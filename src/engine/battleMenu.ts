@@ -1473,6 +1473,25 @@ const ROCK_SLIDE_SHAKE_SEQUENCE: readonly number[] = [0, -7, -7, 0, 0, -7, -7, 0
 /** Ticks from the A-confirm press to RAM tick 2347 (the shake's own first write, and rock #1's own `createsprite` tick - both anchored to the same RAM tick, §9.3). */
 export const ROCK_SLIDE_RAM_ANCHOR_DELAY = 428;
 
+export interface RockSlideAnimationProfile {
+  /** RAM age of the shake task and first falling-rock creation. */
+  readonly rockAnchorAge: number;
+  /** Render ages owned by the target's long `(0,5,50,1)` shake. */
+  readonly targetShakeStartAge: number;
+  readonly targetShakeEndAge: number;
+  /** RAM age of the generic healthbox-wobble/target-blink hit effect. */
+  readonly hitFlashAnchorAge: number;
+  /** Live `sSpriteOrder` before this animation allocates its sprites. */
+  readonly spriteOrderSeed: readonly number[];
+  /** Sprite slots already occupied at the same seed boundary. */
+  readonly occupiedSpriteSlots: readonly number[];
+}
+
+export interface RockSlideGeometry {
+  /** `SetAverageBattlerPositions(target, FALSE)` plus the source's y+=14. */
+  readonly rockOrigin: Readonly<{ x: number; y: number }>;
+}
+
 /**
  * `gBattle_BG3_Y` as it actually affects the RENDERED frame at trace tick
  * `t` - needs the same one-tick render lag `bg1X`/`statsBannerBg1Y`
@@ -1486,9 +1505,13 @@ export const ROCK_SLIDE_RAM_ANCHOR_DELAY = 428;
  * first to show RAM tick 2348's already-written `-7`, i.e. the no-lag
  * mapping (which would make 2348 the first visible tick) is wrong.
  */
-export function rockSlideBg3Y(t: number, pressTick: number): number {
+export function rockSlideBg3Y(
+  t: number,
+  pressTick: number,
+  profile: Readonly<RockSlideAnimationProfile> = ROCK_SLIDE_ANIMATION_PROFILE,
+): number {
   const ramTick = t - 1;
-  const d = ramTick - (pressTick + ROCK_SLIDE_RAM_ANCHOR_DELAY);
+  const d = ramTick - (pressTick + profile.rockAnchorAge);
   if (d < 0 || d >= ROCK_SLIDE_SHAKE_SEQUENCE.length) return 0;
   return ROCK_SLIDE_SHAKE_SEQUENCE[d]!;
 }
@@ -1532,6 +1555,9 @@ export const ROCK_SLIDE_SPAWN_STRIDE = 4;
 
 /** `SetAverageBattlerPositions(gBattleAnimTarget, FALSE, ...)`'s own result for this single (non-double) battle - collapses to Grovyle's own `BATTLER_COORD_X/Y` (`battle_anim_mons.c:2289-2318`, `partnerX/Y = battlerX/Y` when `!IsDoubleBattle()`), plus `AnimFallingRock`'s own one-time `sprite->y += 14`. Empirically anchored this session (not source-derived - `GetBattlerSpriteCoord`'s coordinate tables aren't ported here): every one of the 20 rocks' own RAM `x` at its spawn tick equals `176 + xOffset` exactly and `y` equals `54` exactly (`dump-rockslide-sprites.py`, all 20 spawns cross-checked), so this pair is taken as the fixed anchor rather than re-derived. Sprite `x`/`y` are CENTER coordinates (GBA OAM convention) - the draw call subtracts half the 32x32 frame size to get the top-left corner. */
 const ROCK_SLIDE_ROCK_BASE = { x: 176, y: 54 };
+export const DEFAULT_ROCK_SLIDE_GEOMETRY: RockSlideGeometry = {
+  rockOrigin: ROCK_SLIDE_ROCK_BASE,
+};
 
 /** `gSineTable[i]` (`reference/pokeemerald/src/trig.c`), same literal Q8.8 table as `GBA_SINE_TABLE_256` above but exposed as a general `Sin(index, amplitude)`/`Cos(index, amplitude)` pair (not the amplitude-1-only `bounceSin`) - needed for the falling-rock ellipse motion's much larger amplitudes (up to 70). `Math.floor` on the already-signed product matches C's arithmetic-shift-by-8 (round toward -infinity) bit-for-bit for two's-complement values in this range - RAM-cross-verified this session against all 20 rocks' own per-tick `x2`/`y2` reads, 0 mismatches. */
 function gbaSinTable(index: number, amplitude: number): number {
@@ -1576,10 +1602,16 @@ function gbaCosTable(index: number, amplitude: number): number {
  * `rockSlideBg3Y` above and this codebase's other sprite-state mechanisms,
  * e.g. `doubleTeamCloneOffsets`) before computing `n`.
  */
-export function rockSlideRockState(index: number, t: number, pressTick: number): { centerX: number; centerY: number; animNum: 0 | 1 | 2 } | null {
+export function rockSlideRockState(
+  index: number,
+  t: number,
+  pressTick: number,
+  profile: Readonly<RockSlideAnimationProfile> = ROCK_SLIDE_ANIMATION_PROFILE,
+  geometry: Readonly<RockSlideGeometry> = DEFAULT_ROCK_SLIDE_GEOMETRY,
+): { centerX: number; centerY: number; animNum: 0 | 1 | 2 } | null {
   const args = ROCK_SLIDE_ROCK_TABLE[index];
   if (!args) return null;
-  const spawnRamTick = pressTick + ROCK_SLIDE_RAM_ANCHOR_DELAY + ROCK_SLIDE_SPAWN_STRIDE * index;
+  const spawnRamTick = pressTick + profile.rockAnchorAge + ROCK_SLIDE_SPAWN_STRIDE * index;
   const ramTick = t - 1;
   const n = ramTick - spawnRamTick;
   if (n < 0 || n > 48) return null;
@@ -1599,8 +1631,8 @@ export function rockSlideRockState(index: number, t: number, pressTick: number):
     xShift = args.velocity;
   }
   return {
-    centerX: ROCK_SLIDE_ROCK_BASE.x + args.xOffset + xShift + x2,
-    centerY: ROCK_SLIDE_ROCK_BASE.y + y2,
+    centerX: geometry.rockOrigin.x + args.xOffset + xShift + x2,
+    centerY: geometry.rockOrigin.y + y2,
     animNum: args.animNum,
   };
 }
@@ -1678,18 +1710,36 @@ const ROCK_SLIDE_ORDER_SEED: readonly number[] = [
   44, 45, 46, 47,
 ];
 
+export const ROCK_SLIDE_ANIMATION_PROFILE: Readonly<RockSlideAnimationProfile> =
+  Object.freeze({
+    rockAnchorAge: ROCK_SLIDE_RAM_ANCHOR_DELAY,
+    targetShakeStartAge: 443,
+    targetShakeEndAge: 536,
+    hitFlashAnchorAge: 562,
+    spriteOrderSeed: ROCK_SLIDE_ORDER_SEED,
+    occupiedSpriteSlots: ROCK_SLIDE_BASELINE_SLOTS,
+  });
+
 /** `sDummySprite`'s own packed sort key (`sprite.c:159-169`: `DUMMY_OAM_DATA`'s `.priority=3` ["lowest priority", the macro's own comment], `.subpriority=0xFF`) - the shared filler every non-rock slot collapses to (see the derivation above). */
 const ROCK_SLIDE_FILLER_PACKED_KEY = (3 << 8) | 255;
 /** `sDummySprite.y = DISPLAY_HEIGHT` (160), wrapped the same way `SortSprites` wraps every `oam.y` (`>= 160` subtracts 256). */
 const ROCK_SLIDE_FILLER_Y = -96;
 
-function rockSlideSpawnRamTick(index: number, pressTick: number): number {
-  return pressTick + ROCK_SLIDE_RAM_ANCHOR_DELAY + ROCK_SLIDE_SPAWN_STRIDE * index;
+function rockSlideSpawnRamTick(
+  index: number,
+  pressTick: number,
+  profile: Readonly<RockSlideAnimationProfile>,
+): number {
+  return pressTick + profile.rockAnchorAge + ROCK_SLIDE_SPAWN_STRIDE * index;
 }
 
 /** RAM-confirmed: a rock's host slot is freed the tick after its last rendered tick (`rockSlideRockState`'s own `n=49` destroy). */
-function rockSlideDespawnRamTick(index: number, pressTick: number): number {
-  return rockSlideSpawnRamTick(index, pressTick) + 49;
+function rockSlideDespawnRamTick(
+  index: number,
+  pressTick: number,
+  profile: Readonly<RockSlideAnimationProfile>,
+): number {
+  return rockSlideSpawnRamTick(index, pressTick, profile) + 49;
 }
 
 /** `sprite->y + sprite->y2 + centerToCornerVecY` (`UpdateOamCoords`, `sprite.c`) wrapped to the real 8-bit OAM `y` field's signed-screen-position semantics (`SortSprites`'s own `>= DISPLAY_HEIGHT` check) - numerically cross-checked this session against 980 RAM-read `oam.y` samples (all 20 rocks, full window), 0 mismatches. */
@@ -1701,7 +1751,7 @@ function wrapOamY(cornerY: number): number {
 type RockSlideOrderEvent = { ramTick: number; isDestroy: boolean; rank: number; rockIndex: number | null };
 
 /** Per-`pressTick` memo of `computeRockSlideOrders`'s result - a single compare/render run only ever needs one `pressTick`, and recomputing the ~200-tick simulation from scratch on every rendered frame would be wasteful (though not incorrect - the function is pure). */
-const rockSlideOrderCache = new Map<number, Map<number, readonly number[]>>();
+const rockSlideOrderCache = new Map<string, Map<number, readonly number[]>>();
 
 /**
  * Simulates the whole ROCK_SLIDE window's slot lifecycle + `SortSprites`
@@ -1709,10 +1759,18 @@ const rockSlideOrderCache = new Map<number, Map<number, readonly number[]>>();
  * rock's own despawn. Returns a map from RAM tick to the alive rocks (by
  * `ROCK_SLIDE_ROCK_TABLE` index), background-to-foreground.
  */
-function computeRockSlideOrders(pressTick: number): Map<number, readonly number[]> {
-  const anchor = pressTick + ROCK_SLIDE_RAM_ANCHOR_DELAY;
+function computeRockSlideOrders(
+  pressTick: number,
+  profile: Readonly<RockSlideAnimationProfile>,
+  geometry: Readonly<RockSlideGeometry>,
+): Map<number, readonly number[]> {
+  const anchor = pressTick + profile.rockAnchorAge;
   const seedRamTick = anchor - ROCK_SLIDE_ORDER_SEED_OFFSET;
-  const lastRamTick = rockSlideDespawnRamTick(ROCK_SLIDE_ROCK_COUNT - 1, pressTick);
+  const lastRamTick = rockSlideDespawnRamTick(
+    ROCK_SLIDE_ROCK_COUNT - 1,
+    pressTick,
+    profile,
+  );
 
   // Event order matches real RAM behavior, confirmed by the 0-mismatch
   // slot-assignment validation above: destroys process before creates on
@@ -1725,17 +1783,17 @@ function computeRockSlideOrders(pressTick: number): Map<number, readonly number[
     { ramTick: anchor + ROCK_SLIDE_SHAKE_LIFETIME, isDestroy: true, rank: -1, rockIndex: null },
   ];
   for (let i = 0; i < ROCK_SLIDE_ROCK_COUNT; i += 1) {
-    events.push({ ramTick: rockSlideSpawnRamTick(i, pressTick), isDestroy: false, rank: i, rockIndex: i });
-    events.push({ ramTick: rockSlideDespawnRamTick(i, pressTick), isDestroy: true, rank: i, rockIndex: i });
+    events.push({ ramTick: rockSlideSpawnRamTick(i, pressTick, profile), isDestroy: false, rank: i, rockIndex: i });
+    events.push({ ramTick: rockSlideDespawnRamTick(i, pressTick, profile), isDestroy: true, rank: i, rockIndex: i });
   }
   events.sort((a, b) => a.ramTick - b.ramTick || Number(a.isDestroy) - Number(b.isDestroy) || a.rank - b.rank);
 
   const inUse = new Array<boolean>(64).fill(false);
-  for (const slot of ROCK_SLIDE_BASELINE_SLOTS) inUse[slot] = true;
+  for (const slot of profile.occupiedSpriteSlots) inUse[slot] = true;
   let shakeSlot = -1;
   const rockSlot = new Array<number>(ROCK_SLIDE_ROCK_COUNT).fill(-1);
 
-  const order = ROCK_SLIDE_ORDER_SEED.slice();
+  const order = profile.spriteOrderSeed.slice();
   const result = new Map<number, readonly number[]>();
 
   let eventIdx = 0;
@@ -1762,7 +1820,13 @@ function computeRockSlideOrders(pressTick: number): Map<number, readonly number[
     for (let i = 0; i < ROCK_SLIDE_ROCK_COUNT; i += 1) {
       const slot = rockSlot[i]!;
       if (slot < 0) continue;
-      const state = rockSlideRockState(i, ramTick + 1, pressTick);
+      const state = rockSlideRockState(
+        i,
+        ramTick + 1,
+        pressTick,
+        profile,
+        geometry,
+      );
       if (!state) continue;
       packedKey[slot] = (2 << 8) | ROCK_SLIDE_SUBPRIORITY;
       yKey[slot] = wrapOamY(state.centerY - 16);
@@ -1809,12 +1873,25 @@ function computeRockSlideOrders(pressTick: number): Map<number, readonly number[
  * `computeRockSlideOrders`'s own derivation above. Same one-tick render
  * lag as `rockSlideRockState`/`rockSlideBg3Y`.
  */
-export function rockSlideDrawOrder(t: number, pressTick: number): readonly number[] {
+export function rockSlideDrawOrder(
+  t: number,
+  pressTick: number,
+  profile: Readonly<RockSlideAnimationProfile> = ROCK_SLIDE_ANIMATION_PROFILE,
+  geometry: Readonly<RockSlideGeometry> = DEFAULT_ROCK_SLIDE_GEOMETRY,
+): readonly number[] {
   const ramTick = t - 1;
-  let cached = rockSlideOrderCache.get(pressTick);
+  const cacheKey = [
+    pressTick,
+    profile.rockAnchorAge,
+    geometry.rockOrigin.x,
+    geometry.rockOrigin.y,
+    profile.spriteOrderSeed.join(","),
+    profile.occupiedSpriteSlots.join(","),
+  ].join("|");
+  let cached = rockSlideOrderCache.get(cacheKey);
   if (!cached) {
-    cached = computeRockSlideOrders(pressTick);
-    rockSlideOrderCache.set(pressTick, cached);
+    cached = computeRockSlideOrders(pressTick, profile, geometry);
+    rockSlideOrderCache.set(cacheKey, cached);
   }
   return cached.get(ramTick) ?? [];
 }
@@ -1836,12 +1913,13 @@ export function rockSlideDrawOrder(t: number, pressTick: number): readonly numbe
  * render ticks 2362-2455 (94 ticks) then flat 0 - both boundaries pixel-
  * swept exact (0 diff in the crop at every tested tick from 2349-2459).
  */
-const ROCK_SLIDE_MON_SHAKE_START_DELAY = 443;
-const ROCK_SLIDE_MON_SHAKE_END_DELAY = 536;
-
-export function rockSlideMonShakeY2(t: number, pressTick: number): number {
-  const start = pressTick + ROCK_SLIDE_MON_SHAKE_START_DELAY;
-  const end = pressTick + ROCK_SLIDE_MON_SHAKE_END_DELAY;
+export function rockSlideMonShakeY2(
+  t: number,
+  pressTick: number,
+  profile: Readonly<RockSlideAnimationProfile> = ROCK_SLIDE_ANIMATION_PROFILE,
+): number {
+  const start = pressTick + profile.targetShakeStartAge;
+  const end = pressTick + profile.targetShakeEndAge;
   if (t < start || t > end) return 0;
   const d = (t - start) % 4;
   return d < 2 ? 5 : 0;
@@ -1851,17 +1929,56 @@ export function rockSlideMonShakeY2(t: number, pressTick: number): number {
 export const HIT_FLASH_RAM_ANCHOR_DELAY = 562;
 
 /** The real opponent healthbox sprite's own `y2` wobble (`SpriteCB_HitAnimHealthoxEffect`, `+1/-1` alternating every RAM tick for 20 ticks then 0, §9.3) at trace tick `t` - same one-tick render lag as `rockSlideBg3Y`. RAM-confirmed this session (`dump-rockslide-sprites.py`'s own `healthboxY2` field, ticks 2481-2501): `+1,-1,+1,-1,...` starting at RAM tick 2481, 20 values, 0 outside. */
-export function rockSlideHealthboxWobbleY2(t: number, pressTick: number): number {
-  const d = t - 1 - (pressTick + HIT_FLASH_RAM_ANCHOR_DELAY);
+export function rockSlideHealthboxWobbleY2(
+  t: number,
+  pressTick: number,
+  profile: Readonly<RockSlideAnimationProfile> = ROCK_SLIDE_ANIMATION_PROFILE,
+): number {
+  const d = t - 1 - (pressTick + profile.hitFlashAnchorAge);
   if (d < 0 || d > 19) return 0;
   return d % 2 === 0 ? 1 : -1;
 }
 
 /** Grovyle's own `.invisible` blink bit (`DoHitAnimBlinkSpriteEffect`, 4-tick on/off cycles for 32 ticks, §9.3) at trace tick `t` - same one-tick render lag. RAM-confirmed this session (`dump-rockslide-sprites.py`'s own `targetInvisible` field, ticks 2481-2513): visible at `d=0` (setup), then 4-tick invisible/visible cycles from `d=1` through `d=32`. */
-export function rockSlideMonBlinkInvisible(t: number, pressTick: number): boolean {
-  const d = t - 1 - (pressTick + HIT_FLASH_RAM_ANCHOR_DELAY);
+export function rockSlideMonBlinkInvisible(
+  t: number,
+  pressTick: number,
+  profile: Readonly<RockSlideAnimationProfile> = ROCK_SLIDE_ANIMATION_PROFILE,
+): boolean {
+  const d = t - 1 - (pressTick + profile.hitFlashAnchorAge);
   if (d < 1 || d > 32) return false;
   return Math.floor((d - 1) / 4) % 2 === 0;
+}
+
+/**
+ * Relative presentation-seam view of the source Move_ROCK_SLIDE body.
+ * Canonical battle callers retain their press-relative wrappers above;
+ * portable stages supply only immutable profile/geometry and a local age.
+ */
+export function rockSlideAnimationAtAge(
+  age: number,
+  profile: Readonly<RockSlideAnimationProfile>,
+  geometry: Readonly<RockSlideGeometry>,
+): {
+  readonly bg3Y: number;
+  readonly targetY2: number;
+  readonly targetInvisible: boolean;
+  readonly healthboxY2: number;
+  readonly rocks: readonly {
+    readonly centerX: number;
+    readonly centerY: number;
+    readonly animNum: 0 | 1 | 2;
+  }[];
+} {
+  return {
+    bg3Y: rockSlideBg3Y(age, 0, profile),
+    targetY2: rockSlideMonShakeY2(age, 0, profile),
+    targetInvisible: rockSlideMonBlinkInvisible(age, 0, profile),
+    healthboxY2: rockSlideHealthboxWobbleY2(age, 0, profile),
+    rocks: rockSlideDrawOrder(age, 0, profile, geometry)
+      .map((index) => rockSlideRockState(index, age, 0, profile, geometry))
+      .filter((rock): rock is NonNullable<typeof rock> => rock !== null),
+  };
 }
 
 // --- S7 slice D: HP drain + turn-end (docs/battle-turn-notes.md §9,

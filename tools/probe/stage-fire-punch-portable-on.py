@@ -37,7 +37,7 @@ from pathlib import Path
 if len(sys.argv) not in (2, 3, 4, 5):
     raise SystemExit(
         f"usage: {sys.argv[0]} <fresh-output.json> [fresh-rgb-dir] "
-        "[player|opponent] [fire-punch|faint-attack]"
+        "[player|opponent] [fire-punch|faint-attack|rock-slide]"
     )
 
 OUTPUT_PATH = Path(sys.argv[1])
@@ -46,7 +46,7 @@ ATTACKER_SIDE = sys.argv[3] if len(sys.argv) >= 4 else "player"
 if ATTACKER_SIDE not in ("player", "opponent"):
     raise SystemExit(f"attacker side must be player or opponent, got {ATTACKER_SIDE!r}")
 MOVE_NAME = sys.argv[4] if len(sys.argv) == 5 else "fire-punch"
-MOVE_IDS = {"fire-punch": 7, "faint-attack": 185}
+MOVE_IDS = {"fire-punch": 7, "faint-attack": 185, "rock-slide": 157}
 if MOVE_NAME not in MOVE_IDS:
     raise SystemExit(f"unsupported staged move {MOVE_NAME!r}")
 STAGED_MOVE = MOVE_IDS[MOVE_NAME]
@@ -84,6 +84,11 @@ OPPONENT_BATTLER = 1
 # selection and controller emission while directing the existing choice to
 # the staged move; no chosen-action or turn-order state is written.
 OPPONENT_AI_SLOT = 3
+SPRITE_SIZE = 0x44
+SPRITE_TEMPLATE_OFFSET = 0x14
+SPRITE_FLAGS_OFFSET = 0x3E
+ROCK_TEMPLATE = 0x08596B04
+SPRITE_ORDER = 0x020217F4
 
 # These are the decoder corners used by the native compositor's 64x64 battler
 # sheets. Centers mirror GetBattlerSpriteCoord(battler, X_2/Y_PIC_OFFSET):
@@ -111,7 +116,7 @@ STAGE_TICK = 1886
 CAPTURE_TICKS = {1886, 1887, 1888, 1918, 1919, 1920, 1921, 1922}
 # Dense hashes make the move-owned boundary and complete portable window
 # independently bisectable without committing or consulting screenshots.
-CAPTURE_TICKS.update(range(2080, 3101))
+CAPTURE_TICKS.update(range(1886, 3101))
 
 
 def u16(oracle: EmeraldOracle, addr: int) -> int:
@@ -160,6 +165,13 @@ def frame_record(oracle: EmeraldOracle, tick: int) -> dict[str, object]:
     rgb = oracle.screen_rgb()
     if RGB_DIR is not None:
         (RGB_DIR / f"{tick:05d}.rgb").write_bytes(rgb)
+    rocks = []
+    for slot in range(64):
+        base = oracle.symbols["gSprites"] + slot * SPRITE_SIZE
+        if not oracle.read_u8(base + SPRITE_FLAGS_OFFSET) & 1:
+            continue
+        if oracle.read_u32(base + SPRITE_TEMPLATE_OFFSET) == ROCK_TEMPLATE:
+            rocks.append(slot)
     return {
         "tick": tick,
         "sha256": hashlib.sha256(rgb).hexdigest(),
@@ -176,6 +188,8 @@ def frame_record(oracle: EmeraldOracle, tick: int) -> dict[str, object]:
             "player": battler_sprite(oracle, PLAYER_BATTLER),
             "opponent": battler_sprite(oracle, OPPONENT_BATTLER),
         },
+        "rockSlots": rocks,
+        "spriteOrder": [oracle.read_u8(SPRITE_ORDER + slot) for slot in range(64)],
     }
 
 
@@ -208,7 +222,7 @@ def main() -> None:
     staged_slot = 0 if ATTACKER_SIDE == "player" else OPPONENT_AI_SLOT
     before = battle_mon(oracle, staged_battler)
     battler_base = oracle.symbols["gBattleMons"] + staged_battler * BATTLE_MON_SIZE
-    staged_pp = 15 if MOVE_NAME == "fire-punch" else 20
+    staged_pp = {"fire-punch": 15, "faint-attack": 20, "rock-slide": 10}[MOVE_NAME]
     write_u16(oracle, battler_base + BATTLE_MON_MOVES + staged_slot * 2, STAGED_MOVE)
     oracle.write_u8(battler_base + BATTLE_MON_PP + staged_slot, staged_pp)
     after = battle_mon(oracle, staged_battler)

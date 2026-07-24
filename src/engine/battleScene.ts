@@ -565,6 +565,7 @@ import { drawMode0Objects, drawMode0Ppu, type Mode0Oam, type Mode0State } from "
 import {
   sceneOnFaintAttackView,
   sceneOnFirePunchView,
+  sceneOnRockSlideView,
   type SceneOnMovePresentationState,
 } from "./sceneOnPresentation.ts";
 import {
@@ -13698,6 +13699,74 @@ export function renderSceneOnMovePresentation(
   fb: Uint8Array,
   state: SceneOnMovePresentationState,
 ): void {
+  if (state.config.move === "ROCK_SLIDE") {
+    const view = sceneOnRockSlideView(state);
+    const { attacker, target } = view;
+    const player = attacker.geometry.side === "player" ? attacker : target;
+    const opponent = attacker.geometry.side === "opponent" ? attacker : target;
+    if (
+      player.species !== "ONIX"
+      || opponent.species !== "GROVYLE"
+      || attacker.geometry.side !== "opponent"
+    ) {
+      throw new Error(
+        `unsupported staged ROCK_SLIDE pair ${attacker.species}->${target.species}`,
+      );
+    }
+
+    drawStaticBgShiftedY(fb, view.bg3Y);
+    drawSpriteSheet(
+      fb,
+      grovyleFrontSprite.tileset,
+      grovyleFrontSprite.palette,
+      opponent.geometry.spriteCorner.x,
+      opponent.geometry.spriteCorner.y,
+    );
+    if (!view.targetInvisible) {
+      drawSpriteSheet(
+        fb,
+        onixBackSprite.tileset,
+        onixBackSprite.palette,
+        player.geometry.spriteCorner.x,
+        player.geometry.spriteCorner.y + view.targetY2,
+      );
+    }
+    for (const rock of view.rocks) {
+      drawRockSprite(fb, rock.animNum, rock.centerX, rock.centerY);
+    }
+
+    drawSendOutHealthbox(
+      fb,
+      0,
+      opponentHealthboxContentForHp(state.config.fieldProfile.opponentHp),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      onixPlayerHealthboxContentForState(
+        state.config.fieldProfile.playerHp,
+        state.config.fieldProfile.playerStatus,
+      ),
+      0,
+      view.healthboxY2,
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    const line1 = `Foe ${attacker.species} used`;
+    const line2 = "ROCK SLIDE!";
+    const textStartAge = state.config.moveTextStartAge ?? -1;
+    drawMessageTextLines(
+      fb,
+      line1,
+      line2,
+      Math.min(line1.length + line2.length, view.age - textStartAge + 1),
+    );
+    return;
+  }
+
   if (state.config.move === "FAINT_ATTACK") {
     const view = sceneOnFaintAttackView(state);
     const { attacker, target } = view;
