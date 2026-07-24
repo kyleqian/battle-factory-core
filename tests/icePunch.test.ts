@@ -274,4 +274,14 @@ describe("ICE_PUNCH source-composed presentation components", () => {
       .toMatchObject({ visible: false });
     expect(icePunchHitCrystals(163, center)).toEqual([]);
   });
+
+  it("mirrors the source hit-crystal offsets for a player-side target", () => {
+    expect(icePunchHitCrystals(90, { x: 72, y: 88 }, -1)).toMatchObject([
+      { centerX: 82, centerY: 78 },
+    ]);
+    expect(
+      icePunchHitCrystals(126, { x: 72, y: 88 }, -1)
+        .find(({ sourceSlot }) => sourceSlot === 11),
+    ).toMatchObject({ centerX: 52, centerY: 90 });
+  });
 });

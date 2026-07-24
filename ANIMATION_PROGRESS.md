@@ -39,16 +39,18 @@ remainder.
 ## Current handoff
 
 - **State:** **4 exact / 9 partial / 263 unsupported**. ICE PUNCH remains
-  partial pending an evidence-backed opposite-side/geometry audit.
-- **Did:** added a generic presentation-relative controller display profile.
-  At age 363 it atomically reveals the action menu, then re-anchors the shared
-  source/RAM-proved `DoBounceEffect` sine reducer; HP, status, outcome, RNG,
-  action selection, and turn state remain immutable external inputs.
-- **Evidence:** `ice-punch-onix-grovyle.json` is **462/462 exact** at oracle
-  frames 2339-2800 / ages 0-461, contiguous through the complete player-back
-  move/resolution window, blank hold, action-menu reveal, and a 99-frame
-  settled bounce window including healthbox `y2=2`. FIRE PUNCH portable **225/225**
-  remains exact.
-- **Next:** audit ICE PUNCH's opposite attacker side/geometry with its own
-  dense Scene-ON evidence before exact promotion. Do not claim THUNDER PUNCH
+  partial: opposite-side geometry is proved, but its controller resolution
+  variant is not yet complete.
+- **Did:** made ICE PUNCH field composition side-parametric and source-derived.
+  Battler palettes, blink/shake, HP boxes, and used-move text now select by
+  side; the seven short hit crystals mirror their source X offsets for a
+  player-side target while the inward spiral remains target-relative.
+- **Evidence:** new `ice-punch-grovyle-onix.json` is **314/314 exact** at
+  Scene-ON oracle frames 1966-2279 / ages 0-313: the complete opposite-side
+  move-script body, generic hit/blink/wobble, immutable 117→31 HP drain, and
+  five-frame settled hold. Existing ICE PUNCH player-side **462/462** and FIRE
+  PUNCH **225/225** remain exact.
+- **Next:** densely match the staged opposite-side not-very-effective text,
+  successful freeze/status controller path, command teardown, and
+  next-controller handoff before exact promotion. Do not claim THUNDER PUNCH
   without its own dense evidence.

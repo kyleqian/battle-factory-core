@@ -13818,15 +13818,25 @@ export function renderSceneOnMovePresentation(
     const view = sceneOnIcePunchView(state);
     const { attacker, target, overlay } = view;
     if (
-      attacker.species !== "ONIX"
-      || attacker.geometry.side !== "player"
-      || target.species !== "GROVYLE"
-      || target.geometry.side !== "opponent"
+      !(
+        attacker.species === "ONIX"
+        && attacker.geometry.side === "player"
+        && target.species === "GROVYLE"
+        && target.geometry.side === "opponent"
+      )
+      && !(
+        attacker.species === "GROVYLE"
+        && attacker.geometry.side === "opponent"
+        && target.species === "ONIX"
+        && target.geometry.side === "player"
+      )
     ) {
       throw new Error(
         `unsupported staged ICE_PUNCH pair ${attacker.species}->${target.species}`,
       );
     }
+    const player = attacker.geometry.side === "player" ? attacker : target;
+    const opponent = attacker.geometry.side === "opponent" ? attacker : target;
     const darken = (palette: RgbColor[]): RgbColor[] =>
       overlay.backgroundBlackCoeff === 0
         ? palette
@@ -13841,29 +13851,48 @@ export function renderSceneOnMovePresentation(
       battleBg.static.tilemap,
       battleBg.palette.map(darken),
     );
-    drawSpriteSheet(
-      fb,
-      onixBackSprite.tileset,
-      onixBackSprite.palette,
-      attacker.geometry.spriteCorner.x,
-      attacker.geometry.spriteCorner.y + view.actionMenu.battlerY2,
-    );
     const ice = { r: 99, g: 214, b: 255 };
-    const targetPalette = overlay.targetIceCoeff === 0
-      ? grovyleFrontSprite.palette
-      : grovyleFrontSprite.palette.map((color) => ({
+    const blendedTargetPalette = (palette: RgbColor[]) =>
+      overlay.targetIceCoeff === 0
+        ? palette
+        : palette.map((color) => ({
           r: blendComponentToward(color.r, ice.r, overlay.targetIceCoeff),
           g: blendComponentToward(color.g, ice.g, overlay.targetIceCoeff),
           b: blendComponentToward(color.b, ice.b, overlay.targetIceCoeff),
         }));
-    if (!view.targetInvisible) {
+    if (target.geometry.side !== "player" || !view.targetInvisible) {
+      drawSpriteSheet(
+        fb,
+        onixBackSprite.tileset,
+        target.geometry.side === "player"
+          ? blendedTargetPalette(onixBackSprite.palette)
+          : onixBackSprite.palette,
+        player.geometry.spriteCorner.x,
+        player.geometry.spriteCorner.y
+          + view.actionMenu.battlerY2
+          + (
+            target.geometry.side === "player"
+            && (view.age === 68 || view.age === 69)
+              ? 5
+              : 0
+          ),
+      );
+    }
+    if (target.geometry.side !== "opponent" || !view.targetInvisible) {
       drawSpriteSheet(
         fb,
         grovyleFrontSprite.tileset,
-        targetPalette,
-        target.geometry.spriteCorner.x,
-        target.geometry.spriteCorner.y
-          + (view.age === 68 || view.age === 69 ? 5 : 0),
+        target.geometry.side === "opponent"
+          ? blendedTargetPalette(grovyleFrontSprite.palette)
+          : grovyleFrontSprite.palette,
+        opponent.geometry.spriteCorner.x,
+        opponent.geometry.spriteCorner.y
+          + (
+            target.geometry.side === "opponent"
+            && (view.age === 68 || view.age === 69)
+              ? 5
+              : 0
+          ),
       );
     }
     const beforeEffects = fb.slice();
@@ -13933,17 +13962,24 @@ export function renderSceneOnMovePresentation(
     }
     drawOpponentHealthboxWobble(
       fb,
-      view.healthboxY2,
-      opponentHealthboxContentForHp(view.displayedTargetHp),
+      target.geometry.side === "opponent" ? view.healthboxY2 : 0,
+      opponentHealthboxContentForHp(
+        target.geometry.side === "opponent"
+          ? view.displayedTargetHp
+          : state.config.fieldProfile.opponentHp,
+      ),
     );
     drawComposedPlayerHealthbox(
       fb,
       onixPlayerHealthboxContentForState(
-        state.config.fieldProfile.playerHp,
+        target.geometry.side === "player"
+          ? view.displayedTargetHp
+          : state.config.fieldProfile.playerHp,
         state.config.fieldProfile.playerStatus,
       ),
       0,
-      view.actionMenu.healthboxY2,
+      view.actionMenu.healthboxY2
+        + (target.geometry.side === "player" ? view.healthboxY2 : 0),
     );
     drawTileBg(
       fb,
@@ -13951,7 +13987,9 @@ export function renderSceneOnMovePresentation(
       battleWindow.tilemap,
       battleWindow.palette,
     );
-    const line1 = `${attacker.species} used`;
+    const line1 = attacker.geometry.side === "opponent"
+      ? `Foe ${attacker.species} used`
+      : `${attacker.species} used`;
     const line2 = "ICE PUNCH!";
     const textStartAge = state.config.moveTextStartAge ?? -1;
     const effectivenessStart =
