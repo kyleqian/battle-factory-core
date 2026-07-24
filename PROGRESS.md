@@ -4,6 +4,57 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 429 — S10 step (ii) RUNG 1: accuracycheck, attackstring, ppreduce registered
+
+- **State:** RUNG 1 of the sixteen-opcode hit chain is complete and green at
+  **175 files / 2040 tests**, build green. `createBattleScriptStatusRulesHandlers`
+  now composes **32** opcodes (was 29): `accuracycheck`, `attackstring`,
+  `ppreduce` (new `battleScriptHitChainOpcode.ts`) plus opcode 0's tail fix
+  below. A staged turn runs opcode 0 → accuracycheck → attackstring → ppreduce
+  for both hit and miss, matching the banked ground truth's RNG pattern
+  (exactly one `Random()` call at accuracycheck either way) and PP delta, then
+  hands off cleanly: hit → `critcalc` (unregistered, correct RUNG-2 boundary),
+  miss → `pause` (already registered by a prior session).
+- **Did:** `accuracycheck` is source-complete for the `ACC_CURR_MOVE` argument
+  form (54/55 hit-chain-relevant call sites) — stat-stage accuracy formula
+  (reused `damageCalc.ts` unchanged), the real Protect branch, semi-invulnerable
+  `STATUS3` branches, always-hit moves, `TrySetDestinyBondToHappen`, and
+  `CheckWonderGuardAndLevitate` (Levitate + type-immunity incl. the
+  Foresight-vs-Ghost exception). Added three small battler fields the same way
+  prior MOVEEND checkpoints did (`protected`, `types`, `ppNotAffectedByPressure`)
+  plus a `set-battler-pp-data` semantic event kind for `ppreduce`'s real PP
+  controller sync. Four branches are explicit `unsupported-branch` barriers,
+  each Tier-1-reachability-tested: the `NO_ACC_CALC`/`NO_ACC_CALC_CHECK_LOCK_ON`/
+  explicit-deferred-move top branch (not on the hit chain), `STATUS3_ALWAYS_HITS`
+  Lock-On (`battlerWithSureHit` unmodeled), a nonzero target ability on a hit
+  (`AbilityBattleEffects(ABILITYEFFECT_ABSORBING)` unmodeled beyond ability
+  none), and the target's Enigma Berry evasion `holdEffectParam`. **Fixed an
+  over-broad barrier found while wiring this rung:** opcode 0's tail
+  `DEFENDER_IS_PROTECTED` check previously halted *unconditionally* once
+  Snatch/Lightning Rod passed — even the common "target isn't protected" case
+  — which meant no healthy attacker's turn could ever reach the hit chain at
+  all. It now evaluates the real predicate (Protect flag + the `MOVE_CURSE`/
+  Ghost exception + `IsTwoTurnsMove` gating) and applies `CancelMultiTurnMoves`
+  + the miss flags on a genuine Protect success, advancing otherwise — this,
+  not a hit-chain opcode itself, is what actually unblocks the chain.
+- **Next:** RUNG 2 — register `critcalc`, `damagecalc`, `typecalc`,
+  `adjustnormaldamage`, consuming `damageCalc.ts`'s already-pinned
+  `getCriticalHitChanceStage`/`rollIsCriticalHit`/`calculateBaseDamage`/
+  `applyStab`/`applyTypeEffectiveness`/`applyRandomDamageMultiplier` as-is.
+  The new `types` battler field and `resolveBattleScriptMoveType` are already
+  in place for `typecalc`/`damagecalc`'s STAB and type-effectiveness needs.
+  RUNGS 3–4 (attackanimation..resultmessage; seteffectwithchance,
+  tryfaintmon) remain after that. Opcode 73 (moveend) is still the step-(iii)
+  boundary, not this step's.
+- **Notes:** this rung alone took the full session (deep per-branch source
+  tracing for `Cmd_accuracycheck`'s helpers plus the opcode-0 tail bugfix
+  needed to make the chain reachable at all) — RUNGS 2–4 did not start.
+  `isDefenderProtected` is exported from the new hit-chain module and reused
+  by `battleScriptAttackCancelerOpcode.ts` rather than duplicated. No
+  presentation/render/`battleScene` edits; no oracle traces (Tier-1 only, per
+  the banked ground truth).
+
+---
 ## 428 — [SUPERVISOR] round-1 merges: hit-chain ground truth + anim interpreter
 
 - **State:** merged tree green at **174 files / 2020 tests**, build green.
@@ -74,42 +125,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   two-turn-move gating, real PP-loss execution with a controller emission,
   `B_ACTION_FINISHED` consumption) explicitly out of this step's scope. No
   presentation/render files touched.
-
----
-## 426 — [USER-DIRECTED RE-SCOPE, between sessions] executable-frontier reset
-
-**Read this before ROADMAP.md — it changes the next action.** No code changed;
-suite **172 files / 1994 tests** and the production build are green at
-`856b3b4`.
-
-- **State:** a between-session survey found the kernel's *executable* frontier
-  is not moving in proportion to output. **28 of 249** opcodes registered,
-  almost all print/wait/goto; the entire executable surface is "a mon that
-  cannot act does not act"; **no move resolves damage**; `roundController.ts`
-  still consumes injected fixtures. ~5,000 lines of Tier-1-pinned
-  `Cmd_attackcanceler` phase logic sit unwired
-  (`battleScriptActionAdmission.ts:1208-3686`). The bottleneck is the
-  registration gate, not throughput.
-- **Did (docs only, three commits):** (1) synced ROADMAP Gate 2 / AGENTS.md /
-  `tools/battle-lab/README.md` with the harness's shipped pre-battle party
-  builder (`b30c5d8`/`d3a0cbb`, 14:10--14:18) — switch-in hooks, bench
-  construction, and controlled opponent actions are **closed**, and Gate 2's
-  remainder is exactly Noland's schema plus an earlier scouting-commentary
-  checkpoint. (2) Added ROADMAP S10 **"Executable-frontier reset"**: a
-  registration policy that replaces opcode-level all-or-nothing with explicit
-  `unsupported-branch` barriers, the ordered next steps, a presentation-seam
-  checkpoint, and an overfit-containment rule. (3) Filed ISSUES **#39--#41**
-  (turn-keyed `battleScene.ts`; `featherDance.ts` recorded-table replay;
-  production imports of canonical RAM dumps), added the animation lane's
-  interpreter spike, and added SUPERVISOR.md's executable-frontier gate.
-- **Next:** **not** move-end dependency step 5. Register **opcode 0** by wiring
-  the fifteen existing phase reducers plus the canceler loop and Magic Coat,
-  with Snatch/Lightning Rod as evidence-cited barriers. Then the seventeen
-  hit-chain opcodes, then opcode 73, then a real terminal outcome consumed by
-  `roundController.ts`. See ROADMAP S10's reset for the exact opcode list.
-- **Notes:** leverage for the hit chain — **69 of 197** `BattleScript_Effect*`
-  scripts reach it, covering **155 of 355 moves (44%)**. Prior entries 423--425
-  describe the superseded move-end-first ordering; their landed work is intact
-  and still used. No DEFERRED entries are open.
 
 ---

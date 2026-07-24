@@ -1,3 +1,43 @@
+## 426 — [USER-DIRECTED RE-SCOPE, between sessions] executable-frontier reset
+
+**Read this before ROADMAP.md — it changes the next action.** No code changed;
+suite **172 files / 1994 tests** and the production build are green at
+`856b3b4`.
+
+- **State:** a between-session survey found the kernel's *executable* frontier
+  is not moving in proportion to output. **28 of 249** opcodes registered,
+  almost all print/wait/goto; the entire executable surface is "a mon that
+  cannot act does not act"; **no move resolves damage**; `roundController.ts`
+  still consumes injected fixtures. ~5,000 lines of Tier-1-pinned
+  `Cmd_attackcanceler` phase logic sit unwired
+  (`battleScriptActionAdmission.ts:1208-3686`). The bottleneck is the
+  registration gate, not throughput.
+- **Did (docs only, three commits):** (1) synced ROADMAP Gate 2 / AGENTS.md /
+  `tools/battle-lab/README.md` with the harness's shipped pre-battle party
+  builder (`b30c5d8`/`d3a0cbb`, 14:10--14:18) — switch-in hooks, bench
+  construction, and controlled opponent actions are **closed**, and Gate 2's
+  remainder is exactly Noland's schema plus an earlier scouting-commentary
+  checkpoint. (2) Added ROADMAP S10 **"Executable-frontier reset"**: a
+  registration policy that replaces opcode-level all-or-nothing with explicit
+  `unsupported-branch` barriers, the ordered next steps, a presentation-seam
+  checkpoint, and an overfit-containment rule. (3) Filed ISSUES **#39--#41**
+  (turn-keyed `battleScene.ts`; `featherDance.ts` recorded-table replay;
+  production imports of canonical RAM dumps), added the animation lane's
+  interpreter spike, and added SUPERVISOR.md's executable-frontier gate.
+- **Next:** **not** move-end dependency step 5. Register **opcode 0** by wiring
+  the fifteen existing phase reducers plus the canceler loop and Magic Coat,
+  with Snatch/Lightning Rod as evidence-cited barriers. Then the seventeen
+  hit-chain opcodes, then opcode 73, then a real terminal outcome consumed by
+  `roundController.ts`. See ROADMAP S10's reset for the exact opcode list.
+- **Notes:** leverage for the hit chain — **69 of 197** `BattleScript_Effect*`
+  scripts reach it, covering **155 of 355 moves (44%)**. Prior entries 423--425
+  describe the superseded move-end-first ordering; their landed work is intact
+  and still used. No DEFERRED entries are open.
+
+---
+
+---
+
 ## 425 — vertical move-end dependencies and exact Thunder Punch integrated
 
 - **State:** the vertical player/AI machine slice and move-end dependency steps
