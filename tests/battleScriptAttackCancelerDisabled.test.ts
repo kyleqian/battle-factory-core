@@ -182,6 +182,19 @@ describe("source-shaped attack-canceler disabled phase", () => {
           },
           tracker: { before: 6, after: 7 },
         });
+        expect(Object.keys(result.receipt).sort()).toEqual([
+          "attacker",
+          "cancelMultiTurnMoves",
+          "disabledMove",
+          "effect",
+          "hitMarker",
+          "reason",
+          "script",
+          "scriptingBattler",
+          "sourcePhase",
+          "tracker",
+          "usedDisabledMove",
+        ]);
         for (const id of [0, 1, 2, 3] as const) {
           if (id !== attacker) {
             expect(result.rulesContext.battlers[id]).toBe(source.battlers[id]);

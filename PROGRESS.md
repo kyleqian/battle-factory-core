@@ -24,7 +24,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   pre-set helper/marker/flag states, identities, missing attacker/persistent
   selector, invalid widths, determinism, and deep freezing are pinned.
   Focused **4 files / 39 tests**; Tier-1 **135 files / 1744 tests**, build,
-  OFF info (`9c89c741…`), and diff check green. Pixel diff N/A.
+  OFF info (`9c89c741…`), and diff check green. Code commit `4113388`;
+  pixel diff N/A.
 
 ---
 ## 396 — Gate-3 attack-canceler FLINCH source phase integrated
