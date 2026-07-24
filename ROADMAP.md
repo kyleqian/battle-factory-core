@@ -10,6 +10,10 @@ those battles need. Out of scope: the lobby/frontier overworld and every
 screen before the draft, Battle Points economy beyond a single round, double
 battles, and the open-level rule set (until the single-battle loop is solid).
 
+**Audio marker:** sound effects, cries, fanfares, and music are acknowledged
+as a future presentation concern; they are not yet assigned a stage or
+acceptance scope.
+
 ## Staged plan (authored by the run supervisor, iteration 0, 2026-07-17)
 
 Verification commands used below, all runnable today:
