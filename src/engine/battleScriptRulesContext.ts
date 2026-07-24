@@ -14,6 +14,10 @@ import {
   type BattleScriptMoveValuesRulesContext,
 } from "./battleScriptMoveValuesCommands.ts";
 import {
+  createBattleScriptSetByteCommandHandlers,
+  type BattleScriptSetByteRulesContext,
+} from "./battleScriptSetByte.ts";
+import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
 } from "./battleScriptRuleCommands.ts";
@@ -112,7 +116,7 @@ export type BattleScriptBideTargetByBattler = readonly [
  * source role.
  */
 export type BattleScriptRulesContext = Readonly<
-  BattleScriptMoveValuesRulesContext & {
+  BattleScriptMoveValuesRulesContext & BattleScriptSetByteRulesContext & {
     battlers: BattleScriptRulesBattlers;
     selectorRoles: BattleScriptSelectorRoleBindings;
     scriptingBattler: BattleScriptBattlerId;
@@ -164,6 +168,19 @@ export type BattleScriptRulesContextInput = Readonly<{
   bideTarget?: readonly BattleScriptBattlerId[];
   scriptingBideDmg?: number;
   absentBattlerFlags?: number;
+  battleCommunication0?: number;
+  battleCommunication1?: number;
+  animTargetsHit?: number;
+  animTurn?: number;
+  giveExpState?: number;
+  learnMoveState?: number;
+  lvlBoxState?: number;
+  moveendState?: number;
+  multiHitEffect?: number;
+  statChanger?: number;
+  statAnimPlayed?: number;
+  tripleKickPower?: number;
+  twoTurnStringId?: number;
 }>;
 
 function requireUnsigned(value: number, maximum: number, field: string): number {
@@ -466,9 +483,8 @@ export function createBattleScriptRulesContext(
       0xff,
       "multistringChooser",
     ),
-    battleMoveDamage: requireUnsigned(
+    battleMoveDamage: requireSigned32(
       input.battleMoveDamage ?? 0,
-      0xffff_ffff,
       "battleMoveDamage",
     ),
     bideDmg,
@@ -482,6 +498,27 @@ export function createBattleScriptRulesContext(
       0x0f,
       "absentBattlerFlags",
     ),
+    battleCommunication0: requireUnsigned(
+      input.battleCommunication0 ?? 0,
+      0xff,
+      "battleCommunication0",
+    ),
+    battleCommunication1: requireUnsigned(
+      input.battleCommunication1 ?? 0,
+      0xff,
+      "battleCommunication1",
+    ),
+    animTargetsHit: requireUnsigned(input.animTargetsHit ?? 0, 0xff, "animTargetsHit"),
+    animTurn: requireUnsigned(input.animTurn ?? 0, 0xff, "animTurn"),
+    giveExpState: requireUnsigned(input.giveExpState ?? 0, 0xff, "giveExpState"),
+    learnMoveState: requireUnsigned(input.learnMoveState ?? 0, 0xff, "learnMoveState"),
+    lvlBoxState: requireUnsigned(input.lvlBoxState ?? 0, 0xff, "lvlBoxState"),
+    moveendState: requireUnsigned(input.moveendState ?? 0, 0xff, "moveendState"),
+    multiHitEffect: requireUnsigned(input.multiHitEffect ?? 0, 0xff, "multiHitEffect"),
+    statChanger: requireUnsigned(input.statChanger ?? 0, 0xff, "statChanger"),
+    statAnimPlayed: requireUnsigned(input.statAnimPlayed ?? 0, 0xff, "statAnimPlayed"),
+    tripleKickPower: requireUnsigned(input.tripleKickPower ?? 0, 0xffff, "tripleKickPower"),
+    twoTurnStringId: requireUnsigned(input.twoTurnStringId ?? 0, 0xff, "twoTurnStringId"),
   });
 }
 
@@ -584,6 +621,9 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptSourceCommandHandlers(program, sourcePorts),
     ...createBattleScriptRuleCommandHandlers(program, resolveByteOperand),
     ...createBattleScriptMoveValuesCommandHandlers<BattleScriptRulesContext>(
+      program,
+    ),
+    ...createBattleScriptSetByteCommandHandlers<BattleScriptRulesContext>(
       program,
     ),
   });

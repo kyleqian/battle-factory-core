@@ -1018,6 +1018,27 @@ calls`. Canonical serialization replays identically. Opcode 0 remains
 unregistered; this adds no move-end, mask, switch, mechanic, core, render, or
 oracle breadth.
 
+**SETBYTE vertical-composition checkpoint (2026-07-24):** source-complete
+opcode **46** is now registered through one generic immutable byte-lvalue
+resolver, never a `sMOVEEND_STATE` special case. Generated program,
+opcode-observation, and handler-lexical catalogs mechanically pin exactly
+**214** concrete starts, fixed **[4,1]** operands, **96** concrete value
+spellings, and the complete **24-expression** pointer universe. Existing
+source-equivalent fields are reused; the remaining explicit byte cells plus
+signed `gBattleMoveDamage` and the triple-kick halfword preserve all unaffected
+bytes. Every start executes in Tier 1 with no RNG, controller, or event effect,
+and unknown pointer/value spellings are rejected before registration.
+
+Both the player TYROGUE and trainer-AI PLUSLE asleep paths now execute
+`BattleScript_MoveEnd`'s SETBYTE, leave `moveendState=0`, and stop at the next
+honest opcode **73** `B_SCR_OP_MOVEEND` / `Cmd_moveend` barrier. Ordered
+message/status events, PP, player zero-call RNG, and the AI's exact five-call
+`0x79e39ac4` cursor remain unchanged. Opcodes **0** and **73** are still
+unregistered. Completing opcode 73 requires all of `Cmd_moveend`'s cases,
+loop/end-mode control, delegated ability/item/status/visibility/update hooks,
+controller synchronization, script handoffs, and every reachable state/RNG
+effect; no individual move-end case is implemented by this checkpoint.
+
 S10 has six ordered completion gates:
 
 1. [x] **Complete Factory corpus:** mechanically extract and validate all 300

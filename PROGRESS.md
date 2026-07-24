@@ -4,6 +4,30 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 417 — SETBYTE reaches the honest Cmd_moveend barrier
+
+- **State:** the bounded S10 opcode-46 increment is green at **162 files /
+  1942 tests**. `Cmd_setbyte` is source-complete for the committed generated
+  program; opcodes **0** and **73** remain unregistered.
+- **Did:** added one immutable byte-lvalue resolver over the existing rules
+  context. Registry creation mechanically validates all **214** concrete
+  opcode-46 starts, their fixed **[4,1]** operands, all **96** value spellings,
+  and the complete **24-expression** pointer universe before enabling the
+  shared six-byte write/advance handler. The player and trainer-AI asleep
+  verticals now execute SETBYTE, set `moveendState=0`, and stop at honest
+  `B_SCR_OP_MOVEEND` / `Cmd_moveend` opcode **73**.
+- **Next:** return to the supervisor. The next move-end unit must implement
+  complete `Cmd_moveend` source semantics across every case and delegated
+  hook before registering opcode 73; do not add a case-specific shortcut.
+- **Notes:** every concrete start executes in Tier 1; all 24 lvalue classes,
+  signed `gBattleMoveDamage` byte preservation, triple-kick halfword
+  preservation, unknown rejection, immutability, replay, ordered events/PP,
+  zero SETBYTE RNG/controllers/events, player zero-call RNG, and trainer AI
+  `0x79e39ac4 / 5 calls` are pinned. Focused **5 files / 53 tests**;
+  integrated **162/1942**, production build, OFF v5 info (`9c89c741…`), and
+  diff checks pass; pixel diff N/A.
+
+---
 ## 416 — Factory AI reaches the production script machine
 
 - **State:** the assigned bounded S10 composition is committed and green at
@@ -48,29 +72,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   five draws at `0x79e39ac4`. Focused **2 files / 29 tests**; integrated
   **161/1933**, production build, OFF v5 info (`9c89c741…`), and diff checks
   pass. Code commit `1f32342`; pixel diff N/A.
-
----
-## 414 — Factory AI mask-0 boundary composed
-
-- **State:** the assigned S10 vertical composition is committed and green at
-  **161 files / 1932 tests**. The production policy supports only ordinary
-  Level-50 Factory singles mask **0**; masks 1/7, switching, forced switching,
-  and non-Level-50 views are explicit rejections.
-- **Did:** added a frozen minimal source view and pure injected move policy over
-  the kernel's legal decisions plus explicit `BattleRngState`. It consumes four
-  setup draws in slot order, including illegal slots, scores legal moves
-  **100** and illegal moves **0**, executes no scripts, consumes the mandatory
-  tie draw even at modulus 1, and returns one `BattleDecisionSubmission`, RNG,
-  and a recursively frozen trace. A generic wrapper submits that choice through
-  the published `submitBattleDecision` boundary and synchronizes all policy
-  draws into the kernel-owned cursor before rules execution.
-- **Next:** keep opcode 0 unregistered. The next AI breadth unit is mask 1's
-  source `AI_CheckBadMove` scorer with its required pure mechanics helpers;
-  do not claim mask 7 or switch policy until their separate source paths and
-  path-dependent RNG are complete.
-- **Notes:** canonical replay, legal-list authority, exact five-draw receipts
-  (`0x12345678` → `0x2684ad1f`), raw/simulated values, scores/best slots/tie,
-  mask-selection receipt, immutability, malformed/unsupported inputs, and
-  import boundaries are pinned. Focused **3 files / 60 tests**; integrated
-  **161/1932**, production build, OFF v5 info (`9c89c741…`), and diff checks
-  pass. Code commit `d29a950`; pixel diff N/A.

@@ -197,6 +197,12 @@ describe("Factory asleep move decision-to-machine vertical slice", () => {
       dispatcher: "Cmd_setbyte",
       source: { label: "BattleScript_MoveEnd", statementLine: 268 },
     });
+    expect(program.instructions[moveEnd.programCounter + 1]).toMatchObject({
+      opcodeId: 73,
+      opcodeName: "B_SCR_OP_MOVEEND",
+      dispatcher: "Cmd_moveend",
+      source: { label: "BattleScript_MoveEnd", statementLine: 268 },
+    });
     const protect = resolveBattleScriptLabel(
       program,
       "BattleScript_EffectProtect",
@@ -220,10 +226,10 @@ describe("Factory asleep move decision-to-machine vertical slice", () => {
         barrier: {
           kind: "battle-script",
           entryLabel: "BattleScript_MoveUsedIsAsleep",
-          opcodeId: 46,
-          opcodeName: "B_SCR_OP_SETBYTE",
-          dispatcher: "Cmd_setbyte",
-          instructionsExecuted: 67,
+          opcodeId: 73,
+          opcodeName: "B_SCR_OP_MOVEEND",
+          dispatcher: "Cmd_moveend",
+          instructionsExecuted: 68,
         },
         events: [
           {
@@ -261,6 +267,7 @@ describe("Factory asleep move decision-to-machine vertical slice", () => {
             currentMovePosition: 1,
             atkCancelerTracker: 2,
             hitMarker: BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE,
+            moveendState: 0,
           },
         },
       });
@@ -310,10 +317,10 @@ describe("Factory asleep move decision-to-machine vertical slice", () => {
         barrier: {
           kind: "battle-script",
           entryLabel: "BattleScript_MoveUsedIsAsleep",
-          opcodeId: 46,
-          opcodeName: "B_SCR_OP_SETBYTE",
-          dispatcher: "Cmd_setbyte",
-          instructionsExecuted: 67,
+          opcodeId: 73,
+          opcodeName: "B_SCR_OP_MOVEEND",
+          dispatcher: "Cmd_moveend",
+          instructionsExecuted: 68,
         },
         events: [
           {
@@ -355,6 +362,7 @@ describe("Factory asleep move decision-to-machine vertical slice", () => {
               currentMovePosition: 3,
               atkCancelerTracker: 2,
               hitMarker: BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE,
+              moveendState: 0,
             },
           },
         },
@@ -531,5 +539,6 @@ describe("Factory asleep move decision-to-machine vertical slice", () => {
       expect(source).not.toContain(forbidden);
     }
     expect(source).not.toMatch(/handlers\\s*\\[\\s*0\\s*\\]/);
+    expect(source).not.toMatch(/handlers\\s*\\[\\s*73\\s*\\]/);
   });
 });

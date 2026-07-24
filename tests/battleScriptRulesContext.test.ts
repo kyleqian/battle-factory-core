@@ -168,7 +168,11 @@ describe("source-shaped Battle Script rules context", () => {
     const created = createBattleScriptRulesContext(source);
     expect(Object.keys(created).sort()).toEqual([
       "absentBattlerFlags",
+      "animTargetsHit",
+      "animTurn",
       "atkCancelerTracker",
+      "battleCommunication0",
+      "battleCommunication1",
       "battleMoveDamage",
       "battleOutcome",
       "battlers",
@@ -180,16 +184,25 @@ describe("source-shaped Battle Script rules context", () => {
       "currentMovePosition",
       "currentMovePower",
       "dmgMultiplier",
+      "giveExpState",
       "hitMarker",
       "lastUsedAbility",
+      "learnMoveState",
+      "lvlBoxState",
       "missType",
       "moveEffectByte",
       "moveResultFlags",
+      "moveendState",
       "multiHitCounter",
+      "multiHitEffect",
       "multistringChooser",
       "scriptingBattler",
       "scriptingBideDmg",
       "selectorRoles",
+      "statAnimPlayed",
+      "statChanger",
+      "tripleKickPower",
+      "twoTurnStringId",
     ]);
     expect(created.battlers).toHaveLength(4);
     expect(Object.isFrozen(created)).toBe(true);
@@ -384,10 +397,10 @@ describe("source-shaped Battle Script rules context", () => {
 });
 
 describe("production status rules handler and execution seam", () => {
-  it("composes all 27 source-safe controls, source, multi-hit, and cleanup handlers once", () => {
+  it("composes all 28 source-safe controls, source, multi-hit, cleanup, and SETBYTE handlers once", () => {
     const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts());
     expect(Object.keys(handlers).map(Number).sort((a, b) => a - b)).toEqual([
-      10, 16, 17, 18, 20, 37, 38, 39, 40, 57, 58, 60, 61,
+      10, 16, 17, 18, 20, 37, 38, 39, 40, 46, 57, 58, 60, 61,
       62, 65, 83, 84, 85, 86, 98, 100, 101, 102, 111, 131, 141, 248,
     ]);
   });

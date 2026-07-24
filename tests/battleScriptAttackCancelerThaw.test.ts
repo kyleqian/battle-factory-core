@@ -77,7 +77,7 @@ function rules(changes: Partial<BattleScriptRulesContextInput> = {}) {
     hitMarker: changes.hitMarker ?? 0x4000_0240,
     multiHitCounter: changes.multiHitCounter ?? 3,
     multistringChooser: changes.multistringChooser ?? 9,
-    battleMoveDamage: changes.battleMoveDamage ?? 0xffff_fcf7,
+    battleMoveDamage: changes.battleMoveDamage ?? -777,
     bideDmg: changes.bideDmg ?? [11, 22, 33, 44],
     bideTarget: changes.bideTarget ?? [1, 0, 1, 0],
     scriptingBideDmg: changes.scriptingBideDmg ?? -99,
@@ -320,7 +320,7 @@ describe("source-shaped attack-canceler thaw phase", () => {
       moveResultFlags: 0xa5,
       hitMarker: 0x4000_0240,
       multistringChooser: 9,
-      battleMoveDamage: 0xffff_fcf7,
+      battleMoveDamage: -777,
       scriptingBideDmg: -99,
       absentBattlerFlags: 0,
     });

@@ -577,11 +577,11 @@ BattleDecisionReducer<FactoryBattleScriptDecisionRules> = (
   if (
     !barrierInstruction
     || execution.handlers[barrierInstruction.opcodeId]
-    || barrierInstruction.opcodeId !== 46
-    || barrierInstruction.opcodeName !== "B_SCR_OP_SETBYTE"
+    || barrierInstruction.opcodeId !== 73
+    || barrierInstruction.opcodeName !== "B_SCR_OP_MOVEEND"
     || barrierInstruction.source.label !== "BattleScript_MoveEnd"
   ) {
-    throw new Error("Battle Script did not stop at the source move-end barrier");
+    throw new Error("Battle Script did not stop at the source Cmd_moveend barrier");
   }
   if (
     machine.rng.calls !== 0
