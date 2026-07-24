@@ -1,3 +1,20 @@
+## 363 — SAND ATTACK exact; Gate-3 source/control foundation integrated
+
+- **State:** S10 Gate 1 remains closed and Gate 3 remains open. Scene-ON is
+  now **9 exact / 4 partial / 263 unsupported**; FLY portability is moving
+  independently while the production interpreter remains unwired.
+- **Did:** accepted SAND ATTACK through complete legal zero-PP-Up portable
+  windows in both orientations and the canonical regression. Linked all
+  **249/249** Battle Script dispatch slots to exact enum/table rows and C
+  handler-definition spans with no missing, duplicate, or aliased handlers.
+- **Next:** extend the generic interpreter with an explicit rules-context and
+  semantic-event seam before battle-mutating opcodes. Keep FLY source-relative
+  and retain issue #34's seven-frame affine exclusion without a special case.
+- **Notes:** SAND **269/269 + 269/269 + 190/190**; integrated Tier-1 **104
+  files / 1422 tests** and build green. Both new mechanic fixtures use
+  `ppUps:[0,0,0,0]`; the independent Gate-2 PP builder remains untouched.
+
+---
 ## 362 — S10 Gate-3 typed Battle Script control slice
 
 - **State:** S10 Gate 3 remains open; its first typed, inspectable program and

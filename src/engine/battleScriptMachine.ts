@@ -73,7 +73,24 @@ export type BattleScriptControlDirective =
   | Readonly<{ kind: "jump"; programCounter: number }>
   | Readonly<{ kind: "call"; programCounter: number }>
   | Readonly<{ kind: "return" }>
+  | Readonly<{ kind: "block"; reason: BattleScriptBlockReason }>
   | Readonly<{ kind: "halt"; reason: BattleScriptHaltReason }>;
+
+export type BattleScriptBlockReason =
+  | Readonly<{
+    kind: "controller-busy";
+    programCounter: number;
+    opcodeId: number;
+    opcodeName: string;
+  }>
+  | Readonly<{
+    kind: "source-context-unavailable";
+    programCounter: number;
+    opcodeId: number;
+    opcodeName: string;
+    port: "prepare-message";
+    operandExpression: string;
+  }>;
 
 export type BattleScriptOpcodeHandlerContext<RulesContext extends object> = Readonly<{
   program: BattleScriptProgram;
@@ -98,10 +115,12 @@ export type BattleScriptOpcodeHandlers<RulesContext extends object> = Readonly<
 
 export type BattleScriptStepResult<RulesContext extends object> =
   | Readonly<{ kind: "advanced"; state: BattleScriptMachineState<RulesContext>; instruction: BattleScriptInstruction }>
+  | Readonly<{ kind: "blocked"; state: BattleScriptMachineState<RulesContext>; instruction: BattleScriptInstruction; reason: BattleScriptBlockReason }>
   | Readonly<{ kind: "halted"; state: BattleScriptMachineState<RulesContext>; instruction?: BattleScriptInstruction }>
   | Readonly<{ kind: "unsupported"; state: BattleScriptMachineState<RulesContext>; instruction: BattleScriptInstruction }>;
 
 export type BattleScriptRunResult<RulesContext extends object> =
+  | Readonly<{ kind: "blocked"; state: BattleScriptMachineState<RulesContext>; instruction: BattleScriptInstruction; reason: BattleScriptBlockReason }>
   | Readonly<{ kind: "halted"; state: BattleScriptMachineState<RulesContext> }>
   | Readonly<{ kind: "unsupported"; state: BattleScriptMachineState<RulesContext>; instruction: BattleScriptInstruction }>
   | Readonly<{ kind: "budget-exhausted"; state: BattleScriptMachineState<RulesContext> }>;
@@ -446,6 +465,21 @@ export function stepBattleScriptMachine<RulesContext extends object>(
   const transition = handler(Object.freeze({ program, instruction, state }));
   assertFrozenRulesContext(transition.rulesContext);
   assertRngTransition(state.rng, transition.rng);
+  if (transition.control.kind === "block") {
+    if (
+      transition.rulesContext !== state.rulesContext
+      || transition.rng !== state.rng
+      || transition.events.length !== 0
+    ) {
+      throw new Error("blocked Battle Script transition must preserve rules, RNG, and events");
+    }
+    return Object.freeze({
+      kind: "blocked",
+      state,
+      instruction,
+      reason: Object.freeze(transition.control.reason),
+    });
+  }
   const events = appendEvents(
     state.events,
     transition.events,
@@ -544,13 +578,23 @@ export function runBattleScriptMachine<RulesContext extends object>(
   }
 
   let state = initialState;
-  for (let consumed = 0; consumed < instructionBudget; consumed++) {
+  let consumed = 0;
+  while (consumed < instructionBudget) {
     const result = stepBattleScriptMachine(program, state, handlers);
     state = result.state;
+    if (result.kind === "blocked") {
+      return Object.freeze({
+        kind: "blocked",
+        state,
+        instruction: result.instruction,
+        reason: result.reason,
+      });
+    }
     if (result.kind === "unsupported") {
       return Object.freeze({ kind: "unsupported", state, instruction: result.instruction });
     }
     if (result.kind === "halted") return Object.freeze({ kind: "halted", state });
+    consumed += 1;
   }
 
   const budgetState = haltState(state, {
