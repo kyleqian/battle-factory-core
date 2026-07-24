@@ -1176,11 +1176,18 @@ Not another `Cmd_moveend` dependency step. Ordered:
   `ppreduce`, `critcalc`, `damagecalc`, `typecalc`, `adjustnormaldamage`,
   `attackanimation`, `effectivenesssound`, `hitanimation`, `healthbarupdate`,
   `datahpupdate`, `critmessage`, `resultmessage`, `seteffectwithchance`,
-  `tryfaintmon` — plus **one** for the miss branch, `orbyte`.
+  `tryfaintmon`. **[Corrected 2026-07-24, supervisor source-verified:** the
+  miss branch needs **no** extra opcode — `accuracycheck`'s miss jump targets
+  `BattleScript_PrintMoveMissed` directly (`data/battle_scripts_1.s:244`),
+  skipping the `orbyte`-bearing `BattleScript_MakeMoveMissed` label, which
+  only Swagger/Flatter's Substitute-block path reaches.**]**
   (`waitanimation`, `waitstate`, `waitmessage`, `pause`, `goto`, `end`,
   `setbyte` on that path are already registered.) With opcodes 0 and 73 that
-  is **nineteen registrations for a complete damaging move**. `damageCalc.ts`
+  is **eighteen registrations for a complete damaging move**. `damageCalc.ts`
   is already a bit-exact port and should be consumed, not rewritten.
+  Executable ground truth for this step: `tools/probe/verify-hit-chain-ground-truth.ts`
+  + `docs/hit-chain-ground-truth.md` (hit = exactly 4 attributed `Random()`
+  rolls — accuracy, crit, damage-adjust, effect-chance; miss = 1).
 - **(iii) Register opcode 73** (`moveend`) — the existing dependency ladder's
   steps 1--4 are banked and step 5's receipt is committed; finish it under the
   policy above rather than continuing to build prerequisites ahead of a use.
