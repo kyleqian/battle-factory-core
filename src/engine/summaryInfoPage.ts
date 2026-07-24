@@ -1,5 +1,5 @@
-// S4/S9 summary compositor for the Battle Factory draft's Info page and the
-// source-composed Skills page. Info↔Skills RIGHT uses the real screen's
+// S4/S9 summary compositor for the Battle Factory draft's Info, Skills,
+// Battle Moves, and Contest Moves pages. Page changes use the real screen's
 // layered layout: fixed BG3 + OBJ, an eight-step horizontally moving BG1/BG2
 // page block, and BG0 window replacement only after the scroll task finishes.
 //
@@ -49,7 +49,10 @@ const summaryBg = summaryBgData as unknown as {
   ppPalette: RgbColor[];
   pages: Record<SummaryPage, { width: number; height: number; entries: Array<{ tile: number; hFlip: boolean; vFlip: boolean; palette: number }> }>;
 };
-const typeIcons = summaryTypeIconsData as unknown as { types: Record<string, { tileset: TileGrid; palette: RgbColor[] }> };
+const typeIcons = summaryTypeIconsData as unknown as {
+  types: Record<string, { tileset: TileGrid; palette: RgbColor[] }>;
+  contestCategories: Record<string, { tileset: TileGrid; palette: RgbColor[] }>;
+};
 const markings = summaryMarkingsData as unknown as { tileset: TileGrid; spritePalette: RgbColor[] };
 const buttons = summaryButtonsData as unknown as { a: { tileset: TileGrid; palette: RgbColor[] } };
 const ball = summaryBallData as unknown as { tileset: TileGrid; palette: RgbColor[] };
@@ -80,7 +83,13 @@ const expTables = expTablesData as {
 };
 const moves = new Map(
   (movesData as {
-    moves: Array<{ move: string; name: string; type: string; pp: number }>;
+    moves: Array<{
+      move: string;
+      name: string;
+      type: string;
+      pp: number;
+      contest: { category: string; appeal: number; jam: number };
+    }>;
   }).moves.map((move) => [move.move, move]),
 );
 
@@ -198,6 +207,24 @@ const BATTLE_MOVES_CLOSED_TILEMAP = tilemapWithOverrides(
   })),
 );
 
+// PositionAppealJamSlidingWindow(0, 0xFF, 0) runs while the summary opens on
+// Info. Its width-clamped copy closes the Contest effect panel in the same
+// 10x7 portrait-side region as Battle's power/accuracy panel.
+const CONTEST_MOVES_CLOSED_TILEMAP = tilemapWithOverrides(
+  summaryBg.pages.contestMoves,
+  Array.from({ length: 7 * 10 }, (_, index) => ({
+    x: index % 10,
+    y: 13 + Math.floor(index / 10),
+    tile: 0,
+  })),
+);
+
+function pageTilemap(page: SummaryPage): SummaryTilemap {
+  if (page === "battleMoves") return BATTLE_MOVES_CLOSED_TILEMAP;
+  if (page === "contestMoves") return CONTEST_MOVES_CLOSED_TILEMAP;
+  return summaryBg.pages[page];
+}
+
 function drawGlyphCode(fb: Uint8Array, code: number, x: number, y: number, colors: TextColors, palette: RgbColor[], fadeY: number): number {
   const bitmap = font.glyphs[code];
   const width = (font.widths[code] ?? font.cellSize) + font.letterSpacing;
@@ -272,7 +299,7 @@ function compose(
   if (underlyingPage && underlyingPage !== "info") {
     drawTileBgFaded(
       fb,
-      { tileset: summaryBg.tileset, tilemap: summaryBg.pages[underlyingPage], subpalettes: summaryBg.subpalettes },
+      { tileset: summaryBg.tileset, tilemap: pageTilemap(underlyingPage), subpalettes: summaryBg.subpalettes },
       bgY,
     );
   }
@@ -283,7 +310,7 @@ function compose(
       fb,
       {
         tileset: summaryBg.tileset,
-        tilemap: page === "battleMoves" ? BATTLE_MOVES_CLOSED_TILEMAP : summaryBg.pages[page],
+        tilemap: pageTilemap(page),
         subpalettes: summaryBg.subpalettes,
       },
       bgY,
@@ -422,7 +449,7 @@ function compose(
     drawSpriteFaded(fb, A_BUTTON_SHEET, summaryBg.subpalettes[PAL7]!, cancelIconX + 8, WIN_PROMPT_CANCEL.y + 8, 2, 2, 0, bgY);
     text(cancelText, cancelStringX, WIN_PROMPT_CANCEL.y + 1, COLOR_0, PAL7);
   }
-  if (chromePage === "battleMoves" && !clearPageWindows) {
+  if ((chromePage === "battleMoves" || chromePage === "contestMoves") && !clearPageWindows) {
     const infoText = "INFO";
     const infoStringX = WIN_PROMPT_CANCEL.x + rightAlignXOffset(font, charmap, infoText, 62);
     const infoIconX = Math.max(0, infoStringX - 16);
@@ -537,7 +564,11 @@ function compose(
       codes.reduce((sum, code) => sum + (font.widths[code] ?? font.cellSize), 0);
     drawCodes(totalCodes, WIN_SKILLS_EXP.x + 2 + 42 - codeWidth(totalCodes), WIN_SKILLS_EXP.y + 1);
     drawCodes(nextCodes, WIN_SKILLS_EXP.x + 2 + 42 - codeWidth(nextCodes), WIN_SKILLS_EXP.y + 17);
-  } else if (page === "battleMoves" && destinationChromeInstalled && !clearPageWindows) {
+  } else if (
+    (page === "battleMoves" || page === "contestMoves") &&
+    destinationChromeInstalled &&
+    !clearPageWindows
+  ) {
     const frontierMon = frontierMons.find(
       (entry) => entry.index === (rental as { frontierMonIndex?: number }).frontierMonIndex,
     )!;
@@ -572,8 +603,11 @@ function compose(
         ppPalette,
         { bg: 0, fg: 7, shadow: 8 },
       );
-      const type = typeIcons.types[move.type.replace("TYPE_", "")]!;
-      sprite({ tileset: type.tileset }, type.palette, 101, 40 + i * 16, 4, 2, 0);
+      const icon =
+        page === "contestMoves"
+          ? typeIcons.contestCategories[move.contest.category.replace("CONTEST_CATEGORY_", "")]!
+          : typeIcons.types[move.type.replace("TYPE_", "")]!;
+      sprite({ tileset: icon.tileset }, icon.palette, 101, 40 + i * 16, 4, 2, 0);
     }
   }
 }
@@ -629,10 +663,22 @@ export function renderSummaryBattleMovesPage(
   return fb;
 }
 
+export function renderSummaryContestMovesPage(
+  selectedSlot: number,
+  monAnimClock = 0,
+  animateSwitchedMon = false,
+): Uint8Array {
+  const fb = createFramebuffer();
+  compose(fb, selectedSlot, 0, 0, "contestMoves", monAnimClock, false, 0, true, {
+    animateSwitchedMon,
+  });
+  return fb;
+}
+
 export function renderSummaryPageCleared(
   selectedSlot: number,
   monAnimClock: number,
-  page: "info" | "skills" = "info",
+  page: SummaryPage = "info",
   animateSwitchedMon = false,
 ): Uint8Array {
   const fb = createFramebuffer();
@@ -647,7 +693,7 @@ export function renderSummaryPageCleared(
     0,
     false,
     { animateSwitchedMon },
-    page === "skills" ? "skills" : undefined,
+    page === "info" ? undefined : page,
   );
   return fb;
 }
@@ -779,7 +825,22 @@ export function renderSummaryPageTransition(
     );
     return fb;
   }
-  // Contest Moves remains outside this bounded compositor increment.
+  if (layers.movingPage === "contestMoves" && layers.fixedPage === "battleMoves") {
+    compose(
+      fb,
+      selectedSlot,
+      0,
+      0,
+      "contestMoves",
+      monAnimClock,
+      true,
+      layers.movingX,
+      false,
+      { animateSwitchedMon },
+      "battleMoves",
+    );
+    return fb;
+  }
   compose(fb, selectedSlot, 0, 0, "info", monAnimClock, true);
   return fb;
 }

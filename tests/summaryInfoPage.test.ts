@@ -8,6 +8,7 @@ import { describe, expect, it } from "vitest";
 import { createHash } from "node:crypto";
 import {
   renderSummaryBattleMovesPage,
+  renderSummaryContestMovesPage,
   renderSummaryInfoPage,
   renderSummaryInfoPageFaded,
 } from "../src/engine/summaryInfoPage.ts";
@@ -43,6 +44,17 @@ describe("summary Info page render", () => {
     expect(onix.length).toBe(SCREEN_WIDTH * SCREEN_HEIGHT * 4);
     expect(Buffer.from(onix).equals(Buffer.from(onixAgain))).toBe(true);
     expect(Buffer.from(onix).equals(Buffer.from(magby))).toBe(false);
+    for (let i = 3; i < onix.length; i += 4) expect(onix[i]).toBe(255);
+  });
+
+  it("owns a deterministic, fully opaque Contest Moves page for the selected rental", () => {
+    const onix = renderSummaryContestMovesPage(0, 30);
+    const onixAgain = renderSummaryContestMovesPage(0, 30);
+    const magby = renderSummaryContestMovesPage(1, 30);
+    expect(onix.length).toBe(SCREEN_WIDTH * SCREEN_HEIGHT * 4);
+    expect(Buffer.from(onix).equals(Buffer.from(onixAgain))).toBe(true);
+    expect(Buffer.from(onix).equals(Buffer.from(magby))).toBe(false);
+    expect(Buffer.from(onix).equals(Buffer.from(renderSummaryBattleMovesPage(0, 30)))).toBe(false);
     for (let i = 3; i < onix.length; i += 4) expect(onix[i]).toBe(255);
   });
 

@@ -59,6 +59,7 @@ import {
 } from "./summaryScreen.ts";
 import {
   renderSummaryBattleMovesPage,
+  renderSummaryContestMovesPage,
   renderSummaryInfoPage,
   renderSummaryInfoPageFaded,
   renderSummaryMonTransition,
@@ -2077,13 +2078,17 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
       if (pageTransition.elapsed === 0) {
         return pageTransition.fromPage === "skills"
           ? renderSummarySkillsPage(summary.selectedSlot, summary.openElapsed + 1, animateSwitchedMon)
-          : renderSummaryInfoPage(summary.selectedSlot, summaryMonAnimClock, animateSwitchedMon);
+          : pageTransition.fromPage === "battleMoves"
+            ? renderSummaryBattleMovesPage(summary.selectedSlot, summaryMonAnimClock, animateSwitchedMon)
+            : pageTransition.fromPage === "contestMoves"
+              ? renderSummaryContestMovesPage(summary.selectedSlot, summaryMonAnimClock, animateSwitchedMon)
+              : renderSummaryInfoPage(summary.selectedSlot, summaryMonAnimClock, animateSwitchedMon);
       }
       if (layers.movingPage === pageTransition.toPage && pageTransition.elapsed <= 2) {
         return renderSummaryPageCleared(
           summary.selectedSlot,
           summaryMonAnimClock,
-          pageTransition.fromPage === "skills" ? "skills" : "info",
+          pageTransition.fromPage,
           animateSwitchedMon,
         );
       }
@@ -2099,6 +2104,8 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
         ? renderSummarySkillsPage(summary.selectedSlot, summaryMonAnimClock, animateSwitchedMon)
         : summary.page === "battleMoves"
           ? renderSummaryBattleMovesPage(summary.selectedSlot, summaryMonAnimClock, animateSwitchedMon)
+          : summary.page === "contestMoves"
+            ? renderSummaryContestMovesPage(summary.selectedSlot, summaryMonAnimClock, animateSwitchedMon)
         : renderSummaryInfoPage(summary.selectedSlot, summaryMonAnimClock, animateSwitchedMon)
       : renderFactoryDraftScreen(state.draftScreen);
   }
