@@ -51,6 +51,21 @@ type ControlEdge = {
     opcode?: string;
   };
 };
+type CallsiteContinuation = {
+  // This is deliberately separate from ControlEdge. A CALL transfers to its
+  // target now; its assembly successor becomes executable only if a later
+  // RETURN pops this exact callsite from the runtime script stack.
+  kind: "callsite-continuation";
+  call: { from: { label: string; line: number }; target: { label: string; line: number } | null };
+  continuation: { label: string; line: number } | null;
+  provenance: {
+    kind: "explicit-callsite-continuation";
+    macro: string;
+    macroDeclarationLine: number;
+    opcode: string;
+    continuation: "assembly-successor-after-call";
+  };
+};
 
 function stripAssemblerComment(line: string): string {
   // battle_scripts_1.s does not use quoted strings, but retaining quoted @
@@ -247,6 +262,7 @@ const executableStatements = parsed.labels.flatMap((label) => label.statements
   .filter((statement) => statement.kind === "instruction")
   .map((statement) => ({ label, statement })));
 const controlEdges: ControlEdge[] = [];
+const callsiteContinuations: CallsiteContinuation[] = [];
 for (const [index, current] of executableStatements.entries()) {
   const transfer = controlTransfer(current.statement);
   if (transfer) {
@@ -294,6 +310,37 @@ for (const [index, current] of executableStatements.entries()) {
         },
       });
     }
+    if (transfer.kind === "call") {
+      const target = current.statement.labelOperands[0];
+      const targetStatement = target === undefined
+        ? undefined
+        : executableStatements.find((entry) => entry.label.name === target);
+      // A CALL has exactly one source operand in the current macro. Keep this
+      // relation honest if the source declaration changes instead of silently
+      // selecting one target from an ambiguous call instruction.
+      if (current.statement.labelOperands.length > 1) {
+        throw new Error(`multiple call targets at data/battle_scripts_1.s:${current.statement.line}`);
+      }
+      if (target !== undefined && !targetStatement) {
+        throw new Error(`call target ${target} at data/battle_scripts_1.s:${current.statement.line} has no executable statement`);
+      }
+      const continuation = executableStatements[index + 1];
+      callsiteContinuations.push({
+        kind: "callsite-continuation",
+        call: {
+          from: { label: current.label.name, line: current.statement.line },
+          target: targetStatement === undefined ? null : { label: targetStatement.label.name, line: targetStatement.statement.line },
+        },
+        continuation: continuation === undefined ? null : { label: continuation.label.name, line: continuation.statement.line },
+        provenance: {
+          kind: "explicit-callsite-continuation",
+          macro: current.statement.mnemonic,
+          macroDeclarationLine: current.statement.macroDeclarationLine!,
+          opcode: transfer.opcode,
+          continuation: "assembly-successor-after-call",
+        },
+      });
+    }
   }
   if ((!transfer || transfer.hasAssemblySuccessor) && executableStatements[index + 1]) {
     const next = executableStatements[index + 1]!;
@@ -322,7 +369,7 @@ for (const effect of topology.effects) {
 
 const statements = [...parsed.preamble, ...parsed.labels.flatMap((label) => label.statements)];
 const graph = {
-  schema: "battle-script-graph/v2",
+  schema: "battle-script-graph/v3",
   source: {
     files: ["asm/macros/battle_script.inc", "data/battle_scripts_1.s", "src/data/gen/battle-script-topology.json"],
     note: "Lexical source graph plus a narrow, source-spelled control-flow catalog. Operand tokens are raw assembly text; opcode bindings are mechanically expanded source macros. Fallthrough records only the implicit assembly successor available on a non-transfer path; runtime branch guards and other handler control behavior are not inferred.",
@@ -340,6 +387,7 @@ const graph = {
     fallthroughEdges: controlEdges.filter((edge) => edge.kind === "fallthrough").length,
     explicitJumpEdges: controlEdges.filter((edge) => edge.kind === "jump").length,
     explicitCallEdges: controlEdges.filter((edge) => edge.kind === "call").length,
+    callsiteContinuationEdges: callsiteContinuations.length,
     explicitReturnEdges: controlEdges.filter((edge) => edge.kind === "return").length,
     explicitEndEdges: controlEdges.filter((edge) => edge.kind === "end").length,
   },
@@ -350,9 +398,10 @@ const graph = {
   nonExecutableCategories: parsed.nonExecutableCategories,
   unsupportedLineCategories: {},
   controlFlow: {
-    schema: "battle-script-control-flow/v1",
-    note: "Edges preserve assembly-order fallthrough across source labels and only explicit B_SCR_OP_GOTO, B_SCR_OP_JUMP*, B_SCR_OP_CALL, B_SCR_OP_RETURN, and B_SCR_OP_END* transfers. A null jump/call target is an explicit dynamic transfer with no source-label operand. Return/end edges deliberately have no static target. No runtime guard, handler branch, call-return continuation, address, or operand type is inferred.",
+    schema: "battle-script-control-flow/v2",
+    note: "Edges preserve assembly-order fallthrough across source labels and only explicit B_SCR_OP_GOTO, B_SCR_OP_JUMP*, B_SCR_OP_CALL, B_SCR_OP_RETURN, and B_SCR_OP_END* transfers. A null jump/call target is an explicit dynamic transfer with no source-label operand. Callsite continuations separately record the assembly successor that becomes the return target after that exact CALL; they are not immediate executable fallthrough edges. RETURN has no static target because its destination is selected by the runtime call stack, so no stack-insensitive RETURN-to-continuation edges are fabricated. No runtime guard, handler branch, address, or operand type is inferred.",
     edges: controlEdges,
+    callsiteContinuations,
   },
 };
 

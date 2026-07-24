@@ -10,8 +10,11 @@ Script blocks. Assembly labels also fall through implicitly to the next
 instruction, so that walk underclassified ordinary paths: notably THUNDER and
 SURF lost their accuracy/absorber hooks. The generated Battle Script graph now
 pins those linear successors and source-spelled jump/call/return/end edges,
-but deliberately does not infer runtime branch guards, other handler transfers,
-or call-return continuations. Following more named operands cannot make a
+plus a callsite-to-post-call continuation relation. That relation is not an
+immediate path: a `RETURN` selects its destination from the runtime call stack,
+so the graph intentionally does not emit stack-insensitive direct return edges.
+It still does not infer runtime branch guards or other handler transfers.
+Following more named operands cannot make a
 per-move algorithm conservative or exact; that still needs the remaining
 control and guard evidence before a hook.
 
