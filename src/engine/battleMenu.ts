@@ -1418,6 +1418,83 @@ const TURN6_STATFALL_RAMP_START_DELAY = 229; // pressTick+229 = 7574 (RAM), eva=
 const TURN6_STATFALL_HOLD_END_DELAY = 284; // pressTick+284 = 7629 (RAM), last eva=13 tick
 const TURN6_STATFALL_RAMPDOWN_ANCHOR_DELAY = 285; // pressTick+285 = 7630 (RAM), eva=12 (first post-hold tick)
 
+export interface StatStageDropDisplayProfile {
+  readonly bannerFirstAge: number;
+  readonly bannerHoldEndAge: number;
+  readonly bannerRampDownFirstAge: number;
+  readonly bannerLastAge: number;
+  readonly targetBlend: number;
+  /** First age whose preceding BG-scroll pass has moved the tilemap by -3. */
+  readonly bgScrollFirstAge: number;
+  readonly bgScrollVelocity: number;
+  readonly bgScrollFloor: number;
+  readonly messageFirstAge: number;
+  /** Stable handoff at which the stock controller has cleared gCurrentMove. */
+  readonly nextControllerReadyAge: number;
+}
+
+export interface StatStageDropDisplayState {
+  readonly phase:
+    | "moveBody"
+    | "statBanner"
+    | "messageHandoff"
+    | "statMessage"
+    | "nextControllerReady";
+  readonly banner: Readonly<{ eva: number; bg1Y: number }> | null;
+  readonly messageVisibleChars: number;
+  readonly nextControllerReady: boolean;
+}
+
+/**
+ * Generic, display-only view of a sharply-lowered stat controller command.
+ * Every clock and the already-resolved stage outcome are supplied outside
+ * this reducer; it never rolls RNG or changes a battler's stat stages.
+ */
+export function statStageDropDisplayAtAge(
+  age: number,
+  profile: Readonly<StatStageDropDisplayProfile>,
+  messageLength: number,
+): StatStageDropDisplayState {
+  let banner: StatStageDropDisplayState["banner"] = null;
+  if (age >= profile.bannerFirstAge && age <= profile.bannerLastAge) {
+    const eva = age <= profile.bannerHoldEndAge
+      ? Math.min(
+          profile.targetBlend,
+          Math.floor((age - profile.bannerFirstAge) / 2) + 1,
+        )
+      : Math.max(
+          0,
+          profile.targetBlend
+            - (Math.floor((age - profile.bannerRampDownFirstAge) / 2) + 1),
+        );
+    banner = {
+      eva,
+      bg1Y: Math.max(
+        profile.bgScrollFloor,
+        profile.bgScrollVelocity * (age - profile.bgScrollFirstAge + 1),
+      ),
+    };
+  }
+  const messageVisibleChars = age < profile.messageFirstAge
+    ? 0
+    : Math.min(messageLength, age - profile.messageFirstAge + 1);
+  const nextControllerReady = age >= profile.nextControllerReadyAge;
+  return {
+    phase: nextControllerReady
+      ? "nextControllerReady"
+      : messageVisibleChars > 0
+        ? "statMessage"
+        : banner
+          ? "statBanner"
+          : age >= profile.bannerFirstAge
+            ? "messageHandoff"
+            : "moveBody",
+    banner,
+    messageVisibleChars,
+    nextControllerReady,
+  };
+}
+
 /** `null` outside the banner's own RAM-active window (d<229 or d>309) - a legitimate, harmless value elsewhere (0 is a mathematical no-op just like `statsBannerEva`'s own convention), kept as `null` purely so callers can skip the draw call entirely. */
 export function turn6StatFallEva(t: number, pressTick: number): number | null {
   const d = t - pressTick;

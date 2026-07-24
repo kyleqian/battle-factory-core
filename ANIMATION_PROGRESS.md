@@ -39,18 +39,17 @@ remainder.
 ## Current handoff
 
 - **State:** **5 exact / 8 partial / 263 unsupported**. FEATHER DANCE remains
-  honest partial, now with a portable staged move-script body.
+  honest partial solely pending the source-required opposite target side.
 - **Did:** staged real Level-50 PIDGEOTTO→ONIX through mechanicLab and wired
   `ANIM_TAG_WHITE_FEATHER`/`gFallingFeatherSpriteTemplate` behind the relative
-  Scene-ON seam. Tier-1 pins spawn cadence, affine/lifetime clocks, explicit
-  target geometry, and immutable 6→4 controller stat-stage inputs.
-- **Evidence:** `feather-dance-pidgeotto-onix.json` is **209/209 exact** at
-  oracle frames 46-254 / ages 7-215: complete kickoff printer, all eight
-  feathers through teardown, and two controller-handoff hold frames. ICE
-  PUNCH **1294/1294 + 462/462** and FIRE PUNCH **225/225** remain exact.
-- **Next:** first remainder is oracle frame **255** / age **216**, the
-  stat-drop controller/banner/message continuation through a stable menu.
-  Opposite target-side geometry is required by source (`GetBattlerSide` on
-  `gBattleAnimTarget`). MIST BALL only loads the white-feather asset; its
-  projectile uses `gMistBallSpriteTemplate`/`ANIM_TAG_SMALL_BUBBLES`, so it
-  remains an independent unsupported move.
+  Scene-ON seam, then reused the generic stat-decrease BG1/OBJ-window banner
+  and message printer through a relative `nextControllerReady` boundary.
+  Tier-1 pins banner/message phases and immutable 6→4 controller inputs.
+- **Evidence:** `feather-dance-pidgeotto-onix.json` is **400/400 exact** at
+  oracle frames 46-445 / ages 7-406: kickoff, all eight feathers, complete
+  ATK-drop banner, fully typed/held result message, and `gCurrentMove` clear.
+  ICE PUNCH **1294/1294 + 462/462** and FIRE PUNCH **225/225** remain exact.
+- **Next:** stage the opposite player-attacker/opponent-target geometry
+  required by source (`GetBattlerSide` on `gBattleAnimTarget`) before exact
+  promotion. MIST BALL only shares the loaded white-feather asset; its
+  distinct projectile remains independently unsupported.

@@ -23,9 +23,12 @@ import {
   doubleTeamAnimationAtAge,
   genericHitReactionAtAge,
   rockSlideAnimationAtAge,
+  statStageDropDisplayAtAge,
   type ActionMenuDisplayTransition,
   type DoubleTeamAnimationProfile,
   type RockSlideAnimationProfile,
+  type StatStageDropDisplayProfile,
+  type StatStageDropDisplayState,
 } from "./battleMenu.ts";
 import {
   icePunchHitCrystals,
@@ -311,7 +314,32 @@ export interface SceneOnFeatherDanceView {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly feathers: readonly FeatherRenderSprite[];
+  readonly controllerDisplay: StatStageDropDisplayState;
 }
+
+export const FEATHER_DANCE_STAT_MESSAGE_LINE1 = "ONIX’s ATTACK";
+export const FEATHER_DANCE_STAT_MESSAGE_LINE2 = "harshly fell!";
+export const FEATHER_DANCE_STAT_MESSAGE_LENGTH =
+  FEATHER_DANCE_STAT_MESSAGE_LINE1.length
+  + FEATHER_DANCE_STAT_MESSAGE_LINE2.length;
+
+/**
+ * Source/controller-relative clocks for the staged 6→4 ATK result. Age zero
+ * is oracle frame 39; these are presentation inputs and never apply stages.
+ */
+export const FEATHER_DANCE_STAT_DROP_DISPLAY_PROFILE:
+  Readonly<StatStageDropDisplayProfile> = Object.freeze({
+    bannerFirstAge: 223,
+    bannerHoldEndAge: 278,
+    bannerRampDownFirstAge: 279,
+    bannerLastAge: 303,
+    targetBlend: 13,
+    bgScrollFirstAge: 222,
+    bgScrollVelocity: -3,
+    bgScrollFloor: -246,
+    messageFirstAge: 308,
+    nextControllerReadyAge: 406,
+  });
 
 function assertIntegerPoint(
   label: string,
@@ -600,6 +628,11 @@ export function sceneOnFeatherDanceView(
     feathers: featherDanceSpritesAtAge(
       state.age,
       state.config.target.geometry.battlePositionCenter,
+    ),
+    controllerDisplay: statStageDropDisplayAtAge(
+      state.age,
+      FEATHER_DANCE_STAT_DROP_DISPLAY_PROFILE,
+      FEATHER_DANCE_STAT_MESSAGE_LENGTH,
     ),
   };
 }
