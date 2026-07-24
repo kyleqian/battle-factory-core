@@ -117,7 +117,7 @@ describe("source-shaped attack-canceler frozen phase", () => {
     expect(result.rulesContext.hitMarker).toBe(source.hitMarker);
   });
 
-  it("exhaustively cancels an ordinary move for every failed-thaw remainder", () => {
+  it("exhaustively cancels an ordinary move without a status write for every failed-thaw remainder", () => {
     const seedsByRemainder = [undefined, 2, 4, 1, 6] as const;
     for (const remainder of [1, 2, 3, 4] as const) {
       const seed = seedsByRemainder[remainder]!;
@@ -158,15 +158,7 @@ describe("source-shaped attack-canceler frozen phase", () => {
         addedMask: BATTLE_SCRIPT_HITMARKER_NO_ATTACKSTRING,
         clearedMask: 0,
       });
-      expect(result.receipt.statusController).toMatchObject({
-        kind: "request-status1-write",
-        battler: 0,
-        sourceRequest: "REQUEST_STATUS_BATTLE",
-        offset: 0,
-        size: 4,
-        value: OTHER_STATUS1 | BATTLE_SCRIPT_STATUS1_FREEZE,
-        markForControllerExecution: true,
-      });
+      expect(result.receipt.statusController).toEqual({ kind: "none" });
     }
   });
 
@@ -207,7 +199,7 @@ describe("source-shaped attack-canceler frozen phase", () => {
     }
   });
 
-  it("thaws on remainder zero for both ordinary and thaw-hit effects", () => {
+  it("thaws without a status write on remainder zero for both ordinary and thaw-hit effects", () => {
     for (const move of [TACKLE, FLAME_WHEEL]) {
       const source = rules({
         battlers: [
@@ -249,11 +241,7 @@ describe("source-shaped attack-canceler frozen phase", () => {
           sourceConstant: "B_MSG_DEFROSTED",
           value: 0,
         },
-        statusController: {
-          kind: "request-status1-write",
-          battler: 0,
-          value: OTHER_STATUS1,
-        },
+        statusController: { kind: "none" },
       });
     }
   });

@@ -871,18 +871,11 @@ export function advanceBattleScriptAttackCancelerFrozen(
     atkCancelerTracker: trackerAfter,
     hitMarker: nextHitMarker,
   });
+  // CANCELER_FROZEN mutates only gBattleMons on thaw. Unlike the preceding
+  // sleep phase, it never emits REQUEST_STATUS_BATTLE; the selected
+  // BattleScript_MoveUsedUnfroze later owns the status-icon presentation.
   const statusController: BattleScriptAttackCancelerStatusControllerEffect =
-    effect === 2
-      ? Object.freeze({
-        kind: "request-status1-write",
-        battler: attacker,
-        sourceRequest: "REQUEST_STATUS_BATTLE",
-        offset: 0,
-        size: 4,
-        value: nextStatus1,
-        markForControllerExecution: true,
-      })
-      : Object.freeze({ kind: "none" });
+    Object.freeze({ kind: "none" });
 
   return Object.freeze({
     kind: "advance",
