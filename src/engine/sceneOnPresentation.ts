@@ -1366,6 +1366,27 @@ export const SPOINK_TO_ONIX_BOUNCE_PRESENTATION = {
   },
 } as const satisfies Pick<SceneOnBounceConfig, "attacker" | "target">;
 
+export const PLAYER_SPOINK_TO_OPPONENT_ONIX_BOUNCE_PRESENTATION = {
+  attacker: {
+    species: "SPOINK",
+    geometry: {
+      side: "player",
+      spriteCorner: { x: 40, y: 59 },
+      animationCenter: { x: 72, y: 99 },
+      battlePositionCenter: { x: 72, y: 80 },
+    },
+  },
+  target: {
+    species: "ONIX",
+    geometry: {
+      side: "opponent",
+      spriteCorner: { x: 145, y: 10 },
+      animationCenter: { x: 176, y: 42 },
+      battlePositionCenter: { x: 176, y: 40 },
+    },
+  },
+} as const satisfies Pick<SceneOnBounceConfig, "attacker" | "target">;
+
 export const PLAYER_MURKROW_TO_OPPONENT_ONIX_FLY_PRESENTATION = {
   attacker: {
     species: "MURKROW",

@@ -6,6 +6,7 @@ import {
 } from "../src/engine/bounce.ts";
 import {
   createSceneOnMovePresentation,
+  PLAYER_SPOINK_TO_OPPONENT_ONIX_BOUNCE_PRESENTATION,
   sceneOnBounceView,
   SPOINK_TO_ONIX_BOUNCE_PRESENTATION,
 } from "../src/engine/sceneOnPresentation.ts";
@@ -86,6 +87,29 @@ describe("source-relative BOUNCE presentation", () => {
         line1: "Foe SPOINK used",
         line2: "BOUNCE!",
         visibleChars: 22,
+      },
+    });
+  });
+
+  it("pins the source-derived opposite-side battler geometry", () => {
+    expect(PLAYER_SPOINK_TO_OPPONENT_ONIX_BOUNCE_PRESENTATION).toEqual({
+      attacker: {
+        species: "SPOINK",
+        geometry: {
+          side: "player",
+          spriteCorner: { x: 40, y: 59 },
+          animationCenter: { x: 72, y: 99 },
+          battlePositionCenter: { x: 72, y: 80 },
+        },
+      },
+      target: {
+        species: "ONIX",
+        geometry: {
+          side: "opponent",
+          spriteCorner: { x: 145, y: 10 },
+          animationCenter: { x: 176, y: 42 },
+          battlePositionCenter: { x: 176, y: 40 },
+        },
       },
     });
   });
