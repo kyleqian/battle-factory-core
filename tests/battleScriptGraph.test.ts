@@ -14,16 +14,22 @@ type ControlEdge = {
   kind: "fallthrough" | "jump" | "call" | "return" | "end";
   provenance: { kind: "implicit-assembly-successor" | "explicit-opcode-binding"; macro?: string; macroDeclarationLine?: number; opcode?: string };
 };
+type CallsiteContinuation = {
+  kind: "callsite-continuation";
+  call: { from: { label: string; line: number }; target: { label: string; line: number } | null };
+  continuation: { label: string; line: number } | null;
+  provenance: { kind: "explicit-callsite-continuation"; macro: string; macroDeclarationLine: number; opcode: string; continuation: "assembly-successor-after-call" };
+};
 const graph = graphData as {
   schema: string;
-  counts: { macros: number; labels: number; executableInstructions: number; directives: number; nonExecutableCategories: number; unsupportedLineCategories: number; controlFlowEdges: number; fallthroughEdges: number; explicitJumpEdges: number; explicitCallEdges: number; explicitReturnEdges: number; explicitEndEdges: number };
+  counts: { macros: number; labels: number; executableInstructions: number; directives: number; nonExecutableCategories: number; unsupportedLineCategories: number; controlFlowEdges: number; fallthroughEdges: number; explicitJumpEdges: number; explicitCallEdges: number; callsiteContinuationEdges: number; explicitReturnEdges: number; explicitEndEdges: number };
   macros: Array<{ name: string; declarationLine: number; directOpcodeBindings: string[]; opcodeBindings: string[] }>;
   labels: Label[];
   preamble: Statement[];
   effectEntrypoints: Array<{ id: number; effect: string; label: string }>;
   nonExecutableCategories: Record<string, number>;
   unsupportedLineCategories: Record<string, number>;
-  controlFlow: { schema: string; note: string; edges: ControlEdge[] };
+  controlFlow: { schema: string; note: string; edges: ControlEdge[]; callsiteContinuations: CallsiteContinuation[] };
 };
 const topology = topologyData as { effects: Array<{ id: number; effect: string; entryScript: string }>; moves: Array<{ move: string; entryScript: string }>; opcodes: Array<{ opcode: string }> };
 
@@ -95,8 +101,8 @@ describe("Battle Script source graph extraction", () => {
   });
 
   it("preserves exact implicit assembly successors and source-spelled transfer provenance", () => {
-    expect(graph.schema).toBe("battle-script-graph/v2");
-    expect(graph.controlFlow.schema).toBe("battle-script-control-flow/v1");
+    expect(graph.schema).toBe("battle-script-graph/v3");
+    expect(graph.controlFlow.schema).toBe("battle-script-control-flow/v2");
     expect(graph.controlFlow.note).toContain("No runtime guard");
     expect(graph.counts.controlFlowEdges).toBe(graph.controlFlow.edges.length);
     const countFieldByKind: Record<ControlEdge["kind"], keyof typeof graph.counts> = {
@@ -110,6 +116,8 @@ describe("Battle Script source graph extraction", () => {
       const count = graph.controlFlow.edges.filter((candidate) => candidate.kind === kind).length;
       expect(graph.counts[countFieldByKind[kind]]).toBe(count);
     }
+    expect(graph.counts.callsiteContinuationEdges).toBe(graph.controlFlow.callsiteContinuations.length);
+    expect(graph.controlFlow.callsiteContinuations).toHaveLength(graph.counts.explicitCallEdges);
 
     const executable = graph.labels.flatMap((label) => label.statements
       .filter((statement) => statement.kind === "instruction")
@@ -119,6 +127,18 @@ describe("Battle Script source graph extraction", () => {
       expect(index).toBeGreaterThanOrEqual(0);
       expect(fallthrough.to).toEqual(executable[index + 1]);
       expect(fallthrough.provenance).toEqual({ kind: "implicit-assembly-successor" });
+    }
+    for (const call of graph.controlFlow.edges.filter((candidate) => candidate.kind === "call")) {
+      const continuation = graph.controlFlow.callsiteContinuations.find((candidate) =>
+        candidate.call.from.label === call.from.label && candidate.call.from.line === call.from.line);
+      const index = executable.findIndex((statement) => statement.label === call.from.label && statement.line === call.from.line);
+      expect(index).toBeGreaterThanOrEqual(0);
+      expect(continuation).toMatchObject({
+        kind: "callsite-continuation",
+        call: { from: call.from, target: call.to },
+        continuation: executable[index + 1] ?? null,
+        provenance: { kind: "explicit-callsite-continuation", continuation: "assembly-successor-after-call" },
+      });
     }
 
     expect(edge("BattleScript_EffectThunder", 1923, "jump")).toMatchObject({
@@ -166,5 +186,52 @@ describe("Battle Script source graph extraction", () => {
     }
     expect(edge("BattleScript_PreserveMissedBitDoMoveAnim", 423, "return").to).toBeNull();
     expect(edge("BattleScript_MoveEnd", 269, "end").to).toBeNull();
+  });
+
+  it("records callsite continuations without treating them as immediate paths or guessing RETURN targets", () => {
+    const continuation = (label: string, line: number) => graph.controlFlow.callsiteContinuations.find((candidate) =>
+      candidate.call.from.label === label && candidate.call.from.line === line);
+
+    // One callee has multiple callsites: each has its own source-spelled
+    // post-call continuation, while its RETURN remains stack-dependent.
+    expect(continuation("BattleScript_EffectRazorWind", 782)).toMatchObject({
+      kind: "callsite-continuation",
+      call: { target: { label: "BattleScriptFirstChargingTurn", line: 796 } },
+      continuation: { label: "BattleScript_EffectRazorWind", line: 783 },
+      provenance: { macro: "call", macroDeclarationLine: 361, opcode: "B_SCR_OP_CALL", continuation: "assembly-successor-after-call" },
+    });
+    expect(continuation("BattleScript_EffectSkyAttack", 1068)).toMatchObject({
+      call: { target: { label: "BattleScriptFirstChargingTurn", line: 796 } },
+      continuation: { label: "BattleScript_EffectSkyAttack", line: 1069 },
+    });
+
+    // Independent call frames retain their own continuations. This remains
+    // valid if calls nest at runtime because no RETURN is flattened into a
+    // stack-insensitive direct graph edge.
+    expect(continuation("BattleScript_CastformChange", 4008)).toMatchObject({
+      call: { target: { label: "BattleScript_DoCastformChange", line: 4012 } },
+      continuation: { label: "BattleScript_CastformChange", line: 4009 },
+    });
+    expect(continuation("BattleScript_DrizzleActivates", 3962)).toMatchObject({
+      call: { target: { label: "BattleScript_WeatherFormChanges", line: 4000 } },
+      continuation: { label: "BattleScript_DrizzleActivates", line: 3963 },
+    });
+
+    // A post-call END3 is recorded as a continuation, not claimed to run
+    // before the callee returns. Every RETURN remains targetless in the CFG.
+    expect(continuation("BattleScript_IntimidateActivatesEnd3", 4019)).toMatchObject({
+      continuation: { label: "BattleScript_IntimidateActivatesEnd3", line: 4020 },
+    });
+    for (const returned of graph.controlFlow.edges.filter((candidate) => candidate.kind === "return")) {
+      expect(returned.to).toBeNull();
+    }
+    for (const call of graph.controlFlow.edges.filter((candidate) => candidate.kind === "call")) {
+      expect(graph.controlFlow.edges.some((candidate) =>
+        candidate.kind === "fallthrough"
+        && candidate.from.label === call.from.label
+        && candidate.from.line === call.from.line)).toBe(false);
+    }
+    expect(graph.controlFlow.note).toContain("not immediate executable fallthrough");
+    expect(graph.controlFlow.note).toContain("no stack-insensitive RETURN-to-continuation edges");
   });
 });
