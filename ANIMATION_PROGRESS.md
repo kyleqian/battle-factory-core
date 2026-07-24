@@ -44,20 +44,26 @@ remainder.
 
 ## Current handoff
 
-- **State:** **17 exact / 1 partial / 258 unsupported**. BLAZE KICK is exact
-  for its complete source-owned body in both required orientations.
-- **Did:** connected the existing target-relative reducer through the shared
-  Scene-ON seam with the source `AFFINE_DOUBLE` spinning-foot program, both
-  target-white ramps, the complex whole-field black blend/restore, and one
-  persistent source allocation/order lifetime across foot, hitsplat,
-  invisible palette owner, and seven FireSpread sprites. The semi-transparent
-  hitsplat now samples the actual target-monbg/field target-2 backdrop rather
-  than another same-priority OBJ.
-- **Evidence:** player frames **399..476** and opponent frames **453..530**
-  each match **78/78 component/OAM-order and 78/78 framebuffer frames** at
-  relative ages **0..77**, with zero exclusions. FLAMETHROWER remains
-  **126/126 RGB+component both** and DRAGON BREATH remains **85/85
-  RGB+component both** after fresh dense control runs.
-- **Next:** retain FIRE BLAST, EMBER, FIRE SPIN, and DRAGON RAGE as unsupported
-  distinct-template siblings until each has independent dense move evidence;
-  select the next bounded Level-50 acceptance unit from coverage.
+- **State:** **17 exact / 1 partial / 258 unsupported**. THUNDER PUNCH remains
+  honestly unsupported; this is a source/component checkpoint, not promotion.
+- **Did:** extracted the distinct five-frame `ANIM_TAG_LIGHTNING` sheet and
+  added a target-relative reducer for all three `gLightningSpriteTemplate`
+  spawns. The portable probe now records live lightning slot/subpriority,
+  position, tile, and palette state without changing damage/RNG/controller
+  ownership. Shared Fire/Ice fist, hitsplat, and shake code is unchanged.
+- **Evidence:** the player-back ONIX → opponent-front GROVYLE stock-ROM stage
+  pins lightning displays at frames **2400..2433**: births **2400/2403/2406**,
+  centers **(176,-4)/(176,28)/(176,60)**, five source tile frames, and
+  independent **28-frame** OAM lifetimes; reducer vs live component state is
+  **34/34 frames, 0 component mismatches**. The opposite GROVYLE → ONIX stage
+  correctly produces no meaningful animation body because Electric is
+  ineffective against Ground; therefore dense component/RGB acceptance is
+  **0/0**, not claimed. RGB mismatch count is **N/A (0 frames compared)**
+  because THUNDER PUNCH is not wired into the framebuffer seam. Focused
+  Fire/Ice/Thunder controls are **32/32** green.
+- **Next:** stage a genuinely legal non-Ground Level-50 opponent for the
+  player-side target (with extracted front/back art), then connect this reducer
+  plus source black-palette ramp, two whole-screen inversions, shared
+  fist/hitsplat/shake, monbg, and teardown through the Scene-ON seam. Densely
+  compare the complete meaningful body in both orientations; keep unsupported
+  until both component and RGB counts are exact.
