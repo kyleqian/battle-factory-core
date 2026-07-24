@@ -44,26 +44,18 @@ remainder.
 
 ## Current handoff
 
-- **State:** **17 exact / 1 partial / 258 unsupported**. THUNDER PUNCH remains
-  honestly unsupported; this is a source/component checkpoint, not promotion.
-- **Did:** extracted the distinct five-frame `ANIM_TAG_LIGHTNING` sheet and
-  added a target-relative reducer for all three `gLightningSpriteTemplate`
-  spawns. The portable probe now records live lightning slot/subpriority,
-  position, tile, and palette state without changing damage/RNG/controller
-  ownership. Shared Fire/Ice fist, hitsplat, and shake code is unchanged.
-- **Evidence:** the player-back ONIX → opponent-front GROVYLE stock-ROM stage
-  pins lightning displays at frames **2400..2433**: births **2400/2403/2406**,
-  centers **(176,-4)/(176,28)/(176,60)**, five source tile frames, and
-  independent **28-frame** OAM lifetimes; reducer vs live component state is
-  **34/34 frames, 0 component mismatches**. The opposite GROVYLE → ONIX stage
-  correctly produces no meaningful animation body because Electric is
-  ineffective against Ground; therefore dense component/RGB acceptance is
-  **0/0**, not claimed. RGB mismatch count is **N/A (0 frames compared)**
-  because THUNDER PUNCH is not wired into the framebuffer seam. Focused
-  Fire/Ice/Thunder controls are **32/32** green.
-- **Next:** stage a genuinely legal non-Ground Level-50 opponent for the
-  player-side target (with extracted front/back art), then connect this reducer
-  plus source black-palette ramp, two whole-screen inversions, shared
-  fist/hitsplat/shake, monbg, and teardown through the Scene-ON seam. Densely
-  compare the complete meaningful body in both orientations; keep unsupported
-  until both component and RGB counts are exact.
+- **State:** **18 exact / 1 partial / 257 unsupported**. THUNDER PUNCH is exact
+  for its complete move-owned body in both source-required orientations.
+- **Did:** staged legal zero-PP-Up Level-50 ONIX → non-Ground MURKROW with
+  source Factory set ids and extracted front/back art. Added the relative
+  Thunder Punch seam: black ramp/restore, two inversions, three lightning
+  programs, shared fist/two hitsplats/shake, monbg, alpha, and teardown.
+- **Evidence:** player-back → opponent-front oracle **401..504** and
+  opponent-front → player-back **452..555** are each **104/104 component +
+  104/104 RGB exact**. The reverse second-bolt allocation retains the live
+  hitsplat ahead for one 14-pixel overlap display, then returns to ordinary
+  OAM order. Fresh controls remain exact: FIRE PUNCH **225/225 + 277/277**,
+  ICE PUNCH **462/462 + 1294/1294**, BLAZE KICK **78/78 both**,
+  FLAMETHROWER **126/126 both**, DRAGON BREATH **85/85 both**.
+- **Next:** run `npm run animation:coverage` and resume the next ranked
+  Level-50 component track; THUNDER PUNCH has no known move-owned remainder.

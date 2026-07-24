@@ -104,6 +104,12 @@
       "evidence": ["tools/compare/fixtures/ice-punch-onix-grovyle.json", "tools/compare/fixtures/ice-punch-grovyle-onix.json", "tools/compare/firePunchPortable.ts", "tools/probe/stage-fire-punch-portable-on.py", "docs/ice-punch-portable-staging-probe.md"]
     },
     {
+      "move": "MOVE_THUNDER_PUNCH",
+      "status": "exact",
+      "covered": ["legal zero-PP-Up Level-50 mechanicLab ONIX to non-Ground MURKROW in both source-required orientations, using Factory set ids 156/149/180 and 184/188/135 plus extracted ONIX/MURKROW front/back art", "complete move-owned source interval at relative ages 0..103 / player oracle frames 401..504 and opponent oracle frames 452..555: monbg acquisition/release, setalpha/blendoff, source delay-2 black palette ramp and restoration, both whole-screen inversions, shared fist, two independently affine-scaled hitsplats, target AnimTask_ShakeMon display offsets, all three target-relative gLightningSpriteTemplate births and five-frame/28-display programs, and teardown match 104/104 component frames in each orientation", "shared Scene-ON compositor matches 104/104 dense RGB framebuffers in each orientation with zero exclusions; the reverse orientation pins the source-relative second-bolt allocation boundary where the still-live hitsplat wins their 14-pixel overlap for one display before normal OAM ordering resumes", "fresh FIRE PUNCH 225/225 + 277/277, ICE PUNCH 462/462 + 1294/1294, BLAZE KICK 78/78 both, FLAMETHROWER 126/126 both, and DRAGON BREATH 85/85 both remain exact"],
+      "evidence": ["tools/battle-lab/mechanic-thunder-punch-player-onix-opponent-murkrow.json", "tools/battle-lab/mechanic-thunder-punch-opponent-onix-player-murkrow.json", "tools/compare/fixtures/thunder-punch-player-onix-opponent-murkrow.json", "tools/compare/fixtures/thunder-punch-opponent-onix-player-murkrow.json", "tools/compare/thunderPunchPortable.ts", "tools/probe/run-battle-lab-rgb.py", "src/engine/thunderPunch.ts", "src/engine/sceneOnPresentation.ts", "tests/thunderPunch.test.ts"]
+    },
+    {
       "move": "MOVE_FAINT_ATTACK",
       "status": "partial",
       "covered": ["canonical opponent-front MURKROW to player-back MAGBY, complete dense body in turn16 and repeated turn17 occurrences (221/221 each)", "portable synthetic player-back ONIX to opponent-front GROVYLE, complete dense relative ages 0-220 / oracle frames 2344-2564 (221/221) through the shared Scene-ON adapter"],
@@ -130,7 +136,7 @@
         "MOVE_ICE_PUNCH",
         "MOVE_THUNDER_PUNCH"
       ],
-      "goal": "FIRE PUNCH and ICE PUNCH remain exact controls. THUNDER PUNCH now has its distinct five-frame ANIM_TAG_LIGHTNING asset and all three target-relative gLightningSpriteTemplate births/positions/frame programs/28-display lifetimes source-derived and player-side RAM-pinned at oracle frames 2400-2433: reducer versus live component state is 34/34 frames with 0 component mismatches. It remains unsupported: RGB comparison is N/A (0 frames; no framebuffer seam yet), and the existing opposite-side GROVYLE-to-ONIX stage is Electric-immune and yields no meaningful body. The shared-seam black palette ramp, two whole-screen inversions, fist/hitsplat/shake composition, monbg, teardown, and dense RGB comparison remain. Stage a legal non-Ground Level-50 target and prove the complete body in both orientations before promotion."
+      "goal": "FIRE PUNCH and ICE PUNCH remain exact controls. THUNDER PUNCH independently proves a complete legal non-Ground Level-50 ONIX-to-MURKROW source body through the shared Scene-ON seam at 104/104 component and RGB frames in both orientations, including the distinct lightning asset/program, delay-2 black ramps, both inversions, shared fist/two hitsplats/shake, monbg, teardown, and the reverse-side second-bolt OAM creation boundary."
     },
     {
       "id": "white-feather",

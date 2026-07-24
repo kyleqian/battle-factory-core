@@ -123,6 +123,16 @@ import {
   extremeSpeedImpactAtAge,
   type ExtremeSpeedBackgroundState,
 } from "./extremeSpeed.ts";
+import {
+  thunderPunchFistVisible,
+  thunderPunchFirstHitsplatVisible,
+  thunderPunchLightningAtAge,
+  thunderPunchPaletteAtAge,
+  thunderPunchSecondHitsplatVisible,
+  thunderPunchTargetShakeY2,
+  type ThunderPunchLightning,
+  type ThunderPunchPaletteState,
+} from "./thunderPunch.ts";
 
 export type SceneOnBattlerSide = "player" | "opponent";
 
@@ -404,6 +414,13 @@ export interface SceneOnIcePunchConfig {
   readonly moveTextStartAge?: number;
 }
 
+export interface SceneOnThunderPunchConfig {
+  readonly move: "THUNDER_PUNCH";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnFaintAttackFieldProfile>;
+}
+
 export interface SceneOnFaintAttackFieldProfile {
   readonly playerHp: number;
   readonly opponentHp: number;
@@ -490,6 +507,7 @@ export interface SceneOnEndeavorConfig {
 export type SceneOnMoveConfig =
   | SceneOnFirePunchConfig
   | SceneOnIcePunchConfig
+  | SceneOnThunderPunchConfig
   | SceneOnFaintAttackConfig
   | SceneOnRockSlideConfig
   | SceneOnDoubleTeamConfig
@@ -548,6 +566,20 @@ export interface SceneOnIcePunchView {
     healthboxStatus: "none" | "freeze";
     currentMove: "ICE_PUNCH" | null;
   }>;
+}
+
+export interface SceneOnThunderPunchView {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly palette: ThunderPunchPaletteState;
+  readonly lightning: readonly ThunderPunchLightning[];
+  readonly targetY2: number;
+  readonly fistVisible: boolean;
+  readonly firstHitsplatVisible: boolean;
+  readonly secondHitsplatVisible: boolean;
+  readonly targetOnMonBg: boolean;
+  readonly alpha: Readonly<{ eva: 12; evb: 8 }> | null;
 }
 
 export interface SceneOnFaintAttackView {
@@ -1181,6 +1213,30 @@ export function sceneOnFirePunchView(
         ? firePunchResidualBurnFlames(state.age, geometry)
         : []),
     ],
+  };
+}
+
+export function sceneOnThunderPunchView(
+  state: SceneOnMovePresentationState,
+): SceneOnThunderPunchView {
+  if (state.config.move !== "THUNDER_PUNCH") {
+    throw new Error(`expected THUNDER_PUNCH presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    palette: thunderPunchPaletteAtAge(state.age),
+    lightning: thunderPunchLightningAtAge(
+      state.age,
+      state.config.target.geometry.animationCenter,
+    ),
+    targetY2: thunderPunchTargetShakeY2(state.age),
+    fistVisible: thunderPunchFistVisible(state.age),
+    firstHitsplatVisible: thunderPunchFirstHitsplatVisible(state.age),
+    secondHitsplatVisible: thunderPunchSecondHitsplatVisible(state.age),
+    targetOnMonBg: state.age >= 0 && state.age < 103,
+    alpha: state.age >= 3 && state.age < 103 ? { eva: 12, evb: 8 } : null,
   };
 }
 

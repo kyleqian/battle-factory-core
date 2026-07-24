@@ -76,6 +76,7 @@ def main() -> None:
     flamethrower_flame_template = oracle.symbols["gFlamethrowerFlameSpriteTemplate"]
     spinning_hand_or_foot_template = oracle.symbols["gSpinningHandOrFootSpriteTemplate"]
     fire_spread_template = oracle.symbols["gFireSpreadSpriteTemplate"]
+    lightning_template = oracle.symbols["gLightningSpriteTemplate"]
     speed_dust_template = oracle.symbols["gSpeedDustSpriteTemplate"]
     battle_mons = oracle.symbols["gBattleMons"]
     battler_sprite_ids = oracle.symbols["gBattlerSpriteIds"]
@@ -179,6 +180,7 @@ def main() -> None:
         flamethrower_flame_sprites = []
         spinning_hand_or_foot_sprites = []
         fire_spread_sprites = []
+        lightning_sprites = []
         speed_dust_sprites = []
         for slot in range(64):
             base = sprites + slot * 0x44
@@ -219,6 +221,8 @@ def main() -> None:
                 spinning_hand_or_foot_sprites.append(feather_record(slot))
             elif template == fire_spread_template:
                 fire_spread_sprites.append(feather_record(slot))
+            elif template == lightning_template:
+                lightning_sprites.append(feather_record(slot))
             elif template == speed_dust_template:
                 speed_dust_sprites.append(feather_record(slot))
         sand_attack_dirt_oam = []
@@ -281,6 +285,7 @@ def main() -> None:
                 "flamethrowerFlameSprites": flamethrower_flame_sprites,
                 "spinningHandOrFootSprites": spinning_hand_or_foot_sprites,
                 "fireSpreadSprites": fire_spread_sprites,
+                "lightningSprites": lightning_sprites,
                 "speedDustSprites": speed_dust_sprites,
                 "bg3X": s16(oracle.symbols["gBattle_BG3_X"]),
                 "bg3Y": s16(oracle.symbols["gBattle_BG3_Y"]),
@@ -290,6 +295,10 @@ def main() -> None:
                 "bgPalette2Faded": [
                     u16(pltt_faded + (2 * 16 + index) * 2)
                     for index in range(16)
+                ],
+                "bgPaletteFaded": [
+                    u16(pltt_faded + index * 2)
+                    for index in range(256)
                 ],
                 "bldcnt": oracle.read_u8(0x04000050)
                 | (oracle.read_u8(0x04000051) << 8),
