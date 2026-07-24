@@ -5,8 +5,10 @@ import {
 } from "../src/engine/featherDance.ts";
 import {
   createSceneOnMovePresentation,
+  featherDanceStatDropDisplayProfile,
   FEATHER_DANCE_STAT_DROP_DISPLAY_PROFILE,
   FEATHER_DANCE_STAT_MESSAGE_LENGTH,
+  PLAYER_PIDGEOTTO_TO_OPPONENT_ONIX_FEATHER_DANCE_PRESENTATION,
   PIDGEOTTO_TO_ONIX_FEATHER_DANCE_PRESENTATION,
   sceneOnFeatherDanceView,
 } from "../src/engine/sceneOnPresentation.ts";
@@ -48,6 +50,101 @@ describe("portable FEATHER DANCE presentation", () => {
       pc: base.pc,
       pd: base.pd,
     });
+  });
+
+  it("derives the opposite target-side anchor, priority, and printer-relative script offset", () => {
+    const original = featherDanceSpritesAtAge(
+      54,
+      { x: 72, y: 80 },
+      "player",
+    )[0]!;
+    const opposite = featherDanceSpritesAtAge(
+      50,
+      { x: 176, y: 40 },
+      "opponent",
+      4,
+    )[0]!;
+    expect({
+      dx: opposite.centerX - original.centerX,
+      dy: opposite.centerY - original.centerY,
+      priorityDelta: opposite.priority - original.priority,
+    }).toEqual({ dx: 104, dy: -40, priorityDelta: -1 });
+    expect(opposite).toMatchObject({
+      pa: original.pa,
+      pb: original.pb,
+      pc: original.pc,
+      pd: original.pd,
+      animNum: original.animNum,
+      order: original.order,
+    });
+  });
+
+  it("pins source-derived player-back Pidgeotto and opponent-front Onix geometry", () => {
+    expect(PLAYER_PIDGEOTTO_TO_OPPONENT_ONIX_FEATHER_DANCE_PRESENTATION)
+      .toEqual({
+        attacker: {
+          species: "PIDGEOTTO",
+          geometry: {
+            side: "player",
+            spriteCorner: { x: 40, y: 60 },
+            animationCenter: { x: 72, y: 100 },
+            battlePositionCenter: { x: 72, y: 80 },
+          },
+        },
+        target: {
+          species: "ONIX",
+          geometry: {
+            side: "opponent",
+            spriteCorner: { x: 145, y: 10 },
+            animationCenter: { x: 176, y: 42 },
+            battlePositionCenter: { x: 176, y: 40 },
+          },
+        },
+        animationAgeOffset: 4,
+      });
+  });
+
+  it("uses player/opponent text prefixes while retaining immutable controller outcomes", () => {
+    const controllerProfile = Object.freeze({
+      attackStageBefore: 6,
+      attackStageAfter: 4,
+    });
+    const stage = createSceneOnMovePresentation({
+      move: "FEATHER_DANCE",
+      ...PLAYER_PIDGEOTTO_TO_OPPONENT_ONIX_FEATHER_DANCE_PRESENTATION,
+      fieldProfile: Object.freeze({
+        playerHp: 156,
+        opponentHp: 117,
+        playerStatus: "none" as const,
+        playerGender: "female" as const,
+        opponentGender: "male" as const,
+      }),
+      controllerProfile,
+      moveTextStartAge: 7,
+    });
+    const before = structuredClone(stage.config);
+    const body = sceneOnFeatherDanceView({ ...stage, age: 50 });
+    expect(body.feathers).toHaveLength(1);
+    expect(body.moveText).toEqual({
+      line1: "PIDGEOTTO used",
+      line2: "FEATHERDANCE!",
+    });
+    expect(body.statMessage).toEqual({
+      line1: "Foe ONIX’s ATTACK",
+      line2: "harshly fell!",
+    });
+    expect(featherDanceStatDropDisplayProfile(4)).toMatchObject({
+      bannerFirstAge: 219,
+      bannerLastAge: 299,
+      messageFirstAge: 304,
+      nextControllerReadyAge: 406,
+    });
+    expect(
+      sceneOnFeatherDanceView({ ...stage, age: 333 })
+        .controllerDisplay.messageVisibleChars,
+    ).toBe(30);
+    expect(stage.config).toEqual(before);
+    expect(stage.config.controllerProfile).toBe(controllerProfile);
   });
 
   it("leaves controller-owned stat outcomes and field inputs immutable", () => {

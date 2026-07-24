@@ -21,7 +21,9 @@
     "compare:factory-terminal-round-won": "node --experimental-strip-types tools/compare/factoryTerminalLoss.ts tools/compare/fixtures/factory-terminal-round-won-off.json",
     "compare:factory-terminal-round-won-continuation": "node --experimental-strip-types tools/compare/factoryTerminalLoss.ts tools/compare/fixtures/factory-terminal-round-won-continuation-off.json",
     "compare:factory-swap-duplicate-species": "node --experimental-strip-types tools/compare/factorySwapDuplicateSpecies.ts",
-    "compare:endeavor-portable": "node --experimental-strip-types tools/compare/endeavorPortable.ts"
+    "compare:endeavor-portable": "node --experimental-strip-types tools/compare/endeavorPortable.ts",
+    "compare:feather-dance-portable": "node --experimental-strip-types tools/compare/featherDancePortable.ts",
+    "compare:feather-dance-opposite": "node --experimental-strip-types tools/compare/featherDancePortable.ts tools/compare/fixtures/feather-dance-player-pidgeotto-onix.json"
   },
   "devDependencies": {
     "@types/node": "^26.1.1",

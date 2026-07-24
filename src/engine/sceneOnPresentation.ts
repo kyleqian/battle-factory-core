@@ -80,6 +80,11 @@ export interface SceneOnFeatherDanceConfig {
     readonly attackStageAfter: number;
   }>;
   readonly moveTextStartAge: number;
+  /**
+   * Controller-printer-relative script head start. The player-side move-used
+   * line omits "Foe " and releases FEATHER DANCE four frames earlier.
+   */
+  readonly animationAgeOffset?: number;
 }
 
 export interface SceneOnFirePunchConfig {
@@ -141,6 +146,7 @@ export interface SceneOnFaintAttackFieldProfile {
   readonly opponentHp: number;
   readonly playerStatus: "none" | "burn";
   readonly playerGender?: "male" | "female";
+  readonly opponentGender?: "male" | "female";
 }
 
 export interface SceneOnFaintAttackConfig {
@@ -314,6 +320,8 @@ export interface SceneOnFeatherDanceView {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly feathers: readonly FeatherRenderSprite[];
+  readonly moveText: Readonly<{ line1: string; line2: string }>;
+  readonly statMessage: Readonly<{ line1: string; line2: string }>;
   readonly controllerDisplay: StatStageDropDisplayState;
 }
 
@@ -322,6 +330,12 @@ export const FEATHER_DANCE_STAT_MESSAGE_LINE2 = "harshly fell!";
 export const FEATHER_DANCE_STAT_MESSAGE_LENGTH =
   FEATHER_DANCE_STAT_MESSAGE_LINE1.length
   + FEATHER_DANCE_STAT_MESSAGE_LINE2.length;
+
+function battlerNameWithPrefix(battler: SceneOnPresentationBattler): string {
+  return battler.geometry.side === "opponent"
+    ? `Foe ${battler.species}`
+    : battler.species;
+}
 
 /**
  * Source/controller-relative clocks for the staged 6→4 ATK result. Age zero
@@ -340,6 +354,38 @@ export const FEATHER_DANCE_STAT_DROP_DISPLAY_PROFILE:
     messageFirstAge: 308,
     nextControllerReadyAge: 406,
   });
+
+export function featherDanceStatDropDisplayProfile(
+  animationAgeOffset: number,
+): Readonly<StatStageDropDisplayProfile> {
+  if (animationAgeOffset === 0) return FEATHER_DANCE_STAT_DROP_DISPLAY_PROFILE;
+  return {
+    ...FEATHER_DANCE_STAT_DROP_DISPLAY_PROFILE,
+    bannerFirstAge:
+      FEATHER_DANCE_STAT_DROP_DISPLAY_PROFILE.bannerFirstAge
+      - animationAgeOffset,
+    bannerHoldEndAge:
+      FEATHER_DANCE_STAT_DROP_DISPLAY_PROFILE.bannerHoldEndAge
+      - animationAgeOffset,
+    bannerRampDownFirstAge:
+      FEATHER_DANCE_STAT_DROP_DISPLAY_PROFILE.bannerRampDownFirstAge
+      - animationAgeOffset,
+    bannerLastAge:
+      FEATHER_DANCE_STAT_DROP_DISPLAY_PROFILE.bannerLastAge
+      - animationAgeOffset,
+    bgScrollFirstAge:
+      FEATHER_DANCE_STAT_DROP_DISPLAY_PROFILE.bgScrollFirstAge
+      - animationAgeOffset,
+    messageFirstAge:
+      FEATHER_DANCE_STAT_DROP_DISPLAY_PROFILE.messageFirstAge
+      - animationAgeOffset,
+    // The opposite target's "Foe " prefix adds the same four printer
+    // frames back after the earlier player-side kickoff, so the stable
+    // controller boundary itself remains unchanged.
+    nextControllerReadyAge:
+      FEATHER_DANCE_STAT_DROP_DISPLAY_PROFILE.nextControllerReadyAge,
+  };
+}
 
 function assertIntegerPoint(
   label: string,
@@ -621,6 +667,17 @@ export function sceneOnFeatherDanceView(
   if (state.config.move !== "FEATHER_DANCE") {
     throw new Error(`expected FEATHER_DANCE presentation, got ${state.config.move}`);
   }
+  const moveText = {
+    line1: `${battlerNameWithPrefix(state.config.attacker)} used`,
+    line2: "FEATHERDANCE!",
+  };
+  const statMessage = {
+    line1: `${battlerNameWithPrefix(state.config.target)}’s ATTACK`,
+    line2: FEATHER_DANCE_STAT_MESSAGE_LINE2,
+  };
+  const displayProfile = featherDanceStatDropDisplayProfile(
+    state.config.animationAgeOffset ?? 0,
+  );
   return {
     age: state.age,
     attacker: state.config.attacker,
@@ -628,11 +685,15 @@ export function sceneOnFeatherDanceView(
     feathers: featherDanceSpritesAtAge(
       state.age,
       state.config.target.geometry.battlePositionCenter,
+      state.config.target.geometry.side,
+      state.config.animationAgeOffset ?? 0,
     ),
+    moveText,
+    statMessage,
     controllerDisplay: statStageDropDisplayAtAge(
       state.age,
-      FEATHER_DANCE_STAT_DROP_DISPLAY_PROFILE,
-      FEATHER_DANCE_STAT_MESSAGE_LENGTH,
+      displayProfile,
+      statMessage.line1.length + statMessage.line2.length,
     ),
   };
 }
@@ -657,6 +718,38 @@ export const PIDGEOTTO_TO_ONIX_FEATHER_DANCE_PRESENTATION = {
     },
   },
 } as const satisfies Pick<SceneOnFeatherDanceConfig, "attacker" | "target">;
+
+/**
+ * Source-derived singles geometry for the required opposite-side variant:
+ * Pidgeotto's back sprite uses gMonBackPicCoords.y_offset=12, Onix's front
+ * sprite uses gMonFrontPicCoords.y_offset=2, and sBattlerCoords supplies the
+ * fixed player/opponent animation anchors. The settled Onix front animation
+ * retains OAM x2=1 (dense RAM frames 0-445), hence spriteCorner.x=145.
+ */
+export const PLAYER_PIDGEOTTO_TO_OPPONENT_ONIX_FEATHER_DANCE_PRESENTATION = {
+  attacker: {
+    species: "PIDGEOTTO",
+    geometry: {
+      side: "player",
+      spriteCorner: { x: 40, y: 60 },
+      animationCenter: { x: 72, y: 100 },
+      battlePositionCenter: { x: 72, y: 80 },
+    },
+  },
+  target: {
+    species: "ONIX",
+    geometry: {
+      side: "opponent",
+      spriteCorner: { x: 145, y: 10 },
+      animationCenter: { x: 176, y: 42 },
+      battlePositionCenter: { x: 176, y: 40 },
+    },
+  },
+  animationAgeOffset: 4,
+} as const satisfies Pick<
+  SceneOnFeatherDanceConfig,
+  "attacker" | "target" | "animationAgeOffset"
+>;
 
 export const ONIX_TO_GROVYLE_FIRE_PUNCH_GEOMETRY = {
   attacker: {

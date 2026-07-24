@@ -82,12 +82,14 @@ const BACK_SPECIES: Record<string, string> = {
   ONIX: "onix",
   MAGBY: "magby",
   BAYLEEF: "bayleef",
+  PIDGEOTTO: "pidgeotto",
 };
 const FRONT_SPECIES: Record<string, string> = {
   GROVYLE: "grovyle",
   MURKROW: "murkrow",
   PIDGEOTTO: "pidgeotto",
   KABUTO: "kabuto",
+  ONIX: "onix",
 };
 
 const backSprites: Record<string, Sprite> = {};

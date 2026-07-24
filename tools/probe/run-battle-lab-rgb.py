@@ -62,21 +62,66 @@ def main() -> None:
     RGB_DIR.mkdir()
 
     records = []
+    sprites = oracle.symbols["gSprites"]
+    oam_matrices = oracle.symbols["gOamMatrices"]
+    feather_template = oracle.symbols["gFallingFeatherSpriteTemplate"]
+    battle_mons = oracle.symbols["gBattleMons"]
+    battler_sprite_ids = oracle.symbols["gBattlerSpriteIds"]
+
+    def s16(addr: int) -> int:
+        value = oracle.read_u8(addr) | (oracle.read_u8(addr + 1) << 8)
+        return value - 0x10000 if value >= 0x8000 else value
+
+    def feather_record(slot: int) -> dict:
+        base = sprites + slot * 0x44
+        matrix_num = (oracle.read_u8(base + 3) >> 1) & 0x1F
+        matrix_base = oam_matrices + matrix_num * 8
+        return {
+            "slot": slot,
+            "tileNum": oracle.read_u8(base + 4)
+            | ((oracle.read_u8(base + 5) & 0x3) << 8),
+            "paletteNum": (oracle.read_u8(base + 5) >> 4) & 0xF,
+            "priority": (oracle.read_u8(base + 5) >> 2) & 0x3,
+            "animNum": oracle.read_u8(base + 0x2A),
+            "x": s16(base + 0x20),
+            "y": s16(base + 0x22),
+            "x2": s16(base + 0x24),
+            "y2": s16(base + 0x26),
+            "a": s16(matrix_base),
+            "b": s16(matrix_base + 2),
+            "c": s16(matrix_base + 4),
+            "d": s16(matrix_base + 6),
+        }
+
+    def battler_sprite_record(battler: int) -> dict:
+        slot = oracle.read_u8(battler_sprite_ids + battler)
+        base = sprites + slot * 0x44
+        return {
+            "slot": slot,
+            "tileNum": oracle.read_u8(base + 4)
+            | ((oracle.read_u8(base + 5) & 0x3) << 8),
+            "paletteNum": (oracle.read_u8(base + 5) >> 4) & 0xF,
+            "priority": (oracle.read_u8(base + 5) >> 2) & 0x3,
+            "animNum": oracle.read_u8(base + 0x2A),
+            "animCmdIndex": oracle.read_u8(base + 0x2B),
+            "x": s16(base + 0x20),
+            "y": s16(base + 0x22),
+            "x2": s16(base + 0x24),
+            "y2": s16(base + 0x26),
+        }
 
     def capture(frame: int) -> None:
         rgb = oracle.screen_rgb()
         (RGB_DIR / f"{frame:05d}.rgb").write_bytes(rgb)
         snapshot = lab.snapshot()
-        feather_template = oracle.symbols["gFallingFeatherSpriteTemplate"]
-        sprites = oracle.symbols["gSprites"]
-        feather_slots = []
+        feather_sprites = []
         for slot in range(64):
             base = sprites + slot * 0x44
             if (
                 oracle.read_u8(base + 0x3E) & 1
                 and oracle.read_u32(base + 0x14) == feather_template
             ):
-                feather_slots.append(slot)
+                feather_sprites.append(feather_record(slot))
         records.append(
             {
                 "frame": frame,
@@ -87,7 +132,11 @@ def main() -> None:
                 "opponentControllerCommand": snapshot["engine"]["opponentControllerCommand"],
                 "player": snapshot["battlers"]["player"],
                 "opponent": snapshot["battlers"]["opponent"],
-                "featherSlots": feather_slots,
+                "playerPersonality": oracle.read_u32(battle_mons + 0x48),
+                "opponentPersonality": oracle.read_u32(battle_mons + 0x58 + 0x48),
+                "playerSprite": battler_sprite_record(0),
+                "opponentSprite": battler_sprite_record(1),
+                "featherSprites": feather_sprites,
             }
         )
 

@@ -1,0 +1,29 @@
+{
+  "schema": "scene-on-portable-compare/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-feather-dance-player-pidgeotto-onix.json",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
+  "pair": "PIDGEOTTO (player-back) -> ONIX (opponent-front)",
+  "move": "FEATHER_DANCE",
+  "orientation": "player-to-opponent",
+  "appStage": {
+    "oracleFrame": 46,
+    "presentationAge": 7
+  },
+  "denseWindow": {
+    "startFrame": 46,
+    "endFrame": 445
+  },
+  "fieldProfile": {
+    "playerHp": 156,
+    "opponentHp": 117,
+    "playerStatus": "none",
+    "playerGender": "female",
+    "opponentGender": "male"
+  },
+  "controllerProfile": {
+    "attackStageBefore": 6,
+    "attackStageAfter": 4
+  },
+  "moveTextStartAge": 7
+}
