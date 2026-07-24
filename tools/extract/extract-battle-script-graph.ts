@@ -66,6 +66,32 @@ type CallsiteContinuation = {
     continuation: "assembly-successor-after-call";
   };
 };
+type ConditionalGuard = {
+  // A source-description record for a conditional edge already present in the
+  // graph. It does not assign semantics to the raw tokens: `comparator` and
+  // `selector` are populated only for source macro parameters literally named
+  // `ifflag` and `battler`, respectively.
+  kind: "conditional-guard";
+  from: { label: string; line: number };
+  command: { macro: string; macroDeclarationLine: number; opcode: string };
+  operands: Array<{ parameter: string; token: string }>;
+  comparator: { parameter: string; token: string } | null;
+  selector: { parameter: string; token: string } | null;
+  takenDestination: { operand: { parameter: string; token: string }; label: string; line: number };
+  notTakenSuccessor: { label: string; line: number } | null;
+  provenance: {
+    kind: "source-macro-invocation";
+    destinationParameter: string;
+    comparatorParameter: string | null;
+    selectorParameter: string | null;
+    notTakenSuccessor: "implicit-assembly-successor" | "none";
+  };
+};
+type ConditionalGuardExclusion = {
+  from: { label: string; line: number };
+  command: { macro: string; macroDeclarationLine: number; opcode: string };
+  reason: "macro-parameter-arity-mismatch" | "ambiguous-or-missing-source-destination" | "missing-destination-parameter";
+};
 
 function stripAssemblerComment(line: string): string {
   // battle_scripts_1.s does not use quoted strings, but retaining quoted @
@@ -353,6 +379,74 @@ for (const [index, current] of executableStatements.entries()) {
   }
 }
 
+// Conditional source-macro invocations can state a guard's spelling without
+// pretending to execute it. This deliberately joins only the JUMPIF edges
+// above, requires the single source destination that produced that edge, and
+// reports the assembly successor as the not-taken path. Macro aliases such as
+// `jumpifmove` retain their raw invocation operands; fixed comparisons inside
+// their macro declarations are not reverse-engineered into invented operands.
+const macroByName = new Map(macros.map((macro) => [macro.name, macro]));
+const statementByControlOrigin = new Map(executableStatements.map((entry) => [
+  `${entry.label.name}:${entry.statement.line}`,
+  entry,
+]));
+const conditionalGuards: ConditionalGuard[] = [];
+const conditionalGuardExclusions: ConditionalGuardExclusion[] = [];
+for (const edge of controlEdges) {
+  if (edge.kind !== "jump" || !edge.provenance.opcode?.startsWith("B_SCR_OP_JUMPIF")) continue;
+  const current = statementByControlOrigin.get(`${edge.from.label}:${edge.from.line}`);
+  if (!current || edge.provenance.macro === undefined || edge.provenance.macroDeclarationLine === undefined) {
+    throw new Error(`conditional edge at data/battle_scripts_1.s:${edge.from.line} lacks source macro provenance`);
+  }
+  const macro = macroByName.get(edge.provenance.macro);
+  if (!macro) throw new Error(`conditional edge at data/battle_scripts_1.s:${edge.from.line} names undeclared macro ${edge.provenance.macro}`);
+  const command = { macro: macro.name, macroDeclarationLine: macro.declarationLine, opcode: edge.provenance.opcode };
+  const parameters = macro.parameterTokens.map((parameterToken) => parameterToken.replace(/:.*$/, ""));
+  if (parameters.length !== current.statement.operandTokens.length) {
+    conditionalGuardExclusions.push({ from: edge.from, command, reason: "macro-parameter-arity-mismatch" });
+    continue;
+  }
+  const destinationIndex = parameters.findIndex((parameter) => parameter.endsWith("ptr"));
+  if (destinationIndex < 0) {
+    conditionalGuardExclusions.push({ from: edge.from, command, reason: "missing-destination-parameter" });
+    continue;
+  }
+  const destinationToken = current.statement.operandTokens[destinationIndex]!;
+  if (edge.to === null || current.statement.labelOperands.length !== 1 || current.statement.labelOperands[0] !== destinationToken || edge.to.label !== destinationToken) {
+    conditionalGuardExclusions.push({ from: edge.from, command, reason: "ambiguous-or-missing-source-destination" });
+    continue;
+  }
+  const operands = parameters.map((parameter, index) => ({ parameter, token: current.statement.operandTokens[index]! }));
+  const operandByParameter = new Map(operands.map((operand) => [operand.parameter, operand]));
+  const comparator = operandByParameter.get("ifflag") ?? null;
+  const selector = operandByParameter.get("battler") ?? null;
+  const fallthrough = controlEdges.find((candidate) =>
+    candidate.kind === "fallthrough"
+    && candidate.from.label === edge.from.label
+    && candidate.from.line === edge.from.line);
+  conditionalGuards.push({
+    kind: "conditional-guard",
+    from: edge.from,
+    command,
+    operands,
+    comparator,
+    selector,
+    takenDestination: {
+      operand: { parameter: parameters[destinationIndex]!, token: destinationToken },
+      label: edge.to.label,
+      line: edge.to.line,
+    },
+    notTakenSuccessor: fallthrough?.to,
+    provenance: {
+      kind: "source-macro-invocation",
+      destinationParameter: parameters[destinationIndex]!,
+      comparatorParameter: comparator?.parameter ?? null,
+      selectorParameter: selector?.parameter ?? null,
+      notTakenSuccessor: fallthrough?.to === null || fallthrough === undefined ? "none" : "implicit-assembly-successor",
+    },
+  });
+}
+
 const topology = JSON.parse(readFileSync(join(DATA_GEN, "battle-script-topology.json"), "utf8")) as {
   effects: Array<{ id: number; effect: string; entryScript: string }>;
   opcodes: Array<{ opcode: string }>;
@@ -372,7 +466,7 @@ const graph = {
   schema: "battle-script-graph/v3",
   source: {
     files: ["asm/macros/battle_script.inc", "data/battle_scripts_1.s", "src/data/gen/battle-script-topology.json"],
-    note: "Lexical source graph plus a narrow, source-spelled control-flow catalog. Operand tokens are raw assembly text; opcode bindings are mechanically expanded source macros. Fallthrough records only the implicit assembly successor available on a non-transfer path; runtime branch guards and other handler control behavior are not inferred.",
+    note: "Lexical source graph plus a narrow, source-spelled control-flow catalog. Operand tokens are raw assembly text; opcode bindings are mechanically expanded source macros. Fallthrough records only the implicit assembly successor available on a non-transfer path. Conditional-guard records describe only unambiguous source macro invocations and their existing control edges; runtime branch guards and other handler control behavior are not inferred.",
   },
   counts: {
     macros: macros.length,
@@ -390,6 +484,12 @@ const graph = {
     callsiteContinuationEdges: callsiteContinuations.length,
     explicitReturnEdges: controlEdges.filter((edge) => edge.kind === "return").length,
     explicitEndEdges: controlEdges.filter((edge) => edge.kind === "end").length,
+    conditionalGuardEdges: conditionalGuards.length,
+    conditionalGuardMacros: new Set(conditionalGuards.map((guard) => guard.command.macro)).size,
+    conditionalGuardsWithRawComparator: conditionalGuards.filter((guard) => guard.comparator !== null).length,
+    conditionalGuardsWithRawSelector: conditionalGuards.filter((guard) => guard.selector !== null).length,
+    conditionalGuardsWithNotTakenSuccessor: conditionalGuards.filter((guard) => guard.notTakenSuccessor !== null).length,
+    conditionalGuardExcludedEdges: conditionalGuardExclusions.length,
   },
   macros,
   preamble: parsed.preamble,
@@ -398,10 +498,12 @@ const graph = {
   nonExecutableCategories: parsed.nonExecutableCategories,
   unsupportedLineCategories: {},
   controlFlow: {
-    schema: "battle-script-control-flow/v2",
-    note: "Edges preserve assembly-order fallthrough across source labels and only explicit B_SCR_OP_GOTO, B_SCR_OP_JUMP*, B_SCR_OP_CALL, B_SCR_OP_RETURN, and B_SCR_OP_END* transfers. A null jump/call target is an explicit dynamic transfer with no source-label operand. Callsite continuations separately record the assembly successor that becomes the return target after that exact CALL; they are not immediate executable fallthrough edges. RETURN has no static target because its destination is selected by the runtime call stack, so no stack-insensitive RETURN-to-continuation edges are fabricated. No runtime guard, handler branch, address, or operand type is inferred.",
+    schema: "battle-script-control-flow/v3",
+    note: "Edges preserve assembly-order fallthrough across source labels and only explicit B_SCR_OP_GOTO, B_SCR_OP_JUMP*, B_SCR_OP_CALL, B_SCR_OP_RETURN, and B_SCR_OP_END* transfers. Conditional guards are descriptive records for only the mechanically unambiguous B_SCR_OP_JUMPIF* macro invocations already represented by jump edges: invocation operands remain raw source tokens; `comparator` is present only for an `ifflag` macro operand and `selector` only for a `battler` macro operand. The taken destination is the source-label operand and the not-taken successor is only the lexical implicit fallthrough. No runtime guard state, macro-internal fixed operand, handler branch, address, or operand type is inferred. A null jump/call target is an explicit dynamic transfer with no source-label operand. Callsite continuations separately record the assembly successor that becomes the return target after that exact CALL; they are not immediate executable fallthrough edges. RETURN has no static target because its destination is selected by the runtime call stack, so no stack-insensitive RETURN-to-continuation edges are fabricated.",
     edges: controlEdges,
     callsiteContinuations,
+    conditionalGuards,
+    conditionalGuardExclusions,
   },
 };
 
