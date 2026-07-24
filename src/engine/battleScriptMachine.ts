@@ -570,6 +570,7 @@ function freezeEventPayload(
     case "play-se":
     case "play-fanfare":
     case "play-faint-cry":
+    case "set-battler-sprite-visibility":
       return Object.freeze({ ...payload });
     case "animation":
       return Object.freeze({ ...payload, arguments: Object.freeze([...payload.arguments]) });

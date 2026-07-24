@@ -504,11 +504,47 @@ function emitFaintCryControllerEvent<RulesContext extends object>(
   );
 }
 
+function emitMakeVisibleControllerEvent<RulesContext extends object>(
+  context: BattleScriptOpcodeHandlerContext<RulesContext>,
+  ports: BattleScriptSourceCommandPorts<RulesContext>,
+): BattleScriptCommandTransition<RulesContext> {
+  const required = requireSingleByteOperand(context);
+  if (required.kind === "transition") return required.transition;
+  const battler = ports.resolveBattlerForBattleScript(context, required.operand);
+  if (battler === null) {
+    return blockBattleScriptCommand(
+      context,
+      unavailableBattlerSelectorReason(context, required.operand),
+    );
+  }
+  if (!isBattleScriptBattlerId(battler)) {
+    return haltForInvalidBattler(context, battler);
+  }
+  const scheduler = markBattleScriptControllerPending(
+    schedulerWith(context, { activeBattler: battler }),
+    battler,
+  );
+  return transitionBattleScriptCommand(
+    context,
+    Object.freeze({ kind: "advance" }),
+    {
+      scheduler,
+      events: Object.freeze([
+        Object.freeze({
+          kind: "set-battler-sprite-visibility",
+          battler,
+          invisible: false,
+        }),
+      ]),
+    },
+  );
+}
+
 /**
  * First source-mapped scheduler family:
  * Cmd_nop, Cmd_waitstate, Cmd_printstring, Cmd_printselectionstring,
  * Cmd_printselectionstringfromtable, Cmd_waitmessage, Cmd_pause, Cmd_playse,
- * Cmd_fanfare, and Cmd_playfaintcry.
+ * Cmd_fanfare, Cmd_playfaintcry, and Cmd_makevisible.
  *
  * Controller readiness, source-context string preparation, and exact u16
  * operand resolution are injected logical ports. MSG_DISPLAY and the shared
@@ -586,6 +622,8 @@ export function createBattleScriptSourceCommandHandlers<RulesContext extends obj
     emitAudioControllerEvent(context, ports, "play-fanfare"));
   installHandler(program, handlers, "B_SCR_OP_PLAYFAINTCRY", (context) =>
     emitFaintCryControllerEvent(context, ports));
+  installHandler(program, handlers, "B_SCR_OP_MAKEVISIBLE", (context) =>
+    emitMakeVisibleControllerEvent(context, ports));
   installHandler(program, handlers, "B_SCR_OP_WAITMESSAGE", (context) => {
     if (!ports.isControllerIdle(context)) {
       return blockBattleScriptCommand(context, controllerBusyReason(context));
