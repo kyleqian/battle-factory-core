@@ -159,6 +159,7 @@ const output = {
       "src/data/gen/battle-animation-components.json",
       "src/data/gen/battle-frontier-held-items.json",
       "src/data/gen/item-hold-effects.json",
+      "src/data/gen/summary-info.json",
     ],
     note: "Catalog join only. Null hook categories deliberately record missing source-derived move-to-item/ability dispatch joins rather than inferring semantics from co-occurrence.",
   },
