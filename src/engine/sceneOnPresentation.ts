@@ -18,6 +18,10 @@ import {
   type FaintAttackAnimationProfile,
   type FaintAttackBgState,
 } from "./faintAttack.ts";
+import {
+  rockSlideAnimationAtAge,
+  type RockSlideAnimationProfile,
+} from "./battleMenu.ts";
 
 export type SceneOnBattlerSide = "player" | "opponent";
 
@@ -70,9 +74,21 @@ export interface SceneOnFaintAttackConfig {
   readonly moveTextStartAge?: number;
 }
 
+export interface SceneOnRockSlideConfig {
+  readonly move: "ROCK_SLIDE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly animationProfile: Readonly<RockSlideAnimationProfile>;
+  /** Immutable field values; the presentation seam never calculates damage. */
+  readonly fieldProfile: Readonly<SceneOnFaintAttackFieldProfile>;
+  /** Relative first printer age; negative means text predates this seam. */
+  readonly moveTextStartAge?: number;
+}
+
 export type SceneOnMoveConfig =
   | SceneOnFirePunchConfig
-  | SceneOnFaintAttackConfig;
+  | SceneOnFaintAttackConfig
+  | SceneOnRockSlideConfig;
 
 export interface SceneOnMovePresentationState<
   TConfig extends SceneOnMoveConfig = SceneOnMoveConfig,
@@ -100,6 +116,17 @@ export interface SceneOnFaintAttackView {
   readonly attackerEva: number;
   readonly targetShakeX2: number;
   readonly hitsplatVisible: boolean;
+}
+
+export interface SceneOnRockSlideView {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly bg3Y: number;
+  readonly targetY2: number;
+  readonly targetInvisible: boolean;
+  readonly healthboxY2: number;
+  readonly rocks: ReturnType<typeof rockSlideAnimationAtAge>["rocks"];
 }
 
 function assertIntegerPoint(
@@ -139,7 +166,7 @@ export function createSceneOnMovePresentation<TConfig extends SceneOnMoveConfig>
     config.fieldProfile.playerHp < 0
     || config.fieldProfile.opponentHp < 0
   ) {
-    throw new Error("FAINT_ATTACK field profile requires nonnegative HP");
+    throw new Error(`${config.move} field profile requires nonnegative HP`);
   }
   return { age: 0, config };
 }
@@ -213,6 +240,31 @@ export function sceneOnFaintAttackView(
     attackerEva: faintAttackAttackerEva(state.age, animationProfile),
     targetShakeX2: faintAttackTargetShakeX2(state.age, animationProfile),
     hitsplatVisible: faintAttackHitsplatVisible(state.age, animationProfile),
+  };
+}
+
+export function sceneOnRockSlideView(
+  state: SceneOnMovePresentationState,
+): SceneOnRockSlideView {
+  if (state.config.move !== "ROCK_SLIDE") {
+    throw new Error(`expected ROCK_SLIDE presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationProfile } = state.config;
+  const animation = rockSlideAnimationAtAge(
+    state.age,
+    animationProfile,
+    {
+      rockOrigin: {
+        x: target.geometry.battlePositionCenter.x,
+        y: target.geometry.battlePositionCenter.y + 14,
+      },
+    },
+  );
+  return {
+    age: state.age,
+    attacker,
+    target,
+    ...animation,
   };
 }
 
@@ -323,4 +375,40 @@ export const GROVYLE_TO_ONIX_FIRE_PUNCH_PRESENTATION = {
 } as const satisfies Pick<
   SceneOnFirePunchConfig,
   "animationAgeOffset" | "moveTextStartAge"
+>;
+
+const GROVYLE_TO_ONIX_ROCK_SLIDE_ORDER_SEED = [
+  62, 60, 0, 63, 1, 61, 6, 8, 2, 4, 3, 21, 20, 5, 19, 18, 17, 16,
+  15, 14, 13, 12, 11, 10, 9, 7, 54, 55, 56, 57, 58, 59, 23, 22, 48,
+  49, 50, 51, 52, 53, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34,
+  35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
+] as const;
+
+/**
+ * Source-relative profile from the staged stock controller. Age zero is
+ * oracle frame 1967; first-rock RAM creation is age 7 and the generic hit
+ * controller begins at age 141. The seed is the live pre-allocation
+ * `sSpriteOrder` at frame 1965, not a frame-dependent rendering table.
+ */
+export const GROVYLE_TO_ONIX_ROCK_SLIDE_PROFILE:
+  Readonly<RockSlideAnimationProfile> = Object.freeze({
+    rockAnchorAge: 7,
+    targetShakeStartAge: 22,
+    targetShakeEndAge: 115,
+    hitFlashAnchorAge: 141,
+    spriteOrderSeed: GROVYLE_TO_ONIX_ROCK_SLIDE_ORDER_SEED,
+    occupiedSpriteSlots: [0, 1, 2, 6, 8, 60, 61, 62, 63],
+  });
+
+export const GROVYLE_TO_ONIX_ROCK_SLIDE_PRESENTATION = {
+  animationProfile: GROVYLE_TO_ONIX_ROCK_SLIDE_PROFILE,
+  fieldProfile: Object.freeze({
+    playerHp: 117,
+    opponentHp: 143,
+    playerStatus: "none",
+  }),
+  moveTextStartAge: -30,
+} as const satisfies Pick<
+  SceneOnRockSlideConfig,
+  "animationProfile" | "fieldProfile" | "moveTextStartAge"
 >;

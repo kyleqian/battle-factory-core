@@ -9,11 +9,14 @@ import {
   GROVYLE_TO_ONIX_FIRE_PUNCH_GEOMETRY,
   GROVYLE_TO_ONIX_FIRE_PUNCH_PRESENTATION,
   GROVYLE_TO_ONIX_FIRE_PUNCH_PROFILE,
+  GROVYLE_TO_ONIX_ROCK_SLIDE_PRESENTATION,
+  GROVYLE_TO_ONIX_ROCK_SLIDE_PROFILE,
   ONIX_TO_GROVYLE_FIRE_PUNCH_GEOMETRY,
   ONIX_TO_GROVYLE_FAINT_ATTACK_PROFILE,
   ONIX_TO_GROVYLE_FIRE_PUNCH_PROFILE,
   sceneOnFaintAttackView,
   sceneOnFirePunchView,
+  sceneOnRockSlideView,
 } from "../src/engine/sceneOnPresentation.ts";
 
 function createPortableStage() {
@@ -155,6 +158,35 @@ describe("relative Battle Scene ON move presentation", () => {
       bldy: 1,
     });
     expect(stage.config).toEqual(profileBefore);
+  });
+
+  it("derives opposite-side ROCK SLIDE geometry from immutable relative input", () => {
+    const stage = createSceneOnMovePresentation({
+      move: "ROCK_SLIDE",
+      ...GROVYLE_TO_ONIX_FIRE_PUNCH_GEOMETRY,
+      ...GROVYLE_TO_ONIX_ROCK_SLIDE_PRESENTATION,
+    });
+    const profileBefore = structuredClone(stage.config.animationProfile);
+
+    const firstRock = sceneOnRockSlideView({ ...stage, age: 8 });
+    expect(firstRock.rocks[0]).toEqual({
+      centerX: 67,
+      centerY: 24,
+      animNum: 1,
+    });
+    expect(sceneOnRockSlideView({ ...stage, age: 22 }).targetY2).toBe(5);
+    expect(sceneOnRockSlideView({ ...stage, age: 142 })).toMatchObject({
+      healthboxY2: 1,
+      targetInvisible: false,
+    });
+    expect(sceneOnRockSlideView({ ...stage, age: 143 })).toMatchObject({
+      healthboxY2: -1,
+      targetInvisible: true,
+    });
+    expect(stage.config.animationProfile).toEqual(profileBefore);
+    expect(stage.config.animationProfile).toBe(
+      GROVYLE_TO_ONIX_ROCK_SLIDE_PROFILE,
+    );
   });
 
   it("rejects invalid side, geometry, and HP-profile inputs", () => {
