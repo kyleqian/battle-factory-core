@@ -8,10 +8,12 @@ import { describe, expect, it } from "vitest";
 import { createHash } from "node:crypto";
 import {
   renderSummaryBattleMovesPage,
+  renderSummaryBattleMoveSelectPage,
   renderSummaryContestMovesPage,
   renderSummaryInfoPage,
   renderSummaryInfoPageFaded,
 } from "../src/engine/summaryInfoPage.ts";
+import type { SummaryMoveSelectState } from "../src/engine/summaryScreen.ts";
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from "../src/engine/framebuffer.ts";
 
 describe("summary Info page render", () => {
@@ -45,6 +47,33 @@ describe("summary Info page render", () => {
     expect(Buffer.from(onix).equals(Buffer.from(onixAgain))).toBe(true);
     expect(Buffer.from(onix).equals(Buffer.from(magby))).toBe(false);
     for (let i = 3; i < onix.length; i += 4) expect(onix[i]).toBe(255);
+  });
+
+  it("renders selector index and local blink clocks deterministically from extracted assets", () => {
+    const select: SummaryMoveSelectState = {
+      phase: "open",
+      selectedMoveIndex: 0,
+      presentedMoveIndex: 0,
+      elapsed: 12,
+      selectorAnimationClock: 12,
+      pendingPresentedMoveIndex: null,
+      pendingPresentationTicks: 0,
+    };
+    const visible = renderSummaryBattleMoveSelectPage(0, 40, select);
+    const visibleAgain = renderSummaryBattleMoveSelectPage(0, 40, select);
+    const blinkOff = renderSummaryBattleMoveSelectPage(0, 40, {
+      ...select,
+      selectorAnimationClock: 27,
+    });
+    const secondMove = renderSummaryBattleMoveSelectPage(0, 40, {
+      ...select,
+      selectedMoveIndex: 1,
+      presentedMoveIndex: 1,
+    });
+    expect(Buffer.from(visible).equals(Buffer.from(visibleAgain))).toBe(true);
+    expect(Buffer.from(visible).equals(Buffer.from(blinkOff))).toBe(false);
+    expect(Buffer.from(visible).equals(Buffer.from(secondMove))).toBe(false);
+    for (let i = 3; i < visible.length; i += 4) expect(visible[i]).toBe(255);
   });
 
   it("owns a deterministic, fully opaque Contest Moves page for the selected rental", () => {

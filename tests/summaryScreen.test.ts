@@ -10,8 +10,13 @@ import {
   CLOSED_SUMMARY_SCREEN_STATE,
   openSummaryScreen,
   requestSummaryMonChange,
+  requestSummaryMoveSelect,
+  requestSummaryMoveSelectClose,
+  requestSummaryMoveSelectionChange,
   requestSummaryScreenExit,
   requestSummaryPageChange,
+  SUMMARY_MOVE_SELECT_CLOSE_TICKS,
+  SUMMARY_MOVE_SELECT_INSTALL_TICKS,
   SUMMARY_PAGE_TRANSITION_TICKS,
   SUMMARY_MON_TRANSITION_TICKS,
   summaryPageLayerOffsets,
@@ -371,6 +376,124 @@ describe("summaryScreen: generic page navigation", () => {
     });
     expect(exiting.selectedSlot).toBe(3);
     expect(exiting.isOpen).toBe(false);
+  });
+});
+
+describe("summaryScreen: LOCK_MOVES Battle Moves selector", () => {
+  function battleMoves(slot = 0): SummaryScreenState {
+    const info = run(openSummaryScreen(slot), 59);
+    const skills = run(
+      requestSummaryPageChange(info, "right"),
+      SUMMARY_PAGE_TRANSITION_TICKS,
+    );
+    return run(
+      requestSummaryPageChange(skills, "right"),
+      SUMMARY_PAGE_TRANSITION_TICKS,
+    );
+  }
+
+  it("A transfers ownership to move-select at index 0 without changing page, rental, or mode", () => {
+    const page = battleMoves(3);
+    const selected = requestSummaryMoveSelect(page);
+    expect(selected).toMatchObject({
+      selectedSlot: 3,
+      page: "battleMoves",
+      mode: "SUMMARY_MODE_LOCK_MOVES",
+      isOpen: true,
+      moveSelect: {
+        phase: "open",
+        selectedMoveIndex: 0,
+        presentedMoveIndex: 0,
+        elapsed: 0,
+        selectorAnimationClock: 0,
+        pendingPresentedMoveIndex: null,
+        pendingPresentationTicks: 0,
+      },
+    });
+    const skillsPage = { ...page, page: "skills" as const };
+    expect(requestSummaryMoveSelect(skillsPage)).toBe(skillsPage);
+  });
+
+  it("pins the two setup stalls, the +3 visual install, and true next-task input readiness", () => {
+    const selected = requestSummaryMoveSelect(battleMoves(2));
+    expect(requestSummaryMoveSelectionChange(selected, "down")).toBe(selected);
+    const tick1 = advanceSummaryScreen(selected);
+    const tick2 = advanceSummaryScreen(tick1);
+    const installed = advanceSummaryScreen(tick2);
+    expect(tick1.moveSelect).toMatchObject({ elapsed: 1, selectorAnimationClock: 1 });
+    expect(tick2.moveSelect).toMatchObject({ elapsed: 2, selectorAnimationClock: 2 });
+    expect(installed.moveSelect).toMatchObject({
+      elapsed: SUMMARY_MOVE_SELECT_INSTALL_TICKS,
+      selectorAnimationClock: 3,
+    });
+    expect(tick1.openElapsed).toBe(selected.openElapsed);
+    expect(tick2.openElapsed).toBe(selected.openElapsed);
+    expect(installed.openElapsed).toBe(selected.openElapsed + 1);
+    expect(requestSummaryMoveSelectionChange(tick1, "down").moveSelect?.selectedMoveIndex).toBe(1);
+  });
+
+  it("keeps logical selection immediate, staggers BG/OAM ownership, and resets the blink clock", () => {
+    const ready = run(requestSummaryMoveSelect(battleMoves(4)), 10);
+    const moveOrder = ["ROCK_SLIDE", "BIND", "DRAGON_BREATH", "SANDSTORM"] as const;
+    const down = requestSummaryMoveSelectionChange(ready, "down");
+    expect(down).toMatchObject({
+      selectedSlot: 4,
+      mode: "SUMMARY_MODE_LOCK_MOVES",
+      moveSelect: {
+        selectedMoveIndex: 1,
+        presentedMoveIndex: 0,
+        selectorAnimationClock: 0,
+        pendingPresentedMoveIndex: 1,
+        pendingPresentationTicks: 2,
+      },
+    });
+    const bgValuesReady = advanceSummaryScreen(down);
+    expect(bgValuesReady.moveSelect).toMatchObject({
+      selectedMoveIndex: 1,
+      presentedMoveIndex: 0,
+      selectorAnimationClock: 1,
+      pendingPresentationTicks: 1,
+    });
+    const oamReady = advanceSummaryScreen(bgValuesReady);
+    expect(oamReady.moveSelect).toMatchObject({
+      selectedMoveIndex: 1,
+      presentedMoveIndex: 1,
+      selectorAnimationClock: 2,
+      pendingPresentedMoveIndex: null,
+      pendingPresentationTicks: 0,
+    });
+    expect(moveOrder).toEqual(["ROCK_SLIDE", "BIND", "DRAGON_BREATH", "SANDSTORM"]);
+    expect(oamReady.selectedSlot).toBe(4);
+  });
+
+  it("A/B close instead of installing reorder state, gate in-flight input, and restore Battle Moves at +4", () => {
+    const ready = run(requestSummaryMoveSelect(battleMoves(5)), 8);
+    const closing = requestSummaryMoveSelectClose(ready);
+    expect(closing).toMatchObject({
+      selectedSlot: 5,
+      page: "battleMoves",
+      mode: "SUMMARY_MODE_LOCK_MOVES",
+      moveSelect: { phase: "closing", elapsed: 0 },
+    });
+    expect(requestSummaryMoveSelectionChange(closing, "down")).toBe(closing);
+    expect(requestSummaryPageChange(closing, "left")).toBe(closing);
+    expect(requestSummaryMonChange(closing, "up")).toBe(closing);
+    expect(requestSummaryScreenExit(closing)).toBe(closing);
+
+    const lastSlide = run(closing, SUMMARY_MOVE_SELECT_CLOSE_TICKS - 1);
+    expect(lastSlide.moveSelect).toMatchObject({ phase: "closing", elapsed: 3 });
+    const restored = advanceSummaryScreen(lastSlide);
+    expect(restored).toMatchObject({
+      selectedSlot: 5,
+      page: "battleMoves",
+      mode: "SUMMARY_MODE_LOCK_MOVES",
+      isOpen: true,
+      moveSelect: null,
+    });
+    expect(requestSummaryPageChange(restored, "left").pageTransition).toMatchObject({
+      fromPage: "battleMoves",
+      toPage: "skills",
+    });
   });
 });
 

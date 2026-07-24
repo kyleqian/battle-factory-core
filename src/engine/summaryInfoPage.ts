@@ -18,7 +18,12 @@ import { drawSpriteFaded, drawTextFaded, drawTileBgFaded, drawTilePatchFaded, fa
 import { getMonGender } from "./monGender.ts";
 import { GBA_SINE_TABLE_256 } from "./battleMenu.ts";
 import { drawSpriteSheetAffineRotate } from "./battleScene.ts";
-import type { SummaryMonTransition, SummaryPage, SummaryPageTransition } from "./summaryScreen.ts";
+import type {
+  SummaryMonTransition,
+  SummaryMoveSelectState,
+  SummaryPage,
+  SummaryPageTransition,
+} from "./summaryScreen.ts";
 import { summaryPageLayerOffsets } from "./summaryScreen.ts";
 
 import summaryBgData from "../assets/gen/summary-bg.json" with { type: "json" };
@@ -36,6 +41,9 @@ import frontierMonsData from "../data/gen/battle-frontier-mons.json" with { type
 import itemNamesData from "../data/gen/item-names.json" with { type: "json" };
 import expTablesData from "../data/gen/exp-tables.json" with { type: "json" };
 import movesData from "../data/gen/moves.json" with { type: "json" };
+import summaryMoveEffectBattleData from "../assets/gen/summary-move-effect-battle.json" with { type: "json" };
+import summaryMoveEffectCancelData from "../assets/gen/summary-move-effect-cancel.json" with { type: "json" };
+import summaryMoveSelectData from "../assets/gen/summary-move-select.json" with { type: "json" };
 
 interface TileGrid {
   columns: number;
@@ -88,10 +96,24 @@ const moves = new Map(
       name: string;
       type: string;
       pp: number;
+      power: number;
+      accuracy: number;
+      description: string;
       contest: { category: string; appeal: number; jam: number };
     }>;
   }).moves.map((move) => [move.move, move]),
 );
+const moveEffectBattle = summaryMoveEffectBattleData as unknown as {
+  tilemap: SummaryTilemap;
+  readRows: number;
+};
+const moveEffectCancel = summaryMoveEffectCancelData as unknown as {
+  entries: SummaryTilemap["entries"];
+};
+const moveSelector = summaryMoveSelectData as unknown as {
+  tileset: TileGrid;
+  palette: RgbColor[];
+};
 
 // PositionStatusSlidingWindow(0, 0xFF): unconditionally reset on Info-page
 // load (pokemon_summary_screen.c:1494) regardless of ailment. Tracing the
@@ -248,6 +270,43 @@ function drawGlyphCode(fb: Uint8Array, code: number, x: number, y: number, color
 const BALL_SHEET: SpriteSheet = { tileset: ball.tileset };
 const MARKINGS_SHEET: SpriteSheet = { tileset: markings.tileset };
 const A_BUTTON_SHEET: SpriteSheet = { tileset: buttons.a.tileset };
+const MOVE_SELECTOR_SHEET: SpriteSheet = { tileset: moveSelector.tileset };
+
+function battleMovesSelectTilemap(): SummaryTilemap {
+  const entries = BATTLE_MOVES_CLOSED_TILEMAP.entries.slice();
+  for (let i = 0; i < 20; i += 1) {
+    entries[11 * 32 + 10 + i] = {
+      ...moveEffectCancel.entries[i]!,
+      palette: 3,
+    };
+    entries[12 * 32 + 10 + i] = {
+      ...moveEffectCancel.entries[i]!,
+      palette: 3,
+    };
+    entries[13 * 32 + 10 + i] = {
+      ...moveEffectCancel.entries[20 + i]!,
+      palette: 3,
+    };
+  }
+  return { ...BATTLE_MOVES_CLOSED_TILEMAP, entries };
+}
+
+function battleMoveEffectPatch(hiddenColumns: number): SummaryTilemap {
+  const width = 10;
+  const height = 7;
+  const entries = Array.from({ length: width * height }, () => ({
+    tile: 0,
+    hFlip: false,
+    vFlip: false,
+    palette: 0,
+  }));
+  for (let y = 0; y < height; y += 1) {
+    for (let x = hiddenColumns; x < width; x += 1) {
+      entries[y * width + x] = moveEffectBattle.tilemap.entries[y * width + x - hiddenColumns]!;
+    }
+  }
+  return { width, height, entries };
+}
 
 function compose(
   fb: Uint8Array,
@@ -271,6 +330,7 @@ function compose(
     readonly animateSwitchedMon?: boolean;
   } = {},
   underlyingPage?: SummaryPage,
+  moveSelect?: SummaryMoveSelectState,
 ): void {
   const text = (str: string, x: number, y: number, colors: TextColors, paletteNum: number) =>
     drawTextFaded(fb, font, charmap, str, x, y, summaryBg.subpalettes[paletteNum]!, colors, bgY);
@@ -310,7 +370,12 @@ function compose(
       fb,
       {
         tileset: summaryBg.tileset,
-        tilemap: pageTilemap(page),
+        tilemap:
+          page === "battleMoves" &&
+          moveSelect &&
+          (moveSelect.phase === "open" ? moveSelect.elapsed >= 3 : moveSelect.elapsed === 0)
+            ? battleMovesSelectTilemap()
+            : pageTilemap(page),
         subpalettes: summaryBg.subpalettes,
       },
       bgY,
@@ -368,9 +433,12 @@ function compose(
   // data[2]=0 one callback later in either route.
   const onixAnimStart = monReplacement.animateSwitchedMon === true ? 1 : 6;
   if (spritePool.species === "ONIX" && monAnimClock >= onixAnimStart) {
-    monTileset = frontSprite.animationFrame1;
+    // sAnim_Onix_1 holds frame 1 for 50+30 callbacks, then restores frame 0.
+    if (monAnimClock < onixAnimStart + 80) monTileset = frontSprite.animationFrame1;
     const onixMotionStart = monReplacement.animateSwitchedMon === true ? 2 : 7;
-    const data = Math.max(0, monAnimClock - onixMotionStart) * 24;
+    // Anim_RapidHorizontalHops switches to WaitAnimEnd once data[2] exceeds
+    // 2048; its last rendered callback used 2040 and remains parked there.
+    const data = Math.min(2040, Math.max(0, monAnimClock - onixMotionStart) * 24);
     const phase = Math.floor(data / 512) % 4;
     const within = data % 512;
     // Anim_RapidHorizontalHops wraps its calculation in TryFlipX twice.
@@ -418,6 +486,25 @@ function compose(
     );
   } else if (monReplacement.showMon !== false) {
     sprite({ tileset: monTileset }, frontSprite.palette, monX, monY, 8, 8, 0, true);
+  }
+
+  const moveSelectInstalled =
+    moveSelect !== undefined &&
+    (moveSelect.phase === "closing" || moveSelect.elapsed >= 3);
+  if (moveSelectInstalled) {
+    const hiddenColumns =
+      moveSelect.phase === "closing"
+        ? Math.min(10, moveSelect.elapsed * 3)
+        : Math.max(0, 9 - (moveSelect.elapsed - 2) * 3);
+    drawTilePatchFaded(
+      fb,
+      summaryBg.tileset,
+      summaryBg.subpalettes,
+      battleMoveEffectPatch(hiddenColumns),
+      0,
+      13 * 8,
+      bgY,
+    );
   }
 
   // BG0 windows, topmost.
@@ -475,19 +562,21 @@ function compose(
   text(pool.species, WIN_NICKNAME.x, WIN_NICKNAME.y + 1, COLOR_1, PAL6);
 
   // gText_LevelSymbol = "{LV}" + the (left-aligned, not zero-padded) level.
-  const lvGlyphWidth = drawGlyphCode(
-    fb,
-    GLYPH_CODE_LV,
-    WIN_SPECIES.x + 24,
-    WIN_SPECIES.y + 17,
-    COLOR_1,
-    summaryBg.subpalettes[PAL6]!,
-    bgY,
-  );
-  text(`${rental.level}`, WIN_SPECIES.x + 24 + lvGlyphWidth, WIN_SPECIES.y + 17, COLOR_1, PAL6);
-  text(`/${pool.species}`, WIN_SPECIES.x, WIN_SPECIES.y + 1, COLOR_1, PAL6);
-  if (gender === "male") text("♂", WIN_SPECIES.x + 57, WIN_SPECIES.y + 17, COLOR_MALE, PAL6);
-  else if (gender === "female") text("♀", WIN_SPECIES.x + 57, WIN_SPECIES.y + 17, COLOR_FEMALE, PAL6);
+  if (!moveSelectInstalled) {
+    const lvGlyphWidth = drawGlyphCode(
+      fb,
+      GLYPH_CODE_LV,
+      WIN_SPECIES.x + 24,
+      WIN_SPECIES.y + 17,
+      COLOR_1,
+      summaryBg.subpalettes[PAL6]!,
+      bgY,
+    );
+    text(`${rental.level}`, WIN_SPECIES.x + 24 + lvGlyphWidth, WIN_SPECIES.y + 17, COLOR_1, PAL6);
+    text(`/${pool.species}`, WIN_SPECIES.x, WIN_SPECIES.y + 1, COLOR_1, PAL6);
+    if (gender === "male") text("♂", WIN_SPECIES.x + 57, WIN_SPECIES.y + 17, COLOR_MALE, PAL6);
+    else if (gender === "female") text("♀", WIN_SPECIES.x + 57, WIN_SPECIES.y + 17, COLOR_FEMALE, PAL6);
+  }
 
   if (page === "info" && !clearPageWindows) {
     const abilityRental = rentals[abilitySlot]!;
@@ -609,6 +698,80 @@ function compose(
           : typeIcons.types[move.type.replace("TYPE_", "")]!;
       sprite({ tileset: icon.tileset }, icon.palette, 101, 40 + i * 16, 4, 2, 0);
     }
+
+    const showMoveDetails =
+      moveSelect &&
+      (moveSelect.phase === "open"
+        ? moveSelect.elapsed >= 3
+        : moveSelect.elapsed === 0);
+    if (showMoveDetails) {
+      text("CANCEL", WIN_MOVES_NAMES.x, WIN_MOVES_NAMES.y + 65, COLOR_1, PAL6);
+      const presentedMove = moves.get(frontierMon.moves[moveSelect.presentedMoveIndex]!)!;
+      for (const [lineIndex, line] of presentedMove.description.split("\n").entries()) {
+        text(line, 86, 121 + lineIndex * 16, COLOR_0, PAL6);
+      }
+      const panelFullyOpen =
+        (moveSelect.phase === "open" && moveSelect.elapsed >= 5) ||
+        (moveSelect.phase === "closing" && moveSelect.elapsed === 0);
+      if (panelFullyOpen) {
+        // PrintMovePowerAndAccuracy's already-mapped label window reaches
+        // VRAM one tick before the description/selector OAM handoff.
+        const powerMoveIndex =
+          moveSelect.pendingPresentationTicks > 1
+            ? moveSelect.presentedMoveIndex
+            : moveSelect.selectedMoveIndex;
+        const detailMove = moves.get(frontierMon.moves[powerMoveIndex]!)!;
+        text("POWER", 8, 121, COLOR_1, PAL6);
+        text("ACCURACY", 8, 137, COLOR_1, PAL6);
+        const valueCodes = (value: number, isPower: boolean) =>
+          value < (isPower ? 2 : 1)
+            ? "---".split("").map((char) => charmap.get(char)!)
+            : [
+                ...Array.from(
+                  { length: Math.max(0, 3 - String(value).length) },
+                  () => CHAR_SPACER,
+                ),
+                ...String(value).split("").map((char) => charmap.get(char)!),
+              ];
+        drawGlyphCodes(
+          fb,
+          font,
+          valueCodes(detailMove.power, true),
+          61,
+          121,
+          summaryBg.subpalettes[PAL6]!,
+          COLOR_0,
+        );
+        drawGlyphCodes(
+          fb,
+          font,
+          valueCodes(detailMove.accuracy, false),
+          61,
+          137,
+          summaryBg.subpalettes[PAL6]!,
+          COLOR_0,
+        );
+      }
+
+      const selectorCounter =
+        moveSelect.selectorAnimationClock < 2
+          ? 0
+          : (moveSelect.selectorAnimationClock - 2) & 0x1f;
+      if (selectorCounter <= 24) {
+        for (let i = 0; i < 10; i += 1) {
+          sprite(
+            MOVE_SELECTOR_SHEET,
+            moveSelector.palette,
+            i * 16 + 89,
+            40 + moveSelect.presentedMoveIndex * 16,
+            2,
+            2,
+            i === 0 || i === 9 ? 8 : 10,
+            i === 9,
+          );
+        }
+      }
+    }
   }
 }
 
@@ -660,6 +823,30 @@ export function renderSummaryBattleMovesPage(
   compose(fb, selectedSlot, 0, 0, "battleMoves", monAnimClock, false, 0, true, {
     animateSwitchedMon,
   });
+  return fb;
+}
+
+export function renderSummaryBattleMoveSelectPage(
+  selectedSlot: number,
+  monAnimClock: number,
+  moveSelect: SummaryMoveSelectState,
+  animateSwitchedMon = false,
+): Uint8Array {
+  const fb = createFramebuffer();
+  compose(
+    fb,
+    selectedSlot,
+    0,
+    0,
+    "battleMoves",
+    monAnimClock,
+    false,
+    0,
+    true,
+    { animateSwitchedMon },
+    undefined,
+    moveSelect,
+  );
   return fb;
 }
 

@@ -46,6 +46,32 @@ export interface SummaryMonTransition {
   readonly elapsed: number;
 }
 
+export type SummaryMoveSelectPhase = "open" | "closing";
+
+/**
+ * SwitchToMoveSelection / Task_HandleInput_MoveSelect. LOCK_MOVES still
+ * reaches this inspection mode, but A and B both close it before the
+ * move-position-switch task can be installed.
+ */
+export interface SummaryMoveSelectState {
+  readonly phase: SummaryMoveSelectPhase;
+  /** Source firstMoveIndex; 0..3 are moves and 4 is the CANCEL row. */
+  readonly selectedMoveIndex: number;
+  /** One-VBlank-lagged index owned by BG/OAM presentation. */
+  readonly presentedMoveIndex: number;
+  /** Ticks since entry or close was accepted (0 is the accepting tick). */
+  readonly elapsed: number;
+  /** SpriteCB_MoveSelector's local 0..31 blink clock; navigation resets it. */
+  readonly selectorAnimationClock: number;
+  /** Non-null through the source's two-tick BG/OAM handoff after navigation. */
+  readonly pendingPresentedMoveIndex: number | null;
+  readonly pendingPresentationTicks: number;
+}
+
+export const SUMMARY_MOVE_CANCEL_INDEX = 4;
+export const SUMMARY_MOVE_SELECT_INSTALL_TICKS = 3;
+export const SUMMARY_MOVE_SELECT_CLOSE_TICKS = 4;
+
 /**
  * Task_ChangeSummaryMon returns Task_HandleInput on DOWN+21. The visible
  * replacement is staged before then (old portrait removal at +4, new
@@ -117,6 +143,8 @@ export interface SummaryScreenState {
   pageTransition: SummaryPageTransition | null;
   /** Non-null while Task_ChangeSummaryMon owns input and replaces slot data. */
   monTransition: SummaryMonTransition | null;
+  /** Non-null while the Moves-page selector or its close slide owns presentation. */
+  moveSelect: SummaryMoveSelectState | null;
   /** Ticks since the entry fade settled; presentation-only, page changes do not reset it. */
   openElapsed: number;
   /** Replacement-local front-sprite clock; null before the first mon switch. */
@@ -136,6 +164,7 @@ export const CLOSED_SUMMARY_SCREEN_STATE: SummaryScreenState = {
   onInfoPage: false,
   pageTransition: null,
   monTransition: null,
+  moveSelect: null,
   openElapsed: 0,
   monAnimClock: null,
   selectedSlot: 0,
@@ -166,6 +195,7 @@ export function openSummaryScreen(
     onInfoPage: false,
     pageTransition: null,
     monTransition: null,
+    moveSelect: null,
     openElapsed: 0,
     monAnimClock: null,
     selectedSlot: cursorPos,
@@ -177,7 +207,7 @@ export function openSummaryScreen(
 
 /** pokemon_summary_screen.c's close path, triggered by B on the (unlocked, per SUMMARY_MODE_LOCK_MOVES) Info page. */
 export function requestSummaryScreenExit(state: SummaryScreenState): SummaryScreenState {
-  if (!state.isOpen || state.pageTransition || state.monTransition) return state;
+  if (!state.isOpen || state.pageTransition || state.monTransition || state.moveSelect) return state;
   return {
     ...state,
     transition: { direction: "toDraft", phase: "fadingOut", elapsed: 0 },
@@ -193,7 +223,7 @@ export function requestSummaryPageChange(
   state: SummaryScreenState,
   direction: SummaryPageDirection,
 ): SummaryScreenState {
-  if (!state.isOpen || state.transition || state.pageTransition || state.monTransition) return state;
+  if (!state.isOpen || state.transition || state.pageTransition || state.monTransition || state.moveSelect) return state;
   const fromIndex = PAGE_ORDER.indexOf(state.page);
   const delta = direction === "right" ? 1 : -1;
   const toPage = PAGE_ORDER[fromIndex + delta];
@@ -228,6 +258,7 @@ export function requestSummaryMonChange(
     state.transition ||
     state.pageTransition ||
     state.monTransition ||
+    state.moveSelect ||
     state.page !== "info"
   ) {
     return state;
@@ -247,8 +278,119 @@ export function requestSummaryMonChange(
   };
 }
 
+/** Task_HandleInput's A branch on Battle Moves. */
+export function requestSummaryMoveSelect(state: SummaryScreenState): SummaryScreenState {
+  if (
+    !state.isOpen ||
+    state.transition ||
+    state.pageTransition ||
+    state.monTransition ||
+    state.moveSelect ||
+    state.page !== "battleMoves"
+  ) {
+    return state;
+  }
+  return {
+    ...state,
+    moveSelect: {
+      phase: "open",
+      selectedMoveIndex: 0,
+      presentedMoveIndex: 0,
+      elapsed: 0,
+      selectorAnimationClock: 0,
+      pendingPresentedMoveIndex: null,
+      pendingPresentationTicks: 0,
+    },
+  };
+}
+
+/** ChangeSelectedMove; all four anchor moves are populated, followed by CANCEL. */
+export function requestSummaryMoveSelectionChange(
+  state: SummaryScreenState,
+  direction: SummaryMonDirection,
+): SummaryScreenState {
+  const select = state.moveSelect;
+  if (!select || select.phase !== "open" || select.elapsed < 1) return state;
+  const delta = direction === "down" ? 1 : -1;
+  const selectedMoveIndex =
+    (select.selectedMoveIndex + delta + SUMMARY_MOVE_CANCEL_INDEX + 1) %
+    (SUMMARY_MOVE_CANCEL_INDEX + 1);
+  return {
+    ...state,
+    moveSelect: {
+      ...select,
+      selectedMoveIndex,
+      selectorAnimationClock: 0,
+      pendingPresentedMoveIndex: selectedMoveIndex,
+      pendingPresentationTicks: 2,
+    },
+  };
+}
+
+/** LOCK_MOVES makes both A and B select CloseMoveSelectMode. */
+export function requestSummaryMoveSelectClose(state: SummaryScreenState): SummaryScreenState {
+  const select = state.moveSelect;
+  if (!select || select.phase !== "open" || select.elapsed < 1) return state;
+  return {
+    ...state,
+    moveSelect: {
+      ...select,
+      phase: "closing",
+      elapsed: 0,
+      pendingPresentedMoveIndex: null,
+      pendingPresentationTicks: 0,
+    },
+  };
+}
+
 /** Advance entry/exit and page-scroll state machines by one tick. Call every engine tick. */
 export function advanceSummaryScreen(state: SummaryScreenState): SummaryScreenState {
+  if (state.moveSelect) {
+    const select = state.moveSelect;
+    if (select.phase === "closing") {
+      const elapsed = select.elapsed + 1;
+      if (elapsed >= SUMMARY_MOVE_SELECT_CLOSE_TICKS) {
+        return {
+          ...state,
+          moveSelect: null,
+          openElapsed: state.openElapsed + 1,
+          monAnimClock: state.monAnimClock === null ? null : state.monAnimClock + 1,
+        };
+      }
+      return {
+        ...state,
+        moveSelect: { ...select, elapsed },
+        openElapsed: state.openElapsed + 1,
+        monAnimClock: state.monAnimClock === null ? null : state.monAnimClock + 1,
+      };
+    }
+    const elapsed = select.elapsed + 1;
+    // SwitchToMoveSelection's synchronous window/tilemap/sprite setup keeps
+    // the already-running mon callback two frames behind its ordinary-page
+    // cadence. The first visible selector/effect update is the third tick.
+    const advanceMonClock = elapsed >= SUMMARY_MOVE_SELECT_INSTALL_TICKS;
+    const pendingPresentationTicks = Math.max(0, select.pendingPresentationTicks - 1);
+    const installPending =
+      select.pendingPresentedMoveIndex !== null && pendingPresentationTicks === 0;
+    return {
+      ...state,
+      moveSelect: {
+        ...select,
+        elapsed,
+        selectorAnimationClock: select.selectorAnimationClock + 1,
+        presentedMoveIndex:
+          installPending ? select.pendingPresentedMoveIndex! : select.presentedMoveIndex,
+        pendingPresentedMoveIndex:
+          installPending ? null : select.pendingPresentedMoveIndex,
+        pendingPresentationTicks,
+      },
+      openElapsed: state.openElapsed + (advanceMonClock ? 1 : 0),
+      monAnimClock:
+        state.monAnimClock === null
+          ? null
+          : state.monAnimClock + (advanceMonClock ? 1 : 0),
+    };
+  }
   if (state.monTransition) {
     const elapsed = state.monTransition.elapsed + 1;
     if (elapsed >= SUMMARY_MON_TRANSITION_TICKS) {

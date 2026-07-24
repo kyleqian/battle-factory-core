@@ -52,6 +52,9 @@ import {
   advanceSummaryScreen,
   openSummaryScreen,
   requestSummaryMonChange,
+  requestSummaryMoveSelect,
+  requestSummaryMoveSelectClose,
+  requestSummaryMoveSelectionChange,
   requestSummaryScreenExit,
   requestSummaryPageChange,
   summaryPageLayerOffsets,
@@ -59,6 +62,7 @@ import {
 } from "./summaryScreen.ts";
 import {
   renderSummaryBattleMovesPage,
+  renderSummaryBattleMoveSelectPage,
   renderSummaryContestMovesPage,
   renderSummaryInfoPage,
   renderSummaryInfoPageFaded,
@@ -1278,10 +1282,19 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     // fresh input is rejected until their task returns input ownership.
   } else if (summaryScreen.isOpen) {
     // pokemon_summary_screen.c Task_HandleInput's exact directional priority.
-    if (newKeys.has("UP")) summaryScreen = requestSummaryMonChange(summaryScreen, "up");
+    if (summaryScreen.moveSelect) {
+      if (newKeys.has("UP")) {
+        summaryScreen = requestSummaryMoveSelectionChange(summaryScreen, "up");
+      } else if (newKeys.has("DOWN")) {
+        summaryScreen = requestSummaryMoveSelectionChange(summaryScreen, "down");
+      } else if (newKeys.has("A") || newKeys.has("B")) {
+        summaryScreen = requestSummaryMoveSelectClose(summaryScreen);
+      }
+    } else if (newKeys.has("UP")) summaryScreen = requestSummaryMonChange(summaryScreen, "up");
     else if (newKeys.has("DOWN")) summaryScreen = requestSummaryMonChange(summaryScreen, "down");
     else if (newKeys.has("LEFT")) summaryScreen = requestSummaryPageChange(summaryScreen, "left");
     else if (newKeys.has("RIGHT")) summaryScreen = requestSummaryPageChange(summaryScreen, "right");
+    else if (newKeys.has("A")) summaryScreen = requestSummaryMoveSelect(summaryScreen);
     else if (newKeys.has("B")) summaryScreen = requestSummaryScreenExit(summaryScreen);
   } else {
     let monPic = advanceMonPic(draftScreen.monPic);
@@ -2059,6 +2072,14 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
   const summaryMonAnimClock = summary.monAnimClock ?? summary.openElapsed + 1;
   const animateSwitchedMon = summary.monAnimClock !== null;
   if (!t) {
+    if (summary.moveSelect) {
+      return renderSummaryBattleMoveSelectPage(
+        summary.selectedSlot,
+        summaryMonAnimClock,
+        summary.moveSelect,
+        animateSwitchedMon,
+      );
+    }
     if (summary.monTransition) {
       return renderSummaryMonTransition(
         summary.monTransition,

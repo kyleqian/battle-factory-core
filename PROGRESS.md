@@ -4,6 +4,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 355 — S9 OFF Battle Moves LOCK_MOVES selector: **GREEN — 93/93 exact**
+
+- **State:** A on input-ready ONIX Battle Moves enters the inert LOCK_MOVES
+  selector, DOWN owns BIND details, and B restores the ordinary page at +4.
+- **Did:** added reusable selector ownership, logical/presented indices,
+  source-relative BG/OAM gates and clocks, extracted cursor/effect composition,
+  power/accuracy/description details, CANCEL row, and locked A/B close behavior.
+  Tier-1 pins setup/close gates, rental/page/mode preservation, immutable move
+  order, staggered navigation, cursor clock reset, and no reorder state.
+- **Next:** run the full summary regression matrix plus complete Tier-1/build;
+  if green, record final counts and hand this bounded increment to supervisor.
+- **Notes:** `summary-battle-move-select.json` **93/93** dense OFF exact;
+  targeted Tier-1 **39/39** and build green. No move reordering, Contest
+  move-select, mon switching, battle/controller, absolute ticks, framebuffer
+  assets, or runtime oracle/ROM.
+
+---
 ## 354 — S9 OFF Battle→Contest Moves layered wipe: **GREEN — 16/16 exact**
 
 - **State:** settled ONIX Battle Moves now advances RIGHT through the generic
@@ -38,21 +55,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Info→Skills **25/25**; Skills→Info **56/56**. Tier-1 **1300/1300** and
   build green. No absolute ticks, framebuffer assets, runtime oracle/ROM,
   battle/controller, ROADMAP, or ISSUES edits.
-
----
-## 352 — S9 OFF Info rental DOWN→UP round trip: **GREEN — 87/87 exact**
-
-- **State:** settled ONIX switches DOWN to input-ready MAGBY, then UP returns
-  through the same slot-relative task to input-ready ONIX with zero pixel diff.
-- **Did:** generalized replacement history so the outgoing sprite callback
-  advances through teardown, the destination owns a fresh local animation
-  clock, and the already-installed text window follows its subsequent-copy
-  timing. Tier-1 pins the reverse destination, direction, in-flight gates,
-  endpoint clamps, and Info/slot ownership.
-- **Next:** supervisor verify this checkpoint and choose the next bounded S9
-  route; Moves/Battle Moves/Contest Moves and move-select remain untouched.
-- **Notes:** `summary-info-mon-down-up.json` **87/87**; DOWN **54/54**; Info
-  ONIX **122/122** + MAGBY **132/132**; install **3/3**; RIGHT **25/25**;
-  LEFT **56/56**. Tier-1 **1298/1298** and build green. No absolute ticks,
-  framebuffer assets, runtime oracle/ROM, battle/controller, or ROADMAP/
-  ISSUES edits.
