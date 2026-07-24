@@ -1,3 +1,20 @@
+## 361 — AERIAL ACE exact; Battle Script topology banked
+
+- **State:** S10 Gate 1 remains closed; Scene-ON is now **8 exact / 5 partial
+  / 263 unsupported**. SAND ATTACK is the active ranked animation unit.
+- **Did:** accepted AERIAL ACE through both complete zero-PP-Up portable
+  windows and canonical regression; extracted the source topology for all 214
+  move effects, 249 Battle Script opcodes, 355 moves, and 166 Level-50
+  reachable effect families without defining an interpreter.
+- **Next:** keep SAND ATTACK moving through complete dense ON windows. In the
+  side lane, extract only raw Battle Script source graph data while the Gate-2
+  PP builder remains independently in flight.
+- **Notes:** AERIAL **236/236 + 232/232 + 93/93**, QUICK **219/219 +
+  214/214**, FEATHER **400/400 + 400/400**, FIRE **225/225 + 277/277**, ICE
+  **462/462 + 1294/1294**. Integrated **98 files / 1389 tests** and build
+  green; all new mechanic fixtures retain `ppUps:[0,0,0,0]`.
+
+---
 ## 360 — S10 Gate 1 complete; AERIAL ACE compositor in flight
 
 - **State:** S10's complete Factory corpus gate is supervisor-verified and

@@ -1,3 +1,9 @@
+import { advanceRngValue } from "./rng.ts";
+import type {
+  BattleScriptEventProvenance,
+  BattleScriptSemanticEvent,
+  BattleScriptSemanticEventPayload,
+} from "./battleScriptEvents.ts";
 import type {
   BattleScriptInstruction,
   BattleScriptProgram,
@@ -37,11 +43,29 @@ export type BattleScriptHaltReason =
     programCounter: number;
   }>;
 
-export type BattleScriptMachineState = Readonly<{
+export type BattleScriptRngLedgerEntry = Readonly<{
+  call: number;
+  reason: string;
+  before: number;
+  after: number;
+  randomValue: number;
+  provenance: Omit<BattleScriptEventProvenance, "instructionExecution">;
+}>;
+
+export type BattleScriptRngState = Readonly<{
+  value: number;
+  calls: number;
+  ledger: readonly BattleScriptRngLedgerEntry[];
+}>;
+
+export type BattleScriptMachineState<RulesContext extends object> = Readonly<{
   programCounter: number;
   callStack: readonly number[];
   instructionsExecuted: number;
   haltReason: BattleScriptHaltReason | null;
+  rulesContext: RulesContext;
+  rng: BattleScriptRngState;
+  events: readonly BattleScriptSemanticEvent[];
 }>;
 
 export type BattleScriptControlDirective =
@@ -51,27 +75,36 @@ export type BattleScriptControlDirective =
   | Readonly<{ kind: "return" }>
   | Readonly<{ kind: "halt"; reason: BattleScriptHaltReason }>;
 
-export type BattleScriptOpcodeHandlerContext = Readonly<{
+export type BattleScriptOpcodeHandlerContext<RulesContext extends object> = Readonly<{
   program: BattleScriptProgram;
   instruction: BattleScriptInstruction;
-  state: BattleScriptMachineState;
+  state: BattleScriptMachineState<RulesContext>;
 }>;
 
-export type BattleScriptOpcodeHandler = (
-  context: BattleScriptOpcodeHandlerContext,
-) => BattleScriptControlDirective;
+export type BattleScriptCommandTransition<RulesContext extends object> = Readonly<{
+  control: BattleScriptControlDirective;
+  rulesContext: RulesContext;
+  rng: BattleScriptRngState;
+  events: readonly BattleScriptSemanticEventPayload[];
+}>;
 
-export type BattleScriptOpcodeHandlers = Readonly<Record<number, BattleScriptOpcodeHandler>>;
+export type BattleScriptOpcodeHandler<RulesContext extends object> = (
+  context: BattleScriptOpcodeHandlerContext<RulesContext>,
+) => BattleScriptCommandTransition<RulesContext>;
 
-export type BattleScriptStepResult =
-  | Readonly<{ kind: "advanced"; state: BattleScriptMachineState; instruction: BattleScriptInstruction }>
-  | Readonly<{ kind: "halted"; state: BattleScriptMachineState; instruction?: BattleScriptInstruction }>
-  | Readonly<{ kind: "unsupported"; state: BattleScriptMachineState; instruction: BattleScriptInstruction }>;
+export type BattleScriptOpcodeHandlers<RulesContext extends object> = Readonly<
+  Record<number, BattleScriptOpcodeHandler<RulesContext>>
+>;
 
-export type BattleScriptRunResult =
-  | Readonly<{ kind: "halted"; state: BattleScriptMachineState }>
-  | Readonly<{ kind: "unsupported"; state: BattleScriptMachineState; instruction: BattleScriptInstruction }>
-  | Readonly<{ kind: "budget-exhausted"; state: BattleScriptMachineState }>;
+export type BattleScriptStepResult<RulesContext extends object> =
+  | Readonly<{ kind: "advanced"; state: BattleScriptMachineState<RulesContext>; instruction: BattleScriptInstruction }>
+  | Readonly<{ kind: "halted"; state: BattleScriptMachineState<RulesContext>; instruction?: BattleScriptInstruction }>
+  | Readonly<{ kind: "unsupported"; state: BattleScriptMachineState<RulesContext>; instruction: BattleScriptInstruction }>;
+
+export type BattleScriptRunResult<RulesContext extends object> =
+  | Readonly<{ kind: "halted"; state: BattleScriptMachineState<RulesContext> }>
+  | Readonly<{ kind: "unsupported"; state: BattleScriptMachineState<RulesContext>; instruction: BattleScriptInstruction }>
+  | Readonly<{ kind: "budget-exhausted"; state: BattleScriptMachineState<RulesContext> }>;
 
 export type BattleScriptMachineInspection = Readonly<{
   programCounter: number;
@@ -80,49 +113,144 @@ export type BattleScriptMachineInspection = Readonly<{
   haltReason: BattleScriptHaltReason | null;
   currentInstruction: BattleScriptInstruction | null;
   labels: readonly string[];
+  rngCalls: number;
+  eventCount: number;
 }>;
 
 const ADVANCE = Object.freeze({ kind: "advance" as const });
 const RETURN = Object.freeze({ kind: "return" as const });
 
-function freezeState(
+function instructionProvenance(
+  instruction: BattleScriptInstruction,
+): Omit<BattleScriptEventProvenance, "instructionExecution"> {
+  return Object.freeze({
+    programCounter: instruction.programCounter,
+    opcodeId: instruction.opcodeId,
+    opcodeName: instruction.opcodeName,
+    dispatcher: instruction.dispatcher,
+    sourceLabel: instruction.source.label,
+    sourceStatementLine: instruction.source.statementLine,
+  });
+}
+
+export function createBattleScriptRngState(seed: number): BattleScriptRngState {
+  if (!Number.isSafeInteger(seed) || seed < 0) {
+    throw new Error(`Battle Script RNG seed must be a non-negative safe integer, got ${seed}`);
+  }
+  return Object.freeze({
+    value: seed >>> 0,
+    calls: 0,
+    ledger: Object.freeze([]),
+  });
+}
+
+export function drawBattleScriptRng(
+  rng: BattleScriptRngState,
+  instruction: BattleScriptInstruction,
+  reason: string,
+): Readonly<{ rng: BattleScriptRngState; randomValue: number }> {
+  if (reason.length === 0) throw new Error("Battle Script RNG reason must not be empty");
+  const after = advanceRngValue(rng.value);
+  const randomValue = (after >>> 16) & 0xffff;
+  const entry: BattleScriptRngLedgerEntry = Object.freeze({
+    call: rng.calls + 1,
+    reason,
+    before: rng.value,
+    after,
+    randomValue,
+    provenance: instructionProvenance(instruction),
+  });
+  return Object.freeze({
+    rng: Object.freeze({
+      value: after,
+      calls: rng.calls + 1,
+      ledger: Object.freeze([...rng.ledger, entry]),
+    }),
+    randomValue,
+  });
+}
+
+function assertFrozenRngState(rng: BattleScriptRngState): void {
+  if (
+    !Object.isFrozen(rng)
+    || !Object.isFrozen(rng.ledger)
+    || rng.ledger.some(
+      (entry) => !Object.isFrozen(entry) || !Object.isFrozen(entry.provenance),
+    )
+  ) {
+    throw new Error("Battle Script RNG state and ledger must be frozen");
+  }
+}
+
+function assertFrozenRulesContext(rulesContext: object): void {
+  if (!Object.isFrozen(rulesContext)) {
+    throw new Error("Battle Script rules context must be frozen");
+  }
+}
+
+function freezeState<RulesContext extends object>(
   programCounter: number,
   callStack: readonly number[],
   instructionsExecuted: number,
   haltReason: BattleScriptHaltReason | null,
-): BattleScriptMachineState {
+  rulesContext: RulesContext,
+  rng: BattleScriptRngState,
+  events: readonly BattleScriptSemanticEvent[],
+): BattleScriptMachineState<RulesContext> {
+  assertFrozenRulesContext(rulesContext);
+  assertFrozenRngState(rng);
+  if (!Object.isFrozen(events)) {
+    throw new Error("Battle Script semantic event stream must be frozen");
+  }
   return Object.freeze({
     programCounter,
     callStack: Object.freeze([...callStack]),
     instructionsExecuted,
     haltReason,
+    rulesContext,
+    rng,
+    events,
   });
 }
 
-function haltState(
-  state: BattleScriptMachineState,
+function haltState<RulesContext extends object>(
+  state: BattleScriptMachineState<RulesContext>,
   reason: BattleScriptHaltReason,
   instructionWasExecuted: boolean,
-): BattleScriptMachineState {
+): BattleScriptMachineState<RulesContext> {
   return freezeState(
     state.programCounter,
     state.callStack,
     state.instructionsExecuted + (instructionWasExecuted ? 1 : 0),
     Object.freeze(reason),
+    state.rulesContext,
+    state.rng,
+    state.events,
   );
 }
 
-export function createBattleScriptMachine(
+export function createBattleScriptMachine<RulesContext extends object>(
   program: BattleScriptProgram,
   entryLabel: string,
-): BattleScriptMachineState {
+  rulesContext: RulesContext,
+  rngSeed: number,
+): BattleScriptMachineState<RulesContext> {
   const entry = resolveBattleScriptLabel(program, entryLabel);
   if (!entry) throw new Error(`unknown Battle Script entry label ${entryLabel}`);
-  return freezeState(entry.programCounter, [], 0, null);
+  assertFrozenRulesContext(rulesContext);
+  return freezeState(
+    entry.programCounter,
+    [],
+    0,
+    null,
+    rulesContext,
+    createBattleScriptRngState(rngSeed),
+    Object.freeze([]),
+  );
 }
 
-function targetFromFirstOperand(
-  context: BattleScriptOpcodeHandlerContext,
+function targetFromFirstOperand<RulesContext extends object>(
+  context: BattleScriptOpcodeHandlerContext<RulesContext>,
 ): BattleScriptControlDirective {
   const operand = context.instruction.operands[0];
   const entry = operand?.widthBytes === 4
@@ -141,8 +269,8 @@ function targetFromFirstOperand(
   return Object.freeze({ kind: "jump", programCounter: entry.programCounter });
 }
 
-function callTargetFromFirstOperand(
-  context: BattleScriptOpcodeHandlerContext,
+function callTargetFromFirstOperand<RulesContext extends object>(
+  context: BattleScriptOpcodeHandlerContext<RulesContext>,
 ): BattleScriptControlDirective {
   const target = targetFromFirstOperand(context);
   return target.kind === "jump"
@@ -150,7 +278,9 @@ function callTargetFromFirstOperand(
     : target;
 }
 
-function terminal(context: BattleScriptOpcodeHandlerContext): BattleScriptControlDirective {
+function terminal<RulesContext extends object>(
+  context: BattleScriptOpcodeHandlerContext<RulesContext>,
+): BattleScriptControlDirective {
   return Object.freeze({
     kind: "halt",
     reason: Object.freeze({
@@ -159,6 +289,25 @@ function terminal(context: BattleScriptOpcodeHandlerContext): BattleScriptContro
       opcodeId: context.instruction.opcodeId,
       opcodeName: context.instruction.opcodeName,
     }),
+  });
+}
+
+export function transitionBattleScriptCommand<RulesContext extends object>(
+  context: BattleScriptOpcodeHandlerContext<RulesContext>,
+  control: BattleScriptControlDirective,
+  changes: Readonly<{
+    rulesContext?: RulesContext;
+    rng?: BattleScriptRngState;
+    events?: readonly BattleScriptSemanticEventPayload[];
+  }> = {},
+): BattleScriptCommandTransition<RulesContext> {
+  const rulesContext = changes.rulesContext ?? context.state.rulesContext;
+  assertFrozenRulesContext(rulesContext);
+  return Object.freeze({
+    control,
+    rulesContext,
+    rng: changes.rng ?? context.state.rng,
+    events: Object.freeze([...(changes.events ?? [])]),
   });
 }
 
@@ -171,29 +320,106 @@ function terminal(context: BattleScriptOpcodeHandlerContext): BattleScriptContro
  * it also manipulates the external battle-callback stack and is not equivalent
  * to either terminal command in this pure machine.
  */
-export function createBattleScriptControlHandlers(
+export function createBattleScriptControlHandlers<RulesContext extends object>(
   program: BattleScriptProgram,
-): BattleScriptOpcodeHandlers {
-  const handlers: Record<number, BattleScriptOpcodeHandler> = Object.create(null) as Record<number, BattleScriptOpcodeHandler>;
-  const install = (opcodeName: string, handler: BattleScriptOpcodeHandler) => {
+): BattleScriptOpcodeHandlers<RulesContext> {
+  const handlers: Record<number, BattleScriptOpcodeHandler<RulesContext>> = Object.create(null) as Record<
+    number,
+    BattleScriptOpcodeHandler<RulesContext>
+  >;
+  const install = (opcodeName: string, handler: BattleScriptOpcodeHandler<RulesContext>) => {
     const opcode = program.instructions.find((instruction) => instruction.opcodeName === opcodeName);
     if (!opcode) throw new Error(`committed Battle Script program does not emit ${opcodeName}`);
     handlers[opcode.opcodeId] = handler;
   };
 
-  install("B_SCR_OP_GOTO", targetFromFirstOperand);
-  install("B_SCR_OP_RETURN", () => RETURN);
-  install("B_SCR_OP_END", terminal);
-  install("B_SCR_OP_END2", terminal);
-  install("B_SCR_OP_CALL", callTargetFromFirstOperand);
+  install("B_SCR_OP_GOTO", (context) =>
+    transitionBattleScriptCommand(context, targetFromFirstOperand(context)));
+  install("B_SCR_OP_RETURN", (context) =>
+    transitionBattleScriptCommand(context, RETURN));
+  install("B_SCR_OP_END", (context) =>
+    transitionBattleScriptCommand(context, terminal(context)));
+  install("B_SCR_OP_END2", (context) =>
+    transitionBattleScriptCommand(context, terminal(context)));
+  install("B_SCR_OP_CALL", (context) =>
+    transitionBattleScriptCommand(context, callTargetFromFirstOperand(context)));
   return Object.freeze(handlers);
 }
 
-export function stepBattleScriptMachine(
+function assertRngTransition(previous: BattleScriptRngState, next: BattleScriptRngState): void {
+  assertFrozenRngState(next);
+  if (next.calls !== next.ledger.length || next.calls < previous.calls) {
+    throw new Error("Battle Script RNG ledger/call count is inconsistent");
+  }
+  for (let index = 0; index < previous.ledger.length; index += 1) {
+    if (next.ledger[index] !== previous.ledger[index]) {
+      throw new Error("Battle Script RNG transition rewrote existing ledger history");
+    }
+  }
+  let value = previous.value;
+  for (let index = previous.calls; index < next.calls; index += 1) {
+    const entry = next.ledger[index]!;
+    const expected = advanceRngValue(value);
+    if (
+      entry.call !== index + 1
+      || entry.reason.length === 0
+      || entry.before !== value
+      || entry.after !== expected
+      || entry.randomValue !== ((expected >>> 16) & 0xffff)
+    ) {
+      throw new Error(`Battle Script RNG ledger entry ${index + 1} is not a deterministic LCG draw`);
+    }
+    value = expected;
+  }
+  if (next.value !== value) {
+    throw new Error("Battle Script RNG value does not match its ledger");
+  }
+}
+
+function freezeEventPayload(
+  payload: BattleScriptSemanticEventPayload,
+): BattleScriptSemanticEventPayload {
+  switch (payload.kind) {
+    case "message":
+      return Object.freeze({ ...payload, substitutions: Object.freeze([...payload.substitutions]) });
+    case "animation":
+      return Object.freeze({ ...payload, arguments: Object.freeze([...payload.arguments]) });
+    case "hp-change":
+    case "status-change":
+    case "stat-stage-change":
+    case "switch":
+    case "outcome":
+      return Object.freeze({ ...payload });
+  }
+}
+
+function appendEvents(
+  prior: readonly BattleScriptSemanticEvent[],
+  payloads: readonly BattleScriptSemanticEventPayload[],
+  instruction: BattleScriptInstruction,
+  instructionExecution: number,
+): readonly BattleScriptSemanticEvent[] {
+  if (payloads.length === 0) return prior;
+  const provenance: BattleScriptEventProvenance = Object.freeze({
+    ...instructionProvenance(instruction),
+    instructionExecution,
+  });
+  const appended = payloads.map((rawPayload, index) => {
+    const payload = freezeEventPayload(rawPayload);
+    return Object.freeze({
+      ...payload,
+      sequence: prior.length + index + 1,
+      provenance,
+    }) as BattleScriptSemanticEvent;
+  });
+  return Object.freeze([...prior, ...appended]);
+}
+
+export function stepBattleScriptMachine<RulesContext extends object>(
   program: BattleScriptProgram,
-  state: BattleScriptMachineState,
-  handlers: BattleScriptOpcodeHandlers,
-): BattleScriptStepResult {
+  state: BattleScriptMachineState<RulesContext>,
+  handlers: BattleScriptOpcodeHandlers<RulesContext>,
+): BattleScriptStepResult<RulesContext> {
   if (state.haltReason) return Object.freeze({ kind: "halted", state });
 
   const instruction = program.instructions[state.programCounter];
@@ -217,40 +443,87 @@ export function stepBattleScriptMachine(
     return Object.freeze({ kind: "unsupported", state: next, instruction });
   }
 
-  const directive = handler(Object.freeze({ program, instruction, state }));
-  let next: BattleScriptMachineState;
-  switch (directive.kind) {
+  const transition = handler(Object.freeze({ program, instruction, state }));
+  assertFrozenRulesContext(transition.rulesContext);
+  assertRngTransition(state.rng, transition.rng);
+  const events = appendEvents(
+    state.events,
+    transition.events,
+    instruction,
+    state.instructionsExecuted + 1,
+  );
+
+  let next: BattleScriptMachineState<RulesContext>;
+  switch (transition.control.kind) {
     case "advance":
-      next = freezeState(state.programCounter + 1, state.callStack, state.instructionsExecuted + 1, null);
+      next = freezeState(
+        state.programCounter + 1,
+        state.callStack,
+        state.instructionsExecuted + 1,
+        null,
+        transition.rulesContext,
+        transition.rng,
+        events,
+      );
       break;
     case "jump":
-      next = freezeState(directive.programCounter, state.callStack, state.instructionsExecuted + 1, null);
+      next = freezeState(
+        transition.control.programCounter,
+        state.callStack,
+        state.instructionsExecuted + 1,
+        null,
+        transition.rulesContext,
+        transition.rng,
+        events,
+      );
       break;
     case "call":
       next = freezeState(
-        directive.programCounter,
+        transition.control.programCounter,
         [...state.callStack, state.programCounter + 1],
         state.instructionsExecuted + 1,
         null,
+        transition.rulesContext,
+        transition.rng,
+        events,
       );
       break;
     case "return": {
       const returnAddress = state.callStack.at(-1);
       next = returnAddress === undefined
-        ? haltState(state, {
-          kind: "return-stack-underflow",
-          programCounter: state.programCounter,
-        }, true)
+        ? freezeState(
+          state.programCounter,
+          state.callStack,
+          state.instructionsExecuted + 1,
+          Object.freeze({
+            kind: "return-stack-underflow",
+            programCounter: state.programCounter,
+          }),
+          transition.rulesContext,
+          transition.rng,
+          events,
+        )
         : freezeState(
           returnAddress,
           state.callStack.slice(0, -1),
           state.instructionsExecuted + 1,
           null,
+          transition.rulesContext,
+          transition.rng,
+          events,
         );
       break;
     }
     case "halt":
-      next = haltState(state, directive.reason, true);
+      next = freezeState(
+        state.programCounter,
+        state.callStack,
+        state.instructionsExecuted + 1,
+        Object.freeze(transition.control.reason),
+        transition.rulesContext,
+        transition.rng,
+        events,
+      );
       break;
   }
   return Object.freeze({
@@ -260,12 +533,12 @@ export function stepBattleScriptMachine(
   });
 }
 
-export function runBattleScriptMachine(
+export function runBattleScriptMachine<RulesContext extends object>(
   program: BattleScriptProgram,
-  initialState: BattleScriptMachineState,
-  handlers: BattleScriptOpcodeHandlers,
+  initialState: BattleScriptMachineState<RulesContext>,
+  handlers: BattleScriptOpcodeHandlers<RulesContext>,
   instructionBudget: number,
-): BattleScriptRunResult {
+): BattleScriptRunResult<RulesContext> {
   if (!Number.isSafeInteger(instructionBudget) || instructionBudget < 1) {
     throw new Error(`instruction budget must be a positive safe integer, got ${instructionBudget}`);
   }
@@ -288,9 +561,9 @@ export function runBattleScriptMachine(
   return Object.freeze({ kind: "budget-exhausted", state: budgetState });
 }
 
-export function inspectBattleScriptMachine(
+export function inspectBattleScriptMachine<RulesContext extends object>(
   program: BattleScriptProgram,
-  state: BattleScriptMachineState,
+  state: BattleScriptMachineState<RulesContext>,
 ): BattleScriptMachineInspection {
   return Object.freeze({
     programCounter: state.programCounter,
@@ -299,7 +572,12 @@ export function inspectBattleScriptMachine(
     haltReason: state.haltReason,
     currentInstruction: program.instructions[state.programCounter] ?? null,
     labels: program.labelsAtProgramCounter[state.programCounter] ?? Object.freeze([]),
+    rngCalls: state.rng.calls,
+    eventCount: state.events.length,
   });
 }
 
-export const advanceBattleScriptInstruction = (): BattleScriptControlDirective => ADVANCE;
+export const advanceBattleScriptInstruction = <RulesContext extends object>(
+  context: BattleScriptOpcodeHandlerContext<RulesContext>,
+): BattleScriptCommandTransition<RulesContext> =>
+  transitionBattleScriptCommand(context, ADVANCE);

@@ -6,6 +6,7 @@ import {
   inspectBattleScriptMachine,
   runBattleScriptMachine,
   stepBattleScriptMachine,
+  transitionBattleScriptCommand,
   type BattleScriptOpcodeHandlers,
 } from "../src/engine/battleScriptMachine.ts";
 import {
@@ -14,7 +15,13 @@ import {
 } from "../src/engine/battleScriptProgram.ts";
 
 const program = loadBattleScriptProgram();
-const controls = createBattleScriptControlHandlers(program);
+const rules = Object.freeze({ marker: "control-neutral" });
+type TestRules = typeof rules;
+const controls = createBattleScriptControlHandlers<TestRules>(program);
+
+function createMachine(label: string) {
+  return createBattleScriptMachine(program, label, rules, 0x12345678);
+}
 
 function instructionAt(label: string) {
   const entry = resolveBattleScriptLabel(program, label);
@@ -99,7 +106,7 @@ describe("typed Battle Script program", () => {
 
 describe("pure Battle Script control machine", () => {
   it("executes real goto and terminal control transitions", () => {
-    const initial = createBattleScriptMachine(program, "BattleScript_StatUpEnd");
+    const initial = createMachine("BattleScript_StatUpEnd");
     const goto = stepBattleScriptMachine(program, initial, controls);
     expect(goto.kind).toBe("advanced");
     expect(goto.state.programCounter).toBe(resolveBattleScriptLabel(program, "BattleScript_MoveEnd")!.programCounter);
@@ -107,7 +114,7 @@ describe("pure Battle Script control machine", () => {
     expect(initial.programCounter).toBe(resolveBattleScriptLabel(program, "BattleScript_StatUpEnd")!.programCounter);
     expect(initial.instructionsExecuted).toBe(0);
 
-    const terminalState = createBattleScriptMachine(program, "BattleScript_BeatUpEnd");
+    const terminalState = createMachine("BattleScript_BeatUpEnd");
     const end = stepBattleScriptMachine(program, terminalState, controls);
     expect(end.kind).toBe("halted");
     expect(end.state.haltReason).toEqual({
@@ -120,7 +127,7 @@ describe("pure Battle Script control machine", () => {
   });
 
   it("pushes a real call return address and pops it after injected leaf handlers", () => {
-    const initial = createBattleScriptMachine(program, "BattleScript_SpikesOnAttacker");
+    const initial = createMachine("BattleScript_SpikesOnAttacker");
     const callPc = program.instructions.findIndex(
       (instruction) => instruction.source.label === "BattleScript_SpikesOnAttacker"
         && instruction.source.statementLine === 3392,
@@ -142,7 +149,7 @@ describe("pure Battle Script control machine", () => {
       "B_SCR_OP_PRINTSTRING",
       "B_SCR_OP_WAITMESSAGE",
     ]);
-    const leafHandlers: BattleScriptOpcodeHandlers = Object.freeze({
+    const leafHandlers: BattleScriptOpcodeHandlers<TestRules> = Object.freeze({
       ...controls,
       [print.opcodeId]: advanceBattleScriptInstruction,
       [wait.opcodeId]: advanceBattleScriptInstruction,
@@ -166,7 +173,7 @@ describe("pure Battle Script control machine", () => {
     ]);
     const unsupported = stepBattleScriptMachine(
       program,
-      createBattleScriptMachine(program, "BattleScript_EffectHit"),
+      createMachine("BattleScript_EffectHit"),
       controls,
     );
     expect(unsupported.kind).toBe("unsupported");
@@ -180,10 +187,8 @@ describe("pure Battle Script control machine", () => {
 
     const end3 = program.instructions.find((instruction) => instruction.opcodeName === "B_SCR_OP_END3")!;
     const end3State = Object.freeze({
+      ...createMachine("BattleScript_EffectHit"),
       programCounter: end3.programCounter,
-      callStack: Object.freeze([]),
-      instructionsExecuted: 0,
-      haltReason: null,
     });
     const end3Result = stepBattleScriptMachine(program, end3State, controls);
     expect(end3Result.kind).toBe("unsupported");
@@ -197,7 +202,7 @@ describe("pure Battle Script control machine", () => {
   it("supports END2's shared terminal boundary and reports bare RETURN underflow", () => {
     const end2 = stepBattleScriptMachine(
       program,
-      createBattleScriptMachine(program, "BattleScript_FaintedMonEnd"),
+      createMachine("BattleScript_FaintedMonEnd"),
       controls,
     );
     expect(end2.kind).toBe("halted");
@@ -209,7 +214,7 @@ describe("pure Battle Script control machine", () => {
 
     const bareReturn = stepBattleScriptMachine(
       program,
-      createBattleScriptMachine(program, "BattleScript_PursuitDmgOnSwitchOutRet"),
+      createMachine("BattleScript_PursuitDmgOnSwitchOutRet"),
       controls,
     );
     expect(bareReturn.kind).toBe("halted");
@@ -220,14 +225,17 @@ describe("pure Battle Script control machine", () => {
   });
 
   it("protects a generic injected-handler loop with an explicit instruction budget", () => {
-    const initial = createBattleScriptMachine(program, "BattleScript_EffectHit");
+    const initial = createMachine("BattleScript_EffectHit");
     const instruction = program.instructions[initial.programCounter]!;
-    const loopHandlers: BattleScriptOpcodeHandlers = Object.freeze({
+    const loopHandlers: BattleScriptOpcodeHandlers<TestRules> = Object.freeze({
       ...controls,
-      [instruction.opcodeId]: ({ state }) => Object.freeze({
-        kind: "jump",
-        programCounter: state.programCounter,
-      }),
+      [instruction.opcodeId]: (context) => transitionBattleScriptCommand(
+        context,
+        Object.freeze({
+          kind: "jump",
+          programCounter: context.state.programCounter,
+        }),
+      ),
     });
     const result = runBattleScriptMachine(program, initial, loopHandlers, 7);
     expect(result.kind).toBe("budget-exhausted");
@@ -241,7 +249,7 @@ describe("pure Battle Script control machine", () => {
   });
 
   it("returns detached immutable inspection data without changing machine state", () => {
-    const state = createBattleScriptMachine(program, "BattleScript_EffectMorningSun");
+    const state = createMachine("BattleScript_EffectMorningSun");
     const before = {
       programCounter: state.programCounter,
       callStack: [...state.callStack],

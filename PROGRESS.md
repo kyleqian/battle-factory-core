@@ -4,6 +4,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 364 — S10 Gate-3 immutable rules/event execution seam
+
+- **State:** S10 Gate 3 remains open; the typed interpreter now has a pure,
+  unwired cross-layer contract, but still supports only the five source-safe
+  control opcodes.
+- **Did:** made each handler transition atomically return control, one frozen
+  rules context, audited Gen-3 RNG state/ledger, and immutable sequenced
+  semantic events (message, HP/status/stage, animation, switch, outcome).
+  Added an events-only presentation replay boundary with no rules/RNG input.
+- **Next:** add source-mapped mutating opcode families behind this seam,
+  preserving structured unsupported behavior; do not wire production
+  controllers or presentation until their shared rules context is proven.
+- **Notes:** synthetic architecture tests pin immutable/deterministic
+  transitions, RNG provenance, neutral controls, replay isolation, budgets,
+  unsupported exits, and the existing **3306**-instruction IR. Tier-1 **105
+  files / 1428 tests** and build green; no opcode semantics or pixel claim.
+
+---
 ## 363 — SAND ATTACK exact; Gate-3 source/control foundation integrated
 
 - **State:** S10 Gate 1 remains closed and Gate 3 remains open. Scene-ON is
@@ -38,20 +56,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   external callback stack; all other battle mutation, RNG, presentation, and
   **244/249** opcodes remain out of scope. Tier-1 **102 files / 1413 tests**
   and build green; no oracle/pixel claim.
-
----
-## 361 — AERIAL ACE exact; Battle Script topology banked
-
-- **State:** S10 Gate 1 remains closed; Scene-ON is now **8 exact / 5 partial
-  / 263 unsupported**. SAND ATTACK is the active ranked animation unit.
-- **Did:** accepted AERIAL ACE through both complete zero-PP-Up portable
-  windows and canonical regression; extracted the source topology for all 214
-  move effects, 249 Battle Script opcodes, 355 moves, and 166 Level-50
-  reachable effect families without defining an interpreter.
-- **Next:** keep SAND ATTACK moving through complete dense ON windows. In the
-  side lane, extract only raw Battle Script source graph data while the Gate-2
-  PP builder remains independently in flight.
-- **Notes:** AERIAL **236/236 + 232/232 + 93/93**, QUICK **219/219 +
-  214/214**, FEATHER **400/400 + 400/400**, FIRE **225/225 + 277/277**, ICE
-  **462/462 + 1294/1294**. Integrated **98 files / 1389 tests** and build
-  green; all new mechanic fixtures retain `ppUps:[0,0,0,0]`.
