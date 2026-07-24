@@ -41,16 +41,16 @@ remainder.
 - **State:** **4 exact / 9 partial / 263 unsupported**. The source graph covers
   all **354** moves through **935** reusable components and **3,190**
   dependency edges.
-- **Did:** staged ICE PUNCH through the shared Scene-ON seam, extracted its
-  source-concatenated crystal sheet, and landed the independent opening
-  BG-black/target-ice component clocks. FIRE PUNCH's fist/hitsplat/shake
-  chassis remains unchanged. THUNDER PUNCH was batch-checked through the same
-  normal-controller stage but not promoted.
-- **Evidence:** `ice-punch-onix-grovyle.json` is **35/35 exact** at oracle
-  frames 2339-2373. Fresh template/RAM evidence pins 2374 as the first crystal
-  frame and bounds the still-open move body through 2525. FIRE PUNCH portable
-  **225/225** remains exact.
-- **Next:** continue ICE PUNCH at relative age 35 / oracle 2374 with the
-  small+large spiral, then reuse the exact fist/hitsplat/shake chassis and
-  implement `IceCrystalEffectShort`; do not claim THUNDER PUNCH until its own
-  dense move window is green.
+- **Did:** extended ICE PUNCH with the source-derived small+large inward
+  crystal reducer/renderer: target anchoring, 30-state growing-circle callback,
+  large affine rotation, OBJ alpha, stable OAM-Y order, and the shared
+  fist/hitsplat handoff. FIRE PUNCH's chassis remains unchanged.
+- **Evidence:** `ice-punch-onix-grovyle.json` is **63/63 exact** at oracle
+  frames 2339-2401. The last attempted spiral overlap at 2402-2410 is bounded
+  to 153 pixels across 7/9 frames and needs generic semi-transparent
+  OBJ-over-OBJ composition; source/RAM pins fist/hitsplat/crystal
+  subpriorities 26/27/28. FIRE PUNCH portable **225/225** remains exact.
+- **Next:** close ICE PUNCH 2402-2410 with a generic pixel-level OBJ overlap
+  compositor, verify the final large state at 2411, then implement
+  `IceCrystalEffectShort`, palette restore, teardown, and generic resolution.
+  Do not claim THUNDER PUNCH without its own dense evidence.

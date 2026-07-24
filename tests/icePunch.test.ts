@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
   ICE_PUNCH_OVERLAY_FIRST_AGE,
+  ICE_PUNCH_LARGE_SPIRAL_FIRST_AGE,
   ICE_PUNCH_SMALL_SPIRAL_FIRST_AGE,
+  ICE_PUNCH_SPIRAL_TICKS,
   icePunchOverlayState,
+  icePunchSpiralCrystals,
 } from "../src/engine/icePunch.ts";
 import {
   ONIX_TO_GROVYLE_FIRE_PUNCH_GEOMETRY,
@@ -50,6 +53,8 @@ describe("ICE_PUNCH source-composed presentation components", () => {
       attacker: { species: "ONIX" },
       target: { species: "GROVYLE" },
     });
+    expect(sceneOnIcePunchView({ ...stage, age: 35 }).crystals).toHaveLength(0);
+    expect(sceneOnIcePunchView({ ...stage, age: 36 }).crystals).toHaveLength(4);
     expect(stage.config).toEqual(before);
   });
 
@@ -60,5 +65,64 @@ describe("ICE_PUNCH source-composed presentation components", () => {
       large: { tile: 4, width: 8, height: 16 },
       small: { tile: 6, width: 8, height: 8 },
     });
+  });
+
+  it("pins the source-relative two-batch cadence and 30-frame lifetime", () => {
+    const center = { x: 176, y: 44 };
+    expect(ICE_PUNCH_LARGE_SPIRAL_FIRST_AGE).toBe(42);
+    expect(ICE_PUNCH_SPIRAL_TICKS).toBe(30);
+    expect(icePunchSpiralCrystals(34, center)).toHaveLength(0);
+    expect(icePunchSpiralCrystals(35, center).map(({ kind }) => kind))
+      .toEqual(["small", "small", "small", "small"]);
+    expect(icePunchSpiralCrystals(42, center).filter(({ kind }) => kind === "large"))
+      .toHaveLength(4);
+    expect(icePunchSpiralCrystals(64, center).filter(({ kind }) => kind === "small"))
+      .toHaveLength(4);
+    expect(icePunchSpiralCrystals(65, center).filter(({ kind }) => kind === "small"))
+      .toHaveLength(0);
+    expect(icePunchSpiralCrystals(71, center).filter(({ kind }) => kind === "large"))
+      .toHaveLength(4);
+    expect(icePunchSpiralCrystals(72, center)).toHaveLength(0);
+  });
+
+  it("reproduces source translation, affine rotation, and target anchoring", () => {
+    const center = { x: 176, y: 44 };
+    const firstSmall = icePunchSpiralCrystals(35, center)
+      .find(({ sourceSlot }) => sourceSlot === 3)!;
+    expect(firstSmall).toMatchObject({
+      kind: "small",
+      centerX: 188,
+      centerY: 100,
+      pa: 256,
+      pb: 0,
+      pc: 0,
+      pd: 256,
+    });
+    const firstLarge = icePunchSpiralCrystals(42, center)
+      .find(({ sourceSlot }) => sourceSlot === 9)!;
+    expect(firstLarge).toMatchObject({
+      kind: "large",
+      centerX: 224,
+      centerY: 74,
+      pa: -97,
+      pb: -236,
+      pc: 236,
+      pd: -97,
+    });
+
+    const translated = icePunchSpiralCrystals(42, { x: 72, y: 88 })
+      .find(({ sourceSlot }) => sourceSlot === 9)!;
+    expect({
+      dx: translated.centerX - firstLarge.centerX,
+      dy: translated.centerY - firstLarge.centerY,
+      matrix: [translated.pa, translated.pb, translated.pc, translated.pd],
+    }).toEqual({ dx: -104, dy: 44, matrix: [-97, -236, 236, -97] });
+  });
+
+  it("pins stable source OAM ordering where small and large batches overlap", () => {
+    expect(
+      icePunchSpiralCrystals(42, { x: 176, y: 44 })
+        .map(({ sourceSlot }) => sourceSlot),
+    ).toEqual([10, 4, 11, 3, 5, 9, 12, 7]);
   });
 });
