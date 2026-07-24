@@ -35,9 +35,22 @@ type Statement = {
   rawOperands: string;
   operandTokens: string[];
   opcodeBindings?: string[];
+  macroDeclarationLine?: number;
   labelOperands: string[];
 };
 type Label = { name: string; line: number; sigil: ":" | "::"; nextLabel: string | null; statements: Statement[] };
+type ControlEdgeKind = "fallthrough" | "jump" | "call" | "return" | "end";
+type ControlEdge = {
+  from: { label: string; line: number };
+  to: { label: string; line: number } | null;
+  kind: ControlEdgeKind;
+  provenance: {
+    kind: "implicit-assembly-successor" | "explicit-opcode-binding";
+    macro?: string;
+    macroDeclarationLine?: number;
+    opcode?: string;
+  };
+};
 
 function stripAssemblerComment(line: string): string {
   // battle_scripts_1.s does not use quoted strings, but retaining quoted @
@@ -177,6 +190,7 @@ function parseSourceStatements(source: string, macros: Macro[]): { preamble: Sta
       const macro = macroByName.get(mnemonic);
       if (!macro) throw new Error(`instruction ${mnemonic} at data/battle_scripts_1.s:${line} has no source macro declaration`);
       statement.opcodeBindings = macro.opcodeBindings;
+      statement.macroDeclarationLine = macro.declarationLine;
     } else {
       nonExecutableCategories.set(`directive:${mnemonic}`, (nonExecutableCategories.get(`directive:${mnemonic}`) ?? 0) + 1);
     }
@@ -197,6 +211,101 @@ for (const statement of [...parsed.preamble, ...parsed.labels.flatMap((label) =>
     .filter((token) => labelsByName.has(token));
 }
 
+// This is intentionally a narrow, source-spelled control catalog. The graph
+// reports the assembly successor available when execution does not transfer;
+// it does not evaluate a command handler's branch guards or claim that the
+// successor is taken at runtime. Other label operands (for example a pointer
+// consumed by a non-JUMPIF command) remain lexical operands, not CFG edges.
+const unconditionalControlOpcodes = new Map<string, Exclude<ControlEdgeKind, "fallthrough">>([
+  ["B_SCR_OP_GOTO", "jump"],
+  ["B_SCR_OP_JUMPTOCALLEDMOVE", "jump"],
+  ["B_SCR_OP_CALL", "call"],
+  ["B_SCR_OP_RETURN", "return"],
+  ["B_SCR_OP_END", "end"],
+  ["B_SCR_OP_END2", "end"],
+  ["B_SCR_OP_END3", "end"],
+  ["B_SCR_OP_ENDSELECTIONSCRIPT", "end"],
+  ["B_SCR_OP_ENDLINKBATTLE", "end"],
+]);
+
+function controlTransfer(statement: Statement): { kind: Exclude<ControlEdgeKind, "fallthrough">; hasAssemblySuccessor: boolean; opcode: string } | null {
+  const bindings = statement.opcodeBindings ?? [];
+  const unconditional = bindings.filter((opcode) => unconditionalControlOpcodes.has(opcode));
+  const conditional = bindings.filter((opcode) => opcode.startsWith("B_SCR_OP_JUMPIF"));
+  if (unconditional.length + conditional.length > 1) {
+    throw new Error(`multiple explicit control opcodes at data/battle_scripts_1.s:${statement.line}: ${bindings.join(", ")}`);
+  }
+  if (unconditional.length === 1) {
+    const opcode = unconditional[0]!;
+    return { kind: unconditionalControlOpcodes.get(opcode)!, hasAssemblySuccessor: false, opcode };
+  }
+  if (conditional.length === 1) return { kind: "jump", hasAssemblySuccessor: true, opcode: conditional[0]! };
+  return null;
+}
+
+const executableStatements = parsed.labels.flatMap((label) => label.statements
+  .filter((statement) => statement.kind === "instruction")
+  .map((statement) => ({ label, statement })));
+const controlEdges: ControlEdge[] = [];
+for (const [index, current] of executableStatements.entries()) {
+  const transfer = controlTransfer(current.statement);
+  if (transfer) {
+    const targets = current.statement.labelOperands;
+    if (transfer.kind === "jump" || transfer.kind === "call") {
+      if (targets.length === 0) {
+        controlEdges.push({
+          from: { label: current.label.name, line: current.statement.line },
+          to: null,
+          kind: transfer.kind,
+          provenance: {
+            kind: "explicit-opcode-binding",
+            macro: current.statement.mnemonic,
+            macroDeclarationLine: current.statement.macroDeclarationLine,
+            opcode: transfer.opcode,
+          },
+        });
+      } else {
+        for (const target of targets) {
+          const targetStatement = executableStatements.find((entry) => entry.label.name === target);
+          if (!targetStatement) throw new Error(`control target ${target} at data/battle_scripts_1.s:${current.statement.line} has no executable statement`);
+          controlEdges.push({
+            from: { label: current.label.name, line: current.statement.line },
+            to: { label: targetStatement.label.name, line: targetStatement.statement.line },
+            kind: transfer.kind,
+            provenance: {
+              kind: "explicit-opcode-binding",
+              macro: current.statement.mnemonic,
+              macroDeclarationLine: current.statement.macroDeclarationLine,
+              opcode: transfer.opcode,
+            },
+          });
+        }
+      }
+    } else {
+      controlEdges.push({
+        from: { label: current.label.name, line: current.statement.line },
+        to: null,
+        kind: transfer.kind,
+        provenance: {
+          kind: "explicit-opcode-binding",
+          macro: current.statement.mnemonic,
+          macroDeclarationLine: current.statement.macroDeclarationLine,
+          opcode: transfer.opcode,
+        },
+      });
+    }
+  }
+  if ((!transfer || transfer.hasAssemblySuccessor) && executableStatements[index + 1]) {
+    const next = executableStatements[index + 1]!;
+    controlEdges.push({
+      from: { label: current.label.name, line: current.statement.line },
+      to: { label: next.label.name, line: next.statement.line },
+      kind: "fallthrough",
+      provenance: { kind: "implicit-assembly-successor" },
+    });
+  }
+}
+
 const topology = JSON.parse(readFileSync(join(DATA_GEN, "battle-script-topology.json"), "utf8")) as {
   effects: Array<{ id: number; effect: string; entryScript: string }>;
   opcodes: Array<{ opcode: string }>;
@@ -213,10 +322,10 @@ for (const effect of topology.effects) {
 
 const statements = [...parsed.preamble, ...parsed.labels.flatMap((label) => label.statements)];
 const graph = {
-  schema: "battle-script-graph/v1",
+  schema: "battle-script-graph/v2",
   source: {
     files: ["asm/macros/battle_script.inc", "data/battle_scripts_1.s", "src/data/gen/battle-script-topology.json"],
-    note: "Lexical source graph only. Operand tokens are raw assembly text; opcode bindings are mechanically expanded source macros, not inferred operand types or executable mechanics.",
+    note: "Lexical source graph plus a narrow, source-spelled control-flow catalog. Operand tokens are raw assembly text; opcode bindings are mechanically expanded source macros. Fallthrough records only the implicit assembly successor available on a non-transfer path; runtime branch guards and other handler control behavior are not inferred.",
   },
   counts: {
     macros: macros.length,
@@ -227,6 +336,12 @@ const graph = {
     labelOperandReferences: statements.reduce((total, statement) => total + statement.labelOperands.length, 0),
     nonExecutableCategories: Object.keys(parsed.nonExecutableCategories).length,
     unsupportedLineCategories: 0,
+    controlFlowEdges: controlEdges.length,
+    fallthroughEdges: controlEdges.filter((edge) => edge.kind === "fallthrough").length,
+    explicitJumpEdges: controlEdges.filter((edge) => edge.kind === "jump").length,
+    explicitCallEdges: controlEdges.filter((edge) => edge.kind === "call").length,
+    explicitReturnEdges: controlEdges.filter((edge) => edge.kind === "return").length,
+    explicitEndEdges: controlEdges.filter((edge) => edge.kind === "end").length,
   },
   macros,
   preamble: parsed.preamble,
@@ -234,6 +349,11 @@ const graph = {
   effectEntrypoints: topology.effects.map((effect) => ({ id: effect.id, effect: effect.effect, label: effect.entryScript })),
   nonExecutableCategories: parsed.nonExecutableCategories,
   unsupportedLineCategories: {},
+  controlFlow: {
+    schema: "battle-script-control-flow/v1",
+    note: "Edges preserve assembly-order fallthrough across source labels and only explicit B_SCR_OP_GOTO, B_SCR_OP_JUMP*, B_SCR_OP_CALL, B_SCR_OP_RETURN, and B_SCR_OP_END* transfers. A null jump/call target is an explicit dynamic transfer with no source-label operand. Return/end edges deliberately have no static target. No runtime guard, handler branch, call-return continuation, address, or operand type is inferred.",
+    edges: controlEdges,
+  },
 };
 
 mkdirSync(DATA_GEN, { recursive: true });

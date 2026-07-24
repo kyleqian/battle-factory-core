@@ -8,10 +8,12 @@ individual moves into item or ability hooks. Every move's two
 The rejected first version walked only named operands in assembled Battle
 Script blocks. Assembly labels also fall through implicitly to the next
 instruction, so that walk underclassified ordinary paths: notably THUNDER and
-SURF lost their accuracy/absorber hooks. Following more named operands cannot
-make that algorithm conservative or exact. A future per-move join needs a
-complete control-flow graph with fallthrough plus the source branch guards
-that can short-circuit before a hook.
+SURF lost their accuracy/absorber hooks. The generated Battle Script graph now
+pins those linear successors and source-spelled jump/call/return/end edges,
+but deliberately does not infer runtime branch guards, other handler transfers,
+or call-return continuations. Following more named operands cannot make a
+per-move algorithm conservative or exact; that still needs the remaining
+control and guard evidence before a hook.
 
 ## Included dispatcher inventory
 

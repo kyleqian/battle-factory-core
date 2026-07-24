@@ -6,18 +6,32 @@ import { describe, expect, it } from "vitest";
 import graphData from "../src/data/gen/battle-script-graph.json" with { type: "json" };
 import topologyData from "../src/data/gen/battle-script-topology.json" with { type: "json" };
 
-type Statement = { kind: "instruction" | "directive"; mnemonic: string; operandTokens: string[]; opcodeBindings?: string[]; labelOperands: string[] };
+type Statement = { line: number; kind: "instruction" | "directive"; mnemonic: string; operandTokens: string[]; opcodeBindings?: string[]; macroDeclarationLine?: number; labelOperands: string[] };
 type Label = { name: string; nextLabel: string | null; statements: Statement[] };
+type ControlEdge = {
+  from: { label: string; line: number };
+  to: { label: string; line: number } | null;
+  kind: "fallthrough" | "jump" | "call" | "return" | "end";
+  provenance: { kind: "implicit-assembly-successor" | "explicit-opcode-binding"; macro?: string; macroDeclarationLine?: number; opcode?: string };
+};
 const graph = graphData as {
-  counts: { macros: number; labels: number; executableInstructions: number; directives: number; nonExecutableCategories: number; unsupportedLineCategories: number };
+  schema: string;
+  counts: { macros: number; labels: number; executableInstructions: number; directives: number; nonExecutableCategories: number; unsupportedLineCategories: number; controlFlowEdges: number; fallthroughEdges: number; explicitJumpEdges: number; explicitCallEdges: number; explicitReturnEdges: number; explicitEndEdges: number };
   macros: Array<{ name: string; declarationLine: number; directOpcodeBindings: string[]; opcodeBindings: string[] }>;
   labels: Label[];
   preamble: Statement[];
   effectEntrypoints: Array<{ id: number; effect: string; label: string }>;
   nonExecutableCategories: Record<string, number>;
   unsupportedLineCategories: Record<string, number>;
+  controlFlow: { schema: string; note: string; edges: ControlEdge[] };
 };
-const topology = topologyData as { effects: Array<{ id: number; effect: string; entryScript: string }>; opcodes: Array<{ opcode: string }> };
+const topology = topologyData as { effects: Array<{ id: number; effect: string; entryScript: string }>; moves: Array<{ move: string; entryScript: string }>; opcodes: Array<{ opcode: string }> };
+
+function edge(fromLabel: string, fromLine: number, kind: ControlEdge["kind"]): ControlEdge {
+  const found = graph.controlFlow.edges.find((candidate) => candidate.from.label === fromLabel && candidate.from.line === fromLine && candidate.kind === kind);
+  if (!found) throw new Error(`missing ${kind} edge from ${fromLabel}:${fromLine}`);
+  return found;
+}
 
 describe("Battle Script source graph extraction", () => {
   it("regenerates byte-for-byte after its topology prerequisite in an isolated directory", () => {
@@ -78,5 +92,79 @@ describe("Battle Script source graph extraction", () => {
     for (const statement of [...graph.preamble, ...graph.labels.flatMap((label) => label.statements)]) {
       for (const labelOperand of statement.labelOperands) expect(labels.has(labelOperand), labelOperand).toBe(true);
     }
+  });
+
+  it("preserves exact implicit assembly successors and source-spelled transfer provenance", () => {
+    expect(graph.schema).toBe("battle-script-graph/v2");
+    expect(graph.controlFlow.schema).toBe("battle-script-control-flow/v1");
+    expect(graph.controlFlow.note).toContain("No runtime guard");
+    expect(graph.counts.controlFlowEdges).toBe(graph.controlFlow.edges.length);
+    const countFieldByKind: Record<ControlEdge["kind"], keyof typeof graph.counts> = {
+      fallthrough: "fallthroughEdges",
+      jump: "explicitJumpEdges",
+      call: "explicitCallEdges",
+      return: "explicitReturnEdges",
+      end: "explicitEndEdges",
+    };
+    for (const kind of ["fallthrough", "jump", "call", "return", "end"] as const) {
+      const count = graph.controlFlow.edges.filter((candidate) => candidate.kind === kind).length;
+      expect(graph.counts[countFieldByKind[kind]]).toBe(count);
+    }
+
+    const executable = graph.labels.flatMap((label) => label.statements
+      .filter((statement) => statement.kind === "instruction")
+      .map((statement) => ({ label: label.name, line: statement.line })));
+    for (const fallthrough of graph.controlFlow.edges.filter((candidate) => candidate.kind === "fallthrough")) {
+      const index = executable.findIndex((statement) => statement.label === fallthrough.from.label && statement.line === fallthrough.from.line);
+      expect(index).toBeGreaterThanOrEqual(0);
+      expect(fallthrough.to).toEqual(executable[index + 1]);
+      expect(fallthrough.provenance).toEqual({ kind: "implicit-assembly-successor" });
+    }
+
+    expect(edge("BattleScript_EffectThunder", 1923, "jump")).toMatchObject({
+      to: { label: "BattleScript_EffectHit", line: 237 },
+      provenance: { kind: "explicit-opcode-binding", macro: "goto", macroDeclarationLine: 212, opcode: "B_SCR_OP_GOTO" },
+    });
+    expect(edge("BattleScript_EffectHit", 240, "fallthrough")).toMatchObject({
+      to: { label: "BattleScript_HitFromAtkCanceler", line: 242 },
+    });
+    expect(edge("BattleScript_HitFromAtkCanceler", 242, "fallthrough")).toMatchObject({
+      to: { label: "BattleScript_HitFromAccCheck", line: 244 },
+    });
+  });
+
+  it("keeps ordinary Surf and Tackle on the EffectHit fallthrough path without claiming a branch guard", () => {
+    for (const move of ["MOVE_SURF", "MOVE_TACKLE"]) {
+      expect(topology.moves.find((candidate) => candidate.move === move)?.entryScript).toBe("BattleScript_EffectHit");
+    }
+    const reached = new Set<string>();
+    const pending = ["BattleScript_EffectHit:237"];
+    while (pending.length) {
+      const current = pending.pop()!;
+      if (reached.has(current)) continue;
+      reached.add(current);
+      for (const candidate of graph.controlFlow.edges) {
+        if (`${candidate.from.label}:${candidate.from.line}` !== current || candidate.to === null) continue;
+        pending.push(`${candidate.to.label}:${candidate.to.line}`);
+      }
+    }
+    expect(reached).toContain("BattleScript_HitFromAtkCanceler:242");
+    expect(reached).toContain("BattleScript_HitFromAccCheck:244");
+    expect(edge("BattleScript_EffectHit", 237, "jump").provenance.opcode).toBe("B_SCR_OP_JUMPIFHALFWORD");
+    expect(edge("BattleScript_EffectHit", 237, "fallthrough").to).toEqual({ label: "BattleScript_EffectHit", line: 238 });
+  });
+
+  it("does not fabricate a successor after explicit goto, return, or end", () => {
+    for (const [label, line, kind] of [
+      ["BattleScript_EffectThunder", 1923, "jump"],
+      ["BattleScript_PreserveMissedBitDoMoveAnim", 423, "return"],
+      ["BattleScript_MoveEnd", 269, "end"],
+    ] as const) {
+      const transfers = graph.controlFlow.edges.filter((candidate) => candidate.from.label === label && candidate.from.line === line);
+      expect(transfers.some((candidate) => candidate.kind === "fallthrough")).toBe(false);
+      expect(transfers.some((candidate) => candidate.kind === kind)).toBe(true);
+    }
+    expect(edge("BattleScript_PreserveMissedBitDoMoveAnim", 423, "return").to).toBeNull();
+    expect(edge("BattleScript_MoveEnd", 269, "end").to).toBeNull();
   });
 });
