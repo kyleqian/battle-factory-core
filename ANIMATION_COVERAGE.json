@@ -130,7 +130,7 @@
         "MOVE_ICE_PUNCH",
         "MOVE_THUNDER_PUNCH"
       ],
-      "goal": "FIRE PUNCH remains the exact chassis; ICE PUNCH independently proves its complete player-back move/controller window through age 461 at 462/462 and its opposite-side freeze path through age 847 at 848/848, including both complete FrozenIceCube lifecycles, frozen-solid printers, FRZ healthbox, and current-move clear. The next-controller presentation from age 848 remains before exact promotion; THUNDER PUNCH is source/staging batch-checked but remains unsupported without dense move evidence."
+      "goal": "FIRE PUNCH and ICE PUNCH remain exact controls. THUNDER PUNCH now has its distinct five-frame ANIM_TAG_LIGHTNING asset and all three target-relative gLightningSpriteTemplate births/positions/frame programs/28-display lifetimes source-derived and player-side RAM-pinned at oracle frames 2400-2433. It remains unsupported: the existing opposite-side GROVYLE-to-ONIX stage is Electric-immune and yields no meaningful body, while the shared-seam black palette ramp, two whole-screen inversions, fist/hitsplat/shake composition, monbg, teardown, and dense RGB comparison are not yet implemented. Stage a legal non-Ground Level-50 target and prove the complete body in both orientations before promotion."
     },
     {
       "id": "white-feather",

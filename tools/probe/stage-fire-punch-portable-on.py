@@ -106,6 +106,7 @@ SPRITE_DATA_OFFSET = 0x2E
 ROCK_TEMPLATE = 0x08596B04
 HITSPLAT_TEMPLATE = 0x08597358
 FIST_TEMPLATE = 0x08595E98
+LIGHTNING_TEMPLATE = 0x085956C0
 SWEAT_DROP_TEMPLATE = 0x085CE76C
 ICE_TEMPLATES = {
     0x08595AD0: "spiralLarge",
@@ -209,6 +210,7 @@ def frame_record(oracle: EmeraldOracle, tick: int) -> dict[str, object]:
     endeavor_effects = []
     double_team_clones = []
     ice_effects = []
+    lightning_effects = []
     for slot in range(64):
         base = oracle.symbols["gSprites"] + slot * SPRITE_SIZE
         if not oracle.read_u8(base + SPRITE_FLAGS_OFFSET) & 1:
@@ -236,6 +238,20 @@ def frame_record(oracle: EmeraldOracle, tick: int) -> dict[str, object]:
                     "matrixNum": matrix_num,
                     "matrixA": s16(oracle, matrix_base),
                     "matrixD": s16(oracle, matrix_base + 6),
+                }
+            )
+        if template == LIGHTNING_TEMPLATE:
+            attr2 = u16(oracle, base + 0x04)
+            lightning_effects.append(
+                {
+                    "slot": slot,
+                    "subpriority": oracle.read_u8(base + 0x43),
+                    "x": s16(oracle, base + 0x20),
+                    "y": s16(oracle, base + 0x22),
+                    "x2": s16(oracle, base + 0x24),
+                    "y2": s16(oracle, base + 0x26),
+                    "tileNum": attr2 & 0x3FF,
+                    "paletteNum": (attr2 >> 12) & 0xF,
                 }
             )
         if oracle.read_u32(base + SPRITE_CALLBACK_OFFSET) == ANIM_DOUBLE_TEAM_CALLBACK:
@@ -310,6 +326,7 @@ def frame_record(oracle: EmeraldOracle, tick: int) -> dict[str, object]:
         "endeavorEffects": endeavor_effects,
         "doubleTeamClones": double_team_clones,
         "iceEffects": ice_effects,
+        "lightningEffects": lightning_effects,
         "spriteOrder": [oracle.read_u8(SPRITE_ORDER + slot) for slot in range(64)],
     }
     # ICE PUNCH's small-crystal teardown overlaps the fist/hitsplat stack.

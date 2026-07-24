@@ -240,6 +240,35 @@ function writeJson(path: string, data: unknown): void {
   });
 }
 
+// --- THUNDER_PUNCH's distinct lightning sheet ------------------------------
+//
+// Move_THUNDER_PUNCH loads ANIM_TAG_LIGHTNING and creates exactly three
+// gLightningSpriteTemplate instances. The 32x160 sheet is five stacked
+// 32x32 frames selected by sAnim_Lightning at tile offsets 0/16/32/48/64.
+{
+  const lightning = decodeIndexedPng(
+    join(REF, "graphics", "battle_anims", "sprites", "lightning.png"),
+  );
+  const lightningTiles = sliceTiles(lightning);
+  writeJson(join(ASSETS_GEN, "battle-anim-lightning.json"), {
+    source: "graphics/battle_anims/sprites/lightning.png (src/graphics.c:128, ANIM_TAG_LIGHTNING)",
+    tileset: {
+      columns: lightningTiles.columns,
+      rows: lightningTiles.rows,
+      tiles: lightningTiles.tiles.map((tile) => [...tile.pixels]),
+    },
+    palette: lightning.palette,
+    oam: { shape: "32x32", size: "32x32", affine: false },
+    frameSizeTiles: 16,
+    thunderPunch: {
+      source: "data/battle_anim_scripts.s:4828-4856; src/battle_anim_electric.c:42-65,459-476",
+      frames: [0, 1, 2, 3, 4],
+      frameDurations: [5, 5, 8, 5, 5],
+      offsetsY: [-48, -16, 16],
+    },
+  });
+}
+
 // --- Status_Freeze / SHEER_COLD's source-composed frozen cube --------------
 //
 // graphics_file_rules.mk concatenates four differently shaped OBJ pieces
