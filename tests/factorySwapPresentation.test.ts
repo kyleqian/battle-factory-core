@@ -31,6 +31,8 @@ import {
   factorySwapEnemyQuitReturnPkmnButtonX,
   factorySwapEnemyPkmnButtonX,
   factorySwapEnemySwitchMechanism,
+  factorySwapDuplicateMonPicVisual,
+  factorySwapDuplicateReturnMonPicVisual,
   factorySwapPlayerMonPicVisual,
   factorySwapPlayerOptionBallTile,
   factorySwapPlayerReturnActionFadeY,
@@ -824,6 +826,59 @@ describe("live Factory swap presentation adapter", () => {
       textVisible: true,
       highlightVisible: true,
     });
+  });
+
+  it("rejects duplicate species through the direct picture/message task and rebuilds a fresh enemy picker", () => {
+    let state = createCanonicalFactorySwapPresentation();
+    state = advance(state, FACTORY_SWAP_ENTRY_READY_DELAY);
+    state = handleFactorySwapPresentationInput(state, "A");
+    state = advance(state, 58);
+    state = handleFactorySwapPresentationInput(state, "DOWN");
+    state = handleFactorySwapPresentationInput(state, "A");
+    state = advance(state, 133);
+    state = {
+      ...state,
+      controller: {
+        ...state.controller,
+        enemyParty: [
+          { ...state.controller.enemyParty[0], species: "MAGBY" },
+          state.controller.enemyParty[1],
+          state.controller.enemyParty[2],
+        ],
+      },
+    };
+    const before = structuredClone(state.controller);
+    state = handleFactorySwapPresentationInput(state, "A");
+    expect(state.controller).toMatchObject({
+      phase: "duplicateSpecies",
+      inputReady: false,
+      enemyMonId: null,
+      scriptResult: null,
+      mutationCommitted: false,
+      result: null,
+    });
+    expect(factorySwapDuplicateMonPicVisual(23).spriteVisible).toBe(true);
+    state = advance(state, 23);
+    expect(handleFactorySwapPresentationInput(state, "B")).toBe(state);
+    state = advance(state, 1);
+    state = handleFactorySwapPresentationInput(state, "B");
+    expect(state.controller.phase).toBe("duplicateReturn");
+    expect(factorySwapDuplicateReturnMonPicVisual(1).window).not.toBeNull();
+    expect(factorySwapDuplicateReturnMonPicVisual(21).window).toBeNull();
+    state = advance(state, 22);
+    expect(handleFactorySwapPresentationInput(state, "RIGHT")).toBe(state);
+    state = advance(state, 1);
+    expect(state.controller).toMatchObject({ phase: "enemyPicker", inputReady: false, cursor: 0 });
+    expect(handleFactorySwapPresentationInput(state, "RIGHT")).toBe(state);
+    state = advance(state, 1);
+    expect(state.controller.inputReady).toBe(true);
+    state = handleFactorySwapPresentationInput(state, "RIGHT");
+    expect(state.controller.cursor).toBe(1);
+    expect(state.controller.playerParty).toEqual(before.playerParty);
+    expect(state.controller.rentalMons).toEqual(before.rentalMons);
+    expect(state.controller.scriptResult).toBeNull();
+    expect(state.controller.mutationCommitted).toBe(false);
+    expect(factorySwapRoundDecision(state.controller)).toBeNull();
   });
 
   it("runs default YES through the source-owned accept/exit boundaries without early mutation", () => {

@@ -44,6 +44,7 @@ export type FactorySwapPhase =
   | "quitReturn"
   | "quitExit"
   | "duplicateSpecies"
+  | "duplicateReturn"
   | "complete";
 
 export type FactorySwapCursor = 0 | 1 | 2 | 3 | 4;
@@ -378,6 +379,7 @@ export function handleFactorySwapInput(
     case "playerPickerReturn":
     case "enemySwitch":
     case "playerSwitch":
+    case "duplicateReturn":
     case "acceptReturn":
     case "acceptExit":
     case "quitReturn":
@@ -420,7 +422,7 @@ export function handleFactorySwapInput(
     }
     case "duplicateSpecies":
       return input === "A" || input === "B"
-        ? { ...state, phase: "enemyPicker", inputReady: false }
+        ? { ...state, phase: "duplicateReturn", inputReady: false }
         : state;
   }
 }

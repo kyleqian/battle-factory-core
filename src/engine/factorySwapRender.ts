@@ -13,6 +13,8 @@ import {
   factorySwapAcceptReturnPkmnButtonX,
   factorySwapAcceptPkmnButtonX,
   factorySwapAcceptSpeciesRenderCoeff,
+  factorySwapDuplicateMonPicVisual,
+  factorySwapDuplicateReturnMonPicVisual,
   factorySwapAcceptYesNoVisual,
   factorySwapActionFadeY,
   factorySwapCancelButtonX,
@@ -312,6 +314,7 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
     state.phase === "acceptReturn" ||
     state.phase === "acceptExit" ||
     state.phase === "duplicateSpecies" ||
+    state.phase === "duplicateReturn" ||
     (
       (
         state.phase === "quitPrompt" ||
@@ -521,6 +524,9 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
           state.phase === "acceptExit" ||
           state.phase === "acceptReturn"
       ? "Accept this POKéMON?"
+      : state.phase === "duplicateSpecies" ||
+          (state.phase === "duplicateReturn" && phaseElapsed < 21)
+        ? "Same POKéMON in party already."
       : playerSwitch && phaseElapsed < 108
         ? "Select POKéMON to accept."
       : enemy
@@ -658,7 +664,9 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
     state.phase === "playerPickerReturn" ||
     enemySwitch ||
     state.phase === "acceptPrompt" || state.phase === "acceptExit" ||
-    state.phase === "acceptReturn"
+    state.phase === "acceptReturn" ||
+    state.phase === "duplicateSpecies" ||
+    state.phase === "duplicateReturn"
   ) {
     const returning = state.phase === "playerPickerReturn";
     const ballVisuals: BallVisual[] = renderedBallTiles.map((firstTile, index) => ({
@@ -679,6 +687,10 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
         ? factorySwapAcceptExitMonPicVisual(phaseElapsed)
       : state.phase === "acceptReturn"
         ? factorySwapAcceptReturnMonPicVisual(phaseElapsed)
+      : state.phase === "duplicateSpecies"
+        ? factorySwapDuplicateMonPicVisual(phaseElapsed)
+      : state.phase === "duplicateReturn"
+        ? factorySwapDuplicateReturnMonPicVisual(phaseElapsed)
       : returning || enemySwitch
         ? factorySwapPlayerReturnMonPicVisual(phaseElapsed)
         : factorySwapPlayerMonPicVisual(view.phaseElapsed ?? 0);

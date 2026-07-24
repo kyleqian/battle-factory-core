@@ -175,7 +175,8 @@ describe("Factory swap state/input contract", () => {
     expect(state.phase).toBe("duplicateSpecies");
     expect(state.inputReady).toBe(false);
     state = handleFactorySwapInput(ready(state), "A");
-    expect(state.phase).toBe("enemyPicker");
+    expect(state.phase).toBe("duplicateReturn");
+    expect(state.inputReady).toBe(false);
     expect(state.result).toBeNull();
   });
 

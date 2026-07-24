@@ -59,6 +59,8 @@ export interface FactorySwapPresentationState {
   readonly summaryMaxMonIndex: 2 | null;
   /** True after CB2_InitSwapScreen rebuilt the originating popup. */
   readonly returnedFromSummary: boolean;
+  /** The duplicate-error task rebuilt the enemy picker on the prior frame. */
+  readonly returnedFromDuplicate?: boolean;
   /** Age since accepted summary B; rebuilt ball callbacks start at +41. */
   readonly summaryReturnClock?: number | null;
 }
@@ -151,7 +153,9 @@ export const FACTORY_SWAP_PHASE_READY_DELAYS: Readonly<
   // +35 installs HandleYesNo input state after JOY_NEW was sampled; +36 is
   // the first physical prompt edge the task can consume.
   quitPrompt: 36,
-  duplicateSpecies: 99,
+  // OpenMonPic finishes and state 0 prints the error at +23; +24 is the
+  // first physical A/B edge observed by state 1.
+  duplicateSpecies: 24,
 };
 
 export function createCanonicalFactorySwapPresentation(): FactorySwapPresentationState {
@@ -172,6 +176,7 @@ export function createCanonicalFactorySwapPresentation(): FactorySwapPresentatio
     summaryCurMonIndex: null,
     summaryMaxMonIndex: null,
     returnedFromSummary: false,
+    returnedFromDuplicate: false,
     summaryReturnClock: null,
   };
 }
@@ -188,6 +193,7 @@ function readyDelay(state: FactorySwapPresentationState): number | null {
     state.controller.phase === "playerPickerReturn" ||
     state.controller.phase === "enemySwitch" ||
     state.controller.phase === "playerSwitch"
+    || state.controller.phase === "duplicateReturn"
   ) return null;
   if (state.controller.phase === "playerPicker" && state.elapsed === state.phaseElapsed) {
     return FACTORY_SWAP_ENTRY_READY_DELAY;
@@ -223,6 +229,7 @@ export function advanceFactorySwapPresentation(
   let summaryCurMonIndex = state.summaryCurMonIndex;
   let summaryMaxMonIndex = state.summaryMaxMonIndex;
   let returnedFromSummary = state.returnedFromSummary;
+  let returnedFromDuplicate = state.returnedFromDuplicate ?? false;
   if (controller.phase === "summaryFade") {
     if (phaseElapsed === 1) {
       summaryCallback = "Swap_Task_OpenSummaryScreen";
@@ -337,6 +344,32 @@ export function advanceFactorySwapPresentation(
       summaryCurMonIndex,
       summaryMaxMonIndex,
       returnedFromSummary,
+    };
+  }
+  // Swap_TaskCantHaveSameMons states 2..4: wait for CloseMonPic, restore the
+  // instruction, restore the species window, then install HandleChooseMons.
+  if (controller.phase === "duplicateReturn" && phaseElapsed >= 23) {
+    controller = {
+      ...controller,
+      phase: "enemyPicker",
+      inputReady: false,
+    };
+    returnedFromDuplicate = true;
+    return {
+      controller,
+      elapsed,
+      phaseElapsed: 0,
+      selectedBallClock,
+      selectedBallIndex: state.selectedBallIndex,
+      speciesNameFade: activateSpeciesNameFade(speciesNameFade),
+      fieldHandoff,
+      summaryCallback,
+      summaryMode,
+      summaryCurMonIndex,
+      summaryMaxMonIndex,
+      returnedFromSummary,
+      returnedFromDuplicate,
+      summaryReturnClock,
     };
   }
   if (controller.phase === "enemySwitch" && phaseElapsed === 84) {
@@ -473,15 +506,53 @@ export function advanceFactorySwapPresentation(
     summaryCurMonIndex,
     summaryMaxMonIndex,
     returnedFromSummary,
+    returnedFromDuplicate,
     summaryReturnClock,
   };
   const delay = readyDelay(advanced);
   const effectiveDelay =
-    controller.phase === "playerOptions" && returnedFromSummary ? 1 : delay;
+    controller.phase === "playerOptions" && returnedFromSummary
+      ? 1
+      : controller.phase === "enemyPicker" && returnedFromDuplicate
+        ? 1
+        : delay;
   if (effectiveDelay !== null && phaseElapsed >= effectiveDelay) {
     controller = acknowledgeFactorySwapPresentation(controller);
   }
   return { ...advanced, controller };
+}
+
+/** Direct OpenMonPic used by Swap_TaskCantHaveSameMons (no button teardown). */
+export function factorySwapDuplicateMonPicVisual(
+  phaseElapsed: number,
+): MonPicVisual {
+  if (phaseElapsed >= 23) {
+    return getMonPicVisual({ phase: "open", elapsed: 0, variant: "B", blended: true });
+  }
+  return getMonPicVisual({
+    phase: "opening",
+    elapsed: phaseElapsed + 2,
+    variant: "B",
+    blended: true,
+  });
+}
+
+/** Error-response close owned entirely by Swap_TaskCantHaveSameMons. */
+export function factorySwapDuplicateReturnMonPicVisual(
+  phaseElapsed: number,
+): MonPicVisual {
+  if (phaseElapsed === 0) {
+    return getMonPicVisual({ phase: "open", elapsed: 0, variant: "B", blended: true });
+  }
+  if (phaseElapsed >= 21) {
+    return getMonPicVisual({ phase: "closed", elapsed: 0, variant: "B", blended: true });
+  }
+  return getMonPicVisual({
+    phase: "closing",
+    elapsed: phaseElapsed - 1,
+    variant: "B",
+    blended: true,
+  });
 }
 
 /** Accepted normal-summary B: CloseSummaryScreen will call CB2_InitSwapScreen. */
