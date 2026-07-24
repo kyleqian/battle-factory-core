@@ -240,6 +240,49 @@ function writeJson(path: string, data: unknown): void {
   });
 }
 
+// --- Status_Freeze / SHEER_COLD's source-composed frozen cube --------------
+//
+// graphics_file_rules.mk concatenates four differently shaped OBJ pieces
+// into ANIM_TAG_ICE_CUBE's 0x1200-byte sheet. AnimTask_FrozenIceCube installs
+// the matching subsprite table around its task-created anchor: 64x64 at
+// (-16,-16), 64x32 at (-16,48), 32x64 at (48,-16), and 32x32 at (48,48).
+// Keep the pieces separate so the runtime compositor follows that source OAM
+// layout rather than treating the assembled 96x96 image as baked chrome.
+{
+  const pieces = [
+    { file: "ice_cube_0.png", x: -16, y: -16, width: 64, height: 64, tileOffset: 0 },
+    { file: "ice_cube_1.png", x: -16, y: 48, width: 64, height: 32, tileOffset: 64 },
+    { file: "ice_cube_2.png", x: 48, y: -16, width: 32, height: 64, tileOffset: 96 },
+    { file: "ice_cube_3.png", x: 48, y: 48, width: 32, height: 32, tileOffset: 128 },
+  ].map((piece) => {
+    const image = decodeIndexedPng(
+      join(REF, "graphics", "battle_anims", "sprites", piece.file),
+    );
+    const sliced = sliceTiles(image);
+    return {
+      ...piece,
+      tileset: {
+        columns: sliced.columns,
+        rows: sliced.rows,
+        tiles: sliced.tiles.map((tile) => [...tile.pixels]),
+      },
+    };
+  });
+  writeJson(join(ASSETS_GEN, "battle-anim-ice-cube.json"), {
+    source: "graphics/battle_anims/sprites/ice_cube_{0..3}.png concatenated by graphics_file_rules.mk (src/graphics.c:48-49, ANIM_TAG_ICE_CUBE)",
+    palette: loadJascPal(
+      join(REF, "graphics", "battle_anims", "sprites", "ice_cube.pal"),
+    ),
+    task: {
+      source: "src/battle_anim_status_effects.c:210-259,381-480 (sFrozenIceCubeSubsprites, AnimTask_FrozenIceCube)",
+      createAnchorOffset: { x: -32, y: -36 },
+      subpriority: 4,
+      objMode: "blend",
+    },
+    pieces,
+  });
+}
+
 // --- decoded battle_anim_scripts.s step lists -------------------------------
 //
 // Hand-transcribed (not machine-parsed) from data/battle_anim_scripts.s -

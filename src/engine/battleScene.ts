@@ -529,6 +529,7 @@ import battleAnimFlyBallAsset from "../assets/gen/battle-anim-fly-ball.json" wit
 import battleAnimSmallEmberAsset from "../assets/gen/battle-anim-small-ember.json" with { type: "json" };
 import battleAnimHandsAndFeetAsset from "../assets/gen/battle-anim-hands-and-feet.json" with { type: "json" };
 import battleAnimIceCrystalsAsset from "../assets/gen/battle-anim-ice-crystals.json" with { type: "json" };
+import battleAnimIceCubeAsset from "../assets/gen/battle-anim-ice-cube.json" with { type: "json" };
 import battleBackSpritesAsset from "../assets/gen/battle-back-sprites.json" with { type: "json" };
 import battleAnimItemHealAsset from "../assets/gen/battle-anim-item-heal.json" with { type: "json" };
 import fontNormalData from "../data/gen/font-normal.json" with { type: "json" };
@@ -809,6 +810,14 @@ const battleAnimFlyBall = battleAnimFlyBallAsset as { tileset: Tileset; palette:
 const battleAnimSmallEmber = battleAnimSmallEmberAsset as { tileset: Tileset; palette: RgbColor[] };
 const battleAnimHandsAndFeet = battleAnimHandsAndFeetAsset as { tileset: Tileset; palette: RgbColor[] };
 const battleAnimIceCrystals = battleAnimIceCrystalsAsset as { tileset: Tileset; palette: RgbColor[] };
+const battleAnimIceCube = battleAnimIceCubeAsset as {
+  palette: RgbColor[];
+  pieces: readonly {
+    x: number;
+    y: number;
+    tileset: Tileset;
+  }[];
+};
 const battleAnimIceCrystalLarge: Tileset = {
   columns: 1,
   rows: 2,
@@ -925,7 +934,7 @@ const onixPlayerHealthboxContentByState = new Map<
 >([["117:none", onixPlayerHealthboxContent]]);
 function onixPlayerHealthboxContentForState(
   hp: number,
-  status: "none" | "burn",
+  status: "none" | "burn" | "freeze",
 ): ReturnType<typeof composePlayerHealthbox> {
   const key = `${hp}:${status}`;
   let cached = onixPlayerHealthboxContentByState.get(key);
@@ -13960,6 +13969,30 @@ export function renderSceneOnMovePresentation(
         fb[offset + 3] = frontEffects[offset + 3]!;
       }
     }
+    for (const cube of view.iceCubes) {
+      if (!cube.state.spriteAlive || cube.state.eva === 0) continue;
+      const palette = battleAnimIceCube.palette.slice();
+      const rotating = [
+        battleAnimIceCube.palette[13]!,
+        battleAnimIceCube.palette[14]!,
+        battleAnimIceCube.palette[15]!,
+      ];
+      for (let index = 0; index < rotating.length; index += 1) {
+        palette[13 + index] =
+          rotating[(index + cube.state.paletteRotation) % rotating.length]!;
+      }
+      for (const piece of battleAnimIceCube.pieces) {
+        drawSpriteSheetBlendedOverFb(
+          fb,
+          piece.tileset,
+          palette,
+          cube.anchor.x + piece.x,
+          cube.anchor.y + piece.y,
+          cube.state.eva,
+          cube.state.evb,
+        );
+      }
+    }
     drawOpponentHealthboxWobble(
       fb,
       target.geometry.side === "opponent" ? view.healthboxY2 : 0,
@@ -13975,7 +14008,9 @@ export function renderSceneOnMovePresentation(
         target.geometry.side === "player"
           ? view.displayedTargetHp
           : state.config.fieldProfile.playerHp,
-        state.config.fieldProfile.playerStatus,
+        target.geometry.side === "player"
+          ? view.resolution.healthboxStatus
+          : state.config.fieldProfile.playerStatus,
       ),
       0,
       view.actionMenu.healthboxY2
@@ -13994,7 +14029,41 @@ export function renderSceneOnMovePresentation(
     const textStartAge = state.config.moveTextStartAge ?? -1;
     const effectivenessStart =
       state.config.hpDrainProfile.effectivenessTextStartAge;
+    const statusMessageStart =
+      state.config.controllerDisplayProfile?.statusMessageFirstAge;
+    const nextControllerTextStart =
+      state.config.controllerDisplayProfile?.nextControllerTextFirstAge;
     if (
+      nextControllerTextStart !== undefined
+      && view.age >= nextControllerTextStart
+    ) {
+      const statusLine1 = `${target.species} is`;
+      const statusLine2 = "frozen solid!";
+      drawMessageTextLines(
+        fb,
+        statusLine1,
+        statusLine2,
+        Math.min(
+          statusLine1.length + statusLine2.length,
+          view.age - nextControllerTextStart + 1,
+        ),
+      );
+    } else if (
+      statusMessageStart !== undefined
+      && view.age >= statusMessageStart
+    ) {
+      const statusLine1 = `${target.species} was`;
+      const statusLine2 = "frozen solid!";
+      drawMessageTextLines(
+        fb,
+        statusLine1,
+        statusLine2,
+        Math.min(
+          statusLine1.length + statusLine2.length,
+          view.age - statusMessageStart + 1,
+        ),
+      );
+    } else if (
       effectivenessStart !== undefined
       && view.age >= effectivenessStart
       && (

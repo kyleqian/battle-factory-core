@@ -17,12 +17,18 @@ import {
   icePunchSpiralCrystals,
 } from "../src/engine/icePunch.ts";
 import {
+  GROVYLE_TO_ONIX_FIRE_PUNCH_GEOMETRY,
   ONIX_TO_GROVYLE_FIRE_PUNCH_GEOMETRY,
   createSceneOnMovePresentation,
   sceneOnIcePunchView,
 } from "../src/engine/sceneOnPresentation.ts";
 import { genericHitReactionAtAge } from "../src/engine/battleMenu.ts";
 import crystals from "../src/assets/gen/battle-anim-ice-crystals.json" with { type: "json" };
+import cube from "../src/assets/gen/battle-anim-ice-cube.json" with { type: "json" };
+import {
+  frozenIceCubeAnchor,
+  frozenIceCubeState,
+} from "../src/engine/frozenIceCube.ts";
 
 describe("ICE_PUNCH source-composed presentation components", () => {
   it("reuses the generic hit reaction on a phase-relative clock", () => {
@@ -147,15 +153,17 @@ describe("ICE_PUNCH source-composed presentation components", () => {
       statusOutcome: "freeze" as const,
       statusAppliedAge: 400,
       statusAnimationFirstAge: 405,
+      statusIceCubeTaskFirstAge: 409,
       statusMessageFirstAge: 520,
       healthboxStatusAge: 607,
       currentMoveResetAge: 618,
       nextControllerTextFirstAge: 625,
       nextControllerAnimationFirstAge: 710,
+      nextControllerIceCubeTaskFirstAge: 717,
     });
     const stage = createSceneOnMovePresentation({
       move: "ICE_PUNCH",
-      ...ONIX_TO_GROVYLE_FIRE_PUNCH_GEOMETRY,
+      ...GROVYLE_TO_ONIX_FIRE_PUNCH_GEOMETRY,
       fieldProfile: Object.freeze({
         playerHp: 117,
         opponentHp: 143,
@@ -193,6 +201,19 @@ describe("ICE_PUNCH source-composed presentation components", () => {
       healthboxStatus: "freeze",
       currentMove: null,
     });
+    expect(sceneOnIcePunchView({ ...stage, age: 410 }).iceCubes).toMatchObject([
+      {
+        state: { taskAge: 1, eva: 1, evb: 15 },
+        anchor: { x: 40, y: 52 },
+      },
+    ]);
+    expect(sceneOnIcePunchView({ ...stage, age: 717 }).iceCubes).toMatchObject([
+      {
+        state: { taskAge: 0, eva: 0, evb: 16 },
+        anchor: { x: 40, y: 52 },
+      },
+    ]);
+    expect(sceneOnIcePunchView({ ...stage, age: 823 }).iceCubes).toEqual([]);
     expect(stage.config).toEqual(before);
     expect(stage.config.controllerDisplayProfile).toBe(controllerDisplayProfile);
   });
@@ -338,5 +359,47 @@ describe("ICE_PUNCH source-composed presentation components", () => {
       icePunchHitCrystals(126, { x: 72, y: 88 }, -1)
         .find(({ sourceSlot }) => sourceSlot === 11),
     ).toMatchObject({ centerX: 52, centerY: 90 });
+  });
+
+  it("extracts FrozenIceCube's four source subsprites in compiled tile order", () => {
+    expect(cube.pieces.map(({ x, y, width, height, tileOffset }) => ({
+      x,
+      y,
+      width,
+      height,
+      tileOffset,
+    }))).toEqual([
+      { x: -16, y: -16, width: 64, height: 64, tileOffset: 0 },
+      { x: -16, y: 48, width: 64, height: 32, tileOffset: 64 },
+      { x: 48, y: -16, width: 32, height: 64, tileOffset: 96 },
+      { x: 48, y: 48, width: 32, height: 32, tileOffset: 128 },
+    ]);
+    expect(cube.pieces.map((piece) => piece.tileset.tiles.length))
+      .toEqual([64, 32, 32, 16]);
+    expect(cube.palette).toHaveLength(16);
+  });
+
+  it("pins FrozenIceCube source-relative geometry and full task lifetime", () => {
+    expect(frozenIceCubeAnchor({ x: 72, y: 88 })).toEqual({ x: 40, y: 52 });
+    expect(frozenIceCubeAnchor({ x: 176, y: 44 })).toEqual({ x: 144, y: 8 });
+
+    expect(frozenIceCubeState(-1)).toMatchObject({
+      spriteAlive: false,
+      blendEnabled: false,
+    });
+    expect(frozenIceCubeState(0)).toMatchObject({ eva: 0, evb: 16 });
+    expect(frozenIceCubeState(1)).toMatchObject({ eva: 1, evb: 15 });
+    expect(frozenIceCubeState(9)).toMatchObject({ eva: 9, evb: 7 });
+    expect(frozenIceCubeState(10)).toMatchObject({ eva: 9, evb: 7 });
+    expect(frozenIceCubeState(24).paletteRotation).toBe(0);
+    expect(frozenIceCubeState(27).paletteRotation).toBe(1);
+    expect(frozenIceCubeState(33).paletteRotation).toBe(3);
+    expect(frozenIceCubeState(47).paletteRotation).toBe(3);
+    expect(frozenIceCubeState(56).paletteRotation).toBe(6);
+    expect(frozenIceCubeState(57)).toMatchObject({ eva: 8, evb: 8 });
+    expect(frozenIceCubeState(65)).toMatchObject({ eva: 0, evb: 16 });
+    expect(frozenIceCubeState(66)).toMatchObject({ eva: 0, spriteAlive: true });
+    expect(frozenIceCubeState(103).spriteAlive).toBe(false);
+    expect(frozenIceCubeState(105).blendEnabled).toBe(false);
   });
 });

@@ -43,10 +43,12 @@ interface PortableFixture {
     readonly statusAppliedAge?: number;
     readonly healthboxStatusAge?: number;
     readonly statusAnimationFirstAge?: number;
+    readonly statusIceCubeTaskFirstAge?: number;
     readonly statusMessageFirstAge?: number;
     readonly currentMoveResetAge?: number;
     readonly nextControllerTextFirstAge?: number;
     readonly nextControllerAnimationFirstAge?: number;
+    readonly nextControllerIceCubeTaskFirstAge?: number;
   };
   readonly appStage: {
     readonly oracleFrame: number;
