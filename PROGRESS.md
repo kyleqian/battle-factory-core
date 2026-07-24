@@ -4,20 +4,17 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 357 — S9 OFF Moves-page rental switching: **PARTIAL — 76/80 exact**
+## 357 — S9 OFF Moves-page rental switching: **BATTLE GREEN — 80/80 exact**
 
 - **State:** generic UP/DOWN now switches rentals on Battle/Contest Moves;
-  the dense Battle DOWN→UP→B route is exact except four BG0 copy transients.
-- **Did:** removed the Info-only controller gate, preserved page/mode/selector
-  ownership, generalized page-specific replacement composition and Moves-page
-  exit fading, and Tier-1 pinned both Moves pages, clocks, and input gates.
-- **Next:** reproduce `CopyWindowToVram`'s two partial move-name/PP tile-memory
-  transfers at frames **162–163 and 195–196**, then prove the shared Contest
-  route; do not fit coordinates or thin the dense trace.
-- **Notes:** `summary-battle-moves-mon-down-up.json` **76/80**; residuals are
-  **536/889/431/1235 px**, confined to x120–235 move-name/PP window rows.
-  Info switch **87/87**; Battle/Contest selectors **93/93 + 93/93**; page
-  routes **36/36 + 16/16**. Tier-1 **1329/1329** and build green. No reorder,
+  the dense Battle DOWN→UP→B route is now fully exact.
+- **Did:** modeled the live tile-buffer `CopyWindowToVram` queue, initial
+  clear handoff, and mid-`GLYPH_COPY` PP raster boundary; Tier-1 pins initial
+  versus already-installed windows and the final input-ready transfer.
+- **Next:** prove the same bounded Contest Moves rental-switch route, then
+  rerun all accepted summary traces and the final green gate.
+- **Notes:** `summary-battle-moves-mon-down-up.json` **80/80** (four residual
+  frames closed); Tier-1 **1336/1336** and build green. No reorder, PP policy,
   battle/controller, Scene-ON, absolute ticks, framebuffer assets, runtime
   oracle/ROM, ROADMAP, or ISSUES edits.
 

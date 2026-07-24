@@ -130,3 +130,35 @@ export function drawGlyphCodes(
     cursorX += glyphWidth;
   }
 }
+
+/** Draw one glyph through a source CopyGlyphToWindow row boundary. */
+export function drawGlyphCodeRows(
+  fb: Uint8Array,
+  font: FontData,
+  code: number,
+  x: number,
+  y: number,
+  palette: RgbColor[],
+  colors: TextColors,
+  rasterRows: number,
+  lastRowColumns?: number,
+): void {
+  const bitmap = font.glyphs[code];
+  const glyphWidth = font.widths[code] ?? font.cellSize;
+  if (!bitmap) return;
+  for (let gy = 0; gy < Math.min(font.glyphHeight, rasterRows); gy += 1) {
+    const rowWidth =
+      lastRowColumns !== undefined && gy === Math.min(font.glyphHeight, rasterRows) - 1
+        ? Math.min(glyphWidth, lastRowColumns)
+        : glyphWidth;
+    for (let gx = 0; gx < rowWidth; gx += 1) {
+      const raw = bitmap[gy * font.cellSize + gx]!;
+      const role = raw === 3 ? 0 : raw;
+      const colorIndex = role === 0 ? colors.bg : role === 1 ? colors.fg : colors.shadow;
+      if (colorIndex === 0) continue;
+      const color = palette[colorIndex];
+      if (!color) continue;
+      setPixel(fb, x + gx, y + gy, color.r, color.g, color.b);
+    }
+  }
+}

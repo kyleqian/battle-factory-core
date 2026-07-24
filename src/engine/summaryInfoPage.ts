@@ -13,7 +13,14 @@
 import { createFramebuffer, setPixel } from "./framebuffer.ts";
 import type { RgbColor } from "./bg.ts";
 import type { SpriteSheet } from "./sprites.ts";
-import { drawGlyphCodes, measureText, rightAlignXOffset, type FontData, type TextColors } from "./font.ts";
+import {
+  drawGlyphCodeRows,
+  drawGlyphCodes,
+  measureText,
+  rightAlignXOffset,
+  type FontData,
+  type TextColors,
+} from "./font.ts";
 import { drawSpriteFaded, drawTextFaded, drawTileBgFaded, drawTilePatchFaded, fadeColor } from "./fadeRender.ts";
 import { getMonGender } from "./monGender.ts";
 import { GBA_SINE_TABLE_256 } from "./battleMenu.ts";
@@ -25,6 +32,12 @@ import type {
   SummaryPageTransition,
 } from "./summaryScreen.ts";
 import { summaryPageLayerOffsets } from "./summaryScreen.ts";
+import {
+  glyphLastRowColumnsForTransfer,
+  glyphRasterRowsForTransfer,
+  movesWindowTransferAt,
+  type MovesWindowTransfer,
+} from "./summaryWindowTransfer.ts";
 
 import summaryBgData from "../assets/gen/summary-bg.json" with { type: "json" };
 import summaryTypeIconsData from "../assets/gen/summary-type-icons.json" with { type: "json" };
@@ -363,7 +376,7 @@ function compose(
     readonly pageTextSlot?: number;
     /** Slot owned by SetTypeIcons, one task state before PrintMonInfo. */
     readonly pageIconSlot?: number;
-    readonly movesRowLimit?: number;
+    readonly movesWindowTransfer?: MovesWindowTransfer;
     readonly abilityDescriptionCharLimit?: number;
     readonly showMon?: boolean;
     readonly showBall?: boolean;
@@ -729,26 +742,54 @@ function compose(
     for (let i = 0; i < 4; i += 1) {
       const move = moves.get(frontierMon.moves[i]!)!;
       const y = i * 16 + 1;
-      if (i < (monReplacement.movesRowLimit ?? 4)) {
+      const windowTransfer = monReplacement.movesWindowTransfer;
+      const namesTransfer = windowTransfer?.names ?? { completeRows: 4 };
+      const ppTransfer = windowTransfer?.pp ?? { completeRows: 4 };
+      if (i < namesTransfer.completeRows) {
         text(move.name, WIN_MOVES_NAMES.x, WIN_MOVES_NAMES.y + y, COLOR_1, PAL6);
-        const currentPp = (pageRental as unknown as { pp: number[] }).pp[i]!;
-        const ppCodes = [
-          GLYPH_CODE_PP,
-          ...String(currentPp).padStart(2, " ").split("").map((char) =>
-            char === " " ? CHAR_SPACER : charmap.get(char)!),
-          charmap.get("/")!,
-          ...String(move.pp).padStart(2, " ").split("").map((char) =>
-            char === " " ? CHAR_SPACER : charmap.get(char)!),
-        ];
+      }
+      const currentPp = (pageRental as unknown as { pp: number[] }).pp[i]!;
+      const ppCodes = [
+        GLYPH_CODE_PP,
+        ...String(currentPp).padStart(2, " ").split("").map((char) =>
+          char === " " ? CHAR_SPACER : charmap.get(char)!),
+        charmap.get("/")!,
+        ...String(move.pp).padStart(2, " ").split("").map((char) =>
+          char === " " ? CHAR_SPACER : charmap.get(char)!),
+      ];
+      const ppX = WIN_MOVES_PP.x + 44 - codeWidth(ppCodes);
+      if (i < ppTransfer.completeRows) {
         drawGlyphCodes(
           fb,
           font,
           ppCodes,
-          WIN_MOVES_PP.x + 44 - codeWidth(ppCodes),
+          ppX,
           WIN_MOVES_PP.y + y,
           ppPalette,
           { bg: 0, fg: 7, shadow: 8 },
         );
+      } else if (ppTransfer.partialRow?.row === i) {
+        let glyphX = ppX;
+        for (const [glyphIndex, code] of ppCodes.entries()) {
+          const rasterRows = glyphRasterRowsForTransfer(
+            ppTransfer,
+            i,
+            glyphIndex,
+            font.glyphHeight,
+          );
+          drawGlyphCodeRows(
+            fb,
+            font,
+            code,
+            glyphX,
+            WIN_MOVES_PP.y + y,
+            ppPalette,
+            { bg: 0, fg: 7, shadow: 8 },
+            rasterRows,
+            glyphLastRowColumnsForTransfer(ppTransfer, i, glyphIndex),
+          );
+          glyphX += font.widths[code] ?? font.cellSize;
+        }
       }
       const icon =
         page === "contestMoves"
@@ -1011,13 +1052,9 @@ export function renderSummaryMonTransition(
       memoSlot: elapsed >= 20 ? transition.toSlot : transition.fromSlot,
       pageTextSlot: elapsed >= 19 ? transition.toSlot : transition.fromSlot,
       pageIconSlot: elapsed >= 17 ? transition.toSlot : transition.fromSlot,
-      movesRowLimit:
+      movesWindowTransfer:
         page === "battleMoves" || page === "contestMoves"
-          ? elapsed === 19
-            ? 1
-            : elapsed === 20
-              ? 2
-              : 4
+          ? movesWindowTransferAt(elapsed, sourceIsReplacement)
           : undefined,
       // The first replacement after page construction inherits the initial
       // window-copy queue: AddTextPrinter's speed-0 callback exposes 21
@@ -1032,6 +1069,26 @@ export function renderSummaryMonTransition(
     },
   );
   if (elapsed === 19 && !sourceIsReplacement) {
+    if (page === "battleMoves" || page === "contestMoves") {
+      const handoff = movesWindowTransferAt(elapsed, sourceIsReplacement).pp.clearHandoff;
+      if (handoff) {
+        const cleared = renderSummaryPageCleared(transition.toSlot, 0, page);
+        // PP layout is always the 10px PP glyph plus five 6px cells,
+        // right-aligned in the source's 44px field: its glyph origin is +4.
+        const x0 = WIN_MOVES_PP.x + 4 + handoff.glyphX;
+        const y0 = WIN_MOVES_PP.y + handoff.row * 16 + 1 + handoff.glyphY;
+        for (let y = y0; y < y0 + handoff.height; y += 1) {
+          for (let x = x0; x < x0 + handoff.width; x += 1) {
+            const offset = (y * 240 + x) * 4;
+            fb[offset] = cleared[offset]!;
+            fb[offset + 1] = cleared[offset + 1]!;
+            fb[offset + 2] = cleared[offset + 2]!;
+            fb[offset + 3] = cleared[offset + 3]!;
+          }
+        }
+      }
+      return fb;
+    }
     const description = abilities[rentals[transition.toSlot]!.ability]!.description;
     const prefix = description.slice(0, 21);
     const glyphX = WIN_ABILITY.x + measureText(font, charmap, prefix);
