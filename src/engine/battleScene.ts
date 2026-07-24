@@ -575,6 +575,16 @@ import {
   type SceneOnMovePresentationState,
 } from "./sceneOnPresentation.ts";
 import {
+  SITRUS_ITEM_HEAL_TEXT_FIRST_AGE,
+  SITRUS_ITEM_TEXT_CLEAR_AGE,
+  sitrusDisplayedHpAtAge,
+  sitrusHealTextVisibleCharsAtAge,
+  sitrusRingMatrixAtAge,
+  sitrusRotationAtAge,
+  sitrusStarPlacementAtAge,
+  sitrusTintCoeffAtAge,
+} from "./heldItemHeal.ts";
+import {
   FIRE_PUNCH_REDUCER_EPOCH_AGE,
   TURN17_FIRE_PUNCH_FIRST_ANIMATION_OWNED_AGE,
   FIRE_PUNCH_TEXT_AGE,
@@ -6740,51 +6750,12 @@ function turn5BgFadeY(t: number): number {
  */
 const ONIX_SITRUS_RENDER_LAG = 2;
 const ONIX_SITRUS_RAM_ANCHOR_TICK = 6872;
-const ONIX_SITRUS_CYCLE_LEN = 32;
-const ONIX_SITRUS_CYCLE_COUNT = 3;
-const ONIX_SITRUS_ROTATE_TABLE: readonly (readonly [number, number, number, number])[] = [
-  [256, 0, 0, 256],
-  [255, 6, -6, 255],
-  [255, 6, -6, 255],
-  [255, 12, -12, 255],
-  [255, 12, -12, 255],
-  [255, 18, -18, 255],
-  [255, 18, -18, 255],
-  [254, 25, -25, 254],
-  [254, 25, -25, 254],
-  [254, 31, -31, 254],
-  [254, 31, -31, 254],
-  [253, 37, -37, 253],
-  [253, 37, -37, 253],
-  [252, 43, -43, 252],
-  [252, 43, -43, 252],
-  [251, 49, -49, 251],
-  [251, 49, -49, 251],
-  [251, 49, -49, 251],
-  [252, 43, -43, 252],
-  [252, 43, -43, 252],
-  [253, 37, -37, 253],
-  [253, 37, -37, 253],
-  [254, 31, -31, 254],
-  [254, 31, -31, 254],
-  [254, 25, -25, 254],
-  [254, 25, -25, 254],
-  [255, 18, -18, 255],
-  [255, 18, -18, 255],
-  [255, 12, -12, 255],
-  [255, 12, -12, 255],
-  [255, 6, -6, 255],
-  [255, 6, -6, 255],
-];
+const ONIX_SITRUS_IDENTITY_RENDER_TICK =
+  ONIX_SITRUS_RAM_ANCHOR_TICK + ONIX_SITRUS_RENDER_LAG;
 
 /** `null` means "identity - let the plain static draw handle it" (both outside the rotation's own render window, and at the table's own identity entries). */
 export function onixSitrusRotateMatrix(t: number): { pa: number; pb: number; pc: number; pd: number; y2: number } | null {
-  const ramTick = t - ONIX_SITRUS_RENDER_LAG;
-  const offset = ramTick - ONIX_SITRUS_RAM_ANCHOR_TICK;
-  if (offset < 0 || offset >= ONIX_SITRUS_CYCLE_LEN * ONIX_SITRUS_CYCLE_COUNT) return null;
-  const [pa, pb, pc, pd] = ONIX_SITRUS_ROTATE_TABLE[offset % ONIX_SITRUS_CYCLE_LEN]!;
-  if (pb === 0 && pc === 0) return null;
-  return { pa, pb, pc, pd, y2: Math.abs(pc) >> 3 };
+  return sitrusRotationAtAge(t - ONIX_SITRUS_IDENTITY_RENDER_TICK);
 }
 
 /**
@@ -6821,8 +6792,6 @@ export const TURN5_SITRUS_STAR_SPAWNS: readonly { spawnTick: number; x: number; 
   { spawnTick: 6968, x: 57, y: 88 },
   { spawnTick: 6978, x: 84, y: 83 },
 ];
-const TURN5_SITRUS_STAR_LIFE = 62;
-const TURN5_SITRUS_STAR_RENDER_LAG = 1;
 
 /**
  * Pure placement math for one star (index into `TURN5_SITRUS_STAR_SPAWNS`)
@@ -6831,13 +6800,11 @@ const TURN5_SITRUS_STAR_RENDER_LAG = 1;
  * `drawGrantingStars`'s own doc comment for the pixel evidence.
  */
 export function turn5GrantingStarPlacement(t: number, spawnIndex: number): { frameIndex: number; cx: number; cy: number } | null {
-  const spawn = TURN5_SITRUS_STAR_SPAWNS[spawnIndex]!;
-  const ramTick = t - TURN5_SITRUS_STAR_RENDER_LAG;
-  const local = ramTick - spawn.spawnTick;
-  if (local < 1 || local >= TURN5_SITRUS_STAR_LIFE) return null;
-  const frameIndex = Math.floor(local / 7) % 8;
-  const y2 = Math.floor(local / 8);
-  return { frameIndex, cx: spawn.x - 16, cy: spawn.y + y2 - 16 };
+  return sitrusStarPlacementAtAge(
+    t - ONIX_SITRUS_IDENTITY_RENDER_TICK,
+    spawnIndex,
+    TURN5_SITRUS_RING_CENTER,
+  );
 }
 
 /**
@@ -6855,9 +6822,21 @@ export function turn5GrantingStarPlacement(t: number, spawnIndex: number): { fra
  * own `age = tick - spawnTick - 1`).
  */
 function drawGrantingStars(fb: Uint8Array, t: number): void {
+  drawGrantingStarsAtAge(
+    fb,
+    t - ONIX_SITRUS_IDENTITY_RENDER_TICK,
+    TURN5_SITRUS_RING_CENTER,
+  );
+}
+
+function drawGrantingStarsAtAge(
+  fb: Uint8Array,
+  age: number,
+  center: Readonly<{ x: number; y: number }>,
+): void {
   const { tileset, palette, grantingStarsAnim } = battleAnimItemHeal.sparkle;
   for (let i = TURN5_SITRUS_STAR_SPAWNS.length - 1; i >= 0; i -= 1) {
-    const placement = turn5GrantingStarPlacement(t, i);
+    const placement = sitrusStarPlacementAtAge(age, i, center);
     if (!placement) continue;
     const frame = grantingStarsAnim[placement.frameIndex]!;
     for (let ty = 0; ty < 4; ty += 1) {
@@ -6885,12 +6864,12 @@ function drawGrantingStars(fb: Uint8Array, t: number): void {
  */
 const TURN5_SITRUS_HEAL_LINE1 = "ONIX’s SITRUS BERRY";
 const TURN5_SITRUS_HEAL_LINE2 = "restored health!";
-const TURN5_SITRUS_HEAL_TEXT_TOTAL = TURN5_SITRUS_HEAL_LINE1.length + TURN5_SITRUS_HEAL_LINE2.length;
 const TURN5_SITRUS_HEAL_TEXT_START_TICK = 7078;
 
 export function turn5SitrusHealTextVisibleChars(t: number): number {
-  if (t < TURN5_SITRUS_HEAL_TEXT_START_TICK) return 0;
-  return Math.min(TURN5_SITRUS_HEAL_TEXT_TOTAL, t - TURN5_SITRUS_HEAL_TEXT_START_TICK + 1);
+  return sitrusHealTextVisibleCharsAtAge(
+    t - ONIX_SITRUS_IDENTITY_RENDER_TICK,
+  );
 }
 
 /**
@@ -6920,13 +6899,15 @@ const TURN5_SITRUS_MENU_REDRAW_TICK = 7222;
  * 0-diff hits at yOffset 0/1/2 only, matching `menuIdleBounce`'s own
  * 0..2 range, never a different hp).
  */
-const TURN5_SITRUS_HP_CLIMB_START_TICK = 7180;
 const TURN5_SITRUS_HEAL_HP_START = 1;
 const TURN5_SITRUS_HEAL_HP_END = 31;
 
 export function turn5SitrusOnixHp(t: number): number {
-  if (t < TURN5_SITRUS_HP_CLIMB_START_TICK) return TURN5_SITRUS_HEAL_HP_START;
-  return Math.min(TURN5_SITRUS_HEAL_HP_END, TURN5_SITRUS_HEAL_HP_START + (t - TURN5_SITRUS_HP_CLIMB_START_TICK + 1));
+  return sitrusDisplayedHpAtAge(
+    t - ONIX_SITRUS_IDENTITY_RENDER_TICK,
+    TURN5_SITRUS_HEAL_HP_START,
+    TURN5_SITRUS_HEAL_HP_END,
+  );
 }
 
 /**
@@ -6971,18 +6952,10 @@ export function turn5SitrusResettledBounceTick(t: number): number {
  * committed trace, one past RAM's own 7041 onset.
  */
 const ONIX_SITRUS_TINT_COLOR: RgbColor = { r: 140, g: 255, b: 206 };
-const ONIX_SITRUS_TINT_RAM_START = 7041;
-const ONIX_SITRUS_TINT_RAM_END = 7061;
-const ONIX_SITRUS_TINT_STEP_TICKS = 5;
-const ONIX_SITRUS_TINT_COEFFS: readonly number[] = [7, 5, 3, 1];
-const ONIX_SITRUS_TINT_RENDER_LAG = 1;
 
 /** 0 outside the window (`drawSpriteSheetAffineTintedBlend`'s own no-op convention for `tintCoeff<=0`). */
 export function onixSitrusTintCoeff(t: number): number {
-  const ramTick = t - ONIX_SITRUS_TINT_RENDER_LAG;
-  if (ramTick < ONIX_SITRUS_TINT_RAM_START || ramTick >= ONIX_SITRUS_TINT_RAM_END) return 0;
-  const step = Math.floor((ramTick - ONIX_SITRUS_TINT_RAM_START) / ONIX_SITRUS_TINT_STEP_TICKS);
-  return ONIX_SITRUS_TINT_COEFFS[step]!;
+  return sitrusTintCoeffAtAge(t - ONIX_SITRUS_IDENTITY_RENDER_TICK);
 }
 
 /**
@@ -7003,9 +6976,6 @@ export function onixSitrusTintCoeff(t: number): number {
  * from `AnimSpriteOnMonPos`'s mon-pic Y offset that Onix's own hardcoded
  * rotation call never applies).
  */
-const TURN5_SITRUS_RING_RENDER_LAG = 1;
-const TURN5_SITRUS_RING_RAM_START = 7040;
-const TURN5_SITRUS_RING_RAM_END = 7071;
 export const TURN5_SITRUS_RING_CENTER = { x: 72, y: 88 };
 
 /**
@@ -7020,11 +6990,7 @@ export const TURN5_SITRUS_RING_CENTER = { x: 72, y: 88 };
  * (non-null) matrix there, it just happens to paint nothing.
  */
 export function turn5SitrusRingMatrix(t: number): { pa: number; pb: number; pc: number; pd: number } | null {
-  const ramTick = t - TURN5_SITRUS_RING_RENDER_LAG;
-  if (ramTick < TURN5_SITRUS_RING_RAM_START || ramTick > TURN5_SITRUS_RING_RAM_END) return null;
-  const n = Math.min(31, Math.max(1, ramTick - 7039));
-  const a = Math.floor(4096 / n);
-  return { pa: a, pb: 0, pc: 0, pd: a };
+  return sitrusRingMatrixAtAge(t - ONIX_SITRUS_IDENTITY_RENDER_TICK);
 }
 
 /**
@@ -13869,23 +13835,55 @@ export function renderSceneOnMovePresentation(
           g: blendComponentToward(color.g, ice.g, overlay.targetIceCoeff),
           b: blendComponentToward(color.b, ice.b, overlay.targetIceCoeff),
         }));
+    const sitrusAge = view.heldItemHeal?.timelineAge;
+    const sitrusRotation =
+      sitrusAge === undefined ? null : sitrusRotationAtAge(sitrusAge);
+    const sitrusTint =
+      sitrusAge === undefined ? 0 : sitrusTintCoeffAtAge(sitrusAge);
     if (target.geometry.side !== "player" || !view.targetInvisible) {
-      drawSpriteSheet(
-        fb,
-        onixBackSprite.tileset,
-        target.geometry.side === "player"
-          ? blendedTargetPalette(onixBackSprite.palette)
-          : onixBackSprite.palette,
-        player.geometry.spriteCorner.x,
-        player.geometry.spriteCorner.y
-          + view.actionMenu.battlerY2
-          + (
-            target.geometry.side === "player"
-            && (view.age === 68 || view.age === 69)
-              ? 5
-              : 0
-          ),
-      );
+      const onixPalette = target.geometry.side === "player"
+        ? blendedTargetPalette(onixBackSprite.palette)
+        : onixBackSprite.palette;
+      if (target.geometry.side === "player" && sitrusRotation) {
+        drawSpriteSheetAffineRotate(
+          fb,
+          onixBackSprite.tileset,
+          onixPalette,
+          player.geometry.spriteCorner.x + 32,
+          player.geometry.spriteCorner.y + 32 + sitrusRotation.y2,
+          sitrusRotation.pa,
+          sitrusRotation.pb,
+          sitrusRotation.pc,
+          sitrusRotation.pd,
+        );
+      } else if (target.geometry.side === "player" && sitrusTint > 0) {
+        drawSpriteSheetAffineTintedBlend(
+          fb,
+          onixBackSprite.tileset,
+          onixPalette,
+          player.geometry.spriteCorner.x,
+          player.geometry.spriteCorner.y,
+          256,
+          ONIX_SITRUS_TINT_COLOR,
+          sitrusTint,
+          view.actionMenu.battlerY2,
+        );
+      } else {
+        drawSpriteSheet(
+          fb,
+          onixBackSprite.tileset,
+          onixPalette,
+          player.geometry.spriteCorner.x,
+          player.geometry.spriteCorner.y
+            + view.actionMenu.battlerY2
+            + (
+              target.geometry.side === "player"
+              && (view.age === 68 || view.age === 69)
+                ? 5
+                : 0
+            ),
+        );
+      }
     }
     if (target.geometry.side !== "opponent" || !view.targetInvisible) {
       drawSpriteSheet(
@@ -13993,6 +13991,28 @@ export function renderSceneOnMovePresentation(
         );
       }
     }
+    if (sitrusAge !== undefined) {
+      drawGrantingStarsAtAge(
+        fb,
+        sitrusAge,
+        target.geometry.animationCenter,
+      );
+      const ring = sitrusRingMatrixAtAge(sitrusAge);
+      if (ring) {
+        drawSpriteSheetAffineRotate(
+          fb,
+          battleAnimItemHeal.ring.tileset,
+          battleAnimItemHeal.ring.palette,
+          target.geometry.animationCenter.x,
+          target.geometry.animationCenter.y,
+          ring.pa,
+          ring.pb,
+          ring.pc,
+          ring.pd,
+          PLAYER_BALL_OPEN_VISIBLE_BOTTOM,
+        );
+      }
+    }
     drawOpponentHealthboxWobble(
       fb,
       target.geometry.side === "opponent" ? view.healthboxY2 : 0,
@@ -14033,7 +14053,27 @@ export function renderSceneOnMovePresentation(
       state.config.controllerDisplayProfile?.statusMessageFirstAge;
     const nextControllerTextStart =
       state.config.controllerDisplayProfile?.nextControllerTextFirstAge;
+    const heldItemHeal = state.config.controllerDisplayProfile?.heldItemHeal;
+    const heldItemTextVisible =
+      heldItemHeal !== undefined
+      && sitrusAge !== undefined
+      && sitrusAge >= SITRUS_ITEM_HEAL_TEXT_FIRST_AGE
+      && sitrusAge < SITRUS_ITEM_TEXT_CLEAR_AGE;
     if (
+      heldItemTextVisible
+    ) {
+      drawMessageTextLines(
+        fb,
+        `${target.species}’s SITRUS BERRY`,
+        "restored health!",
+        sitrusHealTextVisibleCharsAtAge(sitrusAge),
+      );
+    } else if (
+      sitrusAge !== undefined
+      && sitrusAge >= SITRUS_ITEM_TEXT_CLEAR_AGE
+    ) {
+      // Controller-cleared blank hold through the atomic action-menu redraw.
+    } else if (
       nextControllerTextStart !== undefined
       && view.age >= nextControllerTextStart
     ) {

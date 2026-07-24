@@ -114,11 +114,11 @@ Therefore ICE PUNCH remains `partial`. The accepted dense window is now
 controller-display window is covered; exact promotion still requires an
 evidence-backed opposite-side/geometry audit.
 
-## Opposite-side successful-freeze continuation
+## Opposite-side successful-freeze completion
 
-The GROVYLE→ONIX fixture now extends from **410/410** to **848/848 exact**
-(oracle frames **1966–2813**, relative ages **0–847**). Ages 314 onward
-prove the complete controller effectiveness printer. The oracle line is
+The GROVYLE→ONIX fixture is now **1294/1294 exact** (oracle frames
+**1966–3259**, relative ages **0–1293**). Ages 314 onward prove the complete
+controller effectiveness printer. The oracle line is
 “It’s super effective!”—Ice is super-effective against ONIX’s Ground type;
 the earlier handoff’s “not very effective” label was not the staged output.
 
@@ -142,9 +142,23 @@ at frame 2375 / age 409 and first visible at 2376 / age 410. The second is at
 frame 2683 / age 717 and first visible at 2684 / age 718. The dense window
 also covers both complete “ONIX was/is frozen solid!” printers, FRZ
 healthbox installation at age 607, `gCurrentMove` clear at age 618, both
-task teardowns, and the settled tail. The first open frame is **2814 / age
-848**, where the frozen-solid hold clears and the next controller
-presentation begins. ICE PUNCH remains partial until that handoff is exact.
+task teardowns, and the settled frozen-solid tail through age 847.
+
+Age 848 begins the existing source-proved held-item display chain, not a new
+battle outcome. Re-anchoring the generic Sitrus component to the
+controller-supplied identity age 847 reproduces the three 32-display rotation
+cycles, two granting-star sprites, cyan tint and expanding ring, heal printer,
+blank hold, and action-menu redraw without consulting the oracle frame. The
+fixture supplies the already-resolved Sitrus result and immutable 31→61 HP
+endpoints; the presentation only displays the one-HP-per-frame climb.
+
+The heal line begins at relative component age 204, the display climb at 306,
+the message clears at 342, and the action menu redraws at 348 (overall
+presentation age 1195 / oracle frame 3161). Dense acceptance continues for a
+99-frame settled bounce through oracle frame 3259, including player sprite and
+healthbox y-offset extrema. The complete player-side no-freeze case remains
+**462/462**, so the two evidence-required attacker-side/controller variants are
+now covered and ICE PUNCH is exact.
 
 ## THUNDER PUNCH sibling check
 

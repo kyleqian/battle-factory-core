@@ -40,6 +40,10 @@ import {
   frozenIceCubeState,
   type FrozenIceCubeState,
 } from "./frozenIceCube.ts";
+import {
+  SITRUS_ITEM_ACTION_MENU_REVEAL_AGE,
+  sitrusDisplayedHpAtAge,
+} from "./heldItemHeal.ts";
 
 export type SceneOnBattlerSide = "player" | "opponent";
 
@@ -99,6 +103,14 @@ export interface SceneOnIcePunchConfig {
     readonly nextControllerAnimationFirstAge?: number;
     /** Task creation pass for the later frozen-solid skip animation. */
     readonly nextControllerIceCubeTaskFirstAge?: number;
+    /** Display-only held-item handoff; healing/item ownership is pre-resolved. */
+    readonly heldItemHeal?: Readonly<{
+      /** First identity display of the source rotation task. */
+      readonly animationIdentityAge: number;
+      readonly item: "SITRUS_BERRY";
+      readonly startHp: number;
+      readonly endHp: number;
+    }>;
   }>;
   /** Relative first printer age; negative means text predates this seam. */
   readonly moveTextStartAge?: number;
@@ -221,6 +233,10 @@ export interface SceneOnIcePunchView {
   readonly targetInvisible: boolean;
   readonly displayedTargetHp: number;
   readonly actionMenu: ActionMenuDisplayTransition;
+  readonly heldItemHeal: Readonly<{
+    timelineAge: number;
+    item: "SITRUS_BERRY";
+  }> | null;
   readonly iceCubes: readonly Readonly<{
     state: FrozenIceCubeState;
     anchor: Readonly<{ x: number; y: number }>;
@@ -389,6 +405,16 @@ export function sceneOnIcePunchView(
     ?? Number.POSITIVE_INFINITY;
   const currentMoveResetAge = displayProfile?.currentMoveResetAge
     ?? Number.POSITIVE_INFINITY;
+  const heldItemHeal = displayProfile?.heldItemHeal;
+  const heldItemTimelineAge = heldItemHeal
+    ? state.age - heldItemHeal.animationIdentityAge
+    : Number.NEGATIVE_INFINITY;
+  const actionMenuRevealAge = displayProfile?.actionMenuRevealAge
+    ?? (
+      heldItemHeal
+        ? heldItemHeal.animationIdentityAge + SITRUS_ITEM_ACTION_MENU_REVEAL_AGE
+        : undefined
+    );
   const iceCubeTaskFirstAges = [
     displayProfile?.statusIceCubeTaskFirstAge,
     displayProfile?.nextControllerIceCubeTaskFirstAge,
@@ -409,17 +435,30 @@ export function sceneOnIcePunchView(
       state.config.target.geometry.animationCenter,
       state.config.target.geometry.side === "player" ? -1 : 1,
     ),
-    displayedTargetHp: displayedHpAfterDamage(
-      state.age,
-      state.config.hpDrainProfile,
-    ),
+    displayedTargetHp:
+      heldItemHeal && heldItemTimelineAge >= 0
+        ? sitrusDisplayedHpAtAge(
+            heldItemTimelineAge,
+            heldItemHeal.startHp,
+            heldItemHeal.endHp,
+          )
+        : displayedHpAfterDamage(
+            state.age,
+            state.config.hpDrainProfile,
+          ),
     actionMenu:
-      displayProfile?.actionMenuRevealAge === undefined
+      actionMenuRevealAge === undefined
         ? { visible: false, battlerY2: 0, healthboxY2: 0 }
         : actionMenuDisplayAtAge(
             state.age,
-            displayProfile.actionMenuRevealAge,
+            actionMenuRevealAge,
           ),
+    heldItemHeal: heldItemHeal
+      ? {
+          timelineAge: heldItemTimelineAge,
+          item: heldItemHeal.item,
+        }
+      : null,
     iceCubes: iceCubeTaskFirstAges
       .map((firstAge) => ({
         state: frozenIceCubeState(state.age - firstAge),

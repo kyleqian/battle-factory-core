@@ -49,6 +49,12 @@ interface PortableFixture {
     readonly nextControllerTextFirstAge?: number;
     readonly nextControllerAnimationFirstAge?: number;
     readonly nextControllerIceCubeTaskFirstAge?: number;
+    readonly heldItemHeal?: {
+      readonly animationIdentityAge: number;
+      readonly item: "SITRUS_BERRY";
+      readonly startHp: number;
+      readonly endHp: number;
+    };
   };
   readonly appStage: {
     readonly oracleFrame: number;
