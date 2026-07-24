@@ -76,15 +76,22 @@ function decrementOccurrences(): readonly BattleScriptInstruction[] {
   );
 }
 
+function counterOccurrences(): readonly BattleScriptInstruction[] {
+  return program.instructions.filter(
+    (instruction) => instruction.opcodeName === "B_SCR_OP_SETMULTIHITCOUNTER",
+  );
+}
+
 function stateAt(
   target: BattleScriptInstruction,
   initialRules = rules(),
+  rngSeed = 0x12345678,
 ): BattleScriptMachineState<FixtureRules> {
   const initial = createBattleScriptMachine(
     program,
     target.source.label,
     initialRules,
-    0x12345678,
+    rngSeed,
   );
   return Object.freeze({ ...initial, programCounter: target.programCounter });
 }
@@ -99,7 +106,12 @@ function literalResolver(
   _context: Parameters<BattleScriptByteResolverPort<FixtureRules>>[0],
   operand: Parameters<BattleScriptByteResolverPort<FixtureRules>>[1],
 ): number | null {
-  const known: Readonly<Record<string, number>> = Object.freeze({ "1": 1, "2": 2, "3": 3 });
+  const known: Readonly<Record<string, number>> = Object.freeze({
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+  });
   return known[operand.expression] ?? null;
 }
 
@@ -379,7 +391,7 @@ describe("source-mapped Battle Script SETMULTIHIT rule command", () => {
     expect(transition.rulesContext).toBe(initial.rulesContext);
   });
 
-  it("replays deterministically and composes to exactly twelve supported IDs in tests", () => {
+  it("replays deterministically and composes to exactly thirteen supported IDs in tests", () => {
     const target = occurrences()[0]!;
     const execute = () => stepBattleScriptMachine(
       program,
@@ -406,8 +418,435 @@ describe("source-mapped Battle Script SETMULTIHIT rule command", () => {
       ...handlers(literalResolver),
     });
     expect(Object.keys(composed).map(Number).sort((left, right) => left - right)).toEqual([
-      16, 18, 38, 39, 40, 57, 58, 60, 61, 62, 65, 131,
+      16, 18, 38, 39, 40, 57, 58, 60, 61, 62, 65, 131, 141,
     ]);
+  });
+});
+
+describe("source-mapped Battle Script SETMULTIHITCOUNTER rule command", () => {
+  it("pins opcode 141, Cmd_setmultihitcounter, its exact body, and two-byte macro provenance", () => {
+    const slot = commandHandlers.slots.find(
+      (candidate) => candidate.opcode === "B_SCR_OP_SETMULTIHITCOUNTER",
+    );
+    expect(slot).toMatchObject({
+      index: 141,
+      opcode: "B_SCR_OP_SETMULTIHITCOUNTER",
+      table: {
+        rowIndex: 141,
+        line: 472,
+        handlerExpression: "Cmd_setmultihitcounter",
+      },
+      handler: {
+        symbol: "Cmd_setmultihitcounter",
+        definition: { startLine: 7139, endLine: 7155 },
+      },
+    });
+
+    const facts = lexicalFacts.handlers.find(
+      (candidate) => candidate.slot.opcode === "B_SCR_OP_SETMULTIHITCOUNTER",
+    )!;
+    expect(facts.rawLines).toEqual([
+      { line: 7139, raw: "static void Cmd_setmultihitcounter(void)" },
+      { line: 7140, raw: "{" },
+      { line: 7141, raw: "    if (gBattlescriptCurrInstr[1])" },
+      { line: 7142, raw: "    {" },
+      { line: 7143, raw: "        gMultiHitCounter = gBattlescriptCurrInstr[1];" },
+      { line: 7144, raw: "    }" },
+      { line: 7145, raw: "    else" },
+      { line: 7146, raw: "    {" },
+      { line: 7147, raw: "        gMultiHitCounter = Random() & 3;" },
+      { line: 7148, raw: "        if (gMultiHitCounter > 1)" },
+      { line: 7149, raw: "            gMultiHitCounter = (Random() & 3) + 2;" },
+      { line: 7150, raw: "        else" },
+      { line: 7151, raw: "            gMultiHitCounter += 2;" },
+      { line: 7152, raw: "    }" },
+      { line: 7153, raw: "" },
+      { line: 7154, raw: "    gBattlescriptCurrInstr += 2;" },
+      { line: 7155, raw: "}" },
+    ]);
+    expect(facts.instructionPointerFacts.reads).toMatchObject([
+      {
+        line: 7141,
+        accessExpression: "gBattlescriptCurrInstr[1]",
+      },
+      {
+        line: 7143,
+        accessExpression: "gBattlescriptCurrInstr[1]",
+        statementRaw: "gMultiHitCounter = gBattlescriptCurrInstr[1];",
+      },
+    ]);
+    expect(facts.instructionPointerFacts.advanceExpressions).toEqual([
+      expect.objectContaining({
+        line: 7154,
+        operation: "compoundAssignment",
+        statementRaw: "gBattlescriptCurrInstr += 2;",
+      }),
+    ]);
+    expect(facts.globalOrConstantLikeReferences.map((entry) => entry.token)).toEqual([
+      "gBattlescriptCurrInstr",
+      "gMultiHitCounter",
+      "gBattlescriptCurrInstr",
+      "gMultiHitCounter",
+      "gMultiHitCounter",
+      "gMultiHitCounter",
+      "gMultiHitCounter",
+      "gBattlescriptCurrInstr",
+    ]);
+
+    for (const instruction of counterOccurrences()) {
+      expect(instruction).toMatchObject({
+        opcodeId: 141,
+        dispatcher: "Cmd_setmultihitcounter",
+        operands: [{
+          widthBytes: 1,
+          sourceMacro: "setmultihitcounter",
+          sourceMacroLine: 768,
+          wrapperPath: ["setmultihitcounter"],
+        }],
+        source: {
+          invocationMnemonic: "setmultihitcounter",
+          invocationMacroLine: 766,
+          sourceMacro: "setmultihitcounter",
+          sourceMacroLine: 767,
+          wrapperPath: ["setmultihitcounter"],
+        },
+      });
+    }
+  });
+
+  it("pins all and only three source-real invocations with values 0, 2, and 2", () => {
+    expect(counterOccurrences().map((instruction) => ({
+      programCounter: instruction.programCounter,
+      label: instruction.source.label,
+      statementLine: instruction.source.statementLine,
+      expression: instruction.operands[0]!.expression,
+    }))).toEqual([
+      {
+        programCounter: 285,
+        label: "BattleScript_EffectMultiHit",
+        statementLine: 609,
+        expression: "0",
+      },
+      {
+        programCounter: 479,
+        label: "BattleScript_EffectDoubleHit",
+        statementLine: 844,
+        expression: "2",
+      },
+      {
+        programCounter: 654,
+        label: "BattleScript_EffectTwineedle",
+        statementLine: 1081,
+        expression: "2",
+      },
+    ]);
+  });
+
+  it("uses a nonzero operand directly, advances once in the IR, and consumes no RNG", () => {
+    const target = counterOccurrences()[1]!;
+    const resolver = vi.fn<BattleScriptByteResolverPort<FixtureRules>>(() => 2);
+    const initial = stateAt(target, rules(77), 0xffffffff);
+    const result = stepBattleScriptMachine(program, initial, handlers(resolver));
+
+    expect(result.kind).toBe("advanced");
+    expect(resolver).toHaveBeenCalledOnce();
+    expect(resolver.mock.calls[0]![1]).toBe(target.operands[0]);
+    expect(result.state.programCounter).toBe(target.programCounter + 1);
+    expect(result.state.instructionsExecuted).toBe(1);
+    expect(result.state.rulesContext).toEqual({
+      ...initial.rulesContext,
+      multiHitCounter: 2,
+    });
+    expect(result.state.rulesContext).not.toBe(initial.rulesContext);
+    expect(result.state.rulesContext.party).toBe(initial.rulesContext.party);
+    expect(Object.isFrozen(result.state.rulesContext)).toBe(true);
+    expect(initial.rulesContext.multiHitCounter).toBe(77);
+    expect(result.state.rng).toBe(initial.rng);
+    expect(result.state.rng).toEqual({
+      value: 0xffffffff,
+      calls: 0,
+      ledger: [],
+    });
+    expect(result.state.scheduler).toBe(initial.scheduler);
+    expect(result.state.events).toBe(initial.events);
+  });
+
+  it.each([
+    {
+      seed: 0,
+      randomValue: 0,
+      after: 24691,
+      expectedCounter: 2,
+    },
+    {
+      seed: 4,
+      randomValue: 1817,
+      after: 119118375,
+      expectedCounter: 3,
+    },
+  ])("uses exactly one audited draw for the first-draw $expectedCounter path", ({
+    seed,
+    randomValue,
+    after,
+    expectedCounter,
+  }) => {
+    const target = counterOccurrences()[0]!;
+    const initialRules = rules(99);
+    const initial = stateAt(target, initialRules, seed);
+    const result = stepBattleScriptMachine(program, initial, handlers(literalResolver));
+
+    expect(result.kind).toBe("advanced");
+    expect(result.state.programCounter).toBe(target.programCounter + 1);
+    expect(result.state.rulesContext).toEqual({
+      ...initialRules,
+      multiHitCounter: expectedCounter,
+    });
+    expect(result.state.rulesContext).not.toBe(initialRules);
+    expect(result.state.rulesContext.party).toBe(initialRules.party);
+    expect(Object.isFrozen(result.state.rulesContext)).toBe(true);
+    expect(initialRules.multiHitCounter).toBe(99);
+    expect(result.state.rng).toEqual({
+      value: after,
+      calls: 1,
+      ledger: [{
+        call: 1,
+        reason: "setmultihitcounter:initial",
+        before: seed,
+        after,
+        randomValue,
+        provenance: {
+          programCounter: 285,
+          opcodeId: 141,
+          opcodeName: "B_SCR_OP_SETMULTIHITCOUNTER",
+          dispatcher: "Cmd_setmultihitcounter",
+          sourceLabel: "BattleScript_EffectMultiHit",
+          sourceStatementLine: 609,
+        },
+      }],
+    });
+    expect(Object.isFrozen(result.state.rng)).toBe(true);
+    expect(Object.isFrozen(result.state.rng.ledger)).toBe(true);
+    expect(Object.isFrozen(result.state.rng.ledger[0])).toBe(true);
+    expect(Object.isFrozen(result.state.rng.ledger[0]!.provenance)).toBe(true);
+    expect(initial.rng).toEqual({ value: seed, calls: 0, ledger: [] });
+    expect(result.state.scheduler).toBe(initial.scheduler);
+    expect(result.state.events).toBe(initial.events);
+  });
+
+  it.each([
+    {
+      seed: 10,
+      firstAfter: 2445242549,
+      firstRandom: 37311,
+      finalAfter: 2212004740,
+      secondRandom: 33752,
+      expectedCounter: 2,
+    },
+    {
+      seed: 1,
+      firstAfter: 1103539936,
+      firstRandom: 16838,
+      finalAfter: 2887849427,
+      secondRandom: 44065,
+      expectedCounter: 3,
+    },
+    {
+      seed: 3,
+      firstAfter: 3310570426,
+      firstRandom: 50515,
+      finalAfter: 828787365,
+      secondRandom: 12646,
+      expectedCounter: 4,
+    },
+    {
+      seed: 5,
+      firstAfter: 1222633620,
+      firstRandom: 18655,
+      finalAfter: 3064692599,
+      secondRandom: 46763,
+      expectedCounter: 5,
+    },
+  ])("uses exactly two audited draws for the rerolled $expectedCounter path", ({
+    seed,
+    firstAfter,
+    firstRandom,
+    finalAfter,
+    secondRandom,
+    expectedCounter,
+  }) => {
+    const target = counterOccurrences()[0]!;
+    const initial = stateAt(target, rules(), seed);
+    const result = stepBattleScriptMachine(program, initial, handlers(literalResolver));
+    const provenance = {
+      programCounter: 285,
+      opcodeId: 141,
+      opcodeName: "B_SCR_OP_SETMULTIHITCOUNTER",
+      dispatcher: "Cmd_setmultihitcounter",
+      sourceLabel: "BattleScript_EffectMultiHit",
+      sourceStatementLine: 609,
+    };
+
+    expect(result.kind).toBe("advanced");
+    expect(result.state.rulesContext.multiHitCounter).toBe(expectedCounter);
+    expect(result.state.rng).toEqual({
+      value: finalAfter,
+      calls: 2,
+      ledger: [
+        {
+          call: 1,
+          reason: "setmultihitcounter:initial",
+          before: seed,
+          after: firstAfter,
+          randomValue: firstRandom,
+          provenance,
+        },
+        {
+          call: 2,
+          reason: "setmultihitcounter:reroll",
+          before: firstAfter,
+          after: finalAfter,
+          randomValue: secondRandom,
+          provenance,
+        },
+      ],
+    });
+    expect(result.state.rng.ledger).toHaveLength(2);
+    for (const entry of result.state.rng.ledger) {
+      expect(Object.isFrozen(entry)).toBe(true);
+      expect(Object.isFrozen(entry.provenance)).toBe(true);
+    }
+    expect(initial.rng).toEqual({ value: seed, calls: 0, ledger: [] });
+    expect(result.state.scheduler).toBe(initial.scheduler);
+    expect(result.state.events).toBe(initial.events);
+  });
+
+  it("identity-blocks before RNG when the byte resolver has no source context", () => {
+    const target = counterOccurrences()[0]!;
+    const resolver = vi.fn<BattleScriptByteResolverPort<FixtureRules>>(() => null);
+    const initial = stateAt(target);
+    const result = stepBattleScriptMachine(program, initial, handlers(resolver));
+
+    expect(result.kind).toBe("blocked");
+    expect(result.state).toBe(initial);
+    expect(resolver).toHaveBeenCalledOnce();
+    if (result.kind !== "blocked") throw new Error("expected blocked result");
+    expect(result.reason).toEqual({
+      kind: "source-context-unavailable",
+      programCounter: 285,
+      opcodeId: 141,
+      opcodeName: "B_SCR_OP_SETMULTIHITCOUNTER",
+      port: "resolve-byte",
+      operandExpression: "0",
+    });
+    expect(result.state.rulesContext).toBe(initial.rulesContext);
+    expect(result.state.scheduler).toBe(initial.scheduler);
+    expect(result.state.rng).toBe(initial.rng);
+    expect(result.state.events).toBe(initial.events);
+  });
+
+  it.each([
+    [256, "256"],
+    [-1, "-1"],
+    [1.5, "1.5"],
+    [Number.NaN, "NaN"],
+  ])("structured-halts an out-of-range resolved operand %s without RNG", (value, received) => {
+    const target = counterOccurrences()[0]!;
+    const initial = stateAt(target);
+    const result = stepBattleScriptMachine(program, initial, handlers(() => value));
+
+    expect(result.kind).toBe("halted");
+    expect(result.state.haltReason).toEqual({
+      kind: "invalid-source-operand",
+      programCounter: 285,
+      opcodeId: 141,
+      opcodeName: "B_SCR_OP_SETMULTIHITCOUNTER",
+      operandExpression: "0",
+      expected: "u8",
+      received,
+    });
+    expect(result.state.rulesContext).toBe(initial.rulesContext);
+    expect(result.state.scheduler).toBe(initial.scheduler);
+    expect(result.state.rng).toBe(initial.rng);
+    expect(result.state.events).toBe(initial.events);
+  });
+
+  it("structured-halts malformed operands before resolving or drawing", () => {
+    const target = counterOccurrences()[0]!;
+    const resolver = vi.fn<BattleScriptByteResolverPort<FixtureRules>>(() => 0);
+    const ruleHandlers = handlers(resolver);
+    const malformed = [
+      Object.freeze({ ...target, operands: Object.freeze([]) }),
+      Object.freeze({
+        ...target,
+        operands: Object.freeze([
+          Object.freeze({ ...target.operands[0]!, widthBytes: 2 as const }),
+        ]),
+      }),
+      Object.freeze({
+        ...target,
+        operands: Object.freeze([target.operands[0]!, target.operands[0]!]),
+      }),
+    ];
+
+    for (const instruction of malformed) {
+      const initial = stateAt(target);
+      const transition = ruleHandlers[141]!(Object.freeze({
+        program,
+        instruction,
+        state: initial,
+      }));
+      expect(transition.control).toMatchObject({
+        kind: "halt",
+        reason: {
+          kind: "invalid-source-operand",
+          programCounter: 285,
+          opcodeId: 141,
+          opcodeName: "B_SCR_OP_SETMULTIHITCOUNTER",
+          expected: "u8",
+        },
+      });
+      expect(transition.rulesContext).toBe(initial.rulesContext);
+      expect(transition.scheduler).toBe(initial.scheduler);
+      expect(transition.rng).toBe(initial.rng);
+      expect(transition.events).toEqual([]);
+    }
+    expect(resolver).not.toHaveBeenCalled();
+  });
+
+  it("keeps arbitrary byte expressions behind the resolver source boundary", () => {
+    const target = counterOccurrences()[0]!;
+    const arbitraryOperand = Object.freeze({
+      ...target.operands[0]!,
+      expression: "MULTI_HIT_COUNT + 1",
+    });
+    const arbitraryInstruction = Object.freeze({
+      ...target,
+      operands: Object.freeze([arbitraryOperand]),
+    });
+    const initial = stateAt(target);
+    const resolver = vi.fn<BattleScriptByteResolverPort<FixtureRules>>(
+      (_context, operand) => operand.expression === "0" ? 0 : null,
+    );
+    const transition = handlers(resolver)[141]!(Object.freeze({
+      program,
+      instruction: arbitraryInstruction,
+      state: initial,
+    }));
+
+    expect(resolver).toHaveBeenCalledWith(expect.anything(), arbitraryOperand);
+    expect(transition.control).toEqual({
+      kind: "block",
+      reason: {
+        kind: "source-context-unavailable",
+        programCounter: 285,
+        opcodeId: 141,
+        opcodeName: "B_SCR_OP_SETMULTIHITCOUNTER",
+        port: "resolve-byte",
+        operandExpression: "MULTI_HIT_COUNT + 1",
+      },
+    });
+    expect(transition.rulesContext).toBe(initial.rulesContext);
+    expect(transition.rng).toBe(initial.rng);
   });
 });
 

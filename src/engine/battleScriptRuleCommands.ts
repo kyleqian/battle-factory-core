@@ -1,4 +1,5 @@
 import {
+  drawBattleScriptRng,
   transitionBattleScriptCommand,
   type BattleScriptBlockReason,
   type BattleScriptCommandTransition,
@@ -75,8 +76,8 @@ function unavailableByteReason<
 }
 
 /**
- * Source-mapped multi-hit rules mutations: Cmd_setmultihit and
- * Cmd_decrementmultihit.
+ * Source-mapped multi-hit rules mutations: Cmd_setmultihit,
+ * Cmd_decrementmultihit, and Cmd_setmultihitcounter.
  *
  * The byte-expression resolver is an injected source-context boundary. This
  * handler never parses assembly expressions or pointer addresses. Conditional
@@ -170,6 +171,72 @@ export function createBattleScriptRuleCommandHandlers<
         programCounter: target.programCounter,
       });
     return transitionBattleScriptCommand(context, control, { rulesContext });
+  });
+
+  install("B_SCR_OP_SETMULTIHITCOUNTER", (context) => {
+    const [operand] = context.instruction.operands;
+    if (!operand || operand.widthBytes !== 1 || context.instruction.operands.length !== 1) {
+      return haltForInvalidOperand(
+        context,
+        operand?.expression ?? "<missing>",
+        `${context.instruction.operands.length} operands; width ${operand?.widthBytes ?? "<missing>"}`,
+      );
+    }
+
+    const resolvedValue = resolveByteOperand(context, operand);
+    if (resolvedValue === null) {
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({
+          kind: "block",
+          reason: unavailableByteReason(context, operand),
+        }),
+      );
+    }
+    if (
+      !Number.isSafeInteger(resolvedValue)
+      || resolvedValue < 0
+      || resolvedValue > 0xff
+    ) {
+      return haltForInvalidOperand(
+        context,
+        operand.expression,
+        String(resolvedValue),
+      );
+    }
+
+    let multiHitCounter = resolvedValue;
+    let rng = context.state.rng;
+    if (multiHitCounter === 0) {
+      const initial = drawBattleScriptRng(
+        rng,
+        context.instruction,
+        "setmultihitcounter:initial",
+      );
+      rng = initial.rng;
+      multiHitCounter = initial.randomValue & 3;
+      if (multiHitCounter > 1) {
+        const reroll = drawBattleScriptRng(
+          rng,
+          context.instruction,
+          "setmultihitcounter:reroll",
+        );
+        rng = reroll.rng;
+        multiHitCounter = (reroll.randomValue & 3) + 2;
+      } else {
+        multiHitCounter += 2;
+      }
+    }
+
+    const rulesContext = Object.freeze({
+      ...context.state.rulesContext,
+      multiHitCounter,
+    }) as RulesContext;
+    return transitionBattleScriptCommand(
+      context,
+      Object.freeze({ kind: "advance" }),
+      { rulesContext, rng },
+    );
   });
 
   return Object.freeze(handlers);
