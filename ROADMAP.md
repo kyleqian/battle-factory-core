@@ -966,6 +966,9 @@ RNG preservation, deep freezing, and canonical replay are Tier-1 pinned. This
 proves the composition contract only; move-end, later action resolution, and
 the general kernel remain Gate-3 work.
 
+**[SUPERSEDED 2026-07-24 by the Executable-frontier reset below — opcode 0
+may now register under the (a)/(b) barrier policy; this paragraph is kept for
+history only.]**
 Opcode 0 remains unregistered until all of `Cmd_attackcanceler` is executable,
 including its delegated controller/Pressure-PP/resume effects and the ordered
 Snatch, Lightning Rod, Protect, and fallthrough branches. Current source
