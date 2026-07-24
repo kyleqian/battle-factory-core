@@ -6,6 +6,10 @@ import type {
   BattleScriptRulesContext,
 } from "./battleScriptRulesContext.ts";
 import {
+  preflightBattleScriptSelectedMovePp,
+  type BattleScriptActionAdmissionReceipt,
+} from "./battleScriptActionAdmission.ts";
+import {
   BATTLE_SCRIPT_ABILITY_SOUNDPROOF,
   BATTLE_SCRIPT_HITMARKER_NO_PPDEDUCT,
   BATTLE_SCRIPT_STATUS2_MASKS,
@@ -161,6 +165,53 @@ export type BattleScriptAttackCancelerMovesBlockJoinResult =
     receipt: BattleScriptAttackCancelerMovesBlockJoinReceipt;
   }>;
 
+export type BattleScriptAttackCancelerSelectedMovePpJoinReceipt =
+  | Readonly<{
+    sourceFunction: "Cmd_attackcanceler";
+    cancelerMovesBlock: BattleScriptAttackCancelerMovesBlockJoinReceipt;
+    sourceCondition:
+      | "AtkCanceler_UnableToUseMove() != 0"
+      | "AbilityBattleEffects(ABILITYEFFECT_MOVES_BLOCK, gBattlerTarget, 0, 0, 0) != 0";
+    selectedMovePp: Readonly<{
+      kind: "not-called";
+      reason: "prior-effect-nonzero";
+    }>;
+    rng: Readonly<{
+      kind: "preserve";
+      before: number;
+      after: number;
+      callsBefore: number;
+      callsAfter: number;
+      callsConsumed: 0;
+    }>;
+  }>
+  | Readonly<{
+    sourceFunction: "Cmd_attackcanceler";
+    cancelerMovesBlock: BattleScriptAttackCancelerMovesBlockJoinReceipt;
+    sourceCondition:
+      "AtkCanceler_UnableToUseMove() == 0 && AbilityBattleEffects(ABILITYEFFECT_MOVES_BLOCK, gBattlerTarget, 0, 0, 0) == 0";
+    selectedMovePp: BattleScriptActionAdmissionReceipt;
+    rng: Readonly<{
+      kind: "preserve";
+      before: number;
+      after: number;
+      callsBefore: number;
+      callsAfter: number;
+      callsConsumed: 0;
+    }>;
+  }>;
+
+export type BattleScriptAttackCancelerSelectedMovePpJoinResult =
+  BattleScriptMovesBlockState & Readonly<{
+    kind:
+      | "canceler-effect"
+      | "moves-block"
+      | "selected-move-no-pp"
+      | "continue";
+    effect: 0 | 1 | 2;
+    receipt: BattleScriptAttackCancelerSelectedMovePpJoinReceipt;
+  }>;
+
 function requireU32(value: number, field: string): number {
   if (
     !Number.isSafeInteger(value)
@@ -217,6 +268,17 @@ function bitFieldEffect(before: number, after: number) {
     after,
     addedMask: (after & ~before) >>> 0,
     clearedMask: 0 as const,
+  });
+}
+
+function preserveRngReceipt(state: BattleScriptMovesBlockState) {
+  return Object.freeze({
+    kind: "preserve" as const,
+    before: state.rngValue,
+    after: state.rngValue,
+    callsBefore: state.rngCallsConsumed,
+    callsAfter: state.rngCallsConsumed,
+    callsConsumed: 0 as const,
   });
 }
 
@@ -450,6 +512,104 @@ export function joinBattleScriptAttackCancelerMovesBlock(
       canceler: cancelerResult.receipt,
       sourceCondition: "AtkCanceler_UnableToUseMove() == 0",
       movesBlock: movesBlock.receipt,
+    }),
+  });
+}
+
+/**
+ * Source-order join from the completed unable-to-use + moves-block seam into
+ * the already-typed selected-slot PP admission.
+ *
+ * Prior canceler effects and a Soundproof moves block return before PP is
+ * inspected. Only a continuing PP admission owns the immediately following
+ * HITMARKER_ALLOW_NO_PP clear. This composition does not deduct PP or claim
+ * obedience or any later Cmd_attackcanceler intercept.
+ */
+export function joinBattleScriptAttackCancelerSelectedMovePp(
+  cancelerMovesBlockResult: BattleScriptAttackCancelerMovesBlockJoinResult,
+  sourceProgramCounter: number,
+): BattleScriptAttackCancelerSelectedMovePpJoinResult {
+  if (
+    cancelerMovesBlockResult === null
+    || typeof cancelerMovesBlockResult !== "object"
+  ) {
+    throw new Error(
+      "Battle Script selected-move PP join requires a canceler+moves-block result",
+    );
+  }
+  const sourcePc = requireU32(
+    sourceProgramCounter,
+    "Battle Script source program counter",
+  );
+  const state = requireState(cancelerMovesBlockResult);
+  const validKindAndEffect = (
+    (
+      cancelerMovesBlockResult.kind === "canceler-effect"
+      && (
+        cancelerMovesBlockResult.effect === 1
+        || cancelerMovesBlockResult.effect === 2
+      )
+    )
+    || (
+      cancelerMovesBlockResult.kind === "moves-block"
+      && cancelerMovesBlockResult.effect === 1
+    )
+    || (
+      cancelerMovesBlockResult.kind === "continue"
+      && cancelerMovesBlockResult.effect === 0
+    )
+  );
+  if (
+    !validKindAndEffect
+    || cancelerMovesBlockResult.receipt === null
+    || typeof cancelerMovesBlockResult.receipt !== "object"
+    || cancelerMovesBlockResult.receipt.sourceFunction !== "Cmd_attackcanceler"
+  ) {
+    throw new Error(
+      "Battle Script selected-move PP join requires a consistent canceler+moves-block result",
+    );
+  }
+
+  if (cancelerMovesBlockResult.kind !== "continue") {
+    const sourceCondition = cancelerMovesBlockResult.kind === "canceler-effect"
+      ? "AtkCanceler_UnableToUseMove() != 0" as const
+      : "AbilityBattleEffects(ABILITYEFFECT_MOVES_BLOCK, gBattlerTarget, 0, 0, 0) != 0" as const;
+    return Object.freeze({
+      kind: cancelerMovesBlockResult.kind,
+      effect: cancelerMovesBlockResult.effect,
+      ...state,
+      receipt: Object.freeze({
+        sourceFunction: "Cmd_attackcanceler",
+        cancelerMovesBlock: cancelerMovesBlockResult.receipt,
+        sourceCondition,
+        selectedMovePp: Object.freeze({
+          kind: "not-called",
+          reason: "prior-effect-nonzero",
+        }),
+        rng: preserveRngReceipt(state),
+      }),
+    });
+  }
+
+  const selectedMovePp = preflightBattleScriptSelectedMovePp(
+    state.rulesContext,
+    sourcePc,
+  );
+  return Object.freeze({
+    kind: selectedMovePp.kind === "stop"
+      ? "selected-move-no-pp"
+      : "continue",
+    effect: 0 as const,
+    rulesContext: selectedMovePp.rulesContext,
+    rngValue: state.rngValue,
+    rngCallsConsumed: state.rngCallsConsumed,
+    receipt: Object.freeze({
+      sourceFunction: "Cmd_attackcanceler",
+      cancelerMovesBlock: cancelerMovesBlockResult.receipt,
+      sourceCondition:
+        "AtkCanceler_UnableToUseMove() == 0 && AbilityBattleEffects(ABILITYEFFECT_MOVES_BLOCK, gBattlerTarget, 0, 0, 0) == 0",
+      selectedMovePp: selectedMovePp.receipt,
+      rng: preserveRngReceipt(state),
     }),
   });
 }
