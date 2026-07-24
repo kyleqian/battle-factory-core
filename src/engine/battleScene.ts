@@ -566,6 +566,8 @@ import {
 import { drawMode0Objects, drawMode0Ppu, type Mode0Oam, type Mode0State } from "./gbaPpu.ts";
 import { compositeSemiTransparentObjPixel } from "./sprites.ts";
 import {
+  FEATHER_DANCE_STAT_MESSAGE_LINE1,
+  FEATHER_DANCE_STAT_MESSAGE_LINE2,
   sceneOnDoubleTeamView,
   sceneOnEndeavorView,
   sceneOnFeatherDanceView,
@@ -4128,6 +4130,45 @@ function drawStatIncreaseBannerForBattler(
           const y = corner.y + ty * 8 + py;
           if (x < 0 || x >= 240 || y < 0 || y >= 160) continue;
           const bg1c = statAnimBg1PixelAt(bgTilemap, bgTileset, bgPalette, x, y + bg1Y);
+          if (!bg1c) continue;
+          const o = (y * 240 + x) * 4;
+          fb[o] = blendChannel(bg1c.r, fb[o]!, eva, evb);
+          fb[o + 1] = blendChannel(bg1c.g, fb[o + 1]!, eva, evb);
+          fb[o + 2] = blendChannel(bg1c.b, fb[o + 2]!, eva, evb);
+        }
+      }
+    }
+  }
+}
+
+function drawStatDecreaseBannerForBattler(
+  fb: Uint8Array,
+  tileset: Tileset,
+  corner: Readonly<{ x: number; y: number }>,
+  eva: number,
+  bg1Y: number,
+): void {
+  const evb = 16 - eva;
+  const bgTileset = statAnimBanner.tileset;
+  const bgTilemap = statAnimBanner.tilemaps.decrease;
+  const bgPalette = statAnimBanner.palettes.attack;
+  for (let ty = 0; ty < tileset.rows; ty += 1) {
+    for (let tx = 0; tx < tileset.columns; tx += 1) {
+      const tile = tileset.tiles[ty * tileset.columns + tx];
+      if (!tile) continue;
+      for (let py = 0; py < 8; py += 1) {
+        for (let px = 0; px < 8; px += 1) {
+          if (tile[py * 8 + px] === 0) continue;
+          const x = corner.x + tx * 8 + px;
+          const y = corner.y + ty * 8 + py;
+          if (x < 0 || x >= 240 || y < 0 || y >= 160) continue;
+          const bg1c = statAnimBg1PixelAt(
+            bgTilemap,
+            bgTileset,
+            bgPalette,
+            x + TURN6_STATFALL_BG1_X,
+            y + bg1Y,
+          );
           if (!bg1c) continue;
           const o = (y * 240 + x) * 4;
           fb[o] = blendChannel(bg1c.r, fb[o]!, eva, evb);
@@ -8140,32 +8181,13 @@ const FEATHER_BASE_PRIORITY_CUTOFF = 3;
  * than a 6-optional-parameter generalization for a single second caller.
  */
 function drawTurn6StatFallBanner(fb: Uint8Array, t: number, pressTick: number, eva: number): void {
-  const evb = 16 - eva;
-  const bg1Y = turn6StatFallBg1Y(t, pressTick);
-  const { tileset } = onixBackSprite;
-  const bgTileset = statAnimBanner.tileset;
-  const bgTilemap = statAnimBanner.tilemaps.decrease;
-  const bgPalette = statAnimBanner.palettes.attack;
-  for (let ty = 0; ty < tileset.rows; ty += 1) {
-    for (let tx = 0; tx < tileset.columns; tx += 1) {
-      const tile = tileset.tiles[ty * tileset.columns + tx];
-      if (!tile) continue;
-      for (let py = 0; py < 8; py += 1) {
-        for (let px = 0; px < 8; px += 1) {
-          if (tile[py * 8 + px] === 0) continue;
-          const x = ONIX_MATERIALIZE_CORNER.x + tx * 8 + px;
-          const y = ONIX_MATERIALIZE_CORNER.y + ty * 8 + py;
-          if (x < 0 || x >= 240 || y < 0 || y >= 160) continue;
-          const bg1c = statAnimBg1PixelAt(bgTilemap, bgTileset, bgPalette, x + TURN6_STATFALL_BG1_X, y + bg1Y);
-          if (!bg1c) continue;
-          const o = (y * 240 + x) * 4;
-          fb[o] = blendChannel(bg1c.r, fb[o]!, eva, evb);
-          fb[o + 1] = blendChannel(bg1c.g, fb[o + 1]!, eva, evb);
-          fb[o + 2] = blendChannel(bg1c.b, fb[o + 2]!, eva, evb);
-        }
-      }
-    }
-  }
+  drawStatDecreaseBannerForBattler(
+    fb,
+    onixBackSprite.tileset,
+    ONIX_MATERIALIZE_CORNER,
+    eva,
+    turn6StatFallBg1Y(t, pressTick),
+  );
 }
 
 function drawTurn6FeatherDanceKickoffText(fb: Uint8Array, t: number, pressTick: number): void {
@@ -13847,21 +13869,39 @@ export function renderSceneOnMovePresentation(
         state.config.fieldProfile.playerGender,
       ),
     );
+    if (view.controllerDisplay.banner) {
+      drawStatDecreaseBannerForBattler(
+        fb,
+        onixBackSprite.tileset,
+        target.geometry.spriteCorner,
+        view.controllerDisplay.banner.eva,
+        view.controllerDisplay.banner.bg1Y,
+      );
+    }
     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
     const line1 = `Foe ${attacker.species} used`;
     const line2 = "FEATHERDANCE!";
-    drawMessageTextLines(
-      fb,
-      line1,
-      line2,
-      Math.max(
-        0,
-        Math.min(
-          line1.length + line2.length,
-          view.age - state.config.moveTextStartAge + 1,
+    if (view.controllerDisplay.messageVisibleChars > 0) {
+      drawMessageTextLines(
+        fb,
+        FEATHER_DANCE_STAT_MESSAGE_LINE1,
+        FEATHER_DANCE_STAT_MESSAGE_LINE2,
+        view.controllerDisplay.messageVisibleChars,
+      );
+    } else {
+      drawMessageTextLines(
+        fb,
+        line1,
+        line2,
+        Math.max(
+          0,
+          Math.min(
+            line1.length + line2.length,
+            view.age - state.config.moveTextStartAge + 1,
+          ),
         ),
-      ),
-    );
+      );
+    }
     return;
   }
 
