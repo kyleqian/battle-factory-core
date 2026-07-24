@@ -17,6 +17,7 @@ import {
 } from "../src/engine/battleScriptSourceCommands.ts";
 import {
   loadBattleScriptProgram,
+  resolveBattleScriptLabel,
   type BattleScriptInstruction,
 } from "../src/engine/battleScriptProgram.ts";
 
@@ -66,6 +67,12 @@ function rules(multiHitCounter = 9): FixtureRules {
 function occurrences(): readonly BattleScriptInstruction[] {
   return program.instructions.filter(
     (instruction) => instruction.opcodeName === "B_SCR_OP_SETMULTIHIT",
+  );
+}
+
+function decrementOccurrences(): readonly BattleScriptInstruction[] {
+  return program.instructions.filter(
+    (instruction) => instruction.opcodeName === "B_SCR_OP_DECREMENTMULTIHIT",
   );
 }
 
@@ -372,7 +379,7 @@ describe("source-mapped Battle Script SETMULTIHIT rule command", () => {
     expect(transition.rulesContext).toBe(initial.rulesContext);
   });
 
-  it("replays deterministically and composes to exactly eleven supported IDs in tests", () => {
+  it("replays deterministically and composes to exactly twelve supported IDs in tests", () => {
     const target = occurrences()[0]!;
     const execute = () => stepBattleScriptMachine(
       program,
@@ -399,7 +406,297 @@ describe("source-mapped Battle Script SETMULTIHIT rule command", () => {
       ...handlers(literalResolver),
     });
     expect(Object.keys(composed).map(Number).sort((left, right) => left - right)).toEqual([
-      16, 18, 38, 40, 57, 58, 60, 61, 62, 65, 131,
+      16, 18, 38, 39, 40, 57, 58, 60, 61, 62, 65, 131,
     ]);
+  });
+});
+
+describe("source-mapped Battle Script DECREMENTMULTIHIT rule command", () => {
+  it("pins opcode 39, Cmd_decrementmultihit, its exact body, and macro provenance", () => {
+    const slot = commandHandlers.slots.find(
+      (candidate) => candidate.opcode === "B_SCR_OP_DECREMENTMULTIHIT",
+    );
+    expect(slot).toMatchObject({
+      index: 39,
+      opcode: "B_SCR_OP_DECREMENTMULTIHIT",
+      table: {
+        rowIndex: 39,
+        line: 370,
+        handlerExpression: "Cmd_decrementmultihit",
+      },
+      handler: {
+        symbol: "Cmd_decrementmultihit",
+        definition: { startLine: 3644, endLine: 3650 },
+      },
+    });
+
+    const facts = lexicalFacts.handlers.find(
+      (candidate) => candidate.slot.opcode === "B_SCR_OP_DECREMENTMULTIHIT",
+    )!;
+    expect(facts.rawLines).toEqual([
+      { line: 3644, raw: "static void Cmd_decrementmultihit(void)" },
+      { line: 3645, raw: "{" },
+      { line: 3646, raw: "    if (--gMultiHitCounter == 0)" },
+      { line: 3647, raw: "        gBattlescriptCurrInstr += 5;" },
+      { line: 3648, raw: "    else" },
+      {
+        line: 3649,
+        raw: "        gBattlescriptCurrInstr = T2_READ_PTR(gBattlescriptCurrInstr + 1);",
+      },
+      { line: 3650, raw: "}" },
+    ]);
+    expect(facts.instructionPointerFacts.advanceExpressions).toMatchObject([
+      {
+        line: 3647,
+        operation: "compoundAssignment",
+        statementRaw: "if (--gMultiHitCounter == 0)\n        gBattlescriptCurrInstr += 5;",
+      },
+    ]);
+    expect(facts.globalOrConstantLikeReferences.map((entry) => entry.token)).toEqual([
+      "gMultiHitCounter",
+      "gBattlescriptCurrInstr",
+      "gBattlescriptCurrInstr",
+      "T2_READ_PTR",
+      "gBattlescriptCurrInstr",
+    ]);
+
+    for (const instruction of decrementOccurrences()) {
+      expect(instruction).toMatchObject({
+        opcodeId: 39,
+        dispatcher: "Cmd_decrementmultihit",
+        operands: [{
+          widthBytes: 4,
+          sourceMacro: "decrementmultihit",
+          sourceMacroLine: 209,
+          wrapperPath: ["decrementmultihit"],
+        }],
+        source: {
+          invocationMnemonic: "decrementmultihit",
+          invocationMacroLine: 207,
+          sourceMacro: "decrementmultihit",
+          sourceMacroLine: 208,
+          wrapperPath: ["decrementmultihit"],
+        },
+      });
+    }
+  });
+
+  it("pins all and only three real occurrences and their exact typed target labels", () => {
+    expect(decrementOccurrences().map((instruction) => {
+      const target = resolveBattleScriptLabel(program, instruction.operands[0]!.expression);
+      return {
+        programCounter: instruction.programCounter,
+        label: instruction.source.label,
+        statementLine: instruction.source.statementLine,
+        targetLabel: instruction.operands[0]!.expression,
+        targetProgramCounter: target?.programCounter,
+      };
+    })).toEqual([
+      {
+        programCounter: 314,
+        label: "BattleScript_DoMultiHit",
+        statementLine: 639,
+        targetLabel: "BattleScript_MultiHitLoop",
+        targetProgramCounter: 288,
+      },
+      {
+        programCounter: 934,
+        label: "BattleScript_DoTripleKickAttack",
+        statementLine: 1420,
+        targetLabel: "BattleScript_TripleKickLoop",
+        targetProgramCounter: 906,
+      },
+      {
+        programCounter: 2246,
+        label: "BattleScript_DoSwitchOut",
+        statementLine: 3104,
+        targetLabel: "BattleScript_PursuitSwitchDmgLoop",
+        targetProgramCounter: 2241,
+      },
+    ]);
+  });
+
+  it.each([
+    [1, 0, "fallthrough"],
+    [2, 1, "jump"],
+    [3, 2, "jump"],
+  ] as const)("pre-decrements count %i to %i and takes the exact source branch", (
+    count,
+    expectedCount,
+    branch,
+  ) => {
+    for (const instruction of decrementOccurrences()) {
+      const initial = stateAt(instruction, rules(count));
+      const result = stepBattleScriptMachine(program, initial, handlers(literalResolver));
+
+      expect(result.kind).toBe("advanced");
+      expect(result.state.rulesContext.multiHitCounter).toBe(expectedCount);
+      expect(result.state.programCounter).toBe(
+        branch === "fallthrough"
+          ? instruction.programCounter + 1
+          : resolveBattleScriptLabel(program, instruction.operands[0]!.expression)!.programCounter,
+      );
+      expect(result.state.rulesContext).not.toBe(initial.rulesContext);
+      expect(Object.isFrozen(result.state.rulesContext)).toBe(true);
+    }
+  });
+
+  it("wraps zero to 255 and jumps without changing scheduler, RNG, or event identities", () => {
+    const instruction = decrementOccurrences()[0]!;
+    const initial = stateAt(instruction, rules(0));
+    const result = stepBattleScriptMachine(program, initial, handlers(literalResolver));
+
+    expect(result.kind).toBe("advanced");
+    expect(result.state.rulesContext).toEqual({
+      ...initial.rulesContext,
+      multiHitCounter: 255,
+    });
+    expect(result.state.programCounter).toBe(
+      resolveBattleScriptLabel(program, "BattleScript_MultiHitLoop")!.programCounter,
+    );
+    expect(result.state.scheduler).toBe(initial.scheduler);
+    expect(result.state.rng).toBe(initial.rng);
+    expect(result.state.events).toBe(initial.events);
+    expect(result.state.rng.calls).toBe(0);
+  });
+
+  it("repeats the same deterministic decrement-and-branch behavior", () => {
+    const instruction = decrementOccurrences()[1]!;
+    const execute = (count: number) => {
+      const initial = stateAt(instruction, rules(count));
+      return handlers(literalResolver)[39]!(Object.freeze({
+        program,
+        instruction,
+        state: initial,
+      }));
+    };
+
+    const first = execute(3);
+    const repeated = execute(first.rulesContext.multiHitCounter);
+    expect(execute(3)).toEqual(first);
+    expect(first.rulesContext.multiHitCounter).toBe(2);
+    expect(repeated.rulesContext.multiHitCounter).toBe(1);
+    expect(first.control).toEqual(repeated.control);
+    expect(first.control).toEqual({
+      kind: "jump",
+      programCounter: resolveBattleScriptLabel(program, "BattleScript_TripleKickLoop")!
+        .programCounter,
+    });
+  });
+
+  it("fallthrough at one ignores the unused label operand exactly like the source condition", () => {
+    const instruction = decrementOccurrences()[0]!;
+    const malformed = Object.freeze({
+      ...instruction,
+      operands: Object.freeze([]),
+    });
+    const initial = stateAt(instruction, rules(1));
+    const transition = handlers(literalResolver)[39]!(Object.freeze({
+      program,
+      instruction: malformed,
+      state: initial,
+    }));
+
+    expect(transition.control).toEqual({ kind: "advance" });
+    expect(transition.rulesContext).toEqual({ ...initial.rulesContext, multiHitCounter: 0 });
+  });
+
+  it.each([
+    ["missing operand", Object.freeze([]), "<missing>"],
+    [
+      "wrong-width operand",
+      Object.freeze([
+        Object.freeze({ ...decrementOccurrences()[0]!.operands[0]!, widthBytes: 2 as const }),
+      ]),
+      "BattleScript_MultiHitLoop",
+    ],
+    [
+      "extra operand",
+      Object.freeze([
+        decrementOccurrences()[0]!.operands[0]!,
+        decrementOccurrences()[0]!.operands[0]!,
+      ]),
+      "BattleScript_MultiHitLoop",
+    ],
+    [
+      "unknown target",
+      Object.freeze([
+        Object.freeze({
+          ...decrementOccurrences()[0]!.operands[0]!,
+          expression: "BattleScript_NotARealLabel",
+        }),
+      ]),
+      "BattleScript_NotARealLabel",
+    ],
+  ] as const)("structured-halts a %s after preserving the source-first decrement", (
+    _description,
+    operands,
+    expression,
+  ) => {
+    const instruction = decrementOccurrences()[0]!;
+    const malformed = Object.freeze({ ...instruction, operands });
+    const initial = stateAt(instruction, rules(2));
+    const transition = handlers(literalResolver)[39]!(Object.freeze({
+      program,
+      instruction: malformed,
+      state: initial,
+    }));
+
+    expect(transition.control).toEqual({
+      kind: "halt",
+      reason: {
+        kind: "invalid-control-target",
+        programCounter: instruction.programCounter,
+        expression,
+      },
+    });
+    expect(transition.rulesContext).not.toBe(initial.rulesContext);
+    expect(transition.rulesContext.multiHitCounter).toBe(1);
+    expect(Object.isFrozen(transition.rulesContext)).toBe(true);
+    expect(transition.scheduler).toBe(initial.scheduler);
+    expect(transition.rng).toBe(initial.rng);
+    expect(transition.events).toEqual([]);
+  });
+
+  it("keeps the new frozen rules snapshot when an unknown target halts through the machine", () => {
+    const instruction = decrementOccurrences()[2]!;
+    const unknownTarget = Object.freeze({
+      ...instruction,
+      operands: Object.freeze([
+        Object.freeze({
+          ...instruction.operands[0]!,
+          expression: "BattleScript_NotARealLabel",
+        }),
+      ]),
+    });
+    const initial = stateAt(instruction, rules(3));
+    const transition = handlers(literalResolver)[39]!(Object.freeze({
+      program,
+      instruction: unknownTarget,
+      state: initial,
+    }));
+    const result = stepBattleScriptMachine(
+      Object.freeze({
+        ...program,
+        instructions: Object.freeze(program.instructions.map((candidate) =>
+          candidate.programCounter === instruction.programCounter ? unknownTarget : candidate
+        )),
+      }),
+      initial,
+      Object.freeze({ 39: () => transition }),
+    );
+
+    expect(result.kind).toBe("halted");
+    expect(result.state.haltReason).toEqual({
+      kind: "invalid-control-target",
+      programCounter: instruction.programCounter,
+      expression: "BattleScript_NotARealLabel",
+    });
+    expect(result.state.rulesContext).toBe(transition.rulesContext);
+    expect(result.state.rulesContext).not.toBe(initial.rulesContext);
+    expect(result.state.rulesContext.multiHitCounter).toBe(2);
+    expect(result.state.scheduler).toBe(initial.scheduler);
+    expect(result.state.rng).toBe(initial.rng);
+    expect(result.state.events).toBe(initial.events);
   });
 });

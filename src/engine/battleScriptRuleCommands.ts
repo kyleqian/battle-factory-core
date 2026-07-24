@@ -11,6 +11,7 @@ import type {
   BattleScriptOperand,
   BattleScriptProgram,
 } from "./battleScriptProgram.ts";
+import { resolveBattleScriptLabel } from "./battleScriptProgram.ts";
 
 export type BattleScriptMultiHitRulesContext = Readonly<{
   multiHitCounter: number;
@@ -74,10 +75,12 @@ function unavailableByteReason<
 }
 
 /**
- * First source-mapped rules mutation: Cmd_setmultihit.
+ * Source-mapped multi-hit rules mutations: Cmd_setmultihit and
+ * Cmd_decrementmultihit.
  *
  * The byte-expression resolver is an injected source-context boundary. This
- * handler neither parses assembly expressions nor owns decrement/loop logic.
+ * handler never parses assembly expressions or pointer addresses. Conditional
+ * control resolves only through the program's typed source labels.
  */
 export function createBattleScriptRuleCommandHandlers<
   RulesContext extends BattleScriptMultiHitRulesContext,
@@ -87,14 +90,20 @@ export function createBattleScriptRuleCommandHandlers<
 ): BattleScriptOpcodeHandlers<RulesContext> {
   const handlers: Record<number, BattleScriptOpcodeHandler<RulesContext>> =
     Object.create(null) as Record<number, BattleScriptOpcodeHandler<RulesContext>>;
-  const instruction = program.instructions.find(
-    (candidate) => candidate.opcodeName === "B_SCR_OP_SETMULTIHIT",
-  );
-  if (!instruction) {
-    throw new Error("committed Battle Script program does not emit B_SCR_OP_SETMULTIHIT");
-  }
+  const install = (
+    opcodeName: string,
+    handler: BattleScriptOpcodeHandler<RulesContext>,
+  ) => {
+    const instruction = program.instructions.find(
+      (candidate) => candidate.opcodeName === opcodeName,
+    );
+    if (!instruction) {
+      throw new Error(`committed Battle Script program does not emit ${opcodeName}`);
+    }
+    handlers[instruction.opcodeId] = handler;
+  };
 
-  handlers[instruction.opcodeId] = (context) => {
+  install("B_SCR_OP_SETMULTIHIT", (context) => {
     const [operand] = context.instruction.operands;
     if (!operand || operand.widthBytes !== 1 || context.instruction.operands.length !== 1) {
       return haltForInvalidOperand(
@@ -127,7 +136,41 @@ export function createBattleScriptRuleCommandHandlers<
       Object.freeze({ kind: "advance" }),
       { rulesContext },
     );
-  };
+  });
+
+  install("B_SCR_OP_DECREMENTMULTIHIT", (context) => {
+    const multiHitCounter = (context.state.rulesContext.multiHitCounter - 1) & 0xff;
+    const rulesContext = Object.freeze({
+      ...context.state.rulesContext,
+      multiHitCounter,
+    }) as RulesContext;
+    if (multiHitCounter === 0) {
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        { rulesContext },
+      );
+    }
+
+    const [operand] = context.instruction.operands;
+    const target = operand?.widthBytes === 4
+      ? resolveBattleScriptLabel(context.program, operand.expression)
+      : undefined;
+    const control = !operand || !target || context.instruction.operands.length !== 1
+      ? Object.freeze({
+        kind: "halt" as const,
+        reason: Object.freeze({
+          kind: "invalid-control-target" as const,
+          programCounter: context.state.programCounter,
+          expression: operand?.expression ?? "<missing>",
+        }),
+      })
+      : Object.freeze({
+        kind: "jump" as const,
+        programCounter: target.programCounter,
+      });
+    return transitionBattleScriptCommand(context, control, { rulesContext });
+  });
 
   return Object.freeze(handlers);
 }
