@@ -19,16 +19,24 @@ Each record contains:
 - the source label/line and invoked macro/opcode;
 - every invocation operand as `{ parameter, token }`, using the macro
   declaration parameter spelling and the raw invocation token;
+- every mechanically expanded emitted token as `{ directive, token,
+  provenance }`. `provenance.kind` is `macro-body-literal` only when the
+  token is source-spelled in a macro body, or `invocation-substitution` only
+  when it is carried from the invoked macro's raw parameter (with its
+  declaration parameter named). This preserves aliases' fixed source spelling
+  such as `jumpifmove`'s `CMP_EQUAL` / `gCurrentMove` and
+  `jumpifnotmove`'s `CMP_NOT_EQUAL` / `gCurrentMove`, without presenting them
+  as new invocation operands;
 - `comparator` only when that invocation has a parameter literally named
   `ifflag`, and `selector` only for a parameter literally named `battler`;
 - the taken destination's raw pointer operand plus resolved source label/line;
 - the existing lexical fallthrough as `notTakenSuccessor`, or `null` where no
   executable source successor exists.
 
-This is intentionally narrower than a semantics catalog. Aliases such as
-`jumpifnotmove` have fixed comparison/source values in macro bodies; those are
-not reverse-expanded or presented as if they had been invocation operands.
-The catalog does not evaluate a comparison, identify a runtime battler, infer
+This is intentionally narrower than a semantics catalog. Alias body text is
+expanded mechanically only as an emission receipt: its fixed values remain
+source-spelled tokens with macro-body provenance, not decoded operands or
+comparison semantics. The catalog does not evaluate a comparison, identify a runtime battler, infer
 handler transfers, compute addresses, assign operand types, or guess return
 targets.
 
@@ -47,5 +55,7 @@ node --experimental-strip-types tools/extract/extract-battle-script-graph.ts
 ```
 
 `tests/battleScriptGraph.test.ts` byte-for-byte regenerates the artifact and
-pins the complete counts, exclusion count, structural join to every conditional
-edge, and representative fixed-macro, raw-comparator, and raw-selector cases.
+pins the complete counts (**1,191** emitted tokens: **384** macro-body literals
+and **807** invocation substitutions), exclusion count, structural join to
+every conditional edge, and representative alias, raw-comparator, and
+raw-selector cases.
