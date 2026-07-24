@@ -549,7 +549,9 @@ picker input at 30087 without mutation.
 The default-YES response/exit is now implemented with selected-state mutation,
 script-result semantics, and a committed dense OFF trace at **43/43 exact**
 through the 30041 field-script handoff. Its input-ready prompt remains
-**66/66 exact**; NO/B response/return remains a separate unimplemented edge.
+**66/66 exact**. The source-equivalent NO and B responses now each have a
+committed **69/69 exact** dense trace through the restored enemy-picker input
+at 30087, with party/rental identity unchanged and no round decision emitted.
 Source extraction now also pins the terminal field-message gates and the
 seventh-win `MSGBOX_GETPOINTS` fanfare/wait path. Fresh OFF probes also pin
 the regular Level 50 seventh-win BP award at +2201, party/status restoration
@@ -560,9 +562,10 @@ ending still need dense OFF-profile UI proofs. The parallel Scene-ON adapter
 now proves FIRE PUNCH in both orientations (**225/225** and **277/277**) and
 its canonical residual windows (**236/236** and **200/200**), making it
 `exact`. ROCK SLIDE is likewise portable (**175/175**) and canonical
-(**256/256**) and is `exact`; FAINT ATTACK is portable and canonical
+(**256/256**) and is `exact`; DOUBLE TEAM is portable and canonical
+(**230/230** each) and is `exact`; FAINT ATTACK is portable and canonical
 (**221/221**) but remains `partial` for its separately parked residual.
-Level 50 animation coverage is therefore **2 exact / 10 partial / 264
+Level 50 animation coverage is therefore **3 exact / 9 partial / 264
 unsupported**. S8 remains `[~]`.
 
 New Stage 8 traces set `"oracleProfile": "battle-scene-off"` explicitly.
