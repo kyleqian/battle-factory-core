@@ -105,6 +105,8 @@ export interface SceneOnBounceConfig {
   readonly turn: BounceTurn;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
+  /** Immutable field values supplied by the legal stock-ROM stage. */
+  readonly fieldProfile: Readonly<SceneOnFaintAttackFieldProfile>;
   /**
    * First displayed callback age for this half of `choosetwoturnanim`.
    * Accuracy, damage, PP, semi-invulnerability, paralysis, and controller

@@ -573,6 +573,7 @@ import {
   sceneOnFaintAttackView,
   sceneOnFirePunchView,
   sceneOnFlyView,
+  sceneOnBounceView,
   sceneOnIcePunchView,
   sceneOnQuickAttackView,
   sceneOnRockSlideView,
@@ -816,6 +817,7 @@ const onixFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFro
 const PIDGEOTTO_CORNER = { x: 144, y: 19 };
 /** S7/S8 turn 13 rung 4 (docs/turn13-notes.md §6/§7): MURKROW's own `yOffset` (11, `mon-pic-coords.json`) is bit-identical to Pidgeotto's, so the same `(144, 8+yOffset)` formula lands on the identical corner - not a coincidence, both front pics share the same 48px-wide/11px-yOffset box. */
 const murkrowFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).MURKROW!;
+const spoinkFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).SPOINK!;
 const MURKROW_CORNER = { x: 144, y: 19 };
 const menuHealthboxPlayer = menuHealthboxPlayerAsset as SendOutHealthboxContentAsset;
 const battleAnimRocks = battleAnimRocksAsset as BattleAnimRocksAsset;
@@ -1047,6 +1049,29 @@ function flyMurkrowPlayerHealthbox(
       maxHp: 142,
     });
     flyMurkrowPlayerHealthboxes.set(key, cached);
+  }
+  return cached;
+}
+
+const bounceSpoinkOpponentHealthboxes = new Map<
+  string,
+  ReturnType<typeof composeOpponentHealthbox>
+>();
+function bounceSpoinkOpponentHealthbox(
+  hp: number,
+  gender: "male" | "female",
+): ReturnType<typeof composeOpponentHealthbox> {
+  const key = `${hp}:${gender}`;
+  let cached = bounceSpoinkOpponentHealthboxes.get(key);
+  if (!cached) {
+    cached = composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: "SPOINK",
+      level: 50,
+      gender,
+      hpFraction: hp / 153,
+      status: "none",
+    });
+    bounceSpoinkOpponentHealthboxes.set(key, cached);
   }
   return cached;
 }
@@ -15563,9 +15588,87 @@ export function renderSceneOnMovePresentation(
   }
 
   if (state.config.move === "BOUNCE") {
-    throw new Error(
-      "BOUNCE framebuffer adapter is not yet installed; source-relative seam only",
+    const view = sceneOnBounceView(state);
+    const { attacker, target } = view;
+    const supported =
+      attacker.species === "SPOINK"
+      && attacker.geometry.side === "opponent"
+      && target.species === "ONIX"
+      && target.geometry.side === "player";
+    if (!supported) {
+      throw new Error(
+        `unsupported staged BOUNCE pair ${attacker.species}->${target.species}`,
+      );
+    }
+
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
     );
+    if (!view.attackerInvisible) {
+      drawSpriteSheet(
+        fb,
+        spoinkFrontSprite.tileset,
+        spoinkFrontSprite.palette,
+        attacker.geometry.spriteCorner.x,
+        attacker.geometry.spriteCorner.y,
+      );
+    }
+    drawSpriteSheet(
+      fb,
+      onixBackSprite.tileset,
+      onixBackSprite.palette,
+      target.geometry.spriteCorner.x,
+      target.geometry.spriteCorner.y + view.targetShakeY2,
+    );
+    if (view.ball) {
+      drawSpriteSheetAffineStretch(
+        fb,
+        battleAnimFlyBall.tileset,
+        battleAnimFlyBall.palette,
+        (
+          view.turn === "charge"
+            ? attacker.geometry.animationCenter.x
+            : target.geometry.battlePositionCenter.x
+        ) - 32,
+        (
+          view.turn === "charge"
+            ? attacker.geometry.animationCenter.y
+            : target.geometry.battlePositionCenter.y
+        ) - 32,
+        view.ball.a,
+        view.ball.d,
+        view.ball.y2,
+        { r: 0, g: 0, b: 0 },
+        0,
+        true,
+      );
+    }
+    drawSendOutHealthbox(
+      fb,
+      0,
+      bounceSpoinkOpponentHealthbox(
+        state.config.fieldProfile.opponentHp,
+        state.config.fieldProfile.opponentGender ?? "female",
+      ),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      onixPlayerHealthboxContentForState(
+        state.config.fieldProfile.playerHp,
+        state.config.fieldProfile.playerStatus,
+        state.config.fieldProfile.playerGender,
+      ),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    return;
   }
 
   const view = sceneOnFirePunchView(state);
