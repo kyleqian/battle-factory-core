@@ -25,6 +25,17 @@ type ConditionalGuard = {
   from: { label: string; line: number };
   command: { macro: string; macroDeclarationLine: number; opcode: string };
   operands: Array<{ parameter: string; token: string }>;
+  emittedTokens: Array<{
+    directive: ".byte" | ".2byte" | ".4byte";
+    token: string;
+    provenance: {
+      kind: "macro-body-literal" | "invocation-substitution";
+      macro: string;
+      line: number;
+      expansionPath: string[];
+      parameter?: string;
+    };
+  }>;
   comparator: { parameter: string; token: string } | null;
   selector: { parameter: string; token: string } | null;
   takenDestination: { operand: { parameter: string; token: string }; label: string; line: number };
@@ -33,7 +44,7 @@ type ConditionalGuard = {
 };
 const graph = graphData as {
   schema: string;
-  counts: { macros: number; labels: number; executableInstructions: number; directives: number; nonExecutableCategories: number; unsupportedLineCategories: number; controlFlowEdges: number; fallthroughEdges: number; explicitJumpEdges: number; explicitCallEdges: number; callsiteContinuationEdges: number; explicitReturnEdges: number; explicitEndEdges: number; conditionalGuardEdges: number; conditionalGuardMacros: number; conditionalGuardsWithRawComparator: number; conditionalGuardsWithRawSelector: number; conditionalGuardsWithNotTakenSuccessor: number; conditionalGuardExcludedEdges: number };
+  counts: { macros: number; labels: number; executableInstructions: number; directives: number; nonExecutableCategories: number; unsupportedLineCategories: number; controlFlowEdges: number; fallthroughEdges: number; explicitJumpEdges: number; explicitCallEdges: number; callsiteContinuationEdges: number; explicitReturnEdges: number; explicitEndEdges: number; conditionalGuardEdges: number; conditionalGuardMacros: number; conditionalGuardsWithRawComparator: number; conditionalGuardsWithRawSelector: number; conditionalGuardsWithNotTakenSuccessor: number; conditionalGuardEmittedTokens: number; conditionalGuardMacroBodyLiteralTokens: number; conditionalGuardInvocationSubstitutionTokens: number; conditionalGuardExcludedEdges: number };
   macros: Array<{ name: string; declarationLine: number; parameterTokens: string[]; directOpcodeBindings: string[]; opcodeBindings: string[] }>;
   labels: Label[];
   preamble: Statement[];
@@ -172,6 +183,9 @@ describe("Battle Script source graph extraction", () => {
     expect(graph.counts.conditionalGuardsWithRawComparator).toBe(87);
     expect(graph.counts.conditionalGuardsWithRawSelector).toBe(124);
     expect(graph.counts.conditionalGuardsWithNotTakenSuccessor).toBe(264);
+    expect(graph.counts.conditionalGuardEmittedTokens).toBe(1191);
+    expect(graph.counts.conditionalGuardMacroBodyLiteralTokens).toBe(384);
+    expect(graph.counts.conditionalGuardInvocationSubstitutionTokens).toBe(807);
     expect(graph.counts.conditionalGuardExcludedEdges).toBe(0);
     expect(graph.controlFlow.conditionalGuards).toHaveLength(conditionalEdges.length);
     expect(graph.controlFlow.conditionalGuardExclusions).toEqual([]);
@@ -200,6 +214,16 @@ describe("Battle Script source graph extraction", () => {
       expect(guard.notTakenSuccessor).toEqual(fallthrough?.to ?? null);
       expect(guard.comparator).toEqual(guard.operands.find((operand) => operand.parameter === "ifflag") ?? null);
       expect(guard.selector).toEqual(guard.operands.find((operand) => operand.parameter === "battler") ?? null);
+      expect(guard.emittedTokens.length).toBeGreaterThan(1);
+      for (const emitted of guard.emittedTokens) {
+        expect([".byte", ".2byte", ".4byte"]).toContain(emitted.directive);
+        expect(emitted.token).not.toContain("\\");
+        expect(emitted.provenance.macro).toMatch(/^[A-Za-z_][A-Za-z0-9_]*$/);
+        expect(emitted.provenance.line).toBeGreaterThan(0);
+        expect(emitted.provenance.expansionPath[0]).toBe(guard.command.macro);
+        if (emitted.provenance.kind === "invocation-substitution") expect(emitted.provenance.parameter).toBeDefined();
+        else expect(emitted.provenance.parameter).toBeUndefined();
+      }
     }
 
     const fixedMacroGuard = graph.controlFlow.conditionalGuards.find((guard) => guard.from.label === "BattleScript_EffectHit" && guard.from.line === 237)!;
@@ -211,6 +235,13 @@ describe("Battle Script source graph extraction", () => {
       takenDestination: { label: "BattleScript_HitFromAtkCanceler", line: 242 },
       notTakenSuccessor: { label: "BattleScript_EffectHit", line: 238 },
     });
+    expect(fixedMacroGuard.emittedTokens).toEqual([
+      { directive: ".byte", token: "B_SCR_OP_JUMPIFHALFWORD", provenance: { kind: "macro-body-literal", macro: "jumpifhalfword", line: 226, expansionPath: ["jumpifnotmove", "jumpifhalfword"] } },
+      { directive: ".byte", token: "CMP_NOT_EQUAL", provenance: { kind: "macro-body-literal", macro: "jumpifnotmove", line: 1419, expansionPath: ["jumpifnotmove"] } },
+      { directive: ".4byte", token: "gCurrentMove", provenance: { kind: "macro-body-literal", macro: "jumpifnotmove", line: 1419, expansionPath: ["jumpifnotmove"] } },
+      { directive: ".2byte", token: "MOVE_SURF", provenance: { kind: "invocation-substitution", macro: "jumpifnotmove", line: 1418, expansionPath: ["jumpifnotmove"], parameter: "move" } },
+      { directive: ".4byte", token: "BattleScript_HitFromAtkCanceler", provenance: { kind: "invocation-substitution", macro: "jumpifnotmove", line: 1418, expansionPath: ["jumpifnotmove"], parameter: "jumpptr" } },
+    ]);
     const rawComparatorGuard = graph.controlFlow.conditionalGuards.find((guard) => guard.from.label === "BattleScript_EffectExplosion" && guard.from.line === 382)!;
     expect(rawComparatorGuard).toMatchObject({
       command: { macro: "jumpifbyte", opcode: "B_SCR_OP_JUMPIFBYTE" },

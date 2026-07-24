@@ -28,6 +28,7 @@ type Macro = {
   directOpcodeBindings: string[];
   opcodeBindings: string[];
 };
+type MacroSource = Macro & { body: Array<{ line: number; text: string }> };
 type Statement = {
   line: number;
   kind: "instruction" | "directive";
@@ -75,6 +76,20 @@ type ConditionalGuard = {
   from: { label: string; line: number };
   command: { macro: string; macroDeclarationLine: number; opcode: string };
   operands: Array<{ parameter: string; token: string }>;
+  // This is a source expansion receipt, not decoded Battle Script operands.
+  // In particular, fixed values in an alias's macro body remain merely source
+  // spelling; they do not say what comparison the runtime will perform.
+  emittedTokens: Array<{
+    directive: ".byte" | ".2byte" | ".4byte";
+    token: string;
+    provenance: {
+      kind: "macro-body-literal" | "invocation-substitution";
+      macro: string;
+      line: number;
+      expansionPath: string[];
+      parameter?: string;
+    };
+  }>;
   comparator: { parameter: string; token: string } | null;
   selector: { parameter: string; token: string } | null;
   takenDestination: { operand: { parameter: string; token: string }; label: string; line: number };
@@ -141,9 +156,9 @@ function splitOperands(raw: string): string[] {
   return operands;
 }
 
-function parseMacroDeclarations(source: string): Macro[] {
-  const macros: Array<Macro & { body: Array<{ line: number; text: string }> }> = [];
-  let current: (Macro & { body: Array<{ line: number; text: string }> }) | undefined;
+function parseMacroDeclarations(source: string): MacroSource[] {
+  const macros: MacroSource[] = [];
+  let current: MacroSource | undefined;
   for (const [index, rawLine] of source.split("\n").entries()) {
     const line = index + 1;
     const text = stripAssemblerComment(rawLine).trim();
@@ -176,7 +191,7 @@ function parseMacroDeclarations(source: string): Macro[] {
 
   const byName = new Map(macros.map((macro) => [macro.name, macro]));
   const visiting = new Set<string>();
-  const resolve = (macro: Macro & { body: Array<{ line: number; text: string }> }): string[] => {
+  const resolve = (macro: MacroSource): string[] => {
     if (macro.opcodeBindings.length) return macro.opcodeBindings;
     if (visiting.has(macro.name)) throw new Error(`recursive source macro ${macro.name}`);
     visiting.add(macro.name);
@@ -196,7 +211,7 @@ function parseMacroDeclarations(source: string): Macro[] {
     return bindings;
   };
   for (const macro of macros) resolve(macro);
-  return macros.map(({ body: _body, ...macro }) => macro);
+  return macros;
 }
 
 function parseSourceStatements(source: string, macros: Macro[]): { preamble: Statement[]; labels: Label[]; nonExecutableCategories: Record<string, number> } {
@@ -390,6 +405,107 @@ const statementByControlOrigin = new Map(executableStatements.map((entry) => [
   `${entry.label.name}:${entry.statement.line}`,
   entry,
 ]));
+
+type TokenBinding = {
+  token: string;
+  provenance: {
+    kind: "macro-body-literal" | "invocation-substitution";
+    macro: string;
+    line: number;
+    expansionPath: string[];
+    parameter?: string;
+  };
+};
+type EmittedGuardToken = ConditionalGuard["emittedTokens"][number];
+
+function substituteBoundParameters(expression: string, bindings: Map<string, TokenBinding>): { token: string; references: TokenBinding[] } {
+  const references: TokenBinding[] = [];
+  const token = expression.replace(/\\([A-Za-z_][A-Za-z0-9_]*)\b/g, (whole, parameter: string) => {
+    const binding = bindings.get(parameter);
+    if (!binding) return whole;
+    references.push(binding);
+    return binding.token;
+  });
+  return { token, references };
+}
+
+// Mechanically expand only declared macro emission text.  A token is either
+// written as a literal in one of those macro bodies, or it reaches that body
+// through a source invocation parameter.  If future source introduces an
+// expression that combines multiple provenance sources, stop rather than
+// silently making up a third category.
+function emittedTokensForInvocation(macro: MacroSource, operandTokens: string[]): EmittedGuardToken[] {
+  if (macro.parameterTokens.length !== operandTokens.length) throw new Error(`guard macro ${macro.name} invocation arity changed`);
+  const rootBindings = new Map<string, TokenBinding>(macro.parameterTokens.map((declaration, index) => {
+    const parameter = declaration.replace(/:.*$/, "");
+    return [parameter, {
+      token: operandTokens[index]!,
+      provenance: {
+        kind: "invocation-substitution",
+        macro: macro.name,
+        line: macro.declarationLine,
+        expansionPath: [macro.name],
+        parameter,
+      },
+    }];
+  }));
+
+  const expand = (current: MacroSource, bindings: Map<string, TokenBinding>, expansionPath: string[], visiting: string[]): EmittedGuardToken[] => {
+    if (visiting.includes(current.name)) throw new Error(`recursive source macro ${[...visiting, current.name].join(" -> ")}`);
+    const output: EmittedGuardToken[] = [];
+    for (const bodyStatement of current.body) {
+      const emission = /^(\.byte|\.2byte|\.4byte)\s+(.+)$/.exec(bodyStatement.text);
+      if (emission) {
+        for (const expression of splitOperands(emission[2]!)) {
+          const substituted = substituteBoundParameters(expression, bindings);
+          if (substituted.references.length > 1) {
+            throw new Error(`mixed guard token provenance at asm/macros/battle_script.inc:${bodyStatement.line}`);
+          }
+          output.push({
+            directive: emission[1]! as EmittedGuardToken["directive"],
+            token: substituted.token,
+            provenance: substituted.references[0]?.provenance ?? {
+              kind: "macro-body-literal",
+              macro: current.name,
+              line: bodyStatement.line,
+              expansionPath,
+            },
+          });
+        }
+        continue;
+      }
+      const invocation = /^([A-Za-z_][A-Za-z0-9_]*)\b(?:\s+(.*))?$/.exec(bodyStatement.text);
+      if (!invocation) throw new Error(`unsupported macro statement at asm/macros/battle_script.inc:${bodyStatement.line}: ${bodyStatement.text}`);
+      const target = macroByName.get(invocation[1]!);
+      if (!target) throw new Error(`macro ${current.name} invokes undeclared wrapper ${invocation[1]} at line ${bodyStatement.line}`);
+      const arguments_ = splitOperands(invocation[2] ?? "");
+      if (arguments_.length !== target.parameterTokens.length) {
+        throw new Error(`guard macro ${current.name} has non-uniform wrapper arity for ${target.name} at line ${bodyStatement.line}`);
+      }
+      const targetBindings = new Map<string, TokenBinding>();
+      for (const [index, declaration] of target.parameterTokens.entries()) {
+        const substituted = substituteBoundParameters(arguments_[index]!, bindings);
+        if (substituted.references.length > 1) {
+          throw new Error(`mixed guard wrapper provenance at asm/macros/battle_script.inc:${bodyStatement.line}`);
+        }
+        targetBindings.set(declaration.replace(/:.*$/, ""), {
+          token: substituted.token,
+          provenance: substituted.references[0]?.provenance ?? {
+            kind: "macro-body-literal",
+            macro: current.name,
+            line: bodyStatement.line,
+            expansionPath,
+          },
+        });
+      }
+      output.push(...expand(target, targetBindings, [...expansionPath, target.name], [...visiting, current.name]));
+    }
+    return output;
+  };
+
+  return expand(macro, rootBindings, [macro.name], []);
+}
+
 const conditionalGuards: ConditionalGuard[] = [];
 const conditionalGuardExclusions: ConditionalGuardExclusion[] = [];
 for (const edge of controlEdges) {
@@ -429,6 +545,7 @@ for (const edge of controlEdges) {
     from: edge.from,
     command,
     operands,
+    emittedTokens: emittedTokensForInvocation(macro, current.statement.operandTokens),
     comparator,
     selector,
     takenDestination: {
@@ -489,9 +606,12 @@ const graph = {
     conditionalGuardsWithRawComparator: conditionalGuards.filter((guard) => guard.comparator !== null).length,
     conditionalGuardsWithRawSelector: conditionalGuards.filter((guard) => guard.selector !== null).length,
     conditionalGuardsWithNotTakenSuccessor: conditionalGuards.filter((guard) => guard.notTakenSuccessor !== null).length,
+    conditionalGuardEmittedTokens: conditionalGuards.reduce((total, guard) => total + guard.emittedTokens.length, 0),
+    conditionalGuardMacroBodyLiteralTokens: conditionalGuards.reduce((total, guard) => total + guard.emittedTokens.filter((token) => token.provenance.kind === "macro-body-literal").length, 0),
+    conditionalGuardInvocationSubstitutionTokens: conditionalGuards.reduce((total, guard) => total + guard.emittedTokens.filter((token) => token.provenance.kind === "invocation-substitution").length, 0),
     conditionalGuardExcludedEdges: conditionalGuardExclusions.length,
   },
-  macros,
+  macros: macros.map(({ body: _body, ...macro }) => macro),
   preamble: parsed.preamble,
   labels: parsed.labels,
   effectEntrypoints: topology.effects.map((effect) => ({ id: effect.id, effect: effect.effect, label: effect.entryScript })),
@@ -499,7 +619,7 @@ const graph = {
   unsupportedLineCategories: {},
   controlFlow: {
     schema: "battle-script-control-flow/v3",
-    note: "Edges preserve assembly-order fallthrough across source labels and only explicit B_SCR_OP_GOTO, B_SCR_OP_JUMP*, B_SCR_OP_CALL, B_SCR_OP_RETURN, and B_SCR_OP_END* transfers. Conditional guards are descriptive records for only the mechanically unambiguous B_SCR_OP_JUMPIF* macro invocations already represented by jump edges: invocation operands remain raw source tokens; `comparator` is present only for an `ifflag` macro operand and `selector` only for a `battler` macro operand. The taken destination is the source-label operand and the not-taken successor is only the lexical implicit fallthrough. No runtime guard state, macro-internal fixed operand, handler branch, address, or operand type is inferred. A null jump/call target is an explicit dynamic transfer with no source-label operand. Callsite continuations separately record the assembly successor that becomes the return target after that exact CALL; they are not immediate executable fallthrough edges. RETURN has no static target because its destination is selected by the runtime call stack, so no stack-insensitive RETURN-to-continuation edges are fabricated.",
+    note: "Edges preserve assembly-order fallthrough across source labels and only explicit B_SCR_OP_GOTO, B_SCR_OP_JUMP*, B_SCR_OP_CALL, B_SCR_OP_RETURN, and B_SCR_OP_END* transfers. Conditional guards are descriptive records for only the mechanically unambiguous B_SCR_OP_JUMPIF* macro invocations already represented by jump edges: invocation operands remain raw source tokens; `emittedTokens` mechanically preserve each macro-body literal or invocation substitution without decoding it; `comparator` is present only for an `ifflag` macro operand and `selector` only for a `battler` macro operand. The taken destination is the source-label operand and the not-taken successor is only the lexical implicit fallthrough. No runtime guard state, macro-internal fixed operand semantics, handler branch, address, or operand type is inferred. A null jump/call target is an explicit dynamic transfer with no source-label operand. Callsite continuations separately record the assembly successor that becomes the return target after that exact CALL; they are not immediate executable fallthrough edges. RETURN has no static target because its destination is selected by the runtime call stack, so no stack-insensitive RETURN-to-continuation edges are fabricated.",
     edges: controlEdges,
     callsiteContinuations,
     conditionalGuards,
