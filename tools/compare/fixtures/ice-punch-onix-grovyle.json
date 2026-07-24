@@ -31,11 +31,17 @@
   },
   "denseWindow": {
     "startFrame": 2339,
-    "endFrame": 2560
+    "endFrame": 2620
   },
   "fieldProfile": {
     "playerHp": 117,
     "opponentHp": 143,
     "playerStatus": "none"
+  },
+  "hpDrainProfile": {
+    "startHp": 143,
+    "endHp": 112,
+    "firstDisplayedAge": 223,
+    "effectivenessTextStartAge": 259
   }
 }

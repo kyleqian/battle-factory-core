@@ -29,6 +29,12 @@ interface PortableFixture {
   };
   readonly profile?: SceneOnFirePunchConfig["resolutionProfile"];
   readonly fieldProfile?: SceneOnFaintAttackFieldProfile;
+  readonly hpDrainProfile?: {
+    readonly startHp: number;
+    readonly endHp: number;
+    readonly firstDisplayedAge: number;
+    readonly effectivenessTextStartAge?: number;
+  };
   readonly appStage: {
     readonly oracleFrame: number;
     readonly presentationAge: number;
@@ -96,6 +102,7 @@ const presentation = fixture.move === "ICE_PUNCH"
       attacker: presentationBattler(fixture.geometry.attacker),
       target: presentationBattler(fixture.geometry.target),
       fieldProfile: fixture.fieldProfile!,
+      hpDrainProfile: fixture.hpDrainProfile!,
       ...fixture.presentation,
     })
   : createSceneOnMovePresentation({

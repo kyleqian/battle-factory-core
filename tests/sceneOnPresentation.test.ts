@@ -6,6 +6,7 @@ import {
 import {
   advanceSceneOnMovePresentation,
   createSceneOnMovePresentation,
+  displayedHpAfterDamage,
   GROVYLE_TO_ONIX_FIRE_PUNCH_GEOMETRY,
   GROVYLE_TO_ONIX_FIRE_PUNCH_PRESENTATION,
   GROVYLE_TO_ONIX_FIRE_PUNCH_PROFILE,
@@ -34,6 +35,14 @@ function createPortableStage() {
 }
 
 describe("relative Battle Scene ON move presentation", () => {
+  it("drains only immutable, controller-supplied ICE PUNCH HP", () => {
+    const profile = { startHp: 143, endHp: 112, firstDisplayedAge: 223 };
+    expect(displayedHpAfterDamage(222, profile)).toBe(143);
+    expect(displayedHpAfterDamage(223, profile)).toBe(142);
+    expect(displayedHpAfterDamage(253, profile)).toBe(112);
+    expect(displayedHpAfterDamage(400, profile)).toBe(112);
+    expect(profile).toEqual({ startHp: 143, endHp: 112, firstDisplayedAge: 223 });
+  });
   it("accepts explicit attacker/target geometry and advances only relative age", () => {
     const initial = createPortableStage();
     const advanced = advanceSceneOnMovePresentation(initial);

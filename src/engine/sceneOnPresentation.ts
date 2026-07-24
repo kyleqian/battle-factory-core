@@ -70,6 +70,9 @@ export interface SceneOnIcePunchConfig {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnFaintAttackFieldProfile>;
+  readonly hpDrainProfile: Readonly<HpDrainPresentationProfile> & {
+    readonly effectivenessTextStartAge?: number;
+  };
   /** Relative first printer age; negative means text predates this seam. */
   readonly moveTextStartAge?: number;
 }
@@ -127,6 +130,24 @@ export interface EndeavorAnimationProfile {
   readonly targetEndHp: number;
 }
 
+export interface HpDrainPresentationProfile {
+  readonly startHp: number;
+  readonly endHp: number;
+  readonly firstDisplayedAge: number;
+}
+
+/** Generic display-only drain for controller-supplied, already-resolved HP. */
+export function displayedHpAfterDamage(
+  age: number,
+  profile: Readonly<HpDrainPresentationProfile>,
+): number {
+  if (age < profile.firstDisplayedAge) return profile.startHp;
+  return Math.max(
+    profile.endHp,
+    profile.startHp - (age - profile.firstDisplayedAge + 1),
+  );
+}
+
 export interface SceneOnEndeavorConfig {
   readonly move: "ENDEAVOR";
   readonly attacker: SceneOnPresentationBattler;
@@ -171,6 +192,7 @@ export interface SceneOnIcePunchView {
   readonly hitCrystals: readonly IcePunchHitCrystal[];
   readonly healthboxY2: number;
   readonly targetInvisible: boolean;
+  readonly displayedTargetHp: number;
 }
 
 export interface SceneOnFaintAttackView {
@@ -336,6 +358,10 @@ export function sceneOnIcePunchView(
     hitCrystals: icePunchHitCrystals(
       state.age - 1,
       state.config.target.geometry.animationCenter,
+    ),
+    displayedTargetHp: displayedHpAfterDamage(
+      state.age,
+      state.config.hpDrainProfile,
     ),
     ...hitReaction,
   };

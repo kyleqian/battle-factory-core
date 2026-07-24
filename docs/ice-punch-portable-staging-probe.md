@@ -80,8 +80,18 @@ latch. The reaction is complete and the field is stable again through frame
 2560 / age 221. HP remains the immutable staged value throughout this bounded
 window.
 
-Therefore ICE PUNCH is `partial`. The precisely uncovered contiguous
-remainder is generic HP-drain/message resolution beginning at **2561**, plus
+The contiguous continuation now includes the controller-owned 143→112 HP
+drain and immediate super-effective message handoff. The bar begins its first
+displayed decrement at frame 2562 / age 223, reaches 112 without the
+presentation calculating or committing damage, and the source-script atomic
+HP write follows at frame 2594. The result printer begins at frame 2598 /
+age 259 and is fully typed plus stably held through frame 2620 / age 281.
+The same generic one-HP display reducer and message renderer already used by
+the presentation seam are driven only by immutable staged inputs.
+
+Therefore ICE PUNCH remains `partial`. The accepted dense window is now
+**2339–2620, 282/282 exact**. The precisely uncovered contiguous remainder
+begins at frame **2621**, including the secondary-effect/controller tail, plus
 any geometry/orientation variant required by source or comparison evidence.
 
 ## THUNDER PUNCH sibling check
