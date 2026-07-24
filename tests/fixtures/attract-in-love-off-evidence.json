@@ -1,0 +1,38 @@
+{
+  "schema": "attract-in-love-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "publicAbiBoundary": {
+    "exposes": ["status2", "pp", "rngValue", "controllerExecFlags", "currentMove"],
+    "doesNotExpose": ["gBattleScripting.battler", "ProtectStruct.loveImmobility", "gHitMarker", "gBattlescriptCurrInstr", "battle script stack", "CancelMultiTurnMoves mutation receipt"],
+    "rule": "Endpoint RNG values are recorded only as semantic checkpoints; they do not attribute the canceler's Random() & 1 draw."
+  },
+  "source": {
+    "attract": "reference/pokeemerald/src/battle_script_commands.c:7654-7695",
+    "status2": "reference/pokeemerald/include/constants/battle.h:142-143",
+    "canceler": "reference/pokeemerald/src/battle_util.c:2200-2219",
+    "multiTurnCancellation": "reference/pokeemerald/src/battle_util.c:877-888",
+    "scripts": "reference/pokeemerald/data/battle_scripts_1.s:3840-3849"
+  },
+  "cases": [
+    {
+      "id": "love-check-passed-observed-action",
+      "scenario": "tools/battle-lab/mechanic-attract-in-love-pass-off.json",
+      "seed": 1,
+      "captures": [
+        {"frame": 0, "sha256": "df758ac520e90294efadf193126665103dfd0239808ac40e3bf9f58db540ffc5", "rngValue": 1755659835, "engine": {"activeBattler": 2, "controllerExecFlags": 1, "currentMove": 0}, "player": {"hp": 129, "pp": [15, 35, 35, 35], "status2": 0}, "opponent": {"hp": 129, "pp": [35, 35, 35, 35], "status2": 0}},
+        {"frame": 734, "sha256": "ddd2ce1316c053f60a0bb2a0556dd5cfc7d7b55683f96f1591a181825adb5aba", "rngValue": 2907959646, "engine": {"activeBattler": 2, "controllerExecFlags": 1, "currentMove": 0}, "player": {"hp": 111, "pp": [14, 35, 35, 35], "status2": 0}, "opponent": {"hp": 129, "pp": [35, 34, 35, 35], "status2": 65536}},
+        {"frame": 1468, "sha256": "02eea673f6c280916be0eaf78fb3982e3a8e39d2b6a5ff98f57a4f8a172a9976", "rngValue": 1177076196, "engine": {"activeBattler": 2, "controllerExecFlags": 1, "currentMove": 0}, "player": {"hp": 91, "pp": [13, 35, 35, 35], "status2": 0}, "opponent": {"hp": 129, "pp": [35, 34, 35, 34], "status2": 65536}}
+      ]
+    },
+    {
+      "id": "immobilized-by-love-observed-no-action",
+      "scenario": "tools/battle-lab/mechanic-attract-in-love-cant-attack-off.json",
+      "seed": 5,
+      "captures": [
+        {"frame": 0, "sha256": "df758ac520e90294efadf193126665103dfd0239808ac40e3bf9f58db540ffc5", "rngValue": 1088717296, "engine": {"activeBattler": 2, "controllerExecFlags": 1, "currentMove": 0}, "player": {"hp": 129, "pp": [15, 35, 35, 35], "status2": 0}, "opponent": {"hp": 129, "pp": [35, 35, 35, 35], "status2": 0}},
+        {"frame": 734, "sha256": "39beef818f1110b48a7943762d96bb48d6ac877aa44a2507f25de476f7a680ec", "rngValue": 3005627430, "engine": {"activeBattler": 2, "controllerExecFlags": 1, "currentMove": 0}, "player": {"hp": 90, "pp": [14, 35, 35, 35], "status2": 0}, "opponent": {"hp": 129, "pp": [34, 35, 35, 35], "status2": 65536}},
+        {"frame": 1468, "sha256": "22371ec1783e8319a58c9ad81cc7d9051b39c9c577563df18ca0fe5a7f13ed7a", "rngValue": 3873511688, "engine": {"activeBattler": 2, "controllerExecFlags": 1, "currentMove": 0}, "player": {"hp": 90, "pp": [13, 35, 35, 35], "status2": 0}, "opponent": {"hp": 129, "pp": [34, 35, 35, 35], "status2": 65536}}
+      ]
+    }
+  ]
+}
