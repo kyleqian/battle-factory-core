@@ -14634,3 +14634,27 @@ in git history immediately before corrective commits `d5ac217` and `9942a8d`.
   player regression, and import boundaries are pinned. Focused **3 files / 39
   tests**; integrated **161/1936**, production build, OFF v5 info
   (`9c89c741…`), and diff checks pass. Code commit `8e186dc`; pixel diff N/A.
+
+---
+## 417 — SETBYTE reaches the honest Cmd_moveend barrier
+
+- **State:** the bounded S10 opcode-46 increment is green at **162 files /
+  1942 tests**. `Cmd_setbyte` is source-complete for the committed generated
+  program; opcodes **0** and **73** remain unregistered.
+- **Did:** added one immutable byte-lvalue resolver over the existing rules
+  context. Registry creation mechanically validates all **214** concrete
+  opcode-46 starts, their fixed **[4,1]** operands, all **96** value spellings,
+  and the complete **24-expression** pointer universe before enabling the
+  shared six-byte write/advance handler. The player and trainer-AI asleep
+  verticals now execute SETBYTE, set `moveendState=0`, and stop at honest
+  `B_SCR_OP_MOVEEND` / `Cmd_moveend` opcode **73**.
+- **Next:** return to the supervisor. The next move-end unit must implement
+  complete `Cmd_moveend` source semantics across every case and delegated
+  hook before registering opcode 73; do not add a case-specific shortcut.
+- **Notes:** every concrete start executes in Tier 1; all 24 lvalue classes,
+  signed `gBattleMoveDamage` byte preservation, triple-kick halfword
+  preservation, unknown rejection, immutability, replay, ordered events/PP,
+  zero SETBYTE RNG/controllers/events, player zero-call RNG, and trainer AI
+  `0x79e39ac4 / 5 calls` are pinned. Focused **5 files / 53 tests**;
+  integrated **162/1942**, production build, OFF v5 info (`9c89c741…`), and
+  diff checks pass. Code commit `1545235`; pixel diff N/A.

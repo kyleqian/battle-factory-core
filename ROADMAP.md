@@ -1047,6 +1047,16 @@ verbatim body plus call/global/mutation/controller/return/script-target
 candidates. It records the exact missing durable item/special/protect/history/
 doubles state and effect delegates; the staged player/AI barrier is unchanged.
 
+**MOVEEND battler-metadata dependency checkpoint (2026-07-24):** dependency
+step 1 adds source-shaped durable metadata to the existing four frozen rules
+battlers: `u16 item`, all eight signed `s8 statStages`, SpecialStatus's
+sprite-restoration bit and signed physical/special damage, and ProtectStruct's
+charging bit. Construction strictly validates widths/cardinality and freezes
+nested values; unrelated immutable updates retain identity. The staged real
+Factory sets derive held items and neutral stages, and canonical player/AI
+replays preserve them. Opcode **73** remains unregistered and no move-end case
+or delegate is implemented.
+
 S10 has six ordered completion gates:
 
 1. [x] **Complete Factory corpus:** mechanically extract and validate all 300
