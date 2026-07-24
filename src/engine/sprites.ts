@@ -9,6 +9,60 @@ export interface SpriteSheet {
   tileset: { columns: number; rows: number; tiles: number[][] };
 }
 
+function gbaAlphaBlendChannel(
+  target1: number,
+  target2: number,
+  eva: number,
+  evb: number,
+): number {
+  const a = Math.min(16, Math.max(0, eva));
+  const b = Math.min(16, Math.max(0, evb));
+  return Math.min(255, Math.floor((target1 * a + target2 * b) / 16));
+}
+
+/**
+ * Composites the selected semi-transparent OBJ pixel using a non-OBJ target-2
+ * buffer.
+ *
+ * GBA OBJ evaluation retains only the frontmost opaque OBJ texel for a
+ * screen pixel. If that texel has OBJ mode 1, BLDCNT/BLDALPHA can blend it
+ * with an eligible BG/backdrop pixel, but an obscured OBJ texel is no longer
+ * available as target 2. Callers may still visit whole sprites
+ * back-to-front to resolve OAM ordering; every visit must read target 2 from
+ * the same BG/backdrop-only buffer rather than the accumulated OBJ output.
+ */
+export function compositeSemiTransparentObjPixel(
+  output: Uint8Array,
+  nonObjTarget2: Uint8Array,
+  x: number,
+  y: number,
+  target1: RgbColor,
+  eva: number,
+  evb: number,
+): void {
+  if (x < 0 || y < 0 || x >= 240 || y >= 160) return;
+  const offset = (y * 240 + x) * 4;
+  output[offset] = gbaAlphaBlendChannel(
+    target1.r,
+    nonObjTarget2[offset]!,
+    eva,
+    evb,
+  );
+  output[offset + 1] = gbaAlphaBlendChannel(
+    target1.g,
+    nonObjTarget2[offset + 1]!,
+    eva,
+    evb,
+  );
+  output[offset + 2] = gbaAlphaBlendChannel(
+    target1.b,
+    nonObjTarget2[offset + 2]!,
+    eva,
+    evb,
+  );
+  output[offset + 3] = 255;
+}
+
 /**
  * Draw a widthInTiles x heightInTiles block of tiles starting at
  * `firstTileRow` (row index into the tileset, in tile units) centered on

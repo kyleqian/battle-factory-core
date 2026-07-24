@@ -11,6 +11,17 @@ export const ICE_PUNCH_SPIRAL_TICKS = 30;
 const SMALL_PHASES = [0, 64, 128, 192] as const;
 const LARGE_PHASES = [32, 96, 160, 224] as const;
 
+/**
+ * RAM-pinned `GetBattlerSpriteSubpriority(target) - offset` results. Lower
+ * subpriority reaches lower OAM indices and wins within the shared OBJ
+ * priority, so software compositing visits this list back-to-front.
+ */
+export const ICE_PUNCH_OBJ_LAYERS_BACK_TO_FRONT = [
+  { kind: "crystal", subpriority: 28 },
+  { kind: "hitsplat", subpriority: 27 },
+  { kind: "fist", subpriority: 26 },
+] as const;
+
 export interface IcePunchCrystal {
   readonly kind: "small" | "large";
   readonly centerX: number;
@@ -71,12 +82,21 @@ function crystalAt(
   if (n < 0 || n >= ICE_PUNCH_SPIRAL_TICKS) return null;
 
   // AnimIcePunchSwirlingParticle invokes the translation callback once at
-  // creation. The first displayed VBlank therefore contains source step 1;
-  // the final displayed VBlank contains step 30 before destruction.
-  const step = n + 1;
-  const radius = 60 - step * 2;
-  const orbitAngle = phase + step * 9;
-  const affineAngle = kind === "large" ? (step + 1) * 40 : 0;
+  // creation. The first displayed VBlank therefore contains source step 1.
+  // On the last callback, TranslateSpriteInGrowingCircle destroys the sprite
+  // before its radius-zero state reaches OAM; hardware retains the already
+  // latched step 29 for the 30th display. The same source/OAM lifecycle is
+  // independently visible for small (2403->2404) and large (2410->2411).
+  const animationStep = n + 1;
+  const translationStep = Math.min(
+    animationStep,
+    ICE_PUNCH_SPIRAL_TICKS - 1,
+  );
+  const radius = 60 - translationStep * 2;
+  const orbitAngle = phase + translationStep * 9;
+  // Affine animation advances independently even while the destroyed
+  // sprite's final translation is retained in hardware.
+  const affineAngle = kind === "large" ? (animationStep + 1) * 40 : 0;
   const sine = kind === "large" ? gbaSin(affineAngle, 256) : 0;
   const cosine = kind === "large" ? gbaSin(affineAngle + 64, 256) : 256;
   return {

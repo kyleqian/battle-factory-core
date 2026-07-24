@@ -77,9 +77,9 @@
     {
       "move": "MOVE_ICE_PUNCH",
       "status": "partial",
-      "covered": ["portable synthetic player-back ONIX to opponent-front GROVYLE, dense script handoff, complete source-composed BG-black/target-ice opening palette overlay, and source-derived small+large inward crystal spiral through the first exact shared fist/hitsplat frame at relative ages 0-62 / oracle frames 2339-2401 (63/63) through the shared Scene-ON adapter"],
+      "covered": ["portable synthetic player-back ONIX to opponent-front GROVYLE, dense script handoff, complete source-composed BG-black/target-ice opening palette overlay, and complete source-derived small+large inward crystal spiral through the shared fist/hitsplat/shake overlap and final large state at relative ages 0-72 / oracle frames 2339-2411 (73/73) through the shared Scene-ON adapter; generic selected-OBJ composition and the callback/OAM final-state handoff are Tier-1 pinned"],
       "evidence": ["tools/compare/fixtures/ice-punch-onix-grovyle.json", "tools/compare/firePunchPortable.ts", "tools/probe/stage-fire-punch-portable-on.py", "docs/ice-punch-portable-staging-probe.md"],
-      "remaining": "Dense oracle frames 2402-2525: final small/large spiral states overlapping the reused fist/hitsplat/shake (2402-2410 currently bounded to 153 pixels across 7/9 frames pending generic semi-transparent OBJ-over-OBJ composition), final large state, seven-spawn IceCrystalEffectShort burst, palette restore, and script teardown; then generic hit/damage presentation and any evidence-required variant."
+      "remaining": "Dense oracle frames 2412-2525: post-spiral gap, seven-spawn IceCrystalEffectShort burst, palette restore, and script teardown; then generic hit/damage presentation and any evidence-required variant."
     },
     {
       "move": "MOVE_FAINT_ATTACK",
@@ -113,7 +113,7 @@
         "MOVE_ICE_PUNCH",
         "MOVE_THUNDER_PUNCH"
       ],
-      "goal": "FIRE PUNCH remains the exact chassis; ICE PUNCH independently proves its opening plus source-derived inward crystal component at 63/63 with the remaining overlap/body bounded at 2402-2525; THUNDER PUNCH is source/staging batch-checked but remains unsupported without dense move evidence."
+      "goal": "FIRE PUNCH remains the exact chassis; ICE PUNCH independently proves its opening plus complete source-derived inward-crystal component at 73/73 with the remaining body bounded at 2412-2525; THUNDER PUNCH is source/staging batch-checked but remains unsupported without dense move evidence."
     },
     {
       "id": "white-feather",

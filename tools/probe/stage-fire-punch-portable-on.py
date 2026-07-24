@@ -274,7 +274,7 @@ def frame_record(oracle: EmeraldOracle, tick: int) -> dict[str, object]:
                     ],
                 }
             )
-    return {
+    record = {
         "tick": tick,
         "sha256": hashlib.sha256(rgb).hexdigest(),
         "currentMove": u16(oracle, oracle.symbols["gCurrentMove"]),
@@ -307,6 +307,21 @@ def frame_record(oracle: EmeraldOracle, tick: int) -> dict[str, object]:
         "iceEffects": ice_effects,
         "spriteOrder": [oracle.read_u8(SPRITE_ORDER + slot) for slot in range(64)],
     }
+    # ICE PUNCH's small-crystal teardown overlaps the fist/hitsplat stack.
+    # Keep the final hardware-order buffer around that boundary so the
+    # selected-OBJ rule and final latched translation are reproducible.
+    if MOVE_NAME == "ice-punch" and 2399 <= tick <= 2405:
+        oam_buffer = oracle.symbols["gMain"] + 0x38
+        record["oamBuffer"] = [
+            {
+                "index": index,
+                "a0": u16(oracle, oam_buffer + index * 8),
+                "a1": u16(oracle, oam_buffer + index * 8 + 2),
+                "a2": u16(oracle, oam_buffer + index * 8 + 4),
+            }
+            for index in range(20)
+        ]
+    return record
 
 
 def main() -> None:

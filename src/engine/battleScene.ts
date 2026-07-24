@@ -563,6 +563,7 @@ import {
   battle2Turn1State,
 } from "./battle2Turn1.ts";
 import { drawMode0Objects, drawMode0Ppu, type Mode0Oam, type Mode0State } from "./gbaPpu.ts";
+import { compositeSemiTransparentObjPixel } from "./sprites.ts";
 import {
   sceneOnDoubleTeamView,
   sceneOnEndeavorView,
@@ -3244,9 +3245,15 @@ export function drawSpriteSheetAffineRotate(
   }
 }
 
-/** Generic OBJ-window affine sampler with hardware alpha blending. */
+/**
+ * Generic affine OBJ-mode-1 sampler. `nonObjTarget2` is the already-rendered
+ * BG/backdrop stack before any objects in this priority group. Keeping it
+ * separate from `fb` implements the PPU's one-selected-OBJ-pixel rule when
+ * multiple semi-transparent objects overlap.
+ */
 function drawSpriteSheetAffineRotateBlendedOverFb(
   fb: Uint8Array,
+  nonObjTarget2: Uint8Array,
   tileset: Tileset,
   palette: RgbColor[],
   centerX: number,
@@ -3282,11 +3289,15 @@ function drawSpriteSheetAffineRotateBlendedOverFb(
       const x = centerX + dx;
       const y = centerY + dy;
       if (!color || x < 0 || x >= 240 || y < 0 || y >= 160) continue;
-      const offset = (y * 240 + x) * 4;
-      fb[offset] = blendChannel(color.r, fb[offset]!, eva, evb);
-      fb[offset + 1] = blendChannel(color.g, fb[offset + 1]!, eva, evb);
-      fb[offset + 2] = blendChannel(color.b, fb[offset + 2]!, eva, evb);
-      fb[offset + 3] = 255;
+      compositeSemiTransparentObjPixel(
+        fb,
+        nonObjTarget2,
+        x,
+        y,
+        color,
+        eva,
+        evb,
+      );
     }
   }
 }
@@ -13854,9 +13865,14 @@ export function renderSceneOnMovePresentation(
         + (view.age === 68 || view.age === 69 ? 5 : 0),
     );
     const beforeEffects = fb.slice();
+    // Source/RAM subpriorities are crystal 28, hitsplat 27, fist 26:
+    // crystals are visited back-to-front here, then the reused impact stack
+    // overwrites them below. Every OBJ-mode-1 crystal samples the same
+    // pre-OBJ target-2 buffer, even where another crystal already painted.
     for (const crystal of view.crystals) {
       drawSpriteSheetAffineRotateBlendedOverFb(
         fb,
+        beforeEffects,
         crystal.kind === "large"
           ? battleAnimIceCrystalLarge
           : battleAnimIceCrystalSmall,
