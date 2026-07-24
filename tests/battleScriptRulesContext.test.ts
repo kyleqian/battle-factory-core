@@ -21,7 +21,10 @@ import {
 } from "../src/engine/battleScriptRulesContext.ts";
 import {
   BATTLE_SCRIPT_BATTLER_SELECTORS,
+  BATTLE_SCRIPT_HITMARKER_DESTINYBOND,
   BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS,
+  BATTLE_SCRIPT_HITMARKER_SYNCHRONIZE_EFFECT,
+  BATTLE_SCRIPT_MOVE_VALUES_CLEANUP_HITMARKER_MASK,
   BATTLE_SCRIPT_STATUS2_MASKS,
   BATTLE_SCRIPT_STATUS3_SEMI_INVULNERABLE,
 } from "../src/engine/battleScriptSourceConstants.ts";
@@ -35,6 +38,7 @@ const program = loadBattleScriptProgram();
 const primaryInstruction = program.instructions[804]!;
 const maskedInstruction = program.instructions[2760]!;
 const explicitInstruction = program.instructions[2754]!;
+const cleanupInstruction = program.instructions[116]!;
 
 function battler(
   status1 = 0,
@@ -56,6 +60,11 @@ function input(
       battler(0x08, 0x000f_0001),
     ],
     selectorRoles: changes.selectorRoles ?? { attacker: 3, effectBattler: 1 },
+    moveResultFlags: changes.moveResultFlags ?? 0xf3,
+    dmgMultiplier: changes.dmgMultiplier ?? 7,
+    critMultiplier: changes.critMultiplier ?? 9,
+    moveEffectByte: changes.moveEffectByte ?? 0xe1,
+    missType: changes.missType ?? 5,
     hitMarker: changes.hitMarker ?? 0,
     multiHitCounter: changes.multiHitCounter ?? 0,
   };
@@ -126,7 +135,12 @@ describe("source-shaped Battle Script rules context", () => {
     const created = createBattleScriptRulesContext(source);
     expect(Object.keys(created).sort()).toEqual([
       "battlers",
+      "critMultiplier",
+      "dmgMultiplier",
       "hitMarker",
+      "missType",
+      "moveEffectByte",
+      "moveResultFlags",
       "multiHitCounter",
       "selectorRoles",
     ]);
@@ -143,6 +157,11 @@ describe("source-shaped Battle Script rules context", () => {
       { battlers: input().battlers.slice(0, 3) },
       { battlers: [battler(-1), ...input().battlers.slice(1)] },
       { battlers: [battler(0, 0, 0, 256), ...input().battlers.slice(1)] },
+      { moveResultFlags: 256 },
+      { dmgMultiplier: -1 },
+      { critMultiplier: 256 },
+      { moveEffectByte: -1 },
+      { missType: 256 },
       { hitMarker: -1 },
       { multiHitCounter: 256 },
       { selectorRoles: { attacker: 4 as BattleScriptBattlerId, effectBattler: 0 } },
@@ -306,12 +325,110 @@ describe("source-shaped Battle Script rules context", () => {
 });
 
 describe("production status rules handler and execution seam", () => {
-  it("composes the existing controls, source handlers, and multi-hit rules once", () => {
+  it("composes all 27 source-safe controls, source, multi-hit, and cleanup handlers once", () => {
     const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts());
     expect(Object.keys(handlers).map(Number).sort((a, b) => a - b)).toEqual([
-      10, 16, 17, 18, 20, 38, 39, 40, 57, 58, 60, 61,
+      10, 16, 17, 18, 20, 37, 38, 39, 40, 57, 58, 60, 61,
       62, 65, 83, 84, 85, 86, 98, 100, 101, 102, 111, 131, 141, 248,
     ]);
+  });
+
+  it("executes cleanup with exact field resets and preserves unrelated production identity", () => {
+    const sourceRules = rules({
+      hitMarker: 0xffff_ffff,
+      multiHitCounter: 4,
+    });
+    const execution = stateAt(cleanupInstruction, sourceRules);
+    const result = stepBattleScriptMachine(
+      program,
+      execution.state,
+      execution.handlers,
+    );
+
+    expect(result.kind).toBe("advanced");
+    expect(result.state.rulesContext).not.toBe(sourceRules);
+    expect(result.state.rulesContext).toMatchObject({
+      moveResultFlags: 0,
+      dmgMultiplier: 1,
+      critMultiplier: 1,
+      moveEffectByte: 0,
+      missType: 0,
+      hitMarker: 0xffff_bfbf,
+      multiHitCounter: 4,
+    });
+    expect(BATTLE_SCRIPT_MOVE_VALUES_CLEANUP_HITMARKER_MASK).toBe(
+      BATTLE_SCRIPT_HITMARKER_DESTINYBOND
+      | BATTLE_SCRIPT_HITMARKER_SYNCHRONIZE_EFFECT,
+    );
+    expect(result.state.rulesContext.battlers).toBe(sourceRules.battlers);
+    expect(result.state.rulesContext.battlers[0]).toBe(sourceRules.battlers[0]);
+    expect(result.state.rulesContext.selectorRoles).toBe(sourceRules.selectorRoles);
+    expect(result.state.scheduler).toBe(execution.state.scheduler);
+    expect(result.state.rng).toBe(execution.state.rng);
+    expect(result.state.events).toBe(execution.state.events);
+    expect(result.state.rng).toMatchObject({ value: 0x1234_5678, calls: 0, ledger: [] });
+    expect(Object.isFrozen(result.state.rulesContext)).toBe(true);
+  });
+
+  it("repeats cleanup idempotently and deterministically without scheduling, RNG, or events", () => {
+    const execute = (sourceRules: BattleScriptRulesContext) => {
+      const execution = stateAt(cleanupInstruction, sourceRules);
+      return stepBattleScriptMachine(
+        program,
+        execution.state,
+        execution.handlers,
+      ).state;
+    };
+    const sourceRules = rules({
+      hitMarker: BATTLE_SCRIPT_MOVE_VALUES_CLEANUP_HITMARKER_MASK | (1 << 20),
+    });
+    const first = execute(sourceRules);
+    const replay = execute(sourceRules);
+    const repeated = execute(first.rulesContext);
+
+    expect(replay).toEqual(first);
+    expect(repeated.rulesContext).toEqual(first.rulesContext);
+    expect(repeated.rulesContext.hitMarker).toBe(1 << 20);
+    expect(repeated.scheduler).toEqual(first.scheduler);
+    expect(repeated.rng).toEqual(first.rng);
+    expect(repeated.rng.calls).toBe(0);
+    expect(repeated.events).toEqual([]);
+  });
+
+  it("keeps all status-animation opcodes working identically before and after cleanup", () => {
+    const sourceRules = rules({
+      hitMarker: BATTLE_SCRIPT_MOVE_VALUES_CLEANUP_HITMARKER_MASK,
+    });
+    const cleanupExecution = stateAt(cleanupInstruction, sourceRules);
+    const cleaned = stepBattleScriptMachine(
+      program,
+      cleanupExecution.state,
+      cleanupExecution.handlers,
+    ).state.rulesContext;
+
+    for (const instruction of [
+      primaryInstruction,
+      maskedInstruction,
+      explicitInstruction,
+    ]) {
+      const before = stateAt(instruction, sourceRules);
+      const after = stateAt(instruction, cleaned);
+      const beforeResult = stepBattleScriptMachine(
+        program,
+        before.state,
+        before.handlers,
+      );
+      const afterResult = stepBattleScriptMachine(
+        program,
+        after.state,
+        after.handlers,
+      );
+      expect(afterResult.kind).toBe("advanced");
+      expect(afterResult.state.events).toEqual(beforeResult.state.events);
+      expect(afterResult.state.scheduler).toEqual(beforeResult.state.scheduler);
+      expect(afterResult.state.rng).toEqual(beforeResult.state.rng);
+      expect(afterResult.state.rulesContext).toBe(cleaned);
+    }
   });
 
   it("executes all three requests through live rules, preserves rules/RNG, and acknowledges", () => {

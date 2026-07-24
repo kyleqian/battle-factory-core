@@ -10,6 +10,10 @@ import {
 } from "./battleScriptMachine.ts";
 import type { BattleScriptOperand, BattleScriptProgram } from "./battleScriptProgram.ts";
 import {
+  createBattleScriptMoveValuesCommandHandlers,
+  type BattleScriptMoveValuesRulesContext,
+} from "./battleScriptMoveValuesCommands.ts";
+import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
 } from "./battleScriptRuleCommands.ts";
@@ -48,16 +52,18 @@ export type BattleScriptSelectorRoleBindings = Readonly<{
  * First durable source-shaped Battle Script rules slice.
  *
  * The four indexed battlers mirror the source's MAX_BATTLERS_COUNT arrays.
- * Only fields read by the landed status-animation family are present. The
- * selector bindings cover only roles observed at opcodes 100-102. Null means
- * the surrounding action has not supplied that source role.
+ * The scalar move-value fields are exactly the u8/u32 globals mutated by
+ * MoveValuesCleanUp. The selector bindings cover only roles observed at
+ * opcodes 100-102. Null means the surrounding action has not supplied that
+ * source role.
  */
-export type BattleScriptRulesContext = Readonly<{
-  battlers: BattleScriptRulesBattlers;
-  selectorRoles: BattleScriptSelectorRoleBindings;
-  hitMarker: number;
-  multiHitCounter: number;
-}>;
+export type BattleScriptRulesContext = Readonly<
+  BattleScriptMoveValuesRulesContext & {
+    battlers: BattleScriptRulesBattlers;
+    selectorRoles: BattleScriptSelectorRoleBindings;
+    multiHitCounter: number;
+  }
+>;
 
 export type BattleScriptRulesContextInput = Readonly<{
   battlers: readonly BattleScriptRulesBattler[];
@@ -65,6 +71,11 @@ export type BattleScriptRulesContextInput = Readonly<{
     attacker?: BattleScriptBattlerId | null;
     effectBattler?: BattleScriptBattlerId | null;
   }>;
+  moveResultFlags: number;
+  dmgMultiplier: number;
+  critMultiplier: number;
+  moveEffectByte: number;
+  missType: number;
   hitMarker: number;
   multiHitCounter: number;
 }>;
@@ -113,6 +124,11 @@ export function createBattleScriptRulesContext(
   return Object.freeze({
     battlers: Object.freeze(battlers),
     selectorRoles,
+    moveResultFlags: requireUnsigned(input.moveResultFlags, 0xff, "moveResultFlags"),
+    dmgMultiplier: requireUnsigned(input.dmgMultiplier, 0xff, "dmgMultiplier"),
+    critMultiplier: requireUnsigned(input.critMultiplier, 0xff, "critMultiplier"),
+    moveEffectByte: requireUnsigned(input.moveEffectByte, 0xff, "moveEffectByte"),
+    missType: requireUnsigned(input.missType, 0xff, "missType"),
     hitMarker: requireUnsigned(input.hitMarker, 0xffff_ffff, "hitMarker") >>> 0,
     multiHitCounter: requireUnsigned(input.multiHitCounter, 0xff, "multiHitCounter"),
   });
@@ -198,7 +214,8 @@ export type BattleScriptStatusRulesExternalPorts = Readonly<
 /**
  * Production handler composition for the currently explicit rules context.
  * The generic command factories remain injectable; this bundle replaces only
- * the two status-family ports whose live source data now has durable owners.
+ * the two status-family ports whose live source data now has durable owners
+ * and includes cleanup because all of its mutated fields are owned here.
  */
 export function createBattleScriptStatusRulesHandlers(
   program: BattleScriptProgram,
@@ -215,6 +232,9 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptControlHandlers<BattleScriptRulesContext>(program),
     ...createBattleScriptSourceCommandHandlers(program, sourcePorts),
     ...createBattleScriptRuleCommandHandlers(program, resolveByteOperand),
+    ...createBattleScriptMoveValuesCommandHandlers<BattleScriptRulesContext>(
+      program,
+    ),
   });
 }
 

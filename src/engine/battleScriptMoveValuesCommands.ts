@@ -6,6 +6,9 @@ import {
   type BattleScriptOpcodeHandlers,
 } from "./battleScriptMachine.ts";
 import type { BattleScriptProgram } from "./battleScriptProgram.ts";
+import {
+  BATTLE_SCRIPT_MOVE_VALUES_CLEANUP_HITMARKER_MASK,
+} from "./battleScriptSourceConstants.ts";
 
 export type BattleScriptMoveValuesRulesContext = Readonly<{
   moveResultFlags: number;
@@ -15,11 +18,6 @@ export type BattleScriptMoveValuesRulesContext = Readonly<{
   missType: number;
   hitMarker: number;
 }>;
-
-const HITMARKER_DESTINYBOND = 1 << 6;
-const HITMARKER_SYNCHRONIZE_EFFECT = 1 << 14;
-const MOVE_VALUES_CLEANUP_HITMARKER_MASK =
-  HITMARKER_DESTINYBOND | HITMARKER_SYNCHRONIZE_EFFECT;
 
 /**
  * Immutable equivalent of MoveValuesCleanUp
@@ -40,7 +38,8 @@ export function cleanUpBattleScriptMoveValues<
     moveEffectByte: 0,
     missType: 0,
     hitMarker: (
-      rulesContext.hitMarker & ~MOVE_VALUES_CLEANUP_HITMARKER_MASK
+      rulesContext.hitMarker
+      & ~BATTLE_SCRIPT_MOVE_VALUES_CLEANUP_HITMARKER_MASK
     ) >>> 0,
   }) as RulesContext;
 }
