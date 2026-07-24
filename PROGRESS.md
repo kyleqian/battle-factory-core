@@ -4,6 +4,31 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 416 — Factory AI reaches the production script machine
+
+- **State:** the assigned bounded S10 composition is committed and green at
+  **161 files / 1936 tests**. The staged production adapter now accepts either
+  singles command side; no opcode, mechanic, AI-mask, switching, render, core,
+  or oracle breadth was added, and opcode 0 remains unregistered.
+- **Did:** generalized the existing asleep state/reducer around one explicit
+  command owner and source-derived singles targets, preserving TYROGUE's
+  player path. A trainer-asleep real set-291 `FRONTIER_MON_PLUSLE_2` state
+  enumerates Thunderbolt/Thunder Wave/Seismic Toss at player battler **0** and
+  Wish at trainer battler **1**. Seed **1** makes the ordinary mask-0 policy
+  choose Wish, synchronize all five draws into the kernel cursor, then the
+  same reducer executes asleep opcodes **16→18→100→40** and returns the honest
+  move-end SETBYTE barrier.
+- **Next:** return to the supervisor. Keep opcode 0 unregistered and retain the
+  recorded S10 ordering; masks, switching, move end, and other mechanics remain
+  separate bounded units.
+- **Notes:** PLUSLE sleep **4→3**, PP **[15,20,20,10]** unchanged, ordered
+  message/status events, battler-1 controller ownership, persisted RNG
+  `0x79e39ac4 / 5 calls`, canonical replay, recursive freezing, no split RNG,
+  player regression, and import boundaries are pinned. Focused **3 files / 39
+  tests**; integrated **161/1936**, production build, OFF v5 info
+  (`9c89c741…`), and diff checks pass. Code commit `8e186dc`; pixel diff N/A.
+
+---
 ## 415 — Factory AI self-target fidelity repaired
 
 - **State:** the bounded S10 mask-0 repair is committed and green at **161
@@ -49,28 +74,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   import boundaries are pinned. Focused **3 files / 60 tests**; integrated
   **161/1932**, production build, OFF v5 info (`9c89c741…`), and diff checks
   pass. Code commit `d29a950`; pixel diff N/A.
-
----
-## 413 — Factory asleep decision reaches real script barrier
-
-- **State:** the assigned S10 vertical composition is committed, clean, and
-  green at **160 files / 1917 tests**. Gate 3 still has **27** source-safe
-  executable opcodes; opcode 0 remains unregistered.
-- **Did:** published a serializable machine barrier and read-only boundary RNG
-  snapshot, then added one compact production adapter. A validated Level-50
-  set-15 TYROGUE asleep state requests its four real Factory moves; submitting
-  PROTECT slot 1 maps its real `BattleScript_EffectProtect` opcode-0 entry
-  through the completed asleep admission helper into
-  `BattleScript_MoveUsedIsAsleep`, executes source opcodes **16→18→100→40**,
-  safely acknowledges controller presentation, and stops before unsupported
-  move-end opcode **46**.
-- **Next:** add the minimal injected Factory-AI seam on this same kernel
-  boundary: source-faithful view + kernel-enumerated legal decisions + explicit
-  RNG returns one legal decision, updated RNG, and inspectable trace, then
-  submits through the identical `BattleDecisionBoundary`.
-- **Notes:** ordered events are `STRINGID_PKMNFASTASLEEP` then status animation
-  for TYROGUE; sleep **4→3**, PP **[30,10,15,20]** unchanged, explicit RNG
-  **0xf4c96838 / 0 calls** unchanged, and barrier execution count **67**.
-  Focused **3 files / 29 tests**, integrated **160/1917**, production build,
-  OFF v5 info (`9c89c741…`), and diff check pass. Code commits `2fa3ce0` +
-  `a71c0a9`; pixel diff N/A.

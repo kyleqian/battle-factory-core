@@ -1,3 +1,28 @@
+## 413 — Factory asleep decision reaches real script barrier
+
+- **State:** the assigned S10 vertical composition is committed, clean, and
+  green at **160 files / 1917 tests**. Gate 3 still has **27** source-safe
+  executable opcodes; opcode 0 remains unregistered.
+- **Did:** published a serializable machine barrier and read-only boundary RNG
+  snapshot, then added one compact production adapter. A validated Level-50
+  set-15 TYROGUE asleep state requests its four real Factory moves; submitting
+  PROTECT slot 1 maps its real `BattleScript_EffectProtect` opcode-0 entry
+  through the completed asleep admission helper into
+  `BattleScript_MoveUsedIsAsleep`, executes source opcodes **16→18→100→40**,
+  safely acknowledges controller presentation, and stops before unsupported
+  move-end opcode **46**.
+- **Next:** add the minimal injected Factory-AI seam on this same kernel
+  boundary: source-faithful view + kernel-enumerated legal decisions + explicit
+  RNG returns one legal decision, updated RNG, and inspectable trace, then
+  submits through the identical `BattleDecisionBoundary`.
+- **Notes:** ordered events are `STRINGID_PKMNFASTASLEEP` then status animation
+  for TYROGUE; sleep **4→3**, PP **[30,10,15,20]** unchanged, explicit RNG
+  **0xf4c96838 / 0 calls** unchanged, and barrier execution count **67**.
+  Focused **3 files / 29 tests**, integrated **160/1917**, production build,
+  OFF v5 info (`9c89c741…`), and diff check pass. Code commits `2fa3ce0` +
+  `a71c0a9`; pixel diff N/A.
+
+---
 ## 412 — Gate-3 Magic Coat intercept composed
 
 - **State:** the run is clean and green at **158 files / 1906 tests**. S10

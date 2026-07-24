@@ -1002,6 +1002,22 @@ target-authoritative: the policy returns the selected slot's exact decision,
 including battler **1** for `FRONTIER_MON_PLUSLE_2`'s Wish, and rejects
 ambiguous multiple decisions for one slot.
 
+**AI-to-machine vertical-composition checkpoint (2026-07-24):** the staged
+asleep production adapter now has one side-generic state creator and reducer;
+the player TYROGUE route remains executable, with all request targets derived
+from generated `gBattleMoves[].target`. A validated trainer-owned
+`FRONTIER_MON_PLUSLE_2` state exposes Thunderbolt, Thunder Wave, and Seismic
+Toss against player battler **0**, and Wish against trainer battler **1**.
+With explicit seed **1**, the ordinary mask-0 policy chooses Wish, synchronizes
+its four setup draws plus mandatory tie draw into the same kernel RNG cursor,
+and submits through `BattleDecisionBoundary`. The existing asleep admission
+helper and production machine then execute source opcodes **16→18→100→40**,
+emit frozen PLUSLE message/status events, decrement sleep **4→3**, preserve PP,
+and stop at the honest move-end SETBYTE barrier with RNG `0x79e39ac4 / 5
+calls`. Canonical serialization replays identically. Opcode 0 remains
+unregistered; this adds no move-end, mask, switch, mechanic, core, render, or
+oracle breadth.
+
 S10 has six ordered completion gates:
 
 1. [x] **Complete Factory corpus:** mechanically extract and validate all 300
