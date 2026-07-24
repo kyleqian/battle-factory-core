@@ -1,27 +1,31 @@
 // Fresh Battle Scene ON isolation probe for ISSUES #23's DRAGON_BREATH
-// projectile residual.  This is dev-time evidence only: it reads the live
-// OAM/matrix state, renders one ember on a blank framebuffer with the shared
-// affine sampler, and subtracts the live app's no-projectile scene from a
-// fresh oracle frame.  Nothing here is imported by src/ or production.
+// projectile residual. This is dev-time evidence only: it reads a fresh
+// live OAM/matrix dump, renders one ember on a blank framebuffer with the
+// shared affine sampler, and verifies the production scene against a fresh
+// oracle frame. Nothing here is imported by src/ or production.
 //
 // Usage:
-//   node --experimental-strip-types tools/probe/verify-dragonbreath-spawn7-isolation.ts
+//   probe_dir=$(mktemp -d /tmp/dragonbreath-isolation.XXXXXX)
+//   python3 tools/run-mgba-probe.py "$probe_dir/ram.json" -- \
+//     /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+//     tools/probe/dump-dragonbreath-anim.py \
+//     tools/compare/traces/turn2-dragonbreath-projectiles.json \
+//     "$probe_dir/ram.json" 3168 3234
+//   node --experimental-strip-types \
+//     tools/probe/verify-dragonbreath-spawn7-isolation.ts "$probe_dir/ram.json"
 //
 // It deliberately uses one compressed and one magnified *single-live-sprite*
 // render.  The earlier whole-scene note that frame 3220 had only spawn 7 is
 // false: RAM 3219 has four live embers.  So is the first version of this
 // instrument's render 3223/RAM 3222 claim: that RAM tick also has four.
 // Exhaustive RAM scanning found that only RAM 3231-3234 has a sole live,
-// magnified ember (the eighth spawn, in reused sprite slot 9).
-import { execFileSync } from "node:child_process";
-import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { dirname, join, resolve } from "node:path";
+// magnified ember (the eleventh spawn, in reused sprite slot 9).
+import { readFileSync } from "node:fs";
 import { renderAppTrace } from "../compare/appTrace.ts";
 import { runOracleTrace, type Trace } from "../compare/oracleClient.ts";
 import { drawSpriteSheetAffineRotate } from "../../src/engine/battleScene.ts";
 
-const TRACE_PATH = "tools/compare/scratch/dragonbreath-projectile-window.json";
+const TRACE_PATH = "tools/compare/traces/turn2-dragonbreath-projectiles.json";
 const SCREEN_W = 240;
 const SCREEN_H = 160;
 const SCAN_START_RAM = 3168;
@@ -39,42 +43,6 @@ type RamRow = { tick: number; fireSprites: Sprite[] };
 type Color = { r: number; g: number; b: number };
 type Tileset = { columns: number; rows: number; tiles: number[][] };
 
-function harnessRoot(): string {
-  for (let candidate = resolve(process.cwd()); ; candidate = dirname(candidate)) {
-    if (existsSync(join(candidate, "oracle", "emerald_core.py"))) return candidate;
-    if (dirname(candidate) === candidate) throw new Error("could not find harness oracle/");
-  }
-}
-
-function runRamProbe(output: string): void {
-  const root = harnessRoot();
-  const pythonCandidates = [
-    join(root, "vendor", "mgba-venv", "bin", "python"),
-    join(dirname(root), "vendor", "mgba-venv", "bin", "python"),
-  ];
-  const python = pythonCandidates.find(existsSync);
-  if (!python) throw new Error(`mGBA Python not found (${pythonCandidates.join(", ")})`);
-  try {
-    execFileSync(python, [
-      "tools/probe/dump-dragonbreath-anim.py", TRACE_PATH, output,
-      String(SCAN_START_RAM), String(SCAN_END_RAM),
-    ], { stdio: "ignore" });
-  } catch (error: unknown) {
-    // libmGBA can fault during teardown after flushing a complete probe.
-    if (!existsSync(output)) throw error;
-  }
-  if (!existsSync(output)) throw new Error("RAM probe did not write its output");
-}
-
-function changedMask(oracle: Uint8Array, baseline: Uint8Array): Uint8Array {
-  const out = new Uint8Array(SCREEN_W * SCREEN_H);
-  for (let i = 0; i < out.length; i += 1) {
-    const p = i * 4;
-    out[i] = oracle[p] !== baseline[p] || oracle[p + 1] !== baseline[p + 1] || oracle[p + 2] !== baseline[p + 2] ? 1 : 0;
-  }
-  return out;
-}
-
 function blankRender(sprite: Sprite, asset: { tileset: Tileset; palette: Color[] }): Uint8Array {
   const fb = new Uint8Array(SCREEN_W * SCREEN_H * 4);
   const frame = sprite.animCmdIndex + 1; // anim command 0/1/2 == sheet frame 1/2/3.
@@ -89,16 +57,6 @@ function blankRender(sprite: Sprite, asset: { tileset: Tileset; palette: Color[]
   return out;
 }
 
-function score(actual: Uint8Array, predicted: Uint8Array) {
-  let tp = 0, fp = 0, fn = 0;
-  for (let i = 0; i < actual.length; i += 1) {
-    if (actual[i] && predicted[i]) tp += 1;
-    else if (predicted[i]) fp += 1;
-    else if (actual[i]) fn += 1;
-  }
-  return { actual: tp + fn, predicted: tp + fp, tp, fp, fn, xor: fp + fn };
-}
-
 function bounds(mask: Uint8Array): string {
   let left = SCREEN_W, top = SCREEN_H, right = -1, bottom = -1;
   for (let y = 0; y < SCREEN_H; y += 1) for (let x = 0; x < SCREEN_W; x += 1) {
@@ -108,52 +66,48 @@ function bounds(mask: Uint8Array): string {
   return right < 0 ? "none" : `${left},${top}-${right},${bottom}`;
 }
 
-function outsideDoubleBox(mask: Uint8Array, sprite: Sprite): number {
-  const centerX = sprite.x + sprite.x2, centerY = sprite.y + sprite.y2;
+function count(mask: Uint8Array): number {
   let count = 0;
-  for (let y = 0; y < SCREEN_H; y += 1) for (let x = 0; x < SCREEN_W; x += 1) {
-    if (!mask[y * SCREEN_W + x]) continue;
-    if (x < centerX - 32 || x >= centerX + 32 || y < centerY - 32 || y >= centerY + 32) count += 1;
-  }
+  for (const value of mask) count += value;
   return count;
 }
 
-const temp = mkdtempSync(join(tmpdir(), "dragonbreath-spawn7-"));
-try {
-  const dumpPath = join(temp, "ram.json");
-  runRamProbe(dumpPath);
-  const rows = new Map((JSON.parse(readFileSync(dumpPath, "utf8")) as { ticks: RamRow[] }).ticks.map((row) => [row.tick, row]));
-  const trace = JSON.parse(readFileSync(TRACE_PATH, "utf8")) as Trace;
-  trace.oracleProfile = "battle-scene-on";
-  trace.captureFrames = CASES.map((c) => c.render);
-  const [oracle, app] = await Promise.all([runOracleTrace(trace), renderAppTrace(trace)]);
-  const oracleByFrame = new Map(oracle.captures.map((capture) => [capture.frame, capture.rgba]));
-  const appByFrame = new Map(app.map((capture) => [capture.frame, capture.rgba]));
-  const asset = JSON.parse(readFileSync("src/assets/gen/battle-anim-small-ember.json", "utf8")) as { tileset: Tileset; palette: Color[] };
-
-  const soleMagnified = [...rows.values()].filter((row) =>
-    row.fireSprites.length === 1 && Math.abs(row.fireSprites[0]!.matrixA) < 256
-  );
-  console.log(`exhaustive RAM ${SCAN_START_RAM}-${SCAN_END_RAM}: sole-live magnified candidates ${soleMagnified.map((row) => `${row.tick}(slot ${row.fireSprites[0]!.slot}, render ${row.tick + 1})`).join(", ") || "none"}`);
-  console.log("fresh ON oracle minus contemporaneous app baseline (which has no DRAGON_BREATH projectile draw)");
-  console.log("the baseline is accepted only when every differing oracle pixel stays inside the sole live sprite's 64x64 affine-double box");
-  for (const c of CASES) {
-    const row = rows.get(c.ram);
-    const oracleRgba = oracleByFrame.get(c.render);
-    const appRgba = appByFrame.get(c.render);
-    if (!row || !oracleRgba || !appRgba) throw new Error(`missing input for render ${c.render}/RAM ${c.ram}`);
-    if (row.fireSprites.length !== 1 || row.fireSprites[0]?.slot !== c.expectedSlot) {
-      throw new Error(`RAM ${c.ram}: expected only slot ${c.expectedSlot}, got ${JSON.stringify(row.fireSprites)}`);
-    }
-    const sprite = row.fireSprites[0]!;
-    const actual = changedMask(oracleRgba, appRgba);
-    const predicted = blankRender(sprite, asset);
-    const result = score(actual, predicted);
-    const outside = outsideDoubleBox(actual, sprite);
-    console.log(`${c.regime} render ${c.render} <- RAM ${c.ram}, slot ${sprite.slot}, center=(${sprite.x + sprite.x2},${sprite.y + sprite.y2}), matrix=(${sprite.matrixA},${sprite.matrixB},${sprite.matrixC},${sprite.matrixD}), frame=${sprite.animCmdIndex + 1}`);
-    console.log(`  oracle-minus-baseline: ${result.actual}px bounds ${bounds(actual)}; outside affine-double box: ${outside}`);
-    console.log(`  blank shared sampler: ${result.predicted}px; TP=${result.tp} FP(overdraw)=${result.fp} FN(missing)=${result.fn} XOR=${result.xor}`);
+function pixelDiff(a: Uint8Array, b: Uint8Array): number {
+  let diff = 0;
+  for (let p = 0; p < a.length; p += 4) {
+    if (a[p] !== b[p] || a[p + 1] !== b[p + 1] || a[p + 2] !== b[p + 2]) diff += 1;
   }
-} finally {
-  rmSync(temp, { recursive: true, force: true });
+  return diff;
+}
+
+const dumpPath = process.argv[2];
+if (!dumpPath) throw new Error("pass a fresh run-mgba-probe JSON path");
+const rows = new Map((JSON.parse(readFileSync(dumpPath, "utf8")) as { ticks: RamRow[] }).ticks.map((row) => [row.tick, row]));
+const trace = JSON.parse(readFileSync(TRACE_PATH, "utf8")) as Trace;
+trace.oracleProfile = "battle-scene-on";
+trace.captureFrames = CASES.map((c) => c.render);
+const [oracle, app] = await Promise.all([runOracleTrace(trace), renderAppTrace(trace)]);
+const oracleByFrame = new Map(oracle.captures.map((capture) => [capture.frame, capture.rgba]));
+const appByFrame = new Map(app.map((capture) => [capture.frame, capture.rgba]));
+const asset = JSON.parse(readFileSync("src/assets/gen/battle-anim-small-ember.json", "utf8")) as { tileset: Tileset; palette: Color[] };
+
+const soleMagnified = [...rows.values()].filter((row) =>
+  row.fireSprites.length === 1 && Math.abs(row.fireSprites[0]!.matrixA) < 256
+);
+console.log(`exhaustive RAM ${SCAN_START_RAM}-${SCAN_END_RAM}: sole-live magnified candidates ${soleMagnified.map((row) => `${row.tick}(slot ${row.fireSprites[0]!.slot}, render ${row.tick + 1})`).join(", ") || "none"}`);
+for (const c of CASES) {
+  const row = rows.get(c.ram);
+  const oracleRgba = oracleByFrame.get(c.render);
+  const appRgba = appByFrame.get(c.render);
+  if (!row || !oracleRgba || !appRgba) throw new Error(`missing input for render ${c.render}/RAM ${c.ram}`);
+  if (row.fireSprites.length !== 1 || row.fireSprites[0]?.slot !== c.expectedSlot) {
+    throw new Error(`RAM ${c.ram}: expected only slot ${c.expectedSlot}, got ${JSON.stringify(row.fireSprites)}`);
+  }
+  const sprite = row.fireSprites[0]!;
+  const predicted = blankRender(sprite, asset);
+  const diff = pixelDiff(oracleRgba, appRgba);
+  console.log(`${c.regime} render ${c.render} <- RAM ${c.ram}, slot ${sprite.slot}, center=(${sprite.x + sprite.x2},${sprite.y + sprite.y2}), matrix=(${sprite.matrixA},${sprite.matrixB},${sprite.matrixC},${sprite.matrixD}), frame=${sprite.animCmdIndex + 1}`);
+  console.log(`  blank shared-sampler coverage: ${count(predicted)}px bounds ${bounds(predicted)}`);
+  console.log(`  production scene vs fresh ON oracle: ${diff}px`);
+  if (diff !== 0) throw new Error(`render ${c.render}: production scene differs by ${diff}px`);
 }

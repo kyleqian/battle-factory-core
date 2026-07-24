@@ -611,7 +611,7 @@ embers) — RULED OUT, two independent ways:**
    scratch/diffdump.mjs` (new, committed — reads two already-rendered
    `oracle-NNNNN.png`/`app-NNNNN.png` pairs and prints every differing
    pixel's exact RGB on both sides) over a scratch trace (`tools/compare/
-   scratch/dragonbreath-projectile-window.json`, `captureFrames` 3177-3235,
+   traces/turn2-dragonbreath-projectiles.json`, `captureFrames` 3177-3235,
    same 50-segment script) run through `npm run compare`. If the blend were
    incorrectly touching the app's own ember palette, the app's mismatched
    pixels would show wrong/blended (red-shifted) hues. They don't: every
@@ -698,7 +698,7 @@ which needed re-deriving):
   didn't resolve to a clean single-spawn explanation.
 - `tools/compare/scratch/diffdump.mjs` and `diffmap.mjs` (both new, committed,
   generic — not DRAGON_BREATH-specific) and `tools/compare/scratch/
-  dragonbreath-projectile-window.json` (a ready-made `captureFrames`
+  turn2-dragonbreath-projectiles.json` (a ready-made `captureFrames`
   3177-3235 scratch trace, byte-identical script to the committed
   ground-truth trace) are ready for the next worker to reuse without
   rebuilding this session's own harness.
@@ -798,7 +798,7 @@ what real fixed-point hardware does — scaling `dx`/`dy` by 2 and shifting by
 - **`halfPixelRound`**: both together.
 
 Ran all 4 through `npm run compare` against
-`tools/compare/scratch/dragonbreath-projectile-window.json` (dense
+`tools/compare/traces/turn2-dragonbreath-projectiles.json` (dense
 3177-3235, 59 frames, unchanged from E2a-4), summing `diffPixels` across
 every captured frame:
 
@@ -1111,3 +1111,48 @@ pixel-exact in the magnified regime. The compressed result remains a bounded
 34px overdraw (no missing pixels), consistent with the already-recorded
 compressed-edge residual. No renderer change follows from this evidence;
 ISSUES #23 remains narrowed to compressed rendering/data decomposition.
+
+## Compressed-projectile closeout (2026-07-24, fresh Battle Scene ON oracle)
+
+The remaining mismatch was not affine sampling. It was two source-data and
+scene-composition mistakes in the earlier attempts:
+
+1. `Move_DRAGON_BREATH` contains **eleven**, not eight,
+   `create_dragon_breath_fire_sprite` commands. A fresh wrapper-validated
+   `dump-dragonbreath-anim.py` run over RAM 3168-3234 observes spawns every
+   four ticks from 3174 through 3214, at most six live concurrently, and the
+   last sprite alive through RAM 3234/render 3235. The earlier eight-spawn
+   reading stopped at RAM 3202 and misattributed later sprites/blobs.
+2. `monbg ANIM_DEF_PARTNER` moves the target to BG1. Each ember is created
+   target-relative at subpriority 38 (target 40 minus script offset 2), while
+   player-left Onix remains an OBJ at subpriority 30. Source `SortSprites`
+   therefore gives Onix the winning lower OAM index: embers paint over the
+   target BG, then Onix's opaque pixels cover compressed embers near their
+   origin. The old renderer painted embers last, creating the exact 34-pixel
+   compressed “overdraw” isolated above.
+
+`src/engine/dragonBreath.ts` now owns the parameterized eleven-spawn reducer:
+the shared 21-state RAM-read translation and affine tables, three-frame sheet
+cycle, render lag, spawn interval, and priority metadata. `battleScene.ts`
+only composes those sprites through the existing generic affine sampler in
+source priority order. No sampler, outcome, status, PP, damage, RNG,
+turn/round, message, or controller rule changed.
+
+Committed ON evidence:
+
+- `turn2-dragonbreath-projectiles.json`: every render 3175-3235, **61/61**.
+- `turn2-dragonbreath.json`: existing broader evidence, **237/237**.
+- repaired sole-live verifier with the fresh dump: compressed render
+  3177/RAM 3176 and magnified render 3232/RAM 3231 are both **0px** against
+  the fresh ON oracle. Blank-sampler coverages remain 44px and 128px,
+  respectively, confirming the shared sampler was not changed to fit this
+  move.
+
+Source-neighbor batch audit: FLAMETHROWER, BLAZE_KICK, FIRE_BLAST, EMBER, and
+FIRE_SPIN share `ANIM_TAG_SMALL_EMBER` and selected generic tasks only; every
+one uses distinct sprite templates. DRAGON_RAGE shares
+`StartDragonFireTranslation` through a distinct template with different
+affine, duration, and geometry inputs. No sibling move is promoted without
+its own dense evidence. DRAGON_BREATH remains partial pending portability and
+the three separately documented pre-existing action-menu bounce exclusions;
+ISSUES #23's projectile remainder itself is closed.

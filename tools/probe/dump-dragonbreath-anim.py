@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Dev-time per-tick RAM probe for DRAGON_BREATH's animation mechanisms
-(docs/dragon-breath-notes.md "Engine slice E2a" - priorities 3-5): the 8
+(docs/dragon-breath-notes.md "Engine slice E2a" - priorities 3-5): the 11
 fire-projectile sprites' per-tick x/y/x2/y2/affine-matrix state, the
 target's red-fade palette blend (`AnimTask_BlendBattleAnimPal`), the
 target's x2/y2 (`AnimTask_ShakeMon2`), and the hit-flash sprite
