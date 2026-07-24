@@ -163,7 +163,8 @@ function readyDelay(state: FactorySwapPresentationState): number | null {
     state.controller.phase === "quitReturn" ||
     state.controller.phase === "summaryFade" ||
     state.controller.phase === "playerPickerReturn" ||
-    state.controller.phase === "enemySwitch"
+    state.controller.phase === "enemySwitch" ||
+    state.controller.phase === "playerSwitch"
   ) return null;
   if (state.controller.phase === "playerPicker" && state.elapsed === state.phaseElapsed) {
     return FACTORY_SWAP_ENTRY_READY_DELAY;
@@ -273,6 +274,50 @@ export function advanceFactorySwapPresentation(
       ...controller,
       phase: "enemyPicker",
     });
+    return {
+      controller,
+      elapsed,
+      phaseElapsed: 0,
+      selectedBallClock,
+      selectedBallIndex: state.selectedBallIndex,
+      speciesNameFade: {
+        ...speciesNameFade,
+        active: true,
+      },
+      fieldHandoff,
+    };
+  }
+  if (controller.phase === "playerSwitch" && phaseElapsed === 71) {
+    controller = {
+      ...controller,
+      actionsCount: 4,
+      cursor: 0,
+      infoCursor: 0,
+      displayCursor: 0,
+      arrowCursor: 0,
+      cursorCopyPending: false,
+    };
+    speciesNameFade = {
+      ...speciesNameFade,
+      active: false,
+      tState: "run",
+      coeffDelay: 0,
+      coeff: 6,
+      fadeOut: false,
+      delay: 0,
+      renderCoeff: 16,
+    };
+  }
+  // ScreenInfoTransitionIn state 8 installs HandleChooseMons during +109.
+  // JOY_NEW was already sampled, so only the following physical edge is
+  // eligible for the reconstructed player picker.
+  if (controller.phase === "playerSwitch" && phaseElapsed >= 109) {
+    controller = {
+      ...controller,
+      phase: "playerPicker",
+      inputReady: false,
+      playerSwitchCompleted: true,
+    };
     return {
       controller,
       elapsed,
@@ -839,4 +884,86 @@ export function factorySwapAcceptReturnActionFadeY(
 export function factorySwapEnemySpeciesRenderCoeff(phaseElapsed: number): number {
   if (phaseElapsed < 24) return 0;
   return Math.min(16, Math.floor((phaseElapsed - 20) / 4));
+}
+
+export type FactorySwapPlayerSwitchMechanism =
+  | "Swap_Task_ScreenInfoTransitionOut"
+  | "Swap_Task_SwitchPartyScreen"
+  | "Swap_Task_ScreenInfoTransitionIn"
+  | "Swap_Task_HandleChooseMons";
+
+/** Source callback ownership relative to accepted enemy PKMN FOR SWAP A. */
+export function factorySwapPlayerSwitchMechanism(
+  phaseElapsed: number,
+): FactorySwapPlayerSwitchMechanism {
+  if (phaseElapsed <= 38) return "Swap_Task_ScreenInfoTransitionOut";
+  if (phaseElapsed <= 71) return "Swap_Task_SwitchPartyScreen";
+  if (phaseElapsed <= 108) return "Swap_Task_ScreenInfoTransitionIn";
+  return "Swap_Task_HandleChooseMons";
+}
+
+/** Enemy-to-player uses the same cyclic three-ball task, 20 ticks later. */
+export function factorySwapPlayerSwitchBallCycleVisuals(
+  phaseElapsed: number,
+): readonly [
+  FactorySwapBallCycleVisual,
+  FactorySwapBallCycleVisual,
+  FactorySwapBallCycleVisual,
+] {
+  return factorySwapEnemyBallCycleVisuals(phaseElapsed - 21);
+}
+
+/** Player CANCEL transition-in begins at +72, after player actions install. */
+export function factorySwapPlayerSwitchCancelButtonX(
+  phaseElapsed: number,
+): number {
+  return factorySwapPlayerReturnCancelButtonX(phaseElapsed - 54);
+}
+
+export function factorySwapPlayerSwitchActionFadeY(
+  phaseElapsed: number,
+): number {
+  return factorySwapPlayerReturnActionFadeY(phaseElapsed - 54);
+}
+
+function factorySwapMovingBallTile(age: number): 0 | 16 | 32 {
+  if (age < 0) return 0;
+  const commands = [
+    [16, 4],
+    [0, 4],
+    [32, 4],
+    [0, 4],
+    [16, 4],
+    [0, 4],
+    [32, 4],
+    [0, 36],
+    [16, 8],
+    [0, 8],
+    [32, 8],
+    [0, 8],
+    [16, 8],
+    [0, 8],
+    [32, 8],
+  ] as const;
+  let remaining = age;
+  for (const [tile, duration] of commands) {
+    if (remaining < duration) return tile;
+    remaining -= duration;
+  }
+  return 0;
+}
+
+/**
+ * SpriteCB_Pokeball clocks after each gray enemy ball cycles back to the
+ * selected player palette. Balls 2/1 start their moving table on their
+ * staggered wrap frames; ball 0 resumes its retained 32-tick cooldown.
+ */
+export function factorySwapPlayerSwitchBallTiles(
+  phaseElapsed: number,
+): readonly [0 | 16 | 32, 0 | 16 | 32, 0 | 16 | 32] {
+  return [
+    factorySwapMovingBallTile(phaseElapsed - 95),
+    factorySwapMovingBallTile(phaseElapsed - 58),
+    factorySwapMovingBallTile(phaseElapsed - 53),
+  ];
 }

@@ -589,9 +589,12 @@ state are Tier-1 pinned. Enemy-origin quit chrome remains bounded and is not
 claimed by this player proof. A separate compact OFF fixture now pins enemy
 `PKMN FOR SWAP` from its accepted action edge through two-button enemy-chrome
 teardown, four-action player-picker reconstruction, and the first fresh player
-input, with immutable parties/rentals; live presentation remains to be
-implemented. SUMMARY return, enemy quit chrome, and duplicate rejection still
-require their own short staged OFF windows, not further Battle-2 turns.
+input, with immutable parties/rentals. That source-relative action is now live
+and **115/115 exact**, including the 5→4 action switch, independent ball
+callbacks, install-frame rejection, and first fresh RIGHT without party,
+rental, decision, or selection-RNG mutation. SUMMARY return, enemy quit chrome,
+and duplicate rejection still require their own short staged OFF windows, not
+further Battle-2 turns.
 The parallel Scene-ON adapter
 now proves FIRE PUNCH in both orientations (**225/225** and **277/277**) and
 its canonical residual windows (**236/236** and **200/200**), making it

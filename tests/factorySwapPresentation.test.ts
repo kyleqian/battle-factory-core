@@ -31,6 +31,11 @@ import {
   factorySwapPlayerReturnCancelButtonX,
   factorySwapPlayerReturnMechanism,
   factorySwapPlayerReturnMonPicVisual,
+  factorySwapPlayerSwitchActionFadeY,
+  factorySwapPlayerSwitchBallCycleVisuals,
+  factorySwapPlayerSwitchBallTiles,
+  factorySwapPlayerSwitchCancelButtonX,
+  factorySwapPlayerSwitchMechanism,
   handleFactorySwapPresentationInput,
   type FactorySwapPresentationState,
 } from "../src/engine/factorySwapPresentation.ts";
@@ -69,6 +74,17 @@ function canonicalQuitPromptReady(): FactorySwapPresentationState {
   state = advance(state, FACTORY_SWAP_ENTRY_READY_DELAY);
   state = handleFactorySwapPresentationInput(state, "B");
   return advance(state, 36);
+}
+
+function canonicalEnemyPickerReady(): FactorySwapPresentationState {
+  let state = createCanonicalFactorySwapPresentation();
+  state = advance(state, FACTORY_SWAP_ENTRY_READY_DELAY);
+  state = handleFactorySwapPresentationInput(state, "A");
+  state = advance(state, 58);
+  state = handleFactorySwapPresentationInput(state, "DOWN");
+  state = advance(state, 2);
+  state = handleFactorySwapPresentationInput(state, "A");
+  return advance(state, 133);
 }
 
 function offerState(cursor: 0 | 1) {
@@ -834,5 +850,125 @@ describe("live Factory swap presentation adapter", () => {
     expect(factorySwapEnemyActionFadeY(108)).toBe(16);
     expect(factorySwapEnemyActionFadeY(109)).toBe(14);
     expect(factorySwapEnemyActionFadeY(123)).toBe(0);
+  });
+
+  it("returns enemy PKMN FOR SWAP to four player actions with an install-frame input rejection", () => {
+    let state = canonicalEnemyPickerReady();
+    const playerBefore = structuredClone(state.controller.playerParty);
+    const enemyBefore = structuredClone(state.controller.enemyParty);
+    const rentalsBefore = structuredClone(state.controller.rentalMons);
+
+    state = handleFactorySwapPresentationInput(state, "DOWN");
+    expect(state.controller).toMatchObject({
+      phase: "enemyPicker",
+      cursor: 3,
+      infoCursor: 0,
+      displayCursor: 0,
+      actionsCount: 5,
+    });
+    state = advance(state, 1);
+    state = handleFactorySwapPresentationInput(state, "A");
+    expect(state).toMatchObject({
+      phaseElapsed: 0,
+      controller: {
+        phase: "playerSwitch",
+        cursor: 3,
+        actionsCount: 5,
+        inputReady: false,
+      },
+    });
+
+    state = advance(state, 38);
+    expect(factorySwapPlayerSwitchMechanism(state.phaseElapsed))
+      .toBe("Swap_Task_ScreenInfoTransitionOut");
+    state = advance(state, 1);
+    expect(factorySwapPlayerSwitchMechanism(state.phaseElapsed))
+      .toBe("Swap_Task_SwitchPartyScreen");
+    state = advance(state, 32);
+    expect(state).toMatchObject({
+      phaseElapsed: 71,
+      controller: {
+        phase: "playerSwitch",
+        cursor: 0,
+        infoCursor: 0,
+        displayCursor: 0,
+        arrowCursor: 0,
+        actionsCount: 4,
+        inputReady: false,
+      },
+    });
+    expect(factorySwapPlayerSwitchMechanism(71))
+      .toBe("Swap_Task_SwitchPartyScreen");
+    expect(factorySwapPlayerSwitchMechanism(72))
+      .toBe("Swap_Task_ScreenInfoTransitionIn");
+
+    state = advance(state, 37);
+    expect(state.phaseElapsed).toBe(108);
+    expect(handleFactorySwapPresentationInput(state, "RIGHT")).toBe(state);
+    state = advance(state, 1);
+    expect(state).toMatchObject({
+      phaseElapsed: 0,
+      controller: {
+        phase: "playerPicker",
+        actionsCount: 4,
+        cursor: 0,
+        inputReady: false,
+        playerSwitchCompleted: true,
+      },
+    });
+    expect(handleFactorySwapPresentationInput(state, "RIGHT")).toBe(state);
+    state = advance(state, 1);
+    expect(state.controller).toMatchObject({
+      phase: "playerPicker",
+      actionsCount: 4,
+      cursor: 0,
+      inputReady: true,
+    });
+    state = handleFactorySwapPresentationInput(state, "RIGHT");
+    expect(state.controller).toMatchObject({
+      cursor: 1,
+      infoCursor: 0,
+      displayCursor: 0,
+      arrowCursor: 0,
+    });
+
+    expect(state.controller.playerParty).toEqual(playerBefore);
+    expect(state.controller.enemyParty).toEqual(enemyBefore);
+    expect(state.controller.rentalMons).toEqual(rentalsBefore);
+    expect(state.controller.enemyMonId).toBeNull();
+    expect(state.controller.mutationCommitted).toBe(false);
+    expect(factorySwapRoundDecision(state.controller)).toBeNull();
+  });
+
+  it("pins enemy-to-player cycle and staggered action chrome boundaries", () => {
+    expect(factorySwapPlayerSwitchBallCycleVisuals(44)).toEqual([
+      { centerX: 72, cycledToEnemy: false },
+      { centerX: 120, cycledToEnemy: false },
+      { centerX: 168, cycledToEnemy: false },
+    ]);
+    expect(factorySwapPlayerSwitchBallCycleVisuals(63).map((ball) =>
+      ball.cycledToEnemy
+    )).toEqual([true, true, true]);
+    expect(factorySwapPlayerSwitchBallCycleVisuals(71).map((ball) =>
+      ball.centerX
+    )).toEqual([64, 114, 164]);
+    expect(factorySwapPlayerSwitchBallCycleVisuals(72).map((ball) =>
+      ball.centerX
+    )).toEqual([72, 120, 168]);
+    expect(factorySwapAcceptPkmnButtonX(26)).toBe(160);
+    expect(factorySwapAcceptPkmnButtonX(27)).toBe(166);
+    expect(factorySwapAcceptCancelButtonX(32)).toBe(192);
+    expect(factorySwapAcceptCancelButtonX(33)).toBe(198);
+    expect(factorySwapPlayerSwitchCancelButtonX(74)).toBe(240);
+    expect(factorySwapPlayerSwitchCancelButtonX(75)).toBe(234);
+    expect(factorySwapPlayerSwitchCancelButtonX(82)).toBe(192);
+    expect(factorySwapPlayerSwitchActionFadeY(84)).toBe(16);
+    expect(factorySwapPlayerSwitchActionFadeY(85)).toBe(14);
+    expect(factorySwapPlayerSwitchActionFadeY(99)).toBe(0);
+    expect(factorySwapPlayerSwitchBallTiles(54)).toEqual([0, 0, 16]);
+    expect(factorySwapPlayerSwitchBallTiles(61)).toEqual([0, 16, 32]);
+    expect(factorySwapPlayerSwitchBallTiles(77)).toEqual([0, 16, 32]);
+    expect(factorySwapPlayerSwitchBallTiles(95)).toEqual([16, 0, 0]);
+    expect(factorySwapPlayerSwitchBallTiles(103)).toEqual([32, 0, 0]);
   });
 });

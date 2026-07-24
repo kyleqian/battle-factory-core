@@ -4,6 +4,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 342 — S8 OFF enemy PKMN FOR SWAP return: **GREEN — 115/115 exact**
+
+- **State:** enemy action 3 now returns through reusable transition-out,
+  party-screen switch, and transition-in tasks to an input-ready four-action
+  player picker. All 14 swap windows and four terminal windows are exact.
+- **Did:** wired the source DOWN jump and accepted A dispatch, staggered
+  two-button teardown, reverse three-ball cycle with independent callback
+  clocks, player action reconstruction, transition palette/chrome, install-
+  frame rejection, and first fresh RIGHT. Tier-1 pins task boundaries,
+  5→4 actions, cursor copies, no decision, and immutable identities.
+- **Next:** implement swap SUMMARY return, then enemy-origin quit chrome and
+  duplicate-species rejection from short staged OFF fixtures. Do not extend
+  canonical Battle 2 or claim Gate 2/Stage 8 complete.
+- **Notes:** new return **115/115**; prior 13 swap windows unchanged; terminal
+  **210/210 + 414/414 + 2513/2513 + 1911/1911**; Tier-1 **1254/1254**,
+  build **5.670 MB**. No absolute tick/frame lookup, framebuffer asset,
+  party/rental mutation, RNG selection roll, or SUMMARY/quit/duplicate work.
+
+---
 ## 341 — S8 OFF player-origin swap quit: **GREEN — 233/233 exact**
 
 - **State:** one reusable phase-relative quit interaction now covers player
@@ -47,25 +66,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **225/225**. No deferred questions. No absolute tick, framebuffer/screenshot
   asset, Battles 2–7 replay, YES recording/save branch, repeat challenge, or
   Stage 8 completion claim.
-
----
-## 339 — S8 OFF seventh-win roundWon through fanfare: **GREEN — 2513/2513 exact**
-
-- **State:** the staged seventh-win route is exact from its `CB2_LoadMap`
-  handoff through congratulations, the BP award, `MSGBOX_GETPOINTS`, and the
-  complete points-fanfare wait at +2513. A source audit confirms four
-  swap-YES interaction families remain beyond the accepted canonical route.
-- **Did:** connected generic `roundCompleted` to a phase-relative `roundWon`
-  terminal adapter and live lobby renderer. Stored gates are +300/+1100/+2200;
-  displayed BP changes 0→3 at +2201 and the 312-frame fanfare reaches zero at
-  +2513 without controller, RNG, battle-index, party, or opponent mutation.
-  ICE PUNCH now extends through its inward crystal spiral at **63/63 exact**.
-- **Next:** continue only the source-relative seventh-win remainder at +2514:
-  exchange message through party/status restore +3549, then reuse the shared
-  record-question/menu machinery through +4424. Swap still needs SUMMARY
-  return, quit flows, enemy `PKMN FOR SWAP`, and duplicate-species rejection;
-  use staged short windows, not a Battle-2 replay.
-- **Notes:** seventh-win **2513/2513**, LOSS **210/210 + 414/414**, Tier-1
-  merged **1242/1242**, build **5.663 MB**; ICE **63/63**, FIRE PUNCH
-  **225/225**. No deferred questions. No absolute tick, framebuffer asset,
-  screenshot lookup, canonical Battle-2 extension, or premature UI claim.

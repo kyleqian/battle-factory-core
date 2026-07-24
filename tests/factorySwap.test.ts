@@ -304,4 +304,36 @@ describe("Factory swap state/input contract", () => {
       arrowCursor: 0,
     });
   });
+
+  it("dispatches enemy PKMN FOR SWAP back through the source switch task", () => {
+    let state: FactorySwapState = {
+      ...createFactorySwapState(player, enemy, rentals),
+      phase: "enemyPicker",
+      playerMonId: 0,
+      actionsCount: 5,
+      inputReady: true,
+    };
+    state = handleFactorySwapInput(state, "DOWN");
+    expect(state).toMatchObject({
+      cursor: 3,
+      infoCursor: 0,
+      displayCursor: 0,
+      actionsCount: 5,
+    });
+    state = handleFactorySwapInput(state, "A");
+    expect(state).toMatchObject({
+      phase: "playerSwitch",
+      cursor: 3,
+      actionsCount: 5,
+      inputReady: false,
+      playerMonId: 0,
+      enemyMonId: null,
+      mutationCommitted: false,
+      result: null,
+    });
+    expect(state.playerParty).toEqual(player);
+    expect(state.enemyParty).toEqual(enemy);
+    expect(state.rentalMons).toEqual(rentals);
+    expect(factorySwapRoundDecision(state)).toBeNull();
+  });
 });

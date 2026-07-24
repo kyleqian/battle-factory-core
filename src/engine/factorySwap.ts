@@ -34,6 +34,7 @@ export type FactorySwapPhase =
   | "summaryFade"
   | "playerPickerReturn"
   | "enemySwitch"
+  | "playerSwitch"
   | "enemyPicker"
   | "acceptPrompt"
   | "acceptReturn"
@@ -69,6 +70,8 @@ export interface FactorySwapState {
   readonly playerMonId: 0 | 1 | 2 | null;
   readonly enemyMonId: 0 | 1 | 2 | null;
   readonly quitReturnPhase: "playerPicker" | "enemyPicker" | null;
+  /** Player picker was reconstructed by enemy PKMN FOR SWAP. */
+  readonly playerSwitchCompleted: boolean;
   /**
    * Set only when the presentation adapter acknowledges that the current
    * transition/animation has completed. Inputs never age themselves ready.
@@ -128,6 +131,7 @@ export function createFactorySwapState(
     playerMonId: null,
     enemyMonId: null,
     quitReturnPhase: null,
+    playerSwitchCompleted: false,
     inputReady: false,
     scriptResult: null,
     mutationCommitted: false,
@@ -275,11 +279,16 @@ export function handleFactorySwapInput(
         input === "UP" ||
         input === "DOWN"
       ) {
-        const cursor = moveAction(
-          state.cursor,
-          input === "LEFT" || input === "UP" ? -1 : 1,
-          state.actionsCount,
-        );
+        const cursor =
+          input === "LEFT" || input === "RIGHT"
+            ? moveAction(state.cursor, input === "LEFT" ? -1 : 1, state.actionsCount)
+            : input === "DOWN"
+              ? state.cursor < 3
+                ? 3
+                : moveAction(state.cursor, 1, state.actionsCount)
+              : state.cursor < 3
+                ? state.actionsCount - 1 as FactorySwapCursor
+                : moveAction(state.cursor, -1, state.actionsCount);
         return { ...state, cursor, cursorCopyPending: true };
       }
       if (input === "B") {
@@ -302,6 +311,13 @@ export function handleFactorySwapInput(
           inputReady: false,
           yesNoCursor: 0,
           quitReturnPhase: state.phase,
+        };
+      }
+      if (state.phase === "enemyPicker" && state.cursor === 3) {
+        return {
+          ...state,
+          phase: "playerSwitch",
+          inputReady: false,
         };
       }
       if (state.cursor >= 3) return state;
@@ -359,6 +375,7 @@ export function handleFactorySwapInput(
     case "summaryFade":
     case "playerPickerReturn":
     case "enemySwitch":
+    case "playerSwitch":
     case "acceptReturn":
     case "acceptExit":
     case "quitReturn":
