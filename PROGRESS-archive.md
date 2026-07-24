@@ -1,3 +1,23 @@
+## 386 — FLY terrain occlusion closes the last excluded charge frames
+
+- **State:** S10 remains open; animation coverage is now **11 exact / 3
+  partial / 262 unsupported**. FLY is exact in both legal orientations and
+  the canonical Scene-ON window; ISSUES #34 is removed.
+- **Did:** added an optional bottom clip to the generic affine-sprite blitter
+  and reused the already-evidenced opponent terrain cutoff in the canonical
+  layered FLY path. No affine table, sampler equation, move outcome, status,
+  PP, RNG, controller rule, or absolute-tick branch changed.
+- **Next:** continue the Level-50 animation queue with DRAGON_BREATH while the
+  OFF lane extends the source-shaped rules context by a fully evidenced
+  family. DIVE still needs independent dense evidence.
+- **Notes:** canonical FLY charge/miss **213/213**; portable opponent
+  **151/151 + 248/248** and player **147/147 + 244/244**, all with zero
+  exclusions. Focused animation tests **304/304**, Tier-1 and build green in
+  the lane. Fresh Bounce outcome probes changed on the refreshed Mechanics
+  Lab even on the untouched base, so no animation claim or policy change was
+  made from those outcomes. Commit `4b9cd44`.
+
+---
 ## 385 — Gate-3 MOVEVALUESCLEANUP production context integrated
 
 - **State:** S10 Gate 3 remains open with all **27** source-safe opcodes now

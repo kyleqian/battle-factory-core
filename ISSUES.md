@@ -27,58 +27,6 @@ delay-specific, or baked-frame patch. Reopen only if the engine gains a
 general cycle/register-queue model; this extra delayed-control frame does not
 block the roadmap's canonical S7 acceptance.
 
-## #23 — [PARKED 2026-07-20, supervisor decision] DRAGON_BREATH compressed
-  fire-projectile overdraw: renders 3177-3235 remain uncaptured
-
-Opened 2026-07-20 (supervisor). The 8 fire-projectile sprites of
-`Move_DRAGON_BREATH` (small_ember gfx, spawn every 4 ticks, 20-tick life)
-are the sole un-landed mechanism of turn 2; `turn2-dragonbreath.json` ships
-**235/235** with 3177-3235 excluded from `captureFrames` (this run's
-standard treatment of un-green spans — never committed red). Everything
-around it is green: kickoff text 3121-3176, shake/blend 3236-3263,
-resolution 3264-3346, and the settled tail through 3846 apart from its
-three separately documented single-tick bounce exclusions.
-
-**Settled by the four attempts (do NOT re-derive):**
-- Geometry: 21-entry `gOamMatrices` table (`a===d`, `b===-c`, identical
-  across all 8 spawns), base `(72,88)`, render lag 1, spawn cadence and
-  frame cycling — all RAM-verified.
-- The "concurrent `AnimTask_BlendBattleAnimPal` also blends the ember
-  palette" theory is CLOSED by source-level call-chain proof
-  (`F_PAL_TARGET` → `GetBattlePalettesMask` only ever selects a named
-  battler's own OBJ palette bank, never the ember's gfx-tag palette),
-  corroborated by pixel evidence (every mismatched pixel is a clean
-  small-ember ramp color — a shape defect, not a color one).
-- The shared sampler `drawSpriteSheetAffineRotate` is ELIMINATED: its
-  double-size iteration box is source-confirmed correct
-  (`gOamData_AffineDouble_ObjNormal_32x32`, same mode as the working ball
-  spin), and a 4-variant rounding/offset sweep found the current
-  convention strictly best (8181 diff-px vs 11410/21469/21933). This
-  matters beyond DRAGON_BREATH: a defect there would have affected every
-  other rotating sprite.
-- An extra-tick-of-life hypothesis was tested and made tick 3220 worse
-  (342→649px); reverted.
-
-**Fresh sole-sprite isolation (2026-07-23) narrows the residual:** the prior
-render-3223/RAM-3222 magnified case was invalid because four projectiles were
-live. An exhaustive 3168-3234 RAM scan finds the sole magnified window at
-RAM 3231-3234. The repaired verifier reports:
-
-- compressed render 3177/RAM 3176: oracle mask 10 px, **TP 10, FP 34,
-  FN 0**;
-- sole-live magnified render 3232/RAM 3231: oracle mask 128 px,
-  **TP 128, FP 0, FN 0**.
-
-The claimed magnified missing blob is therefore falsified. The shared sampler
-is pixel-exact when genuinely isolated in the magnified regime; only bounded
-compressed overdraw remains. Do not change the generic affine sampler from
-this evidence. The next useful probe is source-data decomposition within the
-compressed regime (native sheet/frame selection and coverage before scene
-composition), using the repaired sole-live candidate audit as a guard.
-Full evidence and runnable verifier:
-`docs/dragon-breath-notes.md` and
-`tools/probe/verify-dragonbreath-spawn7-isolation.ts`.
-
 ## #18 — [POLICY SETTLED 2026-07-19, user decision] sendout tick 1496
   (particle z-order, 3px): accepted/parked permanently; S6 ticked [x] with
   every diff frame individually attributed (3× #5, 1× this entry). The
