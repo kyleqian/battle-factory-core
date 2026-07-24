@@ -95,7 +95,7 @@ Every other result below deliberately owns its stated PC/script-stack result.
     clear target last-landed move/type, set MISS_TYPE = B_MSG_PROTECTED, and
     advance PC one byte. The ordinary no-protect case also advances one byte.
 
-Normal PP deduction is not opcode 0: opcode 10 ppreduce
+Normal PP deduction is not opcode 0: opcode 3 ppreduce
 (battle_script_commands.c:1203-1240) starts at one PP, adds Pressure by target
 class, clamps at zero, marks notFirstStrike, emits permanent-mon PP data,
 clears HITMARKER_NO_PPDEDUCT, then advances PC. Opcode 0 owns the no-PP
