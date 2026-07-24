@@ -47,7 +47,12 @@ export type BattleScriptStatusAnimationReceipt = Extract<
   Readonly<{ kind: "status-animation" }>
 >;
 
-export type BattleScriptPrimaryStatusAnimationPreparation =
+export type BattleScriptStatusAnimationRequest =
+  | Readonly<{ kind: "live-status1" }>
+  | Readonly<{ kind: "masked-live-status2"; wantedMask: number }>
+  | Readonly<{ kind: "explicit-status"; isStatus2: number; status: number }>;
+
+export type BattleScriptStatusAnimationPreparation =
   | Readonly<{
     kind: "emit";
     receipt: BattleScriptStatusAnimationReceipt;
@@ -87,17 +92,18 @@ export type BattleScriptBattlerPositionResolverPort<RulesContext extends object>
 ) => BattleScriptBattlerId | null;
 
 /**
- * Rules-owned boundary for Cmd_statusanimation's status/predicate snapshot.
+ * Rules-owned boundary for the status-animation family's status/predicate snapshot.
  * The port returns either the exact frozen receipt to enqueue or suppression;
  * the interpreter does not inspect status, substitute, semi-invulnerability,
  * hit-marker, or any other battle-rule field.
  */
-export type BattleScriptPrimaryStatusAnimationPreparationPort<
+export type BattleScriptStatusAnimationPreparationPort<
   RulesContext extends object,
 > = (
   context: BattleScriptOpcodeHandlerContext<RulesContext>,
   battler: BattleScriptBattlerId,
-) => BattleScriptPrimaryStatusAnimationPreparation | null;
+  request: BattleScriptStatusAnimationRequest,
+) => BattleScriptStatusAnimationPreparation | null;
 
 export type BattleScriptSelectionMessagePreparation = Readonly<{
   attacker: BattleScriptBattlerId;
@@ -121,7 +127,7 @@ export type BattleScriptSourceCommandPorts<RulesContext extends object> = Readon
   prepareMessage: BattleScriptMessagePreparationPort<RulesContext>;
   prepareSelectionMessage: BattleScriptSelectionMessagePreparationPort<RulesContext>;
   prepareSelectionMessageFromTable: BattleScriptSelectionMessageFromTablePreparationPort<RulesContext>;
-  preparePrimaryStatusAnimation: BattleScriptPrimaryStatusAnimationPreparationPort<RulesContext>;
+  prepareStatusAnimation: BattleScriptStatusAnimationPreparationPort<RulesContext>;
   resolveAttackerBattler: BattleScriptAttackerResolverPort<RulesContext>;
   resolveBattlerAtPosition: BattleScriptBattlerPositionResolverPort<RulesContext>;
   resolveBattlerForBattleScript: BattleScriptBattlerSelectorResolverPort<RulesContext>;
@@ -219,7 +225,7 @@ function unavailableBattlerPositionReason<RulesContext extends object>(
   });
 }
 
-function unavailablePrimaryStatusAnimationReason<RulesContext extends object>(
+function unavailableStatusAnimationReason<RulesContext extends object>(
   context: BattleScriptOpcodeHandlerContext<RulesContext>,
   operand: BattleScriptOperand,
 ): BattleScriptBlockReason {
@@ -228,7 +234,7 @@ function unavailablePrimaryStatusAnimationReason<RulesContext extends object>(
     programCounter: context.state.programCounter,
     opcodeId: context.instruction.opcodeId,
     opcodeName: context.instruction.opcodeName,
-    port: "prepare-primary-status-animation",
+    port: "prepare-status-animation",
     operandExpression: operand.expression,
   });
 }
@@ -264,7 +270,7 @@ function unavailableSelectionMessageFromTableReason<RulesContext extends object>
 function invalidSourceOperandReason<RulesContext extends object>(
   context: BattleScriptOpcodeHandlerContext<RulesContext>,
   operandExpression: string,
-  expected: "none" | "u8" | "u16" | "u16-table-pointer",
+  expected: "none" | "u8" | "u16" | "u32" | "u16-table-pointer",
   received: string,
 ): BattleScriptHaltReason {
   return Object.freeze({
@@ -292,7 +298,7 @@ function haltForInvalidOperand<RulesContext extends object>(
   context: BattleScriptOpcodeHandlerContext<RulesContext>,
   operandExpression: string,
   received: string,
-  expected: "none" | "u8" | "u16" | "u16-table-pointer" = "u16",
+  expected: "none" | "u8" | "u16" | "u32" | "u16-table-pointer" = "u16",
 ): BattleScriptCommandTransition<RulesContext> {
   return transitionBattleScriptCommand(
     context,
@@ -632,30 +638,133 @@ function emitTrainerSlideControllerEvent<RulesContext extends object>(
   );
 }
 
-function executePrimaryStatusAnimation<RulesContext extends object>(
+const STATUS_ANIMATION_U32_CONSTANTS: Readonly<Record<string, number>> = Object.freeze({
+  STATUS2_CONFUSION: 0x0000_0007,
+  STATUS2_INFATUATION: 0x000f_0000,
+  STATUS2_NIGHTMARE: 0x0800_0000,
+  STATUS2_CURSED: 0x1000_0000,
+});
+
+function decodeStatusAnimationInteger(
+  expression: string,
+  maximum: number,
+): number | null {
+  const constant = STATUS_ANIMATION_U32_CONSTANTS[expression];
+  if (constant !== undefined && constant <= maximum) return constant;
+  if (!/^(?:0[xX][0-9a-fA-F]+|[0-9]+)$/.test(expression)) return null;
+  const value = Number(expression);
+  return Number.isSafeInteger(value) && value >= 0 && value <= maximum ? value : null;
+}
+
+type StatusAnimationOperandsResult<RulesContext extends object> =
+  | Readonly<{
+    kind: "operands";
+    selector: BattleScriptOperand;
+    request: BattleScriptStatusAnimationRequest;
+  }>
+  | Readonly<{
+    kind: "transition";
+    transition: BattleScriptCommandTransition<RulesContext>;
+  }>;
+
+function requireStatusAnimationOperands<RulesContext extends object>(
+  context: BattleScriptOpcodeHandlerContext<RulesContext>,
+  requestKind: BattleScriptStatusAnimationRequest["kind"],
+): StatusAnimationOperandsResult<RulesContext> {
+  const operands = context.instruction.operands;
+  const selector = operands[0];
+  const expectedWidths = requestKind === "live-status1"
+    ? [1]
+    : requestKind === "masked-live-status2"
+    ? [1, 4]
+    : [1, 1, 4];
+  if (
+    operands.length !== expectedWidths.length
+    || expectedWidths.some((width, index) => operands[index]?.widthBytes !== width)
+  ) {
+    return Object.freeze({
+      kind: "transition",
+      transition: haltForInvalidOperand(
+        context,
+        selector?.expression ?? "<missing>",
+        `${operands.length} operands; widths ${operands.map(({ widthBytes }) => widthBytes).join(",") || "<missing>"}`,
+        "u8",
+      ),
+    });
+  }
+  if (!selector) throw new Error("validated status-animation selector is missing");
+  if (requestKind === "live-status1") {
+    return Object.freeze({
+      kind: "operands",
+      selector,
+      request: Object.freeze({ kind: "live-status1" }),
+    });
+  }
+  if (requestKind === "masked-live-status2") {
+    const wantedMask = decodeStatusAnimationInteger(operands[1]!.expression, 0xffff_ffff);
+    if (wantedMask === null) {
+      return Object.freeze({
+        kind: "transition",
+        transition: haltForInvalidOperand(
+          context,
+          operands[1]!.expression,
+          operands[1]!.expression,
+          "u32",
+        ),
+      });
+    }
+    return Object.freeze({
+      kind: "operands",
+      selector,
+      request: Object.freeze({ kind: "masked-live-status2", wantedMask }),
+    });
+  }
+  const isStatus2 = decodeStatusAnimationInteger(operands[1]!.expression, 0xff);
+  const status = decodeStatusAnimationInteger(operands[2]!.expression, 0xffff_ffff);
+  if (isStatus2 === null || status === null) {
+    const invalid = isStatus2 === null ? operands[1]! : operands[2]!;
+    return Object.freeze({
+      kind: "transition",
+      transition: haltForInvalidOperand(
+        context,
+        invalid.expression,
+        invalid.expression,
+        invalid.widthBytes === 1 ? "u8" : "u32",
+      ),
+    });
+  }
+  return Object.freeze({
+    kind: "operands",
+    selector,
+    request: Object.freeze({ kind: "explicit-status", isStatus2, status }),
+  });
+}
+
+function executeStatusAnimation<RulesContext extends object>(
   context: BattleScriptOpcodeHandlerContext<RulesContext>,
   ports: BattleScriptSourceCommandPorts<RulesContext>,
+  requestKind: BattleScriptStatusAnimationRequest["kind"],
 ): BattleScriptCommandTransition<RulesContext> {
   if (!ports.isControllerIdle(context)) {
     return blockBattleScriptCommand(context, controllerBusyReason(context));
   }
-  const required = requireSingleByteOperand(context);
+  const required = requireStatusAnimationOperands(context, requestKind);
   if (required.kind === "transition") return required.transition;
-  const battler = ports.resolveBattlerForBattleScript(context, required.operand);
+  const battler = ports.resolveBattlerForBattleScript(context, required.selector);
   if (battler === null) {
     return blockBattleScriptCommand(
       context,
-      unavailableBattlerSelectorReason(context, required.operand),
+      unavailableBattlerSelectorReason(context, required.selector),
     );
   }
   if (!isBattleScriptBattlerId(battler)) {
     return haltForInvalidBattler(context, battler);
   }
-  const preparation = ports.preparePrimaryStatusAnimation(context, battler);
+  const preparation = ports.prepareStatusAnimation(context, battler, required.request);
   if (preparation === null) {
     return blockBattleScriptCommand(
       context,
-      unavailablePrimaryStatusAnimationReason(context, required.operand),
+      unavailableStatusAnimationReason(context, required.selector),
     );
   }
   if (
@@ -672,7 +781,7 @@ function executePrimaryStatusAnimation<RulesContext extends object>(
   ) {
     return haltForInvalidSnapshot(
       context,
-      "primary status-animation preparation and receipt must be frozen",
+      "status-animation preparation and receipt must be frozen",
     );
   }
   const baseScheduler = schedulerWith(context, { activeBattler: battler });
@@ -687,12 +796,29 @@ function executePrimaryStatusAnimation<RulesContext extends object>(
   if (
     receipt.kind !== "status-animation"
     || receipt.battler !== battler
-    || receipt.statusMode !== "primary"
+    || !Number.isSafeInteger(receipt.isStatus2)
+    || receipt.isStatus2 < 0
+    || receipt.isStatus2 > 0xff
     || !Number.isSafeInteger(receipt.status)
     || receipt.status < 0
     || receipt.status > 0xffff_ffff
   ) {
-    return haltForInvalidSnapshot(context, "invalid primary status-animation receipt");
+    return haltForInvalidSnapshot(context, "invalid status-animation receipt");
+  }
+  const requestMatchesReceipt =
+    required.request.kind === "live-status1"
+      ? receipt.isStatus2 === 0
+      : required.request.kind === "masked-live-status2"
+      ? (
+        receipt.isStatus2 === 1
+        && ((receipt.status >>> 0) & (~required.request.wantedMask >>> 0)) === 0
+      )
+      : (
+        receipt.isStatus2 === required.request.isStatus2
+        && receipt.status === required.request.status
+      );
+  if (!requestMatchesReceipt) {
+    return haltForInvalidSnapshot(context, "status-animation receipt does not match request");
   }
   return transitionBattleScriptCommand(
     context,
@@ -710,7 +836,7 @@ function executePrimaryStatusAnimation<RulesContext extends object>(
  * Cmd_printselectionstringfromtable, Cmd_waitmessage, Cmd_pause, Cmd_playse,
  * Cmd_fanfare, Cmd_playfaintcry, Cmd_hidepartystatussummary, and
  * Cmd_makevisible, Cmd_trainerslidein, Cmd_trainerslideout, and
- * Cmd_statusanimation.
+ * Cmd_statusanimation, Cmd_status2animation, and Cmd_chosenstatusanimation.
  *
  * Controller readiness, source-context string preparation, and exact u16
  * operand resolution are injected logical ports. MSG_DISPLAY and the shared
@@ -820,7 +946,11 @@ export function createBattleScriptSourceCommandHandlers<RulesContext extends obj
   installHandler(program, handlers, "B_SCR_OP_TRAINERSLIDEOUT", (context) =>
     emitTrainerSlideControllerEvent(context, ports, "trainer-slide-out"));
   installHandler(program, handlers, "B_SCR_OP_STATUSANIMATION", (context) =>
-    executePrimaryStatusAnimation(context, ports));
+    executeStatusAnimation(context, ports, "live-status1"));
+  installHandler(program, handlers, "B_SCR_OP_STATUS2ANIMATION", (context) =>
+    executeStatusAnimation(context, ports, "masked-live-status2"));
+  installHandler(program, handlers, "B_SCR_OP_CHOSENSTATUSANIMATION", (context) =>
+    executeStatusAnimation(context, ports, "explicit-status"));
   installHandler(program, handlers, "B_SCR_OP_WAITMESSAGE", (context) => {
     if (!ports.isControllerIdle(context)) {
       return blockBattleScriptCommand(context, controllerBusyReason(context));

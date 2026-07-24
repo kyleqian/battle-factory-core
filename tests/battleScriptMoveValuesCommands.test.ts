@@ -463,7 +463,7 @@ describe("source-mapped Battle Script MOVEVALUESCLEANUP rule command", () => {
           messageId: operand.expression,
           substitutions: Object.freeze([]),
         }),
-        preparePrimaryStatusAnimation: () => null,
+        prepareStatusAnimation: () => null,
         prepareSelectionMessage: () => null,
         prepareSelectionMessageFromTable: () => null,
         resolveAttackerBattler: () => null,
@@ -483,7 +483,7 @@ describe("source-mapped Battle Script MOVEVALUESCLEANUP rule command", () => {
     });
 
     expect(Object.keys(composed).map(Number).sort((left, right) => left - right)).toEqual([
-      10, 16, 17, 18, 20, 37, 38, 39, 40, 57, 58, 60, 61, 62, 65, 83, 84, 85, 86, 98, 100, 111, 131, 141, 248,
+      10, 16, 17, 18, 20, 37, 38, 39, 40, 57, 58, 60, 61, 62, 65, 83, 84, 85, 86, 98, 100, 101, 102, 111, 131, 141, 248,
     ]);
   });
 });

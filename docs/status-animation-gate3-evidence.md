@@ -1,4 +1,4 @@
-# S10 Gate 3 — `STATUSANIMATION` opcode 100 evidence
+# S10 Gate 3 — status-animation family evidence
 
 ## Verdict
 
@@ -6,9 +6,9 @@
 Script interpreter. The interpreter owns only the controller-idle barrier,
 the one-byte selector, `GetBattlerForBattleScript` resolution, active/pending
 controller bookkeeping, one-instruction advancement, and the typed semantic
-receipt. A dedicated preparation/rules port owns the complete emission
-decision and returns either the exact frozen primary-status receipt or a
-frozen suppression result.
+receipt. One shared preparation/rules port owns the complete emission
+decision for primary live status1, masked live status2, and explicit status
+requests, returning either an exact frozen receipt or frozen suppression.
 
 This slice does not apply a status, inspect or mutate battle rules, consume
 RNG, model controller bytes, or model the visual animation/completion timing.
@@ -84,17 +84,18 @@ oracle state.
 
 ## Port and test boundary
 
-The port returns:
+The generic port accepts frozen `live-status1`, `masked-live-status2`, or
+`explicit-status` requests and returns:
 
 - `{ kind: "emit", receipt }`, where `receipt` is the exact frozen
-  `{ kind: "status-animation", battler, statusMode: "primary", status }`; or
+  `{ kind: "status-animation", battler, isStatus2, status }`; or
 - frozen `{ kind: "suppress" }`.
 
 `null` means required rules context is unavailable and identity-blocks. The
-handler validates the receipt but does not derive it. Emission marks the
-resolved battler pending; suppression advances while changing only the
-source-equivalent active battler. Busy execution never reads the operand or
-calls either port.
+handler validates the receipt against its request but does not derive live
+status or suppression. Emission marks the resolved battler pending;
+suppression advances while changing only the source-equivalent active
+battler. Busy execution never decodes operands or calls either external port.
 
 Tier-1 tests pin source hash/body/provenance, all starts and widths, idle/busy
 ordering, selector null/invalid handling, emitted and suppressed results,

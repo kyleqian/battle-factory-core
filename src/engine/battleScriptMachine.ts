@@ -46,7 +46,7 @@ export type BattleScriptHaltReason =
     opcodeId: number;
     opcodeName: string;
     operandExpression: string;
-    expected: "none" | "u8" | "u16" | "u16-table-pointer";
+    expected: "none" | "u8" | "u16" | "u32" | "u16-table-pointer";
     received: string;
   }>
   | Readonly<{
@@ -129,7 +129,7 @@ export type BattleScriptBlockReason =
       | "resolve-attacker"
       | "resolve-battler-at-position"
       | "resolve-battler-for-battle-script"
-      | "prepare-primary-status-animation"
+      | "prepare-status-animation"
       | "resolve-byte"
       | "resolve-halfword";
     operandExpression: string;

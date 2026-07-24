@@ -62,7 +62,7 @@ function handlers(
   return createBattleScriptSourceCommandHandlers(program, Object.freeze({
     isControllerIdle,
     prepareMessage: () => null,
-    preparePrimaryStatusAnimation: () => null,
+    prepareStatusAnimation: () => null,
     prepareSelectionMessage: () => null,
     prepareSelectionMessageFromTable: () => null,
     resolveAttackerBattler: () => null,
@@ -345,7 +345,7 @@ describe("source-exact Battle Script MAKEVISIBLE controller command", () => {
     expect(acknowledgeBattleScriptController(acknowledged, 2)).toBe(acknowledged);
   });
 
-  it("replays deterministically and composes to exactly twenty-five supported IDs", () => {
+  it("replays deterministically and composes to exactly twenty-seven supported IDs", () => {
     const makeResult = () => stepBattleScriptMachine(
       program,
       stateAt(makeVisible),
@@ -355,7 +355,7 @@ describe("source-exact Battle Script MAKEVISIBLE controller command", () => {
 
     const sourceHandlers = handlers(() => 0);
     expect(Object.keys(sourceHandlers).map(Number).sort((left, right) => left - right)).toEqual([
-      10, 16, 17, 18, 20, 57, 58, 83, 84, 85, 86, 98, 100, 111, 131, 248,
+      10, 16, 17, 18, 20, 57, 58, 83, 84, 85, 86, 98, 100, 101, 102, 111, 131, 248,
     ]);
     expect(sourceHandlers[88]).toBeUndefined();
     const composed = Object.freeze({
@@ -368,7 +368,7 @@ describe("source-exact Battle Script MAKEVISIBLE controller command", () => {
       ...createBattleScriptMoveValuesCommandHandlers<FixtureRules>(program),
     });
     expect(Object.keys(composed).map(Number).sort((left, right) => left - right)).toEqual([
-      10, 16, 17, 18, 20, 37, 38, 39, 40, 57, 58, 60, 61, 62, 65, 83, 84, 85, 86, 98, 100, 111, 131, 141, 248,
+      10, 16, 17, 18, 20, 37, 38, 39, 40, 57, 58, 60, 61, 62, 65, 83, 84, 85, 86, 98, 100, 101, 102, 111, 131, 141, 248,
     ]);
   });
 });

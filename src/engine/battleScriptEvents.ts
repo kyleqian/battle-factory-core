@@ -84,7 +84,8 @@ export type BattleScriptSemanticEventPayload =
   | Readonly<{
     kind: "status-animation";
     battler: BattleScriptBattlerId;
-    statusMode: "primary";
+    /** Raw bool8 controller operand: source does not normalize opcode 102. */
+    isStatus2: number;
     status: number;
   }>
   | Readonly<{

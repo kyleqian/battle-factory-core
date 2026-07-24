@@ -13,7 +13,7 @@ import {
 import {
   createBattleScriptSourceCommandHandlers,
   type BattleScriptBattlerSelectorResolverPort,
-  type BattleScriptPrimaryStatusAnimationPreparationPort,
+  type BattleScriptStatusAnimationPreparationPort,
   type BattleScriptStatusAnimationReceipt,
 } from "../src/engine/battleScriptSourceCommands.ts";
 import {
@@ -39,7 +39,7 @@ function receipt(battler: 0 | 1 | 2 | 3, status = 0x80): BattleScriptStatusAnima
   return Object.freeze({
     kind: "status-animation",
     battler,
-    statusMode: "primary",
+    isStatus2: 0,
     status,
   });
 }
@@ -47,13 +47,13 @@ function receipt(battler: 0 | 1 | 2 | 3, status = 0x80): BattleScriptStatusAnima
 function handlers(
   idle: boolean,
   resolve: BattleScriptBattlerSelectorResolverPort<FixtureRules>,
-  prepare: BattleScriptPrimaryStatusAnimationPreparationPort<FixtureRules>,
+  prepare: BattleScriptStatusAnimationPreparationPort<FixtureRules>,
   selectedProgram: BattleScriptProgram = program,
 ) {
   return createBattleScriptSourceCommandHandlers(selectedProgram, Object.freeze({
     isControllerIdle: () => idle,
     prepareMessage: () => null,
-    preparePrimaryStatusAnimation: prepare,
+    prepareStatusAnimation: prepare,
     prepareSelectionMessage: () => null,
     prepareSelectionMessageFromTable: () => null,
     resolveAttackerBattler: () => null,
@@ -142,7 +142,7 @@ describe("source-exact STATUSANIMATION primary-status receipt", () => {
   it("consults idle first and identity-blocks busy without resolving or preparing", () => {
     const instruction = program.instructions[starts[0]!]!;
     const resolve = vi.fn<BattleScriptBattlerSelectorResolverPort<FixtureRules>>(() => 1);
-    const prepare = vi.fn<BattleScriptPrimaryStatusAnimationPreparationPort<FixtureRules>>(() =>
+    const prepare = vi.fn<BattleScriptStatusAnimationPreparationPort<FixtureRules>>(() =>
       Object.freeze({ kind: "emit", receipt: receipt(1) })
     );
     const initial = stateAt(instruction);
@@ -175,7 +175,7 @@ describe("source-exact STATUSANIMATION primary-status receipt", () => {
 
   it("halts an invalid resolved battler and never calls the rules port", () => {
     const instruction = program.instructions[starts[0]!]!;
-    const prepare = vi.fn<BattleScriptPrimaryStatusAnimationPreparationPort<FixtureRules>>();
+    const prepare = vi.fn<BattleScriptStatusAnimationPreparationPort<FixtureRules>>();
     const result = stepBattleScriptMachine(
       program,
       stateAt(instruction),
@@ -190,7 +190,15 @@ describe("source-exact STATUSANIMATION primary-status receipt", () => {
     const instruction = program.instructions[starts[12]!]!;
     const exactReceipt = receipt(1, 0x380);
     const preparation = Object.freeze({ kind: "emit" as const, receipt: exactReceipt });
-    const selectedHandlers = handlers(true, () => 1, () => preparation);
+    const prepare = vi.fn<BattleScriptStatusAnimationPreparationPort<FixtureRules>>(
+      (_context, battler, request) => {
+        expect(battler).toBe(1);
+        expect(request).toEqual({ kind: "live-status1" });
+        expect(Object.isFrozen(request)).toBe(true);
+        return preparation;
+      },
+    );
+    const selectedHandlers = handlers(true, () => 1, prepare);
     const initial = stateAt(instruction, createBattleScriptSchedulerState({
       messageDisplayActive: true,
       pauseCounterBattle: 7,
@@ -203,6 +211,7 @@ describe("source-exact STATUSANIMATION primary-status receipt", () => {
       state: initial,
     });
     expect(selectedHandlers[100]!(context).events[0]).toBe(exactReceipt);
+    expect(prepare).toHaveBeenCalledOnce();
     const result = stepBattleScriptMachine(program, initial, selectedHandlers);
     expect(result.kind).toBe("advanced");
     expect(result.state.programCounter).toBe(instruction.programCounter + 1);
@@ -258,7 +267,7 @@ describe("source-exact STATUSANIMATION primary-status receipt", () => {
     expect(unavailable.kind).toBe("blocked");
     expect(unavailable.state).toBe(initial);
     if (unavailable.kind !== "blocked") throw new Error("expected preparation block");
-    expect(unavailable.reason).toMatchObject({ port: "prepare-primary-status-animation" });
+    expect(unavailable.reason).toMatchObject({ port: "prepare-status-animation" });
 
     for (const prepare of [
       () => ({ kind: "suppress" as const }),
@@ -316,7 +325,7 @@ describe("source-exact STATUSANIMATION primary-status receipt", () => {
         )),
       });
       const resolve = vi.fn<BattleScriptBattlerSelectorResolverPort<FixtureRules>>(() => 0);
-      const prepare = vi.fn<BattleScriptPrimaryStatusAnimationPreparationPort<FixtureRules>>();
+      const prepare = vi.fn<BattleScriptStatusAnimationPreparationPort<FixtureRules>>();
       const result = stepBattleScriptMachine(
         malformedProgram,
         stateAt(instruction),
@@ -333,11 +342,15 @@ describe("source-exact STATUSANIMATION primary-status receipt", () => {
     }
   });
 
-  it("composes opcode 100 exactly once with no status sibling or visual handler", () => {
+  it("composes all three status receipt opcodes exactly once with no visual handler", () => {
     const selected = handlers(true, () => 0, () => Object.freeze({ kind: "suppress" }));
-    expect(Object.keys(selected).map(Number).filter((id) => id === 100)).toEqual([100]);
+    expect(Object.keys(selected).map(Number).filter((id) => [100, 101, 102].includes(id))).toEqual([
+      100,
+      101,
+      102,
+    ]);
     expect(selected[100]).toBeTypeOf("function");
-    expect(selected[101]).toBeUndefined();
-    expect(selected[102]).toBeUndefined();
+    expect(selected[101]).toBeTypeOf("function");
+    expect(selected[102]).toBeTypeOf("function");
   });
 });

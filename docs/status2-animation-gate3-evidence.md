@@ -1,7 +1,7 @@
 # `STATUS2ANIMATION` / `CHOSENSTATUSANIMATION` Gate-3 evidence
 
-Scope: source and Mechanics Lab audit only. This note does not implement an
-opcode, alter the interpreter, inject a battle result, or make a pixel claim.
+Scope: source audit, semantic receipt implementation, and Mechanics Lab
+evidence. This note does not inject a battle result or make a pixel claim.
 
 ## Identity, bytes, and source coverage
 
@@ -149,13 +149,20 @@ probe was also attempted through `tools/run-mgba-probe.py`; it correctly
 reported the local `_cffi_backend` import failure, while the shared mGBA-backed
 OFF service supplied the successful authoritative run above.
 
+The exact request is now committed as
+`tools/battle-lab/mechanic-confuse-ray-status2animation-off.json`. A fresh
+2026-07-24 OFF run reproduced both framebuffer hashes above. A checked
+manifest assertion confirmed zero PP Ups at both captures, player Confuse Ray
+PP **10→9**, and stock-created opponent `status2` / confusion turns **0→4**.
+The fixture SHA-256 is
+`ebc9b0d780a38af64b20aa92958e6c479092541be8d4149250420069c52a71c3`;
+the fresh scratch manifest SHA-256 is
+`871decd46fef2148633955baed69fcb36dda1a824e66255ee8a921c693cfdefc`.
+
 ## Minimum preparation boundary and verdicts
 
-Current `battleScriptSourceCommands.ts` already owns controller-idle blocking,
-`GetBattlerForBattleScript` resolution, immutable events, and pending-battler
-scheduler state, but installs none of opcodes 100--102. The smallest safe
-addition after opcode 100 is one read-only preparation port, not a rules
-mutation API:
+`battleScriptSourceCommands.ts` now installs opcodes 100--102 through one
+read-only preparation port, not a rules mutation API:
 
 ```ts
 type StatusAnimationRequest =
@@ -165,24 +172,33 @@ type StatusAnimationRequest =
 
 type PrepareStatusAnimation<RulesContext extends object> = (
   context: BattleScriptOpcodeHandlerContext<RulesContext>,
-  selector: BattleScriptOperand,
+  battler: BattleScriptBattlerId,
   request: StatusAnimationRequest,
-) => Readonly<{ battler: BattleScriptBattlerId; isStatus2: number; status: number; suppressed: boolean }> | null;
+) =>
+  | Readonly<{ kind: "emit"; receipt: Readonly<{
+      kind: "status-animation";
+      battler: BattleScriptBattlerId;
+      isStatus2: number;
+      status: number;
+    }> }>
+  | Readonly<{ kind: "suppress" }>
+  | null;
 ```
 
-The port alone reads/resolves selector context, live status1/status2,
-semi-invulnerable status3, substitute HP, and hit-marker suppression. `null`
-means unavailable source context and blocks; `suppressed` means advance with
-no event/pending mark. The interpreter merely validates operand widths,
-honours its existing idle gate, asks this port to prepare an immutable receipt,
-marks the returned battler pending only for an unsuppressed receipt, and
-advances. It consumes neither RNG nor rule transitions and mutates no status.
+The interpreter owns the idle gate, exact `[u8,u32]` / `[u8,u8,u32]`
+decoding, source-pinned constant values, selector resolution/validation,
+immutable request/receipt validation, active/pending scheduler bookkeeping,
+and fixed advance/suppression behavior. The port alone reads live
+status1/status2, semi-invulnerable status3, substitute HP, and hit-marker
+suppression. `null` means unavailable source context and identity-blocks;
+suppression advances with no event or pending mark. The interpreter consumes
+neither RNG nor rule transitions and mutates no status or PP.
 
-- **Opcode 101 — IMPLEMENT after opcode 100 and this shared port.** Its
+- **Opcode 101 — IMPLEMENTED.** Its
   request is `masked-live-status2`; the external port owns the required live
   `status2 & wantedMask` read. It must not be approximated by forwarding the
   script mask or by adding status2 to interpreter state.
-- **Opcode 102 — IMPLEMENT after opcode 100 and this shared port.** Its
+- **Opcode 102 — IMPLEMENTED.** Its
   request is `explicit-status`; it must forward the explicit `u32` and raw
   middle `u8` unchanged while still using the same suppression preparation.
   It must not mask the explicit word against current status2.
@@ -191,3 +207,11 @@ Both verdicts are semantic receipt implementations only. Defer animation
 selection, controller callbacks/acks, status sprite lifetime, Scene-ON/OFF
 timing, rendering, pixels, rules/RNG, and all status mutation to their owning
 layers.
+
+Tier-1 pins both source definitions/hashes, all **5+2** generated starts,
+operand widths and `.4byte` layout, all four observed status2 constants,
+explicit raw-u8 and full-u32 forwarding, the live-mask versus explicit-word
+distinction, idle ordering, unavailable selector/rules context, invalid
+battlers, frozen suppression, emitted/pending/ack behavior, malformed widths
+and expressions, request/receipt mismatch rejection, deterministic replay,
+rules/RNG identity, and exact three-opcode composition.
