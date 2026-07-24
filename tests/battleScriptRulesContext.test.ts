@@ -166,10 +166,13 @@ describe("source-shaped Battle Script rules context", () => {
     const source = input();
     const created = createBattleScriptRulesContext(source);
     expect(Object.keys(created).sort()).toEqual([
+      "absentBattlerFlags",
       "atkCancelerTracker",
       "battleMoveDamage",
       "battleOutcome",
       "battlers",
+      "bideDmg",
+      "bideTarget",
       "critMultiplier",
       "currentMove",
       "currentMoveEffect",
@@ -183,11 +186,14 @@ describe("source-shaped Battle Script rules context", () => {
       "multiHitCounter",
       "multistringChooser",
       "scriptingBattler",
+      "scriptingBideDmg",
       "selectorRoles",
     ]);
     expect(created.battlers).toHaveLength(4);
     expect(Object.isFrozen(created)).toBe(true);
     expect(Object.isFrozen(created.battlers)).toBe(true);
+    expect(Object.isFrozen(created.bideDmg)).toBe(true);
+    expect(Object.isFrozen(created.bideTarget)).toBe(true);
     expect(Object.isFrozen(created.selectorRoles)).toBe(true);
     expect(created.battlers.every(Object.isFrozen)).toBe(true);
     expect(created.battlers.every((value) => Object.isFrozen(value.pp))).toBe(true);

@@ -86,6 +86,20 @@ export type BattleScriptSelectorRoleBindings = Readonly<{
   effectBattler: BattleScriptBattlerId | null;
 }>;
 
+export type BattleScriptBideDamageByBattler = readonly [
+  number,
+  number,
+  number,
+  number,
+];
+
+export type BattleScriptBideTargetByBattler = readonly [
+  BattleScriptBattlerId,
+  BattleScriptBattlerId,
+  BattleScriptBattlerId,
+  BattleScriptBattlerId,
+];
+
 /**
  * First durable source-shaped Battle Script rules slice.
  *
@@ -109,6 +123,14 @@ export type BattleScriptRulesContext = Readonly<
     multiHitCounter: number;
     multistringChooser: number;
     battleMoveDamage: number;
+    /** Source s32 gBideDmg[MAX_BATTLERS_COUNT]. */
+    bideDmg: BattleScriptBideDamageByBattler;
+    /** Source u8 gBideTarget[MAX_BATTLERS_COUNT], validated to battler ids. */
+    bideTarget: BattleScriptBideTargetByBattler;
+    /** Source s32 gBattleScripting.bideDmg. */
+    scriptingBideDmg: number;
+    /** Source u8 gAbsentBattlerFlags, limited to the four battler bits. */
+    absentBattlerFlags: number;
   }
 >;
 
@@ -133,6 +155,10 @@ export type BattleScriptRulesContextInput = Readonly<{
   multiHitCounter: number;
   multistringChooser?: number;
   battleMoveDamage?: number;
+  bideDmg?: readonly number[];
+  bideTarget?: readonly BattleScriptBattlerId[];
+  scriptingBideDmg?: number;
+  absentBattlerFlags?: number;
 }>;
 
 function requireUnsigned(value: number, maximum: number, field: string): number {
@@ -140,6 +166,17 @@ function requireUnsigned(value: number, maximum: number, field: string): number 
     throw new Error(`${field} must be an unsigned integer <= ${maximum}, got ${value}`);
   }
   return value;
+}
+
+function requireSigned32(value: number, field: string): number {
+  if (
+    !Number.isSafeInteger(value)
+    || value < -0x8000_0000
+    || value > 0x7fff_ffff
+  ) {
+    throw new Error(`${field} must be a signed 32-bit integer, got ${value}`);
+  }
+  return value | 0;
 }
 
 type GeneratedMoveEffectRow = Readonly<{
@@ -364,6 +401,24 @@ export function createBattleScriptRulesContext(
     throw new Error("scriptingBattler must be a battler id 0..3");
   }
   const currentMove = requireUnsigned(input.currentMove, 0xffff, "currentMove");
+  const bideDmgInput = input.bideDmg ?? [0, 0, 0, 0];
+  if (!Array.isArray(bideDmgInput) || bideDmgInput.length !== 4) {
+    throw new Error("bideDmg must contain exactly four signed 32-bit values");
+  }
+  const bideDmg = Object.freeze(bideDmgInput.map((value, index) =>
+    requireSigned32(value, `bideDmg[${index}]`)
+  )) as unknown as BattleScriptBideDamageByBattler;
+  const bideTargetInput = input.bideTarget ?? [0, 0, 0, 0];
+  if (!Array.isArray(bideTargetInput) || bideTargetInput.length !== 4) {
+    throw new Error("bideTarget must contain exactly four battler ids");
+  }
+  const bideTarget = Object.freeze(bideTargetInput.map((value, index) => {
+    const target = requireRole(value, `bideTarget[${index}]`);
+    if (target === null) {
+      throw new Error(`bideTarget[${index}] must be a battler id 0..3`);
+    }
+    return target;
+  })) as unknown as BattleScriptBideTargetByBattler;
   return Object.freeze({
     battlers: Object.freeze(battlers),
     selectorRoles,
@@ -398,6 +453,17 @@ export function createBattleScriptRulesContext(
       input.battleMoveDamage ?? 0,
       0xffff_ffff,
       "battleMoveDamage",
+    ),
+    bideDmg,
+    bideTarget,
+    scriptingBideDmg: requireSigned32(
+      input.scriptingBideDmg ?? 0,
+      "scriptingBideDmg",
+    ),
+    absentBattlerFlags: requireUnsigned(
+      input.absentBattlerFlags ?? 0,
+      0x0f,
+      "absentBattlerFlags",
     ),
   });
 }

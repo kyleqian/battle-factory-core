@@ -1,5 +1,9 @@
 import type { BattleScriptBattlerId } from "./battleScriptEvents.ts";
-import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
+import {
+  resolveBattleScriptCurrentMoveEffect,
+  resolveBattleScriptCurrentMovePower,
+  type BattleScriptRulesContext,
+} from "./battleScriptRulesContext.ts";
 import {
   cancelBattleScriptMultiTurnMoves,
   type BattleScriptCancelMultiTurnMovesReceipt,
@@ -21,6 +25,7 @@ import {
   BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE,
   BATTLE_SCRIPT_MOVE_RESULT_MISSED,
   BATTLE_SCRIPT_MOVE_NONE,
+  BATTLE_SCRIPT_MOVE_BIDE,
   BATTLE_SCRIPT_MOVE_POUND,
   BATTLE_SCRIPT_MOVE_SLEEP_TALK,
   BATTLE_SCRIPT_MOVE_SNORE,
@@ -149,7 +154,10 @@ export type BattleScriptAttackCancelerScriptEffect =
       | "BattleScript_MoveUsedIsConfused"
       | "BattleScript_MoveUsedIsConfusedNoMore"
       | "BattleScript_MoveUsedIsParalyzed"
-      | "BattleScript_MoveUsedIsInLove";
+      | "BattleScript_MoveUsedIsInLove"
+      | "BattleScript_BideStoringEnergy"
+      | "BattleScript_BideAttack"
+      | "BattleScript_BideNoEnergyToAttack";
   }>;
 
 export type BattleScriptAttackCancelerCursorEffect =
@@ -908,6 +916,110 @@ export type BattleScriptAttackCancelerInLoveDecision =
     rngValue: number;
     receipt: Readonly<{
       sourcePhase: "CANCELER_IN_LOVE";
+      tracker: Readonly<{ before: number; after: number }>;
+      rng: Readonly<{ kind: "preserve"; value: number; callsConsumed: 0 }>;
+    }>;
+  }>;
+
+export type BattleScriptAttackCancelerBideReason =
+  | "not-biding"
+  | "storing-energy"
+  | "released-with-no-energy"
+  | "released-attack";
+
+export type BattleScriptAttackCancelerBideReceipt = Readonly<{
+  sourcePhase: "CANCELER_BIDE";
+  attacker: BattleScriptBattlerId;
+  reason: BattleScriptAttackCancelerBideReason;
+  counter: Readonly<{
+    sourceMask: "STATUS2_BIDE";
+    mask: typeof BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_BIDE;
+    status2Before: number;
+    encodedBefore: 0 | 1 | 2;
+    decrement: 0 | 1;
+    status2After: number;
+    encodedAfter: 0 | 1;
+  }>;
+  multiTurnStatus: Readonly<{
+    sourceMask: "STATUS2_MULTIPLETURNS";
+    before: boolean;
+    after: boolean;
+    clearingOwner:
+      | "not-requested"
+      | "BattleScript_BideAttack"
+      | "BattleScript_BideNoEnergyToAttack";
+  }>;
+  accumulatedDamage: Readonly<{
+    sourceArray: "gBideDmg";
+    before: number;
+    after: number;
+  }>;
+  scriptingBideDamage:
+    | Readonly<{ kind: "preserve"; before: number; after: number }>
+    | Readonly<{
+      kind: "set-doubled";
+      before: number;
+      after: number;
+      sourceOperation: "gBideDmg[gBattlerAttacker] * 2";
+      arithmetic: "signed-s32-two-complement";
+    }>;
+  currentMove:
+    | Readonly<{ kind: "preserve"; before: number; after: number }>
+    | Readonly<{
+      kind: "set";
+      before: number;
+      after: typeof BATTLE_SCRIPT_MOVE_BIDE;
+      sourceConstant: "MOVE_BIDE";
+    }>;
+  target:
+    | Readonly<{
+      kind: "preserve";
+      before: BattleScriptBattlerId | null;
+      after: BattleScriptBattlerId | null;
+    }>
+    | Readonly<{
+      kind: "restore-saved";
+      before: BattleScriptBattlerId | null;
+      savedTarget: BattleScriptBattlerId;
+      after: BattleScriptBattlerId;
+      sourceArray: "gBideTarget";
+      resolution: "saved-target-present";
+    }>;
+  singlesTargetInvariant: Readonly<{
+    absentBattlerFlags: 0;
+    rngCallsConsumed: 0;
+    absentSavedTargetBranch:
+      "source-unreachable-at-level-50-singles-action-boundary";
+  }>;
+  rng: Readonly<{
+    kind: "preserve";
+    value: number;
+    callsConsumed: 0;
+  }>;
+  effect: 0 | 1;
+  script: BattleScriptAttackCancelerScriptEffect;
+  tracker: Readonly<{
+    before: number;
+    after: number;
+    sourcePhaseBefore: "CANCELER_BIDE";
+    sourcePhaseAfter: "CANCELER_THAW";
+  }>;
+}>;
+
+export type BattleScriptAttackCancelerBideDecision =
+  | Readonly<{
+    kind: "advance";
+    reason: BattleScriptAttackCancelerBideReason;
+    rulesContext: BattleScriptRulesContext;
+    rngValue: number;
+    receipt: BattleScriptAttackCancelerBideReceipt;
+  }>
+  | Readonly<{
+    kind: "not-at-source-phase";
+    rulesContext: BattleScriptRulesContext;
+    rngValue: number;
+    receipt: Readonly<{
+      sourcePhase: "CANCELER_BIDE";
       tracker: Readonly<{ before: number; after: number }>;
       rng: Readonly<{ kind: "preserve"; value: number; callsConsumed: 0 }>;
     }>;
@@ -2935,6 +3047,280 @@ export function advanceBattleScriptAttackCancelerInLove(
         after: trackerAfter,
         sourcePhaseBefore: "CANCELER_IN_LOVE",
         sourcePhaseAfter: "CANCELER_BIDE",
+      }),
+    }),
+  });
+}
+
+/**
+ * Immutable source phase for battle_util.c:2220-2247.
+ *
+ * This seam is deliberately Level-50 singles-only. In the pinned source,
+ * gAbsentBattlerFlags starts at zero, HasNoMonsToSwitch returns FALSE before
+ * inspecting a singles party, and switch-in animation clears the active slot.
+ * Therefore an absent saved Bide target cannot reach an action boundary while
+ * the battle continues. The doubles-only GetMoveTarget fallback (including its
+ * variable Random loop, Follow Me, and Lightning Rod hooks) is rejected here
+ * instead of consuming ambient RNG or silently selecting a target.
+ *
+ * Reachable Bide counters are 2 (decrement and store) and 1 (decrement and
+ * release). Cmd_setbide initializes 2 from the non-Bide state; 3 is not
+ * reachable through the locked singles action flow. Release preserves
+ * STATUS2_MULTIPLETURNS because the source defers clearing to the selected
+ * BattleScript_Bide* program.
+ */
+export function advanceBattleScriptAttackCancelerBide(
+  rulesContext: BattleScriptRulesContext,
+  sourceProgramCounter: number,
+  rngValue: number,
+): BattleScriptAttackCancelerBideDecision {
+  const sourcePc = requireSourceProgramCounter(sourceProgramCounter);
+  const sourceRng = requireRngValue(rngValue);
+  const trackerBefore = rulesContext.atkCancelerTracker;
+  if (
+    trackerBefore
+    !== BATTLE_SCRIPT_ATTACK_CANCELER_PHASES.CANCELER_BIDE
+  ) {
+    return Object.freeze({
+      kind: "not-at-source-phase",
+      rulesContext,
+      rngValue: sourceRng,
+      receipt: Object.freeze({
+        sourcePhase: "CANCELER_BIDE",
+        tracker: Object.freeze({ before: trackerBefore, after: trackerBefore }),
+        rng: Object.freeze({
+          kind: "preserve",
+          value: sourceRng,
+          callsConsumed: 0 as const,
+        }),
+      }),
+    });
+  }
+
+  const attacker = rulesContext.selectorRoles.attacker;
+  if (attacker === null) {
+    throw new Error(
+      "Battle Script attack canceler Bide phase requires an attacker role",
+    );
+  }
+  if (attacker > 1) {
+    throw new Error(
+      `CANCELER_BIDE Level-50 singles attacker must be battler 0 or 1, got ${attacker}`,
+    );
+  }
+  if (rulesContext.absentBattlerFlags !== 0) {
+    throw new Error(
+      "CANCELER_BIDE does not accept absent battlers: the GetMoveTarget fallback "
+      + "is source-unreachable at a continuing Level-50 singles action boundary",
+    );
+  }
+
+  const sourceBattler = rulesContext.battlers[attacker];
+  const bideMask = BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_BIDE;
+  const encodedBefore = (
+    (sourceBattler.status2 & bideMask) >>> 8
+  ) as 0 | 1 | 2 | 3;
+  if (encodedBefore === 3) {
+    throw new Error(
+      "STATUS2_BIDE counter 3 is not reachable from Cmd_setbide in the "
+      + "Level-50 singles locked-action flow",
+    );
+  }
+
+  const decrement = encodedBefore === 0 ? 0 : 1;
+  const nextStatus2 = decrement === 0
+    ? sourceBattler.status2
+    : (sourceBattler.status2 - 0x100) >>> 0;
+  const encodedAfter = (
+    (nextStatus2 & bideMask) >>> 8
+  ) as 0 | 1;
+  const nextBattler = nextStatus2 === sourceBattler.status2
+    ? sourceBattler
+    : Object.freeze({ ...sourceBattler, status2: nextStatus2 });
+  const nextBattlers = nextBattler === sourceBattler
+    ? rulesContext.battlers
+    : Object.freeze(rulesContext.battlers.map((candidate, index) =>
+      index === attacker ? nextBattler : candidate
+    )) as unknown as BattleScriptRulesContext["battlers"];
+
+  const storedDamage = rulesContext.bideDmg[attacker];
+  if (encodedBefore !== 0 && storedDamage < 0) {
+    throw new Error(
+      `gBideDmg[${attacker}] must be nonnegative in reachable Level-50 singles state`,
+    );
+  }
+
+  let reason: BattleScriptAttackCancelerBideReason = "not-biding";
+  let script: BattleScriptAttackCancelerScriptEffect = Object.freeze({
+    kind: "preserve",
+    sourceProgramCounter: sourcePc,
+  });
+  let nextCurrentMove = rulesContext.currentMove;
+  let nextCurrentMoveEffect = rulesContext.currentMoveEffect;
+  let nextCurrentMovePower = rulesContext.currentMovePower;
+  let nextScriptingBideDmg = rulesContext.scriptingBideDmg;
+  let nextSelectorRoles = rulesContext.selectorRoles;
+  let target: BattleScriptAttackCancelerBideReceipt["target"] = Object.freeze({
+    kind: "preserve",
+    before: rulesContext.selectorRoles.target,
+    after: rulesContext.selectorRoles.target,
+  });
+  let scriptingBideDamage:
+    BattleScriptAttackCancelerBideReceipt["scriptingBideDamage"] =
+      Object.freeze({
+        kind: "preserve",
+        before: rulesContext.scriptingBideDmg,
+        after: rulesContext.scriptingBideDmg,
+      });
+
+  if (encodedBefore === 2) {
+    reason = "storing-energy";
+    script = Object.freeze({
+      kind: "handoff",
+      sourceProgramCounter: sourcePc,
+      targetLabel: "BattleScript_BideStoringEnergy",
+    });
+  } else if (encodedBefore === 1 && storedDamage === 0) {
+    reason = "released-with-no-energy";
+    script = Object.freeze({
+      kind: "handoff",
+      sourceProgramCounter: sourcePc,
+      targetLabel: "BattleScript_BideNoEnergyToAttack",
+    });
+  } else if (encodedBefore === 1) {
+    const savedTarget = rulesContext.bideTarget[attacker];
+    const expectedSinglesTarget = (attacker ^ 1) as BattleScriptBattlerId;
+    if (
+      savedTarget !== expectedSinglesTarget
+      || rulesContext.battlers[savedTarget].side === sourceBattler.side
+    ) {
+      throw new Error(
+        `gBideTarget[${attacker}] must be the opposing active singles slot `
+        + `${expectedSinglesTarget}, got ${savedTarget}`,
+      );
+    }
+    reason = "released-attack";
+    nextCurrentMove = BATTLE_SCRIPT_MOVE_BIDE;
+    nextCurrentMoveEffect = resolveBattleScriptCurrentMoveEffect(
+      BATTLE_SCRIPT_MOVE_BIDE,
+    );
+    nextCurrentMovePower = resolveBattleScriptCurrentMovePower(
+      BATTLE_SCRIPT_MOVE_BIDE,
+    );
+    // The target compiler uses 32-bit two's-complement registers. Math.imul
+    // makes the width and wrap behavior explicit for every positive s32 input.
+    nextScriptingBideDmg = Math.imul(storedDamage, 2);
+    nextSelectorRoles = Object.freeze({
+      ...rulesContext.selectorRoles,
+      target: savedTarget,
+    });
+    target = Object.freeze({
+      kind: "restore-saved",
+      before: rulesContext.selectorRoles.target,
+      savedTarget,
+      after: savedTarget,
+      sourceArray: "gBideTarget",
+      resolution: "saved-target-present",
+    });
+    scriptingBideDamage = Object.freeze({
+      kind: "set-doubled",
+      before: rulesContext.scriptingBideDmg,
+      after: nextScriptingBideDmg,
+      sourceOperation: "gBideDmg[gBattlerAttacker] * 2",
+      arithmetic: "signed-s32-two-complement",
+    });
+    script = Object.freeze({
+      kind: "handoff",
+      sourceProgramCounter: sourcePc,
+      targetLabel: "BattleScript_BideAttack",
+    });
+  }
+
+  const trackerAfter = BATTLE_SCRIPT_ATTACK_CANCELER_PHASES.CANCELER_THAW;
+  const nextRulesContext = Object.freeze({
+    ...rulesContext,
+    battlers: nextBattlers,
+    selectorRoles: nextSelectorRoles,
+    currentMove: nextCurrentMove,
+    currentMoveEffect: nextCurrentMoveEffect,
+    currentMovePower: nextCurrentMovePower,
+    scriptingBideDmg: nextScriptingBideDmg,
+    atkCancelerTracker: trackerAfter,
+  });
+  const releaseClearingOwner =
+    reason === "released-attack"
+      ? "BattleScript_BideAttack" as const
+      : reason === "released-with-no-energy"
+        ? "BattleScript_BideNoEnergyToAttack" as const
+        : "not-requested" as const;
+
+  return Object.freeze({
+    kind: "advance",
+    reason,
+    rulesContext: nextRulesContext,
+    rngValue: sourceRng,
+    receipt: Object.freeze({
+      sourcePhase: "CANCELER_BIDE",
+      attacker,
+      reason,
+      counter: Object.freeze({
+        sourceMask: "STATUS2_BIDE",
+        mask: bideMask,
+        status2Before: sourceBattler.status2,
+        encodedBefore,
+        decrement,
+        status2After: nextStatus2,
+        encodedAfter,
+      }),
+      multiTurnStatus: Object.freeze({
+        sourceMask: "STATUS2_MULTIPLETURNS",
+        before: (
+          sourceBattler.status2
+          & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS
+        ) !== 0,
+        after: (
+          nextStatus2
+          & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS
+        ) !== 0,
+        clearingOwner: releaseClearingOwner,
+      }),
+      accumulatedDamage: Object.freeze({
+        sourceArray: "gBideDmg",
+        before: storedDamage,
+        after: storedDamage,
+      }),
+      scriptingBideDamage,
+      currentMove: nextCurrentMove === rulesContext.currentMove
+        ? Object.freeze({
+          kind: "preserve",
+          before: rulesContext.currentMove,
+          after: rulesContext.currentMove,
+        })
+        : Object.freeze({
+          kind: "set",
+          before: rulesContext.currentMove,
+          after: BATTLE_SCRIPT_MOVE_BIDE,
+          sourceConstant: "MOVE_BIDE",
+        }),
+      target,
+      singlesTargetInvariant: Object.freeze({
+        absentBattlerFlags: 0 as const,
+        rngCallsConsumed: 0 as const,
+        absentSavedTargetBranch:
+          "source-unreachable-at-level-50-singles-action-boundary" as const,
+      }),
+      rng: Object.freeze({
+        kind: "preserve",
+        value: sourceRng,
+        callsConsumed: 0 as const,
+      }),
+      effect: encodedBefore === 0 ? 0 as const : 1 as const,
+      script,
+      tracker: Object.freeze({
+        before: trackerBefore,
+        after: trackerAfter,
+        sourcePhaseBefore: "CANCELER_BIDE",
+        sourcePhaseAfter: "CANCELER_THAW",
       }),
     }),
   });

@@ -50,10 +50,12 @@ export const BATTLE_SCRIPT_ATTACK_CANCELER_PHASES = Object.freeze({
   CANCELER_PARALYZED: 10,
   CANCELER_IN_LOVE: 11,
   CANCELER_BIDE: 12,
+  CANCELER_THAW: 13,
 } as const);
 
 export const BATTLE_SCRIPT_MOVE_NONE = 0;
 export const BATTLE_SCRIPT_MOVE_POUND = 1;
+export const BATTLE_SCRIPT_MOVE_BIDE = 117;
 
 export const BATTLE_SCRIPT_STATUS3_SEMI_INVULNERABLE =
   (1 << 6 | 1 << 7 | 1 << 18) >>> 0;
