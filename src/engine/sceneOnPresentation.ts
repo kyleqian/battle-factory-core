@@ -35,6 +35,11 @@ import {
   type IcePunchHitCrystal,
   type IcePunchOverlayState,
 } from "./icePunch.ts";
+import {
+  frozenIceCubeAnchor,
+  frozenIceCubeState,
+  type FrozenIceCubeState,
+} from "./frozenIceCube.ts";
 
 export type SceneOnBattlerSide = "player" | "opponent";
 
@@ -86,10 +91,14 @@ export interface SceneOnIcePunchConfig {
     readonly statusAppliedAge?: number;
     readonly healthboxStatusAge?: number;
     readonly statusAnimationFirstAge?: number;
+    /** Task creation pass for the status-applied FrozenIceCube. */
+    readonly statusIceCubeTaskFirstAge?: number;
     readonly statusMessageFirstAge?: number;
     readonly currentMoveResetAge?: number;
     readonly nextControllerTextFirstAge?: number;
     readonly nextControllerAnimationFirstAge?: number;
+    /** Task creation pass for the later frozen-solid skip animation. */
+    readonly nextControllerIceCubeTaskFirstAge?: number;
   }>;
   /** Relative first printer age; negative means text predates this seam. */
   readonly moveTextStartAge?: number;
@@ -212,6 +221,10 @@ export interface SceneOnIcePunchView {
   readonly targetInvisible: boolean;
   readonly displayedTargetHp: number;
   readonly actionMenu: ActionMenuDisplayTransition;
+  readonly iceCubes: readonly Readonly<{
+    state: FrozenIceCubeState;
+    anchor: Readonly<{ x: number; y: number }>;
+  }>[];
   readonly resolution: Readonly<{
     status: "none" | "freeze";
     healthboxStatus: "none" | "freeze";
@@ -376,6 +389,10 @@ export function sceneOnIcePunchView(
     ?? Number.POSITIVE_INFINITY;
   const currentMoveResetAge = displayProfile?.currentMoveResetAge
     ?? Number.POSITIVE_INFINITY;
+  const iceCubeTaskFirstAges = [
+    displayProfile?.statusIceCubeTaskFirstAge,
+    displayProfile?.nextControllerIceCubeTaskFirstAge,
+  ].filter((age): age is number => age !== undefined);
   return {
     age: state.age,
     attacker: state.config.attacker,
@@ -403,6 +420,14 @@ export function sceneOnIcePunchView(
             state.age,
             displayProfile.actionMenuRevealAge,
           ),
+    iceCubes: iceCubeTaskFirstAges
+      .map((firstAge) => ({
+        state: frozenIceCubeState(state.age - firstAge),
+        anchor: frozenIceCubeAnchor(
+          state.config.target.geometry.animationCenter,
+        ),
+      }))
+      .filter(({ state: cubeState }) => cubeState.blendEnabled),
     resolution: {
       status: state.age >= statusAppliedAge ? statusOutcome : "none",
       healthboxStatus:

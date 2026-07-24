@@ -17,6 +17,7 @@ import {
   icePunchSpiralCrystals,
 } from "../src/engine/icePunch.ts";
 import {
+  GROVYLE_TO_ONIX_FIRE_PUNCH_GEOMETRY,
   ONIX_TO_GROVYLE_FIRE_PUNCH_GEOMETRY,
   createSceneOnMovePresentation,
   sceneOnIcePunchView,
@@ -152,15 +153,17 @@ describe("ICE_PUNCH source-composed presentation components", () => {
       statusOutcome: "freeze" as const,
       statusAppliedAge: 400,
       statusAnimationFirstAge: 405,
+      statusIceCubeTaskFirstAge: 409,
       statusMessageFirstAge: 520,
       healthboxStatusAge: 607,
       currentMoveResetAge: 618,
       nextControllerTextFirstAge: 625,
       nextControllerAnimationFirstAge: 710,
+      nextControllerIceCubeTaskFirstAge: 717,
     });
     const stage = createSceneOnMovePresentation({
       move: "ICE_PUNCH",
-      ...ONIX_TO_GROVYLE_FIRE_PUNCH_GEOMETRY,
+      ...GROVYLE_TO_ONIX_FIRE_PUNCH_GEOMETRY,
       fieldProfile: Object.freeze({
         playerHp: 117,
         opponentHp: 143,
@@ -198,6 +201,19 @@ describe("ICE_PUNCH source-composed presentation components", () => {
       healthboxStatus: "freeze",
       currentMove: null,
     });
+    expect(sceneOnIcePunchView({ ...stage, age: 410 }).iceCubes).toMatchObject([
+      {
+        state: { taskAge: 1, eva: 1, evb: 15 },
+        anchor: { x: 40, y: 52 },
+      },
+    ]);
+    expect(sceneOnIcePunchView({ ...stage, age: 717 }).iceCubes).toMatchObject([
+      {
+        state: { taskAge: 0, eva: 0, evb: 16 },
+        anchor: { x: 40, y: 52 },
+      },
+    ]);
+    expect(sceneOnIcePunchView({ ...stage, age: 823 }).iceCubes).toEqual([]);
     expect(stage.config).toEqual(before);
     expect(stage.config.controllerDisplayProfile).toBe(controllerDisplayProfile);
   });
@@ -364,8 +380,8 @@ describe("ICE_PUNCH source-composed presentation components", () => {
   });
 
   it("pins FrozenIceCube source-relative geometry and full task lifetime", () => {
-    expect(frozenIceCubeAnchor({ x: 72, y: 80 })).toEqual({ x: 40, y: 44 });
-    expect(frozenIceCubeAnchor({ x: 176, y: 40 })).toEqual({ x: 144, y: 4 });
+    expect(frozenIceCubeAnchor({ x: 72, y: 88 })).toEqual({ x: 40, y: 52 });
+    expect(frozenIceCubeAnchor({ x: 176, y: 44 })).toEqual({ x: 144, y: 8 });
 
     expect(frozenIceCubeState(-1)).toMatchObject({
       spriteAlive: false,

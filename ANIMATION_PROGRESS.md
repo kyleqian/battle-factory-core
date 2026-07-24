@@ -39,22 +39,21 @@ remainder.
 ## Current handoff
 
 - **State:** **4 exact / 9 partial / 263 unsupported**. ICE PUNCH remains
-  partial: the opposite-side controller continuation is exact through its
-  successful freeze write/setup, but the visible status animation and later
-  controller handoff remain.
-- **Did:** parameterized ICE PUNCH effectiveness kind and immutable
-  controller-supplied status/healthbox/teardown clocks. No damage, status
-  roll, status mutation, action selection, or turn state is owned by the
-  presentation adapter.
-- **Evidence:** `ice-punch-grovyle-onix.json` is now **410/410 exact** at
-  Scene-ON oracle frames 1966-2375 / ages 0-409. The +96 continuation covers
-  the complete super-effective printer (the staged oracle is super-effective,
-  despite the earlier handoff wording), the successful freeze status1 write
-  at age 400, and the status-animation setup through the final framebuffer
-  before the ice cube becomes visible. Existing ICE PUNCH player-side
-  **462/462** and FIRE PUNCH **225/225** remain exact.
-- **Next:** resume at oracle frame **2376 / age 410**, the first visible
-  FrozenIceCube pixel. Densely match both source status-animation lifecycles,
-  “ONIX was/is frozen solid!” printers, FRZ healthbox update, current-move
-  teardown, and the skipped-move controller handoff before exact promotion.
-  Do not claim THUNDER PUNCH without its own dense evidence.
+  partial: both opposite-side frozen-cube lifecycles and their intervening
+  controller displays are exact, but the later controller handoff remains.
+- **Did:** added the source-extracted four-subsprite FrozenIceCube compositor
+  and its side-parametric callback reducer: 1→9 alpha fade, two independently
+  delayed 13/14/15 palette-rotation cycles, 8→0 fade, sprite destruction, and
+  blend teardown. The same component drives the status-applied and
+  frozen-solid-skip spawns from controller-supplied relative clocks.
+- **Evidence:** `ice-punch-grovyle-onix.json` is now **848/848 exact** at
+  Scene-ON oracle frames 1966-2813 / ages 0-847. The +438 continuation covers
+  both complete cube tasks, “ONIX was frozen solid!” and “ONIX is frozen
+  solid!”, FRZ healthbox installation, `gCurrentMove` clear, and the settled
+  frozen-text tail. Existing ICE PUNCH player-side **462/462** and FIRE PUNCH
+  **225/225** remain exact. Tier-1 pins source geometry, alpha/palette clocks,
+  both spawn clocks, destruction, and immutable controller inputs.
+- **Next:** resume at oracle frame **2814 / age 848**, where the frozen-solid
+  hold clears and the next controller presentation begins. Complete that
+  skipped-move handoff before exact promotion. Do not claim THUNDER PUNCH
+  without its own dense evidence.

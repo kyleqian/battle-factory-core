@@ -116,8 +116,8 @@ evidence-backed opposite-side/geometry audit.
 
 ## Opposite-side successful-freeze continuation
 
-The GROVYLE→ONIX fixture now extends from **314/314** to **410/410 exact**
-(oracle frames **1966–2375**, relative ages **0–409**). Ages 314 onward
+The GROVYLE→ONIX fixture now extends from **410/410** to **848/848 exact**
+(oracle frames **1966–2813**, relative ages **0–847**). Ages 314 onward
 prove the complete controller effectiveness printer. The oracle line is
 “It’s super effective!”—Ice is super-effective against ONIX’s Ground type;
 the earlier handoff’s “not very effective” label was not the staged output.
@@ -126,13 +126,25 @@ The staged controller supplies a successful immutable freeze outcome:
 `status1` becomes `STATUS1_FREEZE` at frame 2366 / age 400. The adapter
 exposes that supplied boundary, plus the later healthbox-status,
 current-move-reset, and next-controller clocks, without rolling RNG or
-mutating battle state. Dense pixel acceptance continues through frame 2375,
-the final frame before FrozenIceCube becomes visible. The exact remaining
-boundary is **frame 2376 / age 410**: implement the source 96×96 ice-cube
-subsprite composition and both status-animation lifecycles, then the
-“ONIX was frozen solid!” / FRZ / teardown / “ONIX is frozen solid!” skipped
-move handoff. ICE PUNCH remains partial until that complete remainder is
-dense-exact.
+mutating battle state.
+
+The source-extracted `ANIM_TAG_ICE_CUBE` compositor preserves all four
+subsprites and their compiled tile offsets: 64×64 at (-16,-16), 64×32 at
+(-16,48), 32×64 at (48,-16), and 32×32 at (48,48), around the task anchor
+`GetBattlerSpriteCoord(target, X_2/Y_PIC_OFFSET) + (-32,-36)`. A reusable
+callback reducer matches the probed BLDALPHA sequence: 1→9 fade-in, two
+separately delayed cycles rotating OBJ palette entries 13/14/15, 8→0
+fade-out, sprite destruction, and blend-register teardown. The staging probe
+now records the cube template plus BLDCNT/BLDALPHA directly.
+
+Both source-spawned tasks use that same reducer. The first creation/setup is
+at frame 2375 / age 409 and first visible at 2376 / age 410. The second is at
+frame 2683 / age 717 and first visible at 2684 / age 718. The dense window
+also covers both complete “ONIX was/is frozen solid!” printers, FRZ
+healthbox installation at age 607, `gCurrentMove` clear at age 618, both
+task teardowns, and the settled tail. The first open frame is **2814 / age
+848**, where the frozen-solid hold clears and the next controller
+presentation begins. ICE PUNCH remains partial until that handoff is exact.
 
 ## THUNDER PUNCH sibling check
 

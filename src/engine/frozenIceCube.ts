@@ -112,10 +112,10 @@ export function frozenIceCubeState(taskAge: number): FrozenIceCubeState {
 }
 
 export function frozenIceCubeAnchor(
-  targetBattlePositionCenter: Readonly<{ x: number; y: number }>,
+  targetAnimationCenter: Readonly<{ x: number; y: number }>,
 ): Readonly<{ x: number; y: number }> {
   return {
-    x: targetBattlePositionCenter.x - 32,
-    y: targetBattlePositionCenter.y - 36,
+    x: targetAnimationCenter.x - 32,
+    y: targetAnimationCenter.y - 36,
   };
 }

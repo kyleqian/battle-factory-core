@@ -112,6 +112,7 @@ ICE_TEMPLATES = {
     0x08595AE8: "spiralSmall",
     0x08595B68: "hitLarge",
     0x08595B80: "hitSmall",
+    0x0853EF48: "frozenCube",
 }
 SPRITE_ORDER = 0x020217F4
 # Static symbol from `arm-none-eabi-nm -n --defined-only pokeemerald.elf`;
@@ -301,6 +302,10 @@ def frame_record(oracle: EmeraldOracle, tick: int) -> dict[str, object]:
             ),
         },
         "animMovePower": u16(oracle, oracle.symbols["gAnimMovePower"]),
+        "blend": {
+            "bldcnt": u16(oracle, 0x04000050),
+            "bldalpha": u16(oracle, 0x04000052),
+        },
         "rockSlots": rocks,
         "endeavorEffects": endeavor_effects,
         "doubleTeamClones": double_team_clones,

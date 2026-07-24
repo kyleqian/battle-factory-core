@@ -31,7 +31,7 @@
   },
   "denseWindow": {
     "startFrame": 1966,
-    "endFrame": 2375
+    "endFrame": 2813
   },
   "fieldProfile": {
     "playerHp": 117,
@@ -50,10 +50,12 @@
     "statusOutcome": "freeze",
     "statusAppliedAge": 400,
     "statusAnimationFirstAge": 405,
+    "statusIceCubeTaskFirstAge": 409,
     "statusMessageFirstAge": 520,
     "healthboxStatusAge": 607,
     "currentMoveResetAge": 618,
     "nextControllerTextFirstAge": 625,
-    "nextControllerAnimationFirstAge": 710
+    "nextControllerAnimationFirstAge": 710,
+    "nextControllerIceCubeTaskFirstAge": 717
   }
 }
