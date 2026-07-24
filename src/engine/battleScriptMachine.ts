@@ -44,7 +44,7 @@ export type BattleScriptHaltReason =
     opcodeId: number;
     opcodeName: string;
     operandExpression: string;
-    expected: "u8" | "u16";
+    expected: "none" | "u8" | "u16";
     received: string;
   }>
   | Readonly<{

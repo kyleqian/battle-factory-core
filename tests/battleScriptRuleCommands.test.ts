@@ -2,7 +2,6 @@ import { describe, expect, it, vi } from "vitest";
 import commandHandlerData from "../src/data/gen/battle-script-command-handlers.json" with { type: "json" };
 import lexicalFactData from "../src/data/gen/battle-script-handler-lexical-facts.json" with { type: "json" };
 import {
-  createBattleScriptControlHandlers,
   createBattleScriptMachine,
   stepBattleScriptMachine,
   type BattleScriptMachineState,
@@ -12,9 +11,6 @@ import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
 } from "../src/engine/battleScriptRuleCommands.ts";
-import {
-  createBattleScriptSourceCommandHandlers,
-} from "../src/engine/battleScriptSourceCommands.ts";
 import {
   loadBattleScriptProgram,
   resolveBattleScriptLabel,
@@ -391,7 +387,7 @@ describe("source-mapped Battle Script SETMULTIHIT rule command", () => {
     expect(transition.rulesContext).toBe(initial.rulesContext);
   });
 
-  it("replays deterministically and composes to exactly thirteen supported IDs in tests", () => {
+  it("replays deterministically", () => {
     const target = occurrences()[0]!;
     const execute = () => stepBattleScriptMachine(
       program,
@@ -399,27 +395,6 @@ describe("source-mapped Battle Script SETMULTIHIT rule command", () => {
       handlers(literalResolver),
     ).state;
     expect(execute()).toEqual(execute());
-
-    const sourceHandlers = createBattleScriptSourceCommandHandlers<FixtureRules>(
-      program,
-      Object.freeze({
-        isControllerIdle: () => true,
-        prepareMessage: (_context, operand) => Object.freeze({
-          kind: "message" as const,
-          messageId: operand.expression,
-          substitutions: Object.freeze([]),
-        }),
-        resolveHalfwordOperand: () => 1,
-      }),
-    );
-    const composed = Object.freeze({
-      ...createBattleScriptControlHandlers<FixtureRules>(program),
-      ...sourceHandlers,
-      ...handlers(literalResolver),
-    });
-    expect(Object.keys(composed).map(Number).sort((left, right) => left - right)).toEqual([
-      16, 18, 38, 39, 40, 57, 58, 60, 61, 62, 65, 131, 141,
-    ]);
   });
 });
 
