@@ -30,10 +30,8 @@ import {
   type BattleScriptRulesBattlerState,
   type BattleScriptRulesContext,
 } from "./battleScriptRulesContext.ts";
-import { advanceBattleScriptAttackCancelerUnableToUseMove } from "./battleScriptAttackCanceler.ts";
 
 const ADAPTER = "factory-asleep-move/v1";
-const ENTRY_LABEL = "BattleScript_MoveUsedIsAsleep";
 const PLAYER_SET_ID = 15;
 const TRAINER_SET_ID = 291;
 const PLAYER_ABILITY = 62; // ABILITY_GUTS
@@ -554,25 +552,6 @@ BattleDecisionReducer<FactoryBattleScriptDecisionRules> = (
     chosenMove: moveId,
   });
   const rngBefore = boundary.rng.snapshot();
-  const admission = advanceBattleScriptAttackCancelerUnableToUseMove({
-    rulesContext: selectedContext,
-    rngValue: rngBefore.value,
-    rngCallsConsumed: rngBefore.calls,
-  }, attackCanceler.programCounter);
-  if (
-    admission.kind !== "effect"
-    || admission.effect !== 2
-    || admission.receipt.programCounter.kind !== "handoff"
-    || admission.receipt.programCounter.targetLabel !== ENTRY_LABEL
-    || admission.receipt.controllerSync.kind !== "request-status1-write"
-    || admission.receipt.controllerSync.battler !== attacker
-    || admission.receipt.rng.callsConsumed !== 0
-    || admission.rngValue !== rngBefore.value
-    || admission.rngCallsConsumed !== rngBefore.calls
-  ) {
-    throw new Error("selected Factory move did not reach the source asleep handoff");
-  }
-
   const ports = Object.freeze({
     isControllerIdle: (
       context: Readonly<{ state: BattleScriptMachineState<BattleScriptRulesContext> }>,
@@ -601,8 +580,8 @@ BattleDecisionReducer<FactoryBattleScriptDecisionRules> = (
   });
   const execution = createBattleScriptStatusRulesExecution(
     PROGRAM,
-    ENTRY_LABEL,
-    admission.rulesContext,
+    topology.entryScript,
+    selectedContext,
     rngBefore.value,
     ports,
   );
@@ -665,7 +644,7 @@ BattleDecisionReducer<FactoryBattleScriptDecisionRules> = (
       kind: "machine-barrier",
       barrier: Object.freeze({
         kind: "battle-script",
-        entryLabel: ENTRY_LABEL,
+        entryLabel: topology.entryScript,
         programCounter: barrierInstruction.programCounter,
         opcodeId: barrierInstruction.opcodeId,
         opcodeName: barrierInstruction.opcodeName,

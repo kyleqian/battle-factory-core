@@ -179,7 +179,7 @@ describe("Factory asleep move decision-to-machine vertical slice", () => {
     assertDeepFrozen(state);
   });
 
-  it("pins the real source labels and executed opcode path without registering opcode 0", () => {
+  it("pins the real source labels and executed opcode path through registered opcode 0", () => {
     const entry = resolveBattleScriptLabel(program, "BattleScript_MoveUsedIsAsleep")!;
     const moveEnd = resolveBattleScriptLabel(program, "BattleScript_MoveEnd")!;
     expect(entry.sourceLine).toBe(3717);
@@ -229,15 +229,23 @@ describe("Factory asleep move decision-to-machine vertical slice", () => {
         kind: "machine-barrier",
         barrier: {
           kind: "battle-script",
-          entryLabel: "BattleScript_MoveUsedIsAsleep",
+          entryLabel: "BattleScript_EffectProtect",
           opcodeId: 73,
           opcodeName: "B_SCR_OP_MOVEEND",
           dispatcher: "Cmd_moveend",
-          instructionsExecuted: 68,
+          instructionsExecuted: 69,
         },
         events: [
           {
             sequence: 0,
+            payload: {
+              kind: "set-battler-status-data",
+              battler: 0,
+              status1: 3,
+            },
+          },
+          {
+            sequence: 1,
             payload: {
               kind: "message",
               messageId: "STRINGID_PKMNFASTASLEEP",
@@ -245,7 +253,7 @@ describe("Factory asleep move decision-to-machine vertical slice", () => {
             },
           },
           {
-            sequence: 1,
+            sequence: 2,
             payload: {
               kind: "status-animation",
               battler: 0,
@@ -257,7 +265,7 @@ describe("Factory asleep move decision-to-machine vertical slice", () => {
       });
       expect(result.state).toMatchObject({
         revision: 1,
-        nextEventSequence: 2,
+        nextEventSequence: 3,
         rng: { value: 0xf4c9_6838, calls: 0 },
         rules: {
           phase: "move-end-barrier",
@@ -320,15 +328,23 @@ describe("Factory asleep move decision-to-machine vertical slice", () => {
         kind: "machine-barrier",
         barrier: {
           kind: "battle-script",
-          entryLabel: "BattleScript_MoveUsedIsAsleep",
+          entryLabel: "BattleScript_EffectWish",
           opcodeId: 73,
           opcodeName: "B_SCR_OP_MOVEEND",
           dispatcher: "Cmd_moveend",
-          instructionsExecuted: 68,
+          instructionsExecuted: 69,
         },
         events: [
           {
             sequence: 0,
+            payload: {
+              kind: "set-battler-status-data",
+              battler: 1,
+              status1: 3,
+            },
+          },
+          {
+            sequence: 1,
             payload: {
               kind: "message",
               messageId: "STRINGID_PKMNFASTASLEEP",
@@ -336,7 +352,7 @@ describe("Factory asleep move decision-to-machine vertical slice", () => {
             },
           },
           {
-            sequence: 1,
+            sequence: 2,
             payload: {
               kind: "status-animation",
               battler: 1,
@@ -347,7 +363,7 @@ describe("Factory asleep move decision-to-machine vertical slice", () => {
         ],
         state: {
           revision: 1,
-          nextEventSequence: 2,
+          nextEventSequence: 3,
           rng: { value: 0x79e3_9ac4, calls: 5 },
           rules: {
             phase: "move-end-barrier",
