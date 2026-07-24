@@ -60,6 +60,13 @@ import {
   aerialAceAnimationAtAge,
   type AerialAceAnimationState,
 } from "./aerialAce.ts";
+import {
+  sandAttackAccuracyBannerAtAge,
+  sandAttackAnimationAtAge,
+  type SandAttackAnimationProfile,
+  type SandAttackAnimationState,
+  type SandAttackAccuracyBanner,
+} from "./sandAttack.ts";
 
 export type SceneOnBattlerSide = "player" | "opponent";
 
@@ -136,6 +143,23 @@ export interface SceneOnAerialAceConfig {
     readonly hitReactionFirstAge: number;
     readonly hpDrainFirstAge: number;
     readonly moveTextClearAge: number;
+    readonly resultTextFirstAge: number;
+    readonly currentMoveResetAge: number;
+  }>;
+  readonly moveTextStartAge: number;
+  readonly animationAgeOffset?: number;
+}
+
+export interface SceneOnSandAttackConfig {
+  readonly move: "SAND_ATTACK";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnFaintAttackFieldProfile>;
+  readonly animationProfile: Readonly<SandAttackAnimationProfile>;
+  /** Already-resolved accuracy stages and controller cleanup. */
+  readonly controllerProfile: Readonly<{
+    readonly accuracyStageBefore: number;
+    readonly accuracyStageAfter: number;
     readonly resultTextFirstAge: number;
     readonly currentMoveResetAge: number;
   }>;
@@ -289,7 +313,8 @@ export type SceneOnMoveConfig =
   | SceneOnEndeavorConfig
   | SceneOnFeatherDanceConfig
   | SceneOnQuickAttackConfig
-  | SceneOnAerialAceConfig;
+  | SceneOnAerialAceConfig
+  | SceneOnSandAttackConfig;
 
 export interface SceneOnMovePresentationState<
   TConfig extends SceneOnMoveConfig = SceneOnMoveConfig,
@@ -418,6 +443,21 @@ export interface SceneOnAerialAceView extends AerialAceAnimationState {
   readonly moveTextVisible: boolean;
   readonly currentMove: "AERIAL_ACE" | null;
   readonly moveText: Readonly<{ line1: string; line2: "AERIAL ACE!" }>;
+}
+
+export interface SceneOnSandAttackView extends SandAttackAnimationState {
+  readonly age: number;
+  readonly animationAge: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly accuracyBanner: SandAttackAccuracyBanner | null;
+  readonly resultText: Readonly<{
+    readonly line1: string;
+    readonly line2: "fell!";
+    readonly visibleChars: number;
+  }> | null;
+  readonly currentMove: "SAND_ATTACK" | null;
+  readonly moveText: Readonly<{ line1: string; line2: "SAND-ATTACK!" }>;
 }
 
 export const FEATHER_DANCE_STAT_MESSAGE_LINE1 = "ONIX’s ATTACK";
@@ -905,6 +945,50 @@ export function sceneOnAerialAceView(
   };
 }
 
+export function sceneOnSandAttackView(
+  state: SceneOnMovePresentationState,
+): SceneOnSandAttackView {
+  if (state.config.move !== "SAND_ATTACK") {
+    throw new Error(`expected SAND_ATTACK presentation, got ${state.config.move}`);
+  }
+  const animationAge =
+    state.age + (state.config.animationAgeOffset ?? 0);
+  const resultLine1 = `${battlerNameWithPrefix(state.config.target)}’s accuracy`;
+  const resultLine2 = "fell!" as const;
+  return {
+    age: state.age,
+    animationAge,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...sandAttackAnimationAtAge(
+      animationAge,
+      state.config.attacker.geometry.animationCenter,
+      state.config.attacker.geometry.side,
+      state.config.animationProfile,
+    ),
+    accuracyBanner: sandAttackAccuracyBannerAtAge(animationAge),
+    resultText:
+      state.age >= state.config.controllerProfile.resultTextFirstAge
+        ? {
+            line1: resultLine1,
+            line2: resultLine2,
+            visibleChars: Math.min(
+              resultLine1.length + resultLine2.length,
+              state.age - state.config.controllerProfile.resultTextFirstAge + 1,
+            ),
+          }
+        : null,
+    currentMove:
+      state.age >= state.config.controllerProfile.currentMoveResetAge
+        ? null
+        : "SAND_ATTACK",
+    moveText: {
+      line1: `${battlerNameWithPrefix(state.config.attacker)} used`,
+      line2: "SAND-ATTACK!",
+    },
+  };
+}
+
 export const PIDGEOTTO_TO_ONIX_FEATHER_DANCE_PRESENTATION = {
   attacker: {
     species: "PIDGEOTTO",
@@ -977,6 +1061,10 @@ export const PIDGEOTTO_TO_ONIX_AERIAL_ACE_PRESENTATION = {
   ...PIDGEOTTO_TO_ONIX_FEATHER_DANCE_PRESENTATION,
 } as const satisfies Pick<SceneOnAerialAceConfig, "attacker" | "target">;
 
+export const PIDGEOTTO_TO_ONIX_SAND_ATTACK_PRESENTATION = {
+  ...PIDGEOTTO_TO_ONIX_FEATHER_DANCE_PRESENTATION,
+} as const satisfies Pick<SceneOnSandAttackConfig, "attacker" | "target">;
+
 export const PLAYER_PIDGEOTTO_TO_OPPONENT_ONIX_AERIAL_ACE_PRESENTATION = {
   attacker:
     PLAYER_PIDGEOTTO_TO_OPPONENT_ONIX_FEATHER_DANCE_PRESENTATION.attacker,
@@ -985,6 +1073,17 @@ export const PLAYER_PIDGEOTTO_TO_OPPONENT_ONIX_AERIAL_ACE_PRESENTATION = {
   animationAgeOffset: 4,
 } as const satisfies Pick<
   SceneOnAerialAceConfig,
+  "attacker" | "target" | "animationAgeOffset"
+>;
+
+export const PLAYER_PIDGEOTTO_TO_OPPONENT_ONIX_SAND_ATTACK_PRESENTATION = {
+  attacker:
+    PLAYER_PIDGEOTTO_TO_OPPONENT_ONIX_FEATHER_DANCE_PRESENTATION.attacker,
+  target:
+    PLAYER_PIDGEOTTO_TO_OPPONENT_ONIX_FEATHER_DANCE_PRESENTATION.target,
+  animationAgeOffset: 4,
+} as const satisfies Pick<
+  SceneOnSandAttackConfig,
   "attacker" | "target" | "animationAgeOffset"
 >;
 

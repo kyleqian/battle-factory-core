@@ -1,0 +1,70 @@
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-sand-attack-pidgeotto-onix.json",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
+  "pair": "PIDGEOTTO (opponent-front) -> ONIX (player-back)",
+  "move": "SAND_ATTACK",
+  "appStage": {
+    "oracleFrame": 46,
+    "presentationAge": 7
+  },
+  "denseWindow": {
+    "startFrame": 46,
+    "endFrame": 314
+  },
+  "fieldProfile": {
+    "playerHp": 117,
+    "opponentHp": 156,
+    "playerStatus": "none",
+    "playerGender": "female"
+  },
+  "animationProfile": {
+    "spriteOrderSeed": [
+      62, 60, 0, 63, 1, 61, 6, 8, 2, 4, 3, 21, 20, 5, 19, 18,
+      17, 16, 15, 14, 13, 12, 11, 10, 9, 7, 54, 55, 56, 57, 58, 59,
+      23, 22, 48, 49, 50, 51, 52, 53, 24, 25, 26, 27, 28, 29, 30,
+      31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45,
+      46, 47
+    ],
+    "dirt": [
+      {"slot": 4, "xStep": 1217, "yStep": 166},
+      {"slot": 5, "xStep": 1305, "yStep": 268},
+      {"slot": 7, "xStep": 1267, "yStep": 320},
+      {"slot": 9, "xStep": 1063, "yStep": 294},
+      {"slot": 10, "xStep": 1165, "yStep": 88},
+      {"slot": 3, "xStep": 1267, "yStep": 294},
+      {"slot": 11, "xStep": 1293, "yStep": 332},
+      {"slot": 12, "xStep": 1075, "yStep": 152},
+      {"slot": 13, "xStep": 1229, "yStep": 472},
+      {"slot": 14, "xStep": 1113, "yStep": 140},
+      {"slot": 15, "xStep": 1037, "yStep": 422},
+      {"slot": 16, "xStep": 973, "yStep": 242},
+      {"slot": 17, "xStep": 1293, "yStep": 344},
+      {"slot": 18, "xStep": 973, "yStep": 102},
+      {"slot": 19, "xStep": 1127, "yStep": 460},
+      {"slot": 20, "xStep": 999, "yStep": 216},
+      {"slot": 21, "xStep": 1101, "yStep": 242},
+      {"slot": 22, "xStep": 1217, "yStep": 486},
+      {"slot": 23, "xStep": 1331, "yStep": 486},
+      {"slot": 24, "xStep": 1075, "yStep": 152},
+      {"slot": 25, "xStep": 999, "yStep": 344},
+      {"slot": 26, "xStep": 1203, "yStep": 370},
+      {"slot": 27, "xStep": 1255, "yStep": 472},
+      {"slot": 28, "xStep": 1203, "yStep": 320},
+      {"slot": 29, "xStep": 973, "yStep": 152},
+      {"slot": 30, "xStep": 999, "yStep": 320},
+      {"slot": 31, "xStep": 1101, "yStep": 472},
+      {"slot": 32, "xStep": 1127, "yStep": 320},
+      {"slot": 33, "xStep": 1101, "yStep": 332},
+      {"slot": 34, "xStep": 973, "yStep": 140}
+    ]
+  },
+  "controllerProfile": {
+    "accuracyStageBefore": 6,
+    "accuracyStageAfter": 5,
+    "resultTextFirstAge": 183,
+    "currentMoveResetAge": 275
+  },
+  "moveTextStartAge": 7
+}
