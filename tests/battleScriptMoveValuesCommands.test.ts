@@ -449,7 +449,7 @@ describe("source-mapped Battle Script MOVEVALUESCLEANUP rule command", () => {
     expect(result.state.events).toBe(initial.events);
   });
 
-  it("composes the existing fifteen supported IDs with opcode 37 to exactly sixteen", () => {
+  it("composes the existing seventeen supported IDs with opcode 37 to exactly eighteen", () => {
     const combinedRules: CombinedRules = Object.freeze({
       ...rules(),
       multiHitCounter: 3,
@@ -465,6 +465,7 @@ describe("source-mapped Battle Script MOVEVALUESCLEANUP rule command", () => {
         }),
         prepareSelectionMessage: () => null,
         prepareSelectionMessageFromTable: () => null,
+        resolveAttackerBattler: () => null,
         resolveHalfwordOperand: () => 1,
       }),
     );
@@ -479,7 +480,7 @@ describe("source-mapped Battle Script MOVEVALUESCLEANUP rule command", () => {
     });
 
     expect(Object.keys(composed).map(Number).sort((left, right) => left - right)).toEqual([
-      16, 17, 18, 20, 37, 38, 39, 40, 57, 58, 60, 61, 62, 65, 131, 141,
+      16, 17, 18, 20, 37, 38, 39, 40, 57, 58, 60, 61, 62, 65, 84, 85, 131, 141,
     ]);
   });
 });

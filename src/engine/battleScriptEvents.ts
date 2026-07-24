@@ -51,6 +51,16 @@ export type BattleScriptSemanticEventPayload =
     snapshot: BattleScriptSelectionMessageSnapshot;
   }>
   | Readonly<{
+    kind: "play-se";
+    battler: BattleScriptBattlerId;
+    songId: number;
+  }>
+  | Readonly<{
+    kind: "play-fanfare";
+    battler: BattleScriptBattlerId;
+    songId: number;
+  }>
+  | Readonly<{
     kind: "hp-change";
     battler: number;
     from: number;

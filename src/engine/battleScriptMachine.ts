@@ -126,6 +126,7 @@ export type BattleScriptBlockReason =
       | "prepare-message"
       | "prepare-selection-message"
       | "prepare-selection-message-from-table"
+      | "resolve-attacker"
       | "resolve-byte"
       | "resolve-halfword";
     operandExpression: string;
@@ -565,6 +566,9 @@ function freezeEventPayload(
         ...payload,
         snapshot: createBattleScriptSelectionMessageSnapshot(payload.snapshot),
       });
+    case "play-se":
+    case "play-fanfare":
+      return Object.freeze({ ...payload });
     case "animation":
       return Object.freeze({ ...payload, arguments: Object.freeze([...payload.arguments]) });
     case "hp-change":

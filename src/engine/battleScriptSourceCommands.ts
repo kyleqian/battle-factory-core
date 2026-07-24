@@ -41,6 +41,10 @@ export type BattleScriptHalfwordResolverPort<RulesContext extends object> = (
   operand: BattleScriptOperand,
 ) => number | null;
 
+export type BattleScriptAttackerResolverPort<RulesContext extends object> = (
+  context: BattleScriptOpcodeHandlerContext<RulesContext>,
+) => BattleScriptBattlerId | null;
+
 export type BattleScriptSelectionMessagePreparation = Readonly<{
   attacker: BattleScriptBattlerId;
   stringId: number;
@@ -63,6 +67,7 @@ export type BattleScriptSourceCommandPorts<RulesContext extends object> = Readon
   prepareMessage: BattleScriptMessagePreparationPort<RulesContext>;
   prepareSelectionMessage: BattleScriptSelectionMessagePreparationPort<RulesContext>;
   prepareSelectionMessageFromTable: BattleScriptSelectionMessageFromTablePreparationPort<RulesContext>;
+  resolveAttackerBattler: BattleScriptAttackerResolverPort<RulesContext>;
   resolveHalfwordOperand: BattleScriptHalfwordResolverPort<RulesContext>;
 }>;
 
@@ -113,6 +118,19 @@ function unavailableHalfwordReason<RulesContext extends object>(
     opcodeName: context.instruction.opcodeName,
     port: "resolve-halfword",
     operandExpression: operand.expression,
+  });
+}
+
+function unavailableAttackerReason<RulesContext extends object>(
+  context: BattleScriptOpcodeHandlerContext<RulesContext>,
+): BattleScriptBlockReason {
+  return Object.freeze({
+    kind: "source-context-unavailable",
+    programCounter: context.state.programCounter,
+    opcodeId: context.instruction.opcodeId,
+    opcodeName: context.instruction.opcodeName,
+    port: "resolve-attacker",
+    operandExpression: "gBattlerAttacker",
   });
 }
 
@@ -381,10 +399,41 @@ function emitPreparedSelectionMessage<RulesContext extends object>(
   );
 }
 
+function emitAudioControllerEvent<RulesContext extends object>(
+  context: BattleScriptOpcodeHandlerContext<RulesContext>,
+  ports: BattleScriptSourceCommandPorts<RulesContext>,
+  kind: "play-se" | "play-fanfare",
+): BattleScriptCommandTransition<RulesContext> {
+  const resolved = resolveHalfwordOperand(context, ports);
+  if (resolved.kind === "transition") return resolved.transition;
+  const attacker = ports.resolveAttackerBattler(context);
+  if (attacker === null) {
+    return blockBattleScriptCommand(context, unavailableAttackerReason(context));
+  }
+  if (!isBattleScriptBattlerId(attacker)) {
+    return haltForInvalidBattler(context, attacker);
+  }
+  const scheduler = markBattleScriptControllerPending(
+    schedulerWith(context, { activeBattler: attacker }),
+    attacker,
+  );
+  return transitionBattleScriptCommand(
+    context,
+    Object.freeze({ kind: "advance" }),
+    {
+      scheduler,
+      events: Object.freeze([
+        Object.freeze({ kind, battler: attacker, songId: resolved.value }),
+      ]),
+    },
+  );
+}
+
 /**
  * First source-mapped scheduler family:
  * Cmd_nop, Cmd_waitstate, Cmd_printstring, Cmd_printselectionstring,
- * Cmd_printselectionstringfromtable, Cmd_waitmessage, and Cmd_pause.
+ * Cmd_printselectionstringfromtable, Cmd_waitmessage, Cmd_pause, Cmd_playse,
+ * and Cmd_fanfare.
  *
  * Controller readiness, source-context string preparation, and exact u16
  * operand resolution are injected logical ports. MSG_DISPLAY and the shared
@@ -456,6 +505,10 @@ export function createBattleScriptSourceCommandHandlers<RulesContext extends obj
     }
     return emitPreparedSelectionMessage(context, required.operand, preparation);
   });
+  installHandler(program, handlers, "B_SCR_OP_PLAYSE", (context) =>
+    emitAudioControllerEvent(context, ports, "play-se"));
+  installHandler(program, handlers, "B_SCR_OP_FANFARE", (context) =>
+    emitAudioControllerEvent(context, ports, "play-fanfare"));
   installHandler(program, handlers, "B_SCR_OP_WAITMESSAGE", (context) => {
     if (!ports.isControllerIdle(context)) {
       return blockBattleScriptCommand(context, controllerBusyReason(context));
