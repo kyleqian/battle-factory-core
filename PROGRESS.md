@@ -4,6 +4,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 334 — S8 OFF default-YES accept/exit: **GREEN — 43/43 exact**
+
+- **State:** default YES is exact from the first sampled prompt edge through
+  `CB2_ReturnToFieldContinueScript` at response +41 / canonical 30041. Dense
+  OFF trace `battle1-swap-enemy-accept-exit.json` is **43/43 exact**; the
+  input-ready accept prompt remains **66/66**.
+- **Did:** added source-owned accept-response/mon-picture-close/exit phases,
+  `gSpecialVar_Result=FALSE` at +20, selected-record ONIX→GROVYLE commit at
+  +21, all-palette fade, and an explicit field-script handoff. Tier-1 rejects
+  the +63 A, proves no early mutation, pins rental monId 188 / PID 1094072807
+  / IV 3 / ability 0 / friendship 0, and opens the round decision seam only
+  after the atomic commit.
+- **Next:** implement one distinct remaining S8 gate-2 edge: accept NO/B
+  return to enemy input at 30087, or a source-pinned loss/seventh-win ending.
+  Do not extend the retired Battle-2 march.
+- **Notes:** Tier-1 **1215/1215**, build **5.568 MB**. Enemy picker, B-close,
+  popup, options, and player picker remain **130/130**, **59/59**, **44/44**,
+  **58/58**, and **101/101**. No absolute tick/frame lookup, screenshot asset,
+  canonical-party replacement branch, NO/B response, or post-handoff path.
+
+---
 ## 333 — S8 OFF enemy accept prompt opening: **GREEN — 66/66 exact**
 
 - **State:** the eligible GROVYLE branch is exact from the input-ready enemy
@@ -43,23 +64,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   popup, options, and player picker remain **130/130**, **59/59**, **44/44**,
   **58/58**, and **101/101**. This is an honest partial, not S8 acceptance;
   no tick/frame lookup, screenshot, runtime oracle asset, or terminal path.
-
----
-## 331 — S8 OFF enemy-screen switch/picker: **GREEN — 130/130 exact**
-
-- **State:** SWAP now reaches the input-ready five-action enemy picker and
-  stops before mon selection. Dense OFF trace
-  `battle1-swap-enemy-picker.json` is **130/130 exact**, including the first
-  accepted LEFT edge and its action-4 highlight.
-- **Did:** implemented source-named `Swap_Task_SwitchPartyScreen`, three
-  independent ball cycles, `Swap_InitActions(SWAP_ENEMY_SCREEN)` (3→5),
-  GROVYLE/MURKROW/PIDGEOTTO identity/order, staggered PKMN-FOR-SWAP/CANCEL
-  slides, labels/category/species, and
-  `Swap_Task_ScreenInfoTransitionIn` → `HandleChooseMons`. LEFT/RIGHT wraps
-  all five actions with category/species/OAM copy lag; the selected-ball and
-  species tasks retain ownership.
-- **Next:** implement the distinct eligible enemy-mon A path through
-  `Swap_AskAcceptMon`; stop at its input-ready YES/NO prompt before a choice.
-- **Notes:** Tier-1 **1199/1199**, build **5.556 MB**. B-close, popup,
-  options, and picker remain **59/59**, **44/44**, **58/58**, **101/101**.
-  No absolute-tick, battle-number, screenshot, or captured-asset path.

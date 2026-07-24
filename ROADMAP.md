@@ -546,10 +546,14 @@ exact**. SWAP evidence pins enemy mode at canonical tick 29886, picker input
 at 29935, and accept-ready state at 29999 / first sampled prompt input 30000.
 YES commits ONIX→GROVYLE at 30021 and exits at 30041; NO/B return to enemy
 picker input at 30087 without mutation.
+The default-YES response/exit is now implemented with selected-state mutation,
+script-result semantics, and a committed dense OFF trace at **43/43 exact**
+through the 30041 field-script handoff. Its input-ready prompt remains
+**66/66 exact**; NO/B response/return remains a separate unimplemented edge.
 Source extraction now also pins the terminal field-message gates and the
 seventh-win `MSGBOX_GETPOINTS` fanfare/wait path, but no ending pixels are
-claimed. Summary/B-close/enemy selection presentation, accept/exit, loss
-ending, and seventh-win ending still need dense OFF-profile UI proofs. The
+claimed. Summary presentation, NO/B return, loss ending, and seventh-win
+ending still need dense OFF-profile UI proofs. The
 parallel Scene-ON adapter has a portable ONIX→GROVYLE FIRE PUNCH case at
 **225/225**. The opposite GROVYLE→ONIX orientation is now deterministically
 staged with source geometry and outcome, but still lacks an app comparison,

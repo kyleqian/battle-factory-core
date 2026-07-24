@@ -1,3 +1,23 @@
+## 331 — S8 OFF enemy-screen switch/picker: **GREEN — 130/130 exact**
+
+- **State:** SWAP now reaches the input-ready five-action enemy picker and
+  stops before mon selection. Dense OFF trace
+  `battle1-swap-enemy-picker.json` is **130/130 exact**, including the first
+  accepted LEFT edge and its action-4 highlight.
+- **Did:** implemented source-named `Swap_Task_SwitchPartyScreen`, three
+  independent ball cycles, `Swap_InitActions(SWAP_ENEMY_SCREEN)` (3→5),
+  GROVYLE/MURKROW/PIDGEOTTO identity/order, staggered PKMN-FOR-SWAP/CANCEL
+  slides, labels/category/species, and
+  `Swap_Task_ScreenInfoTransitionIn` → `HandleChooseMons`. LEFT/RIGHT wraps
+  all five actions with category/species/OAM copy lag; the selected-ball and
+  species tasks retain ownership.
+- **Next:** implement the distinct eligible enemy-mon A path through
+  `Swap_AskAcceptMon`; stop at its input-ready YES/NO prompt before a choice.
+- **Notes:** Tier-1 **1199/1199**, build **5.556 MB**. B-close, popup,
+  options, and picker remain **59/59**, **44/44**, **58/58**, **101/101**.
+  No absolute-tick, battle-number, screenshot, or captured-asset path.
+
+---
 ## 330 — S8 OFF popup B-close/player-picker return: **GREEN — 59/59 exact**
 
 - **State:** the evidence-pinned B path is complete from the `playerOptions`
