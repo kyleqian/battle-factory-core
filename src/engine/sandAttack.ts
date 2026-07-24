@@ -29,7 +29,8 @@ export const SAND_ATTACK_DIRT_FIRST_DISPLAY_AGE = 56;
 export const SAND_ATTACK_DIRT_WAVE_STRIDE = 4;
 export const SAND_ATTACK_DIRT_LIFETIME = 21;
 
-const SLIDE_MAGNITUDES: readonly number[] = [3, 6, 9, 9, 9, 4, 0];
+const OPPONENT_SLIDE_MAGNITUDES: readonly number[] = [3, 6, 9, 9, 9, 4, 0];
+const PLAYER_SLIDE_MAGNITUDES: readonly number[] = [4, 7, 10, 10, 10, 5, 0];
 
 /**
  * Source `SlideMonToOffset` / `SlideMonToOriginalPos`. The script requests
@@ -40,8 +41,11 @@ export function sandAttackAttackerX2AtAge(
   age: number,
   attackerSide: SandAttackSide,
 ): number {
+  const magnitudes = attackerSide === "opponent"
+    ? OPPONENT_SLIDE_MAGNITUDES
+    : PLAYER_SLIDE_MAGNITUDES;
   const magnitude =
-    SLIDE_MAGNITUDES[age - SAND_ATTACK_SLIDE_FIRST_DISPLAY_AGE] ?? 0;
+    magnitudes[age - SAND_ATTACK_SLIDE_FIRST_DISPLAY_AGE] ?? 0;
   if (magnitude === 0) return 0;
   return attackerSide === "opponent" ? magnitude : -magnitude;
 }
@@ -71,11 +75,12 @@ export function sandAttackDirtAtAge(
       const n = candidateAge - firstDisplayAge + 1;
       if (n < 1 || n > SAND_ATTACK_DIRT_LIFETIME) return null;
       const clamped = Math.min(n, 20);
-      const dx = Math.floor((clamped * seed.xStep) / 256);
+      const dxMagnitude = Math.floor((clamped * seed.xStep) / 256);
+      const dyMagnitude = Math.floor((clamped * seed.yStep) / 256);
       return {
         slot: seed.slot,
-        x: origin.x + (attackerSide === "opponent" ? -dx : dx),
-        y: origin.y + Math.floor((clamped * seed.yStep) / 256),
+        x: origin.x + (seed.xStep & 1 ? -dxMagnitude : dxMagnitude),
+        y: origin.y + (seed.yStep & 1 ? -dyMagnitude : dyMagnitude),
       };
     })
     .filter((sprite): sprite is SandAttackDirtSprite => sprite !== null);

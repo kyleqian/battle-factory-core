@@ -28,7 +28,7 @@ describe("portable SAND ATTACK presentation", () => {
     expect(sandAttackAttackerX2AtAge(50, "opponent")).toBe(0);
     expect(sandAttackAttackerX2AtAge(51, "opponent")).toBe(3);
     expect(sandAttackAttackerX2AtAge(53, "opponent")).toBe(9);
-    expect(sandAttackAttackerX2AtAge(51, "player")).toBe(-3);
+    expect(sandAttackAttackerX2AtAge(51, "player")).toBe(-4);
     expect(sandAttackAttackerX2AtAge(57, "player")).toBe(0);
   });
 
@@ -48,11 +48,19 @@ describe("portable SAND ATTACK presentation", () => {
     expect(opponent).toHaveLength(5);
     expect(opponent.find(({ slot }) => slot === 4))
       .toEqual({ slot: 4, x: 157, y: 66 });
+    const playerProfile = {
+      spriteOrderSeed: profile.spriteOrderSeed,
+      dirt: profile.dirt.map(({ slot, xStep, yStep }) => ({
+        slot,
+        xStep: xStep - 1,
+        yStep: yStep + 1,
+      })),
+    };
     const player = sandAttackDirtAtAge(
       56,
       { x: 72, y: 100 },
       "player",
-      profile,
+      playerProfile,
     );
     expect(player.find(({ slot }) => slot === 4))
       .toEqual({ slot: 4, x: 91, y: 115 });

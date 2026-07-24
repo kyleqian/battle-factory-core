@@ -38,19 +38,20 @@ remainder.
 
 ## Current handoff
 
-- **State:** **8 exact / 5 partial / 263 unsupported**. AERIAL ACE is exact
+- **State:** **9 exact / 4 partial / 263 unsupported**. SAND ATTACK is exact
   in both source-required orientations through the shared Scene-ON seam.
-- **Did:** installed its independent portable compositor for the signed
-  ellipse, per-clone OAM order, target-anchored cutting slice, palette pulse,
-  vertical shake, generic hit, immutable 117→108 drain/result, command
-  release, and MOVE_NONE cleanup. Opposite-side evidence additionally pins
-  the source `(target + 40,-32)` slice anchor and the opponent-front monbg
-  reset from settled OAM `x2=+1` to the base corner.
-- **Evidence:** opponent-front frames **46-281 = 236/236** exact;
-  player-back frames **46-277 = 232/232** exact; canonical AERIAL remains
-  **93/93**. Both mechanicLab inputs remain exactly
-  `ppUps:[0,0,0,0]`. Regressions: QUICK **219/219 + 214/214**, FEATHER
-  **400/400 + 400/400**, FIRE **225/225 + 277/277**, ICE **462/462 +
-  1294/1294**.
-- **Next:** supervisor may select the next acceptance unit; SAND ATTACK is
-  now the first partial move in the ranked queue.
+- **Did:** installed its source-relative signed attacker slide, six
+  five-sprite dirt waves with RNG-resolved Q8.8 velocity profiles, stable
+  `SortSprites` insertion ordering from one pre-allocation seed, generic
+  accuracy-decrease banner/result printer, immutable 6→5 controller result,
+  command release, and MOVE_NONE cleanup. The opposite-side audit pins the
+  player slide's asymmetric −4/−7/−10 rounding, signed X/Y dirt words,
+  player-back/opponent-front geometry, and four-frame animation head start.
+- **Evidence:** opponent-front frames **46-314 = 269/269** exact;
+  player-back frames **46-314 = 269/269** exact; canonical turn 13 remains
+  **190/190**. Both mechanicLab inputs remain exactly
+  `ppUps:[0,0,0,0]`. Regressions: AERIAL **236/236 + 232/232**, QUICK
+  **219/219 + 214/214**, FEATHER **400/400 + 400/400**, FIRE **225/225 +
+  277/277**, ICE **462/462 + 1294/1294**.
+- **Next:** supervisor may select the next acceptance unit; FLY is now the
+  first partial move in the ranked queue.

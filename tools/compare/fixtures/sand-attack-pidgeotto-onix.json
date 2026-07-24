@@ -66,5 +66,9 @@
     "resultTextFirstAge": 183,
     "currentMoveResetAge": 275
   },
-  "moveTextStartAge": 7
+  "moveTextStartAge": 7,
+  "acceptance": {
+    "status": "exact",
+    "result": "269/269 dense frames exact with zero differing pixels."
+  }
 }
