@@ -1,3 +1,20 @@
+## 368 — Gate-3 scheduler family + mechanical command audit integrated
+
+- **State:** S10 Gate 3 remains open with ten source-safe opcodes and an
+  unwired immutable scheduler/controller/source-context seam.
+- **Did:** accepted source-exact `PRINTSTRING`/`WAITMESSAGE`/`PAUSE`, including
+  controller block, shared-u16 counter progress/wrap, and display-latch
+  lifecycle. Added a lossless mechanical audit joining all **249** handlers
+  to all **3306** concrete starts; its deliberately narrow lexical rule finds
+  **22** fixed-literal-advance candidates without claiming runtime safety.
+- **Next:** use the audit to choose one bounded source family whose complete
+  battle context is explicit. Keep unsupported commands structured; do not
+  wire production controllers/renderers or touch the independent PP work.
+- **Notes:** exact supported IDs remain
+  **16/18/40/57/58/60/61/62/65/131**. Tier-1 **110 files / 1461 tests** and
+  build green; no new oracle/pixel claim.
+
+---
 ## 367 — Gate-3 immutable scheduler state + wait commands
 
 - **State:** S10 Gate 3 remains open with ten source-safe opcodes and an
