@@ -6,7 +6,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ---
 ## 412 — Gate-3 Magic Coat intercept composed
 
-- **State:** the run is clean and green at **157 files / 1904 tests**. S10
+- **State:** the run is clean and green at **158 files / 1906 tests**. S10
   Gate 3 remains at **27** source-safe executable opcodes. The pure
   attack-canceler chain now reaches Magic Coat immediately after continuing
   Factory obedience; opcode 0 remains unregistered and no Snatch, later
@@ -28,7 +28,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   exact clear, prior bits/markers, canceler effects **1/2**, Soundproof, no
   PP, invalid roles/protect/PC/stack/composition, deterministic replay,
   immutability, recursive freezing, full upstream receipt preservation, and
-  zero RNG are pinned. Focused **3 files / 14 tests**; integrated **157/1904**,
+  zero RNG are pinned. Focused **3 files / 14 tests**; integrated **158/1906**,
   production build, OFF v5 info (`9c89c741…`), validated **684-frame** probe
   (arm **41**, PP **66/240**, clear **214**, bounce/resume **390–393**), and
   diff check green. Code commit `57969b5`; pixel diff N/A.
