@@ -2078,6 +2078,7 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
         summaryMonAnimClock,
         summary.moveSelect,
         animateSwitchedMon,
+        summary.page as "battleMoves" | "contestMoves",
       );
     }
     if (summary.monTransition) {

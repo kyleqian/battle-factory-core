@@ -76,6 +76,42 @@ describe("summary Info page render", () => {
     for (let i = 3; i < visible.length; i += 4) expect(visible[i]).toBe(255);
   });
 
+  it("gives Contest selection its own effect panel, hearts, and effect-description ownership", () => {
+    const select: SummaryMoveSelectState = {
+      phase: "open",
+      selectedMoveIndex: 0,
+      presentedMoveIndex: 0,
+      elapsed: 12,
+      selectorAnimationClock: 12,
+      pendingPresentedMoveIndex: null,
+      pendingPresentationTicks: 0,
+    };
+    const ordinary = renderSummaryContestMovesPage(0, 40);
+    const rockSlide = renderSummaryBattleMoveSelectPage(
+      0,
+      40,
+      select,
+      false,
+      "contestMoves",
+    );
+    const bind = renderSummaryBattleMoveSelectPage(
+      0,
+      40,
+      {
+        ...select,
+        selectedMoveIndex: 1,
+        presentedMoveIndex: 1,
+      },
+      false,
+      "contestMoves",
+    );
+    const battle = renderSummaryBattleMoveSelectPage(0, 40, select);
+    expect(Buffer.from(rockSlide).equals(Buffer.from(ordinary))).toBe(false);
+    expect(Buffer.from(rockSlide).equals(Buffer.from(bind))).toBe(false);
+    expect(Buffer.from(rockSlide).equals(Buffer.from(battle))).toBe(false);
+    for (let i = 3; i < rockSlide.length; i += 4) expect(rockSlide[i]).toBe(255);
+  });
+
   it("owns a deterministic, fully opaque Contest Moves page for the selected rental", () => {
     const onix = renderSummaryContestMovesPage(0, 30);
     const onixAgain = renderSummaryContestMovesPage(0, 30);

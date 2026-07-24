@@ -42,6 +42,7 @@ import itemNamesData from "../data/gen/item-names.json" with { type: "json" };
 import expTablesData from "../data/gen/exp-tables.json" with { type: "json" };
 import movesData from "../data/gen/moves.json" with { type: "json" };
 import summaryMoveEffectBattleData from "../assets/gen/summary-move-effect-battle.json" with { type: "json" };
+import summaryMoveEffectContestData from "../assets/gen/summary-move-effect-contest.json" with { type: "json" };
 import summaryMoveEffectCancelData from "../assets/gen/summary-move-effect-cancel.json" with { type: "json" };
 import summaryMoveSelectData from "../assets/gen/summary-move-select.json" with { type: "json" };
 
@@ -99,11 +100,21 @@ const moves = new Map(
       power: number;
       accuracy: number;
       description: string;
-      contest: { category: string; appeal: number; jam: number };
+      contest: {
+        category: string;
+        appeal: number;
+        jam: number;
+        effect: string;
+        description: string;
+      };
     }>;
   }).moves.map((move) => [move.move, move]),
 );
 const moveEffectBattle = summaryMoveEffectBattleData as unknown as {
+  tilemap: SummaryTilemap;
+  readRows: number;
+};
+const moveEffectContest = summaryMoveEffectContestData as unknown as {
   tilemap: SummaryTilemap;
   readRows: number;
 };
@@ -272,28 +283,38 @@ const MARKINGS_SHEET: SpriteSheet = { tileset: markings.tileset };
 const A_BUTTON_SHEET: SpriteSheet = { tileset: buttons.a.tileset };
 const MOVE_SELECTOR_SHEET: SpriteSheet = { tileset: moveSelector.tileset };
 
-function battleMovesSelectTilemap(): SummaryTilemap {
-  const entries = BATTLE_MOVES_CLOSED_TILEMAP.entries.slice();
+function movesSelectTilemap(page: "battleMoves" | "contestMoves"): SummaryTilemap {
+  const base =
+    page === "battleMoves" ? BATTLE_MOVES_CLOSED_TILEMAP : CONTEST_MOVES_CLOSED_TILEMAP;
+  const entries = base.entries.slice();
+  const palette = page === "battleMoves" ? 3 : 1;
   for (let i = 0; i < 20; i += 1) {
     entries[11 * 32 + 10 + i] = {
       ...moveEffectCancel.entries[i]!,
-      palette: 3,
+      palette,
     };
     entries[12 * 32 + 10 + i] = {
       ...moveEffectCancel.entries[i]!,
-      palette: 3,
+      palette,
     };
     entries[13 * 32 + 10 + i] = {
       ...moveEffectCancel.entries[20 + i]!,
-      palette: 3,
+      palette,
     };
   }
-  return { ...BATTLE_MOVES_CLOSED_TILEMAP, entries };
+  return { ...base, entries };
 }
 
-function battleMoveEffectPatch(hiddenColumns: number): SummaryTilemap {
+function moveEffectPatch(
+  page: "battleMoves" | "contestMoves",
+  hiddenColumns: number,
+  appeal = 0,
+  jam = 0,
+): SummaryTilemap {
   const width = 10;
   const height = 7;
+  const source =
+    page === "battleMoves" ? moveEffectBattle.tilemap : moveEffectContest.tilemap;
   const entries = Array.from({ length: width * height }, () => ({
     tile: 0,
     hFlip: false,
@@ -302,7 +323,21 @@ function battleMoveEffectPatch(hiddenColumns: number): SummaryTilemap {
   }));
   for (let y = 0; y < height; y += 1) {
     for (let x = hiddenColumns; x < width; x += 1) {
-      entries[y * width + x] = moveEffectBattle.tilemap.entries[y * width + x - hiddenColumns]!;
+      entries[y * width + x] = source.entries[y * width + x - hiddenColumns]!;
+    }
+  }
+  if (page === "contestMoves" && hiddenColumns === 0) {
+    const heart = (filled: boolean, isJam: boolean) => ({
+      tile: isJam ? (filled ? 0x3c : 0x3d) : (filled ? 0x3a : 0x39),
+      hFlip: false,
+      vFlip: false,
+      palette: 1,
+    });
+    for (let i = 0; i < 8; i += 1) {
+      const x = 6 + (i & 3);
+      const row = Math.floor(i / 4);
+      entries[(2 + row) * width + x] = heart(i < appeal / 10, false);
+      entries[(4 + row) * width + x] = heart(i < jam / 10, true);
     }
   }
   return { width, height, entries };
@@ -371,10 +406,10 @@ function compose(
       {
         tileset: summaryBg.tileset,
         tilemap:
-          page === "battleMoves" &&
+          (page === "battleMoves" || page === "contestMoves") &&
           moveSelect &&
           (moveSelect.phase === "open" ? moveSelect.elapsed >= 3 : moveSelect.elapsed === 0)
-            ? battleMovesSelectTilemap()
+            ? movesSelectTilemap(page)
             : pageTilemap(page),
         subpalettes: summaryBg.subpalettes,
       },
@@ -496,11 +531,20 @@ function compose(
       moveSelect.phase === "closing"
         ? Math.min(10, moveSelect.elapsed * 3)
         : Math.max(0, 9 - (moveSelect.elapsed - 2) * 3);
+    const frontierMon = frontierMons.find(
+      (entry) => entry.index === (rental as { frontierMonIndex?: number }).frontierMonIndex,
+    )!;
+    const presentedMove = moves.get(frontierMon.moves[moveSelect.presentedMoveIndex]!)!;
     drawTilePatchFaded(
       fb,
       summaryBg.tileset,
       summaryBg.subpalettes,
-      battleMoveEffectPatch(hiddenColumns),
+      moveEffectPatch(
+        page as "battleMoves" | "contestMoves",
+        hiddenColumns,
+        presentedMove.contest.appeal,
+        presentedMove.contest.jam,
+      ),
       0,
       13 * 8,
       bgY,
@@ -704,10 +748,21 @@ function compose(
       (moveSelect.phase === "open"
         ? moveSelect.elapsed >= 3
         : moveSelect.elapsed === 0);
-    if (showMoveDetails) {
+    const showCancel =
+      moveSelect &&
+      (moveSelect.phase === "open"
+        ? moveSelect.elapsed >= (page === "contestMoves" ? 2 : 3)
+        : moveSelect.elapsed === 0);
+    if (showCancel) {
       text("CANCEL", WIN_MOVES_NAMES.x, WIN_MOVES_NAMES.y + 65, COLOR_1, PAL6);
+    }
+    if (showMoveDetails) {
       const presentedMove = moves.get(frontierMon.moves[moveSelect.presentedMoveIndex]!)!;
-      for (const [lineIndex, line] of presentedMove.description.split("\n").entries()) {
+      const description =
+        page === "contestMoves"
+          ? presentedMove.contest.description
+          : presentedMove.description;
+      for (const [lineIndex, line] of description.split("\n").entries()) {
         text(line, 86, 121 + lineIndex * 16, COLOR_0, PAL6);
       }
       const panelFullyOpen =
@@ -721,36 +776,41 @@ function compose(
             ? moveSelect.presentedMoveIndex
             : moveSelect.selectedMoveIndex;
         const detailMove = moves.get(frontierMon.moves[powerMoveIndex]!)!;
-        text("POWER", 8, 121, COLOR_1, PAL6);
-        text("ACCURACY", 8, 137, COLOR_1, PAL6);
-        const valueCodes = (value: number, isPower: boolean) =>
-          value < (isPower ? 2 : 1)
-            ? "---".split("").map((char) => charmap.get(char)!)
-            : [
-                ...Array.from(
-                  { length: Math.max(0, 3 - String(value).length) },
-                  () => CHAR_SPACER,
-                ),
-                ...String(value).split("").map((char) => charmap.get(char)!),
-              ];
-        drawGlyphCodes(
-          fb,
-          font,
-          valueCodes(detailMove.power, true),
-          61,
-          121,
-          summaryBg.subpalettes[PAL6]!,
-          COLOR_0,
-        );
-        drawGlyphCodes(
-          fb,
-          font,
-          valueCodes(detailMove.accuracy, false),
-          61,
-          137,
-          summaryBg.subpalettes[PAL6]!,
-          COLOR_0,
-        );
+        text(page === "contestMoves" ? "APPEAL" : "POWER", 8, 121, COLOR_1, PAL6);
+        text(page === "contestMoves" ? "JAM" : "ACCURACY", 8, 137, COLOR_1, PAL6);
+        if (page === "contestMoves") {
+          // DrawContestMoveHearts owns the BG tilemap values; there are no
+          // numeric values in the Contest label window.
+        } else {
+          const valueCodes = (value: number, isPower: boolean) =>
+            value < (isPower ? 2 : 1)
+              ? "---".split("").map((char) => charmap.get(char)!)
+              : [
+                  ...Array.from(
+                    { length: Math.max(0, 3 - String(value).length) },
+                    () => CHAR_SPACER,
+                  ),
+                  ...String(value).split("").map((char) => charmap.get(char)!),
+                ];
+          drawGlyphCodes(
+            fb,
+            font,
+            valueCodes(detailMove.power, true),
+            61,
+            121,
+            summaryBg.subpalettes[PAL6]!,
+            COLOR_0,
+          );
+          drawGlyphCodes(
+            fb,
+            font,
+            valueCodes(detailMove.accuracy, false),
+            61,
+            137,
+            summaryBg.subpalettes[PAL6]!,
+            COLOR_0,
+          );
+        }
       }
 
       const selectorCounter =
@@ -831,6 +891,7 @@ export function renderSummaryBattleMoveSelectPage(
   monAnimClock: number,
   moveSelect: SummaryMoveSelectState,
   animateSwitchedMon = false,
+  page: "battleMoves" | "contestMoves" = "battleMoves",
 ): Uint8Array {
   const fb = createFramebuffer();
   compose(
@@ -838,7 +899,7 @@ export function renderSummaryBattleMoveSelectPage(
     selectedSlot,
     0,
     0,
-    "battleMoves",
+    page,
     monAnimClock,
     false,
     0,

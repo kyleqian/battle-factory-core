@@ -497,6 +497,94 @@ describe("summaryScreen: LOCK_MOVES Battle Moves selector", () => {
   });
 });
 
+describe("summaryScreen: shared LOCK_MOVES Contest Moves selector", () => {
+  function contestMoves(slot = 0): SummaryScreenState {
+    let page = run(openSummaryScreen(slot), 59);
+    for (let i = 0; i < 3; i += 1) {
+      page = run(
+        requestSummaryPageChange(page, "right"),
+        SUMMARY_PAGE_TRANSITION_TICKS,
+      );
+    }
+    return page;
+  }
+
+  it("reuses selector ownership without mutating rental, page, mode, or move order", () => {
+    const page = contestMoves(4);
+    const selected = requestSummaryMoveSelect(page);
+    expect(page.moveSelect).toBeNull();
+    expect(selected).toMatchObject({
+      selectedSlot: 4,
+      page: "contestMoves",
+      mode: "SUMMARY_MODE_LOCK_MOVES",
+      moveSelect: {
+        phase: "open",
+        selectedMoveIndex: 0,
+        presentedMoveIndex: 0,
+        elapsed: 0,
+        selectorAnimationClock: 0,
+      },
+    });
+    expect(["ROCK_SLIDE", "BIND", "DRAGON_BREATH", "SANDSTORM"]).toEqual([
+      "ROCK_SLIDE",
+      "BIND",
+      "DRAGON_BREATH",
+      "SANDSTORM",
+    ]);
+  });
+
+  it("shares true readiness, index/presentation gates, and cursor-clock reset", () => {
+    const selected = requestSummaryMoveSelect(contestMoves(0));
+    expect(requestSummaryMoveSelectionChange(selected, "down")).toBe(selected);
+    const ready = advanceSummaryScreen(selected);
+    const down = requestSummaryMoveSelectionChange(ready, "down");
+    expect(down.moveSelect).toMatchObject({
+      selectedMoveIndex: 1,
+      presentedMoveIndex: 0,
+      selectorAnimationClock: 0,
+      pendingPresentedMoveIndex: 1,
+      pendingPresentationTicks: 2,
+    });
+    expect(advanceSummaryScreen(down).moveSelect).toMatchObject({
+      presentedMoveIndex: 0,
+      selectorAnimationClock: 1,
+      pendingPresentationTicks: 1,
+    });
+    expect(run(down, 2).moveSelect).toMatchObject({
+      selectedMoveIndex: 1,
+      presentedMoveIndex: 1,
+      selectorAnimationClock: 2,
+      pendingPresentedMoveIndex: null,
+      pendingPresentationTicks: 0,
+    });
+  });
+
+  it("keeps locked A/B on the shared close route and restores ordinary Contest Moves at +4", () => {
+    const ready = run(requestSummaryMoveSelect(contestMoves(2)), 8);
+    const closing = requestSummaryMoveSelectClose(ready);
+    expect(closing).toMatchObject({
+      selectedSlot: 2,
+      page: "contestMoves",
+      mode: "SUMMARY_MODE_LOCK_MOVES",
+      moveSelect: { phase: "closing", elapsed: 0 },
+    });
+    expect(requestSummaryMoveSelectionChange(closing, "down")).toBe(closing);
+    expect(requestSummaryPageChange(closing, "left")).toBe(closing);
+    const restored = run(closing, SUMMARY_MOVE_SELECT_CLOSE_TICKS);
+    expect(restored).toMatchObject({
+      selectedSlot: 2,
+      page: "contestMoves",
+      mode: "SUMMARY_MODE_LOCK_MOVES",
+      isOpen: true,
+      moveSelect: null,
+    });
+    expect(requestSummaryPageChange(restored, "left").pageTransition).toMatchObject({
+      fromPage: "contestMoves",
+      toPage: "battleMoves",
+    });
+  });
+});
+
 describe("summaryScreen: slot-relative Info-page mon switching", () => {
   function settled(slot = 0): SummaryScreenState {
     return run(openSummaryScreen(slot), 59);

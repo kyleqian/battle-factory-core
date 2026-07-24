@@ -1,3 +1,21 @@
+## 353 — S9 OFF Skills→Battle Moves layered wipe: **GREEN — 36/36 exact**
+
+- **State:** settled ONIX Skills now advances RIGHT through the generic
+  eight-step BG1/BG2 wipe to input-ready Battle Moves at +10.
+- **Did:** composed the source Battle Moves tilemap, four move/PP/type rows,
+  palette-8 PP text, title/pagination/A-INFO ownership, closed effect panel,
+  and persistent portrait sprites. Tier-1 pins Skills→Battle ordering,
+  layer offsets, selected rental, in-flight gates, +10 readiness, and edges.
+- **Next:** supervisor verify this route and choose the next bounded S9
+  increment; Contest Moves, move-select/highlight/reorder, and Moves-page mon
+  switching remain untouched.
+- **Notes:** `summary-skills-to-battle-moves.json` **36/36**; DOWN→UP
+  **87/87**; DOWN **54/54**; Info **122/122 + 132/132**; install **3/3**;
+  Info→Skills **25/25**; Skills→Info **56/56**. Tier-1 **1300/1300** and
+  build green. No absolute ticks, framebuffer assets, runtime oracle/ROM,
+  battle/controller, ROADMAP, or ISSUES edits.
+
+---
 ## 352 — S9 OFF Info rental DOWN→UP round trip: **GREEN — 87/87 exact**
 
 - **State:** settled ONIX switches DOWN to input-ready MAGBY, then UP returns

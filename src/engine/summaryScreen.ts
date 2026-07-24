@@ -278,7 +278,7 @@ export function requestSummaryMonChange(
   };
 }
 
-/** Task_HandleInput's A branch on Battle Moves. */
+/** Task_HandleInput's shared A branch on either Moves page. */
 export function requestSummaryMoveSelect(state: SummaryScreenState): SummaryScreenState {
   if (
     !state.isOpen ||
@@ -286,7 +286,7 @@ export function requestSummaryMoveSelect(state: SummaryScreenState): SummaryScre
     state.pageTransition ||
     state.monTransition ||
     state.moveSelect ||
-    state.page !== "battleMoves"
+    (state.page !== "battleMoves" && state.page !== "contestMoves")
   ) {
     return state;
   }
