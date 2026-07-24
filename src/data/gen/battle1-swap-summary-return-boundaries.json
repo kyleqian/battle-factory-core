@@ -1,0 +1,64 @@
+{
+  "profile": "battle-scene-off",
+  "canonicalTrace": "tools/compare/traces-groundtruth/battle1-swapyes-a.json",
+  "generator": "tools/probe/derive-swap-summary-return-trace.mjs",
+  "ramProbe": "tools/probe/dump-swap-summary-return.py",
+  "scope": "player options-popup SUMMARY -> normal summary -> same player options popup; evidence only",
+  "source": {
+    "open": "battle_factory_screen.c:2378-2405; default menu option calls Swap_Task_OpenSummaryScreen then ShowPokemonSummaryScreen(SUMMARY_MODE_NORMAL, gPlayerParty, cursorPos, 2, CB2_InitSwapScreen)",
+    "close": "pokemon_summary_screen.c:1509-1521; CloseSummaryScreen records gLastViewedMonIndex then invokes its callback",
+    "rebuild": "battle_factory_screen.c:3273-3433, 3882-3895; CB2_InitSwapScreen preserves the selected player index, rebuilds player chrome, and resumes Swap_Task_HandleMenu"
+  },
+  "precondition": {
+    "playerOrigin": "ONIX options popup, player mode, ball cursor 0, menu cursor SUMMARY (0), four source actions",
+    "playerParty": [
+      { "species": "ONIX", "speciesId": 95, "personality": 1205102525 },
+      { "species": "MAGBY", "speciesId": 240, "personality": 1534575931 },
+      { "species": "BAYLEEF", "speciesId": 153, "personality": 1550278706 }
+    ],
+    "rentalMons": [156, 149, 180, 188, 184, 135]
+  },
+  "edgePairs": {
+    "popupSummaryA": {
+      "rejected": { "tick": 29759, "buttons": ["A"], "reason": "Swap_Task_HandleMenu installs state 3 after sampling this frame" },
+      "accepted": { "tick": 29760, "buttons": ["A"], "result": "Swap_Task_OpenSummaryScreen state 6" }
+    },
+    "summaryCloseB": {
+      "rejected": { "tick": 29822, "buttons": ["B"], "reason": "the summary fade clears after Task_HandleInput samples this frame" },
+      "accepted": { "tick": 29823, "buttons": ["B"], "result": "BeginCloseSummaryScreen / closing palette fade" }
+    },
+    "returnedPopupDown": {
+      "rejected": { "tick": 29883, "buttons": ["DOWN"], "reason": "returned swap-popup fade is still active" },
+      "accepted": { "tick": 29884, "buttons": ["DOWN"], "result": "fresh returned-popup menu cursor 0 (SUMMARY) -> 1 (SWAP)" }
+    }
+  },
+  "timeline": {
+    "summaryOpen": { "tick": 29760, "task": "Swap_Task_OpenSummaryScreen", "state": 6 },
+    "summaryCleanup": { "tick": 29761, "task": "Swap_Task_OpenSummaryScreen", "state": 7 },
+    "summaryShow": { "tick": 29783, "task": "Swap_Task_OpenSummaryScreen", "state": 8 },
+    "summaryCallback": { "tick": 29784, "callback": "CB2_InitSummaryScreen", "mode": "SUMMARY_MODE_NORMAL", "modeValue": 0, "curMonIndex": 0, "maxMonIndex": 2, "arguments": "source-derived from the exact ShowPokemonSummaryScreen call" },
+    "summaryInputTask": { "tick": 29800, "task": "Summary_Task_HandleInput", "paletteFadeActive": true },
+    "summaryInputReady": { "tick": 29822, "paletteFadeActive": false },
+    "summaryCallbackReturn": { "tick": 29845, "callback": "CB2_InitSwapScreen", "lastViewedMonIndex": 0 },
+    "swapMenuReconstructed": { "tick": 29864, "task": "Swap_Task_HandleMenu", "state": 3, "fromSummaryScreen": false, "menuCursorPos": 0, "cursorPos": 0 },
+    "returnedPopupInputReady": { "tick": 29884, "task": "Swap_Task_HandleMenu", "state": 3, "menuCursorPos": 0, "paletteFadeActive": false }
+  },
+  "preservation": {
+    "partyAndRentalsMutation": false,
+    "selectedPartyMon": "ONIX remains index 0 before, during, and after normal SUMMARY",
+    "rng": {
+      "acceptedOpen": { "tick": 29760, "value": "0x9d0287e2" },
+      "summaryHandoff": { "tick": 29784, "value": "0x65a2eb17" },
+      "acceptedClose": { "tick": 29823, "value": "0x247d935c" },
+      "swapCallbackReturn": { "tick": 29845, "value": "0xfdc5d1fa" },
+      "returnedPopupReady": { "tick": 29884, "value": "0x59ab124b" },
+      "note": "normal VBlank and sprite activity advance gRngValue; SUMMARY makes no swap, party, rental, or selection RNG mutation"
+    }
+  },
+  "limits": {
+    "noPngOrRgbAssets": true,
+    "noProductionRendererUse": true,
+    "noBattle2Replay": true,
+    "framebufferEvidence": "none committed; RAM/task evidence only"
+  }
+}
