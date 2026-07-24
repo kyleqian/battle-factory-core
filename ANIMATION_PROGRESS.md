@@ -44,19 +44,19 @@ remainder.
 
 ## Current handoff
 
-- **State:** **12 exact / 2 partial / 262 unsupported**. DRAGON_BREATH is exact
-  across its complete move body in both Level-50 orientations through the
-  relative shared Scene-ON seam.
-- **Did:** repaired the shared framebuffer compositor with two source-relative
-  display latches (callback/OAM age -1, `BlendPalette` age -2), side-parametric
-  target-relative ember/attacker ordering, and the source back-pic anchor.
-  Corrected the staged Murkrow personality-derived gender input. The comparator
-  now requires both component and framebuffer exactness to pass.
-- **Evidence:** fresh wrapper-validated ON probes match **85/85** dense
-  projectile/palette/shake/monbg states **and 85/85 live framebuffers** in each
-  orientation: player-back ONIX→opponent-front MURKROW frames 395-479 and
-  opponent-front ONIX→player-back MURKROW frames 449-533. Focused **20/20**,
-  full Tier-1, build, coverage, ON info, and diff check are green.
-- **Next:** keep generic hit, HP drain, paralysis/result printers, command
-  release, cleanup, and menu handoff in their independent presentation tracks.
-  DIVE and BIND remain unsupported/partial respectively.
+- **State:** **12 exact / 2 partial / 262 unsupported**. BIND remains partial;
+  its legal Scene-ON actual-hit evidence is now staged without conflating it
+  with the old player-back ONIX miss.
+- **Did:** committed zero-PP-Up ONIX→MURKROW Mechanics Lab BIND plus a relative
+  fixture. Wrapper-validated dense RAM evidence identifies the source-owned
+  body at frames **382–426** (first sway pixel at 385), generic hit handoff at
+  429, HP 142→137 at 471, trapped state `0xc000` at 476, and independent
+  residual trap activity only after `MOVE_NONE` from 590/610.
+- **Evidence:** `Move_BIND` is source sway + two target scale calls; the tendril
+  sprites are `General_TurnTrap`/`Status_BindWrap`, so neither generic tails nor
+  residual wrapping belongs in BIND move-body acceptance. The scenario and
+  fixture are portable, relative, and unthinned; no engine code was added.
+- **Next:** implement and densely compare this 45-frame source body through the
+  shared seam, then determine whether source-side geometry needs the opposite
+  orientation. Keep hit/HP/result/controller and residual lifecycle in their
+  independent tracks.

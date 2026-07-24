@@ -1,0 +1,29 @@
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-bind-player-onix-opponent-murkrow.json",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
+  "pair": "ONIX (player-back) -> MURKROW (opponent-front)",
+  "move": "BIND",
+  "orientation": "player-to-opponent",
+  "appStage": {"oracleFrame": 382, "presentationAge": 0},
+  "denseWindow": {"startFrame": 382, "endFrame": 426},
+  "fieldProfile": {
+    "playerHp": 117,
+    "opponentHpBefore": 142,
+    "opponentHpAfter": 137,
+    "playerPpBefore": 20,
+    "playerPpAfter": 19,
+    "ppUps": [0, 0, 0, 0]
+  },
+  "animationProfile": {
+    "moveBody": "AnimTask_SwayMon(attacker, 0, 6, 3328, 4), then two target ScaleMonAndRestore(10, -5, 5) calls",
+    "firstVisibleSwayFrame": 385,
+    "moveOwnedEndFrame": 426,
+    "genericHitHandoffFrame": 429
+  },
+  "acceptance": {
+    "status": "staged",
+    "result": "45-frame unthinned ROM capture interval is portable evidence only; no app BIND component is implemented yet."
+  }
+}
