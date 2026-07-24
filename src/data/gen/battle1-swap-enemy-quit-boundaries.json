@@ -1,0 +1,80 @@
+{
+  "profile": "battle-scene-off",
+  "canonicalTrace": "tools/compare/traces-groundtruth/battle1-swapyes-b.json",
+  "generator": "tools/probe/derive-swap-enemy-quit-trace.mjs",
+  "ramProbe": "tools/probe/dump-swap-enemy-quit.py",
+  "scope": "enemy-picker B/CANCEL quit prompt and return chrome; evidence only",
+  "source": {
+    "picker": "battle_factory_screen.c:2600-2647; B dispatches the quit transition regardless of inEnemyScreen",
+    "cancel": "battle_factory_screen.c:3983-4023; enemy action index 4 is Swap_ActionCancel",
+    "out": "battle_factory_screen.c:3001-3074; enemy mode removes PKMN FOR SWAP, then CANCEL five frames later",
+    "prompt": "battle_factory_screen.c:2481-2539; Swap_AskQuitSwapping clears monSwapped and uses the common YES/NO task",
+    "response": "battle_factory_screen.c:2457-2479; YES exits while NO/B reconstructs the originating picker",
+    "in": "battle_factory_screen.c:3077-3167; enemy mode restores PKMN FOR SWAP then delayed CANCEL before returning HandleChooseMons"
+  },
+  "edgePairs": {
+    "enemyPickerB": {
+      "rejected": { "tick": 29935, "buttons": ["B"], "reason": "ScreenInfoTransitionIn installs HandleChooseMons during this frame" },
+      "accepted": { "tick": 29936, "buttons": ["B"], "result": "Swap_Task_ScreenInfoTransitionOut state 0" }
+    },
+    "quitPromptA": {
+      "rejected": { "tick": 29977, "buttons": ["A"], "reason": "state-5 readiness is installed after that frame" },
+      "accepted": { "tick": 29978, "buttons": ["A"], "result": "default YES -> Swap_HandleQuitSwappingResponse" }
+    },
+    "enemyReturnRight": {
+      "rejected": { "tick": 30047, "buttons": ["RIGHT"], "reason": "transition-in installs HandleChooseMons during this frame; cursor remains 0" },
+      "accepted": { "tick": 30048, "buttons": ["RIGHT"], "result": "fresh enemy-picker cursor 0 -> 1" }
+    }
+  },
+  "timeline": {
+    "enemyBTransitionOut": 29936,
+    "pkmnForSwapSlideOut": 29961,
+    "cancelSlideOut": 29967,
+    "quitPrinter": { "tick": 29975, "sha256": "9ce38102319b0ae7c5e202703eeaf6881881d9d36d10df21dde3432784e0d0c7" },
+    "yesNoDraw": { "tick": 29976, "taskState": 4, "sha256": "604dc61bfb599b465685ac345776337ab68b2fd14c3939e4435a9cb654761f4f" },
+    "yesNoInputReady": { "tick": 29977, "taskState": 5, "cursor": "YES", "sha256": "76cea05ddcfe72bc37ce6449ca9fa527a4df67e695e99a45a81dc28a04bdbeb5" },
+    "returnTransitionIn": 29999,
+    "pkmnForSwapSlideIn": 30000,
+    "cancelSlideIn": 30011,
+    "enemyPickerInputReady": 30047
+  },
+  "branches": {
+    "bYes": {
+      "input": { "tick": 29978, "buttons": ["A"], "default": "YES" },
+      "response": 29978,
+      "exit": 29979,
+      "fieldCallback": 30000,
+      "specialVarResult": true,
+      "partyAndRentalMutation": false
+    },
+    "bNo": {
+      "input": [{ "tick": 29978, "buttons": ["DOWN"] }, { "tick": 29998, "buttons": ["A"] }],
+      "transitionIn": 29999,
+      "pickerInputReady": 30047,
+      "partyAndRentalMutation": false
+    },
+    "bReturnB": {
+      "input": { "tick": 29998, "buttons": ["B"] },
+      "transitionIn": 29999,
+      "pickerInputReady": 30047,
+      "partyAndRentalMutation": false
+    },
+    "cancelYes": {
+      "input": [{ "tick": 29936, "buttons": ["DOWN"] }, { "tick": 29938, "buttons": ["DOWN"] }, { "tick": 29940, "buttons": ["A"] }, { "tick": 29982, "buttons": ["A"], "default": "YES" }],
+      "cursor": "CANCEL (index 4)",
+      "pkmnForSwapSlideOut": 29965,
+      "cancelSlideOut": 29971,
+      "quitPromptReady": 29981,
+      "fieldCallback": 30004,
+      "partyAndRentalMutation": false
+    }
+  },
+  "identityAndRng": {
+    "playerParty": [{ "species": "ONIX", "speciesId": 95, "personality": 1205102525 }, { "species": "MAGBY", "speciesId": 240, "personality": 1534575931 }, { "species": "BAYLEEF", "speciesId": 153, "personality": 1550278706 }],
+    "enemyParty": [{ "species": "GROVYLE", "speciesId": 278, "personality": 1094072807 }, { "species": "MURKROW", "speciesId": 198, "personality": 3475344024 }, { "species": "PIDGEOTTO", "speciesId": 17, "personality": 3971699699 }],
+    "rentalMons": [156, 149, 180, 188, 184, 135],
+    "allPartyFriendship": 0,
+    "rng": { "pickerReady": { "tick": 29935, "value": "0xdf2973cc" }, "bAccepted": { "tick": 29936, "value": "0x01b6d64f" }, "promptReady": { "tick": 29977, "value": "0x034a49fe" }, "returnPicker": { "tick": 30047, "value": "0xfd6f383c" }, "note": "VBlank/sprite activity advances gRngValue; quit adds no selection RNG operation." }
+  },
+  "limits": { "noPngOrRgbAssets": true, "noProductionRendererUse": true, "noBattle2Replay": true, "framebufferEvidence": "raw RGB888 SHA-256 only" }
+}
