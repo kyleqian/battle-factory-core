@@ -4,6 +4,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 339 — S8 OFF seventh-win roundWon through fanfare: **GREEN — 2513/2513 exact**
+
+- **State:** the staged seventh-win route is exact from its `CB2_LoadMap`
+  handoff through congratulations, the BP award, `MSGBOX_GETPOINTS`, and the
+  complete points-fanfare wait at +2513.
+- **Did:** connected generic `roundCompleted` to a phase-relative `roundWon`
+  terminal adapter and live lobby renderer. Stored gates are +300/+1100/+2200;
+  displayed BP changes 0→3 at +2201 and the 312-frame fanfare reaches zero at
+  +2513 without controller, RNG, battle-index, party, or opponent mutation.
+- **Next:** continue only the source-relative seventh-win remainder at +2514:
+  exchange message through party/status restore +3549, then reuse the shared
+  record-question/menu machinery through +4424. Do not replay Battles 2–7.
+- **Notes:** seventh-win **2513/2513**, LOSS **210/210 + 414/414**, Tier-1
+  **1239/1239**, build **5.659 MB**. No absolute tick, framebuffer asset,
+  screenshot lookup, canonical Battle-2 extension, or premature restore/menu
+  claim.
+
+---
 ## 338 — S8 OFF terminal LOSS record menu: **GREEN — 414/414 exact**
 
 - **State:** the LOSS route is exact from its prior +210 completion through
@@ -42,26 +60,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** graph regeneration and coverage validation are byte-for-byte
   tested. Tier-1 is **1229/1229** and build remains **5.651 MB** because the
   graph is dev-only; no gameplay/RNG/facility behavior changed.
-
----
-## 336 — S8 OFF terminal LOSS opening: **GREEN — 210/210 exact**
-
-- **State:** the source-relative Factory Lobby LOSS path is exact from its
-  staged `CB2_LoadMap` handoff through party restore/status clear at +210.
-  `compare:factory-terminal-loss` covers every +1..+210 frame and both
-  source A releases at +80/+160.
-- **Did:** added an immutable `roundLost` terminal adapter, circular field
-  map/NPC compositor, live fade/message/printer/down-arrow path, dev-only
-  wrapped mGBA comparison fixture, and Tier-1 input/completion coverage.
-  Completion acknowledges the presentation command at +210 without changing
-  round rules/RNG. Source extraction now includes all field-visible NPCs and
-  the regular down-arrow; corrected the terminal-message extractor root. The
-  disjoint ON lane also promoted ENDEAVOR to exact across both attacker sides.
-- **Next:** implement the distinct later LOSS record question/menu
-  (+380..624), or the seventh-win/round-summary ending. Do not extend this
-  opening past +210 as part of the same mechanism and do not resume Battle 2.
-- **Notes:** dense LOSS **210/210**, Tier-1 **1223/1223**, build **5.651 MB**.
-  Swap NO-return remains **69/69**. ENDEAVOR is portable **141/141** and
-  canonical **237/237**; Level-50 animation coverage is **4 exact / 8 partial
-  / 264 unsupported**. No screenshot/framebuffer asset, absolute tick branch,
-  outcome mutation, BP change, record menu, or seventh-win flow.

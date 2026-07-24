@@ -567,6 +567,14 @@ NO record choice. The later LOSS record question/menu is now exact across
 every +211..+624 frame (**414/414**), including the shared `\l` fast-scroll,
 default-NO draw at +622, and first sampled input at +624. The complete
 seventh-win/round-summary ending still needs its dense OFF-profile UI proof.
+The generic seventh-win `roundWon` seam is now live and densely exact from its
+staged `CB2_LoadMap` handoff through congratulations, the source-relative
+award gates, 0→3 BP mutation at +2201, and the complete 312-frame
+`MSGBOX_GETPOINTS` fanfare wait through +2513 (**2513/2513**). It preserves
+the immutable round controller, RNG, battle index, parties, and opponent
+inputs. Gate 2 remains open only for the explicitly bounded +2514 continuation:
+exchange/restore through +3549 and the shared record-question/menu path
+through +4424.
 The parallel Scene-ON adapter
 now proves FIRE PUNCH in both orientations (**225/225** and **277/277**) and
 its canonical residual windows (**236/236** and **200/200**), making it

@@ -7,18 +7,23 @@ import type {
 } from "../src/engine/battleScenario.ts";
 import {
   advanceRoundController,
+  chooseRoundSwap,
   completeBattlePresentation,
   createRoundController,
   resolveRoundBattle,
 } from "../src/engine/roundController.ts";
 import {
   advanceFactoryTerminalPresentation,
+  createFactoryTerminalPresentation,
   createFactoryTerminalLossPresentation,
+  createFactoryTerminalRoundWonPresentation,
   FACTORY_LOSS_TERMINAL_PROFILE,
+  FACTORY_ROUND_WON_TERMINAL_PROFILE,
   factoryTerminalCompletion,
   factoryTerminalRecordMenuInputReady,
   factoryTerminalRecordMenuVisible,
   factoryTerminalVisibleChars,
+  isFactoryTerminalRoundWon,
 } from "../src/engine/factoryTerminalPresentation.ts";
 import { createInitialState, tick, type EngineState } from "../src/engine/core.ts";
 
@@ -55,6 +60,58 @@ function lossController() {
     opponentParty: controller.rules.currentOpponent.party,
     rngValue: 0x89abcdef,
   });
+}
+
+function roundWonController() {
+  const opponents: BattleOpponent[] = Array.from({ length: 7 }, (_, index) => ({
+    id: `win-opponent-${index}`,
+    trainerName: `TRAINER ${index}`,
+    party: party(`win-opponent-${index}`),
+  }));
+  const scenario: FixtureBattleScenario = {
+    id: "terminal-round-won",
+    playerParty: party("winner"),
+    opponentPool: opponents,
+    opponentSelectionInputs: [0, 0, 0, 0, 0, 0, 0],
+    initialRngValue: 0x12345678,
+  };
+  let controller = createRoundController(scenario);
+  controller = advanceRoundController(
+    completeBattlePresentation(controller, {
+      commandId: controller.presentation!.command.commandId,
+    }),
+  );
+  for (let battleIndex = 0; battleIndex < 7; battleIndex += 1) {
+    controller = resolveRoundBattle(controller, {
+      outcome: "win",
+      playerParty: controller.rules.playerParty,
+      opponentParty: controller.rules.currentOpponent.party,
+      rngValue: 0x89abcdef,
+    });
+    if (battleIndex === 6) break;
+    controller = advanceRoundController(
+      completeBattlePresentation(controller, {
+        commandId: controller.presentation!.command.commandId,
+      }),
+    );
+    controller = chooseRoundSwap(
+      completeBattlePresentation(controller, {
+        commandId: controller.presentation!.command.commandId,
+      }),
+      { type: "decline" },
+    );
+    controller = advanceRoundController(
+      completeBattlePresentation(controller, {
+        commandId: controller.presentation!.command.commandId,
+      }),
+    );
+    controller = advanceRoundController(
+      completeBattlePresentation(controller, {
+        commandId: controller.presentation!.command.commandId,
+      }),
+    );
+  }
+  return controller;
 }
 
 function advanceTo(
@@ -203,5 +260,130 @@ describe("Factory Scene-OFF loss terminal adapter", () => {
     expect(engine.roundController!.rules).toBe(rules);
     expect(engine.roundController!.rules.phase).toBe("roundLost");
     expect(engine.roundController!.rules.rngValue).toBe(0x89abcdef);
+  });
+});
+
+describe("Factory Scene-OFF roundWon terminal adapter", () => {
+  it("maps the generic seventh-win completion command onto an immutable roundWon profile", () => {
+    const controller = roundWonController();
+    const command = controller.presentation!.command;
+    expect(command.type).toBe("roundCompleted");
+    if (command.type !== "roundCompleted") {
+      throw new Error("expected roundCompleted");
+    }
+    const terminal = createFactoryTerminalPresentation(command);
+    if (!isFactoryTerminalRoundWon(terminal)) {
+      throw new Error("expected roundWon terminal");
+    }
+    expect(terminal).toMatchObject({
+      commandId: command.commandId,
+      battleIndex: 6,
+      age: 0,
+      challengeStatus: "won",
+      displayedBattlePoints: 0,
+      fanfareRemaining: 0,
+      completed: false,
+    });
+    expect(terminal.profile).toBe(FACTORY_ROUND_WON_TERMINAL_PROFILE);
+    expect(Object.isFrozen(terminal.profile)).toBe(true);
+    expect(Object.isFrozen(terminal.profile.congratulations)).toBe(true);
+    expect(Object.isFrozen(terminal.profile.award)).toBe(true);
+  });
+
+  it("stores all three source input gates and rejects every early edge", () => {
+    const command = roundWonController().presentation!.command;
+    if (command.type !== "roundCompleted") {
+      throw new Error("expected roundCompleted");
+    }
+    let terminal = createFactoryTerminalRoundWonPresentation(command);
+    for (let age = 1; age <= 2200; age += 1) {
+      terminal = advanceFactoryTerminalPresentation(terminal, {
+        pressedA: age === 101 || age === 300 || age === 368 ||
+          age === 1100 || age === 1140 || age === 2200,
+      });
+      if (age === 101) {
+        expect(terminal.congratulationsReleaseAge).toBeNull();
+      } else if (age === 300) {
+        expect(terminal.congratulationsReleaseAge).toBe(300);
+      } else if (age === 368) {
+        expect(terminal.awardScrollReleaseAge).toBeNull();
+      } else if (age === 1100) {
+        expect(terminal.awardScrollReleaseAge).toBe(1100);
+      } else if (age === 1140) {
+        expect(terminal.awardReleaseAge).toBeNull();
+      }
+    }
+    expect(terminal).toMatchObject({
+      congratulationsReleaseAge: 300,
+      awardScrollReleaseAge: 1100,
+      awardReleaseAge: 2200,
+    });
+  });
+
+  it("awards 3 BP at canonical +2201 and ends the 312-frame fanfare at +2513", () => {
+    const command = roundWonController().presentation!.command;
+    if (command.type !== "roundCompleted") {
+      throw new Error("expected roundCompleted");
+    }
+    let terminal = createFactoryTerminalRoundWonPresentation(command);
+    for (let age = 1; age <= 2513; age += 1) {
+      terminal = advanceFactoryTerminalPresentation(terminal, {
+        pressedA: age === 300 || age === 1100 || age === 2200,
+      });
+      if (age === 2200) {
+        expect(terminal.displayedBattlePoints).toBe(0);
+        expect(terminal.fanfareRemaining).toBe(0);
+      } else if (age === 2201) {
+        expect(terminal.displayedBattlePoints).toBe(3);
+        expect(terminal.fanfareRemaining).toBe(312);
+      } else if (age === 2512) {
+        expect(terminal.fanfareRemaining).toBe(1);
+      }
+    }
+    expect(terminal).toMatchObject({
+      age: 2513,
+      congratulationsReleaseAge: 300,
+      awardScrollReleaseAge: 1100,
+      awardReleaseAge: 2200,
+      displayedBattlePoints: 3,
+      fanfareRemaining: 0,
+      partyRestored: false,
+      challengeStatus: "won",
+      completed: false,
+    });
+    expect(factoryTerminalCompletion(terminal)).toBeNull();
+  });
+
+  it("auto-connects the live command and never mutates controller rules, RNG, battle index, or fixture inputs", () => {
+    const controller = roundWonController();
+    const rules = controller.rules;
+    const schedule = controller.opponentSchedule;
+    const selection = controller.opponentSelection;
+    let engine: EngineState = {
+      ...createInitialState(),
+      roundController: controller,
+      factoryTerminal: null,
+      rngMode: "vblank",
+    };
+    for (let age = 1; age <= 2513; age += 1) {
+      engine = tick(
+        engine,
+        new Set(age === 300 || age === 1100 || age === 2200 ? ["A"] : []),
+      );
+    }
+    expect(engine.factoryTerminal).toMatchObject({
+      profile: { outcome: "roundWon" },
+      age: 2513,
+      displayedBattlePoints: 3,
+      fanfareRemaining: 0,
+    });
+    expect(engine.roundController).toBe(controller);
+    expect(engine.roundController!.rules).toBe(rules);
+    expect(engine.roundController!.rules.phase).toBe("roundComplete");
+    expect(engine.roundController!.rules.battleIndex).toBe(6);
+    expect(engine.roundController!.rules.rngValue).toBe(0x89abcdef);
+    expect(engine.roundController!.opponentSchedule).toBe(schedule);
+    expect(engine.roundController!.opponentSelection).toBe(selection);
+    expect(engine.roundController!.presentation!.completed).toBe(false);
   });
 });

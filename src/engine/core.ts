@@ -212,6 +212,7 @@ import {
 import { renderFactorySwapPicker } from "./factorySwapRender.ts";
 import {
   advanceFactoryTerminalPresentation,
+  createFactoryTerminalPresentation,
   factoryTerminalCompletion,
   type FactoryTerminalPresentationState,
 } from "./factoryTerminalPresentation.ts";
@@ -325,10 +326,22 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
   let battleControllerExecFlags = state.battleControllerExecFlags ?? 0;
   let battle2Turn1 = state.battle2Turn1 ?? null;
   let factorySwap = state.factorySwap ?? null;
+  let factoryTerminal = state.factoryTerminal;
+  const pendingTerminalCommand = state.roundController?.presentation?.command;
+  if (
+    factoryTerminal === null &&
+    pendingTerminalCommand !== undefined &&
+    (
+      pendingTerminalCommand.type === "roundLost" ||
+      pendingTerminalCommand.type === "roundCompleted"
+    )
+  ) {
+    factoryTerminal = createFactoryTerminalPresentation(pendingTerminalCommand);
+  }
 
-  if (state.factoryTerminal) {
-    const factoryTerminal = advanceFactoryTerminalPresentation(
-      state.factoryTerminal,
+  if (factoryTerminal) {
+    factoryTerminal = advanceFactoryTerminalPresentation(
+      factoryTerminal,
       {
         pressedA: newKeys.has("A"),
         pressedB: newKeys.has("B"),

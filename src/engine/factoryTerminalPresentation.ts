@@ -29,6 +29,28 @@ export interface FactoryTerminalLossProfile {
   ];
 }
 
+export interface FactoryTerminalRoundWonProfile {
+  readonly outcome: "roundWon";
+  readonly blackFirstAge: number;
+  readonly fieldFirstAge: number;
+  readonly fadeFirstAge: number;
+  readonly messageFrameAge: number;
+  readonly congratulationsTextDelay: number;
+  readonly congratulationsInputReadyAge: number;
+  readonly awardTextDelay: number;
+  readonly awardScrollInputDelay: number;
+  readonly awardScrollTicks: number;
+  readonly awardThirdLineTextDelay: number;
+  readonly awardDefaultInputDelay: number;
+  readonly battlePointMutationDelay: number;
+  readonly getPointsTextDelay: number;
+  readonly fanfareTicks: number;
+  readonly congratulations: readonly [string, string];
+  readonly award: readonly [string, string, string];
+  readonly getPoints: readonly [string, string];
+  readonly battlePointAward: number;
+}
+
 /** Source-relative Scene-OFF loss route from the staged lobby CB2_LoadMap seam. */
 export const FACTORY_LOSS_TERMINAL_PROFILE: FactoryTerminalLossProfile =
   Object.freeze({
@@ -62,7 +84,45 @@ export const FACTORY_LOSS_TERMINAL_PROFILE: FactoryTerminalLossProfile =
     ] as const),
   });
 
-export interface FactoryTerminalPresentationState {
+/**
+ * Regular Level-50 seventh-win route. Every clock after the initial map
+ * handoff is relative to a stored input edge; the roomy staged releases at
+ * +300/+1100/+2200 are evidence inputs, not production timeline branches.
+ */
+export const FACTORY_ROUND_WON_TERMINAL_PROFILE: FactoryTerminalRoundWonProfile =
+  Object.freeze({
+    outcome: "roundWon",
+    blackFirstAge: 2,
+    fieldFirstAge: 13,
+    fadeFirstAge: 13,
+    messageFrameAge: 40,
+    congratulationsTextDelay: 41,
+    congratulationsInputReadyAge: 102,
+    awardTextDelay: 6,
+    awardScrollInputDelay: 69,
+    awardScrollTicks: 4,
+    awardThirdLineTextDelay: 7,
+    awardDefaultInputDelay: 41,
+    battlePointMutationDelay: 1,
+    getPointsTextDelay: 3,
+    fanfareTicks: 312,
+    congratulations: Object.freeze([
+      "Congratulations! You’ve won seven",
+      "straight Battle Swap matches!",
+    ] as const),
+    award: Object.freeze([
+      "In recognition of your wealth of",
+      "knowledge and keen intelligence,",
+      "we award you these Battle Point(s).",
+    ] as const),
+    getPoints: Object.freeze([
+      "MEMORY obtained 3 Battle Point(s).",
+      "",
+    ] as const),
+    battlePointAward: 3,
+  });
+
+export interface FactoryTerminalLossPresentationState {
   readonly commandId: number;
   readonly battleIndex: number;
   readonly profile: FactoryTerminalLossProfile;
@@ -78,12 +138,39 @@ export interface FactoryTerminalPresentationState {
   readonly recordChoice: "yes" | "no" | "cancel" | null;
 }
 
+export interface FactoryTerminalRoundWonPresentationState {
+  readonly commandId: number;
+  readonly battleIndex: number;
+  readonly profile: FactoryTerminalRoundWonProfile;
+  /** Terminal-local age; zero is the staged CB2_LoadMap handoff. */
+  readonly age: number;
+  readonly congratulationsReleaseAge: number | null;
+  readonly awardScrollReleaseAge: number | null;
+  readonly awardReleaseAge: number | null;
+  readonly battlePointsBeforeAward: number;
+  readonly displayedBattlePoints: number;
+  readonly fanfareRemaining: number;
+  readonly partyRestored: false;
+  readonly challengeStatus: "won";
+  readonly completed: false;
+}
+
+export type FactoryTerminalPresentationState =
+  | FactoryTerminalLossPresentationState
+  | FactoryTerminalRoundWonPresentationState;
+
+export function isFactoryTerminalRoundWon(
+  state: FactoryTerminalPresentationState,
+): state is FactoryTerminalRoundWonPresentationState {
+  return state.profile.outcome === "roundWon";
+}
+
 export function createFactoryTerminalLossPresentation(
   command: Pick<
     Extract<BattlePresentationCommand, { readonly type: "roundLost" }>,
     "type" | "commandId" | "battleIndex"
   >,
-): FactoryTerminalPresentationState {
+): FactoryTerminalLossPresentationState {
   return {
     commandId: command.commandId,
     battleIndex: command.battleIndex,
@@ -100,8 +187,43 @@ export function createFactoryTerminalLossPresentation(
   };
 }
 
+export function createFactoryTerminalRoundWonPresentation(
+  command: Pick<
+    Extract<BattlePresentationCommand, { readonly type: "roundCompleted" }>,
+    "type" | "commandId" | "battleIndex"
+  >,
+  battlePointsBeforeAward = 0,
+): FactoryTerminalRoundWonPresentationState {
+  return {
+    commandId: command.commandId,
+    battleIndex: command.battleIndex,
+    profile: FACTORY_ROUND_WON_TERMINAL_PROFILE,
+    age: 0,
+    congratulationsReleaseAge: null,
+    awardScrollReleaseAge: null,
+    awardReleaseAge: null,
+    battlePointsBeforeAward,
+    displayedBattlePoints: battlePointsBeforeAward,
+    fanfareRemaining: 0,
+    partyRestored: false,
+    challengeStatus: "won",
+    completed: false,
+  };
+}
+
+export function createFactoryTerminalPresentation(
+  command: Extract<
+    BattlePresentationCommand,
+    { readonly type: "roundLost" | "roundCompleted" }
+  >,
+): FactoryTerminalPresentationState {
+  return command.type === "roundLost"
+    ? createFactoryTerminalLossPresentation(command)
+    : createFactoryTerminalRoundWonPresentation(command);
+}
+
 export function factoryTerminalActivePage(
-  state: FactoryTerminalPresentationState,
+  state: FactoryTerminalLossPresentationState,
 ): 0 | 1 | 2 {
   if (
     state.secondPageReleaseAge !== null &&
@@ -117,7 +239,7 @@ export function factoryTerminalActivePage(
 }
 
 export function factoryTerminalPageTextFirstAge(
-  state: FactoryTerminalPresentationState,
+  state: FactoryTerminalLossPresentationState,
   page: 0 | 1 | 2,
 ): number | null {
   if (page === 0) return state.profile.firstPageTextAge;
@@ -127,7 +249,7 @@ export function factoryTerminalPageTextFirstAge(
 }
 
 export function factoryTerminalVisibleChars(
-  state: FactoryTerminalPresentationState,
+  state: FactoryTerminalLossPresentationState,
 ): number {
   const page = factoryTerminalActivePage(state);
   const firstAge = factoryTerminalPageTextFirstAge(state, page);
@@ -137,7 +259,7 @@ export function factoryTerminalVisibleChars(
 }
 
 export function factoryTerminalPageInputReady(
-  state: FactoryTerminalPresentationState,
+  state: FactoryTerminalLossPresentationState,
 ): boolean {
   const page = factoryTerminalActivePage(state);
   if (page === 2) return false;
@@ -148,15 +270,15 @@ export function factoryTerminalPageInputReady(
     firstAge + line1.length + line2.length - 1;
 }
 
-export function advanceFactoryTerminalPresentation(
-  state: FactoryTerminalPresentationState,
+function advanceFactoryTerminalLossPresentation(
+  state: FactoryTerminalLossPresentationState,
   input: {
     readonly pressedA?: boolean;
     readonly pressedB?: boolean;
     readonly pressedUp?: boolean;
     readonly pressedDown?: boolean;
   },
-): FactoryTerminalPresentationState {
+): FactoryTerminalLossPresentationState {
   const age = state.age + 1;
   let firstPageReleaseAge = state.firstPageReleaseAge;
   let secondPageReleaseAge = state.secondPageReleaseAge;
@@ -206,7 +328,7 @@ export function advanceFactoryTerminalPresentation(
 }
 
 export function factoryTerminalRecordMenuVisible(
-  state: FactoryTerminalPresentationState,
+  state: FactoryTerminalLossPresentationState,
 ): boolean {
   return state.recordPromptReleaseAge !== null &&
     state.age >=
@@ -214,11 +336,121 @@ export function factoryTerminalRecordMenuVisible(
 }
 
 export function factoryTerminalRecordMenuInputReady(
-  state: FactoryTerminalPresentationState,
+  state: FactoryTerminalLossPresentationState,
 ): boolean {
   return state.recordPromptReleaseAge !== null &&
     state.age >=
       state.recordPromptReleaseAge + state.profile.recordMenuInputDelay;
+}
+
+export function factoryTerminalRoundWonBattlePointMutationAge(
+  state: FactoryTerminalRoundWonPresentationState,
+): number | null {
+  return state.awardReleaseAge === null
+    ? null
+    : state.awardReleaseAge + state.profile.battlePointMutationDelay;
+}
+
+export function advanceFactoryTerminalRoundWonPresentation(
+  state: FactoryTerminalRoundWonPresentationState,
+  input: {
+    readonly pressedA?: boolean;
+    readonly pressedB?: boolean;
+  },
+): FactoryTerminalRoundWonPresentationState {
+  const age = state.age + 1;
+  const pressed = input.pressedA || input.pressedB;
+  let congratulationsReleaseAge = state.congratulationsReleaseAge;
+  let awardScrollReleaseAge = state.awardScrollReleaseAge;
+  let awardReleaseAge = state.awardReleaseAge;
+
+  if (
+    pressed &&
+    congratulationsReleaseAge === null &&
+    age >= state.profile.congratulationsInputReadyAge
+  ) {
+    congratulationsReleaseAge = age;
+  } else if (
+    pressed &&
+    congratulationsReleaseAge !== null &&
+    awardScrollReleaseAge === null &&
+    age >= congratulationsReleaseAge + state.profile.awardScrollInputDelay
+  ) {
+    awardScrollReleaseAge = age;
+  } else if (
+    pressed &&
+    awardScrollReleaseAge !== null &&
+    awardReleaseAge === null &&
+    age >= awardScrollReleaseAge + state.profile.awardDefaultInputDelay
+  ) {
+    awardReleaseAge = age;
+  }
+
+  const mutationAge = awardReleaseAge === null
+    ? null
+    : awardReleaseAge + state.profile.battlePointMutationDelay;
+  const displayedBattlePoints =
+    mutationAge !== null && age >= mutationAge
+      ? Math.min(
+        9999,
+        state.battlePointsBeforeAward + state.profile.battlePointAward,
+      )
+      : state.battlePointsBeforeAward;
+  const fanfareRemaining =
+    mutationAge === null || age < mutationAge
+      ? 0
+      : Math.max(0, state.profile.fanfareTicks - (age - mutationAge));
+
+  return {
+    ...state,
+    age,
+    congratulationsReleaseAge,
+    awardScrollReleaseAge,
+    awardReleaseAge,
+    displayedBattlePoints,
+    fanfareRemaining,
+  };
+}
+
+export function advanceFactoryTerminalPresentation(
+  state: FactoryTerminalLossPresentationState,
+  input: {
+    readonly pressedA?: boolean;
+    readonly pressedB?: boolean;
+    readonly pressedUp?: boolean;
+    readonly pressedDown?: boolean;
+  },
+): FactoryTerminalLossPresentationState;
+export function advanceFactoryTerminalPresentation(
+  state: FactoryTerminalRoundWonPresentationState,
+  input: {
+    readonly pressedA?: boolean;
+    readonly pressedB?: boolean;
+    readonly pressedUp?: boolean;
+    readonly pressedDown?: boolean;
+  },
+): FactoryTerminalRoundWonPresentationState;
+export function advanceFactoryTerminalPresentation(
+  state: FactoryTerminalPresentationState,
+  input: {
+    readonly pressedA?: boolean;
+    readonly pressedB?: boolean;
+    readonly pressedUp?: boolean;
+    readonly pressedDown?: boolean;
+  },
+): FactoryTerminalPresentationState;
+export function advanceFactoryTerminalPresentation(
+  state: FactoryTerminalPresentationState,
+  input: {
+    readonly pressedA?: boolean;
+    readonly pressedB?: boolean;
+    readonly pressedUp?: boolean;
+    readonly pressedDown?: boolean;
+  },
+): FactoryTerminalPresentationState {
+  return isFactoryTerminalRoundWon(state)
+    ? advanceFactoryTerminalRoundWonPresentation(state, input)
+    : advanceFactoryTerminalLossPresentation(state, input);
 }
 
 export function factoryTerminalCompletion(

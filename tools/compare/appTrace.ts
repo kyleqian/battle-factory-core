@@ -18,7 +18,10 @@ import {
   ONIX_TO_GROVYLE_FIRE_PUNCH_GEOMETRY,
   ONIX_TO_GROVYLE_FIRE_PUNCH_PROFILE,
 } from "../../src/engine/sceneOnPresentation.ts";
-import { createFactoryTerminalLossPresentation } from "../../src/engine/factoryTerminalPresentation.ts";
+import {
+  createFactoryTerminalLossPresentation,
+  createFactoryTerminalRoundWonPresentation,
+} from "../../src/engine/factoryTerminalPresentation.ts";
 
 export interface AppCapture {
   frame: number;
@@ -63,6 +66,15 @@ const APP_STAGES: Readonly<Record<string, AppStage>> = {
       type: "roundLost",
       commandId: 1,
       battleIndex: 0,
+    }),
+    rngMode: "vblank",
+  }),
+  "factory-terminal-round-won-cb2-load-map": (state) => ({
+    ...state,
+    factoryTerminal: createFactoryTerminalRoundWonPresentation({
+      type: "roundCompleted",
+      commandId: 1,
+      battleIndex: 6,
     }),
     rngMode: "vblank",
   }),

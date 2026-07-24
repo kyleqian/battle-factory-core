@@ -17,6 +17,7 @@
     "compare:double-team-portable": "node --experimental-strip-types tools/compare/doubleTeamPortable.ts",
     "compare:factory-terminal-loss": "node --experimental-strip-types tools/compare/factoryTerminalLoss.ts",
     "compare:factory-terminal-loss-record-menu": "node --experimental-strip-types tools/compare/factoryTerminalLoss.ts tools/compare/fixtures/factory-terminal-loss-record-menu-off.json",
+    "compare:factory-terminal-round-won": "node --experimental-strip-types tools/compare/factoryTerminalLoss.ts tools/compare/fixtures/factory-terminal-round-won-off.json",
     "compare:endeavor-portable": "node --experimental-strip-types tools/compare/endeavorPortable.ts"
   },
   "devDependencies": {

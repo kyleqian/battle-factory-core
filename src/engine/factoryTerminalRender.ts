@@ -13,7 +13,10 @@ import {
   factoryTerminalPageTextFirstAge,
   factoryTerminalRecordMenuVisible,
   factoryTerminalVisibleChars,
+  isFactoryTerminalRoundWon,
+  type FactoryTerminalLossPresentationState,
   type FactoryTerminalPresentationState,
+  type FactoryTerminalRoundWonPresentationState,
 } from "./factoryTerminalPresentation.ts";
 
 import layoutData from "../data/gen/factory-lobby-terminal-layout.json" with { type: "json" };
@@ -247,7 +250,7 @@ function drawPageText(
 
 function drawPageCursor(
   fb: Uint8Array,
-  state: FactoryTerminalPresentationState,
+  state: FactoryTerminalLossPresentationState,
   page: 0 | 1,
 ): void {
   const firstAge = factoryTerminalPageTextFirstAge(state, page)!;
@@ -265,6 +268,26 @@ function drawPageCursor(
       const color = messageBoxPalette[index];
       if (!color) continue;
       setPixel(fb, x + px, y + py, color.r, color.g, color.b);
+    }
+  }
+}
+
+function drawDownArrow(
+  fb: Uint8Array,
+  line: string,
+  y: number,
+  animationAge: number,
+): void {
+  const phase = Math.floor(Math.max(0, animationAge) / 9) % 4;
+  const x = MESSAGE_ORIGIN.x + measureText(font, charmap, line);
+  const top = y - CURSOR_Y_OFFSETS[phase]!;
+  for (let py = 0; py < downArrow.blitHeight; py += 1) {
+    for (let px = 0; px < downArrow.blitWidth; px += 1) {
+      const index = downArrow.indices[py]?.[px] ?? 0;
+      const color = messageBoxPalette[index];
+      if (index !== 0 && color) {
+        setPixel(fb, x + px, top + py, color.r, color.g, color.b);
+      }
     }
   }
 }
@@ -297,7 +320,7 @@ function drawClippedMessageText(
 
 function drawRecordPrompt(
   fb: Uint8Array,
-  state: FactoryTerminalPresentationState,
+  state: FactoryTerminalLossPresentationState,
 ): void {
   const release = state.recordPromptReleaseAge;
   if (release === null || state.age === release) {
@@ -361,6 +384,96 @@ function drawRecordPrompt(
   }
 }
 
+function drawRoundWonMessage(
+  fb: Uint8Array,
+  state: FactoryTerminalRoundWonPresentationState,
+): void {
+  const profile = state.profile;
+  const congratulationsRelease = state.congratulationsReleaseAge;
+  if (
+    congratulationsRelease === null ||
+    state.age < congratulationsRelease + profile.awardTextDelay - 1
+  ) {
+    const chars = Math.max(
+      0,
+      Math.min(
+        profile.congratulations[0].length + profile.congratulations[1].length,
+        state.age - profile.congratulationsTextDelay + 1,
+      ),
+    );
+    drawPageText(fb, profile.congratulations, chars);
+    return;
+  }
+
+  const awardScrollRelease = state.awardScrollReleaseAge;
+  const awardRelease = state.awardReleaseAge;
+  const mutationAge = awardRelease === null
+    ? null
+    : awardRelease + profile.battlePointMutationDelay;
+  const getPointsTextAge =
+    mutationAge === null ? null : mutationAge + profile.getPointsTextDelay;
+  if (getPointsTextAge !== null && state.age >= getPointsTextAge - 1) {
+    const chars = Math.max(0, Math.min(
+      profile.getPoints[0].length,
+      state.age - getPointsTextAge + 1,
+    ));
+    drawPageText(fb, profile.getPoints, chars);
+    return;
+  }
+
+  const awardTextAge = congratulationsRelease + profile.awardTextDelay;
+  if (awardScrollRelease === null || state.age === awardScrollRelease) {
+    const chars = Math.max(
+      0,
+      Math.min(
+        profile.award[0].length + profile.award[1].length,
+        state.age - awardTextAge + 1,
+      ),
+    );
+    drawPageText(fb, [profile.award[0], profile.award[1]], chars);
+    const cursorStart =
+      awardTextAge + profile.award[0].length + profile.award[1].length + 1;
+    if (state.age >= cursorStart) {
+      drawDownArrow(
+        fb,
+        profile.award[1],
+        MESSAGE_ORIGIN.y2,
+        state.age - cursorStart,
+      );
+    }
+    return;
+  }
+
+  const elapsed = Math.max(0, state.age - awardScrollRelease - 1);
+  const scroll = Math.min(profile.awardScrollTicks, elapsed) * 4;
+  if (elapsed < profile.awardScrollTicks) {
+    drawClippedMessageText(
+      fb,
+      profile.award[0],
+      MESSAGE_ORIGIN.x,
+      MESSAGE_ORIGIN.y1 - scroll,
+    );
+  }
+  drawClippedMessageText(
+    fb,
+    profile.award[1],
+    MESSAGE_ORIGIN.x,
+    MESSAGE_ORIGIN.y2 - scroll,
+  );
+  const thirdTextAge =
+    awardScrollRelease + profile.awardThirdLineTextDelay;
+  const thirdChars = Math.max(
+    0,
+    Math.min(profile.award[2].length, state.age - thirdTextAge + 1),
+  );
+  drawClippedMessageText(
+    fb,
+    profile.award[2].slice(0, thirdChars),
+    MESSAGE_ORIGIN.x,
+    MESSAGE_ORIGIN.y2,
+  );
+}
+
 export function renderFactoryTerminalPresentation(
   state: FactoryTerminalPresentationState,
   priorPresentation: () => Uint8Array,
@@ -377,6 +490,10 @@ export function renderFactoryTerminalPresentation(
   const fb = renderFactoryTerminalField(bgY, objY);
   if (state.age < state.profile.messageFrameAge) return fb;
   drawMessageBoxFrame(fb);
+  if (isFactoryTerminalRoundWon(state)) {
+    drawRoundWonMessage(fb, state);
+    return fb;
+  }
   if (state.age >= state.profile.recordPromptFirstAge) {
     drawRecordPrompt(fb, state);
     return fb;

@@ -9,6 +9,7 @@ import { PNG } from "pngjs";
 interface Fixture {
   readonly probe: string;
   readonly sourceTrace: string;
+  readonly rgbEnvironment?: string;
   readonly stage: { readonly id: string; readonly frame: number };
   readonly relativeWindow: { readonly start: number; readonly end: number };
   readonly segments: Trace["segments"];
@@ -51,7 +52,12 @@ const run = spawnSync(
   {
     cwd: root,
     encoding: "utf8",
-    env: { ...process.env, FACTORY_LOSS_RGB_DIR: rgbDir },
+    env: {
+      ...process.env,
+      [fixture.rgbEnvironment ?? "FACTORY_LOSS_RGB_DIR"]: rgbDir,
+      FACTORY_SEVENTH_WIN_RGB_START: String(fixture.relativeWindow.start),
+      FACTORY_SEVENTH_WIN_RGB_END: String(fixture.relativeWindow.end),
+    },
   },
 );
 if (run.stdout) process.stdout.write(run.stdout);

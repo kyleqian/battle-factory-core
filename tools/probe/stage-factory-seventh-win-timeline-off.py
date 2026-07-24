@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -23,6 +24,9 @@ if len(sys.argv) != 2:
     raise SystemExit(f"usage: {sys.argv[0]} <fresh-output.json>")
 
 OUTPUT_PATH = Path(sys.argv[1])
+RGB_DIR = Path(os.environ["FACTORY_SEVENTH_WIN_RGB_DIR"]) if os.environ.get("FACTORY_SEVENTH_WIN_RGB_DIR") else None
+RGB_START = int(os.environ.get("FACTORY_SEVENTH_WIN_RGB_START", "1"))
+RGB_END = int(os.environ.get("FACTORY_SEVENTH_WIN_RGB_END", "2513"))
 HERE = Path(__file__).resolve().parent
 WORKTREE_ROOT = HERE.parent.parent
 
@@ -241,12 +245,20 @@ def static_framebuffer_holds(rows: list[dict[str, object]]) -> list[dict[str, ob
     return result
 
 
-def run_case(oracle: EmeraldOracle, trace: dict, scheduled_inputs: dict[int, list[str]], frames: int) -> tuple[dict[str, object], list[dict[str, object]]]:
+def run_case(
+    oracle: EmeraldOracle,
+    trace: dict,
+    scheduled_inputs: dict[int, list[str]],
+    frames: int,
+    capture_rgb: bool = False,
+) -> tuple[dict[str, object], list[dict[str, object]]]:
     staged = replay_and_stage(oracle, trace)
     rows = []
     for relative in range(1, frames + 1):
         buttons = scheduled_inputs.get(relative, [])
         oracle.advance(buttons)
+        if capture_rgb and RGB_DIR is not None and RGB_START <= relative <= RGB_END:
+            (RGB_DIR / f"{relative:03d}.rgb").write_bytes(oracle.screen_rgb())
         row = frame(oracle, relative)
         if buttons:
             row["buttons"] = buttons
@@ -281,7 +293,13 @@ def compact_timeline(staged: dict[str, object], rows: list[dict[str, object]]) -
 def main() -> None:
     trace = json.loads(PREFIX_PATH.read_text())
     oracle = EmeraldOracle(ROM_PATH, MAP_PATH, BOOTSTRAP_PATH)
-    ready_stage, ready_rows = run_case(oracle, trace, INPUTS_TO_READY_MENU, MENU_ACCEPT - 1)
+    ready_stage, ready_rows = run_case(
+        oracle,
+        trace,
+        INPUTS_TO_READY_MENU,
+        MENU_ACCEPT - 1,
+        capture_rgb=True,
+    )
     rejected_stage, rejected_rows = run_case(oracle, trace, {**INPUTS_TO_READY_MENU, MENU_DRAW: ["A"]}, MENU_DRAW + 1)
     accepted_stage, accepted_rows = run_case(oracle, trace, {**INPUTS_TO_READY_MENU, MENU_ACCEPT: ["A"]}, FINAL_FRAME)
     if ready_stage != rejected_stage or ready_stage != accepted_stage:
