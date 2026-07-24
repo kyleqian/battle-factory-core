@@ -98,11 +98,33 @@ export interface SceneOnDoubleTeamConfig {
   readonly moveTextStartAge?: number;
 }
 
+export interface EndeavorAnimationProfile {
+  /** Source `gMon{Back,Front}PicCoords[species].y_offset`. */
+  readonly attackerYOffset: number;
+  /** Immutable stale `gAnimMovePower` consumed by the generic shake task. */
+  readonly staleMovePower: number;
+  /** First displayed HP decrement, relative to the move-body epoch. */
+  readonly hpDrainFirstAge: number;
+  readonly targetStartHp: number;
+  readonly targetEndHp: number;
+}
+
+export interface SceneOnEndeavorConfig {
+  readonly move: "ENDEAVOR";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly animationProfile: Readonly<EndeavorAnimationProfile>;
+  readonly fieldProfile: Readonly<SceneOnFaintAttackFieldProfile>;
+  /** Relative first printer age; negative means text predates this seam. */
+  readonly moveTextStartAge?: number;
+}
+
 export type SceneOnMoveConfig =
   | SceneOnFirePunchConfig
   | SceneOnFaintAttackConfig
   | SceneOnRockSlideConfig
-  | SceneOnDoubleTeamConfig;
+  | SceneOnDoubleTeamConfig
+  | SceneOnEndeavorConfig;
 
 export interface SceneOnMovePresentationState<
   TConfig extends SceneOnMoveConfig = SceneOnMoveConfig,
@@ -152,6 +174,14 @@ export interface SceneOnDoubleTeamView {
   readonly frontClone: "a" | "b";
 }
 
+export interface SceneOnEndeavorView {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly animationProfile: Readonly<EndeavorAnimationProfile>;
+  readonly displayedTargetHp: number;
+}
+
 function assertIntegerPoint(
   label: string,
   point: Readonly<{ x: number; y: number }>,
@@ -190,6 +220,16 @@ export function createSceneOnMovePresentation<TConfig extends SceneOnMoveConfig>
     || config.fieldProfile.opponentHp < 0
   ) {
     throw new Error(`${config.move} field profile requires nonnegative HP`);
+  }
+  if (
+    config.move === "ENDEAVOR"
+    && (
+      config.animationProfile.targetStartHp
+        < config.animationProfile.targetEndHp
+      || config.animationProfile.targetEndHp < 0
+    )
+  ) {
+    throw new Error("ENDEAVOR profile requires targetStartHp >= targetEndHp >= 0");
   }
   return { age: 0, config };
 }
@@ -304,6 +344,26 @@ export function sceneOnDoubleTeamView(
     target,
     ...doubleTeamAnimationAtAge(state.age, animationProfile),
     frontClone: animationProfile.frontClone,
+  };
+}
+
+export function sceneOnEndeavorView(
+  state: SceneOnMovePresentationState,
+): SceneOnEndeavorView {
+  if (state.config.move !== "ENDEAVOR") {
+    throw new Error(`expected ENDEAVOR presentation, got ${state.config.move}`);
+  }
+  const { animationProfile, attacker, target } = state.config;
+  const drained = Math.max(0, state.age - animationProfile.hpDrainFirstAge + 1);
+  return {
+    age: state.age,
+    attacker,
+    target,
+    animationProfile,
+    displayedTargetHp: Math.max(
+      animationProfile.targetEndHp,
+      animationProfile.targetStartHp - drained,
+    ),
   };
 }
 
@@ -478,5 +538,31 @@ export const ONIX_TO_GROVYLE_DOUBLE_TEAM_PRESENTATION = {
   moveTextStartAge: -28,
 } as const satisfies Pick<
   SceneOnDoubleTeamConfig,
+  "animationProfile" | "fieldProfile" | "moveTextStartAge"
+>;
+
+/**
+ * Opposite-side stock-controller stage. Age zero is oracle frame 2347, the
+ * first visible palette-blend frame of player-back ONIX's move body.
+ */
+export const ONIX_TO_GROVYLE_ENDEAVOR_PROFILE:
+  Readonly<EndeavorAnimationProfile> = Object.freeze({
+    attackerYOffset: 0,
+    staleMovePower: 0,
+    hpDrainFirstAge: 99,
+    targetStartHp: 143,
+    targetEndHp: 117,
+  });
+
+export const ONIX_TO_GROVYLE_ENDEAVOR_PRESENTATION = {
+  animationProfile: ONIX_TO_GROVYLE_ENDEAVOR_PROFILE,
+  fieldProfile: Object.freeze({
+    playerHp: 117,
+    opponentHp: 143,
+    playerStatus: "none",
+  }),
+  moveTextStartAge: -37,
+} as const satisfies Pick<
+  SceneOnEndeavorConfig,
   "animationProfile" | "fieldProfile" | "moveTextStartAge"
 >;

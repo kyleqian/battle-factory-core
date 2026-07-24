@@ -13,11 +13,14 @@ import {
   GROVYLE_TO_ONIX_ROCK_SLIDE_PROFILE,
   ONIX_TO_GROVYLE_DOUBLE_TEAM_PRESENTATION,
   ONIX_TO_GROVYLE_DOUBLE_TEAM_PROFILE,
+  ONIX_TO_GROVYLE_ENDEAVOR_PRESENTATION,
+  ONIX_TO_GROVYLE_ENDEAVOR_PROFILE,
   ONIX_TO_GROVYLE_FIRE_PUNCH_GEOMETRY,
   ONIX_TO_GROVYLE_FAINT_ATTACK_PROFILE,
   ONIX_TO_GROVYLE_FIRE_PUNCH_PROFILE,
   sceneOnFaintAttackView,
   sceneOnDoubleTeamView,
+  sceneOnEndeavorView,
   sceneOnFirePunchView,
   sceneOnRockSlideView,
 } from "../src/engine/sceneOnPresentation.ts";
@@ -227,6 +230,32 @@ describe("relative Battle Scene ON move presentation", () => {
     expect(stage.config.animationProfile).toEqual(profileBefore);
     expect(stage.config.animationProfile).toBe(
       ONIX_TO_GROVYLE_DOUBLE_TEAM_PROFILE,
+    );
+  });
+
+  it("owns opposite-side ENDEAVOR geometry and HP outcome as immutable input", () => {
+    const stage = createSceneOnMovePresentation({
+      move: "ENDEAVOR",
+      ...ONIX_TO_GROVYLE_FIRE_PUNCH_GEOMETRY,
+      ...ONIX_TO_GROVYLE_ENDEAVOR_PRESENTATION,
+    });
+    const profileBefore = structuredClone(stage.config.animationProfile);
+
+    expect(stage.config.attacker.geometry.battlePositionCenter)
+      .toEqual({ x: 72, y: 80 });
+    expect(stage.config.target.geometry.animationCenter)
+      .toEqual({ x: 176, y: 44 });
+    expect(sceneOnEndeavorView({ ...stage, age: 98 }).displayedTargetHp)
+      .toBe(143);
+    expect(sceneOnEndeavorView({ ...stage, age: 99 }).displayedTargetHp)
+      .toBe(142);
+    expect(sceneOnEndeavorView({ ...stage, age: 126 }).displayedTargetHp)
+      .toBe(117);
+    expect(sceneOnEndeavorView({ ...stage, age: 140 }).displayedTargetHp)
+      .toBe(117);
+    expect(stage.config.animationProfile).toEqual(profileBefore);
+    expect(stage.config.animationProfile).toBe(
+      ONIX_TO_GROVYLE_ENDEAVOR_PROFILE,
     );
   });
 
