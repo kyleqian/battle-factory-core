@@ -1,3 +1,24 @@
+## 415 — Factory AI self-target fidelity repaired
+
+- **State:** the bounded S10 mask-0 repair is committed and green at **161
+  files / 1933 tests**. The policy still supports only ordinary Level-50
+  Factory singles mask **0**; no masks, switching, opcodes, mechanics, or
+  interfaces were broadened.
+- **Did:** corrected the decision boundary to accept the kernel-resolved
+  singles target, then made the AI choose strictly by move slot and return the
+  exact listed legal decision. The real `FRONTIER_MON_PLUSLE_2` tuple now gives
+  Wish slot 3 its source `MOVE_TARGET_USER` battler **1**; seed **1** selects
+  it and `submitBattleDecision` preserves that target. Multiple legal
+  decisions for one slot are rejected as ambiguous.
+- **Next:** return to the supervisor. Keep opcode 0 unregistered; mask 1 and
+  all previously recorded breadth remain separate future units.
+- **Notes:** the original seed's five exact draws/RNG, canonical replay, and
+  recursive freezing remain pinned; the new self-target seed also ends after
+  five draws at `0x79e39ac4`. Focused **2 files / 29 tests**; integrated
+  **161/1933**, production build, OFF v5 info (`9c89c741…`), and diff checks
+  pass. Code commit `1f32342`; pixel diff N/A.
+
+---
 ## 414 — Factory AI mask-0 boundary composed
 
 - **State:** the assigned S10 vertical composition is committed and green at

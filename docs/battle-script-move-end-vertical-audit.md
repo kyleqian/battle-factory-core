@@ -164,9 +164,10 @@ scheduler/turn-finalization after that end is outside the currently staged
 adapter. Therefore the current barrier is honest: it stops before both the
 write primitive and the 289-line move-end state machine.
 
-## 4. Recommended next executable unit
+## 4. Completed SETBYTE unit
 
-The smallest honest increment is **complete generic `Cmd_setbyte` only**:
+The completed smallest honest increment was **complete generic `Cmd_setbyte`
+only**:
 add the explicit 24-class byte-lvalue rules state/resolver, implement the
 fixed six-byte write/advance primitive, and mechanically test all 214
 generated starts plus byte-preservation for the two four-byte/one two-byte
@@ -176,9 +177,49 @@ machine barrier at opcode 73 (`B_SCR_OP_MOVEEND`).  This materially advances
 the current machine while neither registering a partial opcode nor claiming
 any move-end mechanic.
 
-Exact remaining unit after that: source-complete `Cmd_moveend`, including all
+Exact remaining unit after that remains source-complete `Cmd_moveend`, including all
 17 cases, mutable battle/disable/special/history/item state listed above,
 ability and item delegates, controller barriers, script stack/PC transfers,
 doubles replay, and the `end`/action-scheduler continuation.  It is larger
 than the generic SETBYTE primitive and should be decomposed around source
 complete delegates, never by registering a reduced `sMOVEEND_STATE` handler.
+
+## 5. Opcode-73 implementation boundary receipt
+
+`src/data/gen/battle-script-move-end-facts.json` is the committed,
+regenerable source boundary for the remaining decision.  Its extractor reads
+the pinned handler/constant sources plus the assembled opcode observation
+catalog and records:
+
+- all **17** executable numeric states plus sentinel 17, with every case body
+  preserved verbatim and hashed;
+- all **24** assembled opcode-73 starts, uniformly `[1,1]` operands: end-mode
+  counts **0=6 / 1=4 / 2=14** and wrapper counts
+  `all=4 / case=4 / from=2 / fromto=2 / to=12`; and
+- per-case call, global, mutation, controller, explicit-return, and script
+  target candidates.  Numeric state is authoritative: the C source text
+  places item cases 11–12 before visibility cases 8–10.
+
+This receipt also makes the currently missing ownership precise.  A complete
+rules context still needs battler item/stat-stage state; `chosenMove`;
+`choicedMove[]` and `changedItems[]`; special damage/restored-sprite state;
+the charging-turn protect bit; battle type/count/position data; and the
+last-printed/last/resulting/last-landed/last-hit-by/type plus
+`lastTakenMove`/`lastTakenMoveFrom` histories.  The following source hooks
+must return immutable rules/RNG/controller/script effects rather than boolean
+stubs:
+
+- `AbilityBattleEffects` for target Synchronize, on-damage, immunity-loop,
+  and attacker Synchronize;
+- `ItemBattleEffects` for move-end-all and King's Rock/Shell Bell, including
+  any RNG or pushed effect script;
+- held-effect/enigma resolution, `WasUnableToUseMove`, battler
+  side/position/partner lookup, `GET_MOVE_TYPE`, and the damage predicates;
+- status-data and three sprite-visibility controller emissions/resumptions;
+  and
+- `MoveValuesCleanUp`, move-effect script lookup/push, and the
+  `BattleScript_FlushMessageBox` doubles transfer.
+
+Until those owners exist, opcode 73 remains deliberately unregistered and
+the player/AI asleep verticals retain the honest barrier.  The receipt is a
+decomposition checkpoint, not an implementation or a staged no-effect claim.

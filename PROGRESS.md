@@ -4,6 +4,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 418 — MOVEEND remains honest behind a complete source boundary
+
+- **State:** the bounded opcode-73 decision checkpoint is green at **163 files /
+  1948 tests**. `Cmd_moveend` is not implemented or registered; both asleep
+  verticals still stop at the existing honest barrier.
+- **Did:** added a regenerable pinned-source receipt covering all **17**
+  executable move-end states plus sentinel, all **24** assembled opcode sites,
+  fixed `[1,1]` operands, end modes **0/1/2 = 6/4/14**, five wrapper families,
+  and every case's verbatim body plus lexical call/global/mutation/controller/
+  return/script-transfer boundary.
+- **Next:** define durable item/stat-stage, special/protect, choice/change-item,
+  battle-position/doubles, and move-history owners; then implement explicit
+  ability/item/cleanup/controller/script-transfer delegates. Register opcode
+  73 only when every receipt case and end mode is source-complete.
+- **Notes:** a staged no-effect delegate suite was rejected as unsound. The
+  receipt pins source-layout item cases 11–12 before visibility cases 8–10
+  while preserving numeric dispatch. Focused **1 file / 5 tests**; integrated
+  **163/1948**, production build, OFF v5 info (`9c89c741…`), and diff checks
+  pass. Pixel diff N/A.
+
+---
 ## 417 — SETBYTE reaches the honest Cmd_moveend barrier
 
 - **State:** the bounded S10 opcode-46 increment is green at **162 files /
@@ -51,24 +72,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   player regression, and import boundaries are pinned. Focused **3 files / 39
   tests**; integrated **161/1936**, production build, OFF v5 info
   (`9c89c741…`), and diff checks pass. Code commit `8e186dc`; pixel diff N/A.
-
----
-## 415 — Factory AI self-target fidelity repaired
-
-- **State:** the bounded S10 mask-0 repair is committed and green at **161
-  files / 1933 tests**. The policy still supports only ordinary Level-50
-  Factory singles mask **0**; no masks, switching, opcodes, mechanics, or
-  interfaces were broadened.
-- **Did:** corrected the decision boundary to accept the kernel-resolved
-  singles target, then made the AI choose strictly by move slot and return the
-  exact listed legal decision. The real `FRONTIER_MON_PLUSLE_2` tuple now gives
-  Wish slot 3 its source `MOVE_TARGET_USER` battler **1**; seed **1** selects
-  it and `submitBattleDecision` preserves that target. Multiple legal
-  decisions for one slot are rejected as ambiguous.
-- **Next:** return to the supervisor. Keep opcode 0 unregistered; mask 1 and
-  all previously recorded breadth remain separate future units.
-- **Notes:** the original seed's five exact draws/RNG, canonical replay, and
-  recursive freezing remain pinned; the new self-target seed also ends after
-  five draws at `0x79e39ac4`. Focused **2 files / 29 tests**; integrated
-  **161/1933**, production build, OFF v5 info (`9c89c741…`), and diff checks
-  pass. Code commit `1f32342`; pixel diff N/A.

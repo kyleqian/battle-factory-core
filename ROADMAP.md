@@ -1039,6 +1039,14 @@ loop/end-mode control, delegated ability/item/status/visibility/update hooks,
 controller synchronization, script handoffs, and every reachable state/RNG
 effect; no individual move-end case is implemented by this checkpoint.
 
+**MOVEEND source-boundary checkpoint (2026-07-24):** opcode **73** remains
+unregistered. A regenerable pinned-source receipt now enumerates all **17**
+executable cases plus sentinel, all **24** assembled sites, fixed `[1,1]`
+operands, end modes **0/1/2 = 6/4/14**, wrapper families, and each case's
+verbatim body plus call/global/mutation/controller/return/script-target
+candidates. It records the exact missing durable item/special/protect/history/
+doubles state and effect delegates; the staged player/AI barrier is unchanged.
+
 S10 has six ordered completion gates:
 
 1. [x] **Complete Factory corpus:** mechanically extract and validate all 300
