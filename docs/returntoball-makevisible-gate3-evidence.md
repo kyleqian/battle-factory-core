@@ -134,4 +134,3 @@ transport, generic `WAITSTATE`, sprite allocation/destruction, healthbox or
 shadow rendering, substitute/switch-out animation, scene timing/pixels,
 audio, battle rules, RNG, PP, and controller support for link/Safari/Wally.
 Any later hypothetical Pokémon fixture must specify `ppUps: [0, 0, 0, 0]`.
-
