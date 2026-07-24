@@ -1,3 +1,18 @@
+## 346 — S8 OFF duplicate-species loaded-display repair: **GREEN PARTIAL**
+
+- **State:** presentation preserves the source's already-loaded GROVYLE display
+  while the staged logical enemy is MAGBY. Gate 2 remains open: dense audit
+  improves strictly to **1/52 exact**, **97,450** aggregate differing pixels.
+- **Did:** added a presentation-owned loaded-species seam and propagated it
+  phase-relatively through duplicate open/close/return for name/category/pic.
+- **Next:** align the bounded duplicate OpenMonPic/message/close composition
+  using task/window evidence; do not alter identity or RNG ownership.
+- **Notes:** improved **2,014 px**; +2 exact, +0 **243 px**, peak +27
+  **4,982 px**, +51 **2,001 px**. Integrated Tier-1 **1267/1267**, build
+  **5.677 MB**; ICE PUNCH **363/363**, FIRE PUNCH **225/225**. No framebuffer
+  assets, RGB fitting, absolute ticks, runtime oracle/ROM, or logic mutation.
+
+---
 ## 344 — S8 OFF enemy-origin swap quit: **GREEN — 356/356 exact**
 
 - **State:** enemy picker B and enemy CANCEL now share the existing quit

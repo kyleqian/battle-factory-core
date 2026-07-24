@@ -4,6 +4,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 349 — S9 OFF Info→Skills layered summary wipe: **GREEN — 25/25 exact**
+
+- **State:** RIGHT now carries Skills through the source's eight 32px BG1/BG2
+  steps over fixed BG3/OBJ, then installs the destination windows at +10.
+  The complete transition and settled ONIX Skills hold are zero diff.
+- **Did:** added generic page-layer offsets, clipped screen-block composition,
+  Skills pagination/EXP/stat strings from source data, and the exact flipped
+  ONIX horizontal-hop callback. Tier-1 pins both directions' layer geometry,
+  shared clocks, and immutable selected-slot ownership.
+- **Next:** supervisor verify this RIGHT/Skills checkpoint and choose the next
+  bounded S9 summary route; LEFT, mon switching, Moves pages, and move-select
+  remain intentionally unclaimed.
+- **Notes:** `summary-info-to-skills.json` **25/25**; install **3/3**; Info
+  ONIX **122/122** + MAGBY **132/132**. Tier-1 **1287/1287**, build green.
+  No absolute ticks, framebuffer assets, runtime oracle/ROM, or ROADMAP/ISSUES
+  edits.
+
+---
 ## 348 — S9 OFF summary page-navigation install: **GREEN CHECKPOINT — 3/3 exact**
 
 - **State:** the generic Info↔Skills page reducer owns direction, destination,
@@ -38,18 +56,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Regressions: **130/130 + 66/66 + 69/69 + 44/44 + 59/59 + 113/113**.
   Tier-1 **1268/1268**, build **5.679 MB**. No logic/RNG/identity mutation,
   absolute ticks, framebuffer assets, runtime oracle/ROM, or ROADMAP edits.
-
----
-## 346 — S8 OFF duplicate-species loaded-display repair: **GREEN PARTIAL**
-
-- **State:** presentation preserves the source's already-loaded GROVYLE display
-  while the staged logical enemy is MAGBY. Gate 2 remains open: dense audit
-  improves strictly to **1/52 exact**, **97,450** aggregate differing pixels.
-- **Did:** added a presentation-owned loaded-species seam and propagated it
-  phase-relatively through duplicate open/close/return for name/category/pic.
-- **Next:** align the bounded duplicate OpenMonPic/message/close composition
-  using task/window evidence; do not alter identity or RNG ownership.
-- **Notes:** improved **2,014 px**; +2 exact, +0 **243 px**, peak +27
-  **4,982 px**, +51 **2,001 px**. Integrated Tier-1 **1267/1267**, build
-  **5.677 MB**; ICE PUNCH **363/363**, FIRE PUNCH **225/225**. No framebuffer
-  assets, RGB fitting, absolute ticks, runtime oracle/ROM, or logic mutation.

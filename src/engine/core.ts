@@ -59,6 +59,7 @@ import {
   renderSummaryInfoPage,
   renderSummaryInfoPageCleared,
   renderSummaryInfoPageFaded,
+  renderSummaryPageTransition,
   renderSummarySkillsPage,
 } from "./summaryInfoPage.ts";
 import {
@@ -2035,13 +2036,19 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
   const summary = state.summaryScreen;
   const t = summary.transition;
   if (!t) {
-    if (summary.pageTransition && summary.pageTransition.elapsed <= 2) {
+    if (summary.pageTransition) {
       // ChangePage's task handoff is installed immediately but its outgoing
       // window clear is not visible until elapsed=3. The persistent mon
       // callback does continue through this install/rejection window.
       return summary.pageTransition.elapsed === 0
         ? renderSummaryInfoPage(summary.selectedSlot, summary.openElapsed + 1)
-        : renderSummaryInfoPageCleared(summary.selectedSlot, summary.openElapsed + 1);
+        : summary.pageTransition.elapsed <= 2
+          ? renderSummaryInfoPageCleared(summary.selectedSlot, summary.openElapsed + 1)
+          : renderSummaryPageTransition(
+              summary.selectedSlot,
+              summary.pageTransition,
+              summary.openElapsed + 1,
+            );
     }
     return summary.isOpen
       ? summary.page === "skills"

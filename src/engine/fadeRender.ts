@@ -23,10 +23,12 @@ export function drawTileBgFaded(fb: Uint8Array, bg: TileBg, y: number, scrollX =
   const tilesPerRow = bg.tilemap.width;
   for (let screenY = 0; screenY < 160; screenY += 1) {
     const mapY = screenY + scrollY;
+    if (mapY < 0) continue;
     const tileRow = Math.floor(mapY / 8);
     const inTileY = mapY % 8;
     for (let screenX = 0; screenX < 240; screenX += 1) {
       const mapX = screenX + scrollX;
+      if (mapX < 0) continue;
       const tileCol = Math.floor(mapX / 8);
       const inTileX = mapX % 8;
       const entry = bg.tilemap.entries[tileRow * tilesPerRow + tileCol];

@@ -42,6 +42,43 @@ export interface SummaryPageTransition {
  * steps follow and the destination owns input at +10.
  */
 export const SUMMARY_PAGE_TRANSITION_TICKS = 10;
+export const SUMMARY_PAGE_SCROLL_STEP_PX = 32;
+export const SUMMARY_PAGE_SCROLL_STEPS = 8;
+
+export interface SummaryPageLayerOffsets {
+  /** Page carried by the moving BG1/BG2 layer. */
+  readonly movingPage: SummaryPage;
+  /** Screen-space X offset of that page's 256px screen block. */
+  readonly movingX: number;
+  /** Page exposed below the moving layer (BG3 for Info↔Skills). */
+  readonly fixedPage: SummaryPage;
+}
+
+/**
+ * Source-equivalent BG1/BG2 page-block placement during ChangePage.
+ *
+ * RIGHT points the destination tilemap at the second 32x32 screen block and
+ * advances HOFS by 32px per callback, sliding that block in from x=256.
+ * LEFT keeps the outgoing block in front and slides it back toward x=256.
+ * BG3/OBJ never move.
+ */
+export function summaryPageLayerOffsets(
+  transition: SummaryPageTransition,
+): SummaryPageLayerOffsets {
+  const steps = Math.min(SUMMARY_PAGE_SCROLL_STEPS, transition.elapsed);
+  if (transition.direction === "right") {
+    return {
+      movingPage: transition.toPage,
+      movingX: 256 - steps * SUMMARY_PAGE_SCROLL_STEP_PX,
+      fixedPage: transition.fromPage,
+    };
+  }
+  return {
+    movingPage: transition.fromPage,
+    movingX: steps * SUMMARY_PAGE_SCROLL_STEP_PX,
+    fixedPage: transition.toPage,
+  };
+}
 
 export interface SummaryTransition {
   direction: "toSummary" | "toDraft";

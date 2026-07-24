@@ -12,6 +12,7 @@ import {
   requestSummaryScreenExit,
   requestSummaryPageChange,
   SUMMARY_PAGE_TRANSITION_TICKS,
+  summaryPageLayerOffsets,
   type SummaryScreenState,
 } from "../src/engine/summaryScreen.ts";
 
@@ -125,6 +126,38 @@ describe("summaryScreen: generic page navigation", () => {
     expect(info.page).toBe("info");
     expect(info.onInfoPage).toBe(true);
     expect(info.selectedSlot).toBe(2);
+  });
+
+  it("places the moving 256px BG block in generic 32px steps over an immutable selected slot", () => {
+    const right = requestSummaryPageChange(settled(5), "right");
+    expect(summaryPageLayerOffsets(right.pageTransition!)).toEqual({
+      movingPage: "skills",
+      movingX: 256,
+      fixedPage: "info",
+    });
+    const right4 = run(right, 4);
+    expect(summaryPageLayerOffsets(right4.pageTransition!)).toEqual({
+      movingPage: "skills",
+      movingX: 128,
+      fixedPage: "info",
+    });
+    const right8 = run(right, 8);
+    expect(summaryPageLayerOffsets(right8.pageTransition!)).toEqual({
+      movingPage: "skills",
+      movingX: 0,
+      fixedPage: "info",
+    });
+    expect(right8.selectedSlot).toBe(5);
+
+    const skills = run(right, SUMMARY_PAGE_TRANSITION_TICKS);
+    const left = requestSummaryPageChange(skills, "left");
+    const left4 = run(left, 4);
+    expect(summaryPageLayerOffsets(left4.pageTransition!)).toEqual({
+      movingPage: "skills",
+      movingX: 128,
+      fixedPage: "info",
+    });
+    expect(left4.selectedSlot).toBe(5);
   });
 
   it("rejects LEFT at the first page and RIGHT at the final page", () => {
