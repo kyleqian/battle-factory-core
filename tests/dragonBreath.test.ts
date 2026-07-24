@@ -4,6 +4,7 @@ import {
   DRAGON_BREATH_FIRE_SPAWN_COUNT,
   CANONICAL_DRAGON_BREATH_FIRE_GEOMETRY,
   dragonBreathFireSprites,
+  dragonBreathTargetEffectAtAge,
 } from "../src/engine/dragonBreath.ts";
 
 describe("DRAGON_BREATH fire-projectile reducer", () => {
@@ -111,5 +112,29 @@ describe("DRAGON_BREATH fire-projectile reducer", () => {
       ...CANONICAL_DRAGON_BREATH_FIRE_GEOMETRY,
       duration: 12,
     })).toThrow(/affine evidence currently requires duration 20/);
+  });
+
+  it("reduces the source palette, shake, and monbg tasks on the shared age", () => {
+    expect(dragonBreathTargetEffectAtAge(-3)).toEqual({
+      shakeX2: 0,
+      blendCoeff: 0,
+      onMonBg: false,
+    });
+    expect(dragonBreathTargetEffectAtAge(-2).onMonBg).toBe(true);
+    expect(dragonBreathTargetEffectAtAge(10).blendCoeff).toBe(0);
+    expect(dragonBreathTargetEffectAtAge(11).blendCoeff).toBe(1);
+    expect(dragonBreathTargetEffectAtAge(27).blendCoeff).toBe(9);
+    expect(dragonBreathTargetEffectAtAge(64).blendCoeff).toBe(9);
+    expect(dragonBreathTargetEffectAtAge(65).blendCoeff).toBe(8);
+    expect(dragonBreathTargetEffectAtAge(82)).toEqual({
+      shakeX2: 0,
+      blendCoeff: 0,
+      onMonBg: false,
+    });
+    expect(
+      [12, 13, 14, 15, 16, 51, 52, 53].map(
+        (age) => dragonBreathTargetEffectAtAge(age).shakeX2,
+      ),
+    ).toEqual([0, -2, -2, 2, 2, 2, 2, 0]);
   });
 });

@@ -74,6 +74,8 @@ def main() -> None:
     dragon_breath_fire_template = oracle.symbols["gDragonBreathFireSpriteTemplate"]
     battle_mons = oracle.symbols["gBattleMons"]
     battler_sprite_ids = oracle.symbols["gBattlerSpriteIds"]
+    pltt_unfaded = oracle.symbols["gPlttBufferUnfaded"]
+    pltt_faded = oracle.symbols["gPlttBufferFaded"]
     oam_buffer = oracle.symbols["gMain"] + 0x38
     sprite_order = 0x020217F4  # EWRAM static sSpriteOrder (ELF symbol)
 
@@ -122,11 +124,12 @@ def main() -> None:
     def battler_sprite_record(battler: int) -> dict:
         slot = oracle.read_u8(battler_sprite_ids + battler)
         base = sprites + slot * 0x44
+        palette_num = (oracle.read_u8(base + 5) >> 4) & 0xF
         return {
             "slot": slot,
             "tileNum": oracle.read_u8(base + 4)
             | ((oracle.read_u8(base + 5) & 0x3) << 8),
-            "paletteNum": (oracle.read_u8(base + 5) >> 4) & 0xF,
+            "paletteNum": palette_num,
             "priority": (oracle.read_u8(base + 5) >> 2) & 0x3,
             "animNum": oracle.read_u8(base + 0x2A),
             "animCmdIndex": oracle.read_u8(base + 0x2B),
@@ -135,6 +138,14 @@ def main() -> None:
             "y": s16(base + 0x22),
             "x2": s16(base + 0x24),
             "y2": s16(base + 0x26),
+            "paletteUnfaded": [
+                u16(pltt_unfaded + (0x100 + palette_num * 16 + index) * 2)
+                for index in range(16)
+            ],
+            "paletteFaded": [
+                u16(pltt_faded + (0x100 + palette_num * 16 + index) * 2)
+                for index in range(16)
+            ],
         }
 
     def capture(frame: int) -> None:
