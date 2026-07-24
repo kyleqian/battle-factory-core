@@ -13,12 +13,14 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   power/accuracy/description details, CANCEL row, and locked A/B close behavior.
   Tier-1 pins setup/close gates, rental/page/mode preservation, immutable move
   order, staggered navigation, cursor clock reset, and no reorder state.
-- **Next:** run the full summary regression matrix plus complete Tier-1/build;
-  if green, record final counts and hand this bounded increment to supervisor.
+- **Next:** supervisor verify this bounded route and choose the next S9 summary
+  increment; Contest move-select and Moves-page mon switching remain untouched.
 - **Notes:** `summary-battle-move-select.json` **93/93** dense OFF exact;
-  targeted Tier-1 **39/39** and build green. No move reordering, Contest
-  move-select, mon switching, battle/controller, absolute ticks, framebuffer
-  assets, or runtime oracle/ROM.
+  Contest **16/16**; Battle **36/36**; DOWN→UP **87/87**; DOWN **54/54**;
+  Info **122/122 + 132/132**; install **3/3**; Info→Skills **25/25**;
+  Skills→Info **56/56**. Tier-1 **1312/1312** and build green. No move
+  reordering, Contest move-select, mon switching, battle/controller, absolute
+  ticks, framebuffer assets, runtime oracle/ROM, ROADMAP, or ISSUES edits.
 
 ---
 ## 354 — S9 OFF Battle→Contest Moves layered wipe: **GREEN — 16/16 exact**
