@@ -4,6 +4,33 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 406 — Gate-3 attack-canceler BIDE source phase integrated
+
+- **State:** the run is clean and green at **146 files / 1840 tests**. S10
+  Gate 3 remains at **27** source-safe executable opcodes;
+  `AtkCanceler_UnableToUseMove` now has immutable FLAGS through BIDE source
+  decisions only. Opcode 0 remains unregistered and no phase loop exists.
+- **Did:** ported battle_util.c:2220-2247 with source-ordered
+  `STATUS2_BIDE_TURN(1)` subtraction, storage/no-energy/attack script handoffs,
+  `MOVE_BIDE`, signed-s32 doubled scripting damage, and saved-target ownership.
+  Published frozen `gBideDmg`/`gBideTarget`/scripting-damage/absent-bit state
+  plus explicit receipts; Bide itself preserves `STATUS2_MULTIPLETURNS`.
+- **Next:** begin `CANCELER_THAW` only after its freeze/effect predicate,
+  status clear, cursor, chooser, status-controller write, effect, script, and
+  tracker receipts are explicit. Do not loop phases or register opcode 0.
+- **Notes:** singles battlers **0/1**, both sides/saved opposing slots, no-Bide,
+  reachable counters **2→1→0** and rejected **3**, zero/positive releases,
+  positive-s32 doubling through wrap boundaries, target replacement/
+  preservation, status-bit and multi-turn preservation, invalid context, exact
+  zero-call RNG ownership, immutability/determinism, and deep freezing are
+  pinned. The absent-target fallback is explicitly unsupported because
+  `gAbsentBattlerFlags` starts zero, singles `HasNoMonsToSwitch` returns FALSE,
+  and switch-in clears the reused active slot; doubles-only `GetMoveTarget`
+  RNG/Follow Me/Lightning Rod was not imported. Focused **4 files / 49 tests**;
+  integrated Tier-1 **146/1840**, build, OFF v5 info (`9c89c741…`), and diff
+  check green. Code commit `7b20bb8`; pixel diff N/A.
+
+---
 ## 405 — Gate-3 attack-canceler IN_LOVE source phase integrated
 
 - **State:** the run is clean and green at **145 files / 1832 tests**. S10
@@ -51,27 +78,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   pass. Combined Tier-1 **144/1825**, build, both v5 oracle profiles
   (`9c89c741…`), animation coverage, and diff check are green. Merges
   `40336a1` + `1b28a45`; pixel diff N/A outside the cited ON windows.
-
----
-## 403 — Gate-3 attack-canceler PARALYZED source phase integrated
-
-- **State:** the run is clean and green at **142 files / 1789 tests**. S10
-  Gate 3 remains at **27** source-safe executable opcodes;
-  `AtkCanceler_UnableToUseMove` now has immutable FLAGS through PARALYZED
-  source decisions only. Opcode 0 remains unregistered and no phase loop exists.
-- **Did:** ported battle_util.c:2188-2199 with the exact
-  `status1 & STATUS1_PARALYSIS` predicate and conditional `Random() % 4`
-  ownership. Modulo zero sets `ProtectStruct::prlzImmobility`, the unable
-  marker, effect 1, and hands off to `BattleScript_MoveUsedIsParalyzed`;
-  its later `cancelmultiturnmoves BS_ATTACKER` remains explicitly script-owned.
-- **Next:** begin `CANCELER_IN_LOVE` only after its infatuation source,
-  battler selection, conditional RNG/cursor/script branches, protect flag,
-  helper ownership, marker/effect, and receipts are explicit. Do not loop
-  phases or register opcode 0.
-- **Notes:** all four battlers/both sides, non-paralyzed no-draw, all four
-  modulo outcomes and boundaries **0/3/4/65535**, preset protect/marker,
-  missing/invalid context, exact one-call LCG ownership, exactly one tracker
-  advance, input immutability, deterministic replay, and deep freezing are
-  pinned. Focused **4 files / 39 tests**; integrated Tier-1 **142 files / 1789
-  tests**, build, OFF v5 info (`9c89c741…`), and diff check green. Code commit
-  `e6a9b8e`; pixel diff N/A.

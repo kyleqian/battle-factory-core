@@ -1,3 +1,27 @@
+## 403 — Gate-3 attack-canceler PARALYZED source phase integrated
+
+- **State:** the run is clean and green at **142 files / 1789 tests**. S10
+  Gate 3 remains at **27** source-safe executable opcodes;
+  `AtkCanceler_UnableToUseMove` now has immutable FLAGS through PARALYZED
+  source decisions only. Opcode 0 remains unregistered and no phase loop exists.
+- **Did:** ported battle_util.c:2188-2199 with the exact
+  `status1 & STATUS1_PARALYSIS` predicate and conditional `Random() % 4`
+  ownership. Modulo zero sets `ProtectStruct::prlzImmobility`, the unable
+  marker, effect 1, and hands off to `BattleScript_MoveUsedIsParalyzed`;
+  its later `cancelmultiturnmoves BS_ATTACKER` remains explicitly script-owned.
+- **Next:** begin `CANCELER_IN_LOVE` only after its infatuation source,
+  battler selection, conditional RNG/cursor/script branches, protect flag,
+  helper ownership, marker/effect, and receipts are explicit. Do not loop
+  phases or register opcode 0.
+- **Notes:** all four battlers/both sides, non-paralyzed no-draw, all four
+  modulo outcomes and boundaries **0/3/4/65535**, preset protect/marker,
+  missing/invalid context, exact one-call LCG ownership, exactly one tracker
+  advance, input immutability, deterministic replay, and deep freezing are
+  pinned. Focused **4 files / 39 tests**; integrated Tier-1 **142 files / 1789
+  tests**, build, OFF v5 info (`9c89c741…`), and diff check green. Code commit
+  `e6a9b8e`; pixel diff N/A.
+
+---
 ## 402 — Gate-3 attack-canceler CONFUSED source phase integrated
 
 - **State:** the run is clean and green at **140 files / 1777 tests**. S10
