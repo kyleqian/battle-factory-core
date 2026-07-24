@@ -20,16 +20,27 @@ type CallsiteContinuation = {
   continuation: { label: string; line: number } | null;
   provenance: { kind: "explicit-callsite-continuation"; macro: string; macroDeclarationLine: number; opcode: string; continuation: "assembly-successor-after-call" };
 };
+type ConditionalGuard = {
+  kind: "conditional-guard";
+  from: { label: string; line: number };
+  command: { macro: string; macroDeclarationLine: number; opcode: string };
+  operands: Array<{ parameter: string; token: string }>;
+  comparator: { parameter: string; token: string } | null;
+  selector: { parameter: string; token: string } | null;
+  takenDestination: { operand: { parameter: string; token: string }; label: string; line: number };
+  notTakenSuccessor: { label: string; line: number } | null;
+  provenance: { kind: "source-macro-invocation"; destinationParameter: string; comparatorParameter: string | null; selectorParameter: string | null; notTakenSuccessor: "implicit-assembly-successor" | "none" };
+};
 const graph = graphData as {
   schema: string;
-  counts: { macros: number; labels: number; executableInstructions: number; directives: number; nonExecutableCategories: number; unsupportedLineCategories: number; controlFlowEdges: number; fallthroughEdges: number; explicitJumpEdges: number; explicitCallEdges: number; callsiteContinuationEdges: number; explicitReturnEdges: number; explicitEndEdges: number };
-  macros: Array<{ name: string; declarationLine: number; directOpcodeBindings: string[]; opcodeBindings: string[] }>;
+  counts: { macros: number; labels: number; executableInstructions: number; directives: number; nonExecutableCategories: number; unsupportedLineCategories: number; controlFlowEdges: number; fallthroughEdges: number; explicitJumpEdges: number; explicitCallEdges: number; callsiteContinuationEdges: number; explicitReturnEdges: number; explicitEndEdges: number; conditionalGuardEdges: number; conditionalGuardMacros: number; conditionalGuardsWithRawComparator: number; conditionalGuardsWithRawSelector: number; conditionalGuardsWithNotTakenSuccessor: number; conditionalGuardExcludedEdges: number };
+  macros: Array<{ name: string; declarationLine: number; parameterTokens: string[]; directOpcodeBindings: string[]; opcodeBindings: string[] }>;
   labels: Label[];
   preamble: Statement[];
   effectEntrypoints: Array<{ id: number; effect: string; label: string }>;
   nonExecutableCategories: Record<string, number>;
   unsupportedLineCategories: Record<string, number>;
-  controlFlow: { schema: string; note: string; edges: ControlEdge[]; callsiteContinuations: CallsiteContinuation[] };
+  controlFlow: { schema: string; note: string; edges: ControlEdge[]; callsiteContinuations: CallsiteContinuation[]; conditionalGuards: ConditionalGuard[]; conditionalGuardExclusions: unknown[] };
 };
 const topology = topologyData as { effects: Array<{ id: number; effect: string; entryScript: string }>; moves: Array<{ move: string; entryScript: string }>; opcodes: Array<{ opcode: string }> };
 
@@ -102,7 +113,7 @@ describe("Battle Script source graph extraction", () => {
 
   it("preserves exact implicit assembly successors and source-spelled transfer provenance", () => {
     expect(graph.schema).toBe("battle-script-graph/v3");
-    expect(graph.controlFlow.schema).toBe("battle-script-control-flow/v2");
+    expect(graph.controlFlow.schema).toBe("battle-script-control-flow/v3");
     expect(graph.controlFlow.note).toContain("No runtime guard");
     expect(graph.counts.controlFlowEdges).toBe(graph.controlFlow.edges.length);
     const countFieldByKind: Record<ControlEdge["kind"], keyof typeof graph.counts> = {
@@ -151,6 +162,72 @@ describe("Battle Script source graph extraction", () => {
     expect(edge("BattleScript_HitFromAtkCanceler", 242, "fallthrough")).toMatchObject({
       to: { label: "BattleScript_HitFromAccCheck", line: 244 },
     });
+  });
+
+  it("describes every mechanically unambiguous conditional macro invocation without evaluating it", () => {
+    const conditionalEdges = graph.controlFlow.edges.filter((candidate) =>
+      candidate.kind === "jump" && candidate.provenance.opcode?.startsWith("B_SCR_OP_JUMPIF"));
+    expect(graph.counts.conditionalGuardEdges).toBe(264);
+    expect(graph.counts.conditionalGuardMacros).toBe(29);
+    expect(graph.counts.conditionalGuardsWithRawComparator).toBe(87);
+    expect(graph.counts.conditionalGuardsWithRawSelector).toBe(124);
+    expect(graph.counts.conditionalGuardsWithNotTakenSuccessor).toBe(264);
+    expect(graph.counts.conditionalGuardExcludedEdges).toBe(0);
+    expect(graph.controlFlow.conditionalGuards).toHaveLength(conditionalEdges.length);
+    expect(graph.controlFlow.conditionalGuardExclusions).toEqual([]);
+
+    const statements = new Map(graph.labels.flatMap((label) => label.statements
+      .filter((statement) => statement.kind === "instruction")
+      .map((statement) => [`${label.name}:${statement.line}`, statement])));
+    const macros = new Map(graph.macros.map((macro) => [macro.name, macro]));
+    for (const guard of graph.controlFlow.conditionalGuards) {
+      const matchedEdge = conditionalEdges.find((edge) => edge.from.label === guard.from.label && edge.from.line === guard.from.line);
+      const statement = statements.get(`${guard.from.label}:${guard.from.line}`)!;
+      const macro = macros.get(guard.command.macro)!;
+      expect(matchedEdge).toBeDefined();
+      expect(guard.kind).toBe("conditional-guard");
+      expect(guard.command).toEqual({ macro: statement.mnemonic, macroDeclarationLine: macro.declarationLine, opcode: matchedEdge!.provenance.opcode });
+      expect(guard.operands).toEqual(macro.parameterTokens.map((parameterToken, index) => ({
+        parameter: parameterToken.replace(/:.*$/, ""),
+        token: statement.operandTokens[index],
+      })));
+      expect(guard.takenDestination).toMatchObject({
+        operand: { token: matchedEdge!.to!.label },
+        label: matchedEdge!.to!.label,
+        line: matchedEdge!.to!.line,
+      });
+      const fallthrough = graph.controlFlow.edges.find((edge) => edge.kind === "fallthrough" && edge.from.label === guard.from.label && edge.from.line === guard.from.line);
+      expect(guard.notTakenSuccessor).toEqual(fallthrough?.to ?? null);
+      expect(guard.comparator).toEqual(guard.operands.find((operand) => operand.parameter === "ifflag") ?? null);
+      expect(guard.selector).toEqual(guard.operands.find((operand) => operand.parameter === "battler") ?? null);
+    }
+
+    const fixedMacroGuard = graph.controlFlow.conditionalGuards.find((guard) => guard.from.label === "BattleScript_EffectHit" && guard.from.line === 237)!;
+    expect(fixedMacroGuard).toMatchObject({
+      command: { macro: "jumpifnotmove", opcode: "B_SCR_OP_JUMPIFHALFWORD" },
+      operands: [{ parameter: "move", token: "MOVE_SURF" }, { parameter: "jumpptr", token: "BattleScript_HitFromAtkCanceler" }],
+      comparator: null,
+      selector: null,
+      takenDestination: { label: "BattleScript_HitFromAtkCanceler", line: 242 },
+      notTakenSuccessor: { label: "BattleScript_EffectHit", line: 238 },
+    });
+    const rawComparatorGuard = graph.controlFlow.conditionalGuards.find((guard) => guard.from.label === "BattleScript_EffectExplosion" && guard.from.line === 382)!;
+    expect(rawComparatorGuard).toMatchObject({
+      command: { macro: "jumpifbyte", opcode: "B_SCR_OP_JUMPIFBYTE" },
+      comparator: { parameter: "ifflag", token: "CMP_NO_COMMON_BITS" },
+      selector: null,
+      takenDestination: { label: "BattleScript_ExplosionDoAnimStartLoop", line: 386 },
+      notTakenSuccessor: { label: "BattleScript_EffectExplosion", line: 383 },
+    });
+    const rawSelectorGuard = graph.controlFlow.conditionalGuards.find((guard) => guard.from.label === "BattleScript_EffectSleep" && guard.from.line === 288)!;
+    expect(rawSelectorGuard).toMatchObject({
+      command: { macro: "jumpifstatus2", opcode: "B_SCR_OP_JUMPIFSTATUS2" },
+      selector: { parameter: "battler", token: "BS_TARGET" },
+      takenDestination: { label: "BattleScript_ButItFailed", line: 2059 },
+      notTakenSuccessor: { label: "BattleScript_EffectSleep", line: 289 },
+    });
+    expect(graph.controlFlow.note).toContain("macro-internal fixed operand");
+    expect(graph.controlFlow.note).toContain("not-taken successor is only the lexical implicit fallthrough");
   });
 
   it("keeps ordinary Surf and Tackle on the EffectHit fallthrough path without claiming a branch guard", () => {
