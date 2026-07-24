@@ -72,10 +72,30 @@ Per entry:
   call unresolved or race on the shared `tools/compare/out/latest`, while long
   serialized shell batches can terminate mid-command even though their
   individual traces are healthy.
-- **Hits:** 3.
+- **Hits:** 4.
 - **Cost each:** ~1-3 min.
 - **Workaround:** run short bounded batches, retain and poll every execution
   handle, and resume from the first unverified trace after an interruption.
+
+## Scene-ON battle-lab HTTP route is unavailable
+
+- **What:** the Scene-ON service answers canonical oracle requests but returns
+  404 for the battle-lab route, so two animation workers had to discover and
+  switch to the local mGBA battle-lab probe path.
+- **Hits:** 2.
+- **Cost each:** ~2-5 min.
+- **Workaround:** use the committed local mGBA probe/comparator for Scene-ON
+  mechanicLab fixtures until the service exposes the additive route.
+
+## Summary extractor rewrites an unrelated preview asset
+
+- **What:** regenerating summary front-animation data also rewrote an
+  unrelated preview-palette artifact, which had to be identified and restored
+  before the extraction commit could remain file-disjoint.
+- **Hits:** 1.
+- **Cost each:** ~2 min.
+- **Workaround:** inspect extractor output paths with `git status`, and restore
+  unrelated generated previews before committing the intended data artifact.
 
 ## Dense multi-session mGBA probes destabilize long worker processes
 

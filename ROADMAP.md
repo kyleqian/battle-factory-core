@@ -62,7 +62,7 @@ extracted data and match the committed RAM dump exactly; a Tier-1 test pins
 gRngValue evolution over N idle frames (anchor seed `0xd2ddeec8`); `npm
 test` green.
 
-### [~] S4 — Summary screen parity (draft's SUMMARY view)
+### [x] S4 — Summary screen parity (draft's SUMMARY view)
 The summary screen as invoked from the draft menu (confirm exact mode/pages
 from `battle_factory_screen.c`), including page navigation and return to the
 draft.
@@ -97,6 +97,18 @@ the data the deferred pages need (moves/exp/items) is being extracted in
 parallel. S5 may begin. **(Supervisor, 2026-07-18, at S5 completion: the
 same recorded rationale extends this deferral behind the S5→S8 critical
 path — S6 may begin with S4's remainder still open.)**
+**Completion (2026-07-24, supervisor-verified):** the deferred routes are
+closed through generic summary state and presentation mechanisms: all four
+pages navigate with source-relative layered wipes; UP/DOWN switches rentals
+on Info and both Moves pages; the Factory's `LOCK_MOVES` Battle/Contest
+selectors open, navigate, and close without mutating move order; and the six
+named rental front-sprite programs use extracted animation types/frame data.
+Dense OFF evidence is exact for both entry species (**122/122 + 132/132**),
+MAGBY's complete animated hold (**201/201**), page transitions
+(**3/3 + 25/25 + 56/56 + 36/36 + 16/16**), Info switches
+(**54/54 + 87/87**), both selectors (**93/93 + 93/93**), and complete
+Battle/Contest Moves DOWN→UP→B switches (**80/80 + 80/80**). Tier-1 and the
+production build are green.
 
 ### [x] S5 — Complete the draft: rent 3, confirmations, exit sequence
 RENT/OTHERS flows, ball palette change on selection, the 2nd/3rd-pick
@@ -874,7 +886,7 @@ The supervisor independently reviewed the encounter-relative send-out
 printer and reverified the 39/39 new trace, 251/251 predecessor, all 1099
 Tier-1 tests, and build.
 
-### [ ] S9 — Deferred interface and breadth workstreams (non-blocking)
+### [x] S9 — Deferred interface and breadth workstreams (non-blocking)
 
 Finish the intentionally deferred S4 summary-screen interactions, then add
 bounded data/input breadth where it exercises shared mechanisms. Move-animation
@@ -886,6 +898,14 @@ be called complete.
 traces; ≥10 deterministic scenario/fuzz cases cover varied draft orders,
 menu detours, opponents, swaps, wins, and losses at the state layer; selected
 unique UI windows pass compare; `npm test`/`npm run build` are green.
+
+**Completion (2026-07-24, supervisor-verified):** S4's named routes are
+accepted by the exact targeted traces recorded above. The generic
+`roundScenarioMatrix` supplies 12 deterministic state-layer cases spanning
+varied seeds, draft order/menu detours, opponent schedules, swaps, wins,
+losses, and seventh-win completion. The final summary gate is **1351/1351**
+Tier-1 tests plus a green production build. Scene-ON move breadth remains an
+independent coverage lane and does not alter this bounded interface verdict.
 
 ### [ ] S10 — Parameterized battle laboratory + complete Level-50 singles engine
 
