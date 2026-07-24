@@ -4,6 +4,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 340 — S8 OFF seventh-win terminal continuation: **GREEN — 4424/4424 exact**
+
+- **State:** the staged seventh-win route is gaplessly exact through exchange,
+  party/status restore at +3549, save-SE wait, record menu creation at +4422,
+  and first accepted default-NO input at +4424.
+- **Did:** added the phase-relative exchange/restore continuation and reused one
+  shared record prompt/menu reducer and renderer for LOSS and round-won.
+  Tier-1 pins early-gate rejection, restore/clear, menu creation/visibility/
+  input, and immutable round rules, RNG, battle index, parties, and schedule.
+- **Next:** keep Gate 2 open only for the four audited swap-YES remainders:
+  SUMMARY return, quit flows, enemy `PKMN FOR SWAP` return, and
+  duplicate-species rejection. Use staged short OFF windows.
+- **Notes:** seventh-win **2513/2513 + 1911/1911**, LOSS **210/210 + 414/414**.
+  Tier-1 **1244/1244**, build **5.665 MB**. No absolute tick,
+  framebuffer/screenshot asset, Battles 2–7 replay, YES recording/save branch,
+  repeat challenge, or Stage 8 completion claim.
+
+---
 ## 339 — S8 OFF seventh-win roundWon through fanfare: **GREEN — 2513/2513 exact**
 
 - **State:** the staged seventh-win route is exact from its `CB2_LoadMap`
@@ -45,22 +63,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   merged Tier-1 **1235/1235**, build **5.655 MB**; ICE opening **35/35**.
   No deferred questions. No absolute clock, screenshot/framebuffer harvest,
   terminal outcome mutation, or canonical Battle-2 extension.
-
----
-## 337 — Animation dependency/composition pivot: **GREEN — 354 moves mapped**
-
-- **State:** move acceptance remains **4 exact / 8 partial / 264 unsupported**,
-  but implementation work is now source-ranked by **935** reusable components
-  and **3,190** move/component edges across all **354** Emerald moves.
-- **Did:** generated the animation-script call/dependency graph, added
-  component leverage and related-move reporting, and introduced overlapping
-  component tracks. The first track treats FIRE PUNCH as an exact punch
-  chassis for ICE/THUNDER overlays without excluding those moves from other
-  elemental tracks. Also fixed and pruned eight compare/probe/launcher
-  papercuts.
-- **Next:** animation: work the `elemental-punch` track and independently
-  accept ICE/THUNDER windows. Main: implement the later LOSS record menu or
-  seventh-win summary; do not resume Battle 2.
-- **Notes:** graph regeneration and coverage validation are byte-for-byte
-  tested. Tier-1 is **1229/1229** and build remains **5.651 MB** because the
-  graph is dev-only; no gameplay/RNG/facility behavior changed.

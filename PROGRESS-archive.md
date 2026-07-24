@@ -1,3 +1,22 @@
+## 337 — Animation dependency/composition pivot: **GREEN — 354 moves mapped**
+
+- **State:** move acceptance remains **4 exact / 8 partial / 264 unsupported**,
+  but implementation work is now source-ranked by **935** reusable components
+  and **3,190** move/component edges across all **354** Emerald moves.
+- **Did:** generated the animation-script call/dependency graph, added
+  component leverage and related-move reporting, and introduced overlapping
+  component tracks. The first track treats FIRE PUNCH as an exact punch
+  chassis for ICE/THUNDER overlays without excluding those moves from other
+  elemental tracks. Also fixed and pruned eight compare/probe/launcher
+  papercuts.
+- **Next:** animation: work the `elemental-punch` track and independently
+  accept ICE/THUNDER windows. Main: implement the later LOSS record menu or
+  seventh-win summary; do not resume Battle 2.
+- **Notes:** graph regeneration and coverage validation are byte-for-byte
+  tested. Tier-1 is **1229/1229** and build remains **5.651 MB** because the
+  graph is dev-only; no gameplay/RNG/facility behavior changed.
+
+---
 ## 336 — S8 OFF terminal LOSS opening: **GREEN — 210/210 exact**
 
 - **State:** the source-relative Factory Lobby LOSS path is exact from its

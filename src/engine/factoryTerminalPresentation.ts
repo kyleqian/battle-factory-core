@@ -3,7 +3,19 @@ import type {
   BattlePresentationCompletion,
 } from "./battlePresentation.ts";
 
-export interface FactoryTerminalLossProfile {
+export interface FactoryTerminalRecordProfile {
+  /** Source-owned save-SE wait from party/status restoration to the prompt. */
+  readonly recordPromptDelayFromRestore: number;
+  readonly recordPromptTextDelay: number;
+  readonly recordPromptInputDelay: number;
+  readonly recordScrollTicks: number;
+  readonly recordThirdLineDelay: number;
+  readonly recordMenuDrawDelay: number;
+  readonly recordMenuVisibleDelay: number;
+  readonly recordMenuInputDelay: number;
+}
+
+export interface FactoryTerminalLossProfile extends FactoryTerminalRecordProfile {
   readonly outcome: "loss";
   readonly blackFirstAge: number;
   readonly fieldFirstAge: number;
@@ -14,14 +26,6 @@ export interface FactoryTerminalLossProfile {
   readonly nextPageVisualDelay: number;
   readonly printerHandoffDelay: number;
   readonly statusClearDelayFromSecondRelease: number;
-  /** Shared AskRecordBattle message begins after the save-SE wait. */
-  readonly recordPromptFirstAge: number;
-  readonly recordPromptTextFirstAge: number;
-  readonly recordPromptInputReadyAge: number;
-  readonly recordScrollTicks: number;
-  readonly recordThirdLineDelay: number;
-  readonly recordMenuDrawDelay: number;
-  readonly recordMenuInputDelay: number;
   readonly pages: readonly [
     readonly [string, string],
     readonly [string, string],
@@ -29,7 +33,8 @@ export interface FactoryTerminalLossProfile {
   ];
 }
 
-export interface FactoryTerminalRoundWonProfile {
+export interface FactoryTerminalRoundWonProfile
+  extends FactoryTerminalRecordProfile {
   readonly outcome: "roundWon";
   readonly blackFirstAge: number;
   readonly fieldFirstAge: number;
@@ -45,9 +50,17 @@ export interface FactoryTerminalRoundWonProfile {
   readonly battlePointMutationDelay: number;
   readonly getPointsTextDelay: number;
   readonly fanfareTicks: number;
+  readonly exchangeTextDelayFromFanfareEnd: number;
+  readonly exchangeInputDelay: number;
+  readonly exchangeNextPageVisualDelay: number;
+  readonly restoreDelayFromExchangeRelease: number;
   readonly congratulations: readonly [string, string];
   readonly award: readonly [string, string, string];
   readonly getPoints: readonly [string, string];
+  readonly exchange: readonly [
+    readonly [string, string],
+    readonly [string, string],
+  ];
   readonly battlePointAward: number;
 }
 
@@ -64,12 +77,13 @@ export const FACTORY_LOSS_TERMINAL_PROFILE: FactoryTerminalLossProfile =
     nextPageVisualDelay: 2,
     printerHandoffDelay: 2,
     statusClearDelayFromSecondRelease: 50,
-    recordPromptFirstAge: 382,
-    recordPromptTextFirstAge: 383,
-    recordPromptInputReadyAge: 445,
+    recordPromptDelayFromRestore: 172,
+    recordPromptTextDelay: 1,
+    recordPromptInputDelay: 63,
     recordScrollTicks: 4,
     recordThirdLineDelay: 7,
     recordMenuDrawDelay: 23,
+    recordMenuVisibleDelay: 23,
     recordMenuInputDelay: 25,
     pages: Object.freeze([
       Object.freeze(["Thank you for participating!", ""] as const),
@@ -106,6 +120,18 @@ export const FACTORY_ROUND_WON_TERMINAL_PROFILE: FactoryTerminalRoundWonProfile 
     battlePointMutationDelay: 1,
     getPointsTextDelay: 3,
     fanfareTicks: 312,
+    exchangeTextDelayFromFanfareEnd: 8,
+    exchangeInputDelay: 51,
+    exchangeNextPageVisualDelay: 2,
+    restoreDelayFromExchangeRelease: 49,
+    recordPromptDelayFromRestore: 169,
+    recordPromptTextDelay: 1,
+    recordPromptInputDelay: 63,
+    recordScrollTicks: 4,
+    recordThirdLineDelay: 7,
+    recordMenuDrawDelay: 22,
+    recordMenuVisibleDelay: 23,
+    recordMenuInputDelay: 24,
     congratulations: Object.freeze([
       "Congratulations! You’ve won seven",
       "straight Battle Swap matches!",
@@ -118,6 +144,16 @@ export const FACTORY_ROUND_WON_TERMINAL_PROFILE: FactoryTerminalRoundWonProfile 
     getPoints: Object.freeze([
       "MEMORY obtained 3 Battle Point(s).",
       "",
+    ] as const),
+    exchange: Object.freeze([
+      Object.freeze([
+        "Let me exchange your POKéMON",
+        "for our rental POKéMON.",
+      ] as const),
+      Object.freeze([
+        "I need to save the battle data,",
+        "so please wait.",
+      ] as const),
     ] as const),
     battlePointAward: 3,
   });
@@ -150,9 +186,13 @@ export interface FactoryTerminalRoundWonPresentationState {
   readonly battlePointsBeforeAward: number;
   readonly displayedBattlePoints: number;
   readonly fanfareRemaining: number;
-  readonly partyRestored: false;
-  readonly challengeStatus: "won";
-  readonly completed: false;
+  readonly exchangeReleaseAge: number | null;
+  readonly partyRestored: boolean;
+  readonly challengeStatus: "won" | "clear";
+  readonly completed: boolean;
+  readonly recordPromptReleaseAge: number | null;
+  readonly recordMenuCursor: 0 | 1;
+  readonly recordChoice: "yes" | "no" | "cancel" | null;
 }
 
 export type FactoryTerminalPresentationState =
@@ -205,9 +245,13 @@ export function createFactoryTerminalRoundWonPresentation(
     battlePointsBeforeAward,
     displayedBattlePoints: battlePointsBeforeAward,
     fanfareRemaining: 0,
+    exchangeReleaseAge: null,
     partyRestored: false,
     challengeStatus: "won",
     completed: false,
+    recordPromptReleaseAge: null,
+    recordMenuCursor: 1,
+    recordChoice: null,
   };
 }
 
@@ -292,12 +336,118 @@ function advanceFactoryTerminalLossPresentation(
       ? Number.POSITIVE_INFINITY
       : secondPageReleaseAge + state.profile.statusClearDelayFromSecondRelease;
   const completed = age >= clearAge;
+  const record = advanceFactoryTerminalRecordPrompt(
+    { ...state, age, completed },
+    age,
+    input,
+  );
+  return {
+    ...state,
+    age,
+    firstPageReleaseAge,
+    secondPageReleaseAge,
+    partyRestored: completed,
+    challengeStatus: completed ? "clear" : "lost",
+    completed,
+    ...record,
+  };
+}
+
+export function factoryTerminalRecordMenuVisible(
+  state: FactoryTerminalPresentationState,
+): boolean {
+  return state.recordPromptReleaseAge !== null &&
+    state.age >=
+      state.recordPromptReleaseAge + state.profile.recordMenuVisibleDelay;
+}
+
+export function factoryTerminalRecordMenuDrawn(
+  state: FactoryTerminalPresentationState,
+): boolean {
+  return state.recordPromptReleaseAge !== null &&
+    state.age >=
+      state.recordPromptReleaseAge + state.profile.recordMenuDrawDelay;
+}
+
+export function factoryTerminalRecordMenuInputReady(
+  state: FactoryTerminalPresentationState,
+): boolean {
+  return state.recordPromptReleaseAge !== null &&
+    state.age >=
+      state.recordPromptReleaseAge + state.profile.recordMenuInputDelay;
+}
+
+export function factoryTerminalRoundWonBattlePointMutationAge(
+  state: FactoryTerminalRoundWonPresentationState,
+): number | null {
+  return state.awardReleaseAge === null
+    ? null
+    : state.awardReleaseAge + state.profile.battlePointMutationDelay;
+}
+
+export function factoryTerminalRestoreAge(
+  state: FactoryTerminalPresentationState,
+): number | null {
+  if (isFactoryTerminalRoundWon(state)) {
+    return state.exchangeReleaseAge === null
+      ? null
+      : state.exchangeReleaseAge +
+        state.profile.restoreDelayFromExchangeRelease;
+  }
+  return state.secondPageReleaseAge === null
+    ? null
+    : state.secondPageReleaseAge +
+      state.profile.statusClearDelayFromSecondRelease;
+}
+
+export function factoryTerminalRecordPromptFirstAge(
+  state: FactoryTerminalPresentationState,
+): number | null {
+  const restoreAge = factoryTerminalRestoreAge(state);
+  return restoreAge === null
+    ? null
+    : restoreAge + state.profile.recordPromptDelayFromRestore;
+}
+
+export function factoryTerminalRecordPromptTextFirstAge(
+  state: FactoryTerminalPresentationState,
+): number | null {
+  const firstAge = factoryTerminalRecordPromptFirstAge(state);
+  return firstAge === null
+    ? null
+    : firstAge + state.profile.recordPromptTextDelay;
+}
+
+export function factoryTerminalRecordPromptInputReady(
+  state: FactoryTerminalPresentationState,
+): boolean {
+  const firstAge = factoryTerminalRecordPromptFirstAge(state);
+  return firstAge !== null &&
+    state.age >= firstAge + state.profile.recordPromptInputDelay;
+}
+
+function advanceFactoryTerminalRecordPrompt<
+  State extends FactoryTerminalPresentationState,
+>(
+  state: State,
+  age: number,
+  input: {
+    readonly pressedA?: boolean;
+    readonly pressedB?: boolean;
+    readonly pressedUp?: boolean;
+    readonly pressedDown?: boolean;
+  },
+): Pick<
+  State,
+  "recordPromptReleaseAge" | "recordMenuCursor" | "recordChoice"
+> {
   let recordPromptReleaseAge = state.recordPromptReleaseAge;
   let recordMenuCursor = state.recordMenuCursor;
   let recordChoice = state.recordChoice;
+  const atNextAge = { ...state, age };
   if (
     recordPromptReleaseAge === null &&
-    age >= state.profile.recordPromptInputReadyAge &&
+    factoryTerminalRecordPromptInputReady(atNextAge) &&
     (input.pressedA || input.pressedB)
   ) {
     recordPromptReleaseAge = age;
@@ -313,42 +463,7 @@ function advanceFactoryTerminalLossPresentation(
       recordChoice = recordMenuCursor === 0 ? "yes" : "no";
     }
   }
-  return {
-    ...state,
-    age,
-    firstPageReleaseAge,
-    secondPageReleaseAge,
-    partyRestored: completed,
-    challengeStatus: completed ? "clear" : "lost",
-    completed,
-    recordPromptReleaseAge,
-    recordMenuCursor,
-    recordChoice,
-  };
-}
-
-export function factoryTerminalRecordMenuVisible(
-  state: FactoryTerminalLossPresentationState,
-): boolean {
-  return state.recordPromptReleaseAge !== null &&
-    state.age >=
-      state.recordPromptReleaseAge + state.profile.recordMenuDrawDelay;
-}
-
-export function factoryTerminalRecordMenuInputReady(
-  state: FactoryTerminalLossPresentationState,
-): boolean {
-  return state.recordPromptReleaseAge !== null &&
-    state.age >=
-      state.recordPromptReleaseAge + state.profile.recordMenuInputDelay;
-}
-
-export function factoryTerminalRoundWonBattlePointMutationAge(
-  state: FactoryTerminalRoundWonPresentationState,
-): number | null {
-  return state.awardReleaseAge === null
-    ? null
-    : state.awardReleaseAge + state.profile.battlePointMutationDelay;
+  return { recordPromptReleaseAge, recordMenuCursor, recordChoice };
 }
 
 export function advanceFactoryTerminalRoundWonPresentation(
@@ -356,6 +471,8 @@ export function advanceFactoryTerminalRoundWonPresentation(
   input: {
     readonly pressedA?: boolean;
     readonly pressedB?: boolean;
+    readonly pressedUp?: boolean;
+    readonly pressedDown?: boolean;
   },
 ): FactoryTerminalRoundWonPresentationState {
   const age = state.age + 1;
@@ -363,6 +480,7 @@ export function advanceFactoryTerminalRoundWonPresentation(
   let congratulationsReleaseAge = state.congratulationsReleaseAge;
   let awardScrollReleaseAge = state.awardScrollReleaseAge;
   let awardReleaseAge = state.awardReleaseAge;
+  let exchangeReleaseAge = state.exchangeReleaseAge;
 
   if (
     pressed &&
@@ -400,6 +518,29 @@ export function advanceFactoryTerminalRoundWonPresentation(
     mutationAge === null || age < mutationAge
       ? 0
       : Math.max(0, state.profile.fanfareTicks - (age - mutationAge));
+  const fanfareEndAge = mutationAge === null
+    ? null
+    : mutationAge + state.profile.fanfareTicks;
+  const exchangeTextFirstAge = fanfareEndAge === null
+    ? null
+    : fanfareEndAge + state.profile.exchangeTextDelayFromFanfareEnd;
+  if (
+    pressed &&
+    exchangeReleaseAge === null &&
+    exchangeTextFirstAge !== null &&
+    age >= exchangeTextFirstAge + state.profile.exchangeInputDelay
+  ) {
+    exchangeReleaseAge = age;
+  }
+  const restoreAge = exchangeReleaseAge === null
+    ? null
+    : exchangeReleaseAge + state.profile.restoreDelayFromExchangeRelease;
+  const completed = restoreAge !== null && age >= restoreAge;
+  const record = advanceFactoryTerminalRecordPrompt(
+    { ...state, age, exchangeReleaseAge, completed },
+    age,
+    input,
+  );
 
   return {
     ...state,
@@ -409,6 +550,11 @@ export function advanceFactoryTerminalRoundWonPresentation(
     awardReleaseAge,
     displayedBattlePoints,
     fanfareRemaining,
+    exchangeReleaseAge,
+    partyRestored: completed,
+    challengeStatus: completed ? "clear" : "won",
+    completed,
+    ...record,
   };
 }
 

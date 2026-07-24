@@ -11,6 +11,8 @@ import {
 import {
   factoryTerminalActivePage,
   factoryTerminalPageTextFirstAge,
+  factoryTerminalRecordPromptFirstAge,
+  factoryTerminalRecordPromptTextFirstAge,
   factoryTerminalRecordMenuVisible,
   factoryTerminalVisibleChars,
   isFactoryTerminalRoundWon,
@@ -320,21 +322,26 @@ function drawClippedMessageText(
 
 function drawRecordPrompt(
   fb: Uint8Array,
-  state: FactoryTerminalLossPresentationState,
+  state: FactoryTerminalPresentationState,
 ): void {
   const release = state.recordPromptReleaseAge;
+  const textFirstAge = factoryTerminalRecordPromptTextFirstAge(state);
+  const promptFirstAge = factoryTerminalRecordPromptFirstAge(state);
+  const inputReadyAge = promptFirstAge === null
+    ? null
+    : promptFirstAge + state.profile.recordPromptInputDelay;
   if (release === null || state.age === release) {
     const chars = Math.max(
       0,
       Math.min(
         RECORD_LINES[0].length + RECORD_LINES[1].length,
-        state.age - state.profile.recordPromptTextFirstAge + 1,
+        textFirstAge === null ? 0 : state.age - textFirstAge + 1,
       ),
     );
     drawPageText(fb, [RECORD_LINES[0], RECORD_LINES[1]], chars);
-    if (state.age > state.profile.recordPromptInputReadyAge) {
+    if (inputReadyAge !== null && state.age > inputReadyAge) {
       const phase = Math.floor(
-        (state.age - state.profile.recordPromptInputReadyAge - 1) / 9,
+        (state.age - inputReadyAge - 1) / 9,
       ) % 4;
       const x = MESSAGE_ORIGIN.x + measureText(font, charmap, RECORD_LINES[1]);
       const y = 137 - CURSOR_Y_OFFSETS[phase]!;
@@ -412,12 +419,68 @@ function drawRoundWonMessage(
     : awardRelease + profile.battlePointMutationDelay;
   const getPointsTextAge =
     mutationAge === null ? null : mutationAge + profile.getPointsTextDelay;
-  if (getPointsTextAge !== null && state.age >= getPointsTextAge - 1) {
+  const fanfareEndAge =
+    mutationAge === null ? null : mutationAge + profile.fanfareTicks;
+  const exchangeTextAge = fanfareEndAge === null
+    ? null
+    : fanfareEndAge + profile.exchangeTextDelayFromFanfareEnd;
+  if (
+    getPointsTextAge !== null &&
+    state.age >= getPointsTextAge - 1 &&
+    (exchangeTextAge === null || state.age < exchangeTextAge - 1)
+  ) {
     const chars = Math.max(0, Math.min(
       profile.getPoints[0].length,
       state.age - getPointsTextAge + 1,
     ));
     drawPageText(fb, profile.getPoints, chars);
+    return;
+  }
+
+  if (exchangeTextAge !== null && state.age >= exchangeTextAge - 1) {
+    const release = state.exchangeReleaseAge;
+    if (release === null) {
+      const page = profile.exchange[0];
+      const chars = Math.max(0, Math.min(
+        page[0].length + page[1].length,
+        state.age - exchangeTextAge + 1,
+      ));
+      drawPageText(fb, page, chars);
+      const cursorStart = exchangeTextAge + page[0].length + page[1].length + 1;
+      if (state.age >= cursorStart) {
+        drawDownArrow(
+          fb,
+          page[1],
+          MESSAGE_ORIGIN.y2,
+          state.age - cursorStart,
+        );
+      }
+      return;
+    }
+    const page = profile.exchange[1];
+    const textAge = release + profile.exchangeNextPageVisualDelay;
+    if (state.age < textAge) {
+      const previous = profile.exchange[0];
+      drawPageText(
+        fb,
+        previous,
+        previous[0].length + previous[1].length,
+      );
+      const cursorStart =
+        exchangeTextAge + previous[0].length + previous[1].length + 1;
+      drawDownArrow(
+        fb,
+        previous[1],
+        MESSAGE_ORIGIN.y2,
+        state.age - cursorStart,
+      );
+      return;
+    }
+    const chars = Math.max(0, Math.min(
+      page[0].length + page[1].length,
+      state.age - textAge + 1,
+    ));
+    drawPageText(fb, page, chars);
     return;
   }
 
@@ -491,10 +554,16 @@ export function renderFactoryTerminalPresentation(
   if (state.age < state.profile.messageFrameAge) return fb;
   drawMessageBoxFrame(fb);
   if (isFactoryTerminalRoundWon(state)) {
+    const recordFirstAge = factoryTerminalRecordPromptFirstAge(state);
+    if (recordFirstAge !== null && state.age >= recordFirstAge) {
+      drawRecordPrompt(fb, state);
+      return fb;
+    }
     drawRoundWonMessage(fb, state);
     return fb;
   }
-  if (state.age >= state.profile.recordPromptFirstAge) {
+  const recordFirstAge = factoryTerminalRecordPromptFirstAge(state);
+  if (recordFirstAge !== null && state.age >= recordFirstAge) {
     drawRecordPrompt(fb, state);
     return fb;
   }

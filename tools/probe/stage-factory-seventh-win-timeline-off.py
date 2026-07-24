@@ -297,7 +297,7 @@ def main() -> None:
         oracle,
         trace,
         INPUTS_TO_READY_MENU,
-        MENU_ACCEPT - 1,
+        MENU_ACCEPT,
         capture_rgb=True,
     )
     rejected_stage, rejected_rows = run_case(oracle, trace, {**INPUTS_TO_READY_MENU, MENU_DRAW: ["A"]}, MENU_DRAW + 1)

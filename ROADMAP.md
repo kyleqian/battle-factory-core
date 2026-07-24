@@ -565,16 +565,18 @@ map/NPC/message/down-arrow renderer and a committed dense OFF comparison at
 player name `MEMORY`, the Level-50 award of 3 BP, control bytes, and default
 NO record choice. The later LOSS record question/menu is now exact across
 every +211..+624 frame (**414/414**), including the shared `\l` fast-scroll,
-default-NO draw at +622, and first sampled input at +624. The complete
-seventh-win/round-summary ending still needs its dense OFF-profile UI proof.
-The generic seventh-win `roundWon` seam is now live and densely exact from its
+default-NO draw at +622, and first sampled input at +624. The generic
+seventh-win `roundWon` seam is now live and densely exact from its
 staged `CB2_LoadMap` handoff through congratulations, the source-relative
 award gates, 0→3 BP mutation at +2201, and the complete 312-frame
 `MSGBOX_GETPOINTS` fanfare wait through +2513 (**2513/2513**). It preserves
 the immutable round controller, RNG, battle index, parties, and opponent
-inputs. Gate 2 remains open for the explicitly bounded +2514 continuation:
-exchange/restore through +3549 and the shared record-question/menu path
-through +4424. The source-to-trace audit also identifies four unique swap-YES
+inputs. A gapless second staged OFF fixture proves every +2514..+4424 frame
+(**1911/1911**): exchange text, party/status restore and challenge clear at
++3549, save-SE wait, shared record-menu creation at +4422, and first accepted
+default-NO input at +4424. LOSS and round-won use the same generic record
+question/menu reducer and renderer with source-relative clocks. Gate 2
+remains open because the source-to-trace audit identifies four unique swap-YES
 remainders outside the accepted ONIX→GROVYLE route: SUMMARY return, quit
 prompt/exit/returns, enemy `PKMN FOR SWAP` return, and duplicate-species
 rejection. These require short staged OFF windows, not further Battle-2 turns.

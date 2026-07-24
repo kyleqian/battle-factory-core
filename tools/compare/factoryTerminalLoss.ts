@@ -35,34 +35,37 @@ const trace: Trace = {
 };
 
 const scratch = mkdtempSync(join(tmpdir(), "pokebench-factory-loss-compare-"));
-const rgbDir = join(scratch, "rgb");
-mkdirSync(rgbDir);
+const suppliedRgbDir = process.env.FACTORY_TERMINAL_COMPARE_RGB_DIR;
+const rgbDir = suppliedRgbDir ? resolve(suppliedRgbDir) : join(scratch, "rgb");
+if (!suppliedRgbDir) mkdirSync(rgbDir);
 const probeOutput = join(scratch, "probe.json");
 const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));
-const run = spawnSync(
-  "python3",
-  [
-    join(root, "tools/run-mgba-probe.py"),
-    probeOutput,
-    "--",
-    join(vendor, "mgba-venv/bin/python"),
-    resolve(root, fixture.probe),
-    probeOutput,
-  ],
-  {
-    cwd: root,
-    encoding: "utf8",
-    env: {
-      ...process.env,
-      [fixture.rgbEnvironment ?? "FACTORY_LOSS_RGB_DIR"]: rgbDir,
-      FACTORY_SEVENTH_WIN_RGB_START: String(fixture.relativeWindow.start),
-      FACTORY_SEVENTH_WIN_RGB_END: String(fixture.relativeWindow.end),
+if (!suppliedRgbDir) {
+  const run = spawnSync(
+    "python3",
+    [
+      join(root, "tools/run-mgba-probe.py"),
+      probeOutput,
+      "--",
+      join(vendor, "mgba-venv/bin/python"),
+      resolve(root, fixture.probe),
+      probeOutput,
+    ],
+    {
+      cwd: root,
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        [fixture.rgbEnvironment ?? "FACTORY_LOSS_RGB_DIR"]: rgbDir,
+        FACTORY_SEVENTH_WIN_RGB_START: String(fixture.relativeWindow.start),
+        FACTORY_SEVENTH_WIN_RGB_END: String(fixture.relativeWindow.end),
+      },
     },
-  },
-);
-if (run.stdout) process.stdout.write(run.stdout);
-if (run.stderr) process.stderr.write(run.stderr);
-if (run.status !== 0) process.exit(run.status ?? 1);
+  );
+  if (run.stdout) process.stdout.write(run.stdout);
+  if (run.stderr) process.stderr.write(run.stderr);
+  if (run.status !== 0) process.exit(run.status ?? 1);
+}
 
 const app = await renderAppTrace(trace);
 let matching = 0;
@@ -113,9 +116,20 @@ console.log(
   `${matching}/${total} frames matched; ${aggregateDiff} aggregate differing pixels`,
 );
 if (mismatches.length > 0) {
+  const spans: Array<{ start: number; end: number }> = [];
+  for (const { relative } of mismatches) {
+    const last = spans.at(-1);
+    if (last && relative === last.end + 1) last.end = relative;
+    else spans.push({ start: relative, end: relative });
+  }
   console.log(
     `first mismatches: ${mismatches.slice(0, 24).map(({ relative, pixels }) =>
       `+${relative}:${pixels}`
+    ).join(", ")}`,
+  );
+  console.log(
+    `mismatch spans: ${spans.map(({ start, end }) =>
+      start === end ? `+${start}` : `+${start}..+${end}`
     ).join(", ")}`,
   );
   console.log(`first diagnostic PNGs: ${scratch}`);

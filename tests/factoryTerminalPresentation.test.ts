@@ -20,6 +20,8 @@ import {
   FACTORY_LOSS_TERMINAL_PROFILE,
   FACTORY_ROUND_WON_TERMINAL_PROFILE,
   factoryTerminalCompletion,
+  factoryTerminalRecordMenuDrawn,
+  factoryTerminalRecordPromptFirstAge,
   factoryTerminalRecordMenuInputReady,
   factoryTerminalRecordMenuVisible,
   factoryTerminalVisibleChars,
@@ -288,6 +290,7 @@ describe("Factory Scene-OFF roundWon terminal adapter", () => {
     expect(Object.isFrozen(terminal.profile)).toBe(true);
     expect(Object.isFrozen(terminal.profile.congratulations)).toBe(true);
     expect(Object.isFrozen(terminal.profile.award)).toBe(true);
+    expect(Object.isFrozen(terminal.profile.exchange)).toBe(true);
   });
 
   it("stores all three source input gates and rejects every early edge", () => {
@@ -354,6 +357,57 @@ describe("Factory Scene-OFF roundWon terminal adapter", () => {
     expect(factoryTerminalCompletion(terminal)).toBeNull();
   });
 
+  it("uses source-relative exchange/restore gates and the shared default-NO record menu through +4424", () => {
+    const command = roundWonController().presentation!.command;
+    if (command.type !== "roundCompleted") {
+      throw new Error("expected roundCompleted");
+    }
+    let terminal = createFactoryTerminalRoundWonPresentation(command);
+    for (let age = 1; age <= 4424; age += 1) {
+      terminal = advanceFactoryTerminalPresentation(terminal, {
+        pressedA: age === 300 || age === 1100 || age === 2200 ||
+          age === 2571 || age === 3500 || age === 3780 ||
+          age === 4400 || age === 4422 || age === 4423 || age === 4424,
+      });
+      if (age === 2571) expect(terminal.exchangeReleaseAge).toBeNull();
+      if (age === 3500) expect(terminal.exchangeReleaseAge).toBe(3500);
+      if (age === 3548) {
+        expect(terminal).toMatchObject({
+          partyRestored: false,
+          challengeStatus: "won",
+          completed: false,
+        });
+      }
+      if (age === 3549) {
+        expect(terminal).toMatchObject({
+          partyRestored: true,
+          challengeStatus: "clear",
+          completed: true,
+        });
+        expect(factoryTerminalCompletion(terminal)).toEqual({
+          commandId: command.commandId,
+        });
+        expect(factoryTerminalRecordPromptFirstAge(terminal)).toBe(3718);
+      }
+      if (age === 3780) expect(terminal.recordPromptReleaseAge).toBeNull();
+      if (age === 4400) expect(terminal.recordPromptReleaseAge).toBe(4400);
+      if (age === 4421) expect(factoryTerminalRecordMenuVisible(terminal)).toBe(false);
+      if (age === 4422) {
+        expect(factoryTerminalRecordMenuDrawn(terminal)).toBe(true);
+        expect(factoryTerminalRecordMenuVisible(terminal)).toBe(false);
+        expect(factoryTerminalRecordMenuInputReady(terminal)).toBe(false);
+        expect(terminal.recordChoice).toBeNull();
+      }
+      if (age === 4423) {
+        expect(factoryTerminalRecordMenuVisible(terminal)).toBe(true);
+        expect(terminal.recordChoice).toBeNull();
+      }
+    }
+    expect(factoryTerminalRecordMenuInputReady(terminal)).toBe(true);
+    expect(terminal.recordMenuCursor).toBe(1);
+    expect(terminal.recordChoice).toBe("no");
+  });
+
   it("auto-connects the live command and never mutates controller rules, RNG, battle index, or fixture inputs", () => {
     const controller = roundWonController();
     const rules = controller.rules;
@@ -385,5 +439,47 @@ describe("Factory Scene-OFF roundWon terminal adapter", () => {
     expect(engine.roundController!.opponentSchedule).toBe(schedule);
     expect(engine.roundController!.opponentSelection).toBe(selection);
     expect(engine.roundController!.presentation!.completed).toBe(false);
+  });
+
+  it("restores/clears at +3549 and reaches the shared +4422/+4424 menu without mutating round rules or schedule", () => {
+    const controller = roundWonController();
+    const rules = controller.rules;
+    const playerParty = rules.playerParty;
+    const currentOpponent = rules.currentOpponent;
+    const schedule = controller.opponentSchedule;
+    const selection = controller.opponentSelection;
+    let engine: EngineState = {
+      ...createInitialState(),
+      roundController: controller,
+      factoryTerminal: null,
+      rngMode: "vblank",
+    };
+    for (let age = 1; age <= 4424; age += 1) {
+      const pressed = age === 300 || age === 1100 || age === 2200 ||
+        age === 3500 || age === 4400 || age === 4422 || age === 4424;
+      engine = tick(engine, new Set(pressed ? ["A"] : []));
+      if (age === 3549) {
+        expect(engine.factoryTerminal).toMatchObject({
+          partyRestored: true,
+          challengeStatus: "clear",
+          completed: true,
+        });
+      }
+    }
+    expect(engine.factoryTerminal).toMatchObject({
+      age: 4424,
+      recordPromptReleaseAge: 4400,
+      recordMenuCursor: 1,
+      recordChoice: "no",
+    });
+    expect(engine.roundController!.rules).toBe(rules);
+    expect(engine.roundController!.rules.playerParty).toBe(playerParty);
+    expect(engine.roundController!.rules.currentOpponent).toBe(currentOpponent);
+    expect(engine.roundController!.rules.phase).toBe("roundComplete");
+    expect(engine.roundController!.rules.battleIndex).toBe(6);
+    expect(engine.roundController!.rules.rngValue).toBe(0x89abcdef);
+    expect(engine.roundController!.opponentSchedule).toBe(schedule);
+    expect(engine.roundController!.opponentSelection).toBe(selection);
+    expect(engine.roundController!.presentation!.completed).toBe(true);
   });
 });

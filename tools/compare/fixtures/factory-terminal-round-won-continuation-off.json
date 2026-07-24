@@ -1,0 +1,28 @@
+{
+  "schema": "factory-terminal-round-won-compare/v1",
+  "oracleProfile": "battle-scene-off",
+  "probe": "tools/probe/stage-factory-seventh-win-timeline-off.py",
+  "sourceTrace": "../traces-groundtruth/battle1-postwin-dense.json",
+  "rgbEnvironment": "FACTORY_SEVENTH_WIN_RGB_DIR",
+  "stage": {
+    "id": "factory-terminal-round-won-cb2-load-map",
+    "frame": 29601
+  },
+  "relativeWindow": {
+    "start": 2514,
+    "end": 4424
+  },
+  "segments": [
+    { "frames": 299 },
+    { "frames": 1, "buttons": ["A"] },
+    { "frames": 799 },
+    { "frames": 1, "buttons": ["A"] },
+    { "frames": 1099 },
+    { "frames": 1, "buttons": ["A"] },
+    { "frames": 1299 },
+    { "frames": 1, "buttons": ["A"] },
+    { "frames": 899 },
+    { "frames": 1, "buttons": ["A"] },
+    { "frames": 24 }
+  ]
+}
