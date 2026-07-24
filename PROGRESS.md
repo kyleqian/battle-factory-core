@@ -14,8 +14,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Next:** align the bounded duplicate OpenMonPic/message/close composition
   using task/window evidence; do not alter identity or RNG ownership.
 - **Notes:** improved **2,014 px**; +2 exact, +0 **243 px**, peak +27
-  **4,982 px**, +51 **2,001 px**. Tier-1/build green; no framebuffer assets,
-  RGB fitting, absolute ticks, runtime oracle/ROM, or logic mutation.
+  **4,982 px**, +51 **2,001 px**. Integrated Tier-1 **1267/1267**, build
+  **5.677 MB**; ICE PUNCH **363/363**, FIRE PUNCH **225/225**. No framebuffer
+  assets, RGB fitting, absolute ticks, runtime oracle/ROM, or logic mutation.
 
 ---
 ## 345 — S8 OFF duplicate-species rejection: **GREEN LOGIC CHECKPOINT**
