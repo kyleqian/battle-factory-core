@@ -38,6 +38,7 @@ function battler(
     furyCutterCounter: changes.furyCutterCounter ?? 0,
     truantCounter: changes.truantCounter ?? 0,
     rechargeTimer: changes.rechargeTimer ?? 0,
+    flinchImmobility: changes.flinchImmobility ?? 0,
   });
 }
 
@@ -119,6 +120,7 @@ describe("source-shaped attack-canceler asleep phase", () => {
       CANCELER_TRUANT: 3,
       CANCELER_RECHARGE: 4,
       CANCELER_FLINCH: 5,
+      CANCELER_DISABLED: 6,
     });
   });
 

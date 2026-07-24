@@ -51,6 +51,7 @@ function battler(
   furyCutterCounter = 0,
   truantCounter: 0 | 1 = 0,
   rechargeTimer = 0,
+  flinchImmobility: 0 | 1 = 0,
 ) {
   return Object.freeze({
     ability: 0,
@@ -64,6 +65,7 @@ function battler(
     furyCutterCounter,
     truantCounter,
     rechargeTimer,
+    flinchImmobility,
   });
 }
 

@@ -133,7 +133,8 @@ export type BattleScriptAttackCancelerScriptEffect =
       | "BattleScript_MoveUsedIsFrozen"
       | "BattleScript_MoveUsedUnfroze"
       | "BattleScript_MoveUsedLoafingAround"
-      | "BattleScript_MoveUsedMustRecharge";
+      | "BattleScript_MoveUsedMustRecharge"
+      | "BattleScript_MoveUsedFlinched";
   }>;
 
 export type BattleScriptAttackCancelerCursorEffect =
@@ -414,6 +415,49 @@ export type BattleScriptAttackCancelerRechargeDecision =
     rulesContext: BattleScriptRulesContext;
     receipt: Readonly<{
       sourcePhase: "CANCELER_RECHARGE";
+      tracker: Readonly<{ before: number; after: number }>;
+    }>;
+  }>;
+
+export type BattleScriptAttackCancelerFlinchReason =
+  | "not-flinched"
+  | "flinched";
+
+export type BattleScriptAttackCancelerFlinchReceipt = Readonly<{
+  sourcePhase: "CANCELER_FLINCH";
+  attacker: BattleScriptBattlerId;
+  reason: BattleScriptAttackCancelerFlinchReason;
+  status2: BattleScriptBitFieldEffect;
+  flinchImmobility: Readonly<{ before: 0 | 1; after: 0 | 1 }>;
+  cancelMultiTurnMoves:
+    | Readonly<{ kind: "not-invoked" }>
+    | Readonly<{
+      kind: "invoked";
+      receipt: BattleScriptCancelMultiTurnMovesReceipt;
+    }>;
+  hitMarker: BattleScriptBitFieldEffect;
+  effect: 0 | 1;
+  script: BattleScriptAttackCancelerScriptEffect;
+  tracker: Readonly<{
+    before: number;
+    after: number;
+    sourcePhaseBefore: "CANCELER_FLINCH";
+    sourcePhaseAfter: "CANCELER_DISABLED";
+  }>;
+}>;
+
+export type BattleScriptAttackCancelerFlinchDecision =
+  | Readonly<{
+    kind: "advance";
+    reason: BattleScriptAttackCancelerFlinchReason;
+    rulesContext: BattleScriptRulesContext;
+    receipt: BattleScriptAttackCancelerFlinchReceipt;
+  }>
+  | Readonly<{
+    kind: "not-at-source-phase";
+    rulesContext: BattleScriptRulesContext;
+    receipt: Readonly<{
+      sourcePhase: "CANCELER_FLINCH";
       tracker: Readonly<{ before: number; after: number }>;
     }>;
   }>;
@@ -1280,6 +1324,132 @@ export function advanceBattleScriptAttackCancelerRecharge(
         after: trackerAfter,
         sourcePhaseBefore: "CANCELER_RECHARGE",
         sourcePhaseAfter: "CANCELER_FLINCH",
+      }),
+    }),
+  });
+}
+
+/**
+ * The source-shaped CANCELER_FLINCH phase of AtkCanceler_UnableToUseMove.
+ *
+ * The taken branch clears only STATUS2_FLINCHED and sets the one-bit
+ * ProtectStruct flag before invoking CancelMultiTurnMoves. This advances
+ * exactly once to CANCELER_DISABLED and does not implement that phase, loop,
+ * select a message, or execute opcode 0.
+ */
+export function advanceBattleScriptAttackCancelerFlinch(
+  rulesContext: BattleScriptRulesContext,
+  sourceProgramCounter: number,
+): BattleScriptAttackCancelerFlinchDecision {
+  const sourcePc = requireSourceProgramCounter(sourceProgramCounter);
+  const trackerBefore = rulesContext.atkCancelerTracker;
+  if (
+    trackerBefore
+    !== BATTLE_SCRIPT_ATTACK_CANCELER_PHASES.CANCELER_FLINCH
+  ) {
+    return Object.freeze({
+      kind: "not-at-source-phase",
+      rulesContext,
+      receipt: Object.freeze({
+        sourcePhase: "CANCELER_FLINCH",
+        tracker: Object.freeze({
+          before: trackerBefore,
+          after: trackerBefore,
+        }),
+      }),
+    });
+  }
+
+  const attacker = rulesContext.selectorRoles.attacker;
+  if (attacker === null) {
+    throw new Error(
+      "Battle Script attack canceler flinch phase requires an attacker role",
+    );
+  }
+  const sourceBattler = rulesContext.battlers[attacker];
+  const isFlinched = (
+    sourceBattler.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_FLINCHED
+  ) !== 0;
+  const nextStatus2 = isFlinched
+    ? (
+      sourceBattler.status2
+      & ~BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_FLINCHED
+    ) >>> 0
+    : sourceBattler.status2;
+  let nextRulesContext = rulesContext;
+  let helperResult: ReturnType<typeof cancelBattleScriptMultiTurnMoves> | null =
+    null;
+  let nextHitMarker = rulesContext.hitMarker;
+  let effect: 0 | 1 = 0;
+  let script: BattleScriptAttackCancelerScriptEffect = Object.freeze({
+    kind: "preserve",
+    sourceProgramCounter: sourcePc,
+  });
+
+  if (isFlinched) {
+    const clearedBattler = Object.freeze({
+      ...sourceBattler,
+      status2: nextStatus2,
+      flinchImmobility: 1 as const,
+    });
+    const clearedBattlers = Object.freeze(
+      rulesContext.battlers.map((candidate, index) => (
+        index === attacker ? clearedBattler : candidate
+      )),
+    ) as unknown as BattleScriptRulesContext["battlers"];
+    const clearedRulesContext = Object.freeze({
+      ...rulesContext,
+      battlers: clearedBattlers,
+    });
+    helperResult = cancelBattleScriptMultiTurnMoves(
+      clearedRulesContext,
+      attacker,
+    );
+    nextRulesContext = helperResult.rulesContext;
+    nextHitMarker = (
+      rulesContext.hitMarker | BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE
+    ) >>> 0;
+    effect = 1;
+    script = Object.freeze({
+      kind: "handoff",
+      sourceProgramCounter: sourcePc,
+      targetLabel: "BattleScript_MoveUsedFlinched",
+    });
+  }
+
+  const trackerAfter = BATTLE_SCRIPT_ATTACK_CANCELER_PHASES.CANCELER_DISABLED;
+  nextRulesContext = Object.freeze({
+    ...nextRulesContext,
+    atkCancelerTracker: trackerAfter,
+    hitMarker: nextHitMarker,
+  });
+  return Object.freeze({
+    kind: "advance",
+    reason: isFlinched ? "flinched" : "not-flinched",
+    rulesContext: nextRulesContext,
+    receipt: Object.freeze({
+      sourcePhase: "CANCELER_FLINCH",
+      attacker,
+      reason: isFlinched ? "flinched" : "not-flinched",
+      status2: bitFieldEffect(sourceBattler.status2, nextStatus2),
+      flinchImmobility: Object.freeze({
+        before: sourceBattler.flinchImmobility,
+        after: isFlinched ? 1 : sourceBattler.flinchImmobility,
+      }),
+      cancelMultiTurnMoves: helperResult === null
+        ? Object.freeze({ kind: "not-invoked" })
+        : Object.freeze({
+          kind: "invoked",
+          receipt: helperResult.receipt,
+        }),
+      hitMarker: bitFieldEffect(rulesContext.hitMarker, nextHitMarker),
+      effect,
+      script,
+      tracker: Object.freeze({
+        before: trackerBefore,
+        after: trackerAfter,
+        sourcePhaseBefore: "CANCELER_FLINCH",
+        sourcePhaseAfter: "CANCELER_DISABLED",
       }),
     }),
   });

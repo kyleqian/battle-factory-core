@@ -29,6 +29,7 @@ function battler(
     furyCutterCounter: changes.furyCutterCounter ?? 0,
     truantCounter: changes.truantCounter ?? 0,
     rechargeTimer: changes.rechargeTimer ?? 0,
+    flinchImmobility: changes.flinchImmobility ?? 0,
   });
 }
 

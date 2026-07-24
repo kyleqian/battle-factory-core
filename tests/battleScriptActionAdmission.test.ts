@@ -39,6 +39,7 @@ function battler(
     furyCutterCounter: changes.furyCutterCounter ?? 0,
     truantCounter: changes.truantCounter ?? 0,
     rechargeTimer: changes.rechargeTimer ?? 0,
+    flinchImmobility: changes.flinchImmobility ?? 0,
   });
 }
 
@@ -76,6 +77,7 @@ describe("source-shaped attack-canceler flags phase", () => {
       CANCELER_TRUANT: 3,
       CANCELER_RECHARGE: 4,
       CANCELER_FLINCH: 5,
+      CANCELER_DISABLED: 6,
     });
     expect(BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_DESTINY_BOND).toBe(1 << 25);
     expect(BATTLE_SCRIPT_STATUS3_GRUDGE).toBe(1 << 14);
