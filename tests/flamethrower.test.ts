@@ -13,6 +13,8 @@ describe("source-relative Flamethrower presentation", () => {
     targetCenter: { x: 176, y: 51 },
     attackerSide: "player" as const,
     flameSubpriority: 27,
+    flameSpriteSlots: [3, 4, 5, 7, 9, 10, 11, 12],
+    spriteOrderSeed: [3, 10, 9, 7, 5, 4, 12, 11],
   };
 
   it("runs 22 four-tick-staggered 29-state sine-wave projectiles", () => {
@@ -26,6 +28,7 @@ describe("source-relative Flamethrower presentation", () => {
         centerY: 97,
         sheetFrame: 1,
         subpriority: 27,
+        slot: 3,
       },
     ]);
     expect(flamethrowerFlamesAtAge(4, playerGeometry)).toHaveLength(2);
@@ -38,6 +41,8 @@ describe("source-relative Flamethrower presentation", () => {
       targetCenter: { x: 72, y: 97 },
       attackerSide: "opponent",
       flameSubpriority: 37,
+      flameSpriteSlots: [3, 4, 5, 7, 9, 10, 11, 12],
+      spriteOrderSeed: [3, 4, 5, 12, 11, 10, 9, 7],
     })).toEqual([
       {
         spawnIndex: 0,
@@ -46,8 +51,30 @@ describe("source-relative Flamethrower presentation", () => {
         centerY: 57,
         sheetFrame: 1,
         subpriority: 37,
+        slot: 3,
       },
     ]);
+  });
+
+  it("matches probed persistent slot order through ties and destroyed-slot reuse", () => {
+    expect(
+      flamethrowerFlamesAtAge(46, playerGeometry).map((flame) => flame.slot),
+    ).toEqual([10, 11, 12, 3, 4, 5, 7]);
+    expect(
+      flamethrowerFlamesAtAge(73, playerGeometry).map((flame) => flame.slot),
+    ).toEqual([9, 10, 11, 12, 3, 4, 5]);
+
+    const opponentGeometry = {
+      attackerCenter: { x: 176, y: 42 },
+      targetCenter: { x: 72, y: 97 },
+      attackerSide: "opponent" as const,
+      flameSubpriority: 37,
+      flameSpriteSlots: [3, 4, 5, 7, 9, 10, 11, 12],
+      spriteOrderSeed: [3, 4, 5, 12, 11, 10, 9, 7],
+    };
+    expect(
+      flamethrowerFlamesAtAge(28, opponentGeometry).map((flame) => flame.slot),
+    ).toEqual([12, 11, 10, 9, 5, 7, 4, 3]);
   });
 
   it("keeps RAM task state distinct from its OAM display epoch", () => {

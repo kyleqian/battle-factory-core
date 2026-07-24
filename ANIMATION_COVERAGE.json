@@ -27,10 +27,9 @@
     },
     {
       "move": "MOVE_FLAMETHROWER",
-      "status": "partial",
-      "covered": ["legal zero-PP-Up Level-50 mechanicLab ONIX to MURKROW complete move-owned body in both orientations at source-relative ages -11..114: all 22 four-display-cadence gFlamethrowerFlameSpriteTemplate spawns, 29-state fixed-point translations, shared sine-timer phases, three-frame sheet loop, attacker/target AnimTask_ShakeMon programs, setalpha, monbg acquisition, and blendoff/clearmonbg teardown match RAM/OAM components 126/126 in each orientation", "shared live Scene-ON compositor matches 115/126 player-back to opponent-front framebuffers and 117/126 opponent-front to player-back framebuffers; all 20 residual frames contain only 1-25 pixels of overlapping same-priority flame disagreement"],
-      "remaining": ["derive the persistent sSpriteOrder slot permutation for overlapping equal-priority flame OBJs; the source sorter retains scene-history tie order that is not expressible by the current center-y/spawn-index stateless ordering"],
-      "evidence": ["tools/battle-lab/mechanic-flamethrower-player-onix-opponent-murkrow.json", "tools/battle-lab/mechanic-flamethrower-opponent-onix-player-murkrow.json", "tools/compare/fixtures/flamethrower-player-onix-opponent-murkrow.json", "tools/compare/fixtures/flamethrower-opponent-onix-player-murkrow.json", "tools/compare/flamethrowerPortable.ts", "src/engine/flamethrower.ts", "tools/probe/run-battle-lab-rgb.py", "tests/flamethrower.test.ts"]
+      "status": "exact",
+      "covered": ["legal zero-PP-Up Level-50 mechanicLab ONIX to MURKROW complete move-owned body in both orientations at source-relative ages -11..114: all 22 four-display-cadence gFlamethrowerFlameSpriteTemplate spawns, 29-state fixed-point translations, shared sine-timer phases, three-frame sheet loop, attacker/target AnimTask_ShakeMon programs, setalpha, monbg acquisition, and blendoff/clearmonbg teardown", "source-faithful reduced scene scheduler models lowest-free CreateSprite allocation, DestroySprite dummy reset, slot reuse, wrapped-y persistent stable sSpriteOrder insertion passes, and inherited equal-key tie order from one pre-allocation seed per orientation; RAM/OAM/order components match 126/126 in each orientation", "shared live Scene-ON compositor matches complete dense framebuffers 126/126 player-back ONIX to opponent-front MURKROW and 126/126 opponent-front ONIX to player-back MURKROW; generic hit, HP/result/status, and controller tails remain separately owned"],
+      "evidence": ["tools/battle-lab/mechanic-flamethrower-player-onix-opponent-murkrow.json", "tools/battle-lab/mechanic-flamethrower-opponent-onix-player-murkrow.json", "tools/compare/fixtures/flamethrower-player-onix-opponent-murkrow.json", "tools/compare/fixtures/flamethrower-opponent-onix-player-murkrow.json", "tools/compare/flamethrowerPortable.ts", "src/engine/flamethrower.ts", "src/engine/spriteOrder.ts", "tools/probe/run-battle-lab-rgb.py", "tests/flamethrower.test.ts", "tests/spriteOrder.test.ts"]
     },
     {
       "move": "MOVE_FEATHER_DANCE",
@@ -185,7 +184,7 @@
         "MOVE_EMBER",
         "MOVE_FIRE_SPIN"
       ],
-      "goal": "DRAGON BREATH proves its eleven-spawn gDragonBreathFireSpriteTemplate component and priority-correct canonical scene at 61/61. Source batch audit finds the named fire neighbors share the extracted small-ember sheet and selected generic tasks only: FLAMETHROWER, BLAZE KICK, FIRE BLAST, EMBER, and FIRE SPIN use distinct sprite templates; DRAGON RAGE reuses the translation callback family but has a distinct template, affine program, duration, and geometry. All siblings remain unsupported without independent dense move evidence."
+      "goal": "DRAGON BREATH proves its eleven-spawn gDragonBreathFireSpriteTemplate component and priority-correct canonical scene at 61/61. FLAMETHROWER independently proves its distinct 22-spawn sine beam and persistent sprite-order lifetime in both orientations at 126/126 complete dense frames each. Source batch audit finds BLAZE KICK, FIRE BLAST, EMBER, and FIRE SPIN use distinct sprite templates; DRAGON RAGE reuses the translation callback family but has a distinct template, affine program, duration, and geometry. Those siblings remain unsupported without independent dense move evidence."
     },
     {
       "id": "two-turn-semi-invulnerable",

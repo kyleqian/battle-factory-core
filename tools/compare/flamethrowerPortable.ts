@@ -29,6 +29,7 @@ interface Fixture {
 }
 
 interface ProbeSprite {
+  readonly slot: number;
   readonly x: number;
   readonly y: number;
   readonly x2: number;
@@ -48,6 +49,7 @@ interface ProbeFrame {
   readonly flamethrowerFlameSprites: readonly ProbeSprite[];
   readonly playerSprite: ProbeBattlerSprite;
   readonly opponentSprite: ProbeBattlerSprite;
+  readonly spriteOrder: readonly number[];
 }
 
 interface ProbeBattlerSprite {
@@ -131,12 +133,17 @@ for (
     fixture.appStage.firstFramePresentationAge
     + frame - fixture.denseWindow.startFrame;
   const app = sceneOnFlamethrowerView({ ...stage, age }).flames
-    .map(({ spawnIndex: _spawnIndex, age: _age, ...sprite }) =>
+    .map(({ spawnIndex: _spawnIndex, age: _age, slot: _slot, ...sprite }) =>
       JSON.stringify(sprite)
     )
     .sort();
   const oracle = normalizedOracle(record.flamethrowerFlameSprites);
   const view = sceneOnFlamethrowerView({ ...stage, age });
+  const oracleSlotsBackToFront = record.spriteOrder
+    .filter((slot) =>
+      record.flamethrowerFlameSprites.some((sprite) => sprite.slot === slot)
+    )
+    .reverse();
   const attacker =
     fixture.attacker.geometry.side === "player"
       ? record.playerSprite
@@ -148,7 +155,9 @@ for (
   const componentMatches =
     attacker.y2 === view.battlerEffect.attackerY2
     && target.x2 === view.battlerEffect.targetX2
-    && target.invisible === view.battlerEffect.targetOnMonBg;
+    && target.invisible === view.battlerEffect.targetOnMonBg
+    && JSON.stringify(view.flames.map((flame) => flame.slot))
+      === JSON.stringify(oracleSlotsBackToFront);
   if (
     JSON.stringify(app) === JSON.stringify(oracle)
     && componentMatches
@@ -158,7 +167,9 @@ for (
       `${frame}: oracle=${oracle.join("|")} app=${app.join("|")} `
       + `attackerY2=${attacker.y2}/${view.battlerEffect.attackerY2} `
       + `target=${target.x2}/${target.invisible} `
-      + `expected=${view.battlerEffect.targetX2}/${view.battlerEffect.targetOnMonBg}`,
+      + `expected=${view.battlerEffect.targetX2}/${view.battlerEffect.targetOnMonBg} `
+      + `order=${oracleSlotsBackToFront.join(",")}/`
+      + `${view.flames.map((flame) => flame.slot).join(",")}`,
     );
   }
   const oracleRgb = readFileSync(
