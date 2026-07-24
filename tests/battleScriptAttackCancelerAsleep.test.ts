@@ -131,6 +131,7 @@ describe("source-shaped attack-canceler asleep phase", () => {
       CANCELER_DISABLED: 6,
       CANCELER_TAUNTED: 7,
       CANCELER_IMPRISONED: 8,
+      CANCELER_CONFUSED: 9,
     });
   });
 
