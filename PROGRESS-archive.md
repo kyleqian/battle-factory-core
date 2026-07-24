@@ -1,3 +1,20 @@
+## 367 — Gate-3 immutable scheduler state + wait commands
+
+- **State:** S10 Gate 3 remains open with ten source-safe opcodes and an
+  unwired immutable scheduler/controller/source-context seam.
+- **Did:** modeled logical `MSG_DISPLAY` and shared `gPauseCounterBattle`
+  state, plus budget-consuming same-PC scheduler progress distinct from
+  identity-preserving external block. Added source-exact `WAITMESSAGE` and
+  `PAUSE` with injected u16 operand resolution; `PRINTSTRING` now owns the
+  display-active lifecycle while rules, RNG, and presentation stay isolated.
+- **Next:** add another bounded source-mapped semantic family only when its
+  complete battle context is explicit; do not wire production controllers or
+  renderers and do not add message pixels/substitution here.
+- **Notes:** exact supported IDs are
+  **16/18/40/57/58/60/61/62/65/131**; committed IR remains **3306**.
+  Tier-1 **109 files / 1455 tests** and build green; no new oracle/pixel claim.
+
+---
 ## 366 — Gate-3 scheduler yield + first source command family
 
 - **State:** S10 Gate 3 remains open with eight source-safe opcodes and an

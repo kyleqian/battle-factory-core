@@ -4,6 +4,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 370 — Gate-3 conditional multi-hit decrement integrated
+
+- **State:** S10 Gate 3 remains open with **12** source-safe opcodes and an
+  unwired immutable control/scheduler/rules/source-context seam.
+- **Did:** added only `DECREMENTMULTIHIT` (opcode 39): u8 pre-decrement
+  immutably replaces frozen `multiHitCounter`, zero falls through, and nonzero
+  resolves the one 4-byte operand through typed program labels. Pinned all
+  three real loop targets, counts **1/2/3**, 0→255 wrap, repeat branching,
+  source provenance, and source-first mutation on invalid-target halt.
+- **Next:** choose another bounded source family only when its complete rules
+  context is explicit. Do not add random/setmultihitcounter selection, damage,
+  attack loops, PP, production controller/rendering, animation, or pixels.
+- **Notes:** exact supported IDs are
+  **16/18/38/39/40/57/58/60/61/62/65/131**. Tier-1 **111 files / 1487 tests**,
+  focused **26/26**, build, and Scene-OFF oracle contract green; scheduler/
+  RNG/event identities are pinned and there is no pixel claim.
+
+---
 ## 369 — Gate-3 first immutable rules mutation integrated
 
 - **State:** S10 Gate 3 remains open with **11** source-safe opcodes and an
@@ -36,20 +54,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** exact supported IDs remain
   **16/18/40/57/58/60/61/62/65/131**. Tier-1 **110 files / 1461 tests** and
   build green; no new oracle/pixel claim.
-
----
-## 367 — Gate-3 immutable scheduler state + wait commands
-
-- **State:** S10 Gate 3 remains open with ten source-safe opcodes and an
-  unwired immutable scheduler/controller/source-context seam.
-- **Did:** modeled logical `MSG_DISPLAY` and shared `gPauseCounterBattle`
-  state, plus budget-consuming same-PC scheduler progress distinct from
-  identity-preserving external block. Added source-exact `WAITMESSAGE` and
-  `PAUSE` with injected u16 operand resolution; `PRINTSTRING` now owns the
-  display-active lifecycle while rules, RNG, and presentation stay isolated.
-- **Next:** add another bounded source-mapped semantic family only when its
-  complete battle context is explicit; do not wire production controllers or
-  renderers and do not add message pixels/substitution here.
-- **Notes:** exact supported IDs are
-  **16/18/40/57/58/60/61/62/65/131**; committed IR remains **3306**.
-  Tier-1 **109 files / 1455 tests** and build green; no new oracle/pixel claim.
