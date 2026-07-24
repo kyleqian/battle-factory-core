@@ -493,6 +493,47 @@ function writeJson(path: string, data: unknown): void {
     "targetFlag",
   ];
 
+  // Move_MIST_BALL (battle_anim_scripts.s:3955-3973) - the 2026-07-24
+  // generalization step's second-move target (ANIMATION_PROGRESS.md's
+  // "white-feather" component track: it only loads ANIM_TAG_WHITE_FEATHER,
+  // never spawns gFallingFeatherSpriteTemplate). Decoded here (script only)
+  // per that step's instructions; the interpreter/callback port is NOT
+  // implemented - see ANIMATION_PROGRESS.md's 2026-07-24 generalization
+  // verdict for the enumerated command-surface reason this stopped at
+  // decode-only. `complex_palette_blend` is a script MACRO
+  // (asm/macros/battle_anim_script.inc:294-296), not a raw opcode - it
+  // expands to one `createsprite gComplexPaletteBlendSpriteTemplate, ...`;
+  // decoded here as its expansion, matching this file's `shake_mon_or_platform`
+  // precedent (ROCK_SLIDE's own macro-expanded step above).
+  const mistBallMainSteps = [
+    { op: "loadspritegfx", args: { tag: "ANIM_TAG_SMALL_BUBBLES" }, source: "battle_anim_scripts.s:3956" },
+    { op: "loadspritegfx", args: { tag: "ANIM_TAG_WHITE_FEATHER" }, note: "loaded but never consumed by any sprite template this script creates - AnimTask_MistBallFog loads its own separate BG tiles/tilemap/palette (gWeatherFogHorizontalTiles/gBattleAnimFogTilemap/gFogPalette), not this tag; likely a vestigial/defensive preload, not a real dependency", source: "battle_anim_scripts.s:3957" },
+    { op: "delay", frames: 0, source: "battle_anim_scripts.s:3958" },
+    { op: "playsewithpan", args: { se: "SE_M_STRING_SHOT", pan: "SOUND_PAN_ATTACKER" }, source: "battle_anim_scripts.s:3959" },
+    { op: "createsprite", template: "gMistBallSpriteTemplate", battler: "ANIM_TARGET", subpriority: 0, args: [0, 0, 0, 0, 30, 0], decoded: "callback AnimThrowMistBall -> TranslateAnimSpriteToTargetMonLocation -> StartAnimLinearTranslation (src/battle_anim_ice.c:1090-1095, src/battle_anim_mons.c:1546-1568): NEW linear-translation primitive, not yet ported (no move to date drives a projectile through StartAnimLinearTranslation's Q8.8 accumulator generically - firePunch.ts's burn flames hand-fit one instance's constants instead of porting the primitive)", source: "battle_anim_scripts.s:3960" },
+    { op: "waitforvisualfinish", note: "blocks the main script until the mist-ball sprite above self-destroys (duration 30). The interpreter's current waitforvisualfinish handling (featherDance.ts) is a fixed 0-tick no-op calibrated around FEATHER_DANCE's placement (after the LAST createsprite) - here it gates the SECOND half of the script and needs real sprite-lifetime tracking to generalize", source: "battle_anim_scripts.s:3961" },
+    { op: "playsewithpan", args: { se: "SE_M_SAND_ATTACK", pan: "SOUND_PAN_TARGET" }, source: "battle_anim_scripts.s:3962" },
+    { op: "createvisualtask", task: "AnimTask_ShakeMon", priority: 2, args: ["ANIM_TARGET", 5, 0, 10, 0], decoded: "toggles the target's x2 between 0 and 5 every tick (frameDelay=0), 10 times, then restores x2=0 and self-destroys (src/battle_anim_mon_movement.c:87-141) - same task ROCK_SLIDE's decode above already documents, this move's own instance uses different (x2, count) args", source: "battle_anim_scripts.s:3963" },
+    { op: "complex_palette_blend", expandsTo: "createsprite gComplexPaletteBlendSpriteTemplate, ANIM_ATTACKER, 0, F_PAL_BG, 1, 1, RGB(23,16,31), 16, RGB_WHITE, 16", decoded: "NEW subsystem: AnimComplexPaletteBlend/_Step1/_Step2 (src/battle_anim_normal.c:344-407) blends the whole selected battle-palette set (F_PAL_BG here, UnpackSelectedBattlePalettes) from RGB(23,16,31) to RGB_WHITE and back via BlendPalettes, gated on the UNRELATED global gPaletteFade.active being false between steps - deterministic but introduces a new external-state dependency no ported move currently models", source: "battle_anim_scripts.s:3964" },
+    { op: "delay", frames: 0, source: "battle_anim_scripts.s:3965" },
+    { op: "playsewithpan", args: { se: "SE_M_HAZE", pan: 0 }, source: "battle_anim_scripts.s:3966" },
+    { op: "createvisualtask", task: "AnimTask_MistBallFog", priority: 5, args: [], decoded: "NEW subsystem, this move's own flagged 'background fade pipeline': AnimTask_MistBallFog/_Step (src/battle_anim_ice.c:1097-1170+) loads new BG1 tiles (gWeatherFogHorizontalTiles), a tilemap (gBattleAnimFogTilemap), and a new palette (gFogPalette) via LoadBgTiles/AnimLoadCompressedBgTilemapHandleContest/LoadPalette (none of which any ported move's extractor has exercised), sets BLDCNT/BLDALPHA for a whole-BG1 alpha blend, then runs a 4-phase state machine (ramp in via sMistBlendAmounts lookup, hold ~80 ticks, ramp out, clear both BG1/BG2) - this is squarely the 'genuinely new subsystem like a background fade pipeline' case the generalization step's own instructions call out to stop and split on", source: "battle_anim_scripts.s:3967" },
+    { op: "createvisualtask", task: "AnimTask_BlendBattleAnimPal", priority: 10, args: ["F_PAL_TARGET", 3, 0, 16, "RGB_WHITE"], decoded: "target-palette blend toward RGB_WHITE, 0->16 - same task DRAGON_BREATH's battleScene.ts already fits ONE hardcoded instance of (fade toward RGB_RED); MIST_BALL needs it generalized into a reusable parametric primitive (color/range/coeff-step all vary), not a fresh hand-fit", source: "battle_anim_scripts.s:3968" },
+    { op: "delay", frames: 8, source: "battle_anim_scripts.s:3969" },
+    { op: "createvisualtask", task: "AnimTask_ShakeMon", priority: 2, args: ["ANIM_TARGET", 4, 0, 70, 0], source: "battle_anim_scripts.s:3970" },
+    { op: "delay", frames: 70, source: "battle_anim_scripts.s:3971" },
+    { op: "createvisualtask", task: "AnimTask_BlendBattleAnimPal", priority: 10, args: ["F_PAL_TARGET", 2, 16, 0, "RGB_WHITE"], source: "battle_anim_scripts.s:3972" },
+    { op: "end", source: "battle_anim_scripts.s:3973" },
+  ];
+  const mistBallArgvMapping = [
+    "initialXOffset",
+    "initialYOffset",
+    "targetXOffset",
+    "targetYOffset",
+    "durationTicks",
+    "coordFlags",
+  ];
+
   writeJson(join(DATA_GEN, "battle-move-anim-scripts.json"), {
     ROCK_SLIDE: {
       source: "reference/pokeemerald/data/battle_anim_scripts.s:2119-2168 (Move_ROCK_SLIDE + RockSlideRocks)",
@@ -511,6 +552,13 @@ function writeJson(path: string, data: unknown): void {
       createspriteArgvMapping: featherDanceArgvMapping,
       totalFeatherSprites: 8,
       callback: "AnimFallingFeather / AnimFallingFeather_Step (src/battle_anim_flying.c:572-893), ported directly in src/engine/featherDance.ts - see ANIMATION_PROGRESS.md's 2026-07-24 anim-script interpreter spike",
+    },
+    MIST_BALL: {
+      source: "reference/pokeemerald/data/battle_anim_scripts.s:3955-3973 (Move_MIST_BALL)",
+      main: mistBallMainSteps,
+      createspriteArgvMapping: mistBallArgvMapping,
+      callback: null,
+      status: "script decoded only, NOT ported - 2026-07-24 interpreter-generalization step stopped here per its own enumerate-before-coding rule (>4 substantive new ops, including AnimTask_MistBallFog's whole-BG tile/tilemap/palette/blend pipeline). See ANIMATION_PROGRESS.md's 2026-07-24 generalization verdict for the full command-surface enumeration and remainder.",
     },
   });
 }

@@ -3,6 +3,10 @@
 
 import { GBA_SINE_TABLE_256 } from "./battleMenu.ts";
 import { advanceRngValue } from "./rng.ts";
+import {
+  linearTranslationDeltaQ8,
+  linearTranslationOffsetAfterCallbacks,
+} from "./animLinearTranslation.ts";
 
 export const FIRE_PUNCH_SPIRAL_FIRST_AGE = 41;
 export const FIRE_PUNCH_SPIRAL_TICKS = 30;
@@ -458,13 +462,15 @@ const BURN_FLAME_START_AGES = [
   FIRE_PUNCH_BURN_FLAME_FIRST_AGE + 12,
 ] as const;
 const BURN_FLAME_VISIBLE_TICKS = 22;
-// StartAnimLinearTranslation stores an 8.8 delta:
-// ((200 - 152) << 8) / 20 = 614 after integer truncation.
-const BURN_FLAME_X_DELTA_FIXED8 = 614;
-// InitAnimLinearTranslation stores direction in the low bit. Moving left
-// therefore uses 614|1 = 615 before the unsigned accumulator shift.
-const BURN_FLAME_X_DELTA_LEFT_FIXED8 =
-  BURN_FLAME_X_DELTA_FIXED8 | 1;
+/**
+ * `AnimBurnFlame` -> `AnimTravelDiagonally` -> `StartAnimLinearTranslation`
+ * (`battle_anim_fire.c:635-641`, `battle_anim_mons.c:1591-1624`): a 48px
+ * horizontal travel (`GetBattlerSpriteCoord` end minus start, 200-152 for
+ * this geometry) over the script's `duration=20` arg
+ * (`data/battle_anim_scripts.s:10244`).
+ */
+const BURN_FLAME_X_DISTANCE = 48;
+const BURN_FLAME_DURATION_TICKS = 20;
 
 /**
  * Status_Burn's three `gBurnFlameSpriteTemplate` sprites. The source script
@@ -478,17 +484,21 @@ export function firePunchBurnFlames(
 ): BurnFlameParticle[] {
   const particles: BurnFlameParticle[] = [];
   const direction = geometry.horizontalDirection ?? 1;
-  const xDelta = direction === -1
-    ? BURN_FLAME_X_DELTA_LEFT_FIXED8
-    : BURN_FLAME_X_DELTA_FIXED8;
+  const xDelta = linearTranslationDeltaQ8(
+    direction * BURN_FLAME_X_DISTANCE,
+    BURN_FLAME_DURATION_TICKS,
+  );
   const statusBase = geometry.statusBaseCenter;
   for (let i = BURN_FLAME_START_AGES.length - 1; i >= 0; i -= 1) {
     const n = age - BURN_FLAME_START_AGES[i]!;
     if (n < 0 || n >= BURN_FLAME_VISIBLE_TICKS) continue;
     particles.push({
       x: (statusBase?.x ?? geometry.center.x) - direction * 24
-        + direction
-          * ((xDelta * Math.min(n, 20)) >> 8),
+        + linearTranslationOffsetAfterCallbacks(
+          xDelta,
+          n,
+          BURN_FLAME_DURATION_TICKS,
+        ),
       y: statusBase ? statusBase.y + 24 : geometry.center.y + 13,
       frame: (Math.floor((n + 1) / 4) % 5) as 0 | 1 | 2 | 3 | 4,
     });
