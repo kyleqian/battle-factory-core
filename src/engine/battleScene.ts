@@ -509,6 +509,7 @@ import {
   DRAGON_BREATH_FRAMEBUFFER_OAM_AGE_LAG,
   DRAGON_BREATH_FRAMEBUFFER_PALETTE_AGE_LAG,
 } from "./dragonBreath.ts";
+import { flamethrowerDisplayedBattlerOffsetsAtAge } from "./flamethrower.ts";
 
 import battleAnimRocksAsset from "../assets/gen/battle-anim-rocks.json" with { type: "json" };
 import battleAnimMudSandAsset from "../assets/gen/battle-anim-mud-sand.json" with { type: "json" };
@@ -577,6 +578,7 @@ import {
   sceneOnDoubleTeamView,
   sceneOnBindView,
   sceneOnDragonBreathView,
+  sceneOnFlamethrowerView,
   sceneOnAerialAceView,
   sceneOnEndeavorView,
   sceneOnFeatherDanceView,
@@ -14416,6 +14418,96 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "ONIX used" : "Foe ONIX used",
       "BIND!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "FLAMETHROWER") {
+    // Sprite callbacks reach OAM one display after their RAM state, while
+    // the battler shake task mutates before the next OAM build.
+    const view = sceneOnFlamethrowerView({ ...state, age: state.age - 1 });
+    const displayedBattlerEffect = flamethrowerDisplayedBattlerOffsetsAtAge(
+      sceneOnFlamethrowerView(state).animationAge,
+    );
+    const playerToOpponent =
+      view.attacker.species === "ONIX"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "MURKROW"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "ONIX"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "MURKROW"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged FLAMETHROWER pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSprite = playerToOpponent ? onixBackSprite : onixFrontSprite;
+    const targetSprite = playerToOpponent ? murkrowFrontSprite : murkrowBackSprite;
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    drawSpriteSheet(
+      fb,
+      targetSprite.tileset,
+      targetSprite.palette,
+      view.target.geometry.spriteCorner.x + displayedBattlerEffect.targetX2,
+      view.target.geometry.spriteCorner.y,
+    );
+    drawSpriteSheet(
+      fb,
+      attackerSprite.tileset,
+      attackerSprite.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y + displayedBattlerEffect.attackerY2,
+    );
+    for (const flame of view.flames) {
+      drawSpriteSheet(
+        fb,
+        subTileset(battleAnimSmallEmber.tileset, flame.sheetFrame * 4, 4),
+        battleAnimSmallEmber.palette,
+        flame.centerX - 16,
+        flame.centerY - 16,
+      );
+    }
+    if (playerToOpponent) {
+      drawSendOutHealthbox(
+        fb,
+        0,
+        murkrowHealthboxContentForHp(state.config.fieldProfile.opponentHp),
+      );
+      drawComposedPlayerHealthbox(
+        fb,
+        onixPlayerHealthboxContentForState(
+          state.config.fieldProfile.playerHp,
+          state.config.fieldProfile.playerStatus,
+          state.config.fieldProfile.playerGender ?? "female",
+        ),
+      );
+    } else {
+      drawSendOutHealthbox(
+        fb,
+        0,
+        featherDanceOnixOpponentHealthbox(
+          state.config.fieldProfile.opponentHp,
+          state.config.fieldProfile.opponentGender ?? "male",
+        ),
+      );
+      drawComposedPlayerHealthbox(
+        fb,
+        flyMurkrowPlayerHealthbox(
+          state.config.fieldProfile.playerHp,
+          state.config.fieldProfile.playerStatus,
+          state.config.fieldProfile.playerGender ?? "male",
+        ),
+      );
+    }
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "ONIX used" : "Foe ONIX used",
+      "FLAMETHROWER!",
       99,
     );
     return;
