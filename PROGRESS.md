@@ -4,6 +4,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 336 — S8 OFF terminal LOSS opening: **GREEN — 210/210 exact**
+
+- **State:** the source-relative Factory Lobby LOSS path is exact from its
+  staged `CB2_LoadMap` handoff through party restore/status clear at +210.
+  `compare:factory-terminal-loss` covers every +1..+210 frame and both
+  source A releases at +80/+160.
+- **Did:** added an immutable `roundLost` terminal adapter, circular field
+  map/NPC compositor, live fade/message/printer/down-arrow path, dev-only
+  wrapped mGBA comparison fixture, and Tier-1 input/completion coverage.
+  Completion acknowledges the presentation command at +210 without changing
+  round rules/RNG. Source extraction now includes all field-visible NPCs and
+  the regular down-arrow; corrected the terminal-message extractor root.
+- **Next:** implement the distinct later LOSS record question/menu
+  (+380..624), or the seventh-win/round-summary ending. Do not extend this
+  opening past +210 as part of the same mechanism and do not resume Battle 2.
+- **Notes:** dense LOSS **210/210**, Tier-1 **1222/1222**, build **5.650 MB**.
+  Swap NO-return remains **69/69**. No screenshot/framebuffer asset, absolute
+  tick branch, outcome mutation, BP change, record menu, or seventh-win flow.
+
+---
 ## 335 — S8 OFF accept NO/B return: **GREEN — 69/69 + 69/69 exact**
 
 - **State:** A-on-NO and B share the source response/close/transition path and
@@ -43,23 +63,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   popup, options, and player picker remain **130/130**, **59/59**, **44/44**,
   **58/58**, and **101/101**. No absolute tick/frame lookup, screenshot asset,
   canonical-party replacement branch, NO/B response, or post-handoff path.
-
----
-## 333 — S8 OFF enemy accept prompt opening: **GREEN — 66/66 exact**
-
-- **State:** the eligible GROVYLE branch is exact from the input-ready enemy
-  picker through the input-ready YES/NO prompt at phase +64. Dense OFF trace
-  `battle1-swap-enemy-accept-prompt.json` is **66/66 exact** without capture
-  thinning; no YES, NO, or B response is processed.
-- **Did:** modeled the selected-species copy against the prior hardware
-  palette for one VBlank, corrected the later `OpenMonPic` affine/task epoch
-  by two relative ticks so its full flash hands off to the gray-ball-aware
-  degenerate WIN0 window, and separated immediate YES/NO BG copy from the
-  next-OAM highlight. Tier-1 pins all three phase-relative boundaries.
-- **Next:** implement one distinct accept response/exit seam (YES commit or
-  NO/B return) with dense OFF evidence; retain the +64 input-ready boundary.
-  S8 unique-UI gate 2 also still needs loss and seventh-win ending pixels.
-- **Notes:** Tier-1 **1210/1210**, build **5.565 MB**. Enemy picker, B-close,
-  popup, options, and player picker remain **130/130**, **59/59**, **44/44**,
-  **58/58**, and **101/101**. #39 is fixed and pruned; no absolute tick,
-  frame table, screenshot asset, response handling, or Battle-2 march.

@@ -2,8 +2,9 @@
 
 `tools/probe/stage-factory-loss-ending-off.py` is the reproducible OFF-profile
 terminal-loss evidence route. It deliberately stages only the field handoff;
-it does not store PNGs/RGB, alter production code, or use oracle frames as an
-app renderer.
+by default it stores hashes only. The opt-in comparison path writes RGB into
+a fresh temporary directory; those pixels are never committed or imported by
+production rendering.
 
 ## Construction
 
@@ -39,6 +40,19 @@ The wrapper accepts mGBA's known teardown SIGSEGV only after validating the
 fresh output JSON. The JSON retains every one of 720 relative frames as raw
 RGB hashes plus map/status/controller RAM; it contains no pixel assets.
 
+The dense app comparison owns its own fresh scratch directory and runs the
+same wrapped probe:
+
+```sh
+npm run compare:factory-terminal-loss
+```
+
+`tools/compare/fixtures/factory-terminal-loss-off.json` pins the exact
+relative +1..+210 window and A releases at +80/+160. The helper compares all
+210 raw frames, then discards the scratch location with normal OS temporary
+storage lifecycle; the application renders only source-extracted map, NPC,
+window, arrow, and font data.
+
 ## Observed OFF window (fresh run, 2026-07-23)
 
 - Relative frames 1–10 are the real map-loader progression; frame 13 begins
@@ -61,5 +75,7 @@ RGB hashes plus map/status/controller RAM; it contains no pixel assets.
   the captured tail, proving the source record-prompt B dispatch is an input
   gate rather than baked terminal chrome.
 
-This is oracle evidence only. It is a dense, relative OFF window suitable for
-a later app trace adapter; no app pixel-parity claim is made by this probe.
+The terminal-local adapter and compositor match this complete opening window
+at **210/210 exact**. It acknowledges the generic round controller's
+`roundLost` command only at +210, after party restore/status clear, without
+changing round rules or RNG. The later record question remains unimplemented.

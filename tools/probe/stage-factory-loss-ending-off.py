@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -24,6 +25,7 @@ if len(sys.argv) != 2:
     raise SystemExit(f"usage: {sys.argv[0]} <fresh-output.json>")
 
 OUTPUT_PATH = Path(sys.argv[1])
+RGB_DIR = Path(os.environ["FACTORY_LOSS_RGB_DIR"]) if os.environ.get("FACTORY_LOSS_RGB_DIR") else None
 HERE = Path(__file__).resolve().parent
 WORKTREE_ROOT = HERE.parent.parent
 
@@ -120,9 +122,21 @@ def frame(oracle: EmeraldOracle, tick: int) -> dict[str, object]:
     save1 = save1_base(oracle)
     frontier = frontier_base(oracle)
     rgb = oracle.screen_rgb()
+    if RGB_DIR is not None and 1 <= tick <= 210:
+        RGB_DIR.mkdir(parents=True, exist_ok=True)
+        (RGB_DIR / f"{tick:03d}.rgb").write_bytes(rgb)
     return {
         "tick": tick,
         "sha256": hashlib.sha256(rgb).hexdigest(),
+        "playerPosition": {"x": u16(oracle, save1), "y": u16(oracle, save1 + 2)},
+        "bgOffsets": {
+            "bg1x": u16(oracle, 0x04000010),
+            "bg1y": u16(oracle, 0x04000012),
+            "bg2x": u16(oracle, 0x04000014),
+            "bg2y": u16(oracle, 0x04000016),
+            "bg3x": u16(oracle, 0x04000018),
+            "bg3y": u16(oracle, 0x0400001A),
+        },
         "location": read_warp(oracle, save1 + SAVE_BLOCK1_LOCATION),
         "challengeStatus": oracle.read_u8(frontier + FRONTIER_CHALLENGE_STATUS),
         "battleNum": u16(oracle, frontier + 0xCB2),

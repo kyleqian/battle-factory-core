@@ -191,6 +191,7 @@ import {
 } from "./postwin.ts";
 import type { BattleScenario } from "./battleScenario.ts";
 import {
+  completeBattlePresentation,
   createRoundController,
   type RoundControllerState,
 } from "./roundController.ts";
@@ -209,6 +210,12 @@ import {
   type FactorySwapPresentationState,
 } from "./factorySwapPresentation.ts";
 import { renderFactorySwapPicker } from "./factorySwapRender.ts";
+import {
+  advanceFactoryTerminalPresentation,
+  factoryTerminalCompletion,
+  type FactoryTerminalPresentationState,
+} from "./factoryTerminalPresentation.ts";
+import { renderFactoryTerminalPresentation } from "./factoryTerminalRender.ts";
 
 export { SCREEN_WIDTH, SCREEN_HEIGHT } from "./framebuffer.ts";
 
@@ -246,6 +253,8 @@ export interface EngineState {
   sceneOnPresentation: SceneOnMovePresentationState | null;
   /** Live Factory swap-YES controller + presentation adapter. */
   factorySwap: FactorySwapPresentationState | null;
+  /** Source-relative Factory lobby terminal adapter for roundLost. */
+  factoryTerminal: FactoryTerminalPresentationState | null;
 }
 
 /** battleRoom "settled" phase's own elapsed (0 = trace tick 843, see battleTransition.ts) at which core.ts hands off to battleScene.ts - trace tick 1040 (battleScene.ts's own TICK0), the ground-truth trace's own window start. Ticks 1030-1039 are flat black either way (battleTransition's own exit-fade hold and battleScene's own pre-reveal hold render byte-identical solid black), so the exact handoff point within that range is inconsequential to pixels. */
@@ -284,6 +293,7 @@ export function createInitialState(
     stagedBattleTurn: null,
     sceneOnPresentation: null,
     factorySwap: null,
+    factoryTerminal: null,
   };
 }
 
@@ -315,6 +325,29 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
   let battleControllerExecFlags = state.battleControllerExecFlags ?? 0;
   let battle2Turn1 = state.battle2Turn1 ?? null;
   let factorySwap = state.factorySwap ?? null;
+
+  if (state.factoryTerminal) {
+    const factoryTerminal = advanceFactoryTerminalPresentation(
+      state.factoryTerminal,
+      newKeys.has("A"),
+    );
+    const completion = factoryTerminalCompletion(factoryTerminal);
+    const roundController =
+      completion !== null &&
+      state.roundController?.presentation?.command.commandId ===
+        completion.commandId
+        ? completeBattlePresentation(state.roundController, completion)
+        : state.roundController;
+    return {
+      ...state,
+      frame: state.frame + 1,
+      keyRepeat,
+      factoryTerminal,
+      roundController,
+      rngMode: "vblank",
+      rngValue,
+    };
+  }
 
   if (state.sceneOnPresentation) {
     return {
@@ -1745,7 +1778,7 @@ function renderPostwinState(state: EngineState): Uint8Array {
   return fb;
 }
 
-export function render(state: EngineState): Uint8Array {
+function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
   if (state.factorySwap) {
     const swap = state.factorySwap;
     if (swap.elapsed === 0) return renderPostwinState(state);
@@ -1895,4 +1928,14 @@ export function render(state: EngineState): Uint8Array {
   return showingDraft
     ? renderFactoryDraftScreenFaded(state.draftScreen, bgY, objY)
     : renderSummaryInfoPageFaded(summary.selectedSlot, bgY, objY);
+}
+
+export function render(state: EngineState): Uint8Array {
+  if (state.factoryTerminal) {
+    return renderFactoryTerminalPresentation(
+      state.factoryTerminal,
+      () => renderWithoutFactoryTerminal({ ...state, factoryTerminal: null }),
+    );
+  }
+  return renderWithoutFactoryTerminal(state);
 }

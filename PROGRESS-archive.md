@@ -1,3 +1,23 @@
+## 333 — S8 OFF enemy accept prompt opening: **GREEN — 66/66 exact**
+
+- **State:** the eligible GROVYLE branch is exact from the input-ready enemy
+  picker through the input-ready YES/NO prompt at phase +64. Dense OFF trace
+  `battle1-swap-enemy-accept-prompt.json` is **66/66 exact** without capture
+  thinning; no YES, NO, or B response is processed.
+- **Did:** modeled the selected-species copy against the prior hardware
+  palette for one VBlank, corrected the later `OpenMonPic` affine/task epoch
+  by two relative ticks so its full flash hands off to the gray-ball-aware
+  degenerate WIN0 window, and separated immediate YES/NO BG copy from the
+  next-OAM highlight. Tier-1 pins all three phase-relative boundaries.
+- **Next:** implement one distinct accept response/exit seam (YES commit or
+  NO/B return) with dense OFF evidence; retain the +64 input-ready boundary.
+  S8 unique-UI gate 2 also still needs loss and seventh-win ending pixels.
+- **Notes:** Tier-1 **1210/1210**, build **5.565 MB**. Enemy picker, B-close,
+  popup, options, and player picker remain **130/130**, **59/59**, **44/44**,
+  **58/58**, and **101/101**. #39 is fixed and pruned; no absolute tick,
+  frame table, screenshot asset, response handling, or Battle-2 march.
+
+---
 ## 332 — S8 OFF enemy accept prompt: **PARTIAL — 51/66 exact**
 
 - **State:** eligible GROVYLE A now runs phase-relatively from the input-ready

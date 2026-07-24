@@ -1,0 +1,293 @@
+import { createFramebuffer, fillFramebuffer, setPixel } from "./framebuffer.ts";
+import type { RgbColor } from "./bg.ts";
+import { fadeColor } from "./fadeRender.ts";
+import { bgFadeY, FADE_IN, objFadeY } from "./paletteFade.ts";
+import {
+  drawMessageBoxFrame,
+  drawMessageBoxText,
+} from "./prebattleRoomRender.ts";
+import {
+  factoryTerminalActivePage,
+  factoryTerminalPageTextFirstAge,
+  factoryTerminalVisibleChars,
+  type FactoryTerminalPresentationState,
+} from "./factoryTerminalPresentation.ts";
+
+import layoutData from "../data/gen/factory-lobby-terminal-layout.json" with { type: "json" };
+import tilesetData from "../assets/gen/factory-lobby-terminal-tileset.json" with { type: "json" };
+import npcData from "../assets/gen/factory-lobby-terminal-npcs.json" with { type: "json" };
+import downArrowData from "../assets/gen/factory-terminal-down-arrow.json" with { type: "json" };
+import messageBoxData from "../assets/gen/prebattle-room-msgbox.json" with { type: "json" };
+import fontData from "../data/gen/font-normal.json" with { type: "json" };
+import charmapData from "../data/gen/charmap.json" with { type: "json" };
+import { measureText, type FontData } from "./font.ts";
+
+interface TileEntry {
+  readonly tile: number;
+  readonly hFlip: boolean;
+  readonly vFlip: boolean;
+  readonly pal: number;
+}
+interface Block {
+  readonly metatileId: number;
+}
+interface TerminalLayout {
+  readonly width: number;
+  readonly height: number;
+  readonly blocks: readonly Block[];
+  readonly border: {
+    readonly width: number;
+    readonly height: number;
+    readonly blocks: readonly Block[];
+  };
+  readonly cameraOriginPx: { readonly x: number; readonly y: number };
+  readonly visibleObjects: readonly {
+    readonly id: string;
+    readonly asset: string;
+    readonly tile: { readonly x: number; readonly y: number };
+  }[];
+}
+interface TerminalTileset {
+  readonly tiles: Readonly<Record<string, readonly number[]>>;
+  readonly palettes: Readonly<Record<string, readonly RgbColor[]>>;
+  readonly metatiles: Readonly<Record<string, {
+    readonly layerType: number;
+    readonly entries: readonly TileEntry[];
+  }>>;
+}
+interface NpcAsset {
+  readonly frames: readonly {
+    readonly columns: number;
+    readonly rows: number;
+    readonly tiles: readonly (readonly number[])[];
+  }[];
+  readonly palette: readonly RgbColor[];
+}
+
+const layout = layoutData as TerminalLayout;
+const tileset = tilesetData as TerminalTileset;
+const npcs = npcData as Readonly<Record<string, NpcAsset>>;
+const downArrow = downArrowData as {
+  readonly blitWidth: number;
+  readonly blitHeight: number;
+  readonly indices: readonly (readonly number[])[];
+};
+const messageBoxPalette = (
+  messageBoxData as { readonly palette: readonly RgbColor[] }
+).palette;
+const font = fontData as unknown as FontData;
+const charmap = new Map<string, number>(
+  (charmapData as { entries: [string, number][] }).entries,
+);
+
+function positiveMod(value: number, modulus: number): number {
+  return ((value % modulus) + modulus) % modulus;
+}
+
+function blockAt(bx: number, by: number): Block {
+  if (bx >= 0 && bx < layout.width && by >= 0 && by < layout.height) {
+    return layout.blocks[by * layout.width + bx]!;
+  }
+  const x = positiveMod(bx, layout.border.width);
+  const y = positiveMod(by, layout.border.height);
+  return layout.border.blocks[y * layout.border.width + x]!;
+}
+
+function drawEntry(
+  fb: Uint8Array,
+  entry: TileEntry,
+  x: number,
+  y: number,
+  fadeY: number,
+): void {
+  const tile = tileset.tiles[String(entry.tile)];
+  const palette = tileset.palettes[String(entry.pal)];
+  if (!tile || !palette) return;
+  for (let py = 0; py < 8; py += 1) {
+    for (let px = 0; px < 8; px += 1) {
+      const sx = entry.hFlip ? 7 - px : px;
+      const sy = entry.vFlip ? 7 - py : py;
+      const colorIndex = tile[sy * 8 + sx]!;
+      if (colorIndex === 0) continue;
+      const color = fadeColor(palette[colorIndex]!, fadeY);
+      setPixel(fb, x + px, y + py, color.r, color.g, color.b);
+    }
+  }
+}
+
+function forEachVisibleBlock(
+  callback: (
+    metatile: TerminalTileset["metatiles"][string],
+    screenX: number,
+    screenY: number,
+  ) => void,
+  bgOriginX: number,
+): void {
+  // Fresh staged RAM at +29 pins saved camera position (8,8) and BG1/BG2
+  // scroll (0,40). MapGrid's seven-block padding therefore makes layout
+  // block (1,1) buffer-local (0,0), yielding source origins (16,56).
+  // Object events use the independently centered cameraOriginPx below.
+  const bgOrigin = { x: bgOriginX, y: layout.cameraOriginPx.y };
+  const minBx = Math.floor(bgOrigin.x / 16);
+  const minBy = Math.floor(bgOrigin.y / 16);
+  for (let by = minBy; by <= minBy + 10; by += 1) {
+    for (let bx = minBx; bx <= minBx + 15; bx += 1) {
+      const screenX = bx * 16 - bgOrigin.x;
+      const screenY = by * 16 - bgOrigin.y;
+      const metatile = tileset.metatiles[String(blockAt(bx, by).metatileId)];
+      if (metatile) callback(metatile, screenX, screenY);
+    }
+  }
+}
+
+function drawLayerEntries(
+  fb: Uint8Array,
+  entries: readonly TileEntry[],
+  screenX: number,
+  screenY: number,
+  fadeY: number,
+): void {
+  entries.forEach((entry, index) => {
+    drawEntry(
+      fb,
+      entry,
+      screenX + (index % 2) * 8,
+      screenY + Math.floor(index / 2) * 8,
+      fadeY,
+    );
+  });
+}
+
+function drawNpc(
+  fb: Uint8Array,
+  npc: NpcAsset,
+  pos: { readonly x: number; readonly y: number },
+  fadeY: number,
+): void {
+  const frame = npc.frames[0]!;
+  frame.tiles.forEach((tile, index) => {
+    for (let py = 0; py < 8; py += 1) {
+      for (let px = 0; px < 8; px += 1) {
+        const colorIndex = tile[py * 8 + px]!;
+        if (colorIndex === 0) continue;
+        const color = fadeColor(npc.palette[colorIndex]!, fadeY);
+        setPixel(
+          fb,
+          pos.x + (index % frame.columns) * 8 + px,
+          pos.y + Math.floor(index / frame.columns) * 8 + py,
+          color.r,
+          color.g,
+          color.b,
+        );
+      }
+    }
+  });
+}
+
+export function renderFactoryTerminalField(
+  bgY = 0,
+  objY = 0,
+  bgOriginX = 16,
+): Uint8Array {
+  const fb = createFramebuffer();
+  fillFramebuffer(fb, 0, 0, 0);
+  // BG3/BG2: both stored layers are below OBJ only for COVERED metatiles.
+  forEachVisibleBlock((metatile, x, y) => {
+    drawLayerEntries(fb, metatile.entries.slice(0, 4), x, y, bgY);
+    if (metatile.layerType === 1) {
+      drawLayerEntries(fb, metatile.entries.slice(4, 8), x, y, bgY);
+    }
+  }, bgOriginX);
+  const objects = layout.visibleObjects
+    .map((object) => ({
+      object,
+      pos: {
+        x: object.tile.x * 16 -
+          (object.id === "player" ? layout.cameraOriginPx.x : 16),
+        y: object.tile.y * 16 - 16 - layout.cameraOriginPx.y,
+      },
+    }))
+    .sort((a, b) =>
+      (a.object.tile.y - b.object.tile.y) ||
+      (a.object.tile.x - b.object.tile.x)
+    );
+  for (const { object, pos } of objects) {
+    drawNpc(fb, npcs[object.asset]!, pos, objY);
+  }
+  // NORMAL and SPLIT top layers cover object-event sprites.
+  forEachVisibleBlock((metatile, x, y) => {
+    if (metatile.layerType !== 1) {
+      drawLayerEntries(fb, metatile.entries.slice(4, 8), x, y, bgY);
+    }
+  }, bgOriginX);
+  return fb;
+}
+
+const MESSAGE_ORIGIN = { x: 16, y1: 121, y2: 137 };
+const CURSOR_Y_OFFSETS = [0, 1, 2, 1] as const;
+
+function drawPageText(
+  fb: Uint8Array,
+  lines: readonly [string, string],
+  chars: number,
+): void {
+  drawMessageBoxText(fb, lines[0].slice(0, chars), MESSAGE_ORIGIN.x, MESSAGE_ORIGIN.y1);
+  if (chars > lines[0].length) {
+    drawMessageBoxText(
+      fb,
+      lines[1].slice(0, chars - lines[0].length),
+      MESSAGE_ORIGIN.x,
+      MESSAGE_ORIGIN.y2,
+    );
+  }
+}
+
+function drawPageCursor(
+  fb: Uint8Array,
+  state: FactoryTerminalPresentationState,
+  page: 0 | 1,
+): void {
+  const firstAge = factoryTerminalPageTextFirstAge(state, page)!;
+  const lines = state.profile.pages[page];
+  const cursorStart = firstAge + lines[0].length + lines[1].length + 1;
+  if (state.age < cursorStart) return;
+  const phase = Math.floor((state.age - cursorStart) / 9) % 4;
+  const y = (lines[1] ? 137 : 121) - CURSOR_Y_OFFSETS[phase]!;
+  const line = lines[1] || lines[0];
+  const x = MESSAGE_ORIGIN.x + measureText(font, charmap, line);
+  for (let py = 0; py < downArrow.blitHeight; py += 1) {
+    for (let px = 0; px < downArrow.blitWidth; px += 1) {
+      const index = downArrow.indices[py]?.[px] ?? 0;
+      if (index === 0) continue;
+      const color = messageBoxPalette[index];
+      if (!color) continue;
+      setPixel(fb, x + px, y + py, color.r, color.g, color.b);
+    }
+  }
+}
+
+export function renderFactoryTerminalPresentation(
+  state: FactoryTerminalPresentationState,
+  priorPresentation: () => Uint8Array,
+): Uint8Array {
+  if (state.age <= 1) return priorPresentation();
+  if (state.age < state.profile.fieldFirstAge) {
+    const fb = createFramebuffer();
+    fillFramebuffer(fb, 0, 0, 0);
+    return fb;
+  }
+  const fadeAge = state.age - state.profile.fadeFirstAge;
+  const bgY = fadeAge < 0 ? 16 : bgFadeY(fadeAge, FADE_IN);
+  const objY = fadeAge < 0 ? 16 : objFadeY(fadeAge, FADE_IN);
+  const fb = renderFactoryTerminalField(bgY, objY);
+  if (state.age < state.profile.messageFrameAge) return fb;
+  drawMessageBoxFrame(fb);
+  const page = factoryTerminalActivePage(state);
+  drawPageText(
+    fb,
+    state.profile.pages[page],
+    factoryTerminalVisibleChars(state),
+  );
+  if (page === 0 || page === 1) drawPageCursor(fb, state, page);
+  return fb;
+}

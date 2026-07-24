@@ -28,6 +28,19 @@ const DATA = join(OUT, "src", "data", "gen");
 mkdirSync(ASSETS, { recursive: true });
 mkdirSync(DATA, { recursive: true });
 
+const terminalDownArrow = decodeIndexedPng(
+  join(REF, "graphics", "fonts", "down_arrow.png"),
+);
+writeJson(join(ASSETS, "factory-terminal-down-arrow.json"), {
+  width: terminalDownArrow.width,
+  height: terminalDownArrow.height,
+  blitWidth: 8,
+  blitHeight: 16,
+  indices: Array.from({ length: terminalDownArrow.height }, (_, row) =>
+    [...terminalDownArrow.indices.slice(row * terminalDownArrow.width, (row + 1) * terminalDownArrow.width)]
+  ),
+});
+
 function writeJson(path: string, data: unknown): void {
   writeFileSync(path, `${JSON.stringify(data)}\n`);
   console.log(`wrote ${path}`);
@@ -120,6 +133,9 @@ function readBlocks(path: string, count: number): Block[] {
       { id: "singlesAttendant", localId: "LOCALID_FACTORY_ATTENDANT_SINGLES", graphicsId: "OBJ_EVENT_GFX_SCIENTIST_1", tile: { x: 4, y: 7 }, facing: "south", pose: "south", asset: "scientist" },
       { id: "woman", graphicsId: "OBJ_EVENT_GFX_WOMAN_1", tile: { x: 3, y: 11 }, facing: "south", pose: "south", asset: "woman" },
       { id: "fatMan", graphicsId: "OBJ_EVENT_GFX_FAT_MAN", tile: { x: 6, y: 10 }, facing: "south", pose: "south", asset: "fatMan" },
+      { id: "doublesAttendant", localId: "LOCALID_FACTORY_ATTENDANT_DOUBLES", graphicsId: "OBJ_EVENT_GFX_SCIENTIST_1", tile: { x: 14, y: 7 }, facing: "south", pose: "south", asset: "scientist" },
+      { id: "camper", graphicsId: "OBJ_EVENT_GFX_CAMPER", tile: { x: 14, y: 11 }, facing: "south", pose: "south", asset: "camper" },
+      { id: "picnicker", graphicsId: "OBJ_EVENT_GFX_PICNICKER", tile: { x: 13, y: 11 }, facing: "east", pose: "east", asset: "picnicker" },
     ],
   });
 }
@@ -128,14 +144,17 @@ function readBlocks(path: string, count: number): Block[] {
 // regular camera exposes only these starting poses (not the off-screen double
 // attendant/camper/picnicker), so keep the extracted object art equally small.
 {
-  function extractPose(sheetPath: string, frameIndex: number): { columns: number; rows: number; tiles: number[][] } {
+  function extractPose(sheetPath: string, frameIndex: number, hFlip = false): { columns: number; rows: number; tiles: number[][] } {
     const sheet = sliceTiles(decodeIndexedPng(sheetPath));
     const tiles: number[][] = [];
     for (let row = 0; row < 4; row += 1) {
       for (let col = 0; col < 2; col += 1) {
-        const tile = sheet.tiles[row * sheet.columns + frameIndex * 2 + col];
+        const tile = sheet.tiles[row * sheet.columns + frameIndex * 2 + (hFlip ? 1 - col : col)];
         if (!tile) throw new Error(`missing standard overworld frame ${frameIndex}`);
-        tiles.push([...tile.pixels]);
+        tiles.push(hFlip
+          ? Array.from({ length: 64 }, (_, index) =>
+              tile.pixels[Math.floor(index / 8) * 8 + (7 - index % 8)]!)
+          : [...tile.pixels]);
       }
     }
     return { columns: 2, rows: 4, tiles };
@@ -149,5 +168,7 @@ function readBlocks(path: string, count: number): Block[] {
     scientist: { frame: 0, frames: [extractPose(join(people, "scientist_1.png"), 0)], palette: loadJascPal(join(paletteDir, "npc_3.pal")) },
     woman: { frame: 0, frames: [extractPose(join(people, "woman_1.png"), 0)], palette: loadJascPal(join(paletteDir, "npc_1.pal")) },
     fatMan: { frame: 0, frames: [extractPose(join(people, "fat_man.png"), 0)], palette: loadJascPal(join(paletteDir, "npc_1.pal")) },
+    camper: { frame: 0, frames: [extractPose(join(people, "camper.png"), 0)], palette: loadJascPal(join(paletteDir, "npc_3.pal")) },
+    picnicker: { frame: 2, frames: [extractPose(join(people, "picnicker.png"), 2, true)], palette: loadJascPal(join(paletteDir, "npc_3.pal")) },
   });
 }

@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 import layout from "../src/data/gen/factory-lobby-terminal-layout.json" with { type: "json" };
 import tileset from "../src/assets/gen/factory-lobby-terminal-tileset.json" with { type: "json" };
 import npcs from "../src/assets/gen/factory-lobby-terminal-npcs.json" with { type: "json" };
+import downArrow from "../src/assets/gen/factory-terminal-down-arrow.json" with { type: "json" };
 
 describe("Factory Lobby terminal visual extraction", () => {
   it("pins the regular loss/seventh-win handoff viewport including its required border", () => {
@@ -33,8 +34,11 @@ describe("Factory Lobby terminal visual extraction", () => {
       { id: "singlesAttendant", localId: "LOCALID_FACTORY_ATTENDANT_SINGLES", graphicsId: "OBJ_EVENT_GFX_SCIENTIST_1", tile: { x: 4, y: 7 }, facing: "south", pose: "south", asset: "scientist" },
       { id: "woman", graphicsId: "OBJ_EVENT_GFX_WOMAN_1", tile: { x: 3, y: 11 }, facing: "south", pose: "south", asset: "woman" },
       { id: "fatMan", graphicsId: "OBJ_EVENT_GFX_FAT_MAN", tile: { x: 6, y: 10 }, facing: "south", pose: "south", asset: "fatMan" },
+      { id: "doublesAttendant", localId: "LOCALID_FACTORY_ATTENDANT_DOUBLES", graphicsId: "OBJ_EVENT_GFX_SCIENTIST_1", tile: { x: 14, y: 7 }, facing: "south", pose: "south", asset: "scientist" },
+      { id: "camper", graphicsId: "OBJ_EVENT_GFX_CAMPER", tile: { x: 14, y: 11 }, facing: "south", pose: "south", asset: "camper" },
+      { id: "picnicker", graphicsId: "OBJ_EVENT_GFX_PICNICKER", tile: { x: 13, y: 11 }, facing: "east", pose: "east", asset: "picnicker" },
     ]);
-    expect(Object.keys(npcs)).toEqual(["player", "scientist", "woman", "fatMan"]);
+    expect(Object.keys(npcs)).toEqual(["player", "scientist", "woman", "fatMan", "camper", "picnicker"]);
     for (const npc of Object.values(npcs)) {
       expect(npc.frames).toHaveLength(1);
       expect(npc.frames[0]).toMatchObject({ columns: 2, rows: 4 });
@@ -43,6 +47,9 @@ describe("Factory Lobby terminal visual extraction", () => {
     }
     expect(npcs.player.frame).toBe(1); // standard face-north frame
     expect(npcs.scientist.frame).toBe(0); // standard face-south frame
+    expect(npcs.picnicker.frame).toBe(2); // east = west frame h-flipped
+    expect(downArrow).toMatchObject({ width: 8, height: 48, blitWidth: 8, blitHeight: 16 });
+    expect(new Set(downArrow.indices.flat())).toEqual(new Set([0, 2, 4]));
   });
 
   it("pins source decoded metatile and palette inputs rather than a screen capture", () => {
@@ -63,6 +70,7 @@ describe("Factory Lobby terminal visual extraction", () => {
       for (const relative of [
         "src/assets/gen/factory-lobby-terminal-tileset.json",
         "src/assets/gen/factory-lobby-terminal-npcs.json",
+        "src/assets/gen/factory-terminal-down-arrow.json",
         "src/data/gen/factory-lobby-terminal-layout.json",
       ]) {
         expect(readFileSync(join(directory, relative))).toEqual(readFileSync(relative));

@@ -12,7 +12,8 @@
     "animation:coverage": "node --experimental-strip-types tools/animation/report.ts",
     "compare:fire-punch-portable": "node --experimental-strip-types tools/compare/firePunchPortable.ts",
     "compare:faint-attack-portable": "node --experimental-strip-types tools/compare/faintAttackPortable.ts",
-    "compare:double-team-portable": "node --experimental-strip-types tools/compare/doubleTeamPortable.ts"
+    "compare:double-team-portable": "node --experimental-strip-types tools/compare/doubleTeamPortable.ts",
+    "compare:factory-terminal-loss": "node --experimental-strip-types tools/compare/factoryTerminalLoss.ts"
   },
   "devDependencies": {
     "@types/node": "^26.1.1",

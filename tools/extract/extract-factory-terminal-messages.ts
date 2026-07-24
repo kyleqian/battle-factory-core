@@ -13,7 +13,9 @@ import { fileURLToPath } from "node:url";
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, "..", "..");
 const REF = join(ROOT, "reference", "pokeemerald");
-const HARNESS_ROOT = resolve(ROOT, "..", "..", "..", "..");
+const HARNESS_ROOT = resolve(
+  process.env.POKEBENCH_HARNESS_ROOT ?? join(ROOT, "..", ".."),
+);
 const outIndex = process.argv.indexOf("--out-dir");
 if (outIndex !== -1 && !process.argv[outIndex + 1]) throw new Error("--out-dir needs a directory");
 const OUT_DIR = outIndex === -1 ? join(ROOT, "src", "data", "gen") : resolve(process.argv[outIndex + 1]!);

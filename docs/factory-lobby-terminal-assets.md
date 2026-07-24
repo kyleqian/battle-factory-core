@@ -9,6 +9,7 @@ not a terminal-flow implementation and contains no oracle framebuffer data.
 - `src/assets/gen/factory-lobby-terminal-tileset.json`
 - `src/data/gen/factory-lobby-terminal-layout.json`
 - `src/assets/gen/factory-lobby-terminal-npcs.json`
+- `src/assets/gen/factory-terminal-down-arrow.json`
 
 It accepts `--out-dir <directory>` for byte-for-byte regeneration; the Tier-1
 test exercises that path.
@@ -50,6 +51,11 @@ as the existing pre-battle-room extractor and is why the Lobby artifact must
 retain `border.bin`: the terminal viewport reaches three map blocks left of
 the layout and two rows below it. It is source geometry, not a fitted capture.
 
+The live field BG uses a separate circular tilemap origin. Fresh staged RAM at
+relative +29 pins saved position `(8,8)` and BG scroll `(0,40)`; after
+`MAP_OFFSET=7`, the source render origin is `(16,56)`. Brendan remains
+player-centered, while ordinary map objects use that field origin.
+
 ## Visible object scope
 
 The Lobby map's object definitions are in
@@ -60,22 +66,29 @@ ones:
 - Brendan (`OBJ_EVENT_GFX_BRENDAN_NORMAL`), `(4,8)`, facing north;
 - singles attendant (`OBJ_EVENT_GFX_SCIENTIST_1`), `(4,7)`, facing south;
 - Woman 1, `(3,11)`, facing south; and
-- Fat Man, `(6,10)`, facing south.
+- Fat Man, `(6,10)`, facing south;
+- doubles attendant, `(14,7)`, facing south;
+- Camper, `(14,11)`, facing south; and
+- Picnicker, `(13,11)`, facing east.
 
-The doubles attendant at `(14,7)`, Camper `(14,11)`, and Picnicker `(13,11)`
-lie beyond this camera's right edge, so no asset is exported for them. The
-four exported poses are only the one standard 16×32 frame used at the gate:
-standard frame 0 for south and 1 for north (`src/data/object_events/
-object_event_pic_tables.h`; `sAnimTable_Standard`). Their image/palette source
+The circular field origin exposes the right-side objects at x=192/208, so all
+six map objects plus the player are source-extracted. Poses use standard frame
+0 for south, frame 1 for north, and the source's h-flipped frame 2 for east
+(`sAnimTable_Standard`). Their image/palette source
 anchors are `src/data/object_events/object_event_graphics.h` and
 `object_event_graphics_info.h`: Brendan uses `brendan/walking.png` plus
 `brendan.pal`; Scientist 1 uses `scientist_1.png` plus `npc_3.pal`; Woman 1
-and Fat Man use their named PNGs plus shared `npc_1.pal`.
+and Fat Man use their named PNGs plus shared `npc_1.pal`; Camper and
+Picnicker use their named PNGs plus shared `npc_3.pal`.
 
-## Still owned by a later renderer
+The terminal down-arrow artifact decodes `graphics/fonts/down_arrow.png`
+without a palette: its indices 2/4 intentionally address the active field
+message palette.
 
-This data does not include field-script execution, object/event task timing,
-window composition, text printing, audio, or palette fades. A terminal
-renderer can reuse the already-extracted standard message frame
+## Renderer boundary
+
+This data does not include field-script execution or audio. The terminal
+renderer reuses the already-extracted standard message frame
 (`prebattle-room-msgbox.json`) and the existing font/charmap artifacts, then
-compose them above this field map according to source window/task behavior.
+composes them above this field map according to source-relative window/task
+behavior.

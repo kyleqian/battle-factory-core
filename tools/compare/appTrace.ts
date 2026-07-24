@@ -18,6 +18,7 @@ import {
   ONIX_TO_GROVYLE_FIRE_PUNCH_GEOMETRY,
   ONIX_TO_GROVYLE_FIRE_PUNCH_PROFILE,
 } from "../../src/engine/sceneOnPresentation.ts";
+import { createFactoryTerminalLossPresentation } from "../../src/engine/factoryTerminalPresentation.ts";
 
 export interface AppCapture {
   frame: number;
@@ -55,6 +56,15 @@ const APP_STAGES: Readonly<Record<string, AppStage>> = {
       resolutionProfile: ONIX_TO_GROVYLE_FIRE_PUNCH_PROFILE,
     }),
     rngMode: "frontierBattle",
+  }),
+  "factory-terminal-loss-cb2-load-map": (state) => ({
+    ...state,
+    factoryTerminal: createFactoryTerminalLossPresentation({
+      type: "roundLost",
+      commandId: 1,
+      battleIndex: 0,
+    }),
+    rngMode: "vblank",
   }),
 };
 
