@@ -923,6 +923,25 @@ move-name, battle-number, turn-number, or canonical-tick branches. Battle
 logic/RNG emits semantic events; Scene-OFF and Scene-ON presentation consume
 those events without owning outcomes.
 
+**Testability architecture decision (2026-07-24):** before substantially more
+Gate-3 opcode breadth, publish one battle-level decision-boundary contract.
+After initialization, an immutable, serializable `BattleState` owns the RNG
+state; submitting one currently requested player or trainer decision returns
+the next state, ordered semantic events, and either the next decision request
+or a terminal outcome. The protocol may collect both singles commands before
+resolution and may request a voluntary or forced switch. A headless runner can
+auto-acknowledge presentation-only barriers, but those acknowledgements may
+never change rules state or consume RNG.
+
+The native Emerald trainer AI is a separately unit-testable, injected policy
+module. It consumes a source-faithful battle view/history, the kernel's legal
+decisions, the selected Factory AI policy, and explicit RNG state, then returns
+one legal decision, updated RNG, and an inspectable decision trace. The kernel
+does not know whether a decision came from a player, Emerald AI, a test, or a
+future stronger policy. Tier-1 tests may construct arbitrary validated
+transient battle states for focused mechanics coverage; this does not relax
+Gate 2's prohibition on injecting transient state into the stock-ROM oracle.
+
 S10 has six ordered completion gates:
 
 1. [x] **Complete Factory corpus:** mechanically extract and validate all 300
@@ -1020,7 +1039,11 @@ S10 has six ordered completion gates:
    animations, switches, and outcomes. Tier-1 architecture tests prove that
    sibling moves sharing a source effect execute the same handler sequence,
    that event replay cannot alter rules state or RNG, and that no presentation
-   consumer owns a logical side effect.
+   consumer owns a logical side effect. The public headless transition API is
+   deterministic from a complete state plus submitted decision, preserves
+   every caller-owned input, carries RNG only inside the returned state, and
+   reaches a next-decision or terminal boundary without a DOM, renderer,
+   wall-clock, oracle, emulator, or mutable singleton.
 4. [ ] **Persistent mechanics:** implement all battle statuses and volatile
    effects, every stat stage, weather and side conditions, multi-turn effects,
    held-item hooks, ability hooks/immunities, and their switch/faint/end-turn
@@ -1035,7 +1058,12 @@ S10 has six ordered completion gates:
    favorite-type/style commentary from the generated party; render arbitrary
    trainer classes/names/speeches and arbitrary legal parties; support
    voluntary and forced switching. The round controller consumes real battle
-   outcomes rather than injected results.
+   outcomes rather than injected results. Source-faithful AI tests independently
+   cover move limitations, per-script score changes, tie RNG, battle history
+   and known-information behavior, switch/item selection, and every Factory
+   challenge-policy branch. Integration tests prove that the AI returns only a
+   kernel-enumerated legal decision and enters through the same submission
+   boundary as a player or test decision.
 6. [ ] **Breadth acceptance:** a committed mechanics coverage manifest has no
    unsupported move/effect, status, volatile-effect, held-item, ability,
    trainer, or Level-50 Frontier-set entries. Every distinct effect/hook family

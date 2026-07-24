@@ -1,3 +1,28 @@
+## 396 — Gate-3 attack-canceler FLINCH source phase integrated
+
+- **State:** S10 Gate 3 remains open with **27** source-safe executable
+  opcodes. `AtkCanceler_UnableToUseMove` now has immutable FLAGS, ASLEEP,
+  FROZEN, TRUANT, RECHARGE, and FLINCH decisions only; opcode 0 remains
+  unregistered and no phase loop exists.
+- **Did:** modeled `ProtectStruct::u32 flinchImmobility:1` as validated `0 | 1`
+  and ported the exact `STATUS2_FLINCHED` branch: clear only flinch, set the
+  protect flag, then invoke `CancelMultiTurnMoves`, hand off
+  `BattleScript_MoveUsedFlinched`, OR unable-to-use, and return effect 1.
+  The untaken branch preserves all owned fields with effect 0; every path
+  advances once to `CANCELER_DISABLED`.
+- **Next:** implement `CANCELER_DISABLED` only after its disabled-move,
+  protect/scripting-battler, multi-turn cancellation, script, marker, effect,
+  and receipt ownership is explicit. Do not loop phases or register opcode 0.
+- **Notes:** both one-bit values across all four attacker ids, pre-set helper
+  fields, unrelated status/admission fields, already-set marker/protect
+  identities, missing roles, invalid one-bit/PC widths, determinism, deep
+  freezing, and absence of message/RNG/controller/animation/opcode effects are
+  pinned. Source lines 2110-2121 match the brief and own no message chooser.
+  Focused **4 files / 38 tests**; Tier-1 **134 files / 1739 tests**, build, OFF
+  info (`9c89c741…`), and diff check green. Code commit `050fd88`; pixel diff
+  N/A.
+
+---
 ## 395 — Gate-3 attack-canceler RECHARGE source phase integrated
 
 - **State:** S10 Gate 3 remains open with **27** source-safe executable
