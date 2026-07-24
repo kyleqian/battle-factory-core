@@ -595,6 +595,7 @@ describe("Factory AI composition through BattleDecisionBoundary", () => {
     expect(source).toContain("submitBattleDecision(");
     expect(source).toContain("selectFactoryAiMask(");
     for (const forbidden of [
+      "./factoryBattleScriptDecision.ts",
       "./core.ts",
       "./battleScene.ts",
       "Render",

@@ -5,9 +5,11 @@ import {
   createBattleState,
   submitBattleDecision,
   type BattleDecisionReducer,
+  type BattleDecisionSide,
   type BattleDecisionSubmission,
   type BattleDecisionTransitionResult,
   type BattleJsonObject,
+  type BattleSinglesBattler,
   type BattleState,
 } from "./battleDecisionBoundary.ts";
 import {
@@ -47,6 +49,7 @@ type MoveRow = Readonly<{
   move: string;
   id: number;
   pp: number;
+  target: readonly string[];
 }>;
 
 type TopologyMoveRow = Readonly<{
@@ -66,6 +69,7 @@ const PROGRAM = loadBattleScriptProgram();
 export type FactoryAsleepMoveConfig = Readonly<{
   playerSetId: number;
   trainerSetId: number;
+  commandSide: BattleDecisionSide;
   playerHp: number;
   trainerHp: number;
   sleepTurns: number;
@@ -154,6 +158,32 @@ function sourceMoves(row: FrontierMonRow): readonly MoveRow[] {
   }));
 }
 
+function battlerForSide(side: BattleDecisionSide): BattleSinglesBattler {
+  return side === "player" ? 0 : 1;
+}
+
+function commandSideAt(value: unknown): BattleDecisionSide {
+  if (value !== "player" && value !== "trainer") {
+    throw new Error("commandSide must be player or trainer");
+  }
+  return value;
+}
+
+function sourceMoveTarget(
+  move: MoveRow,
+  attacker: BattleSinglesBattler,
+): BattleSinglesBattler {
+  if (move.target.length === 1 && move.target[0] === "MOVE_TARGET_USER") {
+    return attacker;
+  }
+  if (move.target.length === 1 && move.target[0] === "MOVE_TARGET_SELECTED") {
+    return attacker === 0 ? 1 : 0;
+  }
+  throw new Error(
+    `${move.move} has unsupported staged singles target ${move.target.join("|")}`,
+  );
+}
+
 function emptyBattler(side: 0 | 1): BattleScriptRulesBattler {
   return Object.freeze({
     side,
@@ -212,15 +242,29 @@ function createInitialRules(config: FactoryAsleepMoveConfig): FactoryBattleScrip
   }
   const playerMoves = sourceMoves(player);
   const trainerMoves = sourceMoves(trainer);
+  const attacker = battlerForSide(config.commandSide);
+  const target = attacker === 0 ? 1 : 0;
   const rulesContext = createBattleScriptRulesContext({
     battlers: [
-      activeBattler(0, PLAYER_ABILITY, config.playerHp, playerMoves, config.sleepTurns),
-      activeBattler(1, TRAINER_ABILITY, config.trainerHp, trainerMoves, 0),
+      activeBattler(
+        0,
+        PLAYER_ABILITY,
+        config.playerHp,
+        playerMoves,
+        attacker === 0 ? config.sleepTurns : 0,
+      ),
+      activeBattler(
+        1,
+        TRAINER_ABILITY,
+        config.trainerHp,
+        trainerMoves,
+        attacker === 1 ? config.sleepTurns : 0,
+      ),
       emptyBattler(0),
       emptyBattler(1),
     ],
-    selectorRoles: { attacker: 0, target: 1, effectBattler: 1 },
-    scriptingBattler: 0,
+    selectorRoles: { attacker, target, effectBattler: target },
+    scriptingBattler: attacker,
     atkCancelerTracker: 0,
     battleOutcome: 0,
     currentMove: 0,
@@ -256,6 +300,7 @@ function configAt(input: FactoryAsleepMoveConfig): FactoryAsleepMoveConfig {
     [
       "playerSetId",
       "trainerSetId",
+      "commandSide",
       "playerHp",
       "trainerHp",
       "sleepTurns",
@@ -267,6 +312,7 @@ function configAt(input: FactoryAsleepMoveConfig): FactoryAsleepMoveConfig {
   return Object.freeze({
     playerSetId: requireInteger(config.playerSetId, 0, LEVEL_50_SET_MAX, "playerSetId"),
     trainerSetId: requireInteger(config.trainerSetId, 0, LEVEL_50_SET_MAX, "trainerSetId"),
+    commandSide: commandSideAt(config.commandSide),
     playerHp: requireInteger(config.playerHp, 1, 0xffff, "playerHp"),
     trainerHp: requireInteger(config.trainerHp, 1, 0xffff, "trainerHp"),
     sleepTurns: requireInteger(config.sleepTurns, 2, 7, "sleepTurns"),
@@ -280,19 +326,26 @@ export function createFactoryAsleepMoveBattleState(
 ): BattleState<FactoryBattleScriptDecisionRules> {
   const config = configAt(input);
   const rules = createInitialRules(config);
+  const battler = battlerForSide(config.commandSide);
+  const moves = sourceMoves(
+    frontierSet(
+      battler === 0 ? config.playerSetId : config.trainerSetId,
+      `${config.commandSide}SetId`,
+    ),
+  );
   return createBattleState({
     rules,
     rngSeed: config.rngSeed,
     request: {
       kind: "command",
       requestId: config.requestId,
-      side: "player",
-      battler: 0,
-      legalDecisions: rules.rulesContext.battlers[0].moves.map(
-        (_move, moveSlot) => ({
+      side: config.commandSide,
+      battler,
+      legalDecisions: moves.map(
+        (move, moveSlot) => ({
           kind: "use-move" as const,
           moveSlot: moveSlot as 0 | 1 | 2 | 3,
-          targetBattler: 1 as const,
+          targetBattler: sourceMoveTarget(move, battler),
         }),
       ),
     },
@@ -339,9 +392,15 @@ function rulesAt(input: FactoryBattleScriptDecisionRules): FactoryBattleScriptDe
   );
   const expectedPlayerMoves = sourceMoves(frontierSet(PLAYER_SET_ID, "playerSetId"));
   const expectedTrainerMoves = sourceMoves(frontierSet(TRAINER_SET_ID, "trainerSetId"));
+  const attacker = context.selectorRoles.attacker;
+  if (attacker !== 0 && attacker !== 1) {
+    throw new Error("Factory asleep move rules require a singles attacker");
+  }
+  const expectedTarget = attacker === 0 ? 1 : 0;
   if (
-    context.selectorRoles.attacker !== 0
-    || context.selectorRoles.target !== 1
+    context.selectorRoles.target !== expectedTarget
+    || context.selectorRoles.effectBattler !== expectedTarget
+    || context.scriptingBattler !== attacker
     || context.absentBattlerFlags !== 0b1100
     || context.atkCancelerTracker !== 0
     || context.currentMove !== 0
@@ -351,7 +410,8 @@ function rulesAt(input: FactoryBattleScriptDecisionRules): FactoryBattleScriptDe
     || context.battlers[1].ability !== TRAINER_ABILITY
     || context.battlers[0].moves.some((move, index) => move !== expectedPlayerMoves[index]!.id)
     || context.battlers[1].moves.some((move, index) => move !== expectedTrainerMoves[index]!.id)
-    || (context.battlers[0].status1 & 7) < 2
+    || (context.battlers[attacker].status1 & 7) < 2
+    || (context.battlers[expectedTarget].status1 & 7) !== 0
   ) {
     throw new Error("Factory asleep move rules contain an invalid staged singles phase");
   }
@@ -397,21 +457,24 @@ function eventPayloads(state: BattleScriptMachineState<BattleScriptRulesContext>
   }));
 }
 
-const reduceFactoryAsleepMove: BattleDecisionReducer<FactoryBattleScriptDecisionRules> = (
+export const reduceFactoryAsleepMoveDecision:
+BattleDecisionReducer<FactoryBattleScriptDecisionRules> = (
   boundary,
 ) => {
   const rules = rulesAt(boundary.rules);
+  const attacker = rules.rulesContext.selectorRoles.attacker;
   if (
     boundary.request.kind !== "command"
-    || boundary.request.side !== "player"
-    || boundary.request.battler !== 0
+    || attacker === null
+    || boundary.request.battler !== attacker
+    || boundary.request.side !== (attacker === 0 ? "player" : "trainer")
     || boundary.decision.kind !== "use-move"
   ) {
-    throw new Error("factory asleep move adapter requires a player use-move command");
+    throw new Error("factory asleep move adapter requires its active-side use-move command");
   }
   const moveSlot = boundary.decision.moveSlot;
-  const moveId = rules.rulesContext.battlers[0].moves[moveSlot];
-  if (moveId === 0 || rules.rulesContext.battlers[0].pp[moveSlot] === 0) {
+  const moveId = rules.rulesContext.battlers[attacker].moves[moveSlot];
+  if (moveId === 0 || rules.rulesContext.battlers[attacker].pp[moveSlot] === 0) {
     throw new Error(`Factory move slot ${moveSlot} is not usable`);
   }
   const topology = TOPOLOGY_BY_MOVE.get(moveId);
@@ -426,6 +489,12 @@ const reduceFactoryAsleepMove: BattleDecisionReducer<FactoryBattleScriptDecision
 
   const selectedContext = createBattleScriptRulesContext({
     ...rules.rulesContext,
+    selectorRoles: {
+      attacker,
+      target: boundary.decision.targetBattler,
+      effectBattler: boundary.decision.targetBattler,
+    },
+    scriptingBattler: attacker,
     currentMove: moveId,
     currentMovePosition: moveSlot,
   });
@@ -441,6 +510,7 @@ const reduceFactoryAsleepMove: BattleDecisionReducer<FactoryBattleScriptDecision
     || admission.receipt.programCounter.kind !== "handoff"
     || admission.receipt.programCounter.targetLabel !== ENTRY_LABEL
     || admission.receipt.controllerSync.kind !== "request-status1-write"
+    || admission.receipt.controllerSync.battler !== attacker
     || admission.receipt.rng.callsConsumed !== 0
     || admission.rngValue !== rngBefore.value
     || admission.rngCallsConsumed !== rngBefore.calls
@@ -459,12 +529,14 @@ const reduceFactoryAsleepMove: BattleDecisionReducer<FactoryBattleScriptDecision
       ? Object.freeze({
         kind: "message" as const,
         messageId: "STRINGID_PKMNFASTASLEEP",
-        substitutions: Object.freeze(["TYROGUE"]),
+        substitutions: Object.freeze([
+          attacker === 0 ? "TYROGUE" : "PLUSLE",
+        ]),
       })
       : null,
     prepareSelectionMessage: () => null,
     prepareSelectionMessageFromTable: () => null,
-    resolveAttackerBattler: () => 0 as const,
+    resolveAttackerBattler: () => attacker,
     resolveBattlerAtPosition: () => null,
     resolveHalfwordOperand: (
       _context: unknown,
@@ -553,5 +625,9 @@ export function submitFactoryAsleepMoveDecision(
   state: BattleState<FactoryBattleScriptDecisionRules>,
   submission: BattleDecisionSubmission,
 ): BattleDecisionTransitionResult<FactoryBattleScriptDecisionRules> {
-  return submitBattleDecision(state, submission, reduceFactoryAsleepMove);
+  return submitBattleDecision(
+    state,
+    submission,
+    reduceFactoryAsleepMoveDecision,
+  );
 }

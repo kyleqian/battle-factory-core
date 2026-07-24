@@ -8,10 +8,15 @@ import {
 } from "../src/engine/battleDecisionBoundary.ts";
 import {
   createFactoryAsleepMoveBattleState,
+  reduceFactoryAsleepMoveDecision,
   submitFactoryAsleepMoveDecision,
   type FactoryAsleepMoveConfig,
   type FactoryBattleScriptDecisionRules,
 } from "../src/engine/factoryBattleScriptDecision.ts";
+import {
+  submitFactoryAiMaskZeroDecision,
+  type FactoryAiMaskZeroView,
+} from "../src/engine/factoryAiDecisionPolicy.ts";
 import {
   acknowledgeBattleScriptMachineController,
   createBattleScriptMachine,
@@ -29,6 +34,7 @@ const program = loadBattleScriptProgram();
 const config: FactoryAsleepMoveConfig = {
   playerSetId: 15,
   trainerSetId: 291,
+  commandSide: "player",
   playerHp: 110,
   trainerHp: 135,
   sleepTurns: 4,
@@ -38,8 +44,27 @@ const config: FactoryAsleepMoveConfig = {
 const submission = {
   requestId: 41,
   side: "player",
-  decision: { kind: "use-move", moveSlot: 1, targetBattler: 1 },
+  decision: { kind: "use-move", moveSlot: 1, targetBattler: 0 },
 } as const;
+const trainerConfig: FactoryAsleepMoveConfig = {
+  ...config,
+  commandSide: "trainer",
+  sleepTurns: 4,
+  rngSeed: 1,
+  requestId: 73,
+};
+const trainerAiView: FactoryAiMaskZeroView = Object.freeze({
+  schema: "factory-ai-view/v1",
+  mode: "factory-level-50-singles",
+  active: Object.freeze({ aiBattler: 1, targetBattler: 0 }),
+  factory: Object.freeze({
+    levelMode: 0,
+    battleMode: 0,
+    factoryWinStreak: 0,
+    trainerOpponentId: 50,
+  }),
+  moves: Object.freeze([85, 86, 69, 273] as const),
+});
 
 function initial() {
   return createFactoryAsleepMoveBattleState(config);
@@ -72,8 +97,8 @@ describe("Factory asleep move decision-to-machine vertical slice", () => {
           battler: 0,
           legalDecisions: [
             { kind: "use-move", moveSlot: 0, targetBattler: 1 },
-            { kind: "use-move", moveSlot: 1, targetBattler: 1 },
-            { kind: "use-move", moveSlot: 2, targetBattler: 1 },
+            { kind: "use-move", moveSlot: 1, targetBattler: 0 },
+            { kind: "use-move", moveSlot: 2, targetBattler: 0 },
             { kind: "use-move", moveSlot: 3, targetBattler: 1 },
           ],
         },
@@ -110,6 +135,44 @@ describe("Factory asleep move decision-to-machine vertical slice", () => {
       moves: [85, 86, 69, 273],
       pp: [15, 20, 20, 10],
     });
+  });
+
+  it("constructs the trainer-owned asleep request with source-derived singles targets", () => {
+    const state = createFactoryAsleepMoveBattleState(trainerConfig);
+
+    expect(state.boundary).toEqual({
+      kind: "decision-required",
+      request: {
+        kind: "command",
+        requestId: 73,
+        side: "trainer",
+        battler: 1,
+        legalDecisions: [
+          { kind: "use-move", moveSlot: 0, targetBattler: 0 },
+          { kind: "use-move", moveSlot: 1, targetBattler: 0 },
+          { kind: "use-move", moveSlot: 2, targetBattler: 0 },
+          { kind: "use-move", moveSlot: 3, targetBattler: 1 },
+        ],
+      },
+    });
+    expect(state.rules.rulesContext).toMatchObject({
+      selectorRoles: {
+        attacker: 1,
+        target: 0,
+        effectBattler: 0,
+      },
+      scriptingBattler: 1,
+    });
+    expect(state.rules.rulesContext.battlers[0]).toMatchObject({
+      status1: 0,
+      moves: [183, 182, 104, 263],
+    });
+    expect(state.rules.rulesContext.battlers[1]).toMatchObject({
+      status1: 4,
+      moves: [85, 86, 69, 273],
+      pp: [15, 20, 20, 10],
+    });
+    assertDeepFrozen(state);
   });
 
   it("pins the real source labels and executed opcode path without registering opcode 0", () => {
@@ -214,6 +277,124 @@ describe("Factory asleep move decision-to-machine vertical slice", () => {
     }
   });
 
+  it("drives trainer Wish from mask-0 AI through the same asleep script machine without splitting RNG", () => {
+    const ambient = vi.spyOn(Math, "random").mockImplementation(() => {
+      throw new Error("ambient randomness is forbidden");
+    });
+    try {
+      const state = createFactoryAsleepMoveBattleState(trainerConfig);
+      const result = submitFactoryAiMaskZeroDecision(
+        state,
+        trainerAiView,
+        reduceFactoryAsleepMoveDecision,
+      );
+
+      expect(ambient).not.toHaveBeenCalled();
+      expect(result.trace.draws).toHaveLength(5);
+      expect(result.trace.draws[0]).toMatchObject({
+        ordinal: 1,
+        before: { value: 1, calls: 0 },
+      });
+      expect(result.trace.draws[4]).toMatchObject({
+        ordinal: 5,
+        after: { value: 0x79e3_9ac4, calls: 5 },
+      });
+      expect(result.submission).toEqual({
+        requestId: 73,
+        side: "trainer",
+        decision: { kind: "use-move", moveSlot: 3, targetBattler: 1 },
+      });
+      expect(result.rng).toEqual({ value: 0x79e3_9ac4, calls: 5 });
+      expect(result.transition).toMatchObject({
+        kind: "machine-barrier",
+        barrier: {
+          kind: "battle-script",
+          entryLabel: "BattleScript_MoveUsedIsAsleep",
+          opcodeId: 46,
+          opcodeName: "B_SCR_OP_SETBYTE",
+          dispatcher: "Cmd_setbyte",
+          instructionsExecuted: 67,
+        },
+        events: [
+          {
+            sequence: 0,
+            payload: {
+              kind: "message",
+              messageId: "STRINGID_PKMNFASTASLEEP",
+              substitutions: ["PLUSLE"],
+            },
+          },
+          {
+            sequence: 1,
+            payload: {
+              kind: "status-animation",
+              battler: 1,
+              isStatus2: 0,
+              status: 3,
+            },
+          },
+        ],
+        state: {
+          revision: 1,
+          nextEventSequence: 2,
+          rng: { value: 0x79e3_9ac4, calls: 5 },
+          rules: {
+            phase: "move-end-barrier",
+            selectedMove: {
+              slot: 3,
+              moveId: 273,
+              entryScript: "BattleScript_EffectWish",
+            },
+            rulesContext: {
+              selectorRoles: {
+                attacker: 1,
+                target: 1,
+                effectBattler: 1,
+              },
+              currentMove: 273,
+              currentMovePosition: 3,
+              atkCancelerTracker: 2,
+              hitMarker: BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE,
+            },
+          },
+        },
+      });
+      expect(result.transition.state.rng).toEqual(result.rng);
+      expect(result.transition.state.rules.rulesContext.battlers[1]).toMatchObject({
+        status1: 3,
+        pp: [15, 20, 20, 10],
+      });
+      expect(state.rng).toEqual({ value: 1, calls: 0 });
+      expect(state.rules.rulesContext.battlers[1].status1).toBe(4);
+      assertDeepFrozen(result);
+    } finally {
+      ambient.mockRestore();
+    }
+  });
+
+  it("canonically replays the trainer AI-to-machine transition", () => {
+    const state = createFactoryAsleepMoveBattleState(trainerConfig);
+    const restored = parseBattleState(
+      serializeBattleState(state),
+    ) as BattleState<FactoryBattleScriptDecisionRules>;
+
+    const first = submitFactoryAiMaskZeroDecision(
+      state,
+      trainerAiView,
+      reduceFactoryAsleepMoveDecision,
+    );
+    const replay = submitFactoryAiMaskZeroDecision(
+      restored,
+      trainerAiView,
+      reduceFactoryAsleepMoveDecision,
+    );
+
+    expect(replay).toEqual(first);
+    expect(serializeBattleState(replay.transition.state)).toBe(
+      serializeBattleState(first.transition.state),
+    );
+  });
+
   it("canonical parse/serialize replay reproduces the identical transition", () => {
     const state = initial();
     const restored = parseBattleState(
@@ -233,6 +414,7 @@ describe("Factory asleep move decision-to-machine vertical slice", () => {
     for (const invalid of [
       { ...config, playerSetId: 273 },
       { ...config, trainerSetId: 290 },
+      { ...config, commandSide: "spectator" },
       { ...config, playerHp: 0 },
       { ...config, trainerHp: 0 },
       { ...config, sleepTurns: 1 },
@@ -249,7 +431,7 @@ describe("Factory asleep move decision-to-machine vertical slice", () => {
     expect(() =>
       submitFactoryAsleepMoveDecision(initial(), {
         ...submission,
-        decision: { kind: "use-move", moveSlot: 1, targetBattler: 0 },
+        decision: { kind: "use-move", moveSlot: 1, targetBattler: 1 },
       })).toThrow();
     expect(() =>
       submitFactoryAsleepMoveDecision(initial(), {
@@ -333,6 +515,7 @@ describe("Factory asleep move decision-to-machine vertical slice", () => {
       "utf8",
     );
     for (const forbidden of [
+      "./factoryAiDecisionPolicy.ts",
       "./core.ts",
       "./battleScene.ts",
       "Render",
