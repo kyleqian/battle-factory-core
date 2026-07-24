@@ -70,6 +70,7 @@ describe("source-relative BOUNCE presentation", () => {
         playerGender: "female",
         opponentGender: "female",
       },
+      controllerProfile: { moveTextFirstAge: -22 },
       animationAgeOffset: -9,
     });
     expect(sceneOnBounceView({ ...state, age: 18 })).toMatchObject({
@@ -81,6 +82,11 @@ describe("source-relative BOUNCE presentation", () => {
       attackerInvisible: true,
       impactVisible: true,
       targetTaskOwnsY2: true,
+      message: {
+        line1: "Foe SPOINK used",
+        line2: "BOUNCE!",
+        visibleChars: 22,
+      },
     });
   });
 });

@@ -23,6 +23,9 @@
     "playerGender": "female",
     "opponentGender": "female"
   },
+  "controllerProfile": {
+    "moveTextFirstAge": 999
+  },
   "acceptance": {
     "status": "partial",
     "remaining": "Strike/controller half and opposite orientation are not yet accepted."

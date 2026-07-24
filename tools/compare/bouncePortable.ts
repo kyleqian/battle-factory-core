@@ -28,6 +28,7 @@ interface Fixture {
     readonly excludedFrames?: readonly number[];
   };
   readonly fieldProfile: SceneOnFaintAttackFieldProfile;
+  readonly controllerProfile: SceneOnBounceConfig["controllerProfile"];
 }
 
 const root = resolve(dirname(new URL(import.meta.url).pathname), "../..");
@@ -65,6 +66,7 @@ let state: EngineState = {
     turn: fixture.turn,
     ...SPOINK_TO_ONIX_BOUNCE_PRESENTATION,
     fieldProfile: fixture.fieldProfile,
+    controllerProfile: fixture.controllerProfile,
     animationAgeOffset: fixture.appStage.animationAgeOffset,
   }),
 };

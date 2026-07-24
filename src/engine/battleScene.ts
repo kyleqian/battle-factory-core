@@ -15623,6 +15623,19 @@ export function renderSceneOnMovePresentation(
       target.geometry.spriteCorner.x,
       target.geometry.spriteCorner.y + view.targetShakeY2,
     );
+    const bounceEffectBackdrop = fb.slice();
+    if (view.impactVisible) {
+      drawSpriteSheetBlendedOverBackdrop(
+        fb,
+        bounceEffectBackdrop,
+        battleAnimHitsplat.tileset,
+        battleAnimHitsplat.palette,
+        target.geometry.animationCenter.x - 16,
+        target.geometry.animationCenter.y - 16,
+        12,
+        8,
+      );
+    }
     if (view.ball) {
       drawSpriteSheetAffineStretch(
         fb,
@@ -15668,6 +15681,14 @@ export function renderSceneOnMovePresentation(
       battleWindow.tilemap,
       battleWindow.palette,
     );
+    if (view.message) {
+      drawMessageTextLines(
+        fb,
+        view.message.line1,
+        view.message.line2,
+        view.message.visibleChars,
+      );
+    }
     return;
   }
 
