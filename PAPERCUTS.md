@@ -110,6 +110,17 @@ Per entry:
 - **Workaround:** scope `rg` to `src/`, `tests/`, and the exact reference
   source directories, or add generated/bundle globs to the exclusion list.
 
+## Foreground oracle restart floods the execution transcript
+
+- **What:** starting `run-oracle.sh` directly in a retained PTY streams
+  hundreds of kilobytes of routine mGBA diagnostics both at bootstrap and
+  teardown, obscuring the service-ready and shutdown signals.
+- **Hits:** 1.
+- **Cost each:** ~2 min.
+- **Workaround:** launch the retained foreground service with stdout/stderr
+  redirected to a named `/tmp` log, then poll `/v1/info` for readiness and
+  retain only the process handle for shutdown.
+
 ## Serialized oracle compares can strand or terminate multi-trace batches
 
 - **What:** launching several oracle-backed compares concurrently can leave a
