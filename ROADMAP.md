@@ -607,6 +607,11 @@ dynamic frame: B default-YES **65/65**, B NO **113/113**, B return **113/113**,
 and CANCEL default-YES **65/65**. It reuses the player prompt/response reducer,
 owns no party/rental/result or selection-RNG mutation, and leaves only
 duplicate-species rejection in the finite swap-YES UI audit.
+The duplicate reducer/presentation seam is now implemented as a green logic
+checkpoint: source-relative +24 error readiness, +23 close/reconstruction,
+install-frame rejection, and first fresh enemy input are Tier-1 pinned with
+all identities/result/round ownership preserved. Dense staged framebuffer
+verification remains required before Gate 2 or S8 can close.
 The parallel Scene-ON adapter
 now proves FIRE PUNCH in both orientations (**225/225** and **277/277**) and
 its canonical residual windows (**236/236** and **200/200**), making it

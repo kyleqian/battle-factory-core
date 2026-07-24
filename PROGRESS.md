@@ -4,6 +4,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 345 — S8 OFF duplicate-species rejection: **GREEN LOGIC CHECKPOINT**
+
+- **State:** the live generic swap seam now takes the source duplicate-species
+  branch, owns its exact fixture-relative input gates, closes the error, and
+  reconstructs an input-gated enemy picker. S8 stays open pending dense pixel
+  verification of this staged-only branch.
+- **Did:** added direct OpenMonPic/error/close/restore phases, +24 message
+  A/B readiness, +23 picker reconstruction, install-frame rejection, and
+  first fresh input. Tier-1 pins immutable player/enemy/rentals/result,
+  absent copy/round semantics, and source-relative picture ownership.
+- **Next:** compare the live rendered +0..+49 staged window against the
+  fixture/probe framebuffer hashes, correct any presentation offsets, and
+  commit the dense deterministic verifier/trace before closing S8.
+- **Notes:** Tier-1 **1267/1267**, build **5.677 MB**; existing enemy accept
+  prompt **66/66 exact**. No absolute ticks, framebuffer assets, mutation,
+  round ownership, or selection RNG.
+
+---
 ## 344 — S8 OFF enemy-origin swap quit: **GREEN — 356/356 exact**
 
 - **State:** enemy picker B and enemy CANCEL now share the existing quit
