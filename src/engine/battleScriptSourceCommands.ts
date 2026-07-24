@@ -27,6 +27,16 @@ export type BattleScriptMessagePayload = Extract<
   Readonly<{ kind: "message" }>
 >;
 
+type BattleScriptSelectedBattlerControllerEventPayload = Extract<
+  BattleScriptSemanticEventPayload,
+  Readonly<{
+    kind:
+      | "play-faint-cry"
+      | "hide-party-status-summary"
+      | "set-battler-sprite-visibility";
+  }>
+>;
+
 export type BattleScriptControllerIdlePort<RulesContext extends object> = (
   context: BattleScriptOpcodeHandlerContext<RulesContext>,
 ) => boolean;
@@ -472,9 +482,12 @@ function emitAudioControllerEvent<RulesContext extends object>(
   );
 }
 
-function emitFaintCryControllerEvent<RulesContext extends object>(
+function emitSelectedBattlerControllerEvent<RulesContext extends object>(
   context: BattleScriptOpcodeHandlerContext<RulesContext>,
   ports: BattleScriptSourceCommandPorts<RulesContext>,
+  createEvent: (
+    battler: BattleScriptBattlerId,
+  ) => BattleScriptSelectedBattlerControllerEventPayload,
 ): BattleScriptCommandTransition<RulesContext> {
   const required = requireSingleByteOperand(context);
   if (required.kind === "transition") return required.transition;
@@ -498,75 +511,7 @@ function emitFaintCryControllerEvent<RulesContext extends object>(
     {
       scheduler,
       events: Object.freeze([
-        Object.freeze({ kind: "play-faint-cry", battler }),
-      ]),
-    },
-  );
-}
-
-function emitHidePartyStatusSummaryControllerEvent<RulesContext extends object>(
-  context: BattleScriptOpcodeHandlerContext<RulesContext>,
-  ports: BattleScriptSourceCommandPorts<RulesContext>,
-): BattleScriptCommandTransition<RulesContext> {
-  const required = requireSingleByteOperand(context);
-  if (required.kind === "transition") return required.transition;
-  const battler = ports.resolveBattlerForBattleScript(context, required.operand);
-  if (battler === null) {
-    return blockBattleScriptCommand(
-      context,
-      unavailableBattlerSelectorReason(context, required.operand),
-    );
-  }
-  if (!isBattleScriptBattlerId(battler)) {
-    return haltForInvalidBattler(context, battler);
-  }
-  const scheduler = markBattleScriptControllerPending(
-    schedulerWith(context, { activeBattler: battler }),
-    battler,
-  );
-  return transitionBattleScriptCommand(
-    context,
-    Object.freeze({ kind: "advance" }),
-    {
-      scheduler,
-      events: Object.freeze([
-        Object.freeze({ kind: "hide-party-status-summary", battler }),
-      ]),
-    },
-  );
-}
-
-function emitMakeVisibleControllerEvent<RulesContext extends object>(
-  context: BattleScriptOpcodeHandlerContext<RulesContext>,
-  ports: BattleScriptSourceCommandPorts<RulesContext>,
-): BattleScriptCommandTransition<RulesContext> {
-  const required = requireSingleByteOperand(context);
-  if (required.kind === "transition") return required.transition;
-  const battler = ports.resolveBattlerForBattleScript(context, required.operand);
-  if (battler === null) {
-    return blockBattleScriptCommand(
-      context,
-      unavailableBattlerSelectorReason(context, required.operand),
-    );
-  }
-  if (!isBattleScriptBattlerId(battler)) {
-    return haltForInvalidBattler(context, battler);
-  }
-  const scheduler = markBattleScriptControllerPending(
-    schedulerWith(context, { activeBattler: battler }),
-    battler,
-  );
-  return transitionBattleScriptCommand(
-    context,
-    Object.freeze({ kind: "advance" }),
-    {
-      scheduler,
-      events: Object.freeze([
-        Object.freeze({
-          kind: "set-battler-sprite-visibility",
-          battler,
-          invisible: false,
-        }),
+        Object.freeze(createEvent(battler)),
       ]),
     },
   );
@@ -654,11 +599,27 @@ export function createBattleScriptSourceCommandHandlers<RulesContext extends obj
   installHandler(program, handlers, "B_SCR_OP_FANFARE", (context) =>
     emitAudioControllerEvent(context, ports, "play-fanfare"));
   installHandler(program, handlers, "B_SCR_OP_PLAYFAINTCRY", (context) =>
-    emitFaintCryControllerEvent(context, ports));
+    emitSelectedBattlerControllerEvent(
+      context,
+      ports,
+      (battler) => ({ kind: "play-faint-cry", battler }),
+    ));
   installHandler(program, handlers, "B_SCR_OP_HIDEPARTYSTATUSSUMMARY", (context) =>
-    emitHidePartyStatusSummaryControllerEvent(context, ports));
+    emitSelectedBattlerControllerEvent(
+      context,
+      ports,
+      (battler) => ({ kind: "hide-party-status-summary", battler }),
+    ));
   installHandler(program, handlers, "B_SCR_OP_MAKEVISIBLE", (context) =>
-    emitMakeVisibleControllerEvent(context, ports));
+    emitSelectedBattlerControllerEvent(
+      context,
+      ports,
+      (battler) => ({
+        kind: "set-battler-sprite-visibility",
+        battler,
+        invisible: false,
+      }),
+    ));
   installHandler(program, handlers, "B_SCR_OP_WAITMESSAGE", (context) => {
     if (!ports.isControllerIdle(context)) {
       return blockBattleScriptCommand(context, controllerBusyReason(context));
