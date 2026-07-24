@@ -68,6 +68,8 @@ def main() -> None:
     sand_attack_dirt_template = oracle.symbols["gSandAttackDirtSpriteTemplate"]
     fly_ball_up_template = oracle.symbols["gFlyBallUpSpriteTemplate"]
     fly_ball_attack_template = oracle.symbols["gFlyBallAttackSpriteTemplate"]
+    bounce_ball_shrink_template = oracle.symbols["gBounceBallShrinkSpriteTemplate"]
+    bounce_ball_land_template = oracle.symbols["gBounceBallLandSpriteTemplate"]
     basic_hitsplat_template = oracle.symbols["gBasicHitSplatSpriteTemplate"]
     battle_mons = oracle.symbols["gBattleMons"]
     battler_sprite_ids = oracle.symbols["gBattlerSpriteIds"]
@@ -140,6 +142,7 @@ def main() -> None:
         feather_sprites = []
         sand_attack_dirt_sprites = []
         fly_sprites = []
+        bounce_sprites = []
         basic_hitsplat_sprites = []
         for slot in range(64):
             base = sprites + slot * 0x44
@@ -156,6 +159,15 @@ def main() -> None:
                     "kind": (
                         "charge"
                         if template == fly_ball_up_template
+                        else "strike"
+                    ),
+                })
+            elif template in (bounce_ball_shrink_template, bounce_ball_land_template):
+                bounce_sprites.append({
+                    **feather_record(slot),
+                    "kind": (
+                        "charge"
+                        if template == bounce_ball_shrink_template
                         else "strike"
                     ),
                 })
@@ -196,6 +208,7 @@ def main() -> None:
                 "sandAttackDirtSprites": sand_attack_dirt_sprites,
                 "sandAttackDirtOam": sand_attack_dirt_oam,
                 "flySprites": fly_sprites,
+                "bounceSprites": bounce_sprites,
                 "basicHitsplatSprites": basic_hitsplat_sprites,
                 "bldalpha": oracle.read_u8(0x04000052)
                 | (oracle.read_u8(0x04000053) << 8),
