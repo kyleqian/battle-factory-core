@@ -28,6 +28,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { parseItemSourceRecords } from "./item-source.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const RUN_ROOT = join(HERE, "..", "..");
@@ -38,46 +39,9 @@ mkdirSync(DATA_GEN, { recursive: true });
 
 const holdEffectsH = readFileSync(join(REF, "include", "constants", "hold_effects.h"), "utf8");
 const itemsC = readFileSync(join(REF, "src", "data", "items.h"), "utf8");
-
-function parseHoldEffectConstants(): Map<string, number> {
-  const out = new Map<string, number>();
-  for (const m of holdEffectsH.matchAll(/^#define HOLD_EFFECT_(\w+)\s+(\d+)/gm)) {
-    out.set(m[1]!, Number.parseInt(m[2]!, 10));
-  }
-  return out;
-}
-const holdEffectConstants = parseHoldEffectConstants();
-if (holdEffectConstants.get("NONE") !== 0) throw new Error("HOLD_EFFECT_NONE expected to be 0");
-
-// Split into per-item blocks the same way extract-item-names.ts anchors on
-// `[ITEM_x] = {`, but here we need the whole block body (not just the first
-// field), so slice between consecutive markers instead of a single regex.
-const itemBlockStarts = [...itemsC.matchAll(/\[ITEM_(\w+)\]\s*=\s*\{/g)].map((m) => ({
-  item: m[1]!,
-  index: m.index!,
-  bodyStart: m.index! + m[0]!.length,
-}));
-if (itemBlockStarts.length === 0) throw new Error("no [ITEM_x] = { blocks found in items.h");
-
-const entries: { item: string; holdEffect: string; holdEffectParam: number }[] = [];
-for (let i = 0; i < itemBlockStarts.length; i++) {
-  const { item, bodyStart } = itemBlockStarts[i]!;
-  const bodyEnd = i + 1 < itemBlockStarts.length ? itemBlockStarts[i + 1]!.index : itemsC.indexOf("\n};", bodyStart);
-  const block = itemsC.slice(bodyStart, bodyEnd);
-
-  const holdEffectMatch = /\.holdEffect\s*=\s*HOLD_EFFECT_(\w+)/.exec(block);
-  if (!holdEffectMatch) continue; // no explicit .holdEffect field -> HOLD_EFFECT_NONE, not a real hold effect
-
-  const holdEffectName = holdEffectMatch[1]!;
-  if (!holdEffectConstants.has(holdEffectName)) {
-    throw new Error(`ITEM_${item}: unknown HOLD_EFFECT_${holdEffectName} (not in hold_effects.h)`);
-  }
-
-  const paramMatch = /\.holdEffectParam\s*=\s*(\d+)/.exec(block);
-  const holdEffectParam = paramMatch ? Number.parseInt(paramMatch[1]!, 10) : 0;
-
-  entries.push({ item: `ITEM_${item}`, holdEffect: `HOLD_EFFECT_${holdEffectName}`, holdEffectParam });
-}
+const entries = [...parseItemSourceRecords(itemsC, holdEffectsH).values()]
+  .filter((record) => record.hasExplicitHoldEffect)
+  .map(({ item, holdEffect, holdEffectParam }) => ({ item, holdEffect, holdEffectParam }));
 
 // Spot-check the three items this extraction was scoped for.
 const bySymbol = new Map(entries.map((e) => [e.item, e]));
