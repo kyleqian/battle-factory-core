@@ -1,3 +1,28 @@
+## 411 — Factory-scoped obedience composed
+
+- **State:** the run is clean and green at **156 files / 1898 tests**. S10
+  Gate 3 remains at **27** source-safe executable opcodes. The pure
+  attack-canceler chain now reaches the Factory-only obedience continuation;
+  opcode 0 remains unregistered and no machine, controller, decision-boundary,
+  core, round, presentation, OTHER, or IGNORED behavior was added.
+- **Did:** added an explicit typed `BATTLE_FACTORY`/`BATTLE_TYPE_FACTORY`/
+  `BATTLE_TYPE_FRONTIER` scope and an immutable join after selected-slot PP.
+  Legal player-side Factory attackers return obedient at the Frontier check
+  before ownership/badges/level/RNG; opponent-side attackers return even
+  earlier. Successful admission preserves the source PC and prior receipts,
+  consumes zero RNG, and sets exactly `HITMARKER_OBEYS`.
+- **Next:** keep opcode 0 unregistered. The next exact source boundary is
+  Magic Coat after obedience; Snatch, Lightning Rod, Protect, machine and
+  controller integration remain separately unowned.
+- **Notes:** both singles sides, preexisting OBEYS, multi-turn helper bypass,
+  canceler effects **1/2**, Soundproof, and no-PP stops are pinned. Invalid/
+  non-Factory scope, invalid input/composition/PC, deterministic replay, input
+  immutability, recursive freezing, full receipt preservation, and zero RNG
+  are covered. Focused **3 files / 20 tests**; integrated **156/1898**,
+  production build, OFF v5 info (`9c89c741…`), and diff check green. Code
+  commit `61641fa`; pixel diff N/A.
+
+---
 ## 410 — Gate-3 selected-slot PP admission composed
 
 - **State:** the run is clean and green at **154 files / 1887 tests**. S10

@@ -981,6 +981,20 @@ Factory-AI policy boundary: source-faithful view plus kernel-provided legal
 decisions plus explicit RNG returns one legal decision, updated RNG, and an
 inspectable trace, then submits through the same kernel boundary as a player.
 
+**Factory-AI vertical-composition checkpoint (2026-07-24):** the minimal
+injected boundary is implemented for ordinary Level-50 singles mask **0**.
+The pure policy consumes all four setup draws in move-slot order (including
+illegal slots), initializes source scores at **100** and authoritatively zeros
+kernel-illegal decisions, runs no scoring scripts, and consumes the final tie
+draw even for one best move. Its frozen trace records the existing mask
+selection receipt, before/after RNG, raw and simulated values, slot scores,
+best slots, and tie selection. A generic composition wrapper submits the
+resulting `BattleDecisionSubmission` through the published
+`submitBattleDecision` function and advances that same kernel-owned RNG cursor
+before rules execution. Canonical replay and next-request/terminal returns are
+Tier-1 pinned. Masks 1/7, switching, forced switching, Tent/Open/doubles, and
+their path-dependent mechanics/RNG remain explicitly unsupported.
+
 S10 has six ordered completion gates:
 
 1. [x] **Complete Factory corpus:** mechanically extract and validate all 300

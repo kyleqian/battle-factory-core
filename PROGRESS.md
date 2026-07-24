@@ -4,6 +4,32 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 414 — Factory AI mask-0 boundary composed
+
+- **State:** the assigned S10 vertical composition is committed and green at
+  **161 files / 1932 tests**. The production policy supports only ordinary
+  Level-50 Factory singles mask **0**; masks 1/7, switching, forced switching,
+  and non-Level-50 views are explicit rejections.
+- **Did:** added a frozen minimal source view and pure injected move policy over
+  the kernel's legal decisions plus explicit `BattleRngState`. It consumes four
+  setup draws in slot order, including illegal slots, scores legal moves
+  **100** and illegal moves **0**, executes no scripts, consumes the mandatory
+  tie draw even at modulus 1, and returns one `BattleDecisionSubmission`, RNG,
+  and a recursively frozen trace. A generic wrapper submits that choice through
+  the published `submitBattleDecision` boundary and synchronizes all policy
+  draws into the kernel-owned cursor before rules execution.
+- **Next:** keep opcode 0 unregistered. The next AI breadth unit is mask 1's
+  source `AI_CheckBadMove` scorer with its required pure mechanics helpers;
+  do not claim mask 7 or switch policy until their separate source paths and
+  path-dependent RNG are complete.
+- **Notes:** canonical replay, legal-list authority, exact five-draw receipts
+  (`0x12345678` → `0x2684ad1f`), raw/simulated values, scores/best slots/tie,
+  mask-selection receipt, immutability, malformed/unsupported inputs, and
+  import boundaries are pinned. Focused **3 files / 60 tests**; integrated
+  **161/1932**, production build, OFF v5 info (`9c89c741…`), and diff checks
+  pass. Code commit `d29a950`; pixel diff N/A.
+
+---
 ## 413 — Factory asleep decision reaches real script barrier
 
 - **State:** the assigned S10 vertical composition is committed, clean, and
@@ -65,28 +91,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   delegated Pressure PP/resume/controller/history effects, and the complete
   machine adapter over the already-ported prefix. Code commit `57969b5`; pixel
   diff N/A.
-
----
-## 411 — Factory-scoped obedience composed
-
-- **State:** the run is clean and green at **156 files / 1898 tests**. S10
-  Gate 3 remains at **27** source-safe executable opcodes. The pure
-  attack-canceler chain now reaches the Factory-only obedience continuation;
-  opcode 0 remains unregistered and no machine, controller, decision-boundary,
-  core, round, presentation, OTHER, or IGNORED behavior was added.
-- **Did:** added an explicit typed `BATTLE_FACTORY`/`BATTLE_TYPE_FACTORY`/
-  `BATTLE_TYPE_FRONTIER` scope and an immutable join after selected-slot PP.
-  Legal player-side Factory attackers return obedient at the Frontier check
-  before ownership/badges/level/RNG; opponent-side attackers return even
-  earlier. Successful admission preserves the source PC and prior receipts,
-  consumes zero RNG, and sets exactly `HITMARKER_OBEYS`.
-- **Next:** keep opcode 0 unregistered. The next exact source boundary is
-  Magic Coat after obedience; Snatch, Lightning Rod, Protect, machine and
-  controller integration remain separately unowned.
-- **Notes:** both singles sides, preexisting OBEYS, multi-turn helper bypass,
-  canceler effects **1/2**, Soundproof, and no-PP stops are pinned. Invalid/
-  non-Factory scope, invalid input/composition/PC, deterministic replay, input
-  immutability, recursive freezing, full receipt preservation, and zero RNG
-  are covered. Focused **3 files / 20 tests**; integrated **156/1898**,
-  production build, OFF v5 info (`9c89c741…`), and diff check green. Code
-  commit `61641fa`; pixel diff N/A.
