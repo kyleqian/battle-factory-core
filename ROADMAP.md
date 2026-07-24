@@ -1127,6 +1127,90 @@ text hashes. Mutation facts remain explicitly lexical candidates rather than
 alias-analysis claims. No delegate semantics, RNG draw, controller request,
 script transfer, production handler, or opcode registration was added.
 
+### Executable-frontier reset (2026-07-24, user-directed)
+
+**Why.** A survey between supervisor sessions found the kernel's *executable*
+frontier is not moving in proportion to its output. As of `856b3b4`: **28 of
+249** topology opcodes are registered, and the registered set is dominated by
+the trivial print/wait/goto family. The entire executable surface is "a mon
+that cannot act does not act" (asleep TYROGUE; asleep AI PLUSLE). **No move
+resolves damage.** `roundController.ts` still consumes injected
+`CompletedBattle` fixtures, so Gate 5's "consumes real battle outcomes" has no
+path to being exercised. Meanwhile ~5,000 lines of correct, Tier-1-pinned
+`Cmd_attackcanceler` phase logic sit unwired. The bottleneck is not
+implementation throughput — it is the **registration gate**.
+
+**1. Registration policy — supersedes "never partially register opcode 0".**
+The old rule's purpose was sound: a half-implemented opcode silently produces a
+plausible wrong outcome. That guarantee is preserved by a cheaper mechanism.
+An opcode **may** be registered when every source branch is either
+
+- (a) implemented source-completely, or
+- (b) guarded by an explicit precondition that halts the machine with a new
+  `unsupported-branch` `BattleScriptHaltReason` naming the source construct,
+  file, and line — never falling through, never defaulting.
+
+Each (b) guard must be proven reachable by a Tier-1 test that drives the
+machine into the barrier. A branch that cannot be *reached* under the current
+scope (Level-50 singles) is still a (b) guard, not an omission. Silent
+fallthrough on any unimplemented branch remains prohibited, and that
+prohibition — not opcode-level all-or-nothing — is the invariant workers are
+held to.
+
+**2. Next acceptance unit: opcode 0, then one damaging move end-to-end.**
+Not another `Cmd_moveend` dependency step. Ordered:
+
+- **(i) Register opcode 0** by wiring the fifteen existing phase reducers in
+  `battleScriptActionAdmission.ts:1208-3686` (flags, asleep, frozen, truant,
+  recharge, flinch, disabled, taunted, imprisoned, confused, paralyzed,
+  in-love, bide, thaw, PP) plus `battleScriptAttackCanceler.ts`'s loop and
+  `battleScriptMagicCoat.ts`. Snatch (absent from all Factory sets) and
+  Lightning Rod redirection (unreachable in singles) are legitimate (b)
+  barriers with their existing source evidence cited.
+- **(ii) Register the standard hit chain.** Mechanically derived from the
+  committed program, `BattleScript_EffectHit`'s linear path needs **sixteen**
+  more opcodes on the hit branch — `accuracycheck`, `attackstring`,
+  `ppreduce`, `critcalc`, `damagecalc`, `typecalc`, `adjustnormaldamage`,
+  `attackanimation`, `effectivenesssound`, `hitanimation`, `healthbarupdate`,
+  `datahpupdate`, `critmessage`, `resultmessage`, `seteffectwithchance`,
+  `tryfaintmon` — plus **one** for the miss branch, `orbyte`.
+  (`waitanimation`, `waitstate`, `waitmessage`, `pause`, `goto`, `end`,
+  `setbyte` on that path are already registered.) With opcodes 0 and 73 that
+  is **nineteen registrations for a complete damaging move**. `damageCalc.ts`
+  is already a bit-exact port and should be consumed, not rewritten.
+- **(iii) Register opcode 73** (`moveend`) — the existing dependency ladder's
+  steps 1--4 are banked and step 5's receipt is committed; finish it under the
+  policy above rather than continuing to build prerequisites ahead of a use.
+- **(iv) Close the loop:** one legal Level-50 Factory battle runs to a real
+  terminal outcome through `submitBattleDecision`, and `roundController.ts`
+  consumes that outcome instead of a fixture.
+
+**Leverage, so this is not mistaken for one move's worth of work:** **69 of
+197** `BattleScript_Effect*` scripts reach that shared hit chain, covering
+**155 of 355 moves (44%)** — including every `setmoveeffect`+`goto` status-hit
+wrapper. This is the roadmap's own "shared effect scripts are the
+implementation unit" principle applied to its highest-value target.
+
+**3. Presentation seam checkpoint — required before kernel breadth past (iv).**
+The kernel currently has no consumer. `battleScene.ts` is 17,056 lines (30% of
+`src/engine`) whose `BattleSceneState` is keyed to the *one canonical battle*:
+74 declaration lines name a specific turn (`turn13Resolved`,
+`turn15PartySelect`, `turn17KoDismissElapsed`), 969 lines reference a turn
+number, and it reads HP out of committed RAM dumps
+(`battleScene.ts:651-653`). Nothing in it can consume a semantic event.
+Before growing the kernel beyond (iv), one **already-exact** presentation
+window must be re-driven from kernel semantic events rather than turn-N state,
+with its committed trace still passing at its recorded count. Any window
+qualifies; pick the smallest. Discovering the seam does not fit *after* the
+kernel lands is the expensive outcome this checkpoint exists to prevent.
+
+**4. Overfit containment.** AGENTS.md already forbids *new* battle/turn/tick
+branches. Additionally: **no new production import of a canonical recording.**
+Engine modules must not read `src/data/gen/*-ram-dump.json`,
+`*-probe.json`, `*-watch.json`, or `*-boundaries.json` at runtime; those are
+dev-time evidence for tests and extractors. Existing violations are tracked as
+ISSUES #39--#41 and are not grandfathered into new code.
+
 S10 has six ordered completion gates:
 
 1. [x] **Complete Factory corpus:** mechanically extract and validate all 300

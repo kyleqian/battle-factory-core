@@ -4,6 +4,43 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 426 — [USER-DIRECTED RE-SCOPE, between sessions] executable-frontier reset
+
+**Read this before ROADMAP.md — it changes the next action.** No code changed;
+suite **172 files / 1994 tests** and the production build are green at
+`856b3b4`.
+
+- **State:** a between-session survey found the kernel's *executable* frontier
+  is not moving in proportion to output. **28 of 249** opcodes registered,
+  almost all print/wait/goto; the entire executable surface is "a mon that
+  cannot act does not act"; **no move resolves damage**; `roundController.ts`
+  still consumes injected fixtures. ~5,000 lines of Tier-1-pinned
+  `Cmd_attackcanceler` phase logic sit unwired
+  (`battleScriptActionAdmission.ts:1208-3686`). The bottleneck is the
+  registration gate, not throughput.
+- **Did (docs only, three commits):** (1) synced ROADMAP Gate 2 / AGENTS.md /
+  `tools/battle-lab/README.md` with the harness's shipped pre-battle party
+  builder (`b30c5d8`/`d3a0cbb`, 14:10--14:18) — switch-in hooks, bench
+  construction, and controlled opponent actions are **closed**, and Gate 2's
+  remainder is exactly Noland's schema plus an earlier scouting-commentary
+  checkpoint. (2) Added ROADMAP S10 **"Executable-frontier reset"**: a
+  registration policy that replaces opcode-level all-or-nothing with explicit
+  `unsupported-branch` barriers, the ordered next steps, a presentation-seam
+  checkpoint, and an overfit-containment rule. (3) Filed ISSUES **#39--#41**
+  (turn-keyed `battleScene.ts`; `featherDance.ts` recorded-table replay;
+  production imports of canonical RAM dumps), added the animation lane's
+  interpreter spike, and added SUPERVISOR.md's executable-frontier gate.
+- **Next:** **not** move-end dependency step 5. Register **opcode 0** by wiring
+  the fifteen existing phase reducers plus the canceler loop and Magic Coat,
+  with Snatch/Lightning Rod as evidence-cited barriers. Then the seventeen
+  hit-chain opcodes, then opcode 73, then a real terminal outcome consumed by
+  `roundController.ts`. See ROADMAP S10's reset for the exact opcode list.
+- **Notes:** leverage for the hit chain — **69 of 197** `BattleScript_Effect*`
+  scripts reach it, covering **155 of 355 moves (44%)**. Prior entries 423--425
+  describe the superseded move-end-first ordering; their landed work is intact
+  and still used. No DEFERRED entries are open.
+
+---
 ## 425 — vertical move-end dependencies and exact Thunder Punch integrated
 
 - **State:** the vertical player/AI machine slice and move-end dependency steps
@@ -49,22 +86,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   pre-init only. State 16 still stops before cleanup/script transfer.
   Suite/build and OFF v5 (`9c89c741…`) pass; pixel diff N/A.
 
----
-## 422 — move-end history ownership and state reducers landed
-
-- **State:** dependency step 2 is complete and green at **168 files / 1974
-  tests**. Opcodes **73** and **0** remain unregistered; no topology,
-  controller, delegate, loop/end-mode, wrapper, receipt, core, render, or
-  oracle behavior was added.
-- **Did:** added six independent frozen four-battler history arrays plus exact
-  source `u8[16]`/`u8[32]` packed histories. Pure state-14/state-15 reducers
-  normalize unavailable chosen moves, swap roles before indexed writes, pin
-  both absent masks and hit/result/effect gates, resolve dynamic move type and
-  generated Mirror Move flags, and write little-endian target/attacker bytes.
-- **Next:** dependency step 3 only: add topology (`gBattlersCount`, battle type,
-  positions) and a source-shaped `WasUnableToUseMove` predicate. Then
-  controllers, complete ability/item delegates, all-case loop/end modes, and
-  only finally opcode-73 registration.
-- **Notes:** recursive freezing, source widths/cardinality, independent-owner
-  identity, JSON replay, packed byte layout, and existing player/AI verticals
-  pass. Integrated suite/build and OFF v5 (`9c89c741…`) pass; pixel diff N/A.

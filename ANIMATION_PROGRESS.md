@@ -42,6 +42,42 @@ substitute state, multi-turn/multi-hit state, or another explicit script input.
 Every status needs a committed ON-profile trace; `exact` cannot retain a known
 remainder.
 
+## Required next increment: anim-script interpreter spike (2026-07-24, user-directed)
+
+Before more hand-fitted move modules, run **one bounded spike** and let its
+result decide the lane's implementation unit.
+
+**Why.** The lane is at 18 exact of 276. The sixteen moves with their own
+module average **~220 lines each** of hand-derived age constants
+(`firePunch.ts` opens with 20 magic `*_AGE` values, a hardcoded
+`FIRE_PUNCH_AFTER_BURN_RNG_VALUE = 2012156700`, and two `TURN17_*` constants
+inside a nominally portable module). At that unit cost the remaining 258 moves
+are **~57,000 lines**, and `sceneOnPresentation.ts` grows a static import block
+per move. Separately, `src/data/gen/battle-move-anim-scripts.json` — the
+extracted anim command stream — **is not consumed by any `src/` module.** This
+is the same situation the battle-script IR decision already resolved for rules
+("moves select scripts; they do not each define a bespoke control path"),
+applied to animation.
+
+**The spike.** Build a minimal interpreter over the committed anim scripts plus
+a direct port of the sprite callbacks for **one** already-`exact` move, and
+check it against that move's existing dense evidence at its recorded count.
+`MOVE_FEATHER_DANCE` is the recommended subject: its source callbacks
+(`battle_anim_flying.c` `AnimFallingFeather` / `_Step`, ~50 lines) are
+deterministic with no `Random()`, and its current module is a recorded-table
+replay (ISSUES #40), so a success retires real debt rather than duplicating
+work.
+
+**This is falsifiable and either outcome is a result.** If the interpreter
+reproduces the move, the lane's implementation unit becomes
+script + ported callback, and hand-fitted timelines become the exception
+requiring justification. If it cannot, record precisely which source construct
+resists mechanical translation — that finding is worth more than another
+hand-fitted move, and hand-fitting continues with the reason on record.
+
+Move acceptance, dense oracle evidence, and both ledgers are unchanged by this;
+only the implementation unit is in question.
+
 ## Current handoff
 
 - **State:** **18 exact / 1 partial / 257 unsupported**. THUNDER PUNCH is exact

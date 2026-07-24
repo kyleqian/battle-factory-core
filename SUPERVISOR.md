@@ -12,8 +12,9 @@ result, and decides what happens next. You are not the implementer — workers
 via `tools/run-subagent.sh` do the on-the-ground work and should burn most of
 the session's compute. You run rarely and think hard when you do.
 
-Read `AGENTS.md` and the authoritative reset at the start of ROADMAP Stage 8
-first. Everything they say about this run — commit
+Read `AGENTS.md`, the authoritative reset at the start of ROADMAP Stage 8, and
+S10's **Executable-frontier reset** (the current stage's ordered next steps and
+its opcode-registration policy) first. Everything they say about this run — commit
 discipline, test tiers, oracle profiles, and lane ownership — applies to you,
 and you are its enforcer for the workers.
 
@@ -74,11 +75,20 @@ edit.
    Terra tier still defaults to high. Max and ultra are refused globally. This
    routing does not apply to Claude—the established Claude model and launch
    flow stay unchanged.
-   Before every Stage 8 brief, apply the **novelty gate**: name the new
+   Before every battle-lane brief, apply the **novelty gate**: name the new
    reusable mechanism, unique screen, or generic state transition it adds.
    "The next canonical Battle 2 turn/window" is not a mechanism and must not
    be dispatched. Use a staged scenario or controlled seed to prove repeated
    battle behavior without replaying the complete canonical prefix.
+   **S10 adds a second gate — the executable-frontier gate:** name what the
+   step makes *executable* that was not before (an opcode registered, a script
+   path that runs to completion, a decision the kernel can now answer). A step
+   whose only output is another receipt, audit, catalog, or unwired reducer
+   does not pass it. Prerequisite work is legitimate only when the brief names
+   the registration it unblocks and that registration is the next step, not a
+   later one. Prefer staging through `mechanicLab`'s `overrides.parties`
+   builder — abilities, switching, entry hooks, and AI decisions are all
+   directly checkable against the stock ROM now.
 3. **Delegate.** `./tools/run-subagent.sh "<brief>"` (`--help` lists
    configuration flags). Provider-specific launch mechanics are load-bearing:
    - **Claude supervisor:** launch it in the background; a foreground Bash

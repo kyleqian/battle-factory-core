@@ -5,6 +5,70 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
+## #41 — Production engine modules import canonical RAM recordings
+
+**Symptom:** shipped `src/engine/` code reads recorded state from the single
+canonical playthrough instead of computing it, so it is correct only for that
+playthrough.
+
+**Confirmed** (grep, 2026-07-24, `856b3b4`):
+- `battleScene.ts:651-653` imports `battle1-turn1-ram-dump.json`,
+  `battle1-turn2-ram-dump.json`, `battle1-grovyle-faint-ram-dump.json` and
+  reads battler HP/maxHP out of them (`:916-1267`).
+- `factorySwapPresentation.ts:2` imports `battle1-swap-rentalmons-dump.json`.
+- `featherDance.ts:29-31` imports turn-6/7/8 sprite probes (see #40).
+- 57 of the 114 files in `src/data/gen/` are `*-dump`/`*-probe`/`*-watch`/
+  `*-boundaries` recordings.
+
+**Leads:** the HP reads are the cheapest to retire — they become kernel
+semantic events once ROADMAP S10 step (ii) lands `datahpupdate`. Retire each
+import as its owning mechanism gains a real source, and keep the dump files
+for Tier-1 assertions and extractors. ROADMAP S10 §4 forbids new ones.
+
+## #40 — `featherDance.ts` replays a recorded per-tick sprite table
+
+**Symptom:** FEATHER DANCE is marked `exact` in `ANIMATION_COVERAGE.json`, but
+`makeFeatherSpriteLookup` (`featherDance.ts:186-230`) is a lookup over recorded
+RAM probes keyed to absolute canonical ticks (last real ticks 7557 / 8591 /
+9637 for turns 6/7/8), with a coordinate translation layered on top. It
+reproduces recorded feather trajectories, not the mechanism that generates
+them.
+
+**Confirmed:** the source it stands in for,
+`reference/pokeemerald/src/battle_anim_flying.c`'s `AnimFallingFeather` /
+`AnimFallingFeather_Step` (declared `:20-21`, template `gFallingFeatherSprite
+Template` `:171`), is fully deterministic — `gBattleAnimArgs`, battler sprite
+coords, and sine tables, **no `Random()`**. So a direct port is possible and
+would generalize to any battler geometry; the recording cannot.
+
+**Leads:** port the two callbacks (~50 source lines) and check the port
+against the three committed feather traces before deleting the probe imports.
+Good first proof for the anim-script interpreter spike in
+`ANIMATION_PROGRESS.md`.
+
+## #39 — `battleScene.ts` is a state machine over one canonical battle
+
+**Symptom:** the production battle presentation is keyed to *which turn of the
+recorded Battle 1/2 we are in*, not to what happened. It cannot consume kernel
+semantic events, so the battle kernel currently has no possible consumer.
+
+**Confirmed** (2026-07-24, `856b3b4`): 17,056 lines — **30% of all
+`src/engine`**. 74 `BattleSceneState` declaration lines name a specific turn
+(`turn13KoDismissElapsed`, `turn13Resolved`, `turn15PartySelect`,
+`turn17MenuRedrawElapsed`, `turn17KoDismissElapsed`,
+`turn17OutcomeDismissElapsed`, `turn17LossDismissElapsed`); 969 lines reference
+a turn number; per-species render entry points are hardcoded
+(`grovyleFaintSinkRowsAndY2`, `onixSitrusRotateMatrix`,
+`turn5GrantingStarPlacement`, `dragonBreathGrovyleHp`). Sibling files
+`battle2Turn1.ts`, `battle2ActionMenu.ts`, `battle2OffScenario.ts`,
+`turn17.ts` share the shape.
+
+**Not a request to rewrite it.** The windows it renders are individually
+oracle-exact and that evidence is worth keeping. The debt is the *keying*.
+ROADMAP S10 §3 requires one already-exact window to be re-driven from semantic
+events as a proof of the seam; that conversion, window by window, is the
+retirement path. AGENTS.md already forbids adding new turn-keyed branches.
+
 ## #38 — [PARKED 2026-07-22, supervisor decision] Turn 16 FAINT_ATTACK
   delayed-control tick 21006 exposes `BLDALPHA` one VBlank early
 
