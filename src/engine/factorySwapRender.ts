@@ -37,7 +37,7 @@ import {
 } from "./factorySwapPresentation.ts";
 import { blendComponentToward } from "./paletteFade.ts";
 import type { FactorySwapState } from "./factorySwap.ts";
-import { drawMonPic, type BallVisual } from "./monPicRender.ts";
+import { drawMonPicFaded, type BallVisual } from "./monPicRender.ts";
 
 import menuBgData from "../assets/gen/menu-bg.json" with { type: "json" };
 import pokeballData from "../assets/gen/pokeball.json" with { type: "json" };
@@ -655,11 +655,13 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
       enemySwitch && phaseElapsed === 0
         ? { ...monPic, menuHighlightVisible: true }
         : monPic;
-    drawMonPic(
+    drawMonPicFaded(
       fb,
       adjustedMonPic,
       selected.species,
       48 * state.displayCursor + 72,
+      bgFade,
+      objFade,
       ballVisuals,
     );
     if (

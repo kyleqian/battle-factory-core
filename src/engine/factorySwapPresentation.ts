@@ -45,6 +45,22 @@ export interface FactorySwapPresentationState {
   readonly speciesNameFade: SpeciesNameFadeState;
   /** Source callback reached after the exit fade has fully completed. */
   readonly fieldHandoff: "CB2_ReturnToFieldContinueScript" | null;
+  /** Source callback/task owner for the normal-summary round trip. */
+  readonly summaryCallback:
+    | "Swap_Task_OpenSummaryScreen"
+    | "CB2_InitSummaryScreen"
+    | "Summary_Task_HandleInput"
+    | "CloseSummaryScreen"
+    | "CB2_InitSwapScreen"
+    | "Swap_Task_HandleMenu"
+    | null;
+  readonly summaryMode: "SUMMARY_MODE_NORMAL" | null;
+  readonly summaryCurMonIndex: 0 | 1 | 2 | null;
+  readonly summaryMaxMonIndex: 2 | null;
+  /** True after CB2_InitSwapScreen rebuilt the originating popup. */
+  readonly returnedFromSummary: boolean;
+  /** Age since accepted summary B; rebuilt ball callbacks start at +41. */
+  readonly summaryReturnClock?: number | null;
 }
 
 export interface FactorySwapBallCycleVisual {
@@ -151,6 +167,12 @@ export function createCanonicalFactorySwapPresentation(): FactorySwapPresentatio
     selectedBallIndex: null,
     speciesNameFade: INITIAL_FACTORY_SWAP_SPECIES_FADE,
     fieldHandoff: null,
+    summaryCallback: null,
+    summaryMode: null,
+    summaryCurMonIndex: null,
+    summaryMaxMonIndex: null,
+    returnedFromSummary: false,
+    summaryReturnClock: null,
   };
 }
 
@@ -162,6 +184,7 @@ function readyDelay(state: FactorySwapPresentationState): number | null {
     state.controller.phase === "quitExit" ||
     state.controller.phase === "quitReturn" ||
     state.controller.phase === "summaryFade" ||
+    state.controller.phase === "summaryReturn" ||
     state.controller.phase === "playerPickerReturn" ||
     state.controller.phase === "enemySwitch" ||
     state.controller.phase === "playerSwitch"
@@ -179,12 +202,62 @@ export function advanceFactorySwapPresentation(
   const phaseElapsed = state.phaseElapsed + 1;
   const selectedBallClock =
     state.selectedBallClock === null ? null : state.selectedBallClock + 1;
+  const summaryReturnClock =
+    state.summaryReturnClock == null ? null : state.summaryReturnClock + 1;
   let speciesNameFade = advanceSpeciesNameFade(state.speciesNameFade);
   if (elapsed === FACTORY_SWAP_SPECIES_FADE_ACTIVATE_ELAPSED) {
     speciesNameFade = activateSpeciesNameFade(speciesNameFade);
   }
   let controller = copyFactorySwapCursor(state.controller);
   let fieldHandoff = state.fieldHandoff;
+  let summaryCallback = state.summaryCallback;
+  let summaryMode = state.summaryMode;
+  let summaryCurMonIndex = state.summaryCurMonIndex;
+  let summaryMaxMonIndex = state.summaryMaxMonIndex;
+  let returnedFromSummary = state.returnedFromSummary;
+  if (controller.phase === "summaryFade") {
+    if (phaseElapsed === 1) {
+      summaryCallback = "Swap_Task_OpenSummaryScreen";
+      summaryMode = "SUMMARY_MODE_NORMAL";
+      summaryCurMonIndex = controller.cursor as 0 | 1 | 2;
+      summaryMaxMonIndex = 2;
+    } else if (phaseElapsed === 24) {
+      summaryCallback = "CB2_InitSummaryScreen";
+    } else if (phaseElapsed === 40) {
+      summaryCallback = "Summary_Task_HandleInput";
+    }
+  }
+  if (controller.phase === "summaryReturn") {
+    if (phaseElapsed === 22) summaryCallback = "CB2_InitSwapScreen";
+    if (phaseElapsed === 41) summaryCallback = "Swap_Task_HandleMenu";
+    if (phaseElapsed >= 60) {
+      controller = {
+        ...controller,
+        phase: "playerOptions",
+        inputReady: false,
+        actionsCount: 4,
+        playerOptionCursor: 0,
+        playerOptionDisplayCursor: 0,
+        playerOptionCursorCopyPending: false,
+      };
+      returnedFromSummary = true;
+      return {
+        controller,
+        elapsed,
+        phaseElapsed: 0,
+        selectedBallClock: null,
+        selectedBallIndex: state.selectedBallIndex,
+        speciesNameFade,
+        fieldHandoff,
+        summaryCallback,
+        summaryMode,
+        summaryCurMonIndex,
+        summaryMaxMonIndex,
+        returnedFromSummary,
+        summaryReturnClock,
+      };
+    }
+  }
   if (controller.phase === "quitExit" && phaseElapsed === 1) {
     controller = {
       ...controller,
@@ -215,6 +288,11 @@ export function advanceFactorySwapPresentation(
       selectedBallIndex: state.selectedBallIndex,
       speciesNameFade: activateSpeciesNameFade(speciesNameFade),
       fieldHandoff,
+      summaryCallback,
+      summaryMode,
+      summaryCurMonIndex,
+      summaryMaxMonIndex,
+      returnedFromSummary,
     };
   }
   if (controller.phase === "acceptExit" && phaseElapsed === 20) {
@@ -244,6 +322,11 @@ export function advanceFactorySwapPresentation(
       selectedBallIndex: state.selectedBallIndex,
       speciesNameFade,
       fieldHandoff,
+      summaryCallback,
+      summaryMode,
+      summaryCurMonIndex,
+      summaryMaxMonIndex,
+      returnedFromSummary,
     };
   }
   if (controller.phase === "enemySwitch" && phaseElapsed === 84) {
@@ -285,6 +368,11 @@ export function advanceFactorySwapPresentation(
         active: true,
       },
       fieldHandoff,
+      summaryCallback,
+      summaryMode,
+      summaryCurMonIndex,
+      summaryMaxMonIndex,
+      returnedFromSummary,
     };
   }
   if (controller.phase === "playerSwitch" && phaseElapsed === 71) {
@@ -329,6 +417,11 @@ export function advanceFactorySwapPresentation(
         active: true,
       },
       fieldHandoff,
+      summaryCallback,
+      summaryMode,
+      summaryCurMonIndex,
+      summaryMaxMonIndex,
+      returnedFromSummary,
     };
   }
   if (controller.phase === "playerPickerReturn" && phaseElapsed >= 55) {
@@ -345,6 +438,11 @@ export function advanceFactorySwapPresentation(
       selectedBallIndex: state.selectedBallIndex,
       speciesNameFade,
       fieldHandoff,
+      summaryCallback,
+      summaryMode,
+      summaryCurMonIndex,
+      summaryMaxMonIndex,
+      returnedFromSummary,
     };
   }
   // Swap_Task_ScreenInfoTransitionIn state 8 re-enables the existing task
@@ -360,12 +458,63 @@ export function advanceFactorySwapPresentation(
     selectedBallIndex: state.selectedBallIndex,
     speciesNameFade,
     fieldHandoff,
+    summaryCallback,
+    summaryMode,
+    summaryCurMonIndex,
+    summaryMaxMonIndex,
+    returnedFromSummary,
+    summaryReturnClock,
   };
   const delay = readyDelay(advanced);
-  if (delay !== null && phaseElapsed >= delay) {
+  const effectiveDelay =
+    controller.phase === "playerOptions" && returnedFromSummary ? 1 : delay;
+  if (effectiveDelay !== null && phaseElapsed >= effectiveDelay) {
     controller = acknowledgeFactorySwapPresentation(controller);
   }
   return { ...advanced, controller };
+}
+
+/** Accepted normal-summary B: CloseSummaryScreen will call CB2_InitSwapScreen. */
+export function beginFactorySwapSummaryReturn(
+  state: FactorySwapPresentationState,
+): FactorySwapPresentationState {
+  if (
+    state.controller.phase !== "summaryFade" ||
+    state.phaseElapsed < 63
+  ) return state;
+  return {
+    ...state,
+    controller: {
+      ...state.controller,
+      phase: "summaryReturn",
+      inputReady: false,
+    },
+    phaseElapsed: 0,
+    summaryCallback: "CloseSummaryScreen",
+    summaryReturnClock: 0,
+  };
+}
+
+/** Fresh Swap_InitAllSprites callback epoch during CB2_InitSwapScreen. */
+export function factorySwapSummaryReturnBallTile(
+  closeElapsed: number,
+): 0 | 16 | 32 {
+  let age = Math.max(0, closeElapsed - 41);
+  const commands = [
+    [16, 4],
+    [0, 4],
+    [32, 4],
+    [0, 4],
+    [16, 4],
+    [0, 4],
+    [32, 4],
+    [0, 36],
+  ] as const;
+  for (const [tile, duration] of commands) {
+    if (age < duration) return tile;
+    age -= duration;
+  }
+  return 0;
 }
 
 export function handleFactorySwapPresentationInput(
@@ -397,6 +546,20 @@ export function handleFactorySwapPresentationInput(
       ? state.controller.cursor as 0 | 1 | 2
       : state.selectedBallIndex,
     speciesNameFade: pausedSpeciesName,
+    summaryCallback:
+      controller.phase === "summaryFade"
+        ? "Swap_Task_OpenSummaryScreen"
+        : state.summaryCallback,
+    summaryMode:
+      controller.phase === "summaryFade"
+        ? "SUMMARY_MODE_NORMAL"
+        : state.summaryMode,
+    summaryCurMonIndex:
+      controller.phase === "summaryFade"
+        ? state.controller.cursor as 0 | 1 | 2
+        : state.summaryCurMonIndex,
+    summaryMaxMonIndex:
+      controller.phase === "summaryFade" ? 2 : state.summaryMaxMonIndex,
   };
 }
 

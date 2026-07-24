@@ -24,6 +24,8 @@ export type SummaryPhase = "fadingOut" | "black" | "fadingIn";
 
 /** SUMMARY_MODE_LOCK_MOVES's reachable pages (pokemon_summary_screen.c:1121); only "info" renders this slice. */
 export type SummaryPage = "info" | "skills" | "battleMoves" | "contestMoves";
+export type SummaryMode = "SUMMARY_MODE_LOCK_MOVES" | "SUMMARY_MODE_NORMAL";
+export type SummaryReturnTarget = "draft" | "factorySwap";
 
 export interface SummaryTransition {
   direction: "toSummary" | "toDraft";
@@ -40,6 +42,10 @@ export interface SummaryScreenState {
   /** SELECTABLE_MONS_COUNT - 1 = 5 max; the draft cursor slot the summary opened on / is currently viewing. */
   selectedSlot: number;
   page: SummaryPage;
+  /** Exact ShowPokemonSummaryScreen mode supplied by the originating screen. */
+  mode: SummaryMode;
+  /** Callback destination invoked by CloseSummaryScreen. */
+  returnTarget: SummaryReturnTarget;
 }
 
 export const CLOSED_SUMMARY_SCREEN_STATE: SummaryScreenState = {
@@ -47,6 +53,8 @@ export const CLOSED_SUMMARY_SCREEN_STATE: SummaryScreenState = {
   onInfoPage: false,
   selectedSlot: 0,
   page: "info",
+  mode: "SUMMARY_MODE_LOCK_MOVES",
+  returnTarget: "draft",
 };
 
 function fadeOutTicks(direction: SummaryTransition["direction"]): number {
@@ -58,12 +66,20 @@ function blackHoldTicks(direction: SummaryTransition["direction"]): number {
 }
 
 /** Select_Task_OpenSummaryScreen's STATE_SUMMARY_FADE, triggered by A on the draft menu's SUMMARY option. `cursorPos` is the draft screen's currMonId (battle_factory_screen.c:1491). */
-export function openSummaryScreen(cursorPos: number): SummaryScreenState {
+export function openSummaryScreen(
+  cursorPos: number,
+  options: {
+    readonly mode?: SummaryMode;
+    readonly returnTarget?: SummaryReturnTarget;
+  } = {},
+): SummaryScreenState {
   return {
     transition: { direction: "toSummary", phase: "fadingOut", elapsed: 0 },
     onInfoPage: false,
     selectedSlot: cursorPos,
     page: "info",
+    mode: options.mode ?? "SUMMARY_MODE_LOCK_MOVES",
+    returnTarget: options.returnTarget ?? "draft",
   };
 }
 
@@ -87,7 +103,14 @@ export function advanceSummaryScreen(state: SummaryScreenState): SummaryScreenSt
   }
 
   if (t.phase === "black") {
-    if (elapsed >= blackHoldTicks(t.direction)) {
+    const holdTicks =
+      t.direction === "toDraft" && state.returnTarget === "factorySwap"
+        // CloseSummaryScreen -> CB2_InitSwapScreen rebuilds through gMain
+        // states 0..15 before the destination fade. Oracle: first rebuilt
+        // popup fade frame is B+42, versus B+37 for the draft callback.
+        ? 25
+        : blackHoldTicks(t.direction);
+    if (elapsed >= holdTicks) {
       return { ...state, transition: { direction: t.direction, phase: "fadingIn", elapsed: 0 } };
     }
     return { ...state, transition: { ...t, elapsed } };

@@ -3,6 +3,7 @@ import { createInitialState, tick } from "../src/engine/core.ts";
 import {
   FACTORY_SWAP_ENTRY_READY_DELAY,
   advanceFactorySwapPresentation,
+  beginFactorySwapSummaryReturn,
   createCanonicalFactorySwapPresentation,
   factorySwapActionFadeY,
   factorySwapAcceptCancelButtonX,
@@ -36,6 +37,7 @@ import {
   factorySwapPlayerSwitchBallTiles,
   factorySwapPlayerSwitchCancelButtonX,
   factorySwapPlayerSwitchMechanism,
+  factorySwapSummaryReturnBallTile,
   handleFactorySwapPresentationInput,
   type FactorySwapPresentationState,
 } from "../src/engine/factorySwapPresentation.ts";
@@ -105,6 +107,100 @@ function offerState(cursor: 0 | 1) {
 }
 
 describe("live Factory swap presentation adapter", () => {
+  it("round-trips SUMMARY_MODE_NORMAL through CB2_InitSwapScreen to the same selected popup without mutation", () => {
+    let state = createCanonicalFactorySwapPresentation();
+    state = advance(state, FACTORY_SWAP_ENTRY_READY_DELAY);
+    state = handleFactorySwapPresentationInput(state, "A");
+    state = advance(state, 57);
+
+    const before = {
+      playerParty: structuredClone(state.controller.playerParty),
+      enemyParty: structuredClone(state.controller.enemyParty),
+      rentalMons: structuredClone(state.controller.rentalMons),
+      rngIndependentResult: state.controller.result,
+    };
+    expect(handleFactorySwapPresentationInput(state, "A")).toBe(state);
+
+    state = advance(state, 1);
+    state = handleFactorySwapPresentationInput(state, "A");
+    expect(state).toMatchObject({
+      phaseElapsed: 0,
+      controller: {
+        phase: "summaryFade",
+        cursor: 0,
+        actionsCount: 4,
+        inputReady: false,
+      },
+      summaryCallback: "Swap_Task_OpenSummaryScreen",
+      summaryMode: "SUMMARY_MODE_NORMAL",
+      summaryCurMonIndex: 0,
+      summaryMaxMonIndex: 2,
+    });
+
+    state = advance(state, 23);
+    expect(state.summaryCallback).toBe("Swap_Task_OpenSummaryScreen");
+    state = advance(state, 1);
+    expect(state.summaryCallback).toBe("CB2_InitSummaryScreen");
+    state = advance(state, 16);
+    expect(state.summaryCallback).toBe("Summary_Task_HandleInput");
+
+    state = advance(state, 22);
+    expect(state.phaseElapsed).toBe(62);
+    expect(beginFactorySwapSummaryReturn(state)).toBe(state);
+    state = advance(state, 1);
+    state = beginFactorySwapSummaryReturn(state);
+    expect(state).toMatchObject({
+      phaseElapsed: 0,
+      controller: { phase: "summaryReturn", inputReady: false },
+      summaryCallback: "CloseSummaryScreen",
+      summaryReturnClock: 0,
+    });
+
+    state = advance(state, 21);
+    expect(state.summaryCallback).toBe("CloseSummaryScreen");
+    state = advance(state, 1);
+    expect(state.summaryCallback).toBe("CB2_InitSwapScreen");
+    state = advance(state, 19);
+    expect(state.summaryCallback).toBe("Swap_Task_HandleMenu");
+    expect(factorySwapSummaryReturnBallTile(state.summaryReturnClock!)).toBe(16);
+
+    state = advance(state, 19);
+    expect(state).toMatchObject({
+      phaseElapsed: 0,
+      returnedFromSummary: true,
+      selectedBallClock: null,
+      controller: {
+        phase: "playerOptions",
+        cursor: 0,
+        actionsCount: 4,
+        playerOptionCursor: 0,
+        playerOptionDisplayCursor: 0,
+        inputReady: false,
+      },
+    });
+    expect(handleFactorySwapPresentationInput(state, "DOWN")).toBe(state);
+
+    state = advance(state, 1);
+    expect(state.controller.inputReady).toBe(true);
+    state = handleFactorySwapPresentationInput(state, "DOWN");
+    expect(state.controller).toMatchObject({
+      phase: "playerOptions",
+      cursor: 0,
+      playerOptionCursor: 1,
+      playerOptionDisplayCursor: 0,
+    });
+    state = advance(state, 2);
+    expect(state.controller.playerOptionDisplayCursor).toBe(1);
+
+    expect(state.controller.playerParty).toEqual(before.playerParty);
+    expect(state.controller.enemyParty).toEqual(before.enemyParty);
+    expect(state.controller.rentalMons).toEqual(before.rentalMons);
+    expect(state.controller.result).toBe(before.rngIndependentResult);
+    expect(state.controller.scriptResult).toBeNull();
+    expect(state.controller.mutationCommitted).toBe(false);
+    expect(factorySwapRoundDecision(state.controller)).toBeNull();
+  });
+
   it("routes offer YES into the controller while preserving offer NO", () => {
     const accepted = tick(offerState(0), new Set(["A"]));
     expect(accepted.factorySwap).not.toBeNull();

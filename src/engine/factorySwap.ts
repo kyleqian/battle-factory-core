@@ -32,6 +32,7 @@ export type FactorySwapPhase =
   | "playerPicker"
   | "playerOptions"
   | "summaryFade"
+  | "summaryReturn"
   | "playerPickerReturn"
   | "enemySwitch"
   | "playerSwitch"
@@ -373,6 +374,7 @@ export function handleFactorySwapInput(
       };
     }
     case "summaryFade":
+    case "summaryReturn":
     case "playerPickerReturn":
     case "enemySwitch":
     case "playerSwitch":

@@ -38,6 +38,19 @@ describe("summaryScreen: entry (A on SUMMARY)", () => {
     expect(state.page).toBe("info");
   });
 
+  it("carries the source mode and callback origin for a normal Factory swap summary", () => {
+    const state = openSummaryScreen(2, {
+      mode: "SUMMARY_MODE_NORMAL",
+      returnTarget: "factorySwap",
+    });
+    expect(state).toMatchObject({
+      selectedSlot: 2,
+      mode: "SUMMARY_MODE_NORMAL",
+      returnTarget: "factorySwap",
+      page: "info",
+    });
+  });
+
   it("moves fadingOut -> black -> fadingIn -> settled (onInfoPage) at the oracle-pinned tick counts (20/24/15, settle at +59)", () => {
     let state = openSummaryScreen(0);
     state = run(state, 19);
@@ -100,5 +113,26 @@ describe("summaryScreen: exit (B on the settled Info page)", () => {
     expect(black19.transition).toMatchObject({ phase: "black", elapsed: 19 });
     const fadingIn0 = advanceSummaryScreen(black19); // tick 18+20=38: black -> fadingIn
     expect(fadingIn0.transition).toMatchObject({ direction: "toDraft", phase: "fadingIn", elapsed: 0 });
+  });
+
+  it("holds black five extra callback-rebuild ticks for CB2_InitSwapScreen and settles at B+58", () => {
+    const opened = run(
+      openSummaryScreen(0, {
+        mode: "SUMMARY_MODE_NORMAL",
+        returnTarget: "factorySwap",
+      }),
+      59,
+    );
+    const afterB = requestSummaryScreenExit(opened);
+    const before = run(afterB, 57);
+    expect(before.transition).toMatchObject({
+      direction: "toDraft",
+      phase: "fadingIn",
+      elapsed: 14,
+    });
+    const settled = advanceSummaryScreen(before);
+    expect(settled.transition).toBeNull();
+    expect(settled.onInfoPage).toBe(false);
+    expect(settled.returnTarget).toBe("factorySwap");
   });
 });

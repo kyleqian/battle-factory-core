@@ -201,6 +201,7 @@ import {
 } from "./stagedBattleTurn.ts";
 import {
   advanceFactorySwapPresentation,
+  beginFactorySwapSummaryReturn,
   createCanonicalFactorySwapPresentation,
   factorySwapBallTile,
   factorySwapAcceptExitBgFadeY,
@@ -208,6 +209,7 @@ import {
   factorySwapQuitExitBgFadeY,
   factorySwapQuitExitObjFadeY,
   factorySwapPlayerOptionBallTile,
+  factorySwapSummaryReturnBallTile,
   handleFactorySwapPresentationInput,
   type FactorySwapPresentationState,
 } from "./factorySwapPresentation.ts";
@@ -407,19 +409,42 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     let nextPostwin = advancePostwin(postwin);
     if (factorySwap) {
       let nextFactorySwap = advanceFactorySwapPresentation(factorySwap);
-      const directional = (["LEFT", "RIGHT", "UP", "DOWN"] as const)
-        .find((button) => newAndRepeatedKeys.has(button));
-      const action = (["A", "B"] as const).find((button) => newKeys.has(button));
-      if (directional) {
-        nextFactorySwap = handleFactorySwapPresentationInput(
-          nextFactorySwap,
-          directional,
-        );
-      } else if (action) {
-        nextFactorySwap = handleFactorySwapPresentationInput(
-          nextFactorySwap,
-          action,
-        );
+      if (nextFactorySwap.controller.phase === "summaryFade") {
+        if (
+          summaryScreen.onInfoPage &&
+          nextFactorySwap.phaseElapsed >= 63 &&
+          newKeys.has("B")
+        ) {
+          summaryScreen = requestSummaryScreenExit(summaryScreen);
+          nextFactorySwap = beginFactorySwapSummaryReturn(nextFactorySwap);
+        }
+      } else if (nextFactorySwap.controller.phase !== "summaryReturn") {
+        const directional = (["LEFT", "RIGHT", "UP", "DOWN"] as const)
+          .find((button) => newAndRepeatedKeys.has(button));
+        const action = (["A", "B"] as const).find((button) => newKeys.has(button));
+        if (directional) {
+          nextFactorySwap = handleFactorySwapPresentationInput(
+            nextFactorySwap,
+            directional,
+          );
+        } else if (action) {
+          nextFactorySwap = handleFactorySwapPresentationInput(
+            nextFactorySwap,
+            action,
+          );
+        }
+        if (
+          nextFactorySwap.controller.phase === "summaryFade" &&
+          factorySwap.controller.phase === "playerOptions"
+        ) {
+          summaryScreen = openSummaryScreen(
+            nextFactorySwap.controller.cursor,
+            {
+              mode: "SUMMARY_MODE_NORMAL",
+              returnTarget: "factorySwap",
+            },
+          );
+        }
       }
       return {
         ...state,
@@ -427,6 +452,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         keyRepeat,
         postwin: nextPostwin,
         factorySwap: nextFactorySwap,
+        summaryScreen,
         rngMode,
         rngValue,
       };
@@ -1806,6 +1832,80 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
     if (swap.elapsed < 44) return blackFrame();
     const tile = factorySwapBallTile(swap.elapsed);
     const fadeLocal = swap.elapsed - 44;
+    if (
+      swap.controller.phase === "summaryFade" ||
+      swap.controller.phase === "summaryReturn" ||
+      swap.returnedFromSummary
+    ) {
+      const renderPopup = (bgY: number, objY: number): Uint8Array =>
+        renderFactorySwapPicker({
+          state: {
+            ...swap.controller,
+            phase: "playerOptions",
+          },
+          ballTiles:
+            swap.controller.phase === "summaryReturn" ||
+              swap.returnedFromSummary
+              ? [
+                  factorySwapSummaryReturnBallTile(
+                    swap.summaryReturnClock ?? 0,
+                  ),
+                  factorySwapSummaryReturnBallTile(
+                    swap.summaryReturnClock ?? 0,
+                  ),
+                  factorySwapSummaryReturnBallTile(
+                    swap.summaryReturnClock ?? 0,
+                  ),
+                ]
+              : [tile, tile, tile],
+          speciesRenderCoeff: swap.speciesNameFade.renderCoeff,
+          bgFadeY: bgY,
+          objFadeY: objY,
+          // A settled OpenMonPic/Swap_ShowSummaryMonSprite composition.
+          phaseElapsed:
+            swap.controller.phase === "summaryFade"
+              ? 58 + swap.phaseElapsed
+              : swap.controller.phase === "summaryReturn"
+                ? 58 + Math.max(0, swap.phaseElapsed - 42)
+                : 59,
+          selectedBallIndex: swap.selectedBallIndex,
+          selectedBallTile:
+            swap.controller.phase === "summaryReturn" ||
+              swap.selectedBallClock === null
+              ? null
+              : factorySwapPlayerOptionBallTile(swap.selectedBallClock),
+        });
+      const summary = state.summaryScreen;
+      const transition = summary.transition;
+      if (!transition) {
+        return summary.onInfoPage
+          ? renderSummaryInfoPage(summary.selectedSlot)
+          : renderPopup(0, 0);
+      }
+      const isEntry = transition.direction === "toSummary";
+      if (transition.phase === "black") {
+        const holdTicks = isEntry ? ENTRY_BLACK_HOLD_TICKS : 25;
+        if (transition.elapsed + 1 < holdTicks) return blackFrame();
+        const bgY = bgFadeY(0, FADE_IN);
+        const objY = objFadeY(0, FADE_IN);
+        return isEntry
+          ? renderSummaryInfoPageFaded(summary.selectedSlot, bgY, objY)
+          : renderPopup(bgY, objY);
+      }
+      const timing =
+        transition.phase === "fadingIn"
+          ? FADE_IN
+          : isEntry
+            ? ENTRY_FADE_OUT
+            : EXIT_FADE_OUT;
+      const ticks = transition.elapsed + 1;
+      const bgY = bgFadeY(ticks, timing);
+      const objY = objFadeY(ticks, timing);
+      const showingPopup = isEntry === (transition.phase === "fadingOut");
+      return showingPopup
+        ? renderPopup(bgY, objY)
+        : renderSummaryInfoPageFaded(summary.selectedSlot, bgY, objY);
+    }
     const exiting =
       swap.controller.phase === "acceptExit" ||
       swap.controller.phase === "quitExit" ||
