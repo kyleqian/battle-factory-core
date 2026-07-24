@@ -36,6 +36,11 @@ const MATRIX_B = [
   -6, -6, -6, -5, -5, -5, -5, -4, -4, -4,
 ] as const;
 
+const NON_ROTATED_MATRIX_A = [
+  704, 618, 550, 496, 451, 414, 383, 356, 332, 312, 293,
+  277, 263, 250, 238, 227, 217, 208, 200, 192, 185,
+] as const;
+
 export const DRAGON_BREATH_FIRE_SPAWN_COUNT = 11;
 export const DRAGON_BREATH_FIRE_FIRST_SPAWN_RAM_OFFSET = 229;
 export const DRAGON_BREATH_FIRE_SPAWN_INTERVAL = 4;
@@ -105,7 +110,7 @@ export function dragonBreathFireSprites(
       throw new Error("DRAGON_BREATH affine evidence currently requires duration 20");
     }
     const rotated = geometry.attackerSide === "player";
-    const pa = rotated ? MATRIX_A[age]! : -MATRIX_A[age]!;
+    const pa = rotated ? MATRIX_A[age]! : NON_ROTATED_MATRIX_A[age]!;
     const pb = rotated ? MATRIX_B[age]! : 0;
     sprites.push({
       spawnIndex,

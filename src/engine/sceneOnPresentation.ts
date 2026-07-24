@@ -81,6 +81,11 @@ import {
   statusAnimationAtSourceAge,
   type StatusAnimationVisual,
 } from "./statusAnimation.ts";
+import {
+  dragonBreathFireSprites,
+  type DragonBreathFireGeometry,
+  type DragonBreathFireSprite,
+} from "./dragonBreath.ts";
 
 export type SceneOnBattlerSide = "player" | "opponent";
 
@@ -164,6 +169,16 @@ export interface SceneOnFlyConfig {
    * Selection, damage, semi-invulnerability, and turn advancement remain
    * controller-owned and are not represented here.
    */
+  readonly animationAgeOffset?: number;
+}
+
+export interface SceneOnDragonBreathConfig {
+  readonly move: "DRAGON_BREATH";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  /** Source-shaped asset/affine/translation/OAM inputs only. */
+  readonly animationProfile: Readonly<DragonBreathFireGeometry>;
+  /** Relative script clock; damage, status, RNG, PP, and controller stay external. */
   readonly animationAgeOffset?: number;
 }
 
@@ -398,7 +413,8 @@ export type SceneOnMoveConfig =
   | SceneOnAerialAceConfig
   | SceneOnSandAttackConfig
   | SceneOnBounceConfig
-  | SceneOnFlyConfig;
+  | SceneOnFlyConfig
+  | SceneOnDragonBreathConfig;
 
 export interface SceneOnMovePresentationState<
   TConfig extends SceneOnMoveConfig = SceneOnMoveConfig,
@@ -580,6 +596,14 @@ export interface SceneOnBounceView extends BouncePresentationState {
   readonly currentMove: "BOUNCE" | null;
 }
 
+export interface SceneOnDragonBreathView {
+  readonly age: number;
+  readonly animationAge: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fireSprites: readonly DragonBreathFireSprite[];
+}
+
 export const FEATHER_DANCE_STAT_MESSAGE_LINE1 = "ONIX’s ATTACK";
 export const FEATHER_DANCE_STAT_MESSAGE_LINE2 = "harshly fell!";
 export const FEATHER_DANCE_STAT_MESSAGE_LENGTH =
@@ -678,6 +702,7 @@ export function createSceneOnMovePresentation<TConfig extends SceneOnMoveConfig>
   } else if (
     config.move !== "FLY"
     && config.move !== "BOUNCE"
+    && config.move !== "DRAGON_BREATH"
     && (
       config.fieldProfile.playerHp < 0
       || config.fieldProfile.opponentHp < 0
@@ -708,6 +733,29 @@ export function createSceneOnMovePresentation<TConfig extends SceneOnMoveConfig>
     );
   }
   return { age: 0, config };
+}
+
+export function sceneOnDragonBreathView(
+  state: SceneOnMovePresentationState,
+): SceneOnDragonBreathView {
+  if (state.config.move !== "DRAGON_BREATH") {
+    throw new Error(`expected DRAGON_BREATH presentation, got ${state.config.move}`);
+  }
+  const animationAge =
+    state.age + (state.config.animationAgeOffset ?? 0);
+  return {
+    age: state.age,
+    animationAge,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    // Re-anchor the source's press-relative first spawn to animation age 0.
+    // Its one-frame OAM transfer lag means the first displayed state is age 1.
+    fireSprites: dragonBreathFireSprites(
+      animationAge,
+      -229,
+      state.config.animationProfile,
+    ),
+  };
 }
 
 export function sceneOnFlyView(

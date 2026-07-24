@@ -71,6 +71,7 @@ def main() -> None:
     bounce_ball_shrink_template = oracle.symbols["gBounceBallShrinkSpriteTemplate"]
     bounce_ball_land_template = oracle.symbols["gBounceBallLandSpriteTemplate"]
     basic_hitsplat_template = oracle.symbols["gBasicHitSplatSpriteTemplate"]
+    dragon_breath_fire_template = oracle.symbols["gDragonBreathFireSpriteTemplate"]
     battle_mons = oracle.symbols["gBattleMons"]
     battler_sprite_ids = oracle.symbols["gBattlerSpriteIds"]
     oam_buffer = oracle.symbols["gMain"] + 0x38
@@ -145,6 +146,7 @@ def main() -> None:
         fly_sprites = []
         bounce_sprites = []
         basic_hitsplat_sprites = []
+        dragon_breath_fire_sprites = []
         for slot in range(64):
             base = sprites + slot * 0x44
             if not (oracle.read_u8(base + 0x3E) & 1):
@@ -174,6 +176,8 @@ def main() -> None:
                 })
             elif template == basic_hitsplat_template:
                 basic_hitsplat_sprites.append(feather_record(slot))
+            elif template == dragon_breath_fire_template:
+                dragon_breath_fire_sprites.append(feather_record(slot))
         sand_attack_dirt_oam = []
         if sand_attack_dirt_sprites:
             dirt_base = sprites + sand_attack_dirt_sprites[0]["slot"] * 0x44
@@ -211,6 +215,7 @@ def main() -> None:
                 "flySprites": fly_sprites,
                 "bounceSprites": bounce_sprites,
                 "basicHitsplatSprites": basic_hitsplat_sprites,
+                "dragonBreathFireSprites": dragon_breath_fire_sprites,
                 "bldalpha": oracle.read_u8(0x04000052)
                 | (oracle.read_u8(0x04000053) << 8),
                 "spriteOrder": [

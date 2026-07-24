@@ -15822,6 +15822,12 @@ export function renderSceneOnMovePresentation(
     return;
   }
 
+  if (state.config.move === "DRAGON_BREATH") {
+    throw new Error(
+      "DRAGON_BREATH portable component is staged, but its full shared-seam compositor is not yet accepted",
+    );
+  }
+
   const view = sceneOnFirePunchView(state);
   const { attacker, target, resolution } = view;
   const player = attacker.geometry.side === "player" ? attacker : target;

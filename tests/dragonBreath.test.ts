@@ -98,10 +98,10 @@ describe("DRAGON_BREATH fire-projectile reducer", () => {
       subpriority: 28,
       hFlip: false,
       vFlip: false,
-      pa: 703,
+      pa: 704,
       pb: 0,
       pc: 0,
-      pd: 703,
+      pd: 704,
       targetOnMonBg: true,
     });
   });
