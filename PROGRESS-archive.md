@@ -1,3 +1,23 @@
+## 377 — Gate-3 MAKEVISIBLE controller command integrated
+
+- **State:** S10 Gate 3 remains open with **20** source-safe opcodes and an
+  unwired immutable controller/scheduler/rules/RNG/source-context seam.
+- **Did:** added only `MAKEVISIBLE` (opcode **111 / 0x6f**): resolves its
+  required u8 selector through the typed `GetBattlerForBattleScript` port,
+  activates/marks that battler pending, emits one frozen
+  `set-battler-sprite-visibility` event with `invisible: false`, and advances
+  one instruction/two source bytes.
+- **Next:** choose another bounded source family only when its complete rules
+  context is explicit. Keep `RETURNTOBALL`, sprite presence/allocation,
+  persistent visibility, teardown, presentation timing, rules/RNG/PP,
+  animation, pixels, and other opcodes out.
+- **Notes:** exact supported IDs are
+  **16/17/18/20/37/38/39/40/57/58/60/61/62/65/84/85/86/111/131/141**.
+  Focused **90/90**; Tier-1 **118 files / 1584 tests**, build, and Scene-OFF
+  oracle contract green. All five evidence starts are pinned; only the three
+  MAKEVISIBLE starts execute, while both RETURNTOBALL starts remain excluded.
+
+---
 ## 376 — Gate-3 PLAYFAINTCRY controller command integrated
 
 - **State:** S10 Gate 3 remains open with **19** source-safe opcodes and an
