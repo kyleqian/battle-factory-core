@@ -1,3 +1,19 @@
+## 350 — S9 OFF Skills→Info reverse layered wipe: **GREEN — 56/56 exact**
+
+- **State:** LEFT now returns settled ONIX Skills to an input-ready Info page
+  through the generic eight-step BG1/BG2 wipe; the full round trip is zero diff.
+- **Did:** reused source-relative layer offsets for the outgoing page, kept
+  fixed BG3/OBJ, cleared moving-page windows, and deferred source title/
+  pagination replacement until install. Tier-1 pins reverse offsets, gates,
+  readiness, and immutable selected-slot ownership.
+- **Next:** supervisor verify this LEFT checkpoint and choose the next bounded
+  S9 route; mon switching, Moves pages, and move-select remain unclaimed.
+- **Notes:** round trip **56/56** (RIGHT **25/25** preserved); install **3/3**;
+  Info ONIX **122/122** + MAGBY **132/132**. Tier-1 **1289/1289**, build
+  green. No absolute ticks, framebuffer assets, runtime oracle/ROM, or
+  ROADMAP/ISSUES edits.
+
+---
 ## 349 — S9 OFF Info→Skills layered summary wipe: **GREEN — 25/25 exact**
 
 - **State:** RIGHT now carries Skills through the source's eight 32px BG1/BG2

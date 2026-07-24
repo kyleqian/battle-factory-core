@@ -18,7 +18,7 @@ import { drawSpriteFaded, drawTextFaded, drawTileBgFaded, drawTilePatchFaded, fa
 import { getMonGender } from "./monGender.ts";
 import { GBA_SINE_TABLE_256 } from "./battleMenu.ts";
 import { drawSpriteSheetAffineRotate } from "./battleScene.ts";
-import type { SummaryMonTransition, SummaryPageTransition } from "./summaryScreen.ts";
+import type { SummaryMonTransition, SummaryPage, SummaryPageTransition } from "./summaryScreen.ts";
 import { summaryPageLayerOffsets } from "./summaryScreen.ts";
 
 import summaryBgData from "../assets/gen/summary-bg.json" with { type: "json" };
@@ -35,6 +35,7 @@ import anchorStateData from "../data/gen/anchor-state.json" with { type: "json" 
 import frontierMonsData from "../data/gen/battle-frontier-mons.json" with { type: "json" };
 import itemNamesData from "../data/gen/item-names.json" with { type: "json" };
 import expTablesData from "../data/gen/exp-tables.json" with { type: "json" };
+import movesData from "../data/gen/moves.json" with { type: "json" };
 
 interface TileGrid {
   columns: number;
@@ -45,7 +46,8 @@ interface TileGrid {
 const summaryBg = summaryBgData as unknown as {
   tileset: TileGrid;
   subpalettes: RgbColor[][];
-  pages: Record<"info" | "skills", { width: number; height: number; entries: Array<{ tile: number; hFlip: boolean; vFlip: boolean; palette: number }> }>;
+  ppPalette: RgbColor[];
+  pages: Record<SummaryPage, { width: number; height: number; entries: Array<{ tile: number; hFlip: boolean; vFlip: boolean; palette: number }> }>;
 };
 const typeIcons = summaryTypeIconsData as unknown as { types: Record<string, { tileset: TileGrid; palette: RgbColor[] }> };
 const markings = summaryMarkingsData as unknown as { tileset: TileGrid; spritePalette: RgbColor[] };
@@ -65,7 +67,7 @@ const abilities = (summaryInfoData as { abilities: Record<string, { name: string
 const rentals = (anchorStateData as { rentals: Array<{ species: string; personality: number; ability: string; nature: string; level: number }> })
   .rentals;
 const frontierMons = (frontierMonsData as {
-  entries: Array<{ index: number; itemName: string }>;
+  entries: Array<{ index: number; itemName: string; moves: string[] }>;
 }).entries;
 const itemNames = new Map(
   (itemNamesData as { items: Array<{ item: string; name: string }> }).items.map(
@@ -76,6 +78,11 @@ const expTables = expTablesData as {
   growthRates: Record<string, number[]>;
   speciesGrowthRate: Record<string, string>;
 };
+const moves = new Map(
+  (movesData as {
+    moves: Array<{ move: string; name: string; type: string; pp: number }>;
+  }).moves.map((move) => [move.move, move]),
+);
 
 // PositionStatusSlidingWindow(0, 0xFF): unconditionally reset on Info-page
 // load (pokemon_summary_screen.c:1494) regardless of ailment. Tracing the
@@ -112,6 +119,8 @@ const WIN_SKILLS_LABEL_EXP = { x: 80, y: 112 };
 const WIN_SKILLS_STATS_LEFT = { x: 128, y: 56 };
 const WIN_SKILLS_STATS_RIGHT = { x: 216, y: 56 };
 const WIN_SKILLS_EXP = { x: 192, y: 112 };
+const WIN_MOVES_NAMES = { x: 120, y: 32 };
+const WIN_MOVES_PP = { x: 192, y: 32 };
 
 // sTextColors[][3] rows ({bgIdx, fgIdx, shadowIdx}) used on this page, plus
 // the two named-color {COLOR}/{SHADOW} control-code overrides the nature
@@ -139,6 +148,7 @@ const PAL7 = 7;
 // directly here, bypassing the charmap.
 const GLYPH_CODE_LV = 52;
 const GLYPH_CODE_NO = 264;
+const GLYPH_CODE_PP = 262;
 const CHAR_SPACER = 119;
 
 type SummaryTilemap = (typeof summaryBg.pages)["info"];
@@ -155,18 +165,38 @@ function tilemapWithOverrides(
   return { ...source, entries };
 }
 
-// DrawPagination(page=Skills): tile IDs copied into BG3 while preserving its
-// existing palette/flip bits (CopyTileMapEntry palette=16).
-const INFO_BG_SKILLS_PAGINATION = tilemapWithOverrides(summaryBg.pages.info, [
-  { x: 11, y: 0, tile: 0x46 }, { x: 12, y: 0, tile: 0x47 },
-  { x: 13, y: 0, tile: 0x41 }, { x: 14, y: 0, tile: 0x42 },
-  { x: 15, y: 0, tile: 0x43 }, { x: 16, y: 0, tile: 0x44 },
-  { x: 17, y: 0, tile: 0x48 }, { x: 18, y: 0, tile: 0x49 },
-  { x: 11, y: 1, tile: 0x56 }, { x: 12, y: 1, tile: 0x57 },
-  { x: 13, y: 1, tile: 0x51 }, { x: 14, y: 1, tile: 0x52 },
-  { x: 15, y: 1, tile: 0x53 }, { x: 16, y: 1, tile: 0x54 },
-  { x: 17, y: 1, tile: 0x58 }, { x: 18, y: 1, tile: 0x59 },
-]);
+// DrawPagination copies the four two-tile dots into fixed BG3 while
+// preserving the Info tilemap's palette/flip bits.
+function infoBgWithPagination(page: SummaryPage): SummaryTilemap {
+  const pageIndex = ["info", "skills", "battleMoves", "contestMoves"].indexOf(page);
+  const overrides: Array<{ x: number; y: number; tile: number }> = [];
+  for (let i = 0; i < 4; i += 1) {
+    const top =
+      i < pageIndex ? [0x46, 0x47]
+      : i === pageIndex ? (i === 3 ? [0x4b, 0x4c] : [0x41, 0x42])
+      : i === 3 ? [0x48, 0x49]
+      : [0x43, 0x44];
+    overrides.push(
+      { x: 11 + i * 2, y: 0, tile: top[0]! },
+      { x: 12 + i * 2, y: 0, tile: top[1]! },
+      { x: 11 + i * 2, y: 1, tile: top[0]! + 0x10 },
+      { x: 12 + i * 2, y: 1, tile: top[1]! + 0x10 },
+    );
+  }
+  return tilemapWithOverrides(summaryBg.pages.info, overrides);
+}
+
+// SetDefaultTilemaps -> PositionPowerAccSlidingWindow(0, 0xFF) replaces the
+// closed Battle Moves effect panel with transparent tile 0. The source page
+// binary carries the open panel art; the runtime copy is part of page setup.
+const BATTLE_MOVES_CLOSED_TILEMAP = tilemapWithOverrides(
+  summaryBg.pages.battleMoves,
+  Array.from({ length: 7 * 10 }, (_, index) => ({
+    x: index % 10,
+    y: 13 + Math.floor(index / 10),
+    tile: 0,
+  })),
+);
 
 function drawGlyphCode(fb: Uint8Array, code: number, x: number, y: number, colors: TextColors, palette: RgbColor[], fadeY: number): number {
   const bitmap = font.glyphs[code];
@@ -197,11 +227,11 @@ function compose(
   selectedSlot: number,
   bgY: number,
   objY: number,
-  page: "info" | "skills",
+  page: SummaryPage,
   monAnimClock: number,
   clearPageWindows = false,
   pageOffsetX = 0,
-  destinationChromeInstalled = page === "skills",
+  destinationChromeInstalled = page !== "info",
   monReplacement: {
     readonly spriteSlot?: number;
     readonly typeSlot?: number;
@@ -213,6 +243,7 @@ function compose(
     readonly showBall?: boolean;
     readonly animateSwitchedMon?: boolean;
   } = {},
+  underlyingPage?: SummaryPage,
 ): void {
   const text = (str: string, x: number, y: number, colors: TextColors, paletteNum: number) =>
     drawTextFaded(fb, font, charmap, str, x, y, summaryBg.subpalettes[paletteNum]!, colors, bgY);
@@ -230,17 +261,31 @@ function compose(
   // BG3: the fixed Info-page tilemap (InitBGs points BG3 here permanently -
   // see §2/§7's BG-layering note: for a static Info render, BG1/BG2 sit
   // scrolled off-screen and can be ignored entirely).
+  const chromePage = destinationChromeInstalled ? page : underlyingPage ?? "info";
   const infoTilemap =
-    page === "skills" && destinationChromeInstalled
-      ? INFO_BG_SKILLS_PAGINATION
-      : summaryBg.pages.info;
+    destinationChromeInstalled
+      ? infoBgWithPagination(page)
+      : underlyingPage
+        ? infoBgWithPagination(underlyingPage)
+        : summaryBg.pages.info;
   drawTileBgFaded(fb, { tileset: summaryBg.tileset, tilemap: infoTilemap, subpalettes: summaryBg.subpalettes }, bgY);
-  if (page === "skills") {
-    // BG3 remains the fixed Info page. Skills is the active BG1/BG2 layer;
-    // its transparent portrait-side tiles reveal BG3 underneath.
+  if (underlyingPage && underlyingPage !== "info") {
     drawTileBgFaded(
       fb,
-      { tileset: summaryBg.tileset, tilemap: summaryBg.pages.skills, subpalettes: summaryBg.subpalettes },
+      { tileset: summaryBg.tileset, tilemap: summaryBg.pages[underlyingPage], subpalettes: summaryBg.subpalettes },
+      bgY,
+    );
+  }
+  if (page !== "info") {
+    // BG3 remains the fixed Info page. Non-Info pages rotate through BG1/BG2;
+    // their transparent portrait-side tiles reveal BG3 underneath.
+    drawTileBgFaded(
+      fb,
+      {
+        tileset: summaryBg.tileset,
+        tilemap: page === "battleMoves" ? BATTLE_MOVES_CLOSED_TILEMAP : summaryBg.pages[page],
+        subpalettes: summaryBg.subpalettes,
+      },
       bgY,
       -pageOffsetX,
     );
@@ -350,7 +395,10 @@ function compose(
 
   // BG0 windows, topmost.
   text(
-    page === "skills" && destinationChromeInstalled ? "POKéMON SKILLS" : "POKéMON INFO",
+    chromePage === "skills" ? "POKéMON SKILLS"
+      : chromePage === "battleMoves" ? "BATTLE MOVES"
+      : chromePage === "contestMoves" ? "CONTEST MOVES"
+      : "POKéMON INFO",
     WIN_TITLE.x + 2,
     WIN_TITLE.y + 1,
     COLOR_1,
@@ -373,6 +421,13 @@ function compose(
   if (page === "info" && !clearPageWindows) {
     drawSpriteFaded(fb, A_BUTTON_SHEET, summaryBg.subpalettes[PAL7]!, cancelIconX + 8, WIN_PROMPT_CANCEL.y + 8, 2, 2, 0, bgY);
     text(cancelText, cancelStringX, WIN_PROMPT_CANCEL.y + 1, COLOR_0, PAL7);
+  }
+  if (chromePage === "battleMoves" && !clearPageWindows) {
+    const infoText = "INFO";
+    const infoStringX = WIN_PROMPT_CANCEL.x + rightAlignXOffset(font, charmap, infoText, 62);
+    const infoIconX = Math.max(0, infoStringX - 16);
+    drawSpriteFaded(fb, A_BUTTON_SHEET, summaryBg.subpalettes[PAL7]!, infoIconX + 8, WIN_PROMPT_CANCEL.y + 8, 2, 2, 0, bgY);
+    text(infoText, infoStringX, WIN_PROMPT_CANCEL.y + 1, COLOR_0, PAL7);
   }
 
   if (page === "info" && !clearPageWindows) {
@@ -482,6 +537,44 @@ function compose(
       codes.reduce((sum, code) => sum + (font.widths[code] ?? font.cellSize), 0);
     drawCodes(totalCodes, WIN_SKILLS_EXP.x + 2 + 42 - codeWidth(totalCodes), WIN_SKILLS_EXP.y + 1);
     drawCodes(nextCodes, WIN_SKILLS_EXP.x + 2 + 42 - codeWidth(nextCodes), WIN_SKILLS_EXP.y + 17);
+  } else if (page === "battleMoves" && destinationChromeInstalled && !clearPageWindows) {
+    const frontierMon = frontierMons.find(
+      (entry) => entry.index === (rental as { frontierMonIndex?: number }).frontierMonIndex,
+    )!;
+    const ppPalette = [
+      summaryBg.subpalettes[0]![0]!,
+      ...summaryBg.ppPalette.slice(0, 15),
+    ].map((color) => fadeColor(color, bgY));
+    const codeWidth = (codes: readonly number[]) =>
+      codes.reduce(
+        (sum, code) => sum + (font.widths[code] ?? font.cellSize) + font.letterSpacing,
+        0,
+      );
+    for (let i = 0; i < 4; i += 1) {
+      const move = moves.get(frontierMon.moves[i]!)!;
+      const y = i * 16 + 1;
+      text(move.name, WIN_MOVES_NAMES.x, WIN_MOVES_NAMES.y + y, COLOR_1, PAL6);
+      const currentPp = (rental as unknown as { pp: number[] }).pp[i]!;
+      const ppCodes = [
+        GLYPH_CODE_PP,
+        ...String(currentPp).padStart(2, " ").split("").map((char) =>
+          char === " " ? CHAR_SPACER : charmap.get(char)!),
+        charmap.get("/")!,
+        ...String(move.pp).padStart(2, " ").split("").map((char) =>
+          char === " " ? CHAR_SPACER : charmap.get(char)!),
+      ];
+      drawGlyphCodes(
+        fb,
+        font,
+        ppCodes,
+        WIN_MOVES_PP.x + 44 - codeWidth(ppCodes),
+        WIN_MOVES_PP.y + y,
+        ppPalette,
+        { bg: 0, fg: 7, shadow: 8 },
+      );
+      const type = typeIcons.types[move.type.replace("TYPE_", "")]!;
+      sprite({ tileset: type.tileset }, type.palette, 101, 40 + i * 16, 4, 2, 0);
+    }
   }
 }
 
@@ -524,15 +617,38 @@ export function renderSummarySkillsPage(
   return fb;
 }
 
-export function renderSummaryInfoPageCleared(
+export function renderSummaryBattleMovesPage(
   selectedSlot: number,
-  monAnimClock: number,
+  monAnimClock = 0,
   animateSwitchedMon = false,
 ): Uint8Array {
   const fb = createFramebuffer();
-  compose(fb, selectedSlot, 0, 0, "info", monAnimClock, true, 0, false, {
+  compose(fb, selectedSlot, 0, 0, "battleMoves", monAnimClock, false, 0, true, {
     animateSwitchedMon,
   });
+  return fb;
+}
+
+export function renderSummaryPageCleared(
+  selectedSlot: number,
+  monAnimClock: number,
+  page: "info" | "skills" = "info",
+  animateSwitchedMon = false,
+): Uint8Array {
+  const fb = createFramebuffer();
+  compose(
+    fb,
+    selectedSlot,
+    0,
+    0,
+    page,
+    monAnimClock,
+    true,
+    0,
+    false,
+    { animateSwitchedMon },
+    page === "skills" ? "skills" : undefined,
+  );
   return fb;
 }
 
@@ -643,11 +759,27 @@ export function renderSummaryPageTransition(
       layers.movingX,
       transition.fromPage === "skills",
       { animateSwitchedMon },
+      layers.fixedPage,
     );
     return fb;
   }
-  // Later page pairs can share the reducer/layer geometry without pretending
-  // their still-unimplemented page compositors are accepted.
+  if (layers.movingPage === "battleMoves" && layers.fixedPage === "skills") {
+    compose(
+      fb,
+      selectedSlot,
+      0,
+      0,
+      "battleMoves",
+      monAnimClock,
+      true,
+      layers.movingX,
+      false,
+      { animateSwitchedMon },
+      "skills",
+    );
+    return fb;
+  }
+  // Contest Moves remains outside this bounded compositor increment.
   compose(fb, selectedSlot, 0, 0, "info", monAnimClock, true);
   return fb;
 }

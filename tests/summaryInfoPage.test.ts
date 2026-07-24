@@ -6,7 +6,11 @@
 
 import { describe, expect, it } from "vitest";
 import { createHash } from "node:crypto";
-import { renderSummaryInfoPage, renderSummaryInfoPageFaded } from "../src/engine/summaryInfoPage.ts";
+import {
+  renderSummaryBattleMovesPage,
+  renderSummaryInfoPage,
+  renderSummaryInfoPageFaded,
+} from "../src/engine/summaryInfoPage.ts";
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from "../src/engine/framebuffer.ts";
 
 describe("summary Info page render", () => {
@@ -30,6 +34,16 @@ describe("summary Info page render", () => {
     const onix = renderSummaryInfoPage(0);
     const magby = renderSummaryInfoPage(1);
     expect(Buffer.from(onix).equals(Buffer.from(magby))).toBe(false);
+  });
+
+  it("owns a deterministic, fully opaque Battle Moves page for the selected rental", () => {
+    const onix = renderSummaryBattleMovesPage(0, 30);
+    const onixAgain = renderSummaryBattleMovesPage(0, 30);
+    const magby = renderSummaryBattleMovesPage(1, 30);
+    expect(onix.length).toBe(SCREEN_WIDTH * SCREEN_HEIGHT * 4);
+    expect(Buffer.from(onix).equals(Buffer.from(onixAgain))).toBe(true);
+    expect(Buffer.from(onix).equals(Buffer.from(magby))).toBe(false);
+    for (let i = 3; i < onix.length; i += 4) expect(onix[i]).toBe(255);
   });
 
   it("renderSummaryInfoPageFaded(slot, 0, 0) matches the unfaded render exactly", () => {

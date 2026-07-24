@@ -58,10 +58,11 @@ import {
   type SummaryScreenState,
 } from "./summaryScreen.ts";
 import {
+  renderSummaryBattleMovesPage,
   renderSummaryInfoPage,
-  renderSummaryInfoPageCleared,
   renderSummaryInfoPageFaded,
   renderSummaryMonTransition,
+  renderSummaryPageCleared,
   renderSummaryPageTransition,
   renderSummarySkillsPage,
 } from "./summaryInfoPage.ts";
@@ -2079,9 +2080,10 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
           : renderSummaryInfoPage(summary.selectedSlot, summaryMonAnimClock, animateSwitchedMon);
       }
       if (layers.movingPage === pageTransition.toPage && pageTransition.elapsed <= 2) {
-        return renderSummaryInfoPageCleared(
+        return renderSummaryPageCleared(
           summary.selectedSlot,
           summaryMonAnimClock,
+          pageTransition.fromPage === "skills" ? "skills" : "info",
           animateSwitchedMon,
         );
       }
@@ -2095,6 +2097,8 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
     return summary.isOpen
       ? summary.page === "skills"
         ? renderSummarySkillsPage(summary.selectedSlot, summaryMonAnimClock, animateSwitchedMon)
+        : summary.page === "battleMoves"
+          ? renderSummaryBattleMovesPage(summary.selectedSlot, summaryMonAnimClock, animateSwitchedMon)
         : renderSummaryInfoPage(summary.selectedSlot, summaryMonAnimClock, animateSwitchedMon)
       : renderFactoryDraftScreen(state.draftScreen);
   }

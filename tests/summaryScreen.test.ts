@@ -130,6 +130,69 @@ describe("summaryScreen: generic page navigation", () => {
     expect(info.selectedSlot).toBe(2);
   });
 
+  it("orders Skills -> Battle Moves and restores input ownership only at the shared +10 boundary", () => {
+    const skills = run(
+      requestSummaryPageChange(settled(3), "right"),
+      SUMMARY_PAGE_TRANSITION_TICKS,
+    );
+    const battle = requestSummaryPageChange(skills, "right");
+    expect(battle).toMatchObject({
+      selectedSlot: 3,
+      page: "battleMoves",
+      onInfoPage: false,
+      isOpen: true,
+      pageTransition: {
+        fromPage: "skills",
+        toPage: "battleMoves",
+        direction: "right",
+        elapsed: 0,
+      },
+    });
+    expect(summaryPageLayerOffsets(battle.pageTransition!)).toEqual({
+      movingPage: "battleMoves",
+      movingX: 256,
+      fixedPage: "skills",
+    });
+
+    const scrolling = run(battle, 4);
+    expect(summaryPageLayerOffsets(scrolling.pageTransition!)).toEqual({
+      movingPage: "battleMoves",
+      movingX: 128,
+      fixedPage: "skills",
+    });
+    expect(scrolling.selectedSlot).toBe(3);
+    expect(requestSummaryPageChange(scrolling, "left")).toBe(scrolling);
+    expect(requestSummaryPageChange(scrolling, "right")).toBe(scrolling);
+    expect(requestSummaryScreenExit(scrolling)).toBe(scrolling);
+    expect(requestSummaryMonChange(scrolling, "down")).toBe(scrolling);
+
+    const lastInFlight = run(battle, SUMMARY_PAGE_TRANSITION_TICKS - 1);
+    expect(lastInFlight.pageTransition).toMatchObject({ elapsed: 9 });
+    expect(requestSummaryPageChange(lastInFlight, "right")).toBe(lastInFlight);
+
+    const ready = advanceSummaryScreen(lastInFlight);
+    expect(ready).toMatchObject({
+      selectedSlot: 3,
+      page: "battleMoves",
+      pageTransition: null,
+      isOpen: true,
+      onInfoPage: false,
+    });
+    expect(requestSummaryPageChange(ready, "left").pageTransition).toMatchObject({
+      fromPage: "battleMoves",
+      toPage: "skills",
+      direction: "left",
+      elapsed: 0,
+    });
+    expect(requestSummaryPageChange(ready, "right").pageTransition).toMatchObject({
+      fromPage: "battleMoves",
+      toPage: "contestMoves",
+      direction: "right",
+      elapsed: 0,
+    });
+    expect(requestSummaryMonChange(ready, "down")).toBe(ready);
+  });
+
   it("places the moving 256px BG block in generic 32px steps over an immutable selected slot", () => {
     const right = requestSummaryPageChange(settled(5), "right");
     expect(summaryPageLayerOffsets(right.pageTransition!)).toEqual({

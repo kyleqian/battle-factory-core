@@ -61,6 +61,8 @@ function writeJson(path: string, data: unknown): void {
   writeJson(join(ASSETS_GEN, "summary-bg.json"), {
     tileset: { columns, rows, tiles: tiles.map((t) => [...t.pixels]) },
     subpalettes,
+    // pokemon_summary_screen.c:1355 loads gPPTextPalette into BG palette 8.
+    ppPalette: loadJascPal(join(REF, "graphics", "battle_interface", "text_pp.pal")),
     pages,
   });
 }
