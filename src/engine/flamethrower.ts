@@ -8,12 +8,29 @@
  */
 
 import { GBA_SINE_TABLE_256 } from "./battleMenu.ts";
+import {
+  createOrderedSprite,
+  createSpriteOrderState,
+  destroyOrderedSprite,
+  sortSpriteOrder,
+  spriteOwnersBackToFront,
+  spriteSlotForOwner,
+  updateOrderedSprite,
+  type SpriteOrderState,
+} from "./spriteOrder.ts";
 
 export interface FlamethrowerGeometry {
   readonly attackerCenter: Readonly<{ x: number; y: number }>;
   readonly targetCenter: Readonly<{ x: number; y: number }>;
   readonly attackerSide: "player" | "opponent";
   readonly flameSubpriority: number;
+  /** Lowest-free source slots available to this 22-sprite burst. */
+  readonly flameSpriteSlots: readonly number[];
+  /**
+   * Those slots' live relative `sSpriteOrder` immediately before the first
+   * flame allocation. Equal-priority/equal-y ties inherit this order.
+   */
+  readonly spriteOrderSeed: readonly number[];
 }
 
 export interface FlamethrowerFlame {
@@ -23,6 +40,7 @@ export interface FlamethrowerFlame {
   readonly centerY: number;
   readonly sheetFrame: 1 | 2 | 3;
   readonly subpriority: number;
+  readonly slot: number;
 }
 
 export interface FlamethrowerBattlerEffect {
@@ -76,38 +94,76 @@ export function flamethrowerFlamesAtAge(
   animationAge: number,
   geometry: Readonly<FlamethrowerGeometry>,
 ): readonly FlamethrowerFlame[] {
-  const flames: FlamethrowerFlame[] = [];
-  for (let spawnIndex = 0; spawnIndex < FLAMETHROWER_FLAME_COUNT; spawnIndex += 1) {
-    const age = animationAge - spawnIndex * FLAMETHROWER_FLAME_INTERVAL;
-    if (age < 0 || age >= FLAMETHROWER_FLAME_LIFETIME) continue;
-    const steps = age + 2;
-    flames.push({
-      spawnIndex,
-      age,
-      centerX:
-        geometry.attackerCenter.x
-        + (geometry.attackerSide === "player" ? 10 : -10)
-        + signedLinearOffset(
-          geometry.attackerCenter.x + (geometry.attackerSide === "player" ? 10 : -10),
-          geometry.targetCenter.x,
-          30,
-          steps,
-        ),
-      centerY:
-        geometry.attackerCenter.y
-        + 10
-        + signedLinearOffset(
-          geometry.attackerCenter.y + 10,
-          geometry.targetCenter.y,
-          30,
-          steps,
-        )
-        + sineOffset(spawnIndex, age + 1),
-      sheetFrame: ((Math.floor((age + 1) / 2) % 3) + 1) as 1 | 2 | 3,
-      subpriority: geometry.flameSubpriority,
-    });
+  if (animationAge < 0) return [];
+  let scheduler: SpriteOrderState = createSpriteOrderState(
+    geometry.flameSpriteSlots,
+    geometry.spriteOrderSeed,
+  );
+  let current: FlamethrowerFlame[] = [];
+  let priorOwners = new Set<number>();
+  for (let tickAge = 0; tickAge <= animationAge; tickAge += 1) {
+    const flames: Omit<FlamethrowerFlame, "slot">[] = [];
+    for (
+      let spawnIndex = 0;
+      spawnIndex < FLAMETHROWER_FLAME_COUNT;
+      spawnIndex += 1
+    ) {
+      const age = tickAge - spawnIndex * FLAMETHROWER_FLAME_INTERVAL;
+      if (age < 0 || age >= FLAMETHROWER_FLAME_LIFETIME) continue;
+      const steps = age + 2;
+      flames.push({
+        spawnIndex,
+        age,
+        centerX:
+          geometry.attackerCenter.x
+          + (geometry.attackerSide === "player" ? 10 : -10)
+          + signedLinearOffset(
+            geometry.attackerCenter.x
+              + (geometry.attackerSide === "player" ? 10 : -10),
+            geometry.targetCenter.x,
+            30,
+            steps,
+          ),
+        centerY:
+          geometry.attackerCenter.y
+          + 10
+          + signedLinearOffset(
+            geometry.attackerCenter.y + 10,
+            geometry.targetCenter.y,
+            30,
+            steps,
+          )
+          + sineOffset(spawnIndex, age + 1),
+        sheetFrame: ((Math.floor((age + 1) / 2) % 3) + 1) as 1 | 2 | 3,
+        subpriority: geometry.flameSubpriority,
+      });
+    }
+    const owners = new Set(flames.map((flame) => flame.spawnIndex));
+    for (const owner of priorOwners) {
+      if (!owners.has(owner)) scheduler = destroyOrderedSprite(scheduler, owner);
+    }
+    for (const flame of flames) {
+      const key = {
+        priority: 2,
+        subpriority: flame.subpriority,
+        oamY: flame.centerY - 16,
+      };
+      scheduler =
+        spriteSlotForOwner(scheduler, flame.spawnIndex) === null
+          ? createOrderedSprite(scheduler, flame.spawnIndex, key)
+          : updateOrderedSprite(scheduler, flame.spawnIndex, key);
+    }
+    scheduler = sortSpriteOrder(scheduler);
+    priorOwners = owners;
+    if (tickAge === animationAge) {
+      const byOwner = new Map(flames.map((flame) => [flame.spawnIndex, flame]));
+      current = spriteOwnersBackToFront(scheduler).map((owner) => ({
+        ...byOwner.get(owner)!,
+        slot: spriteSlotForOwner(scheduler, owner)!,
+      }));
+    }
   }
-  return flames.sort((a, b) => a.centerY - b.centerY || b.spawnIndex - a.spawnIndex);
+  return current;
 }
 
 export function flamethrowerBattlerEffectAtAge(

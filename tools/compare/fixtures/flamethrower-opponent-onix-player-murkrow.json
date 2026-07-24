@@ -29,7 +29,9 @@
     "attackerCenter": {"x": 176, "y": 42},
     "targetCenter": {"x": 72, "y": 97},
     "attackerSide": "opponent",
-    "flameSubpriority": 37
+    "flameSubpriority": 37,
+    "flameSpriteSlots": [3, 4, 5, 7, 9, 10, 11, 12],
+    "spriteOrderSeed": [3, 4, 5, 12, 11, 10, 9, 7]
   },
   "fieldProfile": {
     "playerHp": 142,

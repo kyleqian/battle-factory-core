@@ -44,19 +44,19 @@ remainder.
 
 ## Current handoff
 
-- **State:** **15 exact / 2 partial / 259 unsupported**. FLAMETHROWER has a
-  complete source-relative body in both orientations but remains honestly
-  partial for equal-priority flame overlap ordering.
-- **Did:** implemented the 22-spawn `gFlamethrowerFlameSpriteTemplate` sine
-  beam, shared timer phase, 30-step fixed translation, three-frame sheet loop,
-  both `AnimTask_ShakeMon` programs, alpha/monbg epochs, and teardown through
-  the relative Scene-ON seam. DRAGON BREATH's reducer/compositor is unchanged.
-- **Evidence:** both orientations match every RAM/OAM component frame
-  (**126/126 + 126/126**). Complete dense RGB windows are **115/126**
-  player-back ONIX → opponent-front MURKROW and **117/126** opponent-front
-  ONIX → player-back MURKROW. The 20 residual frames contain only **1–25 px**
-  where same-priority flame sprites overlap; all other pixels and epochs match.
-- **Next:** derive persistent `sSpriteOrder` slot history for the overlapping
-  equal-priority flame OBJs. Do not promote exact from the stateless
-  center-y/spawn-index order; generic hit/HP/result/controller tails remain
-  independently owned.
+- **State:** **16 exact / 1 partial / 259 unsupported**. FLAMETHROWER is exact
+  across its complete move-owned body in both source-required orientations.
+- **Did:** added a pure reduced model of Emerald's persistent scene-wide
+  `sSpriteOrder`: lowest-free `CreateSprite`, dummy reset on destruction,
+  slot reuse, wrapped-y stable insertion passes, and inherited exact-tie
+  order. FLAMETHROWER consumes one live pre-allocation order seed per staged
+  scene; no frame tables or absolute clocks were added. Existing DRAGON
+  BREATH/EXTREME SPEED/QUICK ATTACK/AERIAL ACE reducers are unchanged.
+- **Evidence:** player-back ONIX → opponent-front MURKROW and the opposite
+  orientation each match **126/126** RAM/OAM/order component frames and
+  **126/126** complete dense RGB frames at source-relative ages **-11..114**.
+  Tier 1 pins creation, destruction, lowest-slot reuse, dummy-state movement,
+  y wrap, stable ties, and probed FLAMETHROWER slot permutations.
+- **Next:** return to the supervisor. Generic hit/HP/result/controller tails
+  remain independently owned; other dragon/fire siblings still need their own
+  complete dense move evidence.
