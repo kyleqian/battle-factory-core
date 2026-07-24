@@ -38,21 +38,21 @@ remainder.
 
 ## Current handoff
 
-- **State:** **9 exact / 4 partial / 263 unsupported**. FLY remains partial:
+- **State:** **9 exact / 5 partial / 262 unsupported**. FLY remains partial:
   all four portable practical windows are exact, but ISSUES #34's seven
-  affine opening frames remain explicitly excluded. BOUNCE remains unsupported
-  because it has source/RAM evidence but no green pixel window.
-- **Did:** staged legal Level-50 SPOINK→ONIX BOUNCE with explicit zero PP Ups;
-  added dense probe support for its two sprite templates; and installed a
-  source-relative charge/strike reducer behind the shared Scene-ON state seam.
-  The framebuffer path rejects BOUNCE explicitly until its compositor exists.
-- **Evidence:** dense RAM/OAM pins charge frames **345-368** (24 affine
-  states), strike frames **881-904** (24 vertical states), hit-splat
-  **890-898**, and vertical shake poses **892-893/896-897/900-901/904**.
-  PP is `[5,5,5,5]` before selection and `[5,5,5,4]` after one use with
-  `ppUps:[0,0,0,0]`; stock HP resolves **117→114**. FLY focused regressions,
-  Tier-1, and build remain green.
-- **Next:** extract SPOINK front/back presentation assets and healthboxes,
-  implement BOUNCE's monbg/alpha/backdrop/OAM composition in both orientations,
-  then dense-compare complete charge/strike/controller windows before assigning
-  any move status. Preserve all FLY windows and ISSUES #34 exclusions.
+  affine opening frames remain explicitly excluded. BOUNCE is now partial:
+  its complete opponent-front charge and strike bodies are exact, while the
+  opposite orientation and controller resolution/cleanup tail remain open.
+- **Did:** extracted SPOINK's source front art and installed BOUNCE's shared
+  Scene-ON framebuffer path: source-relative affine balls, attacker visibility,
+  monbg-owned target y2, ball/hitsplat OAM order, semitransparent backdrop,
+  source-composed healthboxes, and controller-owned move-used text.
+- **Evidence:** committed legal zero-PP-Up SPOINK→ONIX dense fixtures match
+  charge **345-368 = 24/24** and strike **881-904 = 24/24**, with zero
+  exclusions and zero differing pixels. All four FLY portable windows remain
+  green (**144/144 + 248/248 + 140/140 + 244/244**, with only ISSUES #34's
+  already-declared seven charge exclusions). PP remains `[5,5,5,5]→
+  [5,5,5,4]` with `ppUps:[0,0,0,0]`; stock HP remains **117→114**.
+- **Next:** stage the legal opposite-side SPOINK case, extract only its required
+  back art, and prove both bodies plus the complete controller resolution and
+  cleanup tail before exact promotion. Preserve all FLY windows and ISSUES #34.
