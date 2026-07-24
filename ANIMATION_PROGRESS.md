@@ -38,30 +38,23 @@ remainder.
 
 ## Current handoff
 
-- **State:** **11 exact / 3 partial / 262 unsupported**. FLY and BOUNCE are
-  exact across both legal orientations. DRAGON_BREATH remains partial only
-  because portability and its three pre-existing action-menu bounce exclusions
-  are still open; ISSUES #23's compressed fire-projectile remainder is closed.
-- **Did:** replaced the false eight-spawn premise with the source's eleven
-  `create_dragon_breath_fire_sprite` commands and fresh RAM's 3174-3214
-  every-four-tick stream. `dragonBreath.ts` parameterizes the shared
-  translation/affine/frame program. Scene composition now follows
-  `monbg ANIM_DEF_PARTNER` plus OAM subpriorities: embers win over the target
-  BG, while player-back Onix (30) wins over ember sprites (38). The generic
-  affine sampler is unchanged.
-- **Evidence:** the new committed ON trace is **61/61** over every render
-  3175-3235; the existing complete evidence trace remains **237/237**. A fresh
-  wrapper-validated RAM dump finds 11 spawns, max 6 live, and the repaired
-  sole-live verifier is 0px at compressed render 3177 and magnified render
-  3232. Focused Dragon Breath/battle-scene tests are **279/279**; the full
-  suite is **1668/1668**, and build/coverage are green. FLY charge/strike
-  remain **213/213 + 256/256**, BOUNCE's fresh control is **24/24**, and the
-  adjacent ENDEAVOR window remains **237/237**. Source batch audit:
-  FLAMETHROWER, BLAZE_KICK, FIRE_BLAST, EMBER, and FIRE_SPIN share the
-  small-ember asset and selected generic tasks only, but each uses distinct
-  sprite templates; DRAGON_RAGE shares the translation callback family with
-  different affine/geometry inputs. None is promoted.
-- **Next:** prove DRAGON_BREATH portability in both required orientations
-  through the shared seam, without changing Battle Lab outcomes/PP. Its three
-  pre-existing action-menu bounce exclusions remain separate from the now
-  exact projectile component. DIVE remains unsupported.
+- **State:** **11 exact / 3 partial / 262 unsupported**. DRAGON_BREATH stays
+  partial: its projectile/OAM component is now portable in both legal
+  orientations, but complete portable framebuffer/controller windows and the
+  three pre-existing canonical action-menu bounce exclusions remain open.
+- **Did:** replaced canonical displacement with source-shaped attacker/target
+  coordinates, fixed-point duration, eleven-spawn cadence, target-relative
+  subpriority/monbg metadata, and attacker-side sprite/affine selection. Added
+  two zero-PP-Up Level-50 Mechanics Lab stages plus a relative Scene-ON
+  component adapter and dense comparator. No PP, outcome, damage, status, RNG,
+  controller, turn, or facility policy changed.
+- **Evidence:** fresh wrapper-validated ON probes and the shared seam match
+  **61/61** dense projectile/OAM states for player-back ONIX→opponent-front
+  MURKROW and **61/61** for opponent-front ONIX→player-back MURKROW. Canonical
+  projectile/full windows remain **61/61 + 237/237**; FLY controls remain
+  **213/213 + 256/256**. Focused tests/build are green.
+- **Next:** build the portable full-scene DRAGON_BREATH compositor (target
+  blend/shake, battler/healthbox/text/controller handoff) and densely compare
+  both complete Mechanics Lab windows. Retain partial until those and the
+  three menu-bounce exclusions are closed or explicitly accepted. DIVE
+  remains unsupported.
