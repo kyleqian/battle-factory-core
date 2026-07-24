@@ -14,6 +14,17 @@ Per entry:
 - **Cost each:** rough minutes lost per hit.
 - **Workaround:** the current dodge, if any.
 
+## Post-tick staging can exercise the pre-mutation controller branch
+
+- **What:** the duplicate-species verifier changed the staged enemy identity
+  after the canonical A tick had already entered the normal accept branch, so
+  its initial 52-frame comparison never exercised duplicate rejection.
+- **Hits:** 1.
+- **Cost each:** ~8 min.
+- **Workaround:** when a fixture mutates branch-driving state, reconstruct the
+  source's settled input callback before replaying the accepted edge, and
+  assert the expected controller phase at the staging boundary.
+
 ## Staged trace generator can request frames beyond its own trace
 
 - **What:** the SUMMARY-return generator emitted capture frames after the
