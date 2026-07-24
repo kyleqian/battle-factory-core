@@ -1,3 +1,21 @@
+## 351 — S9 OFF Info-page rental DOWN switch: **GREEN — 54/54 exact**
+
+- **State:** settled ONIX Info now switches DOWN to MAGBY through the generic
+  slot-relative replacement task and returns true input ownership at +20.
+- **Did:** added direction/destination ownership, endpoint clamps, in-flight
+  rejection, source-ordered portrait/ball/type/text replacement, and MAGBY's
+  replacement-local vertical-squish callback. Tier-1 pins both directions,
+  readiness, page ownership, and no-wrap behavior.
+- **Next:** add targeted UP pixel acceptance, then continue the remaining
+  bounded S9 Moves-page and move-select routes.
+- **Notes:** `summary-info-mon-down.json` **54/54**; Info ONIX **122/122** +
+  MAGBY **132/132**; install **3/3**; RIGHT **25/25**; LEFT round trip
+  **56/56**. Supervisor reverified the new dense trace and merged the disjoint
+  ON lane: ICE PUNCH is now exact at **1294/1294** opposite-side and
+  **462/462** player-side, with FIRE PUNCH **225/225** preserved. Integrated
+  Tier-1 **1297/1297** and build green. No deferred questions.
+
+---
 ## 350 — S9 OFF Skills→Info reverse layered wipe: **GREEN — 56/56 exact**
 
 - **State:** LEFT now returns settled ONIX Skills to an input-ready Info page

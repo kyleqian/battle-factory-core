@@ -4,6 +4,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 354 — S9 OFF Battle→Contest Moves layered wipe: **GREEN — 16/16 exact**
+
+- **State:** settled ONIX Battle Moves now advances RIGHT through the generic
+  eight-step BG1/BG2 wipe to input-ready Contest Moves at +10.
+- **Did:** composed Contest tilemap closure, category icons, shared move/PP
+  rows, title/pagination/A-INFO ownership, and persistent portrait sprites.
+  Tier-1 pins Battle→Contest order/layers, selected rental, in-flight gates,
+  endpoint behavior, +10 readiness, and deterministic per-rental rendering.
+- **Next:** supervisor verify this route and choose the next bounded S9
+  increment; move-select/highlight/reorder, reverse LEFT beyond the accepted
+  readiness tick, and Moves-page mon switching remain untouched.
+- **Notes:** `summary-battle-to-contest-moves.json` **16/16**; Skills→Battle
+  **36/36**; DOWN→UP **87/87**; DOWN **54/54**; Info **122/122 + 132/132**;
+  install **3/3**; Info→Skills **25/25**; Skills→Info **56/56**. Tier-1
+  **1305/1305** and build green. No absolute ticks, framebuffer assets,
+  runtime oracle/ROM, battle/controller, ROADMAP, or ISSUES edits.
+
+---
 ## 353 — S9 OFF Skills→Battle Moves layered wipe: **GREEN — 36/36 exact**
 
 - **State:** settled ONIX Skills now advances RIGHT through the generic
@@ -38,21 +56,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   LEFT **56/56**. Tier-1 **1298/1298** and build green. No absolute ticks,
   framebuffer assets, runtime oracle/ROM, battle/controller, or ROADMAP/
   ISSUES edits.
-
----
-## 351 — S9 OFF Info-page rental DOWN switch: **GREEN — 54/54 exact**
-
-- **State:** settled ONIX Info now switches DOWN to MAGBY through the generic
-  slot-relative replacement task and returns true input ownership at +20.
-- **Did:** added direction/destination ownership, endpoint clamps, in-flight
-  rejection, source-ordered portrait/ball/type/text replacement, and MAGBY's
-  replacement-local vertical-squish callback. Tier-1 pins both directions,
-  readiness, page ownership, and no-wrap behavior.
-- **Next:** add targeted UP pixel acceptance, then continue the remaining
-  bounded S9 Moves-page and move-select routes.
-- **Notes:** `summary-info-mon-down.json` **54/54**; Info ONIX **122/122** +
-  MAGBY **132/132**; install **3/3**; RIGHT **25/25**; LEFT round trip
-  **56/56**. Supervisor reverified the new dense trace and merged the disjoint
-  ON lane: ICE PUNCH is now exact at **1294/1294** opposite-side and
-  **462/462** player-side, with FIRE PUNCH **225/225** preserved. Integrated
-  Tier-1 **1297/1297** and build green. No deferred questions.
