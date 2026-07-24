@@ -1,0 +1,71 @@
+{
+  "profile": "battle-scene-off",
+  "canonicalTrace": "tools/compare/traces-groundtruth/battle1-swapyes-b.json",
+  "generator": "tools/probe/derive-swap-enemy-return-trace.mjs",
+  "ramProbe": "tools/probe/dump-swap-enemy-return.py",
+  "scope": "enemy PKMN FOR SWAP action returns to an input-ready player picker; evidence only",
+  "source": {
+    "actions": "battle_factory_screen.c:1042-1057; enemy action index 3 is Swap_ActionPkmnForSwap",
+    "dispatch": "battle_factory_screen.c:4017-4023; action installs ScreenInfoTransitionOut with SwitchPartyScreen follow-up",
+    "transitionOut": "battle_factory_screen.c:3001-3074; enemy mode tears down PKMN FOR SWAP then CANCEL five frames later",
+    "switch": "battle_factory_screen.c:3169-3215; enemy mode selects Swap_InitActions(SWAP_PLAYER_SCREEN), hides the enemy button sprites, then enters transition-in",
+    "transitionIn": "battle_factory_screen.c:3077-3167; player mode rebuilds only CANCEL and returns HandleChooseMons state 1"
+  },
+  "edgePairs": {
+    "enemyPickerDown": {
+      "rejected": { "tick": 29935, "buttons": ["DOWN"], "reason": "ScreenInfoTransitionIn state 8 installs HandleChooseMons during this frame; cursor remains 0" },
+      "accepted": { "tick": 29936, "buttons": ["DOWN"], "result": "cursor 0 -> 3 (PKMN FOR SWAP)" }
+    },
+    "enemyPkmnForSwapA": {
+      "accepted": { "tick": 29938, "buttons": ["A"], "result": "Swap_Task_ScreenInfoTransitionOut state 0" }
+    },
+    "playerPickerRight": {
+      "rejected": { "tick": 30047, "buttons": ["RIGHT"], "reason": "player transition-in installs HandleChooseMons during this frame; cursor remains 0" },
+      "accepted": { "tick": 30048, "buttons": ["RIGHT"], "result": "fresh player-picker cursor 0 -> 1" }
+    }
+  },
+  "timeline": {
+    "transitionOut": 29938,
+    "enemyPkmnButtonSlideBegins": 29963,
+    "enemyCancelButtonSlideBegins": 29969,
+    "switchPartyTask": 29977,
+    "playerScreenInitialized": { "tick": 30009, "inEnemyScreen": false, "actionsCount": 4, "cursorPos": 0 },
+    "playerTransitionIn": 30010,
+    "playerPickerInputReady": 30047,
+    "firstFreshPlayerInput": 30048,
+    "rawRgb888Sha256": {
+      "transitionOut": "1e5e594c0d7a66c262638fd17030741d87c85a839681b01a49b23ea98836a712",
+      "enemyChromeTeardown": "039ca11470c8d7e76a15eee93134393737dd66a2a7eb4b843cd68919e681e817",
+      "switchPlayerMode": "07e9b9631ec9359a487a206bc6c185820d28a4cab68ae75388e77d68ea9dc4ad",
+      "playerPickerReady": "fe0b94173acd6e34bd2b4b1486fd3e68caa3e54f3b3f1d4721154ab056e5ccf3"
+    }
+  },
+  "identityAndRng": {
+    "playerParty": [
+      { "species": "ONIX", "speciesId": 95, "personality": 1205102525 },
+      { "species": "MAGBY", "speciesId": 240, "personality": 1534575931 },
+      { "species": "BAYLEEF", "speciesId": 153, "personality": 1550278706 }
+    ],
+    "enemyParty": [
+      { "species": "GROVYLE", "speciesId": 278, "personality": 1094072807 },
+      { "species": "MURKROW", "speciesId": 198, "personality": 3475344024 },
+      { "species": "PIDGEOTTO", "speciesId": 17, "personality": 3971699699 }
+    ],
+    "rentalMons": [156, 149, 180, 188, 184, 135],
+    "allPartyFriendship": 0,
+    "partyAndRentalMutation": false,
+    "rng": {
+      "enemyPickerReady": { "tick": 29935, "value": "0xdf2973cc" },
+      "actionAccepted": { "tick": 29938, "value": "0x1665e7d1" },
+      "playerPickerReady": { "tick": 30047, "value": "0xa4ac0b01" },
+      "firstFreshPlayerInput": { "tick": 30048, "value": "0x4c615de0" },
+      "note": "VBlank/sprite activity advances gRngValue; this action performs no selection roll and mutates neither party nor rental records."
+    }
+  },
+  "limits": {
+    "noPngOrRgbAssets": true,
+    "noProductionRendererUse": true,
+    "noBattle2Replay": true,
+    "framebufferEvidence": "raw RGB888 SHA-256 only"
+  }
+}
