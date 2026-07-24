@@ -611,7 +611,13 @@ The duplicate reducer/presentation seam is now implemented as a green logic
 checkpoint: source-relative +24 error readiness, +23 close/reconstruction,
 install-frame rejection, and first fresh enemy input are Tier-1 pinned with
 all identities/result/round ownership preserved. Dense staged framebuffer
-verification remains required before Gate 2 or S8 can close.
+verification is now reproducible with
+`npm run compare:factory-swap-duplicate-species`: its first every-frame
+picker→error→return audit is **0/52 exact** with **99,464** aggregate differing
+pixels (+0 381px, peak +27 5,010px, +51 2,029px). The bounded remainder is the
+source's already-loaded GROVYLE picker chrome after logical MAGBY staging plus
+the duplicate OpenMonPic/message/close composition. This is an evidence
+checkpoint, not acceptance; Gate 2 and S8 remain open.
 The parallel Scene-ON adapter
 now proves FIRE PUNCH in both orientations (**225/225** and **277/277**) and
 its canonical residual windows (**236/236** and **200/200**), making it

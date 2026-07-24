@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -46,6 +47,7 @@ GSPECIALVAR_RESULT = 0x020375F0
 PARTY_MON_SIZE, RENTALS_OFFSET = 0x64, 0xE70
 HANDLE_CHOOSE, CANT_HAVE_SAME = 0x0819CE40, 0x0819F488
 CHECKPOINTS = {29935, 29937, 29938, 29961, 29962, 29982, 29983, 29984, 29986}
+RGB_DIR = Path(os.environ["FACTORY_SWAP_DUPLICATE_RGB_DIR"]) if os.environ.get("FACTORY_SWAP_DUPLICATE_RGB_DIR") else None
 SUBSTRUCT_ORDERS = (
     (0, 1, 2, 3), (0, 1, 3, 2), (0, 2, 1, 3), (0, 3, 1, 2), (0, 2, 3, 1), (0, 3, 2, 1),
     (1, 0, 2, 3), (1, 0, 3, 2), (2, 0, 1, 3), (3, 0, 1, 2), (2, 0, 3, 1), (3, 0, 2, 1),
@@ -125,6 +127,12 @@ def snapshot(oracle: EmeraldOracle, tick: int) -> dict[str, object]:
     }
 
 
+def dump_rgb(oracle: EmeraldOracle, tick: int) -> None:
+    if RGB_DIR is not None and 29935 <= tick <= 29986:
+        RGB_DIR.mkdir(parents=True, exist_ok=True)
+        (RGB_DIR / f"{tick - 29935:03d}.rgb").write_bytes(oracle.screen_rgb())
+
+
 def main() -> None:
     trace = json.loads(TRACE.read_text())
     oracle = EmeraldOracle(REFERENCE / "pokeemerald.gba", REFERENCE / "pokeemerald.map", BOOTSTRAP)
@@ -156,8 +164,10 @@ def main() -> None:
     assert [party_species(oracle, GENEMYPARTY, i) for i in range(3)] == [240, 198, 17]
 
     rows = [snapshot(oracle, tick)]
+    dump_rgb(oracle, tick)
 
     def record_if_checkpoint() -> None:
+        dump_rgb(oracle, tick)
         if tick in CHECKPOINTS:
             rows.append(snapshot(oracle, tick))
     # Release the deliberately rejected install-frame A, then take the first

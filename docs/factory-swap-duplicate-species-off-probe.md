@@ -53,3 +53,15 @@ the other two player rentals (`:4162-4173`). On match,
 same enemy picker (`:4120-4159`). The accepted-swap-only copy routine is
 separate (`CopySwappedMonData`, `:2350-2361`) and is intentionally absent
 from this fixture's task path.
+
+## Dense live-render audit
+
+`npm run compare:factory-swap-duplicate-species` reruns this probe through
+`tools/run-mgba-probe.py`, writes raw RGB frames only to a fresh temporary
+directory, and compares all 52 staged picker/error/return frames against the
+normal engine renderer. The initial checkpoint is 0/52 exact with 99,464
+aggregate differing pixels (+0 381px, peak +27 5,010px, +51 2,029px).
+The +0 residual exposes the source-owned loaded-display distinction: changing
+the logical enemy species does not replace the already-created GROVYLE picker
+chrome. Later residuals bound the still-open OpenMonPic/message/close
+composition. No framebuffer output is committed or consumed by production.

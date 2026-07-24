@@ -1,0 +1,28 @@
+{
+  "schema": "factory-swap-duplicate-species-compare/v1",
+  "oracleProfile": "battle-scene-off",
+  "probe": "tools/probe/stage-swap-duplicate-species-off.py",
+  "sourceTrace": "../traces-groundtruth/battle1-swapyes-b.json",
+  "sourceSegmentCount": 153,
+  "stage": {
+    "id": "factory-swap-duplicate-species-enemy-picker",
+    "frame": 29935
+  },
+  "relativeWindow": {
+    "start": 0,
+    "end": 51
+  },
+  "segments": [
+    { "frames": 132 },
+    { "frames": 1, "buttons": ["A"] },
+    { "frames": 1 },
+    { "frames": 1, "buttons": ["A"] },
+    { "frames": 1, "buttons": ["B"] },
+    { "frames": 22 },
+    { "frames": 1, "buttons": ["B"] },
+    { "frames": 22 },
+    { "frames": 1, "buttons": ["RIGHT"] },
+    { "frames": 1 },
+    { "frames": 1, "buttons": ["RIGHT"] }
+  ]
+}

@@ -37,6 +37,28 @@ type AppStage = (state: EngineState) => EngineState;
  * trace. Production code never imports this registry.
  */
 const APP_STAGES: Readonly<Record<string, AppStage>> = {
+  "factory-swap-duplicate-species-enemy-picker": (state) => {
+    if (!state.factorySwap) {
+      throw new Error("duplicate-species stage requires the live Factory swap picker");
+    }
+    return {
+      ...state,
+      factorySwap: {
+        ...state.factorySwap,
+        controller: {
+          ...state.factorySwap.controller,
+          enemyParty: [
+            {
+              ...state.factorySwap.controller.enemyParty[0],
+              species: "MAGBY",
+            },
+            state.factorySwap.controller.enemyParty[1],
+            state.factorySwap.controller.enemyParty[2],
+          ],
+        },
+      },
+    };
+  },
   "battle2-off-turn1-before-confirm": (state) => ({
     ...state,
     rngMode: "frontierBattle",
