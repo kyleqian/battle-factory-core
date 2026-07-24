@@ -63,6 +63,7 @@ export type BattleScriptRulesContext = Readonly<
   BattleScriptMoveValuesRulesContext & {
     battlers: BattleScriptRulesBattlers;
     selectorRoles: BattleScriptSelectorRoleBindings;
+    atkCancelerTracker: number;
     battleOutcome: number;
     currentMove: number;
     currentMovePosition: number;
@@ -76,6 +77,7 @@ export type BattleScriptRulesContextInput = Readonly<{
     attacker?: BattleScriptBattlerId | null;
     effectBattler?: BattleScriptBattlerId | null;
   }>;
+  atkCancelerTracker: number;
   battleOutcome: number;
   currentMove: number;
   currentMovePosition: number;
@@ -145,6 +147,11 @@ export function createBattleScriptRulesContext(
   return Object.freeze({
     battlers: Object.freeze(battlers),
     selectorRoles,
+    atkCancelerTracker: requireUnsigned(
+      input.atkCancelerTracker,
+      0xff,
+      "atkCancelerTracker",
+    ),
     battleOutcome: requireUnsigned(input.battleOutcome, 0xff, "battleOutcome"),
     currentMove: requireUnsigned(input.currentMove, 0xffff, "currentMove"),
     currentMovePosition: requireUnsigned(

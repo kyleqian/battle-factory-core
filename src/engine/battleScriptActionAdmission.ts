@@ -1,12 +1,15 @@
+import type { BattleScriptBattlerId } from "./battleScriptEvents.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 import {
   BATTLE_SCRIPT_ACTION_FINISHED,
+  BATTLE_SCRIPT_ATTACK_CANCELER_PHASES,
   BATTLE_SCRIPT_HITMARKER_ALLOW_NO_PP,
   BATTLE_SCRIPT_HITMARKER_NO_ATTACKSTRING,
   BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE,
   BATTLE_SCRIPT_MOVE_RESULT_MISSED,
   BATTLE_SCRIPT_MOVE_STRUGGLE,
   BATTLE_SCRIPT_STATUS2_MASKS,
+  BATTLE_SCRIPT_STATUS3_GRUDGE,
 } from "./battleScriptSourceConstants.ts";
 
 export type BattleScriptActionAdmissionCheckpoint =
@@ -60,6 +63,41 @@ export type BattleScriptActionAdmissionDecision = Readonly<{
   rulesContext: BattleScriptRulesContext;
   receipt: BattleScriptActionAdmissionReceipt;
 }>;
+
+export type BattleScriptAttackCancelerTrackerEffect = Readonly<{
+  before: number;
+  after: number;
+  sourcePhaseBefore: "CANCELER_FLAGS";
+  sourcePhaseAfter: "CANCELER_ASLEEP";
+}>;
+
+export type BattleScriptAttackCancelerFlagsReceipt = Readonly<{
+  sourcePhase: "CANCELER_FLAGS";
+  attacker: BattleScriptBattlerId;
+  status2: BattleScriptBitFieldEffect;
+  status3: BattleScriptBitFieldEffect;
+  tracker: BattleScriptAttackCancelerTrackerEffect;
+}>;
+
+export type BattleScriptAttackCancelerFlagsGateReceipt = Readonly<{
+  sourcePhase: "CANCELER_FLAGS";
+  tracker: Readonly<{
+    before: number;
+    after: number;
+  }>;
+}>;
+
+export type BattleScriptAttackCancelerFlagsDecision =
+  | Readonly<{
+    kind: "advance";
+    rulesContext: BattleScriptRulesContext;
+    receipt: BattleScriptAttackCancelerFlagsReceipt;
+  }>
+  | Readonly<{
+    kind: "not-at-source-phase";
+    rulesContext: BattleScriptRulesContext;
+    receipt: BattleScriptAttackCancelerFlagsGateReceipt;
+  }>;
 
 function requireSourceProgramCounter(sourceProgramCounter: number): number {
   if (
@@ -128,6 +166,91 @@ function preserveProgramCounter(
 
 function preserveCurrentAction(): BattleScriptCurrentActionEffect {
   return Object.freeze({ kind: "preserve" });
+}
+
+/**
+ * The first source phase of AtkCanceler_UnableToUseMove.
+ *
+ * This performs exactly CANCELER_FLAGS and stops at CANCELER_ASLEEP. It does
+ * not loop, decide whether an action is usable, or execute opcode 0.
+ */
+export function advanceBattleScriptAttackCancelerFlags(
+  rulesContext: BattleScriptRulesContext,
+): BattleScriptAttackCancelerFlagsDecision {
+  const trackerBefore = rulesContext.atkCancelerTracker;
+  if (
+    trackerBefore
+    !== BATTLE_SCRIPT_ATTACK_CANCELER_PHASES.CANCELER_FLAGS
+  ) {
+    return Object.freeze({
+      kind: "not-at-source-phase",
+      rulesContext,
+      receipt: Object.freeze({
+        sourcePhase: "CANCELER_FLAGS",
+        tracker: Object.freeze({
+          before: trackerBefore,
+          after: trackerBefore,
+        }),
+      }),
+    });
+  }
+
+  const attacker = rulesContext.selectorRoles.attacker;
+  if (attacker === null) {
+    throw new Error(
+      "Battle Script attack canceler flags phase requires an attacker role",
+    );
+  }
+  const sourceBattler = rulesContext.battlers[attacker];
+  const nextStatus2 = (
+    sourceBattler.status2
+    & ~BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_DESTINY_BOND
+  ) >>> 0;
+  const nextStatus3 = (
+    sourceBattler.status3
+    & ~BATTLE_SCRIPT_STATUS3_GRUDGE
+  ) >>> 0;
+  const battlerChanged = (
+    nextStatus2 !== sourceBattler.status2
+    || nextStatus3 !== sourceBattler.status3
+  );
+  const nextBattler = battlerChanged
+    ? Object.freeze({
+      ...sourceBattler,
+      status2: nextStatus2,
+      status3: nextStatus3,
+    })
+    : sourceBattler;
+  const nextBattlers = battlerChanged
+    ? Object.freeze(
+      rulesContext.battlers.map((battler, index) => (
+        index === attacker ? nextBattler : battler
+      )),
+    ) as unknown as BattleScriptRulesContext["battlers"]
+    : rulesContext.battlers;
+  const trackerAfter = BATTLE_SCRIPT_ATTACK_CANCELER_PHASES.CANCELER_ASLEEP;
+  const nextRulesContext = Object.freeze({
+    ...rulesContext,
+    battlers: nextBattlers,
+    atkCancelerTracker: trackerAfter,
+  });
+
+  return Object.freeze({
+    kind: "advance",
+    rulesContext: nextRulesContext,
+    receipt: Object.freeze({
+      sourcePhase: "CANCELER_FLAGS",
+      attacker,
+      status2: bitFieldEffect(sourceBattler.status2, nextStatus2),
+      status3: bitFieldEffect(sourceBattler.status3, nextStatus3),
+      tracker: Object.freeze({
+        before: trackerBefore,
+        after: trackerAfter,
+        sourcePhaseBefore: "CANCELER_FLAGS",
+        sourcePhaseAfter: "CANCELER_ASLEEP",
+      }),
+    }),
+  });
 }
 
 /**

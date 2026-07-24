@@ -62,6 +62,7 @@ function input(
       battler(0x08, 0x000f_0001),
     ],
     selectorRoles: changes.selectorRoles ?? { attacker: 3, effectBattler: 1 },
+    atkCancelerTracker: changes.atkCancelerTracker ?? 0,
     battleOutcome: changes.battleOutcome ?? 0,
     currentMove: changes.currentMove ?? 92,
     currentMovePosition: changes.currentMovePosition ?? 0,
@@ -139,6 +140,7 @@ describe("source-shaped Battle Script rules context", () => {
     const source = input();
     const created = createBattleScriptRulesContext(source);
     expect(Object.keys(created).sort()).toEqual([
+      "atkCancelerTracker",
       "battleOutcome",
       "battlers",
       "critMultiplier",
@@ -169,6 +171,7 @@ describe("source-shaped Battle Script rules context", () => {
       { battlers: [battler(0, 0, 0, 0, -1), ...input().battlers.slice(1)] },
       { battlers: [battler(0, 0, 0, 0, 1, [0, 0, 0, 256]), ...input().battlers.slice(1)] },
       { battleOutcome: 256 },
+      { atkCancelerTracker: 256 },
       { currentMove: 0x1_0000 },
       { currentMovePosition: 4 },
       { moveResultFlags: 256 },

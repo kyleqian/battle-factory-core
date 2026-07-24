@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import mechanicLabEvidence from "./fixtures/action-admission-mechanic-lab-evidence.json" with { type: "json" };
 import {
+  advanceBattleScriptAttackCancelerFlags,
   preflightBattleScriptActionEntry,
   preflightBattleScriptSelectedMovePp,
 } from "../src/engine/battleScriptActionAdmission.ts";
@@ -11,12 +12,14 @@ import {
 } from "../src/engine/battleScriptRulesContext.ts";
 import {
   BATTLE_SCRIPT_ACTION_FINISHED,
+  BATTLE_SCRIPT_ATTACK_CANCELER_PHASES,
   BATTLE_SCRIPT_HITMARKER_ALLOW_NO_PP,
   BATTLE_SCRIPT_HITMARKER_NO_ATTACKSTRING,
   BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE,
   BATTLE_SCRIPT_MOVE_RESULT_MISSED,
   BATTLE_SCRIPT_MOVE_STRUGGLE,
   BATTLE_SCRIPT_STATUS2_MASKS,
+  BATTLE_SCRIPT_STATUS3_GRUDGE,
 } from "../src/engine/battleScriptSourceConstants.ts";
 
 const SOURCE_PC = 0x0123_4567;
@@ -45,6 +48,7 @@ function contextInput(
       battler(),
     ],
     selectorRoles: changes.selectorRoles ?? { attacker: 0, effectBattler: 1 },
+    atkCancelerTracker: changes.atkCancelerTracker ?? 0,
     battleOutcome: changes.battleOutcome ?? 0,
     currentMove: changes.currentMove ?? 92,
     currentMovePosition: changes.currentMovePosition ?? 0,
@@ -57,6 +61,182 @@ function contextInput(
     multiHitCounter: changes.multiHitCounter ?? 0,
   };
 }
+
+describe("source-shaped attack-canceler flags phase", () => {
+  it("pins the source phase and status masks", () => {
+    expect(BATTLE_SCRIPT_ATTACK_CANCELER_PHASES).toEqual({
+      CANCELER_FLAGS: 0,
+      CANCELER_ASLEEP: 1,
+    });
+    expect(BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_DESTINY_BOND).toBe(1 << 25);
+    expect(BATTLE_SCRIPT_STATUS3_GRUDGE).toBe(1 << 14);
+  });
+
+  it("clears only attacker Destiny Bond and Grudge and advances once", () => {
+    const source = rules({
+      battlers: [
+        battler({ status2: 0x4000_0040, status3: 0x0000_8000 }),
+        battler({ status2: 0x0200_1085, status3: 0x0000_4048 }),
+        battler({ status2: 0x0200_0002, status3: 0x0000_4004 }),
+        battler(),
+      ],
+      selectorRoles: { attacker: 1, effectBattler: 2 },
+      atkCancelerTracker: BATTLE_SCRIPT_ATTACK_CANCELER_PHASES.CANCELER_FLAGS,
+      battleOutcome: 7,
+      currentMove: 165,
+      currentMovePosition: 3,
+      moveResultFlags: 0xa5,
+      hitMarker: 0x8123_4567,
+      multiHitCounter: 9,
+    });
+    const result = advanceBattleScriptAttackCancelerFlags(source);
+    expect(result).toEqual({
+      kind: "advance",
+      rulesContext: {
+        ...source,
+        battlers: [
+          source.battlers[0],
+          { ...source.battlers[1], status2: 0x0000_1085, status3: 0x0000_0048 },
+          source.battlers[2],
+          source.battlers[3],
+        ],
+        atkCancelerTracker: 1,
+      },
+      receipt: {
+        sourcePhase: "CANCELER_FLAGS",
+        attacker: 1,
+        status2: {
+          before: 0x0200_1085,
+          after: 0x0000_1085,
+          addedMask: 0,
+          clearedMask: 0x0200_0000,
+        },
+        status3: {
+          before: 0x0000_4048,
+          after: 0x0000_0048,
+          addedMask: 0,
+          clearedMask: 0x0000_4000,
+        },
+        tracker: {
+          before: 0,
+          after: 1,
+          sourcePhaseBefore: "CANCELER_FLAGS",
+          sourcePhaseAfter: "CANCELER_ASLEEP",
+        },
+      },
+    });
+    expect(result.rulesContext.battlers[0]).toBe(source.battlers[0]);
+    expect(result.rulesContext.battlers[1]).not.toBe(source.battlers[1]);
+    expect(result.rulesContext.battlers[1].pp).toBe(source.battlers[1].pp);
+    expect(result.rulesContext.battlers[2]).toBe(source.battlers[2]);
+    expect(result.rulesContext.battlers[3]).toBe(source.battlers[3]);
+    expect(result.rulesContext.selectorRoles).toBe(source.selectorRoles);
+  });
+
+  it("advances with nested battler identity when both bits are absent", () => {
+    const source = rules({
+      battlers: [battler({ status2: 0x40, status3: 0x80 }), battler(), battler(), battler()],
+    });
+    const result = advanceBattleScriptAttackCancelerFlags(source);
+    expect(result.kind).toBe("advance");
+    if (result.kind !== "advance") throw new Error("expected flags phase to advance");
+    expect(result.rulesContext).not.toBe(source);
+    expect(result.rulesContext.battlers).toBe(source.battlers);
+    expect(result.rulesContext.battlers[0]).toBe(source.battlers[0]);
+    expect(result.receipt.status2).toEqual({
+      before: 0x40,
+      after: 0x40,
+      addedMask: 0,
+      clearedMask: 0,
+    });
+    expect(result.receipt.status3).toEqual({
+      before: 0x80,
+      after: 0x80,
+      addedMask: 0,
+      clearedMask: 0,
+    });
+  });
+
+  it("is an exact identity unless the tracker is at CANCELER_FLAGS", () => {
+    for (const tracker of [1, 2, 14, 255]) {
+      const source = rules({
+        selectorRoles: {},
+        atkCancelerTracker: tracker,
+        battlers: [
+          battler({
+            status2: BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_DESTINY_BOND,
+            status3: BATTLE_SCRIPT_STATUS3_GRUDGE,
+          }),
+          battler(),
+          battler(),
+          battler(),
+        ],
+      });
+      const result = advanceBattleScriptAttackCancelerFlags(source);
+      expect(result).toEqual({
+        kind: "not-at-source-phase",
+        rulesContext: source,
+        receipt: {
+          sourcePhase: "CANCELER_FLAGS",
+          tracker: {
+            before: tracker,
+            after: tracker,
+          },
+        },
+      });
+      expect(result.rulesContext).toBe(source);
+    }
+  });
+
+  it("requires attacker ownership only when the source phase executes", () => {
+    expect(() => advanceBattleScriptAttackCancelerFlags(rules({
+      selectorRoles: {},
+      atkCancelerTracker: BATTLE_SCRIPT_ATTACK_CANCELER_PHASES.CANCELER_FLAGS,
+    }))).toThrow(/flags phase requires an attacker role/);
+  });
+
+  it("is deterministic, deeply frozen, and preserves all admission fields", () => {
+    const source = rules({
+      battlers: [
+        battler({
+          status2: BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_DESTINY_BOND | 7,
+          status3: BATTLE_SCRIPT_STATUS3_GRUDGE | 9,
+        }),
+        battler(),
+        battler(),
+        battler(),
+      ],
+      battleOutcome: 4,
+      currentMove: 355,
+      currentMovePosition: 2,
+      moveResultFlags: 0xe1,
+      hitMarker: 0xfeed_beef,
+      multiHitCounter: 12,
+    });
+    const first = advanceBattleScriptAttackCancelerFlags(source);
+    const replay = advanceBattleScriptAttackCancelerFlags(source);
+    expect(replay).toEqual(first);
+    if (first.kind !== "advance") throw new Error("expected flags phase to advance");
+    expect(source.battlers[0].status2).toBe(0x0200_0007);
+    expect(source.battlers[0].status3).toBe(0x0000_4009);
+    expect(first.rulesContext).toMatchObject({
+      battleOutcome: source.battleOutcome,
+      currentMove: source.currentMove,
+      currentMovePosition: source.currentMovePosition,
+      moveResultFlags: source.moveResultFlags,
+      hitMarker: source.hitMarker,
+      multiHitCounter: source.multiHitCounter,
+    });
+    expect(Object.isFrozen(first)).toBe(true);
+    expect(Object.isFrozen(first.receipt)).toBe(true);
+    expect(Object.isFrozen(first.receipt.status2)).toBe(true);
+    expect(Object.isFrozen(first.receipt.status3)).toBe(true);
+    expect(Object.isFrozen(first.receipt.tracker)).toBe(true);
+    expect(Object.isFrozen(first.rulesContext)).toBe(true);
+    expect(Object.isFrozen(first.rulesContext.battlers)).toBe(true);
+    expect(Object.isFrozen(first.rulesContext.battlers[0])).toBe(true);
+  });
+});
 
 function rules(changes: Partial<BattleScriptRulesContextInput> = {}) {
   return createBattleScriptRulesContext(contextInput(changes));
