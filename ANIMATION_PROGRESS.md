@@ -35,24 +35,20 @@ remainder.
 
 ## Current handoff
 
-- **State:** ROCK SLIDE is `exact`; coverage is now **2 exact / 10 partial /
-  264 unsupported**. Its complete unique Scene-ON body is portable across
-  both singles orientations and retains the canonical Scene-ON and staged
-  Battle-2 OFF controls.
-- **Did:** replaced canonical press/target coupling with an explicit immutable
-  relative profile and geometry seam. Rock origin comes from the target's
-  source `BATTLER_COORD_X/Y + (0,14)`; BG3 shake, 20 source-script rocks,
-  stable OAM order, target shake, healthbox wobble, blink, battler sheets, and
-  printer ownership all consume local age/config. A stock-controller stage
-  changes only GROVYLE's loaded AI move/PP slot and exercises opponent-front
-  GROVYLE → player-back ONIX at ages **0–174**.
-- **Evidence:** portable oracle frames **1967–2141** are **175/175** exact.
-  Canonical Scene-ON ROCK SLIDE remains **256/256** and staged Battle-2 OFF
-  remains **191/191**; FIRE PUNCH controls remain **225/225** and **277/277**,
-  and portable FAINT ATTACK remains **221/221**. Raw RGB is temp-only. The
-  staged stock outcome is 117→109 after the owned body and is never calculated
-  or mutated by the presentation seam.
+- **State:** DOUBLE TEAM is `exact`; coverage is now **3 exact / 9 partial /
+  264 unsupported**. Its complete clone plus evasion-banner body is portable
+  across both singles attacker sides.
+- **Did:** generalized the decoded clone reducer and stat-increase banner
+  behind the relative Scene-ON seam. The portable stock-controller stage
+  changes only ONIX's loaded move/PP slot and exercises player-back ONIX with
+  its own sheet, darkened palette, geometry, and live clone ordering. The
+  presentation seam consumes immutable field values and never resolves the
+  self-target stat outcome.
+- **Evidence:** portable oracle frames **2337–2566** are **230/230** exact,
+  including clone A winning the live slots-3/4 tie (canonical GROVYLE has
+  clone B in front). Canonical Scene-ON DOUBLE TEAM remains **230/230**.
+  Raw RGB and the fresh probe JSON are temp-only.
 - **Next:** do not reopen FAINT ATTACK ISSUE #38. The next independently
-  actionable queue mechanism is DOUBLE TEAM portability/opposite-side
-  geometry. No absolute tick, framebuffer lookup, captured asset, per-frame
-  table, outcome/RNG/turn, or facility mutation was added.
+  actionable queue mechanism is ENDEAVOR portability/opposite-side geometry.
+  No absolute tick, framebuffer lookup, captured asset, per-frame pixel table,
+  damage/RNG/turn, or facility mutation was added.

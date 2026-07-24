@@ -3,10 +3,9 @@
   "entries": [
     {
       "move": "MOVE_DOUBLE_TEAM",
-      "status": "partial",
-      "covered": ["opponent-front GROVYLE"],
-      "evidence": ["tools/compare/traces/turn1-cloneanim.json"],
-      "remaining": "Prove the timeline through a portable staged scenario and audit attacker-side geometry."
+      "status": "exact",
+      "covered": ["canonical opponent-front GROVYLE complete clone/evasion-banner body (230/230)", "portable synthetic player-back ONIX complete clone/evasion-banner body at relative ages 0-229 / oracle frames 2337-2566 (230/230), including the opposite live clone tie order"],
+      "evidence": ["tools/compare/traces/turn1-cloneanim.json", "tools/compare/fixtures/double-team-onix-grovyle.json", "tools/compare/doubleTeamPortable.ts", "tools/probe/stage-fire-punch-portable-on.py", "docs/double-team-portable-staging-probe.md"]
     },
     {
       "move": "MOVE_ROCK_SLIDE",
@@ -86,7 +85,6 @@
   ],
   "queue": [
     "MOVE_FAINT_ATTACK",
-    "MOVE_DOUBLE_TEAM",
     "MOVE_ENDEAVOR",
     "MOVE_FEATHER_DANCE",
     "MOVE_QUICK_ATTACK",
