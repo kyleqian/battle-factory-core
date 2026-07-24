@@ -39,20 +39,19 @@ remainder.
 ## Current handoff
 
 - **State:** **7 exact / 6 partial / 263 unsupported**. QUICK ATTACK is exact
-  in both required attacker-side orientations through the shared Scene-ON
-  seam; AERIAL ACE remains the next fast-contact acceptance unit.
-- **Did:** replaced the invalid mirrored player travel with the source's
-  signed fixed-point ellipse values: `Sin(angle,+24)>>8` yields
-  `16/24/16/0/-17/-24`, while the opponent's `-24` amplitude retains
-  `-17/-24/-17/0/16/24`. The corrected player offsets also drive the
-  TraceMon clone captured at the first travel position. Tier-1 pins both
-  asymmetric tables and the monbg→TraceMon→target/impact ordering boundary.
-- **Evidence:** contiguous player-back PIDGEOTTO→opponent-front ONIX frames
-  **46-259 / ages 7-220 are 214/214 exact**, preserving the independent
-  kickoff **41/41** and controller suffix **158/158**, `ppUps:[0,0,0,0]`,
-  immutable 117→111 outcome, exact command release, and `MOVE_NONE` cleanup.
-  Opponent-front QUICK remains **219/219**. Canonical AERIAL **93/93**;
-  FEATHER **400/400 + 400/400**; FIRE **225/225 + 277/277**; ICE
-  **462/462 + 1294/1294** all regress exact.
-- **Next:** stage AERIAL ACE portability/opposite attacker side without
-  assuming QUICK ATTACK's independent cutting-slice/palette choreography.
+  in both orientations; AERIAL ACE remains partial at an honest staged
+  portability checkpoint.
+- **Did:** added legal Level-50 mechanicLab fixtures with
+  `ppUps:[0,0,0,0]` for both AERIAL orientations. Added source-relative
+  state behind the shared seam for its signed ellipse, independent TraceMon
+  OAM order, cutting slice, complex palette pulse, vertical shake, immutable
+  117→108 HP endpoints, result clocks, command release, and MOVE_NONE ages.
+- **Evidence:** opponent-front intended complete window is frames **46-281
+  (236)**; player-back is **46-277 (232)**. These are staged-not-compared:
+  the portable compositor is deliberately absent, so zero portable frames
+  are claimed. Canonical AERIAL **93/93** remains exact; QUICK **219/219 +
+  214/214**, FEATHER **400/400 + 400/400**, FIRE **225/225 + 277/277**, and
+  ICE **462/462 + 1294/1294** require final regression.
+- **Next:** install the AERIAL-specific portable compositor and prove every
+  frame of both complete windows; do not thin either window or reuse QUICK
+  ATTACK's impact/palette/OAM choreography.

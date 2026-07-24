@@ -1,4 +1,8 @@
 import { describe, expect, it } from "vitest";
+import opponentScenario from "../tools/battle-lab/mechanic-aerial-ace-pidgeotto-onix.json";
+import playerScenario from "../tools/battle-lab/mechanic-aerial-ace-player-pidgeotto-onix.json";
+import opponentFixture from "../tools/compare/fixtures/aerial-ace-pidgeotto-onix.json";
+import playerFixture from "../tools/compare/fixtures/aerial-ace-player-pidgeotto-onix.json";
 import {
   createSceneOnMovePresentation,
   PIDGEOTTO_TO_ONIX_AERIAL_ACE_PRESENTATION,
@@ -18,6 +22,28 @@ import {
 } from "../src/engine/aerialAce.ts";
 
 describe("portable AERIAL ACE source components", () => {
+  it("pins legal zero-PP-Up inputs and unthinned complete-window boundaries", () => {
+    expect(opponentScenario.profile).toBe("battle-scene-on");
+    expect(opponentScenario.overrides.battlers.opponent).toEqual({
+      moves: [332, 332, 332, 332],
+      ppUps: [0, 0, 0, 0],
+    });
+    expect(playerScenario.overrides.battlers.player).toEqual({
+      moves: [332, 332, 332, 332],
+      ppUps: [0, 0, 0, 0],
+    });
+    expect(opponentFixture.denseWindow).toEqual({
+      startFrame: 46,
+      endFrame: 281,
+    });
+    expect(playerFixture.denseWindow).toEqual({
+      startFrame: 46,
+      endFrame: 277,
+    });
+    expect(opponentFixture.acceptance.status).toBe("staged-not-compared");
+    expect(playerFixture.acceptance.status).toBe("staged-not-compared");
+  });
+
   it("pins the independent source-relative component clocks", () => {
     expect({
       slice: AERIAL_ACE_SLICE_FIRST_AGE,

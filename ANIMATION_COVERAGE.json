@@ -48,9 +48,9 @@
     {
       "move": "MOVE_AERIAL_ACE",
       "status": "partial",
-      "covered": ["opponent-front PIDGEOTTO to player-back ONIX"],
-      "evidence": ["tools/compare/traces/turn10-aerialace.json"],
-      "remaining": "Prove portability and the player-back attacker orientation."
+      "covered": ["canonical opponent-front PIDGEOTTO to player-back ONIX (93/93)", "legal zero-PP-Up opponent-front PIDGEOTTO to player-back ONIX staged with complete intended frames 46-281 / ages 7-242 and immutable 117->108 endpoint", "legal zero-PP-Up player-back PIDGEOTTO to opponent-front ONIX staged with complete intended frames 46-277 / ages 7-238, immutable 117->108 endpoint, and source-relative component/controller state"],
+      "evidence": ["tools/compare/traces/turn10-aerialace.json", "tools/battle-lab/mechanic-aerial-ace-pidgeotto-onix.json", "tools/battle-lab/mechanic-aerial-ace-player-pidgeotto-onix.json", "tools/compare/fixtures/aerial-ace-pidgeotto-onix.json", "tools/compare/fixtures/aerial-ace-player-pidgeotto-onix.json", "docs/aerial-ace-portable-staging-probe.md"],
+      "remaining": "The portable compositor is not installed and neither complete dense window has pixel comparison: prove all 236 opponent-front frames and all 232 player-back frames through cleanup without thinning."
     },
     {
       "move": "MOVE_SAND_ATTACK",
@@ -132,7 +132,7 @@
         "MOVE_QUICK_ATTACK",
         "MOVE_AERIAL_ACE"
       ],
-      "goal": "QUICK ATTACK exactly proves complete opposite-side Scene-ON windows at 219/219 and 214/214, including signed monbg ellipse travel, all blended TraceMon OBJ lives, target/impact ordering, and controller cleanup. AERIAL ACE is batch-checked at 93/93 canonical but retains its independent cutting-slice/palette choreography and portability remainder."
+      "goal": "QUICK ATTACK exactly proves complete opposite-side Scene-ON windows at 219/219 and 214/214, including signed monbg ellipse travel, all blended TraceMon OBJ lives, target/impact ordering, and controller cleanup. AERIAL ACE remains 93/93 canonical and now has legal zero-PP-Up complete-window fixtures plus source-relative state for both sides, but its 236-frame and 232-frame portable compositors remain wholly unproved."
     }
   ],
   "variantAudits": {

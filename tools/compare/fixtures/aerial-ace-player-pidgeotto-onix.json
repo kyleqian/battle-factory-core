@@ -1,0 +1,36 @@
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-aerial-ace-player-pidgeotto-onix.json",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
+  "pair": "PIDGEOTTO (player-back) -> ONIX (opponent-front)",
+  "move": "AERIAL_ACE",
+  "orientation": "player-to-opponent",
+  "appStage": {
+    "oracleFrame": 46,
+    "presentationAge": 7
+  },
+  "denseWindow": {
+    "startFrame": 46,
+    "endFrame": 277
+  },
+  "fieldProfile": {
+    "playerHp": 156,
+    "opponentHp": 117,
+    "playerStatus": "none",
+    "playerGender": "female",
+    "opponentGender": "male"
+  },
+  "controllerProfile": {
+    "targetHpBefore": 117,
+    "targetHpAfter": 108,
+    "hpDrainFirstAge": 127,
+    "resultTextFirstAge": 142,
+    "currentMoveResetAge": 238
+  },
+  "moveTextStartAge": 5,
+  "acceptance": {
+    "status": "staged-not-compared",
+    "remaining": "Install the source-relative AERIAL_ACE compositor and prove all 232 dense frames."
+  }
+}
