@@ -17,6 +17,7 @@ import {
   createBattleScriptSetByteCommandHandlers,
   type BattleScriptSetByteRulesContext,
 } from "./battleScriptSetByte.ts";
+import { createBattleScriptAttackCancelerOpcodeHandlers } from "./battleScriptAttackCancelerOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -105,6 +106,10 @@ type BattleScriptRulesBattlerBase = Readonly<{
   prlzImmobility?: 0 | 1;
   /** ProtectStruct::loveImmobility; absent legacy inputs normalize to zero. */
   loveImmobility?: 0 | 1;
+  /** ProtectStruct::stealMove; absent legacy inputs normalize to zero at read sites. */
+  stealMove?: 0 | 1;
+  /** SpecialStatus::lightningRodRedirected; absent legacy inputs normalize to zero. */
+  lightningRodRedirected?: 0 | 1;
   /**
    * The already source-modified physical operands consumed by
    * CalculateBaseDamage's MOVE_POUND/powerOverride=40 confusion call.
@@ -1246,6 +1251,20 @@ export function createBattleScriptRulesContext(
         `battlers[${index}].loveImmobility`,
       ) as 0 | 1,
     }),
+    ...(battler.stealMove === undefined ? {} : {
+      stealMove: requireUnsigned(
+        battler.stealMove,
+        1,
+        `battlers[${index}].stealMove`,
+      ) as 0 | 1,
+    }),
+    ...(battler.lightningRodRedirected === undefined ? {} : {
+      lightningRodRedirected: requireUnsigned(
+        battler.lightningRodRedirected,
+        1,
+        `battlers[${index}].lightningRodRedirected`,
+      ) as 0 | 1,
+    }),
     targetNotAffected: requireUnsigned(
       battler.targetNotAffected ?? 0,
       1,
@@ -1534,6 +1553,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptSetByteCommandHandlers<BattleScriptRulesContext>(
       program,
     ),
+    ...createBattleScriptAttackCancelerOpcodeHandlers(program),
   });
 }
 

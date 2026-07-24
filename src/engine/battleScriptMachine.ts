@@ -27,6 +27,16 @@ export type BattleScriptHaltReason =
     dispatcher: string;
   }>
   | Readonly<{
+    kind: "unsupported-branch";
+    programCounter: number;
+    opcodeId: number;
+    opcodeName: string;
+    /** The source construct this branch would execute, e.g. "Snatch redirect loop". */
+    sourceConstruct: string;
+    sourceFile: string;
+    sourceLine: number;
+  }>
+  | Readonly<{
     kind: "instruction-budget";
     programCounter: number;
     budget: number;

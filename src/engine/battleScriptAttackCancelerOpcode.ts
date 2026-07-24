@@ -1,0 +1,331 @@
+import {
+  advanceBattleScriptAttackCancelerUnableToUseMove,
+  type BattleScriptAttackCancelerLoopResult,
+} from "./battleScriptAttackCanceler.ts";
+import {
+  BATTLE_SCRIPT_FACTORY_FRONTIER_SCOPE,
+  joinBattleScriptAttackCancelerFactoryObedience,
+  joinBattleScriptAttackCancelerMovesBlock,
+  joinBattleScriptAttackCancelerSelectedMovePp,
+} from "./battleScriptAbilityMovesBlock.ts";
+import { joinBattleScriptAttackCancelerMagicCoat } from "./battleScriptMagicCoat.ts";
+import { preflightBattleScriptActionEntry } from "./battleScriptActionAdmission.ts";
+import {
+  drawBattleScriptRng,
+  markBattleScriptControllerPending,
+  transitionBattleScriptCommand,
+  type BattleScriptCommandTransition,
+  type BattleScriptOpcodeHandler,
+  type BattleScriptOpcodeHandlerContext,
+  type BattleScriptOpcodeHandlers,
+  type BattleScriptRngState,
+} from "./battleScriptMachine.ts";
+import { resolveBattleScriptLabel, type BattleScriptProgram } from "./battleScriptProgram.ts";
+import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
+import movesData from "../data/gen/moves.json" with { type: "json" };
+
+type MoveFlagsRow = Readonly<{ id: number; flags: readonly string[] }>;
+
+const GENERATED_MOVE_FLAGS = new Map<number, readonly string[]>(
+  (movesData.moves as readonly MoveFlagsRow[]).map(({ id, flags }) => [id, flags]),
+);
+
+function moveHasFlag(move: number, flag: string): boolean {
+  return (GENERATED_MOVE_FLAGS.get(move) ?? []).includes(flag);
+}
+
+function requireLabelProgramCounter(program: BattleScriptProgram, label: string): number {
+  const entry = resolveBattleScriptLabel(program, label);
+  if (!entry) throw new Error(`committed Battle Script program does not define label ${label}`);
+  return entry.programCounter;
+}
+
+function unsupportedBranch(
+  context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
+  sourceConstruct: string,
+  sourceFile: string,
+  sourceLine: number,
+): BattleScriptCommandTransition<BattleScriptRulesContext> {
+  return transitionBattleScriptCommand(
+    context,
+    Object.freeze({
+      kind: "halt",
+      reason: Object.freeze({
+        kind: "unsupported-branch",
+        programCounter: context.state.programCounter,
+        opcodeId: context.instruction.opcodeId,
+        opcodeName: context.instruction.opcodeName,
+        sourceConstruct,
+        sourceFile,
+        sourceLine,
+      }),
+    }),
+  );
+}
+
+type CancelerCursorResolution =
+  | Readonly<{ kind: "jump" }>
+  | Readonly<{ kind: "call-current" }>
+  | Readonly<{ kind: "unsupported-push"; targetLabel: string }>;
+
+/**
+ * Resolves whether the loop's terminating phase performed a source
+ * BattleScriptPushCursor (resume at this same opcode-0 instruction) or the
+ * CANCELER_IN_LOVE immobilized-by-love BattleScriptPush(explicit label),
+ * which pushes a *different* resume address the machine's call stack cannot
+ * express (it only models "resume at PC" / "resume at PC+1").
+ */
+function resolveCancelerCursor(
+  result: BattleScriptAttackCancelerLoopResult,
+): CancelerCursorResolution {
+  const decision = result.receipt.phases.at(-1);
+  if (!decision) return Object.freeze({ kind: "jump" });
+  const receipt = decision.receipt;
+  switch (receipt.sourcePhase) {
+    case "CANCELER_ASLEEP":
+    case "CANCELER_FROZEN":
+    case "CANCELER_CONFUSED":
+    case "CANCELER_THAW":
+      return receipt.cursor.kind === "push"
+        ? Object.freeze({ kind: "call-current" as const })
+        : Object.freeze({ kind: "jump" as const });
+    case "CANCELER_IN_LOVE":
+      if (receipt.scriptStack.kind === "push-script") {
+        return Object.freeze({
+          kind: "unsupported-push" as const,
+          targetLabel: receipt.scriptStack.targetLabel,
+        });
+      }
+      return receipt.scriptStack.kind === "push-cursor"
+        ? Object.freeze({ kind: "call-current" as const })
+        : Object.freeze({ kind: "jump" as const });
+    default:
+      return Object.freeze({ kind: "jump" as const });
+  }
+}
+
+function applyCancelerEffectTransition(
+  context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
+  cancelerResult: BattleScriptAttackCancelerLoopResult,
+  rulesContext: BattleScriptRulesContext,
+  rng: BattleScriptRngState,
+): BattleScriptCommandTransition<BattleScriptRulesContext> {
+  const scriptEffect = cancelerResult.receipt.programCounter;
+  if (scriptEffect.kind !== "handoff") {
+    throw new Error("Battle Script attack canceler nonzero effect requires a script handoff");
+  }
+  const cursor = resolveCancelerCursor(cancelerResult);
+  if (cursor.kind === "unsupported-push") {
+    return unsupportedBranch(
+      context,
+      `BattleScriptPush(${cursor.targetLabel}) explicit-return-address stack push `
+        + "(CANCELER_IN_LOVE immobilized-by-love: the machine's call stack only "
+        + "models resume-at-this-instruction, not an arbitrary explicit label)",
+      "battle_util.c",
+      2210,
+    );
+  }
+  const target = requireLabelProgramCounter(context.program, scriptEffect.targetLabel);
+  const control = cursor.kind === "call-current"
+    ? Object.freeze({ kind: "call-current" as const, programCounter: target })
+    : Object.freeze({ kind: "jump" as const, programCounter: target });
+
+  if (cancelerResult.effect !== 2) {
+    return transitionBattleScriptCommand(context, control, { rulesContext, rng });
+  }
+
+  const sync = cancelerResult.receipt.controllerSync;
+  if (sync.kind !== "request-status1-write") {
+    throw new Error("Battle Script attack canceler effect 2 requires a status1 controller sync");
+  }
+  const scheduler = markBattleScriptControllerPending(context.state.scheduler, sync.battler);
+  return transitionBattleScriptCommand(context, control, {
+    scheduler,
+    rulesContext,
+    rng,
+    events: Object.freeze([
+      Object.freeze({
+        kind: "set-battler-status-data" as const,
+        battler: sync.battler,
+        status1: sync.value,
+      }),
+    ]),
+  });
+}
+
+/**
+ * The Cmd_attackcanceler tail after Magic Coat continues without bouncing:
+ * the Snatch redirect loop (battle_script_commands.c:971-982, absent from
+ * every Factory set), Lightning Rod redirection
+ * (battle_script_commands.c:984-990, unreachable in Level-50 singles), and
+ * the final DEFENDER_IS_PROTECTED check (battle_script_commands.c:992-1006).
+ * Snatch/Lightning Rod are evaluated against their real source fields so a
+ * Tier-1-constructed transient state can still reach each barrier; Protect
+ * is an unconditional barrier because its predicate needs battler-type,
+ * IsTwoTurnsMove, and Curse/Ghost data this engine does not model yet.
+ */
+function resolveTailBranches(
+  context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
+  rulesContext: BattleScriptRulesContext,
+  rng: BattleScriptRngState,
+): BattleScriptCommandTransition<BattleScriptRulesContext> {
+  void rng;
+  const { battlersCount } = rulesContext.battleTopology;
+  if (moveHasFlag(rulesContext.currentMove, "FLAG_SNATCH_AFFECTED")) {
+    for (let battler = 0; battler < battlersCount; battler += 1) {
+      if ((rulesContext.battlers[battler]!.stealMove ?? 0) === 1) {
+        return unsupportedBranch(
+          context,
+          `Snatch redirect loop: gProtectStructs[battler ${battler}].stealMove is set `
+            + "for a FLAG_SNATCH_AFFECTED move (PressurePPLose, script push, and "
+            + "BattleScript_SnatchedMove handoff are unimplemented)",
+          "battle_script_commands.c",
+          973,
+        );
+      }
+    }
+  }
+
+  const target = rulesContext.selectorRoles.target;
+  if (target === null) {
+    throw new Error("Battle Script attack canceler tail branches require a target role");
+  }
+  if ((rulesContext.battlers[target].lightningRodRedirected ?? 0) === 1) {
+    return unsupportedBranch(
+      context,
+      `Lightning Rod redirection: gSpecialStatuses[battler ${target}].lightningRodRedirected `
+        + "is set (RecordAbilityBattle and BattleScript_TookAttack handoff are unimplemented)",
+      "battle_script_commands.c",
+      984,
+    );
+  }
+
+  return unsupportedBranch(
+    context,
+    "DEFENDER_IS_PROTECTED final check (Protect/Detect fallthrough, the "
+      + "MOVE_CURSE/Ghost-type exception, and IsTwoTurnsMove gating) requires "
+      + "battler type and two-turn-move data this engine does not model yet",
+    "battle_script_commands.c",
+    992,
+  );
+}
+
+/**
+ * Production Cmd_attackcanceler (opcode 0) dispatcher.
+ *
+ * Composes the already Tier-1-pinned entry preflight, the
+ * AtkCanceler_UnableToUseMove loop, the ability moves-block/selected-move-PP/
+ * Factory-obedience join chain, and the Magic Coat bounce check into one
+ * real opcode-0 handler. Every branch the join chain cannot yet complete
+ * source-completely (Magic Coat's PressurePPLose, Snatch, Lightning Rod, and
+ * the final Protect check) halts explicitly via "unsupported-branch" rather
+ * than falling through.
+ */
+export const attackCancelerOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (
+  context,
+) => {
+  const sourcePc = context.state.programCounter;
+
+  const entry = preflightBattleScriptActionEntry(context.state.rulesContext, sourcePc);
+  if (entry.kind === "stop") {
+    if (entry.reason === "battle-outcome-finished") {
+      return unsupportedBranch(
+        context,
+        "gBattleOutcome != 0 -> gCurrentActionFuncId = B_ACTION_FINISHED "
+          + "(consumed by the round controller, out of this step's scope)",
+        "battle_script_commands.c",
+        919,
+      );
+    }
+    const target = requireLabelProgramCounter(context.program, "BattleScript_MoveEnd");
+    return transitionBattleScriptCommand(
+      context,
+      Object.freeze({ kind: "jump", programCounter: target }),
+      { rulesContext: entry.rulesContext },
+    );
+  }
+
+  const cancelerResult = advanceBattleScriptAttackCancelerUnableToUseMove(
+    {
+      rulesContext: entry.rulesContext,
+      rngValue: context.state.rng.value,
+      rngCallsConsumed: context.state.rng.calls,
+    },
+    sourcePc,
+  );
+  let rng = context.state.rng;
+  const drawsNeeded = cancelerResult.rngCallsConsumed - context.state.rng.calls;
+  for (let index = 0; index < drawsNeeded; index += 1) {
+    rng = drawBattleScriptRng(rng, context.instruction, "attackcanceler:unable-to-use-move").rng;
+  }
+  if (rng.value !== cancelerResult.rngValue || rng.calls !== cancelerResult.rngCallsConsumed) {
+    throw new Error(
+      "Battle Script attack canceler loop RNG did not match the machine's RNG ledger",
+    );
+  }
+
+  const movesBlockResult = joinBattleScriptAttackCancelerMovesBlock(cancelerResult, sourcePc);
+  const ppResult = joinBattleScriptAttackCancelerSelectedMovePp(movesBlockResult, sourcePc);
+  const obedienceResult = joinBattleScriptAttackCancelerFactoryObedience(
+    ppResult,
+    BATTLE_SCRIPT_FACTORY_FRONTIER_SCOPE,
+    sourcePc,
+  );
+  const magicCoatResult = joinBattleScriptAttackCancelerMagicCoat(
+    obedienceResult,
+    context.state.callStack,
+    sourcePc,
+  );
+
+  if (magicCoatResult.kind === "canceler-effect") {
+    return applyCancelerEffectTransition(
+      context,
+      cancelerResult,
+      magicCoatResult.rulesContext,
+      rng,
+    );
+  }
+  if (magicCoatResult.kind === "moves-block") {
+    const target = requireLabelProgramCounter(context.program, "BattleScript_SoundproofProtected");
+    return transitionBattleScriptCommand(
+      context,
+      Object.freeze({ kind: "jump", programCounter: target }),
+      { rulesContext: magicCoatResult.rulesContext, rng },
+    );
+  }
+  if (magicCoatResult.kind === "selected-move-no-pp") {
+    const target = requireLabelProgramCounter(context.program, "BattleScript_NoPPForMove");
+    return transitionBattleScriptCommand(
+      context,
+      Object.freeze({ kind: "jump", programCounter: target }),
+      { rulesContext: magicCoatResult.rulesContext, rng },
+    );
+  }
+  if (magicCoatResult.kind === "magic-coat") {
+    return unsupportedBranch(
+      context,
+      "PressurePPLose(gBattlerAttacker, gBattlerTarget, MOVE_MAGIC_COAT) is "
+        + "unimplemented, so the BattleScript_MagicCoatBounce handoff cannot "
+        + "complete source-completely",
+      "battle_script_commands.c",
+      964,
+    );
+  }
+
+  return resolveTailBranches(context, magicCoatResult.rulesContext, rng);
+};
+
+export function createBattleScriptAttackCancelerOpcodeHandlers(
+  program: BattleScriptProgram,
+): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
+  const instruction = program.instructions.find(
+    (candidate) => candidate.opcodeName === "B_SCR_OP_ATTACKCANCELER",
+  );
+  if (!instruction) {
+    throw new Error("committed Battle Script program does not emit B_SCR_OP_ATTACKCANCELER");
+  }
+  const handlers: Record<number, BattleScriptOpcodeHandler<BattleScriptRulesContext>> =
+    Object.create(null) as Record<number, BattleScriptOpcodeHandler<BattleScriptRulesContext>>;
+  handlers[instruction.opcodeId] = attackCancelerOpcodeHandler;
+  return Object.freeze(handlers);
+}
