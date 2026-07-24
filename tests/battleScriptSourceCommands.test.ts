@@ -122,6 +122,7 @@ function sourceHandlers(
   return createBattleScriptSourceCommandHandlers(program, Object.freeze({
     isControllerIdle: () => idle,
     prepareMessage,
+    preparePrimaryStatusAnimation: () => null,
     prepareSelectionMessage,
     prepareSelectionMessageFromTable: () => null,
     resolveAttackerBattler: () => null,
@@ -338,7 +339,7 @@ describe("source-mapped Battle Script scheduler commands", () => {
     }));
   });
 
-  it("composes exactly the fifteen source commands with the five existing controls", () => {
+  it("composes exactly the sixteen source commands with the five existing controls", () => {
     expect(Object.keys(sourceHandlers(true)).map(Number).sort((left, right) => left - right)).toEqual([
       10,
       16,
@@ -352,6 +353,7 @@ describe("source-mapped Battle Script scheduler commands", () => {
       85,
       86,
       98,
+      100,
       111,
       131,
       248,
@@ -374,6 +376,7 @@ describe("source-mapped Battle Script scheduler commands", () => {
       85,
       86,
       98,
+      100,
       111,
       131,
       248,

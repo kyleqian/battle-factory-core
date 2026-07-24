@@ -82,6 +82,12 @@ export type BattleScriptSemanticEventPayload =
     battler: BattleScriptBattlerId;
   }>
   | Readonly<{
+    kind: "status-animation";
+    battler: BattleScriptBattlerId;
+    statusMode: "primary";
+    status: number;
+  }>
+  | Readonly<{
     kind: "hp-change";
     battler: number;
     from: number;

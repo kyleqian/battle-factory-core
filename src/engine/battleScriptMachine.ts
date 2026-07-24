@@ -129,6 +129,7 @@ export type BattleScriptBlockReason =
       | "resolve-attacker"
       | "resolve-battler-at-position"
       | "resolve-battler-for-battle-script"
+      | "prepare-primary-status-animation"
       | "resolve-byte"
       | "resolve-halfword";
     operandExpression: string;
@@ -575,6 +576,7 @@ function freezeEventPayload(
     case "set-battler-sprite-visibility":
     case "trainer-slide-in":
     case "trainer-slide-out":
+    case "status-animation":
       return Object.freeze({ ...payload });
     case "animation":
       return Object.freeze({ ...payload, arguments: Object.freeze([...payload.arguments]) });

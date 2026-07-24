@@ -75,6 +75,7 @@ function handlers(
   return createBattleScriptSourceCommandHandlers(program, Object.freeze({
     isControllerIdle: onIdle,
     prepareMessage: () => null,
+    preparePrimaryStatusAnimation: () => null,
     prepareSelectionMessage,
     prepareSelectionMessageFromTable,
     resolveAttackerBattler: () => null,
@@ -419,7 +420,7 @@ describe("source-exact B_SCR_OP_PRINTSELECTIONSTRINGFROMTABLE", () => {
     expect(result.state.events).toBe(initial.events);
   });
 
-  it("replays deterministically and composes to exactly twenty-four supported IDs", () => {
+  it("replays deterministically and composes to exactly twenty-five supported IDs", () => {
     const makeResult = () => stepBattleScriptMachine(
       program,
       stateAt(),
@@ -441,7 +442,7 @@ describe("source-exact B_SCR_OP_PRINTSELECTIONSTRINGFROMTABLE", () => {
       ...createBattleScriptMoveValuesCommandHandlers<FixtureRules>(program),
     });
     expect(Object.keys(composed).map(Number).sort((left, right) => left - right)).toEqual([
-      10, 16, 17, 18, 20, 37, 38, 39, 40, 57, 58, 60, 61, 62, 65, 83, 84, 85, 86, 98, 111, 131, 141, 248,
+      10, 16, 17, 18, 20, 37, 38, 39, 40, 57, 58, 60, 61, 62, 65, 83, 84, 85, 86, 98, 100, 111, 131, 141, 248,
     ]);
   });
 

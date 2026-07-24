@@ -64,6 +64,7 @@ function sourceHandlers(idle: boolean, selectedProgram: BattleScriptProgram = pr
   return createBattleScriptSourceCommandHandlers(selectedProgram, Object.freeze({
     isControllerIdle: () => idle,
     prepareMessage: () => null,
+    preparePrimaryStatusAnimation: () => null,
     prepareSelectionMessage: () => null,
     prepareSelectionMessageFromTable: () => null,
     resolveAttackerBattler: () => null,
@@ -247,13 +248,13 @@ describe("source-exact WAITANIMATION controller-idle barrier", () => {
     expect(result.state.rng.calls).toBe(0);
   });
 
-  it("replays deterministically and composes to exactly twenty-four supported handlers", () => {
+  it("replays deterministically and composes to exactly twenty-five supported handlers", () => {
     const instruction = program.instructions.find(({ opcodeId }) => opcodeId === 10)!;
     const replay = () => stepBattleScriptMachine(program, stateAt(instruction), sourceHandlers(true));
     expect(replay()).toEqual(replay());
 
     expect(Object.keys(sourceHandlers(true)).map(Number).sort((a, b) => a - b)).toEqual([
-      10, 16, 17, 18, 20, 57, 58, 83, 84, 85, 86, 98, 111, 131, 248,
+      10, 16, 17, 18, 20, 57, 58, 83, 84, 85, 86, 98, 100, 111, 131, 248,
     ]);
     const composed = Object.freeze({
       ...createBattleScriptControlHandlers<FixtureRules>(program),
@@ -266,7 +267,7 @@ describe("source-exact WAITANIMATION controller-idle barrier", () => {
     });
     expect(Object.keys(composed).map(Number).sort((a, b) => a - b)).toEqual([
       10, 16, 17, 18, 20, 37, 38, 39, 40, 57, 58, 60, 61, 62, 65, 83, 84, 85,
-      86, 98, 111, 131, 141, 248,
+      86, 98, 100, 111, 131, 141, 248,
     ]);
   });
 });
