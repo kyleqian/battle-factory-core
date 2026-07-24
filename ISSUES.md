@@ -27,33 +27,6 @@ delay-specific, or baked-frame patch. Reopen only if the engine gains a
 general cycle/register-queue model; this extra delayed-control frame does not
 block the roadmap's canonical S7 acceptance.
 
-## #34 — Turn 14 FLY-up affine coverage at `17781-17787` remains excluded
-
-The separate `17822-17845` one-glyph timing family is **closed
-2026-07-23**: its source-timed printer repair extends
-`turn14-fly-miss.json` from 185 to **206/206 exact**. The earlier
-`17722-17768` PP/redraw/bounce family also remains closed.
-
-Fresh RAM, final-OAM, VRAM, palette, and baseline-subtracted framebuffer
-evidence isolates the only remainder to the first seven visible FLY-ball
-frames. Whole-frame residuals are ball-footprint-only
-**22/42/58/76/94/112/40 px**. The source/OAM-proven object is affine-double
-**64x64** (not 32x32), and the verifier reconstructs its full 2048-byte live
-transfer in the 128x128 destination box. The existing generic
-floor/destination-center-64/source-center-32 convention is the strict best of
-six plausible variants: aggregate **TP 8404, FP 444, FN 0**, with each
-frame's false-positive count exactly equal to the whole-frame residual.
-Alternative rounding and half-pixel centers are all worse.
-
-This proves the current sampler is already the best tested general rule and
-rules out timeline, matrix, object size, iteration box, transfer, palette,
-position, and the tested center/rounding variants. Do not add a FLY,
-tick, or matrix exception. Reopen only with an independently justified GBA
-PPU coverage rule, first evaluated by
-`tools/probe/verify-turn14-flyup-affine-sampler.ts` and then against
-`turn14-fly-miss.json` (**206/206**) and `turn13-switchin.json`
-(**242/242**). Full evidence: `docs/turn14-flyup-opening-probe.md`.
-
 ## #23 — [PARKED 2026-07-20, supervisor decision] DRAGON_BREATH compressed
   fire-projectile overdraw: renders 3177-3235 remain uncaptured
 

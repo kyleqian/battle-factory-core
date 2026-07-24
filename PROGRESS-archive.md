@@ -1,3 +1,23 @@
+## 383 — Gate-3 status-animation family integrated
+
+- **State:** S10 Gate 3 remains open with **27** source-safe opcodes and one
+  generic, rules-owned, read-only status-animation preparation seam.
+- **Did:** refactored opcode 100 onto frozen `live-status1` requests and added
+  `STATUS2ANIMATION`/`CHOSENSTATUSANIMATION` (**101/102**): exact idle/operand/
+  selector gates, masked-live versus explicit/raw-u8 requests, validated
+  receipts, fixed suppression/advance, and pending/ack bookkeeping.
+- **Next:** choose another bounded source family only when its complete rules
+  context is explicit. Keep live status/suppression reads in rules; keep
+  status mutation, PP policy, RNG/effects, controller bytes, visuals/timing,
+  Scene ON, and pixels out.
+- **Notes:** exact supported IDs are
+  **10/16/17/18/20/37/38/39/40/57/58/60/61/62/65/83/84/85/86/98/100/101/102/111/131/141/248**.
+  All **13+5+2** starts/widths are pinned. Fresh OFF Confuse Ray lab evidence
+  proves zero PP Ups, PP **10→9**, and stock-created status2/confusion **0→4**.
+  Focused **141/141**; Tier-1 **123 files / 1640 tests**, build, oracle info,
+  lab manifest check, and diff check green. Pixel diff N/A.
+
+---
 ## 382 — Gate-3 STATUSANIMATION receipt/suppression integrated
 
 - **State:** S10 Gate 3 remains open with **25** source-safe opcodes and a
