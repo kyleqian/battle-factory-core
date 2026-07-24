@@ -129,6 +129,7 @@ def main() -> None:
             "priority": (oracle.read_u8(base + 5) >> 2) & 0x3,
             "animNum": oracle.read_u8(base + 0x2A),
             "animCmdIndex": oracle.read_u8(base + 0x2B),
+            "invisible": bool(oracle.read_u8(base + 0x3E) & 4),
             "x": s16(base + 0x20),
             "y": s16(base + 0x22),
             "x2": s16(base + 0x24),

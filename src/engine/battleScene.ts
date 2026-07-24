@@ -15562,6 +15562,12 @@ export function renderSceneOnMovePresentation(
     return;
   }
 
+  if (state.config.move === "BOUNCE") {
+    throw new Error(
+      "BOUNCE framebuffer adapter is not yet installed; source-relative seam only",
+    );
+  }
+
   const view = sceneOnFirePunchView(state);
   const { attacker, target, resolution } = view;
   const player = attacker.geometry.side === "player" ? attacker : target;

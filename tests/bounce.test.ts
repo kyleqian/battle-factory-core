@@ -4,6 +4,11 @@ import {
   bouncePresentationAtAge,
   bounceStrikeBallAtAge,
 } from "../src/engine/bounce.ts";
+import {
+  createSceneOnMovePresentation,
+  sceneOnBounceView,
+  SPOINK_TO_ONIX_BOUNCE_PRESENTATION,
+} from "../src/engine/sceneOnPresentation.ts";
 
 describe("source-relative BOUNCE presentation", () => {
   it("pins the complete BounceSetUp affine program from legal Scene-ON OAM", () => {
@@ -50,6 +55,25 @@ describe("source-relative BOUNCE presentation", () => {
       ball: null,
       targetTaskOwnsY2: true,
       targetShakeY2: 0,
+    });
+  });
+
+  it("is driven through the shared Scene-ON seam by relative phase age", () => {
+    const state = createSceneOnMovePresentation({
+      move: "BOUNCE",
+      turn: "strike",
+      ...SPOINK_TO_ONIX_BOUNCE_PRESENTATION,
+      animationAgeOffset: -9,
+    });
+    expect(sceneOnBounceView({ ...state, age: 18 })).toMatchObject({
+      age: 18,
+      animationAge: 9,
+      currentMove: "BOUNCE",
+      attacker: { species: "SPOINK" },
+      target: { species: "ONIX" },
+      attackerInvisible: true,
+      impactVisible: true,
+      targetTaskOwnsY2: true,
     });
   });
 });
