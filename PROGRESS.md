@@ -4,6 +4,34 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 419 — executable decision vertical proven; honest MOVEEND boundary mapped
+
+- **State:** the integrated tree is green at **165 files / 1956 tests**. Both
+  player and Factory-AI decisions traverse the published boundary and real
+  Battle Script machine through source-complete SETBYTE, then stop honestly at
+  unregistered opcode **73**; opcode **0** also remains unregistered.
+- **Did:** proved frozen validated state, explicit/synchronized RNG, ordered
+  semantic events, controller barriers, next unsupported-command barrier, and
+  canonical serialized replay for player TYROGUE/Protect and trainer
+  PLUSLE/Wish. The minimal source mask-0 AI uses the same legal-decision
+  boundary. A generated MOVEEND receipt plus
+  `docs/battle-script-move-end-state-ownership.md` now maps all **17** cases,
+  **24** sites, modes, durable owners, delegates, and the safe dependency
+  order without registering staged semantics. Independently, Scene ON reached
+  **16 exact / 1 partial / 259 unsupported** after exact two-orientation
+  Extreme Speed and Flamethrower checkpoints.
+- **Next:** keep opcode 73 unsupported. Add the small immutable move-end
+  battler metadata owner first (item, signed stat stages, special status,
+  charging bit), then the separately tested choice/history, topology,
+  controller, and source-complete ability/item delegate owners documented in
+  the ownership map. Register only after the final all-cases/end-modes gate.
+- **Notes:** full `Cmd_moveend` was rejected on the current rules shape rather
+  than supplied no-effect delegates. Current exact Flamethrower evidence is
+  **126/126 RGB+component frames in both orientations**; the reusable
+  persistent sprite-order seam models allocation, destruction/reuse,
+  wrapped-Y insertion sorting, and stable ties without frame lookup.
+
+---
 ## 418 — MOVEEND remains honest behind a complete source boundary
 
 - **State:** the bounded opcode-73 decision checkpoint is green at **163 files /
@@ -47,28 +75,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `0x79e39ac4 / 5 calls` are pinned. Focused **5 files / 53 tests**;
   integrated **162/1942**, production build, OFF v5 info (`9c89c741…`), and
   diff checks pass. Code commit `1545235`; pixel diff N/A.
-
----
-## 416 — Factory AI reaches the production script machine
-
-- **State:** the assigned bounded S10 composition is committed and green at
-  **161 files / 1936 tests**. The staged production adapter now accepts either
-  singles command side; no opcode, mechanic, AI-mask, switching, render, core,
-  or oracle breadth was added, and opcode 0 remains unregistered.
-- **Did:** generalized the existing asleep state/reducer around one explicit
-  command owner and source-derived singles targets, preserving TYROGUE's
-  player path. A trainer-asleep real set-291 `FRONTIER_MON_PLUSLE_2` state
-  enumerates Thunderbolt/Thunder Wave/Seismic Toss at player battler **0** and
-  Wish at trainer battler **1**. Seed **1** makes the ordinary mask-0 policy
-  choose Wish, synchronize all five draws into the kernel cursor, then the
-  same reducer executes asleep opcodes **16→18→100→40** and returns the honest
-  move-end SETBYTE barrier.
-- **Next:** return to the supervisor. Keep opcode 0 unregistered and retain the
-  recorded S10 ordering; masks, switching, move end, and other mechanics remain
-  separate bounded units.
-- **Notes:** PLUSLE sleep **4→3**, PP **[15,20,20,10]** unchanged, ordered
-  message/status events, battler-1 controller ownership, persisted RNG
-  `0x79e39ac4 / 5 calls`, canonical replay, recursive freezing, no split RNG,
-  player regression, and import boundaries are pinned. Focused **3 files / 39
-  tests**; integrated **161/1936**, production build, OFF v5 info
-  (`9c89c741…`), and diff checks pass. Code commit `8e186dc`; pixel diff N/A.

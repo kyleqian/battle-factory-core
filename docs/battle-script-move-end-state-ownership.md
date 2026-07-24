@@ -3,7 +3,7 @@
 This is an implementation boundary for opcode 73, not an implementation.  It
 uses the pinned receipt at `src/data/gen/battle-script-move-end-facts.json` and
 the source definition at `reference/pokeemerald/src/battle_script_commands.c`
-lines 4225-4497.  The receipt is the verbatim-case authority; this note only
+lines 4210-4498.  The receipt is the verbatim-case authority; this note only
 assigns durable ownership.  Numeric dispatch is authoritative: source orders
 states `0..7, 11, 12, 8..10, 13..17`, even though the enum names 8--10 before
 11--12 (`include/constants/battle_script_commands.h:393-410`).

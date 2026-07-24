@@ -14611,3 +14611,26 @@ in git history immediately before corrective commits `d5ac217` and `9942a8d`.
   helper behavior/receipts are unchanged. Focused **2 files / 23 tests**;
   Tier-1 **132 files / 1730 tests**, build, OFF info (`9c89c741…`), and diff
   check green. Code commits `abc915f` + repair `50e2332`; pixel diff N/A.
+## 416 — Factory AI reaches the production script machine
+
+- **State:** the assigned bounded S10 composition is committed and green at
+  **161 files / 1936 tests**. The staged production adapter now accepts either
+  singles command side; no opcode, mechanic, AI-mask, switching, render, core,
+  or oracle breadth was added, and opcode 0 remains unregistered.
+- **Did:** generalized the existing asleep state/reducer around one explicit
+  command owner and source-derived singles targets, preserving TYROGUE's
+  player path. A trainer-asleep real set-291 `FRONTIER_MON_PLUSLE_2` state
+  enumerates Thunderbolt/Thunder Wave/Seismic Toss at player battler **0** and
+  Wish at trainer battler **1**. Seed **1** makes the ordinary mask-0 policy
+  choose Wish, synchronize all five draws into the kernel cursor, then the
+  same reducer executes asleep opcodes **16→18→100→40** and returns the honest
+  move-end SETBYTE barrier.
+- **Next:** return to the supervisor. Keep opcode 0 unregistered and retain the
+  recorded S10 ordering; masks, switching, move end, and other mechanics remain
+  separate bounded units.
+- **Notes:** PLUSLE sleep **4→3**, PP **[15,20,20,10]** unchanged, ordered
+  message/status events, battler-1 controller ownership, persisted RNG
+  `0x79e39ac4 / 5 calls`, canonical replay, recursive freezing, no split RNG,
+  player regression, and import boundaries are pinned. Focused **3 files / 39
+  tests**; integrated **161/1936**, production build, OFF v5 info
+  (`9c89c741…`), and diff checks pass. Code commit `8e186dc`; pixel diff N/A.

@@ -6,6 +6,11 @@
  * Every `BuildOamBuffer` then performs one stable insertion-sort pass using
  * packed `(oam.priority << 8) | subpriority`, followed by wrapped OAM y.
  *
+ * This reduced seam currently models ordinary, non-double-affine component
+ * sprites. Source `SortSprites` has one additional y-wrap rule for
+ * double-affine size-3 square/vertical sprites; add those key fields before
+ * reusing this helper for such a component.
+ *
  * A presentation reducer only needs the slots its component can allocate:
  * restricting a stable sort to those slots preserves their relative order.
  * The seed therefore comes from the live scene immediately before allocation,
