@@ -23,6 +23,11 @@ import {
 } from "../src/engine/sceneOnPresentation.ts";
 import { genericHitReactionAtAge } from "../src/engine/battleMenu.ts";
 import crystals from "../src/assets/gen/battle-anim-ice-crystals.json" with { type: "json" };
+import cube from "../src/assets/gen/battle-anim-ice-cube.json" with { type: "json" };
+import {
+  frozenIceCubeAnchor,
+  frozenIceCubeState,
+} from "../src/engine/frozenIceCube.ts";
 
 describe("ICE_PUNCH source-composed presentation components", () => {
   it("reuses the generic hit reaction on a phase-relative clock", () => {
@@ -338,5 +343,47 @@ describe("ICE_PUNCH source-composed presentation components", () => {
       icePunchHitCrystals(126, { x: 72, y: 88 }, -1)
         .find(({ sourceSlot }) => sourceSlot === 11),
     ).toMatchObject({ centerX: 52, centerY: 90 });
+  });
+
+  it("extracts FrozenIceCube's four source subsprites in compiled tile order", () => {
+    expect(cube.pieces.map(({ x, y, width, height, tileOffset }) => ({
+      x,
+      y,
+      width,
+      height,
+      tileOffset,
+    }))).toEqual([
+      { x: -16, y: -16, width: 64, height: 64, tileOffset: 0 },
+      { x: -16, y: 48, width: 64, height: 32, tileOffset: 64 },
+      { x: 48, y: -16, width: 32, height: 64, tileOffset: 96 },
+      { x: 48, y: 48, width: 32, height: 32, tileOffset: 128 },
+    ]);
+    expect(cube.pieces.map((piece) => piece.tileset.tiles.length))
+      .toEqual([64, 32, 32, 16]);
+    expect(cube.palette).toHaveLength(16);
+  });
+
+  it("pins FrozenIceCube source-relative geometry and full task lifetime", () => {
+    expect(frozenIceCubeAnchor({ x: 72, y: 80 })).toEqual({ x: 40, y: 44 });
+    expect(frozenIceCubeAnchor({ x: 176, y: 40 })).toEqual({ x: 144, y: 4 });
+
+    expect(frozenIceCubeState(-1)).toMatchObject({
+      spriteAlive: false,
+      blendEnabled: false,
+    });
+    expect(frozenIceCubeState(0)).toMatchObject({ eva: 0, evb: 16 });
+    expect(frozenIceCubeState(1)).toMatchObject({ eva: 1, evb: 15 });
+    expect(frozenIceCubeState(9)).toMatchObject({ eva: 9, evb: 7 });
+    expect(frozenIceCubeState(10)).toMatchObject({ eva: 9, evb: 7 });
+    expect(frozenIceCubeState(24).paletteRotation).toBe(0);
+    expect(frozenIceCubeState(27).paletteRotation).toBe(1);
+    expect(frozenIceCubeState(33).paletteRotation).toBe(3);
+    expect(frozenIceCubeState(47).paletteRotation).toBe(3);
+    expect(frozenIceCubeState(56).paletteRotation).toBe(6);
+    expect(frozenIceCubeState(57)).toMatchObject({ eva: 8, evb: 8 });
+    expect(frozenIceCubeState(65)).toMatchObject({ eva: 0, evb: 16 });
+    expect(frozenIceCubeState(66)).toMatchObject({ eva: 0, spriteAlive: true });
+    expect(frozenIceCubeState(103).spriteAlive).toBe(false);
+    expect(frozenIceCubeState(105).blendEnabled).toBe(false);
   });
 });
