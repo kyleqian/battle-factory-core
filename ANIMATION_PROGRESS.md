@@ -38,17 +38,19 @@ remainder.
 
 ## Current handoff
 
-- **State:** **4 exact / 8 partial / 264 unsupported**. The source graph covers
+- **State:** **4 exact / 9 partial / 263 unsupported**. The source graph covers
   all **354** moves through **935** reusable components and **3,190**
   dependency edges.
-- **Did:** added generated dependency/leverage reporting and three initial
-  overlapping tracks: elemental punch, white feather, and fast contact.
-  Removed parked FAINT ATTACK from the active move queue; its partial evidence
-  and ISSUE #38 remainder remain intact.
-- **Evidence:** graph regeneration is byte-for-byte tested. ENDEAVOR portable
-  **141/141** and canonical **237/237** remain exact; DOUBLE TEAM, FIRE PUNCH,
-  ROCK SLIDE, and FAINT ATTACK remain **230/230**, **225/225**, **175/175**,
-  and **221/221**.
-- **Next:** start the `elemental-punch` track: reuse exact FIRE PUNCH as the
-  chassis, stage ICE/THUNDER overlays, and report component reuse plus
-  independent move windows. Do not reopen FAINT ATTACK ISSUE #38.
+- **Did:** staged ICE PUNCH through the shared Scene-ON seam, extracted its
+  source-concatenated crystal sheet, and landed the independent opening
+  BG-black/target-ice component clocks. FIRE PUNCH's fist/hitsplat/shake
+  chassis remains unchanged. THUNDER PUNCH was batch-checked through the same
+  normal-controller stage but not promoted.
+- **Evidence:** `ice-punch-onix-grovyle.json` is **35/35 exact** at oracle
+  frames 2339-2373. Fresh template/RAM evidence pins 2374 as the first crystal
+  frame and bounds the still-open move body through 2525. FIRE PUNCH portable
+  **225/225** remains exact.
+- **Next:** continue ICE PUNCH at relative age 35 / oracle 2374 with the
+  small+large spiral, then reuse the exact fist/hitsplat/shake chassis and
+  implement `IceCrystalEffectShort`; do not claim THUNDER PUNCH until its own
+  dense move window is green.

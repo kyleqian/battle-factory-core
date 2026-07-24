@@ -37,6 +37,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { decodeIndexedPng } from "./indexedPng.ts";
+import { loadJascPal } from "./jascPal.ts";
 import { sliceTiles } from "./tiles.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -199,6 +200,42 @@ function writeJson(path: string, data: unknown): void {
       source: "asm/macros/battle_anim_script.inc:create_fist_sprite; src/battle_anim_fight.c:sAnim_Fist,gFistFootSpriteTemplate,AnimBasicFistOrFoot",
       frame: 0,
       durationArg: 8,
+    },
+  });
+}
+
+// --- ICE_PUNCH's source-composed crystal sheet -----------------------------
+//
+// graphics_file_rules.mk concatenates ice_crystals_0..4 into the compiled
+// 0x1c0-byte ANIM_TAG_ICE_CRYSTALS sheet. Preserve that tile order: the
+// source animation tables address the large crystal at tile 4 and the small
+// crystal at tile 6.
+{
+  const parts = [0, 1, 2, 3, 4].map((part) =>
+    sliceTiles(
+      decodeIndexedPng(
+        join(
+          REF,
+          "graphics",
+          "battle_anims",
+          "sprites",
+          `ice_crystals_${part}.png`,
+        ),
+      ),
+    )
+  );
+  const tiles = parts.flatMap((part) =>
+    part.tiles.map((tile) => [...tile.pixels])
+  );
+  writeJson(join(ASSETS_GEN, "battle-anim-ice-crystals.json"), {
+    source: "graphics/battle_anims/sprites/ice_crystals_{0..4}.png concatenated by graphics_file_rules.mk (src/graphics.c:484-485, ANIM_TAG_ICE_CRYSTALS)",
+    tileset: { columns: 2, rows: 7, tiles },
+    palette: loadJascPal(
+      join(REF, "graphics", "battle_anims", "sprites", "ice_crystals.pal"),
+    ),
+    frames: {
+      large: { tile: 4, width: 8, height: 16 },
+      small: { tile: 6, width: 8, height: 8 },
     },
   });
 }
