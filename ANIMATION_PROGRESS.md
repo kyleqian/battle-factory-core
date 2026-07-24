@@ -54,10 +54,11 @@ remainder.
   source assets, orientation, timing, and immutability in Tier-1.
 - **Evidence:** opponent-front oracle frames **91–109** and player-back frames
   **87–105** are dense and exact at **19/19 + 19/19 RGB**, through black at the
-  high-speed handoff. The opposite-side QUICK ATTACK control remains
-  **214/214**; the current opponent control resolves a different immutable
-  damage endpoint (117→111 rather than its committed 117→110 fixture) but
-  preserves all **115** pre-damage frames exactly.
+  high-speed handoff. Both complete QUICK ATTACK controls are restored at
+  **219/219 + 214/214** with immutable 117→111 endpoints. The opponent fixture
+  records harness `96603ae` (2026-07-24 06:08), which moved mechanicLab loadout
+  overrides before initial action choices and superseded the pre-change
+  117→110 evidence.
 - **Next:** resolve the high-speed BG fade-in/composition beginning at opponent
   frame **110** / player frame **106**, then prove the affine disappearance,
   three edge impacts, 24 dust spawns, blink reappearance, restore fade, and

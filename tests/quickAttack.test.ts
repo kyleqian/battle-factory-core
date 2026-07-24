@@ -203,7 +203,7 @@ describe("portable QUICK ATTACK presentation", () => {
     expect(stage.config.controllerProfile).toBe(controllerProfile);
   });
 
-  it("reads the controller-owned 117→110 outcome without mutating it", () => {
+  it("reads the current controller-owned 117→111 outcome without mutating it", () => {
     const fieldProfile = Object.freeze({
       playerHp: 117,
       opponentHp: 156,
@@ -212,7 +212,7 @@ describe("portable QUICK ATTACK presentation", () => {
     });
     const controllerProfile = Object.freeze({
       targetHpBefore: 117,
-      targetHpAfter: 110,
+      targetHpAfter: 111,
       hitReactionFirstAge: 81,
       hpDrainFirstAge: 116,
       resultTextFirstAge: 128,
@@ -252,10 +252,10 @@ describe("portable QUICK ATTACK presentation", () => {
       },
       controllerProfile: {
         targetHpBefore: 117,
-        targetHpAfter: 110,
+        targetHpAfter: 111,
         hitReactionFirstAge: 81,
         hpDrainFirstAge: 116,
-        resultTextFirstAge: 128,
+        resultTextFirstAge: 127,
         resultKind: "notVeryEffective",
         currentMoveResetAge: 225,
       },
@@ -280,10 +280,10 @@ describe("portable QUICK ATTACK presentation", () => {
     expect(sceneOnQuickAttackView({ ...stage, age: 116 }).displayedTargetHp)
       .toBe(116);
     expect(sceneOnQuickAttackView({ ...stage, age: 122 }).displayedTargetHp)
-      .toBe(110);
-    expect(sceneOnQuickAttackView({ ...stage, age: 128 }).resultText)
+      .toBe(111);
+    expect(sceneOnQuickAttackView({ ...stage, age: 127 }).resultText)
       .toEqual({ line: "It’s not very effective…", visibleChars: 1 });
-    expect(sceneOnQuickAttackView({ ...stage, age: 151 }).resultText)
+    expect(sceneOnQuickAttackView({ ...stage, age: 150 }).resultText)
       .toEqual({ line: "It’s not very effective…", visibleChars: 24 });
     expect(sceneOnQuickAttackView({ ...stage, age: 224 }).currentMove)
       .toBe("QUICK_ATTACK");

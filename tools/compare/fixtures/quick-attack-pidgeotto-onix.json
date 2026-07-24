@@ -5,6 +5,11 @@
   "probe": "tools/probe/run-battle-lab-rgb.py",
   "pair": "PIDGEOTTO (opponent-front) -> ONIX (player-back)",
   "move": "QUICK_ATTACK",
+  "oracleProvenance": {
+    "harnessCommit": "96603ae",
+    "changedAt": "2026-07-24 06:08",
+    "note": "mechanicLab loadout overrides now apply before initial action choices"
+  },
   "appStage": {
     "oracleFrame": 46,
     "presentationAge": 7
@@ -21,10 +26,10 @@
   },
   "controllerProfile": {
     "targetHpBefore": 117,
-    "targetHpAfter": 110,
+    "targetHpAfter": 111,
     "hitReactionFirstAge": 81,
     "hpDrainFirstAge": 116,
-    "resultTextFirstAge": 128,
+    "resultTextFirstAge": 127,
     "resultKind": "notVeryEffective",
     "currentMoveResetAge": 225
   },
