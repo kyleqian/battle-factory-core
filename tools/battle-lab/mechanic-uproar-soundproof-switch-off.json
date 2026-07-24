@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "mode": "mechanicLab",
+  "profile": "battle-scene-off",
+  "level": 50,
+  "challengeNum": 3,
+  "battleNum": 0,
+  "trainerId": 120,
+  "playerSetIds": [372, 380, 381],
+  "opponentSetIds": [394, 400, 464],
+  "seed": 1,
+  "overrides": {
+    "battlers": {
+      "player": {
+        "moves": [150, 150, 150, 150],
+        "ppUps": [0, 0, 0, 0],
+        "ability": 0
+      },
+      "opponent": {
+        "moves": [253, 253, 253, 253],
+        "ppUps": [0, 0, 0, 0],
+        "ability": 0
+      }
+    }
+  },
+  "trace": {
+    "segments": [
+      {"frames": 2, "buttons": ["A"]},
+      {"frames": 30, "buttons": []},
+      {"frames": 2, "buttons": ["A"]},
+      {"frames": 700, "buttons": []},
+      {"frames": 2, "buttons": ["DOWN"]},
+      {"frames": 30, "buttons": []},
+      {"frames": 2, "buttons": ["A"]},
+      {"frames": 100, "buttons": []},
+      {"frames": 2, "buttons": ["RIGHT"]},
+      {"frames": 30, "buttons": []},
+      {"frames": 2, "buttons": ["A"]},
+      {"frames": 30, "buttons": []},
+      {"frames": 2, "buttons": ["A"]},
+      {"frames": 700, "buttons": []}
+    ],
+    "captureFrames": [0, 734, 1634]
+  }
+}

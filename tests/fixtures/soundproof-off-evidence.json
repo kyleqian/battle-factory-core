@@ -1,0 +1,50 @@
+{
+  "schema": "soundproof-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "source": {
+    "soundMoveTable": "reference/pokeemerald/src/battle_util.c:686-692",
+    "movesBlock": "reference/pokeemerald/src/battle_util.c:2659-2675",
+    "soundproofScript": "reference/pokeemerald/data/battle_scripts_1.s:4158-4164",
+    "uproarScript": "reference/pokeemerald/data/battle_scripts_1.s:2072-2081",
+    "uproarStatus": "reference/pokeemerald/src/battle_script_commands.c:2568-2582"
+  },
+  "publicAbiBoundary": {
+    "exposes": ["ability", "hp", "maxHp", "pp", "status2", "rngValue", "controllerExecFlags"],
+    "doesNotExpose": ["gHitMarker", "gBattlescriptCurrInstr", "gLastUsedAbility"],
+    "rule": "The HITMARKER_NO_PPDEDUCT bit is source-established; this receipt proves its Uproar continuation consequence through public PP, not a fabricated direct marker observation."
+  },
+  "cases": [
+    {
+      "id": "hyper-voice-blocked-by-soundproof",
+      "scenario": "tools/battle-lab/mechanic-soundproof-hyper-voice-off.json",
+      "scenarioSha256": "83bc23ecf92389b0b9587ea367651c6915a6528123d02a704a6ad679bfa261b8",
+      "freshManifestSha256": "0db6ebc6e65d4c701a3742fd83921f952a753f90fa4a9137388c0f5a8f7e75ee",
+      "captures": [
+        {"frame": 0, "sha256": "bfec6fe31b2b25fe92d04f73b17ed5ef55f53c422a259e057af7e9f7458ac3be", "playerPp": 10, "opponentAbility": 43, "opponentHp": 137},
+        {"frame": 734, "sha256": "bfec6fe31b2b25fe92d04f73b17ed5ef55f53c422a259e057af7e9f7458ac3be", "playerPp": 9, "opponentAbility": 43, "opponentHp": 137}
+      ]
+    },
+    {
+      "id": "tackle-control-still-hits-soundproof",
+      "scenario": "tools/battle-lab/mechanic-soundproof-tackle-control-off.json",
+      "scenarioSha256": "b25a1a5ad5a2cda95c1eb4cc8e32ffa29d0a780fcb943c25b28d5cfa6bd69556",
+      "freshManifestSha256": "c5cf556a0e477e87d2b08d7f7041fd66a289291a69fcb77a8c9449618d9aebe5",
+      "captures": [
+        {"frame": 0, "sha256": "bfec6fe31b2b25fe92d04f73b17ed5ef55f53c422a259e057af7e9f7458ac3be", "playerPp": 35, "opponentAbility": 43, "opponentHp": 137},
+        {"frame": 734, "sha256": "c8e55b32afd5f7944a301a7f0f22c0f4049a6ea0bda1498f156d67e0154d8297", "playerPp": 34, "opponentAbility": 43, "opponentHp": 126}
+      ]
+    },
+    {
+      "id": "uproar-continuation-blocked-after-native-soundproof-switch",
+      "scenario": "tools/battle-lab/mechanic-uproar-soundproof-switch-off.json",
+      "scenarioSha256": "86959753ee3b5dcb2a16e66ab0d04ca4bd7b038d75364c75d41ad7128e606802",
+      "freshManifestSha256": "dd3cb40a7785b044274c020136bf9dbd28ab4dd5e8ea35041c9c5c1e8cd7283c",
+      "captures": [
+        {"frame": 0, "sha256": "d90ba6f42f18711252be859670bd587407102a087aee6ccff9f6bc4bd02dacc9", "playerSpecies": 51, "playerAbility": 0, "playerHp": 101, "opponentPp": 10, "opponentStatus2": 0},
+        {"frame": 734, "sha256": "dc5e682feb88e23e683cad299f9893341de597b1f0f75b78acadee3a4a93b7a4", "playerSpecies": 51, "playerAbility": 0, "playerHp": 61, "opponentPp": 9, "opponentStatus2": 4128},
+        {"frame": 1634, "sha256": "52cfb442ecfe939419bb1df2b665cee048ef2641068b4902b8135fc892f65202", "playerSpecies": 122, "playerAbility": 43, "playerHp": 137, "opponentPp": 9, "opponentStatus2": 4112}
+      ]
+    }
+  ],
+  "boundedRemainder": "This evidence is singles-only. It does not test every entry in sSoundMovesTable, Pressure PP loss, a Soundproof user, target redirection, or the transient marker/script pointer directly."
+}
