@@ -10,7 +10,7 @@ damage, RNG, and controller state remain game-owned oracle inputs.
 - Case: player-back ONIX → opponent-front GROVYLE, Battle Scene ON.
 - Move dispatch: oracle frame 2305; PP write: 2332.
 - First `Move_ICE_PUNCH` script-owned display: **2339** (presentation age 0).
-- Dense accepted window: **2339–2502, 164/164 exact**.
+- Dense accepted window: **2339–2525, 187/187 exact**.
 - The window covers the stable handoff and the complete source-composed
   `simple_palette_blend(F_PAL_BG, 0→7, delay 1)` plus
   `AnimTask_BlendBattleAnimPal(F_PAL_TARGET, 0→9, delay 2)` opening ramp.
@@ -62,11 +62,20 @@ that display: at 2411 the position remains `(x2,y2)=(1,1)` while matrix A/D
 advance from -97 to 142. The same general reducer rule closes the small
 boundary at 2404 and the large boundary at 2411.
 
+The accepted move body now also closes the palette and script teardown.
+`simple_palette_blend(F_PAL_BG, 7→0, delay 0)` begins changing the displayed
+BG palettes at age 166. Source `gPaletteFade.deltaY = 2` and the alternating
+BG/OBJ callback toggle produce coefficients **5/5, 3/3, 1/1, 0** across ages
+166–172. The generic teardown reducer profiles those callbacks rather than
+storing frames. RAM pins the target battler's OBJ visibility restoration and
+the same-pass `clearmonbg`/`blendoff` commands at age 179; `gAnimScriptActive`
+clears at age 183 after `Cmd_end`'s sound wait. Ages 183–186 remain the
+pixel-stable controller handoff before generic hit animation begins at 2526.
+
 Therefore ICE PUNCH is `partial`. The precisely uncovered contiguous
-move-body remainder is **2503–2525**: BG palette restoration,
-`clearmonbg`/`blendoff`, and script teardown.
-Generic hit/damage presentation after 2525 and any variant dependency found
-while closing that body also remain unaccepted.
+remainder is generic hit/damage presentation beginning at **2526**, plus any
+geometry/orientation variant required by source or comparison evidence. The
+complete move-script body itself is accepted through 2525.
 
 ## THUNDER PUNCH sibling check
 
