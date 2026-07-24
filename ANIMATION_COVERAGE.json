@@ -34,9 +34,9 @@
     {
       "move": "MOVE_BIND",
       "status": "partial",
-      "covered": ["player-back ONIX miss"],
-      "evidence": ["tools/compare/traces/turn8-bind-a.json", "tools/compare/traces/turn8-bind-b.json"],
-      "remaining": "Stage and match the actual hit animation and residual-damage lifecycle."
+      "covered": ["player-back ONIX miss", "legal zero-PP-Up player-back ONIX hit to opponent-front MURKROW staged through the relative Scene-ON seam", "move-owned sway/two-squeeze body separated from generic hit/HP/result controller tails and the later trapped residual lifecycle"],
+      "evidence": ["tools/compare/traces/turn8-bind-a.json", "tools/compare/traces/turn8-bind-b.json", "tools/battle-lab/mechanic-bind-player-onix-opponent-murkrow.json", "tools/compare/fixtures/bind-player-onix-opponent-murkrow.json", "tools/probe/run-battle-lab-rgb.py", "docs/bind-portable-staging-probe.md"],
+      "remaining": "Implement and densely compare the source-owned 382-426 sway/two-squeeze body through the shared seam; separately stage any source-required side variant. Generic hit/HP/result/controller tails and General_TurnTrap's continuing tendril/residual lifecycle remain independent presentation tracks."
     },
     {
       "move": "MOVE_QUICK_ATTACK",
