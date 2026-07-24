@@ -1,3 +1,34 @@
+## 408 — Complete attack-canceler source loop composed
+
+- **State:** the run is clean and green at **149 files / 1859 tests**. S10
+  Gate 3 remains at **27** source-safe executable opcodes. The pure
+  `AtkCanceler_UnableToUseMove` do/while is complete; opcode 0 remains
+  unregistered and no decision-boundary, controller, round, or presentation
+  integration was added.
+- **Did:** added one typed immutable dispatcher over the existing FLAGS→THAW
+  phase helpers. It starts at the state tracker, stops at END or the first
+  nonzero effect, returns the advanced resumable rules/RNG state, ordered
+  phase decisions, final script handoff, cumulative RNG value/call receipt,
+  and the source-common effect-2 status-controller synchronization.
+- **Next:** before registering opcode 0, implement one source-complete
+  `Cmd_attackcanceler` machine adapter: map the machine RNG value/calls/ledger
+  into this loop and its per-phase draws, apply its script handoff and
+  effect-2 controller barrier, then type the still-unowned source remainder
+  after the helper (move-block ability, PP, obedience, Magic Coat, Snatch,
+  Lightning Rod, and protect branches). Only that complete command may join
+  the executable handler table; do not route it through
+  `BattleDecisionBoundary`, core, or the round controller as part of
+  registration.
+- **Notes:** both singles sides, full all-clear traversal, asleep/Truant/Bide
+  source-order stops, exact FROZEN→PARALYZED→IN_LOVE and FROZEN→CONFUSED RNG
+  chains, skipped-later-phase zero consumption, effect-2 sleep/freeze/thaw
+  sync, effect-1/effect-2 resumptions through END, invalid state/tracker/PC/RNG
+  accounting, determinism, immutability, and recursive deep freezing are
+  pinned. Focused **15 files / 106 tests**; integrated **149/1859**, production
+  build, OFF v5 info (`9c89c741…`), and diff check green. Code commit
+  `392a8af`; pixel diff N/A.
+
+---
 ## 407 — Gate-3 attack-canceler THAW source phase integrated
 
 - **State:** the run is clean and green at **148 files / 1850 tests**. S10

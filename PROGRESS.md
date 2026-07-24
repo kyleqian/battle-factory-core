@@ -4,6 +4,31 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 411 — Factory-scoped obedience composed
+
+- **State:** the run is clean and green at **156 files / 1898 tests**. S10
+  Gate 3 remains at **27** source-safe executable opcodes. The pure
+  attack-canceler chain now reaches the Factory-only obedience continuation;
+  opcode 0 remains unregistered and no machine, controller, decision-boundary,
+  core, round, presentation, OTHER, or IGNORED behavior was added.
+- **Did:** added an explicit typed `BATTLE_FACTORY`/`BATTLE_TYPE_FACTORY`/
+  `BATTLE_TYPE_FRONTIER` scope and an immutable join after selected-slot PP.
+  Legal player-side Factory attackers return obedient at the Frontier check
+  before ownership/badges/level/RNG; opponent-side attackers return even
+  earlier. Successful admission preserves the source PC and prior receipts,
+  consumes zero RNG, and sets exactly `HITMARKER_OBEYS`.
+- **Next:** keep opcode 0 unregistered. The next exact source boundary is
+  Magic Coat after obedience; Snatch, Lightning Rod, Protect, machine and
+  controller integration remain separately unowned.
+- **Notes:** both singles sides, preexisting OBEYS, multi-turn helper bypass,
+  canceler effects **1/2**, Soundproof, and no-PP stops are pinned. Invalid/
+  non-Factory scope, invalid input/composition/PC, deterministic replay, input
+  immutability, recursive freezing, full receipt preservation, and zero RNG
+  are covered. Focused **3 files / 20 tests**; integrated **156/1898**,
+  production build, OFF v5 info (`9c89c741…`), and diff check green. Code
+  commit `61641fa`; pixel diff N/A.
+
+---
 ## 410 — Gate-3 selected-slot PP admission composed
 
 - **State:** the run is clean and green at **154 files / 1887 tests**. S10
@@ -60,34 +85,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Focused **5 files / 56 tests**; integrated **152/1876**, production build,
   OFF v5 info (`9c89c741…`), and diff check green. Code commits `e5e8bae` +
   `12960b9`; pixel diff N/A.
-
----
-## 408 — Complete attack-canceler source loop composed
-
-- **State:** the run is clean and green at **149 files / 1859 tests**. S10
-  Gate 3 remains at **27** source-safe executable opcodes. The pure
-  `AtkCanceler_UnableToUseMove` do/while is complete; opcode 0 remains
-  unregistered and no decision-boundary, controller, round, or presentation
-  integration was added.
-- **Did:** added one typed immutable dispatcher over the existing FLAGS→THAW
-  phase helpers. It starts at the state tracker, stops at END or the first
-  nonzero effect, returns the advanced resumable rules/RNG state, ordered
-  phase decisions, final script handoff, cumulative RNG value/call receipt,
-  and the source-common effect-2 status-controller synchronization.
-- **Next:** before registering opcode 0, implement one source-complete
-  `Cmd_attackcanceler` machine adapter: map the machine RNG value/calls/ledger
-  into this loop and its per-phase draws, apply its script handoff and
-  effect-2 controller barrier, then type the still-unowned source remainder
-  after the helper (move-block ability, PP, obedience, Magic Coat, Snatch,
-  Lightning Rod, and protect branches). Only that complete command may join
-  the executable handler table; do not route it through
-  `BattleDecisionBoundary`, core, or the round controller as part of
-  registration.
-- **Notes:** both singles sides, full all-clear traversal, asleep/Truant/Bide
-  source-order stops, exact FROZEN→PARALYZED→IN_LOVE and FROZEN→CONFUSED RNG
-  chains, skipped-later-phase zero consumption, effect-2 sleep/freeze/thaw
-  sync, effect-1/effect-2 resumptions through END, invalid state/tracker/PC/RNG
-  accounting, determinism, immutability, and recursive deep freezing are
-  pinned. Focused **15 files / 106 tests**; integrated **149/1859**, production
-  build, OFF v5 info (`9c89c741…`), and diff check green. Code commit
-  `392a8af`; pixel diff N/A.
