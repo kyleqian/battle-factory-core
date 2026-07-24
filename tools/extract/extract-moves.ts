@@ -35,6 +35,8 @@ const battleMovesC = readFileSync(join(REF, "src", "data", "battle_moves.h"), "u
 const moveNamesC = readFileSync(join(REF, "src", "data", "text", "move_names.h"), "utf8");
 const moveDescriptionsC = readFileSync(join(REF, "src", "data", "text", "move_descriptions.h"), "utf8");
 const contestMovesC = readFileSync(join(REF, "src", "data", "contest_moves.h"), "utf8");
+const contestTextTablesC = readFileSync(join(REF, "src", "data", "contest_text_tables.h"), "utf8");
+const contestStringsC = readFileSync(join(REF, "data", "text", "contest_strings.inc"), "utf8");
 
 // C string literal -> JS string: this codebase's move/ability description
 // text uses only the "\n" line-break escape (verified: no other backslash
@@ -161,11 +163,45 @@ function parseContestEffects(): Map<string, { appeal: number; jam: number }> {
 }
 const contestEffects = parseContestEffects();
 
+function parseContestEffectDescriptions(): Map<string, string> {
+  const strings = new Map<string, string>();
+  for (const m of contestStringsC.matchAll(/^(\w+)::\n((?:\t\.string .*\n)+)/gm)) {
+    const [, label, body] = m as unknown as [string, string, string];
+    const parts = [...body.matchAll(/"((?:[^"\\]|\\.)*)"/g)].map((part) => part[1]!);
+    strings.set(label, unescapeCString(parts.join("")).replace(/\$$/, ""));
+  }
+
+  const out = new Map<string, string>();
+  for (const m of contestTextTablesC.matchAll(
+    /\[CONTEST_EFFECT_(\w+)\]\s*=\s*(gText_\w+)/g,
+  )) {
+    const description = strings.get(m[2]!);
+    if (description === undefined) {
+      throw new Error(`contest description ${m[2]} not found for CONTEST_EFFECT_${m[1]}`);
+    }
+    out.set(m[1]!, description);
+  }
+  return out;
+}
+const contestEffectDescriptions = parseContestEffectDescriptions();
+
 // gContestMoves[MOVE_x] = { .effect = CONTEST_EFFECT_y, .contestCategory =
 // CONTEST_CATEGORY_z, ... }, - MOVE_NONE is the sole "{0}," single-line
 // placeholder (no real contest data), skipped.
-function parseContestMoves(): Map<string, { category: string; appeal: number; jam: number }> {
-  const out = new Map<string, { category: string; appeal: number; jam: number }>();
+function parseContestMoves(): Map<string, {
+  category: string;
+  appeal: number;
+  jam: number;
+  effect: string;
+  description: string;
+}> {
+  const out = new Map<string, {
+    category: string;
+    appeal: number;
+    jam: number;
+    effect: string;
+    description: string;
+  }>();
   const tableEnd = contestMovesC.indexOf("const struct ContestEffect gContestEffects[]");
   const movesPart = tableEnd >= 0 ? contestMovesC.slice(0, tableEnd) : contestMovesC;
   for (const m of movesPart.matchAll(/\[MOVE_(\w+)\]\s*=\s*\{\n([\s\S]*?)\n {4}\},?/g)) {
@@ -176,7 +212,15 @@ function parseContestMoves(): Map<string, { category: string; appeal: number; ja
     const effectName = effect[1]!.slice("CONTEST_EFFECT_".length);
     const effectData = contestEffects.get(effectName);
     if (!effectData) throw new Error(`no gContestEffects entry for ${effect[1]} (MOVE_${name})`);
-    out.set(name, { category: category[1]!, appeal: effectData.appeal, jam: effectData.jam });
+    const description = contestEffectDescriptions.get(effectName);
+    if (!description) throw new Error(`no contest effect description for ${effect[1]} (MOVE_${name})`);
+    out.set(name, {
+      category: category[1]!,
+      appeal: effectData.appeal,
+      jam: effectData.jam,
+      effect: effect[1]!,
+      description,
+    });
   }
   return out;
 }

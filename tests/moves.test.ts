@@ -10,7 +10,13 @@ type Move = {
   accuracy: number;
   pp: number;
   description: string;
-  contest: { category: string; appeal: number; jam: number } | null;
+  contest: {
+    category: string;
+    appeal: number;
+    jam: number;
+    effect: string;
+    description: string;
+  } | null;
 };
 const byMove = new Map<string, Move>((moves.moves as Move[]).map((m) => [m.move, m]));
 
@@ -52,7 +58,19 @@ describe("moves.json (Battle-Moves / Contest-Moves page extraction)", () => {
       category: "CONTEST_CATEGORY_TOUGH",
       appeal: 40,
       jam: 0,
+      effect: "CONTEST_EFFECT_HIGHLY_APPEALING",
+      description: "A highly appealing move.",
     });
+  });
+
+  it("resolves the Contest effect pointer separately from the battle description", () => {
+    expect(byMove.get("MOVE_ROCK_SLIDE")!.contest).toMatchObject({
+      appeal: 10,
+      jam: 30,
+      description: "Badly startles those that\nhave made appeals.",
+    });
+    expect(byMove.get("MOVE_ROCK_SLIDE")!.contest!.description)
+      .not.toBe(byMove.get("MOVE_ROCK_SLIDE")!.description);
   });
 
   it("MOVE_NONE has no description/contest data (placeholder entry, never printed)", () => {
