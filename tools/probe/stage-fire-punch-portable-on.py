@@ -37,7 +37,7 @@ from pathlib import Path
 if len(sys.argv) not in (2, 3, 4, 5):
     raise SystemExit(
         f"usage: {sys.argv[0]} <fresh-output.json> [fresh-rgb-dir] "
-        "[player|opponent] [fire-punch|faint-attack|rock-slide]"
+        "[player|opponent] [fire-punch|faint-attack|rock-slide|double-team]"
     )
 
 OUTPUT_PATH = Path(sys.argv[1])
@@ -46,7 +46,12 @@ ATTACKER_SIDE = sys.argv[3] if len(sys.argv) >= 4 else "player"
 if ATTACKER_SIDE not in ("player", "opponent"):
     raise SystemExit(f"attacker side must be player or opponent, got {ATTACKER_SIDE!r}")
 MOVE_NAME = sys.argv[4] if len(sys.argv) == 5 else "fire-punch"
-MOVE_IDS = {"fire-punch": 7, "faint-attack": 185, "rock-slide": 157}
+MOVE_IDS = {
+    "fire-punch": 7,
+    "faint-attack": 185,
+    "rock-slide": 157,
+    "double-team": 104,
+}
 if MOVE_NAME not in MOVE_IDS:
     raise SystemExit(f"unsupported staged move {MOVE_NAME!r}")
 STAGED_MOVE = MOVE_IDS[MOVE_NAME]
@@ -87,8 +92,14 @@ OPPONENT_AI_SLOT = 3
 SPRITE_SIZE = 0x44
 SPRITE_TEMPLATE_OFFSET = 0x14
 SPRITE_FLAGS_OFFSET = 0x3E
+SPRITE_CALLBACK_OFFSET = 0x1C
+SPRITE_X2_OFFSET = 0x24
+SPRITE_DATA_OFFSET = 0x2E
 ROCK_TEMPLATE = 0x08596B04
 SPRITE_ORDER = 0x020217F4
+# Static symbol from `arm-none-eabi-nm -n --defined-only pokeemerald.elf`;
+# Thumb bit included. See dump-doubleteam-sprites.py for the canonical probe.
+ANIM_DOUBLE_TEAM_CALLBACK = 0x08102B3D
 
 # These are the decoder corners used by the native compositor's 64x64 battler
 # sheets. Centers mirror GetBattlerSpriteCoord(battler, X_2/Y_PIC_OFFSET):
@@ -116,7 +127,7 @@ STAGE_TICK = 1886
 CAPTURE_TICKS = {1886, 1887, 1888, 1918, 1919, 1920, 1921, 1922}
 # Dense hashes make the move-owned boundary and complete portable window
 # independently bisectable without committing or consulting screenshots.
-CAPTURE_TICKS.update(range(1886, 3101))
+CAPTURE_TICKS.update(range(1886, 3501))
 
 
 def u16(oracle: EmeraldOracle, addr: int) -> int:
@@ -166,12 +177,23 @@ def frame_record(oracle: EmeraldOracle, tick: int) -> dict[str, object]:
     if RGB_DIR is not None:
         (RGB_DIR / f"{tick:05d}.rgb").write_bytes(rgb)
     rocks = []
+    double_team_clones = []
     for slot in range(64):
         base = oracle.symbols["gSprites"] + slot * SPRITE_SIZE
         if not oracle.read_u8(base + SPRITE_FLAGS_OFFSET) & 1:
             continue
         if oracle.read_u32(base + SPRITE_TEMPLATE_OFFSET) == ROCK_TEMPLATE:
             rocks.append(slot)
+        if oracle.read_u32(base + SPRITE_CALLBACK_OFFSET) == ANIM_DOUBLE_TEAM_CALLBACK:
+            double_team_clones.append(
+                {
+                    "slot": slot,
+                    "x2": s16(oracle, base + SPRITE_X2_OFFSET),
+                    "phase": s16(oracle, base + SPRITE_DATA_OFFSET + 2),
+                    "life": s16(oracle, base + SPRITE_DATA_OFFSET),
+                    "subcounter": s16(oracle, base + SPRITE_DATA_OFFSET + 6),
+                }
+            )
     return {
         "tick": tick,
         "sha256": hashlib.sha256(rgb).hexdigest(),
@@ -189,6 +211,7 @@ def frame_record(oracle: EmeraldOracle, tick: int) -> dict[str, object]:
             "opponent": battler_sprite(oracle, OPPONENT_BATTLER),
         },
         "rockSlots": rocks,
+        "doubleTeamClones": double_team_clones,
         "spriteOrder": [oracle.read_u8(SPRITE_ORDER + slot) for slot in range(64)],
     }
 
@@ -222,7 +245,12 @@ def main() -> None:
     staged_slot = 0 if ATTACKER_SIDE == "player" else OPPONENT_AI_SLOT
     before = battle_mon(oracle, staged_battler)
     battler_base = oracle.symbols["gBattleMons"] + staged_battler * BATTLE_MON_SIZE
-    staged_pp = {"fire-punch": 15, "faint-attack": 20, "rock-slide": 10}[MOVE_NAME]
+    staged_pp = {
+        "fire-punch": 15,
+        "faint-attack": 20,
+        "rock-slide": 10,
+        "double-team": 15,
+    }[MOVE_NAME]
     write_u16(oracle, battler_base + BATTLE_MON_MOVES + staged_slot * 2, STAGED_MOVE)
     oracle.write_u8(battler_base + BATTLE_MON_PP + staged_slot, staged_pp)
     after = battle_mon(oracle, staged_battler)
@@ -238,16 +266,21 @@ def main() -> None:
             advance(segment.get("buttons", []))
     # A short input-free animation window is enough to include the move text,
     # the full selected visual task, and post-hit presentation onset.
-    for _ in range(1080):
+    for _ in range(1480):
         advance([])
 
-    target_battler = OPPONENT_BATTLER if staged_battler == PLAYER_BATTLER else PLAYER_BATTLER
+    opposing_battler = (
+        OPPONENT_BATTLER
+        if staged_battler == PLAYER_BATTLER
+        else PLAYER_BATTLER
+    )
+    effect_battler = staged_battler if MOVE_NAME == "double-team" else opposing_battler
     first_move = next(
         capture
         for capture in captures
         if capture["currentMove"] == STAGED_MOVE
         and capture["attacker"] == staged_battler
-        and capture["target"] == target_battler
+        and capture["target"] == effect_battler
     )
     staged_pp = after["pp"][staged_slot]
     pp_spent = next(
@@ -259,16 +292,16 @@ def main() -> None:
         ]["pp"][staged_slot]
         < staged_pp
     )
-    target_hp_before = battle_mon(oracle, target_battler)["maxHp"]
+    target_hp_before = battle_mon(oracle, effect_battler)["maxHp"]
     target_start_hp = first_move[
-        "player" if target_battler == PLAYER_BATTLER else "opponent"
+        "player" if effect_battler == PLAYER_BATTLER else "opponent"
     ]["hp"]
     hp_changed = next(
         (
             capture
             for capture in captures
             if capture[
-                "player" if target_battler == PLAYER_BATTLER else "opponent"
+                "player" if effect_battler == PLAYER_BATTLER else "opponent"
             ]["hp"]
             < target_start_hp
         ),
@@ -278,7 +311,7 @@ def main() -> None:
         (
             capture
             for capture in captures
-            if capture["player" if target_battler == PLAYER_BATTLER else "opponent"]["status1"] != 0
+            if capture["player" if effect_battler == PLAYER_BATTLER else "opponent"]["status1"] != 0
         ),
         None,
     )
@@ -314,7 +347,8 @@ def main() -> None:
             ),
             "geometry": {
                 "attacker": BATTLER_GEOMETRY[staged_battler],
-                "target": BATTLER_GEOMETRY[target_battler],
+                "opposingBattler": BATTLER_GEOMETRY[opposing_battler],
+                "effectBattler": BATTLER_GEOMETRY[effect_battler],
             },
             "relativeReducerEpoch": {
                 "oracleFrame": None,
@@ -333,7 +367,7 @@ def main() -> None:
                 "after": (
                     hp_changed[
                         "player"
-                        if target_battler == PLAYER_BATTLER
+                        if effect_battler == PLAYER_BATTLER
                         else "opponent"
                     ]["hp"]
                     if hp_changed is not None
@@ -344,7 +378,7 @@ def main() -> None:
             "targetStatus": {
                 "before": 0,
                 "after": (
-                    status_changed["player" if target_battler == PLAYER_BATTLER else "opponent"]["status1"]
+                    status_changed["player" if effect_battler == PLAYER_BATTLER else "opponent"]["status1"]
                     if status_changed is not None
                     else 0
                 ),
