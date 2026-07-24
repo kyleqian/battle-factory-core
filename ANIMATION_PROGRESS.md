@@ -44,19 +44,18 @@ remainder.
 
 ## Current handoff
 
-- **State:** **12 exact / 2 partial / 262 unsupported**. BIND remains honestly
-  partial: its complete player-back ONIX→opponent-front MURKROW move-owned body
-  is exact, but source proves the opposite orientation is required.
-- **Did:** implemented reusable, parameterized `AnimTask_SwayMon` and
-  `AnimTask_ScaleMonAndRestore` reducers. The legal zero-PP-Up frames
-  **382–426** / relative ages **0–44** match dense task state **45/45** and live
-  framebuffer **45/45** through the shared Scene-ON seam, including the two
-  squeeze calls at ages 3 and 21 and the two-frame task→OAM display lag.
-- **Evidence:** `tools/compare/bindPortable.ts` reruns the v5 Mechanics Lab
-  probe and compares unthinned RAM matrices/x2 plus RGB. Tier-1 pins source
-  parameters, the whole sway timeline, scale/restore timeline, side sign, and
-  input immutability. Generic hit from 429, damage/trap commit, and residual
-  tendrils remain excluded as independently owned presentation.
-- **Next:** stage opponent-front attacker→player-back target and densely prove
-  the source's opponent-attacker amplitude negation plus back-sprite affine
-  geometry. Only then promote BIND to exact.
+- **State:** **13 exact / 1 partial / 262 unsupported**. BIND is exact for its
+  complete move-owned body in both source-required battle orientations.
+- **Did:** generalized the live BIND compositor across player-back and
+  opponent-front attackers without changing its relative reducer. The new
+  legal zero-PP-Up opponent-front ONIX→player-back MURKROW frames **436–480**
+  / relative ages **0–44** match source task/OAM state **45/45** and live RGB
+  **45/45**. The existing player-back orientation remains **45/45 + 45/45**.
+- **Evidence:** `tools/compare/bindPortable.ts` now selects attacker/target RAM
+  records by side and reruns both unthinned v5 Mechanics Lab probes. Tier-1
+  pins the full signed-rounding-asymmetric opponent sway, back-target geometry
+  and affine peak, plus input immutability. Source inspection finds no further
+  BIND side/species branch after the explicit attacker amplitude negation.
+- **Next:** select the next bounded Level-50 move/component track. Generic hit,
+  HP/result/status/controller tails and `General_TurnTrap` residual tendrils
+  remain separate presentation ownership and do not reopen BIND.

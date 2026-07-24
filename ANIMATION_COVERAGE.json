@@ -33,10 +33,9 @@
     },
     {
       "move": "MOVE_BIND",
-      "status": "partial",
-      "covered": ["player-back ONIX miss", "legal zero-PP-Up player-back ONIX hit to opponent-front MURKROW", "complete source-owned sway/two-squeeze body at relative ages 0-44 / oracle frames 382-426 through the shared Scene-ON seam: source task state 45/45 and live framebuffer 45/45", "move-owned body remains separated from generic hit/HP/result controller tails and the later trapped residual lifecycle"],
-      "evidence": ["tools/compare/traces/turn8-bind-a.json", "tools/compare/traces/turn8-bind-b.json", "tools/battle-lab/mechanic-bind-player-onix-opponent-murkrow.json", "tools/compare/fixtures/bind-player-onix-opponent-murkrow.json", "tools/compare/bindPortable.ts", "src/engine/bind.ts", "tests/bind.test.ts", "tools/probe/run-battle-lab-rgb.py", "docs/bind-portable-staging-probe.md"],
-      "remaining": "Stage and densely compare the source-required opposite orientation: AnimTask_SwayMon explicitly negates amplitude when the attacker is not player-side, and the target ScaleMonAndRestore must cover player-back affine geometry. Generic hit/HP/result/controller tails and General_TurnTrap's continuing tendril/residual lifecycle remain independent presentation tracks."
+      "status": "exact",
+      "covered": ["player-back ONIX miss", "legal zero-PP-Up player-back ONIX hit to opponent-front MURKROW", "complete player-back attacker source-owned sway/two-squeeze body at relative ages 0-44 / oracle frames 382-426 through the shared Scene-ON seam: source task/OAM state 45/45 and live framebuffer 45/45", "legal zero-PP-Up opponent-front ONIX hit to player-back MURKROW", "complete opposite-orientation move-owned body at relative ages 0-44 / oracle frames 436-480 through the shared Scene-ON seam: source task/OAM state 45/45 and live framebuffer 45/45, including amplitude negation before signed Q8.8 rounding and both back-target affine programs", "move-owned body remains separated from generic hit/HP/result controller tails and the later trapped residual lifecycle"],
+      "evidence": ["tools/compare/traces/turn8-bind-a.json", "tools/compare/traces/turn8-bind-b.json", "tools/battle-lab/mechanic-bind-player-onix-opponent-murkrow.json", "tools/battle-lab/mechanic-bind-opponent-onix-player-murkrow.json", "tools/compare/fixtures/bind-player-onix-opponent-murkrow.json", "tools/compare/fixtures/bind-opponent-onix-player-murkrow.json", "tools/compare/bindPortable.ts", "src/engine/bind.ts", "tests/bind.test.ts", "tools/probe/run-battle-lab-rgb.py", "docs/bind-portable-staging-probe.md"]
     },
     {
       "move": "MOVE_QUICK_ATTACK",

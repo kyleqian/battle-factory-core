@@ -92,18 +92,24 @@ for (
   const view = sceneOnBindView(state);
   const oracle = frames.get(frame);
   if (!oracle) throw new Error(`probe omitted frame ${frame}`);
+  const attackerSprite = fixture.attacker.geometry.side === "player"
+    ? oracle.playerSprite
+    : oracle.opponentSprite;
+  const targetSprite = fixture.target.geometry.side === "player"
+    ? oracle.playerSprite
+    : oracle.opponentSprite;
   const componentExact =
-    view.attackerX2 === oracle.playerSprite.x2
-    && view.attackerY2 === oracle.playerSprite.y2
+    view.attackerX2 === attackerSprite.x2
+    && view.attackerY2 === attackerSprite.y2
     && (
       view.targetAffine.active
-        ? oracle.opponentSprite.affineMode === 3
-          && view.targetAffine.xScale === oracle.opponentSprite.matrix.a
-          && view.targetAffine.yScale === oracle.opponentSprite.matrix.d
-          && oracle.opponentSprite.matrix.b === 0
-          && oracle.opponentSprite.matrix.c === 0
-        : oracle.opponentSprite.matrix.a === 256
-          && oracle.opponentSprite.matrix.d === 256
+        ? targetSprite.affineMode === 3
+          && view.targetAffine.xScale === targetSprite.matrix.a
+          && view.targetAffine.yScale === targetSprite.matrix.d
+          && targetSprite.matrix.b === 0
+          && targetSprite.matrix.c === 0
+        : targetSprite.matrix.a === 256
+          && targetSprite.matrix.d === 256
     );
   if (componentExact) componentMatches += 1;
   else mismatches.push(`frame ${frame}: component`);

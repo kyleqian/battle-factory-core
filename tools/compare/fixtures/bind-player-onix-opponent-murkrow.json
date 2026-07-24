@@ -46,7 +46,7 @@
     "genericHitHandoffFrame": 429
   },
   "acceptance": {
-    "status": "partial",
-    "result": "45/45 dense source task states and 45/45 live framebuffers match through the shared Scene-ON seam; source-side amplitude inversion requires an opposite-side variant before exact promotion."
+    "status": "exact",
+    "result": "45/45 dense source task states and 45/45 live framebuffers match through the shared Scene-ON seam; the source-required opposite orientation is independently exact in bind-opponent-onix-player-murkrow.json."
   }
 }

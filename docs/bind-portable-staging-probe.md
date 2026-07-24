@@ -1,4 +1,4 @@
-# BIND Scene-ON portable hit staging
+# BIND Scene-ON portable staging
 
 `mechanic-bind-player-onix-opponent-murkrow.json` is a legal Level-50
 Mechanics Lab case: player-back ONIX has four BIND slots with
@@ -36,8 +36,40 @@ python3 tools/run-mgba-probe.py "$scratch_dir/bind.json" -- \
   "$scratch_dir/bind.json" "$scratch_dir/bind-rgb"
 ```
 
-No side/orientation expansion is claimed: the source `Move_BIND` has no
-target-anchor sprite program, while a later implementation must still prove
-the source-side behavior of `AnimTask_SwayMon` and target scale task through
-the shared presentation seam. This checkpoint intentionally does not implement
-damage, controller, result text, trapped-state, or residual mechanics.
+The source `Move_BIND` has no target-anchor sprite program. This move-owned
+checkpoint intentionally does not implement damage, controller, result text,
+trapped-state, or residual mechanics.
+
+## Opposite orientation
+
+`mechanic-bind-opponent-onix-player-murkrow.json` swaps the same legal
+Level-50 parties and gives opponent-front ONIX four zero-PP-Up BIND slots.
+The ordinary input trace first lets player-back MURKROW finish its selected
+move, then the stock ROM executes BIND. The unthinned probe pins the complete
+move-owned body at frames **436–480**:
+
+- all **45/45** task/OAM states match the shared reducer, including the
+  source's opponent-attacker amplitude negation before signed Q8.8 rounding;
+- both `AnimTask_ScaleMonAndRestore` calls match the player-back MURKROW
+  affine mode and matrices at every frame;
+- all **45/45** raw RGB framebuffers match through the shared Scene-ON seam,
+  using the source-derived ONIX front art, MURKROW back art, their explicit
+  battler corners, and side-correct healthboxes/text.
+
+The source requirement is explicit in
+`battle_anim_mon_movement.c`: `AnimTask_SwayMon` negates argument 1 when
+`gBattleAnimAttacker` is not player-side, before `Sin` multiplies and shifts.
+That ordering makes the opponent offsets signed-rounding asymmetric rather
+than a simple arithmetic negation of the player timeline. `Move_BIND` itself
+contains no further side/species branch: it schedules the same two target
+scale/restore tasks. The generic hit handoff begins at frame 483, after the
+move script releases at frame 480.
+
+Reproduce both complete orientation checks:
+
+```sh
+node --experimental-strip-types tools/compare/bindPortable.ts \
+  tools/compare/fixtures/bind-player-onix-opponent-murkrow.json
+node --experimental-strip-types tools/compare/bindPortable.ts \
+  tools/compare/fixtures/bind-opponent-onix-player-murkrow.json
+```
