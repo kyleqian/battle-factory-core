@@ -65,4 +65,18 @@ describe("persistent source sprite creation/order lifetime seam", () => {
     state = sortSpriteOrder(state);
     expect(state.order).toEqual([4, 3]);
   });
+
+  it("applies the source size-3 double-affine 129..159 y-wrap exception", () => {
+    let state = createSpriteOrderState([3, 4], [3, 4]);
+    state = createOrderedSprite(state, 1, key(140));
+    state = createOrderedSprite(state, 2, {
+      ...key(140),
+      affineMode: "double",
+      oamSize: 3,
+      oamShape: "square",
+    });
+    state = sortSpriteOrder(state);
+
+    expect(spriteOwnersBackToFront(state)).toEqual([2, 1]);
+  });
 });
