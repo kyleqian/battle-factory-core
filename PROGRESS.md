@@ -4,6 +4,29 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 395 — Gate-3 attack-canceler RECHARGE source phase integrated
+
+- **State:** S10 Gate 3 remains open with **27** source-safe executable
+  opcodes. `AtkCanceler_UnableToUseMove` now has immutable FLAGS, ASLEEP,
+  FROZEN, TRUANT, and RECHARGE decisions only; opcode 0 remains unregistered
+  and no phase loop exists.
+- **Did:** audited `DisableStruct::u8 rechargeTimer` and ported the exact
+  `STATUS2_RECHARGE` branch: clear only recharge, zero its timer, invoke
+  `CancelMultiTurnMoves`, OR unable-to-use, and hand off
+  `BattleScript_MoveUsedMustRecharge` with effect 1. The untaken branch
+  preserves those fields with effect 0. Every path advances once.
+- **Next:** implement `CANCELER_FLINCH` only after its exact status,
+  multi-turn cancellation, script/message, marker, effect, and receipt
+  ownership is explicit. Do not loop phases or register opcode 0.
+- **Notes:** all four attacker ids, set/unset recharge, timer boundaries
+  **0/255**, unrelated status bits, already-zero/helper identities, marker,
+  script-owned `STRINGID_PKMNMUSTRECHARGE`, missing roles, invalid u8/PC
+  widths, determinism, and deep freezing are pinned. The source has no
+  `B_MSG_MUST_RECHARGE` chooser write. Focused **4 files / 39 tests**;
+  Tier-1 **133 files / 1734 tests**, build, OFF info (`9c89c741…`), and diff
+  check green. Code commits `d3a42c6` + repair `6b98729`; pixel diff N/A.
+
+---
 ## 394 — Gate-3 attack-canceler TRUANT source phase integrated and repaired
 
 - **State:** S10 Gate 3 remains open with **27** source-safe executable
@@ -52,25 +75,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   further discrepancy. Repair-focused **17/17**; Tier-1 **131 files / 1723
   tests**, build, OFF info (`9c89c741…`), and diff check green. Code commits
   `883b6e7` + `4aa41ce`; pixel diff N/A.
-
----
-## 392 — CANCELER_ASLEEP Uproar ownership repair audited
-
-- **State:** S10 Gate 3 remains open with **27** source-safe executable
-  opcodes. FLAGS and ASLEEP remain the only attack-canceler phases; opcode 0
-  is unregistered and no phase loop, FROZEN, RNG, or controller mutation was
-  added.
-- **Did:** added the selected target role required by the real call and made
-  Uproar receipts own all source side effects. `gBattleScripting.battler`
-  persists; `gBattlerTarget == 0xFF` is rejected and typed as unreachable
-  because `HandleAction_UseMove` selects it before installing the move script;
-  relation-based chooser writes are recorded as synchronous intermediates
-  overwritten by `B_MSG_WOKE_UP_UPROAR` before any handoff.
-- **Next:** implement `CANCELER_FROZEN` only after its exact move-effect, RNG,
-  status, controller, script, cursor, and receipt ownership is explicit. Do
-  not loop phases or register opcode 0.
-- **Notes:** all **4 Uproar sources × 4 reachable targets**, same/different
-  relations, first-source order, target identity, sentinel rejection, and
-  deep freezing are pinned. The zero-PP-Up OFF fixture is unchanged. Focused
-  **56/56**; Tier-1 **130 files / 1715 tests**, build, OFF info
-  (`9c89c741…`), and diff check green. Code commit `6b36535`; pixel diff N/A.

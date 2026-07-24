@@ -13993,3 +13993,25 @@ in git history immediately before corrective commits `d5ac217` and `9942a8d`.
   round ownership, or selection RNG.
 
 ---
+## 392 — CANCELER_ASLEEP Uproar ownership repair audited
+
+- **State:** S10 Gate 3 remains open with **27** source-safe executable
+  opcodes. FLAGS and ASLEEP remain the only attack-canceler phases; opcode 0
+  is unregistered and no phase loop, FROZEN, RNG, or controller mutation was
+  added.
+- **Did:** added the selected target role required by the real call and made
+  Uproar receipts own all source side effects. `gBattleScripting.battler`
+  persists; `gBattlerTarget == 0xFF` is rejected and typed as unreachable
+  because `HandleAction_UseMove` selects it before installing the move script;
+  relation-based chooser writes are recorded as synchronous intermediates
+  overwritten by `B_MSG_WOKE_UP_UPROAR` before any handoff.
+- **Next:** implement `CANCELER_FROZEN` only after its exact move-effect, RNG,
+  status, controller, script, cursor, and receipt ownership is explicit. Do
+  not loop phases or register opcode 0.
+- **Notes:** all **4 Uproar sources × 4 reachable targets**, same/different
+  relations, first-source order, target identity, sentinel rejection, and
+  deep freezing are pinned. The zero-PP-Up OFF fixture is unchanged. Focused
+  **56/56**; Tier-1 **130 files / 1715 tests**, build, OFF info
+  (`9c89c741…`), and diff check green. Code commit `6b36535`; pixel diff N/A.
+
+---
