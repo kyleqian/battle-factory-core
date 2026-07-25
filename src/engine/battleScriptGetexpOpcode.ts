@@ -16,9 +16,13 @@
  *
  * Like Cmd_moveend and Cmd_jumpifbyte, Cmd_getexp reads
  * GetBattlerForBattleScript's selector directly; only BS_TARGET/BS_ATTACKER
- * are modeled (matching Cmd_datahpupdate's own selector scope) -- BS_FAINTED
- * (ISSUES #43's still-open remainder) is the other named barrier, reachable
- * only from the Spikes-on-faint scripts, unrelated to this rung's WIN path.
+ * are modeled (matching Cmd_datahpupdate's own selector scope) -- a literal
+ * `getexp BS_FAINTED` operand (reachable only from the Spikes-on-faint
+ * scripts, unrelated to this rung's WIN path) is the other named barrier.
+ * BattleScript_GiveExp's own call site is `getexp BS_TARGET`, which the
+ * fainted-actions orchestration (battleScriptFaintedActionsOrchestration.ts)
+ * correctly reassigns to the currently-processing fainted battler before
+ * this runs (ISSUES #43, closed).
  *
  * Unlike Cmd_moveend's own do-while loop, Cmd_getexp's states are plain
  * switch cases with a trailing `break` -- state 0 does not touch
@@ -145,7 +149,8 @@ function createGetexpOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRule
         context,
         "Cmd_getexp's GetBattlerForBattleScript selector "
           + `(${context.instruction.operands[0]?.expression ?? "<missing>"}) is not BS_TARGET/BS_ATTACKER `
-          + "(BS_FAINTED needs the still-unbuilt currently-processing-fainted-battler role, ISSUES #43)",
+          + "(BattleScript_GiveExp's own call site is always `getexp BS_TARGET`, correctly reassigned to the "
+          + "fainted battler by the orchestration before this runs, battleScriptFaintedActionsOrchestration.ts)",
         3264,
       );
     }

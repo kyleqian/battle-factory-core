@@ -159,7 +159,7 @@ describe("production getexp (Cmd_getexp) dispatch -- Frontier short-circuit only
   });
 
   describe("(b) unsupported-branch barriers", () => {
-    it("halts on the BS_FAINTED selector (BattleScript_SpikesOnFaintedBattlerFainted; ISSUES #43's still-open remainder)", () => {
+    it("halts on a literal getexp BS_FAINTED operand (BattleScript_SpikesOnFaintedBattlerFainted; unrelated to BattleScript_GiveExp's own BS_TARGET call site)", () => {
       const faintedPc = findGetexpPc("BattleScript_SpikesOnFaintedBattlerFainted");
       const rc = context(1, { giveExpState: 0 });
       const { result } = stepAtProgramCounter(faintedPc, rc);

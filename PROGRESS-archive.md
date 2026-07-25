@@ -1,4 +1,85 @@
 ---
+## 437 — ISSUES #43 BS_TARGET fix + opcodes 26/27 (`dofaintanimation`/`cleareffectsonfaint`) — KO scenario's faint cutscene now runs to script completion
+
+- **State:** tree green at **182 files / 2180 tests** (+8), build green.
+  `createBattleScriptStatusRulesHandlers` now composes **48** opcodes (was
+  46): opcode 26 `B_SCR_OP_DOFAINTANIMATION`/`Cmd_dofaintanimation` (in
+  `battleScriptSourceCommands.ts`, reusing the existing
+  `emitSelectedBattlerControllerEvent` pattern like `playfaintcry`, new event
+  kind `faint-animation`) and opcode 27
+  `B_SCR_OP_CLEAREFFECTSONFAINT`/`Cmd_cleareffectsonfaint` (new handler in
+  `battleScriptHitChainOpcode.ts`, alongside `tryfaintmon`). The KO scenario's
+  real-seed integration test (`battleScriptHitChainOpcode.test.ts` RUNG 4
+  block) now walks the **full** faint cutscene — `playfaintcry` → `pause` (64
+  ticks) → `dofaintanimation` → `cleareffectsonfaint` → `printstring` →
+  `return` → `moveendall` (its own controller-delegated states 9/10
+  acknowledged, matching the RUNG 1 pattern) — all the way to the script's own
+  `end` (`haltReason.kind: "terminal"`), `rng.calls` still exactly **4**
+  throughout, with the pinned 204-damage/HP-0/hpDealt-90 assertions unchanged.
+- **Did:** `resolveRulesBattlerForBattleScript` (`battleScriptRulesContext.ts`)
+  gained the `BS_TARGET` arm — `battle_util.c:694-734`'s unconditional `case
+  BS_TARGET: ret = gBattlerTarget;`, mapped to the already-populated
+  `selectorRoles.target` (additive, no redesign, per ISSUES #43's own
+  diagnosis). `Cmd_cleareffectsonfaint` is source-complete for every
+  battler-scoped field this engine already models: the ARENA-gated `status1`
+  clear (computed off the real `battleTypeFlags` word, not a barrier — always
+  true here since `hp==0` is guaranteed on this path), `status2`/`status3`
+  zero, `statStages` reset to `DEFAULT_STAT_STAGE`, the modeled
+  DisableStruct/ProtectStruct subset (`rolloutTimer`/`furyCutterCounter`/
+  `tauntTimer`/`rechargeTimer`/`truantCounter`/`disabledMove`/`substituteHP`/
+  `bounceMove`/`confusionSelfDmg`/`prlzImmobility`/`loveImmobility`/
+  `stealMove`/`endured`/`helpingHand`/`chargingTurn`/`targetNotAffected`/
+  `flag2Unknown`/`protected`/`usedDisabledMove`/`usedTauntedMove`/
+  `usedImprisonedMove`/`flinchImmobility`), the cross-battler
+  `STATUS2_INFATUATED_WITH(target)` clear (fully computable — the bit itself
+  encodes the relationship, `gBitTable[battler]<<16`, no external field
+  needed), and the target's own `moveHistory`/`choicedMove`/`lastTakenMove*`
+  slots. Two new named **(b) barriers** (18 → 21 in this module, ratchet pin
+  raised deliberately): `STATUS2_ESCAPE_PREVENTION` and `STATUS2_WRAPPED`
+  cross-battler clears each need `gDisableStructs[].battlerPreventingEscape`/
+  `gBattleStruct->wrappedBy` identity this engine doesn't model, so each
+  halts only when its own bit is actually set on another battler (never true
+  for a plain damaging-move KO — unreached on this rung's own scenario,
+  reachability proven by direct construction in the new test). A third
+  barrier reuses `resolveHitChainBattlerOperand`'s existing "not
+  BS_TARGET/BS_ATTACKER" fallback for the Battle-Arena-only
+  `BS_OPPONENT1`/`BS_PLAYER1` call sites (unrelated to Factory). The remaining
+  FaintClearSetData sub-writes (`transformedMonPersonality`, `encoredMove`*,
+  `protectUses`, `stockpileCounter`, `disableTimer`*, `perishSongTimer`*,
+  `chargeTimer`*, `battlerWithSureHit`, `isFirstTurn`,
+  `truantSwitchInHack`, `mimickedMoves`, ProtectStruct's
+  `noValidMoves`/`fleeType`/`physicalDmg`/`specialDmg`/`physicalBattlerId`/
+  `specialBattlerId`, `gActionSelectionCursor`/`gMoveSelectionCursor`,
+  `gBattleResources->flags->flags`, the species-base `types` reassignment —
+  this engine has no code path that ever moves `types` away from base, so
+  leaving it untouched is exactly equivalent — and
+  `ClearBattlerMoveHistory`/`ClearBattlerAbilityHistory`'s separate AI-history
+  structure) have no reader anywhere in this engine's currently modeled
+  scope and are not tracked, matching this file's existing
+  datahpupdate/tryfaintmon precedent for untracked non-branching state
+  (documented in the handler's own comment, not silently dropped). 8 new
+  Tier-1 tests (registration + field-reset dispatch + infatuation-clear +
+  three barrier-reachability tests for `cleareffectsonfaint`, registration +
+  dispatch for `dofaintanimation`), plus the `resolveRulesBattlerForBattleScript`
+  unit test extended with a positive `BS_TARGET` mapping case.
+- **Next:** step (iv) — close the loop: one legal Level-50 Factory battle
+  runs to a real terminal outcome through `submitBattleDecision`, and
+  `roundController.ts` consumes that outcome instead of a fixture. Needs
+  ISSUES #42 (`checkteamslost`/party-HP modeling) solved first, plus the
+  `HandleFaintedMonActions` C-side orchestration-loop equivalent
+  (`docs/round-controller-outcome-seam.md` has the five-piece plan, Option A
+  decided). ISSUES #43's remainder (`BS_FAINTED`, needed only by
+  `getexp`/`openpartyscreen`/`switchhandleorder`) stays open, trimmed to that
+  scope — not on this rung's path and not silently closed.
+- **Notes:** no presentation/render/`battleScene` edits; no oracle traces
+  (Tier-1 only, per the banked ground truth); no new production imports of
+  canonical recordings. `moveendall` expands to `setbyte sMOVEEND_STATE, 0` +
+  `moveend 0, 0` (two instructions, `asm/macros/battle_script.inc:417-420`) —
+  tripped up the integration test once (moveend loop started one instruction
+  early); fixed by stepping the `setbyte` half first, matching the RUNG 1
+  test's own pattern.
+
+---
 ## 436 — S10 step (iii): opcode 73 (`moveend`) registered — hit chain now runs to script completion
 
 - **State:** tree green at **181 files / 2166 tests** (+31), build green.
