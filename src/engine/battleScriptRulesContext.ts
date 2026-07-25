@@ -56,6 +56,7 @@ export const BATTLE_SCRIPT_MOVE_FLAG_MIRROR_MOVE_AFFECTED = 1 << 4;
 export const BATTLE_SCRIPT_EFFECT_BATON_PASS = 127;
 export const BATTLE_SCRIPT_BATTLE_TYPE_DOUBLE = 1 << 0;
 export const BATTLE_SCRIPT_BATTLE_TYPE_TRAINER = 1 << 3;
+export const BATTLE_SCRIPT_BATTLE_TYPE_ARENA = 1 << 18;
 export const BATTLE_SCRIPT_BATTLE_TYPE_FACTORY = 1 << 19;
 export const BATTLE_SCRIPT_HITMARKER_NO_ATTACKSTRING = 1 << 9;
 export const BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE = 1 << 19;
@@ -1533,13 +1534,22 @@ function decodeSupportedBattlerSelector(operand: BattleScriptOperand): number | 
 
 /**
  * Source-exact GetBattlerForBattleScript mapping for the selector roles proven
- * reachable by statusanimation/status2animation/chosenstatusanimation.
- * Other source cases remain unavailable until their own context is explicit.
+ * reachable by statusanimation/status2animation/chosenstatusanimation, plus
+ * BS_TARGET (battle_util.c:694-734: `case BS_TARGET: ret = gBattlerTarget;`
+ * unconditionally -- ISSUES #43). `gBattlerTarget` is unchanged from whatever
+ * the enclosing hit chain set it to, so the already-populated
+ * `selectorRoles.target` is the correct value at any point this selector is
+ * read. Other source cases (e.g. BS_FAINTED, a distinct role reassigned by
+ * `HandleFaintedMonActions`, not an alias of `target`) remain unavailable
+ * until their own context is explicit.
  */
 export const resolveRulesBattlerForBattleScript: NonNullable<
   BattleScriptSourceCommandPorts<BattleScriptRulesContext>["resolveBattlerForBattleScript"]
 > = (context, selectorOperand) => {
   const selector = decodeSupportedBattlerSelector(selectorOperand);
+  if (selector === BATTLE_SCRIPT_BATTLER_SELECTORS.BS_TARGET) {
+    return context.state.rulesContext.selectorRoles.target;
+  }
   if (selector === BATTLE_SCRIPT_BATTLER_SELECTORS.BS_ATTACKER) {
     return context.state.rulesContext.selectorRoles.attacker;
   }

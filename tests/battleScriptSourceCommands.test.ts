@@ -339,13 +339,14 @@ describe("source-mapped Battle Script scheduler commands", () => {
     }));
   });
 
-  it("composes exactly the eighteen source commands with the five existing controls", () => {
+  it("composes exactly the nineteen source commands with the five existing controls", () => {
     expect(Object.keys(sourceHandlers(true)).map(Number).sort((left, right) => left - right)).toEqual([
       10,
       16,
       17,
       18,
       20,
+      26,
       57,
       58,
       83,
@@ -366,6 +367,7 @@ describe("source-mapped Battle Script scheduler commands", () => {
       17,
       18,
       20,
+      26,
       40,
       57,
       58,

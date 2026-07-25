@@ -383,7 +383,7 @@ describe("source-exact B_SCR_OP_PRINTSELECTIONSTRING", () => {
     expect(makeResult()).toEqual(makeResult());
     const sourceHandlers = handlers(() => null);
     expect(Object.keys(sourceHandlers).map(Number).sort((a, b) => a - b)).toEqual([
-      10, 16, 17, 18, 20, 57, 58, 83, 84, 85, 86, 98, 100, 101, 102, 111, 131, 248,
+      10, 16, 17, 18, 20, 26, 57, 58, 83, 84, 85, 86, 98, 100, 101, 102, 111, 131, 248,
     ]);
     expect(sourceHandlers[17]).toBeDefined();
   });

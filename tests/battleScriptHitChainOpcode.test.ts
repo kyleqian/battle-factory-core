@@ -1148,6 +1148,112 @@ describe("production tryfaintmon (Cmd_tryfaintmon) dispatch", () => {
   });
 });
 
+describe("production dofaintanimation (Cmd_dofaintanimation) dispatch", () => {
+  it("registers B_SCR_OP_DOFAINTANIMATION", () => {
+    expect(program.instructions.find((i) => i.opcodeName === "B_SCR_OP_DOFAINTANIMATION")).toBeDefined();
+  });
+
+  it("BS_TARGET (BattleScript_FaintTarget shape): emits faint-animation for the target battler, rulesContext untouched", () => {
+    const pc = program.instructions.find((i) =>
+      i.opcodeName === "B_SCR_OP_DOFAINTANIMATION" && i.operands[0]?.expression === "BS_TARGET"
+    )!.programCounter;
+    const rc = context(0, {}, {}, { hp: 0 });
+    const { result } = stepAtProgramCounter(pc, rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.events).toEqual([
+      expect.objectContaining({ kind: "faint-animation", battler: 1 }),
+    ]);
+    expect(result.state.rulesContext).toBe(rc);
+  });
+});
+
+describe("production cleareffectsonfaint (Cmd_cleareffectsonfaint) dispatch", () => {
+  const cleareffectsonfaintTargetPc = program.instructions.find((i) =>
+    i.opcodeName === "B_SCR_OP_CLEAREFFECTSONFAINT" && i.operands[0]?.expression === "BS_TARGET"
+  )!.programCounter;
+
+  it("registers B_SCR_OP_CLEAREFFECTSONFAINT", () => {
+    expect(program.instructions.find((i) => i.opcodeName === "B_SCR_OP_CLEAREFFECTSONFAINT")).toBeDefined();
+  });
+
+  it(
+    "BS_TARGET (KO scenario shape): zeroes status1/status2/status3/statStages and the modeled "
+      + "DisableStruct/ProtectStruct fields, emits set-battler-status-data, clears the target's own "
+      + "move-history slot",
+    () => {
+      const rc = context(
+        0,
+        {},
+        {},
+        {
+          hp: 0,
+          status1: 0x40,
+          status2: 0x1234,
+          status3: 0x8,
+          statStages: [2, 3, 4, 5, 6, 7, 8, 9],
+          rolloutTimer: 3,
+          furyCutterCounter: 2,
+          tauntTimer: 1,
+          rechargeTimer: 1,
+          disabledMove: 12,
+          protected: 1,
+        },
+      );
+      const { result } = stepAtProgramCounter(cleareffectsonfaintTargetPc, rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      const target = result.state.rulesContext.battlers[1]!;
+      expect(target.status1).toBe(0);
+      expect(target.status2).toBe(0);
+      expect(target.status3).toBe(0);
+      expect(target.statStages).toEqual([6, 6, 6, 6, 6, 6, 6, 6]);
+      expect(target.rolloutTimer).toBe(0);
+      expect(target.furyCutterCounter).toBe(0);
+      expect(target.tauntTimer).toBe(0);
+      expect(target.rechargeTimer).toBe(0);
+      expect(target.disabledMove).toBe(0);
+      expect(target.protected).toBe(0);
+      expect(result.state.rulesContext.moveHistory.lastHitBy[1]).toBe(0xff);
+      expect(result.state.events).toEqual([
+        expect.objectContaining({ kind: "set-battler-status-data", battler: 1, status1: 0 }),
+      ]);
+    },
+  );
+
+  it("clears STATUS2_INFATUATED_WITH(target) on every other battler while leaving unrelated status2 bits alone", () => {
+    const infatuatedWithTarget = (1 << (16 + 1)) >>> 0; // gBitTable[1] << 16
+    const rc = context(0, { status2: infatuatedWithTarget | 0x1 }, {}, { hp: 0 });
+    const { result } = stepAtProgramCounter(cleareffectsonfaintTargetPc, rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.rulesContext.battlers[0]!.status2).toBe(0x1);
+  });
+
+  describe("(b) unsupported-branch barriers", () => {
+    it("halts when another battler has STATUS2_ESCAPE_PREVENTION set (gDisableStructs[].battlerPreventingEscape identity unmodeled)", () => {
+      const rc = context(0, { status2: 1 << 26 }, {}, { hp: 0 });
+      const { result } = stepAtProgramCounter(cleareffectsonfaintTargetPc, rc);
+      expect(result.kind).toBe("halted");
+      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 3277 });
+    });
+
+    it("halts when another battler has a STATUS2_WRAPPED bit set (gBattleStruct->wrappedBy identity unmodeled)", () => {
+      const rc = context(0, { status2: 1 << 13 }, {}, { hp: 0 });
+      const { result } = stepAtProgramCounter(cleareffectsonfaintTargetPc, rc);
+      expect(result.kind).toBe("halted");
+      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 3281 });
+    });
+
+    it("halts on an unsupported selector spelling (Battle Arena's BS_OPPONENT1), not BS_TARGET/BS_ATTACKER", () => {
+      const pc = program.instructions.find((i) =>
+        i.opcodeName === "B_SCR_OP_CLEAREFFECTSONFAINT" && i.operands[0]?.expression === "BS_OPPONENT1"
+      )!.programCounter;
+      const rc = context(0, {}, {}, { hp: 0 });
+      const { result } = stepAtProgramCounter(pc, rc);
+      expect(result.kind).toBe("halted");
+      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 3064 });
+    });
+  });
+});
+
 describe("RUNG 4 integration: opcode 0 -> ... -> seteffectwithchance -> tryfaintmon -> moveend-to-end / playfaintcry boundary", () => {
   it("RUNG 1 hit turn (Tackle, seed 1): walks the full sixteen-opcode hit chain, no-faint tryfaintmon pass-through, halts at moveend (opcode 73)", () => {
     // attack/defense nonzero (unlike the default 0/0 fixture) so damagecalc produces a real,
@@ -1228,7 +1334,9 @@ describe("RUNG 4 integration: opcode 0 -> ... -> seteffectwithchance -> tryfaint
     "full staged hit turn on the KO scenario's real ROM seed (919694434): reproduces the pinned "
       + "142 -> 213 -> 213 -> 204 damage chain, the exact 4-roll ledger (accuracycheck, critcalc, "
       + "adjustnormaldamage, seteffectwithchance), the killing hit's HP -> 0, tryfaintmon's faint "
-      + "branch into BattleScript_FaintTarget, and blocks at playfaintcry's BS_TARGET selector (ISSUES #43)",
+      + "branch into BattleScript_FaintTarget, and now runs the FULL faint cutscene (playfaintcry, "
+      + "pause, dofaintanimation, cleareffectsonfaint, printstring, return) back through moveendall "
+      + "to the script's own end, with rng.calls still exactly 4 throughout (ISSUES #43 fixed)",
     () => {
       const rc = context(
         0,
@@ -1236,12 +1344,16 @@ describe("RUNG 4 integration: opcode 0 -> ... -> seteffectwithchance -> tryfaint
         { currentMove: STRENGTH },
         { defense: 50, types: ["TYPE_GRASS", "TYPE_GRASS"], hp: 90 },
       );
+      const faintPorts = externalPorts({
+        resolveHalfwordOperand: (_context, operand) =>
+          operand.expression === "B_WAIT_TIME_LONG" ? 64 : null,
+      });
       const execution = createBattleScriptStatusRulesExecution(
         program,
         "BattleScript_HitFromAtkCanceler",
         rc,
         919694434, // the KO scenario's actual frame-0 gRngValue (docs/hit-chain-ground-truth.md)
-        externalPorts(),
+        faintPorts,
       );
       const handlers = execution.handlers;
       let result = stepBattleScriptMachine(program, execution.state, handlers); // opcode 0
@@ -1286,19 +1398,91 @@ describe("RUNG 4 integration: opcode 0 -> ... -> seteffectwithchance -> tryfaint
       expect(result.state.callStack.length).toBe(1);
       expect(result.state.rng.calls).toBe(4); // tryfaintmon's faint branch consumes no RNG
 
-      // playfaintcry BS_TARGET: already generically registered (battleScriptSourceCommands.ts), but
-      // resolveRulesBattlerForBattleScript only supports BS_ATTACKER/BS_EFFECT_BATTLER (its own documented
-      // scope) -- not BS_TARGET -- so this blocks rather than halts. That gap predates this rung (it's
-      // the generic battler-selector resolver, not tryfaintmon) and registering it is out of RUNG 4's
-      // two-opcode scope; this is simply where the machine honestly stops today.
-      const blocked = stepBattleScriptMachine(program, result.state, handlers);
-      expect(blocked.kind).toBe("blocked");
-      if (blocked.kind !== "blocked") throw new Error("expected blocked");
-      expect(blocked.reason).toMatchObject({
-        kind: "source-context-unavailable",
-        port: "resolve-battler-for-battle-script",
-        operandExpression: "BS_TARGET",
-      });
+      // playfaintcry BS_TARGET: resolveRulesBattlerForBattleScript now maps BS_TARGET to the
+      // hit chain's own selectorRoles.target (ISSUES #43 fix, battle_util.c:694-734's
+      // unconditional `case BS_TARGET: ret = gBattlerTarget;`), so this genuinely advances.
+      result = stepBattleScriptMachine(program, result.state, handlers); // playfaintcry
+      if (result.kind !== "advanced") throw new Error(`playfaintcry did not advance: ${result.kind}`);
+      expect(result.state.events.at(-1)).toEqual(
+        expect.objectContaining({ kind: "play-faint-cry", battler: 1 }),
+      );
+      expect(result.state.rng.calls).toBe(4);
+
+      // pause B_WAIT_TIME_LONG (64): 63 scheduler-only ticks at the same PC, then advances.
+      let state = result.state;
+      for (let tick = 0; tick < 64; tick += 1) {
+        const stepped = stepBattleScriptMachine(program, state, handlers);
+        const expectedKind = tick < 63 ? "scheduler-progressed" : "advanced";
+        if (stepped.kind !== expectedKind) {
+          throw new Error(`pause tick ${tick} was ${stepped.kind}, expected ${expectedKind}`);
+        }
+        state = stepped.state;
+      }
+      expect(state.rng.calls).toBe(4);
+
+      let stepped = stepBattleScriptMachine(program, state, handlers); // dofaintanimation
+      if (stepped.kind !== "advanced") throw new Error(`dofaintanimation did not advance: ${stepped.kind}`);
+      expect(stepped.state.events.at(-1)).toEqual(
+        expect.objectContaining({ kind: "faint-animation", battler: 1 }),
+      );
+
+      stepped = stepBattleScriptMachine(program, stepped.state, handlers); // cleareffectsonfaint
+      if (stepped.kind !== "advanced") throw new Error(`cleareffectsonfaint did not advance: ${stepped.kind}`);
+      expect(stepped.state.events.at(-1)).toEqual(
+        expect.objectContaining({ kind: "set-battler-status-data", battler: 1, status1: 0 }),
+      );
+      const clearedTarget = stepped.state.rulesContext.battlers[1]!;
+      expect(clearedTarget.status1).toBe(0);
+      expect(clearedTarget.status2).toBe(0);
+      expect(clearedTarget.status3).toBe(0);
+      expect(clearedTarget.statStages).toEqual([6, 6, 6, 6, 6, 6, 6, 6]);
+      expect(stepped.state.rulesContext.moveHistory.lastHitBy[1]).toBe(0xff);
+      expect(stepped.state.rng.calls).toBe(4); // FaintClearSetData draws no RNG (ground truth)
+
+      stepped = stepBattleScriptMachine(program, stepped.state, handlers); // printstring STRINGID_TARGETFAINTED
+      if (stepped.kind !== "advanced") throw new Error(`printstring did not advance: ${stepped.kind}`);
+      expect(stepped.state.events.at(-1)).toEqual(
+        expect.objectContaining({ kind: "message", messageId: "STRINGID_TARGETFAINTED" }),
+      );
+
+      stepped = stepBattleScriptMachine(program, stepped.state, handlers); // return
+      if (stepped.kind !== "advanced") throw new Error(`return did not advance: ${stepped.kind}`);
+      expect(stepped.state.callStack.length).toBe(0); // popped back out of BattleScript_FaintTarget
+      expect(stepped.state.programCounter).toBe(labelPc("BattleScript_MoveEnd")); // moveendall's setbyte half
+
+      stepped = stepBattleScriptMachine(program, stepped.state, handlers); // setbyte sMOVEEND_STATE, 0
+      if (stepped.kind !== "advanced") throw new Error(`setbyte did not advance: ${stepped.kind}`);
+      expect(stepped.state.rulesContext.moveendState).toBe(0);
+
+      // Cmd_moveend's do-while loop pauses (same PC, controller-return) at the ordinary
+      // attacker/target sprite-visibility states even though neither battler is actually
+      // semi-invulnerable, matching the RUNG 1 pattern above; a real driver acknowledges and
+      // resumes the same instruction each time.
+      const moveendPc = stepped.state.programCounter;
+      let moveendState = ackAllPending(stepped.state);
+      let moveendStepped = stepBattleScriptMachine(program, moveendState, handlers);
+      let moveendResumptions = 0;
+      while (moveendStepped.kind === "advanced" && moveendStepped.state.programCounter === moveendPc) {
+        moveendResumptions += 1;
+        if (moveendResumptions > 17) throw new Error("Cmd_moveend did not converge on MOVEEND_COUNT");
+        moveendState = ackAllPending(moveendStepped.state);
+        moveendStepped = stepBattleScriptMachine(program, moveendState, handlers);
+      }
+      if (moveendStepped.kind !== "advanced") throw new Error(`moveend did not complete: ${moveendStepped.kind}`);
+      expect(moveendStepped.state.rulesContext.moveendState).toBe(17); // MOVEEND_COUNT
+      expect(moveendStepped.state.rng.calls).toBe(4); // moveend itself draws no RNG on this path
+      expect(moveendStepped.state.programCounter).toBe(moveendPc + 1);
+
+      const finished = stepBattleScriptMachine(program, moveendStepped.state, handlers); // end
+      expect(finished.kind).toBe("halted");
+      if (finished.kind !== "halted") throw new Error("expected halted");
+      expect(finished.state.haltReason).toMatchObject({ kind: "terminal", opcodeName: "B_SCR_OP_END" });
+      expect(finished.state.rng.calls).toBe(4); // the whole faint window draws zero Random() calls
+      // pinned damage/HP assertions from earlier in this test are unchanged: battleMoveDamage 204,
+      // target hp 0, hpDealt 90 -- this handoff only advances the script, it never revisits damage.
+      expect(finished.state.rulesContext.battleMoveDamage).toBe(204);
+      expect(finished.state.rulesContext.battlers[1]!.hp).toBe(0);
+      expect(finished.state.rulesContext.hpDealt).toBe(90);
     },
   );
 

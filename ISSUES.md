@@ -5,29 +5,40 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #43 — `resolveRulesBattlerForBattleScript` has no BS_TARGET/BS_FAINTED case
+## #43 — `resolveRulesBattlerForBattleScript` has no BS_FAINTED case
 
 **Symptom:** any generic source-command opcode selected via the shared
-`resolveBattlerForBattleScript` port (`playfaintcry`, `hidepartystatussummary`,
-`makevisible`, `trainerslidein`, ...) blocks (`source-context-unavailable`,
+`resolveBattlerForBattleScript` port blocks (`source-context-unavailable`,
 port `resolve-battler-for-battle-script`) the instant its operand is
-`BS_TARGET` or `BS_FAINTED`, even though the opcode itself is "registered."
+`BS_FAINTED`, even though the opcode itself is "registered." (The `BS_TARGET`
+half of this issue was fixed 2026-07-24: `resolveRulesBattlerForBattleScript`
+now maps it to `selectorRoles.target`, matching `GetBattlerForBattleScript`'s
+unconditional `case BS_TARGET: ret = gBattlerTarget;`, `battle_util.c:694-734`.
+The KO scenario's faint cutscene — `playfaintcry`/`dofaintanimation`/
+`cleareffectsonfaint`, all `BS_TARGET` in `BattleScript_FaintTarget` — now
+runs to the script's own `end`.)
 
-**Confirmed** (2026-07-24, S10 step (ii) RUNG 4): driving the KO scenario's
-real ROM seed through the full hit chain into `tryfaintmon`'s faint branch
-(`BattleScript_FaintTarget`) blocks on the very next instruction,
-`playfaintcry BS_TARGET` — `resolveRulesBattlerForBattleScript`
-(`battleScriptRulesContext.ts:1538-1549`) only maps `BS_ATTACKER` and
-`BS_EFFECT_BATTLER`, per its own doc comment scoping it to
-statusanimation/status2animation/chosenstatusanimation's reachable selectors.
-`rulesContext.selectorRoles.target` already exists and is populated — the
-fix is additive (one more `if` arm), not a redesign.
+**Still open:** `BS_FAINTED` is a *different*, currently-nonexistent role, not
+just a missing `if` arm — confirmed from source and banked in
+`docs/faint-outcome-ground-truth.md` §4. `GetBattlerForBattleScript` maps
+`BS_FAINTED -> gBattlerFainted` (`battle_util.c:713`), and `gBattlerFainted`
+is reassigned by `HandleFaintedMonActions` (`gBattlerFainted = gBattlerTarget
+= gBattleStruct->faintedActionsBattlerId`, `battle_util.c:1914`) to whichever
+battler that C-side orchestration loop is currently processing — which can
+diverge from the original hit chain's `target` once more than one battler has
+fainted in the same action (not reachable in singles, but real for
+doubles/multi). `BattleScript_GiveExp`'s own `getexp BS_TARGET` operand is
+ALSO stale-`gBattlerTarget` by the time it runs (same reassignment already
+happened), so reusing the hit chain's `selectorRoles.target` for `getexp`
+would be wrong in general even though it coincides for a single-fault-per-action
+scenario. `openpartyscreen BS_FAINTED`/`switchhandleorder BS_FAINTED` (the
+non-terminal next-mon path) also depend on this same new role.
 
-**Leads:** blocks the KO scenario's faint animation cutscene
-(`BattleScript_FaintAttacker`/`FaintTarget`'s `playfaintcry`/`dofaintanimation`/
-`cleareffectsonfaint` run) from ever advancing past its first instruction.
-Whoever registers `dofaintanimation`/`cleareffectsonfaint` (a future rung)
-will need this fixed first, or will hit the same block immediately.
+**Leads:** needed only by `getexp`/`openpartyscreen`/`switchhandleorder`
+(`getexp` is Frontier-dead per the doc; the rest are step (iv)'s
+`HandleFaintedMonActions` orchestration territory, not this rung's scope).
+The source-faithful fix binds a real "currently-processing-fainted-battler"
+role once that orchestration loop exists — not a second alias onto `target`.
 
 ## #42 — `Cmd_checkteamslost`/`gBattleOutcome` needs party-HP modeling this engine doesn't have
 

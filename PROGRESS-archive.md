@@ -1,4 +1,44 @@
 ---
+## 434 — [BETWEEN-SESSION HARDENING, user-directed] two ratchets + oracle freshness gate
+
+- **State:** tree green at **178 files / 2119 tests**, build green. No code
+  behaviour changed — this entry adds enforcement for rules that were prose,
+  and one startup check. Session 433's work independently re-verified:
+  `verify-hit-chain-ground-truth.ts` rerun against the live oracle, **PASS,
+  0 failing checks**; the `orbyte` correction confirmed against
+  `data/battle_scripts_1.s:244/271/1610/2153` (session 433 was right, the
+  pre-reset ROADMAP was wrong).
+- **Did:** (1) `tests/executableFrontierRatchet.test.ts` — pins the exact
+  allowlist of production canonical-recording imports (**four**, across
+  `battleScene.ts` and `factorySwapPresentation.ts`) and fails on any
+  addition; a retired entry must be *deleted* from the allowlist, so wins
+  ratchet down and cannot silently re-admit. Also pins per-module
+  `unsupported-branch` barrier counts (13 hit-chain, 5 canceler), rejects
+  barriers in unpinned modules, and requires each barrier-bearing module's
+  test file to assert the halt kind. Both ratchets were negative-tested (each
+  was made to fail on a probe file, then reverted) — a green ratchet that
+  cannot go red is worthless. (2) `tools/check-oracle-freshness.sh` — the
+  oracle exposes no version endpoint, so this compares each listening
+  service's process start time against harness HEAD's commit time; exit 1 =
+  stale, restart before staging. Wired into SUPERVISOR.md's Orient step.
+  (3) ROADMAP S10 §3 restated as a **hard ordering constraint** (after step
+  (iv), the next battle-lane brief *is* the presentation-seam checkpoint) and
+  §4 now points at its enforcing test; SUPERVISOR.md and AGENTS.md carry the
+  same two rules where workers actually read them.
+- **Next:** unchanged from 433 — main: RUNG 4 (`seteffectwithchance`,
+  `tryfaintmon`), then step (iii) opcode 73, then step (iv). **Then the
+  presentation-seam checkpoint, not opcode 44.** Animation: MIST_BALL
+  remainder in cost order (`AnimThrowMistBall` next) or the next ranked
+  Level-50 track.
+- **Notes:** the freshness gate exists because session 433 lost time to a
+  service that predated the `overrides.parties` builder it was being asked to
+  serve — banked as "not yet live" in `docs/hit-chain-ground-truth.md:40`,
+  corrected at `:259` after a mid-session restart. The barrier pin exists
+  because the (a)/(b) registration policy's failure mode is barrier creep:
+  an opcode that is mostly barrier passes the executable-frontier gate on
+  paper while executing nothing.
+
+---
 ## 433 — [SUPERVISOR WIND-DOWN 2026-07-24 ~17:30] session summary
 
 - **State:** tree committed and green at **177 files / 2113 tests**, build

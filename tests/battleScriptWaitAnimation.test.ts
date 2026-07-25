@@ -254,7 +254,7 @@ describe("source-exact WAITANIMATION controller-idle barrier", () => {
     expect(replay()).toEqual(replay());
 
     expect(Object.keys(sourceHandlers(true)).map(Number).sort((a, b) => a - b)).toEqual([
-      10, 16, 17, 18, 20, 57, 58, 83, 84, 85, 86, 98, 100, 101, 102, 111, 131, 248,
+      10, 16, 17, 18, 20, 26, 57, 58, 83, 84, 85, 86, 98, 100, 101, 102, 111, 131, 248,
     ]);
     const composed = Object.freeze({
       ...createBattleScriptControlHandlers<FixtureRules>(program),
@@ -266,7 +266,7 @@ describe("source-exact WAITANIMATION controller-idle barrier", () => {
       ...createBattleScriptMoveValuesCommandHandlers<FixtureRules>(program),
     });
     expect(Object.keys(composed).map(Number).sort((a, b) => a - b)).toEqual([
-      10, 16, 17, 18, 20, 37, 38, 39, 40, 57, 58, 60, 61, 62, 65, 83, 84, 85,
+      10, 16, 17, 18, 20, 26, 37, 38, 39, 40, 57, 58, 60, 61, 62, 65, 83, 84, 85,
       86, 98, 100, 101, 102, 111, 131, 141, 248,
     ]);
   });

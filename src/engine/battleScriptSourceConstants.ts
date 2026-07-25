@@ -12,6 +12,7 @@
  * consume numeric source data; they do not dispatch on move names.
  */
 export const BATTLE_SCRIPT_BATTLER_SELECTORS = Object.freeze({
+  BS_TARGET: 0,
   BS_ATTACKER: 1,
   BS_EFFECT_BATTLER: 2,
 } as const);

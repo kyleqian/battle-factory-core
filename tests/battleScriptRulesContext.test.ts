@@ -260,11 +260,18 @@ describe("source-shaped Battle Script rules context", () => {
   });
 
   it("maps the supported named and numeric GetBattlerForBattleScript selectors", () => {
-    const context = contextAt(primaryInstruction);
+    const context = contextAt(
+      primaryInstruction,
+      rules({ selectorRoles: { attacker: 3, effectBattler: 1, target: 2 } }),
+    );
     expect(BATTLE_SCRIPT_BATTLER_SELECTORS).toEqual({
+      BS_TARGET: 0,
       BS_ATTACKER: 1,
       BS_EFFECT_BATTLER: 2,
     });
+    expect(resolveRulesBattlerForBattleScript(context, selector("BS_TARGET"))).toBe(2);
+    expect(resolveRulesBattlerForBattleScript(context, selector("0"))).toBe(2);
+    expect(resolveRulesBattlerForBattleScript(context, selector("0x0"))).toBe(2);
     expect(resolveRulesBattlerForBattleScript(context, selector("BS_ATTACKER"))).toBe(3);
     expect(resolveRulesBattlerForBattleScript(context, selector("1"))).toBe(3);
     expect(resolveRulesBattlerForBattleScript(context, selector("0x1"))).toBe(3);
@@ -274,9 +281,10 @@ describe("source-shaped Battle Script rules context", () => {
 
   it("returns unavailable for missing supported roles and every unsupported/invalid selector", () => {
     const missing = contextAt(primaryInstruction, rules({ selectorRoles: {} }));
+    expect(resolveRulesBattlerForBattleScript(missing, selector("BS_TARGET"))).toBeNull();
     expect(resolveRulesBattlerForBattleScript(missing, selector("BS_ATTACKER"))).toBeNull();
     expect(resolveRulesBattlerForBattleScript(missing, selector("BS_EFFECT_BATTLER"))).toBeNull();
-    for (const expression of ["BS_TARGET", "0", "7", "255", "-1", "bogus"]) {
+    for (const expression of ["7", "255", "-1", "bogus"]) {
       expect(resolveRulesBattlerForBattleScript(missing, selector(expression))).toBeNull();
     }
   });
@@ -412,10 +420,10 @@ describe("source-shaped Battle Script rules context", () => {
 });
 
 describe("production status rules handler and execution seam", () => {
-  it("composes all 46 source-safe controls, source, multi-hit, cleanup, SETBYTE, attackcanceler, hit-chain, and move-end handlers once", () => {
+  it("composes all 48 source-safe controls, source, multi-hit, cleanup, SETBYTE, attackcanceler, hit-chain, and move-end handlers once", () => {
     const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts());
     expect(Object.keys(handlers).map(Number).sort((a, b) => a - b)).toEqual([
-      0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 20, 21, 25, 37, 38, 39, 40,
+      0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 20, 21, 25, 26, 27, 37, 38, 39, 40,
       46, 57, 58, 60, 61, 62, 65, 73, 83, 84, 85, 86, 92, 98, 100, 101, 102, 111, 131, 141, 248,
     ]);
   });

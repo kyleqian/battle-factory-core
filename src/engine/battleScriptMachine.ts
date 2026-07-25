@@ -602,6 +602,7 @@ function freezeEventPayload(
     case "play-se":
     case "play-fanfare":
     case "play-faint-cry":
+    case "faint-animation":
     case "hide-party-status-summary":
     case "set-battler-sprite-visibility":
     case "set-battler-status-data":

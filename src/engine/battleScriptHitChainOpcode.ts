@@ -27,6 +27,7 @@ import type {
   BattleScriptMessagePreparationPort,
 } from "./battleScriptSourceCommands.ts";
 import {
+  BATTLE_SCRIPT_BATTLE_TYPE_ARENA,
   BATTLE_SCRIPT_HITMARKER_ATTACKSTRING_PRINTED,
   BATTLE_SCRIPT_HITMARKER_NO_ATTACKSTRING,
   BATTLE_SCRIPT_ITEM_ENIGMA_BERRY,
@@ -43,6 +44,7 @@ import {
   type BattleScriptRulesBattlerState,
   type BattleScriptRulesBattlers,
   type BattleScriptRulesContext,
+  type BattleScriptStatStages,
 } from "./battleScriptRulesContext.ts";
 import {
   BATTLE_SCRIPT_BATTLE_TYPE_FIRST_BATTLE,
@@ -1685,6 +1687,208 @@ function createTryfaintmonOpcodeHandler(): BattleScriptOpcodeHandler<BattleScrip
   };
 }
 
+/** include/constants/battle.h:150 -- identity-ambiguous without gDisableStructs[].battlerPreventingEscape. */
+const STATUS2_ESCAPE_PREVENTION = 1 << 26;
+/** include/constants/battle.h:140 -- identity-ambiguous without gBattleStruct->wrappedBy. */
+const STATUS2_WRAPPED_MASK = (1 << 13) | (1 << 14) | (1 << 15);
+const DEFAULT_STAT_STAGE = 6;
+const DEFAULT_STAT_STAGES = Object.freeze([
+  DEFAULT_STAT_STAGE, DEFAULT_STAT_STAGE, DEFAULT_STAT_STAGE, DEFAULT_STAT_STAGE,
+  DEFAULT_STAT_STAGE, DEFAULT_STAT_STAGE, DEFAULT_STAT_STAGE, DEFAULT_STAT_STAGE,
+]) as unknown as BattleScriptStatStages;
+
+function statusInfatuatedWithBit(battler: BattleScriptBattlerId): number {
+  return (1 << (16 + battler)) >>> 0;
+}
+
+function replaceAt<T extends readonly number[]>(values: T, index: number, value: number): T {
+  if (values[index] === value) return values;
+  return Object.freeze(values.map((entry, entryIndex) => (entryIndex === index ? value : entry))) as unknown as T;
+}
+
+/**
+ * Cmd_cleareffectsonfaint (battle_script_commands.c:3062-3076) plus
+ * FaintClearSetData (battle_main.c:3264-3355), the "Effects like attractions,
+ * trapping, etc." helper it always calls. The status1 write is ARENA-gated
+ * exactly as source (`!(BATTLE_TYPE_ARENA) || hp==0` -- always true on every
+ * reachable path here since tryfaintmon's faint branch already established
+ * hp==0 -- computed off the already-modeled battleTypeFlags word, not a
+ * barrier). FaintClearSetData's cross-battler STATUS2_INFATUATED_WITH clear
+ * is fully computable from the bit itself (`gBitTable[battler] << 16` encodes
+ * the relationship directly, no external field needed); STATUS2_ESCAPE_PREVENTION
+ * and STATUS2_WRAPPED instead need gDisableStructs[].battlerPreventingEscape/
+ * gBattleStruct->wrappedBy identity this engine does not model, so each is a
+ * named (b) barrier gated on its own bit actually being set on some other
+ * battler (never true for a plain damaging-move KO, so unreached on this
+ * rung's own scenario). The remaining struct-wide DisableStruct/ProtectStruct
+ * fields FaintClearSetData zeroes (transformedMonPersonality, encoredMove*,
+ * protectUses, stockpileCounter, disableTimer*, perishSongTimer*,
+ * chargeTimer*, battlerWithSureHit, isFirstTurn, truantSwitchInHack,
+ * mimickedMoves, ProtectStruct's noValidMoves/fleeType/physicalDmg/
+ * specialDmg/physicalBattlerId/specialBattlerId), gActionSelectionCursor/
+ * gMoveSelectionCursor, gBattleResources->flags->flags, the species-base
+ * `types` reassignment (this engine has no code path that ever moves `types`
+ * away from base, so leaving it untouched is exactly equivalent), and
+ * ClearBattlerMoveHistory/ClearBattlerAbilityHistory (a wholly separate
+ * AI-history structure) all have no reader anywhere in this engine's
+ * currently modeled scope and are not tracked, matching this file's existing
+ * datahpupdate/tryfaintmon precedent for untracked non-branching state.
+ */
+function createCleareffectsonfaintOpcodeHandler(
+  isControllerIdle: BattleScriptControllerIdlePort<BattleScriptRulesContext>,
+): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
+  return (context) => {
+    if (!isControllerIdle(context)) return controllerBusyBlock(context);
+    const rulesContext = context.state.rulesContext;
+    const resolved = resolveHitChainBattlerOperand(context, rulesContext);
+    if (resolved === "unsupported") {
+      return unsupportedBranch(
+        context,
+        `Cmd_cleareffectsonfaint's GetBattlerForBattleScript selector `
+          + `(${context.instruction.operands[0]?.expression ?? "<missing>"}) is not BS_TARGET/BS_ATTACKER`,
+        "battle_script_commands.c",
+        3064,
+      );
+    }
+    const active = resolved;
+    const { battlersCount } = rulesContext.battleTopology;
+
+    for (let i = 0; i < battlersCount; i += 1) {
+      if (i === active) continue;
+      const otherStatus2 = rulesContext.battlers[i as BattleScriptBattlerId].status2;
+      if ((otherStatus2 & STATUS2_ESCAPE_PREVENTION) !== 0) {
+        return unsupportedBranch(
+          context,
+          `FaintClearSetData's STATUS2_ESCAPE_PREVENTION cross-battler clear (battler ${i}) needs `
+            + "gDisableStructs[battler].battlerPreventingEscape identity, not modeled here",
+          "battle_main.c",
+          3277,
+        );
+      }
+      if ((otherStatus2 & STATUS2_WRAPPED_MASK) !== 0) {
+        return unsupportedBranch(
+          context,
+          `FaintClearSetData's STATUS2_WRAPPED cross-battler clear (battler ${i}) needs `
+            + "gBattleStruct->wrappedBy identity, not modeled here",
+          "battle_main.c",
+          3281,
+        );
+      }
+    }
+
+    const activeBattlerState = rulesContext.battlers[active];
+    const isArena = (rulesContext.battleTopology.battleTypeFlags & BATTLE_SCRIPT_BATTLE_TYPE_ARENA) !== 0;
+    const clearsStatus1 = !isArena || activeBattlerState.hp === 0;
+
+    const infatuationBit = statusInfatuatedWithBit(active);
+    const battlers = rulesContext.battlers.map((candidate, index) => {
+      if (index === active) {
+        return Object.freeze({
+          ...candidate,
+          status1: clearsStatus1 ? 0 : candidate.status1,
+          status2: 0,
+          status3: 0,
+          substituteHP: 0,
+          statStages: DEFAULT_STAT_STAGES,
+          rolloutTimer: 0,
+          furyCutterCounter: 0,
+          truantCounter: 0 as const,
+          rechargeTimer: 0,
+          flinchImmobility: 0 as const,
+          disabledMove: 0,
+          usedDisabledMove: 0 as const,
+          tauntTimer: 0,
+          usedTauntedMove: 0 as const,
+          usedImprisonedMove: 0 as const,
+          bounceMove: 0 as const,
+          confusionSelfDmg: 0 as const,
+          prlzImmobility: 0 as const,
+          loveImmobility: 0 as const,
+          stealMove: 0 as const,
+          endured: 0 as const,
+          helpingHand: 0 as const,
+          chargingTurn: 0 as const,
+          targetNotAffected: 0 as const,
+          flag2Unknown: 0 as const,
+          protected: 0 as const,
+        });
+      }
+      const status2 = (candidate.status2 & ~infatuationBit) >>> 0;
+      return status2 === candidate.status2 ? candidate : Object.freeze({ ...candidate, status2 });
+    }) as unknown as BattleScriptRulesBattlers;
+
+    let {
+      lastMoves, lastLandedMoves, lastHitByType, lastResultingMoves,
+      lastPrintedMoves, lastHitBy, lastTakenMove, lastTakenMoveFrom,
+    } = rulesContext.moveHistory;
+    lastMoves = replaceAt(lastMoves, active, 0);
+    lastLandedMoves = replaceAt(lastLandedMoves, active, 0);
+    lastHitByType = replaceAt(lastHitByType, active, 0);
+    lastResultingMoves = replaceAt(lastResultingMoves, active, 0);
+    lastPrintedMoves = replaceAt(lastPrintedMoves, active, 0);
+    lastHitBy = replaceAt(lastHitBy, active, 0xff);
+
+    const nextLastTakenMove = [...lastTakenMove];
+    nextLastTakenMove[active * 2] = 0;
+    nextLastTakenMove[active * 2 + 1] = 0;
+    for (let i = 0; i < battlersCount; i += 1) {
+      if (i !== active && rulesContext.battlers[i as BattleScriptBattlerId].side !== activeBattlerState.side) {
+        nextLastTakenMove[i * 2] = 0;
+        nextLastTakenMove[i * 2 + 1] = 0;
+      }
+    }
+
+    const nextLastTakenMoveFrom = [...lastTakenMoveFrom];
+    for (let j = 0; j < 4; j += 1) {
+      nextLastTakenMoveFrom[active * 8 + j * 2] = 0;
+      nextLastTakenMoveFrom[active * 8 + j * 2 + 1] = 0;
+    }
+    for (let i = 0; i < battlersCount; i += 1) {
+      nextLastTakenMoveFrom[i * 8 + active * 2] = 0;
+      nextLastTakenMoveFrom[i * 8 + active * 2 + 1] = 0;
+    }
+
+    const choicedMove = replaceAt(rulesContext.choicedMove, active, 0);
+
+    const nextRulesContext = Object.freeze({
+      ...rulesContext,
+      battlers: Object.freeze(battlers),
+      choicedMove,
+      moveHistory: Object.freeze({
+        ...rulesContext.moveHistory,
+        lastMoves,
+        lastLandedMoves,
+        lastHitByType,
+        lastResultingMoves,
+        lastPrintedMoves,
+        lastHitBy,
+        lastTakenMove: Object.freeze(nextLastTakenMove),
+        lastTakenMoveFrom: Object.freeze(nextLastTakenMoveFrom),
+      }),
+    }) as unknown as BattleScriptRulesContext;
+
+    if (!clearsStatus1) {
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        { rulesContext: nextRulesContext },
+      );
+    }
+    const scheduler = markBattleScriptControllerPending(context.state.scheduler, active);
+    return transitionBattleScriptCommand(
+      context,
+      Object.freeze({ kind: "advance" }),
+      {
+        rulesContext: nextRulesContext,
+        scheduler,
+        events: Object.freeze([
+          Object.freeze({ kind: "set-battler-status-data" as const, battler: active, status1: 0 }),
+        ]),
+      },
+    );
+  };
+}
+
 export type BattleScriptHitChainPorts = Readonly<{
   isControllerIdle: BattleScriptControllerIdlePort<BattleScriptRulesContext>;
   prepareMessage: BattleScriptMessagePreparationPort<BattleScriptRulesContext>;
@@ -1719,5 +1923,6 @@ export function createBattleScriptHitChainOpcodeHandlers(
   install("B_SCR_OP_RESULTMESSAGE", createResultmessageOpcodeHandler(ports.isControllerIdle, ports.prepareMessage));
   install("B_SCR_OP_SETEFFECTWITHCHANCE", createSeteffectwithchanceOpcodeHandler());
   install("B_SCR_OP_TRYFAINTMON", createTryfaintmonOpcodeHandler());
+  install("B_SCR_OP_CLEAREFFECTSONFAINT", createCleareffectsonfaintOpcodeHandler(ports.isControllerIdle));
   return Object.freeze(handlers);
 }

@@ -33,6 +33,7 @@ type BattleScriptSelectedBattlerControllerEventPayload = Extract<
   Readonly<{
     kind:
       | "play-faint-cry"
+      | "faint-animation"
       | "hide-party-status-summary"
       | "set-battler-sprite-visibility";
   }>
@@ -830,9 +831,13 @@ function executeStatusAnimation<RulesContext extends object>(
  * First source-mapped scheduler family:
  * Cmd_nop, Cmd_waitanimation, Cmd_waitstate, Cmd_printstring, Cmd_printselectionstring,
  * Cmd_printselectionstringfromtable, Cmd_waitmessage, Cmd_pause, Cmd_playse,
- * Cmd_fanfare, Cmd_playfaintcry, Cmd_hidepartystatussummary, and
+ * Cmd_fanfare, Cmd_playfaintcry, Cmd_dofaintanimation, Cmd_hidepartystatussummary, and
  * Cmd_makevisible, Cmd_trainerslidein, Cmd_trainerslideout, and
  * Cmd_statusanimation, Cmd_status2animation, and Cmd_chosenstatusanimation.
+ *
+ * Cmd_dofaintanimation (battle_script_commands.c:3052-3060) is a controller
+ * FaintAnimation emit only -- no gBattleMons/RNG touch -- so it reuses this
+ * same selected-battler-event shape exactly like Cmd_playfaintcry.
  *
  * Controller readiness, source-context string preparation, and exact u16
  * operand resolution are injected logical ports. MSG_DISPLAY and the shared
@@ -920,6 +925,12 @@ export function createBattleScriptSourceCommandHandlers<RulesContext extends obj
       context,
       ports,
       (battler) => ({ kind: "play-faint-cry", battler }),
+    ));
+  installHandler(program, handlers, "B_SCR_OP_DOFAINTANIMATION", (context) =>
+    emitSelectedBattlerControllerEvent(
+      context,
+      ports,
+      (battler) => ({ kind: "faint-animation", battler }),
     ));
   installHandler(program, handlers, "B_SCR_OP_HIDEPARTYSTATUSSUMMARY", (context) =>
     emitSelectedBattlerControllerEvent(

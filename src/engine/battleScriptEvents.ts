@@ -65,6 +65,11 @@ export type BattleScriptSemanticEventPayload =
     battler: BattleScriptBattlerId;
   }>
   | Readonly<{
+    /** BtlController_EmitFaintAnimation(B_COMM_TO_CONTROLLER) -- Cmd_dofaintanimation's only effect. */
+    kind: "faint-animation";
+    battler: BattleScriptBattlerId;
+  }>
+  | Readonly<{
     kind: "hide-party-status-summary";
     battler: BattleScriptBattlerId;
   }>
