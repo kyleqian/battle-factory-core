@@ -157,6 +157,8 @@ type BattleScriptMoveEndBattlerMetadata = Readonly<{
   spAttack: number;
   spDefense: number;
   level: number;
+  /** Source gBattleMons[battler].friendship - Cmd_attackanimation's EmitMoveAnimation argument. */
+  friendship: number;
 }>;
 
 /**
@@ -188,6 +190,7 @@ export type BattleScriptRulesBattler = BattleScriptRulesBattlerBase & Readonly<{
   spAttack?: number;
   spDefense?: number;
   level?: number;
+  friendship?: number;
 }>;
 
 export type BattleScriptRulesBattlerState =
@@ -288,6 +291,8 @@ export type BattleScriptRulesContext = Readonly<
     multiHitCounter: number;
     multistringChooser: number;
     battleMoveDamage: number;
+    /** Source s32 gHpDealt -- Cmd_datahpupdate's real-damage-dealt bookkeeping. */
+    hpDealt: number;
     /** Source s32 gBideDmg[MAX_BATTLERS_COUNT]. */
     bideDmg: BattleScriptBideDamageByBattler;
     /** Source u8 gBideTarget[MAX_BATTLERS_COUNT], validated to battler ids. */
@@ -337,6 +342,7 @@ export type BattleScriptRulesContextInput = Readonly<{
   multiHitCounter: number;
   multistringChooser?: number;
   battleMoveDamage?: number;
+  hpDealt?: number;
   bideDmg?: readonly number[];
   bideTarget?: readonly BattleScriptBattlerId[];
   scriptingBideDmg?: number;
@@ -1343,6 +1349,7 @@ export function createBattleScriptRulesContext(
     spAttack: requireUnsigned(battler.spAttack ?? 0, 0xffff, `battlers[${index}].spAttack`),
     spDefense: requireUnsigned(battler.spDefense ?? 0, 0xffff, `battlers[${index}].spDefense`),
     level: requireUnsigned(battler.level ?? 0, 0xff, `battlers[${index}].level`),
+    friendship: requireUnsigned(battler.friendship ?? 0, 0xff, `battlers[${index}].friendship`),
     ...(battler.confusionDamage === undefined ? {} : {
       confusionDamage: Object.freeze({
         level: requireUnsigned(
@@ -1465,6 +1472,7 @@ export function createBattleScriptRulesContext(
       input.battleMoveDamage ?? 0,
       "battleMoveDamage",
     ),
+    hpDealt: requireSigned32(input.hpDealt ?? 0, "hpDealt"),
     bideDmg,
     bideTarget,
     scriptingBideDmg: requireSigned32(

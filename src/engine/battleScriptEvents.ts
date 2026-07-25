@@ -108,6 +108,12 @@ export type BattleScriptSemanticEventPayload =
     to: number;
   }>
   | Readonly<{
+    /** BtlController_EmitHealthBarUpdate(B_COMM_TO_CONTROLLER, healthValue) -- the animated bar delta, distinct from hp-change's before/after HP. */
+    kind: "health-bar-update";
+    battler: BattleScriptBattlerId;
+    healthValue: number;
+  }>
+  | Readonly<{
     kind: "status-change";
     battler: number;
     from: string;

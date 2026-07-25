@@ -1,3 +1,55 @@
+## 429 — S10 step (ii) RUNG 1: accuracycheck, attackstring, ppreduce registered
+
+- **State:** RUNG 1 of the sixteen-opcode hit chain is complete and green at
+  **175 files / 2040 tests**, build green. `createBattleScriptStatusRulesHandlers`
+  now composes **32** opcodes (was 29): `accuracycheck`, `attackstring`,
+  `ppreduce` (new `battleScriptHitChainOpcode.ts`) plus opcode 0's tail fix
+  below. A staged turn runs opcode 0 → accuracycheck → attackstring → ppreduce
+  for both hit and miss, matching the banked ground truth's RNG pattern
+  (exactly one `Random()` call at accuracycheck either way) and PP delta, then
+  hands off cleanly: hit → `critcalc` (unregistered, correct RUNG-2 boundary),
+  miss → `pause` (already registered by a prior session).
+- **Did:** `accuracycheck` is source-complete for the `ACC_CURR_MOVE` argument
+  form (54/55 hit-chain-relevant call sites) — stat-stage accuracy formula
+  (reused `damageCalc.ts` unchanged), the real Protect branch, semi-invulnerable
+  `STATUS3` branches, always-hit moves, `TrySetDestinyBondToHappen`, and
+  `CheckWonderGuardAndLevitate` (Levitate + type-immunity incl. the
+  Foresight-vs-Ghost exception). Added three small battler fields the same way
+  prior MOVEEND checkpoints did (`protected`, `types`, `ppNotAffectedByPressure`)
+  plus a `set-battler-pp-data` semantic event kind for `ppreduce`'s real PP
+  controller sync. Four branches are explicit `unsupported-branch` barriers,
+  each Tier-1-reachability-tested: the `NO_ACC_CALC`/`NO_ACC_CALC_CHECK_LOCK_ON`/
+  explicit-deferred-move top branch (not on the hit chain), `STATUS3_ALWAYS_HITS`
+  Lock-On (`battlerWithSureHit` unmodeled), a nonzero target ability on a hit
+  (`AbilityBattleEffects(ABILITYEFFECT_ABSORBING)` unmodeled beyond ability
+  none), and the target's Enigma Berry evasion `holdEffectParam`. **Fixed an
+  over-broad barrier found while wiring this rung:** opcode 0's tail
+  `DEFENDER_IS_PROTECTED` check previously halted *unconditionally* once
+  Snatch/Lightning Rod passed — even the common "target isn't protected" case
+  — which meant no healthy attacker's turn could ever reach the hit chain at
+  all. It now evaluates the real predicate (Protect flag + the `MOVE_CURSE`/
+  Ghost exception + `IsTwoTurnsMove` gating) and applies `CancelMultiTurnMoves`
+  + the miss flags on a genuine Protect success, advancing otherwise — this,
+  not a hit-chain opcode itself, is what actually unblocks the chain.
+- **Next:** RUNG 2 — register `critcalc`, `damagecalc`, `typecalc`,
+  `adjustnormaldamage`, consuming `damageCalc.ts`'s already-pinned
+  `getCriticalHitChanceStage`/`rollIsCriticalHit`/`calculateBaseDamage`/
+  `applyStab`/`applyTypeEffectiveness`/`applyRandomDamageMultiplier` as-is.
+  The new `types` battler field and `resolveBattleScriptMoveType` are already
+  in place for `typecalc`/`damagecalc`'s STAB and type-effectiveness needs.
+  RUNGS 3–4 (attackanimation..resultmessage; seteffectwithchance,
+  tryfaintmon) remain after that. Opcode 73 (moveend) is still the step-(iii)
+  boundary, not this step's.
+- **Notes:** this rung alone took the full session (deep per-branch source
+  tracing for `Cmd_accuracycheck`'s helpers plus the opcode-0 tail bugfix
+  needed to make the chain reachable at all) — RUNGS 2–4 did not start.
+  `isDefenderProtected` is exported from the new hit-chain module and reused
+  by `battleScriptAttackCancelerOpcode.ts` rather than duplicated. No
+  presentation/render/`battleScene` edits; no oracle traces (Tier-1 only, per
+  the banked ground truth).
+
+---
+
 ## 428 — [SUPERVISOR] round-1 merges: hit-chain ground truth + anim interpreter
 
 - **State:** merged tree green at **174 files / 2020 tests**, build green.

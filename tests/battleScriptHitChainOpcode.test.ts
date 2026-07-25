@@ -49,6 +49,7 @@ function battler(changes: Partial<BattleScriptRulesBattler> = {}): BattleScriptR
     spAttack: changes.spAttack ?? 0,
     spDefense: changes.spDefense ?? 0,
     level: changes.level ?? 50,
+    friendship: changes.friendship ?? 0,
     endured: changes.endured,
     helpingHand: changes.helpingHand,
   });
@@ -111,8 +112,8 @@ function externalPorts(
   return Object.freeze({
     isControllerIdle: () => true,
     prepareMessage: (_context, operand) =>
-      operand.expression === "STRINGID_USEDMOVE"
-        ? Object.freeze({ kind: "message" as const, messageId: "STRINGID_USEDMOVE", substitutions: Object.freeze([]) })
+      operand.expression.startsWith("STRINGID_")
+        ? Object.freeze({ kind: "message" as const, messageId: operand.expression, substitutions: Object.freeze([]) })
         : null,
     prepareSelectionMessage: () => null,
     prepareSelectionMessageFromTable: () => null,
@@ -620,8 +621,342 @@ describe("production adjustnormaldamage (Cmd_adjustnormaldamage) dispatch", () =
   });
 });
 
-describe("RUNG 2 integration: opcode 0 -> ... -> adjustnormaldamage -> attackanimation boundary", () => {
-  it("RUNG 1 hit turn (Tackle, seed 1): still halts one opcode later now that critcalc is registered", () => {
+/**
+ * The RUNG-3 middle of the hit chain, all already-generic wait opcodes
+ * (waitanimation/waitstate/waitmessage) interleaved per
+ * data/battle_scripts_1.s:253-265.
+ */
+const RUNG_3_LABELS = [
+  "attackanimation",
+  "waitanimation",
+  "effectivenesssound",
+  "hitanimation",
+  "waitstate",
+  "healthbarupdate",
+  "datahpupdate",
+  "critmessage",
+  "waitmessage",
+  "resultmessage",
+  "waitmessage",
+];
+
+describe("production attackanimation (Cmd_attackanimation) dispatch", () => {
+  it("registers B_SCR_OP_ATTACKANIMATION", () => {
+    expect(program.instructions.find((i) => i.opcodeName === "B_SCR_OP_ATTACKANIMATION")).toBeDefined();
+  });
+
+  it("blocks on a busy controller", () => {
+    const rc = context(0, {}, { battleMoveDamage: 2 });
+    const ports = externalPorts({ isControllerIdle: () => false });
+    const { result } = stepAtOpcode("B_SCR_OP_ATTACKANIMATION", rc, 1, ports);
+    expect(result.kind).toBe("blocked");
+  });
+
+  it("emits a MOVE_ANIMATION event for the attacker and marks the controller pending", () => {
+    const rc = context(0, { friendship: 200 }, { battleMoveDamage: 2, multiHitCounter: 0 });
+    const { result } = stepAtOpcode("B_SCR_OP_ATTACKANIMATION", rc);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    const event = result.state.events[0];
+    expect(event).toMatchObject({
+      kind: "animation",
+      animationId: "MOVE_ANIMATION",
+      battler: 0,
+      arguments: [String(TACKLE), "0", "35", "2", "200", "0"], // animTurn arg is pre-increment (source emits, then increments)
+    });
+    expect(result.state.scheduler.pendingControllerBattlers).toContain(0);
+    expect(result.state.rulesContext.animTurn).toBe(1);
+  });
+
+  it("MOVE_RESULT_NO_EFFECT: pauses via BattleScript_Pausex20 without emitting an animation", () => {
+    const rc = context(0, {}, { moveResultFlags: 1 << 3 });
+    const { result } = stepAtOpcode("B_SCR_OP_ATTACKANIMATION", rc);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.events.length).toBe(0);
+    expect(result.state.programCounter).toBe(labelPc("BattleScript_Pausex20"));
+    expect(result.state.callStack.length).toBe(1);
+  });
+
+  it("HITMARKER_NO_ANIMATIONS: pauses via BattleScript_Pausex20 and still increments animTurn/animTargetsHit", () => {
+    const rc = context(0, {}, { hitMarker: 1 << 7 });
+    const { result } = stepAtOpcode("B_SCR_OP_ATTACKANIMATION", rc);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.programCounter).toBe(labelPc("BattleScript_Pausex20"));
+    expect(result.state.rulesContext.animTurn).toBe(1);
+    expect(result.state.rulesContext.animTargetsHit).toBe(1);
+    expect(result.state.events.length).toBe(0);
+  });
+});
+
+describe("production effectivenesssound (Cmd_effectivenesssound) dispatch", () => {
+  it("registers B_SCR_OP_EFFECTIVENESSSOUND", () => {
+    expect(program.instructions.find((i) => i.opcodeName === "B_SCR_OP_EFFECTIVENESSSOUND")).toBeDefined();
+  });
+
+  it("super effective: emits play-se(SE_SUPER_EFFECTIVE) for the target", () => {
+    const rc = context(0, {}, { moveResultFlags: 1 << 1 });
+    const { result } = stepAtOpcode("B_SCR_OP_EFFECTIVENESSSOUND", rc);
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.events[0]).toMatchObject({ kind: "play-se", battler: 1, songId: 14 });
+  });
+
+  it("not very effective: emits play-se(SE_NOT_EFFECTIVE)", () => {
+    const rc = context(0, {}, { moveResultFlags: 1 << 2 });
+    const { result } = stepAtOpcode("B_SCR_OP_EFFECTIVENESSSOUND", rc);
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.events[0]).toMatchObject({ kind: "play-se", songId: 12 });
+  });
+
+  it("neutral hit: emits play-se(SE_EFFECTIVE)", () => {
+    const rc = context(0, {}, { moveResultFlags: 0 });
+    const { result } = stepAtOpcode("B_SCR_OP_EFFECTIVENESSSOUND", rc);
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.events[0]).toMatchObject({ kind: "play-se", songId: 13 });
+  });
+
+  it("doesn't-affect-foe: no sound", () => {
+    const rc = context(0, {}, { moveResultFlags: 1 << 3 });
+    const { result } = stepAtOpcode("B_SCR_OP_EFFECTIVENESSSOUND", rc);
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.events.length).toBe(0);
+  });
+
+  it("missed: no sound", () => {
+    const rc = context(0, {}, { moveResultFlags: 1 });
+    const { result } = stepAtOpcode("B_SCR_OP_EFFECTIVENESSSOUND", rc);
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.events.length).toBe(0);
+  });
+});
+
+describe("production hitanimation (Cmd_hitanimation) dispatch", () => {
+  it("registers B_SCR_OP_HITANIMATION", () => {
+    expect(program.instructions.find((i) => i.opcodeName === "B_SCR_OP_HITANIMATION")).toBeDefined();
+  });
+
+  it("emits an animation event for the target and marks it pending", () => {
+    const rc = context(0);
+    const { result } = stepAtOpcode("B_SCR_OP_HITANIMATION", rc);
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.events[0]).toMatchObject({ kind: "animation", animationId: "HIT_ANIMATION", battler: 1 });
+    expect(result.state.scheduler.pendingControllerBattlers).toContain(1);
+  });
+
+  it("MOVE_RESULT_NO_EFFECT: no animation", () => {
+    const rc = context(0, {}, { moveResultFlags: 1 << 3 });
+    const { result } = stepAtOpcode("B_SCR_OP_HITANIMATION", rc);
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.events.length).toBe(0);
+  });
+
+  it("substitute active + HITMARKER_IGNORE_SUBSTITUTE: suppressed, no animation", () => {
+    const rc = context(0, {}, { hitMarker: 1 << 8 }, { status2: 1 << 24, substituteHP: 10 });
+    const { result } = stepAtOpcode("B_SCR_OP_HITANIMATION", rc);
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.events.length).toBe(0);
+  });
+
+  it("substitute active WITHOUT HITMARKER_IGNORE_SUBSTITUTE: still animates", () => {
+    const rc = context(0, {}, {}, { status2: 1 << 24, substituteHP: 10 });
+    const { result } = stepAtOpcode("B_SCR_OP_HITANIMATION", rc);
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.events.length).toBe(1);
+  });
+});
+
+describe("production healthbarupdate (Cmd_healthbarupdate) dispatch", () => {
+  it("registers B_SCR_OP_HEALTHBARUPDATE", () => {
+    expect(program.instructions.find((i) => i.opcodeName === "B_SCR_OP_HEALTHBARUPDATE")).toBeDefined();
+  });
+
+  it("emits health-bar-update with the raw damage value", () => {
+    const rc = context(0, {}, { battleMoveDamage: 50 });
+    const { result } = stepAtOpcode("B_SCR_OP_HEALTHBARUPDATE", rc);
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.events[0]).toMatchObject({ kind: "health-bar-update", battler: 1, healthValue: 50 });
+  });
+
+  it("clamps huge damage to 10000", () => {
+    const rc = context(0, {}, { battleMoveDamage: 99999 });
+    const { result } = stepAtOpcode("B_SCR_OP_HEALTHBARUPDATE", rc);
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.events[0]).toMatchObject({ healthValue: 10000 });
+  });
+
+  it("MOVE_RESULT_NO_EFFECT: no event", () => {
+    const rc = context(0, {}, { moveResultFlags: 1 << 3, battleMoveDamage: 50 });
+    const { result } = stepAtOpcode("B_SCR_OP_HEALTHBARUPDATE", rc);
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.events.length).toBe(0);
+  });
+
+  it("substitute active: prints STRINGID_SUBSTITUTEDAMAGED instead of a bar update", () => {
+    const rc = context(0, {}, { battleMoveDamage: 50 }, { status2: 1 << 24, substituteHP: 10 });
+    const { result } = stepAtOpcode("B_SCR_OP_HEALTHBARUPDATE", rc);
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.events[0]).toMatchObject({ kind: "message", messageId: "STRINGID_SUBSTITUTEDAMAGED" });
+  });
+});
+
+describe("production datahpupdate (Cmd_datahpupdate) dispatch -- the rung's real HP mutation", () => {
+  it("registers B_SCR_OP_DATAHPUPDATE", () => {
+    expect(program.instructions.find((i) => i.opcodeName === "B_SCR_OP_DATAHPUPDATE")).toBeDefined();
+  });
+
+  it("non-killing hit: exact HP delta, hp-change event, physical-damage bookkeeping (scenario 1's 136 -> 122)", () => {
+    const rc = context(0, {}, { battleMoveDamage: 14 }, { hp: 136 });
+    const { result } = stepAtOpcode("B_SCR_OP_DATAHPUPDATE", rc);
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battlers[1]!.hp).toBe(122);
+    expect(result.state.rulesContext.hpDealt).toBe(14);
+    expect(result.state.events[0]).toMatchObject({ kind: "hp-change", battler: 1, from: 136, to: 122 });
+    expect(result.state.rulesContext.battlers[1]!.specialStatus.physicalDmg).toBe(14); // TACKLE is NORMAL: physical
+    expect(result.state.scheduler.pendingControllerBattlers).toContain(1);
+  });
+
+  it("killing hit: HP clamps to 0, hpDealt is the remaining HP not the full damage (KO scenario's 90 -> 0)", () => {
+    const rc = context(0, {}, { battleMoveDamage: 204 }, { hp: 90 });
+    const { result } = stepAtOpcode("B_SCR_OP_DATAHPUPDATE", rc);
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battlers[1]!.hp).toBe(0);
+    expect(result.state.rulesContext.hpDealt).toBe(90);
+  });
+
+  it("MOVE_RESULT_NO_EFFECT: hp untouched, no event", () => {
+    const rc = context(0, {}, { moveResultFlags: 1 << 3, battleMoveDamage: 50 }, { hp: 100 });
+    const { result } = stepAtOpcode("B_SCR_OP_DATAHPUPDATE", rc);
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battlers[1]!.hp).toBe(100);
+    expect(result.state.events.length).toBe(0);
+  });
+
+  it("substitute active, survives: damages the substitute instead of real HP", () => {
+    const rc = context(0, {}, { battleMoveDamage: 14 }, { hp: 100, status2: 1 << 24, substituteHP: 50 });
+    const { result } = stepAtOpcode("B_SCR_OP_DATAHPUPDATE", rc);
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battlers[1]!.hp).toBe(100);
+    expect(result.state.rulesContext.battlers[1]!.substituteHP).toBe(36);
+    expect(result.state.rulesContext.hpDealt).toBe(14);
+    expect(result.state.events.length).toBe(0);
+  });
+
+  describe("(b) unsupported-branch barriers", () => {
+    it("halts when the substitute would fade (BattleScript_SubstituteFade cutscene unmodeled)", () => {
+      const rc = context(0, {}, { battleMoveDamage: 50 }, { hp: 100, status2: 1 << 24, substituteHP: 30 });
+      const { result } = stepAtOpcode("B_SCR_OP_DATAHPUPDATE", rc);
+      expect(result.kind).toBe("halted");
+      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 1889 });
+    });
+
+    it("halts on negative damage (HP gain needs maxHP, unmodeled)", () => {
+      const rc = context(0, {}, { battleMoveDamage: -10 }, { hp: 50 });
+      const { result } = stepAtOpcode("B_SCR_OP_DATAHPUPDATE", rc);
+      expect(result.kind).toBe("halted");
+      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 1899 });
+    });
+  });
+});
+
+describe("production critmessage (Cmd_critmessage) dispatch", () => {
+  it("registers B_SCR_OP_CRITMESSAGE", () => {
+    expect(program.instructions.find((i) => i.opcodeName === "B_SCR_OP_CRITMESSAGE")).toBeDefined();
+  });
+
+  it("crit + not no-effect: emits STRINGID_CRITICALHIT", () => {
+    const rc = context(0, {}, { critMultiplier: 2 });
+    const { result } = stepAtOpcode("B_SCR_OP_CRITMESSAGE", rc);
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.events[0]).toMatchObject({ kind: "message", messageId: "STRINGID_CRITICALHIT" });
+    expect(result.state.scheduler.messageDisplayActive).toBe(true);
+  });
+
+  it("crit but MOVE_RESULT_NO_EFFECT: no message", () => {
+    const rc = context(0, {}, { critMultiplier: 2, moveResultFlags: 1 << 3 });
+    const { result } = stepAtOpcode("B_SCR_OP_CRITMESSAGE", rc);
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.events.length).toBe(0);
+  });
+
+  it("not a crit: no message", () => {
+    const rc = context(0, {}, { critMultiplier: 1 });
+    const { result } = stepAtOpcode("B_SCR_OP_CRITMESSAGE", rc);
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.events.length).toBe(0);
+  });
+
+  it("blocks on a busy controller", () => {
+    const rc = context(0, {}, { critMultiplier: 2 });
+    const ports = externalPorts({ isControllerIdle: () => false });
+    const { result } = stepAtOpcode("B_SCR_OP_CRITMESSAGE", rc, 1, ports);
+    expect(result.kind).toBe("blocked");
+  });
+});
+
+describe("production resultmessage (Cmd_resultmessage) dispatch", () => {
+  it("registers B_SCR_OP_RESULTMESSAGE", () => {
+    expect(program.instructions.find((i) => i.opcodeName === "B_SCR_OP_RESULTMESSAGE")).toBeDefined();
+  });
+
+  it("miss: emits the gMissStringIds entry for the missType", () => {
+    const rc = context(0, {}, { moveResultFlags: 1, missType: 1 /* B_MSG_PROTECTED */ });
+    const { result } = stepAtOpcode("B_SCR_OP_RESULTMESSAGE", rc);
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.events[0]).toMatchObject({ kind: "message", messageId: "STRINGID_PKMNPROTECTEDITSELF" });
+  });
+
+  it("super effective: emits STRINGID_SUPEREFFECTIVE", () => {
+    const rc = context(0, {}, { moveResultFlags: 1 << 1 });
+    const { result } = stepAtOpcode("B_SCR_OP_RESULTMESSAGE", rc);
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.events[0]).toMatchObject({ kind: "message", messageId: "STRINGID_SUPEREFFECTIVE" });
+  });
+
+  it("no flags at all: no message, messageDisplayActive cleared", () => {
+    const rc = context(0, {}, { moveResultFlags: 0 });
+    const { result } = stepAtOpcode("B_SCR_OP_RESULTMESSAGE", rc);
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.events.length).toBe(0);
+    expect(result.state.scheduler.messageDisplayActive).toBe(false);
+  });
+
+  it("FOE_ENDURED alone: exact-match case prints STRINGID_PKMNENDUREDHIT directly, no jump", () => {
+    const rc = context(0, {}, { moveResultFlags: 1 << 6 });
+    const { result } = stepAtOpcode("B_SCR_OP_RESULTMESSAGE", rc);
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.events[0]).toMatchObject({ kind: "message", messageId: "STRINGID_PKMNENDUREDHIT" });
+  });
+
+  it("FOE_ENDURED combined with SUPER_EFFECTIVE: jumps (call-current) to BattleScript_EnduredMsg, clearing only ENDURED/HUNG_ON", () => {
+    const rc = context(0, {}, { moveResultFlags: (1 << 1) | (1 << 6) });
+    const { result } = stepAtOpcode("B_SCR_OP_RESULTMESSAGE", rc);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.programCounter).toBe(labelPc("BattleScript_EnduredMsg"));
+    expect(result.state.rulesContext.moveResultFlags).toBe(1 << 1); // SUPER_EFFECTIVE survives the clear
+    expect(result.state.callStack.length).toBe(1);
+  });
+
+  describe("(b) unsupported-branch barriers", () => {
+    it("halts on MOVE_RESULT_ONE_HIT_KO (OHKO subsystem unmodeled)", () => {
+      const rc = context(0, {}, { moveResultFlags: 1 << 4 });
+      const { result } = stepAtOpcode("B_SCR_OP_RESULTMESSAGE", rc);
+      expect(result.kind).toBe("halted");
+      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 2071 });
+    });
+
+    it("halts on MOVE_RESULT_FOE_HUNG_ON (Focus Band subsystem unmodeled)", () => {
+      const rc = context(0, {}, { moveResultFlags: 1 << 7 });
+      const { result } = stepAtOpcode("B_SCR_OP_RESULTMESSAGE", rc);
+      expect(result.kind).toBe("halted");
+      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 2083 });
+    });
+  });
+});
+
+describe("RUNG 3 integration: opcode 0 -> ... -> resultmessage -> seteffectwithchance boundary", () => {
+  it("RUNG 1 hit turn (Tackle, seed 1): walks the full hit chain and halts at seteffectwithchance", () => {
     const rc = context(0);
     const execution = createBattleScriptStatusRulesExecution(
       program,
@@ -642,7 +977,7 @@ describe("RUNG 2 integration: opcode 0 -> ... -> adjustnormaldamage -> attackani
     if (result.kind !== "advanced") throw new Error(`ppreduce did not advance: ${result.kind}`);
     expect(result.state.rulesContext.battlers[0]!.pp[0]).toBe(34);
     expect(result.state.programCounter).toBe(labelPc("BattleScript_HitFromCritCalc"));
-    result = stepBattleScriptMachine(program, result.state, handlers); // critcalc (now registered)
+    result = stepBattleScriptMachine(program, result.state, handlers); // critcalc
     if (result.kind !== "advanced") throw new Error(`critcalc did not advance: ${result.kind}`);
     result = stepBattleScriptMachine(program, result.state, handlers); // damagecalc
     if (result.kind !== "advanced") throw new Error(`damagecalc did not advance: ${result.kind}`);
@@ -651,14 +986,21 @@ describe("RUNG 2 integration: opcode 0 -> ... -> adjustnormaldamage -> attackani
     result = stepBattleScriptMachine(program, result.state, handlers); // adjustnormaldamage
     if (result.kind !== "advanced") throw new Error(`adjustnormaldamage did not advance: ${result.kind}`);
     expect(result.state.programCounter).toBe(labelPc("BattleScript_HitFromAtkAnimation"));
-    const halted = stepBattleScriptMachine(program, result.state, handlers); // attackanimation: not yet registered
+    for (const label of RUNG_3_LABELS) {
+      if (result.kind !== "advanced") throw new Error(`${label} did not advance: ${result.kind}`);
+      result = stepBattleScriptMachine(program, result.state, handlers);
+    }
+    if (result.kind !== "advanced") throw new Error(`expected advance before seteffectwithchance, got ${result.kind}`);
+    expect(result.state.rulesContext.battlers[1]!.hp).toBeLessThan(100); // datahpupdate dealt real damage
+    const halted = stepBattleScriptMachine(program, result.state, handlers); // seteffectwithchance: RUNG-4 boundary
     expect(halted.kind).toBe("unsupported");
   });
 
   it(
     "full staged hit turn on the KO scenario's real ROM seed (919694434): reproduces the pinned "
-      + "142 -> 213 -> 213 -> 204 damage chain and the exact 3-roll ledger (accuracycheck, critcalc, "
-      + "adjustnormaldamage), then hands off cleanly at attackanimation",
+      + "142 -> 213 -> 213 -> 204 damage chain, the exact 3-roll ledger (accuracycheck, critcalc, "
+      + "adjustnormaldamage), and the killing hit's HP -> 0, then hands off cleanly at "
+      + "seteffectwithchance",
     () => {
       const rc = context(
         0,
@@ -694,7 +1036,17 @@ describe("RUNG 2 integration: opcode 0 -> ... -> adjustnormaldamage -> attackani
       expect(result.state.rulesContext.battleMoveDamage).toBe(204); // 142 -> STAB 213 -> neutral type -> 96% -> 204
       expect(result.state.programCounter).toBe(labelPc("BattleScript_HitFromAtkAnimation"));
 
-      const halted = stepBattleScriptMachine(program, result.state, handlers); // attackanimation: RUNG-3 boundary
+      const rngCallsBeforeRung3 = result.state.rng.calls;
+      for (const label of RUNG_3_LABELS) {
+        if (result.kind !== "advanced") throw new Error(`${label} did not advance: ${result.kind}`);
+        result = stepBattleScriptMachine(program, result.state, handlers);
+      }
+      if (result.kind !== "advanced") throw new Error(`expected advance before seteffectwithchance, got ${result.kind}`);
+      expect(result.state.rng.calls).toBe(rngCallsBeforeRung3); // RUNG 3 consumes zero RNG (ground truth)
+      expect(result.state.rulesContext.battlers[1]!.hp).toBe(0); // the killing hit clamps HP to 0
+      expect(result.state.rulesContext.hpDealt).toBe(90); // dealt == remaining HP, not the full 204 damage
+
+      const halted = stepBattleScriptMachine(program, result.state, handlers); // seteffectwithchance: RUNG-4 boundary
       expect(halted.kind).toBe("unsupported");
     },
   );

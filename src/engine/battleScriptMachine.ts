@@ -609,6 +609,7 @@ function freezeEventPayload(
     case "trainer-slide-in":
     case "trainer-slide-out":
     case "status-animation":
+    case "health-bar-update":
       return Object.freeze({ ...payload });
     case "animation":
       return Object.freeze({ ...payload, arguments: Object.freeze([...payload.arguments]) });
