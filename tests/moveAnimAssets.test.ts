@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import firePlume from "../src/assets/gen/battle-anim-fire-plume.json" with { type: "json" };
 import rocks from "../src/assets/gen/battle-anim-rocks.json" with { type: "json" };
 import scripts from "../src/data/gen/battle-move-anim-scripts.json" with { type: "json" };
 import tables from "../src/data/gen/battle-move-anim-tables.json" with { type: "json" };
@@ -13,6 +14,27 @@ describe("battle-anim-rocks.json (S7 groundwork: ROCK_SLIDE's gFallingRockSprite
 
   it("pins gFallingRockSpriteTemplate's own anim frames (sAnims_FlyingRock -> frames 2/3/4)", () => {
     expect(rocks.fallingRockAnims.frames).toEqual([2, 3, 4]);
+  });
+});
+
+describe("battle-anim-fire-plume.json (DRAGON_RAGE enumeration rung 1: gDragonRageFirePlumeSpriteTemplate art)", () => {
+  it("pins fire_plume.png's tileset shape (4x20 tiles = 80, matching the compiled 0x0A00-byte sheet)", () => {
+    expect(firePlume.tileset.columns).toBe(4);
+    expect(firePlume.tileset.rows).toBe(20);
+    expect(firePlume.tileset.tiles.length).toBe(80);
+  });
+
+  it("pins the palette sourced from the separate fire.png file, not fire_plume.png itself", () => {
+    expect(firePlume.palette.length).toBe(16);
+  });
+
+  it("pins gDragonRageFirePlumeSpriteTemplate's own OAM shape and one-shot 5-frame reveal", () => {
+    expect(firePlume.oam).toEqual({ shape: "32x32", size: "32x32", affine: false });
+    expect(firePlume.frameSizeTiles).toBe(16);
+    expect(firePlume.dragonRageFirePlumeAnim).toMatchObject({
+      frames: [0, 1, 2, 3, 4],
+      frameDurationTicks: 5,
+    });
   });
 });
 
