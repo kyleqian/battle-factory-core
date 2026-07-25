@@ -87,6 +87,16 @@ import {
 import movesData from "../data/gen/moves.json" with { type: "json" };
 import itemHoldEffectsData from "../data/gen/item-hold-effects.json" with { type: "json" };
 import typeEffectivenessData from "../data/gen/type-effectiveness.json" with { type: "json" };
+import {
+  changeStatBuffs,
+  STAT_ACC,
+  STAT_ATK,
+  STAT_DEF,
+  STAT_EVASION,
+  STAT_SPATK,
+  STAT_SPDEF,
+  STAT_SPEED,
+} from "./battleScriptStatBuffs.ts";
 
 type MoveRow = Readonly<{
   id: number;
@@ -241,6 +251,19 @@ const PRINTFROMTABLE_TABLES: Readonly<Record<string, readonly string[]>> = Objec
     "STRINGID_PKMNSXPREVENTSYSZ",
     "STRINGID_PKMNSXHADNOEFFECTONY",
   ]),
+  /** battle_message.c:1006-1015. B_MSG_STAT_ROSE_EMPTY/B_MSG_STAT_ROSE_ITEM (indices 3-4) are the multi-stat/item-boost callers this registration doesn't drive. */
+  gStatUpStringIds: Object.freeze([
+    "STRINGID_ATTACKERSSTATROSE",
+    "STRINGID_DEFENDERSSTATROSE",
+    "STRINGID_STATSWONTINCREASE",
+  ]),
+  /** battle_message.c:1016-1022. */
+  gStatDownStringIds: Object.freeze([
+    "STRINGID_ATTACKERSSTATFELL",
+    "STRINGID_DEFENDERSSTATFELL",
+    "STRINGID_STATSWONTDECREASE",
+    "STRINGID_EMPTYSTRING3",
+  ]),
 });
 
 const MOVE_EFFECT_LABEL_BY_BYTE: Readonly<Record<number, string>> = Object.freeze({
@@ -255,6 +278,49 @@ const STATUS1_BIT_BY_MOVE_EFFECT_BYTE: Readonly<Record<number, number>> = Object
   [MOVE_EFFECT_BURN]: STATUS1_BURN,
   [MOVE_EFFECT_FREEZE]: STATUS1_FREEZE,
   [MOVE_EFFECT_PARALYSIS]: STATUS1_PARALYSIS,
+});
+
+/**
+ * include/constants/battle.h:262-275,286-299 -- the 12 real (+-1) ids plus
+ * the 12 (+-2) ids no move in battle_moves.h actually uses (topology-join
+ * confirmed by docs/stat-change-confusion-ground-truth.md S1.3); ported
+ * anyway since ChangeStatBuffs' own guard ladder is magnitude-generic and
+ * the source itself defines all 24 SetMoveEffect cases uniformly.
+ */
+type StatMoveEffectEntry = Readonly<{
+  statId: number;
+  direction: "increase" | "decrease";
+  magnitude: 1 | 2;
+}>;
+const STAT_MOVE_EFFECT_TABLE: Readonly<Record<number, StatMoveEffectEntry>> = Object.freeze({
+  15: Object.freeze({ statId: STAT_ATK, direction: "increase", magnitude: 1 }),
+  16: Object.freeze({ statId: STAT_DEF, direction: "increase", magnitude: 1 }),
+  17: Object.freeze({ statId: STAT_SPEED, direction: "increase", magnitude: 1 }),
+  18: Object.freeze({ statId: STAT_SPATK, direction: "increase", magnitude: 1 }),
+  19: Object.freeze({ statId: STAT_SPDEF, direction: "increase", magnitude: 1 }),
+  20: Object.freeze({ statId: STAT_ACC, direction: "increase", magnitude: 1 }),
+  21: Object.freeze({ statId: STAT_EVASION, direction: "increase", magnitude: 1 }),
+  22: Object.freeze({ statId: STAT_ATK, direction: "decrease", magnitude: 1 }),
+  23: Object.freeze({ statId: STAT_DEF, direction: "decrease", magnitude: 1 }),
+  24: Object.freeze({ statId: STAT_SPEED, direction: "decrease", magnitude: 1 }),
+  25: Object.freeze({ statId: STAT_SPATK, direction: "decrease", magnitude: 1 }),
+  26: Object.freeze({ statId: STAT_SPDEF, direction: "decrease", magnitude: 1 }),
+  27: Object.freeze({ statId: STAT_ACC, direction: "decrease", magnitude: 1 }),
+  28: Object.freeze({ statId: STAT_EVASION, direction: "decrease", magnitude: 1 }),
+  39: Object.freeze({ statId: STAT_ATK, direction: "increase", magnitude: 2 }),
+  40: Object.freeze({ statId: STAT_DEF, direction: "increase", magnitude: 2 }),
+  41: Object.freeze({ statId: STAT_SPEED, direction: "increase", magnitude: 2 }),
+  42: Object.freeze({ statId: STAT_SPATK, direction: "increase", magnitude: 2 }),
+  43: Object.freeze({ statId: STAT_SPDEF, direction: "increase", magnitude: 2 }),
+  44: Object.freeze({ statId: STAT_ACC, direction: "increase", magnitude: 2 }),
+  45: Object.freeze({ statId: STAT_EVASION, direction: "increase", magnitude: 2 }),
+  46: Object.freeze({ statId: STAT_ATK, direction: "decrease", magnitude: 2 }),
+  47: Object.freeze({ statId: STAT_DEF, direction: "decrease", magnitude: 2 }),
+  48: Object.freeze({ statId: STAT_SPEED, direction: "decrease", magnitude: 2 }),
+  49: Object.freeze({ statId: STAT_SPATK, direction: "decrease", magnitude: 2 }),
+  50: Object.freeze({ statId: STAT_SPDEF, direction: "decrease", magnitude: 2 }),
+  51: Object.freeze({ statId: STAT_ACC, direction: "decrease", magnitude: 2 }),
+  52: Object.freeze({ statId: STAT_EVASION, direction: "decrease", magnitude: 2 }),
 });
 
 /** include/battle.h:52-53, the doubles-only spread-move target bits attackanimation's early-return checks. */
@@ -284,7 +350,7 @@ const HOLD_EFFECT_EVASION_UP_ID = 22;
 
 const TYPE_EFFECTIVENESS = (typeEffectivenessData.typeEffectiveness as readonly TypeEffectivenessEntry[]);
 
-function unsupportedBranch(
+export function unsupportedBranch(
   context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
   sourceConstruct: string,
   sourceFile: string,
@@ -362,7 +428,7 @@ function requireBattlerRole(
   return value;
 }
 
-function withBattler(
+export function withBattler(
   rulesContext: BattleScriptRulesContext,
   battler: BattleScriptBattlerId,
   changes: Partial<BattleScriptRulesBattlerState>,
@@ -373,7 +439,7 @@ function withBattler(
   return Object.freeze({ ...rulesContext, battlers: Object.freeze(battlers) });
 }
 
-function withClearedLandedMove(
+export function withClearedLandedMove(
   moveHistory: BattleScriptMoveHistory,
   target: BattleScriptBattlerId,
 ): BattleScriptMoveHistory {
@@ -1718,6 +1784,10 @@ function applySetMoveEffect(
   }
 
   if (effectByte > PRIMARY_STATUS_MOVE_EFFECT) {
+    const statEntry = STAT_MOVE_EFFECT_TABLE[effectByte];
+    if (statEntry) {
+      return applyStatMoveEffect(context, baseRulesContext, effectByte, statEntry, affectsUser, attacker, target);
+    }
     return unsupportedBranch(
       context,
       `SetMoveEffect's MOVE_EFFECT_BYTE ${effectByte} is in the status2/misc family `
@@ -1866,6 +1936,75 @@ function applySetMoveEffect(
         Object.freeze({ kind: "set-battler-status-data" as const, battler: effectBattler, status1: newStatus1 }),
       ]),
     },
+  );
+}
+
+/**
+ * The stat-family arm of SetMoveEffect's own dispatch (:2644-2727, see
+ * STAT_MOVE_EFFECT_TABLE above) -- NOT part of ChangeStatBuffs itself.
+ * `flags` passed into ChangeStatBuffs is always 0 or MOVE_EFFECT_AFFECTS_USER
+ * on this route (docs/stat-change-confusion-ground-truth.md S1.1), so
+ * `allowPtr` inside changeStatBuffs is always false: every ability/Mist guard
+ * blocks silently (no message), and the "resolved" outcome kind is only ever
+ * reachable here via the Protect branch (unconditional regardless of flags).
+ * On a genuine WORKED result, SetMoveEffect's own else-branch (not
+ * ChangeStatBuffs') sets animArg1/animArg2 and pushes+jumps into
+ * BattleScript_StatUp/StatDown to print "rose"/"fell" -- ported here
+ * following the same push(current+1)+jump "call" shape `preventionCall`
+ * already established for the status1 family above.
+ */
+function applyStatMoveEffect(
+  context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
+  baseRulesContext: BattleScriptRulesContext,
+  effectByte: number,
+  entry: StatMoveEffectEntry,
+  affectsUser: boolean,
+  attacker: BattleScriptBattlerId,
+  target: BattleScriptBattlerId,
+): BattleScriptCommandTransition<BattleScriptRulesContext> {
+  const flags = affectsUser ? MOVE_EFFECT_AFFECTS_USER : 0;
+  const outcome = changeStatBuffs(context, {
+    attacker,
+    target,
+    currentMove: baseRulesContext.currentMove,
+    statId: entry.statId,
+    direction: entry.direction,
+    magnitude: entry.magnitude,
+    flags,
+    jumpProgramCounter: null,
+  });
+
+  // Only the Protect branch can produce "resolved" here (allowPtr is always
+  // false on this route) -- its transition is already complete and correct
+  // regardless of caller, no role rebinding needed.
+  if (outcome.kind === "resolved") return outcome.transition;
+
+  if (outcome.kind === "blocked-silent") {
+    return transitionBattleScriptCommand(
+      context,
+      Object.freeze({ kind: "advance" }),
+      {
+        rulesContext: Object.freeze({
+          ...outcome.rulesContext,
+          selectorRoles: baseRulesContext.selectorRoles,
+          scriptingBattler: baseRulesContext.scriptingBattler,
+        }),
+      },
+    );
+  }
+
+  const label = entry.direction === "increase" ? "BattleScript_StatUp" : "BattleScript_StatDown";
+  const programCounter = resolveRequiredLabelProgramCounter(context.program, label);
+  const nextRulesContext = Object.freeze({
+    ...outcome.rulesContext,
+    selectorRoles: baseRulesContext.selectorRoles,
+    scriptingBattler: baseRulesContext.scriptingBattler,
+    animArg1: effectByte,
+  });
+  return transitionBattleScriptCommand(
+    context,
+    Object.freeze({ kind: "call", programCounter }),
+    { rulesContext: nextRulesContext, events: outcome.events },
   );
 }
 

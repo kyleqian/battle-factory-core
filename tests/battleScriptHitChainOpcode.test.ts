@@ -1527,6 +1527,154 @@ describe("production seteffectwithchance (Cmd_seteffectwithchance) dispatch", ()
   });
 });
 
+/**
+ * Secondary-effect stat-change route (docs/stat-change-confusion-ground-
+ * truth.md): SetMoveEffect's ATK/DEF/SPD/SP_ATK/SP_DEF/ACC/EVS +-1/+-2 cases
+ * (:2644-2727), all dispatching through the shared changeStatBuffs() core
+ * (battleScriptStatBuffs.ts). `flags` is always 0/MOVE_EFFECT_AFFECTS_USER on
+ * this route, so every ability/Mist guard blocks silently (no message, no
+ * jump) -- MOVE_EFFECT_CERTAIN bypasses Cmd_seteffectwithchance's own outer
+ * chance roll (same technique the PARALYSIS-certain-bit tests above use;
+ * unrelated to ChangeStatBuffs' own internal `certain`, which stays FALSE on
+ * this route regardless per docs S1.1).
+ */
+describe("SetMoveEffect stat-change family (registered) -- secondary-effect route", () => {
+  const MOVE_EFFECT_ATK_PLUS_2 = 39;
+  const MOVE_EFFECT_SP_DEF_PLUS_1 = 19;
+  const MOVE_EFFECT_ACC_MINUS_1 = 27;
+  const MOVE_EFFECT_ATK_MINUS_1 = 22;
+  const MOVE_EFFECT_SP_DEF_MINUS_1 = 26;
+  const MOVE_EFFECT_AFFECTS_USER = 1 << 6;
+  const ABILITY_CLEAR_BODY = 29;
+  const ABILITY_WHITE_SMOKE = 73;
+  const ABILITY_KEEN_EYE = 51;
+  const ABILITY_HYPER_CUTTER = 52;
+  const B_MSG_DEFENDER_STAT_FELL = 1;
+  const B_MSG_DEFENDER_STAT_ROSE = 1;
+  const B_MSG_STAT_WONT_CHANGE = 2;
+  const CRUNCH = 242; // EFFECT_SPECIAL_DEFENSE_DOWN_HIT, secondaryEffectChance 20, FLAG_PROTECT_AFFECTED
+
+  it("SP_DEF_MINUS_1: lowers the target's SPDEF stage 6 -> 5, calls BattleScript_StatDown, zero extra RNG, DEFENDER_STAT_FELL", () => {
+    const rc = context(0, {}, { currentMove: CRUNCH, moveEffectByte: MOVE_EFFECT_SP_DEF_MINUS_1 | MOVE_EFFECT_CERTAIN });
+    const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.programCounter).toBe(labelPc("BattleScript_StatDown"));
+    expect(result.state.callStack.length).toBe(1);
+    expect(result.state.rng.calls).toBe(0);
+    expect(result.state.rulesContext.battlers[1]!.statStages[5]).toBe(5); // STAT_SPDEF
+    expect(result.state.rulesContext.multistringChooser).toBe(B_MSG_DEFENDER_STAT_FELL);
+    expect(result.state.rulesContext.animArg1).toBe(MOVE_EFFECT_SP_DEF_MINUS_1);
+    expect(result.state.rulesContext.selectorRoles.effectBattler).toBe(1);
+  });
+
+  it("SP_DEF_PLUS_1 (increase, no ability/Mist guards apply): raises the target's SPDEF stage 6 -> 7, calls BattleScript_StatUp", () => {
+    const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_SP_DEF_PLUS_1 | MOVE_EFFECT_CERTAIN });
+    const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.programCounter).toBe(labelPc("BattleScript_StatUp"));
+    expect(result.state.rulesContext.battlers[1]!.statStages[5]).toBe(7);
+    // affectsUser=0 -> activeBattler=target(1) -> (target===activeBattler)=true -> DEFENDER (the target's own stat rose, from the mover's perspective).
+    expect(result.state.rulesContext.multistringChooser).toBe(B_MSG_DEFENDER_STAT_ROSE);
+  });
+
+  it("ATK_PLUS_2 (magnitude 2, AFFECTS_USER): raises the attacker's own ATK stage 6 -> 8", () => {
+    const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_ATK_PLUS_2 | MOVE_EFFECT_AFFECTS_USER | MOVE_EFFECT_CERTAIN });
+    const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.rulesContext.battlers[0]!.statStages[1]).toBe(8); // STAT_ATK, attacker battler 0
+    expect(result.state.rulesContext.animArg1).toBe(MOVE_EFFECT_ATK_PLUS_2);
+    expect(result.state.rulesContext.selectorRoles.effectBattler).toBe(0);
+  });
+
+  it("Mist: silently blocks the decrease (no message, no jump), stage untouched, zero extra RNG", () => {
+    const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_SP_DEF_MINUS_1 | MOVE_EFFECT_CERTAIN, mistTimers: [0, 5] });
+    const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.callStack.length).toBe(0);
+    expect(result.state.rng.calls).toBe(0);
+    expect(result.state.rulesContext.battlers[1]!.statStages[5]).toBe(6);
+  });
+
+  it("Protect (structural, unconditional regardless of flags): jumps to BattleScript_ButItFailed and sets MOVE_RESULT_MISSED", () => {
+    const rc = context(0, {}, { currentMove: CRUNCH, moveEffectByte: MOVE_EFFECT_SP_DEF_MINUS_1 | MOVE_EFFECT_CERTAIN }, { protected: 1 });
+    const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.programCounter).toBe(labelPc("BattleScript_ButItFailed"));
+    expect(result.state.rulesContext.moveResultFlags & 1).toBe(1); // MOVE_RESULT_MISSED
+    expect(result.state.rulesContext.battlers[1]!.statStages[5]).toBe(6);
+  });
+
+  it("Clear Body: silently blocks the decrease, stage untouched (docs §2.3's live-verified Metang case)", () => {
+    const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_SP_DEF_MINUS_1 | MOVE_EFFECT_CERTAIN }, { ability: ABILITY_CLEAR_BODY });
+    const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.callStack.length).toBe(0);
+    expect(result.state.rulesContext.battlers[1]!.statStages[5]).toBe(6);
+  });
+
+  it("White Smoke: silently blocks the decrease exactly like Clear Body", () => {
+    const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_ATK_MINUS_1 | MOVE_EFFECT_CERTAIN }, { ability: ABILITY_WHITE_SMOKE });
+    const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.rulesContext.battlers[1]!.statStages[1]).toBe(6);
+  });
+
+  it("Keen Eye: blocks ACC_MINUS_1 specifically (statId-gated)", () => {
+    const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_ACC_MINUS_1 | MOVE_EFFECT_CERTAIN }, { ability: ABILITY_KEEN_EYE });
+    const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.rulesContext.battlers[1]!.statStages[6]).toBe(6); // STAT_ACC
+  });
+
+  it("Keen Eye does not block ATK_MINUS_1 (statId-specific, not a generic block)", () => {
+    const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_ATK_MINUS_1 | MOVE_EFFECT_CERTAIN }, { ability: ABILITY_KEEN_EYE });
+    const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.rulesContext.battlers[1]!.statStages[1]).toBe(5);
+  });
+
+  it("Hyper Cutter: blocks ATK_MINUS_1 specifically (statId-gated)", () => {
+    const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_ATK_MINUS_1 | MOVE_EFFECT_CERTAIN }, { ability: ABILITY_HYPER_CUTTER });
+    const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.rulesContext.battlers[1]!.statStages[1]).toBe(6);
+  });
+
+  it("Shield Dust: blocks a stat-down secondary effect (structurally reachable only on this route, flags===0)", () => {
+    const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_SP_DEF_MINUS_1 | MOVE_EFFECT_CERTAIN }, { ability: ABILITY_SHIELD_DUST });
+    const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.rulesContext.battlers[1]!.statStages[5]).toBe(6);
+  });
+
+  it("already at MAX_STAT_STAGE (12): silently blocks the increase, no early return before the clamp write", () => {
+    const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_SP_DEF_PLUS_1 | MOVE_EFFECT_CERTAIN }, { statStages: [6, 6, 6, 6, 6, 12, 6, 6] });
+    const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.callStack.length).toBe(0);
+    expect(result.state.rulesContext.battlers[1]!.statStages[5]).toBe(12);
+    expect(result.state.rulesContext.multistringChooser).toBe(B_MSG_STAT_WONT_CHANGE);
+  });
+
+  /**
+   * battle_script_commands.c:7091-7096's clamp-tail check compares raw
+   * MULTISTRING_CHOOSER values, and B_MSG_STAT_WONT_INCREASE/_DECREASE are
+   * both literally 2 (battle_string_ids.h:397,405) -- the early-return is
+   * direction-INDEPENDENT. This diverges from docs/stat-change-confusion-
+   * ground-truth.md S1.1's claim that an already-MIN decrease never early-
+   * returns (that claim was never live-verified by its own probe either);
+   * this test pins the literal, source-verified behavior instead.
+   */
+  it("already at MIN_STAT_STAGE (0): also silently blocks (direction-independent per the literal C comparison, not the asymmetry docs/stat-change-confusion-ground-truth.md S1.1 describes)", () => {
+    const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_SP_DEF_MINUS_1 | MOVE_EFFECT_CERTAIN }, { statStages: [6, 6, 6, 6, 6, 0, 6, 6] });
+    const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.callStack.length).toBe(0);
+    expect(result.state.rulesContext.battlers[1]!.statStages[5]).toBe(0);
+    expect(result.state.rulesContext.multistringChooser).toBe(B_MSG_STAT_WONT_CHANGE);
+  });
+});
+
 describe("production printfromtable (Cmd_printfromtable) dispatch", () => {
   it("registers B_SCR_OP_PRINTFROMTABLE", () => {
     expect(program.instructions.find((i) => i.opcodeName === "B_SCR_OP_PRINTFROMTABLE")).toBeDefined();

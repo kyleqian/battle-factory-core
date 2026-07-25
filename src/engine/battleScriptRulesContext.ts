@@ -29,6 +29,7 @@ import { createBattleScriptOpenPartyScreenOpcodeHandlers } from "./battleScriptO
 import { createBattleScriptSwitchinOpcodeHandlers } from "./battleScriptSwitchinOpcode.ts";
 import { createBattleScriptGetexpOpcodeHandlers } from "./battleScriptGetexpOpcode.ts";
 import { createBattleScriptCheckteamslostOpcodeHandlers } from "./battleScriptCheckteamslostOpcode.ts";
+import { createBattleScriptStatbuffchangeOpcodeHandlers } from "./battleScriptStatbuffchangeOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -344,6 +345,8 @@ export type BattleScriptRulesContext = Readonly<
     lastUsedAbility: number;
     multiHitCounter: number;
     multistringChooser: number;
+    /** Source u16 gBattleScripting.animArg1 -- the only field Cmd_playanimation's sB_ANIM_ARG1 operand dereferences (animArg2 is never read by playanimation). */
+    animArg1: number;
     battleMoveDamage: number;
     /** Source s32 gHpDealt -- Cmd_datahpupdate's real-damage-dealt bookkeeping. */
     hpDealt: number;
@@ -386,6 +389,8 @@ export type BattleScriptRulesContext = Readonly<
     party: BattleScriptPartyBySide;
     /** Source u32 gSideStatuses[2], narrowed to the SIDE_STATUS_SAFEGUARD bit SetMoveEffect reads. */
     sideStatuses: readonly [number, number];
+    /** Source u8 gSideTimers[side].mistTimer -- ChangeStatBuffs' own Mist guard (0 = inactive). */
+    mistTimers: readonly [number, number];
     /** Source u32 gBattleWeather. */
     weather: number;
   }
@@ -452,6 +457,7 @@ export type BattleScriptRulesContextInput = Readonly<{
   multiHitEffect?: number;
   statChanger?: number;
   statAnimPlayed?: number;
+  animArg1?: number;
   tripleKickPower?: number;
   twoTurnStringId?: number;
   /** Omitted slots default to species 0 (empty) -- Cmd_checkteamslost's own species-nonzero gate excludes them. */
@@ -460,6 +466,7 @@ export type BattleScriptRulesContextInput = Readonly<{
     opponent?: readonly BattleScriptPartyMemberInput[];
   }>;
   sideStatuses?: readonly [number?, number?];
+  mistTimers?: readonly [number?, number?];
   weather?: number;
 }>;
 
@@ -1722,11 +1729,16 @@ export function createBattleScriptRulesContext(
     multiHitEffect: requireUnsigned(input.multiHitEffect ?? 0, 0xff, "multiHitEffect"),
     statChanger: requireUnsigned(input.statChanger ?? 0, 0xff, "statChanger"),
     statAnimPlayed: requireUnsigned(input.statAnimPlayed ?? 0, 0xff, "statAnimPlayed"),
+    animArg1: requireUnsigned(input.animArg1 ?? 0, 0xffff, "animArg1"),
     tripleKickPower: requireUnsigned(input.tripleKickPower ?? 0, 0xffff, "tripleKickPower"),
     twoTurnStringId: requireUnsigned(input.twoTurnStringId ?? 0, 0xff, "twoTurnStringId"),
     sideStatuses: Object.freeze([
       requireUnsigned(input.sideStatuses?.[0] ?? 0, 0xffff_ffff, "sideStatuses[0]") >>> 0,
       requireUnsigned(input.sideStatuses?.[1] ?? 0, 0xffff_ffff, "sideStatuses[1]") >>> 0,
+    ]) as unknown as readonly [number, number],
+    mistTimers: Object.freeze([
+      requireUnsigned(input.mistTimers?.[0] ?? 0, 0xff, "mistTimers[0]"),
+      requireUnsigned(input.mistTimers?.[1] ?? 0, 0xff, "mistTimers[1]"),
     ]) as unknown as readonly [number, number],
     weather: requireUnsigned(input.weather ?? 0, 0xffff_ffff, "weather") >>> 0,
   });
@@ -1867,6 +1879,10 @@ export function createBattleScriptStatusRulesHandlers(
     }),
     ...createBattleScriptGetexpOpcodeHandlers(program),
     ...createBattleScriptCheckteamslostOpcodeHandlers(program),
+    ...createBattleScriptStatbuffchangeOpcodeHandlers(program, {
+      isControllerIdle: sourceExternalPorts.isControllerIdle,
+      resolveBattlerForBattleScript: resolveRulesBattlerForBattleScript,
+    }),
   });
 }
 

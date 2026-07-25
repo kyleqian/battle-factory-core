@@ -111,6 +111,18 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // fixture (their switched-in mons carry a non-trigger ability, no item, no
   // Spikes/escape/sure-hit state).
   ["src/engine/battleScriptSwitchinOpcode.ts", 8],
+  // Primary-effect stat-change registration (docs/primary-stat-ground-truth.md):
+  // Cmd_playanimation is narrowed to its B_ANIM_STATS_CHANGE arm (the only
+  // animType BattleScript_EffectStatUp/EffectStatDown ever pass) -- any other
+  // animType (2 barriers: an unrecognized animType, an unrecognized argument
+  // operand shape) defers the RAIN/SUN/SANDSTORM/HAIL-continues,
+  // HITMARKER_NO_ANIMATIONS-redirect, and semi-invulnerability branches this
+  // registration's two callers never reach. Cmd_jumpifstatus2 is narrowed to
+  // its one concrete value this route needs (STATUS2_SUBSTITUTE, the DOWN
+  // family's Substitute early-out) -- the other 36 concrete call sites' own
+  // STATUS2_* masks (MULTIPLETURNS/FOCUS_ENERGY/CONFUSION/
+  // ESCAPE_PREVENTION/...) are a separate barrier (1).
+  ["src/engine/battleScriptStatbuffchangeOpcode.ts", 3],
 ]);
 
 function recordingImportsIn(file: string): string[] {
@@ -126,7 +138,7 @@ function barrierCallSitesIn(file: string): number {
   const source = readFileSync(file, "utf8");
   return source
     .split("\n")
-    .filter((line) => line.includes("unsupportedBranch(") && !/^\s*(?:function|const)\s+unsupportedBranch\b/.test(line))
+    .filter((line) => line.includes("unsupportedBranch(") && !/^\s*(?:export\s+)?(?:function|const)\s+unsupportedBranch\b/.test(line))
     .length;
 }
 

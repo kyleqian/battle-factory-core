@@ -116,6 +116,16 @@ export type BattleScriptControlDirective =
   | Readonly<{ kind: "jump"; programCounter: number }>
   | Readonly<{ kind: "call"; programCounter: number }>
   | Readonly<{ kind: "call-current"; programCounter: number }>
+  /**
+   * BattleScriptPush(BS_ptr) followed by an unrelated jump -- ChangeStatBuffs'
+   * own Mist/Clear Body/White Smoke/Keen Eye/Hyper Cutter branches
+   * (battle_script_commands.c:6937-7098) push an EXPLICIT operand-derived
+   * pointer (the calling statbuffchange instruction's own jumpptr operand),
+   * not "the instruction right after this one" -- distinct from "call"/
+   * "call-current", whose return address is always derived from the current
+   * program counter.
+   */
+  | Readonly<{ kind: "call-explicit"; programCounter: number; returnProgramCounter: number }>
   | Readonly<{ kind: "return" }>
   | Readonly<{ kind: "controller-return" }>
   | Readonly<{ kind: "scheduler-progress" }>
@@ -860,6 +870,18 @@ export function stepBattleScriptMachine<RulesContext extends object>(
       next = freezeState(
         transition.control.programCounter,
         [...state.callStack, state.programCounter],
+        state.instructionsExecuted + 1,
+        null,
+        transition.scheduler,
+        transition.rulesContext,
+        transition.rng,
+        events,
+      );
+      break;
+    case "call-explicit":
+      next = freezeState(
+        transition.control.programCounter,
+        [...state.callStack, transition.control.returnProgramCounter],
         state.instructionsExecuted + 1,
         null,
         transition.scheduler,
