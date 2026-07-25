@@ -1,4 +1,64 @@
 ---
+## 441 — S10 step (iv) part 3/3 (FINAL): pure `BattleResolution` adapter + no-fixture win/loss integration proof — **ROADMAP S10 step (iv) is now COMPLETE**
+
+- **State:** tree green at **191 files / 2263 tests** (+3 files / +27 tests
+  over entry 440's 188/2236), build green, ratchet green (6/6, barrier counts
+  and canonical-recording allowlist unchanged — no new production imports).
+  `roundController.ts` and its three fixture-driven test files
+  (`roundController.test.ts`, `roundScenarioMatrix.test.ts`,
+  `factoryTerminalPresentation.test.ts`) are **byte-for-byte untouched**
+  (confirmed via `git diff`, as the seam doc's "what stays intact" promised).
+- **Did:** (1) `src/engine/battleResolutionAdapter.ts` —
+  `deriveBattleResolutionFromTerminalBoundary`, the pure adapter from
+  `docs/round-controller-outcome-seam.md` §4 piece 5. Takes only the narrow
+  `BattleScriptRulesContext` slice it reads (`battlers`/`battleTopology`/
+  `party`, structurally satisfied by the real type) plus the terminal
+  `BattleOutcome`/`rng.value` and the pre-battle `BattleParty` snapshots.
+  Ground-truth-pinned rules, all cited in-file: outcome `player-win`→`"win"`,
+  `trainer-win`/`draw`→`"loss"` (the Factory battle-room script has exactly
+  one `case 1`=WON; LOST and DREW both fall through to the identical
+  `WarpToLobbyLost` branch — `docs/battle-resolution-adapter-ground-truth.md`
+  §4 — a draw is never thrown on); `id`/`maxHp` carried verbatim from the
+  pre-battle snapshot; `hp` overlaid from the kernel's live-synced party
+  slice; `status` is fainted→`"none"`, the slot mirrored by a live battler→
+  its real `status1` mapped to the `BattleStatus` vocabulary (toxic checked
+  ahead of plain poison — `GetAilmentFromStatus` collapses them, this engine's
+  vocabulary keeps them distinct), every other (benched) slot→its pre-battle
+  value, since the kernel's party slice tracks only `species`/`isEgg`/`hp`,
+  not bench status. The `status1`→`BattleStatus` mapping is **total** over
+  real values (every `STATUS1_*` bit checked is disjoint) — no unrepresentable
+  case was found, so no barrier was added. 13 unit tests (outcome mapping ×3,
+  status1 mapping incl. the toxic-vs-poison precedence, identity carry-
+  forward, hp overlay, all three status rules, rngValue passthrough, and a
+  dedicated synthetic-state draw→loss test per the brief). (2) Minimal,
+  additive extension to `factoryBattleScriptTerminalDecision.ts`: an optional
+  `attackingSide: "player" | "trainer"` config knob (default `"player"`,
+  proven byte-for-byte unchanged — existing 5 tests still pass unmodified)
+  that mirrors the identical staged hit chain onto the player's own modeled
+  party slot instead, with no new kernel modeling — exactly the same move
+  math, opposite roles, needed to stage a *real* trainer-win for the
+  integration proof. (3) `tests/battleResolutionAdapterIntegration.test.ts` —
+  the no-fixture integration proof: a staged last-mon-KO scenario runs
+  through `submitBattleDecision` to a REAL terminal boundary, then the
+  adapter, then `resolveRoundBattle` on a real `RoundControllerState`. Win
+  path: `player-win` → `presentingBattleWin` → `lastBattle.outcome==="win"` →
+  `swapOffer` command carries the real adapted (all-fainted) opponent party →
+  declining the swap genuinely increments `battleIndex` 0→1. Loss path:
+  `trainer-win` (via the new `attackingSide:"trainer"` staging) →
+  `resolveRoundBattle` drives `roundLost`, `lastBattle.outcome==="loss"`.
+- **Next: the presentation-seam checkpoint (ROADMAP S10 §3) is the next
+  battle-lane step — a hard ordering constraint, not a preference.** Step
+  (iv) is done; `docs/presentation-seam-scout.md` is its evidence pack (one
+  already-exact presentation window re-driven from kernel semantic events
+  instead of turn-N state, committed trace still passing). Do not register
+  further opcodes or grow the kernel past this checkpoint.
+- **Notes:** no presentation/render/`battleScene` edits; no oracle traces
+  (Tier-1 only); no new production imports of canonical recordings;
+  `core.ts` production wiring of the adapter into the tick flow is
+  deliberately out of this rung's scope (the presentation-seam checkpoint's
+  territory, per the brief).
+
+---
 ## 440 — S10 step (iv) part 2/3: `HandleFaintedMonActions` orchestration + `BS_FAINTED` role — a real Level-50 Factory battle now reaches `{ kind: "terminal", outcome: "player-win" }` through `submitBattleDecision`
 
 - **State:** tree green at **188 files / 2236 tests** (this rung added 2 new

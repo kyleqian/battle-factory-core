@@ -4,6 +4,45 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 444 — SetMoveEffect status-write quartet registered (POISON/BURN/FREEZE/PARALYSIS) — secondary status procs are now kernel-executable
+
+*(Entry written by the supervisor: the worker landed both code commits green
+and was cap-killed mid-docs-update; suite/build/verify script independently
+re-verified before this entry.)*
+
+- **State:** tree green at **194 files / 2318 tests** (+31 over entry 443's
+  2287 baseline at merge), build green. `B_SCR_OP_PRINTFROMTABLE` and
+  `B_SCR_OP_UPDATESTATUSICON` registered (53 opcodes composed);
+  `Cmd_seteffectwithchance`'s two SetMoveEffect dispatch barriers replaced by
+  a real `applySetMoveEffect` dispatch, source-complete for
+  {POISON, BURN, FREEZE, PARALYSIS} — per-status guards ported exactly
+  (type immunities, existing-status, Safeguard, substitute), affects-user
+  flag, `status1` write plus the party-record sync mirroring `datahpupdate`.
+  Barrier pin `battleScriptHitChainOpcode.ts` 19 → 25, fully itemized in the
+  ratchet test's own comment (net of the two retired dispatch barriers;
+  SLEEP/TOXIC route via still-unregistered `Cmd_seteffectprimary`; family-B
+  status2/misc cases incl. FLINCH stay barriers).
+- **Did:** commits `78b1734` (registration + dispatch + 31 Tier-1 tests) and
+  `e40c7f3` (integration proof: staged KADABRA Body Slam vs MAGNETON
+  reproduces the banked ledger — proc seed paralyzes battler AND party slot
+  with zero extra `Random()` draws vs a plain hit, control seed untouched,
+  asserting `docs/set-move-effect-ground-truth.md`'s banked values).
+  Verify script `verify-set-move-effect-ground-truth.ts` re-run all-PASS
+  post-land (supervisor).
+- **Next (banked prep, in consumption order):** (1) forced-switch
+  registration slices — `docs/forced-switch-ground-truth.md` §4's 10-step
+  plan, `openpartyscreen` first (both directions live-proven, 23/23 checks);
+  (2) stat-down secondary family — `docs/stat-change-confusion-ground-truth.md`
+  (`ChangeStatBuffs` zero-RNG, silent-guard finding); (3) end-turn
+  orchestration — `docs/end-turn-ground-truth.md` (inline-faint structural
+  finding, ORWORD/PLAYANIMATION gap, 17/17 checks). Animation lane:
+  DRAGON_RAGE finish ladder in flight.
+- **Notes:** FLINCH deliberately excluded (turn-order field ripple — its own
+  slice). The cap-kill's "unauthenticated/sandboxed" postflight hint was
+  noise (the worker ran 45 min and committed real work) — do not relaunch
+  with sandbox overrides on that basis.
+
+---
 ## 443 — S10 kernel-breadth RUNG 1 complete (`Cmd_ppreduce` Pressure barriers retired); RUNG 2 (SetMoveEffect quartet) scoped, not attempted this session
 
 - **State:** tree green at **194 files / 2286 tests** (+10 tests over entry
@@ -144,64 +183,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   deletion fell out naturally here); `drawFightSubmenuWindow`'s own
   `turn<N>Resolved` boolean cascade is unmodified by design (redesigning it
   was explicitly out of this checkpoint's scope).
-
----
-## 441 — S10 step (iv) part 3/3 (FINAL): pure `BattleResolution` adapter + no-fixture win/loss integration proof — **ROADMAP S10 step (iv) is now COMPLETE**
-
-- **State:** tree green at **191 files / 2263 tests** (+3 files / +27 tests
-  over entry 440's 188/2236), build green, ratchet green (6/6, barrier counts
-  and canonical-recording allowlist unchanged — no new production imports).
-  `roundController.ts` and its three fixture-driven test files
-  (`roundController.test.ts`, `roundScenarioMatrix.test.ts`,
-  `factoryTerminalPresentation.test.ts`) are **byte-for-byte untouched**
-  (confirmed via `git diff`, as the seam doc's "what stays intact" promised).
-- **Did:** (1) `src/engine/battleResolutionAdapter.ts` —
-  `deriveBattleResolutionFromTerminalBoundary`, the pure adapter from
-  `docs/round-controller-outcome-seam.md` §4 piece 5. Takes only the narrow
-  `BattleScriptRulesContext` slice it reads (`battlers`/`battleTopology`/
-  `party`, structurally satisfied by the real type) plus the terminal
-  `BattleOutcome`/`rng.value` and the pre-battle `BattleParty` snapshots.
-  Ground-truth-pinned rules, all cited in-file: outcome `player-win`→`"win"`,
-  `trainer-win`/`draw`→`"loss"` (the Factory battle-room script has exactly
-  one `case 1`=WON; LOST and DREW both fall through to the identical
-  `WarpToLobbyLost` branch — `docs/battle-resolution-adapter-ground-truth.md`
-  §4 — a draw is never thrown on); `id`/`maxHp` carried verbatim from the
-  pre-battle snapshot; `hp` overlaid from the kernel's live-synced party
-  slice; `status` is fainted→`"none"`, the slot mirrored by a live battler→
-  its real `status1` mapped to the `BattleStatus` vocabulary (toxic checked
-  ahead of plain poison — `GetAilmentFromStatus` collapses them, this engine's
-  vocabulary keeps them distinct), every other (benched) slot→its pre-battle
-  value, since the kernel's party slice tracks only `species`/`isEgg`/`hp`,
-  not bench status. The `status1`→`BattleStatus` mapping is **total** over
-  real values (every `STATUS1_*` bit checked is disjoint) — no unrepresentable
-  case was found, so no barrier was added. 13 unit tests (outcome mapping ×3,
-  status1 mapping incl. the toxic-vs-poison precedence, identity carry-
-  forward, hp overlay, all three status rules, rngValue passthrough, and a
-  dedicated synthetic-state draw→loss test per the brief). (2) Minimal,
-  additive extension to `factoryBattleScriptTerminalDecision.ts`: an optional
-  `attackingSide: "player" | "trainer"` config knob (default `"player"`,
-  proven byte-for-byte unchanged — existing 5 tests still pass unmodified)
-  that mirrors the identical staged hit chain onto the player's own modeled
-  party slot instead, with no new kernel modeling — exactly the same move
-  math, opposite roles, needed to stage a *real* trainer-win for the
-  integration proof. (3) `tests/battleResolutionAdapterIntegration.test.ts` —
-  the no-fixture integration proof: a staged last-mon-KO scenario runs
-  through `submitBattleDecision` to a REAL terminal boundary, then the
-  adapter, then `resolveRoundBattle` on a real `RoundControllerState`. Win
-  path: `player-win` → `presentingBattleWin` → `lastBattle.outcome==="win"` →
-  `swapOffer` command carries the real adapted (all-fainted) opponent party →
-  declining the swap genuinely increments `battleIndex` 0→1. Loss path:
-  `trainer-win` (via the new `attackingSide:"trainer"` staging) →
-  `resolveRoundBattle` drives `roundLost`, `lastBattle.outcome==="loss"`.
-- **Next: the presentation-seam checkpoint (ROADMAP S10 §3) is the next
-  battle-lane step — a hard ordering constraint, not a preference.** Step
-  (iv) is done; `docs/presentation-seam-scout.md` is its evidence pack (one
-  already-exact presentation window re-driven from kernel semantic events
-  instead of turn-N state, committed trace still passing). Do not register
-  further opcodes or grow the kernel past this checkpoint.
-- **Notes:** no presentation/render/`battleScene` edits; no oracle traces
-  (Tier-1 only); no new production imports of canonical recordings;
-  `core.ts` production wiring of the adapter into the tick flow is
-  deliberately out of this rung's scope (the presentation-seam checkpoint's
-  territory, per the brief).
 
