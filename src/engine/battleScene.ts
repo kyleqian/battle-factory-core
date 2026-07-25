@@ -17174,6 +17174,15 @@ export function renderSceneOnMovePresentation(
 
   if (state.config.move === "SHADOW_PUNCH") {
     const view = sceneOnShadowPunchView(state);
+    // Per-mechanism framebuffer capture lag (shadowPunch.ts's own doc
+    // comment on SHADOW_PUNCH_ATTACKER_FRAMEBUFFER_LAG): only the
+    // attacker/clone draw calls lag one RAM-write tick behind the rest of
+    // the view (background/target-shake/hitsplat/fist read RAM-pixel-clean
+    // at zero lag), mirroring DRAGON_RAGE's own phase-aware attacker view.
+    const attackerView = sceneOnShadowPunchView({
+      ...state,
+      age: state.age - SHADOW_PUNCH_ATTACKER_FRAMEBUFFER_LAG,
+    });
     const playerToOpponent =
       view.attacker.species === "HAUNTER"
       && view.attacker.geometry.side === "player"

@@ -4,6 +4,98 @@ Older dated sections moved out of `ANIMATION_PROGRESS.md` to keep that
 file lean (`AGENTS.md`'s ~3-most-recent convention). Git history has the
 full record regardless; this file is a read-only reference.
 
+## SHADOW_PUNCH: `AnimTask_AttackerPunchWithTrace` RAM-probed and ported (shadowPunch.ts), Scene-ON wiring + dense comparators NOT done this step (2026-07-25)
+
+**Verdict: the move's one unproven component is now a Tier-1-pinned, RAM-
+proven port; the render-seam wiring and dense pixel acceptance the step
+brief asked for did not fit in this session's remaining budget after the
+probe. No coverage entry added — per this lane's own rule, code alone
+(even RAM-proven code) never promotes a move's status. Honest partial, not
+a blind fit: everything shipped is either read straight from RAM or reused
+verbatim from an already-exact-proven sibling.**
+
+**Extractor decode.** `Move_SHADOW_PUNCH` (`battle_anim_scripts.s:4308-
+4327`) decoded into `battle-move-anim-scripts.json` (additive; the
+byte-identical-reproducibility test and `factoryAnimationComponents.test.ts`
+stayed green). Confirmed the script is exactly as the prior session
+scoped it: linear, every op except `createvisualtask
+AnimTask_AttackerPunchWithTrace` already proven by FIRE_PUNCH/ICE_PUNCH/
+THUNDER_PUNCH/EXTREME_SPEED.
+
+**Assets.** HAUNTER front+back sprites added to `extract-battle-mon-pics.ts`
+(mirrors the CHARMELEON precedent). `BG_GHOST` (tile/palette/tilemap,
+`fadetobg`'s own new bg id — a single tilemap, unlike EXTREME_SPEED's
+side-selected pair) extracted fresh (`extract-shadow-punch-assets.ts`).
+
+**RAM probe (`tools/probe/dump-shadowpunch-full.py`), both attacker
+orientations** (staged `FRONTIER_MON_HAUNTER_1`-vs-ONIX via `mechanicLab
+overrides.parties`, `tools/battle-lab/mechanic-shadow-punch-{haunter-onix,
+onix-haunter}.json`). Found the real mechanism precisely, corrected one
+citation error along the way (the task is `battle_anim_mons.c:2392-2496`,
+not `battle_anim_fight.c` as the prior session's scoping note said —
+confirmed directly via `nm` against the pinned elf, not assumed):
+
+- The task slides the attacker's own sprite `x2` out over 5 ticks then back
+  over 4 (genuinely asymmetric — the source's own "do same number of traces
+  as before" comment doesn't match its actual `tCounter` bookkeeping),
+  spawning one darkened(`BlendPalette` coeff 13 toward `RGB_BLACK`) +
+  translucent (`CloneBattlerSpriteWithBlend` sets `ST_OAM_OBJ_BLEND`,
+  `setalpha 9,8`) afterimage clone per tick — 9 total, each self-destroying
+  exactly 8 ticks after its own creation.
+- A real vanilla artifact, confirmed on hardware, not a bug: task setup runs
+  `gSprites[attacker].x2 -= tBattlerSpriteId` — subtracting the attacker's
+  own SPRITE SLOT INDEX (6-8 in the probed fixtures) from `x2` as if it were
+  a pixel offset, applied once and never undone. RAM-confirmed directly
+  (both orientations) that this offset is baked into every attacker/clone
+  position for the task's whole life.
+- `tMoveSpeed` is +8 player-side, -8 opponent-side (`GetBattlerSide`);
+  `tPriority` is 2 when the attacker's own subpriority is 20 or 40, else 3 —
+  RAM-confirmed both ways (player-side battler-0 subpriority 30 → priority
+  3; opponent-side battler-0 subpriority 40 → priority 2).
+- Derived a closed form for the whole attacker-offset/clone schedule (no
+  lookup table needed — verified against every probed tick both
+  orientations, see `shadowPunch.ts`'s own module doc for the formula).
+- The move's own `fadetobg`/`restorebg` `BLDY` timeline (mechanism already
+  exact-proven via MOVE_EXTREME_SPEED — only this move's own timing anchors
+  are new) came back clean and RAM-exact except a genuine 3-tick startup
+  hold at `bldy=1` on the `restorebg` ramp only (plausibly `Task_FadeToBg`'s
+  own state-2 "recompute the default BG from scratch" costing extra setup
+  frames) — encoded as a literal per-tick table rather than fit, since the
+  window is short and the anomaly doesn't reduce to a clean formula.
+- Fist/hitsplat/target-shake anchor ages read directly off RAM; the target
+  shake reuses the already-ported `shakeMon.ts` primitive verbatim
+  (`AnimTask_ShakeMon, ANIM_TARGET, 3, 0, 6, 1`).
+
+**Port.** `src/engine/shadowPunch.ts` — the attacker-offset/clone closed
+form, the BLDY table, and every anchor age above. `tests/shadowPunch.test.ts`
+pins the closed form against every RAM-probed tick (ages 0-16) for BOTH
+orientations, plus the BLDY table and the priority rule — 6 new tests, all
+green.
+
+**NOT done this step — the named remainder.** Wiring `shadowPunch.ts`
+through the Scene-ON render seam (`battleScene.ts`'s
+`state.config.move === "SHADOW_PUNCH"` dispatch + a `sceneOnShadowPunchView`
+projection in `sceneOnPresentation.ts`, mirroring the DRAGON_RAGE/
+EXTREME_SPEED precedent — healthbox/message-text draw calls are fully
+generic (`composeOpponentHealthbox`/`composePlayerHealthbox` take a plain
+`name: string`, no species union to extend) and the translucent-clone draw
+call already exists verbatim (`drawSpriteSheetBlendedOverFb`, QUICK_ATTACK's
+own precedent) — and the dense pixel comparators (both orientations, twice
+each) the step brief requires for any coverage claim. Ran out of session
+budget after the RAM-probe-and-port stage; stopping here with a clean,
+tested port is the honest outcome rather than rushing the wiring
+uncomparatored. `blend_color_cycle`'s stretch enumeration (this step's own
+"only if 1-4 land with ≥10 min spare" clause) was not reached either, since
+1-4 themselves didn't land.
+
+**Coverage:** no entry added for `MOVE_SHADOW_PUNCH` — no dense pixel
+evidence exists yet, so per this lane's own rule ("shared code alone never
+promotes coverage") it stays unsupported in `ANIMATION_COVERAGE.json`.
+
+**Evidence.** `npm test` 2218/2218 (2212 + 6 new). `npm run build` green.
+Both RAM probes reproducible (`/tmp/shadowpunch-{haunter-onix,onix-haunter}.
+json`, not committed — scratch).
+
 ## DRAGON_RAGE rungs 1-3: render-age-1 guard fixed, fire-spit sheetFrame off-by-one root-caused from source, fire-plume window disciplined-probed but not resolved — 127/150 → 139/150, stays `partial` (2026-07-25)
 
 **Verdict: two of the three named residuals fixed on hard evidence (one of
