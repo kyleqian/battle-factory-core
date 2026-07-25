@@ -202,8 +202,129 @@ async function main(): Promise<void> {
 
   check("battleOutcome stays non-terminal even after the second hit (still 2 living opponent slots)", nextHitDone.battleOutcome !== B_OUTCOME_WON, `battleOutcome=${nextHitDone.battleOutcome}`);
 
+  await runPlayerSideChecks();
+
   console.log(failures === 0 ? "\nALL CHECKS PASSED" : `\n${failures} CHECK(S) FAILED`);
   process.exitCode = failures === 0 ? 0 : 1;
+}
+
+// Player-side forced switch: tools/battle-lab/mechanic-forced-switch-player-choice-off.json
+// is the mirror of the AI-choice scenario above (opponent's URSARING one-shots
+// the player's SUNKERN; player bench slots 1/2 are PIDGEY/MACHOP, both
+// healthy) plus a RAM-probe-derived button recipe (see
+// tools/probe/dump-forced-switch-party-menu.py and docs/forced-switch-ground-truth.md
+// §3) that opens the forced party menu, navigates past the fainted slot 0,
+// and picks slot 2 (MACHOP) -- deliberately NOT slot 1 (PIDGEY, "next living
+// index") -- so this disambiguates genuine player choice the same way §2a
+// disambiguates the AI's choice.
+async function runPlayerSideChecks(): Promise<void> {
+  const path = "tools/battle-lab/mechanic-forced-switch-player-choice-off.json";
+  const run1 = await runScenario(path);
+  const run2 = await runScenario(path);
+
+  const SPECIES_MACHOP = 66;
+  const PARTY_INDEX_PIDGEY = 1; // "next living index" -- the alternative this rung disambiguates against
+
+  const F_START = 0;
+  const F_PRE_KILL = 235; // still mid hit-chain, pre-4th-roll
+  const F_KILL = 240; // datahpupdate already applied; HP 0
+  const F_ROLLS_DONE = 250; // 4th roll landed
+  const F_MENU_NAV_DONE = 660; // player has navigated to slot 2 and confirmed; still mid-dance
+  const F_PARTYINDEX_FLIP = 680; // gBattlerPartyIndexes committed to slot 2
+  const F_REBUILD_DONE = 700; // species/hp/stats fully rebuilt
+  const F_RESUME_IDLE = 800; // real decision phase reached again
+  const F_SECOND_HIT_DONE = 1200; // opponent's next Strength lands on the newly-switched MACHOP
+  const F_TERMINAL = 1300;
+
+  check(
+    "player-side: determinism across reruns (frame 0)",
+    deepEqualCapture(run1.get(F_START)!, run2.get(F_START)!),
+    "initial state differs between runs",
+  );
+  check(
+    "player-side: determinism across reruns (final frame)",
+    deepEqualCapture(run1.get(F_TERMINAL)!, run2.get(F_TERMINAL)!),
+    "final state differs between runs",
+  );
+
+  const preKill = run1.get(F_PRE_KILL)!;
+  const kill = run1.get(F_KILL)!;
+  const rollsDone = run1.get(F_ROLLS_DONE)!;
+  const menuNavDone = run1.get(F_MENU_NAV_DONE)!;
+  const partyIndexFlip = run1.get(F_PARTYINDEX_FLIP)!;
+  const rebuildDone = run1.get(F_REBUILD_DONE)!;
+  const resumeIdle = run1.get(F_RESUME_IDLE)!;
+  const secondHitDone = run1.get(F_SECOND_HIT_DONE)!;
+
+  check(
+    "player-side kill: player HP is already 0 while rngValue is still the pre-4th-roll value",
+    kill.battlers.player.hp === 0 && kill.rngValue === preKill.rngValue,
+    `hp=${kill.battlers.player.hp} rng kill=${kill.rngValue} preKill=${preKill.rngValue}`,
+  );
+  check(
+    "player-side: the 4th roll lands a few frames after the HP update, not before",
+    rollsDone.rngValue !== kill.rngValue,
+    `rngValue unchanged from kill (${kill.rngValue}) through rolls-done frame`,
+  );
+
+  // --- Claim: the forced party-menu dance (fainted-message dismissal +
+  // navigation + submenu commit) draws ZERO Random() calls, same as the
+  // AI-choice dance in §2b -- even though this half is driven by real
+  // player button input, not a synchronous AI algorithm. ---
+  check(
+    "player-side: the entire forced-menu button dance draws ZERO Random() calls",
+    rollsDone.rngValue === menuNavDone.rngValue,
+    `rngValue ${rollsDone.rngValue} -> ${menuNavDone.rngValue}`,
+  );
+
+  check(
+    "player-side: gBattlerPartyIndexes flips to the new slot (2) before species/HP are rebuilt",
+    partyIndexFlip.battlers.player.partyIndex === 2,
+    `partyIndex=${partyIndexFlip.battlers.player.partyIndex}`,
+  );
+
+  // --- THE headline claim: pressing DOWN,DOWN,A,A from the fainted slot 0
+  // lands on slot 2 (MACHOP), not slot 1 (PIDGEY, "next living index") --
+  // proving this is a genuine player choice, distinguishable from a
+  // default-first-healthy autopick, exactly mirroring how §2a disambiguates
+  // the AI's own choice. ---
+  check(
+    "player-side: player's button sequence picks MACHOP at partyIndex 2, NOT PIDGEY at partyIndex 1",
+    rebuildDone.battlers.player.species === SPECIES_MACHOP &&
+      rebuildDone.battlers.player.partyIndex === 2 &&
+      rebuildDone.battlers.player.partyIndex !== PARTY_INDEX_PIDGEY,
+    `species=${rebuildDone.battlers.player.species} partyIndex=${rebuildDone.battlers.player.partyIndex}`,
+  );
+  check(
+    "player-side: species/hp fully rebuilt to the new mon (MACHOP at full HP)",
+    rebuildDone.battlers.player.species === SPECIES_MACHOP && rebuildDone.battlers.player.hp === rebuildDone.battlers.player.maxHp,
+    `species=${rebuildDone.battlers.player.species} hp=${rebuildDone.battlers.player.hp}/${rebuildDone.battlers.player.maxHp}`,
+  );
+
+  // --- Claim: switch-in state reset is symmetric with the AI side (§2a) --
+  // the freshly-switched player mon reads neutral stat stages and no
+  // status, consistent with SwitchInClearSetData's unconditional reset. ---
+  check(
+    "player-side: freshly-switched-in MACHOP reads neutral stat stages ([6]*8) and no status",
+    rebuildDone.battlers.player.statStages.every((stage) => stage === 6) && rebuildDone.battlers.player.status.kind === "none",
+    `statStages=${JSON.stringify(rebuildDone.battlers.player.statStages)} status=${rebuildDone.battlers.player.status.kind}`,
+  );
+
+  check(
+    "player-side: battle stays non-terminal through the switch (player still has PIDGEY on the bench)",
+    resumeIdle.battleOutcome === 0,
+    `battleOutcome=${resumeIdle.battleOutcome}`,
+  );
+
+  // --- Claim: the battle genuinely resumes to a real decision phase after
+  // a PLAYER-driven forced switch, same as the AI-driven case in §2 -- a
+  // second real attack (URSARING's Strength again) lands on the newly
+  // switched-in MACHOP later in the trace. ---
+  check(
+    "player-side: a second real attack lands on the switched-in MACHOP later (proves the battle resumed, not stalled)",
+    secondHitDone.rngValue !== resumeIdle.rngValue && secondHitDone.battlers.player.hp < resumeIdle.battlers.player.hp,
+    `rng idle=${resumeIdle.rngValue} after=${secondHitDone.rngValue}; hp idle=${resumeIdle.battlers.player.hp} after=${secondHitDone.battlers.player.hp}`,
+  );
 }
 
 main().catch((error: unknown) => {

@@ -245,48 +245,160 @@ for its own fresh-mon evidence).
   holds — only the AI-scoring sub-count varies by matchup, which was already
   an open question upstream, not one this rung resolves.
 
-## 3. Live probe attempt: player-side forced switch (party menu)
+## 3. Live probe: player-side forced switch (party menu)
 
-**Attempted, did not land within this rung's time budget — documented
-honestly per the brief's own fallback clause.** Staged the mirror scenario
-(player's SUNKERN in slot 0 dies to the opponent's URSARING/Strength turn 1,
-opening a forced switch for the player instead of the AI) and tried to reuse
-`docs/battle-resolution-adapter-ground-truth.md`'s voluntary-switch button
-recipe (`DOWN, A, RIGHT, A, A`), adapted for the forced case:
+**Cracked.** Two naive battle-lab-only attempts from an earlier session
+(`A, A` after a flat wait; `RIGHT, A, A`) both left `partyIndex` frozen at
+`0` with zero RNG activity — the same shape of failure the voluntary-switch
+recipe's own prior naive attempts hit
+(`docs/battle-resolution-adapter-ground-truth.md` §2b), because both skipped
+a required intermediate step and never waited long enough between presses.
+The fix was the same technique that cracked the voluntary case: RAM-probe
+`gPartyMenu.action`/`.slotId`/`.slotId2`, `gActionSelectionCursor`, and
+`gBattlerPartyIndexes` tick-by-tick with a throwaway probe
+(`tools/probe/dump-forced-switch-party-menu.py`, run via
+`tools/run-mgba-probe.py`) instead of guessing timings.
 
-- The voluntary recipe's leading `DOWN` (FIGHT→POKEMON action-select cursor)
-  does not apply here — a forced switch has no action-selection screen to
-  navigate from; source confirms `PlayerHandleChoosePokemon`
-  (`battle_controller_player.c:2665-2688`) opens the party menu directly via
-  a controller emit, no button needed to trigger it.
-- First attempt: waited 600 frames after the kill (well past the AI-side
-  switch-in's own ~240-frame window, for margin), then `A, A` (assuming the
-  cursor already defaulted to a valid living slot). Result: `partyIndex`
-  stayed `0` and `rngValue` stayed frozen at the post-kill value through
-  frame 958 — no state change of any kind, i.e. the presses had no effect.
-- Second attempt: added a leading `RIGHT` before the `A, A` (in case the
-  cursor initializes on the fainted slot 0 and needs a nudge, mirroring the
-  voluntary recipe's own `RIGHT`-jumps-slot-0-to-slot-1 behavior). Same
-  result: `partyIndex` frozen at `0` through frame 1000, zero RNG activity.
+### 3a. Scenario
 
-Both attempts show the battle **fully idle** (no RNG draws, no state
-mutation) for hundreds of frames after the kill — meaning either the button
-timing did not land inside whatever window the forced-menu flow is actually
-listening on, or the forced-menu cursor/confirmation flow differs from the
-voluntary case's `HandleChooseMonSelection` submenu quirk in a way this
-rung's battle-lab-only (no RAM watch) probing budget could not diagnose.
-The voluntary-switch doc's own recipe was itself derived by RAM-probing
-`gActionSelectionCursor`/`gPartyMenu.slotId`/`.action` tick-by-tick
-(`tools/probe/dump-battler-snapshot.py`-style), not by guessing — the same
-technique is almost certainly required here too, and this rung's remaining
-budget did not allow standing up that probe from scratch. **Bank the
-opponent-side ledger and the complete source map (§1-§2, both directions'
-mechanism fully cited) as the solid deliverable of this rung**; the
-player-side voluntary-switch recipe itself (§2b of
-`docs/battle-resolution-adapter-ground-truth.md`) already proves the
-underlying party-menu machinery works end-to-end for a *non-forced* switch,
-so the remaining gap is specifically the forced-menu's cursor/timing
-differences, not the party-menu mechanism itself.
+`tools/battle-lab/mechanic-forced-switch-player-choice-off.json` — the exact
+mirror of §2's `mechanic-forced-switch-ai-choice-off.json` fixture with the
+two sides' parties swapped: the **opponent** fields the one-shot URSARING
+rig (`MOVE_STRENGTH`×4, Adamant, 252 Atk/4 HP EVs) and the **player** fields
+SUNKERN (slot 0, dies turn 1), PIDGEY (slot 1, healthy — the "next living
+index" decoy), and MACHOP (slot 2, healthy — the slot this recipe
+deliberately picks, to prove the choice is a real player decision and not a
+default-first-healthy autopick).
+
+### 3b. What was actually gating the two failed naive attempts
+
+RAM-probing the idle window right after the kill (zero button presses,
+`gPartyMenu` fields read from `0x203cec8` per `bin/oracle symbols
+gPartyMenu`, offsets `menuType/layout`@+8, `slotId`@+9, `slotId2`@+10,
+`action`@+11 confirmed against `include/party_menu.h`'s `struct PartyMenu`
+layout and cross-validated by replaying the *already-proven*
+`mechanic-voluntary-switch-statused-off.json` fixture through the same
+offsets and reproducing its known frame-722/883/1121 transitions exactly)
+showed `gPartyMenu.action` and every other field **still reading their
+zeroed pre-battle defaults 2200+ ticks after the kill** — the party menu had
+not opened at all, not even the fade. `gBattleMainFunc` was likewise frozen.
+This is **not** the EXP-gain message (`Cmd_getexp`'s `getexpState` case 0
+unconditionally skips to the no-op last case whenever `gBattleTypeFlags &
+BATTLE_TYPE_FRONTIER`, `battle_script_commands.c:3270-3280` — ruled out by
+direct source read, Factory is always Frontier). It **is** the ordinary
+"SUNKERN fainted!" battle text: switching to a dense periodic `A`-press
+pattern (2 frames on, 18 off — the same convention every other committed
+hit-chain/switch fixture already uses, e.g.
+`mechanic-forced-switch-ai-choice-off.json`'s own trace) unblocked it
+immediately: `gPartyMenu.action` flips from `0` to `1`
+(`PARTY_ACTION_SEND_OUT`, `include/constants/party_menu.h:69`) and
+`menuTypeLayout` flips to `1` (menu genuinely open) on the very tick one of
+those periodic `A` presses lands. The two prior failed attempts never
+pressed anything during this window, so the message sat undismissed forever
+and nothing downstream ever ran — this, not a forced-menu timing quirk, was
+the actual gap.
+
+### 3c. The working recipe
+
+**Working, rerunnable button sequence** (exact segments in the committed
+fixture's `trace.segments`):
+
+1. **Submit the doomed mon's move**, same as every other hit-chain fixture:
+   `A(2f)`, wait `30f`, `A(2f)` (FIGHT → move 1).
+2. **Dense `A` mash (`2f` on / `18f` off, ×20) starting immediately after**,
+   continuing well past the kill (frame 240 in this fixture) — this is what
+   dismisses the "SUNKERN fainted!" message. RAM-probed: `gPartyMenu.action`
+   flips `0→1` and `menuTypeLayout` flips `0→1` together, on whichever tick
+   the mash catches the message's open window (tick 396 in the exact
+   200-frames-idle-then-mash timing this fixture uses — not load-bearing
+   precision, any dense-enough mash lands it, confirmed across three
+   independent probe runs with slightly different idle padding all landing
+   within a handful of ticks of each other). **Continuing to mash `A` after
+   the menu opens is harmless**: with the cursor still on slot 0 (the
+   fainted mon), `A` is silently ignored (RAM-confirmed no state change
+   across multiple extra presses) — unlike the voluntary case there is no
+   observed submenu-open-on-illegal-slot here, so the dense mash does not
+   need to stop precisely at the message-dismiss tick.
+3. **Wait ~40 ticks** (menu open→input-accepted lockout, matching the
+   voluntary recipe's own step 2 finding), then **`DOWN(2f)`** — moves the
+   cursor from the fainted slot 0 to slot 1
+   (`UpdatePartySelectionSingleLayout`'s `MENU_DIR_DOWN` case,
+   `party_menu.c:1549-1566`, a plain `(*slotPtr)++`). RAM-probed:
+   `gPartyMenu.slotId` flips `0→1` roughly 40 ticks after the press.
+   (Note: `RIGHT` — the voluntary recipe's own navigation button — only
+   special-cases jumping *from* slot 0, landing on `1` the first time
+   [`MENU_DIR_RIGHT`, `party_menu.c:1567-1575`]; a second `RIGHT` is a no-op
+   once already off slot 0, so `RIGHT` alone cannot reach slot 2. `DOWN`
+   increments one slot per press and does reach it, which is why this
+   recipe uses `DOWN, DOWN` instead.)
+4. **Wait ~40 ticks, then `DOWN(2f)` again** — moves the cursor slot
+   `1→2` (the same plain increment). RAM-probed: `gPartyMenu.slotId` flips
+   `1→2`.
+5. **Wait ~40 ticks, then `A(2f)`** — opens the `SEND OUT / SUMMARY /
+   CANCEL` submenu on slot 2. Source confirms this is the **same
+   `Task_TryCreateSelectionWindow` default-case path** the voluntary
+   recipe's step 4 already found: `HandleChooseMonSelection`'s `switch
+   (gPartyMenu.action)` has no explicit case for `PARTY_ACTION_SEND_OUT`
+   (`= 1`) either, so it falls to the same `default:` branch shared with
+   `ABILITY_PREVENTS`/`SWITCHING` (`party_menu.c:1355-1362`). The submenu's
+   action list is `{MENU_SEND_OUT, MENU_SUMMARY, MENU_CANCEL1}`
+   (`sPartyMenuAction_SendOutSummaryCancel`,
+   `src/data/party_menu.h:697/714`) — `MENU_SEND_OUT` is index 0, the
+   default cursor position, exactly like the voluntary recipe's
+   `MENU_SHIFT` at index 0.
+6. **Wait ~40 ticks, then `A(2f)` again** — confirms the default option
+   (`MENU_SEND_OUT`). This is the same "fifth press confirms the submenu's
+   default option" mechanism the voluntary recipe found, confirmed here for
+   the forced case too. RAM-probed and live-confirmed via the oracle's
+   `/v1/battle-lab/run` route (not just the raw RAM probe):
+   `gBattlerPartyIndexes[0]` flips `0→2` about 80 ticks after this press
+   (frame 680 in the committed fixture).
+7. **The switch itself takes real time after that**, same as the AI-side
+   dance: species/HP/stats fully rebuilt to MACHOP by frame 700.
+
+**No `CANCEL` path exists for this flow** — confirmed by source, not just
+absence of testing: `HandleChooseMonCancel`'s `switch (gPartyMenu.action)`
+special-cases `PARTY_ACTION_SEND_OUT` to just `PlaySE(SE_FAILURE)`
+(`party_menu.c:1372-1375`), unlike the voluntary case's `PARTY_ACTION_SWITCH`
+which offers a real Yes/No cancel-confirmation dialog — matching the
+brief's expectation that the forced flow has no cancel option.
+
+### 3d. Ledger: player-side dance draws zero `Random()`, same as the AI side
+
+Live-verified (`tools/probe/verify-forced-switch-ground-truth.ts`,
+`runPlayerSideChecks`), rerunning
+`mechanic-forced-switch-player-choice-off.json` against the live oracle:
+
+```
+frame   rngValue     player.hp  player.species  player.partyIndex  status
+235     3421819359   90         191 (SUNKERN)   0                  none   <- pre-4th-roll
+240     3421819359   0          191             0                  none   <- HP hits 0 (datahpupdate)
+250     1621732966   0          191             0                  none   <- 4th roll lands
+660     1621732966   0          191             0                  none   <- full button dance done, STILL zero RNG drift
+680     1621732966   0          191             2                  none   <- gBattlerPartyIndexes flips to 2 (MACHOP, not PIDGEY's 1)
+700     1621732966   145        66 (MACHOP)     2                  none   <- species/hp fully rebuilt, neutral stat stages
+822     2210656548   145        66              2                  none   <- AI re-scores its next move (new RNG activity resumes)
+1200    1160559944   0          66              2                  none   <- 2nd Strength lands (one-shots MACHOP too; battle stays non-terminal, PIDGEY still on the bench)
+```
+
+**The entire forced-menu button dance (frame 250→660, 410 frames spanning
+the real, human-timescale button presses in steps 2-6 above) draws zero
+`Random()` calls** — bit-for-bit matching the AI-side dance's own finding
+(§2b) even though this half is gated behind genuine player input rather than
+a synchronous algorithm. The frame-235/240/250 rngValues are bit-identical
+to §2's own table (same attacker/move/seed, parties merely swapped sides),
+an independent cross-check that the turn-1 hit chain is unaffected by which
+side holds which mon. `statStages` reads neutral (`[6]*8`) and `status`
+reads `none` for the freshly-switched MACHOP (frame 700) — the same
+`SwitchInClearSetData` reset already documented in §1d and confirmed live
+for the AI side in §2a, now confirmed symmetric for the player side. The
+battle resumes to a real decision phase after the switch (RNG activity
+resumes at frame 822 — the AI rescoring its move) and a **second real
+attack** lands on the newly-switched MACHOP at frame 1200 (one-shotting it
+too, since URSARING's Strength is that strong against this whole bench) —
+`battleOutcome` stays non-terminal throughout because the player still has
+PIDGEY alive on the bench, proving the engine's forced-switch handling
+survives a second cascade without any special-casing.
 
 ## 4. Recommended registration slices for a main-lane step sequence
 
@@ -344,10 +456,15 @@ this rung found:
    `HandleTurnActionSelectionState` re-entry (§1c) — i.e., the point where
    this engine's decision loop can genuinely accept the next command instead
    of terminating.
-10. **Player-side interactive party-menu controller state** is the one
-    piece this rung could not live-verify (§3) — recommend the main-lane
-    step that lands (2)'s player side budget a RAM-probe session
-    (`tools/run-mgba-probe.py`-style) up front rather than reusing
-    battle-lab-only captures, since this rung's attempts show the forced
-    flow's timing genuinely differs from the already-solved voluntary-switch
-    recipe.
+10. **Player-side interactive party-menu controller state** is now live-verified
+    end-to-end (§3): the recipe is `A,A` (submit the doomed mon's move) →
+    dense `A` mash to dismiss the faint message → `DOWN,DOWN` (navigate off
+    the fainted slot 0 to the target bench slot) → `A,A` (open + confirm the
+    `SEND OUT/SUMMARY/CANCEL` submenu's default option), each press
+    separated by a ~40-tick input-lockout wait. `OpenPartyMenuToChooseMon`'s
+    UI state machine (cursor navigation, the `PARTY_ACTION_SEND_OUT`
+    submenu path, no-cancel behavior) is source-mapped and RAM-confirmed
+    (§3c) enough to model as a controller-side input state machine once (2)
+    is built; the underlying navigation logic
+    (`UpdatePartySelectionSingleLayout`) is pure and RNG-free, matching the
+    AI side's own no-new-RNG-accounting finding.
