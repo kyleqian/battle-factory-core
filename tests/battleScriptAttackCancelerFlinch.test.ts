@@ -59,6 +59,7 @@ function battler(
     friendship: changes.friendship ?? 0,
     partyIndex: changes.partyIndex ?? 0,
     maxHP: changes.maxHP ?? changes.hp ?? 100,
+    speed: changes.speed ?? 100,
   });
 }
 

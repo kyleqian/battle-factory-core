@@ -181,6 +181,15 @@ type BattleScriptMoveEndBattlerMetadata = Readonly<{
    * ever reads this field.
    */
   maxHP: number;
+  /**
+   * Source gBattleMons[battler].speed -- GetWhoStrikesFirst's own effective-
+   * speed input (`turnOrder.ts`, `battle_main.c:4605-4650`), needed once a
+   * decision reducer must compute real turn order between two battlers
+   * (`docs/end-turn-ground-truth.md` PROGRESS #449's own gap). Absent legacy
+   * inputs default to 100 at construction -- safe because no code path
+   * before the full-turn reducer ever reads this field.
+   */
+  speed: number;
 }>;
 
 /**
@@ -215,6 +224,7 @@ export type BattleScriptRulesBattler = BattleScriptRulesBattlerBase & Readonly<{
   friendship?: number;
   partyIndex?: number;
   maxHP?: number;
+  speed?: number;
 }>;
 
 export type BattleScriptRulesBattlerState =
@@ -1560,6 +1570,7 @@ export function createBattleScriptRulesContext(
       `battlers[${index}].partyIndex`,
     ),
     maxHP: requireUnsigned(battler.maxHP ?? battler.hp, 0xffff, `battlers[${index}].maxHP`),
+    speed: requireUnsigned(battler.speed ?? 100, 0xffff, `battlers[${index}].speed`),
     ...(battler.confusionDamage === undefined ? {} : {
       confusionDamage: Object.freeze({
         level: requireUnsigned(
