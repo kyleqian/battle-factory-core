@@ -161,6 +161,8 @@ type BattleScriptMoveEndBattlerMetadata = Readonly<{
   level: number;
   /** Source gBattleMons[battler].friendship - Cmd_attackanimation's EmitMoveAnimation argument. */
   friendship: number;
+  /** Source gBattlerPartyIndexes[battler] -- the party slot this active battler mirrors. */
+  partyIndex: number;
 }>;
 
 /**
@@ -193,6 +195,7 @@ export type BattleScriptRulesBattler = BattleScriptRulesBattlerBase & Readonly<{
   spDefense?: number;
   level?: number;
   friendship?: number;
+  partyIndex?: number;
 }>;
 
 export type BattleScriptRulesBattlerState =
@@ -209,6 +212,31 @@ export type BattleScriptSelectorRoleBindings = Readonly<{
   attacker: BattleScriptBattlerId | null;
   target: BattleScriptBattlerId | null;
   effectBattler: BattleScriptBattlerId | null;
+}>;
+
+/** include/constants/pokemon.h PARTY_SIZE -- Cmd_checkteamslost's own loop bound. */
+export const BATTLE_SCRIPT_PARTY_SIZE = 6;
+
+/** The exact three GetMonData fields Cmd_checkteamslost reads per party slot. */
+export type BattleScriptPartyMemberState = Readonly<{
+  species: number;
+  isEgg: boolean;
+  hp: number;
+}>;
+
+export type BattleScriptPartyState = readonly [
+  BattleScriptPartyMemberState,
+  BattleScriptPartyMemberState,
+  BattleScriptPartyMemberState,
+  BattleScriptPartyMemberState,
+  BattleScriptPartyMemberState,
+  BattleScriptPartyMemberState,
+];
+
+/** Source gPlayerParty/gEnemyParty, narrowed to the three fields above. */
+export type BattleScriptPartyBySide = Readonly<{
+  player: BattleScriptPartyState;
+  opponent: BattleScriptPartyState;
 }>;
 
 export type BattleScriptBideDamageByBattler = readonly [
@@ -319,6 +347,12 @@ export type BattleScriptRulesContext = Readonly<
     moveHistory: BattleScriptMoveHistory;
     /** Source gBattlersCount, gBattleTypeFlags, and gBattlerPositions[4]. */
     battleTopology: BattleScriptBattleTopology;
+    /**
+     * Source gPlayerParty/gEnemyParty, narrowed to the three fields
+     * Cmd_checkteamslost reads. datahpupdate's active-battler HP write keeps
+     * the slot at that battler's partyIndex in sync (battleScriptHitChainOpcode.ts).
+     */
+    party: BattleScriptPartyBySide;
   }
 >;
 
@@ -383,6 +417,17 @@ export type BattleScriptRulesContextInput = Readonly<{
   statAnimPlayed?: number;
   tripleKickPower?: number;
   twoTurnStringId?: number;
+  /** Omitted slots default to species 0 (empty) -- Cmd_checkteamslost's own species-nonzero gate excludes them. */
+  party?: Readonly<{
+    player?: readonly BattleScriptPartyMemberInput[];
+    opponent?: readonly BattleScriptPartyMemberInput[];
+  }>;
+}>;
+
+export type BattleScriptPartyMemberInput = Readonly<{
+  species?: number;
+  isEgg?: boolean;
+  hp?: number;
 }>;
 
 function requireUnsigned(value: number, maximum: number, field: string): number {
@@ -1135,6 +1180,64 @@ function createBattleScriptBattleTopology(
   });
 }
 
+const BATTLE_SCRIPT_EMPTY_PARTY_MEMBER: BattleScriptPartyMemberState = Object.freeze({
+  species: 0,
+  isEgg: false,
+  hp: 0,
+});
+
+function createBattleScriptPartyState(
+  input: readonly BattleScriptPartyMemberInput[] | undefined,
+  field: string,
+): BattleScriptPartyState {
+  if (input === undefined) {
+    return Object.freeze(
+      new Array(BATTLE_SCRIPT_PARTY_SIZE).fill(BATTLE_SCRIPT_EMPTY_PARTY_MEMBER),
+    ) as unknown as BattleScriptPartyState;
+  }
+  if (!Array.isArray(input) || input.length !== BATTLE_SCRIPT_PARTY_SIZE) {
+    throw new Error(`${field} must contain exactly ${BATTLE_SCRIPT_PARTY_SIZE} party member slots`);
+  }
+  return Object.freeze(
+    input.map((member, index) => Object.freeze({
+      species: requireUnsigned(member.species ?? 0, 0xffff, `${field}[${index}].species`),
+      isEgg: Boolean(member.isEgg),
+      hp: requireUnsigned(member.hp ?? 0, 0xffff, `${field}[${index}].hp`),
+    })),
+  ) as unknown as BattleScriptPartyState;
+}
+
+function createBattleScriptPartyBySide(
+  input: BattleScriptRulesContextInput["party"],
+): BattleScriptPartyBySide {
+  return Object.freeze({
+    player: createBattleScriptPartyState(input?.player, "party.player"),
+    opponent: createBattleScriptPartyState(input?.opponent, "party.opponent"),
+  });
+}
+
+/**
+ * Cmd_datahpupdate's write-through sync point (docs/faint-outcome-ground-truth.md
+ * §3.2): the active battler's real HP write also lands in the matching party
+ * slot at that battler's partyIndex, keeping Cmd_checkteamslost's party-wide
+ * sum consistent with the hit chain's own HP mutations.
+ */
+export function withBattleScriptPartyMemberHp(
+  party: BattleScriptPartyBySide,
+  side: 0 | 1,
+  partyIndex: number,
+  hp: number,
+): BattleScriptPartyBySide {
+  const sideKey = side === 0 ? "player" : "opponent";
+  const state = party[sideKey];
+  const member = state[partyIndex];
+  if (member.hp === hp) return party;
+  const nextState = state.map((candidate, index) =>
+    index === partyIndex ? Object.freeze({ ...candidate, hp }) : candidate
+  ) as unknown as BattleScriptPartyState;
+  return Object.freeze({ ...party, [sideKey]: Object.freeze(nextState) });
+}
+
 function requireRole(
   value: BattleScriptBattlerId | null | undefined,
   field: string,
@@ -1352,6 +1455,11 @@ export function createBattleScriptRulesContext(
     spDefense: requireUnsigned(battler.spDefense ?? 0, 0xffff, `battlers[${index}].spDefense`),
     level: requireUnsigned(battler.level ?? 0, 0xff, `battlers[${index}].level`),
     friendship: requireUnsigned(battler.friendship ?? 0, 0xff, `battlers[${index}].friendship`),
+    partyIndex: requireUnsigned(
+      battler.partyIndex ?? 0,
+      BATTLE_SCRIPT_PARTY_SIZE - 1,
+      `battlers[${index}].partyIndex`,
+    ),
     ...(battler.confusionDamage === undefined ? {} : {
       confusionDamage: Object.freeze({
         level: requireUnsigned(
@@ -1435,6 +1543,7 @@ export function createBattleScriptRulesContext(
   ) as BattleScriptMoveEndBytes;
   const moveHistory = createBattleScriptMoveHistory(input.moveHistory);
   const battleTopology = createBattleScriptBattleTopology(input.battleTopology);
+  const party = createBattleScriptPartyBySide(input.party);
   return Object.freeze({
     battlers: Object.freeze(battlers),
     selectorRoles,
@@ -1498,6 +1607,7 @@ export function createBattleScriptRulesContext(
     enigmaBerryHoldEffects,
     moveHistory,
     battleTopology,
+    party,
     battleCommunication0: requireUnsigned(
       input.battleCommunication0 ?? 0,
       0xff,

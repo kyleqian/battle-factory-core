@@ -57,6 +57,7 @@ function battler(
     spDefense: changes.spDefense ?? 0,
     level: changes.level ?? 0,
     friendship: changes.friendship ?? 0,
+    partyIndex: changes.partyIndex ?? 0,
   });
 }
 

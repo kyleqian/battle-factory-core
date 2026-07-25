@@ -247,6 +247,7 @@ function emptyBattler(side: 0 | 1): BattleScriptRulesBattlerState {
     spDefense: 0,
     level: 0,
     friendship: 0,
+    partyIndex: 0,
   });
 }
 

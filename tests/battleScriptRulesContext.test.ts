@@ -205,6 +205,7 @@ describe("source-shaped Battle Script rules context", () => {
       "multiHitCounter",
       "multiHitEffect",
       "multistringChooser",
+      "party",
       "scriptingBattler",
       "scriptingBideDmg",
       "selectorRoles",
