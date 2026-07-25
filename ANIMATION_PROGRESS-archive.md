@@ -4,6 +4,99 @@ Older dated sections moved out of `ANIMATION_PROGRESS.md` to keep that
 file lean (`AGENTS.md`'s ~3-most-recent convention). Git history has the
 full record regardless; this file is a read-only reference.
 
+## DRAGON_RAGE rungs 1-3: render-age-1 guard fixed, fire-spit sheetFrame off-by-one root-caused from source, fire-plume window disciplined-probed but not resolved — 127/150 → 139/150, stays `partial` (2026-07-25)
+
+**Verdict: two of the three named residuals fixed on hard evidence (one of
+them overturning the prior rung's own "rounding question" hypothesis); the
+third (fire-plume) got a genuine disciplined probe cycle — colors dumped,
+RAM read, two candidate fixes tried and both rejected on evidence — but no
+fix survived, so it stays named, not swept. `MOVE_DRAGON_RAGE` stays
+`partial`, a strictly smaller remainder than last rung's.**
+
+**Rung 1 — render-age-1 creation-guard artifact, fixed.** Pixel-dumped
+frame 90 (render age 1) of the player-attacker dense window directly: the
+oracle photo already shows the attacker's `AnimTask_ShakeMon` offset
+applied one tick before the lag-2 model's own `renderTick < creationTick`
+guard clears — a shifted-tileset color map confirmed the two images agree
+everywhere except a small silhouette region matching exactly a 2px
+`yOffset` shake state the app predicts as zero. `shakeMonOffsetAtRenderTick`
+now special-cases `renderTick === creationTick - 1` to return the raw
+`{xOffset,yOffset}` (the RAM-invisible collapsed `sequence[0]` write,
+framebuffer-visible for exactly that one transient tick) instead of zero;
+every other pre-creation tick is unaffected. Tier-1 pinned
+(`tests/dragonRage.test.ts`).
+
+**Rung 2 — fire-spit "rounding" residual, root-caused as a real bug, not a
+rounding question.** Per the step brief's own probe-first method,
+pixel-dumped the render-age-86-96 diff colors *first*: they were genuine
+small-ember fire-ramp colors, but the oracle's true fire-spit silhouette
+was consistently LARGER than the app's, correlated with WHICH of the 3
+animation frames was active (frame 0 undercounted ~5x, frame 2
+overcounted) — a shape signature, not a rounding/timing one, so the step
+brief's own "further `drawSpriteSheetAffineRotate` rounding question"
+hypothesis is falsified and recorded as eliminated. Source proof
+(`reference/pokeemerald/src/battle_anim_dragon.c:126-131`):
+`sAnim_DragonRageFire` is `ANIMCMD_FRAME(16,3),(32,3),(48,3),JUMP(0)` —
+byte-identical tile offsets to `sAnim_DragonBreathFire_0` (`:47-52`), the
+already-pixel-exact DRAGON_BREATH precedent, which `dragonBreath.ts`
+already reads with a `+1` tile-row-block shift (RAM's own `animCmdIndex` is
+an index into the 3-entry ANIMCMD array, not a tile-row-block number — tile
+offsets 16/32/48 are blocks 1/2/3, block 0 belongs to a different animation,
+`sAnim_OutrageOverheatFire_0`). `dragonRage.ts`'s own `sheetFrame` formula
+was missing that shift, silently picking the wrong, unused-by-this-
+animation tile block for frame 0. Fixed the formula and the two Tier-1
+assertions that had pinned the old (wrong) `sheetFrame === animCmdIndex`
+equality to the source-justified `animCmdIndex + 1`; fire-plume's own
+`sheetFrame` is untouched (its own animcmd table legitimately starts at
+tile 0, a separate asset). Dense sweep: every render age 86-96 frame now
+matches, zero regressions.
+
+**Rung 3 — fire-plume window (render ages 98, 105-114): disciplined-probed,
+not resolved, negative results recorded.** Two sub-cases, investigated
+independently:
+
+- **Render age 98** (the exact tick both the target `AnimTask_ShakeMon` and
+  fire-plume spawn 0 are created): a 1598px mismatch confined exactly to
+  ONIX's own sprite box, using ONIX's own grayscale palette — NOT
+  plume-palette colors (the step brief's own hypothesis for this family,
+  checked directly and not confirmed). RAM-probed the target sprite's full
+  state (position, x2/y2, animNum, animCmdIndex, invisible, subpriority,
+  matrixNum) across the surrounding ticks: all clean and unchanged, so the
+  mismatch isn't explained by any currently-modeled variable. Confirmed
+  deterministic (byte-identical mismatch on a second, independent fresh
+  oracle run). Not root-caused.
+- **Render ages 105-114** (10 frames, 1px each): confirmed via direct pixel
+  reconstruction (manually sampling each candidate spawn's own tileset at
+  its RAM-read position/frame) to be a real tie-break bug between two
+  overlapping same-subpriority fire-plume spawns — but not a single-knob
+  fix. Reversing the paint order within each subpriority group fixes the
+  105-113 overlap (spawn 0 vs spawn 1) but breaks a *different*,
+  previously-clean overlap at render ages 114-118/123 (spawn 1 vs spawn 4) —
+  tried, net smaller improvement, reverted, not shipped. A uniform
+  fire-plume lag of 0 was also tried (ages 98-144 regress hard, 112/150,
+  much worse) and rejected; lag 1 stays committed. The age-114 case further
+  shows spawn 1's own rendered sheet frame sits one step behind what the
+  uniform 1-tick lag model predicts at its OWN specific frame-boundary
+  transition, while the same lag is exactly right for every other
+  simultaneously-active spawn — a genuinely compound (z-order tie-break
+  *and* a per-spawn frame-transition detail) residual, not a single
+  constant to sweep. Isolating it cleanly needs a fixture where individual
+  plume spawns don't spatially overlap each other, out of this rung's
+  budget.
+
+**Rung 4 — not reached.** Player orientation is 139/150, not the required
+150/150, so per the step brief's own gate the opponent-attacker orientation
+dense run and CHARMELEON's `ANIM_BACK_AND_LUNGE` front-anim port were not
+attempted this step.
+
+**Coverage:** `MOVE_DRAGON_RAGE` stays `partial` — `remaining` updated to
+139/150 with the narrowed, single-family (fire-plume) residual.
+
+**Evidence.** `npm test` 2209/2209 (2207 + 2 new: the rung-1 transient pin
+and the rung-2 `sheetFrame` shift assertions). `npm run build` green. Both
+fixes reproduced against a fresh, independent oracle capture (not just the
+cached one used to iterate) — 139/150 byte-identical both times.
+
 ## Anim-script interpreter spike: SUCCESS (2026-07-24)
 
 **Verdict: the interpreter reproduces the move.** Built a minimal interpreter

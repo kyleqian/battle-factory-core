@@ -42,99 +42,6 @@ substitute state, multi-turn/multi-hit state, or another explicit script input.
 Every status needs a committed ON-profile trace; `exact` cannot retain a known
 remainder.
 
-## DRAGON_RAGE rungs 1-3: render-age-1 guard fixed, fire-spit sheetFrame off-by-one root-caused from source, fire-plume window disciplined-probed but not resolved — 127/150 → 139/150, stays `partial` (2026-07-25)
-
-**Verdict: two of the three named residuals fixed on hard evidence (one of
-them overturning the prior rung's own "rounding question" hypothesis); the
-third (fire-plume) got a genuine disciplined probe cycle — colors dumped,
-RAM read, two candidate fixes tried and both rejected on evidence — but no
-fix survived, so it stays named, not swept. `MOVE_DRAGON_RAGE` stays
-`partial`, a strictly smaller remainder than last rung's.**
-
-**Rung 1 — render-age-1 creation-guard artifact, fixed.** Pixel-dumped
-frame 90 (render age 1) of the player-attacker dense window directly: the
-oracle photo already shows the attacker's `AnimTask_ShakeMon` offset
-applied one tick before the lag-2 model's own `renderTick < creationTick`
-guard clears — a shifted-tileset color map confirmed the two images agree
-everywhere except a small silhouette region matching exactly a 2px
-`yOffset` shake state the app predicts as zero. `shakeMonOffsetAtRenderTick`
-now special-cases `renderTick === creationTick - 1` to return the raw
-`{xOffset,yOffset}` (the RAM-invisible collapsed `sequence[0]` write,
-framebuffer-visible for exactly that one transient tick) instead of zero;
-every other pre-creation tick is unaffected. Tier-1 pinned
-(`tests/dragonRage.test.ts`).
-
-**Rung 2 — fire-spit "rounding" residual, root-caused as a real bug, not a
-rounding question.** Per the step brief's own probe-first method,
-pixel-dumped the render-age-86-96 diff colors *first*: they were genuine
-small-ember fire-ramp colors, but the oracle's true fire-spit silhouette
-was consistently LARGER than the app's, correlated with WHICH of the 3
-animation frames was active (frame 0 undercounted ~5x, frame 2
-overcounted) — a shape signature, not a rounding/timing one, so the step
-brief's own "further `drawSpriteSheetAffineRotate` rounding question"
-hypothesis is falsified and recorded as eliminated. Source proof
-(`reference/pokeemerald/src/battle_anim_dragon.c:126-131`):
-`sAnim_DragonRageFire` is `ANIMCMD_FRAME(16,3),(32,3),(48,3),JUMP(0)` —
-byte-identical tile offsets to `sAnim_DragonBreathFire_0` (`:47-52`), the
-already-pixel-exact DRAGON_BREATH precedent, which `dragonBreath.ts`
-already reads with a `+1` tile-row-block shift (RAM's own `animCmdIndex` is
-an index into the 3-entry ANIMCMD array, not a tile-row-block number — tile
-offsets 16/32/48 are blocks 1/2/3, block 0 belongs to a different animation,
-`sAnim_OutrageOverheatFire_0`). `dragonRage.ts`'s own `sheetFrame` formula
-was missing that shift, silently picking the wrong, unused-by-this-
-animation tile block for frame 0. Fixed the formula and the two Tier-1
-assertions that had pinned the old (wrong) `sheetFrame === animCmdIndex`
-equality to the source-justified `animCmdIndex + 1`; fire-plume's own
-`sheetFrame` is untouched (its own animcmd table legitimately starts at
-tile 0, a separate asset). Dense sweep: every render age 86-96 frame now
-matches, zero regressions.
-
-**Rung 3 — fire-plume window (render ages 98, 105-114): disciplined-probed,
-not resolved, negative results recorded.** Two sub-cases, investigated
-independently:
-
-- **Render age 98** (the exact tick both the target `AnimTask_ShakeMon` and
-  fire-plume spawn 0 are created): a 1598px mismatch confined exactly to
-  ONIX's own sprite box, using ONIX's own grayscale palette — NOT
-  plume-palette colors (the step brief's own hypothesis for this family,
-  checked directly and not confirmed). RAM-probed the target sprite's full
-  state (position, x2/y2, animNum, animCmdIndex, invisible, subpriority,
-  matrixNum) across the surrounding ticks: all clean and unchanged, so the
-  mismatch isn't explained by any currently-modeled variable. Confirmed
-  deterministic (byte-identical mismatch on a second, independent fresh
-  oracle run). Not root-caused.
-- **Render ages 105-114** (10 frames, 1px each): confirmed via direct pixel
-  reconstruction (manually sampling each candidate spawn's own tileset at
-  its RAM-read position/frame) to be a real tie-break bug between two
-  overlapping same-subpriority fire-plume spawns — but not a single-knob
-  fix. Reversing the paint order within each subpriority group fixes the
-  105-113 overlap (spawn 0 vs spawn 1) but breaks a *different*,
-  previously-clean overlap at render ages 114-118/123 (spawn 1 vs spawn 4) —
-  tried, net smaller improvement, reverted, not shipped. A uniform
-  fire-plume lag of 0 was also tried (ages 98-144 regress hard, 112/150,
-  much worse) and rejected; lag 1 stays committed. The age-114 case further
-  shows spawn 1's own rendered sheet frame sits one step behind what the
-  uniform 1-tick lag model predicts at its OWN specific frame-boundary
-  transition, while the same lag is exactly right for every other
-  simultaneously-active spawn — a genuinely compound (z-order tie-break
-  *and* a per-spawn frame-transition detail) residual, not a single
-  constant to sweep. Isolating it cleanly needs a fixture where individual
-  plume spawns don't spatially overlap each other, out of this rung's
-  budget.
-
-**Rung 4 — not reached.** Player orientation is 139/150, not the required
-150/150, so per the step brief's own gate the opponent-attacker orientation
-dense run and CHARMELEON's `ANIM_BACK_AND_LUNGE` front-anim port were not
-attempted this step.
-
-**Coverage:** `MOVE_DRAGON_RAGE` stays `partial` — `remaining` updated to
-139/150 with the narrowed, single-family (fire-plume) residual.
-
-**Evidence.** `npm test` 2209/2209 (2207 + 2 new: the rung-1 transient pin
-and the rung-2 `sheetFrame` shift assertions). `npm run build` green. Both
-fixes reproduced against a fresh, independent oracle capture (not just the
-cached one used to iterate) — 139/150 byte-identical both times.
-
 ## DRAGON_RAGE rung 6/7: fire-plume z-order fixed via `gMain.oamBuffer` RAM probe (139/150 → 149/150); age-98 ONIX-silhouette anomaly disciplined-probed, both named candidates eliminated, lands `partial` with a single-frame remainder (2026-07-25)
 
 **Verdict: the fire-plume family's tie-break residual (render ages 105-114)
@@ -372,58 +279,137 @@ wire through the Scene-ON seam, dense window both orientations twice).
 reattribution, not new logic; the one touched test updates a byte-count
 pin to the corrected, re-verified extraction). `npm run build` green.
 
+## SHADOW_PUNCH: `AnimTask_AttackerPunchWithTrace` RAM-probed and ported (shadowPunch.ts), Scene-ON wiring + dense comparators NOT done this step (2026-07-25)
+
+**Verdict: the move's one unproven component is now a Tier-1-pinned, RAM-
+proven port; the render-seam wiring and dense pixel acceptance the step
+brief asked for did not fit in this session's remaining budget after the
+probe. No coverage entry added — per this lane's own rule, code alone
+(even RAM-proven code) never promotes a move's status. Honest partial, not
+a blind fit: everything shipped is either read straight from RAM or reused
+verbatim from an already-exact-proven sibling.**
+
+**Extractor decode.** `Move_SHADOW_PUNCH` (`battle_anim_scripts.s:4308-
+4327`) decoded into `battle-move-anim-scripts.json` (additive; the
+byte-identical-reproducibility test and `factoryAnimationComponents.test.ts`
+stayed green). Confirmed the script is exactly as the prior session
+scoped it: linear, every op except `createvisualtask
+AnimTask_AttackerPunchWithTrace` already proven by FIRE_PUNCH/ICE_PUNCH/
+THUNDER_PUNCH/EXTREME_SPEED.
+
+**Assets.** HAUNTER front+back sprites added to `extract-battle-mon-pics.ts`
+(mirrors the CHARMELEON precedent). `BG_GHOST` (tile/palette/tilemap,
+`fadetobg`'s own new bg id — a single tilemap, unlike EXTREME_SPEED's
+side-selected pair) extracted fresh (`extract-shadow-punch-assets.ts`).
+
+**RAM probe (`tools/probe/dump-shadowpunch-full.py`), both attacker
+orientations** (staged `FRONTIER_MON_HAUNTER_1`-vs-ONIX via `mechanicLab
+overrides.parties`, `tools/battle-lab/mechanic-shadow-punch-{haunter-onix,
+onix-haunter}.json`). Found the real mechanism precisely, corrected one
+citation error along the way (the task is `battle_anim_mons.c:2392-2496`,
+not `battle_anim_fight.c` as the prior session's scoping note said —
+confirmed directly via `nm` against the pinned elf, not assumed):
+
+- The task slides the attacker's own sprite `x2` out over 5 ticks then back
+  over 4 (genuinely asymmetric — the source's own "do same number of traces
+  as before" comment doesn't match its actual `tCounter` bookkeeping),
+  spawning one darkened(`BlendPalette` coeff 13 toward `RGB_BLACK`) +
+  translucent (`CloneBattlerSpriteWithBlend` sets `ST_OAM_OBJ_BLEND`,
+  `setalpha 9,8`) afterimage clone per tick — 9 total, each self-destroying
+  exactly 8 ticks after its own creation.
+- A real vanilla artifact, confirmed on hardware, not a bug: task setup runs
+  `gSprites[attacker].x2 -= tBattlerSpriteId` — subtracting the attacker's
+  own SPRITE SLOT INDEX (6-8 in the probed fixtures) from `x2` as if it were
+  a pixel offset, applied once and never undone. RAM-confirmed directly
+  (both orientations) that this offset is baked into every attacker/clone
+  position for the task's whole life.
+- `tMoveSpeed` is +8 player-side, -8 opponent-side (`GetBattlerSide`);
+  `tPriority` is 2 when the attacker's own subpriority is 20 or 40, else 3 —
+  RAM-confirmed both ways (player-side battler-0 subpriority 30 → priority
+  3; opponent-side battler-0 subpriority 40 → priority 2).
+- Derived a closed form for the whole attacker-offset/clone schedule (no
+  lookup table needed — verified against every probed tick both
+  orientations, see `shadowPunch.ts`'s own module doc for the formula).
+- The move's own `fadetobg`/`restorebg` `BLDY` timeline (mechanism already
+  exact-proven via MOVE_EXTREME_SPEED — only this move's own timing anchors
+  are new) came back clean and RAM-exact except a genuine 3-tick startup
+  hold at `bldy=1` on the `restorebg` ramp only (plausibly `Task_FadeToBg`'s
+  own state-2 "recompute the default BG from scratch" costing extra setup
+  frames) — encoded as a literal per-tick table rather than fit, since the
+  window is short and the anomaly doesn't reduce to a clean formula.
+- Fist/hitsplat/target-shake anchor ages read directly off RAM; the target
+  shake reuses the already-ported `shakeMon.ts` primitive verbatim
+  (`AnimTask_ShakeMon, ANIM_TARGET, 3, 0, 6, 1`).
+
+**Port.** `src/engine/shadowPunch.ts` — the attacker-offset/clone closed
+form, the BLDY table, and every anchor age above. `tests/shadowPunch.test.ts`
+pins the closed form against every RAM-probed tick (ages 0-16) for BOTH
+orientations, plus the BLDY table and the priority rule — 6 new tests, all
+green.
+
+**NOT done this step — the named remainder.** Wiring `shadowPunch.ts`
+through the Scene-ON render seam (`battleScene.ts`'s
+`state.config.move === "SHADOW_PUNCH"` dispatch + a `sceneOnShadowPunchView`
+projection in `sceneOnPresentation.ts`, mirroring the DRAGON_RAGE/
+EXTREME_SPEED precedent — healthbox/message-text draw calls are fully
+generic (`composeOpponentHealthbox`/`composePlayerHealthbox` take a plain
+`name: string`, no species union to extend) and the translucent-clone draw
+call already exists verbatim (`drawSpriteSheetBlendedOverFb`, QUICK_ATTACK's
+own precedent) — and the dense pixel comparators (both orientations, twice
+each) the step brief requires for any coverage claim. Ran out of session
+budget after the RAM-probe-and-port stage; stopping here with a clean,
+tested port is the honest outcome rather than rushing the wiring
+uncomparatored. `blend_color_cycle`'s stretch enumeration (this step's own
+"only if 1-4 land with ≥10 min spare" clause) was not reached either, since
+1-4 themselves didn't land.
+
+**Coverage:** no entry added for `MOVE_SHADOW_PUNCH` — no dense pixel
+evidence exists yet, so per this lane's own rule ("shared code alone never
+promotes coverage") it stays unsupported in `ANIMATION_COVERAGE.json`.
+
+**Evidence.** `npm test` 2218/2218 (2212 + 6 new). `npm run build` green.
+Both RAM probes reproducible (`/tmp/shadowpunch-{haunter-onix,onix-haunter}.
+json`, not committed — scratch).
+
 ## Current handoff
 
-- **State:** **19 exact / 2 partial / 255 unsupported.** (DRAGON_RAGE is
-  CLOSED/parked at 149/150 `partial` per this session's own brief — not
-  touched this step; see the two dated sections above for its own
-  accounting.)
-- **Did:** Assigned to open the "BG-swap pipeline"
-  (`restorebg`/`waitbgfadein`/`waitbgfadeout`, ~40 Level-50 moves each,
-  reportedly with no exact representative) as a named blocker for
-  MIST_BALL's fog. Rung 1 (pick representative) surfaced a real bug in
-  `tools/extract/extract-battle-animation-components.ts` first: a typo
-  (`jumretfalse`/`jumrettrue` vs. the real `jumpretfalse`/`jumprettrue`
-  macro names) silently dropped every script block reachable only through
-  those two branch ops. Fixed it (12 moves gained real components,
-  935→971, 3190→3269 edges) and re-ran the downstream
-  level50-parameterization generator. The fix flips the assigned premise:
-  `MOVE_EXTREME_SPEED` (already `exact`) turns out to already be the
-  pixel-verified representative for this whole family — its own
-  `extremeSpeedBackgroundAtAge` already implements the
-  fade-out/BG-load/fade-in/restore cycle, just previously mis-attributed
-  by the buggy graph. `npm run animation:coverage`'s "no exact
-  representative" leaderboard no longer lists this family at all. Also
-  confirmed by direct re-read of `Move_MIST_BALL`'s real script that this
-  family was never actually MIST_BALL's blocker (it never calls
-  `restorebg`/`monbg`/`fadetobg`/either wait op) — `AnimTask_MistBallFog`
-  is a separate, still-fully-open subsystem. Full C-source enumeration of
-  `Cmd_monbg`/`Cmd_restorebg`/`Cmd_waitbgfadein`/`Cmd_waitbgfadeout`/
-  `Cmd_changebg` and `Task_FadeToBg`'s state machine, plus a scoped next
-  representative (`MOVE_SHADOW_PUNCH` via `FRONTIER_MON_HAUNTER_1`, one
-  remaining unproven component: `AnimTask_AttackerPunchWithTrace`), is
-  written into the dated section above. No engine port lands this step —
-  see that section for why stopping here (a corrected map plus a
-  small, precisely bounded next task) is the right-sized outcome rather
-  than rushing a fresh port.
-- **Evidence:** `npm test` 2212/2212, `npm run build` green.
-- **Next:** Port `AnimTask_AttackerPunchWithTrace`
-  (`battle_anim_mons.c:2392-2496`, sprite-clone/trace effect) and wire
-  `MOVE_SHADOW_PUNCH` (HAUNTER, Level-50-legal) through the Scene-ON seam;
-  optionally generalize the hardware BG-fade ramp out of
-  `extremeSpeed.ts`/`faintAttack.ts` into a shared module first (low risk —
-  both already independently derive the identical shape). MIST_BALL's own
-  remaining blockers are unchanged and still open: `waitforvisualfinish`
+- **State:** **19 exact / 2 partial / 255 unsupported.** (Unchanged this
+  step — SHADOW_PUNCH's RAM-probed port above doesn't move a move's status
+  by itself; DRAGON_RAGE stays CLOSED/parked at 149/150 `partial`, not
+  touched this step.)
+- **Did:** Assigned to prove `MOVE_SHADOW_PUNCH` to honest coverage status
+  (the prior session's named next representative for the now-dissolved
+  BG-swap-pipeline track). Extractor-decoded its script, extracted HAUNTER
+  front/back sprites and the `BG_GHOST` bg asset, then RAM-probed the
+  move's one unproven component (`AnimTask_AttackerPunchWithTrace`) both
+  attacker orientations via a staged `mechanicLab overrides.parties`
+  HAUNTER-vs-ONIX fixture, corrected a citation error along the way (the
+  task lives in `battle_anim_mons.c`, not `battle_anim_fight.c`), derived a
+  closed-form attacker-offset/clone schedule (including a real vanilla
+  `x2 -= tBattlerSpriteId` quirk), and ported it into `shadowPunch.ts` with
+  6 Tier-1 tests pinning every RAM-probed tick both orientations. Did NOT
+  reach the Scene-ON render-seam wiring or the dense pixel comparators the
+  step's own acceptance bar requires — see the dated section above for the
+  full account and the exact remainder.
+- **Evidence:** `npm test` 2218/2218, `npm run build` green.
+- **Next:** Wire `shadowPunch.ts` through the Scene-ON seam
+  (`battleScene.ts`'s `state.config.move === "SHADOW_PUNCH"` dispatch + a
+  `sceneOnShadowPunchView` projection, mirroring DRAGON_RAGE/EXTREME_SPEED
+  — the healthbox/message-text/translucent-clone draw calls it needs
+  already exist generically, confirmed this step), then run the dense
+  pixel comparators (both orientations, twice each) the step brief
+  requires before adding any `ANIMATION_COVERAGE.json` entry. MIST_BALL's
+  own remaining blockers are unchanged and still open: `waitforvisualfinish`
   sprite-lifetime tracking, `AnimComplexPaletteBlend`, `AnimTask_MistBallFog`'s
   own BG1 pipeline (a genuinely new subsystem), and generalizing
   `AnimTask_BlendBattleAnimPal` past its one DRAGON_BREATH instance. The
   `dragon-fire-projectile` siblings FIRE_BLAST and FIRE_SPIN also remain
-  open (confirmed this step: FIRE_BLAST doesn't use the BG-swap family at
-  all — its own real surface is `SoundTask_FireBlast` +
-  `gFireBlastCrossSpriteTemplate`/`gFireBlastRingSpriteTemplate` sprites, a
-  different, smaller pocket of work).
-- **Housekeeping:** moved the two oldest DRAGON_RAGE dated sections
-  ("rung 5 remainder" and "idle-motion subsystem") to
+  open (FIRE_BLAST's own real surface is `SoundTask_FireBlast` +
+  `gFireBlastCrossSpriteTemplate`/`gFireBlastRingSpriteTemplate` sprites).
+  `blend_color_cycle` (28 Level-50 moves, the current top no-representative
+  family) is still unenumerated.
+- **Housekeeping:** moved the "DRAGON_RAGE rungs 1-3" dated section to
   `ANIMATION_PROGRESS-archive.md` to make room for this step's section
   while keeping ~3 live (AGENTS.md's convention); DRAGON_RAGE's own
-  "rungs 1-3" and "rung 6/7" sections stay live alongside this one.
+  "rung 6/7" and the BG-swap-pipeline dissolution section stay live
+  alongside this one.
