@@ -407,24 +407,119 @@ unchanged after the `interpretCreateSpriteSchedule` extraction (pure move,
 zero behavior change) — no dense oracle comparator touches
 `animScriptInterpreter.ts`'s exported surface, so none were re-run.
 
+## `AnimTask_ShakeMon2` ported generically, DRAGON_BREATH + BLAZE_KICK re-driven (2026-07-24)
+
+**Verdict: the port generalizes cleanly across both named representatives,
+first try, zero test-fix iterations — both hand-fit shake formulas deleted,
+all four comparators re-run at exactly their recorded counts.** This is the
+coverage report's top task-level leverage item (64 remaining Level-50 moves
+depend on `AnimTask_ShakeMon2`); this step proves the port against its two
+named representatives only — no new move gets wired this step.
+
+**Port.** `src/engine/shakeMon2.ts` (`shakeMon2Sequence`/`shakeMon2OffsetAtTick`)
+is a 1:1 port of `AnimTask_ShakeMon2`/`AnimTask_ShakeMon2_Step`
+(`battle_anim_mon_movement.c:155-238`) — genuinely a different source task
+from `shakeMon.ts`'s `AnimTask_ShakeMon` per the prior rung's warning (no code
+carried over): offsets alternate between `+offset`/`-offset` (never touching
+zero mid-sequence) instead of toggling `offset`/`0`, and the final toggle
+forces zero and self-destroys instead of continuing the alternation. One
+implementation note: the toggle uses `0 - offset` rather than `-offset` to
+avoid emitting `-0` for the `yOffset=0` both call sites pass (numerically
+identical to `0` but fails strict/deep equality). Tier-1 tests
+(`tests/shakeMon2.test.ts`, 6 tests) pin the alternation pattern directly
+(varying `numTimes`/`frameDelay`), that mid-sequence values never land on
+zero, boundary behavior before creation/after self-destroy, and both call
+sites' exact reconciliation against their pre-existing hand-fit tables.
+
+**Call-site mapping, derived from committed constants, not fitted.** Checked
+each site's real source args directly against `battle_anim_scripts.s`:
+- DRAGON_BREATH (`:4943`): `createvisualtask AnimTask_ShakeMon2, 2,
+  ANIM_TARGET, 2, 0, 21, 1` → `shakeMon2OffsetAtTick(2, 0, 21, 1, tick)`.
+- BLAZE_KICK (`:8498`): `createvisualtask AnimTask_ShakeMon2, 2, ANIM_TARGET,
+  3, 0, 14, 1` → `shakeMon2OffsetAtTick(3, 0, 14, 1, tick)`.
+
+Both sites need the same "+1, guard age < creationAge" idiom `fly.ts`'s
+`FLY_SHAKE_CREATION_AGE` already established for `AnimTask_ShakeMon`: the
+port's own tick 0 (the creation write) is never independently displayed.
+For DRAGON_BREATH the creation-age anchor is the pre-existing
+`DRAGON_BREATH_SHAKE_FIRST_AGE` (13) constant itself — confirmed against the
+*independently* RAM-probed old canonical-path comment in `battleScene.ts`
+(`dragonBreathShakeX2`'s own doc: "by the FIRST RAM tick this task's callback
+is observed, x2 ALREADY reads the FIRST FLIP's result", i.e. the exact same
+collapse), not re-derived from scratch. For BLAZE_KICK the anchor is the
+pre-existing `BLAZE_KICK_FIRE_SPREAD_FIRST_AGE` (35) constant: its
+`AnimTask_ShakeMon2` creation coincides (zero `delay` between them, same
+`RunAnimScriptCommand` pass) with `call FireSpreadEffect`'s own first tick,
+so it shares that anchor exactly. Both mappings reproduce their entire
+pre-existing hand-fit table exactly (verified in `tests/shakeMon2.test.ts`
+before touching either call site) — this is a genuine derivation from
+already-committed, already-evidenced constants, not a fresh curve fit.
+
+Both `DRAGON_BREATH_SHAKE_FIRST_AGE`'s formerly-paired `_END_AGE` constant is
+deleted: the port's own self-destroy tick now determines the end, not a
+second hand-picked literal.
+
+**`dragonBreath.ts`/`blazeKick.ts` re-driven, hand-fit constants deleted.**
+`dragonBreath.ts`'s `Math.floor((age-first)/2)%2` formula and
+`DRAGON_BREATH_SHAKE_END_AGE` are gone; `blazeKick.ts`'s
+`Math.floor(shakeAge/2)%2 ? -3 : 3` formula and its local `shakeAge` are
+gone. Both now call `shakeMon2OffsetAtTick` directly.
+
+**Two call sites, NOT this step's scope, left untouched:** `statusAnimation.ts`
+(`animTaskShakeMon2AtSourceAge`, the paralysis-shake visual component BOUNCE's
+successful-paralysis variant uses) and `faintAttack.ts`
+(`AnimTask_ShakeMon2(ANIM_TARGET,2,0,9,1)`) both already have their own
+independent hand-fit `AnimTask_ShakeMon2` formulas. The step brief named only
+`dragonBreath.ts`/`blazeKick.ts`; retiring those two through the new port is
+a natural, bounded follow-up but wasn't attempted here.
+
+**The canonical `turn2-dragonbreath.json`/`turn2-dragonbreath-projectiles.json`/
+`turn13-dragonbreath-faint.json` fixtures do NOT feed through `dragonBreath.ts`
+at all** — checked directly: they render through `battleScene.ts`'s own
+separate, absolute-tick `drawDragonBreathScene`/`dragonBreathShakeX2`
+(the frozen "retired Battle 2 march" path, independently RAM-probed via
+`tools/probe/dump-dragonbreath-anim.py` when it was written), not the
+portable reducer. `battleScene.ts` was not touched this step, so those three
+fixtures are provably unaffected and were not re-run.
+
+**Evidence.** `npm test` 2131/2131 (up from 2125 — added `tests/shakeMon2.test.ts`,
+6 tests). `npm run build` green. All four re-driven comparators at their
+exact recorded counts, zero regressions:
+`dragon-breath-player-onix-opponent-murkrow.json` **85/85** component +
+**85/85** framebuffer, `dragon-breath-opponent-onix-player-murkrow.json`
+**85/85** + **85/85**, `blaze-kick-player-onix-opponent-murkrow.json`
+**78/78** + **78/78**, `blaze-kick-opponent-onix-player-murkrow.json`
+**78/78** + **78/78** (all match `ANIMATION_COVERAGE.json`'s recorded
+counts exactly).
+
+Move acceptance is unchanged: DRAGON_BREATH and BLAZE_KICK both stay `exact`,
+same coverage entries, same evidence files plus the two new port/test files.
+`ANIMATION_COVERAGE.json`'s move-level text is untouched (its own prose
+already describes the shake generically, not as a hand-fit formula) — only
+the `elemental-fire` track's implementation detail changed underneath it.
+
 ## Current handoff
 
-- **State:** **18 exact / 1 partial / 257 unsupported** (unchanged — MIST_BALL
-  stays fully unsupported; this step proves one more mechanism at the engine
-  level, not a move-level presentation).
-- **Did:** MIST_BALL remainder rung 3 (see the section above): ported
-  `AnimThrowMistBall`/`TranslateAnimSpriteToTargetMonLocation`/
-  `StartAnimLinearTranslation` as `src/engine/mistBall.ts`, extracted the
-  anim-script interpreter's createsprite-schedule walk into a shared
-  `src/engine/animScriptInterpreter.ts` (both `featherDance.ts` and
-  `mistBall.ts` now import it), wrote a new RAM probe + `overrides.parties`
-  mechanicLab scenario, and pinned every probed tick with a Tier-1 test.
-- **Evidence:** `npm test` 2125/2125, `npm run build` green. New:
-  `tests/mistBall.test.ts` (6 tests, all 32 probed RAM ticks matched
-  field-by-field). Unaffected dense comparators not re-run (no shared
-  presentation code changed beyond the pure `featherDance.ts` extraction,
-  itself re-verified by its own existing tests).
-- **Next:** MIST_BALL's remaining items in cost order: (1) `ANIM_TAG_SMALL_BUBBLES`
+- **State:** **18 exact / 1 partial / 257 unsupported** (unchanged — this
+  step is an implementation-unit swap behind two already-`exact` moves, not
+  a new promotion).
+- **Did:** Ported `AnimTask_ShakeMon2` generically (`src/engine/shakeMon2.ts`,
+  see the section above) and re-drove `dragonBreath.ts`/`blazeKick.ts`
+  through it, deleting both hand-fit shake formulas. Confirmed (and left
+  untouched, since out of scope) that the canonical turn2/turn13 DRAGON_BREATH
+  fixtures use a wholly separate, already-frozen `battleScene.ts` path.
+- **Evidence:** `npm test` 2131/2131, `npm run build` green. New:
+  `tests/shakeMon2.test.ts` (6 tests). Re-run at exactly recorded counts:
+  DRAGON_BREATH `dragon-breath-player-onix-opponent-murkrow.json` 85/85+85/85,
+  `dragon-breath-opponent-onix-player-murkrow.json` 85/85+85/85; BLAZE_KICK
+  `blaze-kick-player-onix-opponent-murkrow.json` 78/78+78/78,
+  `blaze-kick-opponent-onix-player-murkrow.json` 78/78+78/78.
+- **Next:** Two more existing hand-fit `AnimTask_ShakeMon2` call sites could
+  now retire onto the generic port (`statusAnimation.ts`'s paralysis shake,
+  `faintAttack.ts`'s own instance) — bounded follow-ups, not attempted here.
+  Wiring a genuinely NEW move through `AnimTask_ShakeMon2` (dense evidence
+  required) is the leverage step the coverage report actually wants next.
+  Otherwise, MIST_BALL's remaining items in cost order: (1) `ANIM_TAG_SMALL_BUBBLES`
   asset extraction + OAM wiring so `mistBall.ts` can actually render (needed
   before any dense pixel comparator is possible); (2) generalize
   `AnimTask_BlendBattleAnimPal` past its one DRAGON_BREATH instance; (3) give

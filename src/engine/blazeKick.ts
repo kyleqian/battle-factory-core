@@ -18,6 +18,7 @@ import {
   type SpriteOrderKey,
   type SpriteOrderState,
 } from "./spriteOrder.ts";
+import { shakeMon2OffsetAtTick } from "./shakeMon2.ts";
 
 export interface BlazeKickFireSpreadSprite {
   readonly index: number;
@@ -129,14 +130,23 @@ export function blazeKickAnimationAtAge(
   age: number,
   targetCenter: Readonly<{ x: number; y: number }>,
 ): BlazeKickAnimationState {
-  const shakeAge = age - BLAZE_KICK_FIRE_SPREAD_FIRST_AGE;
   return {
     targetOnMonBg: age >= 0 && age < 77,
     alpha: age >= 3 && age < 77 ? { eva: 12, evb: 8 } : null,
-    targetX2:
-      shakeAge >= 0 && shakeAge < 26
-        ? Math.floor(shakeAge / 2) % 2 === 0 ? -3 : 3
-        : 0,
+    // `AnimTask_ShakeMon2` (`shakeMon2.ts`), driven by the script's own args
+    // (`createvisualtask AnimTask_ShakeMon2, 2, ANIM_TARGET, 3, 0, 14, 1`,
+    // `battle_anim_scripts.s:8498`). Its creation coincides (zero delay
+    // between them) with `call FireSpreadEffect`'s own first tick, so it
+    // anchors on the same `BLAZE_KICK_FIRE_SPREAD_FIRST_AGE` constant, with
+    // the same +1 creation-anchor idiom `dragonBreath.ts`/fly.ts's
+    // `AnimTask_ShakeMon`/`AnimTask_ShakeMon2` call sites use (the port's
+    // own tick 0 is never independently displayed here either).
+    targetX2: age < BLAZE_KICK_FIRE_SPREAD_FIRST_AGE
+      ? 0
+      : shakeMon2OffsetAtTick(
+          3, 0, 14, 1,
+          age - BLAZE_KICK_FIRE_SPREAD_FIRST_AGE + 1,
+        ).x2,
     hitsplatVisible: age >= 35 && age <= 43,
     spinningFootVisible: age >= 3 && age <= 55,
     fireSpread: blazeKickFireSpreadAtAge(age, targetCenter),
