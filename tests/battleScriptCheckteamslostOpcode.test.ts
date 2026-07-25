@@ -264,4 +264,76 @@ describe("production checkteamslost (Cmd_checkteamslost) dispatch -- the real pa
       expect(ongoingResult.kind).toBe("advanced");
     });
   });
+
+  describe("staged integration: BattleScript_GiveExp -> BattleScript_HandleFaintedMon", () => {
+    it("computes a REAL battleOutcome 0 -> 1 transition from the party slice through jumpifbyte / getexp (short-circuit) / checkteamslost", () => {
+      // The opponent's 3-mon Factory roster is entirely fainted (party HP, not
+      // active-battler HP) -- this is the precondition the doc's own KO
+      // scenario ends on; battleOutcome itself starts at 0 and is never
+      // injected, only computed by checkteamslost below.
+      const rc = context({
+        giveExpState: 0,
+        party: { player: sixSlots(100), opponent: sixSlots(0, 0, 0) },
+      });
+      expect(rc.battleOutcome).toBe(0);
+
+      // Stage 1: BattleScript_GiveExp -- setbyte sGIVEEXP_STATE,0 / getexp
+      // BS_TARGET / end2. Real hardware dispatches Cmd_getexp twice (states
+      // 0 -> 6) before its own end2 finishes this BattleScriptExecute call.
+      const giveExp = createBattleScriptStatusRulesExecution(
+        program,
+        "BattleScript_GiveExp",
+        rc,
+        1,
+        externalPorts(),
+      );
+      let step = stepBattleScriptMachine(program, giveExp.state, giveExp.handlers); // setbyte
+      if (step.kind !== "advanced") throw new Error("expected setbyte to advance");
+      expect(step.state.rulesContext.giveExpState).toBe(0);
+
+      step = stepBattleScriptMachine(program, step.state, giveExp.handlers); // getexp state 0 -> 6
+      if (step.kind !== "advanced") throw new Error("expected getexp state 0 to advance");
+      expect(step.state.rulesContext.giveExpState).toBe(6);
+      expect(step.state.rulesContext.battleOutcome).toBe(0); // getexp never touches battleOutcome
+
+      step = stepBattleScriptMachine(program, step.state, giveExp.handlers); // getexp state 6 -> advance
+      if (step.kind !== "advanced") throw new Error("expected getexp state 6 to advance");
+      expect(step.state.rulesContext.giveExpState).toBe(0);
+      expect(step.state.rulesContext.battlers[1]).toMatchObject({ item: 0, ability: 0 });
+
+      const giveExpEnd = stepBattleScriptMachine(program, step.state, giveExp.handlers); // end2
+      expect(giveExpEnd.kind).toBe("halted");
+      if (giveExpEnd.kind !== "halted") throw new Error("expected end2 to halt terminal");
+      expect(giveExpEnd.state.haltReason).toMatchObject({ kind: "terminal" });
+      expect(giveExpEnd.state.rulesContext.battleOutcome).toBe(0);
+
+      // Stage 2: HandleFaintedMonActions would now BattleScriptExecute
+      // BattleScript_HandleFaintedMon (docs/faint-outcome-ground-truth.md
+      // §1) -- that C-side orchestration loop is out of this rung's scope,
+      // so this test stages the next script entry directly, carrying the
+      // same rulesContext forward exactly as the KO scenario's own prior
+      // rungs staged entries.
+      const handleFainted = createBattleScriptStatusRulesExecution(
+        program,
+        "BattleScript_HandleFaintedMon",
+        giveExpEnd.state.rulesContext,
+        1,
+        externalPorts(),
+      );
+
+      const afterCheckteamslost = stepBattleScriptMachine(program, handleFainted.state, handleFainted.handlers);
+      if (afterCheckteamslost.kind !== "advanced") throw new Error("expected checkteamslost to advance");
+      expect(afterCheckteamslost.state.rulesContext.battleOutcome).toBe(1); // B_OUTCOME_WON -- the real transition
+
+      const afterJumpifbyte = stepBattleScriptMachine(
+        program,
+        afterCheckteamslost.state,
+        handleFainted.handlers,
+      );
+      if (afterJumpifbyte.kind !== "advanced") throw new Error("expected jumpifbyte to advance");
+      const faintedMonEnd = resolveBattleScriptLabel(program, "BattleScript_FaintedMonEnd");
+      expect(faintedMonEnd).toBeDefined();
+      expect(afterJumpifbyte.state.programCounter).toBe(faintedMonEnd!.programCounter);
+    });
+  });
 });
