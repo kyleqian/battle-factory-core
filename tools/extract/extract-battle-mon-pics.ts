@@ -97,6 +97,9 @@ const BACK_SPECIES: Record<string, string> = {
   // MOVE_SHADOW_PUNCH's Level-50-legal attacker (FRONTIER_MON_HAUNTER_1)
   // needs its own back pic for the player-side staged orientation.
   HAUNTER: "haunter",
+  // MOVE_GROWTH's Level-50-legal attacker (FRONTIER_MON_IVYSAUR_1) needs its
+  // own back pic for the player-side staged orientation.
+  IVYSAUR: "ivysaur",
 };
 const FRONT_SPECIES: Record<string, string> = {
   GROVYLE: "grovyle",
@@ -116,6 +119,9 @@ const FRONT_SPECIES: Record<string, string> = {
   // MOVE_SHADOW_PUNCH's opposite-side staged orientation needs HAUNTER's
   // front pic (opponent-side attacker).
   HAUNTER: "haunter",
+  // MOVE_GROWTH's opposite-side staged orientation needs IVYSAUR's front
+  // pic (opponent-side attacker).
+  IVYSAUR: "ivysaur",
 };
 
 const backSprites: Record<string, Sprite> = {};
