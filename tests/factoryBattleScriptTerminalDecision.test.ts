@@ -78,7 +78,9 @@ describe("factory terminal move decision -- staged Level-50 Factory KO-of-the-la
 
   it(
     "non-terminal fork: opponent still has a healthy bench slot -- surfaces as a named machine-barrier "
-      + "boundary (the real, unregistered jumpifbattletype forced-switch gate), never a fake terminal",
+      + "boundary (jumpifbattletype is now registered per docs/forced-switch-ground-truth.md §4 slice 1 and "
+      + "takes Factory's real BATTLE_TYPE_TRAINER-taken jump, so the barrier now sits one opcode deeper, at "
+      + "the genuinely unregistered openpartyscreen forced-switch gate), never a fake terminal",
     () => {
       const initial = createFactoryTerminalMoveBattleState(config({ opponentBenchHp: [90, 0] }));
       const result = submitFactoryTerminalMoveDecision(initial, USE_STRENGTH_ON_TARGET);
@@ -87,7 +89,7 @@ describe("factory terminal move decision -- staged Level-50 Factory KO-of-the-la
       expect(result.barrier).toMatchObject({
         kind: "battle-script",
         entryLabel: "BattleScript_HandleFaintedMon",
-        opcodeName: "B_SCR_OP_JUMPIFWORD",
+        opcodeName: "B_SCR_OP_OPENPARTYSCREEN",
       });
       expect(result.state.boundary.kind).toBe("machine-barrier");
       const rulesContext = (result.state.rules as { rulesContext: Record<string, unknown> }).rulesContext;

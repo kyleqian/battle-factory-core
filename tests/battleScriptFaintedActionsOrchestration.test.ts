@@ -174,9 +174,11 @@ describe("runBattleScriptFaintedActionsOrchestration (HandleFaintedMonActions eq
 
   it(
     "non-terminal barrier: opponent still has a healthy bench slot -- checkteamslost's jumpifbyte does NOT "
-      + "take the FaintedMonEnd branch, and the real forced-switch dance's own jumpifbattletype (a jumpifword "
-      + "macro expansion, asm/macros/battle_script.inc:1434-1436) is genuinely unregistered, surfacing as a "
-      + "named machine boundary instead of a fake terminal or silent fallthrough",
+      + "take the FaintedMonEnd branch; jumpifbattletype (a jumpifword macro expansion, "
+      + "asm/macros/battle_script.inc:1434-1436) is now registered (docs/forced-switch-ground-truth.md §4 "
+      + "slice 1) and takes Factory's real BATTLE_TYPE_TRAINER-taken jump straight to "
+      + "BattleScript_FaintedMonTryChoose, so the barrier now surfaces one opcode deeper, at the genuinely "
+      + "unregistered openpartyscreen -- a named machine boundary instead of a fake terminal or silent fallthrough",
     () => {
       const rc = context({
         party: { player: sixSlots(100), opponent: sixSlots(90, 0, 0) },
@@ -186,7 +188,7 @@ describe("runBattleScriptFaintedActionsOrchestration (HandleFaintedMonActions eq
       expect(result.kind).toBe("non-terminal-barrier");
       if (result.kind !== "non-terminal-barrier") throw new Error("expected non-terminal-barrier");
       expect(result.state.rulesContext.battleOutcome).toBe(0); // genuinely undecided, not fabricated
-      expect(result.instruction.opcodeName).toBe("B_SCR_OP_JUMPIFWORD"); // jumpifbattletype's real opcode
+      expect(result.instruction.opcodeName).toBe("B_SCR_OP_OPENPARTYSCREEN"); // openpartyscreen BS_FAINTED
       expect(result.state.rng.calls).toBe(initial.rng.calls);
     },
   );

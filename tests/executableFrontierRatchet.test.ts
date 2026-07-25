@@ -74,6 +74,11 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   ["src/engine/battleScriptAttackCancelerOpcode.ts", 5],
   ["src/engine/battleScriptMoveEndOpcode.ts", 7],
   ["src/engine/battleScriptJumpifbyteOpcode.ts", 1],
+  // Forced-switch ground truth §4 slice 1: one operand-shape barrier, shared
+  // by both the unmodeled-memWord and unmodeled-value cases (e.g.
+  // gBattleMoveDamage / HITMARKER_NO_ATTACKSTRING, neither reachable on
+  // Factory's own BattleScript_HandleFaintedMon path).
+  ["src/engine/battleScriptJumpifwordOpcode.ts", 1],
   ["src/engine/battleScriptGetexpOpcode.ts", 2],
   ["src/engine/battleScriptCheckteamslostOpcode.ts", 3],
 ]);

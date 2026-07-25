@@ -21,6 +21,7 @@ import { createBattleScriptAttackCancelerOpcodeHandlers } from "./battleScriptAt
 import { createBattleScriptHitChainOpcodeHandlers } from "./battleScriptHitChainOpcode.ts";
 import { createBattleScriptMoveEndOpcodeHandlers } from "./battleScriptMoveEndOpcode.ts";
 import { createBattleScriptJumpifbyteOpcodeHandlers } from "./battleScriptJumpifbyteOpcode.ts";
+import { createBattleScriptJumpifwordOpcodeHandlers } from "./battleScriptJumpifwordOpcode.ts";
 import { createBattleScriptGetexpOpcodeHandlers } from "./battleScriptGetexpOpcode.ts";
 import { createBattleScriptCheckteamslostOpcodeHandlers } from "./battleScriptCheckteamslostOpcode.ts";
 import {
@@ -1810,6 +1811,7 @@ export function createBattleScriptStatusRulesHandlers(
     }),
     ...createBattleScriptMoveEndOpcodeHandlers(program),
     ...createBattleScriptJumpifbyteOpcodeHandlers(program),
+    ...createBattleScriptJumpifwordOpcodeHandlers(program),
     ...createBattleScriptGetexpOpcodeHandlers(program),
     ...createBattleScriptCheckteamslostOpcodeHandlers(program),
   });
