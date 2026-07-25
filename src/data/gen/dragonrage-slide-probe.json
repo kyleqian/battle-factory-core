@@ -1,0 +1,1793 @@
+{
+"source": "DRAGON_RAGE enumeration rung 2 (ANIMATION_PROGRESS.md 2026-07-25): tools/probe/dump-dragonrage-slide.py over tools/battle-lab/mechanic-dragon-rage-charmeleon-onix.json (CHARMELEON attacker w/ MOVE_DRAGON_RAGE x4 vs ONIX, mechanicLab overrides.parties), ticks 160-245 - covers both SlideMonToOffset (ticks 168-172, attacker +15px x over 4 ticks) and SlideMonToOriginalPos (ticks 235-238, attacker back to 0 over 4 ticks) dummy-sprite windows.",
+"offsetSlideWindow": {
+"firstTick": 168,
+"lastAliveTick": 172,
+"destroyedByTick": 173
+},
+"originalPosSlideWindow": {
+"firstTick": 235,
+"lastAliveTick": 238,
+"destroyedByTick": 239
+},
+"ticks": [
+{
+"tick": 160,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 0,
+"y2": 2
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 1,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 161,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 0,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 1,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 162,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 0,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 1,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 163,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 0,
+"y2": 2
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 1,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 164,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 0,
+"y2": 2
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 1,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 165,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 0,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 1,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 166,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 0,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 1,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 167,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 0,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 1,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 168,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 3,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 1,
+"y2": 0
+},
+"slideSprites": [
+{
+"slot": 3,
+"kind": "SlideMonToOffset",
+"invisible": true,
+"data": [
+3,
+960,
+0,
+960,
+0,
+6,
+15357,
+2058
+]
+}
+]
+},
+{
+"tick": 169,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 7,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 1,
+"y2": 0
+},
+"slideSprites": [
+{
+"slot": 3,
+"kind": "SlideMonToOffset",
+"invisible": true,
+"data": [
+2,
+960,
+0,
+1920,
+0,
+6,
+15357,
+2058
+]
+}
+]
+},
+{
+"tick": 170,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 11,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 1,
+"y2": 0
+},
+"slideSprites": [
+{
+"slot": 3,
+"kind": "SlideMonToOffset",
+"invisible": true,
+"data": [
+1,
+960,
+0,
+2880,
+0,
+6,
+15357,
+2058
+]
+}
+]
+},
+{
+"tick": 171,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 1,
+"y2": 0
+},
+"slideSprites": [
+{
+"slot": 3,
+"kind": "SlideMonToOffset",
+"invisible": true,
+"data": [
+0,
+960,
+0,
+3840,
+0,
+6,
+15357,
+2058
+]
+}
+]
+},
+{
+"tick": 172,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 1,
+"y2": 0
+},
+"slideSprites": [
+{
+"slot": 3,
+"kind": "SlideMonToOffset",
+"invisible": true,
+"data": [
+0,
+960,
+0,
+3840,
+0,
+6,
+15357,
+2058
+]
+}
+]
+},
+{
+"tick": 173,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 1,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 174,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 1,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 175,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 1,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 176,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 1,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 177,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 1,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 178,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 1,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 179,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 1,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 180,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 1,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 181,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 1,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 182,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 1,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 183,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 1,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 184,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 1,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 185,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 1,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 186,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 187,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 188,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 3
+},
+"slideSprites": []
+},
+{
+"tick": 189,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 3
+},
+"slideSprites": []
+},
+{
+"tick": 190,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 191,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 192,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 3
+},
+"slideSprites": []
+},
+{
+"tick": 193,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 3
+},
+"slideSprites": []
+},
+{
+"tick": 194,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 195,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 196,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 3
+},
+"slideSprites": []
+},
+{
+"tick": 197,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 3
+},
+"slideSprites": []
+},
+{
+"tick": 198,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 199,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 200,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 3
+},
+"slideSprites": []
+},
+{
+"tick": 201,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 3
+},
+"slideSprites": []
+},
+{
+"tick": 202,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 203,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 204,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 3
+},
+"slideSprites": []
+},
+{
+"tick": 205,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 3
+},
+"slideSprites": []
+},
+{
+"tick": 206,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 207,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 208,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 3
+},
+"slideSprites": []
+},
+{
+"tick": 209,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 3
+},
+"slideSprites": []
+},
+{
+"tick": 210,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 211,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 212,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 3
+},
+"slideSprites": []
+},
+{
+"tick": 213,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 3
+},
+"slideSprites": []
+},
+{
+"tick": 214,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 215,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 216,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 3
+},
+"slideSprites": []
+},
+{
+"tick": 217,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 3
+},
+"slideSprites": []
+},
+{
+"tick": 218,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 219,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 220,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 3
+},
+"slideSprites": []
+},
+{
+"tick": 221,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 3
+},
+"slideSprites": []
+},
+{
+"tick": 222,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 223,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 224,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 3
+},
+"slideSprites": []
+},
+{
+"tick": 225,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 3
+},
+"slideSprites": []
+},
+{
+"tick": 226,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 227,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 228,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 3
+},
+"slideSprites": []
+},
+{
+"tick": 229,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 3
+},
+"slideSprites": []
+},
+{
+"tick": 230,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 231,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 232,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 3
+},
+"slideSprites": []
+},
+{
+"tick": 233,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 3
+},
+"slideSprites": []
+},
+{
+"tick": 234,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 15,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 235,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 11,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 0
+},
+"slideSprites": [
+{
+"slot": 3,
+"kind": "SlideMonToOriginalPos",
+"invisible": true,
+"data": [
+3,
+-960,
+0,
+-960,
+0,
+15,
+0,
+1536
+]
+}
+]
+},
+{
+"tick": 236,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 7,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 0
+},
+"slideSprites": [
+{
+"slot": 3,
+"kind": "SlideMonToOriginalPos",
+"invisible": true,
+"data": [
+2,
+-960,
+0,
+-1920,
+0,
+15,
+0,
+1536
+]
+}
+]
+},
+{
+"tick": 237,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 3,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 0
+},
+"slideSprites": [
+{
+"slot": 3,
+"kind": "SlideMonToOriginalPos",
+"invisible": true,
+"data": [
+1,
+-960,
+0,
+-2880,
+0,
+15,
+0,
+1536
+]
+}
+]
+},
+{
+"tick": 238,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 0,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 0
+},
+"slideSprites": [
+{
+"slot": 3,
+"kind": "SlideMonToOriginalPos",
+"invisible": true,
+"data": [
+0,
+-960,
+0,
+-3840,
+0,
+15,
+0,
+1536
+]
+}
+]
+},
+{
+"tick": 239,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 0,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 240,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 0,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 241,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 0,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 242,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 0,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 243,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 0,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 244,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 0,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 0
+},
+"slideSprites": []
+},
+{
+"tick": 245,
+"animScriptActive": 1,
+"attacker": {
+"slot": 6,
+"x": 72,
+"y": 89,
+"x2": 0,
+"y2": 0
+},
+"target": {
+"slot": 8,
+"x": 176,
+"y": 42,
+"x2": 0,
+"y2": 0
+},
+"slideSprites": []
+}
+]
+}

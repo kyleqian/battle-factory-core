@@ -663,12 +663,14 @@ a corner somewhere. Per the brief's own stop-threshold rule, this session
 stopped after the enumeration + additive extractor decode rather than
 rushing a partial port.
 
-**Remainder for whoever picks this back up** (in cost order): (1) extract
+**Remainder for whoever picks this back up** (in cost order): ~~(1) extract
 `ANIM_TAG_FIRE_PLUME` (`fire_plume.png` tiles + `fire.png` palette) — pure
-mechanical decode, same shape as every prior asset addition; (2) port
+mechanical decode, same shape as every prior asset addition~~ **done, see the
+"DRAGON_RAGE enumeration remainder, rungs 1-2" section below**; ~~(2) port
 `SlideMonToOffset`/`SlideMonToOriginalPos` as a shared primitive (Tier-1
 tests first, no move wiring needed yet — same standalone-port pattern
-`shakeMon.ts`/`animLinearTranslation.ts` used); (3) RAM-probe the whole
+`shakeMon.ts`/`animLinearTranslation.ts` used)~~ **done, same section
+below**; (3) RAM-probe the whole
 move body in one battle-lab window (attacker shake → slide-to-offset →
 fire-spit → 8 plumes → slide-to-original) to pin every cadence/render-lag
 in one pass, the same technique `dump-dragonbreath-anim.py`/
@@ -684,28 +686,95 @@ extractor-only change). `npm run build` green. `git status` after the
 extractor re-run showed only `extract-battle-move-anim-assets.ts` and
 `battle-move-anim-scripts.json` changed.
 
+## DRAGON_RAGE enumeration remainder, rungs 1-2: FIRE_PLUME extracted, SlideMonToOffset/SlideMonToOriginalPos ported (2026-07-25)
+
+**Rung 1 — `ANIM_TAG_FIRE_PLUME` asset extraction.** Mirrored the DRAGON_BREATH
+small_ember block's exact layout: `fire_plume.png` (32x160, 4x20 tiles, 5
+stacked 32x32 frames, `gDragonRageFirePlumeSpriteTemplate`'s tile source)
+paired with `fire.png`'s own embedded palette (the `ANIM_TAG_FIRE_PLUME`
+palette-table entry points at `gBattleAnimSpritePal_Fire`, a separate source
+PNG — same tile-vs-palette split `extract-battle-anim-assets.ts`'s
+particles.png/circle_impact.png pair already established). Writes
+`src/assets/gen/battle-anim-fire-plume.json`; pinned in
+`tests/moveAnimAssets.test.ts` mirroring the rocks.png per-asset pattern.
+Additive only — `git status` after a full extractor re-run showed only the
+new JSON output plus the extractor/test files touched.
+
+**Rung 2 — `SlideMonToOffset`/`SlideMonToOriginalPos` primitive port.**
+RAM-probed a real DRAGON_RAGE window first, per the step brief: staged a
+Factory-legal CHARMELEON attacker (mirroring FRONTIER_MON_CHARMELEON_2's own
+real MOVE_DRAGON_RAGE grant) vs. ONIX via a new `mechanicLab overrides.parties`
+fixture (`tools/battle-lab/mechanic-dragon-rage-charmeleon-onix.json`) and a
+new probe (`tools/probe/dump-dragonrage-slide.py`, committed evidence
+`src/data/gen/dragonrage-slide-probe.json`) that identifies the two dummy
+sprites by their own `template` pointer against
+`gSlideMonToOffsetSpriteTemplate`/`gSlideMonToOriginalPosSpriteTemplate`'s
+real rodata addresses (stable for the sprite's whole lifetime, unlike
+`callback` which reassigns itself after the first tick).
+
+Ported both 1:1 as `src/engine/slideMon.ts`
+(`slideMonToOffsetAtTick`/`slideMonToOriginalPosAtTick`, plus
+`slideMonToOffsetMirroredDeltas` for `SlideMonToOffset`'s own opponent-side
+mirror and `*DestroyTick` helpers). Both share
+`InitSpriteDataForLinearTranslation`'s plain-truncating-division Q8.8 setup
+(confirmed distinct from `animLinearTranslation.ts`'s direction-in-low-bit
+variant, per the original enumeration's own finding) but the RAM probe
+surfaced **two real divergences between their step functions**, both now
+encoded in the port rather than assumed: (1) `SlideMonToOriginalPos_Step`
+truncates its accumulator's own contribution to `(s8)` before adding back the
+base offset; `TranslateSpriteLinearByIdFixedPoint` (SlideMonToOffset's step)
+does not — irrelevant at this move's own ≤15px magnitudes but part of the
+real function. (2) Self-destroy timing differs by a full tick: SlideMonToOffset's
+finish branch only *reassigns* `sprite->callback` to `DestroyAnimSprite`
+(`SetCallbackToStoredInData6`), so the actual destroy fires the FOLLOWING
+tick — RAM shows the dummy sprite alive for 5 ticks on a 4-tick duration
+(168-172, tick 172 a repeated no-op), gone by 173. SlideMonToOriginalPos_Step
+calls `DestroyAnimSprite` directly in its own finish branch, same tick as the
+last accumulate — RAM shows exactly 4 ticks alive (235-238), gone by 239.
+`tests/slideMon.test.ts` asserts the port reproduces the probed attacker `x2`
+at every RAM tick across both windows (168-172 offset-out, 235-238
+offset-back) plus both destroy-tick counts, all matching exactly on first
+run — no curve-fitting needed once the source's two branch orders were read
+correctly. The opponent-side mirror branch (`battlerSide: "opponent"`) is
+unit-tested from source only — this attacker was on the player side in the
+probed window, so the mirror itself is **not yet independently RAM-verified**
+(named remainder, not claimed exact).
+
+**No move wiring.** `AnimDragonRageFirePlume`, the fire-spit sprite's
+asymmetric-offset branch, and `StartDragonFireTranslation`'s own fresh affine
+probe are untouched — out of this step's scope per the brief.
+MOVE_DRAGON_RAGE stays unsupported (no `ANIMATION_COVERAGE.json` entry).
+
+**Evidence.** `npm test` 2190/2190 (2180 + 10 new: 3 fire-plume asset pins,
+7 slideMon RAM pins). `npm run build` green.
+
 ## Current handoff
 
 - **State:** **19 exact / 1 partial / 256 unsupported** (unchanged this
-  step — MOVE_DRAGON_RAGE's enumeration stopped before any render code, so
-  no coverage entry was added or promoted).
-- **Did:** Enumerated `Move_DRAGON_RAGE`'s full command surface against its
-  real C callbacks (see dated section above) and landed only the additive
-  extractor decode, per the step brief's own stop-threshold rule (4
-  substantive new items, at threshold, no new subsystem — but not
-  completable with disciplined RAM-probe evidence inside a 60-minute cap).
-- **Evidence:** `npm test` 2180/2180, `npm run build` green. `git status`
-  after the extractor re-run touched only the extractor file and its one
-  JSON output.
-- **Next:** DRAGON_RAGE's own remainder is ordered above (FIRE_PLUME asset
-  → SlideMonToOffset/SlideMonToOriginalPos primitive → one combined RAM
-  probe → AnimDragonRageFirePlume + fire-spit wiring → dense comparators).
-  Alternatively, the next ranked `dragon-fire-projectile` siblings FIRE_BLAST
-  and FIRE_SPIN (both confirmed via source batch audit to use distinct
-  sprite templates) remain open, as does MIST_BALL's own remainder (see the
-  "Interpreter generalization" section above for its full ordered list).
+  step — groundwork only, no render code, no coverage entry added or
+  promoted).
+- **Did:** Landed rungs 1-2 of the DRAGON_RAGE enumeration's named
+  remainder: extracted `ANIM_TAG_FIRE_PLUME` (asset + Tier-1 test) and
+  ported `SlideMonToOffset`/`SlideMonToOriginalPos` generically, RAM-probed
+  against a real staged DRAGON_RAGE window first (see dated section above
+  for the two genuine step-function divergences the probe surfaced).
+- **Evidence:** `npm test` 2190/2190, `npm run build` green. Extractor
+  re-run touched only intended outputs (`git status` confirmed).
+- **Next:** DRAGON_RAGE's own remainder, renumbered — (1) RAM-probe the
+  rest of the move body in one battle-lab window (attacker shake → fire-spit
+  → 8 plumes) to pin every remaining cadence/render-lag, the same technique
+  `dump-dragonbreath-anim.py`/`dump-ember-creation.py`/this step's own
+  `dump-dragonrage-slide.py` used; (2) port `AnimDragonRageFirePlume` and
+  wire `StartDragonFireTranslation`'s offset quirk + fresh affine table (the
+  `SlideMonToOffset`/`SlideMonToOriginalPos` wiring can land alongside, now
+  that the primitive is ported); (3) dense comparators in both orientations,
+  run twice for determinism. Alternatively, the next ranked
+  `dragon-fire-projectile` siblings FIRE_BLAST and FIRE_SPIN (both confirmed
+  via source batch audit to use distinct sprite templates) remain open, as
+  does MIST_BALL's own remainder (see the "Interpreter generalization"
+  section above for its full ordered list).
 - **Housekeeping flag (carried over, still unaddressed):** this file has
-  accumulated 8+ dated sections beyond the ~3-most-recent lean-ledger
+  accumulated 9+ dated sections beyond the ~3-most-recent lean-ledger
   guideline (`AGENTS.md`); no `ANIMATION_PROGRESS-archive.md` exists yet. A
   future step should create the archive file and trim, mirroring
   `PROGRESS-archive.md`'s convention.
