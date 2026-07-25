@@ -498,34 +498,73 @@ same coverage entries, same evidence files plus the two new port/test files.
 already describes the shake generically, not as a hand-fit formula) — only
 the `elemental-fire` track's implementation detail changed underneath it.
 
+## MOVE_MUD_SLAP dense-evidence acceptance step: already complete, re-verified (2026-07-24)
+
+**Verdict: the assigned step ("bring MOVE_MUD_SLAP to a dense-evidence
+acceptance state") was already done — mis-scoped, not blocked.**
+`ANIMATION_COVERAGE.json`'s `MOVE_MUD_SLAP` entry has carried `status:
+"exact"` with both-orientation dense evidence since commit `c1df4a9`
+("animation: prove Mud Slap in both orientations"), an ancestor of this
+worktree's own branch point — the work predates this session's step brief
+entirely. No source code needed changing, so no code commit was made this
+step; this entry exists only to record that the assignment was checked
+honestly rather than skipped or rubber-stamped.
+
+**Verification performed, not assumed.** Read `Move_MUD_SLAP`'s script
+(`reference/pokeemerald/data/battle_anim_scripts.s:5220-5241`):
+`loadspritegfx ANIM_TAG_MUD_SAND`, attacker slide-to-offset/slide-to-original
+choreography (shared `gSlideMonToOffsetSpriteTemplate`/
+`gSlideMonToOriginalPosSpriteTemplate`, same as SAND_ATTACK), then six
+`call MudSlapMud`, each spawning five `gMudSlapMudSpriteTemplate` sprites
+(30 total, matching `src/engine/mudSlap.ts`'s own "30 stock
+`Random2()`-resolved" doc comment) plus a `delay 2`. Read the callback
+(`reference/pokeemerald/src/battle_anim_ground.c`): `gMudSlapMudSpriteTemplate`
+is `.oam = &gOamData_AffineOff_ObjNormal_16x16` with `sAnim_MudSlapMud`
+(frame 1) and `.callback = AnimDirtScatter` — the identical callback
+SAND_ATTACK's `gSandAttackDirtSpriteTemplate` uses at 8x8, confirming
+`mudSlap.ts`'s claim that it "shares `AnimDirtScatter` translation semantics
+with SAND ATTACK" while modeling its own distinct 16x16/30-sprite/6-wave
+geometry — not a guess, matches the actual source.
+
+`npm test` 2147/2147, `npm run build` green (both unchanged from before this
+step — no source touched). Re-ran both committed portable comparators fresh
+against the live oracle rather than trusting the recorded numbers:
+`mud-slap-pidgeotto-onix.json` **51/51** source OAM + **51/51** RGB,
+`mud-slap-player-pidgeotto-onix.json` **51/51** + **51/51** — both match
+`ANIMATION_COVERAGE.json`'s recorded counts exactly, zero regressions.
+SAND_ATTACK's own module/comparators were not touched (out of scope, and
+unnecessary since no shared code changed).
+
 ## Current handoff
 
 - **State:** **18 exact / 1 partial / 257 unsupported** (unchanged — this
-  step is an implementation-unit swap behind two already-`exact` moves, not
-  a new promotion).
-- **Did:** Ported `AnimTask_ShakeMon2` generically (`src/engine/shakeMon2.ts`,
-  see the section above) and re-drove `dragonBreath.ts`/`blazeKick.ts`
-  through it, deleting both hand-fit shake formulas. Confirmed (and left
-  untouched, since out of scope) that the canonical turn2/turn13 DRAGON_BREATH
-  fixtures use a wholly separate, already-frozen `battleScene.ts` path.
-- **Evidence:** `npm test` 2131/2131, `npm run build` green. New:
-  `tests/shakeMon2.test.ts` (6 tests). Re-run at exactly recorded counts:
-  DRAGON_BREATH `dragon-breath-player-onix-opponent-murkrow.json` 85/85+85/85,
-  `dragon-breath-opponent-onix-player-murkrow.json` 85/85+85/85; BLAZE_KICK
-  `blaze-kick-player-onix-opponent-murkrow.json` 78/78+78/78,
-  `blaze-kick-opponent-onix-player-murkrow.json` 78/78+78/78.
-- **Next:** Two more existing hand-fit `AnimTask_ShakeMon2` call sites could
-  now retire onto the generic port (`statusAnimation.ts`'s paralysis shake,
-  `faintAttack.ts`'s own instance) — bounded follow-ups, not attempted here.
+  step re-verified an already-`exact` move; no promotion).
+- **Did:** Re-verified `MOVE_MUD_SLAP` (assigned step) is already at dense
+  `exact` acceptance from a prior session (see section above); no code
+  changes were needed. Confirmed against source, `npm test`, `npm run
+  build`, and fresh live-oracle reruns of both orientation comparators.
+- **Evidence:** `npm test` 2147/2147, `npm run build` green.
+  `mud-slap-pidgeotto-onix.json` 51/51+51/51,
+  `mud-slap-player-pidgeotto-onix.json` 51/51+51/51 (both re-run live,
+  matching recorded counts).
+- **Next:** MOVE_MUD_SLAP needs no further work. Two existing hand-fit
+  `AnimTask_ShakeMon2` call sites could retire onto the generic port
+  (`statusAnimation.ts`'s paralysis shake, `faintAttack.ts`'s own instance).
   Wiring a genuinely NEW move through `AnimTask_ShakeMon2` (dense evidence
-  required) is the leverage step the coverage report actually wants next.
-  Otherwise, MIST_BALL's remaining items in cost order: (1) `ANIM_TAG_SMALL_BUBBLES`
-  asset extraction + OAM wiring so `mistBall.ts` can actually render (needed
+  required) is the leverage step the coverage report wants next. MIST_BALL's
+  remaining items in cost order: (1) `ANIM_TAG_SMALL_BUBBLES` asset
+  extraction + OAM wiring so `mistBall.ts` can actually render (needed
   before any dense pixel comparator is possible); (2) generalize
   `AnimTask_BlendBattleAnimPal` past its one DRAGON_BREATH instance; (3) give
   the interpreter real `waitforvisualfinish` semantics (sprite-lifetime
   tracking); (4)/(5) the two new subsystems (`AnimComplexPaletteBlend`,
   `AnimTask_MistBallFog`'s BG pipeline) — each its own bounded step. Or
-  resume the next ranked Level-50 component track
-  (`mud-sand-scatter`/`dragon-fire-projectile`) if a bounded win elsewhere is
-  preferred. THUNDER PUNCH has no known move-owned remainder.
+  resume the next ranked Level-50 component track (`dragon-fire-projectile`
+  siblings, since `mud-sand-scatter` is now fully proven — both
+  representatives exact) if a bounded win elsewhere is preferred. THUNDER
+  PUNCH has no known move-owned remainder.
+- **Housekeeping flag:** this file has accumulated 6+ dated sections beyond
+  the ~3-most-recent lean-ledger guideline (`AGENTS.md`); no
+  `ANIMATION_PROGRESS-archive.md` exists yet. Not addressed this step
+  (narrowly scoped to MUD_SLAP verification) — a future step should create
+  the archive file and trim, mirroring `PROGRESS-archive.md`'s convention.
