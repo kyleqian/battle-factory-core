@@ -4,6 +4,92 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 450 — Full-turn reducer landed: "decision → both actions → end-turn → next decision boundary" is now a genuine multi-turn cycle
+
+- **State:** tree green at **205 files / 2426 tests** (+1 file/+5 tests
+  over entry 449's 204/2421 — the 5 new reducer integration tests; the
+  `speed` field's own mechanical ripple landed in existing files/tests, no
+  new ones), build green. Ratchet green, **zero new barrier pins**. Census
+  not regenerated (out of scope per this step's brief — pure
+  orchestration/reducer wiring, no move-effect registrations changed,
+  nothing to flip).
+- **Did (new `src/engine/factoryBattleScriptFullTurnDecision.ts` +
+  `tests/factoryBattleScriptFullTurnDecision.test.ts`), built directly on
+  `runBattleEndTurnOrchestration` per entry 449's own "Next" naming this
+  exact step:**
+  - **Shared boundary reused, not invented:** the existing
+    `BattleCommandRequest` (already names `side`/`battler`) asks the player
+    first, then the trainer (test-supplied — the AI port is a later step,
+    `docs/factory-ai-ground-truth.md`) — matching source's own
+    `HandleTurnActionSelectionState` collecting both battlers' actions
+    before `SetActionsAndBattlersTurnOrder` ever runs. No new shared
+    boundary type.
+  - **Turn order:** added a `speed` field to
+    `BattleScriptRulesBattlerState` (own commit, `maxHP` precedent —
+    defaulted to 100, mechanical ripple only: 2 legacy `emptyBattler`
+    call sites + 2 `toStrictEqual`-on-full-battler-object test fixtures
+    needed the same one-time update `maxHP` caused in entry 449). Turn
+    order itself reuses `turnOrder.ts`'s already-ported
+    `getWhoStrikesFirst` verbatim (priority bracket, then effective speed,
+    then the speed-tie `Random() & 1` roll, drawn ONLY on a genuine tie —
+    `battle_main.c:4728/4745`) — not re-derived.
+  - **Second-action skip, sourced not assumed:** in singles, ANY
+    fainted-actions fork from the first action — terminal
+    (`gBattleOutcome != 0`) OR the non-terminal forced-switch dance —
+    cancels the second action. Two distinct source mechanisms converge on
+    this rule: `RunTurnActionsFunctions` (`battle_main.c:4937-4943`) forces
+    `B_ACTION_FINISHED` once `gBattleOutcome != 0`; separately,
+    `BattleScript_HandleFaintedMon`'s own tail runs `cancelallactions`
+    right after `switchineffects` in singles (`data/battle_scripts_1.s
+    :2893-2895`, already a registered no-op opcode), cancelling the
+    pending action even when the battle doesn't end. Either way,
+    `sEndTurnFuncsTable[gBattleOutcome]` (`battle_main.c:554-565`) only
+    reaches `BattleTurnPassed` when `gBattleOutcome === 0` — so a terminal
+    first action skips `runBattleEndTurnOrchestration` entirely (reported
+    immediately), while a non-terminal forced switch still reaches it.
+  - Each action runs its move's script from the LITERAL topology entry
+    (`TOPOLOGY_BY_MOVE`, `factoryBattleScriptDecision.ts`'s own mechanism),
+    reusing `runBattleScriptFaintedActionsOrchestration` after every action
+    (not just the killing one) and `runBattleEndTurnOrchestration`
+    unmodified — no field/battler loop re-derived.
+  - **RNG reconciliation subtlety (new, not present in any single-command
+    reducer):** the machine's own per-invocation ledger always starts its
+    `calls` counter at 0 (`createBattleScriptRngState`'s own contract),
+    while the decision boundary's cursor is cumulative across the WHOLE
+    battle. Reconciliation now compares `rngAfter.calls` against
+    `rngBefore.calls + finalState.rng.calls`, not the two directly —
+    invisible in every prior reducer because those are single-invocation
+    adapters whose `rngBefore.calls` is always 0.
+  - **Integration proofs, all passing:** (1) a full two-turn cycle, real
+    `GetWhoStrikesFirst` order (speed 100 vs 50, no tie), each hit chain's
+    own 4-roll ledger pinned (8 calls/turn, 16 cumulative by turn 2, one
+    continuous LCG stream — not reset per turn); (2) burn applied via a
+    REAL Ember `MOVE_EFFECT_BURN` 10% proc on turn 1 (seed hunted by
+    direct replay, not hand-derived), ticking the flat `floor(maxHP/8) =
+    124` at both end-turns (recurrence, no growth — unlike Toxic,
+    `docs/end-turn-ground-truth.md` §2b); (3) a mid-turn KO on the first
+    action: terminal boundary reported directly, the trainer's own chosen
+    move never dispatches (PP still full, 16 vs the player's used 15),
+    `runBattleEndTurnOrchestration` never runs, exactly the killing blow's
+    banked 4-roll ledger.
+- **Next:** the non-terminal forced-switch variant of proof 3 (second
+  action skipped via `cancelallactions` rather than terminal) is
+  structurally handled by the reducer (same code path as the terminal
+  case, gated on `faint1.kind`) but has no integration test this session —
+  optional per the brief ("if cap allows"), landed the terminal case
+  ("at minimum") instead. Confusion
+  (`docs/stat-change-confusion-ground-truth.md`) and the AI move-selection
+  port (`docs/factory-ai-ground-truth.md`) remain the next open
+  subsystems; `runBattleEndTurnOrchestration`'s own still-barriered cases
+  (Ingrain/Leech Seed/Wrap/weather/Reflect-Light Screen-Safeguard/etc.,
+  entry 449's own "Next") are unchanged.
+- **Notes:** no oracle traces added this session (all three proofs are
+  direct-construction Tier-1, per this step's own brief). No
+  presentation/`battleScene`/ROADMAP edits. OUT OF SCOPE per the brief and
+  untouched: AI port, item/switch player actions beyond the existing fork,
+  census refresh.
+
+---
 ## 449 — End-turn orchestration landed: `BattleTurnPassed` C-side scheduling equivalent, burn/poison/toxic ticks source-complete, faint machinery reused for end-turn KOs
 
 - **State:** tree green at **204 files / 2421 tests** (+1 file/+5 tests
@@ -134,100 +220,3 @@ both verify scripts/census independently re-verified before this entry.)*
   was lost (all rungs committed). The launcher's "unauthenticated/
   sandboxed" postflight hint is again noise on this failure mode.
 
----
-## 447 — Forced-switch §4 slices 3-9 landed: the non-terminal faint fork is now COMPLETE — multi-KO battles are mechanically possible
-
-- **State:** tree green at **202 files / 2396 tests** (+2 files/+30 tests
-  over entry 446's 200/2366), build green. `verify-forced-switch-ground-
-  truth.ts` rerun live before starting and again after every commit: still
-  **31/31 ALL PASS**. Ratchet green: new pin `battleScriptSwitchinOpcode.ts`
-  → 8 barriers (itemized in the ratchet's own comment), each with a
-  reachability test in the new `tests/battleScriptSwitchinOpcode.test.ts`;
-  no new production imports of canonical recordings.
-- **Did, per `docs/forced-switch-ground-truth.md` §4/§5 (new §6 written
-  summarizing this landing)/§1a's own opcode enumeration:**
-  - **`B_SCR_OP_SWITCHHANDLEORDER`** (`Cmd_switchhandleorder`, cases 2/3):
-    per §5's settled finding, `SwitchPartyOrder`'s permutation table is
-    presentation-only and is **not modeled** — the opcode reduces to
-    transcribing the already-decided `monToSwitchIntoId[battler]` into
-    `battleCommunication0`. Cases 0/1 (multi-battler/order-only) barrier.
-  - **`B_SCR_OP_GETSWITCHEDMONDATA` + `B_SCR_OP_SWITCHINDATAUPDATE`**: the
-    first "rebuild an active battler from a bench record" registration.
-    Commits `partyIndex = monToSwitchIntoId[battler]`, then rebuilds
-    species/hp/status1/types from the party record at that index and resets
-    stat stages/status2/status3/the modeled DisableStruct-shaped fields
-    (rolloutTimer, furyCutterCounter, truantCounter, rechargeTimer,
-    disabledMove, usedDisabledMove, tauntTimer, usedTauntedMove,
-    usedImprisonedMove) to `SwitchInClearSetData`'s neutral values, plus the
-    cross-battler `STATUS2_INFATUATED_WITH` clear (same precedent as
-    `cleareffectsonfaint`). `ability`/`item`/`moves`/`pp` are **not**
-    rebuilt — no species-ability table, no per-battler party moves/pp
-    modeled — documented, not silent (matches the established
-    cleareffectsonfaint precedent for untracked fields).
-  - **`B_SCR_OP_SWITCHINANIM`, `B_SCR_OP_HPTHRESHOLDS`,
-    `B_SCR_OP_CANCELALLACTIONS`, `B_SCR_OP_VARIOUS`'s
-    `RESET_PLAYER_FAINTED` case, `B_SCR_OP_DRAWPARTYSTATUSSUMMARY`**:
-    switchinanim clears the switched-in battler's `gAbsentBattlerFlags` bit
-    (Pokédex-seen skipped, Factory is always Frontier); hpthresholds/
-    cancelallactions are pure no-ops (their only writes are untracked,
-    unread fields); various's case 7 clears `HITMARKER_PLAYER_FAINTED` under
-    its real gate; drawpartystatussummary joins hidepartystatussummary's
-    existing controller-emit pattern.
-  - **`B_SCR_OP_SWITCHINEFFECTS`**: clears `HITMARKER_FAINTED(battler)`.
-    Spikes barriers on the real `SIDE_STATUS_SPIKES` bit — structurally
-    unreachable since `sideStatuses` is narrowed to Safeguard only. Truant
-    and `AbilityBattleEffects(ABILITYEFFECT_ON_SWITCHIN)` barrier on the
-    switched-in battler's real `ability` against the closed trigger set
-    (Drizzle/Sand Stream/Drought/Intimidate/Forecast/Trace/Cloud
-    Nine/Air Lock, `battle_util.c:2485-2599`). `ItemBattleEffects
-    (ITEMEFFECT_ON_SWITCH_IN)` needed **no barrier at all**: its only two
-    cases are HOLD_EFFECT_RESTORE_STATS (unreachable — stat stages are
-    always neutral post-`switchindataupdate`) and HOLD_EFFECT_DOUBLE_PRIZE
-    (writes an untracked, unread field).
-  - **Orchestration fix (`battleScriptFaintedActionsOrchestration.ts`)**:
-    `runScriptToOwnEnd` now auto-acknowledges controller round trips (a real
-    gap — the forced-switch dance's own opcodes mark battlers pending,
-    which nothing before this consumed). The result type's old single
-    "terminal" kind is split by `battleOutcome`: nonzero is real terminal
-    (checkteamslost's own jump); zero is a new **`"resumed"`** kind — every
-    fainted battler's script reached `BattleScript_FaintedMonEnd` via the
-    full forced-switch dance instead, battle genuinely continues.
-  - **Reducer (`factoryBattleScriptTerminalDecision.ts`)**: surfaces
-    `"resumed"` as a real `{ kind: "decision-required" }` boundary, reusing
-    the adapter's own established single-command-per-turn shape (the
-    mover's side, its one known move, now targeting the switched-in
-    battler) — **not** end-turn orchestration (dual-sided submission, turn
-    priority, AI's next pick), which stays explicitly out of scope. Added
-    `opponentBenchOverride` to `FactoryTerminalMoveConfig` (optional,
-    backward-compatible) so the integration test could stage a real
-    switch-in candidate (MACHOP + Karate Chop) without touching either
-    existing bench fixture.
-  - **Integration proof**
-    (`tests/factoryBattleScriptTerminalDecision.test.ts`, new test): the
-    healthy-bench KO scenario now runs the **entire** forced switch —
-    `checkteamslost -> jumpifbyte -> jumpifword -> openpartyscreen ->
-    switchhandleorder -> getswitchedmondata -> switchindataupdate ->
-    hpthresholds -> hidepartystatussummary -> switchinanim -> waitstate ->
-    resetplayerfainted -> switchineffects -> cancelallactions -> end2` —
-    MACHOP becomes the real active opponent battler (species/hp/types/
-    partyIndex from the party record, neutral stat stages/status), zero
-    `Random()` draws beyond the banked 4-roll hit chain, and the reducer
-    returns a genuine next `decision-required` boundary. The terminal path
-    (empty bench) and the pre-existing openpartyscreen-pass-2-fallback
-    barrier fixture are both untouched, still passing byte-for-byte.
-- **Next:** §4 step 10 (player-side interactive party-menu controller
-  state) is the one remaining named barrier on this whole path — RAM-proven
-  recipe already banked in §3, not attempted this session (explicitly out
-  of scope per the brief). Otherwise the non-terminal faint fork is
-  COMPLETE: multi-KO battles are now mechanically possible end-to-end for
-  the AI/trainer side. Stat-down family, confusion, and end-turn
-  orchestration (dual-sided action selection, turn-order priority) remain
-  the next open subsystems for whoever picks up S10.
-- **Notes:** no oracle traces added this session (reused the banked
-  `mechanic-forced-switch-ai-choice-off.json`/dump-forced-switch-party-
-  order.py evidence from §2/§5b). No presentation/`battleScene`/ROADMAP
-  edits. `BATTLE_TYPE_FRONTIER` is itself an OR of every frontier
-  facility's bit including `BATTLE_TYPE_ARENA` — a real source quirk that
-  tripped the new opcode file's own tests during development (fixed by
-  using `BATTLE_TYPE_FACTORY` alone in test fixtures); worth flagging for
-  any future fixture that checks a single frontier-facility bit.
