@@ -621,6 +621,42 @@ function writeJson(path: string, data: unknown): void {
   const dragonRageSlideToOffsetArgvMapping = ["battlerFlag", "targetXOffset", "targetYOffset", "mirrorVertical", "duration"];
   const dragonRageSlideToOriginalPosArgvMapping = ["battlerFlag", "axisSnapMode", "duration"];
 
+  // Move_SHADOW_PUNCH (battle_anim_scripts.s:4308-4327) - the "BG-swap
+  // pipeline" step's own named next representative (ANIMATION_PROGRESS.md's
+  // 2026-07-25 dissolution verdict): fully linear (no branches), Factory-legal
+  // at Level 50 via FRONTIER_MON_HAUNTER_1 (SPECIES_HAUNTER). Every component
+  // except `task:AnimTask_AttackerPunchWithTrace` is already exact-proven by
+  // FIRE_PUNCH/ICE_PUNCH/THUNDER_PUNCH/EXTREME_SPEED (fadetobg/waitbgfadein/
+  // monbg/setalpha/clearmonbg/blendoff/restorebg family + the punch's own
+  // create_basic_hitsplat_sprite/create_fist_sprite/AnimTask_ShakeMon).
+  // `create_basic_hitsplat_sprite`/`create_fist_sprite` are script MACROS
+  // (asm/macros/battle_anim_script.inc:487,519), expanded here as their
+  // `createsprite` forms, matching this file's established macro-expansion
+  // precedent (`shake_mon_or_platform`/`complex_palette_blend`/
+  // `create_dragon_rage_fire_plume_sprite`).
+  const shadowPunchMainSteps = [
+    { op: "loadspritegfx", args: { tag: "ANIM_TAG_IMPACT" }, source: "battle_anim_scripts.s:4309" },
+    { op: "loadspritegfx", args: { tag: "ANIM_TAG_HANDS_AND_FEET" }, source: "battle_anim_scripts.s:4310" },
+    { op: "fadetobg", args: { bg: "BG_GHOST" }, note: "already-proven Task_FadeToBg mechanism (MOVE_EXTREME_SPEED); this move's own timing anchors are RAM-probed fresh (dump-shadowpunch-full.py)", source: "battle_anim_scripts.s:4311" },
+    { op: "waitbgfadein", source: "battle_anim_scripts.s:4312" },
+    { op: "monbg", args: { battler: "ANIM_ATK_PARTNER" }, blocksTicks: 1, note: "no-op in a single battle - GetBattlerAtPosition(ANIM_ATK_PARTNER) has no live sprite, same ROCK_SLIDE/DOUBLE_TEAM *_PARTNER no-op precedent", source: "battle_anim_scripts.s:4313" },
+    { op: "setalpha", args: { eva: 9, evb: 8 }, decoded: "BLDALPHA = eva=9/16, evb=8/16 - blends the trace clones (ST_OAM_OBJ_BLEND, set by CloneBattlerSpriteWithBlend) against the backdrop; RAM-confirmed BLDCNT=0x3F40 (1st target=OBJ, 2nd target=BG0-3+OBJ+BD, alpha-blend mode) for this move's whole punch-task window", source: "battle_anim_scripts.s:4314" },
+    { op: "createvisualtask", task: "AnimTask_AttackerPunchWithTrace", priority: 2, args: ["RGB_BLACK", 13], decoded: "THE unproven component (src/battle_anim_mons.c:2392-2496, NOT battle_anim_fight.c). Slides the attacker's own sprite x2 out 5 ticks then back 4, spawning one darkened+translucent CloneBattlerSpriteWithBlend afterimage per tick (9 total, each self-destroying 8 ticks after its own creation) - see shadowPunch.ts for the RAM-probed derivation, including the real vanilla `x2 -= spriteId` quirk applied once at task creation.", source: "battle_anim_scripts.s:4315" },
+    { op: "playsewithpan", args: { se: "SE_M_JUMP_KICK", pan: "SOUND_PAN_ATTACKER" }, source: "battle_anim_scripts.s:4316" },
+    { op: "delay", frames: 6, source: "battle_anim_scripts.s:4317" },
+    { op: "create_basic_hitsplat_sprite", expandsTo: "createsprite gBasicHitSplatSpriteTemplate, ANIM_TARGET, 3, 0, 0, ANIM_TARGET, 1", note: "same template/affine shape as FIRE_PUNCH's own (already-proven) hitsplat - src/data/gen/battle-move-anim-tables.json's endeavor.hitSplat table", source: "battle_anim_scripts.s:4318" },
+    { op: "create_fist_sprite", expandsTo: "createsprite gFistFootSpriteTemplate, ANIM_TARGET, 4, 0, 0, 8, ANIM_TARGET, 0", note: "same template/frame(0)/duration(8) shape as FIRE_PUNCH's own (already-proven) fist", source: "battle_anim_scripts.s:4319" },
+    { op: "playsewithpan", args: { se: "SE_M_COMET_PUNCH", pan: "SOUND_PAN_TARGET" }, source: "battle_anim_scripts.s:4320" },
+    { op: "createvisualtask", task: "AnimTask_ShakeMon", priority: 2, args: ["ANIM_TARGET", 3, 0, 6, 1], decoded: "already-ported primitive (shakeMon.ts) - toggles the TARGET's x2 between 0 and 3 every tick, 6 times.", source: "battle_anim_scripts.s:4321" },
+    { op: "waitforvisualfinish", source: "battle_anim_scripts.s:4322" },
+    { op: "clearmonbg", args: { battler: "ANIM_ATK_PARTNER" }, source: "battle_anim_scripts.s:4323" },
+    { op: "blendoff", source: "battle_anim_scripts.s:4324" },
+    { op: "restorebg", source: "battle_anim_scripts.s:4325" },
+    { op: "waitbgfadein", source: "battle_anim_scripts.s:4326" },
+    { op: "end", source: "battle_anim_scripts.s:4327" },
+  ];
+  const attackerPunchWithTraceArgvMapping = ["blendColor", "blendCoeff"];
+
   writeJson(join(DATA_GEN, "battle-move-anim-scripts.json"), {
     ROCK_SLIDE: {
       source: "reference/pokeemerald/data/battle_anim_scripts.s:2119-2168 (Move_ROCK_SLIDE + RockSlideRocks)",
@@ -659,6 +695,14 @@ function writeJson(path: string, data: unknown): void {
       totalFirePlumeSprites: 8,
       callback: null,
       status: "script decoded only, callback/render NOT ported - 2026-07-25 step stopped here per its own enumerate-before-coding rule. Genuinely-new surface tally (4 substantive items, at the ~4-item stop threshold, none individually a new subsystem): (1) ANIM_TAG_FIRE_PLUME tile+palette asset - EXTRACTED as battle-anim-fire-plume.json (rung 1 of the named remainder, 2026-07-25 groundwork step); (2) SlideMonToOffset/SlideMonToOriginalPos primitive pair (distinct from mudSandSlide.ts's own hand-fit table for a different call site); (3) AnimDragonRageFirePlume's new static-position/one-shot-reveal/self-destroy-on-animEnd mechanism across 8 per-spawn-parameterized spawns; (4) the fire-spit sprite's previously-unexercised side-asymmetric initial/target-offset quirk in StartDragonFireTranslation plus its own fresh RAM-probed affine matrix (distinct scale constants from DRAGON_BREATH's). No render/callback code lands yet - see ANIMATION_PROGRESS.md's 2026-07-25 enumeration verdict for the full per-op command-surface tally and remainder ordering.",
+    },
+    SHADOW_PUNCH: {
+      source: "reference/pokeemerald/data/battle_anim_scripts.s:4308-4327 (Move_SHADOW_PUNCH)",
+      main: shadowPunchMainSteps,
+      createspriteArgvMappings: {
+        AnimTask_AttackerPunchWithTrace: attackerPunchWithTraceArgvMapping,
+      },
+      callback: "AnimTask_AttackerPunchWithTrace ported directly in src/engine/shadowPunch.ts (RAM-probed, both attacker orientations, dump-shadowpunch-full.py) - see ANIMATION_PROGRESS.md's 2026-07-25 SHADOW_PUNCH section.",
     },
   });
 }
