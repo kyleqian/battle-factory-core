@@ -191,3 +191,20 @@ export const SHADOW_PUNCH_ATTACKER_HIDDEN_LAST_AGE = 59;
 export function shadowPunchAttackerVisible(age: number): boolean {
   return age < SHADOW_PUNCH_ATTACKER_HIDDEN_FIRST_AGE || age > SHADOW_PUNCH_ATTACKER_HIDDEN_LAST_AGE;
 }
+
+/**
+ * Framebuffer-only display lag for the attacker/clone mechanism (the
+ * attacker's own `invisible` flag, `x2`, and every trace clone) - RAM-pixel
+ * diffed directly (`dump-shadowpunch-rgb.py`'s own RGB capture vs this
+ * module's component predictions, both orientations): a RAM write at tick N
+ * (e.g. `attacker.invisible` flipping true at RAM tick 38) is not visible
+ * on screen until tick N+1 - the ordinary GBA OAM-buffer double-buffering
+ * lag, same class DRAGON_RAGE's own per-mechanism `FRAMEBUFFER_*_AGE_LAG`
+ * constants already document for its shake/slide/fire-spit tasks. Scoped to
+ * ONLY the attacker/clone draw calls (not background/target-shake/hitsplat/
+ * fist, which RAM-pixel-diff clean at zero lag) - a uniform whole-view lag
+ * was tried first and rejected: it fixes this window but breaks the
+ * already-exact settled tail (the BLDY ramp's own tick boundaries do NOT
+ * share this lag).
+ */
+export const SHADOW_PUNCH_ATTACKER_FRAMEBUFFER_LAG = 3;

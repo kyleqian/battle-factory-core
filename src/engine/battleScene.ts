@@ -615,6 +615,7 @@ import {
   extremeSpeedImpactAtAge,
 } from "./extremeSpeed.ts";
 import {
+  SHADOW_PUNCH_ATTACKER_FRAMEBUFFER_LAG,
   SHADOW_PUNCH_TRACE_ALPHA,
   SHADOW_PUNCH_TRACE_BLEND_COEFF,
 } from "./shadowPunch.ts";
@@ -17232,10 +17233,10 @@ export function renderSceneOnMovePresentation(
     // one-shot blend special effect works and produced a visibly too-dark
     // stack (oracle-pixel-caught).
     const clonePalette = blendPaletteToward(attackerSprite.palette, { r: 0, g: 0, b: 0 }, SHADOW_PUNCH_TRACE_BLEND_COEFF);
-    view.clones.forEach((clone, i) => {
-      const ox = view.attacker.geometry.spriteCorner.x + clone.x2;
-      const oy = view.attacker.geometry.spriteCorner.y;
-      if (i === view.clones.length - 1) {
+    attackerView.clones.forEach((clone, i) => {
+      const ox = attackerView.attacker.geometry.spriteCorner.x + clone.x2;
+      const oy = attackerView.attacker.geometry.spriteCorner.y;
+      if (i === attackerView.clones.length - 1) {
         drawSpriteSheetBlendedOverFb(
           fb,
           attackerSprite.tileset,
@@ -17249,13 +17250,13 @@ export function renderSceneOnMovePresentation(
         drawSpriteSheet(fb, attackerSprite.tileset, clonePalette, ox, oy);
       }
     });
-    if (view.attackerVisible) {
+    if (attackerView.attackerVisible) {
       drawSpriteSheet(
         fb,
         attackerSprite.tileset,
         attackerSprite.palette,
-        view.attacker.geometry.spriteCorner.x + view.attackerX2,
-        view.attacker.geometry.spriteCorner.y,
+        attackerView.attacker.geometry.spriteCorner.x + attackerView.attackerX2,
+        attackerView.attacker.geometry.spriteCorner.y,
       );
     }
     if (view.hitsplatVisible) {
