@@ -676,26 +676,28 @@ export const ppreduceOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesC
   let ppToDeduct = 1;
   if (attackerBattler.ppNotAffectedByPressure !== 1) {
     const moveTarget = resolveBattleScriptMoveTarget(move);
+    const { battlersCount } = rulesContext.battleTopology;
     if ((moveTarget & (1 << 5)) !== 0) {
-      return unsupportedBranch(
-        context,
-        "Cmd_ppreduce's MOVE_TARGET_FOES_AND_ALLY AbilityBattleEffects(ABILITYEFFECT_COUNT_ON_FIELD) "
-          + "Pressure count needs multi-battler doubles support this engine does not model yet",
-        "battle_script_commands.c",
-        1215,
-      );
-    }
-    if ((moveTarget & (BATTLE_SCRIPT_MOVE_TARGET_BOTH | (1 << 6))) !== 0) {
-      return unsupportedBranch(
-        context,
-        "Cmd_ppreduce's MOVE_TARGET_BOTH/MOVE_TARGET_OPPONENTS_FIELD "
-          + "AbilityBattleEffects(ABILITYEFFECT_COUNT_OTHER_SIDE) Pressure count needs multi-battler "
-          + "doubles support this engine does not model yet",
-        "battle_script_commands.c",
-        1218,
-      );
-    }
-    if (attacker !== target && targetBattler.ability === ABILITY_PRESSURE) {
+      // MOVE_TARGET_FOES_AND_ALLY -> AbilityBattleEffects(ABILITYEFFECT_COUNT_ON_FIELD,
+      // ...) (battle_util.c:3182-3191): every other battler on the field, either side,
+      // no hp check.
+      for (let i = 0; i < battlersCount; i += 1) {
+        if (i !== attacker && rulesContext.battlers[i as BattleScriptBattlerId].ability === ABILITY_PRESSURE) {
+          ppToDeduct += 1;
+        }
+      }
+    } else if ((moveTarget & (BATTLE_SCRIPT_MOVE_TARGET_BOTH | (1 << 6))) !== 0) {
+      // MOVE_TARGET_BOTH/MOVE_TARGET_OPPONENTS_FIELD -> AbilityBattleEffects
+      // (ABILITYEFFECT_COUNT_OTHER_SIDE, ...) (battle_util.c:3160-3169): every battler
+      // on the opposing side, no hp check.
+      const attackerSide = attackerBattler.side;
+      for (let i = 0; i < battlersCount; i += 1) {
+        const candidate = rulesContext.battlers[i as BattleScriptBattlerId];
+        if (candidate.side !== attackerSide && candidate.ability === ABILITY_PRESSURE) {
+          ppToDeduct += 1;
+        }
+      }
+    } else if (attacker !== target && targetBattler.ability === ABILITY_PRESSURE) {
       ppToDeduct += 1;
     }
   }

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  BATTLE_SCRIPT_BATTLE_TYPE_DOUBLE,
   createBattleScriptRulesContext,
   createBattleScriptStatusRulesExecution,
   type BattleScriptRulesBattler,
@@ -20,6 +21,9 @@ import {
 const program = loadBattleScriptProgram();
 const TACKLE = 33; // EFFECT_HIT, power 35, accuracy 95, TYPE_NORMAL
 const SLAM = 21; // EFFECT_HIT, power 80, accuracy 75, TYPE_NORMAL
+const ROCK_SLIDE = 157; // EFFECT_FLINCH_HIT, power 75, accuracy 90, MOVE_TARGET_BOTH
+const EARTHQUAKE = 89; // EFFECT_EARTHQUAKE, power 100, accuracy 100, MOVE_TARGET_FOES_AND_ALLY
+const ABILITY_PRESSURE = 46;
 
 function battler(changes: Partial<BattleScriptRulesBattler> = {}): BattleScriptRulesBattler {
   return Object.freeze({
@@ -409,6 +413,150 @@ describe("production ppreduce (Cmd_ppreduce) dispatch", () => {
     expect(result.kind).toBe("advanced");
     if (result.kind !== "advanced") throw new Error("expected advance");
     expect(result.state.rulesContext.battlers[0]!.pp[0]).toBe(34);
+  });
+
+  // MOVE_TARGET_BOTH (ROCK_SLIDE/SURF-class) -> AbilityBattleEffects(ABILITYEFFECT_COUNT_OTHER_SIDE,
+  // ..., ABILITY_PRESSURE, ...) (battle_util.c:3160-3169): sums Pressure across the whole opposing
+  // side, not just the direct target. In singles (gBattlersCount == 2) the opposing side is exactly
+  // the direct target, so the real loop degenerates to the existing default-branch check; the
+  // multi-battler scan only differs from that in doubles (gBattlersCount == 4), proven below by
+  // giving the context an explicit doubles battleTopology.
+  describe("MOVE_TARGET_BOTH -> ABILITYEFFECT_COUNT_OTHER_SIDE (e.g. ROCK_SLIDE)", () => {
+    it("singles: deducts one PP when the opponent has no Pressure", () => {
+      const rc = context(0, { pp: [15, 0, 0, 0] }, { currentMove: ROCK_SLIDE });
+      const result = stepTwiceFromAttackstring(rc);
+      expect(result.kind).toBe("advanced");
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.rulesContext.battlers[0]!.pp[0]).toBe(14);
+    });
+
+    it("singles: deducts two PP when the direct target has Pressure", () => {
+      const rc = context(0, { pp: [15, 0, 0, 0] }, { currentMove: ROCK_SLIDE }, { ability: ABILITY_PRESSURE });
+      const result = stepTwiceFromAttackstring(rc);
+      expect(result.kind).toBe("advanced");
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.rulesContext.battlers[0]!.pp[0]).toBe(13);
+    });
+
+    const doublesTopology = Object.freeze({
+      battlersCount: 4 as const,
+      battleTypeFlags: BATTLE_SCRIPT_BATTLE_TYPE_DOUBLE,
+      battlerPositions: [0, 1, 2, 3] as const,
+    });
+
+    it("doubles: also counts Pressure on an opposing-side battler that is NOT the direct target", () => {
+      const rc = context(0, {}, {
+        currentMove: ROCK_SLIDE,
+        battleTopology: doublesTopology,
+        battlers: [
+          battler({ side: 0, pp: [15, 0, 0, 0] }), // attacker
+          battler({ side: 1 }), // direct target, no Pressure
+          battler({ side: 0 }), // attacker's ally
+          battler({ side: 1, ability: ABILITY_PRESSURE }), // opposing side, not the direct target
+        ],
+      });
+      const result = stepTwiceFromAttackstring(rc);
+      expect(result.kind).toBe("advanced");
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.rulesContext.battlers[0]!.pp[0]).toBe(13);
+    });
+
+    it("doubles: does not count Pressure on the attacker's own side", () => {
+      const rc = context(0, {}, {
+        currentMove: ROCK_SLIDE,
+        battleTopology: doublesTopology,
+        battlers: [
+          battler({ side: 0, pp: [15, 0, 0, 0] }), // attacker
+          battler({ side: 1 }), // direct target, no Pressure
+          battler({ side: 0, ability: ABILITY_PRESSURE }), // attacker's own side -- must not count
+          battler({ side: 1 }),
+        ],
+      });
+      const result = stepTwiceFromAttackstring(rc);
+      expect(result.kind).toBe("advanced");
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.rulesContext.battlers[0]!.pp[0]).toBe(14);
+    });
+
+    it("doubles: sums Pressure from both opposing-side battlers (three total PP)", () => {
+      const rc = context(0, {}, {
+        currentMove: ROCK_SLIDE,
+        battleTopology: doublesTopology,
+        battlers: [
+          battler({ side: 0, pp: [15, 0, 0, 0] }),
+          battler({ side: 1, ability: ABILITY_PRESSURE }),
+          battler({ side: 0 }),
+          battler({ side: 1, ability: ABILITY_PRESSURE }),
+        ],
+      });
+      const result = stepTwiceFromAttackstring(rc);
+      expect(result.kind).toBe("advanced");
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.rulesContext.battlers[0]!.pp[0]).toBe(12);
+    });
+  });
+
+  // MOVE_TARGET_FOES_AND_ALLY (EARTHQUAKE-class) -> AbilityBattleEffects(ABILITYEFFECT_COUNT_ON_FIELD,
+  // ..., ABILITY_PRESSURE, ...) (battle_util.c:3182-3191): sums Pressure across every OTHER battler
+  // on the field, either side, excluding only the attacker itself. In singles this is exactly "does
+  // the one opponent have Pressure" (same as the default branch); doubles is where excluding only
+  // the attacker itself (not the whole opposing side) actually matters, proven below.
+  describe("MOVE_TARGET_FOES_AND_ALLY -> ABILITYEFFECT_COUNT_ON_FIELD (e.g. EARTHQUAKE)", () => {
+    it("singles: deducts one PP when the opponent has no Pressure", () => {
+      const rc = context(0, { pp: [10, 0, 0, 0] }, { currentMove: EARTHQUAKE });
+      const result = stepTwiceFromAttackstring(rc);
+      expect(result.kind).toBe("advanced");
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.rulesContext.battlers[0]!.pp[0]).toBe(9);
+    });
+
+    it("singles: excludes the attacker's own Pressure from its own count", () => {
+      const rc = context(0, { pp: [10, 0, 0, 0], ability: ABILITY_PRESSURE }, { currentMove: EARTHQUAKE });
+      const result = stepTwiceFromAttackstring(rc);
+      expect(result.kind).toBe("advanced");
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.rulesContext.battlers[0]!.pp[0]).toBe(9);
+    });
+
+    const doublesTopology = Object.freeze({
+      battlersCount: 4 as const,
+      battleTypeFlags: BATTLE_SCRIPT_BATTLE_TYPE_DOUBLE,
+      battlerPositions: [0, 1, 2, 3] as const,
+    });
+
+    it("doubles: counts Pressure on the attacker's own ally, not just the opposing side", () => {
+      const rc = context(0, {}, {
+        currentMove: EARTHQUAKE,
+        battleTopology: doublesTopology,
+        battlers: [
+          battler({ side: 0, pp: [10, 0, 0, 0] }), // attacker
+          battler({ side: 1 }),
+          battler({ side: 0, ability: ABILITY_PRESSURE }), // attacker's own ally -- must count
+          battler({ side: 1 }),
+        ],
+      });
+      const result = stepTwiceFromAttackstring(rc);
+      expect(result.kind).toBe("advanced");
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.rulesContext.battlers[0]!.pp[0]).toBe(8);
+    });
+
+    it("doubles: sums Pressure across all three other battlers (four total PP)", () => {
+      const rc = context(0, {}, {
+        currentMove: EARTHQUAKE,
+        battleTopology: doublesTopology,
+        battlers: [
+          battler({ side: 0, pp: [10, 0, 0, 0] }),
+          battler({ side: 1, ability: ABILITY_PRESSURE }),
+          battler({ side: 0, ability: ABILITY_PRESSURE }),
+          battler({ side: 1, ability: ABILITY_PRESSURE }),
+        ],
+      });
+      const result = stepTwiceFromAttackstring(rc);
+      expect(result.kind).toBe("advanced");
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.rulesContext.battlers[0]!.pp[0]).toBe(6);
+    });
   });
 });
 
@@ -1382,6 +1530,83 @@ describe("RUNG 4 integration: opcode 0 -> ... -> seteffectwithchance -> tryfaint
     if (finished.kind !== "halted") throw new Error("expected halted");
     expect(finished.state.haltReason).toMatchObject({ kind: "terminal", opcodeName: "B_SCR_OP_END" });
   });
+
+  it(
+    "RUNG 1 leverage: ROCK_SLIDE (MOVE_TARGET_BOTH, seed 1) previously halted at Cmd_ppreduce's "
+      + "Pressure barrier (PROGRESS 442) -- now walks the full hit chain, through the real "
+      + "ABILITYEFFECT_COUNT_OTHER_SIDE Pressure scan (proven by the dedicated ppreduce unit tests "
+      + "above, both the singles-degenerate case and the doubles multi-battler case), all the way to "
+      + "the script's own end. Singles, no Pressure on the opponent here specifically: giving the "
+      + "direct target a nonzero ability trips a separate, pre-existing, unrelated accuracycheck "
+      + "barrier (JumpIfMoveFailed's AbilityBattleEffects(ABILITYEFFECT_ABSORBING) check, "
+      + "battle_script_commands.c:1020, fires for ANY nonzero target ability); putting Pressure on a "
+      + "non-target doubles battler instead trips moveend's own separate, already-pinned "
+      + "MOVEEND_NEXT_TARGET doubles-replay barrier (battle_script_commands.c:4467, explicitly "
+      + "\"unreachable for Level-50 singles\"). Neither barrier is Cmd_ppreduce's; this test's own "
+      + "job is proving the chain no longer halts at ppreduce, not re-proving the count arithmetic.",
+    () => {
+      const rc = context(0, { attack: 40, pp: [15, 0, 0, 0] }, { currentMove: ROCK_SLIDE }, { defense: 40 });
+      const execution = createBattleScriptStatusRulesExecution(
+        program,
+        "BattleScript_HitFromAtkCanceler",
+        rc,
+        1,
+        externalPorts(),
+      );
+      const handlers = execution.handlers;
+      let result = stepBattleScriptMachine(program, execution.state, handlers); // opcode 0
+      if (result.kind !== "advanced") throw new Error(`opcode 0 did not advance: ${result.kind}`);
+      result = stepBattleScriptMachine(program, result.state, handlers); // accuracycheck
+      if (result.kind !== "advanced") throw new Error(`accuracycheck did not advance: ${result.kind}`);
+      result = stepBattleScriptMachine(program, result.state, handlers); // attackstring
+      if (result.kind !== "advanced") throw new Error(`attackstring did not advance: ${result.kind}`);
+      result = stepBattleScriptMachine(program, result.state, handlers); // ppreduce -- was a barrier, now real
+      if (result.kind !== "advanced") throw new Error(`ppreduce did not advance: ${result.kind}`);
+      expect(result.state.rulesContext.battlers[0]!.pp[0]).toBe(14); // ppToDeduct = 1, no opposing Pressure
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_HitFromCritCalc"));
+      result = stepBattleScriptMachine(program, result.state, handlers); // critcalc
+      if (result.kind !== "advanced") throw new Error(`critcalc did not advance: ${result.kind}`);
+      result = stepBattleScriptMachine(program, result.state, handlers); // damagecalc
+      if (result.kind !== "advanced") throw new Error(`damagecalc did not advance: ${result.kind}`);
+      result = stepBattleScriptMachine(program, result.state, handlers); // typecalc
+      if (result.kind !== "advanced") throw new Error(`typecalc did not advance: ${result.kind}`);
+      result = stepBattleScriptMachine(program, result.state, handlers); // adjustnormaldamage
+      if (result.kind !== "advanced") throw new Error(`adjustnormaldamage did not advance: ${result.kind}`);
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_HitFromAtkAnimation"));
+      for (const label of RUNG_3_LABELS) {
+        if (result.kind !== "advanced") throw new Error(`${label} did not advance: ${result.kind}`);
+        result = stepBattleScriptMachine(program, result.state, handlers);
+      }
+      if (result.kind !== "advanced") throw new Error(`expected advance before seteffectwithchance, got ${result.kind}`);
+      expect(result.state.rulesContext.battlers[1]!.hp).toBeLessThan(100); // datahpupdate dealt real damage
+      result = stepBattleScriptMachine(program, result.state, handlers); // seteffectwithchance
+      if (result.kind !== "advanced") throw new Error(`seteffectwithchance did not advance: ${result.kind}`);
+      result = stepBattleScriptMachine(program, result.state, handlers); // tryfaintmon: no faint, target survives
+      if (result.kind !== "advanced") throw new Error(`tryfaintmon did not advance: ${result.kind}`);
+      expect(result.state.callStack.length).toBe(0); // pass-through, not a call into BattleScript_FaintTarget
+      result = stepBattleScriptMachine(program, result.state, handlers); // setbyte sMOVEEND_STATE, 0
+      if (result.kind !== "advanced") throw new Error(`setbyte did not advance: ${result.kind}`);
+      expect(result.state.rulesContext.moveendState).toBe(0);
+
+      const moveendPc = result.state.programCounter;
+      let state = ackAllPending(result.state);
+      let stepped = stepBattleScriptMachine(program, state, handlers);
+      let moveendResumptions = 0;
+      while (stepped.kind === "advanced" && stepped.state.programCounter === moveendPc) {
+        moveendResumptions += 1;
+        if (moveendResumptions > 17) throw new Error("Cmd_moveend did not converge on MOVEEND_COUNT");
+        state = ackAllPending(stepped.state);
+        stepped = stepBattleScriptMachine(program, state, handlers);
+      }
+      if (stepped.kind !== "advanced") throw new Error(`moveend did not complete: ${stepped.kind}`);
+      expect(stepped.state.rulesContext.moveendState).toBe(17); // MOVEEND_COUNT
+
+      const finished = stepBattleScriptMachine(program, stepped.state, handlers); // end
+      expect(finished.kind).toBe("halted");
+      if (finished.kind !== "halted") throw new Error("expected halted");
+      expect(finished.state.haltReason).toMatchObject({ kind: "terminal", opcodeName: "B_SCR_OP_END" });
+    },
+  );
 
   it(
     "full staged hit turn on the KO scenario's real ROM seed (919694434): reproduces the pinned "
