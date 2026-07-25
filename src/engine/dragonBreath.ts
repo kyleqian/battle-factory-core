@@ -9,6 +9,8 @@
  * `tools/probe/dump-dragonbreath-anim.py`; they are shared by every spawn.
  */
 
+import { shakeMon2OffsetAtTick } from "./shakeMon2.ts";
+
 export type DragonBreathFireSprite = Readonly<{
   spawnIndex: number;
   age: number;
@@ -51,9 +53,15 @@ export const DRAGON_BREATH_FIRE_LIFETIME = MATRIX_A.length;
 export const DRAGON_BREATH_FRAMEBUFFER_OAM_AGE_LAG = 1;
 /** BlendPalette writes reach the framebuffer one age after the OAM latch. */
 export const DRAGON_BREATH_FRAMEBUFFER_PALETTE_AGE_LAG = 2;
-/** First displayed `AnimTask_ShakeMon2` state, relative to the first ember at age 1. */
+/**
+ * `AnimTask_ShakeMon2`'s creation-anchor age, relative to the first ember at
+ * age 1. Also its first DISPLAYED state, per the +1 idiom below - the port's
+ * own tick 0 (the creation write) is never independently observed at this
+ * call site, same as FLY's `AnimTask_ShakeMon` (fly.ts's
+ * `FLY_SHAKE_CREATION_AGE`); the pre-existing hand-fit table this constant
+ * anchored is untouched (still true), only its production formula changed.
+ */
 export const DRAGON_BREATH_SHAKE_FIRST_AGE = 13;
-export const DRAGON_BREATH_SHAKE_END_AGE = 53;
 /** The target is transferred to BG1 three displays before the first ember. */
 export const DRAGON_BREATH_MONBG_FIRST_AGE = -2;
 /** BG ownership and the second palette task both release at this age. */
@@ -83,21 +91,20 @@ export function dragonBreathEmbersInFrontOfAttacker(
  * Ages are displayed callback ages from the same seam as
  * `dragonBreathFireSprites`: age 1 is the first ember. The two palette tasks
  * are `0→9` and `9→0` `AnimTask_BlendBattleAnimPal` programs; the shake is
- * the paired-hold `AnimTask_ShakeMon2` program. No status or controller state
- * is read or changed here.
+ * `AnimTask_ShakeMon2` (`shakeMon2.ts`), driven by the script's own args
+ * (`createvisualtask AnimTask_ShakeMon2, 2, ANIM_TARGET, 2, 0, 21, 1`,
+ * `battle_anim_scripts.s:4943`). No status or controller state is read or
+ * changed here.
  */
 export function dragonBreathTargetEffectAtAge(
   animationAge: number,
 ): DragonBreathTargetEffect {
-  const shakeX2 =
-    animationAge < DRAGON_BREATH_SHAKE_FIRST_AGE
-      || animationAge >= DRAGON_BREATH_SHAKE_END_AGE
-      ? 0
-      : Math.floor(
-          (animationAge - DRAGON_BREATH_SHAKE_FIRST_AGE) / 2,
-        ) % 2 === 0
-        ? -2
-        : 2;
+  const shakeX2 = animationAge < DRAGON_BREATH_SHAKE_FIRST_AGE
+    ? 0
+    : shakeMon2OffsetAtTick(
+        2, 0, 21, 1,
+        animationAge - DRAGON_BREATH_SHAKE_FIRST_AGE + 1,
+      ).x2;
 
   let blendCoeff = 0;
   if (animationAge >= 11 && animationAge < 65) {
