@@ -268,8 +268,14 @@ describe("relative Battle Scene ON move presentation", () => {
         species: "ONIX",
         geometry: {
           side: "opponent",
-          spriteCorner: { x: 145, y: 10 },
-          animationCenter: { x: 177, y: 42 },
+          // Base (unshifted) position - `shadowPunchTargetShakeX2` applies
+          // the settled `Anim_RapidHorizontalHops` x2=1 dynamically, so this
+          // must NOT also bake it in (unlike the static FEATHER_DANCE/
+          // QUICK_ATTACK ONIX-opponent geometry, which never re-derives the
+          // offset and so bakes it into the constant instead) - matches
+          // DRAGON_RAGE's own `spriteCorner.x=144` fixture convention.
+          spriteCorner: { x: 144, y: 10 },
+          animationCenter: { x: 176, y: 42 },
           battlePositionCenter: { x: 176, y: 40 },
         },
       },

@@ -23,8 +23,8 @@
     "species": "ONIX",
     "geometry": {
       "side": "opponent",
-      "spriteCorner": {"x": 145, "y": 10},
-      "animationCenter": {"x": 177, "y": 42},
+      "spriteCorner": {"x": 144, "y": 10},
+      "animationCenter": {"x": 176, "y": 42},
       "battlePositionCenter": {"x": 176, "y": 40}
     }
   },
