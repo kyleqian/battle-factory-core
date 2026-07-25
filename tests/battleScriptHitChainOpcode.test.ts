@@ -20,6 +20,9 @@ import {
 
 const program = loadBattleScriptProgram();
 const TACKLE = 33; // EFFECT_HIT, power 35, accuracy 95, TYPE_NORMAL
+const MOVE_SURF = 57; // EFFECT_HIT, MOVE_TARGET_BOTH -- BattleScript_EffectHit's own underwater-guard move
+/** include/constants/battle.h:175. */
+const STATUS3_UNDERWATER = 1 << 18;
 const SLAM = 21; // EFFECT_HIT, power 80, accuracy 75, TYPE_NORMAL
 const ROCK_SLIDE = 157; // EFFECT_FLINCH_HIT, power 75, accuracy 90, MOVE_TARGET_BOTH
 const EARTHQUAKE = 89; // EFFECT_EARTHQUAKE, power 100, accuracy 100, MOVE_TARGET_FOES_AND_ALLY
@@ -1787,19 +1790,27 @@ describe("production cleareffectsonfaint (Cmd_cleareffectsonfaint) dispatch", ()
 });
 
 describe("RUNG 4 integration: opcode 0 -> ... -> seteffectwithchance -> tryfaintmon -> moveend-to-end / playfaintcry boundary", () => {
-  it("RUNG 1 hit turn (Tackle, seed 1): walks the full sixteen-opcode hit chain, no-faint tryfaintmon pass-through, halts at moveend (opcode 73)", () => {
+  it("RUNG 1 hit turn (Tackle, seed 1): walks the full sixteen-opcode hit chain from the script's own "
+    + "literal BattleScript_EffectHit entry (not the BattleScript_HitFromAtkCanceler shortcut prior "
+    + "integration proofs used, per the executable-frontier census), no-faint tryfaintmon pass-through, "
+    + "halts at moveend (opcode 73)", () => {
     // attack/defense nonzero (unlike the default 0/0 fixture) so damagecalc produces a real,
     // non-NaN, non-lethal hit -- this scenario specifically needs tryfaintmon's no-faint path.
     const rc = context(0, { attack: 40 }, {}, { defense: 40 });
     const execution = createBattleScriptStatusRulesExecution(
       program,
-      "BattleScript_HitFromAtkCanceler",
+      "BattleScript_EffectHit",
       rc,
       1,
       externalPorts(),
     );
     const handlers = execution.handlers;
-    let result = stepBattleScriptMachine(program, execution.state, handlers); // opcode 0
+    // jumpifnotmove MOVE_SURF, BattleScript_HitFromAtkCanceler: currentMove is Tackle (not Surf), so
+    // this is taken unconditionally, skipping the Surf-only underwater guard entirely.
+    let result = stepBattleScriptMachine(program, execution.state, handlers); // jumpifhalfword
+    if (result.kind !== "advanced") throw new Error(`jumpifhalfword did not advance: ${result.kind}`);
+    expect(result.state.programCounter).toBe(labelPc("BattleScript_HitFromAtkCanceler"));
+    result = stepBattleScriptMachine(program, result.state, handlers); // opcode 0
     if (result.kind !== "advanced") throw new Error(`opcode 0 did not advance: ${result.kind}`);
     result = stepBattleScriptMachine(program, result.state, handlers); // accuracycheck
     if (result.kind !== "advanced") throw new Error(`accuracycheck did not advance: ${result.kind}`);
@@ -1861,6 +1872,32 @@ describe("RUNG 4 integration: opcode 0 -> ... -> seteffectwithchance -> tryfaint
     if (finished.kind !== "halted") throw new Error("expected halted");
     expect(finished.state.haltReason).toMatchObject({ kind: "terminal", opcodeName: "B_SCR_OP_END" });
   });
+
+  it(
+    "Surf-underwater sub-branch (executable-frontier census): with the target's own STATUS3_UNDERWATER "
+      + "bit set directly in the staged context (Dive), Surf's jumpifnotmove falls through instead of "
+      + "jumping, jumpifnostatus3 also falls through (bit is set), and the two-instruction underwater "
+      + "sub-script (orword gHitMarker HITMARKER_IGNORE_UNDERWATER; setbyte sDMG_MULTIPLIER 2) runs "
+      + "before reconverging on the same BattleScript_HitFromAtkCanceler entry -- no opcode beyond the "
+      + "registered trio plus the already-registered setbyte is needed on this branch",
+    () => {
+      const rc = context(0, {}, { currentMove: MOVE_SURF }, { status3: STATUS3_UNDERWATER });
+      const execution = createBattleScriptStatusRulesExecution(program, "BattleScript_EffectHit", rc, 1, externalPorts());
+      const handlers = execution.handlers;
+      let result = stepBattleScriptMachine(program, execution.state, handlers); // jumpifhalfword: Surf, not taken
+      if (result.kind !== "advanced") throw new Error(`jumpifhalfword did not advance: ${result.kind}`);
+      expect(result.state.programCounter).toBe(execution.state.programCounter + 1);
+      result = stepBattleScriptMachine(program, result.state, handlers); // jumpifstatus3condition: underwater, not taken
+      if (result.kind !== "advanced") throw new Error(`jumpifstatus3condition did not advance: ${result.kind}`);
+      result = stepBattleScriptMachine(program, result.state, handlers); // orword gHitMarker, HITMARKER_IGNORE_UNDERWATER
+      if (result.kind !== "advanced") throw new Error(`orword did not advance: ${result.kind}`);
+      expect(result.state.rulesContext.hitMarker & (1 << 18)).toBe(1 << 18); // HITMARKER_IGNORE_UNDERWATER
+      result = stepBattleScriptMachine(program, result.state, handlers); // setbyte sDMG_MULTIPLIER, 2
+      if (result.kind !== "advanced") throw new Error(`setbyte did not advance: ${result.kind}`);
+      expect(result.state.rulesContext.dmgMultiplier).toBe(2);
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_HitFromAtkCanceler"));
+    },
+  );
 
   it(
     "RUNG 1 leverage: ROCK_SLIDE (MOVE_TARGET_BOTH, seed 1) previously halted at Cmd_ppreduce's "
@@ -2142,10 +2179,11 @@ describe(
     //     MOVE_EFFECT_PARALYSIS, rather than at the move's own BattleScript_EffectParalyzeHit
     //     entry (`setmoveeffect MOVE_EFFECT_PARALYSIS; goto BattleScript_EffectHit`,
     //     data/battle_scripts_1.s:370-372). BattleScript_EffectHit's own preamble
-    //     (`jumpifnotmove MOVE_SURF, ...`, :237) uses a still-unregistered jumpif opcode --
-    //     unrelated to SetMoveEffect, and for any non-Surf move (Body Slam included) it always
-    //     falls straight through to BattleScript_HitFromAtkCanceler regardless, so pre-setting
-    //     moveEffectByte to what that preamble would have produced is exact, not approximate.
+    //     (`jumpifnotmove MOVE_SURF, ...`, :237) is registered (B_SCR_OP_JUMPIFHALFWORD, see the
+    //     "literal BattleScript_EffectHit entry" test above) but unrelated to SetMoveEffect, and
+    //     for any non-Surf move (Body Slam included) it always falls straight through to
+    //     BattleScript_HitFromAtkCanceler regardless, so pre-setting moveEffectByte to what that
+    //     preamble would have produced is exact, not approximate.
     const SPECIES_KADABRA = 64;
     const SPECIES_MAGNETON = 82;
     const TACKLE_MOVE = 33;

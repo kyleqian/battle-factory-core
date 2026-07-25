@@ -16,14 +16,14 @@
  * this one's scenario is a different battler roster and always continues
  * past moveend into the fainted-actions orchestration.
  *
- * Starts execution at BattleScript_HitFromAtkCanceler, not at the move's own
- * topology entryScript (BattleScript_EffectHit): EFFECT_HIT's shared script
- * opens with `jumpifnotmove MOVE_SURF, BattleScript_HitFromAtkCanceler`
- * (data/battle_scripts_1.s:237), compiled to the still-unregistered
- * B_SCR_OP_JUMPIFHALFWORD. The move staged here is never Surf, so that
- * single guard instruction is a proven no-op to skip -- the same choice
- * every other RUNG 4 KO-scenario Tier-1 test already makes
- * (battleScriptHitChainOpcode.test.ts).
+ * Starts execution at the move's own topology entryScript
+ * (BattleScript_EffectHit), not the BattleScript_HitFromAtkCanceler shortcut
+ * earlier RUNG 4 proofs used: EFFECT_HIT's shared script opens with
+ * `jumpifnotmove MOVE_SURF, BattleScript_HitFromAtkCanceler`
+ * (data/battle_scripts_1.s:237), compiled to B_SCR_OP_JUMPIFHALFWORD --
+ * registered by the executable-frontier census (2026-07-25), along with its
+ * two guard siblings (B_SCR_OP_JUMPIFSTATUS3CONDITION, B_SCR_OP_ORWORD), so
+ * this adapter no longer needs to route around the script's own entry.
  */
 import {
   createBattleState,
@@ -57,7 +57,7 @@ import {
 } from "./battleScriptRulesContext.ts";
 
 const ADAPTER = "factory-terminal-ko/v1";
-const ENTRY_LABEL = "BattleScript_HitFromAtkCanceler";
+const ENTRY_LABEL = "BattleScript_EffectHit";
 const B_WAIT_TIME_LONG = 64;
 /** include/constants/battle.h:100-102. */
 const B_OUTCOME_WON = 1;
