@@ -42,207 +42,6 @@ substitute state, multi-turn/multi-hit state, or another explicit script input.
 Every status needs a committed ON-profile trace; `exact` cannot retain a known
 remainder.
 
-## DRAGON_RAGE rung 5 remainder: per-mechanism lag encoded, idle-bob drift root-caused, lands `partial` (2026-07-25)
-
-**Verdict: real, dense-verified progress (44/150 → 86/150 framebuffer frames,
-player-attacker orientation) and the -1 drift is genuinely root-caused by RAM
-probe, not fitting — but three named residuals remain, so `MOVE_DRAGON_RAGE`
-lands `partial`, not `exact`.**
-
-**Rung 1 — per-mechanism lag, encoded as named constants
-(`dragonRage.ts`'s `DRAGON_RAGE_FRAMEBUFFER_{SHAKE,SLIDE,FIRE_SPIT,
-FIRE_PLUME}_AGE_LAG`, mirroring `dragonBreath.ts`'s own `_OAM_AGE_LAG`/
-`_PALETTE_AGE_LAG` split), pinned by `tests/dragonRage.test.ts`.
-`battleScene.ts`'s `DRAGON_RAGE` draw case now computes four separately-
-lagged views instead of one shared `age - 1`, switching the attacker's own
-lag mid-flight at the exact tick it switches mechanism (shake → slide).**
-A first box-isolated pixel bisection pass (`tools/compare/scratch/
-dragonrage-lag-bisect{,-cached}.ts`, committed) initially suggested
-shake=1/slide=0, but that pass ran through `render()` while the OLD
-`battleScene.ts` code still had its own hardcoded `age - 1` underneath —
-silently double-applying a lag the bisection script wasn't accounting for.
-The values actually committed come from a full dense framebuffer sweep run
-against the real draw path with that hidden shift removed
-(`tools/compare/scratch/dragonrage-dense-cached.ts`, committed, reruns
-fast against one cached oracle capture): **shake=2, slide=1, fire-spit=1**
-(the last also independently confirmed by direct RAM-to-pixel correlation:
-the photographed fire-spit pixels at render age 87 sit at the x2=14 column,
-RAM tick 175's value, one tick behind the already-Tier-1-pinned RAM
-prediction). Fire-plume lag (1) is inferred by mechanism-class analogy
-only — every plume spawn spatially overlaps both the target sprite and a
-sibling plume for its whole 26-tick life, so no clean isolation window
-exists in this fixture to confirm it independently.
-
-**Rung 2 — the -1 drift, root-caused by RAM probe.** Extended nothing (the
-already-committed `dragonrage-full-probe-player-attacker.json` per-tick
-dump already had everything needed). The step brief's own candidate
-(SlideMonToOffset's dummy sprite staying alive one tick past its duration,
-interacting with the target shake task's same-frame creation) is
-**REFUTED**: the dummy is alive ticks 168-172 (RAM-confirmed, matching
-rung 2's own prior finding); the target shake task is created at tick 186 —
-a 13-tick gap, no temporal overlap at all. The REAL mechanism, read
-straight from `AnimTask_ShakeMon`'s own source
-(`battle_anim_mon_movement.c:98-99`): `gSprites[spriteId].x2 =
-gBattleAnimArgs[1]` is an **unconditional absolute set**, not an additive
-offset — it directly overwrites whatever x2 the sprite already had. RAM
-shows the target sprite (ONIX) carries an unrelated x2=+1 residual from
-tick 82 onward (a pre-existing idle-animation artifact, NOT part of
-DRAGON_RAGE's own script — this is the SAME already-open, not-yet-source-
-attributed idle-bob class `battleScene.ts`'s own materialize-window doc
-comment already flags as unresolved for ONIX, see `docs/battle-menu-
-notes.md` §4). When `AnimTask_ShakeMon`'s creation code runs at tick 186
-(`xOffset=0` for the target shake), it clobbers that residual to exactly 0
-— which is what `DRAGON_RAGE_TARGET_SHAKE`'s own model already predicts,
-so the model is right FROM tick 186 onward and wrong (by the pre-existing,
-out-of-scope residual) for the ~97 ticks before it. Per the step brief's
-own instruction, this is named as the strictly-smaller, out-of-scope
-residual rather than chased further (porting a generic species idle-bob
-subsystem is a new mechanism, explicitly out of this step's scope).
-
-**Rung 3 — dense acceptance: partial, not exact.** One dense framebuffer
-run, player-attacker orientation only (time did not allow the opponent
-orientation or a second run of either this step): **86/150** frames match
-(up from 44/150 at the single global `age - 1` default). Three named
-residuals remain, none fully chased down: (1) a single isolated frame
-(render age 1) where the shake lag-2 shift pushes
-`shakeMonOffsetAtRenderTick`'s own creation guard into zeroing a
-legitimate just-post-creation state; (2) the idle-bob residual above,
-active for the ~97 ticks before the target shake's own creation; (3) a
-smaller residual inside the fire-spit sprite's own active window (render
-ages 86-96) that persists at every lag value tried (0, 1, 2 all score
-equal or worse than 1) — likely a `drawSpriteSheetAffineRotate` rounding
-question, not a timing one, not root-caused this step.
-
-**Not attempted:** opponent-attacker orientation dense run; a second run of
-either orientation for determinism; fire-plume's own independent lag
-confirmation; the fire-spit residual's own root cause.
-
-**Coverage:** `MOVE_DRAGON_RAGE` promoted to `partial` in
-`ANIMATION_COVERAGE.json` (19 exact → unchanged, 1 → 2 partial) — a
-meaningful dense window (86/150, more than half) is green with the
-remainder named precisely, matching the `partial` rubric.
-
-**Evidence.** `npm test` 2202/2202 (2201 + 1 new: the four lag constants
-pinned in `tests/dragonRage.test.ts`). `npm run build` green.
-
-## Idle-motion (species send-out front-anim) subsystem enumerated + ported, DRAGON_RAGE's target -1 drift closed (2026-07-25)
-
-**Verdict: real subsystem, source-attributed and RAM-confirmed, ported
-generically and wired into DRAGON_RAGE's target-sprite path only. Dense
-framebuffer match improved 86/150 → 127/150 (player-attacker orientation,
-verified deterministic on two independent live oracle runs). Three
-pre-existing, differently-rooted residuals remain (none newly introduced);
-`MOVE_DRAGON_RAGE` stays `partial`.**
-
-**Rung 1 — enumeration + probe.** Per the step brief's own probe-first
-rule, RAM-probed ONIX's own battler sprite directly by battler index
-(`gBattlerSpriteIds[0]`/`[1]`, `tools/probe/dump-onix-front-idle-anim.py`,
-`src/data/gen/onix-front-idle-probe.json`) across the whole
-CHARMELEON-vs-ONIX fixture — sidestepping `gBattleAnimAttacker`/
-`gBattleAnimTarget`, which are stale/zeroed until `DoMoveAnim` runs
-(`battle_anim.c:201-206`); the prior rung's own full-move probe had
-silently been reading battler 0 twice for its "target" rows before the
-move's own `gAnimScriptActive` flip, not ONIX's real sprite. The clean
-probe shows ONIX's sprite (`x2=1, y2=0, animNum=1`) with an active
-callback resolving to `SpriteCallbackDummy` (`nm pokeemerald.elf`:
-`0x08007428`) from the fixture's very first recorded tick — the
-mechanicLab staging harness fast-forwards past the send-out intro before
-the trace starts, so no committed window observes the animation
-mid-flight, only its already-settled terminal state.
-
-Mapped that callback back to source: `sMonFrontAnimIdsTable[SPECIES_ONIX]
-= ANIM_RAPID_H_HOPS` (`pokemon.c:1501`) → `Anim_RapidHorizontalHops`
-(`pokemon_animation.c:3567-3599`), triggered once at send-out
-(`BattleAnimateFrontSprite`/`DoMonFrontSpriteAnimation`,
-`pokemon.c:6803-6856`). It is NOT a continuous idle loop: its own
-accumulator (`data[2]`) runs 0→2040 over 86 ticks through a 4-phase
-piecewise formula, then permanently freezes `x2`/`y2` at the last active
-tick's value and hands off to `WaitAnimEnd` → `SpriteCallbackDummy`
-(`:5540-5544`) for the rest of the battle — until an unrelated mechanism
-(here, `AnimTask_ShakeMon`'s own unconditional `x2 = gBattleAnimArgs[1]`
-absolute set, `battle_anim_mon_movement.c:98-99`) overwrites it.
-Hand-derived source arithmetic at the last active accumulator (2040)
-gives `x2=1, y2=0` — matching RAM exactly, cross-checked independently of
-the terminal-state probe.
-
-**Enumeration answers:** per-species (keyed by `sMonFrontAnimIdsTable`,
-opponent/front sprite only — the player's own back sprite uses a
-completely separate table/function family, `sSpeciesToBackAnimSet`/
-`BACK_ANIM_*`, not explored); plays once, not looped; triggered by
-send-out; keeps one accumulator (`data[2]`) plus a terminal `data[6]=0`
-reset. Which other committed-fixture species share this family: only
-ONIX is currently rendered on the front-sprite side in a dense window;
-DRAGON_RAGE's own reverse orientation would need CHARMELEON's own front
-entry (`ANIM_BACK_AND_LUNGE`, a different, unexplored multi-phase
-function) — named as out-of-scope below, not ported. This connects to
-`docs/battle-menu-notes.md` §4's own open item (the settled action-menu's
-"idle-bob" flagged unresolved for ONIX): that item is a DIFFERENT
-mechanism (`DoBounceEffect`/`SpriteCB_BounceEffect`, a `y2`-only sine
-bounce, already fully source+RAM-resolved by a sibling lane's
-`docs/battle-menu-idle-notes.md` §1) — the two were conflated under one
-"idle-bob" label in prior doc comments, but are unrelated source
-functions (one writes only `y2` and loops forever; this one writes
-`x2`+`y2` and freezes after 86 ticks). Named here so a future session
-doesn't re-chase `DoBounceEffect` for this residual or vice versa.
-
-**Rung 2 — port.** `src/engine/speciesIdleAnim.ts`: a species → front-anim
-family table (only `ONIX`/`RAPID_H_HOPS` populated, per the stop-threshold
-rule) plus a faithful `rapidHorizontalHopsOffsetAtTick` port (all 4 phases)
-and a generic `computeTerminalOffset` driver that runs the port to its own
-natural stopping point rather than hardcoding the `{1,0}` result — adding
-a second species/family later is a table entry plus its own step function,
-not an ONIX-only special case. `tests/speciesIdleAnim.test.ts` (5 tests)
-pins hand-derived per-tick values across all 4 phases plus the RAM probe's
-own settled state.
-
-**Rung 3 — wired, target-sprite path only.** `sceneOnPresentation.ts`'s
-new `dragonRageTargetOffset` applies the species idle offset only when
-`animationAge < schedule.targetShakeTick` AND the target is on the
-opponent (front-sprite) side; at/after the shake's own creation tick,
-`shakeMonOffsetAtRenderTick` alone is authoritative (matching source's
-absolute-set clobber). A real bug surfaced wiring this in: the
-player-attacker fixture's own `target.spriteCorner.x` was `145` (144 + the
-same residual baked directly into the constant — the identical hack
-`docs/aerial-ace-portable-staging-probe.md` independently used for
-AERIAL_ACE's own opposite-side ONIX target, and the same one
-FEATHER_DANCE/QUICK_ATTACK/BOUNCE/FLY's own SHARED ONIX-opponent presets
-still use). Adding the offset on top of the already-baked corner
-double-counted (146, not 145) and regressed the dense run to 0/150 before
-the fixture was corrected back to the generic `144` — caught immediately
-by re-running the comparator, not left in. DRAGON_RAGE's own fixture is
-NOT shared with any other move's config (confirmed: no other
-`sceneOnPresentation.ts` preset references `CHARMELEON`), so this fix is
-scoped to DRAGON_RAGE alone; FEATHER_DANCE/QUICK_ATTACK/BOUNCE/FLY's own
-shared `145` presets are untouched (their own windows never cross the
-residual's reset boundary, so the baked hack still happens to be correct
-for them — a real, differently-scoped remainder for whoever eventually
-generalizes those, not touched this step).
-
-**Rung 4 — dense re-run.** Player-attacker orientation: **86/150 →
-127/150**, reproduced identically on two independent live oracle runs
-(deterministic) and A/B-verified against the pre-fix baseline replayed
-over the same cached oracle capture (`git checkout` of the prior commit's
-two files against the same RGB dir) — zero regressions, only new matches
-added. The three remaining named residuals are pre-existing and
-unrelated to this rung's own fix (confirmed present in the pre-fix
-baseline too): (1) a single-frame boundary artifact at render age 1
-(shake lag-2 creation-guard interaction); (2) a fire-spit rounding
-residual at render ages 86-96 (not a lag question — lag 0/1/2 all score
-equal or worse); (3) newly isolated (previously hidden under the broader
-pre-fix mismatch range) at render ages 98 and 105-114, coinciding with
-the fire-plume spawns' own creation window — candidate cause is the
-fire-plume framebuffer lag, already flagged as inferred-by-analogy rather
-than independently confirmed. Per the step brief's own rule, since the
-player orientation isn't fully clean, the opponent-attacker orientation
-was not attempted this rung (it would also need CHARMELEON's own
-`ANIM_BACK_AND_LUNGE` front-anim family ported first).
-
-**Coverage:** `MOVE_DRAGON_RAGE` stays `partial` (19 exact / 2 partial
-unchanged) — `remaining` updated with the new 127/150 count and the
-narrowed residual list.
-
-**Evidence.** `npm test` 2207/2207 (2202 + 5 new). `npm run build` green.
-
 ## DRAGON_RAGE rungs 1-3: render-age-1 guard fixed, fire-spit sheetFrame off-by-one root-caused from source, fire-plume window disciplined-probed but not resolved — 127/150 → 139/150, stays `partial` (2026-07-25)
 
 **Verdict: two of the three named residuals fixed on hard evidence (one of
@@ -432,43 +231,199 @@ fresh oracle run).
 pinned against the RAM probe). `npm run build` green. Dense sweep reproduced
 byte-identical on two independent fresh oracle runs.
 
+## BG-swap pipeline (restorebg/waitbgfadein/waitbgfadeout): assigned premise dissolved by a real extractor bug, not a port — MOVE_EXTREME_SPEED is already the exact representative; MIST_BALL's fog needs a different, still-open mechanism (2026-07-25)
+
+**Verdict: the step's own goal — "open the top component family with NO
+exact representative" — turned out to rest on a tooling bug, not a missing
+port. Fixed the bug (real, tested, committed); the family now correctly
+shows an exact representative that was always there. No new engine code
+lands this step; the corrected enumeration plus a precisely-scoped next
+representative (`MOVE_SHADOW_PUNCH`) is the deliverable, matching the step
+brief's own STOP THRESHOLD sanction ("a precise map... is itself the
+deliverable").**
+
+**The bug.** `tools/extract/extract-battle-animation-components.ts`'s
+`controlCommands` set spelled the two conditional-jump opcodes
+`"jumretfalse"`/`"jumrettrue"` — missing the `p` — against the real macro
+names `jumpretfalse`/`jumprettrue`
+(`reference/pokeemerald/asm/macros/battle_anim_script.inc:275-284`). Since
+neither string ever matched, `referencedBlocks()` never followed either
+branch, so any script block reachable ONLY through one of these two jumps
+was silently dropped from that move's `componentIds` — undercounting, not
+overcounting, so the leaderboard's "no exact representative" claims were
+false positives, not false negatives. 21 real uses of these two opcodes
+exist in `battle_anim_scripts.s`. Fixed the typo, re-ran the extractor
+(`--out` byte-identical-reproducibility test still green) and the
+downstream `extract-level50-move-parameterization.ts` (joins on this
+file). **12 moves gained real, previously-hidden components** (935→971
+total components, 3190→3269 dependency edges); the pinned summary counts
+in `tests/factoryAnimationComponents.test.ts` were updated to match.
+
+**The one that matters: `MOVE_EXTREME_SPEED`.** Its script
+(`battle_anim_scripts.s:3392-3434`) branches on
+`jumprettrue ExtremeSpeedAgainstPlayer` before reaching `ExtremeSpeedContinue:`
+— the label holding `waitbgfadeout`, `createvisualtask
+AnimTask_StartSlidingBg`, `waitbgfadein`, and (after the move body) the
+exact `restorebg` / `waitbgfadeout` / `setarg` / `waitbgfadein` closing
+sequence. All of that was invisible to the graph before this fix.
+EXTREME_SPEED is already `exact` in `ANIMATION_COVERAGE.json`, and its own
+coverage note already lists "the opening and restore display latches" and
+"BG_HIGHSPEED_{PLAYER,OPPONENT} selection" as dense-verified — i.e. this
+move's hand-fit `src/engine/extremeSpeed.ts`
+(`extremeSpeedBackgroundAtAge`) already implements and pixel-proves the
+whole fade-out/BG-load/fade-in/hold/restore-fade-out/restore-fade-in cycle.
+The corrected graph now shows `MOVE_EXTREME_SPEED` with **zero** unproven
+components among the restorebg family. Re-running
+`npm run animation:coverage` confirms the effect directly: `restorebg`,
+`waitbgfadein`, `waitbgfadeout`, `fadetobg`, and `setarg` no longer appear
+anywhere in the "components without an exact representative" leaderboard
+(replaced by an unrelated set: `blend_color_cycle` 28,
+`gHorizontalLungeSpriteTemplate` 19, `AnimTask_ShakeMonInPlace` 14,
+`ANIM_TAG_BLUE_STAR`/`gHealingBlueStarSpriteTemplate` 11 each,
+`UnsetPsychicBackground` 11).
+
+**Real C-source enumeration of the pipeline** (full read of
+`reference/pokeemerald/src/battle_anim.c`, this step's own rung-2
+requirement, done via research pass before the bug was found — still the
+correct map):
+- `Cmd_monbg`/`Cmd_clearmonbg` (`battle_anim.c:591-911`,
+  `Task_InitUpdateMonBg`/`Task_UpdateMonBg`/`Task_ClearMonBg`) — paints a
+  battler sprite onto a BG layer and tracks it per-frame. **Already fully
+  proven**, unrelated to this bug (124+ exact-proved moves).
+- `Cmd_blendoff` (`:1036-1041`) — zeroes `BLDCNT`/`BLDALPHA` directly, no
+  task. Already proven.
+- `Cmd_setarg` (`:1055-1071`) — pure script-parser write to
+  `gBattleAnimArgs[argId]`, no BG/task interaction.
+- `Cmd_fadetobg`/`Cmd_fadetobgfromset`/`Cmd_restorebg`/`Task_FadeToBg`
+  (`:1110-1228`) — the real new subsystem. `Task_FadeToBg` is a 4-state
+  machine: fade to black via `BeginHardwarePaletteFade(0xE8,0,0,16,0)`
+  (state 0) → while `gPaletteFade.active`, wait → load the new BG
+  (`LoadMoveBg(bgId)` or, for `restorebg`'s `bgId=-1` sentinel,
+  `LoadDefaultBg()`/`DrawMainBattleBackground()` — **`restorebg` does NOT
+  snapshot/restore prior state; it recomputes the map's default BG from
+  scratch**, state 2) → fade back in (state 2 continued) → wait, then
+  destroy the task (state 3). A single flat `sAnimBackgroundFadeState`
+  global (0/1/2) is what `Cmd_waitbgfadeout`/`Cmd_waitbgfadein` poll — not
+  a per-task counter.
+- `Cmd_waitbgfadeout`/`Cmd_waitbgfadein` (`:1230-1254`) — the two poll
+  points on that global.
+- `Cmd_changebg` (`:1256-1261`) — synchronous BG swap, no fade, no task.
+- `gBattleAnimBackgroundTable[]` (`src/data/battle_anim.h:1596-1625`) is a
+  flat `{image,palette,tilemap}` LZ77-pointer table keyed by bg-id
+  (`BG_GHOST`=2, `BG_HIGHSPEED_OPPONENT`=9, `BG_HIGHSPEED_PLAYER`=10, etc,
+  `include/constants/battle_anim.h:330-338`); `Cmd_monbg`/`Cmd_clearmonbg`
+  never touch it — the two pipelines are independent and composable.
+
+Independently, this exact hardware-fade ramp shape (1 BLDY unit per tick,
+fade out / hold / fade in / later restore-fade-out / restore-fade-in) is
+already hand-derived and pixel-pinned **twice**, completely independently:
+`extremeSpeed.ts`'s `extremeSpeedBackgroundAtAge` and `faintAttack.ts`'s own
+bldy ramp. Both match the same `BeginHardwarePaletteFade` shape. This is
+strong cross-evidence that a shared, parametric module (`durationTicks`
+fixed at 16 per `BeginHardwarePaletteFade`'s own literal argument, per-move
+start-tick probed) would generalize cleanly — **not attempted this step**
+(refactoring two already-exact/partial moves' code carried needless
+regression risk against this step's remaining time budget; left as a
+bounded, low-risk follow-up, not a new derivation).
+
+**This was never actually MIST_BALL's blocker.** Re-read
+`Move_MIST_BALL`'s real script (`battle_anim_scripts.s`, printed directly,
+not from memory) end to end: it contains no `restorebg`, `monbg`,
+`fadetobg`, `clearmonbg`, `waitbgfadein`, or `waitbgfadeout` anywhere.
+`AnimTask_MistBallFog` (`battle_anim_ice.c:1097-1170+`) is a **separate**
+mechanism — a task that loads its OWN BG1 tile/tilemap/palette trio
+(`gWeatherFogHorizontalTiles`/`gBattleAnimFogTilemap`/`gFogPalette`) and
+drives `BLDCNT`/`BLDALPHA` through its own 4-phase state machine directly,
+never going through `Cmd_fadetobg`/`Task_FadeToBg` at all. The step brief's
+framing conflated the two because both are "background" mechanisms in the
+loose sense; they share no code. MIST_BALL's real remaining blockers are
+unchanged from the archived rung-3 session: `waitforvisualfinish`
+sprite-lifetime tracking, `AnimComplexPaletteBlend` (whole-palette-set
+blend gated on `gPaletteFade.active`), `AnimTask_MistBallFog`'s own BG1
+pipeline (a genuinely new subsystem, untouched by this step), and
+generalizing `AnimTask_BlendBattleAnimPal` past its one DRAGON_BREATH
+instance.
+
+**Named next representative for whoever continues this family** (now a
+small, well-bounded task, not a new-subsystem port): `MOVE_SHADOW_PUNCH`.
+Its script (`battle_anim_scripts.s:4308-4327`) is fully linear — no
+branches, so its extracted component list was already accurate before this
+fix — and Factory-legal at Level 50 via `FRONTIER_MON_HAUNTER_1`
+(`SPECIES_HAUNTER`, moves `{SHADOW_PUNCH, CONFUSE_RAY, SPITE, GRUDGE}` —
+its whole kit sits in this family,
+`reference/pokeemerald/src/data/battle_frontier/battle_frontier_mons.h:1256-1262`).
+Post-fix, its only unproven component is `task:AnimTask_AttackerPunchWithTrace`
+— every other component (`fadetobg`, `waitbgfadein`, `monbg`, `setalpha`,
+`clearmonbg`, `blendoff`, `restorebg`, `create_basic_hitsplat_sprite`,
+`create_fist_sprite`, `ANIM_TAG_HANDS_AND_FEET`, `ANIM_TAG_IMPACT`,
+`AnimTask_ShakeMon`) is already proven by FIRE_PUNCH/ICE_PUNCH/
+THUNDER_PUNCH/EXTREME_SPEED. `AnimTask_AttackerPunchWithTrace`
+(`battle_anim_mons.c:2392-2496`) is a sprite-clone "afterimage/trace"
+effect (not shake, not palette-flash): attacker slides ±8px out over 5
+ticks then back over 5, spawning one blended-palette clone sprite per tick
+that self-destructs after 8 ticks, then waits for all clones to expire.
+Not ported this step — no RAM probe run, no code written; named here as
+the concrete next rung (probe HAUNTER's own battler sprite + the clone
+slots via a `mechanicLab overrides.parties` fixture, port the trace effect,
+generalize the fade-ramp module out of `extremeSpeed.ts`/`faintAttack.ts`,
+wire through the Scene-ON seam, dense window both orientations twice).
+
+**Evidence.** `npm test` 2212/2212 (unchanged count — this step's fix is a
+reattribution, not new logic; the one touched test updates a byte-count
+pin to the corrected, re-verified extraction). `npm run build` green.
+
 ## Current handoff
 
-- **State:** **19 exact / 2 partial / 255 unsupported.**
-- **Did:** Landed the last DRAGON_RAGE step in the fire-plume-family arc:
-  RUNG 1 fixed the z-order tie residual (render ages 105-114) via a direct
-  `gMain.oamBuffer` RAM probe, encoding a per-instance paint-order
-  comparator (not a global rule or a whole-history simulation) — dense
-  count **139/150 → 149/150**. RUNG 2 disciplined-probed the remaining
-  age-98 ONIX-silhouette anomaly per the step's own two named candidates
-  (VRAM overwrite, OBJ-blend compositing gap) and ELIMINATED BOTH on hard
-  evidence (VRAM hash stable throughout; `BLDCNT`/`BLDALPHA` both zero,
-  `affineMode` zero) — no fix survived, so per the PARK RULE this residual
-  is named, not swept, and the move stays `partial`. See the dated section
-  above for the full accounting.
+- **State:** **19 exact / 2 partial / 255 unsupported.** (DRAGON_RAGE is
+  CLOSED/parked at 149/150 `partial` per this session's own brief — not
+  touched this step; see the two dated sections above for its own
+  accounting.)
+- **Did:** Assigned to open the "BG-swap pipeline"
+  (`restorebg`/`waitbgfadein`/`waitbgfadeout`, ~40 Level-50 moves each,
+  reportedly with no exact representative) as a named blocker for
+  MIST_BALL's fog. Rung 1 (pick representative) surfaced a real bug in
+  `tools/extract/extract-battle-animation-components.ts` first: a typo
+  (`jumretfalse`/`jumrettrue` vs. the real `jumpretfalse`/`jumprettrue`
+  macro names) silently dropped every script block reachable only through
+  those two branch ops. Fixed it (12 moves gained real components,
+  935→971, 3190→3269 edges) and re-ran the downstream
+  level50-parameterization generator. The fix flips the assigned premise:
+  `MOVE_EXTREME_SPEED` (already `exact`) turns out to already be the
+  pixel-verified representative for this whole family — its own
+  `extremeSpeedBackgroundAtAge` already implements the
+  fade-out/BG-load/fade-in/restore cycle, just previously mis-attributed
+  by the buggy graph. `npm run animation:coverage`'s "no exact
+  representative" leaderboard no longer lists this family at all. Also
+  confirmed by direct re-read of `Move_MIST_BALL`'s real script that this
+  family was never actually MIST_BALL's blocker (it never calls
+  `restorebg`/`monbg`/`fadetobg`/either wait op) — `AnimTask_MistBallFog`
+  is a separate, still-fully-open subsystem. Full C-source enumeration of
+  `Cmd_monbg`/`Cmd_restorebg`/`Cmd_waitbgfadein`/`Cmd_waitbgfadeout`/
+  `Cmd_changebg` and `Task_FadeToBg`'s state machine, plus a scoped next
+  representative (`MOVE_SHADOW_PUNCH` via `FRONTIER_MON_HAUNTER_1`, one
+  remaining unproven component: `AnimTask_AttackerPunchWithTrace`), is
+  written into the dated section above. No engine port lands this step —
+  see that section for why stopping here (a corrected map plus a
+  small, precisely bounded next task) is the right-sized outcome rather
+  than rushing a fresh port.
 - **Evidence:** `npm test` 2212/2212, `npm run build` green.
-- **Next:** DRAGON_RAGE's own remainder is now a single frame (render age
-  98's 1598px ONIX-silhouette mismatch, both brief-named candidates
-  eliminated) — needs a fresh investigative angle, not more RAM/VRAM/IO
-  comparison: candidate is a fixture with less concurrent sprite creation
-  at this exact tick (both the target shake task and fire-plume spawn 0
-  are created simultaneously here), to separate a genuine engine gap from
-  a possible emulator sub-frame-ordering effect. Only once player
-  orientation reaches a clean 150/150 twice does the opponent-attacker
-  orientation dense run become in-scope, gated on porting CHARMELEON's own
-  front-anim family (`ANIM_BACK_AND_LUNGE`, unexplored — a materially
-  different, multi-phase step-function chain, not a copy of
-  `Anim_RapidHorizontalHops`). Separately, FEATHER_DANCE/QUICK_ATTACK/
-  BOUNCE/FLY's own shared ONIX-opponent presentation presets
-  (`sceneOnPresentation.ts`) still bake the species-idle-anim `+1` residual
-  directly into their `spriteCorner.x=145` constant rather than modeling it
-  — harmless today since none of those windows cross the residual's own
-  reset boundary, untouched again this step (out of scope). This step's own
-  brief ends the DRAGON_RAGE move-run here regardless of outcome — the lane
-  switches tracks next. Alternatively, the next ranked
-  `dragon-fire-projectile` siblings FIRE_BLAST and FIRE_SPIN remain open,
-  as does MIST_BALL's own remainder (see the archived "Interpreter
-  generalization" section).
-- **Housekeeping:** none this step (no section moved to archive — adding
-  this rung's own section keeps exactly 3 dated sections live: idle-motion,
-  rungs-1-3, and this one).
+- **Next:** Port `AnimTask_AttackerPunchWithTrace`
+  (`battle_anim_mons.c:2392-2496`, sprite-clone/trace effect) and wire
+  `MOVE_SHADOW_PUNCH` (HAUNTER, Level-50-legal) through the Scene-ON seam;
+  optionally generalize the hardware BG-fade ramp out of
+  `extremeSpeed.ts`/`faintAttack.ts` into a shared module first (low risk —
+  both already independently derive the identical shape). MIST_BALL's own
+  remaining blockers are unchanged and still open: `waitforvisualfinish`
+  sprite-lifetime tracking, `AnimComplexPaletteBlend`, `AnimTask_MistBallFog`'s
+  own BG1 pipeline (a genuinely new subsystem), and generalizing
+  `AnimTask_BlendBattleAnimPal` past its one DRAGON_BREATH instance. The
+  `dragon-fire-projectile` siblings FIRE_BLAST and FIRE_SPIN also remain
+  open (confirmed this step: FIRE_BLAST doesn't use the BG-swap family at
+  all — its own real surface is `SoundTask_FireBlast` +
+  `gFireBlastCrossSpriteTemplate`/`gFireBlastRingSpriteTemplate` sprites, a
+  different, smaller pocket of work).
+- **Housekeeping:** moved the two oldest DRAGON_RAGE dated sections
+  ("rung 5 remainder" and "idle-motion subsystem") to
+  `ANIMATION_PROGRESS-archive.md` to make room for this step's section
+  while keeping ~3 live (AGENTS.md's convention); DRAGON_RAGE's own
+  "rungs 1-3" and "rung 6/7" sections stay live alongside this one.
