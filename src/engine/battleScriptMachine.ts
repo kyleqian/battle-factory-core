@@ -604,6 +604,7 @@ function freezeEventPayload(
     case "play-faint-cry":
     case "faint-animation":
     case "hide-party-status-summary":
+    case "draw-party-status-summary":
     case "set-battler-sprite-visibility":
     case "set-battler-status-data":
     case "status-icon-update":

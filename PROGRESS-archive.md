@@ -1,4 +1,42 @@
 ---
+## 444 — SetMoveEffect status-write quartet registered (POISON/BURN/FREEZE/PARALYSIS) — secondary status procs are now kernel-executable
+
+*(Entry written by the supervisor: the worker landed both code commits green
+and was cap-killed mid-docs-update; suite/build/verify script independently
+re-verified before this entry.)*
+
+- **State:** tree green at **194 files / 2318 tests** (+31 over entry 443's
+  2287 baseline at merge), build green. `B_SCR_OP_PRINTFROMTABLE` and
+  `B_SCR_OP_UPDATESTATUSICON` registered (53 opcodes composed);
+  `Cmd_seteffectwithchance`'s two SetMoveEffect dispatch barriers replaced by
+  a real `applySetMoveEffect` dispatch, source-complete for
+  {POISON, BURN, FREEZE, PARALYSIS} — per-status guards ported exactly
+  (type immunities, existing-status, Safeguard, substitute), affects-user
+  flag, `status1` write plus the party-record sync mirroring `datahpupdate`.
+  Barrier pin `battleScriptHitChainOpcode.ts` 19 → 25, fully itemized in the
+  ratchet test's own comment (net of the two retired dispatch barriers;
+  SLEEP/TOXIC route via still-unregistered `Cmd_seteffectprimary`; family-B
+  status2/misc cases incl. FLINCH stay barriers).
+- **Did:** commits `78b1734` (registration + dispatch + 31 Tier-1 tests) and
+  `e40c7f3` (integration proof: staged KADABRA Body Slam vs MAGNETON
+  reproduces the banked ledger — proc seed paralyzes battler AND party slot
+  with zero extra `Random()` draws vs a plain hit, control seed untouched,
+  asserting `docs/set-move-effect-ground-truth.md`'s banked values).
+  Verify script `verify-set-move-effect-ground-truth.ts` re-run all-PASS
+  post-land (supervisor).
+- **Next (banked prep, in consumption order):** (1) forced-switch
+  registration slices — `docs/forced-switch-ground-truth.md` §4's 10-step
+  plan, `openpartyscreen` first (both directions live-proven, 23/23 checks);
+  (2) stat-down secondary family — `docs/stat-change-confusion-ground-truth.md`
+  (`ChangeStatBuffs` zero-RNG, silent-guard finding); (3) end-turn
+  orchestration — `docs/end-turn-ground-truth.md` (inline-faint structural
+  finding, ORWORD/PLAYANIMATION gap, 17/17 checks). Animation lane:
+  DRAGON_RAGE finish ladder in flight.
+- **Notes:** FLINCH deliberately excluded (turn-order field ripple — its own
+  slice). The cap-kill's "unauthenticated/sandboxed" postflight hint was
+  noise (the worker ran 45 min and committed real work) — do not relaunch
+  with sandbox overrides on that basis.
+---
 ## 443 — S10 kernel-breadth RUNG 1 complete (`Cmd_ppreduce` Pressure barriers retired); RUNG 2 (SetMoveEffect quartet) scoped, not attempted this session
 
 - **State:** tree green at **194 files / 2286 tests** (+10 tests over entry

@@ -4,6 +4,104 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 447 — Forced-switch §4 slices 3-9 landed: the non-terminal faint fork is now COMPLETE — multi-KO battles are mechanically possible
+
+- **State:** tree green at **202 files / 2396 tests** (+2 files/+30 tests
+  over entry 446's 200/2366), build green. `verify-forced-switch-ground-
+  truth.ts` rerun live before starting and again after every commit: still
+  **31/31 ALL PASS**. Ratchet green: new pin `battleScriptSwitchinOpcode.ts`
+  → 8 barriers (itemized in the ratchet's own comment), each with a
+  reachability test in the new `tests/battleScriptSwitchinOpcode.test.ts`;
+  no new production imports of canonical recordings.
+- **Did, per `docs/forced-switch-ground-truth.md` §4/§5 (new §6 written
+  summarizing this landing)/§1a's own opcode enumeration:**
+  - **`B_SCR_OP_SWITCHHANDLEORDER`** (`Cmd_switchhandleorder`, cases 2/3):
+    per §5's settled finding, `SwitchPartyOrder`'s permutation table is
+    presentation-only and is **not modeled** — the opcode reduces to
+    transcribing the already-decided `monToSwitchIntoId[battler]` into
+    `battleCommunication0`. Cases 0/1 (multi-battler/order-only) barrier.
+  - **`B_SCR_OP_GETSWITCHEDMONDATA` + `B_SCR_OP_SWITCHINDATAUPDATE`**: the
+    first "rebuild an active battler from a bench record" registration.
+    Commits `partyIndex = monToSwitchIntoId[battler]`, then rebuilds
+    species/hp/status1/types from the party record at that index and resets
+    stat stages/status2/status3/the modeled DisableStruct-shaped fields
+    (rolloutTimer, furyCutterCounter, truantCounter, rechargeTimer,
+    disabledMove, usedDisabledMove, tauntTimer, usedTauntedMove,
+    usedImprisonedMove) to `SwitchInClearSetData`'s neutral values, plus the
+    cross-battler `STATUS2_INFATUATED_WITH` clear (same precedent as
+    `cleareffectsonfaint`). `ability`/`item`/`moves`/`pp` are **not**
+    rebuilt — no species-ability table, no per-battler party moves/pp
+    modeled — documented, not silent (matches the established
+    cleareffectsonfaint precedent for untracked fields).
+  - **`B_SCR_OP_SWITCHINANIM`, `B_SCR_OP_HPTHRESHOLDS`,
+    `B_SCR_OP_CANCELALLACTIONS`, `B_SCR_OP_VARIOUS`'s
+    `RESET_PLAYER_FAINTED` case, `B_SCR_OP_DRAWPARTYSTATUSSUMMARY`**:
+    switchinanim clears the switched-in battler's `gAbsentBattlerFlags` bit
+    (Pokédex-seen skipped, Factory is always Frontier); hpthresholds/
+    cancelallactions are pure no-ops (their only writes are untracked,
+    unread fields); various's case 7 clears `HITMARKER_PLAYER_FAINTED` under
+    its real gate; drawpartystatussummary joins hidepartystatussummary's
+    existing controller-emit pattern.
+  - **`B_SCR_OP_SWITCHINEFFECTS`**: clears `HITMARKER_FAINTED(battler)`.
+    Spikes barriers on the real `SIDE_STATUS_SPIKES` bit — structurally
+    unreachable since `sideStatuses` is narrowed to Safeguard only. Truant
+    and `AbilityBattleEffects(ABILITYEFFECT_ON_SWITCHIN)` barrier on the
+    switched-in battler's real `ability` against the closed trigger set
+    (Drizzle/Sand Stream/Drought/Intimidate/Forecast/Trace/Cloud
+    Nine/Air Lock, `battle_util.c:2485-2599`). `ItemBattleEffects
+    (ITEMEFFECT_ON_SWITCH_IN)` needed **no barrier at all**: its only two
+    cases are HOLD_EFFECT_RESTORE_STATS (unreachable — stat stages are
+    always neutral post-`switchindataupdate`) and HOLD_EFFECT_DOUBLE_PRIZE
+    (writes an untracked, unread field).
+  - **Orchestration fix (`battleScriptFaintedActionsOrchestration.ts`)**:
+    `runScriptToOwnEnd` now auto-acknowledges controller round trips (a real
+    gap — the forced-switch dance's own opcodes mark battlers pending,
+    which nothing before this consumed). The result type's old single
+    "terminal" kind is split by `battleOutcome`: nonzero is real terminal
+    (checkteamslost's own jump); zero is a new **`"resumed"`** kind — every
+    fainted battler's script reached `BattleScript_FaintedMonEnd` via the
+    full forced-switch dance instead, battle genuinely continues.
+  - **Reducer (`factoryBattleScriptTerminalDecision.ts`)**: surfaces
+    `"resumed"` as a real `{ kind: "decision-required" }` boundary, reusing
+    the adapter's own established single-command-per-turn shape (the
+    mover's side, its one known move, now targeting the switched-in
+    battler) — **not** end-turn orchestration (dual-sided submission, turn
+    priority, AI's next pick), which stays explicitly out of scope. Added
+    `opponentBenchOverride` to `FactoryTerminalMoveConfig` (optional,
+    backward-compatible) so the integration test could stage a real
+    switch-in candidate (MACHOP + Karate Chop) without touching either
+    existing bench fixture.
+  - **Integration proof**
+    (`tests/factoryBattleScriptTerminalDecision.test.ts`, new test): the
+    healthy-bench KO scenario now runs the **entire** forced switch —
+    `checkteamslost -> jumpifbyte -> jumpifword -> openpartyscreen ->
+    switchhandleorder -> getswitchedmondata -> switchindataupdate ->
+    hpthresholds -> hidepartystatussummary -> switchinanim -> waitstate ->
+    resetplayerfainted -> switchineffects -> cancelallactions -> end2` —
+    MACHOP becomes the real active opponent battler (species/hp/types/
+    partyIndex from the party record, neutral stat stages/status), zero
+    `Random()` draws beyond the banked 4-roll hit chain, and the reducer
+    returns a genuine next `decision-required` boundary. The terminal path
+    (empty bench) and the pre-existing openpartyscreen-pass-2-fallback
+    barrier fixture are both untouched, still passing byte-for-byte.
+- **Next:** §4 step 10 (player-side interactive party-menu controller
+  state) is the one remaining named barrier on this whole path — RAM-proven
+  recipe already banked in §3, not attempted this session (explicitly out
+  of scope per the brief). Otherwise the non-terminal faint fork is
+  COMPLETE: multi-KO battles are now mechanically possible end-to-end for
+  the AI/trainer side. Stat-down family, confusion, and end-turn
+  orchestration (dual-sided action selection, turn-order priority) remain
+  the next open subsystems for whoever picks up S10.
+- **Notes:** no oracle traces added this session (reused the banked
+  `mechanic-forced-switch-ai-choice-off.json`/dump-forced-switch-party-
+  order.py evidence from §2/§5b). No presentation/`battleScene`/ROADMAP
+  edits. `BATTLE_TYPE_FRONTIER` is itself an OR of every frontier
+  facility's bit including `BATTLE_TYPE_ARENA` — a real source quirk that
+  tripped the new opcode file's own tests during development (fixed by
+  using `BATTLE_TYPE_FACTORY` alone in test fixtures); worth flagging for
+  any future fixture that checks a single frontier-facility bit.
+
+---
 ## 446 — Executable-frontier census's #1 lever landed: entry-chokepoint trio registered (`JUMPIFHALFWORD`/`JUMPIFSTATUS3CONDITION`/`ORWORD`) — the shared hit chain is now executable from its literal `BattleScript_EffectHit` entry
 
 - **State:** tree green at **200 files / 2366 tests** (+3 files/+24 tests
@@ -132,43 +230,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   presentation/`battleScene`/ROADMAP edits. Terminal KO path (empty bench)
   is untouched — confirmed byte-for-byte by the unchanged terminal-decision
   tests alongside the updated non-terminal ones.
-
----
-## 444 — SetMoveEffect status-write quartet registered (POISON/BURN/FREEZE/PARALYSIS) — secondary status procs are now kernel-executable
-
-*(Entry written by the supervisor: the worker landed both code commits green
-and was cap-killed mid-docs-update; suite/build/verify script independently
-re-verified before this entry.)*
-
-- **State:** tree green at **194 files / 2318 tests** (+31 over entry 443's
-  2287 baseline at merge), build green. `B_SCR_OP_PRINTFROMTABLE` and
-  `B_SCR_OP_UPDATESTATUSICON` registered (53 opcodes composed);
-  `Cmd_seteffectwithchance`'s two SetMoveEffect dispatch barriers replaced by
-  a real `applySetMoveEffect` dispatch, source-complete for
-  {POISON, BURN, FREEZE, PARALYSIS} — per-status guards ported exactly
-  (type immunities, existing-status, Safeguard, substitute), affects-user
-  flag, `status1` write plus the party-record sync mirroring `datahpupdate`.
-  Barrier pin `battleScriptHitChainOpcode.ts` 19 → 25, fully itemized in the
-  ratchet test's own comment (net of the two retired dispatch barriers;
-  SLEEP/TOXIC route via still-unregistered `Cmd_seteffectprimary`; family-B
-  status2/misc cases incl. FLINCH stay barriers).
-- **Did:** commits `78b1734` (registration + dispatch + 31 Tier-1 tests) and
-  `e40c7f3` (integration proof: staged KADABRA Body Slam vs MAGNETON
-  reproduces the banked ledger — proc seed paralyzes battler AND party slot
-  with zero extra `Random()` draws vs a plain hit, control seed untouched,
-  asserting `docs/set-move-effect-ground-truth.md`'s banked values).
-  Verify script `verify-set-move-effect-ground-truth.ts` re-run all-PASS
-  post-land (supervisor).
-- **Next (banked prep, in consumption order):** (1) forced-switch
-  registration slices — `docs/forced-switch-ground-truth.md` §4's 10-step
-  plan, `openpartyscreen` first (both directions live-proven, 23/23 checks);
-  (2) stat-down secondary family — `docs/stat-change-confusion-ground-truth.md`
-  (`ChangeStatBuffs` zero-RNG, silent-guard finding); (3) end-turn
-  orchestration — `docs/end-turn-ground-truth.md` (inline-faint structural
-  finding, ORWORD/PLAYANIMATION gap, 17/17 checks). Animation lane:
-  DRAGON_RAGE finish ladder in flight.
-- **Notes:** FLINCH deliberately excluded (turn-order field ripple — its own
-  slice). The cap-kill's "unauthenticated/sandboxed" postflight hint was
-  noise (the worker ran 45 min and committed real work) — do not relaunch
-  with sandbox overrides on that basis.
 

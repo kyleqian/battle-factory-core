@@ -93,6 +93,16 @@ export type FactoryTerminalMoveConfig = Readonly<{
    */
   opponentBenchHp: readonly [number, number];
   /**
+   * Optional per-slot override (species/moves) for the two bench slots above
+   * -- both otherwise share `STAGED_OPPONENT_SPECIES`'s real types with no
+   * moves, which can never satisfy `GetMostSuitableMonToSwitchInto`'s pass-1
+   * super-effective-move gate (`battleAiSwitchInto.ts`). Lets the non-
+   * terminal fork's own integration proof stage a real switch-in candidate
+   * (e.g. MACHOP + a real Fighting move) without altering either existing
+   * fixture's bench.
+   */
+  opponentBenchOverride?: readonly [BattleScriptPartyMemberInput?, BattleScriptPartyMemberInput?];
+  /**
    * Which side delivers the staged killing blow. Defaults to "player" (the
    * original WON-path staging: the player's mon kills the opponent's last
    * mon). "trainer" mirrors the identical hit chain onto the player's own
@@ -215,8 +225,8 @@ function createInitialRules(config: FactoryTerminalMoveConfig): FactoryTerminalD
   const playerSlot0Hp = moverBattler === 0 ? 100 : config.targetHp;
   const opponentSlot2Hp = moverBattler === 0 ? config.targetHp : 100;
   const opponentParty = Object.freeze([
-    partySlot(config.opponentBenchHp[0], true),
-    partySlot(config.opponentBenchHp[1], true),
+    { ...partySlot(config.opponentBenchHp[0], true), ...config.opponentBenchOverride?.[0] },
+    { ...partySlot(config.opponentBenchHp[1], true), ...config.opponentBenchOverride?.[1] },
     partySlot(opponentSlot2Hp, true),
     { species: 0, isEgg: false, hp: 0 },
     { species: 0, isEgg: false, hp: 0 },
@@ -457,6 +467,34 @@ export const reduceFactoryTerminalMoveDecision: BattleDecisionReducer<FactoryTer
           opcodeName: barrierInstruction.opcodeName,
           dispatcher: barrierInstruction.dispatcher,
           instructionsExecuted: orchestration.state.instructionsExecuted,
+        }),
+      }),
+    });
+  }
+
+  if (orchestration.kind === "resumed") {
+    // The battle genuinely resumes (docs/forced-switch-ground-truth.md §1c): source re-enters
+    // HandleTurnActionSelectionState. End-turn orchestration (dual-sided submission, turn-order
+    // priority, the AI's own next move pick) is out of this adapter's scope, so the next boundary
+    // reuses this adapter's own established single-command-per-turn shape: the mover's side is
+    // asked again with its one already-known legal decision, now targeting the switched-in battler.
+    return Object.freeze({
+      rules: Object.freeze({
+        adapter: ADAPTER,
+        phase: "awaiting-command",
+        rulesContext: orchestration.state.rulesContext,
+      }) as FactoryTerminalDecisionRules,
+      events: eventPayloads(orchestration.state),
+      boundary: Object.freeze({
+        kind: "decision-required",
+        request: Object.freeze({
+          kind: "command",
+          requestId: context.request.requestId + 1,
+          side: context.request.side,
+          battler: attacker,
+          legalDecisions: Object.freeze([
+            Object.freeze({ kind: "use-move" as const, moveSlot: 0 as const, targetBattler }),
+          ]),
         }),
       }),
     });

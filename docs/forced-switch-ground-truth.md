@@ -663,3 +663,50 @@ downstream read — they don't, because nothing downstream of
   position array plus a 2-argument swap operation (mirroring
   `SwitchPartyMonSlots`) belongs — scoped strictly to that presentation
   feature, never touching `monToSwitchIntoId`/battler-party-index state.
+
+## 6. 2026-07-25 (later session): slices 1-9 landed -- the non-terminal fork is complete
+
+`src/engine/battleScriptSwitchinOpcode.ts` registers `SWITCHHANDLEORDER`,
+`GETSWITCHEDMONDATA`, `SWITCHINDATAUPDATE`, `SWITCHINANIM`, `HPTHRESHOLDS`,
+`CANCELALLACTIONS`, and `VARIOUS`'s `RESET_PLAYER_FAINTED` case;
+`DRAWPARTYSTATUSSUMMARY` joins `HIDEPARTYSTATUSSUMMARY` in
+`battleScriptSourceCommands.ts`. Per §5c, no permutation model was added --
+`SWITCHHANDLEORDER` only transcribes the already-decided raw index.
+`SWITCHINDATAUPDATE` is the first "rebuild an active battler from a bench
+record" registration: species/hp/status1/types come from the party record;
+stat stages/status2/status3/the modeled DisableStruct fields reset to
+`SwitchInClearSetData`'s neutral values; `ability`/`item`/`moves`/`pp` stay
+untracked (no species-ability table, no per-battler party moves/pp modeled).
+`SWITCHINEFFECTS` clears `HITMARKER_FAINTED` and barriers only on a real,
+narrow condition (Spikes -- structurally unreachable since `sideStatuses` is
+narrowed to Safeguard; Truant; the closed set of `AbilityBattleEffects
+(ABILITYEFFECT_ON_SWITCHIN)` trigger abilities) -- 8 total barrier call
+sites, none reachable by any fixture this engine builds today (pinned,
+`tests/executableFrontierRatchet.test.ts`).
+
+`battleScriptFaintedActionsOrchestration.ts`'s `runScriptToOwnEnd` now
+auto-acknowledges controller round trips (the forced-switch dance's own,
+previously unneeded since nothing before it ever marked a battler pending),
+and its top-level result splits what used to be a single "terminal" kind by
+`battleOutcome`: nonzero is the real terminal (checkteamslost's own jump);
+zero is a new `"resumed"` kind -- every fainted battler's own script reached
+`BattleScript_FaintedMonEnd` via the full forced-switch dance instead, and
+the battle genuinely continues. `factoryBattleScriptTerminalDecision.ts`'s
+reducer surfaces `"resumed"` as a real `{ kind: "decision-required" }`
+boundary (reusing this adapter's own established single-command-per-turn
+shape -- the mover's side, its one known move, now targeting the switched-in
+battler) rather than end-turn orchestration (dual-sided submission, turn
+priority, the AI's own next pick), which stays explicitly out of scope.
+
+**Slice 10** (the player-side interactive party-menu controller state) did
+not fall out of this work and remains the one named, RAM-proven (§3) barrier
+left on this path -- `openpartyscreen`'s existing player-side halt is
+unchanged. Everything else in §4's list (1-9) is now registered and proven
+by `tests/battleScriptSwitchinOpcode.test.ts` (per-opcode) and
+`tests/factoryBattleScriptTerminalDecision.test.ts` (full-dance integration:
+a healthy-bench KO now runs `checkteamslost -> jumpifbyte -> jumpifword ->
+openpartyscreen -> switchhandleorder -> getswitchedmondata ->
+switchindataupdate -> hpthresholds -> hidepartystatussummary ->
+switchinanim -> waitstate -> resetplayerfainted -> switchineffects ->
+cancelallactions -> end2`, MACHOP becomes the real active opponent battler,
+zero `Random()` draws, neutral reset, and a genuine next decision boundary).

@@ -74,6 +74,11 @@ export type BattleScriptSemanticEventPayload =
     battler: BattleScriptBattlerId;
   }>
   | Readonly<{
+    /** BtlController_EmitDrawPartyStatusSummary -- source's HP/status snapshot payload is presentation-only, not modeled here. */
+    kind: "draw-party-status-summary";
+    battler: BattleScriptBattlerId;
+  }>
+  | Readonly<{
     kind: "set-battler-sprite-visibility";
     battler: BattleScriptBattlerId;
     invisible: boolean;

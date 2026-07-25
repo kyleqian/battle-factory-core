@@ -35,6 +35,7 @@ type BattleScriptSelectedBattlerControllerEventPayload = Extract<
       | "play-faint-cry"
       | "faint-animation"
       | "hide-party-status-summary"
+      | "draw-party-status-summary"
       | "set-battler-sprite-visibility";
   }>
 >;
@@ -937,6 +938,12 @@ export function createBattleScriptSourceCommandHandlers<RulesContext extends obj
       context,
       ports,
       (battler) => ({ kind: "hide-party-status-summary", battler }),
+    ));
+  installHandler(program, handlers, "B_SCR_OP_DRAWPARTYSTATUSSUMMARY", (context) =>
+    emitSelectedBattlerControllerEvent(
+      context,
+      ports,
+      (battler) => ({ kind: "draw-party-status-summary", battler }),
     ));
   installHandler(program, handlers, "B_SCR_OP_MAKEVISIBLE", (context) =>
     emitSelectedBattlerControllerEvent(

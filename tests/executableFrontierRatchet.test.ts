@@ -95,6 +95,22 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   ["src/engine/battleScriptOpenPartyScreenOpcode.ts", 3],
   ["src/engine/battleScriptGetexpOpcode.ts", 2],
   ["src/engine/battleScriptCheckteamslostOpcode.ts", 3],
+  // Forced-switch ground truth §4 slices 1/2/3 tail (SWITCHHANDLEORDER,
+  // GETSWITCHEDMONDATA/SWITCHINDATAUPDATE, SWITCHINANIM, HPTHRESHOLDS,
+  // CANCELALLACTIONS, VARIOUS's RESET_PLAYER_FAINTED case, SWITCHINEFFECTS):
+  // switchhandleorder's cases 0/1 (multi-battler collection / order-only, not
+  // this script's case 2/3); switchindataupdate's STATUS2_ESCAPE_PREVENTION
+  // and STATUS3_ALWAYS_HITS cross-battler clears (battlerPreventingEscape/
+  // battlerWithSureHit identity, unmodeled); switchinanim's BATTLE_TYPE_ARENA
+  // point-init call (never set for Factory); various's every id other than
+  // RESET_PLAYER_FAINTED (7); switchineffects's Spikes branch (structurally
+  // unreachable -- sideStatuses is narrowed to Safeguard only), its Truant
+  // switch-in-hack counter set, and its AbilityBattleEffects
+  // (ABILITYEFFECT_ON_SWITCHIN) dispatch for the small closed set of trigger
+  // abilities. 8 total, none reachable by either committed forced-switch
+  // fixture (their switched-in mons carry a non-trigger ability, no item, no
+  // Spikes/escape/sure-hit state).
+  ["src/engine/battleScriptSwitchinOpcode.ts", 8],
 ]);
 
 function recordingImportsIn(file: string): string[] {

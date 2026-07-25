@@ -9,6 +9,9 @@ import {
 const STRENGTH = 70; // EFFECT_HIT, TYPE_NORMAL -- docs/hit-chain-ground-truth.md's KO scenario move.
 /** The KO scenario's real ROM frame-0 gRngValue (docs/hit-chain-ground-truth.md). */
 const KO_SCENARIO_RNG_SEED = 919694434;
+/** docs/forced-switch-ground-truth.md §2's own switch-in pick: MACHOP + a real super-effective (FIGHTING vs NORMAL) move. */
+const MACHOP = 66;
+const KARATE_CHOP = 2;
 
 function config(overrides: Partial<FactoryTerminalMoveConfig> = {}): FactoryTerminalMoveConfig {
   return {
@@ -95,6 +98,65 @@ describe("factory terminal move decision -- staged Level-50 Factory KO-of-the-la
       const rulesContext = (result.state.rules as { rulesContext: Record<string, unknown> }).rulesContext;
       expect(rulesContext.battleOutcome).toBe(0); // genuinely undecided
       expect(result.state.rng.calls).toBe(4); // the barrier itself draws no additional RNG
+    },
+  );
+
+  it(
+    "non-terminal fork, healthy bench WITH a real switch-in candidate: the orchestration now runs the "
+      + "ENTIRE forced switch (openpartyscreen -> switchhandleorder -> getswitchedmondata -> "
+      + "switchindataupdate -> hpthresholds -> hidepartystatussummary -> switchinanim -> waitstate -> "
+      + "resetplayerfainted -> switchineffects -> cancelallactions -> end2) and the reducer surfaces a "
+      + "REAL decision-required boundary for the next turn, per docs/forced-switch-ground-truth.md §1c's "
+      + "'battle genuinely resumes' finding -- not a fake terminal, not a barrier",
+    () => {
+      const initial = createFactoryTerminalMoveBattleState(config({
+        opponentBenchHp: [145, 0],
+        opponentBenchOverride: [{ species: MACHOP, moves: [KARATE_CHOP, 0, 0, 0] }, undefined],
+      }));
+      const result = submitFactoryTerminalMoveDecision(initial, USE_STRENGTH_ON_TARGET);
+      expect(result.kind).toBe("decision-required");
+      if (result.kind !== "decision-required") throw new Error("expected decision-required");
+
+      // MACHOP (raw party index 0, this fixture's only living bench slot) is now the active
+      // opponent battler 1, rebuilt from real party-derived data.
+      expect(result.nextRequest).toEqual({
+        kind: "command",
+        requestId: 2,
+        side: "player",
+        battler: 0,
+        legalDecisions: [{ kind: "use-move", moveSlot: 0, targetBattler: 1 }],
+      });
+      expect(result.state.boundary).toEqual({ kind: "decision-required", request: result.nextRequest });
+
+      const rulesContext = (result.state.rules as {
+        rulesContext: {
+          battleOutcome: number;
+          battlers: ReadonlyArray<{
+            species: number;
+            hp: number;
+            partyIndex: number;
+            status1: number;
+            status2: number;
+            status3: number;
+            statStages: readonly number[];
+            types: readonly [string, string];
+          }>;
+        };
+      }).rulesContext;
+      expect(rulesContext.battleOutcome).toBe(0); // battle genuinely continues -- never terminal, never a fake outcome
+      const switchedIn = rulesContext.battlers[1]!;
+      expect(switchedIn.species).toBe(MACHOP);
+      expect(switchedIn.hp).toBe(145);
+      expect(switchedIn.partyIndex).toBe(0);
+      expect(switchedIn.types).toEqual(["TYPE_FIGHTING", "TYPE_FIGHTING"]);
+      expect(switchedIn.status1).toBe(0);
+      expect(switchedIn.status2).toBe(0);
+      expect(switchedIn.status3).toBe(0);
+      expect(switchedIn.statStages).toEqual([6, 6, 6, 6, 6, 6, 6, 6]); // SwitchInClearSetData's neutral reset
+
+      // Zero Random() draws through the killing hit chain AND the entire switch-in dance
+      // (docs/forced-switch-ground-truth.md §2b) -- still exactly the banked 4-roll hit-chain ledger.
+      expect(result.state.rng.calls).toBe(4);
     },
   );
 });

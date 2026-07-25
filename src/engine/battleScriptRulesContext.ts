@@ -26,6 +26,7 @@ import { createBattleScriptJumpifhalfwordOpcodeHandlers } from "./battleScriptJu
 import { createBattleScriptJumpifstatus3conditionOpcodeHandlers } from "./battleScriptJumpifstatus3conditionOpcode.ts";
 import { createBattleScriptOrwordOpcodeHandlers } from "./battleScriptOrwordOpcode.ts";
 import { createBattleScriptOpenPartyScreenOpcodeHandlers } from "./battleScriptOpenPartyScreenOpcode.ts";
+import { createBattleScriptSwitchinOpcodeHandlers } from "./battleScriptSwitchinOpcode.ts";
 import { createBattleScriptGetexpOpcodeHandlers } from "./battleScriptGetexpOpcode.ts";
 import { createBattleScriptCheckteamslostOpcodeHandlers } from "./battleScriptCheckteamslostOpcode.ts";
 import {
@@ -1861,6 +1862,9 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptJumpifstatus3conditionOpcodeHandlers(program),
     ...createBattleScriptOrwordOpcodeHandlers(program),
     ...createBattleScriptOpenPartyScreenOpcodeHandlers(program),
+    ...createBattleScriptSwitchinOpcodeHandlers(program, {
+      isControllerIdle: sourceExternalPorts.isControllerIdle,
+    }),
     ...createBattleScriptGetexpOpcodeHandlers(program),
     ...createBattleScriptCheckteamslostOpcodeHandlers(program),
   });

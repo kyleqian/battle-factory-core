@@ -25,14 +25,18 @@
  *  - states 3-5: `BattleScriptExecute(BattleScript_HandleFaintedMon)` per
  *    fainted battler, same reassignment. This is the script that actually
  *    runs `checkteamslost`/`jumpifbyte` and decides the real terminal
- *    `gBattleOutcome`.
- *  - state 6: Intimidate1/Trace/held-item/Forecast switch-in hooks. Only
- *    fires for a battler that just switched in; the forced-switch flow
- *    (`openpartyscreen BS_FAINTED`/`switchhandleorder BS_FAINTED`) is out of
- *    this rung's scope (unregistered opcodes, ISSUES tracked separately), so
- *    nothing ever switches in on any path this orchestration completes --
- *    state 6 is a provable no-op on every reachable outcome here, not a
- *    silently skipped branch.
+ *    `gBattleOutcome` -- and, per `docs/forced-switch-ground-truth.md` §4,
+ *    now also runs the full non-terminal forced-switch dance
+ *    (`openpartyscreen` through `cancelallactions`) when the fainted
+ *    battler's side still has a healthy replacement.
+ *  - state 6: Intimidate1/Trace/held-item/Forecast switch-in hooks, which
+ *    react to flags `Cmd_switchineffects`'s own `AbilityBattleEffects
+ *    (ABILITYEFFECT_ON_SWITCHIN)` call sets. `battleScriptSwitchinOpcode.ts`
+ *    barriers that same call whenever the switched-in battler's ability is
+ *    one that would set those flags -- so if `Cmd_switchineffects` ever
+ *    advances past itself on a path this orchestration completes, no such
+ *    flag was set and state 6 is guaranteed a no-op, not a silently skipped
+ *    branch.
  *
  * Source only ever queues ONE `BattleScriptExecute` call per
  * `HandleFaintedMonActions` invocation and returns control to the main loop
@@ -47,6 +51,7 @@
  * ever block on a controller mid-script on the modeled path.
  */
 import {
+  acknowledgeBattleScriptMachineController,
   stepBattleScriptMachine,
   type BattleScriptMachineState,
   type BattleScriptOpcodeHandlers,
@@ -61,8 +66,15 @@ import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 
 const GIVE_EXP_LABEL = "BattleScript_GiveExp";
 const HANDLE_FAINTED_MON_LABEL = "BattleScript_HandleFaintedMon";
-/** Real per-script instruction ceiling; both scripts complete in single digits. */
-const SCRIPT_BUDGET = 32;
+/**
+ * Real per-script instruction ceiling; both scripts complete in single
+ * digits. Doubled from the pre-forced-switch pin (32) because the forced-
+ * switch dance's own controller round trips (`getswitchedmondata`,
+ * `switchinanim`, `hidepartystatussummary`) each cost one extra
+ * blocked-then-acknowledged budget tick per opcode, per the auto-
+ * acknowledgement loop below.
+ */
+const SCRIPT_BUDGET = 64;
 
 export type BattleScriptFaintedActionsResult =
   | Readonly<{
@@ -73,10 +85,24 @@ export type BattleScriptFaintedActionsResult =
   | Readonly<{
     /**
      * Every fainted battler's BattleScript_HandleFaintedMon reached
-     * BattleScript_FaintedMonEnd (checkteamslost decided the battle) --
-     * `state.rulesContext.battleOutcome` is the real, computed byte.
+     * BattleScript_FaintedMonEnd via checkteamslost's own terminal jump
+     * (`state.rulesContext.battleOutcome` is nonzero -- the real, computed
+     * WON/LOST/DREW byte).
      */
     kind: "terminal";
+    state: BattleScriptMachineState<BattleScriptRulesContext>;
+  }>
+  | Readonly<{
+    /**
+     * Every fainted battler's BattleScript_HandleFaintedMon reached
+     * BattleScript_FaintedMonEnd via the full forced-switch dance
+     * (`docs/forced-switch-ground-truth.md` §4) instead of checkteamslost's
+     * terminal jump -- `battleOutcome` is still 0 (undecided) and a healthy
+     * replacement is now the active battler. The battle genuinely resumes:
+     * source's `BattleTurnPassed` would re-enter `HandleTurnActionSelectionState`
+     * from here (§1c) -- a real next decision boundary, not a fake terminal.
+     */
+    kind: "resumed";
     state: BattleScriptMachineState<BattleScriptRulesContext>;
   }>
   | Readonly<{
@@ -163,12 +189,31 @@ type RunToOwnEndResult =
   }>;
 
 /**
+ * Acknowledges every pending controller battler unconditionally -- the same
+ * transparent-passthrough model `factoryBattleScriptTerminalDecision.ts`'s
+ * own hit-chain loop already uses for controller round trips: this engine
+ * has no real async "wait for frames" concept at the Tier-1 level, so a
+ * `blocked` step always resolves on the very next tick.
+ */
+function acknowledgeAllPendingControllers(
+  state: BattleScriptMachineState<BattleScriptRulesContext>,
+): BattleScriptMachineState<BattleScriptRulesContext> {
+  let next = state;
+  for (const battler of state.scheduler.pendingControllerBattlers) {
+    next = acknowledgeBattleScriptMachineController(next, battler);
+  }
+  return next;
+}
+
+/**
  * Runs one already-started `BattleScriptExecute` script to its own
- * `end`/`end2` halt, or stops the instant an unregistered opcode is reached
- * -- neither `BattleScript_GiveExp` nor `BattleScript_HandleFaintedMon` ever
- * waits on a controller on the modeled path (setbyte/getexp/checkteamslost/
- * jumpifbyte/end2 are all pure source-command opcodes), so this needs no
- * controller-acknowledgement loop, unlike a move's own hit chain.
+ * `end`/`end2` halt, or stops the instant an unregistered opcode is reached.
+ * `BattleScript_GiveExp`/`BattleScript_HandleFaintedMon`'s pre-forced-switch
+ * opcodes never wait on a controller, but the forced-switch dance's own
+ * round trips (`getswitchedmondata`, `switchinanim`, `hidepartystatussummary`,
+ * `drawpartystatussummary`) do mark a battler pending -- `blocked` steps are
+ * auto-acknowledged here rather than left for the caller, matching the
+ * transparent-passthrough model established above.
  */
 function runScriptToOwnEnd(
   program: BattleScriptProgram,
@@ -185,6 +230,17 @@ function runScriptToOwnEnd(
       return Object.freeze({ kind: "barrier", state, instruction });
     }
     const stepped = stepBattleScriptMachine(program, state, handlers);
+    if (stepped.kind === "blocked") {
+      const acknowledged = acknowledgeAllPendingControllers(stepped.state);
+      if (acknowledged === stepped.state) {
+        throw new Error(
+          `fainted-actions orchestration blocked inside ${instruction.source.label} without a safe `
+            + "controller acknowledgement",
+        );
+      }
+      state = acknowledged;
+      continue;
+    }
     if (stepped.kind === "halted") {
       if (stepped.state.haltReason?.kind === "terminal") {
         return Object.freeze({ kind: "terminal", state: stepped.state });
@@ -244,5 +300,11 @@ export function runBattleScriptFaintedActionsOrchestration(
     state = run.state;
   }
 
-  return Object.freeze({ kind: "terminal", state });
+  // checkteamslost is the only writer of battleOutcome (battleScriptCheckteamslostOpcode.ts):
+  // nonzero means its own terminal jump was taken (BattleScript_FaintedMonEnd via the WON/LOST/DREW
+  // path); zero means every fainted battler instead ran the full forced-switch dance to the SAME
+  // BattleScript_FaintedMonEnd label (docs/forced-switch-ground-truth.md §1) -- the battle resumes.
+  return state.rulesContext.battleOutcome !== 0
+    ? Object.freeze({ kind: "terminal", state })
+    : Object.freeze({ kind: "resumed", state });
 }
