@@ -42,6 +42,74 @@ substitute state, multi-turn/multi-hit state, or another explicit script input.
 Every status needs a committed ON-profile trace; `exact` cannot retain a known
 remainder.
 
+## MOVE_GROWTH rungs 1-2 done, rung 3 partial: `AnimTask_BlendColorCycle` RAM-probed and Tier-1-pinned, scene wiring not yet done (2026-07-25)
+
+**Verdict: honest partial progress, no `ANIMATION_COVERAGE.json` entry yet.**
+Per the family map's own recommendation (previous entry below), staged
+IVYSAUR's GROWTH and RAM-probed `AnimTask_BlendColorCycle` (the family's one
+genuinely missing mechanism) tick-by-tick, then ported and Tier-1-pinned the
+exact probed sequence. Scene-seam wiring, IVYSAUR asset extraction, and any
+dense oracle comparator remain undone — this is a documented resting point,
+not a promotion.
+
+**Rung 1 (extractor decode): confirmed already done.** `npm run
+animation:components` full re-run produced a byte-identical
+`battle-animation-components.json` (`git status` clean) — GROWTH's
+`blocks: [Move_GROWTH, GrowthEffect]` and `componentIds` (including
+`task:AnimTask_ScaleMonAndRestore` and `visualCommand:blend_color_cycle`)
+were already correct, exactly as the family map claimed.
+
+**Rung 2 (RAM probe): done.** Two `mechanicLab overrides.parties` fixtures
+(`tools/battle-lab/mechanic-growth-{player,opponent}-ivysaur-opponent-onix
+.json` — IVYSAUR/GROWTH vs ONIX/TACKLE, both orientations, Level 50 legal)
+plus a new probe (`tools/probe/dump-growth-blendcolorcycle.py`) reading
+`gPaletteFade` (bitfield layout RAM-confirmed byte-for-byte, not assumed),
+the attacker's own `gPlttBufferFaded` OBJ row, and the `AnimTask_
+BlendColorCycle[Loop]`/`AnimTask_ScaleMonAndRestore[_Step]` task slots (`nm`
+against the pinned elf: `0x08115a04`/`0x08115aa4`/`0x080d6064`/`0x080d60bc`).
+Full findings in `docs/growth-blendcolorcycle-probe.md`: two non-obvious
+timing quirks pinned directly from ticks 211-238 of the player-orientation
+trace (only the first leg gets a free extra half-step on its own creation
+tick; the finishing hold between "target reached" and the next leg/destroy
+is a fixed 7-tick sequence, +1 more for the final leg's destroy vs a
+same-tick re-`Begin`), plus the OBJ-row's even-age-boundary lag rule. Two
+consecutive `GrowthEffect` invocations in the same trace (ticks 211-237 and
+243-269) show the identical relative shape, confirming this is a pure
+function of relative age for a fixed argv.
+
+**Rung 3 (port + wire): partial — core mechanism ported and tested, scene
+wiring not started.** `src/engine/blendColorCycle.ts` reproduces
+`gPaletteFade.y`'s per-leg progression and the OBJ row's actual pixel blend
+(reusing the already-proven `blendComponentToward`) as a function of
+`(legs, deltaY, age)`, parameterized generically enough to serve any
+`numBlends`-leg sequence at non-negative `delay` (the `numBlends==1`
+degenerate snap and negative-`delay` legs other family members need are
+explicitly NOT implemented). `tests/blendColorCycle.test.ts` pins the exact
+RAM-probed tick sequence (both `gPaletteFade.y` and the attacker OBJ row's
+blue channel, ages -1 through 27) byte-for-byte — 3/3 green. The reused
+`AnimTask_ScaleMonAndRestore` port (`scaleMonAndRestoreAtAge` in
+`src/engine/bind.ts`) was RAM-cross-checked this session too (probe's
+`scaleMonTask` field) but not re-pinned with a new test since MOVE_BIND
+already owns that coverage. **Not done:** wiring into
+`sceneOnPresentation.ts`/`battleScene.ts` (the identified attach point is
+`drawSpriteSheetAffineStretch(..., tintColor, tintCoeff, ...)`, already used
+by other moves for palette flashes, confirmed present but not yet exercised
+for GROWTH's attacker-tint case), IVYSAUR species asset extraction, and any
+dense oracle comparator. `ANIMATION_COVERAGE.json` therefore carries no
+`MOVE_GROWTH` entry — neither `partial` nor `exact` is earned without a real
+rendered dense window per this lane's own acceptance bar.
+
+**Next action for a future session:** extract IVYSAUR's species assets
+(CHARMELEON/HAUNTER precedent), wire `blendColorCycleObjYAtAge` +
+`scaleMonAndRestoreAtAge` through the Scene-ON attacker-tint/affine draw
+path, then run the dense comparator both orientations twice each per this
+step's rung 4.
+
+**Evidence.** `npm test` 2225/2225 (2222 + 3 new, all green). `npm run
+build` green. RAM probe: `tools/probe/dump-growth-blendcolorcycle.py` +
+`tools/battle-lab/mechanic-growth-player-ivysaur-opponent-onix.json` (and
+the opponent-orientation sibling, staged but not yet probed this session).
+
 ## `blend_color_cycle` family map: mechanism decoded, all 28 Level-50 argv surveyed, MOVE_GROWTH recommended as the zero-new-mechanism representative (enumeration only, no port) (2026-07-25)
 
 **Verdict: this is a genuinely bounded, cheap family — smaller than its "28
