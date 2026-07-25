@@ -17222,18 +17222,33 @@ export function renderSceneOnMovePresentation(
       view.target.geometry.spriteCorner.x + view.targetShakeX2,
       view.target.geometry.spriteCorner.y,
     );
+    // Hardware alpha-blend is a single compositor pass over the final
+    // per-pixel top two layers, not a per-sprite cumulative blend: only the
+    // FRONTMOST (topmost-drawn) clone at a given pixel actually blends
+    // against whatever is directly behind it. Every other clone underneath
+    // is fully occluded at that pixel (opaque, not re-blended) - drawing
+    // every clone with its own blended call would cumulatively re-darken
+    // already-blended pixels each layer deeper, which is not how the GBA's
+    // one-shot blend special effect works and produced a visibly too-dark
+    // stack (oracle-pixel-caught).
     const clonePalette = blendPaletteToward(attackerSprite.palette, { r: 0, g: 0, b: 0 }, SHADOW_PUNCH_TRACE_BLEND_COEFF);
-    for (const clone of view.clones) {
-      drawSpriteSheetBlendedOverFb(
-        fb,
-        attackerSprite.tileset,
-        clonePalette,
-        view.attacker.geometry.spriteCorner.x + clone.x2,
-        view.attacker.geometry.spriteCorner.y,
-        SHADOW_PUNCH_TRACE_ALPHA.eva,
-        SHADOW_PUNCH_TRACE_ALPHA.evb,
-      );
-    }
+    view.clones.forEach((clone, i) => {
+      const ox = view.attacker.geometry.spriteCorner.x + clone.x2;
+      const oy = view.attacker.geometry.spriteCorner.y;
+      if (i === view.clones.length - 1) {
+        drawSpriteSheetBlendedOverFb(
+          fb,
+          attackerSprite.tileset,
+          clonePalette,
+          ox,
+          oy,
+          SHADOW_PUNCH_TRACE_ALPHA.eva,
+          SHADOW_PUNCH_TRACE_ALPHA.evb,
+        );
+      } else {
+        drawSpriteSheet(fb, attackerSprite.tileset, clonePalette, ox, oy);
+      }
+    });
     if (view.attackerVisible) {
       drawSpriteSheet(
         fb,
