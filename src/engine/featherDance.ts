@@ -20,57 +20,11 @@
 
 import battleMoveAnimScripts from "../data/gen/battle-move-anim-scripts.json" with { type: "json" };
 import { GBA_SINE_TABLE_256 } from "./battleMenu.ts";
-
-interface FeatherDanceScriptCommand {
-  op: string;
-  args?: number[];
-  frames?: number;
-}
+import { interpretCreateSpriteSchedule, type AnimScriptCommand } from "./animScriptInterpreter.ts";
 
 const FEATHER_DANCE_SCRIPT = battleMoveAnimScripts.FEATHER_DANCE as {
-  main: FeatherDanceScriptCommand[];
+  main: AnimScriptCommand[];
 };
-
-/**
- * Minimal interpreter over the committed anim command stream: walks a
- * move's `main` command list and returns each `createsprite`'s own arg
- * vector plus the RAM tick (relative to the FIRST createsprite) it fires
- * at. Only `delay` and `createsprite` affect createsprite timing in
- * FEATHER_DANCE's script - every other op (loadspritegfx/monbg/
- * splitbgprio_all/playsewithpan/waitforvisualfinish/clearmonbg/end) either
- * precedes the first createsprite (its absolute offset is a separately
- * calibrated input, `TURN6_FIRST_VISIBLE_TICK` below) or follows the last
- * one, so it's a fixed 0-tick no-op here.
- *
- * The `delay N -> N+2 ticks until the next opcode runs` rule comes from the
- * shared script VM itself (`reference/pokeemerald/src/battle_anim.c`):
- * `RunAnimScriptCommand`'s do-while executes ops back-to-back in ONE tick
- * until it hits `Cmd_delay` (sets `sAnimFramesToWait=N`, switches callback
- * to `WaitAnimFrameCount`); `WaitAnimFrameCount` runs once per subsequent
- * tick, decrementing until it observes the count already `<=0` (N
- * decrementing calls + 1 more call to detect zero = N+1 calls), and only
- * resumes `RunAnimScriptCommand` on the FOLLOWING tick - N+2 ticks total
- * from the tick `delay` was issued to the tick the next createsprite fires.
- * Verified (not fitted): this predicts the RAM-probed 8-tick spawn spacing
- * (0,8,8,16,16,24,24,32 across the 8 feathers) from `delay 6` alone, exactly,
- * for all three committed turns.
- */
-function interpretCreateSpriteSchedule(
-  main: readonly FeatherDanceScriptCommand[],
-): Array<{ tick: number; args: number[] }> {
-  const schedule: Array<{ tick: number; args: number[] }> = [];
-  let tick = 0;
-  let started = false;
-  for (const cmd of main) {
-    if (cmd.op === "createsprite") {
-      started = true;
-      schedule.push({ tick, args: cmd.args! });
-    } else if (cmd.op === "delay" && started) {
-      tick += cmd.frames! + 2;
-    }
-  }
-  return schedule;
-}
 
 const FEATHER_DANCE_SPAWN_SCHEDULE = interpretCreateSpriteSchedule(FEATHER_DANCE_SCRIPT.main);
 

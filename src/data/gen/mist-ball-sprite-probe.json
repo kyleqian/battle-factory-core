@@ -1,0 +1,880 @@
+{
+"source": "tools/probe/dump-mist-ball-sprite.py against tools/battle-lab/mechanic-mist-ball-latias-onix.json, ticks 85-122 (full window: 3 ticks before spawn through 3 ticks after destroy)",
+"spawnTick": 88,
+"ticks": [
+{
+"tick": 85,
+"animAttacker": 1,
+"animTarget": 0,
+"animScriptActive": 1,
+"mistBallSprite": null
+},
+{
+"tick": 86,
+"animAttacker": 1,
+"animTarget": 0,
+"animScriptActive": 1,
+"mistBallSprite": null
+},
+{
+"tick": 87,
+"animAttacker": 1,
+"animTarget": 0,
+"animScriptActive": 1,
+"mistBallSprite": null
+},
+{
+"tick": 88,
+"animAttacker": 1,
+"animTarget": 0,
+"animScriptActive": 1,
+"mistBallSprite": {
+"slot": 3,
+"template": "0x8595c70",
+"isMistBall": true,
+"callback": "0x80a6eed",
+"x": 176,
+"y": 35,
+"x2": 0,
+"y2": 0,
+"animNum": 0,
+"data": [
+30,
+0,
+72,
+0,
+88,
+0
+],
+"subpriority": 30
+}
+},
+{
+"tick": 89,
+"animAttacker": 1,
+"animTarget": 0,
+"animScriptActive": 1,
+"mistBallSprite": {
+"slot": 3,
+"template": "0x8595c70",
+"isMistBall": true,
+"callback": "0x80a6f99",
+"x": 176,
+"y": 35,
+"x2": -3,
+"y2": 1,
+"animNum": 0,
+"data": [
+29,
+887,
+452,
+887,
+452,
+0
+],
+"subpriority": 30
+}
+},
+{
+"tick": 90,
+"animAttacker": 1,
+"animTarget": 0,
+"animScriptActive": 1,
+"mistBallSprite": {
+"slot": 3,
+"template": "0x8595c70",
+"isMistBall": true,
+"callback": "0x80a6f99",
+"x": 176,
+"y": 35,
+"x2": -6,
+"y2": 3,
+"animNum": 0,
+"data": [
+28,
+887,
+452,
+1774,
+904,
+0
+],
+"subpriority": 30
+}
+},
+{
+"tick": 91,
+"animAttacker": 1,
+"animTarget": 0,
+"animScriptActive": 1,
+"mistBallSprite": {
+"slot": 3,
+"template": "0x8595c70",
+"isMistBall": true,
+"callback": "0x80a6f99",
+"x": 176,
+"y": 35,
+"x2": -10,
+"y2": 5,
+"animNum": 0,
+"data": [
+27,
+887,
+452,
+2661,
+1356,
+0
+],
+"subpriority": 30
+}
+},
+{
+"tick": 92,
+"animAttacker": 1,
+"animTarget": 0,
+"animScriptActive": 1,
+"mistBallSprite": {
+"slot": 3,
+"template": "0x8595c70",
+"isMistBall": true,
+"callback": "0x80a6f99",
+"x": 176,
+"y": 35,
+"x2": -13,
+"y2": 7,
+"animNum": 0,
+"data": [
+26,
+887,
+452,
+3548,
+1808,
+0
+],
+"subpriority": 30
+}
+},
+{
+"tick": 93,
+"animAttacker": 1,
+"animTarget": 0,
+"animScriptActive": 1,
+"mistBallSprite": {
+"slot": 3,
+"template": "0x8595c70",
+"isMistBall": true,
+"callback": "0x80a6f99",
+"x": 176,
+"y": 35,
+"x2": -17,
+"y2": 8,
+"animNum": 0,
+"data": [
+25,
+887,
+452,
+4435,
+2260,
+0
+],
+"subpriority": 30
+}
+},
+{
+"tick": 94,
+"animAttacker": 1,
+"animTarget": 0,
+"animScriptActive": 1,
+"mistBallSprite": {
+"slot": 3,
+"template": "0x8595c70",
+"isMistBall": true,
+"callback": "0x80a6f99",
+"x": 176,
+"y": 35,
+"x2": -20,
+"y2": 10,
+"animNum": 0,
+"data": [
+24,
+887,
+452,
+5322,
+2712,
+0
+],
+"subpriority": 30
+}
+},
+{
+"tick": 95,
+"animAttacker": 1,
+"animTarget": 0,
+"animScriptActive": 1,
+"mistBallSprite": {
+"slot": 3,
+"template": "0x8595c70",
+"isMistBall": true,
+"callback": "0x80a6f99",
+"x": 176,
+"y": 35,
+"x2": -24,
+"y2": 12,
+"animNum": 0,
+"data": [
+23,
+887,
+452,
+6209,
+3164,
+0
+],
+"subpriority": 30
+}
+},
+{
+"tick": 96,
+"animAttacker": 1,
+"animTarget": 0,
+"animScriptActive": 1,
+"mistBallSprite": {
+"slot": 3,
+"template": "0x8595c70",
+"isMistBall": true,
+"callback": "0x80a6f99",
+"x": 176,
+"y": 35,
+"x2": -27,
+"y2": 14,
+"animNum": 0,
+"data": [
+22,
+887,
+452,
+7096,
+3616,
+0
+],
+"subpriority": 30
+}
+},
+{
+"tick": 97,
+"animAttacker": 1,
+"animTarget": 0,
+"animScriptActive": 1,
+"mistBallSprite": {
+"slot": 3,
+"template": "0x8595c70",
+"isMistBall": true,
+"callback": "0x80a6f99",
+"x": 176,
+"y": 35,
+"x2": -31,
+"y2": 15,
+"animNum": 0,
+"data": [
+21,
+887,
+452,
+7983,
+4068,
+0
+],
+"subpriority": 30
+}
+},
+{
+"tick": 98,
+"animAttacker": 1,
+"animTarget": 0,
+"animScriptActive": 1,
+"mistBallSprite": {
+"slot": 3,
+"template": "0x8595c70",
+"isMistBall": true,
+"callback": "0x80a6f99",
+"x": 176,
+"y": 35,
+"x2": -34,
+"y2": 17,
+"animNum": 0,
+"data": [
+20,
+887,
+452,
+8870,
+4520,
+0
+],
+"subpriority": 30
+}
+},
+{
+"tick": 99,
+"animAttacker": 1,
+"animTarget": 0,
+"animScriptActive": 1,
+"mistBallSprite": {
+"slot": 3,
+"template": "0x8595c70",
+"isMistBall": true,
+"callback": "0x80a6f99",
+"x": 176,
+"y": 35,
+"x2": -38,
+"y2": 19,
+"animNum": 0,
+"data": [
+19,
+887,
+452,
+9757,
+4972,
+0
+],
+"subpriority": 30
+}
+},
+{
+"tick": 100,
+"animAttacker": 1,
+"animTarget": 0,
+"animScriptActive": 1,
+"mistBallSprite": {
+"slot": 3,
+"template": "0x8595c70",
+"isMistBall": true,
+"callback": "0x80a6f99",
+"x": 176,
+"y": 35,
+"x2": -41,
+"y2": 21,
+"animNum": 0,
+"data": [
+18,
+887,
+452,
+10644,
+5424,
+0
+],
+"subpriority": 30
+}
+},
+{
+"tick": 101,
+"animAttacker": 1,
+"animTarget": 0,
+"animScriptActive": 1,
+"mistBallSprite": {
+"slot": 3,
+"template": "0x8595c70",
+"isMistBall": true,
+"callback": "0x80a6f99",
+"x": 176,
+"y": 35,
+"x2": -45,
+"y2": 22,
+"animNum": 0,
+"data": [
+17,
+887,
+452,
+11531,
+5876,
+0
+],
+"subpriority": 30
+}
+},
+{
+"tick": 102,
+"animAttacker": 1,
+"animTarget": 0,
+"animScriptActive": 1,
+"mistBallSprite": {
+"slot": 3,
+"template": "0x8595c70",
+"isMistBall": true,
+"callback": "0x80a6f99",
+"x": 176,
+"y": 35,
+"x2": -48,
+"y2": 24,
+"animNum": 0,
+"data": [
+16,
+887,
+452,
+12418,
+6328,
+0
+],
+"subpriority": 30
+}
+},
+{
+"tick": 103,
+"animAttacker": 1,
+"animTarget": 0,
+"animScriptActive": 1,
+"mistBallSprite": {
+"slot": 3,
+"template": "0x8595c70",
+"isMistBall": true,
+"callback": "0x80a6f99",
+"x": 176,
+"y": 35,
+"x2": -51,
+"y2": 26,
+"animNum": 0,
+"data": [
+15,
+887,
+452,
+13305,
+6780,
+0
+],
+"subpriority": 30
+}
+},
+{
+"tick": 104,
+"animAttacker": 1,
+"animTarget": 0,
+"animScriptActive": 1,
+"mistBallSprite": {
+"slot": 3,
+"template": "0x8595c70",
+"isMistBall": true,
+"callback": "0x80a6f99",
+"x": 176,
+"y": 35,
+"x2": -55,
+"y2": 28,
+"animNum": 0,
+"data": [
+14,
+887,
+452,
+14192,
+7232,
+0
+],
+"subpriority": 30
+}
+},
+{
+"tick": 105,
+"animAttacker": 1,
+"animTarget": 0,
+"animScriptActive": 1,
+"mistBallSprite": {
+"slot": 3,
+"template": "0x8595c70",
+"isMistBall": true,
+"callback": "0x80a6f99",
+"x": 176,
+"y": 35,
+"x2": -58,
+"y2": 30,
+"animNum": 0,
+"data": [
+13,
+887,
+452,
+15079,
+7684,
+0
+],
+"subpriority": 30
+}
+},
+{
+"tick": 106,
+"animAttacker": 1,
+"animTarget": 0,
+"animScriptActive": 1,
+"mistBallSprite": {
+"slot": 3,
+"template": "0x8595c70",
+"isMistBall": true,
+"callback": "0x80a6f99",
+"x": 176,
+"y": 35,
+"x2": -62,
+"y2": 31,
+"animNum": 0,
+"data": [
+12,
+887,
+452,
+15966,
+8136,
+0
+],
+"subpriority": 30
+}
+},
+{
+"tick": 107,
+"animAttacker": 1,
+"animTarget": 0,
+"animScriptActive": 1,
+"mistBallSprite": {
+"slot": 3,
+"template": "0x8595c70",
+"isMistBall": true,
+"callback": "0x80a6f99",
+"x": 176,
+"y": 35,
+"x2": -65,
+"y2": 33,
+"animNum": 0,
+"data": [
+11,
+887,
+452,
+16853,
+8588,
+0
+],
+"subpriority": 30
+}
+},
+{
+"tick": 108,
+"animAttacker": 1,
+"animTarget": 0,
+"animScriptActive": 1,
+"mistBallSprite": {
+"slot": 3,
+"template": "0x8595c70",
+"isMistBall": true,
+"callback": "0x80a6f99",
+"x": 176,
+"y": 35,
+"x2": -69,
+"y2": 35,
+"animNum": 0,
+"data": [
+10,
+887,
+452,
+17740,
+9040,
+0
+],
+"subpriority": 30
+}
+},
+{
+"tick": 109,
+"animAttacker": 1,
+"animTarget": 0,
+"animScriptActive": 1,
+"mistBallSprite": {
+"slot": 3,
+"template": "0x8595c70",
+"isMistBall": true,
+"callback": "0x80a6f99",
+"x": 176,
+"y": 35,
+"x2": -72,
+"y2": 37,
+"animNum": 0,
+"data": [
+9,
+887,
+452,
+18627,
+9492,
+0
+],
+"subpriority": 30
+}
+},
+{
+"tick": 110,
+"animAttacker": 1,
+"animTarget": 0,
+"animScriptActive": 1,
+"mistBallSprite": {
+"slot": 3,
+"template": "0x8595c70",
+"isMistBall": true,
+"callback": "0x80a6f99",
+"x": 176,
+"y": 35,
+"x2": -76,
+"y2": 38,
+"animNum": 0,
+"data": [
+8,
+887,
+452,
+19514,
+9944,
+0
+],
+"subpriority": 30
+}
+},
+{
+"tick": 111,
+"animAttacker": 1,
+"animTarget": 0,
+"animScriptActive": 1,
+"mistBallSprite": {
+"slot": 3,
+"template": "0x8595c70",
+"isMistBall": true,
+"callback": "0x80a6f99",
+"x": 176,
+"y": 35,
+"x2": -79,
+"y2": 40,
+"animNum": 0,
+"data": [
+7,
+887,
+452,
+20401,
+10396,
+0
+],
+"subpriority": 30
+}
+},
+{
+"tick": 112,
+"animAttacker": 1,
+"animTarget": 0,
+"animScriptActive": 1,
+"mistBallSprite": {
+"slot": 3,
+"template": "0x8595c70",
+"isMistBall": true,
+"callback": "0x80a6f99",
+"x": 176,
+"y": 35,
+"x2": -83,
+"y2": 42,
+"animNum": 0,
+"data": [
+6,
+887,
+452,
+21288,
+10848,
+0
+],
+"subpriority": 30
+}
+},
+{
+"tick": 113,
+"animAttacker": 1,
+"animTarget": 0,
+"animScriptActive": 1,
+"mistBallSprite": {
+"slot": 3,
+"template": "0x8595c70",
+"isMistBall": true,
+"callback": "0x80a6f99",
+"x": 176,
+"y": 35,
+"x2": -86,
+"y2": 44,
+"animNum": 0,
+"data": [
+5,
+887,
+452,
+22175,
+11300,
+0
+],
+"subpriority": 30
+}
+},
+{
+"tick": 114,
+"animAttacker": 1,
+"animTarget": 0,
+"animScriptActive": 1,
+"mistBallSprite": {
+"slot": 3,
+"template": "0x8595c70",
+"isMistBall": true,
+"callback": "0x80a6f99",
+"x": 176,
+"y": 35,
+"x2": -90,
+"y2": 45,
+"animNum": 0,
+"data": [
+4,
+887,
+452,
+23062,
+11752,
+0
+],
+"subpriority": 30
+}
+},
+{
+"tick": 115,
+"animAttacker": 1,
+"animTarget": 0,
+"animScriptActive": 1,
+"mistBallSprite": {
+"slot": 3,
+"template": "0x8595c70",
+"isMistBall": true,
+"callback": "0x80a6f99",
+"x": 176,
+"y": 35,
+"x2": -93,
+"y2": 47,
+"animNum": 0,
+"data": [
+3,
+887,
+452,
+23949,
+12204,
+0
+],
+"subpriority": 30
+}
+},
+{
+"tick": 116,
+"animAttacker": 1,
+"animTarget": 0,
+"animScriptActive": 1,
+"mistBallSprite": {
+"slot": 3,
+"template": "0x8595c70",
+"isMistBall": true,
+"callback": "0x80a6f99",
+"x": 176,
+"y": 35,
+"x2": -97,
+"y2": 49,
+"animNum": 0,
+"data": [
+2,
+887,
+452,
+24836,
+12656,
+0
+],
+"subpriority": 30
+}
+},
+{
+"tick": 117,
+"animAttacker": 1,
+"animTarget": 0,
+"animScriptActive": 1,
+"mistBallSprite": {
+"slot": 3,
+"template": "0x8595c70",
+"isMistBall": true,
+"callback": "0x80a6f99",
+"x": 176,
+"y": 35,
+"x2": -100,
+"y2": 51,
+"animNum": 0,
+"data": [
+1,
+887,
+452,
+25723,
+13108,
+0
+],
+"subpriority": 30
+}
+},
+{
+"tick": 118,
+"animAttacker": 1,
+"animTarget": 0,
+"animScriptActive": 1,
+"mistBallSprite": {
+"slot": 3,
+"template": "0x8595c70",
+"isMistBall": true,
+"callback": "0x80a6f99",
+"x": 176,
+"y": 35,
+"x2": -103,
+"y2": 52,
+"animNum": 0,
+"data": [
+0,
+887,
+452,
+26610,
+13560,
+0
+],
+"subpriority": 30
+}
+},
+{
+"tick": 119,
+"animAttacker": 1,
+"animTarget": 0,
+"animScriptActive": 1,
+"mistBallSprite": {
+"slot": 3,
+"template": "0x8595c70",
+"isMistBall": true,
+"callback": "0x80a3bfd",
+"x": 176,
+"y": 35,
+"x2": -103,
+"y2": 52,
+"animNum": 0,
+"data": [
+0,
+887,
+452,
+26610,
+13560,
+0
+],
+"subpriority": 30
+}
+},
+{
+"tick": 120,
+"animAttacker": 1,
+"animTarget": 0,
+"animScriptActive": 1,
+"mistBallSprite": null
+},
+{
+"tick": 121,
+"animAttacker": 1,
+"animTarget": 0,
+"animScriptActive": 1,
+"mistBallSprite": null
+},
+{
+"tick": 122,
+"animAttacker": 1,
+"animTarget": 0,
+"animScriptActive": 1,
+"mistBallSprite": null
+}
+]
+}
