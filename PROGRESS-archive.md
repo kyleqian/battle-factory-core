@@ -1,3 +1,34 @@
+## 430 — [SUPERVISOR] round-2 merges: KO/crit ground truth + generic anim primitives
+
+- **State:** merged tree green at **177 files / 2045 tests**, build green, at
+  `65727ac`. Round 2 landed: main RUNG 1 of the hit chain (entry 429), side
+  KO/crit edge ground truth, and animation's stop-and-split verdict plus two
+  generic primitive ports.
+- **Did (merges + docs):** folded `worker/side-20260724-154507` —
+  `mechanic-hit-chain-ko-off.json` (both `tryfaintmon` branches from real ROM
+  captures: non-terminal faint → switch-in, last-mon faint → terminal WIN with
+  `battleOutcome` 0→1) + `mechanic-hit-chain-crit-off.json` (1/16 crit
+  denominator confirmed; **found `damageCalc.ts` has no crit ×2 step** — the
+  multiplier applies in `Cmd_damagecalc` *before* `Cmd_typecalc`,
+  battle_script_commands.c:1290) + `verify-hit-chain-edges.ts`
+  (supervisor-rerun: exit 0) — and the stacked animation chain
+  `worker/animation-20260724-154508`+`155546`: MIST_BALL enumerated to a
+  STOP-AND-SPLIT verdict (the minimal interpreter does **not** cheaply
+  generalize; 6 substantive items incl. two new subsystems; WHITE_FEATHER
+  component edge is dead code), then generic `AnimTask_ShakeMon` +
+  linear-translation Q8.8 ports landed with QUICK_ATTACK/FIRE_PUNCH re-driven
+  through them (all six portable comparators supervisor-rerun at recorded
+  counts; FLY's ShakeMon instance left hand-fit with a pinned one-tick
+  divergence). Two new PAPERCUTS entries (button busy/idle signal; comparator
+  round-trip cost).
+- **Next:** round 3 — main: RUNG 2 (`critcalc`/`damagecalc`/`typecalc`/
+  `adjustnormaldamage`, consuming the crit-placement ground truth); animation:
+  FLY ShakeMon alignment calibration, then wire `AnimThrowMistBall` (stretch).
+- **Notes:** side lane idle in round 3 by choice (no gate-passing bounded
+  probe; the 10-roll switch-in/AI attribution flagged in the docs serves step
+  (iv), not the next registration).
+
+
 ## 429 — S10 step (ii) RUNG 1: accuracycheck, attackstring, ppreduce registered
 
 - **State:** RUNG 1 of the sixteen-opcode hit chain is complete and green at

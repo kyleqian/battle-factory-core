@@ -4,6 +4,37 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 433 — [SUPERVISOR WIND-DOWN 2026-07-24 ~17:30] session summary
+
+- **State:** tree committed and green at **177 files / 2113 tests**, build
+  green, both hit-chain ground-truth verify scripts PASS, no worktrees or
+  unmerged branches, both oracles current (restarted onto harness `b30c5d8`).
+  **No DEFERRED entries — nothing blocks the next `run-supervisor.sh`.**
+- **Session (9 worker steps + 1 stacked, all green, zero regressions):**
+  S10 step (i) complete — opcode 0 registered with six tested barriers (427),
+  plus a RUNG-1 fix of its over-broad Protect tail. Step (ii) RUNGs 1–3
+  complete — **43 opcodes registered** (was 28): the full hit chain through
+  `resultmessage` executes against banked ROM ground truth (hit = 4 attributed
+  rolls / miss = 1, crit ×2 placement, KO arithmetic). Side lane banked
+  hit/miss/KO/crit scenarios + two PASS/FAIL verify scripts; the KO scenario
+  pins both `tryfaintmon` branches incl. the terminal WIN (`battleOutcome`
+  0→1) that step (iv) will consume. Animation lane: FEATHER_DANCE anim-script
+  interpreter spike **succeeded** (ISSUES #40 deleted); MIST_BALL enumerated
+  to an honest stop-and-split (6 items, 2 new subsystems, WHITE_FEATHER edge
+  is dead code); generic `AnimTask_ShakeMon` + linear-translation ports landed
+  with QUICK_ATTACK/FIRE_PUNCH/FLY re-driven through them at recorded counts
+  (FLY's divergence root-caused: same-frame double-step of a priority-5 task).
+- **Next (in order):** main — RUNG 4 (`seteffectwithchance`, `tryfaintmon`;
+  entry 432 has the boundary), then step (iii) opcode 73 from the banked
+  receipt, then step (iv) close-the-loop consuming the KO scenario's terminal
+  outcome; the presentation-seam checkpoint (ROADMAP S10 §3) before kernel
+  breadth past (iv). Animation — MIST_BALL remainder in cost order
+  (`AnimThrowMistBall` wire is next) or the next ranked Level-50 track.
+- **Notes:** ROADMAP corrected twice this session (opcode-0 supersession
+  marker; step (ii) has no `orbyte`, eighteen registrations). Two PAPERCUTS
+  added (post-KO button-drop staging; comparator round-trip cost).
+
+---
 ## 432 — S10 step (ii) RUNG 3: attackanimation..resultmessage registered (all seven)
 
 - **State:** RUNG 3 of the sixteen-opcode hit chain is complete and green at
@@ -119,36 +150,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   No presentation/render/`battleScene` edits; no oracle traces (Tier-1 only,
   per the banked ground truth); `damageCalc.ts` untouched, exactly as
   directed.
-
----
-## 430 — [SUPERVISOR] round-2 merges: KO/crit ground truth + generic anim primitives
-
-- **State:** merged tree green at **177 files / 2045 tests**, build green, at
-  `65727ac`. Round 2 landed: main RUNG 1 of the hit chain (entry 429), side
-  KO/crit edge ground truth, and animation's stop-and-split verdict plus two
-  generic primitive ports.
-- **Did (merges + docs):** folded `worker/side-20260724-154507` —
-  `mechanic-hit-chain-ko-off.json` (both `tryfaintmon` branches from real ROM
-  captures: non-terminal faint → switch-in, last-mon faint → terminal WIN with
-  `battleOutcome` 0→1) + `mechanic-hit-chain-crit-off.json` (1/16 crit
-  denominator confirmed; **found `damageCalc.ts` has no crit ×2 step** — the
-  multiplier applies in `Cmd_damagecalc` *before* `Cmd_typecalc`,
-  battle_script_commands.c:1290) + `verify-hit-chain-edges.ts`
-  (supervisor-rerun: exit 0) — and the stacked animation chain
-  `worker/animation-20260724-154508`+`155546`: MIST_BALL enumerated to a
-  STOP-AND-SPLIT verdict (the minimal interpreter does **not** cheaply
-  generalize; 6 substantive items incl. two new subsystems; WHITE_FEATHER
-  component edge is dead code), then generic `AnimTask_ShakeMon` +
-  linear-translation Q8.8 ports landed with QUICK_ATTACK/FIRE_PUNCH re-driven
-  through them (all six portable comparators supervisor-rerun at recorded
-  counts; FLY's ShakeMon instance left hand-fit with a pinned one-tick
-  divergence). Two new PAPERCUTS entries (button busy/idle signal; comparator
-  round-trip cost).
-- **Next:** round 3 — main: RUNG 2 (`critcalc`/`damagecalc`/`typecalc`/
-  `adjustnormaldamage`, consuming the crit-placement ground truth); animation:
-  FLY ShakeMon alignment calibration, then wire `AnimThrowMistBall` (stretch).
-- **Notes:** side lane idle in round 3 by choice (no gate-passing bounded
-  probe; the 10-roll switch-in/AI attribution flagged in the docs serves step
-  (iv), not the next registration).
-
 
