@@ -411,3 +411,36 @@ worker (PROGRESS entry 13).
 - **Workaround:** acknowledge between steps in manually-driven opcode tests
   (done in the two affected test files); longer-term, align the opcode
   handlers on the scheduler field.
+
+## No reusable doc for gPartyMenu struct offsets
+
+- **What:** RAM-probing party-menu state (forced/voluntary switch staging)
+  requires `gPartyMenu` field offsets; nothing committed records them, so
+  each probe re-derives from `include/party_menu.h` by hand and
+  cross-validates against a proven fixture.
+- **Hits:** 1.
+- **Cost each:** ~10 min.
+- **Workaround:** `tools/probe/dump-forced-switch-party-menu.py` now
+  encodes the derived offsets — copy from there until a shared
+  symbols/offsets note exists.
+
+## Capture-lag bisection against a hand-rolled harness can be silently double-lagged
+
+- **What:** a box-isolated lag bisection ran through a reimplemented render
+  path while the code under test still had its own hardcoded `age - 1`
+  underneath — every lag verdict was shifted by one until the hidden lag
+  was found (DRAGON_RAGE rung-5 follow-up).
+- **Hits:** 1.
+- **Cost each:** ~15 min.
+- **Workaround:** bisect against the REAL draw path with the code-under-test's
+  own lag constants zeroed/parameterized first; never a hand-rolled copy.
+
+## No committed record of canonical turns' frame-0 gRngValue
+
+- **What:** re-staging a canonical turn's RNG in a Tier-1 harness (seam
+  checkpoint's turn-5 KO) needed the accuracy-roll math hand-derived for a
+  borrowed seed because no doc records per-turn frame-0 `gRngValue`.
+- **Hits:** 1.
+- **Cost each:** ~10 min.
+- **Workaround:** none yet; the turn dossiers record boundary shas but not
+  the LCG cursor — worth adding to the next dossier retrofit pass.
