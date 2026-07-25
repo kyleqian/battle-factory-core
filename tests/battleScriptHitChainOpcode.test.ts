@@ -2121,3 +2121,166 @@ describe("RUNG 4 integration: opcode 0 -> ... -> seteffectwithchance -> tryfaint
     expect(next?.opcodeName).toBe("B_SCR_OP_PAUSE");
   });
 });
+
+describe(
+  "SetMoveEffect integration proof: KADABRA Body Slam vs. MAGNETON "
+    + "(docs/set-move-effect-ground-truth.md §2, tools/battle-lab/mechanic-set-move-effect-paralysis-off.json)",
+  () => {
+    // Real level-50 stats for the committed oracle fixture's overrides.parties (species base
+    // stats x IV 31 / EV 0 / nature 0 HARDY, neutral -- Magneton's derived max HP (125)
+    // independently matches the ground-truth doc's own "125 max HP" citation exactly).
+    // Two deliberate substitutions, both proven inert to this proof's own subject (the status
+    // write), not swept under the rug:
+    // (1) The fixture's real abilities (Synchronize/Magnet Pull) are zeroed here, matching this
+    //     file's own precedent (docs/hit-chain-ground-truth.md's crit scenario does the same,
+    //     "Item and ability are overridden to 0"). This kernel's accuracycheck already barriers
+    //     on ANY nonzero *target* ability (JumpIfMoveFailed's AbilityBattleEffects
+    //     (ABILITYEFFECT_ABSORBING) check, battle_script_commands.c:1020, fires for any nonzero
+    //     ability) -- a real, pre-existing, unrelated limitation. Neither real ability gates
+    //     paralysis (only ABILITY_LIMBER does).
+    // (2) The walk starts at BattleScript_HitFromAtkCanceler with moveEffectByte pre-set to
+    //     MOVE_EFFECT_PARALYSIS, rather than at the move's own BattleScript_EffectParalyzeHit
+    //     entry (`setmoveeffect MOVE_EFFECT_PARALYSIS; goto BattleScript_EffectHit`,
+    //     data/battle_scripts_1.s:370-372). BattleScript_EffectHit's own preamble
+    //     (`jumpifnotmove MOVE_SURF, ...`, :237) uses a still-unregistered jumpif opcode --
+    //     unrelated to SetMoveEffect, and for any non-Surf move (Body Slam included) it always
+    //     falls straight through to BattleScript_HitFromAtkCanceler regardless, so pre-setting
+    //     moveEffectByte to what that preamble would have produced is exact, not approximate.
+    const SPECIES_KADABRA = 64;
+    const SPECIES_MAGNETON = 82;
+    const TACKLE_MOVE = 33;
+
+    function kadabraVsMagnetonContext(): BattleScriptRulesContext {
+      return context(
+        0,
+        {
+          species: SPECIES_KADABRA,
+          types: ["TYPE_PSYCHIC", "TYPE_PSYCHIC"],
+          attack: 55,
+          defense: 50,
+          spAttack: 140,
+          spDefense: 90,
+          level: 50,
+          moves: [BODY_SLAM, 0, 0, 0],
+          pp: [15, 0, 0, 0],
+        },
+        { currentMove: BODY_SLAM, moveEffectByte: MOVE_EFFECT_PARALYSIS },
+        {
+          species: SPECIES_MAGNETON,
+          types: ["TYPE_ELECTRIC", "TYPE_STEEL"],
+          attack: 80,
+          defense: 115,
+          spAttack: 140,
+          spDefense: 90,
+          level: 50,
+          hp: 125,
+          moves: [TACKLE_MOVE, 0, 0, 0],
+          pp: [35, 0, 0, 0],
+        },
+      );
+    }
+
+    /** Walks the real hit chain from opcode 0 through seteffectwithchance, same shape as RUNG 4's integration tests. */
+    function walkKadabraBodySlamToSeteffectwithchance(rngSeed: number) {
+      const B_WAIT_TIME_LONG = 64;
+      const rc = kadabraVsMagnetonContext();
+      const execution = createBattleScriptStatusRulesExecution(
+        program,
+        "BattleScript_HitFromAtkCanceler",
+        rc,
+        rngSeed,
+        // Normal-type Body Slam vs. Magneton's real Electric/Steel typing is genuinely
+        // not-very-effective (Steel resists Normal), so resultmessage's own message prep
+        // -- unlike RUNG 4's same-type-default fixtures -- actually queues a message here,
+        // and the following waitmessage needs a real wait-duration resolution.
+        externalPorts({
+          resolveHalfwordOperand: (_context, operand) =>
+            operand.expression === "B_WAIT_TIME_LONG" ? B_WAIT_TIME_LONG : null,
+        }),
+      );
+      const handlers = execution.handlers;
+      // Body Slam's real not-very-effective message (see above) makes waitmessage's own
+      // pauseCounterBattle threshold loop genuinely run this time (RUNG 4's own step-by-step
+      // walk never needed this because its same-type-default fixtures never queue a message
+      // there) -- pump scheduler-progressed transitions through to their eventual advance,
+      // exactly like Cmd_moveend's own do-while convergence loop elsewhere in this file.
+      const step = (state: BattleScriptMachineState<BattleScriptRulesContext>) => {
+        let stepped = stepBattleScriptMachine(program, state, handlers);
+        while (stepped.kind === "scheduler-progressed") {
+          stepped = stepBattleScriptMachine(program, stepped.state, handlers);
+        }
+        return stepped;
+      };
+      let result = step(execution.state); // opcode 0
+      if (result.kind !== "advanced") throw new Error(`opcode 0 did not advance: ${result.kind}`);
+      result = step(result.state); // accuracycheck
+      if (result.kind !== "advanced") throw new Error(`accuracycheck did not advance: ${result.kind}`);
+      result = step(result.state); // attackstring
+      if (result.kind !== "advanced") throw new Error(`attackstring did not advance: ${result.kind}`);
+      result = step(result.state); // ppreduce
+      if (result.kind !== "advanced") throw new Error(`ppreduce did not advance: ${result.kind}`);
+      result = step(result.state); // critcalc
+      if (result.kind !== "advanced") throw new Error(`critcalc did not advance: ${result.kind}`);
+      result = step(result.state); // damagecalc
+      if (result.kind !== "advanced") throw new Error(`damagecalc did not advance: ${result.kind}`);
+      result = step(result.state); // typecalc
+      if (result.kind !== "advanced") throw new Error(`typecalc did not advance: ${result.kind}`);
+      result = step(result.state); // adjustnormaldamage
+      if (result.kind !== "advanced") throw new Error(`adjustnormaldamage did not advance: ${result.kind}`);
+      for (const label of RUNG_3_LABELS) {
+        if (result.kind !== "advanced") throw new Error(`${label} did not advance: ${result.kind}`);
+        result = step(result.state);
+      }
+      if (result.kind !== "advanced") throw new Error(`expected advance before seteffectwithchance, got ${result.kind}`);
+      result = step(result.state); // seteffectwithchance
+      if (result.kind !== "advanced") throw new Error(`seteffectwithchance did not advance: ${result.kind}`);
+      return result;
+    }
+
+    // The real ROM's own frame-0 gRngValue for this exact fixture's proc seed (seed 4),
+    // docs/set-move-effect-ground-truth.md §2: "Forward-stepping the LCG from frame-0's
+    // rngValue (2643437444) exactly 8 times ... lands exactly on frame-450's captured
+    // rngValue" -- an oracle-verified 32-bit anchor, not a synthetic reconstruction. (A
+    // single target u16 doesn't pin the low 16 bits of the underlying 32-bit LCG state, so
+    // rngValueBeforeU16 -- exact for one draw -- would silently diverge from the second draw
+    // onward; this proof needs the real seed precisely because it drives four consecutive
+    // draws that must all land on the doc's own numbers.)
+    const PROC_SEED_FRAME0_RNG_VALUE = 2643437444;
+
+    it("proc seed (real frame-0 rngValue, rolls 61260/64951/891/37229): paralyzes MAGNETON, status1 synced on battler + party slot, exactly 4 RNG calls (zero extra draws vs. a plain hit)", () => {
+      const result = walkKadabraBodySlamToSeteffectwithchance(PROC_SEED_FRAME0_RNG_VALUE);
+      const rolls = result.state.rng.ledger.map((entry) => entry.randomValue);
+      expect(rolls).toEqual([61260, 64951, 891, 37229]); // docs/set-move-effect-ground-truth.md §2's own proc-seed ledger
+      expect(result.state.rng.calls).toBe(4);
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_MoveEffectParalysis"));
+      expect(result.state.callStack.length).toBe(1);
+      expect(result.state.rulesContext.battlers[1]!.status1).toBe(STATUS1_PARALYSIS_BIT);
+      expect(result.state.rulesContext.party.opponent[0]!.status1).toBe(STATUS1_PARALYSIS_BIT);
+      expect(result.state.rulesContext.battlers[1]!.hp).toBe(117); // 125 -> 117, ground truth's own pinned HP
+      expect(result.state.rulesContext.battlers[0]!.pp[0]).toBe(14); // 15 -> 14, ground truth's own pinned PP
+    });
+
+    // The ground-truth doc pins the control case's own four u16 rolls (40931/33731/29631/
+    // 46260) but not its raw 32-bit frame-0 rngValue, and deriving that value would mean
+    // querying the live oracle -- off-limits for a hermetic Tier-1 test (AGENTS.md: "no
+    // oracle, no emulator, no network"). This seed is therefore a kernel-only synthetic
+    // control, picked only for producing a real >=30 (no-proc) roll 4 through the identical
+    // opcode chain; its own rolls are asserted for determinism, not claimed to reproduce the
+    // doc's literal control numbers.
+    const CONTROL_SEED_KERNEL_ONLY = 3;
+
+    it("control seed (kernel-only, no oracle anchor available): hits without paralyzing, status stays untouched, exactly 4 RNG calls", () => {
+      const result = walkKadabraBodySlamToSeteffectwithchance(CONTROL_SEED_KERNEL_ONLY);
+      const rolls = result.state.rng.ledger.map((entry) => entry.randomValue);
+      expect(rolls).toEqual([50515, 12646, 54250, 64452]);
+      expect(rolls[3]! % 100).toBeGreaterThanOrEqual(30); // the %100 < 30 chance gate genuinely fails
+      expect(result.state.rng.calls).toBe(4);
+      expect(result.state.programCounter).not.toBe(labelPc("BattleScript_MoveEffectParalysis"));
+      expect(result.state.callStack.length).toBe(0);
+      expect(result.state.rulesContext.battlers[1]!.status1).toBe(0);
+      expect(result.state.rulesContext.party.opponent[0]!.status1).toBe(0);
+      expect(result.state.rulesContext.battlers[1]!.hp).toBe(117); // still a real, non-fatal hit
+      expect(result.state.rulesContext.battlers[0]!.pp[0]).toBe(14); // 15 -> 14, same PP decrement regardless of the proc
+    });
+  },
+);
