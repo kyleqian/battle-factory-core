@@ -137,12 +137,31 @@ export const DRAGON_RAGE_FRAMEBUFFER_FIRE_PLUME_AGE_LAG = 1;
  * port tick 0 into its creation tick (priority 5, same mechanism
  * `fly.ts`'s `FLY_SHAKE_CREATION_AGE` documents for FLY's own priority-5
  * call site - RAM-confirmed again here, both DRAGON_RAGE call sites).
+ *
+ * Rung 1 (ANIMATION_PROGRESS.md 2026-07-25): that RAM-invisible collapsed
+ * value (`sequence[0]`, i.e. the raw `{xOffset,yOffset}` the task's own
+ * creation writes into `gSprites[].x2/y2` before the same-frame second step
+ * immediately overwrites it) IS visible in the FRAMEBUFFER, for exactly one
+ * photographed frame - pixel-diffed directly against
+ * `dragon-rage-player-charmeleon-opponent-onix`'s render age 1 (the
+ * attacker's own creation transient, `DRAGON_RAGE_FRAMEBUFFER_SHAKE_AGE_LAG`
+ * = 2): the oracle photo already shows the sprite shifted by the full
+ * `yOffset` (2px) one tick before the lag-2 model's own first
+ * `renderTick >= creationTick` frame produces anything non-zero (which
+ * itself lands on `sequence[1]`, already toggled back to 0 - RAM-confirmed
+ * correct by the zero-lag component check). The two facts only reconcile if
+ * the OAM write from creation reaches the display one tick sooner than the
+ * steady per-tick toggle does - i.e. the transient's own effective lag is
+ * one less than the mechanism's steady-state lag. Modeled as a narrow,
+ * evidence-scoped special case (`renderTick === creationTick - 1`), not a
+ * change to the steady-state math already proven exact.
  */
 function shakeMonOffsetAtRenderTick(
   args: { xOffset: number; yOffset: number; numTimes: number; frameDelay: number },
   creationTick: number,
   renderTick: number,
 ): ShakeMonOffset {
+  if (renderTick === creationTick - 1) return { x2: args.xOffset, y2: args.yOffset };
   if (renderTick < creationTick) return { x2: 0, y2: 0 };
   return shakeMonOffsetAtTick(
     args.xOffset, args.yOffset, args.numTimes, args.frameDelay,

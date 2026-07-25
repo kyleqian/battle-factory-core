@@ -107,6 +107,22 @@ describe("attacker/target AnimTask_ShakeMon (reused primitive, first ATTACKER-si
       }
     }
   });
+
+  // Rung 1 (ANIMATION_PROGRESS.md 2026-07-25): pixel-diffed directly against
+  // `dragon-rage-player-charmeleon-opponent-onix`'s render age 1 (frame 90),
+  // one tick before the lag-2-adjusted attacker shake first clears its own
+  // creation guard - the oracle photo already shows the sprite shifted by
+  // the full `yOffset`, RAM-invisible (collapsed the same tick) but
+  // framebuffer-visible one tick earlier than the steady-state lag predicts.
+  it("one tick before creation shows the RAM-invisible creation-write transient", () => {
+    expect(shakeMonOffsetAtRenderTick(DRAGON_RAGE_ATTACKER_SHAKE, 0, -1)).toEqual({ x2: 0, y2: 2 });
+    expect(shakeMonOffsetAtRenderTick(DRAGON_RAGE_TARGET_SHAKE, 97, 96)).toEqual({ x2: 0, y2: 3 });
+  });
+
+  it("two or more ticks before creation stays zero (guard unaffected outside the one-tick transient)", () => {
+    expect(shakeMonOffsetAtRenderTick(DRAGON_RAGE_ATTACKER_SHAKE, 0, -2)).toEqual({ x2: 0, y2: 0 });
+    expect(shakeMonOffsetAtRenderTick(DRAGON_RAGE_ATTACKER_SHAKE, 0, -10)).toEqual({ x2: 0, y2: 0 });
+  });
 });
 
 describe("SlideMonToOffset/SlideMonToOriginalPos (attacker, battlerFlag=0) at both orientations", () => {
