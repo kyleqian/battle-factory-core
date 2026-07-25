@@ -185,14 +185,20 @@ function runScriptToOwnEnd(
       return Object.freeze({ kind: "barrier", state, instruction });
     }
     const stepped = stepBattleScriptMachine(program, state, handlers);
-    if (stepped.kind === "halted" && stepped.state.haltReason?.kind === "terminal") {
-      return Object.freeze({ kind: "terminal", state: stepped.state });
+    if (stepped.kind === "halted") {
+      if (stepped.state.haltReason?.kind === "terminal") {
+        return Object.freeze({ kind: "terminal", state: stepped.state });
+      }
+      // A registered opcode's own (b) barrier (e.g. openpartyscreen's player-side/pass-2
+      // unsupported-branch halts) is the same kind of real machine boundary as an
+      // unregistered opcode -- surface it the same way, not a crash.
+      return Object.freeze({ kind: "barrier", state: stepped.state, instruction });
     }
     if (stepped.kind !== "advanced") {
       throw new Error(
         `fainted-actions orchestration hit an unexpected ${stepped.kind} step inside `
           + `${instruction.source.label} -- outside this rung's modeled (setbyte/getexp/checkteamslost/`
-          + "jumpifbyte/end2) domain",
+          + "jumpifbyte/openpartyscreen/end2) domain",
       );
     }
     state = stepped.state;

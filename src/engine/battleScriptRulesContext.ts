@@ -22,6 +22,7 @@ import { createBattleScriptHitChainOpcodeHandlers } from "./battleScriptHitChain
 import { createBattleScriptMoveEndOpcodeHandlers } from "./battleScriptMoveEndOpcode.ts";
 import { createBattleScriptJumpifbyteOpcodeHandlers } from "./battleScriptJumpifbyteOpcode.ts";
 import { createBattleScriptJumpifwordOpcodeHandlers } from "./battleScriptJumpifwordOpcode.ts";
+import { createBattleScriptOpenPartyScreenOpcodeHandlers } from "./battleScriptOpenPartyScreenOpcode.ts";
 import { createBattleScriptGetexpOpcodeHandlers } from "./battleScriptGetexpOpcode.ts";
 import { createBattleScriptCheckteamslostOpcodeHandlers } from "./battleScriptCheckteamslostOpcode.ts";
 import {
@@ -356,6 +357,13 @@ export type BattleScriptRulesContext = Readonly<
     choicedMove: BattleScriptMoveEndHalfwords;
     /** Source u16 gBattleStruct->changedItems[MAX_BATTLERS_COUNT]. */
     changedItems: BattleScriptMoveEndHalfwords;
+    /**
+     * Source u8 gBattleStruct->monToSwitchIntoId[MAX_BATTLERS_COUNT] --
+     * PARTY_SIZE (6) is the "undecided" sentinel; 0-5 is a resolved bench
+     * slot. Written by openpartyscreen's AI branch
+     * (docs/forced-switch-ground-truth.md §1a row 1, §4 slice 2).
+     */
+    monToSwitchIntoId: BattleScriptMoveEndHalfwords;
     /** Source u8 gBattleStruct->absentBattlerFlags, separate from the global mask. */
     battleStructAbsentBattlerFlags: number;
     /** Source u8 gBattleStruct->dynamicMoveType. */
@@ -410,6 +418,7 @@ export type BattleScriptRulesContextInput = Readonly<{
   chosenMove?: number;
   choicedMove?: readonly number[];
   changedItems?: readonly number[];
+  monToSwitchIntoId?: readonly number[];
   battleStructAbsentBattlerFlags?: number;
   dynamicMoveType?: number;
   enigmaBerryHoldEffects?: readonly number[];
@@ -1607,6 +1616,16 @@ export function createBattleScriptRulesContext(
     0xffff,
     "changedItems",
   ) as BattleScriptMoveEndHalfwords;
+  const monToSwitchIntoId = createMoveEndArray(
+    input.monToSwitchIntoId ?? [
+      BATTLE_SCRIPT_PARTY_SIZE,
+      BATTLE_SCRIPT_PARTY_SIZE,
+      BATTLE_SCRIPT_PARTY_SIZE,
+      BATTLE_SCRIPT_PARTY_SIZE,
+    ],
+    BATTLE_SCRIPT_PARTY_SIZE,
+    "monToSwitchIntoId",
+  ) as BattleScriptMoveEndHalfwords;
   const enigmaBerryHoldEffects = createMoveEndArray(
     input.enigmaBerryHoldEffects,
     0xff,
@@ -1669,6 +1688,7 @@ export function createBattleScriptRulesContext(
     chosenMove: requireUnsigned(input.chosenMove ?? 0, 0xffff, "chosenMove"),
     choicedMove,
     changedItems,
+    monToSwitchIntoId,
     battleStructAbsentBattlerFlags: requireUnsigned(
       input.battleStructAbsentBattlerFlags ?? 0,
       0x0f,
@@ -1834,6 +1854,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptMoveEndOpcodeHandlers(program),
     ...createBattleScriptJumpifbyteOpcodeHandlers(program),
     ...createBattleScriptJumpifwordOpcodeHandlers(program),
+    ...createBattleScriptOpenPartyScreenOpcodeHandlers(program),
     ...createBattleScriptGetexpOpcodeHandlers(program),
     ...createBattleScriptCheckteamslostOpcodeHandlers(program),
   });

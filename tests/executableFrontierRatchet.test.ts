@@ -79,6 +79,12 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // gBattleMoveDamage / HITMARKER_NO_ATTACKSTRING, neither reachable on
   // Factory's own BattleScript_HandleFaintedMon path).
   ["src/engine/battleScriptJumpifwordOpcode.ts", 1],
+  // Forced-switch ground truth §4 slice 2: doubles/multi topology (not
+  // Factory singles), the player-side interactive party-menu controller
+  // round trip (not modeled at the opcode-machine layer this rung), and
+  // GetMostSuitableMonToSwitchInto's pass-2 AI_CalcDmg raw-damage fallback
+  // (no fixture on this rung reaches it).
+  ["src/engine/battleScriptOpenPartyScreenOpcode.ts", 3],
   ["src/engine/battleScriptGetexpOpcode.ts", 2],
   ["src/engine/battleScriptCheckteamslostOpcode.ts", 3],
 ]);

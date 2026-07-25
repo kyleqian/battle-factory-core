@@ -198,6 +198,7 @@ describe("source-shaped Battle Script rules context", () => {
       "learnMoveState",
       "lvlBoxState",
       "missType",
+      "monToSwitchIntoId",
       "moveEffectByte",
       "moveHistory",
       "moveResultFlags",
@@ -431,11 +432,11 @@ describe("source-shaped Battle Script rules context", () => {
 });
 
 describe("production status rules handler and execution seam", () => {
-  it("composes all 54 source-safe controls, source, multi-hit, cleanup, SETBYTE, attackcanceler, hit-chain, move-end, jumpifbyte, jumpifword, getexp, and checkteamslost handlers once", () => {
+  it("composes all 55 source-safe controls, source, multi-hit, cleanup, SETBYTE, attackcanceler, hit-chain, move-end, jumpifbyte, jumpifword, openpartyscreen, getexp, and checkteamslost handlers once", () => {
     const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts());
     expect(Object.keys(handlers).map(Number).sort((a, b) => a - b)).toEqual([
       0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 25, 26, 27, 35, 36, 37, 38,
-      39, 40, 41, 43, 46, 57, 58, 60, 61, 62, 65, 73, 83, 84, 85, 86, 92, 98, 100, 101, 102, 111, 131, 141, 152, 248,
+      39, 40, 41, 43, 46, 57, 58, 60, 61, 62, 65, 73, 80, 83, 84, 85, 86, 92, 98, 100, 101, 102, 111, 131, 141, 152, 248,
     ]);
   });
 
