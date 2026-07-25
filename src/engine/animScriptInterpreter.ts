@@ -32,6 +32,71 @@ export interface AnimScriptCommand {
   frames?: number;
 }
 
+/**
+ * General `waitforvisualfinish`-aware schedule (DRAGON_RAGE rung 4,
+ * ANIMATION_PROGRESS.md's 2026-07-25 sections): the MIST_BALL enumeration
+ * (2026-07-24) flagged that `waitforvisualfinish` needs real sprite-
+ * lifetime tracking to generalize past FEATHER_DANCE's own script-position
+ * coincidence. `Cmd_waitforvisualfinish` (`battle_anim.c:455-465`) blocks
+ * until `gAnimVisualTaskCount == 0` - i.e. until EVERY sprite/task created
+ * since the last wait has self-destroyed, not just the most recent one.
+ * `Cmd_createsprite`/`Cmd_createvisualtask` increment that counter and never
+ * set `sAnimFramesToWait`, so a run of creation ops (optionally separated by
+ * `delay`) all become active in the same "batch" a `waitforvisualfinish`
+ * then gates on together.
+ *
+ * RAM-probed and confirmed exactly (`dump-dragonrage-full.py`, both
+ * attacker orientations, every one of DRAGON_RAGE's 5 `waitforvisualfinish`
+ * barriers): once every active item's own OWN destroy tick (ticks-since-
+ * its-own-creation, supplied by the caller's `lifetimeOf` per primitive -
+ * `shakeMonSequence(...).length - 2`, `slideMonTo{Offset,OriginalPos}
+ * DestroyTick`, this move's own fire-spit/fire-plume lifetimes) is known,
+ * the next command's own tick is `max(activeGoneTicks) + 1` - the same
+ * 1-tick resolution lag observed at every transition (matches
+ * `SlideMonToOffset`'s own already-documented deferred-destroy shape:
+ * `Cmd_waitforvisualfinish` only unblocks the tick AFTER the last active
+ * item is actually gone from `gAnimVisualTaskCount`'s own bookkeeping).
+ * `delay N` still costs `N+2` (the pre-existing VM rule, unaffected by
+ * pending visual tasks - `Cmd_delay` and `Cmd_waitforvisualfinish` are
+ * different ops with independent counters).
+ */
+export interface AnimScheduleLifetime {
+  /** Ticks after this event's own creation tick that it becomes inactive (destroyed). */
+  readonly goneAfterTicks: number;
+}
+
+export interface ScheduledAnimEvent {
+  readonly tick: number;
+  readonly cmd: AnimScriptCommand;
+}
+
+const CREATION_OPS = new Set(["createsprite", "createvisualtask"]);
+
+function isCreationOp(op: string): boolean {
+  return CREATION_OPS.has(op) || op.startsWith("create_");
+}
+
+export function interpretAnimSchedule(
+  main: readonly AnimScriptCommand[],
+  lifetimeOf: (cmd: AnimScriptCommand) => AnimScheduleLifetime,
+): ScheduledAnimEvent[] {
+  const events: ScheduledAnimEvent[] = [];
+  let tick = 0;
+  let activeGoneTicks: number[] = [];
+  for (const cmd of main) {
+    if (isCreationOp(cmd.op)) {
+      events.push({ tick, cmd });
+      activeGoneTicks.push(tick + lifetimeOf(cmd).goneAfterTicks);
+    } else if (cmd.op === "delay") {
+      tick += cmd.frames! + 2;
+    } else if (cmd.op === "waitforvisualfinish" && activeGoneTicks.length > 0) {
+      tick = Math.max(...activeGoneTicks) + 1;
+      activeGoneTicks = [];
+    }
+  }
+  return events;
+}
+
 export function interpretCreateSpriteSchedule(
   main: readonly AnimScriptCommand[],
 ): Array<{ tick: number; args: number[] }> {
