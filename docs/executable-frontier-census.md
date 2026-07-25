@@ -272,9 +272,9 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 
 The tool itself asserts these before writing this doc and exits nonzero on any mismatch:
 
-- `EFFECT_HIT` executable (opcode 0 + 18-op hit chain + moveend/checkteamslost, ROADMAP S10 step iv)
-- `EFFECT_POISON_HIT`, `EFFECT_BURN_HIT`, `EFFECT_FREEZE_HIT`, `EFFECT_PARALYZE_HIT` executable (SetMoveEffect quartet, PROGRESS 444)
+- `EFFECT_HIT`, `EFFECT_POISON_HIT`, `EFFECT_BURN_HIT`, `EFFECT_FREEZE_HIT`, `EFFECT_PARALYZE_HIT` each blocked-on-opcodes with `B_SCR_OP_JUMPIFHALFWORD` on the main path (the key finding above) and *no* SetMoveEffect-dispatch subsystem note -- proving the quartet's own dispatch is source-complete (PROGRESS 444) and the block is entirely the unrelated shared-entry chokepoint
 - `EFFECT_SLEEP`, `EFFECT_TOXIC` blocked, mentioning `Cmd_seteffectprimary` (still fully unregistered)
+- `EFFECT_RECOIL_IF_MISS` executable (a real positive: it enters via `BattleScript_HitFromAtkString`, skipping the chokepoint entirely, and reaches moveend/checkteamslost)
 
 All checks passed for this run.
 

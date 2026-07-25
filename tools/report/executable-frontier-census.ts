@@ -606,9 +606,14 @@ lines.push("## Validation (fails the run on drift)");
 lines.push("");
 lines.push("The tool itself asserts these before writing this doc and exits nonzero on any mismatch:");
 lines.push("");
-lines.push("- `EFFECT_HIT` executable (opcode 0 + 18-op hit chain + moveend/checkteamslost, ROADMAP S10 step iv)");
-lines.push("- `EFFECT_POISON_HIT`, `EFFECT_BURN_HIT`, `EFFECT_FREEZE_HIT`, `EFFECT_PARALYZE_HIT` executable (SetMoveEffect quartet, PROGRESS 444)");
+lines.push(
+  "- `EFFECT_HIT`, `EFFECT_POISON_HIT`, `EFFECT_BURN_HIT`, `EFFECT_FREEZE_HIT`, `EFFECT_PARALYZE_HIT` "
+  + "each blocked-on-opcodes with `B_SCR_OP_JUMPIFHALFWORD` on the main path (the key finding above) and "
+  + "*no* SetMoveEffect-dispatch subsystem note -- proving the quartet's own dispatch is source-complete "
+  + "(PROGRESS 444) and the block is entirely the unrelated shared-entry chokepoint",
+);
 lines.push("- `EFFECT_SLEEP`, `EFFECT_TOXIC` blocked, mentioning `Cmd_seteffectprimary` (still fully unregistered)");
+lines.push("- `EFFECT_RECOIL_IF_MISS` executable (a real positive: it enters via `BattleScript_HitFromAtkString`, skipping the chokepoint entirely, and reaches moveend/checkteamslost)");
 lines.push("");
 lines.push("All checks passed for this run.");
 lines.push("");
