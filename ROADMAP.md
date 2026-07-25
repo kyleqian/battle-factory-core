@@ -1213,6 +1213,12 @@ window must be re-driven from kernel semantic events rather than turn-N state,
 with its committed trace still passing at its recorded count. Any window
 qualifies; pick the smallest. Discovering the seam does not fit *after* the
 kernel lands is the expensive outcome this checkpoint exists to prevent.
+**This is a hard ordering constraint, not a preference.** Once (iv) lands, the
+next battle-lane brief is this checkpoint. Registering further opcodes is
+cheaper and more legible than proving the seam, so the failure mode is drift:
+opcode 44, 45, 46 all pass the executable-frontier gate individually while the
+question of whether *anything* can consume them stays unasked. If the
+checkpoint fails, that is a finding worth more than the opcodes it displaces.
 
 **4. Overfit containment.** AGENTS.md already forbids *new* battle/turn/tick
 branches. Additionally: **no new production import of a canonical recording.**
@@ -1220,6 +1226,14 @@ Engine modules must not read `src/data/gen/*-ram-dump.json`,
 `*-probe.json`, `*-watch.json`, or `*-boundaries.json` at runtime; those are
 dev-time evidence for tests and extractors. Existing violations are tracked as
 ISSUES #39--#41 and are not grandfathered into new code.
+**Enforced, not advisory:** `tests/executableFrontierRatchet.test.ts` pins the
+exact allowlist of existing recording imports (four, across two modules) and
+fails on any addition; the allowlist may only shrink, and a retired entry must
+be deleted from it so the win is recorded. The same file pins the per-module
+`unsupported-branch` barrier counts from §1 — that policy is safe only while
+barriers stay narrow, and an opcode that is mostly barrier is registered on
+paper and inert in practice. Raising a pinned count is a decision the brief
+must justify, not a formality.
 
 S10 has six ordered completion gates:
 

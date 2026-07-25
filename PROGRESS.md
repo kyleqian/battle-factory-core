@@ -4,6 +4,46 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 434 — [BETWEEN-SESSION HARDENING, user-directed] two ratchets + oracle freshness gate
+
+- **State:** tree green at **178 files / 2119 tests**, build green. No code
+  behaviour changed — this entry adds enforcement for rules that were prose,
+  and one startup check. Session 433's work independently re-verified:
+  `verify-hit-chain-ground-truth.ts` rerun against the live oracle, **PASS,
+  0 failing checks**; the `orbyte` correction confirmed against
+  `data/battle_scripts_1.s:244/271/1610/2153` (session 433 was right, the
+  pre-reset ROADMAP was wrong).
+- **Did:** (1) `tests/executableFrontierRatchet.test.ts` — pins the exact
+  allowlist of production canonical-recording imports (**four**, across
+  `battleScene.ts` and `factorySwapPresentation.ts`) and fails on any
+  addition; a retired entry must be *deleted* from the allowlist, so wins
+  ratchet down and cannot silently re-admit. Also pins per-module
+  `unsupported-branch` barrier counts (13 hit-chain, 5 canceler), rejects
+  barriers in unpinned modules, and requires each barrier-bearing module's
+  test file to assert the halt kind. Both ratchets were negative-tested (each
+  was made to fail on a probe file, then reverted) — a green ratchet that
+  cannot go red is worthless. (2) `tools/check-oracle-freshness.sh` — the
+  oracle exposes no version endpoint, so this compares each listening
+  service's process start time against harness HEAD's commit time; exit 1 =
+  stale, restart before staging. Wired into SUPERVISOR.md's Orient step.
+  (3) ROADMAP S10 §3 restated as a **hard ordering constraint** (after step
+  (iv), the next battle-lane brief *is* the presentation-seam checkpoint) and
+  §4 now points at its enforcing test; SUPERVISOR.md and AGENTS.md carry the
+  same two rules where workers actually read them.
+- **Next:** unchanged from 433 — main: RUNG 4 (`seteffectwithchance`,
+  `tryfaintmon`), then step (iii) opcode 73, then step (iv). **Then the
+  presentation-seam checkpoint, not opcode 44.** Animation: MIST_BALL
+  remainder in cost order (`AnimThrowMistBall` next) or the next ranked
+  Level-50 track.
+- **Notes:** the freshness gate exists because session 433 lost time to a
+  service that predated the `overrides.parties` builder it was being asked to
+  serve — banked as "not yet live" in `docs/hit-chain-ground-truth.md:40`,
+  corrected at `:259` after a mid-session restart. The barrier pin exists
+  because the (a)/(b) registration policy's failure mode is barrier creep:
+  an opcode that is mostly barrier passes the executable-frontier gate on
+  paper while executing nothing.
+
+---
 ## 433 — [SUPERVISOR WIND-DOWN 2026-07-24 ~17:30] session summary
 
 - **State:** tree committed and green at **177 files / 2113 tests**, build
@@ -95,59 +135,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (ground truth: roll 4 belongs to `seteffectwithchance`, not this rung). No
   presentation/render/`battleScene` edits; no oracle traces (Tier-1 only, per
   the banked ground truth).
-
----
-## 431 — S10 step (ii) RUNG 2: critcalc, damagecalc, typecalc, adjustnormaldamage registered
-
-- **State:** RUNG 2 of the sixteen-opcode hit chain is complete and green at
-  **177 files / 2072 tests**, build green. `createBattleScriptStatusRulesHandlers`
-  now composes **36** opcodes (was 32): `critcalc`, `damagecalc`, `typecalc`,
-  `adjustnormaldamage` (all in `battleScriptHitChainOpcode.ts`, reusing
-  `damageCalc.ts`'s pinned functions as-is). A staged hit turn now runs
-  opcode 0 → accuracycheck → attackstring → ppreduce → critcalc → damagecalc →
-  typecalc → adjustnormaldamage and hands off cleanly at `attackanimation`
-  (still unregistered, the correct RUNG-3 boundary).
-- **Did:** `critcalc` computes the real critChance stage (Focus Energy,
-  high-crit moves, Scope Lens, species-gated Lucky Punch/Stick) and the
-  Battle Armor/Shell Armor/`STATUS3_CANT_SCORE_A_CRIT`/tutorial-battle
-  immunity gate as a genuine C `&&` short-circuit — immunity now consumes
-  **zero** RNG, matching the source exactly rather than wasting a roll.
-  `damagecalc` applies the crit ×2 step (`gCritMultiplier`) and
-  `dmgMultiplier` in the correct position — **before** `typecalc`'s STAB/type
-  scaling, per entry 429/430's crit-placement finding — plus Charge's
-  Electric ×2 and Helping Hand's 1.5x. `typecalc` is source-complete: STAB,
-  the type-effectiveness loop with real `TYPE_MUL_*` → `gMoveResultFlags`
-  toggling (super/not-very-effective cancel-out), the Foresight-vs-Ghost
-  immunity skip (typecalc's own independent branch, kept consistent with
-  RUNG 1's `CheckWonderGuardAndLevitate`), Levitate-vs-Ground's short-circuit,
-  Wonder Guard's own miss branch, and the `MOVE_STRUGGLE` no-op. `adjustnormaldamage`
-  runs `ApplyRandomDmgMultiplier` unconditionally then the real False
-  Swipe/Endure HP-clamp-to-1 (`MOVE_RESULT_FOE_ENDURED`); Focus Band's own
-  roll is a `(b)` barrier **gated on the item actually being held**
-  (`resolveBattleScriptBattlerHoldEffect === HOLD_EFFECT_FOCUS_BAND`), never
-  on the plain path — verified by a same-shape non-Focus-Band-item test that
-  still advances normally. Added six new battler fields the same way prior
-  checkpoints did: `species`, `attack`, `defense`, `spAttack`, `spDefense`,
-  `level` (required, `?? 0` defaults — `CalculateBaseDamage`'s raw stat
-  inputs, previously entirely unmodeled in the rules context) plus `endured`/
-  `helpingHand` (optional ProtectStruct bits, same pattern as `bounceMove`
-  etc.). All pinned arithmetic from `docs/hit-chain-ground-truth.md`
-  reproduces exactly via an inverse-LCG test helper (`ISO_RANDOMIZE1` is a
-  bijection mod 2**32, so a target u16 roll's exact seed is solved, not
-  searched): non-crit Tackle 16→15, crit 7→14→7→6, and — as the primary
-  integration test — the KO scenario's **real ROM frame-0 seed 919694434**
-  reproducing 142→213→213→204 with the exact 3-roll ledger
-  (accuracycheck/critcalc/adjustnormaldamage, in order).
-- **Next:** RUNG 3 — register `attackanimation..resultmessage` (the
-  presentation/message-only middle of the hit chain: `waitanimation`,
-  `effectivenesssound`, `hitanimation`, `healthbarupdate`, `datahpupdate`,
-  `critmessage`, `resultmessage`). Then RUNG 4 (`seteffectwithchance`,
-  `tryfaintmon` — roll 4 stays unconsumed by this rung, exactly as ground
-  truth reserves it). Opcode 73 (moveend) remains the step-(iii) boundary.
-- **Notes:** three pre-existing tests broke on the new required battler
-  fields (two `toStrictEqual`-against-raw-input attackcanceler tests, one
-  registration-count pin) and were fixed in the same commit, not left red.
-  No presentation/render/`battleScene` edits; no oracle traces (Tier-1 only,
-  per the banked ground truth); `damageCalc.ts` untouched, exactly as
-  directed.
 

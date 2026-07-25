@@ -116,6 +116,14 @@ top entry of `PROGRESS.md` — uncommitted work is lost work.
   part of `npm test`; run it manually/densely while building.
 - **When you fix or add pure engine logic, pin it with a Tier-1 test** — reserve
   Tier 2 for parity that genuinely needs the emulator or exact pixels.
+- **Two ratchets in `tests/executableFrontierRatchet.test.ts` will fail your
+  step deliberately.** (1) No production module may import a canonical
+  recording (`src/data/gen/*-{dump,probe,watch,boundaries}.json`) — derive
+  behaviour from ported source instead; the four existing imports are tracked
+  debt (ISSUES #41) and the allowlist only shrinks. (2) Per-module
+  `unsupported-branch` barrier counts are pinned — adding a barrier is allowed
+  but must be deliberate and named in your final message. Neither is a lint
+  you should route around; if a pin genuinely must move, move it and say why.
 
 ## The oracle is ground truth
 The oracle is the source-built Pokémon Emerald ROM running headless in mGBA

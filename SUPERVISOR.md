@@ -50,7 +50,12 @@ edit.
    `DEFERRED.md` → `git log` since your last review. Fresh run (roadmap still
    PLAN PENDING)? Do "Fresh run" above before anything else. Otherwise on your
    first iteration, verify the baseline yourself: `npm test` and
-   `npm run build`.
+   `npm run build`, plus `./tools/check-oracle-freshness.sh`. The oracle has
+   no version endpoint, so a long-lived service can silently predate the
+   harness commit it is supposed to be serving — on 2026-07-24 a worker hit
+   exactly that and banked "`overrides.parties` not yet live" as a finding
+   when the docs were right and the *process* was stale. Exit 1 means restart
+   before staging anything.
 2. **Brief one step.** Choose a single increment a worker can land inside its
    cap (default 60 min): a slice of the current roadmap item, one ISSUES.md
    entry, one verification. The brief must carry (a) the concrete goal,
@@ -89,6 +94,10 @@ edit.
    later one. Prefer staging through `mechanicLab`'s `overrides.parties`
    builder — abilities, switching, entry hooks, and AI decisions are all
    directly checkable against the stock ROM now.
+   **One brief is exempt from choosing freely: once S10 step (iv) lands, the
+   next battle-lane brief is the presentation-seam checkpoint (ROADMAP S10
+   §3).** More opcodes will always look like the better step — that is the
+   drift this ordering exists to stop.
 3. **Delegate.** `./tools/run-subagent.sh "<brief>"` (`--help` lists
    configuration flags). Provider-specific launch mechanics are load-bearing:
    - **Claude supervisor:** launch it in the background; a foreground Bash
