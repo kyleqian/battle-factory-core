@@ -564,6 +564,7 @@ import partyExitObjAsset from "../assets/gen/turn15-party-exit-obj.json" with { 
 import turn15FieldPpuAsset from "../assets/gen/turn15-field-ppu-20302.json" with { type: "json" };
 import faintAttackDarkBgAsset from "../assets/gen/battle-anim-bg-dark.json" with { type: "json" };
 import extremeSpeedAsset from "../assets/gen/battle-anim-extreme-speed.json" with { type: "json" };
+import battleAnimGhostBgAsset from "../assets/gen/battle-anim-ghost-bg.json" with { type: "json" };
 import { partyMenuLayers, partySelectEntryPhase, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutGoTextVisibleChars, partySendOutHealthboxDx, partySendOutMenuBounceTick, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_GO_TEXT, type PartyMenuIconLayer } from "./partySelect.ts";
 import { bgFadeY, objFadeY, type FadeTiming } from "./paletteFade.ts";
 import { fadeColor } from "./fadeRender.ts";
@@ -606,12 +607,17 @@ import {
   sceneOnSandAttackView,
   sceneOnMudSlapView,
   sceneOnDragonRageView,
+  sceneOnShadowPunchView,
   type SceneOnMovePresentationState,
 } from "./sceneOnPresentation.ts";
 import {
   extremeSpeedBackgroundVariant,
   extremeSpeedImpactAtAge,
 } from "./extremeSpeed.ts";
+import {
+  SHADOW_PUNCH_TRACE_ALPHA,
+  SHADOW_PUNCH_TRACE_BLEND_COEFF,
+} from "./shadowPunch.ts";
 import {
   SITRUS_ITEM_HEAL_TEXT_FIRST_AGE,
   SITRUS_ITEM_TEXT_CLEAR_AGE,
@@ -853,6 +859,7 @@ const spoinkFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentF
 const arcanineFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ARCANINE!;
 const dugtrioFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).DUGTRIO!;
 const charmeleonFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).CHARMELEON!;
+const haunterFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).HAUNTER!;
 const MURKROW_CORNER = { x: 144, y: 19 };
 const menuHealthboxPlayer = menuHealthboxPlayerAsset as SendOutHealthboxContentAsset;
 const battleAnimRocks = battleAnimRocksAsset as BattleAnimRocksAsset;
@@ -890,6 +897,8 @@ const spoinkBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpr
 const arcanineBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ARCANINE!;
 const dugtrioBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).DUGTRIO!;
 const charmeleonBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).CHARMELEON!;
+const haunterBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).HAUNTER!;
+const battleAnimGhostBg = battleAnimGhostBgAsset as { tileset: Tileset; palette: RgbColor[]; tilemap: Tilemap };
 const extremeSpeedBg = (extremeSpeedAsset as {
   background: {
     tileset: Tileset;
@@ -1103,6 +1112,39 @@ function extremeSpeedOpponentHealthbox(
 
 function extremeSpeedPlayerHealthbox(
   name: "ARCANINE" | "DUGTRIO",
+  hp: number,
+  maxHp: number,
+  gender: "male" | "female",
+): ReturnType<typeof composePlayerHealthbox> {
+  return composePlayerHealthbox(playerHealthboxAssets, {
+    name,
+    level: 50,
+    gender,
+    hpFraction: hp / maxHp,
+    status: "none",
+    currentHp: hp,
+    maxHp,
+  });
+}
+
+/** The staged HAUNTER-vs-ONIX pair's own resolved level-50 HP (mechanicLab `overrides.parties`, RAM-confirmed via `bin/oracle lab` - no explicit IVs/EVs given, so this fixture's own rolled values, not either mon's generic menu-anchor stats). */
+function shadowPunchOpponentHealthbox(
+  name: "HAUNTER" | "ONIX",
+  hp: number,
+  maxHp: number,
+  gender: "male" | "female",
+): ReturnType<typeof composeOpponentHealthbox> {
+  return composeOpponentHealthbox(healthboxAssemblyAssets, {
+    name,
+    level: 50,
+    gender,
+    hpFraction: hp / maxHp,
+    status: "none",
+  });
+}
+
+function shadowPunchPlayerHealthbox(
+  name: "HAUNTER" | "ONIX",
   hp: number,
   maxHp: number,
   gender: "male" | "female",
@@ -17124,6 +17166,133 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "CHARMELEON used" : "Foe CHARMELEON used",
       "DRAGON RAGE!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SHADOW_PUNCH") {
+    const view = sceneOnShadowPunchView(state);
+    const playerToOpponent =
+      view.attacker.species === "HAUNTER"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "HAUNTER"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged SHADOW_PUNCH pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSprite = playerToOpponent ? haunterBackSprite : haunterFrontSprite;
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const gpuDarken = (palette: readonly RgbColor[]) =>
+      palette.map((color) => {
+        const packed = mgbaDarkenColor(
+          color.r | (color.g << 8) | (color.b << 16),
+          view.backgroundBldy,
+        );
+        return {
+          r: packed & 0xff,
+          g: (packed >>> 8) & 0xff,
+          b: (packed >>> 16) & 0xff,
+        };
+      });
+    if (view.backgroundGhost) {
+      drawExtractedTileBg(fb, {
+        tileset: battleAnimGhostBg.tileset,
+        tilemap: battleAnimGhostBg.tilemap,
+        subpalettes: [gpuDarken(battleAnimGhostBg.palette)],
+      });
+    } else {
+      drawExtractedTileBg(fb, {
+        tileset: battleBg.static.tileset,
+        tilemap: battleBg.static.tilemap,
+        subpalettes: battleBg.palette.map(gpuDarken),
+      });
+    }
+    drawSpriteSheet(
+      fb,
+      targetSprite.tileset,
+      targetSprite.palette,
+      view.target.geometry.spriteCorner.x + view.targetShakeX2,
+      view.target.geometry.spriteCorner.y,
+    );
+    const clonePalette = blendPaletteToward(attackerSprite.palette, { r: 0, g: 0, b: 0 }, SHADOW_PUNCH_TRACE_BLEND_COEFF);
+    for (const clone of view.clones) {
+      drawSpriteSheetBlendedOverFb(
+        fb,
+        attackerSprite.tileset,
+        clonePalette,
+        view.attacker.geometry.spriteCorner.x + clone.x2,
+        view.attacker.geometry.spriteCorner.y,
+        SHADOW_PUNCH_TRACE_ALPHA.eva,
+        SHADOW_PUNCH_TRACE_ALPHA.evb,
+      );
+    }
+    if (view.attackerVisible) {
+      drawSpriteSheet(
+        fb,
+        attackerSprite.tileset,
+        attackerSprite.palette,
+        view.attacker.geometry.spriteCorner.x + view.attackerX2,
+        view.attacker.geometry.spriteCorner.y,
+      );
+    }
+    if (view.hitsplatVisible) {
+      drawSpriteSheetAffineStretchBlendedOverFb(
+        fb,
+        battleAnimHitsplat.tileset,
+        battleAnimHitsplat.palette,
+        view.target.geometry.animationCenter.x - 16,
+        view.target.geometry.animationCenter.y - 16,
+        TURN9_HITSPLAT_MATRIX,
+        TURN9_HITSPLAT_MATRIX,
+        12,
+        8,
+        true,
+        "live",
+      );
+    }
+    if (view.fistVisible) {
+      drawSpriteSheet(
+        fb,
+        subTileset(battleAnimHandsAndFeet.tileset, 0, 4),
+        battleAnimHandsAndFeet.palette,
+        view.target.geometry.animationCenter.x - 16,
+        view.target.geometry.animationCenter.y - 16,
+      );
+    }
+    if (playerToOpponent) {
+      drawSendOutHealthbox(
+        fb,
+        0,
+        shadowPunchOpponentHealthbox("ONIX", state.config.fieldProfile.opponentHp, 110, "male"),
+      );
+      drawComposedPlayerHealthbox(
+        fb,
+        shadowPunchPlayerHealthbox("HAUNTER", state.config.fieldProfile.playerHp, 120, "male"),
+      );
+    } else {
+      drawSendOutHealthbox(
+        fb,
+        0,
+        shadowPunchOpponentHealthbox("HAUNTER", state.config.fieldProfile.opponentHp, 120, "male"),
+      );
+      drawComposedPlayerHealthbox(
+        fb,
+        shadowPunchPlayerHealthbox("ONIX", state.config.fieldProfile.playerHp, 110, "male"),
+      );
+    }
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "HAUNTER used" : "Foe HAUNTER used",
+      "SHADOW PUNCH!",
       99,
     );
     return;

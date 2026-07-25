@@ -157,6 +157,23 @@ import {
   type DragonRageSide,
 } from "./dragonRage.ts";
 import { speciesFrontIdleRestOffset } from "./speciesIdleAnim.ts";
+import {
+  shadowPunchAttackerVisible,
+  shadowPunchAttackerX2,
+  shadowPunchBackgroundBldy,
+  shadowPunchBackgroundIsGhost,
+  shadowPunchClonePaintOrder,
+  shadowPunchClonePriority,
+  SHADOW_PUNCH_TARGET_SHAKE,
+  SHADOW_PUNCH_TARGET_SHAKE_FIRST_AGE,
+  SHADOW_PUNCH_FIST_FIRST_AGE,
+  SHADOW_PUNCH_FIST_LAST_AGE,
+  SHADOW_PUNCH_HITSPLAT_FIRST_AGE,
+  SHADOW_PUNCH_HITSPLAT_LAST_AGE,
+  SHADOW_PUNCH_PUNCH_TASK_FIRST_AGE,
+  type ShadowPunchClone,
+} from "./shadowPunch.ts";
+import { shakeMonOffsetAtTick } from "./shakeMon.ts";
 
 export type SceneOnBattlerSide = "player" | "opponent";
 
@@ -179,7 +196,8 @@ export interface SceneOnPresentationBattler {
     | "SPOINK"
     | "ARCANINE"
     | "DUGTRIO"
-    | "CHARMELEON";
+    | "CHARMELEON"
+    | "HAUNTER";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -555,6 +573,18 @@ export interface SceneOnDragonRageConfig {
   readonly animationAgeOffset?: number;
 }
 
+export interface SceneOnShadowPunchConfig {
+  readonly move: "SHADOW_PUNCH";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnFaintAttackFieldProfile>;
+  /** `AnimTask_AttackerPunchWithTrace`'s own closed-form inputs (shadowPunch.ts) - fixed per side for this move's one staged pair. */
+  readonly attackerSpriteId: number;
+  readonly attackerMoveSpeed: number;
+  readonly attackerSubpriority: number;
+  readonly animationAgeOffset?: number;
+}
+
 export type SceneOnMoveConfig =
   | SceneOnFirePunchConfig
   | SceneOnIcePunchConfig
@@ -576,7 +606,8 @@ export type SceneOnMoveConfig =
   | SceneOnBlazeKickConfig
   | SceneOnBindConfig
   | SceneOnEmberConfig
-  | SceneOnDragonRageConfig;
+  | SceneOnDragonRageConfig
+  | SceneOnShadowPunchConfig;
 
 export interface SceneOnMovePresentationState<
   TConfig extends SceneOnMoveConfig = SceneOnMoveConfig,
@@ -715,6 +746,23 @@ export interface SceneOnExtremeSpeedView {
   readonly dust: ReturnType<typeof extremeSpeedDustAtAge>;
   readonly hitsplats: ReturnType<typeof extremeSpeedHitsplatsAtAge>;
   readonly impact: ReturnType<typeof extremeSpeedImpactAtAge>;
+}
+
+export interface SceneOnShadowPunchView {
+  readonly age: number;
+  readonly animationAge: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly backgroundGhost: boolean;
+  readonly backgroundBldy: number;
+  readonly attackerVisible: boolean;
+  readonly attackerX2: number;
+  /** Back-to-front paint order (see `shadowPunchClonePaintOrder`'s own doc). */
+  readonly clones: readonly ShadowPunchClone[];
+  readonly clonePriority: 2 | 3;
+  readonly fistVisible: boolean;
+  readonly hitsplatVisible: boolean;
+  readonly targetShakeX2: number;
 }
 
 export interface SceneOnAerialAceView extends AerialAceAnimationState {
@@ -1749,6 +1797,48 @@ export function sceneOnExtremeSpeedView(
       animationAge,
       state.config.target.geometry.side,
     ),
+  };
+}
+
+export function sceneOnShadowPunchView(
+  state: SceneOnMovePresentationState,
+): SceneOnShadowPunchView {
+  if (state.config.move !== "SHADOW_PUNCH") {
+    throw new Error(`expected SHADOW_PUNCH presentation, got ${state.config.move}`);
+  }
+  const animationAge = state.age + (state.config.animationAgeOffset ?? 0);
+  const { attackerSpriteId, attackerMoveSpeed, attackerSubpriority } = state.config;
+  return {
+    age: state.age,
+    animationAge,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    backgroundGhost: shadowPunchBackgroundIsGhost(animationAge),
+    backgroundBldy: shadowPunchBackgroundBldy(animationAge),
+    attackerVisible: shadowPunchAttackerVisible(animationAge),
+    attackerX2: shadowPunchAttackerX2(
+      animationAge - SHADOW_PUNCH_PUNCH_TASK_FIRST_AGE,
+      attackerSpriteId,
+      attackerMoveSpeed,
+    ),
+    clones: shadowPunchClonePaintOrder(
+      animationAge - SHADOW_PUNCH_PUNCH_TASK_FIRST_AGE,
+      attackerSpriteId,
+      attackerMoveSpeed,
+    ),
+    clonePriority: shadowPunchClonePriority(attackerSubpriority),
+    fistVisible:
+      animationAge >= SHADOW_PUNCH_FIST_FIRST_AGE && animationAge <= SHADOW_PUNCH_FIST_LAST_AGE,
+    hitsplatVisible:
+      animationAge >= SHADOW_PUNCH_HITSPLAT_FIRST_AGE
+      && animationAge <= SHADOW_PUNCH_HITSPLAT_LAST_AGE,
+    targetShakeX2: shakeMonOffsetAtTick(
+      SHADOW_PUNCH_TARGET_SHAKE.xOffset,
+      SHADOW_PUNCH_TARGET_SHAKE.yOffset,
+      SHADOW_PUNCH_TARGET_SHAKE.numTimes,
+      SHADOW_PUNCH_TARGET_SHAKE.frameDelay,
+      animationAge - SHADOW_PUNCH_TARGET_SHAKE_FIRST_AGE,
+    ).x2,
   };
 }
 
