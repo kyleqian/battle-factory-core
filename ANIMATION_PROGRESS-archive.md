@@ -819,3 +819,116 @@ remainder named otherwise).
 
 **Evidence.** `npm test` 2201/2201 (2190 + 11 new). `npm run build` green.
 
+
+## DRAGON_RAGE rung 5: wired through the Scene-ON seam, comparator built, dense run finds a multi-tier capture-lag residual — still unsupported (2026-07-25)
+
+**Verdict: real progress on every ordered remainder item, but no green dense
+window — MOVE_DRAGON_RAGE stays *unsupported*, not `partial`, per the
+rubric's own "a meaningful dense window is green" bar for `partial`.**
+
+**Rung 5.1 — presentation wiring.** Extended `tools/extract/extract-battle-mon-pics.ts`
+with `CHARMELEON` (mechanical species-list addition, same shape as
+SPOINK/ARCANINE/DUGTRIO — additive only, `mon-pic-coords.json` was already
+complete). Added `CHARMELEON` to `SceneOnPresentationBattler`'s species
+union, a `SceneOnDragonRageConfig` + `SceneOnDragonRageView` pair, and
+`sceneOnDragonRageView` to `sceneOnPresentation.ts` — driven entirely by
+`dragonRageSchedule(0)` plus the already-ported `shakeMonOffsetAtRenderTick`/
+`slideMonToOffsetAtTick`/`slideMonToOriginalPosAtTick`/
+`dragonRageFireSpitStateAtAge`/`dragonRageFirePlumeStateAtAge` (no turn-keyed
+branches, no absolute-tick constants). `battleScene.ts` gained the matching
+`DRAGON_RAGE` draw case: attacker/target sprites offset by the composed
+shake+slide state, the fire-spit sprite drawn via the existing
+`drawSpriteSheetAffineRotate` primitive (already generic enough for a fresh
+matrix, no new draw code needed), and the 8 fire-plume sprites split
+front/behind the target by their own per-spawn `subpriorityOffset` (2 vs 66)
+— the fire-spit-vs-attacker order reuses `dragonBreathEmbersInFrontOfAttacker`
+directly, since the fire-spit's own `createsprite` subpriority
+(`targetSubpriority - 2`) is the identical shape EMBER's own embers use.
+
+**Rung 5.2 — portable comparator + RGB probe.** `tools/probe/dump-dragonrage-rgb.py`
+mirrors `run-battle-lab-rgb.py`'s capture-loop/CLI shape
+(`<scenario> <output> <rgb-dir>`) combined with `dump-dragonrage-full.py`'s
+own template-pointer sprite/task identification, so it drives exactly like
+`emberPortable.ts` drives its own probe.
+`tools/compare/dragonRagePortable.ts` checks both a component read (attacker/
+target offset, fire-spit position/frame/matrix, fire-plume positions — self-
+calibrated against ONIX's own species-specific baseline OAM residual rather
+than hardcoding it, since the residual is per-orientation) and full
+framebuffer pixels. Both fixtures staged with real RAM-read HP/gender
+(`tools/compare/fixtures/dragon-rage-{player,opponent}-charmeleon-*.json`):
+CHARMELEON 133/133, ONIX 110/110, both male in both orientations (read
+directly from the probe's own `player`/`opponent`/`*Personality` fields, not
+assumed).
+
+**A real bug the first comparator run caught immediately, fixed:** the draw
+block's healthbox branch had player/opponent backwards, calling ONIX's
+hardcoded-117-max-HP helper (`onixPlayerHealthboxContentForState`) for what
+is actually a 133-HP CHARMELEON slot in this fixture — `composePlayerHealthbox`
+threw immediately (`invalid HP 133/117`), so this was caught before any
+pixel comparison ran, not silently wrong. Replaced with fully generic
+`composeOpponentHealthbox`/`composePlayerHealthbox` calls keyed off a new
+`SceneOnDragonRageFieldProfile` (adds explicit `playerMaxHp`/`opponentMaxHp`
+— no existing shared field profile carries them, since every prior move's
+fixtures reused one canonical battler's own hardcoded-maxHP helper).
+
+**Dense run: component math is exact, framebuffer capture lag is not
+uniform.** At zero capture lag (comparing the view directly against the
+probe's own RAM reads, no display-timing adjustment), every mechanism's
+position/frame/matrix math matches the oracle's RAM state exactly — this
+reconfirms rung 3-4's Tier-1 pinning, now cross-checked against a
+second, independently-captured probe. The FRAMEBUFFER (photographed pixel)
+comparison is where this rung stops short: probing capture-lag values 0-3
+against the cached RGB dump (player-attacker fixture) shows the lag is
+**not one uniform constant** the way it is for every other staged move so
+far —
+- Attacker `AnimTask_ShakeMon`'s own 2-tick toggle pattern needs lag=**2**
+  (149/150 frames of the pure-shake window 89-238 match at lag=2, vs.
+  48/150 at the codebase's normal lag=1 — checked directly, mismatch
+  direction confirmed oracle-vs-app, alternates in lockstep with the
+  shake's own 2-tick period, exactly the signature of a one-tick phase
+  shift, not a value error).
+- The fire-spit sprite's own translation wants lag=**1**: at lag=2 (tuned
+  for the shake), frame 175's diff (`108-112,97-98`: oracle shows fire
+  colors `255/0/0`/`255/99/16`/`255/198/33`, app shows background) is the
+  fire-spit appearing one frame EARLIER in the real oracle than the
+  lag=2 model predicts.
+- Target `x2` drifts by an unmodeled **-1** starting exactly at the target
+  shake's own creation tick (frame 186 onward in the player-attacker
+  fixture) and holds through at least frame 193 — `DRAGON_RAGE_TARGET_SHAKE`'s
+  own `xOffset` is 0, so the port correctly predicts a constant x2, but
+  real RAM shows it stepping down by one right at that tick. Isolated via
+  the comparator's own component check (self-calibrated baseline), not
+  yet root-caused (candidate: some interaction between the SlideMonToOffset
+  dummy sprite's own finish branch, still alive until one tick after its
+  4-tick duration per `slideMonToOffsetDestroyTick`, and the target shake
+  task's creation in the same window — not confirmed).
+
+This is the same category of finding BLAZE_KICK's own module already
+documents (matrix vs. palette writes reaching the framebuffer on different
+ticks) — DRAGON_RAGE has five independent mechanisms sharing one move body,
+and at least three distinct lag/drift behaviors among them. Properly
+resolving this needs its own per-mechanism RAM-vs-photo bisection (the
+"disciplined probe cycle" the step brief calls for), which this rung's
+remaining time did not allow after building and running the comparator
+itself. Per the step brief's own instruction, the code is left at the
+codebase's normal lag=1 default (the least speculative choice, matching
+every other staged move) rather than blind-fitting lag=2 to only partially
+fix the picture — `battleScene.ts`'s `DRAGON_RAGE` case is real, wired,
+and buildable, but its framebuffer output does not yet match the oracle.
+
+**Not attempted:** no exhaustive per-mechanism bisection, no opponent-
+attacker-orientation framebuffer run (the player-attacker fixture's own
+residual already blocks a green window), no coverage entry.
+
+**Remainder, in cost order:** (1) bisect the target x2 drift's own root
+cause (likely a short, disciplined RAM probe around ticks 185-194 of the
+already-staged fixture); (2) determine whether the shake/fire-spit lag
+split is genuinely per-mechanism-type (as BLAZE_KICK's own precedent
+suggests) or reveals a modeling bug in one of the two RAM-tick-to-display
+mappings; (3) re-run the dense comparator, both orientations, twice each,
+once the residuals are resolved; (4) only then promote a coverage entry.
+
+**Evidence.** `npm test` 2201/2201 (unchanged — no new Tier-1 test this
+rung; the comparator's own findings are dev-time evidence, not production
+logic). `npm run build` green.
+
