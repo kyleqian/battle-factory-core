@@ -40,33 +40,6 @@ non-terminal next-mon path) also depend on this same new role.
 The source-faithful fix binds a real "currently-processing-fainted-battler"
 role once that orchestration loop exists — not a second alias onto `target`.
 
-## #42 — `Cmd_checkteamslost`/`gBattleOutcome` needs party-HP modeling this engine doesn't have
-
-**Symptom:** nothing in the registered kernel can compute a real
-`battleOutcome` transition (0 -> WON/LOST) yet. `BattleScriptRulesContext`
-models four active battlers only; it has no party (bench) concept at all.
-
-**Confirmed** (2026-07-24, S10 step (ii) RUNG 4): `Cmd_tryfaintmon`
-(`battle_script_commands.c:2965-3050`) itself never touches `gBattleOutcome`
-— it only sets `HITMARKER_FAINTED`/`HITMARKER_PLAYER_FAINTED` and jumps into
-`BattleScript_FaintAttacker`/`FaintTarget`. The actual transition happens deep
-inside `BattleScript_HandleFaintedMon` -> `Cmd_checkteamslost`
-(`:3534-3576`), which sums `MON_DATA_HP` across all six `gPlayerParty`/
-`gEnemyParty` slots — machinery this engine has never built (`roundController.ts`
-tracks a `BattleParty` at a *higher* layer, entirely disconnected from the
-Battle Script machine). `docs/hit-chain-ground-truth.md`'s KO scenario
-correctly banks the ROM's real `battleOutcome: 0 -> 1` transition on turn 3's
-kill, but that number comes from the full ROM, not from anything the RUNG 4
-worker was scoped to implement (two opcodes: `seteffectwithchance`,
-`tryfaintmon`) — registering `checkteamslost` source-completely needs the
-party-HP model plumbed into the machine first.
-
-**Leads:** ROADMAP S10 step (iv) ("roundController.ts consumes that outcome
-instead of a fixture") and any future `checkteamslost` registration both need
-this. Until then, `battleOutcome` stays exactly what it already was: a raw
-pass-through context field (`battleScriptActionAdmission.ts:3619` reads it,
-nothing in the registered opcode set writes it).
-
 ## #41 — Production engine modules import canonical RAM recordings
 
 **Symptom:** shipped `src/engine/` code reads recorded state from the single

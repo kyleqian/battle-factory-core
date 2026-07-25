@@ -1,4 +1,101 @@
 ---
+## 436 — S10 step (iii): opcode 73 (`moveend`) registered — hit chain now runs to script completion
+
+- **State:** tree green at **181 files / 2166 tests** (+31), build green.
+  `createBattleScriptStatusRulesHandlers` now composes **46** opcodes (was
+  45): opcode 73 `B_SCR_OP_MOVEEND`/`Cmd_moveend`, in a new
+  `src/engine/battleScriptMoveEndOpcode.ts`. The plain-hit staged integration
+  test (`battleScriptHitChainOpcode.test.ts`'s RUNG 4 block) now runs
+  `BattleScript_HitFromAtkCanceler` all the way through `moveend` to the
+  script's own `end` (`haltReason.kind: "terminal"`), with the RNG ledger
+  still exactly the banked 4 rolls (moveend itself draws none on this path).
+  The KO scenario's block (`playfaintcry BS_TARGET`, ISSUES #43) is
+  byte-for-byte unchanged — it never reaches `moveend`.
+- **Did:** the do-while/switch state loop, `moveendState` increment
+  semantics, and `endMode`/`endState` postlude (all three assembled forms:
+  `moveendall`/`moveendcase`/`moveendto`-`moveendfromto`) are implemented
+  source-completely — that's the opcode. Execution order is strictly numeric
+  (0,1,...,16,17; the C file's *physical* case order is 0..7,11,12,8..10,13..17,
+  but moveendState is a plain counter). States 0 (RAGE), 6 (CHOICE_MOVE), 7
+  (CHANGED_ITEMS), 13 (SUBSTITUTE), 14 (UPDATE_LAST_MOVES), 15 (MIRROR_MOVE),
+  and 16's singles path (NEXT_TARGET) are source-complete, mostly by reusing
+  already-banked dependency-ladder reducers (`applyBattleScriptMoveEnd*Ownership`,
+  `resolveBattleScriptMoveEndNextTarget`) from prior sessions. State 1
+  (DEFROST) and 8-10 (sprite visibility) reuse the already-tested
+  `executeBattleScriptMoveEndControllerCase` dependency step directly — no
+  duplicated logic. Seven barriers, each gated on its own real trigger and
+  each with a reachability + pass-through test in the new
+  `tests/battleScriptMoveEndOpcode.test.ts` (ratchet pin added:
+  `battleScriptMoveEndOpcode.ts` → 7): state 2/5 `ABILITYEFFECT_SYNCHRONIZE`/
+  `ATK_SYNCHRONIZE`'s `ABILITY_SYNCHRONIZE` branch (`gBattleStruct->
+  synchronizeMoveEffect` unmodeled); state 3 `ABILITYEFFECT_ON_DAMAGE`'s
+  7 named contact abilities; state 4 `ABILITYEFFECT_IMMUNITY`'s 8 named
+  status-curing abilities (any of the 4 battlers); state 11
+  `ITEMEFFECT_MOVE_END`'s 9 named cure/restore hold effects (any battler);
+  state 12 `ITEMEFFECT_KINGSROCK_SHELLBELL`'s King's-Rock/Shell-Bell branch
+  (gated on `battleMoveDamage != 0`, matching source); state 16's doubles
+  replay (`BATTLE_TYPE_DOUBLE`-gated, unreachable for Level-50 singles).
+- **Scope discovery (say-why, not silent):** registering opcode 73 is global
+  — `factoryBattleScriptDecision.ts`'s staged asleep-move adapter (TYROGUE/
+  PLUSLE) had been deliberately relying on opcode 73 staying unregistered as
+  its own stopping checkpoint (`phase: "move-end-barrier"`). Once registered,
+  that script (which always reaches `BattleScript_MoveEnd`) now runs
+  genuinely instead of halting there, reaching the same `end` terminal. Fixed
+  minimally: `FactoryBattleScriptDecisionRules.phase` gained a
+  `"script-complete"` member (reusing the existing `machine-barrier` boundary
+  shape, now reporting `B_SCR_OP_END`/`Cmd_end` instead of the old
+  unregistered-opcode landing site) rather than inventing a new shared
+  `BattleBoundary` kind. Updated the 4 dependent assertions in
+  `factoryBattleScriptDecision.test.ts` (opcode/dispatcher/instructionCount/
+  phase/`moveendState`/the extra sprite-visibility event) and the stale
+  `battle-script-move-end-facts.json` "evidence-only, unregistered" receipt
+  field (regenerated via its extractor). Separately: the RUNG 1-3 hit-chain
+  opcodes (`attackanimation`/`hitanimation`/etc.) gate on the injected
+  `isControllerIdle` port, not on `BattleScriptSchedulerState.
+  pendingControllerBattlers`, so the RUNG 4 test's manual step sequence never
+  acknowledged the battlers they mark pending — invisible until moveend's
+  controller-delegated states (states 1/8/9/10) started checking that real
+  scheduler field. Fixed by acknowledging between steps in the test (matching
+  what `factoryBattleScriptDecision.ts`'s own `acknowledgePendingControllers`
+  already does in production) — not a production bug, a test-only gap.
+- **Next:** step (iv) — close the loop: one legal Level-50 Factory battle
+  runs to a real terminal outcome through `submitBattleDecision`, and
+  `roundController.ts` consumes that outcome instead of a fixture. Needs
+  ISSUES #42 (`checkteamslost`/party-HP modeling) solved first for a *real*
+  terminal outcome. ISSUES #43 (`BS_TARGET` in
+  `resolveRulesBattlerForBattleScript`) remains open and unrelated to this
+  step — fixing it would let the KO scenario's faint cutscene advance past
+  `playfaintcry`, but nothing here required it.
+- **Notes:** no presentation/render/`battleScene` edits; no oracle traces
+  (Tier-1 only); no new production imports of canonical recordings.
+- **Supervisor fold (2026-07-24 ~20:15):** merged and verified at **182
+  files / 2172 tests**, build green: (1) side-lane step (iv) prep —
+  `docs/faint-outcome-ground-truth.md` + `tools/probe/
+  verify-faint-outcome-ground-truth.ts` (16 live checks PASS, reran
+  independently: six unregistered opcodes on the minimal WIN path;
+  `HandleFaintedMonActions` is a C-side orchestration loop, not an opcode;
+  `getexp` dead for Frontier; `checkteamslost` reads party-wide HP; ISSUES
+  #43 is two selector gaps, BS_TARGET + BS_FAINTED) and
+  `docs/round-controller-outcome-seam.md` (`resolveRoundBattle` has zero
+  production call sites; five-piece dependency-ordered seam plan).
+  **Decision (supervisor, reversible):** the step (iv) party-HP slice uses
+  the seam doc's **Option A** — extend `BattleScriptRulesContext` in place,
+  the established RUNG-2/3 growth pattern — not a second wrapper context.
+  (2) animation lane — MOVE_EMBER at honest `partial` (63/63+63/63 opponent
+  orientation; 63/63+61/63 player orientation, 2-frame creation-tick
+  remainder of the known same-frame-sprite-step class; two real bugs fixed
+  en route: descending `sSpriteOrder` tie-break, wrong full-HP fixture
+  assumption) after a MUD_SLAP verification pass (already `exact` since
+  `c1df4a9`; both comparators re-verified live 51/51×4 — supervisor
+  mis-scoped that brief, per-move status now checked before briefing).
+  A follow-up worker on the 2-frame remainder is in flight. (3) the moveend
+  worker's ROADMAP checkpoint note is accurate status-only content — kept,
+  with the reminder that ROADMAP stays supervisor-owned. Fixed the RUNG 4 KO
+  test's stale title (it blocks at `playfaintcry`, not `dofaintanimation`);
+  appended the `isControllerIdle`-vs-scheduler-field papercut to
+  PAPERCUTS.md.
+
+---
 ## 435 — S10 step (ii) RUNG 4: seteffectwithchance + tryfaintmon registered — sixteen-opcode hit chain complete
 
 - **State:** tree green at **178 files / 2135 tests** (+16), build green.
