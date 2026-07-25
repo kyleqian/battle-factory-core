@@ -25,6 +25,7 @@ import {
   sceneOnDragonBreathView,
   sceneOnFirePunchView,
   sceneOnRockSlideView,
+  sceneOnShadowPunchView,
 } from "../src/engine/sceneOnPresentation.ts";
 import {
   CANONICAL_DRAGON_BREATH_FIRE_GEOMETRY,
@@ -249,6 +250,100 @@ describe("relative Battle Scene ON move presentation", () => {
       bldy: 1,
     });
     expect(stage.config).toEqual(profileBefore);
+  });
+
+  it("carries ONIX's frozen front-idle x2 into SHADOW_PUNCH's target shake, opponent-side (RAM-probed, mechanic-shadow-punch-haunter-onix-dense)", () => {
+    const stage = createSceneOnMovePresentation({
+      move: "SHADOW_PUNCH",
+      attacker: {
+        species: "HAUNTER",
+        geometry: {
+          side: "player",
+          spriteCorner: { x: 40, y: 56 },
+          animationCenter: { x: 72, y: 96 },
+          battlePositionCenter: { x: 72, y: 80 },
+        },
+      },
+      target: {
+        species: "ONIX",
+        geometry: {
+          side: "opponent",
+          spriteCorner: { x: 145, y: 10 },
+          animationCenter: { x: 177, y: 42 },
+          battlePositionCenter: { x: 176, y: 40 },
+        },
+      },
+      attackerSpriteId: 6,
+      attackerMoveSpeed: 8,
+      attackerSubpriority: 30,
+      fieldProfile: {
+        playerHp: 120,
+        opponentHp: 110,
+        playerStatus: "none",
+        playerGender: "male",
+        opponentGender: "male",
+      },
+    });
+    // RAM-probed (`dump-shadowpunch-rgb.py`, ages 40-60): ONIX's own frozen
+    // `Anim_RapidHorizontalHops` x2=1 residual holds through age 48, then
+    // `AnimTask_ShakeMon`'s own `+1`-shifted timeline takes over - NOT the
+    // naive `animationAge - FIRST_AGE` a fresh port would guess (that reads
+    // 0/3 one tick early at every toggle).
+    expect(sceneOnShadowPunchView({ ...stage, age: 40 }).targetShakeX2).toBe(1);
+    expect(sceneOnShadowPunchView({ ...stage, age: 48 }).targetShakeX2).toBe(1);
+    expect(sceneOnShadowPunchView({ ...stage, age: 49 }).targetShakeX2).toBe(0);
+    expect(sceneOnShadowPunchView({ ...stage, age: 50 }).targetShakeX2).toBe(0);
+    expect(sceneOnShadowPunchView({ ...stage, age: 51 }).targetShakeX2).toBe(3);
+    expect(sceneOnShadowPunchView({ ...stage, age: 52 }).targetShakeX2).toBe(3);
+    expect(sceneOnShadowPunchView({ ...stage, age: 53 }).targetShakeX2).toBe(0);
+    expect(sceneOnShadowPunchView({ ...stage, age: 56 }).targetShakeX2).toBe(3);
+    expect(sceneOnShadowPunchView({ ...stage, age: 57 }).targetShakeX2).toBe(0);
+    expect(sceneOnShadowPunchView({ ...stage, age: 70 }).targetShakeX2).toBe(0);
+  });
+
+  it("does NOT apply the front-idle residual to a player-side SHADOW_PUNCH target (RAM-probed, mechanic-shadow-punch-onix-haunter-dense: back sprite uses an unported idle family)", () => {
+    const stage = createSceneOnMovePresentation({
+      move: "SHADOW_PUNCH",
+      attacker: {
+        species: "HAUNTER",
+        geometry: {
+          side: "opponent",
+          spriteCorner: { x: 144, y: 13 },
+          animationCenter: { x: 176, y: 45 },
+          battlePositionCenter: { x: 176, y: 40 },
+        },
+      },
+      target: {
+        species: "ONIX",
+        geometry: {
+          side: "player",
+          spriteCorner: { x: 40, y: 48 },
+          animationCenter: { x: 72, y: 88 },
+          battlePositionCenter: { x: 72, y: 80 },
+        },
+      },
+      attackerSpriteId: 8,
+      attackerMoveSpeed: -8,
+      attackerSubpriority: 40,
+      fieldProfile: {
+        playerHp: 110,
+        opponentHp: 120,
+        playerStatus: "none",
+        playerGender: "male",
+        opponentGender: "male",
+      },
+    });
+    // RAM-probed: no idle residual (player-side back sprite), and age 48
+    // (the shake task's own creation-minus-one tick) reads a clean 0, NOT
+    // the raw xOffset transient DRAGON_RAGE's own attacker-shake call site
+    // shows at the same relative tick - a real per-call-site difference.
+    expect(sceneOnShadowPunchView({ ...stage, age: 40 }).targetShakeX2).toBe(0);
+    expect(sceneOnShadowPunchView({ ...stage, age: 48 }).targetShakeX2).toBe(0);
+    expect(sceneOnShadowPunchView({ ...stage, age: 49 }).targetShakeX2).toBe(0);
+    expect(sceneOnShadowPunchView({ ...stage, age: 51 }).targetShakeX2).toBe(3);
+    expect(sceneOnShadowPunchView({ ...stage, age: 52 }).targetShakeX2).toBe(3);
+    expect(sceneOnShadowPunchView({ ...stage, age: 53 }).targetShakeX2).toBe(0);
+    expect(sceneOnShadowPunchView({ ...stage, age: 57 }).targetShakeX2).toBe(0);
   });
 
   it("derives opposite-side ROCK SLIDE geometry from immutable relative input", () => {
