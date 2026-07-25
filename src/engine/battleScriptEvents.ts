@@ -85,6 +85,13 @@ export type BattleScriptSemanticEventPayload =
     status1: number;
   }>
   | Readonly<{
+    /** BtlController_EmitStatusIconUpdate(status1, status2) -- Cmd_updatestatusicon's icon-redraw notify, distinct from the data-sync set-battler-status-data. */
+    kind: "status-icon-update";
+    battler: BattleScriptBattlerId;
+    status1: number;
+    status2: number;
+  }>
+  | Readonly<{
     kind: "set-battler-pp-data";
     battler: BattleScriptBattlerId;
     /** gCurrMovePos slot, and the raw post-deduction u8 EmitSetMonData(REQUEST_PPMOVE1_BATTLE + slot) sends. */

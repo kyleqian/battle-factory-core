@@ -59,7 +59,18 @@ const ALLOWED_RECORDING_IMPORTS: ReadonlySet<string> = new Set([
  * is not on the path the step claims to make executable.
  */
 const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
-  ["src/engine/battleScriptHitChainOpcode.ts", 19],
+  // 19 -> 25 (SetMoveEffect status-write quartet registration, PROGRESS 444):
+  // Cmd_seteffectwithchance's own two barriers were retired (real dispatch via
+  // applySetMoveEffect), but that function adds 3 of its own -- MOVE_EFFECT_SLEEP
+  // and MOVE_EFFECT_TOXIC (their own scripts call the still-unregistered
+  // Cmd_seteffectprimary instead of this dispatch site) and the whole family-B
+  // (status2/misc, effectByte > PRIMARY_STATUS_MOVE_EFFECT) switch, e.g. FLINCH.
+  // The two new opcodes add their own malformed/uncovered-input barriers:
+  // Cmd_printfromtable (3: bad operand shape, an unrecognized table pointer
+  // outside the quartet's own 7 tables, an out-of-range MULTISTRING_CHOOSER
+  // index) and Cmd_updatestatusicon (2: bad operand shape, the doubles-only
+  // BS_ATTACKER_WITH_PARTNER branch). Net: -2 retired + 3 + 3 + 2 = +6.
+  ["src/engine/battleScriptHitChainOpcode.ts", 25],
   ["src/engine/battleScriptAttackCancelerOpcode.ts", 5],
   ["src/engine/battleScriptMoveEndOpcode.ts", 7],
   ["src/engine/battleScriptJumpifbyteOpcode.ts", 1],

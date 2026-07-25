@@ -1218,6 +1218,29 @@ describe("production resultmessage (Cmd_resultmessage) dispatch", () => {
 
 const MOVE_EFFECT_CERTAIN = 1 << 7;
 const MUD_SLAP = 189; // EFFECT_ACCURACY_DOWN_HIT, secondaryEffectChance 100 -- guarantees the chance-roll succeeds regardless of the actual u16.
+const BODY_SLAM = 34; // EFFECT_PARALYZE_HIT, secondaryEffectChance 30 -- certain === (percentChance >= 100) is FALSE for this move.
+const MOVE_EFFECT_POISON = 2;
+const MOVE_EFFECT_BURN = 3;
+const MOVE_EFFECT_FREEZE = 4;
+const MOVE_EFFECT_PARALYSIS = 5;
+const MOVE_EFFECT_SLEEP = 1;
+const MOVE_EFFECT_TOXIC = 6;
+const MOVE_EFFECT_FLINCH = 8;
+const STATUS1_POISON = 1 << 3;
+const STATUS1_BURN_BIT = 1 << 4;
+const STATUS1_FREEZE_BIT = 1 << 5;
+const STATUS1_PARALYSIS_BIT = 1 << 6;
+const ABILITY_LIMBER = 7;
+const ABILITY_IMMUNITY = 17;
+const ABILITY_SHIELD_DUST = 19;
+const ABILITY_MAGMA_ARMOR = 40;
+const ABILITY_WATER_VEIL = 41;
+const HITMARKER_STATUS_ABILITY_EFFECT = 1 << 13;
+const B_MSG_STATUSED = 0;
+const B_MSG_STATUSED_BY_ABILITY = 1;
+const B_MSG_ABILITY_PREVENTS_MOVE_STATUS = 0;
+const B_MSG_ABILITY_PREVENTS_ABILITY_STATUS = 1;
+const B_MSG_STATUS_HAD_NO_EFFECT = 2;
 
 describe("production seteffectwithchance (Cmd_seteffectwithchance) dispatch", () => {
   it("registers B_SCR_OP_SETEFFECTWITHCHANCE", () => {
@@ -1234,33 +1257,341 @@ describe("production seteffectwithchance (Cmd_seteffectwithchance) dispatch", ()
     expect(result.state.rulesContext.multiHitEffect).toBe(0);
   });
 
-  describe("(b) unsupported-branch barriers", () => {
-    it("halts on MOVE_EFFECT_CERTAIN with NO_EFFECT absent (SetMoveEffect unmodeled)", () => {
-      const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_CERTAIN });
-      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
-      expect(result.kind).toBe("halted");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 2921 });
-    });
+  it("MOVE_EFFECT_CERTAIN alone (effect byte 0 once the CERTAIN bit is stripped): no barrier, passes through -- sStatusFlagsForMoveEffects[0] matches no switch case in real source", () => {
+    const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_CERTAIN });
+    const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.rulesContext.moveEffectByte).toBe(0);
+    expect(result.state.rulesContext.battlers[1]!.status1).toBe(0);
+  });
 
-    it("MOVE_EFFECT_CERTAIN but MOVE_RESULT_NO_EFFECT set: no barrier, passes through untouched", () => {
-      const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_CERTAIN, moveResultFlags: 1 << 3 });
+  it("MOVE_EFFECT_CERTAIN but MOVE_RESULT_NO_EFFECT set: no barrier, passes through untouched", () => {
+    const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_CERTAIN, moveResultFlags: 1 << 3 });
+    const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.rulesContext.moveEffectByte).toBe(0);
+  });
+
+  it("chance roll succeeds but moveEffectByte is 0: no barrier, still consumes the roll and passes through", () => {
+    const rc = context(0, {}, { currentMove: MUD_SLAP, moveEffectByte: 0 });
+    const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.rng.calls).toBe(1);
+  });
+
+  describe("SetMoveEffect status-write quartet (registered)", () => {
+    it("POISON: certain-bit dispatch statuses the target, calls BattleScript_MoveEffectPoison, zero extra RNG, party slot synced", () => {
+      const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_POISON | MOVE_EFFECT_CERTAIN });
       const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
       if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
-      expect(result.state.rulesContext.moveEffectByte).toBe(0);
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_MoveEffectPoison"));
+      expect(result.state.callStack.length).toBe(1);
+      expect(result.state.rng.calls).toBe(0);
+      expect(result.state.rulesContext.battlers[1]!.status1).toBe(STATUS1_POISON);
+      expect(result.state.rulesContext.party.opponent[0]!.status1).toBe(STATUS1_POISON);
+      expect(result.state.rulesContext.multistringChooser).toBe(B_MSG_STATUSED);
+      expect(result.state.rulesContext.selectorRoles.effectBattler).toBe(1);
+      expect(result.state.events).toEqual([
+        expect.objectContaining({ kind: "set-battler-status-data", battler: 1, status1: STATUS1_POISON }),
+      ]);
     });
 
-    it("halts when the chance roll succeeds with a nonzero effect byte (SetMoveEffect unmodeled)", () => {
-      const rc = context(0, {}, { currentMove: MUD_SLAP, moveEffectByte: 1 });
-      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
-      expect(result.kind).toBe("halted");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 2927 });
-    });
-
-    it("chance roll succeeds but moveEffectByte is 0: no barrier, still consumes the roll and passes through", () => {
-      const rc = context(0, {}, { currentMove: MUD_SLAP, moveEffectByte: 0 });
+    it("BURN: certain-bit dispatch statuses the target and calls BattleScript_MoveEffectBurn", () => {
+      const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_BURN | MOVE_EFFECT_CERTAIN });
       const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
       if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_MoveEffectBurn"));
+      expect(result.state.rulesContext.battlers[1]!.status1).toBe(STATUS1_BURN_BIT);
+      expect(result.state.rulesContext.party.opponent[0]!.status1).toBe(STATUS1_BURN_BIT);
+    });
+
+    it("FREEZE: certain-bit dispatch statuses the target and calls BattleScript_MoveEffectFreeze (no weather set)", () => {
+      const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_FREEZE | MOVE_EFFECT_CERTAIN });
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_MoveEffectFreeze"));
+      expect(result.state.rulesContext.battlers[1]!.status1).toBe(STATUS1_FREEZE_BIT);
+    });
+
+    it("FREEZE: sun weather blocks the freeze (WEATHER_HAS_EFFECT && B_WEATHER_SUN)", () => {
+      const B_WEATHER_SUN = (1 << 5) | (1 << 6);
+      const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_FREEZE | MOVE_EFFECT_CERTAIN, weather: B_WEATHER_SUN });
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.programCounter).not.toBe(labelPc("BattleScript_MoveEffectFreeze"));
+      expect(result.state.rulesContext.battlers[1]!.status1).toBe(0);
+    });
+
+    it("PARALYSIS: certain-bit dispatch statuses the target and calls BattleScript_MoveEffectParalysis", () => {
+      const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_PARALYSIS | MOVE_EFFECT_CERTAIN });
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_MoveEffectParalysis"));
+      expect(result.state.rulesContext.battlers[1]!.status1).toBe(STATUS1_PARALYSIS_BIT);
+    });
+
+    it("chance-roll dispatch site (100%-chance move) also reaches applySetMoveEffect and consumes exactly one RNG call", () => {
+      const rc = context(0, {}, { currentMove: MUD_SLAP, moveEffectByte: MOVE_EFFECT_PARALYSIS });
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_MoveEffectParalysis"));
       expect(result.state.rng.calls).toBe(1);
+      expect(result.state.rulesContext.battlers[1]!.status1).toBe(STATUS1_PARALYSIS_BIT);
+    });
+
+    it("already statused: no-op pass-through, status1 unchanged", () => {
+      const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_PARALYSIS | MOVE_EFFECT_CERTAIN }, { status1: STATUS1_BURN_BIT });
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.rulesContext.battlers[1]!.status1).toBe(STATUS1_BURN_BIT);
+      expect(result.state.events).toEqual([]);
+    });
+
+    it("Poison-type target: silently immune, no message, no status (Gen 3 secondary-effect quirk)", () => {
+      const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_POISON | MOVE_EFFECT_CERTAIN }, { types: ["TYPE_POISON", "TYPE_POISON"] });
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.rulesContext.battlers[1]!.status1).toBe(0);
+      expect(result.state.events).toEqual([]);
+    });
+
+    it("Immunity ability, certain: BattleScript_PSNPrevention call, ability-prevents message, hitMarker's ability-effect bit cleared", () => {
+      const rc = context(
+        0,
+        {},
+        { moveEffectByte: MOVE_EFFECT_POISON | MOVE_EFFECT_CERTAIN, hitMarker: HITMARKER_STATUS_ABILITY_EFFECT },
+        { ability: ABILITY_IMMUNITY },
+      );
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_PSNPrevention"));
+      expect(result.state.rulesContext.battlers[1]!.status1).toBe(0);
+      expect(result.state.rulesContext.multistringChooser).toBe(B_MSG_ABILITY_PREVENTS_ABILITY_STATUS);
+      expect(result.state.rulesContext.hitMarker & HITMARKER_STATUS_ABILITY_EFFECT).toBe(0);
+      expect(result.state.rulesContext.lastUsedAbility).toBe(ABILITY_IMMUNITY);
+    });
+
+    it("Immunity ability, certain, no ability-effect hitmarker: ability-prevents-move-status message", () => {
+      const rc = context(
+        0,
+        {},
+        { moveEffectByte: MOVE_EFFECT_POISON | MOVE_EFFECT_CERTAIN },
+        { ability: ABILITY_IMMUNITY },
+      );
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_PSNPrevention"));
+      expect(result.state.rulesContext.multistringChooser).toBe(B_MSG_ABILITY_PREVENTS_MOVE_STATUS);
+    });
+
+    it("Steel-type target with the ability-effect hitmarker, certain: BattleScript_PSNPrevention with STATUS_HAD_NO_EFFECT, hitMarker bit NOT cleared", () => {
+      const rc = context(
+        0,
+        {},
+        { moveEffectByte: MOVE_EFFECT_POISON | MOVE_EFFECT_CERTAIN, hitMarker: HITMARKER_STATUS_ABILITY_EFFECT },
+        { types: ["TYPE_STEEL", "TYPE_STEEL"] },
+      );
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_PSNPrevention"));
+      expect(result.state.rulesContext.multistringChooser).toBe(B_MSG_STATUS_HAD_NO_EFFECT);
+      expect(result.state.rulesContext.hitMarker & HITMARKER_STATUS_ABILITY_EFFECT).toBe(HITMARKER_STATUS_ABILITY_EFFECT);
+    });
+
+    it("Water Veil ability, certain: blocks BURN via BattleScript_BRNPrevention", () => {
+      const rc = context(
+        0,
+        {},
+        { moveEffectByte: MOVE_EFFECT_BURN | MOVE_EFFECT_CERTAIN },
+        { ability: ABILITY_WATER_VEIL },
+      );
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_BRNPrevention"));
+      expect(result.state.rulesContext.battlers[1]!.status1).toBe(0);
+      expect(result.state.rulesContext.lastUsedAbility).toBe(ABILITY_WATER_VEIL);
+    });
+
+    it("Magma Armor ability: silently blocks FREEZE, no message sub-script (source has none for this ability)", () => {
+      const rc = context(
+        0,
+        {},
+        { moveEffectByte: MOVE_EFFECT_FREEZE | MOVE_EFFECT_CERTAIN },
+        { ability: ABILITY_MAGMA_ARMOR },
+      );
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.programCounter).not.toBe(labelPc("BattleScript_MoveEffectFreeze"));
+      expect(result.state.rulesContext.battlers[1]!.status1).toBe(0);
+    });
+
+    it("Limber ability, certain: blocks PARALYSIS via BattleScript_PRLZPrevention", () => {
+      const rc = context(
+        0,
+        {},
+        { moveEffectByte: MOVE_EFFECT_PARALYSIS | MOVE_EFFECT_CERTAIN },
+        { ability: ABILITY_LIMBER },
+      );
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_PRLZPrevention"));
+      expect(result.state.rulesContext.battlers[1]!.status1).toBe(0);
+      expect(result.state.rulesContext.lastUsedAbility).toBe(ABILITY_LIMBER);
+    });
+
+    it("Limber ability, not certain (chance-roll dispatch, percentChance < 100): silently blocks with no message, no prevention call", () => {
+      const rc = context(
+        0,
+        {},
+        { currentMove: BODY_SLAM, moveEffectByte: MOVE_EFFECT_PARALYSIS },
+        { ability: ABILITY_LIMBER },
+      );
+      // Force the seteffectwithchance roll to land well under Body Slam's 30% chance.
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc, rngValueBeforeU16(0));
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.programCounter).not.toBe(labelPc("BattleScript_PRLZPrevention"));
+      expect(result.state.rulesContext.battlers[1]!.status1).toBe(0);
+      expect(result.state.rng.calls).toBe(1);
+    });
+
+    it("Shield Dust ability on the target: silently blocks any quartet member (effectByte <= 9)", () => {
+      const rc = context(
+        0,
+        {},
+        { moveEffectByte: MOVE_EFFECT_POISON | MOVE_EFFECT_CERTAIN },
+        { ability: ABILITY_SHIELD_DUST },
+      );
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.rulesContext.battlers[1]!.status1).toBe(0);
+    });
+
+    it("Safeguard on the target's side: silently blocks any quartet member (effectByte <= 7)", () => {
+      const SIDE_STATUS_SAFEGUARD = 1 << 5;
+      const rc = context(0, {}, {
+        moveEffectByte: MOVE_EFFECT_PARALYSIS | MOVE_EFFECT_CERTAIN,
+        sideStatuses: [0, SIDE_STATUS_SAFEGUARD],
+      });
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.rulesContext.battlers[1]!.status1).toBe(0);
+    });
+
+    it("target at 0 HP: silently blocks (INCREMENT_RESET_RETURN)", () => {
+      const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_POISON | MOVE_EFFECT_CERTAIN }, { hp: 0 });
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.rulesContext.battlers[1]!.status1).toBe(0);
+    });
+
+    it("target has a Substitute up: silently blocks", () => {
+      const STATUS2_SUBSTITUTE = 1 << 24;
+      const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_POISON | MOVE_EFFECT_CERTAIN }, { status2: STATUS2_SUBSTITUTE });
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.rulesContext.battlers[1]!.status1).toBe(0);
+    });
+  });
+
+  describe("(b) unsupported-branch barriers", () => {
+    it("halts on MOVE_EFFECT_SLEEP (its own script uses Cmd_seteffectprimary, not this dispatch)", () => {
+      const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_SLEEP | MOVE_EFFECT_CERTAIN });
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      expect(result.kind).toBe("halted");
+      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 2273 });
+    });
+
+    it("halts on MOVE_EFFECT_TOXIC (its own script uses Cmd_seteffectprimary, not this dispatch)", () => {
+      const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_TOXIC | MOVE_EFFECT_CERTAIN });
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      expect(result.kind).toBe("halted");
+      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 2427 });
+    });
+
+    it("halts on a family-B byte (FLINCH, > PRIMARY_STATUS_MOVE_EFFECT): status2/misc switch is not modeled", () => {
+      const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_FLINCH | MOVE_EFFECT_CERTAIN });
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      expect(result.kind).toBe("halted");
+      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 2522 });
+    });
+
+    it("halts when the chance roll succeeds with a family-B effect byte (SetMoveEffect's status2/misc switch unmodeled)", () => {
+      const rc = context(0, {}, { currentMove: MUD_SLAP, moveEffectByte: MOVE_EFFECT_FLINCH });
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      expect(result.kind).toBe("halted");
+      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 2522 });
+    });
+  });
+});
+
+describe("production printfromtable (Cmd_printfromtable) dispatch", () => {
+  it("registers B_SCR_OP_PRINTFROMTABLE", () => {
+    expect(program.instructions.find((i) => i.opcodeName === "B_SCR_OP_PRINTFROMTABLE")).toBeDefined();
+  });
+
+  it("BattleScript_MoveEffectParalysis's own printfromtable gGotParalyzedStringIds, MULTISTRING_CHOOSER 0: resolves STRINGID_PKMNWASPARALYZED", () => {
+    const pc = program.instructions.find((i) =>
+      i.opcodeName === "B_SCR_OP_PRINTFROMTABLE" && i.operands[0]?.expression === "gGotParalyzedStringIds"
+    )!.programCounter;
+    const rc = context(0, {}, { multistringChooser: B_MSG_STATUSED });
+    const { result } = stepAtProgramCounter(pc, rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.events).toEqual([
+      expect.objectContaining({ kind: "message", messageId: "STRINGID_PKMNWASPARALYZED" }),
+    ]);
+  });
+
+  it("same table, MULTISTRING_CHOOSER 1: resolves STRINGID_PKMNWASPARALYZEDBY", () => {
+    const pc = program.instructions.find((i) =>
+      i.opcodeName === "B_SCR_OP_PRINTFROMTABLE" && i.operands[0]?.expression === "gGotParalyzedStringIds"
+    )!.programCounter;
+    const rc = context(0, {}, { multistringChooser: B_MSG_STATUSED_BY_ABILITY });
+    const { result } = stepAtProgramCounter(pc, rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.events).toEqual([
+      expect.objectContaining({ kind: "message", messageId: "STRINGID_PKMNWASPARALYZEDBY" }),
+    ]);
+  });
+
+  it("BattleScript_PSNPrevention's own printfromtable gPSNPreventionStringIds, MULTISTRING_CHOOSER 2: resolves STRINGID_PKMNSXHADNOEFFECTONY", () => {
+    const pc = program.instructions.find((i) =>
+      i.opcodeName === "B_SCR_OP_PRINTFROMTABLE" && i.operands[0]?.expression === "gPSNPreventionStringIds"
+    )!.programCounter;
+    const rc = context(0, {}, { multistringChooser: B_MSG_STATUS_HAD_NO_EFFECT });
+    const { result } = stepAtProgramCounter(pc, rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.events).toEqual([
+      expect.objectContaining({ kind: "message", messageId: "STRINGID_PKMNSXHADNOEFFECTONY" }),
+    ]);
+  });
+});
+
+describe("production updatestatusicon (Cmd_updatestatusicon) dispatch", () => {
+  it("registers B_SCR_OP_UPDATESTATUSICON", () => {
+    expect(program.instructions.find((i) => i.opcodeName === "B_SCR_OP_UPDATESTATUSICON")).toBeDefined();
+  });
+
+  it("BS_EFFECT_BATTLER (BattleScript_UpdateEffectStatusIconRet's own shape): emits status-icon-update for the effect battler", () => {
+    const pc = program.instructions.find((i) =>
+      i.opcodeName === "B_SCR_OP_UPDATESTATUSICON" && i.operands[0]?.expression === "BS_EFFECT_BATTLER"
+    )!.programCounter;
+    const rc = context(0, {}, {}, { status1: STATUS1_PARALYSIS_BIT });
+    const { result } = stepAtProgramCounter(pc, rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.events).toEqual([
+      expect.objectContaining({ kind: "status-icon-update", battler: 1, status1: STATUS1_PARALYSIS_BIT, status2: 0 }),
+    ]);
+  });
+
+  describe("(b) unsupported-branch barriers", () => {
+    it("halts on BS_ATTACKER_WITH_PARTNER (doubles-only branch, not modeled)", () => {
+      const pc = program.instructions.find((i) =>
+        i.opcodeName === "B_SCR_OP_UPDATESTATUSICON" && i.operands[0]?.expression === "BS_ATTACKER_WITH_PARTNER"
+      )!.programCounter;
+      const rc = context(0);
+      const { result } = stepAtProgramCounter(pc, rc);
+      expect(result.kind).toBe("halted");
+      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 7711 });
     });
   });
 });

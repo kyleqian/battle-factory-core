@@ -234,6 +234,8 @@ export type BattleScriptPartyMemberState = Readonly<{
   species: number;
   isEgg: boolean;
   hp: number;
+  /** Source gPlayerParty/gEnemyParty[].status1 -- kept in sync by SetMoveEffect's status write, mirroring datahpupdate's HP sync. */
+  status1: number;
 }>;
 
 export type BattleScriptPartyState = readonly [
@@ -365,6 +367,10 @@ export type BattleScriptRulesContext = Readonly<
      * the slot at that battler's partyIndex in sync (battleScriptHitChainOpcode.ts).
      */
     party: BattleScriptPartyBySide;
+    /** Source u32 gSideStatuses[2], narrowed to the SIDE_STATUS_SAFEGUARD bit SetMoveEffect reads. */
+    sideStatuses: readonly [number, number];
+    /** Source u32 gBattleWeather. */
+    weather: number;
   }
 >;
 
@@ -435,12 +441,15 @@ export type BattleScriptRulesContextInput = Readonly<{
     player?: readonly BattleScriptPartyMemberInput[];
     opponent?: readonly BattleScriptPartyMemberInput[];
   }>;
+  sideStatuses?: readonly [number?, number?];
+  weather?: number;
 }>;
 
 export type BattleScriptPartyMemberInput = Readonly<{
   species?: number;
   isEgg?: boolean;
   hp?: number;
+  status1?: number;
 }>;
 
 function requireUnsigned(value: number, maximum: number, field: string): number {
@@ -1197,6 +1206,7 @@ const BATTLE_SCRIPT_EMPTY_PARTY_MEMBER: BattleScriptPartyMemberState = Object.fr
   species: 0,
   isEgg: false,
   hp: 0,
+  status1: 0,
 });
 
 function createBattleScriptPartyState(
@@ -1216,6 +1226,7 @@ function createBattleScriptPartyState(
       species: requireUnsigned(member.species ?? 0, 0xffff, `${field}[${index}].species`),
       isEgg: Boolean(member.isEgg),
       hp: requireUnsigned(member.hp ?? 0, 0xffff, `${field}[${index}].hp`),
+      status1: requireUnsigned(member.status1 ?? 0, 0xffff_ffff, `${field}[${index}].status1`) >>> 0,
     })),
   ) as unknown as BattleScriptPartyState;
 }
@@ -1247,6 +1258,29 @@ export function withBattleScriptPartyMemberHp(
   if (member.hp === hp) return party;
   const nextState = state.map((candidate, index) =>
     index === partyIndex ? Object.freeze({ ...candidate, hp }) : candidate
+  ) as unknown as BattleScriptPartyState;
+  return Object.freeze({ ...party, [sideKey]: Object.freeze(nextState) });
+}
+
+/**
+ * SetMoveEffect's status1 write (battle_script_commands.c:2488's
+ * BtlController_EmitSetMonData(REQUEST_STATUS_BATTLE, ...)) also lands in the
+ * matching party slot, exactly mirroring withBattleScriptPartyMemberHp's
+ * already-established datahpupdate sync point
+ * (docs/set-move-effect-ground-truth.md §2).
+ */
+export function withBattleScriptPartyMemberStatus1(
+  party: BattleScriptPartyBySide,
+  side: 0 | 1,
+  partyIndex: number,
+  status1: number,
+): BattleScriptPartyBySide {
+  const sideKey = side === 0 ? "player" : "opponent";
+  const state = party[sideKey];
+  const member = state[partyIndex];
+  if (member.status1 === status1) return party;
+  const nextState = state.map((candidate, index) =>
+    index === partyIndex ? Object.freeze({ ...candidate, status1 }) : candidate
   ) as unknown as BattleScriptPartyState;
   return Object.freeze({ ...party, [sideKey]: Object.freeze(nextState) });
 }
@@ -1643,6 +1677,11 @@ export function createBattleScriptRulesContext(
     statAnimPlayed: requireUnsigned(input.statAnimPlayed ?? 0, 0xff, "statAnimPlayed"),
     tripleKickPower: requireUnsigned(input.tripleKickPower ?? 0, 0xffff, "tripleKickPower"),
     twoTurnStringId: requireUnsigned(input.twoTurnStringId ?? 0, 0xff, "twoTurnStringId"),
+    sideStatuses: Object.freeze([
+      requireUnsigned(input.sideStatuses?.[0] ?? 0, 0xffff_ffff, "sideStatuses[0]") >>> 0,
+      requireUnsigned(input.sideStatuses?.[1] ?? 0, 0xffff_ffff, "sideStatuses[1]") >>> 0,
+    ]) as unknown as readonly [number, number],
+    weather: requireUnsigned(input.weather ?? 0, 0xffff_ffff, "weather") >>> 0,
   });
 }
 
@@ -1767,6 +1806,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptHitChainOpcodeHandlers(program, {
       isControllerIdle: sourceExternalPorts.isControllerIdle,
       prepareMessage: sourceExternalPorts.prepareMessage,
+      resolveBattlerForBattleScript: resolveRulesBattlerForBattleScript,
     }),
     ...createBattleScriptMoveEndOpcodeHandlers(program),
     ...createBattleScriptJumpifbyteOpcodeHandlers(program),
