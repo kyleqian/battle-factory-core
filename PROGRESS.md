@@ -4,6 +4,66 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 441 — S10 step (iv) part 3/3 (FINAL): pure `BattleResolution` adapter + no-fixture win/loss integration proof — **ROADMAP S10 step (iv) is now COMPLETE**
+
+- **State:** tree green at **191 files / 2263 tests** (+3 files / +27 tests
+  over entry 440's 188/2236), build green, ratchet green (6/6, barrier counts
+  and canonical-recording allowlist unchanged — no new production imports).
+  `roundController.ts` and its three fixture-driven test files
+  (`roundController.test.ts`, `roundScenarioMatrix.test.ts`,
+  `factoryTerminalPresentation.test.ts`) are **byte-for-byte untouched**
+  (confirmed via `git diff`, as the seam doc's "what stays intact" promised).
+- **Did:** (1) `src/engine/battleResolutionAdapter.ts` —
+  `deriveBattleResolutionFromTerminalBoundary`, the pure adapter from
+  `docs/round-controller-outcome-seam.md` §4 piece 5. Takes only the narrow
+  `BattleScriptRulesContext` slice it reads (`battlers`/`battleTopology`/
+  `party`, structurally satisfied by the real type) plus the terminal
+  `BattleOutcome`/`rng.value` and the pre-battle `BattleParty` snapshots.
+  Ground-truth-pinned rules, all cited in-file: outcome `player-win`→`"win"`,
+  `trainer-win`/`draw`→`"loss"` (the Factory battle-room script has exactly
+  one `case 1`=WON; LOST and DREW both fall through to the identical
+  `WarpToLobbyLost` branch — `docs/battle-resolution-adapter-ground-truth.md`
+  §4 — a draw is never thrown on); `id`/`maxHp` carried verbatim from the
+  pre-battle snapshot; `hp` overlaid from the kernel's live-synced party
+  slice; `status` is fainted→`"none"`, the slot mirrored by a live battler→
+  its real `status1` mapped to the `BattleStatus` vocabulary (toxic checked
+  ahead of plain poison — `GetAilmentFromStatus` collapses them, this engine's
+  vocabulary keeps them distinct), every other (benched) slot→its pre-battle
+  value, since the kernel's party slice tracks only `species`/`isEgg`/`hp`,
+  not bench status. The `status1`→`BattleStatus` mapping is **total** over
+  real values (every `STATUS1_*` bit checked is disjoint) — no unrepresentable
+  case was found, so no barrier was added. 13 unit tests (outcome mapping ×3,
+  status1 mapping incl. the toxic-vs-poison precedence, identity carry-
+  forward, hp overlay, all three status rules, rngValue passthrough, and a
+  dedicated synthetic-state draw→loss test per the brief). (2) Minimal,
+  additive extension to `factoryBattleScriptTerminalDecision.ts`: an optional
+  `attackingSide: "player" | "trainer"` config knob (default `"player"`,
+  proven byte-for-byte unchanged — existing 5 tests still pass unmodified)
+  that mirrors the identical staged hit chain onto the player's own modeled
+  party slot instead, with no new kernel modeling — exactly the same move
+  math, opposite roles, needed to stage a *real* trainer-win for the
+  integration proof. (3) `tests/battleResolutionAdapterIntegration.test.ts` —
+  the no-fixture integration proof: a staged last-mon-KO scenario runs
+  through `submitBattleDecision` to a REAL terminal boundary, then the
+  adapter, then `resolveRoundBattle` on a real `RoundControllerState`. Win
+  path: `player-win` → `presentingBattleWin` → `lastBattle.outcome==="win"` →
+  `swapOffer` command carries the real adapted (all-fainted) opponent party →
+  declining the swap genuinely increments `battleIndex` 0→1. Loss path:
+  `trainer-win` (via the new `attackingSide:"trainer"` staging) →
+  `resolveRoundBattle` drives `roundLost`, `lastBattle.outcome==="loss"`.
+- **Next: the presentation-seam checkpoint (ROADMAP S10 §3) is the next
+  battle-lane step — a hard ordering constraint, not a preference.** Step
+  (iv) is done; `docs/presentation-seam-scout.md` is its evidence pack (one
+  already-exact presentation window re-driven from kernel semantic events
+  instead of turn-N state, committed trace still passing). Do not register
+  further opcodes or grow the kernel past this checkpoint.
+- **Notes:** no presentation/render/`battleScene` edits; no oracle traces
+  (Tier-1 only); no new production imports of canonical recordings;
+  `core.ts` production wiring of the adapter into the tick flow is
+  deliberately out of this rung's scope (the presentation-seam checkpoint's
+  territory, per the brief).
+
+---
 ## 440 — S10 step (iv) part 2/3: `HandleFaintedMonActions` orchestration + `BS_FAINTED` role — a real Level-50 Factory battle now reaches `{ kind: "terminal", outcome: "player-win" }` through `submitBattleDecision`
 
 - **State:** tree green at **188 files / 2236 tests** (this rung added 2 new
@@ -146,62 +206,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** no presentation/render/`battleScene` edits; no oracle traces
   (Tier-1 only, per the banked ground truth); no new production imports of
   canonical recordings.
-
----
-## 438 — [SUPERVISOR WIND-DOWN 2026-07-24 ~20:40] session summary
-
-- **State:** tree committed and green at **182 files / 2180 tests**, build
-  green, single main worktree, no unmerged branches, both oracles current
-  (freshness gate PASS at session start). **No DEFERRED entries — nothing
-  blocks the next `run-supervisor.sh`.**
-- **Session (11 worker steps across 3 lanes + 2 supervisor folds, all
-  verified green, zero trace regressions):**
-  - **Main (3 steps):** S10 step (ii) closed — RUNG 4 registered
-    `seteffectwithchance` + `tryfaintmon` (45 opcodes) with the
-    evidence-backed correction that terminal `battleOutcome` belongs to
-    `Cmd_checkteamslost`, not `tryfaintmon` (ISSUES #42/#43 filed). Step
-    (iii) closed — opcode 73 `moveend` registered (46; state loop + all
-    three postlude forms source-complete, 7 named barriers); the plain-hit
-    scenario now runs to the script's own `end` at the banked 4-roll ledger.
-    Tail step — #43's BS_TARGET arm fixed + opcodes 26/27 registered (48):
-    the KO scenario now executes its **entire faint cutscene to script
-    completion** (playfaintcry → … → cleareffectsonfaint → return →
-    moveendall → end), rng.calls still exactly 4, barrier pin 18→21.
-  - **Side (3 scouts, all merged):** `docs/presentation-seam-scout.md`
-    (§3 checkpoint pack: `turn5-faint.json` recommended, 4 never-emitted
-    event kinds, 8 named gaps); `docs/faint-outcome-ground-truth.md` +
-    `tools/probe/verify-faint-outcome-ground-truth.ts` (16 live checks
-    PASS, supervisor-rerun: minimal WIN path enumerated,
-    `HandleFaintedMonActions` is a C-side orchestration loop, `getexp`
-    Frontier-dead, `checkteamslost` reads party-wide HP);
-    `docs/round-controller-outcome-seam.md` (`resolveRoundBattle` has zero
-    production call sites; five-piece dependency-ordered step (iv) plan).
-    **Supervisor decision (reversible, recorded):** step (iv)'s party-HP
-    slice extends `BattleScriptRulesContext` in place (seam doc Option A).
-  - **Animation (5 steps, 18→19 exact):** MIST_BALL rung 3
-    (`AnimThrowMistBall` wired through the now-shared
-    `animScriptInterpreter.ts`, 32/32 probe ticks first-try);
-    `AnimTask_ShakeMon2` ported generically (64-move leverage; DRAGON_BREATH
-    + BLAZE_KICK re-driven, hand-fits deleted, 85/85+85/85 / 78/78+78/78);
-    MUD_SLAP verified already-`exact` (supervisor mis-scope; both
-    comparators re-verified live 51/51×4); EMBER landed `partial` then
-    promoted **`exact`** (63/63+63/63 both orientations) after a probe
-    falsified the supervisor's creation-tick hypothesis — real bug was the
-    attacker-vs-ember draw order from target-relative subpriority.
-- **Next (in order):** main — S10 step (iv) using the three banked docs:
-  `getexp`(short-circuit)/`checkteamslost`/`jumpifbyte` registration, the
-  `HandleFaintedMonActions` orchestration equivalent, the Option-A party-HP
-  slice (ISSUES #42), then the `submitBattleDecision` →
-  `resolveRoundBattle` adapter. **Then the next battle-lane brief is the
-  presentation-seam checkpoint (ROADMAP S10 §3, hard ordering constraint)**
-  — `docs/presentation-seam-scout.md` is its evidence pack. Animation —
-  next ranked track (ShakeMon2 call-site retirement in
-  `statusAnimation.ts`/`faintAttack.ts` is a bounded option; or
-  FIRE_SPIN/DRAGON_RAGE/FIRE_BLAST siblings). ISSUES #43's remainder
-  (BS_FAINTED) is step-(iv) territory.
-- **Notes:** two PAPERCUTS updated this session (post-KO staging entry
-  already existed; new `isControllerIdle`-vs-scheduler-field entry). The
-  moveend worker appended an accurate status-only checkpoint note to
-  ROADMAP (supervisor-owned file; kept, boundary re-stated). No usage/rate
-  limits hit; all lanes idle at wind-down.
 

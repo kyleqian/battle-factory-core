@@ -1,4 +1,62 @@
 ---
+## 438 — [SUPERVISOR WIND-DOWN 2026-07-24 ~20:40] session summary
+
+- **State:** tree committed and green at **182 files / 2180 tests**, build
+  green, single main worktree, no unmerged branches, both oracles current
+  (freshness gate PASS at session start). **No DEFERRED entries — nothing
+  blocks the next `run-supervisor.sh`.**
+- **Session (11 worker steps across 3 lanes + 2 supervisor folds, all
+  verified green, zero trace regressions):**
+  - **Main (3 steps):** S10 step (ii) closed — RUNG 4 registered
+    `seteffectwithchance` + `tryfaintmon` (45 opcodes) with the
+    evidence-backed correction that terminal `battleOutcome` belongs to
+    `Cmd_checkteamslost`, not `tryfaintmon` (ISSUES #42/#43 filed). Step
+    (iii) closed — opcode 73 `moveend` registered (46; state loop + all
+    three postlude forms source-complete, 7 named barriers); the plain-hit
+    scenario now runs to the script's own `end` at the banked 4-roll ledger.
+    Tail step — #43's BS_TARGET arm fixed + opcodes 26/27 registered (48):
+    the KO scenario now executes its **entire faint cutscene to script
+    completion** (playfaintcry → … → cleareffectsonfaint → return →
+    moveendall → end), rng.calls still exactly 4, barrier pin 18→21.
+  - **Side (3 scouts, all merged):** `docs/presentation-seam-scout.md`
+    (§3 checkpoint pack: `turn5-faint.json` recommended, 4 never-emitted
+    event kinds, 8 named gaps); `docs/faint-outcome-ground-truth.md` +
+    `tools/probe/verify-faint-outcome-ground-truth.ts` (16 live checks
+    PASS, supervisor-rerun: minimal WIN path enumerated,
+    `HandleFaintedMonActions` is a C-side orchestration loop, `getexp`
+    Frontier-dead, `checkteamslost` reads party-wide HP);
+    `docs/round-controller-outcome-seam.md` (`resolveRoundBattle` has zero
+    production call sites; five-piece dependency-ordered step (iv) plan).
+    **Supervisor decision (reversible, recorded):** step (iv)'s party-HP
+    slice extends `BattleScriptRulesContext` in place (seam doc Option A).
+  - **Animation (5 steps, 18→19 exact):** MIST_BALL rung 3
+    (`AnimThrowMistBall` wired through the now-shared
+    `animScriptInterpreter.ts`, 32/32 probe ticks first-try);
+    `AnimTask_ShakeMon2` ported generically (64-move leverage; DRAGON_BREATH
+    + BLAZE_KICK re-driven, hand-fits deleted, 85/85+85/85 / 78/78+78/78);
+    MUD_SLAP verified already-`exact` (supervisor mis-scope; both
+    comparators re-verified live 51/51×4); EMBER landed `partial` then
+    promoted **`exact`** (63/63+63/63 both orientations) after a probe
+    falsified the supervisor's creation-tick hypothesis — real bug was the
+    attacker-vs-ember draw order from target-relative subpriority.
+- **Next (in order):** main — S10 step (iv) using the three banked docs:
+  `getexp`(short-circuit)/`checkteamslost`/`jumpifbyte` registration, the
+  `HandleFaintedMonActions` orchestration equivalent, the Option-A party-HP
+  slice (ISSUES #42), then the `submitBattleDecision` →
+  `resolveRoundBattle` adapter. **Then the next battle-lane brief is the
+  presentation-seam checkpoint (ROADMAP S10 §3, hard ordering constraint)**
+  — `docs/presentation-seam-scout.md` is its evidence pack. Animation —
+  next ranked track (ShakeMon2 call-site retirement in
+  `statusAnimation.ts`/`faintAttack.ts` is a bounded option; or
+  FIRE_SPIN/DRAGON_RAGE/FIRE_BLAST siblings). ISSUES #43's remainder
+  (BS_FAINTED) is step-(iv) territory.
+- **Notes:** two PAPERCUTS updated this session (post-KO staging entry
+  already existed; new `isControllerIdle`-vs-scheduler-field entry). The
+  moveend worker appended an accurate status-only checkpoint note to
+  ROADMAP (supervisor-owned file; kept, boundary re-stated). No usage/rate
+  limits hit; all lanes idle at wind-down.
+
+---
 ## 437 — ISSUES #43 BS_TARGET fix + opcodes 26/27 (`dofaintanimation`/`cleareffectsonfaint`) — KO scenario's faint cutscene now runs to script completion
 
 - **State:** tree green at **182 files / 2180 tests** (+8), build green.
