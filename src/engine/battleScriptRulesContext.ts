@@ -22,6 +22,9 @@ import { createBattleScriptHitChainOpcodeHandlers } from "./battleScriptHitChain
 import { createBattleScriptMoveEndOpcodeHandlers } from "./battleScriptMoveEndOpcode.ts";
 import { createBattleScriptJumpifbyteOpcodeHandlers } from "./battleScriptJumpifbyteOpcode.ts";
 import { createBattleScriptJumpifwordOpcodeHandlers } from "./battleScriptJumpifwordOpcode.ts";
+import { createBattleScriptJumpifhalfwordOpcodeHandlers } from "./battleScriptJumpifhalfwordOpcode.ts";
+import { createBattleScriptJumpifstatus3conditionOpcodeHandlers } from "./battleScriptJumpifstatus3conditionOpcode.ts";
+import { createBattleScriptOrwordOpcodeHandlers } from "./battleScriptOrwordOpcode.ts";
 import { createBattleScriptOpenPartyScreenOpcodeHandlers } from "./battleScriptOpenPartyScreenOpcode.ts";
 import { createBattleScriptGetexpOpcodeHandlers } from "./battleScriptGetexpOpcode.ts";
 import { createBattleScriptCheckteamslostOpcodeHandlers } from "./battleScriptCheckteamslostOpcode.ts";
@@ -1854,6 +1857,9 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptMoveEndOpcodeHandlers(program),
     ...createBattleScriptJumpifbyteOpcodeHandlers(program),
     ...createBattleScriptJumpifwordOpcodeHandlers(program),
+    ...createBattleScriptJumpifhalfwordOpcodeHandlers(program),
+    ...createBattleScriptJumpifstatus3conditionOpcodeHandlers(program),
+    ...createBattleScriptOrwordOpcodeHandlers(program),
     ...createBattleScriptOpenPartyScreenOpcodeHandlers(program),
     ...createBattleScriptGetexpOpcodeHandlers(program),
     ...createBattleScriptCheckteamslostOpcodeHandlers(program),

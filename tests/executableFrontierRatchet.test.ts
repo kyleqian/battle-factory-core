@@ -79,6 +79,14 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // gBattleMoveDamage / HITMARKER_NO_ATTACKSTRING, neither reachable on
   // Factory's own BattleScript_HandleFaintedMon path).
   ["src/engine/battleScriptJumpifwordOpcode.ts", 1],
+  // Executable-frontier census (2026-07-25): 14 of the committed program's 15
+  // concrete jumpifhalfword/jumpifmove/jumpifnotmove call sites compare a
+  // memHword pointer other than gCurrentMove (gChosenMove, gBattleWeather,
+  // gTrainerBattleOpponent_A) -- unmodeled, so every one of them is this same
+  // single named (b) barrier at runtime. Only BattleScript_EffectHit's own
+  // Surf guard (gCurrentMove) is modeled, which is the registration's whole
+  // point.
+  ["src/engine/battleScriptJumpifhalfwordOpcode.ts", 1],
   // Forced-switch ground truth §4 slice 2: doubles/multi topology (not
   // Factory singles), the player-side interactive party-menu controller
   // round trip (not modeled at the opcode-machine layer this rung), and
