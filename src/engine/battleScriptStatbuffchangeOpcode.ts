@@ -40,7 +40,6 @@ import {
   STAT_CHANGE_ALLOW_PTR,
   STAT_CHANGE_NOT_PROTECT_AFFECTED,
 } from "./battleScriptStatBuffs.ts";
-import { BATTLE_SCRIPT_STATUS2_SUBSTITUTE } from "./battleScriptRulesContext.ts";
 import type {
   BattleScriptControllerIdlePort,
   BattleScriptBattlerSelectorResolverPort,
@@ -226,9 +225,10 @@ function createPlayanimationOpcodeHandler(
   };
 }
 
-/** include/constants/battle.h:216 -- the DOWN family's Substitute early-out (`STATUS2_SUBSTITUTE`) is the only concrete jumpifstatus2 value this registration needs. */
+/** include/constants/battle.h:216 -- STATUS2_SUBSTITUTE = 1 << 24. The DOWN family's Substitute early-out is the only concrete jumpifstatus2 value this registration needs (matches BATTLE_SCRIPT_STATUS2_SUBSTITUTE elsewhere; declared locally to avoid an import cycle through battleScriptRulesContext.ts, which itself imports this module). */
+const STATUS2_SUBSTITUTE = 1 << 24;
 const JUMPIFSTATUS2_VALUES: ReadonlyMap<string, number> = new Map([
-  ["STATUS2_SUBSTITUTE", BATTLE_SCRIPT_STATUS2_SUBSTITUTE],
+  ["STATUS2_SUBSTITUTE", STATUS2_SUBSTITUTE],
 ]);
 
 function createJumpifstatus2OpcodeHandler(

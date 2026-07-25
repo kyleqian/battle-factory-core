@@ -64,6 +64,9 @@ const ATOMIC_VALUES = Object.freeze({
   B_MSG_LEECH_SEED_DRAIN: 3,
   B_MSG_LEECH_SEED_OOZE: 4,
   B_MSG_STAT_FELL_EMPTY: 3,
+  /** battle_string_ids.h:397,405 -- both literally 2, the same shared MULTISTRING_CHOOSER value ChangeStatBuffs' clamp tail writes for either direction. */
+  B_MSG_STAT_WONT_INCREASE: 2,
+  B_MSG_STAT_WONT_DECREASE: 2,
   B_MSG_INCAPABLE_OF_POWER: 4,
   B_MSG_STAT_ROSE_ITEM: 4,
   B_MSG_TURN1_RAZOR_WIND: 0,
