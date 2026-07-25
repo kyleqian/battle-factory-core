@@ -336,48 +336,139 @@ and the rung-2 `sheetFrame` shift assertions). `npm run build` green. Both
 fixes reproduced against a fresh, independent oracle capture (not just the
 cached one used to iterate) — 139/150 byte-identical both times.
 
+## DRAGON_RAGE rung 6/7: fire-plume z-order fixed via `gMain.oamBuffer` RAM probe (139/150 → 149/150); age-98 ONIX-silhouette anomaly disciplined-probed, both named candidates eliminated, lands `partial` with a single-frame remainder (2026-07-25)
+
+**Verdict: the fire-plume family's tie-break residual (render ages 105-114)
+is FIXED on direct hardware evidence, not fitted — the step's own two
+sanctioned instruments (RUNG 1's `gMain.oamBuffer` probe, RUNG 2's VRAM/blend
+probe) were both applied exactly as specified. RUNG 1 landed a real fix.
+RUNG 2's probe cycle completed cleanly but named no fix (both brief
+candidates eliminated by hard evidence) — per the step's own PARK RULE,
+`MOVE_DRAGON_RAGE` stays `partial`, now with a single remaining frame.**
+
+**Rung 1 — plume-vs-plume z-order ties, FIXED.** Wrote
+`tools/probe/dump-dragonrage-oam.py` (ISSUES #32 lineage: the same
+`gMain.oamBuffer`-array-position instrument `dump-turn9-clone-oam.py`/
+`dump-aerialace-oam.py`/`dump-quickattack-hitsplat-oam.py` already used,
+matching each live fire-plume/target sprite's own OAM attrs against the
+128-entry composited buffer to find its real final position — lower
+position = lower hardware OAM index = drawn on top, this codebase's already-
+established `AddSpritesToOamBuffer` convention). Ran it across RAM ticks
+183-206 (render ages 94-117) against the committed CHARMELEON-vs-ONIX
+fixture. Cross-referencing each RAM slot's `(x,y)` against
+`DRAGON_RAGE_FIRE_PLUME_SPAWNS`' own declared offsets gave an exact,
+unambiguous spawn-index↔slot mapping for all 7 spawns observed in this
+window. The 8 spawns share only 2 distinct subpriorities
+(`targetSubpriority ± 2`), so cross-group order was never the problem
+(confirmed correct already); the real-hardware order WITHIN each group,
+read directly off the buffer at every tick both members of a pair were
+alive, resolved to one consistent, source-consistent rule with zero
+exceptions: primarily sort by absolute screen Y (higher Y wins, drawn more
+in front — the ordinary `SortSprites` same-priority/different-Y tie-break);
+ONLY on an exact Y tie (this move's own script has two: spawns 0/4 share
+y-offset 0, spawns 2/6 share y-offset 25) does the EARLIER-created spawn
+win instead (spawn 0 beats spawn 4 at every tick from RAM 195-206; spawn 2
+beats spawn 6 at every tick from RAM 204-206) — matching this codebase's
+already-established "ascending creation order survives an exact tie"
+convention elsewhere (§7.26/27, `spriteOrder.ts`'s own module doc), NOT the
+previously-shipped code's raw script-order paint loop, which was ALSO wrong
+for at least one non-tied pair (spawn 3's higher Y should beat spawn 4's,
+but script order painted spawn 4 after spawn 3). Per the brief's own
+instruction (encode per-instance params for exactly these plume pairs, not
+a whole-history `sSpriteOrder` simulation), landed `orderFirePlumesForDraw`
+(`dragonRage.ts`) — a plain `(y, then descending spawnIndex)` comparator,
+not a persistent scheduler — replacing the naive script-order draw loop in
+`battleScene.ts`'s DRAGON_RAGE case. Tier-1 pinned directly against the two
+RAM-read tie orderings plus a full-group ordering check (`tests/
+dragonRage.test.ts`, 3 new tests). Dense sweep: **139/150 → 149/150** (every
+render age 105-114 now clean, zero regressions), reproduced byte-identical
+on two independent fresh oracle runs (determinism confirmed).
+
+**Rung 2 — age-98 ONIX-silhouette anomaly, disciplined-probed, no fix
+survived.** Extended the same instrument class with a second targeted probe,
+`tools/probe/dump-dragonrage-onix-vram.py`, reading ONIX's own OBJ VRAM tile
+range (`tileNum=473`, 4bpp, 64 tiles/2048 bytes) and hashing it every tick
+from RAM 80 through 190. Both of the step brief's own named candidates were
+checked directly and BOTH eliminated:
+- **(a) Runtime VRAM overwrite (`LoadBallGfx` precedent):** the VRAM hash is
+  completely STABLE and unchanged across the entire target-shake-creation
+  window (RAM 186 onward) — the only hash change in the whole probed range
+  is one unrelated `tileNum` swap at RAM tick 80→82 (ONIX's send-out
+  graphic settling in), long before this move even starts. No overwrite
+  occurs anywhere near the residual's own tick. Eliminated.
+- **(b) OBJ-over-OBJ blend-to-BG compositing gap (#112 precedent):** the
+  existing `dump-dragonrage-oam.py` probe's `BLDCNT`/`BLDALPHA` reads are
+  `0x0`/`0x0` (no color special effect enabled at all) at every tick in this
+  window, and ONIX's own OAM `affineMode` is `0` (no affine transform, ruling
+  out a scale/rotate resampling explanation too) throughout. Eliminated.
+
+With both named mechanisms ruled out, re-examined the mismatch itself
+directly (`tools/compare` diff, not committed — scratch): 1598px confined
+exactly to ONIX's own sprite bounding box (x149-204, y12-73), every
+mismatched color one of ONIX's own known palette shades swapping between
+NEARBY screen positions (e.g. `(222,214,214)` at one pixel, `(189,181,181)`
+— another real ONIX shade — right next to it and vice versa) — the
+signature of a small spatial misregistration of the whole sprite for this
+one tick, not a wrong tile or a color-math bug. The target sprite's own
+already-modeled state (position, x2/y2, animNum, animCmdIndex, invisible,
+subpriority, matrixNum, and now also affineMode) is RAM-confirmed clean and
+matches this port's own prediction through the whole window — this is the
+SAME finding the prior rung already reached, now extended to rule out the
+two remaining named hypotheses too. **No fix shipped**: per this run's own
+standing policy (documented no-fix beats a blind fit), this residual needs a
+different investigative angle than RAM-state/VRAM/IO-register comparison —
+named here, not chased further. Candidate for a future session: a fixture
+with less concurrent sprite creation at this exact tick (both the target
+shake task AND fire-plume spawn 0 are created simultaneously here), to
+separate a genuine engine gap from a possible emulator/hardware sub-frame
+ordering effect this per-tick discrete model can't represent at all.
+Confirmed deterministic (byte-identical mismatch on a second independent
+fresh oracle run).
+
+**Coverage:** `MOVE_DRAGON_RAGE` stays `partial` — `remaining` updated to
+149/150 (up from 139/150), a single residual (render age 98).
+
+**Evidence.** `npm test` 2212/2212 (2209 + 3 new: `orderFirePlumesForDraw`
+pinned against the RAM probe). `npm run build` green. Dense sweep reproduced
+byte-identical on two independent fresh oracle runs.
+
 ## Current handoff
 
 - **State:** **19 exact / 2 partial / 255 unsupported.**
-- **Did:** Fixed 2 of the 3 DRAGON_RAGE residuals named at the end of the
-  prior rung: (1) the render-age-1 shake creation-guard artifact
-  (`shakeMonOffsetAtRenderTick`'s own `renderTick === creationTick - 1`
-  transient, Tier-1 pinned); (2) the fire-spit "rounding" residual, which
-  turned out to be a real `sheetFrame` tile-row-block off-by-one
-  (`dragonRage.ts` was missing the same `+1` shift `dragonBreath.ts`
-  already carries for the byte-identical `sAnim_DragonRageFire`/
-  `sAnim_DragonBreathFire_0` animcmd tables — source-proven, not fitted).
-  Dense framebuffer match improved 127/150 → 139/150 (player-attacker
-  orientation), reproduced byte-identical on a fresh independent oracle
-  run. The third residual (fire-plume window, render ages 98/105-114) got
-  a full disciplined probe cycle — pixel colors dumped, RAM state read,
-  two candidate fixes (z-order reversal, lag=0) tried and both rejected on
-  evidence — but no fix survived, so it's named, not swept. See the dated
-  section above for the full accounting.
-- **Evidence:** `npm test` 2209/2209, `npm run build` green.
-- **Next:** DRAGON_RAGE's own remainder is now a single family (fire-plume,
-  render ages 98 + 105-114), in cost order: (1) render age 98's 1598px
-  ONIX-silhouette mismatch — RAM state is clean/unchanged through this
-  window, so it needs a different investigative angle than RAM-state
-  comparison (candidate: a fixture with less concurrent sprite creation at
-  this tick, or direct emulator VRAM/OAM-buffer instrumentation rather than
-  the CPU-RAM probe this track has used so far); (2) render ages 105-114's
-  compound z-order-tie-break-plus-per-spawn-frame-transition interaction —
-  needs a fixture where individual plume spawns don't spatially overlap
-  each other to isolate the two sub-causes independently; (3) only once
-  player orientation reaches a clean 150/150 twice, the opponent-attacker
-  orientation dense run, gated on porting CHARMELEON's own front-anim
-  family (`ANIM_BACK_AND_LUNGE`, unexplored — a materially different,
-  multi-phase step-function chain, not a copy of `Anim_RapidHorizontalHops`).
-  Separately, FEATHER_DANCE/QUICK_ATTACK/BOUNCE/FLY's own shared
-  ONIX-opponent presentation presets (`sceneOnPresentation.ts`) still bake
-  the species-idle-anim `+1` residual directly into their `spriteCorner.x=145`
-  constant rather than modeling it — harmless today since none of those
-  windows cross the residual's own reset boundary, untouched again this
-  step (out of scope). Alternatively, the next ranked `dragon-fire-projectile`
-  siblings FIRE_BLAST and FIRE_SPIN remain open, as does MIST_BALL's own
-  remainder (see the archived "Interpreter generalization" section).
-- **Housekeeping:** `ANIMATION_PROGRESS-archive.md` extended 2026-07-25;
-  the DRAGON_RAGE rung-5 section moved there (older than the "~3 most
-  recent" convention), keeping the rung 5 remainder, the idle-motion
-  section, and this rungs-1-3 section as the live tail.
+- **Did:** Landed the last DRAGON_RAGE step in the fire-plume-family arc:
+  RUNG 1 fixed the z-order tie residual (render ages 105-114) via a direct
+  `gMain.oamBuffer` RAM probe, encoding a per-instance paint-order
+  comparator (not a global rule or a whole-history simulation) — dense
+  count **139/150 → 149/150**. RUNG 2 disciplined-probed the remaining
+  age-98 ONIX-silhouette anomaly per the step's own two named candidates
+  (VRAM overwrite, OBJ-blend compositing gap) and ELIMINATED BOTH on hard
+  evidence (VRAM hash stable throughout; `BLDCNT`/`BLDALPHA` both zero,
+  `affineMode` zero) — no fix survived, so per the PARK RULE this residual
+  is named, not swept, and the move stays `partial`. See the dated section
+  above for the full accounting.
+- **Evidence:** `npm test` 2212/2212, `npm run build` green.
+- **Next:** DRAGON_RAGE's own remainder is now a single frame (render age
+  98's 1598px ONIX-silhouette mismatch, both brief-named candidates
+  eliminated) — needs a fresh investigative angle, not more RAM/VRAM/IO
+  comparison: candidate is a fixture with less concurrent sprite creation
+  at this exact tick (both the target shake task and fire-plume spawn 0
+  are created simultaneously here), to separate a genuine engine gap from
+  a possible emulator sub-frame-ordering effect. Only once player
+  orientation reaches a clean 150/150 twice does the opponent-attacker
+  orientation dense run become in-scope, gated on porting CHARMELEON's own
+  front-anim family (`ANIM_BACK_AND_LUNGE`, unexplored — a materially
+  different, multi-phase step-function chain, not a copy of
+  `Anim_RapidHorizontalHops`). Separately, FEATHER_DANCE/QUICK_ATTACK/
+  BOUNCE/FLY's own shared ONIX-opponent presentation presets
+  (`sceneOnPresentation.ts`) still bake the species-idle-anim `+1` residual
+  directly into their `spriteCorner.x=145` constant rather than modeling it
+  — harmless today since none of those windows cross the residual's own
+  reset boundary, untouched again this step (out of scope). This step's own
+  brief ends the DRAGON_RAGE move-run here regardless of outcome — the lane
+  switches tracks next. Alternatively, the next ranked
+  `dragon-fire-projectile` siblings FIRE_BLAST and FIRE_SPIN remain open,
+  as does MIST_BALL's own remainder (see the archived "Interpreter
+  generalization" section).
+- **Housekeeping:** none this step (no section moved to archive — adding
+  this rung's own section keeps exactly 3 dated sections live: idle-motion,
+  rungs-1-3, and this one).
