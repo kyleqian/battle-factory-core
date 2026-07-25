@@ -348,6 +348,49 @@ export function dragonRageFirePlumeStateAtAge(
 }
 
 /**
+ * Real-hardware same-subpriority plume-vs-plume draw order (ISSUES #32
+ * lineage: `gMain.oamBuffer` RAM read, `tools/probe/dump-dragonrage-oam.py`,
+ * `docs/dragon-rage-fire-plume-order-notes.md`). This move's 8 spawns share
+ * only 2 distinct subpriorities (targetSubpriority ± 2), so cross-group
+ * comparisons never tie (§ ordering is by subpriority alone there, already
+ * handled by the caller's behind/front split) - this comparator only orders
+ * spawns WITHIN one subpriority group.
+ *
+ * The RAM probe read `gMain.oamBuffer`'s real composited array position
+ * (lower position = lower hardware OAM index = drawn ON TOP, matching this
+ * codebase's already-established `sSpriteOrder`/`AddSpritesToOamBuffer`
+ * convention, e.g. `feather-order-notes.md`) for every live plume pair across
+ * RAM ticks 186-206 (render ages 97-117) and found a consistent rule with NO
+ * exceptions: primarily sort by absolute screen Y (higher Y wins, drawn more
+ * in front - the ordinary GBA same-priority tie-break `SortSprites` uses);
+ * ONLY on an exact Y tie (two of this move's own spawns share identical
+ * `targetBattlePosition.y + spawn.y`: spawns 0/4 at y-offset 0, spawns 2/6 at
+ * y-offset 25) does the lower `spawnIndex` (= earlier creation tick, this
+ * script's own `firePlumeTicks` are strictly ascending with spawn index) win
+ * instead - RAM-confirmed both ties resolve "earlier spawn wins" (spawn 0
+ * beats spawn 4 at every tick both are alive; spawn 2 beats spawn 6 likewise),
+ * matching this codebase's established "ascending creation order survives an
+ * exact tie" convention elsewhere (§7.26/27, `spriteOrder.ts`'s own module
+ * doc). This is a plain comparator, not a full persistent `sSpriteOrder`
+ * simulation - the per-instance parameter this RAM probe supplies is exactly
+ * which SPECIFIC spawn pairs tie and which of each pair wins, not a general
+ * whole-scene history model (out of scope per the standing policy against
+ * that, see `battle-scene-notes.md` §7.32).
+ *
+ * Returns spawns in PAINT order (index 0 painted first/backmost, last
+ * painted/frontmost last) - the previously-shipped code instead painted in
+ * raw script order, which happened to already match this rule for most pairs
+ * (script order tracks ascending Y for several spawns) but was wrong for the
+ * two ties plus at least one non-tied pair (spawn 3 vs spawn 4 - RAM shows
+ * spawn 3's higher Y beats spawn 4 despite spawn 3 being created later).
+ */
+export function orderFirePlumesForDraw<
+  T extends Readonly<{ y: number; spawnIndex: number }>,
+>(plumes: readonly T[]): readonly T[] {
+  return [...plumes].sort((a, b) => (a.y - b.y) || (b.spawnIndex - a.spawnIndex));
+}
+
+/**
  * The whole move's schedule, computed from the decoded script via
  * `interpretAnimSchedule` (`animScriptInterpreter.ts`) - creation ticks are
  * DERIVED from each primitive's own lifetime plus the RAM-confirmed

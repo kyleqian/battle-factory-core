@@ -838,6 +838,17 @@ export interface SceneOnBindView extends BindAnimationState {
 
 export interface SceneOnDragonRageFirePlume extends DragonRageFirePlumeState {
   readonly subpriorityOffset: number;
+  /**
+   * Script order (`DRAGON_RAGE_FIRE_PLUME_SPAWNS` index), which is also
+   * strictly-ascending creation-tick order (`dragonRageSchedule`'s own
+   * `firePlumeTicks` are +3 spaced). Needed by the draw path's real-hardware
+   * z-order comparator: `docs/dragon-rage-fire-plume-order-notes.md`'s
+   * `gMain.oamBuffer` probe (ISSUES #32 lineage) confirms same-subpriority
+   * plume pairs sort by absolute Y primarily, and by ascending
+   * `sSpriteOrder`/creation order (earlier spawn wins, drawn on top) on an
+   * exact Y tie - not raw script/array position on its own.
+   */
+  readonly spawnIndex: number;
 }
 
 export interface SceneOnDragonRageView {
@@ -1089,7 +1100,7 @@ function dragonRageFirePlumes(
       targetSubpriority,
       animationAge - schedule.firePlumeTicks[i]!,
     );
-    if (spawnState) plumes.push({ ...spawnState, subpriorityOffset: spawn.subpriorityOffset });
+    if (spawnState) plumes.push({ ...spawnState, subpriorityOffset: spawn.subpriorityOffset, spawnIndex: i });
   }
   return plumes;
 }

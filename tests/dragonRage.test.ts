@@ -15,6 +15,7 @@ import {
   dragonRageFireSpitStateAtAge,
   dragonRageFirePlumeStateAtAge,
   dragonRageSchedule,
+  orderFirePlumesForDraw,
   shakeMonOffsetAtRenderTick,
   slideMonToOffsetAtTick,
   slideMonToOriginalPosAtTick,
@@ -253,6 +254,36 @@ describe("fire-plume sprites (AnimDragonRageFirePlume, all 8 spawns, both orient
         expect(ported.sheetFrame, `spawn ${i} age ${age} frame`).toBe(probed!.animCmdIndex);
       }
     }
+  });
+});
+
+describe("rung 6 fire-plume z-order (gMain.oamBuffer RAM probe, tools/probe/dump-dragonrage-oam.py, ISSUES #32 lineage)", () => {
+  it("orders the 'behind' group (spawns 0/1/3/4/7) matching the RAM-read real OAM buffer order at RAM ticks 195-206", () => {
+    // Absolute y (targetBattlePosition.y=24 + spawn.y): 0->24, 1->9, 3->29,
+    // 4->24, 7->32. Spawns 0/4 tie exactly (both spawn.y=0) - the RAM probe
+    // read gMain.oamBuffer at every tick both are alive (195-206) and found
+    // spawn 0 consistently at the lower (more-front) buffer index.
+    const plumes = [0, 1, 3, 4].map((spawnIndex) => ({
+      spawnIndex,
+      y: 24 + DRAGON_RAGE_FIRE_PLUME_SPAWNS[spawnIndex]!.y,
+    }));
+    expect(orderFirePlumesForDraw(plumes).map((p) => p.spawnIndex)).toEqual([1, 4, 0, 3]);
+  });
+
+  it("orders the 'front' group (spawns 2/5/6) matching the RAM-read real OAM buffer order at RAM ticks 204-206", () => {
+    // Absolute y: 2->49, 5->54, 6->49. Spawns 2/6 tie exactly (both
+    // spawn.y=25) - RAM shows spawn 2 consistently at the lower buffer index.
+    const plumes = [2, 5, 6].map((spawnIndex) => ({
+      spawnIndex,
+      y: 24 + DRAGON_RAGE_FIRE_PLUME_SPAWNS[spawnIndex]!.y,
+    }));
+    expect(orderFirePlumesForDraw(plumes).map((p) => p.spawnIndex)).toEqual([6, 2, 5]);
+  });
+
+  it("is a pure reorder - never drops or duplicates a plume", () => {
+    const plumes = DRAGON_RAGE_FIRE_PLUME_SPAWNS.map((spawn, spawnIndex) => ({ spawnIndex, y: spawn.y }));
+    const ordered = orderFirePlumesForDraw(plumes);
+    expect(ordered.map((p) => p.spawnIndex).sort((a, b) => a - b)).toEqual(plumes.map((p) => p.spawnIndex));
   });
 });
 
