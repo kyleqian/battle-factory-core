@@ -82,8 +82,10 @@ Per entry:
 
 - **What:** invoking a fresh mGBA probe with the shell's default `python3`
   fails at import time because it lacks `cffi`, even though the repository's
-  wrapper and probe are otherwise valid.
-- **Hits:** 2.
+  wrapper and probe are otherwise valid. Third hit (2026-07-25): a worker
+  lost ~8 min rediscovering the venv path via `ps aux` because it is
+  documented only here, not in AGENTS.md/README.
+- **Hits:** 3.
 - **Cost each:** ~3 min.
 - **Workaround:** invoke both `tools/run-mgba-probe.py` and its nested probe
   with `/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python3`.
