@@ -4,6 +4,76 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 445 — Forced-switch §4 slices 1-2 landed: `jumpifbattletype`/`openpartyscreen` registered — the non-terminal fork now runs through the AI's real pick
+
+- **State:** tree green at **197 files / 2342 tests** (+3 files/+24 tests
+  over entry 444's 194/2318), build green. `verify-forced-switch-ground-
+  truth.ts` rerun live before starting and again after every commit: still
+  **23/23 ALL PASS**. Ratchet green: `battleScriptJumpifwordOpcode.ts` (new,
+  pin 1) and `battleScriptOpenPartyScreenOpcode.ts` (new, pin 3) added to
+  `PINNED_BARRIER_COUNTS`, each with its own reachability test; no new
+  production imports of canonical recordings.
+- **Did (commits `3967df3`, `011deee`, `f3aa6bc`), per
+  `docs/forced-switch-ground-truth.md` §4's own ordering:**
+  - **Slice 1 — `B_SCR_OP_JUMPIFWORD`** (`Cmd_jumpifword`, structurally
+    identical to the already-registered `Cmd_jumpifbyte` but 4-byte
+    word/value): this is what `jumpifbattletype`/`jumpifnotbattletype`
+    expand to. Registering it takes `BattleScript_HandleFaintedMon`'s
+    `BATTLE_TYPE_TRAINER` gate from a halted barrier to a real taken jump
+    for Factory, straight through to `BattleScript_FaintedMonSendOutNew`.
+    Modeled memWord/value universe: `gBattleTypeFlags`/`gHitMarker` against
+    the named constants this rung's path needs; everything else barriers.
+  - **Slice 2 — `B_SCR_OP_OPENPARTYSCREEN`** (`BS_FAINTED`, plain-battler
+    branch), the doc's own "single highest-leverage registration": (a)
+    `src/engine/battleAiSwitchInto.ts` — a pure, RNG-free port of
+    `GetMostSuitableMonToSwitchInto`'s pass-1 gate (type-matchup scoring +
+    super-effective-move check, including the documented "picks the type
+    that takes the MOST damage" bug and the mono-type-opponent double-
+    multiply quirk), built and unit-tested standalone first per the doc's
+    own suggestion; (b) the opcode itself, dispatching AI-controlled
+    fainted battlers through that port (writes a new
+    `monToSwitchIntoId[battler]` rules-context field, zero RNG) and barring
+    three named, reachability-tested branches: doubles/multi topology,
+    the player-side interactive party-menu round trip (§3/§4 step 10's own
+    later slice), and pass-2's `AI_CalcDmg` raw-damage fallback (unreached
+    by any fixture here). Extended `BattleScriptPartyMemberState`/`Input`
+    with a `moves` field (backward compatible) — a real dependency the
+    scoring function needed that the party slice didn't carry yet.
+  - **Integration proof** (`tests/factoryBattleScriptTerminalDecision.test.ts`,
+    `tests/battleScriptFaintedActionsOrchestration.test.ts`, both updated):
+    the healthy-opponent-bench KO scenario now runs `checkteamslost ->
+    jumpifbyte -> jumpifword -> openpartyscreen`, reproducing the banked
+    ledger (MACHOP, party index 2, picked over PIDGEY's "next index" decoy,
+    zero extra `Random()` calls) before halting at the next genuinely
+    unregistered opcode, `switchhandleorder`. Also fixed a real gap this
+    surfaced in `battleScriptFaintedActionsOrchestration.ts`'s
+    `runScriptToOwnEnd`: it only treated an *unregistered* opcode as a
+    barrier — a *registered* opcode's own internal `unsupported-branch`
+    halt (now reachable for the first time) used to hit its catch-all
+    "unexpected step" throw instead of surfacing as the same kind of named
+    machine boundary. Fixed to treat any non-terminal halt uniformly.
+- **Next — slice 3, `SWITCHHANDLEORDER`, is NOT the "trivial" transcription
+  the doc characterized it as; a real finding for whoever picks this up:**
+  reading `SwitchPartyOrder` (`battle_main.c:4086-4115`) shows it calls
+  `GetPartyIdFromBattlePartyId()` + `SwitchPartyMonSlots()` against
+  `gBattlePartyCurrentOrder`/`gBattleStruct->battlerPartyOrders` — a
+  per-battler *permutation* layer over the raw party array that this
+  engine does not model at all (today `party.opponent[i]` IS the raw
+  array, no indirection). `monToSwitchIntoId`/`gBattlerPartyIndexes` are
+  positions in that permuted order, not raw array indices, so slice 4
+  (`GETSWITCHEDMONDATA`/`SWITCHINDATAUPDATE`) reading "party at
+  `gBattlerPartyIndexes[battler]`" only lines up if this permutation is
+  modeled first (or proven a no-op for singles — not yet checked). Do not
+  skip this: it's the actual next slice, sized honestly rather than rushed
+  in the time remaining this session. `docs/forced-switch-ground-truth.md`
+  §4 should get a one-line correction pointing here.
+- **Notes:** `battler({..., partyIndex})`/`.types`/`.moves` were all
+  already-modeled fields this rung reused, not new plumbing. No
+  presentation/`battleScene`/ROADMAP edits. Terminal KO path (empty bench)
+  is untouched — confirmed byte-for-byte by the unchanged terminal-decision
+  tests alongside the updated non-terminal ones.
+
+---
 ## 444 — SetMoveEffect status-write quartet registered (POISON/BURN/FREEZE/PARALYSIS) — secondary status procs are now kernel-executable
 
 *(Entry written by the supervisor: the worker landed both code commits green
@@ -122,65 +192,4 @@ re-verified before this entry.)*
   verify-script rerun (all PASS); no presentation/`battleScene`/ROADMAP
   edits; stat-down family and confusion remain explicitly out of scope per
   the doc.
-
----
-## 442 — S10 §3 presentation-seam checkpoint: **PASSED** — `turn5-faint.json` re-driven from real kernel events, still 110/110
-
-- **State:** tree green at **194 files / 2276 tests** (+3 files/+13 tests
-  over entry 441's 191/2263), build green, ratchet green (6/6, barrier
-  counts and canonical-recording allowlist unchanged — no new production
-  imports). Oracle re-verified live: `turn5-faint.json` **110/110** (exact
-  match to its recorded count), plus 22 other turn3/4/5/6 traces re-run as
-  regression checks (`turn3-endeavor/menu/rockslide`, `turn4-doubleteam/
-  menu/rockslide`, all 11 `turn5-*`, all 6 `turn6-*`) — every one still
-  matches its own recorded count, zero regressions.
-- **Did (the checkpoint's ordered 4-step plan, `docs/presentation-seam-
-  scout.md` §7.3):** (1) **String resolver (gap 5)**,
-  `src/engine/battleStringResolver.ts` — `resolveBattleStringLines` walks
-  the already-extracted `battle-message-templates.json` (365-entry
-  `gBattleStringsTable`, extracted in an earlier S7 session) and splices
-  `{TOKEN}` placeholders via caller-supplied resolvers;
-  `resolveBattleNameWithPrefix` implements `HANDLE_NICKNAME_STRING_CASE`
-  source-faithfully (`battle_message.c:2286-2306` — "Foe "/"Wild "/no
-  prefix by side+battle-type). Pinned against the real
-  `STRINGID_TARGETFAINTED` template (corrected in last week's scout pass to
-  `{B_DEF_NAME_WITH_PREFIX}\nfainted!\p`) producing exactly "Foe GROVYLE"/
-  "fainted!". (2) **PC-to-window bridge (gap 7)**,
-  `src/engine/presentationEventWindowBridge.ts` —
-  `resolveFaintPresentationWindowContent` answers "am I in the fainted
-  window" from a real `hp-change{to:0}` plus a `message` event whose
-  `provenance.sourceLabel === "BattleScript_FaintTarget"`, never a turn
-  number; minimal, scoped to this one window's own content decision (the
-  giant `turn<N>Resolved` dispatch cascade in `drawFightSubmenuWindow` is
-  untouched, per the brief). (3) **The leaf**,
-  `src/engine/turn5FaintPresentationStaging.ts` — stages Onix (real
-  level-50 stats) vs. Grovyle (real level-50 stats, HP 1 -> 0, both from
-  `tests/damageCalc.test.ts`'s own RAM-pinned blocks) through the
-  registered hit chain from `BattleScript_HitFromAtkCanceler` to the
-  script's own `end`, composes the bridge + resolver on the captured
-  events, and exports `resolveTurn5FaintWindowLines()`. `battleScene.ts`'s
-  `TURN5_FAINTED_LINE1`/`LINE2` hardcoded literals are **deleted**, replaced
-  by `const [TURN5_FAINTED_LINE1, TURN5_FAINTED_LINE2] =
-  resolveTurn5FaintWindowLines();` — one real kernel run, computed once at
-  module load, presentation only reads the result. One deliberate,
-  documented substitution: the staged move is `MOVE_STRENGTH`, not the
-  real turn's `MOVE_ROCK_SLIDE` — this leaf's own rendered content never
-  depends on which move KO'd Grovyle, and `ROCK_SLIDE` is
-  `MOVE_TARGET_BOTH` (a spread move), which trips `Cmd_ppreduce`'s
-  existing, unrelated `unsupported-branch` for cross-side Pressure
-  counting (a real, separate, already-pinned engine gap — not something to
-  fake around). (4) **Re-verified**, live oracle: `turn5-faint.json`
-  110/110, 22 regression traces unchanged (see State).
-- **Next:** the presentation-seam checkpoint is closed; per ROADMAP S10 §3
-  the kernel may resume growing past step (iv) (further opcodes/breadth)
-  now that one window is proven to genuinely consume kernel events. Gap 4
-  (tick/frame timestamp on events) remains open and un-scoped (confirmed
-  not on this window's own critical path, §7.3) — the next window that
-  needs HP-interpolation timing (e.g. `turn1-rockslide.json`) will need it.
-- **Notes:** no new turn-keyed branches; no new production imports of
-  canonical recordings (the three RAM-dump HP imports named in ISSUES #41
-  are untouched — the fainted branch has zero RAM-dump reads, so no
-  deletion fell out naturally here); `drawFightSubmenuWindow`'s own
-  `turn<N>Resolved` boolean cascade is unmodified by design (redesigning it
-  was explicitly out of this checkpoint's scope).
 
