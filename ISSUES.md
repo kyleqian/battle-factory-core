@@ -5,6 +5,57 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
+## #43 — `resolveRulesBattlerForBattleScript` has no BS_TARGET/BS_FAINTED case
+
+**Symptom:** any generic source-command opcode selected via the shared
+`resolveBattlerForBattleScript` port (`playfaintcry`, `hidepartystatussummary`,
+`makevisible`, `trainerslidein`, ...) blocks (`source-context-unavailable`,
+port `resolve-battler-for-battle-script`) the instant its operand is
+`BS_TARGET` or `BS_FAINTED`, even though the opcode itself is "registered."
+
+**Confirmed** (2026-07-24, S10 step (ii) RUNG 4): driving the KO scenario's
+real ROM seed through the full hit chain into `tryfaintmon`'s faint branch
+(`BattleScript_FaintTarget`) blocks on the very next instruction,
+`playfaintcry BS_TARGET` — `resolveRulesBattlerForBattleScript`
+(`battleScriptRulesContext.ts:1538-1549`) only maps `BS_ATTACKER` and
+`BS_EFFECT_BATTLER`, per its own doc comment scoping it to
+statusanimation/status2animation/chosenstatusanimation's reachable selectors.
+`rulesContext.selectorRoles.target` already exists and is populated — the
+fix is additive (one more `if` arm), not a redesign.
+
+**Leads:** blocks the KO scenario's faint animation cutscene
+(`BattleScript_FaintAttacker`/`FaintTarget`'s `playfaintcry`/`dofaintanimation`/
+`cleareffectsonfaint` run) from ever advancing past its first instruction.
+Whoever registers `dofaintanimation`/`cleareffectsonfaint` (a future rung)
+will need this fixed first, or will hit the same block immediately.
+
+## #42 — `Cmd_checkteamslost`/`gBattleOutcome` needs party-HP modeling this engine doesn't have
+
+**Symptom:** nothing in the registered kernel can compute a real
+`battleOutcome` transition (0 -> WON/LOST) yet. `BattleScriptRulesContext`
+models four active battlers only; it has no party (bench) concept at all.
+
+**Confirmed** (2026-07-24, S10 step (ii) RUNG 4): `Cmd_tryfaintmon`
+(`battle_script_commands.c:2965-3050`) itself never touches `gBattleOutcome`
+— it only sets `HITMARKER_FAINTED`/`HITMARKER_PLAYER_FAINTED` and jumps into
+`BattleScript_FaintAttacker`/`FaintTarget`. The actual transition happens deep
+inside `BattleScript_HandleFaintedMon` -> `Cmd_checkteamslost`
+(`:3534-3576`), which sums `MON_DATA_HP` across all six `gPlayerParty`/
+`gEnemyParty` slots — machinery this engine has never built (`roundController.ts`
+tracks a `BattleParty` at a *higher* layer, entirely disconnected from the
+Battle Script machine). `docs/hit-chain-ground-truth.md`'s KO scenario
+correctly banks the ROM's real `battleOutcome: 0 -> 1` transition on turn 3's
+kill, but that number comes from the full ROM, not from anything the RUNG 4
+worker was scoped to implement (two opcodes: `seteffectwithchance`,
+`tryfaintmon`) — registering `checkteamslost` source-completely needs the
+party-HP model plumbed into the machine first.
+
+**Leads:** ROADMAP S10 step (iv) ("roundController.ts consumes that outcome
+instead of a fixture") and any future `checkteamslost` registration both need
+this. Until then, `battleOutcome` stays exactly what it already was: a raw
+pass-through context field (`battleScriptActionAdmission.ts:3619` reads it,
+nothing in the registered opcode set writes it).
+
 ## #41 — Production engine modules import canonical RAM recordings
 
 **Symptom:** shipped `src/engine/` code reads recorded state from the single

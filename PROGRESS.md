@@ -4,6 +4,81 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 435 — S10 step (ii) RUNG 4: seteffectwithchance + tryfaintmon registered — sixteen-opcode hit chain complete
+
+- **State:** tree green at **178 files / 2135 tests** (+16), build green.
+  `createBattleScriptStatusRulesHandlers` now composes **45** opcodes (was
+  43): `seteffectwithchance`, `tryfaintmon` (both in
+  `battleScriptHitChainOpcode.ts`). This closes the sixteen-opcode standard
+  hit chain from ROADMAP S10 §2(ii); opcode 73 `moveend` remains the
+  step-(iii) boundary, untouched.
+- **Did:** `seteffectwithchance` is source-complete for its own control flow:
+  Serene Grace doubling, the `MOVE_EFFECT_CERTAIN` short-circuit (no RNG
+  drawn), and the roll-based branch (RNG **always** drawn once whenever
+  CERTAIN isn't taken, matching C's `else if (Random()...)` evaluation order
+  — ground truth's roll 4). Since every move reachable from this engine's
+  registered topology has `moveEffectByte == 0`, both of `SetMoveEffect`'s
+  actual dispatch sites are narrow `(b)` barriers (genuinely unreached today,
+  still guarded per the "still a guard, not an omission" rule), each proven
+  reachable by directly constructing a nonzero `moveEffectByte` in a Tier-1
+  test. `tryfaintmon` is source-complete for the mode-FALSE form used by
+  `BattleScript_EffectHit`: the literal `== BS_ATTACKER` comparison (not a
+  generic selector — any other operand, including `BS_FAINTED`, correctly
+  takes the "target" path, proven by a dedicated test), the no-faint
+  pass-through, the faint branch (`HITMARKER_FAINTED`/`HITMARKER_PLAYER_FAINTED`
+  bit-setting, real `call` transition into `BattleScript_FaintAttacker`/
+  `FaintTarget`), and Destiny Bond/Grudge as narrow barriers gated strictly on
+  their real trigger conditions (both reachable via direct hitMarker/status3
+  construction, not just theoretically). The mode-TRUE `tryfaintmon_spikes`
+  form (needs unmodeled `gSideStatuses`/SIDE_STATUS_SPIKES_DAMAGED) is one
+  more barrier, never reached by the hit chain itself. Five new barriers
+  total (13 → 18, ratchet pin raised deliberately, named above and in the
+  ratchet's own comment). Extended both RUNG-1/KO integration tests: the
+  plain-hit scenario now shows **4** attributed rolls with roll 4 attributed
+  to `seteffectwithchance` and hands off at `moveend` (opcode 73, unregistered
+  — per spec); the KO scenario's real ROM seed reproduces its exact 4-roll
+  ledger including roll 4 (`24745`), drives `tryfaintmon`'s faint branch into
+  `BattleScript_FaintTarget` with the correct `HITMARKER_FAINTED` bit, and
+  then **blocks** (not halts) on the very next instruction, `playfaintcry
+  BS_TARGET` — filed as ISSUES #43 (`resolveRulesBattlerForBattleScript` only
+  maps `BS_ATTACKER`/`BS_EFFECT_BATTLER`, a pre-existing gap unrelated to this
+  rung's two opcodes). 16 new Tier-1 tests (registration + branches +
+  barrier-reachability, following the RUNG 1–3 pattern) plus a fixed
+  pre-existing test whose default `attack:0/defense:0` fixture happened to
+  produce NaN damage that zeroed HP — invisible before tryfaintmon existed to
+  read that HP, now given a real nonzero attack/defense so the "no faint"
+  scenario is actually a no-faint scenario.
+- **Scope correction (say-why, not improvise):** the brief's acceptance
+  criterion asking the KO integration test to drive "the terminal outcome...
+  `battleOutcome` 0 -> 1" is **not achievable inside this rung and not
+  source-faithful to attempt.** `Cmd_tryfaintmon` itself never touches
+  `gBattleOutcome` — confirmed by reading its full body
+  (`battle_script_commands.c:2965-3050`). The real transition lives in
+  `Cmd_checkteamslost` (`:3534-3576`), reached only via
+  `BattleScript_HandleFaintedMon`, deep past `dofaintanimation`/
+  `cleareffectsonfaint`/the switch-in dance — and it requires summing HP
+  across full six-slot `gPlayerParty`/`gEnemyParty` records, a party model
+  this engine's Battle Script machine does not have anywhere (`roundController.ts`
+  tracks a party, but at a disconnected higher layer). Implementing that is
+  not "two opcodes" and was correctly out of scope per the brief's own opcode
+  boundary (`moveend`/opcode 73 untouched). Filed as ISSUES #42 for whoever
+  registers `checkteamslost` or wires step (iv). This rung instead proves
+  exactly what `tryfaintmon` source-faithfully does: takes the real faint
+  branch, sets the real hitMarker bits, and hands off cleanly at the next
+  boundary the machine actually reaches.
+- **Next:** step (iii) — register opcode 73 (`moveend`) per the already-banked
+  dependency-ladder receipt (ROADMAP S10, "MOVEEND source-boundary
+  checkpoint"). Fixing ISSUES #43 (`BS_TARGET` in
+  `resolveRulesBattlerForBattleScript`) first would let the KO scenario's
+  faint cutscene advance further, but is not required to start step (iii).
+  After (iii): step (iv) closes the loop — and needs ISSUES #42
+  (`checkteamslost`/party-HP modeling) solved first for a *real* terminal
+  outcome, not a fixture.
+- **Notes:** no presentation/render/`battleScene` edits; no oracle traces
+  (Tier-1 only, per the banked ground truth); no new production imports of
+  canonical recordings.
+
+---
 ## 434 — [BETWEEN-SESSION HARDENING, user-directed] two ratchets + oracle freshness gate
 
 - **State:** tree green at **178 files / 2119 tests**, build green. No code
@@ -73,66 +148,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** ROADMAP corrected twice this session (opcode-0 supersession
   marker; step (ii) has no `orbyte`, eighteen registrations). Two PAPERCUTS
   added (post-KO button-drop staging; comparator round-trip cost).
-
----
-## 432 — S10 step (ii) RUNG 3: attackanimation..resultmessage registered (all seven)
-
-- **State:** RUNG 3 of the sixteen-opcode hit chain is complete and green at
-  **177 files / 2113 tests**, build green. `createBattleScriptStatusRulesHandlers`
-  now composes **43** opcodes (was 36): `attackanimation`, `effectivenesssound`,
-  `hitanimation`, `healthbarupdate`, `datahpupdate`, `critmessage`,
-  `resultmessage` (all in `battleScriptHitChainOpcode.ts`). The staged hit
-  turn integration test now runs opcode 0 → accuracycheck → ... →
-  adjustnormaldamage → attackanimation → waitanimation → effectivenesssound →
-  hitanimation → waitstate → healthbarupdate → datahpupdate → critmessage →
-  waitmessage → resultmessage → waitmessage, and hands off cleanly at
-  `seteffectwithchance` (still unregistered, the correct RUNG-4 boundary) for
-  both the plain Tackle-hit scenario and the KO scenario's real ROM seed.
-- **Did:** `attackanimation` is source-complete: the `HITMARKER_NO_ANIMATIONS`
-  and `MOVE_RESULT_NO_EFFECT` branches both resolve to a real `BattleScriptPush
-  (curr+1)`-equivalent `call` transition to `BattleScript_Pausex20` (not a
-  barrier — the machine's `call` control-flow kind already models this
-  exactly), the doubles-only spread-move early-return uses the already-present
-  `animTurn`/`animTargetsHit` `gBattleScripting` fields (from
-  `battleScriptSetByte.ts`, not new state), and the multihit-string argument
-  is computed from already-modeled fields (`multiHitCounter`, target
-  `substituteHP`/`hp`) — no barrier needed there either, unlike the brief's
-  worry. `effectivenesssound`/`hitanimation`/`healthbarupdate` are acknowledge-
-  only controller-request emissions (new `health-bar-update` semantic event
-  kind; `play-se`/`animation` kinds existed but were unused until now).
-  `datahpupdate` is the rung's real HP mutation: substitute-active damages
-  `substituteHP` instead of real HP with correct `hpDealt` bookkeeping (the
-  substitute-*fades* sub-case is barriered — it needs the
-  `BattleScript_SubstituteFade` cutscene subsystem, gated strictly on
-  substitute HP actually reaching 0 this hit); negative damage (HP gain) is
-  barriered on needing an unmodeled `maxHP` field (structurally unreachable
-  from `EFFECT_HIT` moves anyway); physical/special bookkeeping reuses the
-  already-present `specialStatus.{physicalDmg,specialDmg}` fields; Bide
-  accumulation reuses the already-present `bideDmg`/`bideTarget` context
-  fields. New required battler field `friendship` (animation-argument only,
-  `?? 0` default) and new context field `hpDealt` (real `gHpDealt`, `?? 0`
-  default). `critmessage` is a direct crit-flag+no-effect gate.
-  `resultmessage`'s stringId selection models the source's real two-phase
-  switch-then-default-bitmask structure faithfully (verified via the
-  `FOE_ENDURED`-combined-with-`SUPER_EFFECTIVE` case, which must exercise the
-  default branch's `BattleScriptPushCursor`-equivalent `call-current` jump to
-  `BattleScript_EnduredMsg`, re-entering `resultmessage` with the flag
-  cleared) — `MOVE_RESULT_ONE_HIT_KO` and `MOVE_RESULT_FOE_HUNG_ON` are the
-  only two barriers, each gated strictly on that flag bit, citing the
-  genuinely-unmodeled OHKO/Focus-Band-activation subsystems.
-- **Next:** RUNG 4 — register `seteffectwithchance` (consumes ground truth's
-  4th roll) and `tryfaintmon` (the KO/next-mon/terminal-win branches banked in
-  `docs/hit-chain-ground-truth.md`'s edge-case scenario). That closes the
-  sixteen-opcode hit chain; opcode 73 (`moveend`) remains the step-(iii)
-  boundary after that.
-- **Notes:** three pre-existing tests broke on the new required `friendship`
-  battler field (two `toStrictEqual`-against-raw-input attackcanceler tests,
-  one registration-count pin) and were fixed in the same commit, same
-  pattern as RUNG 2's `attack`/`defense`/etc additions. Added 41 new Tier-1
-  dispatch tests (one `describe` per opcode, registration + key branches +
-  barrier-reachability) plus extended both RUNG-1/KO integration tests through
-  the new boundary; RNG ledger asserted untouched across all seven opcodes
-  (ground truth: roll 4 belongs to `seteffectwithchance`, not this rung). No
-  presentation/render/`battleScene` edits; no oracle traces (Tier-1 only, per
-  the banked ground truth).
 

@@ -59,7 +59,7 @@ const ALLOWED_RECORDING_IMPORTS: ReadonlySet<string> = new Set([
  * is not on the path the step claims to make executable.
  */
 const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
-  ["src/engine/battleScriptHitChainOpcode.ts", 13],
+  ["src/engine/battleScriptHitChainOpcode.ts", 18],
   ["src/engine/battleScriptAttackCancelerOpcode.ts", 5],
 ]);
 

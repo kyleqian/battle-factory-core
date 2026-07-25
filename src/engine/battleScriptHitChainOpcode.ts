@@ -90,6 +90,7 @@ type MoveRow = Readonly<{
   effect: string;
   type: string;
   flags: readonly string[];
+  secondaryEffectChance: number;
 }>;
 
 const MOVE_ROWS = new Map<number, MoveRow>(
@@ -167,6 +168,16 @@ const MOVE_RESULT_FOE_HUNG_ON = 1 << 7;
 const HITMARKER_IGNORE_BIDE = 1 << 5;
 const HITMARKER_IGNORE_SUBSTITUTE = 1 << 8;
 const HITMARKER_PASSIVE_HP_UPDATE = 1 << 20;
+/** include/constants/battle.h:183,199,201 -- tryfaintmon's own hitMarker bits. */
+const HITMARKER_DESTINYBOND = 1 << 6;
+const HITMARKER_PLAYER_FAINTED = 1 << 22;
+const HITMARKER_GRUDGE = 1 << 24;
+/** include/constants/battle.h:171 -- Grudge's status3 bit, read by tryfaintmon directly off gBattlerTarget. */
+const STATUS3_GRUDGE = 1 << 14;
+/** include/abilities.h:36. */
+const ABILITY_SERENE_GRACE = 32;
+/** include/constants/battle.h:310 -- seteffectwithchance's own MOVE_EFFECT_BYTE bit. */
+const MOVE_EFFECT_CERTAIN = 1 << 7;
 
 /** include/battle.h:52-53, the doubles-only spread-move target bits attackanimation's early-return checks. */
 const MOVE_TARGET_DEPENDS = 1 << 0;
@@ -1519,6 +1530,161 @@ function createResultmessageOpcodeHandler(
   };
 }
 
+/**
+ * Cmd_seteffectwithchance (battle_script_commands.c:2908-2936). No source
+ * `if (gBattleControllerExecFlags) return;` gate exists on this dispatcher
+ * (unlike critmessage/resultmessage), so no isControllerIdle check here,
+ * matching critcalc/damagecalc/typecalc/adjustnormaldamage. C's
+ * `else if (Random() % 100 < percentChance && ...)` evaluates Random() before
+ * the rest of the condition, so this opcode always consumes exactly one roll
+ * whenever the MOVE_EFFECT_CERTAIN branch isn't taken -- docs/hit-chain-
+ * ground-truth.md's roll 4, present on every hit-chain scenario regardless of
+ * secondaryEffectChance. Every EFFECT_HIT move reachable from this engine's
+ * registered topology has moveEffectByte == 0 (no setmoveeffect-family opcode
+ * is registered yet to set it nonzero), so both of SetMoveEffect's dispatch
+ * sites are structurally unreached today -- narrowly barriered per ROADMAP
+ * S10 §1 ("still a (b) guard, not an omission") rather than assumed
+ * unreachable, and proven reachable by directly constructing a nonzero
+ * moveEffectByte in the barrier tests below.
+ */
+function createSeteffectwithchanceOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
+  return (context) => {
+    const rulesContext = context.state.rulesContext;
+    const noEffect = (rulesContext.moveResultFlags & BATTLE_SCRIPT_MOVE_RESULT_NO_EFFECT) !== 0;
+    const certain = (rulesContext.moveEffectByte & MOVE_EFFECT_CERTAIN) !== 0;
+
+    if (certain && !noEffect) {
+      return unsupportedBranch(
+        context,
+        "Cmd_seteffectwithchance's MOVE_EFFECT_CERTAIN branch dispatches "
+          + "SetMoveEffect(FALSE, MOVE_EFFECT_CERTAIN), an unmodeled subsystem",
+        "battle_script_commands.c",
+        2921,
+      );
+    }
+
+    const attacker = requireBattlerRole(rulesContext, "attacker");
+    const attackerBattler = rulesContext.battlers[attacker];
+    const moveRow = requireMoveRow(rulesContext.currentMove);
+    const percentChance = attackerBattler.ability === ABILITY_SERENE_GRACE
+      ? moveRow.secondaryEffectChance * 2
+      : moveRow.secondaryEffectChance;
+
+    const { rng, randomValue } = drawBattleScriptRng(context.state.rng, context.instruction, "seteffectwithchance");
+    const rolledSuccess = (randomValue % 100) < percentChance;
+
+    if (rolledSuccess && rulesContext.moveEffectByte !== 0 && !noEffect) {
+      return unsupportedBranch(
+        context,
+        "Cmd_seteffectwithchance's chance-roll branch dispatches SetMoveEffect, an unmodeled subsystem",
+        "battle_script_commands.c",
+        2927,
+      );
+    }
+
+    return transitionBattleScriptCommand(
+      context,
+      Object.freeze({ kind: "advance" }),
+      { rulesContext: Object.freeze({ ...rulesContext, moveEffectByte: 0, multiHitEffect: 0 }), rng },
+    );
+  };
+}
+
+function hitMarkerFaintedBit(battler: BattleScriptBattlerId): number {
+  return (1 << (28 + battler)) >>> 0;
+}
+
+/**
+ * Cmd_tryfaintmon (battle_script_commands.c:2965-3050). No source
+ * `gBattleControllerExecFlags` gate exists here either (unlike its neighbor
+ * Cmd_dofaintanimation). The mode byte's nonzero form (tryfaintmon_spikes,
+ * `gBattlescriptCurrInstr[2] != 0`) is assembled only at the Spikes-clearing
+ * sites (data/battle_scripts_1.s:2473,2485,2497 and others) -- never by
+ * BattleScript_EffectHit's own `tryfaintmon BS_TARGET` (mode FALSE) -- and it
+ * needs gSideStatuses' SIDE_STATUS_SPIKES_DAMAGED bit, unmodeled by this
+ * engine; barriered whole. The mode-FALSE form's battler selection is a
+ * literal `== BS_ATTACKER` comparison in source, not GetBattlerForBattleScript,
+ * so any other operand spelling (BS_TARGET, BS_FAINTED, ...) takes the
+ * "target" path exactly as source does -- no selector barrier needed.
+ * gBattleResults bookkeeping and AdjustFriendshipOnBattleFaint (battle_util2.c:77,
+ * mutating gPlayerParty, not gBattleMons) are unconditional side effects on
+ * globals this engine does not model anywhere and no reachable opcode reads
+ * back; omitted as inert bookkeeping, matching this file's existing precedent
+ * for untracked non-branching state.
+ */
+function createTryfaintmonOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
+  return (context) => {
+    const rulesContext = context.state.rulesContext;
+    const mode = context.instruction.operands[1]?.expression;
+
+    if (mode === "TRUE") {
+      return unsupportedBranch(
+        context,
+        "Cmd_tryfaintmon's tryfaintmon_spikes form (gBattlescriptCurrInstr[2] != 0) needs "
+          + "GetBattlerForBattleScript's full selector set plus gSideStatuses' "
+          + "SIDE_STATUS_SPIKES_DAMAGED clearing, neither modeled by this engine",
+        "battle_script_commands.c",
+        2969,
+      );
+    }
+
+    const isAttackerOperand = context.instruction.operands[0]?.expression === "BS_ATTACKER";
+    const activeBattler = isAttackerOperand
+      ? requireBattlerRole(rulesContext, "attacker")
+      : requireBattlerRole(rulesContext, "target");
+    const faintTargetLabel = isAttackerOperand ? "BattleScript_FaintAttacker" : "BattleScript_FaintTarget";
+
+    const activeBattlerState = rulesContext.battlers[activeBattler];
+    const absent = (rulesContext.absentBattlerFlags & (1 << activeBattler)) !== 0;
+    const shouldFaint = !absent && activeBattlerState.hp === 0;
+
+    if (!shouldFaint) {
+      return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }));
+    }
+
+    let hitMarker = (rulesContext.hitMarker | hitMarkerFaintedBit(activeBattler)) >>> 0;
+    if (activeBattlerState.side === 0) {
+      hitMarker = (hitMarker | HITMARKER_PLAYER_FAINTED) >>> 0;
+    }
+
+    const attackerBattler = rulesContext.battlers[requireBattlerRole(rulesContext, "attacker")];
+    const targetBattler = rulesContext.battlers[requireBattlerRole(rulesContext, "target")];
+
+    if ((hitMarker & HITMARKER_DESTINYBOND) !== 0 && attackerBattler.hp !== 0) {
+      return unsupportedBranch(
+        context,
+        "Cmd_tryfaintmon's HITMARKER_DESTINYBOND branch (BattleScript_DestinyBondTakesLife) is not modeled",
+        "battle_script_commands.c",
+        3020,
+      );
+    }
+
+    if (
+      (targetBattler.status3 & STATUS3_GRUDGE) !== 0
+      && (hitMarker & HITMARKER_GRUDGE) === 0
+      && attackerBattler.side !== targetBattler.side
+      && attackerBattler.hp !== 0
+      && rulesContext.currentMove !== BATTLE_SCRIPT_MOVE_STRUGGLE
+    ) {
+      return unsupportedBranch(
+        context,
+        "Cmd_tryfaintmon's STATUS3_GRUDGE branch (BattleScript_GrudgeTakesPP) is not modeled",
+        "battle_script_commands.c",
+        3027,
+      );
+    }
+
+    const target = resolveBattleScriptLabel(context.program, faintTargetLabel);
+    if (!target) throw new Error(`tryfaintmon: committed program has no label ${faintTargetLabel}`);
+
+    return transitionBattleScriptCommand(
+      context,
+      Object.freeze({ kind: "call", programCounter: target.programCounter }),
+      { rulesContext: Object.freeze({ ...rulesContext, hitMarker }) },
+    );
+  };
+}
+
 export type BattleScriptHitChainPorts = Readonly<{
   isControllerIdle: BattleScriptControllerIdlePort<BattleScriptRulesContext>;
   prepareMessage: BattleScriptMessagePreparationPort<BattleScriptRulesContext>;
@@ -1551,5 +1717,7 @@ export function createBattleScriptHitChainOpcodeHandlers(
   install("B_SCR_OP_DATAHPUPDATE", createDatahpupdateOpcodeHandler(ports.isControllerIdle));
   install("B_SCR_OP_CRITMESSAGE", createCritmessageOpcodeHandler(ports.isControllerIdle, ports.prepareMessage));
   install("B_SCR_OP_RESULTMESSAGE", createResultmessageOpcodeHandler(ports.isControllerIdle, ports.prepareMessage));
+  install("B_SCR_OP_SETEFFECTWITHCHANCE", createSeteffectwithchanceOpcodeHandler());
+  install("B_SCR_OP_TRYFAINTMON", createTryfaintmonOpcodeHandler());
   return Object.freeze(handlers);
 }

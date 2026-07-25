@@ -184,6 +184,42 @@ function stepAtOpcode(
   return { execution, result };
 }
 
+/**
+ * Jumps straight to an arbitrary committed programCounter -- for
+ * B_SCR_OP_TRYFAINTMON's several concrete operand spellings
+ * (BS_ATTACKER/BS_TARGET/BS_FAINTED x mode FALSE/TRUE), stepAtOpcode's
+ * name-only search always lands on the same first occurrence (PC 24, the
+ * BattleScript_EffectHit `tryfaintmon BS_TARGET` site); this instead selects
+ * a specific instance up front.
+ */
+function stepAtProgramCounter(
+  pc: number,
+  rulesContext: BattleScriptRulesContext,
+  rngSeed = 1,
+  ports = externalPorts(),
+) {
+  const execution = createBattleScriptStatusRulesExecution(
+    program,
+    "BattleScript_HitFromCritCalc",
+    rulesContext,
+    rngSeed,
+    ports,
+  );
+  const patched = Object.freeze({ ...execution.state, programCounter: pc });
+  const result = stepBattleScriptMachine(program, patched, execution.handlers);
+  return { execution, result };
+}
+
+function findTryfaintmonPc(matchOperands: (operands: readonly string[]) => boolean): number {
+  const found = program.instructions.find(
+    (instruction) =>
+      instruction.opcodeName === "B_SCR_OP_TRYFAINTMON"
+      && matchOperands(instruction.operands.map((operand) => operand.expression)),
+  );
+  if (!found) throw new Error("no matching B_SCR_OP_TRYFAINTMON instruction found in the committed program");
+  return found.programCounter;
+}
+
 describe("production accuracycheck (Cmd_accuracycheck) dispatch", () => {
   it("registers B_SCR_OP_ACCURACYCHECK", () => {
     const instruction = program.instructions.find((i) => i.opcodeName === "B_SCR_OP_ACCURACYCHECK")!;
@@ -955,9 +991,144 @@ describe("production resultmessage (Cmd_resultmessage) dispatch", () => {
   });
 });
 
-describe("RUNG 3 integration: opcode 0 -> ... -> resultmessage -> seteffectwithchance boundary", () => {
-  it("RUNG 1 hit turn (Tackle, seed 1): walks the full hit chain and halts at seteffectwithchance", () => {
+const MOVE_EFFECT_CERTAIN = 1 << 7;
+const MUD_SLAP = 189; // EFFECT_ACCURACY_DOWN_HIT, secondaryEffectChance 100 -- guarantees the chance-roll succeeds regardless of the actual u16.
+
+describe("production seteffectwithchance (Cmd_seteffectwithchance) dispatch", () => {
+  it("registers B_SCR_OP_SETEFFECTWITHCHANCE", () => {
+    expect(program.instructions.find((i) => i.opcodeName === "B_SCR_OP_SETEFFECTWITHCHANCE")).toBeDefined();
+  });
+
+  it("plain EFFECT_HIT move (moveEffectByte 0, secondaryEffectChance 0): consumes exactly one roll and passes through", () => {
     const rc = context(0);
+    const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.rng.calls).toBe(1);
+    expect(result.state.rng.ledger[0]!.reason).toBe("seteffectwithchance");
+    expect(result.state.rulesContext.moveEffectByte).toBe(0);
+    expect(result.state.rulesContext.multiHitEffect).toBe(0);
+  });
+
+  describe("(b) unsupported-branch barriers", () => {
+    it("halts on MOVE_EFFECT_CERTAIN with NO_EFFECT absent (SetMoveEffect unmodeled)", () => {
+      const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_CERTAIN });
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      expect(result.kind).toBe("halted");
+      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 2921 });
+    });
+
+    it("MOVE_EFFECT_CERTAIN but MOVE_RESULT_NO_EFFECT set: no barrier, passes through untouched", () => {
+      const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_CERTAIN, moveResultFlags: 1 << 3 });
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.rulesContext.moveEffectByte).toBe(0);
+    });
+
+    it("halts when the chance roll succeeds with a nonzero effect byte (SetMoveEffect unmodeled)", () => {
+      const rc = context(0, {}, { currentMove: MUD_SLAP, moveEffectByte: 1 });
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      expect(result.kind).toBe("halted");
+      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 2927 });
+    });
+
+    it("chance roll succeeds but moveEffectByte is 0: no barrier, still consumes the roll and passes through", () => {
+      const rc = context(0, {}, { currentMove: MUD_SLAP, moveEffectByte: 0 });
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.rng.calls).toBe(1);
+    });
+  });
+});
+
+const HITMARKER_DESTINYBOND = 1 << 6;
+const HITMARKER_PLAYER_FAINTED = 1 << 22;
+const STATUS3_GRUDGE = 1 << 14;
+const TRYFAINTMON_TARGET_FAINTED_BIT = (1 << 29) >>> 0; // HITMARKER_FAINTED(battler 1)
+const TRYFAINTMON_ATTACKER_FAINTED_BIT = (1 << 28) >>> 0; // HITMARKER_FAINTED(battler 0)
+
+describe("production tryfaintmon (Cmd_tryfaintmon) dispatch", () => {
+  it("registers B_SCR_OP_TRYFAINTMON", () => {
+    expect(program.instructions.find((i) => i.opcodeName === "B_SCR_OP_TRYFAINTMON")).toBeDefined();
+  });
+
+  it("no faint (target hp nonzero): passes through, hitMarker untouched", () => {
+    const rc = context(0, {}, {}, { hp: 90 });
+    const { result } = stepAtOpcode("B_SCR_OP_TRYFAINTMON", rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.rulesContext.hitMarker).toBe(0);
+  });
+
+  it("BS_TARGET faints (KO scenario shape): calls into BattleScript_FaintTarget, sets HITMARKER_FAINTED(target) only", () => {
+    const rc = context(0, {}, {}, { hp: 0 });
+    const { result } = stepAtOpcode("B_SCR_OP_TRYFAINTMON", rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.programCounter).toBe(labelPc("BattleScript_FaintTarget"));
+    expect(result.state.callStack.length).toBe(1);
+    expect(result.state.rulesContext.hitMarker & TRYFAINTMON_TARGET_FAINTED_BIT).toBe(TRYFAINTMON_TARGET_FAINTED_BIT);
+    expect(result.state.rulesContext.hitMarker & HITMARKER_PLAYER_FAINTED).toBe(0); // target here is the opponent (side 1)
+  });
+
+  it("BS_ATTACKER faints on the player side: calls BattleScript_FaintAttacker and sets HITMARKER_PLAYER_FAINTED", () => {
+    const pc = findTryfaintmonPc((ops) => ops[0] === "BS_ATTACKER" && ops[1] === "FALSE");
+    const rc = context(0, { hp: 0 });
+    const { result } = stepAtProgramCounter(pc, rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.programCounter).toBe(labelPc("BattleScript_FaintAttacker"));
+    expect(result.state.rulesContext.hitMarker & TRYFAINTMON_ATTACKER_FAINTED_BIT).toBe(TRYFAINTMON_ATTACKER_FAINTED_BIT);
+    expect(result.state.rulesContext.hitMarker & HITMARKER_PLAYER_FAINTED).toBe(HITMARKER_PLAYER_FAINTED);
+  });
+
+  it("any other operand spelling (BS_FAINTED) takes the target path, matching source's literal == BS_ATTACKER comparison", () => {
+    const pc = findTryfaintmonPc((ops) => ops[0] === "BS_FAINTED" && ops[1] === "FALSE");
+    const rc = context(0, {}, {}, { hp: 0 });
+    const { result } = stepAtProgramCounter(pc, rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.programCounter).toBe(labelPc("BattleScript_FaintTarget"));
+  });
+
+  it("absentBattlerFlags set for the target: no faint even at hp 0", () => {
+    const rc = context(0, {}, { absentBattlerFlags: 1 << 1 }, { hp: 0 });
+    const { result } = stepAtOpcode("B_SCR_OP_TRYFAINTMON", rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.rulesContext.hitMarker).toBe(0);
+  });
+
+  describe("(b) unsupported-branch barriers", () => {
+    it("halts on HITMARKER_DESTINYBOND with the attacker still alive (BattleScript_DestinyBondTakesLife unmodeled)", () => {
+      const rc = context(0, {}, { hitMarker: HITMARKER_DESTINYBOND }, { hp: 0 });
+      const { result } = stepAtOpcode("B_SCR_OP_TRYFAINTMON", rc);
+      expect(result.kind).toBe("halted");
+      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 3020 });
+    });
+
+    it("halts on the target's STATUS3_GRUDGE vs. a different-side attacker (BattleScript_GrudgeTakesPP unmodeled)", () => {
+      const rc = context(0, {}, { currentMove: TACKLE }, { hp: 0, status3: STATUS3_GRUDGE });
+      const { result } = stepAtOpcode("B_SCR_OP_TRYFAINTMON", rc);
+      expect(result.kind).toBe("halted");
+      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 3027 });
+    });
+
+    it("Grudge does not fire on MOVE_STRUGGLE, matching source's explicit exclusion", () => {
+      const rc = context(0, {}, { currentMove: 165 /* MOVE_STRUGGLE */ }, { hp: 0, status3: STATUS3_GRUDGE });
+      const { result } = stepAtOpcode("B_SCR_OP_TRYFAINTMON", rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    });
+
+    it("halts on the tryfaintmon_spikes form (mode byte TRUE), regardless of fainted state", () => {
+      const pc = findTryfaintmonPc((ops) => ops[1] === "TRUE");
+      const rc = context(0);
+      const { result } = stepAtProgramCounter(pc, rc);
+      expect(result.kind).toBe("halted");
+      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 2969 });
+    });
+  });
+});
+
+describe("RUNG 4 integration: opcode 0 -> ... -> seteffectwithchance -> tryfaintmon -> moveend/dofaintanimation boundary", () => {
+  it("RUNG 1 hit turn (Tackle, seed 1): walks the full sixteen-opcode hit chain, no-faint tryfaintmon pass-through, halts at moveend (opcode 73)", () => {
+    // attack/defense nonzero (unlike the default 0/0 fixture) so damagecalc produces a real,
+    // non-NaN, non-lethal hit -- this scenario specifically needs tryfaintmon's no-faint path.
+    const rc = context(0, { attack: 40 }, {}, { defense: 40 });
     const execution = createBattleScriptStatusRulesExecution(
       program,
       "BattleScript_HitFromAtkCanceler",
@@ -992,15 +1163,25 @@ describe("RUNG 3 integration: opcode 0 -> ... -> resultmessage -> seteffectwithc
     }
     if (result.kind !== "advanced") throw new Error(`expected advance before seteffectwithchance, got ${result.kind}`);
     expect(result.state.rulesContext.battlers[1]!.hp).toBeLessThan(100); // datahpupdate dealt real damage
-    const halted = stepBattleScriptMachine(program, result.state, handlers); // seteffectwithchance: RUNG-4 boundary
+    result = stepBattleScriptMachine(program, result.state, handlers); // seteffectwithchance
+    if (result.kind !== "advanced") throw new Error(`seteffectwithchance did not advance: ${result.kind}`);
+    expect(result.state.rng.calls).toBe(4); // ground truth's roll 4
+    result = stepBattleScriptMachine(program, result.state, handlers); // tryfaintmon: no faint, target survives
+    if (result.kind !== "advanced") throw new Error(`tryfaintmon did not advance: ${result.kind}`);
+    expect(result.state.callStack.length).toBe(0); // pass-through, not a call into BattleScript_FaintTarget
+    result = stepBattleScriptMachine(program, result.state, handlers); // setbyte sMOVEEND_STATE, 0 (BattleScript_MoveEnd's moveendall)
+    if (result.kind !== "advanced") throw new Error(`setbyte did not advance: ${result.kind}`);
+    const halted = stepBattleScriptMachine(program, result.state, handlers); // moveend: step-(iii) boundary, do NOT register
     expect(halted.kind).toBe("unsupported");
+    if (halted.kind !== "unsupported") throw new Error("expected unsupported");
+    expect(halted.instruction.opcodeName).toBe("B_SCR_OP_MOVEEND");
   });
 
   it(
     "full staged hit turn on the KO scenario's real ROM seed (919694434): reproduces the pinned "
-      + "142 -> 213 -> 213 -> 204 damage chain, the exact 3-roll ledger (accuracycheck, critcalc, "
-      + "adjustnormaldamage), and the killing hit's HP -> 0, then hands off cleanly at "
-      + "seteffectwithchance",
+      + "142 -> 213 -> 213 -> 204 damage chain, the exact 4-roll ledger (accuracycheck, critcalc, "
+      + "adjustnormaldamage, seteffectwithchance), the killing hit's HP -> 0, tryfaintmon's faint "
+      + "branch into BattleScript_FaintTarget, and hands off cleanly at dofaintanimation",
     () => {
       const rc = context(
         0,
@@ -1046,8 +1227,31 @@ describe("RUNG 3 integration: opcode 0 -> ... -> resultmessage -> seteffectwithc
       expect(result.state.rulesContext.battlers[1]!.hp).toBe(0); // the killing hit clamps HP to 0
       expect(result.state.rulesContext.hpDealt).toBe(90); // dealt == remaining HP, not the full 204 damage
 
-      const halted = stepBattleScriptMachine(program, result.state, handlers); // seteffectwithchance: RUNG-4 boundary
-      expect(halted.kind).toBe("unsupported");
+      result = stepBattleScriptMachine(program, result.state, handlers); // seteffectwithchance
+      if (result.kind !== "advanced") throw new Error(`seteffectwithchance did not advance: ${result.kind}`);
+      expect(result.state.rng.calls).toBe(4);
+      expect(result.state.rng.ledger[3]!.reason).toBe("seteffectwithchance");
+      expect(result.state.rng.ledger[3]!.randomValue).toBe(24745); // ground truth's roll 4
+
+      result = stepBattleScriptMachine(program, result.state, handlers); // tryfaintmon: KO'd target faints
+      if (result.kind !== "advanced") throw new Error(`tryfaintmon did not advance: ${result.kind}`);
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_FaintTarget"));
+      expect(result.state.callStack.length).toBe(1);
+      expect(result.state.rng.calls).toBe(4); // tryfaintmon's faint branch consumes no RNG
+
+      // playfaintcry BS_TARGET: already generically registered (battleScriptSourceCommands.ts), but
+      // resolveRulesBattlerForBattleScript only supports BS_ATTACKER/BS_EFFECT_BATTLER (its own documented
+      // scope) -- not BS_TARGET -- so this blocks rather than halts. That gap predates this rung (it's
+      // the generic battler-selector resolver, not tryfaintmon) and registering it is out of RUNG 4's
+      // two-opcode scope; this is simply where the machine honestly stops today.
+      const blocked = stepBattleScriptMachine(program, result.state, handlers);
+      expect(blocked.kind).toBe("blocked");
+      if (blocked.kind !== "blocked") throw new Error("expected blocked");
+      expect(blocked.reason).toMatchObject({
+        kind: "source-context-unavailable",
+        port: "resolve-battler-for-battle-script",
+        operandExpression: "BS_TARGET",
+      });
     },
   );
 
