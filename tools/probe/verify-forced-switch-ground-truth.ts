@@ -8,7 +8,11 @@
 //
 // Run: node --experimental-strip-types tools/probe/verify-forced-switch-ground-truth.ts
 
-import { readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { oracleUrlForProfile } from "../compare/oracleProfiles.ts";
 
 interface BattlerState {
@@ -203,6 +207,7 @@ async function main(): Promise<void> {
   check("battleOutcome stays non-terminal even after the second hit (still 2 living opponent slots)", nextHitDone.battleOutcome !== B_OUTCOME_WON, `battleOutcome=${nextHitDone.battleOutcome}`);
 
   await runPlayerSideChecks();
+  await runPartyOrderRamChecks();
 
   console.log(failures === 0 ? "\nALL CHECKS PASSED" : `\n${failures} CHECK(S) FAILED`);
   process.exitCode = failures === 0 ? 0 : 1;
@@ -324,6 +329,125 @@ async function runPlayerSideChecks(): Promise<void> {
     "player-side: a second real attack lands on the switched-in MACHOP later (proves the battle resumed, not stalled)",
     secondHitDone.rngValue !== resumeIdle.rngValue && secondHitDone.battlers.player.hp < resumeIdle.battlers.player.hp,
     `rng idle=${resumeIdle.rngValue} after=${secondHitDone.rngValue}; hp idle=${resumeIdle.battlers.player.hp} after=${secondHitDone.battlers.player.hp}`,
+  );
+}
+
+// --- 2026-07-25 addition: pin the gBattlePartyCurrentOrder/gBattlerPartyIndexes
+// RAM bytes that settle whether the SwitchPartyOrder permutation (§4 slice 3's
+// SWITCHHANDLEORDER) is a no-op for singles, or diverges from raw-array
+// indexing on the forced-switch mechanical path. See docs/forced-switch-
+// ground-truth.md's dated correction section for the full writeup; this
+// reruns tools/probe/dump-forced-switch-party-order.py (a raw-EWRAM probe,
+// not the battle-lab HTTP capture schema, since gBattlePartyCurrentOrder
+// isn't part of that schema) via tools/run-mgba-probe.py and asserts the
+// exact byte sequences that writeup cites.
+
+interface PartyOrderReading {
+  gBattlePartyCurrentOrder: [number, number, number];
+  gBattlerPartyIndexes: [number, number, number, number];
+  battler0Species: number;
+  battler1Species: number;
+}
+
+function findMgbaVenvPython(scriptDir: string): string {
+  let dir = scriptDir;
+  for (;;) {
+    const candidate = path.join(dir, "oracle", "emerald_core.py");
+    if (existsSync(candidate)) {
+      const venvPython = path.join(path.dirname(dir), "vendor", "mgba-venv", "bin", "python");
+      return existsSync(venvPython) ? venvPython : "python3";
+    }
+    const parent = path.dirname(dir);
+    if (parent === dir) return "python3";
+    dir = parent;
+  }
+}
+
+function runPartyOrderProbe(scenarioPath: string, ticks: number[]): Record<string, PartyOrderReading> {
+  const scriptDir = path.dirname(fileURLToPath(import.meta.url));
+  const worktreeRoot = path.resolve(scriptDir, "..", "..");
+  const venvPython = findMgbaVenvPython(scriptDir);
+  const tmpDir = mkdtempSync(path.join(tmpdir(), "forced-switch-party-order-"));
+  const outputPath = path.join(tmpDir, "probe.json");
+  try {
+    execFileSync(
+      "python3",
+      [
+        "tools/run-mgba-probe.py",
+        outputPath,
+        "--",
+        venvPython,
+        "tools/probe/dump-forced-switch-party-order.py",
+        outputPath,
+        scenarioPath,
+        ...ticks.map(String),
+      ],
+      { cwd: worktreeRoot, stdio: ["ignore", "pipe", "pipe"] },
+    );
+    const payload = JSON.parse(readFileSync(outputPath, "utf8")) as { readings: Record<string, PartyOrderReading> };
+    return payload.readings;
+  } finally {
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+}
+
+async function runPartyOrderRamChecks(): Promise<void> {
+  // AI-choice fixture: opponent (battler 1) SUNKERN (raw index 0) faints,
+  // AI picks MACHOP (raw index 2).
+  const ai = runPartyOrderProbe("tools/battle-lab/mechanic-forced-switch-ai-choice-off.json", [0, 470, 476, 478]);
+
+  check(
+    "RAM: battle start -- gBattlePartyCurrentOrder is the identity permutation ([0x01,0x23,0x45])",
+    JSON.stringify(ai["0"].gBattlePartyCurrentOrder) === JSON.stringify([1, 35, 69]) &&
+      JSON.stringify(ai["0"].gBattlerPartyIndexes) === JSON.stringify([0, 0, 0, 0]),
+    `order=${JSON.stringify(ai["0"].gBattlePartyCurrentOrder)} partyIndexes=${JSON.stringify(ai["0"].gBattlerPartyIndexes)}`,
+  );
+  check(
+    "RAM: SWITCHHANDLEORDER's SwitchPartyOrder call already swapped positions 0/2 in gBattlePartyCurrentOrder ([0x21,0x03,0x45]) BEFORE gBattlerPartyIndexes commits (still [0,0,0,0])",
+    JSON.stringify(ai["470"].gBattlePartyCurrentOrder) === JSON.stringify([33, 3, 69]) &&
+      JSON.stringify(ai["470"].gBattlerPartyIndexes) === JSON.stringify([0, 0, 0, 0]) &&
+      ai["470"].battler1Species === SPECIES_SUNKERN,
+    `order=${JSON.stringify(ai["470"].gBattlePartyCurrentOrder)} partyIndexes=${JSON.stringify(ai["470"].gBattlerPartyIndexes)} species=${ai["470"].battler1Species}`,
+  );
+  check(
+    "RAM: GETSWITCHEDMONDATA commits gBattlerPartyIndexes[1] to the RAW index 2 (not a position), order table unchanged",
+    JSON.stringify(ai["476"].gBattlerPartyIndexes) === JSON.stringify([0, 2, 0, 0]) &&
+      JSON.stringify(ai["476"].gBattlePartyCurrentOrder) === JSON.stringify([33, 3, 69]),
+    `partyIndexes=${JSON.stringify(ai["476"].gBattlerPartyIndexes)} order=${JSON.stringify(ai["476"].gBattlePartyCurrentOrder)}`,
+  );
+  check(
+    "RAM: SWITCHINDATAUPDATE rebuilds battler1 directly from gEnemyParty[2] (MACHOP) -- raw-index lookup, no permutation indirection",
+    ai["478"].battler1Species === SPECIES_MACHOP,
+    `species=${ai["478"].battler1Species}`,
+  );
+
+  // Player-choice fixture: player (battler 0) SUNKERN (raw index 0) faints,
+  // player navigates to and picks MACHOP (raw index 2) -- same mechanism,
+  // opposite side, proving the permutation's shape isn't AI-specific.
+  const player = runPartyOrderProbe("tools/battle-lab/mechanic-forced-switch-player-choice-off.json", [0, 655, 680, 700]);
+
+  check(
+    "RAM (player side): battle start -- gBattlePartyCurrentOrder is also the identity permutation",
+    JSON.stringify(player["0"].gBattlePartyCurrentOrder) === JSON.stringify([1, 35, 69]) &&
+      JSON.stringify(player["0"].gBattlerPartyIndexes) === JSON.stringify([0, 0, 0, 0]),
+    `order=${JSON.stringify(player["0"].gBattlePartyCurrentOrder)} partyIndexes=${JSON.stringify(player["0"].gBattlerPartyIndexes)}`,
+  );
+  check(
+    "RAM (player side): the party-menu commit already swapped positions 0/2 in gBattlePartyCurrentOrder before gBattlerPartyIndexes[0] commits",
+    JSON.stringify(player["655"].gBattlePartyCurrentOrder) === JSON.stringify([33, 3, 69]) &&
+      JSON.stringify(player["655"].gBattlerPartyIndexes) === JSON.stringify([0, 0, 0, 0]),
+    `order=${JSON.stringify(player["655"].gBattlePartyCurrentOrder)} partyIndexes=${JSON.stringify(player["655"].gBattlerPartyIndexes)}`,
+  );
+  check(
+    "RAM (player side): gBattlerPartyIndexes[0] commits to the RAW index 2, identical shape to the AI side",
+    JSON.stringify(player["680"].gBattlerPartyIndexes) === JSON.stringify([2, 0, 0, 0]) &&
+      JSON.stringify(player["680"].gBattlePartyCurrentOrder) === JSON.stringify([33, 3, 69]),
+    `partyIndexes=${JSON.stringify(player["680"].gBattlerPartyIndexes)} order=${JSON.stringify(player["680"].gBattlePartyCurrentOrder)}`,
+  );
+  check(
+    "RAM (player side): battler0 rebuilds directly from gPlayerParty[2] (MACHOP)",
+    player["700"].battler0Species === SPECIES_MACHOP,
+    `species=${player["700"].battler0Species}`,
   );
 }
 

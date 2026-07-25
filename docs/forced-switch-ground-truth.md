@@ -418,8 +418,18 @@ this rung found:
    RNG-free function over already-modeled types/moves/party HP — no new RNG
    accounting, per §2b) for the AI side. These two sides can be built and
    tested independently before wiring either into the shared opcode.
-3. **`SWITCHHANDLEORDER`** — pure, trivial once (2) exists (just transcribes
-   the already-decided buffer value and reorders the party array).
+3. ~~**`SWITCHHANDLEORDER`** — pure, trivial once (2) exists (just transcribes
+   the already-decided buffer value and reorders the party array).~~
+   **CORRECTED (2026-07-25, §5): this was under-specified, not wrong** —
+   `SWITCHHANDLEORDER`'s call to `SwitchPartyOrder` does maintain a real,
+   non-identity-after-one-switch permutation table, exactly as entry 445
+   flagged. §5 settles the actual question that matters for this engine:
+   that permutation is proven (source + RAM) to be a **presentation-only**
+   side table, disjoint from the raw-array indices (`monToSwitchIntoId`/
+   `gBattlerPartyIndexes`) the forced-switch *mechanical* path (slices 3-4)
+   actually reads and writes. The "trivial transcription" characterization
+   is correct for the mechanically-relevant subset of this opcode; it is
+   wrong only if read as "the whole opcode body is a no-op," which it isn't.
 4. **`GETSWITCHEDMONDATA` / `SWITCHINDATAUPDATE`** together — the actual
    battler-struct rebuild from the party record (species/types/ability/
    stats/HP/status1 copy) plus `SwitchInClearSetData`'s stat-stage/volatile
@@ -468,3 +478,188 @@ this rung found:
     is built; the underlying navigation logic
     (`UpdatePartySelectionSingleLayout`) is pure and RNG-free, matching the
     AI side's own no-new-RNG-accounting finding.
+
+## 5. 2026-07-25 correction: the `gBattlePartyCurrentOrder` permutation is real but presentation-only — slice 3 sizing settled
+
+Entry 445 (previous session) flagged that `SwitchPartyOrder`
+(`battle_main.c:4086-4114`, called from `Cmd_switchhandleorder`,
+`battle_script_commands.c:5152-5217` case 2→3 fallthrough) routes through
+`GetPartyIdFromBattlePartyId()`/`SwitchPartyMonSlots()` against
+`gBattlePartyCurrentOrder`/`gBattleStruct->battlerPartyOrders[battler]` — a
+per-battler permutation layer this engine does not model — and asked whether
+`monToSwitchIntoId[battler]`/`gBattlerPartyIndexes[battler]` are raw array
+indices or positions in that permuted order. Settled below, source first,
+then RAM.
+
+### 5a. Source: the permutation and the raw-index space are two disjoint systems
+
+**The permutation's lifecycle.** `gBattlePartyCurrentOrder` is declared
+`EWRAM_DATA u8 gBattlePartyCurrentOrder[PARTY_SIZE / 2] = {0}`
+(`party_menu.c:231`); `gBattleStruct->battlerPartyOrders[MAX_BATTLERS_COUNT][PARTY_SIZE / 2]`
+is its per-battler counterpart (`include/battle.h:381`). Both pack 2 raw
+party-array indices per byte, one per "battle-order position" (confirmed
+empirically in §5b, not just from the source comment, which uses a
+misleading "current pos of Slot N" phrasing). At battle start,
+`BufferBattlePartyOrderBySide` (`party_menu.c:5924-5988`, singles branch
+`:5958-5969`) builds the table as: position 0 = the raw index of whichever
+mon is currently active for that battler (`gBattlerPartyIndexes[leftBattler]`),
+positions 1-5 = every other raw index in ascending numeric order. When the
+active mon is raw index 0 (the ordinary lead-mon-out start state, true for
+both committed fixtures — see §5b), this **is** the literal identity
+permutation, position *i* → raw index *i*.
+
+**Every writer.** The only mutator on the forced-switch path is
+`SwitchPartyOrder(battler)` (`battle_main.c:4086-4114`), called for singles
+from `Cmd_switchhandleorder` case 3 (`battle_script_commands.c:5207`, the
+`else` branch — neither link-multi `:5191` nor in-game-partner `:5201`
+applies to Factory singles). It: (1) copies `battlerPartyOrders[battler]`'s 3
+bytes into the shared global scratch `gBattlePartyCurrentOrder`
+(`:4092-4093`) — note this is a **shared scratch buffer**, not a per-battler
+copy: `SwitchPartyMonSlots`/`GetPartyIdFromBattleSlot`/`SetPartyIdAtBattleSlot`
+(`party_menu.c:6027-6056`) are hardcoded to the single global, so calling
+`SwitchPartyOrder` for the opponent temporarily clobbers whatever was staged
+for the player and vice versa; (2) converts the **old** active raw index
+(`gBattlerPartyIndexes[battler]`, stale — not yet updated to the new mon) and
+the **new** raw index (`monToSwitchIntoId[battler]`, already decided) each to
+a battle-order *position* via `GetPartyIdFromBattlePartyId`
+(`party_menu.c:6058-6075`, an inverse-lookup despite its name: input = a raw
+array index, output = the position currently holding it — confirmed against
+its own call site at `party_menu.c:6085`, `UpdatePartyToBattleOrder`'s
+`memcpy(&gPlayerParty[GetPartyIdFromBattlePartyId(i)], &partyBuffer[i], ...)`,
+which only type-checks if the return value is a position); (3) calls
+`SwitchPartyMonSlots(pos1, pos2)` (`party_menu.c:6051-6056`), which swaps
+which raw index occupies those two positions; (4) writes the 3 resulting
+bytes back to `battlerPartyOrders[battler]` (`:4109-4112`; doubles also
+mirrors to the partner, `:4103-4105` — out of scope, noted only).
+Voluntary/menu switches go through the identical function
+(`party_menu.c:5854`, `TrySwitchInPokemon`) plus a **separate**, real data
+swap (`SwapPartyPokemon(&gPlayerParty[newSlot], &gPlayerParty[slot])`,
+`:5855`) that physically reorders `gPlayerParty[]` itself while the menu is
+open — bracketed by `UpdatePartyToBattleOrder`/`UpdatePartyToFieldOrder`
+(`party_menu.c:6078-6098`, called at menu open/close, e.g. `:5778`) which
+un-reorder it back to raw/field order afterward. None of this touches
+`monToSwitchIntoId`/`gBattlerPartyIndexes`.
+
+**Every reader on the forced-switch mechanical path is in raw-index space,
+never position space.** `gBattlerPartyIndexes` is a **separate** top-level
+global (`EWRAM_DATA u16 gBattlerPartyIndexes[MAX_BATTLERS_COUNT]`,
+`battle_main.c:158`) — distinct from the same-named `u8` field nested inside
+`struct BattleStruct` (`battle.h:379`), which this document's own trace never
+actually reaches. Proof it's raw-index space, not position space:
+- `Cmd_getswitchedmondata` (`battle_script_commands.c:4606-4619`) sets
+  `gBattlerPartyIndexes[battler] = monToSwitchIntoId[battler]` (`:4613`)
+  verbatim, then requests controller data via
+  `gBitTable[gBattlerPartyIndexes[battler]]` (`:4615`) — a bitmask over raw
+  slots.
+- `PlayerHandleGetMonData` → `CopyPlayerMonData(gBattlerPartyIndexes[battler], monData)`
+  (`battle_controller_player.c:1591`) → `GetMonData(&gPlayerParty[monId], ...)`
+  (`:1620` and everywhere else in that function) indexes `gPlayerParty[]`
+  **directly** with the value from `gBattlerPartyIndexes`. No
+  `GetPartyIdFromBattleSlot` translation happens anywhere in this call chain.
+- `OpponentHandleChoosePokemon` (`battle_controller_opponent.c:1621-1676`):
+  `chosenMonId = GetMostSuitableMonToSwitchInto()` (already a port,
+  `src/engine/battleAiSwitchInto.ts`) is compared **directly** against
+  `gBattlerPartyIndexes[battler1/2]` (`:1658-1659`) and indexes
+  `gEnemyParty[chosenMonId]` (`:1657`) — both must live in the same
+  (raw-index) space for this comparison/indexing to be meaningful, and
+  `gEnemyParty[]` only ever takes raw indices.
+- The interactive party menu is the **only** place position-space appears on
+  the player side, and it is fully resolved back to a raw index before
+  crossing into engine state: `TrySwitchInPokemon` (`party_menu.c:5800-5856`)
+  reads the UI cursor via `GetCursorSelectionMonId()` (a raw index, valid
+  because `UpdatePartyToBattleOrder` already physically reordered
+  `gPlayerParty[]` to match display order when the menu opened, `:5778`),
+  then `gSelectedMonPartyId = GetPartyIdFromBattleSlot(slot)` (`:5851`) —
+  which, because the array is already physically reordered, is a no-op
+  identity read-back to the same raw index — and `WaitForMonSelection`
+  (`battle_controller_player.c:1359-1373`) emits exactly that raw
+  `gSelectedMonPartyId` back to the engine (`:1364`). By the time
+  `Cmd_switchhandleorder` reads `gBattleBufferB[battler][1]`
+  (`battle_script_commands.c:5188-5189`), it is already a raw index.
+
+**Conclusion:** the permutation table is consumed only by (a) the
+interactive party-menu's own cursor↔raw-index bookkeeping (self-contained,
+resolved before it reaches the engine) and (b) party-status-summary display
+ordering (`drawpartystatussummary`/`hidepartystatussummary`, §4 slice 5,
+"controller-emit opcodes with no battle-state effect on the modeled
+fields" — still true). It never feeds `monToSwitchIntoId`,
+`gBattlerPartyIndexes`, or any downstream battler-struct field.
+
+### 5b. RAM: identity at start, real swap after one switch, raw-index fields never diverge
+
+Probed via a new raw-EWRAM script,
+`tools/probe/dump-forced-switch-party-order.py` (run only through
+`tools/run-mgba-probe.py`; symbol addresses via `bin/oracle symbols
+gBattlePartyCurrentOrder gBattlerPartyIndexes`), replaying the exact
+committed traces frame-for-frame. `gBattlePartyCurrentOrder` packs
+`(rawIndexAtPosition[2i] << 4) | rawIndexAtPosition[2i+1]` per byte *i*
+(confirmed by this data, not assumed from the source comment):
+
+| Fixture | Tick | `gBattlePartyCurrentOrder` (decimal, 3 bytes) | as hex nibbles | `gBattlerPartyIndexes` | battler species |
+| --- | -: | --- | --- | --- | --- |
+| ai-choice | 0 (battle start) | `[1, 35, 69]` | `01 23 45` (identity: pos *i* → raw *i*) | `[0,0,0,0]` | b1=SUNKERN(191) |
+| ai-choice | 470 (post-`SWITCHHANDLEORDER`, pre-`GETSWITCHEDMONDATA`) | `[33, 3, 69]` | `21 03 45` (positions 0↔2 swapped) | `[0,0,0,0]` (**unchanged**) | b1=SUNKERN(191) (**unchanged**) |
+| ai-choice | 476 (post-`GETSWITCHEDMONDATA`) | `[33, 3, 69]` (unchanged) | `21 03 45` | `[0,2,0,0]` (battler 1 flips to **raw index 2**) | b1=SUNKERN(191) (species not yet rebuilt) |
+| ai-choice | 478 (post-`SWITCHINDATAUPDATE`) | `[33, 3, 69]` (unchanged) | `[0,2,0,0]` (unchanged) | — | b1=MACHOP(66) = `gEnemyParty[2]` |
+| player-choice | 0 (battle start) | `[1, 35, 69]` | `01 23 45` (identity) | `[0,0,0,0]` | b0=SUNKERN(191) |
+| player-choice | 655 (post party-menu commit, pre-flip) | `[33, 3, 69]` | `21 03 45` (same swap shape) | `[0,0,0,0]` (**unchanged**) | b0=SUNKERN(191) |
+| player-choice | 680 (post-`GETSWITCHEDMONDATA`) | `[33, 3, 69]` (unchanged) | `[2,0,0,0]` (battler 0 flips to **raw index 2**) | — | b0=SUNKERN(191) |
+| player-choice | 700 (post-`SWITCHINDATAUPDATE`) | `[33, 3, 69]` (unchanged) | `[2,0,0,0]` (unchanged) | — | b0=MACHOP(66) = `gPlayerParty[2]` |
+
+Decoding `01 23 45 → 21 03 45`: position 0 held raw 0, position 2 held raw 2
+(identity); after the swap, position 0 holds raw 2 and position 2 holds raw
+0 — i.e. `SwitchPartyMonSlots(pos(rawIndex=0)=0, pos(rawIndex=2)=2)` swapped
+exactly those two positions, matching §5a's source trace of
+`SwitchPartyOrder` byte-for-byte, symmetric across both the AI side and the
+player side. All 8 rows are now pinned as executable checks in
+`tools/probe/verify-forced-switch-ground-truth.ts`'s
+`runPartyOrderRamChecks()` (4 new checks per fixture, 8 total; all pass
+alongside the pre-existing 23 as of this writing — **31/31 ALL PASS**).
+
+The headline fact: **the permutation table visibly changes (tick 470/655),
+proving it is not a no-op** — entry 445 was right to flag it as real state —
+**but `gBattlerPartyIndexes` and the rebuilt species never pass through
+position-space at any point**: they flip directly from the old raw index to
+the new one (`0`→`2`), and `SWITCHINDATAUPDATE` rebuilds the battler struct
+directly from `gEnemyParty[2]`/`gPlayerParty[2]`. If the permutation were
+being consulted for the mechanical rebuild, the "identity" reading at tick
+470 (before `GETSWITCHEDMONDATA` runs) vs. the "swapped" reading at 476
+onward would have to produce *different* raw-index resolutions for the same
+downstream read — they don't, because nothing downstream of
+`SWITCHHANDLEORDER` ever calls `GetPartyIdFromBattleSlot`/
+`GetPartyIdFromBattlePartyId` again on this path.
+
+### 5c. Verdict and slice-3 sizing
+
+- **(a) Identity at battle start: YES**, for both sides, in both fixtures —
+  `01 23 45` (§5b), matching §5a's source derivation for the ordinary
+  lead-mon-out start state.
+- **(b) After a Factory forced/voluntary switch: permutes by a pairwise
+  position swap**, not "incoming mon always becomes position 0 via a shift."
+  Concretely: `SwitchPartyMonSlots(GetPartyIdFromBattlePartyId(oldRawIndex),
+  GetPartyIdFromBattlePartyId(newRawIndex))` swaps whichever two positions
+  currently hold the old and new raw indices. Net visible effect happens to
+  read as "new mon → position 0" *only* because the pre-switch active mon is
+  always at position 0 by construction (§5a) — the general operation is the
+  swap, not a move-to-front.
+- **(c) Slice 3 must NOT model this permutation.** It is real, but it is
+  presentation-only bookkeeping for the interactive party-menu's own
+  cursor↔raw-index translation (already self-contained, §5a) and for
+  party-status-summary display order (§4 slice 5, already scoped as
+  state-free for this engine). `SWITCHHANDLEORDER`'s entire
+  mechanically-relevant output, for everything slice 4
+  (`GETSWITCHEDMONDATA`/`SWITCHINDATAUPDATE`) needs, is the one-line
+  transcription §4 originally described:
+  `gBattleCommunication[0] = monToSwitchIntoId[battler] = gBattleBufferB[battler][1]`
+  (`battle_script_commands.c:5188-5189`) — a raw party-array index, exactly
+  the representation this engine's `party.opponent[i]`/`party.player[i]`
+  arrays already use with no indirection. **No new data model is needed**:
+  slice 3 reduces to asserting/threading the already-decided raw index
+  (likely already available from slice 2's `monToSwitchIntoId` plumbing) and
+  can *prove* (rather than model) that this engine's existing raw-array
+  indexing is correct for slices 3-4, via the checks landed in §5b. If a
+  future slice ever models `drawpartystatussummary`'s on-screen ordering or a
+  live party-menu reopen mid-battle, *that* is where a 6-entry per-side
+  position array plus a 2-argument swap operation (mirroring
+  `SwitchPartyMonSlots`) belongs — scoped strictly to that presentation
+  feature, never touching `monToSwitchIntoId`/battler-party-index state.
