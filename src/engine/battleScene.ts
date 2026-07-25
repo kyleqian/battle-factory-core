@@ -579,6 +579,7 @@ import {
   sceneOnDoubleTeamView,
   sceneOnBindView,
   sceneOnDragonBreathView,
+  sceneOnEmberView,
   sceneOnFlamethrowerView,
   sceneOnBlazeKickView,
   sceneOnAerialAceView,
@@ -16865,6 +16866,93 @@ export function renderSceneOnMovePresentation(
     if (view.actionMenu.visible) {
       drawTurn5SitrusSettledMenuChrome(fb);
     }
+    return;
+  }
+
+  if (state.config.move === "EMBER") {
+    // Sprite callbacks/OAM reach the captured framebuffer one display after
+    // their RAM state (same lag DRAGON_BREATH/FLAMETHROWER already pin).
+    const view = sceneOnEmberView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "ONIX"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "MURKROW"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "ONIX"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "MURKROW"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged EMBER pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSprite = playerToOpponent ? onixBackSprite : onixFrontSprite;
+    const targetSprite = playerToOpponent ? murkrowFrontSprite : murkrowBackSprite;
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    drawSpriteSheet(
+      fb,
+      targetSprite.tileset,
+      targetSprite.palette,
+      view.target.geometry.spriteCorner.x,
+      view.target.geometry.spriteCorner.y,
+    );
+    drawSpriteSheet(
+      fb,
+      attackerSprite.tileset,
+      attackerSprite.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    for (const sprite of view.sprites) {
+      drawSpriteSheet(
+        fb,
+        subTileset(battleAnimSmallEmber.tileset, sprite.sheetFrame * 4, 4),
+        battleAnimSmallEmber.palette,
+        sprite.centerX - 16,
+        sprite.centerY - 16,
+      );
+    }
+    if (playerToOpponent) {
+      drawSendOutHealthbox(
+        fb,
+        0,
+        murkrowHealthboxContentForHp(state.config.fieldProfile.opponentHp),
+      );
+      drawComposedPlayerHealthbox(
+        fb,
+        onixPlayerHealthboxContentForState(
+          state.config.fieldProfile.playerHp,
+          state.config.fieldProfile.playerStatus,
+          state.config.fieldProfile.playerGender ?? "female",
+        ),
+      );
+    } else {
+      drawSendOutHealthbox(
+        fb,
+        0,
+        featherDanceOnixOpponentHealthbox(
+          state.config.fieldProfile.opponentHp,
+          state.config.fieldProfile.opponentGender ?? "male",
+        ),
+      );
+      drawComposedPlayerHealthbox(
+        fb,
+        flyMurkrowPlayerHealthbox(
+          state.config.fieldProfile.playerHp,
+          state.config.fieldProfile.playerStatus,
+          state.config.fieldProfile.playerGender ?? "female",
+        ),
+      );
+    }
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "ONIX used" : "Foe ONIX used",
+      "EMBER!",
+      99,
+    );
     return;
   }
 

@@ -101,6 +101,11 @@ import {
   type FlamethrowerGeometry,
 } from "./flamethrower.ts";
 import {
+  emberSpritesInDrawOrder,
+  type EmberGeometry,
+  type EmberOrderedSprite,
+} from "./ember.ts";
+import {
   blazeKickAnimationAtAge,
   blazeKickPaletteAtAge,
   blazeKickSpritesAtAge,
@@ -504,6 +509,15 @@ export interface SceneOnEndeavorConfig {
   readonly moveTextStartAge?: number;
 }
 
+export interface SceneOnEmberConfig {
+  readonly move: "EMBER";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly animationProfile: Readonly<EmberGeometry>;
+  readonly fieldProfile: Readonly<SceneOnFaintAttackFieldProfile>;
+  readonly animationAgeOffset?: number;
+}
+
 export type SceneOnMoveConfig =
   | SceneOnFirePunchConfig
   | SceneOnIcePunchConfig
@@ -523,7 +537,8 @@ export type SceneOnMoveConfig =
   | SceneOnDragonBreathConfig
   | SceneOnFlamethrowerConfig
   | SceneOnBlazeKickConfig
-  | SceneOnBindConfig;
+  | SceneOnBindConfig
+  | SceneOnEmberConfig;
 
 export interface SceneOnMovePresentationState<
   TConfig extends SceneOnMoveConfig = SceneOnMoveConfig,
@@ -759,6 +774,14 @@ export interface SceneOnFlamethrowerView {
   readonly battlerEffect: FlamethrowerBattlerEffect;
 }
 
+export interface SceneOnEmberView {
+  readonly age: number;
+  readonly animationAge: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly sprites: readonly EmberOrderedSprite[];
+}
+
 export interface SceneOnBlazeKickView {
   readonly age: number;
   readonly animationAge: number;
@@ -944,6 +967,22 @@ export function sceneOnFlamethrowerView(
     target: state.config.target,
     flames: flamethrowerFlamesAtAge(animationAge, state.config.animationProfile),
     battlerEffect: flamethrowerBattlerEffectAtAge(animationAge),
+  };
+}
+
+export function sceneOnEmberView(
+  state: SceneOnMovePresentationState,
+): SceneOnEmberView {
+  if (state.config.move !== "EMBER") {
+    throw new Error(`expected EMBER presentation, got ${state.config.move}`);
+  }
+  const animationAge = state.age + (state.config.animationAgeOffset ?? 0);
+  return {
+    age: state.age,
+    animationAge,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    sprites: emberSpritesInDrawOrder(animationAge, state.config.animationProfile),
   };
 }
 

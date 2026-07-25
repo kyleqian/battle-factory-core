@@ -180,16 +180,21 @@ export function emberSpritesInDrawOrder(
     centerX: sprite.centerX,
     centerY: sprite.centerY,
     sheetFrame: 0 as const,
-    spawnIndex: sprite.spawnIndex,
+    // Real creation order: the three embers occupy slots before any flare.
+    creationOrder: sprite.spawnIndex,
   }));
   const flares = emberFlareSpritesAtAge(animationAge, geometry).map((sprite) => ({
     kind: "flare" as const,
     centerX: sprite.centerX,
     centerY: sprite.centerY,
     sheetFrame: sprite.sheetFrame,
-    spawnIndex: sprite.spawnIndex,
+    creationOrder: EMBER_SPAWN_COUNT + sprite.spawnIndex,
   }));
+  // Equal Y (and equal target-relative subpriority): RAM-probe-confirmed the
+  // EARLIER-created sprite paints LAST/frontmost, same descending-creation-
+  // order rule `dragonBreath.ts`'s own identically-shaped sort already uses
+  // among its own eleven embers.
   return [...embers, ...flares].sort((a, b) =>
-    a.centerY - b.centerY || a.spawnIndex - b.spawnIndex
+    a.centerY - b.centerY || b.creationOrder - a.creationOrder
   );
 }
