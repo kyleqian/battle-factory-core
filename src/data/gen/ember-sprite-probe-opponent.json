@@ -1,0 +1,1520 @@
+{
+  "source": "tools/probe/run-battle-lab-rgb.py against tools/battle-lab/mechanic-ember-opponent-onix-player-murkrow.json (MOVE_EMBER, opponent ONIX -> player MURKROW), gEmberSpriteTemplate/gEmberFlareSpriteTemplate identified by template pointer",
+  "frames": [
+    {
+      "frame": 442,
+      "emberSprites": [
+        {
+          "slot": 3,
+          "x": 156,
+          "y": 42,
+          "x2": -3,
+          "y2": 3,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ],
+      "emberFlareSprites": []
+    },
+    {
+      "frame": 443,
+      "emberSprites": [
+        {
+          "slot": 3,
+          "x": 156,
+          "y": 42,
+          "x2": -6,
+          "y2": 6,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ],
+      "emberFlareSprites": []
+    },
+    {
+      "frame": 444,
+      "emberSprites": [
+        {
+          "slot": 3,
+          "x": 156,
+          "y": 42,
+          "x2": -10,
+          "y2": 9,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ],
+      "emberFlareSprites": []
+    },
+    {
+      "frame": 445,
+      "emberSprites": [
+        {
+          "slot": 3,
+          "x": 156,
+          "y": 42,
+          "x2": -13,
+          "y2": 12,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ],
+      "emberFlareSprites": []
+    },
+    {
+      "frame": 446,
+      "emberSprites": [
+        {
+          "slot": 3,
+          "x": 156,
+          "y": 42,
+          "x2": -17,
+          "y2": 15,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ],
+      "emberFlareSprites": []
+    },
+    {
+      "frame": 447,
+      "emberSprites": [
+        {
+          "slot": 3,
+          "x": 156,
+          "y": 42,
+          "x2": -20,
+          "y2": 18,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ],
+      "emberFlareSprites": []
+    },
+    {
+      "frame": 448,
+      "emberSprites": [
+        {
+          "slot": 3,
+          "x": 156,
+          "y": 42,
+          "x2": -23,
+          "y2": 21,
+          "tileNum": 537,
+          "subpriority": 28
+        },
+        {
+          "slot": 4,
+          "x": 156,
+          "y": 42,
+          "x2": -4,
+          "y2": 3,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ],
+      "emberFlareSprites": []
+    },
+    {
+      "frame": 449,
+      "emberSprites": [
+        {
+          "slot": 3,
+          "x": 156,
+          "y": 42,
+          "x2": -27,
+          "y2": 24,
+          "tileNum": 537,
+          "subpriority": 28
+        },
+        {
+          "slot": 4,
+          "x": 156,
+          "y": 42,
+          "x2": -8,
+          "y2": 6,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ],
+      "emberFlareSprites": []
+    },
+    {
+      "frame": 450,
+      "emberSprites": [
+        {
+          "slot": 3,
+          "x": 156,
+          "y": 42,
+          "x2": -30,
+          "y2": 27,
+          "tileNum": 537,
+          "subpriority": 28
+        },
+        {
+          "slot": 4,
+          "x": 156,
+          "y": 42,
+          "x2": -12,
+          "y2": 9,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ],
+      "emberFlareSprites": []
+    },
+    {
+      "frame": 451,
+      "emberSprites": [
+        {
+          "slot": 3,
+          "x": 156,
+          "y": 42,
+          "x2": -34,
+          "y2": 30,
+          "tileNum": 537,
+          "subpriority": 28
+        },
+        {
+          "slot": 4,
+          "x": 156,
+          "y": 42,
+          "x2": -16,
+          "y2": 12,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ],
+      "emberFlareSprites": []
+    },
+    {
+      "frame": 452,
+      "emberSprites": [
+        {
+          "slot": 3,
+          "x": 156,
+          "y": 42,
+          "x2": -37,
+          "y2": 34,
+          "tileNum": 537,
+          "subpriority": 28
+        },
+        {
+          "slot": 4,
+          "x": 156,
+          "y": 42,
+          "x2": -20,
+          "y2": 15,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ],
+      "emberFlareSprites": []
+    },
+    {
+      "frame": 453,
+      "emberSprites": [
+        {
+          "slot": 3,
+          "x": 156,
+          "y": 42,
+          "x2": -40,
+          "y2": 37,
+          "tileNum": 537,
+          "subpriority": 28
+        },
+        {
+          "slot": 4,
+          "x": 156,
+          "y": 42,
+          "x2": -25,
+          "y2": 18,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ],
+      "emberFlareSprites": []
+    },
+    {
+      "frame": 454,
+      "emberSprites": [
+        {
+          "slot": 3,
+          "x": 156,
+          "y": 42,
+          "x2": -44,
+          "y2": 40,
+          "tileNum": 537,
+          "subpriority": 28
+        },
+        {
+          "slot": 4,
+          "x": 156,
+          "y": 42,
+          "x2": -29,
+          "y2": 21,
+          "tileNum": 537,
+          "subpriority": 28
+        },
+        {
+          "slot": 5,
+          "x": 156,
+          "y": 42,
+          "x2": -5,
+          "y2": 3,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ],
+      "emberFlareSprites": []
+    },
+    {
+      "frame": 455,
+      "emberSprites": [
+        {
+          "slot": 3,
+          "x": 156,
+          "y": 42,
+          "x2": -47,
+          "y2": 43,
+          "tileNum": 537,
+          "subpriority": 28
+        },
+        {
+          "slot": 4,
+          "x": 156,
+          "y": 42,
+          "x2": -33,
+          "y2": 24,
+          "tileNum": 537,
+          "subpriority": 28
+        },
+        {
+          "slot": 5,
+          "x": 156,
+          "y": 42,
+          "x2": -10,
+          "y2": 6,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ],
+      "emberFlareSprites": []
+    },
+    {
+      "frame": 456,
+      "emberSprites": [
+        {
+          "slot": 3,
+          "x": 156,
+          "y": 42,
+          "x2": -51,
+          "y2": 46,
+          "tileNum": 537,
+          "subpriority": 28
+        },
+        {
+          "slot": 4,
+          "x": 156,
+          "y": 42,
+          "x2": -37,
+          "y2": 27,
+          "tileNum": 537,
+          "subpriority": 28
+        },
+        {
+          "slot": 5,
+          "x": 156,
+          "y": 42,
+          "x2": -15,
+          "y2": 9,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ],
+      "emberFlareSprites": []
+    },
+    {
+      "frame": 457,
+      "emberSprites": [
+        {
+          "slot": 3,
+          "x": 156,
+          "y": 42,
+          "x2": -54,
+          "y2": 49,
+          "tileNum": 537,
+          "subpriority": 28
+        },
+        {
+          "slot": 4,
+          "x": 156,
+          "y": 42,
+          "x2": -41,
+          "y2": 30,
+          "tileNum": 537,
+          "subpriority": 28
+        },
+        {
+          "slot": 5,
+          "x": 156,
+          "y": 42,
+          "x2": -20,
+          "y2": 12,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ],
+      "emberFlareSprites": []
+    },
+    {
+      "frame": 458,
+      "emberSprites": [
+        {
+          "slot": 3,
+          "x": 156,
+          "y": 42,
+          "x2": -57,
+          "y2": 52,
+          "tileNum": 537,
+          "subpriority": 28
+        },
+        {
+          "slot": 4,
+          "x": 156,
+          "y": 42,
+          "x2": -46,
+          "y2": 34,
+          "tileNum": 537,
+          "subpriority": 28
+        },
+        {
+          "slot": 5,
+          "x": 156,
+          "y": 42,
+          "x2": -25,
+          "y2": 15,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ],
+      "emberFlareSprites": []
+    },
+    {
+      "frame": 459,
+      "emberSprites": [
+        {
+          "slot": 3,
+          "x": 156,
+          "y": 42,
+          "x2": -61,
+          "y2": 55,
+          "tileNum": 537,
+          "subpriority": 28
+        },
+        {
+          "slot": 4,
+          "x": 156,
+          "y": 42,
+          "x2": -50,
+          "y2": 37,
+          "tileNum": 537,
+          "subpriority": 28
+        },
+        {
+          "slot": 5,
+          "x": 156,
+          "y": 42,
+          "x2": -30,
+          "y2": 18,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ],
+      "emberFlareSprites": []
+    },
+    {
+      "frame": 460,
+      "emberSprites": [
+        {
+          "slot": 3,
+          "x": 156,
+          "y": 42,
+          "x2": -64,
+          "y2": 58,
+          "tileNum": 537,
+          "subpriority": 28
+        },
+        {
+          "slot": 4,
+          "x": 156,
+          "y": 42,
+          "x2": -54,
+          "y2": 40,
+          "tileNum": 537,
+          "subpriority": 28
+        },
+        {
+          "slot": 5,
+          "x": 156,
+          "y": 42,
+          "x2": -35,
+          "y2": 21,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ],
+      "emberFlareSprites": []
+    },
+    {
+      "frame": 461,
+      "emberSprites": [
+        {
+          "slot": 3,
+          "x": 156,
+          "y": 42,
+          "x2": -68,
+          "y2": 61,
+          "tileNum": 537,
+          "subpriority": 28
+        },
+        {
+          "slot": 4,
+          "x": 156,
+          "y": 42,
+          "x2": -58,
+          "y2": 43,
+          "tileNum": 537,
+          "subpriority": 28
+        },
+        {
+          "slot": 5,
+          "x": 156,
+          "y": 42,
+          "x2": -40,
+          "y2": 24,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ],
+      "emberFlareSprites": []
+    },
+    {
+      "frame": 462,
+      "emberSprites": [
+        {
+          "slot": 3,
+          "x": 156,
+          "y": 42,
+          "x2": -68,
+          "y2": 61,
+          "tileNum": 537,
+          "subpriority": 28
+        },
+        {
+          "slot": 4,
+          "x": 156,
+          "y": 42,
+          "x2": -62,
+          "y2": 46,
+          "tileNum": 537,
+          "subpriority": 28
+        },
+        {
+          "slot": 5,
+          "x": 156,
+          "y": 42,
+          "x2": -45,
+          "y2": 27,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ],
+      "emberFlareSprites": []
+    },
+    {
+      "frame": 463,
+      "emberSprites": [
+        {
+          "slot": 4,
+          "x": 156,
+          "y": 42,
+          "x2": -67,
+          "y2": 49,
+          "tileNum": 537,
+          "subpriority": 28
+        },
+        {
+          "slot": 5,
+          "x": 156,
+          "y": 42,
+          "x2": -50,
+          "y2": 30,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ],
+      "emberFlareSprites": []
+    },
+    {
+      "frame": 464,
+      "emberSprites": [
+        {
+          "slot": 4,
+          "x": 156,
+          "y": 42,
+          "x2": -71,
+          "y2": 52,
+          "tileNum": 537,
+          "subpriority": 28
+        },
+        {
+          "slot": 5,
+          "x": 156,
+          "y": 42,
+          "x2": -55,
+          "y2": 34,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ],
+      "emberFlareSprites": []
+    },
+    {
+      "frame": 465,
+      "emberSprites": [
+        {
+          "slot": 4,
+          "x": 156,
+          "y": 42,
+          "x2": -75,
+          "y2": 55,
+          "tileNum": 537,
+          "subpriority": 28
+        },
+        {
+          "slot": 5,
+          "x": 156,
+          "y": 42,
+          "x2": -60,
+          "y2": 37,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ],
+      "emberFlareSprites": []
+    },
+    {
+      "frame": 466,
+      "emberSprites": [
+        {
+          "slot": 4,
+          "x": 156,
+          "y": 42,
+          "x2": -79,
+          "y2": 58,
+          "tileNum": 537,
+          "subpriority": 28
+        },
+        {
+          "slot": 5,
+          "x": 156,
+          "y": 42,
+          "x2": -65,
+          "y2": 40,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ],
+      "emberFlareSprites": []
+    },
+    {
+      "frame": 467,
+      "emberSprites": [
+        {
+          "slot": 4,
+          "x": 156,
+          "y": 42,
+          "x2": -83,
+          "y2": 61,
+          "tileNum": 537,
+          "subpriority": 28
+        },
+        {
+          "slot": 5,
+          "x": 156,
+          "y": 42,
+          "x2": -70,
+          "y2": 43,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ],
+      "emberFlareSprites": []
+    },
+    {
+      "frame": 468,
+      "emberSprites": [
+        {
+          "slot": 4,
+          "x": 156,
+          "y": 42,
+          "x2": -83,
+          "y2": 61,
+          "tileNum": 537,
+          "subpriority": 28
+        },
+        {
+          "slot": 5,
+          "x": 156,
+          "y": 42,
+          "x2": -75,
+          "y2": 46,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ],
+      "emberFlareSprites": []
+    },
+    {
+      "frame": 469,
+      "emberSprites": [
+        {
+          "slot": 5,
+          "x": 156,
+          "y": 42,
+          "x2": -80,
+          "y2": 49,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ],
+      "emberFlareSprites": []
+    },
+    {
+      "frame": 470,
+      "emberSprites": [
+        {
+          "slot": 5,
+          "x": 156,
+          "y": 42,
+          "x2": -85,
+          "y2": 52,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ],
+      "emberFlareSprites": []
+    },
+    {
+      "frame": 471,
+      "emberSprites": [
+        {
+          "slot": 5,
+          "x": 156,
+          "y": 42,
+          "x2": -90,
+          "y2": 55,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ],
+      "emberFlareSprites": []
+    },
+    {
+      "frame": 472,
+      "emberSprites": [
+        {
+          "slot": 5,
+          "x": 156,
+          "y": 42,
+          "x2": -95,
+          "y2": 58,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ],
+      "emberFlareSprites": [
+        {
+          "slot": 3,
+          "x": 96,
+          "y": 104,
+          "x2": -2,
+          "y2": 0,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ]
+    },
+    {
+      "frame": 473,
+      "emberSprites": [
+        {
+          "slot": 5,
+          "x": 156,
+          "y": 42,
+          "x2": -100,
+          "y2": 61,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ],
+      "emberFlareSprites": [
+        {
+          "slot": 3,
+          "x": 96,
+          "y": 104,
+          "x2": -4,
+          "y2": 0,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ]
+    },
+    {
+      "frame": 474,
+      "emberSprites": [
+        {
+          "slot": 5,
+          "x": 156,
+          "y": 42,
+          "x2": -100,
+          "y2": 61,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ],
+      "emberFlareSprites": [
+        {
+          "slot": 3,
+          "x": 96,
+          "y": 104,
+          "x2": -7,
+          "y2": 0,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ]
+    },
+    {
+      "frame": 475,
+      "emberSprites": [],
+      "emberFlareSprites": [
+        {
+          "slot": 3,
+          "x": 96,
+          "y": 104,
+          "x2": -9,
+          "y2": 0,
+          "tileNum": 553,
+          "subpriority": 28
+        }
+      ]
+    },
+    {
+      "frame": 476,
+      "emberSprites": [],
+      "emberFlareSprites": [
+        {
+          "slot": 3,
+          "x": 96,
+          "y": 104,
+          "x2": -12,
+          "y2": 0,
+          "tileNum": 553,
+          "subpriority": 28
+        }
+      ]
+    },
+    {
+      "frame": 477,
+      "emberSprites": [],
+      "emberFlareSprites": [
+        {
+          "slot": 3,
+          "x": 96,
+          "y": 104,
+          "x2": -14,
+          "y2": 0,
+          "tileNum": 553,
+          "subpriority": 28
+        }
+      ]
+    },
+    {
+      "frame": 478,
+      "emberSprites": [],
+      "emberFlareSprites": [
+        {
+          "slot": 3,
+          "x": 96,
+          "y": 104,
+          "x2": -16,
+          "y2": 0,
+          "tileNum": 553,
+          "subpriority": 28
+        },
+        {
+          "slot": 4,
+          "x": 96,
+          "y": 104,
+          "x2": -2,
+          "y2": 0,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ]
+    },
+    {
+      "frame": 479,
+      "emberSprites": [],
+      "emberFlareSprites": [
+        {
+          "slot": 3,
+          "x": 96,
+          "y": 104,
+          "x2": -19,
+          "y2": 0,
+          "tileNum": 569,
+          "subpriority": 28
+        },
+        {
+          "slot": 4,
+          "x": 96,
+          "y": 104,
+          "x2": -4,
+          "y2": 0,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ]
+    },
+    {
+      "frame": 480,
+      "emberSprites": [],
+      "emberFlareSprites": [
+        {
+          "slot": 3,
+          "x": 96,
+          "y": 104,
+          "x2": -21,
+          "y2": 0,
+          "tileNum": 569,
+          "subpriority": 28
+        },
+        {
+          "slot": 4,
+          "x": 96,
+          "y": 104,
+          "x2": -7,
+          "y2": 0,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ]
+    },
+    {
+      "frame": 481,
+      "emberSprites": [],
+      "emberFlareSprites": [
+        {
+          "slot": 3,
+          "x": 96,
+          "y": 104,
+          "x2": -24,
+          "y2": 0,
+          "tileNum": 569,
+          "subpriority": 28
+        },
+        {
+          "slot": 4,
+          "x": 96,
+          "y": 104,
+          "x2": -9,
+          "y2": 0,
+          "tileNum": 553,
+          "subpriority": 28
+        }
+      ]
+    },
+    {
+      "frame": 482,
+      "emberSprites": [],
+      "emberFlareSprites": [
+        {
+          "slot": 3,
+          "x": 96,
+          "y": 104,
+          "x2": -26,
+          "y2": 0,
+          "tileNum": 569,
+          "subpriority": 28
+        },
+        {
+          "slot": 4,
+          "x": 96,
+          "y": 104,
+          "x2": -12,
+          "y2": 0,
+          "tileNum": 553,
+          "subpriority": 28
+        }
+      ]
+    },
+    {
+      "frame": 483,
+      "emberSprites": [],
+      "emberFlareSprites": [
+        {
+          "slot": 3,
+          "x": 96,
+          "y": 104,
+          "x2": -28,
+          "y2": 0,
+          "tileNum": 585,
+          "subpriority": 28
+        },
+        {
+          "slot": 4,
+          "x": 96,
+          "y": 104,
+          "x2": -14,
+          "y2": 0,
+          "tileNum": 553,
+          "subpriority": 28
+        }
+      ]
+    },
+    {
+      "frame": 484,
+      "emberSprites": [],
+      "emberFlareSprites": [
+        {
+          "slot": 3,
+          "x": 96,
+          "y": 104,
+          "x2": -31,
+          "y2": 0,
+          "tileNum": 585,
+          "subpriority": 28
+        },
+        {
+          "slot": 4,
+          "x": 96,
+          "y": 104,
+          "x2": -16,
+          "y2": 0,
+          "tileNum": 553,
+          "subpriority": 28
+        },
+        {
+          "slot": 5,
+          "x": 96,
+          "y": 104,
+          "x2": -2,
+          "y2": 0,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ]
+    },
+    {
+      "frame": 485,
+      "emberSprites": [],
+      "emberFlareSprites": [
+        {
+          "slot": 3,
+          "x": 96,
+          "y": 104,
+          "x2": -33,
+          "y2": 0,
+          "tileNum": 585,
+          "subpriority": 28
+        },
+        {
+          "slot": 4,
+          "x": 96,
+          "y": 104,
+          "x2": -19,
+          "y2": 0,
+          "tileNum": 569,
+          "subpriority": 28
+        },
+        {
+          "slot": 5,
+          "x": 96,
+          "y": 104,
+          "x2": -4,
+          "y2": 0,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ]
+    },
+    {
+      "frame": 486,
+      "emberSprites": [],
+      "emberFlareSprites": [
+        {
+          "slot": 3,
+          "x": 96,
+          "y": 104,
+          "x2": -36,
+          "y2": 0,
+          "tileNum": 585,
+          "subpriority": 28
+        },
+        {
+          "slot": 4,
+          "x": 96,
+          "y": 104,
+          "x2": -21,
+          "y2": 0,
+          "tileNum": 569,
+          "subpriority": 28
+        },
+        {
+          "slot": 5,
+          "x": 96,
+          "y": 104,
+          "x2": -7,
+          "y2": 0,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ]
+    },
+    {
+      "frame": 487,
+      "emberSprites": [],
+      "emberFlareSprites": [
+        {
+          "slot": 3,
+          "x": 96,
+          "y": 104,
+          "x2": -38,
+          "y2": 0,
+          "tileNum": 601,
+          "subpriority": 28
+        },
+        {
+          "slot": 4,
+          "x": 96,
+          "y": 104,
+          "x2": -24,
+          "y2": 0,
+          "tileNum": 569,
+          "subpriority": 28
+        },
+        {
+          "slot": 5,
+          "x": 96,
+          "y": 104,
+          "x2": -9,
+          "y2": 0,
+          "tileNum": 553,
+          "subpriority": 28
+        }
+      ]
+    },
+    {
+      "frame": 488,
+      "emberSprites": [],
+      "emberFlareSprites": [
+        {
+          "slot": 3,
+          "x": 96,
+          "y": 104,
+          "x2": -40,
+          "y2": 0,
+          "tileNum": 601,
+          "subpriority": 28
+        },
+        {
+          "slot": 4,
+          "x": 96,
+          "y": 104,
+          "x2": -26,
+          "y2": 0,
+          "tileNum": 569,
+          "subpriority": 28
+        },
+        {
+          "slot": 5,
+          "x": 96,
+          "y": 104,
+          "x2": -12,
+          "y2": 0,
+          "tileNum": 553,
+          "subpriority": 28
+        }
+      ]
+    },
+    {
+      "frame": 489,
+      "emberSprites": [],
+      "emberFlareSprites": [
+        {
+          "slot": 3,
+          "x": 96,
+          "y": 104,
+          "x2": -43,
+          "y2": 0,
+          "tileNum": 601,
+          "subpriority": 28
+        },
+        {
+          "slot": 4,
+          "x": 96,
+          "y": 104,
+          "x2": -28,
+          "y2": 0,
+          "tileNum": 585,
+          "subpriority": 28
+        },
+        {
+          "slot": 5,
+          "x": 96,
+          "y": 104,
+          "x2": -14,
+          "y2": 0,
+          "tileNum": 553,
+          "subpriority": 28
+        }
+      ]
+    },
+    {
+      "frame": 490,
+      "emberSprites": [],
+      "emberFlareSprites": [
+        {
+          "slot": 3,
+          "x": 96,
+          "y": 104,
+          "x2": -45,
+          "y2": 0,
+          "tileNum": 601,
+          "subpriority": 28
+        },
+        {
+          "slot": 4,
+          "x": 96,
+          "y": 104,
+          "x2": -31,
+          "y2": 0,
+          "tileNum": 585,
+          "subpriority": 28
+        },
+        {
+          "slot": 5,
+          "x": 96,
+          "y": 104,
+          "x2": -16,
+          "y2": 0,
+          "tileNum": 553,
+          "subpriority": 28
+        }
+      ]
+    },
+    {
+      "frame": 491,
+      "emberSprites": [],
+      "emberFlareSprites": [
+        {
+          "slot": 3,
+          "x": 96,
+          "y": 104,
+          "x2": -48,
+          "y2": 0,
+          "tileNum": 537,
+          "subpriority": 28
+        },
+        {
+          "slot": 4,
+          "x": 96,
+          "y": 104,
+          "x2": -33,
+          "y2": 0,
+          "tileNum": 585,
+          "subpriority": 28
+        },
+        {
+          "slot": 5,
+          "x": 96,
+          "y": 104,
+          "x2": -19,
+          "y2": 0,
+          "tileNum": 569,
+          "subpriority": 28
+        }
+      ]
+    },
+    {
+      "frame": 492,
+      "emberSprites": [],
+      "emberFlareSprites": [
+        {
+          "slot": 3,
+          "x": 96,
+          "y": 104,
+          "x2": -48,
+          "y2": 0,
+          "tileNum": 537,
+          "subpriority": 28
+        },
+        {
+          "slot": 4,
+          "x": 96,
+          "y": 104,
+          "x2": -36,
+          "y2": 0,
+          "tileNum": 585,
+          "subpriority": 28
+        },
+        {
+          "slot": 5,
+          "x": 96,
+          "y": 104,
+          "x2": -21,
+          "y2": 0,
+          "tileNum": 569,
+          "subpriority": 28
+        }
+      ]
+    },
+    {
+      "frame": 493,
+      "emberSprites": [],
+      "emberFlareSprites": [
+        {
+          "slot": 4,
+          "x": 96,
+          "y": 104,
+          "x2": -38,
+          "y2": 0,
+          "tileNum": 601,
+          "subpriority": 28
+        },
+        {
+          "slot": 5,
+          "x": 96,
+          "y": 104,
+          "x2": -24,
+          "y2": 0,
+          "tileNum": 569,
+          "subpriority": 28
+        }
+      ]
+    },
+    {
+      "frame": 494,
+      "emberSprites": [],
+      "emberFlareSprites": [
+        {
+          "slot": 4,
+          "x": 96,
+          "y": 104,
+          "x2": -40,
+          "y2": 0,
+          "tileNum": 601,
+          "subpriority": 28
+        },
+        {
+          "slot": 5,
+          "x": 96,
+          "y": 104,
+          "x2": -26,
+          "y2": 0,
+          "tileNum": 569,
+          "subpriority": 28
+        }
+      ]
+    },
+    {
+      "frame": 495,
+      "emberSprites": [],
+      "emberFlareSprites": [
+        {
+          "slot": 4,
+          "x": 96,
+          "y": 104,
+          "x2": -43,
+          "y2": 0,
+          "tileNum": 601,
+          "subpriority": 28
+        },
+        {
+          "slot": 5,
+          "x": 96,
+          "y": 104,
+          "x2": -28,
+          "y2": 0,
+          "tileNum": 585,
+          "subpriority": 28
+        }
+      ]
+    },
+    {
+      "frame": 496,
+      "emberSprites": [],
+      "emberFlareSprites": [
+        {
+          "slot": 4,
+          "x": 96,
+          "y": 104,
+          "x2": -45,
+          "y2": 0,
+          "tileNum": 601,
+          "subpriority": 28
+        },
+        {
+          "slot": 5,
+          "x": 96,
+          "y": 104,
+          "x2": -31,
+          "y2": 0,
+          "tileNum": 585,
+          "subpriority": 28
+        }
+      ]
+    },
+    {
+      "frame": 497,
+      "emberSprites": [],
+      "emberFlareSprites": [
+        {
+          "slot": 4,
+          "x": 96,
+          "y": 104,
+          "x2": -48,
+          "y2": 0,
+          "tileNum": 537,
+          "subpriority": 28
+        },
+        {
+          "slot": 5,
+          "x": 96,
+          "y": 104,
+          "x2": -33,
+          "y2": 0,
+          "tileNum": 585,
+          "subpriority": 28
+        }
+      ]
+    },
+    {
+      "frame": 498,
+      "emberSprites": [],
+      "emberFlareSprites": [
+        {
+          "slot": 4,
+          "x": 96,
+          "y": 104,
+          "x2": -48,
+          "y2": 0,
+          "tileNum": 537,
+          "subpriority": 28
+        },
+        {
+          "slot": 5,
+          "x": 96,
+          "y": 104,
+          "x2": -36,
+          "y2": 0,
+          "tileNum": 585,
+          "subpriority": 28
+        }
+      ]
+    },
+    {
+      "frame": 499,
+      "emberSprites": [],
+      "emberFlareSprites": [
+        {
+          "slot": 5,
+          "x": 96,
+          "y": 104,
+          "x2": -38,
+          "y2": 0,
+          "tileNum": 601,
+          "subpriority": 28
+        }
+      ]
+    },
+    {
+      "frame": 500,
+      "emberSprites": [],
+      "emberFlareSprites": [
+        {
+          "slot": 5,
+          "x": 96,
+          "y": 104,
+          "x2": -40,
+          "y2": 0,
+          "tileNum": 601,
+          "subpriority": 28
+        }
+      ]
+    },
+    {
+      "frame": 501,
+      "emberSprites": [],
+      "emberFlareSprites": [
+        {
+          "slot": 5,
+          "x": 96,
+          "y": 104,
+          "x2": -43,
+          "y2": 0,
+          "tileNum": 601,
+          "subpriority": 28
+        }
+      ]
+    },
+    {
+      "frame": 502,
+      "emberSprites": [],
+      "emberFlareSprites": [
+        {
+          "slot": 5,
+          "x": 96,
+          "y": 104,
+          "x2": -45,
+          "y2": 0,
+          "tileNum": 601,
+          "subpriority": 28
+        }
+      ]
+    },
+    {
+      "frame": 503,
+      "emberSprites": [],
+      "emberFlareSprites": [
+        {
+          "slot": 5,
+          "x": 96,
+          "y": 104,
+          "x2": -48,
+          "y2": 0,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ]
+    },
+    {
+      "frame": 504,
+      "emberSprites": [],
+      "emberFlareSprites": [
+        {
+          "slot": 5,
+          "x": 96,
+          "y": 104,
+          "x2": -48,
+          "y2": 0,
+          "tileNum": 537,
+          "subpriority": 28
+        }
+      ]
+    }
+  ]
+}

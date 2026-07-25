@@ -498,34 +498,86 @@ same coverage entries, same evidence files plus the two new port/test files.
 already describes the shake generically, not as a hand-fit formula) — only
 the `elemental-fire` track's implementation detail changed underneath it.
 
+## MOVE_MUD_SLAP dense-evidence acceptance step: already complete, re-verified (2026-07-24)
+
+**Verdict: the assigned step ("bring MOVE_MUD_SLAP to a dense-evidence
+acceptance state") was already done — mis-scoped, not blocked.**
+`ANIMATION_COVERAGE.json`'s `MOVE_MUD_SLAP` entry has carried `status:
+"exact"` with both-orientation dense evidence since commit `c1df4a9`
+("animation: prove Mud Slap in both orientations"), an ancestor of this
+worktree's own branch point — the work predates this session's step brief
+entirely. No source code needed changing, so no code commit was made this
+step; this entry exists only to record that the assignment was checked
+honestly rather than skipped or rubber-stamped.
+
+**Verification performed, not assumed.** Read `Move_MUD_SLAP`'s script
+(`reference/pokeemerald/data/battle_anim_scripts.s:5220-5241`):
+`loadspritegfx ANIM_TAG_MUD_SAND`, attacker slide-to-offset/slide-to-original
+choreography (shared `gSlideMonToOffsetSpriteTemplate`/
+`gSlideMonToOriginalPosSpriteTemplate`, same as SAND_ATTACK), then six
+`call MudSlapMud`, each spawning five `gMudSlapMudSpriteTemplate` sprites
+(30 total, matching `src/engine/mudSlap.ts`'s own "30 stock
+`Random2()`-resolved" doc comment) plus a `delay 2`. Read the callback
+(`reference/pokeemerald/src/battle_anim_ground.c`): `gMudSlapMudSpriteTemplate`
+is `.oam = &gOamData_AffineOff_ObjNormal_16x16` with `sAnim_MudSlapMud`
+(frame 1) and `.callback = AnimDirtScatter` — the identical callback
+SAND_ATTACK's `gSandAttackDirtSpriteTemplate` uses at 8x8, confirming
+`mudSlap.ts`'s claim that it "shares `AnimDirtScatter` translation semantics
+with SAND ATTACK" while modeling its own distinct 16x16/30-sprite/6-wave
+geometry — not a guess, matches the actual source.
+
+`npm test` 2147/2147, `npm run build` green (both unchanged from before this
+step — no source touched). Re-ran both committed portable comparators fresh
+against the live oracle rather than trusting the recorded numbers:
+`mud-slap-pidgeotto-onix.json` **51/51** source OAM + **51/51** RGB,
+`mud-slap-player-pidgeotto-onix.json` **51/51** + **51/51** — both match
+`ANIMATION_COVERAGE.json`'s recorded counts exactly, zero regressions.
+SAND_ATTACK's own module/comparators were not touched (out of scope, and
+unnecessary since no shared code changed).
+
+## MOVE_EMBER dragon-fire-projectile sibling: two sprite families ported, RAM-probed, dense-evidenced both orientations — `partial` (2026-07-24)
+
+**Verdict: real progress, not yet `exact`.** `Move_EMBER` (`battle_anim_scripts.s:919-937`) is genuinely bounded — no monbg/splitbgprio, no new subsystem, both its sprite families (three `gEmberSpriteTemplate` projectiles via `TranslateAnimSpriteToTargetMonLocation`, three `gEmberFlareSpriteTemplate` hit flares via `AnimEmberFlare`/`AnimTravelDiagonally`, both `battle_anim_fire.c`/`battle_anim_mons.c`) collapse onto the SAME `StartAnimLinearTranslation` Q8.8 accumulator DRAGON_BREATH/FLAMETHROWER/MIST_BALL already established. `src/engine/ember.ts` derives every position/frame/subpriority field from the ported source formulas (`SetAnimSpriteInitialXOffset`'s side-signed offset, `TranslateAnimSpriteToTargetMonLocation`'s/`AnimTravelDiagonally`'s distinct coordinate-type rules, `sAnim_BasicFire`'s 5-frame cycle) — verified against fresh mgba RAM probes in both cast orientations, not fitted to them (100% match, 63/63 component frames, at every real tick in both orientations before any framebuffer work started).
+
+**Two real bugs found via the dense pixel comparator itself, both fixed:**
+- The ember/flare draw-order tie-break (equal target-relative subpriority, equal screen Y — three flares can share the same Y) was sorting ascending `spawnIndex`; the RAM-probed `sSpriteOrder` showed the EARLIER-created sprite paints last/frontmost on a Y tie — the same descending-creation-order rule `dragonBreath.ts` already established among its own eleven embers, just not carried over correctly on the first pass.
+- The opponent-attacker fixture (`mechanic-ember-opponent-onix-player-murkrow.json`) initially assumed both battlers were at full HP (a fresh single-move battle). The RAM probe showed opponent ONIX's HP is actually 69/117 by the time EMBER's own dense window starts — player MURKROW's own (unforced, rental-set) move resolves first in that turn order and chips ONIX before EMBER acts. This is exactly why DRAGON_BREATH/THUNDER_PUNCH's own sibling fixtures for this same ONIX/MURKROW pair already use 69, not full HP — not a fresh-battle assumption, confirmed directly against my own probe's `opponent.hp` field per frame.
+
+**Results.** Opponent ONIX → player MURKROW: relative ages 0-62 / oracle frames 442-504, **63/63 component AND 63/63 framebuffer**, zero exclusions — fully exact for this orientation. Player ONIX → opponent MURKROW: relative ages 0-62 / oracle frames 388-450, **63/63 component but 61/63 framebuffer** — two frames (389, 395; 3-8px each) are off, and both are exactly the FIRST displayed tick of a newly-spawned ember (ember1's own age 0, ember2's own age 0); every other tick of both embers, all three flares, and the entire opposite orientation (including its own embers' first ticks, which match exactly) are fine. Since the underlying RAM/OAM component state matches 63/63 even on the two bad frames, this reads as a framebuffer-capture-timing nuance isolated to a sprite's own creation tick (mGBA's OAM-build/VBlank-capture ordering may treat a sprite's zeroth tick differently from its continuing ticks), not a position/frame/z-order bug — not chased further this step given the size of the remainder.
+
+**Move acceptance: `partial`, not `exact`**, per the coverage rubric's own rule ("`exact` cannot retain a known remainder"). `ANIMATION_COVERAGE.json`'s new `MOVE_EMBER` entry and the `dragon-fire-projectile` track's goal text both name the remainder explicitly.
+
+**Evidence.** `npm test` 2153/2153 (up from 2147 — added `tests/ember.test.ts`, 6 tests, RAM-probe-pinned both orientations via `src/data/gen/ember-sprite-probe{,-opponent}.json`). `npm run build` green. Fresh live-oracle reruns of the two now-existing EMBER comparators (`tools/compare/emberPortable.ts`) at the counts above, plus both existing FLAMETHROWER (`126/126` both) and DRAGON_BREATH (`85/85` both) comparators re-run fresh after touching the shared `tools/probe/run-battle-lab-rgb.py`/`sceneOnPresentation.ts`/`battleScene.ts` — zero regressions.
+
 ## Current handoff
 
-- **State:** **18 exact / 1 partial / 257 unsupported** (unchanged — this
-  step is an implementation-unit swap behind two already-`exact` moves, not
-  a new promotion).
-- **Did:** Ported `AnimTask_ShakeMon2` generically (`src/engine/shakeMon2.ts`,
-  see the section above) and re-drove `dragonBreath.ts`/`blazeKick.ts`
-  through it, deleting both hand-fit shake formulas. Confirmed (and left
-  untouched, since out of scope) that the canonical turn2/turn13 DRAGON_BREATH
-  fixtures use a wholly separate, already-frozen `battleScene.ts` path.
-- **Evidence:** `npm test` 2131/2131, `npm run build` green. New:
-  `tests/shakeMon2.test.ts` (6 tests). Re-run at exactly recorded counts:
-  DRAGON_BREATH `dragon-breath-player-onix-opponent-murkrow.json` 85/85+85/85,
-  `dragon-breath-opponent-onix-player-murkrow.json` 85/85+85/85; BLAZE_KICK
-  `blaze-kick-player-onix-opponent-murkrow.json` 78/78+78/78,
-  `blaze-kick-opponent-onix-player-murkrow.json` 78/78+78/78.
-- **Next:** Two more existing hand-fit `AnimTask_ShakeMon2` call sites could
-  now retire onto the generic port (`statusAnimation.ts`'s paralysis shake,
-  `faintAttack.ts`'s own instance) — bounded follow-ups, not attempted here.
-  Wiring a genuinely NEW move through `AnimTask_ShakeMon2` (dense evidence
-  required) is the leverage step the coverage report actually wants next.
-  Otherwise, MIST_BALL's remaining items in cost order: (1) `ANIM_TAG_SMALL_BUBBLES`
-  asset extraction + OAM wiring so `mistBall.ts` can actually render (needed
-  before any dense pixel comparator is possible); (2) generalize
-  `AnimTask_BlendBattleAnimPal` past its one DRAGON_BREATH instance; (3) give
-  the interpreter real `waitforvisualfinish` semantics (sprite-lifetime
-  tracking); (4)/(5) the two new subsystems (`AnimComplexPaletteBlend`,
-  `AnimTask_MistBallFog`'s BG pipeline) — each its own bounded step. Or
-  resume the next ranked Level-50 component track
-  (`mud-sand-scatter`/`dragon-fire-projectile`) if a bounded win elsewhere is
-  preferred. THUNDER PUNCH has no known move-owned remainder.
+- **State:** **18 exact / 2 partial / 256 unsupported** (MOVE_EMBER added as
+  a new `partial` entry — first entry for a `dragon-fire-projectile` sibling
+  beyond DRAGON_BREATH/FLAMETHROWER/BLAZE_KICK).
+- **Did:** Ported both of `Move_EMBER`'s sprite families
+  (`src/engine/ember.ts`), wired them through `sceneOnPresentation.ts`/
+  `battleScene.ts`'s Scene-ON seam, and built dense pixel evidence in both
+  cast orientations (see dated section above). Re-ran FLAMETHROWER/
+  DRAGON_BREATH comparators fresh — no regressions.
+- **Evidence:** `npm test` 2153/2153, `npm run build` green. Opponent ONIX
+  → player MURKROW `63/63` + `63/63` (exact). Player ONIX → opponent
+  MURKROW `63/63` + `61/63` (2-frame named remainder). FLAMETHROWER
+  `126/126` both, DRAGON_BREATH `85/85` both (fresh reruns, unchanged).
+- **Next:** MOVE_EMBER's own remainder (the 2-frame creation-tick
+  framebuffer gap in the player-attacker orientation) is the direct
+  follow-up if promoting this move to `exact` is the priority — likely
+  needs a per-sprite (not per-frame) render-lag model, or independent
+  confirmation this is a one-off mGBA capture artifact rather than a real
+  app bug. Otherwise the next ranked `dragon-fire-projectile` siblings are
+  FIRE_BLAST and FIRE_SPIN (both confirmed via source batch audit to use
+  distinct sprite templates — new component work, not a reuse of
+  `ember.ts`/`dragonBreath.ts`); DRAGON_RAGE shares the translation
+  callback family but has its own distinct template/affine/duration/
+  geometry. MIST_BALL's remaining items are unchanged from the prior
+  handoff (see the "Interpreter generalization" section above for the
+  full ordered list) if that track is preferred instead.
+- **Housekeeping flag (carried over, still unaddressed):** this file has
+  accumulated 7+ dated sections beyond the ~3-most-recent lean-ledger
+  guideline (`AGENTS.md`); no `ANIMATION_PROGRESS-archive.md` exists yet. A
+  future step should create the archive file and trim, mirroring
+  `PROGRESS-archive.md`'s convention.
