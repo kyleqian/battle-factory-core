@@ -1233,6 +1233,21 @@ is the presentation-seam checkpoint** — evidence pack:
 `docs/presentation-seam-scout.md` §7 (ordered 4-step plan, `turn5-faint.json`
 re-pinned live at 110/110).
 
+**§3 presentation-seam checkpoint: PASSED (2026-07-25, supervisor-verified
+live).** `turn5-faint.json` matches **110/110** with the fainted branch
+re-driven from real kernel events: `battleStringResolver.ts` (gap 5,
+`STRINGID_TARGETFAINTED` with source-faithful nickname splice),
+`presentationEventWindowBridge.ts` (gap 7, `sourceLabel:
+BattleScript_FaintTarget` + `hp-change{to:0}` instead of turn booleans), and
+a staged real KO hit chain (`turn5FaintPresentationStaging.ts`); the
+`TURN5_FAINTED_LINE1/2` literals are deleted. 22 turn3-6 regression traces
+unchanged. Suite 194 files / 2276 tests at `7f27094`. Kernel breadth past
+(iv) is now unblocked. Known adjacent gap surfaced by the checkpoint:
+`Cmd_ppreduce` barriers on `MOVE_TARGET_BOTH`/`OPPONENTS_FIELD`/
+`FOES_AND_ALLY` Pressure counting (`battleScriptHitChainOpcode.ts:679-697`),
+blocking ROCK_SLIDE-class moves from the hit chain — next registration
+slice's first rung.
+
 **Leverage, so this is not mistaken for one move's worth of work:** **69 of
 197** `BattleScript_Effect*` scripts reach that shared hit chain, covering
 **155 of 355 moves (44%)** — including every `setmoveeffect`+`goto` status-hit
