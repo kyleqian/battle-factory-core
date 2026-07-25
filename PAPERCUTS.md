@@ -374,10 +374,17 @@ worker (PROGRESS entry 13).
   offers no way to ask whether a press will register; staging multi-turn
   KO scenarios needed trial-and-error until a continuous low-duty-cycle
   A-spam pattern was found (documented in `docs/hit-chain-ground-truth.md`).
-- **Hits:** 1.
+  Second hit (2026-07-25): mid-battle *voluntary party-menu switch*
+  navigation via `overrides.parties` traces — `DOWN,A,RIGHT,A` from the
+  action menu never changed the party index across three attempts (~15 min);
+  the pattern from `mechanic-uproar-soundproof-switch-off.json` did not
+  transfer, likely frame-timing or cursor-geometry sensitive.
+- **Hits:** 2.
 - **Cost each:** ~15 min.
 - **Workaround:** stage post-KO continuations with low-duty-cycle A-spam
-  that self-times, instead of computing exact wait durations.
+  that self-times, instead of computing exact wait durations. No verified
+  pattern yet for mid-battle voluntary switches; needs a dedicated probe
+  that RAM-reads the party-menu cursor to derive a reusable sequence.
 
 ## Oracle comparator round-trips make calibration sweeps slow
 
