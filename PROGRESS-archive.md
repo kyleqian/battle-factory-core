@@ -1,4 +1,85 @@
 ---
+## 440 — S10 step (iv) part 2/3: `HandleFaintedMonActions` orchestration + `BS_FAINTED` role — a real Level-50 Factory battle now reaches `{ kind: "terminal", outcome: "player-win" }` through `submitBattleDecision`
+
+- **State:** tree green at **188 files / 2236 tests** (this rung added 2 new
+  test files — `battleScriptFaintedActionsOrchestration.test.ts`,
+  `factoryBattleScriptTerminalDecision.test.ts` — plus assertions to existing
+  files; entry 439's own 185/2217 baseline predates two lane merges that
+  landed between it and this session), build green. ISSUES #43 closed
+  (deleted). No new opcode registrations (still 51 composed handlers) — this
+  rung is scheduling logic and a selector role, exactly as
+  `docs/faint-outcome-ground-truth.md` §3.1 said it must be, not a 7th
+  opcode.
+- **Did (dependency order):** (1) `BS_FAINTED` selector role —
+  `BattleScriptSelectorRoleBindings` gained a `fainted` field (genuinely new,
+  not an alias of `target`, per ISSUES #43's own diagnosis), and
+  `resolveRulesBattlerForBattleScript` maps it to
+  `battle_util.c:713`'s `case BS_FAINTED: ret = gBattlerFainted;`. (2)
+  `src/engine/battleScriptFaintedActionsOrchestration.ts` — the
+  `HandleFaintedMonActions` (`battle_util.c:1894-1971`) C-side loop
+  equivalent: once a hit chain's own move script halts at its own terminal
+  `end`, it drives `BattleScript_GiveExp` then `BattleScript_HandleFaintedMon`
+  per fainted battler (scanned from `battlers[0..battlersCount)].hp === 0`),
+  reassigning `selectorRoles.target`/`fainted` together each time exactly
+  like source's `gBattlerFainted = gBattlerTarget = ...` (`:1915`) — reusing
+  the already-registered setbyte/getexp/checkteamslost/jumpifbyte/end2
+  opcodes directly, no new registrations. Terminal vs. non-terminal is the
+  real VM: if `checkteamslost`'s `jumpifbyte` takes the
+  `BattleScript_FaintedMonEnd` branch, it reports `"terminal"`; otherwise
+  execution falls into the real `jumpifbattletype BATTLE_TYPE_TRAINER, …`
+  (a `jumpifword` macro expansion, `asm/macros/battle_script.inc:1434-1436`)
+  which is genuinely unregistered, so it naturally halts unsupported-opcode
+  and surfaces as a named `"non-terminal-barrier"` — never fabricated, never
+  a silent fallthrough. 4 new Tier-1 tests (no-fainted-battlers, terminal
+  WIN, non-terminal barrier, terminal LOSS). (3)
+  `src/engine/factoryBattleScriptTerminalDecision.ts` — a sibling
+  `BattleDecisionReducer` to `reduceFactoryAsleepMoveDecision` (own rules
+  type/adapter id, not a growth of that one — its `rulesAt` is pinned to a
+  sleeping-attacker phase that doesn't apply here). Stages a Level-50 Factory
+  singles turn with the opponent's other two party slots pre-faint directly
+  in the rules-context constructor (`party` slice, per the seam doc's own
+  "that is what the slice is for"), runs the real registered hit chain from
+  `BattleScript_HitFromAtkCanceler` (skipping `BattleScript_EffectHit`'s own
+  still-unregistered `jumpifnotmove MOVE_SURF` guard, a proven no-op for any
+  non-Surf move — same choice every RUNG 4 KO test already makes), then the
+  new orchestration, then reconciles the Battle Script machine's internal RNG
+  cursor onto the outer decision-boundary cursor by replaying its ledger
+  through `context.rng.draw()` (both are the same deterministic LCG from the
+  same seed, so this converges exactly). One `submitBattleDecision` call now
+  returns a REAL `{ kind: "terminal", outcome: "player-win" }`, `rng.calls`
+  pinned at the banked **4**, `battleOutcome` computed by `checkteamslost`
+  from the party slice, not injected. `mapFactoryBattleOutcome` pins
+  `B_OUTCOME_WON(1)/LOST(2)/DREW(3)` → `"player-win"/"trainer-win"/"draw"`
+  with direct unit tests (draw is real per
+  `docs/battle-resolution-adapter-ground-truth.md`, not asserted away). One
+  more end-to-end test proves the non-terminal fork (healthy opponent bench
+  slot) surfaces as a real `machine-barrier`, not a fake terminal. 5 new
+  Tier-1 tests total for this file.
+- **Gotcha found and fixed:** `absentBattlerFlags` must stay **0** for a real
+  (non-asleep) hit chain — the asleep adapter's `0b1100` convention trips
+  `CANCELER_BIDE`'s own admission guard
+  (`battleScriptActionAdmission.ts:3205`, `attacker > 1` / absent-battler
+  check) once attackcanceler's state walk actually reaches it, which only
+  happens for a non-sleeping attacker.
+- **Next:** step (iv) part 3/3 (still out of scope for this rung, per the
+  brief): the pure `deriveBattleResolutionFromTerminalBoundary`-style adapter
+  from `docs/round-controller-outcome-seam.md` §4 piece 5, wiring a real
+  terminal boundary into `roundController.resolveRoundBattle`'s
+  `BattleResolution` shape (id/maxHp/status carried forward from the
+  pre-battle `BattleParty` snapshot, `draw` handling decided). No
+  `roundController.ts` edit happened this rung (out of scope, honored).
+- **Notes:** no presentation/render/`battleScene` edits; no oracle traces
+  (Tier-1 only); no new production imports of canonical recordings; ratchet
+  barrier counts unchanged (no `unsupportedBranch` call sites added — the
+  non-terminal fork's barrier is the VM's own natural
+  missing-handler halt, not a new named barrier). The anticipated ripple in
+  `battleScriptHitChainOpcode.test.ts`/`factoryBattleScriptDecision.test.ts`
+  did not materialize: neither file's own code path calls the new
+  orchestration or reducer, so both are byte-for-byte unchanged (only two
+  unrelated `selectorRoles` exact-equality assertions elsewhere needed the
+  new `fainted: null` field added).
+
+---
 ## 439 — S10 step (iv) part 1/3: party-HP slice + jumpifbyte/getexp/checkteamslost registered — real `battleOutcome` 0 -> 1 now computed from party state
 
 - **State:** tree green at **185 files / 2217 tests** (+3 files / +37 tests

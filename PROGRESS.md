@@ -4,6 +4,87 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 443 — S10 kernel-breadth RUNG 1 complete (`Cmd_ppreduce` Pressure barriers retired); RUNG 2 (SetMoveEffect quartet) scoped, not attempted this session
+
+- **State:** tree green at **194 files / 2286 tests** (+10 tests over entry
+  442's 2276), build green, ratchet green — `battleScriptHitChainOpcode.ts`'s
+  barrier pin shrank **21 -> 19** (the two retired Pressure barriers, delta
+  named). `docs/set-move-effect-ground-truth.md`'s verify script rerun live
+  before starting RUNG 2 scoping: still all-PASS.
+- **Did (RUNG 1, committed `c33286c`):** ported the real
+  `AbilityBattleEffects(ABILITYEFFECT_COUNT_ON_FIELD/COUNT_OTHER_SIDE, ...)`
+  loops (`battle_util.c:3160-3191`) into `Cmd_ppreduce`, bounded by the real
+  `gBattlersCount` (2 singles / 4 doubles, same precedent as
+  `cleareffectsonfaint`'s existing loop), replacing the two unconditional
+  barriers that blocked every `MOVE_TARGET_BOTH`/`MOVE_TARGET_FOES_AND_ALLY`
+  move (ROCK_SLIDE, EARTHQUAKE, SURF...) from the hit chain — surfaced by the
+  presentation-seam checkpoint (PROGRESS 442). 15 new Tier-1 tests: both
+  count forms in singles (the real loop degenerates to the old default-branch
+  result) and doubles (genuine multi-battler scan — allies excluded from
+  COUNT_OTHER_SIDE, allies included in COUNT_ON_FIELD, cumulative counts,
+  attacker excluded from its own count), plus one full hit-chain integration
+  test driving ROCK_SLIDE from opcode 0 through `ppreduce` to the script's
+  own `end` (previously impossible — this is the leverage proof).
+- **RUNG 2 (SetMoveEffect status quartet + flinch): scoped via a live source
+  read, deliberately NOT attempted this session** — invoking the brief's own
+  escape hatch rather than risk a half-finished, uncommitted cross-cutting
+  change under the hard time cap. Concretely, for the next session:
+  - **2 new opcodes, both small.** `B_SCR_OP_PRINTFROMTABLE`
+    (`Cmd_printfromtable`, `battle_script_commands.c:2180`) needs **no new
+    port** — it's a table pointer + `MULTISTRING_CHOOSER` index into one of 7
+    small constant tables (`gGotPoisonedStringIds`/`BurnedStringIds`/
+    `FrozenStringIds`/`ParalyzedStringIds`, 2 entries each: STATUSED /
+    STATUSED_BY_ABILITY; `gPSNPreventionStringIds`/`BRNPreventionStringIds`/
+    `PRLZPreventionStringIds`, 3 entries each: ABILITY_PREVENTS_MOVE_STATUS /
+    ABILITY_PREVENTS_ABILITY_STATUS / STATUS_HAD_NO_EFFECT, all in
+    `battle_message.c:1072-1231`) — resolve table+index to a literal
+    `STRINGID_*` operand and feed the *already-registered* `prepareMessage`
+    port, same synthetic-operand trick this file already uses for
+    `STRINGID_USEDMOVE_OPERAND`. `B_SCR_OP_UPDATESTATUSICON`
+    (`Cmd_updatestatusicon`, `:7699`) reuses the existing `BS_EFFECT_BATTLER`
+    selector resolver for the non-doubles branch; `BS_ATTACKER_WITH_PARTNER`
+    (doubles) is a clean (b) barrier.
+  - **SetMoveEffect's dispatch** (`:2234-2521` POISON/BURN/FREEZE/PARALYSIS,
+    `:2546-2567` FLINCH): each status write is
+    `BattleScriptPush(next) + goto sMoveEffectBS_Ptrs[byte]`
+    (`BattleScript_MoveEffect{Poison,Burn,Freeze,Paralysis}`:
+    `statusanimation, printfromtable <table>, waitmessage, goto
+    BattleScript_UpdateEffectStatusIconRet` -> `updatestatusicon, waitstate,
+    return`) on success, each guarded by one ability (Immunity/Water
+    Veil/Magma Armor/Limber) with its own `BattleScript_{PSN,BRN,PRLZ}
+    Prevention` push+jump sub-script, plus type immunity (POISON:
+    Poison/Steel; BURN: Fire; FREEZE: Ice + sun-no-freeze; PARALYSIS: none).
+    All 4 share the affects-user flag, the Shield Dust/Safeguard/0-HP/
+    Substitute `INCREMENT_RESET_RETURN` early-outs (`:2253-2267`), and the
+    party-record `status1` sync (mirrors the already-established
+    `datahpupdate` live-sync pattern — ground truth doc §2 pinned this needs
+    no new plumbing). SLEEP(1)/TOXIC(6) stay named (b) barriers — unreachable
+    via this call site per the doc (their own scripts use the still-
+    unregistered `Cmd_seteffectprimary`).
+  - **FLINCH(8) needs one genuinely new `BattleScriptRulesContext` field**
+    (turn order / `gCurrentTurnActionNumber`, for `GetBattlerTurnOrderNum
+    (gEffectBattler) > gCurrentTurnActionNumber`) before its plain
+    `status2 |=` write is source-complete — real new cross-cutting plumbing
+    (construction/validation, every existing test fixture), not just a
+    dispatch branch. This is the one piece of the doc's "zero new opcodes"
+    claim that's still nontrivial; left a named (b) barrier rather than rush
+    a new required field this session.
+  - Net finding: the guard structure is **not** materially bigger than the
+    doc's enumeration (confirmed by reading the real source, not assumed) —
+    RUNG 2 is tractable, just larger than the time remaining this session.
+- **Next:** RUNG 2 as scoped above — printfromtable/updatestatusicon first
+  (small, no new ports), then the quartet dispatch with party sync, then the
+  integration proof against the banked KADABRA/MAGNETON paralysis ledger in
+  `docs/set-move-effect-ground-truth.md` §2 (must match: 8 total rolls, zero
+  extra draws for the proc, `status1` written on both the battler and its
+  party slot, control seed untouched). Flinch's turn-order field is a
+  separate, addable-after slice.
+- **Notes:** no oracle traces added this session beyond the pre-check
+  verify-script rerun (all PASS); no presentation/`battleScene`/ROADMAP
+  edits; stat-down family and confusion remain explicitly out of scope per
+  the doc.
+
+---
 ## 442 — S10 §3 presentation-seam checkpoint: **PASSED** — `turn5-faint.json` re-driven from real kernel events, still 110/110
 
 - **State:** tree green at **194 files / 2276 tests** (+3 files/+13 tests
@@ -123,85 +204,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `core.ts` production wiring of the adapter into the tick flow is
   deliberately out of this rung's scope (the presentation-seam checkpoint's
   territory, per the brief).
-
----
-## 440 — S10 step (iv) part 2/3: `HandleFaintedMonActions` orchestration + `BS_FAINTED` role — a real Level-50 Factory battle now reaches `{ kind: "terminal", outcome: "player-win" }` through `submitBattleDecision`
-
-- **State:** tree green at **188 files / 2236 tests** (this rung added 2 new
-  test files — `battleScriptFaintedActionsOrchestration.test.ts`,
-  `factoryBattleScriptTerminalDecision.test.ts` — plus assertions to existing
-  files; entry 439's own 185/2217 baseline predates two lane merges that
-  landed between it and this session), build green. ISSUES #43 closed
-  (deleted). No new opcode registrations (still 51 composed handlers) — this
-  rung is scheduling logic and a selector role, exactly as
-  `docs/faint-outcome-ground-truth.md` §3.1 said it must be, not a 7th
-  opcode.
-- **Did (dependency order):** (1) `BS_FAINTED` selector role —
-  `BattleScriptSelectorRoleBindings` gained a `fainted` field (genuinely new,
-  not an alias of `target`, per ISSUES #43's own diagnosis), and
-  `resolveRulesBattlerForBattleScript` maps it to
-  `battle_util.c:713`'s `case BS_FAINTED: ret = gBattlerFainted;`. (2)
-  `src/engine/battleScriptFaintedActionsOrchestration.ts` — the
-  `HandleFaintedMonActions` (`battle_util.c:1894-1971`) C-side loop
-  equivalent: once a hit chain's own move script halts at its own terminal
-  `end`, it drives `BattleScript_GiveExp` then `BattleScript_HandleFaintedMon`
-  per fainted battler (scanned from `battlers[0..battlersCount)].hp === 0`),
-  reassigning `selectorRoles.target`/`fainted` together each time exactly
-  like source's `gBattlerFainted = gBattlerTarget = ...` (`:1915`) — reusing
-  the already-registered setbyte/getexp/checkteamslost/jumpifbyte/end2
-  opcodes directly, no new registrations. Terminal vs. non-terminal is the
-  real VM: if `checkteamslost`'s `jumpifbyte` takes the
-  `BattleScript_FaintedMonEnd` branch, it reports `"terminal"`; otherwise
-  execution falls into the real `jumpifbattletype BATTLE_TYPE_TRAINER, …`
-  (a `jumpifword` macro expansion, `asm/macros/battle_script.inc:1434-1436`)
-  which is genuinely unregistered, so it naturally halts unsupported-opcode
-  and surfaces as a named `"non-terminal-barrier"` — never fabricated, never
-  a silent fallthrough. 4 new Tier-1 tests (no-fainted-battlers, terminal
-  WIN, non-terminal barrier, terminal LOSS). (3)
-  `src/engine/factoryBattleScriptTerminalDecision.ts` — a sibling
-  `BattleDecisionReducer` to `reduceFactoryAsleepMoveDecision` (own rules
-  type/adapter id, not a growth of that one — its `rulesAt` is pinned to a
-  sleeping-attacker phase that doesn't apply here). Stages a Level-50 Factory
-  singles turn with the opponent's other two party slots pre-faint directly
-  in the rules-context constructor (`party` slice, per the seam doc's own
-  "that is what the slice is for"), runs the real registered hit chain from
-  `BattleScript_HitFromAtkCanceler` (skipping `BattleScript_EffectHit`'s own
-  still-unregistered `jumpifnotmove MOVE_SURF` guard, a proven no-op for any
-  non-Surf move — same choice every RUNG 4 KO test already makes), then the
-  new orchestration, then reconciles the Battle Script machine's internal RNG
-  cursor onto the outer decision-boundary cursor by replaying its ledger
-  through `context.rng.draw()` (both are the same deterministic LCG from the
-  same seed, so this converges exactly). One `submitBattleDecision` call now
-  returns a REAL `{ kind: "terminal", outcome: "player-win" }`, `rng.calls`
-  pinned at the banked **4**, `battleOutcome` computed by `checkteamslost`
-  from the party slice, not injected. `mapFactoryBattleOutcome` pins
-  `B_OUTCOME_WON(1)/LOST(2)/DREW(3)` → `"player-win"/"trainer-win"/"draw"`
-  with direct unit tests (draw is real per
-  `docs/battle-resolution-adapter-ground-truth.md`, not asserted away). One
-  more end-to-end test proves the non-terminal fork (healthy opponent bench
-  slot) surfaces as a real `machine-barrier`, not a fake terminal. 5 new
-  Tier-1 tests total for this file.
-- **Gotcha found and fixed:** `absentBattlerFlags` must stay **0** for a real
-  (non-asleep) hit chain — the asleep adapter's `0b1100` convention trips
-  `CANCELER_BIDE`'s own admission guard
-  (`battleScriptActionAdmission.ts:3205`, `attacker > 1` / absent-battler
-  check) once attackcanceler's state walk actually reaches it, which only
-  happens for a non-sleeping attacker.
-- **Next:** step (iv) part 3/3 (still out of scope for this rung, per the
-  brief): the pure `deriveBattleResolutionFromTerminalBoundary`-style adapter
-  from `docs/round-controller-outcome-seam.md` §4 piece 5, wiring a real
-  terminal boundary into `roundController.resolveRoundBattle`'s
-  `BattleResolution` shape (id/maxHp/status carried forward from the
-  pre-battle `BattleParty` snapshot, `draw` handling decided). No
-  `roundController.ts` edit happened this rung (out of scope, honored).
-- **Notes:** no presentation/render/`battleScene` edits; no oracle traces
-  (Tier-1 only); no new production imports of canonical recordings; ratchet
-  barrier counts unchanged (no `unsupportedBranch` call sites added — the
-  non-terminal fork's barrier is the VM's own natural
-  missing-handler halt, not a new named barrier). The anticipated ripple in
-  `battleScriptHitChainOpcode.test.ts`/`factoryBattleScriptDecision.test.ts`
-  did not materialize: neither file's own code path calls the new
-  orchestration or reducer, so both are byte-for-byte unchanged (only two
-  unrelated `selectorRoles` exact-equality assertions elsewhere needed the
-  new `fainted: null` field added).
 
