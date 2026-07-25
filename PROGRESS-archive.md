@@ -16197,3 +16197,39 @@ in git history immediately before corrective commits `d5ac217` and `9942a8d`.
   is untouched — confirmed byte-for-byte by the unchanged terminal-decision
   tests alongside the updated non-terminal ones.
 
+
+---
+## 448 — ChangeStatBuffs core + BOTH stat-change routes registered — census at 105/355 moves (77/276 Factory-L50) executable
+
+*(Entry written by the supervisor: the worker landed all five rungs green
+and was killed by an API server error during its docs tail; suite/build/
+both verify scripts/census independently re-verified before this entry.)*
+
+- **State:** tree green at **203 files / 2416 tests** (+20 over entry 447),
+  build green. Census (re-run live): **53/214 effects, 105/355 moves,
+  77/276 Factory-L50 moves executable** (was 34/74/53 after the trio), 12
+  ground-truth checks pass. Both stat verify scripts all-PASS.
+- **Did (commits `e263061`, `8342ed0`, `b4b9f42`):** `ChangeStatBuffs`
+  ported source-completely (exact guard-ladder order, flags semantics —
+  silent secondary guards vs `STAT_CHANGE_ALLOW_PTR` primary message path,
+  shared value-2 `WONT_INCREASE/_DECREASE` quirk, zero RNG); secondary
+  stat `MOVE_EFFECT_*_PLUS/_MINUS` cases wired in `applySetMoveEffect`
+  (banked Crunch SP_DEF_MINUS_1 proc/control/Clear-Body ledgers asserted);
+  primary route registered end-to-end (`STATBUFFCHANGE`,
+  `SETGRAPHICALSTATCHANGEVALUES`, `PLAYSTATCHANGEANIMATION`, plus the
+  DOWN-path's `JUMPIFSTATUS2`/`ORBYTE`; `setstatchanger` confirmed a
+  setbyte alias) with integration proofs from the LITERAL topology entries
+  (Swords Dance +2 zero rolls, Tail Whip -1 one accuracy roll, Clear Body
+  block with ability-reveal message at unchanged RNG-step count,
+  at-bound early-out). Census doc regenerated + committed; its
+  ground-truth assertions updated deliberately (12 checks).
+- **Next:** end-turn orchestration (`docs/end-turn-ground-truth.md`, 17/17
+  checks banked — the last structural piece for multi-TURN battles), then
+  confusion (`docs/stat-change-confusion-ground-truth.md`) and the AI
+  move-selection port (`docs/factory-ai-ground-truth.md`, 15/17-roll
+  ledgers banked). Forced-switch §4 step 10 (player-side interactive
+  party-menu controller state) remains the one named barrier on that path.
+- **Notes:** the killing API error hit mid-response during docs; no code
+  was lost (all rungs committed). The launcher's "unauthenticated/
+  sandboxed" postflight hint is again noise on this failure mode.
+

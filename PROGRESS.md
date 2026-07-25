@@ -4,6 +4,66 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 451 — [SUPERVISOR WIND-DOWN 2026-07-25 ~16:00] session summary
+
+- **State:** tree committed and green at **207 files / 2439 tests**, build
+  green, single main worktree, zero unmerged branches, census re-verified
+  live (**53/214 effects, 105/355 moves, 77/276 Factory-L50 executable**,
+  12 self-checks pass). **No DEFERRED entries — nothing blocks the next
+  `run-supervisor.sh`.** No usage/rate limits hit all session.
+- **Session (~35 workers across 3 lanes, all outcomes verified; 3 cap-kills
+  + 1 API-server-error, every one salvaged to zero code loss):**
+  - **Main (12 steps):** S10 **step (iv) COMPLETE** (party-HP slice +
+    jumpifbyte/getexp/checkteamslost; BS_FAINTED role + fainted-actions
+    orchestration + first real terminal boundary; BattleResolution adapter
+    with facility-verified draw→loss; ISSUES #42/#43 closed). **S10 §3
+    presentation-seam checkpoint PASSED** (turn5-faint.json 110/110 from
+    real kernel events; string resolver + PC-to-window bridge; 22
+    regression traces clean). Kernel breadth: ppreduce Pressure fix
+    (ROCK_SLIDE-class unblocked), SetMoveEffect status quartet, census
+    entry-chokepoint trio (census 2→74 moves), ChangeStatBuffs + both stat
+    routes (→105 moves), forced-switch fork COMPLETE (jumpifword/
+    openpartyscreen + AI matchup-scorer port + switch-in rebuild — §4 step
+    10 player-side menu is the one named barrier left), end-turn
+    orchestration (burn/poison/toxic ticks, end-turn KO reuses faint
+    machinery), and the **full-turn reducer** — a genuine multi-turn cycle
+    with a continuous LCG ledger (two-turn proof, burn-across-turns proof,
+    mid-turn-KO-cancels-second-action proof).
+  - **Side (9 scouts, all merged):** ground-truth packs with all-PASS
+    verify scripts for the adapter (draw reachability + facility handling
+    + party-status sync + switch recipes both voluntary and forced),
+    SetMoveEffect, secondary+primary stat routes, end-turn, Factory AI
+    (15/17-roll ledgers, unconditional tie-break), party-order permutation
+    (presentation-only verdict), the §7 event-inventory refresh, and the
+    **self-validating executable-frontier census tool**
+    (`tools/report/executable-frontier-census.ts`) whose literal-entry rule
+    found the chokepoint that flipped 72 moves in one registration.
+  - **Animation (14 steps):** DRAGON_RAGE parked `partial` **149/150**
+    (7-step convergence ladder; interpreter gained waitforvisualfinish
+    scheduling; generic slideMon/speciesIdleAnim/FIRE_PLUME ports; final
+    frame forensically eliminated to a named unknown). SHADOW_PUNCH parked
+    `partial` 84/111 player-orientation with all families attributed
+    (opponent orientation has a named BLDY-drift lead). Component-extractor
+    `jumpret` typo fixed (+79 dependency edges — dissolved a false "40
+    moves blocked" premise). blend_color_cycle family mapped (28 moves,
+    zero new blend math) and GROWTH's AnimTask_BlendColorCycle RAM-probed
+    + Tier-1-pinned (scene wiring is the named next action). Coverage:
+    **19 exact / 3 partial**.
+- **Next (in order):** main — forced-switch §4 step 10 (player-side
+  party-menu decision-request), confusion + flinch registrations (ground
+  truth banked), AI move-selection port (`docs/factory-ai-ground-truth.md`),
+  DoFieldEndTurnEffects setters (screens/weather), the full-turn proof's
+  non-terminal variant; presentation — continue the §3 seam retirement
+  window-by-window (ISSUES #39/#41 path). Animation — GROWTH scene wiring →
+  dense comparators (28-move family behind it), SHADOW_PUNCH opponent
+  orientation. All prep docs carry rerunnable verify scripts.
+- **Notes:** PAPERCUTS gained 5 entries/bumps this session. The launcher's
+  "unauthenticated/sandboxed" hint on cap-kill/API-error exits is noise
+  (recorded in entries 444/448). Supervisor salvage rule tightened: verify
+  `npm run build` too, not just tests (a salvaged mid-rework briefly broke
+  `tsc -b`; caught and fixed same session, recorded in memory).
+
+---
 ## 450 — Full-turn reducer landed: "decision → both actions → end-turn → next decision boundary" is now a genuine multi-turn cycle
 
 - **State:** tree green at **205 files / 2426 tests** (+1 file/+5 tests
@@ -184,39 +244,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (`battleScriptAttackCancelerFlinch`/`Disabled.test.ts`) needed their own
   local battler fixture builders updated with the new `maxHP` default —
   the same one-time ripple every new battler field causes; fixed inline.
-
----
-## 448 — ChangeStatBuffs core + BOTH stat-change routes registered — census at 105/355 moves (77/276 Factory-L50) executable
-
-*(Entry written by the supervisor: the worker landed all five rungs green
-and was killed by an API server error during its docs tail; suite/build/
-both verify scripts/census independently re-verified before this entry.)*
-
-- **State:** tree green at **203 files / 2416 tests** (+20 over entry 447),
-  build green. Census (re-run live): **53/214 effects, 105/355 moves,
-  77/276 Factory-L50 moves executable** (was 34/74/53 after the trio), 12
-  ground-truth checks pass. Both stat verify scripts all-PASS.
-- **Did (commits `e263061`, `8342ed0`, `b4b9f42`):** `ChangeStatBuffs`
-  ported source-completely (exact guard-ladder order, flags semantics —
-  silent secondary guards vs `STAT_CHANGE_ALLOW_PTR` primary message path,
-  shared value-2 `WONT_INCREASE/_DECREASE` quirk, zero RNG); secondary
-  stat `MOVE_EFFECT_*_PLUS/_MINUS` cases wired in `applySetMoveEffect`
-  (banked Crunch SP_DEF_MINUS_1 proc/control/Clear-Body ledgers asserted);
-  primary route registered end-to-end (`STATBUFFCHANGE`,
-  `SETGRAPHICALSTATCHANGEVALUES`, `PLAYSTATCHANGEANIMATION`, plus the
-  DOWN-path's `JUMPIFSTATUS2`/`ORBYTE`; `setstatchanger` confirmed a
-  setbyte alias) with integration proofs from the LITERAL topology entries
-  (Swords Dance +2 zero rolls, Tail Whip -1 one accuracy roll, Clear Body
-  block with ability-reveal message at unchanged RNG-step count,
-  at-bound early-out). Census doc regenerated + committed; its
-  ground-truth assertions updated deliberately (12 checks).
-- **Next:** end-turn orchestration (`docs/end-turn-ground-truth.md`, 17/17
-  checks banked — the last structural piece for multi-TURN battles), then
-  confusion (`docs/stat-change-confusion-ground-truth.md`) and the AI
-  move-selection port (`docs/factory-ai-ground-truth.md`, 15/17-roll
-  ledgers banked). Forced-switch §4 step 10 (player-side interactive
-  party-menu controller state) remains the one named barrier on that path.
-- **Notes:** the killing API error hit mid-response during docs; no code
-  was lost (all rungs committed). The launcher's "unauthenticated/
-  sandboxed" postflight hint is again noise on this failure mode.
 
