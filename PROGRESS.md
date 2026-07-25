@@ -4,6 +4,102 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 449 — End-turn orchestration landed: `BattleTurnPassed` C-side scheduling equivalent, burn/poison/toxic ticks source-complete, faint machinery reused for end-turn KOs
+
+- **State:** tree green at **204 files / 2421 tests** (+1 file/+5 tests
+  over entry 448's 203/2416), build green. `verify-end-turn-ground-
+  truth.ts` rerun live before starting and again after every commit: still
+  **17/17 ALL PASS**. Ratchet green, **zero new barrier pins** — the new
+  module's own case-level guards never fire on any existing production
+  path (they're a standalone orchestration surface, not wired into an
+  existing scenario yet). Census regenerated and diffed **byte-identical**
+  to entry 448 (53/214 effects, 105/355 moves, 77/276 Factory-L50) — end
+  turn is orchestration, not a move-effect entry, so nothing was expected
+  to flip and nothing did.
+- **Did (new `src/engine/battleEndTurnOrchestration.ts` +
+  `tests/battleEndTurnOrchestration.test.ts`), per
+  `docs/end-turn-ground-truth.md` §4:**
+  - **Step 2 (orchestration loop, landed):** `runBattleEndTurnOrchestration`
+    is the `BattleTurnPassed` C-side equivalent — same category as the
+    already-landed `HandleFaintedMonActions` port, driving the full
+    field-loop + all-battlers'-19-cases pass to completion in one call.
+    Implements the doc's load-bearing ordering rule verbatim: the instant a
+    fired tick's inline `checkteamslost` leaves `battleOutcome !== 0`, the
+    field/battler loop stops immediately (no further cases, no further
+    battlers) and falls through to the SAME unconditional
+    `runBattleScriptFaintedActionsOrchestration` call the clean-completion
+    path also uses (reused verbatim, not reimplemented).
+  - **Step 1 + step 3 (`ORWORD` + Burn/Poison/Bad Poison, landed):**
+    `ORWORD` was already registered (executable-frontier census, entry
+    446). `BattleScript_PoisonTurnDmg`/`BurnTurnDmg` needed **zero new
+    opcodes** — `orword`/`healthbarupdate`/`datahpupdate`/`tryfaintmon`/
+    `checkteamslost`/`statusanimation`/`printstring`/`waitmessage`/`end2`
+    were all already registered. Added the one real missing piece: a
+    `maxHP` field on `BattleScriptRulesBattlerState` (defaults to `hp` for
+    every legacy fixture — safe, since nothing read it before this doc),
+    letting the C-side damage precompute (`gBattleMoveDamage = maxHP/8` or
+    `/16`, the toxic-counter bump capped at `TOXIC_TURN(15)` with its party
+    `status1` mirror) happen exactly where source does it, before
+    `BattleScriptExecute`.
+  - **Every doc-reachable case this engine doesn't model yet is a named
+    barrier gated on its own real already-modeled bit/field** (never a
+    blanket skip): Ingrain (`STATUS3_ROOTED`), Nightmare/Curse/Thrash
+    (`status2` masks), Disable/Taunt (`disabledMove`/`tauntTimer`),
+    Reflect/Light Screen/Mist/Safeguard (`sideStatuses`/`mistTimers`), and
+    all four weather cases (the already-modeled `weather` field) all
+    barrier for real if their trigger bit is ever set — currently never,
+    since nothing in this engine sets any of them yet. Cases with **no**
+    modeled trigger state at all (Leech Seed, Wrap, Uproar, Encore, Charge,
+    Yawn, Wish, `ENDTURN_ABILITIES`/`ITEMS1`/`ITEMS2`) are documented,
+    permanently-inert no-ops today, matching this step's own brief's
+    explicit Wish/Uproar/Leech-Seed deferral; Lock-On is skipped citing the
+    doc's own dead-for-Factory finding (B15). `PLAYANIMATION` was already
+    registered (narrowed to `B_ANIM_STATS_CHANGE`) — Ingrain/Leech
+    Seed/Wrap's own animation arm would barrier there for real if ever
+    reached, so it needed no further work this session.
+  - **Known simplification, documented, not silently assumed:** per-battler
+    tick order defaults to ascending battler id — `gBattleMons[].speed` has
+    no home anywhere in `BattleScriptRulesContext` (a separate subsystem
+    from `turnOrder.ts`'s own speed model). Not exercised by any proof
+    here or by the doc's own live scenarios, both of which give exactly
+    one battler a live end-turn condition at a time.
+  - **Integration proofs, all passing:** (a) burn ticks the doc's exact
+    live 105→92→79 sequence across two consecutive `runBattleEndTurnOrchestration`
+    calls, battler AND party slot both synced, zero RNG draws either turn;
+    (b) a Toxic end-turn KO (SHEDINJA-shaped, 1 HP) runs the SAME faint
+    machinery as a mid-turn KO — inline `checkteamslost` decides
+    `battleOutcome`, `HandleFaintedMonActions` still runs unconditionally,
+    `cleareffectsonfaint` clears status1, zero further RNG; (c) regular
+    poison (flat `floor(maxHP/8)`, no counter) and Toxic's growing
+    multiplier (1x then 2x across two turns) both pinned as their own
+    direct-construction tests, distinguishing the three `DoTurnDmg`-family
+    statuses from each other.
+- **Next (named, not landed — doc §4 steps 4-8):** `DoFieldEndTurnEffects`
+  itself only ever no-ops today (Reflect/Light Screen/Safeguard/weather
+  have no setter anywhere in this engine yet); Ingrain/Leech Seed/Wrap's
+  own heal/drain bodies (need `PLAYANIMATION`'s animType broadened past
+  `B_ANIM_STATS_CHANGE`, plus `COPYWORD`/`JUMPIFABILITY`/`MANIPULATEDAMAGE`
+  for Leech Seed specifically); the zero-script counter cases
+  (Disable/Encore/Lock-On/Charge/Taunt/Yawn bodies); Thrash's
+  `CHOSENSTATUS2ANIMATION`; and **item (c)'s full "decision → both actions
+  → end-turn → next decision boundary" dual-sided reducer** was not
+  attempted this session (a genuinely new capability — every existing
+  decision reducer is single-command-per-turn) — proofs (a)/(b) instead
+  used the doc's own established direct-construction discipline (§3),
+  which is sufficient to prove the orchestration module itself but does
+  not yet wire it behind a `BattleDecisionReducer`. Whoever picks this up
+  next should build that reducer directly on
+  `runBattleEndTurnOrchestration` rather than re-deriving the field/battler
+  loop.
+- **Notes:** no oracle traces added this session (reused the doc's own
+  banked `mechanic-endturn-burn-off.json`/`mechanic-endturn-toxic-ko-off.json`
+  evidence). No presentation/`battleScene`/ROADMAP edits. Two pre-existing
+  `toStrictEqual`-on-full-battler-object tests
+  (`battleScriptAttackCancelerFlinch`/`Disabled.test.ts`) needed their own
+  local battler fixture builders updated with the new `maxHP` default —
+  the same one-time ripple every new battler field causes; fixed inline.
+
+---
 ## 448 — ChangeStatBuffs core + BOTH stat-change routes registered — census at 105/355 moves (77/276 Factory-L50) executable
 
 *(Entry written by the supervisor: the worker landed all five rungs green
@@ -135,64 +231,3 @@ both verify scripts/census independently re-verified before this entry.)*
   tripped the new opcode file's own tests during development (fixed by
   using `BATTLE_TYPE_FACTORY` alone in test fixtures); worth flagging for
   any future fixture that checks a single frontier-facility bit.
-
----
-## 446 — Executable-frontier census's #1 lever landed: entry-chokepoint trio registered (`JUMPIFHALFWORD`/`JUMPIFSTATUS3CONDITION`/`ORWORD`) — the shared hit chain is now executable from its literal `BattleScript_EffectHit` entry
-
-- **State:** tree green at **200 files / 2366 tests** (+3 files/+24 tests
-  over entry 445's 197/2342), build green. Ratchet green: new barrier pin
-  `battleScriptJumpifhalfwordOpcode.ts` → 1 (the other 14 concrete call
-  sites' unmodeled memHword pointers — `gChosenMove`/`gBattleWeather`/
-  `gTrainerBattleOpponent_A` — all barrier on this one named line);
-  `jumpifstatus3condition`/`orword` need **zero** runtime barriers (see
-  below), so they carry no pin at all. No new production imports of
-  canonical recordings.
-- **Did (commits `efd1cea`, `1c76424`, `2398407`), per the census's own
-  ranked-table #1 row:**
-  - **`B_SCR_OP_JUMPIFHALFWORD`** (`Cmd_jumpifhalfword`): sibling of
-    `jumpifbyte`/`jumpifword`. Models `gCurrentMove` (the Surf guard's
-    load-bearing pointer) against the full source-derived `MOVE_*` catalog;
-    every other concrete call site's pointer is unmodeled → the one pinned
-    barrier.
-  - **`B_SCR_OP_JUMPIFSTATUS3CONDITION`** and **`B_SCR_OP_ORWORD`**: both
-    turned out fully **(a)-complete** — all 7 concrete `jumpifstatus3condition`
-    call sites use `BS_TARGET` + one of 5 named `STATUS3_*` bits, and all 43
-    concrete `orword` call sites target `gHitMarker` with one of 11 named
-    `HITMARKER_*` bits (`|`-joined text parsed at registration). Both use
-    `Cmd_setbyte`'s own eager-validation-at-registration pattern (every
-    concrete instance checked once, up front) instead of a runtime barrier.
-  - **Surf-underwater sub-branch walked by hand + reachability test:** needs
-    only `orword` plus the already-registered `setbyte` (`sDMG_MULTIPLIER`)
-    — no new barrier.
-  - **Integration proof:** `battleScriptHitChainOpcode.test.ts`'s RUNG 4 "hit
-    turn" test now starts at the literal `BattleScript_EffectHit` (not the
-    `BattleScript_HitFromAtkCanceler` shortcut every prior proof used), same
-    banked 4-roll ledger; added a Surf-underwater sibling test.
-    `factoryBattleScriptTerminalDecision.ts`'s `ENTRY_LABEL` switched the same
-    way — its step loop is opcode-driven (256-step budget, no hardcoded PCs)
-    so this was a clean, no-ripple change, verified by its own test + suite.
-  - **Census regenerated:** **34/214 effects, 74/355 moves** executable (was
-    1/214, 2/355). The predicted "~57/214" was optimistic — of the 56
-    trio-only effects, ~22 also carry the tool's own tracked SetMoveEffect
-    subsystem note (`Cmd_seteffectwithchance`'s family-B status2/misc
-    dispatch barrier for their own `MOVE_EFFECT_*` byte, e.g.
-    FLINCH/PAY_DAY/TRI_ATTACK) and correctly stay blocked-on-subsystem, out
-    of scope. Updated the two ground-truth assertions the doc's own text
-    said would flip (quintet: blocked-on-opcodes-with-JUMPIFHALFWORD →
-    executable); all 8 checks pass. Also fixed a real bug this surfaced: the
-    doc's "Key finding" paragraph was hardcoded prose about JUMPIFHALFWORD
-    that would've gone self-contradictory (calling a now-registered opcode
-    "still unregistered") — made it fully dynamic so it always names
-    today's actual top blocker.
-- **Next:** per the regenerated ranked table, `EFFECT_EARTHQUAKE`'s own trio
-  (`BICWORD`, `JUMPIFNEXTTARGETVALID`, `SELECTFIRSTVALIDTARGET`) is now the
-  single highest-leverage next registration (147 weighted, one effect).
-  After that, `STATBUFFCHANGE`/`PLAYANIMATION`/`SETGRAPHICALSTATCHANGEVALUES`
-  unlocks 9 effects/14 moves (the stat-up family) — but stat changes are
-  explicitly out of this lane's scope; hand off to whoever owns that family.
-  Forced-switch §4 slice 3 (`SWITCHHANDLEORDER`'s permutation layer, PROGRESS
-  445's own finding) is still unstarted and still not "trivial."
-- **Notes:** no oracle traces added this session; no presentation/
-  `battleScene`/ROADMAP edits. Stat-down family, confusion, and end-turn
-  orchestration remain explicitly out of scope.
-

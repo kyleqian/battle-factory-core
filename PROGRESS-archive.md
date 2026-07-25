@@ -1,4 +1,64 @@
 ---
+## 446 — Executable-frontier census's #1 lever landed: entry-chokepoint trio registered (`JUMPIFHALFWORD`/`JUMPIFSTATUS3CONDITION`/`ORWORD`) — the shared hit chain is now executable from its literal `BattleScript_EffectHit` entry
+
+- **State:** tree green at **200 files / 2366 tests** (+3 files/+24 tests
+  over entry 445's 197/2342), build green. Ratchet green: new barrier pin
+  `battleScriptJumpifhalfwordOpcode.ts` → 1 (the other 14 concrete call
+  sites' unmodeled memHword pointers — `gChosenMove`/`gBattleWeather`/
+  `gTrainerBattleOpponent_A` — all barrier on this one named line);
+  `jumpifstatus3condition`/`orword` need **zero** runtime barriers (see
+  below), so they carry no pin at all. No new production imports of
+  canonical recordings.
+- **Did (commits `efd1cea`, `1c76424`, `2398407`), per the census's own
+  ranked-table #1 row:**
+  - **`B_SCR_OP_JUMPIFHALFWORD`** (`Cmd_jumpifhalfword`): sibling of
+    `jumpifbyte`/`jumpifword`. Models `gCurrentMove` (the Surf guard's
+    load-bearing pointer) against the full source-derived `MOVE_*` catalog;
+    every other concrete call site's pointer is unmodeled → the one pinned
+    barrier.
+  - **`B_SCR_OP_JUMPIFSTATUS3CONDITION`** and **`B_SCR_OP_ORWORD`**: both
+    turned out fully **(a)-complete** — all 7 concrete `jumpifstatus3condition`
+    call sites use `BS_TARGET` + one of 5 named `STATUS3_*` bits, and all 43
+    concrete `orword` call sites target `gHitMarker` with one of 11 named
+    `HITMARKER_*` bits (`|`-joined text parsed at registration). Both use
+    `Cmd_setbyte`'s own eager-validation-at-registration pattern (every
+    concrete instance checked once, up front) instead of a runtime barrier.
+  - **Surf-underwater sub-branch walked by hand + reachability test:** needs
+    only `orword` plus the already-registered `setbyte` (`sDMG_MULTIPLIER`)
+    — no new barrier.
+  - **Integration proof:** `battleScriptHitChainOpcode.test.ts`'s RUNG 4 "hit
+    turn" test now starts at the literal `BattleScript_EffectHit` (not the
+    `BattleScript_HitFromAtkCanceler` shortcut every prior proof used), same
+    banked 4-roll ledger; added a Surf-underwater sibling test.
+    `factoryBattleScriptTerminalDecision.ts`'s `ENTRY_LABEL` switched the same
+    way — its step loop is opcode-driven (256-step budget, no hardcoded PCs)
+    so this was a clean, no-ripple change, verified by its own test + suite.
+  - **Census regenerated:** **34/214 effects, 74/355 moves** executable (was
+    1/214, 2/355). The predicted "~57/214" was optimistic — of the 56
+    trio-only effects, ~22 also carry the tool's own tracked SetMoveEffect
+    subsystem note (`Cmd_seteffectwithchance`'s family-B status2/misc
+    dispatch barrier for their own `MOVE_EFFECT_*` byte, e.g.
+    FLINCH/PAY_DAY/TRI_ATTACK) and correctly stay blocked-on-subsystem, out
+    of scope. Updated the two ground-truth assertions the doc's own text
+    said would flip (quintet: blocked-on-opcodes-with-JUMPIFHALFWORD →
+    executable); all 8 checks pass. Also fixed a real bug this surfaced: the
+    doc's "Key finding" paragraph was hardcoded prose about JUMPIFHALFWORD
+    that would've gone self-contradictory (calling a now-registered opcode
+    "still unregistered") — made it fully dynamic so it always names
+    today's actual top blocker.
+- **Next:** per the regenerated ranked table, `EFFECT_EARTHQUAKE`'s own trio
+  (`BICWORD`, `JUMPIFNEXTTARGETVALID`, `SELECTFIRSTVALIDTARGET`) is now the
+  single highest-leverage next registration (147 weighted, one effect).
+  After that, `STATBUFFCHANGE`/`PLAYANIMATION`/`SETGRAPHICALSTATCHANGEVALUES`
+  unlocks 9 effects/14 moves (the stat-up family) — but stat changes are
+  explicitly out of this lane's scope; hand off to whoever owns that family.
+  Forced-switch §4 slice 3 (`SWITCHHANDLEORDER`'s permutation layer, PROGRESS
+  445's own finding) is still unstarted and still not "trivial."
+- **Notes:** no oracle traces added this session; no presentation/
+  `battleScene`/ROADMAP edits. Stat-down family, confusion, and end-turn
+  orchestration remain explicitly out of scope.
+
+---
 ## 445 — Forced-switch §4 slices 1-2 landed: `jumpifbattletype`/`openpartyscreen` registered — the non-terminal fork now runs through the AI's real pick
 
 - **State:** tree green at **197 files / 2342 tests** (+3 files/+24 tests

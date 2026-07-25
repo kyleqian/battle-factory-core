@@ -173,6 +173,14 @@ type BattleScriptMoveEndBattlerMetadata = Readonly<{
   friendship: number;
   /** Source gBattlerPartyIndexes[battler] -- the party slot this active battler mirrors. */
   partyIndex: number;
+  /**
+   * Source gBattleMons[battler].maxHP -- end-turn status ticks' own damage
+   * base (`maxHP/8`/`maxHP/16`, `docs/end-turn-ground-truth.md` §2a/§2b).
+   * Absent legacy inputs default to `hp` (a full-HP mon) at construction --
+   * safe because no code path before this doc's own end-turn orchestration
+   * ever reads this field.
+   */
+  maxHP: number;
 }>;
 
 /**
@@ -206,6 +214,7 @@ export type BattleScriptRulesBattler = BattleScriptRulesBattlerBase & Readonly<{
   level?: number;
   friendship?: number;
   partyIndex?: number;
+  maxHP?: number;
 }>;
 
 export type BattleScriptRulesBattlerState =
@@ -1550,6 +1559,7 @@ export function createBattleScriptRulesContext(
       BATTLE_SCRIPT_PARTY_SIZE - 1,
       `battlers[${index}].partyIndex`,
     ),
+    maxHP: requireUnsigned(battler.maxHP ?? battler.hp, 0xffff, `battlers[${index}].maxHP`),
     ...(battler.confusionDamage === undefined ? {} : {
       confusionDamage: Object.freeze({
         level: requireUnsigned(
