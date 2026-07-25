@@ -4,6 +4,67 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 442 — S10 §3 presentation-seam checkpoint: **PASSED** — `turn5-faint.json` re-driven from real kernel events, still 110/110
+
+- **State:** tree green at **194 files / 2276 tests** (+3 files/+13 tests
+  over entry 441's 191/2263), build green, ratchet green (6/6, barrier
+  counts and canonical-recording allowlist unchanged — no new production
+  imports). Oracle re-verified live: `turn5-faint.json` **110/110** (exact
+  match to its recorded count), plus 22 other turn3/4/5/6 traces re-run as
+  regression checks (`turn3-endeavor/menu/rockslide`, `turn4-doubleteam/
+  menu/rockslide`, all 11 `turn5-*`, all 6 `turn6-*`) — every one still
+  matches its own recorded count, zero regressions.
+- **Did (the checkpoint's ordered 4-step plan, `docs/presentation-seam-
+  scout.md` §7.3):** (1) **String resolver (gap 5)**,
+  `src/engine/battleStringResolver.ts` — `resolveBattleStringLines` walks
+  the already-extracted `battle-message-templates.json` (365-entry
+  `gBattleStringsTable`, extracted in an earlier S7 session) and splices
+  `{TOKEN}` placeholders via caller-supplied resolvers;
+  `resolveBattleNameWithPrefix` implements `HANDLE_NICKNAME_STRING_CASE`
+  source-faithfully (`battle_message.c:2286-2306` — "Foe "/"Wild "/no
+  prefix by side+battle-type). Pinned against the real
+  `STRINGID_TARGETFAINTED` template (corrected in last week's scout pass to
+  `{B_DEF_NAME_WITH_PREFIX}\nfainted!\p`) producing exactly "Foe GROVYLE"/
+  "fainted!". (2) **PC-to-window bridge (gap 7)**,
+  `src/engine/presentationEventWindowBridge.ts` —
+  `resolveFaintPresentationWindowContent` answers "am I in the fainted
+  window" from a real `hp-change{to:0}` plus a `message` event whose
+  `provenance.sourceLabel === "BattleScript_FaintTarget"`, never a turn
+  number; minimal, scoped to this one window's own content decision (the
+  giant `turn<N>Resolved` dispatch cascade in `drawFightSubmenuWindow` is
+  untouched, per the brief). (3) **The leaf**,
+  `src/engine/turn5FaintPresentationStaging.ts` — stages Onix (real
+  level-50 stats) vs. Grovyle (real level-50 stats, HP 1 -> 0, both from
+  `tests/damageCalc.test.ts`'s own RAM-pinned blocks) through the
+  registered hit chain from `BattleScript_HitFromAtkCanceler` to the
+  script's own `end`, composes the bridge + resolver on the captured
+  events, and exports `resolveTurn5FaintWindowLines()`. `battleScene.ts`'s
+  `TURN5_FAINTED_LINE1`/`LINE2` hardcoded literals are **deleted**, replaced
+  by `const [TURN5_FAINTED_LINE1, TURN5_FAINTED_LINE2] =
+  resolveTurn5FaintWindowLines();` — one real kernel run, computed once at
+  module load, presentation only reads the result. One deliberate,
+  documented substitution: the staged move is `MOVE_STRENGTH`, not the
+  real turn's `MOVE_ROCK_SLIDE` — this leaf's own rendered content never
+  depends on which move KO'd Grovyle, and `ROCK_SLIDE` is
+  `MOVE_TARGET_BOTH` (a spread move), which trips `Cmd_ppreduce`'s
+  existing, unrelated `unsupported-branch` for cross-side Pressure
+  counting (a real, separate, already-pinned engine gap — not something to
+  fake around). (4) **Re-verified**, live oracle: `turn5-faint.json`
+  110/110, 22 regression traces unchanged (see State).
+- **Next:** the presentation-seam checkpoint is closed; per ROADMAP S10 §3
+  the kernel may resume growing past step (iv) (further opcodes/breadth)
+  now that one window is proven to genuinely consume kernel events. Gap 4
+  (tick/frame timestamp on events) remains open and un-scoped (confirmed
+  not on this window's own critical path, §7.3) — the next window that
+  needs HP-interpolation timing (e.g. `turn1-rockslide.json`) will need it.
+- **Notes:** no new turn-keyed branches; no new production imports of
+  canonical recordings (the three RAM-dump HP imports named in ISSUES #41
+  are untouched — the fainted branch has zero RAM-dump reads, so no
+  deletion fell out naturally here); `drawFightSubmenuWindow`'s own
+  `turn<N>Resolved` boolean cascade is unmodified by design (redesigning it
+  was explicitly out of this checkpoint's scope).
+
+---
 ## 441 — S10 step (iv) part 3/3 (FINAL): pure `BattleResolution` adapter + no-fixture win/loss integration proof — **ROADMAP S10 step (iv) is now COMPLETE**
 
 - **State:** tree green at **191 files / 2263 tests** (+3 files / +27 tests
@@ -143,67 +204,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   orchestration or reducer, so both are byte-for-byte unchanged (only two
   unrelated `selectorRoles` exact-equality assertions elsewhere needed the
   new `fainted: null` field added).
-
----
-## 439 — S10 step (iv) part 1/3: party-HP slice + jumpifbyte/getexp/checkteamslost registered — real `battleOutcome` 0 -> 1 now computed from party state
-
-- **State:** tree green at **185 files / 2217 tests** (+3 files / +37 tests
-  from entry 438), build green. `createBattleScriptStatusRulesHandlers` now
-  composes **51** opcodes (was 48): `B_SCR_OP_JUMPIFBYTE` (41),
-  `B_SCR_OP_GETEXP` (35), `B_SCR_OP_CHECKTEAMSLOST` (36), each in its own new
-  module (`battleScriptJumpifbyteOpcode.ts`/`battleScriptGetexpOpcode.ts`/
-  `battleScriptCheckteamslostOpcode.ts`) with a dedicated Tier-1 test file.
-  ISSUES #42 closed (deleted, not just marked). ISSUES #43 unchanged and
-  still open (`BS_FAINTED`, needed by `getexp`'s barrier and step (iv)'s
-  still-unbuilt orchestration loop).
-- **Did (in dependency order, per the supervisor's Option A decision in
-  entry 438 — not relitigated):** (1) `BattleScriptRulesContext` extended in
-  place with a per-side, 6-slot `{species, isEgg, hp}` party array plus a
-  `partyIndex` field on each active battler
-  (`docs/faint-outcome-ground-truth.md` §3.2) — mechanical blast radius only,
-  new fields default to empty/0 so all ~80 existing construction sites are
-  untouched. (2) `Cmd_datahpupdate`'s real HP write
-  (`battleScriptHitChainOpcode.ts`) now also writes the matching party slot
-  at the active battler's own side/partyIndex, pinned by two new Tier-1
-  tests. (3) `B_SCR_OP_JUMPIFBYTE` — source-complete byte-compare +
-  conditional jump, all six `CMP_*` comparators (individually proven via a
-  synthetic-operand harness against a real instruction's shape, since no
-  compiled call site pairs `CMP_COMMON_BITS`/`CMP_NO_COMMON_BITS` with a
-  resolvable value); the memByte/value resolver covers every pointer this
-  rung's WIN path and this engine's other modeled fields touch, with one
-  unified barrier for the rest of the program's 56 call sites (1 barrier).
-  (4) `B_SCR_OP_GETEXP` registered for exactly the Frontier short-circuit
-  `BattleScript_GiveExp` always takes for a Factory battle (state 0 and
-  state 6 source-complete, including the real two-VM-step cadence real
-  hardware uses since `Cmd_getexp` has no do-while); the general EXP/
-  level-up/evolution machinery (states 1-5) and the `BS_FAINTED` selector
-  are each one named barrier, both proven reachable and both proven crossed
-  without halting on the real Factory path (2 barriers). (5)
-  `B_SCR_OP_CHECKTEAMSLOST` sums the new party slice exactly per source
-  (species-nonzero, non-egg gated) and writes `battleOutcome`; three
-  barriers on their own real, Factory-unreached conditions
-  (`BATTLE_TYPE_INGAME_PARTNER`+Steven, `BATTLE_TYPE_ARENA`'s per-mon
-  exclusion, link-battle empty-spot counting), each reachable + pass-through
-  tested (3 barriers). A staged integration test
-  (`battleScriptCheckteamslostOpcode.test.ts`) stages `BattleScript_GiveExp`
-  then `BattleScript_HandleFaintedMon` (carrying the same rulesContext
-  forward, matching prior rungs' staged-entry convention) and asserts
-  `battleOutcome` goes 0 -> 1 purely from `checkteamslost`'s own sum over an
-  all-fainted opponent party — not injected. Ratchet updated: three new
-  `PINNED_BARRIER_COUNTS` entries (1/2/3, named above) and the composed-
-  handler-count test bumped 48 -> 51. The existing KO scenario integration
-  test is byte-for-byte unchanged (rng.calls 4, damage 204, HP 0).
-- **Next:** step (iv) parts 2-3 (out of this rung's scope, still needed
-  before `roundController.ts` can consume a real outcome): the C-side
-  `HandleFaintedMonActions` orchestration-loop equivalent (drives
-  `BattleScript_GiveExp` then `BattleScript_HandleFaintedMon` per fainted
-  battler once a hit chain's own `moveend` reaches its terminal state —
-  `docs/faint-outcome-ground-truth.md` §3.1); the `BS_FAINTED` selector role
-  the orchestration loop needs (ISSUES #43's remainder); then the pure
-  `deriveBattleResolutionFromTerminalBoundary`-style adapter from
-  `docs/round-controller-outcome-seam.md` §4 onto `submitBattleDecision`.
-  None of this touches `roundController.ts`'s public API.
-- **Notes:** no presentation/render/`battleScene` edits; no oracle traces
-  (Tier-1 only, per the banked ground truth); no new production imports of
-  canonical recordings.
 

@@ -575,6 +575,7 @@ import {
 } from "./battle2Turn1.ts";
 import { drawMode0Objects, drawMode0Ppu, mgbaDarkenColor, type Mode0Oam, type Mode0State } from "./gbaPpu.ts";
 import { compositeSemiTransparentObjPixel } from "./sprites.ts";
+import { resolveTurn5FaintWindowLines } from "./turn5FaintPresentationStaging.ts";
 import {
   sceneOnDoubleTeamView,
   sceneOnBindView,
@@ -7421,9 +7422,16 @@ function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number 
   }
 }
 
-/** `STRINGID_FAINTED` resolved for Grovyle's own faint: "Foe GROVYLE\nfainted!" (pixel-confirmed exact line wrap, `tools/compare/scratch` dense sweep this session). */
-const TURN5_FAINTED_LINE1 = "Foe GROVYLE";
-const TURN5_FAINTED_LINE2 = "fainted!";
+/**
+ * S10 presentation-seam checkpoint (ROADMAP S10 §3): resolved from a REAL
+ * staged kernel event stream (`turn5FaintPresentationStaging.ts`), not a
+ * hardcoded literal -- `STRINGID_TARGETFAINTED`'s own
+ * `{B_DEF_NAME_WITH_PREFIX}` splice for Grovyle (opponent, trainer battle)
+ * gives "Foe GROVYLE"; the template's own `\n` gives the second line
+ * "fainted!" (pixel-confirmed exact line wrap, matching this window's own
+ * committed 110/110 trace, `docs/battle-turn-notes.md` §24).
+ */
+const [TURN5_FAINTED_LINE1, TURN5_FAINTED_LINE2] = resolveTurn5FaintWindowLines();
 const TURN5_FAINTED_TEXT_TOTAL = TURN5_FAINTED_LINE1.length + TURN5_FAINTED_LINE2.length;
 
 /** The wait-cursor's own X position for THIS text - `CURSOR_DEST_X`'s own doc explains why this isn't a fixed constant: it sits right after line 2's own last printed glyph, pixel-confirmed this session (oracle diff isolated to x=61-67, matching `LINE2_ORIGIN.x + measureText(...TURN5_FAINTED_LINE2)` = 60 exactly, not the intro's own 123). */

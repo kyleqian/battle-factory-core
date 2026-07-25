@@ -1,4 +1,68 @@
 ---
+## 439 — S10 step (iv) part 1/3: party-HP slice + jumpifbyte/getexp/checkteamslost registered — real `battleOutcome` 0 -> 1 now computed from party state
+
+- **State:** tree green at **185 files / 2217 tests** (+3 files / +37 tests
+  from entry 438), build green. `createBattleScriptStatusRulesHandlers` now
+  composes **51** opcodes (was 48): `B_SCR_OP_JUMPIFBYTE` (41),
+  `B_SCR_OP_GETEXP` (35), `B_SCR_OP_CHECKTEAMSLOST` (36), each in its own new
+  module (`battleScriptJumpifbyteOpcode.ts`/`battleScriptGetexpOpcode.ts`/
+  `battleScriptCheckteamslostOpcode.ts`) with a dedicated Tier-1 test file.
+  ISSUES #42 closed (deleted, not just marked). ISSUES #43 unchanged and
+  still open (`BS_FAINTED`, needed by `getexp`'s barrier and step (iv)'s
+  still-unbuilt orchestration loop).
+- **Did (in dependency order, per the supervisor's Option A decision in
+  entry 438 — not relitigated):** (1) `BattleScriptRulesContext` extended in
+  place with a per-side, 6-slot `{species, isEgg, hp}` party array plus a
+  `partyIndex` field on each active battler
+  (`docs/faint-outcome-ground-truth.md` §3.2) — mechanical blast radius only,
+  new fields default to empty/0 so all ~80 existing construction sites are
+  untouched. (2) `Cmd_datahpupdate`'s real HP write
+  (`battleScriptHitChainOpcode.ts`) now also writes the matching party slot
+  at the active battler's own side/partyIndex, pinned by two new Tier-1
+  tests. (3) `B_SCR_OP_JUMPIFBYTE` — source-complete byte-compare +
+  conditional jump, all six `CMP_*` comparators (individually proven via a
+  synthetic-operand harness against a real instruction's shape, since no
+  compiled call site pairs `CMP_COMMON_BITS`/`CMP_NO_COMMON_BITS` with a
+  resolvable value); the memByte/value resolver covers every pointer this
+  rung's WIN path and this engine's other modeled fields touch, with one
+  unified barrier for the rest of the program's 56 call sites (1 barrier).
+  (4) `B_SCR_OP_GETEXP` registered for exactly the Frontier short-circuit
+  `BattleScript_GiveExp` always takes for a Factory battle (state 0 and
+  state 6 source-complete, including the real two-VM-step cadence real
+  hardware uses since `Cmd_getexp` has no do-while); the general EXP/
+  level-up/evolution machinery (states 1-5) and the `BS_FAINTED` selector
+  are each one named barrier, both proven reachable and both proven crossed
+  without halting on the real Factory path (2 barriers). (5)
+  `B_SCR_OP_CHECKTEAMSLOST` sums the new party slice exactly per source
+  (species-nonzero, non-egg gated) and writes `battleOutcome`; three
+  barriers on their own real, Factory-unreached conditions
+  (`BATTLE_TYPE_INGAME_PARTNER`+Steven, `BATTLE_TYPE_ARENA`'s per-mon
+  exclusion, link-battle empty-spot counting), each reachable + pass-through
+  tested (3 barriers). A staged integration test
+  (`battleScriptCheckteamslostOpcode.test.ts`) stages `BattleScript_GiveExp`
+  then `BattleScript_HandleFaintedMon` (carrying the same rulesContext
+  forward, matching prior rungs' staged-entry convention) and asserts
+  `battleOutcome` goes 0 -> 1 purely from `checkteamslost`'s own sum over an
+  all-fainted opponent party — not injected. Ratchet updated: three new
+  `PINNED_BARRIER_COUNTS` entries (1/2/3, named above) and the composed-
+  handler-count test bumped 48 -> 51. The existing KO scenario integration
+  test is byte-for-byte unchanged (rng.calls 4, damage 204, HP 0).
+- **Next:** step (iv) parts 2-3 (out of this rung's scope, still needed
+  before `roundController.ts` can consume a real outcome): the C-side
+  `HandleFaintedMonActions` orchestration-loop equivalent (drives
+  `BattleScript_GiveExp` then `BattleScript_HandleFaintedMon` per fainted
+  battler once a hit chain's own `moveend` reaches its terminal state —
+  `docs/faint-outcome-ground-truth.md` §3.1); the `BS_FAINTED` selector role
+  the orchestration loop needs (ISSUES #43's remainder); then the pure
+  `deriveBattleResolutionFromTerminalBoundary`-style adapter from
+  `docs/round-controller-outcome-seam.md` §4 onto `submitBattleDecision`.
+  None of this touches `roundController.ts`'s public API.
+- **Notes:** no presentation/render/`battleScene` edits; no oracle traces
+  (Tier-1 only, per the banked ground truth); no new production imports of
+  canonical recordings.
+
+
+---
 ## 438 — [SUPERVISOR WIND-DOWN 2026-07-24 ~20:40] session summary
 
 - **State:** tree committed and green at **182 files / 2180 tests**, build
