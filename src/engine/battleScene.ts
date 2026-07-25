@@ -510,6 +510,13 @@ import {
   DRAGON_BREATH_FRAMEBUFFER_PALETTE_AGE_LAG,
 } from "./dragonBreath.ts";
 import { flamethrowerDisplayedBattlerOffsetsAtAge } from "./flamethrower.ts";
+import {
+  dragonRageSchedule,
+  DRAGON_RAGE_FRAMEBUFFER_SHAKE_AGE_LAG,
+  DRAGON_RAGE_FRAMEBUFFER_SLIDE_AGE_LAG,
+  DRAGON_RAGE_FRAMEBUFFER_FIRE_SPIT_AGE_LAG,
+  DRAGON_RAGE_FRAMEBUFFER_FIRE_PLUME_AGE_LAG,
+} from "./dragonRage.ts";
 
 import battleAnimRocksAsset from "../assets/gen/battle-anim-rocks.json" with { type: "json" };
 import battleAnimMudSandAsset from "../assets/gen/battle-anim-mud-sand.json" with { type: "json" };
@@ -16980,8 +16987,36 @@ export function renderSceneOnMovePresentation(
   }
 
   if (state.config.move === "DRAGON_RAGE") {
-    // Same one-tick RAM-to-framebuffer lag every prior Scene-ON move uses.
-    const view = sceneOnDragonRageView({ ...state, age: state.age - 1 });
+    // Per-mechanism framebuffer capture lag (ANIMATION_PROGRESS.md's
+    // 2026-07-25 rung 5 remainder): `AnimTask_ShakeMon` (both battlers) and
+    // the fire-spit sprite both use this codebase's normal 1-tick default;
+    // the two `SlideMonTo{Offset,OriginalPos}` dummies use one tick less
+    // (RAM/pixel-confirmed, `dragonRage.ts`'s own doc comments). The
+    // attacker's own combined offset switches lag mid-flight at the exact
+    // tick it switches mechanism (shake -> slide-to-offset -> slide-to-
+    // original-pos), so it needs its own phase-aware view rather than the
+    // single shared one every other Scene-ON move uses.
+    const schedule = dragonRageSchedule(0);
+    const attackerLag =
+      state.age < schedule.slideToOffsetTick
+        ? DRAGON_RAGE_FRAMEBUFFER_SHAKE_AGE_LAG
+        : DRAGON_RAGE_FRAMEBUFFER_SLIDE_AGE_LAG;
+    const view = sceneOnDragonRageView({
+      ...state,
+      age: state.age - attackerLag,
+    });
+    const targetShakeView = sceneOnDragonRageView({
+      ...state,
+      age: state.age - DRAGON_RAGE_FRAMEBUFFER_SHAKE_AGE_LAG,
+    });
+    const fireSpitView = sceneOnDragonRageView({
+      ...state,
+      age: state.age - DRAGON_RAGE_FRAMEBUFFER_FIRE_SPIT_AGE_LAG,
+    });
+    const firePlumeView = sceneOnDragonRageView({
+      ...state,
+      age: state.age - DRAGON_RAGE_FRAMEBUFFER_FIRE_PLUME_AGE_LAG,
+    });
     const playerToOpponent =
       view.attacker.species === "CHARMELEON"
       && view.attacker.geometry.side === "player"
@@ -17000,9 +17035,9 @@ export function renderSceneOnMovePresentation(
     const attackerSprite = playerToOpponent ? charmeleonBackSprite : charmeleonFrontSprite;
     const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
-    const behindPlumes = view.firePlumes.filter((p) => p.subpriorityOffset >= 64);
-    const frontPlumes = view.firePlumes.filter((p) => p.subpriorityOffset < 64);
-    const drawPlume = (plume: (typeof view.firePlumes)[number]) => {
+    const behindPlumes = firePlumeView.firePlumes.filter((p) => p.subpriorityOffset >= 64);
+    const frontPlumes = firePlumeView.firePlumes.filter((p) => p.subpriorityOffset < 64);
+    const drawPlume = (plume: (typeof firePlumeView.firePlumes)[number]) => {
       drawSpriteSheet(
         fb,
         subTileset(battleAnimFirePlume.tileset, plume.sheetFrame * 4, 4),
@@ -17016,8 +17051,8 @@ export function renderSceneOnMovePresentation(
       fb,
       targetSprite.tileset,
       targetSprite.palette,
-      view.target.geometry.spriteCorner.x + view.targetOffset.x2,
-      view.target.geometry.spriteCorner.y + view.targetOffset.y2,
+      view.target.geometry.spriteCorner.x + targetShakeView.targetOffset.x2,
+      view.target.geometry.spriteCorner.y + targetShakeView.targetOffset.y2,
     );
     for (const plume of frontPlumes) drawPlume(plume);
     const drawAttacker = () => {
@@ -17030,17 +17065,17 @@ export function renderSceneOnMovePresentation(
       );
     };
     const drawFireSpit = () => {
-      if (!view.fireSpit) return;
+      if (!fireSpitView.fireSpit) return;
       drawSpriteSheetAffineRotate(
         fb,
-        subTileset(battleAnimSmallEmber.tileset, view.fireSpit.sheetFrame * 4, 4),
+        subTileset(battleAnimSmallEmber.tileset, fireSpitView.fireSpit.sheetFrame * 4, 4),
         battleAnimSmallEmber.palette,
-        view.fireSpit.x + view.fireSpit.x2,
-        view.fireSpit.y + view.fireSpit.y2,
-        view.fireSpit.matrix.pa,
-        view.fireSpit.matrix.pb,
-        view.fireSpit.matrix.pc,
-        view.fireSpit.matrix.pd,
+        fireSpitView.fireSpit.x + fireSpitView.fireSpit.x2,
+        fireSpitView.fireSpit.y + fireSpitView.fireSpit.y2,
+        fireSpitView.fireSpit.matrix.pa,
+        fireSpitView.fireSpit.matrix.pb,
+        fireSpitView.fireSpit.matrix.pc,
+        fireSpitView.fireSpit.matrix.pd,
       );
     };
     // Same target-relative-subpriority-vs-attacker rule EMBER/FLAMETHROWER's

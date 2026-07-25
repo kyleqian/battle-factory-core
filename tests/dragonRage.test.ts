@@ -8,6 +8,10 @@ import {
   DRAGON_RAGE_TARGET_SHAKE,
   DRAGON_RAGE_SLIDE_TO_OFFSET,
   DRAGON_RAGE_SLIDE_TO_ORIGINAL_POS,
+  DRAGON_RAGE_FRAMEBUFFER_SHAKE_AGE_LAG,
+  DRAGON_RAGE_FRAMEBUFFER_SLIDE_AGE_LAG,
+  DRAGON_RAGE_FRAMEBUFFER_FIRE_SPIT_AGE_LAG,
+  DRAGON_RAGE_FRAMEBUFFER_FIRE_PLUME_AGE_LAG,
   dragonRageFireSpitStateAtAge,
   dragonRageFirePlumeStateAtAge,
   dragonRageSchedule,
@@ -229,5 +233,14 @@ describe("fire-plume sprites (AnimDragonRageFirePlume, all 8 spawns, both orient
         expect(ported.sheetFrame, `spawn ${i} age ${age} frame`).toBe(probed!.animCmdIndex);
       }
     }
+  });
+});
+
+describe("rung 5 framebuffer capture-lag constants (dense-sweep-confirmed, see dragonRage.ts's own doc comments)", () => {
+  it("pins the per-mechanism lag values", () => {
+    expect(DRAGON_RAGE_FRAMEBUFFER_SHAKE_AGE_LAG).toBe(2);
+    expect(DRAGON_RAGE_FRAMEBUFFER_SLIDE_AGE_LAG).toBe(1);
+    expect(DRAGON_RAGE_FRAMEBUFFER_FIRE_SPIT_AGE_LAG).toBe(1);
+    expect(DRAGON_RAGE_FRAMEBUFFER_FIRE_PLUME_AGE_LAG).toBe(1);
   });
 });

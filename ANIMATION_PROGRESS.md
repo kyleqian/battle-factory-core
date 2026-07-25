@@ -449,29 +449,109 @@ once the residuals are resolved; (4) only then promote a coverage entry.
 rung; the comparator's own findings are dev-time evidence, not production
 logic). `npm run build` green.
 
+## DRAGON_RAGE rung 5 remainder: per-mechanism lag encoded, idle-bob drift root-caused, lands `partial` (2026-07-25)
+
+**Verdict: real, dense-verified progress (44/150 → 86/150 framebuffer frames,
+player-attacker orientation) and the -1 drift is genuinely root-caused by RAM
+probe, not fitting — but three named residuals remain, so `MOVE_DRAGON_RAGE`
+lands `partial`, not `exact`.**
+
+**Rung 1 — per-mechanism lag, encoded as named constants
+(`dragonRage.ts`'s `DRAGON_RAGE_FRAMEBUFFER_{SHAKE,SLIDE,FIRE_SPIT,
+FIRE_PLUME}_AGE_LAG`, mirroring `dragonBreath.ts`'s own `_OAM_AGE_LAG`/
+`_PALETTE_AGE_LAG` split), pinned by `tests/dragonRage.test.ts`.
+`battleScene.ts`'s `DRAGON_RAGE` draw case now computes four separately-
+lagged views instead of one shared `age - 1`, switching the attacker's own
+lag mid-flight at the exact tick it switches mechanism (shake → slide).**
+A first box-isolated pixel bisection pass (`tools/compare/scratch/
+dragonrage-lag-bisect{,-cached}.ts`, committed) initially suggested
+shake=1/slide=0, but that pass ran through `render()` while the OLD
+`battleScene.ts` code still had its own hardcoded `age - 1` underneath —
+silently double-applying a lag the bisection script wasn't accounting for.
+The values actually committed come from a full dense framebuffer sweep run
+against the real draw path with that hidden shift removed
+(`tools/compare/scratch/dragonrage-dense-cached.ts`, committed, reruns
+fast against one cached oracle capture): **shake=2, slide=1, fire-spit=1**
+(the last also independently confirmed by direct RAM-to-pixel correlation:
+the photographed fire-spit pixels at render age 87 sit at the x2=14 column,
+RAM tick 175's value, one tick behind the already-Tier-1-pinned RAM
+prediction). Fire-plume lag (1) is inferred by mechanism-class analogy
+only — every plume spawn spatially overlaps both the target sprite and a
+sibling plume for its whole 26-tick life, so no clean isolation window
+exists in this fixture to confirm it independently.
+
+**Rung 2 — the -1 drift, root-caused by RAM probe.** Extended nothing (the
+already-committed `dragonrage-full-probe-player-attacker.json` per-tick
+dump already had everything needed). The step brief's own candidate
+(SlideMonToOffset's dummy sprite staying alive one tick past its duration,
+interacting with the target shake task's same-frame creation) is
+**REFUTED**: the dummy is alive ticks 168-172 (RAM-confirmed, matching
+rung 2's own prior finding); the target shake task is created at tick 186 —
+a 13-tick gap, no temporal overlap at all. The REAL mechanism, read
+straight from `AnimTask_ShakeMon`'s own source
+(`battle_anim_mon_movement.c:98-99`): `gSprites[spriteId].x2 =
+gBattleAnimArgs[1]` is an **unconditional absolute set**, not an additive
+offset — it directly overwrites whatever x2 the sprite already had. RAM
+shows the target sprite (ONIX) carries an unrelated x2=+1 residual from
+tick 82 onward (a pre-existing idle-animation artifact, NOT part of
+DRAGON_RAGE's own script — this is the SAME already-open, not-yet-source-
+attributed idle-bob class `battleScene.ts`'s own materialize-window doc
+comment already flags as unresolved for ONIX, see `docs/battle-menu-
+notes.md` §4). When `AnimTask_ShakeMon`'s creation code runs at tick 186
+(`xOffset=0` for the target shake), it clobbers that residual to exactly 0
+— which is what `DRAGON_RAGE_TARGET_SHAKE`'s own model already predicts,
+so the model is right FROM tick 186 onward and wrong (by the pre-existing,
+out-of-scope residual) for the ~97 ticks before it. Per the step brief's
+own instruction, this is named as the strictly-smaller, out-of-scope
+residual rather than chased further (porting a generic species idle-bob
+subsystem is a new mechanism, explicitly out of this step's scope).
+
+**Rung 3 — dense acceptance: partial, not exact.** One dense framebuffer
+run, player-attacker orientation only (time did not allow the opponent
+orientation or a second run of either this step): **86/150** frames match
+(up from 44/150 at the single global `age - 1` default). Three named
+residuals remain, none fully chased down: (1) a single isolated frame
+(render age 1) where the shake lag-2 shift pushes
+`shakeMonOffsetAtRenderTick`'s own creation guard into zeroing a
+legitimate just-post-creation state; (2) the idle-bob residual above,
+active for the ~97 ticks before the target shake's own creation; (3) a
+smaller residual inside the fire-spit sprite's own active window (render
+ages 86-96) that persists at every lag value tried (0, 1, 2 all score
+equal or worse than 1) — likely a `drawSpriteSheetAffineRotate` rounding
+question, not a timing one, not root-caused this step.
+
+**Not attempted:** opponent-attacker orientation dense run; a second run of
+either orientation for determinism; fire-plume's own independent lag
+confirmation; the fire-spit residual's own root cause.
+
+**Coverage:** `MOVE_DRAGON_RAGE` promoted to `partial` in
+`ANIMATION_COVERAGE.json` (19 exact → unchanged, 1 → 2 partial) — a
+meaningful dense window (86/150, more than half) is green with the
+remainder named precisely, matching the `partial` rubric.
+
+**Evidence.** `npm test` 2202/2202 (2201 + 1 new: the four lag constants
+pinned in `tests/dragonRage.test.ts`). `npm run build` green.
+
 ## Current handoff
 
-- **State:** **19 exact / 1 partial / 256 unsupported** (unchanged this
-  step — DRAGON_RAGE is now wired and has a portable comparator, but its
-  framebuffer output doesn't match the oracle yet, so per the MIST_BALL
-  precedent it still doesn't earn a coverage entry).
-- **Did:** DRAGON_RAGE rung 5: `sceneOnPresentation.ts`/`battleScene.ts`
-  wiring (CHARMELEON species entry, `SceneOnDragonRageConfig`,
-  `sceneOnDragonRageView`, the `DRAGON_RAGE` draw case), the CHARMELEON
-  front/back sprite extraction, the portable comparator + RGB probe
-  (`dragonRagePortable.ts`, `dump-dragonrage-rgb.py`), both staged fixtures
-  with real RAM-read HP/gender, and a fixed healthbox species mixup the
-  comparator caught on its first run. The dense run itself found a genuine
-  multi-tier framebuffer capture-lag residual (see the dated section above)
-  — not chased to green this step.
-- **Evidence:** `npm test` 2201/2201, `npm run build` green. Both new
-  fixtures and the probe/comparator pair committed.
-- **Next:** DRAGON_RAGE's own capture-lag bisection (see the dated section
-  above for the precise three-part residual and cost-ordered remainder) —
-  the last step before a coverage entry. Alternatively, the next ranked
-  `dragon-fire-projectile` siblings FIRE_BLAST and FIRE_SPIN remain open,
-  as does MIST_BALL's own remainder (see the archived "Interpreter
-  generalization" section for its full ordered list).
-- **Housekeeping:** `ANIMATION_PROGRESS-archive.md` created this step;
+- **State:** **19 exact / 2 partial / 255 unsupported.**
+- **Did:** DRAGON_RAGE's per-mechanism capture-lag bisection (rung 1) and
+  the -1 drift root-cause (rung 2, RAM-confirmed, prior candidate
+  refuted) — see the dated section above. Dense framebuffer match improved
+  44/150 → 86/150 (player-attacker orientation). Promoted to `partial`.
+- **Evidence:** `npm test` 2202/2202, `npm run build` green.
+- **Next:** DRAGON_RAGE's own remainder, in cost order: (1) the opponent-
+  attacker orientation dense run (not attempted this step); (2) the
+  fire-spit residual's own root cause (render ages 86-96, not a lag
+  question — every candidate lag scores the same or worse); (3) fire-
+  plume's own independent lag confirmation (needs either a different
+  fixture with less spatial overlap, or a same-window differential
+  technique); (4) whether to also port the ONIX/CHARMELEON idle-bob
+  mechanism generically (cross-move, `docs/battle-menu-notes.md` §4's own
+  existing open item) rather than leaving it as DRAGON_RAGE's own named
+  residual. Alternatively, the next ranked `dragon-fire-projectile`
+  siblings FIRE_BLAST and FIRE_SPIN remain open, as does MIST_BALL's own
+  remainder (see the archived "Interpreter generalization" section).
+- **Housekeeping:** `ANIMATION_PROGRESS-archive.md` created 2026-07-25;
   sections older than DRAGON_RAGE's own saga moved there, matching
   `PROGRESS-archive.md`'s convention.
