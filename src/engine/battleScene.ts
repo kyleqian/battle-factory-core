@@ -16898,6 +16898,32 @@ export function renderSceneOnMovePresentation(
       view.target.geometry.spriteCorner.x,
       view.target.geometry.spriteCorner.y,
     );
+    const drawEmberSprites = () => {
+      for (const sprite of view.sprites) {
+        drawSpriteSheet(
+          fb,
+          subTileset(battleAnimSmallEmber.tileset, sprite.sheetFrame * 4, 4),
+          battleAnimSmallEmber.palette,
+          sprite.centerX - 16,
+          sprite.centerY - 16,
+        );
+      }
+    };
+    // `createsprite ..., ANIM_TARGET, 2, ...`: subpriority is target-relative
+    // (`targetSubpriority - 2`), so which sprite wins the OAM tie against the
+    // attacker's own fixed subpriority (`GetBattlerSpriteSubpriority`: 30
+    // player-left, 40 opponent-left) depends on attacker side, same
+    // side-parametric rule DRAGON_BREATH/FLAMETHROWER's own
+    // `dragonBreathEmbersInFrontOfAttacker` already established - a fresh
+    // ember spawns overlapping the attacker's own silhouette for its first
+    // tick or two, so this is only visible right at creation, matching the
+    // named remainder's own two mismatch frames exactly (RAM-probed:
+    // `tools/probe/dump-ember-creation.py`, both bad frames are the attacker's
+    // own opaque pixels showing through where the app drew ember on top).
+    const embersInFrontOfAttacker = dragonBreathEmbersInFrontOfAttacker(
+      view.attacker.geometry.side,
+    );
+    if (!embersInFrontOfAttacker) drawEmberSprites();
     drawSpriteSheet(
       fb,
       attackerSprite.tileset,
@@ -16905,15 +16931,7 @@ export function renderSceneOnMovePresentation(
       view.attacker.geometry.spriteCorner.x,
       view.attacker.geometry.spriteCorner.y,
     );
-    for (const sprite of view.sprites) {
-      drawSpriteSheet(
-        fb,
-        subTileset(battleAnimSmallEmber.tileset, sprite.sheetFrame * 4, 4),
-        battleAnimSmallEmber.palette,
-        sprite.centerX - 16,
-        sprite.centerY - 16,
-      );
-    }
+    if (embersInFrontOfAttacker) drawEmberSprites();
     if (playerToOpponent) {
       drawSendOutHealthbox(
         fb,
