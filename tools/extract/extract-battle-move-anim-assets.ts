@@ -312,6 +312,46 @@ function writeJson(path: string, data: unknown): void {
   });
 }
 
+// --- DRAGON_RAGE's own new sprite gfx (rung 1 of the 2026-07-25 enumeration's
+// named remainder, ANIMATION_PROGRESS.md) -----------------------------------
+//
+// gDragonRageFirePlumeSpriteTemplate (src/battle_anim_dragon.c:115-124) loads
+// ANIM_TAG_FIRE_PLUME -> gBattleAnimSpriteGfx_FirePlume (graphics/
+// battle_anims/sprites/fire_plume.png, src/graphics.c:123, table entry
+// src/data/battle_anim.h:1047) - 32x160px = 4x20 tiles = 80 8x8 tiles, OAM
+// shape 32x32 (4x4 tiles = 16 tiles/frame, gOamData_AffineOff_ObjNormal_32x32,
+// no affine) -> 5 stacked frames (tile offsets 0/16/32/48/64). Unlike
+// DRAGON_BREATH's small_ember sheet above (only frames 1/2/3 used), this
+// move's own sAnim_DragonRageFirePlume (:100-108) ANIMCMD_FRAMEs through ALL
+// 5 frames in order, 5 ticks each, ANIMCMD_END (a one-shot reveal, not a
+// loop) - no needs-only remainder on this sheet.
+//
+// The template's `.paletteTag` is also ANIM_TAG_FIRE_PLUME, but the palette
+// TABLE entry that tag resolves to (src/data/battle_anim.h:1340) points at
+// gBattleAnimSpritePal_Fire - graphics/battle_anims/sprites/fire.png's own
+// embedded palette, a DIFFERENT and separately-unextracted 32x256px source
+// PNG (its own tile pixels are irrelevant here, same tile-vs-palette split
+// already established by extract-battle-anim-assets.ts's particles.png/
+// circle_impact.png pair and this file's own ice_crystals precedent).
+{
+  const firePlume = decodeIndexedPng(join(REF, "graphics", "battle_anims", "sprites", "fire_plume.png"));
+  const firePlumeTiles = sliceTiles(firePlume);
+  const firePal = decodeIndexedPng(join(REF, "graphics", "battle_anims", "sprites", "fire.png"));
+  writeJson(join(ASSETS_GEN, "battle-anim-fire-plume.json"), {
+    source: "graphics/battle_anims/sprites/fire_plume.png (src/graphics.c:123, ANIM_TAG_FIRE_PLUME); palette graphics/battle_anims/sprites/fire.png (src/graphics.c:119, table src/data/battle_anim.h:1340)",
+    tileset: { columns: firePlumeTiles.columns, rows: firePlumeTiles.rows, tiles: firePlumeTiles.tiles.map((t) => [...t.pixels]) },
+    palette: firePal.palette,
+    oam: { shape: "32x32", size: "32x32", affine: false },
+    frameSizeTiles: 16,
+    // Frame index = tile offset / 16 (frame occupies tiles [16*i, 16*i+16)).
+    dragonRageFirePlumeAnim: {
+      source: "src/battle_anim_dragon.c:100-124 (sAnim_DragonRageFirePlume, gDragonRageFirePlumeSpriteTemplate)",
+      frames: [0, 1, 2, 3, 4],
+      frameDurationTicks: 5,
+    },
+  });
+}
+
 // --- decoded battle_anim_scripts.s step lists -------------------------------
 //
 // Hand-transcribed (not machine-parsed) from data/battle_anim_scripts.s -
@@ -546,7 +586,7 @@ function writeJson(path: string, data: unknown): void {
   // platform`/`complex_palette_blend` precedents above.
   const dragonRageMainSteps = [
     { op: "loadspritegfx", args: { tag: "ANIM_TAG_SMALL_EMBER" }, note: "already extracted (battle-anim-small-ember.json, DRAGON_BREATH); DRAGON_RAGE's own fire-spit sprite uses frames 0/4 of that same sheet, flagged as needs-only by that extraction's own otherFramesNeedsOnly note", source: "battle_anim_scripts.s:5244" },
-    { op: "loadspritegfx", args: { tag: "ANIM_TAG_FIRE_PLUME" }, decoded: "NEW asset, not yet extracted anywhere: gBattleAnimSpriteGfx_FirePlume (graphics/battle_anims/sprites/fire_plume.png, 32x160px = 5 stacked 32x32 frames, src/graphics.c, src/data/battle_anim.h:1047, ANIM_TAG_FIRE_PLUME) paired with gBattleAnimSpritePal_Fire (graphics/battle_anims/sprites/fire.png's embedded palette only - a DIFFERENT, also-unextracted source PNG supplies the palette than the one supplying the tiles, src/data/battle_anim.h:1340)", source: "battle_anim_scripts.s:5245" },
+    { op: "loadspritegfx", args: { tag: "ANIM_TAG_FIRE_PLUME" }, note: "now extracted (battle-anim-fire-plume.json, rung 1 of the 2026-07-25 enumeration's remainder): gBattleAnimSpriteGfx_FirePlume (graphics/battle_anims/sprites/fire_plume.png, 32x160px = 5 stacked 32x32 frames, src/graphics.c, src/data/battle_anim.h:1047, ANIM_TAG_FIRE_PLUME) paired with gBattleAnimSpritePal_Fire (graphics/battle_anims/sprites/fire.png's embedded palette only - a DIFFERENT source PNG supplies the palette than the one supplying the tiles, src/data/battle_anim.h:1340)", source: "battle_anim_scripts.s:5245" },
     { op: "playsewithpan", args: { se: "SE_M_DRAGON_RAGE", pan: "SOUND_PAN_ATTACKER" }, source: "battle_anim_scripts.s:5246" },
     { op: "createvisualtask", task: "AnimTask_ShakeMon", priority: 5, args: ["ANIM_ATTACKER", 0, 2, 40, 1], decoded: "already-ported primitive (shakeMon.ts, proven via QUICK_ATTACK/FLY) - toggles the ATTACKER's own y2 between 0 and 2 every tick, 40 times. Every prior call site shakes the TARGET; this is the first ATTACKER-side call - the primitive itself is battler-agnostic (parametric offset applied to whichever sprite the caller names), so this is a cheap render-wiring choice, not a new port.", source: "battle_anim_scripts.s:5247" },
     { op: "waitforvisualfinish", note: "blocks until the attacker ShakeMon task above (40x1-tick alternation) self-destroys", source: "battle_anim_scripts.s:5248" },
@@ -618,7 +658,7 @@ function writeJson(path: string, data: unknown): void {
       },
       totalFirePlumeSprites: 8,
       callback: null,
-      status: "script decoded only, NOT ported - 2026-07-25 step stopped here per its own enumerate-before-coding rule. Genuinely-new surface tally (4 substantive items, at the ~4-item stop threshold, none individually a new subsystem): (1) ANIM_TAG_FIRE_PLUME tile+palette asset, not yet extracted; (2) SlideMonToOffset/SlideMonToOriginalPos primitive pair (distinct from mudSandSlide.ts's own hand-fit table for a different call site); (3) AnimDragonRageFirePlume's new static-position/one-shot-reveal/self-destroy-on-animEnd mechanism across 8 per-spawn-parameterized spawns; (4) the fire-spit sprite's previously-unexercised side-asymmetric initial/target-offset quirk in StartDragonFireTranslation plus its own fresh RAM-probed affine matrix (distinct scale constants from DRAGON_BREATH's). See ANIMATION_PROGRESS.md's 2026-07-25 enumeration verdict for the full per-op command-surface tally and remainder ordering.",
+      status: "script decoded only, callback/render NOT ported - 2026-07-25 step stopped here per its own enumerate-before-coding rule. Genuinely-new surface tally (4 substantive items, at the ~4-item stop threshold, none individually a new subsystem): (1) ANIM_TAG_FIRE_PLUME tile+palette asset - EXTRACTED as battle-anim-fire-plume.json (rung 1 of the named remainder, 2026-07-25 groundwork step); (2) SlideMonToOffset/SlideMonToOriginalPos primitive pair (distinct from mudSandSlide.ts's own hand-fit table for a different call site); (3) AnimDragonRageFirePlume's new static-position/one-shot-reveal/self-destroy-on-animEnd mechanism across 8 per-spawn-parameterized spawns; (4) the fire-spit sprite's previously-unexercised side-asymmetric initial/target-offset quirk in StartDragonFireTranslation plus its own fresh RAM-probed affine matrix (distinct scale constants from DRAGON_BREATH's). No render/callback code lands yet - see ANIMATION_PROGRESS.md's 2026-07-25 enumeration verdict for the full per-op command-surface tally and remainder ordering.",
     },
   });
 }
