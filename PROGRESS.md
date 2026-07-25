@@ -4,6 +4,66 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 446 — Executable-frontier census's #1 lever landed: entry-chokepoint trio registered (`JUMPIFHALFWORD`/`JUMPIFSTATUS3CONDITION`/`ORWORD`) — the shared hit chain is now executable from its literal `BattleScript_EffectHit` entry
+
+- **State:** tree green at **200 files / 2366 tests** (+3 files/+24 tests
+  over entry 445's 197/2342), build green. Ratchet green: new barrier pin
+  `battleScriptJumpifhalfwordOpcode.ts` → 1 (the other 14 concrete call
+  sites' unmodeled memHword pointers — `gChosenMove`/`gBattleWeather`/
+  `gTrainerBattleOpponent_A` — all barrier on this one named line);
+  `jumpifstatus3condition`/`orword` need **zero** runtime barriers (see
+  below), so they carry no pin at all. No new production imports of
+  canonical recordings.
+- **Did (commits `efd1cea`, `1c76424`, `2398407`), per the census's own
+  ranked-table #1 row:**
+  - **`B_SCR_OP_JUMPIFHALFWORD`** (`Cmd_jumpifhalfword`): sibling of
+    `jumpifbyte`/`jumpifword`. Models `gCurrentMove` (the Surf guard's
+    load-bearing pointer) against the full source-derived `MOVE_*` catalog;
+    every other concrete call site's pointer is unmodeled → the one pinned
+    barrier.
+  - **`B_SCR_OP_JUMPIFSTATUS3CONDITION`** and **`B_SCR_OP_ORWORD`**: both
+    turned out fully **(a)-complete** — all 7 concrete `jumpifstatus3condition`
+    call sites use `BS_TARGET` + one of 5 named `STATUS3_*` bits, and all 43
+    concrete `orword` call sites target `gHitMarker` with one of 11 named
+    `HITMARKER_*` bits (`|`-joined text parsed at registration). Both use
+    `Cmd_setbyte`'s own eager-validation-at-registration pattern (every
+    concrete instance checked once, up front) instead of a runtime barrier.
+  - **Surf-underwater sub-branch walked by hand + reachability test:** needs
+    only `orword` plus the already-registered `setbyte` (`sDMG_MULTIPLIER`)
+    — no new barrier.
+  - **Integration proof:** `battleScriptHitChainOpcode.test.ts`'s RUNG 4 "hit
+    turn" test now starts at the literal `BattleScript_EffectHit` (not the
+    `BattleScript_HitFromAtkCanceler` shortcut every prior proof used), same
+    banked 4-roll ledger; added a Surf-underwater sibling test.
+    `factoryBattleScriptTerminalDecision.ts`'s `ENTRY_LABEL` switched the same
+    way — its step loop is opcode-driven (256-step budget, no hardcoded PCs)
+    so this was a clean, no-ripple change, verified by its own test + suite.
+  - **Census regenerated:** **34/214 effects, 74/355 moves** executable (was
+    1/214, 2/355). The predicted "~57/214" was optimistic — of the 56
+    trio-only effects, ~22 also carry the tool's own tracked SetMoveEffect
+    subsystem note (`Cmd_seteffectwithchance`'s family-B status2/misc
+    dispatch barrier for their own `MOVE_EFFECT_*` byte, e.g.
+    FLINCH/PAY_DAY/TRI_ATTACK) and correctly stay blocked-on-subsystem, out
+    of scope. Updated the two ground-truth assertions the doc's own text
+    said would flip (quintet: blocked-on-opcodes-with-JUMPIFHALFWORD →
+    executable); all 8 checks pass. Also fixed a real bug this surfaced: the
+    doc's "Key finding" paragraph was hardcoded prose about JUMPIFHALFWORD
+    that would've gone self-contradictory (calling a now-registered opcode
+    "still unregistered") — made it fully dynamic so it always names
+    today's actual top blocker.
+- **Next:** per the regenerated ranked table, `EFFECT_EARTHQUAKE`'s own trio
+  (`BICWORD`, `JUMPIFNEXTTARGETVALID`, `SELECTFIRSTVALIDTARGET`) is now the
+  single highest-leverage next registration (147 weighted, one effect).
+  After that, `STATBUFFCHANGE`/`PLAYANIMATION`/`SETGRAPHICALSTATCHANGEVALUES`
+  unlocks 9 effects/14 moves (the stat-up family) — but stat changes are
+  explicitly out of this lane's scope; hand off to whoever owns that family.
+  Forced-switch §4 slice 3 (`SWITCHHANDLEORDER`'s permutation layer, PROGRESS
+  445's own finding) is still unstarted and still not "trivial."
+- **Notes:** no oracle traces added this session; no presentation/
+  `battleScene`/ROADMAP edits. Stat-down family, confusion, and end-turn
+  orchestration remain explicitly out of scope.
+
+---
 ## 445 — Forced-switch §4 slices 1-2 landed: `jumpifbattletype`/`openpartyscreen` registered — the non-terminal fork now runs through the AI's real pick
 
 - **State:** tree green at **197 files / 2342 tests** (+3 files/+24 tests
@@ -111,85 +171,4 @@ re-verified before this entry.)*
   slice). The cap-kill's "unauthenticated/sandboxed" postflight hint was
   noise (the worker ran 45 min and committed real work) — do not relaunch
   with sandbox overrides on that basis.
-
----
-## 443 — S10 kernel-breadth RUNG 1 complete (`Cmd_ppreduce` Pressure barriers retired); RUNG 2 (SetMoveEffect quartet) scoped, not attempted this session
-
-- **State:** tree green at **194 files / 2286 tests** (+10 tests over entry
-  442's 2276), build green, ratchet green — `battleScriptHitChainOpcode.ts`'s
-  barrier pin shrank **21 -> 19** (the two retired Pressure barriers, delta
-  named). `docs/set-move-effect-ground-truth.md`'s verify script rerun live
-  before starting RUNG 2 scoping: still all-PASS.
-- **Did (RUNG 1, committed `c33286c`):** ported the real
-  `AbilityBattleEffects(ABILITYEFFECT_COUNT_ON_FIELD/COUNT_OTHER_SIDE, ...)`
-  loops (`battle_util.c:3160-3191`) into `Cmd_ppreduce`, bounded by the real
-  `gBattlersCount` (2 singles / 4 doubles, same precedent as
-  `cleareffectsonfaint`'s existing loop), replacing the two unconditional
-  barriers that blocked every `MOVE_TARGET_BOTH`/`MOVE_TARGET_FOES_AND_ALLY`
-  move (ROCK_SLIDE, EARTHQUAKE, SURF...) from the hit chain — surfaced by the
-  presentation-seam checkpoint (PROGRESS 442). 15 new Tier-1 tests: both
-  count forms in singles (the real loop degenerates to the old default-branch
-  result) and doubles (genuine multi-battler scan — allies excluded from
-  COUNT_OTHER_SIDE, allies included in COUNT_ON_FIELD, cumulative counts,
-  attacker excluded from its own count), plus one full hit-chain integration
-  test driving ROCK_SLIDE from opcode 0 through `ppreduce` to the script's
-  own `end` (previously impossible — this is the leverage proof).
-- **RUNG 2 (SetMoveEffect status quartet + flinch): scoped via a live source
-  read, deliberately NOT attempted this session** — invoking the brief's own
-  escape hatch rather than risk a half-finished, uncommitted cross-cutting
-  change under the hard time cap. Concretely, for the next session:
-  - **2 new opcodes, both small.** `B_SCR_OP_PRINTFROMTABLE`
-    (`Cmd_printfromtable`, `battle_script_commands.c:2180`) needs **no new
-    port** — it's a table pointer + `MULTISTRING_CHOOSER` index into one of 7
-    small constant tables (`gGotPoisonedStringIds`/`BurnedStringIds`/
-    `FrozenStringIds`/`ParalyzedStringIds`, 2 entries each: STATUSED /
-    STATUSED_BY_ABILITY; `gPSNPreventionStringIds`/`BRNPreventionStringIds`/
-    `PRLZPreventionStringIds`, 3 entries each: ABILITY_PREVENTS_MOVE_STATUS /
-    ABILITY_PREVENTS_ABILITY_STATUS / STATUS_HAD_NO_EFFECT, all in
-    `battle_message.c:1072-1231`) — resolve table+index to a literal
-    `STRINGID_*` operand and feed the *already-registered* `prepareMessage`
-    port, same synthetic-operand trick this file already uses for
-    `STRINGID_USEDMOVE_OPERAND`. `B_SCR_OP_UPDATESTATUSICON`
-    (`Cmd_updatestatusicon`, `:7699`) reuses the existing `BS_EFFECT_BATTLER`
-    selector resolver for the non-doubles branch; `BS_ATTACKER_WITH_PARTNER`
-    (doubles) is a clean (b) barrier.
-  - **SetMoveEffect's dispatch** (`:2234-2521` POISON/BURN/FREEZE/PARALYSIS,
-    `:2546-2567` FLINCH): each status write is
-    `BattleScriptPush(next) + goto sMoveEffectBS_Ptrs[byte]`
-    (`BattleScript_MoveEffect{Poison,Burn,Freeze,Paralysis}`:
-    `statusanimation, printfromtable <table>, waitmessage, goto
-    BattleScript_UpdateEffectStatusIconRet` -> `updatestatusicon, waitstate,
-    return`) on success, each guarded by one ability (Immunity/Water
-    Veil/Magma Armor/Limber) with its own `BattleScript_{PSN,BRN,PRLZ}
-    Prevention` push+jump sub-script, plus type immunity (POISON:
-    Poison/Steel; BURN: Fire; FREEZE: Ice + sun-no-freeze; PARALYSIS: none).
-    All 4 share the affects-user flag, the Shield Dust/Safeguard/0-HP/
-    Substitute `INCREMENT_RESET_RETURN` early-outs (`:2253-2267`), and the
-    party-record `status1` sync (mirrors the already-established
-    `datahpupdate` live-sync pattern — ground truth doc §2 pinned this needs
-    no new plumbing). SLEEP(1)/TOXIC(6) stay named (b) barriers — unreachable
-    via this call site per the doc (their own scripts use the still-
-    unregistered `Cmd_seteffectprimary`).
-  - **FLINCH(8) needs one genuinely new `BattleScriptRulesContext` field**
-    (turn order / `gCurrentTurnActionNumber`, for `GetBattlerTurnOrderNum
-    (gEffectBattler) > gCurrentTurnActionNumber`) before its plain
-    `status2 |=` write is source-complete — real new cross-cutting plumbing
-    (construction/validation, every existing test fixture), not just a
-    dispatch branch. This is the one piece of the doc's "zero new opcodes"
-    claim that's still nontrivial; left a named (b) barrier rather than rush
-    a new required field this session.
-  - Net finding: the guard structure is **not** materially bigger than the
-    doc's enumeration (confirmed by reading the real source, not assumed) —
-    RUNG 2 is tractable, just larger than the time remaining this session.
-- **Next:** RUNG 2 as scoped above — printfromtable/updatestatusicon first
-  (small, no new ports), then the quartet dispatch with party sync, then the
-  integration proof against the banked KADABRA/MAGNETON paralysis ledger in
-  `docs/set-move-effect-ground-truth.md` §2 (must match: 8 total rolls, zero
-  extra draws for the proc, `status1` written on both the battler and its
-  party slot, control seed untouched). Flinch's turn-order field is a
-  separate, addable-after slice.
-- **Notes:** no oracle traces added this session beyond the pre-check
-  verify-script rerun (all PASS); no presentation/`battleScene`/ROADMAP
-  edits; stat-down family and confusion remain explicitly out of scope per
-  the doc.
 

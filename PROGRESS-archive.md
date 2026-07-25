@@ -1,4 +1,85 @@
 ---
+## 443 — S10 kernel-breadth RUNG 1 complete (`Cmd_ppreduce` Pressure barriers retired); RUNG 2 (SetMoveEffect quartet) scoped, not attempted this session
+
+- **State:** tree green at **194 files / 2286 tests** (+10 tests over entry
+  442's 2276), build green, ratchet green — `battleScriptHitChainOpcode.ts`'s
+  barrier pin shrank **21 -> 19** (the two retired Pressure barriers, delta
+  named). `docs/set-move-effect-ground-truth.md`'s verify script rerun live
+  before starting RUNG 2 scoping: still all-PASS.
+- **Did (RUNG 1, committed `c33286c`):** ported the real
+  `AbilityBattleEffects(ABILITYEFFECT_COUNT_ON_FIELD/COUNT_OTHER_SIDE, ...)`
+  loops (`battle_util.c:3160-3191`) into `Cmd_ppreduce`, bounded by the real
+  `gBattlersCount` (2 singles / 4 doubles, same precedent as
+  `cleareffectsonfaint`'s existing loop), replacing the two unconditional
+  barriers that blocked every `MOVE_TARGET_BOTH`/`MOVE_TARGET_FOES_AND_ALLY`
+  move (ROCK_SLIDE, EARTHQUAKE, SURF...) from the hit chain — surfaced by the
+  presentation-seam checkpoint (PROGRESS 442). 15 new Tier-1 tests: both
+  count forms in singles (the real loop degenerates to the old default-branch
+  result) and doubles (genuine multi-battler scan — allies excluded from
+  COUNT_OTHER_SIDE, allies included in COUNT_ON_FIELD, cumulative counts,
+  attacker excluded from its own count), plus one full hit-chain integration
+  test driving ROCK_SLIDE from opcode 0 through `ppreduce` to the script's
+  own `end` (previously impossible — this is the leverage proof).
+- **RUNG 2 (SetMoveEffect status quartet + flinch): scoped via a live source
+  read, deliberately NOT attempted this session** — invoking the brief's own
+  escape hatch rather than risk a half-finished, uncommitted cross-cutting
+  change under the hard time cap. Concretely, for the next session:
+  - **2 new opcodes, both small.** `B_SCR_OP_PRINTFROMTABLE`
+    (`Cmd_printfromtable`, `battle_script_commands.c:2180`) needs **no new
+    port** — it's a table pointer + `MULTISTRING_CHOOSER` index into one of 7
+    small constant tables (`gGotPoisonedStringIds`/`BurnedStringIds`/
+    `FrozenStringIds`/`ParalyzedStringIds`, 2 entries each: STATUSED /
+    STATUSED_BY_ABILITY; `gPSNPreventionStringIds`/`BRNPreventionStringIds`/
+    `PRLZPreventionStringIds`, 3 entries each: ABILITY_PREVENTS_MOVE_STATUS /
+    ABILITY_PREVENTS_ABILITY_STATUS / STATUS_HAD_NO_EFFECT, all in
+    `battle_message.c:1072-1231`) — resolve table+index to a literal
+    `STRINGID_*` operand and feed the *already-registered* `prepareMessage`
+    port, same synthetic-operand trick this file already uses for
+    `STRINGID_USEDMOVE_OPERAND`. `B_SCR_OP_UPDATESTATUSICON`
+    (`Cmd_updatestatusicon`, `:7699`) reuses the existing `BS_EFFECT_BATTLER`
+    selector resolver for the non-doubles branch; `BS_ATTACKER_WITH_PARTNER`
+    (doubles) is a clean (b) barrier.
+  - **SetMoveEffect's dispatch** (`:2234-2521` POISON/BURN/FREEZE/PARALYSIS,
+    `:2546-2567` FLINCH): each status write is
+    `BattleScriptPush(next) + goto sMoveEffectBS_Ptrs[byte]`
+    (`BattleScript_MoveEffect{Poison,Burn,Freeze,Paralysis}`:
+    `statusanimation, printfromtable <table>, waitmessage, goto
+    BattleScript_UpdateEffectStatusIconRet` -> `updatestatusicon, waitstate,
+    return`) on success, each guarded by one ability (Immunity/Water
+    Veil/Magma Armor/Limber) with its own `BattleScript_{PSN,BRN,PRLZ}
+    Prevention` push+jump sub-script, plus type immunity (POISON:
+    Poison/Steel; BURN: Fire; FREEZE: Ice + sun-no-freeze; PARALYSIS: none).
+    All 4 share the affects-user flag, the Shield Dust/Safeguard/0-HP/
+    Substitute `INCREMENT_RESET_RETURN` early-outs (`:2253-2267`), and the
+    party-record `status1` sync (mirrors the already-established
+    `datahpupdate` live-sync pattern — ground truth doc §2 pinned this needs
+    no new plumbing). SLEEP(1)/TOXIC(6) stay named (b) barriers — unreachable
+    via this call site per the doc (their own scripts use the still-
+    unregistered `Cmd_seteffectprimary`).
+  - **FLINCH(8) needs one genuinely new `BattleScriptRulesContext` field**
+    (turn order / `gCurrentTurnActionNumber`, for `GetBattlerTurnOrderNum
+    (gEffectBattler) > gCurrentTurnActionNumber`) before its plain
+    `status2 |=` write is source-complete — real new cross-cutting plumbing
+    (construction/validation, every existing test fixture), not just a
+    dispatch branch. This is the one piece of the doc's "zero new opcodes"
+    claim that's still nontrivial; left a named (b) barrier rather than rush
+    a new required field this session.
+  - Net finding: the guard structure is **not** materially bigger than the
+    doc's enumeration (confirmed by reading the real source, not assumed) —
+    RUNG 2 is tractable, just larger than the time remaining this session.
+- **Next:** RUNG 2 as scoped above — printfromtable/updatestatusicon first
+  (small, no new ports), then the quartet dispatch with party sync, then the
+  integration proof against the banked KADABRA/MAGNETON paralysis ledger in
+  `docs/set-move-effect-ground-truth.md` §2 (must match: 8 total rolls, zero
+  extra draws for the proc, `status1` written on both the battler and its
+  party slot, control seed untouched). Flinch's turn-order field is a
+  separate, addable-after slice.
+- **Notes:** no oracle traces added this session beyond the pre-check
+  verify-script rerun (all PASS); no presentation/`battleScene`/ROADMAP
+  edits; stat-down family and confusion remain explicitly out of scope per
+  the doc.
+
+---
 ## 442 — S10 §3 presentation-seam checkpoint: **PASSED** — `turn5-faint.json` re-driven from real kernel events, still 110/110
 
 - **State:** tree green at **194 files / 2276 tests** (+3 files/+13 tests
