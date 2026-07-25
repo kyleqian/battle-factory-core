@@ -534,6 +534,53 @@ function writeJson(path: string, data: unknown): void {
     "coordFlags",
   ];
 
+  // Move_DRAGON_RAGE (battle_anim_scripts.s:5243-5273) - "dragon-fire-
+  // projectile" track's own named sibling (ANIMATION_COVERAGE.json). Decoded
+  // here (script only) per this step's enumerate-before-coding rule; the
+  // callback/render port is NOT implemented this step - see
+  // ANIMATION_PROGRESS.md's 2026-07-25 enumeration verdict for the full
+  // command-surface tally and stop rationale. `create_dragon_rage_fire_spit_
+  // sprite`/`create_dragon_rage_fire_plume_sprite` are script MACROS (asm/
+  // macros/battle_anim_script.inc:363-373), not raw opcodes - expanded here
+  // as their `createsprite` forms, matching this file's `shake_mon_or_
+  // platform`/`complex_palette_blend` precedents above.
+  const dragonRageMainSteps = [
+    { op: "loadspritegfx", args: { tag: "ANIM_TAG_SMALL_EMBER" }, note: "already extracted (battle-anim-small-ember.json, DRAGON_BREATH); DRAGON_RAGE's own fire-spit sprite uses frames 0/4 of that same sheet, flagged as needs-only by that extraction's own otherFramesNeedsOnly note", source: "battle_anim_scripts.s:5244" },
+    { op: "loadspritegfx", args: { tag: "ANIM_TAG_FIRE_PLUME" }, decoded: "NEW asset, not yet extracted anywhere: gBattleAnimSpriteGfx_FirePlume (graphics/battle_anims/sprites/fire_plume.png, 32x160px = 5 stacked 32x32 frames, src/graphics.c, src/data/battle_anim.h:1047, ANIM_TAG_FIRE_PLUME) paired with gBattleAnimSpritePal_Fire (graphics/battle_anims/sprites/fire.png's embedded palette only - a DIFFERENT, also-unextracted source PNG supplies the palette than the one supplying the tiles, src/data/battle_anim.h:1340)", source: "battle_anim_scripts.s:5245" },
+    { op: "playsewithpan", args: { se: "SE_M_DRAGON_RAGE", pan: "SOUND_PAN_ATTACKER" }, source: "battle_anim_scripts.s:5246" },
+    { op: "createvisualtask", task: "AnimTask_ShakeMon", priority: 5, args: ["ANIM_ATTACKER", 0, 2, 40, 1], decoded: "already-ported primitive (shakeMon.ts, proven via QUICK_ATTACK/FLY) - toggles the ATTACKER's own y2 between 0 and 2 every tick, 40 times. Every prior call site shakes the TARGET; this is the first ATTACKER-side call - the primitive itself is battler-agnostic (parametric offset applied to whichever sprite the caller names), so this is a cheap render-wiring choice, not a new port.", source: "battle_anim_scripts.s:5247" },
+    { op: "waitforvisualfinish", note: "blocks until the attacker ShakeMon task above (40x1-tick alternation) self-destroys", source: "battle_anim_scripts.s:5248" },
+    { op: "createsprite", template: "gSlideMonToOffsetSpriteTemplate", battler: "ANIM_TARGET", subpriority: 2, args: [0, 15, 0, 0, 4], decoded: "NEW primitive: SlideMonToOffset -> InitSpriteDataForLinearTranslation + TranslateSpriteLinearByIdFixedPoint (src/battle_anim_mon_movement.c:537-576). gBattleAnimArgs[0]=0 selects the ATTACKER's own sprite (the `ANIM_TARGET` field above only sets this dummy sprite's OAM subpriority, per Cmd_createsprite's battler-vs-argv split already established by MIST_BALL's own enumeration) - slides the attacker +15px x (mirrored for opponent side per GetBattlerSide) over 4 ticks, holds. NOT the same mechanism mudSandSlide.ts ports: that module is a hand-fit lookup table for SAND_ATTACK/MUD_SLAP's own createsprite args (x=-10, duration=3/4), not a generic port of this accumulator - confirmed by reading both SlideMonToOffset (TranslateSpriteLinearByIdFixedPoint, writes to a REFERENCED mon sprite via data[5]) and InitAnimLinearTranslation (the already-ported animLinearTranslation.ts primitive, direction-in-low-bit, writes to the sprite's OWN x2/y2) side by side - different data layout, different rounding (plain division here, no low-bit direction forcing).", source: "battle_anim_scripts.s:5249" },
+    { op: "waitforvisualfinish", note: "blocks until the SlideMonToOffset sprite above (4-tick translation) self-destroys", source: "battle_anim_scripts.s:5250" },
+    { op: "create_dragon_rage_fire_spit_sprite", expandsTo: "createsprite gDragonRageFireSpitSpriteTemplate, ANIM_TARGET, 2, 30, 15, 0, 10, 10", decoded: "gDragonRageFireSpitSpriteTemplate (src/battle_anim_dragon.c:158-167) shares AnimDragonFireToTarget -> StartDragonFireTranslation (:218-274) with gDragonBreathFireSpriteTemplate (comment at :267 literally reads 'For Dragon Breath and Dragon Rage') and the same 3-frame/3-tick sheet cadence (sAnim_DragonRageFire :126-138 is byte-identical in shape to sAnim_DragonBreathFire_0) - reuses the already-ported Q8.8 linear-translation accumulator (dragonBreath.ts's signedLinearOffset). Two genuinely new parts: (1) DRAGON_BREATH's own script always passes initial_x=initial_y=target_x=target_y=0, so StartDragonFireTranslation's side-branch offset logic was never exercised - it has a real quirk (opponent-side branch: `sprite->x -= cmd->initialY` and `sprite->data[2] -= cmd->targetX`, i.e. the OPPONENT branch uses initialY to offset x, not initialX, an asymmetry confirmed straight from source, not guessed) that DRAGON_RAGE's nonzero args (initial_x=30, initial_y=15, target_y=10) actually exercise; (2) its own affine anim (sAffineAnim_DragonRageFire_0/_1 :140-156, AFFINEANIMCMD_FRAME(0x64,0x64,127,1) vs DRAGON_BREATH's (0x50,0x50,127,0)+(0xD,0xD,0,100)) uses DIFFERENT scale constants and only ONE step (duration 1, not 100) - dragonBreath.ts's own MATRIX_A/MATRIX_B tables are RAM-PROBED literals for its own constants, not a closed-form affine derivation, so this needs its own fresh RAM probe (likely a much simpler near-static matrix given the single-step affine anim, but not yet confirmed against real RAM).", source: "battle_anim_scripts.s:5251" },
+    { op: "waitforvisualfinish", note: "blocks until the fire-spit sprite above (10-tick translation) self-destroys", source: "battle_anim_scripts.s:5252" },
+    { op: "loopsewithpan", args: { se: "SE_M_FLAME_WHEEL2", pan: "SOUND_PAN_TARGET", count: 11, delay: 3 }, source: "battle_anim_scripts.s:5253" },
+    { op: "createvisualtask", task: "AnimTask_ShakeMon", priority: 5, args: ["ANIM_TARGET", 0, 3, 25, 1], decoded: "already-ported primitive (shakeMon.ts) - toggles the TARGET's y2 between 0 and 3 every tick, 25 times; same shape as every prior target-shake call site.", source: "battle_anim_scripts.s:5254" },
+    { op: "create_dragon_rage_fire_plume_sprite", expandsTo: "createsprite gDragonRageFirePlumeSpriteTemplate, ANIM_TARGET, 66, ANIM_TARGET, 5, 0", decoded: "NEW callback: AnimDragonRageFirePlume (src/battle_anim_dragon.c:246-265) - a STATIC-position sprite (no translation/accumulator at all, simpler than every other mechanism this track uses): places itself at the named relativeTo battler's BATTLER_COORD_X/Y (here always ANIM_TARGET - the callback's ANIM_ATTACKER branch is dead code for this move, every one of the 8 spawns below passes relative_to=ANIM_TARGET, a red herring like MIST_BALL's unconsumed ANIM_TAG_WHITE_FEATHER load), applies SetAnimSpriteInitialXOffset(x) (already-established side-signed-offset pattern, ember.ts's sideSignedOffset) plus a plain y offset, then just plays sAnim_DragonRageFirePlume's 5-frame/5-tick-each reveal (ANIMCMD_END, not JUMP - a one-shot, not a loop) and self-destroys via RunStoredCallbackWhenAnimEnds once sprite->animEnded latches (25-tick lifetime from BeginAnim's own duration-1 bookkeeping, src/sprite.c:917-946,997 - not yet RAM-confirmed for this callback's own render-lag). Per-spawn subpriority_offset varies (66 or 2, encoded per spawn below) - a real per-spawn detail, not a fixed constant.", subpriorityOffset: 66, x: 5, y: 0, source: "battle_anim_scripts.s:5255" },
+    { op: "delay", frames: 1, source: "battle_anim_scripts.s:5256" },
+    { op: "create_dragon_rage_fire_plume_sprite", expandsTo: "createsprite gDragonRageFirePlumeSpriteTemplate, ANIM_TARGET, 66, ANIM_TARGET, -10, -15", subpriorityOffset: 66, x: -10, y: -15, source: "battle_anim_scripts.s:5257" },
+    { op: "delay", frames: 1, source: "battle_anim_scripts.s:5258" },
+    { op: "create_dragon_rage_fire_plume_sprite", expandsTo: "createsprite gDragonRageFirePlumeSpriteTemplate, ANIM_TARGET, 2, ANIM_TARGET, 0, 25", subpriorityOffset: 2, x: 0, y: 25, source: "battle_anim_scripts.s:5259" },
+    { op: "delay", frames: 1, source: "battle_anim_scripts.s:5260" },
+    { op: "create_dragon_rage_fire_plume_sprite", expandsTo: "createsprite gDragonRageFirePlumeSpriteTemplate, ANIM_TARGET, 66, ANIM_TARGET, 15, 5", subpriorityOffset: 66, x: 15, y: 5, source: "battle_anim_scripts.s:5261" },
+    { op: "delay", frames: 1, source: "battle_anim_scripts.s:5262" },
+    { op: "create_dragon_rage_fire_plume_sprite", expandsTo: "createsprite gDragonRageFirePlumeSpriteTemplate, ANIM_TARGET, 66, ANIM_TARGET, -25, 0", subpriorityOffset: 66, x: -25, y: 0, source: "battle_anim_scripts.s:5263" },
+    { op: "delay", frames: 1, source: "battle_anim_scripts.s:5264" },
+    { op: "create_dragon_rage_fire_plume_sprite", expandsTo: "createsprite gDragonRageFirePlumeSpriteTemplate, ANIM_TARGET, 2, ANIM_TARGET, 30, 30", subpriorityOffset: 2, x: 30, y: 30, source: "battle_anim_scripts.s:5265" },
+    { op: "delay", frames: 1, source: "battle_anim_scripts.s:5266" },
+    { op: "create_dragon_rage_fire_plume_sprite", expandsTo: "createsprite gDragonRageFirePlumeSpriteTemplate, ANIM_TARGET, 2, ANIM_TARGET, -27, 25", subpriorityOffset: 2, x: -27, y: 25, source: "battle_anim_scripts.s:5267" },
+    { op: "delay", frames: 1, source: "battle_anim_scripts.s:5268" },
+    { op: "create_dragon_rage_fire_plume_sprite", expandsTo: "createsprite gDragonRageFirePlumeSpriteTemplate, ANIM_TARGET, 66, ANIM_TARGET, 0, 8", subpriorityOffset: 66, x: 0, y: 8, source: "battle_anim_scripts.s:5269" },
+    { op: "waitforvisualfinish", note: "blocks until all 8 fire-plume sprites above have self-destroyed (each a 25-tick one-shot reveal, staggered by `delay 1` = 3 real VM ticks per the already-derived `delay N -> N+2` rule)", source: "battle_anim_scripts.s:5270" },
+    { op: "createsprite", template: "gSlideMonToOriginalPosSpriteTemplate", battler: "ANIM_TARGET", subpriority: 66, args: [0, 0, 4], decoded: "NEW primitive (paired with SlideMonToOffset above): SlideMonToOriginalPos (src/battle_anim_mon_movement.c:478-535) - a SEPARATE accumulator/step function (own data[1..6] layout, snaps via data[7]'s packed mode+spriteId, restores the attacker's x2/y2 from its CURRENT displaced value back to 0 over 4 ticks, not a fresh two-point interpolation) - gBattleAnimArgs[0]=0 again selects the attacker.", source: "battle_anim_scripts.s:5271" },
+    { op: "waitforvisualfinish", note: "blocks until the SlideMonToOriginalPos sprite above (4-tick restore) self-destroys", source: "battle_anim_scripts.s:5272" },
+    { op: "end", source: "battle_anim_scripts.s:5273" },
+  ];
+  const dragonRageFireSpitArgvMapping = ["initialX", "initialY", "targetX", "targetY", "duration"];
+  const dragonRageFirePlumeArgvMapping = ["relativeTo", "x", "y"];
+  const dragonRageSlideToOffsetArgvMapping = ["battlerFlag", "targetXOffset", "targetYOffset", "mirrorVertical", "duration"];
+  const dragonRageSlideToOriginalPosArgvMapping = ["battlerFlag", "axisSnapMode", "duration"];
+
   writeJson(join(DATA_GEN, "battle-move-anim-scripts.json"), {
     ROCK_SLIDE: {
       source: "reference/pokeemerald/data/battle_anim_scripts.s:2119-2168 (Move_ROCK_SLIDE + RockSlideRocks)",
@@ -559,6 +606,19 @@ function writeJson(path: string, data: unknown): void {
       createspriteArgvMapping: mistBallArgvMapping,
       callback: null,
       status: "script decoded only, NOT ported - 2026-07-24 interpreter-generalization step stopped here per its own enumerate-before-coding rule (>4 substantive new ops, including AnimTask_MistBallFog's whole-BG tile/tilemap/palette/blend pipeline). See ANIMATION_PROGRESS.md's 2026-07-24 generalization verdict for the full command-surface enumeration and remainder.",
+    },
+    DRAGON_RAGE: {
+      source: "reference/pokeemerald/data/battle_anim_scripts.s:5243-5273 (Move_DRAGON_RAGE)",
+      main: dragonRageMainSteps,
+      createspriteArgvMappings: {
+        gDragonRageFireSpitSpriteTemplate: dragonRageFireSpitArgvMapping,
+        gDragonRageFirePlumeSpriteTemplate: dragonRageFirePlumeArgvMapping,
+        gSlideMonToOffsetSpriteTemplate: dragonRageSlideToOffsetArgvMapping,
+        gSlideMonToOriginalPosSpriteTemplate: dragonRageSlideToOriginalPosArgvMapping,
+      },
+      totalFirePlumeSprites: 8,
+      callback: null,
+      status: "script decoded only, NOT ported - 2026-07-25 step stopped here per its own enumerate-before-coding rule. Genuinely-new surface tally (4 substantive items, at the ~4-item stop threshold, none individually a new subsystem): (1) ANIM_TAG_FIRE_PLUME tile+palette asset, not yet extracted; (2) SlideMonToOffset/SlideMonToOriginalPos primitive pair (distinct from mudSandSlide.ts's own hand-fit table for a different call site); (3) AnimDragonRageFirePlume's new static-position/one-shot-reveal/self-destroy-on-animEnd mechanism across 8 per-spawn-parameterized spawns; (4) the fire-spit sprite's previously-unexercised side-asymmetric initial/target-offset quirk in StartDragonFireTranslation plus its own fresh RAM-probed affine matrix (distinct scale constants from DRAGON_BREATH's). See ANIMATION_PROGRESS.md's 2026-07-25 enumeration verdict for the full per-op command-surface tally and remainder ordering.",
     },
   });
 }
