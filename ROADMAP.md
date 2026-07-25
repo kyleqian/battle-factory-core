@@ -1213,6 +1213,26 @@ now runs its committed player/AI routes to genuine script completion instead
 registered; step (iv) is next, blocked on ISSUES #42
 (`checkteamslost`/party-HP modeling) for a *real* terminal outcome.
 
+**Step (iv) completion checkpoint (2026-07-25, supervisor-verified):**
+step (iv) is complete, in three verified parts. (1) `BattleScriptRulesContext`
+gained the Option-A party-HP slice (`{species,isEgg,hp}`×6 per side +
+`partyIndex`), `datahpupdate` write-through, and registrations of
+`jumpifbyte`/`getexp` (Frontier short-circuit)/`checkteamslost` — a real
+`battleOutcome` 0→1 is computed from the party sum (ISSUES #42 closed).
+(2) The `HandleFaintedMonActions` orchestration equivalent (scheduling
+logic, not an opcode), the genuine `BS_FAINTED` selector role (ISSUES #43
+closed), and the first real end-to-end terminal boundary through
+`submitBattleDecision` (`{kind:"terminal", outcome:"player-win"}`, RNG
+ledger pinned at 4 rolls). (3) The pure `BattleResolution` adapter
+(`battleResolutionAdapter.ts`) with facility-verified outcome mapping
+(draw→loss, `docs/battle-resolution-adapter-ground-truth.md` §4) and a
+zero-fixture win+loss integration proof through `resolveRoundBattle` —
+`roundController.ts`'s API untouched. Suite 191 files / 2263 tests at
+`eee7129`. **Per §3's hard ordering constraint, the next battle-lane brief
+is the presentation-seam checkpoint** — evidence pack:
+`docs/presentation-seam-scout.md` §7 (ordered 4-step plan, `turn5-faint.json`
+re-pinned live at 110/110).
+
 **Leverage, so this is not mistaken for one move's worth of work:** **69 of
 197** `BattleScript_Effect*` scripts reach that shared hit chain, covering
 **155 of 355 moves (44%)** — including every `setmoveeffect`+`goto` status-hit
