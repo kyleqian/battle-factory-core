@@ -51,6 +51,7 @@ export interface ShadowPunchAttackerState {
 
 export interface ShadowPunchClone {
   readonly x2: number;
+  readonly creationAge: number;
 }
 
 function shadowPunchCloneX2(creationAge: number, spriteId: number, moveSpeed: number): number {
@@ -76,10 +77,42 @@ export function shadowPunchClonesAtAge(
   const clones: ShadowPunchClone[] = [];
   for (let k = 0; k <= 8; k += 1) {
     if (age >= k && age <= k + 7) {
-      clones.push({ x2: shadowPunchCloneX2(k, spriteId, moveSpeed) });
+      clones.push({ x2: shadowPunchCloneX2(k, spriteId, moveSpeed), creationAge: k });
     }
   }
   return clones;
+}
+
+/**
+ * Draw (paint) order, back to front, for every clone alive at local age `a`.
+ * `CreateBattlerTrace`'s own `CloneBattlerSpriteWithBlend(0)` always grabs
+ * the lowest free sprite slot, and every other slot this task ever touches
+ * is claimed for the task's whole life EXCEPT the very first one (the
+ * lowest slot of all, since it was the first ever claimed) - so it alone
+ * gets reclaimed the instant its own occupant (creation age 0) expires,
+ * which happens on the exact tick creation age 8's clone is born (an
+ * 8-tick lifetime, one creation per tick). RAM-confirmed both attacker
+ * orientations (`dump-shadowpunch-full.py`, `traceSprites[].slot`): ascending
+ * slot order is otherwise plain ascending creation order (this codebase's
+ * usual "lower OAM position draws on top" convention - `AddSpritesToOamBuffer`
+ * preserves `gSprites[]` order, no `SortSprites` call in this task), so at
+ * every age except the reused-slot window the OLDEST alive clone is
+ * frontmost; from local age 8 on, creation-age-8's clone inherits that same
+ * lowest slot and becomes permanently frontmost instead (verified identical
+ * in both fixtures - a structural property of the fixed 9-clones/8-tick-life
+ * schedule, not a fixture-specific coincidence).
+ */
+export function shadowPunchClonePaintOrder(
+  age: number,
+  spriteId: number,
+  moveSpeed: number,
+): readonly ShadowPunchClone[] {
+  const clones = shadowPunchClonesAtAge(age, spriteId, moveSpeed);
+  const frontK = age < 8 ? 0 : 8;
+  const back = clones.filter((c) => c.creationAge !== frontK)
+    .sort((a, b) => b.creationAge - a.creationAge);
+  const front = clones.find((c) => c.creationAge === frontK);
+  return front ? [...back, front] : back;
 }
 
 /** `tPriority`: `GetBattlerSpriteSubpriority` 20 or 40 -> 2, else 3 (RAM-confirmed both ways). */
@@ -139,3 +172,22 @@ export const SHADOW_PUNCH_HITSPLAT_LAST_AGE = 58;
 /** `AnimTask_ShakeMon, ANIM_TARGET, 3, 0, 6, 1` - reuses the already-ported `shakeMon.ts` primitive verbatim. */
 export const SHADOW_PUNCH_TARGET_SHAKE = { xOffset: 3, yOffset: 0, numTimes: 6, frameDelay: 1 } as const;
 export const SHADOW_PUNCH_TARGET_SHAKE_FIRST_AGE = 49;
+
+/**
+ * The real attacker sprite itself goes invisible for this whole window
+ * (RAM-confirmed both orientations, `dump-shadowpunch-full.py`'s own
+ * `attacker.invisible` field) - only the trace clones are ever drawn while
+ * it's active. The window starts 3 ticks before the punch task's own first
+ * RAM-observable tick and ends exactly when `restorebg`'s own second
+ * `fadetobg` fade-out begins (`bldcnt` reads 0 again the same tick this
+ * flips back), bracketing the clone+fist+hitsplat body with a fixed margin
+ * on each side; no source line was found that explains the 3-tick lead-in
+ * directly, so this is encoded as a literal RAM-probed window rather than a
+ * guessed mechanism, matching this module's own BLDY-table precedent.
+ */
+export const SHADOW_PUNCH_ATTACKER_HIDDEN_FIRST_AGE = 38;
+export const SHADOW_PUNCH_ATTACKER_HIDDEN_LAST_AGE = 59;
+
+export function shadowPunchAttackerVisible(age: number): boolean {
+  return age < SHADOW_PUNCH_ATTACKER_HIDDEN_FIRST_AGE || age > SHADOW_PUNCH_ATTACKER_HIDDEN_LAST_AGE;
+}

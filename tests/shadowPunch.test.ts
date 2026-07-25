@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  shadowPunchAttackerVisible,
   shadowPunchAttackerX2,
   shadowPunchBackgroundBldy,
   shadowPunchBackgroundIsGhost,
+  shadowPunchClonePaintOrder,
   shadowPunchClonePriority,
   shadowPunchClonesAtAge,
 } from "../src/engine/shadowPunch.ts";
@@ -119,5 +121,34 @@ describe("shadowPunch AnimTask_AttackerPunchWithTrace port", () => {
     expect(shadowPunchBackgroundIsGhost(16)).toBe(true);
     expect(shadowPunchBackgroundIsGhost(78)).toBe(true);
     expect(shadowPunchBackgroundIsGhost(79)).toBe(false);
+  });
+
+  // Ground truth: `traceSprites[].slot` ascending in `dump-shadowpunch-full.py`'s
+  // own RAM probe (both fixtures), reversed here to back-to-front paint order.
+  const EXPECTED_PAINT_ORDER: ReadonlyArray<readonly [number, readonly number[]]> = [
+    [0, [0]],
+    [1, [1, 0]],
+    [7, [7, 6, 5, 4, 3, 2, 1, 0]],
+    [8, [7, 6, 5, 4, 3, 2, 1, 8]],
+    [9, [7, 6, 5, 4, 3, 2, 8]],
+    [12, [7, 6, 5, 8]],
+    [14, [7, 8]],
+    [15, [8]],
+    [16, []],
+  ];
+
+  it("paints clones back-to-front: the oldest alive clone leads until local age 8, when the reused-slot clone (creation age 8) takes over as permanently frontmost", () => {
+    for (const [age, expected] of EXPECTED_PAINT_ORDER) {
+      const order = shadowPunchClonePaintOrder(age, FIXTURE_A.spriteId, FIXTURE_A.moveSpeed)
+        .map((c) => c.creationAge);
+      expect(order).toEqual(expected);
+    }
+  });
+
+  it("hides the real attacker sprite for the whole clone+fist+hitsplat body, RAM-confirmed both orientations", () => {
+    expect(shadowPunchAttackerVisible(37)).toBe(true);
+    expect(shadowPunchAttackerVisible(38)).toBe(false);
+    expect(shadowPunchAttackerVisible(59)).toBe(false);
+    expect(shadowPunchAttackerVisible(60)).toBe(true);
   });
 });
