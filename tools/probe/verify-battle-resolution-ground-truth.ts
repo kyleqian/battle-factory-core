@@ -11,11 +11,19 @@
 // tools/battle-lab/mechanic-party-status-sync-off.json and asserts the
 // active mon's real status1 (from using Rest) is visible in its party
 // record while still alive, and untouched bench slots keep their pre-battle
-// status/HP. Draw reachability (docs/battle-resolution-adapter-ground-truth.md
-// §1) has no live check here -- live staging of a positive case was assessed
-// as not cheap this session (see that doc's "Staging attempt" note); the
-// verdict rests on source citations plus check 1/2's confirmation that the
-// party-record sync mechanism this doc's reasoning depends on is real.
+// status/HP. Check 3 reruns the NEW
+// tools/battle-lab/mechanic-voluntary-switch-statused-off.json (the
+// DOWN/A/RIGHT/A/A staging recipe documented in
+// docs/battle-resolution-adapter-ground-truth.md's "Staging recipes"
+// section) and asserts a paralyzed active mon that is voluntarily switched
+// out keeps `status: paralysis` in its now-benched party record while the
+// freshly switched-in mon reads `status: none` -- the one leg §2(b) had
+// previously left source-only. Draw reachability
+// (docs/battle-resolution-adapter-ground-truth.md §1) has no live check
+// here -- live staging of a positive case was assessed as not cheap this
+// session (see that doc's "Staging attempt" note); the verdict rests on
+// source citations plus check 1/2/3's confirmation that the party-record
+// sync mechanism this doc's reasoning depends on is real.
 //
 // Run: node --experimental-strip-types tools/probe/verify-battle-resolution-ground-truth.ts
 
@@ -149,6 +157,42 @@ async function main(): Promise<void> {
         `status=${JSON.stringify(bench.status)}`,
       );
     }
+  }
+
+  // --- Check 3: a paralyzed active mon voluntarily switched out via the
+  // DOWN/A/RIGHT/A/A staging recipe (docs/battle-resolution-adapter-ground-truth.md
+  // "Staging recipes") keeps its status in the now-benched party record. ---
+  const switchPath = "tools/battle-lab/mechanic-voluntary-switch-statused-off.json";
+  const switchCaptures = await runScenario(switchPath);
+  const preSwitch = switchCaptures.get(722);
+  const postSwitch = switchCaptures.get(1214);
+  if (!preSwitch || !postSwitch) {
+    check(
+      "voluntary-switch scenario has frames 722 and 1214",
+      false,
+      `frames: ${[...switchCaptures.keys()].join(",")}`,
+    );
+  } else {
+    check(
+      "frame 722: active mon (slot 0) is paralyzed before the switch (Thunder Wave landed)",
+      preSwitch.parties.player[0]!.status.kind === "paralysis" && preSwitch.battlers.player.partyIndex === 0,
+      `status=${JSON.stringify(preSwitch.parties.player[0]!.status)} partyIndex=${preSwitch.battlers.player.partyIndex}`,
+    );
+    check(
+      "frame 1214: the switch actually happened (active battler's partyIndex moved from slot 0 to slot 1)",
+      postSwitch.battlers.player.partyIndex === 1,
+      `partyIndex=${postSwitch.battlers.player.partyIndex}`,
+    );
+    check(
+      "frame 1214: the now-benched, previously-active slot 0 still reads status paralysis",
+      postSwitch.parties.player[0]!.status.kind === "paralysis",
+      `status=${JSON.stringify(postSwitch.parties.player[0]!.status)}`,
+    );
+    check(
+      "frame 1214: the freshly switched-in slot 1 reads status none (never statused)",
+      postSwitch.parties.player[1]!.status.kind === "none",
+      `status=${JSON.stringify(postSwitch.parties.player[1]!.status)}`,
+    );
   }
 
   console.log(failures === 0 ? "\nALL CHECKS PASSED" : `\n${failures} CHECK(S) FAILED`);

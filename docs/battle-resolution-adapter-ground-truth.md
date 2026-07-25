@@ -241,25 +241,25 @@ above (no live capture of "statused mon faints" was completed this session
 
 ### (b) Benched mon, statused then switched out — status persists
 
-**Confirmed**, entirely from the source round-trip above: nothing in the
-switch-out path clears `status1`, and the party record already holds the
-correct value (synced at the moment the status was first applied, not
-deferred to battle end or to the switch itself). The new probe in §2c below
-additionally demonstrates, live, that the party record is genuinely
-kept **live** during battle (matching `gBattleMons` in real time, not just
-snapshotted once) — the mechanism §2b's persistence argument depends on.
-A direct oracle capture of the literal "paralyze → voluntarily switch out →
-read bench slot" sequence was attempted this session (`overrides.parties` +
-a scripted `DOWN, A, RIGHT, A` mid-battle menu sequence, mirroring the
-button pattern documented in `docs/soundproof-off-evidence.md`'s
-`mechanic-uproar-soundproof-switch-off.json`) but the switch never actually
-occurred in three attempts (`battlers.player.partyIndex` stayed `0`
-throughout every trace tried) — the exact menu-cursor timing/geometry for a
-voluntary switch via `overrides.parties` wasn't nailed down within this
-session's budget, unlike the *forced* post-faint switch-in the existing KO
-fixture already exercises successfully (AI-side only). This leg's verdict
-rests on the source round-trip, not an oracle capture of the exact scenario;
-flagging the switch-menu button sequence as a good bounded follow-up probe.
+**Confirmed live**, closing the one leg a prior session left source-only.
+`tools/battle-lab/mechanic-voluntary-switch-statused-off.json` (committed
+this session, recipe in "Staging recipes" below): a Rattata is paralyzed by
+the opponent's Thunder Wave on turn 1 (frame 722:
+`state.parties.player[0].status.kind === "paralysis"`,
+`state.battlers.player.partyIndex === 0`), then voluntarily switched to
+bench slot 1 via the `DOWN, A, RIGHT, A, A` staging recipe. At frame 1214:
+`state.battlers.player.partyIndex === 1` (the switch genuinely happened —
+this is the same live-battler-struct field §2c cross-checks, not an
+assumption) and `state.parties.player[0].status.kind` is **still**
+`"paralysis"` — the now-benched slot keeps the status exactly as the
+source round-trip above predicted, while the freshly-switched-in
+`state.parties.player[1].status.kind === "none"` (never statused). Verify
+script check 3. A prior session's three attempts at this exact scenario
+(`overrides.parties` + a bare `DOWN, A, RIGHT, A` sequence, no wait frames
+between presses and no fifth button) never actually switched
+(`battlers.player.partyIndex` stayed `0` throughout); the "Staging recipes"
+section below explains why that shorter sequence was missing a required
+step, with RAM-probe evidence.
 
 ### (c) Surviving active mon's status — reads real `status1`
 
@@ -274,6 +274,66 @@ as §2's citations, observed directly). Slots 1/2 (never sent out) correctly
 still read `hp: 265/265`, `status: { kind: "none" }` — confirming the seam
 doc's third assumption ("undamaged bench keeps its pre-battle value") too,
 as a free byproduct. Verify script check 2.
+
+## Staging recipes: mid-battle voluntary party switch via `overrides.parties`
+
+**Working, rerunnable button sequence: `DOWN, A, RIGHT, A, A`** (five
+presses, each held 2 frames, with the specific wait gaps below — the wait
+gaps and the fifth `A` are exactly what a prior session's `DOWN, A, RIGHT,
+A` attempts (§2b) were missing). Derived by RAM-probing `gActionSelectionCursor`,
+`gPartyMenu.slotId`/`.action`, and `gBattlerPartyIndexes` per-tick with a
+throwaway probe over `oracle.advance()` (same pattern as
+`tools/probe/dump-battler-snapshot.py`/`run-battle-lab-rgb.py`), not by
+guessing timings — see the frame table below for the actual observed
+transitions. Banked as `tools/battle-lab/mechanic-voluntary-switch-statused-off.json`.
+
+1. **`DOWN` moves the action-selection cursor from FIGHT to POKEMON, no
+   wait needed.** `gActionSelectionCursor[gActiveBattler]` is a 2-bit
+   grid index (0=FIGHT, 1=BAG, 2=POKEMON, 3=RUN); `DOWN` XORs bit 1
+   (`battle_controller_player.c:278-283`). RAM-probed: cursor reads `2`
+   on the very next tick after the press.
+2. **`A` opens the party menu, but takes real time to land** — the engine
+   fades the battle scene out first (`PlayerHandleChoosePokemon`,
+   `battle_controller_player.c:2665-2688`, calls `BeginNormalPaletteFade`
+   then defers to `OpenPartyMenuToChooseMon`/`OpenPartyMenuInBattle` once
+   the fade completes). RAM-probed: `gPartyMenu.action` (the field
+   `GetCurrentPartySlotPtr`, `party_menu.c:1284-1290`, keys off) only
+   updates ~60 ticks after the press in this scenario — **wait at least
+   ~40 ticks before the next input**, not 2-3.
+   (Caution confirmed live: giving both sides a trapping ability, e.g.
+   Wobbuffet's Shadow Tag, on the first probe attempt made
+   `gPartyMenu.action` read `4` = `PARTY_ACTION_ABILITY_PREVENTS`
+   (`include/constants/party_menu.h:72`) instead of `0` = `PARTY_ACTION_CHOOSE_MON`
+   — the party menu still opens but the switch is permanently blocked
+   with no further state change for the rest of the trace. Use a
+   non-trapping species for this recipe, e.g. `SPECIES_RATTATA` (19).)
+3. **`RIGHT` moves the cursor from the active slot (0) directly to slot 1**
+   — `PARTY_LAYOUT_SINGLE`'s `MENU_DIR_RIGHT` case jumps straight from slot
+   0 to `sPartyMenuInternal->lastSelectedSlot` (or `1` the first time,
+   `party_menu.c:1569-1577`); it is **not** a vertical list walk. RAM-probed:
+   `gPartyMenu.slotId` flips `0 → 1` on the very next tick after the press
+   (needs no extra wait, unlike step 2).
+4. **The first `A` on the target slot does not confirm the switch by
+   itself** — this is the step the prior `DOWN, A, RIGHT, A` attempts
+   missed. `HandleChooseMonSelection`'s `switch (gPartyMenu.action)`
+   (`party_menu.c:1300-1364`) has no case for `PARTY_ACTION_CHOOSE_MON`
+   (`= 0`, `include/constants/party_menu.h:68`), so it falls to the
+   `default:` branch shared with `ABILITY_PREVENTS`/`SWITCHING`, which
+   calls `Task_TryCreateSelectionWindow` (`:1358-1363`) — a small SHIFT/
+   SUMMARY/CANCEL-style submenu, not an immediate switch. **A fifth press
+   (`A` again, confirming the submenu's default first option) is required**
+   to actually commit the switch.
+5. **The switch itself takes real animation time after that final `A`** —
+   RAM-probed `gBattlerPartyIndexes[gActiveBattler]` (the field
+   `state.battlers.player.partyIndex` exposes) does not flip from `0` to
+   `1` until roughly 150+ ticks after the confirming press in this
+   scenario; read the post-switch state no earlier than that.
+
+Exact segment sequence used in the committed fixture (`frames`/`buttons`,
+matching `bin/oracle lab`'s trace schema): `{2,[DOWN]}, {38,[]}, {2,[A]},
+{118,[]}, {2,[RIGHT]}, {38,[]}, {2,[A]}, {38,[]}, {2,[A]}, {250,[]}` —
+applied after any preceding turn(s) have already resolved and the action-
+selection menu is back up with its default FIGHT-cursor state.
 
 ## 3. Adjacency: anything besides `datahpupdate` mutating party HP/status on the WIN path?
 
