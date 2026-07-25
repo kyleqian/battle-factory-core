@@ -39,6 +39,7 @@ import {
   resolveBattleScriptBattlerHoldEffect,
   resolveBattleScriptMoveTarget,
   resolveBattleScriptMoveType,
+  withBattleScriptPartyMemberHp,
   type BattleScriptMoveEndHalfwords,
   type BattleScriptMoveHistory,
   type BattleScriptRulesBattlerState,
@@ -1258,7 +1259,11 @@ function createHealthbarupdateOpcodeHandler(
  * specialBattlerId (Counter/Mirror Coat's own attacker attribution) have no
  * reader anywhere in this engine's currently modeled scope and are not
  * tracked, matching the shellBellDmg/gBideDmg-via-gBattleScripting omissions
- * elsewhere in this rung.
+ * elsewhere in this rung. The real (non-substitute, non-negative-damage) HP
+ * write also lands in the party slice at this battler's own side/partyIndex
+ * (docs/faint-outcome-ground-truth.md §3.2's sync point), keeping
+ * Cmd_checkteamslost's party-wide sum consistent with the hit chain's own
+ * mutations without a second write-through mechanism.
  */
 function createDatahpupdateOpcodeHandler(
   isControllerIdle: BattleScriptControllerIdlePort<BattleScriptRulesContext>,
@@ -1354,7 +1359,19 @@ function createDatahpupdateOpcodeHandler(
     hitMarker = (hitMarker & ~HITMARKER_PASSIVE_HP_UPDATE) >>> 0;
 
     const nextRulesContext = withBattler(
-      Object.freeze({ ...rulesContext, hitMarker, hpDealt: dealt, bideDmg, bideTarget }),
+      Object.freeze({
+        ...rulesContext,
+        hitMarker,
+        hpDealt: dealt,
+        bideDmg,
+        bideTarget,
+        party: withBattleScriptPartyMemberHp(
+          rulesContext.party,
+          battlerState.side,
+          battlerState.partyIndex,
+          nextHp,
+        ),
+      }),
       battler,
       battlerChanges,
     );

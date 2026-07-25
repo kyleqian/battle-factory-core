@@ -54,6 +54,7 @@ function battler(changes: Partial<BattleScriptRulesBattler> = {}): BattleScriptR
     spDefense: changes.spDefense ?? 0,
     level: changes.level ?? 50,
     friendship: changes.friendship ?? 0,
+    partyIndex: changes.partyIndex ?? 0,
     endured: changes.endured,
     helpingHand: changes.helpingHand,
   });
@@ -882,6 +883,58 @@ describe("production datahpupdate (Cmd_datahpupdate) dispatch -- the rung's real
     if (result.kind !== "advanced") throw new Error("expected advance");
     expect(result.state.rulesContext.battlers[1]!.hp).toBe(0);
     expect(result.state.rulesContext.hpDealt).toBe(90);
+  });
+
+  it("write-through: also writes the matching party slot at the active battler's partyIndex (docs/faint-outcome-ground-truth.md §3.2 sync point)", () => {
+    const rc = context(
+      0,
+      {},
+      {
+        battleMoveDamage: 204,
+        party: {
+          opponent: [
+            { species: 0, hp: 0 },
+            { species: 0, hp: 0 },
+            { species: 191, hp: 90 },
+            { species: 0, hp: 0 },
+            { species: 0, hp: 0 },
+            { species: 0, hp: 0 },
+          ],
+        },
+      },
+      { hp: 90, partyIndex: 2 },
+    );
+    const { result } = stepAtOpcode("B_SCR_OP_DATAHPUPDATE", rc);
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battlers[1]!.hp).toBe(0);
+    expect(result.state.rulesContext.party.opponent[2]).toMatchObject({ species: 191, hp: 0 });
+    expect(result.state.rulesContext.party.opponent[0]).toMatchObject({ hp: 0 });
+    expect(result.state.rulesContext.party.player).toEqual(rc.party.player);
+  });
+
+  it("write-through: non-killing hit lands the exact delta in the party slot too (136 -> 122)", () => {
+    const rc = context(
+      0,
+      {},
+      {
+        battleMoveDamage: 14,
+        party: {
+          opponent: [
+            { species: 0, hp: 0 },
+            { species: 261, hp: 136 },
+            { species: 0, hp: 0 },
+            { species: 0, hp: 0 },
+            { species: 0, hp: 0 },
+            { species: 0, hp: 0 },
+          ],
+        },
+      },
+      { hp: 136, partyIndex: 1 },
+    );
+    const { result } = stepAtOpcode("B_SCR_OP_DATAHPUPDATE", rc);
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battlers[1]!.hp).toBe(122);
+    expect(result.state.rulesContext.party.opponent[1]).toMatchObject({ species: 261, hp: 122 });
   });
 
   it("MOVE_RESULT_NO_EFFECT: hp untouched, no event", () => {
