@@ -4,6 +4,41 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 448 — ChangeStatBuffs core + BOTH stat-change routes registered — census at 105/355 moves (77/276 Factory-L50) executable
+
+*(Entry written by the supervisor: the worker landed all five rungs green
+and was killed by an API server error during its docs tail; suite/build/
+both verify scripts/census independently re-verified before this entry.)*
+
+- **State:** tree green at **203 files / 2416 tests** (+20 over entry 447),
+  build green. Census (re-run live): **53/214 effects, 105/355 moves,
+  77/276 Factory-L50 moves executable** (was 34/74/53 after the trio), 12
+  ground-truth checks pass. Both stat verify scripts all-PASS.
+- **Did (commits `e263061`, `8342ed0`, `b4b9f42`):** `ChangeStatBuffs`
+  ported source-completely (exact guard-ladder order, flags semantics —
+  silent secondary guards vs `STAT_CHANGE_ALLOW_PTR` primary message path,
+  shared value-2 `WONT_INCREASE/_DECREASE` quirk, zero RNG); secondary
+  stat `MOVE_EFFECT_*_PLUS/_MINUS` cases wired in `applySetMoveEffect`
+  (banked Crunch SP_DEF_MINUS_1 proc/control/Clear-Body ledgers asserted);
+  primary route registered end-to-end (`STATBUFFCHANGE`,
+  `SETGRAPHICALSTATCHANGEVALUES`, `PLAYSTATCHANGEANIMATION`, plus the
+  DOWN-path's `JUMPIFSTATUS2`/`ORBYTE`; `setstatchanger` confirmed a
+  setbyte alias) with integration proofs from the LITERAL topology entries
+  (Swords Dance +2 zero rolls, Tail Whip -1 one accuracy roll, Clear Body
+  block with ability-reveal message at unchanged RNG-step count,
+  at-bound early-out). Census doc regenerated + committed; its
+  ground-truth assertions updated deliberately (12 checks).
+- **Next:** end-turn orchestration (`docs/end-turn-ground-truth.md`, 17/17
+  checks banked — the last structural piece for multi-TURN battles), then
+  confusion (`docs/stat-change-confusion-ground-truth.md`) and the AI
+  move-selection port (`docs/factory-ai-ground-truth.md`, 15/17-roll
+  ledgers banked). Forced-switch §4 step 10 (player-side interactive
+  party-menu controller state) remains the one named barrier on that path.
+- **Notes:** the killing API error hit mid-response during docs; no code
+  was lost (all rungs committed). The launcher's "unauthenticated/
+  sandboxed" postflight hint is again noise on this failure mode.
+
+---
 ## 447 — Forced-switch §4 slices 3-9 landed: the non-terminal faint fork is now COMPLETE — multi-KO battles are mechanically possible
 
 - **State:** tree green at **202 files / 2396 tests** (+2 files/+30 tests
@@ -160,74 +195,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** no oracle traces added this session; no presentation/
   `battleScene`/ROADMAP edits. Stat-down family, confusion, and end-turn
   orchestration remain explicitly out of scope.
-
----
-## 445 — Forced-switch §4 slices 1-2 landed: `jumpifbattletype`/`openpartyscreen` registered — the non-terminal fork now runs through the AI's real pick
-
-- **State:** tree green at **197 files / 2342 tests** (+3 files/+24 tests
-  over entry 444's 194/2318), build green. `verify-forced-switch-ground-
-  truth.ts` rerun live before starting and again after every commit: still
-  **23/23 ALL PASS**. Ratchet green: `battleScriptJumpifwordOpcode.ts` (new,
-  pin 1) and `battleScriptOpenPartyScreenOpcode.ts` (new, pin 3) added to
-  `PINNED_BARRIER_COUNTS`, each with its own reachability test; no new
-  production imports of canonical recordings.
-- **Did (commits `3967df3`, `011deee`, `f3aa6bc`), per
-  `docs/forced-switch-ground-truth.md` §4's own ordering:**
-  - **Slice 1 — `B_SCR_OP_JUMPIFWORD`** (`Cmd_jumpifword`, structurally
-    identical to the already-registered `Cmd_jumpifbyte` but 4-byte
-    word/value): this is what `jumpifbattletype`/`jumpifnotbattletype`
-    expand to. Registering it takes `BattleScript_HandleFaintedMon`'s
-    `BATTLE_TYPE_TRAINER` gate from a halted barrier to a real taken jump
-    for Factory, straight through to `BattleScript_FaintedMonSendOutNew`.
-    Modeled memWord/value universe: `gBattleTypeFlags`/`gHitMarker` against
-    the named constants this rung's path needs; everything else barriers.
-  - **Slice 2 — `B_SCR_OP_OPENPARTYSCREEN`** (`BS_FAINTED`, plain-battler
-    branch), the doc's own "single highest-leverage registration": (a)
-    `src/engine/battleAiSwitchInto.ts` — a pure, RNG-free port of
-    `GetMostSuitableMonToSwitchInto`'s pass-1 gate (type-matchup scoring +
-    super-effective-move check, including the documented "picks the type
-    that takes the MOST damage" bug and the mono-type-opponent double-
-    multiply quirk), built and unit-tested standalone first per the doc's
-    own suggestion; (b) the opcode itself, dispatching AI-controlled
-    fainted battlers through that port (writes a new
-    `monToSwitchIntoId[battler]` rules-context field, zero RNG) and barring
-    three named, reachability-tested branches: doubles/multi topology,
-    the player-side interactive party-menu round trip (§3/§4 step 10's own
-    later slice), and pass-2's `AI_CalcDmg` raw-damage fallback (unreached
-    by any fixture here). Extended `BattleScriptPartyMemberState`/`Input`
-    with a `moves` field (backward compatible) — a real dependency the
-    scoring function needed that the party slice didn't carry yet.
-  - **Integration proof** (`tests/factoryBattleScriptTerminalDecision.test.ts`,
-    `tests/battleScriptFaintedActionsOrchestration.test.ts`, both updated):
-    the healthy-opponent-bench KO scenario now runs `checkteamslost ->
-    jumpifbyte -> jumpifword -> openpartyscreen`, reproducing the banked
-    ledger (MACHOP, party index 2, picked over PIDGEY's "next index" decoy,
-    zero extra `Random()` calls) before halting at the next genuinely
-    unregistered opcode, `switchhandleorder`. Also fixed a real gap this
-    surfaced in `battleScriptFaintedActionsOrchestration.ts`'s
-    `runScriptToOwnEnd`: it only treated an *unregistered* opcode as a
-    barrier — a *registered* opcode's own internal `unsupported-branch`
-    halt (now reachable for the first time) used to hit its catch-all
-    "unexpected step" throw instead of surfacing as the same kind of named
-    machine boundary. Fixed to treat any non-terminal halt uniformly.
-- **Next — slice 3, `SWITCHHANDLEORDER`, is NOT the "trivial" transcription
-  the doc characterized it as; a real finding for whoever picks this up:**
-  reading `SwitchPartyOrder` (`battle_main.c:4086-4115`) shows it calls
-  `GetPartyIdFromBattlePartyId()` + `SwitchPartyMonSlots()` against
-  `gBattlePartyCurrentOrder`/`gBattleStruct->battlerPartyOrders` — a
-  per-battler *permutation* layer over the raw party array that this
-  engine does not model at all (today `party.opponent[i]` IS the raw
-  array, no indirection). `monToSwitchIntoId`/`gBattlerPartyIndexes` are
-  positions in that permuted order, not raw array indices, so slice 4
-  (`GETSWITCHEDMONDATA`/`SWITCHINDATAUPDATE`) reading "party at
-  `gBattlerPartyIndexes[battler]`" only lines up if this permutation is
-  modeled first (or proven a no-op for singles — not yet checked). Do not
-  skip this: it's the actual next slice, sized honestly rather than rushed
-  in the time remaining this session. `docs/forced-switch-ground-truth.md`
-  §4 should get a one-line correction pointing here.
-- **Notes:** `battler({..., partyIndex})`/`.types`/`.moves` were all
-  already-modeled fields this rung reused, not new plumbing. No
-  presentation/`battleScene`/ROADMAP edits. Terminal KO path (empty bench)
-  is untouched — confirmed byte-for-byte by the unchanged terminal-decision
-  tests alongside the updated non-terminal ones.
 
