@@ -1148,7 +1148,7 @@ describe("production tryfaintmon (Cmd_tryfaintmon) dispatch", () => {
   });
 });
 
-describe("RUNG 4 integration: opcode 0 -> ... -> seteffectwithchance -> tryfaintmon -> moveend/dofaintanimation boundary", () => {
+describe("RUNG 4 integration: opcode 0 -> ... -> seteffectwithchance -> tryfaintmon -> moveend-to-end / playfaintcry boundary", () => {
   it("RUNG 1 hit turn (Tackle, seed 1): walks the full sixteen-opcode hit chain, no-faint tryfaintmon pass-through, halts at moveend (opcode 73)", () => {
     // attack/defense nonzero (unlike the default 0/0 fixture) so damagecalc produces a real,
     // non-NaN, non-lethal hit -- this scenario specifically needs tryfaintmon's no-faint path.
@@ -1228,7 +1228,7 @@ describe("RUNG 4 integration: opcode 0 -> ... -> seteffectwithchance -> tryfaint
     "full staged hit turn on the KO scenario's real ROM seed (919694434): reproduces the pinned "
       + "142 -> 213 -> 213 -> 204 damage chain, the exact 4-roll ledger (accuracycheck, critcalc, "
       + "adjustnormaldamage, seteffectwithchance), the killing hit's HP -> 0, tryfaintmon's faint "
-      + "branch into BattleScript_FaintTarget, and hands off cleanly at dofaintanimation",
+      + "branch into BattleScript_FaintTarget, and blocks at playfaintcry's BS_TARGET selector (ISSUES #43)",
     () => {
       const rc = context(
         0,

@@ -6,7 +6,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ---
 ## 436 — S10 step (iii): opcode 73 (`moveend`) registered — hit chain now runs to script completion
 
-- **State:** tree green at **183 files / 2166 tests** (+31), build green.
+- **State:** tree green at **181 files / 2166 tests** (+31), build green.
   `createBattleScriptStatusRulesHandlers` now composes **46** opcodes (was
   45): opcode 73 `B_SCR_OP_MOVEEND`/`Cmd_moveend`, in a new
   `src/engine/battleScriptMoveEndOpcode.ts`. The plain-hit staged integration
@@ -73,6 +73,32 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `playfaintcry`, but nothing here required it.
 - **Notes:** no presentation/render/`battleScene` edits; no oracle traces
   (Tier-1 only); no new production imports of canonical recordings.
+- **Supervisor fold (2026-07-24 ~20:15):** merged and verified at **182
+  files / 2172 tests**, build green: (1) side-lane step (iv) prep —
+  `docs/faint-outcome-ground-truth.md` + `tools/probe/
+  verify-faint-outcome-ground-truth.ts` (16 live checks PASS, reran
+  independently: six unregistered opcodes on the minimal WIN path;
+  `HandleFaintedMonActions` is a C-side orchestration loop, not an opcode;
+  `getexp` dead for Frontier; `checkteamslost` reads party-wide HP; ISSUES
+  #43 is two selector gaps, BS_TARGET + BS_FAINTED) and
+  `docs/round-controller-outcome-seam.md` (`resolveRoundBattle` has zero
+  production call sites; five-piece dependency-ordered seam plan).
+  **Decision (supervisor, reversible):** the step (iv) party-HP slice uses
+  the seam doc's **Option A** — extend `BattleScriptRulesContext` in place,
+  the established RUNG-2/3 growth pattern — not a second wrapper context.
+  (2) animation lane — MOVE_EMBER at honest `partial` (63/63+63/63 opponent
+  orientation; 63/63+61/63 player orientation, 2-frame creation-tick
+  remainder of the known same-frame-sprite-step class; two real bugs fixed
+  en route: descending `sSpriteOrder` tie-break, wrong full-HP fixture
+  assumption) after a MUD_SLAP verification pass (already `exact` since
+  `c1df4a9`; both comparators re-verified live 51/51×4 — supervisor
+  mis-scoped that brief, per-move status now checked before briefing).
+  A follow-up worker on the 2-frame remainder is in flight. (3) the moveend
+  worker's ROADMAP checkpoint note is accurate status-only content — kept,
+  with the reminder that ROADMAP stays supervisor-owned. Fixed the RUNG 4 KO
+  test's stale title (it blocks at `playfaintcry`, not `dofaintanimation`);
+  appended the `isControllerIdle`-vs-scheduler-field papercut to
+  PAPERCUTS.md.
 
 ---
 ## 435 — S10 step (ii) RUNG 4: seteffectwithchance + tryfaintmon registered — sixteen-opcode hit chain complete

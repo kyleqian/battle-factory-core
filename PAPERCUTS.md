@@ -389,3 +389,18 @@ worker (PROGRESS entry 13).
 - **Cost each:** ~10 min.
 - **Workaround:** none cheap yet; a cached local probe-replay mode (reuse
   committed RAM dumps) would make alignment sweeps near-instant.
+
+## Hit-chain opcode tests gate controller-busy on the injected port, not the scheduler field
+
+- **What:** RUNG 1-3 hit-chain opcodes check the injected `isControllerIdle`
+  port rather than `BattleScriptSchedulerState.pendingControllerBattlers`,
+  so manually-stepped test sequences accumulate unacknowledged pending
+  battlers invisibly — surfaced only when opcode 73's controller states
+  started reading the real field, as a confusing "blocked" instead of the
+  expected result. Not a production bug (the real driver acknowledges
+  correctly).
+- **Hits:** 1.
+- **Cost each:** ~15 min.
+- **Workaround:** acknowledge between steps in manually-driven opcode tests
+  (done in the two affected test files); longer-term, align the opcode
+  handlers on the scheduler field.
