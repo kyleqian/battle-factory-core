@@ -510,6 +510,13 @@ import {
   DRAGON_BREATH_FRAMEBUFFER_PALETTE_AGE_LAG,
 } from "./dragonBreath.ts";
 import { flamethrowerDisplayedBattlerOffsetsAtAge } from "./flamethrower.ts";
+import {
+  dragonRageSchedule,
+  DRAGON_RAGE_FRAMEBUFFER_SHAKE_AGE_LAG,
+  DRAGON_RAGE_FRAMEBUFFER_SLIDE_AGE_LAG,
+  DRAGON_RAGE_FRAMEBUFFER_FIRE_SPIT_AGE_LAG,
+  DRAGON_RAGE_FRAMEBUFFER_FIRE_PLUME_AGE_LAG,
+} from "./dragonRage.ts";
 
 import battleAnimRocksAsset from "../assets/gen/battle-anim-rocks.json" with { type: "json" };
 import battleAnimMudSandAsset from "../assets/gen/battle-anim-mud-sand.json" with { type: "json" };
@@ -534,6 +541,7 @@ import battleAnimHitsplatAsset from "../assets/gen/battle-anim-hitsplat.json" wi
 import battleAnimCuttingSliceAsset from "../assets/gen/battle-anim-cutting-slice.json" with { type: "json" };
 import battleAnimFlyBallAsset from "../assets/gen/battle-anim-fly-ball.json" with { type: "json" };
 import battleAnimSmallEmberAsset from "../assets/gen/battle-anim-small-ember.json" with { type: "json" };
+import battleAnimFirePlumeAsset from "../assets/gen/battle-anim-fire-plume.json" with { type: "json" };
 import battleAnimHandsAndFeetAsset from "../assets/gen/battle-anim-hands-and-feet.json" with { type: "json" };
 import battleAnimIceCrystalsAsset from "../assets/gen/battle-anim-ice-crystals.json" with { type: "json" };
 import battleAnimIceCubeAsset from "../assets/gen/battle-anim-ice-cube.json" with { type: "json" };
@@ -597,6 +605,7 @@ import {
   sceneOnRockSlideView,
   sceneOnSandAttackView,
   sceneOnMudSlapView,
+  sceneOnDragonRageView,
   type SceneOnMovePresentationState,
 } from "./sceneOnPresentation.ts";
 import {
@@ -843,6 +852,7 @@ const murkrowFrontSprite = (opponentFrontSpritesAsset as Record<string, Opponent
 const spoinkFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).SPOINK!;
 const arcanineFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ARCANINE!;
 const dugtrioFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).DUGTRIO!;
+const charmeleonFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).CHARMELEON!;
 const MURKROW_CORNER = { x: 144, y: 19 };
 const menuHealthboxPlayer = menuHealthboxPlayerAsset as SendOutHealthboxContentAsset;
 const battleAnimRocks = battleAnimRocksAsset as BattleAnimRocksAsset;
@@ -859,6 +869,7 @@ const battleAnimMudSand = battleAnimMudSandAsset as {
 /** S7/S8 turn 14 (docs/turn14-notes.md's worktree-lane addendum): `gFlyBallUpSpriteTemplate`'s "round shadow" ball sprite (`ANIM_TAG_ROUND_SHADOW`, `round_shadow.png`, 64x64) - see `tools/extract/extract-fly-ball.ts`. */
 const battleAnimFlyBall = battleAnimFlyBallAsset as { tileset: Tileset; palette: RgbColor[] };
 const battleAnimSmallEmber = battleAnimSmallEmberAsset as { tileset: Tileset; palette: RgbColor[] };
+const battleAnimFirePlume = battleAnimFirePlumeAsset as { tileset: Tileset; palette: RgbColor[] };
 const battleAnimHandsAndFeet = battleAnimHandsAndFeetAsset as { tileset: Tileset; palette: RgbColor[] };
 const battleAnimIceCrystals = battleAnimIceCrystalsAsset as { tileset: Tileset; palette: RgbColor[] };
 const battleAnimIceCube = battleAnimIceCubeAsset as {
@@ -878,6 +889,7 @@ const murkrowBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSp
 const spoinkBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).SPOINK!;
 const arcanineBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ARCANINE!;
 const dugtrioBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).DUGTRIO!;
+const charmeleonBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).CHARMELEON!;
 const extremeSpeedBg = (extremeSpeedAsset as {
   background: {
     tileset: Tileset;
@@ -16977,6 +16989,144 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "ONIX used" : "Foe ONIX used",
       "EMBER!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "DRAGON_RAGE") {
+    // Per-mechanism framebuffer capture lag (ANIMATION_PROGRESS.md's
+    // 2026-07-25 rung 5 remainder): `AnimTask_ShakeMon` (both battlers) and
+    // the fire-spit sprite both use this codebase's normal 1-tick default;
+    // the two `SlideMonTo{Offset,OriginalPos}` dummies use one tick less
+    // (RAM/pixel-confirmed, `dragonRage.ts`'s own doc comments). The
+    // attacker's own combined offset switches lag mid-flight at the exact
+    // tick it switches mechanism (shake -> slide-to-offset -> slide-to-
+    // original-pos), so it needs its own phase-aware view rather than the
+    // single shared one every other Scene-ON move uses.
+    const schedule = dragonRageSchedule(0);
+    const attackerLag =
+      state.age < schedule.slideToOffsetTick
+        ? DRAGON_RAGE_FRAMEBUFFER_SHAKE_AGE_LAG
+        : DRAGON_RAGE_FRAMEBUFFER_SLIDE_AGE_LAG;
+    const view = sceneOnDragonRageView({
+      ...state,
+      age: state.age - attackerLag,
+    });
+    const targetShakeView = sceneOnDragonRageView({
+      ...state,
+      age: state.age - DRAGON_RAGE_FRAMEBUFFER_SHAKE_AGE_LAG,
+    });
+    const fireSpitView = sceneOnDragonRageView({
+      ...state,
+      age: state.age - DRAGON_RAGE_FRAMEBUFFER_FIRE_SPIT_AGE_LAG,
+    });
+    const firePlumeView = sceneOnDragonRageView({
+      ...state,
+      age: state.age - DRAGON_RAGE_FRAMEBUFFER_FIRE_PLUME_AGE_LAG,
+    });
+    const playerToOpponent =
+      view.attacker.species === "CHARMELEON"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "CHARMELEON"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged DRAGON_RAGE pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSprite = playerToOpponent ? charmeleonBackSprite : charmeleonFrontSprite;
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    const behindPlumes = firePlumeView.firePlumes.filter((p) => p.subpriorityOffset >= 64);
+    const frontPlumes = firePlumeView.firePlumes.filter((p) => p.subpriorityOffset < 64);
+    const drawPlume = (plume: (typeof firePlumeView.firePlumes)[number]) => {
+      drawSpriteSheet(
+        fb,
+        subTileset(battleAnimFirePlume.tileset, plume.sheetFrame * 4, 4),
+        battleAnimFirePlume.palette,
+        plume.x - 16,
+        plume.y - 16,
+      );
+    };
+    for (const plume of behindPlumes) drawPlume(plume);
+    drawSpriteSheet(
+      fb,
+      targetSprite.tileset,
+      targetSprite.palette,
+      view.target.geometry.spriteCorner.x + targetShakeView.targetOffset.x2,
+      view.target.geometry.spriteCorner.y + targetShakeView.targetOffset.y2,
+    );
+    for (const plume of frontPlumes) drawPlume(plume);
+    const drawAttacker = () => {
+      drawSpriteSheet(
+        fb,
+        attackerSprite.tileset,
+        attackerSprite.palette,
+        view.attacker.geometry.spriteCorner.x + view.attackerOffset.x2,
+        view.attacker.geometry.spriteCorner.y + view.attackerOffset.y2,
+      );
+    };
+    const drawFireSpit = () => {
+      if (!fireSpitView.fireSpit) return;
+      drawSpriteSheetAffineRotate(
+        fb,
+        subTileset(battleAnimSmallEmber.tileset, fireSpitView.fireSpit.sheetFrame * 4, 4),
+        battleAnimSmallEmber.palette,
+        fireSpitView.fireSpit.x + fireSpitView.fireSpit.x2,
+        fireSpitView.fireSpit.y + fireSpitView.fireSpit.y2,
+        fireSpitView.fireSpit.matrix.pa,
+        fireSpitView.fireSpit.matrix.pb,
+        fireSpitView.fireSpit.matrix.pc,
+        fireSpitView.fireSpit.matrix.pd,
+      );
+    };
+    // Same target-relative-subpriority-vs-attacker rule EMBER/FLAMETHROWER's
+    // own draw blocks already established (`dragonBreathEmbersInFrontOfAttacker`):
+    // the fire-spit sprite's own createsprite subpriority is `targetSubpriority
+    // - 2`, the identical shape EMBER's own ember sprites use.
+    if (dragonBreathEmbersInFrontOfAttacker(view.attacker.geometry.side)) {
+      drawAttacker();
+      drawFireSpit();
+    } else {
+      drawFireSpit();
+      drawAttacker();
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "CHARMELEON";
+    const playerSpecies = playerToOpponent ? "CHARMELEON" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "CHARMELEON used" : "Foe CHARMELEON used",
+      "DRAGON RAGE!",
       99,
     );
     return;

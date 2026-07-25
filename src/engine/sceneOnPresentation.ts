@@ -138,6 +138,24 @@ import {
   type ThunderPunchLightning,
   type ThunderPunchPaletteState,
 } from "./thunderPunch.ts";
+import {
+  DRAGON_RAGE_ATTACKER_SHAKE,
+  DRAGON_RAGE_FIRE_PLUME_SPAWNS,
+  DRAGON_RAGE_FIRE_SPIT_GEOMETRY,
+  DRAGON_RAGE_SLIDE_TO_OFFSET,
+  DRAGON_RAGE_SLIDE_TO_ORIGINAL_POS,
+  DRAGON_RAGE_TARGET_SHAKE,
+  dragonRageFirePlumeStateAtAge,
+  dragonRageFireSpitStateAtAge,
+  dragonRageSchedule,
+  shakeMonOffsetAtRenderTick,
+  slideMonToOffsetAtTick,
+  slideMonToOriginalPosAtTick,
+  type DragonRageFirePlumeState,
+  type DragonRageFireSpitState,
+  type DragonRageSchedule,
+  type DragonRageSide,
+} from "./dragonRage.ts";
 
 export type SceneOnBattlerSide = "player" | "opponent";
 
@@ -159,7 +177,8 @@ export interface SceneOnPresentationBattler {
     | "MURKROW"
     | "SPOINK"
     | "ARCANINE"
-    | "DUGTRIO";
+    | "DUGTRIO"
+    | "CHARMELEON";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -518,6 +537,23 @@ export interface SceneOnEmberConfig {
   readonly animationAgeOffset?: number;
 }
 
+export interface SceneOnDragonRageFieldProfile {
+  readonly playerHp: number;
+  readonly playerMaxHp: number;
+  readonly opponentHp: number;
+  readonly opponentMaxHp: number;
+  readonly playerGender?: "male" | "female";
+  readonly opponentGender?: "male" | "female";
+}
+
+export interface SceneOnDragonRageConfig {
+  readonly move: "DRAGON_RAGE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationAgeOffset?: number;
+}
+
 export type SceneOnMoveConfig =
   | SceneOnFirePunchConfig
   | SceneOnIcePunchConfig
@@ -538,7 +574,8 @@ export type SceneOnMoveConfig =
   | SceneOnFlamethrowerConfig
   | SceneOnBlazeKickConfig
   | SceneOnBindConfig
-  | SceneOnEmberConfig;
+  | SceneOnEmberConfig
+  | SceneOnDragonRageConfig;
 
 export interface SceneOnMovePresentationState<
   TConfig extends SceneOnMoveConfig = SceneOnMoveConfig,
@@ -798,6 +835,21 @@ export interface SceneOnBindView extends BindAnimationState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnDragonRageFirePlume extends DragonRageFirePlumeState {
+  readonly subpriorityOffset: number;
+}
+
+export interface SceneOnDragonRageView {
+  readonly age: number;
+  readonly animationAge: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly attackerOffset: Readonly<{ x2: number; y2: number }>;
+  readonly targetOffset: Readonly<{ x2: number; y2: number }>;
+  readonly fireSpit: DragonRageFireSpitState | null;
+  readonly firePlumes: readonly SceneOnDragonRageFirePlume[];
+}
+
 export const FEATHER_DANCE_STAT_MESSAGE_LINE1 = "ONIX’s ATTACK";
 export const FEATHER_DANCE_STAT_MESSAGE_LINE2 = "harshly fell!";
 export const FEATHER_DANCE_STAT_MESSAGE_LENGTH =
@@ -983,6 +1035,99 @@ export function sceneOnEmberView(
     attacker: state.config.attacker,
     target: state.config.target,
     sprites: emberSpritesInDrawOrder(animationAge, state.config.animationProfile),
+  };
+}
+
+/**
+ * Attacker x2/y2 across the move's three sequential (never concurrent, per
+ * the script's own `waitforvisualfinish` barriers - `dragonRage.ts`'s module
+ * doc) phases: `AnimTask_ShakeMon` (self-guards ticks before its own
+ * creation), then `SlideMonToOffset`'s 0->15px ramp (freezes at the held
+ * offset once its own duration elapses), then `SlideMonToOriginalPos`'s
+ * 15px->0 return (`ticksSinceCreation < 0` holds at the same frozen value,
+ * so the boundary between phase 2 and 3 is seamless).
+ */
+function dragonRageAttackerOffset(
+  animationAge: number,
+  schedule: DragonRageSchedule,
+  attackerSide: DragonRageSide,
+): Readonly<{ x2: number; y2: number }> {
+  if (animationAge < schedule.slideToOffsetTick) {
+    return shakeMonOffsetAtRenderTick(DRAGON_RAGE_ATTACKER_SHAKE, schedule.attackerShakeTick, animationAge);
+  }
+  if (animationAge < schedule.slideToOriginalPosTick) {
+    return slideMonToOffsetAtTick(
+      { battlerSide: attackerSide, ...DRAGON_RAGE_SLIDE_TO_OFFSET },
+      animationAge - schedule.slideToOffsetTick,
+    );
+  }
+  const heldX2 =
+    attackerSide === "opponent"
+      ? -DRAGON_RAGE_SLIDE_TO_OFFSET.targetXOffset
+      : DRAGON_RAGE_SLIDE_TO_OFFSET.targetXOffset;
+  return slideMonToOriginalPosAtTick(
+    { currentX2: heldX2, currentY2: 0, ...DRAGON_RAGE_SLIDE_TO_ORIGINAL_POS },
+    animationAge - schedule.slideToOriginalPosTick,
+  );
+}
+
+function dragonRageFirePlumes(
+  animationAge: number,
+  schedule: DragonRageSchedule,
+  attackerSide: DragonRageSide,
+  targetBattlePosition: Readonly<{ x: number; y: number }>,
+  targetSubpriority: number,
+): readonly SceneOnDragonRageFirePlume[] {
+  const plumes: SceneOnDragonRageFirePlume[] = [];
+  for (let i = 0; i < DRAGON_RAGE_FIRE_PLUME_SPAWNS.length; i += 1) {
+    const spawn = DRAGON_RAGE_FIRE_PLUME_SPAWNS[i]!;
+    const spawnState = dragonRageFirePlumeStateAtAge(
+      spawn,
+      attackerSide,
+      targetBattlePosition,
+      targetSubpriority,
+      animationAge - schedule.firePlumeTicks[i]!,
+    );
+    if (spawnState) plumes.push({ ...spawnState, subpriorityOffset: spawn.subpriorityOffset });
+  }
+  return plumes;
+}
+
+export function sceneOnDragonRageView(
+  state: SceneOnMovePresentationState,
+): SceneOnDragonRageView {
+  if (state.config.move !== "DRAGON_RAGE") {
+    throw new Error(`expected DRAGON_RAGE presentation, got ${state.config.move}`);
+  }
+  const animationAge = state.age + (state.config.animationAgeOffset ?? 0);
+  // 0-anchored: `dragonRageSchedule`'s own ticks are derived purely from the
+  // decoded script via `interpretAnimSchedule` (no absolute-tick constant);
+  // `animationAge` IS the RAM-tick-equivalent clock, same convention
+  // `sceneOnEmberView`/`sceneOnDragonBreathView` already establish.
+  const schedule = dragonRageSchedule(0);
+  const attackerSide: DragonRageSide = state.config.attacker.geometry.side;
+  // GetBattlerSpriteSubpriority's fixed singles-battle constant (30 player,
+  // 40 opponent) - species-independent, same value `ember.ts`'s own callers
+  // already pass in as `targetSubpriority`.
+  const targetSubpriority = state.config.target.geometry.side === "player" ? 30 : 40;
+  return {
+    age: state.age,
+    animationAge,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    attackerOffset: dragonRageAttackerOffset(animationAge, schedule, attackerSide),
+    targetOffset: shakeMonOffsetAtRenderTick(DRAGON_RAGE_TARGET_SHAKE, schedule.targetShakeTick, animationAge),
+    fireSpit: dragonRageFireSpitStateAtAge(
+      animationAge - schedule.fireSpitTick,
+      DRAGON_RAGE_FIRE_SPIT_GEOMETRY[attackerSide],
+    ),
+    firePlumes: dragonRageFirePlumes(
+      animationAge,
+      schedule,
+      attackerSide,
+      state.config.target.geometry.battlePositionCenter,
+      targetSubpriority,
+    ),
   };
 }
 

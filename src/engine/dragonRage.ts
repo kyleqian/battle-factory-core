@@ -65,6 +65,74 @@ export const DRAGON_RAGE_SLIDE_TO_ORIGINAL_POS = { axisSnapMode: 0 as const, dur
 export const DRAGON_RAGE_FIRE_SPIT_ARGS = { initialX: 30, initialY: 15, targetX: 0, targetY: 10, duration: 10 } as const;
 
 /**
+ * Rung 5 remainder (ANIMATION_PROGRESS.md 2026-07-25): per-mechanism
+ * capture-lag bisection, same shape as `dragonBreath.ts`'s own
+ * `DRAGON_BREATH_FRAMEBUFFER_OAM_AGE_LAG`/`_PALETTE_AGE_LAG` split - a
+ * named per-mechanism constant, not a global fudge. Each value is
+ * `renderTick - lag = the RAM tick that tick's photo actually shows`,
+ * confirmed via `tools/compare/dragonRagePortable.ts`'s own dense
+ * framebuffer count (`dragon-rage-player-charmeleon-opponent-onix`, both
+ * cross-checked against a full grid sweep over `tools/compare/scratch/
+ * dragonrage-dense-cached.ts` against one cached oracle capture - direct
+ * component-vs-photo pixel correlation, not curve-fitting). An early
+ * box-isolated bisection pass (`dragonrage-lag-bisect{,-cached}.ts`)
+ * initially suggested lower values for shake/slide; those numbers turned
+ * out to be silently contaminated by this module's OWN prior hardcoded
+ * `age - 1` (removed by this rung) still being applied inside `render()`
+ * underneath the bisection script's already-shifted age - the dense
+ * full-frame sweep below, run against the real committed draw path with NO
+ * other hidden shift, is what these values are actually pinned to.
+ *
+ * `AnimTask_ShakeMon` (both call sites - `gTasks[]`/`RunTasks`-driven):
+ * lag 2 makes every dense frame across the whole shake phase (render ages
+ * 0-78) match except age 1 itself (a single-frame boundary artifact where
+ * `shakeMonOffsetAtRenderTick`'s own `renderTick < creationTick` guard
+ * zeroes a legitimate just-past-creation state once shifted by lag 2 -
+ * named, not chased further this step). Target shake reuses the same
+ * `AnimTask_ShakeMon`/`AnimTask_ShakeMon_Step` call (RAM-confirmed
+ * identical) so it shares this lag by mechanism identity; it is not
+ * independently dense-verified because the target-shake phase (render age
+ * 97+) is where the separate, already root-caused idle-bob x2 residual (see
+ * this rung's ledger section) blocks a clean per-frame count regardless of
+ * lag.
+ */
+export const DRAGON_RAGE_FRAMEBUFFER_SHAKE_AGE_LAG = 2;
+/**
+ * `SlideMonToOffset`/`SlideMonToOriginalPos` (dummy `gSprites[].callback`
+ * translations): lag 1 - the shake tasks' own default, NOT the lower value
+ * the (contaminated, see above) box-isolated pass first suggested - makes
+ * every dense frame through the slide phase (render ages 79-85) match.
+ */
+export const DRAGON_RAGE_FRAMEBUFFER_SLIDE_AGE_LAG = 1;
+/**
+ * The fire-spit sprite (`StartDragonFireTranslation`): direct RAM-to-pixel
+ * correlation (render age 87's own predicted x2=22 exactly matches RAM
+ * tick 176 - the already-Tier-1-pinned "component" math - while the
+ * PHOTOGRAPHED fire pixels at that same render tick sit at the x2=14
+ * column, i.e. RAM tick 175's value) confirms lag 1, the same tier the
+ * shake tasks use. The dense sweep's own fire-spit-active window (render
+ * ages 86-96) still shows a real, smaller pixel residual at this lag (not
+ * resolved by trying 0 or 2 instead - both score equal or worse) - left as
+ * a named remainder, likely a further `drawSpriteSheetAffineRotate`
+ * rounding question rather than a timing one.
+ */
+export const DRAGON_RAGE_FRAMEBUFFER_FIRE_SPIT_AGE_LAG = 1;
+/**
+ * The 8 fire-plume sprites (`AnimDragonRageFirePlume`, static position +
+ * one-shot frame reveal): NOT independently pixel-isolated this step - every
+ * spawn's own drawn box overlaps both the target sprite (mid target-shake
+ * the whole time) and at least one sibling plume for its entire 26-tick
+ * life, so no clean single-mechanism window exists in this fixture, and the
+ * dense sweep's own score was identical across lag 0/1/2 in this window
+ * (masked by the concurrent target idle-bob residual). Encoded as the
+ * fire-spit's own confirmed lag (1) by mechanism-class inference (both are
+ * plain `Cmd_createsprite`-created, `AnimateSprites`-stepped sprites,
+ * unlike the slide dummies' own dedicated linear-translation step
+ * functions) - a named, not-yet-independently-confirmed choice.
+ */
+export const DRAGON_RAGE_FRAMEBUFFER_FIRE_PLUME_AGE_LAG = 1;
+
+/**
  * A same-frame double-step collapses each `AnimTask_ShakeMon` call's own
  * port tick 0 into its creation tick (priority 5, same mechanism
  * `fly.ts`'s `FLY_SHAKE_CREATION_AGE` documents for FLY's own priority-5

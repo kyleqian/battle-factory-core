@@ -91,6 +91,9 @@ const BACK_SPECIES: Record<string, string> = {
   SPOINK: "spoink",
   ARCANINE: "arcanine",
   DUGTRIO: "dugtrio",
+  // MOVE_DRAGON_RAGE's Level-50-legal attacker (FRONTIER_MON_CHARMELEON_2)
+  // needs its own back pic for the player-side staged orientation.
+  CHARMELEON: "charmeleon",
 };
 const FRONT_SPECIES: Record<string, string> = {
   GROVYLE: "grovyle",
@@ -104,6 +107,9 @@ const FRONT_SPECIES: Record<string, string> = {
   SPOINK: "spoink",
   ARCANINE: "arcanine",
   DUGTRIO: "dugtrio",
+  // MOVE_DRAGON_RAGE's opposite-side staged orientation needs CHARMELEON's
+  // front pic (opponent-side attacker).
+  CHARMELEON: "charmeleon",
 };
 
 const backSprites: Record<string, Sprite> = {};
