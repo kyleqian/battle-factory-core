@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "mode": "mechanicLab",
+  "profile": "battle-scene-on",
+  "level": 50,
+  "challengeNum": 0,
+  "battleNum": 0,
+  "trainerId": 50,
+  "playerSetIds": [135, 188, 184],
+  "opponentSetIds": [156, 149, 180],
+  "seed": 305419897,
+  "overrides": {
+    "parties": {
+      "player": [
+        {"species": 95, "level": 50, "moves": [150, 150, 150, 150]},
+        {"species": 95, "level": 50, "moves": [150, 150, 150, 150]},
+        {"species": 95, "level": 50, "moves": [150, 150, 150, 150]}
+      ],
+      "opponent": [
+        {"species": 5, "level": 50, "moves": [82, 82, 82, 82]},
+        {"species": 5, "level": 50, "moves": [82, 82, 82, 82]},
+        {"species": 5, "level": 50, "moves": [82, 82, 82, 82]}
+      ]
+    }
+  },
+  "trace": {
+    "segments": [
+      {"frames": 2, "buttons": ["A"]},
+      {"frames": 30, "buttons": []},
+      {"frames": 2, "buttons": ["A"]},
+      {"frames": 700, "buttons": []}
+    ],
+    "captureFrames": [0, 734]
+  }
+}
