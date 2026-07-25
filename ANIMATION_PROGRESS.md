@@ -549,33 +549,38 @@ unnecessary since no shared code changed).
 
 **Evidence.** `npm test` 2153/2153 (up from 2147 — added `tests/ember.test.ts`, 6 tests, RAM-probe-pinned both orientations via `src/data/gen/ember-sprite-probe{,-opponent}.json`). `npm run build` green. Fresh live-oracle reruns of the two now-existing EMBER comparators (`tools/compare/emberPortable.ts`) at the counts above, plus both existing FLAMETHROWER (`126/126` both) and DRAGON_BREATH (`85/85` both) comparators re-run fresh after touching the shared `tools/probe/run-battle-lab-rgb.py`/`sceneOnPresentation.ts`/`battleScene.ts` — zero regressions.
 
+## MOVE_EMBER's 2-frame remainder closed: attacker/ember OAM draw order is subpriority-parametric, not fixed — `exact` (2026-07-24)
+
+**Verdict: the remainder was a draw-order bug, not a timing/lag bug — root-caused by RAM+pixel probe, fixed by reusing an existing function, zero curve-fitting.** The prior step's hypothesis (a per-sprite creation-tick render-lag nuance, by analogy to MIST_BALL/FLY) was investigated and falsified: `tools/probe/dump-ember-creation.py` (new, adapted from `run-battle-lab-rgb.py` + `dump-fly-shakemon-tasks.py`, dumps full `gSprites` struct — `data[]`, raw `callback` pointer — plus cropped RGB per frame) shows ember1 (slot 3) is created during oracle-tick 388's processing already carrying its post-`CreateSpriteAndAnimate`-plus-same-frame-`AnimateSprites()` "1-step" state (`x2=3,y2=-1`), exactly what `ember.ts`'s existing formula already predicted at local age 0 — the position/timing model was never wrong (component check was already 63/63). The actual defect: decoding `emberPortable.ts`'s own mismatch string correctly (`oracle!=app`, not `app!=oracle` as the step brief assumed) shows the **app was drawing fire where the real oracle still showed the attacker's own body** — the app had the ember right and was painting it *over* Onix instead of *under* Onix.
+
+**Root mechanism, source-cited.** `Cmd_createsprite`'s subpriority for both ember families is target-relative (`GetBattlerSpriteSubpriority(target) - 2`, `battle_anim.c` around `Cmd_createsprite`), while the attacker's own battler sprite subpriority is fixed by `GetBattlerSpriteSubpriority` (`battle_anim_mons.c:2035-2061`): 30 for `B_POSITION_PLAYER_LEFT`, 40 for `B_POSITION_OPPONENT_LEFT`. `SortSprites` draws the LOWER-subpriority sprite last/on top. For this codebase's fixed ONIX/MURKROW singles pair: player-attacker Onix (30) < ember subpriority (target Murkrow 40 − 2 = 38) → **Onix occludes freshly-spawned embers still overlapping its own silhouette**; opponent-attacker Onix (40) > ember subpriority (target Murkrow 30 − 2 = 28) → **embers occlude Onix**. This exact side-parametric rule is already generalized and exported as `dragonBreathEmbersInFrontOfAttacker` (`dragonBreath.ts`) and already reused by FLAMETHROWER's own draw block (`battleScene.ts` ~14939) — DRAGON_BREATH's own module doc even states it plainly ("Onix is subpriority 30 … `SortSprites` puts Onix at the winning lower OAM index, so its opaque pixels cover compressed embers near the origin"). EMBER's draw block (`battleScene.ts` ~16872) had never been updated to use it — it always drew the attacker sprite before the embers unconditionally, which happens to be correct for the opponent-attacker orientation (why that side was already 63/63) but wrong for the player-attacker orientation, and only *visible* on each ember's first tick or two, since the small fire graphic's actual opaque pixels move clear of Onix's silhouette within 1-2 ticks even though the two sprites' bounding boxes keep overlapping much longer.
+
+**Fix.** `battleScene.ts`'s EMBER draw block now calls `dragonBreathEmbersInFrontOfAttacker(view.attacker.geometry.side)` and conditionally draws the ember/flare loop before or after the attacker sprite, mirroring FLAMETHROWER's own call site exactly (no new function, no per-frame branch, no age/lag change — `ember.ts` itself is untouched). This is a per-orientation constant, not a per-frame special case.
+
+**Results.** Player ONIX → opponent MURKROW: **63/63 component AND 63/63 framebuffer**, zero exclusions (both previously-bad frames 389/395 now exact). Opponent ONIX → player MURKROW: still **63/63 + 63/63** (unchanged, confirmed no regression from the conditional draw order). `MOVE_EMBER` promoted to `exact` in `ANIMATION_COVERAGE.json` — no remainder left in either orientation.
+
+**Evidence.** `npm test` 2153/2153 (unchanged — no engine-logic module touched, so no new Tier-1 test; the fix is a draw-order line reusing an already-tested function). `npm run build` green. Both EMBER comparators re-run fresh at the counts above. Re-ran FLAMETHROWER (`126/126` both) and DRAGON_BREATH (`85/85` both) since `battleScene.ts` was touched — zero regressions. New dev-time evidence: `tools/probe/dump-ember-creation.py` (committed, same convention as `dump-fly-shakemon-tasks.py`/`dump-mist-ball-sprite.py`).
+
 ## Current handoff
 
-- **State:** **18 exact / 2 partial / 256 unsupported** (MOVE_EMBER added as
-  a new `partial` entry — first entry for a `dragon-fire-projectile` sibling
-  beyond DRAGON_BREATH/FLAMETHROWER/BLAZE_KICK).
-- **Did:** Ported both of `Move_EMBER`'s sprite families
-  (`src/engine/ember.ts`), wired them through `sceneOnPresentation.ts`/
-  `battleScene.ts`'s Scene-ON seam, and built dense pixel evidence in both
-  cast orientations (see dated section above). Re-ran FLAMETHROWER/
-  DRAGON_BREATH comparators fresh — no regressions.
-- **Evidence:** `npm test` 2153/2153, `npm run build` green. Opponent ONIX
-  → player MURKROW `63/63` + `63/63` (exact). Player ONIX → opponent
-  MURKROW `63/63` + `61/63` (2-frame named remainder). FLAMETHROWER
-  `126/126` both, DRAGON_BREATH `85/85` both (fresh reruns, unchanged).
-- **Next:** MOVE_EMBER's own remainder (the 2-frame creation-tick
-  framebuffer gap in the player-attacker orientation) is the direct
-  follow-up if promoting this move to `exact` is the priority — likely
-  needs a per-sprite (not per-frame) render-lag model, or independent
-  confirmation this is a one-off mGBA capture artifact rather than a real
-  app bug. Otherwise the next ranked `dragon-fire-projectile` siblings are
-  FIRE_BLAST and FIRE_SPIN (both confirmed via source batch audit to use
-  distinct sprite templates — new component work, not a reuse of
-  `ember.ts`/`dragonBreath.ts`); DRAGON_RAGE shares the translation
-  callback family but has its own distinct template/affine/duration/
-  geometry. MIST_BALL's remaining items are unchanged from the prior
-  handoff (see the "Interpreter generalization" section above for the
-  full ordered list) if that track is preferred instead.
+- **State:** **19 exact / 1 partial / 256 unsupported** (MOVE_EMBER promoted
+  `partial` → `exact` — the `dragon-fire-projectile` track's fourth exact
+  representative alongside DRAGON_BREATH/FLAMETHROWER/BLAZE_KICK).
+- **Did:** Root-caused and fixed MOVE_EMBER's 2-frame framebuffer remainder
+  (see dated section above) — a subpriority-driven attacker/ember draw-order
+  bug, not a timing bug. Re-ran FLAMETHROWER/DRAGON_BREATH comparators
+  fresh — no regressions.
+- **Evidence:** `npm test` 2153/2153, `npm run build` green. Both EMBER
+  orientations `63/63` + `63/63` (exact). FLAMETHROWER `126/126` both,
+  DRAGON_BREATH `85/85` both (fresh reruns, unchanged).
+- **Next:** The next ranked `dragon-fire-projectile` siblings are FIRE_BLAST
+  and FIRE_SPIN (both confirmed via source batch audit to use distinct
+  sprite templates — new component work, not a reuse of
+  `ember.ts`/`dragonBreath.ts`); DRAGON_RAGE shares the translation callback
+  family but has its own distinct template/affine/duration/geometry.
+  MIST_BALL's remaining items are unchanged from the prior handoff (see the
+  "Interpreter generalization" section above for the full ordered list) if
+  that track is preferred instead.
 - **Housekeeping flag (carried over, still unaddressed):** this file has
   accumulated 7+ dated sections beyond the ~3-most-recent lean-ledger
   guideline (`AGENTS.md`); no `ANIMATION_PROGRESS-archive.md` exists yet. A
