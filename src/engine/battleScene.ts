@@ -17054,48 +17054,31 @@ export function renderSceneOnMovePresentation(
       drawFireSpit();
       drawAttacker();
     }
-    if (playerToOpponent) {
-      drawSendOutHealthbox(
-        fb,
-        0,
-        composeOpponentHealthbox(healthboxAssemblyAssets, {
-          name: "CHARMELEON",
-          level: 50,
-          gender: state.config.fieldProfile.opponentGender ?? "male",
-          hpFraction: state.config.fieldProfile.opponentHp / state.config.fieldProfile.opponentMaxHp,
-          status: "none",
-        }),
-      );
-      drawComposedPlayerHealthbox(
-        fb,
-        onixPlayerHealthboxContentForState(
-          state.config.fieldProfile.playerHp,
-          "none",
-          state.config.fieldProfile.playerGender ?? "female",
-        ),
-      );
-    } else {
-      drawSendOutHealthbox(
-        fb,
-        0,
-        featherDanceOnixOpponentHealthbox(
-          state.config.fieldProfile.opponentHp,
-          state.config.fieldProfile.opponentGender ?? "female",
-        ),
-      );
-      drawComposedPlayerHealthbox(
-        fb,
-        composePlayerHealthbox(playerHealthboxAssets, {
-          name: "CHARMELEON",
-          level: 50,
-          gender: state.config.fieldProfile.playerGender ?? "male",
-          hpFraction: state.config.fieldProfile.playerHp / state.config.fieldProfile.playerMaxHp,
-          status: "none",
-          currentHp: state.config.fieldProfile.playerHp,
-          maxHp: state.config.fieldProfile.playerMaxHp,
-        }),
-      );
-    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "CHARMELEON";
+    const playerSpecies = playerToOpponent ? "CHARMELEON" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
     drawMessageTextLines(
       fb,

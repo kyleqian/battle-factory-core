@@ -1,0 +1,36 @@
+{
+  "schema": "scene-on-portable-component/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-dragon-rage-charmeleon-onix.json",
+  "probe": "tools/probe/dump-dragonrage-rgb.py",
+  "pair": "CHARMELEON (player-back) -> ONIX (opponent-front)",
+  "move": "DRAGON_RAGE",
+  "denseWindow": {"startFrame": 89, "endFrame": 238},
+  "appStage": {"firstFramePresentationAge": 0},
+  "attacker": {
+    "species": "CHARMELEON",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": {"x": 40, "y": 57},
+      "animationCenter": {"x": 72, "y": 97},
+      "battlePositionCenter": {"x": 72, "y": 80}
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": {"x": 145, "y": 10},
+      "animationCenter": {"x": 176, "y": 42},
+      "battlePositionCenter": {"x": 176, "y": 40}
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 133,
+    "playerMaxHp": 133,
+    "opponentHp": 110,
+    "opponentMaxHp": 110,
+    "playerGender": "male",
+    "opponentGender": "male"
+  }
+}
