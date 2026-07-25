@@ -175,7 +175,11 @@ describe("fire-spit sprite (StartDragonFireTranslation, both sides' asymmetric-o
       expect({ x: ported.x, y: ported.y, x2: ported.x2, y2: ported.y2 }, `age ${age}`).toEqual({
         x: probed.x, y: probed.y, x2: probed.x2, y2: probed.y2,
       });
-      expect(ported.sheetFrame, `age ${age} frame`).toBe(probed.animCmdIndex);
+      // +1: `sheetFrame` is the tile-ROW-BLOCK index, `animCmdIndex` is the
+      // RAM ANIMCMD-table index - `sAnim_DragonRageFire`'s own 3 entries
+      // point at tile offsets 16/32/48 (blocks 1/2/3), skipping block 0 (see
+      // `dragonRageFireSpitStateAtAge`'s own doc comment, rung 2).
+      expect(ported.sheetFrame, `age ${age} frame`).toBe(probed.animCmdIndex + 1);
       expect(ported.matrix, `age ${age} matrix`).toEqual({
         pa: probed.matrixA, pb: probed.matrixB, pc: probed.matrixC, pd: probed.matrixD,
       });
@@ -191,7 +195,7 @@ describe("fire-spit sprite (StartDragonFireTranslation, both sides' asymmetric-o
       expect({ x: ported.x, y: ported.y, x2: ported.x2, y2: ported.y2 }, `age ${age}`).toEqual({
         x: probed.x, y: probed.y, x2: probed.x2, y2: probed.y2,
       });
-      expect(ported.sheetFrame, `age ${age} frame`).toBe(probed.animCmdIndex);
+      expect(ported.sheetFrame, `age ${age} frame`).toBe(probed.animCmdIndex + 1);
       expect(ported.matrix, `age ${age} matrix`).toEqual({
         pa: probed.matrixA, pb: probed.matrixB, pc: probed.matrixC, pd: probed.matrixD,
       });

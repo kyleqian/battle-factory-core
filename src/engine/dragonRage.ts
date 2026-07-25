@@ -216,8 +216,12 @@ export interface DragonRageFireSpitState {
   readonly y: number;
   readonly x2: number;
   readonly y2: number;
-  /** 0-indexed frame into `sAnim_DragonRageFire`'s 3-frame sheet. */
-  readonly sheetFrame: 0 | 1 | 2;
+  /**
+   * Tile-row-block index into `battle-anim-small-ember.json`'s shared
+   * tileset - NOT the raw `animCmdIndex` (see this field's own assignment
+   * below for why the two differ by exactly one).
+   */
+  readonly sheetFrame: 1 | 2 | 3;
   readonly matrix: Readonly<{ pa: number; pb: number; pc: number; pd: number }>;
 }
 
@@ -245,10 +249,22 @@ export function dragonRageFireSpitStateAtAge(
     y: geometry.start.y,
     x2: signedDeltaMagnitude(geometry.deltaXQ8, steps),
     y2: signedDeltaMagnitude(geometry.deltaYQ8, steps),
-    // RAM-confirmed cadence, identical shape to `dragonBreath.ts`'s own
-    // `sheetFrame` formula (`sAnim_DragonRageFire`'s 3-frame/3-tick sheet
-    // is byte-identical to `sAnim_DragonBreathFire_0`).
-    sheetFrame: (Math.floor((age + 1) / 3) % 3) as 0 | 1 | 2,
+    // Rung 2 (ANIMATION_PROGRESS.md 2026-07-25): `sAnim_DragonRageFire`
+    // (`battle_anim_dragon.c:126-131`) is `ANIMCMD_FRAME(16,3),(32,3),
+    // (48,3),JUMP(0)` - byte-identical, tile-offset-for-tile-offset, to
+    // `sAnim_DragonBreathFire_0` (`:47-52`). Tile offsets 16/32/48 are tile-
+    // ROW-BLOCKS 1/2/3 of the shared 4-col small-ember sheet (16 tiles =
+    // 4 rows per block); block 0 (tiles 0-15) is a DIFFERENT, unused-by-
+    // this-animation frame (it belongs to `sAnim_OutrageOverheatFire_0`,
+    // which does start at tile 0). RAM's own `animCmdIndex` (0,1,2) is an
+    // index into the 3-entry ANIMCMD array, not a tile-row-block number, so
+    // it must be read as `animCmdIndex + 1` here - the same shift
+    // `dragonBreath.ts`'s own `sheetFrame` formula already applies for the
+    // identical reason. Pixel-diffed directly: the un-shifted `animCmdIndex`
+    // reads picked block 0 for this animation's own first frame, rendering
+    // a visibly smaller/wrong-shaped silhouette than the oracle photo shows
+    // (dense sweep, render ages 86-96).
+    sheetFrame: ((Math.floor((age + 1) / 3) % 3) + 1) as 1 | 2 | 3,
     matrix: geometry.matrix,
   };
 }
