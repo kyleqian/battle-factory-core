@@ -230,13 +230,17 @@ export type BattleScriptSelectorRoleBindings = Readonly<{
 /** include/constants/pokemon.h PARTY_SIZE -- Cmd_checkteamslost's own loop bound. */
 export const BATTLE_SCRIPT_PARTY_SIZE = 6;
 
-/** The exact three GetMonData fields Cmd_checkteamslost reads per party slot. */
+export type BattleScriptPartyMemberMoves = readonly [number, number, number, number];
+
+/** The exact GetMonData fields Cmd_checkteamslost and GetMostSuitableMonToSwitchInto read per party slot. */
 export type BattleScriptPartyMemberState = Readonly<{
   species: number;
   isEgg: boolean;
   hp: number;
   /** Source gPlayerParty/gEnemyParty[].status1 -- kept in sync by SetMoveEffect's status write, mirroring datahpupdate's HP sync. */
   status1: number;
+  /** Source MON_DATA_MOVE1..4 -- read by GetMostSuitableMonToSwitchInto's super-effective-move gate (forced-switch-ground-truth.md §1b/§4 slice 2). */
+  moves: BattleScriptPartyMemberMoves;
 }>;
 
 export type BattleScriptPartyState = readonly [
@@ -451,6 +455,7 @@ export type BattleScriptPartyMemberInput = Readonly<{
   isEgg?: boolean;
   hp?: number;
   status1?: number;
+  moves?: readonly [number?, number?, number?, number?];
 }>;
 
 function requireUnsigned(value: number, maximum: number, field: string): number {
@@ -1203,12 +1208,28 @@ function createBattleScriptBattleTopology(
   });
 }
 
+const BATTLE_SCRIPT_EMPTY_PARTY_MEMBER_MOVES: BattleScriptPartyMemberMoves = Object.freeze([0, 0, 0, 0]);
+
 const BATTLE_SCRIPT_EMPTY_PARTY_MEMBER: BattleScriptPartyMemberState = Object.freeze({
   species: 0,
   isEgg: false,
   hp: 0,
   status1: 0,
+  moves: BATTLE_SCRIPT_EMPTY_PARTY_MEMBER_MOVES,
 });
+
+function createBattleScriptPartyMemberMoves(
+  input: readonly [number?, number?, number?, number?] | undefined,
+  field: string,
+): BattleScriptPartyMemberMoves {
+  if (input === undefined) return BATTLE_SCRIPT_EMPTY_PARTY_MEMBER_MOVES;
+  if (!Array.isArray(input) || input.length !== 4) {
+    throw new Error(`${field} must contain exactly 4 move slots`);
+  }
+  return Object.freeze(
+    input.map((moveId, index) => requireUnsigned(moveId ?? 0, 0xffff, `${field}[${index}]`)),
+  ) as unknown as BattleScriptPartyMemberMoves;
+}
 
 function createBattleScriptPartyState(
   input: readonly BattleScriptPartyMemberInput[] | undefined,
@@ -1228,6 +1249,7 @@ function createBattleScriptPartyState(
       isEgg: Boolean(member.isEgg),
       hp: requireUnsigned(member.hp ?? 0, 0xffff, `${field}[${index}].hp`),
       status1: requireUnsigned(member.status1 ?? 0, 0xffff_ffff, `${field}[${index}].status1`) >>> 0,
+      moves: createBattleScriptPartyMemberMoves(member.moves, `${field}[${index}].moves`),
     })),
   ) as unknown as BattleScriptPartyState;
 }
