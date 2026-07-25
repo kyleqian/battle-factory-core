@@ -1,0 +1,529 @@
+{
+"ticks": [
+{
+"tick": 0,
+"battler0": {
+"battler": 0,
+"slot": 6,
+"x2": 0,
+"y2": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"data2": 5,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+},
+"battler1": {
+"battler": 1,
+"slot": 8,
+"x2": 1,
+"y2": 0,
+"animNum": 1,
+"animCmdIndex": 2,
+"data2": 95,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+}
+},
+{
+"tick": 1,
+"battler0": {
+"battler": 0,
+"slot": 6,
+"x2": 0,
+"y2": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"data2": 5,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+},
+"battler1": {
+"battler": 1,
+"slot": 8,
+"x2": 1,
+"y2": 0,
+"animNum": 1,
+"animCmdIndex": 2,
+"data2": 95,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+}
+},
+{
+"tick": 2,
+"battler0": {
+"battler": 0,
+"slot": 6,
+"x2": 0,
+"y2": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"data2": 5,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+},
+"battler1": {
+"battler": 1,
+"slot": 8,
+"x2": 1,
+"y2": 0,
+"animNum": 1,
+"animCmdIndex": 2,
+"data2": 95,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+}
+},
+{
+"tick": 3,
+"battler0": {
+"battler": 0,
+"slot": 6,
+"x2": 0,
+"y2": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"data2": 5,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+},
+"battler1": {
+"battler": 1,
+"slot": 8,
+"x2": 1,
+"y2": 0,
+"animNum": 1,
+"animCmdIndex": 2,
+"data2": 95,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+}
+},
+{
+"tick": 4,
+"battler0": {
+"battler": 0,
+"slot": 6,
+"x2": 0,
+"y2": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"data2": 5,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+},
+"battler1": {
+"battler": 1,
+"slot": 8,
+"x2": 1,
+"y2": 0,
+"animNum": 1,
+"animCmdIndex": 2,
+"data2": 95,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+}
+},
+{
+"tick": 5,
+"battler0": {
+"battler": 0,
+"slot": 6,
+"x2": 0,
+"y2": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"data2": 5,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+},
+"battler1": {
+"battler": 1,
+"slot": 8,
+"x2": 1,
+"y2": 0,
+"animNum": 1,
+"animCmdIndex": 2,
+"data2": 95,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+}
+},
+{
+"tick": 6,
+"battler0": {
+"battler": 0,
+"slot": 6,
+"x2": 0,
+"y2": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"data2": 5,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+},
+"battler1": {
+"battler": 1,
+"slot": 8,
+"x2": 1,
+"y2": 0,
+"animNum": 1,
+"animCmdIndex": 2,
+"data2": 95,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+}
+},
+{
+"tick": 7,
+"battler0": {
+"battler": 0,
+"slot": 6,
+"x2": 0,
+"y2": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"data2": 5,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+},
+"battler1": {
+"battler": 1,
+"slot": 8,
+"x2": 1,
+"y2": 0,
+"animNum": 1,
+"animCmdIndex": 2,
+"data2": 95,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+}
+},
+{
+"tick": 8,
+"battler0": {
+"battler": 0,
+"slot": 6,
+"x2": 0,
+"y2": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"data2": 5,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+},
+"battler1": {
+"battler": 1,
+"slot": 8,
+"x2": 1,
+"y2": 0,
+"animNum": 1,
+"animCmdIndex": 2,
+"data2": 95,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+}
+},
+{
+"tick": 9,
+"battler0": {
+"battler": 0,
+"slot": 6,
+"x2": 0,
+"y2": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"data2": 5,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+},
+"battler1": {
+"battler": 1,
+"slot": 8,
+"x2": 1,
+"y2": 0,
+"animNum": 1,
+"animCmdIndex": 2,
+"data2": 95,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+}
+},
+{
+"tick": 10,
+"battler0": {
+"battler": 0,
+"slot": 6,
+"x2": 0,
+"y2": 1,
+"animNum": 0,
+"animCmdIndex": 0,
+"data2": 5,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+},
+"battler1": {
+"battler": 1,
+"slot": 8,
+"x2": 1,
+"y2": 0,
+"animNum": 1,
+"animCmdIndex": 2,
+"data2": 95,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+}
+},
+{
+"tick": 11,
+"battler0": {
+"battler": 0,
+"slot": 6,
+"x2": 0,
+"y2": 1,
+"animNum": 0,
+"animCmdIndex": 0,
+"data2": 5,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+},
+"battler1": {
+"battler": 1,
+"slot": 8,
+"x2": 1,
+"y2": 0,
+"animNum": 1,
+"animCmdIndex": 2,
+"data2": 95,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+}
+},
+{
+"tick": 12,
+"battler0": {
+"battler": 0,
+"slot": 6,
+"x2": 0,
+"y2": 1,
+"animNum": 0,
+"animCmdIndex": 0,
+"data2": 5,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+},
+"battler1": {
+"battler": 1,
+"slot": 8,
+"x2": 1,
+"y2": 0,
+"animNum": 1,
+"animCmdIndex": 2,
+"data2": 95,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+}
+},
+{
+"tick": 13,
+"battler0": {
+"battler": 0,
+"slot": 6,
+"x2": 0,
+"y2": 1,
+"animNum": 0,
+"animCmdIndex": 0,
+"data2": 5,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+},
+"battler1": {
+"battler": 1,
+"slot": 8,
+"x2": 1,
+"y2": 0,
+"animNum": 1,
+"animCmdIndex": 2,
+"data2": 95,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+}
+},
+{
+"tick": 14,
+"battler0": {
+"battler": 0,
+"slot": 6,
+"x2": 0,
+"y2": 1,
+"animNum": 0,
+"animCmdIndex": 0,
+"data2": 5,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+},
+"battler1": {
+"battler": 1,
+"slot": 8,
+"x2": 1,
+"y2": 0,
+"animNum": 1,
+"animCmdIndex": 2,
+"data2": 95,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+}
+},
+{
+"tick": 15,
+"battler0": {
+"battler": 0,
+"slot": 6,
+"x2": 0,
+"y2": 1,
+"animNum": 0,
+"animCmdIndex": 0,
+"data2": 5,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+},
+"battler1": {
+"battler": 1,
+"slot": 8,
+"x2": 1,
+"y2": 0,
+"animNum": 1,
+"animCmdIndex": 2,
+"data2": 95,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+}
+},
+{
+"tick": 16,
+"battler0": {
+"battler": 0,
+"slot": 6,
+"x2": 0,
+"y2": 1,
+"animNum": 0,
+"animCmdIndex": 0,
+"data2": 5,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+},
+"battler1": {
+"battler": 1,
+"slot": 8,
+"x2": 1,
+"y2": 0,
+"animNum": 1,
+"animCmdIndex": 2,
+"data2": 95,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+}
+},
+{
+"tick": 17,
+"battler0": {
+"battler": 0,
+"slot": 6,
+"x2": 0,
+"y2": 1,
+"animNum": 0,
+"animCmdIndex": 0,
+"data2": 5,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+},
+"battler1": {
+"battler": 1,
+"slot": 8,
+"x2": 1,
+"y2": 0,
+"animNum": 1,
+"animCmdIndex": 2,
+"data2": 95,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+}
+},
+{
+"tick": 18,
+"battler0": {
+"battler": 0,
+"slot": 6,
+"x2": 0,
+"y2": 1,
+"animNum": 0,
+"animCmdIndex": 0,
+"data2": 5,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+},
+"battler1": {
+"battler": 1,
+"slot": 8,
+"x2": 1,
+"y2": 0,
+"animNum": 1,
+"animCmdIndex": 2,
+"data2": 95,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+}
+},
+{
+"tick": 19,
+"battler0": {
+"battler": 0,
+"slot": 6,
+"x2": 0,
+"y2": 2,
+"animNum": 0,
+"animCmdIndex": 0,
+"data2": 5,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+},
+"battler1": {
+"battler": 1,
+"slot": 8,
+"x2": 1,
+"y2": 0,
+"animNum": 1,
+"animCmdIndex": 2,
+"data2": 95,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+}
+},
+{
+"tick": 20,
+"battler0": {
+"battler": 0,
+"slot": 6,
+"x2": 0,
+"y2": 1,
+"animNum": 0,
+"animCmdIndex": 0,
+"data2": 5,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+},
+"battler1": {
+"battler": 1,
+"slot": 8,
+"x2": 1,
+"y2": 0,
+"animNum": 1,
+"animCmdIndex": 2,
+"data2": 95,
+"callback": "0x8007428",
+"callbackSymbol": "SpriteCallbackDummy"
+}
+}
+]
+}

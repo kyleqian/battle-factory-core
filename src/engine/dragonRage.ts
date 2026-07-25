@@ -137,12 +137,31 @@ export const DRAGON_RAGE_FRAMEBUFFER_FIRE_PLUME_AGE_LAG = 1;
  * port tick 0 into its creation tick (priority 5, same mechanism
  * `fly.ts`'s `FLY_SHAKE_CREATION_AGE` documents for FLY's own priority-5
  * call site - RAM-confirmed again here, both DRAGON_RAGE call sites).
+ *
+ * Rung 1 (ANIMATION_PROGRESS.md 2026-07-25): that RAM-invisible collapsed
+ * value (`sequence[0]`, i.e. the raw `{xOffset,yOffset}` the task's own
+ * creation writes into `gSprites[].x2/y2` before the same-frame second step
+ * immediately overwrites it) IS visible in the FRAMEBUFFER, for exactly one
+ * photographed frame - pixel-diffed directly against
+ * `dragon-rage-player-charmeleon-opponent-onix`'s render age 1 (the
+ * attacker's own creation transient, `DRAGON_RAGE_FRAMEBUFFER_SHAKE_AGE_LAG`
+ * = 2): the oracle photo already shows the sprite shifted by the full
+ * `yOffset` (2px) one tick before the lag-2 model's own first
+ * `renderTick >= creationTick` frame produces anything non-zero (which
+ * itself lands on `sequence[1]`, already toggled back to 0 - RAM-confirmed
+ * correct by the zero-lag component check). The two facts only reconcile if
+ * the OAM write from creation reaches the display one tick sooner than the
+ * steady per-tick toggle does - i.e. the transient's own effective lag is
+ * one less than the mechanism's steady-state lag. Modeled as a narrow,
+ * evidence-scoped special case (`renderTick === creationTick - 1`), not a
+ * change to the steady-state math already proven exact.
  */
 function shakeMonOffsetAtRenderTick(
   args: { xOffset: number; yOffset: number; numTimes: number; frameDelay: number },
   creationTick: number,
   renderTick: number,
 ): ShakeMonOffset {
+  if (renderTick === creationTick - 1) return { x2: args.xOffset, y2: args.yOffset };
   if (renderTick < creationTick) return { x2: 0, y2: 0 };
   return shakeMonOffsetAtTick(
     args.xOffset, args.yOffset, args.numTimes, args.frameDelay,
@@ -197,8 +216,12 @@ export interface DragonRageFireSpitState {
   readonly y: number;
   readonly x2: number;
   readonly y2: number;
-  /** 0-indexed frame into `sAnim_DragonRageFire`'s 3-frame sheet. */
-  readonly sheetFrame: 0 | 1 | 2;
+  /**
+   * Tile-row-block index into `battle-anim-small-ember.json`'s shared
+   * tileset - NOT the raw `animCmdIndex` (see this field's own assignment
+   * below for why the two differ by exactly one).
+   */
+  readonly sheetFrame: 1 | 2 | 3;
   readonly matrix: Readonly<{ pa: number; pb: number; pc: number; pd: number }>;
 }
 
@@ -226,10 +249,22 @@ export function dragonRageFireSpitStateAtAge(
     y: geometry.start.y,
     x2: signedDeltaMagnitude(geometry.deltaXQ8, steps),
     y2: signedDeltaMagnitude(geometry.deltaYQ8, steps),
-    // RAM-confirmed cadence, identical shape to `dragonBreath.ts`'s own
-    // `sheetFrame` formula (`sAnim_DragonRageFire`'s 3-frame/3-tick sheet
-    // is byte-identical to `sAnim_DragonBreathFire_0`).
-    sheetFrame: (Math.floor((age + 1) / 3) % 3) as 0 | 1 | 2,
+    // Rung 2 (ANIMATION_PROGRESS.md 2026-07-25): `sAnim_DragonRageFire`
+    // (`battle_anim_dragon.c:126-131`) is `ANIMCMD_FRAME(16,3),(32,3),
+    // (48,3),JUMP(0)` - byte-identical, tile-offset-for-tile-offset, to
+    // `sAnim_DragonBreathFire_0` (`:47-52`). Tile offsets 16/32/48 are tile-
+    // ROW-BLOCKS 1/2/3 of the shared 4-col small-ember sheet (16 tiles =
+    // 4 rows per block); block 0 (tiles 0-15) is a DIFFERENT, unused-by-
+    // this-animation frame (it belongs to `sAnim_OutrageOverheatFire_0`,
+    // which does start at tile 0). RAM's own `animCmdIndex` (0,1,2) is an
+    // index into the 3-entry ANIMCMD array, not a tile-row-block number, so
+    // it must be read as `animCmdIndex + 1` here - the same shift
+    // `dragonBreath.ts`'s own `sheetFrame` formula already applies for the
+    // identical reason. Pixel-diffed directly: the un-shifted `animCmdIndex`
+    // reads picked block 0 for this animation's own first frame, rendering
+    // a visibly smaller/wrong-shaped silhouette than the oracle photo shows
+    // (dense sweep, render ages 86-96).
+    sheetFrame: ((Math.floor((age + 1) / 3) % 3) + 1) as 1 | 2 | 3,
     matrix: geometry.matrix,
   };
 }
@@ -310,6 +345,49 @@ export function dragonRageFirePlumeStateAtAge(
     subpriority: plumeSubpriority(targetSubpriority, spawn.subpriorityOffset),
     sheetFrame: sheetFrame as 0 | 1 | 2 | 3 | 4,
   };
+}
+
+/**
+ * Real-hardware same-subpriority plume-vs-plume draw order (ISSUES #32
+ * lineage: `gMain.oamBuffer` RAM read, `tools/probe/dump-dragonrage-oam.py`,
+ * `docs/dragon-rage-fire-plume-order-notes.md`). This move's 8 spawns share
+ * only 2 distinct subpriorities (targetSubpriority ± 2), so cross-group
+ * comparisons never tie (§ ordering is by subpriority alone there, already
+ * handled by the caller's behind/front split) - this comparator only orders
+ * spawns WITHIN one subpriority group.
+ *
+ * The RAM probe read `gMain.oamBuffer`'s real composited array position
+ * (lower position = lower hardware OAM index = drawn ON TOP, matching this
+ * codebase's already-established `sSpriteOrder`/`AddSpritesToOamBuffer`
+ * convention, e.g. `feather-order-notes.md`) for every live plume pair across
+ * RAM ticks 186-206 (render ages 97-117) and found a consistent rule with NO
+ * exceptions: primarily sort by absolute screen Y (higher Y wins, drawn more
+ * in front - the ordinary GBA same-priority tie-break `SortSprites` uses);
+ * ONLY on an exact Y tie (two of this move's own spawns share identical
+ * `targetBattlePosition.y + spawn.y`: spawns 0/4 at y-offset 0, spawns 2/6 at
+ * y-offset 25) does the lower `spawnIndex` (= earlier creation tick, this
+ * script's own `firePlumeTicks` are strictly ascending with spawn index) win
+ * instead - RAM-confirmed both ties resolve "earlier spawn wins" (spawn 0
+ * beats spawn 4 at every tick both are alive; spawn 2 beats spawn 6 likewise),
+ * matching this codebase's established "ascending creation order survives an
+ * exact tie" convention elsewhere (§7.26/27, `spriteOrder.ts`'s own module
+ * doc). This is a plain comparator, not a full persistent `sSpriteOrder`
+ * simulation - the per-instance parameter this RAM probe supplies is exactly
+ * which SPECIFIC spawn pairs tie and which of each pair wins, not a general
+ * whole-scene history model (out of scope per the standing policy against
+ * that, see `battle-scene-notes.md` §7.32).
+ *
+ * Returns spawns in PAINT order (index 0 painted first/backmost, last
+ * painted/frontmost last) - the previously-shipped code instead painted in
+ * raw script order, which happened to already match this rule for most pairs
+ * (script order tracks ascending Y for several spawns) but was wrong for the
+ * two ties plus at least one non-tied pair (spawn 3 vs spawn 4 - RAM shows
+ * spawn 3's higher Y beats spawn 4 despite spawn 3 being created later).
+ */
+export function orderFirePlumesForDraw<
+  T extends Readonly<{ y: number; spawnIndex: number }>,
+>(plumes: readonly T[]): readonly T[] {
+  return [...plumes].sort((a, b) => (a.y - b.y) || (b.spawnIndex - a.spawnIndex));
 }
 
 /**

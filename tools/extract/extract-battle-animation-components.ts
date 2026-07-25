@@ -117,8 +117,8 @@ const controlCommands = new Set([
   "jumpifcontest",
   "jumpifmoveturn",
   "jumpreteq",
-  "jumretfalse",
-  "jumrettrue",
+  "jumpretfalse",
+  "jumprettrue",
 ]);
 const nonVisualCommands = new Set([
   "delay",

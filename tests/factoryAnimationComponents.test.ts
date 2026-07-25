@@ -11,8 +11,8 @@ describe("battle animation component graph", () => {
     expect(components.summary).toMatchObject({
       moves: 354,
       scriptBlocks: 658,
-      components: 935,
-      dependencyEdges: 3190,
+      components: 971,
+      dependencyEdges: 3269,
     });
     const firePunch = components.moves.find((move) => move.move === "MOVE_FIRE_PUNCH");
     expect(firePunch?.componentIds).toEqual(expect.arrayContaining([

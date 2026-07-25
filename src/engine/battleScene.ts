@@ -512,6 +512,7 @@ import {
 import { flamethrowerDisplayedBattlerOffsetsAtAge } from "./flamethrower.ts";
 import {
   dragonRageSchedule,
+  orderFirePlumesForDraw,
   DRAGON_RAGE_FRAMEBUFFER_SHAKE_AGE_LAG,
   DRAGON_RAGE_FRAMEBUFFER_SLIDE_AGE_LAG,
   DRAGON_RAGE_FRAMEBUFFER_FIRE_SPIT_AGE_LAG,
@@ -17043,8 +17044,12 @@ export function renderSceneOnMovePresentation(
     const attackerSprite = playerToOpponent ? charmeleonBackSprite : charmeleonFrontSprite;
     const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
-    const behindPlumes = firePlumeView.firePlumes.filter((p) => p.subpriorityOffset >= 64);
-    const frontPlumes = firePlumeView.firePlumes.filter((p) => p.subpriorityOffset < 64);
+    const behindPlumes = orderFirePlumesForDraw(
+      firePlumeView.firePlumes.filter((p) => p.subpriorityOffset >= 64),
+    );
+    const frontPlumes = orderFirePlumesForDraw(
+      firePlumeView.firePlumes.filter((p) => p.subpriorityOffset < 64),
+    );
     const drawPlume = (plume: (typeof firePlumeView.firePlumes)[number]) => {
       drawSpriteSheet(
         fb,

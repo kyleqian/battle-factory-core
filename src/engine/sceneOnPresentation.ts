@@ -156,6 +156,7 @@ import {
   type DragonRageSchedule,
   type DragonRageSide,
 } from "./dragonRage.ts";
+import { speciesFrontIdleRestOffset } from "./speciesIdleAnim.ts";
 
 export type SceneOnBattlerSide = "player" | "opponent";
 
@@ -837,6 +838,17 @@ export interface SceneOnBindView extends BindAnimationState {
 
 export interface SceneOnDragonRageFirePlume extends DragonRageFirePlumeState {
   readonly subpriorityOffset: number;
+  /**
+   * Script order (`DRAGON_RAGE_FIRE_PLUME_SPAWNS` index), which is also
+   * strictly-ascending creation-tick order (`dragonRageSchedule`'s own
+   * `firePlumeTicks` are +3 spaced). Needed by the draw path's real-hardware
+   * z-order comparator: `docs/dragon-rage-fire-plume-order-notes.md`'s
+   * `gMain.oamBuffer` probe (ISSUES #32 lineage) confirms same-subpriority
+   * plume pairs sort by absolute Y primarily, and by ascending
+   * `sSpriteOrder`/creation order (earlier spawn wins, drawn on top) on an
+   * exact Y tie - not raw script/array position on its own.
+   */
+  readonly spawnIndex: number;
 }
 
 export interface SceneOnDragonRageView {
@@ -1088,9 +1100,33 @@ function dragonRageFirePlumes(
       targetSubpriority,
       animationAge - schedule.firePlumeTicks[i]!,
     );
-    if (spawnState) plumes.push({ ...spawnState, subpriorityOffset: spawn.subpriorityOffset });
+    if (spawnState) plumes.push({ ...spawnState, subpriorityOffset: spawn.subpriorityOffset, spawnIndex: i });
   }
   return plumes;
+}
+
+/**
+ * Target x2/y2 before `AnimTask_ShakeMon`'s own creation tick takes over
+ * (`DRAGON_RAGE_TARGET_SHAKE`'s absolute set unconditionally overwrites
+ * whatever the target held, `battle_anim_mon_movement.c:98-99` - once
+ * `animationAge >= schedule.targetShakeTick`, `shakeMonOffsetAtRenderTick`
+ * alone is authoritative). Before that, the target's front sprite (opponent
+ * side only - the player's own back sprite uses an unrelated, unported
+ * animation family) still carries its own send-out species idle-anim
+ * residual (`speciesIdleAnim.ts`, root-caused from ANIMATION_PROGRESS.md's
+ * DRAGON_RAGE rung 5 remainder's "-1 drift" finding) rather than sitting at
+ * a clean `(0,0)`.
+ */
+function dragonRageTargetOffset(
+  animationAge: number,
+  schedule: DragonRageSchedule,
+  target: SceneOnPresentationBattler,
+): Readonly<{ x2: number; y2: number }> {
+  if (animationAge < schedule.targetShakeTick && target.geometry.side === "opponent") {
+    const idle = speciesFrontIdleRestOffset(target.species);
+    if (idle) return idle;
+  }
+  return shakeMonOffsetAtRenderTick(DRAGON_RAGE_TARGET_SHAKE, schedule.targetShakeTick, animationAge);
 }
 
 export function sceneOnDragonRageView(
@@ -1116,7 +1152,7 @@ export function sceneOnDragonRageView(
     attacker: state.config.attacker,
     target: state.config.target,
     attackerOffset: dragonRageAttackerOffset(animationAge, schedule, attackerSide),
-    targetOffset: shakeMonOffsetAtRenderTick(DRAGON_RAGE_TARGET_SHAKE, schedule.targetShakeTick, animationAge),
+    targetOffset: dragonRageTargetOffset(animationAge, schedule, state.config.target),
     fireSpit: dragonRageFireSpitStateAtAge(
       animationAge - schedule.fireSpitTick,
       DRAGON_RAGE_FIRE_SPIT_GEOMETRY[attackerSide],

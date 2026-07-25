@@ -15,6 +15,7 @@ import {
   dragonRageFireSpitStateAtAge,
   dragonRageFirePlumeStateAtAge,
   dragonRageSchedule,
+  orderFirePlumesForDraw,
   shakeMonOffsetAtRenderTick,
   slideMonToOffsetAtTick,
   slideMonToOriginalPosAtTick,
@@ -107,6 +108,22 @@ describe("attacker/target AnimTask_ShakeMon (reused primitive, first ATTACKER-si
       }
     }
   });
+
+  // Rung 1 (ANIMATION_PROGRESS.md 2026-07-25): pixel-diffed directly against
+  // `dragon-rage-player-charmeleon-opponent-onix`'s render age 1 (frame 90),
+  // one tick before the lag-2-adjusted attacker shake first clears its own
+  // creation guard - the oracle photo already shows the sprite shifted by
+  // the full `yOffset`, RAM-invisible (collapsed the same tick) but
+  // framebuffer-visible one tick earlier than the steady-state lag predicts.
+  it("one tick before creation shows the RAM-invisible creation-write transient", () => {
+    expect(shakeMonOffsetAtRenderTick(DRAGON_RAGE_ATTACKER_SHAKE, 0, -1)).toEqual({ x2: 0, y2: 2 });
+    expect(shakeMonOffsetAtRenderTick(DRAGON_RAGE_TARGET_SHAKE, 97, 96)).toEqual({ x2: 0, y2: 3 });
+  });
+
+  it("two or more ticks before creation stays zero (guard unaffected outside the one-tick transient)", () => {
+    expect(shakeMonOffsetAtRenderTick(DRAGON_RAGE_ATTACKER_SHAKE, 0, -2)).toEqual({ x2: 0, y2: 0 });
+    expect(shakeMonOffsetAtRenderTick(DRAGON_RAGE_ATTACKER_SHAKE, 0, -10)).toEqual({ x2: 0, y2: 0 });
+  });
 });
 
 describe("SlideMonToOffset/SlideMonToOriginalPos (attacker, battlerFlag=0) at both orientations", () => {
@@ -159,7 +176,11 @@ describe("fire-spit sprite (StartDragonFireTranslation, both sides' asymmetric-o
       expect({ x: ported.x, y: ported.y, x2: ported.x2, y2: ported.y2 }, `age ${age}`).toEqual({
         x: probed.x, y: probed.y, x2: probed.x2, y2: probed.y2,
       });
-      expect(ported.sheetFrame, `age ${age} frame`).toBe(probed.animCmdIndex);
+      // +1: `sheetFrame` is the tile-ROW-BLOCK index, `animCmdIndex` is the
+      // RAM ANIMCMD-table index - `sAnim_DragonRageFire`'s own 3 entries
+      // point at tile offsets 16/32/48 (blocks 1/2/3), skipping block 0 (see
+      // `dragonRageFireSpitStateAtAge`'s own doc comment, rung 2).
+      expect(ported.sheetFrame, `age ${age} frame`).toBe(probed.animCmdIndex + 1);
       expect(ported.matrix, `age ${age} matrix`).toEqual({
         pa: probed.matrixA, pb: probed.matrixB, pc: probed.matrixC, pd: probed.matrixD,
       });
@@ -175,7 +196,7 @@ describe("fire-spit sprite (StartDragonFireTranslation, both sides' asymmetric-o
       expect({ x: ported.x, y: ported.y, x2: ported.x2, y2: ported.y2 }, `age ${age}`).toEqual({
         x: probed.x, y: probed.y, x2: probed.x2, y2: probed.y2,
       });
-      expect(ported.sheetFrame, `age ${age} frame`).toBe(probed.animCmdIndex);
+      expect(ported.sheetFrame, `age ${age} frame`).toBe(probed.animCmdIndex + 1);
       expect(ported.matrix, `age ${age} matrix`).toEqual({
         pa: probed.matrixA, pb: probed.matrixB, pc: probed.matrixC, pd: probed.matrixD,
       });
@@ -233,6 +254,36 @@ describe("fire-plume sprites (AnimDragonRageFirePlume, all 8 spawns, both orient
         expect(ported.sheetFrame, `spawn ${i} age ${age} frame`).toBe(probed!.animCmdIndex);
       }
     }
+  });
+});
+
+describe("rung 6 fire-plume z-order (gMain.oamBuffer RAM probe, tools/probe/dump-dragonrage-oam.py, ISSUES #32 lineage)", () => {
+  it("orders the 'behind' group (spawns 0/1/3/4/7) matching the RAM-read real OAM buffer order at RAM ticks 195-206", () => {
+    // Absolute y (targetBattlePosition.y=24 + spawn.y): 0->24, 1->9, 3->29,
+    // 4->24, 7->32. Spawns 0/4 tie exactly (both spawn.y=0) - the RAM probe
+    // read gMain.oamBuffer at every tick both are alive (195-206) and found
+    // spawn 0 consistently at the lower (more-front) buffer index.
+    const plumes = [0, 1, 3, 4].map((spawnIndex) => ({
+      spawnIndex,
+      y: 24 + DRAGON_RAGE_FIRE_PLUME_SPAWNS[spawnIndex]!.y,
+    }));
+    expect(orderFirePlumesForDraw(plumes).map((p) => p.spawnIndex)).toEqual([1, 4, 0, 3]);
+  });
+
+  it("orders the 'front' group (spawns 2/5/6) matching the RAM-read real OAM buffer order at RAM ticks 204-206", () => {
+    // Absolute y: 2->49, 5->54, 6->49. Spawns 2/6 tie exactly (both
+    // spawn.y=25) - RAM shows spawn 2 consistently at the lower buffer index.
+    const plumes = [2, 5, 6].map((spawnIndex) => ({
+      spawnIndex,
+      y: 24 + DRAGON_RAGE_FIRE_PLUME_SPAWNS[spawnIndex]!.y,
+    }));
+    expect(orderFirePlumesForDraw(plumes).map((p) => p.spawnIndex)).toEqual([6, 2, 5]);
+  });
+
+  it("is a pure reorder - never drops or duplicates a plume", () => {
+    const plumes = DRAGON_RAGE_FIRE_PLUME_SPAWNS.map((spawn, spawnIndex) => ({ spawnIndex, y: spawn.y }));
+    const ordered = orderFirePlumesForDraw(plumes);
+    expect(ordered.map((p) => p.spawnIndex).sort((a, b) => a - b)).toEqual(plumes.map((p) => p.spawnIndex));
   });
 });
 
