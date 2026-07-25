@@ -42,301 +42,6 @@ substitute state, multi-turn/multi-hit state, or another explicit script input.
 Every status needs a committed ON-profile trace; `exact` cannot retain a known
 remainder.
 
-## MOVE_DRAGON_RAGE enumeration: STOP AND SPLIT (2026-07-25)
-
-**Verdict: does NOT generalize cheaply from the existing `dragon-fire-
-projectile` family. Enumerated the full command surface per the step
-brief's own rule and stopped before writing any render code, per that
-rule's explicit sanction ("that is a successful outcome, not a failure").**
-DRAGON_RAGE is Level-50 legal (`FRONTIER_MON_CHARMELEON_2`, confirmed in
-`factory-animation-inventory.json` before starting), so this is a scope
-finding, not a legality block.
-
-**What was done.** Extended `tools/extract/extract-battle-move-anim-assets.ts`
-with a full decode of `Move_DRAGON_RAGE` (`battle_anim_scripts.s:5243-5273`)
-into `battle-move-anim-scripts.json`'s new `DRAGON_RAGE` entry (`callback:
-null`, `status` field records the stop) — additive only, `git status` after
-a full re-run showed only that one extractor + its one JSON output changed.
-No render/callback code lands this step.
-
-**Command-surface enumeration** (every op read against its real C callback):
-- `loadspritegfx ANIM_TAG_SMALL_EMBER` — already extracted
-  (`battle-anim-small-ember.json`, DRAGON_BREATH); this move's fire-spit
-  sprite uses frames 0/4 of that same sheet (that extraction's own
-  `otherFramesNeedsOnly` note already flagged them as DRAGON_RAGE's).
-- `loadspritegfx ANIM_TAG_FIRE_PLUME` — **NEW asset, not yet extracted
-  anywhere**: `gBattleAnimSpriteGfx_FirePlume` (`fire_plume.png`, 32x160px,
-  5 stacked 32x32 frames) paired with `gBattleAnimSpritePal_Fire`
-  (a DIFFERENT, also-unextracted source PNG, `fire.png`, supplies only the
-  palette — same tile-vs-palette split this codebase's extractor already
-  handles elsewhere, just a fresh pair of source files).
-- `createvisualtask AnimTask_ShakeMon, 5, ANIM_ATTACKER, 0, 2, 40, 1` —
-  already-ported primitive (`shakeMon.ts`, proven via QUICK_ATTACK/FLY).
-  Every prior call site shakes the TARGET; this is the first ATTACKER-side
-  use, but the primitive itself is battler-agnostic — cheap render wiring,
-  not a new port.
-- `createsprite gSlideMonToOffsetSpriteTemplate, ANIM_TARGET, 2, 0, 15, 0, 0, 4`
-  — **NEW primitive**: `SlideMonToOffset` → `InitSpriteDataForLinearTranslation`
-  + `TranslateSpriteLinearByIdFixedPoint` (`battle_anim_mon_movement.c:537-576`).
-  `gBattleAnimArgs[0]=0` selects the ATTACKER's own sprite (the `ANIM_TARGET`
-  field only sets the dummy sprite's OAM subpriority, the same
-  battler-vs-argv split MIST_BALL's own enumeration already established).
-  **Confirmed NOT the same mechanism `mudSandSlide.ts` ports**: that module
-  is a hand-fit lookup table for SAND_ATTACK/MUD_SLAP's own createsprite args
-  (x=-10, duration 3/4), not a generic port of this accumulator — read both
-  side by side: `SlideMonToOffset` writes to a REFERENCED mon sprite via
-  `data[5]` with plain-division rounding, while the already-ported
-  `animLinearTranslation.ts` (`InitAnimLinearTranslation`) writes to the
-  sprite's OWN x2/y2 with direction-in-low-bit rounding — different layout,
-  different math.
-- `create_dragon_rage_fire_spit_sprite ANIM_TARGET, 2, initial_x=30,
-  initial_y=15, target_x=0, target_y=10, duration=10` —
-  `gDragonRageFireSpitSpriteTemplate` (`battle_anim_dragon.c:158-167`)
-  shares `AnimDragonFireToTarget` → `StartDragonFireTranslation`
-  (`:218-274`, comment literally says "For Dragon Breath and Dragon Rage")
-  and an identically-shaped 3-frame/3-tick sheet cadence with DRAGON_BREATH's
-  own ember, reusing the already-ported Q8.8 accumulator. Two genuinely new
-  parts: (1) DRAGON_BREATH's own script always passes all-zero
-  initial/target offsets, so `StartDragonFireTranslation`'s side-branch logic
-  was never exercised — it has a real quirk, confirmed straight from source:
-  the opponent-side branch uses `cmd->initialY` to offset `sprite->x` (not
-  `initialX`), an asymmetry DRAGON_RAGE's nonzero args actually exercise;
-  (2) its own affine anim (`AFFINEANIMCMD_FRAME(0x64,0x64,127,1)`, one step)
-  uses different scale constants and shape than DRAGON_BREATH's own
-  two-step ramp — DRAGON_BREATH's `MATRIX_A`/`MATRIX_B` tables are
-  RAM-PROBED literals, not a closed-form derivation, so this needs its own
-  fresh probe (likely simpler, given the single-step affine anim, but not
-  confirmed against real RAM).
-- `createvisualtask AnimTask_ShakeMon, 5, ANIM_TARGET, 0, 3, 25, 1` —
-  already-ported primitive, same shape as every prior target-shake site.
-- `create_dragon_rage_fire_plume_sprite` ×8 (relative_to=ANIM_TARGET every
-  time — the callback's ANIM_ATTACKER branch is dead code for this move, a
-  red herring like MIST_BALL's unconsumed `ANIM_TAG_WHITE_FEATHER` load) —
-  **NEW callback**: `AnimDragonRageFirePlume` (`battle_anim_dragon.c:246-265`)
-  is a STATIC-position sprite (no translation/accumulator at all — simpler
-  than every other mechanism this track uses): places itself at the target's
-  `BATTLER_COORD_X/Y`, applies the already-established side-signed x-offset
-  pattern (`ember.ts`'s `sideSignedOffset`) plus a plain y offset, plays a
-  5-frame/5-tick-each reveal ONCE (`ANIMCMD_END`, not `JUMP`), then
-  self-destroys via `RunStoredCallbackWhenAnimEnds` once `animEnded`
-  latches. Per-spawn `subpriority_offset` varies (66 or 2) — a real per-spawn
-  detail. Needs its own RAM probe for lifetime/render-lag; none of the
-  existing ported sprite families use this "static + one-shot reveal +
-  destroy-on-animEnd" shape.
-- `createsprite gSlideMonToOriginalPosSpriteTemplate, ANIM_TARGET, 66, 0, 0, 4`
-  — **NEW primitive** (paired with `SlideMonToOffset` above but a SEPARATE
-  C function): `SlideMonToOriginalPos` (`battle_anim_mon_movement.c:478-535`)
-  has its own data layout and step function — restores the attacker's
-  current x2/y2 back to 0 over 4 ticks, not a fresh two-point interpolation.
-
-**Tally: 4 substantive new items** (`ANIM_TAG_FIRE_PLUME` asset,
-`SlideMonToOffset`/`SlideMonToOriginalPos` primitive pair,
-`AnimDragonRageFirePlume`'s new static/one-shot/self-destroy mechanism,
-`StartDragonFireTranslation`'s side-asymmetric offset quirk plus a fresh
-affine probe) — at the step brief's own "~4 substantive ops" stop
-threshold, though none individually rises to a "new subsystem" the way
-MIST_BALL's `AnimComplexPaletteBlend`/`AnimTask_MistBallFog` did (no new
-BG tiles/tilemap, no external fade-gate dependency). Combined with a real
-60-minute session cap, landing all four with disciplined RAM-probe-first
-evidence (per-mechanism render-lag bisection, both orientations, dense
-comparators run twice for determinism) was not achievable without cutting
-a corner somewhere. Per the brief's own stop-threshold rule, this session
-stopped after the enumeration + additive extractor decode rather than
-rushing a partial port.
-
-**Remainder for whoever picks this back up** (in cost order): ~~(1) extract
-`ANIM_TAG_FIRE_PLUME` (`fire_plume.png` tiles + `fire.png` palette) — pure
-mechanical decode, same shape as every prior asset addition~~ **done, see the
-"DRAGON_RAGE enumeration remainder, rungs 1-2" section below**; ~~(2) port
-`SlideMonToOffset`/`SlideMonToOriginalPos` as a shared primitive (Tier-1
-tests first, no move wiring needed yet — same standalone-port pattern
-`shakeMon.ts`/`animLinearTranslation.ts` used)~~ **done, same section
-below**; (3) RAM-probe the whole
-move body in one battle-lab window (attacker shake → slide-to-offset →
-fire-spit → 8 plumes → slide-to-original) to pin every cadence/render-lag
-in one pass, the same technique `dump-dragonbreath-anim.py`/
-`dump-ember-creation.py` already used; (4) port `AnimDragonRageFirePlume`
-and wire `StartDragonFireTranslation`'s offset quirk + fresh affine table;
-(5) dense comparators in both orientations, run twice for determinism.
-MOVE_DRAGON_RAGE stays unsupported (no `ANIMATION_COVERAGE.json` entry) —
-shared code alone never promotes coverage, and zero render code landed
-this step.
-
-**Evidence.** `npm test` 2180/2180 (unchanged — no engine module touched,
-extractor-only change). `npm run build` green. `git status` after the
-extractor re-run showed only `extract-battle-move-anim-assets.ts` and
-`battle-move-anim-scripts.json` changed.
-
-## DRAGON_RAGE enumeration remainder, rungs 1-2: FIRE_PLUME extracted, SlideMonToOffset/SlideMonToOriginalPos ported (2026-07-25)
-
-**Rung 1 — `ANIM_TAG_FIRE_PLUME` asset extraction.** Mirrored the DRAGON_BREATH
-small_ember block's exact layout: `fire_plume.png` (32x160, 4x20 tiles, 5
-stacked 32x32 frames, `gDragonRageFirePlumeSpriteTemplate`'s tile source)
-paired with `fire.png`'s own embedded palette (the `ANIM_TAG_FIRE_PLUME`
-palette-table entry points at `gBattleAnimSpritePal_Fire`, a separate source
-PNG — same tile-vs-palette split `extract-battle-anim-assets.ts`'s
-particles.png/circle_impact.png pair already established). Writes
-`src/assets/gen/battle-anim-fire-plume.json`; pinned in
-`tests/moveAnimAssets.test.ts` mirroring the rocks.png per-asset pattern.
-Additive only — `git status` after a full extractor re-run showed only the
-new JSON output plus the extractor/test files touched.
-
-**Rung 2 — `SlideMonToOffset`/`SlideMonToOriginalPos` primitive port.**
-RAM-probed a real DRAGON_RAGE window first, per the step brief: staged a
-Factory-legal CHARMELEON attacker (mirroring FRONTIER_MON_CHARMELEON_2's own
-real MOVE_DRAGON_RAGE grant) vs. ONIX via a new `mechanicLab overrides.parties`
-fixture (`tools/battle-lab/mechanic-dragon-rage-charmeleon-onix.json`) and a
-new probe (`tools/probe/dump-dragonrage-slide.py`, committed evidence
-`src/data/gen/dragonrage-slide-probe.json`) that identifies the two dummy
-sprites by their own `template` pointer against
-`gSlideMonToOffsetSpriteTemplate`/`gSlideMonToOriginalPosSpriteTemplate`'s
-real rodata addresses (stable for the sprite's whole lifetime, unlike
-`callback` which reassigns itself after the first tick).
-
-Ported both 1:1 as `src/engine/slideMon.ts`
-(`slideMonToOffsetAtTick`/`slideMonToOriginalPosAtTick`, plus
-`slideMonToOffsetMirroredDeltas` for `SlideMonToOffset`'s own opponent-side
-mirror and `*DestroyTick` helpers). Both share
-`InitSpriteDataForLinearTranslation`'s plain-truncating-division Q8.8 setup
-(confirmed distinct from `animLinearTranslation.ts`'s direction-in-low-bit
-variant, per the original enumeration's own finding) but the RAM probe
-surfaced **two real divergences between their step functions**, both now
-encoded in the port rather than assumed: (1) `SlideMonToOriginalPos_Step`
-truncates its accumulator's own contribution to `(s8)` before adding back the
-base offset; `TranslateSpriteLinearByIdFixedPoint` (SlideMonToOffset's step)
-does not — irrelevant at this move's own ≤15px magnitudes but part of the
-real function. (2) Self-destroy timing differs by a full tick: SlideMonToOffset's
-finish branch only *reassigns* `sprite->callback` to `DestroyAnimSprite`
-(`SetCallbackToStoredInData6`), so the actual destroy fires the FOLLOWING
-tick — RAM shows the dummy sprite alive for 5 ticks on a 4-tick duration
-(168-172, tick 172 a repeated no-op), gone by 173. SlideMonToOriginalPos_Step
-calls `DestroyAnimSprite` directly in its own finish branch, same tick as the
-last accumulate — RAM shows exactly 4 ticks alive (235-238), gone by 239.
-`tests/slideMon.test.ts` asserts the port reproduces the probed attacker `x2`
-at every RAM tick across both windows (168-172 offset-out, 235-238
-offset-back) plus both destroy-tick counts, all matching exactly on first
-run — no curve-fitting needed once the source's two branch orders were read
-correctly. The opponent-side mirror branch (`battlerSide: "opponent"`) is
-unit-tested from source only — this attacker was on the player side in the
-probed window, so the mirror itself is **not yet independently RAM-verified**
-(named remainder, not claimed exact).
-
-**No move wiring.** `AnimDragonRageFirePlume`, the fire-spit sprite's
-asymmetric-offset branch, and `StartDragonFireTranslation`'s own fresh affine
-probe are untouched — out of this step's scope per the brief.
-MOVE_DRAGON_RAGE stays unsupported (no `ANIMATION_COVERAGE.json` entry).
-
-**Evidence.** `npm test` 2190/2190 (2180 + 10 new: 3 fire-plume asset pins,
-7 slideMon RAM pins). `npm run build` green.
-
-## DRAGON_RAGE rungs 3-4: whole-move RAM probe, full engine port, interpreter generalized — still unsupported, no dense pixel evidence (2026-07-25)
-
-**Verdict: the move body is fully ported and Tier-1-pinned against real RAM
-in both attacker orientations, but zero dense oracle-pixel window was run
-this step — per this codebase's own MIST_BALL precedent (a standalone,
-Tier-1-pinned, not-yet-wired engine module), DRAGON_RAGE stays *unsupported*
-(no `ANIMATION_COVERAGE.json` entry), not `partial`: `partial` requires "a
-meaningful dense window is green," and none was attempted.**
-
-**Rung 3 — whole-move RAM probe.** Extended rung 2's slide-only probe into
-`tools/probe/dump-dragonrage-full.py`: one pass capturing `gAnimVisualTaskCount`/
-`gAnimScriptActive` (ground truth for `waitforvisualfinish`'s own gating),
-both `AnimTask_ShakeMon` calls (attacker then target, identified across
-their self-reassignment from `AnimTask_ShakeMon` to the static, non-exported
-`AnimTask_ShakeMon_Step` — resolved via `nm pokeemerald.elf`, not the map
-file), the fire-spit sprite (position + its own single-step affine matrix
-via `gOamMatrices`), all 8 fire-plume sprites (creation ticks, `animCmdIndex`
-frame stepping, self-destroy), and both slide dummies. Staged BOTH
-orientations: the existing CHARMELEON/ONIX fixture plus a new reverse
-`tools/battle-lab/mechanic-dragon-rage-onix-charmeleon.json` (ONIX player,
-CHARMELEON opponent) — needed to RAM-probe `StartDragonFireTranslation`'s
-side-asymmetric offset branch and its own affine constants on the side
-DRAGON_BREATH never exercises. Committed as
-`src/data/gen/dragonrage-full-probe-{player,opponent}-attacker.json`.
-
-**Rung 4 — port + wire the move body.** Generalized
-`animScriptInterpreter.ts` with `interpretAnimSchedule`: the
-`waitforvisualfinish` sprite-lifetime tracking the MIST_BALL enumeration
-(2026-07-24) flagged as needed to generalize past FEATHER_DANCE's own
-script-position coincidence. `Cmd_waitforvisualfinish`
-(`battle_anim.c:455-465`) blocks until `gAnimVisualTaskCount == 0` — every
-item active since the last wait, not just the most recent — so the
-scheduler tracks each creation op's own "gone" tick (per-primitive lifetime
-supplied by the caller: `shakeMonSequence(...).length - 2`,
-`slideMonTo{Offset,OriginalPos}DestroyTick`, this move's own fire-spit/
-fire-plume lifetimes) and resolves each `waitforvisualfinish` as
-`max(activeGoneTicks) + 1` — a real, RAM-confirmed 1-tick resolution lag,
-not a hand-fit. Verified exactly (all 5 of DRAGON_RAGE's own
-`waitforvisualfinish` barriers, both orientations) before being trusted;
-`tests/dragonRage.test.ts`'s `dragonRageSchedule` tests pin every predicted
-creation tick against the rung-3 probe.
-
-`src/engine/dragonRage.ts` drives the whole move through this scheduler
-from the decoded script. Reuses `shakeMon.ts` (first ATTACKER-side
-`AnimTask_ShakeMon` call site — same primitive, plus the already-established
-priority-5 same-frame-double-step `+1` creation-tick adjustment
-`fly.ts` documents) and `slideMon.ts` verbatim. Adds two new mechanisms:
-
-- **Fire-spit sprite** (`StartDragonFireTranslation`): the opponent-side
-  branch's `sprite->x -= cmd->initialY` asymmetry (confirmed straight from
-  source, not guessed) plus a fresh, RAM-probed single-step affine matrix
-  per side — player `(pa,pb,pc,pd) = (-183,-4,4,-183)`, opponent
-  `(184,0,0,184)`, both distinct from DRAGON_BREATH's own matrices as
-  predicted. The per-tick Q8.8 delta is a RAM-probed literal (constant
-  across the sprite's life, `data[1]`/`data[2]`), not closed-form derived
-  from either battler's resolved `BATTLER_COORD_X_2`/`Y_PIC_OFFSET` — those
-  don't reproduce the literal via `floor(|distance|<<8/duration)` for
-  reasons not fully chased down this step (same "RAM-probed literal, not a
-  closed form" convention `dragonBreath.ts`'s own `MATRIX_A`/`MATRIX_B`
-  tables already use for this callback family). Frame cadence reuses
-  `dragonBreath.ts`'s own `((age+1)/3 % 3)` formula verbatim — RAM-confirmed
-  identical shape (`sAnim_DragonRageFire` is byte-identical to
-  `sAnim_DragonBreathFire_0`, exactly as the enumeration predicted).
-- **Fire-plume sprites** (`AnimDragonRageFirePlume`, all 8 spawns): static
-  position at the target's own `BATTLER_COORD_X`/`Y` (`targetBattlePosition`
-  — solved independently from the fire-spit's own `X_2`/`Y_PIC_OFFSET`
-  anchor and confirmed genuinely distinct, not a copy/paste error), offset
-  by `SetAnimSpriteInitialXOffset` (side-signed, same `sideSignedOffset`
-  shape `ember.ts` established) on X and a plain add on Y. RAM-probed
-  26-tick lifetime per spawn, identical across all 8 independently: a
-  4/5/5/5/7-tick frame-duration pattern (first frame short one tick — the
-  same "creation tick already reflects one step" idiom `slideMon.ts`
-  documents; last frame held 2 extra ticks after its own countdown before
-  `RunStoredCallbackWhenAnimEnds`'s own deferred-destroy fires).
-
-`tests/dragonRage.test.ts` (11 tests) pins every mechanism against BOTH
-committed RAM probes at every probed tick: schedule ticks (all 6 creation
-events, both orientations — exact match, validating the interpreter
-generalization), attacker/target shake offsets, both slide phases, fire-spit
-position/frame/matrix (both sides), and all 8 plume spawns'
-position/subpriority/frame across their full 26-tick life (both sides).
-
-**What's NOT done — the real remainder.** `dragonRage.ts` is not wired into
-`sceneOnPresentation.ts`'s move-dispatch system (`SceneOnMoveConfig` union,
-`createSceneOnMovePresentation`, a `sceneOnDragonRageView` function) — that
-system doesn't yet know the CHARMELEON species (a new
-`SceneOnPresentationBattler.species` union member + geometry constants,
-which this step DID reverse-solve precisely from the RAM probe for both
-roles: attacker `X_2/Y_pic` `(72,97)` player-side / `(176,49)` opponent-side;
-ONIX-as-target `X_2/Y_pic` `(176,42)` opponent-side / `(72,88)` player-side,
-`battlePositionCenter` `(176,40)` / `(72,80)` — see `dragonRage.ts`'s own
-geometry constants and doc comments for the derivation). No portable
-comparator script (`tools/compare/dragonRagePortable.ts`, mirroring
-`emberPortable.ts`) or dense-window RGB probe exists yet, so no oracle-pixel
-window has run at all — the acceptance bar this move still needs.
-**Remainder, in cost order:** (1) add `CHARMELEON` to
-`SceneOnPresentationBattler`'s species union + wire its `spriteCorner`
-(not yet solved — only the two coordinate pairs above were needed for this
-step's math); (2) add a `SceneOnDragonRageConfig` case + view function to
-`sceneOnPresentation.ts` calling straight into `dragonRage.ts`'s exported
-functions; (3) a portable comparator + RGB probe script (mirror
-`emberPortable.ts`/`tools/probe/run-battle-lab-rgb.py`); (4) dense windows
-at full recorded counts, both orientations, each run twice for determinism;
-(5) only then promote a coverage entry (`exact` if clean, `partial` with the
-remainder named otherwise).
-
-**Evidence.** `npm test` 2201/2201 (2190 + 11 new). `npm run build` green.
-
 ## DRAGON_RAGE rung 5: wired through the Scene-ON seam, comparator built, dense run finds a multi-tier capture-lag residual — still unsupported (2026-07-25)
 
 **Verdict: real progress on every ordered remainder item, but no green dense
@@ -532,26 +237,156 @@ remainder named precisely, matching the `partial` rubric.
 **Evidence.** `npm test` 2202/2202 (2201 + 1 new: the four lag constants
 pinned in `tests/dragonRage.test.ts`). `npm run build` green.
 
+## Idle-motion (species send-out front-anim) subsystem enumerated + ported, DRAGON_RAGE's target -1 drift closed (2026-07-25)
+
+**Verdict: real subsystem, source-attributed and RAM-confirmed, ported
+generically and wired into DRAGON_RAGE's target-sprite path only. Dense
+framebuffer match improved 86/150 → 127/150 (player-attacker orientation,
+verified deterministic on two independent live oracle runs). Three
+pre-existing, differently-rooted residuals remain (none newly introduced);
+`MOVE_DRAGON_RAGE` stays `partial`.**
+
+**Rung 1 — enumeration + probe.** Per the step brief's own probe-first
+rule, RAM-probed ONIX's own battler sprite directly by battler index
+(`gBattlerSpriteIds[0]`/`[1]`, `tools/probe/dump-onix-front-idle-anim.py`,
+`src/data/gen/onix-front-idle-probe.json`) across the whole
+CHARMELEON-vs-ONIX fixture — sidestepping `gBattleAnimAttacker`/
+`gBattleAnimTarget`, which are stale/zeroed until `DoMoveAnim` runs
+(`battle_anim.c:201-206`); the prior rung's own full-move probe had
+silently been reading battler 0 twice for its "target" rows before the
+move's own `gAnimScriptActive` flip, not ONIX's real sprite. The clean
+probe shows ONIX's sprite (`x2=1, y2=0, animNum=1`) with an active
+callback resolving to `SpriteCallbackDummy` (`nm pokeemerald.elf`:
+`0x08007428`) from the fixture's very first recorded tick — the
+mechanicLab staging harness fast-forwards past the send-out intro before
+the trace starts, so no committed window observes the animation
+mid-flight, only its already-settled terminal state.
+
+Mapped that callback back to source: `sMonFrontAnimIdsTable[SPECIES_ONIX]
+= ANIM_RAPID_H_HOPS` (`pokemon.c:1501`) → `Anim_RapidHorizontalHops`
+(`pokemon_animation.c:3567-3599`), triggered once at send-out
+(`BattleAnimateFrontSprite`/`DoMonFrontSpriteAnimation`,
+`pokemon.c:6803-6856`). It is NOT a continuous idle loop: its own
+accumulator (`data[2]`) runs 0→2040 over 86 ticks through a 4-phase
+piecewise formula, then permanently freezes `x2`/`y2` at the last active
+tick's value and hands off to `WaitAnimEnd` → `SpriteCallbackDummy`
+(`:5540-5544`) for the rest of the battle — until an unrelated mechanism
+(here, `AnimTask_ShakeMon`'s own unconditional `x2 = gBattleAnimArgs[1]`
+absolute set, `battle_anim_mon_movement.c:98-99`) overwrites it.
+Hand-derived source arithmetic at the last active accumulator (2040)
+gives `x2=1, y2=0` — matching RAM exactly, cross-checked independently of
+the terminal-state probe.
+
+**Enumeration answers:** per-species (keyed by `sMonFrontAnimIdsTable`,
+opponent/front sprite only — the player's own back sprite uses a
+completely separate table/function family, `sSpeciesToBackAnimSet`/
+`BACK_ANIM_*`, not explored); plays once, not looped; triggered by
+send-out; keeps one accumulator (`data[2]`) plus a terminal `data[6]=0`
+reset. Which other committed-fixture species share this family: only
+ONIX is currently rendered on the front-sprite side in a dense window;
+DRAGON_RAGE's own reverse orientation would need CHARMELEON's own front
+entry (`ANIM_BACK_AND_LUNGE`, a different, unexplored multi-phase
+function) — named as out-of-scope below, not ported. This connects to
+`docs/battle-menu-notes.md` §4's own open item (the settled action-menu's
+"idle-bob" flagged unresolved for ONIX): that item is a DIFFERENT
+mechanism (`DoBounceEffect`/`SpriteCB_BounceEffect`, a `y2`-only sine
+bounce, already fully source+RAM-resolved by a sibling lane's
+`docs/battle-menu-idle-notes.md` §1) — the two were conflated under one
+"idle-bob" label in prior doc comments, but are unrelated source
+functions (one writes only `y2` and loops forever; this one writes
+`x2`+`y2` and freezes after 86 ticks). Named here so a future session
+doesn't re-chase `DoBounceEffect` for this residual or vice versa.
+
+**Rung 2 — port.** `src/engine/speciesIdleAnim.ts`: a species → front-anim
+family table (only `ONIX`/`RAPID_H_HOPS` populated, per the stop-threshold
+rule) plus a faithful `rapidHorizontalHopsOffsetAtTick` port (all 4 phases)
+and a generic `computeTerminalOffset` driver that runs the port to its own
+natural stopping point rather than hardcoding the `{1,0}` result — adding
+a second species/family later is a table entry plus its own step function,
+not an ONIX-only special case. `tests/speciesIdleAnim.test.ts` (5 tests)
+pins hand-derived per-tick values across all 4 phases plus the RAM probe's
+own settled state.
+
+**Rung 3 — wired, target-sprite path only.** `sceneOnPresentation.ts`'s
+new `dragonRageTargetOffset` applies the species idle offset only when
+`animationAge < schedule.targetShakeTick` AND the target is on the
+opponent (front-sprite) side; at/after the shake's own creation tick,
+`shakeMonOffsetAtRenderTick` alone is authoritative (matching source's
+absolute-set clobber). A real bug surfaced wiring this in: the
+player-attacker fixture's own `target.spriteCorner.x` was `145` (144 + the
+same residual baked directly into the constant — the identical hack
+`docs/aerial-ace-portable-staging-probe.md` independently used for
+AERIAL_ACE's own opposite-side ONIX target, and the same one
+FEATHER_DANCE/QUICK_ATTACK/BOUNCE/FLY's own SHARED ONIX-opponent presets
+still use). Adding the offset on top of the already-baked corner
+double-counted (146, not 145) and regressed the dense run to 0/150 before
+the fixture was corrected back to the generic `144` — caught immediately
+by re-running the comparator, not left in. DRAGON_RAGE's own fixture is
+NOT shared with any other move's config (confirmed: no other
+`sceneOnPresentation.ts` preset references `CHARMELEON`), so this fix is
+scoped to DRAGON_RAGE alone; FEATHER_DANCE/QUICK_ATTACK/BOUNCE/FLY's own
+shared `145` presets are untouched (their own windows never cross the
+residual's reset boundary, so the baked hack still happens to be correct
+for them — a real, differently-scoped remainder for whoever eventually
+generalizes those, not touched this step).
+
+**Rung 4 — dense re-run.** Player-attacker orientation: **86/150 →
+127/150**, reproduced identically on two independent live oracle runs
+(deterministic) and A/B-verified against the pre-fix baseline replayed
+over the same cached oracle capture (`git checkout` of the prior commit's
+two files against the same RGB dir) — zero regressions, only new matches
+added. The three remaining named residuals are pre-existing and
+unrelated to this rung's own fix (confirmed present in the pre-fix
+baseline too): (1) a single-frame boundary artifact at render age 1
+(shake lag-2 creation-guard interaction); (2) a fire-spit rounding
+residual at render ages 86-96 (not a lag question — lag 0/1/2 all score
+equal or worse); (3) newly isolated (previously hidden under the broader
+pre-fix mismatch range) at render ages 98 and 105-114, coinciding with
+the fire-plume spawns' own creation window — candidate cause is the
+fire-plume framebuffer lag, already flagged as inferred-by-analogy rather
+than independently confirmed. Per the step brief's own rule, since the
+player orientation isn't fully clean, the opponent-attacker orientation
+was not attempted this rung (it would also need CHARMELEON's own
+`ANIM_BACK_AND_LUNGE` front-anim family ported first).
+
+**Coverage:** `MOVE_DRAGON_RAGE` stays `partial` (19 exact / 2 partial
+unchanged) — `remaining` updated with the new 127/150 count and the
+narrowed residual list.
+
+**Evidence.** `npm test` 2207/2207 (2202 + 5 new). `npm run build` green.
 ## Current handoff
 
 - **State:** **19 exact / 2 partial / 255 unsupported.**
-- **Did:** DRAGON_RAGE's per-mechanism capture-lag bisection (rung 1) and
-  the -1 drift root-cause (rung 2, RAM-confirmed, prior candidate
-  refuted) — see the dated section above. Dense framebuffer match improved
-  44/150 → 86/150 (player-attacker orientation). Promoted to `partial`.
-- **Evidence:** `npm test` 2202/2202, `npm run build` green.
-- **Next:** DRAGON_RAGE's own remainder, in cost order: (1) the opponent-
-  attacker orientation dense run (not attempted this step); (2) the
-  fire-spit residual's own root cause (render ages 86-96, not a lag
-  question — every candidate lag scores the same or worse); (3) fire-
-  plume's own independent lag confirmation (needs either a different
-  fixture with less spatial overlap, or a same-window differential
-  technique); (4) whether to also port the ONIX/CHARMELEON idle-bob
-  mechanism generically (cross-move, `docs/battle-menu-notes.md` §4's own
-  existing open item) rather than leaving it as DRAGON_RAGE's own named
-  residual. Alternatively, the next ranked `dragon-fire-projectile`
+- **Did:** Enumerated and RAM-probed DRAGON_RAGE's own target idle-bob
+  residual, source-attributed it to `Anim_RapidHorizontalHops`
+  (ONIX's own send-out front-anim, `pokemon_animation.c:3567-3599`),
+  ported it generically (`src/engine/speciesIdleAnim.ts`), and wired it
+  into DRAGON_RAGE's target-sprite path only. Fixed a double-counting bug
+  (the fixture's own `spriteCorner` had the same residual baked in) along
+  the way. Dense framebuffer match improved 86/150 → 127/150
+  (player-attacker orientation, deterministic on two runs). See the dated
+  section above for the full mechanism/port/residual accounting.
+- **Evidence:** `npm test` 2207/2207, `npm run build` green.
+- **Next:** DRAGON_RAGE's own remainder, in cost order: (1) the render-age-1
+  shake creation-guard artifact; (2) the fire-spit rounding residual
+  (render ages 86-96, not a lag question); (3) the newly-isolated
+  fire-plume-window residual (render ages 98, 105-114) — needs either a
+  fixture with less spawn overlap or a same-window differential technique
+  to confirm the fire-plume lag independently; (4) the opponent-attacker
+  orientation dense run, gated on porting CHARMELEON's own front-anim
+  family (`ANIM_BACK_AND_LUNGE`, unexplored — a materially different,
+  multi-phase step-function chain, not a copy of `Anim_RapidHorizontalHops`).
+  Separately, FEATHER_DANCE/QUICK_ATTACK/BOUNCE/FLY's own shared
+  ONIX-opponent presentation presets (`sceneOnPresentation.ts`) still bake
+  the same `+1` residual directly into their `spriteCorner.x=145` constant
+  rather than modeling it — harmless today since none of those windows
+  cross the residual's own reset boundary, but a future session
+  generalizing further should be aware the hack is still there, untouched
+  this step (out of scope: "wire it into the DRAGON_RAGE window... ONLY
+  there"). Alternatively, the next ranked `dragon-fire-projectile`
   siblings FIRE_BLAST and FIRE_SPIN remain open, as does MIST_BALL's own
   remainder (see the archived "Interpreter generalization" section).
-- **Housekeeping:** `ANIMATION_PROGRESS-archive.md` created 2026-07-25;
-  sections older than DRAGON_RAGE's own saga moved there, matching
-  `PROGRESS-archive.md`'s convention.
+- **Housekeeping:** `ANIMATION_PROGRESS-archive.md` extended 2026-07-25;
+  the DRAGON_RAGE enumeration/rungs-1-2/rungs-3-4 sections moved there
+  (older than the "~3 most recent" convention), keeping rung 5, the rung 5
+  remainder, and this idle-motion section as the live tail.
