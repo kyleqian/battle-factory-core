@@ -344,6 +344,14 @@ const validationChecks: Array<() => void> = [
   // own label entirely, and its whole reachable set -- including the shared
   // moveend/checkteamslost tail -- is registered today.
   () => requireExecutable("EFFECT_RECOIL_IF_MISS"),
+  // Primary-effect stat-change registration (docs/primary-stat-ground-truth.md):
+  // B_SCR_OP_STATBUFFCHANGE/SETGRAPHICALSTATCHANGEVALUES/PLAYANIMATION flip
+  // the whole UP family (self-target, no accuracy roll) straight to
+  // executable; the DOWN family additionally needed JUMPIFSTATUS2/ORBYTE.
+  () => requireExecutable("EFFECT_ATTACK_UP"),
+  () => requireExecutable("EFFECT_ATTACK_UP_2"),
+  () => requireExecutable("EFFECT_DEFENSE_DOWN"),
+  () => requireExecutable("EFFECT_DEFENSE_DOWN_2"),
 ];
 
 let validationFailed = false;
