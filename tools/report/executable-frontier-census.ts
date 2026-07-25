@@ -322,51 +322,21 @@ function requireBlockedMentioning(effectName: string, needle: string): void {
   }
 }
 
-/**
- * The quartet's OWN SetMoveEffect dispatch is source-complete (PROGRESS 444),
- * but every quartet member's real entryScript still funnels through
- * `BattleScript_EffectHit`'s own first instruction -- `jumpifnotmove
- * MOVE_SURF, ...` (data/battle_scripts_1.s:237), compiled to the still-
- * unregistered B_SCR_OP_JUMPIFHALFWORD (see
- * factoryBattleScriptTerminalDecision.ts's own header comment, which already
- * documents routing around this exact instruction). So the quartet is
- * currently blocked-on-opcodes on that unrelated chokepoint, not on their own
- * dispatch: assert the block names JUMPIFHALFWORD on the main path, and that
- * no SetMoveEffect-dispatch subsystem note is present (proving the quartet's
- * own dispatch is clean, unlike EFFECT_SLEEP/EFFECT_TOXIC below).
- */
-function requireBlockedOnHitChainEntryOnly(effectName: string): void {
-  const report = reportByEffectId.get(effectIdByName(effectName))!;
-  if (report.classification.kind !== "blocked-on-opcodes") {
-    throw new Error(`ground-truth drift: ${effectName} expected blocked-on-opcodes, got ${report.classification.kind}`);
-  }
-  const { missingOpcodes, missingOnMainPath, subsystemNotes } = report.classification;
-  if (!missingOpcodes.includes("B_SCR_OP_JUMPIFHALFWORD") || !missingOnMainPath) {
-    throw new Error(
-      `ground-truth drift: ${effectName} expected a main-path B_SCR_OP_JUMPIFHALFWORD block, got `
-      + JSON.stringify(report.classification),
-    );
-  }
-  if (subsystemNotes.length > 0) {
-    throw new Error(
-      `ground-truth drift: ${effectName} expected a clean SetMoveEffect dispatch (no subsystem note), got `
-      + JSON.stringify(subsystemNotes),
-    );
-  }
-}
-
 const validationChecks: Array<() => void> = [
-  // The census's own headline finding: every shared-hit-chain effect's real
-  // entryScript funnels through BattleScript_EffectHit's Surf-only guard,
-  // whose comparison opcode is itself unregistered -- so the chain is
-  // main-path-blocked before any of ROADMAP S10's own "16 more opcodes" list
-  // even matters. Corroborated independently by
-  // factoryBattleScriptTerminalDecision.ts's header comment.
-  () => requireBlockedOnHitChainEntryOnly("EFFECT_HIT"),
-  () => requireBlockedOnHitChainEntryOnly("EFFECT_POISON_HIT"), // SetMoveEffect quartet (PROGRESS 444)
-  () => requireBlockedOnHitChainEntryOnly("EFFECT_BURN_HIT"),
-  () => requireBlockedOnHitChainEntryOnly("EFFECT_FREEZE_HIT"),
-  () => requireBlockedOnHitChainEntryOnly("EFFECT_PARALYZE_HIT"),
+  // Registration checkpoint (2026-07-25): B_SCR_OP_JUMPIFHALFWORD,
+  // B_SCR_OP_JUMPIFSTATUS3CONDITION, and B_SCR_OP_ORWORD are now registered,
+  // so BattleScript_EffectHit's own Surf-only guard -- the census's own
+  // headline finding -- is no longer the chokepoint routing every
+  // shared-hit-chain effect's real entryScript around executability. The
+  // SetMoveEffect quartet's own dispatch was already source-complete
+  // (PROGRESS 444), so these five flip straight to executable, corroborated
+  // by factoryBattleScriptTerminalDecision.ts's own header comment (which
+  // documented, then closed, the same routing-around gap).
+  () => requireExecutable("EFFECT_HIT"),
+  () => requireExecutable("EFFECT_POISON_HIT"), // SetMoveEffect quartet (PROGRESS 444)
+  () => requireExecutable("EFFECT_BURN_HIT"),
+  () => requireExecutable("EFFECT_FREEZE_HIT"),
+  () => requireExecutable("EFFECT_PARALYZE_HIT"),
   () => requireBlockedMentioning("EFFECT_SLEEP", "SETEFFECTPRIMARY"), // PROGRESS 444: still-unregistered Cmd_seteffectprimary
   () => requireBlockedMentioning("EFFECT_TOXIC", "SETEFFECTPRIMARY"),
   // A real positive: EFFECT_RECOIL_IF_MISS (Jump Kick/Hi Jump Kick) enters via
@@ -518,20 +488,17 @@ lines.push(
 lines.push("");
 if (rankedOpcodeSets.length > 0) {
   const top = rankedOpcodeSets[0]!;
+  const opcodeList = top.opcodes.map((o) => `\`${o}\``).join(", ");
+  const effectPreview = top.effects.slice(0, 6).join(", ") + (top.effects.length > 6 ? ", …" : "");
   lines.push(
-    `**Key finding:** the single highest-leverage gap is not any of ROADMAP S10's own "16 more opcodes" -- `
-    + `it is upstream of all of them. Every shared-hit-chain effect's real \`entryScript\` funnels through `
-    + `\`BattleScript_EffectHit\`'s own first instruction, a Surf-only underwater-immunity guard `
-    + `(\`jumpifnotmove MOVE_SURF, ...\`, \`data/battle_scripts_1.s:237\`) compiled to `
-    + `\`B_SCR_OP_JUMPIFHALFWORD\` -- itself still unregistered, on the **main path**, for every move that `
-    + "uses this family, Surf or not (evaluating the comparison is unconditional even though only Surf takes "
-    + "the branch). Every existing hit-chain Tier-1 proof (PROGRESS 443/444) starts execution at "
-    + `\`BattleScript_HitFromAtkCanceler\` instead of the literal topology entry, silently routing around it `
-    + `(see \`factoryBattleScriptTerminalDecision.ts\`'s own header comment, written before this census, `
-    + "independently confirming the same gap). Registering this single generic halfword-compare-and-jump "
-    + `opcode (plus its two Surf-branch-only siblings) would flip **${top.effectCount} effects / `
-    + `${top.moveCount} moves (${top.factoryMoveCount} Factory-L50, ${top.factoryWeighted} weighted)** from `
-    + "blocked to executable in one step -- by far the largest single entry in the ranked table below.",
+    `**Key finding:** the single highest-leverage next registration is ${opcodeList} -- registering `
+    + `exactly that set would flip **${top.effectCount} effect${top.effectCount === 1 ? "" : "s"} / `
+    + `${top.moveCount} move${top.moveCount === 1 ? "" : "s"} (${top.factoryMoveCount} Factory-L50, `
+    + `${top.factoryWeighted} weighted)** from blocked to executable in one step (${effectPreview}) -- the `
+    + "largest single entry in the ranked table below. This paragraph is generated fresh from the "
+    + "current registered-opcode set every run, so it always names today's actual top blocker, not a "
+    + "past one -- see PROGRESS.md for the registration history (e.g. the 2026-07-25 "
+    + "B_SCR_OP_JUMPIFHALFWORD/JUMPIFSTATUS3CONDITION/ORWORD entry-chokepoint trio).",
   );
   lines.push("");
 }
@@ -607,10 +574,10 @@ lines.push("");
 lines.push("The tool itself asserts these before writing this doc and exits nonzero on any mismatch:");
 lines.push("");
 lines.push(
-  "- `EFFECT_HIT`, `EFFECT_POISON_HIT`, `EFFECT_BURN_HIT`, `EFFECT_FREEZE_HIT`, `EFFECT_PARALYZE_HIT` "
-  + "each blocked-on-opcodes with `B_SCR_OP_JUMPIFHALFWORD` on the main path (the key finding above) and "
-  + "*no* SetMoveEffect-dispatch subsystem note -- proving the quartet's own dispatch is source-complete "
-  + "(PROGRESS 444) and the block is entirely the unrelated shared-entry chokepoint",
+  "- `EFFECT_HIT`, `EFFECT_POISON_HIT`, `EFFECT_BURN_HIT`, `EFFECT_FREEZE_HIT`, `EFFECT_PARALYZE_HIT` each "
+  + "executable -- the SetMoveEffect quartet's own dispatch was already source-complete (PROGRESS 444), "
+  + "and B_SCR_OP_JUMPIFHALFWORD/JUMPIFSTATUS3CONDITION/ORWORD (registered 2026-07-25) closed the "
+  + "shared-entry chokepoint that used to block all five on an unrelated instruction",
 );
 lines.push("- `EFFECT_SLEEP`, `EFFECT_TOXIC` blocked, mentioning `Cmd_seteffectprimary` (still fully unregistered)");
 lines.push("- `EFFECT_RECOIL_IF_MISS` executable (a real positive: it enters via `BattleScript_HitFromAtkString`, skipping the chokepoint entirely, and reaches moveend/checkteamslost)");
