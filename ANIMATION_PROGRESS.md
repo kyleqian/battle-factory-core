@@ -332,23 +332,105 @@ this step — RUNG A's RAM-probe investigation and verification used the full
 session; no safe margin remained to start a second bounded oracle-facing
 change.
 
+## MIST_BALL remainder rung 3: AnimThrowMistBall wired, RAM-probe-validated (2026-07-24)
+
+**Verdict: rung 3 lands clean, first try, zero test-fix iterations — the RAM
+evidence matched the ported chain exactly once the real tick semantics were
+derived from the probe (not assumed).** `src/engine/mistBall.ts` ports
+`AnimThrowMistBall` → `TranslateAnimSpriteToTargetMonLocation` →
+`StartAnimLinearTranslation` (`battle_anim_ice.c:1090-1095`,
+`battle_anim_mons.c:1546-1568`), driven by the script's own single
+`createsprite gMistBallSpriteTemplate, ANIM_TARGET, 0, 0,0,0,0, 30, 0`
+(`durationTicks` read directly from `battle-move-anim-scripts.json`'s
+`createspriteArgvMapping`, not hand-copied) and the already-ported
+`animLinearTranslation.ts` primitive.
+
+**The anim-script interpreter is now a real shared primitive, not a
+FEATHER_DANCE-only helper.** `interpretCreateSpriteSchedule` moved out of
+`featherDance.ts` into a new `src/engine/animScriptInterpreter.ts`; both
+`featherDance.ts` and `mistBall.ts` import the one function. This is the
+"interpreter's createsprite path" the step brief names — MIST_BALL's own
+schedule is the trivial one-element case (a single createsprite before its
+first `delay`), so this generalization step didn't need new interpreter
+logic, only extracting the existing one for reuse.
+
+**RAM probe** (`tools/probe/dump-mist-ball-sprite.py` against a new
+`tools/battle-lab/mechanic-mist-ball-latias-onix.json` `overrides.parties`
+mechanicLab scenario — opponent Latias forced into MIST_BALL on all four
+slots, player Onix — staged in ~1k frames). Sprite identified unambiguously
+by its `template` pointer (`gSprites+0x14`) matching `gMistBallSpriteTemplate`
+(`0x08595c70`, from `bin/oracle symbols`), not by OAM-slot guessing. Full
+window captured: absent before creation, in-use ticks 88-119 (32 ticks),
+absent after. Committed as dev-time evidence,
+`src/data/gen/mist-ball-sprite-probe.json` (38 rows, ticks 85-122).
+
+**The one genuine derivation, from `Cmd_createsprite`'s `CreateSpriteAndAnimate`
+call (`sprite.c:591-611`), not assumed from a neighbor mechanism:** the
+sprite's creation tick shows `TranslateAnimSpriteToTargetMonLocation`'s
+effects (`data[0]=30`, `data[2]`/`data[4]` = target coords, `callback` already
+reassigned to `StartAnimLinearTranslation`) already applied, with `x2=y2=0`
+(no accumulation yet). This is because `CreateSpriteAndAnimate` calls the
+fresh sprite's callback (`AnimThrowMistBall`) *synchronously* at creation
+(inside the `createsprite` opcode itself), then that same frame's ordinary
+`AnimateSprites()` sweep advances the just-reassigned callback
+(`TranslateAnimSpriteToTargetMonLocation`) a *second* time before the frame
+renders — two callback steps land on one RAM tick, mirroring in spirit (but
+not in cause — this is `CreateSpriteAndAnimate`'s own synchronous call, not
+FLY's task-list-traversal double-step) the FLY `AnimTask_ShakeMon` finding
+above. `StartAnimLinearTranslation` itself first runs — and self-invokes
+`AnimTranslateLinear_WithFollowup` once inline — on the *next* tick. Net
+result: `callbacks = tick` (no `+1`/`-1` fixup) maps a probe-relative tick
+directly onto `linearTranslationOffsetAfterCallbacks`, landing exactly on
+the primitive's own documented "first displayed tick is pre-callback" case.
+Verified against **every** real probed tick (32/32), not fitted: the
+Tier-1 test (`tests/mistBall.test.ts`) passed on the first run with no
+constant-tuning.
+
+**Not attempted (honest scope boundary, per the step's own OUT OF SCOPE
+list and stop-and-split remainder):** `mistBall.ts` is a standalone,
+RAM-validated module — it is **not** wired into `battleScene.ts`'s move
+dispatch, so MIST_BALL gets no `ANIMATION_COVERAGE.json` entry and stays
+fully unsupported (shared code alone never promotes coverage). No dense
+oracle pixel comparator exists for the ball's flight: rendering it needs
+`ANIM_TAG_SMALL_BUBBLES` sprite-sheet extraction and OAM draw wiring that
+no extractor in this codebase has exercised yet, a nontrivial slice on its
+own, not a quick add inside this step's remaining time. `waitforvisualfinish`
+sprite-lifetime semantics, `AnimComplexPaletteBlend`, `AnimTask_MistBallFog`'s
+BG pipeline, and generalizing `AnimTask_BlendBattleAnimPal` past its one
+DRAGON_BREATH instance are all still open — MIST_BALL needs every one of
+those before it can render at all, let alone reach `partial`/`exact`.
+
+**Evidence.** `npm test` 2125/2125 (up from 2045 — added `tests/mistBall.test.ts`,
+no regressions). `npm run build` green. `featherDance.ts`'s own tests
+(`tests/featherDance.test.ts`, `tests/featherDanceInterpreter.test.ts`) re-run
+unchanged after the `interpretCreateSpriteSchedule` extraction (pure move,
+zero behavior change) — no dense oracle comparator touches
+`animScriptInterpreter.ts`'s exported surface, so none were re-run.
+
 ## Current handoff
 
-- **State:** **18 exact / 1 partial / 257 unsupported** (unchanged — no move
-  acceptance changed this step; the FLY calibration is an internal
-  implementation substitution behind an already-`exact` move, proven by
-  rerunning its existing dense comparators at unchanged counts).
-- **Did:** resolved the FLY `AnimTask_ShakeMon` alignment (see the section
-  above): pinned the real same-frame-double-step mechanism with RAM
-  evidence from both strike comparators, landed FLY through the generic
-  `shakeMonOffsetAtTick` port, and deleted `FLY_SHAKE_AGES`.
-- **Evidence:** `npm test` 2045/2045, `npm run build` green. QUICK_ATTACK
-  219/219 + 214/214, FLY strike 248/248 + 244/244, FLY charge 151/151 +
-  147/147 — all re-run this step.
-- **Next:** MIST_BALL rung 3 (wire `AnimThrowMistBall` through the
-  now-ported linear-translation primitive + the interpreter's
-  `createsprite` path, RAM-probe-validated — see "MIST_BALL remainder,
-  rungs 1-2" above for the full remainder list); or resume the next ranked
-  Level-50 component track (`mud-sand-scatter`/`dragon-fire-projectile`) if
-  a bounded win elsewhere is preferred. THUNDER PUNCH has no known
-  move-owned remainder.
+- **State:** **18 exact / 1 partial / 257 unsupported** (unchanged — MIST_BALL
+  stays fully unsupported; this step proves one more mechanism at the engine
+  level, not a move-level presentation).
+- **Did:** MIST_BALL remainder rung 3 (see the section above): ported
+  `AnimThrowMistBall`/`TranslateAnimSpriteToTargetMonLocation`/
+  `StartAnimLinearTranslation` as `src/engine/mistBall.ts`, extracted the
+  anim-script interpreter's createsprite-schedule walk into a shared
+  `src/engine/animScriptInterpreter.ts` (both `featherDance.ts` and
+  `mistBall.ts` now import it), wrote a new RAM probe + `overrides.parties`
+  mechanicLab scenario, and pinned every probed tick with a Tier-1 test.
+- **Evidence:** `npm test` 2125/2125, `npm run build` green. New:
+  `tests/mistBall.test.ts` (6 tests, all 32 probed RAM ticks matched
+  field-by-field). Unaffected dense comparators not re-run (no shared
+  presentation code changed beyond the pure `featherDance.ts` extraction,
+  itself re-verified by its own existing tests).
+- **Next:** MIST_BALL's remaining items in cost order: (1) `ANIM_TAG_SMALL_BUBBLES`
+  asset extraction + OAM wiring so `mistBall.ts` can actually render (needed
+  before any dense pixel comparator is possible); (2) generalize
+  `AnimTask_BlendBattleAnimPal` past its one DRAGON_BREATH instance; (3) give
+  the interpreter real `waitforvisualfinish` semantics (sprite-lifetime
+  tracking); (4)/(5) the two new subsystems (`AnimComplexPaletteBlend`,
+  `AnimTask_MistBallFog`'s BG pipeline) — each its own bounded step. Or
+  resume the next ranked Level-50 component track
+  (`mud-sand-scatter`/`dragon-fire-projectile`) if a bounded win elsewhere is
+  preferred. THUNDER PUNCH has no known move-owned remainder.
