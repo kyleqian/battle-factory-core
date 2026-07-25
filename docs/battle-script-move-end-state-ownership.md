@@ -157,3 +157,18 @@ zero-RNG exemption: ability/item delegates and their transferred scripts own
 their source draws in the existing machine ledger.  Registering a no-effect
 stub, a singles-only case filter, or a direct adapter continuation before step
 7 would discard durable source state and violate this ownership boundary.
+
+**[SUPERSEDED 2026-07-24 by ROADMAP S10's Executable-frontier reset, step
+(iii).]** This ladder predates that reset's (a)/(b) registration policy, which
+replaced "never partially register" with "every branch is (a) source-complete
+or (b) an explicit, reachability-tested `unsupported-branch` barrier."
+`src/engine/battleScriptMoveEndOpcode.ts` registers opcode 73 under that
+policy: steps 1-4 above are consumed as planned, but step 5 (full
+`AbilityBattleEffects`/`ItemBattleEffects` ports) is not attempted — the
+seven states that would need those delegates are barriered instead, each
+gated on its own real trigger (named ability/hold-effect/doubles-only) with
+its own reachability and pass-through test, rather than blocking registration
+on a source-complete port of two large, mostly-unrelated dispatch functions.
+Step 6's loop/end-mode requirement is met (all three assembled end-mode
+forms), though not via a dedicated `battleScriptMoveEnd.test.ts` file — see
+`tests/battleScriptMoveEndOpcode.test.ts`. Step 7 landed as described.

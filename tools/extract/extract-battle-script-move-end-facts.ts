@@ -270,9 +270,13 @@ const output = {
   },
   opcodeStarts: starts,
   registration: {
-    implemented: false,
+    implemented: true,
     rationale:
-      "Evidence receipt only: opcode 73 remains unregistered until every extracted state and delegate is source-complete.",
+      "S10 step (iii): opcode 73 is registered under the (a)/(b) policy (ROADMAP S10's Executable-frontier "
+      + "reset). The state loop, moveendState increment semantics, and endMode/endState postlude are "
+      + "source-complete; seven states carry an explicit unsupported-branch barrier on their own real trigger "
+      + "(src/engine/battleScriptMoveEndOpcode.ts) rather than requiring every delegate to be source-complete "
+      + "first.",
   },
 };
 

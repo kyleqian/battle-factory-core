@@ -1,0 +1,475 @@
+/**
+ * S10 step (iii): opcode 73, B_SCR_OP_MOVEEND / Cmd_moveend
+ * (battle_script_commands.c:4210-4498). The state loop, moveendState
+ * increment semantics, and the endMode/endState postlude are the opcode and
+ * are implemented completely; every individual state is either implemented
+ * source-completely or barriered on its own real trigger condition per the
+ * (a)/(b) registration policy (ROADMAP S10's Executable-frontier reset §1).
+ *
+ * Numeric dispatch is authoritative and strictly sequential (0,1,2,...,16,17)
+ * -- moveendState is a plain counter, so execution order matches the MOVEEND_*
+ * constant values, not the case bodies' physical order in the source file
+ * (which is 0..7, 11, 12, 8..10, 13..17; see
+ * docs/battle-script-move-end-state-ownership.md).
+ */
+import type { BattleScriptBattlerId } from "./battleScriptEvents.ts";
+import {
+  transitionBattleScriptCommand,
+  type BattleScriptBlockReason,
+  type BattleScriptCommandTransition,
+  type BattleScriptOpcodeHandler,
+  type BattleScriptOpcodeHandlerContext,
+  type BattleScriptOpcodeHandlers,
+} from "./battleScriptMachine.ts";
+import { resolveBattleScriptLabel, type BattleScriptProgram } from "./battleScriptProgram.ts";
+import {
+  applyBattleScriptMoveEndChangedItemOwnership,
+  applyBattleScriptMoveEndChoiceOwnership,
+  applyBattleScriptMoveEndMirrorMoveOwnership,
+  applyBattleScriptMoveEndSubstituteOwnership,
+  applyBattleScriptMoveEndUpdateLastMovesOwnership,
+  resolveBattleScriptBattlerHoldEffect,
+  resolveBattleScriptMoveEndNextTarget,
+  BATTLE_SCRIPT_MOVE_RESULT_NO_EFFECT,
+  BATTLE_SCRIPT_NUM_BATTLE_STATS,
+  type BattleScriptRulesBattlerState,
+  type BattleScriptRulesBattlers,
+  type BattleScriptRulesContext,
+  type BattleScriptStatStages,
+} from "./battleScriptRulesContext.ts";
+import { executeBattleScriptMoveEndControllerCase } from "./battleScriptMoveEndControllers.ts";
+
+const MOVEEND_RAGE = 0;
+const MOVEEND_DEFROST = 1;
+const MOVEEND_SYNCHRONIZE_TARGET = 2;
+const MOVEEND_ON_DAMAGE_ABILITIES = 3;
+const MOVEEND_IMMUNITY_ABILITIES = 4;
+const MOVEEND_SYNCHRONIZE_ATTACKER = 5;
+const MOVEEND_CHOICE_MOVE = 6;
+const MOVEEND_CHANGED_ITEMS = 7;
+const MOVEEND_ATTACKER_INVISIBLE = 8;
+const MOVEEND_ATTACKER_VISIBLE = 9;
+const MOVEEND_TARGET_VISIBLE = 10;
+const MOVEEND_ITEM_EFFECTS_ALL = 11;
+const MOVEEND_KINGSROCK_SHELLBELL = 12;
+const MOVEEND_SUBSTITUTE = 13;
+const MOVEEND_UPDATE_LAST_MOVES = 14;
+const MOVEEND_MIRROR_MOVE = 15;
+const MOVEEND_NEXT_TARGET = 16;
+const MOVEEND_COUNT = 17;
+
+const STATUS2_RAGE = 1 << 23;
+const STAT_ATK = 1;
+const MAX_STAT_STAGE = 12;
+const HITMARKER_SYNCHRONIZE_EFFECT = 1 << 14;
+const ABILITY_SYNCHRONIZE = 28;
+
+/** include/constants/abilities.h -- AbilityBattleEffects' ON_DAMAGE case (battle_util.c:2749-2871). */
+const ON_DAMAGE_ABILITIES: ReadonlySet<number> = new Set([
+  16, // ABILITY_COLOR_CHANGE
+  24, // ABILITY_ROUGH_SKIN
+  27, // ABILITY_EFFECT_SPORE
+  38, // ABILITY_POISON_POINT
+  9, // ABILITY_STATIC
+  49, // ABILITY_FLAME_BODY
+  56, // ABILITY_CUTE_CHARM
+]);
+
+/** AbilityBattleEffects' ABILITYEFFECT_IMMUNITY case (battle_util.c:2873-2954). */
+const IMMUNITY_ABILITIES: ReadonlySet<number> = new Set([
+  17, // ABILITY_IMMUNITY
+  20, // ABILITY_OWN_TEMPO
+  7, // ABILITY_LIMBER
+  15, // ABILITY_INSOMNIA
+  72, // ABILITY_VITAL_SPIRIT
+  41, // ABILITY_WATER_VEIL
+  40, // ABILITY_MAGMA_ARMOR
+  12, // ABILITY_OBLIVIOUS
+]);
+
+/** include/constants/hold_effects.h -- ItemBattleEffects' ITEMEFFECT_MOVE_END case (battle_util.c:3625-3767). */
+const ITEM_MOVE_END_HOLD_EFFECTS: ReadonlySet<number> = new Set([
+  2, // HOLD_EFFECT_CURE_PAR
+  3, // HOLD_EFFECT_CURE_SLP
+  4, // HOLD_EFFECT_CURE_PSN
+  5, // HOLD_EFFECT_CURE_BRN
+  6, // HOLD_EFFECT_CURE_FRZ
+  8, // HOLD_EFFECT_CURE_CONFUSION
+  9, // HOLD_EFFECT_CURE_STATUS
+  23, // HOLD_EFFECT_RESTORE_STATS
+  28, // HOLD_EFFECT_CURE_ATTRACT
+]);
+
+const HOLD_EFFECT_FLINCH = 30;
+const HOLD_EFFECT_SHELL_BELL = 62;
+
+const MOVEEND_STATE_NAME_TO_VALUE: Readonly<Record<string, number>> = Object.freeze({
+  MOVEEND_RAGE,
+  MOVEEND_DEFROST,
+  MOVEEND_SYNCHRONIZE_TARGET,
+  MOVEEND_ON_DAMAGE_ABILITIES,
+  MOVEEND_IMMUNITY_ABILITIES,
+  MOVEEND_SYNCHRONIZE_ATTACKER,
+  MOVEEND_CHOICE_MOVE,
+  MOVEEND_CHANGED_ITEMS,
+  MOVEEND_ATTACKER_INVISIBLE,
+  MOVEEND_ATTACKER_VISIBLE,
+  MOVEEND_TARGET_VISIBLE,
+  MOVEEND_ITEM_EFFECTS_ALL,
+  MOVEEND_KINGSROCK_SHELLBELL,
+  MOVEEND_SUBSTITUTE,
+  MOVEEND_UPDATE_LAST_MOVES,
+  MOVEEND_MIRROR_MOVE,
+  MOVEEND_NEXT_TARGET,
+  MOVEEND_COUNT,
+});
+
+function parseMoveendOperand(expression: string | undefined, field: string): number {
+  if (expression === undefined) {
+    throw new Error(`Cmd_moveend: missing ${field} operand`);
+  }
+  if (/^\d+$/.test(expression)) return Number(expression);
+  const value = MOVEEND_STATE_NAME_TO_VALUE[expression];
+  if (value === undefined) {
+    throw new Error(`Cmd_moveend: unknown ${field} operand expression ${expression}`);
+  }
+  return value;
+}
+
+function requireBattlerRole(
+  rules: BattleScriptRulesContext,
+  role: "attacker" | "target",
+): BattleScriptBattlerId {
+  const battler = rules.selectorRoles[role];
+  if (battler === null) {
+    throw new Error(`Cmd_moveend requires a bound gBattler${role === "attacker" ? "Attacker" : "Target"}`);
+  }
+  return battler;
+}
+
+function advanceMoveend(rules: BattleScriptRulesContext): BattleScriptRulesContext {
+  return Object.freeze({ ...rules, moveendState: rules.moveendState + 1 });
+}
+
+function replaceBattlerAt(
+  battlers: BattleScriptRulesBattlers,
+  battler: BattleScriptBattlerId,
+  next: BattleScriptRulesBattlerState,
+): BattleScriptRulesBattlers {
+  const mutable = [...battlers] as [
+    BattleScriptRulesBattlerState,
+    BattleScriptRulesBattlerState,
+    BattleScriptRulesBattlerState,
+    BattleScriptRulesBattlerState,
+  ];
+  mutable[battler] = next;
+  return Object.freeze(mutable);
+}
+
+function replaceStatStage(
+  stages: BattleScriptStatStages,
+  index: number,
+  value: number,
+): BattleScriptStatStages {
+  const mutable = [...stages] as number[];
+  mutable[index] = value;
+  if (mutable.length !== BATTLE_SCRIPT_NUM_BATTLE_STATS) {
+    throw new Error("Cmd_moveend: statStages width invariant violated");
+  }
+  return Object.freeze(mutable) as unknown as BattleScriptStatStages;
+}
+
+/** One pass through Cmd_moveend's do-while body for the current moveendState. */
+type MoveendStateOutcome =
+  | Readonly<{ kind: "continue"; rules: BattleScriptRulesContext }>
+  | Readonly<{ kind: "transfer"; transition: BattleScriptCommandTransition<BattleScriptRulesContext> }>;
+
+function continueState(rules: BattleScriptRulesContext): MoveendStateOutcome {
+  return Object.freeze({ kind: "continue", rules });
+}
+
+function transferState(
+  transition: BattleScriptCommandTransition<BattleScriptRulesContext>,
+): MoveendStateOutcome {
+  return Object.freeze({ kind: "transfer", transition });
+}
+
+function abilitySynchronizeApplies(rules: BattleScriptRulesContext, battler: BattleScriptBattlerId): boolean {
+  return rules.battlers[battler].ability === ABILITY_SYNCHRONIZE
+    && (rules.hitMarker & HITMARKER_SYNCHRONIZE_EFFECT) !== 0;
+}
+
+function executeRage(
+  context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
+  rules: BattleScriptRulesContext,
+): MoveendStateOutcome {
+  const attacker = requireBattlerRole(rules, "attacker");
+  const target = requireBattlerRole(rules, "target");
+  const targetState = rules.battlers[target];
+  const applies =
+    (targetState.status2 & STATUS2_RAGE) !== 0
+    && targetState.hp !== 0
+    && attacker !== target
+    && rules.battlers[attacker].side !== targetState.side
+    && (rules.moveResultFlags & BATTLE_SCRIPT_MOVE_RESULT_NO_EFFECT) === 0
+    && (targetState.specialStatus.physicalDmg !== 0 || targetState.specialStatus.specialDmg !== 0)
+    && rules.currentMovePower !== 0
+    && targetState.statStages[STAT_ATK] < MAX_STAT_STAGE;
+  if (!applies) return continueState(advanceMoveend(rules));
+
+  const nextTarget = Object.freeze({
+    ...targetState,
+    statStages: replaceStatStage(targetState.statStages, STAT_ATK, targetState.statStages[STAT_ATK] + 1),
+  });
+  const nextRules = advanceMoveend(
+    Object.freeze({ ...rules, battlers: replaceBattlerAt(rules.battlers, target, nextTarget) }),
+  );
+  const label = resolveBattleScriptLabel(context.program, "BattleScript_RageIsBuilding");
+  if (!label) throw new Error("committed Battle Script program lacks BattleScript_RageIsBuilding");
+  return transferState(
+    transitionBattleScriptCommand(
+      context,
+      Object.freeze({ kind: "call-current", programCounter: label.programCounter }),
+      { rulesContext: nextRules },
+    ),
+  );
+}
+
+function executeControllerDelegatedState(
+  context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
+  rules: BattleScriptRulesContext,
+): MoveendStateOutcome {
+  const patched: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext> = Object.freeze({
+    program: context.program,
+    instruction: context.instruction,
+    state: Object.freeze({ ...context.state, rulesContext: rules }),
+  });
+  const transition = executeBattleScriptMoveEndControllerCase(patched);
+  if (transition.control.kind === "jump") {
+    // The dependency-step helper's no-op continuation; Cmd_moveend's do-while
+    // keeps looping in the same C call, so this stays internal to this opcode.
+    return continueState(transition.rulesContext);
+  }
+  return transferState(transition);
+}
+
+function executeMoveendState(
+  context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
+  rules: BattleScriptRulesContext,
+): MoveendStateOutcome {
+  switch (rules.moveendState) {
+    case MOVEEND_RAGE:
+      return executeRage(context, rules);
+    case MOVEEND_DEFROST:
+    case MOVEEND_ATTACKER_INVISIBLE:
+    case MOVEEND_ATTACKER_VISIBLE:
+    case MOVEEND_TARGET_VISIBLE:
+      return executeControllerDelegatedState(context, rules);
+    case MOVEEND_SYNCHRONIZE_TARGET: {
+      const target = requireBattlerRole(rules, "target");
+      if (abilitySynchronizeApplies(rules, target)) {
+        return transferState(unsupportedBranch(
+          context,
+          "AbilityBattleEffects(ABILITYEFFECT_SYNCHRONIZE)'s ABILITY_SYNCHRONIZE branch "
+            + "(gBattleStruct->synchronizeMoveEffect, BattleScript_SynchronizeActivates transfer) is not modeled",
+          "battle_util.c",
+          2971,
+        ));
+      }
+      return continueState(advanceMoveend(rules));
+    }
+    case MOVEEND_ON_DAMAGE_ABILITIES: {
+      const target = requireBattlerRole(rules, "target");
+      const ability = rules.battlers[target].ability;
+      if (ON_DAMAGE_ABILITIES.has(ability)) {
+        return transferState(unsupportedBranch(
+          context,
+          `AbilityBattleEffects(ABILITYEFFECT_ON_DAMAGE)'s target-ability branch (ability ${ability}: `
+            + "Color Change/Rough Skin/Effect Spore/Poison Point/Static/Flame Body/Cute Charm) needs contact/"
+            + "RNG/script-transfer subsystems not modeled here",
+          "battle_util.c",
+          2750,
+        ));
+      }
+      return continueState(advanceMoveend(rules));
+    }
+    case MOVEEND_IMMUNITY_ABILITIES: {
+      const count = rules.battleTopology.battlersCount;
+      for (let battler = 0; battler < count; battler += 1) {
+        const ability = rules.battlers[battler as BattleScriptBattlerId].ability;
+        if (IMMUNITY_ABILITIES.has(ability)) {
+          return transferState(unsupportedBranch(
+            context,
+            `AbilityBattleEffects(ABILITYEFFECT_IMMUNITY)'s status-curing branch (battler ${battler}, `
+              + `ability ${ability}: Immunity/Own Tempo/Limber/Insomnia/Vital Spirit/Water Veil/Magma Armor/`
+              + "Oblivious) needs the BtlController_EmitSetMonData/BattleScript_AbilityCuredStatus transfer "
+              + "not modeled here",
+            "battle_util.c",
+            2876,
+          ));
+        }
+      }
+      return continueState(advanceMoveend(rules));
+    }
+    case MOVEEND_SYNCHRONIZE_ATTACKER: {
+      const attacker = requireBattlerRole(rules, "attacker");
+      if (abilitySynchronizeApplies(rules, attacker)) {
+        return transferState(unsupportedBranch(
+          context,
+          "AbilityBattleEffects(ABILITYEFFECT_ATK_SYNCHRONIZE)'s ABILITY_SYNCHRONIZE branch "
+            + "(gBattleStruct->synchronizeMoveEffect, BattleScript_SynchronizeActivates transfer) is not modeled",
+          "battle_util.c",
+          2987,
+        ));
+      }
+      return continueState(advanceMoveend(rules));
+    }
+    case MOVEEND_CHOICE_MOVE:
+      return continueState(advanceMoveend(applyBattleScriptMoveEndChoiceOwnership(rules)));
+    case MOVEEND_CHANGED_ITEMS:
+      return continueState(advanceMoveend(applyBattleScriptMoveEndChangedItemOwnership(rules)));
+    case MOVEEND_ITEM_EFFECTS_ALL: {
+      const count = rules.battleTopology.battlersCount;
+      for (let battler = 0; battler < count; battler += 1) {
+        const holdEffect = resolveBattleScriptBattlerHoldEffect(rules, battler as BattleScriptBattlerId);
+        if (ITEM_MOVE_END_HOLD_EFFECTS.has(holdEffect)) {
+          return transferState(unsupportedBranch(
+            context,
+            `ItemBattleEffects(ITEMEFFECT_MOVE_END)'s status/stat-restoring branch (battler ${battler}, `
+              + `holdEffect ${holdEffect}) needs the BattleScriptPushCursor/controller cutscene transfer `
+              + "not modeled here",
+            "battle_util.c",
+            3639,
+          ));
+        }
+      }
+      // Source increments moveendState only when ItemBattleEffects reports no effect.
+      return continueState(advanceMoveend(rules));
+    }
+    case MOVEEND_KINGSROCK_SHELLBELL: {
+      const attacker = requireBattlerRole(rules, "attacker");
+      if (rules.battleMoveDamage !== 0) {
+        const atkHoldEffect = resolveBattleScriptBattlerHoldEffect(rules, attacker);
+        if (atkHoldEffect === HOLD_EFFECT_FLINCH || atkHoldEffect === HOLD_EFFECT_SHELL_BELL) {
+          return transferState(unsupportedBranch(
+            context,
+            `ItemBattleEffects(ITEMEFFECT_KINGSROCK_SHELLBELL)'s ${
+              atkHoldEffect === HOLD_EFFECT_FLINCH ? "King's Rock flinch" : "Shell Bell heal"
+            } branch needs RNG/script-transfer subsystems not modeled here`,
+            "battle_util.c",
+            3772,
+          ));
+        }
+      }
+      // Source increments moveendState unconditionally here, unlike state 11.
+      return continueState(advanceMoveend(rules));
+    }
+    case MOVEEND_SUBSTITUTE:
+      return continueState(advanceMoveend(applyBattleScriptMoveEndSubstituteOwnership(rules)));
+    case MOVEEND_UPDATE_LAST_MOVES:
+      return continueState(applyBattleScriptMoveEndUpdateLastMovesOwnership(rules));
+    case MOVEEND_MIRROR_MOVE:
+      return continueState(applyBattleScriptMoveEndMirrorMoveOwnership(rules));
+    case MOVEEND_NEXT_TARGET: {
+      const resolution = resolveBattleScriptMoveEndNextTarget(rules);
+      if (resolution.kind === "replay-partner") {
+        return transferState(unsupportedBranch(
+          context,
+          "Cmd_moveend's MOVEEND_NEXT_TARGET doubles replay (MoveValuesCleanUp + "
+            + "BattleScript_FlushMessageBox script transfer) is not modeled -- unreachable for Level-50 singles",
+          "battle_script_commands.c",
+          4467,
+        ));
+      }
+      return continueState(
+        Object.freeze({ ...rules, hitMarker: resolution.hitMarker, moveendState: rules.moveendState + 1 }),
+      );
+    }
+    case MOVEEND_COUNT:
+      return continueState(rules);
+    default:
+      throw new Error(
+        `Cmd_moveend: moveendState ${rules.moveendState} is outside the committed program's 0..17 domain`,
+      );
+  }
+}
+
+function controllerBusyBlock(
+  context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
+): BattleScriptCommandTransition<BattleScriptRulesContext> {
+  const reason: BattleScriptBlockReason = Object.freeze({
+    kind: "controller-busy",
+    programCounter: context.state.programCounter,
+    opcodeId: context.instruction.opcodeId,
+    opcodeName: context.instruction.opcodeName,
+  });
+  return transitionBattleScriptCommand(context, Object.freeze({ kind: "block", reason }));
+}
+
+function unsupportedBranch(
+  context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
+  sourceConstruct: string,
+  sourceFile: string,
+  sourceLine: number,
+): BattleScriptCommandTransition<BattleScriptRulesContext> {
+  return transitionBattleScriptCommand(
+    context,
+    Object.freeze({
+      kind: "halt",
+      reason: Object.freeze({
+        kind: "unsupported-branch",
+        programCounter: context.state.programCounter,
+        opcodeId: context.instruction.opcodeId,
+        opcodeName: context.instruction.opcodeName,
+        sourceConstruct,
+        sourceFile,
+        sourceLine,
+      }),
+    }),
+  );
+}
+
+/**
+ * Cmd_moveend (battle_script_commands.c:4210-4498). The do-while/switch state
+ * loop, moveendState increment semantics, and endMode/endState postlude are
+ * the opcode; every source branch inside an individual state is either
+ * implemented completely or an explicit unsupported-branch barrier on its own
+ * trigger, per the (a)/(b) registration policy.
+ */
+function createMoveendOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
+  return (context) => {
+    if (context.state.scheduler.pendingControllerBattlers.length !== 0) {
+      return controllerBusyBlock(context);
+    }
+    const endMode = parseMoveendOperand(context.instruction.operands[0]?.expression, "endMode");
+    const endState = parseMoveendOperand(context.instruction.operands[1]?.expression, "endState");
+    if (endMode !== 0 && endMode !== 1 && endMode !== 2) {
+      throw new Error(`Cmd_moveend: endMode ${endMode} is outside the committed program's 0/1/2 domain`);
+    }
+
+    let rules = context.state.rulesContext;
+    for (;;) {
+      if (rules.moveendState === MOVEEND_COUNT) {
+        return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }), { rulesContext: rules });
+      }
+      const outcome = executeMoveendState(context, rules);
+      if (outcome.kind === "transfer") {
+        return outcome.transition;
+      }
+      rules = outcome.rules;
+      if (endMode === 1) {
+        rules = Object.freeze({ ...rules, moveendState: MOVEEND_COUNT });
+      } else if (endMode === 2 && rules.moveendState === endState) {
+        rules = Object.freeze({ ...rules, moveendState: MOVEEND_COUNT });
+      }
+    }
+  };
+}
+
+export function createBattleScriptMoveEndOpcodeHandlers(
+  program: BattleScriptProgram,
+): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
+  const instruction = program.instructions.find((candidate) => candidate.opcodeName === "B_SCR_OP_MOVEEND");
+  if (!instruction) throw new Error("committed Battle Script program does not emit B_SCR_OP_MOVEEND");
+  return Object.freeze({ [instruction.opcodeId]: createMoveendOpcodeHandler() });
+}

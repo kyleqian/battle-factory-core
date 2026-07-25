@@ -218,17 +218,13 @@ describe("Cmd_moveend source/dependency receipt", () => {
     });
   });
 
-  it("keeps opcode 73 explicitly unregistered while its unresolved delegates remain evidence-only", () => {
-    expect(facts.registration).toEqual({
-      implemented: false,
-      rationale:
-        "Evidence receipt only: opcode 73 remains unregistered until every extracted state and delegate is source-complete.",
-    });
+  it("S10 step (iii): records opcode 73 as registered under the (a)/(b) policy", () => {
+    expect(facts.registration.implemented).toBe(true);
+    expect(facts.registration.rationale).toContain("(a)/(b) policy");
     const rulesBundle = readFileSync(
       "src/engine/battleScriptRulesContext.ts",
       "utf8",
     );
-    expect(rulesBundle).not.toContain("createBattleScriptMoveEnd");
-    expect(rulesBundle).not.toMatch(/handlers\s*\[\s*73\s*\]/);
+    expect(rulesBundle).toContain("createBattleScriptMoveEndOpcodeHandlers");
   });
 });

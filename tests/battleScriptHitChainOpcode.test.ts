@@ -11,7 +11,11 @@ import {
   loadBattleScriptProgram,
   resolveBattleScriptLabel,
 } from "../src/engine/battleScriptProgram.ts";
-import { stepBattleScriptMachine } from "../src/engine/battleScriptMachine.ts";
+import {
+  acknowledgeBattleScriptMachineController,
+  stepBattleScriptMachine,
+  type BattleScriptMachineState,
+} from "../src/engine/battleScriptMachine.ts";
 
 const program = loadBattleScriptProgram();
 const TACKLE = 33; // EFFECT_HIT, power 35, accuracy 95, TYPE_NORMAL
@@ -129,6 +133,26 @@ function labelPc(label: string): number {
   const entry = resolveBattleScriptLabel(program, label);
   if (!entry) throw new Error(`committed Battle Script program does not define label ${label}`);
   return entry.programCounter;
+}
+
+/**
+ * The RUNG 1-3 opcodes (attackanimation, hitanimation, healthbarupdate,
+ * critmessage, resultmessage) gate on the injected isControllerIdle port, not
+ * on BattleScriptSchedulerState.pendingControllerBattlers, so this manual
+ * step sequence never acknowledges the battlers they mark pending. That is
+ * harmless until Cmd_moveend's controller-delegated states (which reuse the
+ * real scheduler gate) are reached, so a real driver -- like
+ * factoryBattleScriptDecision.ts's acknowledgePendingControllers -- must
+ * acknowledge between steps exactly as it would in production.
+ */
+function ackAllPending(
+  state: BattleScriptMachineState<BattleScriptRulesContext>,
+): BattleScriptMachineState<BattleScriptRulesContext> {
+  let next = state;
+  for (const battler of state.scheduler.pendingControllerBattlers) {
+    next = acknowledgeBattleScriptMachineController(next, battler);
+  }
+  return next;
 }
 
 function stepFrom(entryLabel: string, rulesContext: BattleScriptRulesContext, rngSeed = 1, ports = externalPorts()) {
@@ -1171,10 +1195,33 @@ describe("RUNG 4 integration: opcode 0 -> ... -> seteffectwithchance -> tryfaint
     expect(result.state.callStack.length).toBe(0); // pass-through, not a call into BattleScript_FaintTarget
     result = stepBattleScriptMachine(program, result.state, handlers); // setbyte sMOVEEND_STATE, 0 (BattleScript_MoveEnd's moveendall)
     if (result.kind !== "advanced") throw new Error(`setbyte did not advance: ${result.kind}`);
-    const halted = stepBattleScriptMachine(program, result.state, handlers); // moveend: step-(iii) boundary, do NOT register
-    expect(halted.kind).toBe("unsupported");
-    if (halted.kind !== "unsupported") throw new Error("expected unsupported");
-    expect(halted.instruction.opcodeName).toBe("B_SCR_OP_MOVEEND");
+    expect(result.state.rulesContext.moveendState).toBe(0);
+
+    // Cmd_moveend's do-while loop pauses (same PC, controller-return) at the
+    // ordinary attacker/target sprite-visibility states (9, 10) even though
+    // neither battler is actually semi-invulnerable -- matching
+    // docs/battle-script-move-end-vertical-audit.md's case-9/10 analysis. A
+    // real driver acknowledges and resumes the same instruction each time.
+    const moveendPc = result.state.programCounter;
+    let state = ackAllPending(result.state);
+    let stepped = stepBattleScriptMachine(program, state, handlers);
+    let moveendResumptions = 0;
+    while (stepped.kind === "advanced" && stepped.state.programCounter === moveendPc) {
+      moveendResumptions += 1;
+      if (moveendResumptions > 17) throw new Error("Cmd_moveend did not converge on MOVEEND_COUNT");
+      state = ackAllPending(stepped.state);
+      stepped = stepBattleScriptMachine(program, state, handlers);
+    }
+    if (stepped.kind !== "advanced") throw new Error(`moveend did not complete: ${stepped.kind}`);
+    expect(moveendResumptions).toBe(2); // controller-returns at states 9 (attacker) and 10 (target)
+    expect(stepped.state.rulesContext.moveendState).toBe(17); // MOVEEND_COUNT
+    expect(stepped.state.rng.calls).toBe(4); // moveend itself draws no RNG on this path
+    expect(stepped.state.programCounter).toBe(moveendPc + 1);
+
+    const finished = stepBattleScriptMachine(program, stepped.state, handlers); // end
+    expect(finished.kind).toBe("halted");
+    if (finished.kind !== "halted") throw new Error("expected halted");
+    expect(finished.state.haltReason).toMatchObject({ kind: "terminal", opcodeName: "B_SCR_OP_END" });
   });
 
   it(

@@ -61,6 +61,7 @@ const ALLOWED_RECORDING_IMPORTS: ReadonlySet<string> = new Set([
 const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   ["src/engine/battleScriptHitChainOpcode.ts", 18],
   ["src/engine/battleScriptAttackCancelerOpcode.ts", 5],
+  ["src/engine/battleScriptMoveEndOpcode.ts", 7],
 ]);
 
 function recordingImportsIn(file: string): string[] {

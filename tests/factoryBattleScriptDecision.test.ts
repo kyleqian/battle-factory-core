@@ -230,10 +230,10 @@ describe("Factory asleep move decision-to-machine vertical slice", () => {
         barrier: {
           kind: "battle-script",
           entryLabel: "BattleScript_EffectProtect",
-          opcodeId: 73,
-          opcodeName: "B_SCR_OP_MOVEEND",
-          dispatcher: "Cmd_moveend",
-          instructionsExecuted: 69,
+          opcodeId: 61,
+          opcodeName: "B_SCR_OP_END",
+          dispatcher: "Cmd_end",
+          instructionsExecuted: 72,
         },
         events: [
           {
@@ -261,14 +261,22 @@ describe("Factory asleep move decision-to-machine vertical slice", () => {
               status: 3,
             },
           },
+          {
+            sequence: 3,
+            payload: {
+              kind: "set-battler-sprite-visibility",
+              battler: 0,
+              invisible: false,
+            },
+          },
         ],
       });
       expect(result.state).toMatchObject({
         revision: 1,
-        nextEventSequence: 3,
+        nextEventSequence: 4,
         rng: { value: 0xf4c9_6838, calls: 0 },
         rules: {
-          phase: "move-end-barrier",
+          phase: "script-complete",
           selectedMove: {
             slot: 1,
             moveId: 182,
@@ -279,7 +287,7 @@ describe("Factory asleep move decision-to-machine vertical slice", () => {
             currentMovePosition: 1,
             atkCancelerTracker: 2,
             hitMarker: BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE,
-            moveendState: 0,
+            moveendState: 17,
           },
         },
       });
@@ -329,10 +337,10 @@ describe("Factory asleep move decision-to-machine vertical slice", () => {
         barrier: {
           kind: "battle-script",
           entryLabel: "BattleScript_EffectWish",
-          opcodeId: 73,
-          opcodeName: "B_SCR_OP_MOVEEND",
-          dispatcher: "Cmd_moveend",
-          instructionsExecuted: 69,
+          opcodeId: 61,
+          opcodeName: "B_SCR_OP_END",
+          dispatcher: "Cmd_end",
+          instructionsExecuted: 72,
         },
         events: [
           {
@@ -360,13 +368,21 @@ describe("Factory asleep move decision-to-machine vertical slice", () => {
               status: 3,
             },
           },
+          {
+            sequence: 3,
+            payload: {
+              kind: "set-battler-sprite-visibility",
+              battler: 1,
+              invisible: false,
+            },
+          },
         ],
         state: {
           revision: 1,
-          nextEventSequence: 3,
+          nextEventSequence: 4,
           rng: { value: 0x79e3_9ac4, calls: 5 },
           rules: {
-            phase: "move-end-barrier",
+            phase: "script-complete",
             selectedMove: {
               slot: 3,
               moveId: 273,
@@ -382,7 +398,7 @@ describe("Factory asleep move decision-to-machine vertical slice", () => {
               currentMovePosition: 3,
               atkCancelerTracker: 2,
               hitMarker: BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE,
-              moveendState: 0,
+              moveendState: 17,
             },
           },
         },

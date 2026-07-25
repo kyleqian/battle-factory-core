@@ -19,6 +19,7 @@ import {
 } from "./battleScriptSetByte.ts";
 import { createBattleScriptAttackCancelerOpcodeHandlers } from "./battleScriptAttackCancelerOpcode.ts";
 import { createBattleScriptHitChainOpcodeHandlers } from "./battleScriptHitChainOpcode.ts";
+import { createBattleScriptMoveEndOpcodeHandlers } from "./battleScriptMoveEndOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -1629,6 +1630,7 @@ export function createBattleScriptStatusRulesHandlers(
       isControllerIdle: sourceExternalPorts.isControllerIdle,
       prepareMessage: sourceExternalPorts.prepareMessage,
     }),
+    ...createBattleScriptMoveEndOpcodeHandlers(program),
   });
 }
 

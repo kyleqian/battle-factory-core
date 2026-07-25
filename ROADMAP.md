@@ -1195,6 +1195,24 @@ Not another `Cmd_moveend` dependency step. Ordered:
   terminal outcome through `submitBattleDecision`, and `roundController.ts`
   consumes that outcome instead of a fixture.
 
+**Opcode-73 registration checkpoint (2026-07-24):** step (iii) is complete.
+`Cmd_moveend`'s do-while state loop, `moveendState` increment semantics, and
+`endMode`/`endState` postlude (all three assembled forms) are source-complete
+— that is the opcode. States 0, 6, 7, 13-16 are source-complete (mostly by
+reusing the already-banked dependency-ladder reducers); states 1 and 8-10
+reuse the already-tested controller dependency step directly. Seven states
+carry a narrow `unsupported-branch` barrier gated on their own real trigger
+(named abilities/hold-effects/doubles-only paths), each with a reachability
+and pass-through test. The staged plain-hit integration scenario now runs
+through `moveend` to the script's own `end` with the banked 4-roll RNG ledger
+unchanged. Registering opcode 73 turned out to be global: it also changed
+`factoryBattleScriptDecision.ts`'s staged asleep-move adapter, which had been
+using the unregistered opcode as its own stopping checkpoint — that adapter
+now runs its committed player/AI routes to genuine script completion instead
+(fixed minimally, no new shared boundary type). Opcode **0** remains
+registered; step (iv) is next, blocked on ISSUES #42
+(`checkteamslost`/party-HP modeling) for a *real* terminal outcome.
+
 **Leverage, so this is not mistaken for one move's worth of work:** **69 of
 197** `BattleScript_Effect*` scripts reach that shared hit chain, covering
 **155 of 355 moves (44%)** — including every `setmoveeffect`+`goto` status-hit

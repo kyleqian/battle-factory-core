@@ -93,7 +93,7 @@ export type FactoryAsleepMoveConfig = Readonly<{
 
 export type FactoryBattleScriptDecisionRules = BattleJsonObject & Readonly<{
   adapter: typeof ADAPTER;
-  phase: "awaiting-command" | "move-end-barrier";
+  phase: "awaiting-command" | "move-end-barrier" | "script-complete";
   factory: Readonly<{
     level: 50;
     playerSetId: number;
@@ -597,6 +597,14 @@ BattleDecisionReducer<FactoryBattleScriptDecisionRules> = (
   );
   let machine = execution.state;
   let barrierInstruction = PROGRAM.instructions[machine.programCounter];
+  // S10 step (iii) registered opcode 73, so the asleep script (which always
+  // reaches BattleScript_MoveEnd) no longer stops there -- it now runs
+  // Cmd_moveend genuinely and, on this staged singles turn, all the way to
+  // the script's own `end`. That is a second legitimate stopping boundary
+  // alongside the original "landed on an unregistered opcode" barrier; both
+  // report through the same machine-barrier boundary shape, distinguished by
+  // the reported opcode.
+  let scriptComplete = false;
   for (let budget = 0; budget < 256; budget += 1) {
     barrierInstruction = PROGRAM.instructions[machine.programCounter];
     if (!barrierInstruction) {
@@ -612,18 +620,28 @@ BattleDecisionReducer<FactoryBattleScriptDecisionRules> = (
       machine = acknowledged;
       continue;
     }
+    if (stepped.kind === "halted" && stepped.state.haltReason?.kind === "terminal") {
+      machine = stepped.state;
+      scriptComplete = true;
+      break;
+    }
     if (stepped.kind === "halted" || stepped.kind === "unsupported") {
       throw new Error(`Battle Script stopped before its explicit adapter barrier`);
     }
     machine = acknowledgePendingControllers(stepped.state);
   }
   barrierInstruction = PROGRAM.instructions[machine.programCounter];
+  if (!barrierInstruction) {
+    throw new Error(`Battle Script left the committed program at ${machine.programCounter}`);
+  }
   if (
-    !barrierInstruction
-    || execution.handlers[barrierInstruction.opcodeId]
-    || barrierInstruction.opcodeId !== 73
-    || barrierInstruction.opcodeName !== "B_SCR_OP_MOVEEND"
-    || barrierInstruction.source.label !== "BattleScript_MoveEnd"
+    !scriptComplete
+    && (
+      execution.handlers[barrierInstruction.opcodeId]
+      || barrierInstruction.opcodeId !== 73
+      || barrierInstruction.opcodeName !== "B_SCR_OP_MOVEEND"
+      || barrierInstruction.source.label !== "BattleScript_MoveEnd"
+    )
   ) {
     throw new Error("Battle Script did not stop at the source Cmd_moveend barrier");
   }
@@ -640,7 +658,7 @@ BattleDecisionReducer<FactoryBattleScriptDecisionRules> = (
   return Object.freeze({
     rules: Object.freeze({
       adapter: ADAPTER,
-      phase: "move-end-barrier",
+      phase: scriptComplete ? "script-complete" : "move-end-barrier",
       factory: rules.factory,
       selectedMove: Object.freeze({
         slot: moveSlot,
