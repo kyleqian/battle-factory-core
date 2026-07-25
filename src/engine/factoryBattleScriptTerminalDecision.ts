@@ -33,6 +33,7 @@ import {
   type BattleDecisionTransitionResult,
   type BattleJsonObject,
   type BattleOutcome,
+  type BattleSinglesBattler,
   type BattleState,
 } from "./battleDecisionBoundary.ts";
 import {
@@ -91,6 +92,15 @@ export type FactoryTerminalMoveConfig = Readonly<{
    * proven without replaying two prior battles' worth of hit chains.
    */
   opponentBenchHp: readonly [number, number];
+  /**
+   * Which side delivers the staged killing blow. Defaults to "player" (the
+   * original WON-path staging: the player's mon kills the opponent's last
+   * mon). "trainer" mirrors the identical hit chain onto the player's own
+   * (sole modeled) party slot instead -- same move math, opposite roles --
+   * for a real trainer-win (LOST) integration proof
+   * (battleResolutionAdapter.test.ts) with no new kernel modeling.
+   */
+  attackingSide?: "player" | "trainer";
 }>;
 
 export type FactoryTerminalDecisionRules = BattleJsonObject & Readonly<{
@@ -148,9 +158,27 @@ function partySlot(hp: number, alive: boolean): BattleScriptPartyMemberInput {
   return { species: alive ? STAGED_OPPONENT_SPECIES : 0, isEgg: false, hp };
 }
 
+/**
+ * `attackingSide` picks which battler ID is the mover vs. the defender --
+ * everything downstream (`selectorRoles`, the submission's `side`/`battler`,
+ * which physical party the fatal HP write lands in via `battler.side`,
+ * `battleScriptRulesContext.ts:1244`) is symmetric in battler ID, so this is
+ * the only branch point needed to mirror the WON staging into a LOST one.
+ */
+function resolveAttackingRoles(
+  attackingSide: "player" | "trainer",
+): Readonly<{ moverBattler: BattleSinglesBattler; defenderBattler: BattleSinglesBattler }> {
+  const moverBattler: BattleSinglesBattler = attackingSide === "player" ? 0 : 1;
+  const defenderBattler: BattleSinglesBattler = moverBattler === 0 ? 1 : 0;
+  return { moverBattler, defenderBattler };
+}
+
 function createInitialRules(config: FactoryTerminalMoveConfig): FactoryTerminalDecisionRules {
-  const attacker: BattleScriptRulesBattlerState = Object.freeze({
-    ...emptyBattler(0),
+  const attackingSide = config.attackingSide ?? "player";
+  const { moverBattler, defenderBattler } = resolveAttackingRoles(attackingSide);
+
+  const mover: BattleScriptRulesBattlerState = Object.freeze({
+    ...emptyBattler(moverBattler),
     hp: 100,
     species: STAGED_PLAYER_SPECIES,
     attack: config.attackerAttack,
@@ -159,28 +187,43 @@ function createInitialRules(config: FactoryTerminalMoveConfig): FactoryTerminalD
     moves: Object.freeze([config.attackerMoveId, 0, 0, 0] as const),
     pp: Object.freeze([16, 0, 0, 0] as const),
     statStages: NEUTRAL_STAT_STAGES,
-    partyIndex: 0,
+    partyIndex: moverBattler === 0 ? 0 : 2,
   });
-  const target: BattleScriptRulesBattlerState = Object.freeze({
-    ...emptyBattler(1),
+  const defender: BattleScriptRulesBattlerState = Object.freeze({
+    ...emptyBattler(defenderBattler),
     hp: config.targetHp,
     species: STAGED_OPPONENT_SPECIES,
     defense: config.targetDefense,
     level: 50,
     types: Object.freeze(["TYPE_GRASS", "TYPE_GRASS"] as const),
     statStages: NEUTRAL_STAT_STAGES,
-    partyIndex: 2,
+    partyIndex: defenderBattler === 0 ? 0 : 2,
   });
+  const battlers: readonly [
+    BattleScriptRulesBattlerState,
+    BattleScriptRulesBattlerState,
+    BattleScriptRulesBattlerState,
+    BattleScriptRulesBattlerState,
+  ] = moverBattler === 0
+    ? [mover, defender, emptyBattler(0), emptyBattler(1)]
+    : [defender, mover, emptyBattler(0), emptyBattler(1)];
+
+  // The player side has exactly one modeled party slot; the opponent side has
+  // three (bench + the acting slot). Whichever role (mover/defender) sits on
+  // a given side owns that side's real HP value -- the other side's shape is
+  // unchanged from the original WON staging.
+  const playerSlot0Hp = moverBattler === 0 ? 100 : config.targetHp;
+  const opponentSlot2Hp = moverBattler === 0 ? config.targetHp : 100;
   const opponentParty = Object.freeze([
     partySlot(config.opponentBenchHp[0], true),
     partySlot(config.opponentBenchHp[1], true),
-    partySlot(config.targetHp, true),
+    partySlot(opponentSlot2Hp, true),
     { species: 0, isEgg: false, hp: 0 },
     { species: 0, isEgg: false, hp: 0 },
     { species: 0, isEgg: false, hp: 0 },
   ]) as unknown as readonly BattleScriptPartyMemberInput[];
   const playerParty = Object.freeze([
-    { species: STAGED_PLAYER_SPECIES, isEgg: false, hp: 100 },
+    { species: STAGED_PLAYER_SPECIES, isEgg: false, hp: playerSlot0Hp },
     { species: 0, isEgg: false, hp: 0 },
     { species: 0, isEgg: false, hp: 0 },
     { species: 0, isEgg: false, hp: 0 },
@@ -192,9 +235,9 @@ function createInitialRules(config: FactoryTerminalMoveConfig): FactoryTerminalD
   }
 
   const rulesContext = createBattleScriptRulesContext({
-    battlers: [attacker, target, emptyBattler(0), emptyBattler(1)],
-    selectorRoles: { attacker: 0, target: 1, effectBattler: 1, fainted: null },
-    scriptingBattler: 0,
+    battlers,
+    selectorRoles: { attacker: moverBattler, target: defenderBattler, effectBattler: defenderBattler, fainted: null },
+    scriptingBattler: moverBattler,
     atkCancelerTracker: 0,
     battleOutcome: 0,
     currentMove: 0,
@@ -224,15 +267,16 @@ export function createFactoryTerminalMoveBattleState(
   config: FactoryTerminalMoveConfig,
 ): BattleState<FactoryTerminalDecisionRules> {
   const rules = createInitialRules(config);
+  const { moverBattler, defenderBattler } = resolveAttackingRoles(config.attackingSide ?? "player");
   return createBattleState({
     rules,
     rngSeed: config.rngSeed,
     request: {
       kind: "command",
       requestId: config.requestId,
-      side: "player",
-      battler: 0,
-      legalDecisions: [{ kind: "use-move", moveSlot: 0, targetBattler: 1 }],
+      side: moverBattler === 0 ? "player" : "trainer",
+      battler: moverBattler,
+      legalDecisions: [{ kind: "use-move", moveSlot: 0, targetBattler: defenderBattler }],
     },
   }) as BattleState<FactoryTerminalDecisionRules>;
 }
