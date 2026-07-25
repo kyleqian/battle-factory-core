@@ -282,7 +282,7 @@ describe("Cmd_moveend choice/change ownership dependency", () => {
       },
     }));
     const next = applyBattleScriptMoveEndUpdateLastMovesOwnership(context);
-    expect(next.selectorRoles).toEqual({ attacker: 1, target: 0, effectBattler: 1 });
+    expect(next.selectorRoles).toEqual({ attacker: 1, target: 0, effectBattler: 1, fainted: null });
     expect(next.hitMarker & BATTLE_SCRIPT_HITMARKER_SWAP_ATTACKER_TARGET).toBe(0);
     expect(next.moveendState).toBe(15);
     expect(next.moveHistory).toMatchObject({

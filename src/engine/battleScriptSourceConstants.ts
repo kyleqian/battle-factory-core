@@ -15,6 +15,7 @@ export const BATTLE_SCRIPT_BATTLER_SELECTORS = Object.freeze({
   BS_TARGET: 0,
   BS_ATTACKER: 1,
   BS_EFFECT_BATTLER: 2,
+  BS_FAINTED: 3,
 } as const);
 
 export const BATTLE_SCRIPT_STATUS2_MASKS = Object.freeze({

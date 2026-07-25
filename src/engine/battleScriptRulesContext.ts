@@ -215,6 +215,15 @@ export type BattleScriptSelectorRoleBindings = Readonly<{
   attacker: BattleScriptBattlerId | null;
   target: BattleScriptBattlerId | null;
   effectBattler: BattleScriptBattlerId | null;
+  /**
+   * Source gBattlerFainted (battle_util.c:713's BS_FAINTED case). A distinct
+   * role from `target`: HandleFaintedMonActions reassigns
+   * `gBattlerFainted = gBattlerTarget = faintedActionsBattlerId` together
+   * (battle_util.c:1915), so the fainted-actions orchestration
+   * (battleScriptFaintedActionsOrchestration.ts) writes both roles at once
+   * -- this field is never derived from `target` (ISSUES #43).
+   */
+  fainted: BattleScriptBattlerId | null;
 }>;
 
 /** include/constants/pokemon.h PARTY_SIZE -- Cmd_checkteamslost's own loop bound. */
@@ -365,6 +374,7 @@ export type BattleScriptRulesContextInput = Readonly<{
     attacker?: BattleScriptBattlerId | null;
     target?: BattleScriptBattlerId | null;
     effectBattler?: BattleScriptBattlerId | null;
+    fainted?: BattleScriptBattlerId | null;
   }>;
   scriptingBattler: BattleScriptBattlerId;
   atkCancelerTracker: number;
@@ -1505,6 +1515,7 @@ export function createBattleScriptRulesContext(
       input.selectorRoles?.effectBattler,
       "selectorRoles.effectBattler",
     ),
+    fainted: requireRole(input.selectorRoles?.fainted, "selectorRoles.fainted"),
   });
   const scriptingBattler = requireRole(input.scriptingBattler, "scriptingBattler");
   if (scriptingBattler === null) {
@@ -1652,9 +1663,10 @@ function decodeSupportedBattlerSelector(operand: BattleScriptOperand): number | 
  * unconditionally -- ISSUES #43). `gBattlerTarget` is unchanged from whatever
  * the enclosing hit chain set it to, so the already-populated
  * `selectorRoles.target` is the correct value at any point this selector is
- * read. Other source cases (e.g. BS_FAINTED, a distinct role reassigned by
- * `HandleFaintedMonActions`, not an alias of `target`) remain unavailable
- * until their own context is explicit.
+ * read. BS_FAINTED (`:713`, `case BS_FAINTED: ret = gBattlerFainted;`) reads
+ * the distinct `selectorRoles.fainted` role, written only by the fainted-
+ * actions orchestration (battleScriptFaintedActionsOrchestration.ts) --
+ * never derived from `target` (ISSUES #43's closed remainder).
  */
 export const resolveRulesBattlerForBattleScript: NonNullable<
   BattleScriptSourceCommandPorts<BattleScriptRulesContext>["resolveBattlerForBattleScript"]
@@ -1668,6 +1680,9 @@ export const resolveRulesBattlerForBattleScript: NonNullable<
   }
   if (selector === BATTLE_SCRIPT_BATTLER_SELECTORS.BS_EFFECT_BATTLER) {
     return context.state.rulesContext.selectorRoles.effectBattler;
+  }
+  if (selector === BATTLE_SCRIPT_BATTLER_SELECTORS.BS_FAINTED) {
+    return context.state.rulesContext.selectorRoles.fainted;
   }
   return null;
 };

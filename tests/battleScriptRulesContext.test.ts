@@ -263,12 +263,13 @@ describe("source-shaped Battle Script rules context", () => {
   it("maps the supported named and numeric GetBattlerForBattleScript selectors", () => {
     const context = contextAt(
       primaryInstruction,
-      rules({ selectorRoles: { attacker: 3, effectBattler: 1, target: 2 } }),
+      rules({ selectorRoles: { attacker: 3, effectBattler: 1, target: 2, fainted: 0 } }),
     );
     expect(BATTLE_SCRIPT_BATTLER_SELECTORS).toEqual({
       BS_TARGET: 0,
       BS_ATTACKER: 1,
       BS_EFFECT_BATTLER: 2,
+      BS_FAINTED: 3,
     });
     expect(resolveRulesBattlerForBattleScript(context, selector("BS_TARGET"))).toBe(2);
     expect(resolveRulesBattlerForBattleScript(context, selector("0"))).toBe(2);
@@ -278,6 +279,12 @@ describe("source-shaped Battle Script rules context", () => {
     expect(resolveRulesBattlerForBattleScript(context, selector("0x1"))).toBe(3);
     expect(resolveRulesBattlerForBattleScript(context, selector("BS_EFFECT_BATTLER"))).toBe(1);
     expect(resolveRulesBattlerForBattleScript(context, selector("2"))).toBe(1);
+    // BS_FAINTED (battle_util.c:713-715): a role distinct from BS_TARGET, only
+    // ever written by the fainted-actions orchestration -- proven here as a
+    // pure selector mapping, independent of that orchestration's own tests.
+    expect(resolveRulesBattlerForBattleScript(context, selector("BS_FAINTED"))).toBe(0);
+    expect(resolveRulesBattlerForBattleScript(context, selector("3"))).toBe(0);
+    expect(resolveRulesBattlerForBattleScript(context, selector("0x3"))).toBe(0);
   });
 
   it("returns unavailable for missing supported roles and every unsupported/invalid selector", () => {
@@ -285,6 +292,7 @@ describe("source-shaped Battle Script rules context", () => {
     expect(resolveRulesBattlerForBattleScript(missing, selector("BS_TARGET"))).toBeNull();
     expect(resolveRulesBattlerForBattleScript(missing, selector("BS_ATTACKER"))).toBeNull();
     expect(resolveRulesBattlerForBattleScript(missing, selector("BS_EFFECT_BATTLER"))).toBeNull();
+    expect(resolveRulesBattlerForBattleScript(missing, selector("BS_FAINTED"))).toBeNull();
     for (const expression of ["7", "255", "-1", "bogus"]) {
       expect(resolveRulesBattlerForBattleScript(missing, selector(expression))).toBeNull();
     }
