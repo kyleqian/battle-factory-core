@@ -241,25 +241,25 @@ above (no live capture of "statused mon faints" was completed this session
 
 ### (b) Benched mon, statused then switched out — status persists
 
-**Confirmed**, entirely from the source round-trip above: nothing in the
-switch-out path clears `status1`, and the party record already holds the
-correct value (synced at the moment the status was first applied, not
-deferred to battle end or to the switch itself). The new probe in §2c below
-additionally demonstrates, live, that the party record is genuinely
-kept **live** during battle (matching `gBattleMons` in real time, not just
-snapshotted once) — the mechanism §2b's persistence argument depends on.
-A direct oracle capture of the literal "paralyze → voluntarily switch out →
-read bench slot" sequence was attempted this session (`overrides.parties` +
-a scripted `DOWN, A, RIGHT, A` mid-battle menu sequence, mirroring the
-button pattern documented in `docs/soundproof-off-evidence.md`'s
-`mechanic-uproar-soundproof-switch-off.json`) but the switch never actually
-occurred in three attempts (`battlers.player.partyIndex` stayed `0`
-throughout every trace tried) — the exact menu-cursor timing/geometry for a
-voluntary switch via `overrides.parties` wasn't nailed down within this
-session's budget, unlike the *forced* post-faint switch-in the existing KO
-fixture already exercises successfully (AI-side only). This leg's verdict
-rests on the source round-trip, not an oracle capture of the exact scenario;
-flagging the switch-menu button sequence as a good bounded follow-up probe.
+**Confirmed live**, closing the one leg a prior session left source-only.
+`tools/battle-lab/mechanic-voluntary-switch-statused-off.json` (committed
+this session, recipe in "Staging recipes" below): a Rattata is paralyzed by
+the opponent's Thunder Wave on turn 1 (frame 722:
+`state.parties.player[0].status.kind === "paralysis"`,
+`state.battlers.player.partyIndex === 0`), then voluntarily switched to
+bench slot 1 via the `DOWN, A, RIGHT, A, A` staging recipe. At frame 1214:
+`state.battlers.player.partyIndex === 1` (the switch genuinely happened —
+this is the same live-battler-struct field §2c cross-checks, not an
+assumption) and `state.parties.player[0].status.kind` is **still**
+`"paralysis"` — the now-benched slot keeps the status exactly as the
+source round-trip above predicted, while the freshly-switched-in
+`state.parties.player[1].status.kind === "none"` (never statused). Verify
+script check 3. A prior session's three attempts at this exact scenario
+(`overrides.parties` + a bare `DOWN, A, RIGHT, A` sequence, no wait frames
+between presses and no fifth button) never actually switched
+(`battlers.player.partyIndex` stayed `0` throughout); the "Staging recipes"
+section below explains why that shorter sequence was missing a required
+step, with RAM-probe evidence.
 
 ### (c) Surviving active mon's status — reads real `status1`
 
@@ -274,6 +274,66 @@ as §2's citations, observed directly). Slots 1/2 (never sent out) correctly
 still read `hp: 265/265`, `status: { kind: "none" }` — confirming the seam
 doc's third assumption ("undamaged bench keeps its pre-battle value") too,
 as a free byproduct. Verify script check 2.
+
+## Staging recipes: mid-battle voluntary party switch via `overrides.parties`
+
+**Working, rerunnable button sequence: `DOWN, A, RIGHT, A, A`** (five
+presses, each held 2 frames, with the specific wait gaps below — the wait
+gaps and the fifth `A` are exactly what a prior session's `DOWN, A, RIGHT,
+A` attempts (§2b) were missing). Derived by RAM-probing `gActionSelectionCursor`,
+`gPartyMenu.slotId`/`.action`, and `gBattlerPartyIndexes` per-tick with a
+throwaway probe over `oracle.advance()` (same pattern as
+`tools/probe/dump-battler-snapshot.py`/`run-battle-lab-rgb.py`), not by
+guessing timings — see the frame table below for the actual observed
+transitions. Banked as `tools/battle-lab/mechanic-voluntary-switch-statused-off.json`.
+
+1. **`DOWN` moves the action-selection cursor from FIGHT to POKEMON, no
+   wait needed.** `gActionSelectionCursor[gActiveBattler]` is a 2-bit
+   grid index (0=FIGHT, 1=BAG, 2=POKEMON, 3=RUN); `DOWN` XORs bit 1
+   (`battle_controller_player.c:278-283`). RAM-probed: cursor reads `2`
+   on the very next tick after the press.
+2. **`A` opens the party menu, but takes real time to land** — the engine
+   fades the battle scene out first (`PlayerHandleChoosePokemon`,
+   `battle_controller_player.c:2665-2688`, calls `BeginNormalPaletteFade`
+   then defers to `OpenPartyMenuToChooseMon`/`OpenPartyMenuInBattle` once
+   the fade completes). RAM-probed: `gPartyMenu.action` (the field
+   `GetCurrentPartySlotPtr`, `party_menu.c:1284-1290`, keys off) only
+   updates ~60 ticks after the press in this scenario — **wait at least
+   ~40 ticks before the next input**, not 2-3.
+   (Caution confirmed live: giving both sides a trapping ability, e.g.
+   Wobbuffet's Shadow Tag, on the first probe attempt made
+   `gPartyMenu.action` read `4` = `PARTY_ACTION_ABILITY_PREVENTS`
+   (`include/constants/party_menu.h:72`) instead of `0` = `PARTY_ACTION_CHOOSE_MON`
+   — the party menu still opens but the switch is permanently blocked
+   with no further state change for the rest of the trace. Use a
+   non-trapping species for this recipe, e.g. `SPECIES_RATTATA` (19).)
+3. **`RIGHT` moves the cursor from the active slot (0) directly to slot 1**
+   — `PARTY_LAYOUT_SINGLE`'s `MENU_DIR_RIGHT` case jumps straight from slot
+   0 to `sPartyMenuInternal->lastSelectedSlot` (or `1` the first time,
+   `party_menu.c:1569-1577`); it is **not** a vertical list walk. RAM-probed:
+   `gPartyMenu.slotId` flips `0 → 1` on the very next tick after the press
+   (needs no extra wait, unlike step 2).
+4. **The first `A` on the target slot does not confirm the switch by
+   itself** — this is the step the prior `DOWN, A, RIGHT, A` attempts
+   missed. `HandleChooseMonSelection`'s `switch (gPartyMenu.action)`
+   (`party_menu.c:1300-1364`) has no case for `PARTY_ACTION_CHOOSE_MON`
+   (`= 0`, `include/constants/party_menu.h:68`), so it falls to the
+   `default:` branch shared with `ABILITY_PREVENTS`/`SWITCHING`, which
+   calls `Task_TryCreateSelectionWindow` (`:1358-1363`) — a small SHIFT/
+   SUMMARY/CANCEL-style submenu, not an immediate switch. **A fifth press
+   (`A` again, confirming the submenu's default first option) is required**
+   to actually commit the switch.
+5. **The switch itself takes real animation time after that final `A`** —
+   RAM-probed `gBattlerPartyIndexes[gActiveBattler]` (the field
+   `state.battlers.player.partyIndex` exposes) does not flip from `0` to
+   `1` until roughly 150+ ticks after the confirming press in this
+   scenario; read the post-switch state no earlier than that.
+
+Exact segment sequence used in the committed fixture (`frames`/`buttons`,
+matching `bin/oracle lab`'s trace schema): `{2,[DOWN]}, {38,[]}, {2,[A]},
+{118,[]}, {2,[RIGHT]}, {38,[]}, {2,[A]}, {38,[]}, {2,[A]}, {250,[]}` —
+applied after any preceding turn(s) have already resolved and the action-
+selection menu is back up with its default FIGHT-cursor state.
 
 ## 3. Adjacency: anything besides `datahpupdate` mutating party HP/status on the WIN path?
 
@@ -325,6 +385,96 @@ game's round-trip) equals exactly what the real game's party would show —
 no other mechanism on the WIN path needs to be modeled to keep that
 invariant.
 
+## 4. What the Factory facility does with `B_OUTCOME_DREW`
+
+**Verdict: the Factory challenge treats a draw exactly like a loss — same
+message, same "return your rentals and end the challenge" flow, no streak
+credit, no Battle Points.** There is no Factory-specific draw handling
+anywhere in source; the generic post-battle plumbing simply never
+special-cases anything except a clean win, so `DREW` falls into whatever
+"not a win" does. Traced end-to-end:
+
+1. **`gBattleOutcome` reaches the field as `VAR_RESULT` via one universal,
+   non-Frontier-specific copy — not `frontier_get FRONTIER_DATA_BATTLE_OUTCOME`**
+   (that special exists and is used by the Battle Tower's map script,
+   `data/maps/BattleFrontier_BattleTowerBattleRoom/scripts.inc:309`, but the
+   Factory script never calls it). The actual mechanism is
+   `ReturnFromBattleToOverworld` (`src/battle_main.c:5217-5249`), run for
+   every non-link battle right before control returns to the field:
+   `gSpecialVar_Result = gBattleOutcome;` (`:5228`), followed immediately by
+   `SetMainCallback2(gMain.savedCallback)` (`:5248`).
+2. **For a Factory battle, `gMain.savedCallback` is `HandleSpecialTrainerBattleEnd`**
+   (`src/battle_tower.c:2001`, set in `Task_StartBattleAfterTransition` right
+   before `SetMainCallback2(CB2_InitBattle)`, reached via `DoSpecialTrainerBattle`'s
+   `case SPECIAL_BATTLE_FACTORY:` at `src/battle_tower.c:2092-2098`). That
+   handler's `SPECIAL_BATTLE_FACTORY` case (`:1967`, shared with Tower/Dome/
+   Palace/Arena/Pike/Pyramid) only increments `frontier.battlesCount` and
+   calls `SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic)`
+   (`:1994`) — it never reads or branches on `gBattleOutcome`/`gSpecialVar_Result`
+   at all, so the value set in step 1 survives untouched.
+3. **Control resumes the paused field script at the exact next command** —
+   `CB2_ReturnToFieldContinueScriptPlayMapMusic` (`src/overworld.c:1684-1689`)
+   just re-enables the already-parked script context
+   (`gFieldCallback = FieldCB_ContinueScriptHandleMusic`); it doesn't set any
+   variable either. That next command, in
+   `data/maps/BattleFrontier_BattleFactoryBattleRoom/scripts.inc:85-90`, is:
+   ```
+   special DoSpecialTrainerBattle
+   switch VAR_RESULT
+   case 1, BattleFrontier_BattleFactoryBattleRoom_EventScript_DefeatedOpponent
+   BattleFrontier_BattleFactoryBattleRoom_EventScript_WarpToLobbyLost::
+       frontier_set FRONTIER_DATA_CHALLENGE_STATUS, CHALLENGE_STATUS_LOST
+       goto BattleFrontier_BattleFactoryBattleRoom_EventScript_WarpToLobby
+   ```
+   `switch`/`case` are pure comparison macros, not a real jump table
+   (`asm/macros/event.inc:1914-1921`: `switch` just does
+   `copyvar VAR_0x8000, \var`; `case` does `compare VAR_0x8000, \condition` +
+   `goto_if_eq \dest`) — **there is exactly one `case`, matching `1`
+   (`B_OUTCOME_WON`, `include/constants/battle.h:100`)**. Any other value —
+   `B_OUTCOME_LOST` (2) or `B_OUTCOME_DREW` (3, itself `WON|LOST` per §1a,
+   but compared here by exact value against `1`, not by bitmask, so the OR
+   composition doesn't create a false match) — falls straight through to
+   `EventScript_WarpToLobbyLost`, unconditionally: `frontier_set
+   FRONTIER_DATA_CHALLENGE_STATUS, CHALLENGE_STATUS_LOST` then warp to the
+   lobby. **A draw is textually indistinguishable from a loss at this
+   branch point** — the script has no third case and no way to tell them
+   apart.
+4. **The Noland (Factory Head) battle uses the identical pattern**, just
+   inlined instead of `switch`/`case`:
+   `goto_if_eq VAR_RESULT, 1, BattleFrontier_BattleFactoryBattleRoom_EventScript_DefeatedNolandSilver`
+   (`:125`) / `...DefeatedNolandGold` (`:151`), each immediately followed on
+   the next line by `goto BattleFrontier_BattleFactoryBattleRoom_EventScript_WarpToLobbyLost`
+   (`:126`, `:152`) as the sole fallback — same "only WON is special-cased"
+   shape.
+5. **`CHALLENGE_STATUS_LOST` ends the challenge with no streak credit.** The
+   Lobby's `OnFrame` dispatch (`data/maps/BattleFrontier_BattleFactoryLobby/scripts.inc:15-20`)
+   routes that status to `EventScript_LostChallenge` (`:65-75`): shows
+   "Return your Pokémon and save the results" (no win fanfare, no
+   `frontier_givepoints` — that call only exists in `EventScript_WonChallenge`,
+   `:40-63`), sets `factory_set FACTORY_DATA_WIN_STREAK_ACTIVE, FALSE`, saves,
+   and falls into the same terminal `AskRecordBattle` → "look forward to next
+   visit" → `end` tail every challenge-ending path shares (`:76-94`). No
+   branch anywhere in this chain re-enters `BattleFactoryBattleRoom` to
+   continue the streak.
+6. **Confirmed exhaustive:** neither `src/battle_factory.c` nor
+   `src/battle_factory_screen.c` reference `gBattleOutcome`/`B_OUTCOME_DREW`
+   at all (grepped), and `src/frontier_util.c`'s only `gBattleOutcome` site
+   (`:839-841`, `FRONTIER_DATA_BATTLE_OUTCOME` — the special the *Tower*
+   script uses) is dead for Factory's flow per point 1. There is no
+   Factory-specific code path that could special-case a draw even if it
+   wanted to; the WON-only `switch`/`goto_if_eq` shape in the map scripts is
+   the entire decision.
+
+**Adapter mapping recommendation:** map `B_OUTCOME_DREW` to `"loss"`. This
+isn't a judgment call or a fallback guess — it's what the real Factory
+challenge actually does: a draw and a loss execute the exact same script
+branch (`EventScript_WarpToLobbyLost` → `EventScript_LostChallenge`), with
+no message, streak, or reward difference between them. If `BattleResolution.outcome`
+is ever widened to a third `"draw"` value for other facilities or for
+narration purposes, the Factory-specific challenge-progression logic should
+still resolve it identically to `"loss"` (no streak credit, challenge ends)
+to match this source behavior exactly.
+
 ## Adapter implications for piece 5
 
 - **The `draw` outcome is a real, reachable case for ordinary Level-50
@@ -338,11 +488,12 @@ invariant.
   adapter alone) — but it should be tracked as a **known, confirmed gap**
   the adapter will eventually hit in real play, not filed away as unlikely.
   Whoever eventually resolves it should widen `BattleResolution.outcome` to
-  a 3-valued type (or decide a Factory-specific draw ruling — the real game
-  routes `B_OUTCOME_DREW` through `HandleEndTurn_BattleLost`, i.e. treats it
-  as a loss for turn-dispatch purposes, `battle_main.c:559`; that's a
-  plausible fallback mapping if a 3-valued type isn't wanted, but it wasn't
-  the brief's decision to make here).
+  a 3-valued type — or, per §4's now-confirmed verdict (superseding the
+  turn-dispatch-based guess this bullet previously offered), map it straight
+  to `"loss"`, since that is exactly what the Factory challenge itself does
+  (§4 point 5: `EventScript_LostChallenge`, no streak credit) — but it
+  wasn't the brief's decision to make here which of the two the adapter
+  should pick.
 - **`id`/`maxHp` still need to come from the pre-battle snapshot, not the
   kernel** — unchanged from the seam doc; nothing in §2 changes that.
 - **`status` for all six slots can now be derived with a single uniform
