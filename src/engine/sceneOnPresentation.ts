@@ -120,6 +120,10 @@ import {
   type BindAnimationState,
 } from "./bind.ts";
 import {
+  growthAnimationAtAge,
+  type GrowthAnimationState,
+} from "./growth.ts";
+import {
   extremeSpeedAttackerAffineAtAge,
   extremeSpeedAttackerVisibleAtAge,
   extremeSpeedBackgroundAtAge,
@@ -197,7 +201,8 @@ export interface SceneOnPresentationBattler {
     | "ARCANINE"
     | "DUGTRIO"
     | "CHARMELEON"
-    | "HAUNTER";
+    | "HAUNTER"
+    | "IVYSAUR";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -585,6 +590,13 @@ export interface SceneOnShadowPunchConfig {
   readonly animationAgeOffset?: number;
 }
 
+export interface SceneOnGrowthConfig {
+  readonly move: "GROWTH";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export type SceneOnMoveConfig =
   | SceneOnFirePunchConfig
   | SceneOnIcePunchConfig
@@ -607,7 +619,8 @@ export type SceneOnMoveConfig =
   | SceneOnBindConfig
   | SceneOnEmberConfig
   | SceneOnDragonRageConfig
-  | SceneOnShadowPunchConfig;
+  | SceneOnShadowPunchConfig
+  | SceneOnGrowthConfig;
 
 export interface SceneOnMovePresentationState<
   TConfig extends SceneOnMoveConfig = SceneOnMoveConfig,
@@ -879,6 +892,12 @@ export interface SceneOnBlazeKickView {
 }
 
 export interface SceneOnBindView extends BindAnimationState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnGrowthView extends GrowthAnimationState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -1254,6 +1273,20 @@ export function sceneOnBindView(
       state.config.attacker.geometry.side,
       state.config.animationProfile,
     ),
+  };
+}
+
+export function sceneOnGrowthView(
+  state: SceneOnMovePresentationState,
+): SceneOnGrowthView {
+  if (state.config.move !== "GROWTH") {
+    throw new Error(`expected GROWTH presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...growthAnimationAtAge(state.age),
   };
 }
 
