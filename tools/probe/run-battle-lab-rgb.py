@@ -74,6 +74,8 @@ def main() -> None:
     basic_hitsplat_template = oracle.symbols["gBasicHitSplatSpriteTemplate"]
     dragon_breath_fire_template = oracle.symbols["gDragonBreathFireSpriteTemplate"]
     flamethrower_flame_template = oracle.symbols["gFlamethrowerFlameSpriteTemplate"]
+    ember_template = oracle.symbols["gEmberSpriteTemplate"]
+    ember_flare_template = oracle.symbols["gEmberFlareSpriteTemplate"]
     spinning_hand_or_foot_template = oracle.symbols["gSpinningHandOrFootSpriteTemplate"]
     fire_spread_template = oracle.symbols["gFireSpreadSpriteTemplate"]
     lightning_template = oracle.symbols["gLightningSpriteTemplate"]
@@ -178,6 +180,8 @@ def main() -> None:
         basic_hitsplat_sprites = []
         dragon_breath_fire_sprites = []
         flamethrower_flame_sprites = []
+        ember_sprites = []
+        ember_flare_sprites = []
         spinning_hand_or_foot_sprites = []
         fire_spread_sprites = []
         lightning_sprites = []
@@ -217,6 +221,10 @@ def main() -> None:
                 dragon_breath_fire_sprites.append(feather_record(slot))
             elif template == flamethrower_flame_template:
                 flamethrower_flame_sprites.append(feather_record(slot))
+            elif template == ember_template:
+                ember_sprites.append(feather_record(slot))
+            elif template == ember_flare_template:
+                ember_flare_sprites.append(feather_record(slot))
             elif template == spinning_hand_or_foot_template:
                 spinning_hand_or_foot_sprites.append(feather_record(slot))
             elif template == fire_spread_template:
@@ -283,6 +291,8 @@ def main() -> None:
                 "basicHitsplatSprites": basic_hitsplat_sprites,
                 "dragonBreathFireSprites": dragon_breath_fire_sprites,
                 "flamethrowerFlameSprites": flamethrower_flame_sprites,
+                "emberSprites": ember_sprites,
+                "emberFlareSprites": ember_flare_sprites,
                 "spinningHandOrFootSprites": spinning_hand_or_foot_sprites,
                 "fireSpreadSprites": fire_spread_sprites,
                 "lightningSprites": lightning_sprites,
