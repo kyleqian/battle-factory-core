@@ -3442,6 +3442,85 @@ function drawSpriteSheetAffineStretchBlendedOverFb(fb: Uint8Array, tileset: Tile
 }
 
 /**
+ * Defect A's fix (ANIMATION_PROGRESS.md, "the real 2nd blend target"): a
+ * `ST_OAM_OBJ_BLEND` (OAM `objMode=1`) scale-window sprite - `monbg`'s own
+ * frozen BG2 copy is still live underneath it (RAM-confirmed: `monbg` only
+ * hides the OBJ inline; `AnimTask_ScaleMonAndRestore` unconditionally
+ * unhides it again the instant the scale task starts,
+ * `PrepareBattlerSpriteForRotScale`, `battle_anim_mons.c:1295-1307`) - so
+ * hardware's real `BLDCNT`/`BLDALPHA` alpha-blend (mode 1, target2 = every
+ * layer, RAM-read `eva=evb=8`) composites the tinted, scaled OBJ texel
+ * against whatever the caller already drew into `fb` (the frozen monbg copy
+ * over the live BG, if the caller drew it first - see `drawSpriteSheet`
+ * call sites at FUTURE_SIGHT's attacker and CONFUSION's target). Blend
+ * formula verified directly against the oracle's own pixels (captured with
+ * `tools/probe/dump-scale-window-underlayer.py`'s DISPCNT-OBJ-disabled
+ * pass, so `field` here is a real hardware value, not reconstructed from
+ * asset data): computed on the already-8-bit-expanded RGB values via
+ * `blendChannel`, NOT re-truncated to native 5-bit first - re-truncating
+ * throws away real sub-5-bit precision the hardware's own bit-replication
+ * expansion carries, and undershoots the oracle by a few /255 on affected
+ * channels (`tools/compare/scratch/defect-a-blend-check-instrumented.mjs`).
+ * Same sampling shape as `drawSpriteSheetAffineStretch` (tint step included,
+ * since hardware tints the OBJ's own palette via `BlendPalette` before the
+ * alpha-blend stage ever sees it) plus `drawSpriteSheetAffineStretchBlendedOverFb`'s
+ * blend-over-live-`fb` output stage.
+ */
+function drawSpriteSheetAffineStretchTintedBlend(
+  fb: Uint8Array,
+  tileset: Tileset,
+  palette: RgbColor[],
+  ox: number,
+  oy: number,
+  xScale: number,
+  yScale: number,
+  tintColor: RgbColor,
+  tintCoeff: number,
+  eva: number,
+  evb: number,
+  doubled = false,
+  x2 = 0,
+): void {
+  const w = tileset.columns * 8;
+  const h = tileset.rows * 8;
+  const halfW = w / 2;
+  const halfH = h / 2;
+  const dyStart = doubled ? -halfH : 0;
+  const dyEnd = doubled ? h + halfH : h;
+  const dxStart = doubled ? -halfW : 0;
+  const dxEnd = doubled ? w + halfW : w;
+  for (let dy = dyStart; dy < dyEnd; dy += 1) {
+    const ry = dy - halfH;
+    const sy = ((ry * yScale) >> 8) + halfH;
+    if (sy < 0 || sy >= h) continue;
+    const tileRow = Math.floor(sy / 8);
+    const inTileY = sy % 8;
+    for (let dx = dxStart; dx < dxEnd; dx += 1) {
+      const rx = dx - halfW;
+      const sx = ((rx * xScale) >> 8) + halfW;
+      if (sx < 0 || sx >= w) continue;
+      const tile = tileset.tiles[tileRow * tileset.columns + Math.floor(sx / 8)];
+      if (!tile) continue;
+      const idx = tile[inTileY * 8 + (sx % 8)]!;
+      if (idx === 0) continue;
+      const c = palette[idx];
+      if (!c) continue;
+      const color = tintCoeff > 0
+        ? { r: blendComponentToward(c.r, tintColor.r, tintCoeff), g: blendComponentToward(c.g, tintColor.g, tintCoeff), b: blendComponentToward(c.b, tintColor.b, tintCoeff) }
+        : c;
+      const x = ox + dx + x2;
+      const y = oy + dy;
+      if (x < 0 || x >= 240 || y < 0 || y >= 160) continue;
+      const o = (y * 240 + x) * 4;
+      fb[o] = blendChannel(color.r, fb[o]!, eva, evb);
+      fb[o + 1] = blendChannel(color.g, fb[o + 1]!, eva, evb);
+      fb[o + 2] = blendChannel(color.b, fb[o + 2]!, eva, evb);
+      fb[o + 3] = 255;
+    }
+  }
+}
+
+/**
  * S7 slice L-4: same accumulator-based shrink-sampling as `drawSpriteSheetAffineTinted`
  * (`matrixParam = 0x10000 / accumulator`, the emerge/materialize sequence's own
  * convention), but blends each sampled texel's OWN palette color toward
@@ -14716,19 +14795,89 @@ export function renderSceneOnMovePresentation(
       view.target.geometry.spriteCorner.x + (targetIdle?.x2 ?? 0),
       view.target.geometry.spriteCorner.y + (targetIdle?.y2 ?? 0),
     );
-    drawSpriteSheetAffineStretch(
-      fb,
-      attackerSprite.tileset,
-      attackerSprite.palette,
-      view.attacker.geometry.spriteCorner.x,
-      view.attacker.geometry.spriteCorner.y,
-      view.attackerScale.xScale,
-      view.attackerScale.yScale,
-      0,
-      { r: 255, g: 255, b: 255 },
-      view.attackerObjY,
-      view.attackerScale.active,
-    );
+    if (view.attackerBlendActive) {
+      // `AnimTask_ScaleMonAndRestore`'s own objMode=1 arg makes the scaled OBJ
+      // a hardware alpha-blend target; `monbg`'s frozen native-position copy
+      // (never hidden once the scale task starts) is the real 2nd target -
+      // draw it first so the blend below has the right thing under it. The
+      // frozen copy shares the SAME palette RAM as the live OBJ (both
+      // reference the same PLTT slot), so `blend_color_cycle`'s ongoing tint
+      // ramp applies to it too - it's not a static, original-color snapshot
+      // (verified: a plain untinted copy left a constant, tintCoeff-sized
+      // brightness gap against the oracle at every sampled interior pixel).
+      // 256/256 is an identity affine matrix (no scale), so this just tints
+      // in place.
+      drawSpriteSheetAffineStretch(
+        fb,
+        attackerSprite.tileset,
+        attackerSprite.palette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+        256,
+        256,
+        0,
+        { r: 255, g: 255, b: 255 },
+        view.attackerObjY,
+        false,
+      );
+      drawSpriteSheetAffineStretchTintedBlend(
+        fb,
+        attackerSprite.tileset,
+        attackerSprite.palette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+        view.attackerScale.xScale,
+        view.attackerScale.yScale,
+        { r: 255, g: 255, b: 255 },
+        view.attackerObjY,
+        8,
+        8,
+        // OAM `affineMode` (SINGLE vs DOUBLE-size) flips in lockstep with
+        // `objMode` on the same RAM tick (both probed dropping together at
+        // RAM tick 143 while the matrix itself is still non-neutral until
+        // tick 143 too but display-lags an extra tick behind that) - so the
+        // doubled-window flag tracks `attackerBlendActive`, not the matrix's
+        // own two-tick-lagged `attackerScale.active`. Trivially `true` here
+        // since this branch only runs when `attackerBlendActive` is true.
+        true,
+      );
+    } else {
+      if (view.attackerScale.active) {
+        // Tail of the restore countdown: objMode/affineMode have already
+        // reverted (1-tick lag) but the matrix itself hasn't reached neutral
+        // yet (2-tick lag) - real hardware's now-SINGLE-size OAM box clips
+        // the still-slightly-enlarged sample to the native 64x64 rectangle,
+        // and the frozen monbg copy (still live; nothing has cleared it)
+        // shows through the clipped edge gap. Drawn opaque, not blended -
+        // objMode=0 here means no hardware alpha-blend is happening.
+        drawSpriteSheetAffineStretch(
+          fb,
+          attackerSprite.tileset,
+          attackerSprite.palette,
+          view.attacker.geometry.spriteCorner.x,
+          view.attacker.geometry.spriteCorner.y,
+          256,
+          256,
+          0,
+          { r: 255, g: 255, b: 255 },
+          view.attackerObjY,
+          false,
+        );
+      }
+      drawSpriteSheetAffineStretch(
+        fb,
+        attackerSprite.tileset,
+        attackerSprite.palette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+        view.attackerScale.xScale,
+        view.attackerScale.yScale,
+        0,
+        { r: 255, g: 255, b: 255 },
+        view.attackerObjY,
+        false,
+      );
+    }
     const opponentSpecies = playerToOpponent ? "ONIX" : "KADABRA";
     const playerSpecies = playerToOpponent ? "KADABRA" : "ONIX";
     drawSendOutHealthbox(
@@ -14820,20 +14969,50 @@ export function renderSceneOnMovePresentation(
     // ownership of it at CONFUSION_WINDOW2_START_AGE (confusion.ts).
     const targetIdle = speciesFrontIdleRestOffset(view.target.species);
     const targetTouched = view.age >= CONFUSION_WINDOW2_START_AGE;
-    drawSpriteSheetAffineStretch(
-      fb,
-      targetSprite.tileset,
-      targetSprite.palette,
-      view.target.geometry.spriteCorner.x + (targetTouched ? 0 : (targetIdle?.x2 ?? 0)),
-      view.target.geometry.spriteCorner.y + (targetTouched ? 0 : (targetIdle?.y2 ?? 0)),
-      view.targetScale.xScale,
-      view.targetScale.yScale,
-      0,
-      { r: 255, g: 255, b: 255 },
-      0,
-      view.targetScale.active,
-      targetTouched ? view.targetX2 : 0,
-    );
+    if (view.targetScale.active) {
+      // Same defect-A mechanism as FUTURE_SIGHT's attacker (see its own
+      // comment above): `monbg ANIM_DEF_PARTNER`'s frozen copy tracks the
+      // live x2/y2 shake offset (`Task_UpdateMonBg` re-pans it every tick)
+      // even though its tile content is never rescaled, so it's drawn here
+      // at the same x2-shifted position as the live scaled OBJ.
+      drawSpriteSheet(
+        fb,
+        targetSprite.tileset,
+        targetSprite.palette,
+        view.target.geometry.spriteCorner.x + (targetTouched ? view.targetX2 : 0),
+        view.target.geometry.spriteCorner.y,
+      );
+      drawSpriteSheetAffineStretchTintedBlend(
+        fb,
+        targetSprite.tileset,
+        targetSprite.palette,
+        view.target.geometry.spriteCorner.x,
+        view.target.geometry.spriteCorner.y,
+        view.targetScale.xScale,
+        view.targetScale.yScale,
+        { r: 255, g: 255, b: 255 },
+        0,
+        8,
+        8,
+        true,
+        targetTouched ? view.targetX2 : 0,
+      );
+    } else {
+      drawSpriteSheetAffineStretch(
+        fb,
+        targetSprite.tileset,
+        targetSprite.palette,
+        view.target.geometry.spriteCorner.x + (targetTouched ? 0 : (targetIdle?.x2 ?? 0)),
+        view.target.geometry.spriteCorner.y + (targetTouched ? 0 : (targetIdle?.y2 ?? 0)),
+        view.targetScale.xScale,
+        view.targetScale.yScale,
+        0,
+        { r: 255, g: 255, b: 255 },
+        0,
+        false,
+        targetTouched ? view.targetX2 : 0,
+      );
+    }
     drawSpriteSheetAffineStretch(
       fb,
       attackerSprite.tileset,
