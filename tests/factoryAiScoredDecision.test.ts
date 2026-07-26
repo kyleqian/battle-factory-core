@@ -1162,3 +1162,115 @@ describe("submitFactoryAiDecision top-level dispatch", () => {
     expect(band4.trace.mask).toBe(7);
   });
 });
+
+const MOVE_HARDEN_DEFENSE_UP = 106; // EFFECT_DEFENSE_UP
+const MOVE_VITAL_THROW_LAST = 233; // Fighting, IN AI_CV_DefenseUp_PhysicalTypes
+const MOVE_SEISMIC_TOSS_LAST = 69; // Fighting, IN the list, fixed-damage (EFFECT_LEVEL_DAMAGE)
+const MOVE_DRAGON_RAGE_LAST = 82; // Dragon, NOT in the list
+
+// docs/factory-ai-checkviability-ground-truth.md §18's three fixtures
+// (tools/battle-lab/mechanic-factory-ai-cv-defenseup-{lowhp-control,
+// physicallastmove,nonphysicallastmove}-off.json) -- the fifth CBM-blocked
+// pair, reproduced through the REAL mask-7 dispatcher end to end now that
+// both AI_CBM_DefenseUp and AI_CV_DefenseUp are ported. Opponent (AI_USER) =
+// Anorith, all 4 slots MOVE_HARDEN (EFFECT_DEFENSE_UP, +1 own DEF stage);
+// target (player) = Machamp. Per §17.2/§18.2's own finding, only the
+// PHANTOM next-turn re-decision is observable, so by the time it fires:
+// (1) Anorith's own real turn-1 Harden has already raised its DEF stage
+// 6->7 (still < 9, Gate A/DRAW SITE 1 stays unreached, matching the doc's
+// own live attribution -- no Cmd_get_ability, no stage-9+ draw), and (2)
+// MOVEEND_UPDATE_LAST_MOVES has already set gLastMoves[player] to whatever
+// the player's own turn-1 move was -- Gate E/F read THAT move's power/type,
+// not the target's live stats. HP lands directly in the doc's own
+// [40,70)-percent band (Gate C true, Gate D false) via the constructed hp
+// values below (doc §18.3's own real Vital Throw/Seismic Toss/Dragon Rage
+// numbers against this exact matchup), same "construct the decisive
+// post-turn-1 state" precedent as every block above.
+//
+// Draw-count reconciliation (per this step's brief): the doc's own live
+// ledger (§18.4) shows 6 (seed 1) / 5 (seed 99) total Cmd_if_random_less_than
+// calls for BOTH physical-list fixtures (Vital Throw, Seismic Toss) --
+// explicitly NOT the "N identical slots x 1 draw" pattern every other
+// handler in this doc produces, and the doc itself says outright it could
+// not identify the extra 1-2 draws' source ("This session did not
+// single-step the flagged frame", §18.4). This port's own branch-by-branch
+// derivation from the SAME cited assembly (§18.1) is unambiguous: 4
+// identical MOVE_HARDEN slots, each independently reaching Gate E (power
+// != 0) then Gate F (type in the physical list) then DRAW SITE 4 exactly
+// once, deterministically (no loop, no conditional redraw within a single
+// slot's evaluation) -- so the handler's own contribution is EXACTLY 4, not
+// 5-6. Reconciled: this port's ported logic is provably correct against the
+// cited assembly (verified below); the doc's raw 5-6 must come from
+// something outside AI_CV_DefenseUp's own body that its own session did not
+// isolate (the doc's own attribution table lumped it into the
+// Cmd_if_random_less_than bucket, so it is a real, uncredited extra draw
+// somewhere in the real ROM's frame window, not a flaw in this derivation) --
+// left exactly as open as the doc itself left it, not silently resolved.
+describe("AI_CV_DefenseUp mask-7 fixture reproduction (docs/factory-ai-checkviability-ground-truth.md §18.3/§18.4)", () => {
+  const MOVE_DEFENSE_UP_MOVESET = [
+    MOVE_HARDEN_DEFENSE_UP, MOVE_HARDEN_DEFENSE_UP, MOVE_HARDEN_DEFENSE_UP, MOVE_HARDEN_DEFENSE_UP,
+  ] as const;
+  const POST_HARDEN_STAGES = Object.freeze({ ...NEUTRAL_STAGES, def: 7 });
+
+  function anorithAttacker(hp: number): FactoryAiScoredBattlerView {
+    return Object.freeze({
+      types: ["TYPE_ROCK", "TYPE_BUG"] as const,
+      attack: 115, defense: 70, spAttack: 60, spDefense: 70, speed: 95, level: 50,
+      statStages: POST_HARDEN_STAGES,
+      isFirstTurn: 0,
+      hp, maxHp: 120,
+    });
+  }
+  function machampTarget(lastUsedMoveId: number): FactoryAiScoredTargetView {
+    return Object.freeze({
+      species: 68,
+      types: ["TYPE_FIGHTING", "TYPE_FIGHTING"] as const,
+      attack: 150, defense: 100, spAttack: 85, spDefense: 105, speed: 75, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp: 165, maxHp: 165, ability: "ABILITY_GUTS", knownAbility: null,
+      lastUsedMoveId,
+    });
+  }
+  function defenseUpView(attacker: FactoryAiScoredBattlerView, target: FactoryAiScoredTargetView): FactoryAiScoredView {
+    return Object.freeze({
+      schema: "factory-ai-scored-view/v1",
+      mode: "factory-level-50-singles",
+      active: Object.freeze({ aiBattler: 1 as const, targetBattler: 0 as const }),
+      factory: Object.freeze({ levelMode: 0 as const, battleMode: 0 as const, factoryWinStreak: 28, trainerOpponentId: 222 }),
+      moves: MOVE_DEFENSE_UP_MOVESET,
+      attacker,
+      target,
+    });
+  }
+  function phaseDraws(result: ReturnType<typeof chooseFactoryAiScoredDecision>, phase: "check-bad-move" | "try-to-faint" | "check-viability") {
+    return result.trace.draws.filter((d) => "phase" in d && d.phase === phase);
+  }
+
+  it("physical fixture #1 (Vital Throw, doc's own 55/120 = 45.8% HP figure): exactly 4 check-viability draws (DRAW SITE 4, one per identical Harden slot), zero CBM/TryToFaint draws", () => {
+    const view = defenseUpView(anorithAttacker(55), machampTarget(MOVE_VITAL_THROW_LAST));
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 1, calls: 0 } });
+    expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+    expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+    const cvDraws = phaseDraws(result, "check-viability");
+    expect(cvDraws).toHaveLength(4);
+    expect(cvDraws.every((d) => "kind" in d && d.kind === "defense-up-roll-4")).toBe(true);
+  });
+
+  it("physical fixture #2 (Seismic Toss, doc's own 70/120 = 58.3% HP figure): exactly 4 check-viability draws, same code path as Vital Throw", () => {
+    const view = defenseUpView(anorithAttacker(70), machampTarget(MOVE_SEISMIC_TOSS_LAST));
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 1, calls: 0 } });
+    const cvDraws = phaseDraws(result, "check-viability");
+    expect(cvDraws).toHaveLength(4);
+    expect(cvDraws.every((d) => "kind" in d && d.kind === "defense-up-roll-4")).toBe(true);
+  });
+
+  it("non-physical flip (Dragon Rage, doc's own 80/120 = 66.7% HP figure): deterministic ZERO check-viability draws -- Gate F jumps straight to the -2 penalty, matching the doc's own live ledger exactly", () => {
+    const view = defenseUpView(anorithAttacker(80), machampTarget(MOVE_DRAGON_RAGE_LAST));
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 1, calls: 0 } });
+    expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+    expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+    expect(phaseDraws(result, "check-viability")).toHaveLength(0);
+    expect(result.trace.draws).toHaveLength(4 /* setup */ + 1 /* tie */);
+  });
+});

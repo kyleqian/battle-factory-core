@@ -1681,3 +1681,241 @@ describe("AI_CV_AttackUp (docs/factory-ai-checkviability-ground-truth.md §17.1)
     expect(result.draws[0]).toMatchObject({ kind: "attack-up-roll-2" });
   });
 });
+
+const MOVE_HARDEN_DEFENSE_UP = 106; // EFFECT_DEFENSE_UP
+const MOVE_ACID_ARMOR_DEFENSE_UP_2 = 151; // EFFECT_DEFENSE_UP_2 -- same handler, different table entry
+const MOVE_BULK_UP_DEFENSE_UP = 339; // EFFECT_BULK_UP -- CV side dispatches to the SAME AI_CV_DefenseUp
+const MOVE_SPLASH_ZERO_POWER = 150; // power 0 -- Gate E true, same code path as the untouched MOVE_NONE default
+const MOVE_VITAL_THROW_PHYSICAL_LAST = 233; // power 70, Fighting -- IN AI_CV_DefenseUp_PhysicalTypes
+const MOVE_DRAGON_RAGE_NONPHYSICAL_LAST = 82; // power 1 (fixed-damage placeholder), Dragon -- NOT in the list
+
+// data/battle_ai_scripts.s:915-942, docs/factory-ai-checkviability-ground-truth.md
+// §18.1: the fifth CBM-blocked pair's own CV half (AI_CBM_DefenseUp/AI_CBM_BulkUp,
+// the CBM side, are in factoryAiCheckBadMove.test.ts). Gates A/B/DRAW SITE 1/2
+// are AttackUp's own shape with STAT_DEF swapped for STAT_ATK -- not
+// re-tested exhaustively here beyond one smoke case each; this block's own
+// focus is Gate C's inversion and the target's-last-move Gates E/F, the two
+// shapes with no AttackUp precedent. seed 1 -> randomValue % 256 = 198 (>=
+// every threshold except 200); seed 4 -> 25 (< every threshold); seed 5 ->
+// 223 (>= 200, the one case seed 1 can't cover).
+describe("AI_CV_DefenseUp (docs/factory-ai-checkviability-ground-truth.md §18.1)", () => {
+  function defenseUpAttacker(defStage: number, hp: number, maxHp = 100) {
+    return Object.freeze({
+      speed: 100, speedStage: 6, types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+      isFirstTurn: 0, evasionStage: 6, accStage: 6, atkStage: 6, defStage, spDefStage: 6, hp, maxHp,
+    });
+  }
+  function defenseUpTarget(lastUsedMoveId: number) {
+    return Object.freeze({
+      speed: 100, speedStage: 6, types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+      isFirstTurn: 0, evasionStage: 6, accStage: 6, atkStage: 6, defStage: 6, spDefStage: 6, hp: 100, maxHp: 100,
+      lastUsedMoveId,
+    });
+  }
+
+  it("EFFECT_DEFENSE_UP_2 (Acid Armor) and EFFECT_BULK_UP (Bulk Up) both dispatch to the identical handler", () => {
+    for (const moveId of [MOVE_ACID_ARMOR_DEFENSE_UP_2, MOVE_BULK_UP_DEFENSE_UP]) {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId,
+        attacker: defenseUpAttacker(6, 65), // DEF<9 skips site 1; hp!=100 skips site 2; hp<70 skips site 3 straight to Gate D
+        target: defenseUpTarget(MOVE_SPLASH_ZERO_POWER), // hp 65 >= 40 -> Gate D false -> reaches Gate E: power 0 -> site 5
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "defense-up-roll-5" });
+    }
+  });
+
+  describe("Gate A / DRAW SITE 1 (own DEF stage < 9 skips the roll, same shape as AttackUp's Gate A)", () => {
+    it("DEF stage 9 (>= 9): reaches DRAW SITE 1; roll >= 100 applies the -1", () => {
+      // seed 1 -> randomValue % 256 = 198 (>= 100).
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_HARDEN_DEFENSE_UP,
+        attacker: defenseUpAttacker(9, 65), // hp 65 -> Gate C true (hp<70) -> straight to Gate D (false, 65>=40) -> Gate E
+        target: defenseUpTarget(MOVE_SPLASH_ZERO_POWER),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(2);
+      // seed 1's RNG chain: draw1 = 198 (>= 100, -1); draw5 (next value) = 33 (< 60, no further score).
+      expect(result.draws[0]).toMatchObject({ kind: "defense-up-roll-1", succeeded: true });
+      expect(result.draws[1]).toMatchObject({ kind: "defense-up-roll-5", succeeded: false });
+      expect(result.scoreDelta).toBe(-1);
+    });
+  });
+
+  describe("Gate B / DRAW SITE 2 (own HP != 100% skips the roll, same shape as AttackUp's Gate B)", () => {
+    it("HP exactly 100%: reaches DRAW SITE 2; roll >= 128 applies the +2 (then Gate C: hp>=70 -> DRAW SITE 3 too)", () => {
+      // seed 1's chain: draw2 = 198 (>= 128, +2); draw3 (next) = 33 (< 200, stops at End).
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_HARDEN_DEFENSE_UP,
+        attacker: defenseUpAttacker(6, 100),
+        target: defenseUpTarget(MOVE_SPLASH_ZERO_POWER),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(2);
+      expect(result.draws[0]).toMatchObject({ kind: "defense-up-roll-2", succeeded: true });
+      expect(result.draws[1]).toMatchObject({ kind: "defense-up-roll-3", succeeded: false });
+      expect(result.scoreDelta).toBe(2);
+    });
+  });
+
+  describe("Gate C (INVERTED vs AttackUp: own HP < 70% jumps straight into DefenseUp4, skipping DRAW SITE 3)", () => {
+    it("HP exactly 69% (< 70): DRAW SITE 3 skipped entirely -- Gate D false (69 >= 40) -- falls to Gate E", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_HARDEN_DEFENSE_UP,
+        attacker: defenseUpAttacker(6, 69),
+        target: defenseUpTarget(MOVE_SPLASH_ZERO_POWER),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "defense-up-roll-5" });
+    });
+
+    it("HP exactly 70% (>= 70): reaches DRAW SITE 3; roll < 200 stops immediately (own draw only, no Gate D/E/F reached)", () => {
+      // seed 1 -> randomValue % 256 = 198 (< 200).
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_HARDEN_DEFENSE_UP,
+        attacker: defenseUpAttacker(6, 70),
+        target: defenseUpTarget(MOVE_SPLASH_ZERO_POWER),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(0);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "defense-up-roll-3", succeeded: false });
+    });
+
+    it("HP exactly 70% (>= 70): roll >= 200 falls through to DefenseUp4/Gate E instead of stopping", () => {
+      // seed 5 -> randomValue % 256 = 223 (>= 200).
+      const result = runCheckViability({
+        rng: { value: 5, calls: 0 },
+        moveId: MOVE_HARDEN_DEFENSE_UP,
+        attacker: defenseUpAttacker(6, 70),
+        target: defenseUpTarget(MOVE_SPLASH_ZERO_POWER),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(2);
+      expect(result.draws[0]).toMatchObject({ kind: "defense-up-roll-3", succeeded: true });
+      expect(result.draws[1]).toMatchObject({ kind: "defense-up-roll-5" });
+    });
+  });
+
+  describe("Gate D (own HP < 40%: skips straight to the -2 penalty, same shape as AttackUp's Gate D)", () => {
+    it("HP exactly 39% (< 40, reached via the direct Gate C jump since 39 < 70): applies -2 with zero draws", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_HARDEN_DEFENSE_UP,
+        attacker: defenseUpAttacker(6, 39),
+        target: defenseUpTarget(MOVE_SPLASH_ZERO_POWER),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: -2 });
+    });
+  });
+
+  describe("Gates E/F (the TARGET's own last-used move power/type, not AI_USER's)", () => {
+    it("last move power == 0 (Splash): Gate E routes to DefenseUp5's own DRAW SITE 5, skipping Gate F entirely", () => {
+      const result = runCheckViability({
+        rng: { value: 4, calls: 0 },
+        moveId: MOVE_HARDEN_DEFENSE_UP,
+        attacker: defenseUpAttacker(6, 50),
+        target: defenseUpTarget(MOVE_SPLASH_ZERO_POWER),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(0);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "defense-up-roll-5", succeeded: false });
+    });
+
+    it("last move power != 0, type IN the physical list (Vital Throw, Fighting): Gate F routes to DRAW SITE 4", () => {
+      // seed 4 -> randomValue % 256 = 25 (< 60, skips the -2).
+      const result = runCheckViability({
+        rng: { value: 4, calls: 0 },
+        moveId: MOVE_HARDEN_DEFENSE_UP,
+        attacker: defenseUpAttacker(6, 50),
+        target: defenseUpTarget(MOVE_VITAL_THROW_PHYSICAL_LAST),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(0);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "defense-up-roll-4", succeeded: false });
+    });
+
+    it("last move power != 0, type IN the physical list: roll >= 60 at DRAW SITE 4 applies the -2", () => {
+      // seed 1 -> randomValue % 256 = 198 (>= 60).
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_HARDEN_DEFENSE_UP,
+        attacker: defenseUpAttacker(6, 50),
+        target: defenseUpTarget(MOVE_VITAL_THROW_PHYSICAL_LAST),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(-2);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "defense-up-roll-4", succeeded: true });
+    });
+
+    it("last move power != 0, type NOT in the physical list (Dragon Rage, Dragon): Gate F jumps straight to the -2, skipping BOTH remaining draw sites", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_HARDEN_DEFENSE_UP,
+        attacker: defenseUpAttacker(6, 50),
+        target: defenseUpTarget(MOVE_DRAGON_RAGE_NONPHYSICAL_LAST),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: -2 });
+    });
+
+    it("omitted lastUsedMoveId defaults to MOVE_NONE (0), the real battle-start default -- same code path as a genuine 0-power last move (doc §18.2)", () => {
+      const bareTarget = Object.freeze({
+        speed: 100, speedStage: 6, types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+        isFirstTurn: 0, evasionStage: 6, accStage: 6, atkStage: 6, defStage: 6, spDefStage: 6, hp: 100, maxHp: 100,
+      });
+      const result = runCheckViability({
+        rng: { value: 4, calls: 0 },
+        moveId: MOVE_HARDEN_DEFENSE_UP,
+        attacker: defenseUpAttacker(6, 50),
+        target: bareTarget,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "defense-up-roll-5" });
+    });
+  });
+});
