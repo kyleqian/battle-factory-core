@@ -1,0 +1,29 @@
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-confusion-kadabra-onix.json",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
+  "pair": "KADABRA (player-back) -> ONIX (opponent-front)",
+  "move": "CONFUSION",
+  "orientation": "player-to-opponent",
+  "appStage": {"oracleFrame": 81, "presentationAge": 0},
+  "denseWindow": {"startFrame": 81, "endFrame": 220},
+  "attacker": {
+    "species": "KADABRA",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": {"x": 40, "y": 56},
+      "animationCenter": {"x": 72, "y": 96},
+      "battlePositionCenter": {"x": 72, "y": 80}
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": {"x": 144, "y": 10},
+      "animationCenter": {"x": 176, "y": 42},
+      "battlePositionCenter": {"x": 176, "y": 40}
+    }
+  }
+}

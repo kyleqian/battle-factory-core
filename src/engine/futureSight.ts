@@ -44,6 +44,11 @@ import {
   scaleMonAndRestoreAtAge,
   type ScaleMonAndRestoreParameters,
 } from "./bind.ts";
+import {
+  psychicBgFadeRampAtLocalAge,
+  psychicBgRotationCountAtAge,
+  psychicBgPaletteRowAtAge,
+} from "./psychicBackground.ts";
 import type { RgbColor } from "./bg.ts";
 
 export const FUTURE_SIGHT_BLEND_TIMING: Readonly<BlendColorCycleTiming> =
@@ -69,9 +74,6 @@ const FADE_2_RAMPUP_END_AGE = 89;
 const FADE_2_HOLD_END_AGE = 93;
 const FADE_2_RAMPDOWN_END_AGE = 109;
 
-const ROTATION_RING_SIZE = 11;
-const ROTATION_FIRST_APPLIED_AGE = 21;
-const ROTATION_INTERVAL = 4;
 // RAM-probed (tools/probe/run-battle-lab-rgb.py's own `bgPalette2Faded`
 // dump, re-run rung 6 against the same fixture, ages = frame-77): the
 // rotation ring steps cleanly every 4 ages from 21 through 65 (12 steps),
@@ -84,21 +86,29 @@ const ROTATION_INTERVAL = 4;
 // permanently shifted +2 (71, 75, 79, 83, 87, 91, ...). REG_BLDY's own
 // ramp is untouched by this pause (RAM-exact against the existing formula
 // through the whole window), so this is a rotation-cadence-only defect, not
-// a darken-register one.
+// a darken-register one. `MOVE_CONFUSION` (`confusion.ts`) confirms the
+// same +2/single-pause mechanism at its own later breakpoint age (97, that
+// move's own blendoff gap) - the pause SHAPE is shared plumbing
+// (`psychicBackground.ts`), only the breakpoint age is per-move.
 const ROTATION_PAUSE_BREAKPOINT_AGE = 69;
 const ROTATION_PAUSE_EXTRA_TICKS = 2;
 
 /** `REG_BLDY` (0-16) at a given age - the black-cover cross-fade both `SetPsychicBackground` and `UnsetPsychicBackground` drive around the BG swap. The two holds are RAM-probed asymmetric (4 ticks, then 5). */
 export function futureSightBgBldyAtAge(age: number): number {
-  if (age < 0) return 0;
-  if (age <= FADE_1_RAMPUP_END_AGE) return age;
-  if (age <= FADE_1_HOLD_END_AGE) return 16;
-  if (age <= FADE_1_RAMPDOWN_END_AGE) return Math.max(0, FADE_1_RAMPDOWN_END_AGE - age);
-  if (age < FADE_2_RAMPUP_START_AGE) return 0;
-  if (age <= FADE_2_RAMPUP_END_AGE) return age - FADE_2_RAMPUP_START_AGE;
-  if (age <= FADE_2_HOLD_END_AGE) return 16;
-  if (age <= FADE_2_RAMPDOWN_END_AGE) return Math.max(0, FADE_2_RAMPDOWN_END_AGE - age);
-  return 0;
+  if (age < FADE_2_RAMPUP_START_AGE) {
+    return psychicBgFadeRampAtLocalAge(
+      age,
+      FADE_1_RAMPUP_END_AGE,
+      FADE_1_HOLD_END_AGE,
+      FADE_1_RAMPDOWN_END_AGE,
+    );
+  }
+  return psychicBgFadeRampAtLocalAge(
+    age - FADE_2_RAMPUP_START_AGE,
+    FADE_2_RAMPUP_END_AGE - FADE_2_RAMPUP_START_AGE,
+    FADE_2_HOLD_END_AGE - FADE_2_RAMPUP_START_AGE,
+    FADE_2_RAMPDOWN_END_AGE - FADE_2_RAMPUP_START_AGE,
+  );
 }
 
 /** Whether BG_PSYCHIC (vs the default battle background) is the tileset/tilemap/palette in effect - true from the moment it loads under the first black cover through the moment `restorebg` swaps the reference back under the second (RAM-confirmed reverted by age 92, itself still within the second hold). */
@@ -106,23 +116,15 @@ export function futureSightBgIsPsychic(age: number): boolean {
   return age >= FADE_1_HOLD_END_AGE + 1 && age <= FADE_2_RAMPUP_END_AGE + 2;
 }
 
-function rotationCountAtAge(age: number): number {
-  if (age < ROTATION_FIRST_APPLIED_AGE) return 0;
-  const effectiveAge =
-    age < ROTATION_PAUSE_BREAKPOINT_AGE ? age : age - ROTATION_PAUSE_EXTRA_TICKS;
-  return Math.floor((effectiveAge - ROTATION_FIRST_APPLIED_AGE) / ROTATION_INTERVAL) + 1;
-}
-
-/** `SetPsychicBackground_Step`'s own rotate-right-by-1 of BG palette 2's entries 1-11, applied `rotationCountAtAge(age)` times (mod the 11-entry ring). */
+/** `SetPsychicBackground_Step`'s own rotate-right-by-1 of BG palette 2's entries 1-11, applied `psychicBgRotationCountAtAge(age, ...)` times (mod the 11-entry ring). */
 export function futureSightBgPaletteRowAtAge(
   basePalette: readonly Readonly<RgbColor>[],
   age: number,
 ): Readonly<RgbColor>[] {
-  const n = rotationCountAtAge(age) % ROTATION_RING_SIZE;
-  if (n === 0) return basePalette.slice();
-  const ring = basePalette.slice(1, 1 + ROTATION_RING_SIZE);
-  const rotated = ring.slice(ROTATION_RING_SIZE - n).concat(ring.slice(0, ROTATION_RING_SIZE - n));
-  return [basePalette[0]!, ...rotated, ...basePalette.slice(1 + ROTATION_RING_SIZE)];
+  return psychicBgPaletteRowAtAge(
+    basePalette,
+    psychicBgRotationCountAtAge(age, ROTATION_PAUSE_BREAKPOINT_AGE, ROTATION_PAUSE_EXTRA_TICKS),
+  );
 }
 
 export interface FutureSightAttackerEffect {

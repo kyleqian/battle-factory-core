@@ -6,6 +6,105 @@ full record regardless; this file is a read-only reference.
 
 
 
+## `blend_color_cycle` group A extended: enumeration priced CONFUSION/PSYCHIC/FUTURE_SIGHT at 2 net-new components each; MOVE_FUTURE_SIGHT ported (cheapest, attacker-only), lands `partial` — BG swap/rotation exact, attacker-sprite residual named (2026-07-25)
+
+**Verdict: real port, not a fit — but a genuine residual remains, same
+class as GROWTH's own history.** Enumeration (30-min phase, MANDATORY
+ORDER step 1): read the real scripts for all three group-A siblings
+(`battle_anim_scripts.s:4716-4767`) against the already-ported set
+(`battle-animation-components.json` + a live check of `src/engine/`).
+All three tie at exactly 2 net-new substantive components beyond what's
+already proven — `SetPsychicBackground`/`UnsetPsychicBackground`'s own
+`AnimTask_SetPsychicBackground` (a BG-palette-2 11-entry ring rotation) plus
+its `BG_PSYCHIC` asset. `blend_color_cycle` itself, `AnimTask_ShakeMon`
+(proven via `MOVE_FLY`), `AnimTask_ShakeMon2` and `AnimTask_
+ScaleMonAndRestore` (both proven via `MOVE_GROWTH`/`MOVE_BIND`), and the
+whole `monbg`/`clearmonbg`/`fadetobg`/`restorebg`/`waitbgfadein`/
+`waitbgfadeout`/`setalpha`/`blendoff`/`setarg` visual-command family are all
+already-ported reuse, verified directly against each move's real
+`componentIds` in the graph, not assumed. **MOVE_FUTURE_SIGHT picked as the
+cheapest to port**: it's an attacker-only self-effect (`blend_color_cycle` +
+`ScaleMonAndRestore` on `ANIM_ATTACKER`, the identical shape to already-exact
+`MOVE_GROWTH`) with zero target-side task composition — CONFUSION/PSYCHIC
+additionally wire `AnimTask_ShakeMon2`(attacker) + `AnimTask_ShakeMon`
+(target) simultaneously with the blend, a real composition risk FUTURE_SIGHT
+doesn't carry. Factory-legal at Level 50: `FRONTIER_MON_KADABRA_1`
+(`SPECIES_KADABRA`, moves include `FUTURE_SIGHT`) vs `FRONTIER_MON_ONIX`
+(already this lane's common fixture opponent).
+
+**RAM-probed first** (`tools/probe/dump-future-sight-psychicbg.py` against a
+fresh legal `mechanicLab` fixture, player KADABRA/FUTURE_SIGHT vs opponent
+ONIX, oracle ticks 60-200), before any render code: `REG_BLDY`'s two
+fade-cover ramps around the BG swap are asymmetric (a 4-tick hold on the
+way in, a 5-tick hold on the way out — RAM-probed, not assumed symmetric);
+the BG palette 2 rotate-right-by-1-every-4-ticks ring was confirmed
+byte-exact against the extracted `psychic.png` palette including the
+wraparound entry (entry 11's original color correctly lands in entry 1);
+the attacker blend/scale pair's own creation tick is age 37 relative to the
+fade's own start tick.
+
+**Ported** as `src/engine/futureSight.ts`, Tier-1-pinned (`tests/
+futureSight.test.ts`, 8/8, all values checked directly against the RAM
+probe's own output). `BG_PSYCHIC` extracted (`tools/extract/
+extract-psychic-bg.ts`, same `indexedPng`/tilemap pipeline as
+`MOVE_EXTREME_SPEED`'s `BG_HIGHSPEED` — no compression concern, since the
+committed source graphics are plain PNG/bin, not the ROM's own LZ-compiled
+bytes). KADABRA's battle back sprite extracted (`extract-battle-mon-pics.ts`,
+same dimensions/`yOffset` as HAUNTER's, spriteCorner reused). Wired through
+the Scene-ON seam (`sceneOnFutureSightView`, `battleScene.ts`'s
+`FUTURE_SIGHT` draw case): psychic-BG-vs-default-BG selection, `REG_BLDY`
+darken (reusing the SHADOW_PUNCH/EXTREME_SPEED `gpuDarken` pattern), and the
+attacker blend/affine path (reusing GROWTH's own `drawSpriteSheetAffineStretch`
+tint/affine seam). A 1-tick display lag on the BG-palette-rotation read was
+pixel-confirmed and fixed (same framebuffer-lags-RAM-write class as GROWTH/
+BLAZE_KICK); GROWTH's own `(scaleLag=2, tintLag=1)` attacker pair was then
+tried on this move's identical blend+scale seam and **partially transfers**
+(improved the match count, did not fully resolve it — see below), confirming
+the step brief's own caution that per-mechanism lag is not automatically
+portable.
+
+**Dense comparator** (`tools/compare/futureSightPortable.ts` + `tools/
+compare/fixtures/future-sight-player-kadabra-opponent-onix.json`), one
+orientation only (player-back KADABRA → opponent-front ONIX; the family
+map's own derivation says the OBJ-row/task arithmetic is side-uniform, so
+the opposite orientation is expected to need only a KADABRA front-sprite
+extraction, not a new mechanism — not yet staged, so marked `partial` per
+this step's own orientation rule), 114-frame window (oracle ticks 77-190,
+every frame): **framebuffer 75/114**. The BG swap/rotation/fade, target
+ONIX, healthboxes, and message printer are pixel-exact for their own
+frames. The remaining 39/114 mismatches are confined to KADABRA's own
+attacker sprite box (bbox 44,65-100,111) during the blend/scale window —
+the same class of species-specific attacker residual GROWTH itself carried
+for a full prior session (which turned out to be a display-lag bug, not an
+asset/idle-offset issue) before being promoted to exact. Not RAM-probed
+further this session (out of this rung's time budget) — named, not chased
+blind, per this run's no-blind-fit policy.
+
+**Coverage:** added `MOVE_FUTURE_SIGHT` to `ANIMATION_COVERAGE.json` as
+`partial`.
+
+**Evidence.** `npm test` 2451/2451 (2443 + 8 new `futureSight.test.ts`).
+`npm run build` green.
+
+**Next action for a future session:** RAM-probe KADABRA's own attacker-box
+residual directly (VRAM/OAM dump at a clean pre-move tick and window ticks,
+the `dump-growth-ivysaur-vram.py` precedent) to find whether it's a further
+display-lag refinement or a genuine asset/idle-anim gap, then extend to a
+second orientation (KADABRA front sprite) and re-run `futureSightPortable.ts`
+to confirm `exact`. The `blend_color_cycle` family map's own group B-F
+sibling clusters (target-flash, longer-flicker, whole-screen, side-selector,
+degenerate-snap) remain untouched, parked in the archived family-map entry.
+
+**Housekeeping:** moved the "blend_color_cycle family map" section (this
+same family, its argv survey table stays in the archive for future group
+B-F reference) to `ANIMATION_PROGRESS-archive.md` to keep ~3 live
+(AGENTS.md's convention); MOVE_GROWTH's own two most recent entries stay
+live alongside this one.
+
+**Housekeeping (this session):** moved MOVE_GROWTH's own "promoted to
+exact" entry to `ANIMATION_PROGRESS-archive.md` to keep ~3 live
+(AGENTS.md's convention).
+
 ## MOVE_GROWTH promoted to `exact`: last named residual (IVYSAUR attacker salt-and-pepper) was a display-lag bug, not species idle offset or asset decode — both dense windows 63/63, twice each (2026-07-25)
 
 **Verdict: real fix, RAM-probe-first as directed — both suspected classes

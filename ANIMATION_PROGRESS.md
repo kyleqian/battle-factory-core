@@ -42,6 +42,24 @@ substitute state, multi-turn/multi-hit state, or another explicit script input.
 Every status needs a committed ON-profile trace; `exact` cannot retain a known
 remainder.
 
+## MOVE_CONFUSION ported (group-A sibling): window 1 (attacker) lands 19/20 exact, window 2 (target) carries FUTURE_SIGHT's own defect-A residual, stays `partial` at 108/140 (2026-07-25)
+
+**Verdict: real port, not a fit — window 1 essentially exact, window 2's residual is new evidence for FUTURE_SIGHT's still-open defect A, not a new bug.** Per the archived enumeration, CONFUSION's own script (`battle_anim_scripts.s:4716-4730`, verified directly, not assumed) composes only already-proven pieces around TWO sequential simultaneous-task windows, not one: window 1 (attacker) `AnimTask_ShakeMon2`+`blend_color_cycle`; window 2 (target) `AnimTask_ShakeMon`+`AnimTask_ScaleMonAndRestore` (same xDelta/yDelta/duration as FUTURE_SIGHT's own attacker scale, here on the TARGET - the real composition risk this port existed to check). Reused FUTURE_SIGHT's own KADABRA/ONIX fixture pairing (`FRONTIER_MON_KADABRA_1` carries both moves) - zero new sprite extraction needed.
+
+**RAM-probed first** (`tools/battle-lab/mechanic-confusion-kadabra-onix.json`, the already-committed generic `run-battle-lab-rgb.py`, no new probe script): fade 1 is byte-identical in shape to FUTURE_SIGHT's own (same subroutine); window 1 creates at age 37 - the SAME age FUTURE_SIGHT's own attacker effect starts at; window 2 creates at age 65; fade 2 starts later (age 101, not 73 - window 2's own longer task chain runs first) but shares FUTURE_SIGHT's exact ramp/hold/ramp shape; the BG-palette rotation ring carries the SAME rung-6 pause mechanism at its own breakpoint (age 97, not 69) - directly RAM-confirmed against the raw palette row (clean 4-age cadence 21->93, then a jump to 99, not 97).
+
+**Factored, not duplicated** (per this step's own instruction): extracted the shared `SetPsychicBackground`/`UnsetPsychicBackground` fade-ramp and rotation-pause formulas out of `futureSight.ts` into a new `src/engine/psychicBackground.ts` - a pure, behavior-preserving refactor (`futureSight.test.ts` 9/9 unchanged before touching anything else). Ported `src/engine/confusion.ts` on top of it, reusing `blendColorCycleObjYAtAge`/`scaleMonAndRestoreAtAge`/`shakeMonOffsetAtTick`/`shakeMon2OffsetAtTick` verbatim (all already-proven), Tier-1-pinned (`tests/confusion.test.ts`, 11/11, every constant checked directly against the RAM probe's own output - including the already-established `AnimTask_ShakeMon(2)` "+1, guard age<creationAge" idiom from `dragonBreath.ts`/`blazeKick.ts`/`fly.ts`, RAM-confirmed to apply here too).
+
+**Wired** through the Scene-ON seam (`sceneOnConfusionView`, `battleScene.ts`'s CONFUSION draw case, reusing `kadabraBackSprite`/`onixFrontSprite`/`battleAnimPsychicBg` - no new assets). Per-mechanism lag bisection against the dense fixture (not a blind sweep - the ledger's own warning that one window can carry several lag conventions held true here): window 1's `AnimTask_ShakeMon2` needed its OWN scene-level lag (-2, distinct from GROWTH/FUTURE_SIGHT's own tint lag of -1), closing window 1 to 19/20 exact. Window 2's target (both `AnimTask_ShakeMon`'s x2 and `AnimTask_ScaleMonAndRestore`'s matrix) needed NO scene-level lag at all - RAM and pixels already agree at raw age, ruling lag out as window 2's problem.
+
+**Dense comparator, rerun twice** (`tools/compare/confusionPortable.ts`, new `--per-frame-bbox` flag - this session's own fix for the PAPERCUT rung 5 named): **108/140 both times**, deterministic. Window 1 (attacker, frames 118-137, 20 frames): **19/20 exact**, only frame 119 (a single creation-tick boundary frame) mismatches. Window 2 (target, frames 146-176, 31 frames): **0/31 exact** - a whole-sprite-interior residual growing with the scale magnitude, exact at the sprite's center pixel, wrong toward the edges, surviving a full per-mechanism lag bisection. **New evidence for FUTURE_SIGHT's own open defect A, not a new bug**: FUTURE_SIGHT's attacker (has `monbg ANIM_ATK_PARTNER`) shows this residual class, BIND's target (no `monbg` at all) does not, and CONFUSION's target (has `monbg ANIM_DEF_PARTNER`) now shows it too - `monbg`'s own `MoveBattlerSpriteToBG` mechanism (moving the battler onto a BG2 tile copy instead of a plain OBJ) is now a live, named suspect. Not chased here - defect A remains FUTURE_SIGHT's own open item, out of this move's scope.
+
+**Coverage:** `MOVE_CONFUSION` added to `ANIMATION_COVERAGE.json` as `partial`, 108/140.
+
+**Evidence.** `npm test` 2463/2463 (2452 + 11 new `confusion.test.ts`). `npm run build` green.
+
+**Next action for a future session:** PSYCHIC (this family's third and final sibling, not started - identical shape to CONFUSION with different color/deltas per the family map, should port cheaply once staged); the opposite orientation (KADABRA front sprite, not yet extracted); and defect A's real root cause, now with a concrete `monbg`-driven hypothesis shared between FUTURE_SIGHT and CONFUSION to chase (a VRAM/OAM tile-data dump at a scale-window peak tick, or checking whether `MoveBattlerSpriteToBG`'s BG2-copy path changes the affine-stretch sampling itself).
+
 ## MOVE_FUTURE_SIGHT rung 6: register-level probe named and fixed defect B (the second-fade rotation-cadence pause); defect A untouched, stays `partial` at 85/114 (2026-07-25)
 
 **Verdict: real fix, landed and pinned — defect B is closed.** Rung 5 left
@@ -181,101 +199,7 @@ a per-frame or window-wide bbox — this cost real time this session
 follow-up: have the shared dense-comparator harness report bbox for every
 mismatched frame (or at least the widest one), not just the first.
 
-## `blend_color_cycle` group A extended: enumeration priced CONFUSION/PSYCHIC/FUTURE_SIGHT at 2 net-new components each; MOVE_FUTURE_SIGHT ported (cheapest, attacker-only), lands `partial` — BG swap/rotation exact, attacker-sprite residual named (2026-07-25)
-
-**Verdict: real port, not a fit — but a genuine residual remains, same
-class as GROWTH's own history.** Enumeration (30-min phase, MANDATORY
-ORDER step 1): read the real scripts for all three group-A siblings
-(`battle_anim_scripts.s:4716-4767`) against the already-ported set
-(`battle-animation-components.json` + a live check of `src/engine/`).
-All three tie at exactly 2 net-new substantive components beyond what's
-already proven — `SetPsychicBackground`/`UnsetPsychicBackground`'s own
-`AnimTask_SetPsychicBackground` (a BG-palette-2 11-entry ring rotation) plus
-its `BG_PSYCHIC` asset. `blend_color_cycle` itself, `AnimTask_ShakeMon`
-(proven via `MOVE_FLY`), `AnimTask_ShakeMon2` and `AnimTask_
-ScaleMonAndRestore` (both proven via `MOVE_GROWTH`/`MOVE_BIND`), and the
-whole `monbg`/`clearmonbg`/`fadetobg`/`restorebg`/`waitbgfadein`/
-`waitbgfadeout`/`setalpha`/`blendoff`/`setarg` visual-command family are all
-already-ported reuse, verified directly against each move's real
-`componentIds` in the graph, not assumed. **MOVE_FUTURE_SIGHT picked as the
-cheapest to port**: it's an attacker-only self-effect (`blend_color_cycle` +
-`ScaleMonAndRestore` on `ANIM_ATTACKER`, the identical shape to already-exact
-`MOVE_GROWTH`) with zero target-side task composition — CONFUSION/PSYCHIC
-additionally wire `AnimTask_ShakeMon2`(attacker) + `AnimTask_ShakeMon`
-(target) simultaneously with the blend, a real composition risk FUTURE_SIGHT
-doesn't carry. Factory-legal at Level 50: `FRONTIER_MON_KADABRA_1`
-(`SPECIES_KADABRA`, moves include `FUTURE_SIGHT`) vs `FRONTIER_MON_ONIX`
-(already this lane's common fixture opponent).
-
-**RAM-probed first** (`tools/probe/dump-future-sight-psychicbg.py` against a
-fresh legal `mechanicLab` fixture, player KADABRA/FUTURE_SIGHT vs opponent
-ONIX, oracle ticks 60-200), before any render code: `REG_BLDY`'s two
-fade-cover ramps around the BG swap are asymmetric (a 4-tick hold on the
-way in, a 5-tick hold on the way out — RAM-probed, not assumed symmetric);
-the BG palette 2 rotate-right-by-1-every-4-ticks ring was confirmed
-byte-exact against the extracted `psychic.png` palette including the
-wraparound entry (entry 11's original color correctly lands in entry 1);
-the attacker blend/scale pair's own creation tick is age 37 relative to the
-fade's own start tick.
-
-**Ported** as `src/engine/futureSight.ts`, Tier-1-pinned (`tests/
-futureSight.test.ts`, 8/8, all values checked directly against the RAM
-probe's own output). `BG_PSYCHIC` extracted (`tools/extract/
-extract-psychic-bg.ts`, same `indexedPng`/tilemap pipeline as
-`MOVE_EXTREME_SPEED`'s `BG_HIGHSPEED` — no compression concern, since the
-committed source graphics are plain PNG/bin, not the ROM's own LZ-compiled
-bytes). KADABRA's battle back sprite extracted (`extract-battle-mon-pics.ts`,
-same dimensions/`yOffset` as HAUNTER's, spriteCorner reused). Wired through
-the Scene-ON seam (`sceneOnFutureSightView`, `battleScene.ts`'s
-`FUTURE_SIGHT` draw case): psychic-BG-vs-default-BG selection, `REG_BLDY`
-darken (reusing the SHADOW_PUNCH/EXTREME_SPEED `gpuDarken` pattern), and the
-attacker blend/affine path (reusing GROWTH's own `drawSpriteSheetAffineStretch`
-tint/affine seam). A 1-tick display lag on the BG-palette-rotation read was
-pixel-confirmed and fixed (same framebuffer-lags-RAM-write class as GROWTH/
-BLAZE_KICK); GROWTH's own `(scaleLag=2, tintLag=1)` attacker pair was then
-tried on this move's identical blend+scale seam and **partially transfers**
-(improved the match count, did not fully resolve it — see below), confirming
-the step brief's own caution that per-mechanism lag is not automatically
-portable.
-
-**Dense comparator** (`tools/compare/futureSightPortable.ts` + `tools/
-compare/fixtures/future-sight-player-kadabra-opponent-onix.json`), one
-orientation only (player-back KADABRA → opponent-front ONIX; the family
-map's own derivation says the OBJ-row/task arithmetic is side-uniform, so
-the opposite orientation is expected to need only a KADABRA front-sprite
-extraction, not a new mechanism — not yet staged, so marked `partial` per
-this step's own orientation rule), 114-frame window (oracle ticks 77-190,
-every frame): **framebuffer 75/114**. The BG swap/rotation/fade, target
-ONIX, healthboxes, and message printer are pixel-exact for their own
-frames. The remaining 39/114 mismatches are confined to KADABRA's own
-attacker sprite box (bbox 44,65-100,111) during the blend/scale window —
-the same class of species-specific attacker residual GROWTH itself carried
-for a full prior session (which turned out to be a display-lag bug, not an
-asset/idle-offset issue) before being promoted to exact. Not RAM-probed
-further this session (out of this rung's time budget) — named, not chased
-blind, per this run's no-blind-fit policy.
-
-**Coverage:** added `MOVE_FUTURE_SIGHT` to `ANIMATION_COVERAGE.json` as
-`partial`.
-
-**Evidence.** `npm test` 2451/2451 (2443 + 8 new `futureSight.test.ts`).
-`npm run build` green.
-
-**Next action for a future session:** RAM-probe KADABRA's own attacker-box
-residual directly (VRAM/OAM dump at a clean pre-move tick and window ticks,
-the `dump-growth-ivysaur-vram.py` precedent) to find whether it's a further
-display-lag refinement or a genuine asset/idle-anim gap, then extend to a
-second orientation (KADABRA front sprite) and re-run `futureSightPortable.ts`
-to confirm `exact`. The `blend_color_cycle` family map's own group B-F
-sibling clusters (target-flash, longer-flicker, whole-screen, side-selector,
-degenerate-snap) remain untouched, parked in the archived family-map entry.
-
-**Housekeeping:** moved the "blend_color_cycle family map" section (this
-same family, its argv survey table stays in the archive for future group
-B-F reference) to `ANIMATION_PROGRESS-archive.md` to keep ~3 live
-(AGENTS.md's convention); MOVE_GROWTH's own two most recent entries stay
-live alongside this one.
-
-**Housekeeping (this session):** moved MOVE_GROWTH's own "promoted to
-exact" entry to `ANIMATION_PROGRESS-archive.md` to keep ~3 live
-(AGENTS.md's convention).
+**Housekeeping (this session):** moved the "`blend_color_cycle` group A
+extended" entry (MOVE_FUTURE_SIGHT's initial port + the group-A enumeration)
+to `ANIMATION_PROGRESS-archive.md` to keep ~3 live (AGENTS.md's convention);
+rung 6 and rung 5 stay live alongside this session's new CONFUSION entry.
