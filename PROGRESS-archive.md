@@ -1,4 +1,165 @@
 ---
+## 473 — Primary status-move opcode cluster registered: EFFECT_SLEEP/TOXIC/POISON/PARALYZE/CONFUSE all executable (doc's own scout finding, `docs/status-cluster-ground-truth.md`, fully executed this session)
+
+- **Side merge (same round, supervisor-verified PASS live from the worktree
+  + green on the merged tree):** fixed-damage + TYPECALC2 cluster prep-scout
+  banked (branch `worker/side-20260726-124734`, merged, worktree removed) —
+  `docs/fixed-damage-cluster-ground-truth.md` +
+  `tools/probe/verify-fixed-damage-cluster-ground-truth.ts` (PASS ×2 worker
+  + once by the supervisor) + Seismic Toss/Psywave/Counter fixtures.
+  Ledgers: Seismic Toss dealt == level exactly; Psywave formula
+  `level*(draw*10+50)/100` pinned across seeds; Counter 2× retaliation +
+  status-move failure case. **Decisive census-class correction:**
+  Counter/Mirror Coat's real blockers are DATA-MODEL gaps —
+  `gProtectStructs[].physicalBattlerId`/`specialBattlerId` have no home in
+  `BattleScriptRulesContext` (supervisor-verified by grep) and the per-turn
+  `TurnValuesCleanUp(FALSE)` ProtectStruct clear is unmodeled
+  (`battle_main.c:4857-4874`) — registering the opcodes without them would
+  arm stale retaliation forever. TYPECALC2 is a pure immunity gate (no
+  STAB, no scaling) so Brick Break is the cheap consumer. DMGTOLEVEL/
+  PSYWAVE/TYPECALC2/REMOVELIGHTSCREENREFLECT all (a)-portable now.
+  Supervisor also filed **ISSUES #45** (census false positives
+  RAGE/MEAN_LOOK/NIGHTMARE/WILL_O_WISP per this entry's own accounting).
+  Merged tree: **225 files / 2883 tests + build green.**
+
+- **State:** tree green at **225 files / 2883 tests** (+1 file/+30 tests
+  over entry 472's 224/2853 — 1 new production module
+  `battleScriptStatusPrimaryOpcode.ts` + 1 new test file), build green
+  (`tsc -b && vite build`). Ratchet: `battleScriptHitChainOpcode.ts`'s
+  barrier count moved **24 -> 22** (SLEEP/TOXIC's own barriers retired for
+  real, now live switch cases); new module
+  `battleScriptStatusPrimaryOpcode.ts` pinned at **3** barriers (malformed
+  jumpifstatus/jumpiftype/jumpifsideaffecting operands — none reachable via
+  any real committed call site today, all covered). Both moves named in
+  `tests/executableFrontierRatchet.test.ts`. Verify script
+  (`tools/probe/verify-status-cluster-ground-truth.ts`, oracle-only, READ/RUN
+  only): **PASS x2** (before touching source, and again at the end) —
+  unaffected by the engine change either way, as expected.
+- **Did:** registered the doc's full blocker set per its own (a)/(b)
+  classification, all portable:
+  1. `battleScriptHitChainOpcode.ts`: `applySetMoveEffect` gained a real
+     `primary: boolean` parameter (was `certain` only). The Shield-Dust/
+     Safeguard generic early-outs now correctly gate on `!primary` (dead on
+     the primary path, matching source `:2253-2259` — this cluster's own
+     Safeguard block is each script's own `jumpifsideaffecting`, which
+     already ran before `seteffectprimary`). `MOVE_EFFECT_SLEEP`/
+     `MOVE_EFFECT_TOXIC`'s old `unsupportedBranch` barriers deleted; both
+     are now real switch cases: SLEEP ports the Uproar-loop +
+     Insomnia/Vital-Spirit recheck (dead on this cluster's real topology
+     per the doc, ported anyway for `SetMoveEffect` fidelity, matching
+     every other family-A case) and writes `(Random() & 3) + 2` as the raw
+     status1 turn count (not a fixed OR'd bit, per `STATUS1_SLEEP_TURN`);
+     TOXIC mirrors POISON's Immunity/type-immunity gates then writes
+     `STATUS1_TOXIC_POISON`. `Cmd_seteffectprimary` registered as a thin
+     wrapper (`SetMoveEffect(TRUE, 0)`) reading `rulesContext.moveEffectByte`
+     directly (already populated by the generic `setbyte cEFFECT_CHOOSER`
+     opcode). Added the `gUproarAwakeStringIds` table to `printfromtable`'s
+     registered set so `BattleScript_CantMakeAsleep`'s own message resolves
+     instead of barriering.
+  2. New file `battleScriptStatusPrimaryOpcode.ts`: `Cmd_jumpifstatus`
+     (STATUS1_SLEEP/POISON/BURN/FREEZE/PARALYSIS/TOXIC_POISON/ANY, plus
+     arbitrary `|`-combinations — covers all 21 concrete call sites in the
+     committed program, not just this cluster's 5), `Cmd_jumpiftype`
+     (all 18 real TYPE_* tokens via the existing `isBattlerOfType` helper),
+     `Cmd_jumpifsideaffecting` (SIDE_STATUS_SAFEGUARD, the one concrete
+     value all 10 call sites use), `Cmd_jumpifcantmakeasleep` (+
+     `UproarWakeUpCheck`'s bounded battler loop, reusing the pattern
+     already ported in `battleScriptActionAdmission.ts:1344-1357` — zero
+     narrowing needed, all 3 concrete call sites are the same shape).
+  3. `battleScriptIngrainLeechSeedWrapOpcode.ts`: `Cmd_jumpifability`
+     widened from LIQUID_OOZE-only to a 4-value map (+ IMMUNITY/LIMBER/
+     OWN_TEMPO) — the scout's decisive finding, not named in the original
+     supervisor opcode list but required for 4 of the 5 effects.
+  4. `battleScriptStatbuffchangeOpcode.ts`: `JUMPIFSTATUS2_VALUES` widened
+     with `STATUS2_CONFUSION` (EFFECT_CONFUSE's own already-confused check).
+  5. Walked each of the five scripts' full topology from its literal entry —
+     every branch is now (a)-complete; no new silent barriers introduced in
+     this cluster's own reachable set.
+- **Test:** new `tests/battleScriptStatusPrimaryOpcode.test.ts` (29 tests):
+  unit coverage for all 4 new jump opcodes (jump/no-jump/unsupported-branch
+  each, direct handler invocation since no real committed instruction
+  reaches an out-of-scope operand value), plus full-committed-script
+  integration runs for all 5 effects from their literal `BattleScript_Effect*`
+  entry: Thunder Wave (status1 == STATUS1_PARALYSIS, exactly 1 RNG draw,
+  matching the doc's live ledger), Sleep Powder (status1 == (Random()&3)+2,
+  exactly 2 draws), Toxic/Poison (status1 == STATUS1_TOXIC_POISON/POISON),
+  Confuse Ray (status2 CONFUSION counter 2-5, 2 draws) — plus per-effect
+  ability-immunity blocks (Limber/Immunity/Own Tempo, each confirmed at the
+  *script's own* `jumpifability` gate, `BattleScript_LimberProtected` etc.,
+  not `SetMoveEffect`'s internal recheck, which stays dead code on this
+  path as the doc predicted), Safeguard block (after the accuracy roll),
+  already-statused early-outs, and Toxic-vs-Poison-type redirect
+  (`BattleScript_NotAffected`, before any status write). Also updated 2
+  pre-existing tests in `battleScriptHitChainOpcode.test.ts` that asserted
+  the now-retired SLEEP/TOXIC barriers (rewritten to assert real dispatch
+  instead) and 1 in `battleScriptRulesContext.test.ts` (opcode-handler
+  count 97 -> 102).
+- **Census:** `npx tsx tools/report/executable-frontier-census.ts` —
+  **effects 79 -> 90/214** (+11, doc predicted +5), **moves 163 -> 186/355**
+  (+23), **Factory-L50 unweighted 128 -> 148/276** (+20), **weighted
+  1573 -> 1788/2957** (+215). Updated the tool's own validation checks
+  (`EFFECT_SLEEP`/`EFFECT_TOXIC` from `requireBlockedMentioning(...
+  SETEFFECTPRIMARY)` to `requireExecutable`; added the same for
+  `EFFECT_POISON`/`EFFECT_PARALYZE`/`EFFECT_CONFUSE`, previously
+  unasserted) — this file is not doc/verify-script territory, it's the
+  census tool itself, in scope and required to keep the regen from
+  crashing.
+  - **Shortfall/overshoot accounting (per the brief's own precedent):** the
+    +11 is *more* than the doc's +5 prediction, not less — 6 **bonus**
+    effects flipped as a side effect of `SETEFFECTPRIMARY`/`JUMPIFSTATUS`
+    now being opcode-registered (`EFFECT_RAGE`, `EFFECT_MEAN_LOOK`,
+    `EFFECT_NIGHTMARE`, `EFFECT_WILL_O_WISP`, `EFFECT_SNORE`,
+    `EFFECT_FACADE`). Verified by reading their scripts: **`EFFECT_SNORE`
+    and `EFFECT_FACADE` are real** (pure `jumpifstatus` reads, no
+    `seteffectprimary` involved). **`EFFECT_RAGE` (MOVE_EFFECT_RAGE=30),
+    `EFFECT_MEAN_LOOK` (MOVE_EFFECT_PREVENT_ESCAPE=32), and
+    `EFFECT_NIGHTMARE` (MOVE_EFFECT_NIGHTMARE=33) are census FALSE
+    POSITIVES** — all three call `seteffectprimary` with a family-B effect
+    byte `applySetMoveEffect`'s switch does not handle (only
+    CONFUSION/FLINCH/WRAP/the stat table are modeled there), so they will
+    actually halt via the pre-existing `unsupportedBranch` at runtime
+    despite showing "executable". **`EFFECT_WILL_O_WISP` is also a false
+    positive** — its own `jumpifability BS_TARGET, ABILITY_WATER_VEIL,
+    BattleScript_WaterVeilPrevents` call halts unconditionally (Water Veil
+    is not in this session's 4-value widened set), regardless of the
+    actual target's ability. Root cause: the census's `classifySetMoveEffectDispatch`
+    special-case only intercepts `B_SCR_OP_SETEFFECTWITHCHANCE` bindings,
+    never `B_SCR_OP_SETEFFECTPRIMARY` — so for any script reaching
+    `seteffectprimary`, the census's static walk treats the opcode as
+    sufficient and never checks which effect byte it carries. This is the
+    same "registered opcode, narrow-input barrier" blind spot the doc's own
+    Caveats section already documents, now confirmed for a second
+    dispatcher. **Not fixed this session** (out of scope — the brief named
+    5 effects, all 5 are genuinely correct and Tier-1-tested); flagged here
+    precisely so the next census-consuming session doesn't take the +11 at
+    face value. A real follow-up: teach the census's dispatch classifier
+    about `SETEFFECTPRIMARY` the same way it already handles
+    `SETEFFECTWITHCHANCE`.
+- **Next:** doc's own out-of-scope item — EFFECT_CONFUSE's confusion-
+  duration draw was already proven identical to the existing
+  `applyConfusionMoveEffect` secondary-path code (confirmed again this
+  session, zero changes needed). Possible next registration: fix the
+  census's `SETEFFECTPRIMARY` dispatch-classification blind spot (above) so
+  future census runs don't need this kind of manual accounting; or pick up
+  one of the 6 bonus-flipped effects as a real registration target (Rage,
+  Mean Look, Nightmare each need a new family-B `MOVE_EFFECT_*` case in
+  `applySetMoveEffect`; Will-O-Wisp needs `ABILITY_WATER_VEIL` added to
+  `JUMPIFABILITY_VALUES`, which is one line since the map already exists).
+  `ENDTURN_ABILITIES` slice 2 (Shed Skin) and `ENDTURN_ITEMS2` remain the
+  standing end-turn-breadth items from entry 472.
+- **Notes:** stayed in scope — no factory-AI files, no ENDTURN/END3 files
+  beyond nothing (this step never touched end-turn orchestration at all),
+  no seam/animation files, `docs/status-cluster-ground-truth.md` and its
+  verify script read/run only (untouched), no ROADMAP/ISSUES edits. The one
+  deliberate out-of-brief edit: `tools/report/executable-frontier-census.ts`'s
+  own validation checks, required to keep the census regen from crashing
+  after registration — not the ground-truth doc or its verify script. No
+  PAPERCUT — the doc's own source citations (line numbers, exact macro
+  operand shapes) were precise enough that every opcode registered on the
+  first read of `battle_script_commands.c`.
+
+
+---
 ## 472 — END3 registered + ENDTURN_ABILITIES slice 1 wired: Speed Boost + Rain Dish (doc §5 slice 1 mandatory rung, the standing architectural gap from entries 469-471 finally closed)
 
 - **Side merge (same round, supervisor-verified ALL PASS live from the
