@@ -478,6 +478,57 @@ const DRAW_COUNT_SCENARIOS: DrawCountScenarioSpec[] = [
     expectedTotalSteps: { 1: 7, 99: 7 },
     checkCrossSeedStable: true,
   },
+  // AI_CV_AttackUp (data/battle_ai_scripts.s:896-913, doc §17): the fourth
+  // CBM-blocked handler pair to get live ground truth (AI_CBM_AttackUp +
+  // AI_CV_AttackUp), and the first stat-UP pair -- every gate in both
+  // handlers reads AI_USER's (the opponent's) OWN state (ATK stat stage,
+  // HP), never AI_TARGET's, and AI_CBM_AttackUp has no get_ability call at
+  // all (unlike every stat-down CBM handler staged so far), so the §14.2
+  // ability-guess confound cannot occur here by construction. Per §11.0's
+  // "phantom next-decision only" finding (re-confirmed live this session,
+  // §17.2/§17.4): turn 1's own real decision is never observable in a
+  // single-turn window, and AI_USER's own state at that unobservable moment
+  // is always the fresh-battle default (ATK stage 6, HP 100%) in BOTH
+  // fixtures regardless of design -- only the phantom next-turn decision
+  // (reading turn 1's post-action state) can differ. Opponent (Anorith,
+  // Battle Armor -- blocks Cmd_critcalc as in §15/§16) all 4 slots
+  // MOVE_SWORDS_DANCE (14, EFFECT_ATTACK_UP_2, 0 power, accuracy 0 -- the
+  // special "always hits, no Cmd_accuracycheck draw" value, §14.3). Target
+  // (Machamp, ability irrelevant here -- neither handler ever reads
+  // AI_TARGET) uses MOVE_SPLASH (reach) or MOVE_VITAL_THROW (control).
+  // Because AI_CV_AttackUp's own :904 draw site is gated on the opponent's
+  // OWN hp being EXACTLY 100% (if_hp_not_equal, not a <70/<40 threshold
+  // band), the fixture that reaches the draw site is the UNDAMAGED one
+  // (MOVE_SPLASH) and the fixture that deterministically skips it is the
+  // DAMAGED one (MOVE_VITAL_THROW, which drops Anorith below the :908 Gate D
+  // 40% floor) -- the opposite move-to-name assignment from §15/§16's
+  // low-HP-is-reach pairs. Attribution probe (window 0 732) confirms the
+  // full +2 delta (10 reach vs 8 control) splits as +4
+  // Cmd_if_random_less_than (the real AI_CV_AttackUp :904 roll, once per
+  // identical MOVE_SWORDS_DANCE slot, reach only) and -1 Cmd_adjustnormaldamage
+  // / -1 Cmd_seteffectwithchance (MOVE_VITAL_THROW actually connecting in
+  // control vs MOVE_SPLASH doing nothing in reach -- the flipped
+  // precondition's own necessary real-damage cost, not part of the handler
+  // itself). Cmd_get_ability appears in neither fixture's attribution table,
+  // confirming this pair cannot hit that confound at all.
+  {
+    label:
+      "AI_CV_AttackUp, opponent (AI_USER, Anorith) HP stays 100% through turn 1 -- reachable branch (data/battle_ai_scripts.s:896-913): Gate B (if_hp_not_equal USER,100) is false, falling through to the :904 if_random_less_than 128 draw site, which fires once per identical MOVE_SWORDS_DANCE slot on the phantom next-turn re-decision",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-attackup-fullhp-reach-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 10, 99: 10 },
+    checkCrossSeedStable: true,
+  },
+  {
+    label:
+      "AI_CV_AttackUp, opponent (AI_USER, Anorith) HP hit below 40% by a real turn-1 move -- control (same opponent/species/turn count, player uses MOVE_VITAL_THROW instead of MOVE_SPLASH turn 1): Gate B (if_hp_not_equal USER,100) is true and Gate D (if_hp_less_than USER,40) is also true, routing straight to AI_CV_AttackUp_ScoreDown2 before the :904 roll is ever reached, deterministic zero draws from the handler itself",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-attackup-lowhp-control-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 8, 99: 8 },
+    checkCrossSeedStable: true,
+  },
 ];
 
 function totalPpUsed(ppBefore: number[], ppAfter: number[]): number {

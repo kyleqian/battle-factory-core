@@ -1772,3 +1772,259 @@ attribution pattern once isolated correctly.
 session with `AI_CV_SpDefDown`'s 2 fixtures (§16.2/§16.3) — every prior
 scenario (§9, §11.5, §12.1, §13.4, §14.6, §15.5) unchanged and still green.
 **Run twice this session, ALL PASS both times.**
+
+## 17. 2026-07-26 addendum #7: `AI_CBM_AttackUp` + `AI_CV_AttackUp` — first stat-**UP** CBM-blocked pair, fully staged and live-verified; the stat-down fixture recipe does NOT transfer
+
+Fifth follow-up scout session (side lane, Battle Scene OFF), same
+no-`src/`-changes contract. Goal per this step's brief: the mandatory rung —
+bank ground truth for `AI_CBM_AttackUp` + `AI_CV_AttackUp`, the first of the
+brief's two stat-**UP** CBM-blocked pairs (§4 named both `AttackUp` and
+`DefenseUp` among the 17 CBM-blocked `AI_CV_*` handlers). The brief
+explicitly warned the stat-up handlers' CBM side might not resemble the
+stat-down pairs (§14/§15/§16) structurally — confirmed true, and the CV
+side's own draw-site polarity forced a fixture design that inverts §15/§16's
+reach/control naming (documented in 17.3 below), a second respect in which
+"reuse the prior pair's recipe" would have silently produced the wrong
+fixture.
+
+### 17.1 Both real bodies, cited and fully parsed
+
+```
+AI_CBM_AttackUp:                        (data/battle_ai_scripts.s:249-251)
+	if_stat_level_equal AI_USER, STAT_ATK, MAX_STAT_STAGE, Score_Minus10  ; user's OWN ATK stage == 12 -> -10, end
+	end                                                                    ; else 0, end
+```
+
+Two instructions, zero `if_random_less_than`, **zero `get_ability` calls at
+all** — a real structural break from every CBM handler staged so far
+(`AttackDown`/`DefenseDown`/`SpDefDown`, §14-§16), which all `goto` or
+directly call the shared `CheckIfAbilityBlocksStatChange` tail
+(`:308-312`) and therefore always carry at least one conditional
+`Cmd_get_ability` draw. `AI_CBM_AttackUp` reads only `AI_USER`'s own ATK
+stat stage (`MAX_STAT_STAGE` = 12, `include/constants/pokemon.h:89-91`) —
+it never touches `AI_TARGET` at all, so the §14.2 ability-guess confound
+cannot occur here by construction, not by species choice. Confirmed from
+the dispatch table itself (`data/battle_ai_scripts.s:96,127`, both
+`EFFECT_ATTACK_UP` and `EFFECT_ATTACK_UP_2` route to this same handler) —
+`AI_CBM_DefenseUp` (`:253-255`) is the same two-instruction shape with
+`STAT_DEF` swapped for `STAT_ATK`; `AI_CBM_BulkUp` (`:581-584`) is a
+**separate, third** handler (checks both `STAT_ATK` == max -> `-10` AND
+`STAT_DEF` == max -> `-8`) that `EFFECT_BULK_UP` routes to on the CBM side
+only — the CV side's `EFFECT_BULK_UP` instead routes to `AI_CV_DefenseUp`
+(`:778`), confirming the brief's own warning that a stat-up pair's CBM and
+CV halves do not necessarily share the same effect-to-handler mapping the
+way every stat-down pair did. (Relevant to this step's stretch goal, §17.5.)
+
+```
+AI_CV_AttackUp:                         (data/battle_ai_scripts.s:896-913)
+	if_stat_level_less_than AI_USER, STAT_ATK, 9, AI_CV_AttackUp2  ; :897 Gate A (opponent's OWN atk stage)
+	if_random_less_than 100, AI_CV_AttackUp3                        ; :898 DRAW SITE 1
+	score -1
+	goto AI_CV_AttackUp3
+
+AI_CV_AttackUp2:
+	if_hp_not_equal AI_USER, 100, AI_CV_AttackUp3                   ; :903 Gate B (opponent's OWN hp)
+	if_random_less_than 128, AI_CV_AttackUp3                        ; :904 DRAW SITE 2
+	score +2
+AI_CV_AttackUp3:
+	if_hp_more_than AI_USER, 70, AI_CV_AttackUp_End                 ; :907 Gate C (opponent's OWN hp)
+	if_hp_less_than AI_USER, 40, AI_CV_AttackUp_ScoreDown2           ; :908 Gate D (opponent's OWN hp)
+	if_random_less_than 40, AI_CV_AttackUp_End                       ; :909 DRAW SITE 3
+AI_CV_AttackUp_ScoreDown2:
+	score -2
+AI_CV_AttackUp_End:
+	end
+```
+
+Exactly **3** `if_random_less_than` sites (`:898`, `:904`, `:909`), matching
+the brief's count. A second structural break from every handler staged so
+far: **every single gate and draw site reads `AI_USER`'s own state** (its
+own ATK stat stage, its own HP) — `AI_TARGET` (the player's Pokémon) is
+never read anywhere in this handler's body. This is the mechanical
+consequence of the effect being self-targeted (`MOVE_TARGET_SELECTED` +
+`EFFECT_ATTACK_UP*` raises the user's own stat), unlike every stat-*down*
+handler staged so far, whose gates mix `AI_TARGET`'s stat stage/HP/type
+with `AI_USER`'s own HP. Full branch enumeration:
+
+- **Gate A** (`:897`): opponent's own ATK stage < 9 (true at battle start —
+  `DEFAULT_STAT_STAGE` = 6, `pokemon.h:90`) routes to `AI_CV_AttackUp2`,
+  **skipping DRAW SITE 1**. Only a battler whose ATK stage has already been
+  raised to 9-11 by a prior real stat-up move reaches DRAW SITE 1 at all
+  (stage 12 is excluded earlier — `AI_CBM_AttackUp`'s own `Score_Minus10`
+  fires first and `AI_CheckViability` never runs). Not staged this session
+  (2-turn build, same "not attempted, time-capped" status as `AttackDown`'s
+  own DRAW SITE 1, §14.6).
+- **DRAW SITE 1** (`:898`, only reached if ATK stage is already 9-11): 100/256
+  (~39.1%) skip to `AttackUp3`, else (~60.9%) `score -1` then fall through to
+  the same place — this draw's outcome never changes control flow, only the
+  score.
+- **Gate B** (`:903`, only reached if Gate A true): opponent's own HP != 100%
+  (i.e. **any** prior damage at all, not a threshold band) routes straight to
+  `AttackUp3`, **skipping DRAW SITE 2**. Only reachable with HP still exactly
+  100% does the roll fire.
+- **DRAW SITE 2** (`:904`): 128/256 (50%) skip, else (50%) `score +2` then
+  fall through to `AttackUp3` regardless — like DRAW SITE 1, outcome doesn't
+  gate anything downstream.
+- **Gate C** (`:907`, always reached): opponent's own HP > 70% routes to
+  `End`, **skipping Gate D and DRAW SITE 3 entirely**.
+- **Gate D** (`:908`, only reached if Gate C false, i.e. HP <= 70%): opponent's
+  own HP < 40% routes straight to `ScoreDown2` (`score -2`), **skipping DRAW
+  SITE 3**.
+- **DRAW SITE 3** (`:909`, only reached if HP is in [40,70]): 40/256 (~15.6%)
+  skip to `End`, else (~84.4%) falls to `ScoreDown2` (`score -2`).
+
+### 17.2 Design constraint carried over from §11.0/§14-§16: only the phantom next-decision is ever observable in a single-turn window
+
+Per §11.0's own finding (re-confirmed live this session, see 17.4's
+attribution table): turn 1's own AI decision is fully resolved *before*
+frame 0 is captured — entirely unobservable. A single executed-turn window
+(`[A, wait 30, A, wait 700]`, `captureFrames [0,100,300,732]`, this pair's
+own capture shape, matching `AttackDown`/`DefenseDown`/`SpDefDown`) only ever
+exposes the **phantom next-turn** re-decision (computed after turn 1's real
+actions resolve, using turn 1's post-action state, but never executed).
+This matters more for this handler than any prior one, because *every* one
+of its gates reads `AI_USER`'s own state, and `AI_USER`'s own state at the
+unobservable turn-1 decision is **always** the fresh-battle default (ATK
+stage 6, HP 100%) regardless of what the twin fixtures do — so any design
+that tried to differ the two fixtures' turn-1 decisions would fail to differ
+at all. The only thing available to flip is what happens to `AI_USER`'s own
+ATK stage/HP *during* turn 1's real execution, which is exactly what the
+phantom decision reads.
+
+### 17.3 Design: twin fixtures isolating DRAW SITE 2 (`:904`) via the opponent's own turn-1 HP, naming inverted from §15/§16 by necessity
+
+Opponent (`AI_USER`, under test, both fixtures): **Anorith** (species 390,
+reused verbatim from §15.2/§16.2 — Battle Armor blocks `Cmd_critcalc`'s
+`Random()` call entirely, avoiding a crit-driven HP-band or KO risk exactly
+as before), all 4 slots `MOVE_SWORDS_DANCE` (14, Normal, 0 power, **accuracy
+0 — the special "always hits, no `Cmd_accuracycheck` draw" value**, per
+§14.3's own note on Growl vs Swift/Double Team/Splash; `EFFECT_ATTACK_UP_2`,
+both CBM- and CV-table-covered). Target (player, both fixtures): **Machamp**
+(species 68, reused verbatim from §15.2/§16.2). Neither handler under test
+ever reads `AI_TARGET`, so Machamp's own ability/type carries zero relevance
+here (a first for this doc's CBM-blocked pairs) — it's reused purely for its
+known, cross-seed-stable `MOVE_VITAL_THROW` damage band against Anorith's
+120 max HP (86-102 damage, 15-28% remaining, §13.3's own already-verified
+figures). Single executed turn, same capture shape as §14-§16
+(`[A, wait 30, A, wait 700]`, `captureFrames [0,100,300,732]`).
+
+Because Gate B's own precondition is "opponent's own HP != 100%" (an
+equality test, not a threshold band like every stat-down pair's `<70`/`<40`
+gates), the fixture that keeps the opponent **undamaged** is the one whose
+phantom decision reaches DRAW SITE 2 (Gate B false, HP still exactly 100%)
+— i.e. **this pair's "reach" fixture uses the control-shaped `MOVE_SPLASH`
+moveset, and its "control" fixture uses the reach-shaped `MOVE_VITAL_THROW`
+moveset** — the opposite assignment from §15/§16, where the low-HP
+(`MOVE_VITAL_THROW`) fixture was "reach" and the full-HP (`MOVE_SPLASH`)
+fixture was "control". Naming here tracks which fixture reaches the draw
+site under test, not which player move is used — copying §15/§16's
+move-to-name assignment blind would have swapped reach and control.
+
+- **Reach** (`tools/battle-lab/mechanic-factory-ai-cv-attackup-fullhp-reach-off.json`):
+  target uses `MOVE_SPLASH` (150) x4 — Anorith's HP never moves (120 -> 120
+  both seeds), so the phantom decision's Gate B is false (HP still == 100),
+  falling through to DRAW SITE 2.
+- **Control** (`tools/battle-lab/mechanic-factory-ai-cv-attackup-lowhp-control-off.json`):
+  target uses `MOVE_VITAL_THROW` (233) x4 — Anorith drops to 25% (seed 1) /
+  15% (seed 99) remaining, both comfortably under 40%, so the phantom
+  decision's Gate B is true (HP != 100), routing straight past DRAW SITE 2 to
+  `AttackUp3`, where Gate D (HP < 40) then routes straight to `ScoreDown2`
+  — a fully deterministic, zero-draw path through the entire handler.
+
+### 17.4 Live ledger (oracle-verified, both seeds, both runs)
+
+| Fixture | Seed | Opponent PP used | Opponent HP (start→end) | Total `Random()` calls, frame 0→732 | Determinism (2 runs) |
+| --- | -: | -: | --- | -: | --- |
+| Reach (fullhp, Splash) | 1 | 1 | 120→120 (100%) | **10** | identical |
+| Reach (fullhp, Splash) | 99 | 1 | 120→120 (100%) | **10** | identical |
+| Control (lowhp, VitalThrow) | 1 | 1 | 120→30 (25%) | **8** | identical |
+| Control (lowhp, VitalThrow) | 99 | 1 | 120→18 (15%) | **8** | identical |
+
+Both fixtures individually cross-seed-stable (10/10, 8/8).
+
+**Attribution** (`tools/probe/attribute-factory-ai-random-callers.py`, window
+`0 732`, run via `tools/run-mgba-probe.py`, seed 1):
+
+| Caller function | Reach count | Control count | Delta |
+| --- | -: | -: | -: |
+| `BattleAI_SetupAIData+0x83` | 4 | 4 | 0 |
+| `BattleTurnPassed+0x157` | 1 | 1 | 0 |
+| `ChooseMoveOrAction_Singles+0xf7` | 1 | 1 | 0 |
+| `Cmd_if_random_less_than+0x7` | **4** | **0** | **+4** |
+| `Cmd_adjustnormaldamage+0x7` | 0 | 1 | -1 |
+| `Cmd_seteffectwithchance+0x81` | 0 | 1 | -1 |
+
+Net delta +2 (10 - 8) splits cleanly: `Cmd_if_random_less_than`'s +4 is
+`AI_CV_AttackUp`'s own `:904` roll, once per identical `MOVE_SWORDS_DANCE`
+slot (N=4) on the single observable (phantom) decision — the fourth
+independent confirmation of the "N identical slots x 1 reachable decision =
+N draws" mechanism (after `AttackDown`/`DefenseDown`/`SpDefDown`, §14-§16),
+this time on a handler whose gates are 100% opponent-self-state rather than
+target-state or opponent-HP-threshold. The two `-1` rows are `MOVE_VITAL_THROW`
+actually connecting in the control fixture (vs `MOVE_SPLASH` doing nothing in
+reach) — the flipped precondition's own necessary real-damage cost, not part
+of the handler itself, same structural confound §13.3/§15.3/§16.3 already
+named. `Cmd_get_ability` appears in **neither** table, confirming §17.1's
+prediction that this handler pair cannot hit that confound by construction
+(no `get_ability`/`if_ability` instruction exists in either body). Also
+notable: unlike §14.4's single-turn Growl fixture (whose *real* turn-1
+decision was the only one observed, no phantom), and consistent with
+§15.3/§16.3's own VitalThrow-based pairs, this window's *entire* signal comes
+from the phantom decision — turn 1's own real decision, using the
+unavoidable fresh-battle default state (ATK 6, HP 100%) in **both**
+fixtures, is never observed at all (§17.2). A first pass at this design
+wrongly assumed the real turn-1 decision *would* be observable and predicted
+totals of 8 (control) / 12 (reach) with a matching sign; the live run
+returned 8/10 — the attribution probe (not the analytical prediction) is
+what caught and resolved the discrepancy, exactly the doc's own standing
+"read the assembly, verify live, don't trust the paper account" discipline
+(§11.0, §13, §15.3).
+
+### 17.5 What this unblocks
+
+1. **The pair's own port**: exact instruction lists, every gate's real
+   precondition, all 3 draw sites' odds, and a live-verified twin fixture
+   proving DRAW SITE 2's reachability end-to-end (DRAW SITE 1, gated on a
+   2-turn ATK-stage build to 9+, remains an unstaged recipe — same status as
+   `AttackDown`'s own DRAW SITE 1, §14.6; DRAW SITE 3, gated on the HP
+   band [40,70], is a cheaper follow-up than DRAW SITE 1 since it only needs
+   a lighter-damage move than `MOVE_VITAL_THROW` in the same single-turn
+   shape, not attempted this session).
+2. **Confirms the brief's own warning was correct and cheap to falsify only
+   by reading the assembly**: `AI_CBM_AttackUp` shares no structure
+   (no `get_ability`, no `CheckIfAbilityBlocksStatChange` tail, no
+   `if_random`) with any stat-down CBM handler staged so far, and
+   `EFFECT_BULK_UP` splits across CBM (`AI_CBM_BulkUp`, its own third
+   handler) and CV (`AI_CV_DefenseUp`, shared with `DEFENSE_UP`/`_2`) —
+   relevant to the still-open `DefenseUp` stretch goal (§17.6).
+3. **A fourth independent confirmation of the "N identical slots" draw
+   mechanism**, and a new example (Gate B's `!= 100` equality test) of a
+   non-threshold, non-band precondition shape not seen in `AttackDown`/
+   `DefenseDown`/`SpDefDown`/`VitalThrow`.
+
+### 17.6 `AI_CBM_DefenseUp` + `AI_CV_DefenseUp` (stretch goal): NOT staged this session
+
+Both bodies were read (`AI_CBM_DefenseUp`, `data/battle_ai_scripts.s:253-255`,
+same 2-instruction shape as `AI_CBM_AttackUp` with `STAT_DEF` swapped for
+`STAT_ATK`; `AI_CV_DefenseUp`, `:915-942` + its `AI_CV_DefenseUp_PhysicalTypes`
+table at `:944-954`, 5 `if_random_less_than` sites at `:917`, `:923`, `:927`,
+`:936`, `:938`) as part of this step's brief's mandatory "parse all four
+handler bodies" instruction (§17.1's own citations above cross-reference
+these), but **no fixtures were built or run** — this step's brief named
+`DefenseUp` a stretch goal and said explicitly to land `AttackUp` fully
+rather than half-stage both if time ran out. `AI_CV_DefenseUp`'s own
+`AI_CV_DefenseUp4` branch (`:928-936`) additionally reads the *target's*
+last-used move's power and type (`get_last_used_bank_move AI_TARGET` +
+`get_move_power_from_result`/`get_move_type_from_result`, against its own
+`AI_CV_DefenseUp_PhysicalTypes` list) — a real target-history dependency not
+present in `AttackUp` at all and not analyzed further here; a future porter
+should re-derive its exact gate semantics from the assembly rather than
+assuming it mirrors `AttackDown`'s own type-list gate (§14.1), since that
+gate reads the target's *own* type, not the target's *last move's* type.
+
+### 17.7 Verify script status
+
+`tools/probe/verify-factory-ai-checkviability-ground-truth.ts` extended this
+session with `AI_CV_AttackUp`'s 2 fixtures (§17.3/§17.4) — every prior
+scenario (§9, §11.5, §12.1, §13.4, §14.6, §15.5, §16.5) unchanged and still
+green. **Run twice this session, ALL PASS both times.**
