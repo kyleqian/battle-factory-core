@@ -138,6 +138,14 @@ import {
   type ConfusionTargetEffect,
 } from "./confusion.ts";
 import {
+  psychicAttackerEffectAtAge,
+  psychicBgBldyAtAge,
+  psychicBgIsPsychic,
+  psychicTargetEffectAtAge,
+  type PsychicAttackerEffect,
+  type PsychicTargetEffect,
+} from "./psychic.ts";
+import {
   extremeSpeedAttackerAffineAtAge,
   extremeSpeedAttackerVisibleAtAge,
   extremeSpeedBackgroundAtAge,
@@ -626,6 +634,13 @@ export interface SceneOnConfusionConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnPsychicConfig {
+  readonly move: "PSYCHIC";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export type SceneOnMoveConfig =
   | SceneOnFirePunchConfig
   | SceneOnIcePunchConfig
@@ -651,7 +666,8 @@ export type SceneOnMoveConfig =
   | SceneOnShadowPunchConfig
   | SceneOnGrowthConfig
   | SceneOnFutureSightConfig
-  | SceneOnConfusionConfig;
+  | SceneOnConfusionConfig
+  | SceneOnPsychicConfig;
 
 export interface SceneOnMovePresentationState<
   TConfig extends SceneOnMoveConfig = SceneOnMoveConfig,
@@ -957,6 +973,14 @@ export interface SceneOnFutureSightView extends FutureSightAttackerEffect {
 }
 
 export interface SceneOnConfusionView extends ConfusionAttackerEffect, ConfusionTargetEffect {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly bgBldy: number;
+  readonly bgIsPsychic: boolean;
+}
+
+export interface SceneOnPsychicView extends PsychicAttackerEffect, PsychicTargetEffect {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -1485,6 +1509,41 @@ export function sceneOnConfusionView(
     targetX2: targetEffect.targetX2,
     bgBldy: confusionBgBldyAtAge(state.age),
     bgIsPsychic: confusionBgIsPsychic(state.age),
+  };
+}
+
+/**
+ * `age` is ticks since `fadetobg BG_PSYCHIC`'s own creation tick
+ * (`psychic.ts`'s module doc has the full RAM-probed derivation - every
+ * relative age here matched CONFUSION's own already-coded constant exactly,
+ * confirmed independently, not assumed). Same lag-splice shape as
+ * `sceneOnConfusionView` above: PSYCHIC's own script argv is a byte-for-byte
+ * copy of CONFUSION's aside from the blend tint color and the target shake/
+ * scale magnitude, so the same generic OAM-shadow/framebuffer-capture
+ * latencies apply unchanged (verified via this session's own dense
+ * comparator, not just carried over).
+ */
+export function sceneOnPsychicView(
+  state: SceneOnMovePresentationState,
+): SceneOnPsychicView {
+  if (state.config.move !== "PSYCHIC") {
+    throw new Error(`expected PSYCHIC presentation, got ${state.config.move}`);
+  }
+  const attackerTint = psychicAttackerEffectAtAge(state.age - 1);
+  const attackerShake = psychicAttackerEffectAtAge(state.age - 2);
+  const targetEffect = psychicTargetEffectAtAge(state.age - 2);
+  const targetActive = psychicTargetEffectAtAge(state.age - 1).targetScale.active;
+  const targetScale = { ...targetEffect.targetScale, active: targetActive };
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    attackerObjY: attackerTint.attackerObjY,
+    attackerX2: attackerShake.attackerX2,
+    targetScale,
+    targetX2: targetEffect.targetX2,
+    bgBldy: psychicBgBldyAtAge(state.age),
+    bgIsPsychic: psychicBgIsPsychic(state.age),
   };
 }
 

@@ -622,6 +622,7 @@ import {
   sceneOnGrowthView,
   sceneOnFutureSightView,
   sceneOnConfusionView,
+  sceneOnPsychicView,
   type SceneOnMovePresentationState,
 } from "./sceneOnPresentation.ts";
 import {
@@ -630,6 +631,7 @@ import {
 } from "./extremeSpeed.ts";
 import { futureSightBgPaletteRowAtAge } from "./futureSight.ts";
 import { confusionBgPaletteRowAtAge, CONFUSION_WINDOW2_START_AGE, confusionTargetEffectAtAge } from "./confusion.ts";
+import { psychicBgPaletteRowAtAge, PSYCHIC_WINDOW2_START_AGE, psychicTargetEffectAtAge, PSYCHIC_BLEND_TINT_COLOR } from "./psychic.ts";
 import {
   SHADOW_PUNCH_ATTACKER_FRAMEBUFFER_LAG,
   SHADOW_PUNCH_TRACE_ALPHA,
@@ -15136,6 +15138,165 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "KADABRA used" : "Foe KADABRA used",
       "CONFUSION!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "PSYCHIC") {
+    // Byte-for-byte the same script shape as MOVE_CONFUSION (psychic.ts's
+    // own module doc), differing only in the attacker blend's tint color
+    // (RGB(31,23,0), not RGB_WHITE) and the target shake/scale magnitude -
+    // the draw case below mirrors CONFUSION's own structure exactly.
+    const view = sceneOnPsychicView(state);
+    const monbgTargetX2 = psychicTargetEffectAtAge(state.age - 1).targetX2;
+    const playerToOpponent =
+      view.attacker.species === "KADABRA"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    // Only the player-attacker orientation is staged so far (no KADABRA
+    // front sprite extracted yet) - same family-map derivation as
+    // CONFUSION/FUTURE_SIGHT: the OBJ-row/task arithmetic is expected
+    // side-uniform, left for a future session per this step's own time
+    // budget.
+    if (!playerToOpponent) {
+      throw new Error(
+        `unsupported staged PSYCHIC pair ${view.attacker.species}(${view.attacker.geometry.side})->${view.target.species}(${view.target.geometry.side})`,
+      );
+    }
+    const attackerSprite = kadabraBackSprite;
+    const targetSprite = onixFrontSprite;
+    const gpuDarken = (palette: readonly RgbColor[]) =>
+      palette.map((color) => {
+        const packed = mgbaDarkenColor(
+          color.r | (color.g << 8) | (color.b << 16),
+          view.bgBldy,
+        );
+        return {
+          r: packed & 0xff,
+          g: (packed >>> 8) & 0xff,
+          b: (packed >>> 16) & 0xff,
+        };
+      });
+    if (view.bgIsPsychic) {
+      drawExtractedTileBg(fb, {
+        tileset: battleAnimPsychicBg.tileset,
+        tilemap: battleAnimPsychicBg.tilemap,
+        // Captured-framebuffer-lags-RAM-write by one tick, same as
+        // CONFUSION/FUTURE_SIGHT's own rotation read.
+        subpalettes: [gpuDarken(psychicBgPaletteRowAtAge(battleAnimPsychicBg.palette, view.age - 1))],
+      });
+    } else {
+      drawExtractedTileBg(fb, {
+        tileset: battleBg.static.tileset,
+        tilemap: battleBg.static.tilemap,
+        subpalettes: battleBg.palette.map(gpuDarken),
+      });
+    }
+    // Target keeps its permanent front-idle x2/y2 residual (same
+    // CONFUSION/FUTURE_SIGHT/GROWTH "ONIX starts at x2=+1" finding) until
+    // window 2's own AnimTask_ShakeMon/AnimTask_ScaleMonAndRestore pair
+    // takes ownership of it at PSYCHIC_WINDOW2_START_AGE (psychic.ts).
+    const targetIdle = speciesFrontIdleRestOffset(view.target.species);
+    // +1 past the raw creation age, same reasoning as CONFUSION's own
+    // handoff (sceneOnConfusionView's module doc): the live x2 read is
+    // display-lagged by 2 ticks, so the hand-off away from the pre-window
+    // idle offset has to happen one tick later too.
+    const targetTouched = view.age >= PSYCHIC_WINDOW2_START_AGE + 1;
+    if (view.targetScale.active) {
+      // Same defect-A mechanism as CONFUSION's own target (see its own
+      // comment above): monbg ANIM_DEF_PARTNER's frozen copy tracks the
+      // live x2/y2 shake offset even though its tile content is never
+      // rescaled, so it's drawn here at the same x2-shifted position as the
+      // live scaled OBJ.
+      drawSpriteSheet(
+        fb,
+        targetSprite.tileset,
+        targetSprite.palette,
+        view.target.geometry.spriteCorner.x + (targetTouched ? monbgTargetX2 : 0),
+        view.target.geometry.spriteCorner.y,
+      );
+      drawSpriteSheetAffineStretchTintedBlend(
+        fb,
+        targetSprite.tileset,
+        targetSprite.palette,
+        view.target.geometry.spriteCorner.x,
+        view.target.geometry.spriteCorner.y,
+        view.targetScale.xScale,
+        view.targetScale.yScale,
+        { r: 255, g: 255, b: 255 },
+        0,
+        8,
+        8,
+        true,
+        targetTouched ? view.targetX2 : 0,
+      );
+    } else {
+      drawSpriteSheetAffineStretch(
+        fb,
+        targetSprite.tileset,
+        targetSprite.palette,
+        view.target.geometry.spriteCorner.x + (targetTouched ? 0 : (targetIdle?.x2 ?? 0)),
+        view.target.geometry.spriteCorner.y + (targetTouched ? 0 : (targetIdle?.y2 ?? 0)),
+        view.targetScale.xScale,
+        view.targetScale.yScale,
+        0,
+        { r: 255, g: 255, b: 255 },
+        0,
+        false,
+        targetTouched ? view.targetX2 : 0,
+      );
+    }
+    drawSpriteSheetAffineStretch(
+      fb,
+      attackerSprite.tileset,
+      attackerSprite.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+      256,
+      256,
+      0,
+      PSYCHIC_BLEND_TINT_COLOR,
+      view.attackerObjY,
+      false,
+      view.attackerX2,
+    );
+    const opponentSpecies = playerToOpponent ? "ONIX" : "KADABRA";
+    const playerSpecies = playerToOpponent ? "KADABRA" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "KADABRA used" : "Foe KADABRA used",
+      "PSYCHIC!",
       99,
     );
     return;
