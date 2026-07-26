@@ -53,12 +53,13 @@ import subprocess
 import sys
 from pathlib import Path
 
-if len(sys.argv) != 3:
+if len(sys.argv) not in (3, 5):
     raise SystemExit(
-        f"usage: {sys.argv[0]} <mechanicLab-fixture.json> <output.json>"
+        f"usage: {sys.argv[0]} <mechanicLab-fixture.json> <output.json> [windowStartExclusive windowEndInclusive]"
     )
 FIXTURE_PATH = Path(sys.argv[1])
 OUTPUT_PATH = Path(sys.argv[2])
+WINDOW_OVERRIDE = (int(sys.argv[3]), int(sys.argv[4])) if len(sys.argv) == 5 else None
 
 HERE = Path(__file__).resolve().parent
 WORKTREE_ROOT = HERE.parent.parent
@@ -101,8 +102,7 @@ RANDOM_ENTRY_PC = RANDOM_ADDR + 2
 # (the second counter store at `806f5da-806f5e0`) and cross-checked via
 # `arm-none-eabi-nm`.
 SRANDCOUNT_ADDR = 0x020249C0
-DECISION_WINDOW_START = 100  # exclusive — matches the doc's own isolation frame
-DECISION_WINDOW_END = 732  # inclusive
+DECISION_WINDOW_START, DECISION_WINDOW_END = WINDOW_OVERRIDE or (100, 732)  # exclusive/inclusive
 
 
 def build_symbol_table() -> list[tuple[int, str]]:

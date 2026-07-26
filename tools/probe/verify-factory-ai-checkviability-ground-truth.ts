@@ -264,6 +264,51 @@ const DRAW_COUNT_SCENARIOS: DrawCountScenarioSpec[] = [
     expectedTotalSteps: { 1: 23, 99: 24 },
     checkCrossSeedStable: false,
   },
+  {
+    // AI_CV_AlwaysHit (data/battle_ai_scripts.s:1075-1089, doc §11.3): the
+    // opponent (Marowak, all 4 slots MOVE_SWIFT) only ever reaches
+    // AI_CV_AlwaysHit2's if_random_less_than 100 roll once the TARGET's
+    // (player, Haunter) evasion stage exceeds 8 -- a real precondition, not
+    // state-independent like HighCrit/Pursuit, so this fixture builds it
+    // live: player all 4 slots MOVE_DOUBLE_TEAM, raising evasion stage by 1
+    // per executed turn (6 at battle start). Target is Ghost-typed (Haunter)
+    // so Swift's Normal-type STATUS3/type-immunity check
+    // (MOVE_RESULT_DOESNT_AFFECT_FOE) holds both sides' HP exactly constant
+    // every turn -- no HighCrit-style HP-band confound possible. Verified via
+    // the caller-attribution probe (tools/probe/attribute-factory-ai-random-
+    // callers.py, patched for a custom window) that the ENTIRE +8 delta vs
+    // the control fixture below is Cmd_if_random_less_than hits (every other
+    // caller -- BattleAI_SetupAIData, BattleTurnPassed,
+    // ChooseMoveOrAction_Singles, Cmd_adjustnormaldamage, Cmd_critcalc,
+    // Cmd_seteffectwithchance -- has an IDENTICAL count in both fixtures):
+    // turn 4's real decision (evasion 9, reachable) and turn 5's phantom
+    // computed-but-unexecuted decision (evasion 10, still reachable) each
+    // draw 4 times, not 1 -- once per opponent candidate-move slot, since all
+    // 4 are the identical MOVE_SWIFT and AI_CheckViability re-evaluates every
+    // slot independently. This is a NEW finding vs 11.0/11.1/11.2's "1 draw
+    // per reachable decision" assumption for Pursuit/HighCrit (never
+    // attribution-probe-verified there) -- for a moveset with N identical
+    // dispatch-triggering slots, a reachable branch appears to cost N draws,
+    // not 1. Porter guidance: prefer the attribution probe over raw
+    // total-step deltas whenever the exact mechanism matters, not just
+    // presence/absence.
+    label:
+      "AI_CV_AlwaysHit, target (player, Haunter) evasion stage 9->10 across the window -- reachable branch (data/battle_ai_scripts.s:1075-1089): 4 executed turns of MOVE_DOUBLE_TEAM build evasion past 8, then AI_CV_AlwaysHit2's if_random_less_than 100 fires on turn 4 (real) and turn 5 (phantom, computed but unexecuted)",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-alwayshit-evasion-reach-off.json",
+    finalFrame: 2232,
+    expectedPpUsed: 4,
+    expectedTotalSteps: { 1: 44, 99: 44 },
+    checkCrossSeedStable: true,
+  },
+  {
+    label:
+      "AI_CV_AlwaysHit, target (player, Haunter) evasion stays neutral (stage 6) throughout -- control (same opponent/species/turn count, player uses MOVE_SPLASH x4 instead of MOVE_DOUBLE_TEAM): neither AlwaysHit gate is ever true, so AI_CV_AlwaysHit2's roll never fires",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-alwayshit-splash-control-off.json",
+    finalFrame: 1932,
+    expectedPpUsed: 4,
+    expectedTotalSteps: { 1: 36, 99: 36 },
+    checkCrossSeedStable: true,
+  },
 ];
 
 function totalPpUsed(ppBefore: number[], ppAfter: number[]): number {
