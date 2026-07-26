@@ -42,10 +42,20 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   the fainted/active slot (index 0) is rejected.
 - **Next:** entry 460's own list stands, item 3 is now the completed
   remainder off it — `CheckViability` handler bodies phased by the audit's
-  16-reachable-handler table, `addbyte`/`jumpifbytenotequal` sBATTLER
-  widening (unblocks the runtime weather-form loop), Ingrain/Leech Seed/Wrap
-  registration, seam window 3, ENDTURN_ABILITIES/ITEMS breadth, and the
-  standing `B_SCR_OP_TRYCASTFORMDATACHANGE` supervisor decision (entry 458).
+  16-reachable-handler table (ground truth scout first), Ingrain/Leech
+  Seed/Wrap registration, seam window 3 (`turn5-rockslide.json` per the
+  scout doc's ranking), ENDTURN_ABILITIES/ITEMS breadth.
+- **Side merge (same hour, supervisor-verified, `83f15c3`):**
+  `addbyte`/`jumpifbytenotequal` widened off their single hardcoded
+  `gBattleCommunication`/`gBattlersCount` tuple onto the shared SETBYTE
+  byte-lvalue universe (+`gBattlersCount` sentinel comparand) —
+  `BattleScript_WeatherFormChanges` now runs to its own `return` for
+  non-Castform L50 singles (0 RNG draws), Castform barrier still reached
+  *through* the loop; Perish Song/Teeter Dance/Intimidate/Palace loop
+  counters ride the same mechanism (not separately tested). Census
+  unchanged (opcode-level dispatch only; regenerated zero-diff, 25/25
+  self-checks); ratchet barrier count still 3 (comment updated). Merged
+  suite 218 files / 2590 tests + build re-verified green.
 - **Notes:** pure reducer/config work, no presentation/census/opcode-
   registration changes (as scoped; `battleScriptSetByte.ts`/
   `battleScriptDamagingWeatherOpcode.ts` untouched, left for the side worker
