@@ -272,13 +272,14 @@ describe("source-shaped Battle Script rules context", () => {
   it("maps the supported named and numeric GetBattlerForBattleScript selectors", () => {
     const context = contextAt(
       primaryInstruction,
-      rules({ selectorRoles: { attacker: 3, effectBattler: 1, target: 2, fainted: 0 } }),
+      rules({ selectorRoles: { attacker: 3, effectBattler: 1, target: 2, fainted: 0 }, scriptingBattler: 1 }),
     );
     expect(BATTLE_SCRIPT_BATTLER_SELECTORS).toEqual({
       BS_TARGET: 0,
       BS_ATTACKER: 1,
       BS_EFFECT_BATTLER: 2,
       BS_FAINTED: 3,
+      BS_SCRIPTING: 10,
     });
     expect(resolveRulesBattlerForBattleScript(context, selector("BS_TARGET"))).toBe(2);
     expect(resolveRulesBattlerForBattleScript(context, selector("0"))).toBe(2);
@@ -294,6 +295,13 @@ describe("source-shaped Battle Script rules context", () => {
     expect(resolveRulesBattlerForBattleScript(context, selector("BS_FAINTED"))).toBe(0);
     expect(resolveRulesBattlerForBattleScript(context, selector("3"))).toBe(0);
     expect(resolveRulesBattlerForBattleScript(context, selector("0x3"))).toBe(0);
+    // BS_SCRIPTING (battle_util.c:711-713): gBattleScripting.battler, the
+    // ItemBattleEffects end-turn scripts' own selector (docs/endturn-
+    // abilities-items-ground-truth.md §1c/§5 slice 4) -- always populated
+    // (non-nullable rules field), unlike the other roles above.
+    expect(resolveRulesBattlerForBattleScript(context, selector("BS_SCRIPTING"))).toBe(1);
+    expect(resolveRulesBattlerForBattleScript(context, selector("10"))).toBe(1);
+    expect(resolveRulesBattlerForBattleScript(context, selector("0xa"))).toBe(1);
   });
 
   it("returns unavailable for missing supported roles and every unsupported/invalid selector", () => {
@@ -438,7 +446,7 @@ describe("source-shaped Battle Script rules context", () => {
 });
 
 describe("production status rules handler and execution seam", () => {
-  it("composes all 95 source-safe controls, source, multi-hit, cleanup, SETBYTE, BICBYTE, attackcanceler, hit-chain, move-end, jumpifbyte, jumpifword, jumpifhalfword, jumpifstatus3condition, orword, openpartyscreen, switchin, getexp, checkteamslost, statbuffchange, set-side-status, set-weather, damaging-weather, trycastformdatachange, and ingrain/leechseed/wrap handlers once", () => {
+  it("composes all 96 source-safe controls, source, multi-hit, cleanup, SETBYTE, BICBYTE, attackcanceler, hit-chain, move-end, jumpifbyte, jumpifword, jumpifhalfword, jumpifstatus3condition, orword, openpartyscreen, switchin, getexp, checkteamslost, statbuffchange, set-side-status, set-weather, damaging-weather, trycastformdatachange, ingrain/leechseed/wrap, and removeitem handlers once", () => {
     const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts());
     expect(Object.keys(handlers).map(Number).sort((a, b) => a - b)).toEqual([
       0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12,
@@ -447,7 +455,7 @@ describe("production status rules handler and execution seam", () => {
       45, 46, 47, 49, 50, 51, 53, 54, 56, 57, 58, 60,
       61, 62, 65, 69, 70, 71, 73, 76, 77, 78, 80, 81,
       82, 83, 84, 85, 86, 92, 97, 98, 100, 101, 102, 104,
-      105, 111, 115, 118, 125, 126, 127, 128, 131, 137, 141, 146,
+      105, 106, 111, 115, 118, 125, 126, 127, 128, 131, 137, 141, 146,
       149, 150, 152, 153, 184, 187, 200, 213, 216, 231, 248,
     ]);
   });

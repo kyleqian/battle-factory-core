@@ -643,6 +643,7 @@ function freezeEventPayload(
     case "set-battler-status-data":
     case "status-icon-update":
     case "set-battler-pp-data":
+    case "set-battler-item":
     case "trainer-slide-in":
     case "trainer-slide-out":
     case "status-animation":

@@ -277,6 +277,11 @@ const PRINTFROMTABLE_TABLES: Readonly<Record<string, readonly string[]>> = Objec
     "STRINGID_STATSWONTDECREASE",
     "STRINGID_EMPTYSTRING3",
   ]),
+  /** battle_message.c:1208-1212 -- BattleScript_BerryCureChosenStatusRet's own table, shared by HOLD_EFFECT_CURE_STATUS (Lum) and HOLD_EFFECT_CURE_ATTRACT (Mental Herb) (docs/endturn-abilities-items-ground-truth.md §1c). */
+  gBerryEffectStringIds: Object.freeze([
+    "STRINGID_PKMNSITEMCUREDPROBLEM",
+    "STRINGID_PKMNSITEMNORMALIZEDSTATUS",
+  ]),
   /** battle_message.c:908-911 -- gMoveWeatherChangeStringIds, the setter move's own tail (BattleScript_MoveWeatherChange). B_MSG_STARTED_DOWNPOUR (index 1) is unused source-wide. */
   gMoveWeatherChangeStringIds: Object.freeze([
     "STRINGID_STARTEDTORAIN",

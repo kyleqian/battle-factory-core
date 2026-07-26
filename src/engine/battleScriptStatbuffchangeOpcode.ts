@@ -200,6 +200,14 @@ const PLAYANIMATION_ANIM_TYPES: ReadonlyMap<
   ["B_ANIM_INGRAIN_HEAL", { argExpression: "NULL", animationId: "INGRAIN_HEAL", readsAnimArg1: false }],
   ["B_ANIM_LEECH_SEED_DRAIN", { argExpression: "sB_ANIM_ARG1", animationId: "LEECH_SEED_DRAIN", readsAnimArg1: true }],
   ["B_ANIM_TURN_TRAP", { argExpression: "sB_ANIM_ARG1", animationId: "TURN_TRAP", readsAnimArg1: true }],
+  /**
+   * docs/endturn-abilities-items-ground-truth.md §1c/§5 slice 4 -- every
+   * `ITEMEFFECT_NORMAL` end2 script (Leftovers/White Herb/all 8 cure
+   * berries) opens with `playanimation BS_ATTACKER|BS_SCRIPTING,
+   * B_ANIM_HELD_ITEM_EFFECT` (no third operand, same NULL-arg shape as
+   * B_ANIM_INGRAIN_HEAL).
+   */
+  ["B_ANIM_HELD_ITEM_EFFECT", { argExpression: "NULL", animationId: "HELD_ITEM_EFFECT", readsAnimArg1: false }],
 ]);
 
 function createPlayanimationOpcodeHandler(

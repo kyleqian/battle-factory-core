@@ -191,6 +191,13 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // more concrete call site resolves (Endeavor no longer among the "every
   // other" rejected sites), same single barrier call site, count unchanged.
   ["src/engine/battleScriptIngrainLeechSeedWrapOpcode.ts", 3],
+  // REMOVEITEM registration (docs/endturn-abilities-items-ground-truth.md
+  // §5 slice 4): Cmd_removeitem's only unmodeled branch is a selector that
+  // resolves to no live battler role at all (BS_ATTACKER before an attacker
+  // is assigned) -- both of the 13 concrete call sites' own selectors
+  // (BS_SCRIPTING/BS_ATTACKER) resolve for real on every ENDTURN_ITEMS1 tick
+  // this registration drives.
+  ["src/engine/battleScriptRemoveitemOpcode.ts", 1],
 ]);
 
 function recordingImportsIn(file: string): string[] {

@@ -104,6 +104,12 @@ export type BattleScriptSemanticEventPayload =
     pp: number;
   }>
   | Readonly<{
+    /** BtlController_EmitSetMonData(REQUEST_HELDITEM_BATTLE) -- Cmd_removeitem's own consumption notify (battle_script_commands.c:5901-5915). */
+    kind: "set-battler-item";
+    battler: BattleScriptBattlerId;
+    item: number;
+  }>
+  | Readonly<{
     kind: "trainer-slide-in";
     battler: BattleScriptBattlerId;
   }>

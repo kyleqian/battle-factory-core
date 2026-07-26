@@ -36,6 +36,7 @@ import { createBattleScriptSetWeatherOpcodeHandlers } from "./battleScriptSetWea
 import { createBattleScriptDamagingWeatherOpcodeHandlers } from "./battleScriptDamagingWeatherOpcode.ts";
 import { createBattleScriptTryCastformDataChangeOpcodeHandlers } from "./battleScriptTryCastformDataChangeOpcode.ts";
 import { createBattleScriptIngrainLeechSeedWrapOpcodeHandlers } from "./battleScriptIngrainLeechSeedWrapOpcode.ts";
+import { createBattleScriptRemoveitemOpcodeHandlers } from "./battleScriptRemoveitemOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -1958,6 +1959,9 @@ export const resolveRulesBattlerForBattleScript: NonNullable<
   if (selector === BATTLE_SCRIPT_BATTLER_SELECTORS.BS_FAINTED) {
     return context.state.rulesContext.selectorRoles.fainted;
   }
+  if (selector === BATTLE_SCRIPT_BATTLER_SELECTORS.BS_SCRIPTING) {
+    return context.state.rulesContext.scriptingBattler;
+  }
   return null;
 };
 
@@ -2070,6 +2074,9 @@ export function createBattleScriptStatusRulesHandlers(
     }),
     ...createBattleScriptTryCastformDataChangeOpcodeHandlers(program),
     ...createBattleScriptIngrainLeechSeedWrapOpcodeHandlers(program),
+    ...createBattleScriptRemoveitemOpcodeHandlers(program, {
+      resolveBattlerForBattleScript: resolveRulesBattlerForBattleScript,
+    }),
   });
 }
 
