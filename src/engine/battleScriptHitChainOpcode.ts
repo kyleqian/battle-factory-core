@@ -1219,6 +1219,145 @@ export const typecalcOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesC
 };
 
 /**
+ * Cmd_dmgtolevel (battle_script_commands.c:7926-7930): Seismic Toss/Night
+ * Shade's fixed-damage source, `gBattleMoveDamage = gBattleMons[attacker]
+ * .level`. Two lines, no branch, no RNG in source.
+ */
+export const dmgtolevelOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (context) => {
+  const rulesContext = context.state.rulesContext;
+  const attacker = requireBattlerRole(rulesContext, "attacker");
+  const level = rulesContext.battlers[attacker].level;
+  return transitionBattleScriptCommand(
+    context,
+    Object.freeze({ kind: "advance" }),
+    { rulesContext: Object.freeze({ ...rulesContext, battleMoveDamage: level }) },
+  );
+};
+
+/**
+ * Cmd_psywavedamageeffect (battle_script_commands.c:7932-7941): Psywave's
+ * rejection-sampling loop over `Random() % 16`, redrawing while the sample
+ * exceeds 10 (11 of 16 values accepted, ~68.75%/draw), then `gBattleMoveDamage
+ * = level * (randDamage * 10 + 50) / 100` with the accepted sample. Draw
+ * count is unbounded in source but small in practice -- live-verified at 1
+ * and 2 draws (`docs/fixed-damage-cluster-ground-truth.md` §5b).
+ */
+export const psywavedamageeffectOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (context) => {
+  const rulesContext = context.state.rulesContext;
+  const attacker = requireBattlerRole(rulesContext, "attacker");
+  const level = rulesContext.battlers[attacker].level;
+
+  let rng = context.state.rng;
+  let randDamage: number;
+  do {
+    const draw = drawBattleScriptRng(rng, context.instruction, "psywavedamageeffect");
+    rng = draw.rng;
+    randDamage = draw.randomValue % 16;
+  } while (randDamage > 10);
+
+  const damage = Math.trunc((level * (randDamage * 10 + 50)) / 100);
+  return transitionBattleScriptCommand(
+    context,
+    Object.freeze({ kind: "advance" }),
+    { rulesContext: Object.freeze({ ...rulesContext, battleMoveDamage: damage }), rng },
+  );
+};
+
+/**
+ * Cmd_typecalc2 (battle_script_commands.c:4500-4593): Counter/Mirror Coat/
+ * Brick Break's second-call immunity gate. Diverges from Cmd_typecalc
+ * (registered above) in two load-bearing ways, both confirmed by reading the
+ * bodies side by side (`docs/fixed-damage-cluster-ground-truth.md` §2):
+ * (1) no STAB line anywhere in this function; (2) the type-effectiveness
+ * loop only ORs bits into a *local* `flags` u8 (never calls
+ * ModulateDmgByType, never touches `gBattleMoveDamage`) -- so this opcode
+ * never scales damage, only gates DOESNT_AFFECT_FOE/Wonder-Guard-MISSED.
+ * `flags` can therefore never carry `MOVE_RESULT_NO_EFFECT`'s bits (only
+ * NOT_VERY_EFFECTIVE/SUPER_EFFECTIVE are ever OR'd into it), so source's own
+ * `!(flags & MOVE_RESULT_NO_EFFECT)` Wonder Guard guard is a provable
+ * tautology here -- computed for fidelity anyway since it costs nothing.
+ * `AttacksThisTurn(attacker, move) == 2` is structurally always true for
+ * this cluster's three effects (none are two-turn/charging moves), so it is
+ * not modeled as a separate condition, matching Cmd_typecalc's own port
+ * precedent above. `gLastHitByType` is not written by source here (unlike
+ * typecalc) and is not modeled by this engine at all, so nothing to do.
+ */
+export const typecalc2OpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (context) => {
+  const rulesContext = context.state.rulesContext;
+  const attacker = requireBattlerRole(rulesContext, "attacker");
+  const target = requireBattlerRole(rulesContext, "target");
+  const targetBattler = rulesContext.battlers[target];
+  const move = rulesContext.currentMove;
+  const moveRow = requireMoveRow(move);
+  const moveType = resolveMoveTypeName(rulesContext, move);
+
+  let moveResultFlags = rulesContext.moveResultFlags;
+  let missType = rulesContext.missType;
+  let lastUsedAbility = rulesContext.lastUsedAbility;
+  let moveHistory = rulesContext.moveHistory;
+  let flags = 0;
+
+  if (targetBattler.ability === ABILITY_LEVITATE && moveType === "TYPE_GROUND") {
+    lastUsedAbility = ABILITY_LEVITATE;
+    moveResultFlags = (moveResultFlags | BATTLE_SCRIPT_MOVE_RESULT_MISSED | BATTLE_SCRIPT_MOVE_RESULT_DOESNT_AFFECT_FOE) >>> 0;
+    moveHistory = withClearedLandedMove(moveHistory, target);
+    missType = B_MSG_GROUND_MISS;
+  } else {
+    const hasForesight = (targetBattler.status2 & BATTLE_SCRIPT_STATUS2_FORESIGHT) !== 0;
+    const distinctTypes = targetBattler.types[0] === targetBattler.types[1]
+      ? [targetBattler.types[0]]
+      : targetBattler.types;
+    for (const defType of distinctTypes) {
+      if (hasForesight && defType === "TYPE_GHOST" && (moveType === "TYPE_NORMAL" || moveType === "TYPE_FIGHTING")) {
+        continue;
+      }
+      const entry = TYPE_EFFECTIVENESS.find(
+        (candidate) => candidate.attackingType === moveType && candidate.defendingType === defType,
+      );
+      if (!entry) continue;
+      if (entry.multiplierTenths === 0) {
+        moveResultFlags = (moveResultFlags | BATTLE_SCRIPT_MOVE_RESULT_DOESNT_AFFECT_FOE) >>> 0;
+        break;
+      }
+      if (entry.multiplierTenths === 5) {
+        flags |= BATTLE_SCRIPT_MOVE_RESULT_NOT_VERY_EFFECTIVE;
+      } else if (entry.multiplierTenths === 20) {
+        flags |= BATTLE_SCRIPT_MOVE_RESULT_SUPER_EFFECTIVE;
+      }
+    }
+  }
+
+  if (
+    targetBattler.ability === ABILITY_WONDER_GUARD
+    && (flags & BATTLE_SCRIPT_MOVE_RESULT_NO_EFFECT) === 0
+    && moveRow.power !== 0
+    && (
+      (flags & BATTLE_SCRIPT_MOVE_RESULT_SUPER_EFFECTIVE) === 0
+      || (flags & (BATTLE_SCRIPT_MOVE_RESULT_SUPER_EFFECTIVE | BATTLE_SCRIPT_MOVE_RESULT_NOT_VERY_EFFECTIVE))
+        === (BATTLE_SCRIPT_MOVE_RESULT_SUPER_EFFECTIVE | BATTLE_SCRIPT_MOVE_RESULT_NOT_VERY_EFFECTIVE)
+    )
+  ) {
+    lastUsedAbility = ABILITY_WONDER_GUARD;
+    moveResultFlags = (moveResultFlags | BATTLE_SCRIPT_MOVE_RESULT_MISSED) >>> 0;
+    moveHistory = withClearedLandedMove(moveHistory, target);
+    missType = B_MSG_AVOIDED_DMG;
+  }
+
+  let nextRulesContext = Object.freeze({
+    ...rulesContext,
+    moveResultFlags,
+    missType,
+    lastUsedAbility,
+    moveHistory,
+  });
+  if ((moveResultFlags & BATTLE_SCRIPT_MOVE_RESULT_DOESNT_AFFECT_FOE) !== 0) {
+    nextRulesContext = withBattler(nextRulesContext, attacker, { targetNotAffected: 1 });
+  }
+
+  return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }), { rulesContext: nextRulesContext });
+};
+
+/**
  * Cmd_adjustnormaldamage (battle_script_commands.c:1658-1698): the always-run
  * ApplyRandomDmgMultiplier roll, then the False Swipe/Endure/Focus-Band HP
  * clamp. Focus Band's own roll (`Random() % 100 < param`, gated on the target
@@ -2972,6 +3111,9 @@ export function createBattleScriptHitChainOpcodeHandlers(
   install("B_SCR_OP_CRITCALC", critcalcOpcodeHandler);
   install("B_SCR_OP_DAMAGECALC", damagecalcOpcodeHandler);
   install("B_SCR_OP_TYPECALC", typecalcOpcodeHandler);
+  install("B_SCR_OP_TYPECALC2", typecalc2OpcodeHandler);
+  install("B_SCR_OP_DMGTOLEVEL", dmgtolevelOpcodeHandler);
+  install("B_SCR_OP_PSYWAVEDAMAGEEFFECT", psywavedamageeffectOpcodeHandler);
   install("B_SCR_OP_ADJUSTNORMALDAMAGE", adjustnormaldamageOpcodeHandler);
   install("B_SCR_OP_SETDAMAGETOHEALTHDIFFERENCE", setdamagetohealthdifferenceOpcodeHandler);
   install("B_SCR_OP_ADJUSTSETDAMAGE", adjustsetdamageOpcodeHandler);

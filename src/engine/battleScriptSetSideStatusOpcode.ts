@@ -73,6 +73,16 @@ function withSideStatusBit(
   return Object.freeze(next) as readonly [number, number];
 }
 
+function withoutSideStatusBits(
+  rules: BattleScriptRulesContext,
+  side: 0 | 1,
+  bits: number,
+): readonly [number, number] {
+  const next = [...rules.sideStatuses] as [number, number];
+  next[side] = (next[side] & ~bits) >>> 0;
+  return Object.freeze(next) as readonly [number, number];
+}
+
 type SetSideStatusConfig = Readonly<{
   isActive: (rules: BattleScriptRulesContext, side: 0 | 1) => boolean;
   failFlag: number;
@@ -159,6 +169,52 @@ const MIST_CONFIG: SetSideStatusConfig = Object.freeze({
   },
 });
 
+/**
+ * Cmd_removelightscreenreflect (battle_script_commands.c:9883-9903) --
+ * Brick Break's own opener, the sole concrete call site
+ * (data/battle_scripts_1.s:2423). Clears the *opposing* side's Reflect/
+ * Light Screen (bit + timer) if either is active, else leaves them
+ * untouched -- reuses the exact sideStatuses/sideTimers fields the
+ * SETREFLECT/SETLIGHTSCREEN setters above already model.
+ * `gBattleScripting.animTurn`/`.animTargetsHit` are written unconditionally
+ * on both branches (1/1 when cleared, 0/0 otherwise). Despite the source
+ * comment framing these as animation-branch-selection only, Brick Break's
+ * own script reads `animTurn` back through a real
+ * `jumpifbyte CMP_EQUAL, sB_ANIM_TURN, 0` branch gating a
+ * `bicbyte gMoveResultFlags, MOVE_RESULT_MISSED | MOVE_RESULT_DOESNT_AFFECT_FOE`
+ * -- breaking a screen also forcibly clears any Levitate-immunity miss flag
+ * typecalc may have set moments earlier (verified by reading both the
+ * script and Cmd_attackanimation's own `animTurn++`, battle_script_commands.c
+ * :1786/1789, which runs between removelightscreenreflect and the second
+ * `jumpifbyte CMP_LESS_THAN, sB_ANIM_TURN, 2` -- so the "wall shattered"
+ * print is reachable in singles too when a screen actually broke, 1->2 after
+ * the increment, not dead as an earlier scouting pass assumed). `jumpifbyte`/
+ * `bicbyte`/`printstring`/`waitmessage` are all already generically
+ * registered, so this opcode's own job is only the correct animTurn/
+ * animTargetsHit write -- the rest wires itself.
+ */
+export const removelightscreenreflectOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (
+  context,
+) => {
+  const rules = context.state.rulesContext;
+  const side = rules.battlers[requireAttacker(rules)].side;
+  const opposingSide = (side === 0 ? 1 : 0) as 0 | 1;
+  const timers = rules.sideTimers[opposingSide];
+  const screensActive = timers.reflectTimer !== 0 || timers.lightscreenTimer !== 0;
+
+  const nextRules = screensActive
+    ? Object.freeze({
+      ...rules,
+      sideStatuses: withoutSideStatusBits(rules, opposingSide, SIDE_STATUS_REFLECT | SIDE_STATUS_LIGHTSCREEN),
+      sideTimers: withSideTimers(rules, opposingSide, { reflectTimer: 0, lightscreenTimer: 0 }),
+      animTurn: 1,
+      animTargetsHit: 1,
+    })
+    : Object.freeze({ ...rules, animTurn: 0, animTargetsHit: 0 });
+
+  return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }), { rulesContext: nextRules });
+};
+
 function registerSingleInstruction(
   program: BattleScriptProgram,
   opcodeName: string,
@@ -183,5 +239,10 @@ export function createBattleScriptSetSideStatusOpcodeHandlers(
     ...registerSingleInstruction(program, "B_SCR_OP_SETLIGHTSCREEN", createSetSideStatusHandler(LIGHTSCREEN_CONFIG)),
     ...registerSingleInstruction(program, "B_SCR_OP_SETSAFEGUARD", createSetSideStatusHandler(SAFEGUARD_CONFIG)),
     ...registerSingleInstruction(program, "B_SCR_OP_SETMIST", createSetSideStatusHandler(MIST_CONFIG)),
+    ...registerSingleInstruction(
+      program,
+      "B_SCR_OP_REMOVELIGHTSCREENREFLECT",
+      removelightscreenreflectOpcodeHandler,
+    ),
   });
 }

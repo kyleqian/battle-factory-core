@@ -8,8 +8,12 @@ import {
   type BattleScriptRulesContextInput,
   type BattleScriptStatusRulesExternalPorts,
 } from "../src/engine/battleScriptRulesContext.ts";
-import { loadBattleScriptProgram } from "../src/engine/battleScriptProgram.ts";
-import { stepBattleScriptMachine } from "../src/engine/battleScriptMachine.ts";
+import { loadBattleScriptProgram, resolveBattleScriptLabel } from "../src/engine/battleScriptProgram.ts";
+import {
+  acknowledgeBattleScriptMachineController,
+  stepBattleScriptMachine,
+  type BattleScriptMachineState,
+} from "../src/engine/battleScriptMachine.ts";
 import { runBattleEndTurnOrchestration } from "../src/engine/battleEndTurnOrchestration.ts";
 
 const program = loadBattleScriptProgram();
@@ -121,6 +125,61 @@ function stepAtProgramCounter(pc: number, rulesContext: BattleScriptRulesContext
   return { execution, result: stepBattleScriptMachine(program, patched, execution.handlers) };
 }
 
+function labelPc(label: string): number {
+  const entry = resolveBattleScriptLabel(program, label);
+  if (!entry) throw new Error(`committed Battle Script program does not define label ${label}`);
+  return entry.programCounter;
+}
+
+function ackAllPending(
+  state: BattleScriptMachineState<BattleScriptRulesContext>,
+): BattleScriptMachineState<BattleScriptRulesContext> {
+  let next = state;
+  for (const battler of state.scheduler.pendingControllerBattlers) {
+    next = acknowledgeBattleScriptMachineController(next, battler);
+  }
+  return next;
+}
+
+/**
+ * One logical opcode step that transparently acknowledges any controller-
+ * pending block(s) this file's real (non-stubbed) isControllerIdle port
+ * produces, then retries the same instruction -- Brick Break's own chain
+ * (attackanimation/waitanimation/hitanimation/waitstate/healthbarupdate/
+ * critmessage/waitmessage/resultmessage) marks battlers pending exactly like
+ * production, unlike battleScriptHitChainOpcode.test.ts's always-idle stub.
+ */
+function stepAcking(
+  handlers: ReturnType<typeof createBattleScriptStatusRulesExecution>["handlers"],
+  state: BattleScriptMachineState<BattleScriptRulesContext>,
+) {
+  let result = stepBattleScriptMachine(program, state, handlers);
+  while (result.kind === "blocked" || result.kind === "scheduler-progressed") {
+    const next = result.kind === "blocked" ? ackAllPending(result.state) : result.state;
+    result = stepBattleScriptMachine(program, next, handlers);
+  }
+  return result;
+}
+
+/** Runs a script from `entryLabel`, acking controller-pending blocks, until `targetLabel` or `budget` opcodes. */
+function runUntilLabelAcking(
+  entryLabel: string,
+  targetLabel: string,
+  rulesContext: BattleScriptRulesContext,
+  rngSeed = 1,
+  budget = 60,
+) {
+  const execution = createBattleScriptStatusRulesExecution(program, entryLabel, rulesContext, rngSeed, externalPorts());
+  const targetPc = labelPc(targetLabel);
+  let result = stepAcking(execution.handlers, execution.state);
+  let steps = 1;
+  while (result.kind === "advanced" && result.state.programCounter !== targetPc && steps < budget) {
+    result = stepAcking(execution.handlers, result.state);
+    steps++;
+  }
+  return { execution, result, steps };
+}
+
 function scratchState(rulesContext: BattleScriptRulesContext) {
   return createBattleScriptStatusRulesExecution(program, "BattleScript_HandleFaintedMon", rulesContext, 1, externalPorts()).state;
 }
@@ -215,6 +274,163 @@ describe("production screen/mist/weather setters (Cmd_setreflect/setlightscreen/
     expect(sunnyResult.state.rulesContext.weather).toBe(B_WEATHER_SUN_TEMPORARY);
   });
 });
+
+const BRICK_BREAK = 280; // EFFECT_BRICK_BREAK, power 75, accuracy 100, TYPE_FIGHTING
+const MOVE_RESULT_MISSED_BIT = 1 << 0;
+
+describe("production removelightscreenreflect (Cmd_removelightscreenreflect) dispatch", () => {
+  it("registers B_SCR_OP_REMOVELIGHTSCREENREFLECT", () => {
+    expect(program.instructions.find((i) => i.opcodeName === "B_SCR_OP_REMOVELIGHTSCREENREFLECT")).toBeDefined();
+  });
+
+  it("clears the opposing side's Reflect + Light Screen (bit + timer) and sets animTurn/animTargetsHit "
+    + "to 1 when either is active", () => {
+    const pc = findPc("B_SCR_OP_REMOVELIGHTSCREENREFLECT", "BattleScript_EffectBrickBreak");
+    const rc = context({
+      selectorRoles: { attacker: 0, target: 1, effectBattler: 1, fainted: null },
+      sideStatuses: [0, SIDE_STATUS_REFLECT | SIDE_STATUS_LIGHTSCREEN],
+      sideTimers: [{}, { reflectTimer: 4, lightscreenTimer: 5 }],
+    });
+    const { result } = stepAtProgramCounter(pc, rc);
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.sideStatuses[1] & (SIDE_STATUS_REFLECT | SIDE_STATUS_LIGHTSCREEN)).toBe(0);
+    expect(result.state.rulesContext.sideTimers[1].reflectTimer).toBe(0);
+    expect(result.state.rulesContext.sideTimers[1].lightscreenTimer).toBe(0);
+    expect(result.state.rulesContext.animTurn).toBe(1);
+    expect(result.state.rulesContext.animTargetsHit).toBe(1);
+  });
+
+  it("clears only Reflect when only Reflect is active (Light Screen's own timer stays at 0, no-op)", () => {
+    const pc = findPc("B_SCR_OP_REMOVELIGHTSCREENREFLECT", "BattleScript_EffectBrickBreak");
+    const rc = context({
+      selectorRoles: { attacker: 0, target: 1, effectBattler: 1, fainted: null },
+      sideStatuses: [0, SIDE_STATUS_REFLECT],
+      sideTimers: [{}, { reflectTimer: 3 }],
+    });
+    const { result } = stepAtProgramCounter(pc, rc);
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.sideStatuses[1] & SIDE_STATUS_REFLECT).toBe(0);
+    expect(result.state.rulesContext.sideTimers[1].reflectTimer).toBe(0);
+    expect(result.state.rulesContext.animTurn).toBe(1);
+  });
+
+  it("no-op (leaves state alone) and sets animTurn/animTargetsHit to 0 when neither is active", () => {
+    const pc = findPc("B_SCR_OP_REMOVELIGHTSCREENREFLECT", "BattleScript_EffectBrickBreak");
+    const rc = context({
+      selectorRoles: { attacker: 0, target: 1, effectBattler: 1, fainted: null },
+      animTurn: 7, // pre-existing stale value -- source unconditionally overwrites it
+    });
+    const { result } = stepAtProgramCounter(pc, rc);
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.sideStatuses[1]).toBe(0);
+    expect(result.state.rulesContext.animTurn).toBe(0);
+    expect(result.state.rulesContext.animTargetsHit).toBe(0);
+  });
+
+  it("targets the OPPOSING side, not the attacker's own side", () => {
+    const pc = findPc("B_SCR_OP_REMOVELIGHTSCREENREFLECT", "BattleScript_EffectBrickBreak");
+    // attacker is on side 1 this time; its own side (1) has screens up, the opposing side (0) does not.
+    const rc = context({
+      selectorRoles: { attacker: 1, target: 0, effectBattler: 0, fainted: null },
+      sideStatuses: [0, SIDE_STATUS_REFLECT],
+      sideTimers: [{}, { reflectTimer: 3 }],
+    });
+    const { result } = stepAtProgramCounter(pc, rc);
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    // attacker's own side (1) is untouched; the opposing side (0), which has nothing active, stays a no-op.
+    expect(result.state.rulesContext.sideStatuses[1] & SIDE_STATUS_REFLECT).toBe(SIDE_STATUS_REFLECT);
+    expect(result.state.rulesContext.animTurn).toBe(0);
+  });
+});
+
+describe(
+  "EFFECT_BRICK_BREAK: full committed script, screens-up vs screens-down "
+    + "(docs/fixed-damage-cluster-ground-truth.md §4 topology, typecalc-then-typecalc2 double-call shape)",
+  () => {
+    function brickBreakContext(defenderScreensUp: boolean) {
+      return context({
+        battlers: [
+          battler({
+            side: 0,
+            attack: 40,
+            level: 50,
+            types: ["TYPE_FIGHTING", "TYPE_FIGHTING"],
+            moves: [BRICK_BREAK, 0, 0, 0],
+            pp: [16, 0, 0, 0],
+          }),
+          battler({ side: 1, defense: 40, level: 50, hp: 100, types: ["TYPE_WATER", "TYPE_WATER"] }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+        selectorRoles: { attacker: 0, target: 1, effectBattler: 1, fainted: null },
+        currentMove: BRICK_BREAK,
+        sideStatuses: defenderScreensUp ? [0, SIDE_STATUS_REFLECT | SIDE_STATUS_LIGHTSCREEN] : [0, 0],
+        sideTimers: defenderScreensUp ? [{}, { reflectTimer: 5, lightscreenTimer: 5 }] : [{}, {}],
+      });
+    }
+
+    it(
+      "screens-up: removelightscreenreflect clears both, animTurn reaches 2 after attackanimation's own "
+        + "increment so the doubles-only-looking \"wall shattered\" print actually fires in singles too "
+        + "(a correction to this cluster's own prep-scout, which assumed sB_ANIM_TURN maxes at 1 here), "
+        + "typecalc2 gates a non-immune neutral target through cleanly, and damage lands",
+      () => {
+        const rc = brickBreakContext(true);
+        const { execution, result, steps } = runUntilLabelAcking(
+          "BattleScript_EffectBrickBreak",
+          "BattleScript_BrickBreakDoHit",
+          rc,
+        );
+        if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+        expect(result.state.programCounter).toBe(labelPc("BattleScript_BrickBreakDoHit"));
+        expect(result.state.rulesContext.sideStatuses[1] & (SIDE_STATUS_REFLECT | SIDE_STATUS_LIGHTSCREEN)).toBe(0);
+        expect(result.state.rulesContext.sideTimers[1].reflectTimer).toBe(0);
+        expect(result.state.rulesContext.sideTimers[1].lightscreenTimer).toBe(0);
+        expect(result.state.rulesContext.animTurn).toBe(2); // 1 (screens cleared) + 1 (attackanimation's own ++)
+        expect(
+          result.state.events.some(
+            (event) => "messageId" in event && event.messageId === "STRINGID_THEWALLSHATTERED",
+          ),
+        ).toBe(true);
+        expect(result.state.rulesContext.moveResultFlags & MOVE_RESULT_MISSED_BIT).toBe(0);
+        expect(steps).toBeLessThan(60);
+
+        // typecalc2 -> effectivenesssound -> hitanimation -> waitstate -> healthbarupdate -> datahpupdate:
+        // the actual hit lands and HP drops, proving the double typecalc/typecalc2 call shape resolves.
+        let state = result.state;
+        for (let i = 0; i < 6; i++) {
+          const step = stepAcking(execution.handlers, state);
+          if (step.kind !== "advanced") throw new Error(`post-BrickBreakDoHit step ${i} did not advance: ${step.kind}`);
+          state = step.state;
+        }
+        expect(state.rulesContext.battlers[1]!.hp).toBeLessThan(100);
+      },
+    );
+
+    it(
+      "screens-down: removelightscreenreflect is a no-op, animTurn only reaches 1 (< 2) so the "
+        + "\"wall shattered\" print is skipped, typecalc2 still gates cleanly, damage still lands",
+      () => {
+        const rc = brickBreakContext(false);
+        const { result, steps } = runUntilLabelAcking(
+          "BattleScript_EffectBrickBreak",
+          "BattleScript_BrickBreakDoHit",
+          rc,
+        );
+        if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+        expect(result.state.programCounter).toBe(labelPc("BattleScript_BrickBreakDoHit"));
+        expect(result.state.rulesContext.animTurn).toBe(1); // 0 (no screens) + 1 (attackanimation's own ++)
+        expect(
+          result.state.events.some(
+            (event) => "messageId" in event && event.messageId === "STRINGID_THEWALLSHATTERED",
+          ),
+        ).toBe(false);
+        expect(result.state.rulesContext.moveResultFlags & MOVE_RESULT_MISSED_BIT).toBe(0);
+        expect(steps).toBeLessThan(60);
+      },
+    );
+  },
+);
 
 describe(
   "runBattleEndTurnOrchestration -- screens/weather field-loop lifecycles "

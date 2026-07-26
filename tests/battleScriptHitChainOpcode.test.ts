@@ -141,6 +141,14 @@ function externalPorts(
   });
 }
 
+function findPcInLabel(opcodeName: string, sourceLabel: string): number {
+  const found = program.instructions.find(
+    (instruction) => instruction.opcodeName === opcodeName && instruction.source.label === sourceLabel,
+  );
+  if (!found) throw new Error(`no matching ${opcodeName} instruction found in ${sourceLabel}`);
+  return found.programCounter;
+}
+
 function labelPc(label: string): number {
   const entry = resolveBattleScriptLabel(program, label);
   if (!entry) throw new Error(`committed Battle Script program does not define label ${label}`);
@@ -755,6 +763,197 @@ describe("production typecalc (Cmd_typecalc) dispatch", () => {
     expect(result.kind).toBe("advanced");
     if (result.kind !== "advanced") throw new Error("expected advance");
     expect(result.state.rulesContext.battleMoveDamage).toBe(10);
+  });
+});
+
+const SEISMIC_TOSS = 69; // EFFECT_LEVEL_DAMAGE, power 1, accuracy 100, TYPE_FIGHTING
+const NIGHT_SHADE = 101; // EFFECT_LEVEL_DAMAGE, power 1, accuracy 100, TYPE_GHOST
+const PSYWAVE = 149; // EFFECT_PSYWAVE, power 1, accuracy 80, TYPE_PSYCHIC
+const BRICK_BREAK = 280; // EFFECT_BRICK_BREAK, power 75, accuracy 100, TYPE_FIGHTING
+
+describe("production dmgtolevel (Cmd_dmgtolevel) dispatch", () => {
+  it("registers B_SCR_OP_DMGTOLEVEL", () => {
+    expect(program.instructions.find((i) => i.opcodeName === "B_SCR_OP_DMGTOLEVEL")).toBeDefined();
+  });
+
+  it("battleMoveDamage becomes exactly the attacker's level, zero RNG", () => {
+    const rc = context(0, { level: 50 }, { battleMoveDamage: 999 });
+    const pc = findPcInLabel("B_SCR_OP_DMGTOLEVEL", "BattleScript_EffectLevelDamage");
+    const { result } = stepAtProgramCounter(pc, rc);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battleMoveDamage).toBe(50);
+    expect(result.state.rng.calls).toBe(0);
+  });
+
+  it("Night Shade shares the same opcode body at a different level", () => {
+    const rc = context(0, { level: 37 }, { currentMove: NIGHT_SHADE });
+    const pc = findPcInLabel("B_SCR_OP_DMGTOLEVEL", "BattleScript_EffectLevelDamage");
+    const { result } = stepAtProgramCounter(pc, rc);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battleMoveDamage).toBe(37);
+  });
+
+  it(
+    "EFFECT_LEVEL_DAMAGE full committed script (Seismic Toss, L50): "
+      + "BattleScript_EffectLevelDamage -> BattleScript_HitFromAtkAnimation, damage == level exactly, "
+      + "exactly 1 RNG draw so far (accuracycheck; dmgtolevel itself draws none, matching "
+      + "docs/fixed-damage-cluster-ground-truth.md §5a's live ledger)",
+    () => {
+      const rc = context(0, { level: 50 }, { currentMove: SEISMIC_TOSS });
+      const { result, steps } = runUntilLabel("BattleScript_EffectLevelDamage", "BattleScript_HitFromAtkAnimation", rc);
+      expect(result.kind).toBe("advanced");
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_HitFromAtkAnimation"));
+      expect(result.state.rulesContext.battleMoveDamage).toBe(50);
+      expect(result.state.rng.calls).toBe(1);
+      expect(steps).toBeLessThan(50);
+    },
+  );
+});
+
+describe("production psywavedamageeffect (Cmd_psywavedamageeffect) dispatch", () => {
+  it("registers B_SCR_OP_PSYWAVEDAMAGEEFFECT", () => {
+    expect(program.instructions.find((i) => i.opcodeName === "B_SCR_OP_PSYWAVEDAMAGEEFFECT")).toBeDefined();
+  });
+
+  it("single accepted draw (rngSeed 1: raw draw 16838, %16 = 6 <= 10, accepted first try) -- "
+    + "randDamage=60, level 50 -> damage = trunc(50*(60+50)/100) = 55", () => {
+    const rc = context(0, { level: 50 }, { battleMoveDamage: 999 });
+    const pc = findPcInLabel("B_SCR_OP_PSYWAVEDAMAGEEFFECT", "BattleScript_EffectPsywave");
+    const { result } = stepAtProgramCounter(pc, rc, 1);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battleMoveDamage).toBe(55);
+    expect(result.state.rng.calls).toBe(1);
+  });
+
+  it("rejection then acceptance (rngSeed 2: raw draws [33676, 28355], first %16 = 12 > 10 "
+    + "rejected, second %16 = 3 accepted) -- randDamage=30, level 50 -> "
+    + "damage = trunc(50*(30+50)/100) = 40, exactly 2 draws", () => {
+    const rc = context(0, { level: 50 }, { battleMoveDamage: 999 });
+    const pc = findPcInLabel("B_SCR_OP_PSYWAVEDAMAGEEFFECT", "BattleScript_EffectPsywave");
+    const { result } = stepAtProgramCounter(pc, rc, 2);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battleMoveDamage).toBe(40);
+    expect(result.state.rng.calls).toBe(2);
+  });
+
+  it(
+    "EFFECT_PSYWAVE full committed script (L50, rngSeed 1): BattleScript_EffectPsywave -> "
+      + "BattleScript_HitFromAtkAnimation, accuracy roll hits (draw 16838 %100 = 38 < 80) then exactly "
+      + "1 rejection-sampling draw (draw 44065 %16 = 1, accepted), damage = trunc(50*60/100) = 30, "
+      + "total 2 RNG draws (accuracycheck + psywavedamageeffect's own single draw)",
+    () => {
+      const rc = context(0, { level: 50 }, { currentMove: PSYWAVE });
+      const { result, steps } = runUntilLabel("BattleScript_EffectPsywave", "BattleScript_HitFromAtkAnimation", rc, 1);
+      expect(result.kind).toBe("advanced");
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_HitFromAtkAnimation"));
+      expect(result.state.rulesContext.battleMoveDamage).toBe(30);
+      expect(result.state.rng.calls).toBe(2);
+      expect(steps).toBeLessThan(50);
+    },
+  );
+
+  it(
+    "EFFECT_PSYWAVE full committed script, multi-draw case (L50, rngSeed 5): accuracy roll hits "
+      + "(draw 18655 %100 = 55 < 80) then exactly 2 rejection-sampling draws (46763 %16 = 11 rejected, "
+      + "54501 %16 = 5 accepted), damage = trunc(50*100/100) = 50, total 3 RNG draws",
+    () => {
+      const rc = context(0, { level: 50 }, { currentMove: PSYWAVE });
+      const { result, steps } = runUntilLabel("BattleScript_EffectPsywave", "BattleScript_HitFromAtkAnimation", rc, 5);
+      expect(result.kind).toBe("advanced");
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_HitFromAtkAnimation"));
+      expect(result.state.rulesContext.battleMoveDamage).toBe(50);
+      expect(result.state.rng.calls).toBe(3);
+      expect(steps).toBeLessThan(50);
+    },
+  );
+});
+
+describe("production typecalc2 (Cmd_typecalc2) dispatch -- Counter/Mirror Coat/Brick Break's second-call immunity gate", () => {
+  it("registers B_SCR_OP_TYPECALC2", () => {
+    expect(program.instructions.find((i) => i.opcodeName === "B_SCR_OP_TYPECALC2")).toBeDefined();
+  });
+
+  it("never applies STAB and never scales battleMoveDamage, even on a same-type super-effective hit "
+    + "(the load-bearing divergence from Cmd_typecalc)", () => {
+    const rc = context(
+      0,
+      { types: ["TYPE_FIGHTING", "TYPE_FIGHTING"] },
+      { currentMove: BRICK_BREAK, battleMoveDamage: 42 },
+      { types: ["TYPE_NORMAL", "TYPE_NORMAL"] }, // Normal is weak to Fighting: 2x in a real typecalc call
+    );
+    const pc = findPcInLabel("B_SCR_OP_TYPECALC2", "BattleScript_BrickBreakDoHit");
+    const { result } = stepAtProgramCounter(pc, rc);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battleMoveDamage).toBe(42); // untouched
+    expect(result.state.rulesContext.moveResultFlags & (1 << 1)).toBe(0); // SUPER_EFFECTIVE not set on the real flags either
+  });
+
+  it("Levitate vs a Ground move: misses, clears landed-move history, same shape as typecalc's own branch", () => {
+    const rc = context(0, {}, { currentMove: 89 /* MOVE_EARTHQUAKE, TYPE_GROUND */, battleMoveDamage: 50 }, {
+      ability: ABILITY_LEVITATE,
+    });
+    const pc = findPcInLabel("B_SCR_OP_TYPECALC2", "BattleScript_BrickBreakDoHit");
+    const { result } = stepAtProgramCounter(pc, rc);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.moveResultFlags & 1).toBe(1); // MOVE_RESULT_MISSED
+    expect(result.state.rulesContext.moveResultFlags & (1 << 3)).toBe(1 << 3); // DOESNT_AFFECT_FOE
+    expect(result.state.rulesContext.missType).toBe(4); // B_MSG_GROUND_MISS
+    expect(result.state.rulesContext.lastUsedAbility).toBe(ABILITY_LEVITATE);
+    expect(result.state.rulesContext.battleMoveDamage).toBe(50); // still untouched
+  });
+
+  it("real type-chart immunity (Ghost vs Fighting) sets DOESNT_AFFECT_FOE and targetNotAffected on the "
+    + "attacker, damage left alone (not zeroed, unlike typecalc)", () => {
+    const rc = context(0, {}, { currentMove: BRICK_BREAK, battleMoveDamage: 42 }, { types: ["TYPE_GHOST", "TYPE_GHOST"] });
+    const pc = findPcInLabel("B_SCR_OP_TYPECALC2", "BattleScript_BrickBreakDoHit");
+    const { result } = stepAtProgramCounter(pc, rc);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.moveResultFlags & (1 << 3)).toBe(1 << 3); // DOESNT_AFFECT_FOE
+    expect(result.state.rulesContext.battleMoveDamage).toBe(42);
+    expect(result.state.rulesContext.battlers[0]!.targetNotAffected).toBe(1); // attacker, per source
+  });
+
+  it("Wonder Guard reads its own LOCAL flags, not the real moveResultFlags -- a stale SUPER_EFFECTIVE "
+    + "bit left over from typecalc's own earlier call does not save a target this call finds neutral", () => {
+    const rc = context(
+      0,
+      {},
+      {
+        currentMove: BRICK_BREAK,
+        battleMoveDamage: 42,
+        moveResultFlags: 1 << 1, // stale MOVE_RESULT_SUPER_EFFECTIVE from the real typecalc call moments earlier
+      },
+      { ability: ABILITY_WONDER_GUARD, types: ["TYPE_WATER", "TYPE_WATER"] }, // neutral vs Fighting (not in the type table)
+    );
+    const pc = findPcInLabel("B_SCR_OP_TYPECALC2", "BattleScript_BrickBreakDoHit");
+    const { result } = stepAtProgramCounter(pc, rc);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.moveResultFlags & 1).toBe(1); // MOVE_RESULT_MISSED
+    expect(result.state.rulesContext.lastUsedAbility).toBe(ABILITY_WONDER_GUARD);
+  });
+
+  it("Wonder Guard lets this call's own super-effective hit through", () => {
+    const rc = context(0, {}, { currentMove: BRICK_BREAK, battleMoveDamage: 42 }, {
+      ability: ABILITY_WONDER_GUARD,
+      types: ["TYPE_NORMAL", "TYPE_NORMAL"], // weak to Fighting
+    });
+    const pc = findPcInLabel("B_SCR_OP_TYPECALC2", "BattleScript_BrickBreakDoHit");
+    const { result } = stepAtProgramCounter(pc, rc);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.moveResultFlags & 1).toBe(0); // not MISSED
+    expect(result.state.rulesContext.battleMoveDamage).toBe(42); // still never scaled
   });
 });
 
