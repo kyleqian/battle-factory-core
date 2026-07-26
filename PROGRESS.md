@@ -13,6 +13,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ---
 ## 472 — END3 registered + ENDTURN_ABILITIES slice 1 wired: Speed Boost + Rain Dish (doc §5 slice 1 mandatory rung, the standing architectural gap from entries 469-471 finally closed)
 
+- **Side merge (same round, supervisor-verified ALL PASS live from the
+  worktree + green on the merged tree):** doc **§17 `AI_CBM_AttackUp` +
+  `AI_CV_AttackUp`** ground truth banked (branch `worker/side-20260726-122548`,
+  merged, worktree removed) — first stat-UP pair. Supervisor re-verified the
+  assembly: CBM AttackUp is 2 instructions (`:249-251`, zero draws, NO
+  shared `CheckIfAbilityBlocksStatChange` tail — a real stat-up/stat-down
+  CBM asymmetry, and `EFFECT_BULK_UP` splits to a separate `AI_CBM_BulkUp`
+  on the CBM side only); CV AttackUp (`:896-913`) has 3 draw sites, all
+  gates reading `AI_USER`'s own state. The `:904` roll gates on an
+  `if_hp_not_equal AI_USER, 100` EQUALITY test, so reach/control naming
+  INVERTS vs §15/§16 (undamaged = reach) — documented so a porter doesn't
+  copy the convention blind. Ledgers: reach 10/10, control 8/8 (seeds 1/99
+  ×2), +4 `Cmd_if_random_less_than` attribution, zero `get_ability`.
+  15-fixture verify script ALL PASS ×2 (worker) + once by the supervisor.
+  DefenseUp pair: bodies cited (§17.6) but NOT staged (honest time-cap
+  stop; `AI_CV_DefenseUp4` reads the target's LAST-USED MOVE's power/type —
+  a target-history dependency flagged for the next scout). Merged tree:
+  **224 files / 2853 tests + build green.**
+
 - **State:** tree green at **224 files / 2853 tests** (+1 file/+7 tests over
   entry 471's merged 223/2846), build green (`tsc -b && vite build`).
   `executableFrontierRatchet.test.ts` **6/6 unmoved** — no pin move needed.
