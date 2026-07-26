@@ -4,7 +4,74 @@ Older dated sections moved out of `ANIMATION_PROGRESS.md` to keep that
 file lean (`AGENTS.md`'s ~3-most-recent convention). Git history has the
 full record regardless; this file is a read-only reference.
 
+## MOVE_FUTURE_SIGHT rung 5: both mandated residual hypotheses disproven with hard RAM evidence; the named remainder was incomplete — it's actually two separate defects, stays `partial` (2026-07-25)
 
+**Verdict: no fix landed — this is a negative-evidence session, not a fit.**
+The step brief's own precedent (MOVE_GROWTH) said its attacker residual was
+neither idle-offset nor asset-decode but a framebuffer-display-lag bug; this
+session checked both of that precedent's named hypotheses against
+KADABRA/FUTURE_SIGHT in mandated order and **disproved both**, then found the
+named residual itself was incomplete. **No source file changed this
+session** (`git diff --stat src/` is empty) — every check below ran through
+disposable scratch scripts, none promoted since none produced a passing fix.
+
+**(a) Lag-pair bisection** (`tools/compare/scratch/future-sight-lag-bisect-
+cached.ts`, reusing an already-populated oracle scratch dir so each recheck
+is ~1s, no re-invocation): swept `scaleLag`×`tintLag` over `[0,3]×[0,3]`
+against the dense fixture. The already-committed `(2,1)` is the **unique
+local optimum across the whole grid** (max 75/114 anywhere) and `tintLag`
+has **zero effect** on the match count at any `scaleLag` — blend/tint isn't
+the active driver of this residual, and no better lag pair exists. Hypothesis
+rejected.
+
+**(b) RAM probe** (`tools/compare/scratch/future-sight-matrix-diag.ts`) —
+no new Python probe needed: the fixture's own existing probe
+(`tools/probe/run-battle-lab-rgb.py`) already records `playerSprite.matrix`/
+`x2`/`y2`/`paletteFaded`/`paletteUnfaded` every frame via `gOamMatrices`, so
+this session read that data directly. `x2`/`y2` are pinned at 0 every tick
+in the window (no idle-anim rest offset), and the OAM affine matrix is
+**RAM-exact against `futureSightAttackerEffectAtAge`'s own UNLAGGED
+mechanism at every probed tick (114/114)** — the same clean result GROWTH's
+own IVYSAUR VRAM probe found. Idle-offset and asset/decode hypotheses both
+rejected.
+
+**Residual re-characterized.** `futureSightPortable.ts`'s own mismatch
+report only computes a bbox for the *first* diff frame — a per-frame bbox
+sweep (`tools/compare/scratch/future-sight-per-frame-bbox.ts`) over the full
+39-frame mismatch range found the prior "confined to the attacker box"
+description covers only **29/39** frames (116-144: bbox grows 696px→2013px
+peak at frame130→41px, tracking the scale animation's own magnitude — a
+real, still-unidentified scale-window residual, RAM-proven not idle-offset/
+asset). The other **10/39** (147,148,151,152,155,156,159,160,163,164) are a
+**different, much larger defect**: a 17230px bbox spanning nearly the whole
+upper screen (0,0-239,111), recurring in an exact 2-on/2-off period-4
+pattern matching the psychic BG palette ring's own rotation cadence,
+confined to the second (`UnsetPsychicBackground`) fade window — not
+attacker-sprite-related at all. Tried the obvious next candidate (extend the
+already-proven BG-rotation 1-tick display lag to the `REG_BLDY` darken
+read) — this made the whole window sharply **worse** (19/114, not 75/114),
+ruling that mechanism out too, not blindly kept.
+
+**Coverage:** `MOVE_FUTURE_SIGHT` stays `partial` in `ANIMATION_COVERAGE.json`
+— same 75/114, now split into two named defects instead of one
+(incompletely-described) residual.
+
+**Evidence.** `npm test` 2451/2451 (unchanged — no engine code touched).
+`npm run build` green.
+
+**Next action for a future session:** RAM-probe `BLDCNT`/`BLDY` at register
+granularity around the second fade (defect 2 first — 17230px dwarfs
+defect 1's at-most-2013px), then return to defect 1's finer per-tick
+timing/magnitude; extend to the opponent-attacker orientation (KADABRA front
+sprite extraction, side-uniform per the family map) once both are closed;
+re-run `futureSightPortable.ts` to confirm `exact`.
+
+**PAPERCUT:** `futureSightPortable.ts` (and its `growthPortable.ts` sibling)
+only report the bbox of the *first* mismatched frame in a dense window, not
+a per-frame or window-wide bbox — this cost real time this session
+(the true defect shape only surfaced via a bespoke scratch script). Worth a
+follow-up: have the shared dense-comparator harness report bbox for every
+mismatched frame (or at least the widest one), not just the first.
 
 ## `blend_color_cycle` group A extended: enumeration priced CONFUSION/PSYCHIC/FUTURE_SIGHT at 2 net-new components each; MOVE_FUTURE_SIGHT ported (cheapest, attacker-only), lands `partial` — BG swap/rotation exact, attacker-sprite residual named (2026-07-25)
 

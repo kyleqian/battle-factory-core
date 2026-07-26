@@ -42,6 +42,24 @@ substitute state, multi-turn/multi-hit state, or another explicit script input.
 Every status needs a committed ON-profile trace; `exact` cannot retain a known
 remainder.
 
+## Defect A cracked open, not closed: monbg hypothesis RAM-CONFIRMED real, but the direct fix is a no-op — both moves stay `partial`, unchanged counts (2026-07-25)
+
+**Verdict: real, RAM-proven mechanism found; the obvious fix built from it does not close the defect — reverted, not landed.** Mandate: instrument defect A (the scale-window sprite-interior residual, cross-move-triangulated to `monbg`) before touching render code. Wrote `tools/probe/dump-monbg-scale-window.py` (new, cites `Cmd_monbg`/`MoveBattlerSpriteToBG`/`Task_InitUpdateMonBg`/`Task_UpdateMonBg`, `battle_anim.c:591-837`) and ran it against FUTURE_SIGHT's own kadabra-onix fixture, ticks 105-150: reads `gSprites[].invisible`/x2/y2/matrix, `gBattle_BG1_X/Y`/`gBattle_BG2_X/Y`, and the real `BG1CNT`/`BG2CNT`/`BG1HOFS`/`BG1VOFS`/`BG2HOFS`/`BG2VOFS`/`DISPCNT` hardware regs.
+
+**Confirmed:** the attacker OBJ's `invisible` bit is `TRUE` ticks 105-113 (post-`monbg`, pre-scale) and flips `FALSE` at exactly tick 114 — the same tick `attackerScale.active` goes true. Source read explains it exactly: `PrepareBattlerSpriteForRotScale` (`battle_anim_mons.c:1295-1307`), called at `AnimTask_ScaleMonAndRestore`'s own start, unconditionally re-clears the OBJ's `invisible` flag. So `monbg`'s hide is undone the instant the scale task begins — **both** the OBJ (now visible, scaled via its own OAM matrix, already RAM-exact per rung 5) **and** BG2's frozen `MoveBattlerSpriteToBG` tile copy (never rescaled, only re-panned/re-tinted every tick by `Task_UpdateMonBg`) are simultaneously live for the whole scale window. This is real, hard RAM evidence, not a guess.
+
+**The fix built from it did not work.** Tried "draw the same sprite unscaled first, then the real scaled OBJ on top" (gated on `attackerScale.active`/`targetScale.active`) in both moves' `battleScene.ts` draw cases. Reran both dense comparators twice: FUTURE_SIGHT moved only 85/114 → 86/114 (one frame, plausibly noise), and CONFUSION was **byte-identical** at 108/140 — directly verified by stashing the fix and re-rendering the same age: pixel-for-pixel identical output, including inside the mismatch region. **Reverted** (`git checkout -- src/engine/battleScene.ts`) rather than landed.
+
+**Why it was a no-op, and defect A's real shape:** cross-checking already-exact MOVE_BIND's own convention (xDelta=+10 on X drawn as a visible squeeze, i.e. a SHRINK) against `drawSpriteSheetAffineStretch`'s `sy=((ry*my)>>8)+halfH` formula shows a matrix value **below** 256 renders the sprite **bigger** (zoom in), not smaller. FUTURE_SIGHT/CONFUSION's `xDelta=yDelta=-4` is therefore a **GROW** (KADABRA/ONIX puff up), not a shrink — the opposite of this session's initial "shrink exposes a gutter" framing, which is why an underlay fix changed nothing (a grown OBJ already covers any underlay everywhere it matters). Direct pixel sampling (`tools/compare/scratch/confusion-pixel-list.mjs`, new) confirms the real symptom is the opposite of "missing fill": e.g. oracle pixel (181,3) reads `(255,0,0)`, a psychic-BG-swirl color, while this engine's own doubled-affine scan paints an opaque ONIX-gray `(189,181,181)` there — this engine's `doubled=true` scan reaches further than the real hardware's double-size OBJ actually paints.
+
+**Coverage: unchanged.** `MOVE_FUTURE_SIGHT` stays `partial`, 85/114. `MOVE_CONFUSION` stays `partial`, 108/140. Neither ledger's pinned counts moved (the +1 FUTURE_SIGHT frame from the reverted fix is gone too).
+
+**Evidence.** `npm test` 2463/2463 (unchanged — no engine/production code landed this session, only the new probe + scratch diagnostics). `npm run build` green.
+
+**Next action for a future session:** the "gutter" framing is wrong; re-derive from the GROW direction. Dump the OBJ's real OAM attr0/attr1 (shape/size bits — this session's probe didn't capture them) plus a raw per-scanline sample at a peak-scale tick (~frame 130) to find exactly where the real hardware's double-size affine window stops painting, since this engine's current "naive 2x bounding box" doubled scan is now the prime suspect for over-reaching. Both moves share this one root cause and should close together once it's found.
+
+**PAPERCUT:** none new this session beyond the already-known first-diff-only bbox report (already fixed by `--per-frame-bbox`, prior session).
+
 ## MOVE_CONFUSION ported (group-A sibling): window 1 (attacker) lands 19/20 exact, window 2 (target) carries FUTURE_SIGHT's own defect-A residual, stays `partial` at 108/140 (2026-07-25)
 
 **Verdict: real port, not a fit — window 1 essentially exact, window 2's residual is new evidence for FUTURE_SIGHT's still-open defect A, not a new bug.** Per the archived enumeration, CONFUSION's own script (`battle_anim_scripts.s:4716-4730`, verified directly, not assumed) composes only already-proven pieces around TWO sequential simultaneous-task windows, not one: window 1 (attacker) `AnimTask_ShakeMon2`+`blend_color_cycle`; window 2 (target) `AnimTask_ShakeMon`+`AnimTask_ScaleMonAndRestore` (same xDelta/yDelta/duration as FUTURE_SIGHT's own attacker scale, here on the TARGET - the real composition risk this port existed to check). Reused FUTURE_SIGHT's own KADABRA/ONIX fixture pairing (`FRONTIER_MON_KADABRA_1` carries both moves) - zero new sprite extraction needed.
@@ -130,76 +148,6 @@ opponent-attacker orientation (KADABRA front sprite extraction; the
 family map's own derivation says this is side-uniform, no new mechanism
 expected) and re-run `futureSightPortable.ts` to confirm `exact`.
 
-## MOVE_FUTURE_SIGHT rung 5: both mandated residual hypotheses disproven with hard RAM evidence; the named remainder was incomplete — it's actually two separate defects, stays `partial` (2026-07-25)
-
-**Verdict: no fix landed — this is a negative-evidence session, not a fit.**
-The step brief's own precedent (MOVE_GROWTH) said its attacker residual was
-neither idle-offset nor asset-decode but a framebuffer-display-lag bug; this
-session checked both of that precedent's named hypotheses against
-KADABRA/FUTURE_SIGHT in mandated order and **disproved both**, then found the
-named residual itself was incomplete. **No source file changed this
-session** (`git diff --stat src/` is empty) — every check below ran through
-disposable scratch scripts, none promoted since none produced a passing fix.
-
-**(a) Lag-pair bisection** (`tools/compare/scratch/future-sight-lag-bisect-
-cached.ts`, reusing an already-populated oracle scratch dir so each recheck
-is ~1s, no re-invocation): swept `scaleLag`×`tintLag` over `[0,3]×[0,3]`
-against the dense fixture. The already-committed `(2,1)` is the **unique
-local optimum across the whole grid** (max 75/114 anywhere) and `tintLag`
-has **zero effect** on the match count at any `scaleLag` — blend/tint isn't
-the active driver of this residual, and no better lag pair exists. Hypothesis
-rejected.
-
-**(b) RAM probe** (`tools/compare/scratch/future-sight-matrix-diag.ts`) —
-no new Python probe needed: the fixture's own existing probe
-(`tools/probe/run-battle-lab-rgb.py`) already records `playerSprite.matrix`/
-`x2`/`y2`/`paletteFaded`/`paletteUnfaded` every frame via `gOamMatrices`, so
-this session read that data directly. `x2`/`y2` are pinned at 0 every tick
-in the window (no idle-anim rest offset), and the OAM affine matrix is
-**RAM-exact against `futureSightAttackerEffectAtAge`'s own UNLAGGED
-mechanism at every probed tick (114/114)** — the same clean result GROWTH's
-own IVYSAUR VRAM probe found. Idle-offset and asset/decode hypotheses both
-rejected.
-
-**Residual re-characterized.** `futureSightPortable.ts`'s own mismatch
-report only computes a bbox for the *first* diff frame — a per-frame bbox
-sweep (`tools/compare/scratch/future-sight-per-frame-bbox.ts`) over the full
-39-frame mismatch range found the prior "confined to the attacker box"
-description covers only **29/39** frames (116-144: bbox grows 696px→2013px
-peak at frame130→41px, tracking the scale animation's own magnitude — a
-real, still-unidentified scale-window residual, RAM-proven not idle-offset/
-asset). The other **10/39** (147,148,151,152,155,156,159,160,163,164) are a
-**different, much larger defect**: a 17230px bbox spanning nearly the whole
-upper screen (0,0-239,111), recurring in an exact 2-on/2-off period-4
-pattern matching the psychic BG palette ring's own rotation cadence,
-confined to the second (`UnsetPsychicBackground`) fade window — not
-attacker-sprite-related at all. Tried the obvious next candidate (extend the
-already-proven BG-rotation 1-tick display lag to the `REG_BLDY` darken
-read) — this made the whole window sharply **worse** (19/114, not 75/114),
-ruling that mechanism out too, not blindly kept.
-
-**Coverage:** `MOVE_FUTURE_SIGHT` stays `partial` in `ANIMATION_COVERAGE.json`
-— same 75/114, now split into two named defects instead of one
-(incompletely-described) residual.
-
-**Evidence.** `npm test` 2451/2451 (unchanged — no engine code touched).
-`npm run build` green.
-
-**Next action for a future session:** RAM-probe `BLDCNT`/`BLDY` at register
-granularity around the second fade (defect 2 first — 17230px dwarfs
-defect 1's at-most-2013px), then return to defect 1's finer per-tick
-timing/magnitude; extend to the opponent-attacker orientation (KADABRA front
-sprite extraction, side-uniform per the family map) once both are closed;
-re-run `futureSightPortable.ts` to confirm `exact`.
-
-**PAPERCUT:** `futureSightPortable.ts` (and its `growthPortable.ts` sibling)
-only report the bbox of the *first* mismatched frame in a dense window, not
-a per-frame or window-wide bbox — this cost real time this session
-(the true defect shape only surfaced via a bespoke scratch script). Worth a
-follow-up: have the shared dense-comparator harness report bbox for every
-mismatched frame (or at least the widest one), not just the first.
-
-**Housekeeping (this session):** moved the "`blend_color_cycle` group A
-extended" entry (MOVE_FUTURE_SIGHT's initial port + the group-A enumeration)
-to `ANIMATION_PROGRESS-archive.md` to keep ~3 live (AGENTS.md's convention);
-rung 6 and rung 5 stay live alongside this session's new CONFUSION entry.
+**Housekeeping (this session):** moved the "MOVE_FUTURE_SIGHT rung 5" entry
+to `ANIMATION_PROGRESS-archive.md` to keep ~3 live (AGENTS.md's convention)
+after adding this session's new top entry.
