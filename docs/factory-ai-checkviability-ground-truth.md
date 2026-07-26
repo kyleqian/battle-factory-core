@@ -850,3 +850,145 @@ fixtures (§11.1's 2 + §11.2's 2), with cross-seed stability asserted for 3
 of the 4 and explicitly *not* asserted for `HighCrit`'s neutral fixture
 (§11.2's own documented finding). **Run twice this session, ALL PASS both
 times** (existing `SpeedDown` checks unchanged and still passing).
+
+## 12. 2026-07-26 addendum #2: `AI_CV_AlwaysHit` live-staged; `AI_CV_VitalThrow` pickup point confirmed
+
+Second follow-up scout session (side lane, Battle Scene OFF), same no-`src/`-
+changes contract. Recovered and validated a prior session's dropped-mid-work
+draft fixtures for `AI_CV_AlwaysHit` (§11.3's own recipe, followed almost
+exactly as written); `AI_CV_VitalThrow` (§11.4) was not attempted this
+session — its existing recipe remains the accurate pickup point (§12.2 below
+explains why it wasn't started, not just "ran out of time").
+
+### 12.1 `AI_CV_AlwaysHit` — fully staged, live-verified, cleanly attributed
+
+Fixtures (both checked in under `tools/battle-lab/`, both level 50):
+
+- **Reach** (`mechanic-factory-ai-cv-alwayshit-evasion-reach-off.json`):
+  opponent = Marowak (105, pure Ground), all 4 slots `MOVE_SWIFT` (129, 60
+  power, `EFFECT_ALWAYS_HIT`). Target = player's Haunter (93, pure Ghost),
+  all 4 slots `MOVE_DOUBLE_TEAM` (104, `EFFECT_EVASION_UP`, always hits, no
+  accuracy roll) — raises the player's own evasion stage by 1 per executed
+  turn (base 6).
+- **Control** (`mechanic-factory-ai-cv-alwayshit-splash-control-off.json`):
+  identical opponent/target/species/turn-count; target's moveset is
+  `MOVE_SPLASH` (150, `EFFECT_SPLASH`) x4 instead — evasion stays at the
+  neutral stage 6 throughout.
+- **Why Haunter in both fixtures**: `MOVE_SWIFT` is Normal-type; Ghost is
+  immune to Normal regardless of `EFFECT_ALWAYS_HIT`'s accuracy-bypass (real
+  in-game Swift trivia, confirmed live — `oppHP`/`playerHP` unchanged across
+  every turn in both fixtures below), so neither side's HP ever moves. This
+  was §11.3's own point 3, and it removes §11.2's HighCrit-style
+  "phantom-decision reads a seed-variable post-hit HP band" confound
+  entirely — confirmed live, not just asserted: both seeds' total draw
+  counts below are cross-seed-stable, unlike HighCrit's neutral fixture.
+- Both moves confirmed `accuracy: 0` in `data/battle_moves.h` (Double Team,
+  Swift, and Splash all three) — `Cmd_accuracycheck`/`AccuracyCalcHelper`
+  (`battle_script_commands.c:1054-1094,1105-1147`) skip `Random()` entirely
+  for all of them, so no accuracy-roll noise enters either fixture.
+- Multi-turn mash: reused §11.1's calibrated `[A, wait 30, continuous
+  [A(2), wait(18)]]` pattern; reach needed 90 reps (2232 frames total) vs.
+  control's 75 (1932 frames) — Double Team's own longer battle message
+  ("Foe's HAUNTER's evasiveness rose!") vs. Splash's shorter one
+  ("But nothing happened!") shifts turn cadence, same mechanism §11.1 named.
+  Both fixtures individually confirmed (live, this session) to execute
+  **exactly 4 opponent turns** via PP delta before locking in the frame
+  budget — not assumed from the draft.
+
+**Live ledger** (`tools/probe/verify-factory-ai-checkviability-ground-truth.ts`,
+frame 0 → final, `stepsToReach` forward search, cross-checked against the
+oracle's own `pp`/`statStages[STAT_EVASION]` fields directly):
+
+| Fixture | Seed | Opponent PP used (turns) | Player evasion stage (start→end) | Total `Random()` calls, frame 0→final | Determinism (2 runs) |
+| --- | -: | -: | --- | -: | --- |
+| Reach (evasion buildup) | 1 | 4 | 6→10 | **44** | identical |
+| Reach (evasion buildup) | 99 | 4 | 6→10 | **44** | identical |
+| Control (Splash) | 1 | 4 | 6→6 | **36** | identical |
+| Control (Splash) | 99 | 4 | 6→6 | **36** | identical |
+
+Both fixtures individually cross-seed-stable (44/44, 36/36) — no HP-band
+confound, matching the design's own intent. Delta = **+8**, not the "+1 per
+reachable decision" shape §11.0/§11.1/§11.2 assumed for Pursuit/HighCrit.
+
+**Attribution (new instrument use, not just a total-window delta)**: ran the
+patched `tools/probe/attribute-factory-ai-random-callers.py` (this session's
+`probe-window-override.patch` applied — small additive
+`[windowStartExclusive windowEndInclusive]` CLI args, `git apply`d cleanly,
+kept) against both fixtures with the window widened to their own full trace
+(`0 2232` / `0 1932`, since the default 100-732 single-turn window doesn't
+cover a 4-turn build). Per-caller counts are **identical between the two
+fixtures except one**:
+
+| Caller function | Reach count | Control count |
+| --- | -: | -: |
+| `BattleAI_SetupAIData+0x83` | 16 | 16 |
+| `BattleTurnPassed+0x157` | 4 | 4 |
+| `ChooseMoveOrAction_Singles+0xf7` | 4 | 4 |
+| `Cmd_adjustnormaldamage+0x7` | 4 | 4 |
+| `Cmd_critcalc+0x127` | 4 | 4 |
+| `Cmd_seteffectwithchance+0x81` | 4 | 4 |
+| `Cmd_if_random_less_than+0x7` | **8** | **0** |
+
+The entire +8 delta is `Cmd_if_random_less_than` — the exact opcode
+implementing `AI_CV_AlwaysHit2`'s `if_random_less_than 100` — with zero
+contamination from any other call site. This is a strictly cleaner isolation
+than Pursuit/HighCrit got (neither was run through this attribution probe;
+their evidence is the total-step delta alone).
+
+**Mechanism (found via the per-tick attribution table, not guessed)**: the
+window contains 4 visible opponent decisions (turn 1's own decision predates
+frame 0, per §6's established "unobservable before frame 0" finding) at
+ticks ~469/929/1389/1849 — corresponding to turns 2 (evasion 7, both gates
+false), 3 (evasion 8, both gates still false — needs *strictly* greater than
+8), 4 (evasion 9, **reachable**, real/executed), and a phantom 5th
+(computed but never executed — same "next decision is baked in" finding as
+§6/§11.0 — evasion 10, **also reachable**, since 10 is `>8` and not `>10`).
+Only the last two ticks (1389, 1849) show `Cmd_if_random_less_than` hits —
+and each shows **4**, not 1: `AI_CheckViability` evaluates the opponent's
+own 4 move-slot candidates independently, and since all 4 slots are the
+identical `MOVE_SWIFT`, `AI_CV_AlwaysHit` (and its own random roll) runs
+once per slot, all 4 with the same result. **2 reachable decisions × 4
+identical slots = 8.**
+
+**Porter/next-session caveat (new finding, doesn't touch §11.1/§11.2's own
+pinned PASS/FAIL numbers, which are unaffected and still correct
+measurements)**: a reachable branch's draw cost scales with the number of
+identical dispatch-triggering move slots in the moveset used to build the
+fixture, not a flat "1 per decision" — §11.1/§11.2's own prose describing
+"exactly once when reached" was never checked at this attribution-probe
+granularity (their evidence was the total-step delta alone, +2 and +5/+6
+respectively, both consistent with *either* "1 draw × 2 decisions" or some
+other combination that happens to sum the same). Given all 4 slots were
+also identical single moves in those two fixtures, the same ×4 multiplier
+plausibly applies there too and the "+2"/"+5" language undersells the real
+per-decision draw count — but re-deriving that is out of this session's
+scope (their PASS/FAIL assertions are unaffected either way; this note
+exists so a future exact-mechanism claim doesn't inherit an unverified
+"1 draw per decision" assumption without re-checking it).
+
+### 12.2 `AI_CV_VitalThrow` — still not staged; pickup point unchanged from §11.4, with one clarification
+
+Not attempted this session (after `AlwaysHit`'s full stage + live attribution
+above, the remaining budget did not comfortably fit VitalThrow's own harder
+piece — real Gen-3 damage-formula arithmetic sized to land the opponent
+in a comfortable `<40%`-remaining band without risking an accidental
+crit-faint, §11.4's own point 1 — and a rushed, unverified fixture would be
+worse evidence than leaving §11.4's recipe as the accurate next step).
+
+**Confirmed still true, checked again this session**: `MOVE_VITAL_THROW` is
+id 233, `EFFECT_VITAL_THROW`, priority **-1** in
+`data/battle_moves.h` (no change needed to §11.4's citation); `if_target_faster`
+is priority-blind (entry 463's own finding, unchanged). No new source
+reading surfaced anything that revises §11.4's recipe sketch — the next
+porter should start there: pick a specific attacker/defender species+level
+pair, work the exact damage roll band (85-100%, both the low and high ends
+of the 3-hit-or-1-hit sizing), and stage turn 1 as a real player move (not a
+transient HP injection, which `mechanicLab` doesn't allow per
+`tools/battle-lab/README.md`).
+
+**Verify script status**: `tools/probe/verify-factory-ai-checkviability-ground-truth.ts`
+extended this session with `AI_CV_AlwaysHit`'s 2 fixtures only (§12.1) —
+`SpeedDown`/`Pursuit`/`HighCrit` checks (§9, §11.5) unchanged and still
+green. **Run twice this session, ALL PASS both times.** No `AI_CV_VitalThrow`
+scenario exists yet — §11.4's recipe remains unexecuted analysis, not a
+regression.
