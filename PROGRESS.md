@@ -4,6 +4,115 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 466 — Two more CheckViability handler bodies ported: AI_CV_Pursuit + AI_CV_HighCrit, both CV-only per §10 (entry 465's carried item)
+
+- **State:** tree green at **220 files / 2694 tests** (+0 files/+35 tests
+  over entry 465's merged 220/2659), build green (`tsc -b && vite build`).
+  Ratchet unchanged (6/6 `executableFrontierRatchet.test.ts` — same as
+  entry 463, CV's `unsupported-branch` results are plain tagged returns,
+  not the `unsupportedBranch(...)` helper that ratchet tracks). Four
+  commits (`07a5f6a` port, `3242f88` dead-code removal, `fda0564` unit
+  tests, `64d5aae` engine-side fixture reproduction), all green.
+  `tools/probe/verify-factory-ai-checkviability-ground-truth.ts` rerun
+  live against the oracle, twice: **ALL PASS** both times (all 4 §11
+  fixtures + the 2 §6 SpeedDown fixtures, all seeds/counts unchanged —
+  confirms the fixtures still bank, independent of this port).
+- **Did:** ported both of the doc's §11-staged CV-only handlers into
+  `factoryAiCheckViability.ts`, same dispatch-before-barrier shape §463
+  established for SpeedDown.
+  1. **`AI_CV_Pursuit`** (`data/battle_ai_scripts.s:2018-2036`, doc §11.1):
+     `is_first_turn_for AI_USER` gates on the OPPONENT's own elapsed-turns
+     counter (2/1/0 across turns 1/2/3+, unrelated to Pursuit's real
+     switch-punish purpose); once clear, tests the target's own two type
+     slots against Ghost/Psychic (hardcoded, not a real type-effectiveness
+     read), then one `if_random_less_than 128` roll (+1 or nothing).
+     Dispatches on `EFFECT_PURSUIT`.
+  2. **`AI_CV_HighCrit`** (`:1449-1461`, doc §11.2): reused
+     `Cmd_if_type_effectiveness`'s real STAB (`applyStab`) + truncating
+     type-multiply (`applyTypeEffectiveness`) pipeline — the SAME
+     functions the hit chain and `factoryAiTryToFaint.ts`'s
+     `isQuadrupleEffective` already use — plus its 4 magic-number remaps
+     (120/240/30/15 → x2/x4/x0.5/x0.25). New finding beyond the doc's own
+     §11.2 write-up, confirmed by direct source read of the real assembly
+     layout: the neutral/immune "no explicit match" fallthrough doesn't
+     land on a *shared* single roll — it falls through SEQUENTIALLY into
+     the first `if_random_less_than 128`, and NOT jumping from that one
+     (roll >= 128) drops straight into `AI_CV_HighCrit2`'s own second
+     `if_random_less_than 128` immediately after (no gap in the assembly).
+     So the "other" bucket burns ONE draw (first roll < 128) or TWO
+     (first roll >= 128, cascading into the second), not a fixed count —
+     ported and unit-tested for all three shapes (1-draw jump, 2-draw
+     jump, 2-draw fallthrough+bonus). Dispatches on
+     `EFFECT_HIGH_CRITICAL`/`EFFECT_BLAZE_KICK`/`EFFECT_POISON_TAIL` (all
+     3 §11.2-named triggering effects). Deliberately did **not** port
+     `Cmd_if_type_effectiveness`'s own Levitate+Ground short-circuit
+     (unlike its `factoryAiTryToFaint.ts` sibling): all 10 real
+     HighCrit-triggering moves are Fighting/Grass/Water/Normal/Flying/
+     Fire/Poison-typed, never Ground, so that branch is structurally
+     unreachable for this specific handler — carried it initially, then
+     removed it once the unreachability was confirmed (a live, deliberate
+     simplification per AGENTS.md's own anti-overengineering guidance, not
+     an oversight; also collapsed a since-unneeded
+     `FactoryAiCheckViabilityTarget` type back into
+     `FactoryAiCheckViabilityBattler`).
+  3. **Plumbing:** `FactoryAiCheckViabilityBattler`/`FactoryAiScoredBattlerView`
+     gained `types` (both sides) and `isFirstTurn` (attacker-meaningful
+     only, target's copy unread) — no `ability` field added (HighCrit
+     needed it only for the since-removed Levitate branch).
+- **Test:** every branch of both handlers via `runCheckViability` directly
+  (25 new tests in `tests/factoryAiCheckViability.test.ts`, 37 total):
+  Pursuit's turn-1/turn-2 deterministic-zero (even against a matching
+  type), turn-3+ against a non-matching type, all 4 `if_equal` sites
+  (type1==GHOST/PSYCHIC, type2==GHOST/PSYCHIC) reaching the roll, both
+  roll outcomes; HighCrit's x0.25/x0.5 via both direct match and the STAB
+  remap, x2/x4 via both direct match and the STAB remap with both roll
+  outcomes on the direct-match branch, the neutral/immune cascade's three
+  draw-count/outcome shapes plus 0x routing through the same path, all 3
+  dispatching effects, both pass-through barriers. Engine-side
+  reproduction of all 4 banked §11 fixtures through
+  `chooseFactoryAiScoredDecision` (10 new tests in
+  `tests/factoryAiScoredDecision.test.ts`), at both banked seeds (1, 99):
+  Pursuit's real triggering effect has no CBM table entry (unlike entry
+  463's Growl/AttackDown confound), so the real all-4-slots-identical
+  moveset reproduces directly with no control-move substitution needed —
+  reach=4/control=0 check-viability draws (each of the 4 identical slots
+  independently reaches or misses the roll, matching this file's own
+  pre-existing "degenerate fixture" precedent: N identical slots draw N
+  times, not once); HighCrit resisted=0 (deterministic), neutral=6 at
+  both banked seeds (live-computed and pinned exact, not guessed — ranges
+  4-8 per the cascade above, cross-seed-identical here but not asserted
+  invariant in general, matching the doc's own §11.2 cross-seed-wobble
+  finding structurally rather than chasing its window-total numbers, per
+  the brief's own instruction). Along the way, discovered and corrected
+  an invalid assumption that 4 identical move slots always score a clean
+  tie — `AI_TryToFaint`'s own per-slot `simulatedRng` damage-estimate
+  variance breaks that unless every slot's `canFaint` branch fires
+  uniformly (e.g. a 5-HP target, this file's pre-existing degenerate-Surf
+  fixture); the new tests assert the submitted move ID instead of a
+  specific tied slot set.
+- **Next:** `AI_CV_AlwaysHit`/`AI_CV_VitalThrow` (side lane's own item this
+  hour per the brief — analytical-only recipes already banked in doc §11.3/
+  §11.4, not staged or ported here). Any CBM-blocked handler (17 of 22
+  reachable `AI_CV_*`) needs its paired `AI_CBM_*` ported too, not just the
+  CV side. `END3` registration remains a named architectural gap (entry
+  465's own side-merge finding) blocking ENDTURN_ABILITIES's 3 scripted
+  cases. Also still open from entry 465: turn 4's own
+  `anchorOpponentAfterTurn4Hp` staging gap, items 1/5 from seam-scout §9,
+  every other still-`blocked-on-opcodes` census row.
+- **Notes:** stayed inside scope — no `AI_CV_AlwaysHit`/`AI_CV_VitalThrow`,
+  no CBM-blocked handler, no ENDTURN registration, no
+  `docs/factory-ai-checkviability-ground-truth.md` or verify-script edits
+  (side lane's own files this hour), no seam/animation files. No PAPERCUT:
+  the multi-slot draw-count investigation (confirming each of 4 identical
+  moveset slots independently re-executes the handler, not a single shared
+  evaluation) cost real reading time in `battle_ai_script_commands.c`
+  (`BattleAI_DoAIProcessing`/`ChooseMoveOrAction_Singles`) before writing
+  any engine-side test, but resolved cleanly within scope — worth flagging
+  for a future porter: this file's own pre-existing "degenerate fixture
+  (all 4 slots Surf)" test is the load-bearing precedent, not something to
+  re-derive from scratch.
+
+---
 ## 465 — Presentation-seam window 3 wired: `turn5-rockslide.json` re-driven from the REAL MOVE_ENDEAVOR kernel chain (§9.4's own 6-rung plan, rung 1 done in entry 464)
 
 - **State:** tree green at **220 files / 2656 tests** (+0 files/+2 tests
@@ -229,124 +338,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   documented 23-vs-24 cross-seed draw-count wobble (phantom next-turn
   decision, HP-sensitive) — individually reproducible, flagged as porter
   guidance. Merged tree re-verified green (220/2654).
-
----
-## 463 — First CheckViability handler-body port: AI_CBM_SpeedDown + AI_CV_SpeedDown, the proven CBM+CV pair (entry 462's carried item, per `docs/factory-ai-checkviability-ground-truth.md`)
-
-- **State:** tree green at **219 files / 2627 tests** (+0 files/+17 tests
-  over entry 462's 219/2610), build green, ratchet unchanged (the CBM/CV
-  `unsupported-branch` results are plain tagged returns, not the
-  `unsupportedBranch(...)` helper `executableFrontierRatchet.test.ts`
-  tracks — confirmed neither `factoryAiCheckBadMove.ts` nor
-  `factoryAiCheckViability.ts` is in `PINNED_BARRIER_COUNTS`, so this
-  step's barrier-narrowing is real but outside that ratchet's mechanism).
-  Two commits (`7fec289` port, `a2250eb` tests), both green.
-  `tools/probe/verify-factory-ai-checkviability-ground-truth.ts` rerun
-  live against the oracle: **ALL PASS** (both fixtures, both seeds,
-  10/10 and 20/20 total-step counts unchanged — confirms the fixtures
-  still bank, independent of this port).
-- **Did:** ported the doc's own §6-staged pair exactly as scoped.
-  1. **`AI_CBM_SpeedDown`** (`data/battle_ai_scripts.s:287-312`, 3
-     instructions + the shared `CheckIfAbilityBlocksStatChange`
-     subroutine) inside `factoryAiCheckBadMove.ts`: MIN_STAT_STAGE and a
-     new zero-RNG `checkAbilityAiTarget` port of `Cmd_check_ability`
-     (`battle_ai_script_commands.c:1407-1443`, AI_TARGET branch --
-     distinct from `get_ability`'s guess-and-draw machinery, ported
-     exact including its own real quirk: an unknown two-ability species
-     can NEVER register a `check_ability` match, for either ability, not
-     a coin flip) short-circuit Speed Boost; the shared tail's own
-     `get_ability AI_TARGET` reuses `nextGetAbilityDraw` unchanged (entry
-     460's redraw-per-call machinery, not re-derived). Dispatches on
-     `EFFECT_SPEED_DOWN`/`EFFECT_SPEED_DOWN_2` before the generic
-     barrier check; every other CBM-tabled effect still barriers.
-  2. **`AI_CV_SpeedDown`** (`:1142-1152`) inside
-     `factoryAiCheckViability.ts`: `if_target_faster` is `if_user_goes 1`
-     (`Cmd_if_user_goes`, `battle_ai_script_commands.c:1268-1274`) --
-     jumps only when `GetWhoStrikesFirst(AI_USER, AI_TARGET,
-     ignoreChosenMoves=TRUE)` returns EXACTLY 1, reusing `turnOrder.ts`'s
-     already-ported `getWhoStrikesFirst`/`effectiveSpeed` (both
-     battlers forced to movePriority 0, matching `ignoreChosenMoves`)
-     rather than re-deriving speed-order semantics. Ported the one real
-     subtlety the brief flagged for exactness: an EXACT speed tie still
-     burns one real `Random()` call inside `GetWhoStrikesFirst` itself
-     (`speedBattler1 == speedBattler2 && Random() & 1`), even though a
-     tie can only resolve to strikesFirst 0 or 2 -- never 1 -- so the
-     `if_target_faster` branch is never taken on a tie regardless of the
-     roll's parity. Then `if_random_less_than 70` (`Cmd_if_random_less_than`,
-     `random % 256 < 70`, same `nextDraw`/`% 256` shape as
-     `factoryAiTryToFaint.ts`'s own roll). Same dispatch-before-barrier
-     shape as CBM; every other CV-tabled effect still barriers.
-  3. **Plumbing:** `FactoryAiScoredBattlerView` gained `speed`/
-     `statStages.speed` (both attacker and target) -- no other engine
-     module reads it yet, source-required for `if_target_faster` alone;
-     threaded through `targetForCbm.speedStage` and a new `attacker`/
-     `target` param pair on `runCheckViability`. CV's own draws
-     (previously always empty) now flow into the trace the same way
-     CBM/TryToFaint's already do -- `submitFactoryAiScoredDecision`'s own
-     kernel-replay check would have caught a miss here loudly (RNG-calls
-     mismatch), not silently.
-- **Test:** unit coverage for every branch of both handlers (CBM:
-  MIN_STAT_STAGE -10/0 draws using a single-ability target since Marowak's
-  own ambiguous ability would confound the "zero total draws" claim;
-  Speed Boost -10/0 draws via Ninjask; the if_ability two-ability-unknown
-  quirk pinned against Yanma, scoreDelta 0 but 2 real draws; Clear
-  Body/White Smoke -10 via known abilities; CV: target-faster -3/0
-  draws; target-slower roll<70/0-bonus and >=70/+2, exactly 1 draw each;
-  the exact-tie case at both roll parities, 1 draw either way, scoreDelta
-  always -3) -- 20 new tests. Mask-7 end-to-end reproduction of both
-  banked fixtures through `chooseFactoryAiScoredDecision` (2 seeds each,
-  4 new tests): opponent-faster (Dugtrio AI vs Shuckle target) never
-  picks slot 0, 5 total draws (4 setup + 1 tie, zero CBM/TryToFaint/CV);
-  opponent-slower (roles swapped) always picks slot 0, 6 total draws (the
-  extra one is CV's own roll, landing >=70 at both test seeds). Substituted
-  the doc's own `MOVE_GROWL` control move for `MOVE_SPLASH` -- Growl's
-  `EFFECT_ATTACK_DOWN` is a DIFFERENT CBM-blocked handler
-  (`AI_CBM_AttackDown`, unported) that would barrier before this scenario
-  ever reached `AI_CV_SpeedDown`; Splash has no entry in either dispatch
-  table at all (unconditionally zero score/draws, not just in this battle
-  state), so it isolates the SpeedDown pair's own causal contribution
-  cleanly -- named explicitly in both the test file and here since it's a
-  real, deliberate substitution, not an oversight. Both dispatch barriers
-  reconfirmed to still fire for every other reachable effect
-  (`EFFECT_ATTACK_DOWN` pass-through, both files).
-- **Next:** the doc's own §10 recommendation -- the 4 remaining CV-only-
-  reachable handlers with no CBM pairing needed (`AI_CV_AlwaysHit`,
-  `AI_CV_HighCrit`, `AI_CV_VitalThrow`, `AI_CV_Pursuit`; no live fixtures
-  staged for these yet, named as next by the scout). Any of the
-  CBM-blocked 17 (`AccuracyDown`/`AttackDown`/`DefenseDown`/`SpDefDown`/
-  weather setters/screens/stat-ups) needs BOTH its `AI_CBM_*` and
-  `AI_CV_*` handler ported together, not just the CV side (this step's
-  own `MOVE_GROWL`-vs-`AttackDown` gap is a live example of what happens
-  otherwise). Also still open from entry 462: seam window 3
-  (`turn5-rockslide.json`), ENDTURN_ABILITIES/ITEMS1/ITEMS2 breadth,
-  Nightmare/Curse/Thrash/Disable/Taunt end-turn bodies.
-- **Notes:** stayed strictly inside this step's scope -- no other CV
-  handler, no `AI_CV_SpeedDownFromChance`, no seam/presentation/animation
-  files touched. No PAPERCUT: the `MOVE_GROWL`-hits-an-unrelated-barrier
-  discovery cost some investigation time but was resolved within scope by
-  swapping the control move, not a dev-loop friction worth flagging
-  separately.
-- **Side merge (same hour, supervisor-verified, comparator spot-checked
-  live at 256/256):** seam window 3 prep-scout landed as
-  `docs/presentation-seam-scout.md` §9 (`turn5-rockslide.json`): full
-  consumer map (corrects the constants' provenance — three bare literals +
-  one non-turn-dump asset, not `battle1TurnRamDumpAsset` fields), staged
-  opponent-attacks-player proof via unwired
-  `turn5EndeavorPresentationStaging.ts` (+7 tests), and the real blocker
-  named: `EFFECT_ENDEAVOR` is blocked on `SETDAMAGETOHEALTHDIFFERENCE`/
-  `BICBYTE`/`ADJUSTSETDAMAGE` — registration is the wiring step's rung 1.
-- **Animation merge (same hour, supervisor-verified live at 114/114):**
-  defect A FIXED for FUTURE_SIGHT — new DISPCNT-OBJ-off underlayer probe
-  named the 2nd blend target directly (formula exact 26/26 sampled
-  pixels; blend computed on 8-bit-expanded RGB, not re-truncated 5-bit),
-  `battleScene.ts` now composites scale-window blend sprites 50/50 over
-  the tinted frozen `monbg` copy. **MOVE_FUTURE_SIGHT promoted
-  `partial`→`exact` 114/114** (×2). CONFUSION stays 108/140 — blend
-  proven a no-op there via stash-diff; its blocker is the separate
-  banked one-tick OAM x-lag on the target shake. GROWTH 63/63 and BIND
-  45/45 gates held (neither sets objMode=1, source-confirmed). Probe
-  harness finding: `EmeraldOracle.write_u8/u16` silently no-op for
-  IO/OAM/palette RAM — worked around via libmgba-py `_bus_write`.
-  Combined merged tree re-verified: **220 files / 2634 tests + build
-  green.**
 
