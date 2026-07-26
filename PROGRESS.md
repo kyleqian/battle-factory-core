@@ -11,6 +11,73 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > not abandoned). See the matching note in SUPERVISOR.md.
 
 ---
+## 479 — [SUPERVISOR WIND-DOWN 2026-07-26 ~15:50] session summary
+
+- **State:** tree committed and green at **225 files / 3032 tests**, build
+  green, census **90/214 effects, 185/355 moves, 148/276 Factory-L50,
+  1830/2957 weighted** (all 32 self-checks pass; session start was 79/214,
+  163/355, 128/276, 1573/2957 with 25 checks — the census is also
+  MORE HONEST now: 4 false positives fixed via ISSUES #45's classifier fix,
+  so the true frontier delta is larger than the headline numbers). Single
+  main worktree, zero unmerged branches, zero stale worktrees, clean
+  `git status`. **No DEFERRED entries — nothing blocks the next
+  `run-supervisor.sh`.** No usage/rate limits at any point; all 19 workers
+  ran to completion (zero cap-kills, zero API drops, zero failed steps).
+- **Session (10 rounds / 19 workers over 2 lanes — animation paused by user
+  directive; every step supervisor-verified live: side branches verified in
+  their own worktrees with my own verify-script reruns before every merge,
+  suite+build rerun on every merged tree):**
+  - **Factory-AI CheckViability track:** EIGHT CBM+CV pairs ported —
+    AttackDown (§14), DefenseDown+SpDefDown (§15/§16), AttackUp+DefenseUp+
+    BulkUp (§17/§18), AccuracyDown (§19, all 7 draw sites), SpeedUp+SpAtkUp
+    (§20/§21) — 14 of 22 reachable CV handlers now live with CBM
+    counterparts, each against side-staged twin-fixture ground truth
+    (ledgers at both seeds ×2, draw-site attribution, six sibling-copy/
+    prose traps caught by assembly re-derivation). §6's original SpeedDown
+    fixtures now reproduce end-to-end through the engine.
+  - **End-turn track:** ENDTURN_ITEMS1 registered (REMOVEITEM + Leftovers/
+    8 cure berries/White Herb, live-verified to the exact frame); **END3
+    registered** (design-scout → registration pipeline; callback-stack
+    model, Cmd_end3 pops both stacks) with ENDTURN_ABILITIES completed —
+    Speed Boost, Rain Dish, Shed Skin, Truant all wired (barrier set now
+    EMPTY); stretch stat-up berries (Liechi/Salac/Petaya) landed.
+    ENDTURN_ITEMS2 stays correctly unregistered (Yawn/Thrash prerequisite).
+  - **Census clusters:** primary status cluster registered — EFFECT_SLEEP/
+    TOXIC/POISON/PARALYZE/CONFUSE (+ bonus SNORE/FACADE) via
+    SETEFFECTPRIMARY + 4 jump opcodes + jumpifability/JUMPIFSTATUS2
+    widenings; fixed-damage cluster registered — EFFECT_LEVEL_DAMAGE/
+    PSYWAVE/BRICK_BREAK via DMGTOLEVEL/PSYWAVEDAMAGEEFFECT/TYPECALC2
+    (pure immunity gate, no scaling)/REMOVELIGHTSCREENREFLECT.
+  - **Census hygiene:** ISSUES #45 filed AND fixed same-session (4 false
+    positives — classifier now knows SETEFFECTPRIMARY; POISON_FANG
+    corrected the other way; self-checks 25→32).
+  - **Design bank for next session:** `docs/counter-retaliation-design.md`
+    (Counter/Mirror Coat: 4 new flat protect-damage fields + turn clear in
+    `mapFaintedActionsResult`'s no-fainted branch, 8-step checklist) +
+    **ISSUES #46** (the missing ProtectStruct per-turn clear is a LATENT
+    staleness bug in landed admission mechanics, not just a Counter
+    blocker).
+- **Next (in order):** Counter/Mirror Coat registration per
+  `docs/counter-retaliation-design.md` §4 + ISSUES #46 (also fixes the
+  latent clear bug; +54 weighted); SpDefUp/CosmicPower/CalmMind pair
+  (staging groundwork flagged in entry 477's side-merge note: separate CBM
+  handlers `:576-593`, Gate F `if_in_bytes` INVERTED vs DefenseUp); then
+  LightScreen/Reflect/EvasionUp/EvasionDown/weather-trio pairs (the last 8
+  of 22 CV handlers); §19.5's unstaged AccuracyDown sites 2-6 (need mixed
+  movesets); entry 476's §18 5-6-draw window discrepancy (probe candidate,
+  sRandCount attribution); ENDTURN_ITEMS2 after Yawn/Thrash. Seam — turn-4
+  `anchorOpponentAfterTurn4Hp` staging gap and seam-scout §9 items remain
+  carried from entry 468 (untouched this session; the AI/census tracks were
+  prioritized). Animation — still paused per the user directive at top;
+  entry 468's animation items stay deferred, not abandoned.
+- **Notes:** zero PAPERCUTS flagged by any of the 19 workers (a first).
+  Supervisor process: the cwd-in-worktree self-merge trap fired once during
+  a fold (caught immediately, zero loss — branch merged cleanly from the
+  main tree; memory updated with the refined merge-block-starts-with-cd
+  rule). Oracle services stayed fresh all session
+  (`check-oracle-freshness.sh` PASS at start).
+
+---
 ## 478 — Seventh + eighth CBM-blocked pairs ported: `AI_CBM_SpeedUp`+`AI_CV_SpeedUp` (doc §20, mandatory) and `AI_CBM_SpAtkUp`+`AI_CV_SpAtkUp` (doc §21, expected)
 
 - **State:** tree green at **225 files / 3032 tests** (+0 files/+36 tests
@@ -220,122 +287,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   non-mutual-exclusivity of Gates D-G, DRAW SITE 7's reversed polarity, the
   exact status-flag source bits) were precise enough that every gate ported
   cleanly on first read and every unit test passed on first run.
-
----
-## 476 — Both stat-UP CheckViability pairs ported: `AI_CBM_AttackUp`+`AI_CV_AttackUp` (doc §17, mandatory) and `AI_CBM_DefenseUp`+`AI_CV_DefenseUp`+`AI_CBM_BulkUp` (doc §18, stretch — landed)
-
-- **Side merge (same round, supervisor-verified incl. C-source cites, green
-  on the merged tree):** Counter/Mirror Coat retaliation-bookkeeping design
-  scout banked (`docs/counter-retaliation-design.md`, branch
-  `worker/side-20260726-142528`, merged) — the END3-precedent design step.
-  Load-bearing findings (supervisor re-verified `SpecialStatusesClear` at
-  `battle_util.c:658-663` and `TurnValuesCleanUp(FALSE)` at
-  `battle_main.c:3040/3901`): `Cmd_datahpupdate` writes the SAME value into
-  `gSpecialStatuses` (wiped after every action) and `gProtectStructs`
-  (survives to the turn boundary) — Counter reads cross-action, so reusing
-  the engine's `specialStatus.physicalDmg` would be wrong; four new flat
-  fields + a turn clear in `mapFaintedActionsResult`'s no-fainted branch
-  are the design. The missing turn clear is also a LATENT staleness bug for
-  already-modeled ProtectStruct bits — filed as **ISSUES #46** with the
-  §4 8-step registration checklist as the fix path. Merged tree: **225
-  files / 2961 tests + build green.** (Supervisor process note: hit the
-  known cwd-in-worktree self-merge trap once during this fold — caught
-  immediately, no loss; the branch commit survived and merged cleanly from
-  the main tree.)
-
-- **State:** tree green at **225 files / 2961 tests** (+0 files/+45 tests
-  over entry 475's 225/2916), build green (`tsc -b && vite build`). Ratchets
-  **unmoved**: `executableFrontierRatchet.test.ts` (no new opcode — this
-  session touches only `factoryAiCheckBadMove.ts`/`factoryAiCheckViability.ts`/
-  `factoryAiDecisionPolicy.ts`, none opcode-barrier-tracked) and
-  `battleScriptRulesContext.test.ts`'s opcode-handler-count pin (106,
-  unchanged). Doc's own verify script
-  (`tools/probe/verify-factory-ai-checkviability-ground-truth.ts`,
-  READ/RUN-only, untouched): **PASS ×2** (before touching source, and again
-  at the end) — unaffected either way, as expected.
-- **Did (four commits, all green):**
-  1. **Pair 1 port** — `AI_CBM_AttackUp` (`data/battle_ai_scripts.s:249-251`,
-     bare 2-instruction `MAX_STAT_STAGE` gate on `AI_USER`'s own ATK stage,
-     zero `get_ability`, no shared `CheckIfAbilityBlocksStatChange` tail —
-     confirms the brief's documented asymmetry) + `AI_CV_AttackUp`
-     (`:896-913`, 3 `if_random_less_than` sites, every gate/draw site reads
-     `AI_USER`'s own state, `AI_TARGET` never read at all — a first for this
-     doc's CBM-blocked pairs). Landed `AI_CBM_DefenseUp`/`AI_CBM_BulkUp` in
-     the same commit since they're the identical trivial shape, ahead of
-     pair 2. `runCheckBadMovePreamble` gained a required `attacker` param
-     (`FactoryAiCheckBadMoveAttacker`, AI_USER's own atk/defStage) — no
-     prior CBM handler needed the attacker's own state.
-  2. **Pair 1 tests + reproduction** — every gate × outcome × draw count for
-     CBM AttackUp/DefenseUp/BulkUp (incl. BulkUp's two independent gates in
-     all 4 combinations) and CV AttackUp (incl. proving DRAW SITE 1 + DRAW
-     SITE 3 combine while DRAW SITE 2 structurally never can). Engine
-     reproduction of doc §17.3/§17.4's twin fixtures (Anorith all-Swords-Dance
-     vs Machamp) through `chooseFactoryAiScoredDecision`, both seeds — reach
-     draws exactly 4 (DRAW SITE 2, one per identical slot), control draws 0,
-     matching the doc's live ledger exactly. Constructed Anorith's own ATK
-     stage at 8 (not 6) to reflect its real turn-1 Swords Dance execution
-     before the observed phantom decision (§17.2) — still <9, so Gate A
-     stays correctly unreached.
-  3. **Pair 2 port (stretch)** — `AI_CV_DefenseUp` (`:915-942`): Gates A/B/
-     DRAW SITE 1/2 are `AttackUp`'s own shape (`STAT_DEF` for `STAT_ATK`);
-     **Gate C is INVERTED** (`if_hp_less_than USER,70` routes into
-     `DefenseUp4` — HP≥70% instead reaches an *extra* draw site whose own
-     failure is the only clean stop, so HP==100% guarantees one more roll
-     here vs a deterministic stop everywhere else in this doc); Gates E/F
-     read the **TARGET's** last-used move's power/type (`get_last_used_bank_move
-     AI_TARGET`) against a *larger* 9-type physical list than AttackDown's
-     own 6-type one. `EFFECT_BULK_UP`'s CV side dispatches to this same
-     handler (confirmed, doc §18.1). Threading: both
-     `FactoryAiCheckViabilityBattler` and `FactoryAiScoredBattlerView` gained
-     an **optional** `lastUsedMoveId` field defaulting to `MOVE_NONE` (0) —
-     the real battle-start default (doc §18.2) — so zero pre-existing
-     battler literals anywhere in the test suite needed touching.
-  4. **Pair 2 tests + reproduction (stretch)** — Gate C's inversion in both
-     directions, Gate D, and all three Gate E/F shapes (power==0,
-     power!=0+physical, power!=0+non-physical) plus the omitted-field
-     default. Engine reproduction of doc §18.3/§18.4's three fixtures
-     (Anorith all-Harden vs Machamp, target's last move swapped across Vital
-     Throw/Seismic Toss/Dragon Rage) — non-physical flip reproduces the
-     doc's own live **0** draws exactly; physical fixtures reproduce **4**
-     (see reconciliation below, not the doc's raw 5-6).
-- **Draw-count reconciliation (§18, per the brief's explicit ask):** this
-  port's branch-by-branch derivation from the *same* cited assembly (§18.1)
-  is unambiguous — 4 identical `MOVE_HARDEN` slots, each independently and
-  deterministically reaching Gate E (power≠0) → Gate F (physical-list type)
-  → DRAW SITE 4 exactly once (no loop, no conditional redraw possible within
-  one slot's evaluation) — so the handler's own contribution is **exactly
-  4**, not the doc's raw **5-6** (seed 1 / seed 99). The doc's own §18.4
-  already flags this as an anomaly it could not explain ("did not
-  single-step the flagged frame to find the extra 1-2 draws' source"),
-  distinct from every other handler in this doc, which all show the clean
-  "N identical slots × 1 draw" pattern. Reconciled: this port's logic is
-  provably correct against the cited assembly (verified by the reproduction
-  test above); the doc's extra 1-2 draws must come from something outside
-  `AI_CV_DefenseUp`'s own body that its own session never isolated — left
-  exactly as open as the doc left it, not silently resolved either way. The
-  **non-physical** fixture's **0** matches the doc's own live number
-  exactly, so only the physical-branch *count* (not its presence/absence
-  shape) is in question.
-- **Next:** `AI_CV_DefenseUp`'s own DRAW SITE 1 (Gate A, needs opponent DEF
-  stage already built to 9-11 — a 2-turn recipe, same unstaged status as
-  `AttackUp`'s own DRAW SITE 1) and the genuine-empty-`gLastMoves` case
-  (observationally identical to a real 0-power last move, doc §18.2) remain
-  analytical-only, unchanged from the doc. A future session could
-  single-step the flagged extra-draw discrepancy above with
-  `tools/run-mgba-probe.py`, or pick up the next CBM-blocked pair from
-  `docs/factory-ai-checkviability-ground-truth.md` §19 (`AI_CBM_AccDown` +
-  `AI_CV_AccuracyDown`, ground truth already banked, 2 of 7 draw sites
-  live-verified, 5 recipe-only).
-- **Notes:** stayed in scope — no other handler pair, no ENDTURN/END3/
-  status-cluster/fixed-damage src touched, no seam/animation files, doc +
-  verify script read/run only (2 runs, PASS both times), no ROADMAP/ISSUES
-  edits. No PAPERCUT — the doc's §17/§18 citations (exact line numbers,
-  gate ordering, the Gate C inversion, the physical-type table contents)
-  were precise enough that every gate ported cleanly on first read; the one
-  real surprise was catching my own first-draft doc comment overstating
-  which draw sites can combine (Gate B's DRAW SITE 2 can never combine with
-  DRAW SITE 3, since Gate B's own HP==100% precondition forces Gate C true
-  immediately after) — caught by re-deriving from the assembly before
-  writing tests, not left in.
-
 
