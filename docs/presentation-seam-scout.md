@@ -338,3 +338,253 @@ against this lane's Battle Scene OFF oracle (`127.0.0.1:8014`):
 Matches the recorded count cited in §3/§6 (`docs/battle-turn-notes.md:4264`,
 110/110) — re-pinned live, unaffected by the week's kernel growth (no
 presentation code changed).
+
+## 8. Prep-scout for the NEXT window, 2026-07-25 (`turn1-rockslide.json`)
+
+Read-only recon plus one unwired staging module/test (no `battleScene.ts` or
+other production edit — per this step's own brief). Consuming-worker task:
+convert `turn1-rockslide.json` (`drawRockSlideWindow`/`drawRockSlideAttack`,
+§3's runner-up) the same way the turn5-faint checkpoint converted its own
+window. All line numbers below are re-verified against today's `HEAD`
+(`e80bcb9`) — `battleScene.ts` grew from 17,056 to **17,519** lines since §2
+was written, so every §4 line citation for this window has drifted (by
+roughly +65 lines at the leaf, unrelated content elsewhere); the mechanism
+itself is unchanged. `battleScriptEvents.ts`'s event union has also grown
+again, from §7.1's 20 kinds to **22** (`draw-party-status-summary`,
+`status-icon-update` — both unrelated to this window's own content, noted for
+completeness, not analyzed further here).
+
+### 8.1 Every input `turn1-rockslide.json` consumes today (re-verified against `HEAD`)
+
+**Dispatch-routing booleans/gates** — all in `drawFightSubmenuWindow`,
+`battleScene.ts:5149-5330` (turn5-faint's own `turn4Resolved`/`turn5Resolved`
+gate is a subset of this window's own larger gate chain):
+
+| input | line(s) | condition to REACH this window |
+| --- | --- | --- |
+| `turn5Resolved` | `:5240` | false (else routes to `drawTurn6FightSubmenuWindow`) |
+| `turn4Resolved` | `:5293` | false (else routes to `drawTurn5EndeavorText`) |
+| `turn3Resolved` | `:5301` | false (else routes to `drawTurn4KickoffText`) |
+| `turn2Resolved` | `:5309` | false (else routes to `drawTurn3EndeavorText`) |
+| `sm.cursor` | `:5289` | `=== 0` (not `2`, else routes to `drawTurn2KickoffText`) |
+| `sm.confirmElapsed` | `:5270` | not `null` |
+| `t` vs `textStart` | `:5282-5283` | `t >= textStart` |
+| `t - pressTick` vs `STATS_BANNER_END_DELAY` | `:5318` | `> 274` (else draws the DOUBLE_TEAM kickoff text + stats banner instead) |
+| `pressTick` itself | `:5271`, `const pressTick = TICK0 + sm.confirmElapsed;` | **not turn-keyed** — derived from the player's own real A-confirm input tick, identically for every turn 1-12+ this dispatcher handles. Distinct from `TURN6_ROCKSLIDE_PRESS_TICK`-style per-turn hardcoded literals used only where the confirm/reopen flow diverges (different battler on-field, e.g. turn 6) |
+
+Same class as turn5-faint's own gap-7 finding: scheduler/PC state, no
+battle-content mapping is plausible for the boolean gates. `pressTick`
+itself is the one exception worth flagging explicitly (§8.3).
+
+**RAM-dump reads** — `battleScene.ts:670` imports
+`battle1-turn1-ram-dump.json` (`battle1TurnRamDumpAsset`); read at:
+
+| input | value | line(s) |
+| --- | --- | --- |
+| `anchorOpponentBattler.hp` | 143 (`before_turn.battler1.hp`) | `:940-942` |
+| `anchorOpponentAfterTurnHp` | 101 (`after_turn.battler1.hp`) | `:944-946` |
+
+Both feed `rockSlideOpponentHp(t, pressTick, startHp, endHp)` at the two
+call sites `:11826` (`drawRockSlideAttack`) and `:11853`
+(`drawTurnEndSettledMenu`).
+
+**Hardcoded strings** — all in `battleMenu.ts`, all rendered by
+`drawRockSlideWindow`'s own text-cycling branch (`battleScene.ts:11782-11800`,
+three boxes shown in sequence as `t` advances past each one's own start tick):
+
+| input | literal | line(s) |
+| --- | --- | --- |
+| `TURN_KICKOFF_LINE1`/`LINE2` | "Foe GROVYLE used" / "DOUBLE TEAM!" | `battleMenu.ts:1086,1088` |
+| `STAT_ROSE_LINE1`/`LINE2` | "Foe GROVYLE's evasiveness" / "rose!" | `:1592-1593` |
+| `ROCK_SLIDE_LINE1`/`LINE2` | "ONIX used" / "ROCK SLIDE!" | `:1611-1612` |
+
+**Tick anchors** (all `pressTick`-relative offsets, `battleMenu.ts`):
+`STATS_BANNER_END_DELAY`=274 (`:1254`), `STAT_ROSE_TEXT_DELAY`=284 (`:1597`),
+`ROCK_SLIDE_TEXT_DELAY`=393 (`:1616`), `ROCK_SLIDE_RAM_ANCHOR_DELAY`=428
+(`:1640`, the shake+first-rock anchor), `HIT_FLASH_RAM_ANCHOR_DELAY`=562
+(`:2095`), `ROCK_SLIDE_HP_DRAIN_START_DELAY`=597 (`:2203`),
+`ROCK_SLIDE_TEXT_CLEAR_DELAY`=657 (`:2223`), `ROCK_SLIDE_MENU_REDRAW_DELAY`=664
+(`:2224`).
+
+**Sprite/animation cues** (all pure `(t, pressTick, ...)` functions,
+`battleMenu.ts`, called from `drawRockSlideAttack`/`drawTurnEndSettledMenu`,
+`battleScene.ts:11818-11855`): `rockSlideBg3Y` (BG3 shake, `:1674`),
+`rockSlideRockState`/`rockSlideDrawOrder` (20 falling rocks + real draw
+order, `:1771`/`:2042`), `rockSlideMonShakeY2` (Grovyle's own shake,
+`:2082`), `rockSlideHealthboxWobbleY2` (`:2098`), `rockSlideMonBlinkInvisible`
+(`:2109`), `rockSlideOpponentHp` (HP-bar interpolation, `:2205`),
+`rockSlideResettledBounceTick` (`:2243`).
+
+This matches §4's runner-up table's own enumeration almost exactly (only
+line numbers drifted, plus `TURN_KICKOFF_LINE1/2` made explicit here as a
+third text box the same leaf function cycles through, which §4's table
+folded into "dispatch routing" rather than listing as its own message
+input).
+
+### 8.2 Staged proof: what the kernel emits today for this window's own content
+
+`src/engine/turn1RockSlidePresentationStaging.ts` (new, **unwired** — not
+imported by `battleScene.ts` or any production file) mirrors
+`turn5FaintPresentationStaging.ts`'s pattern exactly: stage a real hit chain
+to `BattleScript_HitFromAtkCanceler`'s own `end`, capture every emitted
+event. Unlike turn5's own staging (which had to substitute MOVE_STRENGTH for
+ROCK_SLIDE — PROGRESS #442's `ppreduce` Pressure fix hadn't landed yet), this
+run stages the **real** MOVE_ROCK_SLIDE (id 157) against Grovyle's real turn-1
+HP (143), Onix/Grovyle's real level-50 stats
+(`tests/damageCalc.test.ts`'s own `ONIX`/`GROVYLE` blocks), singles, no
+Pressure on either side — proven runnable end-to-end in singles by
+`tests/battleScriptHitChainOpcode.test.ts:2050-2125`'s own "RUNG 1 leverage"
+test, reused here as the precedent. `tests/turn1RockSlidePresentationStaging.test.ts`
+(new, 7 passing assertions) pins the result — verified live this session, not
+guessed:
+
+```
+targetHpAfter: 97   (this run's own RNG draw; real turn 1 settles 143 -> 101 —
+                      different roll, same real formula, same "Grovyle
+                      survives" shape)
+event kinds, in order:
+  message                       {messageId:"STRINGID_USEDMOVE", substitutions:[]}
+  set-battler-pp-data           {battler:0, movePosition:0, pp:9}
+  animation                     {animationId:"MOVE_ANIMATION", battler:0, arguments:["157","0","75","46","0","0"]}
+  play-se                       {battler:1, songId:13}   (SE_EFFECTIVE)
+  animation                     {animationId:"HIT_ANIMATION", battler:1, arguments:[]}
+  health-bar-update             {battler:1, healthValue:46}
+  hp-change                     {battler:1, from:143, to:97}
+  set-battler-sprite-visibility {battler:0, invisible:false}   (moveend pass-through)
+  set-battler-sprite-visibility {battler:1, invisible:false}   (moveend pass-through)
+```
+
+One correction to §4's own guess, found by running the real chain rather than
+reading the opcode source alone (same "evidence over inference" discipline
+§7.1 established for `STRINGID_TARGETFAINTED`): **`health-bar-update`'s
+`healthValue` is the damage DELTA (`from - to`, 46), not the settled end HP.**
+§4 did not make a claim here (it only said the kind "is emitted today"), but
+a naive reading of the field name invites exactly this wrong guess — pinned
+by a dedicated test assertion (`healthBarUpdate.healthValue ===
+hpChange.from - hpChange.to`) so the next worker does not have to re-derive
+it. `rockSlideOpponentHp`'s own two endpoints must come from `hp-change`'s
+`from`/`to`, not from `health-bar-update`.
+
+### 8.3 Mapping table (turn-N input -> kernel event / gap), current as of this staged run
+
+| turn-N input | kernel replacement | today |
+| --- | --- | --- |
+| `turn2Resolved`/`turn3Resolved`/`turn4Resolved`/`turn5Resolved`/`sm.cursor` dispatch gates | none — scheduler/PC state | **no plausible mapping**, same gap-7 class as turn5-faint's own dispatch gate. The turn5 precedent's fix (`presentationEventWindowBridge.ts`, keyed on `provenance.sourceLabel`) generalizes here: my staged run's own events carry `sourceLabel: "BattleScript_HitFromAtkString"` / `"BattleScript_HitFromAtkAnimation"` (verified in the raw event dump, not guessed) — a ROCK_SLIDE-window bridge keys off this label family instead of the fainted-branch's `BattleScript_FaintTarget`, same mechanism, different label |
+| `pressTick` (`TICK0 + sm.confirmElapsed`) | n/a | **not a kernel gap at all** — already presentation-native and already non-turn-keyed (§8.1's own finding). No kernel timestamp is needed to keep every `rockSlide*` helper working; see §8.4 |
+| `anchorOpponentBattler.hp` (143, RAM dump) | `hp-change`'s `from` | **emitted today, proven**: my staged run's own event has `from: 143` |
+| `anchorOpponentAfterTurnHp` (101, RAM dump) | `hp-change`'s `to` | **emitted today, proven** (my run's own real hit gives `to: 97`, a different genuine roll — same field, same mechanism) |
+| `rockSlideOpponentHp(t, pressTick, startHp, endHp)` interpolation | `hp-change{from,to}` as the two endpoints, `pressTick` unchanged as the timing anchor | **fully unblocked** once step 3 of §8.5 lands — no gap-4 kernel growth needed for this window (§8.4) |
+| `ROCK_SLIDE_LINE1`/`LINE2` ("ONIX used\nROCK SLIDE!") | `message{messageId:"STRINGID_USEDMOVE"}` | **kind AND messageId emitted today, proven**. Template (`battle-message-templates.json`'s `usedMove` entry, read via `battleStringResolver.ts`): `"{B_ATK_NAME_WITH_PREFIX} used\n{B_BUFF2}"`. `B_ATK_NAME_WITH_PREFIX` already has a resolver (`resolveBattleNameWithPrefix`, gap 5's turn5 precedent). `B_BUFF2` ("ROCK SLIDE!", the move's own display name + "!") has **no resolver yet** — narrow, concrete, new: `src/data/gen/moves.json`'s own already-extracted `name` field supplies it (`moves[157].name === "ROCK SLIDE"`), so this is a one-function addition, not new extraction |
+| `TURN_KICKOFF_LINE1`/`LINE2` ("Foe GROVYLE used\nDOUBLE TEAM!") | `message{messageId:"STRINGID_USEDMOVE"}` | **mechanically identical mapping to the row above** — same opcode (`attackstring`), same fixed `STRINGID_USEDMOVE` operand regardless of which move is used (confirmed at the handler, `battleScriptHitChainOpcode.ts:754-757`) — not independently staged (would need Grovyle's own DOUBLE_TEAM hit chain, a different entry point/script; the *mechanism* proof carries over without restaging it) |
+| `STAT_ROSE_LINE1`/`LINE2` ("Foe GROVYLE's evasiveness rose!") | `stat-stage-change` | **still a named gap, unchanged from §5/§7.2 #3, re-confirmed this session**: zero production emission sites anywhere in the kernel (re-grepped fresh, same result as §7.1). My own staged test asserts this explicitly (`events.some(e => e.kind === "stat-stage-change") === false`) so the absence is pinned, not merely claimed. **No staged scenario could produce this kind today, ROCK_SLIDE or DOUBLE_TEAM** — this is real pre-work for the main-lane step, not something this scout could route around |
+| `rockSlideBg3Y`/`rockSlideRockState`/`rockSlideMonBlinkInvisible`/`rockSlideHealthboxWobbleY2`/`rockSlideMonShakeY2` (shake + falling-rock + wobble + blink choreography) | `animation{animationId:"MOVE_ANIMATION"/"HIT_ANIMATION"}` | **kind emitted today, proven** — my staged run's own `attackanimation` payload is `arguments:["157","0","75","46","0","0"]` (move id, anim-turn counter, power, real computed damage, friendship, multihit — all real values from this run, not placeholders). **Gap 6 unchanged**: no frame-by-frame choreography in the payload; the ~10 `rockSlide*` helpers hold 100% of the shake/rock/wobble/blink motion by hand, and nothing in the event stream could reproduce it |
+| effectiveness SFX (`SE_EFFECTIVE`, songId 13) | `play-se` | **emitted today, proven** (my run: `songId:13`). Still moot for this checkpoint's own oracle (pixel-only, gap 8, unchanged) |
+| `currentPPForActiveMon`'s ROCK_SLIDE PP readout (used by LATER turns' own FIGHT submenu, not this window's own render) | `set-battler-pp-data` | **emitted today, proven** (my run: `movePosition:0, pp:9`, i.e. 10->9) — not in §4's own table (that table only covered this window's own leaf content), added here because it is a real input this same hit chain's event stream carries, relevant to whichever window converts the PP display next |
+
+### 8.4 Gap 4 (tick timestamp), re-scoped for this window — evidence and options, not production code
+
+§5/§7.2 named gap 4 as "no tick/frame timestamp on any emitted event,"
+blocking "the timing half of every single-window mapping." Digging into
+*this* window's own timing code changes that framing:
+
+**Finding, evidenced above:** `pressTick` — the one quantity every
+`rockSlide*` helper actually keys its own tick math to — is **not** sourced
+from turn-N state or from any kernel event. It is `TICK0 + sm.confirmElapsed`
+(`battleScene.ts:5271`), where `sm.confirmElapsed` is `FightSubmenuState`'s
+own field recording *when the player's real A-press confirmed the menu* —
+already a single, non-turn-keyed presentation-input quantity used
+identically by every turn this dispatcher handles (turns 1 through 12+, not
+just turn 1). The kernel's own `BattleScriptEventProvenance`
+(`battleScriptEvents.ts:1-9`, still `programCounter`/`opcodeId`/
+`opcodeName`/`dispatcher`/`sourceLabel`/`sourceStatementLine`/
+`instructionExecution` — unchanged since §7.2, re-confirmed by grep this
+session) has no tick/frame field, and **grepping `src/engine/
+battleScriptMachine.ts`, `battleScriptEvents.ts`, `battleDecisionBoundary.ts`
+for `tick`/`frame` finds zero hits** — the kernel has no clock concept of any
+kind, only an instruction-execution counter. That is a genuine unit mismatch
+against the oracle's hardware VBlank tick, not just a missing field: adding a
+raw number wouldn't by itself answer "which unit."
+
+**Option A (recommended, source-faithful, zero kernel schema change):** keep
+`pressTick` exactly as-is (presentation-native, input-derived) and only
+replace the two RAM-dump HP literals with `hp-change`'s `from`/`to` fields
+(§8.3's own row). This works today because — per this checkpoint's own
+established architecture (`turn5FaintPresentationStaging.ts`'s own doc
+comment: "kernel runs at staging time; presentation reads the event list")
+— the kernel's hit chain is not stepped in lockstep with the render tick
+counter; it is staged once, ahead of time, and its event list is read
+whenever presentation needs it. `pressTick` answers "when did I, presentation,
+start showing this window," which is a question the kernel was never going to
+answer regardless of schema — the two clocks are already architecturally
+decoupled by this checkpoint's own design, not accidentally missing a bridge.
+Evidence for this option costing nothing: every `rockSlide*` helper is
+already a pure `(t, pressTick, ...)` function; none of them need to change
+signature or behavior under this option.
+
+**Option B (schema growth, only if a FUTURE window's timing genuinely can't
+be presentation-derived):** add an opaque, kernel-native sequencing field to
+`BattleScriptEventProvenance` (`instructionExecution` already exists and is
+monotonic — a candidate to key off of instead of a new field) and have
+presentation derive its own local tick anchor the first time it observes a
+given `instructionExecution` value, caching that mapping locally (never
+sourced from the kernel's own clock, since it has none). This is strictly
+more machinery than Option A and this scout found no window (turn5-faint or
+turn1-rockslide) that actually needs it — flagged only because the brief
+asked for options, not because evidence favors it here.
+
+**Recommendation:** Option A. Gap 4, as named in §5/§7.2, is not on
+`turn1-rockslide.json`'s critical path either (matching turn5-faint's own
+§7.3 conclusion, for a related but distinct reason — there the tick input
+was presentation-only chrome with no battle content; here the tick input
+turns out to already be a correctly-generalized presentation-native quantity
+with no kernel dependency at all). Downgrade gap 4 to "open, but unconfirmed
+to block any window examined so far by either scout pass" rather than
+re-citing it as a blocker without qualification.
+
+### 8.5 Ordered wiring plan (acceptance: `turn1-rockslide.json` still passes at 256/256)
+
+1. Add a `B_BUFF2` placeholder resolver to `battleStringResolver.ts`
+   (move id -> `${moves.json[id].name}!`, e.g. `MOVE_ROCK_SLIDE` (157) ->
+   `"ROCK SLIDE!"`) alongside the already-existing
+   `resolveBattleNameWithPrefix` (`B_ATK_NAME_WITH_PREFIX`) — together these
+   resolve `STRINGID_USEDMOVE` for both this window's `ROCK_SLIDE_LINE1/2`
+   and (mechanically free, same messageId) `TURN_KICKOFF_LINE1/2`.
+2. Add a `resolveRockSlidePresentationWindowContent`-shaped sibling to
+   `presentationEventWindowBridge.ts` (same null-safe "every required signal
+   present" pattern as `resolveFaintPresentationWindowContent`), keyed on
+   `provenance.sourceLabel` from the `BattleScript_HitFromAtkString`/
+   `BattleScript_HitFromAtkAnimation` family (confirmed by this scout's own
+   staged event dump, §8.2) instead of `turn2Resolved`..`turn5Resolved`/
+   `sm.cursor`.
+3. Wire `drawRockSlideWindow`/`drawRockSlideAttack`
+   (`battleScene.ts:11771-11836`) to source `startHp`/`endHp` from
+   `hp-change{from,to}` (replacing `anchorOpponentBattler.hp`/
+   `anchorOpponentAfterTurnHp`'s RAM-dump reads, `:940-946`) and
+   `ROCK_SLIDE_LINE1/2`'s text from step 1's resolved message, gated by step
+   2's bridge — every `rockSlide*` choreography helper stays byte-for-byte
+   unchanged (§8.4 Option A: `pressTick` needs no kernel input). The
+   `STAT_ROSE_LINE1/2` box stays a hardcoded literal for this pass (gap
+   unchanged, §8.3) — same "narrow the checkpoint to what's actually
+   unblocked" discipline turn5-faint's own plan used for its dispatch gate.
+4. Re-run `npm run compare -- turn1-rockslide.json` and confirm it still
+   matches at **256/256** (recorded count, `docs/battle-turn-notes.md:5470`)
+   before/after — the checkpoint's own acceptance bar.
+
+### 8.6 Comparator re-pin
+
+Ran both live this session, from this worktree, against this lane's Battle
+Scene OFF oracle (`127.0.0.1:8014`):
+
+```
+$ npm run compare -- turn1-rockslide.json --summary
+256/256 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn5-faint.json --summary
+110/110 frames matched -> tools/compare/out/latest
+```
+
+`turn1-rockslide.json` matches its recorded count (`docs/battle-turn-
+notes.md:5470`, 256/256) — re-pinned live, confirming this scout's own
+read-only recon (plus the new unwired staging module) touched nothing live.
+`turn5-faint.json` re-confirms 110/110 (unchanged from §7.4), proving the
+already-landed checkpoint conversion is untouched by this session's work.
