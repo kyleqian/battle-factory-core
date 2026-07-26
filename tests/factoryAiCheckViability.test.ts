@@ -179,3 +179,355 @@ describe("AI_CV_SpeedDown (docs/factory-ai-checkviability-ground-truth.md §6)",
     expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_ATTACK_DOWN" });
   });
 });
+
+const MOVE_PURSUIT = 228; // EFFECT_PURSUIT
+
+/** Speed/speedStage are irrelevant to AI_CV_Pursuit -- fixed dummy values, only `types`/`isFirstTurn` vary per test. */
+function pursuitBattler(types: readonly [string, string], isFirstTurn: number) {
+  return Object.freeze({ speed: 100, speedStage: 6, types, isFirstTurn });
+}
+
+// data/battle_ai_scripts.s:2018-2036, docs/factory-ai-checkviability-ground-truth.md §11.1.
+describe("AI_CV_Pursuit (docs/factory-ai-checkviability-ground-truth.md §11.1)", () => {
+  const ATTACKER_UNUSED_TYPES = ["TYPE_DARK", "TYPE_DARK"] as const; // AI_CV_Pursuit never reads the attacker's own types
+
+  it("turn 1 (isFirstTurn=2): deterministic zero draws/score, even against a Ghost/Psychic target", () => {
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_PURSUIT,
+      attacker: pursuitBattler(ATTACKER_UNUSED_TYPES, 2),
+      target: pursuitBattler(["TYPE_GHOST", "TYPE_PSYCHIC"], 0),
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result).toMatchObject({ kind: "scored", draws: [], scoreDelta: 0 });
+  });
+
+  it("turn 2 (isFirstTurn=1): still deterministic zero draws/score against a Ghost target", () => {
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_PURSUIT,
+      attacker: pursuitBattler(ATTACKER_UNUSED_TYPES, 1),
+      target: pursuitBattler(["TYPE_GHOST", "TYPE_NORMAL"], 0),
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result).toMatchObject({ kind: "scored", draws: [], scoreDelta: 0 });
+  });
+
+  it("turn 3+ (isFirstTurn=0) against a target with neither Ghost nor Psychic typing: zero draws/score (goto End)", () => {
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_PURSUIT,
+      attacker: pursuitBattler(ATTACKER_UNUSED_TYPES, 0),
+      target: pursuitBattler(["TYPE_NORMAL", "TYPE_NORMAL"], 0),
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result).toMatchObject({ kind: "scored", draws: [], scoreDelta: 0 });
+  });
+
+  it.each([
+    ["type1 == GHOST", ["TYPE_GHOST", "TYPE_NORMAL"] as const],
+    ["type1 == PSYCHIC", ["TYPE_PSYCHIC", "TYPE_NORMAL"] as const],
+    ["type2 == GHOST", ["TYPE_NORMAL", "TYPE_GHOST"] as const],
+    ["type2 == PSYCHIC", ["TYPE_NORMAL", "TYPE_PSYCHIC"] as const],
+  ])("turn 3+ (isFirstTurn=0), %s: reaches AI_CV_Pursuit2 and draws exactly once", (_label, targetTypes) => {
+    // seed 3 -> randomValue 50515 % 256 = 83 (< 128, jumps to End, no bonus).
+    const result = runCheckViability({
+      rng: { value: 3, calls: 0 },
+      moveId: MOVE_PURSUIT,
+      attacker: pursuitBattler(ATTACKER_UNUSED_TYPES, 0),
+      target: pursuitBattler(targetTypes, 0),
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result.kind).toBe("scored");
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.scoreDelta).toBe(0);
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "pursuit-roll", succeeded: false });
+    expect(result.rng.calls).toBe(1);
+  });
+
+  it("if_random_less_than 128 roll >= 128: falls through to score +1, exactly one draw", () => {
+    // seed 1 -> randomValue 16838 % 256 = 198 (>= 128).
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_PURSUIT,
+      attacker: pursuitBattler(ATTACKER_UNUSED_TYPES, 0),
+      target: pursuitBattler(["TYPE_GHOST", "TYPE_NORMAL"], 0),
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result.kind).toBe("scored");
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.scoreDelta).toBe(1);
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "pursuit-roll", succeeded: true });
+  });
+
+  it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
+    const result = run({ value: 1, calls: 0 }, MOVE_TOXIC);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_TOXIC" });
+  });
+});
+
+const MOVE_SLASH = 163; // EFFECT_HIGH_CRITICAL, TYPE_NORMAL
+const MOVE_KARATE_CHOP = 2; // EFFECT_HIGH_CRITICAL, TYPE_FIGHTING
+const MOVE_BLAZE_KICK = 299; // EFFECT_BLAZE_KICK, TYPE_FIRE
+const MOVE_POISON_TAIL = 342; // EFFECT_POISON_TAIL, TYPE_POISON
+
+/** isFirstTurn is irrelevant to AI_CV_HighCrit -- fixed dummy value, only `types` vary per test. */
+function highCritBattler(types: readonly [string, string]) {
+  return Object.freeze({ speed: 100, speedStage: 6, types, isFirstTurn: 0 });
+}
+
+// data/battle_ai_scripts.s:1449-1461, docs/factory-ai-checkviability-ground-truth.md §11.2.
+describe("AI_CV_HighCrit (docs/factory-ai-checkviability-ground-truth.md §11.2)", () => {
+  it("exactly 0.25x (no STAB, double 0.5x resist): deterministic zero draws/score", () => {
+    // Slash (Normal) vs Rock+Steel: 40 * 5/10 * 5/10 = 10 = AI_EFFECTIVENESS_x0_25, direct match.
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_SLASH,
+      attacker: highCritBattler(["TYPE_PSYCHIC", "TYPE_PSYCHIC"]),
+      target: highCritBattler(["TYPE_ROCK", "TYPE_STEEL"]),
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result).toMatchObject({ kind: "scored", draws: [], scoreDelta: 0 });
+  });
+
+  it("exactly 0.5x (no STAB, single 0.5x resist -- Onix's real Rock/Ground typing): deterministic zero draws/score", () => {
+    // Slash (Normal) vs Rock+Ground: 40 * 5/10 = 20 = AI_EFFECTIVENESS_x0_5, direct match (Ground has no entry, stays 1x).
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_SLASH,
+      attacker: highCritBattler(["TYPE_PSYCHIC", "TYPE_PSYCHIC"]),
+      target: highCritBattler(["TYPE_ROCK", "TYPE_GROUND"]),
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result).toMatchObject({ kind: "scored", draws: [], scoreDelta: 0 });
+  });
+
+  it("0.5x via the STAB magic-number remap (60*5/10=30 -> AI_EFFECTIVENESS_x0_5): deterministic zero draws/score", () => {
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_SLASH,
+      attacker: highCritBattler(["TYPE_NORMAL", "TYPE_NORMAL"]), // STAB
+      target: highCritBattler(["TYPE_ROCK", "TYPE_GROUND"]),
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result).toMatchObject({ kind: "scored", draws: [], scoreDelta: 0 });
+  });
+
+  it("0.25x via the STAB magic-number remap (60*5/10*5/10=15 -> AI_EFFECTIVENESS_x0_25): deterministic zero draws/score", () => {
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_SLASH,
+      attacker: highCritBattler(["TYPE_NORMAL", "TYPE_NORMAL"]), // STAB
+      target: highCritBattler(["TYPE_ROCK", "TYPE_STEEL"]),
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result).toMatchObject({ kind: "scored", draws: [], scoreDelta: 0 });
+  });
+
+  it("exactly 2x (no STAB, single weak, direct match): jumps straight to AI_CV_HighCrit2, roll < 128 -> zero score, one draw", () => {
+    // Karate Chop (Fighting) vs Normal (dedup'd Normal/Normal): 40 * 20/10 = 80 = AI_EFFECTIVENESS_x2.
+    // seed 3 -> randomValue 50515 % 256 = 83 (< 128).
+    const result = runCheckViability({
+      rng: { value: 3, calls: 0 },
+      moveId: MOVE_KARATE_CHOP,
+      attacker: highCritBattler(["TYPE_WATER", "TYPE_WATER"]),
+      target: highCritBattler(["TYPE_NORMAL", "TYPE_NORMAL"]),
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result.kind).toBe("scored");
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.scoreDelta).toBe(0);
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "high-crit-roll", succeeded: false });
+    expect(result.rng.calls).toBe(1);
+  });
+
+  it("exactly 2x, roll >= 128 -> score +1, one draw", () => {
+    // seed 1 -> randomValue 16838 % 256 = 198 (>= 128).
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_KARATE_CHOP,
+      attacker: highCritBattler(["TYPE_WATER", "TYPE_WATER"]),
+      target: highCritBattler(["TYPE_NORMAL", "TYPE_NORMAL"]),
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result.kind).toBe("scored");
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.scoreDelta).toBe(1);
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "high-crit-roll", succeeded: true });
+  });
+
+  it("exactly 4x (no STAB, double weak, direct match): jumps straight to AI_CV_HighCrit2, one draw", () => {
+    // Karate Chop (Fighting) vs Normal+Rock (both 2x): 40 * 20/10 * 20/10 = 160 = AI_EFFECTIVENESS_x4.
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_KARATE_CHOP,
+      attacker: highCritBattler(["TYPE_WATER", "TYPE_WATER"]),
+      target: highCritBattler(["TYPE_NORMAL", "TYPE_ROCK"]),
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result.kind).toBe("scored");
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "high-crit-roll" });
+  });
+
+  it("2x via the STAB magic-number remap (60*20/10=120 -> AI_EFFECTIVENESS_x2): jumps straight to AI_CV_HighCrit2, one draw", () => {
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_KARATE_CHOP,
+      attacker: highCritBattler(["TYPE_FIGHTING", "TYPE_FIGHTING"]), // STAB
+      target: highCritBattler(["TYPE_NORMAL", "TYPE_NORMAL"]),
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result.kind).toBe("scored");
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "high-crit-roll" });
+  });
+
+  it("4x via the STAB magic-number remap (60*20/10*20/10=240 -> AI_EFFECTIVENESS_x4): jumps straight to AI_CV_HighCrit2, one draw", () => {
+    const result = runCheckViability({
+      rng: { value: 3, calls: 0 },
+      moveId: MOVE_KARATE_CHOP,
+      attacker: highCritBattler(["TYPE_FIGHTING", "TYPE_FIGHTING"]), // STAB
+      target: highCritBattler(["TYPE_NORMAL", "TYPE_ROCK"]),
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result.kind).toBe("scored");
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "high-crit-roll" });
+  });
+
+  describe("neutral/immune fallthrough (no explicit match -- the doc's own §11.2 quirk: 1 or 2 draws, not fixed)", () => {
+    const NEUTRAL_TARGET = ["TYPE_GROUND", "TYPE_GROUND"] as const; // Slash (Normal) has no table entry either direction -> stays 1x
+    const IMMUNE_TARGET = ["TYPE_GHOST", "TYPE_GHOST"] as const; // Normal vs Ghost = 0x
+
+    it("first if_random_less_than 128 roll < 128: jumps to End immediately, exactly one draw, zero score", () => {
+      // seed 3 -> randomValue 50515 % 256 = 83 (< 128).
+      const result = runCheckViability({
+        rng: { value: 3, calls: 0 },
+        moveId: MOVE_SLASH,
+        attacker: highCritBattler(["TYPE_PSYCHIC", "TYPE_PSYCHIC"]),
+        target: highCritBattler(NEUTRAL_TARGET),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(0);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "high-crit-fallthrough-roll", jumpedToEnd: true });
+      expect(result.rng.calls).toBe(1);
+    });
+
+    it("first roll >= 128, second roll (AI_CV_HighCrit2's own) < 128: falls through into the second instruction, TWO draws, zero score", () => {
+      // seed 1 -> draw1 randomValue 16838 % 256 = 198 (>= 128, falls through);
+      // draw2 (from the advanced rngValue) randomValue % 256 = 33 (< 128, jumps to End).
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_SLASH,
+        attacker: highCritBattler(["TYPE_PSYCHIC", "TYPE_PSYCHIC"]),
+        target: highCritBattler(NEUTRAL_TARGET),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(0);
+      expect(result.draws).toHaveLength(2);
+      expect(result.draws[0]).toMatchObject({ kind: "high-crit-fallthrough-roll", jumpedToEnd: false });
+      expect(result.draws[1]).toMatchObject({ kind: "high-crit-roll", succeeded: false });
+      expect(result.rng.calls).toBe(2);
+    });
+
+    it("both rolls >= 128: falls through both instructions, TWO draws, score +1", () => {
+      // seed 2 -> draw1 randomValue % 256 = 140 (>= 128); draw2 randomValue % 256 = 195 (>= 128).
+      const result = runCheckViability({
+        rng: { value: 2, calls: 0 },
+        moveId: MOVE_SLASH,
+        attacker: highCritBattler(["TYPE_PSYCHIC", "TYPE_PSYCHIC"]),
+        target: highCritBattler(NEUTRAL_TARGET),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(1);
+      expect(result.draws).toHaveLength(2);
+      expect(result.draws[0]).toMatchObject({ kind: "high-crit-fallthrough-roll", jumpedToEnd: false });
+      expect(result.draws[1]).toMatchObject({ kind: "high-crit-roll", succeeded: true });
+    });
+
+    it("0x immune effectiveness falls through the SAME path as neutral (not a fifth explicit branch)", () => {
+      const result = runCheckViability({
+        rng: { value: 3, calls: 0 },
+        moveId: MOVE_SLASH,
+        attacker: highCritBattler(["TYPE_PSYCHIC", "TYPE_PSYCHIC"]),
+        target: highCritBattler(IMMUNE_TARGET),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(0);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "high-crit-fallthrough-roll", jumpedToEnd: true });
+    });
+  });
+
+  it("EFFECT_BLAZE_KICK dispatches through the identical handler", () => {
+    // Blaze Kick (Fire) vs Grass (STAB'd single weak, 60*20/10=120 -> remap x2): jumps straight to AI_CV_HighCrit2.
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_BLAZE_KICK,
+      attacker: highCritBattler(["TYPE_FIRE", "TYPE_FIRE"]),
+      target: highCritBattler(["TYPE_GRASS", "TYPE_NORMAL"]),
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result.kind).toBe("scored");
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "high-crit-roll" });
+  });
+
+  it("EFFECT_POISON_TAIL dispatches through the identical handler", () => {
+    // Poison Tail (Poison) vs Grass (STAB'd single weak, 60*20/10=120 -> remap x2): jumps straight to AI_CV_HighCrit2.
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_POISON_TAIL,
+      attacker: highCritBattler(["TYPE_POISON", "TYPE_POISON"]),
+      target: highCritBattler(["TYPE_GRASS", "TYPE_NORMAL"]),
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result.kind).toBe("scored");
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "high-crit-roll" });
+  });
+
+  it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
+    const result = run({ value: 1, calls: 0 }, MOVE_GROWL);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_ATTACK_DOWN" });
+  });
+});
