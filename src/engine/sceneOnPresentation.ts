@@ -940,6 +940,20 @@ export interface SceneOnFutureSightView extends FutureSightAttackerEffect {
   readonly target: SceneOnPresentationBattler;
   readonly bgBldy: number;
   readonly bgIsPsychic: boolean;
+  /**
+   * Whether OAM `objMode` (`ST_OAM_OBJ_BLEND` vs normal) is `1` on the
+   * SCREEN this tick - RAM-probed to have only a ONE-tick display lag
+   * (`tools/probe/dump-scale-window-oam-scanline.py`, ticks 135-150: RAM
+   * objMode flips `1`->`0` at RAM tick 143, but the screen at render tick
+   * 144 already shows the fully-opaque, un-blended sprite - `144-143=1`),
+   * distinct from the affine matrix's own already-established TWO-tick lag
+   * (`attackerScale` above). Not always equal to `attackerScale.active`
+   * (which uses the two-tick-lagged matrix): near the end of the restore
+   * countdown the matrix is still slightly non-neutral while objMode has
+   * already reverted, so `attackerScale.active` alone over-blends the last
+   * frame or two of the window.
+   */
+  readonly attackerBlendActive: boolean;
 }
 
 export interface SceneOnConfusionView extends ConfusionAttackerEffect, ConfusionTargetEffect {
@@ -1384,6 +1398,7 @@ export function sceneOnFutureSightView(
     target: state.config.target,
     attackerObjY: tintState.attackerObjY,
     attackerScale: scaleState.attackerScale,
+    attackerBlendActive: tintState.attackerScale.active,
     bgBldy: futureSightBgBldyAtAge(state.age),
     bgIsPsychic: futureSightBgIsPsychic(state.age),
   };
