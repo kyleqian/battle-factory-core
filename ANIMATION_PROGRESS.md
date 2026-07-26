@@ -42,6 +42,24 @@ substitute state, multi-turn/multi-hit state, or another explicit script input.
 Every status needs a committed ON-profile trace; `exact` cannot retain a known
 remainder.
 
+## Defect A instrument named in the brief CONTRADICTED: the doubled scan window is RAM-byte-identical to hardware — both moves stay `partial`, unchanged counts (2026-07-26)
+
+**Verdict: the "naive 2x bounding box overreaches hardware" hypothesis, as literally stated, is refuted by direct OAM evidence. No render fix attempted (per this step's own contingency: bank evidence and stop, don't chase a speculative fix once the mandate's hypothesis is contradicted).** Wrote `tools/probe/dump-scale-window-oam-scanline.py` (new, extends `dump-monbg-scale-window.py`'s own `sprite_record`) to dump the scaled OBJ's full OAM attr0/attr1 (shape/size/affine-mode bits, the real hardware x/y — not just the matrix, already RAM-confirmed in rung 5) plus raw whole-frame screen captures at the peak-scale ticks, against both fixtures.
+
+**Confirmed exactly as assumed (no defect here):** at FUTURE_SIGHT's attacker peak (oracle tick 130, and its neighbors 116/144) and CONFUSION's target peak (tick 160, neighbors 146/176), OAM `shape=0` (SQUARE), `size=3` (64x64), `affineMode=3` (DOUBLE) — matches this engine's 64x64-tileset assumption exactly, ruling out a shape/size mismatch. More importantly: the real OAM `x`/`y` (`attr1&0x1FF`, `attr0&0xFF`, unwrapped) reads **(8,24)** for FUTURE_SIGHT's attacker throughout the scale window. `sprite.x(72)+x2(0)+centerToCornerVecX(-64, RAM-read directly, matches the doubled `-32*2` from `CalcCenterToCornerVec`'s own table, `reference/pokeemerald/src/sprite.c:137-157`) = 8` — and this engine's own `drawSpriteSheetAffineStretch(doubled=true)` computes its window's screen-space top-left as `ox(40)-halfW(32) = 8`. **Byte-identical.** Same match on Y (24) and on CONFUSION's ONIX target corner. This directly contradicts the brief's own framing that "our scan reaches further than hardware" — the doubled render window's real screen position and size are exactly what this engine already computes; the window itself is not the defect.
+
+**New, load-bearing correction: the earlier `(181,3)` pixel sample (rung 7) was itself using an un-lagged matrix reading and is not representative of the residual's true shape.** Re-checked properly this session: this engine's own `sceneOnFutureSightView` reads the scale matrix at `state.age-2` (the already-proven, RAM-validated GROWTH-derived display lag) — so a screen captured at oracle tick *T* shows the RAM matrix as of tick *T-2*, RAM-confirmed directly here too (matrix at tick114 = 252 = `futureSightAttackerEffectAtAge(0)`'s prediction for what tick116's screen should show; live matrix *at* tick116 itself is 244, which is what tick118's screen shows instead). Redid the per-pixel diff (`tools/compare/scratch/defect-a-scanline-diag.mjs`, new) against the real oracle RGB captures with this lag correctly applied both directions: the residual is **not** simply "oracle transparent, engine opaque" as the single `(181,3)` sample suggested. Most sampled mismatches (e.g. FUTURE_SIGHT tick130, pixel (96,58): app `(198,173,132)`, oracle `(210,86,82)`) are opaque-vs-opaque **color** differences, including pixels **inside the original non-doubled 64×64 footprint** (`dx=56,dy=4`, both within `[0,64)`) — a region the doubled-window-overreach hypothesis cannot touch at all, since that hypothesis only predicts mismatches in the doubled-only fringe. The true residual is a texture-space sampling/coordinate defect somewhere inside the correctly-sized window, not a boundary-clamping bug.
+
+**Checked and ruled out the obvious alternative this evidence suggested (BG2-in-front-of-OBJ):** since `monbg`'s frozen BG2 tile copy stays live for the whole scale window (rung 7's own finding) and rung 7's underlay-fix was a no-op, the natural next guess was that BG2 might actually render *in front of* the scaled OBJ (hiding it under the frozen unscaled copy wherever both overlap, which would explain color-only interior mismatches with no transparency involved). Checked directly: OBJ priority reads `2` and `BG2CNT`'s own priority field also reads `2` throughout the window (`tools/probe/dump-monbg-scale-window.py` rerun ticks 126-132, plus `run-battle-lab-rgb.py`'s own `playerSprite.priority`). Real hardware's OBJ-vs-BG priority tie-break favors the OBJ at equal priority — so BG2 should *not* be winning this composite. Hypothesis checked and set aside, not assumed away.
+
+**One genuinely new, smaller finding, flagged but not chased (out of this step's scope):** CONFUSION's target OAM `x` at tick160 reads `112`, one tick stale relative to the sprite struct's own `x2=3` that same tick (`176+3-64=115≠112`; `176+0-64=112` matches the *previous* tick's `x2=0` exactly) — a real one-tick OAM-copy latency on the shake offset specifically, distinct from the already-modeled scale-matrix display lag. This contradicts `sceneOnConfusionView`'s own doc comment claim that window 2 "needed NO scene-level lag at all." It's a small (±3px) translation effect on the shake, not obviously the driver of defect A's much larger, magnitude-scaling interior residual — banked here for a future session rather than folded in blind.
+
+**Coverage: unchanged.** `MOVE_FUTURE_SIGHT` stays `partial`, 85/114. `MOVE_CONFUSION` stays `partial`, 108/140. No render code touched this session.
+
+**Evidence.** `npm test` 2463/2463 (unchanged — probe + scratch diagnostics only, no production code). `npm run build` green.
+
+**Next action for a future session:** the window-bounds hypothesis is closed out (confirmed correct, not the defect). The real next instrument is a texture-space one: at a fixed peak tick, for several interior mismatched pixels, brute-force search KADABRA's/ONIX's own tileset (accounting for the active tint coefficient) for which `(row,col)` actually produces the oracle's observed color, and compare that against this engine's own computed `(sx,sy)` — if they differ by a consistent delta, that names the exact rounding/coordinate bug in `drawSpriteSheetAffineStretch`'s sampling math directly rather than by further pixel-guessing. Separately worth a quick look: the newly-found one-tick OAM x-lag on CONFUSION's target shake (above) — resolve whether `sceneOnConfusionView`'s "no lag" claim needs a correction, independent of defect A.
+
 ## Defect A cracked open, not closed: monbg hypothesis RAM-CONFIRMED real, but the direct fix is a no-op — both moves stay `partial`, unchanged counts (2026-07-25)
 
 **Verdict: real, RAM-proven mechanism found; the obvious fix built from it does not close the defect — reverted, not landed.** Mandate: instrument defect A (the scale-window sprite-interior residual, cross-move-triangulated to `monbg`) before touching render code. Wrote `tools/probe/dump-monbg-scale-window.py` (new, cites `Cmd_monbg`/`MoveBattlerSpriteToBG`/`Task_InitUpdateMonBg`/`Task_UpdateMonBg`, `battle_anim.c:591-837`) and ran it against FUTURE_SIGHT's own kadabra-onix fixture, ticks 105-150: reads `gSprites[].invisible`/x2/y2/matrix, `gBattle_BG1_X/Y`/`gBattle_BG2_X/Y`, and the real `BG1CNT`/`BG2CNT`/`BG1HOFS`/`BG1VOFS`/`BG2HOFS`/`BG2VOFS`/`DISPCNT` hardware regs.
@@ -78,75 +96,6 @@ remainder.
 
 **Next action for a future session:** PSYCHIC (this family's third and final sibling, not started - identical shape to CONFUSION with different color/deltas per the family map, should port cheaply once staged); the opposite orientation (KADABRA front sprite, not yet extracted); and defect A's real root cause, now with a concrete `monbg`-driven hypothesis shared between FUTURE_SIGHT and CONFUSION to chase (a VRAM/OAM tile-data dump at a scale-window peak tick, or checking whether `MoveBattlerSpriteToBG`'s BG2-copy path changes the affine-stretch sampling itself).
 
-## MOVE_FUTURE_SIGHT rung 6: register-level probe named and fixed defect B (the second-fade rotation-cadence pause); defect A untouched, stays `partial` at 85/114 (2026-07-25)
-
-**Verdict: real fix, landed and pinned — defect B is closed.** Rung 5 left
-two named defects: B (10/39 mismatched frames, 147-164, a 17230px
-whole-upper-screen bbox in a period-4 pattern during the second/restore
-psychic-BG fade) and A (29/39, KADABRA's own attacker box, frames
-116-144). This rung's mandate was defect B first (register-level probe),
-touching A only if the same instrument explained it.
-
-**The instrument.** Re-ran the fixture's own already-committed dense-probe
-script (`tools/probe/run-battle-lab-rgb.py`, invoked directly rather than
-through `futureSightPortable.ts`'s auto-deleted temp dir, so the raw
-`probe.json` could be inspected) — it already records `bldcnt`/`bldalpha`/
-`bldy` and the full `bgPalette2Faded` row every frame, no new probe script
-needed. Diffed the raw BG palette 2 row tick-by-tick across the whole
-window.
-
-**The exact divergence.** The psychic-BG rotation ring's own transition
-ages land at 21, 25, ..., 65 — exactly the existing 4-tick cadence
-already coded in `futureSight.ts`, RAM-confirmed byte-for-byte. Then the
-ring holds for **6 ticks instead of 4**: the next transition is age 71,
-not the naively-predicted 69. After that single pause, the clean 4-tick
-cadence resumes, permanently shifted +2 (71, 75, 79, 83, 87, 91, all
-RAM-confirmed). The pause window (ages 67-72) exactly spans the tick
-range where `REG_BLDCNT`/`REG_BLDALPHA` both read 0 — the gap between the
-attacker `blend_color_cycle`/`ScaleMonAndRestore` pair's own `blendoff`
-cleanup and `UnsetPsychicBackground`'s own fade setup (`REG_BLDCNT` reads
-`0xe8` again starting exactly at age 73, the same tick the existing
-`futureSightBgBldyAtAge` ramp already starts, unlagged). `REG_BLDY`'s own
-ramp was independently re-verified RAM-exact against the existing
-(unchanged) formula through the whole window (e.g. frame 150/age 73 →
-bldy 0, frame 151/age 74 → bldy 1) — confirming this is a
-rotation-cadence-only defect, not a darken-register one, consistent with
-rung 5's own negative result (extending the BLDY lag made things worse).
-
-**The fix.** `rotationCountAtAge` (`src/engine/futureSight.ts`) now
-applies a single documented breakpoint/pause (age 69, +2 ticks) before
-computing the ring position — no lag-guessing, the exact RAM-probed
-transition ages. Pinned with a new Tier-1 test asserting those ages
-directly (`tests/futureSight.test.ts`, 9/9).
-
-**Dense comparator, rerun twice:** `tools/compare/futureSightPortable.ts`
-→ **85/114 both times** (up from 75/114). **Per-defect accounting:**
-defect B — **10/10 frames fixed** (147, 148, 151, 152, 155, 156, 159,
-160, 163, 164 all 0px diff, re-verified with
-`future-sight-per-frame-bbox.ts` against the fresh scratch dir). Defect A
-— **completely unchanged**: same 29 frames (116-144), identical magnitude
-curve. The register instrument that closed B does not explain A (A is a
-smooth continuous scale-magnitude curve, not a cadence artifact), so A
-was left untouched per this rung's own scope — a clean, not blind, stop.
-
-**Coverage:** `MOVE_FUTURE_SIGHT` stays `partial` in
-`ANIMATION_COVERAGE.json` — 85/114, remainder is defect A alone.
-
-**Evidence.** `npm test` 2452/2452 (2451 + 1 new). `npm run build` green.
-
-**Next action for a future session (park rule — this closes
-FUTURE_SIGHT's run this session):** defect A needs a *different*
-instrument than either rung 5 or rung 6 used — both the OAM-matrix probe
-(rung 5) and this rung's BG-palette/register probe came back clean or
-irrelevant for A. Try a VRAM/OAM **tile-data** dump at the scale window's
-peak ticks (~frame 130), the `dump-growth-ivysaur-vram.py` precedent, to
-check for an asset/decode-adjacent mismatch the matrix-only probe
-wouldn't catch (tile indices, or the affine-stretch sampling itself, not
-just the matrix coefficients) — or a sub-pixel rounding difference in
-`drawSpriteSheetAffineStretch`. Once A closes: extend to the
-opponent-attacker orientation (KADABRA front sprite extraction; the
-family map's own derivation says this is side-uniform, no new mechanism
-expected) and re-run `futureSightPortable.ts` to confirm `exact`.
 
 **Housekeeping (this session):** moved the "MOVE_FUTURE_SIGHT rung 5" entry
 to `ANIMATION_PROGRESS-archive.md` to keep ~3 live (AGENTS.md's convention)
