@@ -1,4 +1,106 @@
 ---
+## 472 — END3 registered + ENDTURN_ABILITIES slice 1 wired: Speed Boost + Rain Dish (doc §5 slice 1 mandatory rung, the standing architectural gap from entries 469-471 finally closed)
+
+- **Side merge (same round, supervisor-verified ALL PASS live from the
+  worktree + green on the merged tree):** doc **§17 `AI_CBM_AttackUp` +
+  `AI_CV_AttackUp`** ground truth banked (branch `worker/side-20260726-122548`,
+  merged, worktree removed) — first stat-UP pair. Supervisor re-verified the
+  assembly: CBM AttackUp is 2 instructions (`:249-251`, zero draws, NO
+  shared `CheckIfAbilityBlocksStatChange` tail — a real stat-up/stat-down
+  CBM asymmetry, and `EFFECT_BULK_UP` splits to a separate `AI_CBM_BulkUp`
+  on the CBM side only); CV AttackUp (`:896-913`) has 3 draw sites, all
+  gates reading `AI_USER`'s own state. The `:904` roll gates on an
+  `if_hp_not_equal AI_USER, 100` EQUALITY test, so reach/control naming
+  INVERTS vs §15/§16 (undamaged = reach) — documented so a porter doesn't
+  copy the convention blind. Ledgers: reach 10/10, control 8/8 (seeds 1/99
+  ×2), +4 `Cmd_if_random_less_than` attribution, zero `get_ability`.
+  15-fixture verify script ALL PASS ×2 (worker) + once by the supervisor.
+  DefenseUp pair: bodies cited (§17.6) but NOT staged (honest time-cap
+  stop; `AI_CV_DefenseUp4` reads the target's LAST-USED MOVE's power/type —
+  a target-history dependency flagged for the next scout). Merged tree:
+  **224 files / 2853 tests + build green.**
+
+- **State:** tree green at **224 files / 2853 tests** (+1 file/+7 tests over
+  entry 471's merged 223/2846), build green (`tsc -b && vite build`).
+  `executableFrontierRatchet.test.ts` **6/6 unmoved** — no pin move needed.
+  Census self-check clean (`node --experimental-strip-types
+  tools/report/executable-frontier-census.ts`): **79/214 effects, 163/355
+  moves, 128/276 Factory-L50, all 25 checks pass**, byte-identical to entry
+  471's numbers (git diff empty) — expected, this step is end-turn breadth,
+  not effect/move coverage. Three commits (`1b1559d` END3 + wiring,
+  `9ec18c5` tests + live reconfirmation), both green individually.
+- **Did:** followed `docs/end3-design.md` §4's checklist.
+  1. `battleScriptMachine.ts`: `END3` (opcodeId 63, `Cmd_end3`) gets its own
+     `BattleScriptHaltReason` kind (`"end3"`, NOT `"terminal"` — end3 never
+     sets `B_ACTION_TRY_FINISH`, and the callback-stack pop is orchestration
+     state this pure machine has no notion of, matching design doc §2.3
+     exactly).
+  2. `battleEndTurnOrchestration.ts`: `runPushCursorAndCallbackTickScript`
+     composes the already-banked prototype
+     (`battleScriptCallbackStack.ts`'s `pushCursorAndCallback`/`popEnd3`,
+     unchanged) with a new `runScriptToEnd3` loop (mirrors
+     `runScriptToOwnEnd` but stops on `"end3"` instead of `"terminal"`) —
+     push, run, pop, all inside one synchronous call, exactly the design
+     doc §2.1/§1.5 shape (depth never exceeds 1, never survives past the
+     call). `runAbilitiesTick` wires `ABILITY_RAIN_DISH` (rain weather bit +
+     `maxHP > hp`, `battle_util.c:2607-2619`) and `ABILITY_SPEED_BOOST`
+     (`statStages[SPEED] < 12` AND `isFirstTurn != 2`, `:2642-2652`); Shed
+     Skin and Truant stay named `(b)` case-barriers on their own real
+     reachability condition (status1 has any bit set / ability match with no
+     other gate, respectively) — neither implemented, per brief.
+  3. **Deviation from the design doc, banked as evidence:** §4 step 4 named
+     "extracting/compiling `BattleScript_SpeedBoostActivates`/
+     `RainDishActivates` into the committed program" as a prerequisite this
+     step must do first (`grep` of `src/engine/*.ts` finding nothing was the
+     doc's own evidence). Checked live via `resolveBattleScriptLabel` before
+     writing any wiring: **both scripts (and `ShedSkinActivates`) were
+     already fully compiled** at program counters 2874/2882/2893 with
+     correct opcodes including `B_SCR_OP_END3` — the extractor
+     (`extract-battle-script-program.ts`) parses the WHOLE `.s` file's
+     label blocks unconditionally, not a curated per-label subset, so the
+     doc's grep found an absent *consumer* reference, not an absent
+     *compiled* script. No extraction work was needed; this saved real time
+     and is worth flagging so nobody re-derives it.
+  4. New optional `isFirstTurn` field on `BattleScriptRulesContext` battlers
+     (`gDisableStructs[battler].isFirstTurn`, defaults to 0) — its own
+     decrement (`TurnValuesCleanUp(FALSE)`) stays out of scope, matching
+     this module's pre-existing header comment; only Speed Boost's `!= 2`
+     read is wired.
+  5. Fallout: 13 pre-existing test files' pinned control-handler-count
+     arrays gained opcode 63 (deliberately moved, named here);
+     `battleScriptMachine.test.ts`'s old "keeps END3 outside the safe
+     subset" test rewritten for the new `"end3"` halt kind instead of
+     `"unsupported-opcode"`.
+- **Test:** new `tests/battleEndTurnAbilities.test.ts` (7 tests): Speed
+  Boost fires (+1 speed stage, `STRINGID_PKMNRAISEDSPEED` message event,
+  clean END3 resume, zero RNG), Rain Dish heals `floor(maxHP/16)` in rain,
+  Rain Dish's no-rain no-fire gate, Speed Boost's `MAX_STAT_STAGE`(12)
+  no-fire gate, Speed Boost's `isFirstTurn==2` no-fire gate, two battlers'
+  Speed Boost firing sequentially (never nested) in one end-turn pass, and
+  the empty-stack `popEnd3` mismatch surfacing explicitly (not silent
+  garbage) via the exact primitive production wiring now calls. **Live
+  oracle reconfirmation** (acceptance item 4): re-ran both banked fixtures
+  fresh against `battle-scene-off` — `mechanic-endturn-speedboost-off.json`
+  reproduced `statStages[SPEED]` 6→7→8→9 across frames 723/1934/3147 with
+  `rngValue` bit-identical at each boundary, exactly matching doc §3a;
+  `mechanic-endturn-raindish-off.json` reproduced `hp` 104→111 (frame 953)
+  and 100→107 (frame 2160), `floor(115/16)=7` both times, `rngValue`
+  bit-identical, exactly matching doc §3b. Both ledgers hold.
+- **Next:** doc §5 slice 2 (Shed Skin — same `END3` primitive, plus the
+  `Random() % 3` roll and unconditional `status1 = 0` clear); slice 3
+  (Truant — no script, single `truantCounter` XOR toggle, falls through to
+  `ENDTURN_ITEMS1` in source rather than short-circuiting); `ENDTURN_ITEMS2`
+  registration (doc §5, off the banked recipes); seam's turn-4
+  `anchorOpponentAfterTurn4Hp` staging gap; remaining blocked-on-opcodes
+  census rows.
+- **Notes:** stayed in scope — no Shed Skin/Truant implementation (named
+  barriers only, per brief), no `ENDTURN_ITEMS2`, no factory-AI files, no
+  `docs/status-cluster-ground-truth.md` or its fixtures (other worker's
+  territory), no seam/animation files, no ROADMAP/ISSUES edits. No
+  PAPERCUT — the design doc's own prototype (`battleScriptCallbackStack.ts`)
+  and its source citations were precise enough that wiring took one clean
+  pass with no rework.
+---
 ## 471 — Seventh + eighth CheckViability handler pairs ported: AI_CBM_DefenseDown/AI_CV_DefenseDown + AI_CBM_SpDefDown/AI_CV_SpDefDown (doc §15/§16, mandatory + stretch both landed)
 
 - **Side merge (same round, supervisor-verified PASS live from the worktree
