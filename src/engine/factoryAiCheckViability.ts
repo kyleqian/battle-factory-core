@@ -32,9 +32,15 @@
  * (`AI_CV_AttackUp`, `runCvAttackUp` below, `:896-913`, doc §17 -- the
  * fourth CBM-blocked pair's own CV half, and the first stat-**UP** handler:
  * every gate/draw site reads `AI_USER`'s OWN state, `AI_TARGET` is never
- * read at all). The other 81 are not ported this round (a separate, much
- * larger phased body of work per the audit's §3), so a move that reaches
- * one of THOSE must not silently score zero.
+ * read at all), `EFFECT_DEFENSE_UP`/`EFFECT_DEFENSE_UP_2`/`EFFECT_BULK_UP`
+ * (`AI_CV_DefenseUp`, `runCvDefenseUp` below, `:915-942`, doc §18 -- the
+ * fifth CBM-blocked pair's own CV half), and `EFFECT_ACCURACY_DOWN(_2)`
+ * (`AI_CV_AccuracyDown`, `runCvAccuracyDown` below, `:1198-1234`, doc §19 --
+ * the sixth CBM-blocked pair's own CV half and the largest ported handler
+ * in this doc, 7 `if_random_less_than` sites). The other ~79 are not
+ * ported this round (a separate, much larger phased body of work per the
+ * audit's §3), so a move that reaches one of THOSE must not silently score
+ * zero.
  */
 import { MOVES_BY_ID, TYPE_EFFECTIVENESS } from "./factoryAiCheckBadMove.ts";
 import type { BattleRngState } from "./battleDecisionBoundary.ts";
@@ -132,6 +138,36 @@ export type FactoryAiCheckViabilityBattler = Readonly<{
    * test suite stays valid unchanged.
    */
   lastUsedMoveId?: number;
+  /**
+   * `gBattleMons[].status1 & STATUS1_TOXIC_POISON` (`Cmd_if_not_status`,
+   * `battle_ai_script_commands.c:791-807`, bit 7 -- `include/constants/
+   * battle.h:121`) -- `AI_CV_AccuracyDown`'s Gate D, TARGET's own copy only
+   * (doc §19.1). Optional, defaulting to `false` (the real battle-start
+   * default -- no status at all).
+   */
+  isToxicPoisoned?: boolean;
+  /**
+   * `gStatuses3[] & STATUS3_LEECHSEED` (`Cmd_if_not_status3`,
+   * `battle_ai_script_commands.c:863-879`, bit 2 -- `include/constants/
+   * battle.h:159`) -- `AI_CV_AccuracyDown`'s Gate E, TARGET's own copy only.
+   * Optional, defaulting to `false`.
+   */
+  isLeechSeeded?: boolean;
+  /**
+   * `gStatuses3[] & STATUS3_ROOTED` (same `Cmd_if_not_status3`, bit 10 --
+   * `include/constants/battle.h:167`, Ingrain) -- `AI_CV_AccuracyDown`'s
+   * Gate F, AI_USER's (the opponent's) OWN copy, NOT the target's --
+   * carried on both sides for the same shape-symmetry convention as
+   * `isFirstTurn`/`lastUsedMoveId`. Optional, defaulting to `false`.
+   */
+  isRooted?: boolean;
+  /**
+   * `gBattleMons[].status2 & STATUS2_CURSED` (`Cmd_if_not_status2`,
+   * `battle_ai_script_commands.c:827-843`, bit 28 -- `include/constants/
+   * battle.h:152`) -- `AI_CV_AccuracyDown`'s Gate G, TARGET's own copy only.
+   * Optional, defaulting to `false`.
+   */
+  isCursed?: boolean;
 }>;
 
 export type FactoryAiCheckViabilityDraw =
@@ -271,6 +307,23 @@ export type FactoryAiCheckViabilityDraw =
     ordinal: number;
     reason: string;
     kind: "defense-up-roll-1" | "defense-up-roll-2" | "defense-up-roll-3" | "defense-up-roll-4" | "defense-up-roll-5";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    succeeded: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind:
+      | "accuracy-down-roll-1"
+      | "accuracy-down-roll-2"
+      | "accuracy-down-roll-3"
+      | "accuracy-down-roll-4"
+      | "accuracy-down-roll-5"
+      | "accuracy-down-roll-6"
+      | "accuracy-down-roll-7";
     before: BattleRngState;
     after: BattleRngState;
     rawRngValue: number;
@@ -1203,6 +1256,179 @@ function runCvDefenseUp(input: Readonly<{
   return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
 }
 
+/**
+ * `AI_CV_AccuracyDown` (`data/battle_ai_scripts.s:1198-1234`,
+ * `docs/factory-ai-checkviability-ground-truth.md` §19.1) -- the largest
+ * ported `AI_CV_*` handler in this doc, 7 `if_random_less_than` sites:
+ *
+ * ```
+ * AI_CV_AccuracyDown:
+ *     if_hp_less_than AI_USER, 70, AI_CV_AccuracyDown2       ; Gate A (opponent's OWN hp)
+ *     if_hp_more_than AI_TARGET, 70, AI_CV_AccuracyDown3     ; Gate B (target's hp)
+ * AI_CV_AccuracyDown2:
+ *     if_random_less_than 100, AI_CV_AccuracyDown3           ; DRAW SITE 1
+ *     score -1
+ * AI_CV_AccuracyDown3:
+ *     if_stat_level_more_than AI_USER, STAT_ACC, 4, AI_CV_AccuracyDown4  ; Gate C (opponent's OWN acc stage)
+ *     if_random_less_than 80, AI_CV_AccuracyDown4            ; DRAW SITE 2
+ *     score -2
+ * AI_CV_AccuracyDown4:
+ *     if_not_status AI_TARGET, STATUS1_TOXIC_POISON, AI_CV_AccuracyDown5  ; Gate D
+ *     if_random_less_than 70, AI_CV_AccuracyDown5             ; DRAW SITE 3
+ *     score +2
+ * AI_CV_AccuracyDown5:
+ *     if_not_status3 AI_TARGET, STATUS3_LEECHSEED, AI_CV_AccuracyDown6    ; Gate E
+ *     if_random_less_than 70, AI_CV_AccuracyDown6              ; DRAW SITE 4
+ *     score +2
+ * AI_CV_AccuracyDown6:
+ *     if_not_status3 AI_USER, STATUS3_ROOTED, AI_CV_AccuracyDown7         ; Gate F (opponent's own Ingrain flag)
+ *     if_random_less_than 128, AI_CV_AccuracyDown7             ; DRAW SITE 5
+ *     score +1
+ * AI_CV_AccuracyDown7:
+ *     if_not_status2 AI_TARGET, STATUS2_CURSED, AI_CV_AccuracyDown8       ; Gate G
+ *     if_random_less_than 70, AI_CV_AccuracyDown8               ; DRAW SITE 6
+ *     score +2
+ * AI_CV_AccuracyDown8:
+ *     if_hp_more_than AI_USER, 70, AI_CV_AccuracyDown_End       ; Gate H (opponent's OWN hp again)
+ *     if_stat_level_equal AI_TARGET, STAT_ACC, DEFAULT_STAT_STAGE, AI_CV_AccuracyDown_End  ; Gate I (target's OWN acc stage)
+ *     if_hp_less_than AI_USER, 40, AI_CV_AccuracyDown_ScoreDown2   ; Gate J
+ *     if_hp_less_than AI_TARGET, 40, AI_CV_AccuracyDown_ScoreDown2 ; Gate K
+ *     if_random_less_than 70, AI_CV_AccuracyDown_End             ; DRAW SITE 7
+ * AI_CV_AccuracyDown_ScoreDown2:
+ *     score -2
+ * AI_CV_AccuracyDown_End:
+ *     end
+ * ```
+ *
+ * Gates A-G form one straight-line sequential body: unlike `AttackDown`'s
+ * mutually-exclusive branch pairs or `DefenseUp`'s early-stopping Gate C,
+ * NONE of `score -1`/`-2`/`+2`/`+2`/`+1`/`+2` after DRAW SITEs 1-6 is
+ * followed by a `goto` -- every one falls straight through into the next
+ * gate's own label immediately after, so all six are independently
+ * evaluated regardless of any earlier gate's or draw's own outcome (doc
+ * §19.1's own gate-map prose). Gate A/B reach DRAW SITE 1 by two
+ * independent routes (either battler's HP alone); Gate C guards DRAW SITE 2
+ * on the OPPONENT's own ACC stage (`>4` skips -- true at battle start);
+ * Gates D/E/F/G each gate one status flag's own draw site (target toxic/
+ * leech-seed/cursed, opponent's own rooted) -- none reachable from a
+ * single-turn HP/PP build (doc §19.5). Only past all seven does Gate H
+ * (opponent HP>70%) offer the tail's own clean, deterministic stop,
+ * skipping Gates I/J/K and DRAW SITE 7 entirely; Gate I (target's own ACC
+ * stage == neutral) is the second clean stop -- state-dependent on this
+ * handler's OWN dispatch move already having lowered the target's ACC
+ * stage this same turn (doc §19.1/§19.2); Gates J/K (either battler <40%)
+ * skip straight to the deterministic `-2`, so DRAW SITE 7 is reached only
+ * when both battlers sit in `[40,70]%` HP. Every roll shares the same
+ * JUMP-skips/FALLTHROUGH-applies polarity every other ported handler's roll
+ * already uses, EXCEPT DRAW SITE 7 itself: jump (roll<70) goes straight to
+ * `End` with NO further score change; falling through (roll>=70) is what
+ * applies the tail's own `-2` -- the opposite of DRAW SITEs 1-6, where
+ * fallthrough is what carries a score change and the jump is the no-op.
+ */
+function runCvAccuracyDown(input: Readonly<{
+  rng: BattleRngState;
+  attackerHp: number;
+  attackerMaxHp: number;
+  attackerAccStage: number;
+  attackerIsRooted: boolean;
+  targetHp: number;
+  targetMaxHp: number;
+  targetAccStage: number;
+  targetIsToxicPoisoned: boolean;
+  targetIsLeechSeeded: boolean;
+  targetIsCursed: boolean;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let score = 0;
+
+  const attackerHpPercent = Math.floor((100 * input.attackerHp) / input.attackerMaxHp);
+  const targetHpPercent = Math.floor((100 * input.targetHp) / input.targetMaxHp);
+
+  // Gates A/B -> DRAW SITE 1: either battler's own HP band reaches it.
+  if (attackerHpPercent < 70 || targetHpPercent <= 70) {
+    const draw1 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw1`);
+    rng = draw1.after;
+    ordinal += 1;
+    const succeeded1 = draw1.randomValue % 256 >= 100;
+    draws.push(Object.freeze({ ...draw1, kind: "accuracy-down-roll-1" as const, succeeded: succeeded1 }));
+    if (succeeded1) score -= 1;
+  }
+
+  // Gate C -> DRAW SITE 2: opponent's own ACC stage <= 4.
+  if (!(input.attackerAccStage > 4)) {
+    const draw2 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw2`);
+    rng = draw2.after;
+    ordinal += 1;
+    const succeeded2 = draw2.randomValue % 256 >= 80;
+    draws.push(Object.freeze({ ...draw2, kind: "accuracy-down-roll-2" as const, succeeded: succeeded2 }));
+    if (succeeded2) score -= 2;
+  }
+
+  // Gate D -> DRAW SITE 3: target toxic-poisoned.
+  if (input.targetIsToxicPoisoned) {
+    const draw3 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw3`);
+    rng = draw3.after;
+    ordinal += 1;
+    const succeeded3 = draw3.randomValue % 256 >= 70;
+    draws.push(Object.freeze({ ...draw3, kind: "accuracy-down-roll-3" as const, succeeded: succeeded3 }));
+    if (succeeded3) score += 2;
+  }
+
+  // Gate E -> DRAW SITE 4: target leech-seeded.
+  if (input.targetIsLeechSeeded) {
+    const draw4 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw4`);
+    rng = draw4.after;
+    ordinal += 1;
+    const succeeded4 = draw4.randomValue % 256 >= 70;
+    draws.push(Object.freeze({ ...draw4, kind: "accuracy-down-roll-4" as const, succeeded: succeeded4 }));
+    if (succeeded4) score += 2;
+  }
+
+  // Gate F -> DRAW SITE 5: opponent's OWN rooted (Ingrain) flag.
+  if (input.attackerIsRooted) {
+    const draw5 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw5`);
+    rng = draw5.after;
+    ordinal += 1;
+    const succeeded5 = draw5.randomValue % 256 >= 128;
+    draws.push(Object.freeze({ ...draw5, kind: "accuracy-down-roll-5" as const, succeeded: succeeded5 }));
+    if (succeeded5) score += 1;
+  }
+
+  // Gate G -> DRAW SITE 6: target cursed.
+  if (input.targetIsCursed) {
+    const draw6 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw6`);
+    rng = draw6.after;
+    ordinal += 1;
+    const succeeded6 = draw6.randomValue % 256 >= 70;
+    draws.push(Object.freeze({ ...draw6, kind: "accuracy-down-roll-6" as const, succeeded: succeeded6 }));
+    if (succeeded6) score += 2;
+  }
+
+  // Gate H: opponent's own HP > 70% -- clean stop, skips the entire tail.
+  if (attackerHpPercent > 70) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+  }
+  // Gate I: target's own ACC stage back at neutral -- clean stop.
+  if (input.targetAccStage === DEFAULT_STAT_STAGE) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+  }
+  // Gates J/K: either battler <40% HP skips DRAW SITE 7, deterministic -2.
+  if (attackerHpPercent < 40 || targetHpPercent < 40) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score - 2 });
+  }
+  // DRAW SITE 7: OPPOSITE polarity -- jump (roll<70) is the no-op; falling
+  // through (roll>=70) is what applies the -2.
+  const draw7 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw7`);
+  rng = draw7.after;
+  const succeeded7 = draw7.randomValue % 256 >= 70;
+  draws.push(Object.freeze({ ...draw7, kind: "accuracy-down-roll-7" as const, succeeded: succeeded7 }));
+  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: succeeded7 ? score - 2 : score });
+}
+
 /** `AI_CheckViability` for one move slot (`:652-775` dispatch shell only). */
 export function runCheckViability(input: Readonly<{
   rng: BattleRngState;
@@ -1397,6 +1623,32 @@ export function runCheckViability(input: Readonly<{
       rng: defenseUp.rng,
       draws: defenseUp.draws,
       scoreDelta: defenseUp.scoreDelta,
+    });
+  }
+
+  if (move.effect === "EFFECT_ACCURACY_DOWN" || move.effect === "EFFECT_ACCURACY_DOWN_2") {
+    // EFFECT_ACCURACY_DOWN_2 is dispatched too, source-faithfully, despite
+    // being a vestigial constant with zero real moves (doc §19.1).
+    const accuracyDown = runCvAccuracyDown({
+      rng: input.rng,
+      attackerHp: input.attacker.hp,
+      attackerMaxHp: input.attacker.maxHp,
+      attackerAccStage: input.attacker.accStage,
+      attackerIsRooted: input.attacker.isRooted ?? false,
+      targetHp: input.target.hp,
+      targetMaxHp: input.target.maxHp,
+      targetAccStage: input.target.accStage,
+      targetIsToxicPoisoned: input.target.isToxicPoisoned ?? false,
+      targetIsLeechSeeded: input.target.isLeechSeeded ?? false,
+      targetIsCursed: input.target.isCursed ?? false,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: accuracyDown.rng,
+      draws: accuracyDown.draws,
+      scoreDelta: accuracyDown.scoreDelta,
     });
   }
 

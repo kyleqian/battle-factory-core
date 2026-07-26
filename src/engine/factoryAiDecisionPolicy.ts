@@ -493,6 +493,14 @@ export type FactoryAiScoredBattlerView = Readonly<{
    * when omitted -- the real battle-start default (doc §18.2).
    */
   lastUsedMoveId?: number;
+  /** `gBattleMons[].status1 & STATUS1_TOXIC_POISON` -- source-required for `AI_CV_AccuracyDown`'s Gate D (target only, doc §19.1). Optional, defaulting to `false`. */
+  isToxicPoisoned?: boolean;
+  /** `gStatuses3[] & STATUS3_LEECHSEED` -- source-required for `AI_CV_AccuracyDown`'s Gate E (target only, doc §19.1). Optional, defaulting to `false`. */
+  isLeechSeeded?: boolean;
+  /** `gStatuses3[] & STATUS3_ROOTED` (Ingrain) -- source-required for `AI_CV_AccuracyDown`'s Gate F (AI_USER's own copy only, doc §19.1). Optional, defaulting to `false`. */
+  isRooted?: boolean;
+  /** `gBattleMons[].status2 & STATUS2_CURSED` -- source-required for `AI_CV_AccuracyDown`'s Gate G (target only, doc §19.1). Optional, defaulting to `false`. */
+  isCursed?: boolean;
 }>;
 
 export type FactoryAiScoredTargetView = FactoryAiScoredBattlerView & Readonly<{
@@ -707,6 +715,7 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     atkStage: view.target.statStages.atk,
     defStage: view.target.statStages.def,
     spDefStage: view.target.statStages.spDef,
+    accStage: view.target.statStages.acc,
   });
   const attackerForCbm: FactoryAiCheckBadMoveAttacker = Object.freeze({
     atkStage: view.attacker.statStages.atk,
@@ -792,6 +801,7 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
           spDefStage: view.attacker.statStages.spDef,
           hp: view.attacker.hp,
           maxHp: view.attacker.maxHp,
+          isRooted: view.attacker.isRooted,
         },
         target: {
           speed: view.target.speed,
@@ -806,6 +816,9 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
           hp: view.target.hp,
           maxHp: view.target.maxHp,
           lastUsedMoveId: view.target.lastUsedMoveId,
+          isToxicPoisoned: view.target.isToxicPoisoned,
+          isLeechSeeded: view.target.isLeechSeeded,
+          isCursed: view.target.isCursed,
         },
         drawOrdinalStart: draws.length + 1,
         reasonPrefix: `slot-${slot}-check-viability`,
