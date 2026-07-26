@@ -2028,3 +2028,314 @@ gate reads the target's *own* type, not the target's *last move's* type.
 session with `AI_CV_AttackUp`'s 2 fixtures (§17.3/§17.4) — every prior
 scenario (§9, §11.5, §12.1, §13.4, §14.6, §15.5, §16.5) unchanged and still
 green. **Run twice this session, ALL PASS both times.**
+
+## 18. 2026-07-26 addendum #8: `AI_CBM_DefenseUp` + `AI_CV_DefenseUp` (+ `AI_CBM_BulkUp`) — the target's-last-used-move dependency, live-verified
+
+Sixth follow-up scout session (side lane, Battle Scene OFF), same
+no-`src/`-changes contract. Goal: graduate §17.6's stretch goal —
+`AI_CBM_DefenseUp` + `AI_CV_DefenseUp`, the largest remaining CheckViability
+pair (5 `if_random_less_than` sites) — to a fully live-verified entry, with
+particular attention to the one dependency no prior fixture in this doc has
+needed: a branch that reads the *target's* last-used move's power and type,
+not the target's own current stat/type/HP.
+
+### 18.1 Both real bodies, cited and fully re-parsed from the raw assembly
+
+```
+AI_CBM_DefenseUp:                       (data/battle_ai_scripts.s:253-255)
+	if_stat_level_equal AI_USER, STAT_DEF, MAX_STAT_STAGE, Score_Minus10
+	end
+```
+
+Confirmed byte-for-byte the same 2-instruction shape as `AI_CBM_AttackUp`
+(§17.1) with `STAT_ATK` swapped for `STAT_DEF` — zero `if_random_less_than`,
+zero `get_ability`, reads only `AI_USER`'s own DEF stage. Dispatch table
+(`data/battle_ai_scripts.s:109,134,186`): `EFFECT_DEFENSE_UP`,
+`EFFECT_DEFENSE_UP_2`, **and `EFFECT_DEFENSE_CURL`** all route here on the CBM
+side (`EFFECT_DEFENSE_CURL` has no corresponding CV-side entry at all — it is
+CBM-only, out of this pair's scope and not staged). `EFFECT_BULK_UP`
+(`:210`) routes to a separate handler, `AI_CBM_BulkUp`:
+
+```
+AI_CBM_BulkUp:                          (data/battle_ai_scripts.s:581-584)
+	if_stat_level_equal AI_USER, STAT_ATK, MAX_STAT_STAGE, Score_Minus10
+	if_stat_level_equal AI_USER, STAT_DEF, MAX_STAT_STAGE, Score_Minus8
+	end
+```
+
+Three instructions, still zero `if_random_less_than`/`get_ability` — it adds
+nothing structurally beyond the stat-up 2-instruction pattern already
+established for `AI_CBM_AttackUp`/`AI_CBM_DefenseUp`: it is exactly that
+pattern applied twice (once per stat `EFFECT_BULK_UP` raises), sequentially,
+with no interaction between the two checks. Confirms §17.1's own note: this
+is the handler `EFFECT_BULK_UP` reaches on the **CBM side only**
+(`data/battle_ai_scripts.s:210`) — its CV side (`:771`) instead dispatches to
+`AI_CV_DefenseUp`, shared with `DEFENSE_UP`/`DEFENSE_UP_2` (`:660`, `:689`).
+Since `AI_CBM_BulkUp` is trivial and CV-side behavior for all three effects
+converges on the same `AI_CV_DefenseUp` body, this session designed fixtures
+using an `EFFECT_DEFENSE_UP` dispatch move (`MOVE_HARDEN`) rather than
+`MOVE_BULK_UP`, per the brief's own suggestion — `AI_CBM_BulkUp`'s CBM-side
+draws (there are none) never enter the picture either way.
+
+```
+AI_CV_DefenseUp:                        (data/battle_ai_scripts.s:915-942)
+	if_stat_level_less_than AI_USER, STAT_DEF, 9, AI_CV_DefenseUp2   ; :916 Gate A (opponent's OWN def stage)
+	if_random_less_than 100, AI_CV_DefenseUp3                        ; :917 DRAW SITE 1
+	score -1
+	goto AI_CV_DefenseUp3
+
+AI_CV_DefenseUp2:
+	if_hp_not_equal AI_USER, 100, AI_CV_DefenseUp3                   ; :922 Gate B (opponent's OWN hp)
+	if_random_less_than 128, AI_CV_DefenseUp3                        ; :923 DRAW SITE 2
+	score +2
+AI_CV_DefenseUp3:
+	if_hp_less_than AI_USER, 70, AI_CV_DefenseUp4                    ; :926 Gate C (opponent's OWN hp, NOTE inverted vs AttackUp)
+	if_random_less_than 200, AI_CV_DefenseUp_End                     ; :927 DRAW SITE 3
+AI_CV_DefenseUp4:
+	if_hp_less_than AI_USER, 40, AI_CV_DefenseUp_ScoreDown2          ; :929 Gate D (opponent's OWN hp)
+	get_last_used_bank_move AI_TARGET                                ; :930 -- TARGET's last move, not AI_USER's
+	get_move_power_from_result                                       ; :931
+	if_equal 0, AI_CV_DefenseUp5                                     ; :932 Gate E (last move power == 0)
+	get_last_used_bank_move AI_TARGET                                ; :933
+	get_move_type_from_result                                        ; :934
+	if_not_in_bytes AI_CV_DefenseUp_PhysicalTypes, AI_CV_DefenseUp_ScoreDown2  ; :935 Gate F (last move type)
+	if_random_less_than 60, AI_CV_DefenseUp_End                      ; :936 DRAW SITE 4
+AI_CV_DefenseUp5:
+	if_random_less_than 60, AI_CV_DefenseUp_End                      ; :938 DRAW SITE 5
+AI_CV_DefenseUp_ScoreDown2:
+	score -2
+AI_CV_DefenseUp_End:
+	end
+
+AI_CV_DefenseUp_PhysicalTypes:          (data/battle_ai_scripts.s:944-954)
+	.byte TYPE_NORMAL, TYPE_FIGHTING, TYPE_POISON, TYPE_GROUND, TYPE_FLYING,
+	      TYPE_ROCK, TYPE_BUG, TYPE_GHOST, TYPE_STEEL, -1
+```
+
+Exactly **5** `if_random_less_than` sites (`:917`, `:923`, `:927`, `:936`,
+`:938`), matching §17.6's own count and the brief's. Gates A/B mirror
+`AttackUp`'s own Gate A/B exactly (STAT_ATK → STAT_DEF, same "opponent's own
+stat stage < 9" / "opponent's own HP == 100%" shapes, same DRAW SITE 1/2
+semantics) — **not re-derived as a new finding this session**, since the
+structure is identical to §17.1's already-verified `AttackUp` shape.
+
+**The one real structural break from `AttackUp`, caught by reading the
+assembly rather than assuming symmetry: Gate C's direction is inverted.**
+`AttackUp3`'s own Gate C is `if_hp_more_than AI_USER,70,End` — HP > 70% jumps
+straight to `End`, a clean stop. `DefenseUp3`'s Gate C is
+`if_hp_less_than AI_USER,70,DefenseUp4` — HP < 70% jumps *into* the
+last-move branch, and HP ≥ 70% instead **falls through to DRAW SITE 3**
+(`:927`), whose own *failure* (~21.9%, draw ≥ 200) falls through *again*,
+landing in `AI_CV_DefenseUp4` anyway. A design that reused `AttackUp`'s own
+"HP == 100% is a clean, deterministic stop at Gate C" assumption would have
+been wrong here — HP == 100% instead guarantees an *extra*, sometimes-two-
+outcome draw at DRAW SITE 3 before anything terminates. This session's
+fixtures sidestep that instability entirely by holding the opponent's HP in
+the **[40,70)%** band (Gate C true, Gate D false) — see 18.3.
+
+`Cmd_get_last_used_battler_move` (`battle_ai_script_commands.c:1240-1247`)
+is the real implementation of `get_last_used_bank_move`: `AI_TARGET` reads
+`gLastMoves[gBattlerTarget]` — **the player's own last-used move ID**, not
+`AI_USER`'s. `Cmd_get_move_power_from_result` /
+`Cmd_get_move_type_from_result` (`:2151-2162`) then overwrite
+`funcResult` with `gBattleMoves[funcResult].power` / `.type` — i.e. Gate E/F
+read the move *table* entry for whatever move ID `gLastMoves[player]` holds,
+not any live battle state.
+
+### 18.2 The "hard part": what `gLastMoves[player]` reads before the player has ever moved, and why it doesn't need its own fixture
+
+`gLastMoves` (`src/battle_main.c:190`) is an `EWRAM_DATA` array declared
+`= {0}` and reset to `MOVE_NONE` at battle start (`src/battle_main.c:3053`,
+also `:3222`/`:3314` on each battler's own turn-start). `MOVE_NONE` is `0`
+(`include/constants/moves.h:4`), and `gBattleMoves[MOVE_NONE]` — the very
+first table entry (`src/data/battle_moves.h`) — is `{.effect = EFFECT_HIT,
+.power = 0, .type = TYPE_NORMAL, .accuracy = 0, ...}`. So at battle start (or
+any time the target has never completed a move), Gate E's `if_equal 0` reads
+`gBattleMoves[MOVE_NONE].power == 0` — **true**, exactly the same as any real
+0-power status move — and routes to `AI_CV_DefenseUp5`.
+
+**This means "empty/never-moved" and "target's last move had 0 power" are
+literally the same code path, indistinguishable by this branch or by any
+draw-count observation** — both satisfy Gate E and land on the identical
+`:938` roll. A live fixture proving "empty routes to DefenseUp5" would
+therefore be observationally identical to a live fixture proving "any 0-power
+last move routes to DefenseUp5" (neither was staged this session — see below
+for why). This is the concrete answer to the brief's own question ("what is
+the empty value and which branch does it route"): `MOVE_NONE`, power 0, Gate
+E true, `AI_CV_DefenseUp5`.
+
+**Why this wasn't pinned with its own live fixture:** `MOVEEND_UPDATE_LAST_
+MOVES` (`src/battle_script_commands.c:4407`, inside the `MOVEEND` state
+machine) sets `gLastMoves[gBattlerAttacker] = gChosenMove` as soon as a move
+resolves (hit or miss, as long as the battler obeyed) — *before* the phantom
+next-turn re-decision this doc's single-turn windows observe (§11.0/§17.2).
+So in any single-turn fixture, by the time the phantom decision reads
+`gLastMoves[player]`, it already reflects **whatever real move the player
+used turn 1** — never the untouched `MOVE_NONE` default. Proving the
+"empty" route live (as distinct from a mere 0-power move) needs the opponent
+HP to already sit in the clean [40,70)% band *before* the player's tracked
+move executes — which requires a genuine second turn (turn 1: a real
+damaging move to set the HP band; turn 2: `MOVE_SPLASH` to overwrite
+`gLastMoves[player]` to a literal 0-power entry, observing turn 3's phantom).
+That in turn requires the player's moveset to carry two *different* moves in
+different slots, selected via directional menu navigation across turns
+(every fixture in this doc so far uses an all-identical 4-slot moveset,
+needing only repeated `A` — no cursor movement) — untested trace-authoring
+territory this session did not have budget to derive and verify safely
+inside the 45-minute cap. Left as a recipe: the analytical answer above is
+complete and citation-backed; a future porter can stage the 2-turn variant
+directly (turn 1 = either physical- or non-physical-lastmove fixture below,
+turn 2 = `MOVE_SPLASH`) to additionally confirm live that it lands on
+`:938`, the same site as Gate E's own "empty" default.
+
+### 18.3 Design: an HP-banded last-used-move trio, single-turn, no second turn needed for the physical/non-physical flip
+
+Opponent (`AI_USER`, under test, all fixtures): **Anorith** (species 390,
+reused verbatim from §15-17 — Battle Armor blocks `Cmd_critcalc`'s
+`Random()` call entirely), all 4 slots **`MOVE_HARDEN`** (106,
+`EFFECT_DEFENSE_UP`, 0 power, **accuracy 0** — always hits, no
+`Cmd_accuracycheck` draw, CBM- and CV-table-covered). Target (player, all
+fixtures): **Machamp** (species 68, reused verbatim) — `AI_CV_DefenseUp`
+never reads the target's own stats/type/ability directly (only its *last
+move*), so Machamp's own kit is otherwise irrelevant.
+
+To land Anorith's HP inside the deterministic **[40,70)%** band (Gate C
+true → straight into `AI_CV_DefenseUp4`; Gate D false → the last-move check
+is reached, not skipped) *and* control exactly what the last-move check
+reads, the player's own attacking move on turn 1 does double duty — it both
+deals the damage that sets the band **and** is the move Gate E/F read back,
+since `MOVEEND_UPDATE_LAST_MOVES` sets `gLastMoves[player]` before the same
+window's phantom decision fires (18.2). Two fixed-damage move effects make
+the HP band land on the exact same number both seeds, with no 85-100%
+roll-variance risk:
+
+- `MOVE_VITAL_THROW` (233, Fighting — **in** `AI_CV_DefenseUp_PhysicalTypes`)
+  — normal damage roll, but Anorith's own `MOVE_HARDEN` raises its DEF stage
+  before the hit lands (opponent moved first both seeds here), reducing the
+  hit to a repeatable 65 damage both seeds (120→55, 45.8%) — **inside**
+  [40,70) even though this move's own power/roll differs from its usual
+  86-102 damage elsewhere in this doc (§13.3 etc., against opponents that
+  don't raise their own DEF first). A live discrepancy from that expectation
+  — see 18.5.
+- `MOVE_SEISMIC_TOSS` (69, Fighting — in the list, `EFFECT_LEVEL_DAMAGE`,
+  `dmgtolevel` — data/battle_scripts_1.s:1195-1204 — fixed damage equal to
+  the user's level, 50 at level 50, no roll, no crit calc call at all): 120→70
+  (58.3%), inside [40,70) both seeds identically.
+- `MOVE_DRAGON_RAGE` (82, Dragon — **not** in the list, `EFFECT_DRAGON_RAGE`,
+  `setword gBattleMoveDamage,40` — data/battle_scripts_1.s:819-828 — fixed 40
+  damage, no roll): 120→80 (66.7%), inside [40,70) both seeds identically —
+  the flip fixture.
+
+Single executed turn, same capture shape as every prior CBM-blocked pair
+(`[A, wait 30, A, wait 700]`, `captureFrames [0,100,300,732]`).
+
+- **`defenseup-lowhp-control`** (Vital Throw): a second, independent
+  confirmation of the physical-list branch with a different move/power,
+  landing a different exact HP (55 vs 70) inside the same band.
+- **`defenseup-physicallastmove`** (Seismic Toss): the primary physical-list
+  fixture — deterministic HP, no roll-variance confound at all.
+- **`defenseup-nonphysicallastmove`** (Dragon Rage): the flip — same Gate
+  C/D routing, but Gate F now routes straight to `ScoreDown2`, skipping both
+  remaining draw sites.
+
+### 18.4 Live ledger (oracle-verified, both seeds, both runs)
+
+| Fixture | Seed | Opponent PP used | Opponent HP (start→end) | Total `Random()` calls, frame 0→732 | Determinism (2 runs) |
+| --- | -: | -: | --- | -: | --- |
+| Vital Throw (physical #2) | 1 | 1 | 120→55 (45.8%) | **14** | identical |
+| Vital Throw (physical #2) | 99 | 1 | 120→55 (45.8%) | **13** | identical |
+| Seismic Toss (physical #1) | 1 | 1 | 120→70 (58.3%) | **14** | identical |
+| Seismic Toss (physical #1) | 99 | 1 | 120→70 (58.3%) | **13** | identical |
+| Dragon Rage (non-physical, flip) | 1 | 1 | 120→80 (66.7%) | **8** | identical |
+| Dragon Rage (non-physical, flip) | 99 | 1 | 120→80 (66.7%) | **8** | identical |
+
+Both physical-list fixtures land the *same* per-seed totals (14/13) despite
+different moves/power/exact HP — strong evidence the branch, not the
+specific move, drives the count. The non-physical fixture is cleanly
+cross-seed stable (8/8); the two physical fixtures are **not**
+(14 vs 13) — see attribution below for what's actually stable vs not.
+
+**Attribution** (`tools/probe/attribute-factory-ai-random-callers.py`,
+window `0 732`, seed 1, via `tools/run-mgba-probe.py`):
+
+| Caller function | Vital Throw | Seismic Toss | Dragon Rage |
+| --- | -: | -: | -: |
+| `BattleAI_SetupAIData+0x83` | 4 | 4 | 4 |
+| `BattleTurnPassed+0x157` | 1 | 1 | 1 |
+| `ChooseMoveOrAction_Singles+0xf7` | 1 | 1 | 1 |
+| `Cmd_accuracycheck+0x305` | 0 | 1 | 1 |
+| `Cmd_adjustnormaldamage+0x7` | 1 | 0 | 0 |
+| `Cmd_seteffectwithchance+0x81` | 1 | 1 | 1 |
+| `Cmd_if_random_less_than+0x7` | **6** | **6** | **0** |
+
+The `Cmd_accuracycheck`/`Cmd_adjustnormaldamage` split is the flipped
+precondition's own necessary cost (Vital Throw has a real 85-100% damage
+roll and accuracy 0/always-hits; Seismic Toss/Dragon Rage bypass the damage
+roll via `dmgtolevel`/`setword` but still carry a real accuracy=100 check) —
+not part of the handler. **The handler's own contribution
+(`Cmd_if_random_less_than`) is 0 for the non-physical fixture (both seeds,
+matching the analytical prediction that Gate F routes straight past both
+remaining draw sites) vs 6 (seed 1) / 5 (seed 99) for both physical
+fixtures — clearly present vs cleanly absent, the provable flip the brief
+asked for.** The exact physical-branch count is **not** the clean
+"4 = N identical slots × 1 draw" pattern every prior handler in this doc
+showed (`AttackUp`/`DefenseDown`/`SpDefDown`/`VitalThrow`, §14-17): 4 identical
+`MOVE_HARDEN` slots deterministically take an identical path through Gates
+C/D/E/F (none of those gates depend on a random draw), so a naive read
+predicts exactly 4, not 5-6. This session did not single-step the flagged
+frame to find the extra 1-2 draws' exact source — flagged for a future
+porter, and treated here the same way §11.0 already established for
+`HighCrit`'s own non-uniform neutral fixture: the **shape** (present/absent,
+5-6 vs 0) is the reliable, reproduced signal; the exact count is not.
+`Cmd_get_ability` appears in none of the three tables (Machamp's kit is
+never read by this handler at all, as expected).
+
+### 18.5 A live prose-premise falsification: `MOVE_VITAL_THROW`'s damage against Anorith is NOT 86-102 here
+
+Every prior use of `MOVE_VITAL_THROW` vs Anorith in this doc (§13.3, §15-17)
+reports 86-102 damage (15-28% remaining of 120 HP), because in every one of
+those fixtures Anorith's own dispatch move never touched its own DEF stage.
+Here, Anorith's dispatch move **is** `MOVE_HARDEN` (`EFFECT_DEFENSE_UP`,
+raises `AI_USER`'s own DEF one stage) — and since Anorith moved first both
+seeds, its DEF stage is already +1 by the time Vital Throw connects,
+reducing the hit to a repeatable 65 damage (120→55) instead. Assuming the
+old 86-102 figure would transfer unchanged to a fixture whose own opponent
+dispatch move is a self-buff would have been wrong — caught live by running
+the fixture and reading the actual HP delta, not by re-deriving the damage
+formula on paper. (The exact number still safely satisfies "inside
+[40,70)%", which is all this fixture's design needs.)
+
+### 18.6 What this unblocks
+
+1. **The pair's own port**: exact instruction lists for both `AI_CBM_*`
+   handlers and `AI_CV_DefenseUp`, every gate's real precondition (including
+   Gate C's inversion vs `AttackUp`, a real trap for anyone porting by
+   analogy), the physical-types table, and a citation-backed, live-confirmed
+   resolution of the target's-last-move dependency — the one shape no prior
+   handler in this doc needed.
+2. **Confirms §17.6's own citations were accurate** (line numbers, draw-site
+   count) while correcting an assumption a symmetry-with-`AttackUp` read
+   would have produced silently wrong (Gate C's direction, 18.1) — the
+   session's own "read the assembly, verify live" discipline catching a
+   mistake before it reached the doc, not after.
+3. **A concrete boundary on this doc's own draw-counting methodology**:
+   every prior handler's reachable branch reduced cleanly to "N identical
+   slots × 1 draw"; `DefenseUp`'s physical-list branch does not (5-6, not
+   4) — the first handler in this doc where the shape-not-count hedge
+   (§11.0) had to be invoked for a *newly staged* fixture rather than
+   retroactively explaining an old one (`HighCrit`).
+4. **DRAW SITE 1** (`:917`, Gate A, needs the opponent's own DEF stage
+   already built to 9-11 by a prior real stat-up move) and **DRAW SITE
+   2/3's own HP==100% coupling** (18.1) remain unstaged live this session,
+   same "not attempted, time-capped" status as `AttackUp`'s own DRAW SITE 1
+   (§17.5) — analytically characterized here (18.1) but not independently
+   fixture-verified, since this session's budget centered the last-used-move
+   dependency specifically named in the brief.
+
+### 18.7 Verify script status
+
+`tools/probe/verify-factory-ai-checkviability-ground-truth.ts` extended this
+session with `AI_CV_DefenseUp`'s 3 fixtures (18.3/18.4) — every prior
+scenario (§9, §11.5, §12.1, §13.4, §14.6, §15.5, §16.5, §17.7) unchanged and
+still
+green. **Run twice this session, ALL PASS both times.**
