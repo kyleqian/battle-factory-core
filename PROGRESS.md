@@ -4,6 +4,106 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 464 — EFFECT_ENDEAVOR registered: SETDAMAGETOHEALTHDIFFERENCE/BICBYTE/ADJUSTSETDAMAGE (entry 463's side-merge blocker, seam-scout §9.2)
+
+- **State:** tree green at **220 files / 2654 tests** (+0 files/+20 tests
+  over entry 463's merged 220/2634), build green. Ratchet:
+  `battleScriptHitChainOpcode.ts` 23→24 (one new named barrier — see below);
+  `battleScriptIngrainLeechSeedWrapOpcode.ts` stays pinned at 3 (widened, not
+  narrowed — same single COPYARRAY call site now accepts a second tuple).
+  Three commits (`4758e8c` registration+tests, `0dbdd73` census), all green.
+  Census live-regenerated: **76/214→79/214 effects, 160/355→163/355 moves,
+  125/276→128/276 F-L50 unweighted, 1567→1573 weighted** (25/25 self-checks
+  pass, `docs/executable-frontier-census.md`).
+- **Did:** ported the seam-scout doc's own three named opcodes
+  (`docs/presentation-seam-scout.md` §9.2), then followed where the full
+  script actually led (two more real gaps surfaced only by running
+  `BattleScript_EffectEndeavor` end to end — not guessed in advance):
+  1. **`Cmd_setdamagetohealthdifference`** (`battle_script_commands.c:9366-9377`,
+     `battleScriptHitChainOpcode.ts`): source-complete, zero barriers.
+     `gBattleMoveDamage = target.hp - attacker.hp`; fails (jumps to
+     `BattleScript_ButItFailed`) when `attacker.hp >= target.hp`.
+  2. **`Cmd_bicbyte`** (`:3889-3894`, new `createBattleScriptBicbyteCommandHandlers`
+     in `battleScriptSetByte.ts`): all 11 concrete call sites share one
+     pointer (`gMoveResultFlags`) and one of three literal masks — every one
+     resolves, so this registers **source-completely** via registration-time
+     validation (a hard `throw`, not a runtime barrier), the same style
+     `Cmd_setbyte`'s own registration already uses. Zero rejected.
+  3. **`Cmd_adjustsetdamage`** (`:5861-5899`, `battleScriptHitChainOpcode.ts`):
+     the False Swipe/Endure clamp family, ported like the existing
+     `adjustnormaldamageOpcodeHandler` minus its random multiplier. One new
+     named (b) barrier — `HOLD_EFFECT_FOCUS_BAND`, the exact same
+     `gSpecialStatuses[].focusBanded` gap `adjustnormaldamage` already
+     carries, duplicated onto this sibling opcode (a distinct call site, so
+     +1 to the file's pinned count, not a narrowing).
+  4. **Two more real gaps, found only by driving the full script, both
+     closed:** `jumpifmovehadnoeffect`'s own `MOVE_RESULT_NO_EFFECT`
+     comparand (a `jumpifbyte` macro expansion) was outside the shared
+     SETBYTE value universe — added (`battleScriptSetByte.ts`), which also
+     resolves 8 *other* pre-existing call sites for free (AbsorbUpdateHp,
+     DreamEaterWorked, DoMultiHit, EffectOHKO, EffectParalyze, FuryCutterHit,
+     ...). `Cmd_copyarray` (`battleScriptIngrainLeechSeedWrapOpcode.ts`) was
+     narrowed to only `LeechSeedTurnDrain`'s own
+     `gBattleMoveDamage<-gHpDealt` tuple — widened to also accept Endeavor's
+     own reverse pair (`gHpDealt<-gBattleMoveDamage` right after
+     `setdamagetohealthdifference`, then `gBattleMoveDamage<-gHpDealt` again
+     after typecalc/bicbyte): Endeavor stashes its set-damage across
+     typecalc's own STAB/type-effectiveness multiply, then restores it
+     unmodified — a real source mechanism this widening surfaces, not a
+     special case. Barrier count for that file is unchanged (still one
+     COPYARRAY call site, now a wider accept-tuple check).
+- **Ground truth (live, this session):** `bin/oracle lab
+  tools/battle-lab/mechanic-endeavor-{success,fail}.json` (new, checked in),
+  Diglett (85hp) vs Chansey (325hp) at Level 50, both attacker directions.
+  Success: target settles at the attacker's own HP (325→85), attacker
+  unchanged; exactly **2 RNG draws total** (accuracycheck +
+  seteffectwithchance, both pre-existing opcodes — zero from the three new
+  ones, confirmed both by the live run and by reading all three C functions:
+  none contain a `Random()` call on any implemented branch). Fail: HP
+  unchanged on both sides. The fail branch's own RNG delta was **not**
+  cleanly isolable live (a Chansey-as-AI-opponent turn burns Factory-AI
+  scoring RNG unrelated to Endeavor's own script — that subsystem's own
+  session-scoped complexity is out of this step's scope) — pinned instead by
+  direct source read (zero `Random(` calls on the fail path) plus the
+  live-confirmed zero HP change either side.
+- **Test:** Tier-1 lifecycle coverage in `tests/battleScriptHitChainOpcode.test.ts`
+  (success/boundary/fail for setdamagetohealthdifference; plain-pass-through/
+  False-Swipe/Endure/non-lethal/Focus-Band-barrier for adjustsetdamage; two
+  full-script runs from `BattleScript_EffectEndeavor` reproducing the live
+  ground truth exactly, success and fail) and `tests/battleScriptSetByte.test.ts`
+  (BICBYTE's pinned 11-start/3-mask universe, AND-NOT semantics on every
+  concrete start, all-set/none-set edges, registration-time rejection).
+  Updated `tests/battleScriptJumpifbyteOpcode.test.ts`'s own barrier test
+  (its old example value, MOVE_RESULT_MISSED, now resolves — moved to
+  MOVE_RESULT_FOE_ENDURED, still genuinely unmodeled) and
+  `tests/battleScriptIngrainLeechSeedWrapOpcode.test.ts` (new test pinning
+  COPYARRAY's widened reverse tuple). `tests/battleScriptRulesContext.test.ts`'s
+  composition-count test updated 92→95 handlers.
+- **Next:** `turn5EndeavorPresentationStaging.ts` (seam-scout's own unwired
+  staging module) can now be redone with the **real** `MOVE_ENDEAVOR` chain
+  instead of its `MOVE_STRENGTH` substitute — seam-scout §9.4 items 2-3 are
+  the wiring worker's own next step (not this one): swap the substitute,
+  wire `drawTurn5EndeavorText`'s HP endpoints and kickoff text to the real
+  chain's `hp-change`/`message` events. `battleScene.ts` itself is untouched
+  by this step, as scoped. Also open: the seam-scout's own items 1/4/5 (turn
+  4's `anchorOpponentAfterTurn4Hp` still has no staged proof) and every
+  other still-`blocked-on-opcodes` census row (`B_SCR_OP_DMGTOLEVEL`,
+  `PSYWAVEDAMAGEEFFECT`, `COUNTERDAMAGECALCULATOR`/`TYPECALC2`,
+  `MIRRORCOATDAMAGECALCULATOR`, `STOCKPILETOBASEDAMAGE`, `SETBIDE`, ...).
+- **Notes:** stayed inside scope — no `battleScene.ts`/presentation wiring,
+  no factory-AI files, no animation files, no ENDTURN breadth. The two
+  extra widenings (§9.2's own three opcodes were not sufficient by
+  themselves — `jumpifbyte`'s `MOVE_RESULT_NO_EFFECT` and `copyarray`'s
+  reverse tuple were both genuinely required for the brief's own acceptance
+  bar, "EFFECT_ENDEAVOR's script reaches end") are named above, not silently
+  folded in. PAPERCUT: the fail-branch RNG-draw-count ask cost real
+  investigation time before concluding Factory-AI scoring noise (a separate,
+  out-of-scope subsystem) pollutes any live two-sided-AI RNG diff — worth a
+  standing note for future ground-truth scouts: isolate RNG claims to
+  player-side actions, or diff against a same-AI-role control run, not a
+  raw before/after delta.
+
+---
 ## 463 — First CheckViability handler-body port: AI_CBM_SpeedDown + AI_CV_SpeedDown, the proven CBM+CV pair (entry 462's carried item, per `docs/factory-ai-checkviability-ground-truth.md`)
 
 - **State:** tree green at **219 files / 2627 tests** (+0 files/+17 tests
@@ -229,65 +329,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   under-layer composite (single-layer candidates each fail). Third worker
   now instrumenting the pre-OBJ composite directly. FUTURE_SIGHT/CONFUSION
   stay `partial` 85/114 / 108/140.
-
----
-## 461 — Full-turn reducer: PLAYER-side forced-switch variant lands (entry 459's item 3, the named remainder)
-
-- **State:** tree green at **218 files / 2585 tests** (+0 files/+3 tests
-  over entry 460's 218/2582 — only added tests to the existing
-  `factoryBattleScriptFullTurnDecision.test.ts`), build green, ratchet
-  unchanged (6/6 — no barrier call site touched). Two per-rung commits
-  (`b3f8276` plumbing, `fccfd9d` tests), both green.
-- **Did:** surfaced the `faint1`/`faint2` `"player-choice-required"` fork
-  (both previously threw "outside this reducer's modeled domain") as a real
-  `"forced-switch"` decision-required boundary, mirroring
-  `factoryBattleScriptTerminalDecision.ts`'s own `forced-switch-pending`
-  phase + resume machinery. Added `playerBenchHp`/`playerBenchOverride` to
-  `FactoryFullTurnConfig` (party slot 0 = active, this reducer's own
-  convention — both player and opponent parties now share one `benchSlot`
-  helper). New `pendingForcedSwitchAt`/`pendingScriptAt`/
-  `buildForcedSwitchPendingRules` reconstruct the halted
-  `BattleScript_HandleFaintedMon` script from a durable `pendingScript`
-  bundle (programCounter/callStack/scheduler); `resumeFullTurnForcedSwitch`
-  resumes it via `resumeBattleScriptFaintedActionsAfterPlayerChoice`, and a
-  `"resumed"` result runs straight into a new shared `runEndTurnTail` helper
-  (factored out of the existing two-action-turn tail, now called from both
-  the normal turn path and the forced-switch resume path).
-- **Test:** a pure side-relabeling of entry 459 item 2's own trainer-side
-  fixture (same STRENGTH/200atk/50def/90hp one-shot, same speed gap) so the
-  trainer's killing blow KOs the player's active mon instead. Pins: the
-  reducer surfaces `{kind:"forced-switch", side:"player", battler:0,
-  faintedPartyIndex:0, legalPartyIndexes:[1]}` (not a throw); submitting the
-  legal MACHOP slot rebuilds the active battler (species/hp/partyIndex/
-  neutral stat stages/clean status — moves/pp/other stats intentionally NOT
-  rebuilt, per `battleScriptSwitchinOpcode.ts`'s own documented "ability/
-  item/moves/pp stay untouched" scope) and resumes to a genuine next command
-  boundary; exact RNG ledger (4 total across all three submissions — just
-  the killing blow's own hit chain, zero from the forced-switch dance, zero
-  from the cancelled second action, zero from the quiet end-turn); PP ledger
-  (trainer's Strength used once, the player's own action never dispatched);
-  the fainted/active slot (index 0) is rejected.
-- **Next:** entry 460's own list stands, item 3 is now the completed
-  remainder off it — `CheckViability` handler bodies phased by the audit's
-  16-reachable-handler table (ground truth scout first), Ingrain/Leech
-  Seed/Wrap registration, seam window 3 (`turn5-rockslide.json` per the
-  scout doc's ranking), ENDTURN_ABILITIES/ITEMS breadth.
-- **Side merge (same hour, supervisor-verified, `83f15c3`):**
-  `addbyte`/`jumpifbytenotequal` widened off their single hardcoded
-  `gBattleCommunication`/`gBattlersCount` tuple onto the shared SETBYTE
-  byte-lvalue universe (+`gBattlersCount` sentinel comparand) —
-  `BattleScript_WeatherFormChanges` now runs to its own `return` for
-  non-Castform L50 singles (0 RNG draws), Castform barrier still reached
-  *through* the loop; Perish Song/Teeter Dance/Intimidate/Palace loop
-  counters ride the same mechanism (not separately tested). Census
-  unchanged (opcode-level dispatch only; regenerated zero-diff, 25/25
-  self-checks); ratchet barrier count still 3 (comment updated). Merged
-  suite 218 files / 2590 tests + build re-verified green.
-- **Notes:** pure reducer/config work, no presentation/census/opcode-
-  registration changes (as scoped; `battleScriptSetByte.ts`/
-  `battleScriptDamagingWeatherOpcode.ts` untouched, left for the side worker
-  this hour). Scratch-verified via a deleted `tests/_scratch_item3.test.ts`
-  before writing the real test (same discipline entry 459 used), confirming
-  the exact RNG/PP numbers and the switch-in module's documented
-  moves/pp-untouched limitation before asserting on it. No PAPERCUT logged.
 

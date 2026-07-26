@@ -1,4 +1,65 @@
 ---
+## 461 — Full-turn reducer: PLAYER-side forced-switch variant lands (entry 459's item 3, the named remainder)
+
+- **State:** tree green at **218 files / 2585 tests** (+0 files/+3 tests
+  over entry 460's 218/2582 — only added tests to the existing
+  `factoryBattleScriptFullTurnDecision.test.ts`), build green, ratchet
+  unchanged (6/6 — no barrier call site touched). Two per-rung commits
+  (`b3f8276` plumbing, `fccfd9d` tests), both green.
+- **Did:** surfaced the `faint1`/`faint2` `"player-choice-required"` fork
+  (both previously threw "outside this reducer's modeled domain") as a real
+  `"forced-switch"` decision-required boundary, mirroring
+  `factoryBattleScriptTerminalDecision.ts`'s own `forced-switch-pending`
+  phase + resume machinery. Added `playerBenchHp`/`playerBenchOverride` to
+  `FactoryFullTurnConfig` (party slot 0 = active, this reducer's own
+  convention — both player and opponent parties now share one `benchSlot`
+  helper). New `pendingForcedSwitchAt`/`pendingScriptAt`/
+  `buildForcedSwitchPendingRules` reconstruct the halted
+  `BattleScript_HandleFaintedMon` script from a durable `pendingScript`
+  bundle (programCounter/callStack/scheduler); `resumeFullTurnForcedSwitch`
+  resumes it via `resumeBattleScriptFaintedActionsAfterPlayerChoice`, and a
+  `"resumed"` result runs straight into a new shared `runEndTurnTail` helper
+  (factored out of the existing two-action-turn tail, now called from both
+  the normal turn path and the forced-switch resume path).
+- **Test:** a pure side-relabeling of entry 459 item 2's own trainer-side
+  fixture (same STRENGTH/200atk/50def/90hp one-shot, same speed gap) so the
+  trainer's killing blow KOs the player's active mon instead. Pins: the
+  reducer surfaces `{kind:"forced-switch", side:"player", battler:0,
+  faintedPartyIndex:0, legalPartyIndexes:[1]}` (not a throw); submitting the
+  legal MACHOP slot rebuilds the active battler (species/hp/partyIndex/
+  neutral stat stages/clean status — moves/pp/other stats intentionally NOT
+  rebuilt, per `battleScriptSwitchinOpcode.ts`'s own documented "ability/
+  item/moves/pp stay untouched" scope) and resumes to a genuine next command
+  boundary; exact RNG ledger (4 total across all three submissions — just
+  the killing blow's own hit chain, zero from the forced-switch dance, zero
+  from the cancelled second action, zero from the quiet end-turn); PP ledger
+  (trainer's Strength used once, the player's own action never dispatched);
+  the fainted/active slot (index 0) is rejected.
+- **Next:** entry 460's own list stands, item 3 is now the completed
+  remainder off it — `CheckViability` handler bodies phased by the audit's
+  16-reachable-handler table (ground truth scout first), Ingrain/Leech
+  Seed/Wrap registration, seam window 3 (`turn5-rockslide.json` per the
+  scout doc's ranking), ENDTURN_ABILITIES/ITEMS breadth.
+- **Side merge (same hour, supervisor-verified, `83f15c3`):**
+  `addbyte`/`jumpifbytenotequal` widened off their single hardcoded
+  `gBattleCommunication`/`gBattlersCount` tuple onto the shared SETBYTE
+  byte-lvalue universe (+`gBattlersCount` sentinel comparand) —
+  `BattleScript_WeatherFormChanges` now runs to its own `return` for
+  non-Castform L50 singles (0 RNG draws), Castform barrier still reached
+  *through* the loop; Perish Song/Teeter Dance/Intimidate/Palace loop
+  counters ride the same mechanism (not separately tested). Census
+  unchanged (opcode-level dispatch only; regenerated zero-diff, 25/25
+  self-checks); ratchet barrier count still 3 (comment updated). Merged
+  suite 218 files / 2590 tests + build re-verified green.
+- **Notes:** pure reducer/config work, no presentation/census/opcode-
+  registration changes (as scoped; `battleScriptSetByte.ts`/
+  `battleScriptDamagingWeatherOpcode.ts` untouched, left for the side worker
+  this hour). Scratch-verified via a deleted `tests/_scratch_item3.test.ts`
+  before writing the real test (same discipline entry 459 used), confirming
+  the exact RNG/PP numbers and the switch-in module's documented
+  moves/pp-untouched limitation before asserting on it. No PAPERCUT logged.
+
+---
 ## 460 — [SUPERVISOR WIND-DOWN 2026-07-25 ~21:50] session summary
 
 - **State:** tree committed and green at **218 files / 2582 tests**, build
