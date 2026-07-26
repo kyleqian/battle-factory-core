@@ -1,4 +1,108 @@
 ---
+## 456 — Screens/weather setters + `DoFieldEndTurnEffects` field loop registered (slices 1/2/3/5 of `docs/screens-weather-ground-truth.md` §6); Rain/Sun field case (slice 4) explicitly deferred
+
+- **State:** tree green at **212 files / 2521 tests** (+2 files/+31 tests
+  over entry 455's 210/2490), build green, ratchet green (new pin:
+  `battleScriptDamagingWeatherOpcode.ts` → 3, each barrier has a reachability
+  test AND a pass-through case). `verify-screens-weather-ground-truth.ts`
+  reconfirmed live before AND after: **29/29 PASS** both times.
+- **Did, per the doc's own §6 dependency-ordered slices:**
+  1. **Screen/Mist setter opcodes** (`battleScriptSetSideStatusOpcode.ts`):
+     `SETREFLECT`/`SETLIGHTSCREEN`/`SETSAFEGUARD`/`SETMIST`, source-complete
+     (a) — no barriers, doubles-only message variant out of scope per the
+     doc. `BattleScriptRulesContext` gained `sideTimers` (reflect/lightscreen/
+     safeguard timer+battlerId per side, plus `mistBattlerId`) — `sideStatuses`
+     now genuinely carries REFLECT/LIGHTSCREEN/MIST/SAFEGUARD, not just
+     Safeguard; updated `battleScriptSwitchinOpcode.ts`'s Spikes-barrier
+     comment and the ratchet's matching note to say so explicitly (the
+     brief's own "widen deliberately" instruction).
+  2. **`DoFieldEndTurnEffects` field loop** (`battleEndTurnOrchestration.ts`,
+     `runDoFieldEndTurnEffects` replacing the old barrier-only stub): hosts
+     F2/F3/F4/F5 (Reflect/Light Screen/Mist/Safeguard decrement — silent
+     while >0, `BattleScript_SideStatusWoreOff`/`SafeguardEnds` fire only on
+     the tick the timer reaches 0, matching doc §3d/§3f's live ledgers
+     exactly) and F8/F10 (Sandstorm/Hail continues/damage/ends).
+  3. **Weather setter opcodes** (`battleScriptSetWeatherOpcode.ts`):
+     `SETRAIN`/`SETSUNNY`/`SETSANDSTORM`/`SETHAIL`, same shape, flat `=`
+     assignment not `|=` (doc's load-bearing clobber finding, ported as-is).
+     New `weatherTimer` field (`gWishFutureKnock.weatherDuration`).
+  5. **Sandstorm/Hail damage loop** (`battleScriptDamagingWeatherOpcode.ts`):
+     all 6 doc-corrected opcodes (`PLAYANIMATION_VAR`, `COPYARRAYWITHINDEX`,
+     `WEATHERDAMAGE`, `ADDBYTE`, `JUMPIFARRAYNOTEQUAL`, `BICWORD`), each
+     narrowed to the one concrete operand triple this loop actually uses —
+     every other concrete call site of the three generic array/scratch
+     opcodes (Triple Kick, Perish Song, Teeter Dance, Ghost Curse, link-
+     battle/Palace loops, HitsAllNoUndergroundBonus, MoveUsedWokeUp) is one
+     shared named barrier per opcode, each with a reachability + pass-through
+     test. `WEATHERDAMAGE` models real type/ability immunity (ROCK/GROUND/
+     STEEL + Sand Veil + underground/underwater for Sandstorm; ICE-only for
+     Hail) and Cloud Nine field-wide suppression. New `battlerByTurnOrder`
+     field (`gBattlerByTurnOrder`, populated ascending per
+     `computeBattlerOrder`'s own documented limitation) backs
+     `COPYARRAYWITHINDEX`'s per-battler loop index.
+  - **Widened, not new:** `battleScriptJumpifwordOpcode.ts` now resolves
+    `gBattleMoveDamage` (the loop's own `jumpifword CMP_EQUAL,
+    gBattleMoveDamage, 0, ...` zero-damage skip) — an existing registered
+    module gaining a modeled pointer, not a new barrier; its own stale test
+    (previously asserting this exact site was unmodeled) rewritten to assert
+    both branches taken/not-taken instead. Added `gMoveWeatherChangeStringIds`/
+    `gSandStormHailContinuesStringIds`/`DmgStringIds`/`EndStringIds`/
+    `gReflectLightScreenSafeguardStringIds`/`gMistUsedStringIds` to
+    `PRINTFROMTABLE_TABLES`.
+  - **4. Rain/Sun field case (F7/F9) — deliberately NOT wired, named per the
+     brief's own "say exactly what remains" clause.** Real finding, not a
+     skipped step: `BattleScript_RainContinuesOrEnds`/`SunlightContinues`
+     both call the *non-var* `playanimation BS_ATTACKER, B_ANIM_RAIN_
+     CONTINUES`/`B_ANIM_SUN_CONTINUES`, and the only registered PLAYANIMATION
+     handler (`battleScriptStatbuffchangeOpcode.ts`) is narrowed to its own
+     `B_ANIM_STATS_CHANGE` arm — any other animType is that module's own
+     barrier. Widening it is a real, separate registration (a new animType
+     branch + its own barrier-count change in a module this step doesn't
+     own) that this session's cap did not reach. `runDoFieldEndTurnEffects`
+     still returns the same `case-barrier` shape the old stub did for
+     `ENDTURN_RAIN`/`ENDTURN_SUN`, now with this exact reason cited.
+  - **Tier-1 tests** (`battleScriptScreensWeatherOrchestration.test.ts`,
+    `battleScriptDamagingWeatherOpcode.test.ts`, 30 new): setter fail/success
+    for all 8 moves; **Light Screen full lifecycle** (set → 4 silent
+    decrement ticks → expiry message tick → re-set, doc §3d's exact timer
+    sequence); **Safeguard** identical shape with its own distinct expiry
+    script; **Sandstorm set → 4 damage ticks (immune ONIX untouched every
+    tick, SUNKERN chipped exactly `floor(105/16)=6` each tick, 105→99→93→
+    87→81) → expiry with zero further damage → re-set**, doc §3e's exact
+    ledger; zero `Random()` draws asserted throughout (doc §4). All 3 new
+    (b) barriers (addbyte/bicword/jumpifarraynotequal unmodeled operand)
+    have both a reachability test and a pass-through case.
+- **Census regenerated:** **65→69/214 effects, 144→148/355 moves, 111→
+  114/276 Factory-L50 (unweighted), 1416→1462/2957 weighted.** Exactly 4
+  effects flipped: `EFFECT_REFLECT`/`EFFECT_LIGHT_SCREEN`/`EFFECT_SAFEGUARD`/
+  `EFFECT_MIST`. **A predicted flip that did NOT materialize:**
+  `EFFECT_SANDSTORM`/`EFFECT_RAIN_DANCE`/`EFFECT_SUNNY_DAY`/`EFFECT_HAIL`
+  stayed blocked — even with every end-turn-loop opcode this session
+  registered, the *setting move's own script* still can't complete because
+  `goto BattleScript_MoveWeatherChange` → `call BattleScript_WeatherFormChanges`
+  needs one more opcode, `B_SCR_OP_TRYCASTFORMDATACHANGE` (Castform's
+  ability-triggered species/form change) — a genuinely new finding neither
+  ground-truth doc named, entirely unrelated to the end-turn machinery this
+  step targeted, and out of this step's scope to register.
+- **Next:** widen `Cmd_playanimation` to cover `B_ANIM_RAIN_CONTINUES`/
+  `B_ANIM_SUN_CONTINUES` (own barrier-count change in
+  `battleScriptStatbuffchangeOpcode.ts`) to land F7/F9; register
+  `B_SCR_OP_TRYCASTFORMDATACHANGE` to flip the 4 weather-setter effects to
+  executable (Castform's own species/type-change logic — likely wants its
+  own reachability check first, since Castform isn't a Frontier rental);
+  `ENDTURN_ABILITIES`/`ITEMS1`/`ITEMS2` (doc step 8, explicitly out of
+  scope); Ingrain/Leech Seed/Wrap (doc step 5). Entry 455's AI roll-count
+  gap above is untouched by this session.
+- **Notes:** no presentation/`battleScene` edits. PAPERCUT: none this
+  session (the doc's own live-verified ledgers and exact opcode operand
+  dumps made this a comparatively low-friction registration once the
+  `BattleScript_DamagingWeatherContinues` PLAYANIMATION_VAR/Castform-tail
+  distinction was found — the two genuinely separate blockers (Rain/Sun's
+  animation opcode vs. Castform's form-change opcode) weren't called out
+  as separate in the prep doc's own §6 slice 4/5 split, so budget a beat to
+  re-derive that split if resuming this area).
+
+---
 ## 455 — Factory-AI port slice 1: `AI_CheckBadMove` universal preamble ported in full; TryToFaint/CheckViability/dispatch NOT started (roll-count gap found, unresolved)
 
 - **State:** tree green at **210 files / 2490 tests** (+1 file/+13 tests
