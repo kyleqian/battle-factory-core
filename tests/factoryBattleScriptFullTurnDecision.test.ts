@@ -1,9 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
   createFactoryFullTurnBattleState,
+  reduceFactoryFullTurnDecision,
   submitFactoryFullTurnDecision,
   type FactoryFullTurnConfig,
 } from "../src/engine/factoryBattleScriptFullTurnDecision.ts";
+import {
+  submitFactoryAiDecision,
+  type FactoryAiScoredView,
+} from "../src/engine/factoryAiDecisionPolicy.ts";
 
 const STRENGTH = 70; // EFFECT_HIT, TYPE_NORMAL -- the banked KO-scenario move (factoryBattleScriptTerminalDecision.test.ts).
 const EMBER = 52; // EFFECT_BURN_HIT, TYPE_FIRE, 10% MOVE_EFFECT_BURN secondary proc.
@@ -12,6 +17,57 @@ const KO_SCENARIO_RNG_SEED = 919694434;
 /** Brute-force-found: Ember's 10% burn proc actually lands on turn 1 with this seed, per this move's own real hit-chain RNG order (accuracy, crit, damage, secondary-effect-chance). */
 const BURN_PROC_RNG_SEED = 61;
 const STATUS1_BURN = 1 << 4;
+
+// docs/factory-ai-ground-truth.md's own banked mask-7 fixture moveset/stat shape
+// (factoryAiScoredDecision.test.ts) -- Alakazam-shaped attacker vs Marowak-shaped
+// target, reused here so the SAME move-set proves out through the REAL hit chain,
+// not just the AI's own damage estimate.
+const MOVE_SURF = 57;
+const MOVE_ROCK_SLIDE = 157;
+const MOVE_BODY_SLAM = 34;
+const MOVE_THUNDERBOLT = 85;
+const NEUTRAL_STAGES = Object.freeze({ atk: 6, def: 6, spAtk: 6, spDef: 6 });
+
+function aiTrainerConfig(): FactoryFullTurnConfig {
+  return {
+    requestId: 1,
+    rngSeed: KO_SCENARIO_RNG_SEED,
+    player: {
+      species: 105, moveId: STRENGTH, attack: 130, defense: 130, spAttack: 55, spDefense: 70, speed: 100, hp: 999,
+      types: ["TYPE_GROUND", "TYPE_GROUND"],
+    },
+    trainer: {
+      species: 65,
+      moveId: MOVE_SURF,
+      moves: [MOVE_SURF, MOVE_ROCK_SLIDE, MOVE_BODY_SLAM, MOVE_THUNDERBOLT],
+      attack: 55, defense: 65, spAttack: 135, spDefense: 105, speed: 50, hp: 999,
+      types: ["TYPE_PSYCHIC", "TYPE_PSYCHIC"],
+    },
+  };
+}
+
+/** Hand-built per `factoryAiDecisionPolicy.ts`'s own view contract -- no production "view builder" exists (direct-construction discipline), mirroring `factoryAiScoredDecision.test.ts`'s own fixture. */
+function aiTrainerView(playerHp: number): FactoryAiScoredView {
+  return Object.freeze({
+    schema: "factory-ai-scored-view/v1",
+    mode: "factory-level-50-singles",
+    active: Object.freeze({ aiBattler: 1 as const, targetBattler: 0 as const }),
+    factory: Object.freeze({ levelMode: 0 as const, battleMode: 0 as const, factoryWinStreak: 28, trainerOpponentId: 222 }),
+    moves: Object.freeze([MOVE_SURF, MOVE_ROCK_SLIDE, MOVE_BODY_SLAM, MOVE_THUNDERBOLT] as const),
+    attacker: Object.freeze({
+      types: ["TYPE_PSYCHIC", "TYPE_PSYCHIC"] as const,
+      attack: 55, defense: 65, spAttack: 135, spDefense: 105, level: 50, statStages: NEUTRAL_STAGES,
+    }),
+    target: Object.freeze({
+      species: 105,
+      types: ["TYPE_GROUND", "TYPE_GROUND"] as const,
+      attack: 130, defense: 130, spAttack: 55, spDefense: 70, level: 50, statStages: NEUTRAL_STAGES,
+      hp: playerHp,
+      ability: "ABILITY_ROCK_HEAD",
+      knownAbility: null,
+    }),
+  });
+}
 
 function config(overrides: Partial<FactoryFullTurnConfig> = {}): FactoryFullTurnConfig {
   return {
@@ -208,3 +264,90 @@ describe("factory full-turn decision -- decision -> both actions -> end-turn -> 
     expect(() => submitFactoryFullTurnDecision(result.state, { requestId: 2, side: "trainer", decision: TRAINER_ATTACKS })).toThrow();
   });
 });
+
+describe(
+  "factory full-turn decision -- real Factory AI (mask 7) trainer decisions via submitFactoryAiDecision "
+    + "(item 1: the kernel stays decision-source-agnostic -- the SAME reduceFactoryFullTurnDecision reducer, "
+    + "just entered through the policy's own RNG-synchronizing composition instead of a test-supplied submission)",
+  () => {
+    const PLAYER_ATTACKS_TRAINER = Object.freeze({ kind: "use-move" as const, moveSlot: 0 as const, targetBattler: 1 as const });
+
+    it(
+      "two real turns: each turn the trainer's move is chosen by the live mask-7 policy from a real 4-move "
+        + "set (Surf/RockSlide/BodySlam/Thunderbolt) -- Surf wins unambiguously both times (it strictly "
+        + "out-damages the other three against this Ground-type target, no tie to break) -- with the complete "
+        + "per-turn draw ledger (policy draws + both hit chains) pinned as ONE continuous LCG stream",
+      () => {
+        let state = createFactoryFullTurnBattleState(aiTrainerConfig());
+
+        // Turn 1, action 1: the player's own real hit chain (test-supplied, as before -- only the TRAINER side changes).
+        const t1p = submitFactoryFullTurnDecision(state, {
+          requestId: 1, side: "player", decision: PLAYER_ATTACKS_TRAINER,
+        });
+        if (t1p.kind !== "decision-required") throw new Error("expected decision-required");
+        expect(t1p.nextRequest.side).toBe("trainer");
+        state = t1p.state;
+
+        // Turn 1, action 2: the trainer's decision comes from the REAL policy, not a test-supplied submission.
+        const t1PlayerHp = (t1p.state.rules as { rulesContext: { battlers: ReadonlyArray<{ hp: number }> } })
+          .rulesContext.battlers[0]!.hp;
+        expect(t1PlayerHp).toBe(999); // the player's own move never damages itself
+        const t1Ai = submitFactoryAiDecision(state, aiTrainerView(t1PlayerHp), reduceFactoryFullTurnDecision);
+        expect(t1Ai.trace.mask).toBe(7);
+        expect(t1Ai.trace.executedScoringScripts).toEqual(["check-bad-move", "try-to-faint", "check-viability"]);
+        // setup(4) + CBM get_ability (2 per non-immune slot x 3 = 6) + tie(1) -- zero from
+        // TryToFaint/CheckViability (Surf's own damage estimate dwarfs the other three at 999 HP,
+        // so every slot resolves via the cannot-faint/most-powerful compare, no extra Random() calls).
+        expect(t1Ai.trace.draws).toHaveLength(11);
+        expect(t1Ai.trace.slotScores.map((s) => s.finalScore)).toEqual([100, 99, 99, 89]);
+        expect(t1Ai.trace.bestMoveSlots).toEqual([0]); // Surf, the ONLY best slot -- no tie to break
+        expect(t1Ai.submission.decision).toEqual({ kind: "use-move", moveSlot: 0, targetBattler: 0 });
+
+        const t1 = t1Ai.transition;
+        expect(t1.kind).toBe("decision-required");
+        if (t1.kind !== "decision-required") throw new Error("expected decision-required after turn 1");
+        expect(t1.nextRequest.side).toBe("player");
+        // The whole-battle cumulative cursor: 11 policy draws + 4 (player's Strength hit chain)
+        // + 4 (trainer's real Surf hit chain, chosen by the policy) = 19.
+        expect(t1.state.rng.calls).toBe(19);
+        const rc1 = (t1.state.rules as { rulesContext: Record<string, unknown> }).rulesContext;
+        expect(rc1.battleOutcome).toBe(0);
+        const rc1Battlers = rc1.battlers as ReadonlyArray<{ hp: number }>;
+        // Pinned by direct replay (KO_SCENARIO_RNG_SEED's own real LCG stream), not hand-derived --
+        // player's Strength (Atk130 -> Def65, no STAB) then the AI's own real chosen Surf
+        // (SpAtk135 -> SpDef70, 2x super effective vs Ground/Ground, no STAB).
+        expect(rc1Battlers[1]!.hp).toBe(936); // trainer: 999 -> 936 (Strength)
+        expect(rc1Battlers[0]!.hp).toBe(835); // player: 999 -> 835 (Surf, the policy's real chosen move)
+
+        // Turn 2: the SAME mechanism repeats from wherever the one continuous LCG stream left off.
+        const t2p = submitFactoryFullTurnDecision(t1.state, {
+          requestId: t1.nextRequest.requestId, side: "player", decision: PLAYER_ATTACKS_TRAINER,
+        });
+        if (t2p.kind !== "decision-required") throw new Error("expected decision-required");
+        expect(t2p.nextRequest.side).toBe("trainer");
+
+        const t2PlayerHp = (t2p.state.rules as { rulesContext: { battlers: ReadonlyArray<{ hp: number }> } })
+          .rulesContext.battlers[0]!.hp;
+        expect(t2PlayerHp).toBe(835);
+        const t2Ai = submitFactoryAiDecision(t2p.state, aiTrainerView(t2PlayerHp), reduceFactoryFullTurnDecision);
+        expect(t2Ai.trace.mask).toBe(7);
+        expect(t2Ai.trace.draws).toHaveLength(11);
+        expect(t2Ai.trace.slotScores.map((s) => s.finalScore)).toEqual([100, 99, 99, 89]);
+        expect(t2Ai.trace.bestMoveSlots).toEqual([0]); // Surf wins again, still unambiguous
+        expect(t2Ai.submission.decision).toEqual({ kind: "use-move", moveSlot: 0, targetBattler: 0 });
+
+        const t2 = t2Ai.transition;
+        expect(t2.kind).toBe("decision-required");
+        if (t2.kind !== "decision-required") throw new Error("expected decision-required after turn 2");
+        // Cumulative across BOTH turns -- one continuous stream, not reset per turn:
+        // 19 (turn 1) + 11 (turn 2 policy) + 4 (turn 2 player hit chain) + 4 (turn 2 trainer hit chain) = 38.
+        expect(t2.state.rng.calls).toBe(38);
+        const rc2 = (t2.state.rules as { rulesContext: Record<string, unknown> }).rulesContext;
+        expect(rc2.battleOutcome).toBe(0);
+        const rc2Battlers = rc2.battlers as ReadonlyArray<{ hp: number }>;
+        expect(rc2Battlers[1]!.hp).toBe(871); // trainer: 936 -> 871 (Strength again)
+        expect(rc2Battlers[0]!.hp).toBe(694); // player: 835 -> 694 (Surf again)
+      },
+    );
+  },
+);

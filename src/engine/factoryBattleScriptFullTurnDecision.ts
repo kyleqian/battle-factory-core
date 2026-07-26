@@ -63,6 +63,7 @@ import {
   type BattleDecisionSubmission,
   type BattleDecisionTransitionResult,
   type BattleJsonObject,
+  type BattleMoveSlot,
   type BattleSinglesBattler,
   type BattleState,
 } from "./battleDecisionBoundary.ts";
@@ -124,6 +125,14 @@ type Handlers = BattleScriptOpcodeHandlers<BattleScriptRulesContext>;
 export type FactoryFullTurnBattlerConfig = Readonly<{
   species: number;
   moveId: number;
+  /**
+   * Optional full 4-move moveset override (real Factory AI decision proof,
+   * item 1 -- `docs/factory-ai-ground-truth.md`'s mask-7 policy needs a real
+   * multi-slot choice, not a single staged move). When omitted, `moveId`
+   * alone occupies slot 0 (this reducer's original staged-singles shape,
+   * `factoryBattleScriptTerminalDecision.ts`'s own precedent).
+   */
+  moves?: readonly [number, number, number, number];
   attack: number;
   defense: number;
   spAttack: number;
@@ -197,6 +206,13 @@ function activeBattler(
   side: 0 | 1,
   config: FactoryFullTurnBattlerConfig,
 ): BattleScriptRulesBattlerState {
+  const moves = config.moves ?? ([config.moveId, 0, 0, 0] as const);
+  const pp = moves.map((moveId) => (moveId !== 0 ? 16 : 0)) as unknown as readonly [
+    number,
+    number,
+    number,
+    number,
+  ];
   return Object.freeze({
     ...emptyBattler(side),
     hp: config.hp,
@@ -208,8 +224,8 @@ function activeBattler(
     speed: config.speed,
     level: 50,
     types: config.types ?? (["TYPE_NORMAL", "TYPE_NORMAL"] as const),
-    moves: Object.freeze([config.moveId, 0, 0, 0] as const),
-    pp: Object.freeze([16, 0, 0, 0] as const),
+    moves: Object.freeze(moves),
+    pp: Object.freeze(pp),
     statStages: NEUTRAL_STAT_STAGES,
     status1: config.status1 ?? 0,
     maxHP: config.maxHp ?? config.hp,
@@ -505,6 +521,23 @@ function machineBarrierBoundary(instruction: BattleScriptInstruction, instructio
   });
 }
 
+/**
+ * The trainer's real legal move slots for this turn (item 1's real 4-move
+ * set): one `use-move` decision per nonzero moveset slot, matching
+ * `factoryAiDecisionPolicy.ts`'s own `legalBySlot` expectations for a real
+ * mask-1/7 policy decision (mask-0's own precedent supports the same
+ * multi-slot shape already; this reducer's trainer side just never needed it
+ * before item 1).
+ */
+function trainerLegalDecisions(rulesContext: BattleScriptRulesContext) {
+  const moves = rulesContext.battlers[1]!.moves;
+  const legal = moves.flatMap((moveId, slot) =>
+    moveId !== 0
+      ? [Object.freeze({ kind: "use-move" as const, moveSlot: slot as BattleMoveSlot, targetBattler: 0 as const })]
+      : []);
+  return Object.freeze(legal);
+}
+
 function eventPayloads(state: MachineState) {
   return Object.freeze(state.events.map((event) => {
     const { sequence: _sequence, provenance: _provenance, ...payload } = event;
@@ -541,9 +574,7 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
           requestId: ctx.request.requestId + 1,
           side: "trainer",
           battler: 1 as const,
-          legalDecisions: Object.freeze([
-            Object.freeze({ kind: "use-move" as const, moveSlot: 0 as const, targetBattler: 0 as const }),
-          ]),
+          legalDecisions: trainerLegalDecisions(rules.rulesContext),
         }),
       }),
     });
@@ -555,7 +586,6 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
     || ctx.request.side !== "trainer"
     || ctx.request.battler !== 1
     || ctx.decision.kind !== "use-move"
-    || ctx.decision.moveSlot !== 0
     || rules.pendingPlayerDecision === null
   ) {
     throw new Error("factory full-turn decision requires the trainer's staged singles use-move command");
@@ -563,7 +593,10 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
 
   const rc0 = rules.rulesContext;
   const playerMoveId = rc0.battlers[0]!.moves[0];
-  const trainerMoveId = rc0.battlers[1]!.moves[0];
+  const trainerMoveId = rc0.battlers[1]!.moves[ctx.decision.moveSlot];
+  if (trainerMoveId === 0) {
+    throw new Error(`factory full-turn decision trainer move slot ${ctx.decision.moveSlot} is not usable`);
+  }
   const playerTarget = rules.pendingPlayerDecision.targetBattler;
   const trainerTarget = ctx.decision.targetBattler;
 
