@@ -191,6 +191,7 @@ function emptyBattler(side: 0 | 1): BattleScriptRulesBattlerState {
     partyIndex: 0,
     maxHP: 0,
     speed: 0,
+    turnOrderNum: 1,
   });
 }
 

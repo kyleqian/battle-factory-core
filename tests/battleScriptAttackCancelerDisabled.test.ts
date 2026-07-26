@@ -60,6 +60,7 @@ function battler(
     partyIndex: changes.partyIndex ?? 0,
     maxHP: changes.maxHP ?? changes.hp ?? 100,
     speed: changes.speed ?? 100,
+    turnOrderNum: changes.turnOrderNum ?? 1,
   });
 }
 

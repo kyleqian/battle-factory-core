@@ -190,6 +190,20 @@ type BattleScriptMoveEndBattlerMetadata = Readonly<{
    * before the full-turn reducer ever reads this field.
    */
   speed: number;
+  /**
+   * Source GetBattlerTurnOrderNum(battler) (battle_script_commands.c:2210-2219)
+   * -- this battler's own position within gBattlerByTurnOrder for the
+   * currently-running turn. The only reader is SetMoveEffect's
+   * MOVE_EFFECT_FLINCH case (docs/set-move-effect-ground-truth.md:104-112),
+   * comparing this against the context-level currentTurnActionNumber to gate
+   * "the effect battler hasn't acted yet this turn". Absent legacy inputs
+   * default to 1 alongside currentTurnActionNumber's own default of 0 (see
+   * createBattleScriptRulesContext) -- every battler reads as "hasn't acted",
+   * the shape every single-command hit-chain fixture already implies (one
+   * attacker action, no second mover). Safe because no code path before this
+   * doc's own FLINCH registration ever reads this field.
+   */
+  turnOrderNum: number;
 }>;
 
 /**
@@ -225,6 +239,7 @@ export type BattleScriptRulesBattler = BattleScriptRulesBattlerBase & Readonly<{
   partyIndex?: number;
   maxHP?: number;
   speed?: number;
+  turnOrderNum?: number;
 }>;
 
 export type BattleScriptRulesBattlerState =
@@ -412,6 +427,17 @@ export type BattleScriptRulesContext = Readonly<
     mistTimers: readonly [number, number];
     /** Source u32 gBattleWeather. */
     weather: number;
+    /**
+     * Source u8 gCurrentTurnActionNumber (battle_main.c:162) -- the action
+     * index of the currently-executing battler's script. Paired with each
+     * battler's own turnOrderNum (see BattleScriptRulesBattlerBase) by
+     * SetMoveEffect's MOVE_EFFECT_FLINCH case. The full-turn reducer
+     * (factoryBattleScriptFullTurnDecision.ts) is the one owner of real
+     * per-action values (0 for the first mover's action, 1 for the second);
+     * every other construction site defaults to 0 alongside turnOrderNum's
+     * own default of 1.
+     */
+    currentTurnActionNumber: number;
   }
 >;
 
@@ -487,6 +513,7 @@ export type BattleScriptRulesContextInput = Readonly<{
   sideStatuses?: readonly [number?, number?];
   mistTimers?: readonly [number?, number?];
   weather?: number;
+  currentTurnActionNumber?: number;
 }>;
 
 export type BattleScriptPartyMemberInput = Readonly<{
@@ -1571,6 +1598,7 @@ export function createBattleScriptRulesContext(
     ),
     maxHP: requireUnsigned(battler.maxHP ?? battler.hp, 0xffff, `battlers[${index}].maxHP`),
     speed: requireUnsigned(battler.speed ?? 100, 0xffff, `battlers[${index}].speed`),
+    turnOrderNum: requireUnsigned(battler.turnOrderNum ?? 1, 0xff, `battlers[${index}].turnOrderNum`),
     ...(battler.confusionDamage === undefined ? {} : {
       confusionDamage: Object.freeze({
         level: requireUnsigned(
@@ -1762,6 +1790,11 @@ export function createBattleScriptRulesContext(
       requireUnsigned(input.mistTimers?.[1] ?? 0, 0xff, "mistTimers[1]"),
     ]) as unknown as readonly [number, number],
     weather: requireUnsigned(input.weather ?? 0, 0xffff_ffff, "weather") >>> 0,
+    currentTurnActionNumber: requireUnsigned(
+      input.currentTurnActionNumber ?? 0,
+      0xff,
+      "currentTurnActionNumber",
+    ),
   });
 }
 

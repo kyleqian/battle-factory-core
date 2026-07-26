@@ -189,6 +189,7 @@ function emptyBattler(side: 0 | 1): BattleScriptRulesBattlerState {
     partyIndex: 0,
     maxHP: 0,
     speed: 0,
+    turnOrderNum: 1,
   });
 }
 
@@ -463,6 +464,32 @@ function turnOrderBattler(rulesContext: BattleScriptRulesContext, battler: Battl
   return { speed: b.speed, speedStage: b.statStages[STAT_SPEED]!, movePriority: movePriority(moveId) };
 }
 
+/**
+ * Source GetBattlerTurnOrderNum/gCurrentTurnActionNumber (battle_script_
+ * commands.c:2210-2219, battle_main.c:162), needed by SetMoveEffect's
+ * MOVE_EFFECT_FLINCH gate (docs/set-move-effect-ground-truth.md:104-112).
+ * This reducer is the one owner of real per-action turn-order values: mover1
+ * always occupies position 0 (gBattlerByTurnOrder[0]), mover2 position 1
+ * (singles only, matching this reducer's own two-mover shape), and
+ * currentTurnActionNumber tracks which action is currently executing.
+ * turnOrderNum itself does not change across the turn -- only
+ * currentTurnActionNumber does, once per action -- so this is called once
+ * per action with the same mover1/mover2 pair.
+ */
+function withTurnOrderPositions(
+  rulesContext: BattleScriptRulesContext,
+  currentTurnActionNumber: number,
+  mover1: BattleScriptBattlerId,
+  mover2: BattleScriptBattlerId,
+): BattleScriptRulesContext {
+  const battlers = rulesContext.battlers.map((battler, index) => {
+    if (index === mover1) return Object.freeze({ ...battler, turnOrderNum: 0 });
+    if (index === mover2) return Object.freeze({ ...battler, turnOrderNum: 1 });
+    return battler;
+  }) as unknown as BattleScriptRulesContext["battlers"];
+  return Object.freeze({ ...rulesContext, battlers: Object.freeze(battlers), currentTurnActionNumber });
+}
+
 function machineBarrierBoundary(instruction: BattleScriptInstruction, instructionsExecuted: number): BattleBoundary {
   return Object.freeze({
     kind: "machine-barrier",
@@ -568,7 +595,7 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
     instructionsExecuted: 0,
     haltReason: null,
     scheduler: createBattleScriptSchedulerState(),
-    rulesContext: rc0,
+    rulesContext: withTurnOrderPositions(rc0, 0, mover1, mover2),
     rng: createBattleScriptRngState(rngBefore.value),
     events: Object.freeze([]),
   });
@@ -633,7 +660,11 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
   // faint1.kind is "no-fainted-battlers" (run action 2) or "resumed" (skip action 2, per cancelallactions).
   let preEndTurnState = faint1.state;
   if (faint1.kind === "no-fainted-battlers") {
-    const action2 = runMoveAction(PROGRAM, handlers, faint1.state, mover2, mover2MoveId, mover2Target);
+    const preAction2State: MachineState = Object.freeze({
+      ...faint1.state,
+      rulesContext: withTurnOrderPositions(faint1.state.rulesContext, 1, mover1, mover2),
+    });
+    const action2 = runMoveAction(PROGRAM, handlers, preAction2State, mover2, mover2MoveId, mover2Target);
     if (action2.kind === "barrier") {
       return finish(
         action2.state,

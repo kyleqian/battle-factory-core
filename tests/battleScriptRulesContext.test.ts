@@ -189,6 +189,7 @@ describe("source-shaped Battle Script rules context", () => {
       "currentMoveEffect",
       "currentMovePosition",
       "currentMovePower",
+      "currentTurnActionNumber",
       "dmgMultiplier",
       "dynamicMoveType",
       "enigmaBerryHoldEffects",

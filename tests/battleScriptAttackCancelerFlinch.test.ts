@@ -2,9 +2,13 @@ import { describe, expect, it } from "vitest";
 import { advanceBattleScriptAttackCancelerFlinch } from "../src/engine/battleScriptActionAdmission.ts";
 import {
   createBattleScriptRulesContext,
+  createBattleScriptStatusRulesExecution,
   type BattleScriptRulesBattler,
   type BattleScriptRulesContextInput,
+  type BattleScriptStatusRulesExternalPorts,
 } from "../src/engine/battleScriptRulesContext.ts";
+import { loadBattleScriptProgram } from "../src/engine/battleScriptProgram.ts";
+import { stepBattleScriptMachine } from "../src/engine/battleScriptMachine.ts";
 import {
   BATTLE_SCRIPT_ATTACK_CANCELER_PHASES,
   BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE,
@@ -60,6 +64,7 @@ function battler(
     partyIndex: changes.partyIndex ?? 0,
     maxHP: changes.maxHP ?? changes.hp ?? 100,
     speed: changes.speed ?? 100,
+    turnOrderNum: changes.turnOrderNum ?? 1,
   });
 }
 
@@ -276,5 +281,82 @@ describe("source-shaped attack-canceler flinch phase", () => {
         sourcePc,
       )).toThrow(/source program counter must be a u32/);
     }
+  });
+});
+
+/**
+ * Proves SetMoveEffect's MOVE_EFFECT_FLINCH infliction
+ * (battleScriptHitChainOpcode.ts) feeds this file's own CANCELER_FLINCH
+ * reducer with zero adaptation glue: the STATUS2_FLINCHED bit SetMoveEffect
+ * writes on the target is read back unmodified by
+ * advanceBattleScriptAttackCancelerFlinch on that battler's own next action.
+ */
+describe("integration: MOVE_EFFECT_FLINCH infliction -> CANCELER_FLINCH", () => {
+  const program = loadBattleScriptProgram();
+  const MOVE_EFFECT_FLINCH = 8;
+  const MOVE_EFFECT_CERTAIN = 1 << 7;
+  const TACKLE = 33;
+
+  function externalPorts(): BattleScriptStatusRulesExternalPorts {
+    return Object.freeze({
+      isControllerIdle: () => true,
+      prepareMessage: () => null,
+      prepareSelectionMessage: () => null,
+      prepareSelectionMessageFromTable: () => null,
+      resolveAttackerBattler: () => null,
+      resolveBattlerAtPosition: () => null,
+      resolveHalfwordOperand: () => null,
+      resolveByteOperand: () => null,
+    });
+  }
+
+  it("proc sets STATUS2_FLINCHED (target hasn't acted, the default turn-order shape); the flinched battler's own next admission runs CANCELER_FLINCH to its cant-move outcome", () => {
+    const rc = createBattleScriptRulesContext({
+      battlers: [battler({ side: 0 }), battler({ side: 1 }), battler(), battler({ side: 1 })],
+      selectorRoles: { attacker: 0, target: 1, effectBattler: 1 },
+      scriptingBattler: 0,
+      atkCancelerTracker: 0,
+      battleOutcome: 0,
+      currentMove: TACKLE,
+      currentMovePosition: 0,
+      moveResultFlags: 0,
+      dmgMultiplier: 1,
+      critMultiplier: 1,
+      moveEffectByte: MOVE_EFFECT_FLINCH | MOVE_EFFECT_CERTAIN,
+      missType: 0,
+      hitMarker: 0,
+      multiHitCounter: 0,
+    });
+    const execution = createBattleScriptStatusRulesExecution(
+      program,
+      "BattleScript_HitFromCritCalc",
+      rc,
+      1,
+      externalPorts(),
+    );
+    const setEffectPc = program.instructions.find(
+      (i) => i.opcodeName === "B_SCR_OP_SETEFFECTWITHCHANCE",
+    )!.programCounter;
+    const patched = Object.freeze({ ...execution.state, programCounter: setEffectPc });
+    const inflicted = stepBattleScriptMachine(program, patched, execution.handlers);
+    if (inflicted.kind !== "advanced") throw new Error(`expected advance, got ${inflicted.kind}`);
+    expect(inflicted.state.rulesContext.battlers[1]!.status2 & FLINCHED).toBe(FLINCHED);
+
+    // The flinched battler's own next action: it is now the attacker, and the
+    // EXISTING CANCELER_FLINCH reducer runs against the status2 bit
+    // SetMoveEffect just wrote -- no glue, same rulesContext shape.
+    const nextActionContext = Object.freeze({
+      ...inflicted.state.rulesContext,
+      selectorRoles: Object.freeze({ ...inflicted.state.rulesContext.selectorRoles, attacker: 1 as const }),
+      atkCancelerTracker: BATTLE_SCRIPT_ATTACK_CANCELER_PHASES.CANCELER_FLINCH,
+    });
+    const result = advanceBattleScriptAttackCancelerFlinch(nextActionContext, SOURCE_PC);
+    expect(result.kind).toBe("advance");
+    if (result.kind !== "advance") throw new Error("expected flinch phase");
+    expect(result.reason).toBe("flinched");
+    expect(result.rulesContext.battlers[1]!.status2 & FLINCHED).toBe(0);
+    expect(result.rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE)
+      .toBe(BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE);
+    expect(result.receipt.script).toMatchObject({ kind: "handoff", targetLabel: "BattleScript_MoveUsedFlinched" });
   });
 });

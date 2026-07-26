@@ -64,6 +64,7 @@ function battler(changes: Partial<BattleScriptRulesBattler> = {}): BattleScriptR
     partyIndex: changes.partyIndex ?? 0,
     endured: changes.endured,
     helpingHand: changes.helpingHand,
+    turnOrderNum: changes.turnOrderNum,
   });
 }
 
@@ -1228,7 +1229,9 @@ const MOVE_EFFECT_FREEZE = 4;
 const MOVE_EFFECT_PARALYSIS = 5;
 const MOVE_EFFECT_SLEEP = 1;
 const MOVE_EFFECT_TOXIC = 6;
+const MOVE_EFFECT_CONFUSION = 7;
 const MOVE_EFFECT_FLINCH = 8;
+const MOVE_EFFECT_UPROAR = 10;
 const STATUS1_POISON = 1 << 3;
 const STATUS1_BURN_BIT = 1 << 4;
 const STATUS1_FREEZE_BIT = 1 << 5;
@@ -1511,18 +1514,220 @@ describe("production seteffectwithchance (Cmd_seteffectwithchance) dispatch", ()
       expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 2427 });
     });
 
-    it("halts on a family-B byte (FLINCH, > PRIMARY_STATUS_MOVE_EFFECT): status2/misc switch is not modeled", () => {
-      const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_FLINCH | MOVE_EFFECT_CERTAIN });
+    it("halts on a still-unmodeled family-B byte (UPROAR, > PRIMARY_STATUS_MOVE_EFFECT): status2/misc switch barrier remains for every byte but CONFUSION/FLINCH", () => {
+      const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_UPROAR | MOVE_EFFECT_CERTAIN });
       const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
       expect(result.kind).toBe("halted");
       expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 2522 });
     });
 
-    it("halts when the chance roll succeeds with a family-B effect byte (SetMoveEffect's status2/misc switch unmodeled)", () => {
-      const rc = context(0, {}, { currentMove: MUD_SLAP, moveEffectByte: MOVE_EFFECT_FLINCH });
+    it("halts when the chance roll succeeds with a still-unmodeled family-B effect byte (UPROAR)", () => {
+      const rc = context(0, {}, { currentMove: MUD_SLAP, moveEffectByte: MOVE_EFFECT_UPROAR });
       const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
       expect(result.kind).toBe("halted");
       expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 2522 });
+    });
+  });
+});
+
+/**
+ * MOVE_EFFECT_CONFUSION (7) and MOVE_EFFECT_FLINCH (8), the two family-B
+ * bytes registered directly against `docs/stat-change-confusion-ground-
+ * truth.md` S1.6/S2.5 (confusion) and `docs/set-move-effect-ground-truth.md`
+ * (flinch). Neither needs a new opcode: all 4 BattleScript_MoveEffectConfusion
+ * ops were already registered, and FLINCH's plain case is a direct status2
+ * write with no script sub-call at all.
+ *
+ * The confusion proc/control raw RNG values below are the REAL oracle
+ * frame-0 rngValue for `tools/battle-lab/mechanic-set-move-effect-confusion-
+ * off.json` seeds 9/1, forward-stepped 3 times past the shared accuracycheck/
+ * critcalc/ApplyRandomDmgMultiplier rolls (verified independently via
+ * `bin/oracle lab` at authoring time, matching docs S2.5's own table exactly:
+ * seed 9 -> rolls 17703/40680/247/3806/9241/10365, seed 1 ->
+ * 40931/33731/29631/46260) -- feeding the pre-roll-4 value directly into
+ * `stepAtOpcode`'s rngSeed reproduces the documented roll-4 (chance gate) and
+ * roll-5 (confusion duration) draws byte-for-byte without re-simulating the
+ * three prior hit-chain rolls.
+ */
+describe("SetMoveEffect confusion/flinch family (registered)", () => {
+  const MOVE_WATER_PULSE = 352; // EFFECT_CONFUSE_HIT, secondaryEffectChance 20
+  const ABILITY_OWN_TEMPO = 20;
+  const ABILITY_INNER_FOCUS = 39;
+  const SIDE_STATUS_SAFEGUARD = 1 << 5;
+  const STATUS2_CONFUSION_MASK = 0x7;
+  const STATUS2_FLINCHED = 1 << 3;
+  const STATUS2_SUBSTITUTE = 1 << 24;
+  // docs S2.5: seed 9's raw rngValue immediately before roll 4 (3 steps past frame 0's 789488161).
+  const CONFUSION_PROC_SEED_PRE_ROLL4 = 16193002;
+  // docs S2.2/S2.5: seed 1's raw rngValue immediately before roll 4 (3 steps past frame 0's 3034451114).
+  const CONFUSION_CONTROL_SEED_PRE_ROLL4 = 1941898439;
+
+  describe("MOVE_EFFECT_CONFUSION", () => {
+    it("real seteffectwithchance proc (docs S2.5 seed 9): roll 4 (3806) clears the 20% gate, roll 5 (9241) draws a 3-turn duration, calls BattleScript_MoveEffectConfusion", () => {
+      const rc = context(0, {}, { currentMove: MOVE_WATER_PULSE, moveEffectByte: MOVE_EFFECT_CONFUSION });
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc, CONFUSION_PROC_SEED_PRE_ROLL4);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.rng.calls).toBe(2);
+      expect(result.state.rng.ledger[0]!.randomValue).toBe(3806);
+      expect(result.state.rng.ledger[1]!.randomValue).toBe(9241);
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_MoveEffectConfusion"));
+      expect(result.state.callStack.length).toBe(1);
+      expect(result.state.rulesContext.battlers[1]!.status2 & STATUS2_CONFUSION_MASK).toBe(3); // 9241 % 4 + 2
+      expect(result.state.rulesContext.moveEffectByte).toBe(0);
+    });
+
+    it("control seed (docs S2.2/S2.5 seed 1): roll 4 (46260) misses the 20% gate, no duration draw, status2 untouched", () => {
+      const rc = context(0, {}, { currentMove: MOVE_WATER_PULSE, moveEffectByte: MOVE_EFFECT_CONFUSION });
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc, CONFUSION_CONTROL_SEED_PRE_ROLL4);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.rng.calls).toBe(1);
+      expect(result.state.rng.ledger[0]!.randomValue).toBe(46260);
+      expect(result.state.rulesContext.battlers[1]!.status2).toBe(0);
+    });
+
+    it("certain-bit dispatch (skips the outer chance roll): draws only the duration roll and pins its exact (Random()%4)+2 arithmetic", () => {
+      const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_CONFUSION | MOVE_EFFECT_CERTAIN });
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc, rngValueBeforeU16(9241));
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.rng.calls).toBe(1);
+      expect(result.state.rulesContext.battlers[1]!.status2 & STATUS2_CONFUSION_MASK).toBe(3);
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_MoveEffectConfusion"));
+    });
+
+    it("Own Tempo: silently blocks (no message, no jump), zero RNG", () => {
+      const rc = context(
+        0,
+        {},
+        { moveEffectByte: MOVE_EFFECT_CONFUSION | MOVE_EFFECT_CERTAIN },
+        { ability: ABILITY_OWN_TEMPO },
+      );
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.callStack.length).toBe(0);
+      expect(result.state.rng.calls).toBe(0);
+      expect(result.state.rulesContext.battlers[1]!.status2).toBe(0);
+    });
+
+    it("already confused: the shared status2-already-set early-out skips silently, zero RNG", () => {
+      const rc = context(
+        0,
+        {},
+        { moveEffectByte: MOVE_EFFECT_CONFUSION | MOVE_EFFECT_CERTAIN },
+        { status2: 4 },
+      );
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.rng.calls).toBe(0);
+      expect(result.state.rulesContext.battlers[1]!.status2).toBe(4);
+    });
+
+    it("Safeguard on the target's side: silently blocks (effectByte 7 <= SetMoveEffect's own <=7 gate)", () => {
+      const rc = context(0, {}, {
+        moveEffectByte: MOVE_EFFECT_CONFUSION | MOVE_EFFECT_CERTAIN,
+        sideStatuses: [0, SIDE_STATUS_SAFEGUARD],
+      });
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.rulesContext.battlers[1]!.status2).toBe(0);
+    });
+
+    it("target has a Substitute up: silently blocks", () => {
+      const rc = context(
+        0,
+        {},
+        { moveEffectByte: MOVE_EFFECT_CONFUSION | MOVE_EFFECT_CERTAIN },
+        { status2: STATUS2_SUBSTITUTE },
+      );
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.rulesContext.battlers[1]!.status2 & STATUS2_CONFUSION_MASK).toBe(0);
+    });
+  });
+
+  describe("MOVE_EFFECT_FLINCH", () => {
+    it("proc sets STATUS2_FLINCHED when the target hasn't acted yet (default turn-order shape: currentTurnActionNumber 0, turnOrderNum 1)", () => {
+      const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_FLINCH | MOVE_EFFECT_CERTAIN });
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.rng.calls).toBe(0);
+      expect(result.state.callStack.length).toBe(0);
+      expect(result.state.rulesContext.battlers[1]!.status2).toBe(STATUS2_FLINCHED);
+    });
+
+    it("not-yet-acted gate's negative case: the target has already acted this turn (turnOrderNum <= currentTurnActionNumber), no write", () => {
+      const rc = context(
+        0,
+        {},
+        { moveEffectByte: MOVE_EFFECT_FLINCH | MOVE_EFFECT_CERTAIN, currentTurnActionNumber: 0 },
+        { turnOrderNum: 0 },
+      );
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.rulesContext.battlers[1]!.status2).toBe(0);
+    });
+
+    it("Inner Focus, certain: direct (un-pushed) jump to BattleScript_FlinchPrevention, lastUsedAbility recorded, no status2 write", () => {
+      const rc = context(
+        0,
+        {},
+        { moveEffectByte: MOVE_EFFECT_FLINCH | MOVE_EFFECT_CERTAIN },
+        { ability: ABILITY_INNER_FOCUS },
+      );
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_FlinchPrevention"));
+      expect(result.state.callStack.length).toBe(0); // a plain jump, not a call -- BattleScript_FlinchPrevention's own goto ends the move
+      expect(result.state.rulesContext.lastUsedAbility).toBe(ABILITY_INNER_FOCUS);
+      expect(result.state.rulesContext.battlers[1]!.status2).toBe(0);
+    });
+
+    it("Inner Focus, not certain (chance-roll dispatch, percentChance < 100): silently blocks with no message, no jump", () => {
+      const rc = context(
+        0,
+        {},
+        { currentMove: ROCK_SLIDE, moveEffectByte: MOVE_EFFECT_FLINCH },
+        { ability: ABILITY_INNER_FOCUS },
+      );
+      // Force the seteffectwithchance roll to land well under Rock Slide's 30% chance.
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc, rngValueBeforeU16(0));
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.programCounter).not.toBe(labelPc("BattleScript_FlinchPrevention"));
+      expect(result.state.callStack.length).toBe(0);
+      expect(result.state.rulesContext.battlers[1]!.status2).toBe(0);
+    });
+
+    it("already flinched: the shared status2-already-set early-out skips silently", () => {
+      const rc = context(
+        0,
+        {},
+        { moveEffectByte: MOVE_EFFECT_FLINCH | MOVE_EFFECT_CERTAIN },
+        { status2: STATUS2_FLINCHED },
+      );
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.rulesContext.battlers[1]!.status2).toBe(STATUS2_FLINCHED);
+    });
+
+    it("Safeguard does NOT block flinch (effectByte 8 is above SetMoveEffect's own <=7 Safeguard gate)", () => {
+      const rc = context(0, {}, {
+        moveEffectByte: MOVE_EFFECT_FLINCH | MOVE_EFFECT_CERTAIN,
+        sideStatuses: [0, SIDE_STATUS_SAFEGUARD],
+      });
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.rulesContext.battlers[1]!.status2).toBe(STATUS2_FLINCHED);
+    });
+
+    it("Shield Dust DOES block flinch (effectByte 8 is within SetMoveEffect's own <=9 Shield Dust gate)", () => {
+      const rc = context(
+        0,
+        {},
+        { moveEffectByte: MOVE_EFFECT_FLINCH | MOVE_EFFECT_CERTAIN },
+        { ability: ABILITY_SHIELD_DUST },
+      );
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.rulesContext.battlers[1]!.status2).toBe(0);
     });
   });
 });

@@ -2,12 +2,17 @@ import { describe, expect, it } from "vitest";
 import { advanceBattleScriptAttackCancelerConfused } from "../src/engine/battleScriptActionAdmission.ts";
 import {
   createBattleScriptRulesContext,
+  createBattleScriptStatusRulesExecution,
   type BattleScriptRulesBattler,
   type BattleScriptRulesContextInput,
+  type BattleScriptStatusRulesExternalPorts,
 } from "../src/engine/battleScriptRulesContext.ts";
+import { loadBattleScriptProgram } from "../src/engine/battleScriptProgram.ts";
+import { stepBattleScriptMachine } from "../src/engine/battleScriptMachine.ts";
 import {
   BATTLE_SCRIPT_ATTACK_CANCELER_PHASES,
   BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE,
+  BATTLE_SCRIPT_STATUS2_MASKS,
 } from "../src/engine/battleScriptSourceConstants.ts";
 
 const PC = 0x1234_5678;
@@ -216,5 +221,88 @@ describe("source-shaped attack-canceler confused phase", () => {
     expect(Object.isFrozen(first)).toBe(true);
     expect(Object.isFrozen(first.receipt)).toBe(true);
     expect(Object.isFrozen(first.rulesContext.battlers[0].confusionDamage)).toBe(true);
+  });
+});
+
+/**
+ * Proves SetMoveEffect's MOVE_EFFECT_CONFUSION infliction
+ * (battleScriptHitChainOpcode.ts) feeds this file's own CANCELER_CONFUSED
+ * reducer with zero adaptation glue: the same status2 bits SetMoveEffect
+ * writes are read back unmodified by advanceBattleScriptAttackCancelerConfused
+ * on the confused battler's own next action. Replays docs/stat-change-
+ * confusion-ground-truth.md S2.5's real oracle ledger end-to-end (seed 9,
+ * `tools/battle-lab/mechanic-set-move-effect-confusion-off.json`): rolls 4-5
+ * (chance gate + duration draw) via the production opcode dispatch, then
+ * roll 6 (the canceler's own Random() & 1 check) via this reducer directly --
+ * the exact sequence and rngValue docs S2.5 itself verified against two live
+ * capture frames (200 and 300).
+ */
+describe("integration: MOVE_EFFECT_CONFUSION infliction -> CANCELER_CONFUSED", () => {
+  const program = loadBattleScriptProgram();
+  const MOVE_WATER_PULSE = 352; // EFFECT_CONFUSE_HIT, secondaryEffectChance 20
+  const MOVE_EFFECT_CONFUSION = 7;
+  // docs S2.5: seed 9's raw rngValue immediately before roll 4 (3 steps past the oracle's own frame-0 789488161).
+  const SEED_9_PRE_ROLL_4 = 16193002;
+
+  function externalPorts(): BattleScriptStatusRulesExternalPorts {
+    return Object.freeze({
+      isControllerIdle: () => true,
+      prepareMessage: () => null,
+      prepareSelectionMessage: () => null,
+      prepareSelectionMessageFromTable: () => null,
+      resolveAttackerBattler: () => null,
+      resolveBattlerAtPosition: () => null,
+      resolveHalfwordOperand: () => null,
+      resolveByteOperand: () => null,
+    });
+  }
+
+  it("infliction (rolls 4-5) then the confused battler's own next admission (roll 6) decrement + shake-off/self-hit check", () => {
+    const rc = createBattleScriptRulesContext({
+      battlers: [battler({ side: 0 }), battler({ side: 1 }), battler(), battler({ side: 1 })],
+      selectorRoles: { attacker: 0, target: 1, effectBattler: 1 },
+      scriptingBattler: 0,
+      atkCancelerTracker: 0,
+      battleOutcome: 0,
+      currentMove: MOVE_WATER_PULSE,
+      currentMovePosition: 0,
+      moveResultFlags: 0,
+      dmgMultiplier: 1,
+      critMultiplier: 1,
+      moveEffectByte: MOVE_EFFECT_CONFUSION,
+      missType: 0,
+      hitMarker: 0,
+      multiHitCounter: 0,
+    });
+    const execution = createBattleScriptStatusRulesExecution(
+      program,
+      "BattleScript_HitFromCritCalc",
+      rc,
+      SEED_9_PRE_ROLL_4,
+      externalPorts(),
+    );
+    const setEffectPc = program.instructions.find(
+      (i) => i.opcodeName === "B_SCR_OP_SETEFFECTWITHCHANCE",
+    )!.programCounter;
+    const patched = Object.freeze({ ...execution.state, programCounter: setEffectPc });
+    const inflicted = stepBattleScriptMachine(program, patched, execution.handlers);
+    if (inflicted.kind !== "advanced") throw new Error(`expected advance, got ${inflicted.kind}`);
+    expect(inflicted.state.rng.calls).toBe(2);
+    expect(inflicted.state.rulesContext.battlers[1]!.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_CONFUSION)
+      .toBe(3); // 9241 % 4 + 2
+
+    // The confused battler's own next action: it is now the attacker, and the
+    // EXISTING CANCELER_CONFUSED reducer runs against the status2 bits
+    // SetMoveEffect just wrote -- no glue, same rulesContext shape.
+    const nextActionContext = Object.freeze({
+      ...inflicted.state.rulesContext,
+      selectorRoles: Object.freeze({ ...inflicted.state.rulesContext.selectorRoles, attacker: 1 as const }),
+      atkCancelerTracker: BATTLE_SCRIPT_ATTACK_CANCELER_PHASES.CANCELER_CONFUSED,
+    });
+    const result = advanceBattleScriptAttackCancelerConfused(nextActionContext, 0x1234_5678, inflicted.state.rng.value);
+    if (result.kind !== "advance") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.reason).toBe("confused-continues");
+    expect(result.rngValue).toBe(679317255); // docs S2.5's own live frame-300 rngValue
+    expect(result.rulesContext.battlers[1]!.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_CONFUSION).toBe(2);
   });
 });

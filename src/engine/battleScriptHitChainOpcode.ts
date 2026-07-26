@@ -204,6 +204,9 @@ const MOVE_EFFECT_PARALYSIS = 5;
 const MOVE_EFFECT_TOXIC = 6;
 /** include/constants/battle.h:253 -- MOVE_EFFECT_TOXIC; every family-A byte is <= this. */
 const PRIMARY_STATUS_MOVE_EFFECT = MOVE_EFFECT_TOXIC;
+/** include/constants/battle.h:254-255 -- the first two family-B (status2/misc) MOVE_EFFECT_* values. */
+const MOVE_EFFECT_CONFUSION = 7;
+const MOVE_EFFECT_FLINCH = 8;
 /** include/constants/battle.h:117,119,120 -- STATUS1_BURN is already declared above. */
 const STATUS1_POISON = 1 << 3;
 const STATUS1_FREEZE = 1 << 5;
@@ -213,8 +216,10 @@ const ABILITY_CLOUD_NINE = 13;
 const ABILITY_LIMBER = 7;
 const ABILITY_IMMUNITY = 17;
 const ABILITY_SHIELD_DUST = 19;
+const ABILITY_OWN_TEMPO = 20;
 const ABILITY_MAGMA_ARMOR = 40;
 const ABILITY_WATER_VEIL = 41;
+const ABILITY_INNER_FOCUS = 39;
 const ABILITY_AIR_LOCK = 77;
 /** include/constants/battle.h:190 -- SetMoveEffect's ability-vs-move message discriminant. */
 const HITMARKER_STATUS_ABILITY_EFFECT = 1 << 13;
@@ -1784,6 +1789,12 @@ function applySetMoveEffect(
   }
 
   if (effectByte > PRIMARY_STATUS_MOVE_EFFECT) {
+    if (effectByte === MOVE_EFFECT_CONFUSION) {
+      return applyConfusionMoveEffect(context, baseRulesContext, effectBattler);
+    }
+    if (effectByte === MOVE_EFFECT_FLINCH) {
+      return applyFlinchMoveEffect(context, baseRulesContext, effectBattler, certain);
+    }
     const statEntry = STAT_MOVE_EFFECT_TABLE[effectByte];
     if (statEntry) {
       return applyStatMoveEffect(context, baseRulesContext, effectByte, statEntry, affectsUser, attacker, target);
@@ -1940,6 +1951,122 @@ function applySetMoveEffect(
 }
 
 /**
+ * SetMoveEffect's family-B shared early-out plus its MOVE_EFFECT_CONFUSION
+ * case (battle_script_commands.c:2524,2533-2546 --
+ * docs/stat-change-confusion-ground-truth.md S1.6). The shared early-out
+ * (`status2 & sStatusFlagsForMoveEffects[byte]`, byte=CONFUSION resolves to
+ * the full STATUS2_CONFUSION mask) and the case's own identical `status2 &
+ * STATUS2_CONFUSION` recheck are the same test in practice -- this ports
+ * them as one combined condition alongside the Own Tempo ability check.
+ * Zero new opcodes: all 4 BattleScript_MoveEffectConfusion ops
+ * (chosenstatus2animation/printstring/waitmessage/return) are already
+ * registered. The only new surface is the `(Random() % 4) + 2` duration
+ * draw and the plain status2 write (guaranteed-zero bits per the early-out,
+ * so `|=` and `=` are equivalent here).
+ */
+function applyConfusionMoveEffect(
+  context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
+  baseRulesContext: BattleScriptRulesContext,
+  effectBattler: BattleScriptBattlerId,
+): BattleScriptCommandTransition<BattleScriptRulesContext> {
+  const effectBattlerState = baseRulesContext.battlers[effectBattler];
+  const alreadyConfused = (effectBattlerState.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_CONFUSION) !== 0;
+  if (effectBattlerState.ability === ABILITY_OWN_TEMPO || alreadyConfused) {
+    return transitionBattleScriptCommand(
+      context,
+      Object.freeze({ kind: "advance" }),
+      { rulesContext: baseRulesContext },
+    );
+  }
+
+  const { rng, randomValue } = drawBattleScriptRng(
+    context.state.rng,
+    context.instruction,
+    "SetMoveEffect confusion duration ((Random() % 4) + 2)",
+  );
+  const turns = (randomValue % 4) + 2;
+  const nextRulesContext = withBattler(baseRulesContext, effectBattler, {
+    status2: (effectBattlerState.status2 | turns) >>> 0,
+  });
+  const programCounter = resolveRequiredLabelProgramCounter(context.program, "BattleScript_MoveEffectConfusion");
+  return transitionBattleScriptCommand(
+    context,
+    Object.freeze({ kind: "call", programCounter }),
+    { rulesContext: nextRulesContext, rng },
+  );
+}
+
+/**
+ * SetMoveEffect's family-B shared early-out plus its MOVE_EFFECT_FLINCH case
+ * (battle_script_commands.c:2524,2547-2567 --
+ * docs/set-move-effect-ground-truth.md:94-112). Two independent branches,
+ * neither drawing any RNG:
+ *
+ * - Inner Focus: `certain` (this call site's own resolved MOVE_EFFECT_CERTAIN
+ *   -- `primary` is always FALSE here, matching applySetMoveEffect's own
+ *   documented scope) makes the ability reveal itself via a direct,
+ *   un-pushed jump to BattleScript_FlinchPrevention (source: plain
+ *   `gBattlescriptCurrInstr = BattleScript_FlinchPrevention`, no
+ *   BattleScriptPush -- that script's own `goto BattleScript_MoveEnd` tail
+ *   ends the move entirely, unlike the status1 quartet's push+jump
+ *   prevention calls). Otherwise the ability silently blocks with no message
+ *   at all (not even the ability reveal).
+ * - Otherwise: the plain-case write is gated on the effect battler not
+ *   having acted yet this turn (`GetBattlerTurnOrderNum(gEffectBattler) >
+ *   gCurrentTurnActionNumber`) -- ported via the two turnOrderNum/
+ *   currentTurnActionNumber rules-context fields
+ *   (battleScriptRulesContext.ts). Always falls through with
+ *   `gBattlescriptCurrInstr++`, whether or not the gate passed -- no script
+ *   sub-call either way, matching the doc's "no message ever, just a status2
+ *   write" characterization.
+ */
+function applyFlinchMoveEffect(
+  context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
+  baseRulesContext: BattleScriptRulesContext,
+  effectBattler: BattleScriptBattlerId,
+  certain: boolean,
+): BattleScriptCommandTransition<BattleScriptRulesContext> {
+  const effectBattlerState = baseRulesContext.battlers[effectBattler];
+  const alreadyFlinched = (effectBattlerState.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_FLINCHED) !== 0;
+  if (alreadyFlinched) {
+    return transitionBattleScriptCommand(
+      context,
+      Object.freeze({ kind: "advance" }),
+      { rulesContext: baseRulesContext },
+    );
+  }
+
+  if (effectBattlerState.ability === ABILITY_INNER_FOCUS) {
+    if (!certain) {
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        { rulesContext: baseRulesContext },
+      );
+    }
+    const nextRulesContext = Object.freeze({ ...baseRulesContext, lastUsedAbility: ABILITY_INNER_FOCUS });
+    const programCounter = resolveRequiredLabelProgramCounter(context.program, "BattleScript_FlinchPrevention");
+    return transitionBattleScriptCommand(
+      context,
+      Object.freeze({ kind: "jump", programCounter }),
+      { rulesContext: nextRulesContext },
+    );
+  }
+
+  const hasNotActedYet = effectBattlerState.turnOrderNum > baseRulesContext.currentTurnActionNumber;
+  const nextRulesContext = hasNotActedYet
+    ? withBattler(baseRulesContext, effectBattler, {
+      status2: (effectBattlerState.status2 | BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_FLINCHED) >>> 0,
+    })
+    : baseRulesContext;
+  return transitionBattleScriptCommand(
+    context,
+    Object.freeze({ kind: "advance" }),
+    { rulesContext: nextRulesContext },
+  );
+}
+
+/**
  * The stat-family arm of SetMoveEffect's own dispatch (:2644-2727, see
  * STAT_MOVE_EFFECT_TABLE above) -- NOT part of ChangeStatBuffs itself.
  * `flags` passed into ChangeStatBuffs is always 0 or MOVE_EFFECT_AFFECTS_USER
@@ -2010,12 +2137,10 @@ function applyStatMoveEffect(
 
 function finalizeSeteffectwithchance(
   transition: BattleScriptCommandTransition<BattleScriptRulesContext>,
-  rng: BattleScriptRngState,
 ): BattleScriptCommandTransition<BattleScriptRulesContext> {
   return Object.freeze({
     ...transition,
     rulesContext: Object.freeze({ ...transition.rulesContext, moveEffectByte: 0, multiHitEffect: 0 }),
-    rng,
   });
 }
 
@@ -2041,10 +2166,7 @@ function createSeteffectwithchanceOpcodeHandler(): BattleScriptOpcodeHandler<Bat
 
     if (certain && !noEffect) {
       const effectByte = (rulesContext.moveEffectByte & ~MOVE_EFFECT_CERTAIN) >>> 0;
-      return finalizeSeteffectwithchance(
-        applySetMoveEffect(context, rulesContext, effectByte, true),
-        context.state.rng,
-      );
+      return finalizeSeteffectwithchance(applySetMoveEffect(context, rulesContext, effectByte, true));
     }
 
     const attacker = requireBattlerRole(rulesContext, "attacker");
@@ -2058,9 +2180,20 @@ function createSeteffectwithchanceOpcodeHandler(): BattleScriptOpcodeHandler<Bat
     const rolledSuccess = (randomValue % 100) < percentChance;
 
     if (rolledSuccess && rulesContext.moveEffectByte !== 0 && !noEffect) {
+      // applySetMoveEffect may itself draw further RNG (MOVE_EFFECT_CONFUSION's
+      // duration roll) -- thread the post-chance-roll rng through context.state
+      // so any such nested draw starts from the right value and its own
+      // advancement survives into the returned transition (previously
+      // finalizeSeteffectwithchance unconditionally overwrote .rng with the
+      // caller's pre-nested-draw value, silently discarding it; harmless only
+      // as long as no registered effect byte drew RNG of its own, which
+      // MOVE_EFFECT_CONFUSION is the first to do).
+      const contextAfterRoll: typeof context = Object.freeze({
+        ...context,
+        state: Object.freeze({ ...context.state, rng }),
+      });
       return finalizeSeteffectwithchance(
-        applySetMoveEffect(context, rulesContext, rulesContext.moveEffectByte, percentChance >= 100),
-        rng,
+        applySetMoveEffect(contextAfterRoll, rulesContext, rulesContext.moveEffectByte, percentChance >= 100),
       );
     }
 
