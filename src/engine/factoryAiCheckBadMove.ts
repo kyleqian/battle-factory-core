@@ -38,8 +38,8 @@ import type { TypeEffectivenessEntry } from "./damageCalc.ts";
 
 const U16_MAX = 0xffff;
 
-type MoveRow = Readonly<{ id: number; type: string; power: number; effect: string }>;
-const MOVES_BY_ID: ReadonlyMap<number, MoveRow> = new Map(
+export type MoveRow = Readonly<{ id: number; type: string; power: number; effect: string }>;
+export const MOVES_BY_ID: ReadonlyMap<number, MoveRow> = new Map(
   (movesData.moves as readonly MoveRow[]).map((row) => [row.id, row]),
 );
 
@@ -48,10 +48,10 @@ const SPECIES_BY_ID: ReadonlyMap<number, SpeciesRow> = new Map(
   (speciesStatsData.species as unknown as readonly SpeciesRow[]).map((row) => [row.id, row]),
 );
 
-const TYPE_EFFECTIVENESS = typeEffectivenessData.typeEffectiveness as readonly TypeEffectivenessEntry[];
+export const TYPE_EFFECTIVENESS = typeEffectivenessData.typeEffectiveness as readonly TypeEffectivenessEntry[];
 
 /** `sIgnoredPowerfulMoveEffects` (`battle_ai_script_commands.c:266-281`). */
-const IGNORED_POWERFUL_MOVE_EFFECTS: ReadonlySet<string> = new Set([
+export const IGNORED_POWERFUL_MOVE_EFFECTS: ReadonlySet<string> = new Set([
   "EFFECT_EXPLOSION",
   "EFFECT_DREAM_EATER",
   "EFFECT_RAZOR_WIND",
@@ -202,7 +202,7 @@ function nextGetAbilityDraw(
   return { rng: after, draw, ability: guessedAbility };
 }
 
-function typeMultiplierTenths(attackingType: string, defendingTypes: readonly [string, string]): number {
+export function typeMultiplierTenths(attackingType: string, defendingTypes: readonly [string, string]): number {
   const distinct = defendingTypes[0] === defendingTypes[1] ? [defendingTypes[0]] : defendingTypes;
   let mult = 10;
   for (const defType of distinct) {
