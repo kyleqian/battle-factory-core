@@ -4,6 +4,76 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 460 — [SUPERVISOR WIND-DOWN 2026-07-25 ~21:50] session summary
+
+- **State:** tree committed and green at **218 files / 2582 tests**, build
+  green, census live-verified **73/214 effects, 152/355 moves, 118/276
+  Factory-L50 executable** (session start: 53/105/77; all 25 census
+  self-checks pass), single main worktree, zero unmerged branches, zero
+  stale worktrees. **No DEFERRED entries — nothing blocks the next
+  `run-supervisor.sh`.** No usage/rate limits hit all session.
+- **Session (~17 workers over 3 lanes, every outcome supervisor-verified
+  live; zero cap-kills, one launcher-arg mistake self-caught):**
+  - **Main (7 steps):** forced-switch §4 slice 10 (player-side
+    forced-switch decision request through `submitBattleDecision` — §4 list
+    1-10 COMPLETE); MOVE_EFFECT_CONFUSION+FLINCH registered (census
+    105→122 moves; both feed the existing canceler reducers, RNG-threading
+    bug found+fixed); presentation-seam window 2 (`turn1-rockslide.json`
+    256/256 from kernel events, first production `stat-stage-change`
+    emission, 27-trace sweep clean); Factory-AI port in two steps
+    (CheckBadMove full incl. get_ability redraw semantics, then
+    TryToFaint + CheckViability-as-table + masks 0/1/7 dispatch — all 3
+    banked scenario ledgers reproduce at 11/11/13 policy draws);
+    screens/weather setters + full `DoFieldEndTurnEffects` (F2-F5 +
+    F7-F10, census →148 moves); full-turn reducer consuming the REAL
+    mask-7 policy + non-terminal forced-switch full-turn variant (entry
+    459 — Gate-5's submission-boundary claim now demonstrated for L50
+    singles move selection).
+  - **Side (6 scouts/steps, all merged):** screens/weather ground truth
+    (29/29 verify, corrected end-turn doc's F8/F10 opcode claim);
+    turn1-rockslide seam consumer map (16 inputs, staged proof-of-events);
+    ISSUES #44 census fix (support set now mechanically derived, +8
+    ground-truth checks); AI port-subset audit (masks per band; two doc
+    corrections supervisor-re-verified against source); the
+    **RNG caller-attribution probe** (closed entry 455's 2-roll gap:
+    window totals bundle a trailing opponent proc draw +
+    `BattleTurnPassed`'s `gRandomTurnNumber`, both decision-independent —
+    `tools/probe/attribute-factory-ai-random-callers.py`);
+    Ingrain/Leech Seed/Wrap ground truth (18/18 verify — Ingrain/Wrap
+    end-turn bodies already opcode-complete); `TRYCASTFORMDATACHANGE`
+    registered per supervisor (a)/(b) decision (census →152 moves; a
+    fielded Forecast Castform is the one named barrier; runtime
+    weather-form loop next needs `addbyte`/`jumpifbytenotequal` widened
+    past `gBattleCommunication`-only).
+  - **Animation (7 steps, stacked 7-deep, all merged):** MOVE_GROWTH
+    **`exact`** 63/63 both orientations (residual cracked as per-mechanism
+    framebuffer display lag, scale+2/tint+1); MOVE_FUTURE_SIGHT `partial`
+    85/114 (SetPsychicBackground ported+RAM-probed incl. the rotation-pause
+    cadence; defect B killed by register probe; defect A parked with the
+    monbg mechanism RAM-confirmed and a GROW-direction instrument named);
+    MOVE_CONFUSION `partial` 108/140 (zero net-new components; window 1
+    19/20; window 2 carries defect A — cross-move triangulation banked).
+    Coverage **21 exact / 5 partial**. PSYCHIC noted as cheap once staged.
+- **Next (in order):** main — full-turn player-side forced-switch variant
+  (entry 459's named remainder), CheckViability handler bodies phased by
+  the audit's 16-reachable-handler table, `addbyte`/`jumpifbytenotequal`
+  sBATTLER widening (unblocks the runtime weather-form loop),
+  Ingrain/Leech Seed/Wrap registration (ground truth banked, mostly
+  opcode-complete already), seam window 3, ENDTURN_ABILITIES/ITEMS
+  breadth. Animation — defect A via the OAM double-size-window instrument
+  (promotes FUTURE_SIGHT+CONFUSION together), then PSYCHIC. All prep docs
+  carry rerunnable verify scripts.
+- **Notes:** PAPERCUTS +1 (dense comparators bbox only the first diff
+  frame — partially retired same-day by `confusionPortable.ts`'s
+  `--per-frame-bbox`). Supervisor decisions this session, both recorded in
+  ROADMAP/PROGRESS: AI-port acceptance restated to policy-own draws
+  (11/11/13) after the attribution probe; Castform (a)/(b) split
+  registered with the honest fielded-Castform barrier. Memory file updated
+  with session tactics (launcher-pipeline exit masking; cross-move
+  triangulation; sRandCount+LR attribution probe; point-in-time family
+  costs; probe-then-decide).
+
+---
 ## 459 — Full-turn reducer now consumes the REAL Factory-AI trainer policy (item 1) AND the non-terminal forced-switch full-turn variant (item 2); item 3 (player-side variant) not started, per the brief's own time cap
 
 - **State:** tree green at **217 files / 2570 tests** (+0 files/+2 tests
@@ -193,114 +263,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   vs `sB_ANIM_ARG1` distinction and the exact `jumpifbyte`/`printfromtable`
   gaps fast and citation-backed rather than guessed.
 
----
-## 457 — Factory-AI move-selection port complete: `AI_TryToFaint` + `AI_CheckViability` ported, mask 1/7 dispatch wired through `submitFactoryAiDecision`
-
-- **State:** tree green at **217 test files / 2565 tests** (+3 test files
-  this step's own additions — `factoryAiTryToFaint.test.ts` (10),
-  `factoryAiCheckViability.test.ts` (6), `factoryAiScoredDecision.test.ts`
-  (8); the file/test-count gap vs entry 456's stated 212/2521 baseline also
-  includes two lane merges (`worker/animation-…`, `worker/side-…`) that
-  landed between entry 456 and this session, not just this step's work),
-  build green, ratchet unchanged (6/6 — CBM/TTF/CV barriers are
-  discriminated-union returns, same non-`unsupportedBranch()`-call-site
-  shape entry 455's own CBM module already established, so this pin isn't
-  touched). Two per-rung commits (365a86a, 761069a), both green.
-- **Did, per the work-item order:**
-  1. **`AI_TryToFaint`** (`src/engine/factoryAiTryToFaint.ts`): reuses
-     `damageCalc.ts`'s `calculateBaseDamage`/`applyStab`/
-     `applyTypeEffectiveness` directly (crit forced ×1, variance = the
-     per-slot setup `simulatedRNG` value, never a second formula) for both
-     `if_can_faint`'s single-move estimate and
-     `get_how_powerful_move_is`'s real cross-moveset "most powerful"
-     comparison (source-verified `MOVE_MOST_POWERFUL`/`_NOT_MOST_POWERFUL`/
-     `_POWER_OTHER` three-way classification, reusing CBM's own
-     `sIgnoredPowerfulMoveEffects` set). Can-faint branch: +4 ordinary /
-     +6 Quick Attack (both `score +2` and the `score +4` fallthrough fire)
-     / +0 Explosion. Cannot-faint branch: -1 if out-damaged by a moveset
-     sibling, then the one real draw — `if_random_less_than 80` gating a
-     +2 for an exactly-x4-effective candidate (source's inverted-branch
-     semantics ported exactly: the roll **succeeding** `<80` *skips* the
-     bonus; ported `Cmd_if_type_effectiveness`'s own 40-baseline/
-     STAB-remap quirk for the x4 classification, not a real damage
-     re-estimate). 10 new Tier-1 tests via direct construction, including
-     a hand-verified LCG seed pair (1→succeeds/+2, 4→fails/+0) proving both
-     directions of the inverted branch.
-  2. **`AI_CheckViability`** (`src/engine/factoryAiCheckViability.ts`):
-     source-complete `if_effect` table, same shape as CBM's own (122
-     `if_effect` lines / 90 unique `AI_CV_*` handlers, parsed directly from
-     `data/battle_ai_scripts.s:652-2615`) — no entry → genuine zero
-     contribution; an entry → named `"factory-ai-check-viability"`
-     unsupported-branch barrier. No handler bodies ported this round (per
-     the audit's explicit scope). 6 new tests: barrier + pass-through, two
-     independent effects each.
-  3. **Mask dispatch** (`factoryAiDecisionPolicy.ts`):
-     `chooseFactoryAiScoredDecision`/`submitFactoryAiScoredDecision` (mask
-     1 = CBM only, mask 7 = CBM+TTF+CV, same setup/tie draw shape as the
-     untouched mask-0 policy) plus a top-level `submitFactoryAiDecision`
-     dispatcher that reads `selectFactoryAiMask` and routes band 0-1 to the
-     existing, unmodified `submitFactoryAiMaskZeroDecision`. A slot whose
-     script hits a named barrier throws loudly (can't compute a score for
-     that slot) instead of silently mis-scoring.
-  4. **Tier-1** (`tests/factoryAiScoredDecision.test.ts`, 8 tests):
-     mask-1 pinned by direct construction (Surf/RockSlide/BodySlam 3-way
-     tie at 100 — CBM alone never rewards a merely-better type multiplier,
-     confirming the audit's own §2 "mask-1 shape: NO" prediction).
-     **All three banked mask-7 scenarios reproduce their exact policy draw
-     ledger** — 11/11/13 (setup 4 + CBM `get_ability` 6/6/8 + tie 1) —
-     starting each fixture's real, live-verified frame-100 `rngValue`
-     (seed 1: unambiguous/tie both `249678687`, degenerate `2291141473`)
-     advanced by the 8 documented pre-decision LCG steps (opponent's
-     turn-1 hit-chain tail + player's 4-roll Pound chain + `BattleTurnPassed`
-     + switch-AI's 2-roll pre-check, per the newest ground-truth doc
-     section) — that 8-step offset is applied **only** by the test layer as
-     a raw `advanceRngValue` shim, per this step's restated acceptance;
-     switch-AI semantics itself is not ported anywhere in `src/`.
-  - **Item 5 (`factoryBattleScriptFullTurnDecision.ts` integration) not
-    started** — items 1-4 alone consumed the full session (see Notes);
-    correctly deferred per the brief's own "do not start past ~45 min"
-    guard rather than landing something rushed.
-- **A genuinely new finding this session, beyond the ground-truth doc's own
-  prose (found via a live oracle probe, not paper tracing):** the doc's §2.2
-  narrative ("Surf wins cleanly") implicitly assumes turn 2's decision runs
-  against a **full-HP** Marowak. It doesn't — probing
-  `mechanic-factory-ai-unambiguous-off.json`'s frame 732 (`player.hp`) shows
-  Marowak at **5/135 HP** by the time turn 2's `BattleAI_SetupAIData` runs
-  (turn 1's own 2x Surf hit, ~130 damage, already landed). At 5 HP, Surf/
-  Rock Slide/Body Slam can **all** faint the target — `AI_TryToFaint`'s
-  can-faint +4 branch governs all three identically, producing a genuine
-  **3-way tie**, not a clean "Surf is strongest" win via the
-  cannot-faint/most-powerful branch the doc's prose describes. This doesn't
-  contradict any pinned number (turn 2's actual pick was never directly
-  observable in these fixtures — only its roll *count* is, which this
-  session's 11/11/13 reproduction matches exactly) but it does mean the
-  audit's own §2 "CheckBadMove+TryToFaint: YES, for both pick and roll
-  count" claim is unverified for the *pick* half specifically. The Tier-1
-  reproduction test uses **representative, not live-RAM-probed**
-  Alakazam/Marowak stat magnitudes (real base stats, level-50-scaled, not
-  exact oracle numbers) — the 3-way-tie outcome is robust to this
-  imprecision (any real attack in this matchup clears 5 HP by a wide
-  margin) but is not a byte-exact numeric match against oracle RAM.
-- **Next:** item 5 (one integration test wiring
-  `chooseFactoryAiScoredDecision`/`submitFactoryAiDecision` through
-  `factoryBattleScriptFullTurnDecision.ts` for the trainer side); if
-  pursued, a live RAM stat probe for Alakazam/Marowak's exact level-50
-  stats would upgrade the mask-7 scenario tests from "representative" to
-  byte-exact-verified; `AI_CV_*` handler bodies (16 reachable today, 90 at
-  full registration — explicitly out of this step's scope, its own phased
-  body of work per the audit's §3); CBM's own named-`AI_CBM_*`-handler
-  barrier sizing (how many of the 122 executable moves hit one) is still
-  unsized, flagged by entry 455, still unsized here.
-- **Notes:** no presentation/census/opcode-registration changes (pure
-  policy work, as scoped). PAPERCUT: none logged this session — the
-  newest ground-truth doc section (caller-attribution probe) made the RNG
-  model fully load-bearing and citable, which is exactly what made items
-  1-4 tractable in one session despite their combined size.
-  **Entry 455's roll-count gap: RESOLVED** — see
-  `docs/factory-ai-ground-truth.md`'s 2026-07-25 instrumented
-  caller-attribution section; the true AI-decision draw count is 13/13/15
-  (not 15/15/17), the 2-roll delta was `Cmd_seteffectwithchance`'s
-  opponent-tail instance + `BattleTurnPassed`'s `gRandomTurnNumber` draw,
-  both decision-independent. This session's own port targets the
-  13/13/15 figure minus switch-AI's 2 (11/11/13 policy-only draws, switch-
-  AI modeled as a test-layer LCG offset, not ported).

@@ -1254,6 +1254,35 @@ slice's first rung.
 wrapper. This is the roadmap's own "shared effect scripts are the
 implementation unit" principle applied to its highest-value target.
 
+**Session checkpoint (2026-07-25 evening, supervisor-verified):** the
+executable frontier moved **53→73/214 effects, 105→152/355 moves, 77→118/276
+Factory-L50** in one session (census self-checks 17→25, support set now
+mechanically derived from the engine dispatch — ex-ISSUES #44). Landed and
+live-verified: forced-switch §4 slice 10 (the player-side forced-switch
+decision request through `submitBattleDecision` — §4's list 1-10 is
+complete); MOVE_EFFECT_CONFUSION/FLINCH in the SetMoveEffect dispatch, both
+feeding the existing canceler reducers; screens/weather setters + the
+complete `DoFieldEndTurnEffects` field loop (F2-F5, F7-F10) +
+`TRYCASTFORMDATACHANGE` (source-complete non-Castform gate; a genuinely
+fielded Forecast Castform is the one named barrier — Castform has 2 real
+rental entries, so the form-change table is a real future step; runtime
+weather-form loop also still needs `addbyte`/`jumpifbytenotequal` widened
+past their `gBattleCommunication`-only modeling); the Factory-AI
+move-selection port (CheckBadMove + TryToFaint full, CheckViability as
+source-complete table + named handler barriers, masks 0/1/7 dispatched per
+`GetAiScriptsInBattleFactory`, all three banked scenario ledgers reproduced
+at their instrument-attributed 11/11/13 policy draws — the older 15/15/17
+window totals are now proven to bundle two non-decision draws); and the
+full-turn reducer consuming the real mask-7 policy for the trainer side plus
+the non-terminal forced-switch full-turn variant. Presentation-seam
+retirement continued: `turn1-rockslide.json` (window 2) re-driven from
+kernel events at its recorded **256/256**, first production
+`stat-stage-change` emission proven. Gate-5's "AI returns only a
+kernel-enumerated legal decision and enters through the same submission
+boundary" is now demonstrably true for ordinary L50 singles move selection;
+switch/item AI, entry-hook breadth, and the CheckViability handler bodies
+remain the named remainder.
+
 **3. Presentation seam checkpoint — required before kernel breadth past (iv).**
 The kernel currently has no consumer. `battleScene.ts` is 17,056 lines (30% of
 `src/engine`) whose `BattleSceneState` is keyed to the *one canonical battle*:
