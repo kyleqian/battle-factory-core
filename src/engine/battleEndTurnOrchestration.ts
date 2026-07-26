@@ -98,6 +98,13 @@ const SIDE_STATUS_WORE_OFF_LABEL = "BattleScript_SideStatusWoreOff";
 const SAFEGUARD_ENDS_LABEL = "BattleScript_SafeguardEnds";
 const DAMAGING_WEATHER_CONTINUES_LABEL = "BattleScript_DamagingWeatherContinues";
 const SANDSTORM_HAIL_ENDS_LABEL = "BattleScript_SandStormHailEnds";
+/** battle_util.c:1340-1373 -- Rain is a single shared label, branching internally on the chooser (unlike Sandstorm/Hail/Sun's separate continues/ends labels). */
+const RAIN_CONTINUES_OR_ENDS_LABEL = "BattleScript_RainContinuesOrEnds";
+const SUNLIGHT_CONTINUES_LABEL = "BattleScript_SunlightContinues";
+const SUNLIGHT_FADED_LABEL = "BattleScript_SunlightFaded";
+/** battle_message.c:936-941, cMULTISTRING_CHOOSER values `BattleScript_RainContinuesOrEnds` itself branches on. B_MSG_DOWNPOUR_CONTINUES(1) is unreachable: `B_WEATHER_RAIN_DOWNPOUR` is source-marked "// unused" (include/constants/battle.h:233) and no opcode this engine registers (or plans to) ever sets it. */
+const B_MSG_RAIN_CONTINUES = 0;
+const B_MSG_RAIN_STOPPED = 2;
 
 type MachineState = BattleScriptMachineState<BattleScriptRulesContext>;
 type Handlers = BattleScriptOpcodeHandlers<BattleScriptRulesContext>;
@@ -457,6 +464,66 @@ const B_ANIM_SANDSTORM_CONTINUES = 3;
 const B_ANIM_HAIL_CONTINUES = 5;
 
 /**
+ * F7 (`ENDTURN_RAIN`, `battle_util.c:1340-1373`). No `weatherdamage` loop
+ * (Rain deals no passive damage) -- just the shared decrement/chooser/
+ * playanimation shape `docs/screens-weather-ground-truth.md` §1c/§5 already
+ * confirmed adds zero new opcodes beyond the setter + this widened
+ * PLAYANIMATION. `B_WEATHER_RAIN_PERMANENT` (Drizzle, KYOGRE-only) is not
+ * checked here -- unreachable given this engine's setter only ever writes
+ * the `_TEMPORARY` bit (docs/screens-weather-ground-truth.md §2), same
+ * scope limit `runDamagingWeatherFieldCase` below already accepts for
+ * Sandstorm's own PERMANENT bit (Tyranitar's Sand Stream switch-in trigger
+ * is unwired).
+ */
+function runRainFieldCase(
+  program: BattleScriptProgram,
+  handlers: Handlers,
+  state: MachineState,
+): FieldCaseOutcome {
+  const rc = state.rulesContext;
+  const nextTimer = rc.weatherTimer - 1;
+  const battler = rc.selectorRoles.attacker ?? 0;
+  if (nextTimer === 0) {
+    const ended = Object.freeze({ ...rc, weather: 0, weatherTimer: 0, multistringChooser: B_MSG_RAIN_STOPPED });
+    const run = runTickScript(program, handlers, state, ended, battler, RAIN_CONTINUES_OR_ENDS_LABEL);
+    if (run.kind === "opcode-barrier") return run;
+    return Object.freeze({ kind: "fired", state: run.state });
+  }
+  const continuing = Object.freeze({ ...rc, weatherTimer: nextTimer, multistringChooser: B_MSG_RAIN_CONTINUES });
+  const run = runTickScript(program, handlers, state, continuing, battler, RAIN_CONTINUES_OR_ENDS_LABEL);
+  if (run.kind === "opcode-barrier") return run;
+  return Object.freeze({ kind: "fired", state: run.state });
+}
+
+/**
+ * F9 (`ENDTURN_SUN`, `battle_util.c:1394-1411`). Unlike Rain, the C case
+ * picks between two entirely separate labels (`SunlightContinues`/
+ * `SunlightFaded`) rather than one shared label branching on a chooser byte
+ * -- neither script reads `cMULTISTRING_CHOOSER` at all (each is a single
+ * fixed `printstring`). `B_WEATHER_SUN_PERMANENT` (Drought, GROUDON-only) is
+ * out of scope for the same reason as Rain's PERMANENT bit above.
+ */
+function runSunFieldCase(
+  program: BattleScriptProgram,
+  handlers: Handlers,
+  state: MachineState,
+): FieldCaseOutcome {
+  const rc = state.rulesContext;
+  const nextTimer = rc.weatherTimer - 1;
+  const battler = rc.selectorRoles.attacker ?? 0;
+  if (nextTimer === 0) {
+    const ended = Object.freeze({ ...rc, weather: 0, weatherTimer: 0 });
+    const run = runTickScript(program, handlers, state, ended, battler, SUNLIGHT_FADED_LABEL);
+    if (run.kind === "opcode-barrier") return run;
+    return Object.freeze({ kind: "fired", state: run.state });
+  }
+  const continuing = Object.freeze({ ...rc, weatherTimer: nextTimer });
+  const run = runTickScript(program, handlers, state, continuing, battler, SUNLIGHT_CONTINUES_LABEL);
+  if (run.kind === "opcode-barrier") return run;
+  return Object.freeze({ kind: "fired", state: run.state });
+}
+
+/**
  * F8/F10 (`ENDTURN_SANDSTORM`/`HAIL`, `battle_util.c:1372-1420`,
  * docs/screens-weather-ground-truth.md §1c/§3b/§3e's live-verified ledger).
  * `gBattleScripting.animArg1`/`gBattleCommunication[MULTISTRING_CHOOSER]`
@@ -495,17 +562,14 @@ function runDamagingWeatherFieldCase(
 
 /**
  * `DoFieldEndTurnEffects`'s 9 non-ENDTURN_ORDER cases (`battle_util.c:1181
- * -1438`). REFLECT/LIGHT_SCREEN/MIST/SAFEGUARD (F2-F5) and SANDSTORM/HAIL
- * (F8/F10) are fully wired (docs/screens-weather-ground-truth.md §6 slices
- * 1-3/5). RAIN/SUN (F7/F9) remain a named case-barrier: their own continues
- * scripts call the *non-var* `playanimation BS_ATTACKER, B_ANIM_RAIN_
- * CONTINUES`/`B_ANIM_SUN_CONTINUES`, and the already-registered PLAYANIMATION
- * handler (`battleScriptStatbuffchangeOpcode.ts`) is narrowed to its own
- * B_ANIM_STATS_CHANGE arm only -- widening it is a real, separate
- * registration this step's cap did not reach (doc's own slice 4, deferred).
- * `ENDTURN_WISH` has no modeled trigger state at all (no `wishCounter`
- * field) and is an explicit, documented no-op (this step's brief names Wish
- * as an allowed deferral alongside Uproar/Leech Seed).
+ * -1438`). REFLECT/LIGHT_SCREEN/MIST/SAFEGUARD (F2-F5), RAIN/SUN (F7/F9),
+ * and SANDSTORM/HAIL (F8/F10) are all fully wired
+ * (docs/screens-weather-ground-truth.md §6 slices 1-3/4/5) -- RAIN/SUN's own
+ * `playanimation BS_ATTACKER, B_ANIM_RAIN_CONTINUES`/`B_ANIM_SUN_CONTINUES`
+ * calls are now covered by `battleScriptStatbuffchangeOpcode.ts`'s widened
+ * PLAYANIMATION handler. `ENDTURN_WISH` has no modeled trigger state at all
+ * (no `wishCounter` field) and is an explicit, documented no-op (this step's
+ * brief names Wish as an allowed deferral alongside Uproar/Leech Seed).
  */
 function runDoFieldEndTurnEffects(
   program: BattleScriptProgram,
@@ -550,15 +614,20 @@ function runDoFieldEndTurnEffects(
 
   const rc = state.rulesContext;
   if ((rc.weather & B_WEATHER_RAIN) !== 0) {
-    return Object.freeze({ kind: "case-barrier", state, caseName: "ENDTURN_RAIN", detail: "weather RAIN bit set but BattleScript_RainContinuesOrEnds is not wired (PLAYANIMATION is narrowed to B_ANIM_STATS_CHANGE only)" });
-  }
-  if ((rc.weather & B_WEATHER_SANDSTORM) !== 0) {
+    const result = runRainFieldCase(program, handlers, state);
+    if (result.kind === "opcode-barrier") return Object.freeze({ kind: "opcode-barrier", state: result.state, instruction: result.instruction });
+    state = result.state;
+    if (result.kind === "fired" && state.rulesContext.battleOutcome !== 0) return Object.freeze({ kind: "outcome-decided", state });
+  } else if ((rc.weather & B_WEATHER_SANDSTORM) !== 0) {
     const result = runDamagingWeatherFieldCase(program, handlers, state, B_ANIM_SANDSTORM_CONTINUES, B_MSG_SANDSTORM);
     if (result.kind === "opcode-barrier") return Object.freeze({ kind: "opcode-barrier", state: result.state, instruction: result.instruction });
     state = result.state;
     if (result.kind === "fired" && state.rulesContext.battleOutcome !== 0) return Object.freeze({ kind: "outcome-decided", state });
   } else if ((rc.weather & B_WEATHER_SUN) !== 0) {
-    return Object.freeze({ kind: "case-barrier", state, caseName: "ENDTURN_SUN", detail: "weather SUN bit set but BattleScript_SunlightContinues/Faded is not wired (PLAYANIMATION is narrowed to B_ANIM_STATS_CHANGE only)" });
+    const result = runSunFieldCase(program, handlers, state);
+    if (result.kind === "opcode-barrier") return Object.freeze({ kind: "opcode-barrier", state: result.state, instruction: result.instruction });
+    state = result.state;
+    if (result.kind === "fired" && state.rulesContext.battleOutcome !== 0) return Object.freeze({ kind: "outcome-decided", state });
   } else if ((rc.weather & B_WEATHER_HAIL) !== 0) {
     const result = runDamagingWeatherFieldCase(program, handlers, state, B_ANIM_HAIL_CONTINUES, B_MSG_HAIL);
     if (result.kind === "opcode-barrier") return Object.freeze({ kind: "opcode-barrier", state: result.state, instruction: result.instruction });

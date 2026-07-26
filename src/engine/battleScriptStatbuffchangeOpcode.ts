@@ -3,10 +3,13 @@
  * `B_SCR_OP_STATBUFFCHANGE` (`Cmd_statbuffchange`, battle_script_commands.c:
  * 7100-7105), `B_SCR_OP_SETGRAPHICALSTATCHANGEVALUES` (`Cmd_
  * setgraphicalstatchangevalues`, :4088-4109), `B_SCR_OP_PLAYANIMATION`
- * (`Cmd_playanimation`, :4004-4040, narrowed to its B_ANIM_STATS_CHANGE arm --
+ * (`Cmd_playanimation`, :4004-4040, registered for B_ANIM_STATS_CHANGE --
  * the only animType `BattleScript_EffectStatUp`/`EffectStatDown` ever pass,
  * source-confirmed the unconditional first-checked branch regardless of
- * HITMARKER_NO_ANIMATIONS/semi-invulnerability), `B_SCR_OP_JUMPIFSTATUS2`
+ * HITMARKER_NO_ANIMATIONS/semi-invulnerability -- plus B_ANIM_RAIN_CONTINUES/
+ * B_ANIM_SUN_CONTINUES for the end-turn weather field loop's own continues
+ * scripts, see `createPlayanimationOpcodeHandler`'s own doc for the branch
+ * this widening ports), `B_SCR_OP_JUMPIFSTATUS2`
  * (`Cmd_jumpifstatus2`, :3093-3103, the DOWN family's Substitute early-out),
  * and `B_SCR_OP_ORBYTE` (`Cmd_orbyte`, :3864-3869, only reachable via
  * ChangeStatBuffs' own Protect branch -> BattleScript_ButItFailed).
@@ -147,12 +150,48 @@ function createSetgraphicalstatchangevaluesOpcodeHandler(): BattleScriptOpcodeHa
 }
 
 /**
- * Narrowed to the B_ANIM_STATS_CHANGE arm: source-confirmed the FIRST-checked
- * `if` in Cmd_playanimation, taken unconditionally for this animType
- * regardless of HITMARKER_NO_ANIMATIONS/semi-invulnerability (those guards
- * only apply to animation ids this registration's two callers never pass).
- * Any other animType barriers rather than approximating the other 4 branches.
+ * Widened beyond the B_ANIM_STATS_CHANGE arm (docs/end-turn-ground-truth.md
+ * F7/F9, docs/screens-weather-ground-truth.md §6 slice 4) to also cover
+ * B_ANIM_RAIN_CONTINUES/B_ANIM_SUN_CONTINUES -- `BattleScript_
+ * RainContinuesOrEnds`/`SunlightContinues`'s own `playanimation BS_ATTACKER,
+ * B_ANIM_RAIN_CONTINUES`/`SUN_CONTINUES` (no third operand supplied, so the
+ * macro's `arg=NULL` default is what's actually encoded -- NOT
+ * `sB_ANIM_ARG1`, confirmed against `src/data/gen/battle-script-program.json`'s
+ * own parsed operands for both call sites).
+ *
+ * Source (`battle_script_commands.c:4004-4043`) branches on animType in this
+ * order: (1) STATS_CHANGE/SNATCH_MOVE/SUBSTITUTE_FADE emit unconditionally;
+ * (2) else if HITMARKER_NO_ANIMATIONS, push+`BattleScript_Pausex20` (skip);
+ * (3) else if RAIN_CONTINUES/SUN_CONTINUES/SANDSTORM_CONTINUES/
+ * HAIL_CONTINUES, emit -- this branch is reached only when
+ * HITMARKER_NO_ANIMATIONS is clear, and (unlike the final "else" branch)
+ * bypasses the STATUS3_SEMI_INVULNERABLE skip entirely. This engine never
+ * sets HITMARKER_NO_ANIMATIONS anywhere (no production code path ORs that
+ * bit in -- confirmed by grep; docs/battle-move-anim-notes.md and
+ * docs/battle-turn-notes.md disagree on whether a real save's Battle-Scene-
+ * OFF option keeps it set for a whole battle, an unresolved tension this
+ * registration does not need to settle), so branch (2) is unreachable given
+ * this engine's current state model and branch (3) is the one this handler
+ * ports -- same "emit, bypass semi-invulnerable" shape already established
+ * for SANDSTORM_CONTINUES/HAIL_CONTINUES's own PLAYANIMATION_VAR handler
+ * (`battleScriptDamagingWeatherOpcode.ts`'s `createPlayanimationVarHandler`).
+ * The animation argument (`*argumentPtr`, dereferenced from the encoded NULL
+ * pointer) is decorative-only for this non-presentation engine; emitted with
+ * an empty `arguments` array, matching that same sibling handler's
+ * `WEATHER_VAR` precedent.
+ *
+ * Any other animType (e.g. B_ANIM_SMOKEBALL_ESCAPE, B_ANIM_SNATCH_MOVE) still
+ * barriers rather than approximating the other branches.
  */
+const PLAYANIMATION_ANIM_TYPES: ReadonlyMap<
+  string,
+  Readonly<{ argExpression: string; animationId: string; readsAnimArg1: boolean }>
+> = new Map([
+  ["B_ANIM_STATS_CHANGE", { argExpression: "sB_ANIM_ARG1", animationId: "STATS_CHANGE", readsAnimArg1: true }],
+  ["B_ANIM_RAIN_CONTINUES", { argExpression: "NULL", animationId: "RAIN_CONTINUES", readsAnimArg1: false }],
+  ["B_ANIM_SUN_CONTINUES", { argExpression: "NULL", animationId: "SUN_CONTINUES", readsAnimArg1: false }],
+]);
+
 function createPlayanimationOpcodeHandler(
   isControllerIdle: BattleScriptControllerIdlePort<BattleScriptRulesContext>,
   resolveBattlerForBattleScript: BattleScriptBattlerSelectorResolverPort<BattleScriptRulesContext>,
@@ -173,18 +212,20 @@ function createPlayanimationOpcodeHandler(
       );
     }
     const [battlerOperand, animTypeOperand, argOperand] = context.instruction.operands;
-    if (animTypeOperand!.expression !== "B_ANIM_STATS_CHANGE") {
+    const animType = PLAYANIMATION_ANIM_TYPES.get(animTypeOperand!.expression);
+    if (!animType) {
       return unsupportedBranch(
         context,
-        `Cmd_playanimation's animType ${animTypeOperand!.expression} is not B_ANIM_STATS_CHANGE`,
+        `Cmd_playanimation's animType ${animTypeOperand!.expression} is not registered`,
         "battle_script_commands.c",
         4011,
       );
     }
-    if (argOperand!.expression !== "sB_ANIM_ARG1") {
+    if (argOperand!.expression !== animType.argExpression) {
       return unsupportedBranch(
         context,
-        `Cmd_playanimation's argument operand ${argOperand!.expression} is not sB_ANIM_ARG1`,
+        `Cmd_playanimation's argument operand ${argOperand!.expression} is not ${animType.argExpression} `
+          + `for animType ${animTypeOperand!.expression}`,
         "battle_script_commands.c",
         4009,
       );
@@ -206,7 +247,9 @@ function createPlayanimationOpcodeHandler(
         }),
       );
     }
-    const argument = context.state.rulesContext.animArg1;
+    const eventArguments = animType.readsAnimArg1
+      ? Object.freeze([String(context.state.rulesContext.animArg1)])
+      : Object.freeze([]);
     return transitionBattleScriptCommand(
       context,
       Object.freeze({ kind: "advance" }),
@@ -215,9 +258,9 @@ function createPlayanimationOpcodeHandler(
         events: Object.freeze([
           Object.freeze({
             kind: "animation" as const,
-            animationId: "STATS_CHANGE",
+            animationId: animType.animationId,
             battler,
-            arguments: Object.freeze([String(argument)]),
+            arguments: eventArguments,
           }),
         ]),
       },

@@ -341,14 +341,78 @@ describe(
       },
     );
 
-    it("Rain/Sun remain named case-barriers this session (PLAYANIMATION is narrowed to B_ANIM_STATS_CHANGE only)", () => {
-      const B_WEATHER_RAIN_TEMPORARY = 1 << 0;
-      const rc = context({ weather: B_WEATHER_RAIN_TEMPORARY, weatherTimer: 3 });
-      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts());
-      const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc));
-      expect(result.kind).toBe("case-barrier");
-      if (result.kind !== "case-barrier") throw new Error("expected case-barrier");
-      expect(result.caseName).toBe("ENDTURN_RAIN");
-    });
+    it(
+      "Rain: set -> 4 continues ticks (weather bit stays set, chooser stays RAIN_CONTINUES) -> "
+        + "expiry tick (weather clears, chooser RAIN_STOPPED) -> re-set succeeds "
+        + "(F7, battle_util.c:1340-1373; weatherTimer 5->4->3->2->1->0)",
+      () => {
+        const B_WEATHER_RAIN_TEMPORARY = 1 << 0;
+        const rc = context({ weather: B_WEATHER_RAIN_TEMPORARY, weatherTimer: 5 });
+        const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts());
+        let state = scratchState(rc);
+
+        for (const expectedTimerAfter of [4, 3, 2, 1]) {
+          const result = runBattleEndTurnOrchestration(program, handlers, state);
+          expect(result.kind).toBe("next-turn");
+          if (result.kind !== "next-turn") throw new Error("expected next-turn");
+          expect(result.state.rulesContext.weatherTimer).toBe(expectedTimerAfter);
+          expect(result.state.rulesContext.weather).toBe(B_WEATHER_RAIN_TEMPORARY);
+          expect(result.state.rulesContext.multistringChooser).toBe(0); // B_MSG_RAIN_CONTINUES
+          expect(result.state.rng.calls).toBe(state.rng.calls); // zero Random() draws (doc §4)
+          state = result.state;
+        }
+
+        // 5th tick: weather ends, chooser flips to RAIN_STOPPED, weatherTimer/weather both clear.
+        const ends = runBattleEndTurnOrchestration(program, handlers, state);
+        expect(ends.kind).toBe("next-turn");
+        if (ends.kind !== "next-turn") throw new Error("expected next-turn");
+        expect(ends.state.rulesContext.weather).toBe(0);
+        expect(ends.state.rulesContext.weatherTimer).toBe(0);
+        expect(ends.state.rulesContext.multistringChooser).toBe(2); // B_MSG_RAIN_STOPPED
+        expect(ends.state.rng.calls).toBe(state.rng.calls);
+
+        // Re-set from scratch succeeds.
+        const rePc = findPc("B_SCR_OP_SETRAIN", "BattleScript_EffectRainDance");
+        const { result: reset } = stepAtProgramCounter(rePc, ends.state.rulesContext);
+        if (reset.kind !== "advanced") throw new Error("expected advance");
+        expect(reset.state.rulesContext.weather).toBe(B_WEATHER_RAIN_TEMPORARY);
+        expect(reset.state.rulesContext.weatherTimer).toBe(5);
+      },
+    );
+
+    it(
+      "Sun: set -> 4 continues ticks (BattleScript_SunlightContinues, weather bit stays set) -> "
+        + "expiry tick (BattleScript_SunlightFaded, weather clears) -> re-set succeeds "
+        + "(F9, battle_util.c:1394-1411; weatherTimer 5->4->3->2->1->0)",
+      () => {
+        const B_WEATHER_SUN_TEMPORARY = 1 << 5;
+        const rc = context({ weather: B_WEATHER_SUN_TEMPORARY, weatherTimer: 5 });
+        const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts());
+        let state = scratchState(rc);
+
+        for (const expectedTimerAfter of [4, 3, 2, 1]) {
+          const result = runBattleEndTurnOrchestration(program, handlers, state);
+          expect(result.kind).toBe("next-turn");
+          if (result.kind !== "next-turn") throw new Error("expected next-turn");
+          expect(result.state.rulesContext.weatherTimer).toBe(expectedTimerAfter);
+          expect(result.state.rulesContext.weather).toBe(B_WEATHER_SUN_TEMPORARY);
+          expect(result.state.rng.calls).toBe(state.rng.calls); // zero Random() draws (doc §4)
+          state = result.state;
+        }
+
+        const ends = runBattleEndTurnOrchestration(program, handlers, state);
+        expect(ends.kind).toBe("next-turn");
+        if (ends.kind !== "next-turn") throw new Error("expected next-turn");
+        expect(ends.state.rulesContext.weather).toBe(0);
+        expect(ends.state.rulesContext.weatherTimer).toBe(0);
+        expect(ends.state.rng.calls).toBe(state.rng.calls);
+
+        const rePc = findPc("B_SCR_OP_SETSUNNY", "BattleScript_EffectSunnyDay");
+        const { result: reset } = stepAtProgramCounter(rePc, ends.state.rulesContext);
+        if (reset.kind !== "advanced") throw new Error("expected advance");
+        expect(reset.state.rulesContext.weather).toBe(B_WEATHER_SUN_TEMPORARY);
+        expect(reset.state.rulesContext.weatherTimer).toBe(5);
+      },
+    );
   },
 );

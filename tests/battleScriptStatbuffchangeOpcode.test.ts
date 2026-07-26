@@ -269,6 +269,32 @@ describe("primary-effect stat-change route (Cmd_statbuffchange + SETGRAPHICALSTA
     expect(result.state.rulesContext.moveResultFlags & 1).toBe(1); // MOVE_RESULT_MISSED
   });
 
+  describe("PLAYANIMATION widened for B_ANIM_RAIN_CONTINUES/B_ANIM_SUN_CONTINUES (F7/F9 field-loop)", () => {
+    it.each([
+      ["BattleScript_RainContinuesOrEnds", "RAIN_CONTINUES"],
+      ["BattleScript_SunlightContinues", "SUN_CONTINUES"],
+    ] as const)("%s's own playanimation call now emits a real %s animation event instead of halting", (label, animationId) => {
+      const found = program.instructions.find(
+        (i) => i.opcodeName === "B_SCR_OP_PLAYANIMATION" && i.source.label === label,
+      );
+      expect(found, label).toBeDefined();
+      const rc = context();
+      const execution = createBattleScriptStatusRulesExecution(
+        program,
+        "BattleScript_EffectAttackUp2",
+        rc,
+        1,
+        externalPorts(),
+      );
+      const patched = Object.freeze({ ...execution.state, programCounter: found!.programCounter });
+      const result = stepBattleScriptMachine(program, patched, execution.handlers);
+      expect(result.kind).not.toBe("halted");
+      if (result.kind === "halted") throw new Error("expected no halt");
+      const animEvent = result.state.events.find((e) => e.kind === "animation");
+      expect(animEvent).toMatchObject({ animationId, arguments: [] });
+    });
+  });
+
   describe("(b) unsupported-branch barriers", () => {
     it("Cmd_playanimation halts on a non-B_ANIM_STATS_CHANGE animType", () => {
       const found = program.instructions.find(

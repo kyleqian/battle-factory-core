@@ -278,6 +278,8 @@ const PRINTFROMTABLE_TABLES: Readonly<Record<string, readonly string[]>> = Objec
     "STRINGID_SUNLIGHTGOTBRIGHT",
     "STRINGID_STARTEDHAIL",
   ]),
+  /** battle_message.c:936-941 -- B_MSG_RAIN_CONTINUES(0)/DOWNPOUR_CONTINUES(1, unused)/RAIN_STOPPED(2). */
+  gRainContinuesStringIds: Object.freeze(["STRINGID_RAINCONTINUES", "STRINGID_DOWNPOURCONTINUES", "STRINGID_RAINSTOPPED"]),
   /** battle_message.c:918-922 -- B_MSG_SANDSTORM(0)/B_MSG_HAIL(1). */
   gSandStormHailContinuesStringIds: Object.freeze(["STRINGID_SANDSTORMRAGES", "STRINGID_HAILCONTINUES"]),
   gSandStormHailDmgStringIds: Object.freeze(["STRINGID_PKMNBUFFETEDBYSANDSTORM", "STRINGID_PKMNPELTEDBYHAIL"]),

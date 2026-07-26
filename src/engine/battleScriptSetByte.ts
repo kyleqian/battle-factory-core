@@ -69,6 +69,8 @@ const ATOMIC_VALUES = Object.freeze({
   B_MSG_STAT_WONT_DECREASE: 2,
   B_MSG_INCAPABLE_OF_POWER: 4,
   B_MSG_STAT_ROSE_ITEM: 4,
+  /** battle_string_ids.h:447 -- `BattleScript_RainContinuesOrEnds`'s own `jumpifbyte CMP_EQUAL, cMULTISTRING_CHOOSER, B_MSG_RAIN_STOPPED, ...` comparand. */
+  B_MSG_RAIN_STOPPED: 2,
   B_MSG_TURN1_RAZOR_WIND: 0,
   B_MSG_TURN1_SOLAR_BEAM: 1,
   B_MSG_TURN1_SKULL_BASH: 2,
