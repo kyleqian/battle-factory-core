@@ -486,6 +486,13 @@ export type FactoryAiScoredBattlerView = Readonly<{
   /** Current/max HP -- source-required for `AI_CV_VitalThrow` (`if_hp_more_than`/`if_hp_less_than AI_USER`, entry 468/doc §13); only the attacker's own copy is read today, carried on both sides for the same shape-symmetry convention as `isFirstTurn`. */
   hp: number;
   maxHp: number;
+  /**
+   * `gLastMoves[battler]` -- source-required for `AI_CV_DefenseUp`'s own
+   * Gate E/F (`get_last_used_bank_move AI_TARGET`, doc §18.1/§18.2); only
+   * the target's own copy is read. Optional, defaulting to `MOVE_NONE` (0)
+   * when omitted -- the real battle-start default (doc §18.2).
+   */
+  lastUsedMoveId?: number;
 }>;
 
 export type FactoryAiScoredTargetView = FactoryAiScoredBattlerView & Readonly<{
@@ -798,6 +805,7 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
           spDefStage: view.target.statStages.spDef,
           hp: view.target.hp,
           maxHp: view.target.maxHp,
+          lastUsedMoveId: view.target.lastUsedMoveId,
         },
         drawOrdinalStart: draws.length + 1,
         reasonPrefix: `slot-${slot}-check-viability`,

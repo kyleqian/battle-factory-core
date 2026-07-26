@@ -122,6 +122,16 @@ export type FactoryAiCheckViabilityBattler = Readonly<{
   spDefStage: number;
   hp: number;
   maxHp: number;
+  /**
+   * `gLastMoves[battler]` (`src/battle_main.c:190`), the move ID this
+   * battler last used -- `AI_CV_DefenseUp`'s own Gate E/F read the
+   * TARGET's copy (`get_last_used_bank_move AI_TARGET`, doc §18.1/§18.2).
+   * Optional, defaulting to `MOVE_NONE` (0) when omitted -- the real
+   * source's own battle-start default (`gBattleMoves[MOVE_NONE].power ==
+   * 0`, doc §18.2), so every pre-existing battler literal in this doc's
+   * test suite stays valid unchanged.
+   */
+  lastUsedMoveId?: number;
 }>;
 
 export type FactoryAiCheckViabilityDraw =
@@ -251,6 +261,16 @@ export type FactoryAiCheckViabilityDraw =
     ordinal: number;
     reason: string;
     kind: "attack-up-roll-1" | "attack-up-roll-2" | "attack-up-roll-3";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    succeeded: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "defense-up-roll-1" | "defense-up-roll-2" | "defense-up-roll-3" | "defense-up-roll-4" | "defense-up-roll-5";
     before: BattleRngState;
     after: BattleRngState;
     rawRngValue: number;
@@ -1034,6 +1054,155 @@ function runCvAttackUp(input: Readonly<{
   return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
 }
 
+const MOVE_NONE = 0;
+
+/** `AI_CV_DefenseUp_PhysicalTypes` (`data/battle_ai_scripts.s:944-954`) -- a
+ * DIFFERENT, larger list than `AI_CV_AttackDown`'s own physical-type list
+ * (doc §14.1): this one additionally includes Poison, Flying, and Ghost. */
+const AI_CV_DEFENSE_UP_PHYSICAL_TYPES: ReadonlySet<string> = new Set([
+  "TYPE_NORMAL", "TYPE_FIGHTING", "TYPE_POISON", "TYPE_GROUND", "TYPE_FLYING",
+  "TYPE_ROCK", "TYPE_BUG", "TYPE_GHOST", "TYPE_STEEL",
+]);
+
+/**
+ * `AI_CV_DefenseUp` (`data/battle_ai_scripts.s:915-942`,
+ * `docs/factory-ai-checkviability-ground-truth.md` §18.1):
+ *
+ * ```
+ * AI_CV_DefenseUp:
+ *     if_stat_level_less_than AI_USER, STAT_DEF, 9, AI_CV_DefenseUp2   ; Gate A
+ *     if_random_less_than 100, AI_CV_DefenseUp3                        ; DRAW SITE 1
+ *     score -1
+ *     goto AI_CV_DefenseUp3
+ *
+ * AI_CV_DefenseUp2:
+ *     if_hp_not_equal AI_USER, 100, AI_CV_DefenseUp3                   ; Gate B
+ *     if_random_less_than 128, AI_CV_DefenseUp3                        ; DRAW SITE 2
+ *     score +2
+ * AI_CV_DefenseUp3:
+ *     if_hp_less_than AI_USER, 70, AI_CV_DefenseUp4                    ; Gate C (INVERTED vs AttackUp)
+ *     if_random_less_than 200, AI_CV_DefenseUp_End                     ; DRAW SITE 3
+ * AI_CV_DefenseUp4:
+ *     if_hp_less_than AI_USER, 40, AI_CV_DefenseUp_ScoreDown2          ; Gate D
+ *     get_last_used_bank_move AI_TARGET                                ; Gate E setup -- TARGET's last move
+ *     get_move_power_from_result
+ *     if_equal 0, AI_CV_DefenseUp5                                     ; Gate E (last move power == 0)
+ *     get_last_used_bank_move AI_TARGET
+ *     get_move_type_from_result
+ *     if_not_in_bytes AI_CV_DefenseUp_PhysicalTypes, AI_CV_DefenseUp_ScoreDown2  ; Gate F
+ *     if_random_less_than 60, AI_CV_DefenseUp_End                      ; DRAW SITE 4
+ * AI_CV_DefenseUp5:
+ *     if_random_less_than 60, AI_CV_DefenseUp_End                      ; DRAW SITE 5
+ * AI_CV_DefenseUp_ScoreDown2:
+ *     score -2
+ * AI_CV_DefenseUp_End:
+ *     end
+ * ```
+ *
+ * Gates A/B/DRAW SITE 1/2 are byte-for-byte `AttackUp`'s own shape with
+ * `STAT_DEF` swapped for `STAT_ATK` (doc §18.1 -- not re-derived here).
+ * **Gate C is INVERTED vs `AttackUp`'s own**: own HP < 70% jumps straight
+ * into `DefenseUp4` (skipping DRAW SITE 3 entirely); HP >= 70% instead
+ * reaches DRAW SITE 3 first, whose own *failure* (roll < 200, ~78.1%, jumps
+ * to End) is the only way to stop there -- its success (roll >= 200,
+ * ~21.9%) falls through into `DefenseUp4` anyway, same as a direct Gate C
+ * jump. So HP == 100% (this doc's usual "clean stop" shape for every other
+ * handler) instead guarantees an EXTRA draw here, with a chance to still
+ * continue. Gate D (own HP < 40%) skips straight to the `-2` penalty, same
+ * shape as `AttackUp`'s own. Gates E/F read the TARGET's (not `AI_USER`'s)
+ * last-used move: power == 0 (true for both a genuine 0-power last move AND
+ * the untouched `MOVE_NONE` battle-start default, doc §18.2 -- indistinguishable
+ * by this branch) skips straight to `DefenseUp5`'s own roll; power != 0 AND
+ * type in the (larger, 9-type) `AI_CV_DefenseUp_PhysicalTypes` list reaches
+ * DRAW SITE 4; power != 0 and NOT in the list jumps straight to the `-2`
+ * penalty, skipping both remaining draw sites. DRAW SITE 4 and DRAW SITE 5
+ * are mutually exclusive (Gate E routes to exactly one) and share the
+ * identical `if_random_less_than 60` shape: JUMP (roll < 60, ~23.4%) skips
+ * the `-2`; falling through (roll >= 60, ~76.6%) applies it.
+ */
+function runCvDefenseUp(input: Readonly<{
+  rng: BattleRngState;
+  attackerDefStage: number;
+  attackerHp: number;
+  attackerMaxHp: number;
+  targetLastUsedMoveId: number;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let score = 0;
+
+  const hpPercent = Math.floor((100 * input.attackerHp) / input.attackerMaxHp);
+
+  if (input.attackerDefStage < 9) {
+    // DefenseUp2: Gate B (own HP != 100%) skips DRAW SITE 2 straight to DefenseUp3.
+    if (hpPercent === 100) {
+      const draw2 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw2`);
+      rng = draw2.after;
+      ordinal += 1;
+      const succeeded2 = draw2.randomValue % 256 >= 128;
+      draws.push(Object.freeze({ ...draw2, kind: "defense-up-roll-2" as const, succeeded: succeeded2 }));
+      if (succeeded2) score += 2;
+    }
+  } else {
+    // DRAW SITE 1: if_random_less_than 100, DefenseUp3 (jump skips -1; fall through applies it, then goto DefenseUp3 either way).
+    const draw1 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw1`);
+    rng = draw1.after;
+    ordinal += 1;
+    const succeeded1 = draw1.randomValue % 256 >= 100;
+    draws.push(Object.freeze({ ...draw1, kind: "defense-up-roll-1" as const, succeeded: succeeded1 }));
+    if (succeeded1) score -= 1;
+  }
+
+  // DefenseUp3: Gate C, INVERTED vs AttackUp -- own HP < 70% jumps straight into DefenseUp4.
+  if (hpPercent >= 70) {
+    const draw3 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw3`);
+    rng = draw3.after;
+    ordinal += 1;
+    // if_random_less_than 200, End: JUMP (roll<200, ~78.1%) stops; fall through (roll>=200, ~21.9%) continues to DefenseUp4.
+    const fellThrough = draw3.randomValue % 256 >= 200;
+    draws.push(Object.freeze({ ...draw3, kind: "defense-up-roll-3" as const, succeeded: fellThrough }));
+    if (!fellThrough) {
+      return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+    }
+  }
+
+  // DefenseUp4: Gate D -- own HP < 40% skips straight to the -2 penalty.
+  if (hpPercent < 40) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score - 2 });
+  }
+
+  // Gates E/F: the TARGET's own last-used move power/type.
+  const lastMove = MOVES_BY_ID.get(input.targetLastUsedMoveId);
+  if (!lastMove) {
+    throw new Error(`factory-ai-check-viability: unknown last-used move ${input.targetLastUsedMoveId}`);
+  }
+
+  if (lastMove.power === 0) {
+    // DefenseUp5, DRAW SITE 5.
+    const draw5 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw5`);
+    rng = draw5.after;
+    const succeeded5 = draw5.randomValue % 256 >= 60;
+    draws.push(Object.freeze({ ...draw5, kind: "defense-up-roll-5" as const, succeeded: succeeded5 }));
+    if (succeeded5) score -= 2;
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+  }
+
+  if (!AI_CV_DEFENSE_UP_PHYSICAL_TYPES.has(lastMove.type)) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score - 2 });
+  }
+
+  // DRAW SITE 4.
+  const draw4 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw4`);
+  rng = draw4.after;
+  const succeeded4 = draw4.randomValue % 256 >= 60;
+  draws.push(Object.freeze({ ...draw4, kind: "defense-up-roll-4" as const, succeeded: succeeded4 }));
+  if (succeeded4) score -= 2;
+  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+}
+
 /** `AI_CheckViability` for one move slot (`:652-775` dispatch shell only). */
 export function runCheckViability(input: Readonly<{
   rng: BattleRngState;
@@ -1203,6 +1372,31 @@ export function runCheckViability(input: Readonly<{
       rng: attackUp.rng,
       draws: attackUp.draws,
       scoreDelta: attackUp.scoreDelta,
+    });
+  }
+
+  if (
+    move.effect === "EFFECT_DEFENSE_UP"
+    || move.effect === "EFFECT_DEFENSE_UP_2"
+    || move.effect === "EFFECT_BULK_UP"
+  ) {
+    // EFFECT_BULK_UP's CV side dispatches straight to AI_CV_DefenseUp, shared
+    // with DEFENSE_UP/DEFENSE_UP_2 (doc §18.1) -- AI_CBM_BulkUp (a separate,
+    // third handler) is the CBM-side-only dispatch for this same effect.
+    const defenseUp = runCvDefenseUp({
+      rng: input.rng,
+      attackerDefStage: input.attacker.defStage,
+      attackerHp: input.attacker.hp,
+      attackerMaxHp: input.attacker.maxHp,
+      targetLastUsedMoveId: input.target.lastUsedMoveId ?? MOVE_NONE,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: defenseUp.rng,
+      draws: defenseUp.draws,
+      scoreDelta: defenseUp.scoreDelta,
     });
   }
 
