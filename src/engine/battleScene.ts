@@ -621,6 +621,7 @@ import {
   SHADOW_PUNCH_TRACE_ALPHA,
   SHADOW_PUNCH_TRACE_BLEND_COEFF,
 } from "./shadowPunch.ts";
+import { speciesFrontIdleRestOffset } from "./speciesIdleAnim.ts";
 import {
   SITRUS_ITEM_HEAL_TEXT_FIRST_AGE,
   SITRUS_ITEM_TEXT_CLEAR_AGE,
@@ -14547,12 +14548,20 @@ export function renderSceneOnMovePresentation(
       battleBg.static.tilemap,
       battleBg.palette,
     );
+    // GROWTH never touches the target (self-buff, no AnimTask_ShakeMon), so
+    // an opponent-side front target keeps its permanent send-out
+    // front-sprite-animation residual for the whole window (speciesIdleAnim.ts,
+    // same DRAGON_RAGE/SHADOW_PUNCH "ONIX starts at x2=+1" finding) instead of
+    // settling to (0,0).
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffset(view.target.species)
+      : null;
     drawSpriteSheet(
       fb,
       targetSprite.tileset,
       targetSprite.palette,
-      view.target.geometry.spriteCorner.x,
-      view.target.geometry.spriteCorner.y,
+      view.target.geometry.spriteCorner.x + (targetIdle?.x2 ?? 0),
+      view.target.geometry.spriteCorner.y + (targetIdle?.y2 ?? 0),
     );
     // GrowthEffect's own ScaleMonAndRestore call has objMode=0, the same
     // ANY-affine-transform-uses-ST_OAM_AFFINE_DOUBLE hardware convention
