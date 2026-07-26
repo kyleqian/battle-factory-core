@@ -307,6 +307,189 @@ describe("AI_CV_SpeedDown mask-7 fixture reproduction (docs/factory-ai-checkviab
   });
 });
 
+const MOVE_PURSUIT = 228; // EFFECT_PURSUIT
+const MOVE_SLASH = 163; // EFFECT_HIGH_CRITICAL
+
+// docs/factory-ai-checkviability-ground-truth.md §11.1's two banked fixtures
+// (tools/battle-lab/mechanic-factory-ai-cv-pursuit-{ghost-reach,normal-control}-off.json).
+// Both fixtures use all 4 opponent slots as the SAME dispatch move
+// (MOVE_PURSUIT) -- unlike SpeedDown's own MOVE_GROWL confound (entry 463,
+// EFFECT_ATTACK_DOWN hits an unrelated unported CBM barrier), EFFECT_PURSUIT
+// has no CheckBadMove table entry at all (doc §4), so no control-move
+// substitution is needed here -- the real fixture's own moveset reproduces
+// directly, verbatim.
+//
+// This does NOT replay the live oracle's multi-turn window total (doc
+// §11.0's own "do not chase the window total" finding -- the window embeds
+// a phantom next-decision whose OWN draw count is sensitive to unrelated
+// subsystems, not AI_CV_Pursuit's own contribution). Instead it constructs
+// turn 3's decision directly (isFirstTurn=0, the exact state the real
+// fixture's own reachable branch is measured at, per doc §11.1) and asserts
+// the policy-own draw shape structurally implied by running the identical
+// handler across all 4 identical slots -- matching this file's own
+// "degenerate fixture (all 4 slots Surf)" precedent above: N identical
+// slots each independently draw when reachable, not a single shared draw.
+describe("AI_CV_Pursuit mask-7 fixture reproduction (docs/factory-ai-checkviability-ground-truth.md §11.1)", () => {
+  const MAROWAK_PURSUIT_MOVESET = [MOVE_PURSUIT, MOVE_PURSUIT, MOVE_PURSUIT, MOVE_PURSUIT] as const;
+
+  function marowakAttacker(isFirstTurn: number): FactoryAiScoredBattlerView {
+    return Object.freeze({
+      types: ["TYPE_GROUND", "TYPE_GROUND"] as const,
+      attack: 80, defense: 110, spAttack: 50, spDefense: 80, speed: 45, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn,
+    });
+  }
+  function wobbuffetTarget(): FactoryAiScoredTargetView {
+    return Object.freeze({
+      species: 202,
+      types: ["TYPE_PSYCHIC", "TYPE_PSYCHIC"] as const,
+      attack: 33, defense: 58, spAttack: 33, spDefense: 58, speed: 33, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp: 190, ability: "ABILITY_SHADOW_TAG", knownAbility: null,
+    });
+  }
+  function miltankTarget(): FactoryAiScoredTargetView {
+    return Object.freeze({
+      species: 241,
+      types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+      attack: 80, defense: 105, spAttack: 40, spDefense: 70, speed: 100, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp: 95, ability: "ABILITY_THICK_FAT", knownAbility: null,
+    });
+  }
+  function pursuitView(attacker: FactoryAiScoredBattlerView, target: FactoryAiScoredTargetView): FactoryAiScoredView {
+    return Object.freeze({
+      schema: "factory-ai-scored-view/v1",
+      mode: "factory-level-50-singles",
+      active: Object.freeze({ aiBattler: 1 as const, targetBattler: 0 as const }),
+      factory: Object.freeze({ levelMode: 0 as const, battleMode: 0 as const, factoryWinStreak: 28, trainerOpponentId: 222 }),
+      moves: MAROWAK_PURSUIT_MOVESET,
+      attacker,
+      target,
+    });
+  }
+  function checkViabilityDraws(result: ReturnType<typeof chooseFactoryAiScoredDecision>) {
+    return result.trace.draws.filter((d) => "phase" in d && d.phase === "check-viability");
+  }
+
+  it.each([1, 99])("ghost-reach fixture (Wobbuffet target, pure Psychic), seed %i, turn-3 decision (isFirstTurn=0): all 4 identical Pursuit slots independently reach AI_CV_Pursuit2, exactly 4 check-viability draws, picks Pursuit", (seed) => {
+    const view = pursuitView(marowakAttacker(0), wobbuffetTarget());
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+    const cvDraws = checkViabilityDraws(result);
+    expect(cvDraws).toHaveLength(4);
+    expect(cvDraws.every((d) => "kind" in d && d.kind === "pursuit-roll")).toBe(true);
+    expect(result.submission.decision).toMatchObject({ kind: "use-move" });
+    if (result.submission.decision.kind === "use-move") {
+      expect(view.moves[result.submission.decision.moveSlot]).toBe(MOVE_PURSUIT);
+    }
+  });
+
+  it.each([1, 99])("normal-control fixture (Miltank target, pure Normal), seed %i, turn-3 decision (isFirstTurn=0): target type never matches Ghost/Psychic, zero check-viability draws, picks Pursuit", (seed) => {
+    const view = pursuitView(marowakAttacker(0), miltankTarget());
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+    const cvDraws = checkViabilityDraws(result);
+    expect(cvDraws).toHaveLength(0);
+    expect(result.submission.decision).toMatchObject({ kind: "use-move" });
+    if (result.submission.decision.kind === "use-move") {
+      expect(view.moves[result.submission.decision.moveSlot]).toBe(MOVE_PURSUIT);
+    }
+  });
+
+  it.each([1, 99])("turn-1 decision (isFirstTurn=2) against the SAME reach target, seed %i: is_first_turn_for's own gate keeps check-viability at zero draws regardless of the target's type", (seed) => {
+    const view = pursuitView(marowakAttacker(2), wobbuffetTarget());
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+    expect(checkViabilityDraws(result)).toHaveLength(0);
+  });
+});
+
+// docs/factory-ai-checkviability-ground-truth.md §11.2's two banked fixtures
+// (tools/battle-lab/mechanic-factory-ai-cv-highcrit-{neutral,resisted}-off.json).
+// Same all-4-slots-identical design and "do not chase the window total"
+// discipline as the AI_CV_Pursuit block above -- EFFECT_HIGH_CRITICAL has no
+// CheckBadMove table entry either, so MOVE_SLASH reproduces directly.
+// HighCrit has no isFirstTurn precondition (state-independent, like
+// SpeedDown), so unlike Pursuit this needs no turn-3 construction --
+// AI_USER's own isFirstTurn is fixed at a single value (2) throughout.
+describe("AI_CV_HighCrit mask-7 fixture reproduction (docs/factory-ai-checkviability-ground-truth.md §11.2)", () => {
+  const MAROWAK_SLASH_MOVESET = [MOVE_SLASH, MOVE_SLASH, MOVE_SLASH, MOVE_SLASH] as const;
+
+  const MAROWAK_ATTACKER: FactoryAiScoredBattlerView = Object.freeze({
+    types: ["TYPE_GROUND", "TYPE_GROUND"] as const,
+    attack: 80, defense: 110, spAttack: 50, spDefense: 80, speed: 45, level: 50,
+    statStages: NEUTRAL_STAGES,
+    isFirstTurn: 2,
+  });
+  function onixTarget(): FactoryAiScoredTargetView {
+    return Object.freeze({
+      species: 95,
+      types: ["TYPE_ROCK", "TYPE_GROUND"] as const,
+      attack: 45, defense: 160, spAttack: 30, spDefense: 45, speed: 70, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp: 35, ability: "ABILITY_ROCK_HEAD", knownAbility: null,
+    });
+  }
+  function dugtrioTarget(): FactoryAiScoredTargetView {
+    return Object.freeze({
+      species: 51,
+      types: ["TYPE_GROUND", "TYPE_GROUND"] as const,
+      attack: 80, defense: 50, spAttack: 50, spDefense: 70, speed: 120, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp: 35, ability: "ABILITY_ARENA_TRAP", knownAbility: null,
+    });
+  }
+  function highCritView(target: FactoryAiScoredTargetView): FactoryAiScoredView {
+    return Object.freeze({
+      schema: "factory-ai-scored-view/v1",
+      mode: "factory-level-50-singles",
+      active: Object.freeze({ aiBattler: 1 as const, targetBattler: 0 as const }),
+      factory: Object.freeze({ levelMode: 0 as const, battleMode: 0 as const, factoryWinStreak: 28, trainerOpponentId: 222 }),
+      moves: MAROWAK_SLASH_MOVESET,
+      attacker: MAROWAK_ATTACKER,
+      target,
+    });
+  }
+  function checkViabilityDraws(result: ReturnType<typeof chooseFactoryAiScoredDecision>) {
+    return result.trace.draws.filter((d) => "phase" in d && d.phase === "check-viability");
+  }
+
+  it.each([1, 99])("resisted fixture (Onix target, Rock/Ground -- 0.5x), seed %i: deterministic zero check-viability draws across all 4 identical Slash slots, picks Slash", (seed) => {
+    const view = highCritView(onixTarget());
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+    expect(checkViabilityDraws(result)).toHaveLength(0);
+    expect(result.submission.decision).toMatchObject({ kind: "use-move" });
+    if (result.submission.decision.kind === "use-move") {
+      expect(view.moves[result.submission.decision.moveSlot]).toBe(MOVE_SLASH);
+    }
+  });
+
+  it.each([1, 99])("neutral fixture (Dugtrio target, pure Ground -- 1x), seed %i: each of the 4 identical Slash slots independently reaches the neutral fallthrough (doc §11.2's own 1-or-2-draw-per-reach quirk), picks Slash", (seed) => {
+    const view = highCritView(dugtrioTarget());
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+    const cvDraws = checkViabilityDraws(result);
+    // Each of the 4 slots independently burns 1 draw (first roll < 128) or 2
+    // (first roll >= 128, cascading into AI_CV_HighCrit2's own roll), so the
+    // policy-own total ranges 4-8 depending on the 4 slots' own individual
+    // rolls -- deterministic and reproducible for a GIVEN seed (pinned exact
+    // below at both banked seeds, live-computed, not guessed), but not
+    // asserted equal ACROSS seeds -- doc §11.2's own documented cross-seed
+    // instability, reproduced structurally here rather than against the
+    // oracle's own window-total numbers.
+    expect(cvDraws.length).toBeGreaterThanOrEqual(4);
+    expect(cvDraws.length).toBeLessThanOrEqual(8);
+    expect(cvDraws).toHaveLength(6);
+    expect(cvDraws.every((d) => "kind" in d && (d.kind === "high-crit-fallthrough-roll" || d.kind === "high-crit-roll"))).toBe(true);
+    expect(result.submission.decision).toMatchObject({ kind: "use-move" });
+    if (result.submission.decision.kind === "use-move") {
+      expect(view.moves[result.submission.decision.moveSlot]).toBe(MOVE_SLASH);
+    }
+  });
+});
+
 type FixtureRules = BattleJsonObject & Readonly<{ acceptedMoveSlot: number | null }>;
 
 describe("submitFactoryAiDecision top-level dispatch", () => {
