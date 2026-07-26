@@ -498,3 +498,355 @@ Once a handler in the CBM-blocked 17 is wanted, budget for **both**
 `AI_CBM_X` and `AI_CV_X` together, not just the latter — porting only the CV
 side leaves the CBM barrier firing first, so the CV code is unreachable and
 unverifiable end-to-end against this port until then.
+
+## 11. 2026-07-26 addendum: live staging for the 4 CV-only-reachable handlers named in §10
+
+Follow-up scout session (side lane, Battle Scene OFF), same no-`src/`-changes
+contract. Goal: stage the 4 handlers §10 named as the next slice
+(`AI_CV_AlwaysHit`, `AI_CV_HighCrit`, `AI_CV_VitalThrow`, `AI_CV_Pursuit`).
+**2 of 4 fully staged with live ledgers** (`AI_CV_Pursuit`, `AI_CV_HighCrit`);
+the other 2 (`AI_CV_AlwaysHit`, `AI_CV_VitalThrow`) get analytical-only
+entries per this doc's own §7 precedent — both need multi-turn state builds
+whose staging arithmetic (evasion-stage ladder / HP-band damage) didn't fit
+this session's remaining budget on top of the first two, and a fitted
+half-built fixture would be worse evidence than an honest recipe.
+
+### 11.0 A new methodology note before the per-handler write-ups
+
+§6's `AI_CV_SpeedDown` fixture used a 0-power dispatch move (`MOVE_STRING_SHOT`)
+against a 0-power control (`MOVE_GROWL`) so `AI_TryToFaint`'s "not most
+powerful" penalty ties across all 4 slots and the *pick* becomes the clean
+decision-visible signal. None of this session's four handlers dispatch off a
+0-power move (`AlwaysHit`/`HighCrit`/`VitalThrow`/`Pursuit` all trigger on
+real attacking moves, 40-70 power), and no exact power-matched, dispatch-free
+"control" move exists in the move table to reuse that exact trick (checked:
+no `EFFECT_HIT` move sits at power 70 to pair against `MOVE_SLASH`). The two
+staged handlers below instead use **all 4 opponent slots as the SAME
+dispatch move** (no pick ambiguity to read at all — the AI always uses that
+move, tie-broken by seed among identical slots) and compare **total
+`Random()` draws across the whole window** between two twin fixtures that
+hold species/moveset/turn-count structurally identical and flip only the
+ONE precondition the handler's own script reads (target type for `Pursuit`,
+type effectiveness for `HighCrit`). This is a valid substitute causal
+isolation (the differential can only come from the one thing that changed),
+but it surfaces a real complication worth naming for the next porter:
+
+**Finding: a "total draws in the window" comparison can pick up a phantom
+next-decision's contribution, and that phantom decision is sensitive to
+whatever *else* varies between the twin fixtures (HP, in particular).**
+`docs/factory-ai-checkviability-ground-truth.md` §6 already established that
+turn 1's own AI decision is fully resolved *before* frame 0 is ever
+captured (unobservable directly), and that a trace's *last* button input
+still leaves the *next* turn's decision computed-but-unexecuted inside the
+observable window ("turn 2 is decided but never executed"). Both handlers
+below hit this: the reachable-branch fixture's total draws exceed the
+zero-branch fixture's by **more** than the handler's own single roll would
+predict (`Pursuit`: +2, not +1; `HighCrit`: +5/+6, not +1) — the extra comes
+from a phantom trailing decision (one further re-scoring of the same
+moveset, computed but never executed) landing inside the window too, and,
+for `HighCrit` specifically, from that phantom decision's sensitivity to
+target HP after turn 1's real (variable, 85-100%-roll) damage — see 11.2's
+own note. **Porter guidance:** when the dispatch move has real power, prefer
+comparing a `PP-consumed-bounded` window (fixed turn count, confirmed via
+the opponent's own PP delta, not a fixed frame count — turn cadence itself
+varies with message length, see 11.1) and treat the *shape* of the draw-count
+delta (present/stable vs. absent/stable) as the reliable signal, not the
+exact number, unless the target's post-hit HP band is also held constant
+between fixtures (11.2's own follow-up idea).
+
+### 11.1 `AI_CV_Pursuit` — fully staged, live-verified
+
+```
+AI_CV_Pursuit:                          (data/battle_ai_scripts.s:2018-2036)
+	is_first_turn_for AI_USER
+	if_not_equal 0, AI_CV_Pursuit_End   ; opponent's own isFirstTurn != 0 -> End, 0 draws
+	get_target_type1
+	if_equal TYPE_GHOST, AI_CV_Pursuit2
+	get_target_type1
+	if_equal TYPE_PSYCHIC, AI_CV_Pursuit2
+	get_target_type2
+	if_equal TYPE_GHOST, AI_CV_Pursuit2
+	get_target_type2
+	if_equal TYPE_PSYCHIC, AI_CV_Pursuit2
+	goto AI_CV_Pursuit_End              ; neither type matches -> End, 0 draws
+
+AI_CV_Pursuit2:
+	if_random_less_than 128, AI_CV_Pursuit_End  ; always draws once; ~50% no bonus
+	score +1
+AI_CV_Pursuit_End:
+	end
+```
+
+`is_first_turn_for` reads `gDisableStructs[battler].isFirstTurn`
+(`battle_ai_script_commands.c:2102-2113`), a per-battler counter set to `2`
+on send-out (`battle_main.c:3051`, `3220`, `3312`) and decremented by at
+most 1 per turn end whenever it's already nonzero
+(`TurnValuesCleanUp`, `battle_main.c:4875-4876`) — so it reads `2` during
+turn 1's decision, `1` during turn 2's, and `0` from turn 3 onward. The
+handler is gated on **the opponent's own** elapsed-turns counter, not the
+target's — the check has nothing to do with predicting a target switch
+despite Pursuit's real in-game purpose; it only cares that the opponent's
+current mon has been out for at least 2 full turns.
+
+**Design:** opponent moveset all 4 slots `MOVE_PURSUIT` (228, 40 power,
+`EFFECT_PURSUIT`, no CBM-table entry) — since all 4 are identical there is
+no pick to read (any tie-break is uninformative) and no other handler ever
+engages (Pursuit is the only dispatch-table move used in either fixture).
+Target uses `MOVE_SPLASH` (150) all 3 turns (irrelevant to the opponent's
+own precondition, never confounds). Two fixtures differ **only** in the
+target's species typing:
+
+- **Reach** (`tools/battle-lab/mechanic-factory-ai-cv-pursuit-ghost-reach-off.json`):
+  target = Wobbuffet (species 202, pure Psychic, base HP 190 — picked for
+  survivability headroom against 3 real Dark-typed hits at their 2x
+  weakness, not for any AI-relevant property). Opponent = Marowak (105,
+  pure Ground — no STAB on Pursuit's Dark type, kept out of the picture).
+- **Control** (`tools/battle-lab/mechanic-factory-ai-cv-pursuit-normal-control-off.json`):
+  same opponent, target = Miltank (241, pure Normal — decent bulk, no
+  special interaction with Dark) instead of Wobbuffet. Type is the only
+  changed precondition.
+
+**Multi-turn staging mechanic** (new finding this session, useful for any
+future multi-turn fixture): the very first button block in a trace dismisses
+the battle's own pre-fight intro/send-out messages and does **not** yet
+reach the FIGHT menu — a single-decision trace (§6's pattern) works because
+its second `A`-pair both opens FIGHT and selects the top move in one
+uninterrupted block, but a multi-turn trace needs **continuous** input
+throughout each turn's own message-print pacing (a single `[A,A,wait]` block
+per turn stalls partway through — confirmed by direct probing: a single
+`[A,A]` per turn advanced turns 1-3 but silently stalled turn 4 mid-message).
+The robust pattern used for both fixtures here: one initial `A` (intro
+dismiss) + `wait 30`, then continuous `[A(2 frames), wait(18 frames)]`
+reps (a 20-frame period) for as many frames as needed, followed by a
+silent tail. Turn cadence under this constant mash is **not** fixed —
+Pursuit-vs-Wobbuffet (super-effective, extra "It's super effective!" message)
+averaged ~450 frames/turn; Pursuit-vs-Miltank (neutral, no extra message)
+averaged ~340 frames/turn. Each fixture's own mash length was individually
+calibrated (confirmed via dense 20-frame-granularity sampling of the PP/HP
+trace) to cover **exactly 3 executed turns** — verified directly via the
+opponent's own total PP delta (3), not assumed from a shared frame budget.
+
+**Live ledger** (`tools/probe/verify-factory-ai-checkviability-ground-truth.ts`,
+frame 0 -> final, `stepsToReach` forward search over `sRandCount`'s implied
+LCG steps):
+
+| Fixture | Seed | PP used (turns) | Total `Random()` calls, frame 0->final | Determinism (2 runs) |
+| --- | -: | -: | -: | --- |
+| Reach (Ghost/Psychic) | 1 | 3 | **32** | identical |
+| Reach (Ghost/Psychic) | 99 | 3 | **32** | identical |
+| Control (Normal) | 1 | 3 | **30** | identical |
+| Control (Normal) | 99 | 3 | **30** | identical |
+
+Both fixtures individually cross-seed-stable (32/32, 30/30). The **+2**
+delta (not +1) matches 11.0's phantom-decision finding: within the 3-executed
+-turn window, both turn 3's own decision (which executes) and a computed
+-but-unexecuted turn 4 re-decision (per §6/11.0's established "next decision
+is baked in before its own turn's input" behavior) reach
+`AI_CV_Pursuit2`'s roll in the reach fixture (2 draws), neither in control (0)
+— consistent, reproducible, and matches the handler's per-reachable-decision
+draw count (`if_random_less_than` always draws exactly once when reached,
+regardless of outcome) exactly.
+
+### 11.2 `AI_CV_HighCrit` — fully staged, live-verified (with a caveat)
+
+```
+AI_CV_HighCrit:                         (data/battle_ai_scripts.s:1449-1461)
+	if_type_effectiveness AI_EFFECTIVENESS_x0_25, AI_CV_HighCrit_End
+	if_type_effectiveness AI_EFFECTIVENESS_x0_5, AI_CV_HighCrit_End
+	if_type_effectiveness AI_EFFECTIVENESS_x2, AI_CV_HighCrit2
+	if_type_effectiveness AI_EFFECTIVENESS_x4, AI_CV_HighCrit2
+	if_random_less_than 128, AI_CV_HighCrit_End   ; falls through here at 1x (neutral) too
+
+AI_CV_HighCrit2:
+	if_random_less_than 128, AI_CV_HighCrit_End
+	score +1
+AI_CV_HighCrit_End:
+	end
+```
+
+Real quirk confirmed by direct read (not previously documented): the four
+explicit checks only match `0.25x`/`0.5x`/`2x`/`4x` — **neutral (1x) and
+immune (0x) effectiveness both fall through the same "no match" path** into
+the first `if_random_less_than 128`, which is a **second, independent** 50%
+roll from the one inside `AI_CV_HighCrit2` (same threshold value, different
+call site — the handler always draws exactly once whenever it's reached at
+all, whether via the neutral fallthrough or the super-effective jump).
+
+**Design:** opponent all 4 slots `MOVE_SLASH` (163, 70 power,
+`EFFECT_HIGH_CRITICAL`, no CBM-table entry). Opponent = Marowak (105, pure
+Ground — no STAB on Slash's Normal type, avoids a STAB-shifted effectiveness
+threshold confound). Single turn only (state-independent precondition, same
+shape as §6's `SpeedDown` fixtures — no multi-turn build needed):
+
+- **Resisted** (`tools/battle-lab/mechanic-factory-ai-cv-highcrit-resisted-off.json`):
+  target = Onix (95, Rock/Ground — Rock resists Normal 0.5x) ->
+  deterministic zero-draw branch.
+- **Neutral** (`tools/battle-lab/mechanic-factory-ai-cv-highcrit-neutral-off.json`):
+  target = Dugtrio (51, pure Ground — no resistance or weakness to Normal)
+  -> reachable branch via the fallthrough path above.
+
+**Live ledger** (frame 0 -> 732, §6's own single-turn capture convention —
+`[A,wait30,A,wait700]`):
+
+| Fixture | Seed | PP used | Total `Random()` calls | Determinism (2 runs) |
+| --- | -: | -: | -: | --- |
+| Resisted (Onix, 0.5x) | 1 | 1 | **18** | identical |
+| Resisted (Onix, 0.5x) | 99 | 1 | **18** | identical |
+| Neutral (Dugtrio, 1x) | 1 | 1 | **23** | identical |
+| Neutral (Dugtrio, 1x) | 99 | 1 | **24** | identical |
+
+The resisted branch is unambiguous: stable at 18 across both seeds,
+confirming the deterministic-zero claim cleanly (same standard as every
+other zero-draw claim in this doc). The neutral branch is **not**
+cross-seed-stable (23 vs 24) — both individual values reproduce exactly on
+rerun (not noise in the harness), and both sit well above the resisted
+fixture's 18 (confirming the roll fires), but the residual 1-count spread
+is a real, reproducible finding, not measurement error. Root cause
+(diagnosed, not just observed): Dugtrio's much lower Defense than Onix's
+means turn 1 deals substantial, RNG-variable real damage (Onix: 110->102
+HP, ~7%; Dugtrio: 110->70/68 HP, ~36-38%, itself seed-dependent by 2 HP
+between the two banked seeds) — per 11.0's phantom-decision finding, the
+window also embeds one further computed-but-unexecuted re-decision, and
+*that* decision's own scoring (elsewhere in `AI_TryToFaint`/`AI_CheckBadMove`,
+not `AI_CV_HighCrit` itself — its own contribution is a fixed 1-draw-per-
+reachable-decision regardless of outcome) is sensitive to the post-turn-1 HP
+band, which differs by exactly the 2 HP the two seeds' damage rolls landed
+on. **Porter guidance**: a future exact-count claim for `AI_CV_HighCrit`
+should either restrict to a window with no phantom decision, or pick a
+neutral-effectiveness target with Onix-like bulk (minimal, near-constant
+turn-1 damage) to keep the phantom decision's own HP-dependent branches
+identical across seeds — swapping the Dugtrio target for a bulkier neutral
+mon (a Miltank-class target was tried mid-session and shifted the totals
+again, to 14/16 rather than converging on stability, indicating the
+sensitivity is to the *exact* HP band crossed rather than "high vs low
+damage" broadly, and needs a dedicated follow-up rather than a guess).
+
+### 11.3 `AI_CV_AlwaysHit` — analytical only (not staged this session)
+
+```
+AI_CV_AlwaysHit:                        (data/battle_ai_scripts.s:1075-1089)
+	if_stat_level_more_than AI_TARGET, STAT_EVASION, 10, AI_CV_AlwaysHit_ScoreUp1
+	if_stat_level_less_than AI_USER, STAT_ACC, 2, AI_CV_AlwaysHit_ScoreUp1
+	if_stat_level_more_than AI_TARGET, STAT_EVASION, 8, AI_CV_AlwaysHit2
+	if_stat_level_less_than AI_USER, STAT_ACC, 4, AI_CV_AlwaysHit2
+	goto AI_CV_AlwaysHit_End             ; neither gate -> End, 0 draws
+
+AI_CV_AlwaysHit_ScoreUp1:
+	score +1                             ; evasion stage 11-12 or user acc stage 0-1 -> deterministic +1, 0 draws
+AI_CV_AlwaysHit2:
+	if_random_less_than 100, AI_CV_AlwaysHit_End   ; evasion stage 9-10 or user acc stage 2-3 -> ~61% +1
+	score +1
+AI_CV_AlwaysHit_End:
+	end
+```
+
+Stat stages are stored 0-12 (6 = neutral). Both gates read stat *stages*, not
+raw values — never true at battle start, needs a prior real stat-changing
+move to land. Recipe (untested this session, all pieces verified
+individually against source/census):
+
+1. **Dispatch move**: `MOVE_SWIFT` (129, 60 power, `EFFECT_ALWAYS_HIT`, no
+   CBM-table entry) — all 4 opponent slots, same "no pick to read, use total
+   draws" design as §11.1/11.2 (checked: `EFFECT_ALWAYS_HIT`'s other 5 exec
+   moves — Faint Attack, Shadow Punch, Aerial Ace, Magical Leaf, Shock Wave —
+   are also all real-power, no 0-power option exists for a pick-based
+   design either).
+2. **Precondition build**: player (= `AI_TARGET`) uses `MOVE_DOUBLE_TEAM`
+   (104, `EFFECT_EVASION_UP`, `setstatchanger STAT_EVASION, 1, FALSE` per
+   move — raises the player's own evasion stage by exactly 1, always hits,
+   no accuracy check) on turns 1-3, raising evasion 6->7->8->9. Turn 4's
+   decision (evasion = 9, `> 8` but not `> 10`) reaches `AI_CV_AlwaysHit2`'s
+   random branch — the cheapest reachable-branch precondition of the two
+   (the `ScoreUp1` deterministic branch needs evasion stage > 10, i.e. 5
+   uses of Double Team, or user accuracy stage < 2, i.e. 5 accuracy-lowering
+   hits landed on the opponent — both a longer build than needed for the
+   random branch alone).
+3. **Damage-safety pick**: target species should be Ghost-typed (e.g.
+   Haunter, 93) — Normal-type `MOVE_SWIFT` cannot affect a Ghost target at
+   all (`MOVE_RESULT_DOESNT_AFFECT_FOE`, real type immunity — `EFFECT_ALWAYS_HIT`'s
+   accuracy-bypass does not bypass type immunity, matching real-game Swift
+   trivia), so the target takes **zero** damage across all 4 turns
+   regardless of how many are staged — removes the HP-band contamination
+   risk §11.2 just diagnosed, for free, before it can happen.
+4. **Control fixture**: same opponent/target/turn-count, target moveset
+   `MOVE_SPLASH` x4 instead of `MOVE_DOUBLE_TEAM` x4 (evasion stays neutral
+   throughout) — twin-fixture design identical to §11.1/11.2.
+5. Multi-turn mash mechanic: reuse §11.1's calibrated
+   `[A, wait 30, continuous [A(2), wait(18)]]` pattern, individually
+   calibrated per fixture via dense sampling to confirm exactly 4 executed
+   turns via PP delta before locking in a frame budget.
+
+Not staged this session: this needs a 4-turn build (one more turn than
+`AI_CV_Pursuit`'s 3) plus the same per-fixture cadence calibration, which
+didn't fit after the two staged handlers above. All of steps 1-4 are
+verified individually against source/census this session; only the actual
+oracle run + the two fixtures' JSON remain.
+
+### 11.4 `AI_CV_VitalThrow` — analytical only (not staged this session)
+
+```
+AI_CV_VitalThrow:                       (data/battle_ai_scripts.s:1536-1546)
+	if_target_faster AI_CV_VitalThrow_End        ; target(player) faster -> End, 0 draws
+	if_hp_more_than AI_USER, 60, AI_CV_VitalThrow_End   ; opponent's own HP% > 60 -> End, 0 draws
+	if_hp_less_than AI_USER, 40, AI_CV_VitalThrow2      ; opponent's own HP% < 40 -> skip straight to the cheap 1-roll path
+	if_random_less_than 180, AI_CV_VitalThrow_End       ; only reached at HP in [40,60]: ~70% End, else fall through
+AI_CV_VitalThrow2:
+	if_random_less_than 50, AI_CV_VitalThrow_End
+	score -1
+AI_CV_VitalThrow_End:
+	end
+```
+
+Two preconditions, both real state (no team-build shortcut): the opponent
+must be **at or slower than** the target (reuse entry 463's already-ported
+`getWhoStrikesFirst`/`effectiveSpeed` semantics via a large base-Speed gap,
+e.g. a Shuckle-class opponent vs. a Dugtrio-class target, same species
+pairing trick as §6) **and** the opponent's own HP must be ≤ 60% max —
+this is the hard part, since it needs the PLAYER to have already damaged the
+**opponent** by a known amount on a prior turn (nothing here is player-safe
+the way `AlwaysHit`'s Ghost-target trick was — the opponent must take real,
+sizeable, variable-roll damage). Recipe sketch (not verified against a live
+fixture this session):
+
+1. Turn 1: give the player (in the "opponent slower" role-swapped pairing)
+   a single high-power attack that reliably lands the opponent in the
+   ≤40% band in one hit (comfortably below 40%, not a knife-edge — the
+   `if_hp_less_than USER, 40` gate only needs a comfortable margin, not an
+   exact number, since undershooting further than 40% still routes through
+   the same cheap 1-roll `AI_CV_VitalThrow2` path). This needs the actual
+   Gen-3 damage formula worked out for a specific species/level/move choice
+   (attacker Attack stat, defender Defense stat, power, STAB, type
+   multiplier, 85-100% roll) to size the hit with enough headroom that even
+   a low damage roll still clears 40% remaining-HP, while the high end of
+   the roll doesn't risk a stray critical hit fainting the opponent outright
+   — tighter arithmetic than any of this session's three species picks
+   needed (all of which only needed "clearly survives" or "clearly
+   resisted," not a specific banded outcome).
+2. Turn 2: re-evaluate the same `MOVE_VITAL_THROW`-carrying (233, 70 power,
+   `EFFECT_VITAL_THROW`, priority -1 — irrelevant to `if_target_faster`,
+   which is priority-blind per entry 463) moveset; expect the
+   `AI_CV_VitalThrow2` roll (a clean 50/256 ≈ 19.5% chance of `score -1`,
+   else 0) to fire, 1 draw, matching the corrected count in §3/§5.
+3. Control fixture: opponent HP kept ≥60% (no turn-1 damage, e.g. player
+   uses `MOVE_SPLASH` turn 1 instead) — deterministic zero-draw branch,
+   single turn even (same shape as `HighCrit`'s resisted fixture, no
+   multi-turn build needed for this side of the pair).
+
+Not staged this session: needs the actual per-species damage-formula
+arithmetic worked out and verified live (the one genuinely new piece of
+analysis this handler needs beyond what §6/entry 463 already ported), which
+didn't fit alongside the other three handlers' work this session. This is
+consistent with §7's own assessment that VitalThrow's siblings (the
+CBM-blocked HP-gated handlers) are the more expensive builds in this
+handler set — recommend budgeting this one on its own.
+
+### 11.5 Verify script
+
+`tools/probe/verify-factory-ai-checkviability-ground-truth.ts` extended with
+a second scenario shape (`DRAW_COUNT_SCENARIOS`, `verifyDrawCountScenario`)
+alongside the existing pick-based one — asserts frame-0 determinism, exact
+PP-consumed (turn count), and exact per-seed total-draw count for all 4 new
+fixtures (§11.1's 2 + §11.2's 2), with cross-seed stability asserted for 3
+of the 4 and explicitly *not* asserted for `HighCrit`'s neutral fixture
+(§11.2's own documented finding). **Run twice this session, ALL PASS both
+times** (existing `SpeedDown` checks unchanged and still passing).
