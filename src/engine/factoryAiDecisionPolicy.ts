@@ -31,7 +31,7 @@ import {
   type FactoryAiTryToFaintDraw,
   type FactoryAiTryToFaintTarget,
 } from "./factoryAiTryToFaint.ts";
-import { runCheckViability } from "./factoryAiCheckViability.ts";
+import { runCheckViability, type FactoryAiCheckViabilityDraw } from "./factoryAiCheckViability.ts";
 
 const U16_MAX = 0xffff;
 const U32_MAX = 0xffff_ffff;
@@ -477,8 +477,9 @@ export type FactoryAiScoredBattlerView = Readonly<{
   defense: number;
   spAttack: number;
   spDefense: number;
+  speed: number;
   level: number;
-  statStages: Readonly<{ atk: number; def: number; spAtk: number; spDef: number }>;
+  statStages: Readonly<{ atk: number; def: number; spAtk: number; spDef: number; speed: number }>;
 }>;
 
 export type FactoryAiScoredTargetView = FactoryAiScoredBattlerView & Readonly<{
@@ -502,7 +503,8 @@ export type FactoryAiScoredView = Readonly<{
 
 export type FactoryAiScoredPhaseDraw =
   | (FactoryAiCheckBadMoveDraw & Readonly<{ phase: "check-bad-move"; moveSlot: BattleMoveSlot }>)
-  | (FactoryAiTryToFaintDraw & Readonly<{ phase: "try-to-faint"; moveSlot: BattleMoveSlot }>);
+  | (FactoryAiTryToFaintDraw & Readonly<{ phase: "try-to-faint"; moveSlot: BattleMoveSlot }>)
+  | (FactoryAiCheckViabilityDraw & Readonly<{ phase: "check-viability"; moveSlot: BattleMoveSlot }>);
 
 export type FactoryAiScoredDraw = FactoryAiRngDraw | FactoryAiScoredPhaseDraw;
 
@@ -689,6 +691,7 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     types: view.target.types,
     knownAbility: view.target.knownAbility,
     realAbility: view.target.ability,
+    speedStage: view.target.statStages.speed,
   });
 
   const executedScoringScripts: ("check-bad-move" | "try-to-faint" | "check-viability")[] = [
@@ -754,13 +757,23 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
       score += ttf.scoreDelta;
       tryToFaintDelta = ttf.scoreDelta;
 
-      const cv = runCheckViability({ rng, moveId });
+      const cv = runCheckViability({
+        rng,
+        moveId,
+        attacker: { speed: view.attacker.speed, speedStage: view.attacker.statStages.speed },
+        target: { speed: view.target.speed, speedStage: view.target.statStages.speed },
+        drawOrdinalStart: draws.length + 1,
+        reasonPrefix: `slot-${slot}-check-viability`,
+      });
       if (cv.kind === "unsupported-branch") {
         throw new Error(
           `Factory AI check-viability barrier: slot ${slot} move ${moveId} effect ${cv.effect}`,
         );
       }
       rng = cv.rng;
+      for (const draw of cv.draws) {
+        draws.push(Object.freeze({ ...draw, phase: "check-viability" as const, moveSlot }));
+      }
       score += cv.scoreDelta;
       checkViabilityDelta = cv.scoreDelta;
     }

@@ -20,21 +20,26 @@
  * Guard/Levitate), and the Soundproof nine-move list.
  *
  * `AI_CheckBadMove_CheckEffect`'s `if_effect` dispatch (`:104-214`, ~100
- * entries) is NOT implemented -- any move whose effect has an entry in that
- * table (whether it names an `AI_CBM_*` handler or jumps straight to a
- * `Score_Minus*` label like `EFFECT_TELEPORT`) halts with a named
- * `unsupported-branch` barrier, per the port-subset audit's item 6. A move
- * whose effect has NO entry falls through to the chain's trailing `end`
- * with zero score contribution -- that's a genuine, complete port of that
- * path, not a stub (none of the three banked ledgers' four moves reach a
- * table entry; confirmed by direct grep of `data/battle_ai_scripts.s`).
+ * entries) is otherwise NOT implemented -- any move whose effect has an
+ * entry in that table (whether it names an `AI_CBM_*` handler or jumps
+ * straight to a `Score_Minus*` label like `EFFECT_TELEPORT`) halts with a
+ * named `unsupported-branch` barrier, per the port-subset audit's item 6. A
+ * move whose effect has NO entry falls through to the chain's trailing
+ * `end` with zero score contribution -- that's a genuine, complete port of
+ * that path, not a stub (none of the three banked ledgers' four moves reach
+ * a table entry; confirmed by direct grep of `data/battle_ai_scripts.s`).
+ *
+ * One table entry IS ported: `EFFECT_SPEED_DOWN(_2)` -> `AI_CBM_SpeedDown`
+ * (`data/battle_ai_scripts.s:287-312`, `runCbmSpeedDown` below), the
+ * proven CBM+CV pair with `factoryAiCheckViability.ts`'s `AI_CV_SpeedDown`
+ * (`docs/factory-ai-checkviability-ground-truth.md` §6).
  */
 import movesData from "../data/gen/moves.json" with { type: "json" };
 import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
 import typeEffectivenessData from "../data/gen/type-effectiveness.json" with { type: "json" };
 import { advanceRngValue } from "./rng.ts";
 import type { BattleRngState } from "./battleDecisionBoundary.ts";
-import type { TypeEffectivenessEntry } from "./damageCalc.ts";
+import { MIN_STAT_STAGE, type TypeEffectivenessEntry } from "./damageCalc.ts";
 
 const U16_MAX = 0xffff;
 
@@ -140,6 +145,8 @@ export type FactoryAiCheckBadMoveTarget = Readonly<{
   knownAbility: string | null;
   /** The target's real, engine-known ability (trapper check reads this directly, not a guess). */
   realAbility: string;
+  /** Current SPEED stat stage (`gBattleMons[].statStages[STAT_SPEED]`), 0..12 -- `AI_CBM_SpeedDown`'s MIN_STAT_STAGE gate. */
+  speedStage: number;
 }>;
 
 export type FactoryAiCheckBadMoveDraw = Readonly<{
@@ -200,6 +207,66 @@ function nextGetAbilityDraw(
     guessedAbility,
   });
   return { rng: after, draw, ability: guessedAbility };
+}
+
+const ABILITY_SPEED_BOOST = "ABILITY_SPEED_BOOST";
+const ABILITY_CLEAR_BODY = "ABILITY_CLEAR_BODY";
+const ABILITY_WHITE_SMOKE = "ABILITY_WHITE_SMOKE";
+
+/**
+ * `check_ability AI_TARGET, ability` / `if_ability AI_TARGET, ability, ptr`
+ * (`Cmd_check_ability`, `battle_ai_script_commands.c:1407-1443`, AI_TARGET
+ * branch only -- no caller here needs AI_USER). Zero-RNG, unlike
+ * `get_ability`: a known (BattleHistory) or single-ability species compares
+ * exactly; a species with two distinct, unobserved abilities can NEVER
+ * register a match here regardless of which ability is asked about -- the
+ * source's own `abilityDummyVariable` trick collapses both outcomes
+ * (neither ability matches -> compares against ability slot 0 anyway, which
+ * by construction still doesn't match; one of the two matches -> forced to
+ * ABILITY_NONE, "unable to answer") to a non-match. A genuine source quirk,
+ * ported exactly rather than "simplified" to a coin flip.
+ */
+function checkAbilityAiTarget(target: FactoryAiCheckBadMoveTarget, wantedAbility: string): boolean {
+  if (TRAPPER_ABILITIES.has(target.realAbility)) {
+    return target.realAbility === wantedAbility;
+  }
+  if (target.knownAbility !== null) {
+    return target.knownAbility === wantedAbility;
+  }
+  const species = SPECIES_BY_ID.get(target.species);
+  if (!species) throw new Error(`factory-ai-check-bad-move: unknown species ${target.species}`);
+  const [ability0, ability1] = species.abilities;
+  if (ability1 === "ABILITY_NONE") {
+    return ability0 === wantedAbility;
+  }
+  return false;
+}
+
+/**
+ * `AI_CBM_SpeedDown` + the shared `CheckIfAbilityBlocksStatChange` tail
+ * (`data/battle_ai_scripts.s:287-312`). MIN_STAT_STAGE and Speed Boost are
+ * zero-RNG short-circuits (`if_stat_level_equal`/`if_ability`, the latter
+ * via `checkAbilityAiTarget` above -- distinct from `get_ability`'s
+ * guess-and-draw machinery); the shared tail's own `get_ability AI_TARGET`
+ * reuses `nextGetAbilityDraw` unchanged (same redraw-per-call machinery
+ * CheckBadMove's preamble already established for its own two call sites).
+ */
+function runCbmSpeedDown(
+  target: FactoryAiCheckBadMoveTarget,
+  rng: BattleRngState,
+  ordinal: number,
+  reason: string,
+): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckBadMoveDraw[]; scoreDelta: number }> {
+  if (target.speedStage === MIN_STAT_STAGE) {
+    return Object.freeze({ rng, draws: Object.freeze([]), scoreDelta: -10 });
+  }
+  if (checkAbilityAiTarget(target, ABILITY_SPEED_BOOST)) {
+    return Object.freeze({ rng, draws: Object.freeze([]), scoreDelta: -10 });
+  }
+  const result = nextGetAbilityDraw(rng, ordinal, reason, target);
+  const draws = result.draw ? [result.draw] : [];
+  const blocksChange = result.ability === ABILITY_CLEAR_BODY || result.ability === ABILITY_WHITE_SMOKE;
+  return Object.freeze({ rng: result.rng, draws: Object.freeze(draws), scoreDelta: blocksChange ? -10 : 0 });
 }
 
 export function typeMultiplierTenths(attackingType: string, defendingTypes: readonly [string, string]): number {
@@ -294,6 +361,19 @@ export function runCheckBadMovePreamble(input: Readonly<{
   }
   reachedCheckEffect = true;
   void reachedCheckEffect;
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_SPEED_DOWN(_2) -> AI_CBM_SpeedDown,
+  // the one handler this port implements out of the table's ~100 entries.
+  if (move.effect === "EFFECT_SPEED_DOWN" || move.effect === "EFFECT_SPEED_DOWN_2") {
+    const speedDown = runCbmSpeedDown(target, rng, ordinal, `${input.reasonPrefix}-speed-down`);
+    for (const draw of speedDown.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: speedDown.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: speedDown.scoreDelta,
+    });
+  }
 
   // AI_CheckBadMove_CheckEffect: source-complete if_effect table lookup.
   if (AI_CHECK_BAD_MOVE_TABLE_EFFECTS.has(move.effect)) {

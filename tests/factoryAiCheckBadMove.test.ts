@@ -9,6 +9,7 @@ const MAROWAK: FactoryAiCheckBadMoveTarget = Object.freeze({
   types: ["TYPE_GROUND", "TYPE_GROUND"] as const,
   knownAbility: null,
   realAbility: "ABILITY_ROCK_HEAD",
+  speedStage: 6, // DEFAULT_STAT_STAGE -- neutral, irrelevant to the effects this file exercises.
 });
 
 const MOVE_SURF = 57;
@@ -83,6 +84,7 @@ describe("AI_CheckBadMove universal preamble (docs/factory-ai-ground-truth.md §
       types: ["TYPE_ELECTRIC", "TYPE_ELECTRIC"],
       knownAbility: null,
       realAbility: "ABILITY_SHADOW_TAG",
+      speedStage: 6,
     };
     const result = run(MOVE_SURF, trapper);
     expect(result).toMatchObject({ kind: "scored" });
@@ -96,6 +98,7 @@ describe("AI_CheckBadMove universal preamble (docs/factory-ai-ground-truth.md §
       types: ["TYPE_GRASS", "TYPE_GRASS"], // non-immune to Electric, isolates the ability branch
       knownAbility: "ABILITY_VOLT_ABSORB",
       realAbility: "ABILITY_VOLT_ABSORB",
+      speedStage: 6,
     };
     const result = run(MOVE_THUNDERBOLT, knownVoltAbsorb);
     expect(result).toMatchObject({ kind: "scored", scoreDelta: -12 });
@@ -107,6 +110,7 @@ describe("AI_CheckBadMove universal preamble (docs/factory-ai-ground-truth.md §
       types: ["TYPE_GRASS", "TYPE_GRASS"],
       knownAbility: "ABILITY_WATER_ABSORB",
       realAbility: "ABILITY_WATER_ABSORB",
+      speedStage: 6,
     };
     const result = run(MOVE_THUNDERBOLT /* Electric, not Water */, knownWaterAbsorb);
     expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
@@ -120,6 +124,7 @@ describe("AI_CheckBadMove universal preamble (docs/factory-ai-ground-truth.md §
       types: ["TYPE_NORMAL", "TYPE_NORMAL"],
       knownAbility: "ABILITY_WONDER_GUARD",
       realAbility: "ABILITY_WONDER_GUARD",
+      speedStage: 6,
     };
     const result = run(MOVE_BODY_SLAM /* Normal vs Normal = 1x, not x2 */, wonderGuardTarget);
     expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
@@ -131,6 +136,7 @@ describe("AI_CheckBadMove universal preamble (docs/factory-ai-ground-truth.md §
       types: ["TYPE_NORMAL", "TYPE_NORMAL"],
       knownAbility: "ABILITY_SOUNDPROOF",
       realAbility: "ABILITY_SOUNDPROOF",
+      speedStage: 6,
     };
     const result = run(MOVE_SNORE, soundproofTarget);
     expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });

@@ -19,6 +19,7 @@ const NEUTRAL_STAGES = Object.freeze({
   def: DEFAULT_STAT_STAGE,
   spAtk: DEFAULT_STAT_STAGE,
   spDef: DEFAULT_STAT_STAGE,
+  speed: DEFAULT_STAT_STAGE,
 });
 
 // Representative (not live-RAM-probed) level-50 Alakazam/Marowak-shaped
@@ -34,12 +35,16 @@ const NEUTRAL_STAGES = Object.freeze({
 // BattleAI_SetupAIData runs for turn 2. This means TryToFaint's can-faint
 // branch, not the cannot-faint/most-powerful branch, is what actually
 // governs these 3 banked scenarios' real turn-2 decision.
+// Base speed 120/45 respectively -> representative (not oracle-exact) level-50
+// values via the standard stat formula, same "order of magnitude, not exact"
+// convention as the atk/def/spA/spD fields above.
 const ALAKAZAM = Object.freeze({
   types: ["TYPE_PSYCHIC", "TYPE_PSYCHIC"] as const,
   attack: 55,
   defense: 65,
   spAttack: 135,
   spDefense: 105,
+  speed: 140,
   level: 50,
   statStages: NEUTRAL_STAGES,
 });
@@ -52,6 +57,7 @@ function marowak(hp: number) {
     defense: 130,
     spAttack: 55,
     spDefense: 70,
+    speed: 65,
     level: 50,
     statStages: NEUTRAL_STAGES,
     hp,

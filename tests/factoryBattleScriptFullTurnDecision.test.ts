@@ -26,7 +26,7 @@ const MOVE_SURF = 57;
 const MOVE_ROCK_SLIDE = 157;
 const MOVE_BODY_SLAM = 34;
 const MOVE_THUNDERBOLT = 85;
-const NEUTRAL_STAGES = Object.freeze({ atk: 6, def: 6, spAtk: 6, spDef: 6 });
+const NEUTRAL_STAGES = Object.freeze({ atk: 6, def: 6, spAtk: 6, spDef: 6, speed: 6 });
 
 function aiTrainerConfig(): FactoryFullTurnConfig {
   return {
@@ -56,12 +56,12 @@ function aiTrainerView(playerHp: number): FactoryAiScoredView {
     moves: Object.freeze([MOVE_SURF, MOVE_ROCK_SLIDE, MOVE_BODY_SLAM, MOVE_THUNDERBOLT] as const),
     attacker: Object.freeze({
       types: ["TYPE_PSYCHIC", "TYPE_PSYCHIC"] as const,
-      attack: 55, defense: 65, spAttack: 135, spDefense: 105, level: 50, statStages: NEUTRAL_STAGES,
+      attack: 55, defense: 65, spAttack: 135, spDefense: 105, speed: 140, level: 50, statStages: NEUTRAL_STAGES,
     }),
     target: Object.freeze({
       species: 105,
       types: ["TYPE_GROUND", "TYPE_GROUND"] as const,
-      attack: 130, defense: 130, spAttack: 55, spDefense: 70, level: 50, statStages: NEUTRAL_STAGES,
+      attack: 130, defense: 130, spAttack: 55, spDefense: 70, speed: 65, level: 50, statStages: NEUTRAL_STAGES,
       hp: playerHp,
       ability: "ABILITY_ROCK_HEAD",
       knownAbility: null,
