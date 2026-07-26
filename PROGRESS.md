@@ -4,6 +4,118 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 457 — Factory-AI move-selection port complete: `AI_TryToFaint` + `AI_CheckViability` ported, mask 1/7 dispatch wired through `submitFactoryAiDecision`
+
+- **State:** tree green at **217 test files / 2565 tests** (+3 test files
+  this step's own additions — `factoryAiTryToFaint.test.ts` (10),
+  `factoryAiCheckViability.test.ts` (6), `factoryAiScoredDecision.test.ts`
+  (8); the file/test-count gap vs entry 456's stated 212/2521 baseline also
+  includes two lane merges (`worker/animation-…`, `worker/side-…`) that
+  landed between entry 456 and this session, not just this step's work),
+  build green, ratchet unchanged (6/6 — CBM/TTF/CV barriers are
+  discriminated-union returns, same non-`unsupportedBranch()`-call-site
+  shape entry 455's own CBM module already established, so this pin isn't
+  touched). Two per-rung commits (365a86a, 761069a), both green.
+- **Did, per the work-item order:**
+  1. **`AI_TryToFaint`** (`src/engine/factoryAiTryToFaint.ts`): reuses
+     `damageCalc.ts`'s `calculateBaseDamage`/`applyStab`/
+     `applyTypeEffectiveness` directly (crit forced ×1, variance = the
+     per-slot setup `simulatedRNG` value, never a second formula) for both
+     `if_can_faint`'s single-move estimate and
+     `get_how_powerful_move_is`'s real cross-moveset "most powerful"
+     comparison (source-verified `MOVE_MOST_POWERFUL`/`_NOT_MOST_POWERFUL`/
+     `_POWER_OTHER` three-way classification, reusing CBM's own
+     `sIgnoredPowerfulMoveEffects` set). Can-faint branch: +4 ordinary /
+     +6 Quick Attack (both `score +2` and the `score +4` fallthrough fire)
+     / +0 Explosion. Cannot-faint branch: -1 if out-damaged by a moveset
+     sibling, then the one real draw — `if_random_less_than 80` gating a
+     +2 for an exactly-x4-effective candidate (source's inverted-branch
+     semantics ported exactly: the roll **succeeding** `<80` *skips* the
+     bonus; ported `Cmd_if_type_effectiveness`'s own 40-baseline/
+     STAB-remap quirk for the x4 classification, not a real damage
+     re-estimate). 10 new Tier-1 tests via direct construction, including
+     a hand-verified LCG seed pair (1→succeeds/+2, 4→fails/+0) proving both
+     directions of the inverted branch.
+  2. **`AI_CheckViability`** (`src/engine/factoryAiCheckViability.ts`):
+     source-complete `if_effect` table, same shape as CBM's own (122
+     `if_effect` lines / 90 unique `AI_CV_*` handlers, parsed directly from
+     `data/battle_ai_scripts.s:652-2615`) — no entry → genuine zero
+     contribution; an entry → named `"factory-ai-check-viability"`
+     unsupported-branch barrier. No handler bodies ported this round (per
+     the audit's explicit scope). 6 new tests: barrier + pass-through, two
+     independent effects each.
+  3. **Mask dispatch** (`factoryAiDecisionPolicy.ts`):
+     `chooseFactoryAiScoredDecision`/`submitFactoryAiScoredDecision` (mask
+     1 = CBM only, mask 7 = CBM+TTF+CV, same setup/tie draw shape as the
+     untouched mask-0 policy) plus a top-level `submitFactoryAiDecision`
+     dispatcher that reads `selectFactoryAiMask` and routes band 0-1 to the
+     existing, unmodified `submitFactoryAiMaskZeroDecision`. A slot whose
+     script hits a named barrier throws loudly (can't compute a score for
+     that slot) instead of silently mis-scoring.
+  4. **Tier-1** (`tests/factoryAiScoredDecision.test.ts`, 8 tests):
+     mask-1 pinned by direct construction (Surf/RockSlide/BodySlam 3-way
+     tie at 100 — CBM alone never rewards a merely-better type multiplier,
+     confirming the audit's own §2 "mask-1 shape: NO" prediction).
+     **All three banked mask-7 scenarios reproduce their exact policy draw
+     ledger** — 11/11/13 (setup 4 + CBM `get_ability` 6/6/8 + tie 1) —
+     starting each fixture's real, live-verified frame-100 `rngValue`
+     (seed 1: unambiguous/tie both `249678687`, degenerate `2291141473`)
+     advanced by the 8 documented pre-decision LCG steps (opponent's
+     turn-1 hit-chain tail + player's 4-roll Pound chain + `BattleTurnPassed`
+     + switch-AI's 2-roll pre-check, per the newest ground-truth doc
+     section) — that 8-step offset is applied **only** by the test layer as
+     a raw `advanceRngValue` shim, per this step's restated acceptance;
+     switch-AI semantics itself is not ported anywhere in `src/`.
+  - **Item 5 (`factoryBattleScriptFullTurnDecision.ts` integration) not
+    started** — items 1-4 alone consumed the full session (see Notes);
+    correctly deferred per the brief's own "do not start past ~45 min"
+    guard rather than landing something rushed.
+- **A genuinely new finding this session, beyond the ground-truth doc's own
+  prose (found via a live oracle probe, not paper tracing):** the doc's §2.2
+  narrative ("Surf wins cleanly") implicitly assumes turn 2's decision runs
+  against a **full-HP** Marowak. It doesn't — probing
+  `mechanic-factory-ai-unambiguous-off.json`'s frame 732 (`player.hp`) shows
+  Marowak at **5/135 HP** by the time turn 2's `BattleAI_SetupAIData` runs
+  (turn 1's own 2x Surf hit, ~130 damage, already landed). At 5 HP, Surf/
+  Rock Slide/Body Slam can **all** faint the target — `AI_TryToFaint`'s
+  can-faint +4 branch governs all three identically, producing a genuine
+  **3-way tie**, not a clean "Surf is strongest" win via the
+  cannot-faint/most-powerful branch the doc's prose describes. This doesn't
+  contradict any pinned number (turn 2's actual pick was never directly
+  observable in these fixtures — only its roll *count* is, which this
+  session's 11/11/13 reproduction matches exactly) but it does mean the
+  audit's own §2 "CheckBadMove+TryToFaint: YES, for both pick and roll
+  count" claim is unverified for the *pick* half specifically. The Tier-1
+  reproduction test uses **representative, not live-RAM-probed**
+  Alakazam/Marowak stat magnitudes (real base stats, level-50-scaled, not
+  exact oracle numbers) — the 3-way-tie outcome is robust to this
+  imprecision (any real attack in this matchup clears 5 HP by a wide
+  margin) but is not a byte-exact numeric match against oracle RAM.
+- **Next:** item 5 (one integration test wiring
+  `chooseFactoryAiScoredDecision`/`submitFactoryAiDecision` through
+  `factoryBattleScriptFullTurnDecision.ts` for the trainer side); if
+  pursued, a live RAM stat probe for Alakazam/Marowak's exact level-50
+  stats would upgrade the mask-7 scenario tests from "representative" to
+  byte-exact-verified; `AI_CV_*` handler bodies (16 reachable today, 90 at
+  full registration — explicitly out of this step's scope, its own phased
+  body of work per the audit's §3); CBM's own named-`AI_CBM_*`-handler
+  barrier sizing (how many of the 122 executable moves hit one) is still
+  unsized, flagged by entry 455, still unsized here.
+- **Notes:** no presentation/census/opcode-registration changes (pure
+  policy work, as scoped). PAPERCUT: none logged this session — the
+  newest ground-truth doc section (caller-attribution probe) made the RNG
+  model fully load-bearing and citable, which is exactly what made items
+  1-4 tractable in one session despite their combined size.
+  **Entry 455's roll-count gap: RESOLVED** — see
+  `docs/factory-ai-ground-truth.md`'s 2026-07-25 instrumented
+  caller-attribution section; the true AI-decision draw count is 13/13/15
+  (not 15/15/17), the 2-roll delta was `Cmd_seteffectwithchance`'s
+  opponent-tail instance + `BattleTurnPassed`'s `gRandomTurnNumber` draw,
+  both decision-independent. This session's own port targets the
+  13/13/15 figure minus switch-AI's 2 (11/11/13 policy-only draws, switch-
+  AI modeled as a test-layer LCG offset, not ported).
+
+---
 ## 456 — Screens/weather setters + `DoFieldEndTurnEffects` field loop registered (slices 1/2/3/5 of `docs/screens-weather-ground-truth.md` §6); Rain/Sun field case (slice 4) explicitly deferred
 
 - **State:** tree green at **212 files / 2521 tests** (+2 files/+31 tests
@@ -201,99 +313,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   turned out to be entangled in the same observed RNG window — cost the
   whole session, ~50+ minutes on this one sub-question with only a partial
   close.
-
----
-## 454 — Presentation-seam retirement, window 2: `turn1-rockslide.json` re-driven from kernel events, still 256/256 (ISSUES #39/#41 path)
-
-- **State:** tree green at **209 files / 2477 tests** (+2 files/+12 tests
-  over entry 453's 207/2465), build green, ratchet green (6/6, allowlist
-  unchanged — see Notes for why). Oracle re-verified live, before AND after:
-  `turn1-rockslide.json` **256/256** (recorded count, unchanged),
-  `turn5-faint.json` **110/110** (prior conversion unregressed). Full
-  regression sweep (27 traces: all 4 `turn1-*`, the prior checkpoint's own
-  23-trace `turn3-6` set) — every one matches its own recorded count, zero
-  regressions.
-- **Did, per `docs/presentation-seam-scout.md` §8's own ordered plan:**
-  - **Pre-work (named gap, retired by proof not new code):** the scout's
-    "stat-stage-change has zero production emission sites" claim
-    (§7.1/§7.2/§8.3) turned out to be about test coverage, not code —
-    `battleScriptStatBuffs.ts:296-303` already constructs the event on every
-    `ChangeStatBuffs` "worked" outcome, and both routes
-    (`battleScriptStatbuffchangeOpcode.ts:112-116`,
-    `battleScriptHitChainOpcode.ts:2131-2135`) already thread it through; no
-    test had ever driven a real move through the production opcode registry
-    and asserted `.events`. Added that proof in
-    `tests/battleScriptStatbuffchangeOpcode.test.ts`: DOUBLE_TEAM
-    (EFFECT_EVASION_UP, self-target — `target === attacker` picks
-    `STRINGID_DEFENDERSSTATROSE`, a genuinely different branch than the
-    existing Swords Dance case's `STRINGID_ATTACKERSSTATROSE`) staged from
-    `BattleScript_EffectEvasionUp` through `BattleScript_MoveEnd`, asserting
-    the `stat-stage-change` event and the message id. Corrected
-    `turn1RockSlidePresentationStaging.test.ts`'s stale framing to match.
-  - **Window conversion (§8.5 steps 1-3):** (1) `battleStringResolver.ts`
-    gained `resolveMoveNameExclaim` (move id → `"{name}!"`,
-    `STRINGID_USEDMOVE`'s own `{B_BUFF2}` — source-confirmed all 5
-    `sText_ExclamationMark*` grammar variants are the literal English `"!"`,
-    `battle_message.c:420-424`/`2907-2921`, so the move-specific grammar
-    table is not port-worthy). (2) `presentationEventWindowBridge.ts` gained
-    `resolveRockSlidePresentationWindowContent`, keyed on
-    `provenance.sourceLabel` (`BattleScript_HitFromAtkString`/
-    `BattleScript_HitFromAtkAnimation`) instead of the
-    `turn2Resolved`..`sm.cursor` dispatch cascade (untouched, same "don't
-    redesign the cascade" discipline turn5-faint's own precedent set). (3)
-    `turn1RockSlidePresentationStaging.ts` now exports
-    `resolveTurn1RockSlideAttackLines`/`resolveTurn1DoubleTeamKickoffLines`/
-    `resolveTurn1RockSlideHpEndpoints`; **found and fixed turn 1's own real
-    RNG seed** (`battle1-turn1-ram-dump.json`'s `rngLedger[0].fromValue`,
-    3485459011 — brute-forced against all 7 ledger checkpoint values, live-
-    verified: staging this seed consumes exactly 4 RNG calls ending at
-    rngValue 3326091607, byte-identical to the ledger's own 4th-entry
-    `toValue`, and computes Grovyle's HP as 143→101, byte-identical to
-    `before_turn`/`after_turn.battler1.hp`) — replacing the scout's own
-    borrowed seed (which gave a different, merely-plausible 143→97 roll).
-    `battleScene.ts`'s `drawRockSlideWindow`/`drawRockSlideAttack` now source
-    `TURN_KICKOFF_LINE1/2`+`ROCK_SLIDE_LINE1/2`'s text and the HP-bar's
-    `from`/`to` endpoints from these resolvers (module-load-time constants,
-    same pattern as `TURN5_FAINTED_LINE1/2`) instead of the hardcoded
-    literals/RAM-dump reads — verified byte-identical to the prior hardcoded
-    values before wiring. `STAT_ROSE_LINE1/2` stays a hardcoded literal this
-    pass (per §8.5 step 3's own narrowing — converting it would need a
-    *second* staged DOUBLE_TEAM hit chain merged into the same window's
-    bridge, out of scope); `drawTurnEndSettledMenu` (a separate function,
-    not named in scope, sharing the same two RAM-dump reads) was also left
-    unconverted, flagged as an easy follow-up.
-- **Next:** the next presentation window in the retirement path (ISSUES
-  #39/#41), or `STAT_ROSE_LINE1/2`'s own conversion (needs a staged
-  DOUBLE_TEAM hit chain merged into the ROCK_SLIDE window's bridge) as a
-  narrower follow-up; `drawTurnEndSettledMenu`'s matching RAM-dump reads;
-  kernel breadth resuming past S10 step (iv) per ROADMAP.
-- **Notes:** ratchet allowlist **unchanged, deliberately** —
-  `battle1-turn1-ram-dump.json`'s import in `battleScene.ts` remains needed:
-  `anchorOpponentBattler.hp`/`anchorOpponentAfterTurnHp` are still read by
-  several OTHER windows (the healthbox-harvest baseline, turn 2-5's own
-  `dragonBreathGrovyleHp`/`drawEndeavorSquish`, and `drawTurnEndSettledMenu`
-  above) — this step retired 2 of that import's many read-sites, not the
-  import itself, so ISSUES #41 is not trimmed this pass (its own claim,
-  read at import granularity, remains exactly true) and #39's file-wide
-  architecture claim is likewise unchanged (one more window's content is
-  event-driven; the turn-keyed dispatch cascade itself is untouched, same as
-  the turn5-faint precedent). No new opcodes/registrations, no census
-  regen (emission plumbing already existed; nothing newly executable).
-  PAPERCUT: none this session. Also fixed a pre-existing PROGRESS.md
-  formatting slip (entry 452 was missing its own `## 452` header) while
-  archiving entry 451.
-- **Supervisor fold (2026-07-25 ~19:00), same session:** merged two side
-  scouts on top of this entry's landing: (1) the ISSUES #44 census fix —
-  `SET_MOVE_EFFECT_SUPPORTED_BYTES` now mechanically derived from the
-  engine dispatch (drift-guard proven to fire), census **57→65 effects,
-  122→144 moves, 92→111 Factory-L50** (1099→1416 weighted), 25 ground-truth
-  checks pass, #44 entry deleted per the pruning rule; (2) the Factory-AI
-  port-subset audit appended to `docs/factory-ai-ground-truth.md` —
-  mask-per-band pinned (0-1→0, 2-3→1, 4-7→7; all three banked fixtures ran
-  mask 7), CheckBadMove+TryToFaint proven to reproduce all three banked
-  ledgers exactly (CheckViability contributes zero to them — the doc's old
-  `AI_CV_Paralyze` claim corrected; supervisor re-verified the
-  `EFFECT_PARALYZE_HIT`-has-no-`if_effect`-entry claim against
-  `data/battle_ai_scripts.s` directly), and the 16-of-90 reachable
-  `AI_CV_*` handler table banked for the phased port.
 

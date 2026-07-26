@@ -1,4 +1,99 @@
 ---
+## 454 — Presentation-seam retirement, window 2: `turn1-rockslide.json` re-driven from kernel events, still 256/256 (ISSUES #39/#41 path)
+
+- **State:** tree green at **209 files / 2477 tests** (+2 files/+12 tests
+  over entry 453's 207/2465), build green, ratchet green (6/6, allowlist
+  unchanged — see Notes for why). Oracle re-verified live, before AND after:
+  `turn1-rockslide.json` **256/256** (recorded count, unchanged),
+  `turn5-faint.json` **110/110** (prior conversion unregressed). Full
+  regression sweep (27 traces: all 4 `turn1-*`, the prior checkpoint's own
+  23-trace `turn3-6` set) — every one matches its own recorded count, zero
+  regressions.
+- **Did, per `docs/presentation-seam-scout.md` §8's own ordered plan:**
+  - **Pre-work (named gap, retired by proof not new code):** the scout's
+    "stat-stage-change has zero production emission sites" claim
+    (§7.1/§7.2/§8.3) turned out to be about test coverage, not code —
+    `battleScriptStatBuffs.ts:296-303` already constructs the event on every
+    `ChangeStatBuffs` "worked" outcome, and both routes
+    (`battleScriptStatbuffchangeOpcode.ts:112-116`,
+    `battleScriptHitChainOpcode.ts:2131-2135`) already thread it through; no
+    test had ever driven a real move through the production opcode registry
+    and asserted `.events`. Added that proof in
+    `tests/battleScriptStatbuffchangeOpcode.test.ts`: DOUBLE_TEAM
+    (EFFECT_EVASION_UP, self-target — `target === attacker` picks
+    `STRINGID_DEFENDERSSTATROSE`, a genuinely different branch than the
+    existing Swords Dance case's `STRINGID_ATTACKERSSTATROSE`) staged from
+    `BattleScript_EffectEvasionUp` through `BattleScript_MoveEnd`, asserting
+    the `stat-stage-change` event and the message id. Corrected
+    `turn1RockSlidePresentationStaging.test.ts`'s stale framing to match.
+  - **Window conversion (§8.5 steps 1-3):** (1) `battleStringResolver.ts`
+    gained `resolveMoveNameExclaim` (move id → `"{name}!"`,
+    `STRINGID_USEDMOVE`'s own `{B_BUFF2}` — source-confirmed all 5
+    `sText_ExclamationMark*` grammar variants are the literal English `"!"`,
+    `battle_message.c:420-424`/`2907-2921`, so the move-specific grammar
+    table is not port-worthy). (2) `presentationEventWindowBridge.ts` gained
+    `resolveRockSlidePresentationWindowContent`, keyed on
+    `provenance.sourceLabel` (`BattleScript_HitFromAtkString`/
+    `BattleScript_HitFromAtkAnimation`) instead of the
+    `turn2Resolved`..`sm.cursor` dispatch cascade (untouched, same "don't
+    redesign the cascade" discipline turn5-faint's own precedent set). (3)
+    `turn1RockSlidePresentationStaging.ts` now exports
+    `resolveTurn1RockSlideAttackLines`/`resolveTurn1DoubleTeamKickoffLines`/
+    `resolveTurn1RockSlideHpEndpoints`; **found and fixed turn 1's own real
+    RNG seed** (`battle1-turn1-ram-dump.json`'s `rngLedger[0].fromValue`,
+    3485459011 — brute-forced against all 7 ledger checkpoint values, live-
+    verified: staging this seed consumes exactly 4 RNG calls ending at
+    rngValue 3326091607, byte-identical to the ledger's own 4th-entry
+    `toValue`, and computes Grovyle's HP as 143→101, byte-identical to
+    `before_turn`/`after_turn.battler1.hp`) — replacing the scout's own
+    borrowed seed (which gave a different, merely-plausible 143→97 roll).
+    `battleScene.ts`'s `drawRockSlideWindow`/`drawRockSlideAttack` now source
+    `TURN_KICKOFF_LINE1/2`+`ROCK_SLIDE_LINE1/2`'s text and the HP-bar's
+    `from`/`to` endpoints from these resolvers (module-load-time constants,
+    same pattern as `TURN5_FAINTED_LINE1/2`) instead of the hardcoded
+    literals/RAM-dump reads — verified byte-identical to the prior hardcoded
+    values before wiring. `STAT_ROSE_LINE1/2` stays a hardcoded literal this
+    pass (per §8.5 step 3's own narrowing — converting it would need a
+    *second* staged DOUBLE_TEAM hit chain merged into the same window's
+    bridge, out of scope); `drawTurnEndSettledMenu` (a separate function,
+    not named in scope, sharing the same two RAM-dump reads) was also left
+    unconverted, flagged as an easy follow-up.
+- **Next:** the next presentation window in the retirement path (ISSUES
+  #39/#41), or `STAT_ROSE_LINE1/2`'s own conversion (needs a staged
+  DOUBLE_TEAM hit chain merged into the ROCK_SLIDE window's bridge) as a
+  narrower follow-up; `drawTurnEndSettledMenu`'s matching RAM-dump reads;
+  kernel breadth resuming past S10 step (iv) per ROADMAP.
+- **Notes:** ratchet allowlist **unchanged, deliberately** —
+  `battle1-turn1-ram-dump.json`'s import in `battleScene.ts` remains needed:
+  `anchorOpponentBattler.hp`/`anchorOpponentAfterTurnHp` are still read by
+  several OTHER windows (the healthbox-harvest baseline, turn 2-5's own
+  `dragonBreathGrovyleHp`/`drawEndeavorSquish`, and `drawTurnEndSettledMenu`
+  above) — this step retired 2 of that import's many read-sites, not the
+  import itself, so ISSUES #41 is not trimmed this pass (its own claim,
+  read at import granularity, remains exactly true) and #39's file-wide
+  architecture claim is likewise unchanged (one more window's content is
+  event-driven; the turn-keyed dispatch cascade itself is untouched, same as
+  the turn5-faint precedent). No new opcodes/registrations, no census
+  regen (emission plumbing already existed; nothing newly executable).
+  PAPERCUT: none this session. Also fixed a pre-existing PROGRESS.md
+  formatting slip (entry 452 was missing its own `## 452` header) while
+  archiving entry 451.
+- **Supervisor fold (2026-07-25 ~19:00), same session:** merged two side
+  scouts on top of this entry's landing: (1) the ISSUES #44 census fix —
+  `SET_MOVE_EFFECT_SUPPORTED_BYTES` now mechanically derived from the
+  engine dispatch (drift-guard proven to fire), census **57→65 effects,
+  122→144 moves, 92→111 Factory-L50** (1099→1416 weighted), 25 ground-truth
+  checks pass, #44 entry deleted per the pruning rule; (2) the Factory-AI
+  port-subset audit appended to `docs/factory-ai-ground-truth.md` —
+  mask-per-band pinned (0-1→0, 2-3→1, 4-7→7; all three banked fixtures ran
+  mask 7), CheckBadMove+TryToFaint proven to reproduce all three banked
+  ledgers exactly (CheckViability contributes zero to them — the doc's old
+  `AI_CV_Paralyze` claim corrected; supervisor re-verified the
+  `EFFECT_PARALYZE_HIT`-has-no-`if_effect`-entry claim against
+  `data/battle_ai_scripts.s` directly), and the 16-of-90 reachable
+  `AI_CV_*` handler table banked for the phased port.
+
+---
 ## 453 — MOVE_EFFECT_CONFUSION (7) and MOVE_EFFECT_FLINCH (8) registered in SetMoveEffect's dispatch — zero new opcodes, census +4 effects/+17 moves
 
 - **State:** tree green at **207 files / 2465 tests** (+0 files/+16 tests
