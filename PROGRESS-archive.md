@@ -1,4 +1,121 @@
 ---
+## 458 — Rain/Sun F7/F9 landed (item 1, committed); `TRYCASTFORMDATACHANGE` (item 2) STOPPED per the brief's own condition — Castform reachability confirmed real, not hypothetical
+
+- **State:** tree green at **217 files / 2568 tests** (+0 files/+3 tests
+  over entry 457's 217/2565 — this step only added tests to two existing
+  files), build green, ratchet unchanged (6/6 — the widened PLAYANIMATION
+  handler keeps the same 2 `unsupportedBranch()` call sites it had before,
+  just with a wider recognized-animType map ahead of them). Committed as
+  one rung (`7085324`). `verify-screens-weather-ground-truth.ts`
+  reconfirmed live after landing: **29/29 PASS**.
+- **Item 1 — done, per the brief's own two work items:**
+  1. **Widened `Cmd_playanimation`** (`battleScriptStatbuffchangeOpcode.ts`)
+     beyond its `B_ANIM_STATS_CHANGE` arm to also recognize
+     `B_ANIM_RAIN_CONTINUES`/`B_ANIM_SUN_CONTINUES` (source
+     `battle_script_commands.c:4004-4043`'s branch 3 — reached because this
+     engine never sets `HITMARKER_NO_ANIMATIONS` anywhere in production, a
+     tension `docs/battle-move-anim-notes.md`/`battle-turn-notes.md` already
+     flag and leave unresolved without settling it here; branch 3 bypasses
+     the semi-invulnerable skip, same shape the sibling `PLAYANIMATION_VAR`
+     handler already established for Sandstorm/Hail). Confirmed via
+     `battle-script-program.json`'s own parsed operands that both call sites
+     encode `arg=NULL` (not `sB_ANIM_ARG1` — a real, cited difference from
+     the STATS_CHANGE arm), so the barrier's arg-check is now keyed per
+     animType rather than a single fixed expression.
+  2. **Wired `ENDTURN_RAIN`/`ENDTURN_SUN`** (F7/F9) in
+     `runDoFieldEndTurnEffects` (`battleEndTurnOrchestration.ts`), same
+     decrement/tick-script shape as the already-landed Sandstorm/Hail cases.
+     Rain is genuinely different in shape from Sandstorm/Hail: one shared
+     label (`BattleScript_RainContinuesOrEnds`) branching internally on a
+     `cMULTISTRING_CHOOSER` byte (`B_MSG_RAIN_CONTINUES`/`_STOPPED` —
+     `B_MSG_DOWNPOUR_CONTINUES` is source-marked `// unused`,
+     `include/constants/battle.h:233`, and confirmed dead: no opcode this
+     engine registers or plans to ever sets `B_WEATHER_RAIN_DOWNPOUR`).
+     Sun uses two separate fixed-string labels
+     (`SunlightContinues`/`SunlightFaded`), no chooser at all. Two small gaps
+     the doc's own "zero new opcodes" claim didn't surface until actually
+     wiring it: the `gRainContinuesStringIds` PRINTFROMTABLE table wasn't in
+     the registered set yet (added to `battleScriptHitChainOpcode.ts`), and
+     `B_MSG_RAIN_STOPPED` wasn't a resolvable named jumpifbyte comparand yet
+     (added to `battleScriptSetByte.ts`'s shared `ATOMIC_VALUES`).
+  - **Tier-1** (`battleScriptScreensWeatherOrchestration.test.ts`,
+    `battleScriptStatbuffchangeOpcode.test.ts`): full Rain lifecycle (set →
+    4 continues ticks, chooser pinned to `RAIN_CONTINUES` each tick → expiry
+    tick, chooser flips to `RAIN_STOPPED`, weather clears → re-set
+    succeeds) and full Sun lifecycle (same shape via the two-label path),
+    both asserting zero `Random()` draws throughout; two direct unit tests
+    confirming the widened PLAYANIMATION call sites now emit real
+    `RAIN_CONTINUES`/`SUN_CONTINUES` animation events instead of halting.
+- **Item 2 — STOPPED, not implemented, per the brief's own explicit
+  condition ("If Castform IS somehow reachable, stop and report rather than
+  half-porting the form-change table"):**
+  - **Reachability check performed first, as instructed — result:
+    Castform IS reachable**, contradicting entry 456's own hedge ("since
+    Castform isn't a Frontier rental"). `src/data/gen/battle-frontier-mons.json`
+    contains **2 real rental entries** (`FRONTIER_MON_CASTFORM_1` index 204,
+    `FRONTIER_MON_CASTFORM_2` index 309, out of the full 882-entry catalog)
+    — verified by parsing the JSON directly, not grep-count alone.
+  - **This isn't a rare/defensive edge case — it's the common path
+    whenever it applies.** `species_info.h:10883`:
+    `.abilities = {ABILITY_FORECAST, ABILITY_NONE}` — Castform's *only*
+    ability slot is Forecast (slot 2 empty), so every real Castform rental
+    always has it. `CastformDataTypeChange` (`battle_util.c:2396-2429`)
+    early-returns 0 only if `species != SPECIES_CASTFORM || ability !=
+    ABILITY_FORECAST || hp == 0` — none of which can be true for a live
+    Castform rental — so `BattleScript_WeatherFormChanges`'s loop
+    (`data/battle_scripts_1.s:3999-4005`, walking `sBATTLER` 0..
+    `gBattlersCount-1`, called from `BattleScript_MoveWeatherChange` and the
+    ability-switch-in scripts at `:3962/3990/4055`, **not** from the
+    end-turn continues scripts — confirmed by grepping every
+    `call BattleScript_WeatherFormChanges` site) hits a genuine nonzero
+    `form` value — `BattleScriptPushCursorAndCallback(BattleScript_
+    CastformChange)` plus the real `SET_BATTLER_TYPE` table — every single
+    time a weather-setting move is used while a Castform rental is one of
+    the two active battlers (either side). A barrier here would not be
+    dead defensive code; it would legitimately gate a real, drafted
+    matchup, which is exactly the scenario brief's own OUT-OF-SCOPE line
+    anticipated ("behind the (b) barrier unless reachability forces
+    otherwise") and asked to escalate rather than decide solo.
+  - **No `src/` change made for this item.** Per the brief, this is a
+    report, not a half-port.
+- **Item 3 (census) — regenerated, byte-identical to entry 456's baseline
+  (confirms the prediction failure to materialize, cleanly):**
+  **69/214 effects, 148/355 moves, 114/276 Factory-L50 (unweighted),
+  1462/2957 weighted — zero change** from entry 456's own baseline (same
+  numbers), `git diff docs/executable-frontier-census.md` empty.
+  **The predicted flip (entry 456's own — "the four weather-setter effects
+  flip executable once this opcode lands") did NOT materialize**, because
+  item 2 (the one opcode gating it) was correctly not registered this
+  session. **Still-gating barrier, named exactly:** `B_SCR_OP_
+  TRYCASTFORMDATACHANGE` remains entirely unregistered (no dispatch entry
+  at all — this is a static-reachability census, so runtime barrier depth
+  doesn't matter, only presence), so `EFFECT_SANDSTORM`/`RAIN_DANCE`/
+  `SUNNY_DAY`/`HAIL`'s own setter scripts still cannot reach `end` (they
+  hang at `call BattleScript_WeatherFormChanges` → the missing opcode).
+  Item 1 landing F7/F9 does not touch this gate at all (F7/F9 is the
+  end-turn *continuation*, a wholly separate script from the *setting*
+  move's own `BattleScript_MoveWeatherChange` tail) — the zero-flip result
+  was expected going in, not a surprise found after the fact.
+- **Next:** `B_SCR_OP_TRYCASTFORMDATACHANGE` needs a supervisor decision,
+  not another worker guess: (a) accept a real, live (not merely defensive)
+  `(b)` barrier for "a Castform battler is present" — meaning the four
+  weather-setter effects would flip in the census (the no-Castform path is
+  the vast majority of real matchups) but any battle that actually drafts
+  Castform would legitimately barrier on its own weather-setting turn; or
+  (b) scope in Castform's actual form/type-change table now (a materially
+  bigger, separate piece of work — `SET_BATTLER_TYPE`, the four-form table,
+  interaction with `AbilityBattleEffects`'s other `CastformDataTypeChange`
+  call sites at `battle_util.c:2567/2588/2960`, likely its own sprite/
+  species-data dependency check). Either path is a real, boundable next
+  rung once chosen. `ENDTURN_ABILITIES`/`ITEMS`, Ingrain/Leech Seed/Wrap,
+  and Factory-AI's `AI_CV_*` handler bodies remain untouched, as scoped.
+- **Notes:** no presentation/`battleScene` edits. PAPERCUT: none logged —
+  the doc's own live-verified operand dumps
+  (`src/data/gen/battle-script-program.json`) made confirming the `arg=NULL`
+  vs `sB_ANIM_ARG1` distinction and the exact `jumpifbyte`/`printfromtable`
+  gaps fast and citation-backed rather than guessed.
+
+---
 ## 457 — Factory-AI move-selection port complete: `AI_TryToFaint` + `AI_CheckViability` ported, mask 1/7 dispatch wired through `submitFactoryAiDecision`
 
 - **State:** tree green at **217 test files / 2565 tests** (+3 test files
