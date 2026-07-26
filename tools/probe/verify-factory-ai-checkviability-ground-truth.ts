@@ -444,6 +444,40 @@ const DRAW_COUNT_SCENARIOS: DrawCountScenarioSpec[] = [
     expectedTotalSteps: { 1: 7, 99: 7 },
     checkCrossSeedStable: true,
   },
+  // AI_CV_SpDefDown (data/battle_ai_scripts.s:1186-1196, doc §16): the third
+  // CBM-blocked handler pair to get live ground truth (AI_CBM_SpDefDown +
+  // AI_CV_SpDefDown). Byte-for-byte the same control-flow shape as
+  // AI_CV_DefenseDown (STAT_DEF swapped for STAT_SPDEF) -- reuses §15's
+  // entire Anorith(opponent)/Machamp(target) fixture design verbatim, only
+  // the opponent's dispatch move changes (MOVE_FAKE_TEARS, 313,
+  // EFFECT_SPECIAL_DEFENSE_DOWN_2, 0 power, accuracy 100 -- picked over
+  // MOVE_METAL_SOUND's 85 accuracy to avoid a new miss-chance confound;
+  // EFFECT_SPECIAL_DEFENSE_DOWN itself is source-commented "unused", zero
+  // moves anywhere use it). Numerically identical ledger to DefenseDown's
+  // (13/13 reach, 7/7 control) is expected: same gate structure, same
+  // 0-power/100-accuracy dispatch move, same damage sizing. Attribution
+  // probe (window 0 732) confirms the same clean +6 = +4
+  // Cmd_if_random_less_than / +1 Cmd_adjustnormaldamage / +1
+  // Cmd_seteffectwithchance split, zero Cmd_get_ability or Cmd_critcalc
+  // contamination in either fixture.
+  {
+    label:
+      "AI_CV_SpDefDown, opponent (AI_USER, Anorith) HP hit to <70% by a real turn-1 move -- reachable branch (data/battle_ai_scripts.s:1186-1196): if_hp_less_than USER,70 (Gate A) routes straight to the :1190 if_random_less_than 50 draw site, which fires once per identical MOVE_FAKE_TEARS slot on the phantom next-turn re-decision",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-spdefdown-lowhp-reach-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 13, 99: 13 },
+    checkCrossSeedStable: true,
+  },
+  {
+    label:
+      "AI_CV_SpDefDown, opponent (AI_USER, Anorith) HP stays 100% -- control (same opponent/species/turn count, player uses MOVE_SPLASH instead of MOVE_VITAL_THROW turn 1): Gate A (if_hp_less_than USER,70) is false and Gate B (target SPDEF stage > 3, default 6) is true, routing straight to AI_CV_SpDefDown3 before the :1190 roll is ever reached, deterministic zero draws from the handler itself",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-spdefdown-fullhp-control-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 7, 99: 7 },
+    checkCrossSeedStable: true,
+  },
 ];
 
 function totalPpUsed(ppBefore: number[], ppAfter: number[]): number {

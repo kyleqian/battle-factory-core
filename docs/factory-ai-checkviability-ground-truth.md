@@ -1639,3 +1639,136 @@ session, ALL PASS both times.** DefenseDown's own Gate B path (target DEF
 stage already ≤3) remains unstaged — not needed for this pair's isolation
 (Gate A alone suffices, cheaper than `AttackDown`'s own 2-turn Gate-A-stage
 recipe) and out of this session's scope.
+
+## 16. 2026-07-26 addendum #6: `AI_CBM_SpDefDown` + `AI_CV_SpDefDown` — third CBM-blocked pair, fully staged and live-verified
+
+Stretch goal per this step's brief, landed in the same session as §15.
+`AI_CV_SpDefDown` (`data/battle_ai_scripts.s:1186-1196`) is byte-for-byte the
+same control-flow shape as `AI_CV_DefenseDown` (§15.1) with `STAT_DEF`
+swapped for `STAT_SPDEF`, and `AI_CBM_SpDefDown` (`:296-298`) is the same
+shape as `AI_CBM_DefenseDown` (no direct `get_ability` call, `goto`s straight
+to the shared `CheckIfAbilityBlocksStatChange` tail) — so this pair reuses
+§15's entire fixture design verbatim, substituting only the dispatch move.
+
+### 16.1 Both real bodies, cited and fully parsed
+
+```
+AI_CBM_SpDefDown:                       (data/battle_ai_scripts.s:296-298)
+	if_stat_level_equal AI_TARGET, STAT_SPDEF, MIN_STAT_STAGE, Score_Minus10  ; target SPDEF stage == 0 -> -10, end
+	goto CheckIfAbilityBlocksStatChange
+
+CheckIfAbilityBlocksStatChange:         (data/battle_ai_scripts.s:308-312, shared tail)
+	get_ability AI_TARGET                                                     ; DRAW SITE (conditional, §14.2/§15.1)
+	if_equal ABILITY_CLEAR_BODY, Score_Minus10
+	if_equal ABILITY_WHITE_SMOKE, Score_Minus10
+	end                                                                        ; neither -> 0, end
+```
+
+Zero `if_random_less_than` instructions, identical shape to
+`AI_CBM_DefenseDown` (§15.1) — the only difference is the stat constant
+being compared (`STAT_SPDEF` vs `STAT_DEF`).
+
+```
+AI_CV_SpDefDown:                        (data/battle_ai_scripts.s:1186-1196)
+	if_hp_less_than AI_USER, 70, AI_CV_SpDefDown2                     ; :1187 Gate A (opponent's OWN hp)
+	if_stat_level_more_than AI_TARGET, STAT_SPDEF, 3, AI_CV_SpDefDown3  ; :1188 Gate B (only reached if Gate A false)
+AI_CV_SpDefDown2:
+	if_random_less_than 50, AI_CV_SpDefDown3                          ; :1190 DRAW SITE
+	score -2
+AI_CV_SpDefDown3:
+	if_hp_more_than AI_TARGET, 70, AI_CV_SpDefDown_End                ; :1193 Gate C (target's OWN hp)
+	score -2
+AI_CV_SpDefDown_End:
+	end
+```
+
+Exactly **1** `if_random_less_than` site (`:1190`), matching §3/§5's corrected
+count — identical gate structure to `AI_CV_DefenseDown` (§15.1), `STAT_DEF`
+swapped for `STAT_SPDEF`. All three of §15.1's gate/draw-site semantics carry
+over unchanged (Gate A: opponent's own HP < 70% reaches the draw site
+unconditionally; Gate B: target's SPDEF stage > 3, true by default, skips
+the draw site when Gate A is false; Gate C: target's own HP > 70%, orthogonal
+deterministic fallthrough).
+
+### 16.2 Design: same twin-fixture recipe as §15, dispatch move swapped for a `EFFECT_SPECIAL_DEFENSE_DOWN_2` move
+
+`EFFECT_SPECIAL_DEFENSE_DOWN` (`include/constants/battle_move_effects.h:26`)
+is commented `// unused` in source — **zero moves anywhere in the game** use
+it, so `AI_CV_SpDefDown`'s reachable-move count (2, per §5's table) comes
+entirely from `EFFECT_SPECIAL_DEFENSE_DOWN_2` (`MOVE_FAKE_TEARS` id 313,
+`MOVE_METAL_SOUND` id 319, `src/data/battle_moves.h:4071-4082,4149-4160`).
+`MOVE_METAL_SOUND` has accuracy 85 (a real miss chance, unlike every move
+this session's other fixtures used); `MOVE_FAKE_TEARS` has accuracy 100
+(`.effect = EFFECT_SPECIAL_DEFENSE_DOWN_2, .power = 0, .accuracy = 100`) —
+chosen for the opponent's dispatch move specifically to avoid introducing a
+new miss-chance-driven cross-seed instability risk (the kind §11.2's
+`HighCrit` neutral fixture already surfaced from a different source), keeping
+this pair's isolation as clean as §15's.
+
+Opponent (`AI_USER`, under test, both fixtures): **Anorith** (species 390,
+identical to §15.2 — Battle Armor blocks `Cmd_critcalc`'s `Random()` call
+entirely), all 4 slots `MOVE_FAKE_TEARS` (313, Dark, 0 power, accuracy 100,
+`EFFECT_SPECIAL_DEFENSE_DOWN_2`, CBM-table-covered).
+
+Target (player, both fixtures): **Machamp** (species 68, identical to §15.2
+— single assignable ability, Guts, collapsing the `get_ability` confound to
+zero). Turn-1 damage reuse identical to §15.2: reach fixture's player uses
+`MOVE_VITAL_THROW` (233) x4 (same sized hit, same 15-28%-remaining band,
+comfortably under 70%); control fixture's player uses `MOVE_SPLASH` (150) x4
+(Anorith's HP never moves). Same single-turn capture shape
+(`[A, wait 30, A, wait 700]`, `captureFrames [0,100,300,732]`).
+
+- **Reach** (`tools/battle-lab/mechanic-factory-ai-cv-spdefdown-lowhp-reach-off.json`)
+- **Control** (`tools/battle-lab/mechanic-factory-ai-cv-spdefdown-fullhp-control-off.json`)
+
+### 16.3 Live ledger (oracle-verified, both seeds, both runs)
+
+| Fixture | Seed | Opponent PP used | Opponent HP (start→end) | Total `Random()` calls, frame 0→732 | Determinism (2 runs) |
+| --- | -: | -: | --- | -: | --- |
+| Reach (lowhp) | 1 | 1 | 120→22 (18%) | **13** | identical |
+| Reach (lowhp) | 99 | 1 | 120→30 (25%) | **13** | identical |
+| Control (fullhp) | 1 | 1 | 120→120 (100%) | **7** | identical |
+| Control (fullhp) | 99 | 1 | 120→120 (100%) | **7** | identical |
+
+Numerically identical to §15.3's `DefenseDown` ledger — expected, since
+`MOVE_FAKE_TEARS` and `MOVE_LEER` are both 0-power/100-accuracy status moves
+and the two handlers are structurally identical. Both fixtures individually
+cross-seed-stable (13/13, 7/7).
+
+**Attribution** (`tools/probe/attribute-factory-ai-random-callers.py`, window
+`0 732`, run via `tools/run-mgba-probe.py`, seed 1): the **+6** delta splits
+identically to §15.3:
+
+| Caller function | Reach count | Control count | Delta |
+| --- | -: | -: | -: |
+| `BattleAI_SetupAIData+0x83` | 4 | 4 | 0 |
+| `BattleTurnPassed+0x157` | 1 | 1 | 0 |
+| `ChooseMoveOrAction_Singles+0xf7` | 1 | 1 | 0 |
+| `Cmd_accuracycheck+0x305` | 1 | 1 | 0 |
+| `Cmd_if_random_less_than+0x7` | **4** | **0** | **+4** |
+| `Cmd_adjustnormaldamage+0x7` | 1 | 0 | +1 |
+| `Cmd_seteffectwithchance+0x81` | 1 | 0 | +1 |
+
+Same clean isolation as `DefenseDown`: `Cmd_get_ability` and `Cmd_critcalc`
+appear in neither fixture's table (Machamp's single ability, Anorith's
+Battle Armor, and Anorith's own 0-power dispatch move all cancel the same
+three confounds §15.3 already named). `Cmd_if_random_less_than`'s +4 is
+`AI_CV_SpDefDown`'s own `:1190` roll, once per identical `MOVE_FAKE_TEARS`
+slot on the phantom next-turn re-decision.
+
+### 16.4 What this unblocks
+
+Same as §15.4 — a full instruction-level ground-truth for `AI_CBM_SpDefDown`
++ `AI_CV_SpDefDown`, plus a **third** independent confirmation (after
+`AttackDown` and `DefenseDown`) that the "N identical slots × 1 reachable
+decision = N draws" mechanism holds regardless of which specific gate shape
+or stat the handler reads — three structurally distinct CBM-blocked pairs
+(target-stat-stage-gated, opponent-HP-gated ×2) all reduce to the same
+attribution pattern once isolated correctly.
+
+### 16.5 Verify script status
+
+`tools/probe/verify-factory-ai-checkviability-ground-truth.ts` extended this
+session with `AI_CV_SpDefDown`'s 2 fixtures (§16.2/§16.3) — every prior
+scenario (§9, §11.5, §12.1, §13.4, §14.6, §15.5) unchanged and still green.
+**Run twice this session, ALL PASS both times.**
