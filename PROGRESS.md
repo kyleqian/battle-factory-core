@@ -12,6 +12,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 469 — Sixth CheckViability handler pair ported: AI_CBM_AttackDown + AI_CV_AttackDown, the first CBM-blocked pair (entry 468's own "Next" item, per doc §14)
 
+- **Side merge (same round, supervisor-verified ALL PASS live on the merged
+  tree):** doc **§15 `AI_CBM_DefenseDown`+`AI_CV_DefenseDown`** and **§16
+  `AI_CBM_SpDefDown`+`AI_CV_SpDefDown`** ground truth banked (branch
+  `worker/side-20260726-110057`, merged, worktree removed) — twin fixtures
+  reusing §13's Anorith/Machamp pairing verbatim (both CV draw sites are
+  `if_hp_less_than AI_USER,70`-gated, VitalThrow's shape, so no new damage
+  sizing); ledgers 13/13 reach vs 7/7 control per pair, both seeds ×2,
+  +4 delta cleanly attributed to `Cmd_if_random_less_than`. Premise
+  falsified from source (worker, supervisor re-verified against the raw
+  assembly): §7's "target HP ≤ 70%" prose for DefenseDown/SpDefDown was an
+  `AI_USER`/`AI_TARGET` mixup — the roll is gated by the opponent's OWN HP;
+  target HP only gates the separate deterministic −2 (Gate C). 10-fixture →
+  13-fixture verify script ALL PASS ×2 (worker) + once more by the
+  supervisor from the worktree. Merged tree: **221 files / 2781 tests +
+  build green.** Next porter picks up §15/§16 the way this entry consumed
+  §14.
+
 - **State:** tree green at **221 files / 2781 tests** (+0 files/+30 tests
   over entry 468's merged 221/2751), build green (`tsc -b && vite build`).
   Ratchet unchanged (6/6, `executableFrontierRatchet.test.ts` — the
