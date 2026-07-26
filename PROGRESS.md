@@ -13,6 +13,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ---
 ## 474 — Fixed-damage + TYPECALC2 cluster registered: EFFECT_LEVEL_DAMAGE/EFFECT_PSYWAVE/EFFECT_BRICK_BREAK all executable (`docs/fixed-damage-cluster-ground-truth.md`'s (a)-portable subset, fully executed this session; Counter/Mirror Coat stay blocked per the doc's own data-model finding)
 
+- **Side merge (same round, supervisor-verified ALL PASS live from the
+  worktree + green on the merged tree):** doc **§18 `AI_CBM_DefenseUp` +
+  `AI_CV_DefenseUp`** ground truth banked (branch `worker/side-20260726-132350`,
+  merged, worktree removed) — bodies re-parsed from raw assembly incl.
+  `AI_CBM_BulkUp` (:581-584, trivial); **prose premise falsified live**:
+  DefenseUp's Gate C is INVERTED vs AttackUp's (`if_hp_less_than USER,70` —
+  HP==100% guarantees an extra draw rather than a clean stop). Last-used-move
+  dependency solved without a 2-turn trace: `gLastMoves` resets to
+  MOVE_NONE whose power==0 shares Gate E's code path with a real 0-power
+  move, and `MOVEEND_UPDATE_LAST_MOVES` sets the player's move before the
+  same window's phantom decision — so a fixed-damage player move both sets
+  the HP band AND the last-move gate. 3 fixtures (Vital Throw/Seismic
+  Toss/Dragon Rage flip), both seeds ×2; the physical-route fixtures show a
+  0-vs-6/5 `Cmd_if_random_less_than` presence/absence flip (NOT the usual
+  4-per-slot pattern — flagged honestly for the porter, not guessed).
+  DRAW SITE 1 (2-turn stat build) and the genuine-empty-history case remain
+  recipe-only, stated explicitly. 18-fixture verify script ALL PASS ×2
+  (worker) + once by the supervisor. Merged tree: **225 files / 2905 tests
+  + build green.**
+
 - **State:** tree green at **225 files / 2905 tests** (+0 files/+22 tests
   over entry 473's 225/2883 — widened `battleScriptHitChainOpcode.test.ts`
   and `battleScriptScreensWeatherOrchestration.test.ts` in place, no new
