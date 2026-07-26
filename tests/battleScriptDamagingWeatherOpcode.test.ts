@@ -8,7 +8,7 @@ import {
   type BattleScriptStatusRulesExternalPorts,
 } from "../src/engine/battleScriptRulesContext.ts";
 import { loadBattleScriptProgram } from "../src/engine/battleScriptProgram.ts";
-import { stepBattleScriptMachine } from "../src/engine/battleScriptMachine.ts";
+import { runBattleScriptMachine, stepBattleScriptMachine } from "../src/engine/battleScriptMachine.ts";
 import { createBattleScriptDamagingWeatherOpcodeHandlers } from "../src/engine/battleScriptDamagingWeatherOpcode.ts";
 
 const program = loadBattleScriptProgram();
@@ -211,6 +211,7 @@ describe("production damaging-weather opcode dispatch (screens/weather registrat
 
   describe("Cmd_addbyte -- modeled site vs. barrier", () => {
     const pc = findPc("B_SCR_OP_ADDBYTE", "BattleScript_DamagingWeatherLoopIncrement");
+    const sBattlerPc = findPc("B_SCR_OP_ADDBYTE", "BattleScript_WeatherFormChangesLoop");
     const barrierPc = findPc("B_SCR_OP_ADDBYTE", "BattleScript_DoTripleKickAttack");
 
     it("(pass-through) increments gBattleCommunication by 1", () => {
@@ -220,7 +221,14 @@ describe("production damaging-weather opcode dispatch (screens/weather registrat
       expect(result.state.rulesContext.battleCommunication0).toBe(3);
     });
 
-    it("(unsupported-branch) barriers on an unmodeled addbyte operand (Triple Kick's own counter)", () => {
+    it("(pass-through, shared-universe widening) increments sBATTLER by 1 (BattleScript_WeatherFormChangesLoop)", () => {
+      const rc = context({ scriptingBattler: 0 });
+      const { result } = stepAtProgramCounter(sBattlerPc, rc);
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.rulesContext.scriptingBattler).toBe(1);
+    });
+
+    it("(unsupported-branch) barriers on an unmodeled addbyte operand (Triple Kick's own counter, delta 10 isn't a resolvable literal)", () => {
       const { result } = stepAtProgramCounter(barrierPc, context());
       expect(result.kind).toBe("halted");
       if (result.kind !== "halted") throw new Error("expected halted");
@@ -250,7 +258,8 @@ describe("production damaging-weather opcode dispatch (screens/weather registrat
 
   describe("Cmd_jumpifarraynotequal (jumpifbytenotequal alias) -- modeled site vs. barrier", () => {
     const pc = findPc("B_SCR_OP_JUMPIFARRAYNOTEQUAL", "BattleScript_DamagingWeatherLoopIncrement");
-    const barrierPc = findPc("B_SCR_OP_JUMPIFARRAYNOTEQUAL", "BattleScript_PerishSongLoopIncrement");
+    const sBattlerPc = findPc("B_SCR_OP_JUMPIFARRAYNOTEQUAL", "BattleScript_WeatherFormChangesLoop");
+    const barrierPc = findPc("B_SCR_OP_JUMPIFARRAYNOTEQUAL", "BattleScript_GhostCurse");
 
     it("(pass-through) jumps to the loop start while gBattleCommunication != gBattlersCount", () => {
       const rc = context({ battleCommunication0: 1, battleTopology: { battlersCount: 2, battleTypeFlags: (1 << 3) | (1 << 19), battlerPositions: [0, 1, 2, 3] } });
@@ -266,11 +275,78 @@ describe("production damaging-weather opcode dispatch (screens/weather registrat
       expect(result.state.programCounter).toBe(pc + 1);
     });
 
-    it("(unsupported-branch) barriers on an unmodeled compare pair (Perish Song's own loop counter)", () => {
+    it("(pass-through, shared-universe widening) jumps to the loop start while sBATTLER != gBattlersCount (BattleScript_WeatherFormChangesLoop, also Perish Song's own loop counter)", () => {
+      const rc = context({ scriptingBattler: 0, battleTopology: { battlersCount: 2, battleTypeFlags: (1 << 3) | (1 << 19), battlerPositions: [0, 1, 2, 3] } });
+      const { result } = stepAtProgramCounter(sBattlerPc, rc);
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.programCounter).not.toBe(sBattlerPc + 1);
+    });
+
+    it("(pass-through, shared-universe widening) advances (falls through) once sBATTLER == gBattlersCount", () => {
+      const rc = context({ scriptingBattler: 2, battleTopology: { battlersCount: 2, battleTypeFlags: (1 << 3) | (1 << 19), battlerPositions: [0, 1, 2, 3] } });
+      const { result } = stepAtProgramCounter(sBattlerPc, rc);
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.programCounter).toBe(sBattlerPc + 1);
+    });
+
+    it("(unsupported-branch) barriers on an unmodeled compare pair (Ghost Curse's gBattlerAttacker/gBattlerTarget compare)", () => {
       const { result } = stepAtProgramCounter(barrierPc, context());
       expect(result.kind).toBe("halted");
       if (result.kind !== "halted") throw new Error("expected halted");
       expect(result.state.haltReason?.kind).toBe("unsupported-branch");
+    });
+  });
+
+  describe("BattleScript_WeatherFormChanges -- runtime weather-form loop (PROGRESS 460's named unblock)", () => {
+    function runWeatherFormChanges(rc: BattleScriptRulesContext, budget = 20) {
+      const execution = createBattleScriptStatusRulesExecution(program, "BattleScript_WeatherFormChanges", rc, 1, externalPorts());
+      return runBattleScriptMachine(program, execution.state, execution.handlers, budget);
+    }
+
+    it("runs the complete loop to the script's own end (return, no caller) for a non-Castform Level 50 singles matchup, zero Random() draws, weather set throughout", () => {
+      const B_WEATHER_SANDSTORM_TEMPORARY = 1 << 3;
+      const rc = context({
+        weather: B_WEATHER_SANDSTORM_TEMPORARY,
+        scriptingBattler: 0,
+        battleTopology: { battlersCount: 2, battleTypeFlags: (1 << 3) | (1 << 19), battlerPositions: [0, 1, 2, 3] },
+      });
+      const result = runWeatherFormChanges(rc);
+      expect(result.kind).toBe("halted");
+      if (result.kind !== "halted") throw new Error("expected halted");
+      // BattleScript_WeatherFormChanges is a `call`ed subroutine (`return` at its
+      // end) -- entered directly here with an empty call stack, its own `return`
+      // therefore halts as return-stack-underflow, the exact proof it reached
+      // data/battle_scripts_1.s:4005, not an earlier barrier.
+      expect(result.state.haltReason).toEqual(
+        Object.freeze({ kind: "return-stack-underflow", programCounter: result.state.programCounter }),
+      );
+      expect(result.state.rng.calls).toBe(0);
+      expect(result.state.rulesContext.scriptingBattler).toBe(2); // sBATTLER == gBattlersCount at loop exit
+      expect(result.state.rulesContext.weather).toBe(B_WEATHER_SANDSTORM_TEMPORARY); // untouched by this loop
+    });
+
+    it("(pass-through) with a live Forecast Castform fielded at battler 1, the loop still halts at the named trycastformdatachange barrier -- reached THROUGH the loop's own battler-0 iteration, not directly", () => {
+      const B_WEATHER_SUN = (1 << 5) | (1 << 6);
+      const rc = context({
+        weather: B_WEATHER_SUN,
+        scriptingBattler: 0,
+        battlers: [
+          battler({ side: 0 }),
+          battler({ side: 1, species: 385, ability: 59, hp: 100, types: ["TYPE_NORMAL", "TYPE_NORMAL"] }), // Castform/Forecast
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+        battleTopology: { battlersCount: 2, battleTypeFlags: (1 << 3) | (1 << 19), battlerPositions: [0, 1, 2, 3] },
+      });
+      const result = runWeatherFormChanges(rc);
+      expect(result.kind).toBe("halted");
+      if (result.kind !== "halted") throw new Error("expected halted");
+      expect(result.state.haltReason?.kind).toBe("unsupported-branch");
+      expect((result.state.haltReason as { opcodeName?: string }).opcodeName).toBe("B_SCR_OP_TRYCASTFORMDATACHANGE");
+      // The barrier fires for battler 1 -- proof addbyte/jumpifbytenotequal
+      // already advanced sBATTLER past battler 0's own (non-Castform) iteration.
+      expect(result.state.rulesContext.scriptingBattler).toBe(1);
+      expect(result.state.rng.calls).toBe(0);
     });
   });
 
