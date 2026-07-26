@@ -1,4 +1,114 @@
 ---
+## 464 — EFFECT_ENDEAVOR registered: SETDAMAGETOHEALTHDIFFERENCE/BICBYTE/ADJUSTSETDAMAGE (entry 463's side-merge blocker, seam-scout §9.2)
+
+- **State:** tree green at **220 files / 2654 tests** (+0 files/+20 tests
+  over entry 463's merged 220/2634), build green. Ratchet:
+  `battleScriptHitChainOpcode.ts` 23→24 (one new named barrier — see below);
+  `battleScriptIngrainLeechSeedWrapOpcode.ts` stays pinned at 3 (widened, not
+  narrowed — same single COPYARRAY call site now accepts a second tuple).
+  Three commits (`4758e8c` registration+tests, `0dbdd73` census), all green.
+  Census live-regenerated: **76/214→79/214 effects, 160/355→163/355 moves,
+  125/276→128/276 F-L50 unweighted, 1567→1573 weighted** (25/25 self-checks
+  pass, `docs/executable-frontier-census.md`).
+- **Did:** ported the seam-scout doc's own three named opcodes
+  (`docs/presentation-seam-scout.md` §9.2), then followed where the full
+  script actually led (two more real gaps surfaced only by running
+  `BattleScript_EffectEndeavor` end to end — not guessed in advance):
+  1. **`Cmd_setdamagetohealthdifference`** (`battle_script_commands.c:9366-9377`,
+     `battleScriptHitChainOpcode.ts`): source-complete, zero barriers.
+     `gBattleMoveDamage = target.hp - attacker.hp`; fails (jumps to
+     `BattleScript_ButItFailed`) when `attacker.hp >= target.hp`.
+  2. **`Cmd_bicbyte`** (`:3889-3894`, new `createBattleScriptBicbyteCommandHandlers`
+     in `battleScriptSetByte.ts`): all 11 concrete call sites share one
+     pointer (`gMoveResultFlags`) and one of three literal masks — every one
+     resolves, so this registers **source-completely** via registration-time
+     validation (a hard `throw`, not a runtime barrier), the same style
+     `Cmd_setbyte`'s own registration already uses. Zero rejected.
+  3. **`Cmd_adjustsetdamage`** (`:5861-5899`, `battleScriptHitChainOpcode.ts`):
+     the False Swipe/Endure clamp family, ported like the existing
+     `adjustnormaldamageOpcodeHandler` minus its random multiplier. One new
+     named (b) barrier — `HOLD_EFFECT_FOCUS_BAND`, the exact same
+     `gSpecialStatuses[].focusBanded` gap `adjustnormaldamage` already
+     carries, duplicated onto this sibling opcode (a distinct call site, so
+     +1 to the file's pinned count, not a narrowing).
+  4. **Two more real gaps, found only by driving the full script, both
+     closed:** `jumpifmovehadnoeffect`'s own `MOVE_RESULT_NO_EFFECT`
+     comparand (a `jumpifbyte` macro expansion) was outside the shared
+     SETBYTE value universe — added (`battleScriptSetByte.ts`), which also
+     resolves 8 *other* pre-existing call sites for free (AbsorbUpdateHp,
+     DreamEaterWorked, DoMultiHit, EffectOHKO, EffectParalyze, FuryCutterHit,
+     ...). `Cmd_copyarray` (`battleScriptIngrainLeechSeedWrapOpcode.ts`) was
+     narrowed to only `LeechSeedTurnDrain`'s own
+     `gBattleMoveDamage<-gHpDealt` tuple — widened to also accept Endeavor's
+     own reverse pair (`gHpDealt<-gBattleMoveDamage` right after
+     `setdamagetohealthdifference`, then `gBattleMoveDamage<-gHpDealt` again
+     after typecalc/bicbyte): Endeavor stashes its set-damage across
+     typecalc's own STAB/type-effectiveness multiply, then restores it
+     unmodified — a real source mechanism this widening surfaces, not a
+     special case. Barrier count for that file is unchanged (still one
+     COPYARRAY call site, now a wider accept-tuple check).
+- **Ground truth (live, this session):** `bin/oracle lab
+  tools/battle-lab/mechanic-endeavor-{success,fail}.json` (new, checked in),
+  Diglett (85hp) vs Chansey (325hp) at Level 50, both attacker directions.
+  Success: target settles at the attacker's own HP (325→85), attacker
+  unchanged; exactly **2 RNG draws total** (accuracycheck +
+  seteffectwithchance, both pre-existing opcodes — zero from the three new
+  ones, confirmed both by the live run and by reading all three C functions:
+  none contain a `Random()` call on any implemented branch). Fail: HP
+  unchanged on both sides. The fail branch's own RNG delta was **not**
+  cleanly isolable live (a Chansey-as-AI-opponent turn burns Factory-AI
+  scoring RNG unrelated to Endeavor's own script — that subsystem's own
+  session-scoped complexity is out of this step's scope) — pinned instead by
+  direct source read (zero `Random(` calls on the fail path) plus the
+  live-confirmed zero HP change either side.
+- **Test:** Tier-1 lifecycle coverage in `tests/battleScriptHitChainOpcode.test.ts`
+  (success/boundary/fail for setdamagetohealthdifference; plain-pass-through/
+  False-Swipe/Endure/non-lethal/Focus-Band-barrier for adjustsetdamage; two
+  full-script runs from `BattleScript_EffectEndeavor` reproducing the live
+  ground truth exactly, success and fail) and `tests/battleScriptSetByte.test.ts`
+  (BICBYTE's pinned 11-start/3-mask universe, AND-NOT semantics on every
+  concrete start, all-set/none-set edges, registration-time rejection).
+  Updated `tests/battleScriptJumpifbyteOpcode.test.ts`'s own barrier test
+  (its old example value, MOVE_RESULT_MISSED, now resolves — moved to
+  MOVE_RESULT_FOE_ENDURED, still genuinely unmodeled) and
+  `tests/battleScriptIngrainLeechSeedWrapOpcode.test.ts` (new test pinning
+  COPYARRAY's widened reverse tuple). `tests/battleScriptRulesContext.test.ts`'s
+  composition-count test updated 92→95 handlers.
+- **Next:** `turn5EndeavorPresentationStaging.ts` (seam-scout's own unwired
+  staging module) can now be redone with the **real** `MOVE_ENDEAVOR` chain
+  instead of its `MOVE_STRENGTH` substitute — seam-scout §9.4 items 2-3 are
+  the wiring worker's own next step (not this one): swap the substitute,
+  wire `drawTurn5EndeavorText`'s HP endpoints and kickoff text to the real
+  chain's `hp-change`/`message` events. `battleScene.ts` itself is untouched
+  by this step, as scoped. Also open: the seam-scout's own items 1/4/5 (turn
+  4's `anchorOpponentAfterTurn4Hp` still has no staged proof) and every
+  other still-`blocked-on-opcodes` census row (`B_SCR_OP_DMGTOLEVEL`,
+  `PSYWAVEDAMAGEEFFECT`, `COUNTERDAMAGECALCULATOR`/`TYPECALC2`,
+  `MIRRORCOATDAMAGECALCULATOR`, `STOCKPILETOBASEDAMAGE`, `SETBIDE`, ...).
+- **Notes:** stayed inside scope — no `battleScene.ts`/presentation wiring,
+  no factory-AI files, no animation files, no ENDTURN breadth. The two
+  extra widenings (§9.2's own three opcodes were not sufficient by
+  themselves — `jumpifbyte`'s `MOVE_RESULT_NO_EFFECT` and `copyarray`'s
+  reverse tuple were both genuinely required for the brief's own acceptance
+  bar, "EFFECT_ENDEAVOR's script reaches end") are named above, not silently
+  folded in. PAPERCUT: the fail-branch RNG-draw-count ask cost real
+  investigation time before concluding Factory-AI scoring noise (a separate,
+  out-of-scope subsystem) pollutes any live two-sided-AI RNG diff — worth a
+  standing note for future ground-truth scouts: isolate RNG claims to
+  player-side actions, or diff against a same-AI-role control run, not a
+  raw before/after delta (now a PAPERCUTS.md entry, Hits: 3).
+- **Side merge (same hour, supervisor-verified, verify script ALL PASS
+  live):** CV-only handler fixtures scout landed — `AI_CV_Pursuit` and
+  `AI_CV_HighCrit` fully staged (4 new battle-lab fixtures, twin-fixture
+  single-precondition-flip design, all-slots-identical dispatch move),
+  `AI_CV_AlwaysHit`/`AI_CV_VitalThrow` banked as analytical entries with
+  exact staging recipes (doc §11). Verify script extended with a
+  draw-count scenario shape; HighCrit's reachable-branch fixture has a
+  documented 23-vs-24 cross-seed draw-count wobble (phantom next-turn
+  decision, HP-sensitive) — individually reproducible, flagged as porter
+  guidance. Merged tree re-verified green (220/2654).
+
+---
 ## 463 — First CheckViability handler-body port: AI_CBM_SpeedDown + AI_CV_SpeedDown, the proven CBM+CV pair (entry 462's carried item, per `docs/factory-ai-checkviability-ground-truth.md`)
 
 - **State:** tree green at **219 files / 2627 tests** (+0 files/+17 tests

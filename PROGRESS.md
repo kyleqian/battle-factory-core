@@ -4,6 +4,97 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 467 — Fourth CheckViability handler body ported: AI_CV_AlwaysHit, against the just-banked §12.1 fixtures (entry 466's side-merged item)
+
+- **State:** tree green at **221 files / 2731 tests** (+0 files/+24 tests
+  over entry 466's merged 221/2707), build green (`tsc -b && vite build`).
+  Ratchet unchanged (6/6 `executableFrontierRatchet.test.ts` — CV's
+  `unsupported-branch` results stay plain tagged returns, not the
+  `unsupportedBranch(...)` helper that ratchet tracks). One commit
+  (`9e951cc`), green. `tools/probe/verify-factory-ai-checkviability-ground-truth.ts`
+  rerun live against the oracle, twice (once before touching source to
+  confirm the side lane's banked fixtures still held, once after the port):
+  **ALL PASS** both times (all 6 §11/§12 fixtures unchanged — confirms the
+  fixtures bank independent of this port, since the verify script asserts
+  oracle-only draw counts, not engine output).
+- **Did:** ported `AI_CV_AlwaysHit` (`data/battle_ai_scripts.s:1075-1089`,
+  doc §11.3/§12.1) into `factoryAiCheckViability.ts`, same
+  dispatch-before-barrier shape §463/466 established. Two stat-stage gate
+  pairs — `if_stat_level_more_than TARGET EVASION 10` / `if_stat_level_less_than
+  USER ACC 2` (jump to `ScoreUp1`) and `..._more_than TARGET EVASION 8` /
+  `..._less_than USER ACC 4` (jump to `AlwaysHit2` directly) — both funnel
+  into the same `if_random_less_than 100` roll. **New finding beyond the
+  doc's own §11.3 inline gloss**, found by direct read of `Cmd_score`
+  (`battle_ai_script_commands.c:703-711`: adds to score, advances the
+  script pointer by a fixed 2 bytes, no jump at all): `AI_CV_AlwaysHit_ScoreUp1`'s
+  `score +1` does **not** terminate the script — there's no `goto` after
+  it, so execution falls straight through into the `AI_CV_AlwaysHit2:`
+  label immediately below, i.e. into the SAME `if_random_less_than 100`
+  roll the second gate pair reaches. The doc's own "evasion 11-12 or user
+  acc 0-1 -> deterministic +1, 0 draws" comment undercounts this branch —
+  reaching `ScoreUp1` still burns exactly one draw and scores +1 (roll <
+  100) or +2 (roll >= 100), never a zero-draw deterministic +1. This does
+  **not** touch the doc's own live §12.1 fixture evidence (unaffected,
+  still correct): the banked fixtures' target evasion only ever reaches
+  9/10 (the second gate pair, `AlwaysHit2` direct), never >10, so the
+  `ScoreUp1` fallthrough is real but unexercised by either banked fixture —
+  same shape as entry 466's own HighCrit cascade-fallthrough finding
+  (assembly quirk confirmed by direct source read, not by fighting the
+  doc's fixture numbers). Dispatches on `EFFECT_ALWAYS_HIT` only (unlike
+  HighCrit's 3 triggering effects).
+  1. **Plumbing:** `FactoryAiCheckViabilityBattler` gained `evasionStage`/
+     `accStage` (both sides carried, entry 466's own `isFirstTurn`
+     both-sides-symmetry convention — only AI_TARGET's evasion and
+     AI_USER's own acc are ever read). `FactoryAiScoredBattlerView.statStages`
+     widened with `acc`/`evasion` alongside the existing `atk/def/spAtk/
+     spDef/speed`, wired through `chooseFactoryAiScoredDecision`'s
+     `runCheckViability` call site for both attacker and target.
+- **Test:** every gate x both roll outcomes x exact draw counts (18 new
+  tests in `tests/factoryAiCheckViability.test.ts`, 55 total): neither gate
+  true (0 draws/score), each of the 4 individual gates reaching
+  `AlwaysHit2` directly (both roll outcomes, 1 draw, score 0 or +1), and
+  the `ScoreUp1` fallthrough finding itself explicitly pinned for both
+  gate-1/gate-2 triggers x both roll outcomes (1 draw, score +1 or +2, NOT
+  0 draws/deterministic +1) — the new-finding coverage the brief's
+  "count every gate yourself" instruction was aimed at. Engine-side
+  reproduction of both banked §12.1 fixtures through
+  `chooseFactoryAiScoredDecision` (6 new tests in
+  `tests/factoryAiScoredDecision.test.ts`, 28 total) at both banked seeds
+  (1, 99): reach fixture's real turn-4 decision (target evasion stage 9)
+  and phantom turn-5 decision (stage 10) each reproduce exactly 4
+  policy-own check-viability draws (one per identical MOVE_SWIFT slot,
+  matching entry 466's own AlwaysHit "N identical slots draw N times"
+  precedent, not the fixtures' own 44/44 WINDOW totals which also include
+  setup/tie draws and 3 unreachable turns' own decisions); splash-control
+  fixture (target evasion neutral, stage 6) reproduces exactly 0
+  check-viability draws across both seeds, matching the doc's own
+  "neither AlwaysHit gate is ever true" finding — all six reproduction
+  tests assert the chosen move stays `MOVE_SWIFT` (all 4 slots identical,
+  same "no pick ambiguity" design as Pursuit/HighCrit's own fixtures).
+- **Next:** `AI_CV_VitalThrow` remains the one still-unstaged handler from
+  the brief's original 4-handler slice (doc §11.4/§12.2's own recipe: needs
+  real Gen-3 damage-formula arithmetic to land the opponent in a
+  comfortable <40%-remaining HP band, explicitly flagged as its own
+  separately-budgeted session). Any CBM-blocked handler (17 of 22 reachable
+  `AI_CV_*`) needs its paired `AI_CBM_*` ported too, not just the CV side.
+  `END3` registration remains a named architectural gap blocking
+  ENDTURN_ABILITIES's 3 scripted cases. Turn 4's own
+  `anchorOpponentAfterTurn4Hp` staging gap and seam-scout §9 items 1/5
+  remain open from entry 465.
+- **Notes:** stayed inside scope — no `AI_CV_VitalThrow`, no CBM-blocked
+  handler, no ENDTURN registration, no `docs/factory-ai-checkviability-ground-truth.md`
+  or verify-script edits (side lane's own files this hour, already carried
+  the AlwaysHit fixtures + verify-script scenarios from its prior-session
+  merge — this step only reran the script, never edited it), no
+  seam/animation files. No discrepancy with §12's live fixture evidence to
+  report — the one correction found (`ScoreUp1`'s fallthrough) is a gap in
+  §11.3's own descriptive prose, not in §12.1's banked oracle numbers, and
+  doesn't touch either fixture's reachable branch. No PAPERCUT this
+  session — the source-read-first discipline (checking `Cmd_score`'s real
+  semantics before trusting the doc's inline comment) paid off cleanly
+  within the time budget.
+
+---
 ## 466 — Two more CheckViability handler bodies ported: AI_CV_Pursuit + AI_CV_HighCrit, both CV-only per §10 (entry 465's carried item)
 
 - **State:** tree green at **220 files / 2694 tests** (+0 files/+35 tests
@@ -249,114 +340,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   same function differing in one bool (9 ungated hold effects fire on
   both — ITEMS2 exists to catch same-pass statuses). Merged tree
   re-verified: **220 files / 2659 tests + build green.**
-
----
-## 464 — EFFECT_ENDEAVOR registered: SETDAMAGETOHEALTHDIFFERENCE/BICBYTE/ADJUSTSETDAMAGE (entry 463's side-merge blocker, seam-scout §9.2)
-
-- **State:** tree green at **220 files / 2654 tests** (+0 files/+20 tests
-  over entry 463's merged 220/2634), build green. Ratchet:
-  `battleScriptHitChainOpcode.ts` 23→24 (one new named barrier — see below);
-  `battleScriptIngrainLeechSeedWrapOpcode.ts` stays pinned at 3 (widened, not
-  narrowed — same single COPYARRAY call site now accepts a second tuple).
-  Three commits (`4758e8c` registration+tests, `0dbdd73` census), all green.
-  Census live-regenerated: **76/214→79/214 effects, 160/355→163/355 moves,
-  125/276→128/276 F-L50 unweighted, 1567→1573 weighted** (25/25 self-checks
-  pass, `docs/executable-frontier-census.md`).
-- **Did:** ported the seam-scout doc's own three named opcodes
-  (`docs/presentation-seam-scout.md` §9.2), then followed where the full
-  script actually led (two more real gaps surfaced only by running
-  `BattleScript_EffectEndeavor` end to end — not guessed in advance):
-  1. **`Cmd_setdamagetohealthdifference`** (`battle_script_commands.c:9366-9377`,
-     `battleScriptHitChainOpcode.ts`): source-complete, zero barriers.
-     `gBattleMoveDamage = target.hp - attacker.hp`; fails (jumps to
-     `BattleScript_ButItFailed`) when `attacker.hp >= target.hp`.
-  2. **`Cmd_bicbyte`** (`:3889-3894`, new `createBattleScriptBicbyteCommandHandlers`
-     in `battleScriptSetByte.ts`): all 11 concrete call sites share one
-     pointer (`gMoveResultFlags`) and one of three literal masks — every one
-     resolves, so this registers **source-completely** via registration-time
-     validation (a hard `throw`, not a runtime barrier), the same style
-     `Cmd_setbyte`'s own registration already uses. Zero rejected.
-  3. **`Cmd_adjustsetdamage`** (`:5861-5899`, `battleScriptHitChainOpcode.ts`):
-     the False Swipe/Endure clamp family, ported like the existing
-     `adjustnormaldamageOpcodeHandler` minus its random multiplier. One new
-     named (b) barrier — `HOLD_EFFECT_FOCUS_BAND`, the exact same
-     `gSpecialStatuses[].focusBanded` gap `adjustnormaldamage` already
-     carries, duplicated onto this sibling opcode (a distinct call site, so
-     +1 to the file's pinned count, not a narrowing).
-  4. **Two more real gaps, found only by driving the full script, both
-     closed:** `jumpifmovehadnoeffect`'s own `MOVE_RESULT_NO_EFFECT`
-     comparand (a `jumpifbyte` macro expansion) was outside the shared
-     SETBYTE value universe — added (`battleScriptSetByte.ts`), which also
-     resolves 8 *other* pre-existing call sites for free (AbsorbUpdateHp,
-     DreamEaterWorked, DoMultiHit, EffectOHKO, EffectParalyze, FuryCutterHit,
-     ...). `Cmd_copyarray` (`battleScriptIngrainLeechSeedWrapOpcode.ts`) was
-     narrowed to only `LeechSeedTurnDrain`'s own
-     `gBattleMoveDamage<-gHpDealt` tuple — widened to also accept Endeavor's
-     own reverse pair (`gHpDealt<-gBattleMoveDamage` right after
-     `setdamagetohealthdifference`, then `gBattleMoveDamage<-gHpDealt` again
-     after typecalc/bicbyte): Endeavor stashes its set-damage across
-     typecalc's own STAB/type-effectiveness multiply, then restores it
-     unmodified — a real source mechanism this widening surfaces, not a
-     special case. Barrier count for that file is unchanged (still one
-     COPYARRAY call site, now a wider accept-tuple check).
-- **Ground truth (live, this session):** `bin/oracle lab
-  tools/battle-lab/mechanic-endeavor-{success,fail}.json` (new, checked in),
-  Diglett (85hp) vs Chansey (325hp) at Level 50, both attacker directions.
-  Success: target settles at the attacker's own HP (325→85), attacker
-  unchanged; exactly **2 RNG draws total** (accuracycheck +
-  seteffectwithchance, both pre-existing opcodes — zero from the three new
-  ones, confirmed both by the live run and by reading all three C functions:
-  none contain a `Random()` call on any implemented branch). Fail: HP
-  unchanged on both sides. The fail branch's own RNG delta was **not**
-  cleanly isolable live (a Chansey-as-AI-opponent turn burns Factory-AI
-  scoring RNG unrelated to Endeavor's own script — that subsystem's own
-  session-scoped complexity is out of this step's scope) — pinned instead by
-  direct source read (zero `Random(` calls on the fail path) plus the
-  live-confirmed zero HP change either side.
-- **Test:** Tier-1 lifecycle coverage in `tests/battleScriptHitChainOpcode.test.ts`
-  (success/boundary/fail for setdamagetohealthdifference; plain-pass-through/
-  False-Swipe/Endure/non-lethal/Focus-Band-barrier for adjustsetdamage; two
-  full-script runs from `BattleScript_EffectEndeavor` reproducing the live
-  ground truth exactly, success and fail) and `tests/battleScriptSetByte.test.ts`
-  (BICBYTE's pinned 11-start/3-mask universe, AND-NOT semantics on every
-  concrete start, all-set/none-set edges, registration-time rejection).
-  Updated `tests/battleScriptJumpifbyteOpcode.test.ts`'s own barrier test
-  (its old example value, MOVE_RESULT_MISSED, now resolves — moved to
-  MOVE_RESULT_FOE_ENDURED, still genuinely unmodeled) and
-  `tests/battleScriptIngrainLeechSeedWrapOpcode.test.ts` (new test pinning
-  COPYARRAY's widened reverse tuple). `tests/battleScriptRulesContext.test.ts`'s
-  composition-count test updated 92→95 handlers.
-- **Next:** `turn5EndeavorPresentationStaging.ts` (seam-scout's own unwired
-  staging module) can now be redone with the **real** `MOVE_ENDEAVOR` chain
-  instead of its `MOVE_STRENGTH` substitute — seam-scout §9.4 items 2-3 are
-  the wiring worker's own next step (not this one): swap the substitute,
-  wire `drawTurn5EndeavorText`'s HP endpoints and kickoff text to the real
-  chain's `hp-change`/`message` events. `battleScene.ts` itself is untouched
-  by this step, as scoped. Also open: the seam-scout's own items 1/4/5 (turn
-  4's `anchorOpponentAfterTurn4Hp` still has no staged proof) and every
-  other still-`blocked-on-opcodes` census row (`B_SCR_OP_DMGTOLEVEL`,
-  `PSYWAVEDAMAGEEFFECT`, `COUNTERDAMAGECALCULATOR`/`TYPECALC2`,
-  `MIRRORCOATDAMAGECALCULATOR`, `STOCKPILETOBASEDAMAGE`, `SETBIDE`, ...).
-- **Notes:** stayed inside scope — no `battleScene.ts`/presentation wiring,
-  no factory-AI files, no animation files, no ENDTURN breadth. The two
-  extra widenings (§9.2's own three opcodes were not sufficient by
-  themselves — `jumpifbyte`'s `MOVE_RESULT_NO_EFFECT` and `copyarray`'s
-  reverse tuple were both genuinely required for the brief's own acceptance
-  bar, "EFFECT_ENDEAVOR's script reaches end") are named above, not silently
-  folded in. PAPERCUT: the fail-branch RNG-draw-count ask cost real
-  investigation time before concluding Factory-AI scoring noise (a separate,
-  out-of-scope subsystem) pollutes any live two-sided-AI RNG diff — worth a
-  standing note for future ground-truth scouts: isolate RNG claims to
-  player-side actions, or diff against a same-AI-role control run, not a
-  raw before/after delta (now a PAPERCUTS.md entry, Hits: 3).
-- **Side merge (same hour, supervisor-verified, verify script ALL PASS
-  live):** CV-only handler fixtures scout landed — `AI_CV_Pursuit` and
-  `AI_CV_HighCrit` fully staged (4 new battle-lab fixtures, twin-fixture
-  single-precondition-flip design, all-slots-identical dispatch move),
-  `AI_CV_AlwaysHit`/`AI_CV_VitalThrow` banked as analytical entries with
-  exact staging recipes (doc §11). Verify script extended with a
-  draw-count scenario shape; HighCrit's reachable-branch fixture has a
-  documented 23-vs-24 cross-seed draw-count wobble (phantom next-turn
-  decision, HP-sensitive) — individually reproducible, flagged as porter
-  guidance. Merged tree re-verified green (220/2654).
 
