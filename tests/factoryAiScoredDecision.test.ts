@@ -1392,3 +1392,196 @@ describe("AI_CV_AccuracyDown mask-7 fixture reproduction (docs/factory-ai-checkv
     expect(result.trace.draws).toHaveLength(4 + 1);
   });
 });
+
+const MOVE_AGILITY_SPEED_UP = 97; // EFFECT_SPEED_UP_2
+
+// docs/factory-ai-checkviability-ground-truth.md §20.2/§20.3's twin fixtures
+// (tools/battle-lab/mechanic-factory-ai-cv-speedup-{slower-reach,
+// faster-control}-off.json) -- the seventh CBM-blocked pair, reproduced
+// through the REAL mask-7 dispatcher end to end now that both AI_CBM_SpeedUp
+// and AI_CV_SpeedUp are ported. Species-role-SWAP design (doc §20.2 reuses
+// SpeedDown's own §6 trick, not an HP band): opponent (AI_USER) and target
+// (player) species swap between the reach/control fixtures. Both species
+// single-ability (Crobat: Inner Focus; Shuckle: Sturdy) -- doc §20.2's own
+// live catch that AI_CheckBadMove's shared Soundproof prologue (`:47-58`)
+// unconditionally draws get_ability for ANY dual-ability species regardless
+// of handler body, so single-ability on BOTH sides is required to close that
+// confound, not just the target (a first for this file's CBM-blocked pairs).
+// All 4 opponent slots MOVE_AGILITY (self-targeted, 0 power/accuracy -- no
+// damage/accuracy-check confound); the statStages.speed: 8 below constructs
+// the decisive POST-turn-1 state directly (real Agility execution, stage
+// 6->8), same "construct the decisive state" precedent the AttackUp/
+// DefenseUp blocks above already established. Target's own moveset is
+// irrelevant to either handler body and isn't part of this view at all --
+// only AI_USER's own candidate moves (`view.moves`) are ever scored.
+describe("AI_CV_SpeedUp mask-7 fixture reproduction (docs/factory-ai-checkviability-ground-truth.md §20.2/§20.3)", () => {
+  const MOVE_SPEED_UP_MOVESET = [
+    MOVE_AGILITY_SPEED_UP, MOVE_AGILITY_SPEED_UP, MOVE_AGILITY_SPEED_UP, MOVE_AGILITY_SPEED_UP,
+  ] as const;
+  const POST_AGILITY_STAGES = Object.freeze({ ...NEUTRAL_STAGES, speed: 8 });
+
+  // Crobat (species 169), base Speed 130, single ability (Inner Focus).
+  function crobatAttacker(): FactoryAiScoredBattlerView {
+    return Object.freeze({
+      types: ["TYPE_POISON", "TYPE_FLYING"] as const,
+      attack: 90, defense: 80, spAttack: 70, spDefense: 80, speed: 130, level: 50,
+      statStages: POST_AGILITY_STAGES,
+      isFirstTurn: 0,
+      hp: 100, maxHp: 100,
+    });
+  }
+  function crobatTarget(): FactoryAiScoredTargetView {
+    return Object.freeze({
+      species: 169,
+      types: ["TYPE_POISON", "TYPE_FLYING"] as const,
+      attack: 90, defense: 80, spAttack: 70, spDefense: 80, speed: 130, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp: 100, maxHp: 100, ability: "ABILITY_INNER_FOCUS", knownAbility: null,
+    });
+  }
+  // Shuckle (species 213), base Speed 5, single ability (Sturdy).
+  function shuckleAttacker(): FactoryAiScoredBattlerView {
+    return Object.freeze({
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+      attack: 10, defense: 230, spAttack: 10, spDefense: 230, speed: 5, level: 50,
+      statStages: POST_AGILITY_STAGES,
+      isFirstTurn: 0,
+      hp: 100, maxHp: 100,
+    });
+  }
+  function shuckleTarget(): FactoryAiScoredTargetView {
+    return Object.freeze({
+      species: 213,
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+      attack: 10, defense: 230, spAttack: 10, spDefense: 230, speed: 5, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp: 100, maxHp: 100, ability: "ABILITY_STURDY", knownAbility: null,
+    });
+  }
+  function speedUpView(attacker: FactoryAiScoredBattlerView, target: FactoryAiScoredTargetView): FactoryAiScoredView {
+    return Object.freeze({
+      schema: "factory-ai-scored-view/v1",
+      mode: "factory-level-50-singles",
+      active: Object.freeze({ aiBattler: 1 as const, targetBattler: 0 as const }),
+      factory: Object.freeze({ levelMode: 0 as const, battleMode: 0 as const, factoryWinStreak: 28, trainerOpponentId: 222 }),
+      moves: MOVE_SPEED_UP_MOVESET,
+      attacker,
+      target,
+    });
+  }
+  function phaseDraws(result: ReturnType<typeof chooseFactoryAiScoredDecision>, phase: "check-bad-move" | "try-to-faint" | "check-viability") {
+    return result.trace.draws.filter((d) => "phase" in d && d.phase === phase);
+  }
+
+  it.each([1, 99])("reach fixture (Shuckle AI, post-Agility SPEED stage 8 -> effective speed 10, vs Crobat target -> effective speed 130), seed %i: all 4 identical Agility slots independently reach DRAW SITE 1 -- exactly 4 check-viability draws, zero CBM/TryToFaint draws (both species single-ability)", (seed) => {
+    const view = speedUpView(shuckleAttacker(), crobatTarget());
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+    expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+    expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+    const cvDraws = phaseDraws(result, "check-viability");
+    expect(cvDraws).toHaveLength(4);
+    expect(cvDraws.every((d) => "kind" in d && d.kind === "speed-up-roll")).toBe(true);
+    expect(result.trace.draws).toHaveLength(4 /* setup */ + 4 /* CV roll x4 slots */ + 1 /* tie */);
+  });
+
+  it.each([1, 99])("control fixture (Crobat AI, post-Agility SPEED stage 8 -> effective speed 260, vs Shuckle target -> effective speed 5), seed %i: Gate A false (target not faster) -- deterministic zero check-viability draws", (seed) => {
+    const view = speedUpView(crobatAttacker(), shuckleTarget());
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+    expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+    expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+    expect(phaseDraws(result, "check-viability")).toHaveLength(0);
+    expect(result.trace.draws).toHaveLength(4 /* setup */ + 1 /* tie */);
+  });
+});
+
+const MOVE_GROWTH_SPATK_UP_REPRO = 74; // EFFECT_SPECIAL_ATTACK_UP
+
+// docs/factory-ai-checkviability-ground-truth.md §21.2/§21.3's twin fixtures
+// (tools/battle-lab/mechanic-factory-ai-cv-spatkup-{fullhp-reach,
+// lowhp-control}-off.json) -- the eighth CBM-blocked pair, reproduced
+// through the REAL mask-7 dispatcher end to end now that both AI_CBM_SpAtkUp
+// and AI_CV_SpAtkUp are ported. §17's own Anorith/Machamp fixture design
+// reused verbatim (doc §21.2): opponent (AI_USER) = Anorith (Battle Armor
+// blocks Cmd_critcalc's own Random() call), all 4 slots MOVE_GROWTH
+// (EFFECT_SPECIAL_ATTACK_UP, self-target, 0 power/accuracy); target (player)
+// = Machamp, single assignable ability (Guts), same species pairing as the
+// AttackUp/DefenseDown/SpDefDown/VitalThrow blocks above. Every gate/draw
+// site reads AI_USER's OWN state only (same structural break AttackUp's own
+// block established) -- Machamp's own kit/moveset is irrelevant to this
+// handler entirely, so its HP/ability stay fixed and only Anorith's own HP
+// varies between the reach/control fixtures, constructed directly per this
+// file's own "construct the decisive state" precedent. Neither fixture
+// reaches DRAW SITE 1 (needs SPATK stage already built to 9-11, a 2-turn
+// recipe, doc §21.2's own "not staged this session") or DRAW SITE 3 (needs
+// HP in [40,70), doc §21.2's own note) -- so this reproduction's own numeric
+// ledger is IDENTICAL to AttackUp's own (§17.4: 10/10 reach, 8/8 control),
+// even though DRAW SITE 3's threshold differs (doc §21.1) -- neither
+// fixture design reaches that site either way.
+describe("AI_CV_SpAtkUp mask-7 fixture reproduction (docs/factory-ai-checkviability-ground-truth.md §21.2/§21.3)", () => {
+  const MOVE_SPATK_UP_MOVESET = [
+    MOVE_GROWTH_SPATK_UP_REPRO, MOVE_GROWTH_SPATK_UP_REPRO, MOVE_GROWTH_SPATK_UP_REPRO, MOVE_GROWTH_SPATK_UP_REPRO,
+  ] as const;
+
+  function anorithAttacker(hp: number): FactoryAiScoredBattlerView {
+    return Object.freeze({
+      types: ["TYPE_ROCK", "TYPE_BUG"] as const,
+      attack: 115, defense: 70, spAttack: 60, spDefense: 70, speed: 95, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp, maxHp: 120,
+    });
+  }
+  function machampTarget(): FactoryAiScoredTargetView {
+    return Object.freeze({
+      species: 68,
+      types: ["TYPE_FIGHTING", "TYPE_FIGHTING"] as const,
+      attack: 150, defense: 100, spAttack: 85, spDefense: 105, speed: 75, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp: 165, maxHp: 165, ability: "ABILITY_GUTS", knownAbility: null,
+    });
+  }
+  function spAtkUpView(attacker: FactoryAiScoredBattlerView): FactoryAiScoredView {
+    return Object.freeze({
+      schema: "factory-ai-scored-view/v1",
+      mode: "factory-level-50-singles",
+      active: Object.freeze({ aiBattler: 1 as const, targetBattler: 0 as const }),
+      factory: Object.freeze({ levelMode: 0 as const, battleMode: 0 as const, factoryWinStreak: 28, trainerOpponentId: 222 }),
+      moves: MOVE_SPATK_UP_MOVESET,
+      attacker,
+      target: machampTarget(),
+    });
+  }
+  function phaseDraws(result: ReturnType<typeof chooseFactoryAiScoredDecision>, phase: "check-bad-move" | "try-to-faint" | "check-viability") {
+    return result.trace.draws.filter((d) => "phase" in d && d.phase === phase);
+  }
+
+  it.each([1, 99])("reach fixture (Anorith stays at full 120/120 HP -- Gate B true, reaches DRAW SITE 2), seed %i: exactly 4 check-viability draws, zero CBM/TryToFaint draws", (seed) => {
+    const view = spAtkUpView(anorithAttacker(120));
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+    expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+    expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+    const cvDraws = phaseDraws(result, "check-viability");
+    expect(cvDraws).toHaveLength(4);
+    expect(cvDraws.every((d) => "kind" in d && d.kind === "sp-atk-up-roll-2")).toBe(true);
+    expect(result.trace.draws).toHaveLength(4 /* setup */ + 4 /* CV roll x4 slots */ + 1 /* tie */);
+  });
+
+  it("control fixture, seed 1 (Anorith at 30/120 HP = 25%, doc §21.3's own live-verified endpoint): Gate B false (skips DRAW SITE 2), Gate D true (HP<40, skips DRAW SITE 3) -- deterministic zero check-viability draws", () => {
+    const view = spAtkUpView(anorithAttacker(30));
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 1, calls: 0 } });
+    expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+    expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+    expect(phaseDraws(result, "check-viability")).toHaveLength(0);
+    expect(result.trace.draws).toHaveLength(4 /* setup */ + 1 /* tie */);
+  });
+
+  it("control fixture, seed 99 (Anorith at 18/120 HP = 15%, doc §21.3's own live-verified endpoint): deterministic zero check-viability draws", () => {
+    const view = spAtkUpView(anorithAttacker(18));
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 99, calls: 0 } });
+    expect(phaseDraws(result, "check-viability")).toHaveLength(0);
+    expect(result.trace.draws).toHaveLength(4 /* setup */ + 1 /* tie */);
+  });
+});

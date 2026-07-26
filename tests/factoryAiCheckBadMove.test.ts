@@ -751,6 +751,80 @@ describe("AI_CBM_AttackUp / AI_CBM_DefenseUp / AI_CBM_BulkUp (docs/factory-ai-ch
   });
 });
 
+// data/battle_ai_scripts.s:257-259/261-263,
+// docs/factory-ai-checkviability-ground-truth.md §20.1/§21.1. Byte-for-byte
+// the same bare MAX_STAT_STAGE-on-AI_USER's-own-stage shape as
+// AI_CBM_AttackUp/AI_CBM_DefenseUp above, with STAT_SPEED/STAT_SPATK
+// swapped in -- zero get_ability calls, no shared tail.
+describe("AI_CBM_SpeedUp / AI_CBM_SpAtkUp (docs/factory-ai-checkviability-ground-truth.md §20.1/§21.1)", () => {
+  const MOVE_AGILITY = 97; // EFFECT_SPEED_UP_2 -- EFFECT_SPEED_UP itself has no real move (like EFFECT_ACCURACY_DOWN_2)
+  const MOVE_GROWTH = 74; // EFFECT_SPECIAL_ATTACK_UP
+  const MOVE_TAIL_GLOW = 294; // EFFECT_SPECIAL_ATTACK_UP_2 -- same handler, different table entry
+
+  // Single-ability (Sturdy) target, same species/rationale as the
+  // AttackUp/DefenseUp/BulkUp block's own SHUCKLE above (out of scope here,
+  // this describe block's own sibling) -- isolates each handler's own
+  // zero-RNG gate from the universal soundproof preamble's get_ability draw.
+  const SHUCKLE: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 213,
+    types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+    knownAbility: null,
+    realAbility: "ABILITY_STURDY",
+    speedStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+  });
+
+  function withSpeedAttacker(speedStage: number): FactoryAiCheckBadMoveAttacker {
+    return Object.freeze({ atkStage: 6, defStage: 6, speedStage });
+  }
+  function withSpAtkAttacker(spAtkStage: number): FactoryAiCheckBadMoveAttacker {
+    return Object.freeze({ atkStage: 6, defStage: 6, spAtkStage });
+  }
+
+  it("AI_CBM_SpeedUp: Agility (EFFECT_SPEED_UP_2) scores -10 with zero draws when AI_USER's own SPEED stage is already MAX_STAT_STAGE (12)", () => {
+    const result = run(MOVE_AGILITY, SHUCKLE, undefined, withSpeedAttacker(12));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it.each([11, 6, 0])("AI_CBM_SpeedUp: scores 0 with zero draws when AI_USER's own SPEED stage is %i (not maxed)", (speedStage) => {
+    const result = run(MOVE_AGILITY, SHUCKLE, undefined, withSpeedAttacker(speedStage));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("AI_CBM_SpeedUp: omitted speedStage defaults to DEFAULT_STAT_STAGE (6, not maxed) -- scores 0", () => {
+    const result = run(MOVE_AGILITY, SHUCKLE, undefined, Object.freeze({ atkStage: 6, defStage: 6 }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+
+  it.each([
+    ["Growth (EFFECT_SPECIAL_ATTACK_UP)", MOVE_GROWTH],
+    ["Tail Glow (EFFECT_SPECIAL_ATTACK_UP_2)", MOVE_TAIL_GLOW],
+  ])("AI_CBM_SpAtkUp: %s scores -10 with zero draws when AI_USER's own SPATK stage is already MAX_STAT_STAGE (12)", (_label, moveId) => {
+    const result = run(moveId, SHUCKLE, undefined, withSpAtkAttacker(12));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it.each([11, 6, 0])("AI_CBM_SpAtkUp: scores 0 with zero draws when AI_USER's own SPATK stage is %i (not maxed)", (spAtkStage) => {
+    const result = run(MOVE_GROWTH, SHUCKLE, undefined, withSpAtkAttacker(spAtkStage));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("AI_CBM_SpAtkUp: omitted spAtkStage defaults to DEFAULT_STAT_STAGE (6, not maxed) -- scores 0", () => {
+    const result = run(MOVE_GROWTH, SHUCKLE, undefined, Object.freeze({ atkStage: 6, defStage: 6 }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+});
+
 // data/battle_ai_scripts.s:300-312, docs/factory-ai-checkviability-ground-truth.md
 // §19.1: the sixth CBM-blocked pair's own CBM half (this is the CBM side;
 // AI_CV_AccuracyDown, the CV side, is in factoryAiCheckViability.test.ts).

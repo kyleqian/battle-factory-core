@@ -2296,3 +2296,298 @@ describe("AI_CV_AccuracyDown (docs/factory-ai-checkviability-ground-truth.md §1
     });
   });
 });
+
+const MOVE_AGILITY_SPEED_UP_2 = 97; // EFFECT_SPEED_UP_2 -- EFFECT_SPEED_UP itself has no real move
+
+// data/battle_ai_scripts.s:956-965, docs/factory-ai-checkviability-ground-truth.md
+// §20.1: the seventh CBM-blocked pair's own CV half (AI_CBM_SpeedUp, the CBM
+// side, is in factoryAiCheckBadMove.test.ts). SAME if_target_faster gate and
+// tie-break machinery as AI_CV_SpeedDown above (doc §20.1 cites §6, not
+// AttackUp, as the true structural sibling) -- only the fallthrough score
+// differs (+3 here vs SpeedDown's own +2); the deterministic branch's -3 is
+// identical in both.
+describe("AI_CV_SpeedUp (docs/factory-ai-checkviability-ground-truth.md §20.1)", () => {
+  const SPEED_BATTLER_EXTRAS = Object.freeze({
+    types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+    isFirstTurn: 0,
+    evasionStage: 6,
+    accStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+    hp: 100,
+    maxHp: 100,
+  });
+  const FASTER_USER = Object.freeze({ speed: 120, speedStage: 6, ...SPEED_BATTLER_EXTRAS }); // AI_USER faster -> target NOT faster
+  const SLOWER_USER = Object.freeze({ speed: 5, speedStage: 6, ...SPEED_BATTLER_EXTRAS }); // AI_USER slower -> target faster
+  const FASTER_TARGET = Object.freeze({ speed: 120, speedStage: 6, ...SPEED_BATTLER_EXTRAS });
+  const SLOWER_TARGET = Object.freeze({ speed: 5, speedStage: 6, ...SPEED_BATTLER_EXTRAS });
+
+  it("EFFECT_SPEED_UP itself is unused by any real move (like EFFECT_ACCURACY_DOWN_2, doc §19.1) -- confirmed absent from the generated move table", () => {
+    expect([...MOVES_BY_ID.values()].some((m) => m.effect === "EFFECT_SPEED_UP")).toBe(false);
+  });
+
+  it("scores a deterministic -3 with zero draws when the target is not faster (if_target_faster false)", () => {
+    const rng = { value: 249_678_687, calls: 0 };
+    const result = runCheckViability({
+      rng,
+      moveId: MOVE_AGILITY_SPEED_UP_2,
+      attacker: FASTER_USER,
+      target: SLOWER_TARGET,
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result).toEqual({ kind: "scored", rng, draws: [], scoreDelta: -3 });
+  });
+
+  it("draws exactly one if_random_less_than 70 roll and scores 0 when the target is faster and the roll is < 70", () => {
+    // seed 4 -> randomValue % 256 = 25 (< 70).
+    const result = runCheckViability({
+      rng: { value: 4, calls: 0 },
+      moveId: MOVE_AGILITY_SPEED_UP_2,
+      attacker: SLOWER_USER,
+      target: FASTER_TARGET,
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result.kind).toBe("scored");
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.scoreDelta).toBe(0);
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "speed-up-roll", succeeded: false });
+    expect(result.rng.calls).toBe(1);
+  });
+
+  it("draws exactly one if_random_less_than 70 roll and scores +3 when the target is faster and the roll is >= 70 (SpeedDown's own sibling site scores +2 here)", () => {
+    // seed 1 -> randomValue 16838 % 256 = 198 (>= 70).
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_AGILITY_SPEED_UP_2,
+      attacker: SLOWER_USER,
+      target: FASTER_TARGET,
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result.kind).toBe("scored");
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.scoreDelta).toBe(3);
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "speed-up-roll", succeeded: true });
+  });
+
+  it("an exact speed tie still burns GetWhoStrikesFirst's own Random() call, but never takes the target-faster branch", () => {
+    const TIED = Object.freeze({ speed: 100, speedStage: 6, ...SPEED_BATTLER_EXTRAS });
+    // seed 3 -> tie-roll randomValue 50515 is ODD -> strikesFirst resolves to 2 (target), still not === 1.
+    const result = runCheckViability({
+      rng: { value: 3, calls: 0 },
+      moveId: MOVE_AGILITY_SPEED_UP_2,
+      attacker: TIED,
+      target: TIED,
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result.kind).toBe("scored");
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.scoreDelta).toBe(-3);
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "target-faster-tie", strikesFirst: 2 });
+  });
+
+  it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
+    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
+  });
+});
+
+const MOVE_GROWTH_SPATK_UP = 74; // EFFECT_SPECIAL_ATTACK_UP
+const MOVE_TAIL_GLOW_SPATK_UP_2 = 294; // EFFECT_SPECIAL_ATTACK_UP_2 -- same handler, different table entry
+
+// data/battle_ai_scripts.s:967-983, docs/factory-ai-checkviability-ground-truth.md
+// §21.1: the eighth CBM-blocked pair's own CV half (AI_CBM_SpAtkUp, the CBM
+// side, is in factoryAiCheckBadMove.test.ts). Byte-for-byte AI_CV_AttackUp's
+// own gate topology (§17.1) with STAT_SPATK for STAT_ATK -- reusing that
+// block's own seed convention (seed 1 -> every roll site's randomValue % 256
+// = 198; seed 4 -> 25) -- EXCEPT DRAW SITE 3's threshold is 70, not 40 (doc
+// §21.1's own citation-level correction), so seed 1/4's roll of 198/25
+// against threshold 70 flips DRAW SITE 3's own succeeded/skip verdict
+// relative to AttackUp's own tests at the same seeds -- asserted explicitly
+// below rather than assumed transferable.
+describe("AI_CV_SpAtkUp (docs/factory-ai-checkviability-ground-truth.md §21.1)", () => {
+  function spAtkUpAttacker(spAtkStage: number, hp: number, maxHp = 100) {
+    return Object.freeze({
+      speed: 100, speedStage: 6, types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+      isFirstTurn: 0, evasionStage: 6, accStage: 6, atkStage: 6, defStage: 6, spDefStage: 6, spAtkStage, hp, maxHp,
+    });
+  }
+  const IRRELEVANT_TARGET = Object.freeze({
+    speed: 100, speedStage: 6, types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+    isFirstTurn: 0, evasionStage: 6, accStage: 6, atkStage: 6, defStage: 6, spDefStage: 6, hp: 100, maxHp: 100,
+  });
+
+  it("EFFECT_SPECIAL_ATTACK_UP_2 (Tail Glow) dispatches to the identical handler", () => {
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_TAIL_GLOW_SPATK_UP_2,
+      attacker: spAtkUpAttacker(6, 99), // SPATK<9 skips site 1; hp!=100 skips site 2; hp>70 ends at Gate C -- fully deterministic
+      target: IRRELEVANT_TARGET,
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+  });
+
+  it("omitted spAtkStage defaults to DEFAULT_STAT_STAGE (6, < 9): Gate A skips DRAW SITE 1", () => {
+    const { spAtkStage: _omit, ...withoutSpAtkStage } = spAtkUpAttacker(6, 99);
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_GROWTH_SPATK_UP,
+      attacker: withoutSpAtkStage,
+      target: IRRELEVANT_TARGET,
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+  });
+
+  describe("Gate A / DRAW SITE 1 (own SPATK stage < 9 skips the roll)", () => {
+    it("SPATK stage 9 (>= 9): reaches DRAW SITE 1; roll < 100 skips the -1 (hp 100 -> Gate C ends right after)", () => {
+      // seed 4 -> randomValue % 256 = 25 (< 100).
+      const result = runCheckViability({
+        rng: { value: 4, calls: 0 },
+        moveId: MOVE_GROWTH_SPATK_UP,
+        attacker: spAtkUpAttacker(9, 100),
+        target: IRRELEVANT_TARGET,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(0);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "sp-atk-up-roll-1", succeeded: false });
+    });
+
+    it("SPATK stage 11 (>= 9, < 12): roll >= 100 applies the -1", () => {
+      // seed 1 -> randomValue % 256 = 198 (>= 100).
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_GROWTH_SPATK_UP,
+        attacker: spAtkUpAttacker(11, 100),
+        target: IRRELEVANT_TARGET,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(-1);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "sp-atk-up-roll-1", succeeded: true });
+    });
+  });
+
+  describe("Gate B / DRAW SITE 2 (own HP != 100%, an EQUALITY test, skips the roll)", () => {
+    it("HP exactly 100%: reaches DRAW SITE 2; roll < 128 skips the +2 (Gate C ends right after)", () => {
+      // seed 4 -> randomValue % 256 = 25 (< 128).
+      const result = runCheckViability({
+        rng: { value: 4, calls: 0 },
+        moveId: MOVE_GROWTH_SPATK_UP,
+        attacker: spAtkUpAttacker(6, 100),
+        target: IRRELEVANT_TARGET,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(0);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "sp-atk-up-roll-2", succeeded: false });
+    });
+
+    it("HP exactly 100%: roll >= 128 applies the +2", () => {
+      // seed 1 -> randomValue % 256 = 198 (>= 128).
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_GROWTH_SPATK_UP,
+        attacker: spAtkUpAttacker(6, 100),
+        target: IRRELEVANT_TARGET,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(2);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "sp-atk-up-roll-2", succeeded: true });
+    });
+  });
+
+  describe("Gate D (own HP < 40%: skips DRAW SITE 3 straight to the -2 penalty)", () => {
+    it("HP exactly 39% (< 40): applies -2 with zero draws", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_GROWTH_SPATK_UP,
+        attacker: spAtkUpAttacker(6, 39),
+        target: IRRELEVANT_TARGET,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: -2 });
+    });
+  });
+
+  describe("DRAW SITE 3 (if_random_less_than 70, NOT AttackUp's own 40 -- doc §21.1's citation-level correction)", () => {
+    it("HP exactly 55% (in [40,70) band): roll < 70 skips the -2 (seed 4 -> randomValue % 256 = 25)", () => {
+      const result = runCheckViability({
+        rng: { value: 4, calls: 0 },
+        moveId: MOVE_GROWTH_SPATK_UP,
+        attacker: spAtkUpAttacker(6, 55),
+        target: IRRELEVANT_TARGET,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(0);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "sp-atk-up-roll-3", succeeded: false });
+    });
+
+    it("HP exactly 55% (in band): roll >= 70 applies the -2 (seed 1 -> randomValue % 256 = 198 -- this SAME roll value would have skipped AttackUp's own threshold-40 site, but here it applies, confirming the two sites are NOT interchangeable)", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_GROWTH_SPATK_UP,
+        attacker: spAtkUpAttacker(6, 55),
+        target: IRRELEVANT_TARGET,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(-2);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "sp-atk-up-roll-3", succeeded: true });
+    });
+  });
+
+  it("DRAW SITE 1 and DRAW SITE 3 are NOT mutually exclusive: SPATK stage 9 (reaches site 1) + HP 55% (reaches site 3) draws twice", () => {
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_GROWTH_SPATK_UP,
+      attacker: spAtkUpAttacker(9, 55),
+      target: IRRELEVANT_TARGET,
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result.kind).toBe("scored");
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(2);
+    expect(result.draws[0]).toMatchObject({ kind: "sp-atk-up-roll-1" });
+    expect(result.draws[1]).toMatchObject({ kind: "sp-atk-up-roll-3" });
+    expect(result.rng.calls).toBe(2);
+  });
+
+  it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
+    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
+  });
+});

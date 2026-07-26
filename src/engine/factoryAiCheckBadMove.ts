@@ -50,7 +50,13 @@
  * `AI_CV_DefenseUp` (doc §17/§18) -- the first stat-**UP** handlers: bare
  * MAX_STAT_STAGE gates on `AI_USER`'s OWN stat stage, zero `get_ability`
  * calls, no shared `CheckIfAbilityBlocksStatChange` tail at all (a
- * documented structural break from every stat-DOWN CBM handler above).
+ * documented structural break from every stat-DOWN CBM handler above); and
+ * `EFFECT_SPEED_UP(_2)`/`EFFECT_SPECIAL_ATTACK_UP(_2)` -> `AI_CBM_SpeedUp`/
+ * `AI_CBM_SpAtkUp` (`:257-259`/`:261-263`, `runCbmSpeedUp`/`runCbmSpAtkUp`
+ * below), the seventh and eighth CBM-blocked pairs' own CBM halves, with
+ * `AI_CV_SpeedUp`/`AI_CV_SpAtkUp` (doc §20/§21) -- byte-for-byte the same
+ * bare 2-instruction `MAX_STAT_STAGE` shape as `AI_CBM_AttackUp`/
+ * `AI_CBM_DefenseUp` with `STAT_SPEED`/`STAT_SPATK` swapped in.
  */
 import movesData from "../data/gen/moves.json" with { type: "json" };
 import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
@@ -194,6 +200,20 @@ export type FactoryAiCheckBadMoveAttacker = Readonly<{
   atkStage: number;
   /** AI_USER's own DEFENSE stat stage, 0..12 -- `AI_CBM_DefenseUp`/`AI_CBM_BulkUp`'s own MAX_STAT_STAGE gate. */
   defStage: number;
+  /**
+   * AI_USER's own SPEED stat stage, 0..12 -- `AI_CBM_SpeedUp`'s own
+   * MAX_STAT_STAGE gate (doc §20.1). Optional, defaulting to
+   * `DEFAULT_STAT_STAGE` (6) so no pre-existing `FactoryAiCheckBadMoveAttacker`
+   * literal (e.g. the AttackUp/DefenseUp/BulkUp test block's own) needs
+   * touching -- same precedent as `FactoryAiCheckBadMoveTarget.accStage`.
+   */
+  speedStage?: number;
+  /**
+   * AI_USER's own SPECIAL ATTACK stat stage, 0..12 -- `AI_CBM_SpAtkUp`'s own
+   * MAX_STAT_STAGE gate (doc §21.1). Optional, same default/rationale as
+   * `speedStage` above.
+   */
+  spAtkStage?: number;
 }>;
 
 export type FactoryAiCheckBadMoveDraw = Readonly<{
@@ -498,6 +518,27 @@ function runCbmBulkUp(attackerAtkStage: number, attackerDefStage: number): numbe
   return runCbmAttackUp(attackerAtkStage) + (attackerDefStage === MAX_STAT_STAGE ? -8 : 0);
 }
 
+/**
+ * `AI_CBM_SpeedUp` (`data/battle_ai_scripts.s:257-259`,
+ * `docs/factory-ai-checkviability-ground-truth.md` §20.1) -- byte-for-byte
+ * the same 2-instruction shape as `AI_CBM_AttackUp` with `STAT_SPEED`
+ * swapped in. Dispatch: `EFFECT_SPEED_UP`/`EFFECT_SPEED_UP_2`
+ * (`data/battle_ai_scripts.s:110,135`).
+ */
+function runCbmSpeedUp(attackerSpeedStage: number): number {
+  return attackerSpeedStage === MAX_STAT_STAGE ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_SpAtkUp` (`:261-263`, doc §21.1) -- byte-for-byte the same
+ * 2-instruction shape as `AI_CBM_AttackUp` with `STAT_SPATK` swapped in.
+ * Dispatch: `EFFECT_SPECIAL_ATTACK_UP`/`EFFECT_SPECIAL_ATTACK_UP_2`
+ * (`:111,136`).
+ */
+function runCbmSpAtkUp(attackerSpAtkStage: number): number {
+  return attackerSpAtkStage === MAX_STAT_STAGE ? -10 : 0;
+}
+
 export function typeMultiplierTenths(attackingType: string, defendingTypes: readonly [string, string]): number {
   const distinct = defendingTypes[0] === defendingTypes[1] ? [defendingTypes[0]] : defendingTypes;
   let mult = 10;
@@ -694,6 +735,28 @@ export function runCheckBadMovePreamble(input: Readonly<{
       rng,
       draws: Object.freeze(draws),
       scoreDelta: runCbmBulkUp(input.attacker.atkStage, input.attacker.defStage),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_SPEED_UP(_2) -> AI_CBM_SpeedUp, the
+  // seventh CBM-blocked pair's own CBM half (doc §20).
+  if (move.effect === "EFFECT_SPEED_UP" || move.effect === "EFFECT_SPEED_UP_2") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmSpeedUp(input.attacker.speedStage ?? DEFAULT_STAT_STAGE),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_SPECIAL_ATTACK_UP(_2) -> AI_CBM_SpAtkUp,
+  // the eighth CBM-blocked pair's own CBM half (doc §21).
+  if (move.effect === "EFFECT_SPECIAL_ATTACK_UP" || move.effect === "EFFECT_SPECIAL_ATTACK_UP_2") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmSpAtkUp(input.attacker.spAtkStage ?? DEFAULT_STAT_STAGE),
     });
   }
 

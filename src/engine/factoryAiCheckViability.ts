@@ -34,13 +34,20 @@
  * every gate/draw site reads `AI_USER`'s OWN state, `AI_TARGET` is never
  * read at all), `EFFECT_DEFENSE_UP`/`EFFECT_DEFENSE_UP_2`/`EFFECT_BULK_UP`
  * (`AI_CV_DefenseUp`, `runCvDefenseUp` below, `:915-942`, doc §18 -- the
- * fifth CBM-blocked pair's own CV half), and `EFFECT_ACCURACY_DOWN(_2)`
+ * fifth CBM-blocked pair's own CV half), `EFFECT_ACCURACY_DOWN(_2)`
  * (`AI_CV_AccuracyDown`, `runCvAccuracyDown` below, `:1198-1234`, doc §19 --
  * the sixth CBM-blocked pair's own CV half and the largest ported handler
- * in this doc, 7 `if_random_less_than` sites). The other ~79 are not
- * ported this round (a separate, much larger phased body of work per the
- * audit's §3), so a move that reaches one of THOSE must not silently score
- * zero.
+ * in this doc, 7 `if_random_less_than` sites), `EFFECT_SPEED_UP`/
+ * `EFFECT_SPEED_UP_2` (`AI_CV_SpeedUp`, `runCvSpeedUp` below, `:956-965`,
+ * doc §20 -- the seventh CBM-blocked pair's own CV half, gated on relative
+ * Speed like `AI_CV_SpeedDown` rather than an HP/stat-stage threshold), and
+ * `EFFECT_SPECIAL_ATTACK_UP`/`EFFECT_SPECIAL_ATTACK_UP_2` (`AI_CV_SpAtkUp`,
+ * `runCvSpAtkUp` below, `:967-983`, doc §21 -- the eighth CBM-blocked pair's
+ * own CV half, byte-for-byte `AI_CV_AttackUp`'s own shape with `STAT_SPATK`
+ * for `STAT_ATK` and DRAW SITE 3's threshold corrected to 70, not 40). The
+ * other ~77 are not ported this round (a separate, much larger phased body
+ * of work per the audit's §3), so a move that reaches one of THOSE must not
+ * silently score zero.
  */
 import { MOVES_BY_ID, TYPE_EFFECTIVENESS } from "./factoryAiCheckBadMove.ts";
 import type { BattleRngState } from "./battleDecisionBoundary.ts";
@@ -128,6 +135,14 @@ export type FactoryAiCheckViabilityBattler = Readonly<{
   spDefStage: number;
   hp: number;
   maxHp: number;
+  /**
+   * AI_USER's own SPECIAL ATTACK stat stage, 0..12 -- `AI_CV_SpAtkUp`'s Gate A
+   * (`if_stat_level_less_than AI_USER, STAT_SPATK, 9`, doc §21.1). Optional,
+   * defaulting to `DEFAULT_STAT_STAGE` (6) -- the real battle-start neutral
+   * value -- so no pre-existing battler literal in this doc's test suite
+   * needs touching, same precedent as `lastUsedMoveId` below.
+   */
+  spAtkStage?: number;
   /**
    * `gLastMoves[battler]` (`src/battle_main.c:190`), the move ID this
    * battler last used -- `AI_CV_DefenseUp`'s own Gate E/F read the
@@ -306,6 +321,26 @@ export type FactoryAiCheckViabilityDraw =
   | Readonly<{
     ordinal: number;
     reason: string;
+    kind: "speed-up-roll";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    succeeded: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "sp-atk-up-roll-1" | "sp-atk-up-roll-2" | "sp-atk-up-roll-3";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    succeeded: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
     kind: "defense-up-roll-1" | "defense-up-roll-2" | "defense-up-roll-3" | "defense-up-roll-4" | "defense-up-roll-5";
     before: BattleRngState;
     after: BattleRngState;
@@ -438,6 +473,72 @@ function runCvSpeedDown(input: Readonly<{
   const succeeded = rollDraw.randomValue % 256 >= 70;
   draws.push(Object.freeze({ ...rollDraw, kind: "speed-down-roll" as const, succeeded }));
   return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: succeeded ? 2 : 0 });
+}
+
+/**
+ * `AI_CV_SpeedUp` (`data/battle_ai_scripts.s:956-965`,
+ * `docs/factory-ai-checkviability-ground-truth.md` §20.1):
+ *
+ * ```
+ * AI_CV_SpeedUp:
+ *     if_target_faster AI_CV_SpeedUp2
+ *     score -3
+ *     goto AI_CV_SpeedUp_End
+ * AI_CV_SpeedUp2:
+ *     if_random_less_than 70, AI_CV_SpeedUp_End
+ *     score +3
+ * AI_CV_SpeedUp_End:
+ *     end
+ * ```
+ *
+ * The SAME `if_target_faster` gate and tie-break machinery `runCvSpeedDown`
+ * already ports above (doc §20.1 cites §6 as the true structural sibling,
+ * not `AttackUp`/`DefenseUp`) -- target strictly faster reaches DRAW SITE 1
+ * (`:962`, JUMP roll<70 skips the bonus, ~27.3%; fall through roll>=70
+ * grants +3, ~72.7%); target not faster is a deterministic `score -3`, DRAW
+ * SITE 1 never reached. Only the fallthrough score differs from
+ * `SpeedDown`'s own shape (+3 here vs +2 there); the deterministic branch's
+ * `-3` is identical in both.
+ */
+function runCvSpeedUp(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+
+  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
+  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+
+  let tieRoll = 0;
+  let tieDraw: ReturnType<typeof nextDraw> | null = null;
+  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
+    rng = tieDraw.after;
+    tieRoll = tieDraw.randomValue;
+    ordinal += 1;
+  }
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  if (tieDraw) {
+    draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
+  }
+  const targetFaster = strikesFirst === 1;
+
+  if (!targetFaster) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -3 });
+  }
+
+  const rollDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-roll`);
+  rng = rollDraw.after;
+  // if_random_less_than 70, AI_CV_SpeedUp_End: the JUMP (roll < 70, ~27%)
+  // skips the bonus; falling through (roll >= 70, ~73%) grants +3.
+  const succeeded = rollDraw.randomValue % 256 >= 70;
+  draws.push(Object.freeze({ ...rollDraw, kind: "speed-up-roll" as const, succeeded }));
+  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: succeeded ? 3 : 0 });
 }
 
 /**
@@ -1054,15 +1155,30 @@ function runCvSpDefDown(input: Readonly<{
  * roll >= 40, ~84.4%, applies it) -- same JUMP-skips/FALLTHROUGH-applies
  * roll polarity every other ported handler's `if_random_less_than` already
  * uses.
+ *
+ * Shared with `AI_CV_SpAtkUp` (`:967-983`, doc §21.1) below, which is
+ * byte-for-byte this same gate topology with `STAT_SPATK` for `STAT_ATK`
+ * and ONE numeric difference: DRAW SITE 3's threshold is `70`, not `40`
+ * (doc §21.1's own citation-level correction against a naive "same shape"
+ * copy) -- `runCvAttackStyleStatUp` below factors the shared body out,
+ * parameterized by that one threshold and the draw-kind labels.
  */
-function runCvAttackUp(input: Readonly<{
-  rng: BattleRngState;
-  attackerAtkStage: number;
-  attackerHp: number;
-  attackerMaxHp: number;
-  drawOrdinalStart: number;
-  reasonPrefix: string;
-}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+function runCvAttackStyleStatUp(
+  kinds: Readonly<{
+    roll1: "attack-up-roll-1" | "sp-atk-up-roll-1";
+    roll2: "attack-up-roll-2" | "sp-atk-up-roll-2";
+    roll3: "attack-up-roll-3" | "sp-atk-up-roll-3";
+  }>,
+  drawSite3Threshold: number,
+  input: Readonly<{
+    rng: BattleRngState;
+    attackerStage: number;
+    attackerHp: number;
+    attackerMaxHp: number;
+    drawOrdinalStart: number;
+    reasonPrefix: string;
+  }>,
+): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
   let rng = input.rng;
   let ordinal = input.drawOrdinalStart;
   const draws: FactoryAiCheckViabilityDraw[] = [];
@@ -1070,27 +1186,27 @@ function runCvAttackUp(input: Readonly<{
 
   const hpPercent = Math.floor((100 * input.attackerHp) / input.attackerMaxHp);
 
-  if (input.attackerAtkStage < 9) {
-    // AI_CV_AttackUp2: Gate B (own HP != 100%) skips DRAW SITE 2 straight to AttackUp3.
+  if (input.attackerStage < 9) {
+    // Gate B (own HP != 100%) skips DRAW SITE 2 straight to the tail.
     if (hpPercent === 100) {
       const draw2 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw2`);
       rng = draw2.after;
       ordinal += 1;
       const succeeded2 = draw2.randomValue % 256 >= 128;
-      draws.push(Object.freeze({ ...draw2, kind: "attack-up-roll-2" as const, succeeded: succeeded2 }));
+      draws.push(Object.freeze({ ...draw2, kind: kinds.roll2, succeeded: succeeded2 }));
       if (succeeded2) score += 2;
     }
   } else {
-    // DRAW SITE 1: if_random_less_than 100, AttackUp3 (jump skips -1; fall through applies it, then goto AttackUp3 either way).
+    // DRAW SITE 1: if_random_less_than 100 (jump skips -1; fall through applies it, then goto the tail either way).
     const draw1 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw1`);
     rng = draw1.after;
     ordinal += 1;
     const succeeded1 = draw1.randomValue % 256 >= 100;
-    draws.push(Object.freeze({ ...draw1, kind: "attack-up-roll-1" as const, succeeded: succeeded1 }));
+    draws.push(Object.freeze({ ...draw1, kind: kinds.roll1, succeeded: succeeded1 }));
     if (succeeded1) score -= 1;
   }
 
-  // AttackUp3: Gate C (own HP > 70%) is a clean, deterministic stop.
+  // Gate C (own HP > 70%) is a clean, deterministic stop.
   if (hpPercent > 70) {
     return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
   }
@@ -1101,10 +1217,63 @@ function runCvAttackUp(input: Readonly<{
   // DRAW SITE 3, only reached at HP in [40,70).
   const draw3 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw3`);
   rng = draw3.after;
-  const succeeded3 = draw3.randomValue % 256 >= 40;
-  draws.push(Object.freeze({ ...draw3, kind: "attack-up-roll-3" as const, succeeded: succeeded3 }));
+  const succeeded3 = draw3.randomValue % 256 >= drawSite3Threshold;
+  draws.push(Object.freeze({ ...draw3, kind: kinds.roll3, succeeded: succeeded3 }));
   if (succeeded3) score -= 2;
   return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+}
+
+function runCvAttackUp(input: Readonly<{
+  rng: BattleRngState;
+  attackerAtkStage: number;
+  attackerHp: number;
+  attackerMaxHp: number;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  return runCvAttackStyleStatUp(
+    { roll1: "attack-up-roll-1", roll2: "attack-up-roll-2", roll3: "attack-up-roll-3" },
+    40,
+    {
+      rng: input.rng,
+      attackerStage: input.attackerAtkStage,
+      attackerHp: input.attackerHp,
+      attackerMaxHp: input.attackerMaxHp,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    },
+  );
+}
+
+/**
+ * `AI_CV_SpAtkUp` (`data/battle_ai_scripts.s:967-983`,
+ * `docs/factory-ai-checkviability-ground-truth.md` §21.1) --
+ * `runCvAttackStyleStatUp`'s shared body above, reading `AI_USER`'s own
+ * SPATK stage instead of ATK, with DRAW SITE 3's threshold corrected to
+ * `70` (`:980`, ~27.3% skip) instead of `AttackUp`'s own `40` (~15.6% skip)
+ * -- the doc's own §21.1 citation, re-derived from the raw immediate operand
+ * rather than assumed from gate-topology similarity alone.
+ */
+function runCvSpAtkUp(input: Readonly<{
+  rng: BattleRngState;
+  attackerSpAtkStage: number;
+  attackerHp: number;
+  attackerMaxHp: number;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  return runCvAttackStyleStatUp(
+    { roll1: "sp-atk-up-roll-1", roll2: "sp-atk-up-roll-2", roll3: "sp-atk-up-roll-3" },
+    70,
+    {
+      rng: input.rng,
+      attackerStage: input.attackerSpAtkStage,
+      attackerHp: input.attackerHp,
+      attackerMaxHp: input.attackerMaxHp,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    },
+  );
 }
 
 const MOVE_NONE = 0;
@@ -1649,6 +1818,39 @@ export function runCheckViability(input: Readonly<{
       rng: accuracyDown.rng,
       draws: accuracyDown.draws,
       scoreDelta: accuracyDown.scoreDelta,
+    });
+  }
+
+  if (move.effect === "EFFECT_SPEED_UP" || move.effect === "EFFECT_SPEED_UP_2") {
+    const speedUp = runCvSpeedUp({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: speedUp.rng,
+      draws: speedUp.draws,
+      scoreDelta: speedUp.scoreDelta,
+    });
+  }
+
+  if (move.effect === "EFFECT_SPECIAL_ATTACK_UP" || move.effect === "EFFECT_SPECIAL_ATTACK_UP_2") {
+    const spAtkUp = runCvSpAtkUp({
+      rng: input.rng,
+      attackerSpAtkStage: input.attacker.spAtkStage ?? DEFAULT_STAT_STAGE,
+      attackerHp: input.attacker.hp,
+      attackerMaxHp: input.attacker.maxHp,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: spAtkUp.rng,
+      draws: spAtkUp.draws,
+      scoreDelta: spAtkUp.scoreDelta,
     });
   }
 

@@ -720,6 +720,8 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
   const attackerForCbm: FactoryAiCheckBadMoveAttacker = Object.freeze({
     atkStage: view.attacker.statStages.atk,
     defStage: view.attacker.statStages.def,
+    speedStage: view.attacker.statStages.speed,
+    spAtkStage: view.attacker.statStages.spAtk,
   });
 
   const executedScoringScripts: ("check-bad-move" | "try-to-faint" | "check-viability")[] = [
@@ -799,6 +801,7 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
           atkStage: view.attacker.statStages.atk,
           defStage: view.attacker.statStages.def,
           spDefStage: view.attacker.statStages.spDef,
+          spAtkStage: view.attacker.statStages.spAtk,
           hp: view.attacker.hp,
           maxHp: view.attacker.maxHp,
           isRooted: view.attacker.isRooted,
