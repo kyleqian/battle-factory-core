@@ -13,6 +13,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ---
 ## 477 — Sixth CBM-blocked pair ported: `AI_CBM_AccDown` + `AI_CV_AccuracyDown` (doc §19, largest handler in this doc — 7 `if_random_less_than` sites)
 
+- **Side merge (same round, supervisor-verified ALL PASS live from the
+  worktree + green on the merged tree):** doc **§20 `AI_CBM_SpeedUp` +
+  `AI_CV_SpeedUp`** and **§21 `AI_CBM_SpAtkUp` + `AI_CV_SpAtkUp`** ground
+  truth banked (branch `worker/side-20260726-145534`, merged, worktree
+  removed). SpeedUp's true sibling is SpeedDown §6 (relative-Speed gate,
+  species-role swap: Crobat/Shuckle) not the HP-band pairs; SpAtkUp is
+  AttackUp's shape with DRAW SITE 3's constant 70 vs 40 (citation-level
+  correction to a naive copy). **Doc-wide confound catch:** CBM's
+  UNCONDITIONAL Soundproof-check prologue (`:47-58`) draws `get_ability`
+  for ANY dual-ability species independent of handler bodies — single-
+  ability species now a hard fixture rule (§20.4). Ledgers: SpeedUp 10/10
+  reach vs 6/6 control; SpAtkUp 10/10 vs 8/8; clean +4 attributions.
+  SpDefUp stretch not staged; groundwork flagged: separate
+  `AI_CBM_CosmicPower`/`AI_CBM_CalmMind` handlers (`:576-593`) and Gate F
+  `if_in_bytes` INVERTED vs DefenseUp's — the next scout's trap list.
+  24-fixture verify script ALL PASS ×2 (worker) + once by the supervisor.
+  Merged tree: **225 files / 2996 tests + build green.**
+
 - **State:** tree green at **225 files / 2996 tests** (+0 files/+35 tests
   over entry 476's 225/2961), build green (`tsc -b && vite build`). Ratchets
   **unmoved**: `executableFrontierRatchet.test.ts` (no new opcode — this
