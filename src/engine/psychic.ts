@@ -168,6 +168,26 @@ export function psychicAttackerEffectAtAge(age: number): PsychicAttackerEffect {
   };
 }
 
+/**
+ * Display-layer boundary fix, same shared mechanism as
+ * `confusion.ts`'s own `confusionAttackerShakeDisplayX2` (RAM-probed there
+ * this session, not re-probed for PSYCHIC independently - the family's own
+ * byte-identical script shape/argv already established every relative age
+ * transfers unchanged). `psychicAttackerEffectAtAge`'s own "+1" is a
+ * RAM-sample-alignment idiom only; the OAM shadow shows the shake task's
+ * raw creation-tick value (index 0) directly, one tick before the steady
+ * one-tick OAM-copy lag (index 1 onward) takes over.
+ */
+export function psychicAttackerShakeDisplayX2(displayAge: number): number {
+  return shakeMon2OffsetAtTick(
+    ATTACKER_SHAKE2.xOffset,
+    ATTACKER_SHAKE2.yOffset,
+    ATTACKER_SHAKE2.numTimes,
+    ATTACKER_SHAKE2.frameDelay,
+    displayAge - PSYCHIC_WINDOW1_START_AGE - 1,
+  ).x2;
+}
+
 export interface PsychicTargetEffect {
   readonly targetScale: Readonly<{ readonly active: boolean; readonly xScale: number; readonly yScale: number }>;
   readonly targetX2: number;

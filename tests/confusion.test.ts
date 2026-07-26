@@ -190,4 +190,19 @@ describe("MOVE_CONFUSION's sceneOnConfusionView display lag (this session's fix)
     // worse, growing tick176's residual from 33px to 881px).
     expect(viewAt(95).targetScale).toEqual({ active: false, xScale: 252, yScale: 252 });
   });
+
+  it("attacker shake shows the creation-tick transitional value one tick earlier than the old formula (frame119's own fix, RAM-probed via confusion-boundary-instrument.ts)", () => {
+    // age 37 (tick118): task not yet displayed - still 0.
+    expect(viewAt(37).attackerX2).toBe(0);
+    // age 38 (tick119): the OAM shadow already shows the shake task's raw
+    // pre-flip creation value (`shakeMon2Sequence`'s own index 0, +1 =
+    // xOffset) for exactly this one tick - RAM-confirmed directly, not the
+    // old formula's 0 ("not yet active") nor the steady-state -1. This was
+    // the dense comparator's own frame119 defect (777px bbox), now closed.
+    expect(viewAt(38).attackerX2).toBe(1);
+    // age 39/40 onward: the steady one-tick-lagged sequence read, unchanged.
+    expect(viewAt(39).attackerX2).toBe(-1);
+    expect(viewAt(40).attackerX2).toBe(-1);
+    expect(viewAt(41).attackerX2).toBe(1);
+  });
 });

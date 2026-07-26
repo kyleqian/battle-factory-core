@@ -131,6 +131,7 @@ import {
 } from "./futureSight.ts";
 import {
   confusionAttackerEffectAtAge,
+  confusionAttackerShakeDisplayX2,
   confusionBgBldyAtAge,
   confusionBgIsPsychic,
   confusionTargetEffectAtAge,
@@ -139,6 +140,7 @@ import {
 } from "./confusion.ts";
 import {
   psychicAttackerEffectAtAge,
+  psychicAttackerShakeDisplayX2,
   psychicBgBldyAtAge,
   psychicBgIsPsychic,
   psychicTargetEffectAtAge,
@@ -1480,31 +1482,39 @@ export function sceneOnConfusionView(
   // the strongest evidence available that -2 is the real mechanism for
   // both, not a coincidental curve-fit.
   const attackerTint = confusionAttackerEffectAtAge(state.age - 1);
-  const attackerShake = confusionAttackerEffectAtAge(state.age - 2);
   const targetEffect = confusionTargetEffectAtAge(state.age - 2);
-  // The active/inactive edge itself reaches the display one tick AHEAD of
-  // the numeric magnitude (dense-swept this session): the OAM's
-  // affineMode/objMode bits flip immediately when the task starts/stops
-  // (RAM-confirmed same-tick, no lag - see the OAM-scanline probe dump),
-  // so the "is this the blended, scaled OBJ or the plain one" edge only
-  // carries the generic one-tick capture lag, not the extra OAM-shadow hop
-  // that only affects the x2/matrix VALUES read while that mode is active.
+  // Boundary rung (this session, instrument-first via
+  // `tools/compare/scratch/confusion-boundary-instrument.ts` against fresh
+  // `dump-scale-window-oam-scanline.py` RAM: `confusionAttackerEffectAtAge`'s
+  // own "+1" is a RAM-SAMPLE-alignment idiom, not a display one - see its
+  // own doc). `confusionAttackerShakeDisplayX2` is the corrected display
+  // formula: no "+1" skip, `shakeMon2OffsetAtTick`'s own `tick<0` clamp
+  // handles "not yet created" directly, reproducing the genuine one-tick
+  // creation-boundary transitional value (frame119's own defect) that the
+  // old formula's over-eager zero-clamp missed.
+  const attackerX2 = confusionAttackerShakeDisplayX2(state.age);
+  // Tried this session, RAM-instrument in hand: unifying `active` onto the
+  // SAME age-2 read as the magnitude (removing the age-1 splice below
+  // entirely) was the natural "no genuine intermediate" hypothesis for
+  // frame147/176 too. Empirically refuted by the dense comparator: it left
+  // frame147 unchanged (1460px) and made frame176 far WORSE (33px -> 881px)
+  // - the same regression the original rung-13 session already found when
+  // forcing consistency the other direction. The active/inactive edge
+  // genuinely does reach the display one tick ahead of the magnitude across
+  // nearly the whole window (RAM-confirmed, `dump-scale-window-oam-scanline
+  // .py`); frame147/176 are the two ticks where that edge itself is off by
+  // one, not evidence the splice is wrong in general. Reverted to the
+  // proven splice; the window-2 boundary remainder stays open (see this
+  // session's own ANIMATION_PROGRESS.md entry) rather than trading a 3-frame
+  // remainder for a worse one via an unproven "shared" fix.
   const targetActive = confusionTargetEffectAtAge(state.age - 1).targetScale.active;
-  // Deliberately spliced from two different reads, not a bug: forcing
-  // xScale/yScale back to neutral 256 whenever this edge reads inactive
-  // (the "consistent" fix) was tried and made the dense comparator WORSE
-  // (tail residual grew from 33px to 881px at oracle tick 176) - real
-  // hardware's own OBJ still shows the outgoing magnitude for one tick
-  // after affineMode/objMode already flip off, the same one-tick
-  // objMode-vs-matrix gap FUTURE_SIGHT's own attacker scale documents
-  // (`attackerBlendActive`, this file's own FUTURE_SIGHT view above).
   const targetScale = { ...targetEffect.targetScale, active: targetActive };
   return {
     age: state.age,
     attacker: state.config.attacker,
     target: state.config.target,
     attackerObjY: attackerTint.attackerObjY,
-    attackerX2: attackerShake.attackerX2,
+    attackerX2,
     targetScale,
     targetX2: targetEffect.targetX2,
     bgBldy: confusionBgBldyAtAge(state.age),
@@ -1530,8 +1540,14 @@ export function sceneOnPsychicView(
     throw new Error(`expected PSYCHIC presentation, got ${state.config.move}`);
   }
   const attackerTint = psychicAttackerEffectAtAge(state.age - 1);
-  const attackerShake = psychicAttackerEffectAtAge(state.age - 2);
+  // Same shared window-1 boundary fix as `sceneOnConfusionView` (this
+  // session's own instrument, mirrored not re-probed - see
+  // `psychicAttackerShakeDisplayX2`'s own doc).
+  const attackerX2 = psychicAttackerShakeDisplayX2(state.age);
   const targetEffect = psychicTargetEffectAtAge(state.age - 2);
+  // Window-2's own active/magnitude splice is UNCHANGED (see
+  // `sceneOnConfusionView`'s own comment: unifying it was tried and
+  // empirically refuted this session, not applied here either).
   const targetActive = psychicTargetEffectAtAge(state.age - 1).targetScale.active;
   const targetScale = { ...targetEffect.targetScale, active: targetActive };
   return {
@@ -1539,7 +1555,7 @@ export function sceneOnPsychicView(
     attacker: state.config.attacker,
     target: state.config.target,
     attackerObjY: attackerTint.attackerObjY,
-    attackerX2: attackerShake.attackerX2,
+    attackerX2,
     targetScale,
     targetX2: targetEffect.targetX2,
     bgBldy: psychicBgBldyAtAge(state.age),

@@ -159,4 +159,12 @@ describe("MOVE_PSYCHIC's sceneOnPsychicView display lag", () => {
   it("the active/inactive edge leads the magnitude read by one more tick (same asymmetry as CONFUSION)", () => {
     expect(viewAt(66).targetScale).toEqual({ active: true, xScale: 256, yScale: 256 });
   });
+
+  it("attacker shake shows the creation-tick transitional value one tick earlier, same shared fix as CONFUSION's own frame119 (this move's own argv is byte-identical: xOffset=1)", () => {
+    expect(viewAt(37).attackerX2).toBe(0);
+    expect(viewAt(38).attackerX2).toBe(1);
+    expect(viewAt(39).attackerX2).toBe(-1);
+    expect(viewAt(40).attackerX2).toBe(-1);
+    expect(viewAt(41).attackerX2).toBe(1);
+  });
 });
