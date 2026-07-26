@@ -13,6 +13,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ---
 ## 471 — Seventh + eighth CheckViability handler pairs ported: AI_CBM_DefenseDown/AI_CV_DefenseDown + AI_CBM_SpDefDown/AI_CV_SpDefDown (doc §15/§16, mandatory + stretch both landed)
 
+- **Side merge (same round, supervisor-verified PASS live from the worktree
+  + green on the merged tree):** primary status-move opcode cluster
+  prep-scout banked (branch `worker/side-20260726-120123`, merged, worktree
+  removed) — `docs/status-cluster-ground-truth.md` +
+  `tools/probe/verify-status-cluster-ground-truth.ts` (PASS ×2 worker,
+  + once by the supervisor) + paralyze/sleep mechanicLab fixtures.
+  **Decisive census correction:** the census's named opcode set
+  (SETEFFECTPRIMARY + 4 jump opcodes) only fully unlocks EFFECT_SLEEP —
+  TOXIC/POISON/PARALYZE/CONFUSE additionally need `Cmd_jumpifability`
+  widened past its LIQUID_OOZE-only tuple
+  (`battleScriptIngrainLeechSeedWrapOpcode.ts:183-193`, supervisor-verified)
+  to IMMUNITY/LIMBER/OWN_TEMPO, and JUMPIFSTATUS2 widened for
+  STATUS2_CONFUSION — the census Caveats' "registered opcode, narrow-input
+  barrier" blind spot confirmed live. RNG ledgers pinned: Thunder Wave = 1
+  draw (accuracy only); Sleep Powder = accuracy + `(Random()&3)+2` duration
+  matching the existing sleep-decrement convention. All cluster opcodes
+  classified (a)-portable. Merged tree: **223 files / 2846 tests + build
+  green.**
+
 - **State:** tree green at **223 files / 2846 tests** (+0 files/+65 tests
   over entry 470's merged 222/2805 — no new files, existing CheckBadMove/
   CheckViability/ScoredDecision test files widened in place), build green
