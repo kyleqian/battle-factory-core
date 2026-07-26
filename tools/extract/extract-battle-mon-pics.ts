@@ -100,6 +100,9 @@ const BACK_SPECIES: Record<string, string> = {
   // MOVE_GROWTH's Level-50-legal attacker (FRONTIER_MON_IVYSAUR_1) needs its
   // own back pic for the player-side staged orientation.
   IVYSAUR: "ivysaur",
+  // MOVE_FUTURE_SIGHT's Level-50-legal attacker (FRONTIER_MON_KADABRA_1)
+  // needs its own back pic for the player-side staged orientation.
+  KADABRA: "kadabra",
 };
 const FRONT_SPECIES: Record<string, string> = {
   GROVYLE: "grovyle",

@@ -124,6 +124,12 @@ import {
   type GrowthAnimationState,
 } from "./growth.ts";
 import {
+  futureSightAttackerEffectAtAge,
+  futureSightBgBldyAtAge,
+  futureSightBgIsPsychic,
+  type FutureSightAttackerEffect,
+} from "./futureSight.ts";
+import {
   extremeSpeedAttackerAffineAtAge,
   extremeSpeedAttackerVisibleAtAge,
   extremeSpeedBackgroundAtAge,
@@ -202,7 +208,8 @@ export interface SceneOnPresentationBattler {
     | "DUGTRIO"
     | "CHARMELEON"
     | "HAUNTER"
-    | "IVYSAUR";
+    | "IVYSAUR"
+    | "KADABRA";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -597,6 +604,13 @@ export interface SceneOnGrowthConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnFutureSightConfig {
+  readonly move: "FUTURE_SIGHT";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export type SceneOnMoveConfig =
   | SceneOnFirePunchConfig
   | SceneOnIcePunchConfig
@@ -620,7 +634,8 @@ export type SceneOnMoveConfig =
   | SceneOnEmberConfig
   | SceneOnDragonRageConfig
   | SceneOnShadowPunchConfig
-  | SceneOnGrowthConfig;
+  | SceneOnGrowthConfig
+  | SceneOnFutureSightConfig;
 
 export interface SceneOnMovePresentationState<
   TConfig extends SceneOnMoveConfig = SceneOnMoveConfig,
@@ -901,6 +916,14 @@ export interface SceneOnGrowthView extends GrowthAnimationState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnFutureSightView extends FutureSightAttackerEffect {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly bgBldy: number;
+  readonly bgIsPsychic: boolean;
 }
 
 export interface SceneOnDragonRageFirePlume extends DragonRageFirePlumeState {
@@ -1312,6 +1335,33 @@ export function sceneOnGrowthView(
     target: state.config.target,
     attackerScale: scaleState.attackerScale,
     attackerObjY: tintState.attackerObjY,
+  };
+}
+
+/** `age` is ticks since `fadetobg BG_PSYCHIC`'s own creation tick (`futureSight.ts`'s module doc has the full RAM-probed derivation). */
+export function sceneOnFutureSightView(
+  state: SceneOnMovePresentationState,
+): SceneOnFutureSightView {
+  if (state.config.move !== "FUTURE_SIGHT") {
+    throw new Error(`expected FUTURE_SIGHT presentation, got ${state.config.move}`);
+  }
+  // Captured-framebuffer-lags-RAM-write, same class of latency as
+  // MOVE_GROWTH's own documented (scaleLag=2, tintLag=1) split for the
+  // identical blend_color_cycle+ScaleMonAndRestore attacker-tint/affine
+  // seam (sceneOnGrowthView's own module doc) - reused here since both
+  // moves drive the exact same drawSpriteSheetAffineStretch path; RAM/
+  // pixel-confirmed to transfer unchanged (tools/compare/
+  // futureSightPortable.ts against the dense fixture).
+  const scaleState = futureSightAttackerEffectAtAge(state.age - 2);
+  const tintState = futureSightAttackerEffectAtAge(state.age - 1);
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    attackerObjY: tintState.attackerObjY,
+    attackerScale: scaleState.attackerScale,
+    bgBldy: futureSightBgBldyAtAge(state.age),
+    bgIsPsychic: futureSightBgIsPsychic(state.age),
   };
 }
 

@@ -4,143 +4,534 @@
     {
       "move": "MOVE_DOUBLE_TEAM",
       "status": "exact",
-      "covered": ["canonical opponent-front GROVYLE complete clone/evasion-banner body (230/230)", "portable synthetic player-back ONIX complete clone/evasion-banner body at relative ages 0-229 / oracle frames 2337-2566 (230/230), including the opposite live clone tie order"],
-      "evidence": ["tools/compare/traces/turn1-cloneanim.json", "tools/compare/fixtures/double-team-onix-grovyle.json", "tools/compare/doubleTeamPortable.ts", "tools/probe/stage-fire-punch-portable-on.py", "docs/double-team-portable-staging-probe.md"]
+      "covered": [
+        "canonical opponent-front GROVYLE complete clone/evasion-banner body (230/230)",
+        "portable synthetic player-back ONIX complete clone/evasion-banner body at relative ages 0-229 / oracle frames 2337-2566 (230/230), including the opposite live clone tie order"
+      ],
+      "evidence": [
+        "tools/compare/traces/turn1-cloneanim.json",
+        "tools/compare/fixtures/double-team-onix-grovyle.json",
+        "tools/compare/doubleTeamPortable.ts",
+        "tools/probe/stage-fire-punch-portable-on.py",
+        "docs/double-team-portable-staging-probe.md"
+      ]
     },
     {
       "move": "MOVE_ROCK_SLIDE",
       "status": "exact",
-      "covered": ["canonical player-back ONIX to opponent-front GROVYLE, complete Scene-ON move/resolution window (256/256)", "staged Battle-2 OFF player-back ONIX to opponent-front KABUTO portability control (191/191)", "portable synthetic opponent-front GROVYLE to player-back ONIX, complete unique Move_ROCK_SLIDE body and generic hit handoff at relative ages 0-174 / oracle frames 1967-2141 (175/175) through the shared Scene-ON adapter"],
-      "evidence": ["tools/compare/traces/turn1-rockslide.json", "tools/compare/traces/battle2-turn1-rockslide.json", "tools/compare/fixtures/rock-slide-grovyle-onix.json", "tools/compare/rockSlidePortable.ts", "tools/probe/stage-fire-punch-portable-on.py", "docs/rock-slide-portable-staging-probe.md"]
+      "covered": [
+        "canonical player-back ONIX to opponent-front GROVYLE, complete Scene-ON move/resolution window (256/256)",
+        "staged Battle-2 OFF player-back ONIX to opponent-front KABUTO portability control (191/191)",
+        "portable synthetic opponent-front GROVYLE to player-back ONIX, complete unique Move_ROCK_SLIDE body and generic hit handoff at relative ages 0-174 / oracle frames 1967-2141 (175/175) through the shared Scene-ON adapter"
+      ],
+      "evidence": [
+        "tools/compare/traces/turn1-rockslide.json",
+        "tools/compare/traces/battle2-turn1-rockslide.json",
+        "tools/compare/fixtures/rock-slide-grovyle-onix.json",
+        "tools/compare/rockSlidePortable.ts",
+        "tools/probe/stage-fire-punch-portable-on.py",
+        "docs/rock-slide-portable-staging-probe.md"
+      ]
     },
     {
       "move": "MOVE_ENDEAVOR",
       "status": "exact",
-      "covered": ["canonical opponent-front GROVYLE to player-back ONIX, complete dense kickoff/body/generic-hit/HP-drain window at oracle frames 2894-3130 (237/237)", "portable synthetic player-back ONIX to opponent-front GROVYLE, complete move body plus generic-hit and immutable 143->117 HP-drain handoff at relative ages -2..138 / oracle frames 2345-2485 (141/141), including translated droplets/hitsplats, stale-power shake, front/back y-offset geometry, and opponent-healthbox OAM priority"],
-      "evidence": ["tools/compare/traces/turn2-endeavor-drain.json", "tools/compare/fixtures/endeavor-onix-grovyle.json", "tools/compare/endeavorPortable.ts", "tools/probe/stage-fire-punch-portable-on.py", "docs/endeavor-portable-staging-probe.md"]
+      "covered": [
+        "canonical opponent-front GROVYLE to player-back ONIX, complete dense kickoff/body/generic-hit/HP-drain window at oracle frames 2894-3130 (237/237)",
+        "portable synthetic player-back ONIX to opponent-front GROVYLE, complete move body plus generic-hit and immutable 143->117 HP-drain handoff at relative ages -2..138 / oracle frames 2345-2485 (141/141), including translated droplets/hitsplats, stale-power shake, front/back y-offset geometry, and opponent-healthbox OAM priority"
+      ],
+      "evidence": [
+        "tools/compare/traces/turn2-endeavor-drain.json",
+        "tools/compare/fixtures/endeavor-onix-grovyle.json",
+        "tools/compare/endeavorPortable.ts",
+        "tools/probe/stage-fire-punch-portable-on.py",
+        "docs/endeavor-portable-staging-probe.md"
+      ]
     },
     {
       "move": "MOVE_DRAGON_BREATH",
       "status": "exact",
-      "covered": ["player-back ONIX hit and airborne-target miss", "canonical player-back ONIX to opponent-front GROVYLE fire-projectile component at every render 3175-3235 (61/61): all eleven source spawns, shared fixed-point translation/affine/frame program, live-sprite OAM order, target monbg composition, and attacker-over-ember subpriority occlusion", "legal zero-PP-Up Level-50 Mechanics Lab complete move body in both orientations through the relative Scene-ON seam at ages -2..82: player-back ONIX to opponent-front MURKROW frames 395-479 (85/85 component and 85/85 framebuffer) and opponent-front ONIX to player-back MURKROW frames 449-533 (85/85 component and 85/85 framebuffer), pinning battler-coordinate translation, source duration/cadence, side-selected sprite flip and affine program, target-relative subpriority/OAM ordering, source-relative callback/OAM and BlendPalette display latches, faded target palette RAM for both 0→9→0 blend tasks, paired-hold target x2 shake, monbg acquisition/release, front/back sprite anchors, healthbox base composition, and personality-derived gender"],
-      "evidence": ["tools/compare/traces/turn2-dragonbreath.json", "tools/compare/traces/turn2-dragonbreath-projectiles.json", "tools/compare/traces/turn14-fly-miss.json", "tools/battle-lab/mechanic-dragon-breath-player-onix-opponent-murkrow.json", "tools/battle-lab/mechanic-dragon-breath-opponent-onix-player-murkrow.json", "tools/compare/fixtures/dragon-breath-player-onix-opponent-murkrow.json", "tools/compare/fixtures/dragon-breath-opponent-onix-player-murkrow.json", "tools/compare/dragonBreathPortable.ts", "src/engine/dragonBreath.ts", "src/engine/shakeMon2.ts", "tests/shakeMon2.test.ts", "tools/probe/dump-dragonbreath-anim.py", "tools/probe/verify-dragonbreath-spawn7-isolation.ts", "tools/probe/run-battle-lab-rgb.py", "docs/dragon-breath-notes.md"]
+      "covered": [
+        "player-back ONIX hit and airborne-target miss",
+        "canonical player-back ONIX to opponent-front GROVYLE fire-projectile component at every render 3175-3235 (61/61): all eleven source spawns, shared fixed-point translation/affine/frame program, live-sprite OAM order, target monbg composition, and attacker-over-ember subpriority occlusion",
+        "legal zero-PP-Up Level-50 Mechanics Lab complete move body in both orientations through the relative Scene-ON seam at ages -2..82: player-back ONIX to opponent-front MURKROW frames 395-479 (85/85 component and 85/85 framebuffer) and opponent-front ONIX to player-back MURKROW frames 449-533 (85/85 component and 85/85 framebuffer), pinning battler-coordinate translation, source duration/cadence, side-selected sprite flip and affine program, target-relative subpriority/OAM ordering, source-relative callback/OAM and BlendPalette display latches, faded target palette RAM for both 0→9→0 blend tasks, paired-hold target x2 shake, monbg acquisition/release, front/back sprite anchors, healthbox base composition, and personality-derived gender"
+      ],
+      "evidence": [
+        "tools/compare/traces/turn2-dragonbreath.json",
+        "tools/compare/traces/turn2-dragonbreath-projectiles.json",
+        "tools/compare/traces/turn14-fly-miss.json",
+        "tools/battle-lab/mechanic-dragon-breath-player-onix-opponent-murkrow.json",
+        "tools/battle-lab/mechanic-dragon-breath-opponent-onix-player-murkrow.json",
+        "tools/compare/fixtures/dragon-breath-player-onix-opponent-murkrow.json",
+        "tools/compare/fixtures/dragon-breath-opponent-onix-player-murkrow.json",
+        "tools/compare/dragonBreathPortable.ts",
+        "src/engine/dragonBreath.ts",
+        "src/engine/shakeMon2.ts",
+        "tests/shakeMon2.test.ts",
+        "tools/probe/dump-dragonbreath-anim.py",
+        "tools/probe/verify-dragonbreath-spawn7-isolation.ts",
+        "tools/probe/run-battle-lab-rgb.py",
+        "docs/dragon-breath-notes.md"
+      ]
     },
     {
       "move": "MOVE_FLAMETHROWER",
       "status": "exact",
-      "covered": ["legal zero-PP-Up Level-50 mechanicLab ONIX to MURKROW complete move-owned body in both orientations at source-relative ages -11..114: all 22 four-display-cadence gFlamethrowerFlameSpriteTemplate spawns, 29-state fixed-point translations, shared sine-timer phases, three-frame sheet loop, attacker/target AnimTask_ShakeMon programs, setalpha, monbg acquisition, and blendoff/clearmonbg teardown", "source-faithful reduced scene scheduler models lowest-free CreateSprite allocation, DestroySprite dummy reset, slot reuse, wrapped-y persistent stable sSpriteOrder insertion passes, and inherited equal-key tie order from one pre-allocation seed per orientation; RAM/OAM/order components match 126/126 in each orientation", "shared live Scene-ON compositor matches complete dense framebuffers 126/126 player-back ONIX to opponent-front MURKROW and 126/126 opponent-front ONIX to player-back MURKROW; generic hit, HP/result/status, and controller tails remain separately owned"],
-      "evidence": ["tools/battle-lab/mechanic-flamethrower-player-onix-opponent-murkrow.json", "tools/battle-lab/mechanic-flamethrower-opponent-onix-player-murkrow.json", "tools/compare/fixtures/flamethrower-player-onix-opponent-murkrow.json", "tools/compare/fixtures/flamethrower-opponent-onix-player-murkrow.json", "tools/compare/flamethrowerPortable.ts", "src/engine/flamethrower.ts", "src/engine/spriteOrder.ts", "tools/probe/run-battle-lab-rgb.py", "tests/flamethrower.test.ts", "tests/spriteOrder.test.ts"]
+      "covered": [
+        "legal zero-PP-Up Level-50 mechanicLab ONIX to MURKROW complete move-owned body in both orientations at source-relative ages -11..114: all 22 four-display-cadence gFlamethrowerFlameSpriteTemplate spawns, 29-state fixed-point translations, shared sine-timer phases, three-frame sheet loop, attacker/target AnimTask_ShakeMon programs, setalpha, monbg acquisition, and blendoff/clearmonbg teardown",
+        "source-faithful reduced scene scheduler models lowest-free CreateSprite allocation, DestroySprite dummy reset, slot reuse, wrapped-y persistent stable sSpriteOrder insertion passes, and inherited equal-key tie order from one pre-allocation seed per orientation; RAM/OAM/order components match 126/126 in each orientation",
+        "shared live Scene-ON compositor matches complete dense framebuffers 126/126 player-back ONIX to opponent-front MURKROW and 126/126 opponent-front ONIX to player-back MURKROW; generic hit, HP/result/status, and controller tails remain separately owned"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-flamethrower-player-onix-opponent-murkrow.json",
+        "tools/battle-lab/mechanic-flamethrower-opponent-onix-player-murkrow.json",
+        "tools/compare/fixtures/flamethrower-player-onix-opponent-murkrow.json",
+        "tools/compare/fixtures/flamethrower-opponent-onix-player-murkrow.json",
+        "tools/compare/flamethrowerPortable.ts",
+        "src/engine/flamethrower.ts",
+        "src/engine/spriteOrder.ts",
+        "tools/probe/run-battle-lab-rgb.py",
+        "tests/flamethrower.test.ts",
+        "tests/spriteOrder.test.ts"
+      ]
     },
     {
       "move": "MOVE_BLAZE_KICK",
       "status": "exact",
-      "covered": ["legal zero-PP-Up Level-50 mechanicLab ONIX to MURKROW in both source-required orientations", "complete 78-frame move-owned source interval at relative ages 0..77 / player oracle frames 399..476 and opponent oracle frames 453..530: shared monbg/setalpha lifetime, target AnimTask_ShakeMon2 display offsets, basic hitsplat lifetime, distinct spinning-foot lifetime, and all seven gFireSpreadSpriteTemplate fixed-point translations plus three-frame sheet program match 78/78 component frames in each orientation", "shared Scene-ON compositor matches 78/78 dense framebuffers in each orientation with zero exclusions: source HLE-BIOS affine/OAM matrices for gSpinningHandOrFootSpriteTemplate, target white ramps, whole-field black palette blend/restore, target-relative front/back geometry, immutable healthboxes, and persistent lowest-free allocation/order across the foot, hitsplat, invisible palette owner, and seven FireSpread sprites", "semi-transparent hitsplat composition uses the target-monbg plus field as target-2, excluding same-priority OBJ layers; exact DRAGON BREATH 85/85 both and FLAMETHROWER 126/126 both remain unchanged after fresh controls"],
-      "evidence": ["tools/battle-lab/mechanic-blaze-kick-player-onix-opponent-murkrow.json", "tools/battle-lab/mechanic-blaze-kick-opponent-onix-player-murkrow.json", "tools/compare/fixtures/blaze-kick-player-onix-opponent-murkrow.json", "tools/compare/fixtures/blaze-kick-opponent-onix-player-murkrow.json", "tools/compare/blazeKickPortable.ts", "src/engine/blazeKick.ts", "src/engine/spriteOrder.ts", "src/engine/sceneOnPresentation.ts", "src/engine/shakeMon2.ts", "tests/blazeKick.test.ts", "tests/spriteOrder.test.ts", "tests/shakeMon2.test.ts", "tools/probe/run-battle-lab-rgb.py"]
+      "covered": [
+        "legal zero-PP-Up Level-50 mechanicLab ONIX to MURKROW in both source-required orientations",
+        "complete 78-frame move-owned source interval at relative ages 0..77 / player oracle frames 399..476 and opponent oracle frames 453..530: shared monbg/setalpha lifetime, target AnimTask_ShakeMon2 display offsets, basic hitsplat lifetime, distinct spinning-foot lifetime, and all seven gFireSpreadSpriteTemplate fixed-point translations plus three-frame sheet program match 78/78 component frames in each orientation",
+        "shared Scene-ON compositor matches 78/78 dense framebuffers in each orientation with zero exclusions: source HLE-BIOS affine/OAM matrices for gSpinningHandOrFootSpriteTemplate, target white ramps, whole-field black palette blend/restore, target-relative front/back geometry, immutable healthboxes, and persistent lowest-free allocation/order across the foot, hitsplat, invisible palette owner, and seven FireSpread sprites",
+        "semi-transparent hitsplat composition uses the target-monbg plus field as target-2, excluding same-priority OBJ layers; exact DRAGON BREATH 85/85 both and FLAMETHROWER 126/126 both remain unchanged after fresh controls"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-blaze-kick-player-onix-opponent-murkrow.json",
+        "tools/battle-lab/mechanic-blaze-kick-opponent-onix-player-murkrow.json",
+        "tools/compare/fixtures/blaze-kick-player-onix-opponent-murkrow.json",
+        "tools/compare/fixtures/blaze-kick-opponent-onix-player-murkrow.json",
+        "tools/compare/blazeKickPortable.ts",
+        "src/engine/blazeKick.ts",
+        "src/engine/spriteOrder.ts",
+        "src/engine/sceneOnPresentation.ts",
+        "src/engine/shakeMon2.ts",
+        "tests/blazeKick.test.ts",
+        "tests/spriteOrder.test.ts",
+        "tests/shakeMon2.test.ts",
+        "tools/probe/run-battle-lab-rgb.py"
+      ]
     },
     {
       "move": "MOVE_FEATHER_DANCE",
       "status": "exact",
-      "covered": ["opponent-front PIDGEOTTO to player-back ONIX", "portable mechanicLab opponent-front PIDGEOTTO to player-back ONIX at relative ages 7-406 / oracle frames 46-445 (400/400): complete kickoff printer, source-spawned eight-feather body, every affine/lifetime frame, script teardown, generic ATK-decrease banner, fully typed and held sharply-fell message, and stable next-controller boundary with gCurrentMove cleared through the shared Scene-ON adapter", "portable mechanicLab player-back PIDGEOTTO to opponent-front ONIX at relative ages 7-406 / oracle frames 46-445 (400/400): complete opposite-side kickoff/body/banner/result/controller window; source and dense RAM evidence pin +104/-40 target-anchor translation, -1 GetBattlerSpriteBGPriority shift, front-target depth cutoff, player/opponent sprite offsets and healthbox genders/orientation, and the source-derived four-frame animation/banner/message head start whose longer Foe-prefixed result preserves the shared age-406 controller boundary; immutable 6→4 stat-stage inputs and both side-parametric geometries are Tier-1 pinned", "2026-07-24 anim-script interpreter spike (ANIMATION_PROGRESS.md): the eight-feather body's implementation unit is now a minimal interpreter over the committed `battle-move-anim-scripts.json` FEATHER_DANCE command stream plus a direct port of AnimFallingFeather/_Step (src/engine/featherDance.ts) - NOT a recorded per-tick RAM table. Reproduces all three committed feather traces (turns 6/7/8) field-for-field at their recorded counts, including each sprite's own natural self-destroy tick (matches the old hand-recorded 7557/8591/9637 cutoffs exactly, now derived from physics, no per-turn constant). ISSUES #40 retired."],
-      "evidence": ["tools/compare/traces/turn6-featherdance.json", "tools/compare/traces/turn6-feathers.json", "tools/compare/traces/turn7-feathers.json", "tools/compare/traces/turn8-feathers.json", "tools/battle-lab/mechanic-feather-dance-pidgeotto-onix.json", "tools/battle-lab/mechanic-feather-dance-player-pidgeotto-onix.json", "tools/compare/fixtures/feather-dance-pidgeotto-onix.json", "tools/compare/fixtures/feather-dance-player-pidgeotto-onix.json", "tools/compare/featherDancePortable.ts", "tools/probe/run-battle-lab-rgb.py", "src/engine/featherDance.ts", "src/data/gen/battle-move-anim-scripts.json", "tools/extract/extract-battle-move-anim-assets.ts", "tests/featherDanceInterpreter.test.ts"]
+      "covered": [
+        "opponent-front PIDGEOTTO to player-back ONIX",
+        "portable mechanicLab opponent-front PIDGEOTTO to player-back ONIX at relative ages 7-406 / oracle frames 46-445 (400/400): complete kickoff printer, source-spawned eight-feather body, every affine/lifetime frame, script teardown, generic ATK-decrease banner, fully typed and held sharply-fell message, and stable next-controller boundary with gCurrentMove cleared through the shared Scene-ON adapter",
+        "portable mechanicLab player-back PIDGEOTTO to opponent-front ONIX at relative ages 7-406 / oracle frames 46-445 (400/400): complete opposite-side kickoff/body/banner/result/controller window; source and dense RAM evidence pin +104/-40 target-anchor translation, -1 GetBattlerSpriteBGPriority shift, front-target depth cutoff, player/opponent sprite offsets and healthbox genders/orientation, and the source-derived four-frame animation/banner/message head start whose longer Foe-prefixed result preserves the shared age-406 controller boundary; immutable 6→4 stat-stage inputs and both side-parametric geometries are Tier-1 pinned",
+        "2026-07-24 anim-script interpreter spike (ANIMATION_PROGRESS.md): the eight-feather body's implementation unit is now a minimal interpreter over the committed `battle-move-anim-scripts.json` FEATHER_DANCE command stream plus a direct port of AnimFallingFeather/_Step (src/engine/featherDance.ts) - NOT a recorded per-tick RAM table. Reproduces all three committed feather traces (turns 6/7/8) field-for-field at their recorded counts, including each sprite's own natural self-destroy tick (matches the old hand-recorded 7557/8591/9637 cutoffs exactly, now derived from physics, no per-turn constant). ISSUES #40 retired."
+      ],
+      "evidence": [
+        "tools/compare/traces/turn6-featherdance.json",
+        "tools/compare/traces/turn6-feathers.json",
+        "tools/compare/traces/turn7-feathers.json",
+        "tools/compare/traces/turn8-feathers.json",
+        "tools/battle-lab/mechanic-feather-dance-pidgeotto-onix.json",
+        "tools/battle-lab/mechanic-feather-dance-player-pidgeotto-onix.json",
+        "tools/compare/fixtures/feather-dance-pidgeotto-onix.json",
+        "tools/compare/fixtures/feather-dance-player-pidgeotto-onix.json",
+        "tools/compare/featherDancePortable.ts",
+        "tools/probe/run-battle-lab-rgb.py",
+        "src/engine/featherDance.ts",
+        "src/data/gen/battle-move-anim-scripts.json",
+        "tools/extract/extract-battle-move-anim-assets.ts",
+        "tests/featherDanceInterpreter.test.ts"
+      ]
     },
     {
       "move": "MOVE_BIND",
       "status": "exact",
-      "covered": ["player-back ONIX miss", "legal zero-PP-Up player-back ONIX hit to opponent-front MURKROW", "complete player-back attacker source-owned sway/two-squeeze body at relative ages 0-44 / oracle frames 382-426 through the shared Scene-ON seam: source task/OAM state 45/45 and live framebuffer 45/45", "legal zero-PP-Up opponent-front ONIX hit to player-back MURKROW", "complete opposite-orientation move-owned body at relative ages 0-44 / oracle frames 436-480 through the shared Scene-ON seam: source task/OAM state 45/45 and live framebuffer 45/45, including amplitude negation before signed Q8.8 rounding and both back-target affine programs", "move-owned body remains separated from generic hit/HP/result controller tails and the later trapped residual lifecycle"],
-      "evidence": ["tools/compare/traces/turn8-bind-a.json", "tools/compare/traces/turn8-bind-b.json", "tools/battle-lab/mechanic-bind-player-onix-opponent-murkrow.json", "tools/battle-lab/mechanic-bind-opponent-onix-player-murkrow.json", "tools/compare/fixtures/bind-player-onix-opponent-murkrow.json", "tools/compare/fixtures/bind-opponent-onix-player-murkrow.json", "tools/compare/bindPortable.ts", "src/engine/bind.ts", "tests/bind.test.ts", "tools/probe/run-battle-lab-rgb.py", "docs/bind-portable-staging-probe.md"]
+      "covered": [
+        "player-back ONIX miss",
+        "legal zero-PP-Up player-back ONIX hit to opponent-front MURKROW",
+        "complete player-back attacker source-owned sway/two-squeeze body at relative ages 0-44 / oracle frames 382-426 through the shared Scene-ON seam: source task/OAM state 45/45 and live framebuffer 45/45",
+        "legal zero-PP-Up opponent-front ONIX hit to player-back MURKROW",
+        "complete opposite-orientation move-owned body at relative ages 0-44 / oracle frames 436-480 through the shared Scene-ON seam: source task/OAM state 45/45 and live framebuffer 45/45, including amplitude negation before signed Q8.8 rounding and both back-target affine programs",
+        "move-owned body remains separated from generic hit/HP/result controller tails and the later trapped residual lifecycle"
+      ],
+      "evidence": [
+        "tools/compare/traces/turn8-bind-a.json",
+        "tools/compare/traces/turn8-bind-b.json",
+        "tools/battle-lab/mechanic-bind-player-onix-opponent-murkrow.json",
+        "tools/battle-lab/mechanic-bind-opponent-onix-player-murkrow.json",
+        "tools/compare/fixtures/bind-player-onix-opponent-murkrow.json",
+        "tools/compare/fixtures/bind-opponent-onix-player-murkrow.json",
+        "tools/compare/bindPortable.ts",
+        "src/engine/bind.ts",
+        "tests/bind.test.ts",
+        "tools/probe/run-battle-lab-rgb.py",
+        "docs/bind-portable-staging-probe.md"
+      ]
     },
     {
       "move": "MOVE_QUICK_ATTACK",
       "status": "exact",
-      "covered": ["opponent-front PIDGEOTTO to player-back ONIX", "portable mechanicLab opponent-front PIDGEOTTO to player-back ONIX at relative ages 7-225 / oracle frames 46-264 (219/219): complete kickoff printer, source-relative elliptical travel, all four blended afterimages, impact, six-cycle target-shake display latch, move-script teardown, generic hit healthbox wobble and target blink, immutable 117→111 HP drain, fully typed and held not-very-effective result, animation/controller command release, and gCurrentMove cleanup to MOVE_NONE at the stable pre-next-move boundary through the shared Scene-ON adapter; controller-relative clocks, immutable HP endpoints, and explicit geometry are Tier-1 pinned. Oracle provenance: harness 96603ae (2026-07-24 06:08) moved mechanicLab loadout overrides before initial action choices; the refreshed source-ROM control deterministically resolves 117→111.", "portable mechanicLab player-back PIDGEOTTO to opponent-front ONIX at relative ages 7-220 / oracle frames 46-259 (214/214): complete contiguous kickoff/body/controller window through the shared Scene-ON adapter, including source-signed monbg ellipse travel, blended TraceMon OBJ lives and ordering, target base offset, impact/shake ordering, generic hit, immutable 117→111 HP drain, fully typed and held not-very-effective result, command release, and MOVE_NONE cleanup; the preserved kickoff and controller subwindows remain independently exact at 41/41 and 158/158, and signed fixed-point side asymmetry plus the body ordering boundary are Tier-1 pinned"],
-      "evidence": ["tools/compare/traces/turn9-quickattack.json", "tools/battle-lab/mechanic-quick-attack-pidgeotto-onix.json", "tools/battle-lab/mechanic-quick-attack-player-pidgeotto-onix.json", "tools/compare/fixtures/quick-attack-pidgeotto-onix.json", "tools/compare/fixtures/quick-attack-player-pidgeotto-onix.json", "tools/compare/fixtures/quick-attack-player-pidgeotto-onix-controller.json", "tools/compare/quickAttackPortable.ts", "tools/probe/run-battle-lab-rgb.py"]
+      "covered": [
+        "opponent-front PIDGEOTTO to player-back ONIX",
+        "portable mechanicLab opponent-front PIDGEOTTO to player-back ONIX at relative ages 7-225 / oracle frames 46-264 (219/219): complete kickoff printer, source-relative elliptical travel, all four blended afterimages, impact, six-cycle target-shake display latch, move-script teardown, generic hit healthbox wobble and target blink, immutable 117→111 HP drain, fully typed and held not-very-effective result, animation/controller command release, and gCurrentMove cleanup to MOVE_NONE at the stable pre-next-move boundary through the shared Scene-ON adapter; controller-relative clocks, immutable HP endpoints, and explicit geometry are Tier-1 pinned. Oracle provenance: harness 96603ae (2026-07-24 06:08) moved mechanicLab loadout overrides before initial action choices; the refreshed source-ROM control deterministically resolves 117→111.",
+        "portable mechanicLab player-back PIDGEOTTO to opponent-front ONIX at relative ages 7-220 / oracle frames 46-259 (214/214): complete contiguous kickoff/body/controller window through the shared Scene-ON adapter, including source-signed monbg ellipse travel, blended TraceMon OBJ lives and ordering, target base offset, impact/shake ordering, generic hit, immutable 117→111 HP drain, fully typed and held not-very-effective result, command release, and MOVE_NONE cleanup; the preserved kickoff and controller subwindows remain independently exact at 41/41 and 158/158, and signed fixed-point side asymmetry plus the body ordering boundary are Tier-1 pinned"
+      ],
+      "evidence": [
+        "tools/compare/traces/turn9-quickattack.json",
+        "tools/battle-lab/mechanic-quick-attack-pidgeotto-onix.json",
+        "tools/battle-lab/mechanic-quick-attack-player-pidgeotto-onix.json",
+        "tools/compare/fixtures/quick-attack-pidgeotto-onix.json",
+        "tools/compare/fixtures/quick-attack-player-pidgeotto-onix.json",
+        "tools/compare/fixtures/quick-attack-player-pidgeotto-onix-controller.json",
+        "tools/compare/quickAttackPortable.ts",
+        "tools/probe/run-battle-lab-rgb.py"
+      ]
     },
     {
       "move": "MOVE_EXTREME_SPEED",
       "status": "exact",
-      "covered": ["legal zero-PP-Up Level-50 Mechanics Lab ARCANINE to DUGTRIO in both source-selected attacker orientations", "opponent-front ARCANINE to player-back DUGTRIO complete retained move-owned source window at animation ages 52-354 / oracle frames 91-393 (303/303 RGB)", "player-back ARCANINE to opponent-front DUGTRIO complete opposite-orientation move-owned source window at animation ages 52-354 / oracle frames 87-389 (303/303 RGB), including the four-frame move-printer offset", "source GPU/RAM evidence pins BLDCNT=0xE8, the opening and restore display latches, visible BG3HOFS one VBlank behind the signed ±9 px task accumulator, 256px text-BG wrapping, and BG_HIGHSPEED_{PLAYER,OPPONENT} selection by the attacked side", "the affine reducer reuses all eight steps of source command (96,-13,0,8), affine-double OAM sampling, and SetBattlerSpriteYOffsetFromYScale with source front/back y_offsets 2/6", "the complete contact/recovery body uses three animation-3 mon-edge hitsplats with frozen creation geometry, reciprocal OAM matrix and live 12:8 alpha; source-signed initial/return target displacement with unsigned +6/-6 pulses under opponent-target monbg; all 24 BATTLER_COORD dust spawns with final-frame destruction and blink/hold display epochs; fourteen-toggle attacker reappearance; and restore/script cleanup without an absolute battle clock", "generic hit, HP/result/status, and controller tails remain separately owned and do not participate in this move-level promotion"],
-      "evidence": ["tools/battle-lab/mechanic-extreme-speed-arcanine-dugtrio.json", "tools/battle-lab/mechanic-extreme-speed-player-arcanine-dugtrio.json", "tools/compare/fixtures/extreme-speed-arcanine-dugtrio.json", "tools/compare/fixtures/extreme-speed-player-arcanine-dugtrio.json", "tools/compare/extremeSpeedPortable.ts", "tools/probe/run-battle-lab-rgb.py", "src/engine/extremeSpeed.ts", "src/assets/gen/battle-anim-extreme-speed.json", "src/assets/gen/battle-anim-hitsplat.json", "tests/extremeSpeed.test.ts"]
+      "covered": [
+        "legal zero-PP-Up Level-50 Mechanics Lab ARCANINE to DUGTRIO in both source-selected attacker orientations",
+        "opponent-front ARCANINE to player-back DUGTRIO complete retained move-owned source window at animation ages 52-354 / oracle frames 91-393 (303/303 RGB)",
+        "player-back ARCANINE to opponent-front DUGTRIO complete opposite-orientation move-owned source window at animation ages 52-354 / oracle frames 87-389 (303/303 RGB), including the four-frame move-printer offset",
+        "source GPU/RAM evidence pins BLDCNT=0xE8, the opening and restore display latches, visible BG3HOFS one VBlank behind the signed ±9 px task accumulator, 256px text-BG wrapping, and BG_HIGHSPEED_{PLAYER,OPPONENT} selection by the attacked side",
+        "the affine reducer reuses all eight steps of source command (96,-13,0,8), affine-double OAM sampling, and SetBattlerSpriteYOffsetFromYScale with source front/back y_offsets 2/6",
+        "the complete contact/recovery body uses three animation-3 mon-edge hitsplats with frozen creation geometry, reciprocal OAM matrix and live 12:8 alpha; source-signed initial/return target displacement with unsigned +6/-6 pulses under opponent-target monbg; all 24 BATTLER_COORD dust spawns with final-frame destruction and blink/hold display epochs; fourteen-toggle attacker reappearance; and restore/script cleanup without an absolute battle clock",
+        "generic hit, HP/result/status, and controller tails remain separately owned and do not participate in this move-level promotion"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-extreme-speed-arcanine-dugtrio.json",
+        "tools/battle-lab/mechanic-extreme-speed-player-arcanine-dugtrio.json",
+        "tools/compare/fixtures/extreme-speed-arcanine-dugtrio.json",
+        "tools/compare/fixtures/extreme-speed-player-arcanine-dugtrio.json",
+        "tools/compare/extremeSpeedPortable.ts",
+        "tools/probe/run-battle-lab-rgb.py",
+        "src/engine/extremeSpeed.ts",
+        "src/assets/gen/battle-anim-extreme-speed.json",
+        "src/assets/gen/battle-anim-hitsplat.json",
+        "tests/extremeSpeed.test.ts"
+      ]
     },
     {
       "move": "MOVE_AERIAL_ACE",
       "status": "exact",
-      "covered": ["canonical opponent-front PIDGEOTTO to player-back ONIX (93/93)", "portable legal zero-PP-Up opponent-front PIDGEOTTO to player-back ONIX at relative ages 7-242 / oracle frames 46-281 (236/236): complete kickoff, independent cutting-slice/ellipse/TraceMon/palette/shake body, generic hit, immutable 117->108 HP drain, result printer, command release, and MOVE_NONE cleanup", "portable legal zero-PP-Up player-back PIDGEOTTO to opponent-front ONIX at relative ages 7-238 / oracle frames 46-277 (232/232): complete opposite-side window through the shared seam, including source target-anchored slice geometry, signed ellipse, independent clone OAM order, opponent-front monbg base-corner handoff, immutable 117->108 result, and MOVE_NONE cleanup"],
-      "evidence": ["tools/compare/traces/turn10-aerialace.json", "tools/battle-lab/mechanic-aerial-ace-pidgeotto-onix.json", "tools/battle-lab/mechanic-aerial-ace-player-pidgeotto-onix.json", "tools/compare/fixtures/aerial-ace-pidgeotto-onix.json", "tools/compare/fixtures/aerial-ace-player-pidgeotto-onix.json", "tools/compare/aerialAcePortable.ts", "docs/aerial-ace-portable-staging-probe.md"]
+      "covered": [
+        "canonical opponent-front PIDGEOTTO to player-back ONIX (93/93)",
+        "portable legal zero-PP-Up opponent-front PIDGEOTTO to player-back ONIX at relative ages 7-242 / oracle frames 46-281 (236/236): complete kickoff, independent cutting-slice/ellipse/TraceMon/palette/shake body, generic hit, immutable 117->108 HP drain, result printer, command release, and MOVE_NONE cleanup",
+        "portable legal zero-PP-Up player-back PIDGEOTTO to opponent-front ONIX at relative ages 7-238 / oracle frames 46-277 (232/232): complete opposite-side window through the shared seam, including source target-anchored slice geometry, signed ellipse, independent clone OAM order, opponent-front monbg base-corner handoff, immutable 117->108 result, and MOVE_NONE cleanup"
+      ],
+      "evidence": [
+        "tools/compare/traces/turn10-aerialace.json",
+        "tools/battle-lab/mechanic-aerial-ace-pidgeotto-onix.json",
+        "tools/battle-lab/mechanic-aerial-ace-player-pidgeotto-onix.json",
+        "tools/compare/fixtures/aerial-ace-pidgeotto-onix.json",
+        "tools/compare/fixtures/aerial-ace-player-pidgeotto-onix.json",
+        "tools/compare/aerialAcePortable.ts",
+        "docs/aerial-ace-portable-staging-probe.md"
+      ]
     },
     {
       "move": "MOVE_SAND_ATTACK",
       "status": "exact",
-      "covered": ["canonical opponent-front PIDGEOTTO to player-back ONIX (190/190)", "portable legal zero-PP-Up opponent-front PIDGEOTTO to player-back ONIX at relative ages 7-275 / oracle frames 46-314 (269/269): complete kickoff, signed attacker slide, six RNG-resolved five-dirt waves with live stable SortSprites ordering, generic accuracy-decrease banner, fully typed result, controller command release, and MOVE_NONE cleanup", "portable legal zero-PP-Up player-back PIDGEOTTO to opponent-front ONIX at relative ages 7-275 / oracle frames 46-314 (269/269): complete opposite-side window through the shared seam, including source-signed player slide rounding, signed X/Y dirt velocity words, four-frame body head start, generic Foe-prefixed accuracy result, command release, and MOVE_NONE cleanup"],
-      "evidence": ["tools/compare/traces/turn13-sandattack.json", "tools/battle-lab/mechanic-sand-attack-pidgeotto-onix.json", "tools/battle-lab/mechanic-sand-attack-player-pidgeotto-onix.json", "tools/compare/fixtures/sand-attack-pidgeotto-onix.json", "tools/compare/fixtures/sand-attack-player-pidgeotto-onix.json", "tools/compare/sandAttackPortable.ts", "tools/probe/run-battle-lab-rgb.py"]
+      "covered": [
+        "canonical opponent-front PIDGEOTTO to player-back ONIX (190/190)",
+        "portable legal zero-PP-Up opponent-front PIDGEOTTO to player-back ONIX at relative ages 7-275 / oracle frames 46-314 (269/269): complete kickoff, signed attacker slide, six RNG-resolved five-dirt waves with live stable SortSprites ordering, generic accuracy-decrease banner, fully typed result, controller command release, and MOVE_NONE cleanup",
+        "portable legal zero-PP-Up player-back PIDGEOTTO to opponent-front ONIX at relative ages 7-275 / oracle frames 46-314 (269/269): complete opposite-side window through the shared seam, including source-signed player slide rounding, signed X/Y dirt velocity words, four-frame body head start, generic Foe-prefixed accuracy result, command release, and MOVE_NONE cleanup"
+      ],
+      "evidence": [
+        "tools/compare/traces/turn13-sandattack.json",
+        "tools/battle-lab/mechanic-sand-attack-pidgeotto-onix.json",
+        "tools/battle-lab/mechanic-sand-attack-player-pidgeotto-onix.json",
+        "tools/compare/fixtures/sand-attack-pidgeotto-onix.json",
+        "tools/compare/fixtures/sand-attack-player-pidgeotto-onix.json",
+        "tools/compare/sandAttackPortable.ts",
+        "tools/probe/run-battle-lab-rgb.py"
+      ]
     },
     {
       "move": "MOVE_MUD_SLAP",
       "status": "exact",
-      "covered": ["legal zero-PP-Up Level-50 Mechanics Lab PIDGEOTTO to ONIX in both orientations", "complete opponent-front move-owned body at relative animation ages 45-95 / oracle frames 84-134: shared signed slide choreography, six independently modeled five-mud waves, 16x16 frame-1 geometry, source callback-to-display latch, live OAM ordering, and RGB exact at 51/51 each", "complete player-back opposite-side body at relative animation ages 45-95 / oracle frames 80-130: signed fixed-point translation, player-attacker-over-mud-over-opponent-target OAM depth, source OAM and RGB exact at 51/51 each", "generic hit, HP damage, accuracy result, and controller tails remain separately owned and do not form part of the source move-animation script body"],
-      "evidence": ["tools/battle-lab/mechanic-mud-slap-pidgeotto-onix.json", "tools/battle-lab/mechanic-mud-slap-player-pidgeotto-onix.json", "tools/compare/fixtures/mud-slap-pidgeotto-onix.json", "tools/compare/fixtures/mud-slap-player-pidgeotto-onix.json", "tools/compare/sandAttackPortable.ts", "tools/probe/run-battle-lab-rgb.py", "src/engine/mudSandSlide.ts", "src/engine/mudSlap.ts", "tests/mudSlap.test.ts"]
+      "covered": [
+        "legal zero-PP-Up Level-50 Mechanics Lab PIDGEOTTO to ONIX in both orientations",
+        "complete opponent-front move-owned body at relative animation ages 45-95 / oracle frames 84-134: shared signed slide choreography, six independently modeled five-mud waves, 16x16 frame-1 geometry, source callback-to-display latch, live OAM ordering, and RGB exact at 51/51 each",
+        "complete player-back opposite-side body at relative animation ages 45-95 / oracle frames 80-130: signed fixed-point translation, player-attacker-over-mud-over-opponent-target OAM depth, source OAM and RGB exact at 51/51 each",
+        "generic hit, HP damage, accuracy result, and controller tails remain separately owned and do not form part of the source move-animation script body"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-mud-slap-pidgeotto-onix.json",
+        "tools/battle-lab/mechanic-mud-slap-player-pidgeotto-onix.json",
+        "tools/compare/fixtures/mud-slap-pidgeotto-onix.json",
+        "tools/compare/fixtures/mud-slap-player-pidgeotto-onix.json",
+        "tools/compare/sandAttackPortable.ts",
+        "tools/probe/run-battle-lab-rgb.py",
+        "src/engine/mudSandSlide.ts",
+        "src/engine/mudSlap.ts",
+        "tests/mudSlap.test.ts"
+      ]
     },
     {
       "move": "MOVE_FLY",
       "status": "exact",
-      "covered": ["canonical opponent-front MURKROW charge/miss window (213/213 with the seven formerly excluded opening frames restored) and strike (256/256)", "legal zero-PP-Up Level-50 mechanicLab two-turn staging in both orientations", "source-derived player-back MURKROW art plus a source-relative shared-seam framebuffer/controller adapter for both orientations: charge disappearance/lifetime, side-parametric strike origin, source Q8.8 direction-bit parity, affine matrix, AnimTask_ShakeMon/Task_UpdateMonBg target-x2 ownership, persistent equal-priority OAM ordering, semitransparent OBJ-to-next-eligible-backdrop composition, impact/shake, attacker reappearance, healthboxes, immutable HP display, move/result printers, and current-move cleanup", "portable opponent-front MURKROW to player-back ONIX complete charge at oracle frames 47-197 (151/151, zero exclusions) and complete strike/controller cleanup at frames 485-732 (248/248)", "portable player-back MURKROW to opponent-front ONIX complete charge at oracle frames 47-193 (147/147, zero exclusions) and complete strike/controller cleanup at frames 384-627 (244/244); the prior 24-pixel residual was a staged-gender mismatch against the oracle personality, while the frame-441 overlap is resolved by the reusable OAM selection and semitransparent backdrop rule", "the first seven canonical charge frames reuse the already-proven opponent terrain cutoff at screen y=74 through the generic affine-stretch clip parameter; fresh pixel samples show the oracle retains terrain colors there, so the prior affine-sampler attribution was false"],
-      "evidence": ["tools/compare/traces/turn14-fly-miss.json", "tools/compare/traces/turn15-fly-strike.json", "tools/battle-lab/mechanic-fly-murkrow-onix.json", "tools/battle-lab/mechanic-fly-player-murkrow-onix.json", "tools/compare/fixtures/fly-murkrow-onix-charge.json", "tools/compare/fixtures/fly-murkrow-onix-strike.json", "tools/compare/fixtures/fly-player-murkrow-onix-charge.json", "tools/compare/fixtures/fly-player-murkrow-onix-strike.json", "tools/compare/flyPortable.ts", "src/engine/fly.ts", "tools/probe/dump-fly-anim.py", "tools/probe/verify-turn14-flyup-opening.ts", "tools/probe/run-battle-lab-rgb.py", "docs/fly-portable-staging-probe.md", "docs/turn14-flyup-opening-probe.md"]
+      "covered": [
+        "canonical opponent-front MURKROW charge/miss window (213/213 with the seven formerly excluded opening frames restored) and strike (256/256)",
+        "legal zero-PP-Up Level-50 mechanicLab two-turn staging in both orientations",
+        "source-derived player-back MURKROW art plus a source-relative shared-seam framebuffer/controller adapter for both orientations: charge disappearance/lifetime, side-parametric strike origin, source Q8.8 direction-bit parity, affine matrix, AnimTask_ShakeMon/Task_UpdateMonBg target-x2 ownership, persistent equal-priority OAM ordering, semitransparent OBJ-to-next-eligible-backdrop composition, impact/shake, attacker reappearance, healthboxes, immutable HP display, move/result printers, and current-move cleanup",
+        "portable opponent-front MURKROW to player-back ONIX complete charge at oracle frames 47-197 (151/151, zero exclusions) and complete strike/controller cleanup at frames 485-732 (248/248)",
+        "portable player-back MURKROW to opponent-front ONIX complete charge at oracle frames 47-193 (147/147, zero exclusions) and complete strike/controller cleanup at frames 384-627 (244/244); the prior 24-pixel residual was a staged-gender mismatch against the oracle personality, while the frame-441 overlap is resolved by the reusable OAM selection and semitransparent backdrop rule",
+        "the first seven canonical charge frames reuse the already-proven opponent terrain cutoff at screen y=74 through the generic affine-stretch clip parameter; fresh pixel samples show the oracle retains terrain colors there, so the prior affine-sampler attribution was false"
+      ],
+      "evidence": [
+        "tools/compare/traces/turn14-fly-miss.json",
+        "tools/compare/traces/turn15-fly-strike.json",
+        "tools/battle-lab/mechanic-fly-murkrow-onix.json",
+        "tools/battle-lab/mechanic-fly-player-murkrow-onix.json",
+        "tools/compare/fixtures/fly-murkrow-onix-charge.json",
+        "tools/compare/fixtures/fly-murkrow-onix-strike.json",
+        "tools/compare/fixtures/fly-player-murkrow-onix-charge.json",
+        "tools/compare/fixtures/fly-player-murkrow-onix-strike.json",
+        "tools/compare/flyPortable.ts",
+        "src/engine/fly.ts",
+        "tools/probe/dump-fly-anim.py",
+        "tools/probe/verify-turn14-flyup-opening.ts",
+        "tools/probe/run-battle-lab-rgb.py",
+        "docs/fly-portable-staging-probe.md",
+        "docs/turn14-flyup-opening-probe.md"
+      ]
     },
     {
       "move": "MOVE_BOUNCE",
       "status": "exact",
-      "covered": ["legal zero-PP-Up Level-50 mechanicLab SPOINK to ONIX in both orientations", "complete opponent-front dense charge body at oracle frames 345-368 (24/24): source-relative shrink affine program, attacker visibility handoff, round-shadow sprite, species geometry, healthboxes, and blank controller window through the shared Scene-ON seam", "complete opponent-front strike plus no-status controller tail at oracle frames 881-1179 (299/299): land/rebound body, all five source shake pulses, monbg target-base reset and release, generic hit blink/healthbox wobble, immutable 117→114 HP drain, not-very-effective result printer, controller release, gCurrentMove clear, seven-frame blank hold, atomic action-menu reveal, and 100 menu/bounce frames", "complete player-back charge body at frames 261-284 (24/24) and strike plus no-status controller handoff at frames 777-973 (197/197): source-extracted SPOINK back art, side-relative ball origins, opponent-front monbg geometry and persistent base-offset reset, four-frame hit/controller scheduling lag, immutable 117→114 HP drain, result printer, command release, and four stable MOVE_NONE frames before the next move printer", "complete successful-paralysis opponent-front strike/controller/menu window at frames 881-1330 (450/450): immutable 117→113 outcome, status commit frame 1063, reusable move-agnostic visual status component driven by source-relative age/status kind/target geometry, source-extracted ANIM_TAG_SPARK_2, eight-spawn ElectricityEffect, parameterized AnimTask_ShakeMon2 framebuffer handoff, command-27 lifetime, complete paralysis printer, PAR healthbox, command-26 cleanup, gCurrentMove clear at 1225, menu setup/reveal at 1230/1235, and stable tail"],
-      "evidence": ["tools/battle-lab/mechanic-bounce-spoink-onix.json", "tools/battle-lab/mechanic-bounce-player-spoink-onix.json", "tools/battle-lab/mechanic-bounce-paralysis-spoink-onix.json", "tools/compare/fixtures/bounce-spoink-onix-charge.json", "tools/compare/fixtures/bounce-spoink-onix-strike.json", "tools/compare/fixtures/bounce-player-spoink-onix-charge.json", "tools/compare/fixtures/bounce-player-spoink-onix-strike.json", "tools/compare/fixtures/bounce-paralysis-spoink-onix-strike.json", "tools/compare/bouncePortable.ts", "src/engine/bounce.ts", "src/engine/statusAnimation.ts", "tests/statusAnimation.test.ts", "tools/probe/run-battle-lab-rgb.py", "docs/bounce-portable-staging-probe.md"]
+      "covered": [
+        "legal zero-PP-Up Level-50 mechanicLab SPOINK to ONIX in both orientations",
+        "complete opponent-front dense charge body at oracle frames 345-368 (24/24): source-relative shrink affine program, attacker visibility handoff, round-shadow sprite, species geometry, healthboxes, and blank controller window through the shared Scene-ON seam",
+        "complete opponent-front strike plus no-status controller tail at oracle frames 881-1179 (299/299): land/rebound body, all five source shake pulses, monbg target-base reset and release, generic hit blink/healthbox wobble, immutable 117→114 HP drain, not-very-effective result printer, controller release, gCurrentMove clear, seven-frame blank hold, atomic action-menu reveal, and 100 menu/bounce frames",
+        "complete player-back charge body at frames 261-284 (24/24) and strike plus no-status controller handoff at frames 777-973 (197/197): source-extracted SPOINK back art, side-relative ball origins, opponent-front monbg geometry and persistent base-offset reset, four-frame hit/controller scheduling lag, immutable 117→114 HP drain, result printer, command release, and four stable MOVE_NONE frames before the next move printer",
+        "complete successful-paralysis opponent-front strike/controller/menu window at frames 881-1330 (450/450): immutable 117→113 outcome, status commit frame 1063, reusable move-agnostic visual status component driven by source-relative age/status kind/target geometry, source-extracted ANIM_TAG_SPARK_2, eight-spawn ElectricityEffect, parameterized AnimTask_ShakeMon2 framebuffer handoff, command-27 lifetime, complete paralysis printer, PAR healthbox, command-26 cleanup, gCurrentMove clear at 1225, menu setup/reveal at 1230/1235, and stable tail"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-bounce-spoink-onix.json",
+        "tools/battle-lab/mechanic-bounce-player-spoink-onix.json",
+        "tools/battle-lab/mechanic-bounce-paralysis-spoink-onix.json",
+        "tools/compare/fixtures/bounce-spoink-onix-charge.json",
+        "tools/compare/fixtures/bounce-spoink-onix-strike.json",
+        "tools/compare/fixtures/bounce-player-spoink-onix-charge.json",
+        "tools/compare/fixtures/bounce-player-spoink-onix-strike.json",
+        "tools/compare/fixtures/bounce-paralysis-spoink-onix-strike.json",
+        "tools/compare/bouncePortable.ts",
+        "src/engine/bounce.ts",
+        "src/engine/statusAnimation.ts",
+        "tests/statusAnimation.test.ts",
+        "tools/probe/run-battle-lab-rgb.py",
+        "docs/bounce-portable-staging-probe.md"
+      ]
     },
     {
       "move": "MOVE_FIRE_PUNCH",
       "status": "exact",
-      "covered": ["canonical player-back MAGBY to opponent-front MURKROW, complete dense cast/burn/residual ages through the next action menu (turn16 rungs 3-5: 236/236, 155/155, 175/175)", "canonical repeated lethal player-back MAGBY to already-burned opponent-front MURKROW through cast and faint handoff (turn17 rungs 4-5: 200/200, 113/113)", "portable synthetic player-back ONIX to opponent-front GROVYLE, complete dense ages 0-224 (225/225) through the shared Scene-ON adapter", "portable synthetic opponent-front GROVYLE to player-back ONIX, complete dense ages 0-276 / oracle frames 2081-2357 (277/277) through the shared Scene-ON adapter with immutable 117→96 burn outcome"],
-      "evidence": ["tools/compare/traces/turn16-rung3.json", "tools/compare/traces/turn16-rung4.json", "tools/compare/traces/turn16-rung5.json", "tools/compare/traces/turn17-rung4.json", "tools/compare/traces/turn17-rung5.json", "tools/compare/fixtures/fire-punch-onix-grovyle.json", "tools/compare/fixtures/fire-punch-grovyle-onix.json", "tools/compare/firePunchPortable.ts", "tools/probe/stage-fire-punch-portable-on.py", "docs/fire-punch-portable-staging-probe.md"]
+      "covered": [
+        "canonical player-back MAGBY to opponent-front MURKROW, complete dense cast/burn/residual ages through the next action menu (turn16 rungs 3-5: 236/236, 155/155, 175/175)",
+        "canonical repeated lethal player-back MAGBY to already-burned opponent-front MURKROW through cast and faint handoff (turn17 rungs 4-5: 200/200, 113/113)",
+        "portable synthetic player-back ONIX to opponent-front GROVYLE, complete dense ages 0-224 (225/225) through the shared Scene-ON adapter",
+        "portable synthetic opponent-front GROVYLE to player-back ONIX, complete dense ages 0-276 / oracle frames 2081-2357 (277/277) through the shared Scene-ON adapter with immutable 117→96 burn outcome"
+      ],
+      "evidence": [
+        "tools/compare/traces/turn16-rung3.json",
+        "tools/compare/traces/turn16-rung4.json",
+        "tools/compare/traces/turn16-rung5.json",
+        "tools/compare/traces/turn17-rung4.json",
+        "tools/compare/traces/turn17-rung5.json",
+        "tools/compare/fixtures/fire-punch-onix-grovyle.json",
+        "tools/compare/fixtures/fire-punch-grovyle-onix.json",
+        "tools/compare/firePunchPortable.ts",
+        "tools/probe/stage-fire-punch-portable-on.py",
+        "docs/fire-punch-portable-staging-probe.md"
+      ]
     },
     {
       "move": "MOVE_ICE_PUNCH",
       "status": "exact",
-      "covered": ["portable synthetic player-back ONIX to opponent-front GROVYLE, contiguous dense move-script body, complete generic hit reaction, immutable 143→112 HP-bar drain, super-effective message, completed no-freeze secondary-effect path, controller command teardown, blank result-window hold, atomic action-menu reveal, and settled generic controller bounce at relative ages 0-461 / oracle frames 2339-2800 (462/462) through the shared Scene-ON adapter: script handoff, BG-black/target-ice opening palette overlay, source-derived small+large inward crystal spiral through the shared fist/hitsplat/shake overlap, seven-spawn IceCrystalEffectShort burst, target-palette restoration, BG 7→5→3→1→0 restoration, clearmonbg/blendoff, target OBJ restoration, sound-gated script end, 20-display generic healthbox wobble, four-frame target blink blocks, source-relative one-HP display drain, controller atomic-write boundary, fully typed plus stable result message, immutable status-free secondary outcome, gCurrentMove clear at frame 2692, settled post-command boundary, source-relative result-text clear at frame 2695, seven-frame blank hold, source-relative action-menu reveal at age 363, and a 99-frame action-menu bounce window including healthbox y2=2; generic selected-OBJ composition, callback/OAM final-state handoff, six-callback spawn cadence, target-relative geometry, affine grow/hold, flicker lifetime, top-Y OAM ordering, source-relative teardown stages, preceding-pass generic-hit OAM latch, immutable HP reducer, controller text-clear profile, and controller display-transition profile are Tier-1 pinned", "portable synthetic opponent-front GROVYLE to player-back ONIX at relative ages 0-1293 / oracle frames 1966-3259 (1294/1294): complete opposite-side move body and hit/drain/result path, successful freeze, both source-spawned FrozenIceCube lifecycles, both frozen-solid printers, FRZ player-healthbox installation, current-move clear, the complete skipped-move Sitrus display handoff, immutable 31→61 HP display climb, blank hold, atomic action-menu redraw, and 99-frame settled bounce; source-extracted cube geometry/lifetime plus relative held-item rotation, granting-star, tint/ring, heal-text, HP-display, and menu clocks are Tier-1 pinned without changing controller outcomes"],
-      "evidence": ["tools/compare/fixtures/ice-punch-onix-grovyle.json", "tools/compare/fixtures/ice-punch-grovyle-onix.json", "tools/compare/firePunchPortable.ts", "tools/probe/stage-fire-punch-portable-on.py", "docs/ice-punch-portable-staging-probe.md"]
+      "covered": [
+        "portable synthetic player-back ONIX to opponent-front GROVYLE, contiguous dense move-script body, complete generic hit reaction, immutable 143→112 HP-bar drain, super-effective message, completed no-freeze secondary-effect path, controller command teardown, blank result-window hold, atomic action-menu reveal, and settled generic controller bounce at relative ages 0-461 / oracle frames 2339-2800 (462/462) through the shared Scene-ON adapter: script handoff, BG-black/target-ice opening palette overlay, source-derived small+large inward crystal spiral through the shared fist/hitsplat/shake overlap, seven-spawn IceCrystalEffectShort burst, target-palette restoration, BG 7→5→3→1→0 restoration, clearmonbg/blendoff, target OBJ restoration, sound-gated script end, 20-display generic healthbox wobble, four-frame target blink blocks, source-relative one-HP display drain, controller atomic-write boundary, fully typed plus stable result message, immutable status-free secondary outcome, gCurrentMove clear at frame 2692, settled post-command boundary, source-relative result-text clear at frame 2695, seven-frame blank hold, source-relative action-menu reveal at age 363, and a 99-frame action-menu bounce window including healthbox y2=2; generic selected-OBJ composition, callback/OAM final-state handoff, six-callback spawn cadence, target-relative geometry, affine grow/hold, flicker lifetime, top-Y OAM ordering, source-relative teardown stages, preceding-pass generic-hit OAM latch, immutable HP reducer, controller text-clear profile, and controller display-transition profile are Tier-1 pinned",
+        "portable synthetic opponent-front GROVYLE to player-back ONIX at relative ages 0-1293 / oracle frames 1966-3259 (1294/1294): complete opposite-side move body and hit/drain/result path, successful freeze, both source-spawned FrozenIceCube lifecycles, both frozen-solid printers, FRZ player-healthbox installation, current-move clear, the complete skipped-move Sitrus display handoff, immutable 31→61 HP display climb, blank hold, atomic action-menu redraw, and 99-frame settled bounce; source-extracted cube geometry/lifetime plus relative held-item rotation, granting-star, tint/ring, heal-text, HP-display, and menu clocks are Tier-1 pinned without changing controller outcomes"
+      ],
+      "evidence": [
+        "tools/compare/fixtures/ice-punch-onix-grovyle.json",
+        "tools/compare/fixtures/ice-punch-grovyle-onix.json",
+        "tools/compare/firePunchPortable.ts",
+        "tools/probe/stage-fire-punch-portable-on.py",
+        "docs/ice-punch-portable-staging-probe.md"
+      ]
     },
     {
       "move": "MOVE_THUNDER_PUNCH",
       "status": "exact",
-      "covered": ["legal zero-PP-Up Level-50 mechanicLab ONIX to non-Ground MURKROW in both source-required orientations, using Factory set ids 156/149/180 and 184/188/135 plus extracted ONIX/MURKROW front/back art", "complete move-owned source interval at relative ages 0..103 / player oracle frames 401..504 and opponent oracle frames 452..555: monbg acquisition/release, setalpha/blendoff, source delay-2 black palette ramp and restoration, both whole-screen inversions, shared fist, two independently affine-scaled hitsplats, target AnimTask_ShakeMon display offsets, all three target-relative gLightningSpriteTemplate births and five-frame/28-display programs, and teardown match 104/104 component frames in each orientation", "shared Scene-ON compositor matches 104/104 dense RGB framebuffers in each orientation with zero exclusions; the reverse orientation pins the source-relative second-bolt allocation boundary where the still-live hitsplat wins their 14-pixel overlap for one display before normal OAM ordering resumes", "fresh FIRE PUNCH 225/225 + 277/277, ICE PUNCH 462/462 + 1294/1294, BLAZE KICK 78/78 both, FLAMETHROWER 126/126 both, and DRAGON BREATH 85/85 both remain exact"],
-      "evidence": ["tools/battle-lab/mechanic-thunder-punch-player-onix-opponent-murkrow.json", "tools/battle-lab/mechanic-thunder-punch-opponent-onix-player-murkrow.json", "tools/compare/fixtures/thunder-punch-player-onix-opponent-murkrow.json", "tools/compare/fixtures/thunder-punch-opponent-onix-player-murkrow.json", "tools/compare/thunderPunchPortable.ts", "tools/probe/run-battle-lab-rgb.py", "src/engine/thunderPunch.ts", "src/engine/sceneOnPresentation.ts", "tests/thunderPunch.test.ts"]
+      "covered": [
+        "legal zero-PP-Up Level-50 mechanicLab ONIX to non-Ground MURKROW in both source-required orientations, using Factory set ids 156/149/180 and 184/188/135 plus extracted ONIX/MURKROW front/back art",
+        "complete move-owned source interval at relative ages 0..103 / player oracle frames 401..504 and opponent oracle frames 452..555: monbg acquisition/release, setalpha/blendoff, source delay-2 black palette ramp and restoration, both whole-screen inversions, shared fist, two independently affine-scaled hitsplats, target AnimTask_ShakeMon display offsets, all three target-relative gLightningSpriteTemplate births and five-frame/28-display programs, and teardown match 104/104 component frames in each orientation",
+        "shared Scene-ON compositor matches 104/104 dense RGB framebuffers in each orientation with zero exclusions; the reverse orientation pins the source-relative second-bolt allocation boundary where the still-live hitsplat wins their 14-pixel overlap for one display before normal OAM ordering resumes",
+        "fresh FIRE PUNCH 225/225 + 277/277, ICE PUNCH 462/462 + 1294/1294, BLAZE KICK 78/78 both, FLAMETHROWER 126/126 both, and DRAGON BREATH 85/85 both remain exact"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-thunder-punch-player-onix-opponent-murkrow.json",
+        "tools/battle-lab/mechanic-thunder-punch-opponent-onix-player-murkrow.json",
+        "tools/compare/fixtures/thunder-punch-player-onix-opponent-murkrow.json",
+        "tools/compare/fixtures/thunder-punch-opponent-onix-player-murkrow.json",
+        "tools/compare/thunderPunchPortable.ts",
+        "tools/probe/run-battle-lab-rgb.py",
+        "src/engine/thunderPunch.ts",
+        "src/engine/sceneOnPresentation.ts",
+        "tests/thunderPunch.test.ts"
+      ]
     },
     {
       "move": "MOVE_FAINT_ATTACK",
       "status": "partial",
-      "covered": ["canonical opponent-front MURKROW to player-back MAGBY, complete dense body in turn16 and repeated turn17 occurrences (221/221 each)", "portable synthetic player-back ONIX to opponent-front GROVYLE, complete dense relative ages 0-220 / oracle frames 2344-2564 (221/221) through the shared Scene-ON adapter"],
-      "evidence": ["tools/compare/traces/turn16-rung2a.json", "tools/compare/traces/turn17-rung2.json", "tools/compare/fixtures/faint-attack-onix-grovyle.json", "tools/compare/faintAttackPortable.ts", "tools/probe/stage-fire-punch-portable-on.py", "docs/faint-attack-portable-staging-probe.md"],
+      "covered": [
+        "canonical opponent-front MURKROW to player-back MAGBY, complete dense body in turn16 and repeated turn17 occurrences (221/221 each)",
+        "portable synthetic player-back ONIX to opponent-front GROVYLE, complete dense relative ages 0-220 / oracle frames 2344-2564 (221/221) through the shared Scene-ON adapter"
+      ],
+      "evidence": [
+        "tools/compare/traces/turn16-rung2a.json",
+        "tools/compare/traces/turn17-rung2.json",
+        "tools/compare/fixtures/faint-attack-onix-grovyle.json",
+        "tools/compare/faintAttackPortable.ts",
+        "tools/probe/stage-fire-punch-portable-on.py",
+        "docs/faint-attack-portable-staging-probe.md"
+      ],
       "remaining": "Retain parked ISSUES #38's single +30 delayed-control BLDALPHA register-visibility race; do not promote to exact without a general cycle/register-queue model."
     },
     {
       "move": "MOVE_EMBER",
       "status": "exact",
-      "covered": ["legal zero-PP-Up Level-50 mechanicLab ONIX to MURKROW in both source-required orientations", "complete move-owned source body: three gEmberSpriteTemplate projectiles (TranslateAnimSpriteToTargetMonLocation -> StartAnimLinearTranslation, 6-tick spawn cadence, static frame) and EmberFireHit's three gEmberFlareSpriteTemplate hit flares (AnimTravelDiagonally -> StartAnimLinearTranslation, 18-tick handoff then 6-tick cadence, 5-frame sAnim_BasicFire cycle), both reusing the shared Q8.8 linear-translation accumulator and a target-relative subpriority (targetSubpriority-2, RAM-probe-confirmed 38 opponent-front / 28 player-back)", "attacker/ember OAM draw order follows the same side-parametric subpriority rule DRAGON_BREATH/FLAMETHROWER already established (dragonBreathEmbersInFrontOfAttacker): attacker subpriority is fixed by GetBattlerSpriteSubpriority (30 player-left, 40 opponent-left), so a fresh ember overlapping the attacker's own silhouette for its first tick or two is occluded by the attacker in the player-attacker orientation (30<38) but paints over the attacker in the opponent-attacker orientation (28<40)", "opponent ONIX -> player MURKROW: complete dense body at relative ages 0-62 / oracle frames 442-504, 63/63 component AND 63/63 framebuffer, zero exclusions", "player ONIX -> opponent MURKROW: complete dense body at relative ages 0-62 / oracle frames 388-450, 63/63 component AND 63/63 framebuffer, zero exclusions"],
-      "evidence": ["tools/battle-lab/mechanic-ember-player-onix-opponent-murkrow.json", "tools/battle-lab/mechanic-ember-opponent-onix-player-murkrow.json", "tools/compare/fixtures/ember-player-onix-opponent-murkrow.json", "tools/compare/fixtures/ember-opponent-onix-player-murkrow.json", "tools/compare/emberPortable.ts", "src/engine/ember.ts", "src/engine/dragonBreath.ts", "src/engine/sceneOnPresentation.ts", "tests/ember.test.ts", "src/data/gen/ember-sprite-probe.json", "src/data/gen/ember-sprite-probe-opponent.json", "tools/probe/run-battle-lab-rgb.py", "tools/probe/dump-ember-creation.py"]
+      "covered": [
+        "legal zero-PP-Up Level-50 mechanicLab ONIX to MURKROW in both source-required orientations",
+        "complete move-owned source body: three gEmberSpriteTemplate projectiles (TranslateAnimSpriteToTargetMonLocation -> StartAnimLinearTranslation, 6-tick spawn cadence, static frame) and EmberFireHit's three gEmberFlareSpriteTemplate hit flares (AnimTravelDiagonally -> StartAnimLinearTranslation, 18-tick handoff then 6-tick cadence, 5-frame sAnim_BasicFire cycle), both reusing the shared Q8.8 linear-translation accumulator and a target-relative subpriority (targetSubpriority-2, RAM-probe-confirmed 38 opponent-front / 28 player-back)",
+        "attacker/ember OAM draw order follows the same side-parametric subpriority rule DRAGON_BREATH/FLAMETHROWER already established (dragonBreathEmbersInFrontOfAttacker): attacker subpriority is fixed by GetBattlerSpriteSubpriority (30 player-left, 40 opponent-left), so a fresh ember overlapping the attacker's own silhouette for its first tick or two is occluded by the attacker in the player-attacker orientation (30<38) but paints over the attacker in the opponent-attacker orientation (28<40)",
+        "opponent ONIX -> player MURKROW: complete dense body at relative ages 0-62 / oracle frames 442-504, 63/63 component AND 63/63 framebuffer, zero exclusions",
+        "player ONIX -> opponent MURKROW: complete dense body at relative ages 0-62 / oracle frames 388-450, 63/63 component AND 63/63 framebuffer, zero exclusions"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-ember-player-onix-opponent-murkrow.json",
+        "tools/battle-lab/mechanic-ember-opponent-onix-player-murkrow.json",
+        "tools/compare/fixtures/ember-player-onix-opponent-murkrow.json",
+        "tools/compare/fixtures/ember-opponent-onix-player-murkrow.json",
+        "tools/compare/emberPortable.ts",
+        "src/engine/ember.ts",
+        "src/engine/dragonBreath.ts",
+        "src/engine/sceneOnPresentation.ts",
+        "tests/ember.test.ts",
+        "src/data/gen/ember-sprite-probe.json",
+        "src/data/gen/ember-sprite-probe-opponent.json",
+        "tools/probe/run-battle-lab-rgb.py",
+        "tools/probe/dump-ember-creation.py"
+      ]
     },
     {
       "move": "MOVE_DRAGON_RAGE",
       "status": "partial",
-      "covered": ["legal zero-PP-Up Level-50 mechanicLab CHARMELEON to ONIX, player-attacker orientation: component math (schedule/shake/slide/fire-spit/plume) matches the oracle's own RAM reads exactly at every probed tick; complete move body wired through the shared Scene-ON seam (sceneOnDragonRageView, battleScene.ts's DRAGON_RAGE draw case) with four named per-mechanism framebuffer capture-lag constants (shake=2, slide=1, fire-spit=1, fire-plume=1, dragonRage.ts) replacing the prior single global lag; dense framebuffer count improved from 44/150 (single lag=1 default) to 86/150 after the per-mechanism split", "species send-out front-anim idle-bob residual source-attributed and ported (src/engine/speciesIdleAnim.ts): Anim_RapidHorizontalHops (pokemon_animation.c:3567-3599, sMonFrontAnimIdsTable[ONIX]=ANIM_RAPID_H_HOPS), a one-time 86-tick send-out animation that permanently freezes the front sprite's x2/y2 at its last active tick's value (x2=1,y2=0 for ONIX) until an unrelated mechanism overwrites it; RAM-probed directly by battler index (gBattlerSpriteIds[0]/[1], sidestepping the stale gBattleAnimAttacker/Target read that misidentified the target sprite before this rung), callback pointer confirmed SpriteCallbackDummy (nm pokeemerald.elf 0x08007428) matching this port's own closed-form terminal value; wired into dragonRageTargetOffset (sceneOnPresentation.ts, opponent-side front sprite only, before the target shake's own creation tick) and the fixture's spriteCorner un-hacked back to the generic 144 (was 145, the same residual previously baked directly into the constant, matching FEATHER_DANCE/QUICK_ATTACK/BOUNCE/FLY's own shared ONIX-opponent preset convention) now that the offset is modeled explicitly; dense framebuffer count improved 86/150 -> 127/150, zero regressions (A/B verified against the pre-fix baseline over the same cached oracle capture), reproduced on a second independent live oracle run (determinism confirmed)", "two of the three residuals named by the prior rung fixed on evidence: (1) shakeMonOffsetAtRenderTick's render-age-1 creation-guard artifact - pixel-diffed frame 90 directly, found the oracle photo already shows the attacker shake's full yOffset one tick before the lag-2 model's own guard clears (the RAM-invisible collapsed sequence[0] write is framebuffer-visible for exactly that one transient tick); fixed with a narrow renderTick===creationTick-1 special case, Tier-1 pinned; (2) the fire-spit rounding residual (render ages 86-96) was NOT a rounding question at all (the step brief's own hypothesis, falsified) - pixel-dumped the diff colors first and found the oracle's true fire-spit silhouette was consistently larger than the app's, correlated with WHICH of the 3 animation frames was active; source proof (battle_anim_dragon.c:126-131) shows sAnim_DragonRageFire is byte-identical (tile offsets 16/32/48) to the already-pixel-exact sAnim_DragonBreathFire_0, which dragonBreath.ts already reads with a +1 tile-row-block shift (RAM's animCmdIndex is a command-table index, not a tile-row-block number) - dragonRage.ts's own sheetFrame formula was missing that shift, silently picking the WRONG (unused-by-this-animation) tile block for frame 0; fixed, Tier-1 pinned. Dense framebuffer count improved 127/150 -> 139/150 (render ages 1 and 86-96 both now clean), reproduced byte-identically on an independent fresh oracle run (determinism confirmed).", "fire-plume z-order (render ages 105-114) fixed via a direct gMain.oamBuffer RAM read (ISSUES #32 lineage, tools/probe/dump-dragonrage-oam.py) rather than a global sort-order rule: all 8 fire-plume spawns share only 2 distinct subpriorities (targetSubpriority +-2), so cross-group order was already correct; the RAM probe read the real composited OAM buffer array position (lower position = lower hardware OAM index = drawn on top) for every live same-subpriority plume pair across RAM ticks 186-206 and found a consistent, source-consistent rule: primarily sort by absolute screen Y (higher Y wins, the ordinary SortSprites same-priority tie-break), and ONLY on an exact Y tie (spawns 0/4 and 2/6 each share an identical y-offset) does the earlier-created spawn win instead (RAM-confirmed both ties resolve this way at every tick either pair is alive). Encoded as dragonRage.ts's orderFirePlumesForDraw, a plain comparator (not a persistent whole-scene sSpriteOrder simulation, which this run's standing policy rules out, battle-scene-notes.md §7.32) - Tier-1 pinned directly against the RAM-read pair orderings. Dense framebuffer count improved 139/150 -> 149/150 (render ages 105-114 all now clean), reproduced byte-identical on two independent fresh oracle runs (determinism confirmed)."],
-      "evidence": ["tools/battle-lab/mechanic-dragon-rage-charmeleon-onix.json", "tools/battle-lab/mechanic-dragon-rage-onix-charmeleon.json", "tools/compare/fixtures/dragon-rage-player-charmeleon-opponent-onix.json", "tools/compare/fixtures/dragon-rage-opponent-charmeleon-player-onix.json", "tools/compare/dragonRagePortable.ts", "src/engine/dragonRage.ts", "src/engine/sceneOnPresentation.ts", "src/engine/battleScene.ts", "src/engine/speciesIdleAnim.ts", "tests/dragonRage.test.ts", "tests/speciesIdleAnim.test.ts", "tools/probe/dump-dragonrage-rgb.py", "tools/probe/dump-dragonrage-full.py", "tools/probe/dump-onix-front-idle-anim.py", "tools/probe/dump-dragonrage-oam.py", "tools/probe/dump-dragonrage-onix-vram.py", "src/data/gen/onix-front-idle-probe.json", "tools/compare/scratch/dragonrage-lag-bisect.ts", "tools/compare/scratch/dragonrage-dense-cached.ts", "tools/compare/scratch/dragonrage-diag-age.ts"],
+      "covered": [
+        "legal zero-PP-Up Level-50 mechanicLab CHARMELEON to ONIX, player-attacker orientation: component math (schedule/shake/slide/fire-spit/plume) matches the oracle's own RAM reads exactly at every probed tick; complete move body wired through the shared Scene-ON seam (sceneOnDragonRageView, battleScene.ts's DRAGON_RAGE draw case) with four named per-mechanism framebuffer capture-lag constants (shake=2, slide=1, fire-spit=1, fire-plume=1, dragonRage.ts) replacing the prior single global lag; dense framebuffer count improved from 44/150 (single lag=1 default) to 86/150 after the per-mechanism split",
+        "species send-out front-anim idle-bob residual source-attributed and ported (src/engine/speciesIdleAnim.ts): Anim_RapidHorizontalHops (pokemon_animation.c:3567-3599, sMonFrontAnimIdsTable[ONIX]=ANIM_RAPID_H_HOPS), a one-time 86-tick send-out animation that permanently freezes the front sprite's x2/y2 at its last active tick's value (x2=1,y2=0 for ONIX) until an unrelated mechanism overwrites it; RAM-probed directly by battler index (gBattlerSpriteIds[0]/[1], sidestepping the stale gBattleAnimAttacker/Target read that misidentified the target sprite before this rung), callback pointer confirmed SpriteCallbackDummy (nm pokeemerald.elf 0x08007428) matching this port's own closed-form terminal value; wired into dragonRageTargetOffset (sceneOnPresentation.ts, opponent-side front sprite only, before the target shake's own creation tick) and the fixture's spriteCorner un-hacked back to the generic 144 (was 145, the same residual previously baked directly into the constant, matching FEATHER_DANCE/QUICK_ATTACK/BOUNCE/FLY's own shared ONIX-opponent preset convention) now that the offset is modeled explicitly; dense framebuffer count improved 86/150 -> 127/150, zero regressions (A/B verified against the pre-fix baseline over the same cached oracle capture), reproduced on a second independent live oracle run (determinism confirmed)",
+        "two of the three residuals named by the prior rung fixed on evidence: (1) shakeMonOffsetAtRenderTick's render-age-1 creation-guard artifact - pixel-diffed frame 90 directly, found the oracle photo already shows the attacker shake's full yOffset one tick before the lag-2 model's own guard clears (the RAM-invisible collapsed sequence[0] write is framebuffer-visible for exactly that one transient tick); fixed with a narrow renderTick===creationTick-1 special case, Tier-1 pinned; (2) the fire-spit rounding residual (render ages 86-96) was NOT a rounding question at all (the step brief's own hypothesis, falsified) - pixel-dumped the diff colors first and found the oracle's true fire-spit silhouette was consistently larger than the app's, correlated with WHICH of the 3 animation frames was active; source proof (battle_anim_dragon.c:126-131) shows sAnim_DragonRageFire is byte-identical (tile offsets 16/32/48) to the already-pixel-exact sAnim_DragonBreathFire_0, which dragonBreath.ts already reads with a +1 tile-row-block shift (RAM's animCmdIndex is a command-table index, not a tile-row-block number) - dragonRage.ts's own sheetFrame formula was missing that shift, silently picking the WRONG (unused-by-this-animation) tile block for frame 0; fixed, Tier-1 pinned. Dense framebuffer count improved 127/150 -> 139/150 (render ages 1 and 86-96 both now clean), reproduced byte-identically on an independent fresh oracle run (determinism confirmed).",
+        "fire-plume z-order (render ages 105-114) fixed via a direct gMain.oamBuffer RAM read (ISSUES #32 lineage, tools/probe/dump-dragonrage-oam.py) rather than a global sort-order rule: all 8 fire-plume spawns share only 2 distinct subpriorities (targetSubpriority +-2), so cross-group order was already correct; the RAM probe read the real composited OAM buffer array position (lower position = lower hardware OAM index = drawn on top) for every live same-subpriority plume pair across RAM ticks 186-206 and found a consistent, source-consistent rule: primarily sort by absolute screen Y (higher Y wins, the ordinary SortSprites same-priority tie-break), and ONLY on an exact Y tie (spawns 0/4 and 2/6 each share an identical y-offset) does the earlier-created spawn win instead (RAM-confirmed both ties resolve this way at every tick either pair is alive). Encoded as dragonRage.ts's orderFirePlumesForDraw, a plain comparator (not a persistent whole-scene sSpriteOrder simulation, which this run's standing policy rules out, battle-scene-notes.md §7.32) - Tier-1 pinned directly against the RAM-read pair orderings. Dense framebuffer count improved 139/150 -> 149/150 (render ages 105-114 all now clean), reproduced byte-identical on two independent fresh oracle runs (determinism confirmed)."
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-dragon-rage-charmeleon-onix.json",
+        "tools/battle-lab/mechanic-dragon-rage-onix-charmeleon.json",
+        "tools/compare/fixtures/dragon-rage-player-charmeleon-opponent-onix.json",
+        "tools/compare/fixtures/dragon-rage-opponent-charmeleon-player-onix.json",
+        "tools/compare/dragonRagePortable.ts",
+        "src/engine/dragonRage.ts",
+        "src/engine/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "src/engine/speciesIdleAnim.ts",
+        "tests/dragonRage.test.ts",
+        "tests/speciesIdleAnim.test.ts",
+        "tools/probe/dump-dragonrage-rgb.py",
+        "tools/probe/dump-dragonrage-full.py",
+        "tools/probe/dump-onix-front-idle-anim.py",
+        "tools/probe/dump-dragonrage-oam.py",
+        "tools/probe/dump-dragonrage-onix-vram.py",
+        "src/data/gen/onix-front-idle-probe.json",
+        "tools/compare/scratch/dragonrage-lag-bisect.ts",
+        "tools/compare/scratch/dragonrage-dense-cached.ts",
+        "tools/compare/scratch/dragonrage-diag-age.ts"
+      ],
       "remaining": "149/150 dense framebuffer frames match (player-attacker orientation, reproduced byte-identically on two independent fresh oracle runs - deterministic). One residual remains: render age 98 (the exact tick both the target AnimTask_ShakeMon and fire-plume spawn 0 are created), a 1598px mismatch confined exactly to ONIX's own sprite box using ONIX's own grayscale palette (bbox x149-204,y12-73; mismatched colors are ONIX's own known shades swapping between nearby positions, the signature of a small spatial misregistration of the sprite, not a wrong tile/palette). This rung probed both of the standing brief's named candidate mechanisms directly and eliminated both on hard evidence: (a) a runtime VRAM overwrite of ONIX's own OBJ tile range (the LoadBallGfx precedent) - tools/probe/dump-dragonrage-onix-vram.py hashed ONIX's full 2048-byte 4bpp tile block every tick from RAM 80 through 190; the hash is stable and UNCHANGED across the entire target-shake-creation window (only one earlier, unrelated tileNum swap at RAM tick 80-82, long before the move even starts) - no overwrite occurs near this tick; (b) an OBJ-over-OBJ blend compositing gap (the #112 precedent) - tools/probe/dump-dragonrage-oam.py's BLDCNT/BLDALPHA read is 0x0/0x0 (no color special effect enabled at all) and ONIX's own OAM affineMode is 0 (no affine transform) at every tick in this window, ruling out a blend-mode or affine-scale explanation. The target sprite's own already-modeled state (position, x2/y2, animNum, animCmdIndex, invisible, subpriority, matrixNum, affineMode) is RAM-confirmed clean and matches this codebase's own prediction through the whole window, so the mismatch is not explained by any currently-modeled variable and needs a different investigative angle than RAM/VRAM/IO-register comparison (candidate: a fixture with less concurrent sprite creation at this exact tick, to separate an emulator/hardware sub-frame ordering effect from a genuine engine gap). Confirmed deterministic (byte-identical mismatch on a second independent fresh oracle run). Opponent-attacker orientation not attempted (gated behind a clean 150/150 player orientation per the step brief; not reached this rung)."
     },
     {
       "move": "MOVE_SHADOW_PUNCH",
       "status": "partial",
-      "covered": ["legal zero-PP-Up Level-50 mechanicLab HAUNTER-vs-ONIX, player-attacker orientation (HAUNTER player-back to ONIX opponent-front): complete move body wired through the shared Scene-ON seam this session (sceneOnShadowPunchView, battleScene.ts's SHADOW_PUNCH draw case) after fixing a compile-breaking mid-rework left by the prior cap-killed session (an `attackerView` variable was referenced but never defined - restored as a phase-aware view using the already-committed SHADOW_PUNCH_ATTACKER_FRAMEBUFFER_LAG constant, mirroring DRAGON_RAGE's own per-mechanism lagged-view precedent); component math (attacker visibility/x2, clone x2 set, target shake x2, bldy, fist/hitsplat gating) matches the oracle's own RAM reads exactly at every dense tick, 111/111; dense framebuffer count is 84/111 (relative ages 0-110 / oracle frames 85-195)"],
-      "evidence": ["tools/battle-lab/mechanic-shadow-punch-haunter-onix.json", "tools/battle-lab/mechanic-shadow-punch-onix-haunter.json", "tools/compare/fixtures/shadow-punch-player-haunter-opponent-onix.json", "tools/compare/fixtures/shadow-punch-opponent-haunter-player-onix.json", "tools/compare/shadowPunchPortable.ts", "src/engine/shadowPunch.ts", "src/engine/sceneOnPresentation.ts", "src/engine/battleScene.ts", "tests/shadowPunch.test.ts", "tools/probe/dump-shadowpunch-full.py", "tools/probe/dump-shadowpunch-rgb.py", "tools/compare/scratch/shadowpunch-lag-bisect.ts", "tools/compare/scratch/shadowpunch-attacker-lag-bisect.ts"],
+      "covered": [
+        "legal zero-PP-Up Level-50 mechanicLab HAUNTER-vs-ONIX, player-attacker orientation (HAUNTER player-back to ONIX opponent-front): complete move body wired through the shared Scene-ON seam this session (sceneOnShadowPunchView, battleScene.ts's SHADOW_PUNCH draw case) after fixing a compile-breaking mid-rework left by the prior cap-killed session (an `attackerView` variable was referenced but never defined - restored as a phase-aware view using the already-committed SHADOW_PUNCH_ATTACKER_FRAMEBUFFER_LAG constant, mirroring DRAGON_RAGE's own per-mechanism lagged-view precedent); component math (attacker visibility/x2, clone x2 set, target shake x2, bldy, fist/hitsplat gating) matches the oracle's own RAM reads exactly at every dense tick, 111/111; dense framebuffer count is 84/111 (relative ages 0-110 / oracle frames 85-195)"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-shadow-punch-haunter-onix.json",
+        "tools/battle-lab/mechanic-shadow-punch-onix-haunter.json",
+        "tools/compare/fixtures/shadow-punch-player-haunter-opponent-onix.json",
+        "tools/compare/fixtures/shadow-punch-opponent-haunter-player-onix.json",
+        "tools/compare/shadowPunchPortable.ts",
+        "src/engine/shadowPunch.ts",
+        "src/engine/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/shadowPunch.test.ts",
+        "tools/probe/dump-shadowpunch-full.py",
+        "tools/probe/dump-shadowpunch-rgb.py",
+        "tools/compare/scratch/shadowpunch-lag-bisect.ts",
+        "tools/compare/scratch/shadowpunch-attacker-lag-bisect.ts"
+      ],
       "remaining": "Player-attacker orientation (haunter-onix fixture): 27/111 dense framebuffer frames still mismatch, all in three disjoint, named families - (1) render ages 41-48 / frames 126-133 (up to 3384px, bbox ~x41-131,y64-111): a color-level mismatch in the attacker/clone punch-trace region. Bisected SHADOW_PUNCH_ATTACKER_FRAMEBUFFER_LAG across 0/1/2/4 this session - all four values produce a byte-identical 84/111, so this family is NOT a timing/lag artifact (only a grossly wrong lag like 20 moves the count, and only for the worse); the real cause is most likely a clone paint-order/blend-coefficient bug in the same class as DRAGON_RAGE's own fire-plume z-order residual (needs a gMain.oamBuffer RAM read of the live clone stack, not another lag guess). (2) render ages 49-62 / frames 134-147 (up to 4914px, bbox reaching x177-206,y12-71): a top-of-screen hitsplat/fist region mismatch, unattributed this session - candidate is the reused TURN9_HITSPLAT_MATRIX affine-stretch schedule not matching this move's own hitsplat anchor ages. (3) render ages 106-110 / frames 191-195 (up to 3195px, a large near-white region covering most of the screen): this is the generic post-move result/message textbox appearing - an out-of-scope reusable presentation component per this lane's own acceptance rule (generic hit reactions/HP/result presentation are independently covered and never block or promote a move), not part of SHADOW_PUNCH's own animation body; the fixture's own denseWindow (endFrame 195) should be trimmed to exclude this tail next session rather than treated as a required remainder. Opponent-attacker orientation (onix-haunter fixture) was attempted this session and found materially worse, a genuinely different problem, not yet root-caused: component match is only 95/111 (a real BLDY-ramp one-tick drift starting ~frame 172, oracle decrementing one tick ahead of the app's own table - a new, orientation-specific timing bug with zero counterpart in the player-attacker orientation), and framebuffer match is 0/111 (every single dense frame mismatches, dominated by a persistent ~1590px region from frame 89 in the attacker-side bbox x151-201,y14-71 whose fading-gradient signature suggests the player-attacker fixture's own lag=3 constant does not transfer to this orientation). Next session should RAM-pixel-probe the opponent-attacker orientation independently (do not assume the player-attacker fixes carry over), re-check the `x2 -= tBattlerSpriteId` quirk's sign for the opponent-side attacker slot, then return to the player-attacker families (1) and (2) with a fresh OAM-buffer probe before attempting a third fit."
     },
     {
       "move": "MOVE_GROWTH",
       "status": "exact",
-      "covered": ["blend_color_cycle mechanism (AnimTask_BlendColorCycle) RAM-probed byte-for-byte and Tier-1-pinned (src/engine/blendColorCycle.ts, tests/blendColorCycle.test.ts, 3/3). GrowthEffect (blend_color_cycle + AnimTask_ScaleMonAndRestore, both created on the same tick per call, second call starting a RAM-probed 32 ticks after the first) ported as growthAnimationAtAge (src/engine/growth.ts, tests/growth.test.ts, 4/4). IVYSAUR battle back/front sprites extracted (CHARMELEON/HAUNTER precedent). Wired through the Scene-ON seam (sceneOnGrowthView, battleScene.ts's GROWTH draw case) via the existing drawSpriteSheetAffineStretch tint/affine path. Target (ONIX) framebuffer-exact via the already-ported speciesFrontIdleRestOffset. This session: eliminated the last named residual (IVYSAUR's own attacker-sprite 'salt-and-pepper' mismatch) - RAM-probed first (tools/probe/dump-growth-ivysaur-vram.py) and disproved both suspected classes (x2/y2 pinned at 0 every tick, no idle-anim rest offset; extracted tileset+palette byte-identical to live VRAM/PLTT at a clean tick and window ticks). The real cause: growthAnimationAtAge's own matrix is RAM-exact with NO lag, but the CAPTURED FRAMEBUFFER lags the live OAM write - same class as BLAZE_KICK's own documented OAM/palette display latency, but inverted (here the affine SCALE lags 2 ticks and the BLEND TINT lags 1). Fixed in sceneOnGrowthView (src/engine/sceneOnPresentation.ts) by reading the scale and tint components at independently lagged ages; bisected empirically across all (scaleLag, tintLag) pairs up to 2 in both orientations, (2, 1) is the only pair landing 63/63. Dense ON-profile comparator (tools/compare/growthPortable.ts), whole 63-frame window (oracle ticks 211-273), both orientations, every frame captured: component (RAM-exact mechanism, now compared independent of the lagged view) 63/63 and framebuffer 63/63, both orientations, reproduced byte-identical on two independent runs each."],
-      "evidence": ["tools/battle-lab/mechanic-growth-player-ivysaur-opponent-onix.json", "tools/battle-lab/mechanic-growth-opponent-ivysaur-player-onix.json", "tools/probe/dump-growth-blendcolorcycle.py", "tools/probe/dump-growth-ivysaur-vram.py", "docs/growth-blendcolorcycle-probe.md", "src/engine/blendColorCycle.ts", "src/engine/growth.ts", "src/engine/sceneOnPresentation.ts", "src/engine/battleScene.ts", "tests/blendColorCycle.test.ts", "tests/growth.test.ts", "tools/compare/growthPortable.ts", "tools/compare/fixtures/growth-player-ivysaur-opponent-onix.json", "tools/compare/fixtures/growth-opponent-ivysaur-player-onix.json", "tools/extract/extract-battle-mon-pics.ts"]
+      "covered": [
+        "blend_color_cycle mechanism (AnimTask_BlendColorCycle) RAM-probed byte-for-byte and Tier-1-pinned (src/engine/blendColorCycle.ts, tests/blendColorCycle.test.ts, 3/3). GrowthEffect (blend_color_cycle + AnimTask_ScaleMonAndRestore, both created on the same tick per call, second call starting a RAM-probed 32 ticks after the first) ported as growthAnimationAtAge (src/engine/growth.ts, tests/growth.test.ts, 4/4). IVYSAUR battle back/front sprites extracted (CHARMELEON/HAUNTER precedent). Wired through the Scene-ON seam (sceneOnGrowthView, battleScene.ts's GROWTH draw case) via the existing drawSpriteSheetAffineStretch tint/affine path. Target (ONIX) framebuffer-exact via the already-ported speciesFrontIdleRestOffset. This session: eliminated the last named residual (IVYSAUR's own attacker-sprite 'salt-and-pepper' mismatch) - RAM-probed first (tools/probe/dump-growth-ivysaur-vram.py) and disproved both suspected classes (x2/y2 pinned at 0 every tick, no idle-anim rest offset; extracted tileset+palette byte-identical to live VRAM/PLTT at a clean tick and window ticks). The real cause: growthAnimationAtAge's own matrix is RAM-exact with NO lag, but the CAPTURED FRAMEBUFFER lags the live OAM write - same class as BLAZE_KICK's own documented OAM/palette display latency, but inverted (here the affine SCALE lags 2 ticks and the BLEND TINT lags 1). Fixed in sceneOnGrowthView (src/engine/sceneOnPresentation.ts) by reading the scale and tint components at independently lagged ages; bisected empirically across all (scaleLag, tintLag) pairs up to 2 in both orientations, (2, 1) is the only pair landing 63/63. Dense ON-profile comparator (tools/compare/growthPortable.ts), whole 63-frame window (oracle ticks 211-273), both orientations, every frame captured: component (RAM-exact mechanism, now compared independent of the lagged view) 63/63 and framebuffer 63/63, both orientations, reproduced byte-identical on two independent runs each."
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-growth-player-ivysaur-opponent-onix.json",
+        "tools/battle-lab/mechanic-growth-opponent-ivysaur-player-onix.json",
+        "tools/probe/dump-growth-blendcolorcycle.py",
+        "tools/probe/dump-growth-ivysaur-vram.py",
+        "docs/growth-blendcolorcycle-probe.md",
+        "src/engine/blendColorCycle.ts",
+        "src/engine/growth.ts",
+        "src/engine/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/blendColorCycle.test.ts",
+        "tests/growth.test.ts",
+        "tools/compare/growthPortable.ts",
+        "tools/compare/fixtures/growth-player-ivysaur-opponent-onix.json",
+        "tools/compare/fixtures/growth-opponent-ivysaur-player-onix.json",
+        "tools/extract/extract-battle-mon-pics.ts"
+      ]
+    },
+    {
+      "move": "MOVE_FUTURE_SIGHT",
+      "status": "partial",
+      "covered": [
+        "blend_color_cycle family enumeration (this session): CONFUSION/PSYCHIC/FUTURE_SIGHT all tie at exactly 2 net-new components beyond already-proven blend_color_cycle/AnimTask_ShakeMon/AnimTask_ShakeMon2/AnimTask_ScaleMonAndRestore/monbg-family visual commands - SetPsychicBackground/UnsetPsychicBackground's own AnimTask_SetPsychicBackground (BG palette 2 11-entry ring rotation) plus its BG_PSYCHIC asset. FUTURE_SIGHT picked as cheapest to port: attacker-only self-effect (blend_color_cycle + ScaleMonAndRestore on ANIM_ATTACKER, identical shape to already-exact MOVE_GROWTH), zero target-side task composition (no AnimTask_ShakeMon/ShakeMon2 - FUTURE_SIGHT never touches the target).",
+        "RAM-probed first (tools/probe/dump-future-sight-psychicbg.py against a fresh legal mechanicLab fixture, player KADABRA/FUTURE_SIGHT vs opponent ONIX): REG_BLDY's two fade-cover ramps (asymmetric 4-tick vs 5-tick holds, not assumed symmetric), the BG palette 2 rotate-right-by-1-every-4-ticks ring (confirmed byte-exact against the extracted psychic.png palette including the wraparound entry), and the attacker blend/scale pair's own creation tick (age 37 relative to the fade's own start).",
+        "Ported as src/engine/futureSight.ts, Tier-1-pinned (tests/futureSight.test.ts, 8/8). BG_PSYCHIC asset extracted (tools/extract/extract-psychic-bg.ts, same indexedPng/tilemap pipeline as MOVE_EXTREME_SPEED's BG_HIGHSPEED). KADABRA battle back sprite extracted (extract-battle-mon-pics.ts). Wired through the Scene-ON seam (sceneOnFutureSightView, battleScene.ts's FUTURE_SIGHT draw case): psychic-BG-vs-default-BG selection, REG_BLDY darken (reusing the SHADOW_PUNCH/EXTREME_SPEED gpuDarken pattern), and the attacker blend/affine path (reusing GROWTH's own drawSpriteSheetAffineStretch tint/affine seam and its RAM-probed (scaleLag=2, tintLag=1) display-lag pair, which transferred unchanged per the dense comparator below - confirmed, not assumed).",
+        "Dense comparator (tools/compare/futureSightPortable.ts + tools/compare/fixtures/future-sight-player-kadabra-opponent-onix.json), one orientation (player-back KADABRA -> opponent-front ONIX; the family map's own derivation says the OBJ-row/task arithmetic is side-uniform, so the opposite orientation is expected to need only the missing KADABRA front sprite, not a new mechanism - not yet staged), 114-frame window (oracle ticks 77-190, every frame): framebuffer 75/114. The BG swap/rotation/fade, target ONIX, healthboxes, and message printer are all pixel-exact for their own frames (a 1-tick BG-palette-rotation display lag was RAM/pixel-confirmed and fixed during this session, the same framebuffer-lags-RAM-write class already documented for GROWTH/BLAZE_KICK). The remaining 39/114 mismatches are confined to KADABRA's own attacker sprite box (bbox 44,65-100,111) during the blend/scale window - the same class of species-specific attacker residual GROWTH itself carried for a full session (that one turned out to be a display-lag bug, not an asset/idle-offset issue) before being promoted to exact; not RAM-probed further this session (out of this rung's time budget) - named, not chased blind, per this run's no-blind-fit policy.",
+        "Not yet done: a second orientation (needs a KADABRA front sprite extraction), and the attacker-box residual's root cause (candidates per the GROWTH precedent: a KADABRA-specific asset/VRAM mismatch, or a further display-lag refinement specific to this move's own attacker seam - the GROWTH (2,1) pair only partially transferred, per the framebuffer counts above)."
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-future-sight-kadabra-onix.json",
+        "tools/probe/dump-future-sight-psychicbg.py",
+        "src/engine/futureSight.ts",
+        "tests/futureSight.test.ts",
+        "src/engine/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tools/extract/extract-psychic-bg.ts",
+        "src/assets/gen/battle-anim-psychic-bg.json",
+        "tools/compare/futureSightPortable.ts",
+        "tools/compare/fixtures/future-sight-player-kadabra-opponent-onix.json"
+      ],
+      "remaining": "Player-attacker orientation (kadabra-onix fixture): 75/114 dense framebuffer frames match. The BG swap/rotation/fade, target ONIX, healthboxes, and message printer are all pixel-exact for their own frames; the remaining 39/114 mismatches are confined to KADABRA's own attacker sprite box (bbox 44,65-100,111) during the blend/scale window. GROWTH's own (scaleLag=2, tintLag=1) attacker display-lag pair was tried on this move's identical blend+scale seam and only partially transferred (improved the match count from a same-bbox failure at every active-window frame, but did not fully resolve it) - the residual is confirmed NOT the BG-rotation lag (that 1-tick fix was verified separately and is fully resolved). Next session should RAM-probe KADABRA's own OAM/VRAM directly (dump-growth-ivysaur-vram.py precedent) to distinguish a further lag refinement from a genuine KADABRA-specific asset/idle-anim gap, then extend to the opponent-attacker orientation (needs a KADABRA front sprite extraction; the family map's own derivation says the OBJ-row/task arithmetic is side-uniform, so no new mechanism is expected there) before re-running futureSightPortable.ts to confirm exact."
     }
   ],
   "queue": [
