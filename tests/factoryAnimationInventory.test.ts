@@ -68,11 +68,12 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // MOVE_FUTURE_SIGHT promoted partial->exact this session (defect A
-        // closed): partial 5->4, exact 20->21, deliberate per AGENTS.md.
-        unsupported: 251,
+        // MOVE_PSYCHIC staged this session (psychic family's third sibling,
+        // partial at 137/140 same as CONFUSION's own remainder class):
+        // unsupported 251->250, partial 4->5, deliberate per AGENTS.md.
+        unsupported: 250,
         staged: 0,
-        partial: 4,
+        partial: 5,
         exact: 21,
       },
       {
