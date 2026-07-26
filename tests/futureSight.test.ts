@@ -78,6 +78,39 @@ describe("MOVE_FUTURE_SIGHT's SetPsychicBackground/UnsetPsychicBackground BG swa
     expect(futureSightBgBldyAtAge(-1)).toBe(0);
     expect(futureSightBgIsPsychic(-1)).toBe(false);
   });
+
+  // RAM-probed rung 6 (tools/probe/run-battle-lab-rgb.py's own
+  // `bgPalette2Faded` dump against the same fixture, ages = frame-77): the
+  // ring's own transition ages are 21,25,...,65 (clean 4-age cadence), then
+  // a one-time 6-age hold to 71 (not the naive 69), then 75,79,83,87,91
+  // (clean 4-age cadence again, permanently +2 shifted) - exactly spanning
+  // the attacker blend/scale cleanup gap before UnsetPsychicBackground's own
+  // fade starts. This defect stayed hidden inside the fade-2 black cover in
+  // earlier rungs; it is independently visible pre-cover too (ages 65-70
+  // hold one extra beat before rotating again).
+  it("holds one extra 2-tick beat once, between ages 65 and 71, then resumes its 4-tick cadence permanently shifted", () => {
+    const ring = Array.from({ length: 13 }, (_, index) => ({ r: index, g: 0, b: 0 }));
+    const at = (age: number) => futureSightBgPaletteRowAtAge(ring, age)[1];
+    expect(at(65)).toEqual(at(66));
+    expect(at(66)).toEqual(at(67));
+    expect(at(67)).toEqual(at(68));
+    expect(at(68)).toEqual(at(69));
+    expect(at(69)).toEqual(at(70));
+    // No further rotation through age 70 (the naive 4-tick formula would
+    // have rotated again at age 69 - RAM shows it doesn't).
+    expect(at(70)).toEqual(at(65));
+    // The next rotation lands at age 71, not age 69.
+    expect(at(71)).not.toEqual(at(70));
+    // Cadence resumes cleanly every 4 ages from 71, permanently shifted +2
+    // against the pre-pause anchor (75, 79, 83, 87, 91 all RAM-observed
+    // transition ages).
+    expect(at(74)).toEqual(at(71));
+    expect(at(75)).not.toEqual(at(74));
+    expect(at(78)).toEqual(at(75));
+    expect(at(79)).not.toEqual(at(78));
+    expect(at(87)).not.toEqual(at(86));
+    expect(at(91)).not.toEqual(at(90));
+  });
 });
 
 describe("MOVE_FUTURE_SIGHT's attacker-only blend_color_cycle + ScaleMonAndRestore", () => {

@@ -72,6 +72,21 @@ const FADE_2_RAMPDOWN_END_AGE = 109;
 const ROTATION_RING_SIZE = 11;
 const ROTATION_FIRST_APPLIED_AGE = 21;
 const ROTATION_INTERVAL = 4;
+// RAM-probed (tools/probe/run-battle-lab-rgb.py's own `bgPalette2Faded`
+// dump, re-run rung 6 against the same fixture, ages = frame-77): the
+// rotation ring steps cleanly every 4 ages from 21 through 65 (12 steps),
+// then holds for 6 ages instead of 4 (65->71, not 65->69) - exactly
+// spanning the gap between the attacker blend_color_cycle/ScaleMonAndRestore
+// pair's own `blendoff` (REG_BLDCNT/REG_BLDALPHA both read 0 ages 67-72) and
+// `UnsetPsychicBackground`'s own fade setup (REG_BLDCNT reads 0xe8 again
+// starting age 73, the same tick `futureSightBgBldyAtAge`'s second ramp-up
+// already starts unlagged) - then resumes its clean 4-age cadence
+// permanently shifted +2 (71, 75, 79, 83, 87, 91, ...). REG_BLDY's own
+// ramp is untouched by this pause (RAM-exact against the existing formula
+// through the whole window), so this is a rotation-cadence-only defect, not
+// a darken-register one.
+const ROTATION_PAUSE_BREAKPOINT_AGE = 69;
+const ROTATION_PAUSE_EXTRA_TICKS = 2;
 
 /** `REG_BLDY` (0-16) at a given age - the black-cover cross-fade both `SetPsychicBackground` and `UnsetPsychicBackground` drive around the BG swap. The two holds are RAM-probed asymmetric (4 ticks, then 5). */
 export function futureSightBgBldyAtAge(age: number): number {
@@ -93,7 +108,9 @@ export function futureSightBgIsPsychic(age: number): boolean {
 
 function rotationCountAtAge(age: number): number {
   if (age < ROTATION_FIRST_APPLIED_AGE) return 0;
-  return Math.floor((age - ROTATION_FIRST_APPLIED_AGE) / ROTATION_INTERVAL) + 1;
+  const effectiveAge =
+    age < ROTATION_PAUSE_BREAKPOINT_AGE ? age : age - ROTATION_PAUSE_EXTRA_TICKS;
+  return Math.floor((effectiveAge - ROTATION_FIRST_APPLIED_AGE) / ROTATION_INTERVAL) + 1;
 }
 
 /** `SetPsychicBackground_Step`'s own rotate-right-by-1 of BG palette 2's entries 1-11, applied `rotationCountAtAge(age)` times (mod the 11-entry ring). */
