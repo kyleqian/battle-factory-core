@@ -351,3 +351,88 @@ describe(
     );
   },
 );
+
+describe(
+  "factory full-turn decision -- non-terminal forced-switch variant (item 2, entry 450's own proof-3 "
+    + "remainder): the trainer's active mon faints on the FIRST action with a healthy bench -- "
+    + "BattleScript_HandleFaintedMon's AI branch (docs/forced-switch-ground-truth.md, entry 447's real "
+    + "matchup-scorer machinery) picks the replacement, the second action is cancelled (cancelallactions, "
+    + "NOT terminal), runBattleEndTurnOrchestration still runs, and the next boundary targets the "
+    + "switched-in mon",
+  () => {
+    /** docs/forced-switch-ground-truth.md's own proven switch-in candidate (factoryBattleScriptTerminalDecision.test.ts). */
+    const MACHOP = 66;
+    const KARATE_CHOP = 2;
+
+    function forcedSwitchConfig(): FactoryFullTurnConfig {
+      return config({
+        player: {
+          species: 1, moveId: STRENGTH, attack: 200, defense: 50, spAttack: 50, spDefense: 50, speed: 100, hp: 100,
+        },
+        trainer: {
+          species: 43, moveId: STRENGTH, attack: 50, defense: 50, spAttack: 50, spDefense: 50, speed: 50, hp: 90,
+        },
+        trainerBenchHp: [145, 0],
+        trainerBenchOverride: [{ species: MACHOP, moves: [KARATE_CHOP, 0, 0, 0] }, undefined],
+      });
+    }
+
+    it(
+      "the killing blow is the SAME banked one-shot (mid-turn-KO test's own player/trainer numbers) -- only "
+        + "the trainer's healthy bench changes the outcome from terminal to a genuine resume",
+      () => {
+        const initial = createFactoryFullTurnBattleState(forcedSwitchConfig());
+        const afterPlayer = submitFactoryFullTurnDecision(initial, {
+          requestId: 1, side: "player", decision: PLAYER_ATTACKS,
+        });
+        if (afterPlayer.kind !== "decision-required") throw new Error("expected decision-required");
+
+        const result = submitFactoryFullTurnDecision(afterPlayer.state, {
+          requestId: 2, side: "trainer", decision: TRAINER_ATTACKS,
+        });
+        expect(result.kind).toBe("decision-required"); // NOT terminal -- the battle genuinely resumes
+        if (result.kind !== "decision-required") throw new Error("expected decision-required");
+        expect(result.nextRequest).toEqual({
+          kind: "command", requestId: 3, side: "player", battler: 0,
+          legalDecisions: [{ kind: "use-move", moveSlot: 0, targetBattler: 1 }],
+        });
+
+        const rulesContext = (result.state.rules as {
+          rulesContext: {
+            battleOutcome: number;
+            battlers: ReadonlyArray<{
+              species: number; hp: number; partyIndex: number;
+              pp: readonly number[]; statStages: readonly number[];
+              status1: number; status2: number; status3: number;
+            }>;
+          };
+        }).rulesContext;
+        expect(rulesContext.battleOutcome).toBe(0); // genuinely undecided, computed not injected
+
+        // The boundary's next request targets battler 1 (the trainer slot) -- now rebuilt as MACHOP,
+        // the real switch-in the AI matchup scorer picked (the only living bench slot with a real move).
+        const switchedIn = rulesContext.battlers[1]!;
+        expect(switchedIn.species).toBe(MACHOP);
+        expect(switchedIn.hp).toBe(145);
+        expect(switchedIn.partyIndex).toBe(1); // raw party index 1 -- this reducer's own active-at-0 convention
+        expect(switchedIn.status1).toBe(0);
+        expect(switchedIn.status2).toBe(0);
+        expect(switchedIn.status3).toBe(0);
+        expect(switchedIn.statStages).toEqual([6, 6, 6, 6, 6, 6, 6, 6]); // SwitchInClearSetData's neutral reset
+
+        // PP proof the second action never dispatched: the player's own move (action 1, the killing
+        // blow) shows its one real use; nothing downstream of the fainted mon's own second action ever
+        // ran (there is no second Strength cast to decrement any PP for -- the original trainer mon is
+        // gone, replaced before mover2 would have acted).
+        expect(rulesContext.battlers[0]!.pp[0]).toBe(15);
+
+        // Zero extra RNG beyond the banked ledgers: exactly the killing blow's own 4-roll hit chain
+        // (accuracy, crit, adjustnormaldamage, seteffectwithchance) -- the entire forced-switch dance
+        // draws zero Random() (docs/forced-switch-ground-truth.md §2b), the cancelled second action
+        // draws none (it never dispatches), and this scenario's quiet end-turn (no weather/status set)
+        // draws none either. If the second action HAD dispatched, this would be 8, not 4.
+        expect(result.state.rng.calls).toBe(4);
+      },
+    );
+  },
+);

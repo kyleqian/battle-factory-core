@@ -149,6 +149,19 @@ export type FactoryFullTurnConfig = Readonly<{
   rngSeed: number;
   player: FactoryFullTurnBattlerConfig;
   trainer: FactoryFullTurnBattlerConfig;
+  /**
+   * Optional trainer-side bench (party slots 1/2, since `config.trainer`
+   * itself always occupies slot 0 here -- this reducer's own convention,
+   * distinct from `factoryBattleScriptTerminalDecision.ts`'s active-at-
+   * slot-2 layout). Item 2's non-terminal forced-switch full-turn proof:
+   * a healthy bench lets `BattleScript_HandleFaintedMon`'s AI branch
+   * (`docs/forced-switch-ground-truth.md` §1c/§2, entry 447's machinery)
+   * actually resume the battle instead of ending it. Omitted everywhere
+   * else, keeping every existing fixture's hard-terminal-on-faint shape.
+   */
+  trainerBenchHp?: readonly [number, number];
+  /** Mirrors `factoryBattleScriptTerminalDecision.ts`'s own `opponentBenchOverride` -- per-slot species/moves override for the two bench slots above. */
+  trainerBenchOverride?: readonly [BattleScriptPartyMemberInput?, BattleScriptPartyMemberInput?];
 }>;
 
 export type FactoryFullTurnDecisionRules = BattleJsonObject & Readonly<{
@@ -239,6 +252,11 @@ function partySlot(config: FactoryFullTurnBattlerConfig): BattleScriptPartyMembe
 
 const EMPTY_PARTY_SLOT: BattleScriptPartyMemberInput = Object.freeze({ species: 0, isEgg: false, hp: 0 });
 
+/** A trainer bench slot (party index 1 or 2, item 2's forced-switch proof) -- species/moves come from `override`, `hp` is the only required field. */
+function trainerBenchSlot(hp: number, override?: BattleScriptPartyMemberInput): BattleScriptPartyMemberInput {
+  return { species: 0, isEgg: false, hp, ...override };
+}
+
 function createInitialRules(config: FactoryFullTurnConfig): FactoryFullTurnDecisionRules {
   const playerParty = Object.freeze([
     partySlot(config.player),
@@ -246,7 +264,13 @@ function createInitialRules(config: FactoryFullTurnConfig): FactoryFullTurnDecis
   ]);
   const opponentParty = Object.freeze([
     partySlot(config.trainer),
-    EMPTY_PARTY_SLOT, EMPTY_PARTY_SLOT, EMPTY_PARTY_SLOT, EMPTY_PARTY_SLOT, EMPTY_PARTY_SLOT,
+    config.trainerBenchHp
+      ? trainerBenchSlot(config.trainerBenchHp[0], config.trainerBenchOverride?.[0])
+      : EMPTY_PARTY_SLOT,
+    config.trainerBenchHp
+      ? trainerBenchSlot(config.trainerBenchHp[1], config.trainerBenchOverride?.[1])
+      : EMPTY_PARTY_SLOT,
+    EMPTY_PARTY_SLOT, EMPTY_PARTY_SLOT, EMPTY_PARTY_SLOT,
   ]);
   if (playerParty.length !== BATTLE_SCRIPT_PARTY_SIZE || opponentParty.length !== BATTLE_SCRIPT_PARTY_SIZE) {
     throw new Error("staged parties must contain exactly PARTY_SIZE slots");
