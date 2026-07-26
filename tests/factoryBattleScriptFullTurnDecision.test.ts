@@ -436,3 +436,154 @@ describe(
     );
   },
 );
+
+describe(
+  "factory full-turn decision -- non-terminal PLAYER-side forced-switch variant (item 3, entry 459's own "
+    + "named remainder): the player's active mon faints on the FIRST action with a healthy bench -- "
+    + "BattleScript_HandleFaintedMon's PLAYER branch (openpartyscreen's `side !== SIDE_OPPONENT` fork, "
+    + "battleScriptOpenPartyScreenOpcode.ts) halts on a real player-choice-required reason instead of the "
+    + "AI's automatic pick, surfaced here as a genuine \"forced-switch\" decision-required boundary (not a "
+    + "throw); submitting the legal switch resumes the SAME halted script and then runs straight into "
+    + "runBattleEndTurnOrchestration, exactly where item 2's own faint1-resumed path leads",
+  () => {
+    /** Same proven switch-in candidate as item 2's own bench (factoryBattleScriptTerminalDecision.test.ts). */
+    const MACHOP = 66;
+    const KARATE_CHOP = 2;
+
+    /**
+     * A pure side-relabeling of item 2's own `forcedSwitchConfig` -- same
+     * STRENGTH/200atk/50def/90hp one-shot numbers, same speed gap (100 vs 50),
+     * just with the trainer as the fast attacker and the player as the target
+     * with a healthy bench this time, so the SAME banked KO_SCENARIO_RNG_SEED
+     * hit chain (4 rolls, no more) kills the PLAYER'S active mon instead.
+     */
+    function playerForcedSwitchConfig(): FactoryFullTurnConfig {
+      return config({
+        player: {
+          species: 43, moveId: STRENGTH, attack: 50, defense: 50, spAttack: 50, spDefense: 50, speed: 50, hp: 90,
+        },
+        trainer: {
+          species: 1, moveId: STRENGTH, attack: 200, defense: 50, spAttack: 50, spDefense: 50, speed: 100, hp: 100,
+        },
+        playerBenchHp: [145, 0],
+        playerBenchOverride: [{ species: MACHOP, moves: [KARATE_CHOP, 0, 0, 0] }, undefined],
+      });
+    }
+
+    it(
+      "the killing blow is the SAME banked one-shot, roles reversed: the trainer moves first (speed 100 > "
+        + "50) and KOs the player -- the reducer surfaces a forced-switch request naming exactly the "
+        + "player's one living bench slot, not a throw",
+      () => {
+        const initial = createFactoryFullTurnBattleState(playerForcedSwitchConfig());
+        const afterPlayer = submitFactoryFullTurnDecision(initial, {
+          requestId: 1, side: "player", decision: PLAYER_ATTACKS,
+        });
+        if (afterPlayer.kind !== "decision-required") throw new Error("expected decision-required");
+
+        const result = submitFactoryFullTurnDecision(afterPlayer.state, {
+          requestId: 2, side: "trainer", decision: TRAINER_ATTACKS,
+        });
+        expect(result.kind).toBe("decision-required"); // NOT a throw, NOT terminal
+        if (result.kind !== "decision-required") throw new Error("expected decision-required");
+        expect(result.nextRequest).toEqual({
+          kind: "forced-switch",
+          requestId: 3,
+          side: "player",
+          battler: 0,
+          faintedPartyIndex: 0,
+          legalPartyIndexes: [1], // MACHOP only -- bench slot 2 is empty (species 0)
+        });
+        expect(result.state.boundary).toEqual({ kind: "decision-required", request: result.nextRequest });
+
+        // Exactly the killing blow's own 4-roll hit chain -- the halt itself is not a controller round
+        // trip (docs/forced-switch-ground-truth.md §3d), and the player's own move (mover2) never
+        // dispatched (cancelallactions semantics, same rule item 2 already pins).
+        expect(result.state.rng.calls).toBe(4);
+      },
+    );
+
+    it(
+      "submitting the legal MACHOP slot rebuilds the player's active battler from the bench record "
+        + "(species/hp/partyIndex/neutral stat stages/clean status) and resumes straight into "
+        + "runBattleEndTurnOrchestration -> a genuine next command boundary, zero further Random() calls",
+      () => {
+        const initial = createFactoryFullTurnBattleState(playerForcedSwitchConfig());
+        const afterPlayer = submitFactoryFullTurnDecision(initial, {
+          requestId: 1, side: "player", decision: PLAYER_ATTACKS,
+        });
+        if (afterPlayer.kind !== "decision-required") throw new Error("expected decision-required");
+        const paused = submitFactoryFullTurnDecision(afterPlayer.state, {
+          requestId: 2, side: "trainer", decision: TRAINER_ATTACKS,
+        });
+        if (paused.kind !== "decision-required") throw new Error("expected decision-required");
+
+        const result = submitFactoryFullTurnDecision(paused.state, {
+          requestId: 3, side: "player", decision: { kind: "switch", partyIndex: 1 },
+        });
+        expect(result.kind).toBe("decision-required");
+        if (result.kind !== "decision-required") throw new Error("expected decision-required");
+        // cancelallactions already skipped the player's own (now-moot) second action, so
+        // runBattleEndTurnOrchestration runs immediately and the NEXT boundary is a fresh full-turn
+        // command request for the player (this reducer's own two-action-cycle shape, exactly item 2's
+        // own faint1-resumed path).
+        expect(result.nextRequest).toEqual({
+          kind: "command", requestId: 4, side: "player", battler: 0,
+          legalDecisions: [{ kind: "use-move", moveSlot: 0, targetBattler: 1 }],
+        });
+
+        const rulesContext = (result.state.rules as {
+          rulesContext: {
+            battleOutcome: number;
+            battlers: ReadonlyArray<{
+              species: number; hp: number; partyIndex: number;
+              pp: readonly number[];
+              statStages: readonly number[];
+              status1: number; status2: number; status3: number;
+            }>;
+          };
+        }).rulesContext;
+        expect(rulesContext.battleOutcome).toBe(0); // genuinely undecided, computed not injected
+
+        // The boundary's next request targets battler 0 (the player slot) -- now rebuilt as MACHOP,
+        // the only legal switch-in the player's own submission named.
+        const switchedIn = rulesContext.battlers[0]!;
+        expect(switchedIn.species).toBe(MACHOP);
+        expect(switchedIn.hp).toBe(145);
+        expect(switchedIn.partyIndex).toBe(1); // raw party index 1 -- this reducer's own active-at-0 convention
+        expect(switchedIn.status1).toBe(0);
+        expect(switchedIn.status2).toBe(0);
+        expect(switchedIn.status3).toBe(0);
+        expect(switchedIn.statStages).toEqual([6, 6, 6, 6, 6, 6, 6, 6]); // SwitchInClearSetData's neutral reset
+
+        // PP proof the killing blow (mover1, the trainer) actually dispatched, but the player's own
+        // second action never did: the trainer's Strength shows its one real use.
+        expect(rulesContext.battlers[1]!.pp[0]).toBe(15);
+
+        // Zero Random() draws across all three submissions: exactly the killing blow's own 4-roll hit
+        // chain (accuracy, crit, adjustnormaldamage, seteffectwithchance) -- the forced-switch dance
+        // draws zero (same as item 2's trainer-side proof), the cancelled second action draws none (it
+        // never dispatches), and this scenario's quiet end-turn (no weather/status set) draws none either.
+        expect(result.state.rng.calls).toBe(4);
+      },
+    );
+
+    it("rejects a forced-switch submission naming the fainted/already-active slot (index 0)", () => {
+      const initial = createFactoryFullTurnBattleState(playerForcedSwitchConfig());
+      const afterPlayer = submitFactoryFullTurnDecision(initial, {
+        requestId: 1, side: "player", decision: PLAYER_ATTACKS,
+      });
+      if (afterPlayer.kind !== "decision-required") throw new Error("expected decision-required");
+      const paused = submitFactoryFullTurnDecision(afterPlayer.state, {
+        requestId: 2, side: "trainer", decision: TRAINER_ATTACKS,
+      });
+      if (paused.kind !== "decision-required") throw new Error("expected decision-required");
+
+      expect(() =>
+        submitFactoryFullTurnDecision(paused.state, {
+          requestId: 3, side: "player", decision: { kind: "switch", partyIndex: 0 },
+        })
+      ).toThrow();
+    });
+  },
+);
