@@ -58,8 +58,19 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
     CONFUSION and PSYCHIC now **138/140**), window-2 splice hypothesis
     tested and honestly refuted — a genuinely separate defect class.
     Coverage: **22 exact / 6 partial**.
-- **Next (in order):** main — CBM+CV pairs for the blocked 17 (AttackDown
-  first — unblocks the original Growl fixtures); `END3` registration (architectural, needs its
+- **Round-8 side merge (final step of the session, supervisor-verified
+  ALL PASS live on the merged tree):** `AI_CBM_AttackDown` +
+  `AI_CV_AttackDown` ground truth banked (doc §14) — the FIRST
+  CBM-blocked pair, twin Growl fixtures isolating the physical-type-list
+  gate (+4 delta, 100% `Cmd_if_random_less_than`, both seeds ×2), with a
+  real confound caught and designed out (`Cmd_get_ability`'s ability-guess
+  `Random()&1` fires for any two-ability species — use single-ability
+  targets). Draw-site 1 (needs a 2-turn build) and a CBM-branch-fires
+  fixture remain recipe-only. 10-fixture verify script ALL PASS ×2.
+- **Next (in order):** main — port the `AI_CBM_AttackDown`+`AI_CV_AttackDown`
+  pair (ground truth banked §14; also makes §6's original Growl fixtures
+  engine-reproducible), then further CBM+CV pairs from the blocked 17;
+  `END3` registration (architectural, needs its
   own design look) then ENDTURN_ABILITIES's 3 scripted cases;
   ENDTURN_ITEMS1/2 registration off the banked recipes; remaining
   blocked-on-opcodes census rows (DMGTOLEVEL, PSYWAVE, COUNTER/TYPECALC2,
