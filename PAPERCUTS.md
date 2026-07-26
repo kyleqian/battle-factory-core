@@ -446,3 +446,18 @@ worker (PROGRESS entry 13).
 - **Cost each:** ~10 min.
 - **Workaround:** none yet; the turn dossiers record boundary shas but not
   the LCG cursor — worth adding to the next dossier retrofit pass.
+
+## Dense-comparator harness reports only the first mismatched frame's bbox
+
+- **What:** the portable dense comparators (`growthPortable.ts`,
+  `futureSightPortable.ts` and siblings) print a whole-window match count
+  but bbox/px-dump only the FIRST diff frame — a window carrying two
+  distinct defect families read as one "confined to the attacker box"
+  residual until a bespoke per-frame scratch sweep separated them
+  (2026-07-25 FUTURE_SIGHT rung 5). Two prior workers also hand-wrote
+  throwaway PNG-diff/crop scripts for the same need (GROWTH rungs 4-5).
+- **Hits:** 3 (same session).
+- **Cost each:** ~10-15 min of bespoke scratch scripting per residual hunt.
+- **Workaround:** copy `tools/compare/scratch/future-sight-per-frame-bbox.ts`
+  as the starting point; a shared `--per-frame-bbox` flag on the portable
+  harness template would retire this.
