@@ -15,6 +15,7 @@ import {
 } from "../src/engine/battleScriptRulesContext.ts";
 import {
   BATTLE_SCRIPT_SETBYTE_POINTER_EXPRESSIONS,
+  createBattleScriptBicbyteCommandHandlers,
   createBattleScriptSetByteCommandHandlers,
   readBattleScriptRulesByte,
   resolveBattleScriptSetByteValue,
@@ -23,6 +24,7 @@ import {
 
 const program = loadBattleScriptProgram();
 const starts = program.instructions.filter(({ opcodeId }) => opcodeId === 46);
+const bicbyteStarts = program.instructions.filter((instruction) => instruction.opcodeName === "B_SCR_OP_BICBYTE");
 
 function battler(side: 0 | 1) {
   return Object.freeze({
@@ -247,6 +249,107 @@ describe("source-complete Cmd_setbyte", () => {
       "mgba",
       "emulator",
     ]) {
+      expect(source).not.toContain(forbidden);
+    }
+  });
+});
+
+describe("source-complete Cmd_bicbyte", () => {
+  it("pins all 11 concrete [4,1] starts, one pointer (gMoveResultFlags), three masks", () => {
+    expect(bicbyteStarts).toHaveLength(11);
+    expect(bicbyteStarts.every((instruction) =>
+      instruction.opcodeName === "B_SCR_OP_BICBYTE"
+      && instruction.dispatcher === "Cmd_bicbyte"
+      && instruction.operands.length === 2
+      && instruction.operands[0]?.widthBytes === 4
+      && instruction.operands[1]?.widthBytes === 1
+    )).toBe(true);
+    expect([...new Set(bicbyteStarts.map(({ operands }) => operands[0]!.expression))]).toEqual(["gMoveResultFlags"]);
+    expect([...new Set(bicbyteStarts.map(({ operands }) => operands[1]!.expression))].sort()).toEqual([
+      "MOVE_RESULT_MISSED",
+      "MOVE_RESULT_MISSED | MOVE_RESULT_DOESNT_AFFECT_FOE",
+      "MOVE_RESULT_SUPER_EFFECTIVE | MOVE_RESULT_NOT_VERY_EFFECTIVE",
+    ]);
+    expect(bicbyteStarts.some((i) => i.source.label === "BattleScript_EffectEndeavor")).toBe(true);
+  });
+
+  it("clears exactly the masked bits and preserves the rest, for every concrete start (AND-NOT semantics)", () => {
+    const handlers = createBattleScriptBicbyteCommandHandlers(program);
+    for (const instruction of bicbyteStarts) {
+      const sourceRules = rules();
+      const initial = createBattleScriptMachine(program, instruction.source.label, sourceRules, 0x1234_5678);
+      const state = Object.freeze({ ...initial, programCounter: instruction.programCounter });
+      const result = stepBattleScriptMachine(program, state, handlers);
+      const mask = resolveBattleScriptSetByteValue(instruction.operands[1]!.expression)!;
+      expect(result.kind, `pc ${instruction.programCounter}`).toBe("advanced");
+      expect(result.state.programCounter).toBe(instruction.programCounter + 1);
+      expect(result.state.rulesContext.moveResultFlags).toBe(sourceRules.moveResultFlags & ~mask & 0xff);
+      expect(result.state.rng).toBe(state.rng);
+      expect(result.state.events).toBe(state.events);
+      expect(result.state.scheduler).toBe(state.scheduler);
+      expect(sourceRules).toEqual(rules());
+      expect(Object.isFrozen(result.state.rulesContext)).toBe(true);
+    }
+  });
+
+  it("clears every masked bit when all are set, and is a no-op when none are set", () => {
+    const handlers = createBattleScriptBicbyteCommandHandlers(program);
+    const endeavorInstruction = bicbyteStarts.find((i) => i.source.label === "BattleScript_EffectEndeavor")!;
+    const mask = resolveBattleScriptSetByteValue(endeavorInstruction.operands[1]!.expression)!; // SUPER_EFFECTIVE | NOT_VERY_EFFECTIVE
+
+    const allSet = Object.freeze({ ...rules(), moveResultFlags: 0xff });
+    const stateAllSet = Object.freeze({
+      ...createBattleScriptMachine(program, endeavorInstruction.source.label, allSet, 1),
+      programCounter: endeavorInstruction.programCounter,
+    });
+    const resultAllSet = stepBattleScriptMachine(program, stateAllSet, handlers);
+    expect(resultAllSet.kind).toBe("advanced");
+    if (resultAllSet.kind !== "advanced") throw new Error("expected advance");
+    expect(resultAllSet.state.rulesContext.moveResultFlags).toBe(0xff & ~mask);
+
+    const noneSet = Object.freeze({ ...rules(), moveResultFlags: 0 });
+    const stateNoneSet = Object.freeze({
+      ...createBattleScriptMachine(program, endeavorInstruction.source.label, noneSet, 1),
+      programCounter: endeavorInstruction.programCounter,
+    });
+    const resultNoneSet = stepBattleScriptMachine(program, stateNoneSet, handlers);
+    expect(resultNoneSet.kind).toBe("advanced");
+    if (resultNoneSet.kind !== "advanced") throw new Error("expected advance");
+    expect(resultNoneSet.state.rulesContext.moveResultFlags).toBe(0);
+  });
+
+  it("rejects unknown pointer and mask spellings before registering, and requires all 11 starts", () => {
+    const replace = (operandIndex: 0 | 1, expression: string): BattleScriptProgram => {
+      const first = bicbyteStarts[0]!;
+      const instructions = program.instructions.map((instruction) =>
+        instruction === first
+          ? Object.freeze({
+            ...instruction,
+            operands: Object.freeze(instruction.operands.map((operand, index) =>
+              index === operandIndex ? Object.freeze({ ...operand, expression }) : operand
+            )),
+          })
+          : instruction
+      );
+      return Object.freeze({ ...program, instructions: Object.freeze(instructions) });
+    };
+
+    expect(() => createBattleScriptBicbyteCommandHandlers(replace(0, "gUnknownByte"))).toThrow(/unknown .* pointer/);
+    expect(() => createBattleScriptBicbyteCommandHandlers(replace(1, "MOVE_RESULT_FOE_ENDURED"))).toThrow(/unknown .* mask/);
+
+    const withoutOne = Object.freeze({
+      ...program,
+      instructions: Object.freeze(program.instructions.filter((i) => i !== bicbyteStarts[0])),
+    });
+    expect(() => createBattleScriptBicbyteCommandHandlers(withoutOne)).toThrow(/requires all 11/);
+  });
+
+  it("has no RNG, controller, event, presentation, oracle, or emulator dependency", () => {
+    const source = readFileSync(
+      new URL("../src/engine/battleScriptSetByte.ts", import.meta.url),
+      "utf8",
+    );
+    for (const forbidden of ["drawBattleScriptRng", "markBattleScriptControllerPending", "Math.random", "oracle", "mgba", "emulator"]) {
       expect(source).not.toContain(forbidden);
     }
   });

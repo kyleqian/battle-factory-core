@@ -147,13 +147,24 @@ describe("production jumpifbyte (Cmd_jumpifbyte) dispatch", () => {
       expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch" });
     });
 
-    it("halts on an unmodeled comparison value (MOVE_RESULT_MISSED, gMoveResultFlags itself is modeled)", () => {
+    it("halts on an unmodeled comparison value (MOVE_RESULT_FOE_ENDURED, gMoveResultFlags itself is modeled)", () => {
+      // MOVE_RESULT_MISSED/MOVE_RESULT_NO_EFFECT (and two other OR'd combos) resolve as of the
+      // EFFECT_ENDEAVOR registration (seam-scout §9.2, battleScriptSetByte.ts's shared value
+      // universe) -- BattleScript_DoMultiHit's own MOVE_RESULT_FOE_ENDURED comparand does not.
       const pc = findJumpifbytePc(
-        (ops) => ops[1] === "gMoveResultFlags" && ops[2] === "MOVE_RESULT_MISSED",
+        (ops) => ops[1] === "gMoveResultFlags" && ops[2] === "MOVE_RESULT_FOE_ENDURED",
       );
       const { result } = stepAtProgramCounter(pc, context());
       expect(result.kind).toBe("halted");
       expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch" });
+    });
+
+    it("no longer halts on MOVE_RESULT_MISSED (EFFECT_ENDEAVOR registration widened the shared value universe)", () => {
+      const pc = findJumpifbytePc(
+        (ops) => ops[1] === "gMoveResultFlags" && ops[2] === "MOVE_RESULT_MISSED",
+      );
+      const { result } = stepAtProgramCounter(pc, context());
+      expect(result.kind).toBe("advanced");
     });
 
     it("pass-through: the WIN path's own gBattleOutcome gate never trips either barrier", () => {

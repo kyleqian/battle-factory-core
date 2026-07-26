@@ -14,6 +14,7 @@ import {
   type BattleScriptMoveValuesRulesContext,
 } from "./battleScriptMoveValuesCommands.ts";
 import {
+  createBattleScriptBicbyteCommandHandlers,
   createBattleScriptSetByteCommandHandlers,
   type BattleScriptSetByteRulesContext,
 } from "./battleScriptSetByte.ts";
@@ -2034,6 +2035,9 @@ export function createBattleScriptStatusRulesHandlers(
       program,
     ),
     ...createBattleScriptSetByteCommandHandlers<BattleScriptRulesContext>(
+      program,
+    ),
+    ...createBattleScriptBicbyteCommandHandlers<BattleScriptRulesContext>(
       program,
     ),
     ...createBattleScriptAttackCancelerOpcodeHandlers(program),

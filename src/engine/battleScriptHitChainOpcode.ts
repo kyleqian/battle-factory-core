@@ -1250,6 +1250,92 @@ export const adjustnormaldamageOpcodeHandler: BattleScriptOpcodeHandler<BattleSc
 };
 
 /**
+ * Cmd_setdamagetohealthdifference (battle_script_commands.c:9366-9377),
+ * Endeavor's own damage source and the only concrete call site
+ * (`BattleScript_EffectEndeavor`, program counter 1770). Source's fail
+ * direction is `target.hp <= attacker.hp` -- i.e. it fails whenever the
+ * user's own HP is already at or above the target's, matching the move's
+ * real "gains power only while behind" identity. `gBattleMoveDamage =
+ * target.hp - attacker.hp` on the success branch. Zero `Random(` calls on
+ * either branch.
+ */
+export const setdamagetohealthdifferenceOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (
+  context,
+) => {
+  const rulesContext = context.state.rulesContext;
+  const attacker = requireBattlerRole(rulesContext, "attacker");
+  const target = requireBattlerRole(rulesContext, "target");
+  const targetHp = rulesContext.battlers[target].hp;
+  const attackerHp = rulesContext.battlers[attacker].hp;
+
+  if (targetHp <= attackerHp) {
+    const [failOperand] = context.instruction.operands;
+    const failTarget = resolveBattleScriptLabel(context.program, failOperand!.expression);
+    if (!failTarget) {
+      throw new Error(`Cmd_setdamagetohealthdifference: unresolved jump target ${failOperand!.expression}`);
+    }
+    return transitionBattleScriptCommand(
+      context,
+      Object.freeze({ kind: "jump", programCounter: failTarget.programCounter }),
+    );
+  }
+
+  const nextRulesContext = Object.freeze({ ...rulesContext, battleMoveDamage: targetHp - attackerHp });
+  return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }), { rulesContext: nextRulesContext });
+};
+
+/**
+ * Cmd_adjustsetdamage (battle_script_commands.c:5861-5899): "the same as
+ * adjustnormaldamage, except there's no random damage multiplier" (the
+ * source's own comment) -- the False Swipe/Endure HP clamp, ported exactly
+ * like adjustnormaldamageOpcodeHandler above, minus its RNG roll. Focus Band
+ * is the same named (b) barrier that function already carries: this engine
+ * does not model `gSpecialStatuses[target].focusBanded`, so this halts
+ * whenever the target's resolved holdEffect is Focus Band, before even
+ * checking the clamp condition (matching source's own unconditional
+ * `Random() % 100 < param` roll whenever that item is held) -- never on the
+ * plain (no-item or different-item) path, which is fully implemented per
+ * source.
+ */
+export const adjustsetdamageOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (context) => {
+  const rulesContext = context.state.rulesContext;
+  const target = requireBattlerRole(rulesContext, "target");
+  const targetBattler = rulesContext.battlers[target];
+
+  const holdEffectId = resolveBattleScriptBattlerHoldEffect(rulesContext, target);
+  if (holdEffectId === HOLD_EFFECT_ID_FOCUS_BAND) {
+    return unsupportedBranch(
+      context,
+      "Cmd_adjustsetdamage's HOLD_EFFECT_FOCUS_BAND roll needs gSpecialStatuses[target].focusBanded, "
+        + "which this engine does not model yet",
+      "battle_script_commands.c",
+      5878,
+    );
+  }
+
+  const moveRow = requireMoveRow(rulesContext.currentMove);
+  const hasSubstitute = (targetBattler.status2 & BATTLE_SCRIPT_STATUS2_SUBSTITUTE) !== 0;
+  let damage = rulesContext.battleMoveDamage;
+  const shouldClamp = !hasSubstitute
+    && (moveRow.effect === "EFFECT_FALSE_SWIPE" || targetBattler.endured === 1)
+    && targetBattler.hp <= damage;
+
+  let moveResultFlags = rulesContext.moveResultFlags;
+  if (shouldClamp) {
+    damage = targetBattler.hp - 1;
+    if (targetBattler.endured === 1) {
+      moveResultFlags = (moveResultFlags | BATTLE_SCRIPT_MOVE_RESULT_FOE_ENDURED) >>> 0;
+    }
+  }
+
+  return transitionBattleScriptCommand(
+    context,
+    Object.freeze({ kind: "advance" }),
+    { rulesContext: Object.freeze({ ...rulesContext, battleMoveDamage: damage, moveResultFlags }) },
+  );
+};
+
+/**
  * Cmd_attackanimation (battle_script_commands.c:1743-1799). MOVE_TRANSFORM/
  * MOVE_SUBSTITUTE never reach BattleScript_EffectHit's own hit chain (each
  * has its own dedicated effect script), so the HITMARKER_NO_ANIMATIONS
@@ -2789,6 +2875,8 @@ export function createBattleScriptHitChainOpcodeHandlers(
   install("B_SCR_OP_DAMAGECALC", damagecalcOpcodeHandler);
   install("B_SCR_OP_TYPECALC", typecalcOpcodeHandler);
   install("B_SCR_OP_ADJUSTNORMALDAMAGE", adjustnormaldamageOpcodeHandler);
+  install("B_SCR_OP_SETDAMAGETOHEALTHDIFFERENCE", setdamagetohealthdifferenceOpcodeHandler);
+  install("B_SCR_OP_ADJUSTSETDAMAGE", adjustsetdamageOpcodeHandler);
   install("B_SCR_OP_ATTACKANIMATION", createAttackanimationOpcodeHandler(ports.isControllerIdle));
   install("B_SCR_OP_EFFECTIVENESSSOUND", createEffectivenesssoundOpcodeHandler(ports.isControllerIdle));
   install("B_SCR_OP_HITANIMATION", hitanimationOpcodeHandler);

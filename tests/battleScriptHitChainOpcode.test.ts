@@ -569,6 +569,7 @@ describe("production ppreduce (Cmd_ppreduce) dispatch", () => {
 
 const STRENGTH = 70; // EFFECT_HIT, power 80, accuracy 100, TYPE_NORMAL
 const FALSE_SWIPE = 206; // EFFECT_FALSE_SWIPE, power 40, accuracy 100, TYPE_NORMAL
+const ENDEAVOR = 283; // EFFECT_ENDEAVOR, power 1, accuracy 100, TYPE_NORMAL
 const ABILITY_BATTLE_ARMOR = 4;
 const ABILITY_LEVITATE = 26;
 const ABILITY_WONDER_GUARD = 25;
@@ -835,6 +836,186 @@ describe("production adjustnormaldamage (Cmd_adjustnormaldamage) dispatch", () =
       expect(result.state.rulesContext.battleMoveDamage).toBe(9); // hp - 1, clamped via Endure, item ignored
     });
   });
+});
+
+describe("production setdamagetohealthdifference (Cmd_setdamagetohealthdifference) dispatch", () => {
+  it("registers B_SCR_OP_SETDAMAGETOHEALTHDIFFERENCE", () => {
+    const instruction = program.instructions.find((i) => i.opcodeName === "B_SCR_OP_SETDAMAGETOHEALTHDIFFERENCE")!;
+    expect(instruction).toBeDefined();
+  });
+
+  it(
+    "success: target HP above user HP sets gBattleMoveDamage to the difference, zero RNG "
+      + "(live oracle bin/oracle lab tools/battle-lab/mechanic-endeavor-success.json: "
+      + "Diglett 85hp user vs Chansey 325hp target -> gBattleMoveDamage 240, target settles at 85)",
+    () => {
+      const rc = context(0, { hp: 85 }, {}, { hp: 325 });
+      const { result } = stepAtOpcode("B_SCR_OP_SETDAMAGETOHEALTHDIFFERENCE", rc);
+      expect(result.kind).toBe("advanced");
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.rulesContext.battleMoveDamage).toBe(240);
+      expect(result.state.rng.calls).toBe(0);
+    },
+  );
+
+  it("fails on the exact boundary (target HP equals user HP, source's <=), jumps to BattleScript_ButItFailed", () => {
+    const rc = context(0, { hp: 100 }, {}, { hp: 100 });
+    const { result } = stepAtOpcode("B_SCR_OP_SETDAMAGETOHEALTHDIFFERENCE", rc);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.programCounter).toBe(labelPc("BattleScript_ButItFailed"));
+    expect(result.state.rulesContext.battleMoveDamage).toBe(0); // untouched
+    expect(result.state.rng.calls).toBe(0);
+  });
+
+  it(
+    "fails when the user's HP exceeds the target's, jumps to BattleScript_ButItFailed "
+      + "(live oracle mechanic-endeavor-fail.json: Chansey 325hp user vs Diglett 85hp target -> no HP change either side)",
+    () => {
+      const rc = context(0, { hp: 325 }, {}, { hp: 85 });
+      const { result } = stepAtOpcode("B_SCR_OP_SETDAMAGETOHEALTHDIFFERENCE", rc);
+      expect(result.kind).toBe("advanced");
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_ButItFailed"));
+      expect(result.state.rng.calls).toBe(0);
+    },
+  );
+});
+
+describe("production adjustsetdamage (Cmd_adjustsetdamage) dispatch", () => {
+  it("registers B_SCR_OP_ADJUSTSETDAMAGE", () => {
+    const instruction = program.instructions.find((i) => i.opcodeName === "B_SCR_OP_ADJUSTSETDAMAGE")!;
+    expect(instruction).toBeDefined();
+  });
+
+  it("plain pass-through: Endeavor's own set damage is untouched with no clamp condition, zero RNG (no random multiplier, unlike adjustnormaldamage)", () => {
+    const rc = context(0, {}, { currentMove: ENDEAVOR, battleMoveDamage: 240 }, { hp: 325 });
+    const { result } = stepAtOpcode("B_SCR_OP_ADJUSTSETDAMAGE", rc);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battleMoveDamage).toBe(240);
+    expect(result.state.rulesContext.moveResultFlags & (1 << 6)).toBe(0); // not MOVE_RESULT_FOE_ENDURED
+    expect(result.state.rng.calls).toBe(0);
+  });
+
+  it("False Swipe clamps lethal set-damage to hp-1", () => {
+    const rc = context(0, {}, { currentMove: FALSE_SWIPE, battleMoveDamage: 999 }, { hp: 10 });
+    const { result } = stepAtOpcode("B_SCR_OP_ADJUSTSETDAMAGE", rc);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battleMoveDamage).toBe(9);
+    expect(result.state.rulesContext.moveResultFlags & (1 << 6)).toBe(0);
+  });
+
+  it("Endure clamps lethal set-damage to hp-1 and sets MOVE_RESULT_FOE_ENDURED", () => {
+    const rc = context(0, {}, { currentMove: ENDEAVOR, battleMoveDamage: 999 }, { hp: 10, endured: 1 });
+    const { result } = stepAtOpcode("B_SCR_OP_ADJUSTSETDAMAGE", rc);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battleMoveDamage).toBe(9);
+    expect(result.state.rulesContext.moveResultFlags & (1 << 6)).toBe(1 << 6);
+  });
+
+  it("does not clamp a non-lethal set-damage even with Endure set", () => {
+    const rc = context(0, {}, { currentMove: ENDEAVOR, battleMoveDamage: 5 }, { hp: 100, endured: 1 });
+    const { result } = stepAtOpcode("B_SCR_OP_ADJUSTSETDAMAGE", rc);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battleMoveDamage).toBe(5); // no random multiplier to shrink it here
+    expect(result.state.rulesContext.moveResultFlags & (1 << 6)).toBe(0);
+  });
+
+  describe("(b) unsupported-branch barrier: Focus Band, only when actually held", () => {
+    it("halts when the target holds Focus Band (its roll is unmodeled, same gap as adjustnormaldamage's own)", () => {
+      const rc = context(0, {}, { currentMove: ENDEAVOR, battleMoveDamage: 999 }, { hp: 10, item: HOLD_EFFECT_ITEM_FOCUS_BAND });
+      const { result } = stepAtOpcode("B_SCR_OP_ADJUSTSETDAMAGE", rc);
+      expect(result.kind).toBe("halted");
+      expect(result.state.haltReason).toMatchObject({
+        kind: "unsupported-branch",
+        sourceFile: "battle_script_commands.c",
+        sourceLine: 5878,
+      });
+    });
+
+    it("does not barrier a different held item on the same lethal-hit shape", () => {
+      const rc = context(0, {}, { currentMove: ENDEAVOR, battleMoveDamage: 999 }, { hp: 10, endured: 1, item: HOLD_EFFECT_ITEM_LEFTOVERS });
+      const { result } = stepAtOpcode("B_SCR_OP_ADJUSTSETDAMAGE", rc);
+      expect(result.kind).toBe("advanced");
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.rulesContext.battleMoveDamage).toBe(9);
+    });
+  });
+});
+
+/**
+ * Walks the real committed script from `entryLabel` until `targetLabel`'s own
+ * programCounter is reached (or `budget` steps pass). Mirrors
+ * tests/battleScriptIngrainLeechSeedWrapOpcode.test.ts's own runUntilLabel.
+ */
+function runUntilLabel(
+  entryLabel: string,
+  targetLabel: string,
+  rulesContext: BattleScriptRulesContext,
+  rngSeed = 1,
+  ports = externalPorts(),
+  budget = 50,
+) {
+  const execution = createBattleScriptStatusRulesExecution(program, entryLabel, rulesContext, rngSeed, ports);
+  const targetPc = labelPc(targetLabel);
+  let result = stepBattleScriptMachine(program, execution.state, execution.handlers);
+  let steps = 1;
+  while (result.kind === "advanced" && result.state.programCounter !== targetPc && steps < budget) {
+    result = stepBattleScriptMachine(program, result.state, execution.handlers);
+    steps++;
+  }
+  return { execution, result, steps };
+}
+
+/**
+ * FRONTIER GATE: EFFECT_ENDEAVOR's real committed script
+ * (`BattleScript_EffectEndeavor`, data/battle_scripts_1.s -- attackcanceler,
+ * attackstring, ppreduce, setdamagetohealthdifference, copyword,
+ * accuracycheck, typecalc, jumpifmovehadnoeffect, bicbyte, copyword,
+ * adjustsetdamage, goto BattleScript_HitFromAtkAnimation) now runs end to
+ * end through the three opcodes this module/battleScriptSetByte.ts register
+ * this session, landing in the exact same generic hit-chain tail every other
+ * EFFECT_HIT-family move already proves reachable (the KO scenario test
+ * above). Ground truth pinned live this session (`bin/oracle lab
+ * tools/battle-lab/mechanic-endeavor-{success,fail}.json`): Diglett (85hp,
+ * TYPE_GROUND, avoids the TYPE_NORMAL STAB this synthetic fixture would
+ * otherwise apply) vs Chansey (325hp, default TYPE_NORMAL) at Level 50.
+ */
+describe("EFFECT_ENDEAVOR: full committed script, live-oracle-pinned ground truth", () => {
+  it(
+    "success: reaches BattleScript_HitFromAtkAnimation with gBattleMoveDamage 240 "
+      + "(live oracle: Chansey 325 -> 85, Diglett unchanged at 85), exactly 1 RNG draw so far (accuracycheck; "
+      + "seteffectwithchance's own draw lives in the shared tail past this point, live-oracle total 2)",
+    () => {
+      const rc = context(0, { hp: 85, types: ["TYPE_GROUND", "TYPE_GROUND"] }, { currentMove: ENDEAVOR }, { hp: 325 });
+      const { result, steps } = runUntilLabel("BattleScript_EffectEndeavor", "BattleScript_HitFromAtkAnimation", rc);
+      expect(result.kind).toBe("advanced");
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_HitFromAtkAnimation"));
+      expect(result.state.rulesContext.battleMoveDamage).toBe(240);
+      expect(result.state.rulesContext.moveResultFlags).toBe(0);
+      expect(result.state.rng.calls).toBe(1);
+      expect(steps).toBeLessThan(50);
+    },
+  );
+
+  it(
+    "fail: user's HP already exceeds the target's -- jumps straight to BattleScript_ButItFailed, zero RNG "
+      + "(live oracle: Chansey 325hp user vs Diglett 85hp target, no HP change either side)",
+    () => {
+      const rc = context(0, { hp: 325 }, { currentMove: ENDEAVOR }, { hp: 85 });
+      const { result, steps } = runUntilLabel("BattleScript_EffectEndeavor", "BattleScript_ButItFailed", rc);
+      expect(result.kind).toBe("advanced");
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_ButItFailed"));
+      expect(result.state.rng.calls).toBe(0);
+      expect(steps).toBeLessThan(50);
+    },
+  );
 });
 
 /**

@@ -304,4 +304,35 @@ describe("(b) unsupported-branch barriers -- COPYARRAY/JUMPIFABILITY/MANIPULATED
     expect(result.kind).toBe("halted");
     expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch" });
   });
+
+  it(
+    "Cmd_copyarray's widened universe (EFFECT_ENDEAVOR registration, seam-scout §9.2) also resolves "
+      + "gHpDealt<-gBattleMoveDamage, the reverse of LeechSeedTurnDrain's own tuple",
+    () => {
+      const endeavorCopyarrayStarts = program.instructions.filter(
+        (instruction) => instruction.source.label === "BattleScript_EffectEndeavor" && instruction.opcodeName === "B_SCR_OP_COPYARRAY",
+      );
+      expect(endeavorCopyarrayStarts).toHaveLength(2);
+      expect(endeavorCopyarrayStarts.map((i) => i.operands.map((o) => o.expression))).toEqual([
+        ["gHpDealt", "gBattleMoveDamage", "0x4"],
+        ["gBattleMoveDamage", "gHpDealt", "0x4"],
+      ]);
+
+      const stashPc = endeavorCopyarrayStarts[0]!.programCounter;
+      const { result: stashed } = stepAtProgramCounter(stashPc, context({}, { battleMoveDamage: 240, hpDealt: 0 }));
+      expect(stashed.kind).toBe("advanced");
+      if (stashed.kind !== "advanced") throw new Error("expected advance");
+      expect(stashed.state.rulesContext.hpDealt).toBe(240);
+      expect(stashed.state.rulesContext.battleMoveDamage).toBe(240); // untouched by this direction
+
+      const restorePc = endeavorCopyarrayStarts[1]!.programCounter;
+      const { result: restored } = stepAtProgramCounter(
+        restorePc,
+        context({}, { battleMoveDamage: 360, hpDealt: 240 }), // simulates typecalc having STAB-multiplied battleMoveDamage in between
+      );
+      expect(restored.kind).toBe("advanced");
+      if (restored.kind !== "advanced") throw new Error("expected advance");
+      expect(restored.state.rulesContext.battleMoveDamage).toBe(240); // restored from the stash, STAB undone
+    },
+  );
 });

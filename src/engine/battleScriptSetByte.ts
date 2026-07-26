@@ -120,6 +120,23 @@ const ATOMIC_VALUES = Object.freeze({
   MOVE_EFFECT_RECOIL_33: 38,
   MOVE_EFFECT_KNOCK_OFF: 54,
   MOVE_EFFECT_SP_ATK_TWO_DOWN: 59,
+  /** include/constants/battle.h:220-228 -- Cmd_bicbyte's own gMoveResultFlags masks (battle-script-program.json's 11 concrete B_SCR_OP_BICBYTE call sites). */
+  MOVE_RESULT_MISSED: 1 << 0,
+  "MOVE_RESULT_SUPER_EFFECTIVE | MOVE_RESULT_NOT_VERY_EFFECTIVE": (1 << 1) | (1 << 2),
+  "MOVE_RESULT_MISSED | MOVE_RESULT_DOESNT_AFFECT_FOE": (1 << 0) | (1 << 3),
+  /**
+   * `jumpifmovehadnoeffect`'s own expansion (asm/macros/battle_script.inc:
+   * 1430-1432 -- `jumpifbyte CMP_COMMON_BITS, gMoveResultFlags,
+   * MOVE_RESULT_NO_EFFECT, ptr`), the gate `BattleScript_EffectEndeavor`
+   * itself uses right after typecalc. Widens Cmd_jumpifbyte's own already-
+   * registered comparand resolution (battleScriptJumpifbyteOpcode.ts reuses
+   * this same resolver), not just this file's own SETBYTE/BICBYTE opcodes --
+   * a real, generic literal, not an Endeavor special case: 8 other
+   * `gMoveResultFlags, MOVE_RESULT_NO_EFFECT` call sites (AbsorbUpdateHp,
+   * DreamEaterWorked, DoMultiHit, MultiHitPrintStrings, EffectOHKO,
+   * EffectParalyze, DoTripleKickAttack, FuryCutterHit) resolve too.
+   */
+  MOVE_RESULT_NO_EFFECT: (1 << 0) | (1 << 3) | (1 << 5),
 } as const);
 
 const SETBYTE_VALUES: Readonly<Record<string, number>> = Object.freeze({
@@ -319,4 +336,73 @@ export function createBattleScriptSetByteCommandHandlers<
     );
   };
   return Object.freeze({ 46: handler });
+}
+
+/**
+ * Source-complete Cmd_bicbyte (battle_script_commands.c:3889-3894):
+ * `*memByte &= ~mask`. All 11 concrete B_SCR_OP_BICBYTE call sites in the
+ * committed program target the same pointer (gMoveResultFlags) with one of
+ * three literal masks (MOVE_RESULT_MISSED; MOVE_RESULT_SUPER_EFFECTIVE |
+ * MOVE_RESULT_NOT_VERY_EFFECTIVE, including BattleScript_EffectEndeavor's
+ * own site; MOVE_RESULT_MISSED | MOVE_RESULT_DOESNT_AFFECT_FOE) -- every one
+ * resolves through the shared byte-lvalue universe above (gMoveResultFlags
+ * was already in it; the three masks are new SETBYTE_VALUES entries this
+ * registration adds). Zero call sites rejected: registration validates every
+ * one of the 11 starts up front (a hard `throw`, not a runtime
+ * `unsupported-branch`), so unlike Cmd_addbyte/Cmd_bicword/
+ * Cmd_jumpifarraynotequal (battleScriptDamagingWeatherOpcode.ts) -- which
+ * each have real unresolvable call sites and so keep a runtime (b) guard --
+ * this opcode needs none: every concrete instance the machine can ever
+ * execute is proven to resolve at load time, the same style
+ * B_SCR_OP_SETBYTE's own registration above uses.
+ */
+export function createBattleScriptBicbyteCommandHandlers<
+  RulesContext extends BattleScriptSetByteRulesContext,
+>(
+  program: BattleScriptProgram,
+): BattleScriptOpcodeHandlers<RulesContext> {
+  const starts = program.instructions.filter(
+    (instruction) => instruction.opcodeName === "B_SCR_OP_BICBYTE",
+  );
+  if (starts.length !== 11) {
+    throw new Error(`B_SCR_OP_BICBYTE requires all 11 concrete starts, got ${starts.length}`);
+  }
+  for (const instruction of starts) {
+    const [pointer, mask] = instruction.operands;
+    if (
+      instruction.dispatcher !== "Cmd_bicbyte"
+      || instruction.operands.length !== 2
+      || pointer?.widthBytes !== 4
+      || mask?.widthBytes !== 1
+    ) {
+      throw new Error(`invalid B_SCR_OP_BICBYTE shape at program counter ${instruction.programCounter}`);
+    }
+    if (!BATTLE_SCRIPT_SETBYTE_POINTER_EXPRESSIONS.includes(pointer.expression as never)) {
+      throw new Error(`unknown B_SCR_OP_BICBYTE pointer ${pointer.expression}`);
+    }
+    if (resolveBattleScriptSetByteValue(mask.expression) === null) {
+      throw new Error(`unknown B_SCR_OP_BICBYTE mask ${mask.expression}`);
+    }
+  }
+
+  const handler: BattleScriptOpcodeHandler<RulesContext> = (context) => {
+    const [pointerOperand, maskOperand] = context.instruction.operands;
+    const mask = maskOperand ? resolveBattleScriptSetByteValue(maskOperand.expression) : null;
+    const current = pointerOperand
+      ? readBattleScriptRulesByte(context.state.rulesContext, pointerOperand.expression)
+      : null;
+    if (current === null || mask === null || !pointerOperand) {
+      throw new Error(`validated B_SCR_OP_BICBYTE became undecodable at ${context.state.programCounter}`);
+    }
+    const rulesContext = writeBattleScriptRulesByte(
+      context.state.rulesContext,
+      pointerOperand.expression,
+      (current & ~mask) & 0xff,
+    );
+    if (!rulesContext) {
+      throw new Error(`validated B_SCR_OP_BICBYTE became unwritable at ${context.state.programCounter}`);
+    }
+    return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }), { rulesContext });
+  };
+  return Object.freeze({ [starts[0]!.opcodeId]: handler });
 }

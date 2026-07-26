@@ -115,30 +115,44 @@ function createSetseededHandler(): BattleScriptOpcodeHandler<BattleScriptRulesCo
 }
 
 /**
- * `Cmd_copyarray` (`battle_script_commands.c:3837-3848`), narrowed to
- * `BattleScript_LeechSeedTurnDrain`'s own `copyword gBattleMoveDamage,
- * gHpDealt` call site -- a plain 4-byte copy of the just-dealt drain amount
- * back into the damage register before the sign flip/Liquid Ooze branch.
+ * `Cmd_copyarray` (`battle_script_commands.c:3837-3848`), covers two
+ * concrete 4-byte tuples: `BattleScript_LeechSeedTurnDrain`'s own
+ * `copyword gBattleMoveDamage, gHpDealt` (the just-dealt drain amount copied
+ * back into the damage register before the sign flip/Liquid Ooze branch) and
+ * `BattleScript_EffectEndeavor`'s own reverse pair -- `copyword gHpDealt,
+ * gBattleMoveDamage` right after `setdamagetohealthdifference`, then
+ * `copyword gBattleMoveDamage, gHpDealt` again after typecalc/bicbyte.
+ * Endeavor stashes its own just-computed set-damage into gHpDealt before
+ * typecalc can multiply gBattleMoveDamage by STAB/type-effectiveness, then
+ * restores it unmodified afterward -- the move's real damage is genuinely
+ * immune to typecalc's own side effect, a real source mechanism this
+ * widening surfaces, not a special case. Every other of this opcode's 16
+ * concrete call sites (Triple Kick, Pain Split, Bide, Curse, ability-
+ * immunity messages, ...) is the single named barrier below.
  */
 function createCopyarrayHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
   return (context) => {
     const [dstOperand, srcOperand, sizeOperand] = context.instruction.operands;
     const rulesContext = context.state.rulesContext;
-    if (
-      dstOperand?.expression !== "gBattleMoveDamage"
-      || srcOperand?.expression !== "gHpDealt"
-      || sizeOperand?.expression !== "0x4"
-    ) {
-      return unsupportedBranch(
-        context,
-        `Cmd_copyarray's operand (${dstOperand?.expression ?? "<missing>"}, ${srcOperand?.expression ?? "<missing>"}, `
-          + `${sizeOperand?.expression ?? "<missing>"}) is not the registered gBattleMoveDamage<-gHpDealt, size 4 tuple`,
-        "battle_script_commands.c",
-        3837,
-      );
+    const dst = dstOperand?.expression;
+    const src = srcOperand?.expression;
+    const size = sizeOperand?.expression;
+
+    if (size === "0x4" && dst === "gBattleMoveDamage" && src === "gHpDealt") {
+      const nextRulesContext = Object.freeze({ ...rulesContext, battleMoveDamage: rulesContext.hpDealt });
+      return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }), { rulesContext: nextRulesContext });
     }
-    const nextRulesContext = Object.freeze({ ...rulesContext, battleMoveDamage: rulesContext.hpDealt });
-    return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }), { rulesContext: nextRulesContext });
+    if (size === "0x4" && dst === "gHpDealt" && src === "gBattleMoveDamage") {
+      const nextRulesContext = Object.freeze({ ...rulesContext, hpDealt: rulesContext.battleMoveDamage });
+      return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }), { rulesContext: nextRulesContext });
+    }
+    return unsupportedBranch(
+      context,
+      `Cmd_copyarray's operand (${dst ?? "<missing>"}, ${src ?? "<missing>"}, ${size ?? "<missing>"}) `
+        + "is not a registered gBattleMoveDamage<->gHpDealt, size 4 tuple",
+      "battle_script_commands.c",
+      3837,
+    );
   };
 }
 

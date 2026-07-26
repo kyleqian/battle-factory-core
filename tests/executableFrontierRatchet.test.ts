@@ -77,7 +77,16 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // Cmd_cleareffectsonfaint's STATUS2_WRAPPED cross-battler clear now has the
   // `wrappedBy` identity this doc's own setter registration adds, so it
   // clears for real instead of barriering.
-  ["src/engine/battleScriptHitChainOpcode.ts", 23],
+  // 23 -> 24 (EFFECT_ENDEAVOR registration, seam-scout §9.2/PROGRESS 463's
+  // side merge): Cmd_setdamagetohealthdifference registers source-completely
+  // (zero barriers, two branches, both implemented). Cmd_adjustsetdamage
+  // adds exactly one new barrier -- the same HOLD_EFFECT_FOCUS_BAND gap
+  // Cmd_adjustnormaldamage already carries (`gSpecialStatuses[target].
+  // focusBanded`'s own roll is unmodeled), now duplicated onto this sibling
+  // opcode since it is a distinct call site, not a narrowing of the existing
+  // one. Named, reachability-tested (tests/battleScriptHitChainOpcode.test.ts
+  // "(b) unsupported-branch barrier: Focus Band, only when actually held").
+  ["src/engine/battleScriptHitChainOpcode.ts", 24],
   ["src/engine/battleScriptAttackCancelerOpcode.ts", 5],
   ["src/engine/battleScriptMoveEndOpcode.ts", 7],
   ["src/engine/battleScriptJumpifbyteOpcode.ts", 1],
@@ -165,16 +174,22 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // Ingrain/Leech Seed/Wrap setter opcode registration (docs/ingrain-
   // leechseed-wrap-ground-truth.md §5): Cmd_copyarray is narrowed to
   // BattleScript_LeechSeedTurnDrain's own `gBattleMoveDamage<-gHpDealt, size
-  // 4` tuple (1 barrier, every other of its 15 other concrete call sites --
-  // Triple Kick, Pain Split, Bide, Endeavor, ...). Cmd_jumpifability is
-  // narrowed to the plain BS_TARGET/BS_ATTACKER selector with
+  // 4` tuple (1 barrier, every other of its then-15 other concrete call
+  // sites -- Triple Kick, Pain Split, Bide, Endeavor, ...). Cmd_jumpifability
+  // is narrowed to the plain BS_TARGET/BS_ATTACKER selector with
   // ABILITY_LIQUID_OOZE (1 barrier, every other ability id across its 17
   // other concrete call sites -- Shield Dust/Suction Cups/Own Tempo/Water
   // Veil/Rock Head/Clear Body/... -- plus the BS_ATTACKER_SIDE/
   // BS_NOT_ATTACKER_SIDE AbilityBattleEffects branches, unreached by any
   // concrete call site). Cmd_manipulatedamage is narrowed to DMG_CHANGE_SIGN
   // (1 barrier, DMG_RECOIL_FROM_MISS/DMG_DOUBLED -- Struggle recoil/Beat Up,
-  // out of this slice's scope).
+  // out of this slice's scope). Widened, not narrowed further (EFFECT_ENDEAVOR
+  // registration, seam-scout §9.2): Cmd_copyarray's own accepted tuple set now
+  // also covers `gHpDealt<-gBattleMoveDamage` (BattleScript_EffectEndeavor's
+  // own reverse pair, stashing its set-damage across typecalc's STAB/type-
+  // effectiveness multiply so Endeavor's real damage is immune to it) -- one
+  // more concrete call site resolves (Endeavor no longer among the "every
+  // other" rejected sites), same single barrier call site, count unchanged.
   ["src/engine/battleScriptIngrainLeechSeedWrapOpcode.ts", 3],
 ]);
 
