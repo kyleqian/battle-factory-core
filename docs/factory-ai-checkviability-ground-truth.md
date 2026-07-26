@@ -2874,3 +2874,142 @@ split of any pair in this doc.
 this session with `AI_CV_SpeedUp`'s 2 fixtures (§20.2/§20.3) — every prior
 scenario (§9, §11.5, §12.1, §13.4, §14.6, §15.5, §16.5, §17.7, §18.7, §19.7)
 unchanged and still green. **Run twice this session, ALL PASS both times.**
+
+## 21. 2026-07-26 addendum #11: `AI_CBM_SpAtkUp` + `AI_CV_SpAtkUp` — same shape as `AttackUp` (§17), except one draw site's odds are NOT the same number
+
+Same session as §20 (side lane, Battle Scene OFF, no-`src/`-changes
+contract), continuing to the brief's second (expected) rung: `AI_CBM_
+SpAtkUp` + `AI_CV_SpAtkUp`.
+
+### 21.1 Both real bodies, cited and fully parsed
+
+```
+AI_CBM_SpAtkUp:                         (data/battle_ai_scripts.s:261-263)
+	if_stat_level_equal AI_USER, STAT_SPATK, MAX_STAT_STAGE, Score_Minus10
+	end
+```
+
+Byte-for-byte the same 2-instruction shape as `AI_CBM_AttackUp`/`AI_CBM_
+DefenseUp`/`AI_CBM_SpeedUp` (§17.1/§18.1/§20.1) with `STAT_SPATK` swapped
+in — zero `if_random_less_than`, zero `get_ability`. Dispatch table
+(`data/battle_ai_scripts.s:111,136`): both `EFFECT_SPECIAL_ATTACK_UP` and
+`EFFECT_SPECIAL_ATTACK_UP_2` route here.
+
+```
+AI_CV_SpAtkUp:                          (data/battle_ai_scripts.s:967-983)
+	if_stat_level_less_than AI_USER, STAT_SPATK, 9, AI_CV_SpAtkUp2  ; :968 Gate A
+	if_random_less_than 100, AI_CV_SpAtkUp3                          ; :969 DRAW SITE 1
+	score -1
+	goto AI_CV_SpAtkUp3
+
+AI_CV_SpAtkUp2:
+	if_hp_not_equal AI_USER, 100, AI_CV_SpAtkUp3                    ; :974 Gate B
+	if_random_less_than 128, AI_CV_SpAtkUp3                          ; :975 DRAW SITE 2
+	score +2
+AI_CV_SpAtkUp3:
+	if_hp_more_than AI_USER, 70, AI_CV_SpAtkUp_End                   ; :978 Gate C
+	if_hp_less_than AI_USER, 40, AI_CV_SpAtkUp_ScoreDown2             ; :979 Gate D
+	if_random_less_than 70, AI_CV_SpAtkUp_End                        ; :980 DRAW SITE 3
+AI_CV_SpAtkUp_ScoreDown2:
+	score -2
+AI_CV_SpAtkUp_End:
+	end
+```
+
+Exactly **3** `if_random_less_than` sites (`:969`, `:975`, `:980`), and
+every gate/instruction is a **byte-for-byte structural match** to `AI_CV_
+AttackUp` (`STAT_ATK` -> `STAT_SPATK`, §17.1) — Gate A/B/C/D shapes, label
+topology, and score deltas all identical, re-derived independently rather
+than assumed. **One real numeric difference, only visible by reading the
+actual immediate operand**: DRAW SITE 3's threshold is `if_random_less_than
+70` (`:980`, ~27.3% skip) here, vs. `AttackUp`'s own DRAW SITE 3 threshold
+of `if_random_less_than 40` (`:909`, ~15.6% skip) — same position in the
+same control-flow shape, different odds. A port that assumed "same shape as
+AttackUp" therefore transfers the gate topology correctly but would get
+this one constant wrong without the direct citation. (This session's own
+fixtures don't reach DRAW SITE 3 either way — see 21.2 — so the discrepancy
+is documented here as a citation-level correction, not something the live
+ledger below independently exercises.)
+
+### 21.2 Design: §17's Anorith/Machamp fixture design reused verbatim, dispatch move swapped for `MOVE_GROWTH`
+
+Opponent (`AI_USER`, under test, both fixtures): **Anorith** (species 390,
+reused verbatim from §17 — Battle Armor blocks `Cmd_critcalc`'s `Random()`
+call), all 4 slots **`MOVE_GROWTH`** (74, `EFFECT_SPECIAL_ATTACK_UP`, 0
+power, **accuracy 0** — self-target, always hits, no `Cmd_accuracycheck`
+draw; both CBM- and CV-table-covered alongside `MOVE_TAIL_GLOW`'s
+`EFFECT_SPECIAL_ATTACK_UP_2`, not staged — `MOVE_TAIL_GLOW`'s own accuracy
+is **100**, a real accuracy check the brief's own move-choice guidance says
+to avoid). Target (player, both fixtures): **Machamp** (species 68, reused
+verbatim, single-ability `{GUTS, NONE}` — closes the §14.2/§20.2
+ability-guess confound for the same reason it did in §17). Same capture
+shape as every prior CBM-blocked pair (`[A, wait 30, A, wait 700]`,
+`captureFrames [0,100,300,732]`).
+
+- **Reach** (`tools/battle-lab/mechanic-factory-ai-cv-spatkup-fullhp-reach-off.json`):
+  target uses `MOVE_SPLASH` (150) x4 — Anorith's HP never moves (120 -> 120
+  both seeds), Gate B is false, falling through to DRAW SITE 2 (`:975`).
+- **Control** (`tools/battle-lab/mechanic-factory-ai-cv-spatkup-lowhp-control-off.json`):
+  target uses `MOVE_VITAL_THROW` (233) x4 — Anorith drops to 25% (seed 1) /
+  15% (seed 99), unaffected by `MOVE_GROWTH` (raises SPATK, not DEF, so the
+  §18.5 DEF-stage damage-reduction confound does not apply here — the
+  damage figures match §17's own AttackUp figures exactly, not
+  §18's DefenseUp ones), both comfortably under 40% -> Gate D true ->
+  `ScoreDown2` directly, zero draws.
+
+DRAW SITE 1 (`:969`, Gate A, needs the opponent's own SPATK stage already
+built to 9-11) and DRAW SITE 3 (`:980`, Gate C/D's HP-in-[40,70) band) are
+not staged this session — same "not attempted, time-capped" status as
+`AttackUp`'s own unstaged sites (§17.5).
+
+### 21.3 Live ledger (oracle-verified, both seeds, both runs)
+
+| Fixture | Seed | Opponent PP used | Opponent HP (start→end) | Total `Random()` calls, frame 0→732 | Determinism (2 runs) |
+| --- | -: | -: | --- | -: | --- |
+| Reach (fullhp, Growth) | 1 | 1 | 120→120 (100%) | **10** | identical |
+| Reach (fullhp, Growth) | 99 | 1 | 120→120 (100%) | **10** | identical |
+| Control (lowhp, VitalThrow) | 1 | 1 | 120→30 (25%) | **8** | identical |
+| Control (lowhp, VitalThrow) | 99 | 1 | 120→18 (15%) | **8** | identical |
+
+Numerically identical to `AttackUp`'s own ledger (§17.4: 10/10 reach, 8/8
+control) — expected, since the two handlers share every gate up through
+DRAW SITE 2 byte-for-byte, and neither fixture design reaches the one
+numerically-different site (DRAW SITE 3, §21.1).
+
+**Attribution** (`tools/probe/attribute-factory-ai-random-callers.py`,
+window `0 732`, seed 1, reach fixture only — control's shape (zero-draw,
+deterministic) is already established by the identical AttackUp precedent
+and this session's own §20.2 finding that this species pair closes the
+ability-guess confound):
+
+| Caller function | Reach count |
+| --- | -: |
+| `BattleAI_SetupAIData+0x83` | 4 |
+| `BattleTurnPassed+0x157` | 1 |
+| `ChooseMoveOrAction_Singles+0xf7` | 1 |
+| `Cmd_if_random_less_than+0x7` | **4** |
+
+Clean +4 `Cmd_if_random_less_than` (the `:975` roll, once per identical
+`MOVE_GROWTH` slot), zero `Cmd_get_ability` rows — Machamp's single-ability
+kit closes the §20.2-documented confound here too.
+
+### 21.4 What this unblocks
+
+1. **The pair's own port**: exact instruction lists, every gate's real
+   precondition, all 3 draw sites' odds (including the corrected `:980`
+   threshold, §21.1), and a live-verified twin fixture proving DRAW SITE
+   2's reachability end-to-end — same coverage shape as `AttackUp` (§17.5).
+2. **A citation-level correction that "same shape as a sibling" claims
+   must still be re-derived per constant, not just per gate topology** —
+   the exact trap the brief's own "never copy a sibling's gate map" rule
+   warns about, caught here on a numeric operand rather than a branch
+   direction (contrast §18.1's Gate C *direction* inversion, and §16's own
+   equality-gate caution).
+
+### 21.5 Verify script status
+
+`tools/probe/verify-factory-ai-checkviability-ground-truth.ts` extended
+this session with `AI_CV_SpAtkUp`'s 2 fixtures (§21.2/§21.3) — every prior
+scenario (§9, §11.5, §12.1, §13.4, §14.6, §15.5, §16.5, §17.7, §18.7, §19.7,
+§20.5) unchanged and still green. **Run twice this session, ALL PASS both
+times.**

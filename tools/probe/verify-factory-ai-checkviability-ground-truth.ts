@@ -692,6 +692,40 @@ const DRAW_COUNT_SCENARIOS: DrawCountScenarioSpec[] = [
     expectedTotalSteps: { 1: 6, 99: 6 },
     checkCrossSeedStable: true,
   },
+  // AI_CV_SpAtkUp (data/battle_ai_scripts.s:967-983, doc §21): the fourth
+  // stat-UP pair, byte-for-byte the same control-flow shape as AttackUp
+  // (§17) with STAT_SPATK swapped for STAT_ATK -- EXCEPT DRAW SITE 3's own
+  // threshold, if_random_less_than 70 (:980) vs AttackUp's 40 (:909), a
+  // real numeric difference caught only by re-reading the assembly, not by
+  // assuming the sibling's odds transfer. Reuses §17's entire Anorith
+  // (opponent)/Machamp (target) fixture design verbatim, dispatch move
+  // swapped for MOVE_GROWTH (74, EFFECT_SPECIAL_ATTACK_UP, 0 power,
+  // accuracy 0). Numerically identical ledger to AttackUp's (10/10 reach,
+  // 8/8 control) is expected and confirmed live: same gate structure, same
+  // 0-power/0-accuracy self-target dispatch move, same target/opponent
+  // species and damage sizing (MOVE_VITAL_THROW vs Anorith, unaffected by
+  // Growth since Growth raises SPATK not DEF). Attribution probe (window 0
+  // 732, reach fixture) confirms the same clean +4 Cmd_if_random_less_than,
+  // zero Cmd_get_ability contamination (Machamp's single-ability kit
+  // closes the confound, same as AttackUp and the §20.2 finding).
+  {
+    label:
+      "AI_CV_SpAtkUp, opponent (AI_USER, Anorith) HP stays 100% through turn 1 -- reachable branch (data/battle_ai_scripts.s:967-983): Gate B (if_hp_not_equal USER,100) is false, falling through to the :975 if_random_less_than 128 draw site, which fires once per identical MOVE_GROWTH slot on the phantom next-turn re-decision",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-spatkup-fullhp-reach-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 10, 99: 10 },
+    checkCrossSeedStable: true,
+  },
+  {
+    label:
+      "AI_CV_SpAtkUp, opponent (AI_USER, Anorith) HP hit below 40% by a real turn-1 move -- control (same opponent/species/turn count, player uses MOVE_VITAL_THROW instead of MOVE_SPLASH turn 1): Gate B (if_hp_not_equal USER,100) is true and Gate D (if_hp_less_than USER,40) is also true, routing straight to AI_CV_SpAtkUp_ScoreDown2 before the :975 roll is ever reached, deterministic zero draws from the handler itself",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-spatkup-lowhp-control-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 8, 99: 8 },
+    checkCrossSeedStable: true,
+  },
 ];
 
 function totalPpUsed(ppBefore: number[], ppAfter: number[]): number {
