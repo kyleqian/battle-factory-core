@@ -56,7 +56,7 @@ remainder.
 
 **Coverage: unchanged.** `MOVE_FUTURE_SIGHT` stays `partial`, 85/114. `MOVE_CONFUSION` stays `partial`, 108/140. No render code touched this session.
 
-**Evidence.** `npm test` 2463/2463 (unchanged — probe + scratch diagnostics only, no production code). `npm run build` green.
+**Evidence.** `npm test` 2582/2582 at the branch base (unchanged — probe + scratch diagnostics only, no production code; supervisor-corrected from a stale 2463 copy). `npm run build` green.
 
 **Next action for a future session:** the window-bounds hypothesis is closed out (confirmed correct, not the defect). The real next instrument is a texture-space one: at a fixed peak tick, for several interior mismatched pixels, brute-force search KADABRA's/ONIX's own tileset (accounting for the active tint coefficient) for which `(row,col)` actually produces the oracle's observed color, and compare that against this engine's own computed `(sx,sy)` — if they differ by a consistent delta, that names the exact rounding/coordinate bug in `drawSpriteSheetAffineStretch`'s sampling math directly rather than by further pixel-guessing. Separately worth a quick look: the newly-found one-tick OAM x-lag on CONFUSION's target shake (above) — resolve whether `sceneOnConfusionView`'s "no lag" claim needs a correction, independent of defect A.
 
