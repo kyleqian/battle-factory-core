@@ -22,6 +22,8 @@ const NEUTRAL_STAGES = Object.freeze({
   spAtk: DEFAULT_STAT_STAGE,
   spDef: DEFAULT_STAT_STAGE,
   speed: DEFAULT_STAT_STAGE,
+  acc: DEFAULT_STAT_STAGE,
+  evasion: DEFAULT_STAT_STAGE,
 });
 
 // Representative (not live-RAM-probed) level-50 Alakazam/Marowak-shaped
@@ -486,6 +488,90 @@ describe("AI_CV_HighCrit mask-7 fixture reproduction (docs/factory-ai-checkviabi
     expect(result.submission.decision).toMatchObject({ kind: "use-move" });
     if (result.submission.decision.kind === "use-move") {
       expect(view.moves[result.submission.decision.moveSlot]).toBe(MOVE_SLASH);
+    }
+  });
+});
+
+const MOVE_SWIFT = 129; // EFFECT_ALWAYS_HIT
+
+// docs/factory-ai-checkviability-ground-truth.md §12.1's two banked fixtures
+// (tools/battle-lab/mechanic-factory-ai-cv-alwayshit-{evasion-reach,
+// splash-control}-off.json). Same all-4-slots-identical design as the
+// Pursuit/HighCrit blocks above -- EFFECT_ALWAYS_HIT has no CheckBadMove
+// table entry either, so MOVE_SWIFT reproduces directly. Unlike Pursuit's
+// isFirstTurn gate, AI_CV_AlwaysHit's own precondition (the TARGET's own
+// evasion stage) is real accumulated state, not a fixed per-turn counter --
+// this constructs the DECISIVE state directly (the target's evasion stat
+// stage at the real fixture's own turn 4/5 decisions) rather than replaying
+// the fixture's own 4-turn Double Team build, matching this file's own
+// "construct the decision directly, assert the policy-own draw shape"
+// precedent (§11.1/§11.2 above) -- the 44/44 and 36/36 banked numbers are
+// WINDOW totals (setup/tie draws + every executed turn's own decision, most
+// of them unreachable), not this handler's own policy-level contribution.
+describe("AI_CV_AlwaysHit mask-7 fixture reproduction (docs/factory-ai-checkviability-ground-truth.md §12.1)", () => {
+  const MAROWAK_SWIFT_MOVESET = [MOVE_SWIFT, MOVE_SWIFT, MOVE_SWIFT, MOVE_SWIFT] as const;
+
+  const MAROWAK_ATTACKER: FactoryAiScoredBattlerView = Object.freeze({
+    types: ["TYPE_GROUND", "TYPE_GROUND"] as const,
+    attack: 80, defense: 110, spAttack: 50, spDefense: 80, speed: 45, level: 50,
+    statStages: NEUTRAL_STAGES,
+    isFirstTurn: 0,
+  });
+  // Real base stats (species-types.json/species-stats.json): Ghost/Poison,
+  // immune to MOVE_SWIFT's Normal type regardless of evasion -- same
+  // zero-damage-across-every-turn property doc §12.1 relies on to remove any
+  // TryToFaint HP-band confound.
+  function haunterTarget(evasionStage: number): FactoryAiScoredTargetView {
+    return Object.freeze({
+      species: 93,
+      types: ["TYPE_GHOST", "TYPE_POISON"] as const,
+      attack: 50, defense: 45, spAttack: 115, spDefense: 55, speed: 95, level: 50,
+      statStages: Object.freeze({ ...NEUTRAL_STAGES, evasion: evasionStage }),
+      isFirstTurn: 0,
+      hp: 60, ability: "ABILITY_LEVITATE", knownAbility: null,
+    });
+  }
+  function alwaysHitView(target: FactoryAiScoredTargetView): FactoryAiScoredView {
+    return Object.freeze({
+      schema: "factory-ai-scored-view/v1",
+      mode: "factory-level-50-singles",
+      active: Object.freeze({ aiBattler: 1 as const, targetBattler: 0 as const }),
+      factory: Object.freeze({ levelMode: 0 as const, battleMode: 0 as const, factoryWinStreak: 28, trainerOpponentId: 222 }),
+      moves: MAROWAK_SWIFT_MOVESET,
+      attacker: MAROWAK_ATTACKER,
+      target,
+    });
+  }
+  function checkViabilityDraws(result: ReturnType<typeof chooseFactoryAiScoredDecision>) {
+    return result.trace.draws.filter((d) => "phase" in d && d.phase === "check-viability");
+  }
+
+  it.each([1, 99])("reach fixture, target (Haunter) evasion stage 9 (turn 4's real decision), seed %i: all 4 identical Swift slots independently reach AI_CV_AlwaysHit2, exactly 4 check-viability draws, picks Swift", (seed) => {
+    const view = alwaysHitView(haunterTarget(9));
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+    const cvDraws = checkViabilityDraws(result);
+    expect(cvDraws).toHaveLength(4);
+    expect(cvDraws.every((d) => "kind" in d && d.kind === "always-hit-roll")).toBe(true);
+    expect(result.submission.decision).toMatchObject({ kind: "use-move" });
+    if (result.submission.decision.kind === "use-move") {
+      expect(view.moves[result.submission.decision.moveSlot]).toBe(MOVE_SWIFT);
+    }
+  });
+
+  it.each([1, 99])("reach fixture, target (Haunter) evasion stage 10 (turn 5's phantom decision, still >8 not >10), seed %i: exactly 4 check-viability draws", (seed) => {
+    const view = alwaysHitView(haunterTarget(10));
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+    expect(checkViabilityDraws(result)).toHaveLength(4);
+  });
+
+  it.each([1, 99])("splash-control fixture, target (Haunter) evasion stays neutral (stage 6), seed %i: neither gate ever true, zero check-viability draws, picks Swift", (seed) => {
+    const view = alwaysHitView(haunterTarget(6));
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+    const cvDraws = checkViabilityDraws(result);
+    expect(cvDraws).toHaveLength(0);
+    expect(result.submission.decision).toMatchObject({ kind: "use-move" });
+    if (result.submission.decision.kind === "use-move") {
+      expect(view.moves[result.submission.decision.moveSlot]).toBe(MOVE_SWIFT);
     }
   });
 });

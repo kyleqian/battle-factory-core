@@ -479,7 +479,7 @@ export type FactoryAiScoredBattlerView = Readonly<{
   spDefense: number;
   speed: number;
   level: number;
-  statStages: Readonly<{ atk: number; def: number; spAtk: number; spDef: number; speed: number }>;
+  statStages: Readonly<{ atk: number; def: number; spAtk: number; spDef: number; speed: number; acc: number; evasion: number }>;
   /** `gDisableStructs[].isFirstTurn` (0-2) -- source-required for `AI_CV_Pursuit` (`is_first_turn_for AI_USER`, entry 466); only the attacker's own copy is read today. */
   isFirstTurn: number;
 }>;
@@ -767,12 +767,16 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
           speedStage: view.attacker.statStages.speed,
           types: view.attacker.types,
           isFirstTurn: view.attacker.isFirstTurn,
+          evasionStage: view.attacker.statStages.evasion,
+          accStage: view.attacker.statStages.acc,
         },
         target: {
           speed: view.target.speed,
           speedStage: view.target.statStages.speed,
           types: view.target.types,
           isFirstTurn: view.target.isFirstTurn,
+          evasionStage: view.target.statStages.evasion,
+          accStage: view.target.statStages.acc,
         },
         drawOrdinalStart: draws.length + 1,
         reasonPrefix: `slot-${slot}-check-viability`,

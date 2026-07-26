@@ -10,13 +10,16 @@ const MOVE_TOXIC = 92; // EFFECT_TOXIC -- has an entry (AI_CV_Toxic, not ported)
 
 // Neutral speed/stage battlers for the tests above that don't exercise
 // AI_CV_SpeedDown -- the describe block below owns that handler's own battlers.
-// types/isFirstTurn are irrelevant to these no-table-entry/barrier cases but
-// required by the widened battler shape (entry 466).
+// types/isFirstTurn/evasionStage/accStage are irrelevant to these
+// no-table-entry/barrier cases but required by the widened battler shape
+// (entry 466 added isFirstTurn, this entry adds evasionStage/accStage).
 const NEUTRAL_BATTLER = Object.freeze({
   speed: 100,
   speedStage: 6,
   types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
   isFirstTurn: 0,
+  evasionStage: 6,
+  accStage: 6,
 });
 
 function run(rng: { value: number; calls: number }, moveId: number) {
@@ -71,6 +74,8 @@ describe("AI_CV_SpeedDown (docs/factory-ai-checkviability-ground-truth.md §6)",
   const SPEED_BATTLER_EXTRAS = Object.freeze({
     types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
     isFirstTurn: 0,
+    evasionStage: 6,
+    accStage: 6,
   });
   const FASTER_USER = Object.freeze({ speed: 120, speedStage: 6, ...SPEED_BATTLER_EXTRAS }); // AI_USER faster -> target NOT faster
   const SLOWER_USER = Object.freeze({ speed: 5, speedStage: 6, ...SPEED_BATTLER_EXTRAS }); // AI_USER slower -> target faster
@@ -182,9 +187,9 @@ describe("AI_CV_SpeedDown (docs/factory-ai-checkviability-ground-truth.md §6)",
 
 const MOVE_PURSUIT = 228; // EFFECT_PURSUIT
 
-/** Speed/speedStage are irrelevant to AI_CV_Pursuit -- fixed dummy values, only `types`/`isFirstTurn` vary per test. */
+/** Speed/speedStage/evasionStage/accStage are irrelevant to AI_CV_Pursuit -- fixed dummy values, only `types`/`isFirstTurn` vary per test. */
 function pursuitBattler(types: readonly [string, string], isFirstTurn: number) {
-  return Object.freeze({ speed: 100, speedStage: 6, types, isFirstTurn });
+  return Object.freeze({ speed: 100, speedStage: 6, types, isFirstTurn, evasionStage: 6, accStage: 6 });
 }
 
 // data/battle_ai_scripts.s:2018-2036, docs/factory-ai-checkviability-ground-truth.md §11.1.
@@ -278,9 +283,9 @@ const MOVE_KARATE_CHOP = 2; // EFFECT_HIGH_CRITICAL, TYPE_FIGHTING
 const MOVE_BLAZE_KICK = 299; // EFFECT_BLAZE_KICK, TYPE_FIRE
 const MOVE_POISON_TAIL = 342; // EFFECT_POISON_TAIL, TYPE_POISON
 
-/** isFirstTurn is irrelevant to AI_CV_HighCrit -- fixed dummy value, only `types` vary per test. */
+/** isFirstTurn/evasionStage/accStage are irrelevant to AI_CV_HighCrit -- fixed dummy values, only `types` vary per test. */
 function highCritBattler(types: readonly [string, string]) {
-  return Object.freeze({ speed: 100, speedStage: 6, types, isFirstTurn: 0 });
+  return Object.freeze({ speed: 100, speedStage: 6, types, isFirstTurn: 0, evasionStage: 6, accStage: 6 });
 }
 
 // data/battle_ai_scripts.s:1449-1461, docs/factory-ai-checkviability-ground-truth.md §11.2.
@@ -529,5 +534,138 @@ describe("AI_CV_HighCrit (docs/factory-ai-checkviability-ground-truth.md §11.2)
   it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
     const result = run({ value: 1, calls: 0 }, MOVE_GROWL);
     expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_ATTACK_DOWN" });
+  });
+});
+
+const MOVE_SWIFT = 129; // EFFECT_ALWAYS_HIT
+
+/**
+ * speed/speedStage/types/isFirstTurn are irrelevant to AI_CV_AlwaysHit --
+ * fixed dummy values, only `evasionStage` (read from AI_TARGET) and
+ * `accStage` (read from AI_USER) vary per test.
+ */
+function alwaysHitBattler(evasionStage: number, accStage: number) {
+  return Object.freeze({
+    speed: 100,
+    speedStage: 6,
+    types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+    isFirstTurn: 0,
+    evasionStage,
+    accStage,
+  });
+}
+
+// data/battle_ai_scripts.s:1075-1089, docs/factory-ai-checkviability-ground-truth.md §11.3/§12.1.
+describe("AI_CV_AlwaysHit (docs/factory-ai-checkviability-ground-truth.md §11.3/§12.1)", () => {
+  const NEUTRAL_EVASION = 6; // DEFAULT_STAT_STAGE
+  const NEUTRAL_ACC = 6;
+
+  it("neither gate true (evasion<=8, acc>=4): deterministic zero draws/score (goto End)", () => {
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_SWIFT,
+      attacker: alwaysHitBattler(NEUTRAL_EVASION, NEUTRAL_ACC),
+      target: alwaysHitBattler(NEUTRAL_EVASION, NEUTRAL_ACC),
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result).toMatchObject({ kind: "scored", draws: [], scoreDelta: 0 });
+  });
+
+  it.each([
+    ["target evasion stage 9 (>8, not >10)", 9, NEUTRAL_ACC],
+    ["target evasion stage 10 (>8, not >10)", 10, NEUTRAL_ACC],
+    ["user acc stage 3 (<4, not <2)", NEUTRAL_EVASION, 3],
+    ["user acc stage 2 (<4, not <2)", NEUTRAL_EVASION, 2],
+  ])("%s: reaches AI_CV_AlwaysHit2 directly, roll < 100 -> zero score, one draw", (_label, evasionStage, accStage) => {
+    // seed 3 -> randomValue 50515 % 256 = 83 (< 100, jumps to End, no bonus).
+    const result = runCheckViability({
+      rng: { value: 3, calls: 0 },
+      moveId: MOVE_SWIFT,
+      attacker: alwaysHitBattler(NEUTRAL_EVASION, accStage),
+      target: alwaysHitBattler(evasionStage, NEUTRAL_ACC),
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result.kind).toBe("scored");
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.scoreDelta).toBe(0);
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "always-hit-roll", succeeded: false });
+    expect(result.rng.calls).toBe(1);
+  });
+
+  it.each([
+    ["target evasion stage 9 (>8, not >10)", 9, NEUTRAL_ACC],
+    ["target evasion stage 10 (>8, not >10)", 10, NEUTRAL_ACC],
+    ["user acc stage 3 (<4, not <2)", NEUTRAL_EVASION, 3],
+    ["user acc stage 2 (<4, not <2)", NEUTRAL_EVASION, 2],
+  ])("%s: reaches AI_CV_AlwaysHit2 directly, roll >= 100 -> score +1, one draw", (_label, evasionStage, accStage) => {
+    // seed 1 -> randomValue 16838 % 256 = 198 (>= 100).
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_SWIFT,
+      attacker: alwaysHitBattler(NEUTRAL_EVASION, accStage),
+      target: alwaysHitBattler(evasionStage, NEUTRAL_ACC),
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result.kind).toBe("scored");
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.scoreDelta).toBe(1);
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "always-hit-roll", succeeded: true });
+  });
+
+  describe("ScoreUp1 fallthrough (real finding beyond doc §11.3's own inline gloss -- score +1 does NOT terminate the script, it falls through into AI_CV_AlwaysHit2's own roll)", () => {
+    it.each([
+      ["target evasion stage 11 (>10)", 11, NEUTRAL_ACC],
+      ["target evasion stage 12 (>10)", 12, NEUTRAL_ACC],
+      ["user acc stage 1 (<2)", NEUTRAL_EVASION, 1],
+      ["user acc stage 0 (<2)", NEUTRAL_EVASION, 0],
+    ])("%s: falls through ScoreUp1 into AlwaysHit2, roll < 100 -> score +1 (not +0), exactly one draw (not zero)", (_label, evasionStage, accStage) => {
+      // seed 3 -> randomValue 50515 % 256 = 83 (< 100, jumps to End after ScoreUp1's own +1).
+      const result = runCheckViability({
+        rng: { value: 3, calls: 0 },
+        moveId: MOVE_SWIFT,
+        attacker: alwaysHitBattler(NEUTRAL_EVASION, accStage),
+        target: alwaysHitBattler(evasionStage, NEUTRAL_ACC),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(1);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "always-hit-roll", succeeded: false });
+      expect(result.rng.calls).toBe(1);
+    });
+
+    it.each([
+      ["target evasion stage 11 (>10)", 11, NEUTRAL_ACC],
+      ["target evasion stage 12 (>10)", 12, NEUTRAL_ACC],
+      ["user acc stage 1 (<2)", NEUTRAL_EVASION, 1],
+      ["user acc stage 0 (<2)", NEUTRAL_EVASION, 0],
+    ])("%s: falls through ScoreUp1 into AlwaysHit2, roll >= 100 -> score +2, exactly one draw", (_label, evasionStage, accStage) => {
+      // seed 1 -> randomValue 16838 % 256 = 198 (>= 100).
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_SWIFT,
+        attacker: alwaysHitBattler(NEUTRAL_EVASION, accStage),
+        target: alwaysHitBattler(evasionStage, NEUTRAL_ACC),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(2);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "always-hit-roll", succeeded: true });
+    });
+  });
+
+  it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
+    const result = run({ value: 1, calls: 0 }, MOVE_TOXIC);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_TOXIC" });
   });
 });

@@ -9,16 +9,17 @@
  * handlers) falls straight through to the trailing `end` with a genuine,
  * complete zero score / zero draws -- not a stub for that path. A move
  * whose effect DOES have an entry halts with a named
- * `"factory-ai-check-viability"` unsupported-branch barrier -- except three,
+ * `"factory-ai-check-viability"` unsupported-branch barrier -- except four,
  * dispatched before that barrier check: `EFFECT_SPEED_DOWN(_2)` (`AI_CV_SpeedDown`,
  * `runCvSpeedDown` below, `data/battle_ai_scripts.s:1142-1152`,
  * `docs/factory-ai-checkviability-ground-truth.md` §6), `EFFECT_PURSUIT`
- * (`AI_CV_Pursuit`, `runCvPursuit` below, `:2018-2036`, doc §11.1), and
+ * (`AI_CV_Pursuit`, `runCvPursuit` below, `:2018-2036`, doc §11.1),
  * `EFFECT_HIGH_CRITICAL`/`EFFECT_BLAZE_KICK`/`EFFECT_POISON_TAIL`
- * (`AI_CV_HighCrit`, `runCvHighCrit` below, `:1449-1461`, doc §11.2). The
- * other 87 are not ported this round (a separate, much larger phased body
- * of work per the audit's §3), so a move that reaches one of THOSE must not
- * silently score zero.
+ * (`AI_CV_HighCrit`, `runCvHighCrit` below, `:1449-1461`, doc §11.2), and
+ * `EFFECT_ALWAYS_HIT` (`AI_CV_AlwaysHit`, `runCvAlwaysHit` below,
+ * `:1075-1089`, doc §12.1). The other 86 are not ported this round (a
+ * separate, much larger phased body of work per the audit's §3), so a move
+ * that reaches one of THOSE must not silently score zero.
  */
 import { MOVES_BY_ID, TYPE_EFFECTIVENESS } from "./factoryAiCheckBadMove.ts";
 import type { BattleRngState } from "./battleDecisionBoundary.ts";
@@ -72,17 +73,22 @@ export const AI_CHECK_VIABILITY_TABLE_EFFECTS: ReadonlySet<string> = new Set([
 /**
  * Everything every ported `AI_CV_*` handler body needs from a battler:
  * speed + SPEED stat stage (`if_target_faster`, `runCvSpeedDown`), both
- * types (`get_target_type1/2`, `if_type_effectiveness`'s STAB check), and
+ * types (`get_target_type1/2`, `if_type_effectiveness`'s STAB check),
  * `gDisableStructs[].isFirstTurn` (`is_first_turn_for`, `runCvPursuit` --
  * only AI_USER/the attacker is ever read, but carried on both sides for
  * shape symmetry with the rest of this battler view, same convention
- * `speed`/`speedStage` already established).
+ * `speed`/`speedStage` already established), and EVASION/ACC stat stages
+ * (`if_stat_level_more_than`/`if_stat_level_less_than`, `runCvAlwaysHit` --
+ * only AI_TARGET's evasion and AI_USER's own acc are ever read, same
+ * both-sides-carried convention as `isFirstTurn`).
  */
 export type FactoryAiCheckViabilityBattler = Readonly<{
   speed: number;
   speedStage: number;
   types: readonly [string, string];
   isFirstTurn: number;
+  evasionStage: number;
+  accStage: number;
 }>;
 
 export type FactoryAiCheckViabilityDraw =
@@ -131,6 +137,16 @@ export type FactoryAiCheckViabilityDraw =
     ordinal: number;
     reason: string;
     kind: "high-crit-roll";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    succeeded: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "always-hit-roll";
     before: BattleRngState;
     after: BattleRngState;
     rawRngValue: number;
@@ -415,6 +431,78 @@ function runCvHighCrit(input: Readonly<{
   return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: succeeded ? 1 : 0 });
 }
 
+/**
+ * `AI_CV_AlwaysHit` (`data/battle_ai_scripts.s:1075-1089`,
+ * `docs/factory-ai-checkviability-ground-truth.md` §11.3/§12.1):
+ *
+ * ```
+ * AI_CV_AlwaysHit:
+ *     if_stat_level_more_than AI_TARGET, STAT_EVASION, 10, AI_CV_AlwaysHit_ScoreUp1
+ *     if_stat_level_less_than AI_USER, STAT_ACC, 2, AI_CV_AlwaysHit_ScoreUp1
+ *     if_stat_level_more_than AI_TARGET, STAT_EVASION, 8, AI_CV_AlwaysHit2
+ *     if_stat_level_less_than AI_USER, STAT_ACC, 4, AI_CV_AlwaysHit2
+ *     goto AI_CV_AlwaysHit_End
+ *
+ * AI_CV_AlwaysHit_ScoreUp1:
+ *     score +1
+ * AI_CV_AlwaysHit2:
+ *     if_random_less_than 100, AI_CV_AlwaysHit_End
+ *     score +1
+ * AI_CV_AlwaysHit_End:
+ *     end
+ * ```
+ *
+ * `if_stat_level_more_than`/`if_stat_level_less_than`
+ * (`battle_ai_script_commands.c:1683-1711`) compare `gBattleMons[battler]
+ * .statStages[stat]` (stored 0-12, `DEFAULT_STAT_STAGE`=6 neutral) against a
+ * literal threshold -- never true at battle start, needs a prior real
+ * stat-changing move to land.
+ *
+ * Real finding beyond the doc's own §11.3 inline gloss (confirmed by direct
+ * read of `Cmd_score`, `battle_ai_script_commands.c:703-711`: it only adds
+ * to the score and advances the script pointer by a fixed 2 bytes, no jump
+ * at all): `AI_CV_AlwaysHit_ScoreUp1`'s `score +1` does NOT terminate the
+ * script -- there is no `goto` after it, so execution falls straight through
+ * into the `AI_CV_AlwaysHit2:` label immediately below, i.e. INTO the same
+ * `if_random_less_than 100` roll the second pair of gates reaches. So the
+ * doc's own "§11.3 evasion stage 11-12 or user acc stage 0-1 -> deterministic
+ * +1, 0 draws" comment undercounts this branch (its own recipe never
+ * exercises it -- the reach fixture only ever hits evasion 9/10, the second
+ * gate pair -- so this doesn't touch the doc's live §12.1 fixture evidence,
+ * which is unaffected): reaching `ScoreUp1` still burns exactly one draw and
+ * scores +1 (roll < 100, ~39%) or +2 (roll >= 100, ~61%), never a
+ * zero-draw deterministic +1. Reaching `AI_CV_AlwaysHit2` directly (second
+ * gate pair only) burns the same one draw and scores 0 or +1, matching the
+ * doc's own §12.1 table exactly (the only branch its banked fixtures
+ * exercise). Neither gate true: `goto End`, zero draws, zero score.
+ */
+function runCvAlwaysHit(input: Readonly<{
+  rng: BattleRngState;
+  targetEvasionStage: number;
+  attackerAccStage: number;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const reachesScoreUp1 = input.targetEvasionStage > 10 || input.attackerAccStage < 2;
+  const reachesAlwaysHit2 = reachesScoreUp1
+    || input.targetEvasionStage > 8
+    || input.attackerAccStage < 4;
+  if (!reachesAlwaysHit2) {
+    return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: 0 });
+  }
+
+  const baseScore = reachesScoreUp1 ? 1 : 0;
+  const draw = nextDraw(input.rng, input.drawOrdinalStart, `${input.reasonPrefix}-roll`);
+  // if_random_less_than 100, AI_CV_AlwaysHit_End: the JUMP (roll < 100, ~39%)
+  // skips the bonus; falling through (roll >= 100, ~61%) grants +1.
+  const succeeded = draw.randomValue % 256 >= 100;
+  return Object.freeze({
+    rng: draw.after,
+    draws: Object.freeze([Object.freeze({ ...draw, kind: "always-hit-roll" as const, succeeded })]),
+    scoreDelta: baseScore + (succeeded ? 1 : 0),
+  });
+}
+
 /** `AI_CheckViability` for one move slot (`:652-775` dispatch shell only). */
 export function runCheckViability(input: Readonly<{
   rng: BattleRngState;
@@ -477,6 +565,22 @@ export function runCheckViability(input: Readonly<{
       rng: highCrit.rng,
       draws: highCrit.draws,
       scoreDelta: highCrit.scoreDelta,
+    });
+  }
+
+  if (move.effect === "EFFECT_ALWAYS_HIT") {
+    const alwaysHit = runCvAlwaysHit({
+      rng: input.rng,
+      targetEvasionStage: input.target.evasionStage,
+      attackerAccStage: input.attacker.accStage,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: alwaysHit.rng,
+      draws: alwaysHit.draws,
+      scoreDelta: alwaysHit.scoreDelta,
     });
   }
 
