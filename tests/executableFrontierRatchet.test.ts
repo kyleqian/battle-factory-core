@@ -88,11 +88,14 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // point.
   ["src/engine/battleScriptJumpifhalfwordOpcode.ts", 1],
   // Forced-switch ground truth §4 slice 2: doubles/multi topology (not
-  // Factory singles), the player-side interactive party-menu controller
-  // round trip (not modeled at the opcode-machine layer this rung), and
-  // GetMostSuitableMonToSwitchInto's pass-2 AI_CalcDmg raw-damage fallback
-  // (no fixture on this rung reaches it).
-  ["src/engine/battleScriptOpenPartyScreenOpcode.ts", 3],
+  // Factory singles) and GetMostSuitableMonToSwitchInto's pass-2 AI_CalcDmg
+  // raw-damage fallback (no fixture on this rung reaches it). 3 -> 2 (§4
+  // slice 10, this session): the player-side interactive party-menu branch
+  // is no longer an unsupported-branch placeholder -- it is now a genuine,
+  // named `"player-choice-required"` halt (battleScriptMachine.ts) that
+  // resumes through the same slice-1-9 machinery, so it retires from this
+  // barrier count entirely (it isn't a barrier of any kind anymore).
+  ["src/engine/battleScriptOpenPartyScreenOpcode.ts", 2],
   ["src/engine/battleScriptGetexpOpcode.ts", 2],
   ["src/engine/battleScriptCheckteamslostOpcode.ts", 3],
   // Forced-switch ground truth §4 slices 1/2/3 tail (SWITCHHANDLEORDER,

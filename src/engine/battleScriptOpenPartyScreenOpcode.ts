@@ -14,11 +14,18 @@
  *    immediate write + advance.
  *  - Player side: `PlayerHandleChoosePokemon` hands off to the interactive
  *    party-menu UI (`docs/forced-switch-ground-truth.md` §3) -- a real,
- *    multi-tick controller round trip this engine's opcode-machine layer
- *    does not yet drive. A named (b) barrier, not a silent guess; wiring it
- *    up is `docs/forced-switch-ground-truth.md` §4 step 10's own separate
- *    slice (the RAM-proven button-press recipe is banked there, unused by
- *    this rung).
+ *    human-timescale decision this opcode-machine layer cannot resolve
+ *    synchronously. Modeled as a genuine `"player-choice-required"` halt
+ *    (`battleScriptMachine.ts`) naming the legal replacement slots (alive,
+ *    non-egg, not the fainted slot itself -- exactly what
+ *    `OpenPartyMenuToChooseMon` permits, §3/§4 slice 10); the party-menu
+ *    UI's own cursor/submenu presentation stays out of scope. A caller
+ *    resumes by writing the chosen index into `monToSwitchIntoId[battler]`
+ *    and re-stepping from the same program counter
+ *    (`battleScriptFaintedActionsOrchestration.ts`'s
+ *    `resumeBattleScriptFaintedActionsAfterPlayerChoice`) -- this handler's
+ *    own player branch then takes the "already decided" path below and
+ *    advances, exactly like the AI branch's own tail.
  */
 import speciesTypesData from "../data/gen/species-types.json" with { type: "json" };
 import {
@@ -33,6 +40,7 @@ import {
   resolveBattleScriptBattlerAtPosition,
   resolveBattleScriptBattlerPosition,
   resolveRulesBattlerForBattleScript,
+  BATTLE_SCRIPT_PARTY_SIZE,
   type BattleScriptPartyState,
   type BattleScriptRulesContext,
 } from "./battleScriptRulesContext.ts";
@@ -68,6 +76,27 @@ function partyStateToBench(party: BattleScriptPartyState): BattleAiSwitchBench |
     bench.push({ species: member.species, hp: member.hp, types, moves: member.moves });
   }
   return bench as unknown as BattleAiSwitchBench;
+}
+
+/**
+ * `OpenPartyMenuToChooseMon`'s own switch-in legality gate (`docs/forced-
+ * switch-ground-truth.md` §3/§4 slice 10): alive (hp>0), non-egg, and not
+ * the fainted battler's own (now-vacated) slot. Presentation (cursor
+ * navigation, the SEND OUT/SUMMARY/CANCEL submenu) is out of scope here --
+ * only which slots are legal targets.
+ */
+function legalSwitchPartyIndexes(
+  party: BattleScriptPartyState,
+  activePartyIndex: number,
+): readonly number[] {
+  const legal: number[] = [];
+  for (let index = 0; index < party.length; index += 1) {
+    const member = party[index]!;
+    if (member.species !== 0 && !member.isEgg && member.hp !== 0 && index !== activePartyIndex) {
+      legal.push(index);
+    }
+  }
+  return Object.freeze(legal);
 }
 
 function unsupportedBranch(
@@ -125,13 +154,31 @@ function createOpenPartyScreenOpcodeHandler(): BattleScriptOpcodeHandler<BattleS
     }
 
     const side = rules.battlers[battler].side;
+    const activePartyIndex = rules.battlers[battler].partyIndex;
+
     if (side !== SIDE_OPPONENT) {
-      return unsupportedBranch(
-        context,
-        "PlayerHandleChoosePokemon's interactive party-menu controller round trip "
-          + "(docs/forced-switch-ground-truth.md §3/§4 step 10) is not modeled at the opcode-machine layer",
-        2665,
-      );
+      const pendingChoice = rules.monToSwitchIntoId[battler];
+      if (pendingChoice === BATTLE_SCRIPT_PARTY_SIZE) {
+        const legalPartyIndexes = legalSwitchPartyIndexes(rules.party.player, activePartyIndex);
+        return transitionBattleScriptCommand(
+          context,
+          Object.freeze({
+            kind: "halt",
+            reason: Object.freeze({
+              kind: "player-choice-required",
+              programCounter: context.state.programCounter,
+              opcodeId: context.instruction.opcodeId,
+              opcodeName: context.instruction.opcodeName,
+              battler,
+              faintedPartyIndex: activePartyIndex,
+              legalPartyIndexes,
+            }),
+          }),
+        );
+      }
+      // The player's choice was already resolved externally (monToSwitchIntoId
+      // pre-seeded by a resume) -- advance exactly like the AI branch's own tail.
+      return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }));
     }
 
     const opposingPosition = resolveBattleScriptBattlerPosition(rules.battleTopology, battler) ^ BIT_SIDE;
@@ -149,7 +196,6 @@ function createOpenPartyScreenOpcodeHandler(): BattleScriptOpcodeHandler<BattleS
       );
     }
 
-    const activePartyIndex = rules.battlers[battler].partyIndex;
     const scored = getMostSuitableMonToSwitchInto(bench, activePartyIndex, opposingTypes);
     if (scored.kind === "damage-fallback-needed") {
       return unsupportedBranch(

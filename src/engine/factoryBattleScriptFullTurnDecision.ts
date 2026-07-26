@@ -622,6 +622,13 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
       machineBarrierBoundary(faint1.instruction, faint1.state.instructionsExecuted),
     );
   }
+  if (faint1.kind === "player-choice-required") {
+    throw new Error(
+      "full-turn reducer's fainted-actions orchestration produced a player-choice-required forced-switch "
+        + "request -- outside this reducer's modeled domain (factoryBattleScriptTerminalDecision.ts's own "
+        + "forced-switch resume support is the single-action sibling that models this)",
+    );
+  }
 
   // faint1.kind is "no-fainted-battlers" (run action 2) or "resumed" (skip action 2, per cancelallactions).
   let preEndTurnState = faint1.state;
@@ -649,6 +656,13 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
         machineBarrierBoundary(faint2.instruction, faint2.state.instructionsExecuted),
       );
     }
+    if (faint2.kind === "player-choice-required") {
+      throw new Error(
+        "full-turn reducer's fainted-actions orchestration produced a player-choice-required forced-switch "
+          + "request -- outside this reducer's modeled domain (factoryBattleScriptTerminalDecision.ts's own "
+          + "forced-switch resume support is the single-action sibling that models this)",
+      );
+    }
     preEndTurnState = faint2.state; // "no-fainted-battlers" or "resumed"
   }
 
@@ -671,6 +685,13 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
     throw new Error(
       `full-turn reducer's end-turn orchestration hit case ${endTurn.caseName} (${endTurn.detail}) -- outside `
         + "this reducer's modeled domain (no proof this rung exercises any still-barriered end-turn case)",
+    );
+  }
+  if (endTurn.kind === "player-choice-required") {
+    throw new Error(
+      "full-turn reducer's end-turn orchestration produced a player-choice-required forced-switch request "
+        + "-- outside this reducer's modeled domain (factoryBattleScriptTerminalDecision.ts's own "
+        + "forced-switch resume support is the single-action sibling that models this)",
     );
   }
 

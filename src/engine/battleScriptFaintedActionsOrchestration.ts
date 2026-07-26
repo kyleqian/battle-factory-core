@@ -124,6 +124,23 @@ export type BattleScriptFaintedActionsResult =
      * `B_SCR_OP_JUMPIFWORD`, not a distinct "jumpifbattletype" opcode.
      */
     instruction: BattleScriptInstruction;
+  }>
+  | Readonly<{
+    /**
+     * The fainted battler is player-side and its own party still has a
+     * legal replacement (`docs/forced-switch-ground-truth.md` §3/§4 slice
+     * 10): `openpartyscreen`'s player branch halted with a real, genuine
+     * `"player-choice-required"` reason (`battleScriptMachine.ts`) instead
+     * of an unsupported placeholder. `state` is paused mid-script (NOT yet
+     * at `BattleScript_FaintedMonEnd`) -- a caller resumes it with
+     * `resumeBattleScriptFaintedActionsAfterPlayerChoice` once the human
+     * picks a legal slot from `legalPartyIndexes`.
+     */
+    kind: "player-choice-required";
+    state: BattleScriptMachineState<BattleScriptRulesContext>;
+    battler: BattleScriptBattlerId;
+    faintedPartyIndex: number;
+    legalPartyIndexes: readonly number[];
   }>;
 
 function collectFaintedBattlers(
@@ -186,6 +203,13 @@ type RunToOwnEndResult =
     kind: "barrier";
     state: BattleScriptMachineState<BattleScriptRulesContext>;
     instruction: BattleScriptInstruction;
+  }>
+  | Readonly<{
+    kind: "player-choice";
+    state: BattleScriptMachineState<BattleScriptRulesContext>;
+    battler: BattleScriptBattlerId;
+    faintedPartyIndex: number;
+    legalPartyIndexes: readonly number[];
   }>;
 
 /**
@@ -242,11 +266,21 @@ function runScriptToOwnEnd(
       continue;
     }
     if (stepped.kind === "halted") {
-      if (stepped.state.haltReason?.kind === "terminal") {
+      const haltReason = stepped.state.haltReason;
+      if (haltReason?.kind === "terminal") {
         return Object.freeze({ kind: "terminal", state: stepped.state });
       }
-      // A registered opcode's own (b) barrier (e.g. openpartyscreen's player-side/pass-2
-      // unsupported-branch halts) is the same kind of real machine boundary as an
+      if (haltReason?.kind === "player-choice-required") {
+        return Object.freeze({
+          kind: "player-choice",
+          state: stepped.state,
+          battler: haltReason.battler,
+          faintedPartyIndex: haltReason.faintedPartyIndex,
+          legalPartyIndexes: haltReason.legalPartyIndexes,
+        });
+      }
+      // A registered opcode's own (b) barrier (e.g. openpartyscreen's pass-2
+      // unsupported-branch halt) is the same kind of real machine boundary as an
       // unregistered opcode -- surface it the same way, not a crash.
       return Object.freeze({ kind: "barrier", state: stepped.state, instruction });
     }
@@ -287,6 +321,9 @@ export function runBattleScriptFaintedActionsOrchestration(
           + "this rung's Frontier short-circuit scope (docs/faint-outcome-ground-truth.md §1a row 10)",
       );
     }
+    if (run.kind === "player-choice") {
+      throw new Error("BattleScript_GiveExp unexpectedly halted on a player-choice-required opcode");
+    }
     state = run.state;
   }
 
@@ -294,6 +331,15 @@ export function runBattleScriptFaintedActionsOrchestration(
     state = enterFaintedBattlerContext(state, faintedBattler);
     const started = startBattleScriptExecute(program, HANDLE_FAINTED_MON_LABEL, state);
     const run = runScriptToOwnEnd(program, handlers, started);
+    if (run.kind === "player-choice") {
+      return Object.freeze({
+        kind: "player-choice-required",
+        state: run.state,
+        battler: run.battler,
+        faintedPartyIndex: run.faintedPartyIndex,
+        legalPartyIndexes: run.legalPartyIndexes,
+      });
+    }
     if (run.kind === "barrier") {
       return Object.freeze({ kind: "non-terminal-barrier", state: run.state, instruction: run.instruction });
     }
@@ -304,6 +350,58 @@ export function runBattleScriptFaintedActionsOrchestration(
   // nonzero means its own terminal jump was taken (BattleScript_FaintedMonEnd via the WON/LOST/DREW
   // path); zero means every fainted battler instead ran the full forced-switch dance to the SAME
   // BattleScript_FaintedMonEnd label (docs/forced-switch-ground-truth.md §1) -- the battle resumes.
+  return state.rulesContext.battleOutcome !== 0
+    ? Object.freeze({ kind: "terminal", state })
+    : Object.freeze({ kind: "resumed", state });
+}
+
+/**
+ * Resumes a `"player-choice-required"` halt (docs/forced-switch-ground-truth.md
+ * §3/§4 slice 10) once the human has picked a legal replacement: writes the
+ * chosen raw party index into `monToSwitchIntoId[battler]` -- exactly the
+ * field the AI branch itself writes (`battleScriptOpenPartyScreenOpcode.ts`)
+ * -- clears the halt, and re-steps from the SAME program counter, which then
+ * takes that handler's own "already decided" advance path. The rest of the
+ * forced-switch dance (switchhandleorder through cancelallactions/end2) then
+ * runs exactly as the AI-side dance already does, so this reuses
+ * `runScriptToOwnEnd` unmodified.
+ */
+export function resumeBattleScriptFaintedActionsAfterPlayerChoice(
+  program: BattleScriptProgram,
+  handlers: BattleScriptOpcodeHandlers<BattleScriptRulesContext>,
+  haltedState: BattleScriptMachineState<BattleScriptRulesContext>,
+  chosenPartyIndex: number,
+): BattleScriptFaintedActionsResult {
+  const reason = haltedState.haltReason;
+  if (reason === null || reason.kind !== "player-choice-required") {
+    throw new Error(
+      "resumeBattleScriptFaintedActionsAfterPlayerChoice requires a player-choice-required halt",
+    );
+  }
+  if (!reason.legalPartyIndexes.includes(chosenPartyIndex)) {
+    throw new Error(
+      `chosen party index ${chosenPartyIndex} is not among the legal switch-in slots `
+        + `(${reason.legalPartyIndexes.join(", ")})`,
+    );
+  }
+  const rules = haltedState.rulesContext;
+  const monToSwitchIntoId = Object.freeze(
+    rules.monToSwitchIntoId.map((value, index) => (index === reason.battler ? chosenPartyIndex : value)),
+  ) as unknown as BattleScriptRulesContext["monToSwitchIntoId"];
+  const resumedState: BattleScriptMachineState<BattleScriptRulesContext> = Object.freeze({
+    ...haltedState,
+    haltReason: null,
+    rulesContext: Object.freeze({ ...rules, monToSwitchIntoId }),
+  });
+
+  const run = runScriptToOwnEnd(program, handlers, resumedState);
+  if (run.kind === "player-choice") {
+    throw new Error("forced-switch resume unexpectedly halted on a second player-choice-required opcode");
+  }
+  if (run.kind === "barrier") {
+    return Object.freeze({ kind: "non-terminal-barrier", state: run.state, instruction: run.instruction });
+  }
+  const state = run.state;
   return state.rulesContext.battleOutcome !== 0
     ? Object.freeze({ kind: "terminal", state })
     : Object.freeze({ kind: "resumed", state });

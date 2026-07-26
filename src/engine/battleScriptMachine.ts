@@ -20,6 +20,30 @@ export type BattleScriptHaltReason =
     opcodeName: string;
   }>
   | Readonly<{
+    /**
+     * `Cmd_openpartyscreen`'s player-side branch (`PlayerHandleChoosePokemon`,
+     * `docs/forced-switch-ground-truth.md` §3/§4 slice 10): a real, human-
+     * timescale decision this opcode-machine layer cannot resolve
+     * synchronously (unlike the AI/trainer side's own
+     * `GetMostSuitableMonToSwitchInto` scoring, which advances immediately).
+     * Distinct from `unsupported-branch` -- this is a genuine, intentional
+     * halt naming the legal replacement slots, not a not-yet-modeled branch;
+     * a caller resumes by writing the chosen index into
+     * `monToSwitchIntoId[battler]` and re-stepping from this same program
+     * counter (`battleScriptFaintedActionsOrchestration.ts`'s
+     * `resumeBattleScriptFaintedActionsAfterPlayerChoice`).
+     */
+    kind: "player-choice-required";
+    programCounter: number;
+    opcodeId: number;
+    opcodeName: string;
+    battler: BattleScriptBattlerId;
+    /** The fainted battler's own (now-vacated) party slot -- never itself legal. */
+    faintedPartyIndex: number;
+    /** Bench slots that are alive (hp>0), non-egg, and not `faintedPartyIndex`. */
+    legalPartyIndexes: readonly number[];
+  }>
+  | Readonly<{
     kind: "unsupported-opcode";
     programCounter: number;
     opcodeId: number;

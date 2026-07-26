@@ -154,9 +154,9 @@ describe("production openpartyscreen (Cmd_openpartyscreen) dispatch, BS_FAINTED 
     },
   );
 
-  describe("(b) unsupported-branch barriers", () => {
-    it("player-side fainted battler: interactive party-menu decision not modeled, halts here", () => {
-      const rc = context({
+  describe("player-side forced-switch decision (docs/forced-switch-ground-truth.md §3/§4 slice 10)", () => {
+    function playerFaintedContext(party: Partial<BattleScriptRulesContextInput>) {
+      return context({
         battlers: [
           battler({ side: 0, species: SUNKERN, hp: 0, types: ["TYPE_GRASS", "TYPE_GRASS"], partyIndex: 0 }),
           battler({ side: 1, species: URSARING, types: ["TYPE_NORMAL", "TYPE_NORMAL"] }),
@@ -164,13 +164,67 @@ describe("production openpartyscreen (Cmd_openpartyscreen) dispatch, BS_FAINTED 
           battler({ side: 1 }),
         ],
         selectorRoles: { attacker: 0, target: 0, effectBattler: 0, fainted: 0 },
-        party: { player: opponentBench(), opponent: [EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT] },
+        ...party,
+      });
+    }
+
+    it(
+      "halts with a genuine player-choice-required reason naming the legal bench slots -- alive, "
+        + "non-egg, not the fainted slot itself -- not an unsupported-branch placeholder",
+      () => {
+        const rc = playerFaintedContext({
+          party: { player: opponentBench(), opponent: [EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT] },
+        });
+        const { result } = stepAtProgramCounter(OPEN_PARTY_SCREEN_PC, rc);
+        expect(result.kind).toBe("halted");
+        expect(result.state.haltReason).toMatchObject({
+          kind: "player-choice-required",
+          battler: 0,
+          faintedPartyIndex: 0,
+          legalPartyIndexes: [1, 2], // PIDGEY, MACHOP -- SUNKERN (index 0) is the fainted slot itself
+        });
+        // Zero Random() draws -- this is a halt, not a controller round trip (docs §3d).
+        expect(result.state.rng.calls).toBe(0);
+      },
+    );
+
+    it("excludes egg slots from the legal replacement list", () => {
+      const rc = playerFaintedContext({
+        party: {
+          player: [
+            { species: SUNKERN, hp: 0 },
+            { species: PIDGEY, hp: 100, isEgg: true },
+            { species: MACHOP, hp: 100 },
+            EMPTY_SLOT,
+            EMPTY_SLOT,
+            EMPTY_SLOT,
+          ],
+          opponent: [EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT],
+        },
       });
       const { result } = stepAtProgramCounter(OPEN_PARTY_SCREEN_PC, rc);
       expect(result.kind).toBe("halted");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch" });
+      expect(result.state.haltReason).toMatchObject({ kind: "player-choice-required", legalPartyIndexes: [2] });
     });
 
+    it(
+      "already-decided monToSwitchIntoId (a resume) advances instead of halting again, mirroring the "
+        + "AI branch's own tail -- no re-scoring",
+      () => {
+        const rc = playerFaintedContext({
+          party: { player: opponentBench(), opponent: [EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT] },
+          monToSwitchIntoId: [2, 6, 6, 6], // battler 0 already resolved to MACHOP (index 2); 6 = PARTY_SIZE sentinel
+        });
+        const { result } = stepAtProgramCounter(OPEN_PARTY_SCREEN_PC, rc);
+        if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+        expect(result.state.programCounter).toBe(OPEN_PARTY_SCREEN_PC + 1);
+        expect(result.state.rulesContext.monToSwitchIntoId[0]).toBe(2); // unchanged -- not re-scored
+        expect(result.state.rng.calls).toBe(0);
+      },
+    );
+  });
+
+  describe("(b) unsupported-branch barriers", () => {
     it("doubles topology: not modeled (Factory singles only)", () => {
       const rc = context({
         battlers: [

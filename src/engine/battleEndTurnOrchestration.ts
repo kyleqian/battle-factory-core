@@ -105,7 +105,23 @@ export type BattleEndTurnResult =
   | Readonly<{ kind: "terminal"; state: MachineState }>
   | Readonly<{ kind: "resumed"; state: MachineState }>
   | Readonly<{ kind: "non-terminal-barrier"; state: MachineState; instruction: BattleScriptInstruction }>
-  | Readonly<{ kind: "case-barrier"; state: MachineState } & BattleEndTurnCaseBarrier>;
+  | Readonly<{ kind: "case-barrier"; state: MachineState } & BattleEndTurnCaseBarrier>
+  | Readonly<{
+    /**
+     * A fainted battler is player-side with a healthy bench
+     * (docs/forced-switch-ground-truth.md §3/§4 slice 10) -- the same
+     * genuine `"player-choice-required"` halt
+     * `factoryBattleScriptTerminalDecision.ts` resumes, surfaced here too
+     * since end-turn KOs (Burn/Poison/Toxic) reuse the identical fainted-
+     * actions orchestration. This reducer does not yet wire a forced-switch
+     * continuation of its own -- callers name it as their own barrier.
+     */
+    kind: "player-choice-required";
+    state: MachineState;
+    battler: BattleScriptBattlerId;
+    faintedPartyIndex: number;
+    legalPartyIndexes: readonly number[];
+  }>;
 
 /** `BattleScriptExecute(script)` -- a fresh top-level script, callStack reset (identical to the fainted-actions precedent). */
 function startBattleScriptExecute(
@@ -398,6 +414,15 @@ function mapFaintedActionsResult(result: BattleScriptFaintedActionsResult): Batt
   if (result.kind === "no-fainted-battlers") return Object.freeze({ kind: "next-turn", state: result.state });
   if (result.kind === "terminal") return Object.freeze({ kind: "terminal", state: result.state });
   if (result.kind === "resumed") return Object.freeze({ kind: "resumed", state: result.state });
+  if (result.kind === "player-choice-required") {
+    return Object.freeze({
+      kind: "player-choice-required",
+      state: result.state,
+      battler: result.battler,
+      faintedPartyIndex: result.faintedPartyIndex,
+      legalPartyIndexes: result.legalPartyIndexes,
+    });
+  }
   return Object.freeze({ kind: "non-terminal-barrier", state: result.state, instruction: result.instruction });
 }
 
