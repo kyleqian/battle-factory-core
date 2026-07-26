@@ -49,6 +49,7 @@ const ALAKAZAM = Object.freeze({
   speed: 140,
   level: 50,
   statStages: NEUTRAL_STAGES,
+  isFirstTurn: 2,
 });
 
 function marowak(hp: number) {
@@ -62,6 +63,7 @@ function marowak(hp: number) {
     speed: 65,
     level: 50,
     statStages: NEUTRAL_STAGES,
+    isFirstTurn: 2,
     hp,
     ability: "ABILITY_ROCK_HEAD",
     knownAbility: null,
@@ -257,11 +259,13 @@ describe("AI_CV_SpeedDown mask-7 fixture reproduction (docs/factory-ai-checkviab
     types: ["TYPE_GROUND", "TYPE_GROUND"] as const,
     attack: 80, defense: 50, spAttack: 50, spDefense: 70, speed: 120, level: 50,
     statStages: NEUTRAL_STAGES,
+    isFirstTurn: 2,
   });
   const SHUCKLE_STATS = Object.freeze({
     types: ["TYPE_BUG", "TYPE_ROCK"] as const,
     attack: 10, defense: 230, spAttack: 10, spDefense: 230, speed: 5, level: 50,
     statStages: NEUTRAL_STAGES,
+    isFirstTurn: 2,
   });
   function dugtrioTarget(): FactoryAiScoredTargetView {
     return Object.freeze({ species: 51, ...DUGTRIO_STATS, hp: 100, ability: "ABILITY_ARENA_TRAP", knownAbility: null });

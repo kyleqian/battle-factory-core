@@ -10,7 +10,15 @@ const MOVE_TOXIC = 92; // EFFECT_TOXIC -- has an entry (AI_CV_Toxic, not ported)
 
 // Neutral speed/stage battlers for the tests above that don't exercise
 // AI_CV_SpeedDown -- the describe block below owns that handler's own battlers.
-const NEUTRAL_BATTLER = Object.freeze({ speed: 100, speedStage: 6 });
+// types/isFirstTurn/ability are irrelevant to these no-table-entry/barrier
+// cases but required by the widened battler/target shape (entry 466).
+const NEUTRAL_BATTLER = Object.freeze({
+  speed: 100,
+  speedStage: 6,
+  types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+  isFirstTurn: 0,
+  ability: "ABILITY_NONE",
+});
 
 function run(rng: { value: number; calls: number }, moveId: number) {
   return runCheckViability({
@@ -61,10 +69,15 @@ const MOVE_COTTON_SPORE = 178; // EFFECT_SPEED_DOWN_2 -- same handler, different
 
 // data/battle_ai_scripts.s:1142-1152, docs/factory-ai-checkviability-ground-truth.md §6.
 describe("AI_CV_SpeedDown (docs/factory-ai-checkviability-ground-truth.md §6)", () => {
-  const FASTER_USER = Object.freeze({ speed: 120, speedStage: 6 }); // AI_USER faster -> target NOT faster
-  const SLOWER_USER = Object.freeze({ speed: 5, speedStage: 6 }); // AI_USER slower -> target faster
-  const FASTER_TARGET = Object.freeze({ speed: 120, speedStage: 6 });
-  const SLOWER_TARGET = Object.freeze({ speed: 5, speedStage: 6 });
+  const SPEED_BATTLER_EXTRAS = Object.freeze({
+    types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+    isFirstTurn: 0,
+    ability: "ABILITY_NONE",
+  });
+  const FASTER_USER = Object.freeze({ speed: 120, speedStage: 6, ...SPEED_BATTLER_EXTRAS }); // AI_USER faster -> target NOT faster
+  const SLOWER_USER = Object.freeze({ speed: 5, speedStage: 6, ...SPEED_BATTLER_EXTRAS }); // AI_USER slower -> target faster
+  const FASTER_TARGET = Object.freeze({ speed: 120, speedStage: 6, ...SPEED_BATTLER_EXTRAS });
+  const SLOWER_TARGET = Object.freeze({ speed: 5, speedStage: 6, ...SPEED_BATTLER_EXTRAS });
 
   it("scores a deterministic -3 with zero draws when the target is not faster (if_target_faster false)", () => {
     const rng = { value: 249_678_687, calls: 0 };
@@ -128,7 +141,7 @@ describe("AI_CV_SpeedDown (docs/factory-ai-checkviability-ground-truth.md §6)",
   });
 
   it("an exact speed tie still burns GetWhoStrikesFirst's own Random() call, but never takes the target-faster branch (Cmd_if_user_goes matches strikesFirst===1 exactly, a tie can only resolve to 0 or 2)", () => {
-    const TIED = Object.freeze({ speed: 100, speedStage: 6 });
+    const TIED = Object.freeze({ speed: 100, speedStage: 6, ...SPEED_BATTLER_EXTRAS });
     // seed 3 -> tie-roll randomValue 50515 is ODD -> GetWhoStrikesFirst's own
     // `Random() & 1` tie-break would read as "battler2/target strikes" (2),
     // which if_target_faster's `== 1` check still treats as NOT faster.

@@ -57,11 +57,13 @@ function aiTrainerView(playerHp: number): FactoryAiScoredView {
     attacker: Object.freeze({
       types: ["TYPE_PSYCHIC", "TYPE_PSYCHIC"] as const,
       attack: 55, defense: 65, spAttack: 135, spDefense: 105, speed: 140, level: 50, statStages: NEUTRAL_STAGES,
+      isFirstTurn: 2,
     }),
     target: Object.freeze({
       species: 105,
       types: ["TYPE_GROUND", "TYPE_GROUND"] as const,
       attack: 130, defense: 130, spAttack: 55, spDefense: 70, speed: 65, level: 50, statStages: NEUTRAL_STAGES,
+      isFirstTurn: 2,
       hp: playerHp,
       ability: "ABILITY_ROCK_HEAD",
       knownAbility: null,
