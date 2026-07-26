@@ -13,6 +13,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ---
 ## 475 — ENDTURN_ABILITIES slices 2-3 (Shed Skin + Truant) + ITEMS1 slice 5 (Liechi/Salac/Petaya) wired; census SETEFFECTPRIMARY blind spot fixed (ISSUES #45 closed)
 
+- **Side merge (same round, supervisor-verified ALL PASS live from the
+  worktree + green on the merged tree):** doc **§19 `AI_CBM_AccDown` +
+  `AI_CV_AccuracyDown`** ground truth banked (branch
+  `worker/side-20260726-135458`, merged, worktree removed) — the largest
+  pair by draw sites (7). Gate map re-derived from assembly; CBM carries an
+  extra `ABILITY_KEEN_EYE` gate beyond the shared tail (confirmed live);
+  `EFFECT_ACCURACY_DOWN_2` is vestigial (zero real moves). Single-turn
+  twin fixtures land DRAW SITES 1+7 together (Sand Attack's own ACC-down
+  defeats Gate I's still-default check): reach 17, control 7, both seeds
+  ×2, +8 delta = 4 slots × 2 sites, all `Cmd_if_random_less_than`. New
+  confound found + designed out: the dispatch move's ACC-down vs the
+  target's accuracy-checked damage move ordering (faster species takes the
+  damage role). Sites 2-6 remain citation-backed recipes (§19.5, need
+  mixed movesets). 20-fixture verify script ALL PASS ×2 (worker) + once by
+  the supervisor. Merged tree: **225 files / 2916 tests + build green.**
+
 - **State:** tree green at **225 files / 2916 tests** (+0 files/+11 tests over
   entry 474's 225/2905 — no new test files, existing suites widened), build
   green (`tsc -b && vite build`). Ratchet (`executableFrontierRatchet.test.ts`):
