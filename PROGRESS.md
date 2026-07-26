@@ -101,7 +101,17 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   out-of-scope subsystem) pollutes any live two-sided-AI RNG diff — worth a
   standing note for future ground-truth scouts: isolate RNG claims to
   player-side actions, or diff against a same-AI-role control run, not a
-  raw before/after delta.
+  raw before/after delta (now a PAPERCUTS.md entry, Hits: 3).
+- **Side merge (same hour, supervisor-verified, verify script ALL PASS
+  live):** CV-only handler fixtures scout landed — `AI_CV_Pursuit` and
+  `AI_CV_HighCrit` fully staged (4 new battle-lab fixtures, twin-fixture
+  single-precondition-flip design, all-slots-identical dispatch move),
+  `AI_CV_AlwaysHit`/`AI_CV_VitalThrow` banked as analytical entries with
+  exact staging recipes (doc §11). Verify script extended with a
+  draw-count scenario shape; HighCrit's reachable-branch fixture has a
+  documented 23-vs-24 cross-seed draw-count wobble (phantom next-turn
+  decision, HP-sensitive) — individually reproducible, flagged as porter
+  guidance. Merged tree re-verified green (220/2654).
 
 ---
 ## 463 — First CheckViability handler-body port: AI_CBM_SpeedDown + AI_CV_SpeedDown, the proven CBM+CV pair (entry 462's carried item, per `docs/factory-ai-checkviability-ground-truth.md`)

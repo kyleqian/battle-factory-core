@@ -8,6 +8,23 @@ report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
 Delete an entry when its underlying friction is fixed; git preserves its
 history.
 
+## Raw before/after RNG-window diffs pick up unrelated-subsystem draws
+
+- **What:** ground-truth scouts that pin an RNG draw count from a raw
+  window total keep re-discovering that the window bundles decision-
+  independent draws from other subsystems (Factory-AI scoring for any
+  AI-side turn, trailing next-turn decisions, `BattleTurnPassed`'s
+  `gRandomTurnNumber`). Bit entry 455 (2-roll gap, needed a dedicated
+  attribution probe), entry 464's Endeavor fail branch (uncleanly isolable
+  live, fell back to source read), and side scout 2026-07-26's HighCrit
+  fixture (23-vs-24 cross-seed wobble from a phantom next-turn decision).
+- **Hits:** 3.
+- **Cost each:** ~10-20 min.
+- **Workaround:** isolate RNG claims to player-side actions, diff against a
+  same-AI-role control run, or attribute per-caller with
+  `tools/probe/attribute-factory-ai-random-callers.py`; treat raw window
+  totals as unattributed until proven otherwise.
+
 Per entry:
 - **What:** the friction.
 - **Hits:** how many sessions it has bitten.
