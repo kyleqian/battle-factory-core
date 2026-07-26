@@ -101,6 +101,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   empirical prediction (event-kind list, sourceLabel values, HP endpoints)
   was verified by running the Tier-1 tests before wiring `battleScene.ts`,
   so no dev-loop friction cost real time this session.
+- **Animation merge (same hour, supervisor-verified live):** CONFUSION
+  window-2 OAM x-lag RAM-proven (28/29 + 17/18 ticks:
+  `oamX(t) = x(t) + x2(t-1) + centerToCornerVecX(t)`, overturning the old
+  thin-sample "no lag" claim) and fixed at -2 (OAM-shadow + capture lag),
+  with monbg copy at -1 and a one-tick `targetTouched` shift. **CONFUSION
+  108/140 → 137/140** (×2; supervisor-reproduced on the merged tree —
+  same 3 boundary frames 119/147/176, honestly not promoted). Gates held:
+  FUTURE_SIGHT 114/114, GROWTH 63/63 both, BIND 45/45 (×2 each).
+- **Side merge (same hour, supervisor-verified, 13/13 live ×2):**
+  `docs/endturn-abilities-items-ground-truth.md` — ENDTURN_ABILITIES has
+  only 4 real cases (Rain Dish/Shed Skin/Speed Boost/Truant, all
+  L50-reachable; 3 live-verified, Truant analytical); ITEMS1/2 fully
+  enumerated recipe-only. Load-bearing: the 3 scripted ability cases use
+  `BattleScriptPushCursorAndCallback`+`end3` — **`END3` is unregistered,
+  a real architectural gap, not a trivial add**; ITEMS1/ITEMS2 are the
+  same function differing in one bool (9 ungated hold effects fire on
+  both — ITEMS2 exists to catch same-pass statuses). Merged tree
+  re-verified: **220 files / 2659 tests + build green.**
 
 ---
 ## 464 — EFFECT_ENDEAVOR registered: SETDAMAGETOHEALTHDIFFERENCE/BICBYTE/ADJUSTSETDAMAGE (entry 463's side-merge blocker, seam-scout §9.2)
