@@ -1889,3 +1889,67 @@ fresh oracle run).
 **Evidence.** `npm test` 2212/2212 (2209 + 3 new: `orderFirePlumesForDraw`
 pinned against the RAM probe). `npm run build` green. Dense sweep reproduced
 byte-identical on two independent fresh oracle runs.
+
+## MOVE_GROWTH rung 3 completed, rung 4 done: scene-wired and dense-compared both orientations, lands `partial` (target exact, attacker residual named) (2026-07-25)
+
+**Verdict: real progress, not a fit.** Completed rung 3 (`GrowthEffect` =
+`blend_color_cycle` + `AnimTask_ScaleMonAndRestore`, both RAM-probed to
+share one creation tick per call, second call starting exactly 32 ticks
+after the first) as `growthAnimationAtAge` (`src/engine/growth.ts`,
+`tests/growth.test.ts` 4/4). Extracted IVYSAUR's battle back/front sprites
+(CHARMELEON/HAUNTER precedent, `extract-battle-mon-pics.ts`). Wired
+`sceneOnGrowthView` + a `battleScene.ts` GROWTH draw case through the
+existing `drawSpriteSheetAffineStretch` tint/affine path other moves
+already use for palette flashes — `doubled` follows BIND's own precedent
+(ANY active affine transform sets `ST_OAM_AFFINE_DOUBLE` on real hardware,
+not just over-256 scales).
+
+**Dense comparator (rung 4).** `tools/compare/growthPortable.ts` + two
+fixtures, whole 63-frame window per orientation (oracle ticks 211-273,
+every frame captured), against the committed `mechanic-growth-*` fixtures.
+Component check (attacker affine matrix vs RAM) is **63/63 both
+orientations** — the newly-ported mechanism is RAM-exact at every tick,
+including age 0's already-nonzero scale. First run surfaced a **full-window
+framebuffer loss (0/63)**; pixel-dumped the diff before guessing and found
+it traced entirely to the TARGET (ONIX), not the new mechanism — ONIX
+(opponent-side front) was missing the already-ported send-out front-sprite
+idle residual (`speciesIdleAnim.ts`'s `speciesFrontIdleRestOffset`, the same
+"settles at x2=+1" finding DRAGON_RAGE/SHADOW_PUNCH's own dense windows
+already required) because GROWTH never runs `AnimTask_ShakeMon` on its
+target to overwrite it. Wiring that residual in made the target box
+pixel-exact in both orientations.
+
+**Lands `partial`: framebuffer 3/63 both orientations**, reproduced
+byte-identical (component and framebuffer counts, bbox, px counts) on two
+independent runs each — deterministic. Every remaining mismatch is confined
+to IVYSAUR's (the attacker's) own sprite box in both orientations
+(player-back: 728px, bbox 48,67-96,111; opponent-front: 585px, bbox
+156,28-196,72), a salt-and-pepper pattern on high-detail regions (the
+flower bud), not a shift or color swap. Since the affine-matrix component
+check is exact at these same frames, the newly-ported blend mechanism isn't
+implicated — the pattern matches `speciesIdleAnim.ts`'s own already-named
+gap (IVYSAUR isn't yet in `SPECIES_FRONT_ANIM_FAMILY`, and the back-sprite
+send-out idle family is explicitly documented there as a separate, unported
+mechanism). Not probed/ported this step (a new RAM probe, out of this
+rung's time budget) — named, not chased blind, per this run's own
+no-blind-fit policy.
+
+**Coverage:** added `MOVE_GROWTH` to `ANIMATION_COVERAGE.json` as `partial`.
+
+**Evidence.** `npm test` 2443/2443 (2439 + 4 new `growth.test.ts`). `npm run
+build` green. Both comparators reproduced byte-identical on two independent
+runs each.
+
+**Next action for a future session:** RAM-probe IVYSAUR's own send-out
+settle offset (both front and back sprite forms — `tools/probe/dump-onix-
+front-idle-anim.py` is the direct precedent) and extend
+`speciesIdleAnim.ts`'s `SPECIES_FRONT_ANIM_FAMILY`, or add an attacker-side
+equivalent of `speciesFrontIdleRestOffset` for the back-sprite family, then
+re-run `growthPortable.ts` to confirm `exact`.
+
+**Housekeeping:** moved the superseded "rungs 1-2 done, rung 3 partial"
+section (this same move, now complete through rung 4), the "BG-swap
+pipeline" dissolution section, and the "SHADOW_PUNCH lands partial (third
+session)" section to `ANIMATION_PROGRESS-archive.md` to keep ~3 live
+(AGENTS.md's convention); `blend_color_cycle` family map and DRAGON_RAGE
+rung 6/7 stay live alongside this one.

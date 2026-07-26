@@ -42,6 +42,75 @@ substitute state, multi-turn/multi-hit state, or another explicit script input.
 Every status needs a committed ON-profile trace; `exact` cannot retain a known
 remainder.
 
+## MOVE_FUTURE_SIGHT rung 5: both mandated residual hypotheses disproven with hard RAM evidence; the named remainder was incomplete — it's actually two separate defects, stays `partial` (2026-07-25)
+
+**Verdict: no fix landed — this is a negative-evidence session, not a fit.**
+The step brief's own precedent (MOVE_GROWTH) said its attacker residual was
+neither idle-offset nor asset-decode but a framebuffer-display-lag bug; this
+session checked both of that precedent's named hypotheses against
+KADABRA/FUTURE_SIGHT in mandated order and **disproved both**, then found the
+named residual itself was incomplete. **No source file changed this
+session** (`git diff --stat src/` is empty) — every check below ran through
+disposable scratch scripts, none promoted since none produced a passing fix.
+
+**(a) Lag-pair bisection** (`tools/compare/scratch/future-sight-lag-bisect-
+cached.ts`, reusing an already-populated oracle scratch dir so each recheck
+is ~1s, no re-invocation): swept `scaleLag`×`tintLag` over `[0,3]×[0,3]`
+against the dense fixture. The already-committed `(2,1)` is the **unique
+local optimum across the whole grid** (max 75/114 anywhere) and `tintLag`
+has **zero effect** on the match count at any `scaleLag` — blend/tint isn't
+the active driver of this residual, and no better lag pair exists. Hypothesis
+rejected.
+
+**(b) RAM probe** (`tools/compare/scratch/future-sight-matrix-diag.ts`) —
+no new Python probe needed: the fixture's own existing probe
+(`tools/probe/run-battle-lab-rgb.py`) already records `playerSprite.matrix`/
+`x2`/`y2`/`paletteFaded`/`paletteUnfaded` every frame via `gOamMatrices`, so
+this session read that data directly. `x2`/`y2` are pinned at 0 every tick
+in the window (no idle-anim rest offset), and the OAM affine matrix is
+**RAM-exact against `futureSightAttackerEffectAtAge`'s own UNLAGGED
+mechanism at every probed tick (114/114)** — the same clean result GROWTH's
+own IVYSAUR VRAM probe found. Idle-offset and asset/decode hypotheses both
+rejected.
+
+**Residual re-characterized.** `futureSightPortable.ts`'s own mismatch
+report only computes a bbox for the *first* diff frame — a per-frame bbox
+sweep (`tools/compare/scratch/future-sight-per-frame-bbox.ts`) over the full
+39-frame mismatch range found the prior "confined to the attacker box"
+description covers only **29/39** frames (116-144: bbox grows 696px→2013px
+peak at frame130→41px, tracking the scale animation's own magnitude — a
+real, still-unidentified scale-window residual, RAM-proven not idle-offset/
+asset). The other **10/39** (147,148,151,152,155,156,159,160,163,164) are a
+**different, much larger defect**: a 17230px bbox spanning nearly the whole
+upper screen (0,0-239,111), recurring in an exact 2-on/2-off period-4
+pattern matching the psychic BG palette ring's own rotation cadence,
+confined to the second (`UnsetPsychicBackground`) fade window — not
+attacker-sprite-related at all. Tried the obvious next candidate (extend the
+already-proven BG-rotation 1-tick display lag to the `REG_BLDY` darken
+read) — this made the whole window sharply **worse** (19/114, not 75/114),
+ruling that mechanism out too, not blindly kept.
+
+**Coverage:** `MOVE_FUTURE_SIGHT` stays `partial` in `ANIMATION_COVERAGE.json`
+— same 75/114, now split into two named defects instead of one
+(incompletely-described) residual.
+
+**Evidence.** `npm test` 2451/2451 (unchanged — no engine code touched).
+`npm run build` green.
+
+**Next action for a future session:** RAM-probe `BLDCNT`/`BLDY` at register
+granularity around the second fade (defect 2 first — 17230px dwarfs
+defect 1's at-most-2013px), then return to defect 1's finer per-tick
+timing/magnitude; extend to the opponent-attacker orientation (KADABRA front
+sprite extraction, side-uniform per the family map) once both are closed;
+re-run `futureSightPortable.ts` to confirm `exact`.
+
+**PAPERCUT:** `futureSightPortable.ts` (and its `growthPortable.ts` sibling)
+only report the bbox of the *first* mismatched frame in a dense window, not
+a per-frame or window-wide bbox — this cost real time this session
+(the true defect shape only surfaced via a bespoke scratch script). Worth a
+follow-up: have the shared dense-comparator harness report bbox for every
+mismatched frame (or at least the widest one), not just the first.
+
 ## `blend_color_cycle` group A extended: enumeration priced CONFUSION/PSYCHIC/FUTURE_SIGHT at 2 net-new components each; MOVE_FUTURE_SIGHT ported (cheapest, attacker-only), lands `partial` — BG swap/rotation exact, attacker-sprite residual named (2026-07-25)
 
 **Verdict: real port, not a fit — but a genuine residual remains, same
@@ -176,67 +245,3 @@ each. **Coverage: `MOVE_GROWTH` promoted to `exact`.**
 **Evidence.** `npm test` 2443/2443 (unchanged — no Tier-1 logic touched,
 only the presentation seam and a comparator diagnostic). `npm run build`
 green.
-
-## MOVE_GROWTH rung 3 completed, rung 4 done: scene-wired and dense-compared both orientations, lands `partial` (target exact, attacker residual named) (2026-07-25)
-
-**Verdict: real progress, not a fit.** Completed rung 3 (`GrowthEffect` =
-`blend_color_cycle` + `AnimTask_ScaleMonAndRestore`, both RAM-probed to
-share one creation tick per call, second call starting exactly 32 ticks
-after the first) as `growthAnimationAtAge` (`src/engine/growth.ts`,
-`tests/growth.test.ts` 4/4). Extracted IVYSAUR's battle back/front sprites
-(CHARMELEON/HAUNTER precedent, `extract-battle-mon-pics.ts`). Wired
-`sceneOnGrowthView` + a `battleScene.ts` GROWTH draw case through the
-existing `drawSpriteSheetAffineStretch` tint/affine path other moves
-already use for palette flashes — `doubled` follows BIND's own precedent
-(ANY active affine transform sets `ST_OAM_AFFINE_DOUBLE` on real hardware,
-not just over-256 scales).
-
-**Dense comparator (rung 4).** `tools/compare/growthPortable.ts` + two
-fixtures, whole 63-frame window per orientation (oracle ticks 211-273,
-every frame captured), against the committed `mechanic-growth-*` fixtures.
-Component check (attacker affine matrix vs RAM) is **63/63 both
-orientations** — the newly-ported mechanism is RAM-exact at every tick,
-including age 0's already-nonzero scale. First run surfaced a **full-window
-framebuffer loss (0/63)**; pixel-dumped the diff before guessing and found
-it traced entirely to the TARGET (ONIX), not the new mechanism — ONIX
-(opponent-side front) was missing the already-ported send-out front-sprite
-idle residual (`speciesIdleAnim.ts`'s `speciesFrontIdleRestOffset`, the same
-"settles at x2=+1" finding DRAGON_RAGE/SHADOW_PUNCH's own dense windows
-already required) because GROWTH never runs `AnimTask_ShakeMon` on its
-target to overwrite it. Wiring that residual in made the target box
-pixel-exact in both orientations.
-
-**Lands `partial`: framebuffer 3/63 both orientations**, reproduced
-byte-identical (component and framebuffer counts, bbox, px counts) on two
-independent runs each — deterministic. Every remaining mismatch is confined
-to IVYSAUR's (the attacker's) own sprite box in both orientations
-(player-back: 728px, bbox 48,67-96,111; opponent-front: 585px, bbox
-156,28-196,72), a salt-and-pepper pattern on high-detail regions (the
-flower bud), not a shift or color swap. Since the affine-matrix component
-check is exact at these same frames, the newly-ported blend mechanism isn't
-implicated — the pattern matches `speciesIdleAnim.ts`'s own already-named
-gap (IVYSAUR isn't yet in `SPECIES_FRONT_ANIM_FAMILY`, and the back-sprite
-send-out idle family is explicitly documented there as a separate, unported
-mechanism). Not probed/ported this step (a new RAM probe, out of this
-rung's time budget) — named, not chased blind, per this run's own
-no-blind-fit policy.
-
-**Coverage:** added `MOVE_GROWTH` to `ANIMATION_COVERAGE.json` as `partial`.
-
-**Evidence.** `npm test` 2443/2443 (2439 + 4 new `growth.test.ts`). `npm run
-build` green. Both comparators reproduced byte-identical on two independent
-runs each.
-
-**Next action for a future session:** RAM-probe IVYSAUR's own send-out
-settle offset (both front and back sprite forms — `tools/probe/dump-onix-
-front-idle-anim.py` is the direct precedent) and extend
-`speciesIdleAnim.ts`'s `SPECIES_FRONT_ANIM_FAMILY`, or add an attacker-side
-equivalent of `speciesFrontIdleRestOffset` for the back-sprite family, then
-re-run `growthPortable.ts` to confirm `exact`.
-
-**Housekeeping:** moved the superseded "rungs 1-2 done, rung 3 partial"
-section (this same move, now complete through rung 4), the "BG-swap
-pipeline" dissolution section, and the "SHADOW_PUNCH lands partial (third
-session)" section to `ANIMATION_PROGRESS-archive.md` to keep ~3 live
-(AGENTS.md's convention); `blend_color_cycle` family map and DRAGON_RAGE
-rung 6/7 stay live alongside this one.
