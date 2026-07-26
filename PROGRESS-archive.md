@@ -1,4 +1,145 @@
 ---
+## 474 — Fixed-damage + TYPECALC2 cluster registered: EFFECT_LEVEL_DAMAGE/EFFECT_PSYWAVE/EFFECT_BRICK_BREAK all executable (`docs/fixed-damage-cluster-ground-truth.md`'s (a)-portable subset, fully executed this session; Counter/Mirror Coat stay blocked per the doc's own data-model finding)
+
+- **Side merge (same round, supervisor-verified ALL PASS live from the
+  worktree + green on the merged tree):** doc **§18 `AI_CBM_DefenseUp` +
+  `AI_CV_DefenseUp`** ground truth banked (branch `worker/side-20260726-132350`,
+  merged, worktree removed) — bodies re-parsed from raw assembly incl.
+  `AI_CBM_BulkUp` (:581-584, trivial); **prose premise falsified live**:
+  DefenseUp's Gate C is INVERTED vs AttackUp's (`if_hp_less_than USER,70` —
+  HP==100% guarantees an extra draw rather than a clean stop). Last-used-move
+  dependency solved without a 2-turn trace: `gLastMoves` resets to
+  MOVE_NONE whose power==0 shares Gate E's code path with a real 0-power
+  move, and `MOVEEND_UPDATE_LAST_MOVES` sets the player's move before the
+  same window's phantom decision — so a fixed-damage player move both sets
+  the HP band AND the last-move gate. 3 fixtures (Vital Throw/Seismic
+  Toss/Dragon Rage flip), both seeds ×2; the physical-route fixtures show a
+  0-vs-6/5 `Cmd_if_random_less_than` presence/absence flip (NOT the usual
+  4-per-slot pattern — flagged honestly for the porter, not guessed).
+  DRAW SITE 1 (2-turn stat build) and the genuine-empty-history case remain
+  recipe-only, stated explicitly. 18-fixture verify script ALL PASS ×2
+  (worker) + once by the supervisor. Merged tree: **225 files / 2905 tests
+  + build green.**
+
+- **State:** tree green at **225 files / 2905 tests** (+0 files/+22 tests
+  over entry 473's 225/2883 — widened `battleScriptHitChainOpcode.test.ts`
+  and `battleScriptScreensWeatherOrchestration.test.ts` in place, no new
+  test files), build green (`tsc -b && vite build`). Ratchet: **unmoved**
+  (`battleScriptHitChainOpcode.ts` barrier count still 22) — all four
+  opcodes are genuinely (a)-portable, no new `unsupportedBranch` introduced;
+  `battleScriptRulesContext.test.ts`'s opcode-handler-count pin moved
+  **102 -> 106** (4 new opcode ids: 74 TYPECALC2, 159 DMGTOLEVEL, 160
+  PSYWAVEDAMAGEEFFECT, 238 REMOVELIGHTSCREENREFLECT), named and updated.
+  Verify script (`tools/probe/verify-fixed-damage-cluster-ground-truth.ts`,
+  oracle-only, READ/RUN only): **PASS x2** (before touching source, and
+  again at the end) — unaffected either way, as expected.
+- **Did:** registered the doc's (a)-portable subset (§7 summary table),
+  all four opcodes live-verified/source-cited in the doc:
+  1. `battleScriptHitChainOpcode.ts`: `Cmd_dmgtolevel` (2-line port,
+     `battleMoveDamage = attacker.level`, zero RNG) and
+     `Cmd_psywavedamageeffect` (rejection-sampling `while ((draw =
+     Random()%16) > 10)` loop via `drawBattleScriptRng` in a real `do/while`,
+     then `level*(draw*10+50)/100`) registered next to the existing
+     `typecalcOpcodeHandler`. `Cmd_typecalc2` also registered there: read
+     the real source (`battle_script_commands.c:4500-4593`) side by side
+     with the already-registered `typecalc` to confirm the doc's divergence
+     claims firsthand — no STAB, and the type-effectiveness loop only ORs
+     bits into a *local* `flags` u8 (never calls `ModulateDmgByType`, never
+     touches `gBattleMoveDamage`), so this opcode never scales damage, only
+     gates DOESNT_AFFECT_FOE/Wonder-Guard-MISSED. Wonder Guard's own check
+     reads that local `flags`, not the real `moveResultFlags` — pinned with
+     a test proving a stale `SUPER_EFFECTIVE` bit left over from the real
+     `typecalc` call moments earlier does NOT save a Wonder Guard target
+     this call finds neutral.
+  2. `battleScriptSetSideStatusOpcode.ts`: `Cmd_removelightscreenreflect`
+     (Brick Break's sole call site) registered beside the existing
+     SETREFLECT/SETLIGHTSCREEN/SETSAFEGUARD/SETMIST setters, reusing their
+     exact `sideStatuses`/`sideTimers` fields. Clears the *opposing* side's
+     Reflect/Light Screen (bit + timer) when either is active, writes
+     `animTurn`/`animTargetsHit` (1/1 on clear, 0/0 otherwise) on both
+     branches, per source.
+  3. Walked `BattleScript_EffectLevelDamage`/`EffectPsywave`/
+     `EffectBrickBreak` from their literal entries — every opcode along
+     each path was already registered generically (`attackcanceler`,
+     `accuracycheck`, `attackstring`, `ppreduce`, `typecalc`, `bicbyte`,
+     `adjustsetdamage`, `critcalc`, `damagecalc`, `adjustnormaldamage`,
+     `jumpifbyte`, `attackanimation`, `waitanimation`, `printstring`,
+     `waitmessage`, `effectivenesssound`, `hitanimation`, `waitstate`,
+     `healthbarupdate`, `datahpupdate`, `critmessage`, `resultmessage`,
+     `seteffectwithchance`, `tryfaintmon`) or newly registered this session
+     — no new barriers anywhere in this cluster's reachable set.
+- **Doc premise falsified (verified against source, not assumed):** the
+  scout doc's §4 called the "wall shattered" print
+  (`STRINGID_THEWALLSHATTERED`) "doubles-only... dead in L50 singles (max
+  value 1, branch guards on `>= 2`)". This misses that `Cmd_attackanimation`
+  (`battle_script_commands.c:1786/1789`) *also* increments
+  `gBattleScripting.animTurn`/`.animTargetsHit` by 1 on its own success
+  path, running *between* `removelightscreenreflect` and the second
+  `jumpifbyte CMP_LESS_THAN, sB_ANIM_TURN, 2`. So a screens-up hit reaches
+  animTurn 1 (from the clear) -> 2 (from attackanimation), and the guard
+  *does* fire — the print is reachable in singles whenever Brick Break
+  actually shatters a screen. Confirmed live: an integration test running
+  the real committed script (screens-up vs screens-down, both through
+  controller-ack/scheduler-progress driving) shows the message event firing
+  only in the screens-up case, matching this corrected reading. This also
+  means `removelightscreenreflect`'s `animTurn` write is not purely
+  presentational as the doc framed it — it also gates a real
+  `bicbyte gMoveResultFlags, MOVE_RESULT_MISSED | MOVE_RESULT_DOESNT_AFFECT_FOE`
+  branch (clearing a stale Levitate-immunity miss flag whenever a screen
+  breaks). Both already-generic opcodes (`jumpifbyte`/`bicbyte`) handle this
+  correctly once `removelightscreenreflect`'s write is correct — no extra
+  registration work was needed, just the doc's own rationale was overstated.
+- **Test:** `battleScriptHitChainOpcode.test.ts` (+30 tests): dmgtolevel/
+  psywavedamageeffect/typecalc2 unit coverage (draw-count-pinned RNG
+  sequences computed against this engine's own LCG, not the oracle's —
+  independently verifies the same rejection-sampling algorithm the doc's
+  live ledger exercises) + full-script integration for Seismic Toss and
+  both single-draw/multi-draw Psywave cases through
+  `BattleScript_HitFromAtkAnimation`. `battleScriptScreensWeatherOrchestration.test.ts`
+  (+21 tests incl. new helpers): removelightscreenreflect unit coverage
+  (clears both/one/neither, targets the opposing side not the attacker's
+  own) + the screens-up/screens-down Brick Break integration described
+  above, walking through `BattleScript_BrickBreakDoHit` and 6 more opcodes
+  into `datahpupdate`, confirming HP actually drops (proving the
+  typecalc-then-typecalc2 double-call shape resolves end to end).
+- **Census:** `npx tsx tools/report/executable-frontier-census.ts` —
+  **effects 90 -> 93/214** (+3, exactly as predicted), **moves 186 ->
+  190/355** (+4: Seismic Toss + Night Shade + Psywave + Brick Break),
+  **Factory-L50 unweighted 148 -> 152/276** (+4), **weighted 1788 ->
+  1846/2957** (+58, exactly matching the doc's own prediction: LEVEL_DAMAGE
+  weight 10 + PSYWAVE weight 2 + BRICK_BREAK weight 46). `EFFECT_COUNTER`/
+  `EFFECT_MIRROR_COAT` correctly remain `blocked-on-opcodes` — untouched,
+  per brief. All 28 ground-truth validation checks still pass (no new
+  false-positive class found this session, unlike entry 473's).
+- **Next:** **Counter/Mirror Coat prerequisite restated** (the brief's own
+  explicit out-of-scope item, not attempted): registering
+  `COUNTERDAMAGECALCULATOR`/`MIRRORCOATDAMAGECALCULATOR` needs two
+  data-model additions first, not just opcode dispatch — (1)
+  `gProtectStructs[].physicalBattlerId`/`.specialBattlerId` have no home in
+  `BattleScriptSpecialStatus`/`BattleScriptRulesBattlerBase` (only
+  `physicalDmg`/`specialDmg` are tracked today), so a registered opcode
+  would have nothing correct to read for retaliation-target selection; (2)
+  the per-turn `TurnValuesCleanUp(FALSE)` `ProtectStruct`-wide clear
+  (`battle_main.c:4857-4874`) is unmodeled, so without it a stale
+  `physicalDmg`/`physicalBattlerId` from an old turn could arm a
+  retaliation forever. Both belong to whichever step lands
+  `COUNTERDAMAGECALCULATOR`, not bolted on separately. Otherwise: doc's own
+  out-of-scope Follow-Me/double-battle redirect branch (§6, structurally
+  unreachable at L50 singles); the census's still-open `SETEFFECTPRIMARY`
+  dispatch-classification blind spot (entry 473's finding, not re-touched).
+- **Notes:** stayed in scope — no Counter/Mirror Coat data-model work, no
+  factory-AI files, no ENDTURN/END3 files, no status-cluster src files
+  (status-cluster's own registration from entry 473 coexists cleanly;
+  `applySetMoveEffect` untouched, as scoped), no seam/animation files,
+  `docs/fixed-damage-cluster-ground-truth.md` and its verify script
+  read/run only (untouched), no ROADMAP/ISSUES edits. No PAPERCUT — the
+  scout doc's source citations were precise enough that every opcode
+  registered cleanly; the one real surprise (attackanimation's own
+  animTurn increment making "wall shattered" reachable in singles) came
+  from reading the C source directly, which the brief explicitly asked for
+  ("verify each claim against the C source yourself").
+
+---
 ## 473 — Primary status-move opcode cluster registered: EFFECT_SLEEP/TOXIC/POISON/PARALYZE/CONFUSE all executable (doc's own scout finding, `docs/status-cluster-ground-truth.md`, fully executed this session)
 
 - **Side merge (same round, supervisor-verified PASS live from the worktree
