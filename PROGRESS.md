@@ -6,7 +6,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ---
 ## 468 — [SUPERVISOR WIND-DOWN 2026-07-26 ~05:30] session summary
 
-- **State:** tree committed and green at **221 files / 2733 tests**, build
+- **State:** tree committed and green at **221 files / 2751 tests**, build
   green, census **79/214 effects, 163/355 moves, 128/276 Factory-L50**
   (session start: 76→79 came mid-session; true session start was 73/214,
   152/355, 118/276; all 25 census self-checks pass), single main worktree,
@@ -22,9 +22,16 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
     +3 effects/+8 moves, 18/18 live verify, two hit-chain barriers
     genuinely retired); Factory-AI CheckViability handler bodies ported
     4-for-4 against banked fixtures — SpeedDown CBM+CV pair (463),
-    Pursuit + HighCrit (466), AlwaysHit (467), each with real
-    assembly-quirk corrections pinned (HighCrit's 1-or-2-draw cascade,
-    AlwaysHit's ScoreUp1 fallthrough); EFFECT_ENDEAVOR registered (464,
+    Pursuit + HighCrit (466), AlwaysHit (467), VitalThrow (468, the fifth
+    and last CV-only handler, against §13's banked fixtures — HP-band
+    truncating-percent gate + the shared speed-order plumbing, with the
+    §13.1 target-faster polarity correction and the 50-roll's
+    score/no-score polarity read directly off `Cmd_if_random_less_than`
+    rather than §11.4's own unverified gloss; engine reproduces both §13
+    fixtures' exact 4-vs-0 check-viability draw counts at both banked
+    seeds), each with real assembly-quirk corrections pinned (HighCrit's
+    1-or-2-draw cascade, AlwaysHit's ScoreUp1 fallthrough); EFFECT_ENDEAVOR
+    registered (464,
     3 opcodes + 2 required widenings, census +3 effects/+3 moves);
     presentation-seam window 3 wired (465, `turn5-rockslide.json` 256/256
     ×2 from the real MOVE_ENDEAVOR kernel chain, 14-trace sweep clean,
@@ -51,9 +58,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
     CONFUSION and PSYCHIC now **138/140**), window-2 splice hypothesis
     tested and honestly refuted — a genuinely separate defect class.
     Coverage: **22 exact / 6 partial**.
-- **Next (in order):** main — port `AI_CV_VitalThrow` (fixtures banked
-  §13); CBM+CV pairs for the blocked 17 (AttackDown first — unblocks the
-  original Growl fixtures); `END3` registration (architectural, needs its
+- **Next (in order):** main — CBM+CV pairs for the blocked 17 (AttackDown
+  first — unblocks the original Growl fixtures); `END3` registration (architectural, needs its
   own design look) then ENDTURN_ABILITIES's 3 scripted cases;
   ENDTURN_ITEMS1/2 registration off the banked recipes; remaining
   blocked-on-opcodes census rows (DMGTOLEVEL, PSYWAVE, COUNTER/TYPECALC2,
