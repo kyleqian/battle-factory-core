@@ -6,6 +6,46 @@ full record regardless; this file is a read-only reference.
 
 
 
+## MOVE_GROWTH promoted to `exact`: last named residual (IVYSAUR attacker salt-and-pepper) was a display-lag bug, not species idle offset or asset decode — both dense windows 63/63, twice each (2026-07-25)
+
+**Verdict: real fix, RAM-probe-first as directed — both suspected classes
+from the step brief were checked and disproved with hard evidence before
+any code changed; the actual cause was a third class the brief didn't
+name.** `tools/probe/dump-growth-ivysaur-vram.py` read IVYSAUR's own
+attacker-battler OAM (`x2`/`y2`, tileNum, paletteNum) plus the full VRAM
+tile bytes and OBJ palette row (faded + unfaded) at a clean pre-move tick
+and window ticks, both orientations: `x2`/`y2` are 0 at every tick (no
+idle-anim rest offset — also confirmed from source: `speciesIdleAnim.ts`'s
+own doc notes IVYSAUR's front `ANIM_V_STRETCH`/back `ANIM_H_SLIDE` families
+both explicitly zero out on completion, unlike ONIX's `RAPID_H_HOPS`, so
+the "missing from `SPECIES_FRONT_ANIM_FAMILY`" theory named last session
+was never going to explain a residual here), and the extracted
+tileset+palette are byte-identical to live VRAM/PLTT (all 64 tiles, all 16
+colors, at every probed tick) — ruling out an asset/decode bug too.
+
+**The real cause.** `growthAnimationAtAge`'s own mechanism is RAM-exact
+against the live OAM matrix with NO lag (unchanged, still true) — but the
+CAPTURED FRAMEBUFFER lags the matrix write, the same class of latency
+already documented for BLAZE_KICK ("OAM one frame after the reducer,
+palette one more VBlank after that"), except inverted: here the affine
+SCALE lags the reducer by 2 ticks and the BLEND TINT lags by only 1.
+Bisected empirically (all 9 (scaleLag, tintLag) pairs up to 2, both
+fixtures) using the real render pipeline, not a reimplementation — (2, 1)
+is the only pair landing 63/63 in both. Fixed in `sceneOnGrowthView`
+(`src/engine/sceneOnPresentation.ts`) by reading the scale and tint
+components at independently lagged ages. Updated `growthPortable.ts`'s own
+component check to compare the RAW (unlagged) mechanism against RAM
+directly, since that check's job is verifying `growthAnimationAtAge`'s own
+math, not the display-lag presentation choice.
+
+**Dense comparator, both orientations, twice each:** component 63/63,
+framebuffer 63/63 — reproduced byte-identical on a second independent run
+each. **Coverage: `MOVE_GROWTH` promoted to `exact`.**
+
+**Evidence.** `npm test` 2443/2443 (unchanged — no Tier-1 logic touched,
+only the presentation seam and a comparator diagnostic). `npm run build`
+green.
+
 ## `blend_color_cycle` family map: mechanism decoded, all 28 Level-50 argv surveyed, MOVE_GROWTH recommended as the zero-new-mechanism representative (enumeration only, no port) (2026-07-25)
 
 **Verdict: this is a genuinely bounded, cheap family — smaller than its "28
