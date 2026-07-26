@@ -584,6 +584,103 @@ describe("AI_CV_AlwaysHit mask-7 fixture reproduction (docs/factory-ai-checkviab
   });
 });
 
+const MOVE_VITAL_THROW = 233; // EFFECT_VITAL_THROW
+
+// docs/factory-ai-checkviability-ground-truth.md §13's two banked fixtures
+// (tools/battle-lab/mechanic-factory-ai-cv-vitalthrow-{lowhp-reach,
+// fullhp-control}-off.json). Same all-4-slots-identical design as the
+// Pursuit/HighCrit/AlwaysHit blocks above -- EFFECT_VITAL_THROW has no
+// CheckBadMove table entry either (doc §5/§13.4), so MOVE_VITAL_THROW
+// reproduces directly. Unlike AlwaysHit's accumulated stat-stage
+// precondition, VitalThrow's own precondition is AI_USER's (Anorith's) own
+// current HP -- this constructs the DECISIVE HP states directly (full HP
+// for turn 1's own real decision and the control fixture; the doc's own
+// live-verified post-turn-1 HP for the phantom next decision, seed-specific
+// per §13.3's own table: 32/120=26% at seed 1, 29/120=24% at seed 99)
+// rather than replaying a real damage roll through the hit chain, matching
+// this file's own "construct the decision directly" precedent above.
+describe("AI_CV_VitalThrow mask-7 fixture reproduction (docs/factory-ai-checkviability-ground-truth.md §13)", () => {
+  const MOVE_VITAL_THROW_MOVESET = [MOVE_VITAL_THROW, MOVE_VITAL_THROW, MOVE_VITAL_THROW, MOVE_VITAL_THROW] as const;
+
+  // Anorith (species 390), level 50, base HP45/Atk95/Def50/SpA40/SpD50/Spe75
+  // -> level-50 stats HP120/Atk115/Def70/SpA60/SpD70/Speed95 (doc §13.2).
+  function anorithAttacker(hp: number): FactoryAiScoredBattlerView {
+    return Object.freeze({
+      types: ["TYPE_ROCK", "TYPE_BUG"] as const,
+      attack: 115, defense: 70, spAttack: 60, spDefense: 70, speed: 95, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp, maxHp: 120,
+    });
+  }
+  // Machamp (species 68), level 50, base HP90/Atk130/Def80/SpA65/SpD85/Spe55
+  // -> level-50 stats HP165/Atk150/Def100/SpA85/SpD105/Speed75 (doc §13.2) --
+  // Speed 75 < Anorith's 95 satisfies §13.1's corrected precondition
+  // (opponent faster) with zero Random() cost from the speed check itself.
+  function machampTarget(): FactoryAiScoredTargetView {
+    return Object.freeze({
+      species: 68,
+      types: ["TYPE_FIGHTING", "TYPE_FIGHTING"] as const,
+      attack: 150, defense: 100, spAttack: 85, spDefense: 105, speed: 75, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp: 165, maxHp: 165, ability: "ABILITY_GUTS", knownAbility: null,
+    });
+  }
+  function vitalThrowView(attacker: FactoryAiScoredBattlerView): FactoryAiScoredView {
+    return Object.freeze({
+      schema: "factory-ai-scored-view/v1",
+      mode: "factory-level-50-singles",
+      active: Object.freeze({ aiBattler: 1 as const, targetBattler: 0 as const }),
+      factory: Object.freeze({ levelMode: 0 as const, battleMode: 0 as const, factoryWinStreak: 28, trainerOpponentId: 222 }),
+      moves: MOVE_VITAL_THROW_MOVESET,
+      attacker,
+      target: machampTarget(),
+    });
+  }
+  function checkViabilityDraws(result: ReturnType<typeof chooseFactoryAiScoredDecision>) {
+    return result.trace.draws.filter((d) => "phase" in d && d.phase === "check-viability");
+  }
+  function assertPicksVitalThrow(view: FactoryAiScoredView, result: ReturnType<typeof chooseFactoryAiScoredDecision>) {
+    expect(result.submission.decision).toMatchObject({ kind: "use-move" });
+    if (result.submission.decision.kind === "use-move") {
+      expect(view.moves[result.submission.decision.moveSlot]).toBe(MOVE_VITAL_THROW);
+    }
+  }
+
+  it.each([1, 99])("reach fixture, turn 1's own real decision (Anorith at full 120/120 HP, before any damage), seed %i: deterministic zero check-viability draws across all 4 identical Vital Throw slots, picks Vital Throw", (seed) => {
+    const view = vitalThrowView(anorithAttacker(120));
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+    expect(checkViabilityDraws(result)).toHaveLength(0);
+    assertPicksVitalThrow(view, result);
+  });
+
+  it("reach fixture, phantom next decision (Anorith at 32/120 HP = 26%, seed 1, doc §13.3's own live-verified endpoint): all 4 identical Vital Throw slots independently reach AI_CV_VitalThrow2, exactly 4 check-viability draws, picks Vital Throw", () => {
+    const view = vitalThrowView(anorithAttacker(32));
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 1, calls: 0 } });
+    const cvDraws = checkViabilityDraws(result);
+    expect(cvDraws).toHaveLength(4);
+    expect(cvDraws.every((d) => "kind" in d && d.kind === "vital-throw-roll")).toBe(true);
+    assertPicksVitalThrow(view, result);
+  });
+
+  it("reach fixture, phantom next decision (Anorith at 29/120 HP = 24%, seed 99, doc §13.3's own live-verified endpoint): exactly 4 check-viability draws, all direct AI_CV_VitalThrow2 rolls, picks Vital Throw", () => {
+    const view = vitalThrowView(anorithAttacker(29));
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 99, calls: 0 } });
+    const cvDraws = checkViabilityDraws(result);
+    expect(cvDraws).toHaveLength(4);
+    expect(cvDraws.every((d) => "kind" in d && d.kind === "vital-throw-roll")).toBe(true);
+    assertPicksVitalThrow(view, result);
+  });
+
+  it.each([1, 99])("control fixture (Anorith stays at full 120/120 HP throughout -- if_hp_more_than 60 stays true), seed %i: deterministic zero check-viability draws, picks Vital Throw", (seed) => {
+    const view = vitalThrowView(anorithAttacker(120));
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+    expect(checkViabilityDraws(result)).toHaveLength(0);
+    assertPicksVitalThrow(view, result);
+  });
+});
+
 type FixtureRules = BattleJsonObject & Readonly<{ acceptedMoveSlot: number | null }>;
 
 describe("submitFactoryAiDecision top-level dispatch", () => {
