@@ -1,4 +1,95 @@
 ---
+## 467 — Fourth CheckViability handler body ported: AI_CV_AlwaysHit, against the just-banked §12.1 fixtures (entry 466's side-merged item)
+
+- **State:** tree green at **221 files / 2731 tests** (+0 files/+24 tests
+  over entry 466's merged 221/2707), build green (`tsc -b && vite build`).
+  Ratchet unchanged (6/6 `executableFrontierRatchet.test.ts` — CV's
+  `unsupported-branch` results stay plain tagged returns, not the
+  `unsupportedBranch(...)` helper that ratchet tracks). One commit
+  (`9e951cc`), green. `tools/probe/verify-factory-ai-checkviability-ground-truth.ts`
+  rerun live against the oracle, twice (once before touching source to
+  confirm the side lane's banked fixtures still held, once after the port):
+  **ALL PASS** both times (all 6 §11/§12 fixtures unchanged — confirms the
+  fixtures bank independent of this port, since the verify script asserts
+  oracle-only draw counts, not engine output).
+- **Did:** ported `AI_CV_AlwaysHit` (`data/battle_ai_scripts.s:1075-1089`,
+  doc §11.3/§12.1) into `factoryAiCheckViability.ts`, same
+  dispatch-before-barrier shape §463/466 established. Two stat-stage gate
+  pairs — `if_stat_level_more_than TARGET EVASION 10` / `if_stat_level_less_than
+  USER ACC 2` (jump to `ScoreUp1`) and `..._more_than TARGET EVASION 8` /
+  `..._less_than USER ACC 4` (jump to `AlwaysHit2` directly) — both funnel
+  into the same `if_random_less_than 100` roll. **New finding beyond the
+  doc's own §11.3 inline gloss**, found by direct read of `Cmd_score`
+  (`battle_ai_script_commands.c:703-711`: adds to score, advances the
+  script pointer by a fixed 2 bytes, no jump at all): `AI_CV_AlwaysHit_ScoreUp1`'s
+  `score +1` does **not** terminate the script — there's no `goto` after
+  it, so execution falls straight through into the `AI_CV_AlwaysHit2:`
+  label immediately below, i.e. into the SAME `if_random_less_than 100`
+  roll the second gate pair reaches. The doc's own "evasion 11-12 or user
+  acc 0-1 -> deterministic +1, 0 draws" comment undercounts this branch —
+  reaching `ScoreUp1` still burns exactly one draw and scores +1 (roll <
+  100) or +2 (roll >= 100), never a zero-draw deterministic +1. This does
+  **not** touch the doc's own live §12.1 fixture evidence (unaffected,
+  still correct): the banked fixtures' target evasion only ever reaches
+  9/10 (the second gate pair, `AlwaysHit2` direct), never >10, so the
+  `ScoreUp1` fallthrough is real but unexercised by either banked fixture —
+  same shape as entry 466's own HighCrit cascade-fallthrough finding
+  (assembly quirk confirmed by direct source read, not by fighting the
+  doc's fixture numbers). Dispatches on `EFFECT_ALWAYS_HIT` only (unlike
+  HighCrit's 3 triggering effects).
+  1. **Plumbing:** `FactoryAiCheckViabilityBattler` gained `evasionStage`/
+     `accStage` (both sides carried, entry 466's own `isFirstTurn`
+     both-sides-symmetry convention — only AI_TARGET's evasion and
+     AI_USER's own acc are ever read). `FactoryAiScoredBattlerView.statStages`
+     widened with `acc`/`evasion` alongside the existing `atk/def/spAtk/
+     spDef/speed`, wired through `chooseFactoryAiScoredDecision`'s
+     `runCheckViability` call site for both attacker and target.
+- **Test:** every gate x both roll outcomes x exact draw counts (18 new
+  tests in `tests/factoryAiCheckViability.test.ts`, 55 total): neither gate
+  true (0 draws/score), each of the 4 individual gates reaching
+  `AlwaysHit2` directly (both roll outcomes, 1 draw, score 0 or +1), and
+  the `ScoreUp1` fallthrough finding itself explicitly pinned for both
+  gate-1/gate-2 triggers x both roll outcomes (1 draw, score +1 or +2, NOT
+  0 draws/deterministic +1) — the new-finding coverage the brief's
+  "count every gate yourself" instruction was aimed at. Engine-side
+  reproduction of both banked §12.1 fixtures through
+  `chooseFactoryAiScoredDecision` (6 new tests in
+  `tests/factoryAiScoredDecision.test.ts`, 28 total) at both banked seeds
+  (1, 99): reach fixture's real turn-4 decision (target evasion stage 9)
+  and phantom turn-5 decision (stage 10) each reproduce exactly 4
+  policy-own check-viability draws (one per identical MOVE_SWIFT slot,
+  matching entry 466's own AlwaysHit "N identical slots draw N times"
+  precedent, not the fixtures' own 44/44 WINDOW totals which also include
+  setup/tie draws and 3 unreachable turns' own decisions); splash-control
+  fixture (target evasion neutral, stage 6) reproduces exactly 0
+  check-viability draws across both seeds, matching the doc's own
+  "neither AlwaysHit gate is ever true" finding — all six reproduction
+  tests assert the chosen move stays `MOVE_SWIFT` (all 4 slots identical,
+  same "no pick ambiguity" design as Pursuit/HighCrit's own fixtures).
+- **Next:** `AI_CV_VitalThrow` remains the one still-unstaged handler from
+  the brief's original 4-handler slice (doc §11.4/§12.2's own recipe: needs
+  real Gen-3 damage-formula arithmetic to land the opponent in a
+  comfortable <40%-remaining HP band, explicitly flagged as its own
+  separately-budgeted session). Any CBM-blocked handler (17 of 22 reachable
+  `AI_CV_*`) needs its paired `AI_CBM_*` ported too, not just the CV side.
+  `END3` registration remains a named architectural gap blocking
+  ENDTURN_ABILITIES's 3 scripted cases. Turn 4's own
+  `anchorOpponentAfterTurn4Hp` staging gap and seam-scout §9 items 1/5
+  remain open from entry 465.
+- **Notes:** stayed inside scope — no `AI_CV_VitalThrow`, no CBM-blocked
+  handler, no ENDTURN registration, no `docs/factory-ai-checkviability-ground-truth.md`
+  or verify-script edits (side lane's own files this hour, already carried
+  the AlwaysHit fixtures + verify-script scenarios from its prior-session
+  merge — this step only reran the script, never edited it), no
+  seam/animation files. No discrepancy with §12's live fixture evidence to
+  report — the one correction found (`ScoreUp1`'s fallthrough) is a gap in
+  §11.3's own descriptive prose, not in §12.1's banked oracle numbers, and
+  doesn't touch either fixture's reachable branch. No PAPERCUT this
+  session — the source-read-first discipline (checking `Cmd_score`'s real
+  semantics before trusting the doc's inline comment) paid off cleanly
+  within the time budget.
+
+---
 ## 466 — Two more CheckViability handler bodies ported: AI_CV_Pursuit + AI_CV_HighCrit, both CV-only per §10 (entry 465's carried item)
 
 - **State:** tree green at **220 files / 2694 tests** (+0 files/+35 tests

@@ -498,3 +498,38 @@ lane's oracle). The 4 zero-carrier stat/crit berries and all 5 confuse
 berries (§2b) are (b)-barrier material, not a registration target, for
 Factory L50 specifically — they remain real, correct, and registerable
 later if a non-Factory context ever needs them.
+
+## 6. Registration status addendum (main lane, this session)
+
+§5 slice 4's mandatory rung landed: `REMOVEITEM` registered
+(`battleScriptRemoveitemOpcode.ts`), `ENDTURN_ITEMS1` wired into
+`battleEndTurnOrchestration.ts`'s `runItemsTick` for all ten
+`BattleScriptExecute`+`end2` cases (Leftovers, the 8 zero-RNG cure berries,
+White Herb), every other real switch case barriered on its own genuine
+trigger condition rather than falling through. Slice 5 (the 3 reachable
+stat-up berries) was left as a documented stretch barrier this session —
+see `PROGRESS.md` for the exact next action.
+
+Two new live fixtures verify the wiring against the real `battle-scene-off`
+oracle (`tools/battle-lab/mechanic-endturn-items1-leftovers-off.json`,
+`tools/battle-lab/mechanic-endturn-items1-cure-par-off.json`), both
+re-run clean:
+
+- **Leftovers** (LOTAD, item 200, vs MAGIKARP's real Pound): frame 528→529
+  Pound lands (115→104, -11); frame 849→850 Leftovers heals
+  (104→111, +7 = floor(115/16)), item unchanged at 200 both sides (persists,
+  never consumed) — `rngValue` bit-identical (3031698222) across the exact
+  849/850 heal boundary, zero new `Random()` draws.
+- **Cheri Berry cures paralysis** (same LOTAD, item 133, vs a real
+  Thunder Wave): paralysis (`status1` 64) already landed by frame 491 and
+  holds through 612; frame 612→613 `status1` clears to 0 (`ItemBattleEffects`'s
+  own synchronous C-side clear, ahead of the queued script); item stays 133
+  through 750, then frame 750→751 clears to 0 (`removeitem`, executed only
+  once the script's animation/message delay finishes) — `rngValue` is
+  bit-identical (2682491093) across the ENTIRE 491→751 window spanning both
+  transitions, zero new `Random()` draws anywhere in the cure. The real
+  multi-frame gap between the status clear (613) and the item removal (751)
+  confirms source's own two-step timing (immediate RAM write vs.
+  controller-synced script tail) — this engine's `runTickScript` correctly
+  collapses both into one atomic tick, the same simplification already
+  established for every other landed end-turn case.
