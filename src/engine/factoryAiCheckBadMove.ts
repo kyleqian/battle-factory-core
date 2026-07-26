@@ -42,14 +42,22 @@
  * CBM-blocked pairs' own CBM halves, with `AI_CV_DefenseDown`/`AI_CV_SpDefDown`
  * (doc §15/§16) -- both `goto` straight into the shared tail with no
  * intervening ability check of their own, unlike `AttackDown`'s Hyper Cutter
- * gate.
+ * gate; and `EFFECT_ATTACK_UP(_2)`/`EFFECT_DEFENSE_UP(_2)`/
+ * `EFFECT_DEFENSE_CURL`/`EFFECT_BULK_UP` -> `AI_CBM_AttackUp`/
+ * `AI_CBM_DefenseUp`/`AI_CBM_BulkUp` (`:249-251`/`:253-255`/`:581-584`,
+ * `runCbmAttackUp`/`runCbmDefenseUp`/`runCbmBulkUp` below), the fourth and
+ * fifth CBM-blocked pairs' own CBM halves, with `AI_CV_AttackUp`/
+ * `AI_CV_DefenseUp` (doc §17/§18) -- the first stat-**UP** handlers: bare
+ * MAX_STAT_STAGE gates on `AI_USER`'s OWN stat stage, zero `get_ability`
+ * calls, no shared `CheckIfAbilityBlocksStatChange` tail at all (a
+ * documented structural break from every stat-DOWN CBM handler above).
  */
 import movesData from "../data/gen/moves.json" with { type: "json" };
 import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
 import typeEffectivenessData from "../data/gen/type-effectiveness.json" with { type: "json" };
 import { advanceRngValue } from "./rng.ts";
 import type { BattleRngState } from "./battleDecisionBoundary.ts";
-import { MIN_STAT_STAGE, type TypeEffectivenessEntry } from "./damageCalc.ts";
+import { MAX_STAT_STAGE, MIN_STAT_STAGE, type TypeEffectivenessEntry } from "./damageCalc.ts";
 
 const U16_MAX = 0xffff;
 
@@ -163,6 +171,22 @@ export type FactoryAiCheckBadMoveTarget = Readonly<{
   defStage: number;
   /** Current SPECIAL DEFENSE stat stage, 0..12 -- `AI_CBM_SpDefDown`'s MIN_STAT_STAGE gate. */
   spDefStage: number;
+}>;
+
+/**
+ * `AI_USER`'s own state, needed only by the stat-**UP** CBM handlers
+ * (`AI_CBM_AttackUp`/`AI_CBM_DefenseUp`/`AI_CBM_BulkUp`,
+ * `docs/factory-ai-checkviability-ground-truth.md` §17.1/§18.1) -- every
+ * other CBM handler ported so far reads only `AI_TARGET`'s state
+ * (`FactoryAiCheckBadMoveTarget` above), since stat-DOWN effects target the
+ * opponent. Stat-UP effects are self-targeted, so their own CBM gate reads
+ * the AI battler's (the engine's "attacker") own stat stage instead.
+ */
+export type FactoryAiCheckBadMoveAttacker = Readonly<{
+  /** AI_USER's own ATTACK stat stage, 0..12 -- `AI_CBM_AttackUp`/`AI_CBM_BulkUp`'s own MAX_STAT_STAGE gate. */
+  atkStage: number;
+  /** AI_USER's own DEFENSE stat stage, 0..12 -- `AI_CBM_DefenseUp`/`AI_CBM_BulkUp`'s own MAX_STAT_STAGE gate. */
+  defStage: number;
 }>;
 
 export type FactoryAiCheckBadMoveDraw = Readonly<{
@@ -365,6 +389,60 @@ function runCbmSpDefDown(
   return runCbmStatDownViaSharedTail(target.spDefStage, target, rng, ordinal, reason);
 }
 
+/**
+ * `AI_CBM_AttackUp` (`data/battle_ai_scripts.s:249-251`,
+ * `docs/factory-ai-checkviability-ground-truth.md` §17.1):
+ *
+ * ```
+ * AI_CBM_AttackUp:
+ *     if_stat_level_equal AI_USER, STAT_ATK, MAX_STAT_STAGE, Score_Minus10
+ *     end
+ * ```
+ *
+ * A bare 2-instruction gate on AI_USER's OWN ATK stage -- zero
+ * `get_ability` calls, no shared `CheckIfAbilityBlocksStatChange` tail,
+ * unlike every stat-DOWN CBM handler above (a documented structural break,
+ * §17.1). Dispatch: `EFFECT_ATTACK_UP`/`EFFECT_ATTACK_UP_2`
+ * (`data/battle_ai_scripts.s:96,127`).
+ */
+function runCbmAttackUp(attackerAtkStage: number): number {
+  return attackerAtkStage === MAX_STAT_STAGE ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_DefenseUp` (`:253-255`, doc §18.1) -- byte-for-byte the same
+ * 2-instruction shape as `AI_CBM_AttackUp` with `STAT_DEF` swapped for
+ * `STAT_ATK`. Dispatch: `EFFECT_DEFENSE_UP`, `EFFECT_DEFENSE_UP_2`, AND
+ * `EFFECT_DEFENSE_CURL` (`:109,134,186`) all route to this same handler on
+ * the CBM side -- `EFFECT_DEFENSE_CURL` has no corresponding `AI_CV_*`
+ * dispatch entry at all (doc §18.1's own finding), so only its CBM half is
+ * reachable/ported.
+ */
+function runCbmDefenseUp(attackerDefStage: number): number {
+  return attackerDefStage === MAX_STAT_STAGE ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_BulkUp` (`:581-584`, doc §18.1):
+ *
+ * ```
+ * AI_CBM_BulkUp:
+ *     if_stat_level_equal AI_USER, STAT_ATK, MAX_STAT_STAGE, Score_Minus10
+ *     if_stat_level_equal AI_USER, STAT_DEF, MAX_STAT_STAGE, Score_Minus8
+ *     end
+ * ```
+ *
+ * `AI_CBM_AttackUp`'s own gate applied a second time for STAT_DEF at a
+ * different penalty (-8, not -10), sequentially, no interaction between the
+ * two checks -- a separate, third handler `EFFECT_BULK_UP` reaches on the
+ * CBM side ONLY (`:210`); its CV side (`:771`) instead dispatches straight
+ * to `AI_CV_DefenseUp`, shared with `DEFENSE_UP`/`DEFENSE_UP_2` (doc
+ * §17.1/§18.1).
+ */
+function runCbmBulkUp(attackerAtkStage: number, attackerDefStage: number): number {
+  return runCbmAttackUp(attackerAtkStage) + (attackerDefStage === MAX_STAT_STAGE ? -8 : 0);
+}
+
 export function typeMultiplierTenths(attackingType: string, defendingTypes: readonly [string, string]): number {
   const distinct = defendingTypes[0] === defendingTypes[1] ? [defendingTypes[0]] : defendingTypes;
   let mult = 10;
@@ -386,6 +464,7 @@ export function runCheckBadMovePreamble(input: Readonly<{
   rng: BattleRngState;
   moveId: number;
   target: FactoryAiCheckBadMoveTarget;
+  attacker: FactoryAiCheckBadMoveAttacker;
   drawOrdinalStart: number;
   reasonPrefix: string;
 }>): FactoryAiCheckBadMoveResult {
@@ -507,6 +586,44 @@ export function runCheckBadMovePreamble(input: Readonly<{
       rng: spDefDown.rng,
       draws: Object.freeze(draws),
       scoreDelta: spDefDown.scoreDelta,
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_ATTACK_UP(_2) -> AI_CBM_AttackUp,
+  // the fourth CBM-blocked pair's own CBM half (doc §17) -- the first
+  // stat-UP handler; reads AI_USER's own state, not the target's.
+  if (move.effect === "EFFECT_ATTACK_UP" || move.effect === "EFFECT_ATTACK_UP_2") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmAttackUp(input.attacker.atkStage),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_DEFENSE_UP(_2)/EFFECT_DEFENSE_CURL ->
+  // AI_CBM_DefenseUp, the fifth CBM-blocked pair's own CBM half (doc §18).
+  if (
+    move.effect === "EFFECT_DEFENSE_UP"
+    || move.effect === "EFFECT_DEFENSE_UP_2"
+    || move.effect === "EFFECT_DEFENSE_CURL"
+  ) {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmDefenseUp(input.attacker.defStage),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_BULK_UP -> AI_CBM_BulkUp, a separate
+  // third stat-up handler reached on the CBM side only (doc §18.1).
+  if (move.effect === "EFFECT_BULK_UP") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmBulkUp(input.attacker.atkStage, input.attacker.defStage),
     });
   }
 

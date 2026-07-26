@@ -1,8 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
   runCheckBadMovePreamble,
+  type FactoryAiCheckBadMoveAttacker,
   type FactoryAiCheckBadMoveTarget,
 } from "../src/engine/factoryAiCheckBadMove.ts";
+
+// DEFAULT_STAT_STAGE (6) on both stages -- neutral, irrelevant to every test
+// in this file except the dedicated AI_CBM_AttackUp/DefenseUp/BulkUp block below.
+const NEUTRAL_ATTACKER: FactoryAiCheckBadMoveAttacker = Object.freeze({ atkStage: 6, defStage: 6 });
 
 const MAROWAK: FactoryAiCheckBadMoveTarget = Object.freeze({
   species: 105,
@@ -24,11 +29,17 @@ const MOVE_SNORE = 173;
 const MOVE_STRING_SHOT = 81; // EFFECT_SPEED_DOWN
 const MOVE_COTTON_SPORE = 178; // EFFECT_SPEED_DOWN_2 -- same handler, different table entry
 
-function run(moveId: number, target: FactoryAiCheckBadMoveTarget, rngValue = 249_678_687) {
+function run(
+  moveId: number,
+  target: FactoryAiCheckBadMoveTarget,
+  rngValue = 249_678_687,
+  attacker: FactoryAiCheckBadMoveAttacker = NEUTRAL_ATTACKER,
+) {
   return runCheckBadMovePreamble({
     rng: { value: rngValue, calls: 0 },
     moveId,
     target,
+    attacker,
     drawOrdinalStart: 1,
     reasonPrefix: "test-slot",
   });
@@ -182,6 +193,7 @@ describe("AI_CheckBadMove universal preamble (docs/factory-ai-ground-truth.md §
         rng,
         moveId,
         target: MAROWAK,
+        attacker: NEUTRAL_ATTACKER,
         drawOrdinalStart: totalDraws + 1,
         reasonPrefix: `slot-${moveId}`,
       });

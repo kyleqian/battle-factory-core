@@ -22,6 +22,7 @@ import {
 import { advanceRngValue } from "./rng.ts";
 import {
   runCheckBadMovePreamble,
+  type FactoryAiCheckBadMoveAttacker,
   type FactoryAiCheckBadMoveDraw,
   type FactoryAiCheckBadMoveTarget,
 } from "./factoryAiCheckBadMove.ts";
@@ -700,6 +701,10 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     defStage: view.target.statStages.def,
     spDefStage: view.target.statStages.spDef,
   });
+  const attackerForCbm: FactoryAiCheckBadMoveAttacker = Object.freeze({
+    atkStage: view.attacker.statStages.atk,
+    defStage: view.attacker.statStages.def,
+  });
 
   const executedScoringScripts: ("check-bad-move" | "try-to-faint" | "check-viability")[] = [
     "check-bad-move",
@@ -729,6 +734,7 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
       rng,
       moveId,
       target: targetForCbm,
+      attacker: attackerForCbm,
       drawOrdinalStart: draws.length + 1,
       reasonPrefix: `slot-${slot}-check-bad-move`,
     });

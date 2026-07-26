@@ -28,9 +28,13 @@
  * `EFFECT_SPECIAL_DEFENSE_DOWN(_2)` (`AI_CV_SpDefDown`, `runCvSpDefDown`
  * below, `:1186-1196`, doc §16 -- the third CBM-blocked pair's own CV half,
  * byte-for-byte the same shape as `AI_CV_DefenseDown` with `STAT_SPDEF`
- * swapped for `STAT_DEF`). The other 82 are not ported this round (a
- * separate, much larger phased body of work per the audit's §3), so a move
- * that reaches one of THOSE must not silently score zero.
+ * swapped for `STAT_DEF`), and `EFFECT_ATTACK_UP`/`EFFECT_ATTACK_UP_2`
+ * (`AI_CV_AttackUp`, `runCvAttackUp` below, `:896-913`, doc §17 -- the
+ * fourth CBM-blocked pair's own CV half, and the first stat-**UP** handler:
+ * every gate/draw site reads `AI_USER`'s OWN state, `AI_TARGET` is never
+ * read at all). The other 81 are not ported this round (a separate, much
+ * larger phased body of work per the audit's §3), so a move that reaches
+ * one of THOSE must not silently score zero.
  */
 import { MOVES_BY_ID, TYPE_EFFECTIVENESS } from "./factoryAiCheckBadMove.ts";
 import type { BattleRngState } from "./battleDecisionBoundary.ts";
@@ -237,6 +241,16 @@ export type FactoryAiCheckViabilityDraw =
     ordinal: number;
     reason: string;
     kind: "sp-def-down-roll";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    succeeded: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "attack-up-roll-1" | "attack-up-roll-2" | "attack-up-roll-3";
     before: BattleRngState;
     after: BattleRngState;
     rawRngValue: number;
@@ -922,6 +936,104 @@ function runCvSpDefDown(input: Readonly<{
   });
 }
 
+/**
+ * `AI_CV_AttackUp` (`data/battle_ai_scripts.s:896-913`,
+ * `docs/factory-ai-checkviability-ground-truth.md` §17.1):
+ *
+ * ```
+ * AI_CV_AttackUp:
+ *     if_stat_level_less_than AI_USER, STAT_ATK, 9, AI_CV_AttackUp2  ; Gate A
+ *     if_random_less_than 100, AI_CV_AttackUp3                        ; DRAW SITE 1
+ *     score -1
+ *     goto AI_CV_AttackUp3
+ *
+ * AI_CV_AttackUp2:
+ *     if_hp_not_equal AI_USER, 100, AI_CV_AttackUp3                   ; Gate B
+ *     if_random_less_than 128, AI_CV_AttackUp3                        ; DRAW SITE 2
+ *     score +2
+ * AI_CV_AttackUp3:
+ *     if_hp_more_than AI_USER, 70, AI_CV_AttackUp_End                 ; Gate C
+ *     if_hp_less_than AI_USER, 40, AI_CV_AttackUp_ScoreDown2           ; Gate D
+ *     if_random_less_than 40, AI_CV_AttackUp_End                       ; DRAW SITE 3
+ * AI_CV_AttackUp_ScoreDown2:
+ *     score -2
+ * AI_CV_AttackUp_End:
+ *     end
+ * ```
+ *
+ * A structural break from every handler above: every gate/draw site reads
+ * `AI_USER`'s OWN state (its own ATK stage, its own HP) -- `AI_TARGET` is
+ * never read anywhere in this body (the mechanical consequence of a
+ * self-targeted effect). Gate A (own ATK stage < 9) skips DRAW SITE 1 --
+ * only reachable once a prior real stat-up move has already raised the
+ * stage to 9-11 (stage 12 is excluded earlier, by `AI_CBM_AttackUp`'s own
+ * MAX_STAT_STAGE gate). Gate B (own HP != 100%, an EQUALITY test, not a
+ * threshold band) skips DRAW SITE 2 -- only reachable while still exactly
+ * full HP. Gate A and Gate B gate mutually exclusive branches (only one of
+ * DRAW SITE 1/2 can ever fire per call), but only the Gate-A/DRAW-SITE-1
+ * path can ADDITIONALLY reach DRAW SITE 3 afterwards: Gate B's own
+ * precondition (HP == 100% exactly) makes Gate C (own HP > 70%) always true
+ * immediately afterward, a clean stop -- so a DRAW SITE 2 call can never
+ * also reach DRAW SITE 3, while a DRAW SITE 1 call can, if HP separately
+ * lands in [40,70). Past `AttackUp3`: Gate C (own HP > 70%) is a clean
+ * stop; Gate D (own HP < 40%) skips DRAW SITE 3 straight to the -2 penalty;
+ * the [40,70) band burns DRAW SITE 3 (roll < 40, ~15.6%, skips the penalty;
+ * roll >= 40, ~84.4%, applies it) -- same JUMP-skips/FALLTHROUGH-applies
+ * roll polarity every other ported handler's `if_random_less_than` already
+ * uses.
+ */
+function runCvAttackUp(input: Readonly<{
+  rng: BattleRngState;
+  attackerAtkStage: number;
+  attackerHp: number;
+  attackerMaxHp: number;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let score = 0;
+
+  const hpPercent = Math.floor((100 * input.attackerHp) / input.attackerMaxHp);
+
+  if (input.attackerAtkStage < 9) {
+    // AI_CV_AttackUp2: Gate B (own HP != 100%) skips DRAW SITE 2 straight to AttackUp3.
+    if (hpPercent === 100) {
+      const draw2 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw2`);
+      rng = draw2.after;
+      ordinal += 1;
+      const succeeded2 = draw2.randomValue % 256 >= 128;
+      draws.push(Object.freeze({ ...draw2, kind: "attack-up-roll-2" as const, succeeded: succeeded2 }));
+      if (succeeded2) score += 2;
+    }
+  } else {
+    // DRAW SITE 1: if_random_less_than 100, AttackUp3 (jump skips -1; fall through applies it, then goto AttackUp3 either way).
+    const draw1 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw1`);
+    rng = draw1.after;
+    ordinal += 1;
+    const succeeded1 = draw1.randomValue % 256 >= 100;
+    draws.push(Object.freeze({ ...draw1, kind: "attack-up-roll-1" as const, succeeded: succeeded1 }));
+    if (succeeded1) score -= 1;
+  }
+
+  // AttackUp3: Gate C (own HP > 70%) is a clean, deterministic stop.
+  if (hpPercent > 70) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+  }
+  // Gate D (own HP < 40%) skips DRAW SITE 3 straight to the -2 penalty.
+  if (hpPercent < 40) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score - 2 });
+  }
+  // DRAW SITE 3, only reached at HP in [40,70).
+  const draw3 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw3`);
+  rng = draw3.after;
+  const succeeded3 = draw3.randomValue % 256 >= 40;
+  draws.push(Object.freeze({ ...draw3, kind: "attack-up-roll-3" as const, succeeded: succeeded3 }));
+  if (succeeded3) score -= 2;
+  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+}
+
 /** `AI_CheckViability` for one move slot (`:652-775` dispatch shell only). */
 export function runCheckViability(input: Readonly<{
   rng: BattleRngState;
@@ -1074,6 +1186,23 @@ export function runCheckViability(input: Readonly<{
       rng: spDefDown.rng,
       draws: spDefDown.draws,
       scoreDelta: spDefDown.scoreDelta,
+    });
+  }
+
+  if (move.effect === "EFFECT_ATTACK_UP" || move.effect === "EFFECT_ATTACK_UP_2") {
+    const attackUp = runCvAttackUp({
+      rng: input.rng,
+      attackerAtkStage: input.attacker.atkStage,
+      attackerHp: input.attacker.hp,
+      attackerMaxHp: input.attacker.maxHp,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: attackUp.rng,
+      draws: attackUp.draws,
+      scoreDelta: attackUp.scoreDelta,
     });
   }
 
