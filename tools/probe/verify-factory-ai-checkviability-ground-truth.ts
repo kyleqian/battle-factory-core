@@ -657,6 +657,41 @@ const DRAW_COUNT_SCENARIOS: DrawCountScenarioSpec[] = [
     expectedTotalSteps: { 1: 7, 99: 7 },
     checkCrossSeedStable: true,
   },
+  // AI_CV_SpeedUp (data/battle_ai_scripts.s:956-965, doc §20): the first
+  // stat-UP pair whose CV gate reads relative Speed (if_target_faster) --
+  // not the opponent's own HP/stat-stage threshold like every prior
+  // CBM-blocked UP pair (AttackUp/DefenseUp, doc §17/§18) -- so its twin
+  // fixtures swap species roles (same trick as the doc's very first
+  // SpeedDown scenario, §6) rather than banding one species' own HP. Both
+  // species (Crobat, opponent role; Shuckle, target role) are deliberately
+  // single-ability (Inner Focus/NONE, Sturdy/NONE) -- a first live catch
+  // this session: AI_CheckBadMove's own universal prologue
+  // (data/battle_ai_scripts.s:47-84, entirely separate from any
+  // AI_CV_*/AI_CBM_* handler body) unconditionally calls get_ability
+  // AI_TARGET once per candidate move for the Soundproof check, and an
+  // early Dugtrio-target draft (two real abilities, Sand Veil/Arena Trap)
+  // picked up 4 extra Cmd_get_ability-attributed draws (14 vs the expected
+  // 10) purely from that universal ability-guessing roll -- nothing to do
+  // with AI_CV_SpeedUp itself. Re-staged with a single-ability target and
+  // the confound vanished (confirmed by attribution probe, see doc §20.4).
+  {
+    label:
+      "AI_CV_SpeedUp, opponent (AI_USER, Shuckle) slower than target (Crobat) even after the opponent's own turn-1 Agility (+2 Speed stages) -- reachable branch (data/battle_ai_scripts.s:956-965): if_target_faster (Gate A) is true, falling through to the :962 if_random_less_than 70 draw site, which fires once per identical MOVE_AGILITY slot on the phantom next-turn re-decision",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-speedup-slower-reach-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 10, 99: 10 },
+    checkCrossSeedStable: true,
+  },
+  {
+    label:
+      "AI_CV_SpeedUp, opponent (AI_USER, Crobat) faster than target (Shuckle) even before the opponent's own turn-1 Agility -- control (same species pair, roles swapped): if_target_faster (Gate A) is false, routing straight to score -3 then AI_CV_SpeedUp_End, deterministic zero draws from the handler itself",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-speedup-faster-control-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 6, 99: 6 },
+    checkCrossSeedStable: true,
+  },
 ];
 
 function totalPpUsed(ppBefore: number[], ppAfter: number[]): number {

@@ -2688,3 +2688,189 @@ session's remaining budget after landing sites 1+7 live.
 this session with `AI_CV_AccuracyDown`'s 2 fixtures (19.3/19.4) — every
 prior scenario (§9, §11.5, §12.1, §13.4, §14.6, §15.5, §16.5, §17.7, §18.7)
 unchanged and still green. **Run twice this session, ALL PASS both times.**
+
+## 20. 2026-07-26 addendum #10: `AI_CBM_SpeedUp` + `AI_CV_SpeedUp` — the third stat-UP pair, and the first whose gate is relative Speed, not the opponent's own HP/stat-stage
+
+Eighth follow-up scout session (side lane, Battle Scene OFF), same
+no-`src/`-changes contract. Goal per this step's brief: the mandatory
+rung — bank ground truth for `AI_CBM_SpeedUp` + `AI_CV_SpeedUp`, the
+smallest of the brief's three remaining stat-UP pairs (1 `if_random_less_
+than` site). Structurally the closest sibling in this doc is **not**
+`AttackUp`/`DefenseUp` (§17/§18) but the very first staged scenario,
+`SpeedDown` (§6) — both `AI_CV_Speed{Up,Down}` gate on `if_target_faster`
+(a live relative-Speed comparison), not on the opponent's own HP or stat
+stage the way every other CBM-blocked UP/DOWN pair does. Re-derived from
+the raw assembly regardless — the brief's standing "never copy a sibling's
+gate map" rule applied here too, and caught a real, universal confound
+this session (§20.4) that no prior pair's fixture happened to trip.
+
+### 20.1 Both real bodies, cited and fully parsed
+
+```
+AI_CBM_SpeedUp:                         (data/battle_ai_scripts.s:257-259)
+	if_stat_level_equal AI_USER, STAT_SPEED, MAX_STAT_STAGE, Score_Minus10  ; user's OWN Speed stage == 12 -> -10, end
+	end                                                                      ; else 0, end
+```
+
+Two instructions, zero `if_random_less_than`, zero `get_ability` — the same
+bare `MAX_STAT_STAGE` shape as `AI_CBM_AttackUp`/`AI_CBM_DefenseUp`
+(§17.1/§18.1) with `STAT_SPEED` swapped in. Dispatch table
+(`data/battle_ai_scripts.s:110,135`): both `EFFECT_SPEED_UP` and
+`EFFECT_SPEED_UP_2` route here on the CBM side.
+
+```
+AI_CV_SpeedUp:                          (data/battle_ai_scripts.s:956-965)
+	if_target_faster AI_CV_SpeedUp2      ; :957 Gate A (target's CURRENT speed > user's CURRENT speed, both incl. stat stages)
+	score -3                             ; :958 NO -> deterministic -3
+	goto AI_CV_SpeedUp_End                ; :959
+
+AI_CV_SpeedUp2:
+	if_random_less_than 70, AI_CV_SpeedUp_End  ; :962 DRAW SITE 1
+	score +3                                    ; :963
+AI_CV_SpeedUp_End:
+	end
+```
+
+Exactly **1** `if_random_less_than` site (`:962`), matching the brief's
+count and §5's own table. `Cmd_if_target_faster`
+(`battle_ai_script_commands.c`, `if_target_faster` opcode) calls
+`GetWhoStrikesFirst`-equivalent battler-speed comparison — a live read of
+both battlers' **current** effective Speed (base stat × stage multiplier,
+plus paralysis/item modifiers, none in play here), not a fixed threshold —
+so, unlike `AttackUp`/`DefenseUp`, this gate is controllable purely by
+species/role choice, no HP banding needed. Full branch enumeration:
+
+- **Gate A** (`:957`): target (player) faster than user (opponent) ->
+  `AI_CV_SpeedUp2`, reaching **DRAW SITE 1**. Target not faster (user faster
+  or tied) -> deterministic `score -3`, **DRAW SITE 1 never reached**.
+- **DRAW SITE 1** (`:962`, only reached if Gate A true): 70/256 (~27.3%)
+  skip (score stays whatever it was), else (~72.7%) `score +3`.
+
+### 20.2 Design: a species-role swap (reusing §6's SpeedDown trick), not an HP band — and a first live catch of a universal `AI_CheckBadMove` confound
+
+Because the gate is relative Speed, not the opponent's own HP/stage, the
+twin fixtures swap which species plays the AI-controlled "opponent" role,
+exactly as `SpeedDown`'s own Fixture A/B (§6) — adapted to this doc's later,
+more rigorous forced-dispatch/phantom-decision/draw-count-ledger discipline
+(§11.0, §14-19) rather than `SpeedDown`'s original decision-visible-pick
+design. Both species, all 4 slots **`MOVE_AGILITY`** (97, `EFFECT_SPEED_UP_2`,
+0 power, **accuracy 0** — always hits, no `Cmd_accuracycheck` draw), raising
+the opponent's own Speed stage 6->8 (×2.0 multiplier) during turn 1's real
+execution — read back by the phantom next-turn decision's Gate A, per this
+doc's standing "only the phantom decision is observable in a single-turn
+window" finding (§11.0/§17.2). Neither handler ever reads `AI_TARGET`'s
+ability, type, or HP, so — in principle — species choice should be
+Speed-value-only.
+
+**In practice it is not**, and an early draft caught this live: `AI_
+CheckBadMove`'s own shared prologue (`data/battle_ai_scripts.s:47-58`,
+entirely separate from any `AI_CBM_*`/`AI_CV_*` handler body, and run for
+**every** candidate move regardless of effect) unconditionally executes
+`get_ability AI_TARGET` at its `AI_CheckBadMove_CheckSoundproof` label to
+check for `ABILITY_SOUNDPROOF` against a fixed sound-move list (Growl,
+Roar, Sing, ...) — `MOVE_AGILITY` is not on that list, but the `get_ability`
+call itself still fires, once per candidate move. `Cmd_get_ability`
+(the same `§14.2` mechanism already documented for the down-pairs' shared
+`CheckIfAbilityBlocksStatChange` tail) only burns a `Random()` draw when the
+AI must *guess* between a species' two possible abilities — an early draft
+using Dugtrio (species 51, two real abilities: Sand Veil / Arena Trap) as
+the *target* role picked up **4 extra, wrongly-attributed draws** (14 vs
+the expected 10) purely from this universal ability-guessing roll, nothing
+to do with `AI_CV_SpeedUp` at all. Re-staged with a genuinely single-ability
+target and the confound vanished (attribution below). **This is the first
+time this doc has caught the ability-guess confound originating from `AI_
+CheckBadMove`'s own always-run prologue rather than from a handler's own
+`CheckIfAbilityBlocksStatChange` tail** — worth flagging for any future
+porter staging a pair whose handler bodies have zero `get_ability` calls of
+their own: the confound can still reach the fixture through this
+completely separate, unconditional code path, and only a single-ability
+species on **both** sides closes it.
+
+Final species pairing, both single-ability (closes the confound for good):
+**Crobat** (species 169, base Speed 130, `{ABILITY_INNER_FOCUS,
+ABILITY_NONE}`) and **Shuckle** (species 213, base Speed 5,
+`{ABILITY_STURDY, ABILITY_NONE}`, reused from §6). Target (player) moveset
+is irrelevant to either handler body, so both fixtures use **`MOVE_SPLASH`**
+(150) x4 on that side, avoiding any real-damage confound entirely (a first
+for this doc's CBM-blocked UP pairs — every prior one needed at least one
+fixture with a real damaging move to bank an HP band).
+
+- **Reach** (`tools/battle-lab/mechanic-factory-ai-cv-speedup-slower-reach-off.json`):
+  opponent = Shuckle (Agility x4), target = Crobat (Splash x4). Shuckle's
+  own post-Agility effective Speed (5 × 2.0 = 10) stays far below Crobat's
+  (130 × 1.0 = 130) -> Gate A true -> DRAW SITE 1 reached.
+- **Control** (`tools/battle-lab/mechanic-factory-ai-cv-speedup-faster-control-off.json`):
+  opponent = Crobat (Agility x4), target = Shuckle (Splash x4). Crobat's own
+  post-Agility effective Speed (130 × 2.0 = 260) stays far above Shuckle's
+  (5 × 1.0 = 5) -> Gate A false -> deterministic `score -3`, DRAW SITE 1
+  never reached.
+
+Single executed turn, same capture shape as every prior CBM-blocked pair
+(`[A, wait 30, A, wait 700]`, `captureFrames [0,100,300,732]`).
+
+### 20.3 Live ledger (oracle-verified, both seeds, both runs)
+
+| Fixture | Seed | Opponent PP used | Opponent HP (start→end) | Total `Random()` calls, frame 0→732 | Determinism (2 runs) |
+| --- | -: | -: | --- | -: | --- |
+| Reach (Shuckle slower, Crobat target) | 1 | 1 | 95→95 (100%) | **10** | identical |
+| Reach (Shuckle slower, Crobat target) | 99 | 1 | 95→95 (100%) | **10** | identical |
+| Control (Crobat faster, Shuckle target) | 1 | 1 | 160→160 (100%) | **6** | identical |
+| Control (Crobat faster, Shuckle target) | 99 | 1 | 160→160 (100%) | **6** | identical |
+
+Both fixtures cleanly cross-seed-stable (10/10, 6/6) — neither side ever
+takes damage (`MOVE_SPLASH` does nothing; `MOVE_AGILITY` is self-targeted,
+0 power), so this pair's ledger has zero real-damage-roll confound at all,
+the cleanest of this doc's CBM-blocked pairs so far.
+
+**Attribution** (`tools/probe/attribute-factory-ai-random-callers.py`,
+window `0 732`, seed 1, via `tools/run-mgba-probe.py`, final species
+pairing):
+
+| Caller function | Reach count | Control count | Delta |
+| --- | -: | -: | -: |
+| `BattleAI_SetupAIData+0x83` | 4 | 4 | 0 |
+| `BattleTurnPassed+0x157` | 1 | 1 | 0 |
+| `ChooseMoveOrAction_Singles+0xf7` | 1 | 1 | 0 |
+| `Cmd_if_random_less_than+0x7` | **4** | **0** | **+4** |
+
+Net delta +4 (10 - 6) is **entirely** `Cmd_if_random_less_than` — the
+`:962` roll, once per identical `MOVE_AGILITY` slot (N=4), present in reach
+and absent in control, with no `Cmd_get_ability`, `Cmd_accuracycheck`, or
+`Cmd_adjustnormaldamage` rows in either table (confirming the single-ability
+species choice closed the §20.2 confound, and the 0-power/0-accuracy/no-op
+target move closed the damage-roll one). The single cleanest reach/control
+split of any pair in this doc.
+
+### 20.4 What this unblocks
+
+1. **The pair's own port**: exact instruction lists, Gate A's real
+   precondition (a live relative-Speed comparison, not a threshold), the
+   single draw site's odds, and a live-verified twin fixture proving both
+   the deterministic and probabilistic branches end-to-end — 1/1 draw sites
+   covered (this pair has no unstaged sites, unlike every prior CBM-blocked
+   pair in this doc).
+2. **A new, doc-wide-relevant finding independent of this handler**: `AI_
+   CheckBadMove`'s own shared prologue (`:47-58`) unconditionally calls
+   `get_ability AI_TARGET` for every candidate move (the Soundproof check),
+   so the ability-guess confound (§14.2) can reach *any* fixture in this
+   doc through that path alone, even for handler bodies with zero `get_
+   ability` calls of their own — "handler has no get_ability instruction"
+   is necessary but not sufficient to rule the confound out; the target
+   species itself must still be single-ability. Worth a re-audit pass on
+   this doc's own already-banked AttackUp/DefenseDown/SpDefDown fixtures
+   at some point, though all of them already happen to use Machamp
+   (single-ability) as the target, so this is not believed to have
+   silently contaminated any already-banked ledger — not independently
+   re-verified this session (out of budget).
+3. **Confirms the brief's own count** (1 `if_random_less_than` site) and
+   demonstrates the doc's species-role-swap technique (§6) composes cleanly
+   with its later forced-dispatch/phantom-decision discipline (§11.0,
+   §14-19) for handlers gated on relative state rather than an absolute
+   threshold.
+
+### 20.5 Verify script status
+
+`tools/probe/verify-factory-ai-checkviability-ground-truth.ts` extended
+this session with `AI_CV_SpeedUp`'s 2 fixtures (§20.2/§20.3) — every prior
+scenario (§9, §11.5, §12.1, §13.4, §14.6, §15.5, §16.5, §17.7, §18.7, §19.7)
+unchanged and still green. **Run twice this session, ALL PASS both times.**
