@@ -91,11 +91,14 @@ function readJumpifwordMemWord(
   switch (expression) {
     case "gBattleTypeFlags": return rules.battleTopology.battleTypeFlags;
     case "gHitMarker": return rules.hitMarker;
+    /** Screens/weather registration slice 5 -- BattleScript_DamagingWeatherLoop's own `jumpifword CMP_EQUAL, gBattleMoveDamage, 0, ...` (docs/screens-weather-ground-truth.md §1c). */
+    case "gBattleMoveDamage": return rules.battleMoveDamage;
     default: return null;
   }
 }
 
 function resolveJumpifwordValue(expression: string): number | null {
+  if (expression === "0") return 0;
   return JUMPIFWORD_VALUES.get(expression) ?? null;
 }
 

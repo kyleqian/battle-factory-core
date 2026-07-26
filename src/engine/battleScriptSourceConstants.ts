@@ -99,6 +99,8 @@ export const BATTLE_SCRIPT_MOVE_RESULT_SUPER_EFFECTIVE = 1 << 1;
 export const BATTLE_SCRIPT_MOVE_RESULT_NOT_VERY_EFFECTIVE = 1 << 2;
 export const BATTLE_SCRIPT_MOVE_RESULT_DOESNT_AFFECT_FOE = 1 << 3;
 export const BATTLE_SCRIPT_MOVE_RESULT_FOE_ENDURED = 1 << 6;
+/** include/constants/battle.h:225. */
+export const BATTLE_SCRIPT_MOVE_RESULT_FAILED = 1 << 5;
 export const BATTLE_SCRIPT_STATUS2_FOCUS_ENERGY = 1 << 20;
 export const BATTLE_SCRIPT_STATUS3_CANT_SCORE_A_CRIT = 1 << 15;
 /** Never set for BATTLE_TYPE_FRONTIER, which every battle this engine models is. */

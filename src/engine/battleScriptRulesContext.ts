@@ -30,6 +30,9 @@ import { createBattleScriptSwitchinOpcodeHandlers } from "./battleScriptSwitchin
 import { createBattleScriptGetexpOpcodeHandlers } from "./battleScriptGetexpOpcode.ts";
 import { createBattleScriptCheckteamslostOpcodeHandlers } from "./battleScriptCheckteamslostOpcode.ts";
 import { createBattleScriptStatbuffchangeOpcodeHandlers } from "./battleScriptStatbuffchangeOpcode.ts";
+import { createBattleScriptSetSideStatusOpcodeHandlers } from "./battleScriptSetSideStatusOpcode.ts";
+import { createBattleScriptSetWeatherOpcodeHandlers } from "./battleScriptSetWeatherOpcode.ts";
+import { createBattleScriptDamagingWeatherOpcodeHandlers } from "./battleScriptDamagingWeatherOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -89,6 +92,27 @@ export type BattleScriptSpecialStatus = Readonly<{
   restoredBattlerSprite: 0 | 1;
   physicalDmg: number;
   specialDmg: number;
+}>;
+
+/** struct SideTimer's reflect/lightscreen/safeguard/mist-battlerId fields (include/battle.h:149-174) -- see the field comment on BattleScriptRulesContext.sideTimers. */
+export type BattleScriptSideTimerState = Readonly<{
+  reflectTimer: number;
+  reflectBattlerId: BattleScriptBattlerId;
+  lightscreenTimer: number;
+  lightscreenBattlerId: BattleScriptBattlerId;
+  safeguardTimer: number;
+  safeguardBattlerId: BattleScriptBattlerId;
+  mistBattlerId: BattleScriptBattlerId;
+}>;
+
+export type BattleScriptSideTimerInput = Readonly<{
+  reflectTimer?: number;
+  reflectBattlerId?: BattleScriptBattlerId;
+  lightscreenTimer?: number;
+  lightscreenBattlerId?: BattleScriptBattlerId;
+  safeguardTimer?: number;
+  safeguardBattlerId?: BattleScriptBattlerId;
+  mistBattlerId?: BattleScriptBattlerId;
 }>;
 
 type BattleScriptRulesBattlerBase = Readonly<{
@@ -421,12 +445,46 @@ export type BattleScriptRulesContext = Readonly<
      * the slot at that battler's partyIndex in sync (battleScriptHitChainOpcode.ts).
      */
     party: BattleScriptPartyBySide;
-    /** Source u32 gSideStatuses[2], narrowed to the SIDE_STATUS_SAFEGUARD bit SetMoveEffect reads. */
+    /**
+     * Source u32 gSideStatuses[2]. Originally narrowed to the
+     * SIDE_STATUS_SAFEGUARD bit SetMoveEffect reads; widened by the screens/
+     * weather setter registration (docs/screens-weather-ground-truth.md §2)
+     * to genuinely carry REFLECT/LIGHTSCREEN/MIST too, now that
+     * Cmd_setreflect/setlightscreen/setmist/setsafeguard are real writers.
+     * SIDE_STATUS_SPIKES (and every other unregistered bit) still can never
+     * be set by any fixture this engine can build -- see
+     * battleScriptSwitchinOpcode.ts's own barrier note.
+     */
     sideStatuses: readonly [number, number];
     /** Source u8 gSideTimers[side].mistTimer -- ChangeStatBuffs' own Mist guard (0 = inactive). */
     mistTimers: readonly [number, number];
+    /**
+     * Source struct SideTimer's remaining fields this engine tracks
+     * (include/battle.h:149-174, docs/screens-weather-ground-truth.md §2):
+     * reflect/lightscreen/safeguard's own timers + the battlerId each
+     * Cmd_set* stamps (`gSideTimers[side].reflectBattlerId = gBattlerAttacker`
+     * etc.), read back by DoFieldEndTurnEffects' own end-turn cases to
+     * reassign BS_ATTACKER for the wear-off script. mistBattlerId is kept
+     * here (not beside mistTimers above) since Cmd_setmist writes it too but
+     * no pre-existing reader needed it before this registration.
+     */
+    sideTimers: readonly [BattleScriptSideTimerState, BattleScriptSideTimerState];
     /** Source u32 gBattleWeather. */
     weather: number;
+    /** Source u8 gWishFutureKnock.weatherDuration -- the one shared weather timer every Cmd_set<weather> writes (include/battle.h:172, byte offset 0x28). */
+    weatherTimer: number;
+    /**
+     * Source gBattlerByTurnOrder[MAX_BATTLERS_COUNT] -- populated by
+     * `ENDTURN_ORDER`'s `GetWhoStrikesFirst` insertion sort
+     * (`docs/end-turn-ground-truth.md` §1a) before the field loop runs;
+     * `Cmd_copyarraywithindex`'s own read in
+     * `BattleScript_DamagingWeatherLoop` (doc §1c) is this field's only
+     * reader. Defaults to ascending battler id, matching
+     * `computeBattlerOrder`'s own documented simplification
+     * (`battleEndTurnOrchestration.ts`) -- this engine has no speed model in
+     * `BattleScriptRulesContext` yet.
+     */
+    battlerByTurnOrder: readonly [number, number, number, number];
     /**
      * Source u8 gCurrentTurnActionNumber (battle_main.c:162) -- the action
      * index of the currently-executing battler's script. Paired with each
@@ -512,7 +570,10 @@ export type BattleScriptRulesContextInput = Readonly<{
   }>;
   sideStatuses?: readonly [number?, number?];
   mistTimers?: readonly [number?, number?];
+  sideTimers?: readonly [BattleScriptSideTimerInput?, BattleScriptSideTimerInput?];
   weather?: number;
+  weatherTimer?: number;
+  battlerByTurnOrder?: readonly number[];
   currentTurnActionNumber?: number;
 }>;
 
@@ -1385,6 +1446,32 @@ function requireRole(
   return value;
 }
 
+function requireSideTimerBattlerId(
+  value: BattleScriptBattlerId | undefined,
+  field: string,
+): BattleScriptBattlerId {
+  if (value === undefined) return 0;
+  if (!isBattleScriptBattlerId(value)) {
+    throw new Error(`${field} must be a battler id 0..3, got ${value}`);
+  }
+  return value;
+}
+
+function buildSideTimerState(
+  input: BattleScriptSideTimerInput | undefined,
+  side: 0 | 1,
+): BattleScriptSideTimerState {
+  return Object.freeze({
+    reflectTimer: requireUnsigned(input?.reflectTimer ?? 0, 0xff, `sideTimers[${side}].reflectTimer`),
+    reflectBattlerId: requireSideTimerBattlerId(input?.reflectBattlerId, `sideTimers[${side}].reflectBattlerId`),
+    lightscreenTimer: requireUnsigned(input?.lightscreenTimer ?? 0, 0xff, `sideTimers[${side}].lightscreenTimer`),
+    lightscreenBattlerId: requireSideTimerBattlerId(input?.lightscreenBattlerId, `sideTimers[${side}].lightscreenBattlerId`),
+    safeguardTimer: requireUnsigned(input?.safeguardTimer ?? 0, 0xff, `sideTimers[${side}].safeguardTimer`),
+    safeguardBattlerId: requireSideTimerBattlerId(input?.safeguardBattlerId, `sideTimers[${side}].safeguardBattlerId`),
+    mistBattlerId: requireSideTimerBattlerId(input?.mistBattlerId, `sideTimers[${side}].mistBattlerId`),
+  });
+}
+
 export function createBattleScriptRulesContext(
   input: BattleScriptRulesContextInput,
 ): BattleScriptRulesContext {
@@ -1789,7 +1876,18 @@ export function createBattleScriptRulesContext(
       requireUnsigned(input.mistTimers?.[0] ?? 0, 0xff, "mistTimers[0]"),
       requireUnsigned(input.mistTimers?.[1] ?? 0, 0xff, "mistTimers[1]"),
     ]) as unknown as readonly [number, number],
+    sideTimers: Object.freeze([
+      buildSideTimerState(input.sideTimers?.[0], 0),
+      buildSideTimerState(input.sideTimers?.[1], 1),
+    ]) as unknown as readonly [BattleScriptSideTimerState, BattleScriptSideTimerState],
     weather: requireUnsigned(input.weather ?? 0, 0xffff_ffff, "weather") >>> 0,
+    weatherTimer: requireUnsigned(input.weatherTimer ?? 0, 0xff, "weatherTimer"),
+    battlerByTurnOrder: Object.freeze([
+      requireUnsigned(input.battlerByTurnOrder?.[0] ?? 0, 3, "battlerByTurnOrder[0]"),
+      requireUnsigned(input.battlerByTurnOrder?.[1] ?? 1, 3, "battlerByTurnOrder[1]"),
+      requireUnsigned(input.battlerByTurnOrder?.[2] ?? 2, 3, "battlerByTurnOrder[2]"),
+      requireUnsigned(input.battlerByTurnOrder?.[3] ?? 3, 3, "battlerByTurnOrder[3]"),
+    ]) as unknown as readonly [number, number, number, number],
     currentTurnActionNumber: requireUnsigned(
       input.currentTurnActionNumber ?? 0,
       0xff,
@@ -1934,6 +2032,12 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptGetexpOpcodeHandlers(program),
     ...createBattleScriptCheckteamslostOpcodeHandlers(program),
     ...createBattleScriptStatbuffchangeOpcodeHandlers(program, {
+      isControllerIdle: sourceExternalPorts.isControllerIdle,
+      resolveBattlerForBattleScript: resolveRulesBattlerForBattleScript,
+    }),
+    ...createBattleScriptSetSideStatusOpcodeHandlers(program),
+    ...createBattleScriptSetWeatherOpcodeHandlers(program),
+    ...createBattleScriptDamagingWeatherOpcodeHandlers(program, {
       isControllerIdle: sourceExternalPorts.isControllerIdle,
       resolveBattlerForBattleScript: resolveRulesBattlerForBattleScript,
     }),

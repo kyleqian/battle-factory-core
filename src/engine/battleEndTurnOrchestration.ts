@@ -49,6 +49,7 @@ import type { BattleScriptBattlerId } from "./battleScriptEvents.ts";
 import {
   withBattleScriptPartyMemberStatus1,
   type BattleScriptRulesContext,
+  type BattleScriptSideTimerState,
 } from "./battleScriptRulesContext.ts";
 import { withBattler } from "./battleScriptHitChainOpcode.ts";
 import {
@@ -84,12 +85,19 @@ const STATUS1_TOXIC_TURN_15 = 15 << 8;
 const SIDE_STATUS_REFLECT = 1 << 0;
 const SIDE_STATUS_LIGHTSCREEN = 1 << 1;
 const SIDE_STATUS_SAFEGUARD = 1 << 5;
+const SIDE_STATUS_MIST = 1 << 8;
 
 /** include/constants/battle.h:232-244 -- gBattleWeather bits (this engine's `weather` field is already the raw u32). */
 const B_WEATHER_RAIN = (1 << 0) | (1 << 1) | (1 << 2);
 const B_WEATHER_SANDSTORM = (1 << 3) | (1 << 4);
 const B_WEATHER_SUN = (1 << 5) | (1 << 6);
 const B_WEATHER_HAIL = 1 << 7;
+
+/** battle_util.c:1181-1438 -- the field loop's own script labels this registration hosts (docs/screens-weather-ground-truth.md §3). */
+const SIDE_STATUS_WORE_OFF_LABEL = "BattleScript_SideStatusWoreOff";
+const SAFEGUARD_ENDS_LABEL = "BattleScript_SafeguardEnds";
+const DAMAGING_WEATHER_CONTINUES_LABEL = "BattleScript_DamagingWeatherContinues";
+const SANDSTORM_HAIL_ENDS_LABEL = "BattleScript_SandStormHailEnds";
 
 type MachineState = BattleScriptMachineState<BattleScriptRulesContext>;
 type Handlers = BattleScriptOpcodeHandlers<BattleScriptRulesContext>;
@@ -350,46 +358,215 @@ function runDoBattlerEndTurnEffects(
   return Object.freeze({ kind: "clean", state });
 }
 
+type FieldCaseOutcome =
+  | Readonly<{ kind: "advance"; state: MachineState }>
+  | Readonly<{ kind: "fired"; state: MachineState }>
+  | Readonly<{ kind: "opcode-barrier"; state: MachineState; instruction: BattleScriptInstruction }>;
+
+function withSideTimersPatch(
+  rulesContext: BattleScriptRulesContext,
+  side: 0 | 1,
+  changes: Partial<BattleScriptSideTimerState>,
+): BattleScriptRulesContext {
+  const sideTimers = [...rulesContext.sideTimers] as [BattleScriptSideTimerState, BattleScriptSideTimerState];
+  sideTimers[side] = Object.freeze({ ...sideTimers[side], ...changes });
+  return Object.freeze({
+    ...rulesContext,
+    sideTimers: Object.freeze(sideTimers) as readonly [BattleScriptSideTimerState, BattleScriptSideTimerState],
+  });
+}
+
+function withSideStatusClear(rulesContext: BattleScriptRulesContext, side: 0 | 1, bit: number): BattleScriptRulesContext {
+  const sideStatuses = [...rulesContext.sideStatuses] as [number, number];
+  sideStatuses[side] = (sideStatuses[side] & ~bit) >>> 0;
+  return Object.freeze({
+    ...rulesContext,
+    sideStatuses: Object.freeze(sideStatuses) as readonly [number, number],
+  });
+}
+
+/**
+ * F2/F3/F5 (`ENDTURN_REFLECT`/`LIGHT_SCREEN`/`SAFEGUARD`, `battle_util.c:
+ * 1221-1318`, docs/screens-weather-ground-truth.md §3a): structurally
+ * identical shape. The timer decrements every tick while the bit is set;
+ * `BattleScript_SideStatusWoreOff`/`SafeguardEnds` only fire on the ONE tick
+ * the timer reaches 0 (doc §3d/§3f's live ledgers -- ticks 1-4 are silent
+ * state-only decrements, no script, no message).
+ */
+function runScreenFieldCase(
+  program: BattleScriptProgram,
+  handlers: Handlers,
+  state: MachineState,
+  side: 0 | 1,
+  bit: number,
+  readTimer: (timers: BattleScriptSideTimerState) => number,
+  patchDecrement: (nextTimer: number) => Partial<BattleScriptSideTimerState>,
+  battlerIdOf: (timers: BattleScriptSideTimerState) => BattleScriptBattlerId,
+  expiryLabel: string,
+): FieldCaseOutcome {
+  const rc = state.rulesContext;
+  if ((rc.sideStatuses[side] & bit) === 0) return Object.freeze({ kind: "advance", state });
+  const timers = rc.sideTimers[side];
+  const nextTimer = readTimer(timers) - 1;
+  const decremented = withSideTimersPatch(rc, side, patchDecrement(nextTimer));
+  if (nextTimer !== 0) {
+    return Object.freeze({ kind: "advance", state: Object.freeze({ ...state, rulesContext: decremented }) });
+  }
+  const cleared = withSideStatusClear(decremented, side, bit);
+  const battler = battlerIdOf(timers);
+  const run = runTickScript(program, handlers, state, cleared, battler, expiryLabel);
+  if (run.kind === "opcode-barrier") return run;
+  return Object.freeze({ kind: "fired", state: run.state });
+}
+
+/**
+ * F4 (`ENDTURN_MIST`, `battle_util.c:1272-1294`) -- the one screen case
+ * whose fail-check (and end-turn guard) is the raw `mistTimer` value, not a
+ * `SIDE_STATUS_MIST` bit check, per its setter's own different shape
+ * (doc §2/§3a). Doc-proven zero real Frontier `MOVE_MIST` carriers (F4 row)
+ * -- wired anyway since it shares the screens' cheap shape and the field
+ * already exists.
+ */
+function runMistFieldCase(
+  program: BattleScriptProgram,
+  handlers: Handlers,
+  state: MachineState,
+  side: 0 | 1,
+): FieldCaseOutcome {
+  const rc = state.rulesContext;
+  if (rc.mistTimers[side] === 0) return Object.freeze({ kind: "advance", state });
+  const nextTimer = rc.mistTimers[side] - 1;
+  const mistTimers = [...rc.mistTimers] as [number, number];
+  mistTimers[side] = nextTimer;
+  const decremented = Object.freeze({ ...rc, mistTimers: Object.freeze(mistTimers) as readonly [number, number] });
+  if (nextTimer !== 0) {
+    return Object.freeze({ kind: "advance", state: Object.freeze({ ...state, rulesContext: decremented }) });
+  }
+  const cleared = withSideStatusClear(decremented, side, SIDE_STATUS_MIST);
+  const battler = rc.sideTimers[side].mistBattlerId;
+  const run = runTickScript(program, handlers, state, cleared, battler, SIDE_STATUS_WORE_OFF_LABEL);
+  if (run.kind === "opcode-barrier") return run;
+  return Object.freeze({ kind: "fired", state: run.state });
+}
+
+/** battle_message.c:918-922 -- shared by gSandStormHailContinuesStringIds/DmgStringIds/EndStringIds. */
+const B_MSG_SANDSTORM = 0;
+const B_MSG_HAIL = 1;
+/** include/constants/battle_animation.h. */
+const B_ANIM_SANDSTORM_CONTINUES = 3;
+const B_ANIM_HAIL_CONTINUES = 5;
+
+/**
+ * F8/F10 (`ENDTURN_SANDSTORM`/`HAIL`, `battle_util.c:1372-1420`,
+ * docs/screens-weather-ground-truth.md §1c/§3b/§3e's live-verified ledger).
+ * `gBattleScripting.animArg1`/`gBattleCommunication[MULTISTRING_CHOOSER]`
+ * are stamped (`B_ANIM_*_CONTINUES`/`B_MSG_SANDSTORM`|`HAIL`) before EITHER
+ * branch executes -- both `DamagingWeatherContinues` and `SandStormHailEnds`
+ * read the same chooser value. `weatherHasEffect`, both weather bits, and
+ * the six-opcode per-battler damage loop live entirely in the already-
+ * registered `battleScriptDamagingWeatherOpcode.ts` handlers; this only
+ * hosts the C-side decrement/branch choice.
+ */
+function runDamagingWeatherFieldCase(
+  program: BattleScriptProgram,
+  handlers: Handlers,
+  state: MachineState,
+  animArg1: number,
+  chooser: number,
+): FieldCaseOutcome {
+  const rc = state.rulesContext;
+  const nextTimer = rc.weatherTimer - 1;
+  if (nextTimer === 0) {
+    const ended = Object.freeze({ ...rc, weather: 0, weatherTimer: 0, multistringChooser: chooser });
+    const run = runTickScript(program, handlers, state, ended, rc.selectorRoles.attacker ?? 0, SANDSTORM_HAIL_ENDS_LABEL);
+    if (run.kind === "opcode-barrier") return run;
+    return Object.freeze({ kind: "fired", state: run.state });
+  }
+  const continuing = Object.freeze({
+    ...rc,
+    weatherTimer: nextTimer,
+    animArg1,
+    multistringChooser: chooser,
+  });
+  const run = runTickScript(program, handlers, state, continuing, rc.selectorRoles.attacker ?? 0, DAMAGING_WEATHER_CONTINUES_LABEL);
+  if (run.kind === "opcode-barrier") return run;
+  return Object.freeze({ kind: "fired", state: run.state });
+}
+
 /**
  * `DoFieldEndTurnEffects`'s 9 non-ENDTURN_ORDER cases (`battle_util.c:1181
- * -1438`). Every one gates on a real already-modeled field
- * (`sideStatuses`/`mistTimers`/`weather`) and barriers if it's ever
- * actually set -- currently never, since no move/ability in this engine
- * sets Reflect/Light Screen/Mist/Safeguard/weather yet. `ENDTURN_WISH` has
- * no modeled trigger state at all (no `wishCounter` field) and is an
- * explicit, documented no-op (this step's brief names Wish as an allowed
- * deferral alongside Uproar/Leech Seed).
+ * -1438`). REFLECT/LIGHT_SCREEN/MIST/SAFEGUARD (F2-F5) and SANDSTORM/HAIL
+ * (F8/F10) are fully wired (docs/screens-weather-ground-truth.md §6 slices
+ * 1-3/5). RAIN/SUN (F7/F9) remain a named case-barrier: their own continues
+ * scripts call the *non-var* `playanimation BS_ATTACKER, B_ANIM_RAIN_
+ * CONTINUES`/`B_ANIM_SUN_CONTINUES`, and the already-registered PLAYANIMATION
+ * handler (`battleScriptStatbuffchangeOpcode.ts`) is narrowed to its own
+ * B_ANIM_STATS_CHANGE arm only -- widening it is a real, separate
+ * registration this step's cap did not reach (doc's own slice 4, deferred).
+ * `ENDTURN_WISH` has no modeled trigger state at all (no `wishCounter`
+ * field) and is an explicit, documented no-op (this step's brief names Wish
+ * as an allowed deferral alongside Uproar/Leech Seed).
  */
-function runFieldEndTurnEffects(rulesContext: BattleScriptRulesContext): BattleEndTurnCaseBarrier | null {
+function runDoFieldEndTurnEffects(
+  program: BattleScriptProgram,
+  handlers: Handlers,
+  initialState: MachineState,
+): BattlerLoopResult {
+  let state = initialState;
   for (const side of [0, 1] as const) {
-    if ((rulesContext.sideStatuses[side] & SIDE_STATUS_REFLECT) !== 0) {
-      return Object.freeze({ caseName: "ENDTURN_REFLECT", detail: `side ${side}: SIDE_STATUS_REFLECT set but BattleScript_SideStatusWoreOff is not wired` });
-    }
-    if ((rulesContext.sideStatuses[side] & SIDE_STATUS_LIGHTSCREEN) !== 0) {
-      return Object.freeze({ caseName: "ENDTURN_LIGHT_SCREEN", detail: `side ${side}: SIDE_STATUS_LIGHTSCREEN set but BattleScript_SideStatusWoreOff is not wired` });
-    }
-    if (rulesContext.mistTimers[side] !== 0) {
-      // doc: zero real Frontier MOVE_MIST carriers -- dead for Factory, gated defensively anyway since the field already exists.
-      return Object.freeze({ caseName: "ENDTURN_MIST", detail: `side ${side}: mistTimer nonzero but the wear-off script is not wired (doc-proven dead for Factory)` });
-    }
-    if ((rulesContext.sideStatuses[side] & SIDE_STATUS_SAFEGUARD) !== 0) {
-      return Object.freeze({ caseName: "ENDTURN_SAFEGUARD", detail: `side ${side}: SIDE_STATUS_SAFEGUARD set but BattleScript_SafeguardEnds is not wired` });
-    }
+    const reflect = runScreenFieldCase(
+      program, handlers, state, side, SIDE_STATUS_REFLECT,
+      (t) => t.reflectTimer, (nextTimer) => ({ reflectTimer: nextTimer }),
+      (t) => t.reflectBattlerId, SIDE_STATUS_WORE_OFF_LABEL,
+    );
+    if (reflect.kind === "opcode-barrier") return Object.freeze({ kind: "opcode-barrier", state: reflect.state, instruction: reflect.instruction });
+    state = reflect.state;
+    if (reflect.kind === "fired" && state.rulesContext.battleOutcome !== 0) return Object.freeze({ kind: "outcome-decided", state });
+
+    const lightscreen = runScreenFieldCase(
+      program, handlers, state, side, SIDE_STATUS_LIGHTSCREEN,
+      (t) => t.lightscreenTimer, (nextTimer) => ({ lightscreenTimer: nextTimer }),
+      (t) => t.lightscreenBattlerId, SIDE_STATUS_WORE_OFF_LABEL,
+    );
+    if (lightscreen.kind === "opcode-barrier") return Object.freeze({ kind: "opcode-barrier", state: lightscreen.state, instruction: lightscreen.instruction });
+    state = lightscreen.state;
+    if (lightscreen.kind === "fired" && state.rulesContext.battleOutcome !== 0) return Object.freeze({ kind: "outcome-decided", state });
+
+    const mist = runMistFieldCase(program, handlers, state, side);
+    if (mist.kind === "opcode-barrier") return Object.freeze({ kind: "opcode-barrier", state: mist.state, instruction: mist.instruction });
+    state = mist.state;
+    if (mist.kind === "fired" && state.rulesContext.battleOutcome !== 0) return Object.freeze({ kind: "outcome-decided", state });
+
+    const safeguard = runScreenFieldCase(
+      program, handlers, state, side, SIDE_STATUS_SAFEGUARD,
+      (t) => t.safeguardTimer, (nextTimer) => ({ safeguardTimer: nextTimer }),
+      (t) => t.safeguardBattlerId, SAFEGUARD_ENDS_LABEL,
+    );
+    if (safeguard.kind === "opcode-barrier") return Object.freeze({ kind: "opcode-barrier", state: safeguard.state, instruction: safeguard.instruction });
+    state = safeguard.state;
+    if (safeguard.kind === "fired" && state.rulesContext.battleOutcome !== 0) return Object.freeze({ kind: "outcome-decided", state });
     // ENDTURN_WISH: no modeled wishCounter field -- explicit deferred no-op (this step's brief).
   }
-  if ((rulesContext.weather & B_WEATHER_RAIN) !== 0) {
-    return Object.freeze({ caseName: "ENDTURN_RAIN", detail: "weather RAIN bit set but BattleScript_RainContinuesOrEnds is not wired" });
+
+  const rc = state.rulesContext;
+  if ((rc.weather & B_WEATHER_RAIN) !== 0) {
+    return Object.freeze({ kind: "case-barrier", state, caseName: "ENDTURN_RAIN", detail: "weather RAIN bit set but BattleScript_RainContinuesOrEnds is not wired (PLAYANIMATION is narrowed to B_ANIM_STATS_CHANGE only)" });
   }
-  if ((rulesContext.weather & B_WEATHER_SANDSTORM) !== 0) {
-    return Object.freeze({ caseName: "ENDTURN_SANDSTORM", detail: "weather SANDSTORM bit set but the damaging-weather script is not wired" });
+  if ((rc.weather & B_WEATHER_SANDSTORM) !== 0) {
+    const result = runDamagingWeatherFieldCase(program, handlers, state, B_ANIM_SANDSTORM_CONTINUES, B_MSG_SANDSTORM);
+    if (result.kind === "opcode-barrier") return Object.freeze({ kind: "opcode-barrier", state: result.state, instruction: result.instruction });
+    state = result.state;
+    if (result.kind === "fired" && state.rulesContext.battleOutcome !== 0) return Object.freeze({ kind: "outcome-decided", state });
+  } else if ((rc.weather & B_WEATHER_SUN) !== 0) {
+    return Object.freeze({ kind: "case-barrier", state, caseName: "ENDTURN_SUN", detail: "weather SUN bit set but BattleScript_SunlightContinues/Faded is not wired (PLAYANIMATION is narrowed to B_ANIM_STATS_CHANGE only)" });
+  } else if ((rc.weather & B_WEATHER_HAIL) !== 0) {
+    const result = runDamagingWeatherFieldCase(program, handlers, state, B_ANIM_HAIL_CONTINUES, B_MSG_HAIL);
+    if (result.kind === "opcode-barrier") return Object.freeze({ kind: "opcode-barrier", state: result.state, instruction: result.instruction });
+    state = result.state;
+    if (result.kind === "fired" && state.rulesContext.battleOutcome !== 0) return Object.freeze({ kind: "outcome-decided", state });
   }
-  if ((rulesContext.weather & B_WEATHER_SUN) !== 0) {
-    return Object.freeze({ caseName: "ENDTURN_SUN", detail: "weather SUN bit set but BattleScript_SunlightContinues/Faded is not wired" });
-  }
-  if ((rulesContext.weather & B_WEATHER_HAIL) !== 0) {
-    return Object.freeze({ caseName: "ENDTURN_HAIL", detail: "weather HAIL bit set but the damaging-weather script is not wired" });
-  }
-  return null;
+
+  return Object.freeze({ kind: "clean", state });
 }
 
 /**
@@ -454,10 +631,29 @@ export function runBattleEndTurnOrchestration(
   }
 
   if (state.rulesContext.battleOutcome === 0) {
-    const fieldBarrier = runFieldEndTurnEffects(state.rulesContext);
-    if (fieldBarrier) return Object.freeze({ kind: "case-barrier", state, ...fieldBarrier });
-
     const battlerOrder = computeBattlerOrder(state.rulesContext);
+    // ENDTURN_ORDER (doc §1a): gBattlerByTurnOrder is (re)computed once for the whole end-turn pass, ahead of both the field and battler loops -- Cmd_copyarraywithindex's own read (BattleScript_DamagingWeatherLoop) is this field's only consumer.
+    state = Object.freeze({
+      ...state,
+      rulesContext: Object.freeze({
+        ...state.rulesContext,
+        battlerByTurnOrder: Object.freeze([0, 1, 2, 3].map((i) => battlerOrder[i] ?? i)) as unknown as readonly [number, number, number, number],
+      }),
+    });
+
+    const fieldResult = runDoFieldEndTurnEffects(program, handlers, state);
+    if (fieldResult.kind === "opcode-barrier") {
+      return Object.freeze({ kind: "non-terminal-barrier", state: fieldResult.state, instruction: fieldResult.instruction });
+    }
+    if (fieldResult.kind === "case-barrier") {
+      return Object.freeze({ kind: "case-barrier", state: fieldResult.state, caseName: fieldResult.caseName, detail: fieldResult.detail });
+    }
+    if (fieldResult.kind === "outcome-decided") {
+      const faintedResult = runBattleScriptFaintedActionsOrchestration(program, handlers, fieldResult.state);
+      return mapFaintedActionsResult(faintedResult);
+    }
+    state = fieldResult.state;
+
     const battlerResult = runDoBattlerEndTurnEffects(program, handlers, state, battlerOrder);
     if (battlerResult.kind === "opcode-barrier") {
       return Object.freeze({ kind: "non-terminal-barrier", state: battlerResult.state, instruction: battlerResult.instruction });

@@ -4,6 +4,110 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 456 — Screens/weather setters + `DoFieldEndTurnEffects` field loop registered (slices 1/2/3/5 of `docs/screens-weather-ground-truth.md` §6); Rain/Sun field case (slice 4) explicitly deferred
+
+- **State:** tree green at **212 files / 2521 tests** (+2 files/+31 tests
+  over entry 455's 210/2490), build green, ratchet green (new pin:
+  `battleScriptDamagingWeatherOpcode.ts` → 3, each barrier has a reachability
+  test AND a pass-through case). `verify-screens-weather-ground-truth.ts`
+  reconfirmed live before AND after: **29/29 PASS** both times.
+- **Did, per the doc's own §6 dependency-ordered slices:**
+  1. **Screen/Mist setter opcodes** (`battleScriptSetSideStatusOpcode.ts`):
+     `SETREFLECT`/`SETLIGHTSCREEN`/`SETSAFEGUARD`/`SETMIST`, source-complete
+     (a) — no barriers, doubles-only message variant out of scope per the
+     doc. `BattleScriptRulesContext` gained `sideTimers` (reflect/lightscreen/
+     safeguard timer+battlerId per side, plus `mistBattlerId`) — `sideStatuses`
+     now genuinely carries REFLECT/LIGHTSCREEN/MIST/SAFEGUARD, not just
+     Safeguard; updated `battleScriptSwitchinOpcode.ts`'s Spikes-barrier
+     comment and the ratchet's matching note to say so explicitly (the
+     brief's own "widen deliberately" instruction).
+  2. **`DoFieldEndTurnEffects` field loop** (`battleEndTurnOrchestration.ts`,
+     `runDoFieldEndTurnEffects` replacing the old barrier-only stub): hosts
+     F2/F3/F4/F5 (Reflect/Light Screen/Mist/Safeguard decrement — silent
+     while >0, `BattleScript_SideStatusWoreOff`/`SafeguardEnds` fire only on
+     the tick the timer reaches 0, matching doc §3d/§3f's live ledgers
+     exactly) and F8/F10 (Sandstorm/Hail continues/damage/ends).
+  3. **Weather setter opcodes** (`battleScriptSetWeatherOpcode.ts`):
+     `SETRAIN`/`SETSUNNY`/`SETSANDSTORM`/`SETHAIL`, same shape, flat `=`
+     assignment not `|=` (doc's load-bearing clobber finding, ported as-is).
+     New `weatherTimer` field (`gWishFutureKnock.weatherDuration`).
+  5. **Sandstorm/Hail damage loop** (`battleScriptDamagingWeatherOpcode.ts`):
+     all 6 doc-corrected opcodes (`PLAYANIMATION_VAR`, `COPYARRAYWITHINDEX`,
+     `WEATHERDAMAGE`, `ADDBYTE`, `JUMPIFARRAYNOTEQUAL`, `BICWORD`), each
+     narrowed to the one concrete operand triple this loop actually uses —
+     every other concrete call site of the three generic array/scratch
+     opcodes (Triple Kick, Perish Song, Teeter Dance, Ghost Curse, link-
+     battle/Palace loops, HitsAllNoUndergroundBonus, MoveUsedWokeUp) is one
+     shared named barrier per opcode, each with a reachability + pass-through
+     test. `WEATHERDAMAGE` models real type/ability immunity (ROCK/GROUND/
+     STEEL + Sand Veil + underground/underwater for Sandstorm; ICE-only for
+     Hail) and Cloud Nine field-wide suppression. New `battlerByTurnOrder`
+     field (`gBattlerByTurnOrder`, populated ascending per
+     `computeBattlerOrder`'s own documented limitation) backs
+     `COPYARRAYWITHINDEX`'s per-battler loop index.
+  - **Widened, not new:** `battleScriptJumpifwordOpcode.ts` now resolves
+    `gBattleMoveDamage` (the loop's own `jumpifword CMP_EQUAL,
+    gBattleMoveDamage, 0, ...` zero-damage skip) — an existing registered
+    module gaining a modeled pointer, not a new barrier; its own stale test
+    (previously asserting this exact site was unmodeled) rewritten to assert
+    both branches taken/not-taken instead. Added `gMoveWeatherChangeStringIds`/
+    `gSandStormHailContinuesStringIds`/`DmgStringIds`/`EndStringIds`/
+    `gReflectLightScreenSafeguardStringIds`/`gMistUsedStringIds` to
+    `PRINTFROMTABLE_TABLES`.
+  - **4. Rain/Sun field case (F7/F9) — deliberately NOT wired, named per the
+     brief's own "say exactly what remains" clause.** Real finding, not a
+     skipped step: `BattleScript_RainContinuesOrEnds`/`SunlightContinues`
+     both call the *non-var* `playanimation BS_ATTACKER, B_ANIM_RAIN_
+     CONTINUES`/`B_ANIM_SUN_CONTINUES`, and the only registered PLAYANIMATION
+     handler (`battleScriptStatbuffchangeOpcode.ts`) is narrowed to its own
+     `B_ANIM_STATS_CHANGE` arm — any other animType is that module's own
+     barrier. Widening it is a real, separate registration (a new animType
+     branch + its own barrier-count change in a module this step doesn't
+     own) that this session's cap did not reach. `runDoFieldEndTurnEffects`
+     still returns the same `case-barrier` shape the old stub did for
+     `ENDTURN_RAIN`/`ENDTURN_SUN`, now with this exact reason cited.
+  - **Tier-1 tests** (`battleScriptScreensWeatherOrchestration.test.ts`,
+    `battleScriptDamagingWeatherOpcode.test.ts`, 30 new): setter fail/success
+    for all 8 moves; **Light Screen full lifecycle** (set → 4 silent
+    decrement ticks → expiry message tick → re-set, doc §3d's exact timer
+    sequence); **Safeguard** identical shape with its own distinct expiry
+    script; **Sandstorm set → 4 damage ticks (immune ONIX untouched every
+    tick, SUNKERN chipped exactly `floor(105/16)=6` each tick, 105→99→93→
+    87→81) → expiry with zero further damage → re-set**, doc §3e's exact
+    ledger; zero `Random()` draws asserted throughout (doc §4). All 3 new
+    (b) barriers (addbyte/bicword/jumpifarraynotequal unmodeled operand)
+    have both a reachability test and a pass-through case.
+- **Census regenerated:** **65→69/214 effects, 144→148/355 moves, 111→
+  114/276 Factory-L50 (unweighted), 1416→1462/2957 weighted.** Exactly 4
+  effects flipped: `EFFECT_REFLECT`/`EFFECT_LIGHT_SCREEN`/`EFFECT_SAFEGUARD`/
+  `EFFECT_MIST`. **A predicted flip that did NOT materialize:**
+  `EFFECT_SANDSTORM`/`EFFECT_RAIN_DANCE`/`EFFECT_SUNNY_DAY`/`EFFECT_HAIL`
+  stayed blocked — even with every end-turn-loop opcode this session
+  registered, the *setting move's own script* still can't complete because
+  `goto BattleScript_MoveWeatherChange` → `call BattleScript_WeatherFormChanges`
+  needs one more opcode, `B_SCR_OP_TRYCASTFORMDATACHANGE` (Castform's
+  ability-triggered species/form change) — a genuinely new finding neither
+  ground-truth doc named, entirely unrelated to the end-turn machinery this
+  step targeted, and out of this step's scope to register.
+- **Next:** widen `Cmd_playanimation` to cover `B_ANIM_RAIN_CONTINUES`/
+  `B_ANIM_SUN_CONTINUES` (own barrier-count change in
+  `battleScriptStatbuffchangeOpcode.ts`) to land F7/F9; register
+  `B_SCR_OP_TRYCASTFORMDATACHANGE` to flip the 4 weather-setter effects to
+  executable (Castform's own species/type-change logic — likely wants its
+  own reachability check first, since Castform isn't a Frontier rental);
+  `ENDTURN_ABILITIES`/`ITEMS1`/`ITEMS2` (doc step 8, explicitly out of
+  scope); Ingrain/Leech Seed/Wrap (doc step 5). Entry 455's AI roll-count
+  gap above is untouched by this session.
+- **Notes:** no presentation/`battleScene` edits. PAPERCUT: none this
+  session (the doc's own live-verified ledgers and exact opcode operand
+  dumps made this a comparatively low-friction registration once the
+  `BattleScript_DamagingWeatherContinues` PLAYANIMATION_VAR/Castform-tail
+  distinction was found — the two genuinely separate blockers (Rain/Sun's
+  animation opcode vs. Castform's form-change opcode) weren't called out
+  as separate in the prep doc's own §6 slice 4/5 split, so budget a beat to
+  re-derive that split if resuming this area).
+
+---
 ## 455 — Factory-AI port slice 1: `AI_CheckBadMove` universal preamble ported in full; TryToFaint/CheckViability/dispatch NOT started (roll-count gap found, unresolved)
 
 - **State:** tree green at **210 files / 2490 tests** (+1 file/+13 tests
@@ -192,108 +296,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `EFFECT_PARALYZE_HIT`-has-no-`if_effect`-entry claim against
   `data/battle_ai_scripts.s` directly), and the 16-of-90 reachable
   `AI_CV_*` handler table banked for the phased port.
-
----
-## 453 — MOVE_EFFECT_CONFUSION (7) and MOVE_EFFECT_FLINCH (8) registered in SetMoveEffect's dispatch — zero new opcodes, census +4 effects/+17 moves
-
-- **State:** tree green at **207 files / 2465 tests** (+0 files/+16 tests
-  over entry 452's 207/2449 — all new tests landed in existing files: 14 in
-  `battleScriptHitChainOpcode.test.ts` (a new confusion/flinch describe
-  block; 2 obsolete FLINCH barrier tests were replaced 1:1 with UPROAR-based
-  equivalents, net 0 there), 1 each in the two dedicated
-  `battleScriptAttackCanceler{Confused,Flinch}.test.ts` integration
-  additions, plus a small key-list fixup in `battleScriptRulesContext.test.ts`
-  and two `toStrictEqual` fixture updates), build green. Census regenerated:
-  **53→57 effects, 105→122 moves, 77→92 Factory-L50 (944→1099 weighted)**.
-  Ratchet green, zero pin changes (the 2 barrier tests removed for FLINCH
-  were replaced 1:1 with UPROAR-based equivalents — same barrier call site,
-  different still-unsupported byte).
-- **Did, per `docs/stat-change-confusion-ground-truth.md` §1.6/§2.5 and
-  `docs/set-move-effect-ground-truth.md` (both banked, cited not re-derived):**
-  - `applySetMoveEffect` (`battleScriptHitChainOpcode.ts`) now dispatches
-    `MOVE_EFFECT_CONFUSION`/`MOVE_EFFECT_FLINCH` before falling through to
-    the stat-family table / unsupported-branch barrier. CONFUSION: shared
-    family-B early-out + Own Tempo gate, `(Random()%4)+2` duration draw,
-    plain status2 write (guaranteed-zero bits), push+jump to
-    `BattleScript_MoveEffectConfusion` (all 4 of its ops were already
-    registered). FLINCH: Inner Focus gated on `certain` (a direct, un-pushed
-    jump to `BattleScript_FlinchPrevention` — that script's own `goto
-    BattleScript_MoveEnd` tail ends the move, unlike the status1 quartet's
-    push+jump preventions), otherwise a plain status2 write gated on the
-    target not having acted yet this turn, always falling through with no
-    script call either way (source-verbatim from `battle_script_commands.c`
-    :2524-2567 — read fresh, not assumed).
-  - FLINCH's turn-order gate (`GetBattlerTurnOrderNum(effectBattler) >
-    gCurrentTurnActionNumber`) needed two new `BattleScriptRulesContext`
-    fields: per-battler `turnOrderNum` and context-level
-    `currentTurnActionNumber`. `factoryBattleScriptFullTurnDecision.ts` is
-    the one real owner (mover1=0/mover2=1, set once per action via a new
-    `withTurnOrderPositions` helper); every other construction site
-    (including every existing single-command fixture) defaults to
-    `turnOrderNum=1`/`currentTurnActionNumber=0` — the source-faithful
-    "target hasn't acted yet" shape those fixtures' own one-attacker-action
-    staging already implies, not a made-up convenience default. Three
-    `emptyBattler`/filler-battler call sites (`factoryBattleScriptDecision.ts`,
-    `factoryBattleScriptFullTurnDecision.ts`, `factoryBattleScriptTerminalDecision.ts`)
-    needed the same one-time mechanical ripple `speed`/`maxHP` caused
-    previously.
-  - **Found and fixed a latent RNG-threading bug** in
-    `createSeteffectwithchanceOpcodeHandler`/`finalizeSeteffectwithchance`:
-    the latter unconditionally overwrote the returned transition's `.rng`
-    with the pre-dispatch value, silently discarding any RNG draw made
-    *inside* `applySetMoveEffect`. Invisible until now because every
-    previously-registered effect byte (the status1 quartet, `ChangeStatBuffs`)
-    draws zero RNG — confusion's duration draw is the first genuine second
-    draw within one `seteffectwithchance` step. Fixed by threading the
-    post-chance-roll rng through `context.state` before calling
-    `applySetMoveEffect`, so its own returned `.rng` is authoritative and
-    the override is no longer needed.
-  - **New Tier-1 coverage** (`battleScriptHitChainOpcode.test.ts`): docs
-    §2.5's real oracle ledger (seed 9 proc / seed 1 control) reproduced
-    byte-for-byte — raw rngValues confirmed live via `bin/oracle lab` at
-    authoring time (frame-0 789488161/3034451114, forward-stepped 3 LCG
-    steps past the shared accuracy/crit/damage rolls to the exact pre-roll-4
-    state), not synthesized — plus Own Tempo/Safeguard(blocks, `<=7`
-    gate)/Substitute/already-confused gates for CONFUSION, and Inner
-    Focus/Safeguard-does-NOT-block(`<=7` gate excludes byte 8)/Shield-Dust-
-    DOES-block(`<=9` gate includes it)/turn-order-gate-negative/
-    already-flinched gates for FLINCH.
-  - **Two new integration tests** prove infliction feeds the *existing*
-    CANCELER_CONFUSED/CANCELER_FLINCH reducers with zero adaptation glue:
-    `battleScriptAttackCancelerConfused.test.ts` replays docs §2.5's ledger
-    end-to-end (rolls 4-5 via the production opcode dispatch, then roll 6 —
-    the canceler's own `Random()&1` check — via the reducer directly),
-    landing on the exact live frame-300 `rngValue` (679317255) docs §2.5
-    itself verified against the oracle. `battleScriptAttackCancelerFlinch.test.ts`
-    proves a flinched battler's next admission reaches the reducer's
-    `"flinched"`/`BattleScript_MoveUsedFlinched` cant-move outcome.
-  - Census tool: added `MOVE_EFFECT_CONFUSION`/`MOVE_EFFECT_FLINCH` to
-    `SETMOVEEFFECT_SUPPORTED` plus 5 new drift-guard checks (4
-    require-executable, 1 require-still-blocked for TRI_ATTACK). Four
-    effect scripts flip fully executable: `EFFECT_CONFUSE_HIT`,
-    `EFFECT_FLINCH_HIT`, `EFFECT_FLINCH_MINIMIZE_HIT` (Stomp/Minimize
-    class), `EFFECT_TWISTER`; six more (Razor Wind/Sky Attack/Snore/Skull
-    Bash/Solar Beam/Fake Out) have their remaining-blocker reason correctly
-    narrowed (FLINCH no longer in their list) but stay blocked on other
-    still-missing opcodes.
-- **Next:** ISSUES #44 (a pre-existing, unrelated census gap found along the
-  way — the stat-down secondary-effect family was never added to
-  `SETMOVEEFFECT_SUPPORTED`, so its 4 `EFFECT_*_DOWN_HIT` entries still
-  misreport `blocked-on-subsystem`; cheap follow-up, named not fixed here);
-  the non-terminal forced-switch continuation into the full-turn/end-turn
-  dual-sided reducers (currently a named, unreachable throw); the AI
-  move-selection port (`docs/factory-ai-ground-truth.md`);
-  `DoFieldEndTurnEffects` setters (screens/weather); primary-effect
-  confusion (`EFFECT_CONFUSE`, `Cmd_seteffectprimary`, out of this step's
-  scope) and the other status2 family members (TRI_ATTACK/UPROAR/etc.).
-- **Notes:** no oracle traces committed (Tier-1 direct-construction per this
-  doc's own established discipline; the oracle was queried live only to
-  derive the two raw rngValue literals now pinned in the test file, same
-  discipline the stat-change-confusion ground-truth doc itself used). No
-  presentation/`battleScene`/ROADMAP edits. OUT OF SCOPE per the brief and
-  untouched, confirmed: CANCELER internals (reused, not modified),
-  primary-effect confusion (`CONFUSE_RAY`'s `EFFECT_CONFUSE` path — did not
-  fall out free, `Cmd_seteffectprimary` stays unregistered),
-  TRI_ATTACK/UPROAR/other status2 family members, AI port. PAPERCUT: none
-  this session.
 

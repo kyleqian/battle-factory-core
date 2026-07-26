@@ -454,9 +454,12 @@ function createVariousOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRul
 /**
  * `Cmd_switchineffects` (`battle_script_commands.c:5219-5299`). Spikes is a
  * named barrier gated on the real `SIDE_STATUS_SPIKES` bit -- structurally
- * unreachable today since `sideStatuses` is narrowed to only the Safeguard
- * bit (`battleScriptRulesContext.ts`), so this can never be set by any
- * fixture this engine can build. The Truant switch-in hack and
+ * unreachable today since no move/opcode anywhere in this engine ever writes
+ * that bit (`battleScriptRulesContext.ts`'s `sideStatuses` genuinely carries
+ * REFLECT/LIGHTSCREEN/MIST/SAFEGUARD since the screens/weather setter
+ * registration, docs/screens-weather-ground-truth.md, but Spikes has no
+ * setter of its own yet), so this can never be set by any fixture this
+ * engine can build. The Truant switch-in hack and
  * `AbilityBattleEffects(ABILITYEFFECT_ON_SWITCHIN)` are named barriers gated
  * on the switched-in battler's real `ability` value (a small, closed set of
  * trigger abilities, `battle_util.c:2485-2599`); `ItemBattleEffects

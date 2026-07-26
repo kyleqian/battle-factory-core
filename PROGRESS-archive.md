@@ -1,4 +1,109 @@
 ---
+## 453 — MOVE_EFFECT_CONFUSION (7) and MOVE_EFFECT_FLINCH (8) registered in SetMoveEffect's dispatch — zero new opcodes, census +4 effects/+17 moves
+
+- **State:** tree green at **207 files / 2465 tests** (+0 files/+16 tests
+  over entry 452's 207/2449 — all new tests landed in existing files: 14 in
+  `battleScriptHitChainOpcode.test.ts` (a new confusion/flinch describe
+  block; 2 obsolete FLINCH barrier tests were replaced 1:1 with UPROAR-based
+  equivalents, net 0 there), 1 each in the two dedicated
+  `battleScriptAttackCanceler{Confused,Flinch}.test.ts` integration
+  additions, plus a small key-list fixup in `battleScriptRulesContext.test.ts`
+  and two `toStrictEqual` fixture updates), build green. Census regenerated:
+  **53→57 effects, 105→122 moves, 77→92 Factory-L50 (944→1099 weighted)**.
+  Ratchet green, zero pin changes (the 2 barrier tests removed for FLINCH
+  were replaced 1:1 with UPROAR-based equivalents — same barrier call site,
+  different still-unsupported byte).
+- **Did, per `docs/stat-change-confusion-ground-truth.md` §1.6/§2.5 and
+  `docs/set-move-effect-ground-truth.md` (both banked, cited not re-derived):**
+  - `applySetMoveEffect` (`battleScriptHitChainOpcode.ts`) now dispatches
+    `MOVE_EFFECT_CONFUSION`/`MOVE_EFFECT_FLINCH` before falling through to
+    the stat-family table / unsupported-branch barrier. CONFUSION: shared
+    family-B early-out + Own Tempo gate, `(Random()%4)+2` duration draw,
+    plain status2 write (guaranteed-zero bits), push+jump to
+    `BattleScript_MoveEffectConfusion` (all 4 of its ops were already
+    registered). FLINCH: Inner Focus gated on `certain` (a direct, un-pushed
+    jump to `BattleScript_FlinchPrevention` — that script's own `goto
+    BattleScript_MoveEnd` tail ends the move, unlike the status1 quartet's
+    push+jump preventions), otherwise a plain status2 write gated on the
+    target not having acted yet this turn, always falling through with no
+    script call either way (source-verbatim from `battle_script_commands.c`
+    :2524-2567 — read fresh, not assumed).
+  - FLINCH's turn-order gate (`GetBattlerTurnOrderNum(effectBattler) >
+    gCurrentTurnActionNumber`) needed two new `BattleScriptRulesContext`
+    fields: per-battler `turnOrderNum` and context-level
+    `currentTurnActionNumber`. `factoryBattleScriptFullTurnDecision.ts` is
+    the one real owner (mover1=0/mover2=1, set once per action via a new
+    `withTurnOrderPositions` helper); every other construction site
+    (including every existing single-command fixture) defaults to
+    `turnOrderNum=1`/`currentTurnActionNumber=0` — the source-faithful
+    "target hasn't acted yet" shape those fixtures' own one-attacker-action
+    staging already implies, not a made-up convenience default. Three
+    `emptyBattler`/filler-battler call sites (`factoryBattleScriptDecision.ts`,
+    `factoryBattleScriptFullTurnDecision.ts`, `factoryBattleScriptTerminalDecision.ts`)
+    needed the same one-time mechanical ripple `speed`/`maxHP` caused
+    previously.
+  - **Found and fixed a latent RNG-threading bug** in
+    `createSeteffectwithchanceOpcodeHandler`/`finalizeSeteffectwithchance`:
+    the latter unconditionally overwrote the returned transition's `.rng`
+    with the pre-dispatch value, silently discarding any RNG draw made
+    *inside* `applySetMoveEffect`. Invisible until now because every
+    previously-registered effect byte (the status1 quartet, `ChangeStatBuffs`)
+    draws zero RNG — confusion's duration draw is the first genuine second
+    draw within one `seteffectwithchance` step. Fixed by threading the
+    post-chance-roll rng through `context.state` before calling
+    `applySetMoveEffect`, so its own returned `.rng` is authoritative and
+    the override is no longer needed.
+  - **New Tier-1 coverage** (`battleScriptHitChainOpcode.test.ts`): docs
+    §2.5's real oracle ledger (seed 9 proc / seed 1 control) reproduced
+    byte-for-byte — raw rngValues confirmed live via `bin/oracle lab` at
+    authoring time (frame-0 789488161/3034451114, forward-stepped 3 LCG
+    steps past the shared accuracy/crit/damage rolls to the exact pre-roll-4
+    state), not synthesized — plus Own Tempo/Safeguard(blocks, `<=7`
+    gate)/Substitute/already-confused gates for CONFUSION, and Inner
+    Focus/Safeguard-does-NOT-block(`<=7` gate excludes byte 8)/Shield-Dust-
+    DOES-block(`<=9` gate includes it)/turn-order-gate-negative/
+    already-flinched gates for FLINCH.
+  - **Two new integration tests** prove infliction feeds the *existing*
+    CANCELER_CONFUSED/CANCELER_FLINCH reducers with zero adaptation glue:
+    `battleScriptAttackCancelerConfused.test.ts` replays docs §2.5's ledger
+    end-to-end (rolls 4-5 via the production opcode dispatch, then roll 6 —
+    the canceler's own `Random()&1` check — via the reducer directly),
+    landing on the exact live frame-300 `rngValue` (679317255) docs §2.5
+    itself verified against the oracle. `battleScriptAttackCancelerFlinch.test.ts`
+    proves a flinched battler's next admission reaches the reducer's
+    `"flinched"`/`BattleScript_MoveUsedFlinched` cant-move outcome.
+  - Census tool: added `MOVE_EFFECT_CONFUSION`/`MOVE_EFFECT_FLINCH` to
+    `SETMOVEEFFECT_SUPPORTED` plus 5 new drift-guard checks (4
+    require-executable, 1 require-still-blocked for TRI_ATTACK). Four
+    effect scripts flip fully executable: `EFFECT_CONFUSE_HIT`,
+    `EFFECT_FLINCH_HIT`, `EFFECT_FLINCH_MINIMIZE_HIT` (Stomp/Minimize
+    class), `EFFECT_TWISTER`; six more (Razor Wind/Sky Attack/Snore/Skull
+    Bash/Solar Beam/Fake Out) have their remaining-blocker reason correctly
+    narrowed (FLINCH no longer in their list) but stay blocked on other
+    still-missing opcodes.
+- **Next:** ISSUES #44 (a pre-existing, unrelated census gap found along the
+  way — the stat-down secondary-effect family was never added to
+  `SETMOVEEFFECT_SUPPORTED`, so its 4 `EFFECT_*_DOWN_HIT` entries still
+  misreport `blocked-on-subsystem`; cheap follow-up, named not fixed here);
+  the non-terminal forced-switch continuation into the full-turn/end-turn
+  dual-sided reducers (currently a named, unreachable throw); the AI
+  move-selection port (`docs/factory-ai-ground-truth.md`);
+  `DoFieldEndTurnEffects` setters (screens/weather); primary-effect
+  confusion (`EFFECT_CONFUSE`, `Cmd_seteffectprimary`, out of this step's
+  scope) and the other status2 family members (TRI_ATTACK/UPROAR/etc.).
+- **Notes:** no oracle traces committed (Tier-1 direct-construction per this
+  doc's own established discipline; the oracle was queried live only to
+  derive the two raw rngValue literals now pinned in the test file, same
+  discipline the stat-change-confusion ground-truth doc itself used). No
+  presentation/`battleScene`/ROADMAP edits. OUT OF SCOPE per the brief and
+  untouched, confirmed: CANCELER internals (reused, not modified),
+  primary-effect confusion (`CONFUSE_RAY`'s `EFFECT_CONFUSE` path — did not
+  fall out free, `Cmd_seteffectprimary` stays unregistered),
+  TRI_ATTACK/UPROAR/other status2 family members, AI port. PAPERCUT: none
+  this session.
+
+
+---
 ## 452 — Forced-switch §4 step 10: player-side party-menu decision-request lands, RNG-reconciliation bug fixed
 
 - **State:** tree green at **207 files / 2449 tests** (+0 files/+10 tests

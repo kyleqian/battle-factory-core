@@ -190,14 +190,30 @@ describe("production jumpifword (Cmd_jumpifword) dispatch", () => {
     });
   });
 
-  describe("(b) unsupported-branch barrier", () => {
-    it("halts on an unmodeled memWord pointer (gBattleMoveDamage, only reachable off the Factory path)", () => {
+  describe(
+    "BattleScript_DamagingWeatherLoop's own jumpifword CMP_EQUAL, gBattleMoveDamage, 0, ... "
+      + "(screens/weather registration slice 5, docs/screens-weather-ground-truth.md §1c -- "
+      + "widened from an unsupported-branch barrier to a real, modeled compare)",
+    () => {
       const pc = findJumpifwordPc("BattleScript_DamagingWeatherLoop", (ops) => ops[1] === "gBattleMoveDamage");
-      const { result } = stepAtProgramCounter(pc, context());
-      expect(result.kind).toBe("halted");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch" });
-    });
 
+      it("taken: jumps to BattleScript_DamagingWeatherLoopIncrement when gBattleMoveDamage == 0", () => {
+        const { result } = stepAtProgramCounter(pc, context({ battleMoveDamage: 0 }));
+        if (result.kind !== "advanced") throw new Error("expected advance");
+        const target = program.instructions.find((i) => i.source.label === "BattleScript_DamagingWeatherLoopIncrement");
+        expect(target).toBeDefined();
+        expect(result.state.programCounter).toBe(target!.programCounter);
+      });
+
+      it("not taken: falls through when gBattleMoveDamage != 0 (real chip damage this tick)", () => {
+        const { result } = stepAtProgramCounter(pc, context({ battleMoveDamage: 6 }));
+        if (result.kind !== "advanced") throw new Error("expected advance");
+        expect(result.state.programCounter).toBe(pc + 1);
+      });
+    },
+  );
+
+  describe("(b) unsupported-branch barrier", () => {
     it("halts on an unmodeled comparison value (HITMARKER_NO_ATTACKSTRING, gHitMarker itself is modeled)", () => {
       const pc = findJumpifwordPc("BattleScript_EffectRazorWind", (ops) => ops[2] === "HITMARKER_NO_ATTACKSTRING");
       const { result } = stepAtProgramCounter(pc, context());

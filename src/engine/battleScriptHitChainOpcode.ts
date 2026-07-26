@@ -269,6 +269,30 @@ const PRINTFROMTABLE_TABLES: Readonly<Record<string, readonly string[]>> = Objec
     "STRINGID_STATSWONTDECREASE",
     "STRINGID_EMPTYSTRING3",
   ]),
+  /** battle_message.c:908-911 -- gMoveWeatherChangeStringIds, the setter move's own tail (BattleScript_MoveWeatherChange). B_MSG_STARTED_DOWNPOUR (index 1) is unused source-wide. */
+  gMoveWeatherChangeStringIds: Object.freeze([
+    "STRINGID_STARTEDTORAIN",
+    "STRINGID_DOWNPOURSTARTED",
+    "STRINGID_BUTITFAILED",
+    "STRINGID_SANDSTORMBREWED",
+    "STRINGID_SUNLIGHTGOTBRIGHT",
+    "STRINGID_STARTEDHAIL",
+  ]),
+  /** battle_message.c:918-922 -- B_MSG_SANDSTORM(0)/B_MSG_HAIL(1). */
+  gSandStormHailContinuesStringIds: Object.freeze(["STRINGID_SANDSTORMRAGES", "STRINGID_HAILCONTINUES"]),
+  gSandStormHailDmgStringIds: Object.freeze(["STRINGID_PKMNBUFFETEDBYSANDSTORM", "STRINGID_PKMNPELTEDBYHAIL"]),
+  gSandStormHailEndStringIds: Object.freeze(["STRINGID_SANDSTORMSUBSIDED", "STRINGID_HAILSTOPPED"]),
+  /** battle_message.c:945-951 -- B_MSG_SIDE_STATUS_FAILED(0)/SET_REFLECT_SINGLE(1)/DOUBLE(2)/SET_LIGHTSCREEN_SINGLE(3)/DOUBLE(4)/SET_SAFEGUARD(5). */
+  gReflectLightScreenSafeguardStringIds: Object.freeze([
+    "STRINGID_BUTITFAILED",
+    "STRINGID_PKMNRAISEDDEF",
+    "STRINGID_PKMNRAISEDDEFALITTLE",
+    "STRINGID_PKMNRAISEDSPDEF",
+    "STRINGID_PKMNRAISEDSPDEFALITTLE",
+    "STRINGID_PKMNCOVEREDBYVEIL",
+  ]),
+  /** battle_message.c:1048-1052 -- B_MSG_SET_MIST(0)/MIST_FAILED(1). */
+  gMistUsedStringIds: Object.freeze(["STRINGID_PKMNSHROUDEDINMIST", "STRINGID_BUTITFAILED"]),
 });
 
 const MOVE_EFFECT_LABEL_BY_BYTE: Readonly<Record<number, string>> = Object.freeze({

@@ -107,7 +107,9 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // battlerWithSureHit identity, unmodeled); switchinanim's BATTLE_TYPE_ARENA
   // point-init call (never set for Factory); various's every id other than
   // RESET_PLAYER_FAINTED (7); switchineffects's Spikes branch (structurally
-  // unreachable -- sideStatuses is narrowed to Safeguard only), its Truant
+  // unreachable -- SIDE_STATUS_SPIKES has no writer anywhere in this engine,
+  // even after the screens/weather setter registration widened sideStatuses
+  // to genuinely carry REFLECT/LIGHTSCREEN/MIST/SAFEGUARD too), its Truant
   // switch-in-hack counter set, and its AbilityBattleEffects
   // (ABILITYEFFECT_ON_SWITCHIN) dispatch for the small closed set of trigger
   // abilities. 8 total, none reachable by either committed forced-switch
@@ -126,6 +128,17 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // STATUS2_* masks (MULTIPLETURNS/FOCUS_ENERGY/CONFUSION/
   // ESCAPE_PREVENTION/...) are a separate barrier (1).
   ["src/engine/battleScriptStatbuffchangeOpcode.ts", 3],
+  // Screens/weather registration slice 5 (docs/screens-weather-ground-truth.md
+  // §1c/§6 item 5): Cmd_addbyte/Cmd_bicword/Cmd_jumpifarraynotequal are each
+  // narrowed to the one concrete operand triple
+  // BattleScript_DamagingWeatherLoop/LoopIncrement/ContinuesEnd actually uses;
+  // every other concrete call site of these three generic array/scratch-field
+  // opcodes (Triple Kick's counter, Perish Song's loop, Teeter Dance's loop,
+  // Ghost Curse's compare, the link-battle/Palace loops, HitsAllNoUndergroundBonus's
+  // single-bit clear, MoveUsedWokeUp's HITMARKER_WAKE_UP_CLEAR) falls into one
+  // shared named barrier per opcode -- 3 total, none reachable by either
+  // committed sandstorm/safeguard/lightscreen fixture.
+  ["src/engine/battleScriptDamagingWeatherOpcode.ts", 3],
 ]);
 
 function recordingImportsIn(file: string): string[] {
