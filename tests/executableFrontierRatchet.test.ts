@@ -139,6 +139,15 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // shared named barrier per opcode -- 3 total, none reachable by either
   // committed sandstorm/safeguard/lightscreen fixture.
   ["src/engine/battleScriptDamagingWeatherOpcode.ts", 3],
+  // TRYCASTFORMDATACHANGE registration (PROGRESS 458's supervisor-decided
+  // (a)/(b) split): CastformDataTypeChange (battle_util.c:2396-2429) is
+  // ported source-completely as a pure function; the one barrier fires only
+  // when a live Forecast Castform battler's type is stale for the active
+  // weather (form nonzero) -- the real BattleScript_CastformChange/
+  // SET_BATTLER_TYPE/four-form table this engine has not ported. Every
+  // non-Castform battler (the vast majority of matchups) and an
+  // already-correctly-typed Castform never reach it.
+  ["src/engine/battleScriptTryCastformDataChangeOpcode.ts", 1],
 ]);
 
 function recordingImportsIn(file: string): string[] {
