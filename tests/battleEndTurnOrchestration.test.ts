@@ -36,6 +36,8 @@ const ITEM_LUM_BERRY = 141;
 const ITEM_SITRUS_BERRY = 142;
 const ITEM_LIECHI_BERRY = 168;
 const ITEM_GANLON_BERRY = 169;
+const ITEM_SALAC_BERRY = 170;
+const ITEM_PETAYA_BERRY = 171;
 const ITEM_WHITE_HERB = 180;
 const ITEM_MENTAL_HERB = 185;
 const ITEM_LEFTOVERS = 200;
@@ -48,6 +50,10 @@ const STATUS1_PARALYSIS = 1 << 6;
 const STATUS1_FREEZE = 1 << 5;
 const STATUS1_POISON = 1 << 3;
 const STATUS1_SLEEP_3_TURNS = 3;
+/** include/constants/battle.h -- STAT_ATK/STAT_SPEED/STAT_SPATK (doc §5 slice 5). */
+const STAT_ATK = 1;
+const STAT_SPEED = 3;
+const STAT_SPATK = 4;
 
 function battler(changes: Partial<BattleScriptRulesBattler> & { maxHP?: number } = {}): BattleScriptRulesBattler {
   return Object.freeze({
@@ -638,22 +644,6 @@ describe("runBattleEndTurnOrchestration (BattleTurnPassed equivalent)", () => {
           expect(result.detail).toContain("HOLD_EFFECT_RESTORE_PP");
         });
 
-        it("Liechi Berry (ATTACK_UP, doc §5 slice 5 stretch material) barriers on possession", () => {
-          const rc = context({
-            battlers: [
-              battler({ side: 0 }),
-              battler({ side: 1, hp: 100, maxHP: 100, item: ITEM_LIECHI_BERRY, partyIndex: 2 }),
-              battler({ side: 0 }),
-              battler({ side: 1 }),
-            ],
-          });
-          const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
-          const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
-          expect(result.kind).toBe("case-barrier");
-          if (result.kind !== "case-barrier") throw new Error("expected case-barrier");
-          expect(result.detail).toContain("Liechi");
-        });
-
         it("Ganlon Berry (DEFENSE_UP, zero Factory L50 carriers per doc §2b) barriers on possession", () => {
           const rc = context({
             battlers: [
@@ -668,6 +658,115 @@ describe("runBattleEndTurnOrchestration (BattleTurnPassed equivalent)", () => {
           expect(result.kind).toBe("case-barrier");
           if (result.kind !== "case-barrier") throw new Error("expected case-barrier");
           expect(result.detail).toContain("zero Factory L50 carriers");
+        });
+      });
+
+      describe("(c) slice 5: Liechi/Salac/Petaya stat-up berries", () => {
+        it("Liechi Berry fires at hp <= floor(maxHP/4): +1 Attack stage, item consumed, zero RNG", () => {
+          const rc = context({
+            battlers: [
+              battler({ side: 0 }),
+              battler({ side: 1, hp: 25, maxHP: 100, item: ITEM_LIECHI_BERRY, partyIndex: 2 }),
+              battler({ side: 0 }),
+              battler({ side: 1 }),
+            ],
+          });
+          const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+          const initial = scratchState(rc, 1);
+          const result = runBattleEndTurnOrchestration(program, handlers, initial);
+          expect(result.kind).toBe("next-turn");
+          if (result.kind !== "next-turn") throw new Error("expected next-turn");
+          expect(result.state.rulesContext.battlers[1]!.statStages[STAT_ATK]).toBe(7);
+          expect(result.state.rulesContext.battlers[1]!.item).toBe(0); // consumed (ITEM_NONE)
+          expect(result.state.rng.calls).toBe(initial.rng.calls);
+        });
+
+        it("Liechi Berry does not fire above the hp <= floor(maxHP/4) threshold (real gate, not blanket possession)", () => {
+          const rc = context({
+            battlers: [
+              battler({ side: 0 }),
+              battler({ side: 1, hp: 26, maxHP: 100, item: ITEM_LIECHI_BERRY, partyIndex: 2 }),
+              battler({ side: 0 }),
+              battler({ side: 1 }),
+            ],
+          });
+          const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+          const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
+          expect(result.kind).toBe("next-turn");
+          if (result.kind !== "next-turn") throw new Error("expected next-turn");
+          expect(result.state.rulesContext.battlers[1]!.statStages[STAT_ATK]).toBe(6);
+          expect(result.state.rulesContext.battlers[1]!.item).toBe(ITEM_LIECHI_BERRY); // not consumed
+        });
+
+        it("Salac Berry fires: +1 Speed stage, item consumed", () => {
+          const rc = context({
+            battlers: [
+              battler({ side: 0 }),
+              battler({ side: 1, hp: 20, maxHP: 100, item: ITEM_SALAC_BERRY, partyIndex: 2 }),
+              battler({ side: 0 }),
+              battler({ side: 1 }),
+            ],
+          });
+          const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+          const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
+          expect(result.kind).toBe("next-turn");
+          if (result.kind !== "next-turn") throw new Error("expected next-turn");
+          expect(result.state.rulesContext.battlers[1]!.statStages[STAT_SPEED]).toBe(7);
+          expect(result.state.rulesContext.battlers[1]!.item).toBe(0);
+        });
+
+        it("Salac Berry does not fire above the threshold", () => {
+          const rc = context({
+            battlers: [
+              battler({ side: 0 }),
+              battler({ side: 1, hp: 26, maxHP: 100, item: ITEM_SALAC_BERRY, partyIndex: 2 }),
+              battler({ side: 0 }),
+              battler({ side: 1 }),
+            ],
+          });
+          const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+          const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
+          expect(result.kind).toBe("next-turn");
+          if (result.kind !== "next-turn") throw new Error("expected next-turn");
+          expect(result.state.rulesContext.battlers[1]!.statStages[STAT_SPEED]).toBe(6);
+          expect(result.state.rulesContext.battlers[1]!.item).toBe(ITEM_SALAC_BERRY);
+        });
+
+        it("Petaya Berry fires: +1 Sp. Attack stage, item consumed", () => {
+          const rc = context({
+            battlers: [
+              battler({ side: 0 }),
+              battler({ side: 1, hp: 25, maxHP: 100, item: ITEM_PETAYA_BERRY, partyIndex: 2 }),
+              battler({ side: 0 }),
+              battler({ side: 1 }),
+            ],
+          });
+          const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+          const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
+          expect(result.kind).toBe("next-turn");
+          if (result.kind !== "next-turn") throw new Error("expected next-turn");
+          expect(result.state.rulesContext.battlers[1]!.statStages[STAT_SPATK]).toBe(7);
+          expect(result.state.rulesContext.battlers[1]!.item).toBe(0);
+        });
+
+        it("Petaya Berry does not fire at MAX_STAT_STAGE even under the HP threshold", () => {
+          const rc = context({
+            battlers: [
+              battler({ side: 0 }),
+              battler({
+                side: 1, hp: 10, maxHP: 100, item: ITEM_PETAYA_BERRY, partyIndex: 2,
+                statStages: [6, 6, 6, 6, 12, 6, 6, 6],
+              }),
+              battler({ side: 0 }),
+              battler({ side: 1 }),
+            ],
+          });
+          const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+          const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
+          expect(result.kind).toBe("next-turn");
+          if (result.kind !== "next-turn") throw new Error("expected next-turn");
+          expect(result.state.rulesContext.battlers[1]!.statStages[STAT_SPATK]).toBe(12);
+          expect(result.state.rulesContext.battlers[1]!.item).toBe(ITEM_PETAYA_BERRY); // not consumed
         });
       });
     },

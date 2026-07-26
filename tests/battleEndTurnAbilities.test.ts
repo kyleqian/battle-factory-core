@@ -26,11 +26,19 @@ const B_WAIT_TIME_LONG = 64;
 /** include/constants/abilities.h. */
 const ABILITY_SPEED_BOOST = 3;
 const ABILITY_RAIN_DISH = 44;
+const ABILITY_TRUANT = 54;
+const ABILITY_SHED_SKIN = 61;
 /** include/constants/battle.h:232-234 -- B_WEATHER_RAIN_TEMPORARY, the bit docs/endturn-abilities-items-ground-truth.md §3b's own live ledger sets. */
 const B_WEATHER_RAIN = 1 << 0;
 const STAT_SPEED = 3;
 const MAX_STAT_STAGE = 12;
 const NEUTRAL_STAT_STAGE = 6;
+/** include/constants/battle.h:117-125 -- doc §5 slice 2's own full-clear semantics. */
+const STATUS1_BURN = 1 << 4;
+const STATUS1_TOXIC_TURN_1 = 1 << 8;
+const STATUS2_NIGHTMARE = 1 << 27;
+/** include/constants/items.h -- doc §5 slice 3's own ENDTURN_ITEMS1-fallthrough proof. */
+const ITEM_LEFTOVERS = 200;
 
 function battler(changes: Partial<BattleScriptRulesBattler> & { maxHP?: number } = {}): BattleScriptRulesBattler {
   return Object.freeze({
@@ -254,5 +262,123 @@ describe("runBattleEndTurnOrchestration -- ENDTURN_ABILITIES slice 1 (Speed Boos
   it("the empty-stack END3 mismatch surfaces explicitly (not silent garbage) via the same primitive production wiring relies on", () => {
     const popped = popEnd3(createEmptyCallbackStack());
     expect(popped.kind).toBe("underflow");
+  });
+
+  describe("Shed Skin (doc §5 slice 2)", () => {
+    it("draws zero RNG and does not fire with no status", () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0, ability: ABILITY_SHED_SKIN, status1: 0 }),
+          battler({ side: 1, partyIndex: 2 }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(0));
+      const initial = scratchState(rc, 0);
+      const result = runBattleEndTurnOrchestration(program, handlers, initial);
+      expect(result.kind).toBe("next-turn");
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      expect(result.state.rulesContext.battlers[0]!.status1).toBe(0);
+      expect(result.state.rng.calls).toBe(initial.rng.calls);
+    });
+
+    it("draws exactly 1 RNG call on a miss and does not clear status (seed 919694434 -> randomValue%3 == 1)", () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0, ability: ABILITY_SHED_SKIN, status1: STATUS1_BURN }),
+          battler({ side: 1, partyIndex: 2 }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(0));
+      const initial = scratchState(rc, 0);
+      const result = runBattleEndTurnOrchestration(program, handlers, initial);
+      expect(result.kind).toBe("next-turn");
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      expect(result.state.rulesContext.battlers[0]!.status1).toBe(STATUS1_BURN);
+      expect(result.state.rng.calls).toBe(initial.rng.calls + 1);
+    });
+
+    it("fires on a hit: unconditional full status1 clear (multi-bit), Nightmare-glitch clear, party mirror, END3 resume, exactly 1 RNG draw (seed 42 -> randomValue%3 == 0)", () => {
+      const rc = context({
+        battlers: [
+          battler({
+            side: 0, ability: ABILITY_SHED_SKIN, partyIndex: 0,
+            status1: STATUS1_BURN | STATUS1_TOXIC_TURN_1, status2: STATUS2_NIGHTMARE,
+          }),
+          battler({ side: 1, partyIndex: 2 }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(0));
+      const initial = createBattleScriptStatusRulesExecution(
+        program, "BattleScript_HandleFaintedMon", rc, 42, externalPorts(0),
+      ).state;
+      const result = runBattleEndTurnOrchestration(program, handlers, initial);
+      expect(result.kind).toBe("next-turn");
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      expect(result.state.rulesContext.battlers[0]!.status1).toBe(0);
+      expect(result.state.rulesContext.battlers[0]!.status2 & STATUS2_NIGHTMARE).toBe(0);
+      expect(result.state.rulesContext.party.player[0]!.status1).toBe(0);
+      expect(result.state.haltReason).toBeNull();
+      expect(result.state.rng.calls).toBe(initial.rng.calls + 1);
+    });
+  });
+
+  describe("Truant (doc §5 slice 3)", () => {
+    it("XORs truantCounter with no script queued and no RNG draw", () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0, ability: ABILITY_TRUANT, truantCounter: 0 }),
+          battler({ side: 1, partyIndex: 2 }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(0));
+      const initial = scratchState(rc, 0);
+      const result = runBattleEndTurnOrchestration(program, handlers, initial);
+      expect(result.kind).toBe("next-turn");
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      expect(result.state.rulesContext.battlers[0]!.truantCounter).toBe(1);
+      expect(result.state.haltReason).toBeNull();
+      expect(result.state.rng.calls).toBe(initial.rng.calls);
+    });
+
+    it("toggles 1 -> 0", () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0, ability: ABILITY_TRUANT, truantCounter: 1 }),
+          battler({ side: 1, partyIndex: 2 }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(0));
+      const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 0));
+      expect(result.kind).toBe("next-turn");
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      expect(result.state.rulesContext.battlers[0]!.truantCounter).toBe(0);
+    });
+
+    it("no effect++ short-circuit: the SAME DoBattlerEndTurnEffects call falls through to ENDTURN_ITEMS1 for the same battler in the same tick (Leftovers heals same-tick)", () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0, ability: ABILITY_TRUANT, truantCounter: 0, hp: 100, maxHP: 160, item: ITEM_LEFTOVERS }),
+          battler({ side: 1, partyIndex: 2 }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(0));
+      const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 0));
+      expect(result.kind).toBe("next-turn");
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      expect(result.state.rulesContext.battlers[0]!.truantCounter).toBe(1);
+      expect(result.state.rulesContext.battlers[0]!.hp).toBe(110); // 100 + floor(160/16), same tick as the Truant toggle
+    });
   });
 });

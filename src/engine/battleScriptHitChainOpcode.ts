@@ -269,11 +269,18 @@ const PRINTFROMTABLE_TABLES: Readonly<Record<string, readonly string[]>> = Objec
     "STRINGID_PKMNSXPREVENTSYSZ",
     "STRINGID_PKMNSXHADNOEFFECTONY",
   ]),
-  /** battle_message.c:1006-1015. B_MSG_STAT_ROSE_EMPTY/B_MSG_STAT_ROSE_ITEM (indices 3-4) are the multi-stat/item-boost callers this registration doesn't drive. */
+  /**
+   * battle_message.c:1006-1015. Index 4 (`B_MSG_STAT_ROSE_ITEM`) is driven by
+   * `BattleScript_BerryStatRaiseDoStatUp` (docs/endturn-abilities-items-
+   * ground-truth.md §5 slice 5, Liechi/Salac/Petaya); index 3
+   * (`B_MSG_STAT_ROSE_EMPTY`, the multi-stat caller) stays unexercised.
+   */
   gStatUpStringIds: Object.freeze([
     "STRINGID_ATTACKERSSTATROSE",
     "STRINGID_DEFENDERSSTATROSE",
     "STRINGID_STATSWONTINCREASE",
+    "STRINGID_EMPTYSTRING3",
+    "STRINGID_USINGITEMSTATOFPKMNROSE",
   ]),
   /** battle_message.c:1016-1022. */
   gStatDownStringIds: Object.freeze([

@@ -36,6 +36,7 @@
  */
 import {
   acknowledgeBattleScriptMachineController,
+  drawBattleScriptRng,
   stepBattleScriptMachine,
   type BattleScriptMachineState,
   type BattleScriptOpcodeHandlers,
@@ -146,8 +147,31 @@ const ABILITY_CLOUD_NINE = 13;
 /** battleScriptStatBuffs.ts's own STAT_SPEED/MAX_STAT_STAGE convention. */
 const STAT_SPEED = 3;
 const MAX_STAT_STAGE = 12;
+/** include/constants/battle.h -- STAT_ATK/STAT_SPATK. */
+const STAT_ATK = 1;
+const STAT_SPATK = 4;
+/** reference/pokeemerald/src/data/items.h:2047-2097 -- Liechi/Salac/Petaya's real `holdEffectParam` (all three: 4), the HP-threshold divisor `TRY_EAT_STAT_UP_BERRY` reads (battle_util.c:3244-3255, doc §5 slice 5). */
+const STAT_UP_BERRY_HOLD_EFFECT_PARAM = 4;
+/** battle_anim.h:195. */
+const STAT_ANIM_PLUS1 = 14;
+/**
+ * `BattleScript_BerryStatRaiseDoStatUp`'s own `setbyte cMULTISTRING_CHOOSER,
+ * B_MSG_STAT_ROSE_ITEM` (battle_message.c:1012, battleScriptSetByte.ts's own
+ * already-registered constant) overrides whatever `changeStatBuffs`' own
+ * `statbuffchange` call just set, INSIDE the script -- no C-side
+ * `multistringChooser` patch needed here, unlike every other family-A cure
+ * tick.
+ */
+const BERRY_STAT_RAISE_END2_LABEL = "BattleScript_BerryStatRaiseEnd2";
+/** battle_util.c:3429-3451 -- the 3 Factory-legal (doc §2b) `TRY_EAT_STAT_UP_BERRY`-shaped cases, each keyed by its own holdEffect id, doc §5 slice 5. Liechi (ATTACK_UP) is inlined in source rather than macro-expanded but is byte-for-byte the same shape. */
+const STAT_UP_BERRIES: ReadonlyMap<number, number> = new Map([
+  [HOLD_EFFECT_ATTACK_UP, STAT_ATK], // Liechi
+  [HOLD_EFFECT_SPEED_UP, STAT_SPEED], // Salac
+  [HOLD_EFFECT_SP_ATTACK_UP, STAT_SPATK], // Petaya
+]);
 const SPEED_BOOST_ACTIVATES_LABEL = "BattleScript_SpeedBoostActivates";
 const RAIN_DISH_ACTIVATES_LABEL = "BattleScript_RainDishActivates";
+const SHED_SKIN_ACTIVATES_LABEL = "BattleScript_ShedSkinActivates";
 /** battle_message.c:1208-1212 -- gBerryEffectStringIds' own MULTISTRING_CHOOSER indices. */
 const B_MSG_CURED_PROBLEM = 0;
 const B_MSG_NORMALIZED_STATUS = 1;
@@ -576,17 +600,68 @@ function weatherHasEffect(rulesContext: BattleScriptRulesContext): boolean {
 }
 
 /**
+ * `ABILITY_SHED_SKIN` (`battle_util.c:2620-2641`, doc §5 slice 2) -- the one
+ * `Random()`-bearing end-turn ability. `(Random() % 3) == 0` is a C-side
+ * roll inside `AbilityBattleEffects` itself, not a script opcode, so it
+ * draws via `drawBattleScriptRng` attributed to `BattleScript_
+ * ShedSkinActivates`'s own entry instruction -- the same "C-side draw
+ * attributed to the nearest concrete instruction in hand" convention
+ * `battleScriptAttackCancelerOpcode.ts:328` already established for
+ * `AtkCanceler_UnableToUseMove`'s own admission draws. Draws exactly once
+ * per tick whenever `status1 & STATUS1_ANY`, win or lose (doc §3c/§4) -- the
+ * miss branch still consumes the draw and returns `"advance"` with only the
+ * RNG state changed. On success, `status1` clears unconditionally to 0 (ALL
+ * bits, matching source's raw `= 0`, not a masked clear) plus the Nightmare-
+ * glitch `STATUS2_NIGHTMARE` clear, synced to the party mirror the same way
+ * every other cure tick already does, then `BattleScript_ShedSkinActivates`
+ * runs via the END3 push-cursor-and-callback primitive (docs/end3-design.md),
+ * same as Speed Boost/Rain Dish.
+ */
+function runShedSkinTick(
+  program: BattleScriptProgram,
+  handlers: Handlers,
+  state: MachineState,
+  battler: BattleScriptBattlerId,
+): TickOutcome {
+  const b = state.rulesContext.battlers[battler];
+  if ((b.status1 & STATUS1_ANY) === 0) return Object.freeze({ kind: "advance", state });
+
+  const entry = resolveBattleScriptLabel(program, SHED_SKIN_ACTIVATES_LABEL);
+  if (!entry) throw new Error(`unknown Battle Script entry label ${SHED_SKIN_ACTIVATES_LABEL}`);
+  const entryInstruction = program.instructions[entry.programCounter];
+  if (!entryInstruction) throw new Error(`Battle Script program has no instruction at ${entry.programCounter}`);
+  const { rng, randomValue } = drawBattleScriptRng(state.rng, entryInstruction, "endturn:shedskin");
+  const drawnState: MachineState = Object.freeze({ ...state, rng });
+  if (randomValue % 3 !== 0) {
+    return Object.freeze({ kind: "advance", state: drawnState });
+  }
+
+  const clearedStatus2 = (b.status2 & ~BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_NIGHTMARE) >>> 0;
+  const withStatus = withBattler(drawnState.rulesContext, battler, { status1: 0, status2: clearedStatus2 });
+  const synced = Object.freeze({
+    ...withStatus,
+    party: withBattleScriptPartyMemberStatus1(withStatus.party, b.side, b.partyIndex, 0),
+    scriptingBattler: battler,
+  });
+  return runPushCursorAndCallbackTickScript(program, handlers, drawnState, synced, battler, SHED_SKIN_ACTIVATES_LABEL);
+}
+
+/**
  * `ENDTURN_ABILITIES` (`AbilityBattleEffects(ABILITYEFFECT_ENDTURN, battler,
  * 0, 0, 0)`, `battle_util.c:2601-2658`, docs/endturn-abilities-items-ground-
- * truth.md §1b/§5 slice 1): Rain Dish and Speed Boost, the two zero-RNG,
- * always-or-weather-gated cases. Both preempt `BattleTurnPassed` via
- * `BattleScriptPushCursorAndCallback` + `end3` (docs/end3-design.md), hosted
- * by `runPushCursorAndCallbackTickScript` rather than plain `runTickScript`.
- * Shed Skin (RNG-bearing `Random() % 3` roll, doc §5 slice 2) and Truant (no
- * script at all -- source's own switch case has neither a
- * `BattleScriptExecute`/`PushCursorAndCallback` call nor an `effect++`, doc
- * §5 slice 3) stay named case-barriers on their own real, source-exact
- * reachability condition -- DO NOT implement either here.
+ * truth.md §1b/§5): all four real switch cases. Rain Dish/Speed Boost/Shed
+ * Skin all preempt `BattleTurnPassed` via `BattleScriptPushCursorAndCallback`
+ * + `end3` (docs/end3-design.md), hosted by `runPushCursorAndCallbackTickScript`
+ * rather than plain `runTickScript`. `ABILITY_TRUANT` (`battle_util.c:2653-
+ * 2655`) is the odd one out: `gDisableStructs[gBattlerAttacker].truantCounter
+ * ^= 1` with NO script queued (no `BattleScriptExecute`/
+ * `BattleScriptPushCursorAndCallback` call) and NO `effect++` -- source's own
+ * `gBattlerAttacker` is this tick's own `battler` (`battle_util.c:1471` sets
+ * `gBattlerAttacker = gBattlerByTurnOrder[turnEffectsBattlerId]` before the
+ * switch runs), so the toggle target is just `battler`. Returning `"advance"`
+ * here (never `"fired"`) is what lets the SAME `runDoBattlerEndTurnEffects`
+ * call fall through into `ENDTURN_ITEMS1` for the same battler in the same
+ * tick, matching source's own "no effect, no early return" shape exactly.
  */
 function runAbilitiesTick(
   program: BattleScriptProgram,
@@ -616,17 +691,14 @@ function runAbilitiesTick(
     return Object.freeze({ kind: "advance", state });
   }
 
-  if (b.ability === ABILITY_SHED_SKIN && (b.status1 & STATUS1_ANY) !== 0) {
-    return Object.freeze({
-      kind: "case-barrier", state,
-      detail: "ABILITY_SHED_SKIN: reachable ((status1 & STATUS1_ANY) != 0) but its Random()%3 roll + unconditional status1=0 clear is doc §5 slice 2 stretch material, not wired this slice",
-    });
+  if (b.ability === ABILITY_SHED_SKIN) {
+    return runShedSkinTick(program, handlers, state, battler);
   }
+
   if (b.ability === ABILITY_TRUANT) {
-    return Object.freeze({
-      kind: "case-barrier", state,
-      detail: "ABILITY_TRUANT: reachable (no gate besides the ability match itself) but its truantCounter XOR toggle + no-effect++ ENDTURN_ITEMS1-same-tick fallthrough is doc §5 slice 3 stretch material, not wired this slice",
-    });
+    const toggled = (b.truantCounter ^ 1) as 0 | 1;
+    const withToggle = withBattler(state.rulesContext, battler, { truantCounter: toggled });
+    return Object.freeze({ kind: "advance", state: Object.freeze({ ...state, rulesContext: withToggle }) });
   }
 
   return Object.freeze({ kind: "advance", state });
@@ -655,14 +727,13 @@ function runStatus1CureTick(
 /**
  * `ENDTURN_ITEMS1` (`ItemBattleEffects(ITEMEFFECT_NORMAL, battler, FALSE)`,
  * `battle_util.c:3331-3622`, docs/endturn-abilities-items-ground-truth.md
- * §1c/§5 slice 4): Leftovers, the 8 zero-RNG cure berries, and White Herb --
- * every `!moveTurn`/unconditional case this slice's brief scopes in. Every
- * other real switch case this function does not implement barriers on its
- * own genuine trigger condition (RESTORE_HP/RESTORE_PP) or on mere
- * possession (the 4 zero-carrier stat/crit berries + 5 confuse berries,
+ * §1c/§5 slices 4-5): Leftovers, the 8 zero-RNG cure berries, White Herb, and
+ * (slice 5) Liechi/Salac/Petaya -- every reachable Factory-legal case this
+ * doc names. Every other real switch case this function does not implement
+ * barriers on its own genuine trigger condition (RESTORE_HP/RESTORE_PP) or on
+ * mere possession (the 4 zero-carrier stat/crit berries + 5 confuse berries,
  * doc §2b -- their own HP-threshold gate needs an unmodeled per-item
- * `battlerHoldEffectParam` table no live Factory carrier will ever exercise,
- * per the brief's own explicit "do NOT implement them").
+ * `battlerHoldEffectParam` table no live Factory carrier will ever exercise).
  */
 function runItemsTick(
   program: BattleScriptProgram,
@@ -759,13 +830,21 @@ function runItemsTick(
       detail: "HOLD_EFFECT_RESTORE_PP (Leppa): move-slot/PP-bonus recompute + BtlController_EmitSetMonData(REQUEST_PPMOVE1_BATTLE) is not wired this slice (battle_util.c:3347-3373)",
     });
   }
-  const STAT_UP_BERRIES_STRETCH = new Set([HOLD_EFFECT_ATTACK_UP, HOLD_EFFECT_SPEED_UP, HOLD_EFFECT_SP_ATTACK_UP]);
-  if (STAT_UP_BERRIES_STRETCH.has(holdEffect)) {
-    return Object.freeze({
-      kind: "case-barrier", state,
-      detail: `HOLD_EFFECT ${holdEffect} (Liechi/Salac/Petaya): Factory-legal (doc §2b), doc §5 slice 5 stretch `
-        + "material -- barriered on mere possession since its own HP-threshold holdEffectParam gate is not modeled",
+  const statUpStatId = STAT_UP_BERRIES.get(holdEffect);
+  if (statUpStatId !== undefined) {
+    if (b.hp > Math.floor(b.maxHP / STAT_UP_BERRY_HOLD_EFFECT_PARAM) || b.statStages[statUpStatId]! >= MAX_STAT_STAGE) {
+      return Object.freeze({ kind: "advance", state });
+    }
+    // battle_util.c:3244-3255/3429-3442 (SET_STATCHANGER(stat, 1, FALSE) = statId | (1 << 4)) -- Cmd_statbuffchange
+    // itself reads this scratch field, so the +1 stage change happens inside the script, not here (unlike Speed
+    // Boost's C-side bump: BattleScript_BerryStatRaiseEnd2 is opcode-driven).
+    const rc = Object.freeze({
+      ...state.rulesContext,
+      statChanger: statUpStatId | (1 << 4),
+      animArg1: STAT_ANIM_PLUS1 + statUpStatId,
+      effectBattler: battler,
     });
+    return runTickScript(program, handlers, state, rc, battler, BERRY_STAT_RAISE_END2_LABEL);
   }
   const UNREACHABLE_AT_FACTORY_L50 = new Set([
     HOLD_EFFECT_CONFUSE_SPICY, HOLD_EFFECT_CONFUSE_DRY, HOLD_EFFECT_CONFUSE_SWEET,
