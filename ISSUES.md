@@ -5,29 +5,6 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #45 — Census false positives: `seteffectprimary`-reaching scripts counted executable regardless of effect byte
-
-**Symptom:** `docs/executable-frontier-census.md` (as of `c74dfef`) counts
-`EFFECT_RAGE`, `EFFECT_MEAN_LOOK`, `EFFECT_NIGHTMARE`, and
-`EFFECT_WILL_O_WISP` as executable; all four actually halt at runtime — the
-first three carry family-B effect bytes `applySetMoveEffect`'s switch does
-not handle, and WILL_O_WISP's `jumpifability BS_TARGET, ABILITY_WATER_VEIL`
-call is outside the widened 4-value set (halts unconditionally).
-
-**Confirmed** (2026-07-26, PROGRESS entry 473's full accounting): root cause
-is `classifySetMoveEffectDispatch` in
-`tools/report/executable-frontier-census.ts` intercepting only
-`B_SCR_OP_SETEFFECTWITHCHANCE` bindings, never `B_SCR_OP_SETEFFECTPRIMARY` —
-the "registered opcode, narrow-input barrier" blind spot the census Caveats
-already name, confirmed for a second dispatcher. Same class: `jumpifability`
-value-coverage is not checked per-script.
-
-**Leads:** teach the classifier about `SETEFFECTPRIMARY` exactly the way it
-handles `SETEFFECTWITHCHANCE`, and add a value-coverage check for
-`jumpifability` operands; expected correction: −4 effects (90→86-ish),
-census self-checks updated to pin the four rows as blocked until their real
-handlers land.
-
 ## #41 — Production engine modules import canonical RAM recordings
 
 **Symptom:** shipped `src/engine/` code reads recorded state from the single

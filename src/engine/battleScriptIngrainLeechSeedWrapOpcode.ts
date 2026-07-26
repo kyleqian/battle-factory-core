@@ -173,6 +173,8 @@ const JUMPIFABILITY_VALUES: ReadonlyMap<string, number> = new Map([
   ["ABILITY_IMMUNITY", ABILITY_IMMUNITY],
   ["ABILITY_OWN_TEMPO", ABILITY_OWN_TEMPO],
 ]);
+/** Exported so tools/report/executable-frontier-census.ts's jumpifability value-coverage check never drifts from what this opcode actually dispatches (same live-import precedent as SET_MOVE_EFFECT_SUPPORTED_BYTES). */
+export const JUMPIFABILITY_SUPPORTED_ABILITY_NAMES: ReadonlySet<string> = new Set(JUMPIFABILITY_VALUES.keys());
 
 /**
  * `Cmd_jumpifability` (`battle_script_commands.c:3105-3149`), narrowed to the

@@ -26,6 +26,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { SET_MOVE_EFFECT_SUPPORTED_BYTES } from "../../src/engine/battleScriptHitChainOpcode.ts";
+import { JUMPIFABILITY_SUPPORTED_ABILITY_NAMES } from "../../src/engine/battleScriptIngrainLeechSeedWrapOpcode.ts";
 import { loadBattleScriptProgram } from "../../src/engine/battleScriptProgram.ts";
 import { createBattleScriptStatusRulesHandlers } from "../../src/engine/battleScriptRulesContext.ts";
 
@@ -154,10 +155,12 @@ function firstInstruction(labelName: string, guard: Set<string> = new Set()): { 
 // misclassification, so this list can go stale without the census going
 // stale with it (the exact failure mode of ISSUES #44).
 const MOVE_EFFECT_ID_BY_NAME: Readonly<Record<string, number>> = Object.freeze({
+  MOVE_EFFECT_SLEEP: 1,
   MOVE_EFFECT_POISON: 2,
   MOVE_EFFECT_BURN: 3,
   MOVE_EFFECT_FREEZE: 4,
   MOVE_EFFECT_PARALYSIS: 5,
+  MOVE_EFFECT_TOXIC: 6,
   MOVE_EFFECT_CONFUSION: 7,
   MOVE_EFFECT_FLINCH: 8,
   MOVE_EFFECT_WRAP: 13,
@@ -212,7 +215,6 @@ const SETMOVEEFFECT_SUPPORTED = new Set(
     .filter(([, id]) => SET_MOVE_EFFECT_SUPPORTED_BYTES.has(id))
     .map(([name]) => name),
 );
-const SETMOVEEFFECT_NAMED_BARRIER = new Set(["MOVE_EFFECT_SLEEP", "MOVE_EFFECT_TOXIC"]);
 
 function parseMoveEffectBase(rawOperands: string | undefined): string {
   if (!rawOperands || rawOperands.trim() === "0") return "0";
@@ -225,22 +227,13 @@ function parseMoveEffectBase(rawOperands: string | undefined): string {
 
 type Blocker = { kind: "subsystem"; detail: string };
 
-function classifySetMoveEffectDispatch(pendingEffect: string | null): Blocker | null {
+function classifySetMoveEffectDispatch(opcodeName: string, pendingEffect: string | null): Blocker | null {
   if (pendingEffect === null || pendingEffect === "0") return null;
   if (SETMOVEEFFECT_SUPPORTED.has(pendingEffect)) return null;
-  if (SETMOVEEFFECT_NAMED_BARRIER.has(pendingEffect)) {
-    return {
-      kind: "subsystem",
-      detail:
-        `Cmd_seteffectwithchance dispatch: ${pendingEffect} is an explicit (b) barrier in applySetMoveEffect `
-        + "(the real script for this status calls the still-unregistered Cmd_seteffectprimary instead; this "
-        + "engine still names the byte as unreachable here) -- battle_script_commands.c:2273/2427",
-    };
-  }
   return {
     kind: "subsystem",
     detail:
-      `Cmd_seteffectwithchance dispatch: ${pendingEffect} is in the family-B (status2/misc) switch, a named `
+      `${opcodeName} dispatch: ${pendingEffect} is in the family-B (status2/misc) switch, a named `
       + "(b) barrier in applySetMoveEffect -- battle_script_commands.c:2522",
   };
 }
@@ -280,9 +273,33 @@ function walk(entryLabel: string, allowConditionalForks: boolean): WalkResult {
         nextPendingEffect = parseMoveEffectBase(statement.rawOperands);
       }
       if (statement.opcodeBindings?.includes("B_SCR_OP_SETEFFECTWITHCHANCE")) {
-        const blocker = classifySetMoveEffectDispatch(node.pendingEffect);
+        const blocker = classifySetMoveEffectDispatch("Cmd_seteffectwithchance", node.pendingEffect);
         if (blocker) subsystemBlockers.add(blocker.detail);
         nextPendingEffect = null; // finalizeSeteffectwithchance always resets moveEffectByte to 0
+      }
+      // Cmd_seteffectprimary (battle_script_commands.c:2941-2944, `SetMoveEffect(TRUE, 0)`) reads the
+      // SAME gBattleCommunication[MOVE_EFFECT_BYTE] scratch field as Cmd_seteffectwithchance, staged by
+      // the identical preceding `setmoveeffect X` statement (mnemonic-tracked above, opcode-bound to
+      // B_SCR_OP_SETBYTE either way) -- so this reuses the exact same pendingEffect value and classifier.
+      // Closes the ISSUES #45 blind spot: the census previously only intercepted SETEFFECTWITHCHANCE.
+      if (statement.opcodeBindings?.includes("B_SCR_OP_SETEFFECTPRIMARY")) {
+        const blocker = classifySetMoveEffectDispatch("Cmd_seteffectprimary", node.pendingEffect);
+        if (blocker) subsystemBlockers.add(blocker.detail);
+        nextPendingEffect = null;
+      }
+      // Cmd_jumpifability (battle_script_commands.c:3105-3149) is registered, but the engine's own
+      // handler unconditionally barriers when the ability operand is outside its widened 4-value set
+      // (battleScriptIngrainLeechSeedWrapOpcode.ts) -- regardless of which branch (jump/fallthrough) is
+      // actually taken at runtime, since the check happens before the ability comparison. Same
+      // "registered opcode, narrow operand" blind spot as SETEFFECTPRIMARY/SETEFFECTWITHCHANCE above.
+      if (statement.mnemonic === "jumpifability") {
+        const abilityToken = statement.operandTokens[1];
+        if (abilityToken && !JUMPIFABILITY_SUPPORTED_ABILITY_NAMES.has(abilityToken)) {
+          subsystemBlockers.add(
+            `Cmd_jumpifability: ${abilityToken} is outside the engine's widened ability set `
+            + "(battleScriptIngrainLeechSeedWrapOpcode.ts) -- battle_script_commands.c:3105",
+          );
+        }
       }
     }
 
@@ -460,6 +477,16 @@ const validationChecks: Array<() => void> = [
   () => requireExecutable("EFFECT_ACCURACY_DOWN_HIT"), // MOVE_EFFECT_ACC_MINUS_1
   () => requireExecutable("EFFECT_ATTACK_UP_HIT"), // MOVE_EFFECT_ATK_PLUS_1
   () => requireExecutable("EFFECT_DEFENSE_UP_HIT"), // MOVE_EFFECT_DEF_PLUS_1
+  // ISSUES #45 fix: classifySetMoveEffectDispatch now also intercepts
+  // B_SCR_OP_SETEFFECTPRIMARY (previously only SETEFFECTWITHCHANCE), and a new
+  // jumpifability value-coverage check catches ability operands outside the
+  // engine's widened 4-value set. These four rows were PROGRESS 473's own
+  // named false positives -- pinned blocked now that the census actually
+  // checks the operand, not just the opcode name.
+  () => requireBlockedMentioning("EFFECT_RAGE", "MOVE_EFFECT_RAGE"),
+  () => requireBlockedMentioning("EFFECT_MEAN_LOOK", "MOVE_EFFECT_PREVENT_ESCAPE"),
+  () => requireBlockedMentioning("EFFECT_NIGHTMARE", "MOVE_EFFECT_NIGHTMARE"),
+  () => requireBlockedMentioning("EFFECT_WILL_O_WISP", "ABILITY_WATER_VEIL"),
 ];
 
 let validationFailed = false;

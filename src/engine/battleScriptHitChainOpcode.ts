@@ -408,19 +408,25 @@ const STAT_MOVE_EFFECT_TABLE: Readonly<Record<number, StatMoveEffectEntry>> = Ob
 
 /**
  * The exact MOVE_EFFECT_BYTE values applySetMoveEffect (below) dispatches to
- * completion today -- everything else still falls into unsupportedBranch or
- * one of the two named (SLEEP/TOXIC) barriers. Single source of truth for
- * "genuinely executable via Cmd_seteffectwithchance", read live by
+ * completion today -- everything else still falls into unsupportedBranch.
+ * Single source of truth for "genuinely executable via either
+ * Cmd_seteffectwithchance or Cmd_seteffectprimary" (both call this same
+ * function; SLEEP/MOVE_EFFECT_TOXIC's own real switch cases were registered
+ * by docs/status-cluster-ground-truth.md but this exported list was never
+ * updated to match until the census's SETEFFECTPRIMARY-dispatch fix
+ * (ISSUES #45) exposed the gap), read live by
  * tools/report/executable-frontier-census.ts so its SETMOVEEFFECT_SUPPORTED
  * set can't drift from this dispatch again the way it did before the
  * STAT_MOVE_EFFECT_TABLE family was ever wired into the census (ISSUES #44).
  */
 export const SET_MOVE_EFFECT_SUPPORTED_BYTES: ReadonlySet<number> = new Set<number>([
   0,
+  MOVE_EFFECT_SLEEP,
   MOVE_EFFECT_POISON,
   MOVE_EFFECT_BURN,
   MOVE_EFFECT_FREEZE,
   MOVE_EFFECT_PARALYSIS,
+  MOVE_EFFECT_TOXIC,
   MOVE_EFFECT_CONFUSION,
   MOVE_EFFECT_FLINCH,
   MOVE_EFFECT_WRAP,
