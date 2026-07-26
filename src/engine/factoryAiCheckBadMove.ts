@@ -57,7 +57,7 @@ import speciesStatsData from "../data/gen/species-stats.json" with { type: "json
 import typeEffectivenessData from "../data/gen/type-effectiveness.json" with { type: "json" };
 import { advanceRngValue } from "./rng.ts";
 import type { BattleRngState } from "./battleDecisionBoundary.ts";
-import { MAX_STAT_STAGE, MIN_STAT_STAGE, type TypeEffectivenessEntry } from "./damageCalc.ts";
+import { DEFAULT_STAT_STAGE, MAX_STAT_STAGE, MIN_STAT_STAGE, type TypeEffectivenessEntry } from "./damageCalc.ts";
 
 const U16_MAX = 0xffff;
 
@@ -171,6 +171,13 @@ export type FactoryAiCheckBadMoveTarget = Readonly<{
   defStage: number;
   /** Current SPECIAL DEFENSE stat stage, 0..12 -- `AI_CBM_SpDefDown`'s MIN_STAT_STAGE gate. */
   spDefStage: number;
+  /**
+   * Current ACCURACY stat stage, 0..12 -- `AI_CBM_AccDown`'s MIN_STAT_STAGE
+   * gate (doc §19.1). Optional, defaulting to `DEFAULT_STAT_STAGE` (6) -- the
+   * real battle-start neutral value -- so no pre-existing target literal in
+   * this file's test suite needs updating.
+   */
+  accStage?: number;
 }>;
 
 /**
@@ -251,6 +258,7 @@ function nextGetAbilityDraw(
 
 const ABILITY_SPEED_BOOST = "ABILITY_SPEED_BOOST";
 const ABILITY_HYPER_CUTTER = "ABILITY_HYPER_CUTTER";
+const ABILITY_KEEN_EYE = "ABILITY_KEEN_EYE";
 const ABILITY_CLEAR_BODY = "ABILITY_CLEAR_BODY";
 const ABILITY_WHITE_SMOKE = "ABILITY_WHITE_SMOKE";
 
@@ -369,6 +377,53 @@ function runCbmStatDownViaSharedTail(
   const draws = tail.draw ? [tail.draw] : [];
   const blocksChange = tail.ability === ABILITY_CLEAR_BODY || tail.ability === ABILITY_WHITE_SMOKE;
   return Object.freeze({ rng: tail.rng, draws: Object.freeze(draws), scoreDelta: blocksChange ? -10 : 0 });
+}
+
+/**
+ * `AI_CBM_AccDown` + the shared `CheckIfAbilityBlocksStatChange` tail
+ * (`data/battle_ai_scripts.s:300-312`,
+ * `docs/factory-ai-checkviability-ground-truth.md` §19.1):
+ *
+ * ```
+ * AI_CBM_AccDown:
+ *     if_stat_level_equal AI_TARGET, STAT_ACC, MIN_STAT_STAGE, Score_Minus10
+ *     get_ability AI_TARGET
+ *     if_equal ABILITY_KEEN_EYE, Score_Minus10
+ *     goto CheckIfAbilityBlocksStatChange
+ * ```
+ *
+ * Unlike `AI_CBM_DefenseDown`/`AI_CBM_SpDefDown` (bare MIN_STAT_STAGE gate,
+ * direct `goto` to the shared tail, no intervening ability check), this
+ * handler has its own extra `get_ability AI_TARGET` + `ABILITY_KEEN_EYE`
+ * check first -- the same two-`get_ability`-call shape `AI_CBM_AttackDown`
+ * already established for Hyper Cutter, confirmed live in the source per
+ * the brief's own speculation (doc §19.1). A genuine second, independently
+ * redrawing `get_ability` site distinct from the shared tail's own.
+ */
+function runCbmAccDown(
+  target: FactoryAiCheckBadMoveTarget,
+  rng: BattleRngState,
+  ordinal: number,
+  reason: string,
+): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckBadMoveDraw[]; scoreDelta: number }> {
+  if ((target.accStage ?? DEFAULT_STAT_STAGE) === MIN_STAT_STAGE) {
+    return Object.freeze({ rng, draws: Object.freeze([]), scoreDelta: -10 });
+  }
+  const draws: FactoryAiCheckBadMoveDraw[] = [];
+  const keenEye = nextGetAbilityDraw(rng, ordinal, `${reason}-keen-eye`, target);
+  rng = keenEye.rng;
+  if (keenEye.draw) {
+    draws.push(keenEye.draw);
+    ordinal += 1;
+  }
+  if (keenEye.ability === ABILITY_KEEN_EYE) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -10 });
+  }
+  const tail = nextGetAbilityDraw(rng, ordinal, `${reason}-shared-tail`, target);
+  rng = tail.rng;
+  if (tail.draw) draws.push(tail.draw);
+  const blocksChange = tail.ability === ABILITY_CLEAR_BODY || tail.ability === ABILITY_WHITE_SMOKE;
+  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: blocksChange ? -10 : 0 });
 }
 
 function runCbmDefenseDown(
@@ -586,6 +641,21 @@ export function runCheckBadMovePreamble(input: Readonly<{
       rng: spDefDown.rng,
       draws: Object.freeze(draws),
       scoreDelta: spDefDown.scoreDelta,
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_ACCURACY_DOWN(_2) -> AI_CBM_AccDown,
+  // the sixth CBM-blocked pair's own CBM half (doc §19). EFFECT_ACCURACY_
+  // DOWN_2 is dispatched too, source-faithfully, despite being a vestigial
+  // constant with zero real moves (doc §19.1).
+  if (move.effect === "EFFECT_ACCURACY_DOWN" || move.effect === "EFFECT_ACCURACY_DOWN_2") {
+    const accDown = runCbmAccDown(target, rng, ordinal, `${input.reasonPrefix}-acc-down`);
+    for (const draw of accDown.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: accDown.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: accDown.scoreDelta,
     });
   }
 
