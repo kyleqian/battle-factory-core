@@ -20,6 +20,18 @@ import {
   type FactoryAiMaskSelectionReceipt,
 } from "./factoryAiMaskSelection.ts";
 import { advanceRngValue } from "./rng.ts";
+import {
+  runCheckBadMovePreamble,
+  type FactoryAiCheckBadMoveDraw,
+  type FactoryAiCheckBadMoveTarget,
+} from "./factoryAiCheckBadMove.ts";
+import {
+  runTryToFaint,
+  type FactoryAiTryToFaintBattler,
+  type FactoryAiTryToFaintDraw,
+  type FactoryAiTryToFaintTarget,
+} from "./factoryAiTryToFaint.ts";
+import { runCheckViability } from "./factoryAiCheckViability.ts";
 
 const U16_MAX = 0xffff;
 const U32_MAX = 0xffff_ffff;
@@ -448,4 +460,433 @@ export function submitFactoryAiMaskZeroDecision<
     throw new Error("Battle kernel did not retain the Factory AI RNG draws");
   }
   return Object.freeze({ ...choice, transition });
+}
+
+// ---------------------------------------------------------------------------
+// Mask 1 (CheckBadMove only) / mask 7 (CheckBadMove + TryToFaint +
+// CheckViability), per GetAiScriptsInBattleFactory (battle_factory.c:889-911,
+// factoryAiMaskSelection.ts's already-ported branch table) and the
+// port-subset audit's §4. Reuses the exact same setup/tie draw shape as the
+// mask-0 policy above (BattleAI_SetupAIData's 4 simulatedRNG draws +
+// ChooseMoveOrAction_Singles's unconditional final tie draw, §1.1/§1.4) --
+// mask 0 is untouched by everything below.
+
+export type FactoryAiScoredBattlerView = Readonly<{
+  types: readonly [string, string];
+  attack: number;
+  defense: number;
+  spAttack: number;
+  spDefense: number;
+  level: number;
+  statStages: Readonly<{ atk: number; def: number; spAtk: number; spDef: number }>;
+}>;
+
+export type FactoryAiScoredTargetView = FactoryAiScoredBattlerView & Readonly<{
+  species: number;
+  hp: number;
+  /** Real (not guessed) ability -- TryToFaint/CheckViability read live state. */
+  ability: string;
+  /** BattleHistory-style known ability for CheckBadMove's get_ability guess cache. */
+  knownAbility: string | null;
+}>;
+
+export type FactoryAiScoredView = Readonly<{
+  schema: "factory-ai-scored-view/v1";
+  mode: "factory-level-50-singles";
+  active: Readonly<{ aiBattler: 1; targetBattler: 0 }>;
+  factory: FactoryAiMaskSelectionInput;
+  moves: readonly [number, number, number, number];
+  attacker: FactoryAiScoredBattlerView;
+  target: FactoryAiScoredTargetView;
+}>;
+
+export type FactoryAiScoredPhaseDraw =
+  | (FactoryAiCheckBadMoveDraw & Readonly<{ phase: "check-bad-move"; moveSlot: BattleMoveSlot }>)
+  | (FactoryAiTryToFaintDraw & Readonly<{ phase: "try-to-faint"; moveSlot: BattleMoveSlot }>);
+
+export type FactoryAiScoredDraw = FactoryAiRngDraw | FactoryAiScoredPhaseDraw;
+
+export type FactoryAiScoredSlot = Readonly<{
+  moveSlot: BattleMoveSlot;
+  moveId: number;
+  legal: boolean;
+  initialScore: 100;
+  checkBadMoveDelta: number | null;
+  tryToFaintDelta: number | null;
+  checkViabilityDelta: number | null;
+  finalScore: number;
+}>;
+
+export type FactoryAiScoredTrace = Readonly<{
+  schema: "factory-ai-trace/v1";
+  phase: "choose-move";
+  mask: 1 | 7;
+  maskSelection: FactoryAiMaskSelectionReceipt;
+  executedScoringScripts: readonly ("check-bad-move" | "try-to-faint" | "check-viability")[];
+  draws: readonly FactoryAiScoredDraw[];
+  slotScores: readonly FactoryAiScoredSlot[];
+  bestMoveSlots: readonly BattleMoveSlot[];
+  tie: Readonly<{
+    modulus: number;
+    index: number;
+    chosenDecision: BattleMoveDecision;
+  }>;
+}>;
+
+export type FactoryAiScoredChoice = Readonly<{
+  submission: BattleDecisionSubmission;
+  rng: BattleRngState;
+  trace: FactoryAiScoredTrace;
+}>;
+
+export type FactoryAiScoredTransition<
+  RulesState extends BattleJsonObject = BattleJsonObject,
+> = FactoryAiScoredChoice & Readonly<{
+  transition: BattleDecisionTransitionResult<RulesState>;
+}>;
+
+function scoredViewAt(value: unknown): FactoryAiScoredView {
+  const view = recordAt(value, "Factory AI scored view");
+  exactKeys(
+    view,
+    ["schema", "mode", "active", "factory", "moves", "attacker", "target"],
+    "Factory AI scored view",
+  );
+  if (view.schema !== "factory-ai-scored-view/v1") {
+    return fail("Factory AI scored view.schema", "be factory-ai-scored-view/v1");
+  }
+  if (view.mode !== "factory-level-50-singles") {
+    return fail("Factory AI scored view.mode", "be factory-level-50-singles");
+  }
+  const active = recordAt(view.active, "Factory AI scored view.active");
+  exactKeys(active, ["aiBattler", "targetBattler"], "Factory AI scored view.active");
+  if (active.aiBattler !== 1 || active.targetBattler !== 0) {
+    return fail(
+      "Factory AI scored view.active",
+      "identify trainer battler 1 and player target battler 0",
+    );
+  }
+  const factory = recordAt(view.factory, "Factory AI scored view.factory");
+  exactKeys(
+    factory,
+    ["levelMode", "battleMode", "factoryWinStreak", "trainerOpponentId"],
+    "Factory AI scored view.factory",
+  );
+  const factoryInput = Object.freeze({
+    levelMode: integerAt(factory.levelMode, 0, 2, "Factory AI scored view.factory.levelMode"),
+    battleMode: integerAt(factory.battleMode, 0, 1, "Factory AI scored view.factory.battleMode"),
+    factoryWinStreak: integerAt(
+      factory.factoryWinStreak,
+      0,
+      U16_MAX,
+      "Factory AI scored view.factory.factoryWinStreak",
+    ),
+    trainerOpponentId: integerAt(
+      factory.trainerOpponentId,
+      0,
+      U16_MAX,
+      "Factory AI scored view.factory.trainerOpponentId",
+    ),
+  }) as FactoryAiMaskSelectionInput;
+  if (
+    factoryInput.levelMode !== FACTORY_LEVEL_MODE_50
+    || factoryInput.battleMode !== FACTORY_BATTLE_MODE_SINGLES
+  ) {
+    throw new Error("Factory AI scored policy supports only Level-50 Factory singles");
+  }
+  if (!Array.isArray(view.moves) || view.moves.length !== MAX_MON_MOVES) {
+    return fail("Factory AI scored view.moves", "be a four-slot tuple");
+  }
+  const moves = Object.freeze(view.moves.map((move, slot) =>
+    integerAt(move, 0, U16_MAX, `Factory AI scored view.moves[${slot}]`),
+  )) as unknown as readonly [number, number, number, number];
+
+  return Object.freeze({
+    schema: "factory-ai-scored-view/v1",
+    mode: "factory-level-50-singles",
+    active: Object.freeze({ aiBattler: 1, targetBattler: 0 }),
+    factory: factoryInput,
+    moves,
+    attacker: view.attacker as FactoryAiScoredBattlerView,
+    target: view.target as FactoryAiScoredTargetView,
+  });
+}
+
+/**
+ * Mask-1/mask-7 Factory move chooser: setup (identical to mask 0) + per-slot
+ * `AI_CheckBadMove` (always), then -- mask 7 only -- `AI_TryToFaint` and
+ * `AI_CheckViability`, in that fixed source order (`gBattleAI_ScriptsTable`,
+ * §1.1), then the same unconditional tie draw. A slot whose script halts on
+ * a named unsupported-branch barrier fails the whole decision loudly (no
+ * score can be computed for that slot) rather than silently no-op'ing.
+ */
+export function chooseFactoryAiScoredDecision(input: Readonly<{
+  view: FactoryAiScoredView;
+  request: BattleDecisionRequest;
+  rng: BattleRngState;
+}>): FactoryAiScoredChoice {
+  const choiceInput = recordAt(input, "Factory AI scored decision input");
+  exactKeys(choiceInput, ["view", "request", "rng"], "Factory AI scored decision input");
+  const request = commandRequestAt(choiceInput.request);
+  const view = scoredViewAt(choiceInput.view);
+  let rng = rngAt(choiceInput.rng);
+  if (request.side !== "trainer" || request.battler !== view.active.aiBattler) {
+    throw new Error(
+      "Factory AI scored policy requires the current trainer battler-1 request",
+    );
+  }
+  if (request.legalDecisions.some((decision) => decision.kind !== "use-move")) {
+    throw new Error(
+      "Factory AI scored move policy does not implement switch action prechecks",
+    );
+  }
+
+  const legalMoves = request.legalDecisions as readonly BattleMoveDecision[];
+  const legalBySlot = new Map<BattleMoveSlot, BattleMoveDecision>();
+  for (const decision of legalMoves) {
+    if (legalBySlot.has(decision.moveSlot)) {
+      throw new Error(
+        `Factory AI legal move slot ${decision.moveSlot} has ambiguous duplicate decisions`,
+      );
+    }
+    if (view.moves[decision.moveSlot] === 0) {
+      throw new Error(
+        `Factory AI legal move slot ${decision.moveSlot} contains MOVE_NONE`,
+      );
+    }
+    legalBySlot.set(decision.moveSlot, decision);
+  }
+  if (legalBySlot.size === 0) {
+    throw new Error("Factory AI scored policy requires at least one legal move");
+  }
+
+  const maskSelection = selectFactoryAiMask(view.factory);
+  if (maskSelection.mask !== 1 && maskSelection.mask !== 7) {
+    throw new Error(
+      `Factory AI scored policy does not support selected ${maskSelection.receipt.branch.id} mask ${maskSelection.mask}`,
+    );
+  }
+  const mask = maskSelection.mask;
+
+  const draws: FactoryAiScoredDraw[] = [];
+  const simulatedRng: [number, number, number, number] = [0, 0, 0, 0];
+  for (let slot = 0; slot < MAX_MON_MOVES; slot += 1) {
+    const moveSlot = slot as BattleMoveSlot;
+    const draw = nextDraw(rng, draws.length + 1, `setup-simulated-rng-slot-${slot}`);
+    rng = draw.after;
+    const slotSimulatedRng = DEFAULT_MOVE_SCORE - (draw.randomValue % 16);
+    simulatedRng[slot] = slotSimulatedRng;
+    draws.push(Object.freeze({
+      ...draw,
+      kind: "setup-simulated-rng",
+      moveSlot,
+      simulatedRng: slotSimulatedRng,
+    }));
+  }
+
+  const targetForCbm: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: view.target.species,
+    types: view.target.types,
+    knownAbility: view.target.knownAbility,
+    realAbility: view.target.ability,
+  });
+
+  const executedScoringScripts: ("check-bad-move" | "try-to-faint" | "check-viability")[] = [
+    "check-bad-move",
+  ];
+  if (mask === 7) executedScoringScripts.push("try-to-faint", "check-viability");
+
+  const slotScores: FactoryAiScoredSlot[] = [];
+  for (let slot = 0; slot < MAX_MON_MOVES; slot += 1) {
+    const moveSlot = slot as BattleMoveSlot;
+    const moveId = view.moves[moveSlot];
+    const legal = legalBySlot.has(moveSlot);
+    if (!legal) {
+      slotScores.push(Object.freeze({
+        moveSlot,
+        moveId,
+        legal,
+        initialScore: DEFAULT_MOVE_SCORE,
+        checkBadMoveDelta: null,
+        tryToFaintDelta: null,
+        checkViabilityDelta: null,
+        finalScore: 0,
+      }));
+      continue;
+    }
+
+    const cbm = runCheckBadMovePreamble({
+      rng,
+      moveId,
+      target: targetForCbm,
+      drawOrdinalStart: draws.length + 1,
+      reasonPrefix: `slot-${slot}-check-bad-move`,
+    });
+    if (cbm.kind === "unsupported-branch") {
+      throw new Error(
+        `Factory AI check-bad-move barrier: slot ${slot} move ${moveId} effect ${cbm.effect}`,
+      );
+    }
+    rng = cbm.rng;
+    for (const draw of cbm.draws) {
+      draws.push(Object.freeze({ ...draw, phase: "check-bad-move" as const, moveSlot }));
+    }
+    let score = DEFAULT_MOVE_SCORE + cbm.scoreDelta;
+    let tryToFaintDelta: number | null = null;
+    let checkViabilityDelta: number | null = null;
+
+    if (mask === 7) {
+      const ttf = runTryToFaint({
+        rng,
+        moveId,
+        movesetIndex: moveSlot,
+        moveset: view.moves,
+        simulatedRng,
+        attacker: view.attacker as FactoryAiTryToFaintBattler,
+        target: view.target as FactoryAiTryToFaintTarget,
+        drawOrdinalStart: draws.length + 1,
+        reasonPrefix: `slot-${slot}-try-to-faint`,
+      });
+      rng = ttf.rng;
+      for (const draw of ttf.draws) {
+        draws.push(Object.freeze({ ...draw, phase: "try-to-faint" as const, moveSlot }));
+      }
+      score += ttf.scoreDelta;
+      tryToFaintDelta = ttf.scoreDelta;
+
+      const cv = runCheckViability({ rng, moveId });
+      if (cv.kind === "unsupported-branch") {
+        throw new Error(
+          `Factory AI check-viability barrier: slot ${slot} move ${moveId} effect ${cv.effect}`,
+        );
+      }
+      rng = cv.rng;
+      score += cv.scoreDelta;
+      checkViabilityDelta = cv.scoreDelta;
+    }
+
+    slotScores.push(Object.freeze({
+      moveSlot,
+      moveId,
+      legal,
+      initialScore: DEFAULT_MOVE_SCORE,
+      checkBadMoveDelta: cbm.scoreDelta,
+      tryToFaintDelta,
+      checkViabilityDelta,
+      finalScore: score,
+    }));
+  }
+
+  const legalScores = slotScores.filter((slot) => slot.legal);
+  const bestScore = Math.max(...legalScores.map((slot) => slot.finalScore));
+  const bestMoveSlots = Object.freeze(
+    legalScores.filter((slot) => slot.finalScore === bestScore).map((slot) => slot.moveSlot),
+  );
+  const tieDraw = nextDraw(rng, draws.length + 1, "best-move-tie-selection");
+  rng = tieDraw.after;
+  draws.push(Object.freeze({ ...tieDraw, kind: "best-move-tie" }));
+  const tieIndex = tieDraw.randomValue % bestMoveSlots.length;
+  const chosenSlot = bestMoveSlots[tieIndex]!;
+  const chosenDecision = legalBySlot.get(chosenSlot)!;
+  const submission = Object.freeze({
+    requestId: request.requestId,
+    side: request.side,
+    decision: chosenDecision,
+  });
+  const trace = Object.freeze({
+    schema: "factory-ai-trace/v1" as const,
+    phase: "choose-move" as const,
+    mask,
+    maskSelection: maskSelection.receipt,
+    executedScoringScripts: Object.freeze(executedScoringScripts),
+    draws: Object.freeze(draws),
+    slotScores: Object.freeze(slotScores),
+    bestMoveSlots,
+    tie: Object.freeze({
+      modulus: bestMoveSlots.length,
+      index: tieIndex,
+      chosenDecision,
+    }),
+  });
+  return Object.freeze({ submission, rng, trace });
+}
+
+/** Composition twin of `submitFactoryAiMaskZeroDecision`, for masks 1/7. */
+export function submitFactoryAiScoredDecision<
+  RulesState extends BattleJsonObject,
+>(
+  state: BattleState<RulesState>,
+  view: FactoryAiScoredView,
+  reducer: BattleDecisionReducer<RulesState>,
+): FactoryAiScoredTransition<RulesState> {
+  if (state.boundary.kind !== "decision-required") {
+    throw new Error("Factory AI requires a current Battle decision request");
+  }
+  if (state.boundary.request.kind !== "command") {
+    throw new Error("Factory AI scored policy does not implement forced switches");
+  }
+  const choice = chooseFactoryAiScoredDecision({
+    view,
+    request: state.boundary.request,
+    rng: state.rng,
+  });
+  const synchronizedReducer: BattleDecisionReducer<RulesState> = (context) => {
+    for (const draw of choice.trace.draws) {
+      const before = context.rng.snapshot();
+      if (before.value !== draw.before.value || before.calls !== draw.before.calls) {
+        throw new Error(`Factory AI RNG diverged before draw ${draw.ordinal}`);
+      }
+      const randomValue = context.rng.draw(draw.reason);
+      const after = context.rng.snapshot();
+      if (
+        randomValue !== draw.randomValue
+        || after.value !== draw.after.value
+        || after.calls !== draw.after.calls
+      ) {
+        throw new Error(`Factory AI RNG diverged after draw ${draw.ordinal}`);
+      }
+    }
+    return reducer(context);
+  };
+  const transition = submitBattleDecision(state, choice.submission, synchronizedReducer);
+  if (
+    transition.state.rng.calls < choice.rng.calls
+    || (
+      transition.state.rng.calls === choice.rng.calls
+      && transition.state.rng.value !== choice.rng.value
+    )
+  ) {
+    throw new Error("Battle kernel did not retain the Factory AI RNG draws");
+  }
+  return Object.freeze({ ...choice, transition });
+}
+
+/**
+ * Top-level Factory AI dispatch: `selectFactoryAiMask` picks band 0-1 ->
+ * mask 0 (existing policy, untouched), band 2-3 -> mask 1 (CheckBadMove
+ * only), band 4-7 -> mask 7 (CheckBadMove + TryToFaint + CheckViability),
+ * per `GetAiScriptsInBattleFactory` (`battle_factory.c:889-911`). The kernel
+ * stays decision-source-agnostic: this is the only place that picks which
+ * pure policy runs before handing off to the shared `submitBattleDecision`
+ * boundary.
+ */
+export function submitFactoryAiDecision<
+  RulesState extends BattleJsonObject,
+>(
+  state: BattleState<RulesState>,
+  view: FactoryAiScoredView,
+  reducer: BattleDecisionReducer<RulesState>,
+): FactoryAiDecisionTransition<RulesState> | FactoryAiScoredTransition<RulesState> {
+  const mask = selectFactoryAiMask(view.factory).mask;
+  if (mask === 0) {
+    const maskZeroView: FactoryAiMaskZeroView = Object.freeze({
+      schema: "factory-ai-view/v1",
+      mode: "factory-level-50-singles",
+      active: view.active,
+      factory: view.factory,
+      moves: view.moves,
+    });
+    return submitFactoryAiMaskZeroDecision(state, maskZeroView, reducer);
+  }
+  return submitFactoryAiScoredDecision(state, view, reducer);
 }
