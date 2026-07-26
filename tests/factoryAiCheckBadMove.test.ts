@@ -288,13 +288,137 @@ describe("AI_CBM_SpeedDown + CheckIfAbilityBlocksStatChange (docs/factory-ai-che
     expect(result.draws).toHaveLength(0);
   });
 
-  it("still barriers every other reachable CBM handler untouched by this narrowing (pass-through, EFFECT_ATTACK_DOWN)", () => {
+  it("still barriers every other reachable CBM handler untouched by this narrowing (pass-through, EFFECT_DEFENSE_DOWN)", () => {
     const result = run(MOVE_TAIL_WHIP, { ...MAROWAK, knownAbility: "ABILITY_ROCK_HEAD" });
     expect(result).toEqual({
       kind: "unsupported-branch",
       barrier: "factory-ai-check-bad-move",
       effect: "EFFECT_DEFENSE_DOWN",
       moveId: MOVE_TAIL_WHIP,
+    });
+  });
+});
+
+// data/battle_ai_scripts.s:277-281,308-312, docs/factory-ai-checkviability-ground-truth.md
+// §14.1: the first CBM-blocked pair's own CBM half (this is the CBM side;
+// AI_CV_AttackDown, the CV side, is in factoryAiCheckViability.test.ts).
+describe("AI_CBM_AttackDown + CheckIfAbilityBlocksStatChange (docs/factory-ai-checkviability-ground-truth.md §14.1)", () => {
+  const MOVE_GROWL = 45; // EFFECT_ATTACK_DOWN
+  const MOVE_CHARM = 204; // EFFECT_ATTACK_DOWN_2 -- same handler, different table entry
+
+  // Single-ability species so both draw sites' free-guess path is exercised
+  // without a confound (doc §14.2's own porter guidance).
+  const PINSIR: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 127, // Hyper Cutter is its only ability
+    types: ["TYPE_BUG", "TYPE_BUG"] as const,
+    knownAbility: null,
+    realAbility: "ABILITY_HYPER_CUTTER",
+    speedStage: 6,
+    atkStage: 6,
+  });
+  const SHUCKLE: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 213,
+    types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+    knownAbility: null,
+    realAbility: "ABILITY_STURDY",
+    speedStage: 6,
+    atkStage: 6,
+  });
+
+  it("scores -10 with zero draws when the target's ATK stage is already MIN_STAT_STAGE", () => {
+    const atMinAtk: FactoryAiCheckBadMoveTarget = { ...SHUCKLE, atkStage: 0 };
+    const result = run(MOVE_GROWL, atMinAtk);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("EFFECT_ATTACK_DOWN_2 hits the identical MIN_STAT_STAGE short-circuit", () => {
+    const atMinAtk: FactoryAiCheckBadMoveTarget = { ...SHUCKLE, atkStage: 0 };
+    const result = run(MOVE_CHARM, atMinAtk);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("scores -10 with zero draws for a single-ability Hyper Cutter target (get_ability's own free guess, the first of the handler's two draw sites)", () => {
+    const result = run(MOVE_GROWL, PINSIR);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("scores -10 with zero draws when Hyper Cutter is the known (BattleHistory-cached) ability", () => {
+    const known: FactoryAiCheckBadMoveTarget = { ...PINSIR, knownAbility: "ABILITY_HYPER_CUTTER" };
+    const result = run(MOVE_GROWL, known);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("an ambiguous two-ability target (neither ability is Hyper Cutter, Clear Body, or White Smoke) draws exactly three times -- the universal preamble's own soundproof guess, plus once per AttackDown draw site -- and scores 0", () => {
+    // SPECIES_YANMA: Speed Boost / Compound Eyes, both unobserved -- neither
+    // can ever land on Soundproof (universal preamble), Hyper Cutter (first
+    // AttackDown draw site), or Clear Body/White Smoke (shared-tail second
+    // draw site). Growl is 0-power (MOVE_POWER_OTHER), so the preamble's own
+    // type-negation ability guess is skipped -- only its soundproof guess
+    // draws, same convention the SpeedDown tests already established for why
+    // Marowak (also ambiguous) can't isolate a handler's own draw count.
+    const ambiguous: FactoryAiCheckBadMoveTarget = {
+      species: 193,
+      types: ["TYPE_BUG", "TYPE_FLYING"],
+      knownAbility: null,
+      realAbility: "ABILITY_SPEED_BOOST",
+      speedStage: 6,
+      atkStage: 6,
+    };
+    const result = run(MOVE_GROWL, ambiguous);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(3);
+    expect(result.draws.map((d) => d.reason)).toEqual([
+      "test-slot-soundproof",
+      "test-slot-attack-down-hyper-cutter",
+      "test-slot-attack-down-shared-tail",
+    ]);
+  });
+
+  it("scores -10 when the shared tail's known ability is Clear Body, zero draws (second draw site, known-ability short-circuit)", () => {
+    const knownClearBody: FactoryAiCheckBadMoveTarget = {
+      species: 72, // SPECIES_TENTACOOL: Clear Body / Liquid Ooze
+      types: ["TYPE_WATER", "TYPE_POISON"],
+      knownAbility: "ABILITY_CLEAR_BODY",
+      realAbility: "ABILITY_CLEAR_BODY",
+      speedStage: 6,
+      atkStage: 6,
+    };
+    const result = run(MOVE_GROWL, knownClearBody);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("scores -10 with zero draws for a single-ability White Smoke target (second draw site's own free guess)", () => {
+    const whiteSmoke: FactoryAiCheckBadMoveTarget = {
+      species: 321, // SPECIES_TORKOAL: White Smoke is its only ability
+      types: ["TYPE_FIRE", "TYPE_FIRE"],
+      knownAbility: null,
+      realAbility: "ABILITY_WHITE_SMOKE",
+      speedStage: 6,
+      atkStage: 6,
+    };
+    const result = run(MOVE_GROWL, whiteSmoke);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("still barriers every other reachable CBM handler untouched by this narrowing (pass-through, EFFECT_DEFENSE_DOWN)", () => {
+    const result = run(MOVE_TAIL_WHIP, PINSIR);
+    expect(result).toMatchObject({
+      kind: "unsupported-branch",
+      barrier: "factory-ai-check-bad-move",
+      effect: "EFFECT_DEFENSE_DOWN",
     });
   });
 });

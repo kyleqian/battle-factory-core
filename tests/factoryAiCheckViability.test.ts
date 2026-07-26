@@ -906,3 +906,230 @@ describe("AI_CV_VitalThrow (docs/factory-ai-checkviability-ground-truth.md §13)
     expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
   });
 });
+
+const MOVE_GROWL_ATTACK_DOWN = 45; // EFFECT_ATTACK_DOWN
+const MOVE_CHARM = 204; // EFFECT_ATTACK_DOWN_2 -- same handler, different table entry
+const PHYSICAL_TYPES = ["TYPE_BUG", "TYPE_ROCK"] as const; // both in AI_CV_AttackDown_PhysicalTypeList (Shuckle-shaped)
+const NON_PHYSICAL_TYPES = ["TYPE_GHOST", "TYPE_POISON"] as const; // neither in the list (Haunter-shaped), doc §14.3's own reach fixture
+
+/** isFirstTurn/evasionStage/accStage/speed(Stage) are irrelevant to AI_CV_AttackDown -- fixed dummy values. */
+function attackDownAttacker(hp: number, maxHp = 100) {
+  return Object.freeze({
+    speed: 100, speedStage: 6, types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+    isFirstTurn: 0, evasionStage: 6, accStage: 6, atkStage: 6, hp, maxHp,
+  });
+}
+function attackDownTarget(atkStage: number, hp: number, types: readonly [string, string], maxHp = 100) {
+  return Object.freeze({
+    speed: 100, speedStage: 6, types,
+    isFirstTurn: 0, evasionStage: 6, accStage: 6, atkStage, hp, maxHp,
+  });
+}
+
+// data/battle_ai_scripts.s:1090-1123, docs/factory-ai-checkviability-ground-truth.md §14.1:
+// the first CBM-blocked pair's own CV half (AI_CBM_AttackDown, the CBM side,
+// is in factoryAiCheckBadMove.test.ts). Every one of the 6 gates and both
+// if_random_less_than draw sites, isolated one at a time by holding the
+// other gates at their deterministic/skip settings, plus a combined test
+// proving DRAW SITE 1 and DRAW SITE 2 are NOT mutually exclusive.
+describe("AI_CV_AttackDown (docs/factory-ai-checkviability-ground-truth.md §14.1)", () => {
+  it("Gate A held (target ATK stage == DEFAULT_STAT_STAGE) + Gate D skip (target HP > 70) + Gate E match (type1 physical): fully deterministic, zero draws, zero score", () => {
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_GROWL_ATTACK_DOWN,
+      attacker: attackDownAttacker(100),
+      target: attackDownTarget(6, 100, PHYSICAL_TYPES),
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+  });
+
+  it("EFFECT_ATTACK_DOWN_2 dispatches to the identical handler", () => {
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_CHARM,
+      attacker: attackDownAttacker(100),
+      target: attackDownTarget(6, 100, PHYSICAL_TYPES),
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+  });
+
+  describe("Gate A / Gate B (target ATK stage != DEFAULT_STAT_STAGE; AI_USER's own HP > 90)", () => {
+    it("Gate A not held, Gate C skips DRAW SITE 1 (ATK stage 4 > 3), Gate B skips the second -1 (attacker HP 100% > 90): score -1, zero draws", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_GROWL_ATTACK_DOWN,
+        attacker: attackDownAttacker(100),
+        target: attackDownTarget(4, 100, PHYSICAL_TYPES),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: -1 });
+    });
+
+    it("Gate A not held, Gate B applies the second -1 (attacker HP exactly 90%, NOT >90): score -2, zero draws", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_GROWL_ATTACK_DOWN,
+        attacker: attackDownAttacker(90),
+        target: attackDownTarget(4, 100, PHYSICAL_TYPES),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: -2 });
+    });
+  });
+
+  describe("Gate C / DRAW SITE 1 (if_random_less_than 50, reached only at target ATK stage in [0,3])", () => {
+    it("ATK stage 3 (<=3) reaches the roll; roll < 50 skips the -2 (one draw, base -1 from Gate A only)", () => {
+      // seed 4 -> randomValue % 256 = 25 (< 50).
+      const result = runCheckViability({
+        rng: { value: 4, calls: 0 },
+        moveId: MOVE_GROWL_ATTACK_DOWN,
+        attacker: attackDownAttacker(100), // > 90 -> Gate B's second -1 skipped
+        target: attackDownTarget(3, 100, PHYSICAL_TYPES), // Gate D/E deterministic zero past this
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(-1);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "attack-down-roll-1", succeeded: false });
+    });
+
+    it("ATK stage 3 (<=3), roll >= 50 applies the -2 (one draw, -1 -2 = -3 total)", () => {
+      // seed 1 -> randomValue % 256 = 198 (>= 50).
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_GROWL_ATTACK_DOWN,
+        attacker: attackDownAttacker(100),
+        target: attackDownTarget(3, 100, PHYSICAL_TYPES),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(-3);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "attack-down-roll-1", succeeded: true });
+    });
+  });
+
+  describe("Gate D (if_hp_more_than AI_TARGET, 70 -- the target's OWN hp, a plain fallthrough)", () => {
+    it("target HP exactly 71% (>70): skips the -2", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_GROWL_ATTACK_DOWN,
+        attacker: attackDownAttacker(100),
+        target: attackDownTarget(6, 71, PHYSICAL_TYPES), // Gate A held -> only Gate D/E vary
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+
+    it("target HP exactly 70% (NOT >70): applies the -2", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_GROWL_ATTACK_DOWN,
+        attacker: attackDownAttacker(100),
+        target: attackDownTarget(6, 70, PHYSICAL_TYPES),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: -2 });
+    });
+  });
+
+  describe("Gates E/F (get_target_type1/2 + if_in_bytes AI_CV_AttackDown_PhysicalTypeList)", () => {
+    it("Gate E matches on type1 alone (type2 non-physical): jumps to End, zero draws", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_GROWL_ATTACK_DOWN,
+        attacker: attackDownAttacker(100),
+        target: attackDownTarget(6, 100, ["TYPE_BUG", "TYPE_FLYING"]),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+
+    it("Gate F matches on type2 alone (type1 non-physical, Gate E misses): jumps to End, zero draws", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_GROWL_ATTACK_DOWN,
+        attacker: attackDownAttacker(100),
+        target: attackDownTarget(6, 100, ["TYPE_GHOST", "TYPE_ROCK"]),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+  });
+
+  describe("DRAW SITE 2 (if_random_less_than 50, reached only when neither Gate E nor F matches)", () => {
+    it("roll < 50: jumps to End, exactly one draw, zero score (doc §14.3's own reach fixture shape)", () => {
+      // seed 4 -> randomValue % 256 = 25 (< 50).
+      const result = runCheckViability({
+        rng: { value: 4, calls: 0 },
+        moveId: MOVE_GROWL_ATTACK_DOWN,
+        attacker: attackDownAttacker(100),
+        target: attackDownTarget(6, 100, NON_PHYSICAL_TYPES),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(0);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "attack-down-roll-2", succeeded: false });
+      expect(result.rng.calls).toBe(1);
+    });
+
+    it("roll >= 50: falls through to score -2, exactly one draw", () => {
+      // seed 1 -> randomValue % 256 = 198 (>= 50).
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_GROWL_ATTACK_DOWN,
+        attacker: attackDownAttacker(100),
+        target: attackDownTarget(6, 100, NON_PHYSICAL_TYPES),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(-2);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "attack-down-roll-2", succeeded: true });
+      expect(result.rng.calls).toBe(1);
+    });
+  });
+
+  it("DRAW SITE 1 and DRAW SITE 2 are NOT mutually exclusive: both fire in one pass, worst-case -8 (-1,-1,-2,-2,-2)", () => {
+    // seed 2 -> draw1 randomValue % 256 = 140 (>= 50, succeeds); draw2 randomValue % 256 = 195 (>= 50, succeeds).
+    const result = runCheckViability({
+      rng: { value: 2, calls: 0 },
+      moveId: MOVE_GROWL_ATTACK_DOWN,
+      attacker: attackDownAttacker(50), // <= 90 -> Gate B's second -1 applies
+      target: attackDownTarget(3, 50, NON_PHYSICAL_TYPES), // ATK stage <=3 -> draw1; HP <=70 -> Gate D -2; non-physical -> draw2
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result.kind).toBe("scored");
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.scoreDelta).toBe(-8);
+    expect(result.draws).toHaveLength(2);
+    expect(result.draws[0]).toMatchObject({ kind: "attack-down-roll-1", succeeded: true });
+    expect(result.draws[1]).toMatchObject({ kind: "attack-down-roll-2", succeeded: true });
+    expect(result.rng.calls).toBe(2);
+  });
+
+  it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
+    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
+  });
+});
