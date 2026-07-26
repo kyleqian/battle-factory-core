@@ -1,4 +1,77 @@
 ---
+## 459 — Full-turn reducer now consumes the REAL Factory-AI trainer policy (item 1) AND the non-terminal forced-switch full-turn variant (item 2); item 3 (player-side variant) not started, per the brief's own time cap
+
+- **State:** tree green at **217 files / 2570 tests** (+0 files/+2 tests
+  over entry 458's 217/2568 — both items only added tests to the existing
+  `factoryBattleScriptFullTurnDecision.test.ts`), build green, ratchet
+  unchanged (6/6 — neither item touched a barrier call site). Two per-rung
+  commits (`b2057ba`, `98e1315`), both green.
+- **Item 1 — real AI trainer decisions in the full-turn cycle, done:**
+  generalized the trainer side of `factoryBattleScriptFullTurnDecision.ts`
+  to a real 4-move set (`FactoryFullTurnBattlerConfig.moves` optional
+  override, `trainerLegalDecisions()` enumerating nonzero moveset slots,
+  the trainer-command branch indexed by the submitted `moveSlot` instead of
+  a hardcoded 0) so `submitFactoryAiDecision` (entry 457's mask dispatch)
+  can drive the trainer's per-turn command through the SAME
+  `reduceFactoryFullTurnDecision` reducer — **no new shared boundary type
+  and no reducer-logic change needed**: `submitFactoryAiDecision`'s own
+  RNG-synchronizing wrapper already advances the kernel's cumulative cursor
+  with the policy's draws before calling the reducer, and the reducer's own
+  `rngBefore`/`rngAfter` reconciliation (entry 450's own subtlety) already
+  accounts for whatever the context's cursor holds going in — composition
+  just worked, confirming ROADMAP S10's decision-source-agnostic-kernel
+  architecture. New integration test: two real turns where the trainer's
+  move is chosen by the live mask-7 policy from Surf/RockSlide/BodySlam/
+  Thunderbolt against a Ground-type target — Surf wins unambiguously both
+  times (verified via direct construction against 3 different RNG seeds
+  before writing the test: same [100,99,99,89] score line and single-slot
+  `bestMoveSlots` every time, so the pick needs no seed-dependent tie-break)
+  — with the complete per-turn draw ledger (11 policy draws + both 4-roll
+  hit chains, 19 then 38 cumulative) pinned as one continuous LCG stream
+  and the chosen move (`moveSlot: 0`) asserted both turns.
+- **Item 2 — non-terminal forced-switch full-turn variant, done:** added an
+  optional trainer-side bench (`trainerBenchHp`/`trainerBenchOverride`,
+  party slots 1/2 — slot 0 is always the active trainer mon in this
+  reducer's own layout, unlike `factoryBattleScriptTerminalDecision.ts`'s
+  active-at-slot-2 convention). The reducer's `faint1.kind === "resumed"`
+  branch (already wired when this module first landed, entry 450) needed
+  **zero logic changes** — it already skips the second action and runs
+  straight to `runBattleEndTurnOrchestration` per `cancelallactions`. New
+  integration test reused the existing "mid-turn KO" fixture's exact
+  numbers verbatim, just adding a healthy MACHOP bench (entry 447's own
+  proven switch-in candidate — real move, passes
+  `GetMostSuitableMonToSwitchInto`'s pass-1 gate) — passed on the first
+  run. Pinned: outcome is `decision-required` (not terminal), the next
+  boundary names battler 1 rebuilt as MACHOP (species/hp 145/partyIndex 1/
+  neutral stat stages/clean status), the player's own move shows exactly
+  one PP use (the second action never dispatched — there is no second
+  Strength cast to draw RNG for), and `rng.calls` stays at exactly 4 (the
+  killing blow's own hit chain — the forced-switch dance and this
+  scenario's quiet, weather/status-free end-turn both draw zero; a
+  dispatched second action would have made this 8, not 4).
+- **Item 3 (player-side variant) — not started**, per the brief's own
+  explicit time cap ("do not start past ~40 min") and its own conditional
+  framing ("if BOTH land and cap allows") — items 1+2 together, plus the
+  upfront reading of AGENTS.md/PROGRESS.md/the two source modules, the
+  scratch-tested AI scoring verification, and both green rungs, filled the
+  bounded worker session's budget. No shape gap found for item 3 specifically
+  (not attempted far enough to surface one) — the natural next step would
+  reuse `factoryBattleScriptTerminalDecision.ts`'s own `playerBenchHp`/
+  `playerBenchOverride` precedent (already proven there) ported onto this
+  reducer's player-side party the same way item 2 just did for the trainer
+  side, plus surfacing the `"player-choice-required"` fork this reducer
+  currently just throws on (both `faint1`/`faint2` branches already name
+  the exact throw site: "outside this reducer's modeled domain").
+- **Notes:** no presentation/census/opcode-registration changes (pure
+  reducer/config work, as scoped). Both items composed entirely from
+  already-landed machinery (entries 447/450/457) — no genuine shape gap
+  surfaced needing escalation. PAPERCUT: none logged — a scratch vitest
+  file under `tests/` (deleted after use, never committed) let the exact
+  mask-7 scoring/draw-count numbers get verified against 3 RNG seeds before
+  the real test was written, instead of hand-deriving them and discovering
+  a mismatch after the fact.
+
+---
 ## 458 — Rain/Sun F7/F9 landed (item 1, committed); `TRYCASTFORMDATACHANGE` (item 2) STOPPED per the brief's own condition — Castform reachability confirmed real, not hypothetical
 
 - **State:** tree green at **217 files / 2568 tests** (+0 files/+3 tests

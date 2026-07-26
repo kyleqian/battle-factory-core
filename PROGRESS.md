@@ -4,6 +4,94 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 462 — Ingrain/Leech Seed/Wrap-family registered: setters + end-turn bodies executable (entry 461's next-item list)
+
+- **State:** tree green at **219 files / 2610 tests** (+1 file/+20 tests
+  over entry 461's 218/2590), build green. Ratchet: `battleScriptHitChainOpcode.ts`
+  25→23 barriers (two retired **for real**, not narrowed — see below), new
+  `battleScriptIngrainLeechSeedWrapOpcode.ts` pinned at 3 (deliberate, named
+  in the ratchet's own comment). One commit (`0a29dfe`). Census
+  live-regenerated: **73/214→76/214 effects, 152/355→160/355 moves,
+  118/276→125/276 Factory-L50** (25/25 self-checks pass). Verify script
+  rerun live against the oracle twice for determinism: **18/18 PASS** both
+  times (`node --experimental-strip-types tools/probe/verify-ingrain-leechseed-wrap-ground-truth.ts`).
+- **Did:** followed `docs/ingrain-leechseed-wrap-ground-truth.md`'s own
+  dependency-ordered slices end to end.
+  1. **Setters:** new `TRYSETROOTS` (Ingrain, one concrete site, no RNG) and
+     `SETSEEDED` (Leech Seed — accuracy/already-seeded/Grass-immunity/success
+     branches, `STATUS3_LEECHSEED`+seeder-id bits) opcodes in a new
+     `battleScriptIngrainLeechSeedWrapOpcode.ts`. Wrap's own setter needed no
+     new opcode — `MOVE_EFFECT_WRAP` is a new case inside the
+     already-registered `Cmd_seteffectwithchance` dispatch
+     (`applySetMoveEffect`): the `(Random()&3)+3` duration roll, plus two new
+     per-battler fields this doc's own gap analysis flagged
+     (`wrappedMove`/`wrappedBy`, optional/defaulted so no existing fixture
+     needed updating).
+  2. **End-turn bodies:** wired real `ENDTURN_INGRAIN`/`LEECH_SEED`/`WRAP`
+     ticks into `battleEndTurnOrchestration.ts`'s existing loop, in the
+     enum's real execution order (INGRAIN, ABILITIES/ITEMS1 no-op,
+     LEECH_SEED, POISON/BAD_POISON/BURN, NIGHTMARE, CURSE, WRAP, UPROAR
+     no-op, THRASH, ...) — **not** the C switch's own textual case order,
+     which is cosmetically different and would have mis-sequenced Leech
+     Seed/Wrap against the already-landed status-damage tick. Factored the
+     repeated "run tick, propagate opcode-barrier, check outcome-decided"
+     shape into one `applyTickOutcome` helper shared by all four ticks now
+     (status-damage + the three new ones).
+  3. **Two real shape gaps the doc named, both closed:** `Cmd_datahpupdate`'s
+     negative-damage (HP gain) branch was a barrier from an earlier rung
+     ("needs maxHP, unmodeled") — `maxHP` has existed since the burn/poison
+     work, so this was just stale; implemented the real heal-clamped-at-maxHP
+     branch (no bide/shellBell/physical-special bookkeeping on this branch,
+     matching source exactly). `Cmd_cleareffectsonfaint`'s `STATUS2_WRAPPED`
+     cross-battler barrier is now a real clear using the new `wrappedBy`
+     identity (a fainted mon's own traps release on its allies/foes for
+     real).
+  4. **Two narrow opcode-table gaps the census tool itself surfaced, not the
+     doc:** `PRINTFROMTABLE_TABLES` was missing `gLeechSeedStringIds`
+     entirely (opcode-registered ≠ every table pointer wired); `PLAYANIMATION`'s
+     animType allowlist needed `B_ANIM_INGRAIN_HEAL`/`B_ANIM_LEECH_SEED_DRAIN`/
+     `B_ANIM_TURN_TRAP` added (both discovered by running the tests, not
+     predicted in advance — fixed same rung).
+- **Test:** full setter lifecycle for all three (Ingrain success/already-rooted;
+  Leech Seed success/Grass-immune/already-seeded, entering post-accuracycheck
+  per the doc's own scope note since that roll is already covered elsewhere;
+  Wrap's duration roll/already-wrapped-skip/`BattleScript_MoveEffectWrap`
+  return, isolated at the `seteffectwithchance` dispatch per this codebase's
+  own established per-opcode testing convention rather than gambling on a
+  full accuracy/crit/damage RNG chain) — 11 tests, new file. End-turn tick
+  tests extending `battleEndTurnOrchestration.test.ts`: Ingrain heal capped
+  at maxHP (doc's live 159→161 ledger) and uncapped, Ingrain's real full/0-HP
+  guard, Leech Seed drain+heal (doc's live numbers) plus a Liquid Ooze
+  reversal (seeder damaged instead of healed — the ability check is on the
+  **seeded** mon per source, confirmed against `Cmd_jumpifability`'s exact
+  call site), Wrap still-trapped decrement+damage and release-with-no-damage
+  — 7 new tests. Plus 3 new barrier-reachability tests (COPYARRAY/
+  JUMPIFABILITY/MANIPULATEDAMAGE's own narrowed-tuple misses) required by
+  the ratchet's own "every pinned module needs a reachability test" check.
+  All zero-RNG assertions match the doc's own live ledger exactly.
+- **Ratchet pin moves, named:** `battleScriptHitChainOpcode.ts` 25→23 (both
+  retirements are real — see item 3 above, not a narrowing);
+  `battleScriptIngrainLeechSeedWrapOpcode.ts` new at 3 (`COPYARRAY` narrowed
+  to `BattleScript_LeechSeedTurnDrain`'s own `gBattleMoveDamage<-gHpDealt`
+  tuple among 16 concrete call sites; `JUMPIFABILITY` narrowed to
+  `BS_TARGET`/`BS_ATTACKER` + `ABILITY_LIQUID_OOZE` among 18; `MANIPULATEDAMAGE`
+  narrowed to `DMG_CHANGE_SIGN` among 4 — `DMG_RECOIL_FROM_MISS`/`DMG_DOUBLED`
+  out of this slice's scope).
+- **Next:** CheckViability handler bodies (entry 460's own carried item,
+  phased by the earlier audit's 16-reachable-handler table), seam window 3
+  (`turn5-rockslide.json`), ENDTURN_ABILITIES/ITEMS1/ITEMS2 breadth (pure-C,
+  explicitly out of this step's scope), Nightmare/Curse/Thrash/Disable/Taunt
+  end-turn bodies now that their own case-barriers are the only ones left in
+  `runDoBattlerEndTurnEffects` (no move effect sets any of their trigger
+  bits yet, so still genuinely inert, not just undertested).
+- **Notes:** no factory-AI or `docs/factory-ai-*.md` changes (side worker's
+  area this hour, per the brief's own scope line) — untouched. No new
+  PAPERCUT: the two "opcode registered ≠ every table/animType entry wired"
+  gaps (PRINTFROMTABLE/PLAYANIMATION) cost some time but were caught by the
+  test suite itself within the same session, not a dev-loop friction worth
+  flagging separately from ordinary iteration.
+
+---
 ## 461 — Full-turn reducer: PLAYER-side forced-switch variant lands (entry 459's item 3, the named remainder)
 
 - **State:** tree green at **218 files / 2585 tests** (+0 files/+3 tests
@@ -133,77 +221,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   with session tactics (launcher-pipeline exit masking; cross-move
   triangulation; sRandCount+LR attribution probe; point-in-time family
   costs; probe-then-decide).
-
----
-## 459 — Full-turn reducer now consumes the REAL Factory-AI trainer policy (item 1) AND the non-terminal forced-switch full-turn variant (item 2); item 3 (player-side variant) not started, per the brief's own time cap
-
-- **State:** tree green at **217 files / 2570 tests** (+0 files/+2 tests
-  over entry 458's 217/2568 — both items only added tests to the existing
-  `factoryBattleScriptFullTurnDecision.test.ts`), build green, ratchet
-  unchanged (6/6 — neither item touched a barrier call site). Two per-rung
-  commits (`b2057ba`, `98e1315`), both green.
-- **Item 1 — real AI trainer decisions in the full-turn cycle, done:**
-  generalized the trainer side of `factoryBattleScriptFullTurnDecision.ts`
-  to a real 4-move set (`FactoryFullTurnBattlerConfig.moves` optional
-  override, `trainerLegalDecisions()` enumerating nonzero moveset slots,
-  the trainer-command branch indexed by the submitted `moveSlot` instead of
-  a hardcoded 0) so `submitFactoryAiDecision` (entry 457's mask dispatch)
-  can drive the trainer's per-turn command through the SAME
-  `reduceFactoryFullTurnDecision` reducer — **no new shared boundary type
-  and no reducer-logic change needed**: `submitFactoryAiDecision`'s own
-  RNG-synchronizing wrapper already advances the kernel's cumulative cursor
-  with the policy's draws before calling the reducer, and the reducer's own
-  `rngBefore`/`rngAfter` reconciliation (entry 450's own subtlety) already
-  accounts for whatever the context's cursor holds going in — composition
-  just worked, confirming ROADMAP S10's decision-source-agnostic-kernel
-  architecture. New integration test: two real turns where the trainer's
-  move is chosen by the live mask-7 policy from Surf/RockSlide/BodySlam/
-  Thunderbolt against a Ground-type target — Surf wins unambiguously both
-  times (verified via direct construction against 3 different RNG seeds
-  before writing the test: same [100,99,99,89] score line and single-slot
-  `bestMoveSlots` every time, so the pick needs no seed-dependent tie-break)
-  — with the complete per-turn draw ledger (11 policy draws + both 4-roll
-  hit chains, 19 then 38 cumulative) pinned as one continuous LCG stream
-  and the chosen move (`moveSlot: 0`) asserted both turns.
-- **Item 2 — non-terminal forced-switch full-turn variant, done:** added an
-  optional trainer-side bench (`trainerBenchHp`/`trainerBenchOverride`,
-  party slots 1/2 — slot 0 is always the active trainer mon in this
-  reducer's own layout, unlike `factoryBattleScriptTerminalDecision.ts`'s
-  active-at-slot-2 convention). The reducer's `faint1.kind === "resumed"`
-  branch (already wired when this module first landed, entry 450) needed
-  **zero logic changes** — it already skips the second action and runs
-  straight to `runBattleEndTurnOrchestration` per `cancelallactions`. New
-  integration test reused the existing "mid-turn KO" fixture's exact
-  numbers verbatim, just adding a healthy MACHOP bench (entry 447's own
-  proven switch-in candidate — real move, passes
-  `GetMostSuitableMonToSwitchInto`'s pass-1 gate) — passed on the first
-  run. Pinned: outcome is `decision-required` (not terminal), the next
-  boundary names battler 1 rebuilt as MACHOP (species/hp 145/partyIndex 1/
-  neutral stat stages/clean status), the player's own move shows exactly
-  one PP use (the second action never dispatched — there is no second
-  Strength cast to draw RNG for), and `rng.calls` stays at exactly 4 (the
-  killing blow's own hit chain — the forced-switch dance and this
-  scenario's quiet, weather/status-free end-turn both draw zero; a
-  dispatched second action would have made this 8, not 4).
-- **Item 3 (player-side variant) — not started**, per the brief's own
-  explicit time cap ("do not start past ~40 min") and its own conditional
-  framing ("if BOTH land and cap allows") — items 1+2 together, plus the
-  upfront reading of AGENTS.md/PROGRESS.md/the two source modules, the
-  scratch-tested AI scoring verification, and both green rungs, filled the
-  bounded worker session's budget. No shape gap found for item 3 specifically
-  (not attempted far enough to surface one) — the natural next step would
-  reuse `factoryBattleScriptTerminalDecision.ts`'s own `playerBenchHp`/
-  `playerBenchOverride` precedent (already proven there) ported onto this
-  reducer's player-side party the same way item 2 just did for the trainer
-  side, plus surfacing the `"player-choice-required"` fork this reducer
-  currently just throws on (both `faint1`/`faint2` branches already name
-  the exact throw site: "outside this reducer's modeled domain").
-- **Notes:** no presentation/census/opcode-registration changes (pure
-  reducer/config work, as scoped). Both items composed entirely from
-  already-landed machinery (entries 447/450/457) — no genuine shape gap
-  surfaced needing escalation. PAPERCUT: none logged — a scratch vitest
-  file under `tests/` (deleted after use, never committed) let the exact
-  mask-7 scoring/draw-count numbers get verified against 3 RNG seeds before
-  the real test was written, instead of hand-deriving them and discovering
-  a mismatch after the fact.
 
