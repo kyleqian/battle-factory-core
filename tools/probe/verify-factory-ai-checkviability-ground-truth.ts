@@ -529,6 +529,74 @@ const DRAW_COUNT_SCENARIOS: DrawCountScenarioSpec[] = [
     expectedTotalSteps: { 1: 8, 99: 8 },
     checkCrossSeedStable: true,
   },
+  // AI_CV_DefenseUp (data/battle_ai_scripts.s:915-954, doc §18): the fifth
+  // CBM-blocked handler pair to get live ground truth (AI_CBM_DefenseUp +
+  // AI_CV_DefenseUp), and the largest remaining CheckViability pair (5
+  // if_random_less_than sites: :917/:923/:927/:936/:938). Unlike AttackUp,
+  // DefenseUp3's own Gate C is INVERTED (`if_hp_less_than USER,70,
+  // DefenseUp4` -- true routes INTO the last-move branch, false falls
+  // through to a :927 draw whose own failure ALSO falls into the last-move
+  // branch) -- reusing AttackUp's HP=100%-is-clean assumption would have been
+  // wrong here (a real prose-transfer trap this session caught live, not on
+  // paper). These 3 fixtures instead isolate DefenseUp4's own novel
+  // dependency -- the TARGET's (player's) last-used move power/type
+  // (`get_last_used_bank_move AI_TARGET` + `get_move_power_from_result`/
+  // `get_move_type_from_result`, :930-935) -- by holding the opponent
+  // (Anorith, Battle Armor) HP in the deterministic [40,70)% band via the
+  // PLAYER's own fixed-damage move (MOVE_SEISMIC_TOSS/MOVE_DRAGON_RAGE,
+  // EFFECT_LEVEL_DAMAGE/EFFECT_DRAGON_RAGE, `dmgtolevel`/`setword
+  // gBattleMoveDamage,40` -- data/battle_scripts_1.s:819-828,1195-1204 --
+  // bypass the normal 85-100% damage roll AND crit calc entirely, so HP lands
+  // on the exact same value both seeds, no roll-variance confound), which
+  // ALSO doubles as the last-used-move fixture needs no separate turn: by
+  // the time the phantom next-turn re-decision runs, MOVEEND_UPDATE_LAST_
+  // MOVES (src/battle_script_commands.c:4407) has already set
+  // gLastMoves[player] from turn 1's real action. MOVE_SEISMIC_TOSS
+  // (Fighting, IN AI_CV_DefenseUp_PhysicalTypes) and MOVE_VITAL_THROW
+  // (also Fighting) both land the "physical last move" branch; MOVE_DRAGON_
+  // RAGE (Dragon, NOT in the list) hits the "non-physical" branch instead --
+  // the provable flip. Opponent all 4 slots MOVE_HARDEN (106,
+  // EFFECT_DEFENSE_UP, 0 power, accuracy 0 -- always hits, no
+  // Cmd_accuracycheck draw, CBM- and CV-table-covered). Attribution probe
+  // (window 0 732, tools/probe/attribute-factory-ai-random-callers.py)
+  // confirms Cmd_if_random_less_than fires 0 times in the non-physical
+  // fixture (both seeds, deterministic 8 total) vs 6 (seed 1) / 5 (seed 99)
+  // in BOTH physical-last-move fixtures (Seismic Toss AND Vital Throw agree
+  // on seed 1's count exactly) -- NOT the clean "4 = N slots x 1 draw"
+  // pattern every prior handler showed (AttackUp/DefenseDown/SpDefDown/
+  // VitalThrow), and not cross-seed stable either. A future porter should
+  // single-step the flagged frame to pin the exact per-slot mechanism (this
+  // session did not); the qualitative absence/presence (0 vs 5-6) is the
+  // reliable, reproduced signal here, same "shape over exact count" hedge
+  // this doc's own §11.0 already established for AI_CV_HighCrit's neutral
+  // fixture.
+  {
+    label:
+      "AI_CV_DefenseUp, target (player, Machamp) last-used move is MOVE_VITAL_THROW (Fighting, IN AI_CV_DefenseUp_PhysicalTypes) -- reachable branch (data/battle_ai_scripts.s:915-954): opponent (AI_USER, Anorith) HP lands at 55/120 (45.8%, inside [40,70) after Harden's own +1 Defense stage reduces the hit) so Gate C (if_hp_less_than USER,70) routes straight into AI_CV_DefenseUp4, Gate D (if_hp_less_than USER,40) is false, and the last-move check (power=70 != 0, type=Fighting IS in the physical list) falls through to the :936 if_random_less_than 60 draw site",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-defenseup-lowhp-control-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 14, 99: 13 },
+    checkCrossSeedStable: false,
+  },
+  {
+    label:
+      "AI_CV_DefenseUp, target (player, Machamp) last-used move is MOVE_SEISMIC_TOSS (Fighting, IN AI_CV_DefenseUp_PhysicalTypes, EFFECT_LEVEL_DAMAGE -- fixed 50 damage, no roll variance) -- reachable branch, same code path as the Vital Throw fixture above with a different, deterministic-damage physical move: opponent HP lands at 70/120 (58.3%, inside [40,70)), same :936 draw site reached via the same Gate C/D/power/type chain",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-defenseup-physicallastmove-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 14, 99: 13 },
+    checkCrossSeedStable: false,
+  },
+  {
+    label:
+      "AI_CV_DefenseUp, target (player, Machamp) last-used move is MOVE_DRAGON_RAGE (Dragon, NOT in AI_CV_DefenseUp_PhysicalTypes, EFFECT_DRAGON_RAGE -- fixed 40 damage) -- the flip: opponent HP lands at 80/120 (66.7%, inside [40,70), same Gate C/D routing as the two physical fixtures above), but the last-move type check (power=1 != 0, type=Dragon NOT in the physical list) falls through if_not_in_bytes straight to AI_CV_DefenseUp_ScoreDown2, skipping BOTH :936 and :938 entirely -- deterministic zero draws from the handler itself, cross-seed stable",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-defenseup-nonphysicallastmove-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 8, 99: 8 },
+    checkCrossSeedStable: true,
+  },
 ];
 
 function totalPpUsed(ppBefore: number[], ppAfter: number[]): number {
