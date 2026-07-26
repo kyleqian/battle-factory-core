@@ -90,6 +90,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   gaps (PRINTFROMTABLE/PLAYANIMATION) cost some time but were caught by the
   test suite itself within the same session, not a dev-loop friction worth
   flagging separately from ordinary iteration.
+- **Side merge (same hour, supervisor-verified):** CheckViability prep
+  scout landed (`docs/factory-ai-checkviability-ground-truth.md`, 2 staged
+  SpeedDown fixtures, verify script ALL PASS live twice). Two corrections
+  to the July-25 audit, both supervisor-re-verified against source: (1) the
+  "9 trivial 0-if_random handlers" claim is wrong — every one has ≥1
+  `if_random_less_than`; (2) CBM's own dispatch blocks 17 of 22 reachable
+  CV handlers before viability runs — only AlwaysHit/HighCrit/VitalThrow/
+  Pursuit/SpeedDownFromChance are portable without a paired `AI_CBM_*`.
+  Reachable set re-derived 16→22 at the current census. Merged tree
+  re-verified green (2610 tests).
+- **Animation lane (same session, two evidence rungs merged):** defect A's
+  mechanism is now RAM-proven — the scale-window OBJ has OAM `objMode=1`
+  (ST_OAM_OBJ_BLEND): hardware alpha-blends it 50/50 (`eva=evb=8`,
+  target2=all layers) against the under-layer; texel brute-force across
+  full palette × all tint coefficients finds zero pure-texel matches,
+  ruling out every coordinate-bug candidate. Remaining unknown: the exact
+  under-layer composite (single-layer candidates each fail). Third worker
+  now instrumenting the pre-OBJ composite directly. FUTURE_SIGHT/CONFUSION
+  stay `partial` 85/114 / 108/140.
 
 ---
 ## 461 — Full-turn reducer: PLAYER-side forced-switch variant lands (entry 459's item 3, the named remainder)
