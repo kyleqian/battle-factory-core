@@ -1,4 +1,105 @@
 ---
+## 469 — Sixth CheckViability handler pair ported: AI_CBM_AttackDown + AI_CV_AttackDown, the first CBM-blocked pair (entry 468's own "Next" item, per doc §14)
+
+- **Side merge (same round, supervisor-verified ALL PASS live on the merged
+  tree):** doc **§15 `AI_CBM_DefenseDown`+`AI_CV_DefenseDown`** and **§16
+  `AI_CBM_SpDefDown`+`AI_CV_SpDefDown`** ground truth banked (branch
+  `worker/side-20260726-110057`, merged, worktree removed) — twin fixtures
+  reusing §13's Anorith/Machamp pairing verbatim (both CV draw sites are
+  `if_hp_less_than AI_USER,70`-gated, VitalThrow's shape, so no new damage
+  sizing); ledgers 13/13 reach vs 7/7 control per pair, both seeds ×2,
+  +4 delta cleanly attributed to `Cmd_if_random_less_than`. Premise
+  falsified from source (worker, supervisor re-verified against the raw
+  assembly): §7's "target HP ≤ 70%" prose for DefenseDown/SpDefDown was an
+  `AI_USER`/`AI_TARGET` mixup — the roll is gated by the opponent's OWN HP;
+  target HP only gates the separate deterministic −2 (Gate C). 10-fixture →
+  13-fixture verify script ALL PASS ×2 (worker) + once more by the
+  supervisor from the worktree. Merged tree: **221 files / 2781 tests +
+  build green.** Next porter picks up §15/§16 the way this entry consumed
+  §14.
+
+- **State:** tree green at **221 files / 2781 tests** (+0 files/+30 tests
+  over entry 468's merged 221/2751), build green (`tsc -b && vite build`).
+  Ratchet unchanged (6/6, `executableFrontierRatchet.test.ts` — the
+  `factoryAi*` modules' `kind: "unsupported-branch"` literals aren't
+  tracked by that ratchet's `unsupportedBranch(...)` regex, same as every
+  prior CBM/CV port). `tools/probe/verify-factory-ai-checkviability-ground-truth.ts`
+  rerun live against the oracle before AND after the port: **ALL PASS**
+  both times, both runs (oracle-only, correctly unaffected by the engine
+  change). Three commits (`d7942de` port, `d3221f3` unit tests, `2fbb5f6`
+  fixture reproduction + §14.5 bonus), all green.
+- **Did:** ported both handlers of doc §14's first CBM-blocked pair.
+  1. **`AI_CBM_AttackDown`** (`data/battle_ai_scripts.s:277-281` + the
+     shared `CheckIfAbilityBlocksStatChange` tail `:308-312`) into
+     `factoryAiCheckBadMove.ts`, retiring the `unsupported-branch:
+     factory-ai-check-bad-move` barrier for `EFFECT_ATTACK_DOWN`/`_2` only:
+     `MIN_STAT_STAGE` ATK-stage short-circuit, then a genuine SECOND
+     `get_ability AI_TARGET` draw site (Hyper Cutter, distinct from
+     SpeedDown's zero-RNG `if_ability`/`check_ability` gate) ahead of the
+     shared tail's own Clear Body/White Smoke draw — both sites reuse
+     `nextGetAbilityDraw` unchanged, zero new RNG machinery (doc §14.2).
+     Widened `FactoryAiCheckBadMoveTarget` with `atkStage`.
+  2. **`AI_CV_AttackDown`** (`:1090-1123`) into `factoryAiCheckViability.ts`,
+     same dispatch-before-barrier shape as the five predecessors: all 6
+     gates (A-F) ported straight-line (Gate A's ATK-stage-6 short-circuit
+     skipping B/C/DRAW1 entirely; B/D plain HP-threshold fallthroughs that
+     never gate reachability; C gating DRAW1 to ATK stages 0-3; E/F's
+     combined type1-or-type2-in-physical-list check, computed once since
+     `get_target_type1/2` are pure zero-RNG reads, same simplification
+     `classifyHighCritEffectiveness` already established), both
+     `if_random_less_than 50` draw sites sharing the same jump-skips
+     polarity every other ported roll uses. New finding beyond doc §14.1's
+     own prose: DRAW SITE 1 and DRAW SITE 2 are **not** mutually exclusive
+     — a target with ATK stage in [0,3] AND non-physical typing draws both
+     in one pass (worst case -8 total), unit-tested explicitly. Widened
+     `FactoryAiCheckViabilityBattler` with `atkStage`; `hp`/`maxHp` are now
+     read on BOTH sides by one handler for the first time (Gate B reads
+     AI_USER's own HP, Gate D reads AI_TARGET's).
+  3. Repointed the stale `MOVE_GROWL`/`EFFECT_ATTACK_DOWN` pass-through
+     fixtures across 3 test files (now genuinely ported, no longer a
+     barrier) to `MOVE_HAZE`/`MOVE_TAIL_WHIP` (still-unported effects).
+- **Test:** every gate and both draw sites of both handlers (28 CBM tests,
+  81 CV tests, both files fully green): CBM's MIN_STAT_STAGE shortcut
+  (both table effects), single-ability/known-ability zero-draw paths for
+  BOTH draw sites, and the ambiguous two-ability 3-draw case (preamble
+  soundproof + both AttackDown sites, corrected from an initial 2-draw
+  miscount once the universal preamble's own soundproof guess was
+  accounted for); CV's all 6 gates isolated one at a time, both roll sites'
+  both outcomes, and the combined non-mutually-exclusive case. Engine-side
+  reproduction of both §14.3/§14.4 twin fixtures through
+  `chooseFactoryAiScoredDecision` at both banked seeds (1, 99): reach
+  (Haunter, non-physical) draws exactly 4 check-viability rolls — one per
+  identical Growl slot, matching doc §14.4's own `Cmd_if_random_less_than`
+  +4 attribution exactly — control (Shuckle, physical) draws zero; both
+  assert CBM/TryToFaint also draw zero (single-ability Levitate/Sturdy
+  targets, confirming doc §14.2's fix live in engine code). **Acceptance
+  bonus landed** (§14.5 item 2, not just time-permitting): §6's ORIGINAL
+  `AI_CV_SpeedDown` fixtures (`[MOVE_STRING_SHOT, MOVE_GROWL x3]`) now
+  reproduce end-to-end with the real Growl moveset instead of the
+  `MOVE_SPLASH` substitute the SpeedDown block needed before this pair was
+  ported — both Dugtrio/Shuckle are physical-type and single-ability, so
+  all 3 Growl slots score a deterministic 0 through the newly-ported pair,
+  identical total draw counts to the substitute-move block.
+- **Next:** further CBM+CV pairs from the remaining 16 CBM-blocked
+  `AI_CV_*` handlers (§4's own table); DRAW SITE 1 (`:1097`, the
+  ATK-stage-already-changed branch) remains an unstaged 2-turn recipe, same
+  as doc §7's own `AI_CV_AttackDown` entry — not attempted, ground truth
+  unchanged; a CBM-branch-fires fixture (Score_Minus10 via a Clear-Body/
+  Hyper-Cutter-ability physical-type target) is also still recipe-only per
+  doc §14.6. `END3` registration remains the standing architectural gap
+  blocking ENDTURN_ABILITIES's 3 scripted cases; ENDTURN_ITEMS1/2
+  registration off the banked recipes; seam's turn-4
+  `anchorOpponentAfterTurn4Hp` staging gap; remaining
+  blocked-on-opcodes census rows.
+- **Notes:** stayed inside scope — no other CBM/CV handler, no ENDTURN
+  registration, no `docs/factory-ai-checkviability-ground-truth.md` or
+  verify-script edits (side lane's own files this hour, read/run only), no
+  seam/animation files. Barrier pin unaffected (see State) — no pin move
+  needed since `unsupportedBranch(...)`-based tracking never covered these
+  two modules. No PAPERCUT — the ambiguous-target draw-count miscount
+  (forgetting the universal preamble's own soundproof draw) was caught by
+  the test itself failing immediately, not a source of lost time.
+
 ## 468 — [SUPERVISOR WIND-DOWN 2026-07-26 ~05:30] session summary
 
 - **State:** tree committed and green at **221 files / 2751 tests**, build
