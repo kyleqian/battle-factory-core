@@ -65,7 +65,7 @@ describe("turn1RockSlidePresentationStaging: staged real ROCK_SLIDE hit chain (d
     expect(animations[1]).toMatchObject({ animationId: "HIT_ANIMATION", arguments: [] });
   });
 
-  it("NAMES THE GAP honestly: this staged chain cannot exercise stat-stage-change (the DOUBLE_TEAM evasion-rise banner's own STAT_ROSE_LINE1/2 input) -- that event kind still has zero production emission sites anywhere in the kernel (docs/presentation-seam-scout.md §7.1/§7.2 #3), so no staged scenario, this one included, could produce it today. This is the main-lane step's own pre-work, not something this scout attempted to fake.", () => {
+  it("this ROCK_SLIDE hit chain specifically does not exercise stat-stage-change (the DOUBLE_TEAM evasion-rise banner's own STAT_ROSE_LINE1/2 input needs a SEPARATE DOUBLE_TEAM/EFFECT_EVASION_UP script run, not this ONIX-attacks-GROVYLE chain) -- correction to this scout's own §7.1/§7.2 #3 framing ('zero production emission sites anywhere in the kernel'): the main-lane step's pre-work (tests/battleScriptStatbuffchangeOpcode.test.ts's own 'Double Team' case) proved the kernel already constructs and threads this event end-to-end for a real move's own script entry label -- the gap was never-asserted-by-any-test, not never-emitted-by-any-code. This chain's own absence of the event is simply because ROCK_SLIDE has no stat effect, not because the event kind is unreachable.", () => {
     const { events } = stageTurn1RockSlideHitChain();
     expect(events.some((e) => e.kind === "stat-stage-change")).toBe(false);
   });

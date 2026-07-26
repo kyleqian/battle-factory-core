@@ -19,6 +19,8 @@ const program = loadBattleScriptProgram();
 const SWORDS_DANCE = 14; // EFFECT_ATTACK_UP_2
 const TAIL_WHIP = 39; // EFFECT_DEFENSE_DOWN, accuracy 100
 const ABILITY_CLEAR_BODY = 29;
+/** src/data/gen/moves.json MOVE_DOUBLE_TEAM -- EFFECT_EVASION_UP, MOVE_TARGET_USER (self-target). */
+const DOUBLE_TEAM = 104;
 
 function battler(changes: Partial<BattleScriptRulesBattler> = {}): BattleScriptRulesBattler {
   return Object.freeze({
@@ -164,6 +166,41 @@ describe("primary-effect stat-change route (Cmd_statbuffchange + SETGRAPHICALSTA
     // value = STAT_ANIM_PLUS2(38) + 1 = 39 for a +2 increase; statId(STAT_ATK)=1 -> 1 + 39 - 1 = 39.
     expect(result.state.rulesContext.animArg1).toBe(39);
     expect(steps).toBeLessThan(100);
+  });
+
+  /**
+   * S10 presentation-seam step (docs/presentation-seam-scout.md §8.3's
+   * "STAT_ROSE_LINE1/2" row, ISSUES #39/#41 path): pins that `changeStatBuffs`'
+   * own `stat-stage-change` event (battleScriptStatBuffs.ts:296-303, already
+   * threaded through by this file's `Cmd_statbuffchange` handler,
+   * battleScriptStatbuffchangeOpcode.ts:112-116) is genuinely reachable from
+   * a real move's own script entry label through the production opcode
+   * registry -- not merely constructed and discarded. No test before this one
+   * ever inspected `.events` for this route (the Swords Dance/Tail Whip cases
+   * above only assert `.rulesContext`); this is the first. DOUBLE_TEAM
+   * (EFFECT_EVASION_UP, MOVE_TARGET_USER) is the self-target shape the
+   * DOUBLE_TEAM evasion-rise banner (STAT_ROSE_LINE1/2, "Foe GROVYLE's
+   * evasiveness rose!") needs: `target === attacker` makes `isAttackerActive`
+   * true, so the multistring-chooser picks index 1 (STRINGID_DEFENDERSSTATROSE,
+   * not index 0 STRINGID_ATTACKERSSTATROSE Swords Dance's own distinct-target
+   * fixture happens to pick) -- a genuinely different branch than the
+   * already-covered Swords Dance case, confirmed live here rather than assumed.
+   */
+  it("Double Team (EFFECT_EVASION_UP, self-target): raises EVASION 6 -> 7 and emits a real stat-stage-change event + STRINGID_DEFENDERSSTATROSE, reaches BattleScript_MoveEnd", () => {
+    const rc = context(
+      {},
+      { currentMove: DOUBLE_TEAM, selectorRoles: { attacker: 0, target: 0, effectBattler: null } },
+    );
+    const { result } = runUntilLabel("BattleScript_EffectEvasionUp", "BattleScript_MoveEnd", rc);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battlers[0]!.statStages[7]).toBe(7); // STAT_EVASION 6 -> 7
+    expect(result.state.rulesContext.battlers[0]!.pp[0]).toBe(19); // 20 -> 19
+    const statEvent = result.state.events.find((e) => e.kind === "stat-stage-change");
+    expect(statEvent).toMatchObject({ battler: 0, stat: "evasion", from: 6, to: 7 });
+    const messageEvents = result.state.events.filter((e) => e.kind === "message").map((e) => e.messageId);
+    expect(messageEvents).toContain("STRINGID_DEFENDERSSTATROSE");
+    expect(messageEvents).not.toContain("STRINGID_ATTACKERSSTATROSE");
   });
 
   it("Tail Whip (EFFECT_DEFENSE_DOWN, guaranteed 100-accuracy hit): lowers the target's DEF 6 -> 5, exactly one RNG call (the accuracy roll), reaches BattleScript_MoveEnd", () => {
