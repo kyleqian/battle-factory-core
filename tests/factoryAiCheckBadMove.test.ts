@@ -454,3 +454,195 @@ describe("AI_CBM_AttackDown + CheckIfAbilityBlocksStatChange (docs/factory-ai-ch
     });
   });
 });
+
+// data/battle_ai_scripts.s:283-285,308-312, docs/factory-ai-checkviability-ground-truth.md
+// §15.1: the second CBM-blocked pair's own CBM half (this is the CBM side;
+// AI_CV_DefenseDown, the CV side, is in factoryAiCheckViability.test.ts).
+// Unlike AI_CBM_AttackDown, this handler has no intervening get_ability call
+// of its own before the shared tail -- just a bare MIN_STAT_STAGE gate then
+// a direct goto -- so the shared tail's own get_ability fires at most once.
+describe("AI_CBM_DefenseDown + CheckIfAbilityBlocksStatChange (docs/factory-ai-checkviability-ground-truth.md §15.1)", () => {
+  const MOVE_TAIL_WHIP = 39; // EFFECT_DEFENSE_DOWN
+  const MOVE_SCREECH = 103; // EFFECT_DEFENSE_DOWN_2 -- same handler, different table entry
+
+  const SHUCKLE: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 213,
+    types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+    knownAbility: null,
+    realAbility: "ABILITY_STURDY",
+    speedStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+  });
+
+  it("scores -10 with zero draws when the target's DEF stage is already MIN_STAT_STAGE", () => {
+    const atMinDef: FactoryAiCheckBadMoveTarget = { ...SHUCKLE, defStage: 0 };
+    const result = run(MOVE_TAIL_WHIP, atMinDef);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("EFFECT_DEFENSE_DOWN_2 hits the identical MIN_STAT_STAGE short-circuit", () => {
+    const atMinDef: FactoryAiCheckBadMoveTarget = { ...SHUCKLE, defStage: 0 };
+    const result = run(MOVE_SCREECH, atMinDef);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("an ambiguous two-ability target (neither ability is Clear Body nor White Smoke) draws exactly twice -- the universal preamble's own soundproof guess, plus the shared tail's own -- and scores 0", () => {
+    // SPECIES_YANMA: Speed Boost / Compound Eyes, both unobserved -- Tail
+    // Whip is 0-power (MOVE_POWER_OTHER), so the preamble's own type-negation
+    // ability guess is skipped, same convention the AttackDown block already
+    // established.
+    const ambiguous: FactoryAiCheckBadMoveTarget = {
+      species: 193,
+      types: ["TYPE_BUG", "TYPE_FLYING"],
+      knownAbility: null,
+      realAbility: "ABILITY_SPEED_BOOST",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+    };
+    const result = run(MOVE_TAIL_WHIP, ambiguous);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(2);
+    expect(result.draws.map((d) => d.reason)).toEqual([
+      "test-slot-soundproof",
+      "test-slot-defense-down-shared-tail",
+    ]);
+  });
+
+  it("scores -10 when the shared tail's known ability is Clear Body, zero draws", () => {
+    const knownClearBody: FactoryAiCheckBadMoveTarget = {
+      species: 72, // SPECIES_TENTACOOL: Clear Body / Liquid Ooze
+      types: ["TYPE_WATER", "TYPE_POISON"],
+      knownAbility: "ABILITY_CLEAR_BODY",
+      realAbility: "ABILITY_CLEAR_BODY",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+    };
+    const result = run(MOVE_TAIL_WHIP, knownClearBody);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("scores -10 with zero draws for a single-ability White Smoke target (shared tail's own free guess)", () => {
+    const whiteSmoke: FactoryAiCheckBadMoveTarget = {
+      species: 321, // SPECIES_TORKOAL: White Smoke is its only ability
+      types: ["TYPE_FIRE", "TYPE_FIRE"],
+      knownAbility: null,
+      realAbility: "ABILITY_WHITE_SMOKE",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+    };
+    const result = run(MOVE_TAIL_WHIP, whiteSmoke);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+});
+
+// data/battle_ai_scripts.s:296-298,308-312, docs/factory-ai-checkviability-ground-truth.md
+// §16.1: the third CBM-blocked pair's own CBM half -- byte-for-byte the same
+// shape as AI_CBM_DefenseDown above with STAT_SPDEF swapped for STAT_DEF.
+// EFFECT_SPECIAL_DEFENSE_DOWN itself is unused by any real move (doc §16.2),
+// so every test here dispatches via the _2 table entry; MOVE_FAKE_TEARS (not
+// MOVE_METAL_SOUND, which is in the Soundproof nine-move list) keeps the
+// universal preamble's own soundproof guess from confounding the handler's
+// own scoreDelta.
+describe("AI_CBM_SpDefDown + CheckIfAbilityBlocksStatChange (docs/factory-ai-checkviability-ground-truth.md §16.1)", () => {
+  const MOVE_FAKE_TEARS = 313; // EFFECT_SPECIAL_DEFENSE_DOWN_2
+  const MOVE_METAL_SOUND = 319; // EFFECT_SPECIAL_DEFENSE_DOWN_2 -- same handler, different table entry (also Soundproof-blocked)
+
+  const SHUCKLE: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 213,
+    types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+    knownAbility: null,
+    realAbility: "ABILITY_STURDY",
+    speedStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+  });
+
+  it("scores -10 with zero draws when the target's SPDEF stage is already MIN_STAT_STAGE", () => {
+    const atMinSpDef: FactoryAiCheckBadMoveTarget = { ...SHUCKLE, spDefStage: 0 };
+    const result = run(MOVE_FAKE_TEARS, atMinSpDef);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("MOVE_METAL_SOUND dispatches to the identical handler (both are EFFECT_SPECIAL_DEFENSE_DOWN_2)", () => {
+    const atMinSpDef: FactoryAiCheckBadMoveTarget = { ...SHUCKLE, spDefStage: 0 };
+    const result = run(MOVE_METAL_SOUND, atMinSpDef);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("an ambiguous two-ability target (neither ability is Clear Body nor White Smoke) draws exactly twice -- the universal preamble's own soundproof guess, plus the shared tail's own -- and scores 0", () => {
+    const ambiguous: FactoryAiCheckBadMoveTarget = {
+      species: 193,
+      types: ["TYPE_BUG", "TYPE_FLYING"],
+      knownAbility: null,
+      realAbility: "ABILITY_SPEED_BOOST",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+    };
+    const result = run(MOVE_FAKE_TEARS, ambiguous);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(2);
+    expect(result.draws.map((d) => d.reason)).toEqual([
+      "test-slot-soundproof",
+      "test-slot-sp-def-down-shared-tail",
+    ]);
+  });
+
+  it("scores -10 when the shared tail's known ability is Clear Body, zero draws", () => {
+    const knownClearBody: FactoryAiCheckBadMoveTarget = {
+      species: 72, // SPECIES_TENTACOOL: Clear Body / Liquid Ooze
+      types: ["TYPE_WATER", "TYPE_POISON"],
+      knownAbility: "ABILITY_CLEAR_BODY",
+      realAbility: "ABILITY_CLEAR_BODY",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+    };
+    const result = run(MOVE_FAKE_TEARS, knownClearBody);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("scores -10 with zero draws for a single-ability White Smoke target (shared tail's own free guess)", () => {
+    const whiteSmoke: FactoryAiCheckBadMoveTarget = {
+      species: 321, // SPECIES_TORKOAL: White Smoke is its only ability
+      types: ["TYPE_FIRE", "TYPE_FIRE"],
+      knownAbility: null,
+      realAbility: "ABILITY_WHITE_SMOKE",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+    };
+    const result = run(MOVE_FAKE_TEARS, whiteSmoke);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+});

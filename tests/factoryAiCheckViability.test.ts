@@ -1141,3 +1141,309 @@ describe("AI_CV_AttackDown (docs/factory-ai-checkviability-ground-truth.md §14.
     expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
   });
 });
+
+const MOVE_TAIL_WHIP_DEFENSE_DOWN = 39; // EFFECT_DEFENSE_DOWN
+const MOVE_SCREECH = 103; // EFFECT_DEFENSE_DOWN_2 -- same handler, different table entry
+
+/** speed/speedStage/types/isFirstTurn/evasionStage/accStage/atkStage/spDefStage are irrelevant to AI_CV_DefenseDown -- fixed dummy values. */
+function defenseDownAttacker(hp: number, maxHp = 100) {
+  return Object.freeze({
+    speed: 100, speedStage: 6, types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+    isFirstTurn: 0, evasionStage: 6, accStage: 6, atkStage: 6, defStage: 6, spDefStage: 6, hp, maxHp,
+  });
+}
+function defenseDownTarget(defStage: number, hp: number, maxHp = 100) {
+  return Object.freeze({
+    speed: 100, speedStage: 6, types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+    isFirstTurn: 0, evasionStage: 6, accStage: 6, atkStage: 6, defStage, spDefStage: 6, hp, maxHp,
+  });
+}
+
+// data/battle_ai_scripts.s:1124-1134, docs/factory-ai-checkviability-ground-truth.md
+// §15.1: the second CBM-blocked pair's own CV half (AI_CBM_DefenseDown, the
+// CBM side, is in factoryAiCheckBadMove.test.ts). Gate A (attacker's own hp
+// < 70) and Gate B (target's own DEF stage > 3, only checked if Gate A is
+// false) are two different PATHS INTO THE SAME draw site, not independent
+// options -- isolated one at a time below, plus a combined test proving the
+// draw site's own -2 and Gate C's own -2 are not mutually exclusive.
+describe("AI_CV_DefenseDown (docs/factory-ai-checkviability-ground-truth.md §15.1)", () => {
+  it("Gate A false (attacker HP 100% >= 70) + Gate B true (target DEF stage 6 > 3): skips the draw site entirely, zero draws, zero score", () => {
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_TAIL_WHIP_DEFENSE_DOWN,
+      attacker: defenseDownAttacker(100),
+      target: defenseDownTarget(6, 100),
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+  });
+
+  it("EFFECT_DEFENSE_DOWN_2 dispatches to the identical handler", () => {
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_SCREECH,
+      attacker: defenseDownAttacker(100),
+      target: defenseDownTarget(6, 100),
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+  });
+
+  describe("Gate C (if_hp_more_than AI_TARGET, 70 -- the target's OWN hp, a plain fallthrough past the draw site)", () => {
+    it("target HP exactly 71% (>70): skips the -2, still zero draws (Gate A/B both skip the roll)", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_TAIL_WHIP_DEFENSE_DOWN,
+        attacker: defenseDownAttacker(100),
+        target: defenseDownTarget(6, 71),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+
+    it("target HP exactly 70% (NOT >70): applies the -2, still zero draws", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_TAIL_WHIP_DEFENSE_DOWN,
+        attacker: defenseDownAttacker(100),
+        target: defenseDownTarget(6, 70),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: -2 });
+    });
+  });
+
+  describe("Gate A (attacker's own HP < 70): reaches the draw site unconditionally, regardless of Gate B", () => {
+    it("roll < 50 skips the -2 (one draw, zero score)", () => {
+      // seed 4 -> randomValue % 256 = 25 (< 50).
+      const result = runCheckViability({
+        rng: { value: 4, calls: 0 },
+        moveId: MOVE_TAIL_WHIP_DEFENSE_DOWN,
+        attacker: defenseDownAttacker(69), // < 70 -> Gate A true
+        target: defenseDownTarget(6, 100), // Gate B would also be true, but Gate A short-circuits past it; Gate C deterministic zero
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(0);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "defense-down-roll", succeeded: false });
+      expect(result.rng.calls).toBe(1);
+    });
+
+    it("roll >= 50 applies the -2 (one draw)", () => {
+      // seed 1 -> randomValue % 256 = 198 (>= 50).
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_TAIL_WHIP_DEFENSE_DOWN,
+        attacker: defenseDownAttacker(69),
+        target: defenseDownTarget(6, 100),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(-2);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "defense-down-roll", succeeded: true });
+      expect(result.rng.calls).toBe(1);
+    });
+  });
+
+  it("Gate A false, Gate B false (target DEF stage 3 <= 3): falls through into the SAME draw site the Gate A path would have jumped to, one draw", () => {
+    // seed 1 -> randomValue % 256 = 198 (>= 50).
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_TAIL_WHIP_DEFENSE_DOWN,
+      attacker: defenseDownAttacker(100), // >= 70 -> Gate A false
+      target: defenseDownTarget(3, 100), // <= 3 -> Gate B false, falls through
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result.kind).toBe("scored");
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.scoreDelta).toBe(-2);
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "defense-down-roll", succeeded: true });
+  });
+
+  it("the draw site's own -2 and Gate C's own -2 are NOT mutually exclusive: both fire in one pass, total -4", () => {
+    // seed 1 -> randomValue % 256 = 198 (>= 50, succeeds).
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_TAIL_WHIP_DEFENSE_DOWN,
+      attacker: defenseDownAttacker(50), // < 70 -> Gate A true, reaches the draw site
+      target: defenseDownTarget(6, 50), // <= 70 -> Gate C applies its own -2 too
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result.kind).toBe("scored");
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.scoreDelta).toBe(-4);
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "defense-down-roll", succeeded: true });
+    expect(result.rng.calls).toBe(1);
+  });
+
+  it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
+    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
+  });
+});
+
+const MOVE_FAKE_TEARS_SPDEF_DOWN = 313; // EFFECT_SPECIAL_DEFENSE_DOWN_2
+const MOVE_METAL_SOUND = 319; // EFFECT_SPECIAL_DEFENSE_DOWN_2 -- same handler, different table entry
+
+/** speed/speedStage/types/isFirstTurn/evasionStage/accStage/atkStage/defStage are irrelevant to AI_CV_SpDefDown -- fixed dummy values. */
+function spDefDownAttacker(hp: number, maxHp = 100) {
+  return Object.freeze({
+    speed: 100, speedStage: 6, types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+    isFirstTurn: 0, evasionStage: 6, accStage: 6, atkStage: 6, defStage: 6, spDefStage: 6, hp, maxHp,
+  });
+}
+function spDefDownTarget(spDefStage: number, hp: number, maxHp = 100) {
+  return Object.freeze({
+    speed: 100, speedStage: 6, types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+    isFirstTurn: 0, evasionStage: 6, accStage: 6, atkStage: 6, defStage: 6, spDefStage, hp, maxHp,
+  });
+}
+
+// data/battle_ai_scripts.s:1186-1196, docs/factory-ai-checkviability-ground-truth.md
+// §16.1: the third CBM-blocked pair's own CV half -- byte-for-byte the same
+// shape as AI_CV_DefenseDown above with STAT_SPDEF swapped for STAT_DEF, so
+// this block mirrors that one's gate coverage exactly (doc §16 itself notes
+// the shapes are identical).
+describe("AI_CV_SpDefDown (docs/factory-ai-checkviability-ground-truth.md §16.1)", () => {
+  it("Gate A false (attacker HP 100% >= 70) + Gate B true (target SPDEF stage 6 > 3): skips the draw site entirely, zero draws, zero score", () => {
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_FAKE_TEARS_SPDEF_DOWN,
+      attacker: spDefDownAttacker(100),
+      target: spDefDownTarget(6, 100),
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+  });
+
+  it("MOVE_METAL_SOUND dispatches to the identical handler (both are EFFECT_SPECIAL_DEFENSE_DOWN_2)", () => {
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_METAL_SOUND,
+      attacker: spDefDownAttacker(100),
+      target: spDefDownTarget(6, 100),
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+  });
+
+  describe("Gate C (if_hp_more_than AI_TARGET, 70 -- the target's OWN hp, a plain fallthrough past the draw site)", () => {
+    it("target HP exactly 71% (>70): skips the -2, still zero draws", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_FAKE_TEARS_SPDEF_DOWN,
+        attacker: spDefDownAttacker(100),
+        target: spDefDownTarget(6, 71),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+
+    it("target HP exactly 70% (NOT >70): applies the -2, still zero draws", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_FAKE_TEARS_SPDEF_DOWN,
+        attacker: spDefDownAttacker(100),
+        target: spDefDownTarget(6, 70),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: -2 });
+    });
+  });
+
+  describe("Gate A (attacker's own HP < 70): reaches the draw site unconditionally, regardless of Gate B", () => {
+    it("roll < 50 skips the -2 (one draw, zero score)", () => {
+      // seed 4 -> randomValue % 256 = 25 (< 50).
+      const result = runCheckViability({
+        rng: { value: 4, calls: 0 },
+        moveId: MOVE_FAKE_TEARS_SPDEF_DOWN,
+        attacker: spDefDownAttacker(69), // < 70 -> Gate A true
+        target: spDefDownTarget(6, 100),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(0);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "sp-def-down-roll", succeeded: false });
+      expect(result.rng.calls).toBe(1);
+    });
+
+    it("roll >= 50 applies the -2 (one draw)", () => {
+      // seed 1 -> randomValue % 256 = 198 (>= 50).
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_FAKE_TEARS_SPDEF_DOWN,
+        attacker: spDefDownAttacker(69),
+        target: spDefDownTarget(6, 100),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(-2);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "sp-def-down-roll", succeeded: true });
+      expect(result.rng.calls).toBe(1);
+    });
+  });
+
+  it("Gate A false, Gate B false (target SPDEF stage 3 <= 3): falls through into the SAME draw site the Gate A path would have jumped to, one draw", () => {
+    // seed 1 -> randomValue % 256 = 198 (>= 50).
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_FAKE_TEARS_SPDEF_DOWN,
+      attacker: spDefDownAttacker(100), // >= 70 -> Gate A false
+      target: spDefDownTarget(3, 100), // <= 3 -> Gate B false, falls through
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result.kind).toBe("scored");
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.scoreDelta).toBe(-2);
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "sp-def-down-roll", succeeded: true });
+  });
+
+  it("the draw site's own -2 and Gate C's own -2 are NOT mutually exclusive: both fire in one pass, total -4", () => {
+    // seed 1 -> randomValue % 256 = 198 (>= 50, succeeds).
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_FAKE_TEARS_SPDEF_DOWN,
+      attacker: spDefDownAttacker(50), // < 70 -> Gate A true, reaches the draw site
+      target: spDefDownTarget(6, 50), // <= 70 -> Gate C applies its own -2 too
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result.kind).toBe("scored");
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.scoreDelta).toBe(-4);
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "sp-def-down-roll", succeeded: true });
+    expect(result.rng.calls).toBe(1);
+  });
+
+  it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
+    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
+  });
+});
