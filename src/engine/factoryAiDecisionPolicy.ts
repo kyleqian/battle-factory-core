@@ -697,6 +697,8 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     realAbility: view.target.ability,
     speedStage: view.target.statStages.speed,
     atkStage: view.target.statStages.atk,
+    defStage: view.target.statStages.def,
+    spDefStage: view.target.statStages.spDef,
   });
 
   const executedScoringScripts: ("check-bad-move" | "try-to-faint" | "check-viability")[] = [
@@ -773,6 +775,8 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
           evasionStage: view.attacker.statStages.evasion,
           accStage: view.attacker.statStages.acc,
           atkStage: view.attacker.statStages.atk,
+          defStage: view.attacker.statStages.def,
+          spDefStage: view.attacker.statStages.spDef,
           hp: view.attacker.hp,
           maxHp: view.attacker.maxHp,
         },
@@ -784,6 +788,8 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
           evasionStage: view.target.statStages.evasion,
           accStage: view.target.statStages.acc,
           atkStage: view.target.statStages.atk,
+          defStage: view.target.statStages.def,
+          spDefStage: view.target.statStages.spDef,
           hp: view.target.hp,
           maxHp: view.target.maxHp,
         },

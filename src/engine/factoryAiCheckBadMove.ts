@@ -29,14 +29,20 @@
  * that path, not a stub (none of the three banked ledgers' four moves reach
  * a table entry; confirmed by direct grep of `data/battle_ai_scripts.s`).
  *
- * Two table entries ARE ported: `EFFECT_SPEED_DOWN(_2)` -> `AI_CBM_SpeedDown`
+ * Four table entries ARE ported: `EFFECT_SPEED_DOWN(_2)` -> `AI_CBM_SpeedDown`
  * (`data/battle_ai_scripts.s:287-312`, `runCbmSpeedDown` below), the
  * proven CBM+CV pair with `factoryAiCheckViability.ts`'s `AI_CV_SpeedDown`
- * (`docs/factory-ai-checkviability-ground-truth.md` §6); and
- * `EFFECT_ATTACK_DOWN(_2)` -> `AI_CBM_AttackDown` (`:277-281` +
- * `CheckIfAbilityBlocksStatChange`'s shared tail `:308-312`,
- * `runCbmAttackDown` below), the first CBM-blocked pair's own CBM half, with
- * `AI_CV_AttackDown` (doc §14).
+ * (`docs/factory-ai-checkviability-ground-truth.md` §6); `EFFECT_ATTACK_DOWN(_2)`
+ * -> `AI_CBM_AttackDown` (`:277-281` + `CheckIfAbilityBlocksStatChange`'s
+ * shared tail `:308-312`, `runCbmAttackDown` below), the first CBM-blocked
+ * pair's own CBM half, with `AI_CV_AttackDown` (doc §14); and
+ * `EFFECT_DEFENSE_DOWN(_2)`/`EFFECT_SPECIAL_DEFENSE_DOWN(_2)` ->
+ * `AI_CBM_DefenseDown`/`AI_CBM_SpDefDown` (`:283-285`/`:296-298` + the same
+ * shared tail, `runCbmStatDownViaSharedTail` below), the second and third
+ * CBM-blocked pairs' own CBM halves, with `AI_CV_DefenseDown`/`AI_CV_SpDefDown`
+ * (doc §15/§16) -- both `goto` straight into the shared tail with no
+ * intervening ability check of their own, unlike `AttackDown`'s Hyper Cutter
+ * gate.
  */
 import movesData from "../data/gen/moves.json" with { type: "json" };
 import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
@@ -153,6 +159,10 @@ export type FactoryAiCheckBadMoveTarget = Readonly<{
   speedStage: number;
   /** Current ATTACK stat stage, 0..12 -- `AI_CBM_AttackDown`'s MIN_STAT_STAGE gate. */
   atkStage: number;
+  /** Current DEFENSE stat stage, 0..12 -- `AI_CBM_DefenseDown`'s MIN_STAT_STAGE gate. */
+  defStage: number;
+  /** Current SPECIAL DEFENSE stat stage, 0..12 -- `AI_CBM_SpDefDown`'s MIN_STAT_STAGE gate. */
+  spDefStage: number;
 }>;
 
 export type FactoryAiCheckBadMoveDraw = Readonly<{
@@ -312,6 +322,49 @@ function runCbmAttackDown(
   return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: blocksChange ? -10 : 0 });
 }
 
+/**
+ * Shared body for `AI_CBM_DefenseDown` (`data/battle_ai_scripts.s:283-285`,
+ * doc §15.1) and `AI_CBM_SpDefDown` (`:296-298`, doc §16.1): both are a bare
+ * `if_stat_level_equal AI_TARGET, <stat>, MIN_STAT_STAGE, Score_Minus10`
+ * followed by a direct `goto CheckIfAbilityBlocksStatChange` -- unlike
+ * `AI_CBM_AttackDown`, neither has its own intervening `get_ability` call
+ * before the shared tail, so the tail's own `get_ability AI_TARGET` fires at
+ * most once here (vs. up to twice for AttackDown).
+ */
+function runCbmStatDownViaSharedTail(
+  stage: number,
+  target: FactoryAiCheckBadMoveTarget,
+  rng: BattleRngState,
+  ordinal: number,
+  reason: string,
+): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckBadMoveDraw[]; scoreDelta: number }> {
+  if (stage === MIN_STAT_STAGE) {
+    return Object.freeze({ rng, draws: Object.freeze([]), scoreDelta: -10 });
+  }
+  const tail = nextGetAbilityDraw(rng, ordinal, `${reason}-shared-tail`, target);
+  const draws = tail.draw ? [tail.draw] : [];
+  const blocksChange = tail.ability === ABILITY_CLEAR_BODY || tail.ability === ABILITY_WHITE_SMOKE;
+  return Object.freeze({ rng: tail.rng, draws: Object.freeze(draws), scoreDelta: blocksChange ? -10 : 0 });
+}
+
+function runCbmDefenseDown(
+  target: FactoryAiCheckBadMoveTarget,
+  rng: BattleRngState,
+  ordinal: number,
+  reason: string,
+): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckBadMoveDraw[]; scoreDelta: number }> {
+  return runCbmStatDownViaSharedTail(target.defStage, target, rng, ordinal, reason);
+}
+
+function runCbmSpDefDown(
+  target: FactoryAiCheckBadMoveTarget,
+  rng: BattleRngState,
+  ordinal: number,
+  reason: string,
+): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckBadMoveDraw[]; scoreDelta: number }> {
+  return runCbmStatDownViaSharedTail(target.spDefStage, target, rng, ordinal, reason);
+}
+
 export function typeMultiplierTenths(attackingType: string, defendingTypes: readonly [string, string]): number {
   const distinct = defendingTypes[0] === defendingTypes[1] ? [defendingTypes[0]] : defendingTypes;
   let mult = 10;
@@ -428,6 +481,32 @@ export function runCheckBadMovePreamble(input: Readonly<{
       rng: attackDown.rng,
       draws: Object.freeze(draws),
       scoreDelta: attackDown.scoreDelta,
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_DEFENSE_DOWN(_2) -> AI_CBM_DefenseDown,
+  // the second CBM-blocked pair's own CBM half (doc §15).
+  if (move.effect === "EFFECT_DEFENSE_DOWN" || move.effect === "EFFECT_DEFENSE_DOWN_2") {
+    const defenseDown = runCbmDefenseDown(target, rng, ordinal, `${input.reasonPrefix}-defense-down`);
+    for (const draw of defenseDown.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: defenseDown.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: defenseDown.scoreDelta,
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_SPECIAL_DEFENSE_DOWN(_2) -> AI_CBM_SpDefDown,
+  // the third CBM-blocked pair's own CBM half (doc §16).
+  if (move.effect === "EFFECT_SPECIAL_DEFENSE_DOWN" || move.effect === "EFFECT_SPECIAL_DEFENSE_DOWN_2") {
+    const spDefDown = runCbmSpDefDown(target, rng, ordinal, `${input.reasonPrefix}-sp-def-down`);
+    for (const draw of spDefDown.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: spDefDown.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: spDefDown.scoreDelta,
     });
   }
 

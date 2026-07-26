@@ -22,6 +22,8 @@ const NEUTRAL_BATTLER = Object.freeze({
   evasionStage: 6,
   accStage: 6,
   atkStage: 6,
+  defStage: 6,
+  spDefStage: 6,
   hp: 100,
   maxHp: 100,
 });
@@ -81,6 +83,8 @@ describe("AI_CV_SpeedDown (docs/factory-ai-checkviability-ground-truth.md §6)",
     evasionStage: 6,
     accStage: 6,
     atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
     hp: 100,
     maxHp: 100,
   });
@@ -196,7 +200,7 @@ const MOVE_PURSUIT = 228; // EFFECT_PURSUIT
 
 /** Speed/speedStage/evasionStage/accStage/hp/maxHp are irrelevant to AI_CV_Pursuit -- fixed dummy values, only `types`/`isFirstTurn` vary per test. */
 function pursuitBattler(types: readonly [string, string], isFirstTurn: number) {
-  return Object.freeze({ speed: 100, speedStage: 6, types, isFirstTurn, evasionStage: 6, accStage: 6, atkStage: 6, hp: 100, maxHp: 100 });
+  return Object.freeze({ speed: 100, speedStage: 6, types, isFirstTurn, evasionStage: 6, accStage: 6, atkStage: 6, defStage: 6, spDefStage: 6, hp: 100, maxHp: 100 });
 }
 
 // data/battle_ai_scripts.s:2018-2036, docs/factory-ai-checkviability-ground-truth.md §11.1.
@@ -292,7 +296,7 @@ const MOVE_POISON_TAIL = 342; // EFFECT_POISON_TAIL, TYPE_POISON
 
 /** isFirstTurn/evasionStage/accStage/hp/maxHp are irrelevant to AI_CV_HighCrit -- fixed dummy values, only `types` vary per test. */
 function highCritBattler(types: readonly [string, string]) {
-  return Object.freeze({ speed: 100, speedStage: 6, types, isFirstTurn: 0, evasionStage: 6, accStage: 6, atkStage: 6, hp: 100, maxHp: 100 });
+  return Object.freeze({ speed: 100, speedStage: 6, types, isFirstTurn: 0, evasionStage: 6, accStage: 6, atkStage: 6, defStage: 6, spDefStage: 6, hp: 100, maxHp: 100 });
 }
 
 // data/battle_ai_scripts.s:1449-1461, docs/factory-ai-checkviability-ground-truth.md §11.2.
@@ -560,6 +564,8 @@ function alwaysHitBattler(evasionStage: number, accStage: number) {
     evasionStage,
     accStage,
     atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
     hp: 100,
     maxHp: 100,
   });
@@ -692,6 +698,8 @@ function vitalThrowBattler(speed: number, hp: number, maxHp: number) {
     evasionStage: 6,
     accStage: 6,
     atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
     hp,
     maxHp,
   });
@@ -916,13 +924,13 @@ const NON_PHYSICAL_TYPES = ["TYPE_GHOST", "TYPE_POISON"] as const; // neither in
 function attackDownAttacker(hp: number, maxHp = 100) {
   return Object.freeze({
     speed: 100, speedStage: 6, types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
-    isFirstTurn: 0, evasionStage: 6, accStage: 6, atkStage: 6, hp, maxHp,
+    isFirstTurn: 0, evasionStage: 6, accStage: 6, atkStage: 6, defStage: 6, spDefStage: 6, hp, maxHp,
   });
 }
 function attackDownTarget(atkStage: number, hp: number, types: readonly [string, string], maxHp = 100) {
   return Object.freeze({
     speed: 100, speedStage: 6, types,
-    isFirstTurn: 0, evasionStage: 6, accStage: 6, atkStage, hp, maxHp,
+    isFirstTurn: 0, evasionStage: 6, accStage: 6, atkStage, defStage: 6, spDefStage: 6, hp, maxHp,
   });
 }
 

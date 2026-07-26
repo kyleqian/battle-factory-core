@@ -11,13 +11,15 @@ const MAROWAK: FactoryAiCheckBadMoveTarget = Object.freeze({
   realAbility: "ABILITY_ROCK_HEAD",
   speedStage: 6, // DEFAULT_STAT_STAGE -- neutral, irrelevant to the effects this file exercises.
   atkStage: 6,
+  defStage: 6,
+  spDefStage: 6,
 });
 
 const MOVE_SURF = 57;
 const MOVE_ROCK_SLIDE = 157;
 const MOVE_BODY_SLAM = 34;
 const MOVE_THUNDERBOLT = 85;
-const MOVE_TAIL_WHIP = 39; // EFFECT_DEFENSE_DOWN -- has an if_effect table entry (AI_CBM_DefenseDown, not ported)
+const MOVE_HAZE = 114; // EFFECT_HAZE -- has an if_effect table entry (AI_CBM_Haze, not ported)
 const MOVE_SNORE = 173;
 const MOVE_STRING_SHOT = 81; // EFFECT_SPEED_DOWN
 const MOVE_COTTON_SPORE = 178; // EFFECT_SPEED_DOWN_2 -- same handler, different table entry
@@ -89,6 +91,8 @@ describe("AI_CheckBadMove universal preamble (docs/factory-ai-ground-truth.md §
       realAbility: "ABILITY_SHADOW_TAG",
       speedStage: 6,
       atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
     };
     const result = run(MOVE_SURF, trapper);
     expect(result).toMatchObject({ kind: "scored" });
@@ -104,6 +108,8 @@ describe("AI_CheckBadMove universal preamble (docs/factory-ai-ground-truth.md §
       realAbility: "ABILITY_VOLT_ABSORB",
       speedStage: 6,
       atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
     };
     const result = run(MOVE_THUNDERBOLT, knownVoltAbsorb);
     expect(result).toMatchObject({ kind: "scored", scoreDelta: -12 });
@@ -117,6 +123,8 @@ describe("AI_CheckBadMove universal preamble (docs/factory-ai-ground-truth.md §
       realAbility: "ABILITY_WATER_ABSORB",
       speedStage: 6,
       atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
     };
     const result = run(MOVE_THUNDERBOLT /* Electric, not Water */, knownWaterAbsorb);
     expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
@@ -132,6 +140,8 @@ describe("AI_CheckBadMove universal preamble (docs/factory-ai-ground-truth.md §
       realAbility: "ABILITY_WONDER_GUARD",
       speedStage: 6,
       atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
     };
     const result = run(MOVE_BODY_SLAM /* Normal vs Normal = 1x, not x2 */, wonderGuardTarget);
     expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
@@ -145,18 +155,20 @@ describe("AI_CheckBadMove universal preamble (docs/factory-ai-ground-truth.md §
       realAbility: "ABILITY_SOUNDPROOF",
       speedStage: 6,
       atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
     };
     const result = run(MOVE_SNORE, soundproofTarget);
     expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
   });
 
   it("halts with a named unsupported-branch barrier for a move whose effect has an if_effect table entry", () => {
-    const result = run(MOVE_TAIL_WHIP, { ...MAROWAK, knownAbility: "ABILITY_ROCK_HEAD" });
+    const result = run(MOVE_HAZE, { ...MAROWAK, knownAbility: "ABILITY_ROCK_HEAD" });
     expect(result).toEqual({
       kind: "unsupported-branch",
       barrier: "factory-ai-check-bad-move",
-      effect: "EFFECT_DEFENSE_DOWN",
-      moveId: MOVE_TAIL_WHIP,
+      effect: "EFFECT_HAZE",
+      moveId: MOVE_HAZE,
     });
   });
 
@@ -201,6 +213,8 @@ describe("AI_CBM_SpeedDown + CheckIfAbilityBlocksStatChange (docs/factory-ai-che
     realAbility: "ABILITY_STURDY",
     speedStage: 6,
     atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
   });
 
   it("scores -10 with zero draws when the target's Speed stage is already MIN_STAT_STAGE", () => {
@@ -227,6 +241,8 @@ describe("AI_CBM_SpeedDown + CheckIfAbilityBlocksStatChange (docs/factory-ai-che
       realAbility: "ABILITY_SPEED_BOOST",
       speedStage: 6,
       atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
     };
     const result = run(MOVE_STRING_SHOT, speedBoost);
     expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
@@ -247,6 +263,8 @@ describe("AI_CBM_SpeedDown + CheckIfAbilityBlocksStatChange (docs/factory-ai-che
       realAbility: "ABILITY_SPEED_BOOST",
       speedStage: 6,
       atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
     };
     const result = run(MOVE_STRING_SHOT, ambiguousSpeedBoost);
     expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
@@ -266,6 +284,8 @@ describe("AI_CBM_SpeedDown + CheckIfAbilityBlocksStatChange (docs/factory-ai-che
       realAbility: "ABILITY_CLEAR_BODY",
       speedStage: 6,
       atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
     };
     const result = run(MOVE_STRING_SHOT, knownClearBody);
     expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
@@ -281,6 +301,8 @@ describe("AI_CBM_SpeedDown + CheckIfAbilityBlocksStatChange (docs/factory-ai-che
       realAbility: "ABILITY_WHITE_SMOKE",
       speedStage: 6,
       atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
     };
     const result = run(MOVE_STRING_SHOT, knownWhiteSmoke);
     expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
@@ -288,13 +310,13 @@ describe("AI_CBM_SpeedDown + CheckIfAbilityBlocksStatChange (docs/factory-ai-che
     expect(result.draws).toHaveLength(0);
   });
 
-  it("still barriers every other reachable CBM handler untouched by this narrowing (pass-through, EFFECT_DEFENSE_DOWN)", () => {
-    const result = run(MOVE_TAIL_WHIP, { ...MAROWAK, knownAbility: "ABILITY_ROCK_HEAD" });
+  it("still barriers every other reachable CBM handler untouched by this narrowing (pass-through, EFFECT_HAZE)", () => {
+    const result = run(MOVE_HAZE, { ...MAROWAK, knownAbility: "ABILITY_ROCK_HEAD" });
     expect(result).toEqual({
       kind: "unsupported-branch",
       barrier: "factory-ai-check-bad-move",
-      effect: "EFFECT_DEFENSE_DOWN",
-      moveId: MOVE_TAIL_WHIP,
+      effect: "EFFECT_HAZE",
+      moveId: MOVE_HAZE,
     });
   });
 });
@@ -315,6 +337,8 @@ describe("AI_CBM_AttackDown + CheckIfAbilityBlocksStatChange (docs/factory-ai-ch
     realAbility: "ABILITY_HYPER_CUTTER",
     speedStage: 6,
     atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
   });
   const SHUCKLE: FactoryAiCheckBadMoveTarget = Object.freeze({
     species: 213,
@@ -323,6 +347,8 @@ describe("AI_CBM_AttackDown + CheckIfAbilityBlocksStatChange (docs/factory-ai-ch
     realAbility: "ABILITY_STURDY",
     speedStage: 6,
     atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
   });
 
   it("scores -10 with zero draws when the target's ATK stage is already MIN_STAT_STAGE", () => {
@@ -371,6 +397,8 @@ describe("AI_CBM_AttackDown + CheckIfAbilityBlocksStatChange (docs/factory-ai-ch
       realAbility: "ABILITY_SPEED_BOOST",
       speedStage: 6,
       atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
     };
     const result = run(MOVE_GROWL, ambiguous);
     expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
@@ -391,6 +419,8 @@ describe("AI_CBM_AttackDown + CheckIfAbilityBlocksStatChange (docs/factory-ai-ch
       realAbility: "ABILITY_CLEAR_BODY",
       speedStage: 6,
       atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
     };
     const result = run(MOVE_GROWL, knownClearBody);
     expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
@@ -406,6 +436,8 @@ describe("AI_CBM_AttackDown + CheckIfAbilityBlocksStatChange (docs/factory-ai-ch
       realAbility: "ABILITY_WHITE_SMOKE",
       speedStage: 6,
       atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
     };
     const result = run(MOVE_GROWL, whiteSmoke);
     expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
@@ -413,12 +445,12 @@ describe("AI_CBM_AttackDown + CheckIfAbilityBlocksStatChange (docs/factory-ai-ch
     expect(result.draws).toHaveLength(0);
   });
 
-  it("still barriers every other reachable CBM handler untouched by this narrowing (pass-through, EFFECT_DEFENSE_DOWN)", () => {
-    const result = run(MOVE_TAIL_WHIP, PINSIR);
+  it("still barriers every other reachable CBM handler untouched by this narrowing (pass-through, EFFECT_HAZE)", () => {
+    const result = run(MOVE_HAZE, PINSIR);
     expect(result).toMatchObject({
       kind: "unsupported-branch",
       barrier: "factory-ai-check-bad-move",
-      effect: "EFFECT_DEFENSE_DOWN",
+      effect: "EFFECT_HAZE",
     });
   });
 });

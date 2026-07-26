@@ -204,7 +204,7 @@ describe("Factory AI mask 7 (CheckBadMove + TryToFaint + CheckViability), scenar
   });
 
   it("halts loudly on a CheckBadMove unsupported-branch barrier rather than silently mis-scoring", () => {
-    const view = scoredView([39 /* MOVE_TAIL_WHIP, EFFECT_DEFENSE_DOWN, has an if_effect table entry, not ported */, MOVE_SURF, MOVE_SURF, MOVE_SURF], 28);
+    const view = scoredView([114 /* MOVE_HAZE, EFFECT_HAZE, has an if_effect table entry, not ported */, MOVE_SURF, MOVE_SURF, MOVE_SURF], 28);
     expect(() =>
       chooseFactoryAiScoredDecision({
         view,

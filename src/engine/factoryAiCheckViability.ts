@@ -22,10 +22,15 @@
  * CV-only-reachable handler), and `EFFECT_ATTACK_DOWN`/`EFFECT_ATTACK_DOWN_2`
  * (`AI_CV_AttackDown`, `runCvAttackDown` below, `:1090-1123`, doc §14 -- the
  * first CBM-blocked pair's own CV half, paired with
- * `factoryAiCheckBadMove.ts`'s `AI_CBM_AttackDown`). The other 84 are not
- * ported this round (a separate, much larger phased body of work per the
- * audit's §3), so a move that reaches one of THOSE must not silently score
- * zero.
+ * `factoryAiCheckBadMove.ts`'s `AI_CBM_AttackDown`), `EFFECT_DEFENSE_DOWN(_2)`
+ * (`AI_CV_DefenseDown`, `runCvDefenseDown` below, `:1124-1134`, doc §15 --
+ * the second CBM-blocked pair's own CV half), and
+ * `EFFECT_SPECIAL_DEFENSE_DOWN(_2)` (`AI_CV_SpDefDown`, `runCvSpDefDown`
+ * below, `:1186-1196`, doc §16 -- the third CBM-blocked pair's own CV half,
+ * byte-for-byte the same shape as `AI_CV_DefenseDown` with `STAT_SPDEF`
+ * swapped for `STAT_DEF`). The other 82 are not ported this round (a
+ * separate, much larger phased body of work per the audit's §3), so a move
+ * that reaches one of THOSE must not silently score zero.
  */
 import { MOVES_BY_ID, TYPE_EFFECTIVENESS } from "./factoryAiCheckBadMove.ts";
 import type { BattleRngState } from "./battleDecisionBoundary.ts";
@@ -96,7 +101,10 @@ export const AI_CHECK_VIABILITY_TABLE_EFFECTS: ReadonlySet<string> = new Set([
  * `runCvAttackDown` -- only AI_TARGET's is ever read; this same handler also
  * reads `hp`/`maxHp` on BOTH sides, unlike `VitalThrow`'s attacker-only
  * reads -- AI_USER's own HP gates Gate B and AI_TARGET's own HP gates Gate
- * D, doc §14.1).
+ * D, doc §14.1), and DEFENSE/SPECIAL DEFENSE stat stage
+ * (`if_stat_level_more_than AI_TARGET, STAT_DEF`/`STAT_SPDEF`,
+ * `runCvDefenseDown`/`runCvSpDefDown` -- only AI_TARGET's is ever read for
+ * either, same both-sides-carried convention as `atkStage`).
  */
 export type FactoryAiCheckViabilityBattler = Readonly<{
   speed: number;
@@ -106,6 +114,8 @@ export type FactoryAiCheckViabilityBattler = Readonly<{
   evasionStage: number;
   accStage: number;
   atkStage: number;
+  defStage: number;
+  spDefStage: number;
   hp: number;
   maxHp: number;
 }>;
@@ -207,6 +217,26 @@ export type FactoryAiCheckViabilityDraw =
     ordinal: number;
     reason: string;
     kind: "attack-down-roll-2";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    succeeded: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "defense-down-roll";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    succeeded: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "sp-def-down-roll";
     before: BattleRngState;
     after: BattleRngState;
     rawRngValue: number;
@@ -781,6 +811,117 @@ function runCvAttackDown(input: Readonly<{
   return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
 }
 
+/**
+ * Shared body for `AI_CV_DefenseDown` (`data/battle_ai_scripts.s:1124-1134`,
+ * doc §15.1) and `AI_CV_SpDefDown` (`:1186-1196`, doc §16.1) -- byte-for-byte
+ * the same shape with only the compared stat stage differing:
+ *
+ * ```
+ * AI_CV_DefenseDown:
+ *     if_hp_less_than AI_USER, 70, AI_CV_DefenseDown2                 ; Gate A (opponent's OWN hp)
+ *     if_stat_level_more_than AI_TARGET, STAT_DEF, 3, AI_CV_DefenseDown3  ; Gate B (only reached if Gate A false)
+ * AI_CV_DefenseDown2:
+ *     if_random_less_than 50, AI_CV_DefenseDown3                       ; DRAW SITE
+ *     score -2
+ * AI_CV_DefenseDown3:
+ *     if_hp_more_than AI_TARGET, 70, AI_CV_DefenseDown_End             ; Gate C (target's OWN hp)
+ *     score -2
+ * AI_CV_DefenseDown_End:
+ *     end
+ * ```
+ *
+ * Gate A (AI_USER's own hp < 70%): true jumps straight into the draw site,
+ * bypassing Gate B entirely -- the cheap, unconditional-reachability path.
+ * Gate B (only evaluated when Gate A is false; AI_TARGET's own stat stage >
+ * 3): true skips the draw site entirely (0 draws); false falls straight
+ * through into the SAME draw site Gate A would have jumped to. So the draw
+ * site is reached whenever `hpPercent < 70 || statStage <= 3` -- the two
+ * gates are not independent options, they're two different paths into one
+ * shared roll. `if_random_less_than 50`: JUMP (roll < 50, ~19.5%) skips the
+ * `-2`; falling through (roll >= 50, ~80.5%) applies it -- same polarity
+ * every other ported handler's roll already uses. Gate C (AI_TARGET's own hp
+ * > 70%) is a plain, always-reached fallthrough, orthogonal to the draw
+ * site's own reachability: true skips its own `-2`, false applies it.
+ */
+function runCvStatDown(
+  kind: "defense-down-roll" | "sp-def-down-roll",
+  input: Readonly<{
+    rng: BattleRngState;
+    attackerHp: number;
+    attackerMaxHp: number;
+    targetStatStage: number;
+    targetHp: number;
+    targetMaxHp: number;
+    drawOrdinalStart: number;
+    reasonPrefix: string;
+  }>,
+): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  let rng = input.rng;
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let score = 0;
+
+  const attackerHpPercent = Math.floor((100 * input.attackerHp) / input.attackerMaxHp);
+  const reachesDrawSite = attackerHpPercent < 70 || input.targetStatStage <= 3;
+  if (reachesDrawSite) {
+    const roll = nextDraw(rng, input.drawOrdinalStart, `${input.reasonPrefix}-roll`);
+    rng = roll.after;
+    const succeeded = roll.randomValue % 256 >= 50;
+    draws.push(Object.freeze({ ...roll, kind, succeeded }));
+    if (succeeded) score -= 2;
+  }
+
+  const targetHpPercent = Math.floor((100 * input.targetHp) / input.targetMaxHp);
+  if (targetHpPercent <= 70) {
+    score -= 2;
+  }
+
+  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+}
+
+function runCvDefenseDown(input: Readonly<{
+  rng: BattleRngState;
+  attackerHp: number;
+  attackerMaxHp: number;
+  targetDefStage: number;
+  targetHp: number;
+  targetMaxHp: number;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  return runCvStatDown("defense-down-roll", {
+    rng: input.rng,
+    attackerHp: input.attackerHp,
+    attackerMaxHp: input.attackerMaxHp,
+    targetStatStage: input.targetDefStage,
+    targetHp: input.targetHp,
+    targetMaxHp: input.targetMaxHp,
+    drawOrdinalStart: input.drawOrdinalStart,
+    reasonPrefix: input.reasonPrefix,
+  });
+}
+
+function runCvSpDefDown(input: Readonly<{
+  rng: BattleRngState;
+  attackerHp: number;
+  attackerMaxHp: number;
+  targetSpDefStage: number;
+  targetHp: number;
+  targetMaxHp: number;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  return runCvStatDown("sp-def-down-roll", {
+    rng: input.rng,
+    attackerHp: input.attackerHp,
+    attackerMaxHp: input.attackerMaxHp,
+    targetStatStage: input.targetSpDefStage,
+    targetHp: input.targetHp,
+    targetMaxHp: input.targetMaxHp,
+    drawOrdinalStart: input.drawOrdinalStart,
+    reasonPrefix: input.reasonPrefix,
+  });
+}
+
 /** `AI_CheckViability` for one move slot (`:652-775` dispatch shell only). */
 export function runCheckViability(input: Readonly<{
   rng: BattleRngState;
@@ -895,6 +1036,44 @@ export function runCheckViability(input: Readonly<{
       rng: attackDown.rng,
       draws: attackDown.draws,
       scoreDelta: attackDown.scoreDelta,
+    });
+  }
+
+  if (move.effect === "EFFECT_DEFENSE_DOWN" || move.effect === "EFFECT_DEFENSE_DOWN_2") {
+    const defenseDown = runCvDefenseDown({
+      rng: input.rng,
+      attackerHp: input.attacker.hp,
+      attackerMaxHp: input.attacker.maxHp,
+      targetDefStage: input.target.defStage,
+      targetHp: input.target.hp,
+      targetMaxHp: input.target.maxHp,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: defenseDown.rng,
+      draws: defenseDown.draws,
+      scoreDelta: defenseDown.scoreDelta,
+    });
+  }
+
+  if (move.effect === "EFFECT_SPECIAL_DEFENSE_DOWN" || move.effect === "EFFECT_SPECIAL_DEFENSE_DOWN_2") {
+    const spDefDown = runCvSpDefDown({
+      rng: input.rng,
+      attackerHp: input.attacker.hp,
+      attackerMaxHp: input.attacker.maxHp,
+      targetSpDefStage: input.target.spDefStage,
+      targetHp: input.target.hp,
+      targetMaxHp: input.target.maxHp,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: spDefDown.rng,
+      draws: spDefDown.draws,
+      scoreDelta: spDefDown.scoreDelta,
     });
   }
 
