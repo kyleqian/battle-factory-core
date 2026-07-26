@@ -625,7 +625,7 @@ import {
   extremeSpeedImpactAtAge,
 } from "./extremeSpeed.ts";
 import { futureSightBgPaletteRowAtAge } from "./futureSight.ts";
-import { confusionBgPaletteRowAtAge, CONFUSION_WINDOW2_START_AGE } from "./confusion.ts";
+import { confusionBgPaletteRowAtAge, CONFUSION_WINDOW2_START_AGE, confusionTargetEffectAtAge } from "./confusion.ts";
 import {
   SHADOW_PUNCH_ATTACKER_FRAMEBUFFER_LAG,
   SHADOW_PUNCH_TRACE_ALPHA,
@@ -14920,6 +14920,14 @@ export function renderSceneOnMovePresentation(
 
   if (state.config.move === "CONFUSION") {
     const view = sceneOnConfusionView(state);
+    // `monbg ANIM_DEF_PARTNER`'s frozen copy is repanned by its OWN task
+    // (`Task_UpdateMonBg`), not by the live sprite's shake task, so it never
+    // takes the OAM-shadow hop that adds the extra tick to the live OBJ's
+    // x2 (see sceneOnConfusionView's own module doc) - only the generic
+    // one-tick capture lag applies to this BG-layer copy (dense-swept this
+    // session: -1 here, paired with the live sprite's own -2, is what
+    // clears every interior window-2 tick).
+    const monbgTargetX2 = confusionTargetEffectAtAge(state.age - 1).targetX2;
     const playerToOpponent =
       view.attacker.species === "KADABRA"
       && view.attacker.geometry.side === "player"
@@ -14968,7 +14976,13 @@ export function renderSceneOnMovePresentation(
     // own AnimTask_ShakeMon/AnimTask_ScaleMonAndRestore pair takes
     // ownership of it at CONFUSION_WINDOW2_START_AGE (confusion.ts).
     const targetIdle = speciesFrontIdleRestOffset(view.target.species);
-    const targetTouched = view.age >= CONFUSION_WINDOW2_START_AGE;
+    // +1 past the raw creation age: the live x2 read is now display-lagged
+    // by 2 ticks (see sceneOnConfusionView's own module doc), so the
+    // hand-off away from the pre-window idle offset has to happen one tick
+    // later too, or the first two window-2 ticks would show a spuriously
+    // zeroed x2 instead of the idle offset still bleeding through the lag
+    // (dense-swept this session).
+    const targetTouched = view.age >= CONFUSION_WINDOW2_START_AGE + 1;
     if (view.targetScale.active) {
       // Same defect-A mechanism as FUTURE_SIGHT's attacker (see its own
       // comment above): `monbg ANIM_DEF_PARTNER`'s frozen copy tracks the
@@ -14979,7 +14993,7 @@ export function renderSceneOnMovePresentation(
         fb,
         targetSprite.tileset,
         targetSprite.palette,
-        view.target.geometry.spriteCorner.x + (targetTouched ? view.targetX2 : 0),
+        view.target.geometry.spriteCorner.x + (targetTouched ? monbgTargetX2 : 0),
         view.target.geometry.spriteCorner.y,
       );
       drawSpriteSheetAffineStretchTintedBlend(

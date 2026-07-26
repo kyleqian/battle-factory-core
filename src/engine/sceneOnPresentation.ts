@@ -1418,26 +1418,70 @@ export function sceneOnConfusionView(
   // AnimTask_ShakeMon2's own x2 needed -2 (RAM x2 already matches oracle
   // with NO offset beyond confusion.ts's own "+1" creation-anchor idiom -
   // the extra -2 here is display-only, the captured framebuffer lagging
-  // RAM by 2 ticks for this OAM write, not a formula correction). Window
-  // 2's target (both AnimTask_ShakeMon's x2 and AnimTask_ScaleMonAndRestore's
-  // matrix) needed NO scene-level lag at all - RAM and pixels already agree
-  // at raw `state.age`. The residual pixel mismatch this leaves (dense
-  // comparator, ~40% of window 2's frames) is confined to the target's own
-  // sprite interior, growing with scale magnitude exactly like FUTURE_SIGHT's
-  // own still-open attacker-side "defect A" - out of THIS move's scope, but
-  // notable: FUTURE_SIGHT's attacker (has `monbg`) shows it, BIND's target
-  // (no `monbg`) does not, and CONFUSION's target (has `monbg ANIM_DEF_
-  // PARTNER`) now does too - see ANIMATION_PROGRESS.md for the full account.
+  // RAM by 2 ticks for this OAM write, not a formula correction).
+  //
+  // Window 2's own target x2 carries the SAME -2, not "no lag" as an
+  // earlier session claimed - that claim was based on a 13/30 sampled-pixel
+  // check at a single tick near the scale curve's extremum (where the
+  // matrix barely moves tick-to-tick, masking a real lag) rather than a
+  // dense per-tick sweep. This session RAM-probed both windows directly
+  // (`gSprites[].oam` attr1's real x bitfield vs the SAME struct's x2 field,
+  // read at the identical instant - not a display-timing artifact):
+  // oamX(tick) == x(tick) + x2(tick-1) + centerToCornerVecX(tick) holds for
+  // 28/29 window-2 ticks and 17/18 window-1 ticks (the lone miss each time
+  // is the task's own creation tick, already absorbed by confusion.ts's
+  // "+1" idiom) - a real, uniform ONE-tick OAM-copy latency between the
+  // shake task's RAM write and the OAM shadow struct, on BOTH windows alike
+  // (same class, `AnimTask_ShakeMon`/`AnimTask_ShakeMon2` both apparently
+  // ordered after `BuildOamBuffer` in the per-frame task list). That
+  // combines with the SAME generic one-tick framebuffer-capture lag already
+  // established everywhere else in this codebase (blend/tint/BG-rotation
+  // reads above) for a total of -2, matching window 1's own already-coded
+  // shake lag exactly.
+  //
+  // `AnimTask_ScaleMonAndRestore`'s matrix ALSO needs -2, not 0: RAM
+  // (`gOamMatrices`) matches this move's own formula exactly with zero
+  // shift (dense-checked this session, all 31 ticks), so there's no
+  // RAM-internal lag on the matrix table itself (unlike x2's OAM-shadow
+  // hop) - but FUTURE_SIGHT's own attacker scale, which shares this exact
+  // `scaleMonAndRestoreAtAge`/`FUTURE_SIGHT_SCALE_PARAMS` mechanism, already
+  // carries a documented two-tick DISPLAY lag (ANIMATION_PROGRESS.md's
+  // defect-A fix: "the matrix has its own already-established two-tick
+  // display lag"). CONFUSION's target scale reuses the identical mechanism,
+  // so the same display lag applies here too. Dense full-window sweep
+  // (`tools/compare/scratch/confusion-cached-compare.ts` against every
+  // integer shake/scale shift 0-4) confirms: shake=-2 alone or scale=-2
+  // alone each leave the window unchanged (108/140), but BOTH at -2
+  // together jump to 122/140 with every interior EVEN tick byte-exact -
+  // the strongest evidence available that -2 is the real mechanism for
+  // both, not a coincidental curve-fit.
   const attackerTint = confusionAttackerEffectAtAge(state.age - 1);
   const attackerShake = confusionAttackerEffectAtAge(state.age - 2);
-  const targetEffect = confusionTargetEffectAtAge(state.age);
+  const targetEffect = confusionTargetEffectAtAge(state.age - 2);
+  // The active/inactive edge itself reaches the display one tick AHEAD of
+  // the numeric magnitude (dense-swept this session): the OAM's
+  // affineMode/objMode bits flip immediately when the task starts/stops
+  // (RAM-confirmed same-tick, no lag - see the OAM-scanline probe dump),
+  // so the "is this the blended, scaled OBJ or the plain one" edge only
+  // carries the generic one-tick capture lag, not the extra OAM-shadow hop
+  // that only affects the x2/matrix VALUES read while that mode is active.
+  const targetActive = confusionTargetEffectAtAge(state.age - 1).targetScale.active;
+  // Deliberately spliced from two different reads, not a bug: forcing
+  // xScale/yScale back to neutral 256 whenever this edge reads inactive
+  // (the "consistent" fix) was tried and made the dense comparator WORSE
+  // (tail residual grew from 33px to 881px at oracle tick 176) - real
+  // hardware's own OBJ still shows the outgoing magnitude for one tick
+  // after affineMode/objMode already flip off, the same one-tick
+  // objMode-vs-matrix gap FUTURE_SIGHT's own attacker scale documents
+  // (`attackerBlendActive`, this file's own FUTURE_SIGHT view above).
+  const targetScale = { ...targetEffect.targetScale, active: targetActive };
   return {
     age: state.age,
     attacker: state.config.attacker,
     target: state.config.target,
     attackerObjY: attackerTint.attackerObjY,
     attackerX2: attackerShake.attackerX2,
-    targetScale: targetEffect.targetScale,
+    targetScale,
     targetX2: targetEffect.targetX2,
     bgBldy: confusionBgBldyAtAge(state.age),
     bgIsPsychic: confusionBgIsPsychic(state.age),

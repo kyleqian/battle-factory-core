@@ -6,6 +6,10 @@ import {
   confusionBgPaletteRowAtAge,
   confusionTargetEffectAtAge,
 } from "../src/engine/confusion.ts";
+import {
+  createSceneOnMovePresentation,
+  sceneOnConfusionView,
+} from "../src/engine/sceneOnPresentation.ts";
 
 // RAM-probed via tools/probe/run-battle-lab-rgb.py (no new probe script)
 // against tools/battle-lab/mechanic-confusion-kadabra-onix.json, ticks
@@ -109,5 +113,81 @@ describe("MOVE_CONFUSION's window 2: target AnimTask_ShakeMon + AnimTask_ScaleMo
     const before = confusionTargetEffectAtAge(0);
     expect(before.targetScale).toEqual({ active: false, xScale: 256, yScale: 256 });
     expect(before.targetX2).toBe(0);
+  });
+});
+
+// sceneOnConfusionView's own display-lag correction (this session): RAM-
+// probed directly via a new `dump-scale-window-oam-scanline.py` run against
+// this move's own fixture (not a re-derivation of confusion.ts's already-
+// exact RAM formula above) - reading `gSprites[].oam` attr1's real x
+// bitfield against the SAME struct's x2 field at the identical instant:
+// oamX(tick) == x(tick) + x2(tick-1) + centerToCornerVecX(tick), 28/29
+// window-2 ticks and 17/18 window-1 ticks (the lone miss each time is the
+// task's own creation tick). A real, uniform one-tick OAM-copy latency on
+// BOTH windows' shake tasks, which combines with the already-established
+// generic one-tick framebuffer-capture lag for a total of -2 - matching
+// window 1's own already-coded shake lag, previously NOT applied to window
+// 2 (the earlier "no lag" claim rested on a 13/30 sampled-pixel check at a
+// single tick near the scale curve's extremum, where a lag error is nearly
+// invisible). Dense full-window sweep against the oracle's own captured
+// pixels (`tools/compare/confusionPortable.ts`) went from 108/140 to
+// 137/140 with this fix; the values below are that same verified-correct
+// code's own output, pinned so a regression shows up here before the (much
+// slower) oracle comparator.
+describe("MOVE_CONFUSION's sceneOnConfusionView display lag (this session's fix)", () => {
+  const config = {
+    move: "CONFUSION",
+    attacker: {
+      species: "KADABRA",
+      geometry: {
+        side: "player",
+        spriteCorner: { x: 40, y: 56 },
+        animationCenter: { x: 72, y: 96 },
+        battlePositionCenter: { x: 72, y: 80 },
+      },
+    },
+    target: {
+      species: "ONIX",
+      geometry: {
+        side: "opponent",
+        spriteCorner: { x: 144, y: 10 },
+        animationCenter: { x: 176, y: 42 },
+        battlePositionCenter: { x: 176, y: 40 },
+      },
+    },
+    fieldProfile: { playerHp: 100, playerMaxHp: 100, opponentHp: 100, opponentMaxHp: 100 },
+  } as const;
+  const base = createSceneOnMovePresentation(config);
+  const viewAt = (age: number) => sceneOnConfusionView({ ...base, age });
+
+  it("target x2/scale magnitude trail the RAM-exact confusionTargetEffectAtAge formula by 2 ticks", () => {
+    for (const age of [66, 67, 68, 69, 70, 79, 90, 93, 94]) {
+      const shifted = confusionTargetEffectAtAge(age - 2);
+      expect(viewAt(age).targetX2).toBe(shifted.targetX2);
+      expect(viewAt(age).targetScale.xScale).toBe(shifted.targetScale.xScale);
+      expect(viewAt(age).targetScale.yScale).toBe(shifted.targetScale.yScale);
+    }
+  });
+
+  it("pins concrete oracle-tick values across the window (age = oracle tick - 81)", () => {
+    expect(viewAt(65).targetScale.active).toBe(false); // tick146: task not yet displayed
+    expect(viewAt(66).targetScale).toEqual({ active: true, xScale: 256, yScale: 256 }); // tick147
+    expect(viewAt(67).targetScale.xScale).toBe(252); // tick148
+    expect(viewAt(68).targetX2).toBe(0); // tick149
+    expect(viewAt(69).targetX2).toBe(3); // tick150
+    expect(viewAt(79).targetScale.xScale).toBe(204); // tick160, scale-curve trough
+  });
+
+  it("the active/inactive edge leads the magnitude read by one more tick (a separate, smaller lag)", () => {
+    // age 66 (tick147): active already true, but the magnitude read (age-2
+    // = 64, still pre-window) hasn't started ramping - xScale stays neutral
+    // for exactly this one tick, a real transitional state, not a bug.
+    expect(viewAt(66).targetScale).toEqual({ active: true, xScale: 256, yScale: 256 });
+    // age 95 (tick176, window tail): the active edge has already flipped
+    // off, but the magnitude read (age-2 = 93) is still mid-ramp (252, not
+    // 256) - deliberately NOT forced to neutral here (see this function's
+    // own comment: forcing neutral was tried and made the dense comparator
+    // worse, growing tick176's residual from 33px to 881px).
+    expect(viewAt(95).targetScale).toEqual({ active: false, xScale: 252, yScale: 252 });
   });
 });
