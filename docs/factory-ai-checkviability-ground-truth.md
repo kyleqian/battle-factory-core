@@ -1436,3 +1436,206 @@ not attempted this session (time-capped after the Gate E/F pair + the
 `AI_CBM_AttackDown`'s own `Score_Minus10` branch firing live (e.g. a Clear-
 Body-ability physical-type target) was scoped by this step's brief as a
 stretch goal but not staged this session for the same reason.
+
+## 15. 2026-07-26 addendum #5: `AI_CBM_DefenseDown` + `AI_CV_DefenseDown` — second CBM-blocked pair, fully staged and live-verified
+
+Fifth follow-up scout session (side lane, Battle Scene OFF), same no-`src/`-
+changes contract. Goal per this step's brief: bank ground truth for the next
+CBM-blocked pair in priority order, `AI_CBM_DefenseDown` + `AI_CV_DefenseDown`
+(mandatory rung). Unlike `AttackDown` (§14), this pair's draw site turns out
+to be gated by the **opponent's own HP**, not the target's stat stage — the
+same shape as `AI_CV_VitalThrow` (§13), which made the existing
+Anorith/Machamp species pairing directly reusable with **zero new
+damage-formula arithmetic**.
+
+### 15.1 Both real bodies, cited and fully parsed
+
+```
+AI_CBM_DefenseDown:                     (data/battle_ai_scripts.s:283-285)
+	if_stat_level_equal AI_TARGET, STAT_DEF, MIN_STAT_STAGE, Score_Minus10  ; target DEF stage == 0 -> -10, end
+	goto CheckIfAbilityBlocksStatChange
+
+CheckIfAbilityBlocksStatChange:         (data/battle_ai_scripts.s:308-312, shared tail)
+	get_ability AI_TARGET                                                   ; DRAW SITE (conditional, see §14.2's mechanism)
+	if_equal ABILITY_CLEAR_BODY, Score_Minus10
+	if_equal ABILITY_WHITE_SMOKE, Score_Minus10
+	end                                                                      ; neither -> 0, end
+```
+
+Zero `if_random_less_than` instructions in `AI_CBM_DefenseDown` or its shared
+tail (same as `AI_CBM_AttackDown`, §14.1). Unlike `AI_CBM_AttackDown`,
+`AI_CBM_DefenseDown`'s own body has **no direct `get_ability` call** — it
+`goto`s straight to the shared tail, so `Cmd_get_ability`'s ability-guess
+confound (§14.2) can fire **at most once** per candidate slot here (vs. up to
+twice for `AttackDown`), but the mechanism and the single-ability-species
+mitigation are identical.
+
+```
+AI_CV_DefenseDown:                      (data/battle_ai_scripts.s:1124-1134)
+	if_hp_less_than AI_USER, 70, AI_CV_DefenseDown2                 ; :1125 Gate A (opponent's OWN hp)
+	if_stat_level_more_than AI_TARGET, STAT_DEF, 3, AI_CV_DefenseDown3  ; :1126 Gate B (only reached if Gate A false)
+AI_CV_DefenseDown2:
+	if_random_less_than 50, AI_CV_DefenseDown3                       ; :1128 DRAW SITE
+	score -2
+AI_CV_DefenseDown3:
+	if_hp_more_than AI_TARGET, 70, AI_CV_DefenseDown_End             ; :1131 Gate C (target's OWN hp)
+	score -2
+AI_CV_DefenseDown_End:
+	end
+```
+
+Exactly **1** `if_random_less_than` site (`:1128`), matching §3/§5's corrected
+count. Full branch enumeration:
+
+- **Gate A** (`:1125`): opponent's (`AI_USER`'s) own HP < 70% jumps straight
+  into `AI_CV_DefenseDown2` — **the draw site is reached unconditionally**,
+  bypassing Gate B entirely. This is the cheap path (real prior-turn damage
+  to the AI's own mon, no stat-stage build needed) — the same shape as
+  `AI_CV_VitalThrow`'s own HP-gated reachability (§13), not `AttackDown`'s
+  target-stat-stage gate (§14).
+- **Gate B** (`:1126`, only reached if Gate A is false, i.e. opponent HP ≥
+  70%): target's (`AI_TARGET`'s) own DEF stat stage > 3. **True by default**
+  at battle start (stage 6) — falls straight through to `AI_CV_DefenseDown3`,
+  **skipping the draw site entirely, 0 draws**. Only a target whose DEF stage
+  has already dropped to 0-3 reaches the roll via this second path (not
+  needed for this session's fixtures, since Gate A alone suffices).
+- **DRAW SITE** (`:1128`): 50/256 (~19.5%) skip to `AI_CV_DefenseDown3`
+  (0 further draws, 0 additional score from this site), else (~80.5%)
+  `score -2`.
+- **Gate C** (`:1131`, always reached once past the draw site or Gate B's
+  skip): target's (`AI_TARGET`'s) own HP > 70% skips a further deterministic
+  `-2`; otherwise applies it. Orthogonal to the draw site's own reachability
+  — a straight-line fallthrough either way, held constant (always true, both
+  fixtures' target never takes damage) in this session's design so it can't
+  confound the isolation.
+
+### 15.2 Design: twin fixtures isolating Gate A, reusing §13's Anorith/Machamp pairing verbatim
+
+Both fixtures hold the target's (`AI_TARGET` = player, Machamp) DEF stat
+stage at its default value throughout (no player stat-lowering move is ever
+used) — Gate B is irrelevant to this pair's isolation (Gate A alone decides
+reachability in both fixtures), and `AI_CBM_DefenseDown`'s own
+`MIN_STAT_STAGE` gate never fires (Machamp's DEF stage never reaches 0).
+
+Opponent (`AI_USER`, under test, both fixtures): **Anorith** (species 390,
+level 50, same defaults as §13.2 — base stats HP 45/Atk 95/Def 50/Spe 75,
+level-50 HP 120/Def 70; ability slot 0 `ABILITY_BATTLE_ARMOR`, the species'
+*only* ability), all 4 slots `MOVE_LEER` (43, Normal, 0 power, accuracy 100,
+`EFFECT_DEFENSE_DOWN`, CBM-table-covered, `data/battle_moves.h:562-573`) —
+identical-slots design, no pick ambiguity, same discipline as every prior
+handler pair.
+
+Target (player, both fixtures): **Machamp** (species 68, same as §13.2 — base
+stats HP 90/Atk 130/Spe 55, level-50 HP 165; `.abilities = {ABILITY_GUTS,
+ABILITY_NONE}` — a **single** assignable ability, chosen deliberately per
+§14.2's confound: `CheckIfAbilityBlocksStatChange`'s `get_ability AI_TARGET`
+call would otherwise draw a live `Random() & 1` guess every candidate slot).
+
+**Turn-1 damage reuse**: this session verified live (not just cited) that
+Machamp's `MOVE_VITAL_THROW` against Anorith reproduces §13.3's own damage
+band — reach fixture's opponent HP lands at **22/120 (18%)** (seed 1) and
+**30/120 (25%)** (seed 99), both comfortably under the `if_hp_less_than
+USER,70` gate (a much wider, easier-to-hit band than `VitalThrow`'s own
+`<40%` target, so no re-derivation of the damage arithmetic was needed —
+§13.2's 86-102 damage range against Anorith's 120 max HP lands at 15-28%
+remaining regardless, satisfying `<70%` with large margin from both edges).
+Anorith's Battle Armor blocks `Cmd_critcalc`'s `Random()` call entirely
+(§13.2's own citation, re-confirmed live below), so no stray-crit overshoot
+risk here either. `MOVE_LEER`'s own 0 power means the opponent's own outgoing
+attack never touches Machamp's HP (kept at 100% in both fixtures throughout
+— Gate C therefore reads identically true in both, a controlled constant,
+not a confound).
+
+Single executed turn (`AI_CV_VitalThrow`/`AI_CV_AttackDown`'s own single-turn
+capture shape, `[A, wait 30, A, wait 700]`, `captureFrames [0,100,300,732]`):
+turn 1's own decision reflects pre-turn state (opponent at 100% HP in both
+fixtures, Gate A false, Gate B true by default — 0 draws for turn 1 itself,
+matching every prior handler's "turn 1 predates its own damage" finding).
+Only the **phantom** turn-2 re-decision (computed but never executed, per
+§6/§11.0's established mechanism) reads the post-turn-1 HP:
+
+- **Reach** (`tools/battle-lab/mechanic-factory-ai-cv-defensedown-lowhp-reach-off.json`):
+  player (Machamp) all 4 slots `MOVE_VITAL_THROW` (233) — turn 1 lands the
+  sized hit, dropping Anorith below 70%; the phantom decision's Gate A fires
+  true, reaching the draw site.
+- **Control** (`tools/battle-lab/mechanic-factory-ai-cv-defensedown-fullhp-control-off.json`):
+  identical opponent/species/level; player's 4 slots are `MOVE_SPLASH` (150)
+  instead — Anorith's HP never moves, Gate A stays false, Gate B (Machamp's
+  DEF stage, untouched at 6) stays true, deterministic zero-draw skip.
+
+### 15.3 Live ledger (oracle-verified, both seeds, both runs)
+
+| Fixture | Seed | Opponent PP used | Opponent HP (start→end) | Total `Random()` calls, frame 0→732 | Determinism (2 runs) |
+| --- | -: | -: | --- | -: | --- |
+| Reach (lowhp) | 1 | 1 | 120→22 (18%) | **13** | identical |
+| Reach (lowhp) | 99 | 1 | 120→30 (25%) | **13** | identical |
+| Control (fullhp) | 1 | 1 | 120→120 (100%) | **7** | identical |
+| Control (fullhp) | 99 | 1 | 120→120 (100%) | **7** | identical |
+
+Both fixtures individually cross-seed-stable (13/13, 7/7) — clean, matching
+`AlwaysHit`/`VitalThrow`/`AttackDown`'s own attribution-confirmed determinism.
+Player HP stays 165→165 (100%) in every run (Leer's 0 power, confirming Gate
+C never contaminates the isolation).
+
+**Attribution** (`tools/probe/attribute-factory-ai-random-callers.py`, window
+`0 732`, run via `tools/run-mgba-probe.py`, seed 1): the **+6** delta (reach
+13 vs. control 7) splits cleanly:
+
+| Caller function | Reach count | Control count | Delta |
+| --- | -: | -: | -: |
+| `BattleAI_SetupAIData+0x83` | 4 | 4 | 0 |
+| `BattleTurnPassed+0x157` | 1 | 1 | 0 |
+| `ChooseMoveOrAction_Singles+0xf7` | 1 | 1 | 0 |
+| `Cmd_accuracycheck+0x305` | 1 | 1 | 0 |
+| `Cmd_if_random_less_than+0x7` | **4** | **0** | **+4** |
+| `Cmd_adjustnormaldamage+0x7` | 1 | 0 | +1 |
+| `Cmd_seteffectwithchance+0x81` | 1 | 0 | +1 |
+
+`Cmd_get_ability` doesn't appear in either table — confirming Machamp's
+single assignable ability collapses the §14.2 confound to zero here too.
+`Cmd_if_random_less_than`'s +4 is exactly `AI_CV_DefenseDown`'s own `:1128`
+roll, once per identical `MOVE_LEER` slot on the single reachable (phantom)
+decision (N=4 slots × 1 decision × 1 draw = 4) — the same "N identical slots"
+mechanism as §12/§13/§14. The remaining **+1/+1**
+(`Cmd_adjustnormaldamage`/`Cmd_seteffectwithchance`) are **not** part of
+`AI_CV_DefenseDown` — exactly like §13.3's own finding for `VitalThrow`, this
+is the necessary cost of the ONE flipped precondition itself (Vital Throw
+actually connecting for real damage vs. Splash doing nothing), fully
+attributed rather than left as an unexplained residual. `Cmd_critcalc` does
+**not** appear in either fixture's table at all (unlike §13.3, where it
+appeared as a 1/1 canceling entry from Anorith's own outgoing `MOVE_VITAL_THROW`)
+— here Anorith's own move is `MOVE_LEER` (a 0-power status move, no crit
+calc ever runs for it), and Machamp (Battle Armor-immune Anorith is only ever
+the *defender* of the one real hit) has no crit-immunity ability of its own,
+but Vital Throw's own crit roll against Anorith is unconditionally
+short-circuited by Anorith's Battle Armor before `Random()` is ever called —
+so this fixture pair has **zero** crit-related draws in either direction,
+one confound fewer than `VitalThrow`'s own twin fixtures needed to account
+for.
+
+### 15.4 What this unblocks
+
+1. **The pair's own port**: a future porter has both handlers' exact
+   instruction lists, every gate's real precondition, the draw site's exact
+   odds, the shared-tail `get_ability` reuse point (identical machinery to
+   §14.2, zero new RNG code needed), and a live-verified twin fixture proving
+   `AI_CV_DefenseDown`'s Gate A contribution end-to-end.
+2. **Confirms the "N identical slots" mechanism generalizes across a third,
+   structurally-different gate shape** (opponent's-own-HP-gated, not
+   target-stat-stage-gated like `AttackDown`, not target-type-gated like
+   `Pursuit`/`HighCrit`) — the draw-site delta is +4 (N=4 slots × 1
+   reachable decision), exactly as `AttackDown`'s own single-decision case
+   predicted, reinforcing that this is a general property of
+   `AI_CheckViability`'s per-slot independent re-scoring, not an artifact of
+   any one handler's specific gate structure.
+
+### 15.5 Verify script status
+
+`tools/probe/verify-factory-ai-checkviability-ground-truth.ts` extended this
+session with `AI_CV_DefenseDown`'s 2 fixtures (§15.2/§15.3) —
+`SpeedDown`/`Pursuit`/`HighCrit`/`AlwaysHit`/`VitalThrow`/`AttackDown` checks
+(§9, §11.5, §12.1, §13.4, §14.6) unchanged and still green. **Run twice this
+session, ALL PASS both times.** DefenseDown's own Gate B path (target DEF
+stage already ≤3) remains unstaged — not needed for this pair's isolation
+(Gate A alone suffices, cheaper than `AttackDown`'s own 2-turn Gate-A-stage
+recipe) and out of this session's scope.
