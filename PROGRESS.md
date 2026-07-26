@@ -4,6 +4,123 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 458 — Rain/Sun F7/F9 landed (item 1, committed); `TRYCASTFORMDATACHANGE` (item 2) STOPPED per the brief's own condition — Castform reachability confirmed real, not hypothetical
+
+- **State:** tree green at **217 files / 2568 tests** (+0 files/+3 tests
+  over entry 457's 217/2565 — this step only added tests to two existing
+  files), build green, ratchet unchanged (6/6 — the widened PLAYANIMATION
+  handler keeps the same 2 `unsupportedBranch()` call sites it had before,
+  just with a wider recognized-animType map ahead of them). Committed as
+  one rung (`7085324`). `verify-screens-weather-ground-truth.ts`
+  reconfirmed live after landing: **29/29 PASS**.
+- **Item 1 — done, per the brief's own two work items:**
+  1. **Widened `Cmd_playanimation`** (`battleScriptStatbuffchangeOpcode.ts`)
+     beyond its `B_ANIM_STATS_CHANGE` arm to also recognize
+     `B_ANIM_RAIN_CONTINUES`/`B_ANIM_SUN_CONTINUES` (source
+     `battle_script_commands.c:4004-4043`'s branch 3 — reached because this
+     engine never sets `HITMARKER_NO_ANIMATIONS` anywhere in production, a
+     tension `docs/battle-move-anim-notes.md`/`battle-turn-notes.md` already
+     flag and leave unresolved without settling it here; branch 3 bypasses
+     the semi-invulnerable skip, same shape the sibling `PLAYANIMATION_VAR`
+     handler already established for Sandstorm/Hail). Confirmed via
+     `battle-script-program.json`'s own parsed operands that both call sites
+     encode `arg=NULL` (not `sB_ANIM_ARG1` — a real, cited difference from
+     the STATS_CHANGE arm), so the barrier's arg-check is now keyed per
+     animType rather than a single fixed expression.
+  2. **Wired `ENDTURN_RAIN`/`ENDTURN_SUN`** (F7/F9) in
+     `runDoFieldEndTurnEffects` (`battleEndTurnOrchestration.ts`), same
+     decrement/tick-script shape as the already-landed Sandstorm/Hail cases.
+     Rain is genuinely different in shape from Sandstorm/Hail: one shared
+     label (`BattleScript_RainContinuesOrEnds`) branching internally on a
+     `cMULTISTRING_CHOOSER` byte (`B_MSG_RAIN_CONTINUES`/`_STOPPED` —
+     `B_MSG_DOWNPOUR_CONTINUES` is source-marked `// unused`,
+     `include/constants/battle.h:233`, and confirmed dead: no opcode this
+     engine registers or plans to ever sets `B_WEATHER_RAIN_DOWNPOUR`).
+     Sun uses two separate fixed-string labels
+     (`SunlightContinues`/`SunlightFaded`), no chooser at all. Two small gaps
+     the doc's own "zero new opcodes" claim didn't surface until actually
+     wiring it: the `gRainContinuesStringIds` PRINTFROMTABLE table wasn't in
+     the registered set yet (added to `battleScriptHitChainOpcode.ts`), and
+     `B_MSG_RAIN_STOPPED` wasn't a resolvable named jumpifbyte comparand yet
+     (added to `battleScriptSetByte.ts`'s shared `ATOMIC_VALUES`).
+  - **Tier-1** (`battleScriptScreensWeatherOrchestration.test.ts`,
+    `battleScriptStatbuffchangeOpcode.test.ts`): full Rain lifecycle (set →
+    4 continues ticks, chooser pinned to `RAIN_CONTINUES` each tick → expiry
+    tick, chooser flips to `RAIN_STOPPED`, weather clears → re-set
+    succeeds) and full Sun lifecycle (same shape via the two-label path),
+    both asserting zero `Random()` draws throughout; two direct unit tests
+    confirming the widened PLAYANIMATION call sites now emit real
+    `RAIN_CONTINUES`/`SUN_CONTINUES` animation events instead of halting.
+- **Item 2 — STOPPED, not implemented, per the brief's own explicit
+  condition ("If Castform IS somehow reachable, stop and report rather than
+  half-porting the form-change table"):**
+  - **Reachability check performed first, as instructed — result:
+    Castform IS reachable**, contradicting entry 456's own hedge ("since
+    Castform isn't a Frontier rental"). `src/data/gen/battle-frontier-mons.json`
+    contains **2 real rental entries** (`FRONTIER_MON_CASTFORM_1` index 204,
+    `FRONTIER_MON_CASTFORM_2` index 309, out of the full 882-entry catalog)
+    — verified by parsing the JSON directly, not grep-count alone.
+  - **This isn't a rare/defensive edge case — it's the common path
+    whenever it applies.** `species_info.h:10883`:
+    `.abilities = {ABILITY_FORECAST, ABILITY_NONE}` — Castform's *only*
+    ability slot is Forecast (slot 2 empty), so every real Castform rental
+    always has it. `CastformDataTypeChange` (`battle_util.c:2396-2429`)
+    early-returns 0 only if `species != SPECIES_CASTFORM || ability !=
+    ABILITY_FORECAST || hp == 0` — none of which can be true for a live
+    Castform rental — so `BattleScript_WeatherFormChanges`'s loop
+    (`data/battle_scripts_1.s:3999-4005`, walking `sBATTLER` 0..
+    `gBattlersCount-1`, called from `BattleScript_MoveWeatherChange` and the
+    ability-switch-in scripts at `:3962/3990/4055`, **not** from the
+    end-turn continues scripts — confirmed by grepping every
+    `call BattleScript_WeatherFormChanges` site) hits a genuine nonzero
+    `form` value — `BattleScriptPushCursorAndCallback(BattleScript_
+    CastformChange)` plus the real `SET_BATTLER_TYPE` table — every single
+    time a weather-setting move is used while a Castform rental is one of
+    the two active battlers (either side). A barrier here would not be
+    dead defensive code; it would legitimately gate a real, drafted
+    matchup, which is exactly the scenario brief's own OUT-OF-SCOPE line
+    anticipated ("behind the (b) barrier unless reachability forces
+    otherwise") and asked to escalate rather than decide solo.
+  - **No `src/` change made for this item.** Per the brief, this is a
+    report, not a half-port.
+- **Item 3 (census) — regenerated, byte-identical to entry 456's baseline
+  (confirms the prediction failure to materialize, cleanly):**
+  **69/214 effects, 148/355 moves, 114/276 Factory-L50 (unweighted),
+  1462/2957 weighted — zero change** from entry 456's own baseline (same
+  numbers), `git diff docs/executable-frontier-census.md` empty.
+  **The predicted flip (entry 456's own — "the four weather-setter effects
+  flip executable once this opcode lands") did NOT materialize**, because
+  item 2 (the one opcode gating it) was correctly not registered this
+  session. **Still-gating barrier, named exactly:** `B_SCR_OP_
+  TRYCASTFORMDATACHANGE` remains entirely unregistered (no dispatch entry
+  at all — this is a static-reachability census, so runtime barrier depth
+  doesn't matter, only presence), so `EFFECT_SANDSTORM`/`RAIN_DANCE`/
+  `SUNNY_DAY`/`HAIL`'s own setter scripts still cannot reach `end` (they
+  hang at `call BattleScript_WeatherFormChanges` → the missing opcode).
+  Item 1 landing F7/F9 does not touch this gate at all (F7/F9 is the
+  end-turn *continuation*, a wholly separate script from the *setting*
+  move's own `BattleScript_MoveWeatherChange` tail) — the zero-flip result
+  was expected going in, not a surprise found after the fact.
+- **Next:** `B_SCR_OP_TRYCASTFORMDATACHANGE` needs a supervisor decision,
+  not another worker guess: (a) accept a real, live (not merely defensive)
+  `(b)` barrier for "a Castform battler is present" — meaning the four
+  weather-setter effects would flip in the census (the no-Castform path is
+  the vast majority of real matchups) but any battle that actually drafts
+  Castform would legitimately barrier on its own weather-setting turn; or
+  (b) scope in Castform's actual form/type-change table now (a materially
+  bigger, separate piece of work — `SET_BATTLER_TYPE`, the four-form table,
+  interaction with `AbilityBattleEffects`'s other `CastformDataTypeChange`
+  call sites at `battle_util.c:2567/2588/2960`, likely its own sprite/
+  species-data dependency check). Either path is a real, boundable next
+  rung once chosen. `ENDTURN_ABILITIES`/`ITEMS`, Ingrain/Leech Seed/Wrap,
+  and Factory-AI's `AI_CV_*` handler bodies remain untouched, as scoped.
+- **Notes:** no presentation/`battleScene` edits. PAPERCUT: none logged —
+  the doc's own live-verified operand dumps
+  (`src/data/gen/battle-script-program.json`) made confirming the `arg=NULL`
+  vs `sB_ANIM_ARG1` distinction and the exact `jumpifbyte`/`printfromtable`
+  gaps fast and citation-backed rather than guessed.
+
+---
 ## 457 — Factory-AI move-selection port complete: `AI_TryToFaint` + `AI_CheckViability` ported, mask 1/7 dispatch wired through `submitFactoryAiDecision`
 
 - **State:** tree green at **217 test files / 2565 tests** (+3 test files
@@ -218,99 +335,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   animation opcode vs. Castform's form-change opcode) weren't called out
   as separate in the prep doc's own §6 slice 4/5 split, so budget a beat to
   re-derive that split if resuming this area).
-
----
-## 455 — Factory-AI port slice 1: `AI_CheckBadMove` universal preamble ported in full; TryToFaint/CheckViability/dispatch NOT started (roll-count gap found, unresolved)
-
-- **State:** tree green at **210 files / 2490 tests** (+1 file/+13 tests
-  over entry 454's 209/2477), build green, ratchet green (barrier ratchet
-  untouched — the new module's barrier is a discriminated-union return, not
-  an `unsupportedBranch()` call site, so it isn't tracked by that pin).
-  `tools/probe/verify-factory-ai-ground-truth.ts` reconfirmed live before
-  starting: **ALL PASS**, 15/15/17 attributed rolls still hold.
-- **Did:** ported `AI_CheckBadMove`'s universal preamble
-  (`src/engine/factoryAiCheckBadMove.ts`) source-completely per the
-  2026-07-25 port-subset audit's item 2: type-immunity `Score_Minus10`, the
-  five ability-negation branches (Volt/Water Absorb, Flash Fire, Wonder
-  Guard, Levitate), the Soundproof nine-move list, and `get_ability`'s
-  load-bearing no-cache redraw semantics (both static call sites redraw
-  fresh every reach — modeled via an explicit `knownAbility`/`realAbility`
-  input pair, not a hardcoded "always unknown"). `AI_CheckBadMove_CheckEffect`'s
-  `if_effect` table (`data/battle_ai_scripts.s:104-214`) is a source-complete
-  lookup: no entry → genuine zero contribution; an entry (named `AI_CBM_*`
-  handler or a direct `Score_Minus*` jump) → a named
-  `"factory-ai-check-bad-move"` unsupported-branch barrier. 13 new Tier-1
-  tests via direct construction, including the exact Scenario A per-slot
-  reproduction (Surf/RockSlide/BodySlam: 2 draws/score 0 each; Thunderbolt:
-  0 draws/score -10). **Not yet wired into mask 1/7 dispatch** — no
-  `factoryAiMoveSelectionPolicy.ts` composition exists yet, so this is a
-  ported, tested building block, not a reachable decision path.
-- **Next:** wire this into mask-1 dispatch (reusing the mask-0 policy's
-  setup/tie plumbing per `factoryAiDecisionPolicy.ts`'s pattern) and
-  Tier-1-pin mask-1 semantics directly (no banked oracle fixture — direct
-  construction, per the audit); port `AI_TryToFaint` (call
-  `damageCalc.ts`'s `calculateBaseDamage`/`applyStab`/`applyTypeEffectiveness`
-  with crit forced ×1 and variance = the per-slot `simulatedRNG`, per
-  `factoryAiDecisionPolicy.ts`'s existing setup draw — **also implement
-  `get_how_powerful_move_is`'s real "most powerful in the moveset" cross-
-  comparison**, needed for TryToFaint's `-1`-if-not-strongest branch, not
-  just CBM's `MOVE_POWER_OTHER` classification which this session's port
-  approximates without it since none of the 3 banked scenarios' moves are
-  power ≤1 or in the ignored-effects list); port `AI_CheckViability` as a
-  table-lookup + barrier exactly like CBM's; wire mask 7. Before writing
-  more RNG-threading code, resolve the roll-count gap below, or explicitly
-  re-scope the ledger-reproduction acceptance criterion.
-- **Notes — the roll-count gap (spent >15 min pinning this, over the
-  brief's own budget, could not close it):** live-data-driven code (not
-  hand arithmetic — `species-stats.json`'s real ability data, `moves.json`'s
-  real type/effect data, the real LCG) confirms `AI_CheckBadMove`'s
-  `get_ability` draws are **exactly 6** for Scenario A (2 per non-immune
-  slot × 3 slots) and **exactly 8** for the degenerate scenario (2 × 4
-  slots) — cross-checked against a direct assembly read of
-  `data/battle_ai_scripts.s:51-104`, not just the doc's own "≥2x/slot"
-  hedge. `AI_TryToFaint` and `AI_CheckViability` both contribute **0**
-  draws to all 3 banked scenarios (verified: no move reaches x4
-  effectiveness against pure-Ground Marowak; no move's effect has a
-  `CheckViability` table entry, confirmed by direct grep). Setup(4) +
-  CBM(6) + TTF(0) + CV(0) + tie(1) = **11**, but the live ledger's
-  attributed total is **15** — a gap of 4. Reading
-  `src/battle_controller_opponent.c:1566`'s `OpponentHandleChooseAction`
-  found that `AI_TrySwitchOrUseItem()` (switch/item AI, out of scope per
-  this step) fires **before** `BattleAI_SetupAIData` every turn for
-  `BATTLE_TYPE_TRAINER` battles (Factory battles are), and — because the
-  3 banked fixtures build 3-mon parties per side (`overrides.parties`'s own
-  contract) with the opponent's own moveset containing a real
-  super-effective move (Surf, 2x vs Marowak) — `ShouldSwitch()`
-  (`battle_ai_switch_items.c:429`) provably draws exactly 2 more
-  (`FindMonThatAbsorbsOpponentsMove`'s `Random()%3` gated behind a true
-  `HasSuperEffectiveMoveAgainstOpponents(TRUE)`, and `ShouldSwitch`'s own
-  `HasSuperEffectiveMoveAgainstOpponents(FALSE)` call), live-verified with
-  real Alakazam/Marowak type data. That narrows the gap to 11+2=13 vs 15 —
-  **2 rolls still unaccounted for**, confirmed by literally executing the
-  candidate model against the real `frame-100` seed from
-  `docs/factory-ai-ground-truth.md` §2.2 and comparing against the oracle's
-  own recorded step count, not by re-deriving on paper. Exhaustively
-  re-read `ShouldSwitch`'s remaining branches (`ShouldSwitchIfPerishSong`,
-  `ShouldSwitchIfWonderGuard`, `ShouldSwitchIfNaturalCure`, `AreStatsRaised`,
-  `FindMonWithFlagsAndSuperEffective`×2, `ShouldUseItem`) and found zero
-  further `Random()` sites reachable for this exact matchup. **This is a
-  genuinely new finding beyond the banked ground-truth doc**, which scoped
-  switch/item AI out of its own analysis without checking whether the
-  observed RNG delta window actually excludes it — it does not, for these
-  specific fixtures. The next worker on this step should either (a) find
-  the remaining 2-roll source (candidates not yet ruled out: a second pass
-  through `HasSuperEffectiveMoveAgainstOpponents`'s doubles-only tail
-  somehow still executing, or an instrumented mGBA probe counting
-  `Random()` call sites by return address per the audit's own suggested
-  fallback — not more paper tracing), or (b) get supervisor sign-off to
-  relax acceptance criterion #1 to "reproduces the correct final decision"
-  without the exact draw-count match, since the decision itself is provably
-  RNG-value-independent of switch-AI's own wasted draws (they only shift
-  the LCG's starting position, never influence which move scores highest).
-  No presentation/census changes. PAPERCUT: this step's own 60-minute
-  budget line ("budget the first 10-15 minutes... before writing port
-  code") undersized the actual archaeology needed once switch/item AI
-  turned out to be entangled in the same observed RNG window — cost the
-  whole session, ~50+ minutes on this one sub-question with only a partial
-  close.
 
