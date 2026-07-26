@@ -2339,3 +2339,352 @@ session with `AI_CV_DefenseUp`'s 3 fixtures (18.3/18.4) — every prior
 scenario (§9, §11.5, §12.1, §13.4, §14.6, §15.5, §16.5, §17.7) unchanged and
 still
 green. **Run twice this session, ALL PASS both times.**
+
+## 19. 2026-07-26 addendum #9: `AI_CBM_AccDown` + `AI_CV_AccuracyDown` — the largest remaining pair (7 `if_random_less_than` sites), 2 of 7 live-verified in one fixture pair, 5 documented recipe-only
+
+Seventh follow-up scout session (side lane, Battle Scene OFF), same
+no-`src/`-changes contract. Goal: bank ground truth for the largest
+remaining `AI_CheckViability` pair by draw-site count — `AI_CBM_AccDown` +
+`AI_CV_AccuracyDown` (7 `if_random_less_than` sites per §5's own table,
+`:1198-1234`). §7's own entry for this handler recommended "reclassifying
+this out of phase 1 entirely" because its nonzero branches gate behind
+toxic-poison/leech-seed/rooted/cursed status flags that need their own move
+to land first. That recommendation is **correct for 5 of the 7 sites**
+(§19.5 below) but turns out to be too pessimistic for the handler as a
+whole: 2 of the 7 sites are gated on plain HP bands, not status, and reach
+cleanly off the exact same single-turn HP-banding trick §14-§18 already
+established — no 2-turn status build needed.
+
+### 19.1 Both real bodies, cited and fully re-parsed from the raw assembly
+
+```
+AI_CBM_AccDown:                         (data/battle_ai_scripts.s:300-304)
+	if_stat_level_equal AI_TARGET, STAT_ACC, MIN_STAT_STAGE, Score_Minus10  ; target ACC stage == 0 -> -10, end
+	get_ability AI_TARGET
+	if_equal ABILITY_KEEN_EYE, Score_Minus10                                ; target ability == Keen Eye -> -10, end
+	goto CheckIfAbilityBlocksStatChange
+
+CheckIfAbilityBlocksStatChange:         (data/battle_ai_scripts.s:308-312, shared tail)
+	get_ability AI_TARGET
+	if_equal ABILITY_CLEAR_BODY, Score_Minus10
+	if_equal ABILITY_WHITE_SMOKE, Score_Minus10
+	end
+```
+
+**The brief's own speculation is confirmed live in the source**: unlike
+every stat-down `AI_CBM_*` handler staged so far (`AttackDown`/`DefenseDown`/
+`SpDefDown`, §14-16 — each just `if_stat_level_equal ..., Score_Minus10` then
+a direct `goto CheckIfAbilityBlocksStatChange`), `AI_CBM_AccDown` has **one
+extra ability-specific gate** before the shared tail: `ABILITY_KEEN_EYE`
+(accuracy immunity's real in-game ability) short-circuits to `Score_Minus10`
+on its own, in addition to the shared `CLEAR_BODY`/`WHITE_SMOKE` check two
+lines later. Zero `if_random_less_than` anywhere in either body — every
+branch is a deterministic stat-stage/ability compare, same as every other
+CBM handler in this doc.
+
+Dispatch table (`data/battle_ai_scripts.s:120,145`): both `EFFECT_ACCURACY_
+DOWN` and `EFFECT_ACCURACY_DOWN_2` route to `AI_CBM_AccDown`. **New finding,
+not previously stated in this doc**: `EFFECT_ACCURACY_DOWN_2` (63) has **zero
+real moves** using it — `gBattleScriptsForMoveEffects[EFFECT_ACCURACY_
+DOWN_2]` even points at the generic `BattleScript_EffectHit`, not a real
+stat-down script (`data/battle_scripts_1.s:84`), and a full grep of
+`src/data/battle_moves.h` finds no `.effect = EFFECT_ACCURACY_DOWN_2`
+anywhere. The doc's own §5 table already listed "4 executable moves" for
+this handler and that count is entirely `EFFECT_ACCURACY_DOWN`'s own 4 moves
+(`MOVE_SAND_ATTACK` 100 acc, `MOVE_SMOKESCREEN` 100 acc, `MOVE_KINESIS` 80
+acc, `MOVE_FLASH` 70 acc — `src/data/battle_moves.h`), confirmed by direct
+line-number lookup this session — `_2` is a vestigial constant for this
+effect family, same shape independently confirmed for real elsewhere in Gen
+3's move table.
+
+```
+AI_CV_AccuracyDown:                     (data/battle_ai_scripts.s:1198-1234)
+	if_hp_less_than AI_USER, 70, AI_CV_AccuracyDown2       ; :1199 Gate A (opponent's OWN hp)
+	if_hp_more_than AI_TARGET, 70, AI_CV_AccuracyDown3     ; :1200 Gate B (target's hp)
+AI_CV_AccuracyDown2:
+	if_random_less_than 100, AI_CV_AccuracyDown3           ; :1202 DRAW SITE 1
+	score -1
+AI_CV_AccuracyDown3:
+	if_stat_level_more_than AI_USER, STAT_ACC, 4, AI_CV_AccuracyDown4  ; :1205 Gate C (opponent's OWN acc stage)
+	if_random_less_than 80, AI_CV_AccuracyDown4            ; :1206 DRAW SITE 2
+	score -2
+AI_CV_AccuracyDown4:
+	if_not_status AI_TARGET, STATUS1_TOXIC_POISON, AI_CV_AccuracyDown5  ; :1209 Gate D
+	if_random_less_than 70, AI_CV_AccuracyDown5             ; :1210 DRAW SITE 3
+	score +2
+AI_CV_AccuracyDown5:
+	if_not_status3 AI_TARGET, STATUS3_LEECHSEED, AI_CV_AccuracyDown6    ; :1213 Gate E
+	if_random_less_than 70, AI_CV_AccuracyDown6              ; :1214 DRAW SITE 4
+	score +2
+AI_CV_AccuracyDown6:
+	if_not_status3 AI_USER, STATUS3_ROOTED, AI_CV_AccuracyDown7         ; :1217 Gate F (opponent's own Ingrain flag)
+	if_random_less_than 128, AI_CV_AccuracyDown7             ; :1218 DRAW SITE 5
+	score +1
+AI_CV_AccuracyDown7:
+	if_not_status2 AI_TARGET, STATUS2_CURSED, AI_CV_AccuracyDown8       ; :1221 Gate G
+	if_random_less_than 70, AI_CV_AccuracyDown8               ; :1222 DRAW SITE 6
+	score +2
+AI_CV_AccuracyDown8:
+	if_hp_more_than AI_USER, 70, AI_CV_AccuracyDown_End       ; :1225 Gate H (opponent's OWN hp again)
+	if_stat_level_equal AI_TARGET, STAT_ACC, DEFAULT_STAT_STAGE, AI_CV_AccuracyDown_End  ; :1226 Gate I (target's OWN acc stage)
+	if_hp_less_than AI_USER, 40, AI_CV_AccuracyDown_ScoreDown2   ; :1227 Gate J
+	if_hp_less_than AI_TARGET, 40, AI_CV_AccuracyDown_ScoreDown2 ; :1228 Gate K
+	if_random_less_than 70, AI_CV_AccuracyDown_End             ; :1229 DRAW SITE 7
+AI_CV_AccuracyDown_ScoreDown2:
+	score -2
+AI_CV_AccuracyDown_End:
+	end
+```
+
+Exactly **7** `if_random_less_than` sites (`:1202,1206,1210,1214,1218,1222,
+1229`), matching §5's own corrected count. `Cmd_if_not_status`/
+`Cmd_if_not_status2`/`Cmd_if_not_status3` (`battle_ai_script_commands.c`)
+read `gBattleMons[battler].status1`/`.status2`/`.status3` directly —
+deterministic, no `Random()` call of their own; only the 7 sites above ever
+draw.
+
+**Gate map, in prose:**
+
+- **Gate A** (`:1199`): opponent's own HP < 70% jumps straight into DRAW
+  SITE 1's block (`AI_CV_AccuracyDown2`), skipping Gate B entirely.
+- **Gate B** (`:1200`, only reached if Gate A is false, i.e. opponent HP ≥
+  70%): target HP > 70% skips DRAW SITE 1 (jump to `AI_CV_AccuracyDown3`);
+  target HP ≤ 70% falls through into the same DRAW SITE 1 block instead.
+  **Two independent routes reach DRAW SITE 1** — either battler's HP alone
+  can do it.
+- **DRAW SITE 1** (`:1202`): 100/256 (~39.1%) skip, else (~60.9%) `score -1`.
+- **Gate C** (`:1205`): opponent's own ACC stat stage > 4 (default battle-
+  start value is 6, so this is true at battle start and skips DRAW SITE 2)
+  — only stages 0-4 (already lowered by **two or more** real accuracy-down
+  hits landing on the opponent itself) reach the roll.
+- **DRAW SITE 2** (`:1206`): 80/256 (~31.3%) skip, else (~68.7%) `score -2`.
+- **Gates D/E/F/G** (`:1209/1213/1217/1221`): target toxic-poisoned / target
+  leech-seeded / **opponent** Ingrain-rooted / target cursed — four
+  independent status flags, each gating its own draw site (`:1210/1214/
+  1218/1222`, odds 70/256, 70/256, 128/256 (50%), 70/256 respectively, each
+  a `score +2`/`+2`/`+1`/`+2` on the non-skip branch). None of these four
+  flags is present at battle start or reachable from any single-turn HP/PP
+  build — see §19.5.
+- **Gate H** (`:1225`): opponent's own HP > 70% jumps straight to `End`,
+  skipping the entire tail (Gates I/J/K and DRAW SITE 7) — the same
+  battler-HP check as Gate A, reused a second time later in the body.
+- **Gate I** (`:1226`): target's own ACC stat stage == `DEFAULT_STAT_STAGE`
+  (6) jumps to `End`. **This is the gate that makes the tail state-
+  dependent on the dispatch move's own prior effect**: since every
+  `EFFECT_ACCURACY_DOWN` move (including this handler's own dispatch move,
+  `MOVE_SAND_ATTACK` et al.) lowers the target's ACC stage by 1 every time
+  it lands, a target that has already been hit once by the SAME move this
+  battle no longer reads as "unaffected" here — a live, source-confirmed
+  interaction between the handler's own dispatch move and its own later
+  gate, not previously noted in this doc for any other handler (found live,
+  not on paper — see 19.3).
+- **Gates J/K** (`:1227/1228`): opponent HP < 40% OR target HP < 40% jumps
+  straight to the deterministic `score -2` (`AI_CV_AccuracyDown_
+  ScoreDown2`), **skipping DRAW SITE 7 entirely** — the only way to reach
+  DRAW SITE 7 itself is both battlers sitting in the `[40,70)%` HP band (or
+  higher, up to Gate H's own 70% ceiling) simultaneously.
+- **DRAW SITE 7** (`:1229`): 70/256 (~27.3%) jumps straight to `End` (no
+  score change), else (~72.7%) falls through into `AI_CV_AccuracyDown_
+  ScoreDown2` (`score -2`) — the same `-2` destination Gates J/K jump to
+  directly, but only reached here via the roll's own failure, not
+  unconditionally.
+
+### 19.2 The confound this session found live: the dispatch move's own accuracy roll interacts with its own target-ACC-lowering effect
+
+Every prior CBM-blocked-pair fixture in this doc used a dispatch move whose
+own effect (stat change, in every case) doesn't affect anything the SAME
+turn's damage-dealing move reads. `AccuracyDown` breaks that pattern: this
+handler's dispatch move (`MOVE_SAND_ATTACK`) directly lowers the **target's**
+ACC stat stage, and if that target is *also* the one dealing the fixed-
+damage move used to bank the opponent's HP into the `[40,70)%` band this
+session's design needs (§19.3), a **speed-dependent ordering bug** appears:
+if the ACC-down move resolves before the damage move within the same turn,
+the damage move's own `Cmd_accuracycheck` roll is evaluated against an
+already-lowered ACC stage (stage 5, a 3/4 accuracy multiplier), turning a
+should-always-connect 100-accuracy hit into a **25%-chance miss**.
+
+**Found live, the hard way**: an early draft of this session's fixtures put
+Anorith (base Speed 75) in the `AI_USER`/dispatch-move role and Machamp
+(base Speed 55) as the damage-dealing target — Anorith is faster, so Sand
+Attack always resolved first, and `MOVE_SEISMIC_TOSS`'s own accuracy check
+(100 base, now facing a lowered-ACC attacker) missed outright at seed 99
+(opponent HP stayed 120/120) while connecting at seed 1 (120→70) — a
+seed-dependent, non-reproducible fixture that would have silently
+contaminated the draw-count comparison (a miss skips the entire damage/
+`Cmd_adjustnormaldamage` cost, changing the total unpredictably). **Fix**:
+swap which named species plays which role — Anorith (Speed 75) as the
+**target** doing `MOVE_SEISMIC_TOSS` (so it always moves first, banking its
+fixed-damage hit before anything can touch its own ACC stage) and Machamp
+(Speed 55) as the dispatch-move-using opponent. Re-run confirmed clean,
+cross-seed-identical HP (`165→115`, 69.7%) and draw counts (17/17) — see
+19.4. **Porter guidance**: any future fixture whose dispatch move alters the
+*same* battler that also deals real, accuracy-checked damage that turn
+needs the accuracy-affected battler to move **first** (by base Speed, not
+just "usually faster") — a new confound class this doc's prior CBM-blocked
+pairs (whose dispatch moves never touched the opposing battler's own
+accuracy/evasion) never had reason to surface.
+
+### 19.3 Design: an HP-banded twin pinning DRAW SITE 1 and DRAW SITE 7 together, in one fixture pair
+
+Opponent (`AI_USER`, under test, both fixtures): **Machamp** (species 68,
+single ability `{GUTS, NONE}` — `src/data/pokemon/species_info.h:2073`, Base
+Speed 55), all 4 slots **`MOVE_SAND_ATTACK`** (28, `EFFECT_ACCURACY_DOWN`,
+100 accuracy — the brief's own suggested dispatch move, "freedom from
+confounds" modulo 19.2's finding above). Target (player, `AI_TARGET`):
+**Anorith** (species 390, single ability `{BATTLE_ARMOR, NONE}` —
+`species_info.h:11033`, Base Speed 75, reused verbatim from §15-18) — single-
+ability, avoiding the `Cmd_get_ability`-guess confound §14.2 established for
+`AI_CBM_AccDown`'s own `get_ability AI_TARGET` reads (both the direct
+`KEEN_EYE` check and the shared tail's `CLEAR_BODY`/`WHITE_SMOKE` check).
+Neither Guts nor Battle Armor is Keen Eye/Clear Body/White Smoke, so
+`AI_CBM_AccDown`'s own two `Score_Minus10` branches stay unreached in both
+fixtures — CBM's own contribution is a flat, identical 0, and the entire
+observable delta is `AI_CV_AccuracyDown`'s own.
+
+Single executed turn, same capture shape as every prior CBM-blocked pair
+(`[A, wait 30, A, wait 700]`, `captureFrames [0,100,300,732]`):
+
+- **`accuracydown-lowhp-reach`**: target's move slot 1 = **`MOVE_SEISMIC_
+  TOSS`** (69, `EFFECT_LEVEL_DAMAGE`, fixed damage = user's level, no roll,
+  no crit calc — same fixed-damage trick §18.3 established). Anorith moves
+  first (Speed 75 > 55) and deals a flat 50 damage to Machamp (165 max HP
+  at level 50) — **165→115 (69.7%), inside `[40,70)%`** both seeds
+  identically, no roll-variance risk. Machamp's own Sand Attack then lands
+  on Anorith after the damage resolves (order-safe now, since Anorith's own
+  damaging move already executed) — Anorith's ACC stage moves 6→5.
+  Analytically: Gate A now true (69.7% < 70%) → DRAW SITE 1 fires directly;
+  Gate C false-path skip (Machamp's own ACC stage untouched, still default,
+  `>4`); Gates D-G all skip (no status present); Gate H false (69.7% not
+  `>70%`) → tail continues; Gate I **false** — Anorith's ACC stage is 5, not
+  `DEFAULT_STAT_STAGE` (6), because Sand Attack already landed on it this
+  same turn (§19.1's own Gate I note) — so the tail does NOT stop here;
+  Gates J/K both false (neither battler `<40%`) → **DRAW SITE 7 fires too**.
+  **Both DRAW SITE 1 and DRAW SITE 7 are reached in a single fixture,
+  before any second turn is needed.**
+- **`accuracydown-fullhp-control`**: target's move slot 1 = **`MOVE_SPLASH`**
+  (150, 0 power, no effect) instead — Machamp stays at 100% HP the whole
+  window. Gate A false, Gate B true (target/Anorith HP > 70%, since Machamp
+  never damages it) → DRAW SITE 1 skipped; Gate C skip as above; Gates D-G
+  skip; Gate H **true** (Machamp HP `>70%`, still 100%) → jumps straight to
+  `End`, skipping the entire tail including DRAW SITE 7. **Deterministic
+  zero draws from the handler in this fixture.**
+
+Both fixtures reuse the shared `mechanicLab` header (`level 50, challengeNum
+7, battleNum 1, trainerId 222`, same bench fillers as every other fixture in
+this doc) verbatim.
+
+### 19.4 Live ledger (oracle-verified, both seeds, both runs)
+
+| Fixture | Seed | Opponent (Machamp) PP used | Opponent HP (start→end) | Total `Random()` calls, frame 0→732 | Determinism (2 runs) |
+| --- | -: | -: | --- | -: | --- |
+| Reach (Seismic Toss) | 1 | 1 | 165→115 (69.7%) | **17** | identical |
+| Reach (Seismic Toss) | 99 | 1 | 165→115 (69.7%) | **17** | identical |
+| Control (Splash) | 1 | 1 | 165→165 (100%) | **7** | identical |
+| Control (Splash) | 99 | 1 | 165→165 (100%) | **7** | identical |
+
+Both fixtures individually cross-seed-stable (17/17, 7/7) — the clean shape
+this doc's earlier "N identical slots × 1 draw" handlers showed (§14/§16),
+not the messier non-uniform count `DefenseUp`'s physical-list branch had
+(§18.4).
+
+**Attribution** (`tools/probe/attribute-factory-ai-random-callers.py`,
+window `0 732`, seed 1, via `tools/run-mgba-probe.py`):
+
+| Caller function | Reach count | Control count | Delta |
+| --- | -: | -: | -: |
+| `BattleAI_SetupAIData+0x83` | 4 | 4 | 0 |
+| `BattleTurnPassed+0x157` | 1 | 1 | 0 |
+| `ChooseMoveOrAction_Singles+0xf7` | 1 | 1 | 0 |
+| `Cmd_accuracycheck+0x305` | 2 | 1 | +1 |
+| `Cmd_seteffectwithchance+0x81` | 1 | 0 | +1 |
+| `Cmd_if_random_less_than+0x7` | **8** | **0** | **+8** |
+
+`Cmd_if_random_less_than`'s **+8** is exactly the analytical prediction:
+DRAW SITE 1 (4 identical `MOVE_SAND_ATTACK` slots × 1 roll) + DRAW SITE 7 (4
+slots × 1 roll) = 8, the clean "N slots × sites" shape, both sites confirmed
+present together, none of the other 5 sites reachable in this design (no
+status flags, no pre-lowered opponent-own ACC stage). `Cmd_accuracycheck`'s
++1 is the reach fixture's own extra real accuracy roll (Seismic Toss
+connecting vs. Splash's accuracy-0/no-check no-op) — the flipped
+precondition's own necessary cost, not part of the handler, same pattern
+§14.4/§17.4/§18.4 already established for their own fixtures.
+`Cmd_get_ability` appears in neither table, confirming both species'
+single-ability kits close the §14.2 confound as designed.
+
+### 19.5 The 5 unexercised draw sites — recipes, not fixtures, for a future porter
+
+Sites 2/3/4/5/6 (`:1206/1210/1214/1218/1222`) share a structural obstacle
+none of this doc's "identical 4 slots" fixtures can solve alone: **every
+one of them needs the SAME opponent to use two structurally different real
+moves across two turns** (a status/stage-setting move, then the
+`AccuracyDown` candidate under test) — which means a genuinely mixed
+moveset and a real AI *pick* between them, not a forced single legal
+choice. That is qualitatively harder than every fixture in this doc so far
+(all of which either force a single legal move via 4 identical slots, or
+read a state-independent species property) and was correctly out of this
+session's remaining budget after landing sites 1+7 live.
+
+- **DRAW SITE 2** (`:1206`, `score -2`, reached iff the **opponent's own**
+  ACC stat stage is already ≤ 4): stage the opponent's own ACC stage down
+  by 2 real hits *before* evaluating its `AccuracyDown` candidate — recipe:
+  turns 1-2, the **player** (not AI-gated) uses a real accuracy-lowering
+  move (e.g. `MOVE_SAND_ATTACK`) against the opponent twice (6→5→4); turn 3,
+  re-evaluate the opponent's own `AI_CV_AccuracyDown` candidate with Gate A
+  false (opponent HP still 100%, keep it undamaged to isolate this gate
+  alone) and Gate C now false (stage 4, not `>4`). No opponent-side status
+  moves needed — the opponent's moveset can stay all-4-identical
+  `MOVE_SAND_ATTACK` throughout, since it's the **player's** actions (not
+  the AI's own decision) that set the precondition. This is the cheapest of
+  the five remaining sites — a real future candidate, not attempted this
+  session for time.
+- **DRAW SITE 3** (`:1210`, `score +2`, target `STATUS1_TOXIC_POISON`):
+  needs a real `EFFECT_TOXIC` move to land on the target from the
+  opponent's own moveset — since the opponent's kit must carry BOTH a Toxic
+  move AND an `AccuracyDown` candidate in different slots, turn 1's AI pick
+  between them is a genuine, unforced decision (not solvable by making all
+  4 slots identical). Needs either real AI-scoring modeling to predict
+  which move turn 1 picks, or a two-battler relay (one opponent Pokémon
+  whose entire kit is Toxic lands the status and faints/switches, a second
+  with the identical-slots `AccuracyDown` trick moves next).
+- **DRAW SITE 4** (`:1214`, `score +2`, target `STATUS3_LEECHSEED`): same
+  obstacle and same recipe shape as DRAW SITE 3, substituting
+  `EFFECT_LEECH_SEED` for `EFFECT_TOXIC`.
+- **DRAW SITE 5** (`:1218`, `score +1`, **opponent's own** `STATUS3_ROOTED`,
+  i.e. Ingrain): same mixed-moveset obstacle, but the move is
+  self-targeted (`EFFECT_INGRAIN`, `MOVE_TARGET_USER`) — no accuracy roll
+  of its own to land, and the opponent's own `AI_CBM_Ingrain` handler
+  typically scores self-buffs favorably, which may make winning the turn-1
+  pick more predictable than sites 3/4's target-directed moves (not
+  verified this session).
+- **DRAW SITE 6** (`:1222`, `score +2`, target `STATUS2_CURSED`): needs a
+  Ghost-typed opponent with `EFFECT_CURSE` in its kit (Curse's own dual
+  behavior — self-stat-boost for non-Ghost users, HP-cost target-curse for
+  Ghost users — means the opponent's typing is itself part of the
+  precondition), same mixed-moveset/real-pick obstacle as sites 3/4.
+
+### 19.6 What this unblocks
+
+1. **The pair's own port**: exact instruction lists for both `AI_CBM_
+   AccDown` and `AI_CV_AccuracyDown`, every one of the 7 draw sites' real
+   preconditions and odds, the `ABILITY_KEEN_EYE` divergence from every
+   other stat-down CBM handler in this doc (confirmed live, not assumed),
+   the `EFFECT_ACCURACY_DOWN_2` vestigial-constant finding, and a
+   live-verified twin fixture proving 2 of the 7 sites end-to-end (the
+   `N-slots × 2-sites = 8` clean shape).
+2. **A new confound class named for future porters** (§19.2): a dispatch
+   move whose own effect changes the SAME battler that also deals the
+   turn's real, accuracy-checked damage needs an explicit move-order
+   argument (Speed comparison), not just "pick any two established
+   species" — the first fixture in this doc to need one.
+3. **5 explicit, citation-backed recipes** (§19.5) for a future porter to
+   pick up directly, each naming exactly why it needs more than this
+   session's "identical 4 slots" trick (a real, unforced AI pick between
+   two structurally different moves) rather than leaving them as a bare
+   "not staged" note.
+
+### 19.7 Verify script status
+
+`tools/probe/verify-factory-ai-checkviability-ground-truth.ts` extended
+this session with `AI_CV_AccuracyDown`'s 2 fixtures (19.3/19.4) — every
+prior scenario (§9, §11.5, §12.1, §13.4, §14.6, §15.5, §16.5, §17.7, §18.7)
+unchanged and still green. **Run twice this session, ALL PASS both times.**

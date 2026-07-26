@@ -597,6 +597,66 @@ const DRAW_COUNT_SCENARIOS: DrawCountScenarioSpec[] = [
     expectedTotalSteps: { 1: 8, 99: 8 },
     checkCrossSeedStable: true,
   },
+  // AI_CV_AccuracyDown (data/battle_ai_scripts.s:1198-1234, doc §19): the
+  // sixth CBM-blocked handler pair to get live ground truth (AI_CBM_AccDown
+  // + AI_CV_AccuracyDown), and the largest remaining CheckViability pair by
+  // draw-site count (7 if_random_less_than sites: :1202/1206/1210/1214/
+  // 1218/1222/1229). Unlike every prior pair, this handler's own dispatch
+  // move (MOVE_SAND_ATTACK, EFFECT_ACCURACY_DOWN) lowers the TARGET's own
+  // ACC stat stage -- if the target is also the one dealing this turn's
+  // real, accuracy-checked damage (needed to bank the opponent's HP into
+  // the [40,70)% band both draw sites below need), a speed-dependent
+  // ordering bug appears: if the ACC-down move resolves first, the damage
+  // move's own accuracy roll is checked against an already-lowered ACC
+  // stage, turning a should-always-connect 100-accuracy hit into a
+  // seed-dependent ~25%-chance miss (found live -- an early draft with
+  // Anorith as the dispatch-move user missed outright at seed 99 while
+  // connecting at seed 1). Fix: the target (Anorith, Speed 75) is faster
+  // than the opponent (Machamp, Speed 55, single ability {GUTS, NONE} --
+  // no Cmd_get_ability confound for AI_CBM_AccDown's own two get_ability
+  // reads), so Anorith's own MOVE_SEISMIC_TOSS (EFFECT_LEVEL_DAMAGE, fixed
+  // 50 damage, no roll, no crit calc) always resolves before Machamp's Sand
+  // Attack can touch its ACC stage. Single executed turn (same phantom-
+  // next-decision capture shape as every prior CBM-blocked pair). Because
+  // Sand Attack's own effect lowers the TARGET's (Anorith's) ACC stage
+  // 6->5 on the very turn it first lands, Gate I (:1226, "if_stat_level_
+  // equal AI_TARGET,ACC,DEFAULT_STAT_STAGE,End") is FALSE by the time the
+  // phantom next-turn decision reads it -- so the reach fixture's single
+  // turn-1 build lands BOTH DRAW SITE 1 (:1202, opponent HP<70%) AND DRAW
+  // SITE 7 (:1229, tail reached because Gate H is false and Gate I no
+  // longer short-circuits it) without needing a second real turn.
+  // Attribution probe (window 0 732) confirms the full +8 delta (17 reach
+  // vs 7 control) is entirely Cmd_if_random_less_than (8 vs 0) -- the clean
+  // "N=4 identical MOVE_SAND_ATTACK slots x 2 reachable sites" shape, not
+  // DefenseUp's messier non-uniform count -- plus a +1 Cmd_accuracycheck
+  // (Seismic Toss actually connecting in reach vs Splash's accuracy-0
+  // no-op in control) and +1 Cmd_seteffectwithchance, both the flipped
+  // precondition's own necessary real-damage cost, not part of the
+  // handler. Cmd_get_ability appears in neither fixture's attribution
+  // table, confirming both species' single-ability kits close the §14.2
+  // confound. DRAW SITES 2-6 (opponent's own ACC stage already lowered
+  // twice; target toxic-poisoned/leech-seeded; opponent Ingrain-rooted;
+  // target cursed) all need a genuinely mixed opponent moveset and a real,
+  // unforced AI pick between two different moves across two turns -- out
+  // of this session's budget, left as citation-backed recipes (doc §19.5).
+  {
+    label:
+      "AI_CV_AccuracyDown, opponent (AI_USER, Machamp) HP hit to 69.7% by a real turn-1 move -- reachable branch (data/battle_ai_scripts.s:1198-1234): Gate A (if_hp_less_than USER,70) routes straight into the :1202 if_random_less_than 100 draw site (DRAW SITE 1), and because the same turn's MOVE_SAND_ATTACK already lowered the target's own ACC stage 6->5, Gate I (:1226) is false on the phantom next-turn re-decision, letting Gates H/J/K all fall through into the :1229 if_random_less_than 70 draw site too (DRAW SITE 7) -- both sites fire once per identical MOVE_SAND_ATTACK slot",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-accuracydown-lowhp-reach-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 17, 99: 17 },
+    checkCrossSeedStable: true,
+  },
+  {
+    label:
+      "AI_CV_AccuracyDown, opponent (AI_USER, Machamp) HP stays 100% -- control (same opponent/species/turn count, target uses MOVE_SPLASH instead of MOVE_SEISMIC_TOSS turn 1): Gate A is false and Gate B (target HP>70%) is true, skipping DRAW SITE 1, and Gate H (if_hp_more_than USER,70) jumps straight to End, skipping the entire tail including DRAW SITE 7 -- deterministic zero draws from the handler itself",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-accuracydown-fullhp-control-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 7, 99: 7 },
+    checkCrossSeedStable: true,
+  },
 ];
 
 function totalPpUsed(ppBefore: number[], ppAfter: number[]): number {
