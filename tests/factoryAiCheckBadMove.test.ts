@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  MOVES_BY_ID,
   runCheckBadMovePreamble,
   type FactoryAiCheckBadMoveAttacker,
   type FactoryAiCheckBadMoveTarget,
@@ -747,5 +748,151 @@ describe("AI_CBM_AttackUp / AI_CBM_DefenseUp / AI_CBM_BulkUp (docs/factory-ai-ch
     expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
     if (result.kind !== "scored") throw new Error("unreachable");
     expect(result.draws).toHaveLength(0);
+  });
+});
+
+// data/battle_ai_scripts.s:300-312, docs/factory-ai-checkviability-ground-truth.md
+// §19.1: the sixth CBM-blocked pair's own CBM half (this is the CBM side;
+// AI_CV_AccuracyDown, the CV side, is in factoryAiCheckViability.test.ts).
+// Unlike AI_CBM_DefenseDown/SpDefDown (bare MIN_STAT_STAGE gate, direct goto),
+// this handler has its own extra ABILITY_KEEN_EYE get_ability call first --
+// the same two-draw-site shape AI_CBM_AttackDown already established for
+// Hyper Cutter.
+describe("AI_CBM_AccDown + CheckIfAbilityBlocksStatChange (docs/factory-ai-checkviability-ground-truth.md §19.1)", () => {
+  const MOVE_SAND_ATTACK = 28; // EFFECT_ACCURACY_DOWN
+
+  // Single-ability species so both draw sites' free-guess path is exercised
+  // without a confound (doc §14.2's own porter guidance, reused here).
+  const PIDGEOTTO: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 17, // SPECIES_PIDGEOTTO: Keen Eye is its only ability
+    types: ["TYPE_NORMAL", "TYPE_FLYING"] as const,
+    knownAbility: null,
+    realAbility: "ABILITY_KEEN_EYE",
+    speedStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+    accStage: 6,
+  });
+  const SHUCKLE: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 213,
+    types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+    knownAbility: null,
+    realAbility: "ABILITY_STURDY",
+    speedStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+    accStage: 6,
+  });
+
+  it("scores -10 with zero draws when the target's ACC stage is already MIN_STAT_STAGE", () => {
+    const atMinAcc: FactoryAiCheckBadMoveTarget = { ...SHUCKLE, accStage: 0 };
+    const result = run(MOVE_SAND_ATTACK, atMinAcc);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("defaults an omitted accStage to DEFAULT_STAT_STAGE (6), not MIN_STAT_STAGE -- doesn't short-circuit", () => {
+    const { accStage: _omit, ...withoutAccStage } = SHUCKLE;
+    const result = run(MOVE_SAND_ATTACK, withoutAccStage as FactoryAiCheckBadMoveTarget);
+    // Sturdy is neither Keen Eye nor Clear Body/White Smoke -- falls through
+    // both draw sites to score 0, proving the gate did NOT fire at MIN.
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+
+  it("scores -10 with zero draws for a single-ability Keen Eye target (get_ability's own free guess, the first of the handler's two draw sites)", () => {
+    const result = run(MOVE_SAND_ATTACK, PIDGEOTTO);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("scores -10 with zero draws when Keen Eye is the known (BattleHistory-cached) ability", () => {
+    const known: FactoryAiCheckBadMoveTarget = { ...PIDGEOTTO, knownAbility: "ABILITY_KEEN_EYE" };
+    const result = run(MOVE_SAND_ATTACK, known);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("an ambiguous two-ability target (neither ability is Keen Eye, Clear Body, or White Smoke) draws exactly three times -- the universal preamble's own soundproof guess, plus once per AccDown draw site -- and scores 0", () => {
+    // SPECIES_YANMA: Speed Boost / Compound Eyes, both unobserved -- neither
+    // can ever land on Soundproof (universal preamble), Keen Eye (first
+    // AccDown draw site), or Clear Body/White Smoke (shared-tail second
+    // draw site). Sand Attack is 0-power (MOVE_POWER_OTHER), so the
+    // preamble's own type-negation ability guess is skipped -- only its
+    // soundproof guess draws, same convention the AttackDown block already
+    // established.
+    const ambiguous: FactoryAiCheckBadMoveTarget = {
+      species: 193,
+      types: ["TYPE_BUG", "TYPE_FLYING"],
+      knownAbility: null,
+      realAbility: "ABILITY_SPEED_BOOST",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      accStage: 6,
+    };
+    const result = run(MOVE_SAND_ATTACK, ambiguous);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(3);
+    expect(result.draws.map((d) => d.reason)).toEqual([
+      "test-slot-soundproof",
+      "test-slot-acc-down-keen-eye",
+      "test-slot-acc-down-shared-tail",
+    ]);
+  });
+
+  it("scores -10 when the shared tail's known ability is Clear Body, zero draws (second draw site, known-ability short-circuit)", () => {
+    const knownClearBody: FactoryAiCheckBadMoveTarget = {
+      species: 72, // SPECIES_TENTACOOL: Clear Body / Liquid Ooze
+      types: ["TYPE_WATER", "TYPE_POISON"],
+      knownAbility: "ABILITY_CLEAR_BODY",
+      realAbility: "ABILITY_CLEAR_BODY",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      accStage: 6,
+    };
+    const result = run(MOVE_SAND_ATTACK, knownClearBody);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("scores -10 with zero draws for a single-ability White Smoke target (second draw site's own free guess)", () => {
+    const whiteSmoke: FactoryAiCheckBadMoveTarget = {
+      species: 321, // SPECIES_TORKOAL: White Smoke is its only ability
+      types: ["TYPE_FIRE", "TYPE_FIRE"],
+      knownAbility: null,
+      realAbility: "ABILITY_WHITE_SMOKE",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      accStage: 6,
+    };
+    const result = run(MOVE_SAND_ATTACK, whiteSmoke);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("still barriers every other reachable CBM handler untouched by this narrowing (pass-through, EFFECT_HAZE)", () => {
+    const result = run(MOVE_HAZE, PIDGEOTTO);
+    expect(result).toMatchObject({
+      kind: "unsupported-branch",
+      barrier: "factory-ai-check-bad-move",
+      effect: "EFFECT_HAZE",
+    });
+  });
+
+  it("EFFECT_ACCURACY_DOWN_2 is a vestigial constant with zero real moves (doc §19.1) -- not independently testable through a real move ID, confirmed absent from the generated move table", () => {
+    expect([...MOVES_BY_ID.values()].some((m) => m.effect === "EFFECT_ACCURACY_DOWN_2")).toBe(false);
   });
 });

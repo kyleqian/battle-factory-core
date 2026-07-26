@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { runCheckViability } from "../src/engine/factoryAiCheckViability.ts";
+import { MOVES_BY_ID } from "../src/engine/factoryAiCheckBadMove.ts";
 
 const MOVE_SURF = 57; // EFFECT_HIT -- no if_effect table entry
 const MOVE_ROCK_SLIDE = 157; // EFFECT_FLINCH_HIT -- no entry
@@ -1916,6 +1917,382 @@ describe("AI_CV_DefenseUp (docs/factory-ai-checkviability-ground-truth.md §18.1
       if (result.kind !== "scored") throw new Error("unreachable");
       expect(result.draws).toHaveLength(1);
       expect(result.draws[0]).toMatchObject({ kind: "defense-up-roll-5" });
+    });
+  });
+});
+
+// data/battle_ai_scripts.s:1198-1234, docs/factory-ai-checkviability-ground-truth.md
+// §19.1: the sixth CBM-blocked pair's own CV half, and the largest ported
+// handler in this doc (7 if_random_less_than sites). Two RNG seeds are used
+// throughout: seed 1's first roll is 198 (>= every threshold used here, so
+// it always takes the "succeeded" branch for a single isolated draw), seed
+// 4's first roll is 25 (< every threshold, so it always takes the "skipped"
+// branch) -- computed directly from `advanceRngValue`, same convention the
+// DefenseUp block above already uses for its own seed choices.
+describe("AI_CV_AccuracyDown (docs/factory-ai-checkviability-ground-truth.md §19.1)", () => {
+  const MOVE_SAND_ATTACK = 28; // EFFECT_ACCURACY_DOWN
+  const MOVE_SMOKESCREEN = 108; // EFFECT_ACCURACY_DOWN -- same handler, different real move
+
+  function accDownBattler(overrides: Record<string, unknown> = {}) {
+    return Object.freeze({
+      speed: 100, speedStage: 6, types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+      isFirstTurn: 0, evasionStage: 6, accStage: 6, atkStage: 6, defStage: 6, spDefStage: 6,
+      hp: 100, maxHp: 100,
+      ...overrides,
+    });
+  }
+
+  it("EFFECT_ACCURACY_DOWN dispatches identically for every real move using it (Sand Attack, Smokescreen)", () => {
+    for (const moveId of [MOVE_SAND_ATTACK, MOVE_SMOKESCREEN]) {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId,
+        attacker: accDownBattler({ hp: 71 }), // Gate H (71 > 70) stops the whole tail; A-G all skip too
+        target: accDownBattler(),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    }
+  });
+
+  it("EFFECT_ACCURACY_DOWN_2 is a vestigial constant with zero real moves (doc §19.1) -- confirmed absent from the generated move table, not independently dispatch-testable through a real move ID", () => {
+    expect([...MOVES_BY_ID.values()].some((m) => m.effect === "EFFECT_ACCURACY_DOWN_2")).toBe(false);
+  });
+
+  describe("Gates A/B / DRAW SITE 1 (either battler's own HP band reaches it)", () => {
+    it("Gate A: opponent's own HP 65% (< 70) reaches DRAW SITE 1 directly; roll >= 100 applies the -1", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_SAND_ATTACK,
+        attacker: accDownBattler({ hp: 65 }),
+        target: accDownBattler(), // hp 100 -> Gate H would stop anyway after site1 either way
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "accuracy-down-roll-1", succeeded: true });
+      expect(result.scoreDelta).toBe(-1);
+    });
+
+    it("Gate A false, Gate B: target's own HP exactly 70% (<= 70) falls through into the SAME DRAW SITE 1; roll < 100 skips the -1", () => {
+      const result = runCheckViability({
+        rng: { value: 4, calls: 0 },
+        moveId: MOVE_SAND_ATTACK,
+        attacker: accDownBattler({ hp: 100 }),
+        target: accDownBattler({ hp: 70 }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "accuracy-down-roll-1", succeeded: false });
+      expect(result.scoreDelta).toBe(0);
+    });
+
+    it("Gate A false, Gate B true (target HP 71% > 70): DRAW SITE 1 skipped entirely -- 0 draws (also the doc's own control-fixture shape once Gate H stops the tail too)", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_SAND_ATTACK,
+        attacker: accDownBattler({ hp: 100 }),
+        target: accDownBattler({ hp: 71 }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+  });
+
+  describe("Gate C / DRAW SITE 2 (opponent's own ACC stage <= 4 reaches it; > 4, the battle-start default, skips)", () => {
+    it("ACC stage 4 (<= 4): reaches DRAW SITE 2; roll >= 80 applies the -2", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_SAND_ATTACK,
+        attacker: accDownBattler({ accStage: 4 }), // hp 100 -> Gates A/B skip site 1
+        target: accDownBattler(),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "accuracy-down-roll-2", succeeded: true });
+      expect(result.scoreDelta).toBe(-2);
+    });
+
+    it("ACC stage 5 (> 4): DRAW SITE 2 skipped -- 0 draws", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_SAND_ATTACK,
+        attacker: accDownBattler({ accStage: 5 }),
+        target: accDownBattler(),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+  });
+
+  describe("Gates D/E/F/G / DRAW SITEs 3-6 (four independent status flags, NOT mutually exclusive -- no goto after any of their own score, so every one is evaluated regardless of the others)", () => {
+    it("Gate D: target toxic-poisoned reaches DRAW SITE 3; roll >= 70 applies +2", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_SAND_ATTACK,
+        attacker: accDownBattler(),
+        target: accDownBattler({ isToxicPoisoned: true }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "accuracy-down-roll-3", succeeded: true });
+      expect(result.scoreDelta).toBe(2);
+    });
+
+    it("Gate D false (not toxic-poisoned): DRAW SITE 3 skipped -- 0 draws", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_SAND_ATTACK,
+        attacker: accDownBattler(),
+        target: accDownBattler(),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+
+    it("Gate E: target leech-seeded reaches DRAW SITE 4; roll < 70 skips the +2", () => {
+      const result = runCheckViability({
+        rng: { value: 4, calls: 0 },
+        moveId: MOVE_SAND_ATTACK,
+        attacker: accDownBattler(),
+        target: accDownBattler({ isLeechSeeded: true }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "accuracy-down-roll-4", succeeded: false });
+      expect(result.scoreDelta).toBe(0);
+    });
+
+    it("Gate F: OPPONENT's own rooted (Ingrain) flag reaches DRAW SITE 5 -- the target's copy is irrelevant here; roll >= 128 applies +1", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_SAND_ATTACK,
+        attacker: accDownBattler({ isRooted: true }),
+        target: accDownBattler({ isRooted: false }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "accuracy-down-roll-5", succeeded: true });
+      expect(result.scoreDelta).toBe(1);
+    });
+
+    it("Gate F false: target's own rooted flag is NEVER read by this gate -- 0 draws despite the target being rooted", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_SAND_ATTACK,
+        attacker: accDownBattler({ isRooted: false }),
+        target: accDownBattler({ isRooted: true }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+
+    it("Gate G: target cursed reaches DRAW SITE 6; roll >= 70 applies +2", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_SAND_ATTACK,
+        attacker: accDownBattler(),
+        target: accDownBattler({ isCursed: true }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "accuracy-down-roll-6", succeeded: true });
+      expect(result.scoreDelta).toBe(2);
+    });
+
+    it("all four status flags set simultaneously: DRAW SITEs 3-6 ALL fire, in order, in the SAME pass (not mutually exclusive, same finding as AttackDown's own sites 1/2)", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_SAND_ATTACK,
+        attacker: accDownBattler(),
+        target: accDownBattler({
+          isToxicPoisoned: true,
+          isLeechSeeded: true,
+          isCursed: true,
+        }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      // seed 1's chain: 198 (site3, >=70 -> +2), 33 (site4, <70 -> +0),
+      // 238 (site5 needs attacker isRooted too -- see below), ...
+      // Gate F reads the OPPONENT's own rooted flag, not the target's, so a
+      // target-only status object does NOT reach DRAW SITE 5 here.
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(3);
+      expect(result.draws.map((d) => d.kind)).toEqual([
+        "accuracy-down-roll-3",
+        "accuracy-down-roll-4",
+        "accuracy-down-roll-6",
+      ]);
+      expect(result.draws.map((d) => (d as { succeeded: boolean }).succeeded)).toEqual([true, false, true]);
+      expect(result.scoreDelta).toBe(2 + 0 + 2);
+    });
+
+    it("all FIVE gates (D/E/F/G plus the opponent's own rooted flag) fire together -- the full non-mutual-exclusivity shape", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_SAND_ATTACK,
+        attacker: accDownBattler({ isRooted: true }),
+        target: accDownBattler({
+          isToxicPoisoned: true,
+          isLeechSeeded: true,
+          isCursed: true,
+        }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      // seed 1's chain: 198 (site3 +2), 33 (site4 +0), 238 (site5, >=128 -> +1), 183 (site6, >=70 -> +2).
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(4);
+      expect(result.draws.map((d) => d.kind)).toEqual([
+        "accuracy-down-roll-3",
+        "accuracy-down-roll-4",
+        "accuracy-down-roll-5",
+        "accuracy-down-roll-6",
+      ]);
+      expect(result.scoreDelta).toBe(2 + 0 + 1 + 2);
+    });
+  });
+
+  describe("Gate H (opponent's own HP > 70%: clean stop, skips Gates I/J/K and DRAW SITE 7 entirely)", () => {
+    it("opponent HP exactly 100%: the tail never runs, even with the target's ACC stage already lowered", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_SAND_ATTACK,
+        attacker: accDownBattler({ hp: 100 }),
+        target: accDownBattler({ accStage: 5, hp: 71 }), // hp 71 also skips site 1 via Gate B
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+  });
+
+  describe("Gate I (target's own ACC stage back at DEFAULT_STAT_STAGE: clean stop)", () => {
+    it("opponent HP exactly 70% (Gate H false), target ACC stage still 6 (neutral): stops at Gate I, 0 draws", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_SAND_ATTACK,
+        attacker: accDownBattler({ hp: 70 }),
+        target: accDownBattler({ hp: 100 }), // > 70 -> Gate B skips site 1 too
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+
+    it("target ACC stage 5 (already lowered by this SAME dispatch move this turn, doc §19.1/§19.2): does NOT stop -- falls through toward DRAW SITE 7", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_SAND_ATTACK,
+        attacker: accDownBattler({ hp: 70 }),
+        target: accDownBattler({ hp: 100, accStage: 5 }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "accuracy-down-roll-7" });
+    });
+  });
+
+  describe("Gates J/K (either battler < 40% HP skips DRAW SITE 7 straight to the deterministic -2)", () => {
+    it("Gate J: opponent's own HP 35% (< 40) -- deterministic -2, no DRAW SITE 7 (Gate A's own <70% threshold also reaches DRAW SITE 1 first, a real overlap since 40 < 70)", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_SAND_ATTACK,
+        attacker: accDownBattler({ hp: 35 }),
+        target: accDownBattler({ hp: 100, accStage: 5 }), // accStage 5 keeps Gate I from stopping first
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(1); // DRAW SITE 1 only -- DRAW SITE 7 is skipped by Gate J
+      expect(result.draws[0]).toMatchObject({ kind: "accuracy-down-roll-1", succeeded: true }); // roll 198 >= 100
+      expect(result.scoreDelta).toBe(-1 + -2); // DRAW SITE 1's own -1, plus the tail's deterministic -2
+    });
+
+    it("Gate K: target's own HP 35% (< 40) -- deterministic -2, no DRAW SITE 7 (same real overlap via Gate B's <=70% threshold)", () => {
+      const result = runCheckViability({
+        rng: { value: 4, calls: 0 },
+        moveId: MOVE_SAND_ATTACK,
+        attacker: accDownBattler({ hp: 70 }),
+        target: accDownBattler({ hp: 35, accStage: 5 }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "accuracy-down-roll-1", succeeded: false }); // roll 25 < 100
+      expect(result.scoreDelta).toBe(0 + -2);
+    });
+  });
+
+  describe("DRAW SITE 7 (both battlers in [40,70]% HP -- OPPOSITE polarity from every other site in this handler)", () => {
+    it("roll >= 70 (fall through): applies the -2, same destination Gates J/K jump to directly", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_SAND_ATTACK,
+        attacker: accDownBattler({ hp: 50 }), // [40,70) -> reaches site 1 via Gate A too
+        target: accDownBattler({ hp: 50, accStage: 5 }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      // seed 1: draw1 (site1, roll198>=100 -> -1), draw7 (next roll 33, <70 -> jump, no score).
+      expect(result.draws).toHaveLength(2);
+      expect(result.draws[0]).toMatchObject({ kind: "accuracy-down-roll-1", succeeded: true });
+      expect(result.draws[1]).toMatchObject({ kind: "accuracy-down-roll-7", succeeded: false });
+      expect(result.scoreDelta).toBe(-1); // DRAW SITE 7's own jump applies NO further score
+    });
+
+    it("roll < 70 (jump to End): NO further score change from DRAW SITE 7 itself", () => {
+      const result = runCheckViability({
+        rng: { value: 3, calls: 0 },
+        moveId: MOVE_SAND_ATTACK,
+        attacker: accDownBattler({ hp: 50 }),
+        target: accDownBattler({ hp: 50, accStage: 5 }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      // seed 3's chain: 83 (site1, >=100? no, 83<100 -> skip), 102 (site7, >=70 -> apply -2).
+      expect(result.draws).toHaveLength(2);
+      expect(result.draws[0]).toMatchObject({ kind: "accuracy-down-roll-1", succeeded: false });
+      expect(result.draws[1]).toMatchObject({ kind: "accuracy-down-roll-7", succeeded: true });
+      expect(result.scoreDelta).toBe(-2);
     });
   });
 });
