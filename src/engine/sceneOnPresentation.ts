@@ -124,6 +124,20 @@ import {
   type GrowthAnimationState,
 } from "./growth.ts";
 import {
+  futureSightAttackerEffectAtAge,
+  futureSightBgBldyAtAge,
+  futureSightBgIsPsychic,
+  type FutureSightAttackerEffect,
+} from "./futureSight.ts";
+import {
+  confusionAttackerEffectAtAge,
+  confusionBgBldyAtAge,
+  confusionBgIsPsychic,
+  confusionTargetEffectAtAge,
+  type ConfusionAttackerEffect,
+  type ConfusionTargetEffect,
+} from "./confusion.ts";
+import {
   extremeSpeedAttackerAffineAtAge,
   extremeSpeedAttackerVisibleAtAge,
   extremeSpeedBackgroundAtAge,
@@ -202,7 +216,8 @@ export interface SceneOnPresentationBattler {
     | "DUGTRIO"
     | "CHARMELEON"
     | "HAUNTER"
-    | "IVYSAUR";
+    | "IVYSAUR"
+    | "KADABRA";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -597,6 +612,20 @@ export interface SceneOnGrowthConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnFutureSightConfig {
+  readonly move: "FUTURE_SIGHT";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+export interface SceneOnConfusionConfig {
+  readonly move: "CONFUSION";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export type SceneOnMoveConfig =
   | SceneOnFirePunchConfig
   | SceneOnIcePunchConfig
@@ -620,7 +649,9 @@ export type SceneOnMoveConfig =
   | SceneOnEmberConfig
   | SceneOnDragonRageConfig
   | SceneOnShadowPunchConfig
-  | SceneOnGrowthConfig;
+  | SceneOnGrowthConfig
+  | SceneOnFutureSightConfig
+  | SceneOnConfusionConfig;
 
 export interface SceneOnMovePresentationState<
   TConfig extends SceneOnMoveConfig = SceneOnMoveConfig,
@@ -901,6 +932,22 @@ export interface SceneOnGrowthView extends GrowthAnimationState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnFutureSightView extends FutureSightAttackerEffect {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly bgBldy: number;
+  readonly bgIsPsychic: boolean;
+}
+
+export interface SceneOnConfusionView extends ConfusionAttackerEffect, ConfusionTargetEffect {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly bgBldy: number;
+  readonly bgIsPsychic: boolean;
 }
 
 export interface SceneOnDragonRageFirePlume extends DragonRageFirePlumeState {
@@ -1312,6 +1359,73 @@ export function sceneOnGrowthView(
     target: state.config.target,
     attackerScale: scaleState.attackerScale,
     attackerObjY: tintState.attackerObjY,
+  };
+}
+
+/** `age` is ticks since `fadetobg BG_PSYCHIC`'s own creation tick (`futureSight.ts`'s module doc has the full RAM-probed derivation). */
+export function sceneOnFutureSightView(
+  state: SceneOnMovePresentationState,
+): SceneOnFutureSightView {
+  if (state.config.move !== "FUTURE_SIGHT") {
+    throw new Error(`expected FUTURE_SIGHT presentation, got ${state.config.move}`);
+  }
+  // Captured-framebuffer-lags-RAM-write, same class of latency as
+  // MOVE_GROWTH's own documented (scaleLag=2, tintLag=1) split for the
+  // identical blend_color_cycle+ScaleMonAndRestore attacker-tint/affine
+  // seam (sceneOnGrowthView's own module doc) - reused here since both
+  // moves drive the exact same drawSpriteSheetAffineStretch path; RAM/
+  // pixel-confirmed to transfer unchanged (tools/compare/
+  // futureSightPortable.ts against the dense fixture).
+  const scaleState = futureSightAttackerEffectAtAge(state.age - 2);
+  const tintState = futureSightAttackerEffectAtAge(state.age - 1);
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    attackerObjY: tintState.attackerObjY,
+    attackerScale: scaleState.attackerScale,
+    bgBldy: futureSightBgBldyAtAge(state.age),
+    bgIsPsychic: futureSightBgIsPsychic(state.age),
+  };
+}
+
+/** `age` is ticks since `fadetobg BG_PSYCHIC`'s own creation tick (`confusion.ts`'s module doc has the full RAM-probed derivation). */
+export function sceneOnConfusionView(
+  state: SceneOnMovePresentationState,
+): SceneOnConfusionView {
+  if (state.config.move !== "CONFUSION") {
+    throw new Error(`expected CONFUSION presentation, got ${state.config.move}`);
+  }
+  // Per-mechanism lag bisection against the dense oracle fixture (not
+  // assumed from GROWTH/FUTURE_SIGHT's own scaleLag=2/tintLag=1 - this
+  // move's own window 1 needed a DIFFERENT split): the attacker's tint
+  // (blend_color_cycle's own objY) matches GROWTH/FUTURE_SIGHT's -1;
+  // AnimTask_ShakeMon2's own x2 needed -2 (RAM x2 already matches oracle
+  // with NO offset beyond confusion.ts's own "+1" creation-anchor idiom -
+  // the extra -2 here is display-only, the captured framebuffer lagging
+  // RAM by 2 ticks for this OAM write, not a formula correction). Window
+  // 2's target (both AnimTask_ShakeMon's x2 and AnimTask_ScaleMonAndRestore's
+  // matrix) needed NO scene-level lag at all - RAM and pixels already agree
+  // at raw `state.age`. The residual pixel mismatch this leaves (dense
+  // comparator, ~40% of window 2's frames) is confined to the target's own
+  // sprite interior, growing with scale magnitude exactly like FUTURE_SIGHT's
+  // own still-open attacker-side "defect A" - out of THIS move's scope, but
+  // notable: FUTURE_SIGHT's attacker (has `monbg`) shows it, BIND's target
+  // (no `monbg`) does not, and CONFUSION's target (has `monbg ANIM_DEF_
+  // PARTNER`) now does too - see ANIMATION_PROGRESS.md for the full account.
+  const attackerTint = confusionAttackerEffectAtAge(state.age - 1);
+  const attackerShake = confusionAttackerEffectAtAge(state.age - 2);
+  const targetEffect = confusionTargetEffectAtAge(state.age);
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    attackerObjY: attackerTint.attackerObjY,
+    attackerX2: attackerShake.attackerX2,
+    targetScale: targetEffect.targetScale,
+    targetX2: targetEffect.targetX2,
+    bgBldy: confusionBgBldyAtAge(state.age),
+    bgIsPsychic: confusionBgIsPsychic(state.age),
   };
 }
 

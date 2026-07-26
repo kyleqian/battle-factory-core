@@ -68,9 +68,11 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        unsupported: 253,
+        // MOVE_CONFUSION added this session (partial): unsupported
+        // 252->251, partial 4->5, deliberate per AGENTS.md.
+        unsupported: 251,
         staged: 0,
-        partial: 3,
+        partial: 5,
         exact: 20,
       },
       {

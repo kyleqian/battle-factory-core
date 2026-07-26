@@ -565,6 +565,7 @@ import turn15FieldPpuAsset from "../assets/gen/turn15-field-ppu-20302.json" with
 import faintAttackDarkBgAsset from "../assets/gen/battle-anim-bg-dark.json" with { type: "json" };
 import extremeSpeedAsset from "../assets/gen/battle-anim-extreme-speed.json" with { type: "json" };
 import battleAnimGhostBgAsset from "../assets/gen/battle-anim-ghost-bg.json" with { type: "json" };
+import battleAnimPsychicBgAsset from "../assets/gen/battle-anim-psychic-bg.json" with { type: "json" };
 import { partyMenuLayers, partySelectEntryPhase, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutGoTextVisibleChars, partySendOutHealthboxDx, partySendOutMenuBounceTick, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_GO_TEXT, type PartyMenuIconLayer } from "./partySelect.ts";
 import { bgFadeY, objFadeY, type FadeTiming } from "./paletteFade.ts";
 import { fadeColor } from "./fadeRender.ts";
@@ -615,12 +616,16 @@ import {
   sceneOnDragonRageView,
   sceneOnShadowPunchView,
   sceneOnGrowthView,
+  sceneOnFutureSightView,
+  sceneOnConfusionView,
   type SceneOnMovePresentationState,
 } from "./sceneOnPresentation.ts";
 import {
   extremeSpeedBackgroundVariant,
   extremeSpeedImpactAtAge,
 } from "./extremeSpeed.ts";
+import { futureSightBgPaletteRowAtAge } from "./futureSight.ts";
+import { confusionBgPaletteRowAtAge, CONFUSION_WINDOW2_START_AGE } from "./confusion.ts";
 import {
   SHADOW_PUNCH_ATTACKER_FRAMEBUFFER_LAG,
   SHADOW_PUNCH_TRACE_ALPHA,
@@ -909,7 +914,9 @@ const dugtrioBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSp
 const charmeleonBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).CHARMELEON!;
 const haunterBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).HAUNTER!;
 const ivysaurBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).IVYSAUR!;
+const kadabraBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).KADABRA!;
 const battleAnimGhostBg = battleAnimGhostBgAsset as { tileset: Tileset; palette: RgbColor[]; tilemap: Tilemap };
+const battleAnimPsychicBg = battleAnimPsychicBgAsset as { tileset: Tileset; palette: RgbColor[]; tilemap: Tilemap };
 const extremeSpeedBg = (extremeSpeedAsset as {
   background: {
     tileset: Tileset;
@@ -14643,6 +14650,239 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "IVYSAUR used" : "Foe IVYSAUR used",
       "GROWTH!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "FUTURE_SIGHT") {
+    const view = sceneOnFutureSightView(state);
+    const playerToOpponent =
+      view.attacker.species === "KADABRA"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    // Only the player-attacker orientation is staged so far (no KADABRA
+    // front sprite extracted yet) - the family map's own derivation says
+    // the OBJ-row/task arithmetic is side-uniform, so the opposite
+    // orientation is expected to need no new mechanism, only the missing
+    // sprite; left for a future session per this step's time budget.
+    if (!playerToOpponent) {
+      throw new Error(
+        `unsupported staged FUTURE_SIGHT pair ${view.attacker.species}(${view.attacker.geometry.side})->${view.target.species}(${view.target.geometry.side})`,
+      );
+    }
+    const attackerSprite = kadabraBackSprite;
+    const targetSprite = onixFrontSprite;
+    const gpuDarken = (palette: readonly RgbColor[]) =>
+      palette.map((color) => {
+        const packed = mgbaDarkenColor(
+          color.r | (color.g << 8) | (color.b << 16),
+          view.bgBldy,
+        );
+        return {
+          r: packed & 0xff,
+          g: (packed >>> 8) & 0xff,
+          b: (packed >>> 16) & 0xff,
+        };
+      });
+    if (view.bgIsPsychic) {
+      drawExtractedTileBg(fb, {
+        tileset: battleAnimPsychicBg.tileset,
+        tilemap: battleAnimPsychicBg.tilemap,
+        // Captured-framebuffer-lags-RAM-write by one tick (same class of
+        // latency as GROWTH/BLAZE_KICK's own documented lag) - RAM-probed
+        // rotation ages land one tick early against the rendered pixels.
+        subpalettes: [gpuDarken(futureSightBgPaletteRowAtAge(battleAnimPsychicBg.palette, view.age - 1))],
+      });
+    } else {
+      drawExtractedTileBg(fb, {
+        tileset: battleBg.static.tileset,
+        tilemap: battleBg.static.tilemap,
+        subpalettes: battleBg.palette.map(gpuDarken),
+      });
+    }
+    // FUTURE_SIGHT never touches the target (self-buff/delayed-hit setup,
+    // no AnimTask_ShakeMon), so an opponent-side front target keeps its
+    // permanent send-out front-sprite-animation residual for the whole
+    // window - same MOVE_GROWTH/DRAGON_RAGE/SHADOW_PUNCH finding.
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffset(view.target.species)
+      : null;
+    drawSpriteSheet(
+      fb,
+      targetSprite.tileset,
+      targetSprite.palette,
+      view.target.geometry.spriteCorner.x + (targetIdle?.x2 ?? 0),
+      view.target.geometry.spriteCorner.y + (targetIdle?.y2 ?? 0),
+    );
+    drawSpriteSheetAffineStretch(
+      fb,
+      attackerSprite.tileset,
+      attackerSprite.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+      view.attackerScale.xScale,
+      view.attackerScale.yScale,
+      0,
+      { r: 255, g: 255, b: 255 },
+      view.attackerObjY,
+      view.attackerScale.active,
+    );
+    const opponentSpecies = playerToOpponent ? "ONIX" : "KADABRA";
+    const playerSpecies = playerToOpponent ? "KADABRA" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "KADABRA used" : "Foe KADABRA used",
+      "FUTURE SIGHT!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "CONFUSION") {
+    const view = sceneOnConfusionView(state);
+    const playerToOpponent =
+      view.attacker.species === "KADABRA"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    // Only the player-attacker orientation is staged so far (no KADABRA
+    // front sprite extracted yet) - same family-map derivation as
+    // FUTURE_SIGHT: the OBJ-row/task arithmetic is expected side-uniform,
+    // left for a future session per this step's own time budget.
+    if (!playerToOpponent) {
+      throw new Error(
+        `unsupported staged CONFUSION pair ${view.attacker.species}(${view.attacker.geometry.side})->${view.target.species}(${view.target.geometry.side})`,
+      );
+    }
+    const attackerSprite = kadabraBackSprite;
+    const targetSprite = onixFrontSprite;
+    const gpuDarken = (palette: readonly RgbColor[]) =>
+      palette.map((color) => {
+        const packed = mgbaDarkenColor(
+          color.r | (color.g << 8) | (color.b << 16),
+          view.bgBldy,
+        );
+        return {
+          r: packed & 0xff,
+          g: (packed >>> 8) & 0xff,
+          b: (packed >>> 16) & 0xff,
+        };
+      });
+    if (view.bgIsPsychic) {
+      drawExtractedTileBg(fb, {
+        tileset: battleAnimPsychicBg.tileset,
+        tilemap: battleAnimPsychicBg.tilemap,
+        // Captured-framebuffer-lags-RAM-write by one tick, same as
+        // FUTURE_SIGHT's own rotation read.
+        subpalettes: [gpuDarken(confusionBgPaletteRowAtAge(battleAnimPsychicBg.palette, view.age - 1))],
+      });
+    } else {
+      drawExtractedTileBg(fb, {
+        tileset: battleBg.static.tileset,
+        tilemap: battleBg.static.tilemap,
+        subpalettes: battleBg.palette.map(gpuDarken),
+      });
+    }
+    // Target keeps its permanent front-idle x2/y2 residual (same
+    // FUTURE_SIGHT/GROWTH "ONIX starts at x2=+1" finding) until window 2's
+    // own AnimTask_ShakeMon/AnimTask_ScaleMonAndRestore pair takes
+    // ownership of it at CONFUSION_WINDOW2_START_AGE (confusion.ts).
+    const targetIdle = speciesFrontIdleRestOffset(view.target.species);
+    const targetTouched = view.age >= CONFUSION_WINDOW2_START_AGE;
+    drawSpriteSheetAffineStretch(
+      fb,
+      targetSprite.tileset,
+      targetSprite.palette,
+      view.target.geometry.spriteCorner.x + (targetTouched ? 0 : (targetIdle?.x2 ?? 0)),
+      view.target.geometry.spriteCorner.y + (targetTouched ? 0 : (targetIdle?.y2 ?? 0)),
+      view.targetScale.xScale,
+      view.targetScale.yScale,
+      0,
+      { r: 255, g: 255, b: 255 },
+      0,
+      view.targetScale.active,
+      targetTouched ? view.targetX2 : 0,
+    );
+    drawSpriteSheetAffineStretch(
+      fb,
+      attackerSprite.tileset,
+      attackerSprite.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+      256,
+      256,
+      0,
+      { r: 255, g: 255, b: 255 },
+      view.attackerObjY,
+      false,
+      view.attackerX2,
+    );
+    const opponentSpecies = playerToOpponent ? "ONIX" : "KADABRA";
+    const playerSpecies = playerToOpponent ? "KADABRA" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "KADABRA used" : "Foe KADABRA used",
+      "CONFUSION!",
       99,
     );
     return;

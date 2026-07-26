@@ -42,306 +42,112 @@ substitute state, multi-turn/multi-hit state, or another explicit script input.
 Every status needs a committed ON-profile trace; `exact` cannot retain a known
 remainder.
 
-## MOVE_GROWTH promoted to `exact`: last named residual (IVYSAUR attacker salt-and-pepper) was a display-lag bug, not species idle offset or asset decode — both dense windows 63/63, twice each (2026-07-25)
+## Defect A cracked open, not closed: monbg hypothesis RAM-CONFIRMED real, but the direct fix is a no-op — both moves stay `partial`, unchanged counts (2026-07-25)
 
-**Verdict: real fix, RAM-probe-first as directed — both suspected classes
-from the step brief were checked and disproved with hard evidence before
-any code changed; the actual cause was a third class the brief didn't
-name.** `tools/probe/dump-growth-ivysaur-vram.py` read IVYSAUR's own
-attacker-battler OAM (`x2`/`y2`, tileNum, paletteNum) plus the full VRAM
-tile bytes and OBJ palette row (faded + unfaded) at a clean pre-move tick
-and window ticks, both orientations: `x2`/`y2` are 0 at every tick (no
-idle-anim rest offset — also confirmed from source: `speciesIdleAnim.ts`'s
-own doc notes IVYSAUR's front `ANIM_V_STRETCH`/back `ANIM_H_SLIDE` families
-both explicitly zero out on completion, unlike ONIX's `RAPID_H_HOPS`, so
-the "missing from `SPECIES_FRONT_ANIM_FAMILY`" theory named last session
-was never going to explain a residual here), and the extracted
-tileset+palette are byte-identical to live VRAM/PLTT (all 64 tiles, all 16
-colors, at every probed tick) — ruling out an asset/decode bug too.
+**Verdict: real, RAM-proven mechanism found; the obvious fix built from it does not close the defect — reverted, not landed.** Mandate: instrument defect A (the scale-window sprite-interior residual, cross-move-triangulated to `monbg`) before touching render code. Wrote `tools/probe/dump-monbg-scale-window.py` (new, cites `Cmd_monbg`/`MoveBattlerSpriteToBG`/`Task_InitUpdateMonBg`/`Task_UpdateMonBg`, `battle_anim.c:591-837`) and ran it against FUTURE_SIGHT's own kadabra-onix fixture, ticks 105-150: reads `gSprites[].invisible`/x2/y2/matrix, `gBattle_BG1_X/Y`/`gBattle_BG2_X/Y`, and the real `BG1CNT`/`BG2CNT`/`BG1HOFS`/`BG1VOFS`/`BG2HOFS`/`BG2VOFS`/`DISPCNT` hardware regs.
 
-**The real cause.** `growthAnimationAtAge`'s own mechanism is RAM-exact
-against the live OAM matrix with NO lag (unchanged, still true) — but the
-CAPTURED FRAMEBUFFER lags the matrix write, the same class of latency
-already documented for BLAZE_KICK ("OAM one frame after the reducer,
-palette one more VBlank after that"), except inverted: here the affine
-SCALE lags the reducer by 2 ticks and the BLEND TINT lags by only 1.
-Bisected empirically (all 9 (scaleLag, tintLag) pairs up to 2, both
-fixtures) using the real render pipeline, not a reimplementation — (2, 1)
-is the only pair landing 63/63 in both. Fixed in `sceneOnGrowthView`
-(`src/engine/sceneOnPresentation.ts`) by reading the scale and tint
-components at independently lagged ages. Updated `growthPortable.ts`'s own
-component check to compare the RAW (unlagged) mechanism against RAM
-directly, since that check's job is verifying `growthAnimationAtAge`'s own
-math, not the display-lag presentation choice.
+**Confirmed:** the attacker OBJ's `invisible` bit is `TRUE` ticks 105-113 (post-`monbg`, pre-scale) and flips `FALSE` at exactly tick 114 — the same tick `attackerScale.active` goes true. Source read explains it exactly: `PrepareBattlerSpriteForRotScale` (`battle_anim_mons.c:1295-1307`), called at `AnimTask_ScaleMonAndRestore`'s own start, unconditionally re-clears the OBJ's `invisible` flag. So `monbg`'s hide is undone the instant the scale task begins — **both** the OBJ (now visible, scaled via its own OAM matrix, already RAM-exact per rung 5) **and** BG2's frozen `MoveBattlerSpriteToBG` tile copy (never rescaled, only re-panned/re-tinted every tick by `Task_UpdateMonBg`) are simultaneously live for the whole scale window. This is real, hard RAM evidence, not a guess.
 
-**Dense comparator, both orientations, twice each:** component 63/63,
-framebuffer 63/63 — reproduced byte-identical on a second independent run
-each. **Coverage: `MOVE_GROWTH` promoted to `exact`.**
+**The fix built from it did not work.** Tried "draw the same sprite unscaled first, then the real scaled OBJ on top" (gated on `attackerScale.active`/`targetScale.active`) in both moves' `battleScene.ts` draw cases. Reran both dense comparators twice: FUTURE_SIGHT moved only 85/114 → 86/114 (one frame, plausibly noise), and CONFUSION was **byte-identical** at 108/140 — directly verified by stashing the fix and re-rendering the same age: pixel-for-pixel identical output, including inside the mismatch region. **Reverted** (`git checkout -- src/engine/battleScene.ts`) rather than landed.
 
-**Evidence.** `npm test` 2443/2443 (unchanged — no Tier-1 logic touched,
-only the presentation seam and a comparator diagnostic). `npm run build`
-green.
+**Why it was a no-op, and defect A's real shape:** cross-checking already-exact MOVE_BIND's own convention (xDelta=+10 on X drawn as a visible squeeze, i.e. a SHRINK) against `drawSpriteSheetAffineStretch`'s `sy=((ry*my)>>8)+halfH` formula shows a matrix value **below** 256 renders the sprite **bigger** (zoom in), not smaller. FUTURE_SIGHT/CONFUSION's `xDelta=yDelta=-4` is therefore a **GROW** (KADABRA/ONIX puff up), not a shrink — the opposite of this session's initial "shrink exposes a gutter" framing, which is why an underlay fix changed nothing (a grown OBJ already covers any underlay everywhere it matters). Direct pixel sampling (`tools/compare/scratch/confusion-pixel-list.mjs`, new) confirms the real symptom is the opposite of "missing fill": e.g. oracle pixel (181,3) reads `(255,0,0)`, a psychic-BG-swirl color, while this engine's own doubled-affine scan paints an opaque ONIX-gray `(189,181,181)` there — this engine's `doubled=true` scan reaches further than the real hardware's double-size OBJ actually paints.
 
-## MOVE_GROWTH rung 3 completed, rung 4 done: scene-wired and dense-compared both orientations, lands `partial` (target exact, attacker residual named) (2026-07-25)
+**Coverage: unchanged.** `MOVE_FUTURE_SIGHT` stays `partial`, 85/114. `MOVE_CONFUSION` stays `partial`, 108/140. Neither ledger's pinned counts moved (the +1 FUTURE_SIGHT frame from the reverted fix is gone too).
 
-**Verdict: real progress, not a fit.** Completed rung 3 (`GrowthEffect` =
-`blend_color_cycle` + `AnimTask_ScaleMonAndRestore`, both RAM-probed to
-share one creation tick per call, second call starting exactly 32 ticks
-after the first) as `growthAnimationAtAge` (`src/engine/growth.ts`,
-`tests/growth.test.ts` 4/4). Extracted IVYSAUR's battle back/front sprites
-(CHARMELEON/HAUNTER precedent, `extract-battle-mon-pics.ts`). Wired
-`sceneOnGrowthView` + a `battleScene.ts` GROWTH draw case through the
-existing `drawSpriteSheetAffineStretch` tint/affine path other moves
-already use for palette flashes — `doubled` follows BIND's own precedent
-(ANY active affine transform sets `ST_OAM_AFFINE_DOUBLE` on real hardware,
-not just over-256 scales).
+**Evidence.** `npm test` 2463/2463 (unchanged — no engine/production code landed this session, only the new probe + scratch diagnostics). `npm run build` green.
 
-**Dense comparator (rung 4).** `tools/compare/growthPortable.ts` + two
-fixtures, whole 63-frame window per orientation (oracle ticks 211-273,
-every frame captured), against the committed `mechanic-growth-*` fixtures.
-Component check (attacker affine matrix vs RAM) is **63/63 both
-orientations** — the newly-ported mechanism is RAM-exact at every tick,
-including age 0's already-nonzero scale. First run surfaced a **full-window
-framebuffer loss (0/63)**; pixel-dumped the diff before guessing and found
-it traced entirely to the TARGET (ONIX), not the new mechanism — ONIX
-(opponent-side front) was missing the already-ported send-out front-sprite
-idle residual (`speciesIdleAnim.ts`'s `speciesFrontIdleRestOffset`, the same
-"settles at x2=+1" finding DRAGON_RAGE/SHADOW_PUNCH's own dense windows
-already required) because GROWTH never runs `AnimTask_ShakeMon` on its
-target to overwrite it. Wiring that residual in made the target box
-pixel-exact in both orientations.
+**Next action for a future session:** the "gutter" framing is wrong; re-derive from the GROW direction. Dump the OBJ's real OAM attr0/attr1 (shape/size bits — this session's probe didn't capture them) plus a raw per-scanline sample at a peak-scale tick (~frame 130) to find exactly where the real hardware's double-size affine window stops painting, since this engine's current "naive 2x bounding box" doubled scan is now the prime suspect for over-reaching. Both moves share this one root cause and should close together once it's found.
 
-**Lands `partial`: framebuffer 3/63 both orientations**, reproduced
-byte-identical (component and framebuffer counts, bbox, px counts) on two
-independent runs each — deterministic. Every remaining mismatch is confined
-to IVYSAUR's (the attacker's) own sprite box in both orientations
-(player-back: 728px, bbox 48,67-96,111; opponent-front: 585px, bbox
-156,28-196,72), a salt-and-pepper pattern on high-detail regions (the
-flower bud), not a shift or color swap. Since the affine-matrix component
-check is exact at these same frames, the newly-ported blend mechanism isn't
-implicated — the pattern matches `speciesIdleAnim.ts`'s own already-named
-gap (IVYSAUR isn't yet in `SPECIES_FRONT_ANIM_FAMILY`, and the back-sprite
-send-out idle family is explicitly documented there as a separate, unported
-mechanism). Not probed/ported this step (a new RAM probe, out of this
-rung's time budget) — named, not chased blind, per this run's own
-no-blind-fit policy.
+**PAPERCUT:** none new this session beyond the already-known first-diff-only bbox report (already fixed by `--per-frame-bbox`, prior session).
 
-**Coverage:** added `MOVE_GROWTH` to `ANIMATION_COVERAGE.json` as `partial`.
+## MOVE_CONFUSION ported (group-A sibling): window 1 (attacker) lands 19/20 exact, window 2 (target) carries FUTURE_SIGHT's own defect-A residual, stays `partial` at 108/140 (2026-07-25)
 
-**Evidence.** `npm test` 2443/2443 (2439 + 4 new `growth.test.ts`). `npm run
-build` green. Both comparators reproduced byte-identical on two independent
-runs each.
+**Verdict: real port, not a fit — window 1 essentially exact, window 2's residual is new evidence for FUTURE_SIGHT's still-open defect A, not a new bug.** Per the archived enumeration, CONFUSION's own script (`battle_anim_scripts.s:4716-4730`, verified directly, not assumed) composes only already-proven pieces around TWO sequential simultaneous-task windows, not one: window 1 (attacker) `AnimTask_ShakeMon2`+`blend_color_cycle`; window 2 (target) `AnimTask_ShakeMon`+`AnimTask_ScaleMonAndRestore` (same xDelta/yDelta/duration as FUTURE_SIGHT's own attacker scale, here on the TARGET - the real composition risk this port existed to check). Reused FUTURE_SIGHT's own KADABRA/ONIX fixture pairing (`FRONTIER_MON_KADABRA_1` carries both moves) - zero new sprite extraction needed.
 
-**Next action for a future session:** RAM-probe IVYSAUR's own send-out
-settle offset (both front and back sprite forms — `tools/probe/dump-onix-
-front-idle-anim.py` is the direct precedent) and extend
-`speciesIdleAnim.ts`'s `SPECIES_FRONT_ANIM_FAMILY`, or add an attacker-side
-equivalent of `speciesFrontIdleRestOffset` for the back-sprite family, then
-re-run `growthPortable.ts` to confirm `exact`.
+**RAM-probed first** (`tools/battle-lab/mechanic-confusion-kadabra-onix.json`, the already-committed generic `run-battle-lab-rgb.py`, no new probe script): fade 1 is byte-identical in shape to FUTURE_SIGHT's own (same subroutine); window 1 creates at age 37 - the SAME age FUTURE_SIGHT's own attacker effect starts at; window 2 creates at age 65; fade 2 starts later (age 101, not 73 - window 2's own longer task chain runs first) but shares FUTURE_SIGHT's exact ramp/hold/ramp shape; the BG-palette rotation ring carries the SAME rung-6 pause mechanism at its own breakpoint (age 97, not 69) - directly RAM-confirmed against the raw palette row (clean 4-age cadence 21->93, then a jump to 99, not 97).
 
-**Housekeeping:** moved the superseded "rungs 1-2 done, rung 3 partial"
-section (this same move, now complete through rung 4), the "BG-swap
-pipeline" dissolution section, and the "SHADOW_PUNCH lands partial (third
-session)" section to `ANIMATION_PROGRESS-archive.md` to keep ~3 live
-(AGENTS.md's convention); `blend_color_cycle` family map and DRAGON_RAGE
-rung 6/7 stay live alongside this one.
+**Factored, not duplicated** (per this step's own instruction): extracted the shared `SetPsychicBackground`/`UnsetPsychicBackground` fade-ramp and rotation-pause formulas out of `futureSight.ts` into a new `src/engine/psychicBackground.ts` - a pure, behavior-preserving refactor (`futureSight.test.ts` 9/9 unchanged before touching anything else). Ported `src/engine/confusion.ts` on top of it, reusing `blendColorCycleObjYAtAge`/`scaleMonAndRestoreAtAge`/`shakeMonOffsetAtTick`/`shakeMon2OffsetAtTick` verbatim (all already-proven), Tier-1-pinned (`tests/confusion.test.ts`, 11/11, every constant checked directly against the RAM probe's own output - including the already-established `AnimTask_ShakeMon(2)` "+1, guard age<creationAge" idiom from `dragonBreath.ts`/`blazeKick.ts`/`fly.ts`, RAM-confirmed to apply here too).
 
-## `blend_color_cycle` family map: mechanism decoded, all 28 Level-50 argv surveyed, MOVE_GROWTH recommended as the zero-new-mechanism representative (enumeration only, no port) (2026-07-25)
+**Wired** through the Scene-ON seam (`sceneOnConfusionView`, `battleScene.ts`'s CONFUSION draw case, reusing `kadabraBackSprite`/`onixFrontSprite`/`battleAnimPsychicBg` - no new assets). Per-mechanism lag bisection against the dense fixture (not a blind sweep - the ledger's own warning that one window can carry several lag conventions held true here): window 1's `AnimTask_ShakeMon2` needed its OWN scene-level lag (-2, distinct from GROWTH/FUTURE_SIGHT's own tint lag of -1), closing window 1 to 19/20 exact. Window 2's target (both `AnimTask_ShakeMon`'s x2 and `AnimTask_ScaleMonAndRestore`'s matrix) needed NO scene-level lag at all - RAM and pixels already agree at raw age, ruling lag out as window 2's problem.
 
-**Verdict: this is a genuinely bounded, cheap family — smaller than its "28
-moves, no exact representative" leaderboard ranking suggests.** The core
-per-pixel blend math (`BlendPalette`'s 5-bit formula) is **already ported
-and oracle-proven** (`src/engine/paletteFade.ts`'s `blendComponentToward`,
-proven via the S4 summary-screen/send-out fades). What's genuinely missing
-is (a) the `AnimTask_BlendColorCycle` task state machine and (b) wiring the
-battle-anim `selector` bitmask to a battler's OBJ-palette row inside the
-Scene-ON move seam — both small, well-specified pieces of work. No code
-changes this step per the brief (enumeration only); `MOVE_SHADOW_PUNCH` and
-`MOVE_DRAGON_RAGE` untouched (parked).
+**Dense comparator, rerun twice** (`tools/compare/confusionPortable.ts`, new `--per-frame-bbox` flag - this session's own fix for the PAPERCUT rung 5 named): **108/140 both times**, deterministic. Window 1 (attacker, frames 118-137, 20 frames): **19/20 exact**, only frame 119 (a single creation-tick boundary frame) mismatches. Window 2 (target, frames 146-176, 31 frames): **0/31 exact** - a whole-sprite-interior residual growing with the scale magnitude, exact at the sprite's center pixel, wrong toward the edges, surviving a full per-mechanism lag bisection. **New evidence for FUTURE_SIGHT's own open defect A, not a new bug**: FUTURE_SIGHT's attacker (has `monbg ANIM_ATK_PARTNER`) shows this residual class, BIND's target (no `monbg` at all) does not, and CONFUSION's target (has `monbg ANIM_DEF_PARTNER`) now shows it too - `monbg`'s own `MoveBattlerSpriteToBG` mechanism (moving the battler onto a BG2 tile copy instead of a plain OBJ) is now a live, named suspect. Not chased here - defect A remains FUTURE_SIGHT's own open item, out of this move's scope.
 
-**1. Mechanism.** `blend_color_cycle`/`blend_color_cycleexclude`/
-`blend_color_cyclebytag` (`asm/macros/battle_anim_script.inc:566-576`) each
-expand to `createvisualtask AnimTask_BlendColorCycle[Exclude|ByTag], priority,
-<selector-or-tag>, delay, num_blends, initial_blend_y, target_blend_y, color`.
-All three share one shape (`battle_anim_normal.c:447-646`): a `gTasks[]`
-struct (`data[0]`=selector/tag, `[1]`=delay, `[2]`=numBlends, `[3]`=
-initialBlendY, `[4]`=targetBlendY, `[5]`=color, `[8]`=restoreBlend toggle)
-whose loop function polls `!gPaletteFade.active` and, while `numBlends>0`,
-alternates direction: `!restoreBlend` blends `initialBlendY→targetBlendY`;
-`restoreBlend` blends back `targetBlendY→initialBlendY`; **when
-`numBlends==1` the target is force-overridden to 0 regardless of
-direction** (this is why "num_blends=2" reads in the doc comment as "flash
-to color and back once" — the final leg always lands back at absolute 0,
-not `initialBlendY`, unless they're both 0 already). **Two non-obvious
-quirks a naive port would miss:** (i) the very *first* call
-(`AnimTask_BlendColorCycle`'s setup, not the loop) hardcodes
-`startBlendAmount=0`, ignoring `tInitialBlendY` entirely — so a script that
-sets `initial_blend_y=3` (e.g. the old MIST_BALL-adjacent call at
-`battle_anim_scripts.s:1903`) still starts its first blend from 0, not 3;
-(ii) when `num_blends=1`, only ONE `BeginNormalPaletteFade` call ever
-happens (the hardcoded-0-start setup call) — the loop with its
-numBlends==1 override never runs a second blend, so `initial_blend_y` is
-completely unused/decorative for every `num_blends=1` script (e.g.
-`MOVE_SPARK`'s and `MOVE_STOCKPILE`'s calls) — it's not a no-op even when
-`initial_blend_y==target_blend_y`, it's a real 0→target snap.
+**Coverage:** `MOVE_CONFUSION` added to `ANIMATION_COVERAGE.json` as `partial`, 108/140.
 
-**Palette-selector semantics** (`UnpackSelectedBattlePalettes`,
-`battle_anim_normal.c:317-327`, dispatching to `GetBattlePalettesMask`,
-`battle_anim_mons.c:1402-1453`): a 7-bit selector, bit0=`F_PAL_BG` (BG
-palettes 1-3, mask `0xE`), bit1=`F_PAL_ATTACKER`/bit2=`F_PAL_TARGET`/
-bit3=`F_PAL_ATK_PARTNER`/bit4=`F_PAL_DEF_PARTNER` (each sets bit
-`16+battlerId` of the 32-bit `selectedPalettes` mask, partner bits gated on
-`IsBattlerSpriteVisible`), bit5/6 = BG anim palettes 8/9 (Contest-only in
-practice). `F_PAL_ATK_SIDE`=attacker|atkPartner, `F_PAL_DEF_SIDE`=
-target|defPartner, `F_PAL_BATTLERS`=all four. `blend_color_cyclebytag`
-instead resolves ONE OBJ palette row via `IndexOfSpritePaletteTag`;
-`blend_color_cycleexclude` builds the inverse of {attacker,target} across
-`gBattlersCount` battlers, plus BG (`0xE`) when its `unk0==1`.
+**Evidence.** `npm test` 2463/2463 (2452 + 11 new `confusion.test.ts`). `npm run build` green.
 
-**Ties into the already-solved 5-bit rule exactly, no new derivation
-needed.** `BeginNormalPaletteFade` (`palette.c:156-200`) stores the mask/
-delay/y/targetY/color into the global `gPaletteFade` struct
-(`include/palette.h:35-53`, RAM address `0x2037fd4` per
-`docs/battle-scene-notes.md`'s own citation, oracle-confirmed reachable
-this session via `bin/oracle symbols gPaletteFade`); `UpdateNormalPaletteFade`
-(`palette.c:406-485`) is driven every frame and processes the selector's BG
-half (bits 0-15, `paletteOffset` starting at 0) and OBJ half (bits 16-31,
-`paletteOffset` starting at `OBJ_PLTT_OFFSET`=256) on **alternating calls**
-(`objPaletteToggle`), calling `BlendPalette(paletteOffset, 16, gPaletteFade.y,
-blendColor)` per selected 16-entry row — the exact same `BlendPalette`
-(`util.c:264`) whose 5-bit `faded5 = c5 + (((target5-c5)*y)>>4)` formula
-`src/engine/paletteFade.ts` already implements as `blendComponentToward`
-(general form, already proven pixel-exact against S4 fades) — **this
-family needs zero new per-pixel math**, only the task-level orchestration
-above. Timing: `deltaY` defaults to 2 per y-step; a negative `delay`
-(several calls in this family use `delay=-31`) instead sets
-`deltaY=2+|delay|` and forces `delay=0` — i.e. a near-instant 33-unit jump
-per step (used for `MOVE_SPARK`'s flicker sequence, not a gradual fade). The
-BG half is gated on `delayCounter` reaching `delay` (a `delay+1`-frame hold
-per step); the OBJ half never waits on `delayCounter`, so **OBJ always lags
-BG's `y` by exactly one tick** — the identical `objY(t)===bgY(t-1)`
-relationship `paletteFade.ts`'s own module doc already derived for the S4
-fades, confirmed here to be the *general* `UpdateNormalPaletteFade`
-behavior, not something S4-specific. Each battler's OBJ palette row is
-`OBJ_PLTT_OFFSET + battlerId*16` directly from the two functions above
-(`GetBattlePalettesMask`'s `1<<(battlerId+16)` bit and
-`UpdateNormalPaletteFade`'s `paletteOffset += 16` per bit) — arithmetic, not
-inferred, so no RAM probe is needed to establish it, only to confirm no
-other engine quirk perturbs it for a specific move.
+**Next action for a future session:** PSYCHIC (this family's third and final sibling, not started - identical shape to CONFUSION with different color/deltas per the family map, should port cheaply once staged); the opposite orientation (KADABRA front sprite, not yet extracted); and defect A's real root cause, now with a concrete `monbg`-driven hypothesis shared between FUTURE_SIGHT and CONFUSION to chase (a VRAM/OAM tile-data dump at a scale-window peak tick, or checking whether `MoveBattlerSpriteToBG`'s BG2-copy path changes the affine-stretch sampling itself).
 
-**2. Per-move argv survey (all 28 Level-50 moves, from the real script
-text via `blocks`, not memory):**
+## MOVE_FUTURE_SIGHT rung 6: register-level probe named and fixed defect B (the second-fade rotation-cadence pause); defect A untouched, stays `partial` at 85/114 (2026-07-25)
 
-| Move | selector | delay | numBlends | initial→target | color |
-|---|---|---|---|---|---|
-| GROWTH | ATTACKER | 0 | 2 | 0→8 | WHITE |
-| CONFUSION | ATTACKER | 0 | 2 | 0→8 | WHITE |
-| PSYCHIC | ATTACKER | 0 | 2 | 0→8 | (31,23,0) |
-| FUTURE_SIGHT | ATTACKER | 0 | 2 | 0→8 | WHITE |
-| FOCUS_ENERGY | ATTACKER | 2 | 2 | 0→11 | WHITE |
-| ENDURE | ATTACKER | 2 | 2 | 0→11 | RED |
-| CURSE | ATTACKER | 4 | 2 | 0→10 | RED |
-| SAFEGUARD | ATK_SIDE | 0 | 2 | 0→10 | WHITE |
-| SPITE | ATTACKER | 2 | 6 | 0→8 | WHITE |
-| RECOVER | ATTACKER | 0 | 6 | 0→11 | (31,31,11) |
-| SYNTHESIS | ATTACKER | 2 | 2 | 0→16 | (27,31,18) |
-| REVENGE | ATTACKER | 0 | 4 | 2→8 | RED |
-| STOCKPILE | ATTACKER | 8 | **1** | (unused)→12 | WHITE |
-| HYPNOSIS | TARGET | 2 | 2 | 0→12 | (31,18,31) |
-| PSYBEAM | TARGET | 2 | 2 | 0→12 | (31,18,31) |
-| SMOG | TARGET | 2 | 2 | 0→12 | (26,0,26) |
-| SLUDGE | TARGET | 1 | 2 | 0→12 | (30,0,31) |
-| SLUDGE_BOMB | TARGET | 1 | 2 | 0→12 | (30,0,31) |
-| NIGHT_SHADE | TARGET | 0 | 2 | 0→13 | BLACK |
-| POISON_FANG | TARGET | 0 | 4 | 0→12 | (26,0,26) |
-| PSYWAVE | TARGET | 1 | 4 | 0→12 | (31,18,31) |
-| ATTRACT | TARGET | 4 | 4 | 0→10 | (31,25,27) |
-| SWEET_SCENT | DEF_SIDE | 1 | 5 | 5→13 | (31,21,21) |
-| ACID | DEF_SIDE | 2 | 2 | 0→12 | (30,0,31) |
-| SOLAR_BEAM | ATTACKER | 1 | 4 | 0→11 | (31,31,11) |
-| REVERSAL | BG\|BATTLERS | 3 | 2 | 0→10 | WHITE |
-| BATON_PASS | BG\|BATTLERS | 1 | 2 | 0→11 | (31,22,30) |
-| SPARK | BG\|ATTACKER, then TARGET (7 calls) | **-31** (×6), then -31 | **1**×6, then 2 | 5→5, 0→0, 5→5, 0→0, 7→7, 0→0, then 0→6 | (31,31,22) |
+**Verdict: real fix, landed and pinned — defect B is closed.** Rung 5 left
+two named defects: B (10/39 mismatched frames, 147-164, a 17230px
+whole-upper-screen bbox in a period-4 pattern during the second/restore
+psychic-BG fade) and A (29/39, KADABRA's own attacker box, frames
+116-144). This rung's mandate was defect B first (register-level probe),
+touching A only if the same instrument explained it.
 
-Groups (batch-check siblings once one member is proven): **(A) self-flash,
-`ATTACKER`/`delay=0`/`numBlends=2`/`target=8`** — GROWTH, CONFUSION,
-PSYCHIC, FUTURE_SIGHT (near-identical, color the only variable) — the
-cheapest cluster. **(B) target-flash, `TARGET`/`numBlends=2`/`target≈12`**
-— HYPNOSIS, PSYBEAM, SMOG, SLUDGE, SLUDGE_BOMB, NIGHT_SHADE (6 moves).
-**(C) longer flicker, `numBlends=4`** — SOLAR_BEAM, PSYWAVE, ATTRACT,
-REVENGE, POISON_FANG. **(D) whole-screen `BG|BATTLERS`** — REVERSAL,
-BATON_PASS (drives BG + all 4 battlers' OBJ rows at once — more surface
-area, do after (A)). **(E) side selectors** — SAFEGUARD (`ATK_SIDE`),
-SWEET_SCENT/ACID (`DEF_SIDE`) — singles-legal (partner bit contributes
-nothing without a partner sprite). **(F) `numBlends=1` degenerate snap** —
-STOCKPILE, and SPARK's 6 `-31`-delay legs — exercises the "initialBlendY
-unused" quirk above; do these only after (A) is proven, as a targeted
-quirk check, not a first representative. Every one of the 28 also carries
-`monbg`/`clearmonbg`/`fadetobg`/`restorebg`/`waitbgfadein`/`splitbgprio`-family
-visual commands already proven exact (`MOVE_EXTREME_SPEED` et al.) or a
-per-move task (`AnimTask_ShakeMon2`, `AnimTask_ScaleMonAndRestore`, both
-already proven — see below).
+**The instrument.** Re-ran the fixture's own already-committed dense-probe
+script (`tools/probe/run-battle-lab-rgb.py`, invoked directly rather than
+through `futureSightPortable.ts`'s auto-deleted temp dir, so the raw
+`probe.json` could be inspected) — it already records `bldcnt`/`bldalpha`/
+`bldy` and the full `bgPalette2Faded` row every frame, no new probe script
+needed. Diffed the raw BG palette 2 row tick-by-tick across the whole
+window.
 
-**3. Representative recommendation: `MOVE_GROWTH`.** Its script
-(`battle_anim_scripts.s:2020-2030`) is `call GrowthEffect` ×2 (self-buff,
-no branches) into a 4-line subroutine: `blend_color_cycle` (group A
-above), `playsewithpan` (audio, untracked), `createvisualtask
-AnimTask_ScaleMonAndRestore, 5, -3, -3, 16, ANIM_ATTACKER, 0`. Cross-checked
-against the component graph: `AnimTask_ScaleMonAndRestore` is **already
-proven** — `MOVE_BIND` (exact) calls the identical task
-(`battle_anim_scripts.s:7126`, ported in `src/engine/bind.ts`) — and the
-extractor already resolves the `call`/`return` subroutine shape correctly
-(`GrowthEffect` appears as a real block in `MOVE_GROWTH`'s `blocks`, no
-decode-extension needed). The only genuinely new mechanism GROWTH needs is
-`blend_color_cycle` itself — **zero other unported components**, the
-single cheapest move in the whole family (every other move needs at least
-one net-new task: `MOVE_NIGHT_SHADE`→`AnimTask_NightShadeClone`,
-`MOVE_SPITE`→`AnimTask_SpiteTargetShadow`, both real one-off sprite/shadow
-tasks, not wrapper artifacts). **Factory-legal at Level 50:**
-`FRONTIER_MON_IVYSAUR_1` (`SPECIES_IVYSAUR`, moves `{PETAL_DANCE, GROWTH,
-SWEET_SCENT, FURY_CUTTER}`) and `FRONTIER_MON_SUNFLORA_2` (`{GIGA_DRAIN,
-GRASS_WHISTLE, GROWTH, DOUBLE_TEAM}`), both in
-`src/data/gen/battle-frontier-mons.json`. Recommend IVYSAUR (a fresh
-species this lane hasn't fixtured, unlike ONIX/HAUNTER) paired against an
-already-common fixture opponent (ONIX) for wiring consistency with other
-`mechanicLab overrides.parties` staged traces.
+**The exact divergence.** The psychic-BG rotation ring's own transition
+ages land at 21, 25, ..., 65 — exactly the existing 4-tick cadence
+already coded in `futureSight.ts`, RAM-confirmed byte-for-byte. Then the
+ring holds for **6 ticks instead of 4**: the next transition is age 71,
+not the naively-predicted 69. After that single pause, the clean 4-tick
+cadence resumes, permanently shifted +2 (71, 75, 79, 83, 87, 91, all
+RAM-confirmed). The pause window (ages 67-72) exactly spans the tick
+range where `REG_BLDCNT`/`REG_BLDALPHA` both read 0 — the gap between the
+attacker `blend_color_cycle`/`ScaleMonAndRestore` pair's own `blendoff`
+cleanup and `UnsetPsychicBackground`'s own fade setup (`REG_BLDCNT` reads
+`0xe8` again starting exactly at age 73, the same tick the existing
+`futureSightBgBldyAtAge` ramp already starts, unlagged). `REG_BLDY`'s own
+ramp was independently re-verified RAM-exact against the existing
+(unchanged) formula through the whole window (e.g. frame 150/age 73 →
+bldy 0, frame 151/age 74 → bldy 1) — confirming this is a
+rotation-cadence-only defect, not a darken-register one, consistent with
+rung 5's own negative result (extending the BLDY lag made things worse).
 
-**Staging fixture shape:** a `mechanicLab overrides.parties` trace, IVYSAUR
-(GROWTH first slot) vs a stock opposing mon, single dense window starting
-at the move-selection tick through `waitforvisualfinish`/`end`; test both
-attacker-side orientations only if the RAM probe (next) shows the
-battler→OBJ-row arithmetic isn't already uniform in this engine (it should
-be, per the direct-from-source derivation above — no evidence of an
-orientation dependency was found this session, so start with one side).
+**The fix.** `rotationCountAtAge` (`src/engine/futureSight.ts`) now
+applies a single documented breakpoint/pause (age 69, +2 ticks) before
+computing the ring position — no lag-guessing, the exact RAM-probed
+transition ages. Pinned with a new Tier-1 test asserting those ages
+directly (`tests/futureSight.test.ts`, 9/9).
 
-**RAM signals a probe should capture** (the `gPlttBufferFaded`-read
-precedent, `docs/battle-scene-notes.md` §7.5-style): per tick, (a)
-`gPaletteFade` at `0x2037fd4` — `active`, `y`, `targetY`, `delayCounter`,
-`objPaletteToggle`, `deltaY` (bitfield layout in `include/palette.h:35-53`;
-`multipurpose1` is a leading `u32`, so the bitfields start at byte offset
-4) to nail the BG/OBJ alternation parity directly instead of pixel-inverting
-it; (b) `gPlttBufferFaded[256 + attackerBattlerId*16 .. +15]` (IVYSAUR's own
-OBJ palette row) across the flash-and-back window, cross-checked against
-the group-A argv table above (target_blend_y=8, WHITE) — a clean,
-sprite-owned 16-entry row, not a shared/background sample, so no
-contamination risk unlike the S4 background-swatch technique. `bin/oracle
---profile battle-scene-on symbols gPaletteFade` confirmed the address
-resolves against the live oracle this session.
+**Dense comparator, rerun twice:** `tools/compare/futureSightPortable.ts`
+→ **85/114 both times** (up from 75/114). **Per-defect accounting:**
+defect B — **10/10 frames fixed** (147, 148, 151, 152, 155, 156, 159,
+160, 163, 164 all 0px diff, re-verified with
+`future-sight-per-frame-bbox.ts` against the fresh scratch dir). Defect A
+— **completely unchanged**: same 29 frames (116-144), identical magnitude
+curve. The register instrument that closed B does not explain A (A is a
+smooth continuous scale-magnitude curve, not a cadence artifact), so A
+was left untouched per this rung's own scope — a clean, not blind, stop.
 
-**4. Decode extension:** not needed. `GrowthEffect`'s `call`/`return` shape
-is already correctly resolved by the extractor (verified directly above),
-and the argv survey required no other extractor change — this step made
-no code changes, per its own enumeration-only scope.
+**Coverage:** `MOVE_FUTURE_SIGHT` stays `partial` in
+`ANIMATION_COVERAGE.json` — 85/114, remainder is defect A alone.
 
-**Not done (explicitly out of scope this step):** no RAM probe run, no
-engine code, no `ANIMATION_COVERAGE.json`/fixture changes. `MOVE_SHADOW_PUNCH`
-and `MOVE_DRAGON_RAGE` untouched (parked, per this step's brief).
+**Evidence.** `npm test` 2452/2452 (2451 + 1 new). `npm run build` green.
 
-**Evidence.** `npm test` 2222/2222 (unchanged — no logic touched). `npm run
-build` green. Enumeration cross-checked against
-`src/data/gen/battle-animation-components.json`,
-`src/data/gen/battle-frontier-mons.json`, and a live oracle `symbols` call;
-all move/component/argv claims above are generated directly from the
-committed JSON + real script/source text (scripts in `/tmp`, not
-committed — this ledger carries the durable output).
+**Next action for a future session (park rule — this closes
+FUTURE_SIGHT's run this session):** defect A needs a *different*
+instrument than either rung 5 or rung 6 used — both the OAM-matrix probe
+(rung 5) and this rung's BG-palette/register probe came back clean or
+irrelevant for A. Try a VRAM/OAM **tile-data** dump at the scale window's
+peak ticks (~frame 130), the `dump-growth-ivysaur-vram.py` precedent, to
+check for an asset/decode-adjacent mismatch the matrix-only probe
+wouldn't catch (tile indices, or the affine-stretch sampling itself, not
+just the matrix coefficients) — or a sub-pixel rounding difference in
+`drawSpriteSheetAffineStretch`. Once A closes: extend to the
+opponent-attacker orientation (KADABRA front sprite extraction; the
+family map's own derivation says this is side-uniform, no new mechanism
+expected) and re-run `futureSightPortable.ts` to confirm `exact`.
 
+**Housekeeping (this session):** moved the "MOVE_FUTURE_SIGHT rung 5" entry
+to `ANIMATION_PROGRESS-archive.md` to keep ~3 live (AGENTS.md's convention)
+after adding this session's new top entry.
