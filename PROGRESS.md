@@ -99,6 +99,29 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   discovery cost some investigation time but was resolved within scope by
   swapping the control move, not a dev-loop friction worth flagging
   separately.
+- **Side merge (same hour, supervisor-verified, comparator spot-checked
+  live at 256/256):** seam window 3 prep-scout landed as
+  `docs/presentation-seam-scout.md` §9 (`turn5-rockslide.json`): full
+  consumer map (corrects the constants' provenance — three bare literals +
+  one non-turn-dump asset, not `battle1TurnRamDumpAsset` fields), staged
+  opponent-attacks-player proof via unwired
+  `turn5EndeavorPresentationStaging.ts` (+7 tests), and the real blocker
+  named: `EFFECT_ENDEAVOR` is blocked on `SETDAMAGETOHEALTHDIFFERENCE`/
+  `BICBYTE`/`ADJUSTSETDAMAGE` — registration is the wiring step's rung 1.
+- **Animation merge (same hour, supervisor-verified live at 114/114):**
+  defect A FIXED for FUTURE_SIGHT — new DISPCNT-OBJ-off underlayer probe
+  named the 2nd blend target directly (formula exact 26/26 sampled
+  pixels; blend computed on 8-bit-expanded RGB, not re-truncated 5-bit),
+  `battleScene.ts` now composites scale-window blend sprites 50/50 over
+  the tinted frozen `monbg` copy. **MOVE_FUTURE_SIGHT promoted
+  `partial`→`exact` 114/114** (×2). CONFUSION stays 108/140 — blend
+  proven a no-op there via stash-diff; its blocker is the separate
+  banked one-tick OAM x-lag on the target shake. GROWTH 63/63 and BIND
+  45/45 gates held (neither sets objMode=1, source-confirmed). Probe
+  harness finding: `EmeraldOracle.write_u8/u16` silently no-op for
+  IO/OAM/palette RAM — worked around via libmgba-py `_bus_write`.
+  Combined merged tree re-verified: **220 files / 2634 tests + build
+  green.**
 
 ---
 ## 462 — Ingrain/Leech Seed/Wrap-family registered: setters + end-turn bodies executable (entry 461's next-item list)
