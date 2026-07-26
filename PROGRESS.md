@@ -83,6 +83,20 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   PAPERCUT: none this session. Also fixed a pre-existing PROGRESS.md
   formatting slip (entry 452 was missing its own `## 452` header) while
   archiving entry 451.
+- **Supervisor fold (2026-07-25 ~19:00), same session:** merged two side
+  scouts on top of this entry's landing: (1) the ISSUES #44 census fix —
+  `SET_MOVE_EFFECT_SUPPORTED_BYTES` now mechanically derived from the
+  engine dispatch (drift-guard proven to fire), census **57→65 effects,
+  122→144 moves, 92→111 Factory-L50** (1099→1416 weighted), 25 ground-truth
+  checks pass, #44 entry deleted per the pruning rule; (2) the Factory-AI
+  port-subset audit appended to `docs/factory-ai-ground-truth.md` —
+  mask-per-band pinned (0-1→0, 2-3→1, 4-7→7; all three banked fixtures ran
+  mask 7), CheckBadMove+TryToFaint proven to reproduce all three banked
+  ledgers exactly (CheckViability contributes zero to them — the doc's old
+  `AI_CV_Paralyze` claim corrected; supervisor re-verified the
+  `EFFECT_PARALYZE_HIT`-has-no-`if_effect`-entry claim against
+  `data/battle_ai_scripts.s` directly), and the 16-of-90 reachable
+  `AI_CV_*` handler table banked for the phased port.
 
 ---
 ## 453 — MOVE_EFFECT_CONFUSION (7) and MOVE_EFFECT_FLINCH (8) registered in SetMoveEffect's dispatch — zero new opcodes, census +4 effects/+17 moves
