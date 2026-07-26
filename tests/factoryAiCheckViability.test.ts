@@ -5,7 +5,7 @@ const MOVE_SURF = 57; // EFFECT_HIT -- no if_effect table entry
 const MOVE_ROCK_SLIDE = 157; // EFFECT_FLINCH_HIT -- no entry
 const MOVE_BODY_SLAM = 34; // EFFECT_PARALYZE_HIT -- no entry
 const MOVE_THUNDERBOLT = 85; // EFFECT_PARALYZE_HIT -- no entry
-const MOVE_GROWL = 45; // EFFECT_ATTACK_DOWN -- has an entry (AI_CV_AttackDown, not ported)
+const MOVE_HAZE = 114; // EFFECT_HAZE -- has an entry (AI_CV_Haze, not ported)
 const MOVE_TOXIC = 92; // EFFECT_TOXIC -- has an entry (AI_CV_Toxic, not ported)
 
 // Neutral speed/stage battlers for the tests above that don't exercise
@@ -21,6 +21,7 @@ const NEUTRAL_BATTLER = Object.freeze({
   isFirstTurn: 0,
   evasionStage: 6,
   accStage: 6,
+  atkStage: 6,
   hp: 100,
   maxHp: 100,
 });
@@ -49,12 +50,12 @@ describe("AI_CheckViability dispatch shell (docs/factory-ai-ground-truth.md §4 
   });
 
   it("halts with a named unsupported-branch barrier for a move whose effect has an if_effect table entry", () => {
-    const result = run({ value: 1, calls: 0 }, MOVE_GROWL);
+    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
     expect(result).toEqual({
       kind: "unsupported-branch",
       barrier: "factory-ai-check-viability",
-      effect: "EFFECT_ATTACK_DOWN",
-      moveId: MOVE_GROWL,
+      effect: "EFFECT_HAZE",
+      moveId: MOVE_HAZE,
     });
   });
 
@@ -79,6 +80,7 @@ describe("AI_CV_SpeedDown (docs/factory-ai-checkviability-ground-truth.md §6)",
     isFirstTurn: 0,
     evasionStage: 6,
     accStage: 6,
+    atkStage: 6,
     hp: 100,
     maxHp: 100,
   });
@@ -185,8 +187,8 @@ describe("AI_CV_SpeedDown (docs/factory-ai-checkviability-ground-truth.md §6)",
   });
 
   it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
-    const result = run({ value: 1, calls: 0 }, MOVE_GROWL);
-    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_ATTACK_DOWN" });
+    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
   });
 });
 
@@ -194,7 +196,7 @@ const MOVE_PURSUIT = 228; // EFFECT_PURSUIT
 
 /** Speed/speedStage/evasionStage/accStage/hp/maxHp are irrelevant to AI_CV_Pursuit -- fixed dummy values, only `types`/`isFirstTurn` vary per test. */
 function pursuitBattler(types: readonly [string, string], isFirstTurn: number) {
-  return Object.freeze({ speed: 100, speedStage: 6, types, isFirstTurn, evasionStage: 6, accStage: 6, hp: 100, maxHp: 100 });
+  return Object.freeze({ speed: 100, speedStage: 6, types, isFirstTurn, evasionStage: 6, accStage: 6, atkStage: 6, hp: 100, maxHp: 100 });
 }
 
 // data/battle_ai_scripts.s:2018-2036, docs/factory-ai-checkviability-ground-truth.md §11.1.
@@ -290,7 +292,7 @@ const MOVE_POISON_TAIL = 342; // EFFECT_POISON_TAIL, TYPE_POISON
 
 /** isFirstTurn/evasionStage/accStage/hp/maxHp are irrelevant to AI_CV_HighCrit -- fixed dummy values, only `types` vary per test. */
 function highCritBattler(types: readonly [string, string]) {
-  return Object.freeze({ speed: 100, speedStage: 6, types, isFirstTurn: 0, evasionStage: 6, accStage: 6, hp: 100, maxHp: 100 });
+  return Object.freeze({ speed: 100, speedStage: 6, types, isFirstTurn: 0, evasionStage: 6, accStage: 6, atkStage: 6, hp: 100, maxHp: 100 });
 }
 
 // data/battle_ai_scripts.s:1449-1461, docs/factory-ai-checkviability-ground-truth.md §11.2.
@@ -537,8 +539,8 @@ describe("AI_CV_HighCrit (docs/factory-ai-checkviability-ground-truth.md §11.2)
   });
 
   it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
-    const result = run({ value: 1, calls: 0 }, MOVE_GROWL);
-    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_ATTACK_DOWN" });
+    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
   });
 });
 
@@ -557,6 +559,7 @@ function alwaysHitBattler(evasionStage: number, accStage: number) {
     isFirstTurn: 0,
     evasionStage,
     accStage,
+    atkStage: 6,
     hp: 100,
     maxHp: 100,
   });
@@ -688,6 +691,7 @@ function vitalThrowBattler(speed: number, hp: number, maxHp: number) {
     isFirstTurn: 0,
     evasionStage: 6,
     accStage: 6,
+    atkStage: 6,
     hp,
     maxHp,
   });
@@ -898,7 +902,7 @@ describe("AI_CV_VitalThrow (docs/factory-ai-checkviability-ground-truth.md §13)
   });
 
   it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
-    const result = run({ value: 1, calls: 0 }, MOVE_GROWL);
-    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_ATTACK_DOWN" });
+    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
   });
 });

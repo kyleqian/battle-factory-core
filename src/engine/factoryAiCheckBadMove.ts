@@ -29,10 +29,14 @@
  * that path, not a stub (none of the three banked ledgers' four moves reach
  * a table entry; confirmed by direct grep of `data/battle_ai_scripts.s`).
  *
- * One table entry IS ported: `EFFECT_SPEED_DOWN(_2)` -> `AI_CBM_SpeedDown`
+ * Two table entries ARE ported: `EFFECT_SPEED_DOWN(_2)` -> `AI_CBM_SpeedDown`
  * (`data/battle_ai_scripts.s:287-312`, `runCbmSpeedDown` below), the
  * proven CBM+CV pair with `factoryAiCheckViability.ts`'s `AI_CV_SpeedDown`
- * (`docs/factory-ai-checkviability-ground-truth.md` §6).
+ * (`docs/factory-ai-checkviability-ground-truth.md` §6); and
+ * `EFFECT_ATTACK_DOWN(_2)` -> `AI_CBM_AttackDown` (`:277-281` +
+ * `CheckIfAbilityBlocksStatChange`'s shared tail `:308-312`,
+ * `runCbmAttackDown` below), the first CBM-blocked pair's own CBM half, with
+ * `AI_CV_AttackDown` (doc §14).
  */
 import movesData from "../data/gen/moves.json" with { type: "json" };
 import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
@@ -147,6 +151,8 @@ export type FactoryAiCheckBadMoveTarget = Readonly<{
   realAbility: string;
   /** Current SPEED stat stage (`gBattleMons[].statStages[STAT_SPEED]`), 0..12 -- `AI_CBM_SpeedDown`'s MIN_STAT_STAGE gate. */
   speedStage: number;
+  /** Current ATTACK stat stage, 0..12 -- `AI_CBM_AttackDown`'s MIN_STAT_STAGE gate. */
+  atkStage: number;
 }>;
 
 export type FactoryAiCheckBadMoveDraw = Readonly<{
@@ -210,6 +216,7 @@ function nextGetAbilityDraw(
 }
 
 const ABILITY_SPEED_BOOST = "ABILITY_SPEED_BOOST";
+const ABILITY_HYPER_CUTTER = "ABILITY_HYPER_CUTTER";
 const ABILITY_CLEAR_BODY = "ABILITY_CLEAR_BODY";
 const ABILITY_WHITE_SMOKE = "ABILITY_WHITE_SMOKE";
 
@@ -267,6 +274,42 @@ function runCbmSpeedDown(
   const draws = result.draw ? [result.draw] : [];
   const blocksChange = result.ability === ABILITY_CLEAR_BODY || result.ability === ABILITY_WHITE_SMOKE;
   return Object.freeze({ rng: result.rng, draws: Object.freeze(draws), scoreDelta: blocksChange ? -10 : 0 });
+}
+
+/**
+ * `AI_CBM_AttackDown` + the shared `CheckIfAbilityBlocksStatChange` tail
+ * (`data/battle_ai_scripts.s:277-281,308-312`,
+ * `docs/factory-ai-checkviability-ground-truth.md` §14.1). Unlike
+ * `AI_CBM_SpeedDown`'s second gate (`if_ability`, zero-RNG
+ * `checkAbilityAiTarget`), this handler's own Hyper Cutter check is a real
+ * `get_ability AI_TARGET` + `if_equal` pair -- a genuine second (guessing,
+ * uncached) draw site distinct from the shared tail's own, per §14.2's own
+ * finding that this handler calls `get_ability` twice.
+ */
+function runCbmAttackDown(
+  target: FactoryAiCheckBadMoveTarget,
+  rng: BattleRngState,
+  ordinal: number,
+  reason: string,
+): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckBadMoveDraw[]; scoreDelta: number }> {
+  if (target.atkStage === MIN_STAT_STAGE) {
+    return Object.freeze({ rng, draws: Object.freeze([]), scoreDelta: -10 });
+  }
+  const draws: FactoryAiCheckBadMoveDraw[] = [];
+  const hyperCutter = nextGetAbilityDraw(rng, ordinal, `${reason}-hyper-cutter`, target);
+  rng = hyperCutter.rng;
+  if (hyperCutter.draw) {
+    draws.push(hyperCutter.draw);
+    ordinal += 1;
+  }
+  if (hyperCutter.ability === ABILITY_HYPER_CUTTER) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -10 });
+  }
+  const tail = nextGetAbilityDraw(rng, ordinal, `${reason}-shared-tail`, target);
+  rng = tail.rng;
+  if (tail.draw) draws.push(tail.draw);
+  const blocksChange = tail.ability === ABILITY_CLEAR_BODY || tail.ability === ABILITY_WHITE_SMOKE;
+  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: blocksChange ? -10 : 0 });
 }
 
 export function typeMultiplierTenths(attackingType: string, defendingTypes: readonly [string, string]): number {
@@ -363,7 +406,7 @@ export function runCheckBadMovePreamble(input: Readonly<{
   void reachedCheckEffect;
 
   // AI_CheckBadMove_CheckEffect: EFFECT_SPEED_DOWN(_2) -> AI_CBM_SpeedDown,
-  // the one handler this port implements out of the table's ~100 entries.
+  // one of the two handlers this port implements out of the table's ~100 entries.
   if (move.effect === "EFFECT_SPEED_DOWN" || move.effect === "EFFECT_SPEED_DOWN_2") {
     const speedDown = runCbmSpeedDown(target, rng, ordinal, `${input.reasonPrefix}-speed-down`);
     for (const draw of speedDown.draws) draws.push(draw);
@@ -372,6 +415,19 @@ export function runCheckBadMovePreamble(input: Readonly<{
       rng: speedDown.rng,
       draws: Object.freeze(draws),
       scoreDelta: speedDown.scoreDelta,
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_ATTACK_DOWN(_2) -> AI_CBM_AttackDown,
+  // the first CBM-blocked pair's own CBM half (doc §14).
+  if (move.effect === "EFFECT_ATTACK_DOWN" || move.effect === "EFFECT_ATTACK_DOWN_2") {
+    const attackDown = runCbmAttackDown(target, rng, ordinal, `${input.reasonPrefix}-attack-down`);
+    for (const draw of attackDown.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: attackDown.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: attackDown.scoreDelta,
     });
   }
 
