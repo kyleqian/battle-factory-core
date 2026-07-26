@@ -1274,3 +1274,121 @@ describe("AI_CV_DefenseUp mask-7 fixture reproduction (docs/factory-ai-checkviab
     expect(result.trace.draws).toHaveLength(4 /* setup */ + 1 /* tie */);
   });
 });
+
+const MOVE_SAND_ATTACK_ACC_DOWN = 28; // EFFECT_ACCURACY_DOWN
+const MOVE_SAND_ATTACK_MOVESET = [
+  MOVE_SAND_ATTACK_ACC_DOWN, MOVE_SAND_ATTACK_ACC_DOWN, MOVE_SAND_ATTACK_ACC_DOWN, MOVE_SAND_ATTACK_ACC_DOWN,
+] as const;
+
+// docs/factory-ai-checkviability-ground-truth.md §19's twin fixtures
+// (tools/battle-lab/mechanic-factory-ai-cv-accuracydown-{lowhp-reach,
+// fullhp-control}-off.json) -- the sixth CBM-blocked pair, reproduced
+// through the REAL mask-7 dispatcher end to end. Opponent (AI_USER) =
+// Machamp (species 68, single ability Guts, Base Speed 55), all 4 slots
+// MOVE_SAND_ATTACK; target (player) = Anorith (species 390, single ability
+// Battle Armor, Base Speed 75) -- both single-ability, closing the
+// Cmd_get_ability confound (doc §19.3) so AI_CBM_AccDown's own contribution
+// is a flat, identical 0 in both fixtures. Doc §19.2's own confound finding
+// governs the role assignment: Anorith (faster) plays the real-damage
+// role (Seismic Toss, fixed damage, no accuracy-check ordering risk),
+// Machamp (slower) is the dispatch-move-using opponent under test -- the
+// SAME single real turn-1 decision this doc's whole CBM-blocked-pair series
+// reproduces (not a second/phantom turn; §19.3's own fixtures execute
+// exactly one turn).
+//
+// Draw-count reconciliation (per this step's brief): the doc's own live
+// ledger (§19.4) shows 17 total Random() calls for the reach fixture, 7 for
+// control, both cross-seed-stable. The live attribution table (§19.4)
+// breaks the reach total down as: BattleAI_SetupAIData+0x83 (4, this port's
+// own "setup-simulated-rng" draws) + BattleTurnPassed+0x157 (1) +
+// ChooseMoveOrAction_Singles+0xf7 (1, this port's own tie draw) +
+// Cmd_accuracycheck+0x305 (2) + Cmd_seteffectwithchance+0x81 (1) +
+// Cmd_if_random_less_than+0x7 (8) = 17; the control total drops the last
+// three (Cmd_accuracycheck 1 instead of 2, Cmd_seteffectwithchance 0,
+// Cmd_if_random_less_than 0) = 7. Of these, ONLY the setup (4), tie (1),
+// and Cmd_if_random_less_than (8 reach / 0 control) draws are inside
+// chooseFactoryAiScoredDecision's own scope -- BattleTurnPassed's turn-order
+// draw and both real moves' own Cmd_accuracycheck/Cmd_seteffectwithchance
+// rolls happen elsewhere in the engine's move-execution pipeline, outside
+// the AI's own move-scoring function, same reconciliation shape §18.4
+// already established for AI_CV_DefenseUp's own extra unattributed draws.
+// So this port's own policy-only total is 4+1+8=13 (reach) / 4+1+0=5
+// (control) -- a documented SUBSET of the oracle's full 17/7 window totals,
+// not a mismatch.
+describe("AI_CV_AccuracyDown mask-7 fixture reproduction (docs/factory-ai-checkviability-ground-truth.md §19.3/§19.4)", () => {
+  function machampAttacker(hp: number): FactoryAiScoredBattlerView {
+    return Object.freeze({
+      types: ["TYPE_FIGHTING", "TYPE_FIGHTING"] as const,
+      attack: 150, defense: 100, spAttack: 85, spDefense: 105, speed: 55, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp, maxHp: 165,
+    });
+  }
+  function anorithTarget(accStage: number): FactoryAiScoredTargetView {
+    return Object.freeze({
+      species: 390,
+      types: ["TYPE_ROCK", "TYPE_BUG"] as const,
+      attack: 115, defense: 70, spAttack: 60, spDefense: 70, speed: 75, level: 50,
+      statStages: Object.freeze({ ...NEUTRAL_STAGES, acc: accStage }),
+      isFirstTurn: 0,
+      hp: 120, maxHp: 120, ability: "ABILITY_BATTLE_ARMOR", knownAbility: null,
+    });
+  }
+  function accuracyDownView(attacker: FactoryAiScoredBattlerView, target: FactoryAiScoredTargetView): FactoryAiScoredView {
+    return Object.freeze({
+      schema: "factory-ai-scored-view/v1",
+      mode: "factory-level-50-singles",
+      active: Object.freeze({ aiBattler: 1 as const, targetBattler: 0 as const }),
+      factory: Object.freeze({ levelMode: 0 as const, battleMode: 0 as const, factoryWinStreak: 28, trainerOpponentId: 222 }),
+      moves: MOVE_SAND_ATTACK_MOVESET,
+      attacker,
+      target,
+    });
+  }
+  function phaseDraws(result: ReturnType<typeof chooseFactoryAiScoredDecision>, phase: "check-bad-move" | "try-to-faint" | "check-viability") {
+    return result.trace.draws.filter((d) => "phase" in d && d.phase === phase);
+  }
+
+  it("reach fixture (Machamp at 115/165 HP = 69.7%, doc's own live-verified HP figure): Gate A true (DRAW SITE 1) AND Gate I false (Anorith's own ACC stage already 5, this same dispatch move's own prior hit) -> DRAW SITE 7 too -- 8 check-viability draws (2 sites x 4 identical slots), zero CBM/TryToFaint draws", () => {
+    const view = accuracyDownView(machampAttacker(115), anorithTarget(5));
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 1, calls: 0 } });
+    expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+    expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+    const cvDraws = phaseDraws(result, "check-viability");
+    expect(cvDraws).toHaveLength(8);
+    const kinds = cvDraws.map((d) => ("kind" in d ? d.kind : null));
+    expect(kinds.filter((k) => k === "accuracy-down-roll-1")).toHaveLength(4);
+    expect(kinds.filter((k) => k === "accuracy-down-roll-7")).toHaveLength(4);
+    // Policy-only total: 4 setup + 1 tie + 8 check-viability = 13 (see the
+    // reconciliation comment above for why this is a documented SUBSET of
+    // the oracle's own 17-draw full window total, not a mismatch).
+    expect(result.trace.draws).toHaveLength(4 + 1 + 8);
+  });
+
+  it("reach fixture, seed 99 (doc's own cross-seed-stable second run): identical 8 check-viability draws", () => {
+    const view = accuracyDownView(machampAttacker(115), anorithTarget(5));
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 99, calls: 0 } });
+    expect(phaseDraws(result, "check-viability")).toHaveLength(8);
+    expect(result.trace.draws).toHaveLength(4 + 1 + 8);
+  });
+
+  it("control fixture (Machamp stays at full 165/165 HP throughout, doc's own live-verified figure): Gate B true (skips DRAW SITE 1) and Gate H true (skips the entire tail) -- deterministic ZERO check-viability draws, matching the doc's own live ledger exactly", () => {
+    const view = accuracyDownView(machampAttacker(165), anorithTarget(5));
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 1, calls: 0 } });
+    expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+    expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+    expect(phaseDraws(result, "check-viability")).toHaveLength(0);
+    // Policy-only total: 4 setup + 1 tie = 5 -- a documented SUBSET of the
+    // oracle's own 7-draw full window total (see the reconciliation
+    // comment above).
+    expect(result.trace.draws).toHaveLength(4 + 1);
+  });
+
+  it("control fixture, seed 99 (doc's own cross-seed-stable second run): identical deterministic zero check-viability draws", () => {
+    const view = accuracyDownView(machampAttacker(165), anorithTarget(5));
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 99, calls: 0 } });
+    expect(phaseDraws(result, "check-viability")).toHaveLength(0);
+    expect(result.trace.draws).toHaveLength(4 + 1);
+  });
+});
