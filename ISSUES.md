@@ -5,6 +5,30 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
+## #44 — `tools/report/executable-frontier-census.ts`'s SetMoveEffect exception set predates the stat-family registration
+
+**Symptom:** the census's `SETMOVEEFFECT_SUPPORTED` set (the one place it
+tracks a `setmoveeffect` operand value rather than only opcode names) only
+lists `MOVE_EFFECT_POISON/BURN/FREEZE/PARALYSIS` — the secondary-effect
+stat-down family (`MOVE_EFFECT_SP_DEF_MINUS_1` etc., registered via
+`STAT_MOVE_EFFECT_TABLE`/`changeStatBuffs()` well before this session, per
+PROGRESS's "ChangeStatBuffs + both stat routes (→105 moves)") was never
+added. `EFFECT_SPECIAL_DEFENSE_DOWN_HIT`/`EFFECT_SPEED_DOWN_HIT`/
+`EFFECT_DEFENSE_DOWN_HIT`/`EFFECT_ATTACK_DOWN_HIT` (188+48+32+3 legal L50
+sets) are consequently still misclassified `blocked-on-subsystem` in the
+generated doc even though `applySetMoveEffect` genuinely dispatches them
+end-to-end today. Confirmed by direct source read (`STAT_MOVE_EFFECT_TABLE`,
+`src/engine/battleScriptHitChainOpcode.ts`) — this is a report-tool gap, not
+an engine gap.
+
+**Fix:** add the 12 real `MOVE_EFFECT_*_PLUS_1/MINUS_1/PLUS_2/MINUS_2`
+tokens (or a numeric-range check mirroring `STAT_MOVE_EFFECT_TABLE`'s own
+key set) to `SETMOVEEFFECT_SUPPORTED`, then rerun the census and expect the
+four `*_DOWN_HIT` effects (and the `*_UP_HIT`-adjacent id 15-28 family
+generally) to flip to executable. Left unfixed by the confusion/flinch
+registration step that found it (out of that step's named scope) — cheap
+pickup for whoever next regenerates the census.
+
 ## #41 — Production engine modules import canonical RAM recordings
 
 **Symptom:** shipped `src/engine/` code reads recorded state from the single

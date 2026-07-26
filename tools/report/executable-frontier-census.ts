@@ -143,7 +143,14 @@ function firstInstruction(labelName: string, guard: Set<string> = new Set()): { 
 // it executes" diverge today (PROGRESS 444).
 // ---------------------------------------------------------------------------
 
-const SETMOVEEFFECT_SUPPORTED = new Set(["MOVE_EFFECT_POISON", "MOVE_EFFECT_BURN", "MOVE_EFFECT_FREEZE", "MOVE_EFFECT_PARALYSIS"]);
+const SETMOVEEFFECT_SUPPORTED = new Set([
+  "MOVE_EFFECT_POISON",
+  "MOVE_EFFECT_BURN",
+  "MOVE_EFFECT_FREEZE",
+  "MOVE_EFFECT_PARALYSIS",
+  "MOVE_EFFECT_CONFUSION",
+  "MOVE_EFFECT_FLINCH",
+]);
 const SETMOVEEFFECT_NAMED_BARRIER = new Set(["MOVE_EFFECT_SLEEP", "MOVE_EFFECT_TOXIC"]);
 
 function parseMoveEffectBase(rawOperands: string | undefined): string {
@@ -339,6 +346,15 @@ const validationChecks: Array<() => void> = [
   () => requireExecutable("EFFECT_PARALYZE_HIT"),
   () => requireBlockedMentioning("EFFECT_SLEEP", "SETEFFECTPRIMARY"), // PROGRESS 444: still-unregistered Cmd_seteffectprimary
   () => requireBlockedMentioning("EFFECT_TOXIC", "SETEFFECTPRIMARY"),
+  // MOVE_EFFECT_CONFUSION/MOVE_EFFECT_FLINCH registration (this session):
+  // zero new opcodes for either, so both flip straight to executable.
+  () => requireExecutable("EFFECT_CONFUSE_HIT"),
+  () => requireExecutable("EFFECT_FLINCH_HIT"),
+  () => requireExecutable("EFFECT_FLINCH_MINIMIZE_HIT"),
+  () => requireExecutable("EFFECT_TWISTER"),
+  // TRI_ATTACK recurses into a re-rolled SetMoveEffect call and stays a named
+  // (b) barrier -- out of this session's scope.
+  () => requireBlockedMentioning("EFFECT_TRI_ATTACK", "MOVE_EFFECT_TRI_ATTACK"),
   // A real positive: EFFECT_RECOIL_IF_MISS (Jump Kick/Hi Jump Kick) enters via
   // BattleScript_HitFromAtkString directly, skipping BattleScript_EffectHit's
   // own label entirely, and its whole reachable set -- including the shared
