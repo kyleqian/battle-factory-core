@@ -1175,3 +1175,264 @@ This closes out the brief's own count: all 22 reachable `AI_CV_*` handlers
 now have either a live-staged fixture (the 6 covered across §6/§11/§12/§13)
 or a documented CBM-blocked/analytical status (§5/§7/§8) — `AI_CV_VitalThrow`
 was the last CV-only-reachable handler without ground truth.
+
+## 14. 2026-07-26 addendum #4: `AI_CBM_AttackDown` + `AI_CV_AttackDown` — the first CBM-blocked pair, fully staged and live-verified
+
+Fourth follow-up scout session (side lane, Battle Scene OFF), same no-`src/`-
+changes contract. Goal per this step's brief: bank ground truth for the
+**first CBM-blocked pair** (`AI_CBM_AttackDown` + `AI_CV_AttackDown`) —
+entry 463's already-ported SpeedDown pair is the only other CBM+CV pair with
+live ground truth; §4 named 17 of 22 reachable `AI_CV_*` handlers as
+CBM-blocked, and this is the first of those 17 to get a twin-fixture
+treatment.
+
+### 14.1 Both real bodies, cited and fully parsed
+
+```
+AI_CBM_AttackDown:                      (data/battle_ai_scripts.s:277-281)
+	if_stat_level_equal AI_TARGET, STAT_ATK, MIN_STAT_STAGE, Score_Minus10  ; target ATK stage == 0 -> -10, end
+	get_ability AI_TARGET                                                   ; DRAW SITE (conditional, see §14.2)
+	if_equal ABILITY_HYPER_CUTTER, Score_Minus10                            ; target ability == Hyper Cutter -> -10, end
+	goto CheckIfAbilityBlocksStatChange
+
+CheckIfAbilityBlocksStatChange:         (data/battle_ai_scripts.s:308-312, shared tail)
+	get_ability AI_TARGET                                                   ; DRAW SITE (conditional, see §14.2)
+	if_equal ABILITY_CLEAR_BODY, Score_Minus10
+	if_equal ABILITY_WHITE_SMOKE, Score_Minus10
+	end                                                                      ; neither -> 0, end
+```
+
+Zero `if_random_less_than` instructions anywhere in `AI_CBM_AttackDown` or
+its shared tail — every branch is a deterministic stat-stage/ability
+compare. `MIN_STAT_STAGE`/`DEFAULT_STAT_STAGE`/`MAX_STAT_STAGE` = 0/6/12
+(`include/constants/pokemon.h:89-91`); `Score_Minus10`
+(`data/battle_ai_scripts.s:620-622`) is `score -10; end`.
+
+```
+AI_CV_AttackDown:                       (data/battle_ai_scripts.s:1090-1123)
+	if_stat_level_equal AI_TARGET, STAT_ATK, DEFAULT_STAT_STAGE, AI_CV_AttackDown3  ; :1091 Gate A
+	score -1
+	if_hp_more_than AI_USER, 90, AI_CV_AttackDown2                                  ; :1093 Gate B (opponent's OWN hp)
+	score -1
+AI_CV_AttackDown2:
+	if_stat_level_more_than AI_TARGET, STAT_ATK, 3, AI_CV_AttackDown3               ; :1096 Gate C
+	if_random_less_than 50, AI_CV_AttackDown3                                       ; :1097 DRAW SITE 1
+	score -2
+AI_CV_AttackDown3:
+	if_hp_more_than AI_TARGET, 70, AI_CV_AttackDown4                                ; :1100 Gate D (target hp)
+	score -2
+AI_CV_AttackDown4:
+	get_target_type1
+	if_in_bytes AI_CV_AttackDown_PhysicalTypeList, AI_CV_AttackDown_End             ; :1104 Gate E (type1)
+	get_target_type2
+	if_in_bytes AI_CV_AttackDown_PhysicalTypeList, AI_CV_AttackDown_End             ; :1106 Gate F (type2)
+	if_random_less_than 50, AI_CV_AttackDown_End                                    ; :1107 DRAW SITE 2
+	score -2
+AI_CV_AttackDown_End:
+	end
+```
+
+Exactly **2** `if_random_less_than` sites (`:1097`, `:1107`), matching §3's
+corrected count. Full branch enumeration (all 6 gates, both draw sites):
+
+- **Gate A** (`:1091`): target ATK stage == `DEFAULT_STAT_STAGE` (6, a fresh
+  battler's own starting value) jumps straight to `AI_CV_AttackDown3`,
+  **skipping Gates B/C and DRAW SITE 1 entirely** — this is the
+  precondition-never-true-at-battle-start idiom §3 already named for this
+  handler's family. Only a battler whose ATK stage has already been changed
+  (by an earlier real stat-changing move) reaches Gate B/C/DRAW SITE 1 at
+  all.
+- **Gate B** (`:1093`, only reached if Gate A's stage != 6): opponent's
+  (`AI_USER`'s) own HP > 90% skips a second `-1`; otherwise an extra `-1`
+  applies. Doesn't gate reachability of anything downstream — a straight-
+  line fallthrough either way.
+- **Gate C** (`:1096`, same precondition as B): target ATK stage > 3 skips
+  DRAW SITE 1; only stages 0-3 (already lowered, and, since Gate A already
+  excluded stage 6, this also silently excludes stages 7-12 raised-but-
+  under-4-away-from-max via the same `> 3` test) reach the roll.
+- **DRAW SITE 1** (`:1097`): 50/256 (~19.5%) skip, else (~80.5%) `score -2`.
+  Reachable only when the target's ATK stage is already in [0,3] — a 2-turn
+  build (a real Attack-lowering move must land on the target first), not
+  staged this session; recipe unchanged from §7's own `AI_CV_AttackDown`
+  entry.
+- **Gate D** (`:1100`): target HP > 70% skips a `-2`, else applies it — like
+  Gate B, a straight-line fallthrough, doesn't gate reachability of
+  anything past it (always continues to `AI_CV_AttackDown4` regardless).
+- **Gates E/F** (`:1104`/`:1106`): target type1 OR type2 in
+  `AI_CV_AttackDown_PhysicalTypeList` (Normal/Fighting/Ground/Rock/Bug/Steel,
+  `:1115-1122` — Flying/Poison/**Ghost** conspicuously left out, source's own
+  comment at `:1112-1114`) jumps straight to `End` with **zero** further
+  draws. This is the **only** gate that is both state-independent (knowable
+  from species typing alone, no multi-turn build) and fully decisive for
+  DRAW SITE 2's reachability — the one this session's twin fixtures isolate.
+- **DRAW SITE 2** (`:1107`, reached only if neither Gate E nor F matched):
+  50/256 (~19.5%) skip, else (~80.5%) `score -2`.
+
+### 14.2 A new confound found live, and why it doesn't touch this handler's own port: `Cmd_get_ability`'s ability-guessing roll
+
+`get_ability AI_TARGET` appears **twice** in `AI_CBM_AttackDown`'s own body
+(once directly, once in the shared `CheckIfAbilityBlocksStatChange` tail
+every non-Score_Minus10 path reaches). `Cmd_get_ability`
+(`battle_ai_script_commands.c:1350-1377`) is **not** a fixed-cost read: when
+querying a battler other than the AI's own (`AI_TARGET`, here), if the
+target's ability hasn't been revealed yet this battle
+(`BATTLE_HISTORY->abilities[battler] == 0`) and its real ability isn't one
+of three "always inferrable" ones (`ABILITY_SHADOW_TAG`/`MAGNET_PULL`/
+`ARENA_TRAP` — abilities that prevent fleeing, checked directly against the
+real ability with no draw), the AI **guesses**: if the species has exactly
+one possible ability (`abilities[1] == ABILITY_NONE`), the guess is free
+(deterministic, zero draws); if it has **two**, `Random() & 1` picks one of
+the two **every single call, uncached** (`:1382-1385`).
+
+This is real, source-confirmed behavior, not a porting bug — and it's
+**already correctly ported** as `nextGetAbilityDraw`/`checkAbilityAiTarget`
+in `src/engine/factoryAiCheckBadMove.ts` (`:177-244`, entry 463's own
+SpeedDown-pairing work, which needed the same helper for
+`AI_CBM_SpeedDown`'s `if_ability AI_TARGET, ABILITY_SPEED_BOOST`). A future
+`AI_CBM_AttackDown` port needs **zero new RNG machinery** — both of its
+`get_ability` sites are direct call sites into this already-existing helper.
+
+**Found live, the hard way**: an early draft of this session's control
+fixture used Dugtrio (pure Ground, `{SAND_VEIL, ARENA_TRAP}` — two
+abilities, and its assigned real ability turned out to be Sand Veil, not the
+directly-inferrable Arena Trap) as the physical-type-list target. The
+attribution probe showed **12** extra `Cmd_get_ability`-attributed draws
+versus the eventual Haunter-target fixture — entirely unrelated to
+`AI_CV_AttackDown`'s own gates, and large enough to flip which fixture had
+the *higher* raw total (the Dugtrio draft totaled 19 against Haunter's 11,
+the *opposite* direction from what `AI_CV_AttackDown`'s own reachable-branch
+delta predicts). Swapping the control target to Shuckle (Bug/Rock, `{STURDY,
+NONE}` — one ability, zero-draw guess) collapsed this to zero and produced
+the clean isolation in §14.3/§14.4 below. **Porter guidance**: any future
+CBM-blocked-pair fixture that stages `AI_TARGET`'s ability path (most of the
+CBM handlers do — Attack/Defense/Speed/SpAtk/SpDef Down/Up all call
+`get_ability` or `if_ability` on the target) should pick single-ability
+species for any battler whose ability isn't the thing under test, exactly
+as `AlwaysHit`'s Ghost-target trick (§11.3 point 3) did for a different
+confound (type immunity) — same discipline, new confound source.
+
+### 14.3 Design: twin fixtures isolating Gates E/F, CBM held unreached throughout
+
+Both fixtures keep the target's ATK stat stage at `DEFAULT_STAT_STAGE` (a
+fresh battle's own value, no staging needed) so:
+
+- `AI_CV_AttackDown`'s own Gate A skips straight to `AI_CV_AttackDown3` —
+  **DRAW SITE 1 is unreached in both fixtures by construction** (this pair
+  isolates DRAW SITE 2 only; DRAW SITE 1 remains an unstaged 2-turn recipe,
+  unchanged from §7).
+- `AI_CBM_AttackDown`'s own `MIN_STAT_STAGE` gate never fires (stage is 6,
+  not 0).
+
+Target ability is neither Hyper Cutter, Clear Body, nor White Smoke in
+either fixture (both Haunter and Shuckle's real abilities are Levitate/
+Sturdy respectively) — `AI_CBM_AttackDown`'s two `Score_Minus10` branches
+stay unreached in both fixtures too, so **CBM's own contribution is a flat,
+identical 0 in both** and the entire observable delta is `AI_CV_AttackDown`'s
+own.
+
+Opponent (`AI_USER`, both fixtures): Marowak (105, pure Ground — ability
+irrelevant here, only `AI_TARGET`'s is ever read), all 4 slots `MOVE_GROWL`
+(45, `EFFECT_ATTACK_DOWN`, 0 power, accuracy 100 — `src/data/battle_moves.h:
+588-599`) — identical-slots design, no pick ambiguity, same as
+§11.1/§11.2/§12.1/§13.2. Single executed turn (state-independent
+precondition, `HighCrit`/`VitalThrow`'s own single-turn capture shape,
+`[A, wait 30, A, wait 700]`, `captureFrames [0,100,300,732]`).
+
+- **Reach** (`tools/battle-lab/mechanic-factory-ai-cv-attackdown-nonphysical-reach-off.json`):
+  target = Haunter (93, Ghost/Poison — **neither** type is in
+  `AI_CV_AttackDown_PhysicalTypeList`, Ghost being one of the three types the
+  source's own comment names as conspicuously left out) — falls through
+  Gates E/F into DRAW SITE 2.
+- **Control** (`tools/battle-lab/mechanic-factory-ai-cv-attackdown-physical-control-off.json`):
+  target = Shuckle (213, Bug/Rock — **both** types are in the physical
+  list) — Gate E matches immediately on type1, deterministic zero-draw
+  `End`.
+
+Growl's own accuracy (100, not the special "always hits" 0 value used by
+Swift/Double Team/Splash in §12.1) does draw one `Cmd_accuracycheck` roll
+per executed turn in both fixtures — confirmed identical (1 each) by the
+attribution probe below, so it cancels cleanly in the diff and doesn't
+contaminate the isolation, unlike VitalThrow's own real-damage confound
+which needed explicit accounting (§13.3) rather than simply canceling.
+
+### 14.4 Live ledger (oracle-verified, both seeds, both runs)
+
+| Fixture | Seed | Opponent PP used | Player ATK stage (start→end) | Total `Random()` calls, frame 0→732 | Determinism (2 runs) |
+| --- | -: | -: | --- | -: | --- |
+| Reach (Haunter, non-physical) | 1 | 1 | 6→5 | **11** | identical |
+| Reach (Haunter, non-physical) | 99 | 1 | 6→5 | **11** | identical |
+| Control (Shuckle, physical) | 1 | 1 | 6→5 | **7** | identical |
+| Control (Shuckle, physical) | 99 | 1 | 6→5 | **7** | identical |
+
+Both fixtures individually cross-seed-stable (11/11, 7/7) — clean, matching
+`AlwaysHit`/`VitalThrow`'s own attribution-confirmed determinism rather than
+`HighCrit`'s neutral-fixture wobble. Growl's own stat-lowering effect lands
+in **both** fixtures (ATK stage 6→5 either way — Ghost is immune to
+*damaging* Normal-type moves, not Normal-type status effects; a live-
+confirmed distinct fact from `AlwaysHit`'s Swift-vs-Ghost damage immunity,
+§11.3 point 3), so the type-list gate's effect is on `AI_CV_AttackDown`'s
+own *score*, never on whether Growl actually executes.
+
+**Attribution** (`tools/probe/attribute-factory-ai-random-callers.py`,
+window `0 732`, run via `tools/run-mgba-probe.py`, seed 1): the **+4** delta
+(reach 11 vs. control 7) is:
+
+| Caller function | Reach count | Control count | Delta |
+| --- | -: | -: | -: |
+| `BattleAI_SetupAIData+0x83` | 4 | 4 | 0 |
+| `BattleTurnPassed+0x157` | 1 | 1 | 0 |
+| `ChooseMoveOrAction_Singles+0xf7` | 1 | 1 | 0 |
+| `Cmd_accuracycheck+0x305` | 1 | 1 | 0 |
+| `Cmd_if_random_less_than+0x7` | **4** | **0** | **+4** |
+
+Every non-`AI_CV_AttackDown` caller is identical between fixtures —
+`Cmd_get_ability` doesn't appear in **either** table (both targets have a
+single assignable ability, confirming §14.2's fix). `Cmd_if_random_less_than`'s
++4 is exactly `AI_CV_AttackDown`'s own `:1107` roll, once per identical
+`MOVE_GROWL` slot on the single reachable decision (N=4 slots × 1 decision ×
+1 draw = 4) — a cleaner, single-decision instance of the "N identical slots"
+mechanism §12/§13 established (no phantom next-turn decision shows up in
+this window, unlike Pursuit/HighCrit/AlwaysHit/VitalThrow's own trailing
+computed-but-unexecuted re-decision — not investigated further this
+session, since the reachable-branch signal is already unambiguous without
+it).
+
+### 14.5 What this unblocks
+
+Two things, per this step's own brief:
+
+1. **The pair's own port**: a future porter has both handlers' exact
+   instruction lists, every gate's real preconditions, both draw sites'
+   exact odds, the `get_ability` reuse point (§14.2, zero new machinery
+   needed), and a live-verified twin fixture proving `AI_CV_AttackDown`'s
+   Gate E/F contribution end-to-end — the same completeness `AI_CV_SpeedDown`
+   got from entry 463's own CBM+CV pairing (the only other pair with this
+   level of live evidence).
+2. **§6's own `AI_CV_SpeedDown` fixtures becoming engine-reproducible**:
+   those two fixtures' opponent movesets are `[MOVE_STRING_SHOT, MOVE_GROWL,
+   MOVE_GROWL, MOVE_GROWL]` — three of the four candidate slots are Growl,
+   whose effect (`EFFECT_ATTACK_DOWN`) is CBM-table-covered
+   (`data/battle_ai_scripts.s:115`). Until *both* `AI_CBM_AttackDown` and
+   `AI_CV_AttackDown` are ported, `chooseFactoryAiScoredDecision` cannot
+   score those three Growl candidates at all (each hits the
+   `unsupported-branch: factory-ai-check-bad-move` barrier) — so §6's own
+   fixtures, despite being live-verified against the oracle since this
+   step's own predecessor session, are **not yet** reproducible end-to-end
+   through the engine's public API the way §11.1/§12.1's
+   `chooseFactoryAiScoredDecision` reproduction tests are for Pursuit/
+   AlwaysHit (entry 466/467's own precedent). This pair's port closes that
+   gap directly.
+
+### 14.6 Verify script status
+
+`tools/probe/verify-factory-ai-checkviability-ground-truth.ts` extended
+this session with `AI_CV_AttackDown`'s 2 fixtures (§14.3/§14.4) —
+`SpeedDown`/`Pursuit`/`HighCrit`/`AlwaysHit`/`VitalThrow` checks (§9, §11.5,
+§12.1, §13.4) unchanged and still green. **Run twice this session, ALL PASS
+both times.** DRAW SITE 1 (`:1097`, the ATK-stage-already-changed branch)
+remains unstaged — same 2-turn recipe as §7's own `AI_CV_AttackDown` entry,
+not attempted this session (time-capped after the Gate E/F pair + the
+`get_ability` confound diagnosis/fix above); a bonus fixture proving
+`AI_CBM_AttackDown`'s own `Score_Minus10` branch firing live (e.g. a Clear-
+Body-ability physical-type target) was scoped by this step's brief as a
+stretch goal but not staged this session for the same reason.

@@ -350,6 +350,52 @@ const DRAW_COUNT_SCENARIOS: DrawCountScenarioSpec[] = [
     expectedTotalSteps: { 1: 9, 99: 9 },
     checkCrossSeedStable: true,
   },
+  // AI_CV_AttackDown (data/battle_ai_scripts.s:1090-1123, doc §14): the first
+  // CBM-blocked handler pair to get live ground truth (AI_CBM_AttackDown +
+  // AI_CV_AttackDown). Both fixtures hold the target's ATK stat stage at
+  // DEFAULT_STAT_STAGE (6, a fresh battle's own starting value) so
+  // AI_CV_AttackDown's own :1091 gate jumps straight to AI_CV_AttackDown3
+  // (the ":1097 if_random_less_than 50" site is UNREACHED in both -- neither
+  // fixture stages a prior Attack-stage change) and AI_CBM_AttackDown's own
+  // Score_Minus10 branches stay unreached too (ATK stage != MIN_STAT_STAGE,
+  // target ability is neither Hyper Cutter/Clear Body/White Smoke) -- so the
+  // ONLY thing that varies between the twin fixtures is AI_CV_AttackDown's
+  // own :1104/:1106 physical-type-list gate, isolating the handler's real
+  // remaining draw site (:1107). Opponent (Marowak, all 4 slots MOVE_GROWL --
+  // EFFECT_ATTACK_DOWN, 0 power, CBM-table-covered but CBM's own tail is
+  // 0-draws regardless of which branch it takes) faces two different player
+  // targets differing ONLY in type. Both targets were deliberately picked
+  // with exactly ONE assignable ability (Haunter: Levitate only; Shuckle:
+  // Sturdy only) to dodge an unrelated confound found live this session:
+  // Cmd_get_ability (battle_ai_script_commands.c:1350-1377), called twice
+  // per candidate slot by AI_CBM_AttackDown's own body + its shared
+  // CheckIfAbilityBlocksStatChange tail, draws one Random() (`Random() & 1`,
+  // a 50/50 "AI doesn't know the target's real ability, guess between its
+  // two possible ability slots") EVERY call when the target species has TWO
+  // assignable abilities and neither is Shadow Tag/Magnet Pull/Arena Trap
+  // (the three abilities Cmd_get_ability can read directly, no guess) --
+  // confirmed live by an earlier draft of the control fixture (Dugtrio,
+  // Sand Veil/Arena Trap) showing 12 extra Cmd_get_ability-attributed draws
+  // that had nothing to do with AI_CV_AttackDown at all. Single-ability
+  // targets collapse that confound to zero in both fixtures.
+  {
+    label:
+      "AI_CV_AttackDown, target (player, Haunter) type1/type2 (Ghost/Poison) are NEITHER in AI_CV_AttackDown_PhysicalTypeList -- reachable branch (data/battle_ai_scripts.s:1090-1123): falls through the :1104/:1106 type-list gates into the :1107 if_random_less_than 50 roll",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-attackdown-nonphysical-reach-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 11, 99: 11 },
+    checkCrossSeedStable: true,
+  },
+  {
+    label:
+      "AI_CV_AttackDown, target (player, Shuckle) type1 (Bug) IS in AI_CV_AttackDown_PhysicalTypeList -- control (same opponent/species/turn count, target type is the only precondition changed): the :1104 get_target_type1 check matches immediately, routing straight to AI_CV_AttackDown_End before the :1107 roll is ever reached",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-attackdown-physical-control-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 7, 99: 7 },
+    checkCrossSeedStable: true,
+  },
 ];
 
 function totalPpUsed(ppBefore: number[], ppAfter: number[]): number {
