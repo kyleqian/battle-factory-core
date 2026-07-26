@@ -340,3 +340,286 @@ switch/item AI (already covered by the boundary audit, unchanged here),
 doubles branches, Frontier Brain masks (0 uses the same setup/tie-break
 plumbing but never enters any of the three named scripts), and any src/
 implementation of the policy itself.
+
+## 2026-07-25 — port-subset audit (settles the exactly-bounded first slice)
+
+Status: read-only source/artifact audit for the upcoming main-lane port; no
+src/ changes. Re-verified §2's live ledgers by rerunning
+`tools/probe/verify-factory-ai-ground-truth.ts` against the running Battle
+Scene OFF oracle this session — **ALL PASS**, same 15/15/17 attributed-roll
+counts as originally banked, confirming the numeric ledgers in §2.2-2.4
+still hold. This section also finds and corrects two source-level errors in
+§1.3/§2.2's *prose explanation* of those numbers — the counts are right, the
+named mechanism wasn't. Both are cited against
+`reference/pokeemerald@83df84e40623b79281f2397faa611cbf044170bd`.
+
+### 0. Two corrections to §1.3/§2.2, verified against source this session
+
+1. **Scenario A's moves are not "Surf/Rock Slide/Thunderbolt = plain
+   EFFECT_HIT, Body Slam alone = EFFECT_PARALYZE_HIT."** Direct read of
+   `reference/pokeemerald/src/data/battle_moves.h`: `MOVE_SURF` (57) is
+   `EFFECT_HIT`, but `MOVE_ROCK_SLIDE` (157) is `EFFECT_FLINCH_HIT`
+   (:2046) and `MOVE_THUNDERBOLT` (85) is `EFFECT_PARALYZE_HIT` (:1110) —
+   the *same* effect as Body Slam (:447), not `EFFECT_HIT`.
+2. **None of the four opponent moves in any of the three banked scenarios
+   reach a named `AI_CBM_*`/`AI_CV_*` handler at all** — including Body
+   Slam, which §1.3/§2.2 claims dispatches to `AI_CV_Paralyze`. Grepping
+   `data/battle_ai_scripts.s` for `EFFECT_PARALYZE_HIT`/`EFFECT_FLINCH_HIT`
+   in either script returns **zero matches** (confirmed: neither
+   `AI_CheckBadMove`'s nor `AI_CheckViability`'s `if_effect` dispatch chain
+   has an entry for either effect; `EFFECT_PARALYZE` at `:704`, which does
+   map to `AI_CV_Paralyze`, is Thunder-Wave-class pure status, a different
+   effect ID from Thunderbolt/Body Slam's `EFFECT_PARALYZE_HIT`).
+   `Cmd_if_effect` (`src/battle_ai_script_commands.c:1667-1673`) is a plain
+   `==` against `gBattleMoves[moveConsidered].effect`, so there is no
+   partial/family match that could route `EFFECT_PARALYZE_HIT` into
+   `EFFECT_PARALYZE`'s handler. All four of Scenario A's moves (and by
+   extension B's and C's, which reuse the same four) fall straight through
+   both scripts' entire `if_effect` chain to each chain's trailing `end`
+   (`data/battle_ai_scripts.s:776` for `AI_CheckViability`) — **zero
+   named-handler score contribution, zero named-handler `Random()` draws**,
+   for all 12 move-slots across the three fixtures. The real "Body Slam can
+   overtake Surf" mechanism (§2.2's flagged finding) is therefore *not*
+   `AI_CV_Paralyze` reacting to anything — it must come from
+   `AI_CheckBadMove`'s un-named preamble and/or `AI_TryToFaint`'s
+   damage-estimate ranking (both described below), which do differentiate
+   the four moves. Re-deriving *exactly* which is genuinely the §4 two-turn
+   drift follow-up this doc already named as future work; this session
+   only had budget to confirm the wrong mechanism was named, not to name
+   the right one with the same live-ledger rigor as §2.
+
+Two secondary, source-confirmed corrections worth carrying into a port
+(neither changes any banked number, both are "the doc's prose was
+imprecise about *when* a draw fires," not "the count is wrong"):
+
+- `Cmd_if_can_faint` (`:1741-1764`) **jumps to its operand label when the
+  move CAN faint the target** (`gBattleMons[target].hp <=
+  gBattleMoveDamage`), landing on `AI_TryToFaint_TryToEncourageQuickAttack`
+  — the `+4`/`+2` "go for it" branch. Only the *fallthrough* (cannot faint)
+  reaches the `-1 if not strongest` check and the `if_type_effectiveness
+  x4` gate; the `if_random_less_than 80` draw only executes on that
+  fallthrough path **and** only when effectiveness is exactly x4
+  (`data/battle_ai_scripts.s:2616-2637`). It is not, as §1.3 states, an
+  unconditional once-per-slot draw — it is reachable only for a
+  can't-currently-faint, exactly-x4-effective candidate.
+- `Cmd_get_ability` (`src/battle_ai_script_commands.c:1667+`, exact fn
+  `:~1383` per §1.2) **never caches its coin-flip guess** —
+  `BATTLE_HISTORY->abilities[target]` is read but never written by this
+  command, so every `get_ability AI_TARGET` call redraws fresh if the
+  target's ability is still unrecorded, even multiple times within the
+  same slot's `AI_CheckBadMove` pass (`get_ability AI_TARGET` appears twice
+  in `AI_CheckBadMove`'s own preamble alone: the ability-negation block at
+  `:60` and the Soundproof block at `:90`, both reachable per-slot whenever
+  `if_type_effectiveness AI_EFFECTIVENESS_x0` doesn't short-circuit past
+  them). For Scenario A, Marowak (the target) has two distinct abilities
+  (Rock Head/Lightning Rod), so this is very likely the dominant
+  contributor to the 15/17 attributed rolls the existing doc under-credits
+  to "interpreter opcodes across 3 scripts x 4 slots" without singling it
+  out. This redraw-every-call behavior is itself a real port hazard: a
+  naive "guess once per battler" cache would under-draw relative to
+  native.
+
+### 1. Mask per challenge band 0-7 (`GetAiScriptsInBattleFactory`,
+`src/battle_factory.c:889-911`)
+
+Source-verified branch table (also mechanically preserved by
+`src/data/gen/factory-ai-policy.json`'s 5 `branches` entries and 13
+`aiScriptFlags`, cross-checked live: `python3 -c` load of that JSON this
+session reproduces exactly this table):
+
+| Input | Mask | Scripts |
+| --- | -: | --- |
+| `lvlMode == FRONTIER_LVL_TENT` (any band) | 0 | none |
+| `gTrainerBattleOpponent_A == TRAINER_FRONTIER_BRAIN` (any band) | 7 | CheckBadMove, TryToFaint, CheckViability |
+| challenge band 0 or 1 (`challengeNum < 2`) | 0 | none |
+| challenge band 2 or 3 (`challengeNum < 4`) | 1 | CheckBadMove only |
+| challenge band 4, 5, 6, 7 (and beyond — no upper clamp in source) | 7 | CheckBadMove, TryToFaint, CheckViability |
+
+Mask 0 is not "no AI" — setup (4 `simulatedRNG` draws) and the final tie
+`Random()%numOfBestMoves` still run unconditionally (§1.1/§1.4, confirmed
+unchanged this session).
+
+**The three banked fixtures**: all three (`mechanic-factory-ai-{unambiguous,
+tie,degenerate}-off.json`) set `"challengeNum": 7` directly (verified by
+reading each fixture's JSON this session) — **all three ran under mask 7**,
+the same branch a Frontier Brain match would use. No banked scenario
+currently exercises mask 0 or mask 1 (an ordinary band-2/3 trainer). That is
+a real coverage gap for validating a CheckBadMove-only port slice against a
+live ledger, flagged for whoever picks this up next — cheap to fill (same
+`overrides.parties` recipe, `challengeNum: 2` or `3`).
+
+### 2. Per-scenario handler set and CheckBadMove/CheckBadMove+TryToFaint reproduction
+
+Per §0(2): **zero `AI_CBM_*`/`AI_CV_*` named handlers fire in any of the
+three banked scenarios** — every move-slot in all three fixtures takes the
+fully generic path through both scripts. That collapses what "exact handler
+set" means for these three ledgers specifically:
+
+| Scenario | Handler set actually exercised (branch-aware) |
+| --- | --- |
+| Unambiguous | `AI_CheckBadMove` universal preamble only (`if_type_effectiveness x0`→immunity `Score_Minus10` for Thunderbolt; `get_ability AI_TARGET` redrawn ≥2x/slot for the 3 non-immune slots per §0; Soundproof list, all false) + `AI_TryToFaint`'s un-named `if_can_faint`/`-1`-if-not-strongest/x4-gated-`if_random_less_than 80` path, every slot + setup(4) + tie(1). No `AI_CV_*` handler reached (CheckViability's `if_effect` chain misses all 4 effects, falls to its trailing `end`, contributing 0 score / 0 draws). |
+| Tie | Identical handler set to Unambiguous, per-slot (slots 0/2 are the literal same move, so identical CBM/TryToFaint results by construction — that's *why* they tie, not a CV-level tie-break). |
+| Degenerate | Identical handler set again, but all 4 slots are Surf (non-immune, no ability-negation) — so the only per-slot differentiator is `AI_TryToFaint`'s damage estimate using each slot's distinct `simulatedRNG[i]` from setup, consistent with the doc's own observed seed-dependent turn-1 pick (slot 1 vs slot 3). |
+
+**Reproduction verdict** (the specific ask: does any banked scenario
+reproduce under a phased port?):
+
+- **CheckBadMove-only (mask 1 shape): NO**, not for the final *pick*.
+  `AI_CheckBadMove`'s universal preamble only ever produces `Score_Minus10`
+  (type-immune) or `Score_Minus12` (ability-negated) — it has no branch
+  that rewards a merely-better-than-neutral type multiplier (0.5x vs 1x vs
+  2x are all untouched by the preamble, and none of the 4 moves' effects
+  reach a named `AI_CBM_*` handler that could add more). Scenario A under
+  CheckBadMove-only would score Thunderbolt at -10 and Surf/Rock
+  Slide/Body Slam all at 0 — a **3-way tie**, not native's clean
+  "Surf wins" pick. The roll *count* would also differ (no TryToFaint/CV
+  passes at all, but CBM's own `get_ability` redraws still fire).
+- **CheckBadMove + TryToFaint (no CheckViability): YES**, for both pick and
+  roll count, for **all three** banked scenarios. Since CheckViability is
+  proven (§0(2)) to contribute exactly zero score and zero draws to every
+  move in all three fixtures, a port that implements CheckBadMove +
+  TryToFaint in full and stubs CheckViability entirely is
+  indistinguishable from the full mask-7 native behavior for these
+  specific ledgers. This is the load-bearing finding for §4's
+  recommendation below.
+
+### 3. `AI_CV_*` handlers reachable given the current 122-move executable
+roster (not 144 — see note)
+
+**Note on the brief's "144 executable moves" figure**: current
+`docs/executable-frontier-census.md` (regenerated at commit `abcf93e`,
+same session as this doc's last PROGRESS entry) reports **122** executable
+moves (355 total; 92 unweighted / 1099 weighted Factory-L50). No occurrence
+of "144" exists anywhere in that census doc or its generating tool's output
+at any prior commit checked (`b4b9f42`: 105; `2398407`: 74). Recording both
+per VERIFY-DON'T-ASSUME: the brief's number appears stale or mistaken;
+**122 is what's live on this branch right now** and is what the table below
+uses.
+
+Method: parsed all 122 `if_effect EFFECT_X, AI_CV_Y` lines inside
+`AI_CheckViability` (`data/battle_ai_scripts.s:652-2615`; a plain `==`
+dispatch per §0), grouped by handler (**90 unique `AI_CV_*` handlers** —
+the doc's own "~80" in §1.3 was a rough estimate, 90 is the exact count),
+and cross-referenced each triggering `EFFECT_*`'s executable/blocked
+classification and move count directly from
+`docs/executable-frontier-census.md`'s per-effect table (confirmed: summing
+its `Moves` column across all 214 effect rows = 355 exactly, so it's a
+clean partition safe to join against).
+
+**Headline**: of 90 `AI_CV_*` handlers, only **16** have at least one
+currently-executable move that would select them; those 16 cover **48** of
+the roster's 122 executable moves (the remaining 74 executable moves — Surf/
+Rock Slide/Thunderbolt/Body Slam's own effects among them, per §0 —have no
+named `AI_CV_*` handler at all and take the zero-contribution generic
+path). Across the full 355-move game, those same 16 handlers cover 53 moves
+(vs 48 today) — registering the rest of the roster barely moves these 16's
+own reach; the real full-game payoff is in the other 74 handlers this
+roster doesn't touch yet. Per-handler figures (executable-roster vs
+full-355) below are what matters for scoping:
+
+| Handler | Triggering `EFFECT_*` | Executable-roster moves | Full-355 moves | Size class |
+| --- | --- | -: | -: | --- |
+| `AI_CV_AlwaysHit` | `EFFECT_ALWAYS_HIT` | 6 | 6 | trivial (5 instr, 0 `if_random`) |
+| `AI_CV_HighCrit` | `EFFECT_HIGH_CRITICAL`, `EFFECT_BLAZE_KICK`, `EFFECT_POISON_TAIL` | 10 | 10 | multi-branch, 1 `if_random_less_than` |
+| `AI_CV_DefenseUp` | `EFFECT_DEFENSE_UP(_2)`, `EFFECT_BULK_UP` | 5 | 6 | multi-branch, 1 `if_random` |
+| `AI_CV_AccuracyDown` | `EFFECT_ACCURACY_DOWN(_2)` | 4 | 4 | trivial (2 instr, 0 `if_random`) |
+| `AI_CV_AttackUp` | `EFFECT_ATTACK_UP(_2)` | 4 | 4 | multi-branch, 1 `if_random` |
+| `AI_CV_AttackDown` | `EFFECT_ATTACK_DOWN(_2)` | 3 | 3 | trivial (4 instr, 0 `if_random`) |
+| `AI_CV_DefenseDown` | `EFFECT_DEFENSE_DOWN(_2)`, `EFFECT_TICKLE` | 3 | 4 | trivial (2 instr, 0 `if_random`) |
+| `AI_CV_SpeedDown` | `EFFECT_SPEED_DOWN(_2)` | 3 | 3 | trivial (3 instr, 0 `if_random`) |
+| `AI_CV_SpAtkUp` | `EFFECT_SPECIAL_ATTACK_UP(_2)` | 2 | 2 | multi-branch, 1 `if_random` |
+| `AI_CV_SpDefDown` | `EFFECT_SPECIAL_DEFENSE_DOWN(_2)` | 2 | 2 | trivial (2 instr, 0 `if_random`) |
+| `AI_CV_SpDefUp` | `EFFECT_SPECIAL_DEFENSE_UP(_2)`, `EFFECT_COSMIC_POWER`, `EFFECT_CALM_MIND` | 1 | 3 | multi-branch, 1 `if_random` |
+| `AI_CV_SpeedUp` | `EFFECT_SPEED_UP(_2)` | 1 | 1 | trivial (3 instr, 0 `if_random`) |
+| `AI_CV_EvasionUp` | `EFFECT_EVASION_UP(_2)`, `EFFECT_MINIMIZE` | 1 | 2 | multi-branch, 1 `if_random` |
+| `AI_CV_EvasionDown` | `EFFECT_EVASION_DOWN(_2)` | 1 | 1 | trivial (2 instr, 0 `if_random`) |
+| `AI_CV_VitalThrow` | `EFFECT_VITAL_THROW` | 1 | 1 | multi-branch, 1 `if_random` |
+| `AI_CV_Pursuit` | `EFFECT_PURSUIT` | 1 | 1 | trivial-ish (11 instr, but 0 `if_random` — purely deterministic branching) |
+
+9 of these 16 are fully deterministic (0 `if_random_less_than`); 7 gate a
+single `+1..+3`-class score nudge behind one probability roll. None come
+close to the ~130-draw, 80-handler mass §1.3 describes for the *full*
+355-move roster — the current executable roster only exercises **7 total
+`if_random_less_than` sites** across all reachable `AI_CV_*` handlers. The
+other 74 `AI_CV_*` handlers (Sleep, Absorb, SelfKO/Explosion, Paralyze,
+Toxic, Trap, OHKO, etc. — the effects with real move-selection weight in
+the actual game) stay unreachable until their own `EFFECT_*` gets
+registered per the existing effect-by-effect discipline; §1.3's "~80
+handlers, 130 draws" estimate is the honest full-game target, this
+section's 16/7 is what a port needs *today*.
+
+### 4. Recommended first main-lane port slice
+
+**Port now** (proven sufficient for all 3 banked ledgers, §2):
+1. Setup: `CheckMoveLimitations`-equivalent (kernel-owned, already a
+   defined boundary per `docs/factory-ai-boundary-audit.md`) + the 4
+   `simulatedRNG[i] = 100 - Random()%16` draws, one per slot, unconditional
+   — including PP-legal-but-limited slots.
+2. `AI_CheckBadMove`'s universal preamble in full: the `if_type_effectiveness
+   x0`→`Score_Minus10` immunity check, the 5 ability-negation branches
+   (Volt/Water Absorb, Flash Fire, Wonder Guard, Levitate,
+   `Score_Minus12`/`Score_Minus10`), and the Soundproof 9-move list —
+   **including** `get_ability`'s no-cache redraw-per-call semantics (§0),
+   which is load-bearing for roll-count parity, not an optional detail.
+3. `AI_TryToFaint` in full: `if_can_faint` (delegates to the kernel's
+   `AI_CalcDmg`/`TypeCalc` — the *same* `CalculateBaseDamage`/`TypeCalc`
+   real move execution uses, crit forced x1, variance = that slot's
+   `simulatedRNG`, per §1.4, unchanged this session) → the can-faint
+   `+4`/`+2` branch, or the cannot-faint `-1`-if-not-strongest +
+   x4-gated-`if_random_less_than 80` branch (§0's corrected reading).
+4. The final `Random() % numOfBestMoves` tie-break, unconditional.
+5. **Stub `AI_CheckViability` entirely** behind a named barrier (e.g.
+   `unsupported-branch: factory-ai-check-viability`) that fires whenever a
+   scored move's effect has *any* `if_effect` entry in
+   `AI_CheckViability`'s dispatch chain (the 90-handler set from §3, not
+   just the 16 currently reachable — a future move registration could add
+   an effect this port doesn't yet know) — this is honest per the ratchet
+   discipline (`tests/executableFrontierRatchet.test.ts`) rather than
+   silently no-op'ing forever.
+6. **Also barrier, not silently skip, any move whose effect has a named
+   `AI_CBM_*` handler** in `AI_CheckBadMove`'s own `if_effect` chain
+   (`:104-214`) — none of the 3 banked ledgers reach one, but the current
+   roster almost certainly has moves that do (Sleep/Explosion/DreamEater/
+   stat-changers/etc. are named `AI_CBM_*` targets); porting only the
+   universal preamble and claiming "CheckBadMove is done" would be wrong
+   the moment such a move enters a Factory rental set. Sizing that barrier
+   precisely (how many of the current 122 executable moves hit a named
+   `AI_CBM_*` handler) is a same-shape follow-up to §3's CV table this
+   session didn't have budget to also produce — flagged, not done.
+
+**Must reproduce end-to-end**: all three of
+`mechanic-factory-ai-{unambiguous,tie,degenerate}-off.json` at both banked
+seeds (1 and 99) — same turn-1 pick, same frame-100→732 total step count
+(19/19/21 per §2's table), matching `tools/probe/verify-factory-ai-ground-
+truth.ts`'s existing PASS criteria (that script is already the right
+acceptance harness — no new fixture needed for this slice).
+
+**Expected Random() attribution for the slice**: 4 (setup) + a
+per-move-per-slot `get_ability` redraw count that is now known to be
+real but not yet exactly re-derived (§0 flags this precisely — it's the
+concrete gap between "the count reproduces" and "the doc explains the
+count") + 0-1 per slot from `AI_TryToFaint`'s x4 gate + 1 (final tie) = the
+already-banked 15/15/17 totals. A worker landing this slice should expect
+to spend real budget instrumenting `get_ability`'s call count per slot
+(cheapest path: a one-off console-log build or an mGBA probe counting
+`Random()` call sites by return address, not further live-ledger
+guessing) before wiring the port's own RNG draw count, or the port will
+get the *pick* right and the *draw count* wrong — silently correct on
+score, silently wrong on RNG stream position for whatever runs after it
+in the turn.
+
+**Honest sizing for a 60-minute worker**: items 1-4 + 6's barrier
+(CheckBadMove's universal preamble, TryToFaint, setup/tie, one named
+CBM-handler barrier) is a reasonable single slice — it's the same
+shape (kernel-injected pure policy calling existing damage/type helpers,
+per the boundary audit) as recent hit-chain opcode registrations this run
+has already landed repeatedly. Item 5 (CheckViability stub) is cheap
+(one barrier, zero new logic) *as long as it stays a stub* — do **not**
+scope in any `AI_CV_*` handler implementation this round; §3 shows that's
+a genuinely separate, much larger body of work (16 handlers reachable
+today, 90 at full registration) that deserves its own phased slices per
+handler, exactly like the existing effect-by-effect opcode registration
+discipline. The `get_ability` redraw-count gap above is the one piece of
+real risk in the 60-minute estimate — budget the first 10-15 minutes of
+that session to nailing it down before writing port code, or size it out
+as its own follow-up if it doesn't fit.
