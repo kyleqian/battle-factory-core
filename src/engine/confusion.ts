@@ -150,6 +150,35 @@ export function confusionAttackerEffectAtAge(age: number): ConfusionAttackerEffe
   };
 }
 
+/**
+ * Display-layer boundary fix (RAM-probed this session,
+ * `tools/compare/scratch/confusion-boundary-instrument.ts` against
+ * `dump-scale-window-oam-scanline.py`): `confusionAttackerEffectAtAge`'s own
+ * "+1" is a RAM-SAMPLE-alignment idiom only (RAM never observes the shake
+ * task's raw pre-flip creation value, `shakeMon2Sequence`'s own index 0 -
+ * RAM always reads index 1 by the first tick the task's callback is
+ * observed). The OAM shadow is a DIFFERENT, earlier read: at the task's own
+ * creation tick, the OAM already shows index 0 directly (RAM-confirmed: real
+ * `oamX` extra reads `+1` = `xOffset` at the exact creation tick, not `0`
+ * "not yet active" NOR `-1` = index 1's value), for exactly that one tick,
+ * before the steady one-tick OAM-copy lag (index 1 from the NEXT tick
+ * onward) takes over. Composed with the generic one-tick framebuffer-capture
+ * lag already established everywhere else in this codebase, the DISPLAYED
+ * pixel at `displayAge` is `shakeMon2Sequence[displayAge - START_AGE - 1]`
+ * directly (`shakeMon2OffsetAtTick`'s own `tick<0` clamp handles "not yet
+ * created" - no separate guard needed, and critically no "+1" skip: the
+ * skip belongs only to RAM-sample alignment, not this display formula).
+ */
+export function confusionAttackerShakeDisplayX2(displayAge: number): number {
+  return shakeMon2OffsetAtTick(
+    ATTACKER_SHAKE2.xOffset,
+    ATTACKER_SHAKE2.yOffset,
+    ATTACKER_SHAKE2.numTimes,
+    ATTACKER_SHAKE2.frameDelay,
+    displayAge - CONFUSION_WINDOW1_START_AGE - 1,
+  ).x2;
+}
+
 export interface ConfusionTargetEffect {
   readonly targetScale: Readonly<{ readonly active: boolean; readonly xScale: number; readonly yScale: number }>;
   readonly targetX2: number;
