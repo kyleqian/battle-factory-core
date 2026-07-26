@@ -676,3 +676,229 @@ describe("AI_CV_AlwaysHit (docs/factory-ai-checkviability-ground-truth.md §11.3
     expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_TOXIC" });
   });
 });
+
+const MOVE_VITAL_THROW = 233; // EFFECT_VITAL_THROW
+
+/** types/isFirstTurn/evasionStage/accStage are irrelevant to AI_CV_VitalThrow -- fixed dummy values, only `speed`/`hp`/`maxHp` vary per test. */
+function vitalThrowBattler(speed: number, hp: number, maxHp: number) {
+  return Object.freeze({
+    speed,
+    speedStage: 6,
+    types: ["TYPE_FIGHTING", "TYPE_FIGHTING"] as const,
+    isFirstTurn: 0,
+    evasionStage: 6,
+    accStage: 6,
+    hp,
+    maxHp,
+  });
+}
+
+// data/battle_ai_scripts.s:1536-1546, docs/factory-ai-checkviability-ground-truth.md §13.
+describe("AI_CV_VitalThrow (docs/factory-ai-checkviability-ground-truth.md §13)", () => {
+  it("target strictly faster: deterministic zero draws/score, HP is never even read (goto End before the HP check)", () => {
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_VITAL_THROW,
+      attacker: vitalThrowBattler(75, 1, 100), // 1% HP -- would reach VitalThrow2 if the speed gate didn't short-circuit first.
+      target: vitalThrowBattler(95, 100, 100),
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+  });
+
+  it("an exact speed tie still burns GetWhoStrikesFirst's own Random() call, but never takes the target-faster branch (same Cmd_if_user_goes quirk runCvSpeedDown already pins)", () => {
+    // seed 3 -> tie-roll randomValue 50515 is ODD -> strikesFirst=2 (still not 1).
+    const oddTie = runCheckViability({
+      rng: { value: 3, calls: 0 },
+      moveId: MOVE_VITAL_THROW,
+      attacker: vitalThrowBattler(100, 100, 100), // 100% HP -> deterministic End once past the speed gate.
+      target: vitalThrowBattler(100, 100, 100),
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(oddTie.kind).toBe("scored");
+    if (oddTie.kind !== "scored") throw new Error("unreachable");
+    expect(oddTie.scoreDelta).toBe(0);
+    expect(oddTie.draws).toHaveLength(1);
+    expect(oddTie.draws[0]).toMatchObject({ kind: "target-faster-tie", strikesFirst: 2 });
+
+    // seed 8 -> tie-roll randomValue 3634 is EVEN -> strikesFirst stays 0.
+    const evenTie = runCheckViability({
+      rng: { value: 8, calls: 0 },
+      moveId: MOVE_VITAL_THROW,
+      attacker: vitalThrowBattler(100, 100, 100),
+      target: vitalThrowBattler(100, 100, 100),
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(evenTie.kind).toBe("scored");
+    if (evenTie.kind !== "scored") throw new Error("unreachable");
+    expect(evenTie.scoreDelta).toBe(0);
+    expect(evenTie.draws).toHaveLength(1);
+    expect(evenTie.draws[0]).toMatchObject({ kind: "target-faster-tie", strikesFirst: 0 });
+  });
+
+  it("HP% exactly 61 (>60): deterministic zero draws/score (if_hp_more_than AI_USER, 60 is true)", () => {
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_VITAL_THROW,
+      attacker: vitalThrowBattler(100, 61, 100),
+      target: vitalThrowBattler(50, 100, 100),
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+  });
+
+  it("HP% exactly 60 (NOT >60): reaches the [40,60] midband roll, not the deterministic End", () => {
+    // seed 2 -> randomValue % 256 = 140 (< 180, jumps to End), exactly one draw.
+    const result = runCheckViability({
+      rng: { value: 2, calls: 0 },
+      moveId: MOVE_VITAL_THROW,
+      attacker: vitalThrowBattler(100, 60, 100),
+      target: vitalThrowBattler(50, 100, 100),
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result.kind).toBe("scored");
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.scoreDelta).toBe(0);
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "vital-throw-midband-roll", jumpedToEnd: true });
+  });
+
+  it("HP% exactly 40 (NOT <40): reaches the [40,60] midband roll too, same as 60", () => {
+    // seed 2 -> randomValue % 256 = 140 (< 180, jumps to End), exactly one draw.
+    const result = runCheckViability({
+      rng: { value: 2, calls: 0 },
+      moveId: MOVE_VITAL_THROW,
+      attacker: vitalThrowBattler(100, 40, 100),
+      target: vitalThrowBattler(50, 100, 100),
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result.kind).toBe("scored");
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.scoreDelta).toBe(0);
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "vital-throw-midband-roll", jumpedToEnd: true });
+  });
+
+  it("HP% exactly 39 (<40): skips the midband roll entirely, straight to AI_CV_VitalThrow2's own roll (one draw, not two)", () => {
+    // seed 4 -> randomValue % 256 = 25 (< 50, jumps to End).
+    const result = runCheckViability({
+      rng: { value: 4, calls: 0 },
+      moveId: MOVE_VITAL_THROW,
+      attacker: vitalThrowBattler(100, 39, 100),
+      target: vitalThrowBattler(50, 100, 100),
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result.kind).toBe("scored");
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.scoreDelta).toBe(0);
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "vital-throw-roll", succeeded: false });
+  });
+
+  describe("[40,60] midband roll (if_random_less_than 180)", () => {
+    it("roll < 180: jumps straight to End, exactly one draw, zero score", () => {
+      // seed 2 -> randomValue % 256 = 140 (< 180).
+      const result = runCheckViability({
+        rng: { value: 2, calls: 0 },
+        moveId: MOVE_VITAL_THROW,
+        attacker: vitalThrowBattler(100, 50, 100),
+        target: vitalThrowBattler(50, 100, 100),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(0);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "vital-throw-midband-roll", jumpedToEnd: true });
+    });
+
+    it("roll >= 180, then AI_CV_VitalThrow2's own roll < 50: falls through both instructions, TWO draws, zero score", () => {
+      // seed 1 -> draw1 randomValue % 256 = 198 (>= 180, falls through); draw2 randomValue % 256 = 33 (< 50, jumps to End).
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_VITAL_THROW,
+        attacker: vitalThrowBattler(100, 50, 100),
+        target: vitalThrowBattler(50, 100, 100),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(0);
+      expect(result.draws).toHaveLength(2);
+      expect(result.draws[0]).toMatchObject({ kind: "vital-throw-midband-roll", jumpedToEnd: false });
+      expect(result.draws[1]).toMatchObject({ kind: "vital-throw-roll", succeeded: false });
+      expect(result.rng.calls).toBe(2);
+    });
+
+    it("roll >= 180, then AI_CV_VitalThrow2's own roll >= 50: falls through both instructions, TWO draws, score -1", () => {
+      // seed 9 -> draw1 randomValue % 256 = 249 (>= 180); draw2 randomValue % 256 = 53 (>= 50).
+      const result = runCheckViability({
+        rng: { value: 9, calls: 0 },
+        moveId: MOVE_VITAL_THROW,
+        attacker: vitalThrowBattler(100, 50, 100),
+        target: vitalThrowBattler(50, 100, 100),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(-1);
+      expect(result.draws).toHaveLength(2);
+      expect(result.draws[0]).toMatchObject({ kind: "vital-throw-midband-roll", jumpedToEnd: false });
+      expect(result.draws[1]).toMatchObject({ kind: "vital-throw-roll", succeeded: true });
+      expect(result.rng.calls).toBe(2);
+    });
+  });
+
+  describe("<40% direct AI_CV_VitalThrow2 roll (if_random_less_than 50)", () => {
+    it("roll < 50: jumps to End, exactly one draw, zero score", () => {
+      // seed 4 -> randomValue % 256 = 25 (< 50).
+      const result = runCheckViability({
+        rng: { value: 4, calls: 0 },
+        moveId: MOVE_VITAL_THROW,
+        attacker: vitalThrowBattler(100, 20, 100),
+        target: vitalThrowBattler(50, 100, 100),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(0);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "vital-throw-roll", succeeded: false });
+      expect(result.rng.calls).toBe(1);
+    });
+
+    it("roll >= 50: falls through to score -1, exactly one draw", () => {
+      // seed 1 -> randomValue % 256 = 198 (>= 50).
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_VITAL_THROW,
+        attacker: vitalThrowBattler(100, 20, 100),
+        target: vitalThrowBattler(50, 100, 100),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(-1);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "vital-throw-roll", succeeded: true });
+      expect(result.rng.calls).toBe(1);
+    });
+  });
+
+  it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
+    const result = run({ value: 1, calls: 0 }, MOVE_GROWL);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_ATTACK_DOWN" });
+  });
+});
