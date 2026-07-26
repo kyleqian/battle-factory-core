@@ -4,6 +4,87 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 454 — Presentation-seam retirement, window 2: `turn1-rockslide.json` re-driven from kernel events, still 256/256 (ISSUES #39/#41 path)
+
+- **State:** tree green at **209 files / 2477 tests** (+2 files/+12 tests
+  over entry 453's 207/2465), build green, ratchet green (6/6, allowlist
+  unchanged — see Notes for why). Oracle re-verified live, before AND after:
+  `turn1-rockslide.json` **256/256** (recorded count, unchanged),
+  `turn5-faint.json` **110/110** (prior conversion unregressed). Full
+  regression sweep (27 traces: all 4 `turn1-*`, the prior checkpoint's own
+  23-trace `turn3-6` set) — every one matches its own recorded count, zero
+  regressions.
+- **Did, per `docs/presentation-seam-scout.md` §8's own ordered plan:**
+  - **Pre-work (named gap, retired by proof not new code):** the scout's
+    "stat-stage-change has zero production emission sites" claim
+    (§7.1/§7.2/§8.3) turned out to be about test coverage, not code —
+    `battleScriptStatBuffs.ts:296-303` already constructs the event on every
+    `ChangeStatBuffs` "worked" outcome, and both routes
+    (`battleScriptStatbuffchangeOpcode.ts:112-116`,
+    `battleScriptHitChainOpcode.ts:2131-2135`) already thread it through; no
+    test had ever driven a real move through the production opcode registry
+    and asserted `.events`. Added that proof in
+    `tests/battleScriptStatbuffchangeOpcode.test.ts`: DOUBLE_TEAM
+    (EFFECT_EVASION_UP, self-target — `target === attacker` picks
+    `STRINGID_DEFENDERSSTATROSE`, a genuinely different branch than the
+    existing Swords Dance case's `STRINGID_ATTACKERSSTATROSE`) staged from
+    `BattleScript_EffectEvasionUp` through `BattleScript_MoveEnd`, asserting
+    the `stat-stage-change` event and the message id. Corrected
+    `turn1RockSlidePresentationStaging.test.ts`'s stale framing to match.
+  - **Window conversion (§8.5 steps 1-3):** (1) `battleStringResolver.ts`
+    gained `resolveMoveNameExclaim` (move id → `"{name}!"`,
+    `STRINGID_USEDMOVE`'s own `{B_BUFF2}` — source-confirmed all 5
+    `sText_ExclamationMark*` grammar variants are the literal English `"!"`,
+    `battle_message.c:420-424`/`2907-2921`, so the move-specific grammar
+    table is not port-worthy). (2) `presentationEventWindowBridge.ts` gained
+    `resolveRockSlidePresentationWindowContent`, keyed on
+    `provenance.sourceLabel` (`BattleScript_HitFromAtkString`/
+    `BattleScript_HitFromAtkAnimation`) instead of the
+    `turn2Resolved`..`sm.cursor` dispatch cascade (untouched, same "don't
+    redesign the cascade" discipline turn5-faint's own precedent set). (3)
+    `turn1RockSlidePresentationStaging.ts` now exports
+    `resolveTurn1RockSlideAttackLines`/`resolveTurn1DoubleTeamKickoffLines`/
+    `resolveTurn1RockSlideHpEndpoints`; **found and fixed turn 1's own real
+    RNG seed** (`battle1-turn1-ram-dump.json`'s `rngLedger[0].fromValue`,
+    3485459011 — brute-forced against all 7 ledger checkpoint values, live-
+    verified: staging this seed consumes exactly 4 RNG calls ending at
+    rngValue 3326091607, byte-identical to the ledger's own 4th-entry
+    `toValue`, and computes Grovyle's HP as 143→101, byte-identical to
+    `before_turn`/`after_turn.battler1.hp`) — replacing the scout's own
+    borrowed seed (which gave a different, merely-plausible 143→97 roll).
+    `battleScene.ts`'s `drawRockSlideWindow`/`drawRockSlideAttack` now source
+    `TURN_KICKOFF_LINE1/2`+`ROCK_SLIDE_LINE1/2`'s text and the HP-bar's
+    `from`/`to` endpoints from these resolvers (module-load-time constants,
+    same pattern as `TURN5_FAINTED_LINE1/2`) instead of the hardcoded
+    literals/RAM-dump reads — verified byte-identical to the prior hardcoded
+    values before wiring. `STAT_ROSE_LINE1/2` stays a hardcoded literal this
+    pass (per §8.5 step 3's own narrowing — converting it would need a
+    *second* staged DOUBLE_TEAM hit chain merged into the same window's
+    bridge, out of scope); `drawTurnEndSettledMenu` (a separate function,
+    not named in scope, sharing the same two RAM-dump reads) was also left
+    unconverted, flagged as an easy follow-up.
+- **Next:** the next presentation window in the retirement path (ISSUES
+  #39/#41), or `STAT_ROSE_LINE1/2`'s own conversion (needs a staged
+  DOUBLE_TEAM hit chain merged into the ROCK_SLIDE window's bridge) as a
+  narrower follow-up; `drawTurnEndSettledMenu`'s matching RAM-dump reads;
+  kernel breadth resuming past S10 step (iv) per ROADMAP.
+- **Notes:** ratchet allowlist **unchanged, deliberately** —
+  `battle1-turn1-ram-dump.json`'s import in `battleScene.ts` remains needed:
+  `anchorOpponentBattler.hp`/`anchorOpponentAfterTurnHp` are still read by
+  several OTHER windows (the healthbox-harvest baseline, turn 2-5's own
+  `dragonBreathGrovyleHp`/`drawEndeavorSquish`, and `drawTurnEndSettledMenu`
+  above) — this step retired 2 of that import's many read-sites, not the
+  import itself, so ISSUES #41 is not trimmed this pass (its own claim,
+  read at import granularity, remains exactly true) and #39's file-wide
+  architecture claim is likewise unchanged (one more window's content is
+  event-driven; the turn-keyed dispatch cascade itself is untouched, same as
+  the turn5-faint precedent). No new opcodes/registrations, no census
+  regen (emission plumbing already existed; nothing newly executable).
+  PAPERCUT: none this session. Also fixed a pre-existing PROGRESS.md
+  formatting slip (entry 452 was missing its own `## 452` header) while
+  archiving entry 451.
+
+---
 ## 453 — MOVE_EFFECT_CONFUSION (7) and MOVE_EFFECT_FLINCH (8) registered in SetMoveEffect's dispatch — zero new opcodes, census +4 effects/+17 moves
 
 - **State:** tree green at **207 files / 2465 tests** (+0 files/+16 tests
@@ -107,6 +188,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   TRI_ATTACK/UPROAR/other status2 family members, AI port. PAPERCUT: none
   this session.
 
+---
+## 452 — Forced-switch §4 step 10: player-side party-menu decision-request lands, RNG-reconciliation bug fixed
+
 - **State:** tree green at **207 files / 2449 tests** (+0 files/+10 tests
   over entry 451's 207/2439 — all new tests landed in existing files), build
   green. Ratchet: `battleScriptOpenPartyScreenOpcode.ts`'s `unsupported-
@@ -188,63 +272,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   switch-in entry hooks, the AI move-selection port, census regeneration.
   PAPERCUT: none this session.
 
----
-## 451 — [SUPERVISOR WIND-DOWN 2026-07-25 ~16:00] session summary
-
-- **State:** tree committed and green at **207 files / 2439 tests**, build
-  green, single main worktree, zero unmerged branches, census re-verified
-  live (**53/214 effects, 105/355 moves, 77/276 Factory-L50 executable**,
-  12 self-checks pass). **No DEFERRED entries — nothing blocks the next
-  `run-supervisor.sh`.** No usage/rate limits hit all session.
-- **Session (~35 workers across 3 lanes, all outcomes verified; 3 cap-kills
-  + 1 API-server-error, every one salvaged to zero code loss):**
-  - **Main (12 steps):** S10 **step (iv) COMPLETE** (party-HP slice +
-    jumpifbyte/getexp/checkteamslost; BS_FAINTED role + fainted-actions
-    orchestration + first real terminal boundary; BattleResolution adapter
-    with facility-verified draw→loss; ISSUES #42/#43 closed). **S10 §3
-    presentation-seam checkpoint PASSED** (turn5-faint.json 110/110 from
-    real kernel events; string resolver + PC-to-window bridge; 22
-    regression traces clean). Kernel breadth: ppreduce Pressure fix
-    (ROCK_SLIDE-class unblocked), SetMoveEffect status quartet, census
-    entry-chokepoint trio (census 2→74 moves), ChangeStatBuffs + both stat
-    routes (→105 moves), forced-switch fork COMPLETE (jumpifword/
-    openpartyscreen + AI matchup-scorer port + switch-in rebuild — §4 step
-    10 player-side menu is the one named barrier left), end-turn
-    orchestration (burn/poison/toxic ticks, end-turn KO reuses faint
-    machinery), and the **full-turn reducer** — a genuine multi-turn cycle
-    with a continuous LCG ledger (two-turn proof, burn-across-turns proof,
-    mid-turn-KO-cancels-second-action proof).
-  - **Side (9 scouts, all merged):** ground-truth packs with all-PASS
-    verify scripts for the adapter (draw reachability + facility handling
-    + party-status sync + switch recipes both voluntary and forced),
-    SetMoveEffect, secondary+primary stat routes, end-turn, Factory AI
-    (15/17-roll ledgers, unconditional tie-break), party-order permutation
-    (presentation-only verdict), the §7 event-inventory refresh, and the
-    **self-validating executable-frontier census tool**
-    (`tools/report/executable-frontier-census.ts`) whose literal-entry rule
-    found the chokepoint that flipped 72 moves in one registration.
-  - **Animation (14 steps):** DRAGON_RAGE parked `partial` **149/150**
-    (7-step convergence ladder; interpreter gained waitforvisualfinish
-    scheduling; generic slideMon/speciesIdleAnim/FIRE_PLUME ports; final
-    frame forensically eliminated to a named unknown). SHADOW_PUNCH parked
-    `partial` 84/111 player-orientation with all families attributed
-    (opponent orientation has a named BLDY-drift lead). Component-extractor
-    `jumpret` typo fixed (+79 dependency edges — dissolved a false "40
-    moves blocked" premise). blend_color_cycle family mapped (28 moves,
-    zero new blend math) and GROWTH's AnimTask_BlendColorCycle RAM-probed
-    + Tier-1-pinned (scene wiring is the named next action). Coverage:
-    **19 exact / 3 partial**.
-- **Next (in order):** main — forced-switch §4 step 10 (player-side
-  party-menu decision-request), confusion + flinch registrations (ground
-  truth banked), AI move-selection port (`docs/factory-ai-ground-truth.md`),
-  DoFieldEndTurnEffects setters (screens/weather), the full-turn proof's
-  non-terminal variant; presentation — continue the §3 seam retirement
-  window-by-window (ISSUES #39/#41 path). Animation — GROWTH scene wiring →
-  dense comparators (28-move family behind it), SHADOW_PUNCH opponent
-  orientation. All prep docs carry rerunnable verify scripts.
-- **Notes:** PAPERCUTS gained 5 entries/bumps this session. The launcher's
-  "unauthenticated/sandboxed" hint on cap-kill/API-error exits is noise
-  (recorded in entries 444/448). Supervisor salvage rule tightened: verify
-  `npm run build` too, not just tests (a salvaged mid-rework briefly broke
-  `tsc -b`; caught and fixed same session, recorded in memory).
 

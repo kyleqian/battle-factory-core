@@ -14,6 +14,9 @@
  * `battle_message.c:2286-2306`).
  */
 import battleMessageTemplates from "../data/gen/battle-message-templates.json" with { type: "json" };
+import movesAsset from "../data/gen/moves.json" with { type: "json" };
+
+const MOVES = movesAsset.moves as readonly { id: number; name: string }[];
 
 type BattleMessageSegment =
   | Readonly<{ type: "text"; value: string }>
@@ -49,6 +52,26 @@ export type BattleStringNameWithPrefixInput = Readonly<{
 export function resolveBattleNameWithPrefix(input: BattleStringNameWithPrefixInput): string {
   if (input.side === "player") return input.nickname;
   return `${input.isTrainerBattle ? "Foe " : "Wild "}${input.nickname}`;
+}
+
+/**
+ * `STRINGID_USEDMOVE`'s own `{B_BUFF2}` (`battle_message.c:2155-2162`):
+ * `gBattleTextBuff2` is set to `gMoveNames[currentMove]`, then
+ * `ChooseTypeOfMoveUsedString` (`:2922-2955`) appends one of 5
+ * `sText_ExclamationMark*` constants selected via `sGrammarMoveUsedTable`
+ * (a leftover Japanese-grammar table -- MOVE_ROCK_SLIDE falls into its
+ * default/untabled case, MOVE_DOUBLE_TEAM is explicitly tabled into a
+ * different case) -- but all 5 constants are the literal English string `"!"`
+ * (`:420-424`, confirmed by the source's own comment `:2907-2921`: the
+ * Japanese-specific grammar collapsed to identical English text), so the
+ * table's own case selection is not port-worthy: every move's own display
+ * name plus a bare `"!"` is correct in English regardless of which case it
+ * falls into.
+ */
+export function resolveMoveNameExclaim(moveId: number): string {
+  const entry = MOVES[moveId];
+  if (!entry) throw new Error(`battleStringResolver: no moves.json entry for move id ${moveId}`);
+  return `${entry.name}!`;
 }
 
 /** One resolver function per `{TOKEN}` placeholder this call site's template(s) actually use. */

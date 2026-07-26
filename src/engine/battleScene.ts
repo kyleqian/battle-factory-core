@@ -587,6 +587,11 @@ import { drawMode0Objects, drawMode0Ppu, mgbaDarkenColor, type Mode0Oam, type Mo
 import { compositeSemiTransparentObjPixel } from "./sprites.ts";
 import { resolveTurn5FaintWindowLines } from "./turn5FaintPresentationStaging.ts";
 import {
+  resolveTurn1RockSlideAttackLines,
+  resolveTurn1DoubleTeamKickoffLines,
+  resolveTurn1RockSlideHpEndpoints,
+} from "./turn1RockSlidePresentationStaging.ts";
+import {
   sceneOnDoubleTeamView,
   sceneOnBindView,
   sceneOnDragonBreathView,
@@ -11772,6 +11777,28 @@ function drawTurn5RockSlideWindow(fb: Uint8Array, t: number): void {
  * `+657` (box stays, no text), then hard-cuts to the resettled action menu
  * at `+664` (`drawTurnEndSettledMenu`).
  */
+/**
+ * Presentation-seam retirement, window 2 (ISSUES #39/#41,
+ * `docs/presentation-seam-scout.md` §8): resolved from REAL staged kernel
+ * event streams (`turn1RockSlidePresentationStaging.ts`), not hardcoded
+ * literals -- `STRINGID_USEDMOVE`'s own `{B_ATK_NAME_WITH_PREFIX}`/`{B_BUFF2}`
+ * splices give "ONIX used"/"ROCK SLIDE!" (Onix, player side, real
+ * MOVE_ROCK_SLIDE display name) and "Foe GROVYLE used"/"DOUBLE TEAM!"
+ * (Grovyle, opponent side, real MOVE_DOUBLE_TEAM display name) respectively.
+ * `TURN1_ROCKSLIDE_HP` is Grovyle's real turn-1 `hp-change{from,to}` (143 ->
+ * 101), replacing the `anchorOpponentBattler.hp`/`anchorOpponentAfterTurnHp`
+ * RAM-dump reads for this window's own two call sites. The STAT_ROSE text
+ * box (below) stays the existing hardcoded literal for this pass --
+ * `stat-stage-change` has a proven production emission site as of this step
+ * (`tests/battleScriptStatbuffchangeOpcode.test.ts`'s "Double Team" case),
+ * but wiring it into THIS window would need a second staged DOUBLE_TEAM hit
+ * chain merged into the same bridge, out of this step's own scope (matching
+ * `docs/presentation-seam-scout.md` §8.5 step 3's own narrowing).
+ */
+const [TURN1_ROCKSLIDE_KICKOFF_LINE1, TURN1_ROCKSLIDE_KICKOFF_LINE2] = resolveTurn1DoubleTeamKickoffLines();
+const [TURN1_ROCKSLIDE_ATTACK_LINE1, TURN1_ROCKSLIDE_ATTACK_LINE2] = resolveTurn1RockSlideAttackLines();
+const TURN1_ROCKSLIDE_HP = resolveTurn1RockSlideHpEndpoints();
+
 function drawRockSlideWindow(fb: Uint8Array, t: number, pressTick: number): void {
   const redrawTick = pressTick + ROCK_SLIDE_MENU_REDRAW_DELAY;
   if (t >= redrawTick) {
@@ -11788,16 +11815,16 @@ function drawRockSlideWindow(fb: Uint8Array, t: number, pressTick: number): void
     let line2: string;
     let chars: number;
     if (t < statRoseStart) {
-      line1 = TURN_KICKOFF_LINE1;
-      line2 = TURN_KICKOFF_LINE2;
+      line1 = TURN1_ROCKSLIDE_KICKOFF_LINE1;
+      line2 = TURN1_ROCKSLIDE_KICKOFF_LINE2;
       chars = turnKickoffTextVisibleChars(t, pressTick);
     } else if (t < rockSlideStart) {
       line1 = STAT_ROSE_LINE1;
       line2 = STAT_ROSE_LINE2;
       chars = statRoseTextVisibleChars(t, pressTick);
     } else {
-      line1 = ROCK_SLIDE_LINE1;
-      line2 = ROCK_SLIDE_LINE2;
+      line1 = TURN1_ROCKSLIDE_ATTACK_LINE1;
+      line2 = TURN1_ROCKSLIDE_ATTACK_LINE2;
       chars = rockSlideTextVisibleChars(t, pressTick);
     }
     drawMessageTextLines(fb, line1, line2, chars);
@@ -11827,7 +11854,7 @@ function drawRockSlideAttack(fb: Uint8Array, t: number, pressTick: number): void
   }
   drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y);
   const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick);
-  const opponentHp = rockSlideOpponentHp(t, pressTick, anchorOpponentBattler.hp, anchorOpponentAfterTurnHp);
+  const opponentHp = rockSlideOpponentHp(t, pressTick, TURN1_ROCKSLIDE_HP.from, TURN1_ROCKSLIDE_HP.to);
   drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(opponentHp));
   if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2);
   drawMenuHealthboxPlayer(fb, 0);

@@ -55,3 +55,53 @@ export function resolveFaintPresentationWindowContent(
     }),
   });
 }
+
+/**
+ * docs/presentation-seam-scout.md §8.3's own mapping row for
+ * `turn1-rockslide.json` (`drawRockSlideWindow`/`drawRockSlideAttack`): the
+ * ROCK_SLIDE-window sibling to `resolveFaintPresentationWindowContent` above,
+ * same mechanism (identify this window's own content purely from
+ * `sourceLabel`, never a turn number), different label family --
+ * `BattleScript_HitFromAtkString`/`BattleScript_HitFromAtkAnimation`
+ * (`reference/pokeemerald/data/battle_scripts_1.s:243-260`, confirmed live
+ * in this staged run's own event dump, §8.2) instead of the fainted branch's
+ * `BattleScript_FaintTarget`.
+ */
+export const HIT_FROM_ATK_STRING_SCRIPT_LABEL = "BattleScript_HitFromAtkString";
+export const HIT_FROM_ATK_ANIMATION_SCRIPT_LABEL = "BattleScript_HitFromAtkAnimation";
+
+export type RockSlidePresentationWindowContent = Readonly<{
+  message: Readonly<{ messageId: string; substitutions: readonly string[] }>;
+  hp: Readonly<{ battler: number; from: number; to: number }>;
+}>;
+
+/**
+ * Answers "are we in the ROCK_SLIDE attack's own message + HP-drain
+ * presentation content" from the event stream's own provenance. Returns
+ * `null` (not a guess) when either signal is absent -- both the real
+ * `attackstring`-labeled message and the `attackanimation`-labeled
+ * `hp-change` must be present.
+ */
+export function resolveRockSlidePresentationWindowContent(
+  events: readonly BattleScriptSemanticEvent[],
+  attackStringScriptLabel: string = HIT_FROM_ATK_STRING_SCRIPT_LABEL,
+  attackAnimationScriptLabel: string = HIT_FROM_ATK_ANIMATION_SCRIPT_LABEL,
+): RockSlidePresentationWindowContent | null {
+  const messageEvent = events.find(
+    (event) => event.kind === "message" && event.provenance.sourceLabel === attackStringScriptLabel,
+  );
+  if (!messageEvent || messageEvent.kind !== "message") return null;
+
+  const hpChangeEvent = events.find(
+    (event) => event.kind === "hp-change" && event.provenance.sourceLabel === attackAnimationScriptLabel,
+  );
+  if (!hpChangeEvent || hpChangeEvent.kind !== "hp-change") return null;
+
+  return Object.freeze({
+    message: Object.freeze({
+      messageId: messageEvent.messageId,
+      substitutions: messageEvent.substitutions,
+    }),
+    hp: Object.freeze({ battler: hpChangeEvent.battler, from: hpChangeEvent.from, to: hpChangeEvent.to }),
+  });
+}

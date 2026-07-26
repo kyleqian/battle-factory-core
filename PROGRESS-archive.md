@@ -1,4 +1,64 @@
 ---
+## 451 — [SUPERVISOR WIND-DOWN 2026-07-25 ~16:00] session summary
+
+- **State:** tree committed and green at **207 files / 2439 tests**, build
+  green, single main worktree, zero unmerged branches, census re-verified
+  live (**53/214 effects, 105/355 moves, 77/276 Factory-L50 executable**,
+  12 self-checks pass). **No DEFERRED entries — nothing blocks the next
+  `run-supervisor.sh`.** No usage/rate limits hit all session.
+- **Session (~35 workers across 3 lanes, all outcomes verified; 3 cap-kills
+  + 1 API-server-error, every one salvaged to zero code loss):**
+  - **Main (12 steps):** S10 **step (iv) COMPLETE** (party-HP slice +
+    jumpifbyte/getexp/checkteamslost; BS_FAINTED role + fainted-actions
+    orchestration + first real terminal boundary; BattleResolution adapter
+    with facility-verified draw→loss; ISSUES #42/#43 closed). **S10 §3
+    presentation-seam checkpoint PASSED** (turn5-faint.json 110/110 from
+    real kernel events; string resolver + PC-to-window bridge; 22
+    regression traces clean). Kernel breadth: ppreduce Pressure fix
+    (ROCK_SLIDE-class unblocked), SetMoveEffect status quartet, census
+    entry-chokepoint trio (census 2→74 moves), ChangeStatBuffs + both stat
+    routes (→105 moves), forced-switch fork COMPLETE (jumpifword/
+    openpartyscreen + AI matchup-scorer port + switch-in rebuild — §4 step
+    10 player-side menu is the one named barrier left), end-turn
+    orchestration (burn/poison/toxic ticks, end-turn KO reuses faint
+    machinery), and the **full-turn reducer** — a genuine multi-turn cycle
+    with a continuous LCG ledger (two-turn proof, burn-across-turns proof,
+    mid-turn-KO-cancels-second-action proof).
+  - **Side (9 scouts, all merged):** ground-truth packs with all-PASS
+    verify scripts for the adapter (draw reachability + facility handling
+    + party-status sync + switch recipes both voluntary and forced),
+    SetMoveEffect, secondary+primary stat routes, end-turn, Factory AI
+    (15/17-roll ledgers, unconditional tie-break), party-order permutation
+    (presentation-only verdict), the §7 event-inventory refresh, and the
+    **self-validating executable-frontier census tool**
+    (`tools/report/executable-frontier-census.ts`) whose literal-entry rule
+    found the chokepoint that flipped 72 moves in one registration.
+  - **Animation (14 steps):** DRAGON_RAGE parked `partial` **149/150**
+    (7-step convergence ladder; interpreter gained waitforvisualfinish
+    scheduling; generic slideMon/speciesIdleAnim/FIRE_PLUME ports; final
+    frame forensically eliminated to a named unknown). SHADOW_PUNCH parked
+    `partial` 84/111 player-orientation with all families attributed
+    (opponent orientation has a named BLDY-drift lead). Component-extractor
+    `jumpret` typo fixed (+79 dependency edges — dissolved a false "40
+    moves blocked" premise). blend_color_cycle family mapped (28 moves,
+    zero new blend math) and GROWTH's AnimTask_BlendColorCycle RAM-probed
+    + Tier-1-pinned (scene wiring is the named next action). Coverage:
+    **19 exact / 3 partial**.
+- **Next (in order):** main — forced-switch §4 step 10 (player-side
+  party-menu decision-request), confusion + flinch registrations (ground
+  truth banked), AI move-selection port (`docs/factory-ai-ground-truth.md`),
+  DoFieldEndTurnEffects setters (screens/weather), the full-turn proof's
+  non-terminal variant; presentation — continue the §3 seam retirement
+  window-by-window (ISSUES #39/#41 path). Animation — GROWTH scene wiring →
+  dense comparators (28-move family behind it), SHADOW_PUNCH opponent
+  orientation. All prep docs carry rerunnable verify scripts.
+- **Notes:** PAPERCUTS gained 5 entries/bumps this session. The launcher's
+  "unauthenticated/sandboxed" hint on cap-kill/API-error exits is noise
+  (recorded in entries 444/448). Supervisor salvage rule tightened: verify
+  `npm run build` too, not just tests (a salvaged mid-rework briefly broke
+  `tsc -b`; caught and fixed same session, recorded in memory).
+
+---
 ## 450 — Full-turn reducer landed: "decision → both actions → end-turn → next decision boundary" is now a genuine multi-turn cycle
 
 - **State:** tree green at **205 files / 2426 tests** (+1 file/+5 tests
