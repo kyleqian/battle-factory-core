@@ -270,10 +270,12 @@ describe("production trycastformdatachange (Cmd_trycastformdatachange) dispatch 
 
   describe("staged integration: BattleScript_MoveWeatherChange's real call into BattleScript_WeatherFormChanges", () => {
     it(
-      "advances through this opcode for battler 0 of an ordinary (non-Castform) matchup, then halts one "
-        + "opcode later on the pre-existing, already-inventoried sBATTLER addbyte barrier "
-        + "(battleScriptDamagingWeatherOpcode.ts's Cmd_addbyte only models the gBattleCommunication,1 call "
-        + "site) -- proof this opcode is no longer the WeatherFormChanges loop's own gate",
+      "runs the complete loop for an ordinary (non-Castform) 2-battler matchup -- both battlers' "
+        + "trycastformdatachange, both addbyte increments (battleScriptDamagingWeatherOpcode.ts's Cmd_addbyte/"
+        + "Cmd_jumpifarraynotequal widened this session onto the shared sBATTLER byte-lvalue universe), the "
+        + "loop-back jump, and the exit compare -- then pops the real call stack `call "
+        + "BattleScript_WeatherFormChanges` pushed, landing exactly at its own continuation "
+        + "(`goto BattleScript_MoveEnd`)",
       () => {
         const rc = context(
           [battler({ side: 0 }), battler({ side: 1 }), battler({ side: 0 }), battler({ side: 1 })],
@@ -305,15 +307,40 @@ describe("production trycastformdatachange (Cmd_trycastformdatachange) dispatch 
         expect(afterSetbyte.state.rulesContext.scriptingBattler).toBe(0);
 
         // trycastformdatachange, battler 0 (ordinary) -- this session's registration: a real advance.
-        const afterTrycastform = stepBattleScriptMachine(program, afterSetbyte.state, execution.handlers);
-        expect(afterTrycastform.kind).toBe("advanced");
+        const afterTrycastform0 = stepBattleScriptMachine(program, afterSetbyte.state, execution.handlers);
+        expect(afterTrycastform0.kind).toBe("advanced");
 
-        // addbyte sBATTLER, 1 -- one opcode further down the exact same loop; a different, already-pinned barrier.
-        if (afterTrycastform.kind !== "advanced") throw new Error("expected trycastformdatachange to advance");
-        const afterAddbyte = stepBattleScriptMachine(program, afterTrycastform.state, execution.handlers);
-        expect(afterAddbyte.kind).toBe("halted");
-        if (afterAddbyte.kind !== "halted") throw new Error("expected addbyte to halt");
-        expect(afterAddbyte.state.haltReason).toMatchObject({ kind: "unsupported-branch" });
+        // addbyte sBATTLER, 1 -- now a real advance (shared-universe widening), sBATTLER 0 -> 1.
+        if (afterTrycastform0.kind !== "advanced") throw new Error("expected trycastformdatachange to advance");
+        const afterAddbyte0 = stepBattleScriptMachine(program, afterTrycastform0.state, execution.handlers);
+        if (afterAddbyte0.kind !== "advanced") throw new Error("expected addbyte to advance");
+        expect(afterAddbyte0.state.rulesContext.scriptingBattler).toBe(1);
+
+        // jumpifbytenotequal sBATTLER(1), gBattlersCount(2) -- not equal, jumps back to the loop start.
+        const afterJump0 = stepBattleScriptMachine(program, afterAddbyte0.state, execution.handlers);
+        if (afterJump0.kind !== "advanced") throw new Error("expected jumpifbytenotequal to advance");
+        expect(afterJump0.state.programCounter).not.toBe(afterAddbyte0.state.programCounter + 1);
+
+        // trycastformdatachange, battler 1 (ordinary) -- second loop iteration.
+        const afterTrycastform1 = stepBattleScriptMachine(program, afterJump0.state, execution.handlers);
+        if (afterTrycastform1.kind !== "advanced") throw new Error("expected trycastformdatachange to advance");
+
+        // addbyte sBATTLER, 1 -- sBATTLER 1 -> 2.
+        const afterAddbyte1 = stepBattleScriptMachine(program, afterTrycastform1.state, execution.handlers);
+        if (afterAddbyte1.kind !== "advanced") throw new Error("expected addbyte to advance");
+        expect(afterAddbyte1.state.rulesContext.scriptingBattler).toBe(2);
+
+        // jumpifbytenotequal sBATTLER(2), gBattlersCount(2) -- equal, falls through (loop exit).
+        const afterJump1 = stepBattleScriptMachine(program, afterAddbyte1.state, execution.handlers);
+        if (afterJump1.kind !== "advanced") throw new Error("expected jumpifbytenotequal to advance");
+        expect(afterJump1.state.programCounter).toBe(afterAddbyte1.state.programCounter + 1);
+
+        // return -- pops the real call stack, landing at the call site's own continuation.
+        const afterReturn = stepBattleScriptMachine(program, afterJump1.state, execution.handlers);
+        if (afterReturn.kind !== "advanced") throw new Error("expected return to advance");
+        expect(afterReturn.state.callStack.length).toBe(0);
+        expect(afterReturn.state.programCounter).toBe(callPc.programCounter + 1);
+        expect(afterReturn.state.rng.calls).toBe(0);
       },
     );
   });

@@ -129,15 +129,22 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // ESCAPE_PREVENTION/...) are a separate barrier (1).
   ["src/engine/battleScriptStatbuffchangeOpcode.ts", 3],
   // Screens/weather registration slice 5 (docs/screens-weather-ground-truth.md
-  // §1c/§6 item 5): Cmd_addbyte/Cmd_bicword/Cmd_jumpifarraynotequal are each
-  // narrowed to the one concrete operand triple
-  // BattleScript_DamagingWeatherLoop/LoopIncrement/ContinuesEnd actually uses;
-  // every other concrete call site of these three generic array/scratch-field
-  // opcodes (Triple Kick's counter, Perish Song's loop, Teeter Dance's loop,
-  // Ghost Curse's compare, the link-battle/Palace loops, HitsAllNoUndergroundBonus's
-  // single-bit clear, MoveUsedWokeUp's HITMARKER_WAKE_UP_CLEAR) falls into one
-  // shared named barrier per opcode -- 3 total, none reachable by either
-  // committed sandstorm/safeguard/lightscreen fixture.
+  // §1c/§6 item 5), widened this session (runtime weather-form loop, PROGRESS
+  // 460): Cmd_bicword still narrows to the one concrete operand pair
+  // BattleScript_DamagingWeatherContinuesEnd uses (HitsAllNoUndergroundBonus's
+  // single-bit clear / MoveUsedWokeUp's HITMARKER_WAKE_UP_CLEAR are its one
+  // barrier). Cmd_addbyte/Cmd_jumpifarraynotequal no longer special-case a
+  // single tuple -- both now resolve any pointer/comparand through the same
+  // shared byte-lvalue universe battleScriptSetByte.ts owns (plus the
+  // gBattlersCount sentinel), so BattleScript_WeatherFormChangesLoop's own
+  // sBATTLER pair runs for real, and so (as the same mechanism, not a special
+  // case) do Perish Song's/Teeter Dance's/Palace's own loop counters. Still
+  // one shared barrier per opcode: Triple Kick's counter (delta 10 isn't a
+  // resolvable literal), the multi-hit string buffer (pointer outside the
+  // universe), Ghost Curse's compare, and the link-battle loop (both compare
+  // a selector role -- gBattlerAttacker/gBattlerFainted -- this universe does
+  // not expose). 3 total, none reachable by either committed sandstorm/
+  // safeguard/lightscreen fixture.
   ["src/engine/battleScriptDamagingWeatherOpcode.ts", 3],
   // TRYCASTFORMDATACHANGE registration (PROGRESS 458's supervisor-decided
   // (a)/(b) split): CastformDataTypeChange (battle_util.c:2396-2429) is

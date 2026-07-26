@@ -15,10 +15,15 @@
  * `Cmd_bicword` are all generic array/scratch-field primitives with many
  * concrete call sites across the full committed program (most belonging to
  * OTHER move effects entirely, e.g. Triple Kick's own counter, Perish Song's
- * loop). Only the exact operand triples `BattleScript_DamagingWeatherLoop`/
- * `LoopIncrement`/`ContinuesEnd` actually use are modeled here; every other
+ * loop). `Cmd_copyarraywithindex`/`Cmd_bicword` model only the exact operand
+ * triple `BattleScript_DamagingWeatherLoop`/`ContinuesEnd` use; every other
  * concrete call site's unmodeled pointer/value is a single named (b) barrier,
  * same policy as `battleScriptJumpifbyteOpcode.ts`.
+ *
+ * `Cmd_addbyte`/`Cmd_jumpifarraynotequal` were widened (runtime weather-form
+ * loop, PROGRESS 460) off that same one-tuple special case onto the shared
+ * byte-lvalue universe `battleScriptSetByte.ts` owns -- see each handler's own
+ * doc comment for the exact spellings this now covers vs. still rejects.
  */
 import {
   resolveBattleScriptLabel,
@@ -35,6 +40,12 @@ import type {
   BattleScriptControllerIdlePort,
   BattleScriptBattlerSelectorResolverPort,
 } from "./battleScriptSourceCommands.ts";
+import {
+  BATTLE_SCRIPT_SETBYTE_POINTER_EXPRESSIONS,
+  readBattleScriptRulesByte,
+  resolveBattleScriptSetByteValue,
+  writeBattleScriptRulesByte,
+} from "./battleScriptSetByte.ts";
 import {
   BATTLE_SCRIPT_HITMARKER_GRUDGE,
   BATTLE_SCRIPT_HITMARKER_IGNORE_BIDE,
@@ -204,28 +215,46 @@ function createWeatherdamageHandler(): BattleScriptOpcodeHandler<BattleScriptRul
 }
 
 /**
- * `Cmd_addbyte` (`battle_script_commands.c:3823-3828`). Only the loop's own
- * `addbyte gBattleCommunication, 1` (`BattleScript_DamagingWeatherLoopIncrement`)
- * is modeled; every other concrete call site (Triple Kick's power counter,
- * the multi-hit string buffer, Perish Song's loop, Teeter Dance's loop, ...)
- * is the single named barrier below.
+ * `Cmd_addbyte` (`battle_script_commands.c:3823-3828`). The lvalue and delta
+ * both resolve through the same shared byte universe `Cmd_setbyte`/
+ * `Cmd_jumpifbyte` already use (`battleScriptSetByte.ts`'s pointer list plus
+ * its literal-value resolver) -- a generic mechanism, not a special case
+ * keyed to any one script. Widened this session (runtime weather-form loop,
+ * PROGRESS 460) from a single hardcoded tuple to that shared universe: still
+ * covers `gBattleCommunication, 1` (`BattleScript_DamagingWeatherLoopIncrement`)
+ * and now also `sBATTLER, 1` (`BattleScript_WeatherFormChangesLoop`,
+ * `BattleScript_PerishSongLoopIncrement`), `gBattlerTarget, 1`
+ * (`BattleScript_TeeterDanceLoopIncrement`, `BattleScript_IntimidateActivates
+ * LoopIncrement`), and `gBattleCommunication + 1, 1`
+ * (`BattleScript_PalaceEndFlavorText`) -- every concrete addbyte call site
+ * whose pointer is already SETBYTE-resolvable and whose delta is a
+ * resolvable literal. Left rejected: `sMULTIHIT_STRING + 4`/
+ * `sTRIPLE_KICK_POWER` (Triple Kick/multi-hit's own buffers -- the former's
+ * pointer isn't in the shared universe at all, the latter's delta `10` isn't
+ * a resolvable SETBYTE literal even though its pointer is) -- the single
+ * named barrier below.
  */
 function createAddbyteHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
   return (context) => {
     const [ptrOperand, byteOperand] = context.instruction.operands;
     const rules = context.state.rulesContext;
-    if (ptrOperand!.expression !== "gBattleCommunication" || byteOperand!.expression !== "1") {
+    const pointer = ptrOperand!.expression;
+    const delta = byteOperand ? resolveBattleScriptSetByteValue(byteOperand.expression) : null;
+    const current = BATTLE_SCRIPT_SETBYTE_POINTER_EXPRESSIONS.includes(pointer as never)
+      ? readBattleScriptRulesByte(rules, pointer)
+      : null;
+    if (current === null || delta === null) {
       return unsupportedBranch(
         context,
-        `Cmd_addbyte's operand (${ptrOperand!.expression}, ${byteOperand!.expression}) is not modeled`,
+        `Cmd_addbyte's operand (${pointer}, ${byteOperand!.expression}) is not modeled`,
         "battle_script_commands.c",
         3823,
       );
     }
-    const nextRules = Object.freeze({
-      ...rules,
-      battleCommunication0: (rules.battleCommunication0 + 1) & 0xff,
-    });
+    const nextRules = writeBattleScriptRulesByte(rules, pointer, (current + delta) & 0xff);
+    if (!nextRules) {
+      throw new Error(`Cmd_addbyte: ${pointer} accepted a read but rejected the incremented value`);
+    }
     return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }), { rulesContext: nextRules });
   };
 }
@@ -270,21 +299,39 @@ function createBicwordHandler(): BattleScriptOpcodeHandler<BattleScriptRulesCont
 /**
  * `Cmd_jumpifarraynotequal` (`battle_script_commands.c:3793-3812`), reached
  * here only via the `jumpifbytenotequal` macro alias (size operand always
- * `1`, `asm/macros/battle_script.inc:1406-1408`). Only the loop's own
- * `jumpifbytenotequal gBattleCommunication, gBattlersCount,
- * BattleScript_DamagingWeatherLoop` is modeled; the other six concrete call
- * sites (Perish Song/Teeter Dance/Ghost Curse/link-battle/Palace loops) are
- * the single named barrier below.
+ * `1`, `asm/macros/battle_script.inc:1406-1408`). Both compared bytes resolve
+ * through the same shared universe `Cmd_addbyte` above now uses: either
+ * pointer may be any SETBYTE-resolvable expression, or the literal
+ * `gBattlersCount` -- a read-only battle-topology fact (already how
+ * `Cmd_weatherdamage`'s own loop bound reads it above), not a settable
+ * scratch byte, so it is not part of the SETBYTE universe itself. Widened
+ * this session (runtime weather-form loop, PROGRESS 460) from a single
+ * hardcoded pair to that shared universe: still covers
+ * `gBattleCommunication, gBattlersCount` (`BattleScript_DamagingWeatherLoop
+ * Increment`) and now also `sBATTLER, gBattlersCount`
+ * (`BattleScript_WeatherFormChangesLoop`, `BattleScript_PerishSongLoop
+ * Increment`), `gBattlerTarget, gBattlersCount`
+ * (`BattleScript_TeeterDanceLoopIncrement`), and `gBattleCommunication + 1,
+ * gBattlersCount` (`BattleScript_PalaceEndFlavorText`). Left rejected:
+ * Ghost Curse's `gBattlerAttacker, gBattlerTarget` and the link-battle
+ * loop's `gBattlerFainted, gBattlersCount` -- `gBattlerAttacker`/
+ * `gBattlerFainted` are selector roles this shared universe does not expose
+ * as SETBYTE-resolvable pointers -- the single named barrier below.
  */
+function readJumpifarraynotequalOperand(rules: BattleScriptRulesContext, expression: string): number | null {
+  if (expression === "gBattlersCount") return rules.battleTopology.battlersCount;
+  return BATTLE_SCRIPT_SETBYTE_POINTER_EXPRESSIONS.includes(expression as never)
+    ? readBattleScriptRulesByte(rules, expression)
+    : null;
+}
+
 function createJumpifarraynotequalHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
   return (context) => {
     const [mem1Operand, mem2Operand, sizeOperand, ptrOperand] = context.instruction.operands;
     const rules = context.state.rulesContext;
-    if (
-      mem1Operand!.expression !== "gBattleCommunication"
-      || mem2Operand!.expression !== "gBattlersCount"
-      || sizeOperand!.expression !== "0x1"
-    ) {
+    const mem1 = readJumpifarraynotequalOperand(rules, mem1Operand!.expression);
+    const mem2 = readJumpifarraynotequalOperand(rules, mem2Operand!.expression);
+    if (mem1 === null || mem2 === null || sizeOperand!.expression !== "0x1") {
       return unsupportedBranch(
         context,
         `Cmd_jumpifarraynotequal's operand (${mem1Operand!.expression}, ${mem2Operand!.expression}, size ${sizeOperand!.expression}) is not modeled`,
@@ -292,7 +339,7 @@ function createJumpifarraynotequalHandler(): BattleScriptOpcodeHandler<BattleScr
         3793,
       );
     }
-    if (rules.battleCommunication0 === rules.battleTopology.battlersCount) {
+    if (mem1 === mem2) {
       return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }));
     }
     const target = resolveBattleScriptLabel(context.program, ptrOperand!.expression);
