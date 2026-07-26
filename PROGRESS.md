@@ -13,6 +13,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ---
 ## 473 — Primary status-move opcode cluster registered: EFFECT_SLEEP/TOXIC/POISON/PARALYZE/CONFUSE all executable (doc's own scout finding, `docs/status-cluster-ground-truth.md`, fully executed this session)
 
+- **Side merge (same round, supervisor-verified PASS live from the worktree
+  + green on the merged tree):** fixed-damage + TYPECALC2 cluster prep-scout
+  banked (branch `worker/side-20260726-124734`, merged, worktree removed) —
+  `docs/fixed-damage-cluster-ground-truth.md` +
+  `tools/probe/verify-fixed-damage-cluster-ground-truth.ts` (PASS ×2 worker
+  + once by the supervisor) + Seismic Toss/Psywave/Counter fixtures.
+  Ledgers: Seismic Toss dealt == level exactly; Psywave formula
+  `level*(draw*10+50)/100` pinned across seeds; Counter 2× retaliation +
+  status-move failure case. **Decisive census-class correction:**
+  Counter/Mirror Coat's real blockers are DATA-MODEL gaps —
+  `gProtectStructs[].physicalBattlerId`/`specialBattlerId` have no home in
+  `BattleScriptRulesContext` (supervisor-verified by grep) and the per-turn
+  `TurnValuesCleanUp(FALSE)` ProtectStruct clear is unmodeled
+  (`battle_main.c:4857-4874`) — registering the opcodes without them would
+  arm stale retaliation forever. TYPECALC2 is a pure immunity gate (no
+  STAB, no scaling) so Brick Break is the cheap consumer. DMGTOLEVEL/
+  PSYWAVE/TYPECALC2/REMOVELIGHTSCREENREFLECT all (a)-portable now.
+  Supervisor also filed **ISSUES #45** (census false positives
+  RAGE/MEAN_LOOK/NIGHTMARE/WILL_O_WISP per this entry's own accounting).
+  Merged tree: **225 files / 2883 tests + build green.**
+
 - **State:** tree green at **225 files / 2883 tests** (+1 file/+30 tests
   over entry 472's 224/2853 — 1 new production module
   `battleScriptStatusPrimaryOpcode.ts` + 1 new test file), build green
