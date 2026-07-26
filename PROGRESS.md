@@ -11,6 +11,82 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > not abandoned). See the matching note in SUPERVISOR.md.
 
 ---
+## 471 — Seventh + eighth CheckViability handler pairs ported: AI_CBM_DefenseDown/AI_CV_DefenseDown + AI_CBM_SpDefDown/AI_CV_SpDefDown (doc §15/§16, mandatory + stretch both landed)
+
+- **State:** tree green at **223 files / 2846 tests** (+0 files/+65 tests
+  over entry 470's merged 222/2805 — no new files, existing CheckBadMove/
+  CheckViability/ScoredDecision test files widened in place), build green
+  (`tsc -b && vite build`). Ratchet **6/6** unmoved (`factoryAiCheckBadMove.ts`/
+  `factoryAiCheckViability.ts` aren't ratchet-tracked — same precedent as
+  every prior CBM/CV port). Three commits (`e58c48d` port, `865e32e` unit
+  tests, `4a3c034` engine reproduction), each green.
+  `tools/probe/verify-factory-ai-checkviability-ground-truth.ts`: **ALL
+  PASS**, run before touching source (confirmed the side lane's banked
+  §15/§16 fixtures already held) and again after (oracle-only assertions,
+  unaffected by an engine-side port either way).
+- **Did:** ported both remaining mandatory-priority CBM-blocked pairs per
+  `docs/factory-ai-checkviability-ground-truth.md` §15/§16 — both handlers'
+  CBM half (`AI_CBM_DefenseDown`/`AI_CBM_SpDefDown`, `data/battle_ai_scripts.s
+  :283-285`/`:296-298`) is a bare MIN_STAT_STAGE gate that `goto`s straight
+  into the ALREADY-ported shared `CheckIfAbilityBlocksStatChange` tail
+  (`:308-312`, reused unchanged from entry 469's AttackDown port, not
+  duplicated) — factored as `runCbmStatDownViaSharedTail` in
+  `factoryAiCheckBadMove.ts` since the two handlers are byte-for-byte
+  identical modulo which stat stage they read. Both handlers' CV half
+  (`AI_CV_DefenseDown`/`AI_CV_SpDefDown`, `:1124-1134`/`:1186-1196`) share an
+  identical 3-gate/1-draw-site shape — Gate A (opponent's OWN hp<70,
+  unconditional reach into the draw site) and Gate B (target's OWN stat
+  stage>3, only checked if Gate A is false, skips the draw site) are two
+  DIFFERENT PATHS INTO THE SAME roll, not independent branches; Gate C
+  (target's OWN hp>70) is an orthogonal always-reached fallthrough that
+  stacks with the draw site's own -2 — factored as `runCvStatDown` in
+  `factoryAiCheckViability.ts`. Widened `FactoryAiCheckBadMoveTarget` (+
+  `defStage`/`spDefStage`) and `FactoryAiCheckViabilityBattler` (same two
+  fields, both sides) and plumbed them through `factoryAiDecisionPolicy.ts`'s
+  CBM-target/CV-attacker/CV-target construction from
+  `view.*.statStages.def`/`.spDef` (those fields already existed on
+  `FactoryAiScoredBattlerView`, just unwired until now). Pair (2)
+  (SpDefDown) landed in the same rung as pair (1) rather than as a separate
+  stretch step — the shared-helper factoring made it near-zero marginal
+  work once pair (1)'s shape was in place, exactly as the brief predicted.
+  Updated the two pre-existing "still barriers every other reachable
+  handler" pass-through examples from `EFFECT_DEFENSE_DOWN`/`MOVE_TAIL_WHIP`
+  (no longer unsupported) to `EFFECT_HAZE`/`MOVE_HAZE`.
+- **Test:** 28 new Tier-1 tests across `factoryAiCheckBadMove.test.ts`
+  (32→38: MIN_STAT_STAGE short-circuit + both table-entry variants, an
+  ambiguous two-ability target reaching the shared tail for exactly 2 draws,
+  known-Clear-Body/single-ability-White-Smoke short-circuits, one block per
+  handler) and `factoryAiCheckViability.test.ts` (81→99: Gate A/B as
+  distinct paths into the identical draw site, both roll outcomes, Gate C's
+  independent fallthrough, and a combined test proving the draw site's -2
+  and Gate C's -2 are NOT mutually exclusive, one block per handler) + 12
+  new engine-reproduction tests in `factoryAiScoredDecision.test.ts`
+  (38→50): Anorith (Battle Armor, single ability)/Machamp (Guts, single
+  ability) — the exact §13.2/§15.2 species pairing reused verbatim — reach
+  (Anorith at the doc's own live-verified 22/120=18% seed 1 / 30/120=25%
+  seed 99 endpoints, Gate A true) vs. control (120/120, Gate A false + Gate
+  B true at neutral stage) through the REAL mask-7 dispatcher: reach yields
+  exactly 4 identical check-viability draws (one per identical
+  `MOVE_LEER`/`MOVE_FAKE_TEARS` slot), control yields zero, zero CBM/
+  TryToFaint draws throughout (single-ability target keeps CBM's
+  shared-tail `get_ability` guess free), both always pick the dispatch move.
+- **Next:** further CBM+CV pairs from the blocked-17 priority list (doc's
+  own audit); `END3` registration (architectural, needs its own design
+  look, currently another worker's territory); ENDTURN doc §5 slice 5
+  (Liechi/Salac/Petaya stat-up berries, `REMOVEITEM`-unblocked per entry
+  470); remaining blocked-on-opcodes census rows.
+- **Notes:** one real assembly-reading gotcha beyond the doc's own prose:
+  Gate A and Gate B in `AI_CV_DefenseDown`/`AI_CV_SpDefDown` are NOT two
+  independent preconditions gating the SAME effect the way AttackDown's own
+  Gate A/Gate C do — they're two different jump targets that both land on
+  the identical draw site (Gate A jumps straight there; Gate B's own
+  fallthrough, when false, lands there too) — worth spelling out explicitly
+  in code comments since a naive per-gate boolean-AND port would have
+  silently required BOTH gates true to reach the roll, which is wrong (Gate
+  B is only ever consulted when Gate A is false in the first place). No
+  PAPERCUT this session.
+
+---
 ## 470 — ENDTURN_ITEMS1 registered: REMOVEITEM opcode + Leftovers/8 cure berries/White Herb (doc §5 slice 4's mandatory rung), live-verified
 
 - **Side merge (same round, supervisor-verified in-worktree + on the merged
@@ -206,86 +282,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (forgetting the universal preamble's own soundproof draw) was caught by
   the test itself failing immediately, not a source of lost time.
 
----
-## 468 — [SUPERVISOR WIND-DOWN 2026-07-26 ~05:30] session summary
-
-- **State:** tree committed and green at **221 files / 2751 tests**, build
-  green, census **79/214 effects, 163/355 moves, 128/276 Factory-L50**
-  (session start: 76→79 came mid-session; true session start was 73/214,
-  152/355, 118/276; all 25 census self-checks pass), single main worktree,
-  zero unmerged branches, zero stale worktrees. **No DEFERRED entries —
-  nothing blocks the next `run-supervisor.sh`.** No usage/rate limits all
-  session (one worker died to an API connection drop mid-response, salvaged
-  and relaunched cleanly — not a limit).
-- **Session (~20 workers over 3 lanes, every outcome supervisor-verified
-  live; 1 API-drop failure salvaged via scratchpad + relaunch):**
-  - **Main (7 steps):** player-side forced-switch full-turn variant (461,
-    entry 459's remainder — the `player-choice-required` fork is now a real
-    decision boundary); Ingrain/Leech Seed/Wrap registered (462, census
-    +3 effects/+8 moves, 18/18 live verify, two hit-chain barriers
-    genuinely retired); Factory-AI CheckViability handler bodies ported
-    4-for-4 against banked fixtures — SpeedDown CBM+CV pair (463),
-    Pursuit + HighCrit (466), AlwaysHit (467), VitalThrow (468, the fifth
-    and last CV-only handler, against §13's banked fixtures — HP-band
-    truncating-percent gate + the shared speed-order plumbing, with the
-    §13.1 target-faster polarity correction and the 50-roll's
-    score/no-score polarity read directly off `Cmd_if_random_less_than`
-    rather than §11.4's own unverified gloss; engine reproduces both §13
-    fixtures' exact 4-vs-0 check-viability draw counts at both banked
-    seeds), each with real assembly-quirk corrections pinned (HighCrit's
-    1-or-2-draw cascade, AlwaysHit's ScoreUp1 fallthrough); EFFECT_ENDEAVOR
-    registered (464,
-    3 opcodes + 2 required widenings, census +3 effects/+3 moves);
-    presentation-seam window 3 wired (465, `turn5-rockslide.json` 256/256
-    ×2 from the real MOVE_ENDEAVOR kernel chain, 14-trace sweep clean,
-    2 RAM-dump literals deleted).
-  - **Side (7 steps, all merged):** `addbyte`/`jumpifbytenotequal` widened
-    onto the shared SETBYTE universe (runtime weather-form loop executable);
-    CheckViability scout with two supervisor-re-verified audit corrections
-    (no "trivial 0-if_random" handlers exist; CBM blocks 17/22 CV handlers
-    — only 5 are CV-only-portable); seam window 3 prep-scout (§9);
-    CV fixtures for Pursuit/HighCrit (§11), AlwaysHit (§12, the salvaged
-    relaunch), VitalThrow (§13, Battle-Armor crit-block design + §11.4
-    polarity correction) — **all 5 CV-only handlers now have banked live
-    ground truth, 8-fixture verify script ALL PASS ×2**; ENDTURN
-    abilities/items ground truth (only 4 real ability cases; END3
-    named as a real architectural gap, ITEMS1/2 recipe-banked).
-  - **Animation (6 steps, all merged):** defect A KILLED in three
-    instrument-first rungs — window-bounds hypothesis refuted (OAM
-    byte-identical), real mechanism found (`objMode=1` hardware 50/50
-    alpha blend, formula verified 26/26 pixels via a new DISPCNT-OBJ-off
-    underlayer probe), fix landed → **MOVE_FUTURE_SIGHT promoted
-    `exact` 114/114**; CONFUSION's OAM-shadow x-lag RAM-proven and fixed
-    (108→137/140); **MOVE_PSYCHIC ported** (byte-identical script shape,
-    137/140 first run); family window-1 boundary tick fixed (both
-    CONFUSION and PSYCHIC now **138/140**), window-2 splice hypothesis
-    tested and honestly refuted — a genuinely separate defect class.
-    Coverage: **22 exact / 6 partial**.
-- **Round-8 side merge (final step of the session, supervisor-verified
-  ALL PASS live on the merged tree):** `AI_CBM_AttackDown` +
-  `AI_CV_AttackDown` ground truth banked (doc §14) — the FIRST
-  CBM-blocked pair, twin Growl fixtures isolating the physical-type-list
-  gate (+4 delta, 100% `Cmd_if_random_less_than`, both seeds ×2), with a
-  real confound caught and designed out (`Cmd_get_ability`'s ability-guess
-  `Random()&1` fires for any two-ability species — use single-ability
-  targets). Draw-site 1 (needs a 2-turn build) and a CBM-branch-fires
-  fixture remain recipe-only. 10-fixture verify script ALL PASS ×2.
-- **Next (in order):** main — port the `AI_CBM_AttackDown`+`AI_CV_AttackDown`
-  pair (ground truth banked §14; also makes §6's original Growl fixtures
-  engine-reproducible), then further CBM+CV pairs from the blocked 17;
-  `END3` registration (architectural, needs its
-  own design look) then ENDTURN_ABILITIES's 3 scripted cases;
-  ENDTURN_ITEMS1/2 registration off the banked recipes; remaining
-  blocked-on-opcodes census rows (DMGTOLEVEL, PSYWAVE, COUNTER/TYPECALC2,
-  MIRRORCOAT, STOCKPILE, SETBIDE...). Seam — turn-4
-  `anchorOpponentAfterTurn4Hp` staging gap (needs a turn-4 settle staging
-  module, currently circular), seam-scout §9 items 1/5. Animation — the
-  window-2 splice defect class (CONFUSION/PSYCHIC each 138/140, shared
-  2-frame remainder, banked instrument evidence); PSYCHIC opposite
-  orientation; next component track from `npm run animation:coverage`.
-- **Notes:** PAPERCUTS +1 (raw before/after RNG-window diffs, Hits: 3).
-  Supervisor process lessons recorded in memory: run worktree merges from
-  the main tree only; never run suite/merges in the main tree while a
-  main-lane worker is live; the launcher's "unauthenticated/sandboxed"
-  trailer can misdiagnose an API drop (check spend/duration first);
-  API-drop salvage via scratchpad-copy + relaunch brief worked cleanly.
