@@ -623,3 +623,202 @@ discipline. The `get_ability` redraw-count gap above is the one piece of
 real risk in the 60-minute estimate — budget the first 10-15 minutes of
 that session to nailing it down before writing port code, or size it out
 as its own follow-up if it doesn't fit.
+
+## 2026-07-25 — instrumented caller attribution closes PROGRESS entry 455's
+"2-roll gap" (§5, this session)
+
+Status: read-only instrumented-probe audit, no src/ changes. Entry 455
+(previous session) reached a live-data-driven model of **13** AI-decision
+`Random()` draws (setup 4 + `Cmd_get_ability` 6/8 + `ShouldSwitch`'s
+switch-AI pre-check 2 + tie-break 1) against the pinned **15/15/17**
+attributed totals for `mechanic-factory-ai-{unambiguous,tie,
+degenerate}-off.json` — a 2-roll-per-scenario gap, with paper tracing
+exhausted. This section closes it by instrument: every `Random()` call in
+each fixture's frame-100→732 window, tagged with its exact caller function
+by reading the ARM link register at the moment of entry into `Random()`.
+
+### 0. Method — a live-fire exec-breakpoint attempt segfaulted; the fallback used instead
+
+A hardware execution breakpoint (`lib.mDebuggerCreate(lib.DEBUGGER_CLI, core)`
++ `lib.mDebuggerAttach(...)`, `vendor/libmgba-py/mgba/debugger.py`'s
+`NativeDebugger.set_breakpoint`) was tried first — `mDebuggerCreate` only
+returns a non-NULL debugger for `DEBUGGER_CLI`/`DEBUGGER_GDB` in this build
+(`DEBUGGER_CUSTOM`/`DEBUGGER_NONE` both return NULL), but `mDebuggerAttach`
+with the CLI debugger **segfaults immediately (exit 139)**, before any
+breakpoint fires, on this libmgba-py build. Not pursued further given the
+budget — worth flagging for whoever next needs exec breakpoints on this
+harness.
+
+The fallback actually used, per this step's own brief:
+1. **Fast pass, no single-stepping.** `src/random.c:5,14` defines
+   `EWRAM_DATA static u32 sRandCount`, incremented unconditionally on every
+   `Random()` call (confirmed by disassembling `Random()` itself,
+   `0x0806f5cc`-`0x0806f5e4`: the second counter store at
+   `0x0806f5da-0x0806f5e0`, address `0x020249c0`, cross-checked against
+   `arm-none-eabi-nm`). This is real, already-shipped source instrumentation,
+   not a probe-injected hack — a single RAM read before/after each
+   `oracle.advance()` gives an **exact** per-frame draw count at full
+   emulation speed, no LCG inversion needed. Driving the identical
+   `mechanicLab` staging `verify-factory-ai-ground-truth.ts` already uses
+   (`BattleLab(oracle, "battle-scene-off").prepare(request)` with the
+   fixture's own JSON as the request body) and summing `sRandCount` deltas
+   over frames 101-732 reproduces the pinned totals exactly: **19/19/21**.
+2. **Targeted single-step pass.** Pass 1 flags only a handful of frames per
+   fixture as nonzero (13 of ~632 for unambiguous/tie, 13 for degenerate) —
+   single-stepping is bounded to just those, not the whole window. Fresh
+   session, fast-forward via `oracle.advance()` through unflagged frames,
+   `core.step()` (one ARM/Thumb instruction) through flagged ones, reading
+   `core.cpu.pc`/`core.cpu.lr` at each step. **Load-bearing gotcha**:
+   libmgba-py's `cpu.pc` reads the *pipelined* PC (Thumb: executing-
+   instruction address **+2**, the same convention real ARM7TDMI code relies
+   on for PC-relative literal-pool loads) — empirically confirmed by
+   single-stepping `Random()`'s own 13-instruction body and observing
+   `cpu.pc` visit `0x0806f5ce..0x0806f5e6`, every value shifted +2 from the
+   real instruction addresses. The entry check must therefore compare
+   against `RANDOM_ADDR + 2`, not `RANDOM_ADDR`; comparing against the raw
+   symbol address silently finds zero hits despite `sRandCount` changing.
+   Each hit's LR is bisected against a full local+global function symbol
+   table (`arm-none-eabi-nm --defined-only -n reference/pokeemerald/
+   pokeemerald.elf`, sections `t`/`T` — this, not the linker map, is what
+   resolves *static* functions like `Cmd_get_ability`/`ShouldSwitch` that
+   `bin/oracle symbols`/`pokeemerald.map` don't carry).
+
+Pass-1 and pass-2 totals match exactly for all three fixtures (19/19/21),
+and the two passes are independent runs (separate fresh `EmeraldOracle`
+sessions) — this is a real reconciliation, not a tautology.
+
+Probe: `tools/probe/attribute-factory-ai-random-callers.py`. Invocation
+(one fixture; swap the filename for the other two):
+```
+python3 tools/run-mgba-probe.py /tmp/factory-ai-callers-unambiguous.json -- \
+    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    tools/probe/attribute-factory-ai-random-callers.py \
+    tools/battle-lab/mechanic-factory-ai-unambiguous-off.json \
+    /tmp/factory-ai-callers-unambiguous.json
+```
+Runs in ~7-8s per fixture (single-stepping is bounded to the ~13 flagged
+frames, not the ~632-frame window).
+
+### 1. Ordered caller table — unambiguous (identical shape for tie; degenerate differs only in `get_ability` count/ticks)
+
+| Tick | Caller | Count | Role |
+| -: | --- | -: | --- |
+| 366 | `Cmd_seteffectwithchance+0x81` (`battle_script_commands.c:2923`) | 1 | **turn 1**, opponent's own trailing Surf hit-chain draw (see §2) |
+| 378 | `Cmd_accuracycheck+0x305` | 1 | turn 1, player's Pound chain |
+| 400 | `Cmd_critcalc+0x127` | 1 | turn 1, player's Pound chain |
+| 403 | `Cmd_adjustnormaldamage+0x7` | 1 | turn 1, player's Pound chain |
+| 507 | `Cmd_seteffectwithchance+0x81` | 1 | turn 1, player's Pound chain (4th roll) |
+| 517 | `BattleTurnPassed+0x157` (`battle_main.c:4013`) | 1 | **new site**, per-turn `gRandomTurnNumber` draw (see §3) |
+| 522 | `FindMonThatAbsorbsOpponentsMove+0x1d` | 1 | switch-AI pre-check (entry 455's own finding) |
+| 522 | `HasSuperEffectiveMoveAgainstOpponents+0x85` | 1 | switch-AI pre-check (entry 455's own finding) |
+| 524 | `BattleAI_SetupAIData+0x83` | 4 | setup `simulatedRNG[i]` draws (§1.1) |
+| 524-528 | `Cmd_get_ability+0x9d` | 6 | `AI_CheckBadMove` ability-guess redraws (§0(2)) |
+| 531 | `ChooseMoveOrAction_Singles+0xf7` | 1 | final tie-break (§1.4) |
+
+Sums to **19**, exactly matching `sRandCount`'s own frame-100→732 delta and
+the pinned total — every draw in the window is now named, with zero
+unattributed remainder. Tie and degenerate reproduce the identical shape
+(`orderedCallerTable` in each fixture's probe output): tie is
+tick-for-tick identical to unambiguous; degenerate shifts every tick by
++2 (its own setup route takes 2 frames longer) and draws `Cmd_get_ability`
+8 times instead of 6 (2 per slot × 4 non-immune slots instead of 3, per
+entry 455's already-confirmed model), reconciling to 21.
+
+### 2. What `Cmd_seteffectwithchance`'s second appearance actually is
+
+Reading `gCurrentMove`/`gBattlerAttacker` (`bin/oracle symbols gCurrentMove
+gBattlerAttacker`) at tick 366 shows `gCurrentMove=57` (`MOVE_SURF`),
+`gBattlerAttacker=1` (the **opponent's** battler slot) — this is not a
+second player draw, nor a new AI-decision site: it is the **opponent's own
+turn-1 Surf attack's trailing secondary-effect-chance check**, the same
+`Cmd_seteffectwithchance` instance any `EFFECT_HIT` move takes once per
+real execution (`battle_script_commands.c:2908-2935`; Surf's own 0%
+secondary chance means the `Random()%100 < 0` gate always fails, same
+shape as Pound's). At tick 403/508, `gCurrentMove=1` (`MOVE_POUND`),
+`gBattlerAttacker=0` (the **player**) confirms ticks 378-507 are the
+player's own Pound chain exactly as already established. §2.1's isolation
+claim ("opponent's own turn-1 move has already fully resolved by frame
+100") is therefore imprecise in one respect: the RNG-relevant portion of
+the opponent's move *is* done by frame 100 (rngValue is provably stable
+100→300), but the same script's trailing, RNG-consuming
+`seteffectwithchance` opcode is delayed until tick 366 by ordinary
+message-print pacing (many frames of text-scroll between damage-applied
+and the secondary-effect check, a pattern already established elsewhere in
+this codebase's own hit-chain ground truth). The original doc's
+`totalSteps - 4` subtraction (§2.2-2.4, `verify-factory-ai-ground-
+truth.ts`'s `PLAYER_CHAIN_ROLLS`) assumed exactly one
+`Cmd_seteffectwithchance` draw in the window; there are actually two, and
+the subtraction silently folds the extra (opponent-tail) one into what it
+labels "turn-2 decision rolls" even though it is a turn-1 draw with zero
+relationship to the AI's move-selection scoring.
+
+### 3. The genuinely new site: `BattleTurnPassed`'s per-turn `gRandomTurnNumber` draw
+
+`battle_main.c:4013`, inside `BattleTurnPassed` (the turn-cleanup function
+that transitions from "turn N finished" to `HandleTurnActionSelectionState`
+for turn N+1): `gRandomTurnNumber = Random();` — **unconditional**, for
+every turn of every battle type, executed *before* the
+`BATTLE_TYPE_PALACE`/`BATTLE_TYPE_ARENA` checks that follow it. This site is
+outside both files §1.2's source enumeration grepped
+(`battle_ai_script_commands.c`, `battle_ai_switch_items.c`), so the original
+doc never had a chance to find it — it isn't AI code at all, it's core
+turn-passage bookkeeping in `battle_main.c`.
+
+`gRandomTurnNumber` is **not** decoration: `GetWhoStrikesFirst`
+(`battle_main.c:4653,4687`, already named in §1.2's table as the speed-tie
+site) reads it for the `HOLD_EFFECT_QUICK_CLAW` check
+(`gRandomTurnNumber < (0xFFFF * holdEffectParam) / 100` forces
+`speedBattler = UINT_MAX`, i.e. guaranteed-first if the roll succeeds), and
+`BattleScript_PalacePrintFlavorText`/arena-turn-counter logic consume it for
+`BATTLE_TYPE_PALACE`/`BATTLE_TYPE_ARENA`. For these 3 fixtures specifically
+it is provably inert: `oracle/battle_lab.py:839`'s custom-party builder
+defaults every mon's `item` to `0` (`ITEM_NONE`) when the fixture doesn't
+specify one, and none of the 3 fixtures' 6 party slots (per each fixture's
+own `overrides.parties`) specify an item — no Quick Claw holder exists in
+any banked scenario, and Battle Factory is `BATTLE_TYPE_FRONTIER`, never
+Palace/Arena. So the draw fires, shifts `gRngValue`, and its *result* is
+read by nothing, for these specific ledgers. A future fixture with a
+Quick-Claw-holding rental mon would make this draw's value genuinely
+decision-relevant (to turn order, not to the AI's move scoring itself).
+
+### 4. VERDICT
+
+**Entry 455's own 13-draw AI-decision model was already correct** — the
+"2-roll gap" was never inside the AI's scoring logic. The 2 missing rolls
+are:
+
+1. `Cmd_seteffectwithchance`'s second, opponent-tail instance (tick 366) —
+   not a new site, a **window-accounting artifact**: the doc's own
+   `totalSteps - PLAYER_CHAIN_ROLLS` subtraction assumed one
+   `seteffectwithchance` draw in the window when there are really two, and
+   silently misattributes the extra (turn-1) one to "turn-2 decision."
+2. `BattleTurnPassed`'s `gRandomTurnNumber = Random()` (`battle_main.c:4013`)
+   — a **genuinely new, always-fires-once-per-turn-transition site**,
+   outside the two files the original source enumeration grepped.
+
+**Neither influences the move decision itself** for these 3 fixtures: (1)
+is turn-1's own hit-chain artifact, fully resolved and PP-decremented
+before `BattleAI_SetupAIData` ever runs; (2)'s value is read only by
+`GetWhoStrikesFirst`'s Quick Claw branch and Palace/Arena flavor text, both
+provably unreached here (no Quick Claw item, Battle Factory ≠ Palace/Arena).
+Both draws are pure `gRngValue`-position shifts relative to the AI's own
+scoring, exactly like entry 455's already-confirmed switch-AI draws. This
+directly answers entry 455's relax-option-(b) question: **yes**, the 2
+draws in the gap are decision-independent, on the same evidentiary footing
+as the switch-AI draws entry 455 already confirmed — a port targeting "same
+final decision" needs neither; a port targeting **exact
+`gRngValue`-position** parity (matching every downstream RNG consumer for
+the rest of the turn, not just this decision) needs both, in the order
+shown in §1 (`BattleTurnPassed` before the switch-AI pre-check, before
+`BattleAI_SetupAIData`).
+
+The true AI-decision-only roll count is **13/13/15** (setup 4 + CBM's
+`get_ability` 6/6/8 + switch-AI pre-check 2 + tie-break 1); the pinned
+**15/15/17** "attributed turn-2 decision rolls" figures remain correct as
+totals (unchanged, still what `verify-factory-ai-ground-truth.ts` asserts)
+but are now known to bundle in the 2 non-decision draws above rather than
+being 15/15/17 pure AI-scoring draws. `tools/probe/verify-factory-ai-
+ground-truth.ts` has been updated (comments/log labels only — no numeric
+value or PASS/FAIL condition changed) to stop calling that remainder
+"attributed turn-2 AI decision rolls" outright; rerun after the edit:
+**ALL PASS**, same 19/19/21 totals.

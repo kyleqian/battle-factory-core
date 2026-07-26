@@ -77,6 +77,14 @@ function check(label: string, condition: boolean, detail: string): void {
 // attacker's own chain regardless of seed (accuracycheck never misses,
 // critcalc/adjustnormaldamage/seteffectwithchance always draw once each).
 // docs/hit-chain-ground-truth.md Scenario 1 established this 4-roll shape.
+// NOTE (2026-07-25 caller-attribution probe, docs/factory-ai-ground-truth.md
+// §5): totalSteps - PLAYER_CHAIN_ROLLS is NOT purely "turn-2 AI decision"
+// rolls -- it also includes 2 real, decision-irrelevant Random() calls (the
+// opponent's own trailing turn-1 Cmd_seteffectwithchance draw, delayed past
+// frame 100 by message-print pacing, and BattleTurnPassed's unconditional
+// per-turn gRandomTurnNumber = Random() draw, battle_main.c:4013). Both are
+// LCG-position-only, never consumed by AI scoring for BATTLE_TYPE_FACTORY.
+// The true AI-decision-only roll count is 13/13/15 (this total minus those 2).
 const PLAYER_CHAIN_ROLLS = 4;
 
 interface ScenarioSpec {
@@ -97,19 +105,19 @@ const SCENARIOS: ScenarioSpec[] = [
     label: "unambiguous (Surf/RockSlide/BodySlam/Thunderbolt vs pure-Ground Marowak)",
     path: "tools/battle-lab/mechanic-factory-ai-unambiguous-off.json",
     expectedTurn1Slot: { 1: 0, 99: 0 }, // both seeds: slot 0 (Surf, 2x super effective)
-    expectedTotalSteps: 19, // 4 (player Pound chain) + 15 (turn-2 AI decision)
+    expectedTotalSteps: 19, // 4 (player chain) + 2 (non-decision, see NOTE above) + 13 (real AI decision)
   },
   {
     label: "tie (Surf in slots 0 and 2, tied top score)",
     path: "tools/battle-lab/mechanic-factory-ai-tie-off.json",
     expectedTurn1Slot: { 1: 0, 99: 0 }, // both tested seeds resolved the tie to slot 0
-    expectedTotalSteps: 19, // same shape as the unambiguous scenario: 4 + 15
+    expectedTotalSteps: 19, // same shape as the unambiguous scenario: 4 + 2 + 13
   },
   {
     label: "degenerate (all four slots Surf, four-way tie)",
     path: "tools/battle-lab/mechanic-factory-ai-degenerate-off.json",
     expectedTurn1Slot: { 1: 1, 99: 3 }, // different slots across seeds: real Random()-driven tie-break
-    expectedTotalSteps: 21, // 4 (player Pound chain) + 17 (turn-2 AI decision, all-x4-candidate path)
+    expectedTotalSteps: 21, // 4 (player chain) + 2 (non-decision) + 15 (real AI decision, all-x4-candidate path)
   },
 ];
 
@@ -154,14 +162,15 @@ async function verifyScenario(spec: ScenarioSpec): Promise<void> {
 
     const totalSteps = stepsToReach(f100.rngValue, f732.rngValue, spec.expectedTotalSteps + 10);
     check(
-      `seed ${seed}: exactly ${spec.expectedTotalSteps} total Random() calls from frame 100 to frame 732 (player's ${PLAYER_CHAIN_ROLLS}-roll Pound chain + turn-2's isolated AI decision, no contaminating end-turn RNG)`,
+      `seed ${seed}: exactly ${spec.expectedTotalSteps} total Random() calls from frame 100 to frame 732 (player's ${PLAYER_CHAIN_ROLLS}-roll Pound chain + 2 non-decision draws + turn-2's isolated AI decision, no contaminating end-turn RNG)`,
       totalSteps === spec.expectedTotalSteps,
       `forward-search found ${totalSteps === null ? "no match" : `step ${totalSteps}`}`,
     );
 
-    const decisionRolls = totalSteps === null ? null : totalSteps - PLAYER_CHAIN_ROLLS;
+    // NOT purely "AI decision" -- see the NOTE by PLAYER_CHAIN_ROLLS above.
+    const postChainRolls = totalSteps === null ? null : totalSteps - PLAYER_CHAIN_ROLLS;
     console.log(
-      `  seed ${seed}: turn-1 slot=${usedSlot}, total steps 100->732=${totalSteps}, attributed turn-2 AI decision rolls=${decisionRolls}`,
+      `  seed ${seed}: turn-1 slot=${usedSlot}, total steps 100->732=${totalSteps}, post-player-chain rolls (AI decision + 2 non-decision draws)=${postChainRolls}`,
     );
   }
 
