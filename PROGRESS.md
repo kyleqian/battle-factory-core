@@ -11,6 +11,127 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > not abandoned). See the matching note in SUPERVISOR.md.
 
 ---
+## 474 — Fixed-damage + TYPECALC2 cluster registered: EFFECT_LEVEL_DAMAGE/EFFECT_PSYWAVE/EFFECT_BRICK_BREAK all executable (`docs/fixed-damage-cluster-ground-truth.md`'s (a)-portable subset, fully executed this session; Counter/Mirror Coat stay blocked per the doc's own data-model finding)
+
+- **State:** tree green at **225 files / 2905 tests** (+0 files/+22 tests
+  over entry 473's 225/2883 — widened `battleScriptHitChainOpcode.test.ts`
+  and `battleScriptScreensWeatherOrchestration.test.ts` in place, no new
+  test files), build green (`tsc -b && vite build`). Ratchet: **unmoved**
+  (`battleScriptHitChainOpcode.ts` barrier count still 22) — all four
+  opcodes are genuinely (a)-portable, no new `unsupportedBranch` introduced;
+  `battleScriptRulesContext.test.ts`'s opcode-handler-count pin moved
+  **102 -> 106** (4 new opcode ids: 74 TYPECALC2, 159 DMGTOLEVEL, 160
+  PSYWAVEDAMAGEEFFECT, 238 REMOVELIGHTSCREENREFLECT), named and updated.
+  Verify script (`tools/probe/verify-fixed-damage-cluster-ground-truth.ts`,
+  oracle-only, READ/RUN only): **PASS x2** (before touching source, and
+  again at the end) — unaffected either way, as expected.
+- **Did:** registered the doc's (a)-portable subset (§7 summary table),
+  all four opcodes live-verified/source-cited in the doc:
+  1. `battleScriptHitChainOpcode.ts`: `Cmd_dmgtolevel` (2-line port,
+     `battleMoveDamage = attacker.level`, zero RNG) and
+     `Cmd_psywavedamageeffect` (rejection-sampling `while ((draw =
+     Random()%16) > 10)` loop via `drawBattleScriptRng` in a real `do/while`,
+     then `level*(draw*10+50)/100`) registered next to the existing
+     `typecalcOpcodeHandler`. `Cmd_typecalc2` also registered there: read
+     the real source (`battle_script_commands.c:4500-4593`) side by side
+     with the already-registered `typecalc` to confirm the doc's divergence
+     claims firsthand — no STAB, and the type-effectiveness loop only ORs
+     bits into a *local* `flags` u8 (never calls `ModulateDmgByType`, never
+     touches `gBattleMoveDamage`), so this opcode never scales damage, only
+     gates DOESNT_AFFECT_FOE/Wonder-Guard-MISSED. Wonder Guard's own check
+     reads that local `flags`, not the real `moveResultFlags` — pinned with
+     a test proving a stale `SUPER_EFFECTIVE` bit left over from the real
+     `typecalc` call moments earlier does NOT save a Wonder Guard target
+     this call finds neutral.
+  2. `battleScriptSetSideStatusOpcode.ts`: `Cmd_removelightscreenreflect`
+     (Brick Break's sole call site) registered beside the existing
+     SETREFLECT/SETLIGHTSCREEN/SETSAFEGUARD/SETMIST setters, reusing their
+     exact `sideStatuses`/`sideTimers` fields. Clears the *opposing* side's
+     Reflect/Light Screen (bit + timer) when either is active, writes
+     `animTurn`/`animTargetsHit` (1/1 on clear, 0/0 otherwise) on both
+     branches, per source.
+  3. Walked `BattleScript_EffectLevelDamage`/`EffectPsywave`/
+     `EffectBrickBreak` from their literal entries — every opcode along
+     each path was already registered generically (`attackcanceler`,
+     `accuracycheck`, `attackstring`, `ppreduce`, `typecalc`, `bicbyte`,
+     `adjustsetdamage`, `critcalc`, `damagecalc`, `adjustnormaldamage`,
+     `jumpifbyte`, `attackanimation`, `waitanimation`, `printstring`,
+     `waitmessage`, `effectivenesssound`, `hitanimation`, `waitstate`,
+     `healthbarupdate`, `datahpupdate`, `critmessage`, `resultmessage`,
+     `seteffectwithchance`, `tryfaintmon`) or newly registered this session
+     — no new barriers anywhere in this cluster's reachable set.
+- **Doc premise falsified (verified against source, not assumed):** the
+  scout doc's §4 called the "wall shattered" print
+  (`STRINGID_THEWALLSHATTERED`) "doubles-only... dead in L50 singles (max
+  value 1, branch guards on `>= 2`)". This misses that `Cmd_attackanimation`
+  (`battle_script_commands.c:1786/1789`) *also* increments
+  `gBattleScripting.animTurn`/`.animTargetsHit` by 1 on its own success
+  path, running *between* `removelightscreenreflect` and the second
+  `jumpifbyte CMP_LESS_THAN, sB_ANIM_TURN, 2`. So a screens-up hit reaches
+  animTurn 1 (from the clear) -> 2 (from attackanimation), and the guard
+  *does* fire — the print is reachable in singles whenever Brick Break
+  actually shatters a screen. Confirmed live: an integration test running
+  the real committed script (screens-up vs screens-down, both through
+  controller-ack/scheduler-progress driving) shows the message event firing
+  only in the screens-up case, matching this corrected reading. This also
+  means `removelightscreenreflect`'s `animTurn` write is not purely
+  presentational as the doc framed it — it also gates a real
+  `bicbyte gMoveResultFlags, MOVE_RESULT_MISSED | MOVE_RESULT_DOESNT_AFFECT_FOE`
+  branch (clearing a stale Levitate-immunity miss flag whenever a screen
+  breaks). Both already-generic opcodes (`jumpifbyte`/`bicbyte`) handle this
+  correctly once `removelightscreenreflect`'s write is correct — no extra
+  registration work was needed, just the doc's own rationale was overstated.
+- **Test:** `battleScriptHitChainOpcode.test.ts` (+30 tests): dmgtolevel/
+  psywavedamageeffect/typecalc2 unit coverage (draw-count-pinned RNG
+  sequences computed against this engine's own LCG, not the oracle's —
+  independently verifies the same rejection-sampling algorithm the doc's
+  live ledger exercises) + full-script integration for Seismic Toss and
+  both single-draw/multi-draw Psywave cases through
+  `BattleScript_HitFromAtkAnimation`. `battleScriptScreensWeatherOrchestration.test.ts`
+  (+21 tests incl. new helpers): removelightscreenreflect unit coverage
+  (clears both/one/neither, targets the opposing side not the attacker's
+  own) + the screens-up/screens-down Brick Break integration described
+  above, walking through `BattleScript_BrickBreakDoHit` and 6 more opcodes
+  into `datahpupdate`, confirming HP actually drops (proving the
+  typecalc-then-typecalc2 double-call shape resolves end to end).
+- **Census:** `npx tsx tools/report/executable-frontier-census.ts` —
+  **effects 90 -> 93/214** (+3, exactly as predicted), **moves 186 ->
+  190/355** (+4: Seismic Toss + Night Shade + Psywave + Brick Break),
+  **Factory-L50 unweighted 148 -> 152/276** (+4), **weighted 1788 ->
+  1846/2957** (+58, exactly matching the doc's own prediction: LEVEL_DAMAGE
+  weight 10 + PSYWAVE weight 2 + BRICK_BREAK weight 46). `EFFECT_COUNTER`/
+  `EFFECT_MIRROR_COAT` correctly remain `blocked-on-opcodes` — untouched,
+  per brief. All 28 ground-truth validation checks still pass (no new
+  false-positive class found this session, unlike entry 473's).
+- **Next:** **Counter/Mirror Coat prerequisite restated** (the brief's own
+  explicit out-of-scope item, not attempted): registering
+  `COUNTERDAMAGECALCULATOR`/`MIRRORCOATDAMAGECALCULATOR` needs two
+  data-model additions first, not just opcode dispatch — (1)
+  `gProtectStructs[].physicalBattlerId`/`.specialBattlerId` have no home in
+  `BattleScriptSpecialStatus`/`BattleScriptRulesBattlerBase` (only
+  `physicalDmg`/`specialDmg` are tracked today), so a registered opcode
+  would have nothing correct to read for retaliation-target selection; (2)
+  the per-turn `TurnValuesCleanUp(FALSE)` `ProtectStruct`-wide clear
+  (`battle_main.c:4857-4874`) is unmodeled, so without it a stale
+  `physicalDmg`/`physicalBattlerId` from an old turn could arm a
+  retaliation forever. Both belong to whichever step lands
+  `COUNTERDAMAGECALCULATOR`, not bolted on separately. Otherwise: doc's own
+  out-of-scope Follow-Me/double-battle redirect branch (§6, structurally
+  unreachable at L50 singles); the census's still-open `SETEFFECTPRIMARY`
+  dispatch-classification blind spot (entry 473's finding, not re-touched).
+- **Notes:** stayed in scope — no Counter/Mirror Coat data-model work, no
+  factory-AI files, no ENDTURN/END3 files, no status-cluster src files
+  (status-cluster's own registration from entry 473 coexists cleanly;
+  `applySetMoveEffect` untouched, as scoped), no seam/animation files,
+  `docs/fixed-damage-cluster-ground-truth.md` and its verify script
+  read/run only (untouched), no ROADMAP/ISSUES edits. No PAPERCUT — the
+  scout doc's source citations were precise enough that every opcode
+  registered cleanly; the one real surprise (attackanimation's own
+  animTurn increment making "wall shattered" reachable in singles) came
+  from reading the C source directly, which the brief explicitly asked for
+  ("verify each claim against the C source yourself").
+
+---
 ## 473 — Primary status-move opcode cluster registered: EFFECT_SLEEP/TOXIC/POISON/PARALYZE/CONFUSE all executable (doc's own scout finding, `docs/status-cluster-ground-truth.md`, fully executed this session)
 
 - **Side merge (same round, supervisor-verified PASS live from the worktree
@@ -272,99 +393,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   PAPERCUT — the design doc's own prototype (`battleScriptCallbackStack.ts`)
   and its source citations were precise enough that wiring took one clean
   pass with no rework.
-
----
-## 471 — Seventh + eighth CheckViability handler pairs ported: AI_CBM_DefenseDown/AI_CV_DefenseDown + AI_CBM_SpDefDown/AI_CV_SpDefDown (doc §15/§16, mandatory + stretch both landed)
-
-- **Side merge (same round, supervisor-verified PASS live from the worktree
-  + green on the merged tree):** primary status-move opcode cluster
-  prep-scout banked (branch `worker/side-20260726-120123`, merged, worktree
-  removed) — `docs/status-cluster-ground-truth.md` +
-  `tools/probe/verify-status-cluster-ground-truth.ts` (PASS ×2 worker,
-  + once by the supervisor) + paralyze/sleep mechanicLab fixtures.
-  **Decisive census correction:** the census's named opcode set
-  (SETEFFECTPRIMARY + 4 jump opcodes) only fully unlocks EFFECT_SLEEP —
-  TOXIC/POISON/PARALYZE/CONFUSE additionally need `Cmd_jumpifability`
-  widened past its LIQUID_OOZE-only tuple
-  (`battleScriptIngrainLeechSeedWrapOpcode.ts:183-193`, supervisor-verified)
-  to IMMUNITY/LIMBER/OWN_TEMPO, and JUMPIFSTATUS2 widened for
-  STATUS2_CONFUSION — the census Caveats' "registered opcode, narrow-input
-  barrier" blind spot confirmed live. RNG ledgers pinned: Thunder Wave = 1
-  draw (accuracy only); Sleep Powder = accuracy + `(Random()&3)+2` duration
-  matching the existing sleep-decrement convention. All cluster opcodes
-  classified (a)-portable. Merged tree: **223 files / 2846 tests + build
-  green.**
-
-- **State:** tree green at **223 files / 2846 tests** (+0 files/+65 tests
-  over entry 470's merged 222/2805 — no new files, existing CheckBadMove/
-  CheckViability/ScoredDecision test files widened in place), build green
-  (`tsc -b && vite build`). Ratchet **6/6** unmoved (`factoryAiCheckBadMove.ts`/
-  `factoryAiCheckViability.ts` aren't ratchet-tracked — same precedent as
-  every prior CBM/CV port). Three commits (`e58c48d` port, `865e32e` unit
-  tests, `4a3c034` engine reproduction), each green.
-  `tools/probe/verify-factory-ai-checkviability-ground-truth.ts`: **ALL
-  PASS**, run before touching source (confirmed the side lane's banked
-  §15/§16 fixtures already held) and again after (oracle-only assertions,
-  unaffected by an engine-side port either way).
-- **Did:** ported both remaining mandatory-priority CBM-blocked pairs per
-  `docs/factory-ai-checkviability-ground-truth.md` §15/§16 — both handlers'
-  CBM half (`AI_CBM_DefenseDown`/`AI_CBM_SpDefDown`, `data/battle_ai_scripts.s
-  :283-285`/`:296-298`) is a bare MIN_STAT_STAGE gate that `goto`s straight
-  into the ALREADY-ported shared `CheckIfAbilityBlocksStatChange` tail
-  (`:308-312`, reused unchanged from entry 469's AttackDown port, not
-  duplicated) — factored as `runCbmStatDownViaSharedTail` in
-  `factoryAiCheckBadMove.ts` since the two handlers are byte-for-byte
-  identical modulo which stat stage they read. Both handlers' CV half
-  (`AI_CV_DefenseDown`/`AI_CV_SpDefDown`, `:1124-1134`/`:1186-1196`) share an
-  identical 3-gate/1-draw-site shape — Gate A (opponent's OWN hp<70,
-  unconditional reach into the draw site) and Gate B (target's OWN stat
-  stage>3, only checked if Gate A is false, skips the draw site) are two
-  DIFFERENT PATHS INTO THE SAME roll, not independent branches; Gate C
-  (target's OWN hp>70) is an orthogonal always-reached fallthrough that
-  stacks with the draw site's own -2 — factored as `runCvStatDown` in
-  `factoryAiCheckViability.ts`. Widened `FactoryAiCheckBadMoveTarget` (+
-  `defStage`/`spDefStage`) and `FactoryAiCheckViabilityBattler` (same two
-  fields, both sides) and plumbed them through `factoryAiDecisionPolicy.ts`'s
-  CBM-target/CV-attacker/CV-target construction from
-  `view.*.statStages.def`/`.spDef` (those fields already existed on
-  `FactoryAiScoredBattlerView`, just unwired until now). Pair (2)
-  (SpDefDown) landed in the same rung as pair (1) rather than as a separate
-  stretch step — the shared-helper factoring made it near-zero marginal
-  work once pair (1)'s shape was in place, exactly as the brief predicted.
-  Updated the two pre-existing "still barriers every other reachable
-  handler" pass-through examples from `EFFECT_DEFENSE_DOWN`/`MOVE_TAIL_WHIP`
-  (no longer unsupported) to `EFFECT_HAZE`/`MOVE_HAZE`.
-- **Test:** 28 new Tier-1 tests across `factoryAiCheckBadMove.test.ts`
-  (32→38: MIN_STAT_STAGE short-circuit + both table-entry variants, an
-  ambiguous two-ability target reaching the shared tail for exactly 2 draws,
-  known-Clear-Body/single-ability-White-Smoke short-circuits, one block per
-  handler) and `factoryAiCheckViability.test.ts` (81→99: Gate A/B as
-  distinct paths into the identical draw site, both roll outcomes, Gate C's
-  independent fallthrough, and a combined test proving the draw site's -2
-  and Gate C's -2 are NOT mutually exclusive, one block per handler) + 12
-  new engine-reproduction tests in `factoryAiScoredDecision.test.ts`
-  (38→50): Anorith (Battle Armor, single ability)/Machamp (Guts, single
-  ability) — the exact §13.2/§15.2 species pairing reused verbatim — reach
-  (Anorith at the doc's own live-verified 22/120=18% seed 1 / 30/120=25%
-  seed 99 endpoints, Gate A true) vs. control (120/120, Gate A false + Gate
-  B true at neutral stage) through the REAL mask-7 dispatcher: reach yields
-  exactly 4 identical check-viability draws (one per identical
-  `MOVE_LEER`/`MOVE_FAKE_TEARS` slot), control yields zero, zero CBM/
-  TryToFaint draws throughout (single-ability target keeps CBM's
-  shared-tail `get_ability` guess free), both always pick the dispatch move.
-- **Next:** further CBM+CV pairs from the blocked-17 priority list (doc's
-  own audit); `END3` registration (architectural, needs its own design
-  look, currently another worker's territory); ENDTURN doc §5 slice 5
-  (Liechi/Salac/Petaya stat-up berries, `REMOVEITEM`-unblocked per entry
-  470); remaining blocked-on-opcodes census rows.
-- **Notes:** one real assembly-reading gotcha beyond the doc's own prose:
-  Gate A and Gate B in `AI_CV_DefenseDown`/`AI_CV_SpDefDown` are NOT two
-  independent preconditions gating the SAME effect the way AttackDown's own
-  Gate A/Gate C do — they're two different jump targets that both land on
-  the identical draw site (Gate A jumps straight there; Gate B's own
-  fallthrough, when false, lands there too) — worth spelling out explicitly
-  in code comments since a naive per-gate boolean-AND port would have
-  silently required BOTH gates true to reach the roll, which is wrong (Gate
-  B is only ever consulted when Gate A is false in the first place). No
-  PAPERCUT this session.
-
