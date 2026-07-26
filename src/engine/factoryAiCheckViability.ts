@@ -85,9 +85,6 @@ export type FactoryAiCheckViabilityBattler = Readonly<{
   isFirstTurn: number;
 }>;
 
-/** Adds the real (not guessed) ability `AI_CV_HighCrit`'s Levitate/Ground short-circuit reads -- target-only, matching `factoryAiTryToFaint.ts`'s own convention. */
-export type FactoryAiCheckViabilityTarget = FactoryAiCheckViabilityBattler & Readonly<{ ability: string }>;
-
 export type FactoryAiCheckViabilityDraw =
   | Readonly<{
     ordinal: number;
@@ -330,21 +327,20 @@ const AI_EFFECTIVENESS_X4 = 160;
  * `ModulateDmgByType2`'s own shape) the real hit chain uses, then remaps
  * the 4 magic-number results a STAB'd double-type application produces
  * (120/240/30/15) back onto the four named `AI_EFFECTIVENESS_x*` constants
- * -- exactly `Cmd_if_type_effectiveness`'s own 4 `if` remaps. Levitate+Ground
- * skips the type loop entirely (`TypeCalc`'s own short-circuit) -- the
- * STAB'd baseline (40 or 60) is returned unremapped, matching none of the
- * four named constants either (same fallthrough as neutral/immune).
+ * -- exactly `Cmd_if_type_effectiveness`'s own 4 `if` remaps. (Unlike
+ * `factoryAiTryToFaint.ts`'s sibling probe, this one does NOT port
+ * `TypeCalc`'s Levitate+Ground short-circuit: all 10 of `AI_CV_HighCrit`'s
+ * real triggering moves -- `EFFECT_HIGH_CRITICAL`/`BLAZE_KICK`/
+ * `POISON_TAIL`, doc §11.2 -- are Fighting/Grass/Water/Normal/Flying/Fire/
+ * Poison typed, never Ground, so that branch is structurally unreachable
+ * here and is left unported rather than carried as dead code.)
  */
 function classifyHighCritEffectiveness(
   attackerTypes: readonly [string, string],
   moveType: string,
   targetTypes: readonly [string, string],
-  targetAbility: string,
 ): number {
   const stabbed = applyStab(AI_EFFECTIVENESS_X1, attackerTypes, moveType);
-  if (targetAbility === "ABILITY_LEVITATE" && moveType === "TYPE_GROUND") {
-    return stabbed;
-  }
   let value = applyTypeEffectiveness(stabbed, moveType, targetTypes, TYPE_EFFECTIVENESS).damage;
   if (value === 120) value = AI_EFFECTIVENESS_X2; // Super effective STAB.
   if (value === 240) value = AI_EFFECTIVENESS_X4;
@@ -389,16 +385,10 @@ function runCvHighCrit(input: Readonly<{
   attackerTypes: readonly [string, string];
   moveType: string;
   targetTypes: readonly [string, string];
-  targetAbility: string;
   drawOrdinalStart: number;
   reasonPrefix: string;
 }>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
-  const classified = classifyHighCritEffectiveness(
-    input.attackerTypes,
-    input.moveType,
-    input.targetTypes,
-    input.targetAbility,
-  );
+  const classified = classifyHighCritEffectiveness(input.attackerTypes, input.moveType, input.targetTypes);
   if (classified === AI_EFFECTIVENESS_X0_25 || classified === AI_EFFECTIVENESS_X0_5) {
     return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: 0 });
   }
@@ -430,7 +420,7 @@ export function runCheckViability(input: Readonly<{
   rng: BattleRngState;
   moveId: number;
   attacker: FactoryAiCheckViabilityBattler;
-  target: FactoryAiCheckViabilityTarget;
+  target: FactoryAiCheckViabilityBattler;
   drawOrdinalStart: number;
   reasonPrefix: string;
 }>): FactoryAiCheckViabilityResult {
@@ -479,7 +469,6 @@ export function runCheckViability(input: Readonly<{
       attackerTypes: input.attacker.types,
       moveType: move.type,
       targetTypes: input.target.types,
-      targetAbility: input.target.ability,
       drawOrdinalStart: input.drawOrdinalStart,
       reasonPrefix: input.reasonPrefix,
     });

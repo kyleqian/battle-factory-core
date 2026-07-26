@@ -773,7 +773,6 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
           speedStage: view.target.statStages.speed,
           types: view.target.types,
           isFirstTurn: view.target.isFirstTurn,
-          ability: view.target.ability,
         },
         drawOrdinalStart: draws.length + 1,
         reasonPrefix: `slot-${slot}-check-viability`,

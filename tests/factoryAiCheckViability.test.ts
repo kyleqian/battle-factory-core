@@ -10,14 +10,13 @@ const MOVE_TOXIC = 92; // EFFECT_TOXIC -- has an entry (AI_CV_Toxic, not ported)
 
 // Neutral speed/stage battlers for the tests above that don't exercise
 // AI_CV_SpeedDown -- the describe block below owns that handler's own battlers.
-// types/isFirstTurn/ability are irrelevant to these no-table-entry/barrier
-// cases but required by the widened battler/target shape (entry 466).
+// types/isFirstTurn are irrelevant to these no-table-entry/barrier cases but
+// required by the widened battler shape (entry 466).
 const NEUTRAL_BATTLER = Object.freeze({
   speed: 100,
   speedStage: 6,
   types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
   isFirstTurn: 0,
-  ability: "ABILITY_NONE",
 });
 
 function run(rng: { value: number; calls: number }, moveId: number) {
@@ -72,7 +71,6 @@ describe("AI_CV_SpeedDown (docs/factory-ai-checkviability-ground-truth.md §6)",
   const SPEED_BATTLER_EXTRAS = Object.freeze({
     types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
     isFirstTurn: 0,
-    ability: "ABILITY_NONE",
   });
   const FASTER_USER = Object.freeze({ speed: 120, speedStage: 6, ...SPEED_BATTLER_EXTRAS }); // AI_USER faster -> target NOT faster
   const SLOWER_USER = Object.freeze({ speed: 5, speedStage: 6, ...SPEED_BATTLER_EXTRAS }); // AI_USER slower -> target faster
