@@ -18,6 +18,8 @@ const MOVE_BODY_SLAM = 34;
 const MOVE_THUNDERBOLT = 85;
 const MOVE_GROWL = 45;
 const MOVE_SNORE = 173;
+const MOVE_STRING_SHOT = 81; // EFFECT_SPEED_DOWN
+const MOVE_COTTON_SPORE = 178; // EFFECT_SPEED_DOWN_2 -- same handler, different table entry
 
 function run(moveId: number, target: FactoryAiCheckBadMoveTarget, rngValue = 249_678_687) {
   return runCheckBadMovePreamble({
@@ -174,5 +176,114 @@ describe("AI_CheckBadMove universal preamble (docs/factory-ai-ground-truth.md §
     // neither matches Rock Head/Lightning Rod); Thunderbolt: 0 (x0 short-circuit).
     expect(totalDraws).toBe(6);
     expect(scores).toEqual([0, 0, 0, -10]);
+  });
+});
+
+// data/battle_ai_scripts.s:287-312, docs/factory-ai-checkviability-ground-truth.md's
+// proven CBM+CV pair (§6 is the CV half; this is the CBM half).
+describe("AI_CBM_SpeedDown + CheckIfAbilityBlocksStatChange (docs/factory-ai-checkviability-ground-truth.md §6)", () => {
+  // Marowak's own realAbility is ambiguous (Rock Head / Lightning Rod, two
+  // distinct abilities) -- it still draws once for the universal preamble's
+  // OWN soundproof guess regardless of this handler, so the "zero total
+  // draws" claim below needs a single-ability target (Shuckle, this doc's
+  // own §6 fixture species) to isolate the SpeedDown branch's own zero-RNG
+  // MIN_STAT_STAGE short-circuit cleanly.
+  const SHUCKLE: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 213,
+    types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+    knownAbility: null,
+    realAbility: "ABILITY_STURDY",
+    speedStage: 6,
+  });
+
+  it("scores -10 with zero draws when the target's Speed stage is already MIN_STAT_STAGE", () => {
+    const atMinSpeed: FactoryAiCheckBadMoveTarget = { ...SHUCKLE, speedStage: 0 };
+    const result = run(MOVE_STRING_SHOT, atMinSpeed);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("EFFECT_SPEED_DOWN_2 hits the identical MIN_STAT_STAGE short-circuit", () => {
+    const atMinSpeed: FactoryAiCheckBadMoveTarget = { ...SHUCKLE, speedStage: 0 };
+    const result = run(MOVE_COTTON_SPORE, atMinSpeed);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("scores -10 with zero draws for a Speed Boost target (if_ability, zero-RNG check_ability, not a get_ability guess)", () => {
+    const speedBoost: FactoryAiCheckBadMoveTarget = {
+      species: 302, // SPECIES_NINJASK: Speed Boost is its only ability
+      types: ["TYPE_BUG", "TYPE_FLYING"],
+      knownAbility: null,
+      realAbility: "ABILITY_SPEED_BOOST",
+      speedStage: 6,
+    };
+    const result = run(MOVE_STRING_SHOT, speedBoost);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("if_ability's own quirk: an UNKNOWN two-ability target never registers a check_ability match, even when one of its two abilities is the one being asked about", () => {
+    // SPECIES_YANMA: Speed Boost / Compound Eyes, both unobserved -- real
+    // source behavior (Cmd_check_ability's abilityDummyVariable branch) is
+    // that check_ability can never return true for such a target, so the
+    // MIN_STAT_STAGE/Speed-Boost short-circuits both miss and the shared
+    // CheckIfAbilityBlocksStatChange tail's own get_ability guess runs.
+    const ambiguousSpeedBoost: FactoryAiCheckBadMoveTarget = {
+      species: 193,
+      types: ["TYPE_BUG", "TYPE_FLYING"],
+      knownAbility: null,
+      realAbility: "ABILITY_SPEED_BOOST",
+      speedStage: 6,
+    };
+    const result = run(MOVE_STRING_SHOT, ambiguousSpeedBoost);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    // One draw for the universal preamble's own soundproof guess, one for
+    // CheckIfAbilityBlocksStatChange's get_ability guess -- neither can ever
+    // land on Clear Body/White Smoke for this species, so scoreDelta stays 0
+    // regardless of the coin flip, but both draws are real.
+    expect(result.draws).toHaveLength(2);
+  });
+
+  it("scores -10 when CheckIfAbilityBlocksStatChange's get_ability guess is Clear Body (known ability, zero draws)", () => {
+    const knownClearBody: FactoryAiCheckBadMoveTarget = {
+      species: 72, // SPECIES_TENTACOOL: Clear Body / Liquid Ooze
+      types: ["TYPE_WATER", "TYPE_POISON"],
+      knownAbility: "ABILITY_CLEAR_BODY",
+      realAbility: "ABILITY_CLEAR_BODY",
+      speedStage: 6,
+    };
+    const result = run(MOVE_STRING_SHOT, knownClearBody);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("scores -10 when CheckIfAbilityBlocksStatChange's get_ability guess is White Smoke (known ability, zero draws)", () => {
+    const knownWhiteSmoke: FactoryAiCheckBadMoveTarget = {
+      species: 321, // SPECIES_TORKOAL: White Smoke is its only ability
+      types: ["TYPE_FIRE", "TYPE_FIRE"],
+      knownAbility: "ABILITY_WHITE_SMOKE",
+      realAbility: "ABILITY_WHITE_SMOKE",
+      speedStage: 6,
+    };
+    const result = run(MOVE_STRING_SHOT, knownWhiteSmoke);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("still barriers every other reachable CBM handler untouched by this narrowing (pass-through, EFFECT_ATTACK_DOWN)", () => {
+    const result = run(MOVE_GROWL, { ...MAROWAK, knownAbility: "ABILITY_ROCK_HEAD" });
+    expect(result).toEqual({
+      kind: "unsupported-branch",
+      barrier: "factory-ai-check-bad-move",
+      effect: "EFFECT_ATTACK_DOWN",
+      moveId: MOVE_GROWL,
+    });
   });
 });

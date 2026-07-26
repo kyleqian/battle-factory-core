@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   chooseFactoryAiScoredDecision,
   submitFactoryAiDecision,
+  type FactoryAiScoredBattlerView,
+  type FactoryAiScoredTargetView,
   type FactoryAiScoredView,
 } from "../src/engine/factoryAiDecisionPolicy.ts";
 import {
@@ -70,6 +72,8 @@ const MOVE_SURF = 57;
 const MOVE_ROCK_SLIDE = 157;
 const MOVE_BODY_SLAM = 34;
 const MOVE_THUNDERBOLT = 85;
+const MOVE_STRING_SHOT = 81; // EFFECT_SPEED_DOWN
+const MOVE_SPLASH = 150; // EFFECT_SPLASH -- 0 power, no CBM or CV table entry
 
 function scoredView(
   moves: readonly [number, number, number, number],
@@ -210,6 +214,92 @@ describe("Factory AI mask 7 (CheckBadMove + TryToFaint + CheckViability), scenar
         request: fourSlotRequest,
         rng: { value: 0x1234_5678, calls: 0 },
       })).toThrow(/check-viability barrier/);
+  });
+});
+
+// docs/factory-ai-checkviability-ground-truth.md §6's two banked fixtures
+// (tools/battle-lab/mechanic-factory-ai-cv-speeddown-{opponent-faster,
+// opponent-slower}-off.json), reproduced through the REAL mask-7 dispatcher
+// end to end -- the first CheckViability handler-body port, verified the
+// same way entry 460's port verified the three earlier mask-7 scenarios.
+//
+// The doc's own control move (MOVE_GROWL) can't be reused here: its effect
+// (EFFECT_ATTACK_DOWN) is a DIFFERENT CBM-blocked handler that isn't ported
+// (AI_CBM_AttackDown), so it would hit an unrelated check-bad-move barrier
+// before this scenario ever reached AI_CV_SpeedDown. MOVE_SPLASH substitutes
+// cleanly: same 0-power/ties-most-powerful property the doc's own design
+// section requires, but EFFECT_SPLASH has NO entry in either the CBM or the
+// CV dispatch table at all (unconditionally 0 score/0 draws in every battle
+// state, not just this one) -- so it isolates AI_CV_SpeedDown's own causal
+// contribution without depending on any unported handler's state-dependent
+// short-circuit.
+//
+// This does not replay the live oracle's exact pre-decision RNG state for
+// turn 1 (docs/factory-ai-checkviability-ground-truth.md §6's own
+// "Not yet banked" note: turn 1's decision is baked into rngValue before
+// frame 0 is ever captured, and the caller-attribution offset that would let
+// a fresh construction start from the SAME LCG state as the live fixture
+// hasn't been run for these two fixtures). What IS reproduced, matching the
+// doc's own tables exactly: the categorical turn-1 pick (never slot 0 when
+// the opponent/AI is faster, always slot 0 when it's slower) and the
+// doc-predicted policy-own draw shape (CBM/TryToFaint contribute zero draws
+// in both fixtures -- Dugtrio's real ability ARENA_TRAP and Shuckle's only
+// ability STURDY both short-circuit every get_ability call zero-RNG, and
+// neither move's type pair ever hits the x4-effective gate TryToFaint's own
+// `if_random_less_than 80` sits behind; AI_CV_SpeedDown alone draws 0 in the
+// deterministic branch and exactly 1 in the probabilistic branch), across
+// two different construction seeds each, matching "same turn-1 pick" cross-seed
+// stability the same way the doc's own two-seed table does.
+describe("AI_CV_SpeedDown mask-7 fixture reproduction (docs/factory-ai-checkviability-ground-truth.md §6)", () => {
+  const MOVE_SPEED_DOWN_MOVESET = [MOVE_STRING_SHOT, MOVE_SPLASH, MOVE_SPLASH, MOVE_SPLASH] as const;
+
+  const DUGTRIO_STATS = Object.freeze({
+    types: ["TYPE_GROUND", "TYPE_GROUND"] as const,
+    attack: 80, defense: 50, spAttack: 50, spDefense: 70, speed: 120, level: 50,
+    statStages: NEUTRAL_STAGES,
+  });
+  const SHUCKLE_STATS = Object.freeze({
+    types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+    attack: 10, defense: 230, spAttack: 10, spDefense: 230, speed: 5, level: 50,
+    statStages: NEUTRAL_STAGES,
+  });
+  function dugtrioTarget(): FactoryAiScoredTargetView {
+    return Object.freeze({ species: 51, ...DUGTRIO_STATS, hp: 100, ability: "ABILITY_ARENA_TRAP", knownAbility: null });
+  }
+  function shuckleTarget(): FactoryAiScoredTargetView {
+    return Object.freeze({ species: 213, ...SHUCKLE_STATS, hp: 100, ability: "ABILITY_STURDY", knownAbility: null });
+  }
+  function speedDownView(attacker: FactoryAiScoredBattlerView, target: FactoryAiScoredTargetView): FactoryAiScoredView {
+    return Object.freeze({
+      schema: "factory-ai-scored-view/v1",
+      mode: "factory-level-50-singles",
+      active: Object.freeze({ aiBattler: 1 as const, targetBattler: 0 as const }),
+      factory: Object.freeze({ levelMode: 0 as const, battleMode: 0 as const, factoryWinStreak: 28, trainerOpponentId: 222 }),
+      moves: MOVE_SPEED_DOWN_MOVESET,
+      attacker,
+      target,
+    });
+  }
+
+  it.each([1, 99])("opponent-faster fixture (Dugtrio AI vs Shuckle target), seed %i: never picks String Shot, 5 total draws, zero CBM/TryToFaint/CV draws for the -3 branch", (seed) => {
+    const view = speedDownView(DUGTRIO_STATS, shuckleTarget());
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+    expect(result.trace.draws).toHaveLength(4 /* setup */ + 1 /* tie */);
+    expect(result.trace.slotScores.map((s) => s.finalScore)).toEqual([97, 100, 100, 100]);
+    expect(result.trace.bestMoveSlots).toEqual([1, 2, 3]);
+    expect(result.submission.decision).toMatchObject({ kind: "use-move" });
+    if (result.submission.decision.kind === "use-move") {
+      expect(result.submission.decision.moveSlot).not.toBe(0);
+    }
+  });
+
+  it.each([1, 99])("opponent-slower fixture (Shuckle AI vs Dugtrio target), seed %i: always picks String Shot, 6 total draws (the if_random_less_than 70 roll lands >= 70)", (seed) => {
+    const view = speedDownView(SHUCKLE_STATS, dugtrioTarget());
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+    expect(result.trace.draws).toHaveLength(4 /* setup */ + 1 /* CV roll */ + 1 /* tie */);
+    expect(result.trace.slotScores.map((s) => s.finalScore)).toEqual([102, 100, 100, 100]);
+    expect(result.trace.bestMoveSlots).toEqual([0]);
+    expect(result.submission.decision).toMatchObject({ kind: "use-move", moveSlot: 0 });
   });
 });
 
