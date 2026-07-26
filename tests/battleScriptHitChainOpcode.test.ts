@@ -1698,18 +1698,31 @@ describe("production seteffectwithchance (Cmd_seteffectwithchance) dispatch", ()
   });
 
   describe("(b) unsupported-branch barriers", () => {
-    it("halts on MOVE_EFFECT_SLEEP (its own script uses Cmd_seteffectprimary, not this dispatch)", () => {
+    it("SLEEP: certain-bit dispatch also reaches applySetMoveEffect's SLEEP case (registered via Cmd_seteffectprimary; the switch itself is dispatch-path-agnostic), drawing the duration roll", () => {
       const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_SLEEP | MOVE_EFFECT_CERTAIN });
       const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
-      expect(result.kind).toBe("halted");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 2273 });
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_MoveEffectSleep"));
+      expect(result.state.rng.calls).toBe(1);
+      const status1 = result.state.rulesContext.battlers[1]!.status1;
+      expect(status1).toBeGreaterThanOrEqual(2);
+      expect(status1).toBeLessThanOrEqual(5);
     });
 
-    it("halts on MOVE_EFFECT_TOXIC (its own script uses Cmd_seteffectprimary, not this dispatch)", () => {
+    it("TOXIC: certain-bit dispatch statuses the target and calls BattleScript_MoveEffectToxic", () => {
       const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_TOXIC | MOVE_EFFECT_CERTAIN });
       const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
-      expect(result.kind).toBe("halted");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 2427 });
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_MoveEffectToxic"));
+      expect(result.state.rulesContext.battlers[1]!.status1).toBe(1 << 7);
+    });
+
+    it("TOXIC: Immunity blocks with the certain bit set (primary||certain gate)", () => {
+      const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_TOXIC | MOVE_EFFECT_CERTAIN }, { ability: ABILITY_IMMUNITY });
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_PSNPrevention"));
+      expect(result.state.rulesContext.battlers[1]!.status1).toBe(0);
     });
 
     it("halts on a still-unmodeled family-B byte (UPROAR, > PRIMARY_STATUS_MOVE_EFFECT): status2/misc switch barrier remains for every byte but CONFUSION/FLINCH", () => {

@@ -37,6 +37,7 @@ import { createBattleScriptDamagingWeatherOpcodeHandlers } from "./battleScriptD
 import { createBattleScriptTryCastformDataChangeOpcodeHandlers } from "./battleScriptTryCastformDataChangeOpcode.ts";
 import { createBattleScriptIngrainLeechSeedWrapOpcodeHandlers } from "./battleScriptIngrainLeechSeedWrapOpcode.ts";
 import { createBattleScriptRemoveitemOpcodeHandlers } from "./battleScriptRemoveitemOpcode.ts";
+import { createBattleScriptStatusPrimaryOpcodeHandlers } from "./battleScriptStatusPrimaryOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -2090,6 +2091,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptRemoveitemOpcodeHandlers(program, {
       resolveBattlerForBattleScript: resolveRulesBattlerForBattleScript,
     }),
+    ...createBattleScriptStatusPrimaryOpcodeHandlers(program, resolveRulesBattlerForBattleScript),
   });
 }
 

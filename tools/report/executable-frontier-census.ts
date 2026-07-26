@@ -405,8 +405,22 @@ const validationChecks: Array<() => void> = [
   () => requireExecutable("EFFECT_BURN_HIT"),
   () => requireExecutable("EFFECT_FREEZE_HIT"),
   () => requireExecutable("EFFECT_PARALYZE_HIT"),
-  () => requireBlockedMentioning("EFFECT_SLEEP", "SETEFFECTPRIMARY"), // PROGRESS 444: still-unregistered Cmd_seteffectprimary
-  () => requireBlockedMentioning("EFFECT_TOXIC", "SETEFFECTPRIMARY"),
+  // Primary status-move opcode cluster registration
+  // (docs/status-cluster-ground-truth.md): Cmd_seteffectprimary +
+  // Cmd_jumpifstatus/Cmd_jumpiftype/Cmd_jumpifsideaffecting/
+  // Cmd_jumpifcantmakeasleep are now registered, so all five of this
+  // cluster's effects flip to executable by this tool's own static
+  // opcode-reachability walk. EFFECT_TOXIC/POISON/PARALYZE/CONFUSE's
+  // additional real-correctness dependency on Cmd_jumpifability/
+  // Cmd_jumpifstatus2's concrete-value widening (also done this session,
+  // battleScriptIngrainLeechSeedWrapOpcode.ts/battleScriptStatbuffchangeOpcode.ts)
+  // is exactly the "registered opcode, narrow-input barrier" gap this tool's
+  // own Caveats section already documents as invisible to this walk.
+  () => requireExecutable("EFFECT_SLEEP"),
+  () => requireExecutable("EFFECT_TOXIC"),
+  () => requireExecutable("EFFECT_POISON"),
+  () => requireExecutable("EFFECT_PARALYZE"),
+  () => requireExecutable("EFFECT_CONFUSE"),
   // MOVE_EFFECT_CONFUSION/MOVE_EFFECT_FLINCH registration (this session):
   // zero new opcodes for either, so both flip straight to executable.
   () => requireExecutable("EFFECT_CONFUSE_HIT"),

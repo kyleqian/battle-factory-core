@@ -1,4 +1,98 @@
 ---
+## 470 — ENDTURN_ITEMS1 registered: REMOVEITEM opcode + Leftovers/8 cure berries/White Herb (doc §5 slice 4's mandatory rung), live-verified
+
+- **Side merge (same round, supervisor-verified in-worktree + on the merged
+  tree):** END3 design scout banked (branch `worker/side-20260726-112551`,
+  merged, worktree removed) — `docs/end3-design.md` + UNWIRED
+  `src/engine/battleScriptCallbackStack.ts` prototype (5 Tier-1 tests).
+  Load-bearing design facts, supervisor re-verified against
+  `battle_script_commands.c:3967-3973`: `Cmd_end3` pops BOTH stacks
+  (script cursor via `BattleScriptPop()` + `gBattleMainFunc` from
+  `battleCallbackStack`); for the end-turn abilities the popped cursor is
+  observably dead — the real resume point is `turnEffectsTracker` state —
+  while the mid-script (Intimidate `ON_SWITCHIN`) case is a live
+  continuation; stack depth caps at 1 (`if (effect) return` short-circuit).
+  Registration checklist for the main-lane END3 step: `docs/end3-design.md`
+  §4. Two endturn-doc §1b imprecisions corrected (no
+  `gBattlescriptCurrInstrStackPtr` symbol; `end3` restores
+  `BattleTurnPassed`, not a re-entry point). Merged tree: **223 files /
+  2810 tests + build green.**
+
+- **State:** tree green at **222 files / 2805 tests** (+1 file/+24 tests
+  over entry 469's merged 221/2781), build green (`tsc -b && vite build`).
+  Ratchet **6/6**
+  (`executableFrontierRatchet.test.ts`) — one new pinned entry,
+  `battleScriptRemoveitemOpcode.ts: 1` (moved deliberately, named in both
+  commit messages): `Cmd_removeitem`'s only unmodeled branch is a selector
+  resolving to no live battler role, reachability-tested. The
+  `runItemsTick` case-barriers for RESTORE_HP/RESTORE_PP/the 3 stretch
+  stat-up berries/the 9 zero-Factory-carrier hold effects do **not** add to
+  that ratchet (same `"case-barrier"` shape as the pre-existing
+  NIGHTMARES/CURSE/THRASH/DISABLE/TAUNT guards, not a machine-level
+  `unsupportedBranch(...)` call). Two commits (`1c8e015` opcode,
+  `d8e161a` orchestration wiring), both green; a third (docs/fixtures only)
+  follows this entry. `npx tsx tools/report/executable-frontier-census.ts`:
+  unchanged (79/214 effects, 163/355 moves, 128/276 Factory-L50 moves,
+  1573/2957 weighted, 25/25 checks) — this slice is end-turn breadth, not
+  move-effect breadth, exactly as the brief anticipated.
+- **Did:** read `docs/endturn-abilities-items-ground-truth.md` in full,
+  then (1) registered `B_SCR_OP_REMOVEITEM`/`Cmd_removeitem`
+  (`battleScriptRemoveitemOpcode.ts`, all 13 concrete call sites eagerly
+  validated), widening the shared `GetBattlerForBattleScript` resolver for
+  `BS_SCRIPTING` (the existing non-nullable `scriptingBattler` field) so
+  `PLAYANIMATION`/`UPDATESTATUSICON` work inside the new scripts too, plus
+  registering `B_ANIM_HELD_ITEM_EFFECT` and `gBerryEffectStringIds`; (2)
+  wired `ENDTURN_ITEMS1` (`runItemsTick` in
+  `battleEndTurnOrchestration.ts`) for Leftovers (heals floor(maxHP/16)
+  capped, persists), White Herb (resets every below-neutral stat stage to
+  6, consumes), and the 8 zero-RNG cure berries (Cheri/Pecha/Rawst/Aspear/
+  Chesto/Persim/Lum/Mental Herb — each clears its own status1/status2 bit,
+  syncs the party status1 mirror the same way `bumpToxicCounter` already
+  does, consumes the item) — `runTickScript` reused unchanged, zero new
+  control-flow work, matching the doc's own "no new opcode beyond
+  REMOVEITEM" finding. Every other real switch case barriers on its own
+  genuine trigger condition rather than falling through: RESTORE_HP
+  (`hp <= maxHP/2`)/RESTORE_PP (a real zero-PP move exists) are Factory-legal
+  but out of this slice's ten; the 3 stretch stat-up berries
+  (Liechi/Salac/Petaya, doc §5 slice 5) and the 9 zero-Factory-carrier cases
+  (4 stat/crit berries + 5 confuse berries, doc §2b) barrier on mere
+  possession since their own HP-threshold gate needs an unmodeled per-item
+  `holdEffectParam` table no live carrier will ever exercise.
+  **Did NOT reach slice 5** (stretch) — time went to the mandatory ten plus
+  live verification instead; see Next.
+- **Test:** 20 new Tier-1 tests in `battleEndTurnOrchestration.test.ts`
+  (12→32 total: one per cure berry via a small table-driven block,
+  Leftovers/White Herb fire+no-fire pairs, and one reachability test per
+  (b) guard including a "does NOT barrier below the gate" negative for
+  RESTORE_HP) + 4 new tests in `battleScriptRemoveitemOpcode.test.ts` (both
+  selectors, plus the opcode's own barrier) + 2 existing
+  `battleScriptRulesContext.test.ts` tests widened in place (BS_SCRIPTING
+  added to the selector map/composition count, 95→96) — net +24 tests, +1
+  file, matching the measured 2781→2805.
+  **Live oracle verification (both re-run clean against `battle-scene-off`,
+  numbers in doc §6):** `tools/battle-lab/mechanic-endturn-items1-leftovers-off.json`
+  (LOTAD holding Leftovers vs. a real MAGIKARP Pound: frame 528→529 the hit
+  lands -11, frame 849→850 Leftovers heals +7 = floor(115/16), item
+  unchanged at 200 throughout, `rngValue` bit-identical at the exact heal
+  boundary) and `tools/battle-lab/mechanic-endturn-items1-cure-par-off.json`
+  (same LOTAD holding Cheri Berry vs. a real Thunder Wave: `status1` clears
+  612→613, item clears 750→751 — confirms source's real two-step timing,
+  the C-side status clear fires synchronously ahead of the queued script's
+  animation/message tail that ends in `removeitem` — `rngValue` bit-identical
+  across the ENTIRE 491→751 window, zero draws).
+- **Next:** doc §5 slice 5 (Liechi/Salac/Petaya, `STATBUFFCHANGE` already
+  registered, label-lookup-only addition once `REMOVEITEM` exists — this
+  session's own `runItemsTick` dispatch is ready to extend, just add the
+  three cases where the stretch barrier bucket currently sits and drop them
+  from that `Set`). `ENDTURN_ITEMS2` stays correctly unregistered (its real
+  trigger needs Yawn/Thrash's own end-turn cases, doc's own finding).
+  `END3` registration (Speed Boost/Rain Dish/Shed Skin, doc slices 1-3)
+  remains the next architectural gap after that.
+- **Notes:** stayed in scope — no END3, no slices 1-3, no ENDTURN_ITEMS2, no
+  factory-AI files, no ground-truth content edits beyond the short §6
+  registration-status addendum the brief allowed. No PAPERCUT this session.
+
+---
 ## 469 — Sixth CheckViability handler pair ported: AI_CBM_AttackDown + AI_CV_AttackDown, the first CBM-blocked pair (entry 468's own "Next" item, per doc §14)
 
 - **Side merge (same round, supervisor-verified ALL PASS live on the merged

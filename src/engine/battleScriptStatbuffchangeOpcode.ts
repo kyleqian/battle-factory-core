@@ -288,8 +288,11 @@ function createPlayanimationOpcodeHandler(
 
 /** include/constants/battle.h:216 -- STATUS2_SUBSTITUTE = 1 << 24. The DOWN family's Substitute early-out is the only concrete jumpifstatus2 value this registration needs (matches BATTLE_SCRIPT_STATUS2_SUBSTITUTE elsewhere; declared locally to avoid an import cycle through battleScriptRulesContext.ts, which itself imports this module). */
 const STATUS2_SUBSTITUTE = 1 << 24;
+/** include/constants/battle.h:129 -- STATUS2_CONFUSION = 1<<0 | 1<<1 | 1<<2. EFFECT_CONFUSE's own already-confused check (docs/status-cluster-ground-truth.md); matches BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_CONFUSION elsewhere, declared locally for the same import-cycle reason as STATUS2_SUBSTITUTE above. */
+const STATUS2_CONFUSION = 0x7;
 const JUMPIFSTATUS2_VALUES: ReadonlyMap<string, number> = new Map([
   ["STATUS2_SUBSTITUTE", STATUS2_SUBSTITUTE],
+  ["STATUS2_CONFUSION", STATUS2_CONFUSION],
 ]);
 
 function createJumpifstatus2OpcodeHandler(

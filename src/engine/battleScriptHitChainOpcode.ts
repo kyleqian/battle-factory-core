@@ -157,6 +157,8 @@ const HOLD_EFFECT_ID_STICK = 66;
 const STATUS3_CHARGED_UP = 1 << 9;
 /** STATUS1_BURN (include/constants/battle.h:118). */
 const STATUS1_BURN = 1 << 4;
+/** STATUS1_TOXIC_POISON (include/constants/battle.h:121). */
+const STATUS1_TOXIC_POISON = 1 << 7;
 
 const B_MSG_MISSED = 0;
 const B_MSG_PROTECTED = 1;
@@ -221,6 +223,7 @@ const STATUS1_FREEZE = 1 << 5;
 const STATUS1_PARALYSIS = 1 << 6;
 /** include/abilities.h. */
 const ABILITY_CLOUD_NINE = 13;
+const ABILITY_INSOMNIA = 15;
 const ABILITY_LIMBER = 7;
 const ABILITY_IMMUNITY = 17;
 const ABILITY_SHIELD_DUST = 19;
@@ -228,7 +231,9 @@ const ABILITY_OWN_TEMPO = 20;
 const ABILITY_MAGMA_ARMOR = 40;
 const ABILITY_WATER_VEIL = 41;
 const ABILITY_INNER_FOCUS = 39;
+const ABILITY_SOUNDPROOF = 43;
 const ABILITY_AIR_LOCK = 77;
+const ABILITY_VITAL_SPIRIT = 72;
 /** include/constants/battle.h:190 -- SetMoveEffect's ability-vs-move message discriminant. */
 const HITMARKER_STATUS_ABILITY_EFFECT = 1 << 13;
 /** include/constants/battle.h:214. */
@@ -276,6 +281,12 @@ const PRINTFROMTABLE_TABLES: Readonly<Record<string, readonly string[]>> = Objec
     "STRINGID_DEFENDERSSTATFELL",
     "STRINGID_STATSWONTDECREASE",
     "STRINGID_EMPTYSTRING3",
+  ]),
+  /** battle_message.c:999-1004 -- BattleScript_CantMakeAsleep's own table (Cmd_jumpifcantmakeasleep, docs/status-cluster-ground-truth.md). */
+  gUproarAwakeStringIds: Object.freeze([
+    "STRINGID_PKMNCANTSLEEPINUPROAR2",
+    "STRINGID_UPROARKEPTPKMNAWAKE",
+    "STRINGID_PKMNSTAYEDAWAKEUSING",
   ]),
   /** battle_message.c:1208-1212 -- BattleScript_BerryCureChosenStatusRet's own table, shared by HOLD_EFFECT_CURE_STATUS (Lum) and HOLD_EFFECT_CURE_ATTRACT (Mental Herb) (docs/endturn-abilities-items-ground-truth.md §1c). */
   gBerryEffectStringIds: Object.freeze([
@@ -328,10 +339,13 @@ const PRINTFROMTABLE_TABLES: Readonly<Record<string, readonly string[]>> = Objec
 });
 
 const MOVE_EFFECT_LABEL_BY_BYTE: Readonly<Record<number, string>> = Object.freeze({
+  /** sMoveEffectBS_Ptrs[MOVE_EFFECT_SLEEP] (:628) -- reached only via Cmd_seteffectprimary's own status1-write tail below, never the generic STATUS1_BIT_BY_MOVE_EFFECT_BYTE path (sleep's status1 write is a drawn turn count, not a fixed bit). */
+  [MOVE_EFFECT_SLEEP]: "BattleScript_MoveEffectSleep",
   [MOVE_EFFECT_POISON]: "BattleScript_MoveEffectPoison",
   [MOVE_EFFECT_BURN]: "BattleScript_MoveEffectBurn",
   [MOVE_EFFECT_FREEZE]: "BattleScript_MoveEffectFreeze",
   [MOVE_EFFECT_PARALYSIS]: "BattleScript_MoveEffectParalysis",
+  [MOVE_EFFECT_TOXIC]: "BattleScript_MoveEffectToxic",
 });
 
 const STATUS1_BIT_BY_MOVE_EFFECT_BYTE: Readonly<Record<number, number>> = Object.freeze({
@@ -339,6 +353,7 @@ const STATUS1_BIT_BY_MOVE_EFFECT_BYTE: Readonly<Record<number, number>> = Object
   [MOVE_EFFECT_BURN]: STATUS1_BURN,
   [MOVE_EFFECT_FREEZE]: STATUS1_FREEZE,
   [MOVE_EFFECT_PARALYSIS]: STATUS1_PARALYSIS,
+  [MOVE_EFFECT_TOXIC]: STATUS1_TOXIC_POISON,
 });
 
 /**
@@ -1923,6 +1938,7 @@ function applySetMoveEffect(
   context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
   rulesContext: BattleScriptRulesContext,
   rawEffectByte: number,
+  primary: boolean,
   certain: boolean,
 ): BattleScriptCommandTransition<BattleScriptRulesContext> {
   const affectsUser = (rawEffectByte & MOVE_EFFECT_AFFECTS_USER) !== 0;
@@ -1947,14 +1963,19 @@ function applySetMoveEffect(
     { rulesContext: baseRulesContext },
   );
 
-  // Shield Dust (:2253-2255) -- primary is always FALSE at this call site.
-  if (effectBattlerState.ability === ABILITY_SHIELD_DUST && !abilityEffectHitmarkerSet && effectByte <= 9) {
+  // Shield Dust (:2253-2255) -- dead on the primary path (Cmd_seteffectprimary
+  // always passes primary=TRUE); only Cmd_seteffectwithchance's secondary-effect
+  // callers (primary=FALSE) can still hit this early-out.
+  if (effectBattlerState.ability === ABILITY_SHIELD_DUST && !abilityEffectHitmarkerSet && !primary && effectByte <= 9) {
     return passThrough();
   }
-  // Safeguard (:2257-2259).
+  // Safeguard (:2257-2259) -- same primary-path dead-code shape. This cluster's
+  // own Safeguard gate is each script's own jumpifsideaffecting call, which
+  // already ran before seteffectprimary; see createJumpifsideaffectingOpcodeHandler.
   if (
     (baseRulesContext.sideStatuses[effectBattlerState.side] & SIDE_STATUS_SAFEGUARD) !== 0
     && !abilityEffectHitmarkerSet
+    && !primary
     && effectByte <= 7
   ) {
     return passThrough();
@@ -1992,26 +2013,6 @@ function applySetMoveEffect(
       2522,
     );
   }
-  if (effectByte === MOVE_EFFECT_SLEEP) {
-    return unsupportedBranch(
-      context,
-      "MOVE_EFFECT_SLEEP is not reachable via Cmd_seteffectwithchance in the real topology "
-        + "(BattleScript_EffectSleep calls Cmd_seteffectprimary instead); this engine still "
-        + "barriers a directly-constructed byte",
-      "battle_script_commands.c",
-      2273,
-    );
-  }
-  if (effectByte === MOVE_EFFECT_TOXIC) {
-    return unsupportedBranch(
-      context,
-      "MOVE_EFFECT_TOXIC is not reachable via Cmd_seteffectwithchance in the real topology "
-        + "(BattleScript_EffectToxic calls Cmd_seteffectprimary instead); this engine still "
-        + "barriers a directly-constructed byte",
-      "battle_script_commands.c",
-      2427,
-    );
-  }
   if (effectByte === 0) {
     // sStatusFlagsForMoveEffects[0] matches no switch case (:2271-2475) -- statusChanged
     // stays FALSE, the real function falls straight through to the no-op tail.
@@ -2045,14 +2046,42 @@ function applySetMoveEffect(
 
   let statusChanged: boolean;
   switch (effectByte) {
+    case MOVE_EFFECT_SLEEP: {
+      // (:2274-2298) -- uproar check (skipped entirely if the sleeping
+      // candidate itself has Soundproof), then status1/ability re-checks.
+      // Provably dead on this cluster's only real topology (each of the five
+      // scripts' own jumpifcantmakeasleep/jumpifstatus already filtered these
+      // cases before seteffectprimary ever runs) -- ported anyway for
+      // SetMoveEffect fidelity, matching every other family-A case's full
+      // port. CancelMultiTurnMoves(gEffectBattler) on the success path is not
+      // modeled, matching this same function's pre-existing MOVE_EFFECT_FREEZE
+      // case (also a CancelMultiTurnMoves call site) already omitting it.
+      let uproarActive = false;
+      if (effectBattlerState.ability !== ABILITY_SOUNDPROOF) {
+        const { battlersCount } = baseRulesContext.battleTopology;
+        for (let i = 0; i < battlersCount; i += 1) {
+          if ((baseRulesContext.battlers[i as BattleScriptBattlerId].status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_UPROAR) !== 0) {
+            uproarActive = true;
+            break;
+          }
+        }
+      }
+      statusChanged = !(
+        effectBattlerState.status1 !== 0
+        || uproarActive
+        || effectBattlerState.ability === ABILITY_VITAL_SPIRIT
+        || effectBattlerState.ability === ABILITY_INSOMNIA
+      );
+      break;
+    }
     case MOVE_EFFECT_POISON: {
-      if (effectBattlerState.ability === ABILITY_IMMUNITY && certain) {
+      if (effectBattlerState.ability === ABILITY_IMMUNITY && (primary || certain)) {
         return preventionCall("BattleScript_PSNPrevention", true, ABILITY_IMMUNITY);
       }
       if (
         (isBattlerOfType(effectBattlerState, "TYPE_POISON") || isBattlerOfType(effectBattlerState, "TYPE_STEEL"))
         && abilityEffectHitmarkerSet
-        && certain
+        && (primary || certain)
       ) {
         return preventionCall("BattleScript_PSNPrevention", false);
       }
@@ -2065,10 +2094,10 @@ function applySetMoveEffect(
       break;
     }
     case MOVE_EFFECT_BURN: {
-      if (effectBattlerState.ability === ABILITY_WATER_VEIL && certain) {
+      if (effectBattlerState.ability === ABILITY_WATER_VEIL && (primary || certain)) {
         return preventionCall("BattleScript_BRNPrevention", true, ABILITY_WATER_VEIL);
       }
-      if (isBattlerOfType(effectBattlerState, "TYPE_FIRE") && abilityEffectHitmarkerSet && certain) {
+      if (isBattlerOfType(effectBattlerState, "TYPE_FIRE") && abilityEffectHitmarkerSet && (primary || certain)) {
         return preventionCall("BattleScript_BRNPrevention", false);
       }
       statusChanged = !(
@@ -2090,7 +2119,7 @@ function applySetMoveEffect(
     }
     case MOVE_EFFECT_PARALYSIS: {
       if (effectBattlerState.ability === ABILITY_LIMBER) {
-        if (certain) {
+        if (primary || certain) {
           return preventionCall("BattleScript_PRLZPrevention", true, ABILITY_LIMBER);
         }
         statusChanged = false;
@@ -2099,40 +2128,90 @@ function applySetMoveEffect(
       }
       break;
     }
+    case MOVE_EFFECT_TOXIC: {
+      if (effectBattlerState.ability === ABILITY_IMMUNITY && (primary || certain)) {
+        return preventionCall("BattleScript_PSNPrevention", true, ABILITY_IMMUNITY);
+      }
+      if (
+        (isBattlerOfType(effectBattlerState, "TYPE_POISON") || isBattlerOfType(effectBattlerState, "TYPE_STEEL"))
+        && abilityEffectHitmarkerSet
+        && (primary || certain)
+      ) {
+        return preventionCall("BattleScript_PSNPrevention", false);
+      }
+      if (effectBattlerState.status1 !== 0) {
+        statusChanged = false;
+        break;
+      }
+      if (isBattlerOfType(effectBattlerState, "TYPE_POISON") || isBattlerOfType(effectBattlerState, "TYPE_STEEL")) {
+        // (:2477-2480) gMoveResultFlags |= MOVE_RESULT_DOESNT_AFFECT_FOE, no
+        // status1 write. Provably dead here -- BattleScript_EffectToxic's own
+        // jumpiftype(POISON)/jumpiftype(STEEL) already redirect to
+        // BattleScript_NotAffected before seteffectprimary ever runs -- ported
+        // for SetMoveEffect fidelity only.
+        statusChanged = false;
+        break;
+      }
+      statusChanged = effectBattlerState.ability !== ABILITY_IMMUNITY;
+      break;
+    }
     default:
       throw new Error(`applySetMoveEffect: unreachable MOVE_EFFECT_BYTE ${effectByte}`);
   }
 
   if (!statusChanged) return passThrough();
 
-  const statusBit = STATUS1_BIT_BY_MOVE_EFFECT_BYTE[effectByte]!;
-  const newStatus1 = (effectBattlerState.status1 | statusBit) >>> 0;
   const multistringChooser = abilityEffectHitmarkerSet ? B_MSG_STATUSED_BY_ABILITY : B_MSG_STATUSED;
   const nextHitMarker = abilityEffectHitmarkerSet ? (hitMarker & ~HITMARKER_STATUS_ABILITY_EFFECT) >>> 0 : hitMarker;
-  const updatedContext = withBattler(baseRulesContext, effectBattler, { status1: newStatus1 });
-  const finalRulesContext = Object.freeze({
-    ...updatedContext,
-    hitMarker: nextHitMarker,
-    multistringChooser,
-    party: withBattleScriptPartyMemberStatus1(
-      updatedContext.party,
-      effectBattlerState.side,
-      effectBattlerState.partyIndex,
-      newStatus1,
-    ),
-  });
   const label = MOVE_EFFECT_LABEL_BY_BYTE[effectByte]!;
   const programCounter = resolveRequiredLabelProgramCounter(context.program, label);
-  return transitionBattleScriptCommand(
-    context,
-    Object.freeze({ kind: "call", programCounter }),
-    {
-      rulesContext: finalRulesContext,
-      events: Object.freeze([
-        Object.freeze({ kind: "set-battler-status-data" as const, battler: effectBattler, status1: newStatus1 }),
-      ]),
-    },
-  );
+
+  function finishStatusWrite(
+    newStatus1: number,
+    rng?: BattleScriptRngState,
+  ): BattleScriptCommandTransition<BattleScriptRulesContext> {
+    const updatedContext = withBattler(baseRulesContext, effectBattler, { status1: newStatus1 });
+    const finalRulesContext = Object.freeze({
+      ...updatedContext,
+      hitMarker: nextHitMarker,
+      multistringChooser,
+      party: withBattleScriptPartyMemberStatus1(
+        updatedContext.party,
+        effectBattlerState.side,
+        effectBattlerState.partyIndex,
+        newStatus1,
+      ),
+    });
+    return transitionBattleScriptCommand(
+      context,
+      Object.freeze({ kind: "call", programCounter }),
+      {
+        rulesContext: finalRulesContext,
+        ...(rng === undefined ? {} : { rng }),
+        events: Object.freeze([
+          Object.freeze({ kind: "set-battler-status-data" as const, battler: effectBattler, status1: newStatus1 }),
+        ]),
+      },
+    );
+  }
+
+  if (effectByte === MOVE_EFFECT_SLEEP) {
+    // (:2480-2482) STATUS1_SLEEP_TURN((Random() & 3) + 2) -- the raw status1
+    // byte IS the turn counter (battle.h:116), not a fixed bit OR'd in like
+    // every other family-A member.
+    const { rng, randomValue } = drawBattleScriptRng(
+      context.state.rng,
+      context.instruction,
+      "SetMoveEffect sleep duration ((Random() & 3) + 2)",
+    );
+    const sleepTurns = (randomValue & 3) + 2;
+    const newStatus1 = (effectBattlerState.status1 | sleepTurns) >>> 0;
+    return finishStatusWrite(newStatus1, rng);
+  }
+
+  const statusBit = STATUS1_BIT_BY_MOVE_EFFECT_BYTE[effectByte]!;
+  const newStatus1 = (effectBattlerState.status1 | statusBit) >>> 0;
+  return finishStatusWrite(newStatus1);
 }
 
 /**
@@ -2404,7 +2483,7 @@ function createSeteffectwithchanceOpcodeHandler(): BattleScriptOpcodeHandler<Bat
 
     if (certain && !noEffect) {
       const effectByte = (rulesContext.moveEffectByte & ~MOVE_EFFECT_CERTAIN) >>> 0;
-      return finalizeSeteffectwithchance(applySetMoveEffect(context, rulesContext, effectByte, true));
+      return finalizeSeteffectwithchance(applySetMoveEffect(context, rulesContext, effectByte, false, true));
     }
 
     const attacker = requireBattlerRole(rulesContext, "attacker");
@@ -2431,7 +2510,7 @@ function createSeteffectwithchanceOpcodeHandler(): BattleScriptOpcodeHandler<Bat
         state: Object.freeze({ ...context.state, rng }),
       });
       return finalizeSeteffectwithchance(
-        applySetMoveEffect(contextAfterRoll, rulesContext, rulesContext.moveEffectByte, percentChance >= 100),
+        applySetMoveEffect(contextAfterRoll, rulesContext, rulesContext.moveEffectByte, false, percentChance >= 100),
       );
     }
 
@@ -2440,6 +2519,20 @@ function createSeteffectwithchanceOpcodeHandler(): BattleScriptOpcodeHandler<Bat
       Object.freeze({ kind: "advance" }),
       { rulesContext: Object.freeze({ ...rulesContext, moveEffectByte: 0, multiHitEffect: 0 }), rng },
     );
+  };
+}
+
+/**
+ * Cmd_seteffectprimary (battle_script_commands.c:2941-2944): `SetMoveEffect
+ * (TRUE, 0)` -- zero operands, always primary=TRUE/certain=FALSE. The effect
+ * byte itself was already written into moveEffectByte by the preceding
+ * setmoveeffect (setbyte cEFFECT_CHOOSER, ...) instruction, already
+ * generically registered (docs/status-cluster-ground-truth.md).
+ */
+function createSeteffectprimaryOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
+  return (context) => {
+    const rulesContext = context.state.rulesContext;
+    return applySetMoveEffect(context, rulesContext, rulesContext.moveEffectByte, true, false);
   };
 }
 
@@ -2890,6 +2983,7 @@ export function createBattleScriptHitChainOpcodeHandlers(
   install("B_SCR_OP_CRITMESSAGE", createCritmessageOpcodeHandler(ports.isControllerIdle, ports.prepareMessage));
   install("B_SCR_OP_RESULTMESSAGE", createResultmessageOpcodeHandler(ports.isControllerIdle, ports.prepareMessage));
   install("B_SCR_OP_SETEFFECTWITHCHANCE", createSeteffectwithchanceOpcodeHandler());
+  install("B_SCR_OP_SETEFFECTPRIMARY", createSeteffectprimaryOpcodeHandler());
   install("B_SCR_OP_PRINTFROMTABLE", createPrintfromtableOpcodeHandler(ports.isControllerIdle, ports.prepareMessage));
   install(
     "B_SCR_OP_UPDATESTATUSICON",

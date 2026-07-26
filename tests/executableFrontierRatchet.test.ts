@@ -86,7 +86,13 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // opcode since it is a distinct call site, not a narrowing of the existing
   // one. Named, reachability-tested (tests/battleScriptHitChainOpcode.test.ts
   // "(b) unsupported-branch barrier: Focus Band, only when actually held").
-  ["src/engine/battleScriptHitChainOpcode.ts", 24],
+  // 24 -> 22 (primary status-move opcode cluster registration,
+  // docs/status-cluster-ground-truth.md): Cmd_seteffectprimary is now
+  // registered and applySetMoveEffect's MOVE_EFFECT_SLEEP/MOVE_EFFECT_TOXIC
+  // barriers retire for real -- both effect bytes are now live switch cases
+  // (SLEEP's Uproar/ability re-check + drawn duration, TOXIC's status1 write)
+  // reached from BattleScript_EffectSleep/_EffectToxic via that opcode.
+  ["src/engine/battleScriptHitChainOpcode.ts", 22],
   ["src/engine/battleScriptAttackCancelerOpcode.ts", 5],
   ["src/engine/battleScriptMoveEndOpcode.ts", 7],
   ["src/engine/battleScriptJumpifbyteOpcode.ts", 1],
@@ -198,6 +204,15 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // (BS_SCRIPTING/BS_ATTACKER) resolve for real on every ENDTURN_ITEMS1 tick
   // this registration drives.
   ["src/engine/battleScriptRemoveitemOpcode.ts", 1],
+  // Primary status-move opcode cluster registration
+  // (docs/status-cluster-ground-truth.md): Cmd_jumpifstatus/Cmd_jumpiftype/
+  // Cmd_jumpifsideaffecting each narrow to a small named concrete-value set
+  // (all values these five scripts and the wider committed program's other
+  // concrete call sites actually use); an operand outside that set is the
+  // one barrier per opcode (3 total). Cmd_jumpifcantmakeasleep has no
+  // narrowing at all -- every one of its 3 concrete call sites is the same
+  // shape, so it contributes zero barriers.
+  ["src/engine/battleScriptStatusPrimaryOpcode.ts", 3],
 ]);
 
 function recordingImportsIn(file: string): string[] {

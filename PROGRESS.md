@@ -11,6 +11,145 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > not abandoned). See the matching note in SUPERVISOR.md.
 
 ---
+## 473 — Primary status-move opcode cluster registered: EFFECT_SLEEP/TOXIC/POISON/PARALYZE/CONFUSE all executable (doc's own scout finding, `docs/status-cluster-ground-truth.md`, fully executed this session)
+
+- **State:** tree green at **225 files / 2883 tests** (+1 file/+30 tests
+  over entry 472's 224/2853 — 1 new production module
+  `battleScriptStatusPrimaryOpcode.ts` + 1 new test file), build green
+  (`tsc -b && vite build`). Ratchet: `battleScriptHitChainOpcode.ts`'s
+  barrier count moved **24 -> 22** (SLEEP/TOXIC's own barriers retired for
+  real, now live switch cases); new module
+  `battleScriptStatusPrimaryOpcode.ts` pinned at **3** barriers (malformed
+  jumpifstatus/jumpiftype/jumpifsideaffecting operands — none reachable via
+  any real committed call site today, all covered). Both moves named in
+  `tests/executableFrontierRatchet.test.ts`. Verify script
+  (`tools/probe/verify-status-cluster-ground-truth.ts`, oracle-only, READ/RUN
+  only): **PASS x2** (before touching source, and again at the end) —
+  unaffected by the engine change either way, as expected.
+- **Did:** registered the doc's full blocker set per its own (a)/(b)
+  classification, all portable:
+  1. `battleScriptHitChainOpcode.ts`: `applySetMoveEffect` gained a real
+     `primary: boolean` parameter (was `certain` only). The Shield-Dust/
+     Safeguard generic early-outs now correctly gate on `!primary` (dead on
+     the primary path, matching source `:2253-2259` — this cluster's own
+     Safeguard block is each script's own `jumpifsideaffecting`, which
+     already ran before `seteffectprimary`). `MOVE_EFFECT_SLEEP`/
+     `MOVE_EFFECT_TOXIC`'s old `unsupportedBranch` barriers deleted; both
+     are now real switch cases: SLEEP ports the Uproar-loop +
+     Insomnia/Vital-Spirit recheck (dead on this cluster's real topology
+     per the doc, ported anyway for `SetMoveEffect` fidelity, matching
+     every other family-A case) and writes `(Random() & 3) + 2` as the raw
+     status1 turn count (not a fixed OR'd bit, per `STATUS1_SLEEP_TURN`);
+     TOXIC mirrors POISON's Immunity/type-immunity gates then writes
+     `STATUS1_TOXIC_POISON`. `Cmd_seteffectprimary` registered as a thin
+     wrapper (`SetMoveEffect(TRUE, 0)`) reading `rulesContext.moveEffectByte`
+     directly (already populated by the generic `setbyte cEFFECT_CHOOSER`
+     opcode). Added the `gUproarAwakeStringIds` table to `printfromtable`'s
+     registered set so `BattleScript_CantMakeAsleep`'s own message resolves
+     instead of barriering.
+  2. New file `battleScriptStatusPrimaryOpcode.ts`: `Cmd_jumpifstatus`
+     (STATUS1_SLEEP/POISON/BURN/FREEZE/PARALYSIS/TOXIC_POISON/ANY, plus
+     arbitrary `|`-combinations — covers all 21 concrete call sites in the
+     committed program, not just this cluster's 5), `Cmd_jumpiftype`
+     (all 18 real TYPE_* tokens via the existing `isBattlerOfType` helper),
+     `Cmd_jumpifsideaffecting` (SIDE_STATUS_SAFEGUARD, the one concrete
+     value all 10 call sites use), `Cmd_jumpifcantmakeasleep` (+
+     `UproarWakeUpCheck`'s bounded battler loop, reusing the pattern
+     already ported in `battleScriptActionAdmission.ts:1344-1357` — zero
+     narrowing needed, all 3 concrete call sites are the same shape).
+  3. `battleScriptIngrainLeechSeedWrapOpcode.ts`: `Cmd_jumpifability`
+     widened from LIQUID_OOZE-only to a 4-value map (+ IMMUNITY/LIMBER/
+     OWN_TEMPO) — the scout's decisive finding, not named in the original
+     supervisor opcode list but required for 4 of the 5 effects.
+  4. `battleScriptStatbuffchangeOpcode.ts`: `JUMPIFSTATUS2_VALUES` widened
+     with `STATUS2_CONFUSION` (EFFECT_CONFUSE's own already-confused check).
+  5. Walked each of the five scripts' full topology from its literal entry —
+     every branch is now (a)-complete; no new silent barriers introduced in
+     this cluster's own reachable set.
+- **Test:** new `tests/battleScriptStatusPrimaryOpcode.test.ts` (29 tests):
+  unit coverage for all 4 new jump opcodes (jump/no-jump/unsupported-branch
+  each, direct handler invocation since no real committed instruction
+  reaches an out-of-scope operand value), plus full-committed-script
+  integration runs for all 5 effects from their literal `BattleScript_Effect*`
+  entry: Thunder Wave (status1 == STATUS1_PARALYSIS, exactly 1 RNG draw,
+  matching the doc's live ledger), Sleep Powder (status1 == (Random()&3)+2,
+  exactly 2 draws), Toxic/Poison (status1 == STATUS1_TOXIC_POISON/POISON),
+  Confuse Ray (status2 CONFUSION counter 2-5, 2 draws) — plus per-effect
+  ability-immunity blocks (Limber/Immunity/Own Tempo, each confirmed at the
+  *script's own* `jumpifability` gate, `BattleScript_LimberProtected` etc.,
+  not `SetMoveEffect`'s internal recheck, which stays dead code on this
+  path as the doc predicted), Safeguard block (after the accuracy roll),
+  already-statused early-outs, and Toxic-vs-Poison-type redirect
+  (`BattleScript_NotAffected`, before any status write). Also updated 2
+  pre-existing tests in `battleScriptHitChainOpcode.test.ts` that asserted
+  the now-retired SLEEP/TOXIC barriers (rewritten to assert real dispatch
+  instead) and 1 in `battleScriptRulesContext.test.ts` (opcode-handler
+  count 97 -> 102).
+- **Census:** `npx tsx tools/report/executable-frontier-census.ts` —
+  **effects 79 -> 90/214** (+11, doc predicted +5), **moves 163 -> 186/355**
+  (+23), **Factory-L50 unweighted 128 -> 148/276** (+20), **weighted
+  1573 -> 1788/2957** (+215). Updated the tool's own validation checks
+  (`EFFECT_SLEEP`/`EFFECT_TOXIC` from `requireBlockedMentioning(...
+  SETEFFECTPRIMARY)` to `requireExecutable`; added the same for
+  `EFFECT_POISON`/`EFFECT_PARALYZE`/`EFFECT_CONFUSE`, previously
+  unasserted) — this file is not doc/verify-script territory, it's the
+  census tool itself, in scope and required to keep the regen from
+  crashing.
+  - **Shortfall/overshoot accounting (per the brief's own precedent):** the
+    +11 is *more* than the doc's +5 prediction, not less — 6 **bonus**
+    effects flipped as a side effect of `SETEFFECTPRIMARY`/`JUMPIFSTATUS`
+    now being opcode-registered (`EFFECT_RAGE`, `EFFECT_MEAN_LOOK`,
+    `EFFECT_NIGHTMARE`, `EFFECT_WILL_O_WISP`, `EFFECT_SNORE`,
+    `EFFECT_FACADE`). Verified by reading their scripts: **`EFFECT_SNORE`
+    and `EFFECT_FACADE` are real** (pure `jumpifstatus` reads, no
+    `seteffectprimary` involved). **`EFFECT_RAGE` (MOVE_EFFECT_RAGE=30),
+    `EFFECT_MEAN_LOOK` (MOVE_EFFECT_PREVENT_ESCAPE=32), and
+    `EFFECT_NIGHTMARE` (MOVE_EFFECT_NIGHTMARE=33) are census FALSE
+    POSITIVES** — all three call `seteffectprimary` with a family-B effect
+    byte `applySetMoveEffect`'s switch does not handle (only
+    CONFUSION/FLINCH/WRAP/the stat table are modeled there), so they will
+    actually halt via the pre-existing `unsupportedBranch` at runtime
+    despite showing "executable". **`EFFECT_WILL_O_WISP` is also a false
+    positive** — its own `jumpifability BS_TARGET, ABILITY_WATER_VEIL,
+    BattleScript_WaterVeilPrevents` call halts unconditionally (Water Veil
+    is not in this session's 4-value widened set), regardless of the
+    actual target's ability. Root cause: the census's `classifySetMoveEffectDispatch`
+    special-case only intercepts `B_SCR_OP_SETEFFECTWITHCHANCE` bindings,
+    never `B_SCR_OP_SETEFFECTPRIMARY` — so for any script reaching
+    `seteffectprimary`, the census's static walk treats the opcode as
+    sufficient and never checks which effect byte it carries. This is the
+    same "registered opcode, narrow-input barrier" blind spot the doc's own
+    Caveats section already documents, now confirmed for a second
+    dispatcher. **Not fixed this session** (out of scope — the brief named
+    5 effects, all 5 are genuinely correct and Tier-1-tested); flagged here
+    precisely so the next census-consuming session doesn't take the +11 at
+    face value. A real follow-up: teach the census's dispatch classifier
+    about `SETEFFECTPRIMARY` the same way it already handles
+    `SETEFFECTWITHCHANCE`.
+- **Next:** doc's own out-of-scope item — EFFECT_CONFUSE's confusion-
+  duration draw was already proven identical to the existing
+  `applyConfusionMoveEffect` secondary-path code (confirmed again this
+  session, zero changes needed). Possible next registration: fix the
+  census's `SETEFFECTPRIMARY` dispatch-classification blind spot (above) so
+  future census runs don't need this kind of manual accounting; or pick up
+  one of the 6 bonus-flipped effects as a real registration target (Rage,
+  Mean Look, Nightmare each need a new family-B `MOVE_EFFECT_*` case in
+  `applySetMoveEffect`; Will-O-Wisp needs `ABILITY_WATER_VEIL` added to
+  `JUMPIFABILITY_VALUES`, which is one line since the map already exists).
+  `ENDTURN_ABILITIES` slice 2 (Shed Skin) and `ENDTURN_ITEMS2` remain the
+  standing end-turn-breadth items from entry 472.
+- **Notes:** stayed in scope — no factory-AI files, no ENDTURN/END3 files
+  beyond nothing (this step never touched end-turn orchestration at all),
+  no seam/animation files, `docs/status-cluster-ground-truth.md` and its
+  verify script read/run only (untouched), no ROADMAP/ISSUES edits. The one
+  deliberate out-of-brief edit: `tools/report/executable-frontier-census.ts`'s
+  own validation checks, required to keep the census regen from crashing
+  after registration — not the ground-truth doc or its verify script. No
+  PAPERCUT — the doc's own source citations (line numbers, exact macro
+  operand shapes) were precise enough that every opcode registered on the
+  first read of `battle_script_commands.c`.
+
+---
 ## 472 — END3 registered + ENDTURN_ABILITIES slice 1 wired: Speed Boost + Rain Dish (doc §5 slice 1 mandatory rung, the standing architectural gap from entries 469-471 finally closed)
 
 - **Side merge (same round, supervisor-verified ALL PASS live from the
@@ -207,98 +346,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   silently required BOTH gates true to reach the roll, which is wrong (Gate
   B is only ever consulted when Gate A is false in the first place). No
   PAPERCUT this session.
-
----
-## 470 — ENDTURN_ITEMS1 registered: REMOVEITEM opcode + Leftovers/8 cure berries/White Herb (doc §5 slice 4's mandatory rung), live-verified
-
-- **Side merge (same round, supervisor-verified in-worktree + on the merged
-  tree):** END3 design scout banked (branch `worker/side-20260726-112551`,
-  merged, worktree removed) — `docs/end3-design.md` + UNWIRED
-  `src/engine/battleScriptCallbackStack.ts` prototype (5 Tier-1 tests).
-  Load-bearing design facts, supervisor re-verified against
-  `battle_script_commands.c:3967-3973`: `Cmd_end3` pops BOTH stacks
-  (script cursor via `BattleScriptPop()` + `gBattleMainFunc` from
-  `battleCallbackStack`); for the end-turn abilities the popped cursor is
-  observably dead — the real resume point is `turnEffectsTracker` state —
-  while the mid-script (Intimidate `ON_SWITCHIN`) case is a live
-  continuation; stack depth caps at 1 (`if (effect) return` short-circuit).
-  Registration checklist for the main-lane END3 step: `docs/end3-design.md`
-  §4. Two endturn-doc §1b imprecisions corrected (no
-  `gBattlescriptCurrInstrStackPtr` symbol; `end3` restores
-  `BattleTurnPassed`, not a re-entry point). Merged tree: **223 files /
-  2810 tests + build green.**
-
-- **State:** tree green at **222 files / 2805 tests** (+1 file/+24 tests
-  over entry 469's merged 221/2781), build green (`tsc -b && vite build`).
-  Ratchet **6/6**
-  (`executableFrontierRatchet.test.ts`) — one new pinned entry,
-  `battleScriptRemoveitemOpcode.ts: 1` (moved deliberately, named in both
-  commit messages): `Cmd_removeitem`'s only unmodeled branch is a selector
-  resolving to no live battler role, reachability-tested. The
-  `runItemsTick` case-barriers for RESTORE_HP/RESTORE_PP/the 3 stretch
-  stat-up berries/the 9 zero-Factory-carrier hold effects do **not** add to
-  that ratchet (same `"case-barrier"` shape as the pre-existing
-  NIGHTMARES/CURSE/THRASH/DISABLE/TAUNT guards, not a machine-level
-  `unsupportedBranch(...)` call). Two commits (`1c8e015` opcode,
-  `d8e161a` orchestration wiring), both green; a third (docs/fixtures only)
-  follows this entry. `npx tsx tools/report/executable-frontier-census.ts`:
-  unchanged (79/214 effects, 163/355 moves, 128/276 Factory-L50 moves,
-  1573/2957 weighted, 25/25 checks) — this slice is end-turn breadth, not
-  move-effect breadth, exactly as the brief anticipated.
-- **Did:** read `docs/endturn-abilities-items-ground-truth.md` in full,
-  then (1) registered `B_SCR_OP_REMOVEITEM`/`Cmd_removeitem`
-  (`battleScriptRemoveitemOpcode.ts`, all 13 concrete call sites eagerly
-  validated), widening the shared `GetBattlerForBattleScript` resolver for
-  `BS_SCRIPTING` (the existing non-nullable `scriptingBattler` field) so
-  `PLAYANIMATION`/`UPDATESTATUSICON` work inside the new scripts too, plus
-  registering `B_ANIM_HELD_ITEM_EFFECT` and `gBerryEffectStringIds`; (2)
-  wired `ENDTURN_ITEMS1` (`runItemsTick` in
-  `battleEndTurnOrchestration.ts`) for Leftovers (heals floor(maxHP/16)
-  capped, persists), White Herb (resets every below-neutral stat stage to
-  6, consumes), and the 8 zero-RNG cure berries (Cheri/Pecha/Rawst/Aspear/
-  Chesto/Persim/Lum/Mental Herb — each clears its own status1/status2 bit,
-  syncs the party status1 mirror the same way `bumpToxicCounter` already
-  does, consumes the item) — `runTickScript` reused unchanged, zero new
-  control-flow work, matching the doc's own "no new opcode beyond
-  REMOVEITEM" finding. Every other real switch case barriers on its own
-  genuine trigger condition rather than falling through: RESTORE_HP
-  (`hp <= maxHP/2`)/RESTORE_PP (a real zero-PP move exists) are Factory-legal
-  but out of this slice's ten; the 3 stretch stat-up berries
-  (Liechi/Salac/Petaya, doc §5 slice 5) and the 9 zero-Factory-carrier cases
-  (4 stat/crit berries + 5 confuse berries, doc §2b) barrier on mere
-  possession since their own HP-threshold gate needs an unmodeled per-item
-  `holdEffectParam` table no live carrier will ever exercise.
-  **Did NOT reach slice 5** (stretch) — time went to the mandatory ten plus
-  live verification instead; see Next.
-- **Test:** 20 new Tier-1 tests in `battleEndTurnOrchestration.test.ts`
-  (12→32 total: one per cure berry via a small table-driven block,
-  Leftovers/White Herb fire+no-fire pairs, and one reachability test per
-  (b) guard including a "does NOT barrier below the gate" negative for
-  RESTORE_HP) + 4 new tests in `battleScriptRemoveitemOpcode.test.ts` (both
-  selectors, plus the opcode's own barrier) + 2 existing
-  `battleScriptRulesContext.test.ts` tests widened in place (BS_SCRIPTING
-  added to the selector map/composition count, 95→96) — net +24 tests, +1
-  file, matching the measured 2781→2805.
-  **Live oracle verification (both re-run clean against `battle-scene-off`,
-  numbers in doc §6):** `tools/battle-lab/mechanic-endturn-items1-leftovers-off.json`
-  (LOTAD holding Leftovers vs. a real MAGIKARP Pound: frame 528→529 the hit
-  lands -11, frame 849→850 Leftovers heals +7 = floor(115/16), item
-  unchanged at 200 throughout, `rngValue` bit-identical at the exact heal
-  boundary) and `tools/battle-lab/mechanic-endturn-items1-cure-par-off.json`
-  (same LOTAD holding Cheri Berry vs. a real Thunder Wave: `status1` clears
-  612→613, item clears 750→751 — confirms source's real two-step timing,
-  the C-side status clear fires synchronously ahead of the queued script's
-  animation/message tail that ends in `removeitem` — `rngValue` bit-identical
-  across the ENTIRE 491→751 window, zero draws).
-- **Next:** doc §5 slice 5 (Liechi/Salac/Petaya, `STATBUFFCHANGE` already
-  registered, label-lookup-only addition once `REMOVEITEM` exists — this
-  session's own `runItemsTick` dispatch is ready to extend, just add the
-  three cases where the stretch barrier bucket currently sits and drop them
-  from that `Set`). `ENDTURN_ITEMS2` stays correctly unregistered (its real
-  trigger needs Yawn/Thrash's own end-turn cases, doc's own finding).
-  `END3` registration (Speed Boost/Rain Dish/Shed Skin, doc slices 1-3)
-  remains the next architectural gap after that.
-- **Notes:** stayed in scope — no END3, no slices 1-3, no ENDTURN_ITEMS2, no
-  factory-AI files, no ground-truth content edits beyond the short §6
-  registration-status addendum the brief allowed. No PAPERCUT this session.
 

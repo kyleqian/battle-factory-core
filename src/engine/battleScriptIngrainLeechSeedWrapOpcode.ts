@@ -158,17 +158,34 @@ function createCopyarrayHandler(): BattleScriptOpcodeHandler<BattleScriptRulesCo
 
 /** include/abilities.h:68. */
 const ABILITY_LIQUID_OOZE = 64;
+/**
+ * include/abilities.h -- widened per docs/status-cluster-ground-truth.md's
+ * scout finding: EFFECT_TOXIC/EFFECT_POISON/EFFECT_PARALYZE/EFFECT_CONFUSE's
+ * own script-level jumpifability calls (Immunity/Limber/Own Tempo) need
+ * these three concrete values in addition to Leech Seed's Liquid Ooze check.
+ */
+const ABILITY_LIMBER = 7;
+const ABILITY_IMMUNITY = 17;
+const ABILITY_OWN_TEMPO = 20;
+const JUMPIFABILITY_VALUES: ReadonlyMap<string, number> = new Map([
+  ["ABILITY_LIQUID_OOZE", ABILITY_LIQUID_OOZE],
+  ["ABILITY_LIMBER", ABILITY_LIMBER],
+  ["ABILITY_IMMUNITY", ABILITY_IMMUNITY],
+  ["ABILITY_OWN_TEMPO", ABILITY_OWN_TEMPO],
+]);
 
 /**
  * `Cmd_jumpifability` (`battle_script_commands.c:3105-3149`), narrowed to the
  * plain `GetBattlerForBattleScript` selector branch (BS_TARGET/BS_ATTACKER --
- * every one of this opcode's 18 concrete call sites uses one of those two,
- * never the BS_ATTACKER_SIDE/BS_NOT_ATTACKER_SIDE `AbilityBattleEffects` side
- * -check branches) and, per the doc's own scope note, the one ability id this
- * slice's own call site (`BattleScript_LeechSeedTurnDrain`'s Liquid Ooze
- * check) needs. `RecordAbilityBattle`/`gBattleScripting.battlerWithAbility`
- * are the same untracked AI-history bookkeeping `Cmd_cleareffectsonfaint`'s
- * own doc comment already established has no reader in this engine's scope.
+ * every one of this opcode's concrete call sites this engine registers uses
+ * one of those two, never the BS_ATTACKER_SIDE/BS_NOT_ATTACKER_SIDE
+ * `AbilityBattleEffects` side-check branches) and, per
+ * docs/status-cluster-ground-truth.md, the four concrete ability ids this
+ * widening covers (Liquid Ooze for Leech Seed, Immunity/Limber/Own Tempo for
+ * the primary status-move cluster). `RecordAbilityBattle`/
+ * `gBattleScripting.battlerWithAbility` are the same untracked AI-history
+ * bookkeeping `Cmd_cleareffectsonfaint`'s own doc comment already established
+ * has no reader in this engine's scope.
  */
 function createJumpifabilityHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
   return (context) => {
@@ -180,22 +197,23 @@ function createJumpifabilityHandler(): BattleScriptOpcodeHandler<BattleScriptRul
       : battlerExpression === "BS_ATTACKER"
         ? rulesContext.selectorRoles.attacker
         : null;
-    if (battler === null || abilityOperand?.expression !== "ABILITY_LIQUID_OOZE") {
+    const abilityId = abilityOperand === undefined ? undefined : JUMPIFABILITY_VALUES.get(abilityOperand.expression);
+    if (battler === null || abilityId === undefined) {
       return unsupportedBranch(
         context,
         `Cmd_jumpifability's operand (${battlerExpression ?? "<missing>"}, ${abilityOperand?.expression ?? "<missing>"}) `
-          + "is not the registered BS_TARGET/BS_ATTACKER, ABILITY_LIQUID_OOZE tuple",
+          + "is not a registered BS_TARGET/BS_ATTACKER, ABILITY_* tuple",
         "battle_script_commands.c",
         3105,
       );
     }
     const battlerState = rulesContext.battlers[battler];
-    if (battlerState.ability !== ABILITY_LIQUID_OOZE) {
+    if (battlerState.ability !== abilityId) {
       return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }));
     }
     const target = resolveBattleScriptLabel(context.program, jumpOperand!.expression);
     if (!target) throw new Error(`Cmd_jumpifability: unresolved jump target ${jumpOperand!.expression}`);
-    const nextRulesContext = Object.freeze({ ...rulesContext, lastUsedAbility: ABILITY_LIQUID_OOZE });
+    const nextRulesContext = Object.freeze({ ...rulesContext, lastUsedAbility: abilityId });
     return transitionBattleScriptCommand(
       context,
       Object.freeze({ kind: "jump", programCounter: target.programCounter }),
