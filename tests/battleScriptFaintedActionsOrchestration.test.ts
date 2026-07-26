@@ -10,7 +10,10 @@ import {
   type BattleScriptStatusRulesExternalPorts,
 } from "../src/engine/battleScriptRulesContext.ts";
 import { loadBattleScriptProgram } from "../src/engine/battleScriptProgram.ts";
-import { runBattleScriptFaintedActionsOrchestration } from "../src/engine/battleScriptFaintedActionsOrchestration.ts";
+import {
+  resumeBattleScriptFaintedActionsAfterPlayerChoice,
+  runBattleScriptFaintedActionsOrchestration,
+} from "../src/engine/battleScriptFaintedActionsOrchestration.ts";
 
 const program = loadBattleScriptProgram();
 const TACKLE = 33;
@@ -94,7 +97,12 @@ function context(contextChanges: Partial<BattleScriptRulesContextInput> = {}): B
 function externalPorts(): BattleScriptStatusRulesExternalPorts {
   return Object.freeze({
     isControllerIdle: () => true,
-    prepareMessage: () => null,
+    // The forced-switch dance's own STRINGID_SWITCHINMON (printstring) needs a real message,
+    // not the terminal/non-terminal-barrier tests' own never-reached default of null.
+    prepareMessage: (_context: unknown, operand: Readonly<{ expression: string }>) =>
+      operand.expression.startsWith("STRINGID_")
+        ? Object.freeze({ kind: "message" as const, messageId: operand.expression, substitutions: Object.freeze([]) })
+        : null,
     prepareSelectionMessage: () => null,
     prepareSelectionMessageFromTable: () => null,
     resolveAttackerBattler: () => null,
@@ -211,4 +219,43 @@ describe("runBattleScriptFaintedActionsOrchestration (HandleFaintedMonActions eq
     expect(result.state.rulesContext.battleOutcome).toBe(2); // B_OUTCOME_LOST
     expect(result.state.rulesContext.selectorRoles.fainted).toBe(0);
   });
+
+  it(
+    "player-choice-required: player-side faint with a healthy bench halts mid-script naming the legal "
+      + "slots -- a real, named boundary (docs/forced-switch-ground-truth.md §3/§4 slice 10), not a fake "
+      + "barrier or a fabricated terminal",
+    () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0, hp: 0, partyIndex: 0, species: 261 }),
+          battler({ side: 1 }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+        selectorRoles: { attacker: 1, target: 0, effectBattler: 0 },
+        party: { player: sixSlots(0, 100, 90), opponent: sixSlots(100) },
+      });
+      const initial = haltedAtOwnEnd(rc);
+      const result = runBattleScriptFaintedActionsOrchestration(program, handlers, initial);
+      expect(result.kind).toBe("player-choice-required");
+      if (result.kind !== "player-choice-required") throw new Error("expected player-choice-required");
+      expect(result.battler).toBe(0);
+      expect(result.faintedPartyIndex).toBe(0);
+      expect(result.legalPartyIndexes).toEqual([1, 2]);
+      // A halt, not a controller round trip -- zero Random() draws (docs §3d).
+      expect(result.state.rng.calls).toBe(initial.rng.calls);
+      expect(result.state.rulesContext.battleOutcome).toBe(0); // genuinely undecided, not fabricated
+
+      const resumed = resumeBattleScriptFaintedActionsAfterPlayerChoice(program, handlers, result.state, 2);
+      expect(resumed.kind).toBe("resumed");
+      if (resumed.kind !== "resumed") throw new Error("expected resumed");
+      expect(resumed.state.rulesContext.battlers[0]).toMatchObject({ species: 261, hp: 90, partyIndex: 2 });
+      expect(resumed.state.rng.calls).toBe(initial.rng.calls); // still zero further draws
+
+      // Rejects a chosen index outside the halt's own legalPartyIndexes.
+      expect(() => resumeBattleScriptFaintedActionsAfterPlayerChoice(program, handlers, result.state, 0)).toThrow();
+      expect(() => resumeBattleScriptFaintedActionsAfterPlayerChoice(program, handlers, result.state, 1))
+        .not.toThrow();
+    },
+  );
 });
