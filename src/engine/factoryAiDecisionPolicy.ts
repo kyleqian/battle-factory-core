@@ -482,11 +482,13 @@ export type FactoryAiScoredBattlerView = Readonly<{
   statStages: Readonly<{ atk: number; def: number; spAtk: number; spDef: number; speed: number; acc: number; evasion: number }>;
   /** `gDisableStructs[].isFirstTurn` (0-2) -- source-required for `AI_CV_Pursuit` (`is_first_turn_for AI_USER`, entry 466); only the attacker's own copy is read today. */
   isFirstTurn: number;
+  /** Current/max HP -- source-required for `AI_CV_VitalThrow` (`if_hp_more_than`/`if_hp_less_than AI_USER`, entry 468/doc §13); only the attacker's own copy is read today, carried on both sides for the same shape-symmetry convention as `isFirstTurn`. */
+  hp: number;
+  maxHp: number;
 }>;
 
 export type FactoryAiScoredTargetView = FactoryAiScoredBattlerView & Readonly<{
   species: number;
-  hp: number;
   /** Real (not guessed) ability -- TryToFaint/CheckViability read live state. */
   ability: string;
   /** BattleHistory-style known ability for CheckBadMove's get_ability guess cache. */
@@ -769,6 +771,8 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
           isFirstTurn: view.attacker.isFirstTurn,
           evasionStage: view.attacker.statStages.evasion,
           accStage: view.attacker.statStages.acc,
+          hp: view.attacker.hp,
+          maxHp: view.attacker.maxHp,
         },
         target: {
           speed: view.target.speed,
@@ -777,6 +781,8 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
           isFirstTurn: view.target.isFirstTurn,
           evasionStage: view.target.statStages.evasion,
           accStage: view.target.statStages.acc,
+          hp: view.target.hp,
+          maxHp: view.target.maxHp,
         },
         drawOrdinalStart: draws.length + 1,
         reasonPrefix: `slot-${slot}-check-viability`,

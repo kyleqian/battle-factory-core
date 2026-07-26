@@ -15,9 +15,11 @@
  * `docs/factory-ai-checkviability-ground-truth.md` §6), `EFFECT_PURSUIT`
  * (`AI_CV_Pursuit`, `runCvPursuit` below, `:2018-2036`, doc §11.1),
  * `EFFECT_HIGH_CRITICAL`/`EFFECT_BLAZE_KICK`/`EFFECT_POISON_TAIL`
- * (`AI_CV_HighCrit`, `runCvHighCrit` below, `:1449-1461`, doc §11.2), and
+ * (`AI_CV_HighCrit`, `runCvHighCrit` below, `:1449-1461`, doc §11.2),
  * `EFFECT_ALWAYS_HIT` (`AI_CV_AlwaysHit`, `runCvAlwaysHit` below,
- * `:1075-1089`, doc §12.1). The other 86 are not ported this round (a
+ * `:1075-1089`, doc §12.1), and `EFFECT_VITAL_THROW` (`AI_CV_VitalThrow`,
+ * `runCvVitalThrow` below, `:1536-1546`, doc §13 -- the fifth and last
+ * CV-only-reachable handler). The other 85 are not ported this round (a
  * separate, much larger phased body of work per the audit's §3), so a move
  * that reaches one of THOSE must not silently score zero.
  */
@@ -77,10 +79,15 @@ export const AI_CHECK_VIABILITY_TABLE_EFFECTS: ReadonlySet<string> = new Set([
  * `gDisableStructs[].isFirstTurn` (`is_first_turn_for`, `runCvPursuit` --
  * only AI_USER/the attacker is ever read, but carried on both sides for
  * shape symmetry with the rest of this battler view, same convention
- * `speed`/`speedStage` already established), and EVASION/ACC stat stages
+ * `speed`/`speedStage` already established), EVASION/ACC stat stages
  * (`if_stat_level_more_than`/`if_stat_level_less_than`, `runCvAlwaysHit` --
  * only AI_TARGET's evasion and AI_USER's own acc are ever read, same
- * both-sides-carried convention as `isFirstTurn`).
+ * both-sides-carried convention as `isFirstTurn`), and current/max HP
+ * (`if_hp_more_than`/`if_hp_less_than`, `runCvVitalThrow` -- only AI_USER's
+ * own `hp`/`maxHp` are ever read, same both-sides-carried convention;
+ * `hpPercent` is truncating `100*hp/maxHp`, matching
+ * `Cmd_if_hp_more_than`/`Cmd_if_hp_less_than`'s own `(u32)` cast, `battle_ai
+ * _script_commands.c:713-741`).
  */
 export type FactoryAiCheckViabilityBattler = Readonly<{
   speed: number;
@@ -89,6 +96,8 @@ export type FactoryAiCheckViabilityBattler = Readonly<{
   isFirstTurn: number;
   evasionStage: number;
   accStage: number;
+  hp: number;
+  maxHp: number;
 }>;
 
 export type FactoryAiCheckViabilityDraw =
@@ -147,6 +156,27 @@ export type FactoryAiCheckViabilityDraw =
     ordinal: number;
     reason: string;
     kind: "always-hit-roll";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    succeeded: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "vital-throw-midband-roll";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    /** true = jumped straight to End (roll < 180, this call draws no further); false = fell through into AI_CV_VitalThrow2's own roll immediately after. */
+    jumpedToEnd: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "vital-throw-roll";
     before: BattleRngState;
     after: BattleRngState;
     rawRngValue: number;
@@ -503,6 +533,111 @@ function runCvAlwaysHit(input: Readonly<{
   });
 }
 
+/**
+ * `AI_CV_VitalThrow` (`data/battle_ai_scripts.s:1536-1546`,
+ * `docs/factory-ai-checkviability-ground-truth.md` §13):
+ *
+ * ```
+ * AI_CV_VitalThrow:
+ *     if_target_faster AI_CV_VitalThrow_End
+ *     if_hp_more_than AI_USER, 60, AI_CV_VitalThrow_End
+ *     if_hp_less_than AI_USER, 40, AI_CV_VitalThrow2
+ *     if_random_less_than 180, AI_CV_VitalThrow_End
+ * AI_CV_VitalThrow2:
+ *     if_random_less_than 50, AI_CV_VitalThrow_End
+ *     score -1
+ * AI_CV_VitalThrow_End:
+ *     end
+ * ```
+ *
+ * `if_target_faster` is the SAME macro/comparison `runCvSpeedDown` already
+ * ports (`if_user_goes 1` -> `GetWhoStrikesFirst(AI_USER, AI_TARGET, TRUE)
+ * === 1`), reused verbatim including its tie-break `Random()` burn -- but
+ * with the OPPOSITE consequence. Doc §13.1's own correction of §11.4's
+ * backwards prose: this jump lands on End (0 draws past any tie-break) when
+ * the TARGET is strictly faster, so the rest of the handler is reachable
+ * only when AI_USER (the attacker) is faster than or tied with the target.
+ *
+ * Past that gate, `if_hp_more_than`/`if_hp_less_than`
+ * (`battle_ai_script_commands.c:713-741`) read AI_USER's OWN truncating
+ * `100*hp/maxHp` -- never the target's. >60%: deterministic End, zero
+ * draws (both HP checks use strict `>`/`<`, so exactly 60% itself does NOT
+ * take this branch). <40%: skips straight to `AI_CV_VitalThrow2`'s own
+ * roll, one draw. The remaining [40,60] band (both ends inclusive) burns
+ * the `if_random_less_than 180` roll first: jump (roll<180, ~70.3%) to
+ * End, one draw total; fall through (roll>=180, ~29.7%) into
+ * `AI_CV_VitalThrow2`'s own roll immediately after -- no gap in the real
+ * assembly, the same fallthrough shape `AI_CV_HighCrit`'s own neutral
+ * cascade already established -- two draws total.
+ *
+ * `AI_CV_VitalThrow2`'s own `if_random_less_than 50`: jump (roll<50,
+ * ~19.5%) to End, no score; fall through (roll>=50, ~80.5%) to `score -1`.
+ * This polarity is read directly off `Cmd_if_random_less_than`'s own
+ * jump-on-less-than semantics (`battle_ai_script_commands.c:663-671`, the
+ * SAME opcode every other ported handler's roll already uses), not off
+ * §11.4's own inline gloss, which states this roll's score/no-score
+ * polarity backwards -- an unverified analytical claim (§11.4 was never
+ * staged live); §13's own live fixtures assert draw counts and the chosen
+ * move only, never the score sign, since all 4 dispatch slots are
+ * identical `MOVE_VITAL_THROW` with no pick ambiguity (doc §13.3).
+ */
+function runCvVitalThrow(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+
+  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
+  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+
+  let tieRoll = 0;
+  let tieDraw: ReturnType<typeof nextDraw> | null = null;
+  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
+    rng = tieDraw.after;
+    tieRoll = tieDraw.randomValue;
+    ordinal += 1;
+  }
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  if (tieDraw) {
+    draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
+  }
+  if (strikesFirst === 1) {
+    // Target strictly faster: goto End immediately, no HP check ever runs.
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: 0 });
+  }
+
+  const hpPercent = Math.floor((100 * input.attacker.hp) / input.attacker.maxHp);
+  if (hpPercent > 60) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: 0 });
+  }
+
+  if (hpPercent >= 40) {
+    // Only reached at HP% in [40, 60]: if_random_less_than 180.
+    const midbandDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-midband-roll`);
+    rng = midbandDraw.after;
+    ordinal += 1;
+    const jumpedToEnd = midbandDraw.randomValue % 256 < 180;
+    draws.push(Object.freeze({ ...midbandDraw, kind: "vital-throw-midband-roll" as const, jumpedToEnd }));
+    if (jumpedToEnd) {
+      return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: 0 });
+    }
+  }
+
+  const roll = nextDraw(rng, ordinal, `${input.reasonPrefix}-roll`);
+  rng = roll.after;
+  // if_random_less_than 50, AI_CV_VitalThrow_End: the JUMP (roll < 50, ~19.5%)
+  // skips the penalty; falling through (roll >= 50, ~80.5%) scores -1.
+  const succeeded = roll.randomValue % 256 >= 50;
+  draws.push(Object.freeze({ ...roll, kind: "vital-throw-roll" as const, succeeded }));
+  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: succeeded ? -1 : 0 });
+}
+
 /** `AI_CheckViability` for one move slot (`:652-775` dispatch shell only). */
 export function runCheckViability(input: Readonly<{
   rng: BattleRngState;
@@ -581,6 +716,22 @@ export function runCheckViability(input: Readonly<{
       rng: alwaysHit.rng,
       draws: alwaysHit.draws,
       scoreDelta: alwaysHit.scoreDelta,
+    });
+  }
+
+  if (move.effect === "EFFECT_VITAL_THROW") {
+    const vitalThrow = runCvVitalThrow({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: vitalThrow.rng,
+      draws: vitalThrow.draws,
+      scoreDelta: vitalThrow.scoreDelta,
     });
   }
 

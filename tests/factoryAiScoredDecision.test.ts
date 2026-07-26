@@ -52,6 +52,8 @@ const ALAKAZAM = Object.freeze({
   level: 50,
   statStages: NEUTRAL_STAGES,
   isFirstTurn: 2,
+  hp: 135,
+  maxHp: 135,
 });
 
 function marowak(hp: number) {
@@ -67,6 +69,7 @@ function marowak(hp: number) {
     statStages: NEUTRAL_STAGES,
     isFirstTurn: 2,
     hp,
+    maxHp: 135,
     ability: "ABILITY_ROCK_HEAD",
     knownAbility: null,
   });
@@ -262,18 +265,20 @@ describe("AI_CV_SpeedDown mask-7 fixture reproduction (docs/factory-ai-checkviab
     attack: 80, defense: 50, spAttack: 50, spDefense: 70, speed: 120, level: 50,
     statStages: NEUTRAL_STAGES,
     isFirstTurn: 2,
+    hp: 100, maxHp: 100,
   });
   const SHUCKLE_STATS = Object.freeze({
     types: ["TYPE_BUG", "TYPE_ROCK"] as const,
     attack: 10, defense: 230, spAttack: 10, spDefense: 230, speed: 5, level: 50,
     statStages: NEUTRAL_STAGES,
     isFirstTurn: 2,
+    hp: 100, maxHp: 100,
   });
   function dugtrioTarget(): FactoryAiScoredTargetView {
-    return Object.freeze({ species: 51, ...DUGTRIO_STATS, hp: 100, ability: "ABILITY_ARENA_TRAP", knownAbility: null });
+    return Object.freeze({ species: 51, ...DUGTRIO_STATS, ability: "ABILITY_ARENA_TRAP", knownAbility: null });
   }
   function shuckleTarget(): FactoryAiScoredTargetView {
-    return Object.freeze({ species: 213, ...SHUCKLE_STATS, hp: 100, ability: "ABILITY_STURDY", knownAbility: null });
+    return Object.freeze({ species: 213, ...SHUCKLE_STATS, ability: "ABILITY_STURDY", knownAbility: null });
   }
   function speedDownView(attacker: FactoryAiScoredBattlerView, target: FactoryAiScoredTargetView): FactoryAiScoredView {
     return Object.freeze({
@@ -340,6 +345,7 @@ describe("AI_CV_Pursuit mask-7 fixture reproduction (docs/factory-ai-checkviabil
       attack: 80, defense: 110, spAttack: 50, spDefense: 80, speed: 45, level: 50,
       statStages: NEUTRAL_STAGES,
       isFirstTurn,
+      hp: 100, maxHp: 100,
     });
   }
   function wobbuffetTarget(): FactoryAiScoredTargetView {
@@ -349,7 +355,7 @@ describe("AI_CV_Pursuit mask-7 fixture reproduction (docs/factory-ai-checkviabil
       attack: 33, defense: 58, spAttack: 33, spDefense: 58, speed: 33, level: 50,
       statStages: NEUTRAL_STAGES,
       isFirstTurn: 0,
-      hp: 190, ability: "ABILITY_SHADOW_TAG", knownAbility: null,
+      hp: 190, maxHp: 190, ability: "ABILITY_SHADOW_TAG", knownAbility: null,
     });
   }
   function miltankTarget(): FactoryAiScoredTargetView {
@@ -359,7 +365,7 @@ describe("AI_CV_Pursuit mask-7 fixture reproduction (docs/factory-ai-checkviabil
       attack: 80, defense: 105, spAttack: 40, spDefense: 70, speed: 100, level: 50,
       statStages: NEUTRAL_STAGES,
       isFirstTurn: 0,
-      hp: 95, ability: "ABILITY_THICK_FAT", knownAbility: null,
+      hp: 95, maxHp: 95, ability: "ABILITY_THICK_FAT", knownAbility: null,
     });
   }
   function pursuitView(attacker: FactoryAiScoredBattlerView, target: FactoryAiScoredTargetView): FactoryAiScoredView {
@@ -423,6 +429,7 @@ describe("AI_CV_HighCrit mask-7 fixture reproduction (docs/factory-ai-checkviabi
     attack: 80, defense: 110, spAttack: 50, spDefense: 80, speed: 45, level: 50,
     statStages: NEUTRAL_STAGES,
     isFirstTurn: 2,
+    hp: 100, maxHp: 100,
   });
   function onixTarget(): FactoryAiScoredTargetView {
     return Object.freeze({
@@ -431,7 +438,7 @@ describe("AI_CV_HighCrit mask-7 fixture reproduction (docs/factory-ai-checkviabi
       attack: 45, defense: 160, spAttack: 30, spDefense: 45, speed: 70, level: 50,
       statStages: NEUTRAL_STAGES,
       isFirstTurn: 0,
-      hp: 35, ability: "ABILITY_ROCK_HEAD", knownAbility: null,
+      hp: 35, maxHp: 100, ability: "ABILITY_ROCK_HEAD", knownAbility: null,
     });
   }
   function dugtrioTarget(): FactoryAiScoredTargetView {
@@ -441,7 +448,7 @@ describe("AI_CV_HighCrit mask-7 fixture reproduction (docs/factory-ai-checkviabi
       attack: 80, defense: 50, spAttack: 50, spDefense: 70, speed: 120, level: 50,
       statStages: NEUTRAL_STAGES,
       isFirstTurn: 0,
-      hp: 35, ability: "ABILITY_ARENA_TRAP", knownAbility: null,
+      hp: 35, maxHp: 100, ability: "ABILITY_ARENA_TRAP", knownAbility: null,
     });
   }
   function highCritView(target: FactoryAiScoredTargetView): FactoryAiScoredView {
@@ -516,6 +523,7 @@ describe("AI_CV_AlwaysHit mask-7 fixture reproduction (docs/factory-ai-checkviab
     attack: 80, defense: 110, spAttack: 50, spDefense: 80, speed: 45, level: 50,
     statStages: NEUTRAL_STAGES,
     isFirstTurn: 0,
+    hp: 100, maxHp: 100,
   });
   // Real base stats (species-types.json/species-stats.json): Ghost/Poison,
   // immune to MOVE_SWIFT's Normal type regardless of evasion -- same
@@ -528,7 +536,7 @@ describe("AI_CV_AlwaysHit mask-7 fixture reproduction (docs/factory-ai-checkviab
       attack: 50, defense: 45, spAttack: 115, spDefense: 55, speed: 95, level: 50,
       statStages: Object.freeze({ ...NEUTRAL_STAGES, evasion: evasionStage }),
       isFirstTurn: 0,
-      hp: 60, ability: "ABILITY_LEVITATE", knownAbility: null,
+      hp: 60, maxHp: 100, ability: "ABILITY_LEVITATE", knownAbility: null,
     });
   }
   function alwaysHitView(target: FactoryAiScoredTargetView): FactoryAiScoredView {

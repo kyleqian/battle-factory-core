@@ -10,9 +10,10 @@ const MOVE_TOXIC = 92; // EFFECT_TOXIC -- has an entry (AI_CV_Toxic, not ported)
 
 // Neutral speed/stage battlers for the tests above that don't exercise
 // AI_CV_SpeedDown -- the describe block below owns that handler's own battlers.
-// types/isFirstTurn/evasionStage/accStage are irrelevant to these
+// types/isFirstTurn/evasionStage/accStage/hp/maxHp are irrelevant to these
 // no-table-entry/barrier cases but required by the widened battler shape
-// (entry 466 added isFirstTurn, this entry adds evasionStage/accStage).
+// (entry 466 added isFirstTurn, entry 467 added evasionStage/accStage, this
+// entry adds hp/maxHp).
 const NEUTRAL_BATTLER = Object.freeze({
   speed: 100,
   speedStage: 6,
@@ -20,6 +21,8 @@ const NEUTRAL_BATTLER = Object.freeze({
   isFirstTurn: 0,
   evasionStage: 6,
   accStage: 6,
+  hp: 100,
+  maxHp: 100,
 });
 
 function run(rng: { value: number; calls: number }, moveId: number) {
@@ -76,6 +79,8 @@ describe("AI_CV_SpeedDown (docs/factory-ai-checkviability-ground-truth.md §6)",
     isFirstTurn: 0,
     evasionStage: 6,
     accStage: 6,
+    hp: 100,
+    maxHp: 100,
   });
   const FASTER_USER = Object.freeze({ speed: 120, speedStage: 6, ...SPEED_BATTLER_EXTRAS }); // AI_USER faster -> target NOT faster
   const SLOWER_USER = Object.freeze({ speed: 5, speedStage: 6, ...SPEED_BATTLER_EXTRAS }); // AI_USER slower -> target faster
@@ -187,9 +192,9 @@ describe("AI_CV_SpeedDown (docs/factory-ai-checkviability-ground-truth.md §6)",
 
 const MOVE_PURSUIT = 228; // EFFECT_PURSUIT
 
-/** Speed/speedStage/evasionStage/accStage are irrelevant to AI_CV_Pursuit -- fixed dummy values, only `types`/`isFirstTurn` vary per test. */
+/** Speed/speedStage/evasionStage/accStage/hp/maxHp are irrelevant to AI_CV_Pursuit -- fixed dummy values, only `types`/`isFirstTurn` vary per test. */
 function pursuitBattler(types: readonly [string, string], isFirstTurn: number) {
-  return Object.freeze({ speed: 100, speedStage: 6, types, isFirstTurn, evasionStage: 6, accStage: 6 });
+  return Object.freeze({ speed: 100, speedStage: 6, types, isFirstTurn, evasionStage: 6, accStage: 6, hp: 100, maxHp: 100 });
 }
 
 // data/battle_ai_scripts.s:2018-2036, docs/factory-ai-checkviability-ground-truth.md §11.1.
@@ -283,9 +288,9 @@ const MOVE_KARATE_CHOP = 2; // EFFECT_HIGH_CRITICAL, TYPE_FIGHTING
 const MOVE_BLAZE_KICK = 299; // EFFECT_BLAZE_KICK, TYPE_FIRE
 const MOVE_POISON_TAIL = 342; // EFFECT_POISON_TAIL, TYPE_POISON
 
-/** isFirstTurn/evasionStage/accStage are irrelevant to AI_CV_HighCrit -- fixed dummy values, only `types` vary per test. */
+/** isFirstTurn/evasionStage/accStage/hp/maxHp are irrelevant to AI_CV_HighCrit -- fixed dummy values, only `types` vary per test. */
 function highCritBattler(types: readonly [string, string]) {
-  return Object.freeze({ speed: 100, speedStage: 6, types, isFirstTurn: 0, evasionStage: 6, accStage: 6 });
+  return Object.freeze({ speed: 100, speedStage: 6, types, isFirstTurn: 0, evasionStage: 6, accStage: 6, hp: 100, maxHp: 100 });
 }
 
 // data/battle_ai_scripts.s:1449-1461, docs/factory-ai-checkviability-ground-truth.md §11.2.
@@ -540,7 +545,7 @@ describe("AI_CV_HighCrit (docs/factory-ai-checkviability-ground-truth.md §11.2)
 const MOVE_SWIFT = 129; // EFFECT_ALWAYS_HIT
 
 /**
- * speed/speedStage/types/isFirstTurn are irrelevant to AI_CV_AlwaysHit --
+ * speed/speedStage/types/isFirstTurn/hp/maxHp are irrelevant to AI_CV_AlwaysHit --
  * fixed dummy values, only `evasionStage` (read from AI_TARGET) and
  * `accStage` (read from AI_USER) vary per test.
  */
@@ -552,6 +557,8 @@ function alwaysHitBattler(evasionStage: number, accStage: number) {
     isFirstTurn: 0,
     evasionStage,
     accStage,
+    hp: 100,
+    maxHp: 100,
   });
 }
 
