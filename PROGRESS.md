@@ -13,6 +13,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ---
 ## 470 — ENDTURN_ITEMS1 registered: REMOVEITEM opcode + Leftovers/8 cure berries/White Herb (doc §5 slice 4's mandatory rung), live-verified
 
+- **Side merge (same round, supervisor-verified in-worktree + on the merged
+  tree):** END3 design scout banked (branch `worker/side-20260726-112551`,
+  merged, worktree removed) — `docs/end3-design.md` + UNWIRED
+  `src/engine/battleScriptCallbackStack.ts` prototype (5 Tier-1 tests).
+  Load-bearing design facts, supervisor re-verified against
+  `battle_script_commands.c:3967-3973`: `Cmd_end3` pops BOTH stacks
+  (script cursor via `BattleScriptPop()` + `gBattleMainFunc` from
+  `battleCallbackStack`); for the end-turn abilities the popped cursor is
+  observably dead — the real resume point is `turnEffectsTracker` state —
+  while the mid-script (Intimidate `ON_SWITCHIN`) case is a live
+  continuation; stack depth caps at 1 (`if (effect) return` short-circuit).
+  Registration checklist for the main-lane END3 step: `docs/end3-design.md`
+  §4. Two endturn-doc §1b imprecisions corrected (no
+  `gBattlescriptCurrInstrStackPtr` symbol; `end3` restores
+  `BattleTurnPassed`, not a re-entry point). Merged tree: **223 files /
+  2810 tests + build green.**
+
 - **State:** tree green at **222 files / 2805 tests** (+1 file/+24 tests
   over entry 469's merged 221/2781), build green (`tsc -b && vite build`).
   Ratchet **6/6**
