@@ -163,12 +163,13 @@ describe("pure Battle Script control machine", () => {
     expect(call.state.callStack).toEqual([callPc + 1]);
   });
 
-  it("halts with structured unsupported data and keeps END3 outside the safe subset", () => {
+  it("halts with structured unsupported data and gives END3 its own halt kind (docs/end3-design.md)", () => {
     expect(Object.keys(controls).map(Number).sort((left, right) => left - right)).toEqual([
       40,
       60,
       61,
       62,
+      63,
       65,
     ]);
     const unsupported = stepBattleScriptMachine(
@@ -191,9 +192,9 @@ describe("pure Battle Script control machine", () => {
       programCounter: end3.programCounter,
     });
     const end3Result = stepBattleScriptMachine(program, end3State, controls);
-    expect(end3Result.kind).toBe("unsupported");
+    expect(end3Result.kind).toBe("halted");
     expect(end3Result.state.haltReason).toMatchObject({
-      kind: "unsupported-opcode",
+      kind: "end3",
       opcodeId: 63,
       opcodeName: "B_SCR_OP_END3",
     });

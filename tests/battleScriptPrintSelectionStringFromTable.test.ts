@@ -420,7 +420,7 @@ describe("source-exact B_SCR_OP_PRINTSELECTIONSTRINGFROMTABLE", () => {
     expect(result.state.events).toBe(initial.events);
   });
 
-  it("replays deterministically and composes to exactly twenty-eight supported IDs", () => {
+  it("replays deterministically and composes to exactly twenty-nine supported IDs", () => {
     const makeResult = () => stepBattleScriptMachine(
       program,
       stateAt(),
@@ -442,7 +442,7 @@ describe("source-exact B_SCR_OP_PRINTSELECTIONSTRINGFROMTABLE", () => {
       ...createBattleScriptMoveValuesCommandHandlers<FixtureRules>(program),
     });
     expect(Object.keys(composed).map(Number).sort((left, right) => left - right)).toEqual([
-      10, 16, 17, 18, 20, 26, 37, 38, 39, 40, 57, 58, 60, 61, 62, 65, 83, 84, 85, 86, 97, 98, 100, 101, 102, 111, 131, 141, 248,
+      10, 16, 17, 18, 20, 26, 37, 38, 39, 40, 57, 58, 60, 61, 62, 63, 65, 83, 84, 85, 86, 97, 98, 100, 101, 102, 111, 131, 141, 248,
     ]);
   });
 

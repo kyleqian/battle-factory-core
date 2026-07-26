@@ -21,6 +21,23 @@ export type BattleScriptHaltReason =
   }>
   | Readonly<{
     /**
+     * `Cmd_end3` (`battle_script_commands.c:3966-3973`, `docs/end3-design.md`
+     * §1.3/§2.3): deliberately NOT `"terminal"` -- `end3` pops the caller's
+     * script cursor AND the external `battleCallbackStack`, but unlike
+     * `end`/`end2` never sets `gCurrentActionFuncId = B_ACTION_TRY_FINISH`.
+     * This machine has no notion of the callback stack itself (it lives at
+     * orchestration level, `battleEndTurnOrchestration.ts`'s
+     * `runPushCursorAndCallbackTickScript`) -- this halt only marks "an
+     * END3 opcode was reached"; the caller that pushed the matching frame
+     * is the only one that may consume it.
+     */
+    kind: "end3";
+    programCounter: number;
+    opcodeId: number;
+    opcodeName: string;
+  }>
+  | Readonly<{
+    /**
      * `Cmd_openpartyscreen`'s player-side branch (`PlayerHandleChoosePokemon`,
      * `docs/forced-switch-ground-truth.md` §3/§4 slice 10): a real, human-
      * timescale decision this opcode-machine layer cannot resolve
@@ -534,6 +551,20 @@ function terminal<RulesContext extends object>(
   });
 }
 
+function end3<RulesContext extends object>(
+  context: BattleScriptOpcodeHandlerContext<RulesContext>,
+): BattleScriptControlDirective {
+  return Object.freeze({
+    kind: "halt",
+    reason: Object.freeze({
+      kind: "end3",
+      programCounter: context.state.programCounter,
+      opcodeId: context.instruction.opcodeId,
+      opcodeName: context.instruction.opcodeName,
+    }),
+  });
+}
+
 export function transitionBattleScriptCommand<RulesContext extends object>(
   context: BattleScriptOpcodeHandlerContext<RulesContext>,
   control: BattleScriptControlDirective,
@@ -559,12 +590,14 @@ export function transitionBattleScriptCommand<RulesContext extends object>(
 
 /**
  * Source-safe control subset verified in battle_script_commands.c:
- * Cmd_goto, Cmd_return, Cmd_end, Cmd_end2, and Cmd_call.
+ * Cmd_goto, Cmd_return, Cmd_end, Cmd_end2, Cmd_end3, and Cmd_call.
  *
  * END/END2 expose only their common "finish this action" control boundary.
- * Their battle-state side effects are intentionally absent. END3 is omitted:
- * it also manipulates the external battle-callback stack and is not equivalent
- * to either terminal command in this pure machine.
+ * Their battle-state side effects are intentionally absent. END3 gets its
+ * OWN halt kind (`"end3"`, not `"terminal"`) -- it never sets
+ * `gCurrentActionFuncId = B_ACTION_TRY_FINISH` the way end/end2 do, and its
+ * external-callback-stack pop is orchestration-level state this pure
+ * machine doesn't hold (`docs/end3-design.md` §2.2/§2.3).
  */
 export function createBattleScriptControlHandlers<RulesContext extends object>(
   program: BattleScriptProgram,
@@ -587,6 +620,8 @@ export function createBattleScriptControlHandlers<RulesContext extends object>(
     transitionBattleScriptCommand(context, terminal(context)));
   install("B_SCR_OP_END2", (context) =>
     transitionBattleScriptCommand(context, terminal(context)));
+  install("B_SCR_OP_END3", (context) =>
+    transitionBattleScriptCommand(context, end3(context)));
   install("B_SCR_OP_CALL", (context) =>
     transitionBattleScriptCommand(context, callTargetFromFirstOperand(context)));
   return Object.freeze(handlers);

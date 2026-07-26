@@ -58,6 +58,11 @@ import {
   type BattleScriptFaintedActionsResult,
 } from "./battleScriptFaintedActionsOrchestration.ts";
 import {
+  createEmptyCallbackStack,
+  popEnd3,
+  pushCursorAndCallback,
+} from "./battleScriptCallbackStack.ts";
+import {
   BATTLE_SCRIPT_STATUS1_SLEEP,
   BATTLE_SCRIPT_STATUS2_MASKS,
   BATTLE_SCRIPT_STATUS2_WRAPPED_MASK,
@@ -131,6 +136,18 @@ const HOLD_EFFECT_RESTORE_STATS = 23;
 const HOLD_EFFECT_CURE_ATTRACT = 28;
 const HOLD_EFFECT_LEFTOVERS = 43;
 const DEFAULT_STAT_STAGE = 6;
+/** include/constants/abilities.h -- the four `ENDTURN_ABILITIES` switch cases (docs/endturn-abilities-items-ground-truth.md §1b, source-confirmed exhaustive). */
+const ABILITY_SPEED_BOOST = 3;
+const ABILITY_RAIN_DISH = 44;
+const ABILITY_TRUANT = 54;
+const ABILITY_SHED_SKIN = 61;
+/** battleScriptDamagingWeatherOpcode.ts's own established `WEATHER_HAS_EFFECT` precedent (Cloud Nine only; Air Lock is Rayquaza-only and Frontier-absent, docs/screens-weather-ground-truth.md §2). */
+const ABILITY_CLOUD_NINE = 13;
+/** battleScriptStatBuffs.ts's own STAT_SPEED/MAX_STAT_STAGE convention. */
+const STAT_SPEED = 3;
+const MAX_STAT_STAGE = 12;
+const SPEED_BOOST_ACTIVATES_LABEL = "BattleScript_SpeedBoostActivates";
+const RAIN_DISH_ACTIVATES_LABEL = "BattleScript_RainDishActivates";
 /** battle_message.c:1208-1212 -- gBerryEffectStringIds' own MULTISTRING_CHOOSER indices. */
 const B_MSG_CURED_PROBLEM = 0;
 const B_MSG_NORMALIZED_STATUS = 1;
@@ -312,6 +329,105 @@ function runTickScript(
   return Object.freeze({ kind: "fired", state: run.state });
 }
 
+type RunToEnd3Result =
+  | Readonly<{ kind: "end3"; state: MachineState }>
+  | Readonly<{ kind: "barrier"; state: MachineState; instruction: BattleScriptInstruction }>;
+
+/** Same shape as `runScriptToOwnEnd`, but its stopping condition is the new `"end3"` halt kind instead of `"terminal"` -- `BattleScript_SpeedBoostActivates`/`RainDishActivates` (docs/end3-design.md) never reach end/end2. */
+function runScriptToEnd3(program: BattleScriptProgram, handlers: Handlers, initialState: MachineState): RunToEnd3Result {
+  let state = initialState;
+  for (let budget = 0; budget < SCRIPT_BUDGET; budget += 1) {
+    const instruction = program.instructions[state.programCounter];
+    if (!instruction) {
+      throw new Error(`end-turn orchestration left the committed program at ${state.programCounter}`);
+    }
+    if (!handlers[instruction.opcodeId]) {
+      return Object.freeze({ kind: "barrier", state, instruction });
+    }
+    const stepped = stepBattleScriptMachine(program, state, handlers);
+    if (stepped.kind === "blocked") {
+      const acknowledged = acknowledgeAllPendingControllers(stepped.state);
+      if (acknowledged === stepped.state) {
+        throw new Error(`end-turn orchestration blocked inside ${instruction.source.label} without a safe controller acknowledgement`);
+      }
+      state = acknowledged;
+      continue;
+    }
+    if (stepped.kind === "halted") {
+      if (stepped.state.haltReason?.kind === "end3") {
+        return Object.freeze({ kind: "end3", state: stepped.state });
+      }
+      return Object.freeze({ kind: "barrier", state: stepped.state, instruction });
+    }
+    if (stepped.kind === "unsupported") {
+      return Object.freeze({ kind: "barrier", state: stepped.state, instruction });
+    }
+    state = stepped.state;
+  }
+  throw new Error("end-turn orchestration exceeded its per-script instruction budget");
+}
+
+/**
+ * `BattleScriptPushCursorAndCallback` + `Cmd_end3` (`battle_util.c:3209-3215`,
+ * `battle_script_commands.c:3966-3973`, docs/end3-design.md) -- the
+ * push-cursor-and-resume-caller primitive `runTickScript`'s plain
+ * `BattleScriptExecute`+end/end2 shape cannot host. Every end-turn-abilities
+ * consumer of this helper preempts `BattleTurnPassed` itself, a bare C
+ * function rather than a running script (design doc §1.4(a)): the callback-
+ * stack cell is created empty, pushed, run to the new script's own `END3`,
+ * and popped back to empty within this ONE synchronous call -- depth never
+ * exceeds 1 and never survives past this function's return (design doc
+ * §1.5/§2.2; this engine already runs each end-turn tick to completion in
+ * one call, doc §2.1). An "underflow" pop or a resumed `"script"`
+ * continuation would both mean a bug in THIS function's own push/pop
+ * pairing (never a reachable real-play state down this call path) --
+ * thrown loudly rather than silently resumed, matching the prototype's own
+ * contract (`battleScriptCallbackStack.ts`).
+ */
+function runPushCursorAndCallbackTickScript(
+  program: BattleScriptProgram,
+  handlers: Handlers,
+  priorState: MachineState,
+  rulesContextForScript: BattleScriptRulesContext,
+  battler: BattleScriptBattlerId,
+  entryLabel: string,
+): TickOutcome {
+  const withPatch: MachineState = Object.freeze({ ...priorState, rulesContext: rulesContextForScript });
+  const ticking = enterTickBattlerContext(withPatch, battler);
+  const entry = resolveBattleScriptLabel(program, entryLabel);
+  if (!entry) throw new Error(`unknown Battle Script entry label ${entryLabel}`);
+  const pushed = pushCursorAndCallback(
+    createEmptyCallbackStack(),
+    Object.freeze({ programCounter: ticking.programCounter, callStack: ticking.callStack }),
+    Object.freeze({ kind: "cCallback", name: "BattleTurnPassed" }),
+    entry.programCounter,
+  );
+  const started: MachineState = Object.freeze({
+    ...ticking,
+    programCounter: pushed.programCounter,
+    callStack: pushed.callStack,
+    haltReason: null,
+  });
+  const run = runScriptToEnd3(program, handlers, started);
+  if (run.kind === "barrier") {
+    return Object.freeze({ kind: "opcode-barrier", state: run.state, instruction: run.instruction });
+  }
+  const popped = popEnd3(pushed.stack);
+  if (popped.kind === "underflow") {
+    throw new Error(`END3 for ${entryLabel} popped an empty callback stack -- push/pop mismatch in runPushCursorAndCallbackTickScript`);
+  }
+  if (popped.continuation.kind !== "cCallback") {
+    throw new Error(`END3 for ${entryLabel} resumed a "script" continuation -- no end-turn ability path ever pushes one`);
+  }
+  const resumed: MachineState = Object.freeze({
+    ...run.state,
+    programCounter: popped.deadOrLiveScriptCursor.programCounter,
+    callStack: popped.deadOrLiveScriptCursor.callStack,
+    haltReason: null,
+  });
+  return Object.freeze({ kind: "fired", state: resumed });
+}
+
 /** `status1 += STATUS1_TOXIC_TURN(1)` capped at TURN(15) (battle_util.c:1542-1543), plus the party status1 mirror `datahpupdate`'s own sync already establishes for HP. */
 function bumpToxicCounter(rulesContext: BattleScriptRulesContext, battler: BattleScriptBattlerId): BattleScriptRulesContext {
   const b = rulesContext.battlers[battler];
@@ -449,6 +565,72 @@ function runWrapTick(
 type ItemsTickOutcome =
   | TickOutcome
   | Readonly<{ kind: "case-barrier"; state: MachineState; detail: string }>;
+
+/** `WEATHER_HAS_EFFECT` (include/battle_util.h:47), modeled the same as `battleScriptDamagingWeatherOpcode.ts`'s own `battlerCarriesCloudNine` precedent. */
+function weatherHasEffect(rulesContext: BattleScriptRulesContext): boolean {
+  const count = rulesContext.battleTopology.battlersCount;
+  for (let i = 0; i < count; i += 1) {
+    if (rulesContext.battlers[i]!.ability === ABILITY_CLOUD_NINE) return false;
+  }
+  return true;
+}
+
+/**
+ * `ENDTURN_ABILITIES` (`AbilityBattleEffects(ABILITYEFFECT_ENDTURN, battler,
+ * 0, 0, 0)`, `battle_util.c:2601-2658`, docs/endturn-abilities-items-ground-
+ * truth.md §1b/§5 slice 1): Rain Dish and Speed Boost, the two zero-RNG,
+ * always-or-weather-gated cases. Both preempt `BattleTurnPassed` via
+ * `BattleScriptPushCursorAndCallback` + `end3` (docs/end3-design.md), hosted
+ * by `runPushCursorAndCallbackTickScript` rather than plain `runTickScript`.
+ * Shed Skin (RNG-bearing `Random() % 3` roll, doc §5 slice 2) and Truant (no
+ * script at all -- source's own switch case has neither a
+ * `BattleScriptExecute`/`PushCursorAndCallback` call nor an `effect++`, doc
+ * §5 slice 3) stay named case-barriers on their own real, source-exact
+ * reachability condition -- DO NOT implement either here.
+ */
+function runAbilitiesTick(
+  program: BattleScriptProgram,
+  handlers: Handlers,
+  state: MachineState,
+  battler: BattleScriptBattlerId,
+): ItemsTickOutcome {
+  const b = state.rulesContext.battlers[battler];
+  if (b.hp === 0) return Object.freeze({ kind: "advance", state });
+
+  if (b.ability === ABILITY_RAIN_DISH) {
+    const rainActive = (state.rulesContext.weather & B_WEATHER_RAIN) !== 0;
+    if (weatherHasEffect(state.rulesContext) && rainActive && b.maxHP > b.hp) {
+      const heal = floorDivAtLeastOne(b.maxHP, 16);
+      const rc = Object.freeze({ ...state.rulesContext, battleMoveDamage: -heal });
+      return runPushCursorAndCallbackTickScript(program, handlers, state, rc, battler, RAIN_DISH_ACTIVATES_LABEL);
+    }
+    return Object.freeze({ kind: "advance", state });
+  }
+
+  if (b.ability === ABILITY_SPEED_BOOST) {
+    if (b.statStages[STAT_SPEED]! < MAX_STAT_STAGE && b.isFirstTurn !== 2) {
+      const stages = b.statStages.map((stage, stat) => (stat === STAT_SPEED ? stage + 1 : stage));
+      const withStage = withBattler(state.rulesContext, battler, { statStages: stages as never });
+      return runPushCursorAndCallbackTickScript(program, handlers, state, withStage, battler, SPEED_BOOST_ACTIVATES_LABEL);
+    }
+    return Object.freeze({ kind: "advance", state });
+  }
+
+  if (b.ability === ABILITY_SHED_SKIN && (b.status1 & STATUS1_ANY) !== 0) {
+    return Object.freeze({
+      kind: "case-barrier", state,
+      detail: "ABILITY_SHED_SKIN: reachable ((status1 & STATUS1_ANY) != 0) but its Random()%3 roll + unconditional status1=0 clear is doc §5 slice 2 stretch material, not wired this slice",
+    });
+  }
+  if (b.ability === ABILITY_TRUANT) {
+    return Object.freeze({
+      kind: "case-barrier", state,
+      detail: "ABILITY_TRUANT: reachable (no gate besides the ability match itself) but its truantCounter XOR toggle + no-effect++ ENDTURN_ITEMS1-same-tick fallthrough is doc §5 slice 3 stretch material, not wired this slice",
+    });
+  }
+
+  return Object.freeze({ kind: "advance", state });
+}
 
 /** Clears a status1 bit, syncs the party mirror (same shape as `bumpToxicCounter`), and runs the named cure script with `scriptingBattler` set (every cure-berry script reads `BS_SCRIPTING`). */
 function runStatus1CureTick(
@@ -657,7 +839,18 @@ function runDoBattlerEndTurnEffects(
     }
     if (ingrain.kind === "outcome-decided") return Object.freeze({ kind: "outcome-decided", state: ingrain.state });
     state = ingrain.state;
-    // ENDTURN_ABILITIES: pure-C ability breadth, explicitly out of scope (doc B2) -- no-op.
+
+    const abilities = runAbilitiesTick(program, handlers, state, battler);
+    if (abilities.kind === "opcode-barrier") {
+      return Object.freeze({ kind: "opcode-barrier", state: abilities.state, instruction: abilities.instruction });
+    }
+    if (abilities.kind === "case-barrier") {
+      return Object.freeze({ kind: "case-barrier", state: abilities.state, caseName: "ENDTURN_ABILITIES", detail: abilities.detail });
+    }
+    if (abilities.kind === "fired" && abilities.state.rulesContext.battleOutcome !== 0) {
+      return Object.freeze({ kind: "outcome-decided", state: abilities.state });
+    }
+    state = abilities.state;
 
     const items1 = runItemsTick(program, handlers, state, battler);
     if (items1.kind === "opcode-barrier") {

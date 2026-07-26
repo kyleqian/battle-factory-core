@@ -249,6 +249,17 @@ type BattleScriptMoveEndBattlerMetadata = Readonly<{
    * own setter registration ever does.
    */
   wrappedBy: BattleScriptBattlerId;
+  /**
+   * Source `gDisableStructs[battler].isFirstTurn` -- set to 2 at battle
+   * init/switch-in (`battle_main.c:3051,3220,3312`), decremented by
+   * `TurnValuesCleanUp(FALSE)` (not modeled by this engine yet, see
+   * `battleEndTurnOrchestration.ts`'s own header comment). The ONLY reader
+   * this engine wires is `ABILITY_SPEED_BOOST`'s own `!= 2` exception
+   * (`battle_util.c:2643`, docs/endturn-abilities-items-ground-truth.md
+   * §1b). Absent legacy inputs default to 0 (i.e. "not first turn") -- safe
+   * because no code path before this registration ever reads this field.
+   */
+  isFirstTurn: number;
 }>;
 
 /**
@@ -287,6 +298,7 @@ export type BattleScriptRulesBattler = BattleScriptRulesBattlerBase & Readonly<{
   turnOrderNum?: number;
   wrappedMove?: number;
   wrappedBy?: BattleScriptBattlerId;
+  isFirstTurn?: number;
 }>;
 
 export type BattleScriptRulesBattlerState =
@@ -1711,6 +1723,7 @@ export function createBattleScriptRulesContext(
     turnOrderNum: requireUnsigned(battler.turnOrderNum ?? 1, 0xff, `battlers[${index}].turnOrderNum`),
     wrappedMove: requireUnsigned(battler.wrappedMove ?? 0, 0xffff, `battlers[${index}].wrappedMove`),
     wrappedBy: requireUnsigned(battler.wrappedBy ?? 0, 3, `battlers[${index}].wrappedBy`) as BattleScriptBattlerId,
+    isFirstTurn: requireUnsigned(battler.isFirstTurn ?? 0, 2, `battlers[${index}].isFirstTurn`),
     ...(battler.confusionDamage === undefined ? {} : {
       confusionDamage: Object.freeze({
         level: requireUnsigned(
