@@ -588,3 +588,286 @@ notes.md:5470`, 256/256) — re-pinned live, confirming this scout's own
 read-only recon (plus the new unwired staging module) touched nothing live.
 `turn5-faint.json` re-confirms 110/110 (unchanged from §7.4), proving the
 already-landed checkpoint conversion is untouched by this session's work.
+
+## 9. Prep-scout for the NEXT window, 2026-07-26 (`turn5-rockslide.json`)
+
+Read-only recon plus one unwired staging module/test (no `battleScene.ts` or
+other production edit — same contract §8 used for `turn1-rockslide.json`,
+which landed on the first wiring try). Since §8 was written, **both windows
+it and §7 scouted have actually been wired into production**: `battleScene.ts`
+now imports `resolveTurn5FaintWindowLines` (`turn5FaintPresentationStaging.ts`)
+and `resolveTurn1RockSlideAttackLines`/`resolveTurn1DoubleTeamKickoffLines`/
+`resolveTurn1RockSlideHpEndpoints` (`turn1RockSlidePresentationStaging.ts`) at
+`battleScene.ts:589-593`, consumed at `:7506` and `:11805-11807`. Both re-pin
+at their recorded counts live (§9.5). `battleScene.ts` grew from 17,519 lines
+(§8) to **17,888**; `battleScriptEvents.ts`'s event union is unchanged at 22
+kinds since §8.
+
+This window is `drawTurn5EndeavorText` (`battleScene.ts:6935-6949`) handing
+off into `drawTurn5RockSlideWindow`'s own attack branch
+(`battleScene.ts:11735-11764`, the `t < faintedStart` branch at `:11740-11743`)
+— **not yet wired**: `drawTurn5RockSlideWindow`'s attack branch still draws
+the raw hardcoded `ROCK_SLIDE_LINE1`/`ROCK_SLIDE_LINE2` (`battleMenu.ts:1611-1612`),
+not the resolved `TURN1_ROCKSLIDE_ATTACK_LINE1/2` constants window 2 already
+proved.
+
+### 9.1 Every input `turn5-rockslide.json` consumes today (re-verified against `HEAD`, commit `0c7408f`)
+
+**Dispatch-routing booleans/gates** reaching `drawTurn5EndeavorText`, all in
+`drawFightSubmenuWindow` (`battleScene.ts:5160-5414`):
+
+| input | line(s) | condition to REACH this window |
+| --- | --- | --- |
+| `turn14Resolved`…`turn6Resolved` | `:5180-5255` | all false (else routes to turns 15/14/13/…/7's own dedicated dispatchers) |
+| `turn5Resolved` (outer) | `:5256` | false (else routes to `drawTurn6FightSubmenuWindow` — turn 6 is genuinely a different base scene, Pidgeotto not Grovyle) |
+| `sm.openElapsed`/`sm.closeElapsed` | `:5265,5279` | both past their own DMA-wait windows (ordinary settled-submenu path) |
+| `sm.confirmElapsed !== null` | `:5286` | true (a real A-confirm press already landed) |
+| `inTurn4DoubleTeamWindow = turn3Resolved && !turn4Resolved` | `:5297` | irrelevant once `turn4Resolved` is true (see below) — only distinguishes turn 4's own window |
+| `t >= textStart` | `:5298-5299` | true (message has started) |
+| `sm.cursor === 2` | `:5305` | false (cursor rests on ROCK_SLIDE, slot 0, not DRAGON_BREATH) |
+| `turn4Resolved` | `:5309` | **true** — this is the one boolean that actually selects this window (`drawTurn5EndeavorText(fb, t, pressTick)`, `:5314`); every check above it is a false/pass-through gate |
+
+Same class as §8.1's own finding: scheduler/PC state, no battle-content
+mapping is plausible for any of these gates.
+
+**RAM-dump / HP-constant reads.** The brief's own framing ("2-3
+RAM-dump-constant reads — `anchorPlayerAfterTurn3Hp`/`anchorPlayerAfterTurn5Hp`/
+`anchorOpponentAfterTurn4Hp`") is **only partially right, corrected here by
+reading each constant's own definition** (`battleScene.ts:1285-1364`), same
+"evidence over inference" discipline §7.1 already established:
+
+| constant | value | real source | line(s) |
+| --- | --- | --- | --- |
+| `anchorPlayerAfterTurn3Hp` | 88 | **is** an asset read — but from `battle1-grovyle-faint-ram-dump.json` (`battle1GrovyleFaintRamDumpAsset`), field `battlerSnapshots["4892"].battler0.hp` — **not** `battle1TurnRamDumpAsset` as the brief's framing implied | `:1327-1329` |
+| `anchorPlayerAfterTurn5Hp` | 1 | a **hardcoded literal**, not an asset read at all — sourced from an uncommitted `tools/probe/ram-probe.py` run this doc comment cites (`src/data/gen/turn5-endeavor-watch-probe.json`, which exists on disk but is never imported by any `.ts` file, confirmed by a fresh grep this session) | `:1355-1364` |
+| `anchorOpponentAfterTurn4Hp` | 1 | also a **hardcoded literal**, same uncommitted-probe provenance, no JSON import | `:1344-1355` |
+| `anchorOpponentAfterTurn5Hp` | 0 | **a fourth constant the brief's own "2-3" estimate missed entirely** — also a hardcoded literal (`:6969-6970`), Grovyle's real turn-5 END hp (the faint) | `:6969-6970` |
+
+So of the four HP constants this window's full render path actually touches,
+**zero** are `battle1TurnRamDumpAsset` fields (the brief's own named asset);
+one is asset-backed (a *different* asset), and three are bare literals whose
+only paper trail is a doc-comment citation to an uncommitted probe JSON.
+
+**The hidden-state finding this brief explicitly asked to flag (§2's own
+dispatcher warning, re-confirmed here):** `drawTurn5RockSlideWindow(fb, t)`
+— a plain 2-arg call — unconditionally calls `drawTurn6FieldBase(fb, t)` at
+its very first line (`:11737`), which itself (via its own defaulted
+parameters, `:11711`) calls `drawTurn5RockSlideAttack(fb, t, ...)` (`:11712`).
+That function independently reads a **fourth HP-interpolation call**,
+`rockSlideOpponentHp(t, pressTick, anchorOpponentAfterTurn4Hp,
+anchorOpponentAfterTurn5Hp)` (`:7483`) — Grovyle's own opponent-healthbox
+drain, a completely separate interpolation from `drawTurn5EndeavorText`'s own
+`endeavorOnixHp(t, pressTick, anchorPlayerAfterTurn3Hp, anchorPlayerAfterTurn5Hp)`
+(`:6941`, Onix's player-side healthbox). **Concretely, this means Grovyle's
+sprite is already mid-faint-sink during part of the attack branch's own
+active window**: `GROVYLE_FAINT_SINK_START_TICK` = 6502 (`:6995`,
+`grovyleFaintSinkRowsAndY2`, called unconditionally at `:7407`) falls
+*inside* the attack branch's own `[rockSlideTextStartTick(5829)=6222,
+turn5FaintedTextStartTick(5829)=6523)` window (`:6936`, `:7515-7517`) — so for
+render ticks 6502-6522 (21 of this branch's ~300 active ticks), the "ONIX
+used\nROCK SLIDE!" text is still being held while Grovyle's own sprite is
+already erasing/shifting underneath it. `drawTurn6FieldBase(fb, t)` also
+threads `turn5SitrusOnixHp(t)` (its own default parameter, `:11711`) as
+Onix's on-field healthbox HP — a tick-keyed formula (`heldItemHeal.ts:134-144`,
+`sitrusDisplayedHpAtAge`) that floors at `TURN5_SITRUS_HEAL_HP_START=1`
+(`:7290`) for every tick before its own much-later climb begins, which is
+every tick in this branch's own window — a **third, independent** path that
+happens to reproduce the same "Onix settled at 1 HP" fact `anchorPlayerAfterTurn5Hp`
+encodes directly, duplicated rather than shared. None of this is reachable
+from `drawTurn5EndeavorText`/`drawTurn5RockSlideWindow`'s own two-argument
+signatures without walking two more levels of defaulted-parameter call
+chains — exactly the "reads more hidden state than its declaration suggests"
+shape §2 named.
+
+**Hardcoded strings:**
+
+| input | literal | line(s) |
+| --- | --- | --- |
+| `TURN_KICKOFF_LINE1`/`TURN2_KICKOFF_LINE2` | "Foe GROVYLE used" / "ENDEAVOR!" | `battleMenu.ts:1086`, `:2635` (drawn by `drawTurn5EndeavorText`, `:6948`) |
+| `ROCK_SLIDE_LINE1`/`ROCK_SLIDE_LINE2` | "ONIX used" / "ROCK SLIDE!" | `battleMenu.ts:1611-1612` (drawn by `drawTurn5RockSlideWindow`'s attack branch, `:11741`) — **identical text** to window 2's own already-resolved `TURN1_ROCKSLIDE_ATTACK_LINE1/2`, but this call site still uses the raw literals, not the resolver |
+
+**Tick anchors / stale-power literal:** `TURN5_ROCKSLIDE_PRESS_TICK=5829`
+(synthetic anchor, `:6967`), `ROCK_SLIDE_MOVE_POWER=75` (stale-power shake
+input, `:5848`, unrelated to ENDEAVOR's own 0 listed power — see `endeavorShakeSteps`'s
+own doc, `:5852`), `turn5FaintedTextStartTick`/`rockSlideTextStartTick`
+(delay constants, `:7515-7517`, `battleMenu.ts:1618-1624`).
+
+**Sprite/animation cues** (pure `(t, pressTick, ...)` functions, unchanged
+mechanism from §8's own runner-up window, reused verbatim by
+`drawTurn5RockSlideAttack`): `rockSlideBg3Y`, `rockSlideMonBlinkInvisible`,
+`rockSlideMonShakeY2`, `rockSlideHealthboxWobbleY2`, `rockSlideDrawOrder`/
+`rockSlideRockState`, plus `drawEndeavorSquish`'s own ENDEAVOR-specific
+choreography (`endeavorShakeX2`, `drawEndeavorHitsplats`, `endeavorHealthboxBounceY2`,
+`ENDEAVOR_SQUISH_TABLE`-driven affine stretch, `drawEndeavorDroplets`) —
+none of this choreography is this scout's concern beyond confirming gap 6
+(§5/§7.2, no frame-by-frame payload in the `animation` event) still applies
+unchanged.
+
+### 9.2 Staged proof: what the kernel emits today for this window's own content
+
+**`EFFECT_ENDEAVOR` is not executable today**, confirmed live by
+regenerating the census this session (`npx tsx tools/report/executable-frontier-census.ts`,
+zero diff to the committed file — still 76/214 effects):
+`docs/executable-frontier-census.md:245` — `blocked-on-opcodes`, missing
+`B_SCR_OP_SETDAMAGETOHEALTHDIFFERENCE`, `B_SCR_OP_BICBYTE`,
+`B_SCR_OP_ADJUSTSETDAMAGE` on its main path. Confirmed against the real
+source (`reference/pokeemerald/data/battle_scripts_1.s:2479-2491`,
+`BattleScript_EffectEndeavor::`): `attackcanceler`, `attackstring`,
+`ppreduce`, `setdamagetohealthdifference` (**missing**), `copyword`,
+`accuracycheck`, `typecalc`, `jumpifmovehadnoeffect`, `bicbyte` (**missing**),
+`copyword`, `adjustsetdamage` (**missing**), then `goto
+BattleScript_HitFromAtkAnimation` — the same generic tail label window 2's
+own ROCK_SLIDE chain already proved reachable.
+
+**Nearest executable equivalent, staged this session:**
+`src/engine/turn5EndeavorPresentationStaging.ts` (new, **unwired**), mirrors
+`turn5FaintPresentationStaging.ts`'s own precedent of substituting an
+executable move when the real one is blocked (that module substituted
+MOVE_STRENGTH for MOVE_ROCK_SLIDE against a *different* opcode gap). Here:
+MOVE_STRENGTH (id 70, `EFFECT_HIT`, 100% accuracy, `MOVE_TARGET_SELECTED`)
+with **Grovyle as attacker (side 1) and Onix as target (side 0)** — the
+opposite direction from every prior staging module in this file family
+(`turn1RockSlidePresentationStaging.ts` and `turn5FaintPresentationStaging.ts`
+only ever staged Onix-attacks-Grovyle). Real level-50 stats for both
+(`tests/damageCalc.test.ts`'s own `ONIX`/`GROVYLE` blocks, same as every
+sibling module); Onix (target) starts at 88 HP (`anchorPlayerAfterTurn3Hp`,
+this window's own real drain-start anchor); Grovyle (attacker) is at 1 HP
+(`anchorOpponentAfterTurn4Hp`, this window's own real steady value). RNG
+seed reused verbatim from `turn5FaintPresentationStaging.ts`'s own
+`KO_HIT_SEED` (919694434), already proven live to clear a 100%-accuracy
+check in this program. `tests/turn5EndeavorPresentationStaging.test.ts` (new,
+7 passing assertions) pins the live result — run this session, not guessed:
+
+```
+targetHpAfter: 79   (88 -> 79, real NORMAL-vs-ROCK/GROUND not-very-effective
+                      formula — genuinely computed, not copied: confirmed by
+                      the extra STRINGID_NOTVERYEFFECTIVE resultmessage
+                      window 2's own neutral-effectiveness chain never emits)
+event kinds, in order:
+  message           {messageId:"STRINGID_USEDMOVE"}       sourceLabel: BattleScript_HitFromAtkString
+  set-battler-pp-data
+  animation         MOVE_ANIMATION
+  play-se
+  animation         HIT_ANIMATION
+  health-bar-update
+  hp-change         {battler:0, from:88, to:79}            sourceLabel: BattleScript_HitFromAtkAnimation
+  message           {messageId:"STRINGID_NOTVERYEFFECTIVE"}
+  set-battler-sprite-visibility  (attacker)
+  set-battler-sprite-visibility  (target)
+```
+
+`presentationEventWindowBridge.ts`'s existing `resolveRockSlidePresentationWindowContent`
+(built for window 2, keyed only on `sourceLabel`, never on `side`) resolves
+this run's own message+hp-change pair **unchanged, zero bridge edits needed**
+— proven, not assumed (`resolveTurn5EndeavorWindowContent()` in the new
+module calls it directly; the test asserts it returns non-null and the right
+values). The kickoff message resolves to `["Foe GROVYLE used", "STRENGTH!"]`
+— the real "Foe " opponent-side prefix (`HANDLE_NICKNAME_STRING_CASE`,
+`battleStringResolver.ts:52-55`) live for the first time this session, not
+merely claimed "mechanically identical" by analogy the way window 2's own
+`TURN_KICKOFF_LINE1/2` was (§8.3's own row).
+
+**What this staged run does and does not prove:** it proves the
+`message`+`hp-change` *mechanism* — attacker-name resolution, prefix
+selection, `hp-change` on the correct (target) battler index, the bridge's
+own label-matching — generalizes to an opponent-attacks-player direction
+this session's evidence had never exercised live before. It does **not**
+prove anything about ENDEAVOR's own damage formula (`calculateEndeavorDamage`/
+`resolveEndeavorDamage`, `damageCalc.ts:291-312` — already ported as pure
+functions, unreachable from the script machine only because the three
+opcodes above aren't registered) — that gap is real, precisely named, and
+not routed around.
+
+### 9.3 Mapping table (turn-N input -> kernel event / gap), current as of this staged run
+
+| turn-N input | kernel replacement | today |
+| --- | --- | --- |
+| `turn6Resolved`…`turn4Resolved` dispatch gates (§9.1) | none — scheduler/PC state | **no plausible mapping**, same gap-7 class every prior window found. The turn1-rockslide precedent's bridge mechanism (key off `provenance.sourceLabel`) generalizes here too — no new bridge design needed, only a new call site |
+| `anchorPlayerAfterTurn3Hp` (88) | `hp-change`'s `from`, staged proof: **confirmed**, `battler:0, from:88` | **mechanism proven this session** (§9.2) — but only via the MOVE_STRENGTH substitute, not the real ENDEAVOR script |
+| `anchorPlayerAfterTurn5Hp` (1) | `hp-change`'s `to` | **blocked on the real gap**: the substitute run's own `to` (79) is NOT ENDEAVOR's real settle (1) — this endpoint specifically needs `EFFECT_ENDEAVOR` itself registered (3 missing opcodes, §9.2), not just the message/hp-change mechanism, which is otherwise ready |
+| `anchorOpponentAfterTurn4Hp` (1) used as `drawEndeavorSquish`'s "opponent healthbox during this window" HP | not directly an `hp-change` endpoint in the real ENDEAVOR chain (Grovyle's HP never changes during turn 5's ENDEAVOR — it's the ATTACKER) — this is a steady-state read, not a drain endpoint | **no kernel event needed at all for this specific read**: Grovyle's HP is simply whatever the rules-context battler array already holds from the prior turn, which a real kernel-driven presentation layer would read from battler state directly, not from a dedicated event |
+| `anchorOpponentAfterTurn4Hp`/`anchorOpponentAfterTurn5Hp` pair, `drawTurn5RockSlideAttack`'s own `rockSlideOpponentHp` interpolation (§9.1's hidden-state finding) | `hp-change{from,to}` on Grovyle (battler 1) — this is turn 5's OWN ROCK_SLIDE-from-turn-4-onward steady/settle read, a **different** hit chain than ENDEAVOR (it's turn 4's already-real ROCK_SLIDE settle carried forward, then turn 5's own separate fatal hit at the very end of the full window past this branch) | **partially available**: turn 4's own settle (`anchorOpponentAfterTurn4Hp`) has no staged proof yet (no turn-4 module exists); turn 5's own fatal ROCK_SLIDE hit (`anchorOpponentAfterTurn5Hp=0`) is exactly `turn5FaintPresentationStaging.ts`'s own already-staged/tested KO chain (`hp-change{to:0}`) — **already proven**, just not yet wired to this specific `rockSlideOpponentHp` call site |
+| `ROCK_SLIDE_LINE1`/`LINE2` ("ONIX used\nROCK SLIDE!") | `message{messageId:"STRINGID_USEDMOVE"}` | **fully proven, already resolved** — this is byte-identical content to window 2's own `TURN1_ROCKSLIDE_ATTACK_LINE1/2` (`turn1RockSlidePresentationStaging.ts:257-264`); no new staging needed, just a new call site pointed at the existing resolver functions |
+| `TURN_KICKOFF_LINE1`/`TURN2_KICKOFF_LINE2` ("Foe GROVYLE used\nENDEAVOR!") | `message{messageId:"STRINGID_USEDMOVE"}` | **kind+messageId mechanism proven this session** (§9.2's staged run, opponent-attacker direction) but the REAL line 2 ("ENDEAVOR!") needs `resolveMoveNameExclaim(MOVE_ENDEAVOR)` off a REAL Endeavor chain to be source-faithful — the substitute run's own "STRENGTH!" is not swappable in-place without either (a) accepting the substitute's own move name for this text (wrong pixels) or (b) registering the 3 missing opcodes first |
+| `drawEndeavorSquish`'s own squish/hitsplat/shake choreography | `animation{animationId:"MOVE_ANIMATION"}` | **kind emitted, proven** (§9.2's own `animation` events) — gap 6 (§5/§7.2, no frame-by-frame payload) unchanged, same as every prior window |
+| `turn5SitrusOnixHp(t)`'s hidden floor-at-1 read (§9.1's third hidden-state path) | `hp-change`'s settled `to` value, once available (same value `anchorPlayerAfterTurn5Hp` already needs) | **same blocker as the direct read** — not an independent gap, just a second consumer of the identical missing ENDEAVOR settle |
+| `Grovyle mid-faint-sink during ticks 6502-6522` (§9.1's concrete finding) | `faint-animation`/sprite-visibility events, already emitted (`battleScriptHitChainOpcode.ts`, per §7.1's table) via `turn5FaintPresentationStaging.ts`'s own already-staged KO chain | **already proven reachable** (a different, already-landed staging module) — this window's own wiring would need to consume that SAME staged result at an EARLIER point in its own timeline than the fainted-branch window does, a sequencing detail for the wiring step, not a new kernel gap |
+
+### 9.4 Ordered wiring plan (acceptance: `turn5-rockslide.json` still passes at 256/256, regression sweep over turn3-6 traces unchanged)
+
+1. Register `B_SCR_OP_SETDAMAGETOHEALTHDIFFERENCE`, `B_SCR_OP_BICBYTE`,
+   `B_SCR_OP_ADJUSTSETDAMAGE` (§9.2) — this is the one REAL kernel gap this
+   window's own Endeavor content is blocked on; `damageCalc.ts:291-312`
+   already has the pure formula ported, so this is opcode wiring, not new
+   damage math. Out of THIS scout's own scope (no `src/` production edits
+   permitted here), but the single highest-leverage next step for the
+   wiring worker — without it, step 3 below cannot use the REAL ENDEAVOR
+   chain and must keep the MOVE_STRENGTH substitute (wrong move name in the
+   rendered text).
+2. Once (1) lands, replace `turn5EndeavorPresentationStaging.ts`'s own
+   MOVE_STRENGTH substitute with the real MOVE_ENDEAVOR (id per
+   `moves.json`), Grovyle-attacks-Onix, real turn-5 HPs (88 -> 1), reusing
+   this scout's own module structure and the *already-generalized*
+   `resolveRockSlidePresentationWindowContent` bridge unchanged (§9.2
+   proved zero bridge edits needed for this attacker direction). Add
+   `resolveTurn5EndeavorAttackLines`/`resolveTurn5EndeavorHpEndpoints`
+   siblings to the existing `resolveTurn1RockSlideAttackLines`/
+   `resolveTurn1RockSlideHpEndpoints` pattern (`turn1RockSlidePresentationStaging.ts:257-270`).
+3. Wire `drawTurn5EndeavorText` (`battleScene.ts:6935-6949`) to source
+   `onixHp`'s two endpoints from step 2's `hp-change{from,to}` instead of
+   the direct `anchorPlayerAfterTurn3Hp`/`anchorPlayerAfterTurn5Hp` reads
+   (`:6941`), and `TURN_KICKOFF_LINE1`/`TURN2_KICKOFF_LINE2`'s text from
+   step 2's resolved message (`:6948`) — `drawEndeavorSquish`'s own
+   choreography (shake/hitsplat/droplets) stays byte-for-byte unchanged,
+   same "gap 4 not on this window's critical path" reasoning §8.4's Option
+   A already established (this window's own tick anchors are all
+   presentation-native `pressTick`-relative offsets, no kernel timestamp
+   needed).
+4. Wire `drawTurn5RockSlideWindow`'s attack branch (`:11740-11743`) to the
+   ALREADY-RESOLVED `TURN1_ROCKSLIDE_ATTACK_LINE1/2` constants (no new
+   staging — §9.3's own finding that this content is byte-identical to
+   window 2's) instead of the raw `ROCK_SLIDE_LINE1`/`ROCK_SLIDE_LINE2`
+   literals.
+5. Wire `drawTurn5RockSlideAttack`'s own `rockSlideOpponentHp(t, pressTick,
+   anchorOpponentAfterTurn4Hp, anchorOpponentAfterTurn5Hp)` call (`:7483`,
+   reached indirectly via `drawTurn6FieldBase`, §9.1's hidden-state finding)
+   to `turn5FaintPresentationStaging.ts`'s own already-staged/tested KO
+   `hp-change{to:0}` for its `to` endpoint — this is the SAME already-landed
+   staging module the fainted-branch window (§7) consumes, just a second,
+   earlier consumption point in this window's own timeline; the `from`
+   endpoint (`anchorOpponentAfterTurn4Hp`) still has no staged proof and may
+   need to stay a literal for this pass (name it as a residual gap in the
+   wiring worker's own follow-up report if so — do not silently skip it).
+6. Re-run `npm run compare -- turn5-rockslide.json` and confirm it still
+   matches at **256/256** (recorded count, `docs/battle-turn-notes.md:5309`)
+   before/after, PLUS a regression sweep of `turn1-rockslide.json` (256/256)
+   and `turn5-faint.json` (110/110) — the two already-wired windows this
+   step's own edits sit adjacent to (`drawTurn6FieldBase` is shared
+   machinery reached by both this window and the fainted branch) — the
+   checkpoint's own acceptance bar.
+
+### 9.5 Comparator re-pin
+
+Ran three times live this session, from this worktree, against this lane's
+Battle Scene OFF oracle (`127.0.0.1:8014`):
+
+```
+$ npm run compare -- turn5-rockslide.json --summary   (run 1)
+256/256 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn5-rockslide.json --summary   (run 2, determinism check)
+256/256 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn5-faint.json --summary
+110/110 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn1-rockslide.json --summary
+256/256 frames matched -> tools/compare/out/latest
+```
+
+`turn5-rockslide.json` matches its recorded count (`docs/battle-turn-
+notes.md:5309`, 256/256) both runs — re-pinned live, this is the baseline
+the wiring step (§9.4) must preserve. `turn5-faint.json`/`turn1-rockslide.json`
+re-confirm their own already-wired counts unchanged, proving this session's
+read-only recon (plus the new unwired `turn5EndeavorPresentationStaging.ts`
+module) touched nothing live.
