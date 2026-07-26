@@ -33,6 +33,7 @@ import { createBattleScriptStatbuffchangeOpcodeHandlers } from "./battleScriptSt
 import { createBattleScriptSetSideStatusOpcodeHandlers } from "./battleScriptSetSideStatusOpcode.ts";
 import { createBattleScriptSetWeatherOpcodeHandlers } from "./battleScriptSetWeatherOpcode.ts";
 import { createBattleScriptDamagingWeatherOpcodeHandlers } from "./battleScriptDamagingWeatherOpcode.ts";
+import { createBattleScriptTryCastformDataChangeOpcodeHandlers } from "./battleScriptTryCastformDataChangeOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -2041,6 +2042,7 @@ export function createBattleScriptStatusRulesHandlers(
       isControllerIdle: sourceExternalPorts.isControllerIdle,
       resolveBattlerForBattleScript: resolveRulesBattlerForBattleScript,
     }),
+    ...createBattleScriptTryCastformDataChangeOpcodeHandlers(program),
   });
 }
 

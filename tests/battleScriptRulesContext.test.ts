@@ -438,7 +438,7 @@ describe("source-shaped Battle Script rules context", () => {
 });
 
 describe("production status rules handler and execution seam", () => {
-  it("composes all 86 source-safe controls, source, multi-hit, cleanup, SETBYTE, attackcanceler, hit-chain, move-end, jumpifbyte, jumpifword, jumpifhalfword, jumpifstatus3condition, orword, openpartyscreen, switchin, getexp, checkteamslost, statbuffchange, set-side-status, set-weather, and damaging-weather handlers once", () => {
+  it("composes all 87 source-safe controls, source, multi-hit, cleanup, SETBYTE, attackcanceler, hit-chain, move-end, jumpifbyte, jumpifword, jumpifhalfword, jumpifstatus3condition, orword, openpartyscreen, switchin, getexp, checkteamslost, statbuffchange, set-side-status, set-weather, damaging-weather, and trycastformdatachange handlers once", () => {
     const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts());
     expect(Object.keys(handlers).map(Number).sort((a, b) => a - b)).toEqual([
       0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12,
@@ -448,7 +448,7 @@ describe("production status rules handler and execution seam", () => {
       69, 70, 71, 73, 76, 77, 78, 80, 81, 82, 83, 84,
       85, 86, 92, 97, 98, 100, 101, 102, 104, 111, 115, 118,
       125, 126, 131, 137, 141, 146, 149, 150, 152, 153, 184, 187,
-      200, 248,
+      200, 231, 248,
     ]);
   });
 
