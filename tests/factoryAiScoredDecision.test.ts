@@ -952,6 +952,96 @@ describe("AI_CV_SpDefDown mask-7 fixture reproduction (docs/factory-ai-checkviab
   });
 });
 
+const MOVE_SWORDS_DANCE_ATTACK_UP = 14; // EFFECT_ATTACK_UP_2
+
+// docs/factory-ai-checkviability-ground-truth.md §17's twin fixtures
+// (tools/battle-lab/mechanic-factory-ai-cv-attackup-{fullhp-reach,
+// lowhp-control}-off.json) -- the fourth CBM-blocked pair, reproduced
+// through the REAL mask-7 dispatcher end to end now that both
+// AI_CBM_AttackUp and AI_CV_AttackUp are ported. Opponent (AI_USER) =
+// Anorith, all 4 slots MOVE_SWORDS_DANCE (EFFECT_ATTACK_UP_2); target
+// (player) = Machamp, same species pairing as the VitalThrow/DefenseDown/
+// SpDefDown blocks above. Unlike every stat-DOWN pair, every gate/draw site
+// here reads AI_USER's OWN state -- Machamp's own kit is irrelevant to this
+// handler entirely (doc §17.3's own note, a first for this file's
+// CBM-blocked pairs). §17.2's own finding applies: only the PHANTOM
+// next-turn re-decision is observable in a single executed turn, so by the
+// time it fires, turn 1's own REAL Swords Dance has already raised
+// Anorith's own ATK stage from DEFAULT_STAT_STAGE (6) to 8 (still < 9, so
+// Gate A/DRAW SITE 1 stays unreached in both fixtures, matching the doc's
+// own live ledger -- attribution shows zero AI_CBM/AI_CV draws attributable
+// to a stage-12 CBM short-circuit or a Gate-A-true DRAW SITE 1 path)
+// -- constructed directly here (statStages.atk: 8), same "construct the
+// decisive post-turn-1 state" precedent the DefenseDown/SpDefDown blocks
+// above already established for HP.
+describe("AI_CV_AttackUp mask-7 fixture reproduction (docs/factory-ai-checkviability-ground-truth.md §17.3/§17.4)", () => {
+  const MOVE_ATTACK_UP_MOVESET = [
+    MOVE_SWORDS_DANCE_ATTACK_UP, MOVE_SWORDS_DANCE_ATTACK_UP, MOVE_SWORDS_DANCE_ATTACK_UP, MOVE_SWORDS_DANCE_ATTACK_UP,
+  ] as const;
+  const POST_SWORDS_DANCE_STAGES = Object.freeze({ ...NEUTRAL_STAGES, atk: 8 });
+
+  function anorithAttacker(hp: number): FactoryAiScoredBattlerView {
+    return Object.freeze({
+      types: ["TYPE_ROCK", "TYPE_BUG"] as const,
+      attack: 115, defense: 70, spAttack: 60, spDefense: 70, speed: 95, level: 50,
+      statStages: POST_SWORDS_DANCE_STAGES,
+      isFirstTurn: 0,
+      hp, maxHp: 120,
+    });
+  }
+  function machampTarget(): FactoryAiScoredTargetView {
+    return Object.freeze({
+      species: 68,
+      types: ["TYPE_FIGHTING", "TYPE_FIGHTING"] as const,
+      attack: 150, defense: 100, spAttack: 85, spDefense: 105, speed: 75, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp: 165, maxHp: 165, ability: "ABILITY_GUTS", knownAbility: null,
+    });
+  }
+  function attackUpView(attacker: FactoryAiScoredBattlerView): FactoryAiScoredView {
+    return Object.freeze({
+      schema: "factory-ai-scored-view/v1",
+      mode: "factory-level-50-singles",
+      active: Object.freeze({ aiBattler: 1 as const, targetBattler: 0 as const }),
+      factory: Object.freeze({ levelMode: 0 as const, battleMode: 0 as const, factoryWinStreak: 28, trainerOpponentId: 222 }),
+      moves: MOVE_ATTACK_UP_MOVESET,
+      attacker,
+      target: machampTarget(),
+    });
+  }
+  function phaseDraws(result: ReturnType<typeof chooseFactoryAiScoredDecision>, phase: "check-bad-move" | "try-to-faint" | "check-viability") {
+    return result.trace.draws.filter((d) => "phase" in d && d.phase === phase);
+  }
+
+  it.each([1, 99])("reach fixture (Anorith stays at full 120/120 HP -- Gate B true, reaches DRAW SITE 2), seed %i: exactly 4 check-viability draws, zero CBM/TryToFaint draws", (seed) => {
+    const view = attackUpView(anorithAttacker(120));
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+    expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+    expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+    const cvDraws = phaseDraws(result, "check-viability");
+    expect(cvDraws).toHaveLength(4);
+    expect(cvDraws.every((d) => "kind" in d && d.kind === "attack-up-roll-2")).toBe(true);
+    expect(result.trace.draws).toHaveLength(4 /* setup */ + 4 /* CV roll x4 slots */ + 1 /* tie */);
+  });
+
+  it("control fixture, seed 1 (Anorith at 30/120 HP = 25%, doc §17.4's own live-verified endpoint): Gate B false (skips DRAW SITE 2), Gate D true (HP<40, skips DRAW SITE 3) -- deterministic zero check-viability draws", () => {
+    const view = attackUpView(anorithAttacker(30));
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 1, calls: 0 } });
+    expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+    expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+    expect(phaseDraws(result, "check-viability")).toHaveLength(0);
+    expect(result.trace.draws).toHaveLength(4 /* setup */ + 1 /* tie */);
+  });
+
+  it("control fixture, seed 99 (Anorith at 18/120 HP = 15%, doc §17.4's own live-verified endpoint): deterministic zero check-viability draws", () => {
+    const view = attackUpView(anorithAttacker(18));
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 99, calls: 0 } });
+    expect(phaseDraws(result, "check-viability")).toHaveLength(0);
+    expect(result.trace.draws).toHaveLength(4 /* setup */ + 1 /* tie */);
+  });
+});
+
 // docs/factory-ai-checkviability-ground-truth.md §14.5 item 2's own
 // acceptance bonus: §6's ORIGINAL AI_CV_SpeedDown fixtures used a real
 // opponent moveset of [MOVE_STRING_SHOT, MOVE_GROWL, MOVE_GROWL, MOVE_GROWL]

@@ -658,3 +658,94 @@ describe("AI_CBM_SpDefDown + CheckIfAbilityBlocksStatChange (docs/factory-ai-che
     expect(result.draws).toHaveLength(0);
   });
 });
+
+// data/battle_ai_scripts.s:249-251/253-255/581-584,
+// docs/factory-ai-checkviability-ground-truth.md §17.1/§18.1. Unlike every
+// stat-DOWN CBM handler above, these three read AI_USER's OWN ATK/DEF stat
+// stage (the ATTACKER, not the target) and never call get_ability at all --
+// a bare MAX_STAT_STAGE gate, no shared CheckIfAbilityBlocksStatChange tail.
+describe("AI_CBM_AttackUp / AI_CBM_DefenseUp / AI_CBM_BulkUp (docs/factory-ai-checkviability-ground-truth.md §17.1/§18.1)", () => {
+  const MOVE_MEDITATE = 96; // EFFECT_ATTACK_UP
+  const MOVE_SWORDS_DANCE = 14; // EFFECT_ATTACK_UP_2 -- same handler, different table entry
+  const MOVE_HARDEN = 106; // EFFECT_DEFENSE_UP
+  const MOVE_ACID_ARMOR = 151; // EFFECT_DEFENSE_UP_2 -- same handler, different table entry
+  const MOVE_DEFENSE_CURL = 111; // EFFECT_DEFENSE_CURL -- also routes to AI_CBM_DefenseUp, CBM-only (doc §18.1)
+  const MOVE_BULK_UP = 339; // EFFECT_BULK_UP -- separate handler, CBM side only
+
+  // Single-ability (Sturdy) target: the universal preamble's own soundproof
+  // guess (still run for every move, including these 0-power stat-up moves)
+  // costs zero real draws here, isolating each handler's own zero-RNG gate.
+  const SHUCKLE: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 213,
+    types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+    knownAbility: null,
+    realAbility: "ABILITY_STURDY",
+    speedStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+  });
+
+  function withAttacker(atkStage: number, defStage: number): FactoryAiCheckBadMoveAttacker {
+    return Object.freeze({ atkStage, defStage });
+  }
+
+  it.each([
+    ["Meditate (EFFECT_ATTACK_UP)", MOVE_MEDITATE],
+    ["Swords Dance (EFFECT_ATTACK_UP_2)", MOVE_SWORDS_DANCE],
+  ])("AI_CBM_AttackUp: %s scores -10 with zero draws when AI_USER's own ATK stage is already MAX_STAT_STAGE (12)", (_label, moveId) => {
+    const result = run(moveId, SHUCKLE, undefined, withAttacker(12, 6));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it.each([11, 6, 0])("AI_CBM_AttackUp: scores 0 with zero draws when AI_USER's own ATK stage is %i (not maxed)", (atkStage) => {
+    const result = run(MOVE_MEDITATE, SHUCKLE, undefined, withAttacker(atkStage, 6));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it.each([
+    ["Harden (EFFECT_DEFENSE_UP)", MOVE_HARDEN],
+    ["Acid Armor (EFFECT_DEFENSE_UP_2)", MOVE_ACID_ARMOR],
+    ["Defense Curl (EFFECT_DEFENSE_CURL, CBM-only dispatch)", MOVE_DEFENSE_CURL],
+  ])("AI_CBM_DefenseUp: %s scores -10 with zero draws when AI_USER's own DEF stage is already MAX_STAT_STAGE (12)", (_label, moveId) => {
+    const result = run(moveId, SHUCKLE, undefined, withAttacker(6, 12));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("AI_CBM_DefenseUp: scores 0 with zero draws when AI_USER's own DEF stage is not maxed", () => {
+    const result = run(MOVE_HARDEN, SHUCKLE, undefined, withAttacker(6, 6));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("AI_CBM_BulkUp: scores -18 (both gates fire independently, -10 + -8) when both ATK and DEF are already MAX_STAT_STAGE", () => {
+    const result = run(MOVE_BULK_UP, SHUCKLE, undefined, withAttacker(12, 12));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -18 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("AI_CBM_BulkUp: scores -10 (only the ATK gate fires) when ATK is maxed but DEF is not", () => {
+    const result = run(MOVE_BULK_UP, SHUCKLE, undefined, withAttacker(12, 6));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("AI_CBM_BulkUp: scores -8 (only the DEF gate fires) when DEF is maxed but ATK is not", () => {
+    const result = run(MOVE_BULK_UP, SHUCKLE, undefined, withAttacker(6, 12));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -8 });
+  });
+
+  it("AI_CBM_BulkUp: scores 0 when neither ATK nor DEF is maxed", () => {
+    const result = run(MOVE_BULK_UP, SHUCKLE, undefined, withAttacker(6, 6));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+});

@@ -1447,3 +1447,237 @@ describe("AI_CV_SpDefDown (docs/factory-ai-checkviability-ground-truth.md §16.1
     expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
   });
 });
+
+const MOVE_MEDITATE_ATTACK_UP = 96; // EFFECT_ATTACK_UP
+const MOVE_SWORDS_DANCE_ATTACK_UP = 14; // EFFECT_ATTACK_UP_2 -- same handler, different table entry
+
+// data/battle_ai_scripts.s:896-913, docs/factory-ai-checkviability-ground-truth.md
+// §17.1: the fourth CBM-blocked pair's own CV half (AI_CBM_AttackUp, the CBM
+// side, is in factoryAiCheckBadMove.test.ts). Every gate/draw site reads
+// AI_USER's OWN state (atkStage/hp) -- AI_TARGET is never read at all, so
+// `target` below is a fixed irrelevant dummy. seed 1 -> every roll site's
+// randomValue % 256 = 198 (>= every threshold used here: 100/128/40);
+// seed 4 -> 25 (< every threshold) -- reused from the AttackDown/DefenseDown/
+// SpDefDown blocks' own established seed convention above.
+describe("AI_CV_AttackUp (docs/factory-ai-checkviability-ground-truth.md §17.1)", () => {
+  function attackUpAttacker(atkStage: number, hp: number, maxHp = 100) {
+    return Object.freeze({
+      speed: 100, speedStage: 6, types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+      isFirstTurn: 0, evasionStage: 6, accStage: 6, atkStage, defStage: 6, spDefStage: 6, hp, maxHp,
+    });
+  }
+  const IRRELEVANT_TARGET = Object.freeze({
+    speed: 100, speedStage: 6, types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+    isFirstTurn: 0, evasionStage: 6, accStage: 6, atkStage: 6, defStage: 6, spDefStage: 6, hp: 100, maxHp: 100,
+  });
+
+  it("EFFECT_ATTACK_UP_2 (Swords Dance) dispatches to the identical handler", () => {
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_SWORDS_DANCE_ATTACK_UP,
+      attacker: attackUpAttacker(6, 99), // ATK<9 skips site 1; hp!=100 skips site 2; hp>70 ends at Gate C -- fully deterministic
+      target: IRRELEVANT_TARGET,
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+  });
+
+  describe("Gate A / DRAW SITE 1 (own ATK stage < 9 skips the roll)", () => {
+    it("ATK stage 6 (< 9): Gate A skips DRAW SITE 1 entirely -- falls to AttackUp2", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_MEDITATE_ATTACK_UP,
+        attacker: attackUpAttacker(6, 99), // hp != 100 -> Gate B also skips DRAW SITE 2; hp > 70 -> Gate C ends
+        target: IRRELEVANT_TARGET,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+
+    it("ATK stage 9 (>= 9): reaches DRAW SITE 1; roll < 100 skips the -1 (hp 100 -> Gate C ends right after)", () => {
+      // seed 4 -> randomValue % 256 = 25 (< 100).
+      const result = runCheckViability({
+        rng: { value: 4, calls: 0 },
+        moveId: MOVE_MEDITATE_ATTACK_UP,
+        attacker: attackUpAttacker(9, 100),
+        target: IRRELEVANT_TARGET,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(0);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "attack-up-roll-1", succeeded: false });
+    });
+
+    it("ATK stage 11 (>= 9, < 12 -- 12 is excluded earlier by AI_CBM_AttackUp): roll >= 100 applies the -1", () => {
+      // seed 1 -> randomValue % 256 = 198 (>= 100).
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_MEDITATE_ATTACK_UP,
+        attacker: attackUpAttacker(11, 100),
+        target: IRRELEVANT_TARGET,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(-1);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "attack-up-roll-1", succeeded: true });
+    });
+  });
+
+  describe("Gate B / DRAW SITE 2 (own HP != 100%, an EQUALITY test, skips the roll)", () => {
+    it("HP 99% (!= 100): Gate B skips DRAW SITE 2 entirely -- falls to AttackUp3, Gate C ends (99 > 70)", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_MEDITATE_ATTACK_UP,
+        attacker: attackUpAttacker(6, 99),
+        target: IRRELEVANT_TARGET,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+
+    it("HP exactly 100%: reaches DRAW SITE 2; roll < 128 skips the +2 (Gate C ends right after)", () => {
+      // seed 4 -> randomValue % 256 = 25 (< 128).
+      const result = runCheckViability({
+        rng: { value: 4, calls: 0 },
+        moveId: MOVE_MEDITATE_ATTACK_UP,
+        attacker: attackUpAttacker(6, 100),
+        target: IRRELEVANT_TARGET,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(0);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "attack-up-roll-2", succeeded: false });
+    });
+
+    it("HP exactly 100%: roll >= 128 applies the +2", () => {
+      // seed 1 -> randomValue % 256 = 198 (>= 128).
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_MEDITATE_ATTACK_UP,
+        attacker: attackUpAttacker(6, 100),
+        target: IRRELEVANT_TARGET,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(2);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "attack-up-roll-2", succeeded: true });
+    });
+  });
+
+  describe("Gate C (own HP > 70%: a clean, deterministic stop)", () => {
+    it("HP exactly 71% (> 70): stops at AttackUp3, zero further draws/score", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_MEDITATE_ATTACK_UP,
+        attacker: attackUpAttacker(6, 71),
+        target: IRRELEVANT_TARGET,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+  });
+
+  describe("Gate D (own HP < 40%: skips DRAW SITE 3 straight to the -2 penalty)", () => {
+    it("HP exactly 39% (< 40): applies -2 with zero draws", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_MEDITATE_ATTACK_UP,
+        attacker: attackUpAttacker(6, 39),
+        target: IRRELEVANT_TARGET,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: -2 });
+    });
+  });
+
+  describe("DRAW SITE 3 (if_random_less_than 40, only reached at own HP in [40,70))", () => {
+    it("HP exactly 40% (in band): roll < 40 skips the -2", () => {
+      // seed 4 -> randomValue % 256 = 25 (< 40).
+      const result = runCheckViability({
+        rng: { value: 4, calls: 0 },
+        moveId: MOVE_MEDITATE_ATTACK_UP,
+        attacker: attackUpAttacker(6, 40),
+        target: IRRELEVANT_TARGET,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(0);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "attack-up-roll-3", succeeded: false });
+    });
+
+    it("HP exactly 69% (in band): roll >= 40 applies the -2", () => {
+      // seed 1 -> randomValue % 256 = 198 (>= 40).
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_MEDITATE_ATTACK_UP,
+        attacker: attackUpAttacker(6, 69),
+        target: IRRELEVANT_TARGET,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(-2);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "attack-up-roll-3", succeeded: true });
+    });
+  });
+
+  it("DRAW SITE 1 and DRAW SITE 3 are NOT mutually exclusive: ATK stage 9 (reaches site 1) + HP 55% (reaches site 3) draws twice", () => {
+    // seed 1's RNG chain: draw1 randomValue % 256 = 198 (>= 100, -1); draw3 (next
+    // value in the same chain) randomValue % 256 = 33 (< 40, skips the -2).
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_MEDITATE_ATTACK_UP,
+      attacker: attackUpAttacker(9, 55),
+      target: IRRELEVANT_TARGET,
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result.kind).toBe("scored");
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.scoreDelta).toBe(-1);
+    expect(result.draws).toHaveLength(2);
+    expect(result.draws[0]).toMatchObject({ kind: "attack-up-roll-1", succeeded: true });
+    expect(result.draws[1]).toMatchObject({ kind: "attack-up-roll-3", succeeded: false });
+    expect(result.rng.calls).toBe(2);
+  });
+
+  it("Gate B's own DRAW SITE 2 can NEVER combine with DRAW SITE 3: HP==100 forces Gate C true immediately after", () => {
+    // hp must be exactly 100 to reach DRAW SITE 2 at all (Gate B is an
+    // equality test) -- and 100 > 70 makes Gate C a guaranteed stop right
+    // after, so this path structurally can never also reach DRAW SITE 3.
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_MEDITATE_ATTACK_UP,
+      attacker: attackUpAttacker(6, 100),
+      target: IRRELEVANT_TARGET,
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result.kind).toBe("scored");
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "attack-up-roll-2" });
+  });
+});
