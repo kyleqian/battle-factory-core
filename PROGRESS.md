@@ -4,6 +4,90 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 452 — Forced-switch §4 slice 10 landed: the player-side `openpartyscreen` halt is now a real forced-switch decision, not a barrier — §4's whole slice list (1-10) is complete
+
+- **State:** tree green at **207 files / 2449 tests** (+0 files/+10 tests
+  over entry 451's 207/2439 — all new tests landed in existing files), build
+  green. Ratchet: `battleScriptOpenPartyScreenOpcode.ts`'s `unsupported-
+  branch` pin **deliberately dropped 3 → 2** — the player-side branch
+  retired from the barrier count entirely (it's a genuine named halt now,
+  not an unsupported-branch placeholder); the doubles-topology and
+  `GetMostSuitableMonToSwitchInto` pass-2 barriers are unchanged. Census
+  untouched (no opcode registrations changed — `openpartyscreen` was
+  already registered; only its player-side branch's internal behavior
+  changed).
+- **Did, per `docs/forced-switch-ground-truth.md` §3/§4 slice 10 (the one
+  barrier entry 447 left named):**
+  - `battleScriptOpenPartyScreenOpcode.ts`'s player branch now halts with a
+    genuine `"player-choice-required"` reason (new `BattleScriptHaltReason`
+    kind, `battleScriptMachine.ts`) naming the legal bench slots — alive
+    (hp>0), non-egg, not the fainted slot itself, exactly
+    `OpenPartyMenuToChooseMon`'s own gate — instead of an unsupported-branch
+    placeholder. A resume writes the chosen index into
+    `monToSwitchIntoId[battler]` (the SAME sentinel field the AI branch
+    already writes) and the identical opcode handler then takes an
+    "already-decided" advance path — no parallel mechanism invented.
+  - `battleScriptFaintedActionsOrchestration.ts` surfaces this as a new
+    `"player-choice-required"` result (paused mid-script, NOT at
+    `BattleScript_FaintedMonEnd`) and exports
+    `resumeBattleScriptFaintedActionsAfterPlayerChoice`, which clears the
+    halt and re-drives the existing slice 1-9 machinery
+    (`switchhandleorder → getswitchedmondata → switchindataupdate → ... →
+    cancelallactions → end2`) unmodified to completion.
+  - `factoryBattleScriptTerminalDecision.ts` wires this into the kernel's
+    own **pre-existing but previously unused** `BattleForcedSwitchRequest`/
+    `BattleSwitchDecision` shapes (`battleDecisionBoundary.ts` already
+    defined and validated them; no reducer had ever produced or consumed
+    one) via a new resumable `"forced-switch-pending"` phase
+    (`pendingScript`: `programCounter`/`callStack`/`scheduler`, JSON-safe,
+    round-trips through `serializeBattleState`/`parseBattleState`) and a
+    shared `finalizeOrchestration` tail factored out of the original
+    single-call reducer path. That factoring caught and fixed a **latent
+    RNG-reconciliation bug**: the original reconciliation compared
+    `rngAfter.calls` directly against the machine-local ledger's own count,
+    which only worked because the adapter had never before been invoked a
+    SECOND time on the same lineage (`rngBefore.calls` was always 0); the
+    forced-switch resume is this adapter's first genuine second invocation,
+    so the fix (`rngBefore.calls + machineRng.calls`, mirroring
+    `factoryBattleScriptFullTurnDecision.ts`'s own documented subtlety)
+    applies uniformly to both call sites now.
+  - **Rejection tests needed zero new validation code**: `submitBattleDecision`'s
+    existing `legalPartyIndexes`/`side` schema checks
+    (`battleDecisionBoundary.ts`, already written, never before exercised by
+    a real reducer) already reject fainted/active slot, egg slot,
+    out-of-range index, and wrong-side submissions before the reducer ever
+    runs — proven, not assumed, by four new rejection tests, each asserting
+    the paused state's serialization is byte-identical before/after.
+  - `battleEndTurnOrchestration.ts`/`factoryBattleScriptFullTurnDecision.ts`
+    gained explicit (currently unreachable, thrown) handling for the new
+    result kind to stay exhaustive — a player-side end-turn KO (e.g. Toxic)
+    could in principle reach the same fork, but wiring a real forced-switch
+    continuation into those dual-sided reducers is intentionally out of
+    this step's scope.
+  - New Tier-1 coverage: `battleScriptOpenPartyScreenOpcode.test.ts` (halt
+    shape, egg exclusion, already-decided resume-advance path),
+    `battleScriptFaintedActionsOrchestration.test.ts` (the orchestration
+    result + resume function directly, independent of the adapter),
+    `factoryBattleScriptTerminalDecision.test.ts` (the full player-side
+    integration: decision request → legal-slot submit → rebuilt battler
+    (species/hp/types/status1/statStages) → genuine next boundary, zero
+    `Random()` calls throughout, plus canonical serialize/parse replay of
+    both the request and the resume transition).
+- **Next:** wiring a real forced-switch continuation into the full-turn/
+  end-turn dual-sided reducers (currently a named, unreachable throw);
+  confusion + flinch registrations (ground truth banked); the AI
+  move-selection port (`docs/factory-ai-ground-truth.md`);
+  `DoFieldEndTurnEffects` setters (screens/weather); the full-turn proof's
+  non-terminal variant.
+- **Notes:** no oracle traces added (pure Tier-1, direct-construction per
+  this doc's own established discipline — the live oracle recipe was
+  already banked in §3 from an earlier session). No presentation/
+  `battleScene`/ROADMAP edits. OUT OF SCOPE per the brief and untouched:
+  party-menu presentation/UI, voluntary switching as a turn action,
+  switch-in entry hooks, the AI move-selection port, census regeneration.
+  PAPERCUT: none this session.
+
+---
 ## 451 — [SUPERVISOR WIND-DOWN 2026-07-25 ~16:00] session summary
 
 - **State:** tree committed and green at **207 files / 2439 tests**, build
@@ -148,100 +232,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   presentation/`battleScene`/ROADMAP edits. OUT OF SCOPE per the brief and
   untouched: AI port, item/switch player actions beyond the existing fork,
   census refresh.
-
----
-## 449 — End-turn orchestration landed: `BattleTurnPassed` C-side scheduling equivalent, burn/poison/toxic ticks source-complete, faint machinery reused for end-turn KOs
-
-- **State:** tree green at **204 files / 2421 tests** (+1 file/+5 tests
-  over entry 448's 203/2416), build green. `verify-end-turn-ground-
-  truth.ts` rerun live before starting and again after every commit: still
-  **17/17 ALL PASS**. Ratchet green, **zero new barrier pins** — the new
-  module's own case-level guards never fire on any existing production
-  path (they're a standalone orchestration surface, not wired into an
-  existing scenario yet). Census regenerated and diffed **byte-identical**
-  to entry 448 (53/214 effects, 105/355 moves, 77/276 Factory-L50) — end
-  turn is orchestration, not a move-effect entry, so nothing was expected
-  to flip and nothing did.
-- **Did (new `src/engine/battleEndTurnOrchestration.ts` +
-  `tests/battleEndTurnOrchestration.test.ts`), per
-  `docs/end-turn-ground-truth.md` §4:**
-  - **Step 2 (orchestration loop, landed):** `runBattleEndTurnOrchestration`
-    is the `BattleTurnPassed` C-side equivalent — same category as the
-    already-landed `HandleFaintedMonActions` port, driving the full
-    field-loop + all-battlers'-19-cases pass to completion in one call.
-    Implements the doc's load-bearing ordering rule verbatim: the instant a
-    fired tick's inline `checkteamslost` leaves `battleOutcome !== 0`, the
-    field/battler loop stops immediately (no further cases, no further
-    battlers) and falls through to the SAME unconditional
-    `runBattleScriptFaintedActionsOrchestration` call the clean-completion
-    path also uses (reused verbatim, not reimplemented).
-  - **Step 1 + step 3 (`ORWORD` + Burn/Poison/Bad Poison, landed):**
-    `ORWORD` was already registered (executable-frontier census, entry
-    446). `BattleScript_PoisonTurnDmg`/`BurnTurnDmg` needed **zero new
-    opcodes** — `orword`/`healthbarupdate`/`datahpupdate`/`tryfaintmon`/
-    `checkteamslost`/`statusanimation`/`printstring`/`waitmessage`/`end2`
-    were all already registered. Added the one real missing piece: a
-    `maxHP` field on `BattleScriptRulesBattlerState` (defaults to `hp` for
-    every legacy fixture — safe, since nothing read it before this doc),
-    letting the C-side damage precompute (`gBattleMoveDamage = maxHP/8` or
-    `/16`, the toxic-counter bump capped at `TOXIC_TURN(15)` with its party
-    `status1` mirror) happen exactly where source does it, before
-    `BattleScriptExecute`.
-  - **Every doc-reachable case this engine doesn't model yet is a named
-    barrier gated on its own real already-modeled bit/field** (never a
-    blanket skip): Ingrain (`STATUS3_ROOTED`), Nightmare/Curse/Thrash
-    (`status2` masks), Disable/Taunt (`disabledMove`/`tauntTimer`),
-    Reflect/Light Screen/Mist/Safeguard (`sideStatuses`/`mistTimers`), and
-    all four weather cases (the already-modeled `weather` field) all
-    barrier for real if their trigger bit is ever set — currently never,
-    since nothing in this engine sets any of them yet. Cases with **no**
-    modeled trigger state at all (Leech Seed, Wrap, Uproar, Encore, Charge,
-    Yawn, Wish, `ENDTURN_ABILITIES`/`ITEMS1`/`ITEMS2`) are documented,
-    permanently-inert no-ops today, matching this step's own brief's
-    explicit Wish/Uproar/Leech-Seed deferral; Lock-On is skipped citing the
-    doc's own dead-for-Factory finding (B15). `PLAYANIMATION` was already
-    registered (narrowed to `B_ANIM_STATS_CHANGE`) — Ingrain/Leech
-    Seed/Wrap's own animation arm would barrier there for real if ever
-    reached, so it needed no further work this session.
-  - **Known simplification, documented, not silently assumed:** per-battler
-    tick order defaults to ascending battler id — `gBattleMons[].speed` has
-    no home anywhere in `BattleScriptRulesContext` (a separate subsystem
-    from `turnOrder.ts`'s own speed model). Not exercised by any proof
-    here or by the doc's own live scenarios, both of which give exactly
-    one battler a live end-turn condition at a time.
-  - **Integration proofs, all passing:** (a) burn ticks the doc's exact
-    live 105→92→79 sequence across two consecutive `runBattleEndTurnOrchestration`
-    calls, battler AND party slot both synced, zero RNG draws either turn;
-    (b) a Toxic end-turn KO (SHEDINJA-shaped, 1 HP) runs the SAME faint
-    machinery as a mid-turn KO — inline `checkteamslost` decides
-    `battleOutcome`, `HandleFaintedMonActions` still runs unconditionally,
-    `cleareffectsonfaint` clears status1, zero further RNG; (c) regular
-    poison (flat `floor(maxHP/8)`, no counter) and Toxic's growing
-    multiplier (1x then 2x across two turns) both pinned as their own
-    direct-construction tests, distinguishing the three `DoTurnDmg`-family
-    statuses from each other.
-- **Next (named, not landed — doc §4 steps 4-8):** `DoFieldEndTurnEffects`
-  itself only ever no-ops today (Reflect/Light Screen/Safeguard/weather
-  have no setter anywhere in this engine yet); Ingrain/Leech Seed/Wrap's
-  own heal/drain bodies (need `PLAYANIMATION`'s animType broadened past
-  `B_ANIM_STATS_CHANGE`, plus `COPYWORD`/`JUMPIFABILITY`/`MANIPULATEDAMAGE`
-  for Leech Seed specifically); the zero-script counter cases
-  (Disable/Encore/Lock-On/Charge/Taunt/Yawn bodies); Thrash's
-  `CHOSENSTATUS2ANIMATION`; and **item (c)'s full "decision → both actions
-  → end-turn → next decision boundary" dual-sided reducer** was not
-  attempted this session (a genuinely new capability — every existing
-  decision reducer is single-command-per-turn) — proofs (a)/(b) instead
-  used the doc's own established direct-construction discipline (§3),
-  which is sufficient to prove the orchestration module itself but does
-  not yet wire it behind a `BattleDecisionReducer`. Whoever picks this up
-  next should build that reducer directly on
-  `runBattleEndTurnOrchestration` rather than re-deriving the field/battler
-  loop.
-- **Notes:** no oracle traces added this session (reused the doc's own
-  banked `mechanic-endturn-burn-off.json`/`mechanic-endturn-toxic-ko-off.json`
-  evidence). No presentation/`battleScene`/ROADMAP edits. Two pre-existing
-  `toStrictEqual`-on-full-battler-object tests
-  (`battleScriptAttackCancelerFlinch`/`Disabled.test.ts`) needed their own
-  local battler fixture builders updated with the new `maxHP` default —
-  the same one-time ripple every new battler field causes; fixed inline.
 
