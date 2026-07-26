@@ -13,6 +13,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ---
 ## 476 — Both stat-UP CheckViability pairs ported: `AI_CBM_AttackUp`+`AI_CV_AttackUp` (doc §17, mandatory) and `AI_CBM_DefenseUp`+`AI_CV_DefenseUp`+`AI_CBM_BulkUp` (doc §18, stretch — landed)
 
+- **Side merge (same round, supervisor-verified incl. C-source cites, green
+  on the merged tree):** Counter/Mirror Coat retaliation-bookkeeping design
+  scout banked (`docs/counter-retaliation-design.md`, branch
+  `worker/side-20260726-142528`, merged) — the END3-precedent design step.
+  Load-bearing findings (supervisor re-verified `SpecialStatusesClear` at
+  `battle_util.c:658-663` and `TurnValuesCleanUp(FALSE)` at
+  `battle_main.c:3040/3901`): `Cmd_datahpupdate` writes the SAME value into
+  `gSpecialStatuses` (wiped after every action) and `gProtectStructs`
+  (survives to the turn boundary) — Counter reads cross-action, so reusing
+  the engine's `specialStatus.physicalDmg` would be wrong; four new flat
+  fields + a turn clear in `mapFaintedActionsResult`'s no-fainted branch
+  are the design. The missing turn clear is also a LATENT staleness bug for
+  already-modeled ProtectStruct bits — filed as **ISSUES #46** with the
+  §4 8-step registration checklist as the fix path. Merged tree: **225
+  files / 2961 tests + build green.** (Supervisor process note: hit the
+  known cwd-in-worktree self-merge trap once during this fold — caught
+  immediately, no loss; the branch commit survived and merged cleanly from
+  the main tree.)
+
 - **State:** tree green at **225 files / 2961 tests** (+0 files/+45 tests
   over entry 475's 225/2916), build green (`tsc -b && vite build`). Ratchets
   **unmoved**: `executableFrontierRatchet.test.ts` (no new opcode — this
