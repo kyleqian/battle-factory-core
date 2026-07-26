@@ -99,12 +99,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   close.
 
 ---
-# Progress ledger
-
-Newest entry on top. Keep only ~3 entries here; archive the rest to
-`PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
-
----
 ## 454 — Presentation-seam retirement, window 2: `turn1-rockslide.json` re-driven from kernel events, still 256/256 (ISSUES #39/#41 path)
 
 - **State:** tree green at **209 files / 2477 tests** (+2 files/+12 tests
