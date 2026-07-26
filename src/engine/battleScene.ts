@@ -586,12 +586,16 @@ import {
 } from "./battle2Turn1.ts";
 import { drawMode0Objects, drawMode0Ppu, mgbaDarkenColor, type Mode0Oam, type Mode0State } from "./gbaPpu.ts";
 import { compositeSemiTransparentObjPixel } from "./sprites.ts";
-import { resolveTurn5FaintWindowLines } from "./turn5FaintPresentationStaging.ts";
+import { resolveTurn5FaintWindowKoHp, resolveTurn5FaintWindowLines } from "./turn5FaintPresentationStaging.ts";
 import {
   resolveTurn1RockSlideAttackLines,
   resolveTurn1DoubleTeamKickoffLines,
   resolveTurn1RockSlideHpEndpoints,
 } from "./turn1RockSlidePresentationStaging.ts";
+import {
+  resolveTurn5EndeavorAttackLines,
+  resolveTurn5EndeavorHpEndpoints,
+} from "./turn5EndeavorPresentationStaging.ts";
 import {
   sceneOnDoubleTeamView,
   sceneOnBindView,
@@ -1357,11 +1361,12 @@ const anchorOpponentAfterTurn4Hp = 1;
 /**
  * S7 slice J (docs/battle-turn-notes.md §13/§23): Onix's own post-turn-5-
  * ENDEAVOR hp (a 1-HP survival, target.hp(88)-user.hp(1)=87 HP-diff, §13's
- * own ledger). Fresh `tools/probe/ram-probe.py` run this session (`src/data/
- * gen/turn5-endeavor-watch-probe.json`): `gBattleMons[0].hp` updates 88->**1**
- * at RAM tick 6201.
+ * own ledger) -- superseded by `resolveTurn5EndeavorHpEndpoints`'s own real
+ * `setdamagetohealthdifference` computation (`docs/presentation-seam-scout
+ * .md` §9.4 rung 2/3), which reproduces this exact literal from the REAL
+ * `BattleScript_EffectEndeavor` script, not a RAM probe -- deleted here, no
+ * longer read anywhere in this file.
  */
-const anchorPlayerAfterTurn5Hp = 1;
 
 const playerHealthboxHpOverlayAssets = {
   hpbar: healthboxAssemblyAssets.hpbar,
@@ -6979,6 +6984,25 @@ function turn5KickoffBounceTick(t: number, pressTick: number): number {
 }
 
 /**
+ * Presentation-seam wiring, window 3 (`docs/presentation-seam-scout.md`
+ * §9.4 rungs 2-3): resolved from the REAL staged MOVE_ENDEAVOR kernel event
+ * stream (`turn5EndeavorPresentationStaging.ts`), not the RAM-probe-sourced
+ * `anchorPlayerAfterTurn3Hp`/`anchorPlayerAfterTurn5Hp`/`TURN_KICKOFF_LINE1`/
+ * `TURN2_KICKOFF_LINE2` literals this window's own call site used before --
+ * `STRINGID_USEDMOVE`'s own `{B_ATK_NAME_WITH_PREFIX}`/`{B_BUFF2}` splices
+ * give "Foe GROVYLE used"/"ENDEAVOR!" (Grovyle, opponent side, real
+ * MOVE_ENDEAVOR display name); `TURN5_ENDEAVOR_HP` is Onix's real
+ * `hp-change{from,to}` (88 -> 1, ENDEAVOR's own `setdamagetohealthdifference`
+ * formula, `target.hp - attacker.hp`). `anchorPlayerAfterTurn3Hp` itself
+ * stays defined and in use elsewhere in this file (every turn 1-4 window's
+ * own call sites still read it directly) -- only THIS window's own two
+ * inputs are superseded, per `docs/presentation-seam-scout.md` §9.4's own
+ * narrowing.
+ */
+const [TURN5_ENDEAVOR_ATTACK_LINE1, TURN5_ENDEAVOR_ATTACK_LINE2] = resolveTurn5EndeavorAttackLines();
+const TURN5_ENDEAVOR_HP = resolveTurn5EndeavorHpEndpoints();
+
+/**
  * S7 slice J (docs/battle-turn-notes.md §13/§23): turn 5's own kickoff
  * message, "Foe GROVYLE used\nENDEAVOR!" a third time (Grovyle repeats its
  * turn-2/3 move, §13's own ledger) - reuses `drawTurn2KickoffText`/
@@ -7017,14 +7041,14 @@ function drawTurn5EndeavorText(fb: Uint8Array, t: number, pressTick: number): vo
     return;
   }
   const bounceTick = turn5KickoffBounceTick(t, pressTick);
-  const onixHp = endeavorOnixHp(t, pressTick, anchorPlayerAfterTurn3Hp, anchorPlayerAfterTurn5Hp);
+  const onixHp = endeavorOnixHp(t, pressTick, TURN5_ENDEAVOR_HP.from, TURN5_ENDEAVOR_HP.to);
   if (drawEndeavorSquish(fb, t, pressTick, anchorOpponentAfterTurn4Hp, bounceTick, ROCK_SLIDE_MOVE_POWER)) {
     drawPlayerHealthboxHpOverlay(fb, onixHp, endeavorHealthboxBounceY2(t, pressTick));
   } else {
     drawActionMenuIdleContent(fb, bounceTick, true, true, onixHp, true, true);
   }
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
-  drawMessageTextLines(fb, TURN_KICKOFF_LINE1, TURN2_KICKOFF_LINE2, turn2KickoffTextVisibleChars(t, pressTick));
+  drawMessageTextLines(fb, TURN5_ENDEAVOR_ATTACK_LINE1, TURN5_ENDEAVOR_ATTACK_LINE2, turn2KickoffTextVisibleChars(t, pressTick));
 }
 
 /**
@@ -7045,8 +7069,19 @@ function drawTurn5EndeavorText(fb: Uint8Array, t: number, pressTick: number): vo
  */
 const TURN5_ROCKSLIDE_PRESS_TICK = 5829; // rockSlideTextStartTick(5829) = 6222
 
-/** Grovyle faints this hit (1->0) - the opponent healthbox's own EMPTY bar (`filledPixels===0`, no forced sliver since `hpFraction` is exactly 0) is oracle-exercised for the first time in this dossier; `calcBarFilledPixels`'s existing general formula already produces this correctly with zero compositor changes (verified via `npm run compare`, not assumed). */
-const anchorOpponentAfterTurn5Hp = 0;
+/**
+ * Grovyle faints this hit (1->0) - the opponent healthbox's own EMPTY bar
+ * (`filledPixels===0`, no forced sliver since `hpFraction` is exactly 0) is
+ * oracle-exercised for the first time in this dossier; `calcBarFilledPixels`'s
+ * existing general formula already produces this correctly with zero
+ * compositor changes (verified via `npm run compare`, not assumed).
+ * Superseded as a literal by `resolveTurn5FaintWindowKoHp()`
+ * (`docs/presentation-seam-scout.md` §9.4 rung 5): the SAME already-staged
+ * `turn5FaintPresentationStaging.ts` KO chain the fainted-branch window
+ * consumes, reused here as this window's own EARLIER consumption point of
+ * Grovyle's real settle -- deleted here, no longer read anywhere in this
+ * file.
+ */
 
 /**
  * The faint-sink animation (docs/faint-switch-notes.md §3a/§7a,
@@ -7479,6 +7514,21 @@ export function turn5SitrusRingMatrix(t: number): { pa: number; pb: number; pc: 
  * a defaulted param" idiom `onixHp`/`bounceTick`/`beforeMonSprite` already
  * use on this same call chain.
  */
+/**
+ * Presentation-seam wiring, window 3 (`docs/presentation-seam-scout.md`
+ * §9.4 rung 5): Grovyle's own settle at the end of this window's
+ * `rockSlideOpponentHp` drain (below) is the SAME KO
+ * `turn5FaintPresentationStaging.ts` already stages for the fainted-branch
+ * window (§7) -- this is a second, EARLIER consumption point of that
+ * identical staged chain, not a new staged run. Only the `to` endpoint is
+ * wired: the `from` endpoint (`anchorOpponentAfterTurn4Hp`) is fed INTO that
+ * staged chain's own Grovyle precondition, so reading it back out of the
+ * chain's own event would be circular, not independent proof -- it stays a
+ * literal for this pass (named as a residual gap, `docs/presentation-seam-
+ * scout.md` §9.4 rung 5's own note).
+ */
+const TURN5_ROCKSLIDE_OPPONENT_TO_HP = resolveTurn5FaintWindowKoHp();
+
 function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixX2: number = 0, onixInvisible: boolean = false, onixY2Extra: number = 0, darken: boolean = false, bgFadeYOverride?: number, onixSinkSkipRows: number = 0): void {
   const pressTick = TURN5_ROCKSLIDE_PRESS_TICK;
   const shiftY = rockSlideBg3Y(t, pressTick);
@@ -7559,7 +7609,7 @@ function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number 
     );
   }
   const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick);
-  const opponentHp = rockSlideOpponentHp(t, pressTick, anchorOpponentAfterTurn4Hp, anchorOpponentAfterTurn5Hp);
+  const opponentHp = rockSlideOpponentHp(t, pressTick, anchorOpponentAfterTurn4Hp, TURN5_ROCKSLIDE_OPPONENT_TO_HP);
   if (t < GROVYLE_HEALTHBOX_VANISH_TICK) {
     const opponentContent = opponentHealthboxContentForHp(opponentHp);
     drawSendOutHealthbox(fb, 0, opponentContent);
@@ -11811,13 +11861,23 @@ function drawTurn6FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, b
   drawPlayerHealthboxHpOverlay(fb, onixHp, healthboxY2);
 }
 
+/**
+ * Presentation-seam wiring, window 3 (`docs/presentation-seam-scout.md`
+ * §9.4 rung 4): the attack branch's own "ONIX used\nROCK SLIDE!" text is
+ * byte-identical to window 2's own already-resolved
+ * `TURN1_ROCKSLIDE_ATTACK_LINE1/2` (`turn1RockSlidePresentationStaging.ts`)
+ * -- no new staging needed, just this call site pointed at the existing
+ * resolved constants instead of the raw `ROCK_SLIDE_LINE1`/`ROCK_SLIDE_LINE2`
+ * literals (`ROCK_SLIDE_LINE1`/`LINE2` themselves stay defined and in use by
+ * every OTHER turn's own ROCK_SLIDE window elsewhere in this file).
+ */
 function drawTurn5RockSlideWindow(fb: Uint8Array, t: number): void {
   const pressTick = TURN5_ROCKSLIDE_PRESS_TICK;
   drawTurn6FieldBase(fb, t);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   const faintedStart = turn5FaintedTextStartTick(pressTick);
   if (t < faintedStart) {
-    drawMessageTextLines(fb, ROCK_SLIDE_LINE1, ROCK_SLIDE_LINE2, rockSlideTextVisibleChars(t, pressTick));
+    drawMessageTextLines(fb, TURN1_ROCKSLIDE_ATTACK_LINE1, TURN1_ROCKSLIDE_ATTACK_LINE2, rockSlideTextVisibleChars(t, pressTick));
     return;
   }
   if (t < TURN5_SITRUS_HEAL_TEXT_START_TICK) {

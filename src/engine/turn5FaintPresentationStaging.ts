@@ -264,6 +264,23 @@ export function resolveTurn5FaintWindowContent(): Turn5FaintWindowResolution {
 }
 
 /**
+ * The KO's own real settle (0 -- Grovyle faints) -- `docs/presentation-seam-
+ * scout.md` §9.4 rung 5's own second consumption point of this SAME staged
+ * chain: `battleScene.ts`'s `drawTurn5RockSlideAttack` reads Grovyle's own
+ * `rockSlideOpponentHp` drain endpoint at an EARLIER point in turn 5's own
+ * timeline than this window's fainted-message branch (`resolveTurn5FaintWindowLines`)
+ * consumes it -- same KO hit chain, two call sites, not a second staged run.
+ */
+export function resolveTurn5FaintWindowKoHp(): number {
+  const { events } = stageTurn5FaintHitChain();
+  const koEvent = events.find((event) => event.kind === "hp-change" && event.to === 0);
+  if (!koEvent || koEvent.kind !== "hp-change") {
+    throw new Error("turn5FaintPresentationStaging: staged hit chain did not produce a KO hp-change event");
+  }
+  return koEvent.to;
+}
+
+/**
  * The full seam, end to end: stage -> bridge -> resolve. Battle Factory
  * battles are always trainer battles (`BATTLE_TYPE_TRAINER`, set in this
  * staging's own rules context construction is implicit -- singles hit

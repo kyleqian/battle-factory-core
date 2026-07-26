@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   resolveTurn5FaintWindowContent,
+  resolveTurn5FaintWindowKoHp,
   resolveTurn5FaintWindowLines,
   stageTurn5FaintHitChain,
 } from "../src/engine/turn5FaintPresentationStaging.ts";
@@ -36,5 +37,9 @@ describe("turn5FaintPresentationStaging (S10 presentation-seam checkpoint, gap 3
     // window (110/110) -- the exact literal battleScene.ts's own
     // TURN5_FAINTED_LINE1/2 hardcoded before this rung.
     expect(resolveTurn5FaintWindowLines()).toEqual(["Foe GROVYLE", "fainted!"]);
+  });
+
+  it("resolveTurn5FaintWindowKoHp (docs/presentation-seam-scout.md §9.4 rung 5) exposes the SAME staged chain's own KO settle (0) for drawTurn5RockSlideAttack's own earlier rockSlideOpponentHp consumption point, matching battleScene.ts's anchorOpponentAfterTurn5Hp for real", () => {
+    expect(resolveTurn5FaintWindowKoHp()).toBe(0);
   });
 });

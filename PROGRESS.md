@@ -4,6 +4,105 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 465 — Presentation-seam window 3 wired: `turn5-rockslide.json` re-driven from the REAL MOVE_ENDEAVOR kernel chain (§9.4's own 6-rung plan, rung 1 done in entry 464)
+
+- **State:** tree green at **220 files / 2656 tests** (+0 files/+2 tests
+  over entry 464's 220/2654), build green (`tsc -b && vite build`).
+  Ratchet unchanged (6/6, `executableFrontierRatchet.test.ts`) — no new
+  opcode registrations, no production module imports a canonical
+  recording. One commit this session.
+  **Comparator (§9.5 re-pin, the acceptance bar):**
+  `turn5-rockslide.json` **256/256**, run twice for determinism.
+  Regression sweep, all unchanged: `turn5-faint.json` **110/110**,
+  `turn1-rockslide.json` **256/256**, plus the full turn3-6
+  `tools/compare/traces/` set — `turn3-rockslide` 256/256, `turn3-endeavor`
+  192/192, `turn3-menu` 254/254, `turn4-rockslide` 250/250,
+  `turn4-doubleteam` 250/250, `turn4-menu` 44/44, `turn6-menu` 44/44,
+  `turn6-featherdance` 90/90, `turn6-rockslide-a` 255/255,
+  `turn6-rockslide-b` 105/105, `turn6-feathers` 235/235, `turn6-statfall`
+  127/127 — all full match, live this session.
+- **Did:** executed `docs/presentation-seam-scout.md` §9.4's own ordered
+  plan end to end (rung 1, opcode registration, was entry 464's own step):
+  1. **Rung 2:** `turn5EndeavorPresentationStaging.ts` now stages the REAL
+     `MOVE_ENDEAVOR` (id 283) through its own real entry label,
+     `BattleScript_EffectEndeavor` — **not** the generic
+     `BattleScript_HitFromAtkCanceler` every sibling staging module uses.
+     Real finding, confirmed live by this module's own tests: ENDEAVOR's
+     own `attackstring`/`ppreduce` execute directly under that top label
+     (no intervening `BattleScript_HitFromAtkString` sub-label exists in
+     this script), so their events' `provenance.sourceLabel` is
+     `"BattleScript_EffectEndeavor"`, not the bridge's default. The
+     trailing `goto BattleScript_HitFromAtkAnimation` DOES land on that
+     real label, so `hp-change`'s sourceLabel stays default.
+     `resolveRockSlidePresentationWindowContent` already accepted an
+     `attackStringScriptLabel` override parameter for exactly this —
+     passed explicitly, **zero bridge edits**. Onix settles 88→**1** for
+     real (`setdamagetohealthdifference`'s own `target.hp - attacker.hp =
+     87`), matching `anchorPlayerAfterTurn5Hp` exactly — reproduced by the
+     real formula, not copied. Also discovered live: `bicbyte`
+     unconditionally clears both effectiveness flags before
+     `resultmessage` runs, so this chain's own event list is SHORTER than
+     the old MOVE_STRENGTH substitute's (no `STRINGID_NOTVERYEFFECTIVE`) —
+     confirmed by this module's own tests, not assumed. Added
+     `resolveTurn5EndeavorAttackLines`/`resolveTurn5EndeavorHpEndpoints`
+     (renamed from the substitute-era `resolveTurn5EndeavorKickoffLines`),
+     mirroring window 2's `resolveTurn1RockSlideAttackLines`/
+     `resolveTurn1RockSlideHpEndpoints` pattern per §9.4's own naming.
+  2. **Rung 3:** wired `drawTurn5EndeavorText` (`battleScene.ts`) to source
+     `onixHp`'s two endpoints and the kickoff text from rung 2's resolved
+     constants (`TURN5_ENDEAVOR_HP`, `TURN5_ENDEAVOR_ATTACK_LINE1/2`)
+     instead of the `anchorPlayerAfterTurn3Hp`/`anchorPlayerAfterTurn5Hp`/
+     `TURN_KICKOFF_LINE1`/`TURN2_KICKOFF_LINE2` literals — deleted
+     `anchorPlayerAfterTurn5Hp` (single-use, now superseded exactly).
+     `anchorPlayerAfterTurn3Hp`/`TURN_KICKOFF_LINE1`/`TURN2_KICKOFF_LINE2`
+     themselves stay defined and in use — every turn 1-4 window's own call
+     sites still read them directly, out of this step's scope.
+  3. **Rung 4:** wired `drawTurn5RockSlideWindow`'s attack branch to the
+     ALREADY-RESOLVED `TURN1_ROCKSLIDE_ATTACK_LINE1/2` (byte-identical
+     text, window 2's own finding) instead of the raw `ROCK_SLIDE_LINE1`/
+     `ROCK_SLIDE_LINE2` literals (which stay defined, used by every other
+     turn's own ROCK_SLIDE window).
+  4. **Rung 5:** wired `drawTurn5RockSlideAttack`'s own `rockSlideOpponentHp`
+     call (reached indirectly via the unconditional `drawTurn6FieldBase`,
+     §9.1's own hidden-state finding) to a NEW `resolveTurn5FaintWindowKoHp()`
+     export off `turn5FaintPresentationStaging.ts` — the SAME already-staged
+     KO chain the fainted-branch window consumes, reused here as this
+     window's own EARLIER consumption point, for its `to` endpoint only
+     (0, Grovyle's real faint settle). Deleted `anchorOpponentAfterTurn5Hp`
+     (single-use, superseded exactly). The `from` endpoint
+     (`anchorOpponentAfterTurn4Hp`) stays a literal, **named as a residual
+     gap per §9.4's own instruction**: that staged KO chain's own Grovyle
+     precondition is ITSELF fed from that same literal, so reading it back
+     out would be circular, not independent proof — genuinely still
+     unstaged, not silently skipped.
+  5. **Rung 6:** the comparator re-pin above.
+- **Test:** `tests/turn5EndeavorPresentationStaging.test.ts` fully redone
+  (8 tests) against the real chain — terminal HP (88→1), the shorter
+  9-event kind list (no resultmessage event), both sourceLabels
+  (`BattleScript_EffectEndeavor` for the message,
+  `BattleScript_HitFromAtkAnimation` for hp-change), the resolved
+  {from:88,to:1} endpoints, and "Foe GROVYLE used"/"ENDEAVOR!" (the real
+  move name, not a substitute's). `tests/turn5FaintPresentationStaging.test.ts`
+  +1 test pinning `resolveTurn5FaintWindowKoHp()` at 0.
+- **Next:** seam-scout's own still-open items: turn 4's own
+  `anchorOpponentAfterTurn4Hp` has no staged proof yet (the residual gap
+  named above — needs a turn-4 RockSlide-settle staging module before it
+  can be wired for real, not just fed back to itself), items 1/5 from §9's
+  own list, ENDTURN_ABILITIES/ITEMS1/ITEMS2 breadth (pure-C), Nightmare/
+  Curse/Thrash/Disable/Taunt end-turn bodies, every other still-
+  `blocked-on-opcodes` census row (`B_SCR_OP_DMGTOLEVEL`,
+  `PSYWAVEDAMAGEEFFECT`, `COUNTERDAMAGECALCULATOR`/`TYPECALC2`,
+  `MIRRORCOATDAMAGECALCULATOR`, `STOCKPILETOBASEDAMAGE`, `SETBIDE`, ...),
+  the 4 remaining CV-only factory-AI handlers (side lane's own next item
+  per entry 463).
+- **Notes:** stayed inside scope — no factory-AI files, no
+  `docs/factory-ai-*.md`, no animation files, no opcode registrations
+  beyond entry 464's own three, no other seam window. No PAPERCUT: every
+  empirical prediction (event-kind list, sourceLabel values, HP endpoints)
+  was verified by running the Tier-1 tests before wiring `battleScene.ts`,
+  so no dev-loop friction cost real time this session.
+
+---
 ## 464 — EFFECT_ENDEAVOR registered: SETDAMAGETOHEALTHDIFFERENCE/BICBYTE/ADJUSTSETDAMAGE (entry 463's side-merge blocker, seam-scout §9.2)
 
 - **State:** tree green at **220 files / 2654 tests** (+0 files/+20 tests
@@ -232,111 +331,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   IO/OAM/palette RAM — worked around via libmgba-py `_bus_write`.
   Combined merged tree re-verified: **220 files / 2634 tests + build
   green.**
-
----
-## 462 — Ingrain/Leech Seed/Wrap-family registered: setters + end-turn bodies executable (entry 461's next-item list)
-
-- **State:** tree green at **219 files / 2610 tests** (+1 file/+20 tests
-  over entry 461's 218/2590), build green. Ratchet: `battleScriptHitChainOpcode.ts`
-  25→23 barriers (two retired **for real**, not narrowed — see below), new
-  `battleScriptIngrainLeechSeedWrapOpcode.ts` pinned at 3 (deliberate, named
-  in the ratchet's own comment). One commit (`0a29dfe`). Census
-  live-regenerated: **73/214→76/214 effects, 152/355→160/355 moves,
-  118/276→125/276 Factory-L50** (25/25 self-checks pass). Verify script
-  rerun live against the oracle twice for determinism: **18/18 PASS** both
-  times (`node --experimental-strip-types tools/probe/verify-ingrain-leechseed-wrap-ground-truth.ts`).
-- **Did:** followed `docs/ingrain-leechseed-wrap-ground-truth.md`'s own
-  dependency-ordered slices end to end.
-  1. **Setters:** new `TRYSETROOTS` (Ingrain, one concrete site, no RNG) and
-     `SETSEEDED` (Leech Seed — accuracy/already-seeded/Grass-immunity/success
-     branches, `STATUS3_LEECHSEED`+seeder-id bits) opcodes in a new
-     `battleScriptIngrainLeechSeedWrapOpcode.ts`. Wrap's own setter needed no
-     new opcode — `MOVE_EFFECT_WRAP` is a new case inside the
-     already-registered `Cmd_seteffectwithchance` dispatch
-     (`applySetMoveEffect`): the `(Random()&3)+3` duration roll, plus two new
-     per-battler fields this doc's own gap analysis flagged
-     (`wrappedMove`/`wrappedBy`, optional/defaulted so no existing fixture
-     needed updating).
-  2. **End-turn bodies:** wired real `ENDTURN_INGRAIN`/`LEECH_SEED`/`WRAP`
-     ticks into `battleEndTurnOrchestration.ts`'s existing loop, in the
-     enum's real execution order (INGRAIN, ABILITIES/ITEMS1 no-op,
-     LEECH_SEED, POISON/BAD_POISON/BURN, NIGHTMARE, CURSE, WRAP, UPROAR
-     no-op, THRASH, ...) — **not** the C switch's own textual case order,
-     which is cosmetically different and would have mis-sequenced Leech
-     Seed/Wrap against the already-landed status-damage tick. Factored the
-     repeated "run tick, propagate opcode-barrier, check outcome-decided"
-     shape into one `applyTickOutcome` helper shared by all four ticks now
-     (status-damage + the three new ones).
-  3. **Two real shape gaps the doc named, both closed:** `Cmd_datahpupdate`'s
-     negative-damage (HP gain) branch was a barrier from an earlier rung
-     ("needs maxHP, unmodeled") — `maxHP` has existed since the burn/poison
-     work, so this was just stale; implemented the real heal-clamped-at-maxHP
-     branch (no bide/shellBell/physical-special bookkeeping on this branch,
-     matching source exactly). `Cmd_cleareffectsonfaint`'s `STATUS2_WRAPPED`
-     cross-battler barrier is now a real clear using the new `wrappedBy`
-     identity (a fainted mon's own traps release on its allies/foes for
-     real).
-  4. **Two narrow opcode-table gaps the census tool itself surfaced, not the
-     doc:** `PRINTFROMTABLE_TABLES` was missing `gLeechSeedStringIds`
-     entirely (opcode-registered ≠ every table pointer wired); `PLAYANIMATION`'s
-     animType allowlist needed `B_ANIM_INGRAIN_HEAL`/`B_ANIM_LEECH_SEED_DRAIN`/
-     `B_ANIM_TURN_TRAP` added (both discovered by running the tests, not
-     predicted in advance — fixed same rung).
-- **Test:** full setter lifecycle for all three (Ingrain success/already-rooted;
-  Leech Seed success/Grass-immune/already-seeded, entering post-accuracycheck
-  per the doc's own scope note since that roll is already covered elsewhere;
-  Wrap's duration roll/already-wrapped-skip/`BattleScript_MoveEffectWrap`
-  return, isolated at the `seteffectwithchance` dispatch per this codebase's
-  own established per-opcode testing convention rather than gambling on a
-  full accuracy/crit/damage RNG chain) — 11 tests, new file. End-turn tick
-  tests extending `battleEndTurnOrchestration.test.ts`: Ingrain heal capped
-  at maxHP (doc's live 159→161 ledger) and uncapped, Ingrain's real full/0-HP
-  guard, Leech Seed drain+heal (doc's live numbers) plus a Liquid Ooze
-  reversal (seeder damaged instead of healed — the ability check is on the
-  **seeded** mon per source, confirmed against `Cmd_jumpifability`'s exact
-  call site), Wrap still-trapped decrement+damage and release-with-no-damage
-  — 7 new tests. Plus 3 new barrier-reachability tests (COPYARRAY/
-  JUMPIFABILITY/MANIPULATEDAMAGE's own narrowed-tuple misses) required by
-  the ratchet's own "every pinned module needs a reachability test" check.
-  All zero-RNG assertions match the doc's own live ledger exactly.
-- **Ratchet pin moves, named:** `battleScriptHitChainOpcode.ts` 25→23 (both
-  retirements are real — see item 3 above, not a narrowing);
-  `battleScriptIngrainLeechSeedWrapOpcode.ts` new at 3 (`COPYARRAY` narrowed
-  to `BattleScript_LeechSeedTurnDrain`'s own `gBattleMoveDamage<-gHpDealt`
-  tuple among 16 concrete call sites; `JUMPIFABILITY` narrowed to
-  `BS_TARGET`/`BS_ATTACKER` + `ABILITY_LIQUID_OOZE` among 18; `MANIPULATEDAMAGE`
-  narrowed to `DMG_CHANGE_SIGN` among 4 — `DMG_RECOIL_FROM_MISS`/`DMG_DOUBLED`
-  out of this slice's scope).
-- **Next:** CheckViability handler bodies (entry 460's own carried item,
-  phased by the earlier audit's 16-reachable-handler table), seam window 3
-  (`turn5-rockslide.json`), ENDTURN_ABILITIES/ITEMS1/ITEMS2 breadth (pure-C,
-  explicitly out of this step's scope), Nightmare/Curse/Thrash/Disable/Taunt
-  end-turn bodies now that their own case-barriers are the only ones left in
-  `runDoBattlerEndTurnEffects` (no move effect sets any of their trigger
-  bits yet, so still genuinely inert, not just undertested).
-- **Notes:** no factory-AI or `docs/factory-ai-*.md` changes (side worker's
-  area this hour, per the brief's own scope line) — untouched. No new
-  PAPERCUT: the two "opcode registered ≠ every table/animType entry wired"
-  gaps (PRINTFROMTABLE/PLAYANIMATION) cost some time but were caught by the
-  test suite itself within the same session, not a dev-loop friction worth
-  flagging separately from ordinary iteration.
-- **Side merge (same hour, supervisor-verified):** CheckViability prep
-  scout landed (`docs/factory-ai-checkviability-ground-truth.md`, 2 staged
-  SpeedDown fixtures, verify script ALL PASS live twice). Two corrections
-  to the July-25 audit, both supervisor-re-verified against source: (1) the
-  "9 trivial 0-if_random handlers" claim is wrong — every one has ≥1
-  `if_random_less_than`; (2) CBM's own dispatch blocks 17 of 22 reachable
-  CV handlers before viability runs — only AlwaysHit/HighCrit/VitalThrow/
-  Pursuit/SpeedDownFromChance are portable without a paired `AI_CBM_*`.
-  Reachable set re-derived 16→22 at the current census. Merged tree
-  re-verified green (2610 tests).
-- **Animation lane (same session, two evidence rungs merged):** defect A's
-  mechanism is now RAM-proven — the scale-window OBJ has OAM `objMode=1`
-  (ST_OAM_OBJ_BLEND): hardware alpha-blends it 50/50 (`eva=evb=8`,
-  target2=all layers) against the under-layer; texel brute-force across
-  full palette × all tint coefficients finds zero pure-texel matches,
-  ruling out every coordinate-bug candidate. Remaining unknown: the exact
-  under-layer composite (single-layer candidates each fail). Third worker
-  now instrumenting the pre-OBJ composite directly. FUTURE_SIGHT/CONFUSION
-  stay `partial` 85/114 / 108/140.
 

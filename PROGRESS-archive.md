@@ -1,4 +1,111 @@
 ---
+## 462 — Ingrain/Leech Seed/Wrap-family registered: setters + end-turn bodies executable (entry 461's next-item list)
+
+- **State:** tree green at **219 files / 2610 tests** (+1 file/+20 tests
+  over entry 461's 218/2590), build green. Ratchet: `battleScriptHitChainOpcode.ts`
+  25→23 barriers (two retired **for real**, not narrowed — see below), new
+  `battleScriptIngrainLeechSeedWrapOpcode.ts` pinned at 3 (deliberate, named
+  in the ratchet's own comment). One commit (`0a29dfe`). Census
+  live-regenerated: **73/214→76/214 effects, 152/355→160/355 moves,
+  118/276→125/276 Factory-L50** (25/25 self-checks pass). Verify script
+  rerun live against the oracle twice for determinism: **18/18 PASS** both
+  times (`node --experimental-strip-types tools/probe/verify-ingrain-leechseed-wrap-ground-truth.ts`).
+- **Did:** followed `docs/ingrain-leechseed-wrap-ground-truth.md`'s own
+  dependency-ordered slices end to end.
+  1. **Setters:** new `TRYSETROOTS` (Ingrain, one concrete site, no RNG) and
+     `SETSEEDED` (Leech Seed — accuracy/already-seeded/Grass-immunity/success
+     branches, `STATUS3_LEECHSEED`+seeder-id bits) opcodes in a new
+     `battleScriptIngrainLeechSeedWrapOpcode.ts`. Wrap's own setter needed no
+     new opcode — `MOVE_EFFECT_WRAP` is a new case inside the
+     already-registered `Cmd_seteffectwithchance` dispatch
+     (`applySetMoveEffect`): the `(Random()&3)+3` duration roll, plus two new
+     per-battler fields this doc's own gap analysis flagged
+     (`wrappedMove`/`wrappedBy`, optional/defaulted so no existing fixture
+     needed updating).
+  2. **End-turn bodies:** wired real `ENDTURN_INGRAIN`/`LEECH_SEED`/`WRAP`
+     ticks into `battleEndTurnOrchestration.ts`'s existing loop, in the
+     enum's real execution order (INGRAIN, ABILITIES/ITEMS1 no-op,
+     LEECH_SEED, POISON/BAD_POISON/BURN, NIGHTMARE, CURSE, WRAP, UPROAR
+     no-op, THRASH, ...) — **not** the C switch's own textual case order,
+     which is cosmetically different and would have mis-sequenced Leech
+     Seed/Wrap against the already-landed status-damage tick. Factored the
+     repeated "run tick, propagate opcode-barrier, check outcome-decided"
+     shape into one `applyTickOutcome` helper shared by all four ticks now
+     (status-damage + the three new ones).
+  3. **Two real shape gaps the doc named, both closed:** `Cmd_datahpupdate`'s
+     negative-damage (HP gain) branch was a barrier from an earlier rung
+     ("needs maxHP, unmodeled") — `maxHP` has existed since the burn/poison
+     work, so this was just stale; implemented the real heal-clamped-at-maxHP
+     branch (no bide/shellBell/physical-special bookkeeping on this branch,
+     matching source exactly). `Cmd_cleareffectsonfaint`'s `STATUS2_WRAPPED`
+     cross-battler barrier is now a real clear using the new `wrappedBy`
+     identity (a fainted mon's own traps release on its allies/foes for
+     real).
+  4. **Two narrow opcode-table gaps the census tool itself surfaced, not the
+     doc:** `PRINTFROMTABLE_TABLES` was missing `gLeechSeedStringIds`
+     entirely (opcode-registered ≠ every table pointer wired); `PLAYANIMATION`'s
+     animType allowlist needed `B_ANIM_INGRAIN_HEAL`/`B_ANIM_LEECH_SEED_DRAIN`/
+     `B_ANIM_TURN_TRAP` added (both discovered by running the tests, not
+     predicted in advance — fixed same rung).
+- **Test:** full setter lifecycle for all three (Ingrain success/already-rooted;
+  Leech Seed success/Grass-immune/already-seeded, entering post-accuracycheck
+  per the doc's own scope note since that roll is already covered elsewhere;
+  Wrap's duration roll/already-wrapped-skip/`BattleScript_MoveEffectWrap`
+  return, isolated at the `seteffectwithchance` dispatch per this codebase's
+  own established per-opcode testing convention rather than gambling on a
+  full accuracy/crit/damage RNG chain) — 11 tests, new file. End-turn tick
+  tests extending `battleEndTurnOrchestration.test.ts`: Ingrain heal capped
+  at maxHP (doc's live 159→161 ledger) and uncapped, Ingrain's real full/0-HP
+  guard, Leech Seed drain+heal (doc's live numbers) plus a Liquid Ooze
+  reversal (seeder damaged instead of healed — the ability check is on the
+  **seeded** mon per source, confirmed against `Cmd_jumpifability`'s exact
+  call site), Wrap still-trapped decrement+damage and release-with-no-damage
+  — 7 new tests. Plus 3 new barrier-reachability tests (COPYARRAY/
+  JUMPIFABILITY/MANIPULATEDAMAGE's own narrowed-tuple misses) required by
+  the ratchet's own "every pinned module needs a reachability test" check.
+  All zero-RNG assertions match the doc's own live ledger exactly.
+- **Ratchet pin moves, named:** `battleScriptHitChainOpcode.ts` 25→23 (both
+  retirements are real — see item 3 above, not a narrowing);
+  `battleScriptIngrainLeechSeedWrapOpcode.ts` new at 3 (`COPYARRAY` narrowed
+  to `BattleScript_LeechSeedTurnDrain`'s own `gBattleMoveDamage<-gHpDealt`
+  tuple among 16 concrete call sites; `JUMPIFABILITY` narrowed to
+  `BS_TARGET`/`BS_ATTACKER` + `ABILITY_LIQUID_OOZE` among 18; `MANIPULATEDAMAGE`
+  narrowed to `DMG_CHANGE_SIGN` among 4 — `DMG_RECOIL_FROM_MISS`/`DMG_DOUBLED`
+  out of this slice's scope).
+- **Next:** CheckViability handler bodies (entry 460's own carried item,
+  phased by the earlier audit's 16-reachable-handler table), seam window 3
+  (`turn5-rockslide.json`), ENDTURN_ABILITIES/ITEMS1/ITEMS2 breadth (pure-C,
+  explicitly out of this step's scope), Nightmare/Curse/Thrash/Disable/Taunt
+  end-turn bodies now that their own case-barriers are the only ones left in
+  `runDoBattlerEndTurnEffects` (no move effect sets any of their trigger
+  bits yet, so still genuinely inert, not just undertested).
+- **Notes:** no factory-AI or `docs/factory-ai-*.md` changes (side worker's
+  area this hour, per the brief's own scope line) — untouched. No new
+  PAPERCUT: the two "opcode registered ≠ every table/animType entry wired"
+  gaps (PRINTFROMTABLE/PLAYANIMATION) cost some time but were caught by the
+  test suite itself within the same session, not a dev-loop friction worth
+  flagging separately from ordinary iteration.
+- **Side merge (same hour, supervisor-verified):** CheckViability prep
+  scout landed (`docs/factory-ai-checkviability-ground-truth.md`, 2 staged
+  SpeedDown fixtures, verify script ALL PASS live twice). Two corrections
+  to the July-25 audit, both supervisor-re-verified against source: (1) the
+  "9 trivial 0-if_random handlers" claim is wrong — every one has ≥1
+  `if_random_less_than`; (2) CBM's own dispatch blocks 17 of 22 reachable
+  CV handlers before viability runs — only AlwaysHit/HighCrit/VitalThrow/
+  Pursuit/SpeedDownFromChance are portable without a paired `AI_CBM_*`.
+  Reachable set re-derived 16→22 at the current census. Merged tree
+  re-verified green (2610 tests).
+- **Animation lane (same session, two evidence rungs merged):** defect A's
+  mechanism is now RAM-proven — the scale-window OBJ has OAM `objMode=1`
+  (ST_OAM_OBJ_BLEND): hardware alpha-blends it 50/50 (`eva=evb=8`,
+  target2=all layers) against the under-layer; texel brute-force across
+  full palette × all tint coefficients finds zero pure-texel matches,
+  ruling out every coordinate-bug candidate. Remaining unknown: the exact
+  under-layer composite (single-layer candidates each fail). Third worker
+  now instrumenting the pre-OBJ composite directly. FUTURE_SIGHT/CONFUSION
+  stay `partial` 85/114 / 108/140.
+
+---
 ## 461 — Full-turn reducer: PLAYER-side forced-switch variant lands (entry 459's item 3, the named remainder)
 
 - **State:** tree green at **218 files / 2585 tests** (+0 files/+3 tests
