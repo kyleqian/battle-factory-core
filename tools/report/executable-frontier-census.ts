@@ -25,6 +25,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { SET_MOVE_EFFECT_SUPPORTED_BYTES } from "../../src/engine/battleScriptHitChainOpcode.ts";
 import { loadBattleScriptProgram } from "../../src/engine/battleScriptProgram.ts";
 import { createBattleScriptStatusRulesHandlers } from "../../src/engine/battleScriptRulesContext.ts";
 
@@ -132,7 +133,7 @@ function firstInstruction(labelName: string, guard: Set<string> = new Set()): { 
 // ---------------------------------------------------------------------------
 // The one deliberate semantic exception: Cmd_seteffectwithchance's
 // SetMoveEffect dispatch (applySetMoveEffect,
-// src/engine/battleScriptHitChainOpcode.ts:1669-1870, itself a source-faithful
+// src/engine/battleScriptHitChainOpcode.ts:1760-1971, itself a source-faithful
 // port of battle_script_commands.c's Cmd_seteffectwithchance switch). The
 // opcode B_SCR_OP_SETEFFECTWITHCHANCE is registered, but which MOVE_EFFECT_*
 // byte a specific effect script feeds it (via the preceding `setmoveeffect`
@@ -143,14 +144,73 @@ function firstInstruction(labelName: string, guard: Set<string> = new Set()): { 
 // it executes" diverge today (PROGRESS 444).
 // ---------------------------------------------------------------------------
 
-const SETMOVEEFFECT_SUPPORTED = new Set([
-  "MOVE_EFFECT_POISON",
-  "MOVE_EFFECT_BURN",
-  "MOVE_EFFECT_FREEZE",
-  "MOVE_EFFECT_PARALYSIS",
-  "MOVE_EFFECT_CONFUSION",
-  "MOVE_EFFECT_FLINCH",
-]);
+// include/constants/battle.h:247-299 -- MOVE_EFFECT_* token name -> numeric
+// id. This is the one hand-maintained piece left (the *set of dispatched
+// ids* itself is imported live from the engine above, not re-derived here):
+// BattleScript operand tokens are source text ("MOVE_EFFECT_ATK_MINUS_1"),
+// not the numeric bytes the engine's dispatch is keyed on, and the committed
+// script topology/graph never resolves that text to a number. The guard loop
+// right below turns any gap here into a hard failure instead of a silent
+// misclassification, so this list can go stale without the census going
+// stale with it (the exact failure mode of ISSUES #44).
+const MOVE_EFFECT_ID_BY_NAME: Readonly<Record<string, number>> = Object.freeze({
+  MOVE_EFFECT_POISON: 2,
+  MOVE_EFFECT_BURN: 3,
+  MOVE_EFFECT_FREEZE: 4,
+  MOVE_EFFECT_PARALYSIS: 5,
+  MOVE_EFFECT_CONFUSION: 7,
+  MOVE_EFFECT_FLINCH: 8,
+  MOVE_EFFECT_ATK_PLUS_1: 15,
+  MOVE_EFFECT_DEF_PLUS_1: 16,
+  MOVE_EFFECT_SPD_PLUS_1: 17,
+  MOVE_EFFECT_SP_ATK_PLUS_1: 18,
+  MOVE_EFFECT_SP_DEF_PLUS_1: 19,
+  MOVE_EFFECT_ACC_PLUS_1: 20,
+  MOVE_EFFECT_EVS_PLUS_1: 21,
+  MOVE_EFFECT_ATK_MINUS_1: 22,
+  MOVE_EFFECT_DEF_MINUS_1: 23,
+  MOVE_EFFECT_SPD_MINUS_1: 24,
+  MOVE_EFFECT_SP_ATK_MINUS_1: 25,
+  MOVE_EFFECT_SP_DEF_MINUS_1: 26,
+  MOVE_EFFECT_ACC_MINUS_1: 27,
+  MOVE_EFFECT_EVS_MINUS_1: 28,
+  MOVE_EFFECT_ATK_PLUS_2: 39,
+  MOVE_EFFECT_DEF_PLUS_2: 40,
+  MOVE_EFFECT_SPD_PLUS_2: 41,
+  MOVE_EFFECT_SP_ATK_PLUS_2: 42,
+  MOVE_EFFECT_SP_DEF_PLUS_2: 43,
+  MOVE_EFFECT_ACC_PLUS_2: 44,
+  MOVE_EFFECT_EVS_PLUS_2: 45,
+  MOVE_EFFECT_ATK_MINUS_2: 46,
+  MOVE_EFFECT_DEF_MINUS_2: 47,
+  MOVE_EFFECT_SPD_MINUS_2: 48,
+  MOVE_EFFECT_SP_ATK_MINUS_2: 49,
+  MOVE_EFFECT_SP_DEF_MINUS_2: 50,
+  MOVE_EFFECT_ACC_MINUS_2: 51,
+  MOVE_EFFECT_EVS_MINUS_2: 52,
+});
+const NAMED_MOVE_EFFECT_IDS = new Set(Object.values(MOVE_EFFECT_ID_BY_NAME));
+
+// Drift guard: every id the engine says it genuinely dispatches (other than
+// the bare "0" sentinel, which parseMoveEffectBase resolves before ever
+// consulting SETMOVEEFFECT_SUPPORTED) must be nameable here, or this census
+// would keep classifying a script using that id as blocked forever.
+for (const id of SET_MOVE_EFFECT_SUPPORTED_BYTES) {
+  if (id === 0) continue;
+  if (!NAMED_MOVE_EFFECT_IDS.has(id)) {
+    throw new Error(
+      `executable-frontier census: applySetMoveEffect (battleScriptHitChainOpcode.ts) now dispatches `
+      + `MOVE_EFFECT_BYTE ${id}, which has no entry in this tool's MOVE_EFFECT_ID_BY_NAME token table -- `
+      + "add its name (include/constants/battle.h) so SETMOVEEFFECT_SUPPORTED stays derived correctly.",
+    );
+  }
+}
+
+const SETMOVEEFFECT_SUPPORTED = new Set(
+  Object.entries(MOVE_EFFECT_ID_BY_NAME)
+    .filter(([, id]) => SET_MOVE_EFFECT_SUPPORTED_BYTES.has(id))
+    .map(([name]) => name),
+);
 const SETMOVEEFFECT_NAMED_BARRIER = new Set(["MOVE_EFFECT_SLEEP", "MOVE_EFFECT_TOXIC"]);
 
 function parseMoveEffectBase(rawOperands: string | undefined): string {
@@ -368,6 +428,23 @@ const validationChecks: Array<() => void> = [
   () => requireExecutable("EFFECT_ATTACK_UP_2"),
   () => requireExecutable("EFFECT_DEFENSE_DOWN"),
   () => requireExecutable("EFFECT_DEFENSE_DOWN_2"),
+  // ISSUES #44: SETMOVEEFFECT_SUPPORTED now derives from the engine's own
+  // exported SET_MOVE_EFFECT_SUPPORTED_BYTES (which spreads
+  // STAT_MOVE_EFFECT_TABLE's keys) instead of a hand list that predated that
+  // table's registration. These EFFECT_*_HIT scripts feed SetMoveEffect a
+  // magnitude-1 stat token via Cmd_seteffectwithchance -- distinct from the
+  // EFFECT_ATTACK_UP/EFFECT_DEFENSE_DOWN primary-effect pair just above,
+  // which reach ChangeStatBuffs through Cmd_statbuffchange instead -- and
+  // all flip straight to executable since applySetMoveEffect's stat-family
+  // dispatch was already source-complete.
+  () => requireExecutable("EFFECT_ATTACK_DOWN_HIT"), // MOVE_EFFECT_ATK_MINUS_1
+  () => requireExecutable("EFFECT_DEFENSE_DOWN_HIT"), // MOVE_EFFECT_DEF_MINUS_1
+  () => requireExecutable("EFFECT_SPEED_DOWN_HIT"), // MOVE_EFFECT_SPD_MINUS_1
+  () => requireExecutable("EFFECT_SPECIAL_ATTACK_DOWN_HIT"), // MOVE_EFFECT_SP_ATK_MINUS_1
+  () => requireExecutable("EFFECT_SPECIAL_DEFENSE_DOWN_HIT"), // MOVE_EFFECT_SP_DEF_MINUS_1
+  () => requireExecutable("EFFECT_ACCURACY_DOWN_HIT"), // MOVE_EFFECT_ACC_MINUS_1
+  () => requireExecutable("EFFECT_ATTACK_UP_HIT"), // MOVE_EFFECT_ATK_PLUS_1
+  () => requireExecutable("EFFECT_DEFENSE_UP_HIT"), // MOVE_EFFECT_DEF_PLUS_1
 ];
 
 let validationFailed = false;
@@ -605,6 +682,13 @@ lines.push(
 );
 lines.push("- `EFFECT_SLEEP`, `EFFECT_TOXIC` blocked, mentioning `Cmd_seteffectprimary` (still fully unregistered)");
 lines.push("- `EFFECT_RECOIL_IF_MISS` executable (a real positive: it enters via `BattleScript_HitFromAtkString`, skipping the chokepoint entirely, and reaches moveend/checkteamslost)");
+lines.push(
+  "- `EFFECT_ATTACK_DOWN_HIT`, `EFFECT_DEFENSE_DOWN_HIT`, `EFFECT_SPEED_DOWN_HIT`, "
+  + "`EFFECT_SPECIAL_ATTACK_DOWN_HIT`, `EFFECT_SPECIAL_DEFENSE_DOWN_HIT`, `EFFECT_ACCURACY_DOWN_HIT`, "
+  + "`EFFECT_ATTACK_UP_HIT`, `EFFECT_DEFENSE_UP_HIT` each executable (ISSUES #44: `SETMOVEEFFECT_SUPPORTED` "
+  + "is now derived from the engine's own exported `SET_MOVE_EFFECT_SUPPORTED_BYTES`, which spreads "
+  + "`STAT_MOVE_EFFECT_TABLE`'s keys, instead of a hand list that predated that table's registration)",
+);
 lines.push("");
 lines.push("All checks passed for this run.");
 lines.push("");
@@ -619,13 +703,17 @@ lines.push(
 );
 lines.push(
   "- **One deliberate semantic exception:** `Cmd_seteffectwithchance`'s SetMoveEffect dispatch "
-  + "(`applySetMoveEffect`, `src/engine/battleScriptHitChainOpcode.ts:1669-1870`) is opcode-registered but "
+  + "(`applySetMoveEffect`, `src/engine/battleScriptHitChainOpcode.ts:1760-1971`) is opcode-registered but "
   + "internally branches on the `MOVE_EFFECT_*` byte a script sets via the preceding `setmoveeffect` "
   + "statement. This is the only production dispatcher today where opcode registration and per-script "
   + "executability diverge (PROGRESS 444), so this census specifically tracks that one operand value along "
-  + "each walk. Every other multi-branch dispatcher's internal barriers are *not* modeled operand-by-operand "
-  + "here -- if a future dispatcher gains the same pattern (registered opcode, narrow-input barrier), this "
-  + "tool will overstate its effects as fully executable until a similar tracked exception is added.",
+  + "each walk -- reading the supported-byte set live from the engine's own exported "
+  + "`SET_MOVE_EFFECT_SUPPORTED_BYTES` (ISSUES #44) rather than a second hand-maintained copy, with a "
+  + "name<->id lookup table guarded by an assertion that fails the run if the engine's dispatch grows an id "
+  + "this tool cannot name yet. Every other multi-branch dispatcher's internal barriers are *not* modeled "
+  + "operand-by-operand here -- if a future dispatcher gains the same pattern (registered opcode, "
+  + "narrow-input barrier), this tool will overstate its effects as fully executable until a similar tracked "
+  + "exception is added.",
 );
 lines.push(
   "- **Call/return modeling.** A `call` edge is treated as reaching *both* the callee's entry (to collect "

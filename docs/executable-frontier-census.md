@@ -10,10 +10,10 @@ Answers ROADMAP S10's Executable-frontier reset question directly: not "how many
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 57 | 214 | 26.6% |
-| Moves (unweighted, all 355) | 122 | 355 | 34.4% |
-| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 92 | 276 | 33.3% |
-| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 1099 | 2957 | 37.2% |
+| Effect scripts | 65 | 214 | 30.4% |
+| Moves (unweighted, all 355) | 144 | 355 | 40.6% |
+| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 111 | 276 | 40.2% |
+| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 1416 | 2957 | 47.9% |
 
 "Executable" means every opcode on every statically reachable path from the effect's entry script has a dispatch entry today (registered barriers included, per ROADMAP S10 §1's (a)/(b) policy). It is not a semantic-correctness claim -- see Caveats.
 
@@ -121,12 +121,12 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_REFLECT | `BattleScript_EffectReflect` | blocked-on-opcodes | `B_SCR_OP_SETREFLECT` (main path) | - | 1 | 1 (16) |
 | EFFECT_POISON | `BattleScript_EffectPoison` | blocked-on-opcodes | `B_SCR_OP_JUMPIFABILITY`, `B_SCR_OP_COPYARRAY`, `B_SCR_OP_JUMPIFSTATUS`, `B_SCR_OP_JUMPIFTYPE`, `B_SCR_OP_JUMPIFSIDEAFFECTING`, `B_SCR_OP_SETEFFECTPRIMARY` (main path) | - | 2 | 0 (0) |
 | EFFECT_PARALYZE | `BattleScript_EffectParalyze` | blocked-on-opcodes | `B_SCR_OP_JUMPIFABILITY`, `B_SCR_OP_COPYARRAY`, `B_SCR_OP_JUMPIFSTATUS`, `B_SCR_OP_JUMPIFSIDEAFFECTING`, `B_SCR_OP_SETEFFECTPRIMARY` (main path) | - | 3 | 3 (64) |
-| EFFECT_ATTACK_DOWN_HIT | `BattleScript_EffectAttackDownHit` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_ATK_MINUS_1 is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 1 | 1 (3) |
-| EFFECT_DEFENSE_DOWN_HIT | `BattleScript_EffectDefenseDownHit` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_DEF_MINUS_1 is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 4 | 3 (32) |
-| EFFECT_SPEED_DOWN_HIT | `BattleScript_EffectSpeedDownHit` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_SPD_MINUS_1 is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 6 | 4 (48) |
-| EFFECT_SPECIAL_ATTACK_DOWN_HIT | `BattleScript_EffectSpecialAttackDownHit` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_SP_ATK_MINUS_1 is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 1 | 1 (2) |
-| EFFECT_SPECIAL_DEFENSE_DOWN_HIT | `BattleScript_EffectSpecialDefenseDownHit` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_SP_DEF_MINUS_1 is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 4 | 4 (188) |
-| EFFECT_ACCURACY_DOWN_HIT | `BattleScript_EffectAccuracyDownHit` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_ACC_MINUS_1 is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 3 | 3 (16) |
+| EFFECT_ATTACK_DOWN_HIT | `BattleScript_EffectAttackDownHit` | executable | - | - | 1 | 1 (3) |
+| EFFECT_DEFENSE_DOWN_HIT | `BattleScript_EffectDefenseDownHit` | executable | - | - | 4 | 3 (32) |
+| EFFECT_SPEED_DOWN_HIT | `BattleScript_EffectSpeedDownHit` | executable | - | - | 6 | 4 (48) |
+| EFFECT_SPECIAL_ATTACK_DOWN_HIT | `BattleScript_EffectSpecialAttackDownHit` | executable | - | - | 1 | 1 (2) |
+| EFFECT_SPECIAL_DEFENSE_DOWN_HIT | `BattleScript_EffectSpecialDefenseDownHit` | executable | - | - | 4 | 4 (188) |
+| EFFECT_ACCURACY_DOWN_HIT | `BattleScript_EffectAccuracyDownHit` | executable | - | - | 3 | 3 (16) |
 | EFFECT_EVASION_DOWN_HIT | `BattleScript_EffectHit` | executable | - | - | 0 | 0 (0) |
 | EFFECT_SKY_ATTACK | `BattleScript_EffectSkyAttack` | blocked-on-opcodes | `B_SCR_OP_CLEARSTATUSFROMEFFECT`, `B_SCR_OP_SETEFFECTPRIMARY`, `B_SCR_OP_COPYARRAY` (edge branch only) | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_CHARGING is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 1 | 1 (1) |
 | EFFECT_CONFUSE_HIT | `BattleScript_EffectConfuseHit` | executable | - | - | 6 | 6 (42) |
@@ -191,8 +191,8 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_HIDDEN_POWER | `BattleScript_EffectHiddenPower` | blocked-on-opcodes | `B_SCR_OP_HIDDENPOWERCALC` (main path) | - | 1 | 1 (1) |
 | EFFECT_RAIN_DANCE | `BattleScript_EffectRainDance` | blocked-on-opcodes | `B_SCR_OP_SETRAIN`, `B_SCR_OP_TRYCASTFORMDATACHANGE`, `B_SCR_OP_ADDBYTE`, `B_SCR_OP_JUMPIFARRAYNOTEQUAL` (main path) | - | 1 | 1 (28) |
 | EFFECT_SUNNY_DAY | `BattleScript_EffectSunnyDay` | blocked-on-opcodes | `B_SCR_OP_SETSUNNY`, `B_SCR_OP_TRYCASTFORMDATACHANGE`, `B_SCR_OP_ADDBYTE`, `B_SCR_OP_JUMPIFARRAYNOTEQUAL` (main path) | - | 1 | 1 (25) |
-| EFFECT_DEFENSE_UP_HIT | `BattleScript_EffectDefenseUpHit` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_DEF_PLUS_1 is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 1 | 1 (12) |
-| EFFECT_ATTACK_UP_HIT | `BattleScript_EffectAttackUpHit` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_ATK_PLUS_1 is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 2 | 2 (16) |
+| EFFECT_DEFENSE_UP_HIT | `BattleScript_EffectDefenseUpHit` | executable | - | - | 1 | 1 (12) |
+| EFFECT_ATTACK_UP_HIT | `BattleScript_EffectAttackUpHit` | executable | - | - | 2 | 2 (16) |
 | EFFECT_ALL_STATS_UP_HIT | `BattleScript_EffectAllStatsUpHit` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_ALL_STATS_UP is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 2 | 2 (33) |
 | EFFECT_UNUSED_8D | `BattleScript_EffectHit` | executable | - | - | 0 | 0 (0) |
 | EFFECT_BELLY_DRUM | `BattleScript_EffectBellyDrum` | blocked-on-opcodes | `B_SCR_OP_MAXATTACKHALVEHP` (main path) | - | 1 | 1 (2) |
@@ -275,13 +275,14 @@ The tool itself asserts these before writing this doc and exits nonzero on any m
 - `EFFECT_HIT`, `EFFECT_POISON_HIT`, `EFFECT_BURN_HIT`, `EFFECT_FREEZE_HIT`, `EFFECT_PARALYZE_HIT` each executable -- the SetMoveEffect quartet's own dispatch was already source-complete (PROGRESS 444), and B_SCR_OP_JUMPIFHALFWORD/JUMPIFSTATUS3CONDITION/ORWORD (registered 2026-07-25) closed the shared-entry chokepoint that used to block all five on an unrelated instruction
 - `EFFECT_SLEEP`, `EFFECT_TOXIC` blocked, mentioning `Cmd_seteffectprimary` (still fully unregistered)
 - `EFFECT_RECOIL_IF_MISS` executable (a real positive: it enters via `BattleScript_HitFromAtkString`, skipping the chokepoint entirely, and reaches moveend/checkteamslost)
+- `EFFECT_ATTACK_DOWN_HIT`, `EFFECT_DEFENSE_DOWN_HIT`, `EFFECT_SPEED_DOWN_HIT`, `EFFECT_SPECIAL_ATTACK_DOWN_HIT`, `EFFECT_SPECIAL_DEFENSE_DOWN_HIT`, `EFFECT_ACCURACY_DOWN_HIT`, `EFFECT_ATTACK_UP_HIT`, `EFFECT_DEFENSE_UP_HIT` each executable (ISSUES #44: `SETMOVEEFFECT_SUPPORTED` is now derived from the engine's own exported `SET_MOVE_EFFECT_SUPPORTED_BYTES`, which spreads `STAT_MOVE_EFFECT_TABLE`'s keys, instead of a hand list that predated that table's registration)
 
 All checks passed for this run.
 
 ## Caveats (read before trusting a number here)
 
 - **Registration coverage, not semantic verification.** "Executable" means every reachable opcode has a dispatch entry, not that its behavior is bit-exact or complete. A registered opcode with a narrow (b)-policy barrier still counts as "registered" per ROADMAP S10 §1 unless it is the one named exception below.
-- **One deliberate semantic exception:** `Cmd_seteffectwithchance`'s SetMoveEffect dispatch (`applySetMoveEffect`, `src/engine/battleScriptHitChainOpcode.ts:1669-1870`) is opcode-registered but internally branches on the `MOVE_EFFECT_*` byte a script sets via the preceding `setmoveeffect` statement. This is the only production dispatcher today where opcode registration and per-script executability diverge (PROGRESS 444), so this census specifically tracks that one operand value along each walk. Every other multi-branch dispatcher's internal barriers are *not* modeled operand-by-operand here -- if a future dispatcher gains the same pattern (registered opcode, narrow-input barrier), this tool will overstate its effects as fully executable until a similar tracked exception is added.
+- **One deliberate semantic exception:** `Cmd_seteffectwithchance`'s SetMoveEffect dispatch (`applySetMoveEffect`, `src/engine/battleScriptHitChainOpcode.ts:1760-1971`) is opcode-registered but internally branches on the `MOVE_EFFECT_*` byte a script sets via the preceding `setmoveeffect` statement. This is the only production dispatcher today where opcode registration and per-script executability diverge (PROGRESS 444), so this census specifically tracks that one operand value along each walk -- reading the supported-byte set live from the engine's own exported `SET_MOVE_EFFECT_SUPPORTED_BYTES` (ISSUES #44) rather than a second hand-maintained copy, with a name<->id lookup table guarded by an assertion that fails the run if the engine's dispatch grows an id this tool cannot name yet. Every other multi-branch dispatcher's internal barriers are *not* modeled operand-by-operand here -- if a future dispatcher gains the same pattern (registered opcode, narrow-input barrier), this tool will overstate its effects as fully executable until a similar tracked exception is added.
 - **Call/return modeling.** A `call` edge is treated as reaching *both* the callee's entry (to collect its opcodes) and the callsite's recorded continuation (`callsiteContinuations`), unconditionally. This assumes the callee always returns; it does not model the callee diverging (e.g. hitting `end` without returning), which would make this census's reachable set a strict superset of the true one in rare cases -- i.e. it can only make an effect look *more* blocked than reality, never less.
 - **"Main path" is a conservative proxy, not a dominance analysis.** An opcode is reported as reached "on the main path" only if some route from the entry reaches it using zero conditional forks (unconditional fallthrough, unconditional `goto`, and calls only). Any instruction beyond the first conditional jump in a script is reported as "edge branch only" even if every real branch of that fork reconverges to the same later instruction. This under-claims "main path" rather than over-claiming it.
 - **Dynamic dispatch.** `B_SCR_OP_JUMPTOCALLEDMOVE` (Metronome/Sleep Talk/Assist-style "run another move's effect script") has a runtime-computed target with no static label operand; those three call sites are reported as a subsystem note (dynamic move-effect dispatch), not walked further.

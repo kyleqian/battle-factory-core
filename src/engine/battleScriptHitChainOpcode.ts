@@ -328,6 +328,26 @@ const STAT_MOVE_EFFECT_TABLE: Readonly<Record<number, StatMoveEffectEntry>> = Ob
   52: Object.freeze({ statId: STAT_EVASION, direction: "decrease", magnitude: 2 }),
 });
 
+/**
+ * The exact MOVE_EFFECT_BYTE values applySetMoveEffect (below) dispatches to
+ * completion today -- everything else still falls into unsupportedBranch or
+ * one of the two named (SLEEP/TOXIC) barriers. Single source of truth for
+ * "genuinely executable via Cmd_seteffectwithchance", read live by
+ * tools/report/executable-frontier-census.ts so its SETMOVEEFFECT_SUPPORTED
+ * set can't drift from this dispatch again the way it did before the
+ * STAT_MOVE_EFFECT_TABLE family was ever wired into the census (ISSUES #44).
+ */
+export const SET_MOVE_EFFECT_SUPPORTED_BYTES: ReadonlySet<number> = new Set<number>([
+  0,
+  MOVE_EFFECT_POISON,
+  MOVE_EFFECT_BURN,
+  MOVE_EFFECT_FREEZE,
+  MOVE_EFFECT_PARALYSIS,
+  MOVE_EFFECT_CONFUSION,
+  MOVE_EFFECT_FLINCH,
+  ...Object.keys(STAT_MOVE_EFFECT_TABLE).map(Number),
+]);
+
 /** include/battle.h:52-53, the doubles-only spread-move target bits attackanimation's early-return checks. */
 const MOVE_TARGET_DEPENDS = 1 << 0;
 const MOVE_TARGET_FOES_AND_ALLY = 1 << 5;
