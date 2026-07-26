@@ -609,6 +609,7 @@ import {
   sceneOnMudSlapView,
   sceneOnDragonRageView,
   sceneOnShadowPunchView,
+  sceneOnGrowthView,
   type SceneOnMovePresentationState,
 } from "./sceneOnPresentation.ts";
 import {
@@ -620,6 +621,7 @@ import {
   SHADOW_PUNCH_TRACE_ALPHA,
   SHADOW_PUNCH_TRACE_BLEND_COEFF,
 } from "./shadowPunch.ts";
+import { speciesFrontIdleRestOffset } from "./speciesIdleAnim.ts";
 import {
   SITRUS_ITEM_HEAL_TEXT_FIRST_AGE,
   SITRUS_ITEM_TEXT_CLEAR_AGE,
@@ -862,6 +864,7 @@ const arcanineFrontSprite = (opponentFrontSpritesAsset as Record<string, Opponen
 const dugtrioFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).DUGTRIO!;
 const charmeleonFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).CHARMELEON!;
 const haunterFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).HAUNTER!;
+const ivysaurFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).IVYSAUR!;
 const MURKROW_CORNER = { x: 144, y: 19 };
 const menuHealthboxPlayer = menuHealthboxPlayerAsset as SendOutHealthboxContentAsset;
 const battleAnimRocks = battleAnimRocksAsset as BattleAnimRocksAsset;
@@ -900,6 +903,7 @@ const arcanineBackSprite = (battleBackSpritesAsset as Record<string, BattleBackS
 const dugtrioBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).DUGTRIO!;
 const charmeleonBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).CHARMELEON!;
 const haunterBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).HAUNTER!;
+const ivysaurBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).IVYSAUR!;
 const battleAnimGhostBg = battleAnimGhostBgAsset as { tileset: Tileset; palette: RgbColor[]; tilemap: Tilemap };
 const extremeSpeedBg = (extremeSpeedAsset as {
   background: {
@@ -14514,6 +14518,104 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "ONIX used" : "Foe ONIX used",
       "BIND!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "GROWTH") {
+    const view = sceneOnGrowthView(state);
+    const playerToOpponent =
+      view.attacker.species === "IVYSAUR"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "IVYSAUR"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged GROWTH pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSprite = playerToOpponent ? ivysaurBackSprite : ivysaurFrontSprite;
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    // GROWTH never touches the target (self-buff, no AnimTask_ShakeMon), so
+    // an opponent-side front target keeps its permanent send-out
+    // front-sprite-animation residual for the whole window (speciesIdleAnim.ts,
+    // same DRAGON_RAGE/SHADOW_PUNCH "ONIX starts at x2=+1" finding) instead of
+    // settling to (0,0).
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffset(view.target.species)
+      : null;
+    drawSpriteSheet(
+      fb,
+      targetSprite.tileset,
+      targetSprite.palette,
+      view.target.geometry.spriteCorner.x + (targetIdle?.x2 ?? 0),
+      view.target.geometry.spriteCorner.y + (targetIdle?.y2 ?? 0),
+    );
+    // GrowthEffect's own ScaleMonAndRestore call has objMode=0, the same
+    // ANY-affine-transform-uses-ST_OAM_AFFINE_DOUBLE hardware convention
+    // MOVE_BIND's target squeeze already established (see
+    // drawSpriteSheetAffineStretch's own module doc) - `doubled` follows
+    // `attackerScale.active` directly, not just an over-256-scale check.
+    drawSpriteSheetAffineStretch(
+      fb,
+      attackerSprite.tileset,
+      attackerSprite.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+      view.attackerScale.xScale,
+      view.attackerScale.yScale,
+      0,
+      { r: 255, g: 255, b: 255 },
+      view.attackerObjY,
+      view.attackerScale.active,
+    );
+    const opponentSpecies = playerToOpponent ? "ONIX" : "IVYSAUR";
+    const playerSpecies = playerToOpponent ? "IVYSAUR" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "IVYSAUR used" : "Foe IVYSAUR used",
+      "GROWTH!",
       99,
     );
     return;

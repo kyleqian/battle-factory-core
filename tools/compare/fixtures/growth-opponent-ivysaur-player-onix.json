@@ -1,0 +1,29 @@
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-growth-opponent-ivysaur-player-onix.json",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
+  "pair": "IVYSAUR (opponent-front) -> ONIX (player-back)",
+  "move": "GROWTH",
+  "orientation": "opponent-to-player",
+  "appStage": {"oracleFrame": 211, "presentationAge": 0},
+  "denseWindow": {"startFrame": 211, "endFrame": 273},
+  "attacker": {
+    "species": "IVYSAUR",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": {"x": 144, "y": 18},
+      "animationCenter": {"x": 176, "y": 50},
+      "battlePositionCenter": {"x": 176, "y": 40}
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": {"x": 40, "y": 48},
+      "animationCenter": {"x": 72, "y": 88},
+      "battlePositionCenter": {"x": 72, "y": 80}
+    }
+  }
+}
