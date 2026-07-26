@@ -4,6 +4,103 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 463 — First CheckViability handler-body port: AI_CBM_SpeedDown + AI_CV_SpeedDown, the proven CBM+CV pair (entry 462's carried item, per `docs/factory-ai-checkviability-ground-truth.md`)
+
+- **State:** tree green at **219 files / 2627 tests** (+0 files/+17 tests
+  over entry 462's 219/2610), build green, ratchet unchanged (the CBM/CV
+  `unsupported-branch` results are plain tagged returns, not the
+  `unsupportedBranch(...)` helper `executableFrontierRatchet.test.ts`
+  tracks — confirmed neither `factoryAiCheckBadMove.ts` nor
+  `factoryAiCheckViability.ts` is in `PINNED_BARRIER_COUNTS`, so this
+  step's barrier-narrowing is real but outside that ratchet's mechanism).
+  Two commits (`7fec289` port, `a2250eb` tests), both green.
+  `tools/probe/verify-factory-ai-checkviability-ground-truth.ts` rerun
+  live against the oracle: **ALL PASS** (both fixtures, both seeds,
+  10/10 and 20/20 total-step counts unchanged — confirms the fixtures
+  still bank, independent of this port).
+- **Did:** ported the doc's own §6-staged pair exactly as scoped.
+  1. **`AI_CBM_SpeedDown`** (`data/battle_ai_scripts.s:287-312`, 3
+     instructions + the shared `CheckIfAbilityBlocksStatChange`
+     subroutine) inside `factoryAiCheckBadMove.ts`: MIN_STAT_STAGE and a
+     new zero-RNG `checkAbilityAiTarget` port of `Cmd_check_ability`
+     (`battle_ai_script_commands.c:1407-1443`, AI_TARGET branch --
+     distinct from `get_ability`'s guess-and-draw machinery, ported
+     exact including its own real quirk: an unknown two-ability species
+     can NEVER register a `check_ability` match, for either ability, not
+     a coin flip) short-circuit Speed Boost; the shared tail's own
+     `get_ability AI_TARGET` reuses `nextGetAbilityDraw` unchanged (entry
+     460's redraw-per-call machinery, not re-derived). Dispatches on
+     `EFFECT_SPEED_DOWN`/`EFFECT_SPEED_DOWN_2` before the generic
+     barrier check; every other CBM-tabled effect still barriers.
+  2. **`AI_CV_SpeedDown`** (`:1142-1152`) inside
+     `factoryAiCheckViability.ts`: `if_target_faster` is `if_user_goes 1`
+     (`Cmd_if_user_goes`, `battle_ai_script_commands.c:1268-1274`) --
+     jumps only when `GetWhoStrikesFirst(AI_USER, AI_TARGET,
+     ignoreChosenMoves=TRUE)` returns EXACTLY 1, reusing `turnOrder.ts`'s
+     already-ported `getWhoStrikesFirst`/`effectiveSpeed` (both
+     battlers forced to movePriority 0, matching `ignoreChosenMoves`)
+     rather than re-deriving speed-order semantics. Ported the one real
+     subtlety the brief flagged for exactness: an EXACT speed tie still
+     burns one real `Random()` call inside `GetWhoStrikesFirst` itself
+     (`speedBattler1 == speedBattler2 && Random() & 1`), even though a
+     tie can only resolve to strikesFirst 0 or 2 -- never 1 -- so the
+     `if_target_faster` branch is never taken on a tie regardless of the
+     roll's parity. Then `if_random_less_than 70` (`Cmd_if_random_less_than`,
+     `random % 256 < 70`, same `nextDraw`/`% 256` shape as
+     `factoryAiTryToFaint.ts`'s own roll). Same dispatch-before-barrier
+     shape as CBM; every other CV-tabled effect still barriers.
+  3. **Plumbing:** `FactoryAiScoredBattlerView` gained `speed`/
+     `statStages.speed` (both attacker and target) -- no other engine
+     module reads it yet, source-required for `if_target_faster` alone;
+     threaded through `targetForCbm.speedStage` and a new `attacker`/
+     `target` param pair on `runCheckViability`. CV's own draws
+     (previously always empty) now flow into the trace the same way
+     CBM/TryToFaint's already do -- `submitFactoryAiScoredDecision`'s own
+     kernel-replay check would have caught a miss here loudly (RNG-calls
+     mismatch), not silently.
+- **Test:** unit coverage for every branch of both handlers (CBM:
+  MIN_STAT_STAGE -10/0 draws using a single-ability target since Marowak's
+  own ambiguous ability would confound the "zero total draws" claim;
+  Speed Boost -10/0 draws via Ninjask; the if_ability two-ability-unknown
+  quirk pinned against Yanma, scoreDelta 0 but 2 real draws; Clear
+  Body/White Smoke -10 via known abilities; CV: target-faster -3/0
+  draws; target-slower roll<70/0-bonus and >=70/+2, exactly 1 draw each;
+  the exact-tie case at both roll parities, 1 draw either way, scoreDelta
+  always -3) -- 20 new tests. Mask-7 end-to-end reproduction of both
+  banked fixtures through `chooseFactoryAiScoredDecision` (2 seeds each,
+  4 new tests): opponent-faster (Dugtrio AI vs Shuckle target) never
+  picks slot 0, 5 total draws (4 setup + 1 tie, zero CBM/TryToFaint/CV);
+  opponent-slower (roles swapped) always picks slot 0, 6 total draws (the
+  extra one is CV's own roll, landing >=70 at both test seeds). Substituted
+  the doc's own `MOVE_GROWL` control move for `MOVE_SPLASH` -- Growl's
+  `EFFECT_ATTACK_DOWN` is a DIFFERENT CBM-blocked handler
+  (`AI_CBM_AttackDown`, unported) that would barrier before this scenario
+  ever reached `AI_CV_SpeedDown`; Splash has no entry in either dispatch
+  table at all (unconditionally zero score/draws, not just in this battle
+  state), so it isolates the SpeedDown pair's own causal contribution
+  cleanly -- named explicitly in both the test file and here since it's a
+  real, deliberate substitution, not an oversight. Both dispatch barriers
+  reconfirmed to still fire for every other reachable effect
+  (`EFFECT_ATTACK_DOWN` pass-through, both files).
+- **Next:** the doc's own §10 recommendation -- the 4 remaining CV-only-
+  reachable handlers with no CBM pairing needed (`AI_CV_AlwaysHit`,
+  `AI_CV_HighCrit`, `AI_CV_VitalThrow`, `AI_CV_Pursuit`; no live fixtures
+  staged for these yet, named as next by the scout). Any of the
+  CBM-blocked 17 (`AccuracyDown`/`AttackDown`/`DefenseDown`/`SpDefDown`/
+  weather setters/screens/stat-ups) needs BOTH its `AI_CBM_*` and
+  `AI_CV_*` handler ported together, not just the CV side (this step's
+  own `MOVE_GROWL`-vs-`AttackDown` gap is a live example of what happens
+  otherwise). Also still open from entry 462: seam window 3
+  (`turn5-rockslide.json`), ENDTURN_ABILITIES/ITEMS1/ITEMS2 breadth,
+  Nightmare/Curse/Thrash/Disable/Taunt end-turn bodies.
+- **Notes:** stayed strictly inside this step's scope -- no other CV
+  handler, no `AI_CV_SpeedDownFromChance`, no seam/presentation/animation
+  files touched. No PAPERCUT: the `MOVE_GROWL`-hits-an-unrelated-barrier
+  discovery cost some investigation time but was resolved within scope by
+  swapping the control move, not a dev-loop friction worth flagging
+  separately.
+
+---
 ## 462 — Ingrain/Leech Seed/Wrap-family registered: setters + end-turn bodies executable (entry 461's next-item list)
 
 - **State:** tree green at **219 files / 2610 tests** (+1 file/+20 tests
@@ -170,74 +267,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   before writing the real test (same discipline entry 459 used), confirming
   the exact RNG/PP numbers and the switch-in module's documented
   moves/pp-untouched limitation before asserting on it. No PAPERCUT logged.
-
----
-## 460 — [SUPERVISOR WIND-DOWN 2026-07-25 ~21:50] session summary
-
-- **State:** tree committed and green at **218 files / 2582 tests**, build
-  green, census live-verified **73/214 effects, 152/355 moves, 118/276
-  Factory-L50 executable** (session start: 53/105/77; all 25 census
-  self-checks pass), single main worktree, zero unmerged branches, zero
-  stale worktrees. **No DEFERRED entries — nothing blocks the next
-  `run-supervisor.sh`.** No usage/rate limits hit all session.
-- **Session (~17 workers over 3 lanes, every outcome supervisor-verified
-  live; zero cap-kills, one launcher-arg mistake self-caught):**
-  - **Main (7 steps):** forced-switch §4 slice 10 (player-side
-    forced-switch decision request through `submitBattleDecision` — §4 list
-    1-10 COMPLETE); MOVE_EFFECT_CONFUSION+FLINCH registered (census
-    105→122 moves; both feed the existing canceler reducers, RNG-threading
-    bug found+fixed); presentation-seam window 2 (`turn1-rockslide.json`
-    256/256 from kernel events, first production `stat-stage-change`
-    emission, 27-trace sweep clean); Factory-AI port in two steps
-    (CheckBadMove full incl. get_ability redraw semantics, then
-    TryToFaint + CheckViability-as-table + masks 0/1/7 dispatch — all 3
-    banked scenario ledgers reproduce at 11/11/13 policy draws);
-    screens/weather setters + full `DoFieldEndTurnEffects` (F2-F5 +
-    F7-F10, census →148 moves); full-turn reducer consuming the REAL
-    mask-7 policy + non-terminal forced-switch full-turn variant (entry
-    459 — Gate-5's submission-boundary claim now demonstrated for L50
-    singles move selection).
-  - **Side (6 scouts/steps, all merged):** screens/weather ground truth
-    (29/29 verify, corrected end-turn doc's F8/F10 opcode claim);
-    turn1-rockslide seam consumer map (16 inputs, staged proof-of-events);
-    ISSUES #44 census fix (support set now mechanically derived, +8
-    ground-truth checks); AI port-subset audit (masks per band; two doc
-    corrections supervisor-re-verified against source); the
-    **RNG caller-attribution probe** (closed entry 455's 2-roll gap:
-    window totals bundle a trailing opponent proc draw +
-    `BattleTurnPassed`'s `gRandomTurnNumber`, both decision-independent —
-    `tools/probe/attribute-factory-ai-random-callers.py`);
-    Ingrain/Leech Seed/Wrap ground truth (18/18 verify — Ingrain/Wrap
-    end-turn bodies already opcode-complete); `TRYCASTFORMDATACHANGE`
-    registered per supervisor (a)/(b) decision (census →152 moves; a
-    fielded Forecast Castform is the one named barrier; runtime
-    weather-form loop next needs `addbyte`/`jumpifbytenotequal` widened
-    past `gBattleCommunication`-only).
-  - **Animation (7 steps, stacked 7-deep, all merged):** MOVE_GROWTH
-    **`exact`** 63/63 both orientations (residual cracked as per-mechanism
-    framebuffer display lag, scale+2/tint+1); MOVE_FUTURE_SIGHT `partial`
-    85/114 (SetPsychicBackground ported+RAM-probed incl. the rotation-pause
-    cadence; defect B killed by register probe; defect A parked with the
-    monbg mechanism RAM-confirmed and a GROW-direction instrument named);
-    MOVE_CONFUSION `partial` 108/140 (zero net-new components; window 1
-    19/20; window 2 carries defect A — cross-move triangulation banked).
-    Coverage **21 exact / 5 partial**. PSYCHIC noted as cheap once staged.
-- **Next (in order):** main — full-turn player-side forced-switch variant
-  (entry 459's named remainder), CheckViability handler bodies phased by
-  the audit's 16-reachable-handler table, `addbyte`/`jumpifbytenotequal`
-  sBATTLER widening (unblocks the runtime weather-form loop),
-  Ingrain/Leech Seed/Wrap registration (ground truth banked, mostly
-  opcode-complete already), seam window 3, ENDTURN_ABILITIES/ITEMS
-  breadth. Animation — defect A via the OAM double-size-window instrument
-  (promotes FUTURE_SIGHT+CONFUSION together), then PSYCHIC. All prep docs
-  carry rerunnable verify scripts.
-- **Notes:** PAPERCUTS +1 (dense comparators bbox only the first diff
-  frame — partially retired same-day by `confusionPortable.ts`'s
-  `--per-frame-bbox`). Supervisor decisions this session, both recorded in
-  ROADMAP/PROGRESS: AI-port acceptance restated to policy-own draws
-  (11/11/13) after the attribution probe; Castform (a)/(b) split
-  registered with the honest fielded-Castform barrier. Memory file updated
-  with session tactics (launcher-pipeline exit masking; cross-move
-  triangulation; sRandCount+LR attribution probe; point-in-time family
-  costs; probe-then-decide).
 

@@ -1,4 +1,74 @@
 ---
+## 460 — [SUPERVISOR WIND-DOWN 2026-07-25 ~21:50] session summary
+
+- **State:** tree committed and green at **218 files / 2582 tests**, build
+  green, census live-verified **73/214 effects, 152/355 moves, 118/276
+  Factory-L50 executable** (session start: 53/105/77; all 25 census
+  self-checks pass), single main worktree, zero unmerged branches, zero
+  stale worktrees. **No DEFERRED entries — nothing blocks the next
+  `run-supervisor.sh`.** No usage/rate limits hit all session.
+- **Session (~17 workers over 3 lanes, every outcome supervisor-verified
+  live; zero cap-kills, one launcher-arg mistake self-caught):**
+  - **Main (7 steps):** forced-switch §4 slice 10 (player-side
+    forced-switch decision request through `submitBattleDecision` — §4 list
+    1-10 COMPLETE); MOVE_EFFECT_CONFUSION+FLINCH registered (census
+    105→122 moves; both feed the existing canceler reducers, RNG-threading
+    bug found+fixed); presentation-seam window 2 (`turn1-rockslide.json`
+    256/256 from kernel events, first production `stat-stage-change`
+    emission, 27-trace sweep clean); Factory-AI port in two steps
+    (CheckBadMove full incl. get_ability redraw semantics, then
+    TryToFaint + CheckViability-as-table + masks 0/1/7 dispatch — all 3
+    banked scenario ledgers reproduce at 11/11/13 policy draws);
+    screens/weather setters + full `DoFieldEndTurnEffects` (F2-F5 +
+    F7-F10, census →148 moves); full-turn reducer consuming the REAL
+    mask-7 policy + non-terminal forced-switch full-turn variant (entry
+    459 — Gate-5's submission-boundary claim now demonstrated for L50
+    singles move selection).
+  - **Side (6 scouts/steps, all merged):** screens/weather ground truth
+    (29/29 verify, corrected end-turn doc's F8/F10 opcode claim);
+    turn1-rockslide seam consumer map (16 inputs, staged proof-of-events);
+    ISSUES #44 census fix (support set now mechanically derived, +8
+    ground-truth checks); AI port-subset audit (masks per band; two doc
+    corrections supervisor-re-verified against source); the
+    **RNG caller-attribution probe** (closed entry 455's 2-roll gap:
+    window totals bundle a trailing opponent proc draw +
+    `BattleTurnPassed`'s `gRandomTurnNumber`, both decision-independent —
+    `tools/probe/attribute-factory-ai-random-callers.py`);
+    Ingrain/Leech Seed/Wrap ground truth (18/18 verify — Ingrain/Wrap
+    end-turn bodies already opcode-complete); `TRYCASTFORMDATACHANGE`
+    registered per supervisor (a)/(b) decision (census →152 moves; a
+    fielded Forecast Castform is the one named barrier; runtime
+    weather-form loop next needs `addbyte`/`jumpifbytenotequal` widened
+    past `gBattleCommunication`-only).
+  - **Animation (7 steps, stacked 7-deep, all merged):** MOVE_GROWTH
+    **`exact`** 63/63 both orientations (residual cracked as per-mechanism
+    framebuffer display lag, scale+2/tint+1); MOVE_FUTURE_SIGHT `partial`
+    85/114 (SetPsychicBackground ported+RAM-probed incl. the rotation-pause
+    cadence; defect B killed by register probe; defect A parked with the
+    monbg mechanism RAM-confirmed and a GROW-direction instrument named);
+    MOVE_CONFUSION `partial` 108/140 (zero net-new components; window 1
+    19/20; window 2 carries defect A — cross-move triangulation banked).
+    Coverage **21 exact / 5 partial**. PSYCHIC noted as cheap once staged.
+- **Next (in order):** main — full-turn player-side forced-switch variant
+  (entry 459's named remainder), CheckViability handler bodies phased by
+  the audit's 16-reachable-handler table, `addbyte`/`jumpifbytenotequal`
+  sBATTLER widening (unblocks the runtime weather-form loop),
+  Ingrain/Leech Seed/Wrap registration (ground truth banked, mostly
+  opcode-complete already), seam window 3, ENDTURN_ABILITIES/ITEMS
+  breadth. Animation — defect A via the OAM double-size-window instrument
+  (promotes FUTURE_SIGHT+CONFUSION together), then PSYCHIC. All prep docs
+  carry rerunnable verify scripts.
+- **Notes:** PAPERCUTS +1 (dense comparators bbox only the first diff
+  frame — partially retired same-day by `confusionPortable.ts`'s
+  `--per-frame-bbox`). Supervisor decisions this session, both recorded in
+  ROADMAP/PROGRESS: AI-port acceptance restated to policy-own draws
+  (11/11/13) after the attribution probe; Castform (a)/(b) split
+  registered with the honest fielded-Castform barrier. Memory file updated
+  with session tactics (launcher-pipeline exit masking; cross-move
+  triangulation; sRandCount+LR attribution probe; point-in-time family
+  costs; probe-then-decide).
+
+---
 ## 459 — Full-turn reducer now consumes the REAL Factory-AI trainer policy (item 1) AND the non-terminal forced-switch full-turn variant (item 2); item 3 (player-side variant) not started, per the brief's own time cap
 
 - **State:** tree green at **217 files / 2570 tests** (+0 files/+2 tests
