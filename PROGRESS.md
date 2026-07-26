@@ -4,7 +4,108 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 452 — Forced-switch §4 slice 10 landed: the player-side `openpartyscreen` halt is now a real forced-switch decision, not a barrier — §4's whole slice list (1-10) is complete
+## 453 — MOVE_EFFECT_CONFUSION (7) and MOVE_EFFECT_FLINCH (8) registered in SetMoveEffect's dispatch — zero new opcodes, census +4 effects/+17 moves
+
+- **State:** tree green at **207 files / 2465 tests** (+0 files/+16 tests
+  over entry 452's 207/2449 — all new tests landed in existing files: 14 in
+  `battleScriptHitChainOpcode.test.ts` (a new confusion/flinch describe
+  block; 2 obsolete FLINCH barrier tests were replaced 1:1 with UPROAR-based
+  equivalents, net 0 there), 1 each in the two dedicated
+  `battleScriptAttackCanceler{Confused,Flinch}.test.ts` integration
+  additions, plus a small key-list fixup in `battleScriptRulesContext.test.ts`
+  and two `toStrictEqual` fixture updates), build green. Census regenerated:
+  **53→57 effects, 105→122 moves, 77→92 Factory-L50 (944→1099 weighted)**.
+  Ratchet green, zero pin changes (the 2 barrier tests removed for FLINCH
+  were replaced 1:1 with UPROAR-based equivalents — same barrier call site,
+  different still-unsupported byte).
+- **Did, per `docs/stat-change-confusion-ground-truth.md` §1.6/§2.5 and
+  `docs/set-move-effect-ground-truth.md` (both banked, cited not re-derived):**
+  - `applySetMoveEffect` (`battleScriptHitChainOpcode.ts`) now dispatches
+    `MOVE_EFFECT_CONFUSION`/`MOVE_EFFECT_FLINCH` before falling through to
+    the stat-family table / unsupported-branch barrier. CONFUSION: shared
+    family-B early-out + Own Tempo gate, `(Random()%4)+2` duration draw,
+    plain status2 write (guaranteed-zero bits), push+jump to
+    `BattleScript_MoveEffectConfusion` (all 4 of its ops were already
+    registered). FLINCH: Inner Focus gated on `certain` (a direct, un-pushed
+    jump to `BattleScript_FlinchPrevention` — that script's own `goto
+    BattleScript_MoveEnd` tail ends the move, unlike the status1 quartet's
+    push+jump preventions), otherwise a plain status2 write gated on the
+    target not having acted yet this turn, always falling through with no
+    script call either way (source-verbatim from `battle_script_commands.c`
+    :2524-2567 — read fresh, not assumed).
+  - FLINCH's turn-order gate (`GetBattlerTurnOrderNum(effectBattler) >
+    gCurrentTurnActionNumber`) needed two new `BattleScriptRulesContext`
+    fields: per-battler `turnOrderNum` and context-level
+    `currentTurnActionNumber`. `factoryBattleScriptFullTurnDecision.ts` is
+    the one real owner (mover1=0/mover2=1, set once per action via a new
+    `withTurnOrderPositions` helper); every other construction site
+    (including every existing single-command fixture) defaults to
+    `turnOrderNum=1`/`currentTurnActionNumber=0` — the source-faithful
+    "target hasn't acted yet" shape those fixtures' own one-attacker-action
+    staging already implies, not a made-up convenience default. Three
+    `emptyBattler`/filler-battler call sites (`factoryBattleScriptDecision.ts`,
+    `factoryBattleScriptFullTurnDecision.ts`, `factoryBattleScriptTerminalDecision.ts`)
+    needed the same one-time mechanical ripple `speed`/`maxHP` caused
+    previously.
+  - **Found and fixed a latent RNG-threading bug** in
+    `createSeteffectwithchanceOpcodeHandler`/`finalizeSeteffectwithchance`:
+    the latter unconditionally overwrote the returned transition's `.rng`
+    with the pre-dispatch value, silently discarding any RNG draw made
+    *inside* `applySetMoveEffect`. Invisible until now because every
+    previously-registered effect byte (the status1 quartet, `ChangeStatBuffs`)
+    draws zero RNG — confusion's duration draw is the first genuine second
+    draw within one `seteffectwithchance` step. Fixed by threading the
+    post-chance-roll rng through `context.state` before calling
+    `applySetMoveEffect`, so its own returned `.rng` is authoritative and
+    the override is no longer needed.
+  - **New Tier-1 coverage** (`battleScriptHitChainOpcode.test.ts`): docs
+    §2.5's real oracle ledger (seed 9 proc / seed 1 control) reproduced
+    byte-for-byte — raw rngValues confirmed live via `bin/oracle lab` at
+    authoring time (frame-0 789488161/3034451114, forward-stepped 3 LCG
+    steps past the shared accuracy/crit/damage rolls to the exact pre-roll-4
+    state), not synthesized — plus Own Tempo/Safeguard(blocks, `<=7`
+    gate)/Substitute/already-confused gates for CONFUSION, and Inner
+    Focus/Safeguard-does-NOT-block(`<=7` gate excludes byte 8)/Shield-Dust-
+    DOES-block(`<=9` gate includes it)/turn-order-gate-negative/
+    already-flinched gates for FLINCH.
+  - **Two new integration tests** prove infliction feeds the *existing*
+    CANCELER_CONFUSED/CANCELER_FLINCH reducers with zero adaptation glue:
+    `battleScriptAttackCancelerConfused.test.ts` replays docs §2.5's ledger
+    end-to-end (rolls 4-5 via the production opcode dispatch, then roll 6 —
+    the canceler's own `Random()&1` check — via the reducer directly),
+    landing on the exact live frame-300 `rngValue` (679317255) docs §2.5
+    itself verified against the oracle. `battleScriptAttackCancelerFlinch.test.ts`
+    proves a flinched battler's next admission reaches the reducer's
+    `"flinched"`/`BattleScript_MoveUsedFlinched` cant-move outcome.
+  - Census tool: added `MOVE_EFFECT_CONFUSION`/`MOVE_EFFECT_FLINCH` to
+    `SETMOVEEFFECT_SUPPORTED` plus 5 new drift-guard checks (4
+    require-executable, 1 require-still-blocked for TRI_ATTACK). Four
+    effect scripts flip fully executable: `EFFECT_CONFUSE_HIT`,
+    `EFFECT_FLINCH_HIT`, `EFFECT_FLINCH_MINIMIZE_HIT` (Stomp/Minimize
+    class), `EFFECT_TWISTER`; six more (Razor Wind/Sky Attack/Snore/Skull
+    Bash/Solar Beam/Fake Out) have their remaining-blocker reason correctly
+    narrowed (FLINCH no longer in their list) but stay blocked on other
+    still-missing opcodes.
+- **Next:** ISSUES #44 (a pre-existing, unrelated census gap found along the
+  way — the stat-down secondary-effect family was never added to
+  `SETMOVEEFFECT_SUPPORTED`, so its 4 `EFFECT_*_DOWN_HIT` entries still
+  misreport `blocked-on-subsystem`; cheap follow-up, named not fixed here);
+  the non-terminal forced-switch continuation into the full-turn/end-turn
+  dual-sided reducers (currently a named, unreachable throw); the AI
+  move-selection port (`docs/factory-ai-ground-truth.md`);
+  `DoFieldEndTurnEffects` setters (screens/weather); primary-effect
+  confusion (`EFFECT_CONFUSE`, `Cmd_seteffectprimary`, out of this step's
+  scope) and the other status2 family members (TRI_ATTACK/UPROAR/etc.).
+- **Notes:** no oracle traces committed (Tier-1 direct-construction per this
+  doc's own established discipline; the oracle was queried live only to
+  derive the two raw rngValue literals now pinned in the test file, same
+  discipline the stat-change-confusion ground-truth doc itself used). No
+  presentation/`battleScene`/ROADMAP edits. OUT OF SCOPE per the brief and
+  untouched, confirmed: CANCELER internals (reused, not modified),
+  primary-effect confusion (`CONFUSE_RAY`'s `EFFECT_CONFUSE` path — did not
+  fall out free, `Cmd_seteffectprimary` stays unregistered),
+  TRI_ATTACK/UPROAR/other status2 family members, AI port. PAPERCUT: none
+  this session.
 
 - **State:** tree green at **207 files / 2449 tests** (+0 files/+10 tests
   over entry 451's 207/2439 — all new tests landed in existing files), build
@@ -146,90 +247,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (recorded in entries 444/448). Supervisor salvage rule tightened: verify
   `npm run build` too, not just tests (a salvaged mid-rework briefly broke
   `tsc -b`; caught and fixed same session, recorded in memory).
-
----
-## 450 — Full-turn reducer landed: "decision → both actions → end-turn → next decision boundary" is now a genuine multi-turn cycle
-
-- **State:** tree green at **205 files / 2426 tests** (+1 file/+5 tests
-  over entry 449's 204/2421 — the 5 new reducer integration tests; the
-  `speed` field's own mechanical ripple landed in existing files/tests, no
-  new ones), build green. Ratchet green, **zero new barrier pins**. Census
-  not regenerated (out of scope per this step's brief — pure
-  orchestration/reducer wiring, no move-effect registrations changed,
-  nothing to flip).
-- **Did (new `src/engine/factoryBattleScriptFullTurnDecision.ts` +
-  `tests/factoryBattleScriptFullTurnDecision.test.ts`), built directly on
-  `runBattleEndTurnOrchestration` per entry 449's own "Next" naming this
-  exact step:**
-  - **Shared boundary reused, not invented:** the existing
-    `BattleCommandRequest` (already names `side`/`battler`) asks the player
-    first, then the trainer (test-supplied — the AI port is a later step,
-    `docs/factory-ai-ground-truth.md`) — matching source's own
-    `HandleTurnActionSelectionState` collecting both battlers' actions
-    before `SetActionsAndBattlersTurnOrder` ever runs. No new shared
-    boundary type.
-  - **Turn order:** added a `speed` field to
-    `BattleScriptRulesBattlerState` (own commit, `maxHP` precedent —
-    defaulted to 100, mechanical ripple only: 2 legacy `emptyBattler`
-    call sites + 2 `toStrictEqual`-on-full-battler-object test fixtures
-    needed the same one-time update `maxHP` caused in entry 449). Turn
-    order itself reuses `turnOrder.ts`'s already-ported
-    `getWhoStrikesFirst` verbatim (priority bracket, then effective speed,
-    then the speed-tie `Random() & 1` roll, drawn ONLY on a genuine tie —
-    `battle_main.c:4728/4745`) — not re-derived.
-  - **Second-action skip, sourced not assumed:** in singles, ANY
-    fainted-actions fork from the first action — terminal
-    (`gBattleOutcome != 0`) OR the non-terminal forced-switch dance —
-    cancels the second action. Two distinct source mechanisms converge on
-    this rule: `RunTurnActionsFunctions` (`battle_main.c:4937-4943`) forces
-    `B_ACTION_FINISHED` once `gBattleOutcome != 0`; separately,
-    `BattleScript_HandleFaintedMon`'s own tail runs `cancelallactions`
-    right after `switchineffects` in singles (`data/battle_scripts_1.s
-    :2893-2895`, already a registered no-op opcode), cancelling the
-    pending action even when the battle doesn't end. Either way,
-    `sEndTurnFuncsTable[gBattleOutcome]` (`battle_main.c:554-565`) only
-    reaches `BattleTurnPassed` when `gBattleOutcome === 0` — so a terminal
-    first action skips `runBattleEndTurnOrchestration` entirely (reported
-    immediately), while a non-terminal forced switch still reaches it.
-  - Each action runs its move's script from the LITERAL topology entry
-    (`TOPOLOGY_BY_MOVE`, `factoryBattleScriptDecision.ts`'s own mechanism),
-    reusing `runBattleScriptFaintedActionsOrchestration` after every action
-    (not just the killing one) and `runBattleEndTurnOrchestration`
-    unmodified — no field/battler loop re-derived.
-  - **RNG reconciliation subtlety (new, not present in any single-command
-    reducer):** the machine's own per-invocation ledger always starts its
-    `calls` counter at 0 (`createBattleScriptRngState`'s own contract),
-    while the decision boundary's cursor is cumulative across the WHOLE
-    battle. Reconciliation now compares `rngAfter.calls` against
-    `rngBefore.calls + finalState.rng.calls`, not the two directly —
-    invisible in every prior reducer because those are single-invocation
-    adapters whose `rngBefore.calls` is always 0.
-  - **Integration proofs, all passing:** (1) a full two-turn cycle, real
-    `GetWhoStrikesFirst` order (speed 100 vs 50, no tie), each hit chain's
-    own 4-roll ledger pinned (8 calls/turn, 16 cumulative by turn 2, one
-    continuous LCG stream — not reset per turn); (2) burn applied via a
-    REAL Ember `MOVE_EFFECT_BURN` 10% proc on turn 1 (seed hunted by
-    direct replay, not hand-derived), ticking the flat `floor(maxHP/8) =
-    124` at both end-turns (recurrence, no growth — unlike Toxic,
-    `docs/end-turn-ground-truth.md` §2b); (3) a mid-turn KO on the first
-    action: terminal boundary reported directly, the trainer's own chosen
-    move never dispatches (PP still full, 16 vs the player's used 15),
-    `runBattleEndTurnOrchestration` never runs, exactly the killing blow's
-    banked 4-roll ledger.
-- **Next:** the non-terminal forced-switch variant of proof 3 (second
-  action skipped via `cancelallactions` rather than terminal) is
-  structurally handled by the reducer (same code path as the terminal
-  case, gated on `faint1.kind`) but has no integration test this session —
-  optional per the brief ("if cap allows"), landed the terminal case
-  ("at minimum") instead. Confusion
-  (`docs/stat-change-confusion-ground-truth.md`) and the AI move-selection
-  port (`docs/factory-ai-ground-truth.md`) remain the next open
-  subsystems; `runBattleEndTurnOrchestration`'s own still-barriered cases
-  (Ingrain/Leech Seed/Wrap/weather/Reflect-Light Screen-Safeguard/etc.,
-  entry 449's own "Next") are unchanged.
-- **Notes:** no oracle traces added this session (all three proofs are
-  direct-construction Tier-1, per this step's own brief). No
-  presentation/`battleScene`/ROADMAP edits. OUT OF SCOPE per the brief and
-  untouched: AI port, item/switch player actions beyond the existing fork,
-  census refresh.
 

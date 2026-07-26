@@ -1,4 +1,90 @@
 ---
+## 450 — Full-turn reducer landed: "decision → both actions → end-turn → next decision boundary" is now a genuine multi-turn cycle
+
+- **State:** tree green at **205 files / 2426 tests** (+1 file/+5 tests
+  over entry 449's 204/2421 — the 5 new reducer integration tests; the
+  `speed` field's own mechanical ripple landed in existing files/tests, no
+  new ones), build green. Ratchet green, **zero new barrier pins**. Census
+  not regenerated (out of scope per this step's brief — pure
+  orchestration/reducer wiring, no move-effect registrations changed,
+  nothing to flip).
+- **Did (new `src/engine/factoryBattleScriptFullTurnDecision.ts` +
+  `tests/factoryBattleScriptFullTurnDecision.test.ts`), built directly on
+  `runBattleEndTurnOrchestration` per entry 449's own "Next" naming this
+  exact step:**
+  - **Shared boundary reused, not invented:** the existing
+    `BattleCommandRequest` (already names `side`/`battler`) asks the player
+    first, then the trainer (test-supplied — the AI port is a later step,
+    `docs/factory-ai-ground-truth.md`) — matching source's own
+    `HandleTurnActionSelectionState` collecting both battlers' actions
+    before `SetActionsAndBattlersTurnOrder` ever runs. No new shared
+    boundary type.
+  - **Turn order:** added a `speed` field to
+    `BattleScriptRulesBattlerState` (own commit, `maxHP` precedent —
+    defaulted to 100, mechanical ripple only: 2 legacy `emptyBattler`
+    call sites + 2 `toStrictEqual`-on-full-battler-object test fixtures
+    needed the same one-time update `maxHP` caused in entry 449). Turn
+    order itself reuses `turnOrder.ts`'s already-ported
+    `getWhoStrikesFirst` verbatim (priority bracket, then effective speed,
+    then the speed-tie `Random() & 1` roll, drawn ONLY on a genuine tie —
+    `battle_main.c:4728/4745`) — not re-derived.
+  - **Second-action skip, sourced not assumed:** in singles, ANY
+    fainted-actions fork from the first action — terminal
+    (`gBattleOutcome != 0`) OR the non-terminal forced-switch dance —
+    cancels the second action. Two distinct source mechanisms converge on
+    this rule: `RunTurnActionsFunctions` (`battle_main.c:4937-4943`) forces
+    `B_ACTION_FINISHED` once `gBattleOutcome != 0`; separately,
+    `BattleScript_HandleFaintedMon`'s own tail runs `cancelallactions`
+    right after `switchineffects` in singles (`data/battle_scripts_1.s
+    :2893-2895`, already a registered no-op opcode), cancelling the
+    pending action even when the battle doesn't end. Either way,
+    `sEndTurnFuncsTable[gBattleOutcome]` (`battle_main.c:554-565`) only
+    reaches `BattleTurnPassed` when `gBattleOutcome === 0` — so a terminal
+    first action skips `runBattleEndTurnOrchestration` entirely (reported
+    immediately), while a non-terminal forced switch still reaches it.
+  - Each action runs its move's script from the LITERAL topology entry
+    (`TOPOLOGY_BY_MOVE`, `factoryBattleScriptDecision.ts`'s own mechanism),
+    reusing `runBattleScriptFaintedActionsOrchestration` after every action
+    (not just the killing one) and `runBattleEndTurnOrchestration`
+    unmodified — no field/battler loop re-derived.
+  - **RNG reconciliation subtlety (new, not present in any single-command
+    reducer):** the machine's own per-invocation ledger always starts its
+    `calls` counter at 0 (`createBattleScriptRngState`'s own contract),
+    while the decision boundary's cursor is cumulative across the WHOLE
+    battle. Reconciliation now compares `rngAfter.calls` against
+    `rngBefore.calls + finalState.rng.calls`, not the two directly —
+    invisible in every prior reducer because those are single-invocation
+    adapters whose `rngBefore.calls` is always 0.
+  - **Integration proofs, all passing:** (1) a full two-turn cycle, real
+    `GetWhoStrikesFirst` order (speed 100 vs 50, no tie), each hit chain's
+    own 4-roll ledger pinned (8 calls/turn, 16 cumulative by turn 2, one
+    continuous LCG stream — not reset per turn); (2) burn applied via a
+    REAL Ember `MOVE_EFFECT_BURN` 10% proc on turn 1 (seed hunted by
+    direct replay, not hand-derived), ticking the flat `floor(maxHP/8) =
+    124` at both end-turns (recurrence, no growth — unlike Toxic,
+    `docs/end-turn-ground-truth.md` §2b); (3) a mid-turn KO on the first
+    action: terminal boundary reported directly, the trainer's own chosen
+    move never dispatches (PP still full, 16 vs the player's used 15),
+    `runBattleEndTurnOrchestration` never runs, exactly the killing blow's
+    banked 4-roll ledger.
+- **Next:** the non-terminal forced-switch variant of proof 3 (second
+  action skipped via `cancelallactions` rather than terminal) is
+  structurally handled by the reducer (same code path as the terminal
+  case, gated on `faint1.kind`) but has no integration test this session —
+  optional per the brief ("if cap allows"), landed the terminal case
+  ("at minimum") instead. Confusion
+  (`docs/stat-change-confusion-ground-truth.md`) and the AI move-selection
+  port (`docs/factory-ai-ground-truth.md`) remain the next open
+  subsystems; `runBattleEndTurnOrchestration`'s own still-barriered cases
+  (Ingrain/Leech Seed/Wrap/weather/Reflect-Light Screen-Safeguard/etc.,
+  entry 449's own "Next") are unchanged.
+- **Notes:** no oracle traces added this session (all three proofs are
+  direct-construction Tier-1, per this step's own brief). No
+  presentation/`battleScene`/ROADMAP edits. OUT OF SCOPE per the brief and
+  untouched: AI port, item/switch player actions beyond the existing fork,
+  census refresh.
+
+---
 ## 449 — End-turn orchestration landed: `BattleTurnPassed` C-side scheduling equivalent, burn/poison/toxic ticks source-complete, faint machinery reused for end-turn KOs
 
 - **State:** tree green at **204 files / 2421 tests** (+1 file/+5 tests
