@@ -137,6 +137,13 @@ edit.
 
 ## Parallel workers (max 3: main, side, animation)
 
+> **TEMPORARY — animation lane PAUSED (user directive, 2026-07-26).** Do not
+> brief or launch `--lane animation` workers, and skip the
+> `ANIMATION_PROGRESS.md` orientation step, until the user removes this note.
+> The user is weighing a separate animation supervisor/worktree split;
+> animation items in `PROGRESS.md` "Next" lists are deferred, not abandoned.
+> Spend the freed lane budget on main and side work.
+
 The launcher exposes:
 
 - `./tools/run-subagent.sh "<brief>"` — main tree, Battle Scene OFF;

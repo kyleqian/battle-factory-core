@@ -4,6 +4,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+> **USER DIRECTIVE (2026-07-26, temporary):** the animation lane is paused to
+> conserve tokens while the user evaluates splitting animation into its own
+> supervisor/worktree. Next sessions run main + side lanes only; skip entry
+> 468's animation "Next" items until this note is removed (they are deferred,
+> not abandoned). See the matching note in SUPERVISOR.md.
+
 ## 468 — [SUPERVISOR WIND-DOWN 2026-07-26 ~05:30] session summary
 
 - **State:** tree committed and green at **221 files / 2751 tests**, build
