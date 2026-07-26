@@ -59,11 +59,18 @@ import {
 import {
   BATTLE_SCRIPT_STATUS1_SLEEP,
   BATTLE_SCRIPT_STATUS2_MASKS,
+  BATTLE_SCRIPT_STATUS2_WRAPPED_MASK,
+  BATTLE_SCRIPT_STATUS3_LEECHSEED,
+  BATTLE_SCRIPT_STATUS3_LEECHSEED_BATTLER_MASK,
   BATTLE_SCRIPT_STATUS3_ROOTED,
 } from "./battleScriptSourceConstants.ts";
 
 const POISON_TURN_DMG_LABEL = "BattleScript_PoisonTurnDmg";
 const BURN_TURN_DMG_LABEL = "BattleScript_BurnTurnDmg";
+const INGRAIN_TURN_HEAL_LABEL = "BattleScript_IngrainTurnHeal";
+const LEECH_SEED_TURN_DRAIN_LABEL = "BattleScript_LeechSeedTurnDrain";
+const WRAP_TURN_DMG_LABEL = "BattleScript_WrapTurnDmg";
+const WRAP_ENDS_LABEL = "BattleScript_WrapEnds";
 /**
  * Higher than battleScriptFaintedActionsOrchestration.ts's own per-script
  * ceiling (64): the DoTurnDmg-family scripts' printstring/waitmessage pair
@@ -293,6 +300,102 @@ function runBattlerStatusDamageTick(
   return Object.freeze({ kind: "advance", state });
 }
 
+/**
+ * `ENDTURN_INGRAIN` (`battle_util.c:1480-1492`,
+ * docs/ingrain-leechseed-wrap-ground-truth.md §2a) -- zero `Random()` draws,
+ * heal capped at maxHP by `datahpupdate`'s own negative-damage branch, no
+ * `tryfaintmon`/`checkteamslost` anywhere in `BattleScript_IngrainTurnHeal`
+ * (healing can never decide the battle).
+ */
+function runIngrainTick(
+  program: BattleScriptProgram,
+  handlers: Handlers,
+  state: MachineState,
+  battler: BattleScriptBattlerId,
+): TickOutcome {
+  const b = state.rulesContext.battlers[battler];
+  if ((b.status3 & BATTLE_SCRIPT_STATUS3_ROOTED) === 0 || b.hp === b.maxHP || b.hp === 0) {
+    return Object.freeze({ kind: "advance", state });
+  }
+  const damage = -floorDivAtLeastOne(b.maxHP, 16);
+  const rc = Object.freeze({ ...state.rulesContext, battleMoveDamage: damage });
+  return runTickScript(program, handlers, state, rc, battler, INGRAIN_TURN_HEAL_LABEL);
+}
+
+/**
+ * `ENDTURN_LEECH_SEED` (`battle_util.c:1509-1524`,
+ * docs/ingrain-leechseed-wrap-ground-truth.md §2b) -- `BS_ATTACKER` is the
+ * seeded battler (this tick's own `battler`, drains first); `BS_TARGET` is
+ * the seeder (the HP receiver, per the C side's own comment), read back from
+ * `status3`'s low two bits and threaded in as the `target` selector role
+ * before the script runs. Zero `Random()` draws.
+ */
+function runLeechSeedTick(
+  program: BattleScriptProgram,
+  handlers: Handlers,
+  state: MachineState,
+  battler: BattleScriptBattlerId,
+): TickOutcome {
+  const b = state.rulesContext.battlers[battler];
+  const seederId = (b.status3 & BATTLE_SCRIPT_STATUS3_LEECHSEED_BATTLER_MASK) as BattleScriptBattlerId;
+  const seeder = state.rulesContext.battlers[seederId];
+  if ((b.status3 & BATTLE_SCRIPT_STATUS3_LEECHSEED) === 0 || seeder.hp === 0 || b.hp === 0) {
+    return Object.freeze({ kind: "advance", state });
+  }
+  const damage = floorDivAtLeastOne(b.maxHP, 8);
+  const rc = Object.freeze({
+    ...state.rulesContext,
+    battleMoveDamage: damage,
+    selectorRoles: Object.freeze({ ...state.rulesContext.selectorRoles, target: seederId }),
+  });
+  return runTickScript(program, handlers, state, rc, battler, LEECH_SEED_TURN_DRAIN_LABEL);
+}
+
+/**
+ * `ENDTURN_WRAP` (`battle_util.c:1592-1621`,
+ * docs/ingrain-leechseed-wrap-ground-truth.md §2c) -- the counter decrements
+ * FIRST, then branches: still trapped fires the damage script
+ * (`floor(maxHP/16)`, zero `Random()`), the decrement hitting zero fires the
+ * release script instead (no damage). Both scripts only ever read
+ * `BS_ATTACKER` (this tick's own `battler`, the trapped mon).
+ */
+function runWrapTick(
+  program: BattleScriptProgram,
+  handlers: Handlers,
+  state: MachineState,
+  battler: BattleScriptBattlerId,
+): TickOutcome {
+  const b = state.rulesContext.battlers[battler];
+  if ((b.status2 & BATTLE_SCRIPT_STATUS2_WRAPPED_MASK) === 0 || b.hp === 0) {
+    return Object.freeze({ kind: "advance", state });
+  }
+  const decrementedStatus2 = (b.status2 - (1 << 13)) >>> 0;
+  const decrementedRc = withBattler(state.rulesContext, battler, { status2: decrementedStatus2 });
+  if ((decrementedStatus2 & BATTLE_SCRIPT_STATUS2_WRAPPED_MASK) !== 0) {
+    const damage = floorDivAtLeastOne(b.maxHP, 16);
+    const rc = Object.freeze({ ...decrementedRc, battleMoveDamage: damage });
+    return runTickScript(program, handlers, state, rc, battler, WRAP_TURN_DMG_LABEL);
+  }
+  return runTickScript(program, handlers, state, decrementedRc, battler, WRAP_ENDS_LABEL);
+}
+
+/** Folds a fired/opcode-barrier `TickOutcome` into the battler loop's own result shape, uniformly across every ENDTURN_* tick. */
+type TickApplyResult =
+  | Readonly<{ kind: "continue"; state: MachineState }>
+  | Readonly<{ kind: "opcode-barrier"; state: MachineState; instruction: BattleScriptInstruction }>
+  | Readonly<{ kind: "outcome-decided"; state: MachineState }>;
+
+function applyTickOutcome(tick: TickOutcome): TickApplyResult {
+  if (tick.kind === "opcode-barrier") {
+    return Object.freeze({ kind: "opcode-barrier", state: tick.state, instruction: tick.instruction });
+  }
+  if (tick.kind === "fired" && tick.state.rulesContext.battleOutcome !== 0) {
+    // doc §1: an inline checkteamslost/tryfaintmon deciding the battle stops all further field/battler processing this turn.
+    return Object.freeze({ kind: "outcome-decided", state: tick.state });
+  }
+  return Object.freeze({ kind: "continue", state: tick.state });
+}
+
 type BattlerLoopResult =
   | Readonly<{ kind: "clean"; state: MachineState }>
   | Readonly<{ kind: "outcome-decided"; state: MachineState }>
@@ -301,16 +404,21 @@ type BattlerLoopResult =
 
 /**
  * `DoBattlerEndTurnEffects` (`battle_util.c:1464-1783`): per battler (turn
- * order), all 19 `ENDTURN_*` cases in enum order. Only
- * POISON/BAD_POISON/BURN are fully wired; every other reachable-but-
- * unmodeled case gates on whatever real bit/field this engine already
- * tracks and barriers if it's ever actually set (currently never, since no
- * move/ability effect in this engine sets any of them yet) -- a real,
- * live check, not a blanket skip. Cases with no modeled trigger state at
- * all (Leech Seed, Wrap, Uproar, Encore, Charge, Yawn) are documented,
- * permanently-inert no-ops today; Lock-On is skipped per the doc's own
- * dead-for-Factory finding (B15); Abilities/Items1/Items2 are pure-C
- * breadth explicitly out of this doc's scope (B2/B3/B19).
+ * order), all 19 `ENDTURN_*` cases in real enum/execution order (INGRAIN,
+ * ABILITIES, ITEMS1, LEECH_SEED, POISON, BAD_POISON, BURN, NIGHTMARES,
+ * CURSE, WRAP, UPROAR, THRASH, DISABLE, ENCORE, LOCK_ON, CHARGE, TAUNT,
+ * YAWN, ITEMS2 -- the C switch's own textual case ordering differs from
+ * this, but `turnEffectsTracker` walks the enum's integer values, not
+ * source-file position). Ingrain/Leech Seed/Wrap are now fully wired
+ * (docs/ingrain-leechseed-wrap-ground-truth.md §5 slices 1-3); every other
+ * reachable-but-unmodeled case gates on whatever real bit/field this engine
+ * already tracks and barriers if it's ever actually set (currently never,
+ * since no move/ability effect in this engine sets any of them yet) -- a
+ * real, live check, not a blanket skip. Cases with no modeled trigger state
+ * at all (Uproar, Encore, Charge, Yawn) are documented, permanently-inert
+ * no-ops today; Lock-On is skipped per the doc's own dead-for-Factory
+ * finding (B15); Abilities/Items1/Items2 are pure-C breadth explicitly out
+ * of this doc's scope (B2/B3/B19).
  */
 function runDoBattlerEndTurnEffects(
   program: BattleScriptProgram,
@@ -322,21 +430,27 @@ function runDoBattlerEndTurnEffects(
   for (const battler of battlerOrder) {
     if ((state.rulesContext.absentBattlerFlags & (1 << battler)) !== 0) continue;
 
-    // ENDTURN_INGRAIN: gated on the real STATUS3_ROOTED bit; nothing in this engine sets it yet (Ingrain's own move effect is unported).
-    if ((state.rulesContext.battlers[battler].status3 & BATTLE_SCRIPT_STATUS3_ROOTED) !== 0) {
-      return Object.freeze({ kind: "case-barrier", state, caseName: "ENDTURN_INGRAIN", detail: "STATUS3_ROOTED set but the Ingrain heal script (playanimation) is not wired" });
+    const ingrain = applyTickOutcome(runIngrainTick(program, handlers, state, battler));
+    if (ingrain.kind === "opcode-barrier") {
+      return Object.freeze({ kind: "opcode-barrier", state: ingrain.state, instruction: ingrain.instruction });
     }
+    if (ingrain.kind === "outcome-decided") return Object.freeze({ kind: "outcome-decided", state: ingrain.state });
+    state = ingrain.state;
     // ENDTURN_ABILITIES/ENDTURN_ITEMS1: pure-C ability/item breadth, explicitly out of scope (doc B2/B3) -- no-op.
 
-    const tick = runBattlerStatusDamageTick(program, handlers, state, battler);
-    if (tick.kind === "opcode-barrier") {
-      return Object.freeze({ kind: "opcode-barrier", state: tick.state, instruction: tick.instruction });
+    const leechSeed = applyTickOutcome(runLeechSeedTick(program, handlers, state, battler));
+    if (leechSeed.kind === "opcode-barrier") {
+      return Object.freeze({ kind: "opcode-barrier", state: leechSeed.state, instruction: leechSeed.instruction });
     }
-    state = tick.state;
-    if (tick.kind === "fired" && state.rulesContext.battleOutcome !== 0) {
-      // doc §1: an inline checkteamslost deciding the battle stops all further field/battler processing this turn.
-      return Object.freeze({ kind: "outcome-decided", state });
+    if (leechSeed.kind === "outcome-decided") return Object.freeze({ kind: "outcome-decided", state: leechSeed.state });
+    state = leechSeed.state;
+
+    const statusDamage = applyTickOutcome(runBattlerStatusDamageTick(program, handlers, state, battler));
+    if (statusDamage.kind === "opcode-barrier") {
+      return Object.freeze({ kind: "opcode-barrier", state: statusDamage.state, instruction: statusDamage.instruction });
     }
+    if (statusDamage.kind === "outcome-decided") return Object.freeze({ kind: "outcome-decided", state: statusDamage.state });
+    state = statusDamage.state;
 
     const b = state.rulesContext.battlers[battler];
     if ((b.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_NIGHTMARE) !== 0) {
@@ -346,17 +460,26 @@ function runDoBattlerEndTurnEffects(
     if ((b.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_CURSED) !== 0) {
       return Object.freeze({ kind: "case-barrier", state, caseName: "ENDTURN_CURSE", detail: "STATUS2_CURSED set but BattleScript_CurseTurnDmg is not wired" });
     }
-    // ENDTURN_WRAP/ENDTURN_UPROAR: no modeled trigger state (no wrap counter, no uproar timer) -- permanently inert no-op today (doc B10/B11).
-    if ((b.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_LOCK_CONFUSE) !== 0) {
+
+    const wrap = applyTickOutcome(runWrapTick(program, handlers, state, battler));
+    if (wrap.kind === "opcode-barrier") {
+      return Object.freeze({ kind: "opcode-barrier", state: wrap.state, instruction: wrap.instruction });
+    }
+    if (wrap.kind === "outcome-decided") return Object.freeze({ kind: "outcome-decided", state: wrap.state });
+    state = wrap.state;
+    // ENDTURN_UPROAR: no modeled uproar timer -- permanently inert no-op today (doc B11).
+
+    const b2 = state.rulesContext.battlers[battler];
+    if ((b2.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_LOCK_CONFUSE) !== 0) {
       return Object.freeze({ kind: "case-barrier", state, caseName: "ENDTURN_THRASH", detail: "STATUS2_LOCK_CONFUSE set but BattleScript_ThrashConfuses is not wired" });
     }
-    if (b.disabledMove !== 0) {
+    if (b2.disabledMove !== 0) {
       return Object.freeze({ kind: "case-barrier", state, caseName: "ENDTURN_DISABLE", detail: "disabledMove set but the disableTimer decrement/BattleScript_DisabledNoMore path is not wired" });
     }
     // ENDTURN_ENCORE: no modeled encoreTimer/encoredMove -- inert no-op today (doc B14).
     // ENDTURN_LOCK_ON: doc-proven dead for Factory (zero MOVE_LOCK_ON/MOVE_MIND_READER carriers, B15) -- skipped, not silently ignored.
     // ENDTURN_CHARGE: no modeled chargeTimer/STATUS3_CHARGED_UP -- inert no-op today (doc B16).
-    if (b.tauntTimer !== 0) {
+    if (b2.tauntTimer !== 0) {
       return Object.freeze({ kind: "case-barrier", state, caseName: "ENDTURN_TAUNT", detail: "tauntTimer set but its decrement/BattleScript_EncoredNoMore-sibling clear is not wired" });
     }
     // ENDTURN_YAWN: no modeled yawn counter -- inert no-op today (doc B18; also the only Random() draw in the whole end-turn phase, deferred with it).

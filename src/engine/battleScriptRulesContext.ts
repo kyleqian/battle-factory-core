@@ -34,6 +34,7 @@ import { createBattleScriptSetSideStatusOpcodeHandlers } from "./battleScriptSet
 import { createBattleScriptSetWeatherOpcodeHandlers } from "./battleScriptSetWeatherOpcode.ts";
 import { createBattleScriptDamagingWeatherOpcodeHandlers } from "./battleScriptDamagingWeatherOpcode.ts";
 import { createBattleScriptTryCastformDataChangeOpcodeHandlers } from "./battleScriptTryCastformDataChangeOpcode.ts";
+import { createBattleScriptIngrainLeechSeedWrapOpcodeHandlers } from "./battleScriptIngrainLeechSeedWrapOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -229,6 +230,23 @@ type BattleScriptMoveEndBattlerMetadata = Readonly<{
    * doc's own FLINCH registration ever reads this field.
    */
   turnOrderNum: number;
+  /**
+   * Source `gBattleStruct->wrappedMove[battler]` -- the trapping move's id,
+   * written by SetMoveEffect's MOVE_EFFECT_WRAP case
+   * (docs/ingrain-leechseed-wrap-ground-truth.md §1c). Absent legacy inputs
+   * default to 0 (MOVE_NONE) -- safe because no code path before Wrap's own
+   * setter registration ever reads this field.
+   */
+  wrappedMove: number;
+  /**
+   * Source `gBattleStruct->wrappedBy[battler]` -- the attacker who set the
+   * trap, read back by `Cmd_cleareffectsonfaint`'s cross-battler
+   * STATUS2_WRAPPED clear (`FaintClearSetData`, battle_main.c:3281). Absent
+   * legacy inputs default to 0 -- inert unless this battler's own status2
+   * STATUS2_WRAPPED bits are actually set, which no code path before Wrap's
+   * own setter registration ever does.
+   */
+  wrappedBy: BattleScriptBattlerId;
 }>;
 
 /**
@@ -265,6 +283,8 @@ export type BattleScriptRulesBattler = BattleScriptRulesBattlerBase & Readonly<{
   maxHP?: number;
   speed?: number;
   turnOrderNum?: number;
+  wrappedMove?: number;
+  wrappedBy?: BattleScriptBattlerId;
 }>;
 
 export type BattleScriptRulesBattlerState =
@@ -1687,6 +1707,8 @@ export function createBattleScriptRulesContext(
     maxHP: requireUnsigned(battler.maxHP ?? battler.hp, 0xffff, `battlers[${index}].maxHP`),
     speed: requireUnsigned(battler.speed ?? 100, 0xffff, `battlers[${index}].speed`),
     turnOrderNum: requireUnsigned(battler.turnOrderNum ?? 1, 0xff, `battlers[${index}].turnOrderNum`),
+    wrappedMove: requireUnsigned(battler.wrappedMove ?? 0, 0xffff, `battlers[${index}].wrappedMove`),
+    wrappedBy: requireUnsigned(battler.wrappedBy ?? 0, 3, `battlers[${index}].wrappedBy`) as BattleScriptBattlerId,
     ...(battler.confusionDamage === undefined ? {} : {
       confusionDamage: Object.freeze({
         level: requireUnsigned(
@@ -2043,6 +2065,7 @@ export function createBattleScriptStatusRulesHandlers(
       resolveBattlerForBattleScript: resolveRulesBattlerForBattleScript,
     }),
     ...createBattleScriptTryCastformDataChangeOpcodeHandlers(program),
+    ...createBattleScriptIngrainLeechSeedWrapOpcodeHandlers(program),
   });
 }
 

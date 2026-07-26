@@ -68,6 +68,11 @@ export const BATTLE_SCRIPT_STATUS3_UNDERGROUND = 1 << 7;
 export const BATTLE_SCRIPT_STATUS3_MINIMIZED = 1 << 8;
 export const BATTLE_SCRIPT_STATUS3_ROOTED = 1 << 10;
 export const BATTLE_SCRIPT_STATUS3_UNDERWATER = 1 << 18;
+/** include/constants/battle.h:158-159 -- the seeder's battler id (bits 0-1) plus the "is seeded" bit. */
+export const BATTLE_SCRIPT_STATUS3_LEECHSEED_BATTLER_MASK = (1 << 0) | (1 << 1);
+export const BATTLE_SCRIPT_STATUS3_LEECHSEED = 1 << 2;
+/** include/constants/battle.h:140-141 -- STATUS2_WRAPPED's 3-bit turn counter (bits 13-15). */
+export const BATTLE_SCRIPT_STATUS2_WRAPPED_MASK = (1 << 13) | (1 << 14) | (1 << 15);
 
 export const BATTLE_SCRIPT_STATUS2_TRANSFORMED = 1 << 21;
 export const BATTLE_SCRIPT_STATUS2_FORESIGHT = 1 << 29;

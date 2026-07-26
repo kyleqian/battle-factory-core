@@ -18,6 +18,12 @@ const BATTLE_TYPE_FACTORY = 1 << 19;
 const STATUS1_BURN = 1 << 4;
 const STATUS1_TOXIC_POISON = 1 << 7;
 const B_WAIT_TIME_LONG = 64;
+/** include/constants/battle.h:140-141,158-159,167. */
+const STATUS3_ROOTED = 1 << 10;
+const STATUS3_LEECHSEED = 1 << 2;
+const STATUS2_WRAPPED_MASK = (1 << 13) | (1 << 14) | (1 << 15);
+/** include/abilities.h:68. */
+const ABILITY_LIQUID_OOZE = 64;
 
 function battler(changes: Partial<BattleScriptRulesBattler> & { maxHP?: number } = {}): BattleScriptRulesBattler {
   return Object.freeze({
@@ -52,6 +58,8 @@ function battler(changes: Partial<BattleScriptRulesBattler> & { maxHP?: number }
     level: changes.level ?? 50,
     friendship: changes.friendship ?? 0,
     partyIndex: changes.partyIndex ?? 0,
+    wrappedMove: changes.wrappedMove,
+    wrappedBy: changes.wrappedBy,
   }) as unknown as BattleScriptRulesBattler;
 }
 
@@ -240,5 +248,133 @@ describe("runBattleEndTurnOrchestration (BattleTurnPassed equivalent)", () => {
     const turn2 = runBattleEndTurnOrchestration(program, handlers, turn1.state);
     if (turn2.kind !== "next-turn") throw new Error("expected next-turn");
     expect(turn2.state.rulesContext.battlers[1]!.hp).toBe(814); // 938 - 62*2 = 814
+  });
+
+  it("(c) Ingrain heal ticks floor(maxHP/16) capped at maxHP -- doc's live 159 -> 161 ledger (docs/ingrain-leechseed-wrap-ground-truth.md §2a), zero RNG", () => {
+    const rc = context({
+      battlers: [
+        battler({ side: 0 }),
+        battler({ side: 1, hp: 159, maxHP: 161, status3: STATUS3_ROOTED, partyIndex: 2 }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+      party: { player: sixSlots(100), opponent: sixSlots(0, 0, 159) },
+    });
+    const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+    const initial = scratchState(rc, 1);
+    const result = runBattleEndTurnOrchestration(program, handlers, initial);
+    expect(result.kind).toBe("next-turn");
+    expect(result.state.rulesContext.battlers[1]!.hp).toBe(161); // capped at maxHP, not a blind +10 (floor(161/16))
+    expect(result.state.rulesContext.battlers[1]!.status3).toBe(STATUS3_ROOTED);
+    expect(result.state.rulesContext.party.opponent[2]!.hp).toBe(161);
+    expect(result.state.rng.calls).toBe(initial.rng.calls);
+  });
+
+  it("Ingrain heal ticks a full floor(maxHP/16) when nowhere near the cap", () => {
+    const rc = context({
+      battlers: [
+        battler({ side: 0 }),
+        battler({ side: 1, hp: 50, maxHP: 161, status3: STATUS3_ROOTED, partyIndex: 2 }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+      party: { player: sixSlots(100), opponent: sixSlots(0, 0, 50) },
+    });
+    const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+    const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
+    expect(result.kind).toBe("next-turn");
+    expect(result.state.rulesContext.battlers[1]!.hp).toBe(60); // 50 + floor(161/16) = 50 + 10
+  });
+
+  it("Ingrain does not heal at full HP or at 0 HP (real guard, not just an inert no-op)", () => {
+    const fullHpRc = context({
+      battlers: [
+        battler({ side: 0 }),
+        battler({ side: 1, hp: 100, maxHP: 100, status3: STATUS3_ROOTED, partyIndex: 2 }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+    });
+    const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+    const initial = scratchState(fullHpRc, 1);
+    const result = runBattleEndTurnOrchestration(program, handlers, initial);
+    expect(result.kind).toBe("next-turn");
+    expect(result.state.rulesContext.battlers[1]!.hp).toBe(100);
+    expect(result.state.rng.calls).toBe(initial.rng.calls);
+  });
+
+  it("(d) Leech Seed drains floor(maxHP/8) from the seeded battler and heals the seeder the same amount, zero RNG (docs/ingrain-leechseed-wrap-ground-truth.md §2b)", () => {
+    const rc = context({
+      battlers: [
+        battler({ side: 0, hp: 100, maxHP: 200, partyIndex: 0 }), // seeder (player, battler 0)
+        battler({ side: 1, hp: 170, maxHP: 170, status3: STATUS3_LEECHSEED | 0, partyIndex: 2 }), // seeded, seeder id 0
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+      party: { player: sixSlots(100), opponent: sixSlots(0, 0, 170) },
+    });
+    const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+    const initial = scratchState(rc, 1);
+    const result = runBattleEndTurnOrchestration(program, handlers, initial);
+    expect(result.kind).toBe("next-turn");
+    expect(result.state.rulesContext.battlers[1]!.hp).toBe(149); // 170 - floor(170/8) = 170 - 21
+    expect(result.state.rulesContext.battlers[0]!.hp).toBe(121); // seeder gains the same 21
+    expect(result.state.rulesContext.battlers[1]!.status3 & STATUS3_LEECHSEED).not.toBe(0);
+    expect(result.state.rng.calls).toBe(initial.rng.calls);
+  });
+
+  it("Leech Seed + Liquid Ooze on the SEEDED battler: the seeder is damaged instead of healed (real ability branch, not source-cited only)", () => {
+    const rc = context({
+      battlers: [
+        battler({ side: 0, hp: 100, maxHP: 200, partyIndex: 0 }), // seeder
+        battler({ side: 1, hp: 170, maxHP: 170, status3: STATUS3_LEECHSEED | 0, ability: ABILITY_LIQUID_OOZE, partyIndex: 2 }), // seeded, has Liquid Ooze
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+      party: { player: sixSlots(100), opponent: sixSlots(0, 0, 170) },
+    });
+    const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+    const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
+    expect(result.kind).toBe("next-turn");
+    expect(result.state.rulesContext.battlers[1]!.hp).toBe(149); // seeded mon still drains normally: 170 - 21
+    expect(result.state.rulesContext.battlers[0]!.hp).toBe(79); // seeder takes 21 damage instead of healing
+  });
+
+  it("(e) Wrap still-trapped: counter decrements first, then deals floor(maxHP/16), zero RNG (docs/ingrain-leechseed-wrap-ground-truth.md §2c)", () => {
+    const rc = context({
+      battlers: [
+        battler({ side: 0 }),
+        battler({ side: 1, hp: 170, maxHP: 170, status2: 3 << 13, partyIndex: 2 }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+      party: { player: sixSlots(100), opponent: sixSlots(0, 0, 170) },
+    });
+    const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+    const initial = scratchState(rc, 1);
+    const result = runBattleEndTurnOrchestration(program, handlers, initial);
+    expect(result.kind).toBe("next-turn");
+    expect((result.state.rulesContext.battlers[1]!.status2 & STATUS2_WRAPPED_MASK) >>> 13).toBe(2); // 3 -> 2
+    expect(result.state.rulesContext.battlers[1]!.hp).toBe(160); // 170 - floor(170/16) = 170 - 10
+    expect(result.state.rng.calls).toBe(initial.rng.calls);
+  });
+
+  it("Wrap release: the decrement hitting zero frees the battler with no damage this tick", () => {
+    const rc = context({
+      battlers: [
+        battler({ side: 0 }),
+        battler({ side: 1, hp: 170, maxHP: 170, status2: 1 << 13, partyIndex: 2 }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+      party: { player: sixSlots(100), opponent: sixSlots(0, 0, 170) },
+    });
+    const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+    const initial = scratchState(rc, 1);
+    const result = runBattleEndTurnOrchestration(program, handlers, initial);
+    expect(result.kind).toBe("next-turn");
+    expect(result.state.rulesContext.battlers[1]!.status2 & STATUS2_WRAPPED_MASK).toBe(0);
+    expect(result.state.rulesContext.battlers[1]!.hp).toBe(170); // unchanged -- release deals no damage
+    expect(result.state.rng.calls).toBe(initial.rng.calls);
   });
 });

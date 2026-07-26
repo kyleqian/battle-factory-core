@@ -70,7 +70,14 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // outside the quartet's own 7 tables, an out-of-range MULTISTRING_CHOOSER
   // index) and Cmd_updatestatusicon (2: bad operand shape, the doubles-only
   // BS_ATTACKER_WITH_PARTNER branch). Net: -2 retired + 3 + 3 + 2 = +6.
-  ["src/engine/battleScriptHitChainOpcode.ts", 25],
+  // 25 -> 23 (Ingrain/Leech Seed/Wrap registration, docs/ingrain-leechseed-
+  // wrap-ground-truth.md §5): two barriers retired for real, not narrowed --
+  // Cmd_datahpupdate's negative-damage (HP gain) branch is now a genuine
+  // maxHP-clamped heal (Ingrain/Leech Seed's own end-turn ticks need it), and
+  // Cmd_cleareffectsonfaint's STATUS2_WRAPPED cross-battler clear now has the
+  // `wrappedBy` identity this doc's own setter registration adds, so it
+  // clears for real instead of barriering.
+  ["src/engine/battleScriptHitChainOpcode.ts", 23],
   ["src/engine/battleScriptAttackCancelerOpcode.ts", 5],
   ["src/engine/battleScriptMoveEndOpcode.ts", 7],
   ["src/engine/battleScriptJumpifbyteOpcode.ts", 1],
@@ -155,6 +162,20 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // non-Castform battler (the vast majority of matchups) and an
   // already-correctly-typed Castform never reach it.
   ["src/engine/battleScriptTryCastformDataChangeOpcode.ts", 1],
+  // Ingrain/Leech Seed/Wrap setter opcode registration (docs/ingrain-
+  // leechseed-wrap-ground-truth.md §5): Cmd_copyarray is narrowed to
+  // BattleScript_LeechSeedTurnDrain's own `gBattleMoveDamage<-gHpDealt, size
+  // 4` tuple (1 barrier, every other of its 15 other concrete call sites --
+  // Triple Kick, Pain Split, Bide, Endeavor, ...). Cmd_jumpifability is
+  // narrowed to the plain BS_TARGET/BS_ATTACKER selector with
+  // ABILITY_LIQUID_OOZE (1 barrier, every other ability id across its 17
+  // other concrete call sites -- Shield Dust/Suction Cups/Own Tempo/Water
+  // Veil/Rock Head/Clear Body/... -- plus the BS_ATTACKER_SIDE/
+  // BS_NOT_ATTACKER_SIDE AbilityBattleEffects branches, unreached by any
+  // concrete call site). Cmd_manipulatedamage is narrowed to DMG_CHANGE_SIGN
+  // (1 barrier, DMG_RECOIL_FROM_MISS/DMG_DOUBLED -- Struggle recoil/Beat Up,
+  // out of this slice's scope).
+  ["src/engine/battleScriptIngrainLeechSeedWrapOpcode.ts", 3],
 ]);
 
 function recordingImportsIn(file: string): string[] {

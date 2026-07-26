@@ -28,11 +28,12 @@ const ROCK_SLIDE = 157; // EFFECT_FLINCH_HIT, power 75, accuracy 90, MOVE_TARGET
 const EARTHQUAKE = 89; // EFFECT_EARTHQUAKE, power 100, accuracy 100, MOVE_TARGET_FOES_AND_ALLY
 const ABILITY_PRESSURE = 46;
 
-function battler(changes: Partial<BattleScriptRulesBattler> = {}): BattleScriptRulesBattler {
+function battler(changes: Partial<BattleScriptRulesBattler> & { maxHP?: number } = {}): BattleScriptRulesBattler {
   return Object.freeze({
     side: changes.side ?? 0,
     ability: changes.ability ?? 0,
     hp: changes.hp ?? 100,
+    maxHP: changes.maxHP ?? changes.hp ?? 100,
     moves: changes.moves ?? Object.freeze([TACKLE, 0, 0, 0]),
     pp: changes.pp ?? Object.freeze([35, 0, 0, 0]),
     status1: changes.status1 ?? 0,
@@ -65,6 +66,8 @@ function battler(changes: Partial<BattleScriptRulesBattler> = {}): BattleScriptR
     endured: changes.endured,
     helpingHand: changes.helpingHand,
     turnOrderNum: changes.turnOrderNum,
+    wrappedMove: changes.wrappedMove,
+    wrappedBy: changes.wrappedBy,
   });
 }
 
@@ -1115,11 +1118,25 @@ describe("production datahpupdate (Cmd_datahpupdate) dispatch -- the rung's real
       expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 1889 });
     });
 
-    it("halts on negative damage (HP gain needs maxHP, unmodeled)", () => {
-      const rc = context(0, {}, { battleMoveDamage: -10 }, { hp: 50 });
+  });
+
+  describe("negative damage is HP gain (Ingrain/Leech Seed's own end-turn heals -- docs/ingrain-leechseed-wrap-ground-truth.md §2a/§2b)", () => {
+    it("heals, clamped at maxHP, with none of the positive branch's bide/shellBell/physical-special bookkeeping", () => {
+      const rc = context(0, {}, { battleMoveDamage: -10, hitMarker: 1 << 20 }, { hp: 50, maxHP: 55 });
       const { result } = stepAtOpcode("B_SCR_OP_DATAHPUPDATE", rc);
-      expect(result.kind).toBe("halted");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 1899 });
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.rulesContext.battlers[1]!.hp).toBe(55); // 50 + 10 = 60, capped at maxHP 55
+      expect(result.state.rulesContext.hitMarker & (1 << 20)).toBe(0); // HITMARKER_PASSIVE_HP_UPDATE cleared either way
+      expect(result.state.rulesContext.hpDealt).toBe(0); // unlike the positive branch, gHpDealt is left untouched
+      expect(result.state.events.length).toBe(1);
+      expect(result.state.events[0]).toMatchObject({ kind: "hp-change", battler: 1, from: 50, to: 55 });
+    });
+
+    it("does not overheal past maxHP even far below it", () => {
+      const rc = context(0, {}, { battleMoveDamage: -10 }, { hp: 100, maxHP: 161 });
+      const { result } = stepAtOpcode("B_SCR_OP_DATAHPUPDATE", rc);
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.rulesContext.battlers[1]!.hp).toBe(110);
     });
   });
 });
@@ -2115,6 +2132,24 @@ describe("production cleareffectsonfaint (Cmd_cleareffectsonfaint) dispatch", ()
     expect(result.state.rulesContext.battlers[0]!.status2).toBe(0x1);
   });
 
+  it(
+    "clears STATUS2_WRAPPED on another battler only when this fainted battler is the one who set it "
+      + "(gBattleStruct->wrappedBy identity, docs/ingrain-leechseed-wrap-ground-truth.md §1c/§5 slice 2)",
+    () => {
+      const rc = context(0, { status2: (3 << 13) | 0x1, wrappedBy: 1 }, {}, { hp: 0 });
+      const { result } = stepAtProgramCounter(cleareffectsonfaintTargetPc, rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.rulesContext.battlers[0]!.status2).toBe(0x1); // WRAPPED bits cleared, unrelated bit kept
+    },
+  );
+
+  it("leaves STATUS2_WRAPPED alone when some OTHER battler (not this fainted one) set it", () => {
+    const rc = context(0, { status2: 3 << 13, wrappedBy: 2 }, {}, { hp: 0 });
+    const { result } = stepAtProgramCounter(cleareffectsonfaintTargetPc, rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.rulesContext.battlers[0]!.status2).toBe(3 << 13);
+  });
+
   describe("(b) unsupported-branch barriers", () => {
     it("halts when another battler has STATUS2_ESCAPE_PREVENTION set (gDisableStructs[].battlerPreventingEscape identity unmodeled)", () => {
       const rc = context(0, { status2: 1 << 26 }, {}, { hp: 0 });
@@ -2123,12 +2158,6 @@ describe("production cleareffectsonfaint (Cmd_cleareffectsonfaint) dispatch", ()
       expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 3277 });
     });
 
-    it("halts when another battler has a STATUS2_WRAPPED bit set (gBattleStruct->wrappedBy identity unmodeled)", () => {
-      const rc = context(0, { status2: 1 << 13 }, {}, { hp: 0 });
-      const { result } = stepAtProgramCounter(cleareffectsonfaintTargetPc, rc);
-      expect(result.kind).toBe("halted");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 3281 });
-    });
 
     it("halts on an unsupported selector spelling (Battle Arena's BS_OPPONENT1), not BS_TARGET/BS_ATTACKER", () => {
       const pc = program.instructions.find((i) =>

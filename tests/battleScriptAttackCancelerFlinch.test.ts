@@ -65,6 +65,8 @@ function battler(
     maxHP: changes.maxHP ?? changes.hp ?? 100,
     speed: changes.speed ?? 100,
     turnOrderNum: changes.turnOrderNum ?? 1,
+    wrappedMove: changes.wrappedMove ?? 0,
+    wrappedBy: changes.wrappedBy ?? 0,
   });
 }
 

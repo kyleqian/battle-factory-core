@@ -190,6 +190,16 @@ const PLAYANIMATION_ANIM_TYPES: ReadonlyMap<
   ["B_ANIM_STATS_CHANGE", { argExpression: "sB_ANIM_ARG1", animationId: "STATS_CHANGE", readsAnimArg1: true }],
   ["B_ANIM_RAIN_CONTINUES", { argExpression: "NULL", animationId: "RAIN_CONTINUES", readsAnimArg1: false }],
   ["B_ANIM_SUN_CONTINUES", { argExpression: "NULL", animationId: "SUN_CONTINUES", readsAnimArg1: false }],
+  /**
+   * docs/ingrain-leechseed-wrap-ground-truth.md §2a/§2b/§2c -- Ingrain's own
+   * `playanimation BS_ATTACKER, B_ANIM_INGRAIN_HEAL` (no third operand, `arg`
+   * defaults to NULL, the same shape as RAIN/SUN_CONTINUES above); Leech
+   * Seed's/Wrap's own end-turn scripts both pass `sB_ANIM_ARG1` explicitly,
+   * the same shape as B_ANIM_STATS_CHANGE.
+   */
+  ["B_ANIM_INGRAIN_HEAL", { argExpression: "NULL", animationId: "INGRAIN_HEAL", readsAnimArg1: false }],
+  ["B_ANIM_LEECH_SEED_DRAIN", { argExpression: "sB_ANIM_ARG1", animationId: "LEECH_SEED_DRAIN", readsAnimArg1: true }],
+  ["B_ANIM_TURN_TRAP", { argExpression: "sB_ANIM_ARG1", animationId: "TURN_TRAP", readsAnimArg1: true }],
 ]);
 
 function createPlayanimationOpcodeHandler(

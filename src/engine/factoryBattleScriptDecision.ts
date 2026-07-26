@@ -251,6 +251,8 @@ function emptyBattler(side: 0 | 1): BattleScriptRulesBattlerState {
     maxHP: 0,
     speed: 0,
     turnOrderNum: 1,
+    wrappedMove: 0,
+    wrappedBy: side,
   });
 }
 

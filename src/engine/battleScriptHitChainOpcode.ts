@@ -207,6 +207,14 @@ const PRIMARY_STATUS_MOVE_EFFECT = MOVE_EFFECT_TOXIC;
 /** include/constants/battle.h:254-255 -- the first two family-B (status2/misc) MOVE_EFFECT_* values. */
 const MOVE_EFFECT_CONFUSION = 7;
 const MOVE_EFFECT_FLINCH = 8;
+/** include/constants/battle.h:260 -- SetMoveEffect's Wrap-family case (docs/ingrain-leechseed-wrap-ground-truth.md §1c/§5 slice 2). */
+const MOVE_EFFECT_WRAP = 13;
+/**
+ * `gTrappingMoves` (`battle_message.c:1256-1264`) -- the fixed 6-move family
+ * MOVE_EFFECT_WRAP's own duration/message dispatch indexes by, in this exact
+ * order (`include/constants/moves.h`).
+ */
+const TRAPPING_MOVES: readonly number[] = [20, 35, 83, 128, 250, 328]; // BIND, WRAP, FIRE_SPIN, CLAMP, WHIRLPOOL, SAND_TOMB
 /** include/constants/battle.h:117,119,120 -- STATUS1_BURN is already declared above. */
 const STATUS1_POISON = 1 << 3;
 const STATUS1_FREEZE = 1 << 5;
@@ -295,6 +303,23 @@ const PRINTFROMTABLE_TABLES: Readonly<Record<string, readonly string[]>> = Objec
   ]),
   /** battle_message.c:1048-1052 -- B_MSG_SET_MIST(0)/MIST_FAILED(1). */
   gMistUsedStringIds: Object.freeze(["STRINGID_PKMNSHROUDEDINMIST", "STRINGID_BUTITFAILED"]),
+  /** battle_message.c:960-966 -- B_MSG_LEECH_SEED_SET(0)/MISS(1)/FAIL(2)/DRAIN(3)/OOZE(4). */
+  gLeechSeedStringIds: Object.freeze([
+    "STRINGID_PKMNSEEDED",
+    "STRINGID_PKMNEVADEDATTACK",
+    "STRINGID_ITDOESNTAFFECT",
+    "STRINGID_PKMNSAPPEDBYLEECHSEED",
+    "STRINGID_ITSUCKEDLIQUIDOOZE",
+  ]),
+  /** battle_message.c:1038-1045 -- indexed by the move's own position in gTrappingMoves, not MULTISTRING_CHOOSER's usual small enum. */
+  gWrappedStringIds: Object.freeze([
+    "STRINGID_PKMNSQUEEZEDBYBIND",
+    "STRINGID_PKMNWRAPPEDBY",
+    "STRINGID_PKMNTRAPPEDINVORTEX",
+    "STRINGID_PKMNCLAMPED",
+    "STRINGID_PKMNTRAPPEDINVORTEX",
+    "STRINGID_PKMNTRAPPEDBYSANDTOMB",
+  ]),
 });
 
 const MOVE_EFFECT_LABEL_BY_BYTE: Readonly<Record<number, string>> = Object.freeze({
@@ -371,6 +396,7 @@ export const SET_MOVE_EFFECT_SUPPORTED_BYTES: ReadonlySet<number> = new Set<numb
   MOVE_EFFECT_PARALYSIS,
   MOVE_EFFECT_CONFUSION,
   MOVE_EFFECT_FLINCH,
+  MOVE_EFFECT_WRAP,
   ...Object.keys(STAT_MOVE_EFFECT_TABLE).map(Number),
 ]);
 
@@ -1444,10 +1470,11 @@ function createHealthbarupdateOpcodeHandler(
  * bookkeeping matches source); the substitute-FADES sub-case
  * (BattleScriptPushCursor to BattleScript_SubstituteFade, an unrelated
  * cutscene subsystem) is barriered, gated strictly on the substitute's HP
- * actually reaching zero this hit. Negative damage (HP gain) is barriered --
- * it needs gBattleMons[battler].maxHP, unmodeled anywhere in this engine, and
- * is structurally unreachable from BattleScript_EffectHit's own EFFECT_HIT
- * moves regardless. Physical/special bookkeeping reuses the already-modeled
+ * actually reaching zero this hit. Negative damage (HP gain, Ingrain/Leech
+ * Seed's own end-turn ticks -- docs/ingrain-leechseed-wrap-ground-truth.md
+ * §2a/§2b) is a plain HP write clamped at maxHP, with none of the positive
+ * branch's bide/shellBell/physical-special bookkeeping (source has no such
+ * code on this branch at all). Physical/special bookkeeping reuses the already-modeled
  * gSpecialStatuses[battler].{physicalDmg,specialDmg} fields (added for
  * Cmd_moveend); gProtectStructs' parallel copy and physicalBattlerId/
  * specialBattlerId (Counter/Mirror Coat's own attacker attribution) have no
@@ -1509,12 +1536,30 @@ function createDatahpupdateOpcodeHandler(
     }
 
     if (damage < 0) {
-      return unsupportedBranch(
+      // Negative damage is HP gain (:1899-1903) -- no bide/shellBell/physical-special
+      // bookkeeping on this branch at all in source, just the HP write itself,
+      // clamped at maxHP (docs/ingrain-leechseed-wrap-ground-truth.md §2a/§2b).
+      const currentHp = battlerState.hp;
+      const healedHp = Math.min(currentHp - damage, battlerState.maxHP);
+      const nextHitMarker = (rulesContext.hitMarker & ~HITMARKER_PASSIVE_HP_UPDATE) >>> 0;
+      const nextRulesContext = withBattler(
+        Object.freeze({
+          ...rulesContext,
+          hitMarker: nextHitMarker,
+          party: withBattleScriptPartyMemberHp(rulesContext.party, battlerState.side, battlerState.partyIndex, healedHp),
+        }),
+        battler,
+        { hp: healedHp },
+      );
+      const scheduler = markBattleScriptControllerPending(context.state.scheduler, battler);
+      return transitionBattleScriptCommand(
         context,
-        "Cmd_datahpupdate's negative-damage (HP gain) branch needs gBattleMons[battler].maxHP, "
-          + "which this engine does not model yet",
-        "battle_script_commands.c",
-        1899,
+        Object.freeze({ kind: "advance" }),
+        {
+          rulesContext: nextRulesContext,
+          scheduler,
+          events: Object.freeze([Object.freeze({ kind: "hp-change" as const, battler, from: currentHp, to: healedHp })]),
+        },
       );
     }
 
@@ -1743,7 +1788,7 @@ function createResultmessageOpcodeHandler(
   };
 }
 
-function isBattlerOfType(battlerState: BattleScriptRulesBattlerState, typeName: string): boolean {
+export function isBattlerOfType(battlerState: BattleScriptRulesBattlerState, typeName: string): boolean {
   return battlerState.types[0] === typeName || battlerState.types[1] === typeName;
 }
 
@@ -1840,6 +1885,9 @@ function applySetMoveEffect(
     }
     if (effectByte === MOVE_EFFECT_FLINCH) {
       return applyFlinchMoveEffect(context, baseRulesContext, effectBattler, certain);
+    }
+    if (effectByte === MOVE_EFFECT_WRAP) {
+      return applyWrapMoveEffect(context, baseRulesContext, effectBattler);
     }
     const statEntry = STAT_MOVE_EFFECT_TABLE[effectByte];
     if (statEntry) {
@@ -2109,6 +2157,59 @@ function applyFlinchMoveEffect(
     context,
     Object.freeze({ kind: "advance" }),
     { rulesContext: nextRulesContext },
+  );
+}
+
+/**
+ * SetMoveEffect's MOVE_EFFECT_WRAP case (`battle_script_commands.c:2609-2632`,
+ * docs/ingrain-leechseed-wrap-ground-truth.md §1c/§5 slice 2). Already-wrapped
+ * (re-cast Wrap on an already-trapped target) is a plain skip -- the C source
+ * never re-rolls the duration or re-stamps wrappedMove/wrappedBy. Otherwise:
+ * draw the `(Random() & 3) + 3` duration (3-6 turns inclusive, confirmed live
+ * this doc's own probe), stamp both new struct-identity fields this engine now
+ * models (`wrappedMove`/`wrappedBy` -- the second unblocks
+ * `Cmd_cleareffectsonfaint`'s own cross-battler clear below), compute
+ * `printfromtable gWrappedStringIds`' own index (this move's position in the
+ * fixed `gTrappingMoves` list, source's own bounded find-loop -- every real
+ * call site is one of the six trapping moves, so the "not found" clamp to
+ * index 5 is unreachable here, not silently guessed), and push+jump into
+ * `BattleScript_MoveEffectWrap` (printfromtable/waitmessage/return, all
+ * already-registered opcodes).
+ */
+function applyWrapMoveEffect(
+  context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
+  baseRulesContext: BattleScriptRulesContext,
+  effectBattler: BattleScriptBattlerId,
+): BattleScriptCommandTransition<BattleScriptRulesContext> {
+  const effectBattlerState = baseRulesContext.battlers[effectBattler];
+  if ((effectBattlerState.status2 & STATUS2_WRAPPED_MASK) !== 0) {
+    return transitionBattleScriptCommand(
+      context,
+      Object.freeze({ kind: "advance" }),
+      { rulesContext: baseRulesContext },
+    );
+  }
+
+  const attacker = requireBattlerRole(baseRulesContext, "attacker");
+  const { rng, randomValue } = drawBattleScriptRng(
+    context.state.rng,
+    context.instruction,
+    "SetMoveEffect Wrap duration ((Random() & 3) + 3)",
+  );
+  const turns = (randomValue & 3) + 3;
+  const updatedContext = withBattler(baseRulesContext, effectBattler, {
+    status2: (effectBattlerState.status2 | (turns << 13)) >>> 0,
+    wrappedMove: baseRulesContext.currentMove,
+    wrappedBy: attacker,
+  });
+  const chooserIndex = TRAPPING_MOVES.indexOf(baseRulesContext.currentMove);
+  const multistringChooser = chooserIndex === -1 ? TRAPPING_MOVES.length - 1 : chooserIndex;
+  const nextRulesContext = Object.freeze({ ...updatedContext, multistringChooser });
+  const programCounter = resolveRequiredLabelProgramCounter(context.program, "BattleScript_MoveEffectWrap");
+  return transitionBattleScriptCommand(
+    context,
+    Object.freeze({ kind: "call", programCounter }),
+    { rulesContext: nextRulesContext, rng },
   );
 }
 
@@ -2492,12 +2593,14 @@ function replaceAt<T extends readonly number[]>(values: T, index: number, value:
  * hp==0 -- computed off the already-modeled battleTypeFlags word, not a
  * barrier). FaintClearSetData's cross-battler STATUS2_INFATUATED_WITH clear
  * is fully computable from the bit itself (`gBitTable[battler] << 16` encodes
- * the relationship directly, no external field needed); STATUS2_ESCAPE_PREVENTION
- * and STATUS2_WRAPPED instead need gDisableStructs[].battlerPreventingEscape/
- * gBattleStruct->wrappedBy identity this engine does not model, so each is a
- * named (b) barrier gated on its own bit actually being set on some other
- * battler (never true for a plain damaging-move KO, so unreached on this
- * rung's own scenario). The remaining struct-wide DisableStruct/ProtectStruct
+ * the relationship directly, no external field needed), and so now is its
+ * STATUS2_WRAPPED clear (docs/ingrain-leechseed-wrap-ground-truth.md §1c/§5
+ * slice 2's own `wrappedBy` field this engine now models). Only
+ * STATUS2_ESCAPE_PREVENTION still needs
+ * `gDisableStructs[].battlerPreventingEscape` identity this engine does not
+ * model, so it stays a named (b) barrier gated on its own bit actually being
+ * set on some other battler (never true for a plain damaging-move KO, so
+ * unreached on this rung's own scenario). The remaining struct-wide DisableStruct/ProtectStruct
  * fields FaintClearSetData zeroes (transformedMonPersonality, encoredMove*,
  * protectUses, stockpileCounter, disableTimer*, perishSongTimer*,
  * chargeTimer*, battlerWithSureHit, isFirstTurn, truantSwitchInHack,
@@ -2542,15 +2645,6 @@ function createCleareffectsonfaintOpcodeHandler(
           3277,
         );
       }
-      if ((otherStatus2 & STATUS2_WRAPPED_MASK) !== 0) {
-        return unsupportedBranch(
-          context,
-          `FaintClearSetData's STATUS2_WRAPPED cross-battler clear (battler ${i}) needs `
-            + "gBattleStruct->wrappedBy identity, not modeled here",
-          "battle_main.c",
-          3281,
-        );
-      }
     }
 
     const activeBattlerState = rulesContext.battlers[active];
@@ -2590,7 +2684,10 @@ function createCleareffectsonfaintOpcodeHandler(
           protected: 0 as const,
         });
       }
-      const status2 = (candidate.status2 & ~infatuationBit) >>> 0;
+      // FaintClearSetData (battle_main.c:3281): other battlers wrapped BY the
+      // fainted one are freed -- real gBattleStruct->wrappedBy identity, not a barrier.
+      const wrappedByActive = (candidate.status2 & STATUS2_WRAPPED_MASK) !== 0 && candidate.wrappedBy === active;
+      const status2 = (candidate.status2 & ~infatuationBit & (wrappedByActive ? ~STATUS2_WRAPPED_MASK : ~0)) >>> 0;
       return status2 === candidate.status2 ? candidate : Object.freeze({ ...candidate, status2 });
     }) as unknown as BattleScriptRulesBattlers;
 
