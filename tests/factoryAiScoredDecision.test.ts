@@ -776,6 +776,182 @@ describe("AI_CV_AttackDown mask-7 fixture reproduction (docs/factory-ai-checkvia
   });
 });
 
+const MOVE_LEER = 43; // EFFECT_DEFENSE_DOWN
+const MOVE_FAKE_TEARS = 313; // EFFECT_SPECIAL_DEFENSE_DOWN_2
+
+// docs/factory-ai-checkviability-ground-truth.md §15's twin fixtures
+// (tools/battle-lab/mechanic-factory-ai-cv-defensedown-{lowhp-reach,
+// fullhp-control}-off.json) -- the second CBM-blocked pair, reproduced
+// through the REAL mask-7 dispatcher end to end now that both
+// AI_CBM_DefenseDown and AI_CV_DefenseDown are ported. Opponent (AI_USER) =
+// Anorith, all 4 slots MOVE_LEER; target (player) = Machamp, same species
+// pairing as the VitalThrow block above (doc §15.2 reuses it verbatim) --
+// Battle Armor blocks Anorith's own crit roll, Machamp's single assignable
+// ability (Guts) keeps CBM's shared-tail get_ability guess free. Unlike
+// AttackDown's target-stat-stage gate, this pair's Gate A reads AI_USER's
+// OWN hp -- the reach/control split is the SAME hp values §15.3 live-verified
+// for VitalThrow's own attacker (22/120=18% seed 1, 30/120=25% seed 99 for
+// reach; 120/120=100% for control), constructed directly per this file's own
+// "construct the decisive state" precedent rather than replayed through the
+// hit chain.
+describe("AI_CV_DefenseDown mask-7 fixture reproduction (docs/factory-ai-checkviability-ground-truth.md §15.2/§15.3)", () => {
+  const MOVE_DEFENSE_DOWN_MOVESET = [MOVE_LEER, MOVE_LEER, MOVE_LEER, MOVE_LEER] as const;
+
+  // Anorith (species 390), level 50, base HP45/Atk95/Def50/SpA40/SpD50/Spe75
+  // -> level-50 stats HP120/Atk115/Def70/SpA60/SpD70/Speed95 (doc §15.2, same
+  // as §13.2's own VitalThrow attacker).
+  function anorithAttacker(hp: number): FactoryAiScoredBattlerView {
+    return Object.freeze({
+      types: ["TYPE_ROCK", "TYPE_BUG"] as const,
+      attack: 115, defense: 70, spAttack: 60, spDefense: 70, speed: 95, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp, maxHp: 120,
+    });
+  }
+  // Machamp (species 68), single assignable ability (Guts) -- doc §15.2, same
+  // species/stats as the VitalThrow block's own target.
+  function machampTarget(): FactoryAiScoredTargetView {
+    return Object.freeze({
+      species: 68,
+      types: ["TYPE_FIGHTING", "TYPE_FIGHTING"] as const,
+      attack: 150, defense: 100, spAttack: 85, spDefense: 105, speed: 75, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp: 165, maxHp: 165, ability: "ABILITY_GUTS", knownAbility: null,
+    });
+  }
+  function defenseDownView(attacker: FactoryAiScoredBattlerView): FactoryAiScoredView {
+    return Object.freeze({
+      schema: "factory-ai-scored-view/v1",
+      mode: "factory-level-50-singles",
+      active: Object.freeze({ aiBattler: 1 as const, targetBattler: 0 as const }),
+      factory: Object.freeze({ levelMode: 0 as const, battleMode: 0 as const, factoryWinStreak: 28, trainerOpponentId: 222 }),
+      moves: MOVE_DEFENSE_DOWN_MOVESET,
+      attacker,
+      target: machampTarget(),
+    });
+  }
+  function phaseDraws(result: ReturnType<typeof chooseFactoryAiScoredDecision>, phase: "check-bad-move" | "try-to-faint" | "check-viability") {
+    return result.trace.draws.filter((d) => "phase" in d && d.phase === phase);
+  }
+  function assertPicksLeer(view: FactoryAiScoredView, result: ReturnType<typeof chooseFactoryAiScoredDecision>) {
+    expect(result.submission.decision).toMatchObject({ kind: "use-move" });
+    if (result.submission.decision.kind === "use-move") {
+      expect(view.moves[result.submission.decision.moveSlot]).toBe(MOVE_LEER);
+    }
+  }
+
+  it("reach fixture, seed 1 (Anorith at 22/120 HP = 18%, doc §15.3's own live-verified endpoint): Gate A true for all 4 identical Leer slots, exactly 4 check-viability draws, zero CBM/TryToFaint draws, picks Leer", () => {
+    const view = defenseDownView(anorithAttacker(22));
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 1, calls: 0 } });
+    expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+    expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+    const cvDraws = phaseDraws(result, "check-viability");
+    expect(cvDraws).toHaveLength(4);
+    expect(cvDraws.every((d) => "kind" in d && d.kind === "defense-down-roll")).toBe(true);
+    assertPicksLeer(view, result);
+  });
+
+  it("reach fixture, seed 99 (Anorith at 30/120 HP = 25%, doc §15.3's own live-verified endpoint): exactly 4 check-viability draws, picks Leer", () => {
+    const view = defenseDownView(anorithAttacker(30));
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 99, calls: 0 } });
+    const cvDraws = phaseDraws(result, "check-viability");
+    expect(cvDraws).toHaveLength(4);
+    expect(cvDraws.every((d) => "kind" in d && d.kind === "defense-down-roll")).toBe(true);
+    assertPicksLeer(view, result);
+  });
+
+  it.each([1, 99])("control fixture (Anorith stays at full 120/120 HP -- Gate A false, Gate B true at neutral DEF stage), seed %i: deterministic zero check-viability draws, picks Leer", (seed) => {
+    const view = defenseDownView(anorithAttacker(120));
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+    expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+    expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+    expect(phaseDraws(result, "check-viability")).toHaveLength(0);
+    assertPicksLeer(view, result);
+  });
+});
+
+// docs/factory-ai-checkviability-ground-truth.md §16's twin fixtures
+// (tools/battle-lab/mechanic-factory-ai-cv-spdefdown-{lowhp-reach,
+// fullhp-control}-off.json) -- the third CBM-blocked pair, same recipe as
+// AI_CV_DefenseDown above with the dispatch move swapped to MOVE_FAKE_TEARS
+// (EFFECT_SPECIAL_DEFENSE_DOWN_2 -- EFFECT_SPECIAL_DEFENSE_DOWN itself is
+// unused by any real move, doc §16.2) and the draw kind swapped to
+// "sp-def-down-roll".
+describe("AI_CV_SpDefDown mask-7 fixture reproduction (docs/factory-ai-checkviability-ground-truth.md §16.2/§16.3)", () => {
+  const MOVE_SPDEF_DOWN_MOVESET = [MOVE_FAKE_TEARS, MOVE_FAKE_TEARS, MOVE_FAKE_TEARS, MOVE_FAKE_TEARS] as const;
+
+  function anorithAttacker(hp: number): FactoryAiScoredBattlerView {
+    return Object.freeze({
+      types: ["TYPE_ROCK", "TYPE_BUG"] as const,
+      attack: 115, defense: 70, spAttack: 60, spDefense: 70, speed: 95, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp, maxHp: 120,
+    });
+  }
+  function machampTarget(): FactoryAiScoredTargetView {
+    return Object.freeze({
+      species: 68,
+      types: ["TYPE_FIGHTING", "TYPE_FIGHTING"] as const,
+      attack: 150, defense: 100, spAttack: 85, spDefense: 105, speed: 75, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp: 165, maxHp: 165, ability: "ABILITY_GUTS", knownAbility: null,
+    });
+  }
+  function spDefDownView(attacker: FactoryAiScoredBattlerView): FactoryAiScoredView {
+    return Object.freeze({
+      schema: "factory-ai-scored-view/v1",
+      mode: "factory-level-50-singles",
+      active: Object.freeze({ aiBattler: 1 as const, targetBattler: 0 as const }),
+      factory: Object.freeze({ levelMode: 0 as const, battleMode: 0 as const, factoryWinStreak: 28, trainerOpponentId: 222 }),
+      moves: MOVE_SPDEF_DOWN_MOVESET,
+      attacker,
+      target: machampTarget(),
+    });
+  }
+  function phaseDraws(result: ReturnType<typeof chooseFactoryAiScoredDecision>, phase: "check-bad-move" | "try-to-faint" | "check-viability") {
+    return result.trace.draws.filter((d) => "phase" in d && d.phase === phase);
+  }
+  function assertPicksFakeTears(view: FactoryAiScoredView, result: ReturnType<typeof chooseFactoryAiScoredDecision>) {
+    expect(result.submission.decision).toMatchObject({ kind: "use-move" });
+    if (result.submission.decision.kind === "use-move") {
+      expect(view.moves[result.submission.decision.moveSlot]).toBe(MOVE_FAKE_TEARS);
+    }
+  }
+
+  it("reach fixture, seed 1 (Anorith at 22/120 HP = 18%): Gate A true for all 4 identical Fake Tears slots, exactly 4 check-viability draws, zero CBM/TryToFaint draws, picks Fake Tears", () => {
+    const view = spDefDownView(anorithAttacker(22));
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 1, calls: 0 } });
+    expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+    expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+    const cvDraws = phaseDraws(result, "check-viability");
+    expect(cvDraws).toHaveLength(4);
+    expect(cvDraws.every((d) => "kind" in d && d.kind === "sp-def-down-roll")).toBe(true);
+    assertPicksFakeTears(view, result);
+  });
+
+  it("reach fixture, seed 99 (Anorith at 30/120 HP = 25%): exactly 4 check-viability draws, picks Fake Tears", () => {
+    const view = spDefDownView(anorithAttacker(30));
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 99, calls: 0 } });
+    const cvDraws = phaseDraws(result, "check-viability");
+    expect(cvDraws).toHaveLength(4);
+    expect(cvDraws.every((d) => "kind" in d && d.kind === "sp-def-down-roll")).toBe(true);
+    assertPicksFakeTears(view, result);
+  });
+
+  it.each([1, 99])("control fixture (Anorith stays at full 120/120 HP -- Gate A false, Gate B true at neutral SPDEF stage), seed %i: deterministic zero check-viability draws, picks Fake Tears", (seed) => {
+    const view = spDefDownView(anorithAttacker(120));
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+    expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+    expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+    expect(phaseDraws(result, "check-viability")).toHaveLength(0);
+    assertPicksFakeTears(view, result);
+  });
+});
+
 // docs/factory-ai-checkviability-ground-truth.md §14.5 item 2's own
 // acceptance bonus: §6's ORIGINAL AI_CV_SpeedDown fixtures used a real
 // opponent moveset of [MOVE_STRING_SHOT, MOVE_GROWL, MOVE_GROWL, MOVE_GROWL]
