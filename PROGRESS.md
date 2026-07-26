@@ -111,6 +111,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   for a future porter: this file's own pre-existing "degenerate fixture
   (all 4 slots Surf)" test is the load-bearing precedent, not something to
   re-derive from scratch.
+- **Side merge (same hour, supervisor-verified ALL PASS live on the merged
+  tree):** `AI_CV_AlwaysHit` fully staged and validated — the salvaged
+  twin fixtures from an API-dropped earlier attempt (drafts preserved via
+  scratchpad, worktree relaunched) held up: 44/44 and 36/36 draws, seeds
+  1/99, ×2 each; the +8 delta attributed EXCLUSIVELY to
+  `Cmd_if_random_less_than` via the (kept) window-override probe patch —
+  the cleanest per-caller evidence in the fixture set. New mechanism
+  documented in doc §12: a reachable branch's draw cost scales with the
+  number of identical dispatch-triggering slots (2 decisions × 4 Swift
+  slots = 8), not flat-per-decision. VitalThrow not attempted; §12.2
+  confirms §11.4's recipe as the accurate pickup point.
+- **Animation merge (same hour, supervisor-reproduced live at 137/140):**
+  MOVE_PSYCHIC ported and staged — byte-identical script shape to
+  CONFUSION (three argv literals differ: tint RGB(31,23,0), shake amp 5,
+  scale delta -6), every probe age matching CONFUSION's constants; dense
+  comparator **137/140** ×2 with the 3 mismatches at the SAME relative
+  ages (38/66/95) as CONFUSION's banked remainder — one shared
+  creation/tail-boundary defect across the family, a single-fix promotion
+  target. Gates held ×2 (FUTURE_SIGHT 114/114, CONFUSION 137/140, GROWTH
+  63/63 both, BIND 45/45). Coverage: PSYCHIC `partial`. Merged tree:
+  **221 files / 2707 tests + build green.**
 
 ---
 ## 465 — Presentation-seam window 3 wired: `turn5-rockslide.json` re-driven from the REAL MOVE_ENDEAVOR kernel chain (§9.4's own 6-rung plan, rung 1 done in entry 464)
