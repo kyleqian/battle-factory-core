@@ -42,6 +42,46 @@ substitute state, multi-turn/multi-hit state, or another explicit script input.
 Every status needs a committed ON-profile trace; `exact` cannot retain a known
 remainder.
 
+## MOVE_GROWTH promoted to `exact`: last named residual (IVYSAUR attacker salt-and-pepper) was a display-lag bug, not species idle offset or asset decode — both dense windows 63/63, twice each (2026-07-25)
+
+**Verdict: real fix, RAM-probe-first as directed — both suspected classes
+from the step brief were checked and disproved with hard evidence before
+any code changed; the actual cause was a third class the brief didn't
+name.** `tools/probe/dump-growth-ivysaur-vram.py` read IVYSAUR's own
+attacker-battler OAM (`x2`/`y2`, tileNum, paletteNum) plus the full VRAM
+tile bytes and OBJ palette row (faded + unfaded) at a clean pre-move tick
+and window ticks, both orientations: `x2`/`y2` are 0 at every tick (no
+idle-anim rest offset — also confirmed from source: `speciesIdleAnim.ts`'s
+own doc notes IVYSAUR's front `ANIM_V_STRETCH`/back `ANIM_H_SLIDE` families
+both explicitly zero out on completion, unlike ONIX's `RAPID_H_HOPS`, so
+the "missing from `SPECIES_FRONT_ANIM_FAMILY`" theory named last session
+was never going to explain a residual here), and the extracted
+tileset+palette are byte-identical to live VRAM/PLTT (all 64 tiles, all 16
+colors, at every probed tick) — ruling out an asset/decode bug too.
+
+**The real cause.** `growthAnimationAtAge`'s own mechanism is RAM-exact
+against the live OAM matrix with NO lag (unchanged, still true) — but the
+CAPTURED FRAMEBUFFER lags the matrix write, the same class of latency
+already documented for BLAZE_KICK ("OAM one frame after the reducer,
+palette one more VBlank after that"), except inverted: here the affine
+SCALE lags the reducer by 2 ticks and the BLEND TINT lags by only 1.
+Bisected empirically (all 9 (scaleLag, tintLag) pairs up to 2, both
+fixtures) using the real render pipeline, not a reimplementation — (2, 1)
+is the only pair landing 63/63 in both. Fixed in `sceneOnGrowthView`
+(`src/engine/sceneOnPresentation.ts`) by reading the scale and tint
+components at independently lagged ages. Updated `growthPortable.ts`'s own
+component check to compare the RAW (unlagged) mechanism against RAM
+directly, since that check's job is verifying `growthAnimationAtAge`'s own
+math, not the display-lag presentation choice.
+
+**Dense comparator, both orientations, twice each:** component 63/63,
+framebuffer 63/63 — reproduced byte-identical on a second independent run
+each. **Coverage: `MOVE_GROWTH` promoted to `exact`.**
+
+**Evidence.** `npm test` 2443/2443 (unchanged — no Tier-1 logic touched,
+only the presentation seam and a comparator diagnostic). `npm run build`
+green.
+
 ## MOVE_GROWTH rung 3 completed, rung 4 done: scene-wired and dense-compared both orientations, lands `partial` (target exact, attacker residual named) (2026-07-25)
 
 **Verdict: real progress, not a fit.** Completed rung 3 (`GrowthEffect` =
@@ -305,98 +345,3 @@ all move/component/argv claims above are generated directly from the
 committed JSON + real script/source text (scripts in `/tmp`, not
 committed — this ledger carries the durable output).
 
-## DRAGON_RAGE rung 6/7: fire-plume z-order fixed via `gMain.oamBuffer` RAM probe (139/150 → 149/150); age-98 ONIX-silhouette anomaly disciplined-probed, both named candidates eliminated, lands `partial` with a single-frame remainder (2026-07-25)
-
-**Verdict: the fire-plume family's tie-break residual (render ages 105-114)
-is FIXED on direct hardware evidence, not fitted — the step's own two
-sanctioned instruments (RUNG 1's `gMain.oamBuffer` probe, RUNG 2's VRAM/blend
-probe) were both applied exactly as specified. RUNG 1 landed a real fix.
-RUNG 2's probe cycle completed cleanly but named no fix (both brief
-candidates eliminated by hard evidence) — per the step's own PARK RULE,
-`MOVE_DRAGON_RAGE` stays `partial`, now with a single remaining frame.**
-
-**Rung 1 — plume-vs-plume z-order ties, FIXED.** Wrote
-`tools/probe/dump-dragonrage-oam.py` (ISSUES #32 lineage: the same
-`gMain.oamBuffer`-array-position instrument `dump-turn9-clone-oam.py`/
-`dump-aerialace-oam.py`/`dump-quickattack-hitsplat-oam.py` already used,
-matching each live fire-plume/target sprite's own OAM attrs against the
-128-entry composited buffer to find its real final position — lower
-position = lower hardware OAM index = drawn on top, this codebase's already-
-established `AddSpritesToOamBuffer` convention). Ran it across RAM ticks
-183-206 (render ages 94-117) against the committed CHARMELEON-vs-ONIX
-fixture. Cross-referencing each RAM slot's `(x,y)` against
-`DRAGON_RAGE_FIRE_PLUME_SPAWNS`' own declared offsets gave an exact,
-unambiguous spawn-index↔slot mapping for all 7 spawns observed in this
-window. The 8 spawns share only 2 distinct subpriorities
-(`targetSubpriority ± 2`), so cross-group order was never the problem
-(confirmed correct already); the real-hardware order WITHIN each group,
-read directly off the buffer at every tick both members of a pair were
-alive, resolved to one consistent, source-consistent rule with zero
-exceptions: primarily sort by absolute screen Y (higher Y wins, drawn more
-in front — the ordinary `SortSprites` same-priority/different-Y tie-break);
-ONLY on an exact Y tie (this move's own script has two: spawns 0/4 share
-y-offset 0, spawns 2/6 share y-offset 25) does the EARLIER-created spawn
-win instead (spawn 0 beats spawn 4 at every tick from RAM 195-206; spawn 2
-beats spawn 6 at every tick from RAM 204-206) — matching this codebase's
-already-established "ascending creation order survives an exact tie"
-convention elsewhere (§7.26/27, `spriteOrder.ts`'s own module doc), NOT the
-previously-shipped code's raw script-order paint loop, which was ALSO wrong
-for at least one non-tied pair (spawn 3's higher Y should beat spawn 4's,
-but script order painted spawn 4 after spawn 3). Per the brief's own
-instruction (encode per-instance params for exactly these plume pairs, not
-a whole-history `sSpriteOrder` simulation), landed `orderFirePlumesForDraw`
-(`dragonRage.ts`) — a plain `(y, then descending spawnIndex)` comparator,
-not a persistent scheduler — replacing the naive script-order draw loop in
-`battleScene.ts`'s DRAGON_RAGE case. Tier-1 pinned directly against the two
-RAM-read tie orderings plus a full-group ordering check (`tests/
-dragonRage.test.ts`, 3 new tests). Dense sweep: **139/150 → 149/150** (every
-render age 105-114 now clean, zero regressions), reproduced byte-identical
-on two independent fresh oracle runs (determinism confirmed).
-
-**Rung 2 — age-98 ONIX-silhouette anomaly, disciplined-probed, no fix
-survived.** Extended the same instrument class with a second targeted probe,
-`tools/probe/dump-dragonrage-onix-vram.py`, reading ONIX's own OBJ VRAM tile
-range (`tileNum=473`, 4bpp, 64 tiles/2048 bytes) and hashing it every tick
-from RAM 80 through 190. Both of the step brief's own named candidates were
-checked directly and BOTH eliminated:
-- **(a) Runtime VRAM overwrite (`LoadBallGfx` precedent):** the VRAM hash is
-  completely STABLE and unchanged across the entire target-shake-creation
-  window (RAM 186 onward) — the only hash change in the whole probed range
-  is one unrelated `tileNum` swap at RAM tick 80→82 (ONIX's send-out
-  graphic settling in), long before this move even starts. No overwrite
-  occurs anywhere near the residual's own tick. Eliminated.
-- **(b) OBJ-over-OBJ blend-to-BG compositing gap (#112 precedent):** the
-  existing `dump-dragonrage-oam.py` probe's `BLDCNT`/`BLDALPHA` reads are
-  `0x0`/`0x0` (no color special effect enabled at all) at every tick in this
-  window, and ONIX's own OAM `affineMode` is `0` (no affine transform, ruling
-  out a scale/rotate resampling explanation too) throughout. Eliminated.
-
-With both named mechanisms ruled out, re-examined the mismatch itself
-directly (`tools/compare` diff, not committed — scratch): 1598px confined
-exactly to ONIX's own sprite bounding box (x149-204, y12-73), every
-mismatched color one of ONIX's own known palette shades swapping between
-NEARBY screen positions (e.g. `(222,214,214)` at one pixel, `(189,181,181)`
-— another real ONIX shade — right next to it and vice versa) — the
-signature of a small spatial misregistration of the whole sprite for this
-one tick, not a wrong tile or a color-math bug. The target sprite's own
-already-modeled state (position, x2/y2, animNum, animCmdIndex, invisible,
-subpriority, matrixNum, and now also affineMode) is RAM-confirmed clean and
-matches this port's own prediction through the whole window — this is the
-SAME finding the prior rung already reached, now extended to rule out the
-two remaining named hypotheses too. **No fix shipped**: per this run's own
-standing policy (documented no-fix beats a blind fit), this residual needs a
-different investigative angle than RAM-state/VRAM/IO-register comparison —
-named here, not chased further. Candidate for a future session: a fixture
-with less concurrent sprite creation at this exact tick (both the target
-shake task AND fire-plume spawn 0 are created simultaneously here), to
-separate a genuine engine gap from a possible emulator/hardware sub-frame
-ordering effect this per-tick discrete model can't represent at all.
-Confirmed deterministic (byte-identical mismatch on a second independent
-fresh oracle run).
-
-**Coverage:** `MOVE_DRAGON_RAGE` stays `partial` — `remaining` updated to
-149/150 (up from 139/150), a single residual (render age 98).
-
-**Evidence.** `npm test` 2212/2212 (2209 + 3 new: `orderFirePlumesForDraw`
-pinned against the RAM probe). `npm run build` green. Dense sweep reproduced
-byte-identical on two independent fresh oracle runs.

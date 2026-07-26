@@ -7,6 +7,7 @@ import {
   sceneOnGrowthView,
   type SceneOnPresentationBattler,
 } from "../../src/engine/sceneOnPresentation.ts";
+import { growthAnimationAtAge } from "../../src/engine/growth.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 import { getMonGender } from "../../src/engine/monGender.ts";
 
@@ -109,10 +110,17 @@ for (
     ? oracle.playerSprite
     : oracle.opponentSprite;
 
-  const scaleExact = view.attackerScale.active
+  // The mechanism itself (`growthAnimationAtAge`) is RAM-exact tick-for-tick
+  // with NO display lag - it's `sceneOnGrowthView`'s own presentation lag
+  // (below) that back-dates what's actually shown on a given captured
+  // frame, matching the PPU's own render-then-capture pipeline. So the
+  // component check compares the RAW mechanism at this tick's own age
+  // directly, not the lagged view the framebuffer draw path uses.
+  const mechanism = growthAnimationAtAge(age).attackerScale;
+  const scaleExact = mechanism.active
     ? attackerSprite.affineMode === 3
-      && view.attackerScale.xScale === attackerSprite.matrix.a
-      && view.attackerScale.yScale === attackerSprite.matrix.d
+      && mechanism.xScale === attackerSprite.matrix.a
+      && mechanism.yScale === attackerSprite.matrix.d
       && attackerSprite.matrix.b === 0
       && attackerSprite.matrix.c === 0
     : attackerSprite.matrix.a === 256 && attackerSprite.matrix.d === 256;

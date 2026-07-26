@@ -1276,17 +1276,42 @@ export function sceneOnBindView(
   };
 }
 
+/**
+ * The IVYSAUR-attacker residual (ANIMATION_PROGRESS.md's own "salt-and-
+ * pepper on high-detail regions" finding) was neither of the two suspected
+ * classes: a direct RAM probe (`tools/probe/dump-growth-ivysaur-vram.py`,
+ * this session) found `x2`/`y2` pinned at 0 for IVYSAUR's own battler
+ * sprite at every window tick (no idle-anim rest offset - source-confirmed
+ * too, `speciesIdleAnim.ts`'s doc: IVYSAUR's own
+ * front `ANIM_V_STRETCH`/back `ANIM_H_SLIDE` families both explicitly zero
+ * `x2`/`y2` on completion, unlike ONIX's `RAPID_H_HOPS`), and the extracted
+ * tileset+palette were confirmed byte-identical against live VRAM/PLTT at
+ * both a clean pre-move tick and window ticks (all 64 tiles, all 16 colors).
+ * The actual cause: `growthAnimationAtAge`'s own mechanism is RAM-exact
+ * against the live OAM matrix with NO lag (this module's `paletteFaded`/
+ * matrix component check, still true), but the CAPTURED FRAMEBUFFER lags
+ * the matrix write - same class of latency as BLAZE_KICK's own documented
+ * "OAM one frame after the reducer, palette one more VBlank after that" -
+ * except here the SCALE (affine matrix) lags TWO ticks and the BLEND TINT
+ * lags only ONE, the reverse order from BLAZE_KICK's own affine/palette
+ * split. Bisected empirically against both dense fixtures (all 9
+ * (scaleLag, tintLag) combinations up to 2, both orientations); (2, 1) is
+ * the only pair landing 63/63 framebuffer in both, reproduced twice each.
+ */
 export function sceneOnGrowthView(
   state: SceneOnMovePresentationState,
 ): SceneOnGrowthView {
   if (state.config.move !== "GROWTH") {
     throw new Error(`expected GROWTH presentation, got ${state.config.move}`);
   }
+  const scaleState = growthAnimationAtAge(state.age - 2);
+  const tintState = growthAnimationAtAge(state.age - 1);
   return {
     age: state.age,
     attacker: state.config.attacker,
     target: state.config.target,
-    ...growthAnimationAtAge(state.age),
+    attackerScale: scaleState.attackerScale,
+    attackerObjY: tintState.attackerObjY,
   };
 }
 
