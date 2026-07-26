@@ -681,6 +681,174 @@ describe("AI_CV_VitalThrow mask-7 fixture reproduction (docs/factory-ai-checkvia
   });
 });
 
+const MOVE_GROWL_ATTACK_DOWN = 45; // EFFECT_ATTACK_DOWN
+
+// docs/factory-ai-checkviability-ground-truth.md §14.3/§14.4's twin fixtures
+// (tools/battle-lab/mechanic-factory-ai-cv-attackdown-{nonphysical-reach,
+// physical-control}-off.json) -- the first CBM-blocked pair, reproduced
+// through the REAL mask-7 dispatcher end to end now that both
+// AI_CBM_AttackDown and AI_CV_AttackDown are ported. Same all-4-slots-
+// identical design as the Pursuit/HighCrit/AlwaysHit/VitalThrow blocks
+// above: opponent (AI_USER) = Marowak, all 4 slots MOVE_GROWL. Unlike those
+// four, EFFECT_ATTACK_DOWN DOES have a CheckBadMove table entry -- but both
+// fixtures' target is single-ability (Levitate/Sturdy), so per doc §14.2's
+// own live finding, CBM's get_ability guesses are free (zero draws) and its
+// two Score_Minus10 branches stay unreached (target ability is neither Hyper
+// Cutter, Clear Body, nor White Smoke) -- CBM's own contribution is a flat,
+// identical 0 in both fixtures, asserted directly below rather than assumed.
+// Target ATK stage stays at NEUTRAL_STAGES (DEFAULT_STAT_STAGE) in both --
+// AI_CV_AttackDown's own Gate A skips straight to AttackDown3, so DRAW SITE 1
+// is unreached in both fixtures by construction (doc §14.3), matching entry
+// 463's SpeedDown reproduction precedent above of constructing the decisive
+// state directly rather than replaying a real stat-change turn.
+describe("AI_CV_AttackDown mask-7 fixture reproduction (docs/factory-ai-checkviability-ground-truth.md §14.3/§14.4)", () => {
+  const MOVE_ATTACK_DOWN_MOVESET = [
+    MOVE_GROWL_ATTACK_DOWN, MOVE_GROWL_ATTACK_DOWN, MOVE_GROWL_ATTACK_DOWN, MOVE_GROWL_ATTACK_DOWN,
+  ] as const;
+
+  const MAROWAK_ATTACKER: FactoryAiScoredBattlerView = Object.freeze({
+    types: ["TYPE_GROUND", "TYPE_GROUND"] as const,
+    attack: 130, defense: 130, spAttack: 55, spDefense: 70, speed: 65, level: 50,
+    statStages: NEUTRAL_STAGES,
+    isFirstTurn: 2,
+    hp: 135, maxHp: 135,
+  });
+  // Haunter (species 93), Ghost/Poison -- neither type is in
+  // AI_CV_AttackDown_PhysicalTypeList, falls through Gates E/F into DRAW
+  // SITE 2. Levitate is its only ability (doc §14.2's own single-ability
+  // porter guidance, confirmed live after the Dugtrio-target confound).
+  function haunterTarget(): FactoryAiScoredTargetView {
+    return Object.freeze({
+      species: 93,
+      types: ["TYPE_GHOST", "TYPE_POISON"] as const,
+      attack: 50, defense: 45, spAttack: 115, spDefense: 55, speed: 95, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 2,
+      hp: 100, maxHp: 100, ability: "ABILITY_LEVITATE", knownAbility: null,
+    });
+  }
+  // Shuckle (species 213), Bug/Rock -- both types are in the physical list;
+  // Gate E matches immediately on type1, deterministic zero-draw End. Same
+  // species/stats as the SpeedDown block's own `shuckleTarget` above.
+  function shuckleAttackDownTarget(): FactoryAiScoredTargetView {
+    return Object.freeze({
+      species: 213,
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+      attack: 10, defense: 230, spAttack: 10, spDefense: 230, speed: 5, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 2,
+      hp: 100, maxHp: 100, ability: "ABILITY_STURDY", knownAbility: null,
+    });
+  }
+  function attackDownView(target: FactoryAiScoredTargetView): FactoryAiScoredView {
+    return Object.freeze({
+      schema: "factory-ai-scored-view/v1",
+      mode: "factory-level-50-singles",
+      active: Object.freeze({ aiBattler: 1 as const, targetBattler: 0 as const }),
+      factory: Object.freeze({ levelMode: 0 as const, battleMode: 0 as const, factoryWinStreak: 28, trainerOpponentId: 222 }),
+      moves: MOVE_ATTACK_DOWN_MOVESET,
+      attacker: MAROWAK_ATTACKER,
+      target,
+    });
+  }
+  function phaseDraws(result: ReturnType<typeof chooseFactoryAiScoredDecision>, phase: "check-bad-move" | "try-to-faint" | "check-viability") {
+    return result.trace.draws.filter((d) => "phase" in d && d.phase === phase);
+  }
+
+  it.each([1, 99])("reach fixture (Marowak AI vs Haunter target, non-physical), seed %i: all 4 identical Growl slots independently reach DRAW SITE 2 -- exactly 4 check-viability draws, zero CBM/TryToFaint draws (single-ability Levitate target)", (seed) => {
+    const view = attackDownView(haunterTarget());
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+    expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+    expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+    const cvDraws = phaseDraws(result, "check-viability");
+    expect(cvDraws).toHaveLength(4);
+    expect(cvDraws.every((d) => "kind" in d && d.kind === "attack-down-roll-2")).toBe(true);
+    expect(result.trace.draws).toHaveLength(4 /* setup */ + 4 /* CV roll x4 slots */ + 1 /* tie */);
+  });
+
+  it.each([1, 99])("control fixture (Marowak AI vs Shuckle target, physical), seed %i: Gate E matches immediately for all 4 slots -- zero check-viability draws, zero CBM/TryToFaint draws (single-ability Sturdy target)", (seed) => {
+    const view = attackDownView(shuckleAttackDownTarget());
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+    expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+    expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+    expect(phaseDraws(result, "check-viability")).toHaveLength(0);
+    expect(result.trace.draws).toHaveLength(4 /* setup */ + 1 /* tie */);
+  });
+});
+
+// docs/factory-ai-checkviability-ground-truth.md §14.5 item 2's own
+// acceptance bonus: §6's ORIGINAL AI_CV_SpeedDown fixtures used a real
+// opponent moveset of [MOVE_STRING_SHOT, MOVE_GROWL, MOVE_GROWL, MOVE_GROWL]
+// (not the MOVE_SPLASH substitute the block above had to use before this
+// pair was ported) -- three of the four candidate slots are Growl, whose
+// effect (EFFECT_ATTACK_DOWN) was CBM-table-blocked until this entry's own
+// port. Reusing the SpeedDown block's own DUGTRIO_STATS/SHUCKLE_STATS
+// (opponent-faster) and SHUCKLE_STATS/DUGTRIO_STATS (opponent-slower) pairs
+// unchanged -- both Dugtrio (Arena Trap, single ability) and Shuckle
+// (Sturdy, single ability) keep every CBM get_ability guess zero-draw, and
+// both are physical-list types (Ground/Bug+Rock), so AI_CV_AttackDown's own
+// Gates E/F short-circuit every Growl slot to a deterministic zero -- these
+// fixtures isolate AI_CV_SpeedDown's own contribution exactly like the
+// MOVE_SPLASH block did, just with the real move the doc's own live oracle
+// fixture used.
+describe("AI_CV_SpeedDown mask-7 fixture reproduction with the doc's own real §6 moveset (docs/factory-ai-checkviability-ground-truth.md §14.5 item 2)", () => {
+  const MOVE_REAL_SPEED_DOWN_MOVESET = [
+    MOVE_STRING_SHOT, MOVE_GROWL_ATTACK_DOWN, MOVE_GROWL_ATTACK_DOWN, MOVE_GROWL_ATTACK_DOWN,
+  ] as const;
+
+  function realSpeedDownView(attacker: FactoryAiScoredBattlerView, target: FactoryAiScoredTargetView): FactoryAiScoredView {
+    return Object.freeze({
+      schema: "factory-ai-scored-view/v1",
+      mode: "factory-level-50-singles",
+      active: Object.freeze({ aiBattler: 1 as const, targetBattler: 0 as const }),
+      factory: Object.freeze({ levelMode: 0 as const, battleMode: 0 as const, factoryWinStreak: 28, trainerOpponentId: 222 }),
+      moves: MOVE_REAL_SPEED_DOWN_MOVESET,
+      attacker,
+      target,
+    });
+  }
+  const DUGTRIO_STATS = Object.freeze({
+    types: ["TYPE_GROUND", "TYPE_GROUND"] as const,
+    attack: 80, defense: 50, spAttack: 50, spDefense: 70, speed: 120, level: 50,
+    statStages: NEUTRAL_STAGES,
+    isFirstTurn: 2,
+    hp: 100, maxHp: 100,
+  });
+  const SHUCKLE_ATTACK_DOWN_STATS = Object.freeze({
+    types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+    attack: 10, defense: 230, spAttack: 10, spDefense: 230, speed: 5, level: 50,
+    statStages: NEUTRAL_STAGES,
+    isFirstTurn: 2,
+    hp: 100, maxHp: 100,
+  });
+  function dugtrioTarget(): FactoryAiScoredTargetView {
+    return Object.freeze({ species: 51, ...DUGTRIO_STATS, ability: "ABILITY_ARENA_TRAP", knownAbility: null });
+  }
+  function shuckleTarget(): FactoryAiScoredTargetView {
+    return Object.freeze({ species: 213, ...SHUCKLE_ATTACK_DOWN_STATS, ability: "ABILITY_STURDY", knownAbility: null });
+  }
+
+  it.each([1, 99])("opponent-faster fixture (Dugtrio AI vs Shuckle target), seed %i: never picks String Shot, zero CBM/TryToFaint/CV draws for the -3 branch, all 3 Growl slots deterministic 0 (physical-list target)", (seed) => {
+    const view = realSpeedDownView(DUGTRIO_STATS, shuckleTarget());
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+    expect(result.trace.draws).toHaveLength(4 /* setup */ + 1 /* tie */);
+    expect(result.trace.slotScores.map((s) => s.finalScore)).toEqual([97, 100, 100, 100]);
+    expect(result.trace.bestMoveSlots).toEqual([1, 2, 3]);
+    if (result.submission.decision.kind === "use-move") {
+      expect(result.submission.decision.moveSlot).not.toBe(0);
+    }
+  });
+
+  it.each([1, 99])("opponent-slower fixture (Shuckle AI vs Dugtrio target), seed %i: always picks String Shot, 1 CV draw (the SpeedDown if_random_less_than 70 roll), all 3 Growl slots deterministic 0 (physical-list target)", (seed) => {
+    const view = realSpeedDownView(SHUCKLE_ATTACK_DOWN_STATS, dugtrioTarget());
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+    expect(result.trace.draws).toHaveLength(4 /* setup */ + 1 /* CV roll */ + 1 /* tie */);
+    expect(result.trace.slotScores.map((s) => s.finalScore)).toEqual([102, 100, 100, 100]);
+    expect(result.trace.bestMoveSlots).toEqual([0]);
+    expect(result.submission.decision).toMatchObject({ kind: "use-move", moveSlot: 0 });
+  });
+});
+
 type FixtureRules = BattleJsonObject & Readonly<{ acceptedMoveSlot: number | null }>;
 
 describe("submitFactoryAiDecision top-level dispatch", () => {
