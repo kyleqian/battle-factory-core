@@ -47,6 +47,7 @@ import {
 } from "./battleScriptProgram.ts";
 import type { BattleScriptBattlerId } from "./battleScriptEvents.ts";
 import {
+  resolveBattleScriptBattlerHoldEffect,
   withBattleScriptPartyMemberStatus1,
   type BattleScriptRulesContext,
   type BattleScriptSideTimerState,
@@ -71,6 +72,16 @@ const INGRAIN_TURN_HEAL_LABEL = "BattleScript_IngrainTurnHeal";
 const LEECH_SEED_TURN_DRAIN_LABEL = "BattleScript_LeechSeedTurnDrain";
 const WRAP_TURN_DMG_LABEL = "BattleScript_WrapTurnDmg";
 const WRAP_ENDS_LABEL = "BattleScript_WrapEnds";
+/** `ItemBattleEffects(ITEMEFFECT_NORMAL, ...)`'s ten `BattleScriptExecute`+`end2` labels this registration wires (docs/endturn-abilities-items-ground-truth.md §1c/§5 slice 4). */
+const ITEM_HEAL_HP_END2_LABEL = "BattleScript_ItemHealHP_End2";
+const WHITE_HERB_END2_LABEL = "BattleScript_WhiteHerbEnd2";
+const BERRY_CURE_PRLZ_END2_LABEL = "BattleScript_BerryCurePrlzEnd2";
+const BERRY_CURE_PSN_END2_LABEL = "BattleScript_BerryCurePsnEnd2";
+const BERRY_CURE_BRN_END2_LABEL = "BattleScript_BerryCureBrnEnd2";
+const BERRY_CURE_FRZ_END2_LABEL = "BattleScript_BerryCureFrzEnd2";
+const BERRY_CURE_SLP_END2_LABEL = "BattleScript_BerryCureSlpEnd2";
+const BERRY_CURE_CONFUSION_END2_LABEL = "BattleScript_BerryCureConfusionEnd2";
+const BERRY_CURE_CHOSEN_STATUS_END2_LABEL = "BattleScript_BerryCureChosenStatusEnd2";
 /**
  * Higher than battleScriptFaintedActionsOrchestration.ts's own per-script
  * ceiling (64): the DoTurnDmg-family scripts' printstring/waitmessage pair
@@ -83,10 +94,66 @@ const SCRIPT_BUDGET = 256;
 /** include/constants/battle.h:117-123. */
 const STATUS1_POISON = 1 << 3;
 const STATUS1_BURN = 1 << 4;
+const STATUS1_FREEZE = 1 << 5;
+const STATUS1_PARALYSIS = 1 << 6;
 const STATUS1_TOXIC_POISON = 1 << 7;
 const STATUS1_TOXIC_COUNTER = (1 << 8) | (1 << 9) | (1 << 10) | (1 << 11);
 const STATUS1_TOXIC_TURN_1 = 1 << 8;
 const STATUS1_TOXIC_TURN_15 = 15 << 8;
+const STATUS1_PSN_ANY = STATUS1_POISON | STATUS1_TOXIC_POISON;
+/** include/constants/battle.h:125 -- STATUS1_ANY, HOLD_EFFECT_CURE_STATUS's own gate. */
+const STATUS1_ANY = BATTLE_SCRIPT_STATUS1_SLEEP | STATUS1_POISON | STATUS1_BURN
+  | STATUS1_FREEZE | STATUS1_PARALYSIS | STATUS1_TOXIC_POISON;
+
+/** include/item_effects.h:5-47 -- the ITEMEFFECT_NORMAL switch's own hold-effect ids (docs/endturn-abilities-items-ground-truth.md §1c/§2b). */
+const HOLD_EFFECT_RESTORE_HP = 1;
+const HOLD_EFFECT_CURE_PAR = 2;
+const HOLD_EFFECT_CURE_SLP = 3;
+const HOLD_EFFECT_CURE_PSN = 4;
+const HOLD_EFFECT_CURE_BRN = 5;
+const HOLD_EFFECT_CURE_FRZ = 6;
+const HOLD_EFFECT_RESTORE_PP = 7;
+const HOLD_EFFECT_CURE_CONFUSION = 8;
+const HOLD_EFFECT_CURE_STATUS = 9;
+const HOLD_EFFECT_CONFUSE_SPICY = 10;
+const HOLD_EFFECT_CONFUSE_DRY = 11;
+const HOLD_EFFECT_CONFUSE_SWEET = 12;
+const HOLD_EFFECT_CONFUSE_BITTER = 13;
+const HOLD_EFFECT_CONFUSE_SOUR = 14;
+const HOLD_EFFECT_ATTACK_UP = 15;
+const HOLD_EFFECT_DEFENSE_UP = 16;
+const HOLD_EFFECT_SPEED_UP = 17;
+const HOLD_EFFECT_SP_ATTACK_UP = 18;
+const HOLD_EFFECT_SP_DEFENSE_UP = 19;
+const HOLD_EFFECT_CRITICAL_UP = 20;
+const HOLD_EFFECT_RANDOM_STAT_UP = 21;
+const HOLD_EFFECT_RESTORE_STATS = 23;
+const HOLD_EFFECT_CURE_ATTRACT = 28;
+const HOLD_EFFECT_LEFTOVERS = 43;
+const DEFAULT_STAT_STAGE = 6;
+/** battle_message.c:1208-1212 -- gBerryEffectStringIds' own MULTISTRING_CHOOSER indices. */
+const B_MSG_CURED_PROBLEM = 0;
+const B_MSG_NORMALIZED_STATUS = 1;
+
+/**
+ * Hold effects real (Factory-legal, doc §2b) but out of this slice's own
+ * ten-case registration, each barriered on its own genuine trigger
+ * condition (never blanket "any holder"): `RESTORE_HP`'s heal-amount and
+ * `RESTORE_PP`'s move-slot/PP-bonus machinery are both real extra plumbing
+ * this slice's brief scoped to a later pass, not this doc's "no new opcode"
+ * ten. Threading their own cheap gates (HP <= maxHP/2; a real zero-PP move)
+ * costs nothing extra and keeps the barrier honest -- a full-HP Sitrus
+ * holder or an undamaged-PP Leppa holder correctly advances silently, same
+ * as source's own no-op case.
+ */
+function restoreHpGateFires(b: BattleScriptRulesBattlerLike): boolean {
+  return b.hp <= Math.floor(b.maxHP / 2);
+}
+function restorePpGateFires(b: BattleScriptRulesBattlerLike): boolean {
+  return b.moves.some((move, index) => move !== 0 && b.pp[index] === 0);
+}
+
+type BattleScriptRulesBattlerLike = BattleScriptRulesContext["battlers"][number];
 
 /** include/constants/battle.h:210-217 -- gSideStatuses/gSideTimers bits this engine can already represent (sideStatuses/mistTimers are raw modeled fields). */
 const SIDE_STATUS_REFLECT = 1 << 0;
@@ -379,6 +446,160 @@ function runWrapTick(
   return runTickScript(program, handlers, state, decrementedRc, battler, WRAP_ENDS_LABEL);
 }
 
+type ItemsTickOutcome =
+  | TickOutcome
+  | Readonly<{ kind: "case-barrier"; state: MachineState; detail: string }>;
+
+/** Clears a status1 bit, syncs the party mirror (same shape as `bumpToxicCounter`), and runs the named cure script with `scriptingBattler` set (every cure-berry script reads `BS_SCRIPTING`). */
+function runStatus1CureTick(
+  program: BattleScriptProgram,
+  handlers: Handlers,
+  state: MachineState,
+  battler: BattleScriptBattlerId,
+  nextStatus1: number,
+  entryLabel: string,
+  statusPatch?: Partial<BattleScriptRulesBattlerLike>,
+): ItemsTickOutcome {
+  const b = state.rulesContext.battlers[battler];
+  const withStatus = withBattler(state.rulesContext, battler, { status1: nextStatus1, ...statusPatch });
+  const synced = Object.freeze({
+    ...withStatus,
+    party: withBattleScriptPartyMemberStatus1(withStatus.party, b.side, b.partyIndex, nextStatus1),
+    scriptingBattler: battler,
+  });
+  return runTickScript(program, handlers, state, synced, battler, entryLabel);
+}
+
+/**
+ * `ENDTURN_ITEMS1` (`ItemBattleEffects(ITEMEFFECT_NORMAL, battler, FALSE)`,
+ * `battle_util.c:3331-3622`, docs/endturn-abilities-items-ground-truth.md
+ * §1c/§5 slice 4): Leftovers, the 8 zero-RNG cure berries, and White Herb --
+ * every `!moveTurn`/unconditional case this slice's brief scopes in. Every
+ * other real switch case this function does not implement barriers on its
+ * own genuine trigger condition (RESTORE_HP/RESTORE_PP) or on mere
+ * possession (the 4 zero-carrier stat/crit berries + 5 confuse berries,
+ * doc §2b -- their own HP-threshold gate needs an unmodeled per-item
+ * `battlerHoldEffectParam` table no live Factory carrier will ever exercise,
+ * per the brief's own explicit "do NOT implement them").
+ */
+function runItemsTick(
+  program: BattleScriptProgram,
+  handlers: Handlers,
+  state: MachineState,
+  battler: BattleScriptBattlerId,
+): ItemsTickOutcome {
+  const b = state.rulesContext.battlers[battler];
+  if (b.hp === 0) return Object.freeze({ kind: "advance", state });
+  const holdEffect = resolveBattleScriptBattlerHoldEffect(state.rulesContext, battler);
+
+  if (holdEffect === HOLD_EFFECT_LEFTOVERS) {
+    if (b.hp >= b.maxHP) return Object.freeze({ kind: "advance", state });
+    const heal = Math.min(floorDivAtLeastOne(b.maxHP, 16), b.maxHP - b.hp);
+    const rc = Object.freeze({ ...state.rulesContext, battleMoveDamage: -heal });
+    return runTickScript(program, handlers, state, rc, battler, ITEM_HEAL_HP_END2_LABEL);
+  }
+
+  if (holdEffect === HOLD_EFFECT_RESTORE_STATS) {
+    const stages = b.statStages;
+    if (!stages.some((stage) => stage < DEFAULT_STAT_STAGE)) return Object.freeze({ kind: "advance", state });
+    const resetStages = Object.freeze(stages.map((stage) => (stage < DEFAULT_STAT_STAGE ? DEFAULT_STAT_STAGE : stage)));
+    const withStages = withBattler(state.rulesContext, battler, { statStages: resetStages as never });
+    const rc = Object.freeze({ ...withStages, scriptingBattler: battler });
+    return runTickScript(program, handlers, state, rc, battler, WHITE_HERB_END2_LABEL);
+  }
+
+  if (holdEffect === HOLD_EFFECT_CURE_PAR) {
+    if ((b.status1 & STATUS1_PARALYSIS) === 0) return Object.freeze({ kind: "advance", state });
+    return runStatus1CureTick(program, handlers, state, battler, b.status1 & ~STATUS1_PARALYSIS, BERRY_CURE_PRLZ_END2_LABEL);
+  }
+  if (holdEffect === HOLD_EFFECT_CURE_PSN) {
+    if ((b.status1 & STATUS1_PSN_ANY) === 0) return Object.freeze({ kind: "advance", state });
+    return runStatus1CureTick(program, handlers, state, battler, b.status1 & ~(STATUS1_PSN_ANY | STATUS1_TOXIC_COUNTER), BERRY_CURE_PSN_END2_LABEL);
+  }
+  if (holdEffect === HOLD_EFFECT_CURE_BRN) {
+    if ((b.status1 & STATUS1_BURN) === 0) return Object.freeze({ kind: "advance", state });
+    return runStatus1CureTick(program, handlers, state, battler, b.status1 & ~STATUS1_BURN, BERRY_CURE_BRN_END2_LABEL);
+  }
+  if (holdEffect === HOLD_EFFECT_CURE_FRZ) {
+    if ((b.status1 & STATUS1_FREEZE) === 0) return Object.freeze({ kind: "advance", state });
+    return runStatus1CureTick(program, handlers, state, battler, b.status1 & ~STATUS1_FREEZE, BERRY_CURE_FRZ_END2_LABEL);
+  }
+  if (holdEffect === HOLD_EFFECT_CURE_SLP) {
+    if ((b.status1 & BATTLE_SCRIPT_STATUS1_SLEEP) === 0) return Object.freeze({ kind: "advance", state });
+    return runStatus1CureTick(
+      program, handlers, state, battler, b.status1 & ~BATTLE_SCRIPT_STATUS1_SLEEP, BERRY_CURE_SLP_END2_LABEL,
+      { status2: (b.status2 & ~BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_NIGHTMARE) >>> 0 },
+    );
+  }
+  if (holdEffect === HOLD_EFFECT_CURE_CONFUSION) {
+    if ((b.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_CONFUSION) === 0) return Object.freeze({ kind: "advance", state });
+    const withStatus2 = withBattler(state.rulesContext, battler, {
+      status2: (b.status2 & ~BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_CONFUSION) >>> 0,
+    });
+    const rc = Object.freeze({ ...withStatus2, scriptingBattler: battler });
+    return runTickScript(program, handlers, state, rc, battler, BERRY_CURE_CONFUSION_END2_LABEL);
+  }
+  if (holdEffect === HOLD_EFFECT_CURE_STATUS) {
+    const hasStatus1 = (b.status1 & STATUS1_ANY) !== 0;
+    const hasConfusion = (b.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_CONFUSION) !== 0;
+    if (!hasStatus1 && !hasConfusion) return Object.freeze({ kind: "advance", state });
+    const clearedStatus2 = (b.status2
+      & ~BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_NIGHTMARE
+      & ~BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_CONFUSION) >>> 0;
+    const withStatus = withBattler(state.rulesContext, battler, { status1: 0, status2: clearedStatus2 });
+    const synced = Object.freeze({
+      ...withStatus,
+      party: withBattleScriptPartyMemberStatus1(withStatus.party, b.side, b.partyIndex, 0),
+      scriptingBattler: battler,
+      // battle_util.c:3572-3577: >1 condition cleared at once (a status1 bit AND confusion together) prints the "normalized" variant.
+      multistringChooser: hasStatus1 && hasConfusion ? B_MSG_NORMALIZED_STATUS : B_MSG_CURED_PROBLEM,
+    });
+    return runTickScript(program, handlers, state, synced, battler, BERRY_CURE_CHOSEN_STATUS_END2_LABEL);
+  }
+  if (holdEffect === HOLD_EFFECT_CURE_ATTRACT) {
+    if ((b.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_INFATUATION) === 0) return Object.freeze({ kind: "advance", state });
+    const withStatus2 = withBattler(state.rulesContext, battler, {
+      status2: (b.status2 & ~BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_INFATUATION) >>> 0,
+    });
+    const rc = Object.freeze({ ...withStatus2, scriptingBattler: battler, multistringChooser: B_MSG_CURED_PROBLEM });
+    return runTickScript(program, handlers, state, rc, battler, BERRY_CURE_CHOSEN_STATUS_END2_LABEL);
+  }
+
+  if (holdEffect === HOLD_EFFECT_RESTORE_HP && restoreHpGateFires(b)) {
+    return Object.freeze({
+      kind: "case-barrier", state,
+      detail: "HOLD_EFFECT_RESTORE_HP (Sitrus/Oran/Berry Juice): heal-amount holdEffectParam lookup + removeitem's own end2 variant is not wired this slice (battle_util.c:3335-3345)",
+    });
+  }
+  if (holdEffect === HOLD_EFFECT_RESTORE_PP && restorePpGateFires(b)) {
+    return Object.freeze({
+      kind: "case-barrier", state,
+      detail: "HOLD_EFFECT_RESTORE_PP (Leppa): move-slot/PP-bonus recompute + BtlController_EmitSetMonData(REQUEST_PPMOVE1_BATTLE) is not wired this slice (battle_util.c:3347-3373)",
+    });
+  }
+  const STAT_UP_BERRIES_STRETCH = new Set([HOLD_EFFECT_ATTACK_UP, HOLD_EFFECT_SPEED_UP, HOLD_EFFECT_SP_ATTACK_UP]);
+  if (STAT_UP_BERRIES_STRETCH.has(holdEffect)) {
+    return Object.freeze({
+      kind: "case-barrier", state,
+      detail: `HOLD_EFFECT ${holdEffect} (Liechi/Salac/Petaya): Factory-legal (doc §2b), doc §5 slice 5 stretch `
+        + "material -- barriered on mere possession since its own HP-threshold holdEffectParam gate is not modeled",
+    });
+  }
+  const UNREACHABLE_AT_FACTORY_L50 = new Set([
+    HOLD_EFFECT_CONFUSE_SPICY, HOLD_EFFECT_CONFUSE_DRY, HOLD_EFFECT_CONFUSE_SWEET,
+    HOLD_EFFECT_CONFUSE_BITTER, HOLD_EFFECT_CONFUSE_SOUR,
+    HOLD_EFFECT_DEFENSE_UP, HOLD_EFFECT_SP_DEFENSE_UP, HOLD_EFFECT_CRITICAL_UP, HOLD_EFFECT_RANDOM_STAT_UP,
+  ]);
+  if (UNREACHABLE_AT_FACTORY_L50.has(holdEffect)) {
+    return Object.freeze({
+      kind: "case-barrier", state,
+      detail: `HOLD_EFFECT ${holdEffect}: zero Factory L50 carriers (doc §2b) -- not wired, barriered on mere `
+        + "possession since its own HP-threshold gate needs an unmodeled holdEffectParam table",
+    });
+  }
+  return Object.freeze({ kind: "advance", state });
+}
+
 /** Folds a fired/opcode-barrier `TickOutcome` into the battler loop's own result shape, uniformly across every ENDTURN_* tick. */
 type TickApplyResult =
   | Readonly<{ kind: "continue"; state: MachineState }>
@@ -436,7 +657,19 @@ function runDoBattlerEndTurnEffects(
     }
     if (ingrain.kind === "outcome-decided") return Object.freeze({ kind: "outcome-decided", state: ingrain.state });
     state = ingrain.state;
-    // ENDTURN_ABILITIES/ENDTURN_ITEMS1: pure-C ability/item breadth, explicitly out of scope (doc B2/B3) -- no-op.
+    // ENDTURN_ABILITIES: pure-C ability breadth, explicitly out of scope (doc B2) -- no-op.
+
+    const items1 = runItemsTick(program, handlers, state, battler);
+    if (items1.kind === "opcode-barrier") {
+      return Object.freeze({ kind: "opcode-barrier", state: items1.state, instruction: items1.instruction });
+    }
+    if (items1.kind === "case-barrier") {
+      return Object.freeze({ kind: "case-barrier", state: items1.state, caseName: "ENDTURN_ITEMS1", detail: items1.detail });
+    }
+    if (items1.kind === "fired" && items1.state.rulesContext.battleOutcome !== 0) {
+      return Object.freeze({ kind: "outcome-decided", state: items1.state });
+    }
+    state = items1.state;
 
     const leechSeed = applyTickOutcome(runLeechSeedTick(program, handlers, state, battler));
     if (leechSeed.kind === "opcode-barrier") {

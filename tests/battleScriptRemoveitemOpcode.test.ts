@@ -14,8 +14,8 @@ const program = loadBattleScriptProgram();
 
 /** include/constants/battle.h:78 -- Factory always sets this bit. */
 const BATTLE_TYPE_FACTORY = 1 << 19;
-/** include/constants/items.h -- a real held item id, distinct from ITEM_NONE(0). */
-const ITEM_LEFTOVERS = 132;
+/** Any nonzero item id, distinct from ITEM_NONE(0) -- Cmd_removeitem doesn't branch on which item. */
+const ITEM_HELD_FOR_TEST = 200;
 
 function battler(changes: Partial<BattleScriptRulesBattler> = {}): BattleScriptRulesBattler {
   return Object.freeze({
@@ -111,7 +111,7 @@ describe("production removeitem (Cmd_removeitem) dispatch -- battle_script_comma
   describe("(a) source-complete pass-through", () => {
     it("BS_SCRIPTING: clears the scripting battler's item to ITEM_NONE and emits set-battler-item", () => {
       const rc = context(
-        [battler({ side: 0, item: ITEM_LEFTOVERS }), battler({ side: 1 }), battler({ side: 0 }), battler({ side: 1 })],
+        [battler({ side: 0, item: ITEM_HELD_FOR_TEST }), battler({ side: 1 }), battler({ side: 0 }), battler({ side: 1 })],
         { attacker: 1, target: 1, effectBattler: 1 },
         0,
       );
@@ -127,7 +127,7 @@ describe("production removeitem (Cmd_removeitem) dispatch -- battle_script_comma
 
     it("BS_ATTACKER: clears the attacking battler's item, distinct from the scripting battler", () => {
       const rc = context(
-        [battler({ side: 0 }), battler({ side: 1, item: ITEM_LEFTOVERS }), battler({ side: 0 }), battler({ side: 1 })],
+        [battler({ side: 0 }), battler({ side: 1, item: ITEM_HELD_FOR_TEST }), battler({ side: 0 }), battler({ side: 1 })],
         { attacker: 1, target: 0, effectBattler: 0 },
         0,
       );

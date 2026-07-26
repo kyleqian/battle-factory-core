@@ -24,6 +24,30 @@ const STATUS3_LEECHSEED = 1 << 2;
 const STATUS2_WRAPPED_MASK = (1 << 13) | (1 << 14) | (1 << 15);
 /** include/abilities.h:68. */
 const ABILITY_LIQUID_OOZE = 64;
+/** include/constants/items.h -- docs/endturn-abilities-items-ground-truth.md §5 slice 4's own ten held items. */
+const ITEM_CHERI_BERRY = 133;
+const ITEM_CHESTO_BERRY = 134;
+const ITEM_PECHA_BERRY = 135;
+const ITEM_RAWST_BERRY = 136;
+const ITEM_ASPEAR_BERRY = 137;
+const ITEM_LEPPA_BERRY = 138;
+const ITEM_PERSIM_BERRY = 140;
+const ITEM_LUM_BERRY = 141;
+const ITEM_SITRUS_BERRY = 142;
+const ITEM_LIECHI_BERRY = 168;
+const ITEM_GANLON_BERRY = 169;
+const ITEM_WHITE_HERB = 180;
+const ITEM_MENTAL_HERB = 185;
+const ITEM_LEFTOVERS = 200;
+/** include/constants/battle.h:129-142. */
+const STATUS2_CONFUSION = (1 << 0) | (1 << 1) | (1 << 2);
+const STATUS2_NIGHTMARE = 1 << 27;
+const STATUS2_INFATUATION = (1 << 16) | (1 << 17) | (1 << 18) | (1 << 19);
+/** include/constants/battle.h:115-120. */
+const STATUS1_PARALYSIS = 1 << 6;
+const STATUS1_FREEZE = 1 << 5;
+const STATUS1_POISON = 1 << 3;
+const STATUS1_SLEEP_3_TURNS = 3;
 
 function battler(changes: Partial<BattleScriptRulesBattler> & { maxHP?: number } = {}): BattleScriptRulesBattler {
   return Object.freeze({
@@ -377,4 +401,275 @@ describe("runBattleEndTurnOrchestration (BattleTurnPassed equivalent)", () => {
     expect(result.state.rulesContext.battlers[1]!.hp).toBe(170); // unchanged -- release deals no damage
     expect(result.state.rng.calls).toBe(initial.rng.calls);
   });
+
+  describe(
+    "(f) ENDTURN_ITEMS1 (ItemBattleEffects(ITEMEFFECT_NORMAL, battler, FALSE), docs/endturn-abilities-items-ground-truth.md §1c/§5 slice 4)",
+    () => {
+      it("Leftovers heals floor(maxHP/16) capped at maxHP and PERSISTS (the only non-consuming case), zero RNG", () => {
+        const rc = context({
+          battlers: [
+            battler({ side: 0 }),
+            battler({ side: 1, hp: 100, maxHP: 160, item: ITEM_LEFTOVERS, partyIndex: 2 }),
+            battler({ side: 0 }),
+            battler({ side: 1 }),
+          ],
+          party: { player: sixSlots(100), opponent: sixSlots(0, 0, 100) },
+        });
+        const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+        const initial = scratchState(rc, 1);
+        const result = runBattleEndTurnOrchestration(program, handlers, initial);
+        expect(result.kind).toBe("next-turn");
+        expect(result.state.rulesContext.battlers[1]!.hp).toBe(110); // 100 + floor(160/16) = 100 + 10
+        expect(result.state.rulesContext.battlers[1]!.item).toBe(ITEM_LEFTOVERS); // persists
+        expect(result.state.rulesContext.party.opponent[2]!.hp).toBe(110);
+        expect(result.state.rng.calls).toBe(initial.rng.calls);
+      });
+
+      it("Leftovers does not heal at full HP (real guard, not a blanket skip)", () => {
+        const rc = context({
+          battlers: [
+            battler({ side: 0 }),
+            battler({ side: 1, hp: 160, maxHP: 160, item: ITEM_LEFTOVERS, partyIndex: 2 }),
+            battler({ side: 0 }),
+            battler({ side: 1 }),
+          ],
+        });
+        const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+        const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
+        expect(result.kind).toBe("next-turn");
+        expect(result.state.rulesContext.battlers[1]!.hp).toBe(160);
+        expect(result.state.rulesContext.battlers[1]!.item).toBe(ITEM_LEFTOVERS);
+      });
+
+      it("White Herb resets every stat stage below neutral(6) back to 6 and CONSUMES the item, zero RNG", () => {
+        const rc = context({
+          battlers: [
+            battler({ side: 0 }),
+            battler({
+              side: 1, hp: 100, maxHP: 100, item: ITEM_WHITE_HERB, partyIndex: 2,
+              statStages: [6, 4, 6, 3, 6, 6, 6, 6], // ATK -2, SPEED -3, everything else neutral
+            }),
+            battler({ side: 0 }),
+            battler({ side: 1 }),
+          ],
+        });
+        const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+        const initial = scratchState(rc, 1);
+        const result = runBattleEndTurnOrchestration(program, handlers, initial);
+        expect(result.kind).toBe("next-turn");
+        expect(result.state.rulesContext.battlers[1]!.statStages).toEqual([6, 6, 6, 6, 6, 6, 6, 6]);
+        expect(result.state.rulesContext.battlers[1]!.item).toBe(0); // ITEM_NONE -- consumed
+        expect(result.state.rng.calls).toBe(initial.rng.calls);
+      });
+
+      it("White Herb does not fire when every stat stage is already neutral or above (real guard)", () => {
+        const rc = context({
+          battlers: [
+            battler({ side: 0 }),
+            battler({ side: 1, hp: 100, maxHP: 100, item: ITEM_WHITE_HERB, partyIndex: 2, statStages: [6, 6, 8, 6, 6, 6, 6, 6] }),
+            battler({ side: 0 }),
+            battler({ side: 1 }),
+          ],
+        });
+        const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+        const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
+        expect(result.kind).toBe("next-turn");
+        expect(result.state.rulesContext.battlers[1]!.item).toBe(ITEM_WHITE_HERB); // untouched, not consumed
+        expect(result.state.rulesContext.battlers[1]!.statStages).toEqual([6, 6, 8, 6, 6, 6, 6, 6]);
+      });
+
+      const cureBerryCases: ReadonlyArray<{
+        name: string;
+        item: number;
+        battlerChanges: Partial<BattleScriptRulesBattler>;
+        assertCured: (battlerAfter: BattleScriptRulesBattler) => void;
+      }> = [
+        {
+          name: "Cheri Berry cures paralysis",
+          item: ITEM_CHERI_BERRY,
+          battlerChanges: { status1: STATUS1_PARALYSIS },
+          assertCured: (b) => expect(b.status1).toBe(0),
+        },
+        {
+          name: "Pecha Berry cures regular poison",
+          item: ITEM_PECHA_BERRY,
+          battlerChanges: { status1: STATUS1_POISON },
+          assertCured: (b) => expect(b.status1).toBe(0),
+        },
+        {
+          name: "Pecha Berry cures toxic poison (also clears the toxic counter)",
+          item: ITEM_PECHA_BERRY,
+          battlerChanges: { status1: STATUS1_TOXIC_POISON | (5 << 8) },
+          assertCured: (b) => expect(b.status1).toBe(0),
+        },
+        {
+          name: "Rawst Berry cures burn",
+          item: ITEM_RAWST_BERRY,
+          battlerChanges: { status1: STATUS1_BURN },
+          assertCured: (b) => expect(b.status1).toBe(0),
+        },
+        {
+          name: "Aspear Berry cures freeze",
+          item: ITEM_ASPEAR_BERRY,
+          battlerChanges: { status1: STATUS1_FREEZE },
+          assertCured: (b) => expect(b.status1).toBe(0),
+        },
+        {
+          name: "Chesto Berry cures sleep (and the nightmare glitch-fix bit)",
+          item: ITEM_CHESTO_BERRY,
+          battlerChanges: { status1: STATUS1_SLEEP_3_TURNS, status2: STATUS2_NIGHTMARE },
+          assertCured: (b) => {
+            expect(b.status1).toBe(0);
+            expect(b.status2 & STATUS2_NIGHTMARE).toBe(0);
+          },
+        },
+        {
+          name: "Persim Berry cures confusion (status2, not status1)",
+          item: ITEM_PERSIM_BERRY,
+          battlerChanges: { status2: STATUS2_CONFUSION },
+          assertCured: (b) => expect(b.status2 & STATUS2_CONFUSION).toBe(0),
+        },
+        {
+          name: "Mental Herb cures infatuation",
+          item: ITEM_MENTAL_HERB,
+          battlerChanges: { status2: STATUS2_INFATUATION },
+          assertCured: (b) => expect(b.status2 & STATUS2_INFATUATION).toBe(0),
+        },
+        {
+          name: "Lum Berry cures a single status1 condition",
+          item: ITEM_LUM_BERRY,
+          battlerChanges: { status1: STATUS1_PARALYSIS },
+          assertCured: (b) => expect(b.status1).toBe(0),
+        },
+        {
+          name: "Lum Berry cures status1 AND confusion together in the same tick",
+          item: ITEM_LUM_BERRY,
+          battlerChanges: { status1: STATUS1_BURN, status2: STATUS2_CONFUSION },
+          assertCured: (b) => {
+            expect(b.status1).toBe(0);
+            expect(b.status2 & STATUS2_CONFUSION).toBe(0);
+          },
+        },
+      ];
+
+      for (const { name, item, battlerChanges, assertCured } of cureBerryCases) {
+        it(`${name}, consuming the berry, zero RNG`, () => {
+          const rc = context({
+            battlers: [
+              battler({ side: 0 }),
+              battler({ side: 1, hp: 100, maxHP: 100, item, partyIndex: 2, ...battlerChanges }),
+              battler({ side: 0 }),
+              battler({ side: 1 }),
+            ],
+            party: { player: sixSlots(100), opponent: sixSlots(0, 0, 100) },
+          });
+          const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+          const initial = scratchState(rc, 1);
+          const result = runBattleEndTurnOrchestration(program, handlers, initial);
+          expect(result.kind).toBe("next-turn");
+          if (result.kind !== "next-turn") throw new Error("expected next-turn");
+          assertCured(result.state.rulesContext.battlers[1]!);
+          expect(result.state.rulesContext.battlers[1]!.item).toBe(0); // ITEM_NONE -- every one of these consumes
+          expect(result.state.rulesContext.party.opponent[2]!.hp).toBe(100); // untouched, no HP change
+          expect(result.state.rng.calls).toBe(initial.rng.calls); // zero Random() draws (doc §4)
+        });
+      }
+
+      it("a cure berry held with no matching status does not fire (real per-case guard, item persists)", () => {
+        const rc = context({
+          battlers: [
+            battler({ side: 0 }),
+            battler({ side: 1, hp: 100, maxHP: 100, item: ITEM_CHERI_BERRY, partyIndex: 2 }),
+            battler({ side: 0 }),
+            battler({ side: 1 }),
+          ],
+        });
+        const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+        const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
+        expect(result.kind).toBe("next-turn");
+        expect(result.state.rulesContext.battlers[1]!.item).toBe(ITEM_CHERI_BERRY);
+      });
+
+      describe("(b) unsupported-branch/case-barrier: real hold effects this slice does not implement", () => {
+        it("Sitrus Berry (RESTORE_HP) barriers when its real HP<=maxHP/2 gate is true", () => {
+          const rc = context({
+            battlers: [
+              battler({ side: 0 }),
+              battler({ side: 1, hp: 40, maxHP: 100, item: ITEM_SITRUS_BERRY, partyIndex: 2 }),
+              battler({ side: 0 }),
+              battler({ side: 1 }),
+            ],
+          });
+          const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+          const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
+          expect(result.kind).toBe("case-barrier");
+          if (result.kind !== "case-barrier") throw new Error("expected case-barrier");
+          expect(result.caseName).toBe("ENDTURN_ITEMS1");
+          expect(result.detail).toContain("HOLD_EFFECT_RESTORE_HP");
+        });
+
+        it("Sitrus Berry does NOT barrier above the HP<=maxHP/2 gate (real gate, not blanket possession)", () => {
+          const rc = context({
+            battlers: [
+              battler({ side: 0 }),
+              battler({ side: 1, hp: 90, maxHP: 100, item: ITEM_SITRUS_BERRY, partyIndex: 2 }),
+              battler({ side: 0 }),
+              battler({ side: 1 }),
+            ],
+          });
+          const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+          const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
+          expect(result.kind).toBe("next-turn");
+        });
+
+        it("Leppa Berry (RESTORE_PP) barriers when a real move is at 0 PP", () => {
+          const rc = context({
+            battlers: [
+              battler({ side: 0 }),
+              battler({ side: 1, hp: 100, maxHP: 100, item: ITEM_LEPPA_BERRY, moves: [33, 0, 0, 0], pp: [0, 0, 0, 0], partyIndex: 2 }),
+              battler({ side: 0 }),
+              battler({ side: 1 }),
+            ],
+          });
+          const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+          const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
+          expect(result.kind).toBe("case-barrier");
+          if (result.kind !== "case-barrier") throw new Error("expected case-barrier");
+          expect(result.detail).toContain("HOLD_EFFECT_RESTORE_PP");
+        });
+
+        it("Liechi Berry (ATTACK_UP, doc §5 slice 5 stretch material) barriers on possession", () => {
+          const rc = context({
+            battlers: [
+              battler({ side: 0 }),
+              battler({ side: 1, hp: 100, maxHP: 100, item: ITEM_LIECHI_BERRY, partyIndex: 2 }),
+              battler({ side: 0 }),
+              battler({ side: 1 }),
+            ],
+          });
+          const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+          const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
+          expect(result.kind).toBe("case-barrier");
+          if (result.kind !== "case-barrier") throw new Error("expected case-barrier");
+          expect(result.detail).toContain("Liechi");
+        });
+
+        it("Ganlon Berry (DEFENSE_UP, zero Factory L50 carriers per doc §2b) barriers on possession", () => {
+          const rc = context({
+            battlers: [
+              battler({ side: 0 }),
+              battler({ side: 1, hp: 100, maxHP: 100, item: ITEM_GANLON_BERRY, partyIndex: 2 }),
+              battler({ side: 0 }),
+              battler({ side: 1 }),
+            ],
+          });
+          const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+          const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
+          expect(result.kind).toBe("case-barrier");
+          if (result.kind !== "case-barrier") throw new Error("expected case-barrier");
+          expect(result.detail).toContain("zero Factory L50 carriers");
+        });
+      });
+    },
+  );
 });
