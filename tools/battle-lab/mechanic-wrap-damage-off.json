@@ -1,0 +1,355 @@
+{
+  "schemaVersion": 1,
+  "mode": "mechanicLab",
+  "profile": "battle-scene-off",
+  "level": 50,
+  "challengeNum": 2,
+  "battleNum": 2,
+  "trainerId": 110,
+  "playerSetIds": [
+    274,
+    354,
+    338
+  ],
+  "opponentSetIds": [
+    349,
+    339,
+    327
+  ],
+  "seed": 1,
+  "overrides": {
+    "parties": {
+      "player": [
+        {
+          "species": 72,
+          "level": 50,
+          "nature": 3,
+          "ivs": {
+            "hp": 31,
+            "attack": 31,
+            "defense": 31,
+            "speed": 31,
+            "spAttack": 31,
+            "spDefense": 31
+          },
+          "evs": {
+            "hp": 0,
+            "attack": 0,
+            "defense": 0,
+            "speed": 0,
+            "spAttack": 0,
+            "spDefense": 0
+          },
+          "moves": [
+            35,
+            35,
+            35,
+            35
+          ],
+          "ppUps": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "item": 0,
+          "abilitySlot": 0
+        },
+        {
+          "species": 1,
+          "moves": [
+            33,
+            33,
+            33,
+            33
+          ]
+        },
+        {
+          "species": 1,
+          "moves": [
+            33,
+            33,
+            33,
+            33
+          ]
+        }
+      ],
+      "opponent": [
+        {
+          "species": 360,
+          "level": 50,
+          "nature": 3,
+          "ivs": {
+            "hp": 31,
+            "attack": 31,
+            "defense": 31,
+            "speed": 31,
+            "spAttack": 31,
+            "spDefense": 31
+          },
+          "evs": {
+            "hp": 0,
+            "attack": 0,
+            "defense": 0,
+            "speed": 0,
+            "spAttack": 0,
+            "spDefense": 0
+          },
+          "moves": [
+            150,
+            150,
+            150,
+            150
+          ],
+          "ppUps": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "item": 0,
+          "abilitySlot": 0
+        },
+        {
+          "species": 1,
+          "moves": [
+            33,
+            33,
+            33,
+            33
+          ]
+        },
+        {
+          "species": 1,
+          "moves": [
+            33,
+            33,
+            33,
+            33
+          ]
+        }
+      ]
+    }
+  },
+  "trace": {
+    "segments": [
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 400,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 400,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 400,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 400,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 400,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 400,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 400,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 400,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 400,
+        "buttons": []
+      }
+    ],
+    "captureFrames": [
+      0,
+      535,
+      536,
+      537,
+      538,
+      539,
+      540,
+      541,
+      542,
+      543,
+      544,
+      795,
+      796,
+      797,
+      798,
+      799,
+      800,
+      801,
+      802,
+      803,
+      804,
+      935,
+      936,
+      937,
+      938,
+      939,
+      940,
+      941,
+      942,
+      943,
+      944,
+      1915,
+      1916,
+      1917,
+      1918,
+      1919,
+      1920,
+      1921,
+      1922,
+      1923,
+      1924,
+      2055,
+      2056,
+      2057,
+      2058,
+      2059,
+      2060,
+      2061,
+      2062,
+      2063,
+      2064,
+      3155,
+      3156,
+      3157,
+      3158,
+      3159,
+      3160,
+      3161,
+      3162,
+      3163,
+      3164,
+      3295,
+      3296,
+      3297,
+      3298,
+      3299,
+      3300,
+      3301,
+      3302,
+      3303,
+      3304
+    ]
+  }
+}
