@@ -11,6 +11,109 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > not abandoned). See the matching note in SUPERVISOR.md.
 
 ---
+## 478 — Seventh + eighth CBM-blocked pairs ported: `AI_CBM_SpeedUp`+`AI_CV_SpeedUp` (doc §20, mandatory) and `AI_CBM_SpAtkUp`+`AI_CV_SpAtkUp` (doc §21, expected)
+
+- **State:** tree green at **225 files / 3032 tests** (+0 files/+36 tests
+  over entry 477's 225/2996), build green (`tsc -b && vite build`). Ratchets
+  **unmoved**: `executableFrontierRatchet.test.ts` (no new opcode — this
+  session only touches `factoryAiCheckBadMove.ts`/`factoryAiCheckViability.ts`/
+  `factoryAiDecisionPolicy.ts`, none opcode-barrier-tracked) and
+  `battleScriptRulesContext.test.ts`'s opcode-handler-count pin (106,
+  unchanged). Doc's own verify script
+  (`tools/probe/verify-factory-ai-checkviability-ground-truth.ts`,
+  READ/RUN-only, untouched): **PASS ×2** against the live oracle (before
+  touching source, and again at the end) — unaffected either way, as
+  expected; both new pairs' fixtures reproduce the doc's own §20.3/§21.3
+  live ledgers exactly (SpeedUp 10/10 reach vs 6/6 control; SpAtkUp 10/10 vs
+  8/8, both cross-seed-stable).
+- **Did (one commit, green):**
+  1. **`AI_CBM_SpeedUp`/`AI_CBM_SpAtkUp` port** (`data/battle_ai_scripts.s:
+     257-259`/`:261-263`): bare 2-instruction `MAX_STAT_STAGE` gates on
+     `AI_USER`'s own SPEED/SPATK stage, byte-for-byte the same shape as
+     `AI_CBM_AttackUp`/`AI_CBM_DefenseUp` (entry 476) with the stat swapped
+     in. `FactoryAiCheckBadMoveAttacker` gained two new **optional**
+     `speedStage`/`spAtkStage` fields defaulting to `DEFAULT_STAT_STAGE` —
+     same "optional, so no pre-existing literal needs touching" precedent
+     entry 477's `accStage` established, chosen over entry 476's own
+     required-field precedent because this type's existing two fields
+     (`atkStage`/`defStage`) were required only because the type was brand
+     new at the time; widening it further without defaults would have
+     forced every AttackUp/DefenseUp/BulkUp test literal to add two
+     irrelevant fields.
+  2. **`AI_CV_SpeedUp` port** (`:956-965`, doc §20.1): the SAME
+     `if_target_faster` gate + `GetWhoStrikesFirst` tie-break machinery
+     `AI_CV_SpeedDown` (§6) already ports — doc §20.1's own finding that
+     this pair's true structural sibling is SpeedDown, not AttackUp/
+     DefenseUp, confirmed by re-deriving the assembly independently rather
+     than assumed. Only the fallthrough score differs (+3 vs SpeedDown's
+     own +2); the deterministic branch's -3 is identical in both.
+  3. **`AI_CV_SpAtkUp` port** (`:967-983`, doc §21.1): byte-for-byte
+     `AI_CV_AttackUp`'s own gate topology (§17.1) with `STAT_SPATK` for
+     `STAT_ATK`, **except DRAW SITE 3's threshold is 70, not AttackUp's own
+     40** (doc §21.1's own citation-level correction against a naive
+     "same shape as a sibling" copy — a numeric-operand trap, not a branch-
+     direction one). Factored the shared gate topology into a new
+     `runCvAttackStyleStatUp` helper (parameterized by the draw-kind labels
+     and DRAW SITE 3's threshold) and refactored `runCvAttackUp` to call it
+     with threshold 40 — same "shared body, per-caller parameter" precedent
+     `runCvStatDown` already established for DefenseDown/SpDefDown (entry
+     475), chosen here because SpAtkUp's topology match to AttackUp is
+     total (unlike AttackUp/DefenseUp's own genuine Gate C divergence,
+     which is why THOSE two stayed separate functions). AttackUp's own
+     pre-existing unit/reproduction tests passed unchanged after the
+     refactor, confirming no behavior drift.
+  4. **Wiring + tests**: `FactoryAiCheckViabilityBattler` gained an
+     **optional** `spAtkStage` field (same default convention). Unit tests
+     cover every gate × outcome × draw count for both CBM handlers (MAX_
+     STAT_STAGE fired/not-fired/omitted-defaults-to-neutral) and both CV
+     handlers (SpeedUp: Gate A both branches, DRAW SITE 1 both outcomes,
+     the speed-tie burn; SpAtkUp: Gates A/B/D, DRAW SITE 1/2/3 incl. the
+     corrected threshold's own succeed/skip split at the SAME seed values
+     AttackUp's own tests use — proving the two sites are NOT
+     interchangeable rather than assuming it). Engine reproduction of doc
+     §20.3's twin fixtures (species-role-swap Crobat/Shuckle, both
+     single-ability, all 4 slots `MOVE_AGILITY` vs `MOVE_SPLASH`, post-
+     turn-1 SPEED stage 8 constructed directly per this file's own
+     "construct the decisive state" precedent) and §21.3's twin fixtures
+     (Anorith/Machamp, `MOVE_GROWTH`, reused verbatim from entry 476's own
+     AttackUp block) through `chooseFactoryAiScoredDecision`, both seeds:
+     reach draws exactly **4** check-viability draws for both pairs
+     (matching the doc's own live +4 `Cmd_if_random_less_than` attribution
+     exactly), control draws deterministic **zero** for both — no CBM/
+     TryToFaint draws in either fixture (both target species single-
+     ability, closing the doc §20.2/§14.2 ability-guess confound).
+- **Next:** pick up `AI_CBM_SpDefUp`/`AI_CBM_CosmicPower`/`AI_CBM_CalmMind`
+  (unstaged per entry 477's own groundwork flag — separate handlers at
+  `data/battle_ai_scripts.s:576-593`, Gate F's `if_in_bytes` is INVERTED vs
+  DefenseUp's own) or the next unstaged CV-only/CBM-blocked pair from
+  `docs/factory-ai-checkviability-ground-truth.md`'s remaining phased body
+  of work. Carried forward, unchanged from prior entries: LightScreen/
+  Reflect/EvasionUp/EvasionDown/weather-trio handler pairs (not yet staged);
+  Counter/Mirror Coat retaliation-bookkeeping registration per
+  `docs/counter-retaliation-design.md` §4's 8-step checklist + **ISSUES
+  #46** (the latent turn-boundary staleness bug); `ENDTURN_ITEMS2`'s own
+  Yawn/Thrash prerequisite (unregistered, entry 475's own finding); doc
+  §19.5's 5 unstaged draw-site recipes (sites 2-6, DRAW SITE 2 is the
+  cheapest — needs only the player's own real accuracy-lowering hits, no
+  opponent moveset change); entry 476's own flagged §18 5-6-draw window
+  discrepancy (this port's own branch-by-branch derivation says `AI_CV_
+  DefenseUp`'s physical-route contribution is exactly 4, not the doc's raw
+  5/6 — still unreconciled, needs a `tools/run-mgba-probe.py` single-step).
+  This was this session's own final bounded worker step (40-minute cap) —
+  landing here at a clean, small, fully-green resting point rather than
+  reaching for extra scope.
+- **Notes:** stayed in scope — no other handler pair (SpDefUp/CosmicPower/
+  CalmMind correctly left unstaged), no ENDTURN/status-cluster/fixed-damage/
+  Counter files, no seam/animation files, doc + verify script read/run only
+  (2 runs against the live oracle, PASS both times), no ROADMAP/ISSUES
+  edits. No PAPERCUT — doc §20/§21's own citations (exact line numbers, the
+  SpeedDown-not-AttackUp sibling correction, the DRAW SITE 3 threshold
+  correction) were precise enough that every gate ported cleanly on first
+  read and every unit/reproduction test passed on first run; the
+  `runCvAttackUp`/`runCvStatDown` refactor precedent-matching was the only
+  design decision that took real thought, not a source-reading surprise.
+
+---
 ## 477 — Sixth CBM-blocked pair ported: `AI_CBM_AccDown` + `AI_CV_AccuracyDown` (doc §19, largest handler in this doc — 7 `if_random_less_than` sites)
 
 - **Side merge (same round, supervisor-verified ALL PASS live from the
@@ -234,105 +337,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   DRAW SITE 3, since Gate B's own HP==100% precondition forces Gate C true
   immediately after) — caught by re-deriving from the assembly before
   writing tests, not left in.
-
----
-## 475 — ENDTURN_ABILITIES slices 2-3 (Shed Skin + Truant) + ITEMS1 slice 5 (Liechi/Salac/Petaya) wired; census SETEFFECTPRIMARY blind spot fixed (ISSUES #45 closed)
-
-- **Side merge (same round, supervisor-verified ALL PASS live from the
-  worktree + green on the merged tree):** doc **§19 `AI_CBM_AccDown` +
-  `AI_CV_AccuracyDown`** ground truth banked (branch
-  `worker/side-20260726-135458`, merged, worktree removed) — the largest
-  pair by draw sites (7). Gate map re-derived from assembly; CBM carries an
-  extra `ABILITY_KEEN_EYE` gate beyond the shared tail (confirmed live);
-  `EFFECT_ACCURACY_DOWN_2` is vestigial (zero real moves). Single-turn
-  twin fixtures land DRAW SITES 1+7 together (Sand Attack's own ACC-down
-  defeats Gate I's still-default check): reach 17, control 7, both seeds
-  ×2, +8 delta = 4 slots × 2 sites, all `Cmd_if_random_less_than`. New
-  confound found + designed out: the dispatch move's ACC-down vs the
-  target's accuracy-checked damage move ordering (faster species takes the
-  damage role). Sites 2-6 remain citation-backed recipes (§19.5, need
-  mixed movesets). 20-fixture verify script ALL PASS ×2 (worker) + once by
-  the supervisor. Merged tree: **225 files / 2916 tests + build green.**
-
-- **State:** tree green at **225 files / 2916 tests** (+0 files/+11 tests over
-  entry 474's 225/2905 — no new test files, existing suites widened), build
-  green (`tsc -b && vite build`). Ratchet (`executableFrontierRatchet.test.ts`):
-  **unmoved** — no new opcode registered this session, only real dispatch
-  wiring inside already-registered opcodes (STATBUFFCHANGE, REMOVEITEM,
-  PRINTFROMTABLE table widened) plus a census-side classification fix.
-  `battleScriptRulesContext.test.ts`'s opcode-handler-count pin: **unmoved**
-  (106, same as entry 474 — no opcode ids added).
-- **Did (two commits, both green):**
-  1. **Rung 1 — Shed Skin** (`battle_util.c:2620-2641`): `(Random() % 3) == 0`
-     drawn via `drawBattleScriptRng` attributed to `BattleScript_
-     ShedSkinActivates`'s own entry instruction (same C-side-draw convention
-     `battleScriptAttackCancelerOpcode.ts:328` established). 0 draws with no
-     status; 1 draw every tick with `status1 & STATUS1_ANY` regardless of
-     hit/miss (doc §4). On hit: unconditional `status1 = 0` (multi-bit
-     clear, not masked) + `STATUS2_NIGHTMARE` glitch clear + party mirror,
-     script queued via the existing END3 push-cursor-and-callback primitive.
-  2. **Rung 2 — Truant** (`battle_util.c:2653-2655`): reused the
-     `truantCounter` field already modeled in `BattleScriptRulesContext`
-     (`battleScriptActionAdmission.ts`'s truant admission phase already read
-     it; end-turn never toggled it until now — confirmed by grep before
-     writing). Bare XOR toggle (`gBattlerAttacker == battler` at this point,
-     `battle_util.c:1471`), no script, no `effect++` — `runAbilitiesTick`
-     returns `"advance"`, letting the SAME `runDoBattlerEndTurnEffects` call
-     fall through to `ENDTURN_ITEMS1` for the same battler in the same tick
-     (pinned by a same-tick Leftovers-heals-alongside-the-toggle test).
-  3. **Rung 3 — stretch berries** (`battle_util.c:3429-3451`, items.h
-     holdEffectParam=4 for all three): Liechi/Salac/Petaya's `hp <=
-     floor(maxHP/4)` fire condition, `+1` stat stage via
-     `BattleScript_BerryStatRaiseEnd2` (opcode-driven `Cmd_statbuffchange`
-     reading a C-side-staged `statChanger` scratch field, `SET_STATCHANGER`
-     encoding — NOT pre-mutated like Speed Boost), consumption via the
-     already-registered REMOVEITEM inside the script. Extended
-     `gStatUpStringIds`' printfromtable table with indices 3-4
-     (`STRINGID_EMPTYSTRING3`/`STRINGID_USINGITEMSTATOFPKMNROSE`) so
-     `B_MSG_STAT_ROSE_ITEM` resolves instead of barriering.
-  4. **Rung 4 — census fix (ISSUES #45):** `classifySetMoveEffectDispatch`
-     now intercepts `B_SCR_OP_SETEFFECTPRIMARY` the same way it already
-     handled `SETEFFECTWITHCHANCE` (both call the same `applySetMoveEffect`;
-     the preceding `setmoveeffect X` statement stages the same pendingEffect
-     for either dispatcher, so the existing mnemonic-based tracking needed
-     no new plumbing). Added `jumpifability` value-coverage: registered
-     opcode, but the handler unconditionally barriers outside its widened
-     4-value set (`LIQUID_OOZE`/`IMMUNITY`/`LIMBER`/`OWN_TEMPO`, exported as
-     `JUMPIFABILITY_SUPPORTED_ABILITY_NAMES`). Fixing SETEFFECTPRIMARY's
-     classification surfaced a real pre-existing gap: `SET_MOVE_EFFECT_
-     SUPPORTED_BYTES` never included `MOVE_EFFECT_SLEEP`/`TOXIC` even though
-     entry 473 registered both as real switch cases — fixed the Set (+
-     census's own name table), retiring the now-dead `SETMOVEEFFECT_
-     NAMED_BARRIER` special case.
-- **Census before -> after:** effects **93 -> 90/214** (net −3, fully
-  accounted: `EFFECT_RAGE`/`EFFECT_MEAN_LOOK`/`EFFECT_NIGHTMARE`/
-  `EFFECT_WILL_O_WISP` flip executable→blocked, −4, ISSUES #45's own named
-  false positives; `EFFECT_POISON_FANG` flips blocked→executable, +1, a
-  genuine correctness fix once via the shared seteffectwithchance tail).
-  Moves **190 -> 185/355** (−5), Factory-L50 unweighted **152 -> 148/276**
-  (−4), weighted **1846 -> 1830/2957** (−16) — every delta matches the five
-  flipped rows' own move/factory/weight counts exactly (worked out by hand,
-  not asserted blind). Self-checks: **32/32 pass** (+4 new
-  `requireBlockedMentioning` pins for the four false positives). ISSUES #45
-  deleted in the same commit.
-- **Next:** `ENDTURN_ABILITIES` barrier set is now empty — all four real
-  switch cases (Rain Dish/Speed Boost/Shed Skin/Truant) are wired; nothing
-  remains barriered in `runAbilitiesTick`. `ENDTURN_ITEMS1`'s remaining
-  barriers are RESTORE_HP/RESTORE_PP (their own real HP/PP gates, need a
-  heal-amount/PP-bonus holdEffectParam lookup) and the 9 zero-Factory-carrier
-  hold effects (§2b) — both explicitly out of this session's scope.
-  `ENDTURN_ITEMS2` remains unregistered (unchanged finding, per brief).
-  Doc's own out-of-scope items carried forward unchanged: Counter/Mirror
-  Coat data-model prerequisite (entry 474), Follow-Me/double-battle redirect.
-- **Notes:** stayed in scope — no factory-AI files, no status-cluster/
-  fixed-damage src beyond the census script, no seam/animation files,
-  ground-truth docs and verify scripts read/run only (untouched), no
-  ROADMAP edits. `docs/end3-design.md`/`docs/endturn-abilities-items-
-  ground-truth.md` read-only, exactly as scoped. No PAPERCUT — both docs'
-  own citations (line numbers, exact struct/macro shapes) were precise
-  enough that every rung wired cleanly on the first source read; the one
-  real surprise (`SET_MOVE_EFFECT_SUPPORTED_BYTES` missing SLEEP/TOXIC) was
-  a genuine pre-existing gap the rung 4 fix correctly surfaced and closed,
-  not a papercut.
 
 
