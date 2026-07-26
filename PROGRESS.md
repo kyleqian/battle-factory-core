@@ -4,6 +4,73 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 468 — [SUPERVISOR WIND-DOWN 2026-07-26 ~05:30] session summary
+
+- **State:** tree committed and green at **221 files / 2733 tests**, build
+  green, census **79/214 effects, 163/355 moves, 128/276 Factory-L50**
+  (session start: 76→79 came mid-session; true session start was 73/214,
+  152/355, 118/276; all 25 census self-checks pass), single main worktree,
+  zero unmerged branches, zero stale worktrees. **No DEFERRED entries —
+  nothing blocks the next `run-supervisor.sh`.** No usage/rate limits all
+  session (one worker died to an API connection drop mid-response, salvaged
+  and relaunched cleanly — not a limit).
+- **Session (~20 workers over 3 lanes, every outcome supervisor-verified
+  live; 1 API-drop failure salvaged via scratchpad + relaunch):**
+  - **Main (7 steps):** player-side forced-switch full-turn variant (461,
+    entry 459's remainder — the `player-choice-required` fork is now a real
+    decision boundary); Ingrain/Leech Seed/Wrap registered (462, census
+    +3 effects/+8 moves, 18/18 live verify, two hit-chain barriers
+    genuinely retired); Factory-AI CheckViability handler bodies ported
+    4-for-4 against banked fixtures — SpeedDown CBM+CV pair (463),
+    Pursuit + HighCrit (466), AlwaysHit (467), each with real
+    assembly-quirk corrections pinned (HighCrit's 1-or-2-draw cascade,
+    AlwaysHit's ScoreUp1 fallthrough); EFFECT_ENDEAVOR registered (464,
+    3 opcodes + 2 required widenings, census +3 effects/+3 moves);
+    presentation-seam window 3 wired (465, `turn5-rockslide.json` 256/256
+    ×2 from the real MOVE_ENDEAVOR kernel chain, 14-trace sweep clean,
+    2 RAM-dump literals deleted).
+  - **Side (7 steps, all merged):** `addbyte`/`jumpifbytenotequal` widened
+    onto the shared SETBYTE universe (runtime weather-form loop executable);
+    CheckViability scout with two supervisor-re-verified audit corrections
+    (no "trivial 0-if_random" handlers exist; CBM blocks 17/22 CV handlers
+    — only 5 are CV-only-portable); seam window 3 prep-scout (§9);
+    CV fixtures for Pursuit/HighCrit (§11), AlwaysHit (§12, the salvaged
+    relaunch), VitalThrow (§13, Battle-Armor crit-block design + §11.4
+    polarity correction) — **all 5 CV-only handlers now have banked live
+    ground truth, 8-fixture verify script ALL PASS ×2**; ENDTURN
+    abilities/items ground truth (only 4 real ability cases; END3
+    named as a real architectural gap, ITEMS1/2 recipe-banked).
+  - **Animation (6 steps, all merged):** defect A KILLED in three
+    instrument-first rungs — window-bounds hypothesis refuted (OAM
+    byte-identical), real mechanism found (`objMode=1` hardware 50/50
+    alpha blend, formula verified 26/26 pixels via a new DISPCNT-OBJ-off
+    underlayer probe), fix landed → **MOVE_FUTURE_SIGHT promoted
+    `exact` 114/114**; CONFUSION's OAM-shadow x-lag RAM-proven and fixed
+    (108→137/140); **MOVE_PSYCHIC ported** (byte-identical script shape,
+    137/140 first run); family window-1 boundary tick fixed (both
+    CONFUSION and PSYCHIC now **138/140**), window-2 splice hypothesis
+    tested and honestly refuted — a genuinely separate defect class.
+    Coverage: **22 exact / 6 partial**.
+- **Next (in order):** main — port `AI_CV_VitalThrow` (fixtures banked
+  §13); CBM+CV pairs for the blocked 17 (AttackDown first — unblocks the
+  original Growl fixtures); `END3` registration (architectural, needs its
+  own design look) then ENDTURN_ABILITIES's 3 scripted cases;
+  ENDTURN_ITEMS1/2 registration off the banked recipes; remaining
+  blocked-on-opcodes census rows (DMGTOLEVEL, PSYWAVE, COUNTER/TYPECALC2,
+  MIRRORCOAT, STOCKPILE, SETBIDE...). Seam — turn-4
+  `anchorOpponentAfterTurn4Hp` staging gap (needs a turn-4 settle staging
+  module, currently circular), seam-scout §9 items 1/5. Animation — the
+  window-2 splice defect class (CONFUSION/PSYCHIC each 138/140, shared
+  2-frame remainder, banked instrument evidence); PSYCHIC opposite
+  orientation; next component track from `npm run animation:coverage`.
+- **Notes:** PAPERCUTS +1 (raw before/after RNG-window diffs, Hits: 3).
+  Supervisor process lessons recorded in memory: run worktree merges from
+  the main tree only; never run suite/merges in the main tree while a
+  main-lane worker is live; the launcher's "unauthenticated/sandboxed"
+  trailer can misdiagnose an API drop (check spend/duration first);
+  API-drop salvage via scratchpad-copy + relaunch brief worked cleanly.
+
+---
 ## 467 — Fourth CheckViability handler body ported: AI_CV_AlwaysHit, against the just-banked §12.1 fixtures (entry 466's side-merged item)
 
 - **State:** tree green at **221 files / 2731 tests** (+0 files/+24 tests
@@ -223,121 +290,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   target. Gates held ×2 (FUTURE_SIGHT 114/114, CONFUSION 137/140, GROWTH
   63/63 both, BIND 45/45). Coverage: PSYCHIC `partial`. Merged tree:
   **221 files / 2707 tests + build green.**
-
----
-## 465 — Presentation-seam window 3 wired: `turn5-rockslide.json` re-driven from the REAL MOVE_ENDEAVOR kernel chain (§9.4's own 6-rung plan, rung 1 done in entry 464)
-
-- **State:** tree green at **220 files / 2656 tests** (+0 files/+2 tests
-  over entry 464's 220/2654), build green (`tsc -b && vite build`).
-  Ratchet unchanged (6/6, `executableFrontierRatchet.test.ts`) — no new
-  opcode registrations, no production module imports a canonical
-  recording. One commit this session.
-  **Comparator (§9.5 re-pin, the acceptance bar):**
-  `turn5-rockslide.json` **256/256**, run twice for determinism.
-  Regression sweep, all unchanged: `turn5-faint.json` **110/110**,
-  `turn1-rockslide.json` **256/256**, plus the full turn3-6
-  `tools/compare/traces/` set — `turn3-rockslide` 256/256, `turn3-endeavor`
-  192/192, `turn3-menu` 254/254, `turn4-rockslide` 250/250,
-  `turn4-doubleteam` 250/250, `turn4-menu` 44/44, `turn6-menu` 44/44,
-  `turn6-featherdance` 90/90, `turn6-rockslide-a` 255/255,
-  `turn6-rockslide-b` 105/105, `turn6-feathers` 235/235, `turn6-statfall`
-  127/127 — all full match, live this session.
-- **Did:** executed `docs/presentation-seam-scout.md` §9.4's own ordered
-  plan end to end (rung 1, opcode registration, was entry 464's own step):
-  1. **Rung 2:** `turn5EndeavorPresentationStaging.ts` now stages the REAL
-     `MOVE_ENDEAVOR` (id 283) through its own real entry label,
-     `BattleScript_EffectEndeavor` — **not** the generic
-     `BattleScript_HitFromAtkCanceler` every sibling staging module uses.
-     Real finding, confirmed live by this module's own tests: ENDEAVOR's
-     own `attackstring`/`ppreduce` execute directly under that top label
-     (no intervening `BattleScript_HitFromAtkString` sub-label exists in
-     this script), so their events' `provenance.sourceLabel` is
-     `"BattleScript_EffectEndeavor"`, not the bridge's default. The
-     trailing `goto BattleScript_HitFromAtkAnimation` DOES land on that
-     real label, so `hp-change`'s sourceLabel stays default.
-     `resolveRockSlidePresentationWindowContent` already accepted an
-     `attackStringScriptLabel` override parameter for exactly this —
-     passed explicitly, **zero bridge edits**. Onix settles 88→**1** for
-     real (`setdamagetohealthdifference`'s own `target.hp - attacker.hp =
-     87`), matching `anchorPlayerAfterTurn5Hp` exactly — reproduced by the
-     real formula, not copied. Also discovered live: `bicbyte`
-     unconditionally clears both effectiveness flags before
-     `resultmessage` runs, so this chain's own event list is SHORTER than
-     the old MOVE_STRENGTH substitute's (no `STRINGID_NOTVERYEFFECTIVE`) —
-     confirmed by this module's own tests, not assumed. Added
-     `resolveTurn5EndeavorAttackLines`/`resolveTurn5EndeavorHpEndpoints`
-     (renamed from the substitute-era `resolveTurn5EndeavorKickoffLines`),
-     mirroring window 2's `resolveTurn1RockSlideAttackLines`/
-     `resolveTurn1RockSlideHpEndpoints` pattern per §9.4's own naming.
-  2. **Rung 3:** wired `drawTurn5EndeavorText` (`battleScene.ts`) to source
-     `onixHp`'s two endpoints and the kickoff text from rung 2's resolved
-     constants (`TURN5_ENDEAVOR_HP`, `TURN5_ENDEAVOR_ATTACK_LINE1/2`)
-     instead of the `anchorPlayerAfterTurn3Hp`/`anchorPlayerAfterTurn5Hp`/
-     `TURN_KICKOFF_LINE1`/`TURN2_KICKOFF_LINE2` literals — deleted
-     `anchorPlayerAfterTurn5Hp` (single-use, now superseded exactly).
-     `anchorPlayerAfterTurn3Hp`/`TURN_KICKOFF_LINE1`/`TURN2_KICKOFF_LINE2`
-     themselves stay defined and in use — every turn 1-4 window's own call
-     sites still read them directly, out of this step's scope.
-  3. **Rung 4:** wired `drawTurn5RockSlideWindow`'s attack branch to the
-     ALREADY-RESOLVED `TURN1_ROCKSLIDE_ATTACK_LINE1/2` (byte-identical
-     text, window 2's own finding) instead of the raw `ROCK_SLIDE_LINE1`/
-     `ROCK_SLIDE_LINE2` literals (which stay defined, used by every other
-     turn's own ROCK_SLIDE window).
-  4. **Rung 5:** wired `drawTurn5RockSlideAttack`'s own `rockSlideOpponentHp`
-     call (reached indirectly via the unconditional `drawTurn6FieldBase`,
-     §9.1's own hidden-state finding) to a NEW `resolveTurn5FaintWindowKoHp()`
-     export off `turn5FaintPresentationStaging.ts` — the SAME already-staged
-     KO chain the fainted-branch window consumes, reused here as this
-     window's own EARLIER consumption point, for its `to` endpoint only
-     (0, Grovyle's real faint settle). Deleted `anchorOpponentAfterTurn5Hp`
-     (single-use, superseded exactly). The `from` endpoint
-     (`anchorOpponentAfterTurn4Hp`) stays a literal, **named as a residual
-     gap per §9.4's own instruction**: that staged KO chain's own Grovyle
-     precondition is ITSELF fed from that same literal, so reading it back
-     out would be circular, not independent proof — genuinely still
-     unstaged, not silently skipped.
-  5. **Rung 6:** the comparator re-pin above.
-- **Test:** `tests/turn5EndeavorPresentationStaging.test.ts` fully redone
-  (8 tests) against the real chain — terminal HP (88→1), the shorter
-  9-event kind list (no resultmessage event), both sourceLabels
-  (`BattleScript_EffectEndeavor` for the message,
-  `BattleScript_HitFromAtkAnimation` for hp-change), the resolved
-  {from:88,to:1} endpoints, and "Foe GROVYLE used"/"ENDEAVOR!" (the real
-  move name, not a substitute's). `tests/turn5FaintPresentationStaging.test.ts`
-  +1 test pinning `resolveTurn5FaintWindowKoHp()` at 0.
-- **Next:** seam-scout's own still-open items: turn 4's own
-  `anchorOpponentAfterTurn4Hp` has no staged proof yet (the residual gap
-  named above — needs a turn-4 RockSlide-settle staging module before it
-  can be wired for real, not just fed back to itself), items 1/5 from §9's
-  own list, ENDTURN_ABILITIES/ITEMS1/ITEMS2 breadth (pure-C), Nightmare/
-  Curse/Thrash/Disable/Taunt end-turn bodies, every other still-
-  `blocked-on-opcodes` census row (`B_SCR_OP_DMGTOLEVEL`,
-  `PSYWAVEDAMAGEEFFECT`, `COUNTERDAMAGECALCULATOR`/`TYPECALC2`,
-  `MIRRORCOATDAMAGECALCULATOR`, `STOCKPILETOBASEDAMAGE`, `SETBIDE`, ...),
-  the 4 remaining CV-only factory-AI handlers (side lane's own next item
-  per entry 463).
-- **Notes:** stayed inside scope — no factory-AI files, no
-  `docs/factory-ai-*.md`, no animation files, no opcode registrations
-  beyond entry 464's own three, no other seam window. No PAPERCUT: every
-  empirical prediction (event-kind list, sourceLabel values, HP endpoints)
-  was verified by running the Tier-1 tests before wiring `battleScene.ts`,
-  so no dev-loop friction cost real time this session.
-- **Animation merge (same hour, supervisor-verified live):** CONFUSION
-  window-2 OAM x-lag RAM-proven (28/29 + 17/18 ticks:
-  `oamX(t) = x(t) + x2(t-1) + centerToCornerVecX(t)`, overturning the old
-  thin-sample "no lag" claim) and fixed at -2 (OAM-shadow + capture lag),
-  with monbg copy at -1 and a one-tick `targetTouched` shift. **CONFUSION
-  108/140 → 137/140** (×2; supervisor-reproduced on the merged tree —
-  same 3 boundary frames 119/147/176, honestly not promoted). Gates held:
-  FUTURE_SIGHT 114/114, GROWTH 63/63 both, BIND 45/45 (×2 each).
-- **Side merge (same hour, supervisor-verified, 13/13 live ×2):**
-  `docs/endturn-abilities-items-ground-truth.md` — ENDTURN_ABILITIES has
-  only 4 real cases (Rain Dish/Shed Skin/Speed Boost/Truant, all
-  L50-reachable; 3 live-verified, Truant analytical); ITEMS1/2 fully
-  enumerated recipe-only. Load-bearing: the 3 scripted ability cases use
-  `BattleScriptPushCursorAndCallback`+`end3` — **`END3` is unregistered,
-  a real architectural gap, not a trivial add**; ITEMS1/ITEMS2 are the
-  same function differing in one bool (9 ungated hold effects fire on
-  both — ITEMS2 exists to catch same-pass statuses). Merged tree
-  re-verified: **220 files / 2659 tests + build green.**
 
