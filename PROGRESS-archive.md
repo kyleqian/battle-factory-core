@@ -1,4 +1,88 @@
 ---
+## 452 — Forced-switch §4 step 10: player-side party-menu decision-request lands, RNG-reconciliation bug fixed
+
+- **State:** tree green at **207 files / 2449 tests** (+0 files/+10 tests
+  over entry 451's 207/2439 — all new tests landed in existing files), build
+  green. Ratchet: `battleScriptOpenPartyScreenOpcode.ts`'s `unsupported-
+  branch` pin **deliberately dropped 3 → 2** — the player-side branch
+  retired from the barrier count entirely (it's a genuine named halt now,
+  not an unsupported-branch placeholder); the doubles-topology and
+  `GetMostSuitableMonToSwitchInto` pass-2 barriers are unchanged. Census
+  untouched (no opcode registrations changed — `openpartyscreen` was
+  already registered; only its player-side branch's internal behavior
+  changed).
+- **Did, per `docs/forced-switch-ground-truth.md` §3/§4 slice 10 (the one
+  barrier entry 447 left named):**
+  - `battleScriptOpenPartyScreenOpcode.ts`'s player branch now halts with a
+    genuine `"player-choice-required"` reason (new `BattleScriptHaltReason`
+    kind, `battleScriptMachine.ts`) naming the legal bench slots — alive
+    (hp>0), non-egg, not the fainted slot itself, exactly
+    `OpenPartyMenuToChooseMon`'s own gate — instead of an unsupported-branch
+    placeholder. A resume writes the chosen index into
+    `monToSwitchIntoId[battler]` (the SAME sentinel field the AI branch
+    already writes) and the identical opcode handler then takes an
+    "already-decided" advance path — no parallel mechanism invented.
+  - `battleScriptFaintedActionsOrchestration.ts` surfaces this as a new
+    `"player-choice-required"` result (paused mid-script, NOT at
+    `BattleScript_FaintedMonEnd`) and exports
+    `resumeBattleScriptFaintedActionsAfterPlayerChoice`, which clears the
+    halt and re-drives the existing slice 1-9 machinery
+    (`switchhandleorder → getswitchedmondata → switchindataupdate → ... →
+    cancelallactions → end2`) unmodified to completion.
+  - `factoryBattleScriptTerminalDecision.ts` wires this into the kernel's
+    own **pre-existing but previously unused** `BattleForcedSwitchRequest`/
+    `BattleSwitchDecision` shapes (`battleDecisionBoundary.ts` already
+    defined and validated them; no reducer had ever produced or consumed
+    one) via a new resumable `"forced-switch-pending"` phase
+    (`pendingScript`: `programCounter`/`callStack`/`scheduler`, JSON-safe,
+    round-trips through `serializeBattleState`/`parseBattleState`) and a
+    shared `finalizeOrchestration` tail factored out of the original
+    single-call reducer path. That factoring caught and fixed a **latent
+    RNG-reconciliation bug**: the original reconciliation compared
+    `rngAfter.calls` directly against the machine-local ledger's own count,
+    which only worked because the adapter had never before been invoked a
+    SECOND time on the same lineage (`rngBefore.calls` was always 0); the
+    forced-switch resume is this adapter's first genuine second invocation,
+    so the fix (`rngBefore.calls + machineRng.calls`, mirroring
+    `factoryBattleScriptFullTurnDecision.ts`'s own documented subtlety)
+    applies uniformly to both call sites now.
+  - **Rejection tests needed zero new validation code**: `submitBattleDecision`'s
+    existing `legalPartyIndexes`/`side` schema checks
+    (`battleDecisionBoundary.ts`, already written, never before exercised by
+    a real reducer) already reject fainted/active slot, egg slot,
+    out-of-range index, and wrong-side submissions before the reducer ever
+    runs — proven, not assumed, by four new rejection tests, each asserting
+    the paused state's serialization is byte-identical before/after.
+  - `battleEndTurnOrchestration.ts`/`factoryBattleScriptFullTurnDecision.ts`
+    gained explicit (currently unreachable, thrown) handling for the new
+    result kind to stay exhaustive — a player-side end-turn KO (e.g. Toxic)
+    could in principle reach the same fork, but wiring a real forced-switch
+    continuation into those dual-sided reducers is intentionally out of
+    this step's scope.
+  - New Tier-1 coverage: `battleScriptOpenPartyScreenOpcode.test.ts` (halt
+    shape, egg exclusion, already-decided resume-advance path),
+    `battleScriptFaintedActionsOrchestration.test.ts` (the orchestration
+    result + resume function directly, independent of the adapter),
+    `factoryBattleScriptTerminalDecision.test.ts` (the full player-side
+    integration: decision request → legal-slot submit → rebuilt battler
+    (species/hp/types/status1/statStages) → genuine next boundary, zero
+    `Random()` calls throughout, plus canonical serialize/parse replay of
+    both the request and the resume transition).
+- **Next:** wiring a real forced-switch continuation into the full-turn/
+  end-turn dual-sided reducers (currently a named, unreachable throw);
+  confusion + flinch registrations (ground truth banked); the AI
+  move-selection port (`docs/factory-ai-ground-truth.md`);
+  `DoFieldEndTurnEffects` setters (screens/weather); the full-turn proof's
+  non-terminal variant.
+- **Notes:** no oracle traces added (pure Tier-1, direct-construction per
+  this doc's own established discipline — the live oracle recipe was
+  already banked in §3 from an earlier session). No presentation/
+  `battleScene`/ROADMAP edits. OUT OF SCOPE per the brief and untouched:
+  party-menu presentation/UI, voluntary switching as a turn action,
+  switch-in entry hooks, the AI move-selection port, census regeneration.
+  PAPERCUT: none this session.
+
+---
 ## 451 — [SUPERVISOR WIND-DOWN 2026-07-25 ~16:00] session summary
 
 - **State:** tree committed and green at **207 files / 2439 tests**, build
