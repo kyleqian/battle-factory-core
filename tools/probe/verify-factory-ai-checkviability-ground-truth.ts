@@ -396,6 +396,88 @@ const DRAW_COUNT_SCENARIOS: DrawCountScenarioSpec[] = [
     expectedTotalSteps: { 1: 7, 99: 7 },
     checkCrossSeedStable: true,
   },
+  // AI_CV_DefenseDown (data/battle_ai_scripts.s:1124-1134, doc §15): the
+  // second CBM-blocked handler pair to get live ground truth (AI_CBM_DefenseDown
+  // + AI_CV_DefenseDown). Unlike AttackDown, this handler's own draw site
+  // (:1128) is gated by the OPPONENT's (AI_USER's) own HP < 70% (Gate A),
+  // not the target's stat stage -- the same shape as AI_CV_VitalThrow (§13),
+  // so this pair reuses that exact Anorith (opponent, Battle Armor -- blocks
+  // Cmd_critcalc's Random() call entirely, no crit-overshoot risk)/Machamp
+  // (target, single ability Guts -- collapses the §14.2 get_ability confound
+  // to zero) species pairing verbatim, including the already-verified
+  // 86-102 damage / 15-28% remaining-HP band from Machamp's own
+  // MOVE_VITAL_THROW -- comfortably under DefenseDown's much wider <70% gate,
+  // no new damage-formula arithmetic needed. Opponent all 4 slots MOVE_LEER
+  // (43, EFFECT_DEFENSE_DOWN, 0 power, CBM-table-covered) -- 0 power keeps
+  // Machamp's own HP at 100% in both fixtures throughout, holding Gate C
+  // (target HP > 70%) constant-true and out of the isolation. Single-turn
+  // capture (matches VitalThrow/AttackDown's own convention): turn 1's
+  // decision predates its own damage (0 draws), only the phantom turn-2
+  // re-decision reaches the reachable branch. Attribution probe (window
+  // 0 732) confirms the full +6 delta over the control fixture splits as +4
+  // Cmd_if_random_less_than (the real AI_CV_DefenseDown :1128 roll, once per
+  // identical MOVE_LEER slot) and +1 Cmd_adjustnormaldamage / +1
+  // Cmd_seteffectwithchance (the flipped precondition's OWN necessary
+  // real-damage cost -- Vital Throw actually connecting vs Splash doing
+  // nothing -- same structural confound as VitalThrow's own twin fixtures,
+  // not part of the handler itself). Cmd_get_ability does not appear in
+  // either fixture's attribution table (Machamp's single ability collapses
+  // that confound too), and Cmd_critcalc does not appear in EITHER fixture
+  // at all here (Anorith's own outgoing move is the 0-power MOVE_LEER, no
+  // crit calc ever runs for it, one confound fewer than VitalThrow's own
+  // twin fixtures needed to account for).
+  {
+    label:
+      "AI_CV_DefenseDown, opponent (AI_USER, Anorith) HP hit to <70% by a real turn-1 move -- reachable branch (data/battle_ai_scripts.s:1124-1134): if_hp_less_than USER,70 (Gate A) routes straight to the :1128 if_random_less_than 50 draw site, which fires once per identical MOVE_LEER slot on the phantom next-turn re-decision",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-defensedown-lowhp-reach-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 13, 99: 13 },
+    checkCrossSeedStable: true,
+  },
+  {
+    label:
+      "AI_CV_DefenseDown, opponent (AI_USER, Anorith) HP stays 100% -- control (same opponent/species/turn count, player uses MOVE_SPLASH instead of MOVE_VITAL_THROW turn 1): Gate A (if_hp_less_than USER,70) is false and Gate B (target DEF stage > 3, default 6) is true, routing straight to AI_CV_DefenseDown3 before the :1128 roll is ever reached, deterministic zero draws from the handler itself",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-defensedown-fullhp-control-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 7, 99: 7 },
+    checkCrossSeedStable: true,
+  },
+  // AI_CV_SpDefDown (data/battle_ai_scripts.s:1186-1196, doc §16): the third
+  // CBM-blocked handler pair to get live ground truth (AI_CBM_SpDefDown +
+  // AI_CV_SpDefDown). Byte-for-byte the same control-flow shape as
+  // AI_CV_DefenseDown (STAT_DEF swapped for STAT_SPDEF) -- reuses §15's
+  // entire Anorith(opponent)/Machamp(target) fixture design verbatim, only
+  // the opponent's dispatch move changes (MOVE_FAKE_TEARS, 313,
+  // EFFECT_SPECIAL_DEFENSE_DOWN_2, 0 power, accuracy 100 -- picked over
+  // MOVE_METAL_SOUND's 85 accuracy to avoid a new miss-chance confound;
+  // EFFECT_SPECIAL_DEFENSE_DOWN itself is source-commented "unused", zero
+  // moves anywhere use it). Numerically identical ledger to DefenseDown's
+  // (13/13 reach, 7/7 control) is expected: same gate structure, same
+  // 0-power/100-accuracy dispatch move, same damage sizing. Attribution
+  // probe (window 0 732) confirms the same clean +6 = +4
+  // Cmd_if_random_less_than / +1 Cmd_adjustnormaldamage / +1
+  // Cmd_seteffectwithchance split, zero Cmd_get_ability or Cmd_critcalc
+  // contamination in either fixture.
+  {
+    label:
+      "AI_CV_SpDefDown, opponent (AI_USER, Anorith) HP hit to <70% by a real turn-1 move -- reachable branch (data/battle_ai_scripts.s:1186-1196): if_hp_less_than USER,70 (Gate A) routes straight to the :1190 if_random_less_than 50 draw site, which fires once per identical MOVE_FAKE_TEARS slot on the phantom next-turn re-decision",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-spdefdown-lowhp-reach-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 13, 99: 13 },
+    checkCrossSeedStable: true,
+  },
+  {
+    label:
+      "AI_CV_SpDefDown, opponent (AI_USER, Anorith) HP stays 100% -- control (same opponent/species/turn count, player uses MOVE_SPLASH instead of MOVE_VITAL_THROW turn 1): Gate A (if_hp_less_than USER,70) is false and Gate B (target SPDEF stage > 3, default 6) is true, routing straight to AI_CV_SpDefDown3 before the :1190 roll is ever reached, deterministic zero draws from the handler itself",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-spdefdown-fullhp-control-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 7, 99: 7 },
+    checkCrossSeedStable: true,
+  },
 ];
 
 function totalPpUsed(ppBefore: number[], ppAfter: number[]): number {
