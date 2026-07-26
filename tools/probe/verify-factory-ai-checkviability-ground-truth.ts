@@ -194,9 +194,137 @@ async function verifyScenario(spec: ScenarioSpec): Promise<void> {
   );
 }
 
+// AI_CV_Pursuit and AI_CV_HighCrit fixtures (2026-07-26 addition, doc's own
+// §10 recommendation): all four opponent slots carry the SAME
+// handler-triggering move, so there is no cross-slot "which move won" pick
+// to read (unlike SpeedDown's Growl-control design) -- these two handlers'
+// own triggering moves have real power (Pursuit 40, Slash 70), so a
+// 0-power/matched-power control move would still leave AI_TryToFaint's
+// "most powerful" comparison as a confound. Evidence here is instead the
+// window's TOTAL Random() draw count, cross-checked against a twin fixture
+// that holds the moveset/species-pair structure fixed and varies only the
+// ONE precondition the handler's own dispatch reads (target type for
+// Pursuit, type effectiveness for HighCrit) -- same "identical setup,
+// flip one precondition" isolation discipline as SpeedDown's speed-role
+// swap, applied to draw count instead of pick.
+interface DrawCountScenarioSpec {
+  label: string;
+  path: string;
+  finalFrame: number;
+  expectedPpUsed: number; // total PP consumed across all 4 opponent slots (turns actually executed)
+  expectedTotalSteps: Record<number, number>; // frame 0 -> finalFrame, per seed
+  // HighCrit's "neutral effectiveness" fixture does NOT hold this -- see its
+  // own comment at the scenario definition for the documented reason
+  // (a phantom next-turn re-decision reads post-turn-1 HP, which differs
+  // slightly per seed because of the real damage-roll variance).
+  checkCrossSeedStable: boolean;
+}
+
+const DRAW_COUNT_SCENARIOS: DrawCountScenarioSpec[] = [
+  {
+    label:
+      "AI_CV_Pursuit, target IS Ghost/Psychic-typed -- reachable branch (data/battle_ai_scripts.s:2018-2036): 3 turns let the opponent's own is_first_turn_for gate clear (isFirstTurn 2->1->0), then AI_CV_Pursuit2's if_random_less_than 128 fires",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-pursuit-ghost-reach-off.json",
+    finalFrame: 1202,
+    expectedPpUsed: 3,
+    expectedTotalSteps: { 1: 32, 99: 32 },
+    checkCrossSeedStable: true,
+  },
+  {
+    label:
+      "AI_CV_Pursuit, target is NOT Ghost/Psychic-typed -- control (same opponent/move/turn count, target type is the only precondition changed): the get_target_type1/2 checks never match, so AI_CV_Pursuit2's roll never fires",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-pursuit-normal-control-off.json",
+    finalFrame: 1062,
+    expectedPpUsed: 3,
+    expectedTotalSteps: { 1: 30, 99: 30 },
+    checkCrossSeedStable: true,
+  },
+  {
+    label:
+      "AI_CV_HighCrit, target resists Normal 0.5x (Onix, Rock/Ground) -- deterministic zero-draw branch (data/battle_ai_scripts.s:1449-1461): both explicit AI_EFFECTIVENESS_x0_25/x0_5 checks route straight to End before either if_random_less_than",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-highcrit-resisted-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 18, 99: 18 },
+    checkCrossSeedStable: true,
+  },
+  {
+    label:
+      "AI_CV_HighCrit, target is neutral to Normal (Dugtrio, pure Ground) -- reachable branch: falls through both AI_EFFECTIVENESS_x2/x4 checks (neither matches at 1x) straight into the shared if_random_less_than 128 roll",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-highcrit-neutral-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    // NOT cross-seed stable (23 vs 24) -- both values individually
+    // reproduce deterministically (reruns match exactly) and both sit well
+    // above the resisted fixture's stable 18, confirming the branch fires,
+    // but the +5/+6 gap (not a clean +1 or +2) means this window also
+    // embeds a phantom, HP-sensitive re-decision unrelated to HighCrit
+    // itself -- see the ground-truth doc's own porter note on this finding
+    // before reusing this fixture for an exact-count claim.
+    expectedTotalSteps: { 1: 23, 99: 24 },
+    checkCrossSeedStable: false,
+  },
+];
+
+function totalPpUsed(ppBefore: number[], ppAfter: number[]): number {
+  let used = 0;
+  for (let i = 0; i < ppBefore.length; i++) used += ppBefore[i]! - ppAfter[i]!;
+  return used;
+}
+
+async function verifyDrawCountScenario(spec: DrawCountScenarioSpec): Promise<void> {
+  console.log(`\n=== ${spec.label} ===`);
+  const perSeedTotals: number[] = [];
+  for (const seed of SEEDS) {
+    const run1 = await runScenario(spec.path, seed);
+    const run2 = await runScenario(spec.path, seed);
+
+    const f0a = run1.get(0)!;
+    const f0b = run2.get(0)!;
+    check(
+      `seed ${seed}: frame 0 identical across reruns (determinism)`,
+      JSON.stringify(f0a) === JSON.stringify(f0b),
+      "initial state differs between runs",
+    );
+
+    const f0 = run1.get(0)!;
+    const fEnd = run1.get(spec.finalFrame)!;
+
+    const ppUsed = totalPpUsed(f0.battlers.opponent.pp, fEnd.battlers.opponent.pp);
+    check(
+      `seed ${seed}: exactly ${spec.expectedPpUsed} opponent turn(s) executed (PP consumed across all 4 slots)`,
+      ppUsed === spec.expectedPpUsed,
+      `observed ${ppUsed} PP used, ${JSON.stringify(f0.battlers.opponent.pp)} -> ${JSON.stringify(fEnd.battlers.opponent.pp)}`,
+    );
+
+    const totalSteps = stepsToReach(f0.rngValue, fEnd.rngValue, spec.expectedTotalSteps[seed]! + 20);
+    check(
+      `seed ${seed}: exactly ${spec.expectedTotalSteps[seed]} total Random() calls from frame 0 to frame ${spec.finalFrame}`,
+      totalSteps === spec.expectedTotalSteps[seed],
+      `forward-search found ${totalSteps === null ? "no match" : `step ${totalSteps}`}`,
+    );
+    perSeedTotals.push(totalSteps ?? -1);
+
+    console.log(`  seed ${seed}: pp used=${ppUsed}, total steps 0->${spec.finalFrame}=${totalSteps}`);
+  }
+
+  if (spec.checkCrossSeedStable) {
+    check(
+      `count stability: total-step count is identical across seeds ${SEEDS.join(" and ")} (${JSON.stringify(perSeedTotals)})`,
+      perSeedTotals.every((n) => n === perSeedTotals[0]),
+      `per-seed totals differ: ${JSON.stringify(perSeedTotals)}`,
+    );
+  } else {
+    console.log(`  (cross-seed stability intentionally not asserted -- see scenario comment)`);
+  }
+}
+
 async function main(): Promise<void> {
   for (const spec of SCENARIOS) {
     await verifyScenario(spec);
+  }
+  for (const spec of DRAW_COUNT_SCENARIOS) {
+    await verifyDrawCountScenario(spec);
   }
 
   console.log(`\n${failures === 0 ? "ALL PASS" : `${failures} FAILURE(S)`}`);
