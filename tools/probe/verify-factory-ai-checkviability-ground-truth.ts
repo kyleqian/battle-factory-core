@@ -309,6 +309,47 @@ const DRAW_COUNT_SCENARIOS: DrawCountScenarioSpec[] = [
     expectedTotalSteps: { 1: 36, 99: 36 },
     checkCrossSeedStable: true,
   },
+  // AI_CV_VitalThrow (data/battle_ai_scripts.s:1536-1546, doc §11.4/§12.2/§13):
+  // opponent (Anorith, ability slot 0 = Battle Armor -- blocks Cmd_critcalc's
+  // Random() call entirely via short-circuit, so no stray crit can ever
+  // faint it) all 4 slots MOVE_VITAL_THROW. Single executed turn (matches
+  // HighCrit's own single-turn capture convention): player (Machamp, all 4
+  // slots MOVE_VITAL_THROW in the reach fixture) lands one real, deterministic-
+  // band hit (85-100% roll, 86-102 damage against Anorith's 120 max HP --
+  // BOTH ends of the roll land at 28%/15% remaining, comfortably inside the
+  // if_hp_less_than USER,40 band) that brings the opponent's own HP under the
+  // 40% gate BEFORE the window's phantom next-turn (computed-but-unexecuted)
+  // re-decision reads it -- no second real turn needed, so no risk of a
+  // follow-up hit fainting the opponent. Reach's turn-1 decision itself (HP
+  // 100%, deterministic if_hp_more_than 60 -> End) draws 0; only the phantom
+  // decision reaches AI_CV_VitalThrow2's if_random_less_than 50, once per
+  // identical dispatch slot (4), matching §12's "N identical slots -> N
+  // draws per reachable decision" finding exactly. Attribution probe
+  // (window 0 732) confirms the full +6 delta over the control fixture
+  // splits as +4 Cmd_if_random_less_than (the real AI_CV_VitalThrow2 roll)
+  // and +1 Cmd_adjustnormaldamage / +1 Cmd_seteffectwithchance (the flipped
+  // precondition's OWN necessary real-damage roll cost -- Vital Throw
+  // actually connecting vs Splash doing nothing -- not part of the handler
+  // itself, but part of the twin fixtures' one intentionally-flipped
+  // precondition).
+  {
+    label:
+      "AI_CV_VitalThrow, opponent (AI_USER, Anorith) HP hit to <40% by a real turn-1 move -- reachable branch (data/battle_ai_scripts.s:1536-1546): if_hp_less_than USER,40 routes straight to AI_CV_VitalThrow2, whose if_random_less_than 50 fires once per identical MOVE_VITAL_THROW slot on the phantom next-turn re-decision",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-vitalthrow-lowhp-reach-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 15, 99: 15 },
+    checkCrossSeedStable: true,
+  },
+  {
+    label:
+      "AI_CV_VitalThrow, opponent (AI_USER, Anorith) HP stays 100% -- control (same opponent/species/turn count, player uses MOVE_SPLASH instead of MOVE_VITAL_THROW turn 1): if_hp_more_than USER,60 routes straight to End, deterministic zero draws from the handler itself",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-vitalthrow-fullhp-control-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 9, 99: 9 },
+    checkCrossSeedStable: true,
+  },
 ];
 
 function totalPpUsed(ppBefore: number[], ppAfter: number[]): number {

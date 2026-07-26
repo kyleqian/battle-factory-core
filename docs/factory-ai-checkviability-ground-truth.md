@@ -992,3 +992,186 @@ extended this session with `AI_CV_AlwaysHit`'s 2 fixtures only (§12.1) —
 green. **Run twice this session, ALL PASS both times.** No `AI_CV_VitalThrow`
 scenario exists yet — §11.4's recipe remains unexecuted analysis, not a
 regression.
+
+## 13. 2026-07-26 addendum #3: `AI_CV_VitalThrow` fully staged and live-verified — the last CV-only handler without ground truth
+
+Third follow-up scout session (side lane, Battle Scene OFF), same no-`src/`-
+changes contract. Executed §11.4/§12.2's recipe end to end, with one
+correction to the recipe's own prose (below) caught by re-deriving the
+precondition from source rather than trusting the prior write-up.
+
+### 13.1 Correction: §11.4's "opponent at or slower than the target" has the polarity backwards
+
+Re-reading `data/battle_ai_scripts.s:1536-1546` and the macro/opcode chain it
+expands through:
+
+```
+AI_CV_VitalThrow:
+	if_target_faster AI_CV_VitalThrow_End        ; branch to End IF target faster
+	if_hp_more_than AI_USER, 60, AI_CV_VitalThrow_End
+	if_hp_less_than AI_USER, 40, AI_CV_VitalThrow2
+	if_random_less_than 180, AI_CV_VitalThrow_End
+AI_CV_VitalThrow2:
+	if_random_less_than 50, AI_CV_VitalThrow_End
+	score -1
+AI_CV_VitalThrow_End:
+	end
+```
+
+`if_target_faster ptr` expands to `if_user_goes 1, ptr`
+(`asm/macros/battle_ai_script.inc:595-597`), and
+`Cmd_if_user_goes`/`Cmd_if_target_faster`'s underlying comparison,
+`GetWhoStrikesFirst(sBattler_AI, gBattlerTarget, TRUE)`
+(`battle_ai_script_commands.c:1268-1270`), returns `1` exactly when
+`gBattlerTarget` (the AI's target — **the player**) has more effective
+speed (`battle_main.c:4725-4728`, the `ignoreChosenMoves=TRUE` path folds
+both priorities to 0, so this is a pure current-speed compare, no
+`if_target_faster`-vs-priority confound — matches entry 463's own
+priority-blind finding, re-confirmed here for this handler specifically).
+So `if_target_faster AI_CV_VitalThrow_End` branches to **End (0 draws)
+when the TARGET is faster**, meaning **the opposite** of §11.4's own prose
+is what actually gates reachability: to get past this line at all, **the
+opponent (AI_USER) must be faster than, or equal to, the target** — not
+"at or slower." (The `AI_CV_SpeedDown` precedent this recipe's prose
+apparently generalized from uses the *same* macro but jumps *forward* to
+its own reachable branch on a target-faster match
+(`data/battle_ai_scripts.s:1142`, §6's own citation) — opposite polarity
+of use, easy to transpose by pattern-matching the macro name alone instead
+of re-checking each script's own jump target. This is exactly the kind of
+misreading the brief asked this session to re-verify against source rather
+than inherit.) The species-pairing *suggestion* itself
+(fast opponent / slow target) was actually right for reaching the
+interesting branches — only the English description of *why* was
+backwards. No equal-speed pairing is used below regardless (a tie would
+route `GetWhoStrikesFirst` through its own `Random() & 1` coin-flip,
+`battle_main.c:4726`, adding an unrelated confound), so this session's
+fixtures sidestep the ambiguity entirely with a clean speed gap.
+
+### 13.2 Design
+
+**Opponent (AI_USER under test)**: Anorith (species 390, level 50, default
+IVs 31/EVs 0/nature Hardy) — base stats HP 45/Atk 95/Def 50/Spe 75
+(`src/data/pokemon/species_info.h:11009-11035`), giving level-50 stats HP
+120/Def 70/Speed 95 (`(2*base+31)*level/100` truncated, +5 for non-HP/+level+10
+for HP — the same formula `oracle/battle_lab.py:960-981` computes). Ability
+slot 0 is its ONLY ability, `ABILITY_BATTLE_ARMOR`
+(`species_info.h:11032`) — chosen deliberately: `Cmd_critcalc`
+(`battle_script_commands.c:1277-1281`) short-circuits its own `Random()`
+call entirely when the target's ability is Battle Armor/Shell Armor (the
+condition is the *first* term of a `&&` chain), so **no critical hit is
+possible against Anorith, ever, regardless of roll** — this removes the
+crit-driven overshoot risk §11.4's own point 1 flagged (a bare 0.6-0.75×
+maxHP hit that lands the target inside the `<40%` band would, if critically
+doubled, exceed 100% of maxHP and faint the opponent outright) as a
+structural non-issue rather than something to route around statistically.
+Moveset: all 4 slots `MOVE_VITAL_THROW` (233, Fighting, power 70, accuracy
+100, `EFFECT_VITAL_THROW`, priority -1, no secondary effect —
+`data/battle_moves.h`, ID confirmed unchanged per §12.2) — the dispatch
+move under test, same "no pick to read" all-identical-slots design as
+§11.1/§11.2/§12.1.
+
+**Target (player)**: Machamp (species 68, level 50, same IV/EV/nature
+defaults) — base stats HP 90/Atk 130/Spe 55
+(`species_info.h:2049-2057`), giving level-50 stats HP 165/Atk 150/Speed 75.
+Speed 75 < Anorith's 95 (a clean 20-point gap, no tie) satisfies §13.1's
+corrected precondition (**opponent faster**) with zero `Random()` cost from
+the speed check itself.
+
+**Turn-1 damage sizing** (the recipe's own hard part): Machamp's `MOVE_VITAL_THROW`
+against Anorith (Rock/Bug) — `applyTypeEffectiveness` scales by Rock (2x,
+`Fighting`→`Rock` = 20 tenths) then Bug (0.5x, `Fighting`→`Bug` = 5 tenths)
+sequentially, net exactly 1.0x with **no truncation loss** (2x-then-halve
+of an already-even intermediate value —
+`src/data/gen/type-effectiveness.json`); STAB applies (Machamp is
+Fighting/Fighting) for a clean 1.5x. Hand-computed via `calculateBaseDamage`'s
+own ported formula (`src/engine/damageCalc.ts:150-200`): base damage (Atk
+150, power 70, level factor 22, Def 70) = 66, +2 unconditional = 68, ×1.5
+STAB (trunc) = 102, ×1.0 type (exact) = 102 pre-random. The 85-100% roll
+(`applyRandomDamageMultiplier`, 16 discrete steps) therefore spans
+**86 (85%) to 102 (100%)** — against Anorith's 120 max HP, that's remaining
+HP **34 down to 18**, i.e. **28% down to 15%** by the source's own truncating
+`100*hp/maxHp` (`Cmd_if_hp_less_than`, `battle_ai_script_commands.c:713-725`):
+both ends land inside the `<40%` band with comfortable margin from both
+edges (0% and 40%), confirmed **live** against the oracle at both banked
+seeds (below) — not just the hand computation.
+
+Because Anorith survives comfortably (never below 15%) and the phantom
+next-turn re-decision (§11.0/§12.1's own established mechanism — the AI's
+next move is computed, but not executed, before a trace's silent tail ends)
+already reads the post-turn-1 HP without needing a second real turn to
+execute, this fixture reuses `HighCrit`'s **single-turn** capture shape
+(`[A, wait 30, A, wait 700]`, `captureFrames [0,100,300,732]`) rather than
+`AlwaysHit`'s 4-turn continuous-mash build — turn 1 itself is Anorith's own
+deterministic zero-draw branch (100% HP, `if_hp_more_than 60` true), and the
+**phantom** turn-2 re-decision is the one that reaches
+`AI_CV_VitalThrow2`. No multi-turn mash-calibration mechanic was needed at
+all for this handler, contrary to §11.4's own assumption that it would need
+one.
+
+**Reach** (`tools/battle-lab/mechanic-factory-ai-cv-vitalthrow-lowhp-reach-off.json`):
+player (Machamp) all 4 slots `MOVE_VITAL_THROW` — turn 1 lands the sized hit.
+
+**Control** (`tools/battle-lab/mechanic-factory-ai-cv-vitalthrow-fullhp-control-off.json`):
+identical opponent/species/level; player's 4 slots are `MOVE_SPLASH` (150)
+instead — Anorith's HP never moves, `if_hp_more_than AI_USER,60` is true,
+deterministic zero-draw End. Twin-fixture design, one flipped precondition,
+same discipline as every prior handler in §11/§12.
+
+### 13.3 Live ledger (oracle-verified, both seeds, both runs)
+
+| Fixture | Seed | Opponent PP used | Opponent HP (start→end) | Total `Random()` calls, frame 0→732 | Determinism (2 runs) |
+| --- | -: | -: | --- | -: | --- |
+| Reach (lowhp) | 1 | 1 | 120→32 (26%) | **15** | identical |
+| Reach (lowhp) | 99 | 1 | 120→29 (24%) | **15** | identical |
+| Control (fullhp) | 1 | 1 | 120→120 (100%) | **9** | identical |
+| Control (fullhp) | 99 | 1 | 120→120 (100%) | **9** | identical |
+
+Both fixtures individually cross-seed-stable (15/15, 9/9) — no HighCrit-style
+neutral-fixture wobble, matching AlwaysHit's clean result rather than
+HighCrit's. Both banked HP endpoints (26%, 24%) land inside `<40%` exactly as
+sized, at the two different real damage rolls the two seeds happened to draw
+(88 and 91 damage respectively — both inside the hand-computed 86-102 range).
+
+**Attribution** (`tools/probe/attribute-factory-ai-random-callers.py`,
+window `0 732`, run via `tools/run-mgba-probe.py`): the **+6** delta (reach
+15 vs. control 9) splits cleanly:
+
+| Caller function | Reach count | Control count | Delta |
+| --- | -: | -: | -: |
+| `BattleAI_SetupAIData+0x83` | 4 | 4 | 0 |
+| `BattleTurnPassed+0x157` | 1 | 1 | 0 |
+| `ChooseMoveOrAction_Singles+0xf7` | 1 | 1 | 0 |
+| `Cmd_critcalc+0x127` | 1 | 1 | 0 |
+| `Cmd_if_random_less_than+0x7` | **4** | **0** | **+4** |
+| `Cmd_adjustnormaldamage+0x7` | 2 | 1 | +1 |
+| `Cmd_seteffectwithchance+0x81` | 2 | 1 | +1 |
+
+`Cmd_if_random_less_than`'s +4 is exactly `AI_CV_VitalThrow2`'s own
+`if_random_less_than 50` roll, once per identical `MOVE_VITAL_THROW` slot on
+the single reachable (phantom) decision — matching §12's "N identical
+slots × 1 reachable decision = N draws" mechanism precisely (here N=4,
+decisions=1, vs. AlwaysHit's N=4, decisions=2). The remaining **+1/+1**
+(`Cmd_adjustnormaldamage`/`Cmd_seteffectwithchance`) are **not** part of
+`AI_CV_VitalThrow` at all — they're the necessary cost of the ONE flipped
+precondition itself: Vital Throw actually connecting (real damage roll +
+move-script effect-chance check) vs. Splash doing nothing. Unlike
+`AlwaysHit`'s Ghost-target trick (§11.3 point 3, zero damage on both sides
+by design), `VitalThrow`'s own precondition genuinely requires real damage,
+so this small additional confound is structural, not an error — and fully
+attributed, not left as an unexplained residual the way Pursuit/HighCrit's
+own "+2"/"+5-6" deltas were (§11.0/§11.2, neither run through this
+attribution probe). `Cmd_critcalc` firing identically (1) in both fixtures
+confirms it's Anorith's own outgoing `MOVE_VITAL_THROW` hitting Machamp
+(whose ability has no crit immunity) — present in both fixtures regardless
+of the flipped precondition, correctly canceling in the diff.
+
+### 13.4 Verify script status
+
+`tools/probe/verify-factory-ai-checkviability-ground-truth.ts` extended
+this session with `AI_CV_VitalThrow`'s 2 fixtures (§13.2/§13.3) —
+`SpeedDown`/`Pursuit`/`HighCrit`/`AlwaysHit` checks (§9, §11.5, §12.1)
+unchanged and still green. **Run twice this session, ALL PASS both times.**
+This closes out the brief's own count: all 22 reachable `AI_CV_*` handlers
+now have either a live-staged fixture (the 6 covered across §6/§11/§12/§13)
+or a documented CBM-blocked/analytical status (§5/§7/§8) — `AI_CV_VitalThrow`
+was the last CV-only-reachable handler without ground truth.
