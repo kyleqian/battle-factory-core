@@ -44,6 +44,16 @@ animation. A status caused by a move is not part of that move's animation.
   presentation seam and all source- or evidence-required variants are covered.
 - No entry means unsupported.
 
+## Current resumable state (2026-07-27)
+
+Coverage is **35/276 exact, 3 partial, 238 unsupported**. The latest bounded
+work leaves ENCORE unsupported at **215/215 component frames** but only
+**43/215** player-back and **89/215** opponent-front framebuffer frames,
+reproduced twice after strengthening its OAM/matrix comparator. Its next safe
+repair is the general per-scanline OAM-budget/order and OBJ-window compositor
+described below; otherwise select the next bounded component from
+`npm run animation:coverage`. Animation-main is green at this checkpoint.
+
 ## DRAGON CLAW promoted to exact; PlaySE1WithPanning track established (2026-07-27)
 
 **Verdict:** `MOVE_DRAGON_CLAW` is exact through the shared Scene-ON seam in
