@@ -56,6 +56,7 @@ function battler(
     protectSpecialBattlerId: changes.protectSpecialBattlerId ?? 0,
     types: changes.types ?? (["TYPE_NORMAL", "TYPE_NORMAL"] as const),
     species: changes.species ?? 0,
+    personality: changes.personality ?? 0,
     attack: changes.attack ?? 0,
     defense: changes.defense ?? 0,
     spAttack: changes.spAttack ?? 0,

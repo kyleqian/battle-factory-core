@@ -246,6 +246,7 @@ function emptyBattler(side: 0 | 1): BattleScriptRulesBattlerState {
     protectSpecialBattlerId: 0,
     types: Object.freeze(["TYPE_NORMAL", "TYPE_NORMAL"] as const),
     species: 0,
+    personality: 0,
     attack: 0,
     defense: 0,
     spAttack: 0,
