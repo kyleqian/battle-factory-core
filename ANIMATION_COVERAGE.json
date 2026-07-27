@@ -2,6 +2,26 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_MILK_DRINK",
+      "status": "exact",
+      "covered": [
+        "complete legal Level-50 mechanicLab parties use MILTANK set 411, a real Factory MILK DRINK carrier, and legally constrained TACKLE; turn 1 stages damage through stock battle flow rather than injected HP",
+        "player-back MILTANK complete move-owned Scene-ON body at oracle frames 617-802: source component/RAM 186/186 and shared-seam framebuffer 186/186, reproduced twice",
+        "opponent-front MILTANK complete move-owned Scene-ON body at oracle frames 621-806: source component/RAM 186/186 and shared-seam framebuffer 186/186, reproduced twice",
+        "gMilkBottleSpriteTemplate's AnimMilkBottle blend-in/hold/affine-wobble/fall/blend-out body, ANIM_TAG_MILK_BOTTLE, gThinRingExpandingSpriteTemplate affine program 1 and terminal hold, ANIM_TAG_THIN_RING, monbg/clearmonbg display latches, and HealingEffect2's four target-side gHealingBlueStarSpriteTemplate sprites"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-milk-drink-player-miltank-opponent-onix.json",
+        "tools/battle-lab/mechanic-milk-drink-opponent-miltank-player-onix.json",
+        "tools/compare/fixtures/milk-drink-player-miltank-opponent-onix.json",
+        "tools/compare/fixtures/milk-drink-opponent-miltank-player-onix.json",
+        "tools/compare/milkDrinkPortable.ts",
+        "tools/compare/milkDrinkProbe.py",
+        "src/animation/milkDrink.ts",
+        "tests/animation/milkDrink.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_RECOVER",
       "status": "exact",
       "covered": [
@@ -801,11 +821,16 @@
       "id": "healing-blue-star",
       "components": [
         "subroutine:HealingEffect",
+        "subroutine:HealingEffect2",
         "asset:ANIM_TAG_BLUE_STAR",
         "sprite:gHealingBlueStarSpriteTemplate",
         "subroutine:RecoverAbsorbEffect",
         "visualCommand:create_power_absorption_orb_sprite",
-        "asset:ANIM_TAG_ORBS"
+        "asset:ANIM_TAG_ORBS",
+        "asset:ANIM_TAG_MILK_BOTTLE",
+        "sprite:gMilkBottleSpriteTemplate",
+        "asset:ANIM_TAG_THIN_RING",
+        "sprite:gThinRingExpandingSpriteTemplate"
       ],
       "representatives": [
         "MOVE_RECOVER",
@@ -820,7 +845,7 @@
         "MOVE_MOONLIGHT",
         "MOVE_SWALLOW"
       ],
-      "goal": "MOVE_RECOVER solely proves the complete three-wave RecoverAbsorbEffect plus attacker HealingEffect body in both orientations at 169/169 component/RAM and framebuffer frames, reproduced twice. GROWTH remains 63/63 and BIND 45/45 in both orientations as seam controls. No sibling is promoted: ABSORB needs its 8-orb sine drain/hitsplat/green field body; MEGA_DRAIN its paired 16-orb stronger-green body; DREAM_EATER its psychic-background/target-scale-and-shake/24-orb body; GIGA_DRAIN its 24-orb/high-green body; SOFT_BOILED its breaking-egg/thin-ring/target HealingEffect2 body; MILK_DRINK its bottle/thin-ring/HealingEffect2 body; PRESENT both conditional bag/explosion and green-particle heal branches with target HealingEffect2; SYNTHESIS its GrantingStarsEffect and 0-to-16 attacker blend; MOONLIGHT its blackout/moon/alpha/sparkle pipeline; and SWALLOW its move-turn-dependent deform/shake/blue-orb multiplicity. Each remains unsupported pending its own complete dense acceptance."
+      "goal": "MOVE_RECOVER proves the complete three-wave RecoverAbsorbEffect plus attacker HealingEffect body in both orientations at 169/169 component/RAM and framebuffer frames, reproduced twice. MOVE_MILK_DRINK independently proves its complete bottle/thin-ring/target HealingEffect2 body in both orientations at 186/186 component/RAM and framebuffer frames, reproduced twice. RECOVER remains 169/169 and BIND 45/45 in both orientations as regression controls. No other sibling is promoted: ABSORB needs its 8-orb sine drain/hitsplat/green field body; MEGA_DRAIN its paired 16-orb stronger-green body; DREAM_EATER its psychic-background/target-scale-and-shake/24-orb body; GIGA_DRAIN its 24-orb/high-green body; SOFT_BOILED has a distinct breaking-egg pair, attacker shake, two offset affine-program-0 thin rings, palette blend, and target HealingEffect2 body and needs its own dense move evidence; PRESENT has a distinct common moving item-bag body plus conditional five-explosion damage body or nine-green-particle healing body before target HealingEffect2, and needs dense evidence for both conditional outcomes; SYNTHESIS needs GrantingStarsEffect and its 0-to-16 attacker blend; MOONLIGHT its blackout/moon/alpha/sparkle pipeline; and SWALLOW its move-turn-dependent deform/shake/blue-orb multiplicity. Each remains unsupported pending its own complete dense acceptance."
     }
   ],
   "variantAudits": {

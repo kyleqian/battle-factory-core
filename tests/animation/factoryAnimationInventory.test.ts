@@ -68,11 +68,11 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // RECOVER is exact in both required orientations at 169/169.
-        unsupported: 248,
+        // RECOVER and MILK_DRINK are exact in both required orientations.
+        unsupported: 247,
         staged: 0,
         partial: 3,
-        exact: 25,
+        exact: 26,
       },
       {
         tier: "openOnly",

@@ -4,6 +4,16 @@ Older dated sections moved out of `ANIMATION_PROGRESS.md` to keep that
 file lean (`AGENTS.md`'s ~3-most-recent convention). Git history has the
 full record regardless; this file is a read-only reference.
 
+## Psychic-family opposite orientation closure (2026-07-26)
+
+CONFUSION and PSYCHIC promoted from partial to exact and FUTURE_SIGHT stayed
+exact after the opponent-front KADABRA / player-back ONIX variants closed
+through the shared seam. Source dependencies were KADABRA's distinct battle
+`anim_front.png`, 56×56/yOffset-5 geometry, frame program, and
+`ANIM_GROW_VIBRATE`; the three complete opposite windows were 140/140,
+140/140, and 114/114, reproduced twice, with their player orientations and
+GROWTH/BIND controls also green. Commit `abc5474`.
+
 ## Psychic-family window-2 boundary closure (2026-07-26)
 
 CONFUSION and PSYCHIC reached 140/140 in their player-attacker windows through

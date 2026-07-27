@@ -44,6 +44,47 @@ animation. A status caused by a move is not part of that move's animation.
   presentation seam and all source- or evidence-required variants are covered.
 - No entry means unsupported.
 
+## MILK DRINK promoted to exact; HealingEffect2 / thin-ring family represented (2026-07-26)
+
+**Verdict:** `MOVE_MILK_DRINK` is exact through the shared Scene-ON seam in
+both required orientations, each reproduced twice: player-back MILTANK is
+**186/186** component/RAM and framebuffer frames (oracle 617-802), and
+opponent-front MILTANK is **186/186** (621-806). Census: **26/276 exact, 3
+partial, 247 unsupported**.
+
+**Source/probe:** complete legal mechanicLab parties use MILTANK Factory set
+411, with all four active choices constrained to MILK DRINK; ONIX is
+constrained to TACKLE. Turn 1 stages real stock-engine damage and turn 2
+supplies the accepted healing body. The relative reducer covers
+`gMilkBottleSpriteTemplate` / `AnimMilkBottle`'s alternating blend, hold,
+affine wobble, fall, and blend-out; `ANIM_TAG_MILK_BOTTLE`; affine program 1
+and terminal hold for `gThinRingExpandingSpriteTemplate` /
+`ANIM_TAG_THIN_RING`; `monbg`/`clearmonbg`; and target-side `HealingEffect2`.
+The blue stars reuse RECOVER's shared frame/geometry component only where the
+literal args match. RAM evidence additionally pins `clearmonbg`'s two
+sprite-animation ticks before the first HealingEffect2 child, and framebuffer
+evidence pins bottle OAM at a one-frame latch while its blend registers are
+current-frame.
+
+**Sibling audit (no promotions):** `MOVE_SOFT_BOILED` has a distinct
+two-sprite breaking-egg body, attacker shake, palette blend, and two
+offset affine-program-0 thin rings before target `HealingEffect2`.
+`MOVE_PRESENT` has a common moving item-bag body followed conditionally by
+either five explosions or nine green healing particles before target
+`HealingEffect2`. Each needs its own complete dense move evidence, with
+PRESENT requiring both conditional outcomes.
+
+**Evidence/controls:** committed legal fixtures, reproducible sprite
+extractor, dense RAM/RGB probe, portable comparator, and focused Tier-1
+tests. Fresh acceptance is **186/186 ×2 in both orientations**. RECOVER
+remains **169/169** and BIND **45/45**, both orientations, as regression
+controls. Implementation commits: `51206b4`, `e752c6e`.
+
+**Verification:** **232 test files / 3135 tests green**; production build
+green; coverage self-check reports **26/276 exact, 3 partial, 247
+unsupported**. The animation-owned coverage ratchet advanced by exactly this
+one accepted move; the animation/engine import-boundary ratchet did not widen.
+
 ## Healing blue-star track established; RECOVER promoted to exact (2026-07-26)
 
 **Verdict:** `MOVE_RECOVER` is the sole promoted acceptance unit. Its complete
@@ -131,34 +172,3 @@ orientation, battler dimensions or anchors, palette/silhouette, transformed or
 substitute state, multi-turn/multi-hit state, or another explicit script input.
 Every status needs a committed ON-profile trace; `exact` cannot retain a known
 remainder.
-
-## Psychic-family opposite orientation closed: CONFUSION/PSYCHIC promoted to exact; FUTURE_SIGHT stays exact (2026-07-26)
-
-**Verdict:** opponent-front KADABRA attacking player-back ONIX is exact through
-the shared Scene-ON seam for all three family moves. `MOVE_CONFUSION` and
-`MOVE_PSYCHIC` promote `partial` → **`exact`**; `MOVE_FUTURE_SIGHT` remains
-**`exact`**. Census: **23/276 exact, 3 partial**.
-
-**Source/geometry:** all move tasks and psychic-background branches are
-side-agnostic. The actual new dependencies were KADABRA's battle
-`anim_front.png` (frame 0 genuinely differs from generic `front.png`), front
-coords **56×56 / yOffset 5** (corner `(144,13)`, animation center `(176,45)`),
-frame program **0×12, 1×45, 0×15**, and `ANIM_GROW_VIBRATE`. That family ends
-through `ResetSpriteAfterAnim`, leaving identity affine and zero `x2/y2`;
-ONIX is now player-back, so its opponent-front idle residual does not apply.
-The runtime asset stays under `src/animation/assets/`; shared generated
-catalogs and boundary ratchets are unchanged.
-
-**Implementation/evidence:** the three `battleScene.ts` cases select
-KADABRA front/back and ONIX back/front solely by battler side; no timing,
-absolute-frame, damage, RNG, turn, or facility branch changed. Complete legal
-mechanicLab party fixtures stage the opposite orientation. Fresh results,
-each reproduced twice: CONFUSION opponent **140/140** (frames 85-224),
-PSYCHIC opponent **140/140** (83-222), FUTURE_SIGHT opponent **114/114**
-(81-194). Existing player orientations reproduced twice at **140/140,
-140/140, 114/114**. Regression gates twice in both orientations: GROWTH
-**63/63 component + framebuffer**, BIND **45/45 component + framebuffer**.
-
-**Verification:** Tier-1 asset/geometry/side tests added; **227 test files /
-3041 tests** and production build green. Implementation commit:
-`abc5474 feat(animation): close psychic opposite orientation`.
