@@ -175,6 +175,10 @@ import {
   type HyperFangEffect,
 } from "./hyperFang.ts";
 import {
+  swaggerAtAge,
+  type SwaggerState,
+} from "./swagger.ts";
+import {
   poisonTailAtAge,
   type PoisonTailState,
 } from "./poisonTail.ts";
@@ -330,6 +334,7 @@ export interface SceneOnPresentationBattler {
     | "GRIMER"
     | "ZUBAT"
     | "RATICATE"
+    | "RATTATA"
     | "SKIPLOOM"
     | "RELICANTH"
     | "LUNATONE"
@@ -812,6 +817,13 @@ export interface SceneOnHyperFangConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnSwaggerConfig {
+  readonly move: "SWAGGER";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnPoisonTailConfig {
   readonly move: "POISON_TAIL";
   readonly attacker: SceneOnPresentationBattler;
@@ -948,6 +960,7 @@ export type SceneOnMoveConfig =
   | SceneOnSludgeBombConfig
   | SceneOnPoisonFangConfig
   | SceneOnHyperFangConfig
+  | SceneOnSwaggerConfig
   | SceneOnPoisonTailConfig
   | SceneOnToxicConfig
   | SceneOnEarthquakeConfig
@@ -1022,6 +1035,12 @@ export interface SceneOnPoisonFangView {
 }
 
 export interface SceneOnHyperFangView extends HyperFangEffect {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSwaggerView extends SwaggerState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -2079,6 +2098,27 @@ export function sceneOnHyperFangView(
     target: state.config.target,
     ...hyperFangEffectAtAge(
       state.age,
+      state.config.target.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is GrowAndShrink's first displayed task frame. */
+export function sceneOnSwaggerView(
+  state: SceneOnMovePresentationState,
+): SceneOnSwaggerView {
+  if (state.config.move !== "SWAGGER") {
+    throw new Error(`expected SWAGGER presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...swaggerAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
       state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,
     ),

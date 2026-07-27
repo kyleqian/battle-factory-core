@@ -549,6 +549,7 @@ import sludgeAsset from "../animation/assets/sludge.json" with { type: "json" };
 import sludgeBombAsset from "../animation/assets/sludgeBomb.json" with { type: "json" };
 import poisonFangAsset from "../animation/assets/poisonFang.json" with { type: "json" };
 import hyperFangAsset from "../animation/assets/hyperFang.json" with { type: "json" };
+import swaggerAsset from "../animation/assets/swagger.json" with { type: "json" };
 import poisonTailAsset from "../animation/assets/poisonTail.json" with { type: "json" };
 import toxicAsset from "../animation/assets/toxic.json" with { type: "json" };
 import hardenAsset from "../animation/assets/harden.json" with { type: "json" };
@@ -657,6 +658,7 @@ import {
   sceneOnSludgeBombView,
   sceneOnPoisonFangView,
   sceneOnHyperFangView,
+  sceneOnSwaggerView,
   sceneOnPoisonTailView,
   sceneOnToxicView,
   sceneOnEarthquakeView,
@@ -995,6 +997,12 @@ const hyperFangArt = hyperFangAsset as {
   };
   raticateBack: { tileset: Tileset; palette: RgbColor[] };
   raticateFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const swaggerArt = swaggerAsset as {
+  breath: { tileset: Tileset; palette: RgbColor[] };
+  anger: { tileset: Tileset; palette: RgbColor[] };
+  rattataBack: { tileset: Tileset; palette: RgbColor[] };
+  rattataFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const poisonTailArt = poisonTailAsset as {
   metal: { tileset: Tileset; tilemap: Tilemap; palette: RgbColor[] };
@@ -15712,6 +15720,125 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "RATICATE used" : "Foe RATICATE used",
       "HYPER FANG!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SWAGGER") {
+    const view = sceneOnSwaggerView(state);
+    const displayed = sceneOnSwaggerView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "RATTATA"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "RATTATA"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged SWAGGER pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const rattataSource = playerToOpponent
+      ? swaggerArt.rattataBack
+      : swaggerArt.rattataFront;
+    const rattataSprite = playerToOpponent ? rattataSource : {
+      ...rattataSource,
+      tileset: {
+        columns: 8, rows: 8, tiles: rattataSource.tileset.tiles.slice(0, 64),
+      },
+    };
+    const onixSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    drawSpriteSheet(
+      fb,
+      onixSprite.tileset,
+      onixSprite.palette,
+      view.target.geometry.spriteCorner.x + targetIdle.x2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    drawSpriteSheetAffineStretch(
+      fb,
+      rattataSprite.tileset,
+      rattataSprite.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+      displayed.attackerScale.x,
+      displayed.attackerScale.y,
+      0,
+      { r: 0, g: 0, b: 0 },
+      0,
+      displayed.attackerScale.x !== 256 || displayed.attackerScale.y !== 256,
+    );
+    if (displayed.breath) {
+      const frameStart = displayed.breath.frame * 4;
+      drawSpriteSheet(
+        fb,
+        {
+          columns: 2,
+          rows: 2,
+          tiles: swaggerArt.breath.tileset.tiles.slice(frameStart, frameStart + 4),
+        },
+        swaggerArt.breath.palette,
+        displayed.breath.x - 8,
+        displayed.breath.y - 8,
+      );
+    }
+    for (const mark of displayed.angerMarks) {
+      const matrix = Math.trunc(0x10000 / mark.xScale);
+      drawSpriteSheetAffineRotate(
+        fb,
+        swaggerArt.anger.tileset,
+        swaggerArt.anger.palette,
+        mark.x,
+        mark.y,
+        matrix,
+        0,
+        0,
+        matrix,
+        undefined,
+        false,
+      );
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "RATTATA";
+    const playerSpecies = playerToOpponent ? "RATTATA" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "RATTATA used" : "Foe RATTATA used",
+      "SWAGGER!",
       99,
     );
     return;
