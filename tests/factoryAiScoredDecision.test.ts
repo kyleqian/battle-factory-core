@@ -1585,3 +1585,110 @@ describe("AI_CV_SpAtkUp mask-7 fixture reproduction (docs/factory-ai-checkviabil
     expect(result.trace.draws).toHaveLength(4 /* setup */ + 1 /* tie */);
   });
 });
+
+const MOVE_COSMIC_POWER_MASK7 = 322; // EFFECT_COSMIC_POWER
+const MOVE_CALM_MIND_MASK7 = 347; // EFFECT_CALM_MIND
+
+// docs/factory-ai-checkviability-ground-truth.md §22.2/§22.3's four fixtures
+// (tools/battle-lab/mechanic-factory-ai-cv-spdefup-{cosmicpower,calmmind}-
+// {reach,control}-off.json) -- the ninth CBM-blocked pair, reproduced
+// through the REAL mask-7 dispatcher end to end now that AI_CBM_CosmicPower,
+// AI_CBM_CalmMind, and the shared AI_CV_SpDefUp are all ported. §18.3's own
+// Anorith/Machamp HP-banded last-used-move recipe reused verbatim (doc
+// §22.2): opponent (AI_USER) = Anorith (Battle Armor blocks Cmd_critcalc's
+// own Random() call), target (player) = Machamp (single ability Guts) --
+// same species pairing as the DefenseUp/SpAtkUp blocks above. Gate F's own
+// polarity inversion (doc §22.1) flips the reach/control move-to-name
+// assignment vs DefenseUp's own: here Seismic Toss (physical, IN the list)
+// is the CONTROL fixture (Gate F now jumps straight to ScoreDown2, a fully
+// deterministic zero-draw path) and Dragon Rage (non-physical, NOT in the
+// list) is the REACH fixture (falls through to DRAW SITE 4) -- the exact
+// opposite of DefenseUp's own naming, per §22.2's own explicit warning
+// against copying DefenseUp's move-to-name assignment blind. Same "4 clean
+// check-viability draws" policy-own-draws model the DefenseUp block above
+// established: the oracle's own live window totals (§22.3: reach 14/13,
+// control 8/8 cross-seed) include extra per-slot Random() calls outside
+// chooseFactoryAiScoredDecision's own scope plus the still-unresolved
+// "5-6, not 4" anomaly (§18.4/§22.3-22.4) this port does not model -- a
+// documented subset, same relationship every prior HP-banded/last-move pair
+// (DefenseUp/AccuracyDown) already established, not a mismatch.
+describe("AI_CV_SpDefUp mask-7 fixture reproduction (docs/factory-ai-checkviability-ground-truth.md §22.2/§22.3)", () => {
+  function anorithAttacker(hp: number): FactoryAiScoredBattlerView {
+    return Object.freeze({
+      types: ["TYPE_ROCK", "TYPE_BUG"] as const,
+      attack: 115, defense: 70, spAttack: 60, spDefense: 70, speed: 95, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp, maxHp: 120,
+    });
+  }
+  function machampTarget(lastUsedMoveId: number): FactoryAiScoredTargetView {
+    return Object.freeze({
+      species: 68,
+      types: ["TYPE_FIGHTING", "TYPE_FIGHTING"] as const,
+      attack: 150, defense: 100, spAttack: 85, spDefense: 105, speed: 75, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp: 165, maxHp: 165, ability: "ABILITY_GUTS", knownAbility: null,
+      lastUsedMoveId,
+    });
+  }
+  function spDefUpView(
+    moveId: number,
+    attacker: FactoryAiScoredBattlerView,
+    target: FactoryAiScoredTargetView,
+  ): FactoryAiScoredView {
+    return Object.freeze({
+      schema: "factory-ai-scored-view/v1",
+      mode: "factory-level-50-singles",
+      active: Object.freeze({ aiBattler: 1 as const, targetBattler: 0 as const }),
+      factory: Object.freeze({ levelMode: 0 as const, battleMode: 0 as const, factoryWinStreak: 28, trainerOpponentId: 222 }),
+      moves: [moveId, moveId, moveId, moveId] as const,
+      attacker,
+      target,
+    });
+  }
+  function phaseDraws(result: ReturnType<typeof chooseFactoryAiScoredDecision>, phase: "check-bad-move" | "try-to-faint" | "check-viability") {
+    return result.trace.draws.filter((d) => "phase" in d && d.phase === phase);
+  }
+
+  it.each([
+    ["CosmicPower", MOVE_COSMIC_POWER_MASK7],
+    ["CalmMind", MOVE_CALM_MIND_MASK7],
+  ])("%s reach fixture (Dragon Rage last, Anorith 80/120 = 66.7%%): Gate F NOT in the physical list -- falls through to DRAW SITE 4, exactly 4 check-viability draws, zero CBM/TryToFaint draws", (_label, moveId) => {
+    const view = spDefUpView(moveId, anorithAttacker(80), machampTarget(MOVE_DRAGON_RAGE_LAST));
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 1, calls: 0 } });
+    expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+    expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+    const cvDraws = phaseDraws(result, "check-viability");
+    expect(cvDraws).toHaveLength(4);
+    expect(cvDraws.every((d) => "kind" in d && d.kind === "sp-def-up-roll-4")).toBe(true);
+  });
+
+  it.each([
+    ["CosmicPower", MOVE_COSMIC_POWER_MASK7],
+    ["CalmMind", MOVE_CALM_MIND_MASK7],
+  ])("%s control fixture (Seismic Toss last, Anorith 70/120 = 58.3%%): Gate F IS in the physical list -- INVERTED vs DefenseUp, jumps straight to ScoreDown2, deterministic ZERO check-viability draws", (_label, moveId) => {
+    const view = spDefUpView(moveId, anorithAttacker(70), machampTarget(MOVE_SEISMIC_TOSS_LAST));
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 1, calls: 0 } });
+    expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+    expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+    expect(phaseDraws(result, "check-viability")).toHaveLength(0);
+    expect(result.trace.draws).toHaveLength(4 /* setup */ + 1 /* tie */);
+  });
+
+  it("CosmicPower and CalmMind produce numerically identical draw counts for the same reach fixture (neither's own extra raised stat affects Dragon Rage's fixed damage or AI_CV_SpDefUp's own gates, doc §22.3)", () => {
+    const reachCosmic = chooseFactoryAiScoredDecision({
+      view: spDefUpView(MOVE_COSMIC_POWER_MASK7, anorithAttacker(80), machampTarget(MOVE_DRAGON_RAGE_LAST)),
+      request: fourSlotRequest,
+      rng: { value: 1, calls: 0 },
+    });
+    const reachCalm = chooseFactoryAiScoredDecision({
+      view: spDefUpView(MOVE_CALM_MIND_MASK7, anorithAttacker(80), machampTarget(MOVE_DRAGON_RAGE_LAST)),
+      request: fourSlotRequest,
+      rng: { value: 1, calls: 0 },
+    });
+    expect(reachCalm.trace.draws).toHaveLength(reachCosmic.trace.draws.length);
+    expect(phaseDraws(reachCalm, "check-viability")).toHaveLength(phaseDraws(reachCosmic, "check-viability").length);
+  });
+});

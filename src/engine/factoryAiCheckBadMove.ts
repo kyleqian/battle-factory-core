@@ -56,7 +56,18 @@
  * below), the seventh and eighth CBM-blocked pairs' own CBM halves, with
  * `AI_CV_SpeedUp`/`AI_CV_SpAtkUp` (doc §20/§21) -- byte-for-byte the same
  * bare 2-instruction `MAX_STAT_STAGE` shape as `AI_CBM_AttackUp`/
- * `AI_CBM_DefenseUp` with `STAT_SPEED`/`STAT_SPATK` swapped in.
+ * `AI_CBM_DefenseUp` with `STAT_SPEED`/`STAT_SPATK` swapped in; and
+ * `EFFECT_COSMIC_POWER`/`EFFECT_CALM_MIND` -> `AI_CBM_CosmicPower`/
+ * `AI_CBM_CalmMind` (`:576-579`/`:590-593`, `runCbmCosmicPower`/
+ * `runCbmCalmMind` below, doc §22.1), the ninth CBM-blocked pair's own CBM
+ * half -- unlike every stat-UP handler above, these are TWO SEPARATE
+ * dual-stat handlers (the `AI_CBM_BulkUp`/`AI_CBM_DragonDance` shape, §18.1),
+ * each checking both stats the move raises (`-10` first stat, `-8` second),
+ * not aliases of each other or of the also-dispatched-but-not-ported-here
+ * single-stat `AI_CBM_SpDefUp` (`EFFECT_SPECIAL_DEFENSE_UP(_2)`'s own CBM
+ * target, doc §22.1 -- out of this pair's scope, still an unsupported
+ * branch). Both converge with `EFFECT_SPECIAL_DEFENSE_UP(_2)` on the single
+ * shared `AI_CV_SpDefUp` CV handler (doc §22).
  */
 import movesData from "../data/gen/moves.json" with { type: "json" };
 import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
@@ -214,6 +225,12 @@ export type FactoryAiCheckBadMoveAttacker = Readonly<{
    * `speedStage` above.
    */
   spAtkStage?: number;
+  /**
+   * AI_USER's own SPECIAL DEFENSE stat stage, 0..12 -- `AI_CBM_CosmicPower`/
+   * `AI_CBM_CalmMind`'s own second MAX_STAT_STAGE gate (doc §22.1). Optional,
+   * same default/rationale as `speedStage`/`spAtkStage` above.
+   */
+  spDefStage?: number;
 }>;
 
 export type FactoryAiCheckBadMoveDraw = Readonly<{
@@ -539,6 +556,37 @@ function runCbmSpAtkUp(attackerSpAtkStage: number): number {
   return attackerSpAtkStage === MAX_STAT_STAGE ? -10 : 0;
 }
 
+/**
+ * `AI_CBM_CosmicPower` (`data/battle_ai_scripts.s:576-579`, doc §22.1):
+ *
+ * ```
+ * AI_CBM_CosmicPower:
+ *     if_stat_level_equal AI_USER, STAT_DEF, MAX_STAT_STAGE, Score_Minus10
+ *     if_stat_level_equal AI_USER, STAT_SPDEF, MAX_STAT_STAGE, Score_Minus8
+ *     end
+ * ```
+ *
+ * `AI_CBM_BulkUp`'s own dual-stat shape (checks the user's own DEF then
+ * SPDEF, sequentially, no interaction between the two checks) applied to
+ * `Cosmic Power`'s own two raised stats -- a genuinely separate handler
+ * (it inlines its own DEF check rather than `goto AI_CBM_DefenseUp`), but
+ * composes `runCbmDefenseUp` for that identical first check exactly as
+ * `runCbmBulkUp` composes `runCbmAttackUp` above.
+ */
+function runCbmCosmicPower(attackerDefStage: number, attackerSpDefStage: number): number {
+  return runCbmDefenseUp(attackerDefStage) + (attackerSpDefStage === MAX_STAT_STAGE ? -8 : 0);
+}
+
+/**
+ * `AI_CBM_CalmMind` (`:590-593`, doc §22.1) -- same dual-stat shape as
+ * `AI_CBM_CosmicPower` above, `STAT_SPATK` then `STAT_SPDEF` (`Calm Mind`'s
+ * own two raised stats, not `Cosmic Power`'s DEF+SPDEF). Composes
+ * `runCbmSpAtkUp` for the first check.
+ */
+function runCbmCalmMind(attackerSpAtkStage: number, attackerSpDefStage: number): number {
+  return runCbmSpAtkUp(attackerSpAtkStage) + (attackerSpDefStage === MAX_STAT_STAGE ? -8 : 0);
+}
+
 export function typeMultiplierTenths(attackingType: string, defendingTypes: readonly [string, string]): number {
   const distinct = defendingTypes[0] === defendingTypes[1] ? [defendingTypes[0]] : defendingTypes;
   let mult = 10;
@@ -757,6 +805,36 @@ export function runCheckBadMovePreamble(input: Readonly<{
       rng,
       draws: Object.freeze(draws),
       scoreDelta: runCbmSpAtkUp(input.attacker.spAtkStage ?? DEFAULT_STAT_STAGE),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_COSMIC_POWER -> AI_CBM_CosmicPower,
+  // the ninth CBM-blocked pair's own CBM half (doc §22) -- a separate
+  // dual-stat handler (DEF then SPDEF), not an alias of AI_CBM_DefenseUp.
+  if (move.effect === "EFFECT_COSMIC_POWER") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmCosmicPower(
+        input.attacker.defStage,
+        input.attacker.spDefStage ?? DEFAULT_STAT_STAGE,
+      ),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_CALM_MIND -> AI_CBM_CalmMind, the
+  // ninth CBM-blocked pair's other CBM half (doc §22) -- a separate
+  // dual-stat handler (SPATK then SPDEF), not an alias of AI_CBM_SpAtkUp.
+  if (move.effect === "EFFECT_CALM_MIND") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmCalmMind(
+        input.attacker.spAtkStage ?? DEFAULT_STAT_STAGE,
+        input.attacker.spDefStage ?? DEFAULT_STAT_STAGE,
+      ),
     });
   }
 
