@@ -14,6 +14,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > entry 468's animation items are the animation supervisor's backlog now.
 
 ---
+## 486 — [SUPERVISOR SESSION START 2026-07-26 ~21:55] orient + animation fold
+
+- **State:** folded `animation-main` into master at orient (fast-forward to
+  `f422a97` — their baseline merge of master plus 2 Knock Off commits:
+  `96dfd06` partial seam wiring, `f958878` player OAM transfer fix). Union
+  verified green: **230 files / 3124 tests**, `npm run build` clean, both
+  oracle services fresh (`check-oracle-freshness.sh` PASS). The animation
+  supervisor session is LIVE concurrently (started 21:50); commits it lands
+  after `f422a97` fold next orient.
+- **Session plan (paired rounds):** main lane consumes the banked seam §9
+  prep (register the 3 ENDEAVOR opcodes, then wire window 3
+  `turn5-rockslide.json` attack branch per `docs/presentation-seam-scout.md`
+  §9.4); side lane prep-scouts §24 EvasionUp/EvasionDown ground truth (the
+  largest remaining CV handler, 8 draw sites). Then port §24, stage the
+  weather trio (§25, incl. the CBM weather-entry verification §5 flagged),
+  and continue down entry 485's Next list as rounds allow.
+
+---
 ## 485 — [SUPERVISOR WIND-DOWN 2026-07-26 ~21:20] session summary
 
 - **State:** tree committed and green at **230 files / 3123 tests**, build
@@ -111,69 +129,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   independent (its own supervisor, entry 481, archived).
 - **Notes:** no ISSUES.md changes (none were open on this pair). No
   PAPERCUTS this step.
-
----
-## 483 — [2026-07-26] SpDefUp/CosmicPower/CalmMind CBM+CV pair ported (§22)
-
-- **State:** tree committed and green at **226 files / 3081 tests** (+27
-  over entry 482's 3054), build green (`tsc -b && vite build`). Census
-  **unchanged at 92/214 effects, 187/355 moves, 150/276 Factory-L50,
-  1884/2957 weighted, all 32 self-checks pass** — this AI-decision port
-  touches a wholly separate subsystem (`battle_ai_scripts.s`) from the one
-  the census measures (`battle_scripts_1.s` effect execution), so no
-  refresh was expected or needed; reran `tools/report/executable-frontier-
-  census.ts` to confirm (file byte-identical, no diff). `executableFrontier
-  Ratchet.test.ts`'s per-module barrier counts **unmoved** (no new
-  unsupported-branch barrier — this step only widened reachability of four
-  effects already present in each file's own table-lookup fallback set).
-- **Did:** landed §22's full pair per its exact ground truth (`docs/factory-
-  ai-checkviability-ground-truth.md` §22, merged last round at `c5d0848`).
-  (1) `factoryAiCheckBadMove.ts`: added `runCbmCosmicPower`/`runCbmCalmMind`
-  — two genuinely SEPARATE dual-stat handlers (the `AI_CBM_BulkUp`/
-  `DragonDance` shape, §18.1 precedent), not aliases of each other or of
-  `AI_CBM_DefenseUp`/`AI_CBM_SpAtkUp`: `CosmicPower` composes
-  `runCbmDefenseUp` (DEF, -10) + inlines SPDEF (-8); `CalmMind` composes
-  `runCbmSpAtkUp` (SPATK, -10) + inlines SPDEF (-8) — exactly mirroring how
-  `runCbmBulkUp` already composes `runCbmAttackUp`. Added `spDefStage?`
-  to `FactoryAiCheckBadMoveAttacker` (same optional/`DEFAULT_STAT_STAGE`
-  convention as `speedStage`/`spAtkStage`). (2) `factoryAiCheckViability.ts`:
-  added `runCvSpDefUp`, the single shared CV target for all four dispatching
-  effects (`EFFECT_SPECIAL_DEFENSE_UP(_2)`/`EFFECT_COSMIC_POWER`/
-  `EFFECT_CALM_MIND`) — byte-for-byte `AI_CV_DefenseUp`'s own gate topology
-  and odds (`STAT_DEF`→`STAT_SPDEF`) with Gate F's **`if_in_bytes` polarity
-  INVERTED** vs `DefenseUp`'s own `if_not_in_bytes` (re-verified against the
-  raw assembly per §22.1, not copied from the sibling) — reused the existing
-  `AI_CV_DEFENSE_UP_PHYSICAL_TYPES` set directly rather than duplicating an
-  identical byte list under a second name. (3) Tier-1 tests: 10 CBM tests
-  (both handlers' independent/combined/omitted-field gates), 12 CV
-  handler-level tests (Gates A-F, DRAW SITES 1-5, Gate F's inverted verdict
-  proven on the same Seismic Toss/Dragon Rage moves `DefenseUp`'s own tests
-  use, plus a pass-through barrier check), 5 mask-7
-  `chooseFactoryAiScoredDecision` end-to-end reproduction tests (Anorith/
-  Machamp, both dispatch moves × both reach/control fixtures, policy-own-
-  draws model: reach = clean 4 `sp-def-up-roll-4` draws, control =
-  deterministic 0, CosmicPower≡CalmMind draw-count parity) — 27 tests
-  total, following the SpeedUp/SpAtkUp (§20/§21, entry 478) port pattern
-  exactly. The oracle's own live window totals (control 8/8, reach 14/13,
-  §22.3) are a documented superset (extra per-slot draws outside this
-  engine's own AI-decision scope, plus the still-unresolved "5-6 not 4"
-  anomaly §18.4/§22.3-22.4 first flagged for `DefenseUp` and now confirmed
-  recurring here) — same subset relationship every prior HP-banded/last-
-  move pair (`DefenseUp`/`AccuracyDown`) already established, not a
-  mismatch; not independently re-verified against the live oracle this
-  round (that verification is the already-merged, supervisor-rerun §22.6
-  ground truth work, not this porting step).
-- **Next:** LightScreen/Reflect/EvasionUp/EvasionDown/weather-trio pairs
-  (the last 8 of 22 CV handlers, a side-lane scout is staging §23
-  concurrently); §19.5's unstaged AccuracyDown sites 2-6 (need mixed
-  movesets); entry 476's §18 5-6-draw window discrepancy (probe candidate,
-  sRandCount attribution — now a 2-handler-wide anomaly per this step);
-  ENDTURN_ITEMS2 after Yawn/Thrash. DRAW SITE 1/2/3 + site 5's empty-last-
-  move sub-case remain documented recipe-only for `SpDefUp` too (same
-  deferred status as every prior pair). Seam — turn-4
-  `anchorOpponentAfterTurn4Hp` staging gap and seam-scout §9 items remain
-  carried from entry 468. Animation program is independent (its own
-  supervisor, entry 481).
-- **Notes:** no ISSUES.md changes (none were open on this pair). No
-  PAPERCUTS this step.
-
