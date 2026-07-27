@@ -962,7 +962,8 @@ describe("runBattleEndTurnOrchestration (BattleTurnPassed equivalent)", () => {
   );
 
   describe(
-    "(g) ENDTURN_ITEMS2 (ItemBattleEffects(ITEMEFFECT_MOVE_END, battler, TRUE), docs/yawn-thrash-endturn-design.md §5, Rung 3)",
+    "(g) ENDTURN_ITEMS2 (ItemBattleEffects(ITEMEFFECT_NORMAL, battler, TRUE) -- SAME caseID as ITEMS1, only moveTurn "
+      + "differs, battle_util.c:1500-1505 -- docs/yawn-thrash-endturn-design.md §5, Rung 3)",
     () => {
       describe("moveTurn gate: no-double-fire regression, one per §5's must-gate row", () => {
         it("Leftovers heals exactly once per tick (ITEMS1 only) -- an ungated ITEMS2 call would heal a second time", () => {
