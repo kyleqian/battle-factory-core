@@ -9,8 +9,10 @@
  * handlers) falls straight through to the trailing `end` with a genuine,
  * complete zero score / zero draws -- not a stub for that path. A move
  * whose effect DOES have an entry halts with a named
- * `"factory-ai-check-viability"` unsupported-branch barrier -- except five,
- * dispatched before that barrier check: `EFFECT_SPEED_DOWN(_2)` (`AI_CV_SpeedDown`,
+ * `"factory-ai-check-viability"` unsupported-branch barrier -- except the
+ * following (all 22 reachable handlers per
+ * `docs/factory-ai-checkviability-ground-truth.md` §5's table, dispatched
+ * before that barrier check): `EFFECT_SPEED_DOWN(_2)` (`AI_CV_SpeedDown`,
  * `runCvSpeedDown` below, `data/battle_ai_scripts.s:1142-1152`,
  * `docs/factory-ai-checkviability-ground-truth.md` §6), `EFFECT_PURSUIT`
  * (`AI_CV_Pursuit`, `runCvPursuit` below, `:2018-2036`, doc §11.1),
@@ -79,16 +81,23 @@
  * reusing the shared `runCvStatDown` body), and `EFFECT_SUNNY_DAY`/
  * `EFFECT_HAIL`/`EFFECT_RAIN_DANCE` (`AI_CV_SunnyDay`/`AI_CV_Hail`/
  * `AI_CV_RainDance`, `runCvSunnyDay`/`runCvHail`/`runCvRainDance` below,
- * `:2060-2075`/`:2261-2276`/`:2037-2058`, doc §25 -- the twelfth and final
- * CBM-blocked pair's own CV third, and the last 3 of the 22-handler program.
- * `SunnyDay`/`Hail` are exact twins (1 HP gate + a 3-way `get_weather` chain
- * over the OTHER three weather values, zero `if_random_less_than`);
- * `RainDance` genuinely diverges with its own extra Speed-order/Swift-Swim
- * bypass prologue and Rain-Dish tail bonus (doc §25.2/§25.3), independently
- * re-derived per the doc's own standing divergence-check rule rather than
- * assumed identical to its siblings). The other ~69 are not ported this
- * round (a separate, much larger phased body of work per the audit's §3),
- * so a move that reaches one of THOSE must not silently score zero.
+ * `:2060-2075`/`:2261-2276`/`:2037-2058`, doc §25 -- the twelfth CBM-blocked
+ * pair's own CV third. `SunnyDay`/`Hail` are exact twins (1 HP gate + a
+ * 3-way `get_weather` chain over the OTHER three weather values, zero
+ * `if_random_less_than`); `RainDance` genuinely diverges with its own extra
+ * Speed-order/Swift-Swim bypass prologue and Rain-Dish tail bonus (doc
+ * §25.2/§25.3), independently re-derived per the doc's own standing
+ * divergence-check rule rather than assumed identical to its siblings), and
+ * `EFFECT_SPEED_DOWN_HIT` (`AI_CV_SpeedDownFromChance`,
+ * `runCvSpeedDownFromChance` below, `:1136-1141`, doc §5's table row/§4's
+ * footnote/§10 -- the 22nd and last reachable handler, completing this
+ * program. Zero `if_random_less_than` sites of its own: a plain `if_move`
+ * literal-ID match against 3 of its 6 covered moves that `goto`s straight
+ * into `AI_CV_SpeedDown`'s own label -- reused verbatim via `runCvSpeedDown`,
+ * not reimplemented -- with the other 3 moves falling through to a genuine
+ * zero). The other ~68 are not ported this round (a separate, much larger
+ * phased body of work per the audit's §3), so a move that reaches one of
+ * THOSE must not silently score zero.
  */
 import {
   AI_WEATHER_HAIL,
@@ -602,6 +611,55 @@ function runCvSpeedDown(input: Readonly<{
   const succeeded = rollDraw.randomValue % 256 >= 70;
   draws.push(Object.freeze({ ...rollDraw, kind: "speed-down-roll" as const, succeeded }));
   return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: succeeded ? 2 : 0 });
+}
+
+const MOVE_ICY_WIND = 196;
+const MOVE_ROCK_TOMB = 317;
+const MOVE_MUD_SHOT = 341;
+
+/**
+ * `AI_CV_SpeedDownFromChance` (`data/battle_ai_scripts.s:1136-1141`,
+ * `docs/factory-ai-checkviability-ground-truth.md` §5's table row, §4's
+ * footnote, §10's porter note):
+ *
+ * ```
+ * AI_CV_SpeedDownFromChance:
+ *     if_move MOVE_ICY_WIND, AI_CV_SpeedDown
+ *     if_move MOVE_ROCK_TOMB, AI_CV_SpeedDown
+ *     if_move MOVE_MUD_SHOT, AI_CV_SpeedDown
+ *     end
+ * ```
+ *
+ * `EFFECT_SPEED_DOWN_HIT` covers 6 executable moves (`MOVE_ICY_WIND`,
+ * `MOVE_ROCK_TOMB`, `MOVE_MUD_SHOT`, `MOVE_BUBBLE_BEAM`, `MOVE_CONSTRICT`,
+ * `MOVE_BUBBLE`). The handler's own body has ZERO `if_random_less_than`
+ * sites and reads nothing but the literal move ID currently under
+ * consideration (`if_move`, a plain `u16` compare, `Cmd_if_move` --
+ * NOT a read of any effect-chance/secondary-effect-probability datum
+ * despite the "FromChance" name; that name describes the in-game MOVE
+ * CATEGORY the 6 dispatching moves belong to (a chance-on-hit secondary
+ * effect), not anything this handler itself inspects -- re-derived from
+ * the raw assembly, not assumed from the name). Exactly 3 of the 6
+ * (`ICY_WIND`/`ROCK_TOMB`/`MUD_SHOT`) `goto` into `AI_CV_SpeedDown`'s OWN
+ * label -- the real ROM's control flow lands inside that handler's own
+ * instructions, not a copy -- so this port calls `runCvSpeedDown` directly
+ * for those three, unmodified (no duplicated gate/roll logic). The other 3
+ * (`BUBBLE_BEAM`/`CONSTRICT`/`BUBBLE`) fall through the un-matched `if_move`
+ * chain straight to `end`: a genuine, deterministic zero score/zero draws
+ * for every battle state, not a stub.
+ */
+function runCvSpeedDownFromChance(input: Readonly<{
+  rng: BattleRngState;
+  moveId: number;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  if (input.moveId === MOVE_ICY_WIND || input.moveId === MOVE_ROCK_TOMB || input.moveId === MOVE_MUD_SHOT) {
+    return runCvSpeedDown(input);
+  }
+  return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: 0 });
 }
 
 /**
@@ -2429,6 +2487,23 @@ export function runCheckViability(input: Readonly<{
       rng: speedDown.rng,
       draws: speedDown.draws,
       scoreDelta: speedDown.scoreDelta,
+    });
+  }
+
+  if (move.effect === "EFFECT_SPEED_DOWN_HIT") {
+    const speedDownFromChance = runCvSpeedDownFromChance({
+      rng: input.rng,
+      moveId: input.moveId,
+      attacker: input.attacker,
+      target: input.target,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: speedDownFromChance.rng,
+      draws: speedDownFromChance.draws,
+      scoreDelta: speedDownFromChance.scoreDelta,
     });
   }
 

@@ -94,7 +94,10 @@
  * byte-for-byte identical 3-instruction bodies (`get_weather; if_equal
  * <OWN_WEATHER>, Score_Minus8; end`), converging with
  * `factoryAiCheckViability.ts`'s `AI_CV_RainDance`/`AI_CV_SunnyDay`/
- * `AI_CV_Hail` (doc §25) -- completes all 22 reachable `AI_CV_*` handlers.
+ * `AI_CV_Hail` (doc §25) -- the last of the twelve CBM-blocked pairs. The
+ * 22nd and last reachable CV handler overall, `AI_CV_SpeedDownFromChance`
+ * (doc §5's table), is CV-only-reachable and has no CBM counterpart, so it
+ * has no entry in this file.
  */
 import movesData from "../data/gen/moves.json" with { type: "json" };
 import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
