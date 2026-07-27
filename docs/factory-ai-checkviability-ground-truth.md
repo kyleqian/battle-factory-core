@@ -2340,7 +2340,7 @@ scenario (§9, §11.5, §12.1, §13.4, §14.6, §15.5, §16.5, §17.7) unchanged
 still
 green. **Run twice this session, ALL PASS both times.**
 
-## 19. 2026-07-26 addendum #9: `AI_CBM_AccDown` + `AI_CV_AccuracyDown` — the largest remaining pair (7 `if_random_less_than` sites), 2 of 7 live-verified in one fixture pair, 5 documented recipe-only
+## 19. 2026-07-26 addendum #9: `AI_CBM_AccDown` + `AI_CV_AccuracyDown` — the largest remaining pair (7 `if_random_less_than` sites), 3 of 7 live-verified across two fixture pairs (§19.3/§19.4 original, §19.5 DRAW SITE 2 added by a follow-up side-lane session), 4 documented recipe-only
 
 Seventh follow-up scout session (side lane, Battle Scene OFF), same
 no-`src/`-changes contract. Goal: bank ground truth for the largest
@@ -2611,32 +2611,70 @@ precondition's own necessary cost, not part of the handler, same pattern
 `Cmd_get_ability` appears in neither table, confirming both species'
 single-ability kits close the §14.2 confound as designed.
 
-### 19.5 The 5 unexercised draw sites — recipes, not fixtures, for a future porter
+### 19.5 DRAW SITE 2 — live-staged and verified this follow-up session; 4 sites remain recipe-only
 
-Sites 2/3/4/5/6 (`:1206/1210/1214/1218/1222`) share a structural obstacle
-none of this doc's "identical 4 slots" fixtures can solve alone: **every
-one of them needs the SAME opponent to use two structurally different real
-moves across two turns** (a status/stage-setting move, then the
-`AccuracyDown` candidate under test) — which means a genuinely mixed
-moveset and a real AI *pick* between them, not a forced single legal
-choice. That is qualitatively harder than every fixture in this doc so far
-(all of which either force a single legal move via 4 identical slots, or
-read a state-independent species property) and was correctly out of this
-session's remaining budget after landing sites 1+7 live.
+Sites 3/4/5/6 (`:1210/1214/1218/1222`) share a structural obstacle none of
+this doc's "identical 4 slots" fixtures can solve alone: **every one of
+them needs the SAME opponent to use two structurally different real moves
+across two turns** (a status/stage-setting move, then the `AccuracyDown`
+candidate under test) — which means a genuinely mixed moveset and a real
+AI *pick* between them, not a forced single legal choice. That is
+qualitatively harder than every fixture in this doc so far (all of which
+either force a single legal move via 4 identical slots, or read a
+state-independent species property) and remains out of budget. **DRAW SITE
+2 does not share that obstacle** — it turned out to be gated purely on the
+**opponent's own** ACC stat stage, settable directly by the **player's**
+own actions with the opponent's moveset held at 4 identical
+`MOVE_SAND_ATTACK` slots throughout — and a follow-up side-lane session
+staged and live-verified it.
 
-- **DRAW SITE 2** (`:1206`, `score -2`, reached iff the **opponent's own**
-  ACC stat stage is already ≤ 4): stage the opponent's own ACC stage down
-  by 2 real hits *before* evaluating its `AccuracyDown` candidate — recipe:
-  turns 1-2, the **player** (not AI-gated) uses a real accuracy-lowering
-  move (e.g. `MOVE_SAND_ATTACK`) against the opponent twice (6→5→4); turn 3,
-  re-evaluate the opponent's own `AI_CV_AccuracyDown` candidate with Gate A
-  false (opponent HP still 100%, keep it undamaged to isolate this gate
-  alone) and Gate C now false (stage 4, not `>4`). No opponent-side status
-  moves needed — the opponent's moveset can stay all-4-identical
-  `MOVE_SAND_ATTACK` throughout, since it's the **player's** actions (not
-  the AI's own decision) that set the precondition. This is the cheapest of
-  the five remaining sites — a real future candidate, not attempted this
-  session for time.
+- **DRAW SITE 2** (`:1206`, `score -2`, reached iff the opponent's own ACC
+  stat stage is already ≤ 4) — **live-verified**, fixture pair
+  `mechanic-factory-ai-cv-accuracydown-accdown-{reach,control}-off.json`.
+  Opponent (`AI_USER`, under test) **Machamp** (68, single ability Guts),
+  all 4 slots `MOVE_SAND_ATTACK` (28), reused verbatim from 19.3/19.4.
+  Target (player, `AI_TARGET`) is **Pidgey** (16, single ability Keen Eye,
+  Normal/Flying) instead of Anorith — the recipe above (§19.5, prior
+  revision) under-specified one thing, corrected here with live evidence:
+  since the **player's own** move must itself be a real accuracy-lowering
+  hit against the opponent (to actually lower Machamp's ACC stage 6→5→4
+  over 2 turns), and the opponent's forced kit is ALSO all `MOVE_SAND_
+  ATTACK`, the opponent's own move reciprocally targets the player every
+  turn too — an unprotected target's own ACC stage would fall in step,
+  making the player's own later Sand Attack accuracy rolls against Machamp
+  probabilistic (a compounding, cross-turn version of 19.2's ordering
+  confound, found live while staging this site: an early Anorith-as-target
+  draft showed seed-dependent PP/HP drift from exactly this). **Fix**:
+  Pidgey closes the confound twice over — `MOVE_SAND_ATTACK` is Ground-type
+  and cannot touch a Flying-type target at all (type immunity, resolved
+  before any accuracy roll), and Keen Eye independently blocks any
+  accuracy-lowering effect from landing on its holder regardless of type
+  (`src/battle_script_commands.c:4144`, `Cmd_statbuffchange`'s own
+  `ability == ABILITY_KEEN_EYE && currStat == STAT_ACC` short-circuit) — so
+  the player's own Sand Attack against Machamp stays a deterministic 100%
+  hit both turns, and Machamp's own ACC stage falls 6→5→4 exactly on
+  schedule. 2 real executed turns (mash-button reps calibrated separately
+  per fixture — Sand Attack's own stat-change animation makes each button
+  rep "worth" less real-turn progress than Splash's animation-free turns,
+  confirmed live by testing both fixtures at several tail lengths up to
+  2000 frames and finding a stable "exactly 2 PP used" plateau at 40 reps
+  for the reach fixture and 30 reps for the control — an uncalibrated
+  shared rep count silently let an early control draft execute a genuine
+  3rd real turn instead of stopping at the reach fixture's own phantom 3rd
+  decision, breaking turn-count parity between the twins) bring Machamp's
+  ACC to 4 (Gate C now false) while both battlers' HP stay at 100%
+  throughout (0-power moves both sides, cleanly skipping DRAW SITE 1 via
+  Gates A/B same as 19.3/19.4). The phantom 3rd-turn re-decision then
+  reaches the `:1206 if_random_less_than 80` roll once per identical
+  `MOVE_SAND_ATTACK` slot. Live ledger (both seeds, both reruns
+  deterministic): reach fixture (frame 0→1500) — PP used 2, opponent/target
+  HP 165→165/115→115 (both fixtures), total `Random()` calls **20** (both
+  seeds); control fixture (target `MOVE_SPLASH` instead, frame 0→1300) — PP
+  used 2, total `Random()` calls **14** (both seeds). Delta **+6** matches
+  the analytical prediction exactly: +4 `Cmd_if_random_less_than` (DRAW
+  SITE 2, N=4 slots × 1 draw) + 2 `Cmd_accuracycheck` (the player's own 2
+  real Sand Attack hits landing on Machamp, absent from the control's 2
+  Splash turns).
 - **DRAW SITE 3** (`:1210`, `score +2`, target `STATUS1_TOXIC_POISON`):
   needs a real `EFFECT_TOXIC` move to land on the target from the
   opponent's own moveset — since the opponent's kit must carry BOTH a Toxic
@@ -2668,26 +2706,30 @@ session's remaining budget after landing sites 1+7 live.
    AccDown` and `AI_CV_AccuracyDown`, every one of the 7 draw sites' real
    preconditions and odds, the `ABILITY_KEEN_EYE` divergence from every
    other stat-down CBM handler in this doc (confirmed live, not assumed),
-   the `EFFECT_ACCURACY_DOWN_2` vestigial-constant finding, and a
-   live-verified twin fixture proving 2 of the 7 sites end-to-end (the
-   `N-slots × 2-sites = 8` clean shape).
-2. **A new confound class named for future porters** (§19.2): a dispatch
-   move whose own effect changes the SAME battler that also deals the
-   turn's real, accuracy-checked damage needs an explicit move-order
-   argument (Speed comparison), not just "pick any two established
-   species" — the first fixture in this doc to need one.
-3. **5 explicit, citation-backed recipes** (§19.5) for a future porter to
-   pick up directly, each naming exactly why it needs more than this
-   session's "identical 4 slots" trick (a real, unforced AI pick between
-   two structurally different moves) rather than leaving them as a bare
-   "not staged" note.
+   the `EFFECT_ACCURACY_DOWN_2` vestigial-constant finding, and live-verified
+   fixtures proving 3 of the 7 sites end-to-end (the original `N-slots ×
+   2-sites = 8` twin, plus DRAW SITE 2's own pair).
+2. **Two named confound classes for future porters**: §19.2's single-turn
+   ordering bug (a dispatch move whose own effect changes the SAME battler
+   that also deals the turn's real, accuracy-checked damage needs an
+   explicit move-order argument) and this follow-up session's **cross-turn**
+   variant (§19.5, DRAW SITE 2) — staging a multi-turn precondition with the
+   SAME move family on both sides needs the *receiving* battler protected
+   (type immunity and/or a blocking ability) from the reciprocal effect, or
+   the precondition-setting turns themselves become probabilistic.
+3. **4 explicit, citation-backed recipes** (§19.5) remaining for a future
+   porter to pick up directly, each naming exactly why it needs more than
+   this session's "identical 4 slots" trick (a real, unforced AI pick
+   between two structurally different moves) rather than leaving them as a
+   bare "not staged" note.
 
 ### 19.7 Verify script status
 
 `tools/probe/verify-factory-ai-checkviability-ground-truth.ts` extended
-this session with `AI_CV_AccuracyDown`'s 2 fixtures (19.3/19.4) — every
-prior scenario (§9, §11.5, §12.1, §13.4, §14.6, §15.5, §16.5, §17.7, §18.7)
-unchanged and still green. **Run twice this session, ALL PASS both times.**
+this session with `AI_CV_AccuracyDown`'s original 2 fixtures (19.3/19.4);
+extended again by a follow-up side-lane session with DRAW SITE 2's own
+reach/control pair (19.5) — every prior scenario unchanged and still green.
+**Run twice this session, ALL PASS both times.**
 
 ## 20. 2026-07-26 addendum #10: `AI_CBM_SpeedUp` + `AI_CV_SpeedUp` — the third stat-UP pair, and the first whose gate is relative Speed, not the opponent's own HP/stat-stage
 
