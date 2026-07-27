@@ -50,6 +50,7 @@ import type { BattleScriptBattlerId } from "./battleScriptEvents.ts";
 import {
   resolveBattleScriptBattlerHoldEffect,
   withBattleScriptPartyMemberStatus1,
+  type BattleScriptRulesBattlerState,
   type BattleScriptRulesContext,
   type BattleScriptSideTimerState,
 } from "./battleScriptRulesContext.ts";
@@ -1284,8 +1285,55 @@ function computeBattlerOrder(rulesContext: BattleScriptRulesContext): readonly B
   return Object.freeze(order);
 }
 
+/**
+ * `TurnValuesCleanUp(FALSE)`'s full per-battler `ProtectStruct` memset
+ * (`battle_main.c:4857-4874`, doc §1.3/§2.4): every field this engine has a
+ * home for, reset to zero for all `battlersCount` battlers.
+ * `isFirstTurn`/`rechargeTimer` decrements (`DisableStruct`, a different
+ * struct) and the unconditional substitute-status2 sync are `var0`-adjacent
+ * source side effects out of this function's scope -- see
+ * `docs/counter-retaliation-design.md` §2.4/Out of scope.
+ */
+const PROTECT_STRUCT_CLEAR: Partial<BattleScriptRulesBattlerState> = Object.freeze({
+  protected: 0,
+  endured: 0,
+  chargingTurn: 0,
+  targetNotAffected: 0,
+  flag2Unknown: 0,
+  prlzImmobility: 0,
+  confusionSelfDmg: 0,
+  loveImmobility: 0,
+  bounceMove: 0,
+  stealMove: 0,
+  helpingHand: 0,
+  usedDisabledMove: 0,
+  usedTauntedMove: 0,
+  usedImprisonedMove: 0,
+  flinchImmobility: 0,
+  protectPhysicalDmg: 0,
+  protectPhysicalBattlerId: 0,
+  protectSpecialDmg: 0,
+  protectSpecialBattlerId: 0,
+});
+
+function clearProtectStructsForNextTurn(rulesContext: BattleScriptRulesContext): BattleScriptRulesContext {
+  let next = rulesContext;
+  for (let i = 0; i < next.battleTopology.battlersCount; i += 1) {
+    next = withBattler(next, i as BattleScriptBattlerId, PROTECT_STRUCT_CLEAR);
+  }
+  return next;
+}
+
 function mapFaintedActionsResult(result: BattleScriptFaintedActionsResult): BattleEndTurnResult {
-  if (result.kind === "no-fainted-battlers") return Object.freeze({ kind: "next-turn", state: result.state });
+  if (result.kind === "no-fainted-battlers") {
+    return Object.freeze({
+      kind: "next-turn",
+      state: Object.freeze({
+        ...result.state,
+        rulesContext: clearProtectStructsForNextTurn(result.state.rulesContext),
+      }),
+    });
+  }
   if (result.kind === "terminal") return Object.freeze({ kind: "terminal", state: result.state });
   if (result.kind === "resumed") return Object.freeze({ kind: "resumed", state: result.state });
   if (result.kind === "player-choice-required") {
@@ -1306,13 +1354,17 @@ function mapFaintedActionsResult(result: BattleScriptFaintedActionsResult): Batt
  * own `HandleFaintedMonActions`, already resolved to a real continuation
  * point) and before the next turn's decision boundary is computed.
  *
- * `TurnValuesCleanUp(TRUE)`'s only effect this engine can represent is
- * clearing each battler's `flinchImmobility` (`STATUS2_FLINCHED`);
- * `TurnValuesCleanUp(FALSE)`'s ProtectStruct-wide reset and
- * `HandleWishPerishSongOnTurnEnd` (no modeled Perish Song/Future Sight
- * state) are both out of this rung's modeled scope and are not applied --
- * callers that need a fresh `ProtectStruct` for the next turn must not rely
- * on this function for that yet.
+ * `TurnValuesCleanUp(TRUE)` (top of `BattleTurnPassed`, source `var0=TRUE`)
+ * clears only `protected`/`endured` and is not modeled as a separate step --
+ * this engine instead applies the full `ProtectStruct` memset once, at the
+ * position matching `TurnValuesCleanUp(FALSE)`'s call site (the *tail* of
+ * `BattleTurnPassed`, `battle_main.c:3974`, doc §1.3/§2.4), which is a
+ * strict superset of the `TRUE` clear and produces the same end state for
+ * every case this engine models (no rung yet needs the `TRUE`/`FALSE`
+ * split's mid-pass timing distinction -- see
+ * `docs/counter-retaliation-design.md` §2.2). `HandleWishPerishSongOnTurnEnd`
+ * (no modeled Perish Song/Future Sight state) stays out of this rung's
+ * modeled scope and is not applied.
  */
 export function runBattleEndTurnOrchestration(
   program: BattleScriptProgram,
@@ -1320,12 +1372,6 @@ export function runBattleEndTurnOrchestration(
   initialState: MachineState,
 ): BattleEndTurnResult {
   let state = initialState;
-  for (let i = 0; i < state.rulesContext.battleTopology.battlersCount; i += 1) {
-    const battler = i as BattleScriptBattlerId;
-    if (state.rulesContext.battlers[battler].flinchImmobility !== 0) {
-      state = Object.freeze({ ...state, rulesContext: withBattler(state.rulesContext, battler, { flinchImmobility: 0 }) });
-    }
-  }
 
   if (state.rulesContext.battleOutcome === 0) {
     const battlerOrder = computeBattlerOrder(state.rulesContext);

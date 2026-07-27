@@ -446,7 +446,7 @@ describe("source-shaped Battle Script rules context", () => {
 });
 
 describe("production status rules handler and execution seam", () => {
-  it("composes all 106 source-safe controls, source, multi-hit, cleanup, SETBYTE, BICBYTE, attackcanceler, hit-chain, move-end, jumpifbyte, jumpifword, jumpifhalfword, jumpifstatus3condition, orword, openpartyscreen, switchin, getexp, checkteamslost, statbuffchange, set-side-status, set-weather, damaging-weather, trycastformdatachange, ingrain/leechseed/wrap, removeitem, status-primary (SETEFFECTPRIMARY/JUMPIFSTATUS/JUMPIFTYPE/JUMPIFSIDEAFFECTING/JUMPIFCANTMAKEASLEEP, docs/status-cluster-ground-truth.md), and fixed-damage/TYPECALC2 (DMGTOLEVEL/PSYWAVEDAMAGEEFFECT/TYPECALC2/REMOVELIGHTSCREENREFLECT, docs/fixed-damage-cluster-ground-truth.md) handlers once", () => {
+  it("composes all 108 source-safe controls, source, multi-hit, cleanup, SETBYTE, BICBYTE, attackcanceler, hit-chain, move-end, jumpifbyte, jumpifword, jumpifhalfword, jumpifstatus3condition, orword, openpartyscreen, switchin, getexp, checkteamslost, statbuffchange, set-side-status, set-weather, damaging-weather, trycastformdatachange, ingrain/leechseed/wrap, removeitem, status-primary (SETEFFECTPRIMARY/JUMPIFSTATUS/JUMPIFTYPE/JUMPIFSIDEAFFECTING/JUMPIFCANTMAKEASLEEP, docs/status-cluster-ground-truth.md), fixed-damage/TYPECALC2 (DMGTOLEVEL/PSYWAVEDAMAGEEFFECT/TYPECALC2/REMOVELIGHTSCREENREFLECT, docs/fixed-damage-cluster-ground-truth.md), and Counter/Mirror Coat (COUNTERDAMAGECALCULATOR/MIRRORCOATDAMAGECALCULATOR, docs/counter-retaliation-design.md) handlers once", () => {
     const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts());
     expect(Object.keys(handlers).map(Number).sort((a, b) => a - b)).toEqual([
       0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12,
@@ -456,7 +456,7 @@ describe("production status rules handler and execution seam", () => {
       61, 62, 63, 65, 69, 70, 71, 73, 74, 76, 77, 78, 80, 81,
       82, 83, 84, 85, 86, 92, 97, 98, 100, 101, 102, 104,
       105, 106, 111, 115, 118, 125, 126, 127, 128, 131, 132, 137, 141, 146,
-      149, 150, 152, 153, 159, 160, 184, 187, 200, 213, 216, 231, 238, 248,
+      149, 150, 152, 153, 159, 160, 161, 162, 184, 187, 200, 213, 216, 231, 238, 248,
     ]);
   });
 

@@ -1371,6 +1371,111 @@ export const typecalc2OpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRules
 };
 
 /**
+ * Cmd_counterdamagecalculator (battle_script_commands.c:7943-7966): Counter's
+ * own three-gate success check, reading THIS battler's (the Counter user's,
+ * `gBattlerAttacker`) own ProtectStruct copy -- `protectPhysicalDmg`/
+ * `protectPhysicalBattlerId`, written by `Cmd_datahpupdate`
+ * (`createDatahpupdateOpcodeHandler` above), cleared once per turn
+ * (`docs/counter-retaliation-design.md` §1.4/§4 step 4). All three gates
+ * must hold: (a) `protectPhysicalDmg != 0` -- something hit this battler
+ * physically since the last per-turn clear; (b) the recorded hitter's side
+ * differs from this battler's own side; (c) that recorded hitter is still
+ * alive. Source computes `sideTarget = GetBattlerSide(physicalBattlerId)`
+ * unconditionally, even in the zeroed post-clear state, but the `&&` chain
+ * short-circuits on gate (a) first, so a false gate (a) makes the dummy
+ * `hitter` read inert regardless of its value (pure `GetBattlerSide`, no
+ * side effect either way) -- this port relies on the same short-circuit.
+ * Follow Me's redirect (`gSideTimers[].followmeTimer`) has no field in this
+ * engine's `BattleScriptSideTimerState` at all, so it is a structural (not
+ * gated) no-op -- retaliation always targets the recorded hitter directly,
+ * matching prep-scout §6's "unreachable in L50 singles" finding. Failure
+ * writes the real, already-modeled `ppNotAffectedByPressure` field and jumps
+ * to the operand's fail target (`BattleScript_FailedFromAtkString` at every
+ * real call site).
+ */
+export const counterdamagecalculatorOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (
+  context,
+) => {
+  const rulesContext = context.state.rulesContext;
+  const attacker = requireBattlerRole(rulesContext, "attacker");
+  const attackerBattler = rulesContext.battlers[attacker];
+  const hitterId = attackerBattler.protectPhysicalBattlerId;
+  const hitter = rulesContext.battlers[hitterId];
+
+  const success = attackerBattler.protectPhysicalDmg !== 0
+    && attackerBattler.side !== hitter.side
+    && hitter.hp !== 0;
+
+  if (!success) {
+    const [failOperand] = context.instruction.operands;
+    const failTarget = resolveBattleScriptLabel(context.program, failOperand!.expression);
+    if (!failTarget) {
+      throw new Error(`Cmd_counterdamagecalculator: unresolved jump target ${failOperand!.expression}`);
+    }
+    const nextRulesContext = withBattler(rulesContext, attacker, { ppNotAffectedByPressure: 1 });
+    return transitionBattleScriptCommand(
+      context,
+      Object.freeze({ kind: "jump", programCounter: failTarget.programCounter }),
+      { rulesContext: nextRulesContext },
+    );
+  }
+
+  const nextRulesContext = Object.freeze({
+    ...rulesContext,
+    battleMoveDamage: attackerBattler.protectPhysicalDmg * 2,
+    selectorRoles: hitterId === rulesContext.selectorRoles.target
+      ? rulesContext.selectorRoles
+      : Object.freeze({ ...rulesContext.selectorRoles, target: hitterId }),
+  });
+  return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }), { rulesContext: nextRulesContext });
+};
+
+/**
+ * Cmd_mirrorcoatdamagecalculator (battle_script_commands.c:7969-7990):
+ * "confirmed byte-for-byte identical [to Cmd_counterdamagecalculator] with
+ * every physical* swapped for special*" (source's own comment at :7968,
+ * docs/counter-retaliation-design.md §1.4) -- same three gates, same
+ * ppNotAffectedByPressure failure write, reading protectSpecialDmg/
+ * protectSpecialBattlerId instead.
+ */
+export const mirrorcoatdamagecalculatorOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (
+  context,
+) => {
+  const rulesContext = context.state.rulesContext;
+  const attacker = requireBattlerRole(rulesContext, "attacker");
+  const attackerBattler = rulesContext.battlers[attacker];
+  const hitterId = attackerBattler.protectSpecialBattlerId;
+  const hitter = rulesContext.battlers[hitterId];
+
+  const success = attackerBattler.protectSpecialDmg !== 0
+    && attackerBattler.side !== hitter.side
+    && hitter.hp !== 0;
+
+  if (!success) {
+    const [failOperand] = context.instruction.operands;
+    const failTarget = resolveBattleScriptLabel(context.program, failOperand!.expression);
+    if (!failTarget) {
+      throw new Error(`Cmd_mirrorcoatdamagecalculator: unresolved jump target ${failOperand!.expression}`);
+    }
+    const nextRulesContext = withBattler(rulesContext, attacker, { ppNotAffectedByPressure: 1 });
+    return transitionBattleScriptCommand(
+      context,
+      Object.freeze({ kind: "jump", programCounter: failTarget.programCounter }),
+      { rulesContext: nextRulesContext },
+    );
+  }
+
+  const nextRulesContext = Object.freeze({
+    ...rulesContext,
+    battleMoveDamage: attackerBattler.protectSpecialDmg * 2,
+    selectorRoles: hitterId === rulesContext.selectorRoles.target
+      ? rulesContext.selectorRoles
+      : Object.freeze({ ...rulesContext.selectorRoles, target: hitterId }),
+  });
+  return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }), { rulesContext: nextRulesContext });
+};
+
+/**
  * Cmd_adjustnormaldamage (battle_script_commands.c:1658-1698): the always-run
  * ApplyRandomDmgMultiplier roll, then the False Swipe/Endure/Focus-Band HP
  * clamp. Focus Band's own roll (`Random() % 100 < param`, gated on the target
@@ -1732,12 +1837,16 @@ function createHealthbarupdateOpcodeHandler(
  * Seed's own end-turn ticks -- docs/ingrain-leechseed-wrap-ground-truth.md
  * §2a/§2b) is a plain HP write clamped at maxHP, with none of the positive
  * branch's bide/shellBell/physical-special bookkeeping (source has no such
- * code on this branch at all). Physical/special bookkeeping reuses the already-modeled
- * gSpecialStatuses[battler].{physicalDmg,specialDmg} fields (added for
- * Cmd_moveend); gProtectStructs' parallel copy and physicalBattlerId/
- * specialBattlerId (Counter/Mirror Coat's own attacker attribution) have no
- * reader anywhere in this engine's currently modeled scope and are not
- * tracked, matching the shellBellDmg/gBideDmg-via-gBattleScripting omissions
+ * code on this branch at all). Physical/special bookkeeping writes both
+ * parallel copies source writes together:
+ * gSpecialStatuses[battler].{physicalDmg,specialDmg} (added for Cmd_moveend's
+ * Rage/Defrost, cleared every action) and gProtectStructs[battler].
+ * {physicalDmg,specialDmg,physicalBattlerId,specialBattlerId} (Counter/
+ * Mirror Coat's own attacker attribution, modeled as protectPhysicalDmg/
+ * protectPhysicalBattlerId/protectSpecialDmg/protectSpecialBattlerId,
+ * cleared once per turn -- docs/counter-retaliation-design.md §1.2/§2.3
+ * explains why these cannot share a field despite the identical value),
+ * matching the shellBellDmg/gBideDmg-via-gBattleScripting omissions
  * elsewhere in this rung. The real (non-substitute, non-negative-damage) HP
  * write also lands in the party slice at this battler's own side/partyIndex
  * (docs/faint-outcome-ground-truth.md §3.2's sync point), keeping
@@ -1846,11 +1955,17 @@ function createDatahpupdateOpcodeHandler(
     if (noPassiveUpdate) {
       const moveType = resolveMoveTypeName(rulesContext, rulesContext.currentMove);
       const physical = isTypePhysical(moveType);
+      const retaliationBattlerId = isTargetOperand
+        ? requireBattlerRole(rulesContext, "attacker")
+        : requireBattlerRole(rulesContext, "target");
       battlerChanges = {
         ...battlerChanges,
         specialStatus: physical
           ? Object.freeze({ ...battlerState.specialStatus, physicalDmg: dealt })
           : Object.freeze({ ...battlerState.specialStatus, specialDmg: dealt }),
+        ...(physical
+          ? { protectPhysicalDmg: dealt, protectPhysicalBattlerId: retaliationBattlerId }
+          : { protectSpecialDmg: dealt, protectSpecialBattlerId: retaliationBattlerId }),
       };
     }
     hitMarker = (hitMarker & ~HITMARKER_PASSIVE_HP_UPDATE) >>> 0;
@@ -3130,6 +3245,8 @@ export function createBattleScriptHitChainOpcodeHandlers(
   install("B_SCR_OP_ADJUSTNORMALDAMAGE", adjustnormaldamageOpcodeHandler);
   install("B_SCR_OP_SETDAMAGETOHEALTHDIFFERENCE", setdamagetohealthdifferenceOpcodeHandler);
   install("B_SCR_OP_ADJUSTSETDAMAGE", adjustsetdamageOpcodeHandler);
+  install("B_SCR_OP_COUNTERDAMAGECALCULATOR", counterdamagecalculatorOpcodeHandler);
+  install("B_SCR_OP_MIRRORCOATDAMAGECALCULATOR", mirrorcoatdamagecalculatorOpcodeHandler);
   install("B_SCR_OP_ATTACKANIMATION", createAttackanimationOpcodeHandler(ports.isControllerIdle));
   install("B_SCR_OP_EFFECTIVENESSSOUND", createEffectivenesssoundOpcodeHandler(ports.isControllerIdle));
   install("B_SCR_OP_HITANIMATION", hitanimationOpcodeHandler);

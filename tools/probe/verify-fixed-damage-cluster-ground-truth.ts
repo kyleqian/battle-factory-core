@@ -1,11 +1,13 @@
 // S10 prep-scout probe: ground truth for the fixed-damage + TYPECALC2
 // retaliation opcode cluster (Cmd_dmgtolevel, Cmd_psywavedamageeffect,
-// Cmd_counterdamagecalculator, battle_script_commands.c), currently blocking
-// EFFECT_LEVEL_DAMAGE/EFFECT_PSYWAVE/EFFECT_COUNTER per
-// docs/executable-frontier-census.md. This script reruns four committed
-// battle-lab scenarios (Seismic Toss, Psywave, Counter-hit, Counter-fail) at
+// Cmd_counterdamagecalculator, Cmd_mirrorcoatdamagecalculator,
+// battle_script_commands.c), covering EFFECT_LEVEL_DAMAGE/EFFECT_PSYWAVE/
+// EFFECT_COUNTER/EFFECT_MIRROR_COAT per docs/executable-frontier-census.md.
+// This script reruns eight committed battle-lab scenarios (Seismic Toss,
+// Psywave, Counter-hit, Counter-fail, Mirror Coat-hit, Mirror Coat-fail) at
 // two seeds each against the real ROM (Battle Scene OFF oracle) and asserts
-// PASS/FAIL for every live claim in docs/fixed-damage-cluster-ground-truth.md.
+// PASS/FAIL for every live claim in docs/fixed-damage-cluster-ground-truth.md
+// and docs/counter-retaliation-design.md.
 //
 // Run: node --experimental-strip-types tools/probe/verify-fixed-damage-cluster-ground-truth.ts
 // (also runnable via `npx tsx` if available; no project code depends on either).
@@ -17,6 +19,8 @@ const SEISMIC_TOSS_PATH = "tools/battle-lab/mechanic-fixed-damage-seismictoss.js
 const PSYWAVE_PATH = "tools/battle-lab/mechanic-fixed-damage-psywave.json";
 const COUNTER_HIT_PATH = "tools/battle-lab/mechanic-fixed-damage-counter-hit.json";
 const COUNTER_FAIL_PATH = "tools/battle-lab/mechanic-fixed-damage-counter-fail.json";
+const MIRROR_COAT_HIT_PATH = "tools/battle-lab/mechanic-fixed-damage-mirrorcoat-hit.json";
+const MIRROR_COAT_FAIL_PATH = "tools/battle-lab/mechanic-fixed-damage-mirrorcoat-fail.json";
 
 interface BattlerState {
   hp: number;
@@ -223,6 +227,56 @@ async function verifyCounterFailSeed(seed: number): Promise<void> {
   );
 }
 
+async function verifyMirrorCoatHitSeed(seed: number): Promise<void> {
+  console.log(`\n=== EFFECT_MIRROR_COAT (hit), seed ${seed}: ELECTRODE Water Gun -> SHUCKLE, SHUCKLE Mirror Coat -> ELECTRODE ===`);
+  const run1 = await runScenario(MIRROR_COAT_HIT_PATH, seed);
+  const run2 = await runScenario(MIRROR_COAT_HIT_PATH, seed);
+
+  const before1 = run1.captures.get(0)!;
+  const after1 = run1.captures.get(450)!;
+  const before2 = run2.captures.get(0)!;
+  const after2 = run2.captures.get(450)!;
+
+  check(`seed ${seed}: determinism, frame 0 identical across reruns`, deepEqualCapture(before1, before2), "initial state differs between runs");
+  check(`seed ${seed}: determinism, frame 450 identical across reruns`, deepEqualCapture(after1, after2), "post-turn state differs between runs");
+
+  const playerSpecialDmg = before1.battlers.player.hp - after1.battlers.player.hp;
+  const opponentMirrorCoatDmg = before1.battlers.opponent.hp - after1.battlers.opponent.hp;
+  console.log(`    Shuckle (player, slower) took ${playerSpecialDmg} special dmg from Water Gun; Electrode (opponent) took ${opponentMirrorCoatDmg} from Mirror Coat`);
+
+  check(`seed ${seed}: Electrode's Water Gun actually dealt special damage this turn (Mirror Coat has something to retaliate against)`, playerSpecialDmg > 0, `playerSpecialDmg=${playerSpecialDmg}`);
+  check(
+    `seed ${seed}: Cmd_mirrorcoatdamagecalculator (battle_script_commands.c:7969-7990) deals exactly 2x gProtectStructs[attacker].specialDmg`,
+    opponentMirrorCoatDmg === playerSpecialDmg * 2,
+    `mirror coat dealt ${opponentMirrorCoatDmg}, expected 2x${playerSpecialDmg}=${playerSpecialDmg * 2}`,
+  );
+}
+
+async function verifyMirrorCoatFailSeed(seed: number): Promise<void> {
+  console.log(`\n=== EFFECT_MIRROR_COAT (failure case), seed ${seed}: ELECTRODE Growl (status) -> SHUCKLE, SHUCKLE Mirror Coat (should fail) ===`);
+  const run1 = await runScenario(MIRROR_COAT_FAIL_PATH, seed);
+  const run2 = await runScenario(MIRROR_COAT_FAIL_PATH, seed);
+
+  const before1 = run1.captures.get(0)!;
+  const after1 = run1.captures.get(450)!;
+  const before2 = run2.captures.get(0)!;
+  const after2 = run2.captures.get(450)!;
+
+  check(`seed ${seed}: determinism, frame 0 identical across reruns`, deepEqualCapture(before1, before2), "initial state differs between runs");
+  check(`seed ${seed}: determinism, frame 450 identical across reruns`, deepEqualCapture(after1, after2), "post-turn state differs between runs");
+
+  const playerHpDelta = before1.battlers.player.hp - after1.battlers.player.hp;
+  const opponentHpDelta = before1.battlers.opponent.hp - after1.battlers.opponent.hp;
+  console.log(`    Shuckle (player) hp delta ${playerHpDelta}; Electrode (opponent) hp delta ${opponentHpDelta}`);
+
+  check(`seed ${seed}: Growl is a status move -- no special damage recorded on the player this turn`, playerHpDelta === 0, `playerHpDelta=${playerHpDelta}`);
+  check(
+    `seed ${seed}: with gProtectStructs[attacker].specialDmg still 0, Mirror Coat fails outright (Cmd_mirrorcoatdamagecalculator's else branch, T1_READ_PTR jump to BattleScript_FailedFromAtkString) -- zero damage dealt to the opponent`,
+    opponentHpDelta === 0,
+    `opponentHpDelta=${opponentHpDelta}`,
+  );
+}
+
 async function main(): Promise<void> {
   await verifySeismicTossSeed(1);
   await verifySeismicTossSeed(4);
@@ -235,6 +289,12 @@ async function main(): Promise<void> {
 
   await verifyCounterFailSeed(1);
   await verifyCounterFailSeed(4);
+
+  await verifyMirrorCoatHitSeed(1);
+  await verifyMirrorCoatHitSeed(4);
+
+  await verifyMirrorCoatFailSeed(1);
+  await verifyMirrorCoatFailSeed(4);
 
   console.log(`\n${failures === 0 ? "PASS" : "FAIL"}: ${failures} failing check(s)`);
   if (failures > 0) process.exit(1);

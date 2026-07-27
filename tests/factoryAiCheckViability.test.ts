@@ -2591,3 +2591,397 @@ describe("AI_CV_SpAtkUp (docs/factory-ai-checkviability-ground-truth.md §21.1)"
     expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
   });
 });
+
+const MOVE_COSMIC_POWER_SPDEF_UP = 322; // EFFECT_COSMIC_POWER
+const MOVE_CALM_MIND_SPDEF_UP = 347; // EFFECT_CALM_MIND
+const MOVE_SEISMIC_TOSS_PHYSICAL_LAST = 69; // power 1 (fixed-damage placeholder), Fighting -- IN AI_CV_DefenseUp_PhysicalTypes
+
+// data/battle_ai_scripts.s:986-1013, docs/factory-ai-checkviability-ground-truth.md
+// §22.1: the ninth CBM-blocked pair's own CV half -- the single shared
+// AI_CV_SpDefUp target for EFFECT_SPECIAL_DEFENSE_UP(_2)/EFFECT_COSMIC_POWER/
+// EFFECT_CALM_MIND (AI_CBM_CosmicPower/AI_CBM_CalmMind, the CBM side, are in
+// factoryAiCheckBadMove.test.ts). Gates A/B/C/D/DRAW SITE 1/2/3 are
+// AI_CV_DefenseUp's own shape with STAT_DEF swapped for STAT_SPDEF -- not
+// re-tested exhaustively here beyond one smoke case each; this block's own
+// focus is Gate F's INVERTED polarity (the one real structural break vs
+// DefenseUp), reusing the same seed convention DefenseUp's own block
+// established (seed 1 -> randomValue % 256 = 198; seed 4 -> 25; seed 5 -> 223).
+describe("AI_CV_SpDefUp (docs/factory-ai-checkviability-ground-truth.md §22.1)", () => {
+  function spDefUpAttacker(spDefStage: number, hp: number, maxHp = 100) {
+    return Object.freeze({
+      speed: 100, speedStage: 6, types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+      isFirstTurn: 0, evasionStage: 6, accStage: 6, atkStage: 6, defStage: 6, spDefStage, hp, maxHp,
+    });
+  }
+  function spDefUpTarget(lastUsedMoveId: number) {
+    return Object.freeze({
+      speed: 100, speedStage: 6, types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+      isFirstTurn: 0, evasionStage: 6, accStage: 6, atkStage: 6, defStage: 6, spDefStage: 6, hp: 100, maxHp: 100,
+      lastUsedMoveId,
+    });
+  }
+
+  it("EFFECT_COSMIC_POWER and EFFECT_CALM_MIND both dispatch to the identical handler", () => {
+    for (const moveId of [MOVE_COSMIC_POWER_SPDEF_UP, MOVE_CALM_MIND_SPDEF_UP]) {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId,
+        attacker: spDefUpAttacker(6, 65), // SPDEF<9 skips site 1; hp!=100 skips site 2; hp<70 skips site 3 straight to Gate D
+        target: spDefUpTarget(MOVE_SPLASH_ZERO_POWER), // hp 65 >= 40 -> Gate D false -> reaches Gate E: power 0 -> site 5
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "sp-def-up-roll-5" });
+    }
+  });
+
+  describe("Gate A / DRAW SITE 1 (own SPDEF stage < 9 skips the roll, same shape as DefenseUp's own Gate A)", () => {
+    it("SPDEF stage 9 (>= 9): reaches DRAW SITE 1; roll >= 100 applies the -1", () => {
+      // seed 1 -> randomValue % 256 = 198 (>= 100).
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_COSMIC_POWER_SPDEF_UP,
+        attacker: spDefUpAttacker(9, 65), // hp 65 -> Gate C true (hp<70) -> straight to Gate D (false, 65>=40) -> Gate E
+        target: spDefUpTarget(MOVE_SPLASH_ZERO_POWER),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(2);
+      expect(result.draws[0]).toMatchObject({ kind: "sp-def-up-roll-1", succeeded: true });
+      expect(result.draws[1]).toMatchObject({ kind: "sp-def-up-roll-5", succeeded: false });
+      expect(result.scoreDelta).toBe(-1);
+    });
+  });
+
+  describe("Gate B / DRAW SITE 2 (own HP != 100% skips the roll)", () => {
+    it("HP exactly 100%: reaches DRAW SITE 2; roll >= 128 applies the +2 (then Gate C: hp>=70 -> DRAW SITE 3 too)", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_COSMIC_POWER_SPDEF_UP,
+        attacker: spDefUpAttacker(6, 100),
+        target: spDefUpTarget(MOVE_SPLASH_ZERO_POWER),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(2);
+      expect(result.draws[0]).toMatchObject({ kind: "sp-def-up-roll-2", succeeded: true });
+      expect(result.draws[1]).toMatchObject({ kind: "sp-def-up-roll-3", succeeded: false });
+      expect(result.scoreDelta).toBe(2);
+    });
+  });
+
+  describe("Gate C (same direction as DefenseUp: own HP < 70% jumps straight into SpDefUp4, skipping DRAW SITE 3)", () => {
+    it("HP exactly 69% (< 70): DRAW SITE 3 skipped entirely -- Gate D false (69 >= 40) -- falls to Gate E", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_COSMIC_POWER_SPDEF_UP,
+        attacker: spDefUpAttacker(6, 69),
+        target: spDefUpTarget(MOVE_SPLASH_ZERO_POWER),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "sp-def-up-roll-5" });
+    });
+
+    it("HP exactly 70% (>= 70): roll >= 200 falls through to SpDefUp4/Gate E instead of stopping", () => {
+      // seed 5 -> randomValue % 256 = 223 (>= 200).
+      const result = runCheckViability({
+        rng: { value: 5, calls: 0 },
+        moveId: MOVE_COSMIC_POWER_SPDEF_UP,
+        attacker: spDefUpAttacker(6, 70),
+        target: spDefUpTarget(MOVE_SPLASH_ZERO_POWER),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(2);
+      expect(result.draws[0]).toMatchObject({ kind: "sp-def-up-roll-3", succeeded: true });
+      expect(result.draws[1]).toMatchObject({ kind: "sp-def-up-roll-5" });
+    });
+  });
+
+  describe("Gate D (own HP < 40%: skips straight to the -2 penalty)", () => {
+    it("HP exactly 39% (< 40, reached via the direct Gate C jump since 39 < 70): applies -2 with zero draws", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_COSMIC_POWER_SPDEF_UP,
+        attacker: spDefUpAttacker(6, 39),
+        target: spDefUpTarget(MOVE_SPLASH_ZERO_POWER),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: -2 });
+    });
+  });
+
+  describe("Gates E/F (the TARGET's own last-used move power/type, INVERTED Gate F polarity vs DefenseUp)", () => {
+    it("last move power == 0 (Splash): Gate E routes to SpDefUp5's own DRAW SITE 5, skipping Gate F entirely", () => {
+      const result = runCheckViability({
+        rng: { value: 4, calls: 0 },
+        moveId: MOVE_COSMIC_POWER_SPDEF_UP,
+        attacker: spDefUpAttacker(6, 50),
+        target: spDefUpTarget(MOVE_SPLASH_ZERO_POWER),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(0);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "sp-def-up-roll-5", succeeded: false });
+    });
+
+    it("last move power != 0, type IN the physical list (Seismic Toss, Fighting): Gate F is INVERTED -- jumps straight to the -2, skipping BOTH remaining draw sites (the opposite of DefenseUp's own Gate F verdict for this exact move)", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_COSMIC_POWER_SPDEF_UP,
+        attacker: spDefUpAttacker(6, 50),
+        target: spDefUpTarget(MOVE_SEISMIC_TOSS_PHYSICAL_LAST),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: -2 });
+    });
+
+    it("last move power != 0, type NOT in the physical list (Dragon Rage, Dragon): Gate F is INVERTED -- falls through to DRAW SITE 4 (the opposite of DefenseUp's own Gate F verdict for this exact move)", () => {
+      // seed 4 -> randomValue % 256 = 25 (< 60, skips the -2).
+      const result = runCheckViability({
+        rng: { value: 4, calls: 0 },
+        moveId: MOVE_CALM_MIND_SPDEF_UP,
+        attacker: spDefUpAttacker(6, 50),
+        target: spDefUpTarget(MOVE_DRAGON_RAGE_NONPHYSICAL_LAST),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(0);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "sp-def-up-roll-4", succeeded: false });
+    });
+
+    it("last move power != 0, type NOT in the physical list: roll >= 60 at DRAW SITE 4 applies the -2", () => {
+      // seed 1 -> randomValue % 256 = 198 (>= 60).
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_CALM_MIND_SPDEF_UP,
+        attacker: spDefUpAttacker(6, 50),
+        target: spDefUpTarget(MOVE_DRAGON_RAGE_NONPHYSICAL_LAST),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(-2);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "sp-def-up-roll-4", succeeded: true });
+    });
+
+    it("omitted lastUsedMoveId defaults to MOVE_NONE (0), the real battle-start default -- same code path as a genuine 0-power last move", () => {
+      const bareTarget = Object.freeze({
+        speed: 100, speedStage: 6, types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+        isFirstTurn: 0, evasionStage: 6, accStage: 6, atkStage: 6, defStage: 6, spDefStage: 6, hp: 100, maxHp: 100,
+      });
+      const result = runCheckViability({
+        rng: { value: 4, calls: 0 },
+        moveId: MOVE_COSMIC_POWER_SPDEF_UP,
+        attacker: spDefUpAttacker(6, 50),
+        target: bareTarget,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "sp-def-up-roll-5" });
+    });
+  });
+
+  it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
+    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
+  });
+});
+
+const MOVE_LIGHT_SCREEN_CV = 113; // EFFECT_LIGHT_SCREEN
+const MOVE_REFLECT_CV = 115; // EFFECT_REFLECT
+
+// data/battle_ai_scripts.s:1373-1382/1492-1501, docs/factory-ai-checkviability-
+// ground-truth.md §23.1: the tenth CBM-blocked pair's own CV half
+// (AI_CBM_LightScreen/AI_CBM_Reflect, the CBM side, are in
+// factoryAiCheckBadMove.test.ts) -- the first fully twin-symmetric pair in
+// this doc, byte-for-byte identical shape between siblings differing only in
+// which type list is referenced. seed 1 -> randomValue % 256 = 198 (>= 50,
+// draw succeeds); seed 4 -> 25 (< 50, draw fails).
+describe("AI_CV_LightScreen / AI_CV_Reflect (docs/factory-ai-checkviability-ground-truth.md §23.1)", () => {
+  function sideScreenAttacker(hp: number, maxHp = 100) {
+    return Object.freeze({
+      speed: 100, speedStage: 6, types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+      isFirstTurn: 0, evasionStage: 6, accStage: 6, atkStage: 6, defStage: 6, spDefStage: 6, hp, maxHp,
+    });
+  }
+  function sideScreenTarget(types: readonly [string, string]) {
+    return Object.freeze({
+      speed: 100, speedStage: 6, types,
+      isFirstTurn: 0, evasionStage: 6, accStage: 6, atkStage: 6, defStage: 6, spDefStage: 6, hp: 100, maxHp: 100,
+    });
+  }
+
+  describe("Gate A (AI_USER's own hp < 50 -- ScoreDown2, zero draws, no further gates read)", () => {
+    it("AI_CV_LightScreen: hp exactly 49% (< 50): scores -2 with zero draws regardless of target type", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_LIGHT_SCREEN_CV,
+        attacker: sideScreenAttacker(49),
+        target: sideScreenTarget(["TYPE_FIRE", "TYPE_FIRE"]),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: -2 });
+    });
+
+    it("AI_CV_Reflect: hp exactly 49% (< 50): scores -2 with zero draws regardless of target type", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_REFLECT_CV,
+        attacker: sideScreenAttacker(49),
+        target: sideScreenTarget(["TYPE_NORMAL", "TYPE_NORMAL"]),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: -2 });
+    });
+
+    it("hp exactly 50% (NOT < 50): falls through to Gates B/C instead of the deterministic -2", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_LIGHT_SCREEN_CV,
+        attacker: sideScreenAttacker(50),
+        target: sideScreenTarget(["TYPE_FIRE", "TYPE_FIRE"]), // Gate B matches -> deterministic 0, not -2
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+  });
+
+  describe("Gates B/C (target's own type1/type2 vs the type list) -- LightScreen's 8-type special list, Reflect's 9-type physical list, exact complements", () => {
+    it("AI_CV_LightScreen: type1 alone in the special list (Fire): jumps to End, zero draws", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_LIGHT_SCREEN_CV,
+        attacker: sideScreenAttacker(100),
+        target: sideScreenTarget(["TYPE_FIRE", "TYPE_NORMAL"]),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+
+    it("AI_CV_LightScreen: type2 alone in the special list (type1 not, Gate B misses): jumps to End, zero draws", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_LIGHT_SCREEN_CV,
+        attacker: sideScreenAttacker(100),
+        target: sideScreenTarget(["TYPE_NORMAL", "TYPE_DRAGON"]),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+
+    it("AI_CV_LightScreen: neither type in the special list (Bug/Rock, Shuckle-shaped): falls through to the DRAW SITE", () => {
+      const result = runCheckViability({
+        rng: { value: 4, calls: 0 }, // roll < 50 -> succeeded false -> score 0
+        moveId: MOVE_LIGHT_SCREEN_CV,
+        attacker: sideScreenAttacker(100),
+        target: sideScreenTarget(["TYPE_BUG", "TYPE_ROCK"]),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(0);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "light-screen-roll", succeeded: false });
+    });
+
+    it("AI_CV_Reflect: type1 alone in the physical list (Bug, Shuckle-shaped): jumps to End, zero draws", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_REFLECT_CV,
+        attacker: sideScreenAttacker(100),
+        target: sideScreenTarget(["TYPE_BUG", "TYPE_ROCK"]),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+
+    it("AI_CV_Reflect: neither type in the physical list (pure Fire, Vulpix-shaped): falls through to the DRAW SITE", () => {
+      const result = runCheckViability({
+        rng: { value: 4, calls: 0 }, // roll < 50 -> succeeded false -> score 0
+        moveId: MOVE_REFLECT_CV,
+        attacker: sideScreenAttacker(100),
+        target: sideScreenTarget(["TYPE_FIRE", "TYPE_FIRE"]),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(0);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "reflect-roll", succeeded: false });
+    });
+  });
+
+  describe("DRAW SITE (if_random_less_than 50, only reached when neither type is listed)", () => {
+    it("AI_CV_LightScreen: roll >= 50 applies the -2", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 }, // randomValue % 256 = 198 (>= 50)
+        moveId: MOVE_LIGHT_SCREEN_CV,
+        attacker: sideScreenAttacker(100),
+        target: sideScreenTarget(["TYPE_BUG", "TYPE_ROCK"]),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(-2);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "light-screen-roll", succeeded: true });
+    });
+
+    it("AI_CV_Reflect: roll >= 50 applies the -2", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 }, // randomValue % 256 = 198 (>= 50)
+        moveId: MOVE_REFLECT_CV,
+        attacker: sideScreenAttacker(100),
+        target: sideScreenTarget(["TYPE_FIRE", "TYPE_FIRE"]),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(-2);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "reflect-roll", succeeded: true });
+    });
+  });
+
+  it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
+    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
+  });
+});

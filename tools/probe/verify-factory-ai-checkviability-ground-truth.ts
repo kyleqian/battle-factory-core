@@ -726,6 +726,150 @@ const DRAW_COUNT_SCENARIOS: DrawCountScenarioSpec[] = [
     expectedTotalSteps: { 1: 8, 99: 8 },
     checkCrossSeedStable: true,
   },
+  // AI_CV_SpDefUp (data/battle_ai_scripts.s:986-1025, doc §22): reached by
+  // TWO separate CBM handlers (AI_CBM_CosmicPower, :576-579, AND
+  // AI_CBM_CalmMind, :590-593 -- unlike every prior CBM+CV pair in this
+  // doc, which paired one CBM handler with one CV handler), plus
+  // AI_CBM_SpDefUp/AI_CV_SpDefUp's own EFFECT_SPECIAL_DEFENSE_UP{,_2} route
+  // (not separately fixtured here). Byte-for-byte the same control-flow
+  // shape as AI_CV_DefenseUp (STAT_DEF -> STAT_SPDEF, same 5 odds
+  // 100/128/200/60/60 at the same 5 positions) EXCEPT Gate F's polarity is
+  // INVERTED: DefenseUp's :935 is `if_not_in_bytes ...,ScoreDown2` (non-
+  // physical last move -> deterministic stop); SpDefUp's :1006 is `if_in_
+  // bytes ...,ScoreDown2` (physical last move -> deterministic stop) -- the
+  // exact trap PROGRESS-archive entry 477's side-merge flag named,
+  // independently re-derived from the assembly here. Reuses DefenseUp's
+  // entire Anorith(opponent)/Machamp(target) HP-banded last-used-move
+  // fixture design (doc §18.3) verbatim, dispatch move swapped for
+  // MOVE_COSMIC_POWER (322)/MOVE_CALM_MIND (347) -- both self-target,
+  // 0 power, accuracy 0, so neither's own DEF+SPDEF/SPATK+SPDEF stat raise
+  // affects the fixed-damage moves (MOVE_SEISMIC_TOSS, MOVE_DRAGON_RAGE)
+  // used to bank the HP band and the last-move-type gate simultaneously.
+  // Because Gate F's polarity is inverted vs DefenseUp, the reach/control
+  // move-to-name assignment inverts too: MOVE_SEISMIC_TOSS (physical, IN
+  // the list) is now the deterministic-zero-draw CONTROL (Gate F true ->
+  // ScoreDown2 directly), and MOVE_DRAGON_RAGE (non-physical, NOT in the
+  // list) is now the REACH fixture (Gate F false -> falls through to the
+  // :1007 draw site) -- the opposite of DefenseUp's own physical=reach/
+  // non-physical=control assignment (§18.3). Attribution probe (window 0
+  // 732) confirms the control fixtures draw ZERO Cmd_if_random_less_than
+  // (both CosmicPower and CalmMind), the reach fixtures draw 6 (seed 1),
+  // and Cmd_get_ability appears in neither table (Machamp's single-ability
+  // kit closes the confound, same as every stat-up pair since SpeedUp,
+  // §20.2/§20.4). CosmicPower and CalmMind's ledgers are numerically
+  // identical in every row, as expected since both dispatch to the same
+  // AI_CV_SpDefUp body. The reach fixtures' own 14/13 (not a clean 4-per-
+  // slot 10ish) total reproduces DefenseUp's own unresolved "5-6, not 4"
+  // draw-count anomaly (doc §18.4) on this handler too -- flagged again,
+  // not resolved, for a future porter to single-step.
+  {
+    label:
+      "AI_CV_SpDefUp, target (player, Machamp) last-used move is MOVE_DRAGON_RAGE (Dragon, NOT in AI_CV_SpDefUp_PhysicalTypes) -- reachable branch (data/battle_ai_scripts.s:986-1025), opponent dispatch move MOVE_COSMIC_POWER: opponent (AI_USER, Anorith) HP lands at 80/120 (66.7%, inside [40,70)) so Gate C routes into AI_CV_SpDefUp4, Gate D is false, and Gate F (last move type NOT in the physical list) falls through to the :1007 if_random_less_than 60 draw site -- the INVERTED-polarity flip vs DefenseUp's own physical=reach assignment",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-spdefup-cosmicpower-reach-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 14, 99: 13 },
+    checkCrossSeedStable: false,
+  },
+  {
+    label:
+      "AI_CV_SpDefUp, target (player, Machamp) last-used move is MOVE_SEISMIC_TOSS (Fighting, IN AI_CV_SpDefUp_PhysicalTypes) -- control, opponent dispatch move MOVE_COSMIC_POWER: opponent HP lands at 70/120 (58.3%, inside [40,70)), Gate F (last move type IS in the physical list) routes straight to AI_CV_SpDefUp_ScoreDown2, deterministic zero draws from the handler itself -- the INVERTED-polarity flip vs DefenseUp's own physical=reach assignment",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-spdefup-cosmicpower-control-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 8, 99: 8 },
+    checkCrossSeedStable: true,
+  },
+  {
+    label:
+      "AI_CV_SpDefUp, target (player, Machamp) last-used move is MOVE_DRAGON_RAGE -- reachable branch, opponent dispatch move MOVE_CALM_MIND (347, EFFECT_CALM_MIND, raises SPATK+SPDEF -- neither affects Dragon Rage's fixed damage): numerically identical ledger to the MOVE_COSMIC_POWER reach fixture above, confirming both dispatch effects converge on the same AI_CV_SpDefUp body",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-spdefup-calmmind-reach-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 14, 99: 13 },
+    checkCrossSeedStable: false,
+  },
+  {
+    label:
+      "AI_CV_SpDefUp, target (player, Machamp) last-used move is MOVE_SEISMIC_TOSS -- control, opponent dispatch move MOVE_CALM_MIND: numerically identical ledger to the MOVE_COSMIC_POWER control fixture above, confirming both dispatch effects converge on the same AI_CV_SpDefUp body",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-spdefup-calmmind-control-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 8, 99: 8 },
+    checkCrossSeedStable: true,
+  },
+  // AI_CV_LightScreen (data/battle_ai_scripts.s:1373-1393, doc §23) and
+  // AI_CV_Reflect (:1492-1514) -- the simplest CBM+CV pair yet: each CBM
+  // half is a single if_side_affecting check against the opponent's OWN
+  // side status (Score_Minus8), and each CV half is Gate A (opponent's OWN
+  // hp < 50 -> deterministic ScoreDown2) then Gates B/C (target's OWN type1/
+  // type2 in a type list -> deterministic End) then exactly 1
+  // if_random_less_than 50 draw site. Byte-for-byte identical topology
+  // between LightScreen and Reflect on BOTH the CBM and CV sides -- the
+  // first pair in this doc with zero sibling divergence either way -- the
+  // only difference is which SIDE_STATUS_*/type-list is referenced.
+  // LightScreen's 8-type SpecialTypeList and Reflect's 9-type
+  // PhysicalTypeList are exact complements (all 17 Gen 3 types, no overlap),
+  // so the same two target species serve both pairs with reach/control
+  // simply swapping: Shuckle (213, Bug/Rock, single ability Sturdy) is
+  // LightScreen's reach (neither type in the special list) and Reflect's
+  // control (both types in the physical list); Vulpix (37, pure Fire,
+  // single ability Flash Fire) is the opposite. Opponent (AI_USER) is
+  // Anorith (390), all 4 slots the dispatch move under test
+  // (MOVE_LIGHT_SCREEN 113 / MOVE_REFLECT 115, both already 0 power/0
+  // accuracy/self-target by their own game data); the target's own move in
+  // every fixture is MOVE_HARDEN (106, 0 power/0 accuracy/self-target) so
+  // NO damage occurs on either side at all -- the opponent's HP is held at
+  // its own max for the whole trace by construction, a first for this doc's
+  // CBM-blocked-pair series (every prior pair needed at least a one-turn
+  // real hit to pin HP state). Attribution probe (window 0 732, seed 1)
+  // confirms no Cmd_accuracycheck row in any of the 4 fixtures (both moves
+  // are 0-accuracy) and no Cmd_get_ability row (both targets single-
+  // ability); the clean +4 delta (10 vs 6) is entirely
+  // Cmd_if_random_less_than, the "N=4 slots x 1 draw" shape (matching
+  // AttackDown's own DRAW SITE 2, §14.4), not the DefenseUp/SpDefUp
+  // family's unresolved 5-6 anomaly (§18.4/§22.4). LightScreen's and
+  // Reflect's own reach/control ledgers are numerically identical to each
+  // other in every row, confirming the zero-divergence finding at the
+  // instrument level too. Gate A (opponent HP < 50%) is not staged this
+  // session -- would need a real-damage fixture variant, contradicting this
+  // design's own zero-damage isolation.
+  {
+    label:
+      "AI_CV_LightScreen, target (player, Shuckle, Bug/Rock) type is NOT in AI_CV_LightScreen_SpecialTypeList -- reachable branch (data/battle_ai_scripts.s:1373-1393), opponent dispatch move MOVE_LIGHT_SCREEN: opponent (AI_USER, Anorith) HP held at 120/120 (100%, Gate A false) by construction (target's MOVE_HARDEN never damages), Gates B/C both false, falls through to the :1379 if_random_less_than 50 draw site",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-lightscreen-reach-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 10, 99: 10 },
+    checkCrossSeedStable: true,
+  },
+  {
+    label:
+      "AI_CV_LightScreen, target (player, Vulpix, pure Fire) type IS in AI_CV_LightScreen_SpecialTypeList -- control, opponent dispatch move MOVE_LIGHT_SCREEN: Gate B matches immediately on type1, deterministic zero-draw End, opponent HP held at 120/120 (100%) by construction",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-lightscreen-control-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 6, 99: 6 },
+    checkCrossSeedStable: true,
+  },
+  {
+    label:
+      "AI_CV_Reflect, target (player, Vulpix, pure Fire) type is NOT in AI_CV_Reflect_PhysicalTypeList -- reachable branch (data/battle_ai_scripts.s:1492-1514), opponent dispatch move MOVE_REFLECT: numerically identical ledger to the LightScreen reach fixture above, confirming both handlers are structurally twins",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-reflect-reach-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 10, 99: 10 },
+    checkCrossSeedStable: true,
+  },
+  {
+    label:
+      "AI_CV_Reflect, target (player, Shuckle, Bug/Rock) type IS in AI_CV_Reflect_PhysicalTypeList -- control, opponent dispatch move MOVE_REFLECT: numerically identical ledger to the LightScreen control fixture above, confirming both handlers are structurally twins",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-reflect-control-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 6, 99: 6 },
+    checkCrossSeedStable: true,
+  },
 ];
 
 function totalPpUsed(ppBefore: number[], ppAfter: number[]): number {

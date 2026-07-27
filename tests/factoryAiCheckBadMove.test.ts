@@ -825,6 +825,95 @@ describe("AI_CBM_SpeedUp / AI_CBM_SpAtkUp (docs/factory-ai-checkviability-ground
   });
 });
 
+// data/battle_ai_scripts.s:576-579/590-593, docs/factory-ai-checkviability-ground-truth.md
+// §22.1: the ninth CBM-blocked pair's own CBM half -- unlike every stat-UP
+// handler above, TWO SEPARATE dual-stat handlers (the AI_CBM_BulkUp/
+// AI_CBM_DragonDance shape, §18.1), each independently checking both stats
+// its own move raises (-10 first stat, -8 second), not aliases of each
+// other or of AI_CBM_DefenseUp/AI_CBM_SpAtkUp/AI_CBM_SpDefUp.
+describe("AI_CBM_CosmicPower / AI_CBM_CalmMind (docs/factory-ai-checkviability-ground-truth.md §22.1)", () => {
+  const MOVE_COSMIC_POWER = 322; // EFFECT_COSMIC_POWER
+  const MOVE_CALM_MIND = 347; // EFFECT_CALM_MIND
+
+  // Single-ability (Sturdy) target, same species/rationale as the
+  // AttackUp/DefenseUp/BulkUp/SpeedUp/SpAtkUp blocks' own SHUCKLE above.
+  const SHUCKLE: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 213,
+    types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+    knownAbility: null,
+    realAbility: "ABILITY_STURDY",
+    speedStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+  });
+
+  function withCosmicPowerAttacker(defStage: number, spDefStage: number): FactoryAiCheckBadMoveAttacker {
+    return Object.freeze({ atkStage: 6, defStage, spDefStage });
+  }
+  function withCalmMindAttacker(spAtkStage: number, spDefStage: number): FactoryAiCheckBadMoveAttacker {
+    return Object.freeze({ atkStage: 6, defStage: 6, spAtkStage, spDefStage });
+  }
+
+  it("AI_CBM_CosmicPower: scores -18 (both gates fire independently, -10 + -8) when both DEF and SPDEF are already MAX_STAT_STAGE", () => {
+    const result = run(MOVE_COSMIC_POWER, SHUCKLE, undefined, withCosmicPowerAttacker(12, 12));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -18 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("AI_CBM_CosmicPower: scores -10 (only the DEF gate fires) when DEF is maxed but SPDEF is not", () => {
+    const result = run(MOVE_COSMIC_POWER, SHUCKLE, undefined, withCosmicPowerAttacker(12, 6));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("AI_CBM_CosmicPower: scores -8 (only the SPDEF gate fires) when SPDEF is maxed but DEF is not", () => {
+    const result = run(MOVE_COSMIC_POWER, SHUCKLE, undefined, withCosmicPowerAttacker(6, 12));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -8 });
+  });
+
+  it("AI_CBM_CosmicPower: scores 0 with zero draws when neither DEF nor SPDEF is maxed", () => {
+    const result = run(MOVE_COSMIC_POWER, SHUCKLE, undefined, withCosmicPowerAttacker(6, 6));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("AI_CBM_CosmicPower: omitted spDefStage defaults to DEFAULT_STAT_STAGE (6, not maxed) -- DEF-only gate still fires", () => {
+    const result = run(MOVE_COSMIC_POWER, SHUCKLE, undefined, Object.freeze({ atkStage: 6, defStage: 12 }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("AI_CBM_CalmMind: scores -18 (both gates fire independently, -10 + -8) when both SPATK and SPDEF are already MAX_STAT_STAGE", () => {
+    const result = run(MOVE_CALM_MIND, SHUCKLE, undefined, withCalmMindAttacker(12, 12));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -18 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("AI_CBM_CalmMind: scores -10 (only the SPATK gate fires) when SPATK is maxed but SPDEF is not", () => {
+    const result = run(MOVE_CALM_MIND, SHUCKLE, undefined, withCalmMindAttacker(12, 6));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+  });
+
+  it("AI_CBM_CalmMind: scores -8 (only the SPDEF gate fires) when SPDEF is maxed but SPATK is not", () => {
+    const result = run(MOVE_CALM_MIND, SHUCKLE, undefined, withCalmMindAttacker(6, 12));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -8 });
+  });
+
+  it("AI_CBM_CalmMind: scores 0 with zero draws when neither SPATK nor SPDEF is maxed", () => {
+    const result = run(MOVE_CALM_MIND, SHUCKLE, undefined, withCalmMindAttacker(6, 6));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("AI_CBM_CalmMind: omitted spAtkStage/spDefStage both default to DEFAULT_STAT_STAGE (6, not maxed) -- scores 0", () => {
+    const result = run(MOVE_CALM_MIND, SHUCKLE, undefined, Object.freeze({ atkStage: 6, defStage: 6 }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+});
+
 // data/battle_ai_scripts.s:300-312, docs/factory-ai-checkviability-ground-truth.md
 // §19.1: the sixth CBM-blocked pair's own CBM half (this is the CBM side;
 // AI_CV_AccuracyDown, the CV side, is in factoryAiCheckViability.test.ts).
@@ -968,5 +1057,76 @@ describe("AI_CBM_AccDown + CheckIfAbilityBlocksStatChange (docs/factory-ai-check
 
   it("EFFECT_ACCURACY_DOWN_2 is a vestigial constant with zero real moves (doc §19.1) -- not independently testable through a real move ID, confirmed absent from the generated move table", () => {
     expect([...MOVES_BY_ID.values()].some((m) => m.effect === "EFFECT_ACCURACY_DOWN_2")).toBe(false);
+  });
+});
+
+// data/battle_ai_scripts.s:354-356/393-395, docs/factory-ai-checkviability-ground-truth.md
+// §23.1: the tenth CBM-blocked pair's own CBM half -- the smallest CBM
+// handler shape in this doc to date, a single AI_USER-own-side-status bit
+// test with zero stat-stage read and zero get_ability call.
+describe("AI_CBM_LightScreen / AI_CBM_Reflect (docs/factory-ai-checkviability-ground-truth.md §23.1)", () => {
+  const MOVE_LIGHT_SCREEN = 113; // EFFECT_LIGHT_SCREEN
+  const MOVE_REFLECT = 115; // EFFECT_REFLECT
+
+  // Single-ability (Sturdy) target, same species/rationale as the
+  // AttackUp/DefenseUp/BulkUp/SpeedUp/SpAtkUp/CosmicPower/CalmMind blocks'
+  // own SHUCKLE above.
+  const SHUCKLE: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 213,
+    types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+    knownAbility: null,
+    realAbility: "ABILITY_STURDY",
+    speedStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+  });
+
+  it("AI_CBM_LightScreen: scores -8 when AI_USER's own light screen is up", () => {
+    const result = run(MOVE_LIGHT_SCREEN, SHUCKLE, undefined, Object.freeze({ atkStage: 6, defStage: 6, lightScreenUp: true }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -8 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("AI_CBM_LightScreen: scores 0 with zero draws when AI_USER's own light screen is not up", () => {
+    const result = run(MOVE_LIGHT_SCREEN, SHUCKLE, undefined, Object.freeze({ atkStage: 6, defStage: 6, lightScreenUp: false }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("AI_CBM_LightScreen: omitted lightScreenUp defaults to false (not up) -- scores 0", () => {
+    const result = run(MOVE_LIGHT_SCREEN, SHUCKLE, undefined, Object.freeze({ atkStage: 6, defStage: 6 }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+
+  it("AI_CBM_LightScreen: AI_USER's own reflectUp is irrelevant to this gate (distinct SIDE_STATUS_* bits)", () => {
+    const result = run(MOVE_LIGHT_SCREEN, SHUCKLE, undefined, Object.freeze({ atkStage: 6, defStage: 6, reflectUp: true }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+
+  it("AI_CBM_Reflect: scores -8 when AI_USER's own reflect is up", () => {
+    const result = run(MOVE_REFLECT, SHUCKLE, undefined, Object.freeze({ atkStage: 6, defStage: 6, reflectUp: true }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -8 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("AI_CBM_Reflect: scores 0 with zero draws when AI_USER's own reflect is not up", () => {
+    const result = run(MOVE_REFLECT, SHUCKLE, undefined, Object.freeze({ atkStage: 6, defStage: 6, reflectUp: false }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("AI_CBM_Reflect: omitted reflectUp defaults to false (not up) -- scores 0", () => {
+    const result = run(MOVE_REFLECT, SHUCKLE, undefined, Object.freeze({ atkStage: 6, defStage: 6 }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+
+  it("AI_CBM_Reflect: AI_USER's own lightScreenUp is irrelevant to this gate (distinct SIDE_STATUS_* bits)", () => {
+    const result = run(MOVE_REFLECT, SHUCKLE, undefined, Object.freeze({ atkStage: 6, defStage: 6, lightScreenUp: true }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
   });
 });

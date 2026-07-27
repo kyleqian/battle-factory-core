@@ -1,6 +1,6 @@
 # Executable-frontier census
 
-Generated 2026-07-26. Rerun: `npx tsx tools/report/executable-frontier-census.ts`
+Generated 2026-07-27. Rerun: `npx tsx tools/report/executable-frontier-census.ts`
 
 Answers ROADMAP S10's Executable-frontier reset question directly: not "how many opcodes are registered" but **how many of the 355 moves can the kernel execute end-to-end today, and what exactly blocks each of the rest.** Every `BattleScript_Effect*` entry in the committed topology (`src/data/gen/battle-script-topology.json` + `battle-script-graph.json`) is walked for full opcode reachability (branches, goto/call targets, the shared hit-chain tail) against the opcode set the engine currently registers (read live from `src/engine/battleScriptRulesContext.ts`'s `createBattleScriptStatusRulesHandlers`, so this doc cannot drift from what the engine actually installs).
 
@@ -10,10 +10,10 @@ Answers ROADMAP S10's Executable-frontier reset question directly: not "how many
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 90 | 214 | 42.1% |
-| Moves (unweighted, all 355) | 185 | 355 | 52.1% |
-| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 148 | 276 | 53.6% |
-| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 1830 | 2957 | 61.9% |
+| Effect scripts | 92 | 214 | 43.0% |
+| Moves (unweighted, all 355) | 187 | 355 | 52.7% |
+| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 150 | 276 | 54.3% |
+| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 1884 | 2957 | 63.7% |
 
 "Executable" means every opcode on every statically reachable path from the effect's entry script has a dispatch entry today (registered barriers included, per ROADMAP S10 §1's (a)/(b) policy). It is not a semantic-correctness claim -- see Caveats.
 
@@ -30,7 +30,6 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_JUMPIFSTAT`, `B_SCR_OP_PLAYSTATCHANGEANIMATION` | 5 (EFFECT_TICKLE, EFFECT_COSMIC_POWER, EFFECT_BULK_UP, EFFECT_CALM_MIND, EFFECT_DRAGON_DANCE) | 5 | 5 | 45 |
 | `B_SCR_OP_TRYINFATUATING` | 1 (EFFECT_ATTRACT) | 1 | 1 | 45 |
 | `B_SCR_OP_FORCERANDOMSWITCH`, `B_SCR_OP_INITMULTIHITSTRING`, `B_SCR_OP_JUMPIFHASNOHP` | 1 (EFFECT_ROAR) | 2 | 2 | 40 |
-| `B_SCR_OP_COUNTERDAMAGECALCULATOR` | 1 (EFFECT_COUNTER) | 1 | 1 | 40 |
 | `B_SCR_OP_CLEARSEMIINVULNERABLEBIT`, `B_SCR_OP_CLEARSTATUSFROMEFFECT`, `B_SCR_OP_SETSEMIINVULNERABLEBIT` | 1 (EFFECT_SEMI_INVULNERABLE) | 4 | 4 | 32 |
 | `B_SCR_OP_TRYHEALHALFHEALTH` | 2 (EFFECT_RESTORE_HP, EFFECT_SOFTBOILED) | 4 | 3 | 29 |
 | `B_SCR_OP_TRYKO`, `B_SCR_OP_TRYSETDESTINYBONDTOHAPPEN` | 1 (EFFECT_OHKO) | 4 | 4 | 28 |
@@ -44,10 +43,11 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_CLEARSTATUSFROMEFFECT`, `B_SCR_OP_JUMPIFABILITYPRESENT` | 1 (EFFECT_SOLAR_BEAM) | 1 | 1 | 16 |
 | `B_SCR_OP_JUMPIFNOTFIRSTTURN` | 1 (EFFECT_FAKE_OUT) | 1 | 1 | 15 |
 | `B_SCR_OP_COPYFOESTATS` | 1 (EFFECT_PSYCH_UP) | 1 | 1 | 14 |
-| `B_SCR_OP_MIRRORCOATDAMAGECALCULATOR` | 1 (EFFECT_MIRROR_COAT) | 1 | 1 | 14 |
 | `B_SCR_OP_JUMPIFCANTSWITCH`, `B_SCR_OP_RETURNTOBALL`, `B_SCR_OP_SWITCHOUTABILITIES` | 1 (EFFECT_BATON_PASS) | 1 | 1 | 13 |
 | `B_SCR_OP_JUMPIFNODAMAGE` | 1 (EFFECT_FOCUS_PUNCH) | 1 | 1 | 11 |
 | `B_SCR_OP_SETDESTINYBOND` | 1 (EFFECT_DESTINY_BOND) | 1 | 1 | 10 |
+| `B_SCR_OP_SETSUBSTITUTE` | 1 (EFFECT_SUBSTITUTE) | 1 | 1 | 10 |
+| `B_SCR_OP_SETYAWN` | 1 (EFFECT_YAWN) | 1 | 1 | 10 |
 
 ## Per-effect detail
 
@@ -142,7 +142,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_DISABLE | `BattleScript_EffectDisable` | blocked-on-opcodes | `B_SCR_OP_DISABLELASTUSEDATTACK` (main path) | - | 1 | 1 (5) |
 | EFFECT_LEVEL_DAMAGE | `BattleScript_EffectLevelDamage` | executable | - | - | 2 | 2 (10) |
 | EFFECT_PSYWAVE | `BattleScript_EffectPsywave` | executable | - | - | 1 | 1 (2) |
-| EFFECT_COUNTER | `BattleScript_EffectCounter` | blocked-on-opcodes | `B_SCR_OP_COUNTERDAMAGECALCULATOR` (main path) | - | 1 | 1 (40) |
+| EFFECT_COUNTER | `BattleScript_EffectCounter` | executable | - | - | 1 | 1 (40) |
 | EFFECT_ENCORE | `BattleScript_EffectEncore` | blocked-on-opcodes | `B_SCR_OP_TRYSETENCORE` (main path) | - | 1 | 1 (4) |
 | EFFECT_PAIN_SPLIT | `BattleScript_EffectPainSplit` | blocked-on-opcodes | `B_SCR_OP_PAINSPLITDMGCALC` (main path) | - | 1 | 1 (2) |
 | EFFECT_SNORE | `BattleScript_EffectSnore` | executable | - | - | 1 | 1 (1) |
@@ -197,7 +197,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_UNUSED_8D | `BattleScript_EffectHit` | executable | - | - | 0 | 0 (0) |
 | EFFECT_BELLY_DRUM | `BattleScript_EffectBellyDrum` | blocked-on-opcodes | `B_SCR_OP_MAXATTACKHALVEHP` (main path) | - | 1 | 1 (2) |
 | EFFECT_PSYCH_UP | `BattleScript_EffectPsychUp` | blocked-on-opcodes | `B_SCR_OP_COPYFOESTATS` (main path) | - | 1 | 1 (14) |
-| EFFECT_MIRROR_COAT | `BattleScript_EffectMirrorCoat` | blocked-on-opcodes | `B_SCR_OP_MIRRORCOATDAMAGECALCULATOR` (main path) | - | 1 | 1 (14) |
+| EFFECT_MIRROR_COAT | `BattleScript_EffectMirrorCoat` | executable | - | - | 1 | 1 (14) |
 | EFFECT_SKULL_BASH | `BattleScript_EffectSkullBash` | blocked-on-opcodes | `B_SCR_OP_CLEARSTATUSFROMEFFECT` (edge branch only) | Cmd_seteffectprimary dispatch: MOVE_EFFECT_CHARGING is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522<br>Cmd_seteffectwithchance dispatch: MOVE_EFFECT_CHARGING is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 1 | 0 (0) |
 | EFFECT_TWISTER | `BattleScript_EffectTwister` | executable | - | - | 1 | 0 (0) |
 | EFFECT_EARTHQUAKE | `BattleScript_EffectEarthquake` | blocked-on-opcodes | `B_SCR_OP_SELECTFIRSTVALIDTARGET`, `B_SCR_OP_JUMPIFNEXTTARGETVALID` (main path) | - | 1 | 1 (147) |

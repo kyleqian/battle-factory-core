@@ -14,7 +14,7 @@ import {
   type BattleState,
 } from "../src/engine/battleDecisionBoundary.ts";
 import { advanceRngValue } from "../src/engine/rng.ts";
-import { DEFAULT_STAT_STAGE } from "../src/engine/damageCalc.ts";
+import { DEFAULT_STAT_STAGE, MAX_STAT_STAGE } from "../src/engine/damageCalc.ts";
 
 const NEUTRAL_STAGES = Object.freeze({
   atk: DEFAULT_STAT_STAGE,
@@ -1583,5 +1583,271 @@ describe("AI_CV_SpAtkUp mask-7 fixture reproduction (docs/factory-ai-checkviabil
     const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 99, calls: 0 } });
     expect(phaseDraws(result, "check-viability")).toHaveLength(0);
     expect(result.trace.draws).toHaveLength(4 /* setup */ + 1 /* tie */);
+  });
+});
+
+const MOVE_COSMIC_POWER_MASK7 = 322; // EFFECT_COSMIC_POWER
+const MOVE_CALM_MIND_MASK7 = 347; // EFFECT_CALM_MIND
+
+// docs/factory-ai-checkviability-ground-truth.md §22.2/§22.3's four fixtures
+// (tools/battle-lab/mechanic-factory-ai-cv-spdefup-{cosmicpower,calmmind}-
+// {reach,control}-off.json) -- the ninth CBM-blocked pair, reproduced
+// through the REAL mask-7 dispatcher end to end now that AI_CBM_CosmicPower,
+// AI_CBM_CalmMind, and the shared AI_CV_SpDefUp are all ported. §18.3's own
+// Anorith/Machamp HP-banded last-used-move recipe reused verbatim (doc
+// §22.2): opponent (AI_USER) = Anorith (Battle Armor blocks Cmd_critcalc's
+// own Random() call), target (player) = Machamp (single ability Guts) --
+// same species pairing as the DefenseUp/SpAtkUp blocks above. Gate F's own
+// polarity inversion (doc §22.1) flips the reach/control move-to-name
+// assignment vs DefenseUp's own: here Seismic Toss (physical, IN the list)
+// is the CONTROL fixture (Gate F now jumps straight to ScoreDown2, a fully
+// deterministic zero-draw path) and Dragon Rage (non-physical, NOT in the
+// list) is the REACH fixture (falls through to DRAW SITE 4) -- the exact
+// opposite of DefenseUp's own naming, per §22.2's own explicit warning
+// against copying DefenseUp's move-to-name assignment blind. Same "4 clean
+// check-viability draws" policy-own-draws model the DefenseUp block above
+// established: the oracle's own live window totals (§22.3: reach 14/13,
+// control 8/8 cross-seed) include extra per-slot Random() calls outside
+// chooseFactoryAiScoredDecision's own scope plus the still-unresolved
+// "5-6, not 4" anomaly (§18.4/§22.3-22.4) this port does not model -- a
+// documented subset, same relationship every prior HP-banded/last-move pair
+// (DefenseUp/AccuracyDown) already established, not a mismatch.
+describe("AI_CV_SpDefUp mask-7 fixture reproduction (docs/factory-ai-checkviability-ground-truth.md §22.2/§22.3)", () => {
+  function anorithAttacker(hp: number): FactoryAiScoredBattlerView {
+    return Object.freeze({
+      types: ["TYPE_ROCK", "TYPE_BUG"] as const,
+      attack: 115, defense: 70, spAttack: 60, spDefense: 70, speed: 95, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp, maxHp: 120,
+    });
+  }
+  function machampTarget(lastUsedMoveId: number): FactoryAiScoredTargetView {
+    return Object.freeze({
+      species: 68,
+      types: ["TYPE_FIGHTING", "TYPE_FIGHTING"] as const,
+      attack: 150, defense: 100, spAttack: 85, spDefense: 105, speed: 75, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp: 165, maxHp: 165, ability: "ABILITY_GUTS", knownAbility: null,
+      lastUsedMoveId,
+    });
+  }
+  function spDefUpView(
+    moveId: number,
+    attacker: FactoryAiScoredBattlerView,
+    target: FactoryAiScoredTargetView,
+  ): FactoryAiScoredView {
+    return Object.freeze({
+      schema: "factory-ai-scored-view/v1",
+      mode: "factory-level-50-singles",
+      active: Object.freeze({ aiBattler: 1 as const, targetBattler: 0 as const }),
+      factory: Object.freeze({ levelMode: 0 as const, battleMode: 0 as const, factoryWinStreak: 28, trainerOpponentId: 222 }),
+      moves: [moveId, moveId, moveId, moveId] as const,
+      attacker,
+      target,
+    });
+  }
+  function phaseDraws(result: ReturnType<typeof chooseFactoryAiScoredDecision>, phase: "check-bad-move" | "try-to-faint" | "check-viability") {
+    return result.trace.draws.filter((d) => "phase" in d && d.phase === phase);
+  }
+
+  it.each([
+    ["CosmicPower", MOVE_COSMIC_POWER_MASK7],
+    ["CalmMind", MOVE_CALM_MIND_MASK7],
+  ])("%s reach fixture (Dragon Rage last, Anorith 80/120 = 66.7%%): Gate F NOT in the physical list -- falls through to DRAW SITE 4, exactly 4 check-viability draws, zero CBM/TryToFaint draws", (_label, moveId) => {
+    const view = spDefUpView(moveId, anorithAttacker(80), machampTarget(MOVE_DRAGON_RAGE_LAST));
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 1, calls: 0 } });
+    expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+    expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+    const cvDraws = phaseDraws(result, "check-viability");
+    expect(cvDraws).toHaveLength(4);
+    expect(cvDraws.every((d) => "kind" in d && d.kind === "sp-def-up-roll-4")).toBe(true);
+  });
+
+  it.each([
+    ["CosmicPower", MOVE_COSMIC_POWER_MASK7],
+    ["CalmMind", MOVE_CALM_MIND_MASK7],
+  ])("%s control fixture (Seismic Toss last, Anorith 70/120 = 58.3%%): Gate F IS in the physical list -- INVERTED vs DefenseUp, jumps straight to ScoreDown2, deterministic ZERO check-viability draws", (_label, moveId) => {
+    const view = spDefUpView(moveId, anorithAttacker(70), machampTarget(MOVE_SEISMIC_TOSS_LAST));
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 1, calls: 0 } });
+    expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+    expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+    expect(phaseDraws(result, "check-viability")).toHaveLength(0);
+    expect(result.trace.draws).toHaveLength(4 /* setup */ + 1 /* tie */);
+  });
+
+  it.each([
+    ["CosmicPower", MOVE_COSMIC_POWER_MASK7],
+    ["CalmMind", MOVE_CALM_MIND_MASK7],
+  ])("%s wiring: the attacker's own maxed SPDEF stage reaches the CBM handler through the real dispatcher (mask 1 isolates CheckBadMove: -8 on every slot vs the neutral-stage run; pins the previously unwired spDefStage)", (_label, moveId) => {
+    // Mask 1 (win streak below the mask-7 band) so ONLY CheckBadMove runs --
+    // under mask 7 the shared AI_CV_SpDefUp body reads the same maxed stage
+    // through its own gates and contaminates a total-score comparison.
+    function mask1View(attacker: FactoryAiScoredBattlerView): FactoryAiScoredView {
+      const base = spDefUpView(moveId, attacker, machampTarget(MOVE_SEISMIC_TOSS_LAST));
+      return Object.freeze({ ...base, factory: Object.freeze({ ...base.factory, factoryWinStreak: 14 }) });
+    }
+    const neutral = chooseFactoryAiScoredDecision({
+      view: mask1View(anorithAttacker(70)),
+      request: fourSlotRequest,
+      rng: { value: 1, calls: 0 },
+    });
+    const maxed = chooseFactoryAiScoredDecision({
+      view: mask1View(Object.freeze({
+        ...anorithAttacker(70),
+        statStages: Object.freeze({ ...NEUTRAL_STAGES, spDef: MAX_STAT_STAGE }),
+      })),
+      request: fourSlotRequest,
+      rng: { value: 1, calls: 0 },
+    });
+    expect(maxed.trace.mask).toBe(1);
+    expect(maxed.trace.executedScoringScripts).toEqual(["check-bad-move"]);
+    expect(phaseDraws(maxed, "check-bad-move")).toHaveLength(0);
+    expect(maxed.trace.slotScores.map((s) => s.finalScore)).toEqual(
+      neutral.trace.slotScores.map((s) => s.finalScore - 8),
+    );
+  });
+
+  it("CosmicPower and CalmMind produce numerically identical draw counts for the same reach fixture (neither's own extra raised stat affects Dragon Rage's fixed damage or AI_CV_SpDefUp's own gates, doc §22.3)", () => {
+    const reachCosmic = chooseFactoryAiScoredDecision({
+      view: spDefUpView(MOVE_COSMIC_POWER_MASK7, anorithAttacker(80), machampTarget(MOVE_DRAGON_RAGE_LAST)),
+      request: fourSlotRequest,
+      rng: { value: 1, calls: 0 },
+    });
+    const reachCalm = chooseFactoryAiScoredDecision({
+      view: spDefUpView(MOVE_CALM_MIND_MASK7, anorithAttacker(80), machampTarget(MOVE_DRAGON_RAGE_LAST)),
+      request: fourSlotRequest,
+      rng: { value: 1, calls: 0 },
+    });
+    expect(reachCalm.trace.draws).toHaveLength(reachCosmic.trace.draws.length);
+    expect(phaseDraws(reachCalm, "check-viability")).toHaveLength(phaseDraws(reachCosmic, "check-viability").length);
+  });
+});
+
+const MOVE_LIGHT_SCREEN_MASK7 = 113; // EFFECT_LIGHT_SCREEN
+const MOVE_REFLECT_MASK7 = 115; // EFFECT_REFLECT
+
+// docs/factory-ai-checkviability-ground-truth.md §23.2/§23.3's four fixtures
+// (tools/battle-lab/mechanic-factory-ai-cv-{lightscreen,reflect}-{reach,
+// control}-off.json) -- the tenth CBM-blocked pair, reproduced through the
+// REAL mask-7 dispatcher end to end now that AI_CBM_LightScreen/
+// AI_CBM_Reflect and AI_CV_LightScreen/AI_CV_Reflect are all ported. Opponent
+// (AI_USER) = Anorith (same species/stats as the DefenseDown/DefenseUp/
+// SpAtkUp/SpDefUp blocks above), stays at full 120/120 HP in EVERY fixture --
+// unlike every prior CBM-blocked pair, doc §23.2 needs zero move-damage or
+// HP-banding at all, since Gate A only cares whether that HP is < 50% (never
+// true here). LightScreen's 8-type special list and Reflect's 9-type
+// physical list are exact complements (doc §23.1), so the same two target
+// species (Shuckle 213 Bug/Rock, single ability Sturdy; Vulpix 37 pure Fire,
+// single ability Flash Fire -- both closing the CBM preamble's own
+// get_ability confound) serve both pairs with reach/control simply swapping:
+// Shuckle is LightScreen's reach (neither type listed) / Reflect's control
+// (both types listed); Vulpix is LightScreen's control (Fire listed) /
+// Reflect's reach (Fire not listed). Same "4 clean check-viability draws"
+// policy-own-draws model every prior block establishes: the oracle's own
+// live window totals (§23.3: reach 10/10, control 6/6 cross-seed) are a
+// documented superset (the extra +1 is BattleTurnPassed, outside
+// chooseFactoryAiScoredDecision's own scope, doc §23.4) -- reach's own
+// policy total is 4 setup + 4 CV + 1 tie = 9; control's is 4 setup + 0 CV +
+// 1 tie = 5.
+describe("AI_CV_LightScreen / AI_CV_Reflect mask-7 fixture reproduction (docs/factory-ai-checkviability-ground-truth.md §23.2/§23.3)", () => {
+  function anorithSideScreenAttacker(): FactoryAiScoredBattlerView {
+    return Object.freeze({
+      types: ["TYPE_ROCK", "TYPE_BUG"] as const,
+      attack: 115, defense: 70, spAttack: 60, spDefense: 70, speed: 95, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp: 120, maxHp: 120,
+    });
+  }
+  function shuckleSideScreenTarget(): FactoryAiScoredTargetView {
+    return Object.freeze({
+      species: 213,
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+      attack: 10, defense: 230, spAttack: 10, spDefense: 230, speed: 5, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp: 100, maxHp: 100, ability: "ABILITY_STURDY", knownAbility: null,
+    });
+  }
+  function vulpixSideScreenTarget(): FactoryAiScoredTargetView {
+    return Object.freeze({
+      species: 37,
+      types: ["TYPE_FIRE", "TYPE_FIRE"] as const,
+      attack: 41, defense: 40, spAttack: 50, spDefense: 65, speed: 65, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp: 100, maxHp: 100, ability: "ABILITY_FLASH_FIRE", knownAbility: null,
+    });
+  }
+  function sideScreenView(moveId: number, target: FactoryAiScoredTargetView): FactoryAiScoredView {
+    return Object.freeze({
+      schema: "factory-ai-scored-view/v1",
+      mode: "factory-level-50-singles",
+      active: Object.freeze({ aiBattler: 1 as const, targetBattler: 0 as const }),
+      factory: Object.freeze({ levelMode: 0 as const, battleMode: 0 as const, factoryWinStreak: 28, trainerOpponentId: 222 }),
+      moves: [moveId, moveId, moveId, moveId] as const,
+      attacker: anorithSideScreenAttacker(),
+      target,
+    });
+  }
+  function phaseDraws(result: ReturnType<typeof chooseFactoryAiScoredDecision>, phase: "check-bad-move" | "try-to-faint" | "check-viability") {
+    return result.trace.draws.filter((d) => "phase" in d && d.phase === phase);
+  }
+
+  it.each([1, 99])("LightScreen reach fixture (Shuckle target, Bug/Rock -- neither type in the special list), seed %i: all 4 identical slots independently reach the DRAW SITE -- exactly 4 check-viability draws, zero CBM/TryToFaint draws, 9 total policy draws", (seed) => {
+    const view = sideScreenView(MOVE_LIGHT_SCREEN_MASK7, shuckleSideScreenTarget());
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+    expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+    expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+    const cvDraws = phaseDraws(result, "check-viability");
+    expect(cvDraws).toHaveLength(4);
+    expect(cvDraws.every((d) => "kind" in d && d.kind === "light-screen-roll")).toBe(true);
+    expect(result.trace.draws).toHaveLength(4 /* setup */ + 4 /* CV roll x4 slots */ + 1 /* tie */);
+  });
+
+  it.each([1, 99])("LightScreen control fixture (Vulpix target, pure Fire -- IS in the special list), seed %i: Gate B matches immediately for all 4 slots -- zero check-viability draws, zero CBM/TryToFaint draws, 5 total policy draws", (seed) => {
+    const view = sideScreenView(MOVE_LIGHT_SCREEN_MASK7, vulpixSideScreenTarget());
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+    expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+    expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+    expect(phaseDraws(result, "check-viability")).toHaveLength(0);
+    expect(result.trace.draws).toHaveLength(4 /* setup */ + 1 /* tie */);
+  });
+
+  it.each([1, 99])("Reflect reach fixture (Vulpix target, pure Fire -- NOT in the physical list), seed %i: all 4 identical slots independently reach the DRAW SITE -- exactly 4 check-viability draws, zero CBM/TryToFaint draws, 9 total policy draws", (seed) => {
+    const view = sideScreenView(MOVE_REFLECT_MASK7, vulpixSideScreenTarget());
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+    expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+    expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+    const cvDraws = phaseDraws(result, "check-viability");
+    expect(cvDraws).toHaveLength(4);
+    expect(cvDraws.every((d) => "kind" in d && d.kind === "reflect-roll")).toBe(true);
+    expect(result.trace.draws).toHaveLength(4 /* setup */ + 4 /* CV roll x4 slots */ + 1 /* tie */);
+  });
+
+  it.each([1, 99])("Reflect control fixture (Shuckle target, Bug/Rock -- both types in the physical list), seed %i: Gate B matches immediately for all 4 slots -- zero check-viability draws, zero CBM/TryToFaint draws, 5 total policy draws", (seed) => {
+    const view = sideScreenView(MOVE_REFLECT_MASK7, shuckleSideScreenTarget());
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+    expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+    expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+    expect(phaseDraws(result, "check-viability")).toHaveLength(0);
+    expect(result.trace.draws).toHaveLength(4 /* setup */ + 1 /* tie */);
+  });
+
+  it("LightScreen and Reflect produce numerically identical draw counts on their own respective reach fixtures (doc §23.3's own cross-handler parity)", () => {
+    const lightScreenReach = chooseFactoryAiScoredDecision({
+      view: sideScreenView(MOVE_LIGHT_SCREEN_MASK7, shuckleSideScreenTarget()),
+      request: fourSlotRequest,
+      rng: { value: 1, calls: 0 },
+    });
+    const reflectReach = chooseFactoryAiScoredDecision({
+      view: sideScreenView(MOVE_REFLECT_MASK7, vulpixSideScreenTarget()),
+      request: fourSlotRequest,
+      rng: { value: 1, calls: 0 },
+    });
+    expect(reflectReach.trace.draws).toHaveLength(lightScreenReach.trace.draws.length);
+    expect(phaseDraws(reflectReach, "check-viability")).toHaveLength(phaseDraws(lightScreenReach, "check-viability").length);
   });
 });

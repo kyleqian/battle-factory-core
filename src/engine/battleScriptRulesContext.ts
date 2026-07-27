@@ -188,6 +188,12 @@ type BattleScriptMoveEndBattlerMetadata = Readonly<{
   protected: 0 | 1;
   /** SpecialStatus::ppNotAffectedByPressure. */
   ppNotAffectedByPressure: 0 | 1;
+  /** ProtectStruct::physicalDmg -- Counter's own retaliation-amount input (distinct from SpecialStatus::physicalDmg, specialStatus.physicalDmg above; see docs/counter-retaliation-design.md §1.2 for why these cannot share a field). */
+  protectPhysicalDmg: number;
+  protectPhysicalBattlerId: BattleScriptBattlerId;
+  /** ProtectStruct::specialDmg -- Mirror Coat's equivalent. */
+  protectSpecialDmg: number;
+  protectSpecialBattlerId: BattleScriptBattlerId;
   /** Source gBattleMons[battler].types[2], the hit-chain's defending/Ghost-immunity types. */
   types: readonly [string, string];
   /** Source gBattleMons[battler].species - Lucky Punch/Stick's species-gated crit stage boost. */
@@ -285,6 +291,10 @@ export type BattleScriptRulesBattler = BattleScriptRulesBattlerBase & Readonly<{
   flag2Unknown?: 0 | 1;
   protected?: 0 | 1;
   ppNotAffectedByPressure?: 0 | 1;
+  protectPhysicalDmg?: number;
+  protectPhysicalBattlerId?: BattleScriptBattlerId;
+  protectSpecialDmg?: number;
+  protectSpecialBattlerId?: BattleScriptBattlerId;
   types?: readonly [string, string];
   species?: number;
   attack?: number;
@@ -1694,6 +1704,24 @@ export function createBattleScriptRulesContext(
       1,
       `battlers[${index}].ppNotAffectedByPressure`,
     ) as 0 | 1,
+    protectPhysicalDmg: requireSigned32(
+      battler.protectPhysicalDmg ?? 0,
+      `battlers[${index}].protectPhysicalDmg`,
+    ),
+    protectPhysicalBattlerId: requireUnsigned(
+      battler.protectPhysicalBattlerId ?? 0,
+      3,
+      `battlers[${index}].protectPhysicalBattlerId`,
+    ) as BattleScriptBattlerId,
+    protectSpecialDmg: requireSigned32(
+      battler.protectSpecialDmg ?? 0,
+      `battlers[${index}].protectSpecialDmg`,
+    ),
+    protectSpecialBattlerId: requireUnsigned(
+      battler.protectSpecialBattlerId ?? 0,
+      3,
+      `battlers[${index}].protectSpecialBattlerId`,
+    ) as BattleScriptBattlerId,
     types: Object.freeze(
       (() => {
         const types = battler.types ?? ["TYPE_NORMAL", "TYPE_NORMAL"];
