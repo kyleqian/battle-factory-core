@@ -44,6 +44,40 @@ animation. A status caused by a move is not part of that move's animation.
   presentation seam and all source- or evidence-required variants are covered.
 - No entry means unsupported.
 
+## SYNTHESIS promoted to exact; SPARKLE_2 / GrantingStars track established (2026-07-27)
+
+**Verdict:** `MOVE_SYNTHESIS` is exact through the shared Scene-ON seam in
+both required orientations, each reproduced twice. Player-back SKIPLOOM is
+**130/130 component/task/RAM/palette and framebuffer frames** (oracle
+609-738); opponent-front SKIPLOOM is **130/130** (220-349). Census:
+**31/276 exact, 3 partial, 242 unsupported**.
+
+**Source/probe:** complete legal mechanicLab parties stage SKIPLOOM, the real
+Level-50 Factory set-129 carrier. Stock TACKLE damage creates missing HP; no
+transient battle state is injected. The reducer ports the literal delay-2
+two-leg attacker `blend_color_cycle` (0→16→0), both
+`gGrantingStarsSpriteTemplate` fixed-point/frame-animation bodies from
+`GrantingStarsEffect`, the asset unload/delay/load boundary, and the full
+already-shared `HealingEffect`. `ANIM_TAG_SPARKLE_2`, SKIPLOOM front/back
+chrome, source OAM ordering, palette coefficients, and carrier tile VRAM are
+extracted or probed reproducibly.
+
+**Sibling audit (no promotions):** HEAL BELL still needs its bell, twelve
+palette-managed music notes, three HealBellRing tasks, the distinct
+`gSparklingStarsSpriteTemplate`, and finale; WISH needs gold stars, black-BG
+fade/pan, wish star, and delay; REFRESH needs StatusClearedEffect, palette
+restore, and thin ring; AROMATHERAPY needs nine flowers, green BG/monbg,
+thin ring, and `HealingEffect2`; COSMIC POWER needs its non-attacker palette
+fades, cosmic BG pipeline, sound tasks, delay, and two GrantingStars calls.
+All remain unsupported pending independent complete dense acceptance.
+
+**Evidence/controls:** legal fixtures, reproducible extractor, dense
+task/OAM/palette/RGB probe, portable comparator, and focused Tier-1 tests are
+committed. Acceptance is **130/130 ×2 in both orientations**. After the final
+renderer change RECOVER remains **169/169**, MILK DRINK **186/186**, and BIND
+**45/45**, each in both orientations. The shared blend-color-cycle and
+HealingEffect tests and animation import boundary remain green.
+
 ## ACID promoted to exact; poison-bubble track established (2026-07-27)
 
 **Verdict:** `MOVE_ACID` is exact through the shared Scene-ON seam in both
@@ -121,47 +155,6 @@ comparator, and focused Tier-1 tests are committed. Acceptance is **197/197
 ×2 in both orientations**. WATER GUN remains **111/111**, SUPERSONIC
 **51/51**, and BIND **45/45**, both orientations, after the final renderer
 change. The animation import boundary did not widen.
-
-## WATER GUN promoted to exact; small-bubbles / water-impact track established (2026-07-26)
-
-**Verdict:** `MOVE_WATER_GUN` is exact through the shared Scene-ON seam in
-both required orientations, each reproduced twice. Player-back HORSEA is
-**111/111 component/RAM and framebuffer frames** (oracle 83-193);
-opponent-front HORSEA is **111/111** (87-197). Census: **28/276 exact, 3
-partial, 245 unsupported**.
-
-**Source/probe:** complete legal mechanicLab parties stage HORSEA, the real
-Level-50 Factory set-60 carrier, with all four choices constrained to WATER
-GUN; ONIX is constrained to TACKLE. The reducer covers
-`ANIM_TAG_SMALL_BUBBLES`, `ANIM_TAG_WATER_IMPACT`, the projectile's complete
-40-callback horizontal arc, hitsplat affine program 2, all three delayed
-fixed-point/looping-affine droplets,
-`splitbgprio/monbg/setalpha/blendoff/clearmonbg`, and only the literal
-`AnimTask_ShakeMon2(target,1,0,8,1)` tuple. The compositor models the target
-as `monbg` BG2—the water OBJ's real alpha target—while the attacker stays an
-OBJ; source OAM slot ordering puts the hitsplat in front of the first droplet.
-
-**Sibling audit (no promotions):** SMALL_BUBBLES: BUBBLE BEAM needs 18 large
-projectiles, SwayMon, and its short bubble effect; SECRET POWER dispatches to
-environment-specific complete scripts; DIVE needs both two-turn splash/spray
-halves and RisingWaterHitEffect; MIST BALL needs its translating ball,
-shake/palette tasks, and fog BG pipeline; FAKE TEARS needs BlendParticle,
-RockMonBackAndForth, and eight tear sprites; WATER PULSE needs five bubbles,
-three rings, shake, and BG blend. WATER_IMPACT: HYDRO PUMP needs paired orb
-beams, sine timer, shakes, and repeated hitsplats; CRABHAMMER needs palette
-blend, slide/return, shake, and eight bubble pairs; WATER SPOUT needs its
-glowy-orb launch/rain tasks. All remain unsupported pending independent dense
-evidence.
-
-**Evidence/controls:** legal fixtures, reproducible extractor, dense RAM/RGB
-probe, portable comparator, and focused Tier-1 tests are committed. Acceptance
-is **111/111 ×2 in both orientations**. BIND remains **45/45** and SUPERSONIC
-**51/51**, both orientations, after final renderer changes; ShakeMon2 and the
-animation import boundary remain green.
-
-**Verification:** **234 test files / 3141 tests green**; production build
-green; coverage self-check reports **28/276 exact, 3 partial, 245
-unsupported**.
 
 Start with one representative attacker/target. Add variants only when source
 inspection or comparison identifies a dependency: attacker side, front/back
