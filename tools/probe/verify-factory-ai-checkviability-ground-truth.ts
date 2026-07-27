@@ -634,11 +634,14 @@ const DRAW_COUNT_SCENARIOS: DrawCountScenarioSpec[] = [
   // precondition's own necessary real-damage cost, not part of the
   // handler. Cmd_get_ability appears in neither fixture's attribution
   // table, confirming both species' single-ability kits close the §14.2
-  // confound. DRAW SITES 2-6 (opponent's own ACC stage already lowered
-  // twice; target toxic-poisoned/leech-seeded; opponent Ingrain-rooted;
-  // target cursed) all need a genuinely mixed opponent moveset and a real,
-  // unforced AI pick between two different moves across two turns -- out
-  // of this session's budget, left as citation-backed recipes (doc §19.5).
+  // confound. DRAW SITES 3-6 (target toxic-poisoned/leech-seeded; opponent
+  // Ingrain-rooted; target cursed) all need a genuinely mixed opponent
+  // moveset and a real, unforced AI pick between two different moves across
+  // two turns -- still out of session budget, left as citation-backed
+  // recipes (doc §19.5). DRAW SITE 2 (below) does NOT share that obstacle --
+  // it is gated on the OPPONENT's (Machamp's) own ACC stat stage, which the
+  // PLAYER's own actions can set directly with the opponent's moveset held
+  // at 4 identical MOVE_SAND_ATTACK slots throughout.
   {
     label:
       "AI_CV_AccuracyDown, opponent (AI_USER, Machamp) HP hit to 69.7% by a real turn-1 move -- reachable branch (data/battle_ai_scripts.s:1198-1234): Gate A (if_hp_less_than USER,70) routes straight into the :1202 if_random_less_than 100 draw site (DRAW SITE 1), and because the same turn's MOVE_SAND_ATTACK already lowered the target's own ACC stage 6->5, Gate I (:1226) is false on the phantom next-turn re-decision, letting Gates H/J/K all fall through into the :1229 if_random_less_than 70 draw site too (DRAW SITE 7) -- both sites fire once per identical MOVE_SAND_ATTACK slot",
@@ -655,6 +658,61 @@ const DRAW_COUNT_SCENARIOS: DrawCountScenarioSpec[] = [
     finalFrame: 732,
     expectedPpUsed: 1,
     expectedTotalSteps: { 1: 7, 99: 7 },
+    checkCrossSeedStable: true,
+  },
+  // AI_CV_AccuracyDown DRAW SITE 2 (:1206, doc §19.5's own recipe, staged
+  // live this session): opponent (AI_USER, Machamp) same species/moveset as
+  // above (all 4 slots MOVE_SAND_ATTACK). Target (player) is Pidgey (16,
+  // single ability Keen Eye, Normal/Flying) instead of Anorith -- a NEW
+  // confound found live staging this site: since BOTH battlers now carry
+  // Sand Attack (the player's own copy is the real move that lowers
+  // Machamp's OWN ACC stage 6->5->4 over 2 turns, the precondition Gate C
+  // needs), Machamp's own forced Sand Attack reciprocally targets the
+  // player every turn too -- an unprotected target's OWN ACC stage would
+  // fall in step, making the player's later Sand Attack accuracy rolls
+  // against Machamp probabilistic (a compounding, cross-turn version of the
+  // single-turn ordering bug already found in the lowhp-reach fixture
+  // above). Pidgey closes this by construction twice over: Ground-type
+  // Sand Attack cannot touch a Flying-type at all (type immunity, checked
+  // before any accuracy roll), and Keen Eye independently blocks any
+  // accuracy-lowering effect from landing on its holder regardless
+  // (src/battle_script_commands.c:4144) -- so the player's own Sand Attack
+  // against Machamp stays a deterministic 100% hit both turns. 2 real
+  // executed turns (calibrated mash-button reps, verified stable under
+  // both a 700- and 2000-frame tail: exactly 2 PP consumed, never a real
+  // 3rd) bring Machamp's own ACC stage to 4 (Gate C, :1205, now false);
+  // both battlers' HP stay at 100% throughout (0-power moves both sides),
+  // so Gates A/B cleanly skip DRAW SITE 1 as in every other AccuracyDown
+  // fixture. The phantom 3rd-turn re-decision then reaches the :1206
+  // if_random_less_than 80 roll once per identical MOVE_SAND_ATTACK slot.
+  // The control fixture (target uses MOVE_SPLASH instead) is calibrated
+  // separately (30 mash reps, not 40) because Splash's own lack of a
+  // stat-change animation lets real turns execute faster per button-rep
+  // than Sand Attack's does -- an uncalibrated shared rep count would have
+  // let the control run a genuine (but harmless, since ACC never changes)
+  // 3rd real turn instead of stopping at the same phantom 3rd decision the
+  // reach fixture reads, breaking the two fixtures' turn-count parity.
+  // Observed delta (20 reach vs 14 control, both cross-seed stable) matches
+  // the analytical prediction exactly: +4 Cmd_if_random_less_than (DRAW
+  // SITE 2, N=4 slots x 1 draw) + 2 Cmd_accuracycheck (the player's own 2
+  // real Sand Attack hits on Machamp, absent in the control's 2 Splash
+  // turns) = +6.
+  {
+    label:
+      "AI_CV_AccuracyDown, opponent (AI_USER, Machamp) own ACC stat stage lowered to 4 by two real player (Pidgey) Sand Attack turns -- DRAW SITE 2 reachable branch (data/battle_ai_scripts.s:1198-1234): Gates A/B skip DRAW SITE 1 (both battlers held at 100% HP throughout), Gate C (if_stat_level_more_than USER,ACC,4) is false once the opponent's own ACC stage reaches 4, reaching the :1206 if_random_less_than 80 draw site on the phantom 3rd-turn re-decision, once per identical MOVE_SAND_ATTACK slot",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-accuracydown-accdown-reach-off.json",
+    finalFrame: 1500,
+    expectedPpUsed: 2,
+    expectedTotalSteps: { 1: 20, 99: 20 },
+    checkCrossSeedStable: true,
+  },
+  {
+    label:
+      "AI_CV_AccuracyDown, opponent (AI_USER, Machamp) own ACC stat stage stays default -- control (same species/turn count, player uses MOVE_SPLASH instead of MOVE_SAND_ATTACK): Gate C (if_stat_level_more_than USER,ACC,4) stays true (default stage 6), so the :1206 draw site is never reached on the phantom 3rd-turn re-decision",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-accuracydown-accdown-control-off.json",
+    finalFrame: 1300,
+    expectedPpUsed: 2,
+    expectedTotalSteps: { 1: 14, 99: 14 },
     checkCrossSeedStable: true,
   },
   // AI_CV_SpeedUp (data/battle_ai_scripts.s:956-965, doc §20): the first
