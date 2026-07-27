@@ -43,8 +43,10 @@ export function calmMindAtAge(age: number): CalmMindState {
   for (let index = 0; index < CALM_MIND_RING_START_AGES.length; index++) {
     const localAge = age - CALM_MIND_RING_START_AGES[index]!;
     if (localAge < 0 || localAge > CALM_MIND_RING_CALLBACKS) continue;
+    // AnimateSprites consumes the first -16 affine callback on the creation
+    // pass before the sprite reaches hardware OAM.
     const sourceScale = 0x200 - 0x10 * Math.min(
-      localAge,
+      localAge + 1,
       CALM_MIND_RING_CALLBACKS,
     );
     rings.push({

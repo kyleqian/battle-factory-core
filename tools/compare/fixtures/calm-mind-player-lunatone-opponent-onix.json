@@ -1,0 +1,13 @@
+{
+  "schema":"scene-on-portable-component/v1",
+  "oracleProfile":"battle-scene-on",
+  "scenario":"tools/battle-lab/mechanic-calm-mind-player-lunatone-opponent-onix.json",
+  "probe":"tools/compare/calmMindProbe.py",
+  "pair":"LUNATONE real Level-50 Factory set-327 CALM MIND carrier player-back -> ONIX opponent-front",
+  "move":"CALM_MIND",
+  "denseWindow":{"startFrame":294,"endFrame":394},
+  "appStage":{"presentationAge":0},
+  "attacker":{"species":"LUNATONE","geometry":{"side":"player","spriteCorner":{"x":40,"y":53},"animationCenter":{"x":72,"y":93},"battlePositionCenter":{"x":72,"y":80}}},
+  "target":{"species":"ONIX","geometry":{"side":"opponent","spriteCorner":{"x":144,"y":10},"animationCenter":{"x":176,"y":42},"battlePositionCenter":{"x":176,"y":40}}},
+  "fieldProfile":{"playerHp":173,"playerMaxHp":177,"opponentHp":110,"opponentMaxHp":110,"playerGender":"none","opponentGender":"male"}
+}

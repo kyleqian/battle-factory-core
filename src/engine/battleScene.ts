@@ -541,6 +541,7 @@ import supersonicAsset from "../animation/assets/supersonic.json" with { type: "
 import waterGunAsset from "../animation/assets/water-gun.json" with { type: "json" };
 import acidAsset from "../animation/assets/acid.json" with { type: "json" };
 import hardenAsset from "../animation/assets/harden.json" with { type: "json" };
+import calmMindAsset from "../animation/assets/calm-mind.json" with { type: "json" };
 import menuHealthboxPlayerAsset from "../assets/gen/menu-healthbox-player.json" with { type: "json" };
 import summaryBallAsset from "../assets/gen/summary-ball.json" with { type: "json" };
 import battleAnimBallOpenAsset from "../assets/gen/battle-anim-ball-open.json" with { type: "json" };
@@ -637,6 +638,7 @@ import {
   sceneOnAcidView,
   sceneOnEarthquakeView,
   sceneOnHardenView,
+  sceneOnCalmMindView,
   sceneOnFutureSightView,
   sceneOnConfusionView,
   sceneOnPsychicView,
@@ -943,6 +945,11 @@ const hardenArt = hardenAsset as {
   metal: { tileset: Tileset; tilemap: Tilemap; palette: RgbColor[] };
   relicanthBack: { tileset: Tileset; palette: RgbColor[] };
   relicanthFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const calmMindArt = calmMindAsset as {
+  thinRing: { tileset: Tileset; palette: RgbColor[] };
+  lunatoneBack: { tileset: Tileset; palette: RgbColor[] };
+  lunatoneFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const MURKROW_CORNER = { x: 144, y: 19 };
 const menuHealthboxPlayer = menuHealthboxPlayerAsset as SendOutHealthboxContentAsset;
@@ -15615,6 +15622,136 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "RELICANTH used" : "Foe RELICANTH used",
       "HARDEN!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "CALM_MIND") {
+    const view = sceneOnCalmMindView(state);
+    // OAM/palette writes become visible on the following display latch.
+    const displayed = sceneOnCalmMindView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "LUNATONE"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "LUNATONE"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged CALM_MIND pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSource = playerToOpponent
+      ? calmMindArt.lunatoneBack : calmMindArt.lunatoneFront;
+    const attackerSprite = playerToOpponent
+      ? attackerSource
+      : {
+          ...attackerSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: attackerSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const dark = { r: 0, g: 0, b: 0 };
+    const paletteBlendY = state.age >= 84
+      ? view.paletteBlendY
+      : displayed.paletteBlendY;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      blendPaletteBanksToward(
+        battleBg.palette,
+        dark,
+        paletteBlendY,
+      ),
+    );
+    if (!displayed.nonAttackerInvisible) {
+      const targetIdle = view.target.geometry.side === "opponent"
+        ? speciesFrontIdleRestOffset(view.target.species)
+        : null;
+      drawSpriteSheet(
+        fb,
+        targetSprite.tileset,
+        blendPaletteToward(
+          targetSprite.palette,
+          dark,
+          paletteBlendY,
+        ),
+        view.target.geometry.spriteCorner.x + (targetIdle?.x2 ?? 0),
+        view.target.geometry.spriteCorner.y + (targetIdle?.y2 ?? 0),
+      );
+    }
+    // `monbg` moves the attacker below OBJ; every semi-transparent ring is
+    // therefore composited over the attacker silhouette.
+    drawSpriteSheet(
+      fb,
+      attackerSprite.tileset,
+      attackerSprite.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    // Same-subpriority source order: older rings win OAM order and are drawn
+    // last among rings.
+    for (const ring of [...displayed.rings].reverse()) {
+      drawSpriteSheetAffineStretch(
+        fb,
+        calmMindArt.thinRing.tileset,
+        calmMindArt.thinRing.palette,
+        view.attacker.geometry.animationCenter.x - 32,
+        view.attacker.geometry.animationCenter.y - 32,
+        ring.oamScale,
+        ring.oamScale,
+        0,
+        dark,
+        0,
+        true,
+      );
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "LUNATONE";
+    const playerSpecies = playerToOpponent ? "LUNATONE" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "LUNATONE used" : "Foe LUNATONE used",
+      "CALM MIND!",
       99,
     );
     return;

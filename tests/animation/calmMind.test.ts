@@ -31,10 +31,10 @@ describe("CALM MIND source reducer", () => {
   it("creates all three shrinking rings on the literal delay-14 schedule", () => {
     expect(CALM_MIND_RING_START_AGES).toEqual([20, 36, 52]);
     expect(calmMindAtAge(20).rings).toEqual([{
-      spawnIndex: 0, localAge: 0, sourceScale: 512, oamScale: 128,
+      spawnIndex: 0, localAge: 0, sourceScale: 496, oamScale: 132,
     }]);
     expect(calmMindAtAge(35).rings[0]).toMatchObject({
-      localAge: 15, sourceScale: 272, oamScale: 240,
+      localAge: 15, sourceScale: 256, oamScale: 256,
     });
     expect(calmMindAtAge(36).rings.map((ring) => ring.spawnIndex))
       .toEqual([0, 1]);

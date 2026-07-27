@@ -13,6 +13,10 @@ import {
   type MetallicShineState,
 } from "./metallicShine.ts";
 import {
+  calmMindAtAge,
+  type CalmMindState,
+} from "./calmMind.ts";
+import {
   FAINT_ATTACK_ANIMATION_PROFILE,
   faintAttackAttackerEva,
   faintAttackAttackerOffset,
@@ -275,6 +279,7 @@ export interface SceneOnPresentationBattler {
     | "EKANS"
     | "SKIPLOOM"
     | "RELICANTH"
+    | "LUNATONE"
     | "SHUPPET"
     | "PLUSLE";
   readonly geometry: SceneOnBattlerGeometry;
@@ -735,6 +740,19 @@ export interface SceneOnHardenConfig {
   readonly attackerSpriteCenter: Readonly<{ x: number; y: number }>;
 }
 
+export interface SceneOnCalmMindConfig {
+  readonly move: "CALM_MIND";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<
+    Omit<SceneOnDragonRageFieldProfile, "playerGender" | "opponentGender">
+    & {
+      readonly playerGender?: "male" | "female" | "none";
+      readonly opponentGender?: "male" | "female" | "none";
+    }
+  >;
+}
+
 export interface SceneOnFutureSightConfig {
   readonly move: "FUTURE_SIGHT";
   readonly attacker: SceneOnPresentationBattler;
@@ -796,6 +814,7 @@ export type SceneOnMoveConfig =
   | SceneOnAcidConfig
   | SceneOnEarthquakeConfig
   | SceneOnHardenConfig
+  | SceneOnCalmMindConfig
   | SceneOnFutureSightConfig
   | SceneOnConfusionConfig
   | SceneOnPsychicConfig
@@ -842,6 +861,12 @@ export interface SceneOnEarthquakeView extends EarthquakeAnimationState {
 }
 
 export interface SceneOnHardenView extends MetallicShineState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnCalmMindView extends CalmMindState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -1793,6 +1818,21 @@ export function sceneOnHardenView(
       state.config.attackerSpriteCenter.y,
       false,
     ),
+  };
+}
+
+/** `age=0` is the settled field immediately before the script's `monbg`. */
+export function sceneOnCalmMindView(
+  state: SceneOnMovePresentationState,
+): SceneOnCalmMindView {
+  if (state.config.move !== "CALM_MIND") {
+    throw new Error(`expected CALM_MIND presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...calmMindAtAge(state.age),
   };
 }
 
