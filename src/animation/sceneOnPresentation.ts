@@ -246,6 +246,15 @@ import {
   knockOffTargetOamOffsetAtAge,
   type KnockOffBodyState,
 } from "./knockOff.ts";
+import {
+  shadowBallBackgroundBldy,
+  shadowBallBackgroundIsGhost,
+  shadowBallLoopSoundAtAge,
+  shadowBallSpriteAtAge,
+  shadowBallTargetShakeAtAge,
+  type LoopSeAdjustPanningState,
+  type ShadowBallSprite,
+} from "./shadowBall.ts";
 
 export type SceneOnBattlerSide = "player" | "opponent";
 
@@ -281,7 +290,8 @@ export interface SceneOnPresentationBattler {
     | "RELICANTH"
     | "LUNATONE"
     | "SHUPPET"
-    | "PLUSLE";
+    | "PLUSLE"
+    | "SABLEYE";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -753,6 +763,13 @@ export interface SceneOnCalmMindConfig {
   >;
 }
 
+export interface SceneOnShadowBallConfig {
+  readonly move: "SHADOW_BALL";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnFutureSightConfig {
   readonly move: "FUTURE_SIGHT";
   readonly attacker: SceneOnPresentationBattler;
@@ -815,6 +832,7 @@ export type SceneOnMoveConfig =
   | SceneOnEarthquakeConfig
   | SceneOnHardenConfig
   | SceneOnCalmMindConfig
+  | SceneOnShadowBallConfig
   | SceneOnFutureSightConfig
   | SceneOnConfusionConfig
   | SceneOnPsychicConfig
@@ -870,6 +888,17 @@ export interface SceneOnCalmMindView extends CalmMindState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnShadowBallView {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly backgroundGhost: boolean;
+  readonly backgroundBldy: number;
+  readonly sprite: ShadowBallSprite | null;
+  readonly targetOffset: Readonly<{ x2: number; y2: number }>;
+  readonly loopSound: LoopSeAdjustPanningState | null;
 }
 
 export interface SceneOnFirePunchView {
@@ -1833,6 +1862,31 @@ export function sceneOnCalmMindView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...calmMindAtAge(state.age),
+  };
+}
+
+/** `age=0` is the `fadetobg BG_GHOST` creation tick. */
+export function sceneOnShadowBallView(
+  state: SceneOnMovePresentationState,
+): SceneOnShadowBallView {
+  if (state.config.move !== "SHADOW_BALL") {
+    throw new Error(`expected SHADOW_BALL presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    backgroundGhost: shadowBallBackgroundIsGhost(state.age),
+    backgroundBldy: shadowBallBackgroundBldy(state.age),
+    sprite: shadowBallSpriteAtAge(state.age, {
+      attackerCenter: state.config.attacker.geometry.animationCenter,
+      targetCenter: state.config.target.geometry.animationCenter,
+    }),
+    targetOffset: shadowBallTargetShakeAtAge(state.age),
+    loopSound: shadowBallLoopSoundAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+    ),
   };
 }
 

@@ -542,6 +542,7 @@ import waterGunAsset from "../animation/assets/water-gun.json" with { type: "jso
 import acidAsset from "../animation/assets/acid.json" with { type: "json" };
 import hardenAsset from "../animation/assets/harden.json" with { type: "json" };
 import calmMindAsset from "../animation/assets/calm-mind.json" with { type: "json" };
+import shadowBallAsset from "../animation/assets/shadow-ball.json" with { type: "json" };
 import menuHealthboxPlayerAsset from "../assets/gen/menu-healthbox-player.json" with { type: "json" };
 import summaryBallAsset from "../assets/gen/summary-ball.json" with { type: "json" };
 import battleAnimBallOpenAsset from "../assets/gen/battle-anim-ball-open.json" with { type: "json" };
@@ -639,6 +640,7 @@ import {
   sceneOnEarthquakeView,
   sceneOnHardenView,
   sceneOnCalmMindView,
+  sceneOnShadowBallView,
   sceneOnFutureSightView,
   sceneOnConfusionView,
   sceneOnPsychicView,
@@ -950,6 +952,11 @@ const calmMindArt = calmMindAsset as {
   thinRing: { tileset: Tileset; palette: RgbColor[] };
   lunatoneBack: { tileset: Tileset; palette: RgbColor[] };
   lunatoneFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const shadowBallArt = shadowBallAsset as {
+  shadowBall: { tileset: Tileset; palette: RgbColor[] };
+  sableyeBack: { tileset: Tileset; palette: RgbColor[] };
+  sableyeFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const MURKROW_CORNER = { x: 144, y: 19 };
 const menuHealthboxPlayer = menuHealthboxPlayerAsset as SendOutHealthboxContentAsset;
@@ -15752,6 +15759,145 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "LUNATONE used" : "Foe LUNATONE used",
       "CALM MIND!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SHADOW_BALL") {
+    const view = sceneOnShadowBallView(state);
+    const displayed = sceneOnShadowBallView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "SABLEYE"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "SABLEYE"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged SHADOW_BALL pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const sableyeSource = playerToOpponent
+      ? shadowBallArt.sableyeBack
+      : shadowBallArt.sableyeFront;
+    const sableyeSprite = playerToOpponent
+      ? sableyeSource
+      : {
+          ...sableyeSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: sableyeSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const onixSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const gpuDarken = (palette: readonly RgbColor[]) =>
+      palette.map((color) => {
+        const packed = mgbaDarkenColor(
+          color.r | (color.g << 8) | (color.b << 16),
+          view.backgroundBldy,
+        );
+        return {
+          r: packed & 0xff,
+          g: (packed >>> 8) & 0xff,
+          b: (packed >>> 16) & 0xff,
+        };
+      });
+    if (view.backgroundGhost) {
+      drawExtractedTileBg(fb, {
+        tileset: battleAnimGhostBg.tileset,
+        tilemap: battleAnimGhostBg.tilemap,
+        subpalettes: [gpuDarken(battleAnimGhostBg.palette)],
+      });
+    } else {
+      drawExtractedTileBg(fb, {
+        tileset: battleBg.static.tileset,
+        tilemap: battleBg.static.tilemap,
+        subpalettes: battleBg.palette.map(gpuDarken),
+      });
+    }
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffset(view.target.species)
+      : null;
+    const shakeActive =
+      displayed.targetOffset.x2 !== 0 || displayed.targetOffset.y2 !== 0;
+    drawSpriteSheet(
+      fb,
+      onixSprite.tileset,
+      onixSprite.palette,
+      view.target.geometry.spriteCorner.x
+        + (shakeActive
+          ? displayed.targetOffset.x2
+          : (targetIdle?.x2 ?? 0)),
+      view.target.geometry.spriteCorner.y
+        + (shakeActive
+          ? displayed.targetOffset.y2
+          : (targetIdle?.y2 ?? 0)),
+    );
+    drawSpriteSheet(
+      fb,
+      sableyeSprite.tileset,
+      sableyeSprite.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    if (view.sprite) {
+      drawSpriteSheetAffineRotate(
+        fb,
+        shadowBallArt.shadowBall.tileset,
+        shadowBallArt.shadowBall.palette,
+        view.sprite.x,
+        view.sprite.y,
+        view.sprite.pa,
+        view.sprite.pb,
+        view.sprite.pc,
+        view.sprite.pd,
+        undefined,
+        false,
+      );
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "SABLEYE";
+    const playerSpecies = playerToOpponent ? "SABLEYE" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "SABLEYE used" : "Foe SABLEYE used",
+      "SHADOW BALL!",
       99,
     );
     return;
