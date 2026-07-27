@@ -18,6 +18,7 @@ type SpeciesStats = {
   baseSpAttack: number;
   baseSpDefense: number;
   abilities: [string, string];
+  genderRatio: number;
 };
 
 const stats = speciesStatsData.species as SpeciesStats[];
@@ -74,6 +75,16 @@ describe("species-stats.json (complete Emerald base-stat and ability corpus)", (
       abilities: ["ABILITY_NONE", "ABILITY_NONE"],
     });
     expect(statsByName.get("SPECIES_FLYGON")!.abilities).toEqual(["ABILITY_LEVITATE", "ABILITY_LEVITATE"]);
+  });
+
+  it("pins genderRatio's four representable shapes (species_info.h:24,58 + include/constants/pokemon.h:169-171)", () => {
+    expect(statsByName.get("SPECIES_NIDORAN_M")!.genderRatio).toBe(0x00); // MON_MALE literal
+    expect(statsByName.get("SPECIES_NIDORAN_F")!.genderRatio).toBe(0xfe); // MON_FEMALE literal
+    expect(statsByName.get("SPECIES_MAGNEMITE")!.genderRatio).toBe(0xff); // MON_GENDERLESS literal
+    expect(statsByName.get("SPECIES_OLD_UNOWN_B")!.genderRatio).toBe(0xff); // MON_GENDERLESS via macro shorthand
+    expect(statsByName.get("SPECIES_ONIX")!.genderRatio).toBe(127); // PERCENT_FEMALE(50) truncated
+    expect(statsByName.get("SPECIES_BULBASAUR")!.genderRatio).toBe(31); // PERCENT_FEMALE(12.5) truncated
+    expect(statsByName.get("SPECIES_MAGBY")!.genderRatio).toBe(63); // PERCENT_FEMALE(25) truncated
   });
 
   it("resolves every Frontier set species against stats, types, and display names", () => {

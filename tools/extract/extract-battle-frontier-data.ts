@@ -166,6 +166,7 @@ function readRef(...parts: string[]): string {
     baseSpAttack: number;
     baseSpDefense: number;
     abilities: string[];
+    genderRatio: number;
   }> = [];
 
   function macroBody(macroName: string): string {
@@ -173,6 +174,24 @@ function readRef(...parts: string[]): string {
     const macroMatch = macroRe.exec(speciesInfo);
     if (!macroMatch) throw new Error(`could not find species_info.h macro ${macroName}`);
     return macroMatch[1]!;
+  }
+
+  // .genderRatio (species_info.h) is either a fixed literal (MON_MALE=0x00/
+  // MON_FEMALE=0xFE/MON_GENDERLESS=0xFF, include/constants/pokemon.h:169-171)
+  // or PERCENT_FEMALE(percent), defined at species_info.h:3 as
+  // `min(254, ((percent * 255) / 100))` -- a plain double expression (percent
+  // literals include a decimal point, e.g. 12.5) truncated on assignment to
+  // the u8 genderRatio field, so replicate with Math.trunc, not Math.round.
+  function genderRatioField(body: string, name: string): number {
+    const m = /\.genderRatio\s*=\s*(MON_MALE|MON_FEMALE|MON_GENDERLESS|PERCENT_FEMALE\(([0-9.]+)\))/.exec(body);
+    if (!m) throw new Error(`missing .genderRatio for ${name}`);
+    if (m[2] !== undefined) return Math.min(254, Math.trunc((Number(m[2]) * 255) / 100));
+    switch (m[1]) {
+      case "MON_MALE": return 0x00;
+      case "MON_FEMALE": return 0xfe;
+      case "MON_GENDERLESS": return 0xff;
+      default: throw new Error(`unknown .genderRatio literal ${m[1]} for ${name}`);
+    }
   }
 
   function entryBody(name: string): string {
@@ -215,6 +234,7 @@ function readRef(...parts: string[]): string {
       baseSpAttack: field("baseSpAttack"),
       baseSpDefense: field("baseSpDefense"),
       abilities,
+      genderRatio: genderRatioField(body, name),
     });
   }
 
