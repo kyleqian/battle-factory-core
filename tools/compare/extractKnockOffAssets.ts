@@ -34,6 +34,10 @@ const data = {
     "graphics/pokemon/shuppet/back.png",
     "graphics/pokemon/shuppet/normal.pal",
   ),
+  plusleBack: sprite(
+    "graphics/pokemon/plusle/back.png",
+    "graphics/pokemon/plusle/normal.pal",
+  ),
 };
 mkdirSync(dirname(out), { recursive: true });
 writeFileSync(out, `${JSON.stringify(data)}\n`);

@@ -533,6 +533,7 @@ import battleHealthboxAsset from "../assets/gen/battle-healthbox.json" with { ty
 import downArrowAsset from "../assets/gen/battle-interface-down-arrow.json" with { type: "json" };
 import opponentFrontSpritesAsset from "../assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
 import kadabraFrontSpriteAsset from "../animation/assets/kadabra-front.json" with { type: "json" };
+import knockOffAsset from "../animation/assets/knock-off.json" with { type: "json" };
 import menuHealthboxPlayerAsset from "../assets/gen/menu-healthbox-player.json" with { type: "json" };
 import summaryBallAsset from "../assets/gen/summary-ball.json" with { type: "json" };
 import battleAnimBallOpenAsset from "../assets/gen/battle-anim-ball-open.json" with { type: "json" };
@@ -624,6 +625,7 @@ import {
   sceneOnFutureSightView,
   sceneOnConfusionView,
   sceneOnPsychicView,
+  sceneOnKnockOffView,
   type SceneOnMovePresentationState,
 } from "../animation/sceneOnPresentation.ts";
 import {
@@ -883,6 +885,11 @@ const charmeleonFrontSprite = (opponentFrontSpritesAsset as Record<string, Oppon
 const haunterFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).HAUNTER!;
 const ivysaurFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).IVYSAUR!;
 const kadabraFrontSprite = kadabraFrontSpriteAsset as OpponentFrontSpriteAsset;
+const knockOffArt = knockOffAsset as {
+  strike: { tileset: Tileset; palette: RgbColor[] };
+  shuppetBack: { tileset: Tileset; palette: RgbColor[] };
+  plusleBack: { tileset: Tileset; palette: RgbColor[] };
+};
 const MURKROW_CORNER = { x: 144, y: 19 };
 const menuHealthboxPlayer = menuHealthboxPlayerAsset as SendOutHealthboxContentAsset;
 const battleAnimRocks = battleAnimRocksAsset as BattleAnimRocksAsset;
@@ -14426,6 +14433,126 @@ export function renderSceneOnMovePresentation(
   fb: Uint8Array,
   state: SceneOnMovePresentationState,
 ): void {
+  if (state.config.move === "KNOCK_OFF") {
+    // Task/sprite callbacks update RAM after this frame's OAM and palette
+    // transfer. The complete move body therefore reaches the framebuffer
+    // one display after the probe-visible source state.
+    const view = sceneOnKnockOffView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "PLUSLE"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    if (!playerToOpponent) {
+      throw new Error(
+        `unsupported staged KNOCK_OFF pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const white = { r: 255, g: 255, b: 255 };
+    const paletteCoeff = view.palette?.coeff ?? 0;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      blendPaletteBanksToward(battleBg.palette, white, paletteCoeff),
+    );
+    drawSpriteSheetAffineStretch(
+      fb,
+      onixFrontSprite.tileset,
+      onixFrontSprite.palette,
+      view.target.geometry.spriteCorner.x,
+      view.target.geometry.spriteCorner.y,
+      256,
+      256,
+      view.targetOffset.y2,
+      white,
+      paletteCoeff,
+      false,
+      view.targetOffset.x2 + (view.animationAge < 17 ? 1 : 0),
+    );
+    if (view.strike) {
+      const strikeStep = view.animationAge - 6;
+      const rotation = -4 * strikeStep;
+      const radians = rotation * 2 * Math.PI / 256;
+      const pa = Math.trunc(256 * Math.cos(radians));
+      const pc = Math.trunc(256 * Math.sin(radians));
+      const frame = subTileset(knockOffArt.strike.tileset, view.strike.sheetFrame * 8, 8);
+      drawSpriteSheetAffineRotate(
+        fb,
+        frame,
+        knockOffArt.strike.palette,
+        view.target.geometry.animationCenter.x - 16
+          + ((GBA_SINE_TABLE_256[(view.strike.angle + 64) & 0xff]! * 20) >> 8),
+        view.target.geometry.animationCenter.y - 16
+          + ((GBA_SINE_TABLE_256[view.strike.angle]! * 20) >> 8),
+        pa,
+        -pc,
+        pc,
+        pa,
+        undefined,
+        false,
+      );
+    }
+    if (view.hitsplatVisible) {
+      drawSpriteSheetAffineStretch(
+        fb,
+        battleAnimHitsplat.tileset,
+        battleAnimHitsplat.palette,
+        view.target.geometry.animationCenter.x - 16,
+        view.target.geometry.animationCenter.y - 16,
+        372,
+        372,
+        0,
+        white,
+        0,
+      );
+    }
+    drawSpriteSheetAffineStretch(
+      fb,
+      knockOffArt.plusleBack.tileset,
+      knockOffArt.plusleBack.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+      256,
+      256,
+      view.attackerOffset.y2,
+      white,
+      paletteCoeff,
+      false,
+      view.attackerOffset.x2,
+    );
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: "PLUSLE",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(fb, "PLUSLE used", "KNOCK OFF!", 99);
+    return;
+  }
+
   if (state.config.move === "EXTREME_SPEED") {
     const view = sceneOnExtremeSpeedView(state);
     // Battler task mutations miss the OAM buffer already built for this

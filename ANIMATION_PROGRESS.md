@@ -44,69 +44,33 @@ animation. A status caused by a move is not part of that move's animation.
   presentation seam and all source- or evidence-required variants are covered.
 - No entry means unsupported.
 
-## Knock Off source-body checkpoint: full relative composition and assets banked; move remains unsupported (2026-07-26)
+## Knock Off shared-seam partial: 54/59 dense player-orientation body (2026-07-26)
 
-**Verdict:** no move-level promotion and no framebuffer numerator/denominator
-is claimed. The bounded session did not safely reach shared-seam wiring plus a
-complete dense comparison, so this is an honest material evidence checkpoint,
-not a partial acceptance claim.
+**Verdict:** `MOVE_KNOCK_OFF` promotes unsupported → **partial**. The complete
+move-owned Scene-ON interval (oracle frames 70-128; frames 129-130 begin the
+separately-owned generic hit blink) is **59/59 component/RAM** and **54/59
+framebuffer** through the shared seam. This is an honest partial, not exact:
+frames **105, 107, 109, 111, 113** retain only the opponent-front ONIX
+silhouette during the in-place-shake/slide-return OAM transfer. Opposite
+orientation is also still named and unattempted.
 
-**Did:** `knockOff.ts` composes the already-proven horizontal lunge and
-in-place shake reducers with the generic slide reducers, the two-frame
-`AnimKnockOffStrike` orbit/side mirror, the complex-palette epoch, and the
-basic hitsplat lifetime on a source-relative clock derived only from the
-script's delay commands. Tier-1 tests pin the complete player-side epoch and
-the source-declared opponent-side mirrors. A reproducible dev-time extractor
-now writes the only new staged-orientation runtime art:
-`ANIM_TAG_SLAM_HIT_2` and SHUPPET's back sprite. The mechanicLab fixture now
-commits every capture frame 70-130 so the next worker can inspect the full
-lead-in/body/tail rather than only endpoints.
+**Resolved display facts:** live RAM pins `gBattleAnimAttacker=0` (player) and
+`gBattleAnimTarget=1` (opponent). The lunge moves the player; the slide-out and
+final return move the target because their literal argv[0] is 1, while the
+first simultaneous return helper's argv[0] is 0 and is a no-op on the already
+restored attacker. Strike orbit, two sheets, HLE affine matrices, hitsplat
+372×372 matrix/lifetime, palette epoch, healthboxes, corners, and the shared
+one-display OAM/palette transfer are densely checked. The legal source route
+loads PLUSLE chrome before mechanicLab replaces the complete party with
+SHUPPET, so the oracle truthfully displays PLUSLE art/name over SHUPPET battle
+RAM; the seam fixture records that display-boundary fact explicitly rather
+than pretending the preloaded chrome changed.
 
-**Narrow remainder:** wire this body through `sceneOnPresentation.ts` and
-`battleScene.ts`; verify the strike affine matrix, palette/OAM display lags,
-same-tick competing slide-helper ordering, hitsplat scale/order, SHUPPET
-corner, healthboxes, and complete framebuffer body against the dense Scene ON
-fixture. Then stage the opposite orientation before exact closure. SUPER_FANG
-and SECRET_POWER remain unsupported and receive no inherited acceptance.
-
-## Knock Off component checkpoint: lunge + in-place shake ported; move remains unsupported (2026-07-26)
-
-**Verdict:** no move-level promotion and no dense numerator/denominator is
-claimed. A complete-party Scene-ON mechanicLab fixture now stages player-back
-SHUPPET (the species of real Factory Knock Off carrier set **62**) against
-opponent-front ONIX. The move executes normally from `gCurrentMove=282` at
-frame 39 and exposes its body at frames 81-115, but it is not yet wired through
-the shared app seam, so this is an honest evidence checkpoint rather than a
-partial acceptance entry.
-
-**Source inventory and implementation:** `Move_KNOCK_OFF` owns
-`gHorizontalLungeSpriteTemplate`, `gKnockOffStrikeSpriteTemplate`,
-`complex_palette_blend`, the basic hitsplat,
-`gSlideMonToOffsetSpriteTemplate`, `gSlideMonToOriginalPosSpriteTemplate`, and
-`AnimTask_ShakeMonInPlace` (plus `ANIM_TAG_SLAM_HIT_2`/`ANIM_TAG_IMPACT`).
-New generic reducers port `DoHorizontalLunge`/its two callback handoffs and
-`AnimTask_ShakeMonInPlace`'s synchronous creation step. Fresh Scene-ON RAM/frame
-evidence pins Knock Off's player lunge at frames 81-91 to
-**0,6,12,18,24,24,24,18,12,6,0**; the two peak holds are the distinct
-Translate→Reverse callback assignments, not fitted delays. The existing
-`slideMon.ts` already ports both slide callbacks. Tier-1 tests cover side
-mirroring, callback lifetime, Knock Off's `(4,6)` lunge and `(0,3,6,1)` shake,
-plus SUPER FANG's first `(1,0,20,1)` shake arguments.
-
-**Sibling audit / named boundary:** SUPER FANG directly consumes both new
-components, but still owns its fang sprite, blend-in/out task, palette blend,
-and independent dense window. SECRET POWER is environment-dispatched; the
-Factory building path selects `Move_STRENGTH`, while its union spans both new
-components and many unrelated environment-specific bodies. Neither sibling is
-promoted. Knock Off still needs strike-asset extraction/rendering, palette
-blend, hitsplat ordering, simultaneous slide/shake composition, seam wiring,
-and a complete dense framebuffer comparison (then opposite orientation only if
-source/oracle evidence requires it).
-
-**Evidence:** `tools/battle-lab/mechanic-knock-off-shuppet-onix.json`,
-`src/animation/horizontalLunge.ts`,
-`src/animation/shakeMonInPlace.ts`, and their Tier-1 tests. Baseline and final
-verification are recorded in the worker handoff.
+**Evidence:** `tools/compare/knockOffPortable.ts`,
+`tools/compare/fixtures/knock-off-player-shuppet-opponent-onix.json`,
+`tools/probe/run-battle-lab-rgb.py`, `src/animation/knockOff.ts`, and focused
+Tier-1 tests. SUPER_FANG and SECRET_POWER remain unsupported; shared reducers
+do not promote either sibling.
 
 Start with one representative attacker/target. Add variants only when source
 inspection or comparison identifies a dependency: attacker side, front/back

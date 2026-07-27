@@ -204,6 +204,10 @@ import {
   type ShadowPunchClone,
 } from "./shadowPunch.ts";
 import { shakeMonOffsetAtTick } from "./shakeMon.ts";
+import {
+  knockOffBodyAtAge,
+  type KnockOffBodyState,
+} from "./knockOff.ts";
 
 export type SceneOnBattlerSide = "player" | "opponent";
 
@@ -229,7 +233,9 @@ export interface SceneOnPresentationBattler {
     | "CHARMELEON"
     | "HAUNTER"
     | "IVYSAUR"
-    | "KADABRA";
+    | "KADABRA"
+    | "SHUPPET"
+    | "PLUSLE";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -645,6 +651,14 @@ export interface SceneOnPsychicConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnKnockOffConfig {
+  readonly move: "KNOCK_OFF";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationAgeOffset?: number;
+}
+
 export type SceneOnMoveConfig =
   | SceneOnFirePunchConfig
   | SceneOnIcePunchConfig
@@ -671,7 +685,8 @@ export type SceneOnMoveConfig =
   | SceneOnGrowthConfig
   | SceneOnFutureSightConfig
   | SceneOnConfusionConfig
-  | SceneOnPsychicConfig;
+  | SceneOnPsychicConfig
+  | SceneOnKnockOffConfig;
 
 export interface SceneOnMovePresentationState<
   TConfig extends SceneOnMoveConfig = SceneOnMoveConfig,
@@ -940,6 +955,13 @@ export interface SceneOnBlazeKickView {
   readonly animation: BlazeKickAnimationState;
   readonly sprites: readonly BlazeKickOrderedSprite[];
   readonly palette: BlazeKickPaletteState;
+}
+
+export interface SceneOnKnockOffView extends KnockOffBodyState {
+  readonly age: number;
+  readonly animationAge: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
 }
 
 export interface SceneOnBindView extends BindAnimationState {
@@ -1346,6 +1368,26 @@ export function sceneOnBlazeKickView(
       state.config.animationProfile,
     ),
     palette: blazeKickPaletteAtAge(animationAge),
+  };
+}
+
+export function sceneOnKnockOffView(
+  state: SceneOnMovePresentationState,
+): SceneOnKnockOffView {
+  if (state.config.move !== "KNOCK_OFF") {
+    throw new Error(`expected KNOCK_OFF presentation, got ${state.config.move}`);
+  }
+  const animationAge = state.age + (state.config.animationAgeOffset ?? 0);
+  return {
+    age: state.age,
+    animationAge,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...knockOffBodyAtAge(
+      animationAge,
+      state.config.attacker.geometry.side,
+      state.config.target.geometry.side,
+    ),
   };
 }
 

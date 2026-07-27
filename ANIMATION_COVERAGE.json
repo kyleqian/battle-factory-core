@@ -2,6 +2,27 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_KNOCK_OFF",
+      "status": "partial",
+      "covered": [
+        "legal Scene-ON source route with complete SHUPPET party override, staged player orientation against opponent-front ONIX",
+        "complete move-owned oracle frames 70-128: source component/RAM 59/59 and shared-seam framebuffer 54/59",
+        "player lunge, target slide/shake/return task roles and ordering, strike orbit/two-sheet/HLE affine program, 372x372 hitsplat, complex palette epoch, corners, healthboxes, and the fixture's preloaded PLUSLE display chrome"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-knock-off-shuppet-onix.json",
+        "tools/compare/fixtures/knock-off-player-shuppet-opponent-onix.json",
+        "tools/compare/knockOffPortable.ts",
+        "tools/probe/run-battle-lab-rgb.py",
+        "src/animation/knockOff.ts",
+        "tests/animation/knockOff.test.ts"
+      ],
+      "remaining": [
+        "player orientation frames 105, 107, 109, 111, and 113: opponent-front ONIX silhouette only, bounded to the in-place-shake/slide-return OAM transfer",
+        "opposite attacker orientation"
+      ]
+    },
+    {
       "move": "MOVE_DOUBLE_TEAM",
       "status": "exact",
       "covered": [

@@ -68,11 +68,11 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // Psychic-family opposite orientations close CONFUSION/PSYCHIC's
-        // sole remaining variant gap: partial 5->3, exact 21->23.
-        unsupported: 250,
+        // Knock Off's staged player body is an honest 54/59 framebuffer
+        // partial; the psychic-family exact counts remain unchanged.
+        unsupported: 249,
         staged: 0,
-        partial: 3,
+        partial: 4,
         exact: 23,
       },
       {

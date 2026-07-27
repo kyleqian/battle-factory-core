@@ -80,6 +80,7 @@ def main() -> None:
     fire_spread_template = oracle.symbols["gFireSpreadSpriteTemplate"]
     lightning_template = oracle.symbols["gLightningSpriteTemplate"]
     speed_dust_template = oracle.symbols["gSpeedDustSpriteTemplate"]
+    knock_off_strike_template = oracle.symbols["gKnockOffStrikeSpriteTemplate"]
     battle_mons = oracle.symbols["gBattleMons"]
     battler_sprite_ids = oracle.symbols["gBattlerSpriteIds"]
     pltt_unfaded = oracle.symbols["gPlttBufferUnfaded"]
@@ -186,6 +187,7 @@ def main() -> None:
         fire_spread_sprites = []
         lightning_sprites = []
         speed_dust_sprites = []
+        knock_off_strike_sprites = []
         for slot in range(64):
             base = sprites + slot * 0x44
             if not (oracle.read_u8(base + 0x3E) & 1):
@@ -233,6 +235,8 @@ def main() -> None:
                 lightning_sprites.append(feather_record(slot))
             elif template == speed_dust_template:
                 speed_dust_sprites.append(feather_record(slot))
+            elif template == knock_off_strike_template:
+                knock_off_strike_sprites.append(feather_record(slot))
         sand_attack_dirt_oam = []
         if sand_attack_dirt_sprites:
             dirt_base = sprites + sand_attack_dirt_sprites[0]["slot"] * 0x44
@@ -272,6 +276,8 @@ def main() -> None:
                 "frame": frame,
                 "sha256": hashlib.sha256(rgb).hexdigest(),
                 "currentMove": snapshot["engine"]["currentMove"],
+                "battleAnimAttacker": oracle.read_u8(oracle.symbols["gBattleAnimAttacker"]),
+                "battleAnimTarget": oracle.read_u8(oracle.symbols["gBattleAnimTarget"]),
                 "controllerExecFlags": snapshot["engine"]["controllerExecFlags"],
                 "playerControllerCommand": snapshot["engine"]["playerControllerCommand"],
                 "opponentControllerCommand": snapshot["engine"]["opponentControllerCommand"],
@@ -297,6 +303,7 @@ def main() -> None:
                 "fireSpreadSprites": fire_spread_sprites,
                 "lightningSprites": lightning_sprites,
                 "speedDustSprites": speed_dust_sprites,
+                "knockOffStrikeSprites": knock_off_strike_sprites,
                 "bg3X": s16(oracle.symbols["gBattle_BG3_X"]),
                 "bg3Y": s16(oracle.symbols["gBattle_BG3_Y"]),
                 "bg3cnt": u16(0x0400000E),
