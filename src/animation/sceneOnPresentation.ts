@@ -175,6 +175,14 @@ import {
   type HyperFangEffect,
 } from "./hyperFang.ts";
 import {
+  swaggerAtAge,
+  type SwaggerState,
+} from "./swagger.ts";
+import {
+  selfDestructAtAge,
+  type SelfDestructState,
+} from "./selfDestruct.ts";
+import {
   poisonTailAtAge,
   type PoisonTailState,
 } from "./poisonTail.ts";
@@ -330,6 +338,7 @@ export interface SceneOnPresentationBattler {
     | "GRIMER"
     | "ZUBAT"
     | "RATICATE"
+    | "RATTATA"
     | "SKIPLOOM"
     | "RELICANTH"
     | "LUNATONE"
@@ -340,7 +349,9 @@ export interface SceneOnPresentationBattler {
     | "ALTARIA"
     | "AZURILL"
     | "CLAMPERL"
-    | "SEVIPER";
+    | "SEVIPER"
+    | "SUDOWOODO"
+    | "SHUCKLE";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -812,6 +823,22 @@ export interface SceneOnHyperFangConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnSwaggerConfig {
+  readonly move: "SWAGGER";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source `GetBattlerSpriteCoord(attacker, Y_PIC_OFFSET)` breath origin. */
+  readonly breathOrigin: Readonly<{ x: number; y: number }>;
+}
+
+export interface SceneOnSelfDestructConfig {
+  readonly move: "SELF_DESTRUCT";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnPoisonTailConfig {
   readonly move: "POISON_TAIL";
   readonly attacker: SceneOnPresentationBattler;
@@ -948,6 +975,8 @@ export type SceneOnMoveConfig =
   | SceneOnSludgeBombConfig
   | SceneOnPoisonFangConfig
   | SceneOnHyperFangConfig
+  | SceneOnSwaggerConfig
+  | SceneOnSelfDestructConfig
   | SceneOnPoisonTailConfig
   | SceneOnToxicConfig
   | SceneOnEarthquakeConfig
@@ -1022,6 +1051,18 @@ export interface SceneOnPoisonFangView {
 }
 
 export interface SceneOnHyperFangView extends HyperFangEffect {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSwaggerView extends SwaggerState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSelfDestructView extends SelfDestructState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -2081,6 +2122,48 @@ export function sceneOnHyperFangView(
       state.age,
       state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is GrowAndShrink's first displayed task frame. */
+export function sceneOnSwaggerView(
+  state: SceneOnMovePresentationState,
+): SceneOnSwaggerView {
+  if (state.config.move !== "SWAGGER") {
+    throw new Error(`expected SWAGGER presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...swaggerAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.breathOrigin,
+      state.config.target.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is the first software-OAM explosion sprite. */
+export function sceneOnSelfDestructView(
+  state: SceneOnMovePresentationState,
+): SceneOnSelfDestructView {
+  if (state.config.move !== "SELF_DESTRUCT") {
+    throw new Error(
+      `expected SELF_DESTRUCT presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...selfDestructAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.battlePositionCenter,
     ),
   };
 }

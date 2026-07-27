@@ -68,11 +68,11 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // HYPER FANG is dense-exact through both Scene-ON orientations.
-        unsupported: 230,
+        // SELF DESTRUCT closes both dense directions through the shared seam.
+        unsupported: 228,
         staged: 0,
         partial: 3,
-        exact: 43,
+        exact: 45,
       },
       {
         tier: "openOnly",
@@ -110,6 +110,18 @@ describe("animation coverage ledger", () => {
   });
 
   it("uses the source dependency graph for non-exclusive work grouping", () => {
+    expect(
+      queuedAnimationComponentTracks().find(
+        (track) => track.id === "anger-mark-grow-breath",
+      ),
+    ).toMatchObject({
+      representatives: [
+        "MOVE_SWAGGER",
+        "MOVE_FRUSTRATION",
+        "MOVE_TORMENT",
+        "MOVE_TAUNT",
+      ],
+    });
     expect(
       queuedAnimationComponentTracks().find(
         (track) => track.id === "elemental-punch",

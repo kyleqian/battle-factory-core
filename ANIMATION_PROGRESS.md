@@ -46,7 +46,107 @@ animation. A status caused by a move is not part of that move's animation.
 
 ## Current resumable state (2026-07-27)
 
-Coverage is **43/276 exact, 3 partial, 230 unsupported**. HYPER FANG is exact
+Coverage is **45/276 exact, 3 partial, 228 unsupported**. SELF DESTRUCT is exact
+through the shared Scene-ON seam at **113/113 player-back + 113/113
+opponent-front** complete-body component and raw-RGB framebuffer frames,
+reproduced twice fresh. DRAGON BREATH remains **85/85** in both orientations
+as the exact ShakeMon2/palette regression control.
+
+## SELF DESTRUCT promoted to exact; explosion sprite track established (2026-07-27)
+
+**Verdict:** `MOVE_SELF_DESTRUCT` is exact. Complete legal mechanicLab parties
+stage SUDOWOODO from real Level-50 Factory set 298 in both orientations,
+constrain every active choice to SELF DESTRUCT, and use slower SHUCKLE with
+TACKLE. The strengthened comparator matches the complete first move-owned body
+at **113/113 player-back** (oracle 82-194) and **113/113 opponent-front**
+(86-198), for both source components and the shared-seam raw-RGB framebuffer,
+each reproduced twice fresh.
+
+**Source reducer/renderer:** the existing reducer's ten explosion instances,
+mirrored offsets, 4/5/5/5 cells, both visible battlers' ShakeMon2, attacker-only
+red 0→9→0 palette ramps, ten sound restarts, and teardown now feed a typed
+Scene-ON Self Destruct config/view. The compositor renders reproducibly
+extracted SUDOWOODO, SHUCKLE, and explosion art with source palette ramps,
+the one-display palette/explosion OAM latches, ShakeMon2's neutral first
+hardware frame plus two-display latch, source `SortSprites` Y ordering,
+audio-neutral field chrome, and complete cleanup.
+
+**Controls/scope:** DRAGON BREATH remains **85/85 component + 85/85
+framebuffer** in both orientations on fresh control runs. Damage resolution,
+fainting, health-bar loss, controller, turn, RNG, and facility state remain
+outside this move-owned body. EXPLOSION, PRESENT, DYNAMIC PUNCH, and all other
+siblings remain unsupported. No absolute ticks, screenshots, canonical
+imports, unsupported barriers, or boundary widening were added.
+
+## Previous current state (2026-07-27)
+
+Coverage was **44/276 exact, 4 partial, 228 unsupported**. SELF DESTRUCT was an
+honest partial checkpoint: its complete first move-owned source-component body
+matches the Scene-ON oracle at **113/113 player-back + 113/113 opponent-front**
+frames, reproduced twice fresh, but it is not wired through the shared renderer
+and has no framebuffer acceptance.
+
+## SELF DESTRUCT source-component body closed; explosion track remains partial (2026-07-27)
+
+**Verdict:** `MOVE_SELF_DESTRUCT` is partial. Complete legal mechanicLab parties
+stage SUDOWOODO from the real Level-50 Factory set 298 in both orientations,
+constrain every active choice to SELF DESTRUCT, and use slower SHUCKLE with
+TACKLE. Dense oracle evidence matches **113/113** source-component frames at
+oracle 82-194 player-back and 86-198 opponent-front, twice fresh.
+
+**Source reducer/evidence:** `selfDestructAtAge` ports both literal
+`SelfDestructExplode` calls (ten `gExplosionSpriteTemplate` instances), their
+mirrored offsets and 4/5/5/5 display-cell program, both visible battlers'
+38-toggle `AnimTask_ShakeMon2`, the duplicate forced-attacker task's identical
+write, attacker-only red 0→9→0 palette ramps, all ten attacker-pan audio
+restarts, and teardown. Assets for the explosion and both set-298 SUDOWOODO
+orientations are reproducibly extracted.
+
+**Precise remainder:** no `sceneOnPresentation`/`battleScene` wiring was landed,
+so shared-seam raw-RGB framebuffer acceptance is **0/113 attempted**, not exact.
+Port the source OAM/display latches and draw extracted SUDOWOODO, SHUCKLE, and
+explosions, then require 113/113 in both orientations plus existing exact
+ShakeMon2 and palette-blend framebuffer controls. EXPLOSION, PRESENT,
+DYNAMIC PUNCH, and all other siblings remain unsupported. No absolute ticks,
+screenshots, canonical imports, unsupported barriers, or boundary widening
+were added.
+
+## Previous current state (2026-07-27)
+
+Coverage is **44/276 exact, 3 partial, 229 unsupported**. SWAGGER is exact
+through the shared Scene-ON seam at **161/161 player-back + 161/161
+opponent-front** complete-body component and framebuffer frames, reproduced
+twice fresh. HYPER FANG remains **107/107** in both orientations as the
+sprite/task regression control.
+
+## SWAGGER promoted to exact; anger-mark component track established (2026-07-27)
+
+**Verdict:** `MOVE_SWAGGER` is exact. Complete legal mechanicLab parties stage
+RATTATA from real Level-50 Factory set 34 (Docile, Attack/HP, King's Rock) in
+both orientations, constrain all four active choices to SWAGGER, and constrain
+ONIX to TACKLE. The strengthened comparator matches the complete first
+move-animation body at **161/161 player-back** (oracle 76-236) and **161/161
+opponent-front** (80-240), each reproduced twice fresh.
+
+**Source reducer/evidence:** `swaggerAtAge` ports GrowAndShrink's 12/24/12
+attacker affine program, side/species Y anchoring and two-display hardware
+transfer; the breath puff's four frames, player hFlip, signed fixed-point
+translation, looping attacker-pan audio and terminal callback; and both
+target-relative anger marks' mirrored geometry, affine-normal matrices,
+allocation/OAM transfer latches, overlap, target-pan audio, and teardown.
+
+**Renderer/controls:** breath, anger, and both set-34 RATTATA orientations are
+reproducibly extracted. The shared seam renders the full body through relative
+ages with raw-RGB exact field chrome and cleanup. HYPER FANG remains
+**107/107** component and framebuffer exact in both orientations on fresh
+control runs. FRUSTRATION, TORMENT, TAUNT, METRONOME, FAKE TEARS, and every
+other sibling remain unsupported without independent dense acceptance. No
+absolute ticks, screenshots, coordinate/RGB fitting, exclusions, unsupported
+barriers, or import-boundary widening were added.
+
+## Previous current state (2026-07-27)
+
+Coverage was **43/276 exact, 3 partial, 230 unsupported**. HYPER FANG is exact
 through the shared Scene-ON seam at **107/107 player-back + 107/107
 opponent-front** complete-body component and framebuffer frames, reproduced
 twice fresh. POISON FANG remains **104/104** in both orientations as the
