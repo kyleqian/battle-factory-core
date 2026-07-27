@@ -15,9 +15,43 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 520 — [SUPERVISOR 2026-07-27 ~15:15] round 1 verified + merged (3 workers, all green); apostrophe-charmap prerequisite FIXED; round 2 dispatched
+
+- **State:** master green at **268 files / 3560 tests** (union of entry 519's
+  main-lane step + two side merges), `npm run build` clean, both side
+  worktrees removed, zero unmerged branches. Census **108/214 effects,
+  209/355 moves, 2321/2957 weighted (78.5%)**.
+- **Side merges (both verified in-worktree first, live compare reruns by
+  supervisor):** (1) §13 prep-scout — `docs/presentation-seam-scout.md` §13
+  picks `turn2-endeavor.json` (77 frames, smallest unblocked genuinely-new
+  window; comparator re-pinned 77/77 twice + 9-trace sweep; staging module
+  `turn2EndeavorPresentationStaging.ts` committed unwired, 9 tests). Scout
+  also proved `turn6-statfall.json` is *directly* apostrophe-blocked (its
+  committed capture renders past the curly ’ in "ONIX’s ATTACK") and
+  `turn11-featherdance.json` doubly so. (2) That prerequisite is now FIXED:
+  root cause `tools/extract/extract-battle-messages.ts` never applied
+  charmap.txt:87-88's `'\'' = B4` alias — extractor now decodes it (with a
+  loud byte/glyph assertion), 129/365 templates corrected apostrophe-only
+  (structural diff verified), generic dual-alias sweep found no other
+  affected glyph class, 2 new resolver pins + 2 stale pins updated; zero
+  drift across 4 resolver-driven traces + literal-driven turn6-statfall
+  127/127 (supervisor reran resolver tests 13/13 + turn6-featherdance 90/90
+  + turn1-rockslide 256/256 live).
+- **Round 2 (dispatched):** main → §13.3 wiring (`turn2-endeavor.json`
+  kickoff text from kernel events, acceptance 77/77 + §13.3's regression
+  sweep) ∥ side → design/prep scout for the new top census set:
+  EFFECT_ROAR's `FORCERANDOMSWITCH`/`INITMULTIHITSTRING`/`JUMPIFHASNOHP`
+  trio (40) + the overlapping multi-hit pair row (4 effects, 23) — ground
+  truth + registration plan for a round-3 main step.
+- **Next:** verify round 2; then either the turn6-statfall wiring (now
+  unblocked, zero new staged proof needed per §13's table) or the Roar/
+  multi-hit registration, per what's banked.
+
+---
 ## 519 — [BOUNDED WORKER 2026-07-27 ~15:00] B_SCR_OP_TRYINFATUATING + B_SCR_OP_JUMPIFCONFUSEDANDSTATMAXED registered; EFFECT_ATTRACT/EFFECT_SWAGGER/EFFECT_FLATTER executable end to end
 
-- **State:** tree green at **269 files / 3549 tests** (+6 files / +99 tests
+- **State:** tree green at **267 files / 3549 tests** (worker wrote 269;
+  supervisor corrected against a live `npm test` run) (+99 tests
   over session start 263/3512: `battleScriptTryinfatuatingOpcode.test.ts`
   15 tests, `battleScriptJumpifconfusedandstatmaxedOpcode.test.ts` 13 tests,
   plus 2 existing test files updated for the barrier narrowing below and 2
@@ -110,51 +144,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   apostrophe-charmap residual is documented context, not fixed there).
 - **Next:** verify round 1; continue ranked-table descent + seam cadence;
   §24.5 sites 6/7 + §19.5 sites 3-6 recipe-only breadth remain optional.
-
----
-## 517 — [SUPERVISOR WIND-DOWN 2026-07-27 ~14:00] session complete: 7 rounds / 14 workers, all verified and merged
-
-- **State (final):** tree committed and green at **263 files / 3512 tests**
-  (session start: 245/3363; 247/3370 after the orient animation fold),
-  `npm run build` clean, clean `git status`, zero unmerged side branches,
-  zero stale worktrees, `animation-main` folded twice (11 commits at
-  orient — fast-forward onto the live animation supervisor's own
-  sync-merge — and 32 at wind-down: Poison Tail/Hyper Fang/Sludge
-  Bomb/Toxic tooling; animation coverage now 43/276 exact; 0 unfolded at
-  close, later commits fold next orient). **No DEFERRED entries — nothing
-  blocks the next `run-supervisor.sh`.** All 14 workers across 7 rounds
-  completed (0 failures, 0 salvages, no usage limits).
-- **Census:** 94/214 → **105/214 effects**, 191/355 → **206/355 moves**,
-  153/276 → **167/276 Factory-L50**, 1900/2957 → **2251/2957 weighted
-  (64.3% → 76.1%)** via 4 ranked-table sets: EARTHQUAKE target-iteration
-  pair (+147, incl. a hidden per-operand `Cmd_bicword` barrier the census
-  cannot see — standing warning recorded), SETPROTECTLIKE (+61, new
-  `protectUses` field + real block/endure composition proofs),
-  NEGATIVEDAMAGE+TRYSETREST (+98), JUMPIFSTAT+PLAYSTATCHANGEANIMATION
-  (+45). Next top blocker: `B_SCR_OP_TRYINFATUATING` (EFFECT_ATTRACT, 45).
-- **ISSUES #47 closed and deleted** in 3 pipelined rounds: logic-ID-major
-  restructure + Channel 2 first-slot model (entry 504) → side evidence
-  pack (§27 22-handler write audit + index-1 fixtures, live divergence
-  confirmed) → per-slot funcResult value propagation (entry 511) → §27.5
-  conditional-predecessor A/B pair CONFIRMED. 5 dedicated fixtures, zero
-  contradictions; remaining 6 unstaged predecessors = optional breadth
-  (§27.5 recipe), not debt.
-- **Presentation seam:** two windows re-driven from kernel events —
-  `turn4-doubleteam.json` kickoff (§11.3, 250/250 preserved) and
-  `turn6-featherdance.json` (§12.3, 90/90; first opponent-target,
-  two-sourceLabel bridge) — plus §12 prep-scout banked and executed in the
-  same session. ENDTURN `RESTORE_HP`/`RESTORE_PP` registered with a live
-  Sitrus fixture (+30 heal at the exact ≤50% gate, zero draws, berry
-  consumed). CV ground truth: §24.5 DRAW SITEs 2 and 5 live-verified
-  (2 recipe-only remain: 6 ingrain, 7 curse) incl. a real Gate-A polarity
-  correction.
-- **Next (in order):** TRYINFATUATING census set (then descend the ranked
-  table); next presentation prep-scout (§13) per the §8-§12 cadence —
-  note entry 514's apostrophe-charmap prerequisite before wiring
-  `TURN6_ATKFELL` text; §24.5 sites 6/7 + §19.5 sites 3-6 (recipe-only);
-  ISSUES #41/#39 keep retiring window by window.
-- **Notes:** 1 new PAPERCUTS entry (mash-rep calibration doesn't transfer
-  between move-animation classes, 2 hits). Entry 516's process note: check
-  `git status` right after any tsc-triggered fix. Oracle services fresh
-  all session. The user's `codex/oracle-tooling-papercuts` worktree left
-  untouched.

@@ -1,4 +1,52 @@
 ---
+## 517 — [SUPERVISOR WIND-DOWN 2026-07-27 ~14:00] session complete: 7 rounds / 14 workers, all verified and merged
+
+- **State (final):** tree committed and green at **263 files / 3512 tests**
+  (session start: 245/3363; 247/3370 after the orient animation fold),
+  `npm run build` clean, clean `git status`, zero unmerged side branches,
+  zero stale worktrees, `animation-main` folded twice (11 commits at
+  orient — fast-forward onto the live animation supervisor's own
+  sync-merge — and 32 at wind-down: Poison Tail/Hyper Fang/Sludge
+  Bomb/Toxic tooling; animation coverage now 43/276 exact; 0 unfolded at
+  close, later commits fold next orient). **No DEFERRED entries — nothing
+  blocks the next `run-supervisor.sh`.** All 14 workers across 7 rounds
+  completed (0 failures, 0 salvages, no usage limits).
+- **Census:** 94/214 → **105/214 effects**, 191/355 → **206/355 moves**,
+  153/276 → **167/276 Factory-L50**, 1900/2957 → **2251/2957 weighted
+  (64.3% → 76.1%)** via 4 ranked-table sets: EARTHQUAKE target-iteration
+  pair (+147, incl. a hidden per-operand `Cmd_bicword` barrier the census
+  cannot see — standing warning recorded), SETPROTECTLIKE (+61, new
+  `protectUses` field + real block/endure composition proofs),
+  NEGATIVEDAMAGE+TRYSETREST (+98), JUMPIFSTAT+PLAYSTATCHANGEANIMATION
+  (+45). Next top blocker: `B_SCR_OP_TRYINFATUATING` (EFFECT_ATTRACT, 45).
+- **ISSUES #47 closed and deleted** in 3 pipelined rounds: logic-ID-major
+  restructure + Channel 2 first-slot model (entry 504) → side evidence
+  pack (§27 22-handler write audit + index-1 fixtures, live divergence
+  confirmed) → per-slot funcResult value propagation (entry 511) → §27.5
+  conditional-predecessor A/B pair CONFIRMED. 5 dedicated fixtures, zero
+  contradictions; remaining 6 unstaged predecessors = optional breadth
+  (§27.5 recipe), not debt.
+- **Presentation seam:** two windows re-driven from kernel events —
+  `turn4-doubleteam.json` kickoff (§11.3, 250/250 preserved) and
+  `turn6-featherdance.json` (§12.3, 90/90; first opponent-target,
+  two-sourceLabel bridge) — plus §12 prep-scout banked and executed in the
+  same session. ENDTURN `RESTORE_HP`/`RESTORE_PP` registered with a live
+  Sitrus fixture (+30 heal at the exact ≤50% gate, zero draws, berry
+  consumed). CV ground truth: §24.5 DRAW SITEs 2 and 5 live-verified
+  (2 recipe-only remain: 6 ingrain, 7 curse) incl. a real Gate-A polarity
+  correction.
+- **Next (in order):** TRYINFATUATING census set (then descend the ranked
+  table); next presentation prep-scout (§13) per the §8-§12 cadence —
+  note entry 514's apostrophe-charmap prerequisite before wiring
+  `TURN6_ATKFELL` text; §24.5 sites 6/7 + §19.5 sites 3-6 (recipe-only);
+  ISSUES #41/#39 keep retiring window by window.
+- **Notes:** 1 new PAPERCUTS entry (mash-rep calibration doesn't transfer
+  between move-animation classes, 2 hits). Entry 516's process note: check
+  `git status` right after any tsc-triggered fix. Oracle services fresh
+  all session. The user's `codex/oracle-tooling-papercuts` worktree left
+  untouched.
+
+---
 ## 516 — [BOUNDED WORKER 2026-07-27 ~14:00] B_SCR_OP_JUMPIFSTAT + B_SCR_OP_PLAYSTATCHANGEANIMATION registered; EFFECT_TICKLE/COSMIC_POWER/BULK_UP/CALM_MIND/DRAGON_DANCE executable end to end
 
 - **State:** tree green at **255 files / 3484 tests** (+3 files / +38 tests
