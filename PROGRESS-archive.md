@@ -1,4 +1,65 @@
 ---
+## 500 — [SUPERVISOR WIND-DOWN 2026-07-27 ~03:20] session summary
+
+- **State:** tree committed and green at **245 files / 3350 tests** (session
+  start: 230/3123), build green, full CV verify script ALL PASS on the
+  final merged tree, census **94/214 effects, 191/355 moves, 153/276
+  Factory-L50, 1900/2957 weighted** (start: 92/214, 187/355, 150/276,
+  1884/2957), all self-checks pass. Zero unmerged side branches, zero stale
+  worktrees, clean `git status`. **No DEFERRED entries.** No usage/rate
+  limits; all 16 workers ran to completion (1 salvage, below).
+- **Session (13 rounds / 16 workers over 2 lanes + 2 animation folds):**
+  - **Seam program closed:** ENDEAVOR-opcode/window-3 brief found already
+    landed (archived 464/465 — carried-Next-note drift; doc fixed, entry
+    487); turn-4 settle staging module + all consumers wired (entry 488);
+    §10 scout + `turn3-rockslide.json` wired first-try (entries 494/497) —
+    the whole Grovyle ROCK_SLIDE HP chain (turns 1/3/4/5) is kernel-staged;
+    §11 prep-scout banked for `turn4-doubleteam.json` (narrower gap than
+    hypothesized, new bridge shape named).
+  - **AI 22-handler program COMPLETE:** §24 Evasion + §25 weather-trio
+    ground truth scouted, ported, and closed by the §26 SpeedDownFromChance
+    port + live ledger (entries 489-493, 495-496 region; every handler now
+    has live oracle evidence). The §18/§22 draw anomaly was SOLVED by a
+    gAIScriptPtr-attributing probe — a real chained-draw-site port bug,
+    fixed in DefenseUp/SpDefUp + a second audit-found instance in
+    EvasionUp's toxic branch, both later oracle-corroborated (probe doc §7,
+    ground truth §24.8). A whole-surface audit checked all 46 draw sites.
+  - **Yawn/Thrash → ENDTURN_ITEMS2 ladder: Rungs 1-5 of 6 landed in one
+    session** from a design scout (docs/yawn-thrash-endturn-design.md):
+    SETYAWN + jumpifability widening (+ a generic NO_ACC_CALC accuracycheck
+    fix unblocking 8 call sites), ENDTURN_YAWN with the real sleep
+    transition, ENDTURN_ITEMS2 with moveTurn gating + live same-pass
+    Chesto trigger (the roadmap's oldest carried breadth item, closed),
+    Thrash lock-in (+ a jumpifstatus2 operand gap the doc's citation table
+    missed), ENDTURN_THRASH (+ a ThrashConfuses gating correction). Census
+    grew EFFECT_YAWN + EFFECT_RAMPAGE.
+  - **NEW ISSUES #47:** the ported weather handlers diverge from the ROM's
+    `get_weather` stale-read bug in two live-verified Factory-reachable
+    channels (§25.10 banked complete; deliberate port decision pending).
+  - **Animation folds:** at orient (`f422a97`, 2 Knock Off commits) and at
+    wind-down (41 commits: Calm Mind, Shadow Ball, Water Gun, Synthesis
+    coverage + tooling); union suites green both times. The animation
+    supervisor session was still live at both folds; later commits fold
+    next session.
+- **Next (in order):** Rung 6 (Persim-Berry ENDTURN_ITEMS2-via-Thrash
+  verification fixture — design doc §7, verification-only) + Rung 4's
+  TAUROS live-fixture remainder; ISSUES #47 (stale-weather port decision,
+  ground truth complete); §11 wiring for `turn4-doubleteam.json` (scout
+  banked, new bridge shape named); remaining recipe-only sites (§19.5
+  sites 3-6, §24.5's leech-seed/ingrain/curse trio); ENDTURN_ITEMS2's
+  ITEMS1-vs-ITEMS2 breadth beyond the gated four rows as census targets.
+- **Notes:** 1 worker failure (FromChance scout self-suspended on a
+  ScheduleWakeup awaiting a second verify run — new failure class,
+  salvage-committed after full supervisor verification; recorded in
+  supervisor memory with the recipe). 1 process incident: a supervisor
+  mid-worker PAPERCUTS commit swept the worker's staged rung (shared
+  index) — content intact and verified, attribution misleading on
+  `4e766d4`; rule refined to pathspec commits. 1 new PAPERCUTS entry
+  (`bin/oracle lab` default output dir). The user's separate
+  `codex/oracle-tooling-papercuts` session/worktree
+  (`.worktrees/oracle-tooling`) was left untouched. Oracle services fresh
+  all session.
+---
 ## 499 — [BOUNDED WORKER 2026-07-27 ~03:45] Thrash Rung 5 landed: ENDTURN_THRASH end-turn case (lock countdown + final-turn confusion transition) — plus a real design-doc gap in the ThrashConfuses gating condition
 
 - **State:** tree green at **235 files / 3311 tests** (+6 tests over this

@@ -15,6 +15,32 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 503 — [SUPERVISOR ORIENT 2026-07-27 ~09:35] new session: animation-main folded (fast-forward onto the live animation supervisor's own sync-merge); round 1 dispatched
+
+- **State:** union baseline verified green at **247 files / 3370 tests**
+  (245/3363 + animation's Dragon Claw/Encore work), `npm run build` clean,
+  both oracle services fresh (`check-oracle-freshness.sh` PASS). No DEFERRED
+  entries. Hard deadline this session: **15:28**.
+- **Fold:** `master..animation-main` had 11 commits (Dragon Claw exact 35/276,
+  Encore strengthened checkpoint). The live animation supervisor session had
+  just merged master into `animation-main` (cd27abf), so the fold resolved as
+  a fast-forward of master onto that union — both branches now at cd27abf;
+  union suite + build verified here. No "For the main program:" note in the
+  animation ledger top entry.
+- **Round 1 (dispatched, 2 lanes, genuinely disjoint):** main → ISSUES #47
+  Channel 2 with the supervisor decision made: **option (a), logic-ID-major
+  restructure** of `chooseFactoryAiScoredDecision` matching the ROM's proven
+  CBM(0-3)→TTF(0-3)→CV(0-3) order (option (b)'s preview rejected — it leaves
+  the movesetIndex-1-3 carry a permanent guess; (a) models the mechanism),
+  then the 3 staged fixtures' mask-7 net-score tests (-7/+1/+1). Side →
+  ENDTURN_ITEMS1 `RESTORE_HP`/`RESTORE_PP` registration (45 + 2 Factory-legal
+  carriers, doc §1/§2b), the two barriered reachable rows, with a live Sitrus
+  fixture per the Chesto/Persim pattern.
+- **Next:** verify round 1; then §11 wiring for `turn4-doubleteam.json`
+  (main) ∥ §19.5 sites 3-6 / §24.5 recipe-only live staging (side, freed
+  once #47 stops touching the AI verify surface).
+
+---
 ## 502 — [SUPERVISOR FINAL CLOSE 2026-07-27 ~03:35] extension round folded; session complete
 
 - **State (final):** tree committed and green at **245 files / 3363 tests**,
@@ -40,8 +66,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   restructure vs. scoped TTF preview, then land the 3 fixtures' mask-7
   net-score tests); §11 wiring for `turn4-doubleteam.json` (scout banked,
   new bridge shape named); remaining recipe-only sites (§19.5 sites 3-6,
-  §24.5 leech-seed/ingrain/curse); ENDTURN items breadth. Entry 500 below
-  has the full session summary.
+  §24.5 leech-seed/ingrain/curse); ENDTURN items breadth. Entry 500
+  (archived) has the full session summary.
 
 ---
 ## 501 — [BOUNDED WORKER 2026-07-27 ~04:05] ISSUES #47 Channel 1 (CBM ability-id collision) fixed; Channel 2 (CV) precisely scoped as a real remainder, not shipped
@@ -119,64 +145,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** no PAPERCUT. Ledger still at 3 entries (500/499 below), no
   archiving needed yet.
 
----
-## 500 — [SUPERVISOR WIND-DOWN 2026-07-27 ~03:20] session summary
-
-- **State:** tree committed and green at **245 files / 3350 tests** (session
-  start: 230/3123), build green, full CV verify script ALL PASS on the
-  final merged tree, census **94/214 effects, 191/355 moves, 153/276
-  Factory-L50, 1900/2957 weighted** (start: 92/214, 187/355, 150/276,
-  1884/2957), all self-checks pass. Zero unmerged side branches, zero stale
-  worktrees, clean `git status`. **No DEFERRED entries.** No usage/rate
-  limits; all 16 workers ran to completion (1 salvage, below).
-- **Session (13 rounds / 16 workers over 2 lanes + 2 animation folds):**
-  - **Seam program closed:** ENDEAVOR-opcode/window-3 brief found already
-    landed (archived 464/465 — carried-Next-note drift; doc fixed, entry
-    487); turn-4 settle staging module + all consumers wired (entry 488);
-    §10 scout + `turn3-rockslide.json` wired first-try (entries 494/497) —
-    the whole Grovyle ROCK_SLIDE HP chain (turns 1/3/4/5) is kernel-staged;
-    §11 prep-scout banked for `turn4-doubleteam.json` (narrower gap than
-    hypothesized, new bridge shape named).
-  - **AI 22-handler program COMPLETE:** §24 Evasion + §25 weather-trio
-    ground truth scouted, ported, and closed by the §26 SpeedDownFromChance
-    port + live ledger (entries 489-493, 495-496 region; every handler now
-    has live oracle evidence). The §18/§22 draw anomaly was SOLVED by a
-    gAIScriptPtr-attributing probe — a real chained-draw-site port bug,
-    fixed in DefenseUp/SpDefUp + a second audit-found instance in
-    EvasionUp's toxic branch, both later oracle-corroborated (probe doc §7,
-    ground truth §24.8). A whole-surface audit checked all 46 draw sites.
-  - **Yawn/Thrash → ENDTURN_ITEMS2 ladder: Rungs 1-5 of 6 landed in one
-    session** from a design scout (docs/yawn-thrash-endturn-design.md):
-    SETYAWN + jumpifability widening (+ a generic NO_ACC_CALC accuracycheck
-    fix unblocking 8 call sites), ENDTURN_YAWN with the real sleep
-    transition, ENDTURN_ITEMS2 with moveTurn gating + live same-pass
-    Chesto trigger (the roadmap's oldest carried breadth item, closed),
-    Thrash lock-in (+ a jumpifstatus2 operand gap the doc's citation table
-    missed), ENDTURN_THRASH (+ a ThrashConfuses gating correction). Census
-    grew EFFECT_YAWN + EFFECT_RAMPAGE.
-  - **NEW ISSUES #47:** the ported weather handlers diverge from the ROM's
-    `get_weather` stale-read bug in two live-verified Factory-reachable
-    channels (§25.10 banked complete; deliberate port decision pending).
-  - **Animation folds:** at orient (`f422a97`, 2 Knock Off commits) and at
-    wind-down (41 commits: Calm Mind, Shadow Ball, Water Gun, Synthesis
-    coverage + tooling); union suites green both times. The animation
-    supervisor session was still live at both folds; later commits fold
-    next session.
-- **Next (in order):** Rung 6 (Persim-Berry ENDTURN_ITEMS2-via-Thrash
-  verification fixture — design doc §7, verification-only) + Rung 4's
-  TAUROS live-fixture remainder; ISSUES #47 (stale-weather port decision,
-  ground truth complete); §11 wiring for `turn4-doubleteam.json` (scout
-  banked, new bridge shape named); remaining recipe-only sites (§19.5
-  sites 3-6, §24.5's leech-seed/ingrain/curse trio); ENDTURN_ITEMS2's
-  ITEMS1-vs-ITEMS2 breadth beyond the gated four rows as census targets.
-- **Notes:** 1 worker failure (FromChance scout self-suspended on a
-  ScheduleWakeup awaiting a second verify run — new failure class,
-  salvage-committed after full supervisor verification; recorded in
-  supervisor memory with the recipe). 1 process incident: a supervisor
-  mid-worker PAPERCUTS commit swept the worker's staged rung (shared
-  index) — content intact and verified, attribution misleading on
-  `4e766d4`; rule refined to pathspec commits. 1 new PAPERCUTS entry
-  (`bin/oracle lab` default output dir). The user's separate
-  `codex/oracle-tooling-papercuts` session/worktree
-  (`.worktrees/oracle-tooling`) was left untouched. Oracle services fresh
-  all session.
