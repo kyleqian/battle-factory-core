@@ -1,4 +1,95 @@
 ---
+## 495 — [BOUNDED WORKER 2026-07-27 ~01:40] Yawn Rung 2 landed: ENDTURN_YAWN end-turn case (countdown decrement + real sleep transition) — live fixture reproduces the ROM's full 2-turn trajectory including the AND-chain firing
+
+- **State:** tree green at **232 files / 3282 tests** (+6 over entry 494's
+  3276), `npm run build` clean. Census re-run byte-identical (93/214
+  effects, 188/355 moves, 151/276 Factory-L50, 1894/2957 weighted, all 32
+  checks pass, `git status --porcelain docs/executable-frontier-census.md`
+  empty) — expected: this rung is an end-turn-tick reducer, not a
+  move-execution dispatch change, so the census (which only walks move
+  scripts) has nothing new to count; the real delta is qualitative
+  (`ENDTURN_YAWN`'s silent no-op comment is now a live-modeled case).
+  `executableFrontierRatchet.test.ts` unmoved (6/6 green, no new barrier —
+  this rung wires an *existing* reachable case rather than adding an
+  unsupported-branch barrier).
+- **Did:** landed `docs/yawn-thrash-endturn-design.md` §2 exactly as scoped.
+  New `runYawnTick` in `battleEndTurnOrchestration.ts`, replacing the
+  `:991`-area no-op comment in `runDoBattlerEndTurnEffects`: (1) decrements
+  `STATUS3_YAWN` by one turn unit every pass the mask is nonzero (new
+  `BATTLE_SCRIPT_STATUS3_YAWN_TURN_1` constant in
+  `battleScriptSourceConstants.ts`, mirroring Rung 1's `_TURN_2`); (2) on
+  the pass that empties the counter, runs the exact AND-chain
+  (`!status1 && ability != VITAL_SPIRIT/INSOMNIA`, reusing Rung 1's own
+  ability ids as a plain equality check, no opcode) before calling the
+  ALREADY-LANDED `cancelBattleScriptMultiTurnMoves`
+  (`battleScriptMultiTurnCancellation.ts`, confirmed by entry 494's own
+  de-risking note — no new helper needed) and drawing the sleep-turn RNG
+  (`(Random() & 3) + 2`, attributed to `BattleScript_YawnMakesAsleep`'s own
+  entry instruction, same "draw before the script starts" convention
+  `runShedSkinTick` established); (3) writes the raw sleep-turn count
+  directly into `status1` (guaranteed zero going in, so no OR needed,
+  unlike every other family-A status write) and syncs the party mirror;
+  (4) runs `BattleScript_YawnMakesAsleep` via the plain `runTickScript`
+  primitive (`BattleScriptExecute`+`end2`, no `END3` — confirmed opcode-
+  complete by Rung 1's own census). One real wiring detail Rung 1's own
+  scoping note didn't call out: `BattleScript_YawnMakesAsleep` reads
+  `BS_EFFECT_BATTLER` for all three of its battler-selector opcodes
+  (`statusanimation`/`updatestatusicon`/`makevisible`, matching source's own
+  `gEffectBattler = gActiveBattler`), but `enterTickBattlerContext` only
+  ever sets the `attacker` role (documented as narrowed to it, since every
+  prior DoTurnDmg-family script only reads `BS_ATTACKER`) — `runYawnTick`
+  sets `selectorRoles.effectBattler` explicitly itself, the first tick
+  reducer in this file that needs to. Re-verified against the raw C switch
+  body (`battle_util.c:1753-1771`, quoted in full) that Yawn's case has NO
+  `hp != 0` guard (unlike Curse/Wrap, which do) — the reducer correctly
+  omits one. `UproarWakeUpCheck`'s omission (STATUS2_UPROAR never set by
+  any production code) is cited in the reducer's own doc comment, not
+  re-verified again this session (already confirmed twice: doc §2 and entry
+  494's de-risking note).
+- **Tier-1 (+6, `tests/battleEndTurnOrchestration.test.ts`):** new `ENDTURN_
+  YAWN` describe block — first-pass decrement only (`TURN(2)->TURN(1)`,
+  zero RNG); second-pass transition (`TURN(1)->0`, `status1` sleep-turn
+  write matching the raw-byte convention, party mirror sync, exactly 1 RNG
+  draw, seed-pinned like the file's existing Shed Skin precedent: seed
+  919694434's first draw gives `(randomValue&3)+2 == 3`); each AND-chain
+  blocker still decrements to zero but does NOT transition (statused
+  target, Vital Spirit, Insomnia — 3 tests); no-yawn-set pure no-op. All
+  assert the RNG-draw-count convention (zero on decrement-only, one on
+  transition) explicitly.
+- **Live fixture (`tools/battle-lab/mechanic-yawn-endturn-transition-off.json`,
+  new sibling extending Rung 1's GULPIN-vs-MAGIKARP fixture with a second
+  turn's worth of input past the original 900-frame idle window):**
+  opponent (MAGIKARP) `status3` observed **0 → 4096/0x1000 (frame 180,
+  `setyawn`) → 2048/0x800 (frame 320, turn 1's `ENDTURN_YAWN` decrement,
+  matches Rung 1's own preview) → 0 (frame 1260, turn 2's `ENDTURN_YAWN`
+  decrement emptying the counter)**; `status1` observed **0 → 5** at the
+  SAME frame 1260 (`STATUS1_SLEEP_TURN(5)`, within the real 2-5 turn range,
+  raw-byte value with no OR — matches the engine's write exactly). Frame
+  1260 screenshot: "Foe MAGIKARP fell asleep!" (`STRINGID_PKMNFELLASLEEP`),
+  confirming `BattleScript_YawnMakesAsleep` actually ran. Between frames
+  320 and 1200 status3/status1 sit frozen at 2048/0 (confirmed at 900,
+  1080, 1100, 1120, 1200 during binary-search narrowing) because turn 2
+  needs its own manual FIGHT-menu input in this harness (message
+  `waitmessage`s auto-advance on their own timer; the top-level action menu
+  does not) — the added second `A`-press pair supplies exactly that, GULPIN
+  re-attempting Yawn on an already-yawning target (silently fails,
+  `ButItFailed`, no new state) while MAGIKARP's own end-turn tick empties
+  the counter and transitions. This is the ROM's real 2-turn countdown
+  end-to-end, not just Rung 1's single-decrement preview.
+- **Next:** Rung 3 (`ENDTURN_ITEMS2` + `moveTurn` gating) is explicitly the
+  next MAIN-lane brief per the design doc's own ladder — out of scope for
+  this step and deliberately not started (its `moveTurn`-threading work
+  deserves its own fresh cap, per this step's own brief). Rungs 4-6
+  (Thrash-family) remain independent, lower-priority follow-ups per the
+  design doc's own headline finding (Yawn alone unblocks `ENDTURN_ITEMS2`).
+- **Notes:** no PAPERCUT. Ratchet/census both unmoved, as expected for an
+  end-turn-tick wiring step (named above). Time split roughly matched the
+  brief's guidance: reducer + Tier-1 landed well inside 40 minutes, live
+  fixture extension (the trickiest part — finding where the harness froze
+  waiting for turn-2 input, then binary-searching the transition frame)
+  took the remainder but stayed inside the cap.
+
+---
 ## 494 — [BOUNDED WORKER 2026-07-27 ~01:15] Yawn Rung 1 landed (SETYAWN + JUMPIFABILITY widening) — plus a real accuracycheck gap the design doc's own census missed
 
 - **State:** tree green at **232 files / 3276 tests** (+9 over entry 493's

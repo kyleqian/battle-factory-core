@@ -10,10 +10,10 @@ Answers ROADMAP S10's Executable-frontier reset question directly: not "how many
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 93 | 214 | 43.5% |
-| Moves (unweighted, all 355) | 188 | 355 | 53.0% |
-| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 151 | 276 | 54.7% |
-| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 1894 | 2957 | 64.1% |
+| Effect scripts | 94 | 214 | 43.9% |
+| Moves (unweighted, all 355) | 191 | 355 | 53.8% |
+| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 153 | 276 | 55.4% |
+| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 1900 | 2957 | 64.3% |
 
 "Executable" means every opcode on every statically reachable path from the effect's entry script has a dispatch entry today (registered barriers included, per ROADMAP S10 §1's (a)/(b) policy). It is not a semantic-correctness claim -- see Caveats.
 
@@ -80,7 +80,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_EVASION_DOWN | `BattleScript_EffectEvasionDown` | executable | - | - | 1 | 1 (3) |
 | EFFECT_HAZE | `BattleScript_EffectHaze` | blocked-on-opcodes | `B_SCR_OP_NORMALISEBUFFS` (main path) | - | 1 | 1 (1) |
 | EFFECT_BIDE | `BattleScript_EffectBide` | blocked-on-opcodes | `B_SCR_OP_SETBIDE` (main path) | - | 1 | 0 (0) |
-| EFFECT_RAMPAGE | `BattleScript_EffectRampage` | blocked-on-opcodes | `B_SCR_OP_CONFUSEIFREPEATINGATTACKENDS` (edge branch only) | - | 3 | 2 (6) |
+| EFFECT_RAMPAGE | `BattleScript_EffectRampage` | executable | - | - | 3 | 2 (6) |
 | EFFECT_ROAR | `BattleScript_EffectRoar` | blocked-on-opcodes | `B_SCR_OP_FORCERANDOMSWITCH`, `B_SCR_OP_INITMULTIHITSTRING`, `B_SCR_OP_JUMPIFHASNOHP` (edge branch only) | Cmd_jumpifability: ABILITY_SUCTION_CUPS is outside the engine's widened ability set (battleScriptIngrainLeechSeedWrapOpcode.ts) -- battle_script_commands.c:3105 | 2 | 2 (40) |
 | EFFECT_MULTI_HIT | `BattleScript_EffectMultiHit` | blocked-on-opcodes | `B_SCR_OP_INITMULTIHITSTRING`, `B_SCR_OP_JUMPIFHASNOHP` (main path) | - | 12 | 6 (9) |
 | EFFECT_CONVERSION | `BattleScript_EffectConversion` | blocked-on-opcodes | `B_SCR_OP_TRYCONVERSIONTYPECHANGE` (main path) | - | 1 | 0 (0) |

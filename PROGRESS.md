@@ -14,6 +14,134 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > entry 468's animation items are the animation supervisor's backlog now.
 
 ---
+## 498 — [BOUNDED WORKER 2026-07-27 ~03:05] Thrash Rung 4 landed: CONFUSEIFREPEATINGATTACKENDS + MOVE_EFFECT_THRASH lock-in start — plus a real jumpifstatus2 gap the design doc's own citation table missed
+
+- **State:** tree green at **234 files / 3300 tests** (+1 file/+7 tests over
+  entry 497's 233/3293), `npm run build` clean. `executableFrontierRatchet
+  .test.ts` unmoved (6/6 green, **zero new barriers** — the new opcode file
+  has no `unsupportedBranch` call at all, same shape as Rung 1's
+  `battleScriptSetyawnOpcode.ts`; widening `JUMPIFSTATUS2_VALUES`'s Map
+  doesn't add a call site either). Census: **94/214 effects (+1), 191/355
+  moves (+3), 153/276 Factory-L50 unweighted (+2), 1900/2957 weighted (+6)**
+  — `EFFECT_RAMPAGE` flips `blocked-on-opcodes` → `executable`; smaller than
+  the design doc's own raw-catalog estimate (9 entries, 2+2+5 unweighted)
+  because that count wasn't rental-tier-filtered, same shape as Rung 1's own
+  raw-vs-weighted correction (entry 494).
+- **UNVERIFIED item resolved (this rung's own required first action,
+  design doc §3):** `gLockedMoves[battler]`/forced-repeat-move selection is
+  **NOT modeled anywhere in this engine, and deliberately stays that way.**
+  Grepped `battleScriptActionAdmission.ts`'s existing `STATUS2_MULTIPLETURNS`
+  references first, per the brief — all of them are Bide's own counter/
+  clearing-owner tracking (`:3163-3379`) or the no-PP-block check
+  (`:3696-3710`); none reads `gLockedMoves` or re-derives which move a
+  battler uses. Source's real reader is `HandleAction_UseMove`
+  (`battle_util.c:79-135`), the per-battler "which move does this turn
+  execute" dispatcher that runs once per action, *before*
+  `Cmd_attackcanceler`/this engine's Battle Script machine ever starts —
+  grepped for it directly (`HandleAction_UseMove`, `gChosenMoveByBattler`,
+  `noValidMoves`, `encoredMove`) across `src/`: zero hits outside doc-comment
+  citations. Confirmed architecturally, not just by absence: every call site
+  that starts a move's execution anywhere in this codebase
+  (`factoryBattleScriptFullTurnDecision.ts:568-599`'s `buildActionContext`/
+  `runMoveAction`, every Tier-1/battle-lab fixture) takes the move id as a
+  **given external input**, never derives it internally — there is no
+  ported `HandleAction_UseMove` equivalent for `gLockedMoves` to plug into
+  at any layer. Landed the same way `runYawnTick` (Rung 2) omitted
+  `UproarWakeUpCheck` and `applySetMoveEffect`'s own `MOVE_EFFECT_SLEEP`/
+  `MOVE_EFFECT_FREEZE` cases already omit `CancelMultiTurnMoves`: cited,
+  proven-unobservable state writes are skipped, not ported as dead fields.
+  Not a Rung 4b split — there was no subsystem-sized gap to split, only a
+  one-line write with no reader anywhere in scope.
+- **Real citation gap found and fixed (verify-each-citation bar, not a
+  planned deliverable):** the design doc's §3 script enumeration marked
+  `jumpifstatus2 BS_ATTACKER, STATUS2_MULTIPLETURNS, BattleScript_
+  EffectRampage2` as `[registered]` — true only for the bare *opcode*;
+  `Cmd_jumpifstatus2`'s operand-VALUE narrowing (`battleScriptStatbuffchangeOpcode.ts`'s
+  `JUMPIFSTATUS2_VALUES` map) covered only `STATUS2_SUBSTITUTE`/
+  `STATUS2_CONFUSION`, not `STATUS2_MULTIPLETURNS` — confirmed live: a
+  from-`BattleScript_EffectRampage` pass-through test halted on
+  `unsupported-branch` at this exact instruction, on the very first
+  Thrash-family use, before `confuseifrepeatingattackends` was ever
+  reached. Widened the Map with `STATUS2_MULTIPLETURNS` (same (a)-real,
+  same-shape widening as the existing CONFUSION entry) — real, reachable,
+  load-bearing for every Thrash/Outrage/Petal Dance use, not (b) material.
+  Zero ratchet impact (widening the Map isn't a new `unsupportedBranch` call
+  site). Fixed two now-stale pre-existing tests that depended on the old
+  gap: `battleScriptStatbuffchangeOpcode.test.ts`'s barrier test (picked
+  "first non-SUBSTITUTE jumpifstatus2 site" as its halt example, which was
+  exactly this Rampage instruction — repointed to an explicit still-
+  unsupported set) and `battleScriptRulesContext.test.ts`'s 109-handler
+  inventory test (now 110, `+140`).
+- **Did:** new `battleScriptConfuseifrepeatingattackendsOpcode.ts`
+  (`Cmd_confuseifrepeatingattackends`, `battle_script_commands.c:7131-7136`,
+  zero operands, no jump target — stages `moveEffectByte = MOVE_EFFECT_THRASH
+  |MOVE_EFFECT_AFFECTS_USER` only when the attacker isn't already
+  `STATUS2_LOCK_CONFUSE`'d, else leaves it untouched, always advances),
+  registered under `B_SCR_OP_CONFUSEIFREPEATINGATTACKENDS` (opcodeId 140) in
+  `battleScriptRulesContext.ts`. New `applyThrashMoveEffect` case in
+  `battleScriptHitChainOpcode.ts`'s `applySetMoveEffect` (`MOVE_EFFECT_THRASH`
+  = 53, widened into `SET_MOVE_EFFECT_SUPPORTED_BYTES`): single early-out on
+  `STATUS2_LOCK_CONFUSE` already set (source's own inner `if` is dead here —
+  `sStatusFlagsForMoveEffects[MOVE_EFFECT_THRASH] == STATUS2_LOCK_CONFUSE`
+  means the shared family-B early-out already excludes it, verified by
+  direct read of `:2523-2524`, same single-early-out shape as
+  `applyFlinchMoveEffect`/`applyWrapMoveEffect`), else sets
+  `STATUS2_MULTIPLETURNS | STATUS2_LOCK_CONFUSE_TURN((Random()&1)+2)` and
+  **advances (no script call)** — unlike every status1-family case and
+  `MOVE_EFFECT_CONFUSION`, `SetMoveEffect`'s own THRASH case just `break`s.
+- **Tier-1 (+7, new `tests/battleScriptConfuseifrepeatingattackendsOpcode
+  .test.ts`):** direct opcode tests (stages the byte when unlocked, leaves
+  it untouched when locked, zero RNG either way); `applySetMoveEffect` case
+  tests via the established `stepAtSetEffectWithChance`-style direct-PC-patch
+  convention (Wrap's own precedent) — not-locked path draws exactly 2 RNG
+  calls (seteffectwithchance's own unconditional percentChance roll,
+  MOVE_THRASH's `secondaryEffectChance=100` still calls `Random()` per house
+  convention, plus the nested duration draw), turns land in [2,3], attacker
+  only (target untouched, confirming `MOVE_EFFECT_AFFECTS_USER` routing);
+  already-locked path draws exactly 1 (seteffectwithchance's own roll only,
+  no nested draw). Plus the pass-through test the brief asked for: real
+  script wiring from `BattleScript_EffectRampage` through attackcanceler/
+  accuracycheck/attackstring/(jumpifstatus2)/ppreduce/confuseifrepeatingatt
+  ackends into `BattleScript_HitFromCritCalc`, both fresh (ppreduce runs,
+  byte staged) and already-mid-lock (jumpifstatus2 skips straight to
+  `BattleScript_EffectRampage2`, ppreduce does NOT re-run) — the **lock-in
+  START runs to completion**, per this rung's own scope (the confusion END
+  is Rung 5, not attempted). Stops at `BattleScript_HitFromCritCalc`'s own
+  entry rather than running through real damage calc, matching this
+  codebase's established convention (`battleScriptHitChainOpcode.test.ts`'s
+  own `stepAtOpcode` comment: "critcalc/damagecalc/typecalc all recompute
+  battleMoveDamage from the battlers' raw stats, which a focused
+  single-opcode test does not want to also have to set up realistically").
+- **Live fixture: NOT attempted this session — Tier-1-only.** Per the
+  brief's own time-split guidance, landing the opcode+case+citation-gap-fix
+  with tests green is the deepest committable resting point; a real TAUROS
+  (`MOVE_THRASH`, Factory-L50 carrier per the design doc's own table)
+  live-fixture observation of the lock-in bits landing is the clean
+  remainder for whoever picks this back up (either finishing Rung 4's own
+  live corroboration, or folding it into Rung 5's own TAUROS fixture per
+  §7's Rung 5 pass-through test description, which already plans to extend
+  "Rung 4's TAUROS fixture").
+- **Next:** Rung 5 (`ENDTURN_THRASH` — wiring the already-scaffolded
+  case-barrier at `battleEndTurnOrchestration.ts` into a real reducer,
+  extracting/reusing `applyConfusionMoveEffect`'s state-mutation logic and
+  calling `BattleScript_ThrashConfuses` via `runTickScript`, **never**
+  `BattleScript_MoveEffectConfusion` per §4's load-bearing discard finding)
+  is next per the design doc's own ladder — explicitly out of scope for
+  this step and not started. Landing Rung 4 makes `ENDTURN_THRASH`'s
+  case-barrier live for the first time (any battler with `STATUS2_LOCK_
+  CONFUSE` now reaches its next end-turn pass) — this is the ratchet
+  working as intended (loud, named barrier) if some future fixture reaches
+  it before Rung 5 lands, not a regression. `WasUnableToUseMove`
+  (`battle_util.c:890-902`) is Rung 5's own first UNVERIFIED action per the
+  design doc, unstarted here.
+- **Notes:** no PAPERCUT. Archived entry 495 to `PROGRESS-archive.md` to
+  keep this ledger at 3 entries. The `jumpifstatus2` gap (a real blocker
+  the design doc's own census missed, same shape as Rung 1's accuracycheck
+  gap) was the only real deviation from plan — found by verifying the
+  citation live rather than trusting the table, fixed narrowly, and named
+  here per the brief's own prove-or-refute bar.
+
+---
 ## 497 — [BOUNDED WORKER 2026-07-27 ~02:40] `turn3-rockslide.json` wired from kernel semantic events — closes the entire Grovyle ROCK_SLIDE HP chain (turns 1/3/4/5 all staged now)
 
 - **State:** tree green at **233 files / 3293 tests** (unchanged — this step
@@ -161,95 +289,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   495's own precedent of binary-searching transition frames) — both halves
   finished inside the overall cap, so no remainder needs naming beyond
   Rungs 4-6 above.
-
----
-## 495 — [BOUNDED WORKER 2026-07-27 ~01:40] Yawn Rung 2 landed: ENDTURN_YAWN end-turn case (countdown decrement + real sleep transition) — live fixture reproduces the ROM's full 2-turn trajectory including the AND-chain firing
-
-- **State:** tree green at **232 files / 3282 tests** (+6 over entry 494's
-  3276), `npm run build` clean. Census re-run byte-identical (93/214
-  effects, 188/355 moves, 151/276 Factory-L50, 1894/2957 weighted, all 32
-  checks pass, `git status --porcelain docs/executable-frontier-census.md`
-  empty) — expected: this rung is an end-turn-tick reducer, not a
-  move-execution dispatch change, so the census (which only walks move
-  scripts) has nothing new to count; the real delta is qualitative
-  (`ENDTURN_YAWN`'s silent no-op comment is now a live-modeled case).
-  `executableFrontierRatchet.test.ts` unmoved (6/6 green, no new barrier —
-  this rung wires an *existing* reachable case rather than adding an
-  unsupported-branch barrier).
-- **Did:** landed `docs/yawn-thrash-endturn-design.md` §2 exactly as scoped.
-  New `runYawnTick` in `battleEndTurnOrchestration.ts`, replacing the
-  `:991`-area no-op comment in `runDoBattlerEndTurnEffects`: (1) decrements
-  `STATUS3_YAWN` by one turn unit every pass the mask is nonzero (new
-  `BATTLE_SCRIPT_STATUS3_YAWN_TURN_1` constant in
-  `battleScriptSourceConstants.ts`, mirroring Rung 1's `_TURN_2`); (2) on
-  the pass that empties the counter, runs the exact AND-chain
-  (`!status1 && ability != VITAL_SPIRIT/INSOMNIA`, reusing Rung 1's own
-  ability ids as a plain equality check, no opcode) before calling the
-  ALREADY-LANDED `cancelBattleScriptMultiTurnMoves`
-  (`battleScriptMultiTurnCancellation.ts`, confirmed by entry 494's own
-  de-risking note — no new helper needed) and drawing the sleep-turn RNG
-  (`(Random() & 3) + 2`, attributed to `BattleScript_YawnMakesAsleep`'s own
-  entry instruction, same "draw before the script starts" convention
-  `runShedSkinTick` established); (3) writes the raw sleep-turn count
-  directly into `status1` (guaranteed zero going in, so no OR needed,
-  unlike every other family-A status write) and syncs the party mirror;
-  (4) runs `BattleScript_YawnMakesAsleep` via the plain `runTickScript`
-  primitive (`BattleScriptExecute`+`end2`, no `END3` — confirmed opcode-
-  complete by Rung 1's own census). One real wiring detail Rung 1's own
-  scoping note didn't call out: `BattleScript_YawnMakesAsleep` reads
-  `BS_EFFECT_BATTLER` for all three of its battler-selector opcodes
-  (`statusanimation`/`updatestatusicon`/`makevisible`, matching source's own
-  `gEffectBattler = gActiveBattler`), but `enterTickBattlerContext` only
-  ever sets the `attacker` role (documented as narrowed to it, since every
-  prior DoTurnDmg-family script only reads `BS_ATTACKER`) — `runYawnTick`
-  sets `selectorRoles.effectBattler` explicitly itself, the first tick
-  reducer in this file that needs to. Re-verified against the raw C switch
-  body (`battle_util.c:1753-1771`, quoted in full) that Yawn's case has NO
-  `hp != 0` guard (unlike Curse/Wrap, which do) — the reducer correctly
-  omits one. `UproarWakeUpCheck`'s omission (STATUS2_UPROAR never set by
-  any production code) is cited in the reducer's own doc comment, not
-  re-verified again this session (already confirmed twice: doc §2 and entry
-  494's de-risking note).
-- **Tier-1 (+6, `tests/battleEndTurnOrchestration.test.ts`):** new `ENDTURN_
-  YAWN` describe block — first-pass decrement only (`TURN(2)->TURN(1)`,
-  zero RNG); second-pass transition (`TURN(1)->0`, `status1` sleep-turn
-  write matching the raw-byte convention, party mirror sync, exactly 1 RNG
-  draw, seed-pinned like the file's existing Shed Skin precedent: seed
-  919694434's first draw gives `(randomValue&3)+2 == 3`); each AND-chain
-  blocker still decrements to zero but does NOT transition (statused
-  target, Vital Spirit, Insomnia — 3 tests); no-yawn-set pure no-op. All
-  assert the RNG-draw-count convention (zero on decrement-only, one on
-  transition) explicitly.
-- **Live fixture (`tools/battle-lab/mechanic-yawn-endturn-transition-off.json`,
-  new sibling extending Rung 1's GULPIN-vs-MAGIKARP fixture with a second
-  turn's worth of input past the original 900-frame idle window):**
-  opponent (MAGIKARP) `status3` observed **0 → 4096/0x1000 (frame 180,
-  `setyawn`) → 2048/0x800 (frame 320, turn 1's `ENDTURN_YAWN` decrement,
-  matches Rung 1's own preview) → 0 (frame 1260, turn 2's `ENDTURN_YAWN`
-  decrement emptying the counter)**; `status1` observed **0 → 5** at the
-  SAME frame 1260 (`STATUS1_SLEEP_TURN(5)`, within the real 2-5 turn range,
-  raw-byte value with no OR — matches the engine's write exactly). Frame
-  1260 screenshot: "Foe MAGIKARP fell asleep!" (`STRINGID_PKMNFELLASLEEP`),
-  confirming `BattleScript_YawnMakesAsleep` actually ran. Between frames
-  320 and 1200 status3/status1 sit frozen at 2048/0 (confirmed at 900,
-  1080, 1100, 1120, 1200 during binary-search narrowing) because turn 2
-  needs its own manual FIGHT-menu input in this harness (message
-  `waitmessage`s auto-advance on their own timer; the top-level action menu
-  does not) — the added second `A`-press pair supplies exactly that, GULPIN
-  re-attempting Yawn on an already-yawning target (silently fails,
-  `ButItFailed`, no new state) while MAGIKARP's own end-turn tick empties
-  the counter and transitions. This is the ROM's real 2-turn countdown
-  end-to-end, not just Rung 1's single-decrement preview.
-- **Next:** Rung 3 (`ENDTURN_ITEMS2` + `moveTurn` gating) is explicitly the
-  next MAIN-lane brief per the design doc's own ladder — out of scope for
-  this step and deliberately not started (its `moveTurn`-threading work
-  deserves its own fresh cap, per this step's own brief). Rungs 4-6
-  (Thrash-family) remain independent, lower-priority follow-ups per the
-  design doc's own headline finding (Yawn alone unblocks `ENDTURN_ITEMS2`).
-- **Notes:** no PAPERCUT. Ratchet/census both unmoved, as expected for an
-  end-turn-tick wiring step (named above). Time split roughly matched the
-  brief's guidance: reducer + Tier-1 landed well inside 40 minutes, live
-  fixture extension (the trickiest part — finding where the harness froze
-  waiting for turn-2 input, then binary-searching the transition frame)
-  took the remainder but stayed inside the cap.
 

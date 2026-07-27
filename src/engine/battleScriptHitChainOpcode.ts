@@ -211,6 +211,8 @@ const MOVE_EFFECT_CONFUSION = 7;
 const MOVE_EFFECT_FLINCH = 8;
 /** include/constants/battle.h:260 -- SetMoveEffect's Wrap-family case (docs/ingrain-leechseed-wrap-ground-truth.md §1c/§5 slice 2). */
 const MOVE_EFFECT_WRAP = 13;
+/** include/constants/battle.h:300 -- SetMoveEffect's Thrash-family lock-in case (docs/yawn-thrash-endturn-design.md §3, Rung 4). */
+const MOVE_EFFECT_THRASH = 53;
 /**
  * `gTrappingMoves` (`battle_message.c:1256-1264`) -- the fixed 6-move family
  * MOVE_EFFECT_WRAP's own duration/message dispatch indexes by, in this exact
@@ -430,6 +432,7 @@ export const SET_MOVE_EFFECT_SUPPORTED_BYTES: ReadonlySet<number> = new Set<numb
   MOVE_EFFECT_CONFUSION,
   MOVE_EFFECT_FLINCH,
   MOVE_EFFECT_WRAP,
+  MOVE_EFFECT_THRASH,
   ...Object.keys(STAT_MOVE_EFFECT_TABLE).map(Number),
 ]);
 
@@ -2338,6 +2341,9 @@ function applySetMoveEffect(
     if (effectByte === MOVE_EFFECT_WRAP) {
       return applyWrapMoveEffect(context, baseRulesContext, effectBattler);
     }
+    if (effectByte === MOVE_EFFECT_THRASH) {
+      return applyThrashMoveEffect(context, baseRulesContext, effectBattler);
+    }
     const statEntry = STAT_MOVE_EFFECT_TABLE[effectByte];
     if (statEntry) {
       return applyStatMoveEffect(context, baseRulesContext, effectByte, statEntry, affectsUser, attacker, target);
@@ -2716,6 +2722,77 @@ function applyWrapMoveEffect(
   return transitionBattleScriptCommand(
     context,
     Object.freeze({ kind: "call", programCounter }),
+    { rulesContext: nextRulesContext, rng },
+  );
+}
+
+/**
+ * SetMoveEffect's MOVE_EFFECT_THRASH case (`battle_script_commands.c:2851-
+ * 2860`, docs/yawn-thrash-endturn-design.md §3, Rung 4). Thrash/Outrage/
+ * Petal Dance's lock-in start: `sStatusFlagsForMoveEffects[MOVE_EFFECT_THRASH]
+ * == STATUS2_LOCK_CONFUSE` (`:624`), so the shared family-B early-out
+ * (`status2 & sStatusFlagsForMoveEffects[byte]`, `:2523-2524`) already
+ * excludes this case whenever `STATUS2_LOCK_CONFUSE` is set -- the case
+ * body's own inner `if (status2 & STATUS2_LOCK_CONFUSE) { instr++; }` can
+ * never observe TRUE and is not a second check here, matching
+ * `applyFlinchMoveEffect`/`applyWrapMoveEffect`'s own single-early-out shape
+ * for their respective already-set bits. On the real (not-yet-locked) path:
+ * sets `STATUS2_MULTIPLETURNS`, draws the `(Random() & 1) + 2`-turn lock
+ * duration into `STATUS2_LOCK_CONFUSE_TURN` (`battle.h:138`, an unmasked
+ * `(num) << 10` write -- 2 or 3 both fit the 2-bit field with no carry into
+ * `STATUS2_MULTIPLETURNS`'s own bit 12), and -- unlike every status1-family
+ * case above -- never pushes/jumps to a script at all: `SetMoveEffect`'s own
+ * switch just `break`s, so `BattleScript_EffectRampage2`'s `goto
+ * BattleScript_HitFromCritCalc` tail (already run before `seteffectwithchance`
+ * reaches this dispatch) is genuinely the whole move; `"advance"` is the
+ * correct transition, not a `"call"`.
+ *
+ * `gLockedMoves[gEffectBattler] = gCurrentMove` is deliberately NOT ported.
+ * Source reads it back exactly once, in `HandleAction_UseMove`
+ * (`battle_util.c:109`) -- the per-battler "which move does this turn
+ * execute" selector that runs once per battler action, before
+ * `Cmd_attackcanceler`/this engine's Battle Script machine ever starts.
+ * This engine has no ported equivalent of `HandleAction_UseMove` anywhere
+ * (confirmed by grep: zero references outside doc citations) -- every call
+ * site that starts a move's execution (`factoryBattleScriptFullTurnDecision
+ * .ts`'s `buildActionContext`/`runMoveAction`, every battle-lab/Tier-1 test)
+ * takes the move id as a given external input, never derives it internally.
+ * So `gLockedMoves` has no read-back consumer in this codebase at any layer
+ * -- the same "state written but provably unobservable here" shape this
+ * function's own MOVE_EFFECT_SLEEP/MOVE_EFFECT_FREEZE cases already use to
+ * omit `CancelMultiTurnMoves(gEffectBattler)`, not a gap to fill later.
+ */
+function applyThrashMoveEffect(
+  context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
+  baseRulesContext: BattleScriptRulesContext,
+  effectBattler: BattleScriptBattlerId,
+): BattleScriptCommandTransition<BattleScriptRulesContext> {
+  const effectBattlerState = baseRulesContext.battlers[effectBattler];
+  const alreadyLocked = (effectBattlerState.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_LOCK_CONFUSE) !== 0;
+  if (alreadyLocked) {
+    return transitionBattleScriptCommand(
+      context,
+      Object.freeze({ kind: "advance" }),
+      { rulesContext: baseRulesContext },
+    );
+  }
+
+  const { rng, randomValue } = drawBattleScriptRng(
+    context.state.rng,
+    context.instruction,
+    "SetMoveEffect Thrash-family lock-in duration ((Random() & 1) + 2)",
+  );
+  const turns = (randomValue & 1) + 2;
+  const nextRulesContext = withBattler(baseRulesContext, effectBattler, {
+    status2: (
+      effectBattlerState.status2
+      | BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS
+      | (turns << 10)
+    ) >>> 0,
+  });
+  return transitionBattleScriptCommand(
+    context,
+    Object.freeze({ kind: "advance" }),
     { rulesContext: nextRulesContext, rng },
   );
 }
