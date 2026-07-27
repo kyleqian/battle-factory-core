@@ -187,6 +187,10 @@ import {
   type ExplosionState,
 } from "./explosion.ts";
 import {
+  dynamicPunchAtAge,
+  type DynamicPunchState,
+} from "./dynamicPunch.ts";
+import {
   poisonTailAtAge,
   type PoisonTailState,
 } from "./poisonTail.ts";
@@ -356,7 +360,8 @@ export interface SceneOnPresentationBattler {
     | "SEVIPER"
     | "SUDOWOODO"
     | "SHUCKLE"
-    | "GLALIE";
+    | "GLALIE"
+    | "HITMONCHAN";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -851,6 +856,13 @@ export interface SceneOnExplosionConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnDynamicPunchConfig {
+  readonly move: "DYNAMIC_PUNCH";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnPoisonTailConfig {
   readonly move: "POISON_TAIL";
   readonly attacker: SceneOnPresentationBattler;
@@ -1011,6 +1023,11 @@ export interface SceneOnMovePresentationState<
   readonly config: TConfig;
 }
 
+export interface SceneOnDynamicPunchPresentationState {
+  readonly age: number;
+  readonly config: SceneOnDynamicPunchConfig;
+}
+
 export interface SceneOnSupersonicView {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -1082,6 +1099,12 @@ export interface SceneOnSelfDestructView extends SelfDestructState {
 }
 
 export interface SceneOnExplosionView extends ExplosionState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnDynamicPunchView extends DynamicPunchState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -2202,6 +2225,28 @@ export function sceneOnExplosionView(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.battlePositionCenter,
+    ),
+  };
+}
+
+/** `age=0` is the first software-OAM fist/hitsplat display. */
+export function sceneOnDynamicPunchView(
+  state: SceneOnDynamicPunchPresentationState,
+): SceneOnDynamicPunchView {
+  if (state.config.move !== "DYNAMIC_PUNCH") {
+    throw new Error(
+      `expected DYNAMIC_PUNCH presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...dynamicPunchAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.target.geometry.animationCenter,
+      state.config.target.geometry.battlePositionCenter,
     ),
   };
 }

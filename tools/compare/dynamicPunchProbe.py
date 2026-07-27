@@ -1,0 +1,105 @@
+#!/usr/bin/env python3
+"""Dense source-component evidence for legal Scene-ON DYNAMIC PUNCH fixtures."""
+from __future__ import annotations
+import hashlib, json, subprocess, sys
+from pathlib import Path
+
+if len(sys.argv) != 3:
+    raise SystemExit("usage: dynamicPunchProbe.py <scenario> <output.json>")
+SCENARIO, OUTPUT = Path(sys.argv[1]), Path(sys.argv[2])
+ROOT = Path(__file__).resolve().parents[2]
+HARNESS = next(p for p in (ROOT, *ROOT.parents) if (p / "oracle" / "emerald_core.py").is_file())
+sys.path.insert(0, str(HARNESS / "oracle"))
+from battle_lab import BattleLab, validate_request  # noqa: E402
+from emerald_core import EmeraldOracle  # noqa: E402
+
+def main() -> None:
+    request = validate_request(json.loads(SCENARIO.read_text()), "battle-scene-on")
+    reference = (ROOT / "reference" / "pokeemerald").resolve()
+    oracle = EmeraldOracle(reference / "pokeemerald.gba", reference / "pokeemerald.map",
+                           HARNESS / "oracle" / "bootstrap" / "factory.json")
+    lab = BattleLab(oracle, "battle-scene-on")
+    setup = lab.prepare(request)
+    sprites, matrices, tasks = oracle.symbols["gSprites"], oracle.symbols["gOamMatrices"], oracle.symbols["gTasks"]
+    battler_ids = oracle.symbols["gBattlerSpriteIds"]
+    faded, unfaded = oracle.symbols["gPlttBufferFaded"], oracle.symbols["gPlttBufferUnfaded"]
+    se1_info, se1_tracks = oracle.symbols["gMPlayInfo_SE1"], oracle.symbols["gMPlayTrack_SE1"]
+    song_table = oracle.symbols["gSongTable"]
+    nm = subprocess.run(["arm-none-eabi-nm", str(reference / "pokeemerald.elf")],
+                        check=True, capture_output=True, text=True).stdout
+    symbols = {p[2]: int(p[0], 16) | 1 for line in nm.splitlines()
+               if len(p := line.split()) == 3}
+    templates = {name: oracle.symbols[name] for name in
+                 ("gFistFootSpriteTemplate", "gBasicHitSplatSpriteTemplate",
+                  "gExplosionSpriteTemplate")}
+    task_names = ("AnimTask_ShakeMon", "AnimTask_ShakeMon_Step",
+                  "AnimTask_ShakeMon2", "AnimTask_ShakeMon2_Step")
+    task_funcs = {symbols[name] for name in task_names}
+    def u16(a: int) -> int: return oracle.read_u8(a) | (oracle.read_u8(a + 1) << 8)
+    def s16(a: int) -> int:
+        v = u16(a)
+        return v - 0x10000 if v >= 0x8000 else v
+    def s8(a: int) -> int:
+        v = oracle.read_u8(a)
+        return v - 0x100 if v >= 0x80 else v
+    def sprite(slot: int) -> dict:
+        base = sprites + slot * 0x44
+        matrix_num = (u16(base + 2) >> 9) & 0x1f
+        matrix = matrices + matrix_num * 8
+        hw_matrix = 0x07000006 + matrix_num * 0x20
+        return {"slot": slot, "attr0": u16(base), "attr1": u16(base+2), "attr2": u16(base+4),
+                "x": s16(base+0x20), "y": s16(base+0x22),
+                "x2": s16(base+0x24), "y2": s16(base+0x26),
+                "template": oracle.read_u32(base+0x14),
+                "callback": oracle.read_u32(base+0x1c),
+                "subpriority": oracle.read_u8(base+0x43), "matrixNum": matrix_num,
+                "matrix": [s16(matrix+i) for i in (0, 2, 4, 6)],
+                "hardwareMatrix": [s16(hw_matrix+i) for i in (0, 8, 16, 24)],
+                "data": [s16(base+0x2e+i*2) for i in range(8)]}
+    def battler(i: int) -> dict: return sprite(oracle.read_u8(battler_ids + i))
+    def active_tasks() -> list[dict]:
+        result = []
+        for slot in range(16):
+            base = tasks + slot * 0x28
+            if oracle.read_u8(base + 4) == 0: continue
+            func = oracle.read_u32(base)
+            if func in task_funcs:
+                result.append({"slot": slot, "func": func,
+                               "data": [s16(base+8+i*2) for i in range(16)]})
+        return result
+    rows = []
+    def capture(frame: int) -> None:
+        snap = lab.snapshot()
+        if snap["engine"]["currentMove"] != 223: return
+        active = []
+        for slot in range(64):
+            base = sprites + slot * 0x44
+            if oracle.read_u8(base+0x3e) & 1:
+                item = sprite(slot)
+                if item["template"] in templates.values(): active.append(item)
+        rgb = oracle.screen_rgb()
+        rows.append({"frame": frame, "sha256": hashlib.sha256(rgb).hexdigest(),
+          "player": snap["battlers"]["player"], "opponent": snap["battlers"]["opponent"],
+          "playerSprite": battler(0), "opponentSprite": battler(1), "sprites": active,
+          "tasks": active_tasks(), "fadedPalette": [u16(faded+i*2) for i in range(512)],
+          "unfadedPalette": [u16(unfaded+i*2) for i in range(512)],
+          "hardwarePalette": [u16(0x05000000+i*2) for i in range(512)],
+          "hardwareOam": [[u16(0x07000000+i*8+j) for j in (0,2,4)] for i in range(128)],
+          "se1": {"songHeader": oracle.read_u32(se1_info), "status": oracle.read_u32(se1_info+4),
+                  "tracks": [{"flags": oracle.read_u8(se1_tracks+i*0x50),
+                              "pan": s8(se1_tracks+i*0x50+0x14),
+                              "panX": s8(se1_tracks+i*0x50+0x15)} for i in range(3)]},
+          "bldcnt": u16(0x04000050), "bldalpha": u16(0x04000052)})
+    frame = 0
+    capture(frame)
+    for segment in request["trace"]["segments"]:
+        for _ in range(segment["frames"]):
+            oracle.advance(segment.get("buttons", [])); frame += 1; capture(frame)
+    OUTPUT.write_text(json.dumps({"schema": "dynamic-punch-dense-evidence/v1",
+      "setup": setup, "templates": templates,
+      "taskFuncs": {name: symbols[name] for name in task_names},
+      "songHeaders": {"SE_M_VITAL_THROW2": oracle.read_u32(song_table+123*8),
+                      "SE_M_SELF_DESTRUCT": oracle.read_u32(song_table+177*8)},
+      "frames": rows}) + "\n")
+    print(f"wrote {OUTPUT} ({len(rows)} frames; {rows[0]['frame'] if rows else '-'}..{rows[-1]['frame'] if rows else '-'})")
+main()

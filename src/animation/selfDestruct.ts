@@ -32,21 +32,28 @@ export const SELF_DESTRUCT_EXPLOSION_OFFSETS = [
   { x: 16, y: 16 },
 ] as const;
 
-function explosionAtAge(
+/**
+ * Shared source reducer for the literal `gExplosionSpriteTemplate`.
+ * `relativeSide` is the side whose animation arguments were mirrored by the
+ * battle-animation interpreter; `center` is the source-selected battler
+ * coordinate (attacker or target, with or without picture Y offset).
+ */
+export function explosionSpriteAtAge(
   age: number,
   spawnIndex: number,
-  attackerSide: SelfDestructSide,
-  attackerCenter: Readonly<{ x: number; y: number }>,
+  relativeSide: SelfDestructSide,
+  center: Readonly<{ x: number; y: number }>,
+  interval = SELF_DESTRUCT_EXPLOSION_INTERVAL,
 ): SelfDestructExplosion | null {
-  const localAge = age - spawnIndex * SELF_DESTRUCT_EXPLOSION_INTERVAL;
+  const localAge = age - spawnIndex * interval;
   if (localAge < 0 || localAge >= SELF_DESTRUCT_EXPLOSION_LIFETIME) return null;
   const offset = SELF_DESTRUCT_EXPLOSION_OFFSETS[spawnIndex]!;
   return {
     spawnIndex,
     age: localAge,
     // InitSpritePosToAnimAttacker mirrors script x offsets for the opponent.
-    x: attackerCenter.x + (attackerSide === "player" ? offset.x : -offset.x),
-    y: attackerCenter.y + offset.y,
+    x: center.x + (relativeSide === "player" ? offset.x : -offset.x),
+    y: center.y + offset.y,
     // StartSpriteAnim advances once on creation; the first cell therefore
     // has four displayed states and the remaining cells have five.
     frame: Math.min(3, Math.floor((localAge + 1) / 5)) as 0 | 1 | 2 | 3,
@@ -66,7 +73,7 @@ export function selfDestructAtAge(
   attackerCenter: Readonly<{ x: number; y: number }>,
 ): SelfDestructState {
   const explosions = SELF_DESTRUCT_EXPLOSION_OFFSETS.map((_, index) =>
-    explosionAtAge(age, index, attackerSide, attackerCenter),
+    explosionSpriteAtAge(age, index, attackerSide, attackerCenter),
   ).filter((sprite): sprite is SelfDestructExplosion => sprite !== null);
 
   // All four position tasks are created, but only the two visible singles
