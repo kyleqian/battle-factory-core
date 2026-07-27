@@ -33,8 +33,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   + the §11.4 regression sweep) ∥ side → §24.5 recipe-only CV draw sites,
   DRAW SITE 2 first (cheapest: opponent's own low HP, no mixed kit), then
   relay-pattern sites as cap allows.
-- **Next:** verify round 2; then §19.5 sites / Rung-4 TAUROS / #47
-  movesetIndex-1-3 remainder as later rounds.
+- **Next:** verify round 2; then §19.5 sites / #47 movesetIndex-1-3
+  remainder as later rounds. (Drift scrub: entry 504's carried "Rung 6/
+  Rung 4 TAUROS" Next item is STALE — the Yawn/Thrash ladder closed 6/6 in
+  entry 502, incl. Rung 4's TAUROS remainder; do not re-brief it.)
 
 ---
 ## 504 — [BOUNDED WORKER 2026-07-27 ~10:10] ISSUES #47 CLOSED for its live-verified shape: logic-ID-major restructure (option a) landed, Channel 2 modeled, 3 staged fixtures reproduce exactly; trimmed to one precisely-scoped, underivable remainder
