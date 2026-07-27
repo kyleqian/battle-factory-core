@@ -23,7 +23,10 @@ export const RECOVER_ORB_WAVES = 3;
 export const RECOVER_HEALING_START_AGE = 120;
 export const RECOVER_STAR_SPAWN_PERIOD = 9;
 export const RECOVER_STAR_FRAME_DURATIONS =
-  Object.freeze([2, 2, 2, 3, 5, 3, 2, 2] as const);
+  // The sprite animation advances once on its creation tick: frame 0 is
+  // therefore RAM-visible for one tick, while animEnded's destroy callback
+  // leaves the terminal frame visible for one additional tick.
+  Object.freeze([1, 2, 2, 3, 5, 3, 2, 3] as const);
 export const RECOVER_STAR_FRAMES =
   Object.freeze([0, 1, 2, 3, 4, 5, 6, 0] as const);
 

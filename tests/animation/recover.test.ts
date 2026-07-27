@@ -1,11 +1,21 @@
 import { describe, expect, it } from "vitest";
 import {
+  RECOVER_BLEND_TIMING,
   RECOVER_HEALING_START_AGE,
   RECOVER_ORB_ARGS,
   recoverEffectAtAge,
 } from "../../src/animation/recover.ts";
+import { blendColorCycleLegDuration } from "../../src/animation/blendColorCycle.ts";
 
 describe("MOVE_RECOVER source-relative component reducer", () => {
+  it("pins the odd 0<->11 blend cycle's source-probed 18-tick leg", () => {
+    expect(blendColorCycleLegDuration(
+      RECOVER_BLEND_TIMING.legs[0]!,
+      RECOVER_BLEND_TIMING.deltaY,
+      false,
+    )).toBe(18);
+  });
+
   it("replays the first player-side orb's RAM-probed translation and affine matrix", () => {
     const expected = [
       { x: 109, y: 86, scale: 266 },

@@ -124,6 +124,10 @@ import {
   type GrowthAnimationState,
 } from "./growth.ts";
 import {
+  recoverEffectAtAge,
+  type RecoverEffectSprite,
+} from "./recover.ts";
+import {
   futureSightAttackerEffectAtAge,
   futureSightBgBldyAtAge,
   futureSightBgIsPsychic,
@@ -631,6 +635,13 @@ export interface SceneOnGrowthConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnRecoverConfig {
+  readonly move: "RECOVER";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnFutureSightConfig {
   readonly move: "FUTURE_SIGHT";
   readonly attacker: SceneOnPresentationBattler;
@@ -684,6 +695,7 @@ export type SceneOnMoveConfig =
   | SceneOnDragonRageConfig
   | SceneOnShadowPunchConfig
   | SceneOnGrowthConfig
+  | SceneOnRecoverConfig
   | SceneOnFutureSightConfig
   | SceneOnConfusionConfig
   | SceneOnPsychicConfig
@@ -976,6 +988,14 @@ export interface SceneOnGrowthView extends GrowthAnimationState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnRecoverView {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly attackerObjY: number;
+  readonly sprites: readonly RecoverEffectSprite[];
 }
 
 export interface SceneOnFutureSightView extends FutureSightAttackerEffect {
@@ -1451,6 +1471,26 @@ export function sceneOnGrowthView(
     target: state.config.target,
     attackerScale: scaleState.attackerScale,
     attackerObjY: tintState.attackerObjY,
+  };
+}
+
+/** `age` is ticks since the first RecoverAbsorbEffect orb creation. */
+export function sceneOnRecoverView(
+  state: SceneOnMovePresentationState,
+): SceneOnRecoverView {
+  if (state.config.move !== "RECOVER") {
+    throw new Error(`expected RECOVER presentation, got ${state.config.move}`);
+  }
+  const effect = recoverEffectAtAge(
+    state.age,
+    state.config.attacker.geometry.side,
+    state.config.attacker.geometry.animationCenter,
+  );
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...effect,
   };
 }
 

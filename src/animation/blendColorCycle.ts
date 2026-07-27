@@ -67,7 +67,16 @@ export function blendColorCycleLegDuration(
   deltaY: number,
   isFinalLeg: boolean,
 ): number {
-  return legReachAge(leg, deltaY) + POST_REACH_TICKS + (isFinalLeg ? FINAL_LEG_EXTRA_TICK : 0);
+  // An odd/non-divisible swing is clamped on the OBJ half one transfer
+  // later than an exactly divisible swing. RECOVER's literal 0<->11,
+  // delta-2 cycle RAM-probes this extra tick on every leg; GROWTH's
+  // divisible 0<->8 legs retain their established 13/14 durations.
+  const swing = Math.abs(leg.targetY - leg.startY);
+  const clampTransferTick = swing % deltaY === 0 ? 0 : 1;
+  return legReachAge(leg, deltaY)
+    + POST_REACH_TICKS
+    + clampTransferTick
+    + (isFinalLeg ? FINAL_LEG_EXTRA_TICK : 0);
 }
 
 function legStepY(

@@ -534,6 +534,7 @@ import downArrowAsset from "../assets/gen/battle-interface-down-arrow.json" with
 import opponentFrontSpritesAsset from "../assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
 import kadabraFrontSpriteAsset from "../animation/assets/kadabra-front.json" with { type: "json" };
 import knockOffAsset from "../animation/assets/knock-off.json" with { type: "json" };
+import recoverAsset from "../animation/assets/recover.json" with { type: "json" };
 import menuHealthboxPlayerAsset from "../assets/gen/menu-healthbox-player.json" with { type: "json" };
 import summaryBallAsset from "../assets/gen/summary-ball.json" with { type: "json" };
 import battleAnimBallOpenAsset from "../assets/gen/battle-anim-ball-open.json" with { type: "json" };
@@ -622,6 +623,7 @@ import {
   sceneOnDragonRageView,
   sceneOnShadowPunchView,
   sceneOnGrowthView,
+  sceneOnRecoverView,
   sceneOnFutureSightView,
   sceneOnConfusionView,
   sceneOnPsychicView,
@@ -890,6 +892,10 @@ const knockOffArt = knockOffAsset as {
   shuppetBack: { tileset: Tileset; palette: RgbColor[] };
   plusleBack: { tileset: Tileset; palette: RgbColor[] };
   plusleFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const recoverArt = recoverAsset as {
+  orbs: { tileset: Tileset; palette: RgbColor[] };
+  blueStar: { tileset: Tileset; palette: RgbColor[] };
 };
 const MURKROW_CORNER = { x: 144, y: 19 };
 const menuHealthboxPlayer = menuHealthboxPlayerAsset as SendOutHealthboxContentAsset;
@@ -14945,6 +14951,139 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "IVYSAUR used" : "Foe IVYSAUR used",
       "GROWTH!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "RECOVER") {
+    const view = sceneOnRecoverView(state);
+    const displayed = sceneOnRecoverView({ ...state, age: state.age - 1 });
+    const displayedSprites = displayed.sprites;
+    const playerToOpponent =
+      view.attacker.species === "KADABRA"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "KADABRA"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged RECOVER pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSprite = playerToOpponent ? kadabraBackSprite : kadabraFrontSprite;
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffset(view.target.species)
+      : null;
+    drawSpriteSheet(
+      fb,
+      targetSprite.tileset,
+      targetSprite.palette,
+      view.target.geometry.spriteCorner.x + (targetIdle?.x2 ?? 0),
+      view.target.geometry.spriteCorner.y + (targetIdle?.y2 ?? 0),
+    );
+    drawSpriteSheetAffineStretch(
+      fb,
+      attackerSprite.tileset,
+      attackerSprite.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+      256,
+      256,
+      0,
+      { r: 255, g: 255, b: 90 },
+      displayed.attackerObjY,
+      false,
+    );
+    const objTarget2 = fb.slice();
+    const orbTileset: Tileset = {
+      columns: 2,
+      rows: 2,
+      tiles: recoverArt.orbs.tileset.tiles.slice(8, 12),
+    };
+    for (const sprite of displayedSprites) {
+      if (sprite.kind === "orb") {
+        drawSpriteSheetAffineRotateBlendedOverFb(
+          fb,
+          objTarget2,
+          orbTileset,
+          recoverArt.orbs.palette,
+          sprite.x,
+          sprite.y,
+          sprite.xScale,
+          0,
+          0,
+          sprite.yScale,
+          12,
+          8,
+          false,
+        );
+      } else {
+        const starTileset: Tileset = {
+          columns: 4,
+          rows: 4,
+          tiles: recoverArt.blueStar.tileset.tiles.slice(
+            sprite.frame * 16,
+            sprite.frame * 16 + 16,
+          ),
+        };
+        drawSpriteSheet(
+          fb,
+          starTileset,
+          recoverArt.blueStar.palette,
+          sprite.x - 16,
+          sprite.y - 16,
+        );
+      }
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "KADABRA";
+    const playerSpecies = playerToOpponent ? "KADABRA" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "KADABRA used" : "Foe KADABRA used",
+      "RECOVER!",
       99,
     );
     return;
