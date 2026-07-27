@@ -207,6 +207,29 @@
       ]
     },
     {
+      "move": "MOVE_POISON_FANG",
+      "status": "exact",
+      "covered": [
+        "complete legal Level-50 mechanicLab parties stage ZUBAT, the real Factory set-25 POISON_FANG carrier, in both player-back and opponent-front orientations, with all four active choices constrained to POISON_FANG and ONIX constrained to TACKLE",
+        "player-back ZUBAT to opponent-front ONIX complete first move-animation script body at oracle frames 83-186: source component/task/OAM/affine/palette/audio and shared-seam raw-RGB framebuffer match 104/104, reproduced twice fresh",
+        "opponent-front ZUBAT to player-back ONIX complete first move-animation script body at oracle frames 87-190: the same strengthened component and shared-seam framebuffer surface matches 104/104, reproduced twice fresh",
+        "source reducer ports gFangSpriteTemplate's four-frame animation and eight-callback affine-double shrink, AnimTask_ShakeMon(target,3,0,10,1) including its first display latch, delay-0 four-leg target blend_color_cycle to RGB(26,0,26), and all six shared PoisonBubblesEffect sprites with side-relative geometry, affine state, OAM reuse/order, and cleanup",
+        "ANIM_TAG_FANG_ATTACK, ANIM_TAG_POISON_BUBBLE, and ZUBAT back/front art are reproducibly extracted; SE_M_BITE and six SE_M_TOXIC target-pan boundaries, faded/hardware palette latches, and complete cleanup are dense-checked; SLUDGE 102/102 and ACID 131/131 remain exact in both orientations"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-poison-fang-player-zubat-opponent-onix.json",
+        "tools/battle-lab/mechanic-poison-fang-opponent-zubat-player-onix.json",
+        "tools/compare/fixtures/poison-fang-player-zubat-opponent-onix.json",
+        "tools/compare/fixtures/poison-fang-opponent-zubat-player-onix.json",
+        "tools/compare/poisonFangPortable.ts",
+        "tools/compare/poisonFangProbe.py",
+        "tools/compare/extractPoisonFangAssets.ts",
+        "src/animation/assets/poisonFang.json",
+        "src/animation/poisonFang.ts",
+        "tests/animation/poisonFang.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_EARTHQUAKE",
       "status": "exact",
       "covered": [

@@ -46,10 +46,36 @@ animation. A status caused by a move is not part of that move's animation.
 
 ## Current resumable state (2026-07-27)
 
-Coverage is **38/276 exact, 3 partial, 235 unsupported**. SLUDGE is exact
-through the shared Scene-ON seam at strengthened **102/102 player-back +
-102/102 opponent-front** component and framebuffer frames, reproduced twice
-fresh. TOXIC, SLUDGE BOMB, POISON FANG, and POISON TAIL remain unsupported.
+Coverage is **39/276 exact, 3 partial, 234 unsupported**. POISON FANG is exact
+through the shared Scene-ON seam at strengthened **104/104 player-back +
+104/104 opponent-front** component and framebuffer frames, reproduced twice
+fresh. TOXIC, SLUDGE BOMB, and POISON TAIL remain unsupported.
+
+## POISON FANG promoted to exact; fang contact joins poison track (2026-07-27)
+
+**Verdict:** `MOVE_POISON_FANG` is exact. Complete legal Scene-ON mechanicLab
+parties use ZUBAT, the real Level-50 Factory set-25 carrier, in both required
+orientations with all four choices constrained to POISON FANG and ONIX
+constrained to TACKLE. The strengthened comparator matches the complete first
+move-animation script body at **104/104 player-back** (oracle 83-186) and
+**104/104 opponent-front** (87-190), each reproduced twice fresh.
+
+**Source reducer/evidence:** the reducer ports `gFangSpriteTemplate`'s complete
+four-frame animation and eight-callback affine-double shrink, target
+`AnimTask_ShakeMon(3,0,10,1)` including its script-created first display
+latch, the delay-0 four-leg RGB(26,0,26) target palette cycle, and all six
+already-proven `PoisonBubblesEffect` spawns. Dense evidence checks sprite
+templates, OAM slots and affine matrices, task argv/lifetimes, faded and
+hardware palette latches, raw RGB, `SE_M_BITE`, and all six `SE_M_TOXIC`
+target-pan restarts.
+
+**Renderer/assets/controls:** fang, poison-bubble, and both ZUBAT orientations
+are reproducibly extracted. `sceneOnPresentation`/`battleScene` render the
+complete body and cleanup through relative ages. SLUDGE remains **102/102**
+and ACID **131/131** in both orientations as exact controls. No absolute
+ticks, screenshots, coordinate/RGB fitting, exclusions, new unsupported
+barriers, or import-boundary widening were added. TOXIC, SLUDGE BOMB, and
+POISON TAIL remain unsupported; no sibling was promoted.
 
 ## SLUDGE promoted to exact; PoisonBubblesEffect established (2026-07-27)
 
