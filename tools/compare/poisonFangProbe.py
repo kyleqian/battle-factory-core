@@ -24,6 +24,16 @@ def main() -> None:
                 mon.update({"species": 20, "nature": 3, "moves": [158] * 4})
                 mon["evs"] = {"hp": 0, "attack": 255, "defense": 0,
                               "speed": 255, "spAttack": 0, "spDefense": 0}
+    elif MOVE_ID == 207:
+        parties = raw_request["overrides"]["parties"]
+        for side in ("player", "opponent"):
+            mon = parties[side][0]
+            if mon["species"] == 41:
+                # Real Level-50 Factory set 34: RATTATA, Docile, Attack/HP.
+                mon.update({"species": 19, "nature": 6, "moves": [207] * 4,
+                            "item": 187})
+                mon["evs"] = {"hp": 255, "attack": 255, "defense": 0,
+                              "speed": 0, "spAttack": 0, "spDefense": 0}
     request = validate_request(raw_request, "battle-scene-on")
     reference = (ROOT / "reference" / "pokeemerald").resolve()
     oracle = EmeraldOracle(reference / "pokeemerald.gba", reference / "pokeemerald.map", HARNESS / "oracle" / "bootstrap" / "factory.json")
@@ -37,12 +47,15 @@ def main() -> None:
     song_table = oracle.symbols["gSongTable"]
     nm = subprocess.run(["arm-none-eabi-nm", str(reference / "pokeemerald.elf")], check=True, capture_output=True, text=True).stdout
     symbols = {line.split()[2]: int(line.split()[0], 16) | 1 for line in nm.splitlines() if len(line.split()) == 3}
-    template_names = ("gFangSpriteTemplate",) if MOVE_ID == 158 else (
-        "gFangSpriteTemplate", "gPoisonBubbleSpriteTemplate")
+    template_names = (
+        ("gFangSpriteTemplate",) if MOVE_ID == 158 else
+        ("gBreathPuffSpriteTemplate", "gAngerMarkSpriteTemplate") if MOVE_ID == 207 else
+        ("gFangSpriteTemplate", "gPoisonBubbleSpriteTemplate"))
     templates = {name: oracle.symbols[name] for name in template_names}
     task_names = ("AnimTask_ShakeMon", "AnimTask_ShakeMon_Step",
                   "AnimTask_BlendColorCycle", "AnimTask_BlendColorCycleLoop",
-                  "Task_FadeToBg")
+                  "Task_FadeToBg", "AnimTask_GrowAndShrink",
+                  "AnimTask_GrowAndShrink_Step")
     task_funcs = {symbols[name] for name in task_names}
     def u16(a: int) -> int: return oracle.read_u8(a) | (oracle.read_u8(a + 1) << 8)
     def s16(a: int) -> int:
@@ -107,6 +120,8 @@ def main() -> None:
       "templates":templates,"taskFuncs":{name:symbols[name] for name in task_names},
       "songHeaders":{"SE_M_BITE":oracle.read_u32(song_table+161*8),
                      "SE_M_LEER":oracle.read_u32(song_table+192*8),
+                     "SE_M_SWAGGER":oracle.read_u32(song_table+193*8),
+                     "SE_M_SWAGGER2":oracle.read_u32(song_table+194*8),
                      "SE_M_TOXIC":oracle.read_u32(song_table+148*8)},"frames":rows}) + "\n")
     print(f"wrote {OUTPUT} ({len(rows)} frames; {rows[0]['frame'] if rows else '-'}..{rows[-1]['frame'] if rows else '-'})")
 main()

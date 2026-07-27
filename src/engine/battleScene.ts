@@ -15728,6 +15728,7 @@ export function renderSceneOnMovePresentation(
   if (state.config.move === "SWAGGER") {
     const view = sceneOnSwaggerView(state);
     const displayed = sceneOnSwaggerView({ ...state, age: state.age - 1 });
+    const affineDisplayed = sceneOnSwaggerView({ ...state, age: state.age - 2 });
     const playerToOpponent =
       view.attacker.species === "RATTATA"
       && view.attacker.geometry.side === "player"
@@ -15756,6 +15757,9 @@ export function renderSceneOnMovePresentation(
     const targetIdle = playerToOpponent
       ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
       : { x2: 0, y2: 0 };
+    const attackerIdle = opponentToPlayer
+      ? (speciesFrontIdleRestOffset("RATTATA") ?? { x2: 1, y2: 0 })
+      : { x2: 0, y2: 0 };
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
     drawSpriteSheet(
       fb,
@@ -15768,18 +15772,25 @@ export function renderSceneOnMovePresentation(
       fb,
       rattataSprite.tileset,
       rattataSprite.palette,
-      view.attacker.geometry.spriteCorner.x,
-      view.attacker.geometry.spriteCorner.y,
-      displayed.attackerScale.x,
-      displayed.attackerScale.y,
-      0,
+      view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+      view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
+      affineDisplayed.attackerScale.x,
+      affineDisplayed.attackerScale.y,
+      affineDisplayed.attackerY2,
       { r: 0, g: 0, b: 0 },
       0,
-      displayed.attackerScale.x !== 256 || displayed.attackerScale.y !== 256,
+      affineDisplayed.attackerScale.x !== 256
+        || affineDisplayed.attackerScale.y !== 256,
     );
     if (displayed.breath) {
-      const frameStart = displayed.breath.frame * 4;
-      drawSpriteSheet(
+      const currentBreath = view.breath;
+      const breathFrame = state.age === 53 || state.age === 93 || state.age === 97
+        ? (currentBreath?.frame ?? displayed.breath.frame)
+        : displayed.breath.frame;
+      const frameStart = breathFrame * 4;
+      const drawBreath = displayed.breath.hFlip
+        ? drawSpriteSheetHFlip : drawSpriteSheet;
+      drawBreath(
         fb,
         {
           columns: 2,

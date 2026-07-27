@@ -40,13 +40,14 @@ export interface SwaggerAngerMark {
 
 export interface SwaggerState {
   readonly attackerScale: Readonly<{ x: number; y: number }>;
+  readonly attackerY2: number;
   readonly breath: SwaggerBreathPuff | null;
   readonly angerMarks: readonly SwaggerAngerMark[];
 }
 
-export const SWAGGER_BREATH_CREATION_AGE = 50;
-export const SWAGGER_FIRST_ANGER_CREATION_AGE = 128;
-export const SWAGGER_SECOND_ANGER_CREATION_AGE = 140;
+export const SWAGGER_BREATH_CREATION_AGE = 49;
+export const SWAGGER_FIRST_ANGER_CREATION_AGE = 129;
+export const SWAGGER_SECOND_ANGER_CREATION_AGE = 143;
 
 function affineValueAtAge(
   age: number,
@@ -84,12 +85,16 @@ export function swaggerBreathAtAge(
   attackerCenter: SwaggerPoint,
 ): SwaggerBreathPuff | null {
   const spriteAge = age - SWAGGER_BREATH_CREATION_AGE;
-  if (spriteAge < 0 || spriteAge >= 52) return null;
+  if (spriteAge < 0 || spriteAge >= 53) return null;
   const direction = attackerSide === "player" ? 1 : -1;
+  const travel = attackerSide === "player"
+    ? Math.trunc((spriteAge + 1) / 4)
+    : Math.min(13, Math.ceil((spriteAge + 1) / 4));
   return {
     kind: "breath",
     age: spriteAge,
-    x: attackerCenter.x + direction * (32 + Math.trunc(spriteAge / 4)),
+    x: attackerCenter.x
+      + direction * (32 + travel),
     y: attackerCenter.y,
     frame: breathFrame(spriteAge),
     hFlip: attackerSide === "player",
@@ -104,12 +109,17 @@ function angerMarkAtAge(
   targetCenter: SwaggerPoint,
 ): SwaggerAngerMark | null {
   const spriteAge = age - creationAge;
-  if (spriteAge < 0 || spriteAge >= 16) return null;
+  if (spriteAge < 0 || spriteAge >= 17) return null;
   const scriptX = spawnIndex === 0 ? -20 : 20;
   const mirroredX = targetSide === "opponent" ? -scriptX : scriptX;
-  const scale = spriteAge < 8
-    ? 256 + 11 * (spriteAge + 1)
-    : 344 - 11 * (spriteAge - 7);
+  // `StartSpriteAffineAnim` advances once during creation and the callback
+  // advances again in that same interpreter frame. The final identity state
+  // remains allocated for one cleanup frame.
+  const scale = spriteAge < 7
+    ? 278 + 11 * spriteAge
+    : spriteAge < 15
+      ? 333 - 11 * (spriteAge - 7)
+      : 256;
   return {
     kind: "anger",
     spawnIndex,
@@ -128,8 +138,12 @@ export function swaggerAtAge(
   targetSide: SwaggerSide,
   targetCenter: SwaggerPoint,
 ): SwaggerState {
+  const attackerScale = swaggerGrowAndShrinkAtAge(age);
+  const battlerHeight = attackerSide === "player" ? 38 : 32;
+  const scaledHeight = Math.trunc((battlerHeight << 8) / attackerScale.y);
   return {
-    attackerScale: swaggerGrowAndShrinkAtAge(age),
+    attackerScale,
+    attackerY2: Math.trunc((battlerHeight - scaledHeight) / 2),
     breath: swaggerBreathAtAge(age, attackerSide, attackerCenter),
     angerMarks: [
       angerMarkAtAge(

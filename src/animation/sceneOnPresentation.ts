@@ -822,6 +822,8 @@ export interface SceneOnSwaggerConfig {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source `GetBattlerSpriteCoord(attacker, Y_PIC_OFFSET)` breath origin. */
+  readonly breathOrigin: Readonly<{ x: number; y: number }>;
 }
 
 export interface SceneOnPoisonTailConfig {
@@ -2118,7 +2120,7 @@ export function sceneOnSwaggerView(
     ...swaggerAtAge(
       state.age,
       state.config.attacker.geometry.side,
-      state.config.attacker.geometry.animationCenter,
+      state.config.breathOrigin,
       state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,
     ),
