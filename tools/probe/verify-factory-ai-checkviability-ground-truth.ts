@@ -1432,6 +1432,145 @@ async function verifyDrawCountScenario(spec: DrawCountScenarioSpec): Promise<voi
   }
 }
 
+// AI_CV_SpeedDownFromChance (data/battle_ai_scripts.s:1136-1141, doc §26):
+// closes PROGRESS entry 493's "no live ledger" flag. All four fixtures reuse
+// the exact Dugtrio(51, speed120)/Shuckle(213, speed5) pair §6 already
+// proved zero-confound (strictly ordered speeds -- never a tie -- and
+// neither species' own type/ability drags in an unrelated CV/CBM
+// contribution), with all 4 opponent slots IDENTICAL (unlike §6's own mixed
+// String-Shot/Growl design, unnecessary here since we read total draw COUNT,
+// not WHICH slot wins) and the player using MOVE_SPLASH x4 (the "Splash-not-
+// Growl filler" lesson -- Splash costs the window zero RNG of its own,
+// unlike Growl which still needs a matching-type-list argument to reach
+// zero). Same frame-100->732 window as §6 (not frame 0, matching §6's own
+// documented reason: swapping which side is faster swaps move order, so
+// frame 0's rngValue already has turn 1's decision baked in -- starting the
+// step count at frame 100 avoids re-litigating that).
+//
+// Redirect pair (MOVE_ICY_WIND x4, one of the handler's own 3 redirecting
+// moves, data/battle_ai_scripts.s:1137): "reach" = opponent (AI_USER, the
+// handler under test) SLOWER than target -> if_target_faster true ->
+// AI_CV_SpeedDown's own if_random_less_than 70 fires; "control" = opponent
+// FASTER -> if_target_faster false -> deterministic -3, zero draws from the
+// handler (§6's own branch shape, re-derived here for a redirecting move
+// instead of direct EFFECT_SPEED_DOWN dispatch). PREDICTED (before running,
+// from runCvSpeedDownFromChance/runCvSpeedDown's own ported bodies): reach's
+// window is nonzero AND strictly greater than control's (the roll fires,
+// scaling with the 4 identical slots per the doc's own "N identical slots ->
+// N draws per reachable decision" finding, §11-§12, likely doubled again by
+// the window's own trailing phantom next-turn re-decision, §6's "Not yet
+// banked" note); control's window has zero draws contributed by the handler
+// itself (any nonzero total left is entirely the real move's own
+// accuracy/damage/secondary-effect-chance execution cost, unrelated to
+// AI_CV_SpeedDown). OBSERVED (live, both seeds 1 and 99, reproduced twice
+// each): reach = 24, control = 7 -- confirms the qualitative prediction
+// (reach > control, both cross-seed-stable) though the exact +17 delta is
+// larger than a naive 4-or-8-draw guess; see doc §26 for the corroborating
+// fallthrough-pair comparison that isolates the handler's own contribution
+// to a clean +6 (not +17 -- the rest of the delta is the two fixtures'
+// differing move-execution order, not the handler).
+//
+// Fallthrough boundary pair (MOVE_CONSTRICT x4, one of the handler's own 3
+// NON-redirecting moves, data/battle_ai_scripts.s:1136-1141's un-matched
+// `if_move` tail): proves the redirect boundary live by holding species/
+// speed-role fixed at BOTH of the redirect pair's own two configurations and
+// swapping only the move ID. runCvSpeedDownFromChance returns rng/draws
+// UNCHANGED immediately whenever moveId doesn't match ICY_WIND/ROCK_TOMB/
+// MUD_SHOT -- a genuine, state-independent zero, not a stub -- so PREDICTED:
+// both fallthrough fixtures' own handler contribution is zero regardless of
+// which side is faster, unlike the redirect pair (whose reach/control totals
+// diverge specifically BECAUSE the handler's contribution flips with speed
+// role). OBSERVED: fallthrough-boundary (opponent slower, same role as
+// reach) = 18; fallthrough-speedswap (opponent faster, same role as control)
+// = 7 -- and 7 exactly equals the redirect pair's own control total (7),
+// confirming the "opponent faster" configuration's non-handler baseline is
+// identical for these two different moves (Icy Wind vs Constrict), which
+// licenses reading the "opponent slower" configuration's own 24-vs-18 delta
+// (+6) as the handler's real, isolated contribution -- present for the
+// redirecting move, genuinely absent for the fall-through move, at the
+// IDENTICAL speed role.
+interface RedirectScenarioSpec {
+  label: string;
+  path: string;
+  expectedPpUsed: number;
+  expectedTotalSteps: Record<number, number>;
+}
+
+const SPEEDDOWNFROMCHANCE_REDIRECT_SCENARIOS: RedirectScenarioSpec[] = [
+  {
+    label:
+      "AI_CV_SpeedDownFromChance redirect REACH: MOVE_ICY_WIND x4, opponent (AI_USER) slower than target -- if_target_faster true, AI_CV_SpeedDown's own if_random_less_than 70 fires (data/battle_ai_scripts.s:1137,1148)",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-speeddownfromchance-redirect-reach-off.json",
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 24, 99: 24 },
+  },
+  {
+    label:
+      "AI_CV_SpeedDownFromChance redirect CONTROL: MOVE_ICY_WIND x4, opponent (AI_USER) faster than target -- if_target_faster false, deterministic -3, zero draws from the handler",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-speeddownfromchance-redirect-control-off.json",
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 7, 99: 7 },
+  },
+  {
+    label:
+      "AI_CV_SpeedDownFromChance fallthrough BOUNDARY: MOVE_CONSTRICT x4 (non-redirecting), opponent (AI_USER) slower than target (same role as the redirect REACH fixture) -- if_move never matches, unconditional zero draws from the handler regardless of the reachable speed state",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-speeddownfromchance-fallthrough-boundary-off.json",
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 18, 99: 18 },
+  },
+  {
+    label:
+      "AI_CV_SpeedDownFromChance fallthrough SPEED-SWAP: MOVE_CONSTRICT x4 (non-redirecting), opponent (AI_USER) faster than target (same role as the redirect CONTROL fixture) -- total matches the redirect CONTROL fixture's own 7 exactly, confirming the non-handler baseline is move-independent in this configuration",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-speeddownfromchance-fallthrough-speedswap-off.json",
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 7, 99: 7 },
+  },
+];
+
+async function verifyRedirectScenario(spec: RedirectScenarioSpec): Promise<void> {
+  console.log(`\n=== ${spec.label} ===`);
+  const perSeedTotals: number[] = [];
+  for (const seed of SEEDS) {
+    const run1 = await runScenario(spec.path, seed);
+    const run2 = await runScenario(spec.path, seed);
+
+    const f0a = run1.get(0)!;
+    const f0b = run2.get(0)!;
+    check(
+      `seed ${seed}: frame 0 identical across reruns (determinism)`,
+      JSON.stringify(f0a) === JSON.stringify(f0b),
+      "initial state differs between runs",
+    );
+
+    const f0 = run1.get(0)!;
+    const f100 = run1.get(100)!;
+    const f732 = run1.get(732)!;
+
+    const ppUsed = totalPpUsed(f0.battlers.opponent.pp, f732.battlers.opponent.pp);
+    check(
+      `seed ${seed}: exactly ${spec.expectedPpUsed} opponent turn(s) executed (PP consumed across all 4 slots)`,
+      ppUsed === spec.expectedPpUsed,
+      `observed ${ppUsed} PP used, ${JSON.stringify(f0.battlers.opponent.pp)} -> ${JSON.stringify(f732.battlers.opponent.pp)}`,
+    );
+
+    const totalSteps = stepsToReach(f100.rngValue, f732.rngValue, spec.expectedTotalSteps[seed]! + 20);
+    check(
+      `seed ${seed}: exactly ${spec.expectedTotalSteps[seed]} total Random() calls from frame 100 to frame 732`,
+      totalSteps === spec.expectedTotalSteps[seed],
+      `forward-search found ${totalSteps === null ? "no match" : `step ${totalSteps}`}`,
+    );
+    perSeedTotals.push(totalSteps ?? -1);
+
+    console.log(`  seed ${seed}: pp used=${ppUsed}, total steps 100->732=${totalSteps}`);
+  }
+
+  check(
+    `count stability: total-step count is identical across seeds ${SEEDS.join(" and ")} (${JSON.stringify(perSeedTotals)})`,
+    perSeedTotals.every((n) => n === perSeedTotals[0]),
+    `per-seed totals differ: ${JSON.stringify(perSeedTotals)}`,
+  );
+}
+
 async function main(): Promise<void> {
   for (const spec of SCENARIOS) {
     await verifyScenario(spec);
@@ -1444,6 +1583,9 @@ async function main(): Promise<void> {
   }
   for (const spec of WEATHER_PICK_SCENARIOS) {
     await verifyWeatherPickScenario(spec);
+  }
+  for (const spec of SPEEDDOWNFROMCHANCE_REDIRECT_SCENARIOS) {
+    await verifyRedirectScenario(spec);
   }
 
   console.log(`\n${failures === 0 ? "ALL PASS" : `${failures} FAILURE(S)`}`);

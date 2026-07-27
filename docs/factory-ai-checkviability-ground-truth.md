@@ -4981,11 +4981,6 @@ seeds, twice each for determinism: `ALL PASS`, 0 failures, exit code 0** —
 every prior scenario (§9, §11.5, §12.1, §13.4, §14.6, §15.5, §16.5, §17.7,
 §18.7, §19.7, §20.5, §21.5, §22.6, §23.6, §24.8, §25.7) unchanged and still
 green. Reproduce with:
-
-```sh
-node --experimental-strip-types tools/probe/verify-factory-ai-checkviability-ground-truth.ts
-```
-
 ### 25.9.7 What remains open
 
 §25.6 item 4 (`get_weather`'s `AI_WEATHER_NONE` stale-read bug) is
@@ -4996,3 +4991,192 @@ Gate R) deliberately chose target ability IDs (4, 5) outside the bug's
 results (§25.9.2) — a future worker reproducing it would need the *opposite*
 choice (a target whose ability ID lands inside `0`-`3`) as its own dedicated
 fixture, not a byproduct of these two.
+
+
+## 26. 2026-07-27 addendum #16: `AI_CV_SpeedDownFromChance`'s own redirect path, live-verified — closes PROGRESS entry 493's no-live-ledger flag
+
+Side-lane GROUND-TRUTH-ONLY session (Battle Scene OFF oracle), same no-
+`src/`-changes contract as every prior addendum. `AI_CV_SpeedDownFromChance`
+was ported this session as the 22nd and final `AI_CV_*` handler (PROGRESS
+entry 493) with dispatcher/unit tests but **zero banked live ledger** — §6's
+own `AI_CV_SpeedDown` fixtures dispatch `MOVE_STRING_SHOT`
+(`EFFECT_SPEED_DOWN`, direct dispatch, `:1142`), never one of
+`AI_CV_SpeedDownFromChance`'s own 6 `EFFECT_SPEED_DOWN_HIT` moves
+(`:1136-1141`). This addendum closes that gap: two new fixture pairs prove
+(1) the redirect itself — 3 of the 6 moves (`MOVE_ICY_WIND`, `MOVE_ROCK_TOMB`,
+`MOVE_MUD_SHOT`) really do land inside `AI_CV_SpeedDown`'s own draw site when
+dispatched live, matching §4's footnote/§10's recommendation exactly — and
+(2) the redirect boundary — the other 3 (`MOVE_BUBBLE_BEAM`, `MOVE_CONSTRICT`,
+`MOVE_BUBBLE`) really do fall through to a genuine, state-independent zero.
+
+**Format choice**: a new top-level section, not a §6 addendum. §6 is already
+long and closes with its own "Not yet banked" note that this session
+directly answers; every other follow-up in this doc that adds ground truth
+for a *different* handler (or, here, a structurally different dispatch path
+into an *already-verified* handler) got its own `## N. 2026-0M-DD addendum
+#K` section (§11-§25), never an inline edit to an earlier section — keeping
+§6 byte-for-byte as originally banked preserves its own "fully executed,
+live-verified" closing state as a citable snapshot, and matches every prior
+session's own practice of appending rather than rewriting.
+
+### 26.1 Source re-derivation (read-only, no `src/` changes)
+
+```
+AI_CV_SpeedDownFromChance:                (data/battle_ai_scripts.s:1136-1141)
+    if_move MOVE_ICY_WIND, AI_CV_SpeedDown
+    if_move MOVE_ROCK_TOMB, AI_CV_SpeedDown
+    if_move MOVE_MUD_SHOT, AI_CV_SpeedDown
+    end
+```
+
+Three plain `u16` move-ID compares (`Cmd_if_move`, not an
+`if_random`/effect-chance read despite the "FromChance" name — the name
+describes the dispatching moves' own in-game category, a chance-on-hit
+secondary effect, not anything this handler itself inspects) that `goto`
+into `AI_CV_SpeedDown`'s **own label** on a match — real control-flow entry
+into that handler's own instructions, not a duplicated copy — and fall
+through to `end` (zero score, zero draws, unconditionally, for every battle
+state) on no match. `EFFECT_SPEED_DOWN_HIT` covers 6 executable moves total
+(`src/engine/factoryAiCheckViability.ts:616-663`'s own
+`runCvSpeedDownFromChance`, ported this session, re-derives this exactly):
+`MOVE_ICY_WIND` (196), `MOVE_ROCK_TOMB` (317), `MOVE_MUD_SHOT` (341) redirect;
+`MOVE_BUBBLE_BEAM` (61), `MOVE_CONSTRICT` (132), `MOVE_BUBBLE` (145) fall
+through. All 6 have real power (10-65) and sub-100 secondary-effect chance
+for 3 of them (`BUBBLE_BEAM`/`CONSTRICT`/`BUBBLE`, all 10%) or a forced 100%
+for the redirecting 3 (`ICY_WIND`/`ROCK_TOMB`/`MUD_SHOT`) — irrelevant to
+this handler (the AI script's own dispatch never reads secondary-effect
+chance, only the move ID), but relevant to fixture design (§26.2): unlike
+§6's `MOVE_STRING_SHOT` (0 power), every one of these 6 moves does real
+damage, so `AI_TryToFaint`'s "not most powerful" `-1` no longer ties for free
+— the fixture design below sidesteps this by using **identical moves in all
+4 opponent slots** (a tie against itself) rather than §6's mixed-moveset
+"equal-baseline control" trick, reading total `Random()` **count**, not
+**which slot wins** (the same DRAW_COUNT_SCENARIOS technique §11 onward
+already established for handlers whose own triggering move has real power).
+
+### 26.2 Fixture design: identical-slots + Dugtrio/Shuckle speed-role swap, extended to a redirect/fallthrough 2×2
+
+All four new fixtures reuse §6's own Dugtrio (species 51, base Speed 120) /
+Shuckle (species 213, base Speed 5) pair verbatim — strictly ordered speeds
+(120 vs. 5, never a tie, so `getWhoStrikesFirst`'s own hidden tie-break
+`Random()` call, §25.3, never fires) and both single-ability species (no
+`Cmd_get_ability` guess-draw confound, §14.2's finding). All 4 opponent
+slots carry the **same** move (unlike §6's mixed String Shot/Growl design —
+unnecessary here since the read channel is total draw count, not which slot
+wins) and the player's own moveset is `MOVE_SPLASH` (150) ×4 — the "Splash-
+not-Growl filler" lesson this doc's own later sessions converged on (§21.2,
+§24.3, §24.5): Splash costs the window **zero** `Random()` of its own,
+whereas Growl would need a fresh type-list argument to reach its own zero
+baseline, an unnecessary confound when the filler's only job is "resolve
+harmlessly." Same frame-100→732 window §6 established (not frame 0 — §6's
+own documented reason still applies: swapping which side is faster swaps
+move order, so frame 0's `rngValue` already has turn 1's decision baked in;
+starting the count at frame 100 avoids re-litigating a pick that already
+happened before the trace's first capture).
+
+**Redirect pair** (`MOVE_ICY_WIND` ×4, one of the 3 redirecting moves):
+
+- **`redirect-reach`**: opponent (`AI_USER`, the handler under test) =
+  Shuckle (slower) — `if_target_faster` true → `AI_CV_SpeedDown`'s own
+  `if_random_less_than 70` fires (`:1148`).
+- **`redirect-control`**: opponent = Dugtrio (faster) — `if_target_faster`
+  false → deterministic `-3`, zero draws from the handler.
+
+**Fallthrough boundary pair** (`MOVE_CONSTRICT` ×4, one of the 3 NON-
+redirecting moves — chosen over `BUBBLE_BEAM`/`BUBBLE` arbitrarily, all 3
+take the identical zero-touch `end` path with no move-specific distinction
+inside this handler): the SAME two speed roles, to prove the redirect
+boundary rather than just assert it —
+
+- **`fallthrough-boundary`**: opponent = Shuckle (slower — same role as
+  `redirect-reach`) — `if_move` never matches; unconditional zero draws
+  regardless of the reachable speed state.
+- **`fallthrough-speedswap`**: opponent = Dugtrio (faster — same role as
+  `redirect-control`) — same unconditional zero.
+
+**Prediction, branch-by-branch, written before running**: `runCvSpeedDown`
+(`src/engine/factoryAiCheckViability.ts:574-614`) draws once per identical
+dispatch slot when reachable (§11/§12's "N identical slots → N draws per
+reachable decision" finding), and this doc's own convention (§6) already
+established that a single-input-turn capture window includes both the real
+turn-1 decision AND a trailing **phantom** turn-2 re-decision (computed,
+never executed) — for a handler whose only gate is relative Speed (fixed at
+team-build time, unlike VitalThrow/AlwaysHit's HP/stage-dependent gates),
+nothing changes between those two decisions, so both should reach the same
+branch. Qualitative prediction: `redirect-reach`'s total is nonzero and
+strictly greater than `redirect-control`'s (the roll fires in the former,
+never in the latter); both `fallthrough` fixtures' totals should be
+unaffected by speed role (the handler contributes exactly zero in both,
+by construction — `runCvSpeedDownFromChance` returns `{ rng: input.rng,
+draws: [], scoreDelta: 0 }` unconditionally for a non-matching `moveId`,
+never reading speed at all).
+
+### 26.3 Live ledger (oracle-verified, both seeds, both reruns)
+
+| Fixture | Opponent (AI_USER) | Move ×4 | Speed role | Total `Random()`, frame 100→732 |
+| --- | --- | --- | --- | -: |
+| `redirect-reach` | Shuckle | `MOVE_ICY_WIND` (redirects) | slower (reach) | **24** (seeds 1, 99) |
+| `redirect-control` | Dugtrio | `MOVE_ICY_WIND` (redirects) | faster (control) | **7** (seeds 1, 99) |
+| `fallthrough-boundary` | Shuckle | `MOVE_CONSTRICT` (falls through) | slower (same role as reach) | **18** (seeds 1, 99) |
+| `fallthrough-speedswap` | Dugtrio | `MOVE_CONSTRICT` (falls through) | faster (same role as control) | **7** (seeds 1, 99) |
+
+All four fixtures reproduced byte-identical frame-0 state across two runs at
+each seed (the determinism requirement) and identical totals across seeds 1
+and 99 (cross-seed count stability) — 4 fixtures × 2 seeds × 2 reruns each,
+every one landing exactly on its predicted qualitative shape.
+
+**The redirect confirms live**: `redirect-reach` (24) is strictly greater
+than `redirect-control` (7) for the **identical move** — the only variable
+that changed is which side is faster, i.e. exactly `AI_CV_SpeedDown`'s own
+gate (`:1142`, `if_target_faster`). This is only possible if
+`MOVE_ICY_WIND` really does land inside `AI_CV_SpeedDown`'s own body when
+dispatched through `AI_CV_SpeedDownFromChance` — the redirect the ported
+`runCvSpeedDownFromChance` claims, now live-verified rather than asserted
+from static analysis alone.
+
+**The boundary confirms live, and pins down the redirect's own exact
+contribution**: `fallthrough-speedswap` (7) is **exactly equal** to
+`redirect-control` (7) — in the "opponent faster" configuration, the two
+different moves (Icy Wind vs. Constrict) cost an identical number of
+`Random()` calls, meaning this configuration's non-handler baseline
+(accuracy check, damage roll, secondary-effect-chance roll — none of them
+handler-attributable) does not actually differ between these two moves at
+this window's granularity. That licenses reading the "opponent slower"
+configuration's own delta cleanly: `redirect-reach` (24) − `fallthrough-
+boundary` (18) = **+6**, present only for the redirecting move, at the
+IDENTICAL speed role and IDENTICAL species pair — an isolated, live-verified
+measurement of `AI_CV_SpeedDown`'s own draw-site contribution when reached
+via the redirect, structurally the same "N identical slots → N draws" shape
+as every prior pair in this doc, though the exact figure (+6, not a bare +4
+or the naively doubled +8 the prediction guessed for "real decision +
+phantom re-decision, 4 slots each") was not pinned exactly before running —
+consistent with this doc's own standing caveat (§6, §12) that the frame-
+100→732 window's total describes the **whole** post-turn-1 window, phantom
+re-decision included, not a clean per-decision breakdown; a future worker
+wanting the exact per-decision split should reach for
+`tools/probe/attribute-factory-ai-random-callers.py` (directly reusable
+against these fixtures, not run this session for time — same status §6 left
+it in).
+
+**No contradiction found**: the ported redirect (`MOVE_ICY_WIND`/
+`MOVE_ROCK_TOMB`/`MUD_SHOT` → `AI_CV_SpeedDown`'s own body;
+`MOVE_BUBBLE_BEAM`/`MOVE_CONSTRICT`/`MOVE_BUBBLE` → zero) matches the oracle
+exactly. **This closes PROGRESS entry 493's "22nd and final CV handler,
+ZERO banked live ledger" flag** — `AI_CV_SpeedDownFromChance` now has the
+same live-oracle standing as all 21 other reachable `AI_CV_*` handlers in
+this doc.
+
+### 26.4 Verify script status
+
+`tools/probe/verify-factory-ai-checkviability-ground-truth.ts` extended this
+session with a new `SPEEDDOWNFROMCHANCE_REDIRECT_SCENARIOS` array +
+`verifyRedirectScenario` runner (frame-100→732 total-step count, same shape
+as `SCENARIOS`'s own runner minus the "which slot won" pick check — all 4
+opponent slots are identical here, so there is no cross-slot pick to read)
+covering the 4 fixtures above. Every prior scenario (§9, §11.5, §12.1,
+§13.4, §14.6, §15.5, §16.5, §17.7, §18.7, §19.7, §20.5, §21.5, §22.6,
+§23.6, §24.8, §25.7) unchanged and still green. Reproduce with:
+
+```sh
+node --experimental-strip-types tools/probe/verify-factory-ai-checkviability-ground-truth.ts
+```
