@@ -7,6 +7,7 @@ import {
   sceneOnEncoreView,
   type SceneOnPresentationBattler,
 } from "../../src/animation/sceneOnPresentation.ts";
+import { encoreTargetX2AtAge } from "../../src/animation/encore.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 
 interface Fixture {
@@ -201,7 +202,12 @@ for (
       === (age >= fixture.windowSchedule.objFirstAge
         && age <= fixture.windowSchedule.objLastAge);
   const swayMatch =
-    oracle.battlerSprites[targetIndex]!.y2 === view.targetY2;
+    oracle.battlerSprites[targetIndex]!.y2 === view.targetY2
+    && oracle.battlerSprites[targetIndex]!.x2 === encoreTargetX2AtAge(
+      age,
+      view.attacker.geometry.side,
+      view.target.geometry.side === "opponent" ? 1 : 0,
+    );
   if (handsMatch && spotlightMatch && registersMatch && swayMatch) {
     componentMatches += 1;
   } else {

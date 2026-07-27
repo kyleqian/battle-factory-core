@@ -157,6 +157,32 @@ import {
   type AcidSprite,
 } from "./acid.ts";
 import {
+  sludgeEffectAtAge,
+  sludgeSpritesBackToFrontAtAge,
+  sludgeTargetPaletteYAtAge,
+  type SludgeSprite,
+} from "./sludge.ts";
+import {
+  sludgeBombEffectAtAge,
+  type SludgeBombSprite,
+} from "./sludgeBomb.ts";
+import {
+  poisonFangEffectAtAge,
+  type PoisonFangSprite,
+} from "./poisonFang.ts";
+import {
+  hyperFangEffectAtAge,
+  type HyperFangEffect,
+} from "./hyperFang.ts";
+import {
+  poisonTailAtAge,
+  type PoisonTailState,
+} from "./poisonTail.ts";
+import {
+  toxicEffectAtAge,
+  type ToxicSprite,
+} from "./toxic.ts";
+import {
   earthquakeAnimationAtAge,
   type EarthquakeAnimationState,
 } from "./earthquake.ts";
@@ -264,6 +290,12 @@ import {
   dragonClawAtAge,
   type DragonClawState,
 } from "./dragonClaw.ts";
+import {
+  singNotesBackToFrontAtAge,
+  singPanTaskAtAge,
+  type SingNote,
+  type SingPanTask,
+} from "./sing.ts";
 
 export type SceneOnBattlerSide = "player" | "opponent";
 
@@ -295,6 +327,9 @@ export interface SceneOnPresentationBattler {
     | "DUSTOX"
     | "HORSEA"
     | "EKANS"
+    | "GRIMER"
+    | "ZUBAT"
+    | "RATICATE"
     | "SKIPLOOM"
     | "RELICANTH"
     | "LUNATONE"
@@ -302,7 +337,10 @@ export interface SceneOnPresentationBattler {
     | "PLUSLE"
     | "MINUN"
     | "SABLEYE"
-    | "ALTARIA";
+    | "ALTARIA"
+    | "AZURILL"
+    | "CLAMPERL"
+    | "SEVIPER";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -743,6 +781,51 @@ export interface SceneOnAcidConfig {
   readonly projectileOrigin: Readonly<{ x: number; y: number }>;
 }
 
+export interface SceneOnSludgeConfig {
+  readonly move: "SLUDGE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source `GetBattlerSpriteCoord2(attacker, X_2/Y_PIC_OFFSET)`. */
+  readonly projectileOrigin: Readonly<{ x: number; y: number }>;
+}
+
+export interface SceneOnSludgeBombConfig {
+  readonly move: "SLUDGE_BOMB";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly projectileOrigin: Readonly<{ x: number; y: number }>;
+}
+
+export interface SceneOnPoisonFangConfig {
+  readonly move: "POISON_FANG";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+export interface SceneOnHyperFangConfig {
+  readonly move: "HYPER_FANG";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+export interface SceneOnPoisonTailConfig {
+  readonly move: "POISON_TAIL";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+export interface SceneOnToxicConfig {
+  readonly move: "TOXIC";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnEarthquakeConfig {
   readonly move: "EARTHQUAKE";
   readonly attacker: SceneOnPresentationBattler;
@@ -790,6 +873,13 @@ export interface SceneOnEncoreConfig {
 
 export interface SceneOnDragonClawConfig {
   readonly move: "DRAGON_CLAW";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+export interface SceneOnSingConfig {
+  readonly move: "SING";
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
@@ -854,12 +944,19 @@ export type SceneOnMoveConfig =
   | SceneOnSupersonicConfig
   | SceneOnWaterGunConfig
   | SceneOnAcidConfig
+  | SceneOnSludgeConfig
+  | SceneOnSludgeBombConfig
+  | SceneOnPoisonFangConfig
+  | SceneOnHyperFangConfig
+  | SceneOnPoisonTailConfig
+  | SceneOnToxicConfig
   | SceneOnEarthquakeConfig
   | SceneOnHardenConfig
   | SceneOnCalmMindConfig
   | SceneOnShadowBallConfig
   | SceneOnEncoreConfig
   | SceneOnDragonClawConfig
+  | SceneOnSingConfig
   | SceneOnFutureSightConfig
   | SceneOnConfusionConfig
   | SceneOnPsychicConfig
@@ -897,6 +994,52 @@ export interface SceneOnAcidView {
   readonly sprites: readonly AcidSprite[];
 }
 
+export interface SceneOnSludgeView {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly targetOffset: Readonly<{ x2: number; y2: number }>;
+  readonly defenderPaletteY: number;
+  readonly sprites: readonly SludgeSprite[];
+}
+
+export interface SceneOnSludgeBombView {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly targetOffset: Readonly<{ x2: number; y2: number }>;
+  readonly defenderPaletteY: number;
+  readonly sprites: readonly SludgeBombSprite[];
+}
+
+export interface SceneOnPoisonFangView {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly targetOffset: Readonly<{ x2: number; y2: number }>;
+  readonly defenderPaletteY: number;
+  readonly sprites: readonly PoisonFangSprite[];
+}
+
+export interface SceneOnHyperFangView extends HyperFangEffect {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnPoisonTailView extends PoisonTailState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnToxicView {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly sprites: readonly ToxicSprite[];
+}
+
 export interface SceneOnEncoreView extends EncoreState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -907,6 +1050,15 @@ export interface SceneOnDragonClawView extends DragonClawState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSingView {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly notes: readonly SingNote[];
+  readonly pan: SingPanTask | null;
+  readonly targetInMonBg: boolean;
 }
 
 export interface SceneOnEarthquakeView extends EarthquakeAnimationState {
@@ -1847,6 +1999,132 @@ export function sceneOnAcidView(
   };
 }
 
+/** `age` is ticks since `gSludgeProjectileSpriteTemplate` creation. */
+export function sceneOnSludgeView(
+  state: SceneOnMovePresentationState,
+): SceneOnSludgeView {
+  if (state.config.move !== "SLUDGE") {
+    throw new Error(`expected SLUDGE presentation, got ${state.config.move}`);
+  }
+  const effect = sludgeEffectAtAge(
+    state.age,
+    state.config.attacker.geometry.side,
+    state.config.projectileOrigin,
+    state.config.target.geometry.animationCenter,
+  );
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    targetOffset: effect.targetOffset,
+    defenderPaletteY: sludgeTargetPaletteYAtAge(state.age),
+    sprites: sludgeSpritesBackToFrontAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.projectileOrigin,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age` is ticks since the first of ten sludge projectile creations. */
+export function sceneOnSludgeBombView(
+  state: SceneOnMovePresentationState,
+): SceneOnSludgeBombView {
+  if (state.config.move !== "SLUDGE_BOMB") {
+    throw new Error(`expected SLUDGE_BOMB presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...sludgeBombEffectAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.projectileOrigin,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age` is ticks since `gFangSpriteTemplate` creation. */
+export function sceneOnPoisonFangView(
+  state: SceneOnMovePresentationState,
+): SceneOnPoisonFangView {
+  if (state.config.move !== "POISON_FANG") {
+    throw new Error(`expected POISON_FANG presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...poisonFangEffectAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is Hyper Fang's initial SE_M_BITE display frame. */
+export function sceneOnHyperFangView(
+  state: SceneOnMovePresentationState,
+): SceneOnHyperFangView {
+  if (state.config.move !== "HYPER_FANG") {
+    throw new Error(`expected HYPER_FANG presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...hyperFangEffectAtAge(
+      state.age,
+      state.config.target.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is the MetallicShine initializer's first displayed frame. */
+export function sceneOnPoisonTailView(
+  state: SceneOnMovePresentationState,
+): SceneOnPoisonTailView {
+  if (state.config.move !== "POISON_TAIL") {
+    throw new Error(`expected POISON_TAIL presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...poisonTailAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age` is ticks since the first `gToxicBubbleSpriteTemplate` creation. */
+export function sceneOnToxicView(
+  state: SceneOnMovePresentationState,
+): SceneOnToxicView {
+  if (state.config.move !== "TOXIC") {
+    throw new Error(`expected TOXIC presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    sprites: toxicEffectAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.target.geometry.battlePositionCenter,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
 /** `age=0` is the two simultaneous HorizontalShake task creation tick. */
 export function sceneOnEarthquakeView(
   state: SceneOnMovePresentationState,
@@ -1967,6 +2245,34 @@ export function sceneOnDragonClawView(
       attackerCenter: state.config.attacker.geometry.battlePositionCenter,
       targetCenter: state.config.target.geometry.animationCenter,
     }),
+  };
+}
+
+/** `age=0` is the first active frame of SING's move animation script. */
+export function sceneOnSingView(
+  state: SceneOnMovePresentationState,
+): SceneOnSingView {
+  if (state.config.move !== "SING") {
+    throw new Error(`expected SING presentation, got ${state.config.move}`);
+  }
+  const noteAge = state.age - 7;
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    notes: singNotesBackToFrontAtAge(
+      noteAge,
+      state.config.attacker.geometry.animationCenter,
+      state.config.target.geometry.animationCenter,
+    ),
+    pan: singPanTaskAtAge(noteAge, state.config.attacker.geometry.side),
+    // Task_InitUpdateMonBg hides the target four relative frames after
+    // script activation; Cmd_clearmonbg restores it after the final note.
+    targetInMonBg:
+      state.age >= 4
+      && state.age <= (
+        state.config.attacker.geometry.side === "player" ? 150 : 153
+      ),
   };
 }
 

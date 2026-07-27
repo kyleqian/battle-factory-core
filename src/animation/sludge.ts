@@ -1,0 +1,195 @@
+import { GBA_SINE_TABLE_256 } from "../engine/battleMenu.ts";
+import {
+  linearTranslationDeltaQ8,
+  linearTranslationOffsetAfterCallbacks,
+} from "./animLinearTranslation.ts";
+import { shakeMonOffsetAtTick } from "./shakeMon.ts";
+
+export const SLUDGE_PROJECTILE_DURATION = 40;
+export const SLUDGE_POISON_BUBBLE_START_AGES = [41, 49, 57, 65, 73, 81] as const;
+export const SLUDGE_POISON_BUBBLE_OFFSETS = [
+  { x: 10, y: 10 },
+  { x: 20, y: -20 },
+  { x: -20, y: 15 },
+  { x: 0, y: 0 },
+  { x: -20, y: -20 },
+  { x: 16, y: -8 },
+] as const;
+
+const PROJECTILE_MATRICES = [
+  191, 197, 203, 210, 217, 224, 232, 240, 250, 260,
+  250, 240, 232, 224, 217, 210, 203, 197, 191, 186, 186,
+] as const;
+
+/** Shared `gSludgeProjectileSpriteTemplate` callback body. */
+export function sludgeProjectileAtLocalAge(
+  localAge: number,
+  attackerSide: "player" | "opponent",
+  projectileOrigin: Readonly<{ x: number; y: number }>,
+  targetCenter: Readonly<{ x: number; y: number }>,
+  spawnIndex = 0,
+  oamSlot = 3,
+): SludgeSprite | undefined {
+  if (localAge < 0 || localAge >= SLUDGE_PROJECTILE_DURATION) return undefined;
+  const startX = projectileOrigin.x + (attackerSide === "player" ? 20 : -20);
+  const callbacks = localAge + 1;
+  const arcAngle = Math.trunc(
+    (Math.trunc(0x8000 / SLUDGE_PROJECTILE_DURATION) * callbacks) / 256,
+  ) & 0xff;
+  const matrix = PROJECTILE_MATRICES[localAge % PROJECTILE_MATRICES.length]!;
+  return {
+    kind: "projectile",
+    x: startX + linearTranslationOffsetAfterCallbacks(
+      linearTranslationDeltaQ8(targetCenter.x - startX, SLUDGE_PROJECTILE_DURATION),
+      callbacks,
+      SLUDGE_PROJECTILE_DURATION,
+    ),
+    y: projectileOrigin.y + linearTranslationOffsetAfterCallbacks(
+      linearTranslationDeltaQ8(
+        targetCenter.y - projectileOrigin.y,
+        SLUDGE_PROJECTILE_DURATION,
+      ),
+      callbacks,
+      SLUDGE_PROJECTILE_DURATION,
+    ) + Math.floor((GBA_SINE_TABLE_256[arcAngle]! * -30) / 256),
+    xScale: matrix,
+    yScale: matrix,
+    spawnIndex,
+    oamSlot,
+  };
+}
+
+export interface SludgeSprite {
+  readonly kind: "projectile" | "poisonBubble";
+  readonly x: number;
+  readonly y: number;
+  readonly xScale: number;
+  readonly yScale: number;
+  readonly spawnIndex: number;
+  readonly oamSlot: number;
+}
+
+export interface SludgeEffect {
+  readonly targetOffset: Readonly<{ x2: number; y2: number }>;
+  readonly sprites: readonly SludgeSprite[];
+}
+
+/** Source OAM priority: lower OBJ slots win equal-priority overlaps. */
+export function sludgeSpritesBackToFrontAtAge(
+  age: number,
+  attackerSide: "player" | "opponent",
+  projectileOrigin: Readonly<{ x: number; y: number }>,
+  targetCenter: Readonly<{ x: number; y: number }>,
+): readonly SludgeSprite[] {
+  return [...sludgeEffectAtAge(
+    age,
+    attackerSide,
+    projectileOrigin,
+    targetCenter,
+  ).sprites].sort((a, b) => b.oamSlot - a.oamSlot);
+}
+
+/**
+ * Target OBJ/BG palette coefficient for SLUDGE's literal delay=1,
+ * num_blends=2, 0<->12 blend_color_cycle. Each coefficient is exposed for
+ * three display ticks; the source palette-fade completion path holds the
+ * peak before the reverse leg.
+ */
+export function sludgeTargetPaletteYAtAge(age: number): number {
+  if (age < 44) return 0;
+  if (age <= 59) return Math.min(12, 2 + 2 * Math.floor((age - 44) / 3));
+  if (age < 68) return 12;
+  return Math.max(0, 10 - 2 * Math.floor((age - 68) / 3));
+}
+
+/**
+ * Displayed battler offset after the script-created ShakeMon initializer.
+ * The creation frame's synchronous initializer plus RunTasks step exposes
+ * the first +3 write before the steady two-display task/OAM pipeline.
+ */
+export function sludgeDisplayedTargetOffsetAtAge(
+  age: number,
+  baselineX2: number,
+): Readonly<{ x2: number; y2: number }> {
+  if (age <= 41) return { x2: baselineX2, y2: 0 };
+  if (age === 42) return { x2: 3, y2: 0 };
+  return shakeMonOffsetAtTick(3, 0, 5, 1, age - 42);
+}
+
+function poisonBubbleAtLocalAge(
+  local: number,
+  spawnIndex: number,
+  attackerSide: "player" | "opponent",
+  targetCenter: Readonly<{ x: number; y: number }>,
+): SludgeSprite | undefined {
+  // AFFINEANIMCMD_FRAME(0x9c) initializes scale, then the 20-frame +5
+  // command is advanced by AnimateSprites on the creation frame.
+  if (local < 0 || local > 20) return undefined;
+  const offset = SLUDGE_POISON_BUBBLE_OFFSETS[spawnIndex]!;
+  const angle = ((local + 1) * 0xb) & 0xff;
+  const scale = 0x9c + Math.min(local + 1, 20) * 5;
+  const matrix = Math.trunc(0x10000 / scale);
+  return {
+    kind: "poisonBubble",
+    x: targetCenter.x + (attackerSide === "player" ? offset.x : -offset.x)
+      + Math.floor((GBA_SINE_TABLE_256[angle]! * 4) / 256),
+    y: targetCenter.y + offset.y - Math.trunc(((local + 1) * 0x30) / 0x100),
+    xScale: matrix,
+    yScale: matrix,
+    spawnIndex,
+    oamSlot: [3, 4, 5, 3, 4, 5][spawnIndex]!,
+  };
+}
+
+/**
+ * Shared `PoisonBubblesEffect` sprite body with caller-relative interpreter
+ * spawn ages. Most callers use the direct SLUDGE cadence; callers whose
+ * preceding command/DMA handoff adds display latches can supply the literal
+ * source-probed creation ages without duplicating bubble motion or OAM reuse.
+ */
+export function poisonBubblesAtAge(
+  age: number,
+  attackerSide: "player" | "opponent",
+  targetCenter: Readonly<{ x: number; y: number }>,
+  startAges: readonly number[] = SLUDGE_POISON_BUBBLE_START_AGES,
+  localAgeAt: (localAge: number, spawnIndex: number) => number
+    = (localAge) => localAge,
+): readonly SludgeSprite[] {
+  const sprites: SludgeSprite[] = [];
+  for (let index = 0; index < startAges.length; index += 1) {
+    const sprite = poisonBubbleAtLocalAge(
+      localAgeAt(age - startAges[index]!, index),
+      index,
+      attackerSide,
+      targetCenter,
+    );
+    if (sprite) sprites.push(sprite);
+  }
+  return sprites;
+}
+
+/**
+ * Complete source-relative visual body for Move_SLUDGE, with age zero at
+ * gSludgeProjectileSpriteTemplate's creation callback.
+ */
+export function sludgeEffectAtAge(
+  age: number,
+  attackerSide: "player" | "opponent",
+  projectileOrigin: Readonly<{ x: number; y: number }>,
+  targetCenter: Readonly<{ x: number; y: number }>,
+): SludgeEffect {
+  const sprites: SludgeSprite[] = [];
+  const projectile = sludgeProjectileAtLocalAge(
+    age, attackerSide, projectileOrigin, targetCenter,
+  );
+  if (projectile) sprites.push(projectile);
+  sprites.push(...poisonBubblesAtAge(age, attackerSide, targetCenter));
+  return {
+    // A script-created visual task receives its synchronous initializer step
+    // and the same frame's RunTasks step before this displayed latch.
+    targetOffset: age < 41
+      ? { x2: 0, y2: 0 }
+      : shakeMonOffsetAtTick(3, 0, 5, 1, age - 40),
+    sprites,
+  };
+}

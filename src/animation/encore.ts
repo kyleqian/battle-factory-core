@@ -126,11 +126,11 @@ export function encoreSpotlightAtAge(
   };
 }
 
-export function encoreTargetY2AtAge(
+function encoreTargetSwayAtAge(
   age: number,
   attackerSide: "player" | "opponent",
-): number {
-  if (age < ENCORE_SWAY_FIRST_AGE) return 0;
+): { readonly y2: number; readonly complete: boolean } {
+  if (age < ENCORE_SWAY_FIRST_AGE) return { y2: 0, complete: false };
   let sineIndex = 0;
   let highHalf = 0;
   let lowHalf = 1;
@@ -150,10 +150,29 @@ export function encoreTargetY2AtAge(
       highHalf ^= 1;
       lowHalf ^= 1;
       sways -= 1;
-      if (sways === 0) return 0;
+      if (sways === 0) return { y2: 0, complete: true };
     }
   }
-  return y2;
+  return { y2, complete: false };
+}
+
+export function encoreTargetY2AtAge(
+  age: number,
+  attackerSide: "player" | "opponent",
+): number {
+  return encoreTargetSwayAtAge(age, attackerSide).y2;
+}
+
+/**
+ * The vertical SwayMon task leaves the target's existing x2 untouched until
+ * its terminal source branch, which unconditionally resets both x2 and y2.
+ */
+export function encoreTargetX2AtAge(
+  age: number,
+  attackerSide: "player" | "opponent",
+  initialX2: number,
+): number {
+  return encoreTargetSwayAtAge(age, attackerSide).complete ? 0 : initialX2;
 }
 
 export function encoreAtAge(
