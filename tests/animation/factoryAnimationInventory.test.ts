@@ -68,11 +68,11 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // TOXIC closes its two-orientation shared-seam framebuffer evidence.
-        unsupported: 233,
+        // SLUDGE BOMB closes its two-orientation shared-seam evidence.
+        unsupported: 232,
         staged: 0,
         partial: 3,
-        exact: 40,
+        exact: 41,
       },
       {
         tier: "openOnly",

@@ -46,7 +46,42 @@ animation. A status caused by a move is not part of that move's animation.
 
 ## Current resumable state (2026-07-27)
 
-Coverage is **40/276 exact, 3 partial, 233 unsupported**. TOXIC is exact
+Coverage is **41/276 exact, 3 partial, 232 unsupported**. SLUDGE BOMB is exact
+through the shared Scene-ON seam at **160/160 player-back + 160/160
+opponent-front** component and framebuffer frames, reproduced twice fresh.
+SLUDGE and TOXIC remain exact controls in both orientations. POISON TAIL
+remains unsupported.
+
+## SLUDGE BOMB promoted to exact; delayed sludge-hit track closed (2026-07-27)
+
+**Verdict:** `MOVE_SLUDGE_BOMB` is exact. Complete legal Scene-ON mechanicLab
+parties use WEEPINBELL, the real Level-50 Factory set-270 carrier, in both
+required orientations with all four choices constrained to SLUDGE BOMB and
+ONIX constrained to TACKLE. The strengthened comparator matches the complete
+first move-animation script body at **160/160 player-back** (oracle 85-244)
+and **160/160 opponent-front** (89-248), each reproduced twice fresh.
+
+**Source reducer/evidence:** all ten calls reuse SLUDGE's exact
+`gSludgeProjectileSpriteTemplate` reducer at their five-display-frame cadence.
+The move-specific reducer ports `AnimTask_ShakeMon2(3,0,15,1)`, the delay-1
+target blend cycle, three batches containing all twelve literal
+`gSludgeBombHitParticleSpriteTemplate` fixed-point bodies, `waitsound`, and
+the final shared `PoisonBubblesEffect`. Dense evidence checks tasks, software
+and hardware OAM, affine allocation/transfer latches, palettes, all ten
+`SE_M_BUBBLE3`, three `SE_M_DIG`, and six `SE_M_TOXIC` pan/restart boundaries,
+cleanup, raw RGB, and the shared-seam framebuffer.
+
+**Renderer/assets/controls:** poison-bubble art and both set-270 WEEPINBELL
+orientations are reproducibly extracted. `sceneOnPresentation`/`battleScene`
+render the complete body and source hardware latches through relative ages.
+SLUDGE remains **102/102** and TOXIC **219/219** in both orientations. No
+absolute ticks, screenshots, coordinate/RGB fitting, exclusions, unsupported
+barriers, or import-boundary widening were added. POISON TAIL remains
+unsupported; no sibling was promoted.
+
+## Previous current state (2026-07-27)
+
+Coverage was **40/276 exact, 3 partial, 233 unsupported**. TOXIC is exact
 through the shared Scene-ON seam at strengthened **219/219 player-back +
 219/219 opponent-front** component and framebuffer frames, reproduced twice
 fresh. SLUDGE BOMB and POISON TAIL remain unsupported.
