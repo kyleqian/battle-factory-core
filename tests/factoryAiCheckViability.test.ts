@@ -3186,8 +3186,15 @@ describe("AI_CV_EvasionUp (docs/factory-ai-checkviability-ground-truth.md §24.1
     });
   });
 
-  describe("Gates C/D / DRAW SITEs 3-4 (mutually exclusive, unlike AccuracyDown's own independent status gates)", () => {
-    it("target toxic-poisoned + opponent's OWN hp > 50%: routes to DRAW SITE 4 only; roll >= 50 applies +3", () => {
+  // Gates C/D's own opponent-HP band picks the ENTRY point, not two mutually
+  // exclusive single-draw sites (docs/factory-ai-draw-discrepancy-probe.md
+  // §7): own HP > 50% jumps straight to DRAW SITE 4 alone (unaffected by the
+  // fix below). Own HP <= 50% reaches DRAW SITE 3 first, whose own failure
+  // (roll >= 80) chains straight into DRAW SITE 4's own roll -- the SAME
+  // DefenseUp-style chain, three outcomes: pass@3 (seed 4), fail@3+pass@4
+  // (seed 1), fail@3+fail@4 (seed 2).
+  describe("Gates C/D / DRAW SITEs 3-4 (own hp band picks the entry point; <= 50% chains DRAW SITE 3's own failure into DRAW SITE 4, same shape as AI_CV_DefenseUp's own DRAW SITE 4/5)", () => {
+    it("target toxic-poisoned + opponent's OWN hp > 50%: routes to DRAW SITE 4 only (direct entry, not part of the chain); roll >= 50 applies +3", () => {
       const result = runCheckViability({
         rng: { value: 1, calls: 0 },
         moveId: MOVE_DOUBLE_TEAM_CV,
@@ -3203,7 +3210,8 @@ describe("AI_CV_EvasionUp (docs/factory-ai-checkviability-ground-truth.md §24.1
       expect(result.scoreDelta).toBe(3);
     });
 
-    it("target toxic-poisoned + opponent's OWN hp <= 50%: routes to DRAW SITE 3 only, never both; roll < 80 skips the +3", () => {
+    it("target toxic-poisoned + opponent's OWN hp <= 50%: pass@3 -- roll < 80 stops with a single draw, no bonus", () => {
+      // seed 4 -> randomValue % 256 = 25 (< 80, stops here).
       const result = runCheckViability({
         rng: { value: 4, calls: 0 },
         moveId: MOVE_DOUBLE_TEAM_CV,
@@ -3217,6 +3225,42 @@ describe("AI_CV_EvasionUp (docs/factory-ai-checkviability-ground-truth.md §24.1
       expect(result.draws).toHaveLength(1);
       expect(result.draws[0]).toMatchObject({ kind: "evasion-up-roll-3", succeeded: false });
       expect(result.scoreDelta).toBe(0);
+    });
+
+    it("target toxic-poisoned + opponent's OWN hp <= 50%: fail@3+pass@4 -- DRAW SITE 3's own failure chains into DRAW SITE 4, whose own roll < 50 still stops with no bonus", () => {
+      // seed 1's chain: draw3 = 198 (>= 80, chains); draw4 (next) = 33 (< 50, stops).
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_DOUBLE_TEAM_CV,
+        attacker: evasionUpAttacker({ hp: 45 }),
+        target: evasionUpTarget({ isToxicPoisoned: true }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(2);
+      expect(result.draws[0]).toMatchObject({ kind: "evasion-up-roll-3", succeeded: true });
+      expect(result.draws[1]).toMatchObject({ kind: "evasion-up-roll-4", succeeded: false });
+      expect(result.scoreDelta).toBe(0);
+    });
+
+    it("target toxic-poisoned + opponent's OWN hp <= 50%: fail@3+fail@4 -- only a SECOND failed roll applies the +3", () => {
+      // seed 2's chain: draw3 = 140 (>= 80, chains); draw4 (next) = 195 (>= 50, applies +3).
+      const result = runCheckViability({
+        rng: { value: 2, calls: 0 },
+        moveId: MOVE_DOUBLE_TEAM_CV,
+        attacker: evasionUpAttacker({ hp: 45 }),
+        target: evasionUpTarget({ isToxicPoisoned: true }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(2);
+      expect(result.draws[0]).toMatchObject({ kind: "evasion-up-roll-3", succeeded: true });
+      expect(result.draws[1]).toMatchObject({ kind: "evasion-up-roll-4", succeeded: true });
+      expect(result.scoreDelta).toBe(3);
     });
 
     it("target NOT toxic-poisoned: neither DRAW SITE 3 nor 4 fires, regardless of HP band", () => {

@@ -2042,13 +2042,23 @@ function runCvAccuracyDown(input: Readonly<{
  * the operand flips because EvasionUp raises the OPPONENT's own stat, unlike
  * AccuracyDown which lowers the target's.
  *
- * Gates C/D (`:1046-1047`) mutually exclusive DRAW SITE 3/DRAW SITE 4: only
- * reached at all when the target is toxic-poisoned (Gate C), then split by
- * the opponent's OWN hp (> 50% -> DRAW SITE 4 only; <= 50% -> DRAW SITE 3
- * only) -- never both in the same pass, unlike AccuracyDown's own four
- * independent (non-exclusive) status gates. DRAW SITE 8 (`:1069`) shares
- * AccuracyDown's own DRAW SITE 7 OPPOSITE polarity: jump (roll < 70) is the
- * no-op; falling through (roll >= 70) is what applies the tail's `-2`.
+ * Gates C/D (`:1046-1047`) gate DRAW SITE 3/DRAW SITE 4 as a pair only
+ * reached at all when the target is toxic-poisoned (Gate C); the opponent's
+ * OWN hp then picks the ENTRY point, NOT two mutually exclusive single-draw
+ * alternatives (this comment's own prior claim, disproved by docs/factory-
+ * ai-draw-discrepancy-probe.md §7, the same audit that found this): > 50%
+ * jumps straight to DRAW SITE 4 alone (one draw); <= 50% reaches DRAW SITE 3
+ * first, and DRAW SITE 3's own failure (roll >= 80) falls straight through
+ * into DRAW SITE 4's own roll immediately below with no gate between them
+ * (`data/battle_ai_scripts.s:1048-1050`) -- the SAME chained-pair shape
+ * `AI_CV_DefenseUp`'s own DRAW SITE 4/5 has (`runCvDefenseUp`'s own doc
+ * comment above). So this branch burns 0 draws (Gate C false), 1 draw (Gate
+ * D true, or Gate C true + DRAW SITE 3 succeeds), or 2 draws (Gate C true,
+ * own hp <= 50%, DRAW SITE 3 fails and chains into DRAW SITE 4) -- unlike
+ * AccuracyDown's own four independent (non-exclusive, always-single-draw)
+ * status gates. DRAW SITE 8 (`:1069`) shares AccuracyDown's own DRAW SITE 7
+ * OPPOSITE polarity: jump (roll < 70) is the no-op; falling through (roll >=
+ * 70) is what applies the tail's `-2`.
  */
 function runCvEvasionUp(input: Readonly<{
   rng: BattleRngState;
@@ -2094,8 +2104,15 @@ function runCvEvasionUp(input: Readonly<{
   }
 
   // Gates C/D -> DRAW SITE 3/4: target toxic-poisoned reaches this pair at
-  // all; the opponent's OWN hp band then picks exactly one of the two
-  // mutually exclusive sites.
+  // all. The opponent's OWN hp band picks the ENTRY point, NOT two mutually
+  // exclusive single-draw sites (a prior version of this comment's own
+  // claim, disproved by docs/factory-ai-draw-discrepancy-probe.md §7): own
+  // HP > 50% jumps straight to DRAW SITE 4 (a single, independent draw); own
+  // HP <= 50% reaches DRAW SITE 3 first, whose own failure (roll >= 80) falls
+  // straight through into DRAW SITE 4's own roll immediately below -- no
+  // gate between them (data/battle_ai_scripts.s:1048-1050) -- the SAME
+  // chained-pair shape `AI_CV_DefenseUp`'s own DRAW SITE 4/5 has. Only a
+  // second failed roll (DRAW SITE 4's own, roll >= 50) applies the `+3`.
   if (input.targetIsToxicPoisoned) {
     if (attackerHpPercent > 50) {
       const draw4 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw4`);
@@ -2110,7 +2127,15 @@ function runCvEvasionUp(input: Readonly<{
       ordinal += 1;
       const succeeded3 = draw3.randomValue % 256 >= 80;
       draws.push(Object.freeze({ ...draw3, kind: "evasion-up-roll-3" as const, succeeded: succeeded3 }));
-      if (succeeded3) score += 3;
+      if (succeeded3) {
+        // DRAW SITE 3's own failure falls straight through into DRAW SITE 4.
+        const draw4 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw4`);
+        rng = draw4.after;
+        ordinal += 1;
+        const succeeded4 = draw4.randomValue % 256 >= 50;
+        draws.push(Object.freeze({ ...draw4, kind: "evasion-up-roll-4" as const, succeeded: succeeded4 }));
+        if (succeeded4) score += 3;
+      }
     }
   }
 
