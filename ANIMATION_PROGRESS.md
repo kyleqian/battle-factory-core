@@ -46,13 +46,13 @@ animation. A status caused by a move is not part of that move's animation.
 
 ## Current resumable state (2026-07-27)
 
-Coverage is **35/276 exact, 3 partial, 238 unsupported**. The latest bounded
-work leaves ENCORE unsupported at **215/215 component frames** but only
-**43/215** player-back and **89/215** opponent-front framebuffer frames,
-reproduced twice after strengthening its OAM/matrix comparator. Its next safe
-repair is the general per-scanline OAM-budget/order and OBJ-window compositor
-described below; otherwise select the next bounded component from
-`npm run animation:coverage`. Animation-main is green at this checkpoint.
+Coverage is **36/276 exact, 3 partial, 237 unsupported**. ENCORE is exact at
+**215/215 strengthened component and framebuffer frames** in both required
+MINUN→ONIX orientations, reproduced twice. Its reusable GBA OBJ compositor now
+models ascending-OAM scanline evaluation, cycle budgets, normal/OBJ-window
+arbitration, and WIN1/OBJWIN color-effect masks. Select the next bounded
+component from `npm run animation:coverage`. Animation-main is green at this
+checkpoint.
 
 ## DRAGON CLAW promoted to exact; PlaySE1WithPanning track established (2026-07-27)
 
@@ -92,14 +92,12 @@ distinct centered/attacker-pan sounds. All remain unsupported.
 opponent-front, KNOCK OFF **59/59** in both orientations, and BIND **45/45**
 in both orientations, all framebuffer-exact.
 
-## ENCORE transformed-OBJ checkpoint; PlaySE2WithPanning track not promoted (2026-07-27)
+## ENCORE promoted to exact; GBA OBJ-window compositor established (2026-07-27)
 
-**Verdict:** `MOVE_ENCORE` remains unsupported. The source/task reducer is
-exact for the complete 215-frame move-owned body in both player-back and
-opponent-front MINUN orientations (**215/215 strengthened component frames**),
-but the shared-seam framebuffer remains only **43/215** and **89/215**,
-respectively, reproduced after the final change. Coverage census and ratchets
-therefore remain unchanged.
+**Verdict:** `MOVE_ENCORE` is exact for the complete move-owned Scene-ON body
+in both player-back and opponent-front MINUN orientations. Each is **215/215
+strengthened component and framebuffer frames**, reproduced twice. Coverage is
+**36/276 exact, 3 partial, 237 unsupported**.
 
 **Source/probe:** complete legal mechanicLab parties use the real challenge-0
 Level-50 carrier `FRONTIER_MON_MINUN_1` set 187 (species 354, Docile, HP/DEF
@@ -113,22 +111,20 @@ reproduce the component result. The comparator now additionally checks every
 hand's x/y/x2/y2, facing matrix and clap counter; the spotlight's software
 position plus hardware OAM affine-double position, matrix number, full signed
 PA/PB/PC/PD matrix and one-frame x2 display latch; and WIN0/register latches.
-This closes the prior evidence hole where 215/215 omitted affine matrix/OAM/
-window state.
+The strengthened comparator also checks the source SwayMon terminal x2 reset,
+which distinguishes the opponent-front target's idle one-pixel x2 from the
+post-animation zero latch.
 
-**Bounded remainder:** the first player-orientation framebuffer residual is
-relative age 43, 15 pixels at x175-177/y74-80; later residuals expand with the
-affine OBJ-window spotlight and clapping-hand OAM interaction. The opposite
-orientation first differs at age 43, 20 pixels at x72/y24-43, then includes
-the player-back target sprite/OAM interaction. The extracted spotlight VRAM
-matches the source asset byte-for-byte, and task/sprite/register/sway/OAM
-matrix state is exact. `battleScene.ts` now uses the source/GBA affine-double
-destination box and signed 8.8 full 2×2 inverse matrix (PB/PC included rather
-than assuming axis-aligned scale), with integer source clipping. Completing
-acceptance still needs the remaining general GBA per-scanline OAM evaluation,
-budget/order and normal+OBJ-window pair arbitration plus WIN1/OBJWIN
-color-effect masking; no coordinate fitting, exclusions, or comparator
-weakening was introduced.
+**Renderer:** the reusable compositor evaluates OAM in ascending index order
+per scanline, charges source-derived regular/affine-double fetch costs against
+the GBA OBJ cycle budget, retains the budget-exhausting object, and arbitrates
+normal and OBJ-window candidates independently before applying priority/OAM
+order. The ENCORE seam supplies healthboxes, battlers, clapping hands, and the
+affine-double spotlight in their probed OAM slots, then applies WIN1/OBJWIN
+color-effect masks. Focused Tier-1 tests pin ordering, transparent texels,
+budget exhaustion, and normal/OBJ-window arbitration. No coordinate fitting,
+exclusions, comparator weakening, screenshots, or absolute-tick branches were
+introduced.
 
 **Sibling audit/controls:** SKY ATTACK uses `SE_M_SKY_UPPERCUT` at attacker
 pan; SUPERPOWER uses `SE_M_EARTHQUAKE` at center; FLATTER shares

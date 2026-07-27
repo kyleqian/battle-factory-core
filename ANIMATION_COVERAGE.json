@@ -2,6 +2,32 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_ENCORE",
+      "status": "exact",
+      "covered": [
+        "complete legal Level-50 mechanicLab parties stage MINUN from real Factory set 187 in both player-back and opponent-front orientations, with a real preceding move before ENCORE is legally selected; ONIX is constrained to TACKLE",
+        "player-back MINUN complete move-owned Scene-ON body at oracle frames 608-822: strengthened source component/task/sprite/OAM/matrix/register/audio evidence 215/215 and shared-seam framebuffer 215/215, reproduced twice on fresh oracle runs",
+        "opponent-front MINUN complete move-owned Scene-ON body at oracle frames 610-824: strengthened source component/task/sprite/OAM/matrix/register/audio evidence 215/215 and shared-seam framebuffer 215/215, reproduced twice on fresh oracle runs",
+        "Create/RemoveSpotlight, both HardwarePaletteFade directions, signed affine-double spotlight transform and sweep, four clapping-hand sprites, PlaySE2WithPanning, signed SwayMon including terminal x2 reset, WIN/register lifetimes, and teardown",
+        "reusable ascending-OAM per-scanline evaluation and cycle budget, normal/OBJ-window priority and OAM-order arbitration, transparent texel handling, budget-exhausting OBJ retention, and WIN1/OBJWIN color-effect masks"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-encore-player-minun-opponent-onix.json",
+        "tools/battle-lab/mechanic-encore-opponent-minun-player-onix.json",
+        "tools/compare/fixtures/encore-player-minun-opponent-onix.json",
+        "tools/compare/fixtures/encore-opponent-minun-player-onix.json",
+        "tools/compare/encorePortable.ts",
+        "tools/compare/encoreProbe.py",
+        "tools/compare/extractEncoreAssets.ts",
+        "src/animation/assets/encore.json",
+        "src/animation/encore.ts",
+        "src/animation/gbaObjCompositor.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/encore.test.ts",
+        "tests/animation/gbaObjCompositor.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_DRAGON_CLAW",
       "status": "exact",
       "covered": [

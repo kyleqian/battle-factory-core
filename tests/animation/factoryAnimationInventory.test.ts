@@ -68,11 +68,11 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // DRAGON CLAW is exact in both required orientations.
-        unsupported: 238,
+        // ENCORE is exact in both required orientations.
+        unsupported: 237,
         staged: 0,
         partial: 3,
-        exact: 35,
+        exact: 36,
       },
       {
         tier: "openOnly",
