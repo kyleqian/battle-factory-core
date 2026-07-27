@@ -44,6 +44,52 @@ animation. A status caused by a move is not part of that move's animation.
   presentation seam and all source- or evidence-required variants are covered.
 - No entry means unsupported.
 
+## Healing blue-star track established; RECOVER promoted to exact (2026-07-26)
+
+**Verdict:** `MOVE_RECOVER` is the sole promoted acceptance unit. Its complete
+move-owned Scene-ON body is source component/RAM-exact and framebuffer-exact
+through the shared seam in both required orientations, each reproduced twice:
+player-back KADABRA is **169/169** (oracle 611-779), and opponent-front
+KADABRA is **169/169** (615-783). Census: **25/276 exact, 3 partial**.
+
+**Source/probe:** complete legal mechanicLab parties use KADABRA, a real
+Level-50 Factory RECOVER carrier, with all four choices constrained to
+RECOVER; ONIX is legally constrained to TACKLE. Turn 1 stages real damage
+through the stock battle engine, and turn 2 supplies the accepted healing
+body—no HP injection or transient override. The shared reducer covers all 21
+literal `RecoverAbsorbEffect` spawns, `gPowerAbsorptionOrbSpriteTemplate`'s
+Q8.8 translation and affine shrink, side-mirrored attacker geometry,
+`ANIM_TAG_ORBS`, the six-leg 0↔11 yellow palette cycle,
+`monbg/setalpha/blendoff`, and `HealingEffect`'s four
+`gHealingBlueStarSpriteTemplate` sprites and complete frame program. The only
+shared timing generalization is source-shaped: a non-divisible 11/2 palette
+swing needs one clamp-transfer tick beyond an even swing; GROWTH's established
+0↔8 durations remain unchanged.
+
+**Sibling audit (no promotions):** ABSORB still needs its 8 sine drain orbs,
+hitsplat/shake, and green field blend; MEGA_DRAIN its paired 16-orb stronger
+green body; DREAM_EATER its psychic background, target scale/shakes, and
+24-orb body; GIGA_DRAIN its 24-orb/high-green body; SOFT_BOILED its breaking
+egg, thin rings, shake, and target-side `HealingEffect2`; MILK_DRINK its milk
+bottle, thin ring, and `HealingEffect2`; PRESENT both conditional bag/explosion
+and green-particle heal branches plus target healing; SYNTHESIS its
+`GrantingStarsEffect` and 0→16 attacker blend; MOONLIGHT its blackout, moon,
+alpha tasks, and sparkle pipeline; SWALLOW its move-turn-dependent deform,
+shakes, and blue-orb multiplicity. All ten remain unsupported pending their
+own complete dense evidence.
+
+**Evidence/controls:** fixtures, dense RAM/RGB probe, source asset extractor,
+portable comparator, and Tier-1 reducer tests are committed in `2218cc2` and
+`a48b361`. Fresh acceptance is **169/169 component + framebuffer ×2 in both
+orientations**. GROWTH remains **63/63** and BIND **45/45**, each in both
+orientations, as self-target/palette and seam controls. The non-exclusive
+`healing-blue-star` track is registered in `ANIMATION_COVERAGE.json`; only
+RECOVER has an exact coverage entry.
+
+**Verification:** **231 test files / 3131 tests green**; production build
+green; coverage self-check reports **25/276 exact, 3 partial, 248
+unsupported**.
+
 ## Knock Off opposite orientation closed; promoted to exact (2026-07-26)
 
 **Verdict:** `MOVE_KNOCK_OFF` promotes **partial → exact**. Its complete
@@ -116,62 +162,3 @@ PSYCHIC opponent **140/140** (83-222), FUTURE_SIGHT opponent **114/114**
 **Verification:** Tier-1 asset/geometry/side tests added; **227 test files /
 3041 tests** and production build green. Implementation commit:
 `abc5474 feat(animation): close psychic opposite orientation`.
-
-## Psychic-family window-2 boundary closed through the shared mode/matrix seam: CONFUSION 140/140, PSYCHIC 140/140 (2026-07-26)
-
-**Verdict:** the remaining boundary frames are exact with no absolute-tick or
-move-specific branch. `MOVE_CONFUSION` and `MOVE_PSYCHIC` stay `partial` only
-because their opposite KADABRA-front orientation remains unstaged; the complete
-player-attacker windows are now **140/140** each, reproduced twice with fresh
-Scene-ON evidence.
-
-**Evidence first:** a fresh `dump-scale-window-oam-scanline.py` run separated
-three states that the old `targetScale.active` splice conflated. At CONFUSION
-tick146, source `AnimTask_ShakeMon` has already synchronously cleared RAM
-`x2` to 0, but the OAM shadow still holds the raw creation write
-`oamExtra=+3`; the framebuffer displays that creation latch at frame147.
-At the restore edge, `objMode`/`affineMode` revert after the one-tick display
-lag while the affine matrix retains its two-tick lag, leaving one real
-normal/single-size but still-scaled tail frame. This is the same asymmetric
-state already modeled exactly by `MOVE_FUTURE_SIGHT`.
-
-**Fix:** `confusionTargetShakeDisplayX2` and
-`psychicTargetShakeDisplayX2` query the literal shared `AnimTask_ShakeMon`
-sequence at `displayAge - windowStart - 1`, closing the creation edges with
-the script amplitudes (+3/+5). `sceneOnConfusionView`/
-`sceneOnPsychicView` now expose `targetBlendActive` separately from the
-two-tick-lagged `targetScale`; `battleScene.ts` keeps `monbg`'s frozen copy
-under the opaque, single-size, still-scaled tail OBJ. This mirrors
-FUTURE_SIGHT's existing source-derived mechanism and closes CONFUSION
-frames147/176 plus PSYCHIC frames145/174.
-
-**Dense evidence (fresh, twice each):** CONFUSION **140/140 ×2**; PSYCHIC
-**140/140 ×2**; FUTURE_SIGHT **114/114 ×2**; GROWTH **63/63 component +
-framebuffer ×2 in both orientations**; BIND **45/45 component + framebuffer
-×2 in both orientations**. Tier-1 literals pin the creation OAM values and
-the separate mode/matrix edges.
-
-**Coverage:** both moves remain honest `partial`; their staged complete
-windows have zero remaining frames, while the opposite KADABRA-front
-orientation remains the sole named coverage gap. Commit:
-`3b443cd fix(animation): separate psychic scale boundary states`.
-Final verification: **226 test files / 3037 tests green**; production build
-green; coverage census remains **21/276 exact, 5 partial**.
-
-## Psychic-family shared boundary defect: window-1 creation-tick off-by-one closed (137→138/140 both moves); window-2 splice unification tried and refuted, banked (2026-07-26)
-
-**Verdict: real, shared-mechanism fix landed for one of the family's two boundary classes; the other was tested and honestly refuted, not special-cased. `MOVE_CONFUSION` and `MOVE_PSYCHIC` both move 137/140 → 138/140, stay `partial`. No regressions.**
-
-**Instrument first (per this step's brief):** `tools/compare/scratch/confusion-boundary-instrument.ts` (new) prints RAM ground truth (fresh `dump-scale-window-oam-scanline.py` run against `mechanic-confusion-kadabra-onix.json`) side by side with `sceneOnConfusionView`'s own prediction at each of the 3 named defect ticks (119/147/176) and their neighbors. Finding for window 1 (frame119): the OAM shadow shows `AnimTask_ShakeMon2`'s own raw pre-flip creation value (`shakeMon2Sequence` index 0) directly at the creation tick — RAM-confirmed (`oamX` extra reads `+1` = `xOffset`, not `0` "not yet active" nor `-1` = the steady-state index-1 value) — for exactly one tick, before the already-proven one-tick OAM-copy lag takes over. The old formula's "+1" is a RAM-**sample**-alignment idiom only (RAM itself never observes index 0), wrongly reused for the **display** formula too, clamping this transitional tick to 0. A genuine off-by-one in which tick becomes active, exactly as the brief hypothesized — not a new lag value.
-
-**Fix:** new `confusionAttackerShakeDisplayX2`/`psychicAttackerShakeDisplayX2` (`confusion.ts`/`psychic.ts`) call `shakeMon2OffsetAtTick` directly with `displayAge - START_AGE - 1`, letting the function's own `tick<0` clamp handle "not yet created" — no separate guard, no "+1" skip. Used directly by `sceneOnConfusionView`/`sceneOnPsychicView` in place of the old `confusionAttackerEffectAtAge(state.age-2)`/psychic equivalent for the shake read (the tint read is unaffected). Dense comparators: `confusionPortable.ts` 137/140 → **138/140** (frame119's 777px bbox fully closed); `psychicPortable.ts` 137/140 → **138/140** (frame145, this fixture's own relative-age-38 tick, 1583px bbox closed) — both reproduced, byte-identical result.
-
-**Window 2's splice (frame147/176, and PSYCHIC's frame174) tried and REFUTED as one shared mechanism.** The natural unification hypothesis: drop the separate age-1 `targetActive` read, use the same age-2 read as the magnitude for both (no "genuine intermediate" — `scaleMonAndRestoreAtAge` already returns `{active, xScale, yScale}` as one unit). Tested directly against the dense comparator: frame147 unchanged (1460px, still the whole target silhouette), frame176 **regressed** 33px → 881px — reproducing almost exactly the regression the original rung-13 session already found trying the mirror-image fix ("forcing xScale to neutral whenever [the less-lagged read] is inactive" also grew 176's residual to 881px). The age-1-leads-age-2 splice is empirically correct for nearly the entire window-2 tail (RAM-confirmed via the OAM-scanline probe); frame147/176 are the two ticks where that edge itself is off by one, not evidence the splice is wrong in general. Per this lane's own no-per-tick-patch rule: **refuted, banked, not special-cased.** Reverted to the proven splice.
-
-**Coverage.** `MOVE_CONFUSION`: stays `partial`, 137/140 → **138/140** (`confusionPortable.ts`). `MOVE_PSYCHIC`: stays `partial`, 137/140 → **138/140** (`psychicPortable.ts`), mirrored fix (not independently re-probed — the family's byte-identical script/argv already established every relative age transfers unchanged). New Tier-1 tests (`tests/animation/confusion.test.ts`, `tests/animation/psychic.test.ts`) pin both display-formula fixes against literal RAM-probed oracle-tick values. Regression gates green, reproduced **once each** (this session's time cap did not allow the mandated second repro — flagged honestly, not silently skipped): `futureSightPortable.ts` 114/114, `growthPortable.ts` 63/63 both orientations, `bindPortable.ts` 45/45 both orientations.
-
-**Evidence.** `npm test` 2709/2709. `npm run build` green.
-
-**Next action for a future session:** 2 frames remain on each move (CONFUSION: 147/176; PSYCHIC: 174, plus its own already-known window-1 defect is now closed) — all window-2 splice-boundary ticks. Closing them needs a genuinely different, asymmetric correction to the active-edge threshold alone (not a blanket unification, which this session proved makes things worse) — e.g. investigate whether the active edge itself needs its OWN off-by-one at exactly the 2 boundary ticks while keeping the current lag everywhere else, the same shape of fix window 1 just got. Separately, unchanged from prior sessions: PSYCHIC's opposite orientation (KADABRA front sprite) and CONFUSION's second orientation remain open.
-
-**Housekeeping (this session):** moved the "Defect A closed... MOVE_FUTURE_SIGHT promoted to exact" entry to `ANIMATION_PROGRESS-archive.md` to keep ~3 live (AGENTS.md's convention) after adding this session's new top entry.

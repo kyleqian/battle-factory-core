@@ -68,11 +68,11 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // Knock Off is exact in both required orientations at 59/59.
-        unsupported: 249,
+        // RECOVER is exact in both required orientations at 169/169.
+        unsupported: 248,
         staged: 0,
         partial: 3,
-        exact: 24,
+        exact: 25,
       },
       {
         tier: "openOnly",

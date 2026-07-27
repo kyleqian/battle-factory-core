@@ -4,6 +4,22 @@ Older dated sections moved out of `ANIMATION_PROGRESS.md` to keep that
 file lean (`AGENTS.md`'s ~3-most-recent convention). Git history has the
 full record regardless; this file is a read-only reference.
 
+## Psychic-family window-2 boundary closure (2026-07-26)
+
+CONFUSION and PSYCHIC reached 140/140 in their player-attacker windows through
+the shared `AnimTask_ShakeMon` creation latch and separate mode/matrix seam.
+They remained partial only for the then-unstaged opposite KADABRA-front
+orientation. FUTURE_SIGHT stayed 114/114; GROWTH and BIND controls passed in
+both orientations. Commit `3b443cd`.
+
+## Psychic-family window-1 creation-tick correction (2026-07-26)
+
+The display formula had skipped `AnimTask_ShakeMon2`'s raw creation write.
+Using the literal index-0 source state closed one frame each for CONFUSION and
+PSYCHIC (138/140). A proposed window-2 splice unification was tested and
+refuted because it regressed the restore edge, so no per-tick patch landed.
+The later window-2 and opposite-orientation entries supersede this checkpoint.
+
 ## MOVE_PSYCHIC initially staged at 137/140 before shared boundary and orientation closure (2026-07-26)
 
 `Move_PSYCHIC` was proven byte-for-byte the CONFUSION script shape except for

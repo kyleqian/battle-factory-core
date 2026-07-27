@@ -2,6 +2,26 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_RECOVER",
+      "status": "exact",
+      "covered": [
+        "complete legal Level-50 mechanicLab parties use KADABRA, a real Factory RECOVER carrier, and legally constrained TACKLE; the first turn stages damage through stock battle flow rather than injected HP",
+        "player-back KADABRA complete move-owned Scene-ON body at oracle frames 611-779: source component/RAM 169/169 and shared-seam framebuffer 169/169, reproduced twice",
+        "opponent-front KADABRA complete move-owned Scene-ON body at oracle frames 615-783: source component/RAM 169/169 and shared-seam framebuffer 169/169, reproduced twice",
+        "all 21 RecoverAbsorbEffect gPowerAbsorptionOrbSpriteTemplate spawns, ANIM_TAG_ORBS affine shrink and signed side geometry, six-leg odd-swing blend_color_cycle, monbg/setalpha/blendoff teardown, and HealingEffect's four ANIM_TAG_BLUE_STAR sprites/frame program"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-recover-player-kadabra-opponent-onix.json",
+        "tools/battle-lab/mechanic-recover-opponent-kadabra-player-onix.json",
+        "tools/compare/fixtures/recover-player-kadabra-opponent-onix.json",
+        "tools/compare/fixtures/recover-opponent-kadabra-player-onix.json",
+        "tools/compare/recoverPortable.ts",
+        "tools/compare/recoverProbe.py",
+        "src/animation/recover.ts",
+        "tests/animation/recover.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_KNOCK_OFF",
       "status": "exact",
       "covered": [
@@ -776,6 +796,31 @@
         "MOVE_SECRET_POWER"
       ],
       "goal": "MOVE_KNOCK_OFF is exact through the shared Scene-ON seam in both source-required orientations: player-back PLUSLE to opponent-front ONIX and opponent-front PLUSLE to player-back ONIX are each 59/59 component/RAM and 59/59 framebuffer frames, reproduced twice. HorizontalLunge, ShakeMonInPlace, and both SlideMon helpers remain one source-relative implementation; the opposite route adds only source-selected PLUSLE front/ONIX back chrome and AnimKnockOffStrike's declared player-target affine/x-argument mirror. BIND remains 45/45 in both orientations twice as a seam regression. Sibling batch verdicts remain independent: SUPER_FANG is unsupported because its complete body additionally requires gSuperFangSpriteTemplate, AnimTask_BlendMonInAndOut, palette blend, and its own dense acceptance; SECRET_POWER is unsupported because the Factory building environment dispatches to Move_STRENGTH and other environments dispatch to distinct move bodies. Neither sibling is promoted by shared reducer coverage."
+    },
+    {
+      "id": "healing-blue-star",
+      "components": [
+        "subroutine:HealingEffect",
+        "asset:ANIM_TAG_BLUE_STAR",
+        "sprite:gHealingBlueStarSpriteTemplate",
+        "subroutine:RecoverAbsorbEffect",
+        "visualCommand:create_power_absorption_orb_sprite",
+        "asset:ANIM_TAG_ORBS"
+      ],
+      "representatives": [
+        "MOVE_RECOVER",
+        "MOVE_ABSORB",
+        "MOVE_MEGA_DRAIN",
+        "MOVE_SOFT_BOILED",
+        "MOVE_DREAM_EATER",
+        "MOVE_GIGA_DRAIN",
+        "MOVE_MILK_DRINK",
+        "MOVE_PRESENT",
+        "MOVE_SYNTHESIS",
+        "MOVE_MOONLIGHT",
+        "MOVE_SWALLOW"
+      ],
+      "goal": "MOVE_RECOVER solely proves the complete three-wave RecoverAbsorbEffect plus attacker HealingEffect body in both orientations at 169/169 component/RAM and framebuffer frames, reproduced twice. GROWTH remains 63/63 and BIND 45/45 in both orientations as seam controls. No sibling is promoted: ABSORB needs its 8-orb sine drain/hitsplat/green field body; MEGA_DRAIN its paired 16-orb stronger-green body; DREAM_EATER its psychic-background/target-scale-and-shake/24-orb body; GIGA_DRAIN its 24-orb/high-green body; SOFT_BOILED its breaking-egg/thin-ring/target HealingEffect2 body; MILK_DRINK its bottle/thin-ring/HealingEffect2 body; PRESENT both conditional bag/explosion and green-particle heal branches with target HealingEffect2; SYNTHESIS its GrantingStarsEffect and 0-to-16 attacker blend; MOONLIGHT its blackout/moon/alpha/sparkle pipeline; and SWALLOW its move-turn-dependent deform/shake/blue-orb multiplicity. Each remains unsupported pending its own complete dense acceptance."
     }
   ],
   "variantAudits": {
