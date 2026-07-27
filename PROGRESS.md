@@ -14,6 +14,84 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > entry 468's animation items are the animation supervisor's backlog now.
 
 ---
+## 491 — [BOUNDED WORKER 2026-07-26 ~23:50] Landed the DefenseUp/SpDefUp DRAW SITE 4/5 chain fix (entry 490's own finding) + whole-surface audit found and fixed a second instance in EvasionUp
+
+- **State:** tree committed and green at **231 test files / 3195 tests**
+  (+4 over entry 490's 3191), `npm run build` clean. Census re-run
+  byte-identical (92/214 effects, 187/355 moves, 150/276 Factory-L50,
+  1884/2957 weighted, all 32 checks pass, `git status --porcelain docs/
+  executable-frontier-census.md` empty). `executableFrontierRatchet.test.ts`
+  barrier counts unmoved (6/6 green, no new barrier). Three commits: the
+  DefenseUp/SpDefUp fix, the EvasionUp fix, and the audit-doc update.
+- **Did (RUNG 1):** fixed `runCvDefenseUp`/`runCvSpDefUp`
+  (`factoryAiCheckViability.ts`) per entry 490's own sized recommendation:
+  DRAW SITE 4's own failure (roll >= 60) no longer applies `-2` on the spot
+  — it now chains into a second draw at DRAW SITE 5 (same `<60`-stops
+  semantics), and `-2` fires only when BOTH rolls fail (`(196/256)^2 ≈
+  58.65%`, not the old single-roll ~76.6%). Corrected both functions' own
+  doc comments, which had claimed DRAW SITE 4/5 were "mutually exclusive"
+  (the exact claim entry 490's probe disproved). Added three-outcome
+  Tier-1 tests for both handlers (pass@4, fail@4+pass@5, fail@4+fail@5).
+  **Mask-7 reconciliation (brief's own requested numbers):** the
+  `AI_CV_DefenseUp`/`AI_CV_SpDefUp` mask-7 fixture-reproduction tests in
+  `factoryAiScoredDecision.test.ts` previously hard-coded **4**
+  check-viability draws (the "always 4" derivation entry 490 showed was
+  wrong); re-run against the fixed handler at the same seed, all three
+  physical-list fixtures now reproduce **7** draws (2+2+1+2 across the 4
+  slots: fail+fail, fail+fail, pass, fail+pass) — inside the fixed model's
+  own valid `[4,8]` range. This test's own RNG-stream offset is a
+  construction convenience, not a replay of the live ROM's frame, so its 7
+  does not need to equal the live probe's own 6 number-for-number, and the
+  two don't need to reconcile against each other — what reconciles to
+  **zero unexplained** is the mechanism itself: every draw count anywhere
+  (live probe's 6, this test's 7, the `[4,8]` theoretical range) is now
+  fully explained by "each of the 4 slots draws once (passes) or twice
+  (fails and chains)," with no residual unattributed component, superseding
+  the old comments' "EXACTLY 4" claim.
+- **Did (RUNG 2 — whole-surface audit):** mechanically cross-checked all 46
+  `if_random_less_than` sites across the 18 dispatched `AI_CV_*` handlers
+  (of the file's 144 total) against their literal assembly fall-through,
+  full table in `docs/factory-ai-draw-discrepancy-probe.md` §7.2. Found a
+  SECOND, independent instance of the identical defect class in
+  `AI_CV_EvasionUp`'s Gates C/D (DRAW SITE 3/4, `:1048-1050`) — ported
+  (entry 489) as two mutually-exclusive single-draw sites keyed on the
+  opponent's own HP band, but the real assembly chains DRAW SITE 3's own
+  failure (roll >= 80, reached only when target is toxic-poisoned AND own
+  HP <= 50%) straight into DRAW SITE 4's own roll, byte-for-byte the same
+  shape as DefenseUp's bug. This is exactly the brief's own predicted
+  highest-risk shape: `AI_CV_EvasionUp`'s one banked live fixture (§24.3)
+  never sets target toxic-poison status, so it could never have exercised
+  this branch at all — a fixture gap, not a probe gap, only findable by
+  reading the assembly. Fixed the same way (chain + three-outcome tests:
+  pass@3, fail@3+pass@4, fail@3+fail@4); the direct `own HP > 50%` entry to
+  DRAW SITE 4 alone (unaffected, not part of the chain) stays as-is. Every
+  OTHER site across all 18 handlers confirmed OK: either a self-contained
+  deterministic `score`/`goto` action, or an already-correctly-modeled
+  chain (`AI_CV_HighCrit`, `AI_CV_VitalThrow`, both already used the
+  `jumpedToEnd`/fallthrough-roll pattern this step's fixes now also use).
+  Confirmed the CBM side is genuinely if_random-free (`grep -c
+  if_random_less_than` over `AI_CheckBadMove`'s own `:51-651` range = 0) —
+  trivially clean of this defect class as the brief predicted, verified not
+  assumed.
+- **Next:** entry 490's own carried Next list stands, minus the item this
+  step closed: weather trio (RainDance/SunnyDay/Hail, §25, last 3 of 22 CV
+  handlers, explicitly out of THIS step's scope); §19.5's unstaged
+  AccuracyDown sites 2-6 (now confirmed structurally safe by this step's
+  audit — no chain risk there, just never independently live-verified);
+  §24's own newly-surfaced follow-up from §7.4: a live oracle fixture for
+  `AI_CV_EvasionUp`'s toxic-poisoned + own-HP<=50% branch does not exist
+  yet in `tools/battle-lab/` — building one and rerunning §2's own
+  `attribute-factory-ai-cv-drawsite-callers.py` probe (parameterized by
+  `DRAW_SITE_TABLE`) against it would give this fix the same live
+  corroboration `DefenseUp`/`SpDefUp` already have, but wasn't in this
+  step's scope or time budget; ENDTURN_ITEMS2 after Yawn/Thrash.
+- **Notes:** no PAPERCUT. Time split roughly matched the brief's guidance —
+  rung 1 (fix + tests + reconciliation) landed at ~30min elapsed, leaving
+  enough room to run the full rung-2 audit (not just a partial table with a
+  named remainder) and land its own fix + tests green, with the doc/
+  PROGRESS writeup absorbing the reserved tail.
+
+---
 ## 490 — [BOUNDED WORKER 2026-07-26 ~23:45] §18/§22 "5-6 draws not 4" anomaly SOLVED by instrument — real engine gap found, not fixed (probe-only step)
 
 - **State:** tree committed and green at **231 files / 3191 tests** (unchanged
@@ -158,75 +236,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   CV EvasionUp (8-site handler) + all fixtures landed as one green rung
   inside the ~40-minute budget, so no partial-rung split was needed this
   session.
-
----
-## 488 — [BOUNDED WORKER 2026-07-26 ~22:30] turn-4 ROCK_SLIDE settle staged + wired — presentation-seam §9's last residual gap CLOSED
-
-- **State:** tree committed and green at **231 files / 3131 tests** (+1
-  file/+7 tests over entry 487), `npm run build` clean. Census unchanged
-  (reran `tools/report/executable-frontier-census.ts` live: byte-identical,
-  no diff — **92/214 effects, 187/355 moves, 150/276 Factory-L50, 1884/2957
-  weighted, all 32 checks pass**); `executableFrontierRatchet.test.ts`'s
-  per-module barrier counts unmoved (6/6 green, no new barrier — this step
-  touches no unsupported-branch code). Two commits: `65f2f4d` (rung 1,
-  staging module + tests) and the rung-2 wiring commit (`battleScene.ts`).
-- **Did:** closed the ONE real remaining item of the presentation-seam §9
-  program (entries 465/468/487's own named residual: `anchorOpponentAfterTurn4Hp`'s
-  `from`-endpoint had no staged proof).
-  - **Rung 1:** `src/engine/turn4RockSlidePresentationStaging.ts` (new),
-    mirrors `turn1RockSlidePresentationStaging.ts` verbatim — stages a real
-    Onix ROCK_SLIDE → Grovyle hit chain (41 → 1, 40 damage, non-crit,
-    non-faint) through the unmodified `resolveRockSlidePresentationWindowContent`
-    bridge. **The RNG seed (3051035979) is turn 4's own real recorded value**,
-    not fabricated: derived from `battle1-grovyle-faint-ram-dump.json`'s own
-    `rngLedger` (already committed/already imported for
-    `anchorPlayerAfterTurn3Hp`/`anchorOpponentAfterTurn3Hp`) — specifically
-    its four single-step entries at ticks 5316/5340/5343/5569 — independently
-    corroborated by `battleScene.ts`'s own already-committed
-    `drawTurn4KickoffText` doc comment, which separately cites the identical
-    three ticks for accuracy/crit/damage-lock rolls. Staging it reproduces
-    41 → 1 byte-identical, ending exactly at the ledger's own next recorded
-    value. 7 new Tier-1 tests (event sequence, message content, hp-change
-    endpoints, health-bar delta, bridge resolution, no faint-family event).
-  - **Rung 2:** wired every mandatory consumer named in the brief —
-    `drawTurn4RockSlideAttack`/`drawTurn4RockSlideTurnEndSettledMenu`'s
-    `rockSlideOpponentHp`/`opponentHealthboxContentForHp` calls,
-    `drawTurn4RockSlideWindow`'s attack text (now
-    `TURN1_ROCKSLIDE_ATTACK_LINE1/2`, byte-identical content per §9.3 — it
-    was still raw `ROCK_SLIDE_LINE1/2` literals), and **the residual gap
-    itself**: `drawTurn5RockSlideAttack`'s own `rockSlideOpponentHp` `from`
-    endpoint now reads the staged settle instead of the bare literal — not
-    circular (the turn-4 module stages Grovyle's PRE-turn-4 hp and computes
-    ITS OWN settle independently). Also did the OPTIONAL item:
-    `drawMenuIdleBaseWithOpponentHp`'s `turn4Resolved` arm (turn2/turn3 arms
-    untouched, per scope). `anchorOpponentAfterTurn3Hp`/`anchorOpponentAfterTurn4Hp`
-    both kept (still read by turn 3's own window and `drawEndeavorSquish`'s
-    steady-state read respectively — only the re-driven reads were retired).
-  - Updated `docs/presentation-seam-scout.md` §9's own top status block with
-    a second STATUS UPDATE note recording closure (matching entry 487's own
-    precedent of correcting stale carried-forward summaries at the source).
-- **Acceptance (all live this session, oracle `127.0.0.1:8014`):**
-  `npm run compare -- turn4-rockslide.json --summary` **250/250** (recorded,
-  `docs/battle-turn-notes.md`); regression sweep, **zero drops**:
-  `turn5-rockslide.json` **256/256**, `turn1-rockslide.json` **256/256**,
-  `turn5-faint.json` **110/110**, `turn4-doubleteam.json` **250/250**
-  (confirmed pre-existing/unaffected by diffing against the rung-1 commit
-  before any rung-2 edit — `docs/battle-turn-notes.md`'s own `249/249`
-  mentions are stale copy-paste from an older trace revision, not a
-  regression target), `turn4-menu.json` **44/44**, `turn3-rockslide.json`
-  **256/256**.
-- **Next:** presentation-seam §9 is now FULLY CLOSED — no more items in that
-  program. Resume entry 485/487's own carried Next list: EvasionUp/
-  EvasionDown/weather-trio pairs (last 6 of 22 CV handlers); §19.5's unstaged
-  AccuracyDown sites 2-6; §18 5-6-draw window discrepancy (recurring for
-  `SpDefUp` too, §22.3-22.4 — probe candidate, sRandCount attribution);
-  ENDTURN_ITEMS2 after Yawn/Thrash; `SpDefUp`/§23 DRAW SITE recipe-only
-  leftovers.
-- **Notes:** no PAPERCUT. Sourcing the RNG seed from an already-committed
-  asset (rather than a fresh/uncommitted probe, the pattern §9.1 flagged as
-  a debt for the OTHER three turn-4/5 HP constants) is worth naming as a
-  reusable technique for `anchorPlayerAfterTurn5Hp` if that one is ever
-  tackled — it too may have a real ledger hiding in an already-imported
-  fixture rather than needing a fresh probe.
 
 ---

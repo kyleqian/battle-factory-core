@@ -1,4 +1,74 @@
 ---
+## 488 — [BOUNDED WORKER 2026-07-26 ~22:30] turn-4 ROCK_SLIDE settle staged + wired — presentation-seam §9's last residual gap CLOSED
+
+- **State:** tree committed and green at **231 files / 3131 tests** (+1
+  file/+7 tests over entry 487), `npm run build` clean. Census unchanged
+  (reran `tools/report/executable-frontier-census.ts` live: byte-identical,
+  no diff — **92/214 effects, 187/355 moves, 150/276 Factory-L50, 1884/2957
+  weighted, all 32 checks pass**); `executableFrontierRatchet.test.ts`'s
+  per-module barrier counts unmoved (6/6 green, no new barrier — this step
+  touches no unsupported-branch code). Two commits: `65f2f4d` (rung 1,
+  staging module + tests) and the rung-2 wiring commit (`battleScene.ts`).
+- **Did:** closed the ONE real remaining item of the presentation-seam §9
+  program (entries 465/468/487's own named residual: `anchorOpponentAfterTurn4Hp`'s
+  `from`-endpoint had no staged proof).
+  - **Rung 1:** `src/engine/turn4RockSlidePresentationStaging.ts` (new),
+    mirrors `turn1RockSlidePresentationStaging.ts` verbatim — stages a real
+    Onix ROCK_SLIDE → Grovyle hit chain (41 → 1, 40 damage, non-crit,
+    non-faint) through the unmodified `resolveRockSlidePresentationWindowContent`
+    bridge. **The RNG seed (3051035979) is turn 4's own real recorded value**,
+    not fabricated: derived from `battle1-grovyle-faint-ram-dump.json`'s own
+    `rngLedger` (already committed/already imported for
+    `anchorPlayerAfterTurn3Hp`/`anchorOpponentAfterTurn3Hp`) — specifically
+    its four single-step entries at ticks 5316/5340/5343/5569 — independently
+    corroborated by `battleScene.ts`'s own already-committed
+    `drawTurn4KickoffText` doc comment, which separately cites the identical
+    three ticks for accuracy/crit/damage-lock rolls. Staging it reproduces
+    41 → 1 byte-identical, ending exactly at the ledger's own next recorded
+    value. 7 new Tier-1 tests (event sequence, message content, hp-change
+    endpoints, health-bar delta, bridge resolution, no faint-family event).
+  - **Rung 2:** wired every mandatory consumer named in the brief —
+    `drawTurn4RockSlideAttack`/`drawTurn4RockSlideTurnEndSettledMenu`'s
+    `rockSlideOpponentHp`/`opponentHealthboxContentForHp` calls,
+    `drawTurn4RockSlideWindow`'s attack text (now
+    `TURN1_ROCKSLIDE_ATTACK_LINE1/2`, byte-identical content per §9.3 — it
+    was still raw `ROCK_SLIDE_LINE1/2` literals), and **the residual gap
+    itself**: `drawTurn5RockSlideAttack`'s own `rockSlideOpponentHp` `from`
+    endpoint now reads the staged settle instead of the bare literal — not
+    circular (the turn-4 module stages Grovyle's PRE-turn-4 hp and computes
+    ITS OWN settle independently). Also did the OPTIONAL item:
+    `drawMenuIdleBaseWithOpponentHp`'s `turn4Resolved` arm (turn2/turn3 arms
+    untouched, per scope). `anchorOpponentAfterTurn3Hp`/`anchorOpponentAfterTurn4Hp`
+    both kept (still read by turn 3's own window and `drawEndeavorSquish`'s
+    steady-state read respectively — only the re-driven reads were retired).
+  - Updated `docs/presentation-seam-scout.md` §9's own top status block with
+    a second STATUS UPDATE note recording closure (matching entry 487's own
+    precedent of correcting stale carried-forward summaries at the source).
+- **Acceptance (all live this session, oracle `127.0.0.1:8014`):**
+  `npm run compare -- turn4-rockslide.json --summary` **250/250** (recorded,
+  `docs/battle-turn-notes.md`); regression sweep, **zero drops**:
+  `turn5-rockslide.json` **256/256**, `turn1-rockslide.json` **256/256**,
+  `turn5-faint.json` **110/110**, `turn4-doubleteam.json` **250/250**
+  (confirmed pre-existing/unaffected by diffing against the rung-1 commit
+  before any rung-2 edit — `docs/battle-turn-notes.md`'s own `249/249`
+  mentions are stale copy-paste from an older trace revision, not a
+  regression target), `turn4-menu.json` **44/44**, `turn3-rockslide.json`
+  **256/256**.
+- **Next:** presentation-seam §9 is now FULLY CLOSED — no more items in that
+  program. Resume entry 485/487's own carried Next list: EvasionUp/
+  EvasionDown/weather-trio pairs (last 6 of 22 CV handlers); §19.5's unstaged
+  AccuracyDown sites 2-6; §18 5-6-draw window discrepancy (recurring for
+  `SpDefUp` too, §22.3-22.4 — probe candidate, sRandCount attribution);
+  ENDTURN_ITEMS2 after Yawn/Thrash; `SpDefUp`/§23 DRAW SITE recipe-only
+  leftovers.
+- **Notes:** no PAPERCUT. Sourcing the RNG seed from an already-committed
+  asset (rather than a fresh/uncommitted probe, the pattern §9.1 flagged as
+  a debt for the OTHER three turn-4/5 HP constants) is worth naming as a
+  reusable technique for `anchorPlayerAfterTurn5Hp` if that one is ever
+  tackled — it too may have a real ledger hiding in an already-imported
+  fixture rather than needing a fresh probe.
+
+---
 ## 487 — [BOUNDED WORKER 2026-07-26 ~22:00] assigned step already done — verified, not redone
 
 - **State:** tree unchanged at **230 files / 3124 tests**, build green,
