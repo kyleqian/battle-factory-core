@@ -726,6 +726,7 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     defStage: view.attacker.statStages.def,
     speedStage: view.attacker.statStages.speed,
     spAtkStage: view.attacker.statStages.spAtk,
+    spDefStage: view.attacker.statStages.spDef,
     lightScreenUp: view.attacker.lightScreenUp,
     reflectUp: view.attacker.reflectUp,
   });

@@ -14,7 +14,7 @@ import {
   type BattleState,
 } from "../src/engine/battleDecisionBoundary.ts";
 import { advanceRngValue } from "../src/engine/rng.ts";
-import { DEFAULT_STAT_STAGE } from "../src/engine/damageCalc.ts";
+import { DEFAULT_STAT_STAGE, MAX_STAT_STAGE } from "../src/engine/damageCalc.ts";
 
 const NEUTRAL_STAGES = Object.freeze({
   atk: DEFAULT_STAT_STAGE,
@@ -1675,6 +1675,38 @@ describe("AI_CV_SpDefUp mask-7 fixture reproduction (docs/factory-ai-checkviabil
     expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
     expect(phaseDraws(result, "check-viability")).toHaveLength(0);
     expect(result.trace.draws).toHaveLength(4 /* setup */ + 1 /* tie */);
+  });
+
+  it.each([
+    ["CosmicPower", MOVE_COSMIC_POWER_MASK7],
+    ["CalmMind", MOVE_CALM_MIND_MASK7],
+  ])("%s wiring: the attacker's own maxed SPDEF stage reaches the CBM handler through the real dispatcher (mask 1 isolates CheckBadMove: -8 on every slot vs the neutral-stage run; pins the previously unwired spDefStage)", (_label, moveId) => {
+    // Mask 1 (win streak below the mask-7 band) so ONLY CheckBadMove runs --
+    // under mask 7 the shared AI_CV_SpDefUp body reads the same maxed stage
+    // through its own gates and contaminates a total-score comparison.
+    function mask1View(attacker: FactoryAiScoredBattlerView): FactoryAiScoredView {
+      const base = spDefUpView(moveId, attacker, machampTarget(MOVE_SEISMIC_TOSS_LAST));
+      return Object.freeze({ ...base, factory: Object.freeze({ ...base.factory, factoryWinStreak: 14 }) });
+    }
+    const neutral = chooseFactoryAiScoredDecision({
+      view: mask1View(anorithAttacker(70)),
+      request: fourSlotRequest,
+      rng: { value: 1, calls: 0 },
+    });
+    const maxed = chooseFactoryAiScoredDecision({
+      view: mask1View(Object.freeze({
+        ...anorithAttacker(70),
+        statStages: Object.freeze({ ...NEUTRAL_STAGES, spDef: MAX_STAT_STAGE }),
+      })),
+      request: fourSlotRequest,
+      rng: { value: 1, calls: 0 },
+    });
+    expect(maxed.trace.mask).toBe(1);
+    expect(maxed.trace.executedScoringScripts).toEqual(["check-bad-move"]);
+    expect(phaseDraws(maxed, "check-bad-move")).toHaveLength(0);
+    expect(maxed.trace.slotScores.map((s) => s.finalScore)).toEqual(
+      neutral.trace.slotScores.map((s) => s.finalScore - 8),
+    );
   });
 
   it("CosmicPower and CalmMind produce numerically identical draw counts for the same reach fixture (neither's own extra raised stat affects Dragon Rage's fixed damage or AI_CV_SpDefUp's own gates, doc §22.3)", () => {
