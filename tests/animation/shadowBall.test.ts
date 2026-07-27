@@ -75,7 +75,7 @@ describe("Shadow Ball source reducer", () => {
     expect(shadowBallBackgroundIsGhost(16)).toBe(true);
     expect(shadowBallBackgroundIsGhost(127)).toBe(true);
     expect(shadowBallBackgroundIsGhost(128)).toBe(false);
-    expect(shadowBallTargetShakeAtAge(95)).toEqual({ x2: 4, y2: 0 });
+    expect(shadowBallTargetShakeAtAge(95)).toEqual({ x2: 0, y2: 0 });
     expect(shadowBallTargetShakeAtAge(96)).toEqual({ x2: -4, y2: 0 });
     expect(shadowBallTargetShakeAtAge(110)).toEqual({ x2: 0, y2: 0 });
   });

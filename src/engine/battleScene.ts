@@ -15767,6 +15767,7 @@ export function renderSceneOnMovePresentation(
   if (state.config.move === "SHADOW_BALL") {
     const view = sceneOnShadowBallView(state);
     const displayed = sceneOnShadowBallView({ ...state, age: state.age - 1 });
+    const displayedTarget = view.displayedTargetOffset;
     const playerToOpponent =
       view.attacker.species === "SABLEYE"
       && view.attacker.geometry.side === "player"
@@ -15824,43 +15825,79 @@ export function renderSceneOnMovePresentation(
     const targetIdle = view.target.geometry.side === "opponent"
       ? speciesFrontIdleRestOffset(view.target.species)
       : null;
+    const targetRest = state.age <= 96
+      ? { x2: targetIdle?.x2 ?? 0, y2: targetIdle?.y2 ?? 0 }
+      : { x2: 0, y2: 0 };
     const shakeActive =
-      displayed.targetOffset.x2 !== 0 || displayed.targetOffset.y2 !== 0;
-    drawSpriteSheet(
-      fb,
-      onixSprite.tileset,
-      onixSprite.palette,
-      view.target.geometry.spriteCorner.x
-        + (shakeActive
-          ? displayed.targetOffset.x2
-          : (targetIdle?.x2 ?? 0)),
-      view.target.geometry.spriteCorner.y
-        + (shakeActive
-          ? displayed.targetOffset.y2
-          : (targetIdle?.y2 ?? 0)),
-    );
-    drawSpriteSheet(
+      displayedTarget.x2 !== 0 || displayedTarget.y2 !== 0;
+    // Creation is not transferred to hardware OAM until the following
+    // frame; live callbacks thereafter update the already-owned OAM slot in
+    // the same display pass, while destruction leaves one terminal frame.
+    const displayedBall = state.age === 55 || !displayed.sprite
+      ? null
+      : {
+          ...(view.sprite ?? displayed.sprite),
+          // OAM coordinates are transferred one frame after software
+          // sprite state, while the already-owned affine matrix is current.
+          x: displayed.sprite.x,
+          y: displayed.sprite.y,
+          ...(!view.sprite
+            ? (() => {
+                const rotation =
+                  ((displayed.sprite.localAge + 2) * 10) & 0xff;
+                const radians = rotation * 2 * Math.PI / 256;
+                const cosine = Math.trunc(256 * Math.cos(radians));
+                const sine = Math.trunc(256 * Math.sin(radians));
+                return {
+                  pa: cosine,
+                  pb: sine === 0 ? 0 : -sine,
+                  pc: sine,
+                  pd: cosine,
+                };
+              })()
+            : {}),
+        };
+    const drawShadowBall = () => {
+      if (!displayedBall) return;
+      drawSpriteSheetAffineRotate(
+        fb,
+        shadowBallArt.shadowBall.tileset,
+        shadowBallArt.shadowBall.palette,
+        displayedBall.x,
+        displayedBall.y,
+        displayedBall.pa,
+        displayedBall.pb,
+        displayedBall.pc,
+        displayedBall.pd,
+        undefined,
+        false,
+      );
+    };
+    const drawSableye = () => drawSpriteSheet(
       fb,
       sableyeSprite.tileset,
       sableyeSprite.palette,
       view.attacker.geometry.spriteCorner.x,
       view.attacker.geometry.spriteCorner.y,
     );
-    if (view.sprite) {
-      drawSpriteSheetAffineRotate(
-        fb,
-        shadowBallArt.shadowBall.tileset,
-        shadowBallArt.shadowBall.palette,
-        view.sprite.x,
-        view.sprite.y,
-        view.sprite.pa,
-        view.sprite.pb,
-        view.sprite.pc,
-        view.sprite.pd,
-        undefined,
-        false,
-      );
-    }
+    drawSpriteSheet(
+      fb,
+      onixSprite.tileset,
+      onixSprite.palette,
+      view.target.geometry.spriteCorner.x
+        + (shakeActive
+          ? displayedTarget.x2
+          : targetRest.x2),
+      view.target.geometry.spriteCorner.y
+        + (shakeActive
+          ? displayedTarget.y2
+          : targetRest.y2),
+    );
+    if (opponentToPlayer) drawSableye();
+    drawShadowBall();
+    // Source subpriority 2 keeps the projectile below the attacker sprite
+    // for player-back geometry; opponent-front OAM ordering is reversed.
+    if (playerToOpponent) drawSableye();
     const opponentSpecies = playerToOpponent ? "ONIX" : "SABLEYE";
     const playerSpecies = playerToOpponent ? "SABLEYE" : "ONIX";
     drawSendOutHealthbox(

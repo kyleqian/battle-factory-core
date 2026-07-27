@@ -123,10 +123,19 @@ export function shadowBallLoopSoundAtAge(
 }
 
 export function shadowBallTargetShakeAtAge(age: number): ShakeMon2Offset {
+  if (age < SHADOW_BALL_SHAKE_FIRST_AGE) return { x2: 0, y2: 0 };
   return shakeMon2OffsetAtTick(
     4, 0, 8, 1,
     age - SHADOW_BALL_SHAKE_FIRST_AGE + 1,
   );
+}
+
+/** OAM-to-framebuffer transfer: the initializer's +4 pose appears at age 97. */
+export function shadowBallDisplayedTargetShakeAtAge(
+  age: number,
+): ShakeMon2Offset {
+  if (age < 97) return { x2: 0, y2: 0 };
+  return shakeMon2OffsetAtTick(4, 0, 8, 1, age - 97);
 }
 
 export function shadowBallBackgroundBldy(age: number): number {

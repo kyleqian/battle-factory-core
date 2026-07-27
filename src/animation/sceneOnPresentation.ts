@@ -249,6 +249,7 @@ import {
 import {
   shadowBallBackgroundBldy,
   shadowBallBackgroundIsGhost,
+  shadowBallDisplayedTargetShakeAtAge,
   shadowBallLoopSoundAtAge,
   shadowBallSpriteAtAge,
   shadowBallTargetShakeAtAge,
@@ -898,6 +899,7 @@ export interface SceneOnShadowBallView {
   readonly backgroundBldy: number;
   readonly sprite: ShadowBallSprite | null;
   readonly targetOffset: Readonly<{ x2: number; y2: number }>;
+  readonly displayedTargetOffset: Readonly<{ x2: number; y2: number }>;
   readonly loopSound: LoopSeAdjustPanningState | null;
 }
 
@@ -1883,6 +1885,7 @@ export function sceneOnShadowBallView(
       targetCenter: state.config.target.geometry.animationCenter,
     }),
     targetOffset: shadowBallTargetShakeAtAge(state.age),
+    displayedTargetOffset: shadowBallDisplayedTargetShakeAtAge(state.age),
     loopSound: shadowBallLoopSoundAtAge(
       state.age,
       state.config.attacker.geometry.side,
