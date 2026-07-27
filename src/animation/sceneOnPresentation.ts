@@ -249,6 +249,7 @@ export interface SceneOnPresentationBattler {
     | "KADABRA"
     | "MILTANK"
     | "LOUDRED"
+    | "DUSTOX"
     | "SHUPPET"
     | "PLUSLE";
   readonly geometry: SceneOnBattlerGeometry;

@@ -910,8 +910,8 @@ const milkDrinkArt = milkDrinkAsset as {
 };
 const supersonicArt = supersonicAsset as {
   goldRing: { tileset: Tileset; palette: RgbColor[] };
-  loudredBack: { tileset: Tileset; palette: RgbColor[] };
-  loudredFront: { tileset: Tileset; palette: RgbColor[] };
+  dustoxBack: { tileset: Tileset; palette: RgbColor[] };
+  dustoxFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const MURKROW_CORNER = { x: 144, y: 19 };
 const menuHealthboxPlayer = menuHealthboxPlayerAsset as SendOutHealthboxContentAsset;
@@ -14976,13 +14976,16 @@ export function renderSceneOnMovePresentation(
     const view = sceneOnSupersonicView(state);
     // Captured OAM is transferred to the framebuffer one VBlank later.
     const displayed = sceneOnSupersonicView({ ...state, age: state.age - 1 });
+    const displayedAttackerOffset = state.age <= 0
+      ? { x2: 0, y2: 0 }
+      : displayed.attackerOffset;
     const playerToOpponent =
-      view.attacker.species === "LOUDRED"
+      view.attacker.species === "DUSTOX"
       && view.attacker.geometry.side === "player"
       && view.target.species === "ONIX"
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "LOUDRED"
+      view.attacker.species === "DUSTOX"
       && view.attacker.geometry.side === "opponent"
       && view.target.species === "ONIX"
       && view.target.geometry.side === "player";
@@ -14991,17 +14994,17 @@ export function renderSceneOnMovePresentation(
         `unsupported staged SUPERSONIC pair ${view.attacker.species}->${view.target.species}`,
       );
     }
-    const loudredSource = playerToOpponent
-      ? supersonicArt.loudredBack
-      : supersonicArt.loudredFront;
-    const loudredSprite = playerToOpponent
-      ? loudredSource
+    const dustoxSource = playerToOpponent
+      ? supersonicArt.dustoxBack
+      : supersonicArt.dustoxFront;
+    const dustoxSprite = playerToOpponent
+      ? dustoxSource
       : {
-          ...loudredSource,
+          ...dustoxSource,
           tileset: {
             columns: 8,
             rows: 8,
-            tiles: loudredSource.tileset.tiles.slice(0, 64),
+            tiles: dustoxSource.tileset.tiles.slice(0, 64),
           },
         };
     const onixSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
@@ -15011,6 +15014,29 @@ export function renderSceneOnMovePresentation(
       battleBg.static.tilemap,
       battleBg.palette,
     );
+    const drawSupersonicRings = () => {
+      // The two source sides inherit opposite persistent `sSpriteOrder`
+      // histories from their separately loaded battler chrome. Preserve
+      // that side-dependent OAM tie order for same-subpriority rings.
+      const ringPaintOrder = playerToOpponent
+        ? displayed.rings
+        : displayed.rings.toReversed();
+      for (const ring of ringPaintOrder) {
+        drawSpriteSheetAffineRotate(
+          fb,
+          supersonicArt.goldRing.tileset,
+          supersonicArt.goldRing.palette,
+          ring.x,
+          ring.y,
+          ring.xScale,
+          0,
+          0,
+          ring.yScale,
+          undefined,
+          true,
+        );
+      }
+    };
     if (playerToOpponent) {
       const idle = speciesFrontIdleRestOffset("ONIX");
       drawSpriteSheet(
@@ -15022,18 +15048,18 @@ export function renderSceneOnMovePresentation(
       );
       drawSpriteSheet(
         fb,
-        loudredSprite.tileset,
-        loudredSprite.palette,
-        view.attacker.geometry.spriteCorner.x + displayed.attackerOffset.x2,
-        view.attacker.geometry.spriteCorner.y + displayed.attackerOffset.y2,
+        dustoxSprite.tileset,
+        dustoxSprite.palette,
+        view.attacker.geometry.spriteCorner.x + displayedAttackerOffset.x2,
+        view.attacker.geometry.spriteCorner.y + displayedAttackerOffset.y2,
       );
     } else {
       drawSpriteSheet(
         fb,
-        loudredSprite.tileset,
-        loudredSprite.palette,
-        view.attacker.geometry.spriteCorner.x + displayed.attackerOffset.x2,
-        view.attacker.geometry.spriteCorner.y + displayed.attackerOffset.y2,
+        dustoxSprite.tileset,
+        dustoxSprite.palette,
+        view.attacker.geometry.spriteCorner.x + displayedAttackerOffset.x2,
+        view.attacker.geometry.spriteCorner.y + displayedAttackerOffset.y2,
       );
       drawSpriteSheet(
         fb,
@@ -15043,26 +15069,9 @@ export function renderSceneOnMovePresentation(
         view.target.geometry.spriteCorner.y,
       );
     }
-    const nonObjTarget2 = fb.slice();
-    for (const ring of displayed.rings) {
-      drawSpriteSheetAffineRotateBlendedOverFb(
-        fb,
-        nonObjTarget2,
-        supersonicArt.goldRing.tileset,
-        supersonicArt.goldRing.palette,
-        ring.x,
-        ring.y,
-        ring.xScale,
-        0,
-        0,
-        ring.yScale,
-        12,
-        8,
-        true,
-      );
-    }
-    const opponentSpecies = playerToOpponent ? "ONIX" : "LOUDRED";
-    const playerSpecies = playerToOpponent ? "LOUDRED" : "ONIX";
+    drawSupersonicRings();
+    const opponentSpecies = playerToOpponent ? "ONIX" : "DUSTOX";
+    const playerSpecies = playerToOpponent ? "DUSTOX" : "ONIX";
     drawSendOutHealthbox(
       fb,
       0,
@@ -15096,7 +15105,7 @@ export function renderSceneOnMovePresentation(
     );
     drawMessageTextLines(
       fb,
-      playerToOpponent ? "LOUDRED used" : "Foe LOUDRED used",
+      playerToOpponent ? "DUSTOX used" : "Foe DUSTOX used",
       "SUPERSONIC!",
       99,
     );

@@ -1,0 +1,13 @@
+{
+  "schema": "scene-on-portable-component/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-supersonic-opponent-loudred-player-onix.json",
+  "probe": "tools/compare/supersonicProbe.py",
+  "pair": "LOUDRED battle RAM (Factory set 144 carrier), DUSTOX opponent-front route chrome -> ONIX player-back",
+  "move": "SUPERSONIC",
+  "denseWindow": {"startFrame": 84, "endFrame": 134},
+  "appStage": {"presentationAge": 0},
+  "attacker": {"species":"DUSTOX","geometry":{"side":"opponent","spriteCorner":{"x":144,"y":13},"animationCenter":{"x":176,"y":45},"battlePositionCenter":{"x":176,"y":40}}},
+  "target": {"species":"ONIX","geometry":{"side":"player","spriteCorner":{"x":40,"y":48},"animationCenter":{"x":72,"y":88},"battlePositionCenter":{"x":72,"y":80}}},
+  "fieldProfile": {"playerHp":110,"playerMaxHp":110,"opponentHp":135,"opponentMaxHp":135,"playerGender":"male","opponentGender":"male"}
+}

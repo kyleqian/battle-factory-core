@@ -27,17 +27,17 @@ mkdirSync(dirname(out), { recursive: true });
 writeFileSync(out, `${JSON.stringify({
   source: {
     goldRing: "graphics/battle_anims/sprites/gold_ring.png; gSupersonicRingSpriteTemplate; ANIM_TAG_GOLD_RING",
-    loudredBack: "graphics/pokemon/loudred/back.png; gMonBackPic_Loudred",
-    loudredFront: "graphics/pokemon/loudred/anim_front.png; gMonFrontPic_Loudred resting frame 0",
+    dustoxBack: "graphics/pokemon/dustox/back.png; mechanicLab route chrome for the Loudred RAM override",
+    dustoxFront: "graphics/pokemon/dustox/anim_front.png; mechanicLab route chrome for the Loudred RAM override, resting frame 0",
   },
   goldRing: sprite("graphics/battle_anims/sprites/gold_ring.png"),
-  loudredBack: sprite(
-    "graphics/pokemon/loudred/back.png",
-    "graphics/pokemon/loudred/normal.pal",
+  dustoxBack: sprite(
+    "graphics/pokemon/dustox/back.png",
+    "graphics/pokemon/dustox/normal.pal",
   ),
-  loudredFront: sprite(
-    "graphics/pokemon/loudred/anim_front.png",
-    "graphics/pokemon/loudred/normal.pal",
+  dustoxFront: sprite(
+    "graphics/pokemon/dustox/anim_front.png",
+    "graphics/pokemon/dustox/normal.pal",
   ),
 })}\n`);
 console.log(`wrote ${out}`);
