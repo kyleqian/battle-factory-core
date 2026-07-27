@@ -64,6 +64,7 @@ import {
   popEnd3,
   pushCursorAndCallback,
 } from "./battleScriptCallbackStack.ts";
+import { cancelBattleScriptMultiTurnMoves } from "./battleScriptMultiTurnCancellation.ts";
 import {
   BATTLE_SCRIPT_STATUS1_SLEEP,
   BATTLE_SCRIPT_STATUS2_MASKS,
@@ -71,6 +72,8 @@ import {
   BATTLE_SCRIPT_STATUS3_LEECHSEED,
   BATTLE_SCRIPT_STATUS3_LEECHSEED_BATTLER_MASK,
   BATTLE_SCRIPT_STATUS3_ROOTED,
+  BATTLE_SCRIPT_STATUS3_YAWN,
+  BATTLE_SCRIPT_STATUS3_YAWN_TURN_1,
 } from "./battleScriptSourceConstants.ts";
 
 const POISON_TURN_DMG_LABEL = "BattleScript_PoisonTurnDmg";
@@ -79,6 +82,8 @@ const INGRAIN_TURN_HEAL_LABEL = "BattleScript_IngrainTurnHeal";
 const LEECH_SEED_TURN_DRAIN_LABEL = "BattleScript_LeechSeedTurnDrain";
 const WRAP_TURN_DMG_LABEL = "BattleScript_WrapTurnDmg";
 const WRAP_ENDS_LABEL = "BattleScript_WrapEnds";
+/** `ENDTURN_YAWN`'s own sleep-transition script (`battle_scripts_1.s:3878-3885`, docs/yawn-thrash-endturn-design.md §2) -- `BattleScriptExecute`+`end2`, no `END3`. */
+const YAWN_MAKES_ASLEEP_LABEL = "BattleScript_YawnMakesAsleep";
 /** `ItemBattleEffects(ITEMEFFECT_NORMAL, ...)`'s ten `BattleScriptExecute`+`end2` labels this registration wires (docs/endturn-abilities-items-ground-truth.md §1c/§5 slice 4). */
 const ITEM_HEAL_HP_END2_LABEL = "BattleScript_ItemHealHP_End2";
 const WHITE_HERB_END2_LABEL = "BattleScript_WhiteHerbEnd2";
@@ -143,6 +148,9 @@ const ABILITY_SPEED_BOOST = 3;
 const ABILITY_RAIN_DISH = 44;
 const ABILITY_TRUANT = 54;
 const ABILITY_SHED_SKIN = 61;
+/** include/constants/abilities.h -- `ENDTURN_YAWN`'s own AND-chain (docs/yawn-thrash-endturn-design.md §2), same ids as `JUMPIFABILITY_VALUES`'s Rung 1 widening (`battleScriptIngrainLeechSeedWrapOpcode.ts:177-178`). */
+const ABILITY_VITAL_SPIRIT = 72;
+const ABILITY_INSOMNIA = 15;
 /** battleScriptDamagingWeatherOpcode.ts's own established `WEATHER_HAS_EFFECT` precedent (Cloud Nine only; Air Lock is Rayquaza-only and Frontier-absent, docs/screens-weather-ground-truth.md §2). */
 const ABILITY_CLOUD_NINE = 13;
 /** battleScriptStatBuffs.ts's own STAT_SPEED/MAX_STAT_STAGE convention. */
@@ -587,6 +595,77 @@ function runWrapTick(
   return runTickScript(program, handlers, state, decrementedRc, battler, WRAP_ENDS_LABEL);
 }
 
+/**
+ * `ENDTURN_YAWN` (`battle_util.c:1753-1771`, docs/yawn-thrash-endturn-design.md
+ * §2) -- the counter decrements FIRST (no `hp != 0` guard, unlike Curse/Wrap:
+ * source's own case body has none, re-read directly above), then the
+ * fall-asleep AND-chain only ever runs on the SAME pass the decrement empties
+ * the counter. `ability !== VITAL_SPIRIT/INSOMNIA` reuses Rung 1's own
+ * `JUMPIFABILITY_VALUES` ids as a plain equality check (a C-side `if`, not a
+ * script opcode, here). `!UproarWakeUpCheck(gActiveBattler)` is provably
+ * always `TRUE` in this engine's reachable state space -- `STATUS2_UPROAR` is
+ * never set by any production code (confirmed by grep, doc §2) -- and is
+ * omitted rather than modeled as a call that can never observe its `FALSE`
+ * input. `CancelMultiTurnMoves` reuses the shared `cancelBattleScriptMulti
+ * TurnMoves` helper (already landed for `battleScriptActionAdmission.ts`,
+ * not new this rung). The sleep-turn draw
+ * (`STATUS1_SLEEP_TURN((Random() & 3) + 2)`) is the ONLY `Random()` call in
+ * end-turn -- zero draws on a decrement-only pass, exactly one on the
+ * transition pass, attributed to `BattleScript_YawnMakesAsleep`'s own entry
+ * instruction (the same "draw before the script starts" convention
+ * `runShedSkinTick` already established). `status1` is guaranteed zero going
+ * in (the AND-chain's own `!(status1 & STATUS1_ANY)` term), so the raw sleep-
+ * turn count IS the new `status1` value, no OR needed.
+ * `BattleScript_YawnMakesAsleep` reads `BS_EFFECT_BATTLER` for all three of
+ * its battler-selector opcodes (`statusanimation`/`updatestatusicon`/
+ * `makevisible`) -- source's own `gEffectBattler = gActiveBattler` assignment
+ * -- so `selectorRoles.effectBattler` must be set explicitly here;
+ * `enterTickBattlerContext` only ever sets the `attacker` role.
+ */
+function runYawnTick(
+  program: BattleScriptProgram,
+  handlers: Handlers,
+  state: MachineState,
+  battler: BattleScriptBattlerId,
+): TickOutcome {
+  const b = state.rulesContext.battlers[battler];
+  if ((b.status3 & BATTLE_SCRIPT_STATUS3_YAWN) === 0) {
+    return Object.freeze({ kind: "advance", state });
+  }
+
+  const decrementedStatus3 = (b.status3 - BATTLE_SCRIPT_STATUS3_YAWN_TURN_1) >>> 0;
+  const decrementedRc = withBattler(state.rulesContext, battler, { status3: decrementedStatus3 });
+
+  const yawnExpired = (decrementedStatus3 & BATTLE_SCRIPT_STATUS3_YAWN) === 0;
+  const noStatus1 = (b.status1 & STATUS1_ANY) === 0;
+  const noBlockingAbility = b.ability !== ABILITY_VITAL_SPIRIT && b.ability !== ABILITY_INSOMNIA;
+  if (!yawnExpired || !noStatus1 || !noBlockingAbility) {
+    return Object.freeze({ kind: "advance", state: Object.freeze({ ...state, rulesContext: decrementedRc }) });
+  }
+
+  const { rulesContext: canceledRc } = cancelBattleScriptMultiTurnMoves(decrementedRc, battler);
+
+  const entry = resolveBattleScriptLabel(program, YAWN_MAKES_ASLEEP_LABEL);
+  if (!entry) throw new Error(`unknown Battle Script entry label ${YAWN_MAKES_ASLEEP_LABEL}`);
+  const entryInstruction = program.instructions[entry.programCounter];
+  if (!entryInstruction) throw new Error(`Battle Script program has no instruction at ${entry.programCounter}`);
+  const { rng, randomValue } = drawBattleScriptRng(
+    state.rng,
+    entryInstruction,
+    "ENDTURN_YAWN sleep duration ((Random() & 3) + 2)",
+  );
+  const sleepTurns = (randomValue & 3) + 2;
+
+  const withStatus = withBattler(canceledRc, battler, { status1: sleepTurns });
+  const synced = Object.freeze({
+    ...withStatus,
+    party: withBattleScriptPartyMemberStatus1(withStatus.party, b.side, b.partyIndex, sleepTurns),
+    selectorRoles: Object.freeze({ ...withStatus.selectorRoles, effectBattler: battler }),
+  });
+  const drawnState: MachineState = Object.freeze({ ...state, rng });
+  return runTickScript(program, handlers, drawnState, synced, battler, YAWN_MAKES_ASLEEP_LABEL);
+}
+
 type ItemsTickOutcome =
   | TickOutcome
   | Readonly<{ kind: "case-barrier"; state: MachineState; detail: string }>;
@@ -892,16 +971,17 @@ type BattlerLoopResult =
  * CURSE, WRAP, UPROAR, THRASH, DISABLE, ENCORE, LOCK_ON, CHARGE, TAUNT,
  * YAWN, ITEMS2 -- the C switch's own textual case ordering differs from
  * this, but `turnEffectsTracker` walks the enum's integer values, not
- * source-file position). Ingrain/Leech Seed/Wrap are now fully wired
- * (docs/ingrain-leechseed-wrap-ground-truth.md §5 slices 1-3); every other
+ * source-file position). Ingrain/Leech Seed/Wrap/Yawn are now fully wired
+ * (docs/ingrain-leechseed-wrap-ground-truth.md §5 slices 1-3;
+ * docs/yawn-thrash-endturn-design.md §2 for Yawn); every other
  * reachable-but-unmodeled case gates on whatever real bit/field this engine
  * already tracks and barriers if it's ever actually set (currently never,
  * since no move/ability effect in this engine sets any of them yet) -- a
  * real, live check, not a blanket skip. Cases with no modeled trigger state
- * at all (Uproar, Encore, Charge, Yawn) are documented, permanently-inert
- * no-ops today; Lock-On is skipped per the doc's own dead-for-Factory
- * finding (B15); Abilities/Items1/Items2 are pure-C breadth explicitly out
- * of this doc's scope (B2/B3/B19).
+ * at all (Uproar, Encore, Charge) are documented, permanently-inert no-ops
+ * today; Lock-On is skipped per the doc's own dead-for-Factory finding
+ * (B15); Abilities/Items1/Items2 are pure-C breadth explicitly out of this
+ * doc's scope (B2/B3/B19).
  */
 function runDoBattlerEndTurnEffects(
   program: BattleScriptProgram,
@@ -988,7 +1068,12 @@ function runDoBattlerEndTurnEffects(
     if (b2.tauntTimer !== 0) {
       return Object.freeze({ kind: "case-barrier", state, caseName: "ENDTURN_TAUNT", detail: "tauntTimer set but its decrement/BattleScript_EncoredNoMore-sibling clear is not wired" });
     }
-    // ENDTURN_YAWN: no modeled yawn counter -- inert no-op today (doc B18; also the only Random() draw in the whole end-turn phase, deferred with it).
+    const yawn = applyTickOutcome(runYawnTick(program, handlers, state, battler));
+    if (yawn.kind === "opcode-barrier") {
+      return Object.freeze({ kind: "opcode-barrier", state: yawn.state, instruction: yawn.instruction });
+    }
+    if (yawn.kind === "outcome-decided") return Object.freeze({ kind: "outcome-decided", state: yawn.state });
+    state = yawn.state;
     // ENDTURN_ITEMS2: pure-C item breadth, explicitly out of scope (doc B3/B19) -- no-op.
   }
   return Object.freeze({ kind: "clean", state });

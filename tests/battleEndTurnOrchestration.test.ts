@@ -54,6 +54,13 @@ const STATUS1_SLEEP_3_TURNS = 3;
 const STAT_ATK = 1;
 const STAT_SPEED = 3;
 const STAT_SPATK = 4;
+/** include/constants/battle.h:168-169 -- STATUS3_YAWN's 2-bit turn counter (bits 11-12), docs/yawn-thrash-endturn-design.md §2. */
+const STATUS3_YAWN_MASK = (1 << 11) | (1 << 12);
+const STATUS3_YAWN_TURN_1 = (1 << 11) & STATUS3_YAWN_MASK;
+const STATUS3_YAWN_TURN_2 = (2 << 11) & STATUS3_YAWN_MASK;
+/** include/constants/abilities.h -- same ids as Rung 1's `JUMPIFABILITY_VALUES` widening. */
+const ABILITY_VITAL_SPIRIT = 72;
+const ABILITY_INSOMNIA = 15;
 
 function battler(changes: Partial<BattleScriptRulesBattler> & { maxHP?: number } = {}): BattleScriptRulesBattler {
   return Object.freeze({
@@ -471,6 +478,123 @@ describe("runBattleEndTurnOrchestration (BattleTurnPassed equivalent)", () => {
     expect(result.state.rulesContext.battlers[1]!.status2 & STATUS2_WRAPPED_MASK).toBe(0);
     expect(result.state.rulesContext.battlers[1]!.hp).toBe(170); // unchanged -- release deals no damage
     expect(result.state.rng.calls).toBe(initial.rng.calls);
+  });
+
+  describe("ENDTURN_YAWN (battle_util.c:1753-1771, docs/yawn-thrash-endturn-design.md §2)", () => {
+    it("first end-turn pass only decrements the counter (TURN(2) -> TURN(1)), no sleep transition, zero RNG", () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0 }),
+          battler({ side: 1, status3: STATUS3_YAWN_TURN_2, partyIndex: 2 }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+      const initial = scratchState(rc, 1);
+      const result = runBattleEndTurnOrchestration(program, handlers, initial);
+      expect(result.kind).toBe("next-turn");
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      expect(result.state.rulesContext.battlers[1]!.status3 & STATUS3_YAWN_MASK).toBe(STATUS3_YAWN_TURN_1);
+      expect(result.state.rulesContext.battlers[1]!.status1).toBe(0);
+      expect(result.state.rng.calls).toBe(initial.rng.calls);
+    });
+
+    it("second end-turn pass empties the counter and fires the real sleep transition: status1 sleep-turn write, cancelMultiTurnMoves, exactly 1 RNG draw (seed 919694434 -> (randomValue&3)+2 == 3)", () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0 }),
+          battler({ side: 1, status3: STATUS3_YAWN_TURN_1, partyIndex: 2 }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+      const initial = scratchState(rc, 1);
+      const result = runBattleEndTurnOrchestration(program, handlers, initial);
+      expect(result.kind).toBe("next-turn");
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      expect(result.state.rulesContext.battlers[1]!.status3 & STATUS3_YAWN_MASK).toBe(0);
+      expect(result.state.rulesContext.battlers[1]!.status1).toBe(3); // STATUS1_SLEEP_TURN(3), 2-5 turn range
+      expect(result.state.rulesContext.party.opponent[2]!.status1).toBe(3);
+      expect(result.state.rng.calls).toBe(initial.rng.calls + 1);
+    });
+
+    it("does not transition when status1 is already set (statused-target AND-chain blocker) -- still decrements to zero", () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0 }),
+          battler({ side: 1, status3: STATUS3_YAWN_TURN_1, status1: STATUS1_BURN, partyIndex: 2 }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+      const initial = scratchState(rc, 1);
+      const result = runBattleEndTurnOrchestration(program, handlers, initial);
+      expect(result.kind).toBe("next-turn");
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      expect(result.state.rulesContext.battlers[1]!.status3 & STATUS3_YAWN_MASK).toBe(0);
+      expect(result.state.rulesContext.battlers[1]!.status1).toBe(STATUS1_BURN); // unchanged, not overwritten by sleep
+      expect(result.state.rng.calls).toBe(initial.rng.calls);
+    });
+
+    it("does not transition when the target has Vital Spirit (AND-chain blocker)", () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0 }),
+          battler({ side: 1, status3: STATUS3_YAWN_TURN_1, ability: ABILITY_VITAL_SPIRIT, partyIndex: 2 }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+      const initial = scratchState(rc, 1);
+      const result = runBattleEndTurnOrchestration(program, handlers, initial);
+      expect(result.kind).toBe("next-turn");
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      expect(result.state.rulesContext.battlers[1]!.status3 & STATUS3_YAWN_MASK).toBe(0);
+      expect(result.state.rulesContext.battlers[1]!.status1).toBe(0);
+      expect(result.state.rng.calls).toBe(initial.rng.calls);
+    });
+
+    it("does not transition when the target has Insomnia (AND-chain blocker)", () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0 }),
+          battler({ side: 1, status3: STATUS3_YAWN_TURN_1, ability: ABILITY_INSOMNIA, partyIndex: 2 }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+      const initial = scratchState(rc, 1);
+      const result = runBattleEndTurnOrchestration(program, handlers, initial);
+      expect(result.kind).toBe("next-turn");
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      expect(result.state.rulesContext.battlers[1]!.status3 & STATUS3_YAWN_MASK).toBe(0);
+      expect(result.state.rulesContext.battlers[1]!.status1).toBe(0);
+      expect(result.state.rng.calls).toBe(initial.rng.calls);
+    });
+
+    it("no yawn counter set at all: pure no-op, zero RNG", () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0 }),
+          battler({ side: 1, partyIndex: 2 }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+      const initial = scratchState(rc, 1);
+      const result = runBattleEndTurnOrchestration(program, handlers, initial);
+      expect(result.kind).toBe("next-turn");
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      expect(result.state.rulesContext.battlers[1]!.status3).toBe(0);
+      expect(result.state.rulesContext.battlers[1]!.status1).toBe(0);
+      expect(result.state.rng.calls).toBe(initial.rng.calls);
+    });
   });
 
   describe(
