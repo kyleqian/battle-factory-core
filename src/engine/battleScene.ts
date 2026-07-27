@@ -15563,13 +15563,13 @@ export function renderSceneOnMovePresentation(
     drawSpriteSheet(
       fb,
       attackerSprite.tileset,
-      displayed.attackerGrayscale
+      state.age >= 2 && displayed.attackerGrayscale
         ? grayscalePalette(attackerSprite.palette)
         : attackerSprite.palette,
       view.attacker.geometry.spriteCorner.x,
       view.attacker.geometry.spriteCorner.y,
     );
-    if (displayed.metalBgLoaded) {
+    if (state.age >= 2 && displayed.metalBgLoaded) {
       drawMetallicShineMasked(
         fb,
         attackerSprite,

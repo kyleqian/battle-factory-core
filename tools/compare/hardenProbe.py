@@ -56,6 +56,7 @@ def main() -> None:
         active = [slot for slot in range(64) if oracle.read_u8(sprites+slot*0x44+0x3e)&1]
         rows.append({"frame":frame,"sha256":hashlib.sha256(rgb).hexdigest(),
           "attacker":snap["engine"]["activeBattler"],"bg1X":s16(bg1_x),"bg1Y":s16(bg1_y),
+          "player":snap["battlers"]["player"],"opponent":snap["battlers"]["opponent"],
           "registers":{name:u16(addr) for name,addr in {
             "DISPCNT":0x4000000,"BG1CNT":0x400000a,"BG1HOFS":0x4000014,"BG1VOFS":0x4000016,
             "WIN0H":0x4000040,"WIN0V":0x4000044,"WININ":0x4000048,"WINOUT":0x400004a,
@@ -64,6 +65,7 @@ def main() -> None:
           "activeSprites":[sprite(i) for i in active],
           "fadedPalette":[u16(faded+i*2) for i in range(256)],
           "unfadedPalette":[u16(unfaded+i*2) for i in range(256)],
+          "hardwarePalette":[u16(0x5000000+i*2) for i in range(512)],
           "hardwareOam":block(0x7000000,0x400).hex(),
           "bgVramSha256":hashlib.sha256(block(0x6000000,0x10000)).hexdigest()})
     frame = 0
