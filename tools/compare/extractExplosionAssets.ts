@@ -29,9 +29,9 @@ mkdirSync(dirname(out), { recursive: true });
 writeFileSync(out, `${JSON.stringify({
   source: {
     glalieBack:
-      "graphics/pokemon/glalie/back.png; FRONTIER_MON_GLALIE_4 set 495",
+      "graphics/pokemon/glalie/back.png; FRONTIER_MON_GLALIE_2 set 495",
     glalieFront:
-      "graphics/pokemon/glalie/anim_front.png frame 0; FRONTIER_MON_GLALIE_4 set 495",
+      "graphics/pokemon/glalie/anim_front.png frame 0; FRONTIER_MON_GLALIE_2 set 495",
   },
   glalieBack: sprite(
     "graphics/pokemon/glalie/back.png",
