@@ -15,6 +15,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 518 — [SUPERVISOR ORIENT 2026-07-27 ~14:30] animation-main folded (SWAGGER + SELF_DESTRUCT exact); round 1 dispatched
+
+- **State:** master green at **3520 tests** (fold merge `b1f86cd`),
+  `npm run build` clean, oracle services fresh (both profiles PASS). Folded
+  6 animation commits (tip `3dcf03c`): SWAGGER and SELF_DESTRUCT promoted
+  exact — animation coverage now **45/276 exact, 3 partial**. The animation
+  supervisor's own session wound down clean (no worker branches or stale
+  worktrees on their side).
+- **Round 1 (dispatched):** main → top-2 ranked census sets
+  `B_SCR_OP_TRYINFATUATING` (EFFECT_ATTRACT, 45 weighted) +
+  `B_SCR_OP_JUMPIFCONFUSEDANDSTATMAXED` (EFFECT_SWAGGER + EFFECT_FLATTER,
+  25 weighted) ∥ side → §13 presentation prep-scout (scout picks the next
+  window by §10's smallest-input-surface method; the §12.3-step-3
+  apostrophe-charmap residual is documented context, not fixed there).
+- **Next:** verify round 1; continue ranked-table descent + seam cadence;
+  §24.5 sites 6/7 + §19.5 sites 3-6 recipe-only breadth remain optional.
+
+---
 ## 517 — [SUPERVISOR WIND-DOWN 2026-07-27 ~14:00] session complete: 7 rounds / 14 workers, all verified and merged
 
 - **State (final):** tree committed and green at **263 files / 3512 tests**
@@ -133,31 +151,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   in a small follow-up commit with no behavior change. Worth double-checking
   `git status` is clean immediately after any `tsc`-driven fix, not just
   before the final wrap-up.
-
----
-## 515 — [SUPERVISOR 2026-07-27 ~13:20] round 6 verified + merged; ISSUES #47 CLOSED and deleted; final round dispatched
-
-- **State:** master green at **252 files / 3446 tests**, build clean, census
-  **100/214 effects, 201/355 moves, 162/276 Factory-L50, 2206/2957 weighted
-  (74.6%)**. Round 6 landed: NEGATIVEDAMAGE + TRYSETREST (entry 513) ∥ §12
-  wiring (entry 514; supervisor reran compares live: turn6-featherdance
-  90/90, turn5-faint 110/110) ∥ side §27.5 (merged from
-  `worker/side-20260727-120806`, cleaned; verify script rerun in-worktree
-  ALL PASS): AI_CV_RainDance live-verified as a writes-conditionally
-  PREDECESSOR in a controlled A/B pair — **shipped model CONFIRMED both
-  directions**.
-- **ISSUES #47 deleted (supervisor decision, this commit):** the engine's
-  per-slot funcResult value model is implemented for all 22 CV handlers
-  (entry 511) and live-validated across all three write classes — 
-  writes-never, writes-always (§27.4), and writes-conditionally (§27.5) — 
-  5 dedicated fixtures + 2 net-score reproductions, zero contradictions.
-  The 6 conditional predecessors not individually staged are recorded in
-  §27.5 as optional validation breadth with the exact recipe, not open
-  debt.
-- **Final round (dispatched, shortened caps):** main → next census set
-  `B_SCR_OP_JUMPIFSTAT`+`PLAYSTATCHANGEANIMATION` (5 effects, 45 weighted,
-  entry 513's handoff) ∥ side → §24.5 recipe-only relay sites 5/6/7 (as
-  many as fit).
-- **Next:** verify final round, wind-down (deadline 15:28): animation-main
-  fold check, final union verify, session summary.
-
