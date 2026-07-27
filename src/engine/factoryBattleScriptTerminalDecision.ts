@@ -179,6 +179,7 @@ function emptyBattler(side: 0 | 1): BattleScriptRulesBattlerState {
     flag2Unknown: 0,
     chargingTurn: 0,
     protected: 0,
+    protectUses: 0,
     ppNotAffectedByPressure: 0,
     protectPhysicalDmg: 0,
     protectPhysicalBattlerId: 0,

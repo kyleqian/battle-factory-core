@@ -237,6 +237,15 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // singles -- its one named barrier, reachability-tested in
   // tests/battleScriptTargetIterationOpcode.test.ts.
   ["src/engine/battleScriptTargetIterationOpcode.ts", 1],
+  // B_SCR_OP_SETPROTECTLIKE registration (EFFECT_PROTECT/EFFECT_ENDURE, the
+  // census's next-ranked blocker after EFFECT_EARTHQUAKE): Cmd_setprotectlike
+  // has exactly one real branch this engine cannot source-model --
+  // sProtectSuccessRates[protectUses] indexes one past its own 4-entry table
+  // once protectUses reaches 4 (four consecutive successful Protects), which
+  // reads whatever ROM byte follows the const array on real hardware. Named
+  // (b) barrier, reachability-tested in
+  // tests/battleScriptProtectlikeOpcode.test.ts.
+  ["src/engine/battleScriptProtectlikeOpcode.ts", 1],
 ]);
 
 function recordingImportsIn(file: string): string[] {

@@ -52,6 +52,7 @@ function battler(
     flag2Unknown: changes.flag2Unknown ?? 0,
     chargingTurn: changes.chargingTurn ?? 0,
     protected: changes.protected ?? 0,
+    protectUses: changes.protectUses ?? 0,
     ppNotAffectedByPressure: changes.ppNotAffectedByPressure ?? 0,
     protectPhysicalDmg: changes.protectPhysicalDmg ?? 0,
     protectPhysicalBattlerId: changes.protectPhysicalBattlerId ?? 0,

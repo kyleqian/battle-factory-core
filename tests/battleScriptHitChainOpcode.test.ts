@@ -2779,6 +2779,7 @@ describe("production cleareffectsonfaint (Cmd_cleareffectsonfaint) dispatch", ()
           rechargeTimer: 1,
           disabledMove: 12,
           protected: 1,
+          protectUses: 3,
         },
       );
       const { result } = stepAtProgramCounter(cleareffectsonfaintTargetPc, rc);
@@ -2794,6 +2795,10 @@ describe("production cleareffectsonfaint (Cmd_cleareffectsonfaint) dispatch", ()
       expect(target.rechargeTimer).toBe(0);
       expect(target.disabledMove).toBe(0);
       expect(target.protected).toBe(0);
+      // FaintClearSetData's DisableStruct::protectUses zero -- a real write now that
+      // battleScriptProtectlikeOpcode.ts's own field exists (previously a no-op, see
+      // that file's history: this field simply didn't exist on the engine's battler state).
+      expect(target.protectUses).toBe(0);
       expect(result.state.rulesContext.moveHistory.lastHitBy[1]).toBe(0xff);
       expect(result.state.events).toEqual([
         expect.objectContaining({ kind: "set-battler-status-data", battler: 1, status1: 0 }),

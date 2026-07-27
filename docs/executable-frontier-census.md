@@ -4,16 +4,16 @@ Generated 2026-07-27. Rerun: `npx tsx tools/report/executable-frontier-census.ts
 
 Answers ROADMAP S10's Executable-frontier reset question directly: not "how many opcodes are registered" but **how many of the 355 moves can the kernel execute end-to-end today, and what exactly blocks each of the rest.** Every `BattleScript_Effect*` entry in the committed topology (`src/data/gen/battle-script-topology.json` + `battle-script-graph.json`) is walked for full opcode reachability (branches, goto/call targets, the shared hit-chain tail) against the opcode set the engine currently registers (read live from `src/engine/battleScriptRulesContext.ts`'s `createBattleScriptStatusRulesHandlers`, so this doc cannot drift from what the engine actually installs).
 
-**Key finding:** the single highest-leverage next registration is `B_SCR_OP_SETPROTECTLIKE` -- registering exactly that set would flip **2 effects / 3 moves (3 Factory-L50, 61 weighted)** from blocked to executable in one step (EFFECT_PROTECT, EFFECT_ENDURE) -- the largest single entry in the ranked table below. This paragraph is generated fresh from the current registered-opcode set every run, so it always names today's actual top blocker, not a past one -- see PROGRESS.md for the registration history (e.g. the 2026-07-25 B_SCR_OP_JUMPIFHALFWORD/JUMPIFSTATUS3CONDITION/ORWORD entry-chokepoint trio).
+**Key finding:** the single highest-leverage next registration is `B_SCR_OP_NEGATIVEDAMAGE` -- registering exactly that set would flip **2 effects / 5 moves (4 Factory-L50, 49 weighted)** from blocked to executable in one step (EFFECT_ABSORB, EFFECT_DREAM_EATER) -- the largest single entry in the ranked table below. This paragraph is generated fresh from the current registered-opcode set every run, so it always names today's actual top blocker, not a past one -- see PROGRESS.md for the registration history (e.g. the 2026-07-25 B_SCR_OP_JUMPIFHALFWORD/JUMPIFSTATUS3CONDITION/ORWORD entry-chokepoint trio).
 
 ## Headline counts
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 95 | 214 | 44.4% |
-| Moves (unweighted, all 355) | 192 | 355 | 54.1% |
-| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 154 | 276 | 55.8% |
-| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2047 | 2957 | 69.2% |
+| Effect scripts | 97 | 214 | 45.3% |
+| Moves (unweighted, all 355) | 195 | 355 | 54.9% |
+| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 157 | 276 | 56.9% |
+| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2108 | 2957 | 71.3% |
 
 "Executable" means every opcode on every statically reachable path from the effect's entry script has a dispatch entry today (registered barriers included, per ROADMAP S10 §1's (a)/(b) policy). It is not a semantic-correctness claim -- see Caveats.
 
@@ -23,7 +23,6 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 
 | Missing opcode(s) | Effects unlocked | Moves unlocked (unweighted) | Factory-L50 moves (unweighted) | Factory-L50 weighted |
 | --- | --- | --- | --- | --- |
-| `B_SCR_OP_SETPROTECTLIKE` | 2 (EFFECT_PROTECT, EFFECT_ENDURE) | 3 | 3 | 61 |
 | `B_SCR_OP_NEGATIVEDAMAGE` | 2 (EFFECT_ABSORB, EFFECT_DREAM_EATER) | 5 | 4 | 49 |
 | `B_SCR_OP_TRYSETREST` | 1 (EFFECT_REST) | 1 | 1 | 49 |
 | `B_SCR_OP_JUMPIFSTAT`, `B_SCR_OP_PLAYSTATCHANGEANIMATION` | 5 (EFFECT_TICKLE, EFFECT_COSMIC_POWER, EFFECT_BULK_UP, EFFECT_CALM_MIND, EFFECT_DRAGON_DANCE) | 5 | 5 | 45 |
@@ -48,6 +47,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_SETSUBSTITUTE` | 1 (EFFECT_SUBSTITUTE) | 1 | 1 | 10 |
 | `B_SCR_OP_TRYCHOOSESLEEPTALKMOVE` | 1 (EFFECT_SLEEP_TALK) | 1 | 1 | 8 |
 | `B_SCR_OP_TRYWISH` | 1 (EFFECT_WISH) | 1 | 1 | 8 |
+| `B_SCR_OP_ROLLOUTDAMAGECALCULATION` | 1 (EFFECT_ROLLOUT) | 2 | 2 | 7 |
 
 ## Per-effect detail
 
@@ -164,12 +164,12 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_MINIMIZE | `BattleScript_EffectMinimize` | blocked-on-opcodes | `B_SCR_OP_SETMINIMIZE` (main path) | - | 1 | 1 (5) |
 | EFFECT_CURSE | `BattleScript_EffectCurse` | blocked-on-opcodes | `B_SCR_OP_JUMPIFTYPE2`, `B_SCR_OP_JUMPIFSTAT`, `B_SCR_OP_CURSETARGET` (main path) | - | 1 | 1 (18) |
 | EFFECT_UNUSED_6E | `BattleScript_EffectHit` | executable | - | - | 0 | 0 (0) |
-| EFFECT_PROTECT | `BattleScript_EffectProtect` | blocked-on-opcodes | `B_SCR_OP_SETPROTECTLIKE` (main path) | - | 2 | 2 (37) |
+| EFFECT_PROTECT | `BattleScript_EffectProtect` | executable | - | - | 2 | 2 (37) |
 | EFFECT_SPIKES | `BattleScript_EffectSpikes` | blocked-on-opcodes | `B_SCR_OP_TRYSETSPIKES` (main path) | - | 1 | 1 (3) |
 | EFFECT_FORESIGHT | `BattleScript_EffectForesight` | blocked-on-opcodes | `B_SCR_OP_SETFORESIGHT` (main path) | - | 2 | 1 (3) |
 | EFFECT_PERISH_SONG | `BattleScript_EffectPerishSong` | blocked-on-opcodes | `B_SCR_OP_TRYSETPERISHSONG` (main path) | Cmd_jumpifability: ABILITY_SOUNDPROOF is outside the engine's widened ability set (battleScriptIngrainLeechSeedWrapOpcode.ts) -- battle_script_commands.c:3105 | 1 | 1 (4) |
 | EFFECT_SANDSTORM | `BattleScript_EffectSandstorm` | executable | - | - | 1 | 1 (14) |
-| EFFECT_ENDURE | `BattleScript_EffectEndure` | blocked-on-opcodes | `B_SCR_OP_SETPROTECTLIKE` (main path) | - | 1 | 1 (24) |
+| EFFECT_ENDURE | `BattleScript_EffectEndure` | executable | - | - | 1 | 1 (24) |
 | EFFECT_ROLLOUT | `BattleScript_EffectRollout` | blocked-on-opcodes | `B_SCR_OP_ROLLOUTDAMAGECALCULATION` (edge branch only) | - | 2 | 2 (7) |
 | EFFECT_SWAGGER | `BattleScript_EffectSwagger` | blocked-on-opcodes | `B_SCR_OP_JUMPIFCONFUSEDANDSTATMAXED` (edge branch only) | - | 1 | 1 (23) |
 | EFFECT_FURY_CUTTER | `BattleScript_EffectFuryCutter` | blocked-on-opcodes | `B_SCR_OP_FURYCUTTERCALC` (main path) | - | 1 | 1 (5) |

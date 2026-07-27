@@ -41,6 +41,7 @@ import { createBattleScriptStatusPrimaryOpcodeHandlers } from "./battleScriptSta
 import { createBattleScriptSetyawnOpcodeHandlers } from "./battleScriptSetyawnOpcode.ts";
 import { createBattleScriptConfuseifrepeatingattackendsOpcodeHandlers } from "./battleScriptConfuseifrepeatingattackendsOpcode.ts";
 import { createBattleScriptTargetIterationOpcodeHandlers } from "./battleScriptTargetIterationOpcode.ts";
+import { createBattleScriptProtectlikeOpcodeHandlers } from "./battleScriptProtectlikeOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -189,6 +190,8 @@ type BattleScriptMoveEndBattlerMetadata = Readonly<{
   flag2Unknown: 0 | 1;
   /** ProtectStruct::protected (this battler used Protect/Detect this turn). */
   protected: 0 | 1;
+  /** DisableStruct::protectUses (Cmd_setprotectlike's success-rate index/streak counter). */
+  protectUses: number;
   /** SpecialStatus::ppNotAffectedByPressure. */
   ppNotAffectedByPressure: 0 | 1;
   /** ProtectStruct::physicalDmg -- Counter's own retaliation-amount input (distinct from SpecialStatus::physicalDmg, specialStatus.physicalDmg above; see docs/counter-retaliation-design.md §1.2 for why these cannot share a field). */
@@ -293,6 +296,7 @@ export type BattleScriptRulesBattler = BattleScriptRulesBattlerBase & Readonly<{
   targetNotAffected?: 0 | 1;
   flag2Unknown?: 0 | 1;
   protected?: 0 | 1;
+  protectUses?: number;
   ppNotAffectedByPressure?: 0 | 1;
   protectPhysicalDmg?: number;
   protectPhysicalBattlerId?: BattleScriptBattlerId;
@@ -1752,6 +1756,11 @@ export function createBattleScriptRulesContext(
       1,
       `battlers[${index}].protected`,
     ) as 0 | 1,
+    protectUses: requireUnsigned(
+      battler.protectUses ?? 0,
+      0xff,
+      `battlers[${index}].protectUses`,
+    ),
     ppNotAffectedByPressure: requireUnsigned(
       battler.ppNotAffectedByPressure ?? 0,
       1,
@@ -2176,6 +2185,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptSetyawnOpcodeHandlers(program),
     ...createBattleScriptConfuseifrepeatingattackendsOpcodeHandlers(program),
     ...createBattleScriptTargetIterationOpcodeHandlers(program),
+    ...createBattleScriptProtectlikeOpcodeHandlers(program),
   });
 }
 

@@ -337,6 +337,12 @@ const PRINTFROMTABLE_TABLES: Readonly<Record<string, readonly string[]>> = Objec
     "STRINGID_PKMNSAPPEDBYLEECHSEED",
     "STRINGID_ITSUCKEDLIQUIDOOZE",
   ]),
+  /** battle_message.c:943-947 -- BattleScript_EffectProtect/_EffectEndure's own table (Cmd_setprotectlike, battleScriptProtectlikeOpcode.ts), B_MSG_PROTECTED_ITSELF(0)/BRACED_ITSELF(1)/PROTECT_FAILED(2). */
+  gProtectLikeUsedStringIds: Object.freeze([
+    "STRINGID_PKMNPROTECTEDITSELF2",
+    "STRINGID_PKMNBRACEDITSELF",
+    "STRINGID_BUTITFAILED",
+  ]),
   /** battle_message.c:1038-1045 -- indexed by the move's own position in gTrappingMoves, not MULTISTRING_CHOOSER's usual small enum. */
   gWrappedStringIds: Object.freeze([
     "STRINGID_PKMNSQUEEZEDBYBIND",
@@ -3228,9 +3234,11 @@ function replaceAt<T extends readonly number[]>(values: T, index: number, value:
  * `gDisableStructs[].battlerPreventingEscape` identity this engine does not
  * model, so it stays a named (b) barrier gated on its own bit actually being
  * set on some other battler (never true for a plain damaging-move KO, so
- * unreached on this rung's own scenario). The remaining struct-wide DisableStruct/ProtectStruct
+ * unreached on this rung's own scenario). `protectUses` is now a real write
+ * (`battleScriptProtectlikeOpcode.ts`'s own field), tested below. The
+ * remaining struct-wide DisableStruct/ProtectStruct
  * fields FaintClearSetData zeroes (transformedMonPersonality, encoredMove*,
- * protectUses, stockpileCounter, disableTimer*, perishSongTimer*,
+ * stockpileCounter, disableTimer*, perishSongTimer*,
  * chargeTimer*, battlerWithSureHit, isFirstTurn, truantSwitchInHack,
  * mimickedMoves, ProtectStruct's noValidMoves/fleeType/physicalDmg/
  * specialDmg/physicalBattlerId/specialBattlerId), gActionSelectionCursor/
@@ -3310,6 +3318,7 @@ function createCleareffectsonfaintOpcodeHandler(
           targetNotAffected: 0 as const,
           flag2Unknown: 0 as const,
           protected: 0 as const,
+          protectUses: 0,
         });
       }
       // FaintClearSetData (battle_main.c:3281): other battlers wrapped BY the
