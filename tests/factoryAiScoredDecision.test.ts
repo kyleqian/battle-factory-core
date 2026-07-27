@@ -1187,25 +1187,29 @@ const MOVE_DRAGON_RAGE_LAST = 82; // Dragon, NOT in the list
 // numbers against this exact matchup), same "construct the decisive
 // post-turn-1 state" precedent as every block above.
 //
-// Draw-count reconciliation (per this step's brief): the doc's own live
-// ledger (§18.4) shows 6 (seed 1) / 5 (seed 99) total Cmd_if_random_less_than
-// calls for BOTH physical-list fixtures (Vital Throw, Seismic Toss) --
-// explicitly NOT the "N identical slots x 1 draw" pattern every other
-// handler in this doc produces, and the doc itself says outright it could
-// not identify the extra 1-2 draws' source ("This session did not
-// single-step the flagged frame", §18.4). This port's own branch-by-branch
-// derivation from the SAME cited assembly (§18.1) is unambiguous: 4
-// identical MOVE_HARDEN slots, each independently reaching Gate E (power
-// != 0) then Gate F (type in the physical list) then DRAW SITE 4 exactly
-// once, deterministically (no loop, no conditional redraw within a single
-// slot's evaluation) -- so the handler's own contribution is EXACTLY 4, not
-// 5-6. Reconciled: this port's ported logic is provably correct against the
-// cited assembly (verified below); the doc's raw 5-6 must come from
-// something outside AI_CV_DefenseUp's own body that its own session did not
-// isolate (the doc's own attribution table lumped it into the
-// Cmd_if_random_less_than bucket, so it is a real, uncredited extra draw
-// somewhere in the real ROM's frame window, not a flaw in this derivation) --
-// left exactly as open as the doc itself left it, not silently resolved.
+// Draw-count reconciliation (per docs/factory-ai-draw-discrepancy-probe.md,
+// which supersedes this comment's own prior "EXACTLY 4" claim): the doc's
+// own live ledger (§18.4) showed 5-6 total Cmd_if_random_less_than calls for
+// the physical-list fixtures, which an earlier session here could not
+// reconcile against a naive "4 identical slots x 1 draw" derivation and left
+// as an open, unattributed extra. The probe doc's own live single-step
+// instrumentation (its §3.1/§3.2, watching gAIScriptPtr itself, not just the
+// shared C-level return address) positively identified the missing site:
+// DRAW SITE 4's own failure (roll >= 60) falls straight through into DRAW
+// SITE 5's own instruction with no gate between them (probe doc §4, raw ROM
+// byte offsets) -- so each of the 4 identical slots draws once (pass, stops)
+// or TWICE (fails at site 4, chains into site 5), not always once. Fixed
+// below (`runCvDefenseUp`'s own DRAW SITE 4/5 chain) and confirmed here: this
+// exact fixture (seed 1, Vital Throw and Seismic Toss both) now reproduces 7
+// check-viability draws -- slot 1 fail@4+fail@5 (2 draws, -2), slot 2
+// fail@4+fail@5 (2 draws, -2), slot 3 pass@4 (1 draw, no penalty), slot 4
+// fail@4+pass@5 (2 draws, no penalty) -- squarely inside the fixed model's
+// own [4,8]-draw range (4 slots x 1-or-2 draws each), not the old buggy
+// model's fixed-4. This test's own seed/ordinal position is NOT the live
+// ROM's own RNG stream, so its 7 does not need to equal the doc's raw 5-6
+// number-for-number; what's reconciled is the MECHANISM (chained, variable
+// per-slot draw count) that the old "always 4" derivation and the old port
+// both missed.
 describe("AI_CV_DefenseUp mask-7 fixture reproduction (docs/factory-ai-checkviability-ground-truth.md §18.3/§18.4)", () => {
   const MOVE_DEFENSE_UP_MOVESET = [
     MOVE_HARDEN_DEFENSE_UP, MOVE_HARDEN_DEFENSE_UP, MOVE_HARDEN_DEFENSE_UP, MOVE_HARDEN_DEFENSE_UP,
@@ -1247,22 +1251,37 @@ describe("AI_CV_DefenseUp mask-7 fixture reproduction (docs/factory-ai-checkviab
     return result.trace.draws.filter((d) => "phase" in d && d.phase === phase);
   }
 
-  it("physical fixture #1 (Vital Throw, doc's own 55/120 = 45.8% HP figure): exactly 4 check-viability draws (DRAW SITE 4, one per identical Harden slot), zero CBM/TryToFaint draws", () => {
+  it("physical fixture #1 (Vital Throw, doc's own 55/120 = 45.8% HP figure): 7 check-viability draws -- DRAW SITE 4 chains into DRAW SITE 5 whenever the first roll fails, zero CBM/TryToFaint draws", () => {
     const view = defenseUpView(anorithAttacker(55), machampTarget(MOVE_VITAL_THROW_LAST));
     const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 1, calls: 0 } });
     expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
     expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
     const cvDraws = phaseDraws(result, "check-viability");
-    expect(cvDraws).toHaveLength(4);
-    expect(cvDraws.every((d) => "kind" in d && d.kind === "defense-up-roll-4")).toBe(true);
+    // slot 1: fail@4+fail@5 (-2); slot 2: fail@4+fail@5 (-2); slot 3: pass@4
+    // (no penalty); slot 4: fail@4+pass@5 (no penalty). 2+2+1+2 = 7 draws.
+    expect(cvDraws.map((d) => ("kind" in d ? d.kind : null))).toEqual([
+      "defense-up-roll-4", "defense-up-roll-5",
+      "defense-up-roll-4", "defense-up-roll-5",
+      "defense-up-roll-4",
+      "defense-up-roll-4", "defense-up-roll-5",
+    ]);
+    expect(cvDraws.map((d) => ("succeeded" in d ? d.succeeded : null))).toEqual([
+      true, true, true, true, false, true, false,
+    ]);
+    expect(result.trace.draws).toHaveLength(4 /* setup */ + 7 /* check-viability */ + 1 /* tie */);
   });
 
-  it("physical fixture #2 (Seismic Toss, doc's own 70/120 = 58.3% HP figure): exactly 4 check-viability draws, same code path as Vital Throw", () => {
+  it("physical fixture #2 (Seismic Toss, doc's own 70/120 = 58.3% HP figure): identical 7-draw chain, same code path as Vital Throw", () => {
     const view = defenseUpView(anorithAttacker(70), machampTarget(MOVE_SEISMIC_TOSS_LAST));
     const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 1, calls: 0 } });
     const cvDraws = phaseDraws(result, "check-viability");
-    expect(cvDraws).toHaveLength(4);
-    expect(cvDraws.every((d) => "kind" in d && d.kind === "defense-up-roll-4")).toBe(true);
+    expect(cvDraws.map((d) => ("kind" in d ? d.kind : null))).toEqual([
+      "defense-up-roll-4", "defense-up-roll-5",
+      "defense-up-roll-4", "defense-up-roll-5",
+      "defense-up-roll-4",
+      "defense-up-roll-4", "defense-up-roll-5",
+    ]);
+    expect(result.trace.draws).toHaveLength(4 /* setup */ + 7 /* check-viability */ + 1 /* tie */);
   });
 
   it("non-physical flip (Dragon Rage, doc's own 80/120 = 66.7% HP figure): deterministic ZERO check-viability draws -- Gate F jumps straight to the -2 penalty, matching the doc's own live ledger exactly", () => {
@@ -1604,14 +1623,18 @@ const MOVE_CALM_MIND_MASK7 = 347; // EFFECT_CALM_MIND
 // deterministic zero-draw path) and Dragon Rage (non-physical, NOT in the
 // list) is the REACH fixture (falls through to DRAW SITE 4) -- the exact
 // opposite of DefenseUp's own naming, per §22.2's own explicit warning
-// against copying DefenseUp's move-to-name assignment blind. Same "4 clean
-// check-viability draws" policy-own-draws model the DefenseUp block above
-// established: the oracle's own live window totals (§22.3: reach 14/13,
-// control 8/8 cross-seed) include extra per-slot Random() calls outside
-// chooseFactoryAiScoredDecision's own scope plus the still-unresolved
-// "5-6, not 4" anomaly (§18.4/§22.3-22.4) this port does not model -- a
-// documented subset, same relationship every prior HP-banded/last-move pair
-// (DefenseUp/AccuracyDown) already established, not a mismatch.
+// against copying DefenseUp's move-to-name assignment blind. Same chained
+// DRAW SITE 4/5 model the DefenseUp block above establishes (docs/factory-
+// ai-draw-discrepancy-probe.md §4: byte-identical topology, confirmed live
+// on this second handler too, probe doc §3.4) -- reusing the SAME species/
+// stats/moveset-count shape as the DefenseUp fixture above puts this
+// fixture's own CV phase at the identical RNG-stream offset, so it
+// reproduces the identical 7-draw chain (slot1/2 fail@4+fail@5, slot3
+// pass@4, slot4 fail@4+pass@5). The oracle's own live window totals (§22.3:
+// reach 14/13, control 8/8 cross-seed) include extra per-slot Random() calls
+// outside chooseFactoryAiScoredDecision's own scope -- a documented subset,
+// same relationship every prior HP-banded/last-move pair (DefenseUp/
+// AccuracyDown) already established, not a mismatch.
 describe("AI_CV_SpDefUp mask-7 fixture reproduction (docs/factory-ai-checkviability-ground-truth.md §22.2/§22.3)", () => {
   function anorithAttacker(hp: number): FactoryAiScoredBattlerView {
     return Object.freeze({
@@ -1655,14 +1678,20 @@ describe("AI_CV_SpDefUp mask-7 fixture reproduction (docs/factory-ai-checkviabil
   it.each([
     ["CosmicPower", MOVE_COSMIC_POWER_MASK7],
     ["CalmMind", MOVE_CALM_MIND_MASK7],
-  ])("%s reach fixture (Dragon Rage last, Anorith 80/120 = 66.7%%): Gate F NOT in the physical list -- falls through to DRAW SITE 4, exactly 4 check-viability draws, zero CBM/TryToFaint draws", (_label, moveId) => {
+  ])("%s reach fixture (Dragon Rage last, Anorith 80/120 = 66.7%%): Gate F NOT in the physical list -- falls through to DRAW SITE 4, which chains into DRAW SITE 5 on failure -- 7 check-viability draws, identical to DefenseUp's own physical fixture (same RNG-stream offset), zero CBM/TryToFaint draws", (_label, moveId) => {
     const view = spDefUpView(moveId, anorithAttacker(80), machampTarget(MOVE_DRAGON_RAGE_LAST));
     const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 1, calls: 0 } });
     expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
     expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
     const cvDraws = phaseDraws(result, "check-viability");
-    expect(cvDraws).toHaveLength(4);
-    expect(cvDraws.every((d) => "kind" in d && d.kind === "sp-def-up-roll-4")).toBe(true);
+    // Same 2+2+1+2 = 7 shape as AI_CV_DefenseUp's own physical fixture above.
+    expect(cvDraws.map((d) => ("kind" in d ? d.kind : null))).toEqual([
+      "sp-def-up-roll-4", "sp-def-up-roll-5",
+      "sp-def-up-roll-4", "sp-def-up-roll-5",
+      "sp-def-up-roll-4",
+      "sp-def-up-roll-4", "sp-def-up-roll-5",
+    ]);
+    expect(result.trace.draws).toHaveLength(4 /* setup */ + 7 /* check-viability */ + 1 /* tie */);
   });
 
   it.each([

@@ -1446,10 +1446,22 @@ const AI_CV_DEFENSE_UP_PHYSICAL_TYPES: ReadonlySet<string> = new Set([
  * by this branch) skips straight to `DefenseUp5`'s own roll; power != 0 AND
  * type in the (larger, 9-type) `AI_CV_DefenseUp_PhysicalTypes` list reaches
  * DRAW SITE 4; power != 0 and NOT in the list jumps straight to the `-2`
- * penalty, skipping both remaining draw sites. DRAW SITE 4 and DRAW SITE 5
- * are mutually exclusive (Gate E routes to exactly one) and share the
- * identical `if_random_less_than 60` shape: JUMP (roll < 60, ~23.4%) skips
- * the `-2`; falling through (roll >= 60, ~76.6%) applies it.
+ * penalty, skipping both remaining draw sites. **DRAW SITE 4 and DRAW SITE 5
+ * are NOT mutually exclusive** -- `docs/factory-ai-draw-discrepancy-probe.md`
+ * §4 confirms, via raw ROM byte disassembly and live single-step
+ * instrumentation, that DRAW SITE 4's own failure path (roll >= 60) is
+ * literally DRAW SITE 5's own instruction address (`AI_CV_DefenseUp4`'s +6
+ * bytes == `AI_CV_DefenseUp5`'s own label, no gate between them) -- reaching
+ * DRAW SITE 4 at all means either 1 draw (roll < 60, ~23.4%, stops with no
+ * penalty) or 2 draws (roll >= 60, ~76.6%, falls through into DRAW SITE 5's
+ * own `if_random_less_than 60` roll, which only THEN decides the `-2`: stops
+ * with no penalty on its own roll < 60, ~23.4%, or applies `-2` on roll >=
+ * 60, ~76.6%). Net probability of the `-2` penalty given DRAW SITE 4 is
+ * reached at all: `(196/256)^2 ~= 58.65%`, not the naive single-roll 76.6%.
+ * Gate E's own direct jump into `DefenseUp5` is a SEPARATE, single-draw path
+ * to the identical site -- the two entry paths share the site's kind label
+ * (`"defense-up-roll-5"`) because they are the same physical assembly
+ * instruction, not because they are the same logical event.
  */
 function runCvDefenseUp(input: Readonly<{
   rng: BattleRngState;
@@ -1525,12 +1537,27 @@ function runCvDefenseUp(input: Readonly<{
     return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score - 2 });
   }
 
-  // DRAW SITE 4.
+  // DRAW SITE 4: if_random_less_than 60, End (roll<60, ~23.4%, stops here).
+  // Its own failure (roll>=60, ~76.6%) does NOT apply the penalty directly --
+  // there is no gate between them (data/battle_ai_scripts.s:936-938), so
+  // execution falls straight through into DRAW SITE 5's own instruction
+  // immediately below (the SAME site the Gate E jump above reaches
+  // directly). Only a second failed roll applies the -2 penalty.
   const draw4 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw4`);
   rng = draw4.after;
+  ordinal += 1;
   const succeeded4 = draw4.randomValue % 256 >= 60;
   draws.push(Object.freeze({ ...draw4, kind: "defense-up-roll-4" as const, succeeded: succeeded4 }));
-  if (succeeded4) score -= 2;
+  if (!succeeded4) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+  }
+
+  // DRAW SITE 5, reached here via DRAW SITE 4's own fall-through.
+  const draw5 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw5`);
+  rng = draw5.after;
+  const succeeded5 = draw5.randomValue % 256 >= 60;
+  draws.push(Object.freeze({ ...draw5, kind: "defense-up-roll-5" as const, succeeded: succeeded5 }));
+  if (succeeded5) score -= 2;
   return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
 }
 
@@ -1586,6 +1613,12 @@ function runCvDefenseUp(input: Readonly<{
  * an identical byte list under a second name -- `AI_CV_SpDefUp_PhysicalTypes`
  * (`:1015-1025`) is a distinct assembly symbol at a different address, but
  * doc §22.1 confirms its 9-type contents are byte-for-byte identical.
+ * DRAW SITE 4 and DRAW SITE 5 share `AI_CV_DefenseUp`'s own chained (NOT
+ * mutually exclusive) shape byte-for-byte -- see `runCvDefenseUp`'s own doc
+ * comment above and `docs/factory-ai-draw-discrepancy-probe.md` §4: DRAW
+ * SITE 4's own failure (roll >= 60) falls straight through into DRAW SITE
+ * 5's own roll, which alone decides the `-2` (net ~58.65%, not a naive
+ * single-roll ~76.6%).
  */
 function runCvSpDefUp(input: Readonly<{
   rng: BattleRngState;
@@ -1661,12 +1694,26 @@ function runCvSpDefUp(input: Readonly<{
     return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score - 2 });
   }
 
-  // DRAW SITE 4 (reached when NOT in the physical list).
+  // DRAW SITE 4 (reached when NOT in the physical list): if_random_less_than
+  // 60, End (roll<60, ~23.4%, stops here). Its own failure (roll>=60,
+  // ~76.6%) falls straight through into DRAW SITE 5's own instruction
+  // immediately below (same site the Gate E jump above reaches directly) --
+  // only a second failed roll applies the -2 penalty.
   const draw4 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw4`);
   rng = draw4.after;
+  ordinal += 1;
   const succeeded4 = draw4.randomValue % 256 >= 60;
   draws.push(Object.freeze({ ...draw4, kind: "sp-def-up-roll-4" as const, succeeded: succeeded4 }));
-  if (succeeded4) score -= 2;
+  if (!succeeded4) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+  }
+
+  // DRAW SITE 5, reached here via DRAW SITE 4's own fall-through.
+  const draw5 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw5`);
+  rng = draw5.after;
+  const succeeded5 = draw5.randomValue % 256 >= 60;
+  draws.push(Object.freeze({ ...draw5, kind: "sp-def-up-roll-5" as const, succeeded: succeeded5 }));
+  if (succeeded5) score -= 2;
   return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
 }
 

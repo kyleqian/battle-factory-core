@@ -1854,8 +1854,17 @@ describe("AI_CV_DefenseUp (docs/factory-ai-checkviability-ground-truth.md §18.1
       expect(result.draws[0]).toMatchObject({ kind: "defense-up-roll-5", succeeded: false });
     });
 
-    it("last move power != 0, type IN the physical list (Vital Throw, Fighting): Gate F routes to DRAW SITE 4", () => {
-      // seed 4 -> randomValue % 256 = 25 (< 60, skips the -2).
+    // DRAW SITE 4 and DRAW SITE 5 are a CHAINED pair, not two independent
+    // alternatives (docs/factory-ai-draw-discrepancy-probe.md §4): DRAW SITE
+    // 4's own failure (roll >= 60) falls straight through into DRAW SITE 5's
+    // own roll with no gate between them, and the -2 penalty only fires if
+    // THAT roll also fails (roll >= 60). Three outcomes, one seed each (all
+    // reuse this file's own established seed convention): pass@4 (seed 4:
+    // 25 < 60, stops after 1 draw); fail@4+pass@5 (seed 1: 198 >= 60 chains,
+    // then 33 < 60 stops, 2 draws, no penalty); fail@4+fail@5 (seed 5: 223
+    // >= 60 chains, then 171 >= 60, 2 draws, -2 penalty).
+    it("last move power != 0, type IN the physical list (Vital Throw, Fighting): pass@4 -- roll < 60 stops with a single draw, no penalty", () => {
+      // seed 4 -> randomValue % 256 = 25 (< 60, stops here).
       const result = runCheckViability({
         rng: { value: 4, calls: 0 },
         moveId: MOVE_HARDEN_DEFENSE_UP,
@@ -1871,8 +1880,8 @@ describe("AI_CV_DefenseUp (docs/factory-ai-checkviability-ground-truth.md §18.1
       expect(result.draws[0]).toMatchObject({ kind: "defense-up-roll-4", succeeded: false });
     });
 
-    it("last move power != 0, type IN the physical list: roll >= 60 at DRAW SITE 4 applies the -2", () => {
-      // seed 1 -> randomValue % 256 = 198 (>= 60).
+    it("last move power != 0, type IN the physical list: fail@4+pass@5 -- DRAW SITE 4's own failure falls through to DRAW SITE 5, whose own roll < 60 still stops with no penalty", () => {
+      // seed 1's chain: draw4 = 198 (>= 60, falls through); draw5 (next) = 33 (< 60, stops).
       const result = runCheckViability({
         rng: { value: 1, calls: 0 },
         moveId: MOVE_HARDEN_DEFENSE_UP,
@@ -1883,9 +1892,28 @@ describe("AI_CV_DefenseUp (docs/factory-ai-checkviability-ground-truth.md §18.1
       });
       expect(result.kind).toBe("scored");
       if (result.kind !== "scored") throw new Error("unreachable");
-      expect(result.scoreDelta).toBe(-2);
-      expect(result.draws).toHaveLength(1);
+      expect(result.scoreDelta).toBe(0);
+      expect(result.draws).toHaveLength(2);
       expect(result.draws[0]).toMatchObject({ kind: "defense-up-roll-4", succeeded: true });
+      expect(result.draws[1]).toMatchObject({ kind: "defense-up-roll-5", succeeded: false });
+    });
+
+    it("last move power != 0, type IN the physical list: fail@4+fail@5 -- only a SECOND failed roll applies the -2 penalty", () => {
+      // seed 5's chain: draw4 = 223 (>= 60, falls through); draw5 (next) = 171 (>= 60, applies -2).
+      const result = runCheckViability({
+        rng: { value: 5, calls: 0 },
+        moveId: MOVE_HARDEN_DEFENSE_UP,
+        attacker: defenseUpAttacker(6, 50),
+        target: defenseUpTarget(MOVE_VITAL_THROW_PHYSICAL_LAST),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(-2);
+      expect(result.draws).toHaveLength(2);
+      expect(result.draws[0]).toMatchObject({ kind: "defense-up-roll-4", succeeded: true });
+      expect(result.draws[1]).toMatchObject({ kind: "defense-up-roll-5", succeeded: true });
     });
 
     it("last move power != 0, type NOT in the physical list (Dragon Rage, Dragon): Gate F jumps straight to the -2, skipping BOTH remaining draw sites", () => {
@@ -2754,8 +2782,12 @@ describe("AI_CV_SpDefUp (docs/factory-ai-checkviability-ground-truth.md §22.1)"
       expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: -2 });
     });
 
-    it("last move power != 0, type NOT in the physical list (Dragon Rage, Dragon): Gate F is INVERTED -- falls through to DRAW SITE 4 (the opposite of DefenseUp's own Gate F verdict for this exact move)", () => {
-      // seed 4 -> randomValue % 256 = 25 (< 60, skips the -2).
+    // Same chained DRAW SITE 4/5 pair as AI_CV_DefenseUp's own (byte-for-byte
+    // identical topology past Gate F, docs/factory-ai-draw-discrepancy-probe.md
+    // §4) -- three outcomes, same seed convention: pass@4 (seed 4), fail@4+
+    // pass@5 (seed 1), fail@4+fail@5 (seed 5).
+    it("last move power != 0, type NOT in the physical list (Dragon Rage, Dragon): Gate F is INVERTED -- falls through to DRAW SITE 4; pass@4 stops with a single draw, no penalty", () => {
+      // seed 4 -> randomValue % 256 = 25 (< 60, stops here).
       const result = runCheckViability({
         rng: { value: 4, calls: 0 },
         moveId: MOVE_CALM_MIND_SPDEF_UP,
@@ -2771,8 +2803,8 @@ describe("AI_CV_SpDefUp (docs/factory-ai-checkviability-ground-truth.md §22.1)"
       expect(result.draws[0]).toMatchObject({ kind: "sp-def-up-roll-4", succeeded: false });
     });
 
-    it("last move power != 0, type NOT in the physical list: roll >= 60 at DRAW SITE 4 applies the -2", () => {
-      // seed 1 -> randomValue % 256 = 198 (>= 60).
+    it("last move power != 0, type NOT in the physical list: fail@4+pass@5 -- DRAW SITE 4's own failure falls through to DRAW SITE 5, whose own roll < 60 still stops with no penalty", () => {
+      // seed 1's chain: draw4 = 198 (>= 60, falls through); draw5 (next) = 33 (< 60, stops).
       const result = runCheckViability({
         rng: { value: 1, calls: 0 },
         moveId: MOVE_CALM_MIND_SPDEF_UP,
@@ -2783,9 +2815,28 @@ describe("AI_CV_SpDefUp (docs/factory-ai-checkviability-ground-truth.md §22.1)"
       });
       expect(result.kind).toBe("scored");
       if (result.kind !== "scored") throw new Error("unreachable");
-      expect(result.scoreDelta).toBe(-2);
-      expect(result.draws).toHaveLength(1);
+      expect(result.scoreDelta).toBe(0);
+      expect(result.draws).toHaveLength(2);
       expect(result.draws[0]).toMatchObject({ kind: "sp-def-up-roll-4", succeeded: true });
+      expect(result.draws[1]).toMatchObject({ kind: "sp-def-up-roll-5", succeeded: false });
+    });
+
+    it("last move power != 0, type NOT in the physical list: fail@4+fail@5 -- only a SECOND failed roll applies the -2 penalty", () => {
+      // seed 5's chain: draw4 = 223 (>= 60, falls through); draw5 (next) = 171 (>= 60, applies -2).
+      const result = runCheckViability({
+        rng: { value: 5, calls: 0 },
+        moveId: MOVE_CALM_MIND_SPDEF_UP,
+        attacker: spDefUpAttacker(6, 50),
+        target: spDefUpTarget(MOVE_DRAGON_RAGE_NONPHYSICAL_LAST),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(-2);
+      expect(result.draws).toHaveLength(2);
+      expect(result.draws[0]).toMatchObject({ kind: "sp-def-up-roll-4", succeeded: true });
+      expect(result.draws[1]).toMatchObject({ kind: "sp-def-up-roll-5", succeeded: true });
     });
 
     it("omitted lastUsedMoveId defaults to MOVE_NONE (0), the real battle-start default -- same code path as a genuine 0-power last move", () => {
