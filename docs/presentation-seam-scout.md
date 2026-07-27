@@ -1220,3 +1220,326 @@ own already-established count unchanged, proving this session's read-only
 recon (plus the new unwired `turn3RockSlidePresentationStaging.ts` module)
 touched nothing live. `npm test` (233 files, 3289 tests) and `npm run build`
 both green in this worktree at the same commit.
+
+## 11. Prep-scout for the NEXT window, 2026-07-27 (`turn4-doubleteam.json`), side lane
+
+Read-only recon plus one unwired staging module/test — same contract §8/§9/§10
+used — for the window the supervisor assigned directly (not self-picked by
+this scout, unlike §10): `turn4-doubleteam.json` (250 frames,
+`docs/battle-turn-notes.md:3919`), Grovyle's own turn-4 DOUBLE_TEAM kickoff.
+Run concurrently with a MAIN-lane worker wiring §10's own turn3-rockslide
+plan in a sibling worktree — this session touches no `battleScene.ts` or
+other production file, per this checkpoint's own read-only-recon-plus-one-
+staging-module contract. All line numbers below are re-verified against this
+worktree's own `HEAD` (`6ca54da`, unchanged from §10's own commit —
+`battleScene.ts` has not grown since §10 was written in this lane, since the
+concurrent turn3-rockslide wiring lands in a different worktree, not this
+one).
+
+**Correction to the brief's own framing, found by reading the actual leaf
+function before staging anything (evidence over inference, same discipline
+every prior section established):** the brief's own "WHY THIS WINDOW" note
+says landing `stat-stage-change`'s new production emission site "plausibly
+narrows this window's own STAT_ROSE gap," pointing at §8.3's own named gap
+("`STAT_ROSE_LINE1`/`LINE2` … still a named gap"). That gap is real but
+belongs to a **different window**: `STAT_ROSE_LINE1`/`LINE2` (the literal
+text "Foe GROVYLE's evasiveness rose!", `battleMenu.ts:1592-1593`) is drawn
+by `drawRockSlideWindow`'s own three-box text cycle (§8.1, turn 1's window),
+not by this window's own leaf, `drawTurn4KickoffText`
+(`battleScene.ts:6827-6837`) — that function draws exactly one text box
+(`TURN_KICKOFF_LINE1`/`LINE2`, "Foe GROVYLE used\nDOUBLE TEAM!",
+`battleMenu.ts:1086,1088`) and then, past `STATS_BANNER_END_DELAY`(274)
+ticks, hands off straight to `drawTurn4RockSlideWindow` (`:6829`) — it never
+reaches a STAT_ROSE text phase at all. `turn4-doubleteam.json`'s own 250
+`captureFrames` (ticks 4934-5313) confirm this isn't just a static-analysis
+argument: `TURN4_CONFIRM_PRESS_TICK`(4925)+274=5199 falls inside the capture
+window, so the trace genuinely straddles both `drawTurn4KickoffText`'s own
+kickoff phase (4934-5199) **and** the start of `drawTurn4RockSlideWindow`'s
+own ROCK_SLIDE phase (5199-5313) — the latter is **already wired** (§9,
+`turn4RockSlidePresentationStaging.ts`, imported at
+`battleScene.ts:597`). So the genuinely unwired residual this window's own
+250 frames still depend on is narrower than "the STAT_ROSE gap": it's
+`drawTurn4KickoffText`'s own kickoff-phase content — the `TURN_KICKOFF_LINE1/2`
+text, `drawDoubleTeamClones`'s clone choreography, and `drawStatsBanner`'s
+evasion-rise BG1 graphic — plus the two steady (non-draining) HP overlays it
+threads through `drawActionMenuIdleContent`. The brief's own underlying
+instinct (that DOUBLE_TEAM's own now-executable `stat-stage-change` route is
+relevant here) is correct, just not via the STAT_ROSE-text gap specifically —
+see §11.2's own mapping table for the real, verified connection.
+
+### 11.1 Every input `turn4-doubleteam.json` consumes today (re-verified against `HEAD`)
+
+**Dispatch-routing booleans/gates**, all in `drawFightSubmenuWindow`
+(`battleScene.ts:5269-5457`):
+
+| input | line(s) | condition to REACH this window |
+| --- | --- | --- |
+| `turn9Resolved`…`turn5Resolved` | `:5333-5372` | all false (else routes to turns 6-11's own dedicated dispatchers) |
+| `sm.openElapsed`/`sm.closeElapsed` | `:5374,5388` | both past their own DMA-wait windows (ordinary settled-submenu path) |
+| `sm.confirmElapsed !== null` | `:5395` | true (turn 4's own real A-confirm press already landed, `TICK0 + sm.confirmElapsed` = `TURN4_CONFIRM_PRESS_TICK` = 4925, a REAL press — unlike turn 3's own synthetic ROCK_SLIDE anchor, §10.1) |
+| `inTurn4DoubleTeamWindow = turn3Resolved && !turn4Resolved` | `:5406` | **true** — this is the one boolean that actually selects this window (distinguishes it from turn 1's own cursor-0 confirm, which shares the same `turnKickoffTextStartTick` formula family) |
+| `t >= textStart` | `:5407-5408` | true (message has started; `textStart` is `turnKickoffTextStartTick(pressTick)` since `inTurn4DoubleTeamWindow` routes past the `turn2KickoffTextStartTick` branch) |
+| `sm.cursor === 2` | `:5414` | false (cursor rests on ROCK_SLIDE, slot 0, not DRAGON_BREATH — else routes to `drawTurn2KickoffText`) |
+| `turn4Resolved` | `:5418` | false (else routes to `drawTurn5EndeavorText`) |
+| `turn3Resolved` | `:5426` | **true** — the one boolean that actually selects `drawTurn4KickoffText(fb, t, pressTick)` (`:5431`); every check above it is a false/pass-through gate, same "scheduler/PC state, no content mapping" class as every prior window's own dispatch chain |
+
+**RAM-dump / HP-constant reads** — re-verified against each constant's own
+definition (`battleScene.ts:1309-1371`), same discipline §7.1/§9.1/§10.1
+already established:
+
+| constant | value | real source | line(s) | role in THIS window |
+| --- | --- | --- | --- | --- |
+| `anchorOpponentAfterTurn3Hp` | 41 | asset read: `battle1-grovyle-faint-ram-dump.json`'s `battlerSnapshots["4892"].battler1.hp` | `:1356-1358` | Grovyle's own steady overlay HP (`drawMenuIdleBaseWithOpponentHp`'s `turn3Resolved` arm, `:5166`) — **not a drain endpoint of this window's own content**: DOUBLE_TEAM is non-damaging, so this value never changes across the whole 250-frame span |
+| `anchorPlayerAfterTurn3Hp` | 88 | asset read: same `"4892"` snapshot, `battler0.hp` | `:1343-1345` | Onix's own steady overlay HP, threaded through `drawTurn4KickoffText`'s own `drawActionMenuIdleContent(fb, bounceTick, true, true, anchorPlayerAfterTurn3Hp, true)` call (`:6833`) — same "steady read, not a drain endpoint" class §10.2's own mapping-table row already established for the mirror-image Onix case |
+
+Both are already asset-backed (not bare literals) and already staged as
+`hp-change` endpoints by `turn4RockSlidePresentationStaging.ts` for the
+LATER, already-wired ROCK_SLIDE half of this same window's own capture
+range — this window's own kickoff phase only ever reads them as static
+overlay content, never as a transition.
+
+**Hardcoded strings** — `battleMenu.ts`, drawn by `drawTurn4KickoffText`
+itself (`battleScene.ts:6835`):
+
+| input | literal | line(s) |
+| --- | --- | --- |
+| `TURN_KICKOFF_LINE1`/`LINE2` | "Foe GROVYLE used" / "DOUBLE TEAM!" | `battleMenu.ts:1086,1088` — the SAME literal turn 1's own kickoff text uses (`turn1RockSlidePresentationStaging.ts`'s own `resolveTurn1DoubleTeamKickoffLines`, which asserts the mechanism by analogy only); this session's own staged run (§11.2) re-derives it from a REAL run of THIS specific turn's own script, a strictly stronger proof |
+
+**Tick anchors** (all `pressTick`-relative offsets, `TURN4_CONFIRM_PRESS_TICK`
+=4925 the shared real-press anchor, `battleScene.ts:6772`):
+`STATS_BANNER_END_DELAY`=274 (`battleMenu.ts:1254`), plus the reused
+`turnKickoffTextVisibleChars`/`turnKickoffBounceTick`/`TURN4_KICKOFF_FROZEN_
+BOUNCE_TICK` family (`:6795-6798,6793`) — all presentation-native, same "not
+a kernel gap" finding §8.4's Option A already established for this whole
+function family, re-confirmed here a fourth time.
+
+**Sprite/animation cues** (pure `(t, pressTick, ...)` functions, called from
+`drawTurn4KickoffText`, `battleScene.ts:6827-6837`, reused with **zero code
+changes** from turn 1's own already-written (but, per `docs/battle-turn-
+notes.md` §22, never pixel-verified until a later session closed it)
+functions of the same name): `doubleTeamCloneOffsets`/`getDoubleTeamClonePalette`/
+`eraseGrovyleFootprint` (`battleMenu.ts:1220`/`battleScene.ts:4264,4328`,
+`drawDoubleTeamClones`), `statsBannerEva`/`statsBannerBg1Y`
+(`battleMenu.ts:1273,1318`, `drawStatsBanner`).
+
+**The hidden-state finding this brief explicitly asked to flag:** Grovyle's
+own EVASION stat stage is never read from anywhere in `battleScene.ts` at
+all for this window — `drawStatsBanner`'s own `eva`/`evb` locals (`:4519,4539`)
+are GBA alpha-BLEND coefficients (`BLDALPHA` register halves), not the
+battle stat stage; the function draws the SAME hardcoded evasion-increase
+graphic (`gStatAnim_Increase_Tilemap`/`gStatAnim_Evasion_Pal`) regardless of
+what Grovyle's real stage is or was, because this slice only ever wires up
+the one stat/direction DOUBLE_TEAM needs (the code's own doc comment,
+`:4498-4500`). This is a genuinely defaulted/never-threaded value, worth
+naming per this brief's own ask: **the real battle-content fact this window
+renders — Grovyle's evasion rising a SECOND time, 7 -> 8, not a fresh 6 -> 7
+— exists nowhere in `battleScene.ts`'s own state.** §11.2 stages it for the
+first time.
+
+### 11.2 Staged proof: what the kernel emits today for this window's own content
+
+EFFECT_EVASION_UP has been executable since before this session
+(`docs/executable-frontier-census.md:72`, `BattleScript_EffectEvasionUp`) —
+and unlike every ROCK_SLIDE/ENDEAVOR sibling module, this move's own real
+script needs **no RNG research** at all: DOUBLE_TEAM draws zero `Random()`
+calls (RAM-confirmed, `docs/battle-turn-notes.md:93`,`:1339`).
+`src/engine/turn4DoubleTeamPresentationStaging.ts` (new, **unwired** — not
+imported by `battleScene.ts` or any production file) stages Grovyle's own
+real turn-4 DOUBLE_TEAM use: real level-50 stats
+(`tests/damageCalc.test.ts`'s own `GROVYLE` block, same copy every sibling
+module uses), real MOVE_DOUBLE_TEAM (id 104), self-targeted
+(attacker===target===effectBattler), real pre-move HP (41,
+`anchorOpponentAfterTurn3Hp`), and — the one genuinely new input this module
+introduces — a real pre-move EVASION stat stage of **7, not the neutral
+default 6** (turn 1's own persisted boost, `docs/battle-turn-notes.md:1132`,
+`:3845`'s own RAM probe: "evasion stage 7->8 at 4965, RAM-exact").
+
+**One real dead end, corrected in the code and documented so the next
+session doesn't repeat it:** this module's first draft entered at
+`BattleScript_HitFromAtkCanceler`, mechanically copying every ROCK_SLIDE
+sibling's own entry label. That is the WRONG label for this move family —
+`BattleScript_HitFromAtkCanceler` unconditionally runs `accuracycheck
+ACC_CURR_MOVE` (`reference/pokeemerald/data/battle_scripts_1.s:244`), and
+DOUBLE_TEAM's own `moves.json` `accuracy` field is 0, which this engine's
+faithfully-ported `Cmd_accuracycheck` (`battleScriptHitChainOpcode.ts:877`,
+`calculateAccuracy`'s own `moveAccuracy` input)
+turns into `calc=0` — an unconditional miss, consuming 1 RNG call and
+producing no `stat-stage-change` at all. Verified live, not guessed: running
+it that way first produced exactly that failure (1 RNG call, evasion stage
+unchanged at 7, no `STRINGID_DEFENDERSSTATROSE`). The real script
+(`reference/pokeemerald/data/battle_scripts_1.s:487-494`,
+`BattleScript_EffectEvasionUp` -> shared `BattleScript_EffectStatUp`/
+`...StatUpAfterAtkCanceler`) never runs `accuracycheck` at all — it goes
+`setstatchanger` -> `attackcanceler` -> `attackstring` -> `ppreduce` ->
+`statbuffchange` -> ... directly, matching
+`tests/battleScriptStatbuffchangeOpcode.test.ts`'s own "Double Team" case,
+which already enters at this same correct label (that test just doesn't run
+it with turn 4's own real pre-move stage/RNG/full event capture — this
+module does). Fixed to enter at `BattleScript_EffectEvasionUp`; the RNG seed
+(3051035979) is turn 4's own real recorded value —
+`turn4RockSlidePresentationStaging.ts:88`'s own `STAGED_RNG_SEED`, reusable
+here because DOUBLE_TEAM (Grovyle's move, resolving before Onix's ROCK_SLIDE
+within the same turn) draws zero RNG, so the value live entering DOUBLE_TEAM's
+own script equals the value live entering ROCK_SLIDE's — verified live this
+session (`tests/turn4DoubleTeamPresentationStaging.test.ts`, 5 passing
+assertions): `rngCalls: 0`, ending `rngValue` byte-identical to the seed.
+
+```
+evasionStageAfter: 8   (7 -> 8, byte-identical to the real RAM-confirmed
+                         turn-4 SECOND rise, docs/battle-turn-notes.md:3845 --
+                         not a fresh 6 -> 7 first use)
+event kinds, in order:
+  message                       {messageId:"STRINGID_USEDMOVE"}                    sourceLabel: BattleScript_EffectStatUpAfterAtkCanceler
+  set-battler-pp-data           {battler:1, movePosition:0, pp:13}                  (14 -> 13; 14 itself is this module's own ASSUMPTION -- base 15 minus turn 1's one use -- not independently RAM-verified this session, flagged not guessed-silently)
+  stat-stage-change             {battler:1, stat:"evasion", from:7, to:8}           sourceLabel: BattleScript_EffectStatUpAfterAtkCanceler
+  animation                     {animationId:"MOVE_ANIMATION", battler:1, arguments:["104","0","0","0","0","0"]}
+  animation                     {animationId:"STATS_CHANGE", battler:1, arguments:["21"]}
+  message                       {messageId:"STRINGID_DEFENDERSSTATROSE"}           (NOT STRINGID_ATTACKERSSTATROSE -- target===attacker picks the "defender's own" string variant, battleScriptStatBuffs.ts:276)
+  set-battler-sprite-visibility {battler:1, invisible:false}                       (moveend pass-through)
+```
+
+No `hp-change`/`health-bar-update`/`play-se` anywhere in this stream — this
+window's own kickoff content genuinely has no damage component, confirmed by
+a dedicated test assertion, not inferred from the move's data row alone.
+The `STATS_CHANGE` animation kind is new to this section's own event
+inventory (every ROCK_SLIDE/ENDEAVOR sibling only ever emits `MOVE_ANIMATION`/
+`HIT_ANIMATION`) — its own emission site is
+`battleScriptStatbuffchangeOpcode.ts:190` (`B_ANIM_STATS_CHANGE` ->
+`animationId:"STATS_CHANGE"`, `readsAnimArg1:true`), and its argument (21) is
+independently decodable: `Cmd_setgraphicalstatchangevalues`'s own formula
+(`:124,143`) gives `STAT_ANIM_PLUS1(14)+1 + STAT_EVASION(7) - 1 = 21` for a
++1 evasion rise — the SAME formula shape (and the SAME opcode/handler) the
+existing "Swords Dance" test already pins for a +2 attack rise
+(`tests/battleScriptStatbuffchangeOpcode.test.ts:165-167`, `animArg1===39`).
+This means the kernel's own `STATS_CHANGE` animation event carries enough
+payload to distinguish "which stat, which direction, which magnitude" in
+principle — not merely "an animation happened" — though this window's own
+`drawStatsBanner` never needs to consume that distinction today (it already
+hardcodes the one evasion-increase graphic this slice wires up, §11.1).
+
+**Mapping table** (turn-N input -> kernel event / gap), current as of this
+staged run:
+
+| turn-N input | kernel replacement | today |
+| --- | --- | --- |
+| `turn9Resolved`…`turn3Resolved`/`sm.cursor`/`inTurn4DoubleTeamWindow` dispatch chain (§11.1) | none — scheduler/PC state | **no plausible mapping**, same gap-7 class every prior window found |
+| `TURN_KICKOFF_LINE1`/`LINE2` ("Foe GROVYLE used\nDOUBLE TEAM!") | `message{messageId:"STRINGID_USEDMOVE"}` | **fully proven, re-derived from a real run of THIS turn's own script** (not merely asserted by analogy to turn 1's, unlike `turn1RockSlidePresentationStaging.ts`'s own `resolveTurn1DoubleTeamKickoffLines`) — `resolveTurn4DoubleTeamKickoffLines` (this module) resolves to `["Foe GROVYLE used", "DOUBLE TEAM!"]`, byte-identical |
+| (the never-rendered) `STAT_ROSE_LINE1`/`LINE2` gap named in §8.3/§5/§7.2 | `message{messageId:"STRINGID_DEFENDERSSTATROSE"}` | **NOT this window's own gap to close** (§11's own preamble correction) — but note for whichever window DOES render that text (turn 1's own `drawRockSlideWindow`): this staged run proves the real message is `STRINGID_DEFENDERSSTATROSE` (matching `tests/battleScriptStatbuffchangeOpcode.test.ts`'s own finding for the identical self-target shape), not a still-unproven guess |
+| Grovyle's own EVASION stat stage, 7 -> 8 (never read anywhere in `battleScene.ts` today, §11.1's own hidden-state finding) | `stat-stage-change{battler:1, stat:"evasion", from:7, to:8}` | **emitted today, proven this session** — the real production emission site (`battleScriptStatBuffs.ts:296-303`) is reachable end-to-end from this move's own real script entry with turn 4's own real pre-move stage and RNG, not merely reachable in isolation (`battleScriptStatbuffchangeOpcode.test.ts`'s own "Double Team" case already proved isolated reachability with an arbitrary seed and the neutral 6->7 first-use stage; this module is the first to prove the SECOND-use 7->8 transition with the real recorded seed) |
+| `doubleTeamCloneOffsets`/clone choreography (`drawDoubleTeamClones`) | `animation{animationId:"MOVE_ANIMATION"}` | **kind emitted today, proven** — this run's own payload is `arguments:["104","0","0","0","0","0"]` (move id, real values). Gap 6 (no frame-by-frame payload) unchanged, same as every prior window; the clone helper itself needs zero code changes regardless |
+| `statsBannerEva`/`statsBannerBg1Y` (`drawStatsBanner`'s own evasion-increase BG1 graphic) | `animation{animationId:"STATS_CHANGE", arguments:["21"]}` | **kind AND a decodable stat/direction/magnitude payload emitted today, proven** — genuinely new finding this section establishes (no prior window's own staged run ever exercised `Cmd_playanimation`'s `B_ANIM_STATS_CHANGE` arm). Not currently a REQUIRED gate for this window (only one graphic is wired, §11.1), but a real, present signal a bridge COULD key a dispatch decision off, unlike the purely-scheduler gates above |
+| `anchorOpponentAfterTurn3Hp`(41)/`anchorPlayerAfterTurn3Hp`(88) steady overlays | not `hp-change` endpoints in THIS window's own chain (no battler is drained by a self-target status move) | **no kernel event needed for either read**, same "steady-state read, not a drain endpoint" finding §9.3/§10.2 already made for their own mirror-image cases |
+| PP readout (10th slot after turn 1, 14->13 assumed) | `set-battler-pp-data{battler:1, movePosition:0, pp:13}` | **emitted today, proven this run** — but the STARTING pp (14) is this module's own unverified assumption (base 15 minus turn 1's one use), not independently RAM-confirmed this session; flagged, not silently trusted, same "evidence over inference" discipline as every other named input |
+
+**What this staged run does and does not prove:** it proves the real
+DOUBLE_TEAM self-target chain reproduces turn 4's own specific real
+transition (evasion 7->8, not merely "a real rise") and that the resulting
+`stat-stage-change`/`STATS_CHANGE`-animation/`STRINGID_DEFENDERSSTATROSE`
+triad is genuinely reachable end-to-end through the real script, not just in
+an isolated opcode test — that reachability is this module's own new work.
+It does NOT prove `resolveRockSlidePresentationWindowContent`
+(`presentationEventWindowBridge.ts`) generalizes here: it does not. That
+bridge REQUIRES an `hp-change` event with a matching `sourceLabel`
+(`resolveRockSlidePresentationWindowContent`'s own code,
+`presentationEventWindowBridge.ts:95-98`), and this window's own real event
+stream never contains one — a fundamentally different shape than every
+ROCK_SLIDE/ENDEAVOR sibling's own window, not just a different label to pass
+as this function's own override parameter. A genuinely NEW bridge shape is
+needed (§11.3 step 2), not a relabeled reuse — this prep-scout does not add
+it (`presentationEventWindowBridge.ts` is a shared production file, out of
+this checkpoint's own one-staging-module contract), only names it precisely
+enough for the wiring worker to add it directly.
+
+### 11.3 Ordered wiring plan (acceptance: `turn4-doubleteam.json` still passes at 250/250, regression sweep over the adjacent DOUBLE_TEAM/ROCK_SLIDE traces unchanged)
+
+1. Add a `resolveDoubleTeamKickoffPresentationWindowContent`-shaped sibling
+   to `presentationEventWindowBridge.ts` (same null-safe pattern as
+   `resolveFaintPresentationWindowContent`/`resolveRockSlidePresentationWindowContent`,
+   but a NEW return shape — `{message, statChange}`, no `hp` field at all,
+   since this window's own content genuinely has none, §11.2's own finding):
+   keyed on `provenance.sourceLabel === "BattleScript_EffectStatUpAfterAtkCanceler"`
+   for both the `message{messageId:"STRINGID_USEDMOVE"}` event (this window's
+   own kickoff text) and the `stat-stage-change` event (the evasion-rise
+   content) — both are real, present, and co-located under this one label per
+   §11.2's own event dump, so a single `sourceLabel` check identifies this
+   window's own content the same "identify from provenance, never a turn
+   number" way every prior bridge function does.
+2. Wire `drawTurn4KickoffText` (`battleScene.ts:6827-6837`) to source
+   `TURN_KICKOFF_LINE1/2`'s text from step 1's resolved message (mechanically
+   identical `STRINGID_USEDMOVE` mapping, zero new resolver work beyond a
+   `B_ATK_NAME_WITH_PREFIX`/`B_BUFF2` pair the turn-1 window's own gap-5
+   resolver already supplies, §8.5 step 1) — `drawDoubleTeamClones`/
+   `drawStatsBanner`'s own choreography stays byte-for-byte unchanged (no
+   kernel-timestamp input needed, §8.4 Option A applies unchanged a fourth
+   time); their FIRING (not their internal `pressTick`-relative math) may
+   additionally be gated on step 1's `statChange` signal being present, since
+   that's now a real, provable "did DOUBLE_TEAM's own effect actually run"
+   check instead of pure dispatch-boolean plumbing — genuinely optional for
+   250/250 (the dispatch booleans alone already reproduce the pixels
+   correctly), named here as a real option, not a requirement.
+3. The two steady HP overlays (`anchorOpponentAfterTurn3Hp`/
+   `anchorPlayerAfterTurn3Hp`, §11.1/§11.2's own mapping-table rows) stay
+   direct literals for this pass — not drain endpoints of THIS window's own
+   content, same "narrow to what's actually unblocked" discipline every
+   prior window's own plan used for its adjacent out-of-scope reads.
+4. `set-battler-pp-data`'s own starting-PP assumption (14, §11.2) needs a
+   real RAM check before it's trusted for a PP-readout wiring step (out of
+   THIS window's own pixel content regardless, since `drawTurn4KickoffText`
+   never renders the FIGHT submenu's PP digits itself) — named as a residual
+   for whichever later window converts the submenu's own PP display, not
+   blocking this one.
+5. Re-run `npm run compare -- turn4-doubleteam.json` and confirm it still
+   matches at **250/250** (recorded count, `docs/battle-turn-notes.md:3919`,
+   re-pinned live in §11.4) before/after, PLUS a regression sweep of
+   `turn4-rockslide.json` (250/250, the ALREADY-WIRED tail half of this exact
+   same trace's own capture range — the step most likely to regress if the
+   new bridge function's `sourceLabel` key is too broad), `turn1-rockslide.json`
+   (256/256, shares `TURN_KICKOFF_LINE1/2`'s own text mechanism),
+   `turn3-rockslide.json`/`turn3-endeavor.json` (whatever this worktree's own
+   `HEAD` currently pins them at — the concurrent MAIN-lane wiring step may
+   land mid-session in a sibling worktree, not this one), and `turn5-rockslide.json`/
+   `turn5-faint.json` (256/256, 110/110) — the checkpoint's own established
+   acceptance bar.
+
+### 11.4 Comparator re-pin
+
+Ran twice live this session (determinism check), plus a named
+adjacent-trace regression sweep, from this worktree, against this lane's
+Battle Scene OFF oracle (`127.0.0.1:8014`):
+
+```
+$ npm run compare -- turn4-doubleteam.json --summary   (run 1)
+250/250 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn4-doubleteam.json --summary   (run 2, determinism check)
+250/250 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn4-rockslide.json --summary
+250/250 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn1-rockslide.json --summary
+256/256 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn3-rockslide.json --summary
+256/256 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn3-endeavor.json --summary
+192/192 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn5-rockslide.json --summary
+256/256 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn5-faint.json --summary
+110/110 frames matched -> tools/compare/out/latest
+```
+
+`turn4-doubleteam.json` matches its recorded count (`docs/battle-turn-
+notes.md:3919`, 250/250) both runs — re-pinned live, this is the baseline the
+wiring step (§11.3) must preserve. `turn3-rockslide.json`/`turn3-endeavor.json`
+re-confirm the SAME counts §10.4 already pinned in this lane's own worktree
+(the concurrent MAIN-lane wiring of §10's own plan lands in a different
+worktree and had not merged into this one as of this session), proving this
+session's read-only recon (plus the new unwired
+`turn4DoubleTeamPresentationStaging.ts` module) touched nothing live in
+either lane's own scope. `npm test` (234 files, 3298 tests) and `npm run
+build` both green in this worktree at the same commit.
