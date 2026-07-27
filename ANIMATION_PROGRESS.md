@@ -46,12 +46,48 @@ animation. A status caused by a move is not part of that move's animation.
 
 ## Current resumable state (2026-07-27)
 
-Coverage is **37/276 exact, 3 partial, 236 unsupported**. SING is exact for
-its complete first animation-script block in both required orientations:
-**245/245 player-back + 248/248 opponent-front** strengthened component/OAM/
-matrix/palette/monbg and raw-RGB/shared-seam framebuffer frames, reproduced
-twice fresh. The four audited siblings remain unsupported without independent
-complete dense evidence. Animation-main is green at this checkpoint.
+Coverage is **37/276 exact, 4 partial, 235 unsupported**. SLUDGE is partial:
+its complete sprite/task body is **102/102 player-back + 102/102 opponent-
+front** dense source-component frames. Palette hardware latches, sound,
+asset extraction, raw RGB, shared-seam framebuffer, controls, and twice-fresh
+reproduction remain, so exact promotion is explicitly withheld. TOXIC,
+SLUDGE BOMB, POISON FANG, and POISON TAIL remain unsupported.
+
+## SLUDGE source-component checkpoint; PoisonBubblesEffect established (2026-07-27)
+
+**Verdict:** `MOVE_SLUDGE` is partial. Complete legal Scene-ON mechanicLab
+parties use GRIMER, the real Level-50 Factory set-110 carrier, in both required
+orientations with all four choices constrained to SLUDGE and ONIX constrained
+to TACKLE. The strengthened source-component comparator matches the complete
+sprite/task body at **102/102 player-back** (oracle 218-319) and **102/102
+opponent-front** (230-331).
+
+**Source reducer/evidence:** the reducer ports
+`gSludgeProjectileSpriteTemplate`'s 40-callback mirrored horizontal arc,
+animation/frame/OAM and looping affine program; target
+`AnimTask_ShakeMon(3,0,5,1)` including the animation-script task's extra
+same-frame display step; the delay-1 two-leg target blend task shape; and all
+six literal `PoisonBubblesEffect` spawns with side-relative x offsets,
+eight-frame displayed cadence, rising/sway callbacks, affine terminal clamp,
+OAM low-slot reuse, and cleanup. The live comparator caught signed GBA sine
+rounding and opponent-side offset mirroring rather than fitting either.
+
+**Exact remainder:** compare selected target faded/hardware palette rows for
+the complete RGB(30,0,31) cycle; capture attacker-pan `SE_M_BUBBLE3` and six
+target-pan `SE_M_TOXIC` boundaries; reproducibly extract poison-bubble art;
+wire the renderer through `sceneOnPresentation`/`battleScene`; close raw RGB,
+field/text/healthboxes, cleanup, and shared-seam framebuffer in both
+orientations; reproduce twice and rerun SING plus ACID or BIND controls.
+No absolute ticks, screenshots, coordinate/RGB fitting, exclusions,
+unsupported barriers, or import-boundary widening were added.
+
+**Sibling audit (all unsupported):** TOXIC still needs its separate toxic
+asset and two four-sprite waves; SLUDGE BOMB needs ten projectile calls,
+twelve distinct hit particles, its longer ShakeMon2, palette body and
+waitsound; POISON FANG needs fang art/sprites, contact shake and four-leg
+delay-0 palette cycle; POISON TAIL needs metallic shine, lunge/hitsplat,
+shake, alpha/monbg teardown. Shared PoisonBubblesEffect coverage does not
+promote any sibling.
 
 ## SING promoted to exact; ANIM_TAG_MUSIC_NOTES track established (2026-07-27)
 

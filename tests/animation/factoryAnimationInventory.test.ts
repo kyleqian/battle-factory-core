@@ -68,10 +68,10 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // SING is exact through the shared Scene-ON seam in both orientations.
-        unsupported: 236,
+        // SLUDGE adds a two-orientation dense source-component checkpoint.
+        unsupported: 235,
         staged: 0,
-        partial: 3,
+        partial: 4,
         exact: 37,
       },
       {
