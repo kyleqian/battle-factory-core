@@ -1772,6 +1772,121 @@ async function verifyMovesetIndexCarryScenario(spec: MovesetIndexCarryScenarioSp
   }
 }
 
+// doc §27.5: ISSUES #47's own residual -- a live fixture placing MOVE_HAIL
+// at movesetIndex 1 behind one of the 7 **writes-conditionally** handlers
+// specifically (not writes-never/writes-always, both already covered by
+// MOVESETINDEX_CARRY_SCENARIOS above). Predecessor: AI_CV_RainDance (doc
+// §27.1 handler 22) at movesetIndex 0. Unlike the HP-banded writes-
+// conditionally handlers (DefenseUp/SpDefUp/LightScreen/Reflect), RainDance's
+// own Gate P (`if_user_faster`) is a STATIC species/speed comparison, not
+// real damage -- the cheapest of the 7 to control live. Opponent (AI_USER)
+// = Anorith (390, base Speed 75 -> level-50 95, ability Battle Armor,
+// established elsewhere in this doc), moveset
+// [MOVE_RAIN_DANCE(240), MOVE_HAIL(258), MOVE_SPLASH(150) x2] in both
+// fixtures -- only the TARGET's species (hence relative speed) changes:
+//
+// - **carry** fixture: target = Shuckle (213, level-50 Speed ~14) --
+//   Anorith is faster, Gate P jumps straight to the shared weather span,
+//   skipping Gate S's own `get_ability` write entirely. No real weather is
+//   ever set, so the span's own `get_weather` doesn't write either (BUGFIX-
+//   undefined, same as every SunnyDay/Hail/RainDance fixture in this doc) --
+//   RainDance's own `funcResultAfter` is the untouched TTF-pass carry
+//   (`AI_WEATHER_SUN`=0, from the 2 Splash fillers). RainDance's own score
+//   ALSO reads that carry (`SUN` is in `RAIN_DANCE_OTHER_THREE`) -> +1 --
+//   so RainDance and Hail (which reads the SAME surviving Sun carry) tie at
+//   +1 each, both strictly above Splash's 0. Prediction: the turn-1 pick is
+//   movesetIndex 0 OR 1, **never** 2 or 3.
+// - **clean** fixture: target = Misdreavus (200, level-50 Speed 105) --
+//   Anorith is now SLOWER, Gate P is false, so Gate S's own
+//   `get_ability AI_USER` (Battle Armor, ability id 4 -- outside
+//   `ABILITY_ID_IN_WEATHER_RANGE`'s 0-3 collision set) ALWAYS fires,
+//   overwriting `funcResult` with a value that collision-maps to `undefined`
+//   (safe). RainDance's own score: the overwritten value isn't Rain Dish
+//   either, so Gate R's own tail also nets 0 -- RainDance scores 0. Hail
+//   (movesetIndex 1) now reads that same safe, non-`SUN` carry -> also 0.
+//   All 4 slots tie at 0, a genuine 4-way tie like doc §27's own
+//   writesalways-clean fixture. Prediction: the turn-1 pick can be ANY of
+//   the 4 slots (not asserted which), varying by seed.
+//
+// Both predictions independently confirmed against
+// `chooseFactoryAiScoredDecision` directly (not just hand-derived) before
+// ever touching the oracle: carry fixture -> checkViabilityDelta
+// [1,1,0,0], bestMoveSlots [0,1] both seeds; clean fixture ->
+// checkViabilityDelta [0,0,0,0], bestMoveSlots [0,1,2,3], seed 1 -> index
+// 3, seed 99 -> index 1 (the engine's OWN synthetic tie-break RNG stream,
+// not a claim about the oracle's, same caveat as doc §27's own banked
+// tie-break test).
+interface MovesetIndexTieScenarioSpec {
+  label: string;
+  path: string;
+  // 0-based opponent moveset slots the turn-1 pick is allowed to land on.
+  // Every slot NOT in this list must show zero PP delta.
+  allowedWinnerSlots: readonly number[];
+}
+
+const RAINDANCE_HAIL_TIE_SCENARIOS: MovesetIndexTieScenarioSpec[] = [
+  {
+    label:
+      "doc §27.5 carry: opponent moveset [MOVE_RAIN_DANCE(240, EFFECT_RAIN_DANCE -> AI_CV_RainDance, doc §27.1 handler 22, writes-conditionally), MOVE_HAIL(258), MOVE_SPLASH x2] vs Shuckle (Anorith faster, Gate P true) -- Gate P jumps past Gate S entirely, the weatherless shared span never writes, so the TTF-pass exit (Sun, from the 0-power filler slots) survives RainDance's own dispatch untouched AND scores RainDance's own +1 (Sun is in RAIN_DANCE_OTHER_THREE) -- Hail then reads that same surviving Sun carry for its own +1. Net CV +1/+1/0/0 -- a genuine 2-way tie between RainDance and Hail, both strictly above both Splash slots. The turn-1 pick must land on movesetIndex 0 or 1, never 2 or 3, both seeds.",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-hail-movesetindex1-writesconditionally-raindance-carry-off.json",
+    allowedWinnerSlots: [0, 1],
+  },
+  {
+    label:
+      "doc §27.5 clean: opponent moveset [MOVE_RAIN_DANCE(240), MOVE_HAIL(258), MOVE_SPLASH x2] vs Misdreavus (Anorith SLOWER, Gate P false) -- Gate S's own get_ability AI_USER (Battle Armor, id 4, outside the 0-3 ABILITY_ID_IN_WEATHER_RANGE collision set) ALWAYS fires, overwriting funcResult with a safe (non-weather-colliding) value before the shared span or Hail's own get_weather ever reads it -- RainDance's own score is 0 (not Rain Dish either), Hail's own score is 0 (the carry it reads is not Sun). Net CV 0/0/0/0 -- a genuine 4-way tie, same shape as doc §27's own writesalways-clean fixture. The turn-1 pick may land on ANY of the 4 slots (not asserted which), both seeds.",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-hail-movesetindex1-writesconditionally-raindance-clean-off.json",
+    allowedWinnerSlots: [0, 1, 2, 3],
+  },
+];
+
+async function verifyMovesetIndexTieScenario(spec: MovesetIndexTieScenarioSpec): Promise<void> {
+  console.log(`\n=== ${spec.label} ===`);
+  for (const seed of SEEDS) {
+    const run1 = await runScenario(spec.path, seed);
+    const run2 = await runScenario(spec.path, seed);
+
+    const f0a = run1.get(0)!;
+    const f0b = run2.get(0)!;
+    check(
+      `seed ${seed}: frame 0 identical across reruns (determinism)`,
+      JSON.stringify(f0a) === JSON.stringify(f0b),
+      "initial state differs between runs",
+    );
+
+    const fAfter = run1.get(732)!;
+    const fAfter2 = run2.get(732)!;
+    check(
+      `seed ${seed}: frame 732 identical across reruns (determinism)`,
+      JSON.stringify(fAfter) === JSON.stringify(fAfter2),
+      "final state differs between runs",
+    );
+
+    const before = f0a.battlers.opponent.pp;
+    const after = fAfter.battlers.opponent.pp;
+    const deltas = before.map((v, i) => v - after[i]!);
+    const winners = deltas.map((d, i) => (d !== 0 ? i : -1)).filter((i) => i >= 0);
+
+    check(
+      `seed ${seed}: exactly one opponent moveset slot used this turn`,
+      winners.length === 1 && deltas[winners[0]!] === 1,
+      `observed opponent PP ${JSON.stringify(before)} -> ${JSON.stringify(after)} (deltas ${JSON.stringify(deltas)})`,
+    );
+    check(
+      `seed ${seed}: turn-1 pick lands on an allowed slot (${JSON.stringify(spec.allowedWinnerSlots)})`,
+      winners.length === 1 && spec.allowedWinnerSlots.includes(winners[0]!),
+      `turn-1 pick was slot ${JSON.stringify(winners)}, allowed ${JSON.stringify(spec.allowedWinnerSlots)}`,
+    );
+
+    check(
+      `seed ${seed}: opponent HP stays >=40% through frame 732 (no HP-gate confound)`,
+      fAfter.battlers.opponent.hp >= 0.4 * f0a.battlers.opponent.hp,
+      `opponent HP ${f0a.battlers.opponent.hp} -> ${fAfter.battlers.opponent.hp}`,
+    );
+
+    console.log(`  seed ${seed}: opponent PP @0=${JSON.stringify(before)} @732=${JSON.stringify(after)}`);
+  }
+}
+
 async function main(): Promise<void> {
   for (const spec of SCENARIOS) {
     await verifyScenario(spec);
@@ -1790,6 +1905,9 @@ async function main(): Promise<void> {
   }
   for (const spec of MOVESETINDEX_CARRY_SCENARIOS) {
     await verifyMovesetIndexCarryScenario(spec);
+  }
+  for (const spec of RAINDANCE_HAIL_TIE_SCENARIOS) {
+    await verifyMovesetIndexTieScenario(spec);
   }
 
   console.log(`\n${failures === 0 ? "ALL PASS" : `${failures} FAILURE(S)`}`);

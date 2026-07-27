@@ -5630,3 +5630,194 @@ facing AI parity for this specific remainder is ever prioritized: threading
 a full per-slot `funcResult` simulation across the CV pass (using §27.1's
 own per-handler write table directly) rather than the current single-slot
 fallback.
+
+### 27.5 2026-07-27 follow-up side-lane session: the 7 writes-conditionally handlers as PREDECESSORS, live-verified for `AI_CV_RainDance` — ISSUES #47's last named residual
+
+Bounded side-lane worker session (Battle Scene OFF oracle), same
+no-`src/`-changes contract as every addendum above. Since §27.4 was
+written, PROGRESS entry 511 shipped the full per-slot `funcResult` value
+simulation §27.1's audit called for — `factoryAiCheckViability.ts` now
+returns a derived `funcResultAfter` on every dispatch branch of all 22
+`AI_CV_*` handlers, including the 7 writes-conditionally ones, and
+`factoryAiDecisionPolicy.ts` threads it slot-to-slot across the whole CV
+pass. What §27.4 left open — "no live fixture places a weather move behind
+ONE OF THESE SEVEN specifically" — is this session's scope: stage a
+predecessor/weather-move pair from that class and confirm the shipped
+derivation against the real ROM, not just against source.
+
+#### 27.5.1 Predecessor choice: `AI_CV_RainDance`'s Gate P, not an HP band
+
+4 of the 7 (`DefenseUp`/`SpDefUp`/`LightScreen`/`Reflect`) gate their write
+on **AI_USER's own HP band** (§27.1 handlers 11/15-17) — reaching a
+non-default band requires real, calibrated turn-1 damage (this doc's
+established `mash-rep`/damage-sizing recipes, e.g. §13's Anorith/Machamp
+`MOVE_VITAL_THROW` pairing), and the *interesting* decision would then be a
+**second, fully-executed turn** (a phantom, computed-but-unexecuted
+next-turn re-decision can't be read via PP delta at all, since it never
+touches PP — confirmed by re-deriving §11.0's own phantom-decision note
+against `weatherSetterCvScore`'s zero-`if_random_less_than` body: neither
+`AI_CV_LightScreen`/`AI_CV_Hail`'s own draw count differs between branches
+when the target's type is chosen to avoid the `AI_WEATHER_*` collision
+range, so a phantom decision would be externally silent either way). The
+other 2 (`SunnyDay`/`Hail`, handlers 20-21) gate on **real weather being
+set**, but `get_weather` reads genuine ground truth for every weather
+handler that calls it — once real weather exists, `Hail`'s own read no
+longer depends on what any predecessor wrote or didn't, so this class
+can't demonstrate "predecessor write replaces the carry with a value that
+changes what Hail sees" at all (confirmed by re-deriving `weatherSetterCvScore`
+directly: `currentWeather` is consulted before any stale fallback,
+independent of the calling slot).
+
+`AI_CV_RainDance` (handler 22) is the one exception: its Gate P
+(`if_user_faster`) is a **static species/speed comparison**, not real
+battle damage — the cheapest of the 7 to force, and per the brief's own
+"avoid predecessors whose condition needs an unforceable AI pick" guidance,
+fully forceable by species choice alone. Gate S (`get_ability AI_USER`,
+`data/battle_ai_scripts.s:2039`) fires unconditionally whenever
+`!userFaster`, regardless of HP or weather — the one write path among the
+7 needing zero real damage and zero RNG-forcing.
+
+`runCvRainDance`/`rainDanceFuncResultAfter` (`src/engine/factoryAiCheckViability.ts:2570-2662`,
+PROGRESS entry 511): with `userFaster` true, Gate S is bypassed entirely and
+the shared weather span's own `get_weather` doesn't write absent real
+weather (same BUGFIX-undefined gap as `SunnyDay`/`Hail`) — RainDance's own
+`funcResultAfter` is the untouched incoming carry. With `userFaster` false,
+Gate S's own `get_ability AI_USER` call ALWAYS writes, collision-mapped via
+`ABILITY_ID_IN_WEATHER_RANGE` (`factoryAiCheckBadMove.ts:150-155`:
+`ABILITY_NONE`=0, `ABILITY_STENCH`=1, `ABILITY_DRIZZLE`=2,
+`ABILITY_SPEED_BOOST`=3 collide; every other ability, including Battle
+Armor at its real id 4, is safe/non-colliding).
+
+#### 27.5.2 Fixture design
+
+Both fixtures: opponent (AI_USER) = **Anorith (390, level 50, base Speed
+75 → level-50 95, ability Battle Armor — its only ability, already this
+doc's established confound-free choice, §13.2/§27.2)**, moveset
+`[MOVE_RAIN_DANCE(240), MOVE_HAIL(258), MOVE_SPLASH(150) x2]` — RainDance
+at movesetIndex **0** (the predecessor under test), Hail at index **1**,
+the same 2-Splash-filler tail every §27 fixture uses to bank the TTF-pass
+exit at `AI_WEATHER_SUN` (0). No damage occurs anywhere in either fixture
+(both fixtures' target moveset is `MOVE_SPLASH` x4) — the only thing that
+changes between them is the **target species**, which flips the
+Anorith-vs-target speed comparison Gate P reads:
+
+- **`mechanic-factory-ai-cv-hail-movesetindex1-writesconditionally-raindance-carry-off.json`**
+  ("carry"): target = **Shuckle (213, level-50 Speed ~14)** — Anorith (95)
+  is faster, `userFaster` = true, Gate P jumps past Gate S.
+- **`mechanic-factory-ai-cv-hail-movesetindex1-writesconditionally-raindance-clean-off.json`**
+  ("clean"): target = **Misdreavus (200, level-50 Speed 105, ability
+  Levitate — single ability, no entry hook, no weather interaction)** —
+  Anorith is now SLOWER, `userFaster` = false, Gate S always fires.
+
+Both: single turn only (`[A, wait 30, A, wait 700]`, `captureFrames
+[0,100,300,732]`, this doc's simplest established capture shape — no
+multi-turn mash needed, since the only real decision under test is turn
+1's own, at each species' default 100% HP).
+
+#### 27.5.3 Prediction, computed directly from the shipped engine code (not hand-derived alone) before touching the oracle
+
+Per this session's own no-`src/`-changes contract, the prediction was
+computed twice, independently: once by hand from §27.1's audit + PROGRESS
+entry 511's derivation prose, and once by calling
+`chooseFactoryAiScoredDecision` directly with the exact fixture stats
+(a throwaway harness reusing the `movesetIndex1View` shape from
+`tests/factoryAiScoredDecision.test.ts`'s own §27 describe block) — both
+agree exactly, reproduced here:
+
+- **Carry fixture**: `checkViabilityDelta` = `[+1, +1, 0, 0]`,
+  `bestMoveSlots` = `[0, 1]` — Gate P true skips Gate S, the shared span
+  never writes (no real weather), so RainDance's own `funcResultAfter` is
+  the surviving Sun(0) carry; RainDance's own score ALSO reads that same
+  carry (`RAIN_DANCE_OTHER_THREE` = `{HAIL, SUN, SANDSTORM}`, Sun is a
+  member) for `+1`; Hail (movesetIndex 1) then reads the same surviving
+  Sun carry for its own `+1` (`HAIL_OTHER_THREE` includes Sun too). A
+  genuine **2-way tie** between RainDance and Hail, both strictly above
+  both Splash slots (`0`) — **not** a clean single-winner shape like §27's
+  own writesnever fixture, because RainDance and Hail are both
+  weather-adjacent handlers reading the identical surviving carry.
+- **Clean fixture**: `checkViabilityDelta` = `[0, 0, 0, 0]`,
+  `bestMoveSlots` = `[0, 1, 2, 3]` — Gate S's own ability read overwrites
+  the carry with Battle Armor's collision (`undefined`, id 4 is outside
+  the 0-3 map); RainDance's own score is `0` (not Rain Dish either, so
+  Gate R's own tail also nets `0`); Hail then reads that same safe,
+  non-Sun value for its own `0`. A genuine **4-way tie**, byte-for-byte the
+  same shape as §27's own writesalways-clean fixture.
+
+**What the CURRENT (post-entry-511) engine model predicts, both fixtures**:
+exactly the two shapes above — entry 511's per-slot `funcResultAfter`
+simulation already threads `RainDance`'s own derived carry/write into
+`Hail`'s own slot-1 dispatch, using the SAME mechanism §27.2 confirmed for
+the writes-never/writes-always classes. If the ROM's real behavior matches,
+this is a **positive confirmation** of the shipped model for a
+writes-conditionally predecessor specifically (not yet exercised by any
+prior fixture) — not a search for a new bug, per the brief's own framing
+("should now MATCH the ROM if entry 511's derivations are right").
+
+#### 27.5.4 Live ledger (oracle-verified, both seeds, both reruns)
+
+| Fixture | Opponent PP @ frame 0 | Opponent PP @ frame 732 | Result |
+| --- | --- | --- | --- |
+| `...writesconditionally-raindance-carry-off` | `[5,10,40,40]` | seed 1: `[4,10,40,40]`; seed 99: `[4,10,40,40]` | Slot 0 (RainDance) wins both banked seeds — **never** slot 2/3 (Splash). Byte-identical across both reruns each. |
+| `...writesconditionally-raindance-clean-off` | `[5,10,40,40]` | seed 1: `[4,10,40,40]`; seed 99: `[5,10,39,40]` | Seed 1 → slot 0 (RainDance); seed 99 → slot 2 (Splash) — two *different* slots win across the two seeds, live-confirming a genuine 4-way tie (the same evidentiary standard §27.3's own writesalways-clean fixture used). Byte-identical across both reruns each. |
+
+Both fixtures: opponent HP stays at 100% through frame 732 in every run (no
+damage occurs on either side by design — no HP-gate confound is even
+possible). Wired into
+`tools/probe/verify-factory-ai-checkviability-ground-truth.ts`'s new
+`RAINDANCE_HAIL_TIE_SCENARIOS` array (2 entries) +
+`verifyMovesetIndexTieScenario` runner (asserts exactly one opponent
+moveset slot is used per turn, and that slot is a member of the fixture's
+own `allowedWinnerSlots` set — `[0,1]` for the carry fixture, `[0,1,2,3]`
+for the clean fixture). Full script run this session: **ALL PASS, 0
+failures**, run twice (reproduce with `node --experimental-strip-types
+tools/probe/verify-factory-ai-checkviability-ground-truth.ts`) — every
+prior scenario in this doc (§9, §11.5, §12.1, §13.4, §14.6, §15.5, §16.5,
+§17.7, §18.7, §19.7, §20.5, §21.5, §22.6, §23.6, §24.8, §25.7, §26.4,
+§27.3) unchanged and still green.
+
+**Additional exploratory seeds** (not part of the pinned 2-seed script, but
+recorded here since the carry fixture's own banked seeds 1/99 both happened
+to land on RainDance rather than Hail, which alone wouldn't distinguish "a
+genuine 2-way tie" from "RainDance deterministically outscores Hail"):
+seeds 2, 3, 5 land on slot 1 (Hail, PP `10→9`); seeds 7, 13, 21, 42 land on
+slot 0 (RainDance, PP `5→4`) — across 9 total seeds, **both** tied slots
+win at least once, and slot 2/3 (Splash) **never** wins in any of them,
+confirming the predicted 2-way tie directly rather than resting on the two
+banked seeds' own coincidence.
+
+#### 27.5.5 Verdict: shipped model vs. the ROM, per fixture
+
+**`...writesconditionally-raindance-carry-off`: shipped model CONFIRMED.**
+The ROM's turn-1 pick lands only on RainDance or Hail (never Splash) across
+9 tested seeds, exactly matching the shipped engine's own `[+1,+1,0,0]`
+2-way-tie prediction — entry 511's per-slot `funcResultAfter` simulation
+correctly threads `AI_CV_RainDance`'s own Gate-P-bypassed, weatherless
+"no write" branch into `AI_CV_Hail`'s own slot-1 dispatch, the same
+mechanism §27.4 confirmed for a writes-never predecessor, now positively
+extended to a writes-conditionally one.
+
+**`...writesconditionally-raindance-clean-off`: shipped model CONFIRMED.**
+The ROM's turn-1 pick varies by seed across all 4 slots (a genuine tie,
+same live-observed shape as §27.3's own writesalways-clean fixture),
+exactly matching the shipped engine's own `[0,0,0,0]` 4-way-tie prediction
+— entry 511's derivation of `AI_CV_RainDance`'s own Gate-S ability write
+(collision-mapped, safely non-`AI_WEATHER_*`) correctly destroys the carry
+before `AI_CV_Hail`'s own slot-1 dispatch, exactly as intended.
+
+**No divergence found for this predecessor.** Both fixtures' predictions
+were computed BEFORE the oracle was ever queried (independently, by hand
+and by direct engine invocation, agreeing exactly) and both matched the
+live ROM exactly — entry 511's write audit and its engine-side
+implementation hold up for the one writes-conditionally handler this
+session live-tested as a predecessor. The remaining 6 writes-conditionally
+handlers (`DefenseUp`/`SpDefUp`/`LightScreen`/`Reflect`/`SunnyDay`/`Hail`)
+are still not live-tested as predecessors specifically — per §27.5.1,
+`DefenseUp`/`SpDefUp`/`LightScreen`/`Reflect` would need a genuinely
+two-real-turn fixture (calibrated turn-1 damage banding AI_USER's own HP,
+then a second, fully-executed turn to read the interesting decision via PP
+delta — a phantom computed-but-unexecuted decision is unreadable here,
+confirmed above), and `SunnyDay`/`Hail` as predecessors can't demonstrate
+this angle at all once real weather exists (every weather handler reads
+the same ground truth, independent of any predecessor's own write). ISSUES
+#47's own residual should be trimmed to name exactly this remainder, not
+left implying all 7 are equally untested.
