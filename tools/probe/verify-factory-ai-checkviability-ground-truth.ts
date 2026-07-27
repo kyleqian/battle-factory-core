@@ -1665,6 +1665,113 @@ async function verifyRedirectScenario(spec: RedirectScenarioSpec): Promise<void>
   );
 }
 
+// ISSUES #47 remainder (docs/factory-ai-checkviability-ground-truth.md
+// §25.11): does the TTF-pass-exit `funcResult` carry (Channel 2, doc
+// §25.10.1) survive an EARLIER movesetIndex slot's own `AI_CV_*` dispatch
+// within the SAME CV pass, reaching a LATER slot's own weather handler?
+// `factoryAiDecisionPolicy.ts`'s own `staleFuncResultFallback` (PROGRESS
+// entry 504) is threaded into the CV pass's first actually-scripted slot
+// ONLY (movesetIndex 0) -- both fixtures below place `MOVE_HAIL` at
+// movesetIndex **1**, so the engine's own fallback provably never applies
+// to it, regardless of what the ROM itself does. These two fixtures isolate
+// the ROM's real answer for the two `AI_CV_*` write classes doc §25.11's
+// own audit table names: `AI_CV_SpeedDown` (movesetIndex 0, writes-never --
+// carry should survive) and `AI_CV_AttackDown` (movesetIndex 0,
+// writes-always via its own unconditional `get_target_type1` -- carry
+// should be destroyed before Hail's own slot dispatches). Opponent
+// (AI_USER) = Dugtrio (51, base Speed 120, single relevant confound-free
+// species already used by this doc's own established `AI_CV_SpeedDown`
+// fixtures); target (player) = Shuckle (213, base Speed 5 -- always slower,
+// so `AI_CV_SpeedDown`'s own `if_target_faster` gate deterministically takes
+// its zero-draw `-3` branch; Bug/Rock typing lands in BOTH
+// `AI_CV_AttackDown_PhysicalTypeList` -- deterministic zero-draw `0` -- and
+// safely outside the `AI_WEATHER_*` 0-3 id range for every stale-carry
+// value either handler could leave behind: `TYPE_BUG`=6,
+// `MOVE_POWER_OTHER`=0 only matters when NOT overwritten; ability Sturdy=5
+// keeps the CBM-pass Channel 1 collision silent throughout, matching this
+// doc's own established "safe target" convention, §25.9.3/§25.10.2). No
+// weather is ever established (both fixtures' turn 1 is the only turn
+// executed), so `get_weather` itself never writes `funcResult`
+// (BUGFIX-undefined in this pinned checkout, doc §25.10.1) -- whatever
+// value is sitting in `funcResult` when Hail's own dispatch reads it is
+// entirely determined by whether movesetIndex 0's own handler touched it.
+interface MovesetIndexCarryScenarioSpec {
+  label: string;
+  path: string;
+  // 0-based opponent moveset index carrying MOVE_HAIL.
+  weatherSlot: number;
+  // true: the weather slot is predicted to win turn 1 deterministically
+  // (both seeds) -- the stale TTF-exit carry survived movesetIndex 0's own
+  // dispatch untouched and matches AI_CV_Hail's own Sun branch. false: the
+  // weather slot is predicted to NEVER win (both seeds) -- movesetIndex 0's
+  // own handler overwrote funcResult first, so AI_CV_Hail's own get_weather
+  // reads a value that cannot collide with AI_WEATHER_SUN/RAIN/SANDSTORM;
+  // which of the OTHER (tied, zero-score) slots wins its own tie-break is
+  // not asserted.
+  expectedWeatherSlotWins: boolean;
+}
+
+const MOVESETINDEX_CARRY_SCENARIOS: MovesetIndexCarryScenarioSpec[] = [
+  {
+    label:
+      "ISSUES #47 remainder, carry survives: opponent moveset [MOVE_STRING_SHOT(81, EFFECT_SPEED_DOWN -> AI_CV_SpeedDown, doc §25.11 writes-never), MOVE_HAIL(258), MOVE_SPLASH x2] vs Shuckle -- AI_CV_SpeedDown's own deterministic -3 branch (data/battle_ai_scripts.s:1142-1145, if_target_faster false) never touches funcResult, so the TTF-pass exit (MOVE_POWER_OTHER=0=AI_WEATHER_SUN, from the last 0-power filler slot, doc §25.10.1) is still sitting there untouched when AI_CV_Hail's own get_weather (movesetIndex 1, :2263) reads it -- net CV +1 for Hail (Sun branch), -3 for String Shot, 0 for both Splash slots -- Hail must win turn 1's pick outright, both seeds. The CURRENT ENGINE would NOT reproduce this: `staleFuncResultFallback` is supplied only to the CV pass's movesetIndex-0 call (`factoryAiCheckViability.ts` callers in `factoryAiDecisionPolicy.ts`), never to movesetIndex 1, so a naive port of this exact fixture would score Hail's own CV contribution as a clean 0 (tied with both Splash slots, needing a 3-way tie-break) rather than the ROM's own deterministic +1 -- the engine-vs-ROM divergence this doc's own §47 audit predicted.",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-hail-movesetindex1-writesnever-carry-off.json",
+    weatherSlot: 1,
+    expectedWeatherSlotWins: true,
+  },
+  {
+    label:
+      "ISSUES #47 remainder, carry destroyed: opponent moveset [MOVE_GROWL(45, EFFECT_ATTACK_DOWN -> AI_CV_AttackDown, doc §25.11 writes-always), MOVE_HAIL(258), MOVE_SPLASH x2] vs Shuckle -- AI_CV_AttackDown's own body ALWAYS reaches its unconditional get_target_type1 (data/battle_ai_scripts.s:1090-1104 -- Shuckle's own neutral ATK stage and >70% HP both take the zero-draw fallthrough into AI_CV_AttackDown4, no branch skips it), overwriting funcResult with TYPE_BUG(6) -- outside the AI_WEATHER_* 0-3 range, and Shuckle's own Bug/Rock typing is in AI_CV_AttackDown_PhysicalTypeList so Growl itself nets a deterministic zero-draw 0 -- by the time AI_CV_Hail's own get_weather (movesetIndex 1) reads funcResult, the TTF-pass exit carry is already gone, replaced by 6 -- none of Hail's own Sun/Rain/Sandstorm checks match, net CV 0 for Hail, tied with Growl(0)/Splash(0)/Splash(0) -- Hail must NEVER win turn 1's pick (a real Random()-driven tie-break governs which of the other three slots does, not asserted here), both seeds. This is the CURRENT ENGINE'S own prediction too (no fallback applies to movesetIndex 1 either way, and funcResult never entered the engine's clean model to begin with) -- no divergence expected for this fixture, confirming the audit's writes-always classification rather than exposing a gap.",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-hail-movesetindex1-writesalways-clean-off.json",
+    weatherSlot: 1,
+    expectedWeatherSlotWins: false,
+  },
+];
+
+async function verifyMovesetIndexCarryScenario(spec: MovesetIndexCarryScenarioSpec): Promise<void> {
+  console.log(`\n=== ${spec.label} ===`);
+  for (const seed of SEEDS) {
+    const run1 = await runScenario(spec.path, seed);
+    const run2 = await runScenario(spec.path, seed);
+
+    const f0a = run1.get(0)!;
+    const f0b = run2.get(0)!;
+    check(
+      `seed ${seed}: frame 0 identical across reruns (determinism)`,
+      JSON.stringify(f0a) === JSON.stringify(f0b),
+      "initial state differs between runs",
+    );
+
+    const fAfter = run1.get(732)!;
+    const before = f0a.battlers.opponent.pp;
+    const after = fAfter.battlers.opponent.pp;
+    const weatherDelta = before[spec.weatherSlot]! - after[spec.weatherSlot]!;
+
+    if (spec.expectedWeatherSlotWins) {
+      const othersUntouched = before.every((v, i) => i === spec.weatherSlot || v === after[i]);
+      check(
+        `seed ${seed}: turn-1 pick is the weather slot (index ${spec.weatherSlot}, MOVE_HAIL) -- PP drops by exactly 1, every other slot untouched`,
+        weatherDelta === 1 && othersUntouched,
+        `observed opponent PP ${JSON.stringify(before)} -> ${JSON.stringify(after)}`,
+      );
+    } else {
+      check(
+        `seed ${seed}: turn-1 pick is NEVER the weather slot (index ${spec.weatherSlot}, MOVE_HAIL) -- its own PP stays untouched`,
+        weatherDelta === 0,
+        `observed opponent PP ${JSON.stringify(before)} -> ${JSON.stringify(after)}`,
+      );
+    }
+
+    check(
+      `seed ${seed}: opponent HP stays >=40% through frame 732 (no HP-gate confound)`,
+      fAfter.battlers.opponent.hp >= 0.4 * f0a.battlers.opponent.hp,
+      `opponent HP ${f0a.battlers.opponent.hp} -> ${fAfter.battlers.opponent.hp}`,
+    );
+
+    console.log(`  seed ${seed}: opponent PP @0=${JSON.stringify(before)} @732=${JSON.stringify(after)}`);
+  }
+}
+
 async function main(): Promise<void> {
   for (const spec of SCENARIOS) {
     await verifyScenario(spec);
@@ -1680,6 +1787,9 @@ async function main(): Promise<void> {
   }
   for (const spec of SPEEDDOWNFROMCHANCE_REDIRECT_SCENARIOS) {
     await verifyRedirectScenario(spec);
+  }
+  for (const spec of MOVESETINDEX_CARRY_SCENARIOS) {
+    await verifyMovesetIndexCarryScenario(spec);
   }
 
   console.log(`\n${failures === 0 ? "ALL PASS" : `${failures} FAILURE(S)`}`);
