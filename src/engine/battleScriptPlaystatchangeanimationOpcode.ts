@@ -61,7 +61,7 @@ import type {
   BattleScriptBattlerSelectorResolverPort,
   BattleScriptControllerIdlePort,
 } from "./battleScriptSourceCommands.ts";
-import type { BattleScriptRulesContext, BattleScriptRulesBattler } from "./battleScriptRulesContext.ts";
+import type { BattleScriptRulesContext, BattleScriptRulesBattlerState } from "./battleScriptRulesContext.ts";
 import type { BattleScriptProgram } from "./battleScriptProgram.ts";
 
 /** include/constants/battle_script_commands.h:382-388. */
@@ -135,7 +135,7 @@ type PlaystatchangeanimationOutcome = Readonly<{
 }>;
 
 function computePlaystatchangeanimation(
-  battlerState: BattleScriptRulesBattler,
+  battlerState: BattleScriptRulesBattlerState,
   mistTimer: number,
   statsToCheckMask: number,
   flags: number,
