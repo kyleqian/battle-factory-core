@@ -14,6 +14,66 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > entry 468's animation items are the animation supervisor's backlog now.
 
 ---
+## 482 — [2026-07-26] Counter/Mirror Coat registered end-to-end (closes ISSUES #46)
+
+- **State:** tree committed and green at **226 files / 3054 tests** (+19
+  tests over entry 481's 3035), build green (`tsc -b && vite build`).
+  Census **92/214 effects, 187/355 moves, 150/276 Factory-L50, 1884/2957
+  weighted** (was 90/214/185/355/148/276/1830/2957; +54 weighted, exactly
+  entry 479's estimate — EFFECT_COUNTER +40, EFFECT_MIRROR_COAT +14), all
+  32 self-checks pass. `executableFrontierRatchet.test.ts`'s per-module
+  barrier counts **unmoved** (no new unsupported-branch barrier added).
+  `battleScriptRulesContext.test.ts`'s opcode-handler-count pin moved
+  106→108 (the 2 new opcodes).
+- **Did:** landed `docs/counter-retaliation-design.md` §4's full 8-step
+  checklist in 5 commits. (1) Added `protectPhysicalDmg`/
+  `protectPhysicalBattlerId`/`protectSpecialDmg`/`protectSpecialBattlerId`
+  to `BattleScriptMoveEndBattlerMetadata`/`BattleScriptRulesBattler` +
+  the materialization loop + the 3 zero-construction sites. (2) Wired
+  `createDatahpupdateOpcodeHandler`'s physical/special branches to also
+  write the 2 new fields each (stale doc comment corrected). (3) Added
+  the full-`ProtectStruct`-table per-turn clear at
+  `mapFaintedActionsResult`'s `"no-fainted-battlers"` branch — **this is
+  the ISSUES #46 fix**: every modeled `ProtectStruct` bit on every
+  battler now resets once per turn, matching source's
+  `TurnValuesCleanUp(FALSE)`, instead of persisting forever once set.
+  Deleted the mislabeled top-of-function `flinchImmobility` clear it
+  superseded (it never matched `TurnValuesCleanUp(TRUE)`'s real
+  protected/endured-only semantics and was redundant with the new tail
+  clear). (4) Registered `B_SCR_OP_COUNTERDAMAGECALCULATOR`/
+  `B_SCR_OP_MIRRORCOATDAMAGECALCULATOR` per §1.4's exact 3-gate success
+  branch + `ppNotAffectedByPressure` failure branch; Follow Me redirect
+  is a structural no-op (this engine's `BattleScriptSideTimerState` has
+  no `followmeTimer` field at all). (5)/(6) TYPECALC2 and both
+  `BattleScript_EffectCounter`/`EffectMirrorCoat` script blocks were
+  already present (entry 479/pre-existing) — re-verified fresh, no
+  changes needed. (7) Added 2 new Mirror Coat live battle-lab fixtures
+  (prep-scout §1d: not yet fixtured) and reran
+  `tools/probe/verify-fixed-damage-cluster-ground-truth.ts` against the
+  live Battle Scene OFF oracle: **all 8 scenarios PASS** (Counter hit
+  2→4 both seeds; Mirror Coat hit 16→32 seed 1 / 15→30 seed 4; both
+  fail cases 0/0). (8) `npm test` stayed green throughout — no test
+  pinned the pre-existing cross-turn staleness bug, so no test needed
+  fixing.
+- **Next:** SpDefUp/CosmicPower/CalmMind CBM+CV pair (staging groundwork
+  flagged in entry 477's side-merge note: separate CBM handlers
+  `:576-593`, Gate F `if_in_bytes` INVERTED vs DefenseUp); then
+  LightScreen/Reflect/EvasionUp/EvasionDown/weather-trio pairs (the last
+  8 of 22 CV handlers); §19.5's unstaged AccuracyDown sites 2-6 (need
+  mixed movesets); entry 476's §18 5-6-draw window discrepancy (probe
+  candidate, sRandCount attribution); ENDTURN_ITEMS2 after Yawn/Thrash.
+  Seam — turn-4 `anchorOpponentAfterTurn4Hp` staging gap and seam-scout
+  §9 items remain carried from entry 468. Animation program is
+  independent now (entry 481's separate supervisor).
+- **Notes:** 26 new Tier-1 tests total (13 opcode-level success/failure-
+  gate/cross-gate-isolation, 4 full-committed-script live-oracle-pinned
+  reproduction, 1 per-turn-clear-across-all-battlers, 2 datahpupdate
+  write-through, 2 attack-canceler helper-fixups, 4 misc). DisableStruct
+  `isFirstTurn`/rechargeTimer` decrements and substitute-status2 sync
+  stayed out of scope per the design doc (noted for a future struct, not
+  modeled). No PAPERCUTS this step.
+
+---
 ## 481 — [USER-DIRECTED 2026-07-26 ~20:00] Separate animation supervisor stood up: `--lane animation` launcher, `animation-main` branch + persistent worktree, session-boundary merge protocol
 
 - **State:** tree committed and green (226 files / 3035 tests, build green —
@@ -83,69 +143,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   remain the one shared surface (carving them into a registry is the named
   follow-up if the separate-supervisor plan proceeds).
 
----
-## 479 — [SUPERVISOR WIND-DOWN 2026-07-26 ~15:50] session summary
-
-- **State:** tree committed and green at **225 files / 3032 tests**, build
-  green, census **90/214 effects, 185/355 moves, 148/276 Factory-L50,
-  1830/2957 weighted** (all 32 self-checks pass; session start was 79/214,
-  163/355, 128/276, 1573/2957 with 25 checks — the census is also
-  MORE HONEST now: 4 false positives fixed via ISSUES #45's classifier fix,
-  so the true frontier delta is larger than the headline numbers). Single
-  main worktree, zero unmerged branches, zero stale worktrees, clean
-  `git status`. **No DEFERRED entries — nothing blocks the next
-  `run-supervisor.sh`.** No usage/rate limits at any point; all 19 workers
-  ran to completion (zero cap-kills, zero API drops, zero failed steps).
-- **Session (10 rounds / 19 workers over 2 lanes — animation paused by user
-  directive; every step supervisor-verified live: side branches verified in
-  their own worktrees with my own verify-script reruns before every merge,
-  suite+build rerun on every merged tree):**
-  - **Factory-AI CheckViability track:** EIGHT CBM+CV pairs ported —
-    AttackDown (§14), DefenseDown+SpDefDown (§15/§16), AttackUp+DefenseUp+
-    BulkUp (§17/§18), AccuracyDown (§19, all 7 draw sites), SpeedUp+SpAtkUp
-    (§20/§21) — 14 of 22 reachable CV handlers now live with CBM
-    counterparts, each against side-staged twin-fixture ground truth
-    (ledgers at both seeds ×2, draw-site attribution, six sibling-copy/
-    prose traps caught by assembly re-derivation). §6's original SpeedDown
-    fixtures now reproduce end-to-end through the engine.
-  - **End-turn track:** ENDTURN_ITEMS1 registered (REMOVEITEM + Leftovers/
-    8 cure berries/White Herb, live-verified to the exact frame); **END3
-    registered** (design-scout → registration pipeline; callback-stack
-    model, Cmd_end3 pops both stacks) with ENDTURN_ABILITIES completed —
-    Speed Boost, Rain Dish, Shed Skin, Truant all wired (barrier set now
-    EMPTY); stretch stat-up berries (Liechi/Salac/Petaya) landed.
-    ENDTURN_ITEMS2 stays correctly unregistered (Yawn/Thrash prerequisite).
-  - **Census clusters:** primary status cluster registered — EFFECT_SLEEP/
-    TOXIC/POISON/PARALYZE/CONFUSE (+ bonus SNORE/FACADE) via
-    SETEFFECTPRIMARY + 4 jump opcodes + jumpifability/JUMPIFSTATUS2
-    widenings; fixed-damage cluster registered — EFFECT_LEVEL_DAMAGE/
-    PSYWAVE/BRICK_BREAK via DMGTOLEVEL/PSYWAVEDAMAGEEFFECT/TYPECALC2
-    (pure immunity gate, no scaling)/REMOVELIGHTSCREENREFLECT.
-  - **Census hygiene:** ISSUES #45 filed AND fixed same-session (4 false
-    positives — classifier now knows SETEFFECTPRIMARY; POISON_FANG
-    corrected the other way; self-checks 25→32).
-  - **Design bank for next session:** `docs/counter-retaliation-design.md`
-    (Counter/Mirror Coat: 4 new flat protect-damage fields + turn clear in
-    `mapFaintedActionsResult`'s no-fainted branch, 8-step checklist) +
-    **ISSUES #46** (the missing ProtectStruct per-turn clear is a LATENT
-    staleness bug in landed admission mechanics, not just a Counter
-    blocker).
-- **Next (in order):** Counter/Mirror Coat registration per
-  `docs/counter-retaliation-design.md` §4 + ISSUES #46 (also fixes the
-  latent clear bug; +54 weighted); SpDefUp/CosmicPower/CalmMind pair
-  (staging groundwork flagged in entry 477's side-merge note: separate CBM
-  handlers `:576-593`, Gate F `if_in_bytes` INVERTED vs DefenseUp); then
-  LightScreen/Reflect/EvasionUp/EvasionDown/weather-trio pairs (the last 8
-  of 22 CV handlers); §19.5's unstaged AccuracyDown sites 2-6 (need mixed
-  movesets); entry 476's §18 5-6-draw window discrepancy (probe candidate,
-  sRandCount attribution); ENDTURN_ITEMS2 after Yawn/Thrash. Seam — turn-4
-  `anchorOpponentAfterTurn4Hp` staging gap and seam-scout §9 items remain
-  carried from entry 468 (untouched this session; the AI/census tracks were
-  prioritized). Animation — still paused per the user directive at top;
-  entry 468's animation items stay deferred, not abandoned.
-- **Notes:** zero PAPERCUTS flagged by any of the 19 workers (a first).
-  Supervisor process: the cwd-in-worktree self-merge trap fired once during
-  a fold (caught immediately, zero loss — branch merged cleanly from the
-  main tree; memory updated with the refined merge-block-starts-with-cd
-  rule). Oracle services stayed fresh all session
-  (`check-oracle-freshness.sh` PASS at start).

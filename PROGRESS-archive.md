@@ -1,4 +1,71 @@
 ---
+## 479 — [SUPERVISOR WIND-DOWN 2026-07-26 ~15:50] session summary
+
+- **State:** tree committed and green at **225 files / 3032 tests**, build
+  green, census **90/214 effects, 185/355 moves, 148/276 Factory-L50,
+  1830/2957 weighted** (all 32 self-checks pass; session start was 79/214,
+  163/355, 128/276, 1573/2957 with 25 checks — the census is also
+  MORE HONEST now: 4 false positives fixed via ISSUES #45's classifier fix,
+  so the true frontier delta is larger than the headline numbers). Single
+  main worktree, zero unmerged branches, zero stale worktrees, clean
+  `git status`. **No DEFERRED entries — nothing blocks the next
+  `run-supervisor.sh`.** No usage/rate limits at any point; all 19 workers
+  ran to completion (zero cap-kills, zero API drops, zero failed steps).
+- **Session (10 rounds / 19 workers over 2 lanes — animation paused by user
+  directive; every step supervisor-verified live: side branches verified in
+  their own worktrees with my own verify-script reruns before every merge,
+  suite+build rerun on every merged tree):**
+  - **Factory-AI CheckViability track:** EIGHT CBM+CV pairs ported —
+    AttackDown (§14), DefenseDown+SpDefDown (§15/§16), AttackUp+DefenseUp+
+    BulkUp (§17/§18), AccuracyDown (§19, all 7 draw sites), SpeedUp+SpAtkUp
+    (§20/§21) — 14 of 22 reachable CV handlers now live with CBM
+    counterparts, each against side-staged twin-fixture ground truth
+    (ledgers at both seeds ×2, draw-site attribution, six sibling-copy/
+    prose traps caught by assembly re-derivation). §6's original SpeedDown
+    fixtures now reproduce end-to-end through the engine.
+  - **End-turn track:** ENDTURN_ITEMS1 registered (REMOVEITEM + Leftovers/
+    8 cure berries/White Herb, live-verified to the exact frame); **END3
+    registered** (design-scout → registration pipeline; callback-stack
+    model, Cmd_end3 pops both stacks) with ENDTURN_ABILITIES completed —
+    Speed Boost, Rain Dish, Shed Skin, Truant all wired (barrier set now
+    EMPTY); stretch stat-up berries (Liechi/Salac/Petaya) landed.
+    ENDTURN_ITEMS2 stays correctly unregistered (Yawn/Thrash prerequisite).
+  - **Census clusters:** primary status cluster registered — EFFECT_SLEEP/
+    TOXIC/POISON/PARALYZE/CONFUSE (+ bonus SNORE/FACADE) via
+    SETEFFECTPRIMARY + 4 jump opcodes + jumpifability/JUMPIFSTATUS2
+    widenings; fixed-damage cluster registered — EFFECT_LEVEL_DAMAGE/
+    PSYWAVE/BRICK_BREAK via DMGTOLEVEL/PSYWAVEDAMAGEEFFECT/TYPECALC2
+    (pure immunity gate, no scaling)/REMOVELIGHTSCREENREFLECT.
+  - **Census hygiene:** ISSUES #45 filed AND fixed same-session (4 false
+    positives — classifier now knows SETEFFECTPRIMARY; POISON_FANG
+    corrected the other way; self-checks 25→32).
+  - **Design bank for next session:** `docs/counter-retaliation-design.md`
+    (Counter/Mirror Coat: 4 new flat protect-damage fields + turn clear in
+    `mapFaintedActionsResult`'s no-fainted branch, 8-step checklist) +
+    **ISSUES #46** (the missing ProtectStruct per-turn clear is a LATENT
+    staleness bug in landed admission mechanics, not just a Counter
+    blocker).
+- **Next (in order):** Counter/Mirror Coat registration per
+  `docs/counter-retaliation-design.md` §4 + ISSUES #46 (also fixes the
+  latent clear bug; +54 weighted); SpDefUp/CosmicPower/CalmMind pair
+  (staging groundwork flagged in entry 477's side-merge note: separate CBM
+  handlers `:576-593`, Gate F `if_in_bytes` INVERTED vs DefenseUp); then
+  LightScreen/Reflect/EvasionUp/EvasionDown/weather-trio pairs (the last 8
+  of 22 CV handlers); §19.5's unstaged AccuracyDown sites 2-6 (need mixed
+  movesets); entry 476's §18 5-6-draw window discrepancy (probe candidate,
+  sRandCount attribution); ENDTURN_ITEMS2 after Yawn/Thrash. Seam — turn-4
+  `anchorOpponentAfterTurn4Hp` staging gap and seam-scout §9 items remain
+  carried from entry 468 (untouched this session; the AI/census tracks were
+  prioritized). Animation — still paused per the user directive at top;
+  entry 468's animation items stay deferred, not abandoned.
+- **Notes:** zero PAPERCUTS flagged by any of the 19 workers (a first).
+  Supervisor process: the cwd-in-worktree self-merge trap fired once during
+  a fold (caught immediately, zero loss — branch merged cleanly from the
+  main tree; memory updated with the refined merge-block-starts-with-cd
+  rule). Oracle services stayed fresh all session
+  (`check-oracle-freshness.sh` PASS at start).
+
+---
 ## 478 — Seventh + eighth CBM-blocked pairs ported: `AI_CBM_SpeedUp`+`AI_CV_SpeedUp` (doc §20, mandatory) and `AI_CBM_SpAtkUp`+`AI_CV_SpAtkUp` (doc §21, expected)
 
 - **State:** tree green at **225 files / 3032 tests** (+0 files/+36 tests

@@ -5,34 +5,6 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #46 — ProtectStruct bits have no per-turn clear (latent staleness; blocks Counter/Mirror Coat)
-
-**Symptom:** the engine models several `gProtectStructs` bits (protect/endure,
-the nine-bit `WasUnableToUseMove` inputs, charging) that source resets every
-turn via `TurnValuesCleanUp(FALSE)` (`battle_main.c:3040/3901`, def
-`:4857-4874`) — the engine has no equivalent clear, so any set bit persists
-forever. Admission reducers (Disable/Taunt/Imprison/confusion/paralysis/
-infatuation) faithfully "only force to 1, never to 0", relying entirely on
-the missing clear. No current test pins the stale behavior (targeted grep,
-not exhaustive), so it is latent rather than manifest today.
-
-**Confirmed** (2026-07-26, design scout `docs/counter-retaliation-design.md`,
-supervisor re-verified the C cites): `SpecialStatusesClear()` wipes
-`gSpecialStatuses` after EVERY action (`battle_util.c:658-663`), while
-`gProtectStructs` survives to the true turn boundary — `Cmd_datahpupdate`
-writes the same damage value into both structs, so Counter (a cross-action
-same-turn read) must NOT reuse the engine's `specialStatus.physicalDmg`
-(same-action reads only: Rage/Defrost). Also: the `flinchImmobility` clear
-at the top of `runBattleEndTurnOrchestration` is mislabeled (conflates
-`STATUS2_FLINCHED`) — currently harmless, fix alongside.
-
-**Leads:** `docs/counter-retaliation-design.md` §4's 8-step registration
-checklist — four new flat fields (`protectPhysicalDmg`/`protectPhysicalBattlerId`
-+ special twins), write-through in `datahpupdate`, the turn clear in
-`mapFaintedActionsResult`'s `"no-fainted-battlers"` branch
-(`battleEndTurnOrchestration.ts:1287-1301`), then
-COUNTERDAMAGECALCULATOR/MIRRORCOATDAMAGECALCULATOR registration.
-
 ## #41 — Production engine modules import canonical RAM recordings
 
 **Symptom:** shipped `src/engine/` code reads recorded state from the single
