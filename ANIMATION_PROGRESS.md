@@ -51,6 +51,26 @@ through the shared Scene-ON seam at **139/139 player-back + 139/139
 opponent-front** complete component, hardware-transfer, and raw-RGB frames,
 reproduced twice fresh.
 
+## TAUNT source-evidence checkpoint; remains unsupported (2026-07-27)
+
+**Verdict:** `MOVE_TAUNT` remains unsupported. Complete legal Scene-ON
+mechanicLab parties now stage the real Level-50 set-184 MURKROW carrier
+(Quirky; SpDef/Defense/HP EV spread; Lax Incense) against slower constrained
+SHUCKLE in both player-back and opponent-front orientations. Schedule IDs
+184-189 are valid in the source Level-50 range, all active MURKROW choices
+are TAUNT, and both validated runs reach `currentMove: 269` with the complete
+party builder enabled.
+
+**Source boundary:** `Move_TAUNT` owns THOUGHT_BUBBLE (45-frame hold then
+reverse), FINGER_2's side-dependent animation/lifetime, two target-relative
+ANGER instances, Metronome/Tail Whip/Swagger2 sound boundaries, delays and
+waits. The existing SWAGGER anger reducer can be reused only for the literal
+ANGER template and target argv semantics; it cannot establish the new bubble
+or finger body. No reducer, typed seam, probe/comparator, assets, renderer,
+or raw-RGB claim is present; the exact dense window remains deliberately
+unmeasured. RAZOR LEAF stays **139/139** in both orientations as the required
+typed/renderer control.
+
 ## RAZOR LEAF promoted exact; leaf/cutter display path closed (2026-07-27)
 
 **Verdict:** `MOVE_RAZOR_LEAF` is exact. Legal challenge-0 parties retain real
