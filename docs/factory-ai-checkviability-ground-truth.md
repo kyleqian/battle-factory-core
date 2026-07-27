@@ -4078,31 +4078,122 @@ site, §23.4) that the anomaly is specific to the last-move-type-list code
 region those two handlers share, not a general property of "a draw site
 sitting last before `End`."
 
-### 24.5 The 6 unexercised `AI_CV_EvasionUp` draw sites — recipes, not fixtures, for a future porter
+### 24.5 DRAW SITE 3/4 (toxic-poison chain) — live-verified this follow-up session; 4 sites remain recipe-only
+
+**DRAW SITE 3 / DRAW SITE 4, live-verified** (`:1048`/`:1050`, target
+`STATUS1_TOXIC_POISON`) — this follow-up side-lane session (Battle Scene OFF
+oracle) closed the "genuine, unforced AI pick between two structurally
+different moves" obstacle the recipe below used to name, using the
+**two-Pokémon opponent relay** `docs/factory-ai-checkviability-ground-
+truth.md` §19.5 itself suggested for `AccuracyDown`'s analogous sites 3/4
+("one opponent Pokémon whose entire kit is Toxic lands the status and
+faints/switches, a second with the identical-slots candidate moves next"):
+opponent party slot 0 = **Magikarp** (129, level 5 — the low level is the
+whole trick, shrinking its max HP to 18 so a single `MOVE_SEISMIC_TOSS` hit
+is a guaranteed OHKO regardless of the roll), all 4 slots **`MOVE_TOXIC`**
+(92) — forced (4 identical slots), so its real turn-1 use against the
+target is not an unforced pick at all. Target (player) **Anorith** (390,
+single ability Battle Armor, reused verbatim from §13-23), all 4 slots
+**`MOVE_SEISMIC_TOSS`** (69, `EFFECT_LEVEL_DAMAGE`, fixed 50 dmg = Anorith's
+level, reused verbatim from §18.3/§19.3/§24.2). Opponent party slot 1 = the
+handler under test, **Shuckle** (213, single ability Sturdy, base Speed 5),
+all 4 slots **`MOVE_DOUBLE_TEAM`** (104).
+
+Turn 1: Magikarp (forced) uses Toxic on Anorith — lands both banked seeds
+(85% accuracy, not hard-guaranteed, but empirically confirmed live at both
+seed 1 and seed 99); Anorith Splashes (harmless, no retaliation risk while
+Magikarp is still needed alive to move). Turn 2: Anorith Seismic Tosses
+Magikarp (18 max HP, OHKO) — the opponent auto-sends Shuckle, switching in
+fresh at 95/95 (100%). **A new same-turn confound found live, closed by
+species choice, not staging**: an early draft used Magikarp (base Speed 80)
+for *both* opponent slots — since Magikarp is faster than Anorith (base
+Speed 75), Shuckle's own `MOVE_DOUBLE_TEAM` (raising its own evasion stage,
+executing *first* within the turn) would land before Anorith's *same-turn*
+Seismic Toss resolved, turning what should be Seismic Toss's guaranteed-hit
+100-accuracy check into a real, probabilistic ~85.7%-chance roll against the
+now-raised evasion stage — the exact same bug class §19.2/§19.5 already
+named for `AccuracyDown`'s own dispatch move (a same-turn move-order
+confound), just triggered here by the SECOND opponent Pokémon's own
+self-buff instead of the dispatch move itself. **Fix**: Shuckle's base Speed
+5 (vs. Anorith's 75) guarantees Anorith always moves first, so every Seismic
+Toss against it lands as a deterministic 50 damage with the target's evasion
+still at its pre-turn value.
+
+- **`evasionup-toxicchain-reach`** (REACH — the chain itself): after turn 2,
+  the trace continues into **turn 3** — Anorith Seismic Tosses Shuckle again
+  (95→45, 47.4%, comfortably ≤ 50%). The trailing phantom decision (this
+  doc's own "only the phantom next-decision is observable" mechanism, §11.0)
+  then reads target-toxic = true **and** opponent-own-HP ≤ 50% — Gate D's
+  reach condition for DRAW SITE 3's own chain.
+- **`evasionup-toxicchain-control`** (CONTROL A — same toxic prerequisite,
+  opposite HP band): the trace stops right after turn 2, capturing the
+  trailing phantom decision with Shuckle still fresh at 95/95 (> 50%) — Gate
+  D routes straight to DRAW SITE 4 alone, DRAW SITE 3 never reached.
+- **CONTROL B (no toxic) — already proven, not re-staged**: none of §24.3's
+  three existing `AI_CV_EvasionUp` fixtures (`fullhp-reach`, `midhp-control`,
+  `lowhp-reach`) ever apply `STATUS1_TOXIC_POISON` to the target, and Gate C
+  (`:1046`) is checked unconditionally on every pass regardless of the
+  opponent's own HP band — so all three already live-verified fixtures are
+  standing proof that Gates C/D and DRAW SITES 3/4 stay at zero draws when
+  the target isn't toxic-poisoned. No new fixture needed for this leg.
+
+**Live ledger, per-DRAW-SITE attribution**
+(`tools/probe/attribute-factory-ai-cv-drawsite-callers.py`, run against the
+handler's own real ROM addresses even though the script's checked-in
+`DRAW_SITE_TABLE` only names `DefenseUp`/`SpDefUp` — every `EvasionUp`-family
+hit still resolves to its own exact `AI_CV_EvasionUp*+0x<offset>` label via
+the script's `ai-decision-other-script` fallback path, which is what the
+table below transcribes; both seeds, window `0`→finalFrame):
+
+| Fixture | Seed | Opponent end state | `AI_CV_EvasionUp` (site 1) | `AI_CV_EvasionUp3` (site 3) | `AI_CV_EvasionUp4` (site 4) | `AI_CV_EvasionUp8` (site 8) | Total `Random()` (frame 0→final) |
+| --- | -: | --- | -: | -: | -: | -: | -: |
+| REACH | 1 | Shuckle 45/95 (47.4%) | 4 | **4** | **6** | 4 | 41 |
+| REACH | 99 | Shuckle 45/95 (47.4%) | 4 | **4** | **7** | 4 | 42 |
+| CONTROL A | 1 | Shuckle 95/95 (100%) | 4 | **0** | **4** | 0 | 23 |
+| CONTROL A | 99 | Shuckle 95/95 (100%) | 4 | **0** | **4** | 0 | 23 |
+
+**Oracle corroborates the chained model from `docs/factory-ai-draw-
+discrepancy-probe.md` §7.1/§7.3 (commit 20f09bb) exactly, with numbers**:
+CONTROL A's own DRAW SITE 3 count is **zero** in both seeds — when the
+opponent's own HP is > 50%, Gate D routes straight past DRAW SITE 3 entirely
+(the pre-fix port's "mutually exclusive" comment was correct about *this*
+half). REACH's own DRAW SITE 3 count is a flat **4** in both seeds — one
+draw per identical `MOVE_DOUBLE_TEAM` slot, *unconditionally*, regardless of
+each roll's own outcome, exactly the "a second draw is mandatory" chain
+shape, never fewer. DRAW SITE 4's own count decomposes cleanly: both REACH
+fixtures carry CONTROL's own direct-entry baseline of 4 (from the *earlier*,
+still-100%-HP decision computed right after turn 2, before Anorith's turn-3
+hit lands) **plus** 2 (seed 1) / 3 (seed 99) *extra* draws — exactly the
+number of the 4 identical slots whose own DRAW SITE 3 roll fell through
+(`>= 80`) into a second roll at DRAW SITE 4, landing inside the fixed
+model's own valid `[4, 8]`-draw range every time. Had the pre-fix "two
+mutually exclusive single-draw sites" model still been live, REACH's own
+DRAW SITE 3 count would have had to be **zero** whenever DRAW SITE 4 fired
+(and vice versa) — the oracle shows both firing together, non-zero, in the
+same decision, which the old model cannot produce at all. This is the live
+corroboration `docs/factory-ai-draw-discrepancy-probe.md` §7.4 asked a
+future session to add.
+
+The 4 remaining sites below are still recipe-only:
 
 - **DRAW SITE 2** (`:1043`, `score -1`, reached iff the **opponent's own**
   evasion stage is already ≥ 9): stage it with the identical-4-slots
   `MOVE_DOUBLE_TEAM` kit itself — 3 executed turns raise the stage 6→7→8→9,
   then a 4th turn's (or phantom) decision reaches the roll with Gate A held
   false (opponent HP kept ≥ 90% throughout, e.g. via a 0-power target move)
-  to avoid DRAW SITE 1 contaminating the same window. Cheapest of the six
+  to avoid DRAW SITE 1 contaminating the same window. Cheapest of the four
   remaining sites — the opponent's own kit does not need a second move at
-  all, unlike sites 3-7 below. Not attempted this session for time (same
+  all, unlike sites 5-7 below. Not attempted this session for time (same
   status as every prior pair's own unstaged "already-built-3-stages" gate,
   §17.5/§18.6/§19.5/§21.2/§22.5).
-- **DRAW SITE 3 / DRAW SITE 4** (`:1048`/`:1050`, `score +3` each, target
-  `STATUS1_TOXIC_POISON`): needs a real `EFFECT_TOXIC` move in the
-  opponent's own kit alongside `MOVE_DOUBLE_TEAM` — a genuine, unforced
-  turn-1 AI pick between two structurally different moves (not solvable by
-  4 identical slots), same obstacle §19.5 named for `AccuracyDown`'s own
-  sites 3/4. Once toxic-poisoned, Gate D further splits on the **opponent's
-  own** HP (> 50% → site 4, ≤ 50% → site 3) — both reachable from the same
-  staged precondition, differing only in which HP band the opponent sits.
 - **DRAW SITE 5** (`:1054`, `score +3`, target `STATUS3_LEECHSEED`): same
-  mixed-moveset obstacle, substituting `EFFECT_LEECH_SEED` for `EFFECT_
-  TOXIC`.
+  mixed-moveset obstacle DRAW SITE 3/4 used to have, substituting `EFFECT_
+  LEECH_SEED` for `EFFECT_TOXIC` — now that the two-Pokémon relay recipe
+  above is live-proven, this site is a straightforward re-application of the
+  same trick (a second opponent party slot whose entire kit is the new
+  status move) rather than an open question.
 - **DRAW SITE 6** (`:1058`, `score +2`, **opponent's own** `STATUS3_ROOTED`,
-  i.e. Ingrain): same mixed-moveset obstacle as sites 3-5, but self-targeted
+  i.e. Ingrain): same mixed-moveset obstacle as site 5, but self-targeted
   (`EFFECT_INGRAIN`, `MOVE_TARGET_USER` — no accuracy roll of its own to
   land), the same "may be more predictable to force the turn-1 pick, not
   verified" caveat §19.5 flagged for `AccuracyDown`'s own analogous site.
@@ -4134,11 +4225,16 @@ sitting last before `End`."
    is `MOVE_SWEET_SCENT` (`EFFECT_EVASION_DOWN_2` contributes zero). No
    correction to §5's table is needed — both "Exec moves: 1" entries are
    correct, now with a named move behind each.
-4. **6 explicit, citation-backed recipes** (24.5) for a future porter,
+4. **4 explicit, citation-backed recipes** (24.5) for a future porter,
    each naming exactly why it needs more than the identical-4-slots trick
    (a real, unforced AI pick between two structurally different moves, or a
    multi-turn stat-stage build) — the same discipline §19.5 established for
-   `AccuracyDown`'s own unstaged sites.
+   `AccuracyDown`'s own unstaged sites. A follow-up side-lane session closed
+   DRAW SITE 3/4 (the toxic-poison chain) with the two-Pokémon opponent
+   relay recipe §19.5 itself suggested — live per-site attribution confirms
+   the chained-fall-through model from `docs/factory-ai-draw-discrepancy-
+   probe.md` §7.1/§7.3 (commit 20f09bb), not the pre-fix "two mutually
+   exclusive single-draw sites" model (24.5).
 
 ### 24.7 Confirm-or-correct: census cross-check for `EVASION_UP`/`MINIMIZE`/`EVASION_DOWN`
 
@@ -4180,6 +4276,11 @@ Reproduce with:
 ```sh
 node --experimental-strip-types tools/probe/verify-factory-ai-checkviability-ground-truth.ts
 ```
+
+**Follow-up side-lane session (2026-07-27) extended it again** with the
+`evasionup-toxicchain-{reach,control}` pair (24.5) — every prior scenario
+unchanged and still green. **Full script run live this session: 350
+PASS, 0 FAIL, `ALL PASS`.**
 
 ## 25. 2026-07-26 addendum #15: `AI_CBM_RainDance` + `AI_CV_RainDance`, `AI_CBM_SunnyDay` + `AI_CV_SunnyDay`, `AI_CBM_Hail` + `AI_CV_Hail` — the weather trio, §5's own open CBM-weather question answered, and a real `RainDance`/`SunnyDay` sibling divergence
 
