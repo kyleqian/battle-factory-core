@@ -1,5 +1,5 @@
 import { horizontalLungeX2AtTick } from "./horizontalLunge.ts";
-import { shakeMonOffsetAtTick } from "./shakeMon.ts";
+import { GBA_SINE_TABLE_256 } from "../engine/battleMenu.ts";
 
 export const DRAGON_CLAW_BODY_FIRST_FRAME = 82;
 export const DRAGON_CLAW_END_AGE = 136;
@@ -66,18 +66,14 @@ const FIRE_PATTERN = [
 // controller window. These ages are therefore derived from the command
 // sequence, not fitted from sprite coordinates.
 const FIRE_SPAWNS: readonly FireSpawn[] = [
-  ...[1, 25, 49, 77].flatMap((base) =>
+  ...[1, 25].flatMap((base) =>
     FIRE_PATTERN.map((entry, index) => ({ age: base + index * 4, ...entry }))),
-  { age: 53, ...FIRE_PATTERN[1] },
-  { age: 57, ...FIRE_PATTERN[2] },
-  { age: 61, ...FIRE_PATTERN[3] },
-  { age: 65, ...FIRE_PATTERN[4] },
-  { age: 69, ...FIRE_PATTERN[5] },
-  { age: 73, ...FIRE_PATTERN[0] },
+  ...[49, 73].flatMap((base) =>
+    FIRE_PATTERN.map((entry, index) => ({ age: base + index * 4, ...entry }))),
 ];
 
 const sin = (angle: number, amplitude: number): number =>
-  Math.trunc(Math.sin((angle & 0xff) * Math.PI / 128) * amplitude);
+  (GBA_SINE_TABLE_256[angle & 0xff]! * amplitude) >> 8;
 
 export function dragonClawFireSpinAtAge(
   age: number,
@@ -85,7 +81,7 @@ export function dragonClawFireSpinAtAge(
 ): readonly DragonClawFireSpin[] {
   return FIRE_SPAWNS.flatMap((spawn) => {
     const callback = age - spawn.age + 1;
-    if (callback <= 0 || callback > spawn.duration + 1) return [];
+    if (callback <= 0 || callback > spawn.duration) return [];
     return [{
       spawnAge: spawn.age,
       x: geometry.attackerCenter.x,
@@ -94,7 +90,7 @@ export function dragonClawFireSpinAtAge(
       y2: -((callback * spawn.velocityY) >> 8),
       remaining: spawn.duration - callback,
       angle: (callback * spawn.angleStep) & 0xff,
-      animationFrame: Math.floor((callback - 1) / 2) % 5,
+      animationFrame: Math.floor(callback / 4) % 5,
     }];
   });
 }
@@ -105,12 +101,12 @@ export function dragonClawSlashesAtAge(
 ): readonly DragonClawSlash[] {
   const groups = [
     { age: 53, x: -10, animation: 0 as const },
-    { age: 73, x: 10, animation: 1 as const },
+    { age: 69, x: 10, animation: 1 as const },
   ];
   return groups.flatMap((group) => {
     const local = age - group.age;
-    if (local < 0 || local >= 20) return [];
-    const animationFrame = Math.floor(local / 4);
+    if (local < 0 || local > 20) return [];
+    const animationFrame = Math.min(4, Math.floor((local + 1) / 4));
     return [-10, 10].map((y) => ({
       spawnAge: group.age,
       x: geometry.targetCenter.x + group.x,
@@ -122,7 +118,7 @@ export function dragonClawSlashesAtAge(
 }
 
 function targetShakeY(age: number): number {
-  for (const spawn of [53, 73]) {
+  for (const spawn of [53, 69]) {
     const local = age - spawn;
     if (local < 0 || local > 10) continue;
     // `shake_mon_or_platform -4,1,10,SHAKE_MON_Y`: the invisible helper
@@ -137,22 +133,25 @@ export function dragonClawAtAge(
   geometry: DragonClawGeometry,
 ): DragonClawState {
   const firstLunge = horizontalLungeX2AtTick(
-    6, 4, geometry.attackerSide, age - 49,
+    6, 4, geometry.attackerSide, age - 48,
   );
   const secondLunge = horizontalLungeX2AtTick(
-    6, 4, geometry.attackerSide, age - 69,
+    6, 4, geometry.attackerSide, age - 64,
   );
   return {
-    attackerOffset: age >= 1 && age <= 29
-      ? shakeMonOffsetAtTick(0, 2, 15, 1, age - 1)
+    attackerOffset: age >= 3 && age <= 30
+      ? {
+          x2: 0,
+          y2: Math.floor((age - 3) / 2) % 2 === 0 ? 2 : 0,
+        }
       : { x2: firstLunge + secondLunge, y2: 0 },
     targetGlobalY: targetShakeY(age),
     fireSpin: dragonClawFireSpinAtAge(age, geometry),
     slashes: dragonClawSlashesAtAge(age, geometry),
     blendDirection: age >= 1 && age < 49
-      ? "forward" : age >= 101 && age <= DRAGON_CLAW_END_AGE
+      ? "forward" : age >= 97 && age <= DRAGON_CLAW_END_AGE
         ? "reverse" : null,
-    soundEvents: [53, 73].includes(age)
+    soundEvents: [53, 69].includes(age)
       ? [{
           age,
           song: "SE_M_RAZOR_WIND",

@@ -20018,6 +20018,12 @@ export function renderSceneOnMovePresentation(
     return;
   }
 
+  if (state.config.move === "DRAGON_CLAW") {
+    throw new Error(
+      "DRAGON_CLAW framebuffer renderer checkpoint: component reducer only",
+    );
+  }
+
   const view = sceneOnFirePunchView(state);
   const { attacker, target, resolution } = view;
   const player = attacker.geometry.side === "player" ? attacker : target;

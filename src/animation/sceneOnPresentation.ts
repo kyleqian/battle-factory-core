@@ -260,6 +260,10 @@ import {
   encoreAtAge,
   type EncoreState,
 } from "./encore.ts";
+import {
+  dragonClawAtAge,
+  type DragonClawState,
+} from "./dragonClaw.ts";
 
 export type SceneOnBattlerSide = "player" | "opponent";
 
@@ -297,7 +301,8 @@ export interface SceneOnPresentationBattler {
     | "SHUPPET"
     | "PLUSLE"
     | "MINUN"
-    | "SABLEYE";
+    | "SABLEYE"
+    | "ALTARIA";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -783,6 +788,13 @@ export interface SceneOnEncoreConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnDragonClawConfig {
+  readonly move: "DRAGON_CLAW";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnFutureSightConfig {
   readonly move: "FUTURE_SIGHT";
   readonly attacker: SceneOnPresentationBattler;
@@ -847,6 +859,7 @@ export type SceneOnMoveConfig =
   | SceneOnCalmMindConfig
   | SceneOnShadowBallConfig
   | SceneOnEncoreConfig
+  | SceneOnDragonClawConfig
   | SceneOnFutureSightConfig
   | SceneOnConfusionConfig
   | SceneOnPsychicConfig
@@ -885,6 +898,12 @@ export interface SceneOnAcidView {
 }
 
 export interface SceneOnEncoreView extends EncoreState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnDragonClawView extends DragonClawState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -1929,6 +1948,25 @@ export function sceneOnEncoreView(
       state.config.attacker.geometry.battlePositionCenter,
       state.config.target.geometry.battlePositionCenter,
     ),
+  };
+}
+
+/** `age=0` is the settled field immediately before the first visual task. */
+export function sceneOnDragonClawView(
+  state: SceneOnMovePresentationState,
+): SceneOnDragonClawView {
+  if (state.config.move !== "DRAGON_CLAW") {
+    throw new Error(`expected DRAGON_CLAW presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...dragonClawAtAge(state.age, {
+      attackerSide: state.config.attacker.geometry.side,
+      attackerCenter: state.config.attacker.geometry.battlePositionCenter,
+      targetCenter: state.config.target.geometry.animationCenter,
+    }),
   };
 }
 
