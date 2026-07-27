@@ -68,10 +68,10 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // SELF DESTRUCT closes both dense directions through the shared seam.
-        unsupported: 228,
+        // EXPLOSION closes both component directions but not the shared seam.
+        unsupported: 227,
         staged: 0,
-        partial: 3,
+        partial: 4,
         exact: 45,
       },
       {
