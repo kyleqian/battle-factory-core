@@ -1584,3 +1584,320 @@ re-run AFTER the change with byte-identical results — `turn4-doubleteam.json`
 247/247 files, 3385/3385 tests (+4 over this session's own start: 3 new
 bridge tests + 1 new staging-module test). `npm run build` clean.
 `executableFrontierRatchet.test.ts` unmoved (6/6, zero new barriers).
+
+## 12. Prep-scout for the NEXT window, 2026-07-27 (`turn6-featherdance.json`), side lane
+
+Read-only recon plus one unwired staging module/test — the same §8/§9/§10/§11
+contract, self-picked this time per the brief's own selection logic ("the
+smallest already-exact committed OFF-profile trace whose content is NOT yet
+kernel-driven"). This session touches no `battleScene.ts`,
+`presentationEventWindowBridge.ts`, or any other production file. All line
+numbers below are re-verified against this worktree's own `HEAD` (`62fa07d`).
+
+**Selection.** §11.1's own preamble named the candidate family directly:
+"turns 2, 5-11 kickoffs and the turn 13/15/17 KO/party/loss windows." Turn
+5's own kickoff (ENDEAVOR) is already wired (§9/`turn5EndeavorPresentation
+Staging.ts`), so the real remaining single-move-kickoff candidates are turns
+2, 6, 7, 8, 9, 10, 11, plus the much larger turn 13/15/17 KO/party/loss
+family. A frame-count survey of every committed trace in `tools/compare/
+traces/` for those candidates gives:
+
+| trace | frames | leaf draw function |
+| --- | --- | --- |
+| `turn6-featherdance.json` | **90** | `drawTurn6FeatherDanceKickoffText` (unwired) |
+| `turn2-dragonbreath-projectiles.json` | 61 | sub-slice of `drawTurn2KickoffText` (a much larger function that ALSO renders turn 2's own ENDEAVOR squish half — messier surface, not a clean single-move kickoff) |
+| `turn2-endeavor.json` | 77 | ditto, `drawTurn2KickoffText`'s ENDEAVOR half |
+| `turn7-feathers.json` | 145 | `drawTurn7FeatherDanceKickoffText` (unwired) |
+| `turn8-feathers.json` | 162 | `drawTurn8FeatherDanceKickoffText` (unwired) |
+| `turn9-quickattack.json` | 169 | `drawTurn9QuickAttackWindow` (unwired) |
+| `turn10-aerialace.json` | 93 | `drawTurn10AerialAceWindow` (partially unmodeled per its own doc, `battleScene.ts:6889-6895` history — not a clean pick) |
+| `turn11-featherdance.json` | 178 | `drawTurn11FeatherDanceWindow` (unwired) |
+
+The turn 13/15/17 KO/party/loss family was surveyed separately (`turn13-
+switchin.json` 242, `turn15-party-select.json` 200, `turn15-sendout-rung*`
+16-195, `turn17-rung*` 41-255) and rejected for THIS checkpoint: its own
+draw path (`drawTurn15PartySelectWindow` and its ~15 own helper functions,
+`battleScene.ts:13359-14600`+) is an order of magnitude larger than every
+prior §8-11 pick (a multi-hundred-line ball/particle/affine/healthbox-slide
+mechanism, `docs/turn15-sendout-notes.md`'s own 6-rung dossier), not a single
+bounded leaf function — auditing "every input" to this checkpoint's own
+established depth would not fit a 60-minute bounded session. It is ALSO
+blocked on a much larger kernel gap than any single move: the `switch`
+semantic event (`battleScriptEvents.ts:159`) is declared but has **zero**
+production emission sites anywhere in `src/engine/` today (re-confirmed live
+this session — `grep -rn 'kind: "switch"' src/engine/*.ts` finds only the
+type declaration and an unrelated same-named `BattleCommandDecision` kind in
+`battleDecisionBoundary.ts`, a different namespace entirely), even though
+the switch-IN mechanism itself is executable (`battleScriptSwitchinOpcode.ts`/
+`battleScriptOpenPartyScreenOpcode.ts` both exist and are wired into the
+opcode table). That is real, worth flagging for a dedicated future
+checkpoint of its own, but is a materially bigger lift than this one.
+
+`turn6-featherdance.json` (90 frames, `docs/battle-turn-notes.md` §28,
+`captureFrames` 7307-7404) is therefore the smallest genuinely-in-scope
+candidate: a single bounded leaf function
+(`drawTurn6FeatherDanceKickoffText`, `battleScene.ts:8953-8975`, 23 lines),
+already fully pixel-solved for its own content (§28's own "90/90, 0 diff"
+history — only the feather/starburst sprite animation itself stays deferred,
+unrelated to this window's own text/banner content), and genuinely NOT yet
+kernel-driven: every string it draws is still a hardcoded `battleMenu.ts`/
+`battleScene.ts` literal. It also newly requires an **opponent-target**
+(non-self) stat-change bridge shape — every prior wired window
+(`turn1`/`turn4` DOUBLE_TEAM) staged a SELF-target stat change; this is the
+family's first genuinely different shape, matching this brief's own ask for
+"what new bridge/event shape it needs."
+
+### 12.1 Every input `turn6-featherdance.json` consumes today (re-verified against `HEAD`)
+
+**Dispatch-routing chain**, `drawFightSubmenuWindow`
+(`battleScene.ts:5494-5598`, twelve `turnNResolved` boolean parameters):
+
+| input | line(s) | condition to REACH this window |
+| --- | --- | --- |
+| `turn14Resolved`…`turn6Resolved` | `:5514-5589` | all false (else routes to turns 7-15's own dedicated dispatchers) |
+| `turn5Resolved` | `:5590` | **true** — the one boolean that actually selects `drawTurn6FightSubmenuWindow(fb, t, sm)` (`:5596`); every check above it is a false/pass-through gate, same "scheduler/PC state, no content mapping" class every prior window's own dispatch chain already established |
+
+**`drawTurn6FightSubmenuWindow`'s own inner chain** (`battleScene.ts:9067-9099`):
+
+| input | line(s) | condition to REACH this window |
+| --- | --- | --- |
+| `sm.openElapsed === null` | `:9068` | false (submenu already open) |
+| `t < revealTick` (`TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY`) | `:9072-9073` | false (submenu fully revealed) |
+| `sm.confirmElapsed !== null` | `:9077` | **true** — a REAL A-confirm press (this trace's own genuine button-press script, not a synthetic anchor like `TURN6_ROCKSLIDE_PRESS_TICK` below); `pressTick = TICK0 + sm.confirmElapsed` resolves to **7345** for this trace (derived by inverting `turn6FeatherDanceTextStartTick`'s own `pressTick+13=7358` fit against the oracle-pixel-confirmed first-changing-tick, independently cross-checked against `turn6AtkFellTextStartTick`'s own `pressTick+314=7659` fit — both agree on 7345) |
+| `t >= textStart` (`turn6FeatherDanceTextStartTick(pressTick)`, `:8864-8866`, `pressTick+13`) | `:9079-9080` | true for most of this trace's own capture range (7358-7404); the capture's own leading ticks (7307-7357) render the pre-text reveal/settle frames of this SAME function's fallthrough path (`:9085-9098`), still inside `drawTurn6FightSubmenuWindow`, just before its own text branch fires |
+
+**`drawTurn6FeatherDanceKickoffText`'s own body** (`battleScene.ts:8953-8975`):
+
+| input | line(s) | condition / role in THIS window |
+| --- | --- | --- |
+| `t >= rockSlideTextStartTick(TURN6_ROCKSLIDE_PRESS_TICK)` | `:8960` | **false** for this trace's entire capture range (7307-7404 all `< 7765` — `TURN6_ROCKSLIDE_PRESS_TICK`=7372 is a SEPARATE synthetic anchor for turn 6's own LATER ROCK_SLIDE half, unrelated to this real trace's own `pressTick`=7345) — so this window never reaches the `drawTurn6RockSlideWindow` handoff at all; that half is a genuinely different, already-out-of-scope mechanism |
+| `turn6StatFallEva(t, pressTick)` (`battleMenu.ts:1499-1506`) | `:8966-8967` | `null` for this trace's entire capture range (needs `d = t-pressTick >= TURN6_STATFALL_RAMP_START_DELAY`, past tick 7404) — the stat-fall BG1 banner graphic is NEVER drawn within this trace's own captured frames, a real but out-of-capture-range residual, not a bug |
+| `turn6AtkFellTextStartTick(pressTick)` (`battleMenu.ts:1563-1565`, `pressTick+314=7659`) | `:8969-8974` | **false** for this trace's entire capture range (max captured tick 7404 < 7659) — so `TURN6_ATKFELL_LINE1/2` is likewise never actually rendered by this specific committed trace; only `TURN6_FEATHERDANCE_LINE1/2` (the kickoff message) is pixel-exercised here. Both the stat-fall banner and the ATK-fell text ARE staged and proven reachable by §12.2 below (useful groundwork for whichever future capture extends this window's own range), but this trace's own 90 frames do not exercise them — named precisely, not glossed over |
+| `TURN6_FEATHERDANCE_LINE1`/`LINE2` ("Foe PIDGEOTTO used"/"FEATHERDANCE!", `battleScene.ts:8860-8861`) | `:8973` | the ONE literal this trace's own captured frames actually render, via `turn6FeatherDanceTextVisibleChars(t, pressTick)` (`:8869-8871`, same 1-tick/char mechanism every kickoff text in this dossier uses) |
+
+**Hardcoded strings**, both defined but only the first is pixel-exercised by
+this specific trace (see table above): `TURN6_FEATHERDANCE_LINE1/2`
+(`battleScene.ts:8860-8861`), `TURN6_ATKFELL_LINE1/2` ("ONIX’s ATTACK"/
+"harshly fell!", `battleMenu.ts:1559-1560`).
+
+**Tick anchors** (all `pressTick`-relative offsets): `turn6FeatherDanceText
+StartTick`=+13 (`battleScene.ts:8864-8866`), `turn6AtkFellTextStartTick`=+314
+(`battleMenu.ts:1563-1565`), `TURN6_STATFALL_RAMP_START_DELAY`/`_HOLD_END_
+DELAY`/`_RAMPDOWN_ANCHOR_DELAY` (`battleMenu.ts`, `turn6StatFallEva`'s own
+constants) — all presentation-native, same "not a kernel gap" finding §8.4
+Option A already established for this whole function family, re-confirmed
+here a fifth time.
+
+**The hidden-state finding this brief's own §11 precedent asks to flag:**
+Onix's own ATTACK stat stage is never read from anywhere in
+`drawTurn6FeatherDanceKickoffText` — the function draws the SAME hardcoded
+kickoff text and (once past this trace's own capture range) the same
+hardcoded "harshly fell!" literal regardless of what Onix's real stage
+actually is or was. The real battle-content fact this window renders —
+Onix's ATTACK dropping a first, genuine 6 -> 4 (two full stages) — exists
+nowhere in `battleScene.ts`'s own state. §12.2 stages it for the first time.
+
+### 12.2 Staged proof: what the kernel emits today for this window's own content
+
+EFFECT_ATTACK_DOWN_2 has been executable since before this session
+(`docs/executable-frontier-census.md:114`, `BattleScript_EffectAttackDown2`).
+`src/engine/turn6FeatherDancePresentationStaging.ts` (new, **unwired** — not
+imported by `battleScene.ts` or any production file, and does NOT add a
+resolver to `presentationEventWindowBridge.ts` either, per this checkpoint's
+own contract) stages Pidgeotto's own real turn-6 FEATHER_DANCE use: real
+level-50 stats for BOTH battlers (`docs/turn6-notes.md` §4's own RAM-
+confirmed snapshot table — ONIX atk/def/spd/spA/spD 51/187/76/36/72, HP 31;
+PIDGEOTTO 98/61/77/56/56, HP 156), real MOVE_FEATHER_DANCE (id 297),
+**opponent**-targeted (attacker=battler1/PIDGEOTTO, target=battler0/ONIX —
+the first module in this family to stage a genuinely non-self stat change),
+real pre-move ATK stage 6 (neutral — a genuine FIRST use, unlike turn 4's own
+second-use evasion case), and a real recorded RNG seed.
+
+**The RNG seed is derived, not RAM-read directly, and this is flagged
+explicitly rather than silently trusted:** `docs/turn6-notes.md` §3's own
+RNG ledger records the value AFTER Pidgeotto's own accuracy roll
+(`1484887866` at tick 7356, exactly 1 `Random()` step), not the seed
+entering it. This module inverts the documented LCG step (`next =
+1103515245*seed + 24691 mod 2^32`) to recover `seed = 538069379`, then
+verifies the round-trip forward reproduces the SAME documented post-roll
+value — checked by this module's own test (`rngValueAfter` assertion), not
+an unverified guess. Unlike DOUBLE_TEAM's own EFFECT_EVASION_UP route (which
+skips `accuracycheck` entirely), FEATHER_DANCE's real script
+(`BattleScript_EffectStatDown`, `reference/pokeemerald/data/battle_scripts_
+1.s:534-553`) DOES run one — accuracy 100 always passes it, but it still
+consumes a real `Random()` call, matching the ledger's own count exactly
+(verified live: `rngCalls` is 1, not 0).
+
+```
+atkStageAfter: 4   (6 -> 4, matching the real RAM-confirmed turn-6 FIRST
+                     drop, docs/turn6-notes.md §4 -- not a repeat use)
+event kinds, in order:
+  message                       {messageId:"STRINGID_USEDMOVE"}                    sourceLabel: BattleScript_EffectStatDown
+  set-battler-pp-data           {battler:1, movePosition:2, pp:14}                  sourceLabel: BattleScript_EffectStatDown (15 -> 14, RAM-confirmed first use, docs/turn6-notes.md §4)
+  stat-stage-change             {battler:0, stat:"attack", from:6, to:4}            sourceLabel: BattleScript_EffectStatDown
+  animation                     {animationId:"MOVE_ANIMATION", battler:1, arguments:["297","0","0","0","0","0"]}   sourceLabel: BattleScript_StatDownDoAnim
+  animation                     {animationId:"STATS_CHANGE", battler:0, arguments:["46"]}                          sourceLabel: BattleScript_StatDownDoAnim
+  message                       {messageId:"STRINGID_DEFENDERSSTATFELL"}           sourceLabel: BattleScript_StatDownPrintString  (NOT STRINGID_ATTACKERSSTATFELL -- target===activeBattler for an opponent-target move picks the "defender's own" string variant, battleScriptStatBuffs.ts:276-279, the exact opposite-looking-but-same-code-path result §11.2 already found for DOUBLE_TEAM's self-target case)
+  set-battler-sprite-visibility {battler:1, invisible:false}                       (moveend pass-through)
+  set-battler-sprite-visibility {battler:0, invisible:false}                       (moveend pass-through)
+```
+
+No `hp-change`/`health-bar-update`/faint-family event anywhere in this
+stream — confirmed by a dedicated test assertion. The `STATS_CHANGE`
+animation argument (`46`) is independently decodable, same discipline
+§11.2 established for the rise case: `Cmd_setgraphicalstatchangevalues`'s
+own DECREASE-side formula (`battleScriptStatbuffchangeOpcode.ts:129,141,146`)
+gives `STAT_ANIM_MINUS2(45)+1 + STAT_ATK(1) - 1 = 46` for a -2 ATK drop —
+same formula shape, opposite direction table entry, as the rise case.
+
+**One glyph residual, discovered live, not by inspection alone:** resolving
+`STRINGID_DEFENDERSSTATFELL`'s own template
+(`{B_DEF_NAME_WITH_PREFIX}'s {B_BUFF1}\n{B_BUFF2}`) through the SHARED
+`resolveBattleStringLines` (`battleStringResolver.ts`, unmodified this
+session) produces `"ONIX's ATTACK"` — a straight ASCII apostrophe — not the
+already-committed `TURN6_ATKFELL_LINE1`'s own `"ONIX’s ATTACK"` (curly
+U+2019, `battleMenu.ts:1559`'s own doc citing the font's charmap-only-curly
+convention). The extracted `battle-message-templates.json` segment for this
+template's own literal `"'s "` text run is a plain ASCII apostrophe (an
+artifact of extraction, `tools/extract/extract-battle-messages.ts`), and
+`resolveBattleStringLines` has never before been exercised against an
+apostrophe-bearing template in production (every prior wired window's own
+`STRINGID_USEDMOVE`/`STRINGID_DEFENDERSSTATROSE`/`STRINGID_ATTACKERSSTATROSE`
+calls happened to avoid one — DOUBLE_TEAM's own "Foe GROVYLE used" has none;
+`STAT_ROSE_LINE1`'s "Foe GROVYLE’s evasiveness" is still a literal, never
+routed through this resolver, §8.3/§5). This is a REAL, newly-exposed gap
+in the shared resolver (out of THIS checkpoint's own one-staging-module
+contract to fix — `battleStringResolver.ts` is a shared production file),
+named here precisely so the next wiring worker doesn't rediscover it from
+scratch: any window resolving a `'S`-possessive template through this
+resolver needs either a charmap-aware post-process or a literal `’`
+correction in the template extraction itself.
+
+**Mapping table** (turn-N input -> kernel event / gap), current as of this
+staged run:
+
+| turn-N input | kernel replacement | today |
+| --- | --- | --- |
+| `turn14Resolved`…`turn5Resolved` dispatch chain + `drawTurn6FightSubmenuWindow`'s own inner `sm`/tick gates (§12.1) | none — scheduler/PC state | **no plausible mapping**, same gap-7 class every prior window found |
+| `TURN6_FEATHERDANCE_LINE1`/`LINE2` ("Foe PIDGEOTTO used\nFEATHERDANCE!") | `message{messageId:"STRINGID_USEDMOVE"}` | **fully proven, re-derived from a real run of THIS turn's own script** — `resolveTurn6FeatherDanceKickoffLines` (this module) resolves to `["Foe PIDGEOTTO used", "FEATHERDANCE!"]`, byte-identical. This IS pixel-exercised by the committed trace (captured ticks 7358-7404) |
+| Onix's own ATTACK stat stage, 6 -> 4 (never read anywhere in `battleScene.ts` today, §12.1's own hidden-state finding) | `stat-stage-change{battler:0, stat:"attack", from:6, to:4}` | **emitted today, proven this session** — the real production emission site (`battleScriptStatBuffs.ts:296-303`) is reachable end-to-end from FEATHER_DANCE's own real script entry with turn 6's own real pre-move stage and a real derived RNG seed. NOT pixel-exercised by this trace's own captured frames (the stat-fall banner and ATK-fell text both open past tick 7404, §12.1) — staged and proven regardless, useful groundwork for a future capture-range extension |
+| `TURN6_ATKFELL_LINE1`/`LINE2` ("ONIX’s ATTACK\nharshly fell!") | `message{messageId:"STRINGID_DEFENDERSSTATFELL"}` | **message id proven** (`resolveTurn6AtkFellLines`), but resolving it through the shared string resolver reveals the ASCII-vs-curly-apostrophe residual above — a real, DIFFERENT-from-content gap. NOT pixel-exercised by this trace (out of captured range) |
+| `turn6StatFallEva`/`turn6StatFallBg1Y` (`drawTurn6StatFallBanner`'s own ATK-decrease BG1 graphic) | `animation{animationId:"STATS_CHANGE", arguments:["46"]}` | **kind AND a decodable stat/direction/magnitude payload emitted today, proven** — same "present, decodable, not currently a required gate" finding §11.2 made for the rise case's own `STATS_CHANGE` payload. NOT pixel-exercised by this trace (out of captured range) |
+| `doubleTeamCloneOffsets`-style choreography — N/A here (FEATHER_DANCE has no equivalent clone mechanism; only `attackanimation`/`waitanimation` fire) | `animation{animationId:"MOVE_ANIMATION"}` | **kind emitted today, proven** — payload `arguments:["297","0","0","0","0","0"]` (move id, real values) |
+| PP readout (Pidgeotto's own FEATHER_DANCE, first use, 15->14) | `set-battler-pp-data{battler:1, movePosition:2, pp:14}` | **emitted today, proven this run**, and independently RAM-confirmed (`docs/turn6-notes.md` §4's own table — unlike §11.2's own flagged-unverified 14->13 PP assumption for DOUBLE_TEAM, this one IS independently RAM-checked) |
+| ONIX/PIDGEOTTO HP (31/156) | no `hp-change` events anywhere in this stream | **no kernel event needed** — FEATHER_DANCE deals no damage, same "steady-state read, not a drain endpoint" finding every prior sibling module's own mapping table already made for its own out-of-scope HP reads |
+
+**What this staged run does and does not prove:** it proves the real
+FEATHER_DANCE opponent-target chain reproduces turn 6's own specific real
+transition (ATK 6->4, a genuine first use) and that the resulting
+`stat-stage-change`/`STATS_CHANGE`-animation/`STRINGID_DEFENDERSSTATFELL`
+triad is genuinely reachable end-to-end through the real script — the first
+proof in this dossier of the **opponent-target** route through
+`changeStatBuffs` (every prior wired case was self-target). It does NOT
+prove `presentationEventWindowBridge.ts` needs no new shape: it does. Unlike
+DOUBLE_TEAM's own single-`sourceLabel` triad
+(`BattleScript_EffectStatUpAfterAtkCanceler` covering message + stat-change
+together), THIS window's own two messages sit under TWO DIFFERENT
+`sourceLabel`s — `STRINGID_USEDMOVE` and the `stat-stage-change` event share
+`BattleScript_EffectStatDown`, but `STRINGID_DEFENDERSSTATFELL` sits under
+the separate `BattleScript_StatDownPrintString` — a genuinely different
+shape from every prior wired sibling, named precisely here so the next
+wiring worker builds the right bridge function instead of copying the
+single-label pattern verbatim (§12.3 step 1).
+
+### 12.3 Ordered wiring plan (acceptance: `turn6-featherdance.json` still passes at 90/90, regression sweep over the adjacent turn 6/1/5 traces unchanged)
+
+1. Add a `resolveFeatherDanceKickoffPresentationWindowContent`-shaped
+   sibling to `presentationEventWindowBridge.ts` (same null-safe pattern as
+   `resolveDoubleTeamKickoffPresentationWindowContent`, but reading from TWO
+   `sourceLabel`s, not one, per §12.2's own finding): key the
+   `message{messageId:"STRINGID_USEDMOVE"}` + `stat-stage-change` pair on
+   `provenance.sourceLabel === "BattleScript_EffectStatDown"`, and
+   separately key the `message{messageId:"STRINGID_DEFENDERSSTATFELL"}` (or
+   `..._ATTACKERSSTATFELL`, for whichever future self-target ATK/DEF/etc.
+   down move needs it) on `provenance.sourceLabel ===
+   "BattleScript_StatDownPrintString"` — return shape
+   `{message, statChange, statFellMessage}` (no `hp` field, matching
+   §12.2's own "no damage component" finding).
+2. Wire `drawTurn6FeatherDanceKickoffText` (`battleScene.ts:8953-8975`) to
+   source `TURN6_FEATHERDANCE_LINE1/2`'s text from step 1's resolved
+   `message` (mechanically identical `STRINGID_USEDMOVE` mapping, zero new
+   resolver work beyond what turn 1's own gap-5 resolver already supplies,
+   §8.5 step 1) — the feather-sprite choreography and `drawTurn6RockSlideWindow`
+   handoff stay byte-for-byte unchanged (no kernel-timestamp input needed,
+   §8.4 Option A applies unchanged a sixth time).
+3. Wiring `TURN6_ATKFELL_LINE1/2` from step 1's `statFellMessage` needs the
+   glyph residual (§12.2) fixed FIRST — either a charmap-aware
+   post-processing pass in `resolveBattleStringLines` or a corrected
+   `battle-message-templates.json` extraction (curly `’` in the source
+   template segment) — otherwise the wired render would regress the
+   already-pixel-correct literal by one glyph. Named as an explicit
+   PREREQUISITE substep, not a parallel nice-to-have: wiring this line
+   before fixing the resolver would fail its own regression sweep. NOTE:
+   this trace's own captured frames (7307-7404) never reach this text phase
+   (opens at pressTick+314=7659) — this step is real groundwork for a FUTURE
+   capture-range extension of this same window, not required for THIS
+   trace's own 90/90 acceptance bar.
+4. The `STATS_CHANGE`/stat-fall-banner wiring (`drawTurn6StatFallBanner`,
+   `turn6StatFallEva`) is similarly real but out of THIS trace's own
+   captured range (§12.1) — named as a residual for the same future
+   extension, not blocking this step.
+5. Re-run `npm run compare -- turn6-featherdance.json` and confirm it still
+   matches at **90/90** (recorded count, `docs/battle-turn-notes.md` §28,
+   re-pinned live in §12.4) before/after, PLUS a regression sweep of
+   `turn6-rockslide-a.json` (255/255, the ALREADY-nominally-separate
+   ROCK_SLIDE tail of this exact same turn — the step most likely to
+   regress if the new bridge function's `sourceLabel` keys are too broad),
+   `turn6-statfall.json` (127/127, shares `turn6StatFallEva`/`Bg1Y`),
+   `turn6-feathers.json` (235/235, shares the feather sprite mechanism),
+   `turn6-menu.json` (44/44, shares the settled-submenu chrome),
+   `turn1-rockslide.json` (256/256, shares the message-box/font mechanism —
+   most likely to catch an apostrophe-glyph regression from step 3), and
+   `turn5-rockslide.json`/`turn4-doubleteam.json` (256/256, 250/250 — the
+   checkpoint's own established acceptance bar, re-pinned live in §12.4).
+
+### 12.4 Comparator re-pin
+
+Ran twice live this session (determinism check), plus a named
+adjacent-trace regression sweep, from this worktree, against this lane's
+Battle Scene OFF oracle (`127.0.0.1:8014`):
+
+```
+$ npm run compare -- turn6-featherdance.json --summary   (run 1)
+90/90 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn6-featherdance.json --summary   (run 2, determinism check)
+90/90 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn6-rockslide-a.json --summary
+255/255 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn6-statfall.json --summary
+127/127 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn6-feathers.json --summary
+235/235 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn6-menu.json --summary
+44/44 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn1-rockslide.json --summary
+256/256 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn5-rockslide.json --summary
+256/256 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn4-doubleteam.json --summary
+250/250 frames matched -> tools/compare/out/latest
+```
+
+`turn6-featherdance.json` matches its recorded count (`docs/battle-turn-
+notes.md` §28, 90/90) both runs — re-pinned live, this is the baseline
+§12.3's own wiring step must preserve. Every regression trace matches its
+own already-established count with zero drift, proving this session's
+read-only recon (plus the new unwired `turn6FeatherDancePresentationStaging.ts`
+module) touched nothing live in this lane's own scope. `npm test` **250/250
+files, 3417/3417 tests** (+1 file/+8 tests over this session's own start —
+one new staging-module test file only). `npm run build` clean.
+`executableFrontierRatchet.test.ts` unmoved (zero new barriers, no canonical
+recording import added).
