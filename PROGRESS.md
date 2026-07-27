@@ -55,9 +55,19 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   fail cases 0/0). (8) `npm test` stayed green throughout — no test
   pinned the pre-existing cross-turn staleness bug, so no test needed
   fixing.
-- **Next:** SpDefUp/CosmicPower/CalmMind CBM+CV pair (staging groundwork
-  flagged in entry 477's side-merge note: separate CBM handlers
-  `:576-593`, Gate F `if_in_bytes` INVERTED vs DefenseUp); then
+- **Side merge (supervisor, same round):** §22 ground truth for the
+  SpDefUp/CosmicPower/CalmMind pair staged and merged at `c5d0848` —
+  4 live-verified fixtures (`mechanic-factory-ai-cv-spdefup-*`), ledgers
+  control 8/8, reach 14/13 (reproduces §18's 5-6-draw anomaly on the
+  shared DRAW SITE 4/5 region), CosmicPower ≡ CalmMind numerically
+  (same `AI_CV_SpDefUp` body); Gate F `if_in_bytes` inversion vs
+  DefenseUp supervisor-verified against raw assembly; verify command
+  `node --experimental-strip-types
+  tools/probe/verify-factory-ai-checkviability-ground-truth.ts`
+  rerun by supervisor: ALL PASS. DRAW SITE 1/2/3 + site 5's empty-last-
+  move sub-case documented recipe-only (same status as prior pairs).
+- **Next:** SpDefUp/CosmicPower/CalmMind CBM+CV pair **port** (ground
+  truth ready, §22); then
   LightScreen/Reflect/EvasionUp/EvasionDown/weather-trio pairs (the last
   8 of 22 CV handlers); §19.5's unstaged AccuracyDown sites 2-6 (need
   mixed movesets); entry 476's §18 5-6-draw window discrepancy (probe
