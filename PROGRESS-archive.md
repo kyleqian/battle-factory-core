@@ -1,4 +1,53 @@
 ---
+## 487 — [BOUNDED WORKER 2026-07-26 ~22:00] assigned step already done — verified, not redone
+
+- **State:** tree unchanged at **230 files / 3124 tests**, build green,
+  census unchanged **92/214 effects, 187/355 moves, 150/276 Factory-L50,
+  1884/2957 weighted** (reran the census tool live: byte-identical, no
+  diff). No code commits this session — the assigned step turned out to be
+  fully complete already; only this doc/ledger correction is new.
+- **Did:** was briefed to (rung 1) register `B_SCR_OP_SETDAMAGETOHEALTHDIFFERENCE`/
+  `B_SCR_OP_BICBYTE`/`B_SCR_OP_ADJUSTSETDAMAGE` and (rung 2) wire seam
+  window 3 (`turn5-rockslide.json`'s attack branch) per
+  `docs/presentation-seam-scout.md` §9.4. Both rungs were **already landed**
+  in `PROGRESS-archive.md` entries 464 (`4758e8c`, the 3 opcodes,
+  EFFECT_ENDEAVOR executable) and 465 (the full §9.4 wiring: real
+  `MOVE_ENDEAVOR` staging, `drawTurn5EndeavorText`, `drawTurn5RockSlideWindow`'s
+  attack branch, `drawTurn5RockSlideAttack`'s `rockSlideOpponentHp` `to`
+  endpoint) — both from earlier the same day, well before this ledger's
+  current top-3 entries. Confirmed by reading the current source directly
+  (`battleScriptSetByte.ts`'s `createBattleScriptBicbyteCommandHandlers`,
+  `battleScriptHitChainOpcode.ts`'s `adjustsetdamage`/
+  `setdamagetohealthdifference`, `battleScene.ts:7049-7063,7541,11885-11893`
+  all matching entry 465's own description exactly, down to the named
+  residual gap), then re-ran the full acceptance bar live: `npm test`
+  230/230 files, `npm run build` clean, `npm run compare -- turn5-rockslide.json
+  --summary` **256/256**, `turn1-rockslide.json` **256/256**, `turn5-faint.json`
+  **110/110** — all match entry 465's own recorded numbers exactly, zero
+  regression. Root-caused why the brief re-assigned finished work: entry
+  468 correctly scoped the one still-open remainder as "seam-scout §9 items
+  **1/5**" (the `anchorOpponentAfterTurn4Hp` `from`-endpoint gap, entry
+  465's own named residual — needs a new turn-4 settle staging module, not
+  a redo of §9.4's plan); that `1/5` qualifier was silently dropped across
+  entries 484-486's carried-forward Next notes, reading as if all of §9
+  were still open. Added a status note to `docs/presentation-seam-scout.md`
+  §9's own top (pointing at entries 464/465 and the real remainder) so this
+  doesn't recur.
+- **Next:** the ONE real remaining item from the original §9 scope: a
+  turn-4 RockSlide-settle staging module to give `anchorOpponentAfterTurn4Hp`
+  a non-circular staged proof (currently a literal, entry 465's own named
+  gap) — NOT another pass at rungs 1-2. Otherwise, entry 485's own Next list
+  stands unchanged: EvasionUp/EvasionDown/weather-trio pairs (last 6 of 22
+  CV handlers), §19.5's unstaged AccuracyDown sites 2-6, §18 5-6-draw window
+  discrepancy, ENDTURN_ITEMS2 after Yawn/Thrash, `SpDefUp`/§23 DRAW SITE
+  recipe-only leftovers.
+- **Notes:** no PAPERCUT in the harness sense, but flagging the process gap
+  for the supervisor: carried-forward "Next" notes that summarize a doc
+  section by name (e.g. "seam-scout §9 items") lose precision fast when
+  re-summarized entry over entry — prefer naming the exact remaining
+  sub-item (as entry 468 originally did) over the section name alone.
+
+---
 ## 486 — [SUPERVISOR SESSION START 2026-07-26 ~21:55] orient + animation fold
 
 - **State:** folded `animation-main` into master at orient (fast-forward to
