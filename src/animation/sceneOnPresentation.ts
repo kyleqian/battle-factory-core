@@ -206,6 +206,7 @@ import {
 import { shakeMonOffsetAtTick } from "./shakeMon.ts";
 import {
   knockOffBodyAtAge,
+  knockOffTargetOamOffsetAtAge,
   type KnockOffBodyState,
 } from "./knockOff.ts";
 
@@ -962,6 +963,7 @@ export interface SceneOnKnockOffView extends KnockOffBodyState {
   readonly animationAge: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
+  readonly targetOamOffset: Readonly<{ x2: number; y2: number }>;
 }
 
 export interface SceneOnBindView extends BindAnimationState {
@@ -1383,6 +1385,10 @@ export function sceneOnKnockOffView(
     animationAge,
     attacker: state.config.attacker,
     target: state.config.target,
+    targetOamOffset: knockOffTargetOamOffsetAtAge(
+      animationAge,
+      state.config.target.geometry.side,
+    ),
     ...knockOffBodyAtAge(
       animationAge,
       state.config.attacker.geometry.side,

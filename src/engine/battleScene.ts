@@ -14464,11 +14464,11 @@ export function renderSceneOnMovePresentation(
       view.target.geometry.spriteCorner.y,
       256,
       256,
-      view.targetOffset.y2,
+      view.targetOamOffset.y2,
       white,
       paletteCoeff,
       false,
-      view.targetOffset.x2 + (view.animationAge < 17 ? 1 : 0),
+      view.targetOamOffset.x2 + (view.animationAge < 17 ? 1 : 0),
     );
     if (view.strike) {
       const strikeStep = view.animationAge - 6;

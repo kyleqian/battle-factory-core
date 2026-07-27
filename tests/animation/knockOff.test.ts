@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { knockOffBodyAtAge } from "../../src/animation/knockOff.ts";
+import {
+  knockOffBodyAtAge,
+  knockOffTargetOamOffsetAtAge,
+} from "../../src/animation/knockOff.ts";
 
 describe("MOVE_KNOCK_OFF source-relative body", () => {
   it("composes the player lunge, strike, slide, and target shake epochs", () => {
@@ -42,5 +45,27 @@ describe("MOVE_KNOCK_OFF source-relative body", () => {
       .toEqual({ x2: -4, y2: 3 });
     expect(knockOffBodyAtAge(29, "opponent", "player").targetOffset)
       .toEqual({ x2: -10, y2: 4 });
+  });
+
+  it("transfers ShakeMonInPlace one OAM epoch after the absolute slide write", () => {
+    expect(Array.from({ length: 13 }, (_, index) =>
+      index + 22
+    ).map((age) =>
+      knockOffTargetOamOffsetAtAge(age, "opponent")
+    )).toEqual([
+      { x2: 12, y2: 6 },
+      { x2: 12, y2: 6 },
+      { x2: 12, y2: 12 },
+      { x2: 12, y2: 12 },
+      { x2: 12, y2: 6 },
+      { x2: 12, y2: 6 },
+      { x2: 12, y2: 12 },
+      { x2: 10, y2: 10 },
+      { x2: 8, y2: 8 },
+      { x2: 6, y2: 6 },
+      { x2: 4, y2: 4 },
+      { x2: 2, y2: 2 },
+      { x2: 0, y2: 0 },
+    ]);
   });
 });

@@ -18,7 +18,11 @@ export interface KnockOffBodyState {
   readonly hitsplatVisible: boolean;
 }
 
-function knockOffTargetOffsetAtAge(age: number): Readonly<{ x2: number; y2: number }> {
+const KNOCK_OFF_SHAKE_DELTA_BY_AGE = new Map<number, number>([
+  [22, -3], [23, 6], [25, -6], [27, 6], [29, -6], [31, 3],
+]);
+
+function knockOffTargetBaseOffsetAtAge(age: number): Readonly<{ x2: number; y2: number }> {
   if (age < 17) return { x2: 0, y2: 0 };
   if (age < 22) {
     return slideMonToOffsetAtTick({
@@ -35,25 +39,59 @@ function knockOffTargetOffsetAtAge(age: number): Readonly<{ x2: number; y2: numb
   // writes its absolute interpolation before the shake task applies its
   // same-tick delta. These are callback-order deltas, not fitted positions.
   const held = { x2: 12, y2: 9 };
-  const shakeDeltaByAge = new Map<number, number>([
-    [22, -3], [23, 6], [25, -6], [27, 6], [29, -6], [31, 3],
-  ]);
-  if (age < 29) {
-    let y2 = held.y2;
-    for (let tick = 22; tick <= age; tick += 1) {
-      y2 += shakeDeltaByAge.get(tick) ?? 0;
-    }
-    return { x2: held.x2, y2 };
-  }
-  const restored = slideMonToOriginalPosAtTick({
+  if (age < 29) return held;
+  return slideMonToOriginalPosAtTick({
     currentX2: 12,
     currentY2: 12,
     axisSnapMode: 0,
     durationTicks: 6,
   }, age - 29);
+}
+
+function knockOffTargetShakeY2AtAge(age: number): number {
+  if (age < 22) return 0;
+  if (age < 29) {
+    let y2 = 0;
+    for (let tick = 22; tick <= age; tick += 1) {
+      y2 += KNOCK_OFF_SHAKE_DELTA_BY_AGE.get(tick) ?? 0;
+    }
+    return y2;
+  }
+  return KNOCK_OFF_SHAKE_DELTA_BY_AGE.get(age) ?? 0;
+}
+
+function knockOffTargetOffsetAtAge(age: number): Readonly<{ x2: number; y2: number }> {
+  const base = knockOffTargetBaseOffsetAtAge(age);
   return {
-    x2: restored.x2,
-    y2: restored.y2 + (shakeDeltaByAge.get(age) ?? 0),
+    x2: base.x2,
+    y2: base.y2 + knockOffTargetShakeY2AtAge(age),
+  };
+}
+
+/**
+ * Displayed target OAM after the shared one-transfer battler lag has already
+ * selected `sourceAge`. `AnimTask_ShakeMonInPlace` runs after that battler
+ * copy, so its y2 write arrives one additional transfer later than the
+ * slide helpers' absolute x2/y2 write.
+ */
+export function knockOffTargetOamOffsetAtAge(
+  sourceAge: number,
+  targetSide: KnockOffSide,
+): Readonly<{ x2: number; y2: number }> {
+  const base = knockOffTargetBaseOffsetAtAge(sourceAge);
+  const x2 = targetSide === "opponent" ? base.x2 : -base.x2;
+  // The creation callback's raw first write enters the OAM build directly.
+  // Subsequent in-place shake writes trail by one transfer. Once the return
+  // helper is active, its later absolute write wins that OAM build and
+  // discards the shake task's intermediate y2 mutation altogether.
+  const shakeY2 = sourceAge === 22
+    ? knockOffTargetShakeY2AtAge(sourceAge)
+    : sourceAge < 29
+      ? knockOffTargetShakeY2AtAge(sourceAge - 1)
+      : 0;
+  return {
+    x2,
+    y2: base.y2 + shakeY2,
   };
 }
 

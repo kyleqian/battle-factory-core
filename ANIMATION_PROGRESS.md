@@ -44,15 +44,15 @@ animation. A status caused by a move is not part of that move's animation.
   presentation seam and all source- or evidence-required variants are covered.
 - No entry means unsupported.
 
-## Knock Off shared-seam partial: 54/59 dense player-orientation body (2026-07-26)
+## Knock Off staged orientation exact: 59/59 dense player-orientation body (2026-07-26)
 
-**Verdict:** `MOVE_KNOCK_OFF` promotes unsupported → **partial**. The complete
+**Verdict:** `MOVE_KNOCK_OFF` remains **partial**, but its staged orientation
+is now exact. The complete
 move-owned Scene-ON interval (oracle frames 70-128; frames 129-130 begin the
-separately-owned generic hit blink) is **59/59 component/RAM** and **54/59
-framebuffer** through the shared seam. This is an honest partial, not exact:
-frames **105, 107, 109, 111, 113** retain only the opponent-front ONIX
-silhouette during the in-place-shake/slide-return OAM transfer. Opposite
-orientation is also still named and unattempted.
+separately-owned generic hit blink) is **59/59 component/RAM** and **59/59
+framebuffer** through the shared seam, reproduced twice. The move itself is
+not promoted to exact because the opposite orientation remains named and
+unattempted.
 
 **Resolved display facts:** live RAM pins `gBattleAnimAttacker=0` (player) and
 `gBattleAnimTarget=1` (opponent). The lunge moves the player; the slide-out and
@@ -60,7 +60,12 @@ final return move the target because their literal argv[0] is 1, while the
 first simultaneous return helper's argv[0] is 0 and is a no-op on the already
 restored attacker. Strike orbit, two sheets, HLE affine matrices, hitsplat
 372×372 matrix/lifetime, palette epoch, healthboxes, corners, and the shared
-one-display OAM/palette transfer are densely checked. The legal source route
+one-display OAM/palette transfer are densely checked. The last five silhouette
+frames close through callback/OAM ordering: ShakeMonInPlace's creation write
+enters OAM immediately, its later writes trail the absolute slide state by one
+additional transfer, and SlideMonToOriginalPos's later callback write wins once
+the return begins. This is source-relative and has no oracle-frame or battle
+branch. The legal source route
 loads PLUSLE chrome before mechanicLab replaces the complete party with
 SHUPPET, so the oracle truthfully displays PLUSLE art/name over SHUPPET battle
 RAM; the seam fixture records that display-boundary fact explicitly rather
@@ -69,8 +74,9 @@ than pretending the preloaded chrome changed.
 **Evidence:** `tools/compare/knockOffPortable.ts`,
 `tools/compare/fixtures/knock-off-player-shuppet-opponent-onix.json`,
 `tools/probe/run-battle-lab-rgb.py`, `src/animation/knockOff.ts`, and focused
-Tier-1 tests. SUPER_FANG and SECRET_POWER remain unsupported; shared reducers
-do not promote either sibling.
+Tier-1 tests. KNOCK_OFF reproduced **59/59 twice**; BIND remained **45/45** in
+both orientations. SUPER_FANG and SECRET_POWER remain unsupported; shared
+reducers do not promote either sibling.
 
 Start with one representative attacker/target. Add variants only when source
 inspection or comparison identifies a dependency: attacker side, front/back
