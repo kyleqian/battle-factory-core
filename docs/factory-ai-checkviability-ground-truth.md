@@ -3723,7 +3723,7 @@ green. **Run twice this session, ALL PASS both times.** Reproduce with:
 node --experimental-strip-types tools/probe/verify-factory-ai-checkviability-ground-truth.ts
 ```
 
-## 24. 2026-07-26 addendum #14: `AI_CBM_EvasionUp` + `AI_CV_EvasionUp` and `AI_CBM_EvasionDown` + `AI_CV_EvasionDown` — the largest remaining CV handler by draw-site count, 5 of 8 live-verified (updated by two follow-up side-lane sessions, §24.5), and a byte-for-byte "Down"-family twin
+## 24. 2026-07-26 addendum #14: `AI_CBM_EvasionUp` + `AI_CV_EvasionUp` and `AI_CBM_EvasionDown` + `AI_CV_EvasionDown` — the largest remaining CV handler by draw-site count, 6 of 8 live-verified (updated by three follow-up side-lane sessions, §24.5), and a byte-for-byte "Down"-family twin
 
 Prep-scout session (side lane, Battle Scene OFF), same no-`src/`-changes
 contract. Goal per this step's brief: `AI_CV_EvasionUp` (`data/
@@ -4078,7 +4078,7 @@ site, §23.4) that the anomaly is specific to the last-move-type-list code
 region those two handlers share, not a general property of "a draw site
 sitting last before `End`."
 
-### 24.5 DRAW SITE 2 (evasion-stage build) and DRAW SITE 3/4 (toxic-poison chain) — both live-verified; 3 sites remain recipe-only
+### 24.5 DRAW SITE 2 (evasion-stage build), DRAW SITE 3/4 (toxic-poison chain), and DRAW SITE 5 (leech-seed chain) — all three live-verified; 2 sites remain recipe-only
 
 **DRAW SITE 2, live-verified** (`:1043`, `score -1`, reached iff the
 **opponent's own** evasion stage is already ≥ 9) — a second follow-up
@@ -4249,14 +4249,79 @@ same decision, which the old model cannot produce at all. This is the live
 corroboration `docs/factory-ai-draw-discrepancy-probe.md` §7.4 asked a
 future session to add.
 
-The 3 remaining sites below are still recipe-only:
+**DRAW SITE 5, live-verified** (`:1054`, `score +3`, target
+`STATUS3_LEECHSEED`) — this same follow-up side-lane session, immediately
+after closing the toxic-poison chain: a direct re-application of the
+two-Pokémon relay above, `EFFECT_TOXIC` swapped for `EFFECT_LEECH_SEED`,
+confirming the recipe's own prior "straightforward re-application" call.
+Opponent party slot 0 = **Magikarp** (129, level 5, 18 max HP), all 4 slots
+**`MOVE_LEECH_SEED`** (73) — forced, so turn 1's cast on the target is not a
+genuine, unforced AI pick. Target (player) **Anorith** (390, single ability
+Battle Armor, reused verbatim), turn 1 **`MOVE_SPLASH`** (150, harmless),
+turn 2 **`MOVE_SEISMIC_TOSS`** (69, fixed 50 dmg = Anorith's level) OHKOs
+Magikarp — the opponent auto-sends its second party slot, **Shuckle** (213,
+single ability Sturdy, all 4 slots `MOVE_DOUBLE_TEAM`), switching in fresh
+at 95/95. Unlike the toxic chain, Gate E (`:1053`) has no opponent-HP-band
+dependency at all, so no third real turn is needed: the trailing phantom
+decision (§11.0's "only the phantom next-decision is observable" mechanism)
+already reads Gate C false (target not toxic-poisoned in this fixture, so
+Gates C/D and DRAW SITES 3/4 stay unreached, falling straight through to
+`EvasionUp5`) and Gate E false (target **is** leech-seeded) — landing
+directly in the `:1054 if_random_less_than 70` roll once per identical
+`MOVE_DOUBLE_TEAM` slot.
 
-- **DRAW SITE 5** (`:1054`, `score +3`, target `STATUS3_LEECHSEED`): same
-  mixed-moveset obstacle DRAW SITE 3/4 used to have, substituting `EFFECT_
-  LEECH_SEED` for `EFFECT_TOXIC` — now that the two-Pokémon relay recipe
-  above is live-proven, this site is a straightforward re-application of the
-  same trick (a second opponent party slot whose entire kit is the new
-  status move) rather than an open question.
+**A calibration confound found live, closed by re-timing the trace, not
+restaging**: copying the toxic chain's own button-mash trace verbatim (same
+rep count before the turn-2 move-menu opens) silently broke — the extra
+"confirm" presses spilled into turn 2's own move-select menu before the
+scripted `RIGHT` press ever landed, so the player kept re-selecting slot 0
+(`Splash`) instead of ever reaching `Seismic Toss`, and the fixture cycled
+through 2+ real Splash turns with Magikarp never fainting. `Leech Seed`'s own
+"a seed was planted!" message evidently costs a different number of
+dismiss-frames than `Toxic`'s "was badly poisoned!" in this harness (an
+`if_random_less_than`-adjacent effect, not a doc claim, so not worth
+deriving from source) — found and closed empirically by sweeping the
+mash-rep count and reading off PP/species/HP at each value until the
+correct one-Splash/one-Seismic-Toss/fresh-Shuckle signature appeared (29
+reps, vs. the toxic chain's 24). This is the same "calibrated mash-rep
+count, wide margin" discipline §19.5/§24.5 already established, just
+reconfirming that the calibration is per-move, not reusable verbatim across
+different dispatch-move message shapes.
+
+**Analytical prediction (before running), from the transcribed handler
+body**: a single captured decision (the phantom one; no real Shuckle turn
+executes in this window) draws DRAW SITE 1 (×4, Gate A false since Shuckle's
+own HP never drops below the 90% threshold) + DRAW SITE 5 (×4, Gate E false)
+= **8** handler-branch draws, plus Magikarp's own turn-1/turn-2 AI decisions
+(`EFFECT_LEECH_SEED` dispatches to the shared `AI_CV_Toxic` handler,
+`data/battle_ai_scripts.s:711` — a handler with its own `if_random` sites,
+contributing separately-accounted draws to the same window, unrelated to
+`EvasionUp`) plus the fixed per-decision baseline (§24.4). The zero-draw
+control for Gate E/DRAW SITE 5 needed **no new fixture**: every other
+`EvasionUp` fixture already live-verified in this doc (`fullhp-reach`,
+`midhp-control`, `lowhp-reach`, `site2-reach`, `site2-control`,
+`toxicchain-reach`, `toxicchain-control`) never applies
+`STATUS3_LEECHSEED` to its target, so Gate E already reads true (skip) in
+all seven — the same "CONTROL B, already proven, not re-staged" pattern this
+section established for Gates C/D's own toxic prerequisite.
+
+**Live ledger** (oracle-verified, both seeds, both reruns deterministic;
+`tools/battle-lab/mechanic-factory-ai-cv-evasionup-leechseed-reach-off.json`):
+
+| Fixture | Seed | Target leech-seeded (status3 bit 2) | Opponent end state | Total `Random()` calls, frame 0→1788 | Determinism (2 runs) |
+| --- | -: | --- | --- | -: | --- |
+| `evasionup-leechseed-reach` | 1 | yes (`leechSeededBy="opponent"`) | Shuckle 95/95 (fresh, PP untouched) | **23** | identical |
+| `evasionup-leechseed-reach` | 99 | yes (`leechSeededBy="opponent"`) | Shuckle 95/95 (fresh, PP untouched) | **23** | identical |
+
+Both seeds agree exactly (cross-seed stable), both individually reproduce
+across two full reruns. Shuckle's untouched PP (`[15,15,15,15]`) confirms
+zero real Shuckle turns executed in this window — only the phantom decision
+fired, isolating DRAW SITE 5 cleanly the same way every other single-decision
+capture in this doc does.
+
+The 2 remaining sites below are still recipe-only, not attempted this
+session (time-capped — see §24.8):
+
 - **DRAW SITE 6** (`:1058`, `score +2`, **opponent's own** `STATUS3_ROOTED`,
   i.e. Ingrain): same mixed-moveset obstacle as site 5, but self-targeted
   (`EFFECT_INGRAIN`, `MOVE_TARGET_USER` — no accuracy roll of its own to
@@ -4275,8 +4340,8 @@ The 3 remaining sites below are still recipe-only:
    draw sites' exact odds and score deltas, `EvasionUp`'s own
    `AI_USER`-vs-`AI_TARGET` Gate I flip vs `AccuracyDown` (the exact kind of
    trap this doc's "never copy a sibling's gate map" rule exists to catch,
-   §17/§18/§21/§22), and live-verified fixtures proving 5 of `EvasionUp`'s 8
-   sites (1, 2, 3, 4, 8) and `EvasionDown`'s 1 site end-to-end.
+   §17/§18/§21/§22), and live-verified fixtures proving 6 of `EvasionUp`'s 8
+   sites (1, 2, 3, 4, 5, 8) and `EvasionDown`'s 1 site end-to-end.
 2. **A worked example of a disjoint-threshold twin-site handler**: unlike
    `AccuracyDown`'s two gates sharing one 70% threshold (allowing a 2-
    fixture design, §19.3), `EvasionUp`'s Gate A (90%) and Gate H (70%) are
@@ -4290,19 +4355,23 @@ The 3 remaining sites below are still recipe-only:
    is `MOVE_SWEET_SCENT` (`EFFECT_EVASION_DOWN_2` contributes zero). No
    correction to §5's table is needed — both "Exec moves: 1" entries are
    correct, now with a named move behind each.
-4. **3 explicit, citation-backed recipes** (24.5) remain for a future porter
-   (DRAW SITE 5/6/7, all needing a genuine mixed-moveset AI pick or a
+4. **2 explicit, citation-backed recipes** (24.5) remain for a future porter
+   (DRAW SITE 6/7, needing a genuine mixed-moveset AI pick or a
    Ghost-typed opponent), each naming exactly why it needs more than the
    identical-4-slots trick — the same discipline §19.5 established for
-   `AccuracyDown`'s own unstaged sites. Two follow-up side-lane sessions
-   closed the other three: DRAW SITE 3/4 (the toxic-poison chain) with the
+   `AccuracyDown`'s own unstaged sites. Three follow-up side-lane sessions
+   closed the other four: DRAW SITE 3/4 (the toxic-poison chain) with the
    two-Pokémon opponent relay recipe §19.5 itself suggested — live per-site
    attribution confirms the chained-fall-through model from `docs/factory-ai-
    draw-discrepancy-probe.md` §7.1/§7.3 (commit 20f09bb), not the pre-fix
-   "two mutually exclusive single-draw sites" model — and DRAW SITE 2 (the
+   "two mutually exclusive single-draw sites" model — DRAW SITE 2 (the
    evasion-stage build) with a 3-turn/2-turn executed-turn-count pair, zero
    navigation needed, whose live evidence also corrected the recipe's own
-   prior Gate A polarity error (24.5).
+   prior Gate A polarity error (24.5) — and DRAW SITE 5 (the leech-seed
+   chain) with the same two-Pokémon relay reused verbatim (`EFFECT_TOXIC`
+   swapped for `EFFECT_LEECH_SEED`), confirming the recipe's own prior
+   "straightforward re-application" call and needing only a per-move
+   mash-rep recalibration, not a design change (24.5).
 
 ### 24.7 Confirm-or-correct: census cross-check for `EVASION_UP`/`MINIMIZE`/`EVASION_DOWN`
 
@@ -4354,6 +4423,14 @@ PASS, 0 FAIL, `ALL PASS`.**
 the `evasionup-site2-{reach,control}` pair (24.5) — every prior scenario
 unchanged and still green. **Full script run live this session, twice: 428
 PASS, 0 FAIL, `ALL PASS` both times.**
+
+**Third follow-up side-lane session (2026-07-27, shortened-cap) extended it
+again** with the `evasionup-leechseed-reach` fixture (DRAW SITE 5, 24.5) —
+every prior scenario (including both prior follow-ups' additions) unchanged
+and still green. DRAW SITE 6/7 were not attempted this session (time-capped
+per this step's own brief — land one proven site rather than three loose
+ones); their recipes remain as documented in 24.5. **Full script run live
+this session, twice: 473 PASS, 0 FAIL, `ALL PASS` both times.**
 
 ## 25. 2026-07-26 addendum #15: `AI_CBM_RainDance` + `AI_CV_RainDance`, `AI_CBM_SunnyDay` + `AI_CV_SunnyDay`, `AI_CBM_Hail` + `AI_CV_Hail` — the weather trio, §5's own open CBM-weather question answered, and a real `RainDance`/`SunnyDay` sibling divergence
 
