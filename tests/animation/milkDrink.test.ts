@@ -40,17 +40,17 @@ describe("MOVE_MILK_DRINK source-relative component reducer", () => {
       MILK_DRINK_RING_START_AGE + 30,
       "player",
       { x: 72, y: 95 },
-    )[0]).toMatchObject({ xScale: 128, yScale: 128 });
+    )[0]).toMatchObject({ xScale: 132, yScale: 132 });
   });
 
   it("reuses HealingEffect2 only for the literal target-side star args", () => {
     const player = milkDrinkEffectAtAge(
-      MILK_DRINK_HEALING_START_AGE + 9,
+      MILK_DRINK_HEALING_START_AGE + 11,
       "player",
       { x: 72, y: 95 },
     );
     const opponent = milkDrinkEffectAtAge(
-      MILK_DRINK_HEALING_START_AGE + 9,
+      MILK_DRINK_HEALING_START_AGE + 11,
       "opponent",
       { x: 176, y: 44 },
     );

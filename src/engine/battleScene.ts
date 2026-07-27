@@ -15169,6 +15169,7 @@ export function renderSceneOnMovePresentation(
       );
     }
     const nonObjTarget2 = fb.slice();
+    const currentBottle = view.sprites.find((sprite) => sprite.kind === "bottle");
     for (const sprite of displayed.sprites) {
       if (sprite.kind === "bottle") {
         if (sprite.invisible) continue;
@@ -15183,8 +15184,8 @@ export function renderSceneOnMovePresentation(
           sprite.rotB,
           sprite.rotC,
           sprite.yScale,
-          sprite.eva,
-          sprite.evb,
+          currentBottle?.kind === "bottle" ? currentBottle.eva : sprite.eva,
+          currentBottle?.kind === "bottle" ? currentBottle.evb : sprite.evb,
           false,
         );
       } else if (sprite.kind === "ring") {

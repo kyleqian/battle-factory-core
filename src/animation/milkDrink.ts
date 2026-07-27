@@ -1,6 +1,7 @@
 import { GBA_SINE_TABLE_256 } from "../engine/battleMenu.ts";
 import {
-  healingBlueStarsAtAge,
+  HEALING_BLUE_STAR_OFFSETS,
+  healingBlueStarFrameAtLocalAge,
   type RecoverEffectSprite,
 } from "./recover.ts";
 
@@ -34,6 +35,51 @@ export type MilkDrinkEffectSprite =
   | MilkDrinkBottleSprite
   | MilkDrinkRingSprite
   | RecoverEffectSprite;
+
+function milkDrinkHealingStarsAtAge(
+  age: number,
+  side: "player" | "opponent",
+  center: Readonly<{ x: number; y: number }>,
+): readonly RecoverEffectSprite[] {
+  // `clearmonbg ANIM_TARGET` immediately before HealingEffect2 consumes two
+  // sprite-animation ticks while its first child is alive. The subsequent
+  // literal delay-7 spawns therefore start at 0,11,20,29 rather than the
+  // ordinary HealingEffect 0,9,18,27 schedule.
+  const starts = [0, 11, 20, 29] as const;
+  const firstDurations = [1, 4, 2, 3, 5, 3, 2, 3] as const;
+  const firstFrames = [0, 1, 2, 3, 4, 5, 6, 0] as const;
+  const sprites: RecoverEffectSprite[] = [];
+  for (let index = 0; index < starts.length; index += 1) {
+    const local = age - starts[index]!;
+    if (local < 0) continue;
+    let frame: number | null;
+    if (index === 0) {
+      let end = 0;
+      frame = null;
+      for (let i = 0; i < firstDurations.length; i += 1) {
+        end += firstDurations[i]!;
+        if (local < end) {
+          frame = firstFrames[i]!;
+          break;
+        }
+      }
+    } else {
+      frame = healingBlueStarFrameAtLocalAge(local);
+    }
+    if (frame === null) continue;
+    const offset = HEALING_BLUE_STAR_OFFSETS[index]!;
+    sprites.push({
+      kind: "star",
+      x: center.x + (side === "player" ? offset.x : -offset.x),
+      y: center.y + offset.y,
+      frame,
+      xScale: 256,
+      yScale: 256,
+      spawnIndex: index,
+    });
+  }
+  return sprites;
+}
 
 function milkBottleRotationAtAge(age: number): number {
   if (age < 40) return 0;
@@ -107,7 +153,7 @@ export function milkDrinkEffectAtAge(
 
   if (age >= MILK_DRINK_RING_START_AGE && age <= MILK_DRINK_RING_LAST_AGE) {
     const local = age - MILK_DRINK_RING_START_AGE;
-    const scale = 32 + local * 16;
+    const scale = 32 + Math.min(local, 29) * 16;
     const matrix = Math.trunc(0x10000 / scale);
     return [{
       kind: "ring",
@@ -119,7 +165,7 @@ export function milkDrinkEffectAtAge(
   }
 
   if (age >= MILK_DRINK_HEALING_START_AGE) {
-    return healingBlueStarsAtAge(
+    return milkDrinkHealingStarsAtAge(
       age - MILK_DRINK_HEALING_START_AGE,
       side,
       targetCenter,
