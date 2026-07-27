@@ -68,10 +68,10 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // SLUDGE BOMB closes its two-orientation shared-seam evidence.
-        unsupported: 232,
+        // POISON TAIL has a bounded two-orientation component checkpoint.
+        unsupported: 231,
         staged: 0,
-        partial: 3,
+        partial: 4,
         exact: 41,
       },
       {
