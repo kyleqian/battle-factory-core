@@ -4992,6 +4992,182 @@ results (§25.9.2) — a future worker reproducing it would need the *opposite*
 choice (a target whose ability ID lands inside `0`-`3`) as its own dedicated
 fixture, not a byproduct of these two.
 
+### 25.10 2026-07-27 second follow-up side-lane session: `get_weather`'s own stale-read bug (§25.6 item 4, the last open item), live-staged — TWO independent Factory-reachable channels found, not one, and the engine's ported handlers diverge from the real ROM in both
+
+Bounded side-lane worker session (Battle Scene OFF oracle), same no-`src/`-
+edits contract as every addendum above. Scope: characterize §25.6 item 4
+from source, stage a live fixture that discriminates stale-vs-fresh, and
+settle whether `factoryAiCheckBadMove.ts`/`factoryAiCheckViability.ts`'s
+already-ported weather handlers (read **read-only**) agree with the real
+ROM's actual behavior in the affected flow.
+
+#### 25.10.1 The mechanism, pinned exactly — and a second channel §25.1/§25.6 never named
+
+`Cmd_get_weather` (`src/battle_ai_script_commands.c:1644-1665`) only writes
+`AI_THINKING_STRUCT->funcResult` when a real weather bit is set; the
+`AI_WEATHER_NONE` sentinel assignment is `#ifdef BUGFIX`-gated (`:1651-1653`)
+and `BUGFIX` is commented out in this pinned checkout
+(`include/config.h:48`). So in a genuinely weatherless battle
+(`gBattleWeather == 0`), `get_weather` leaves `funcResult` holding whatever
+the *previous* AI script command wrote — and `AI_THINKING_STRUCT` is zeroed
+**once** per battler-decision (`BattleAI_SetupAIData`,
+`battle_ai_script_commands.c:312-380`), not per move and not per logic pass
+(`BattleAI_DoAIProcessing`, `:572-616`, resets `gAIScriptPtr` to the current
+logic's table entry for every `movesetIndex` but never touches
+`funcResult`). For a Factory battle at `challengeNum >= 4` (or vs the
+Frontier Brain), `GetAiScriptsInBattleFactory` (`src/battle_factory.c:889-911`)
+sets `aiFlags = AI_SCRIPT_CHECK_BAD_MOVE | AI_SCRIPT_TRY_TO_FAINT |
+AI_SCRIPT_CHECK_VIABILITY`, executed in that bit order (`aiLogicId` 0/1/2,
+`ChooseMoveOrAction_Singles`, `:396-415`) across all 4 movesetIndex slots
+per pass, all sharing the one un-zeroed `funcResult` for the whole decision.
+
+**Channel 1 (CBM, the mechanism §25.1 already named)**: `AI_CheckBadMove`'s
+own universal preamble (`AI_CheckBadMove_CheckSoundproof`,
+`data/battle_ai_scripts.s:93`) runs `get_ability AI_TARGET` immediately
+before the effect dispatch, for **every** move, regardless of whether the
+move's own effect has a handler. `Cmd_get_ability` (`:1350-1401`) takes the
+direct `gBattleMons[battler].ability` read (no `Random()` guess) for a
+single-ability target species. `AI_CBM_RainDance`/`SunnyDay`/`Hail`
+(`:490-493`/`:495-498`/`:522-525`) each open with `get_weather` as their
+**first** instruction — so a genuinely weatherless dispatch reads the
+target's real ability id straight through. Collision requires the target's
+ability id to land in `AI_WEATHER_*`'s `0`-`3` range
+(`include/constants/battle_ai.h:26-30`: Sun=0/Rain=1/Sandstorm=2/Hail=3).
+Ability id 0 (`ABILITY_NONE`) is never a real species ability (no dex entry
+has it as ability slot 0); id 1 (`ABILITY_STENCH`) has no single-ability
+carrier in this dex (Gulpin/Swalot pair it with Sticky Hold); id 2
+(`ABILITY_DRIZZLE`)'s only single-ability carrier is Groudon, not a Factory
+rental. **Id 3 (`ABILITY_SPEED_BOOST`) is single-ability on Ninjask (302,
+`abilities={SPEED_BOOST,NONE}`, species_info.h:8393-8397), and Ninjask is a
+real Factory rental** (`src/data/battle_frontier/battle_frontier_mons.h:1670,2405`)
+— the collision the brief asked for is reachable, via `AI_CBM_Hail` specifically
+(id 3 == `AI_WEATHER_HAIL`).
+
+**Channel 2 (CV, not named by §25.1/§25.6/§25.9 — found this session while
+tracing Channel 1's own boundary conditions)**: `AI_CheckViability`'s own
+preamble (`data/battle_ai_scripts.s:652-655`) is just `if_target_is_ally
+AI_Ret` — no universal ability or power read before its own effect dispatch,
+unlike CBM. But `AI_TryToFaint`'s own per-move preamble
+(`:2616-2622`) unconditionally runs `get_how_powerful_move_is`
+(`Cmd_get_how_powerful_move_is`, `battle_ai_script_commands.c:1174-1240`)
+whenever `if_can_faint` is false (`Cmd_if_can_faint`, `:1743-1770`, never
+itself touches `funcResult`) — true for any 0/1-power move, which always
+sets `funcResult = MOVE_POWER_OTHER` (`= 0`,
+`include/constants/battle_ai.h:33`, line 1236 of the C source). Since
+`AI_SCRIPT_TRY_TO_FAINT` (logic id 1) runs immediately before
+`AI_SCRIPT_CHECK_VIABILITY` (logic id 2) and both iterate all 4
+`movesetIndex` slots without resetting `funcResult` between passes, **any
+Factory decision whose last moveset slot (index 3) is a real move with power
+≤1** (i.e. essentially every filler slot in every weather-trio fixture in
+this doc, `Growl`/`Splash` both included) leaves `funcResult =
+MOVE_POWER_OTHER(0)` sitting there when `AI_CV_RainDance`/`SunnyDay`/`Hail`'s
+own `get_weather` call runs next — and `MOVE_POWER_OTHER(0)` numerically
+equals `AI_WEATHER_SUN(0)`. All three CV handlers' own weather chains
+include a Sun check (`RainDance`/`Hail` check Sun directly; `SunnyDay`
+excludes Sun but that's irrelevant here since `SunnyDay`'s own chain is
+Hail/Rain/Sandstorm), so this second channel spuriously scores `+1` in a
+genuinely weatherless battle — **independent of the target's ability
+entirely**, unlike Channel 1. This channel is reachable by essentially every
+"reach" fixture already banked in §25.4-§25.9 (any single-turn weatherless
+fixture with 0-power filler moves in slot 3), not just a specially-chosen
+target.
+
+#### 25.10.2 Three fixtures staged, all matching their predictions exactly, both seeds, deterministic (no ties)
+
+Predictions were fixed before running (below), per the mechanism above.
+Opponent (`AI_USER`) = Huntail (374, arbitrary — `Hail` has no `AI_USER`-side
+ability/speed gate to confound), moveset `[MOVE_HAIL(258), MOVE_SPLASH(150)
+x3]` for the first two; `raindance-noraindish-stalesun` reuses Gate R's own
+exact setup with one field changed.
+
+| Fixture | Target (ability id) | Prediction (source) | Live result, both seeds |
+| --- | --- | --- | --- |
+| `mechanic-factory-ai-hail-staleweather-collision-off.json` | Ninjask (Speed Boost=3, **collides** with both channels: CBM=-8 via Hail-id match, CV=+1 via Sun-id match) | net **-7**, Hail must lose to Splash(0) | opponent PP `[10,40,40,40]→[10,40,40,39]` — Hail (slot 0) **never** touched, a Splash slot drops. Exact match. |
+| `mechanic-factory-ai-hail-staleweather-control-off.json` | Anorith (Battle Armor=4, **outside** 0-3, CBM channel silenced) | net **+1** (CV channel alone, target-independent) — Hail must beat Splash(0) despite the "safe" ability choice | opponent PP `[10,40,40,40]→[9,40,40,40]` — Hail (slot 0) **wins**. Exact match. |
+| `mechanic-factory-ai-cv-raindance-noraindish-stalesun-off.json` (Lotad `abilitySlot:0`=Swift Swim instead of §25.9's `abilitySlot:1`=Rain Dish, vs Shuckle, same moveset as the banked Gate R fixture) | N/A (attacker-ability re-attribution check) | if CV channel fires: Rain Dance wins (+1) **despite no Rain Dish**; if Gate R's own tail were the true mechanism: tie (0) | opponent PP `[5,40,40,40]→[4,40,40,40]` — Rain Dance **wins**, identical margin to the original Gate R fixture, **with Rain Dish removed**. |
+
+All three: 2/2 seeds identical, deterministic (no tie-break noise — the
+score gaps are large enough that no `Random()`-based tie-break is ever
+consulted). Wired into `tools/probe/verify-factory-ai-checkviability-ground-truth.ts`'s
+`WEATHER_PICK_SCENARIOS` array (3 new entries, `beforeFrame:0`/`afterFrame:732`,
+the established single-turn shape). **Full script run this session: ALL
+PASS, 0 failures** (every one of the doc's 79+ pre-existing checks
+unchanged and still green; reproduce with
+`node --experimental-strip-types tools/probe/verify-factory-ai-checkviability-ground-truth.ts`).
+
+The third fixture is a re-attribution check on already-banked evidence, not
+new scope creep: it shows the original `raindance-gates-raindish-reach`
+fixture's own live `+1` (§25.9.3/§25.9.5, claimed there as confirmation of
+Gate R's ability-tail bonus) is **at least as well explained** by Channel 2
+firing at Gate W2 (the Sun branch of `RainDance`'s own weather chain, which
+comes *before* Gate R's tail check in instruction order) as by Gate R
+itself — removing Rain Dish entirely reproduces the identical `+1` margin.
+This doesn't overturn §25.9's own *numeric* claim (the engine's `+1` for
+that fixture is still correct, and Gate R's own code is still exercised
+correctly whenever it *is* reached, e.g. genuinely via a future fixture that
+also avoids the Sun-collision), but its *causal attribution* — "confirms
+Gate R correctly ported" — is unconfirmed by that fixture specifically,
+since the live ROM path for it almost certainly never reached Gate R's own
+two instructions at all. Left as a documentation note, not a new open item:
+no `src/` changes, no fixture retraction (the fixture's own numeric claim
+still holds).
+
+#### 25.10.3 Verdict
+
+**(a) Does the pinned ROM exhibit the stale read in a Factory-reachable
+flow?** Yes, confirmed live — and via **two independent channels**, not the
+one §25.1/§25.6 anticipated. Channel 1 (CBM, ability-id collision) requires
+a specific single-ability target (Ninjask, id 3, only reachable for
+`AI_CBM_Hail`); Channel 2 (CV, `MOVE_POWER_OTHER`/`AI_WEATHER_SUN` id
+collision via `AI_TryToFaint`'s own tail state) requires no special ability
+at all and fires in essentially any weatherless Factory decision with a
+low-power filler in the last moveset slot — a much larger blast radius than
+the brief's own framing assumed.
+
+**(b) What value does the ROM actually use there?** Channel 1: the target's
+real ability id (read via `AI_CheckBadMove_CheckSoundproof`'s own
+`get_ability AI_TARGET`). Channel 2: `MOVE_POWER_OTHER` (`=0`, read via
+`AI_TryToFaint`'s own `get_how_powerful_move_is` on the last moveset slot) —
+which happens to equal `AI_WEATHER_SUN`, so every affected CV weather
+handler spuriously takes its own "some other real weather is active" `+1`
+branch.
+
+**(c) Does the engine's ported handler agree or diverge?** **Diverges,
+in both fixtures.** `runCbmWeatherSetter`
+(`src/engine/factoryAiCheckBadMove.ts:757-758`, `return currentWeather ===
+ownWeatherConstant ? -8 : 0`) and `weatherSetterCvScore`
+(`src/engine/factoryAiCheckViability.ts:2330-2340`, `return 0` when
+`currentWeather` doesn't match the "other three" set) both take a clean
+`currentWeather?: AiWeatherValue` input, documented at its own definition
+site (`src/engine/factoryAiDecisionPolicy.ts:516-522`, "Optional, defaulting
+to `undefined` (no weather bit set)") — a correct, garbage-free model of
+"no weather," with no mechanism to read a stale ability id or a stale
+move-power classification. Fed `currentWeather = undefined` (the correct
+value for both live fixtures above), the engine computes Hail's total score
+as exactly **0** in both cases — tied with Splash's own 0. The real ROM's
+live, verified score is **-7** (collision fixture) and **+1** (control
+fixture) respectively — neither matches the engine's `0`, and the two
+fixtures diverge from the engine in *opposite directions*, confirming the
+mismatch isn't a single sign error but a genuine missing mechanism (the
+engine was always going to disagree here, by design — porting either stale-
+read channel byte-for-byte would mean threading target-ability and
+last-moveset-slot-power state into the weather handlers' own clean
+interface, which §25.8's own porter note already flagged as a deliberate
+choice a porter should make explicitly, not an oversight).
+
+**No `src/` change made** (out of scope for this step). This closes §25.6
+item 4 — the last of that section's four open items — with a live-verified
+divergence, not an infeasibility proof: staging was possible, and the
+engine's already-ported handlers do not reproduce either channel, by
+design and now by live evidence. A future porter should decide explicitly
+whether Factory-facing AI parity requires replicating one or both channels
+(Channel 1 needs a `target ability id` input on the weather CBM handlers;
+Channel 2 needs the AI's own last-considered-move power classification
+threaded across the CBM/TryToFaint/CV boundary — a much more invasive change
+than any other handler in this doc's own 22-handler `AI_CV_*` program, since
+every other handler's own state is self-contained within its own script
+body) or to leave the bug un-replicated as a deliberate simplification.
+
 
 ## 26. 2026-07-27 addendum #16: `AI_CV_SpeedDownFromChance`'s own redirect path, live-verified — closes PROGRESS entry 493's no-live-ledger flag
 
