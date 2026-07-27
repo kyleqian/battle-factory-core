@@ -68,11 +68,11 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // CALM MIND is exact in both required orientations.
-        unsupported: 240,
+        // SHADOW BALL is exact in both required orientations.
+        unsupported: 239,
         staged: 0,
         partial: 3,
-        exact: 33,
+        exact: 34,
       },
       {
         tier: "openOnly",
