@@ -2,6 +2,28 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_SELF_DESTRUCT",
+      "status": "partial",
+      "covered": [
+        "complete legal Level-50 Scene-ON mechanicLab parties stage SUDOWOODO, the real Factory set-298 SELF DESTRUCT carrier (Hardy, SpDef/HP), in both player-back and opponent-front orientations; all four active choices are constrained to SELF DESTRUCT and a slower SHUCKLE is constrained to TACKLE",
+        "complete first move-owned source-component body at oracle frames 82-194 player-back and 86-198 opponent-front: all ten gExplosionSpriteTemplate instances, four animation cells, mirrored attacker geometry, both visible battler ShakeMon2 offsets, attacker-only 0->9->0 red palette ramps, and ten SE_M_SELF_DESTRUCT restart/pan boundaries match 113/113 in each orientation, reproduced twice fresh",
+        "ANIM_TAG_EXPLOSION art and both set-298 SUDOWOODO orientations are reproducibly extracted; the reducer stops before damage, fainting, health bars, and round/controller ownership"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-self-destruct-player-sudowoodo-opponent-shuckle.json",
+        "tools/battle-lab/mechanic-self-destruct-opponent-sudowoodo-player-shuckle.json",
+        "tools/compare/fixtures/self-destruct-player-sudowoodo-opponent-shuckle.json",
+        "tools/compare/fixtures/self-destruct-opponent-sudowoodo-player-shuckle.json",
+        "tools/compare/selfDestructPortable.ts",
+        "tools/compare/selfDestructProbe.py",
+        "tools/compare/extractSelfDestructAssets.ts",
+        "src/animation/assets/selfDestruct.json",
+        "src/animation/selfDestruct.ts",
+        "tests/animation/selfDestruct.test.ts"
+      ],
+      "remaining": "Not wired through sceneOnPresentation/battleScene, so no shared-seam raw-RGB framebuffer acceptance exists and exact promotion is forbidden. Remaining work is the source OAM/software-to-hardware display latch and compositor draw case for extracted SUDOWOODO/SHUCKLE/explosion art, followed by 113/113 raw-RGB acceptance in both orientations and bounded existing exact ShakeMon2/palette-blend framebuffer controls. EXPLOSION, PRESENT, DYNAMIC_PUNCH, and every other asset/template sibling remain unsupported pending independent complete-body evidence."
+    },
+    {
       "move": "MOVE_SWAGGER",
       "status": "exact",
       "covered": [
@@ -1108,6 +1130,23 @@
     "MOVE_BIND"
   ],
   "componentTracks": [
+    {
+      "id": "explosion-sprite-self-destruct",
+      "components": [
+        "asset:ANIM_TAG_EXPLOSION",
+        "sprite:gExplosionSpriteTemplate",
+        "task:AnimTask_BlendBattleAnimPal",
+        "task:AnimTask_ShakeMon2",
+        "subroutine:SelfDestructExplode"
+      ],
+      "representatives": [
+        "MOVE_SELF_DESTRUCT",
+        "MOVE_EXPLOSION",
+        "MOVE_PRESENT",
+        "MOVE_DYNAMIC_PUNCH"
+      ],
+      "goal": "MOVE_SELF_DESTRUCT currently proves the complete source-component body in both orientations at 113/113 task/sprite/OAM-RAM/palette/audio frames, reproduced twice, but remains partial until the same dense windows are raw-RGB exact through the shared seam. EXPLOSION has a distinct orb/background/complex-palette prelude and explosion sequence; PRESENT conditionally reaches a distinct target-relative five-explosion damage branch or a nine-particle healing branch after its moving bag; DYNAMIC PUNCH uses target-relative explosion instances inside a distinct punch/background/hitsplat body. No sibling is promoted without its own complete dense move acceptance."
+    },
     {
       "id": "anger-mark-grow-breath",
       "components": [

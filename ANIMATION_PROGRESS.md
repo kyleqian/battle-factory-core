@@ -46,6 +46,39 @@ animation. A status caused by a move is not part of that move's animation.
 
 ## Current resumable state (2026-07-27)
 
+Coverage is **44/276 exact, 4 partial, 228 unsupported**. SELF DESTRUCT is an
+honest partial checkpoint: its complete first move-owned source-component body
+matches the Scene-ON oracle at **113/113 player-back + 113/113 opponent-front**
+frames, reproduced twice fresh, but it is not wired through the shared renderer
+and has no framebuffer acceptance.
+
+## SELF DESTRUCT source-component body closed; explosion track remains partial (2026-07-27)
+
+**Verdict:** `MOVE_SELF_DESTRUCT` is partial. Complete legal mechanicLab parties
+stage SUDOWOODO from the real Level-50 Factory set 298 in both orientations,
+constrain every active choice to SELF DESTRUCT, and use slower SHUCKLE with
+TACKLE. Dense oracle evidence matches **113/113** source-component frames at
+oracle 82-194 player-back and 86-198 opponent-front, twice fresh.
+
+**Source reducer/evidence:** `selfDestructAtAge` ports both literal
+`SelfDestructExplode` calls (ten `gExplosionSpriteTemplate` instances), their
+mirrored offsets and 4/5/5/5 display-cell program, both visible battlers'
+38-toggle `AnimTask_ShakeMon2`, the duplicate forced-attacker task's identical
+write, attacker-only red 0→9→0 palette ramps, all ten attacker-pan audio
+restarts, and teardown. Assets for the explosion and both set-298 SUDOWOODO
+orientations are reproducibly extracted.
+
+**Precise remainder:** no `sceneOnPresentation`/`battleScene` wiring was landed,
+so shared-seam raw-RGB framebuffer acceptance is **0/113 attempted**, not exact.
+Port the source OAM/display latches and draw extracted SUDOWOODO, SHUCKLE, and
+explosions, then require 113/113 in both orientations plus existing exact
+ShakeMon2 and palette-blend framebuffer controls. EXPLOSION, PRESENT,
+DYNAMIC PUNCH, and all other siblings remain unsupported. No absolute ticks,
+screenshots, canonical imports, unsupported barriers, or boundary widening
+were added.
+
+## Previous current state (2026-07-27)
+
 Coverage is **44/276 exact, 3 partial, 229 unsupported**. SWAGGER is exact
 through the shared Scene-ON seam at **161/161 player-back + 161/161
 opponent-front** complete-body component and framebuffer frames, reproduced

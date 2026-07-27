@@ -68,10 +68,10 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // SWAGGER is dense-exact through both Scene-ON orientations.
-        unsupported: 229,
+        // SELF DESTRUCT adds a dense two-orientation component-only partial.
+        unsupported: 228,
         staged: 0,
-        partial: 3,
+        partial: 4,
         exact: 44,
       },
       {

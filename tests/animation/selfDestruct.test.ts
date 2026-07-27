@@ -19,6 +19,8 @@ describe("MOVE_SELF_DESTRUCT source-relative reducer", () => {
     ]);
     expect(player(8).explosions.map((sprite) => sprite.spawnIndex))
       .toEqual([0, 1]);
+    expect(player(3).explosions[0]?.frame).toBe(0);
+    expect(player(4).explosions[0]?.frame).toBe(1);
     expect(player(19).explosions[0]?.frame).toBe(3);
     expect(player(20).explosions.some((sprite) => sprite.spawnIndex === 0))
       .toBe(false);
@@ -38,8 +40,8 @@ describe("MOVE_SELF_DESTRUCT source-relative reducer", () => {
   it("composes the existing exact ShakeMon2 and both palette ramps", () => {
     expect([0, 1, 2, 3, 74, 75, 76].map((age) => player(age).battlerX2))
       .toEqual([-6, -6, 6, 6, 0, 0, 0]);
-    expect([0, 1, 15, 16, 91, 92, 93, 106, 107, 108].map(
+    expect([0, 1, 2, 17, 18, 94, 95, 96, 109, 110, 111].map(
       (age) => player(age).attackerPaletteY,
-    )).toEqual([1, 1, 8, 9, 9, 8, 8, 1, 1, 0]);
+    )).toEqual([0, 0, 1, 8, 9, 9, 8, 8, 1, 1, 0]);
   });
 });

@@ -47,7 +47,9 @@ function explosionAtAge(
     // InitSpritePosToAnimAttacker mirrors script x offsets for the opponent.
     x: attackerCenter.x + (attackerSide === "player" ? offset.x : -offset.x),
     y: attackerCenter.y + offset.y,
-    frame: Math.floor(localAge / 5) as 0 | 1 | 2 | 3,
+    // StartSpriteAnim advances once on creation; the first cell therefore
+    // has four displayed states and the remaining cells have five.
+    frame: Math.min(3, Math.floor((localAge + 1) / 5)) as 0 | 1 | 2 | 3,
   };
 }
 
@@ -74,10 +76,10 @@ export function selfDestructAtAge(
   // The first delay-1 0->9 task is complete before the explosions finish.
   // waitforvisualfinish releases after the last sprite; the reverse 9->0 task
   // starts on the following interpreter/display handoff.
-  const reverseStart = 92;
-  const attackerPaletteY = age < reverseStart
-    ? Math.min(9, Math.max(0, Math.floor((age + 2) / 2)))
-    : Math.max(0, 9 - Math.floor((age - reverseStart + 2) / 2));
+  const reverseFirstChange = 95;
+  const attackerPaletteY = age < reverseFirstChange
+    ? Math.min(9, Math.max(0, Math.floor(age / 2)))
+    : Math.max(0, 9 - Math.floor((age - reverseFirstChange + 2) / 2));
 
   return { explosions, battlerX2, attackerPaletteY };
 }
