@@ -75,17 +75,48 @@ const ON_DAMAGE_ABILITIES: ReadonlySet<number> = new Set([
   56, // ABILITY_CUTE_CHARM
 ]);
 
-/** AbilityBattleEffects' ABILITYEFFECT_IMMUNITY case (battle_util.c:2873-2954). */
-const IMMUNITY_ABILITIES: ReadonlySet<number> = new Set([
-  17, // ABILITY_IMMUNITY
-  20, // ABILITY_OWN_TEMPO
-  7, // ABILITY_LIMBER
-  15, // ABILITY_INSOMNIA
-  72, // ABILITY_VITAL_SPIRIT
-  41, // ABILITY_WATER_VEIL
-  40, // ABILITY_MAGMA_ARMOR
-  12, // ABILITY_OBLIVIOUS
-]);
+/**
+ * AbilityBattleEffects' ABILITYEFFECT_IMMUNITY case (battle_util.c:2873-
+ * 2954): each ability only cures when its own specific status bit is
+ * actually set (`switch (ability) { case ABILITY_X: if (status & Y) ... }`)
+ * -- ability membership alone is a no-op in source (falls through the
+ * `if`, `effect` stays 0, nothing happens), so the barrier below must gate
+ * on the same per-ability status check, not just "does this battler hold
+ * one of these eight abilities" (that over-fired for e.g. an Oblivious
+ * battler with no active infatuation, blocking EFFECT_ATTRACT's own
+ * Oblivious-fails-to-attract tail even though no cure was ever relevant).
+ */
+const STATUS1_POISON = 1 << 3;
+const STATUS1_BURN = 1 << 4;
+const STATUS1_FREEZE = 1 << 5;
+const STATUS1_PARALYSIS = 1 << 6;
+const STATUS1_TOXIC_POISON = 1 << 7;
+const STATUS1_TOXIC_COUNTER = (1 << 8) | (1 << 9) | (1 << 10) | (1 << 11);
+const STATUS1_SLEEP = (1 << 0) | (1 << 1) | (1 << 2);
+const STATUS2_CONFUSION = (1 << 0) | (1 << 1) | (1 << 2);
+const STATUS2_INFATUATION = (1 << 16) | (1 << 17) | (1 << 18) | (1 << 19);
+
+function immunityAbilityCuresStatus(ability: number, battlerState: BattleScriptRulesBattlerState): boolean {
+  switch (ability) {
+    case 17: // ABILITY_IMMUNITY
+      return (battlerState.status1 & (STATUS1_POISON | STATUS1_TOXIC_POISON | STATUS1_TOXIC_COUNTER)) !== 0;
+    case 20: // ABILITY_OWN_TEMPO
+      return (battlerState.status2 & STATUS2_CONFUSION) !== 0;
+    case 7: // ABILITY_LIMBER
+      return (battlerState.status1 & STATUS1_PARALYSIS) !== 0;
+    case 15: // ABILITY_INSOMNIA
+    case 72: // ABILITY_VITAL_SPIRIT
+      return (battlerState.status1 & STATUS1_SLEEP) !== 0;
+    case 41: // ABILITY_WATER_VEIL
+      return (battlerState.status1 & STATUS1_BURN) !== 0;
+    case 40: // ABILITY_MAGMA_ARMOR
+      return (battlerState.status1 & STATUS1_FREEZE) !== 0;
+    case 12: // ABILITY_OBLIVIOUS
+      return (battlerState.status2 & STATUS2_INFATUATION) !== 0;
+    default:
+      return false;
+  }
+}
 
 /** include/constants/hold_effects.h -- ItemBattleEffects' ITEMEFFECT_MOVE_END case (battle_util.c:3625-3767). */
 const ITEM_MOVE_END_HOLD_EFFECTS: ReadonlySet<number> = new Set([
@@ -296,8 +327,9 @@ function executeMoveendState(
     case MOVEEND_IMMUNITY_ABILITIES: {
       const count = rules.battleTopology.battlersCount;
       for (let battler = 0; battler < count; battler += 1) {
-        const ability = rules.battlers[battler as BattleScriptBattlerId].ability;
-        if (IMMUNITY_ABILITIES.has(ability)) {
+        const battlerState = rules.battlers[battler as BattleScriptBattlerId];
+        const ability = battlerState.ability;
+        if (immunityAbilityCuresStatus(ability, battlerState)) {
           return transferState(unsupportedBranch(
             context,
             `AbilityBattleEffects(ABILITYEFFECT_IMMUNITY)'s status-curing branch (battler ${battler}, `

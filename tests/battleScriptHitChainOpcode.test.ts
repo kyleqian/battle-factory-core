@@ -343,11 +343,16 @@ describe("production accuracycheck (Cmd_accuracycheck) dispatch", () => {
       expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 1052 });
     });
 
-    it("halts when the target holds a nonzero ability on a hit (AbilityBattleEffects absorbing unmodeled)", () => {
-      const rc = context(0, {}, {}, { ability: 3 });
-      const { result } = stepFrom("BattleScript_HitFromAccCheck", rc, 1);
-      expect(result.kind).toBe("halted");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 1020 });
+    it("halts when the target holds one of AbilityBattleEffects(ABILITYEFFECT_ABSORBING)'s three real switch cases on a hit (Volt Absorb/Water Absorb/Flash Fire unmodeled) but not any other ability (falls through that switch with no effect, per source)", () => {
+      for (const ability of [10, 11, 18]) { // ABILITY_VOLT_ABSORB, ABILITY_WATER_ABSORB, ABILITY_FLASH_FIRE
+        const rc = context(0, {}, {}, { ability });
+        const { result } = stepFrom("BattleScript_HitFromAccCheck", rc, 1);
+        expect(result.kind).toBe("halted");
+        expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 1020 });
+      }
+      const rcOtherAbility = context(0, {}, {}, { ability: 3 }); // ABILITY_KEEN_EYE, not one of the three switch cases
+      const { result: otherResult } = stepFrom("BattleScript_HitFromAccCheck", rcOtherAbility, 1);
+      expect(otherResult.kind).toBe("advanced");
     });
   });
 });

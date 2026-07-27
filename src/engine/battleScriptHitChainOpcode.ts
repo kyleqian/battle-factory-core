@@ -138,6 +138,10 @@ const ABILITY_LEVITATE = 26;
 const ABILITY_WONDER_GUARD = 25;
 const ABILITY_PRESSURE = 46;
 const ABILITY_SHELL_ARMOR = 75;
+/** include/constants/abilities.h:14-15,22 -- the only three AbilityBattleEffects(ABILITYEFFECT_ABSORBING) switch cases (battle_util.c:2679-2729); every other ability (including ABILITY_NONE) falls through that switch with no effect. */
+const ABILITY_VOLT_ABSORB = 10;
+const ABILITY_WATER_ABSORB = 11;
+const ABILITY_FLASH_FIRE = 18;
 const ABILITY_NAME_BY_ID: Readonly<Record<number, string>> = Object.freeze({
   8: "ABILITY_SAND_VEIL",
   14: "ABILITY_COMPOUND_EYES",
@@ -632,10 +636,15 @@ function jumpToMissTarget(
 /**
  * JumpIfMoveFailed's "not failed" branch: TrySetDestinyBondToHappen
  * (battle_util.c:8285-8294, fully modeled) plus AbilityBattleEffects
- * (ABILITYEFFECT_ABSORBING, ...) -- barriered whenever the target actually
- * holds an ability (ability 0/none is AbilityBattleEffects' only
- * structurally-representable no-op here; every other ability needs the full
- * generated ability-effect switch this engine does not model yet).
+ * (ABILITYEFFECT_ABSORBING, ...) -- that switch (battle_util.c:2679-2729)
+ * only special-cases three abilities (Volt Absorb/Water Absorb/Flash Fire,
+ * each needing a full HP-drain/immunity redirect this engine does not model
+ * yet); every other ability -- including ABILITY_NONE -- falls through with
+ * `effect` staying 0, so `AbilityBattleEffects` returns FALSE and
+ * `JumpIfMoveFailed` proceeds exactly like the none-ability case. Barriering
+ * only the three real switch cases (not "any nonzero ability") matters here:
+ * Attract's own Oblivious block (`Cmd_tryinfatuating`, a later opcode in the
+ * same script) needs to walk straight through this accuracycheck first.
  */
 function advancePastAccuracyCheck(
   context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
@@ -646,11 +655,15 @@ function advancePastAccuracyCheck(
 ): BattleScriptCommandTransition<BattleScriptRulesContext> {
   const attackerBattler = rulesContext.battlers[attacker];
   const targetBattler = rulesContext.battlers[target];
-  if (targetBattler.ability !== 0) {
+  if (
+    targetBattler.ability === ABILITY_VOLT_ABSORB
+    || targetBattler.ability === ABILITY_WATER_ABSORB
+    || targetBattler.ability === ABILITY_FLASH_FIRE
+  ) {
     return unsupportedBranch(
       context,
       `JumpIfMoveFailed's AbilityBattleEffects(ABILITYEFFECT_ABSORBING) check needs the full `
-        + `generated ability-effect switch (target ability ${targetBattler.ability} is not none)`,
+        + `generated ability-effect switch (target ability ${targetBattler.ability} is one of the three real switch cases)`,
       "battle_script_commands.c",
       1020,
     );
