@@ -14,6 +14,62 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > entry 468's animation items are the animation supervisor's backlog now.
 
 ---
+## 497 — [BOUNDED WORKER 2026-07-27 ~02:40] `turn3-rockslide.json` wired from kernel semantic events — closes the entire Grovyle ROCK_SLIDE HP chain (turns 1/3/4/5 all staged now)
+
+- **State:** tree green at **233 files / 3293 tests** (unchanged — this step
+  is pure wiring, no new tests; matches the count already banked at the
+  `docs/presentation-seam-scout.md` §10 prep-scout commit, `e5465e4`),
+  `npm run build` clean. `executableFrontierRatchet.test.ts` unmoved (6/6
+  green, no new barrier — this step touches zero opcodes).
+- **Did:** executed §10.3's ordered wiring plan exactly, in `battleScene.ts`
+  only (the staging module `turn3RockSlidePresentationStaging.ts` and its
+  test landed with §10, unwired — consumed here, not rebuilt): (1) imported
+  `resolveTurn3RockSlideHpEndpoints` and hoisted a module-level
+  `TURN3_ROCKSLIDE_HP` constant (mirroring `TURN4_ROCKSLIDE_HP`'s own
+  pattern); `drawTurn3RockSlideAttack` (`:6707`) and
+  `drawTurn3RockSlideTurnEndSettledMenu` (`:6744`) now read
+  `TURN3_ROCKSLIDE_HP.from`/`.to` instead of the direct
+  `anchorOpponentAfterTurn2Hp`/`anchorOpponentAfterTurn3Hp` literal reads;
+  (2) `drawTurn3RockSlideWindow`'s attack-text branch now reads the
+  already-resolved `TURN1_ROCKSLIDE_ATTACK_LINE1/2` constants instead of the
+  raw `ROCK_SLIDE_LINE1`/`ROCK_SLIDE_LINE2` literals — the fourth and final
+  ROCK_SLIDE call site to make this swap (turns 1/5 already had; turn 4 never
+  needed to). (3) Left `anchorPlayerAfterTurn3Hp`'s steady overlay (Onix's own
+  HP, not a drain endpoint of this window) as a literal, per §10.3 step 3's
+  own "narrow to what's actually unblocked" instruction — named, not
+  silently skipped. No new rendering branches; choreography helpers
+  (`rockSlideBg3Y`/`rockSlideRockState`/etc.) untouched, byte-for-byte, per
+  §10.2's own "zero code changes needed" finding.
+- **Acceptance (§10.4's bar, all re-run this session from this lane's
+  Battle-Scene-OFF oracle, `127.0.0.1:8014`):** `turn3-rockslide.json`
+  **256/256** (both swaps landed clean on the first try — no bisection
+  needed), re-run twice for determinism, both 256/256. Named adjacent
+  regression sweep, all at their recorded counts, unchanged:
+  `turn3-endeavor.json` 192/192, `turn1-rockslide.json` 256/256,
+  `turn4-rockslide.json` 250/250, `turn5-rockslide.json` 256/256,
+  `turn5-faint.json` 110/110, `turn4-doubleteam.json` 250/250,
+  `turn4-menu.json` 44/44. `npm test` (233/3293) and `npm run build` both
+  green. Only `src/engine/battleScene.ts` touched (`git status --porcelain`
+  confirms); no docs/presentation-seam-scout.md edits (owned by this round's
+  side scout, per the step brief).
+- **Next:** the Grovyle ROCK_SLIDE HP chain (turns 1/3/4/5) is now fully
+  kernel-staged end to end — ISSUES #39's window-by-window retirement path
+  has one complete, closed arc as a template. Per §10's own "candidates
+  weighed" table, the next cheapest unconverted window is `turn3-endeavor.json`
+  (ONE new staged hit chain, 101->88, reusing `turn5EndeavorPresentationStaging
+  .ts`'s already-proven MOVE_ENDEAVOR pattern — same zero-new-code shape this
+  step just used) or `turn4-doubleteam.json`'s STAT_ROSE banner, now
+  possibly unblocked by this week's fresh `stat-stage-change` production
+  emission-site finding (§10's own intro note) but NOT yet verified live —
+  a future prep-scout's job, not assumed here. Yawn/Thrash rungs 4-6 remain
+  the other MAIN-lane program track (entry 496's own Next), independent of
+  this presentation-seam work.
+- **Notes:** no PAPERCUT. Archived entry 494 to `PROGRESS-archive.md` to keep
+  this ledger at 3 entries. Both §10.3 swaps were exactly as clean as the
+  scout claimed — no divergence to bisect, no literal left un-swapped beyond
+  the one §10.3 itself named as a residual (`anchorPlayerAfterTurn3Hp`).
+
+---
 ## 496 — [BOUNDED WORKER 2026-07-27 ~02:10] Yawn Rung 3 landed: ENDTURN_ITEMS2 registered with real moveTurn gating — the item the whole Yawn track was roadmapped to unblock (entries 460-464) is now live
 
 - **State:** tree green at **232 files / 3286 tests** (+4 over entry 495's
@@ -197,109 +253,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   waiting for turn-2 input, then binary-searching the transition frame)
   took the remainder but stayed inside the cap.
 
----
-## 494 — [BOUNDED WORKER 2026-07-27 ~01:15] Yawn Rung 1 landed (SETYAWN + JUMPIFABILITY widening) — plus a real accuracycheck gap the design doc's own census missed
-
-- **State:** tree green at **232 files / 3276 tests** (+9 over entry 493's
-  3267), `npm run build` clean. Census: 93/214 effects (+1), 188/355 moves
-  (+1), 151/276 Factory-L50 unweighted (+1), 1894/2957 weighted (**+10, not
-  the design doc's ~14** — see below), all 32 checks pass.
-  `executableFrontierRatchet.test.ts`: **`battleScriptHitChainOpcode.ts`
-  barrier pin moved 22→23, named and justified in the ratchet's own comment**
-  — a real widening (8 of 11 non-`ACC_CURR_MOVE` `accuracycheck` sites now
-  execute instead of halting) that adds exactly one new named barrier
-  (`STATUS3_ALWAYS_HITS`/Lock-On, mirroring the existing `ACC_CURR_MOVE`
-  branch's identical barrier, provably unreachable today).
-- **Did:** landed `docs/yawn-thrash-endturn-design.md` Rung 1 exactly as
-  scoped — new `battleScriptSetyawnOpcode.ts` (`Cmd_setyawn`,
-  `battle_script_commands.c:9352-9364`, two-branch jump on
-  `STATUS3_YAWN|status1` gate, writes `STATUS3_YAWN_TURN(2)`), two new
-  `BATTLE_SCRIPT_STATUS3_YAWN`/`_TURN_2` constants, and widened
-  `JUMPIFABILITY_VALUES` (`battleScriptIngrainLeechSeedWrapOpcode.ts`) with
-  `ABILITY_VITAL_SPIRIT`(72)/`ABILITY_INSOMNIA`(15). No (b) barrier material
-  needed for either, confirming the doc's own claim.
-- **CONFIRM-OR-CORRECT finding (real, not assumed):** the doc's own §0 opcode
-  census marked `accuracycheck BattleScript_ButItFailed,
-  NO_ACC_CALC_CHECK_LOCK_ON` — Yawn's own accuracy check — "`[registered]`"
-  because `B_SCR_OP_ACCURACYCHECK` has a dispatch entry, but that entry was
-  narrowed to ONLY the `ACC_CURR_MOVE` operand form; the `NO_ACC_CALC_CHECK_
-  LOCK_ON` literal (a completely different source branch, `battle_script_
-  commands.c:1103-1113`, that skips the `Random()` accuracy roll entirely)
-  hit `unsupportedBranch` every time — confirmed live via a debug run before
-  writing any fix. This would have blocked Rung 1's own pass-through test
-  outright, so it was in-scope to fix, not deferred: added
-  `accuracycheckNoAccCalcCheckLockOn` (sure-hit Lock-On barrier reusing the
-  `ACC_CURR_MOVE` branch's own precedent; semi-invulnerable bare-jump miss;
-  `JumpIfMoveAffectedByProtect(0)`'s Protect gate, which reads `gCurrentMove`
-  for its flag check despite the literal `0` argument). Net effect: **Yawn's
-  own move-use side draws ZERO `Random()` calls** (not 1, as I first assumed
-  by analogy to Thunder Wave's `ACC_CURR_MOVE` accuracy roll) — this actually
-  matches, not contradicts, the design doc's own §2 remark that end-turn's
-  sleep-turn roll is "the only `Random()` in end-turn" for the whole Yawn
-  mechanic. 7 of the 8 `NO_ACC_CALC_CHECK_LOCK_ON` sites besides Yawn's own
-  remain barriered behind their own separate unregistered opcodes (Roar,
-  OHKO, Mimic, Pain Split, Curse, Role Play, Skill Swap) — this fix only
-  widens the shared opcode's operand-form dispatch, it doesn't newly unblock
-  any of those scripts end-to-end.
-- **Second finding, in the census refresh itself:** the doc's §1c "14 unique
-  Factory L50 carrier species" for `MOVE_YAWN` was counted against the raw
-  882-entry `battle-frontier-mons.json` catalog with no tier filter. The
-  census's own weighted metric restricts to `factory-round-policy.json`'s
-  `rentalSelection.ranges.level50` (a union of real `GetFactoryMonId` rank
-  bands, effectively indices 110-849 of the 882) — 6 of the doc's 14 species
-  (WOOPER, TOGEPI, SLUGMA, SLAKOTH, **GULPIN**, SLOWPOKE, all at catalog
-  indices <110) fall outside every modeled Level-50 rental-rank band, leaving
-  8 species / 10 catalog entries (WARTORTLE, TOGETIC, WALREIN, SLAKING ×3,
-  QUAGSIRE, SLOWBRO, SLOWKING, URSARING) — exactly the census's own
-  precomputed `frontierMonCount:10, speciesCount:8` for `MOVE_YAWN`, and
-  exactly the +10 observed. GULPIN (the brief's own suggested live-fixture
-  species) is one of the excluded six — the live fixture below still proves
-  the mechanic correctly (mechanicLab's `overrides.parties` explicitly
-  permits any species regardless of real rental-draft legality), it just
-  isn't itself evidence of a Level-50-legal encounter; QUAGSIRE or
-  SLOWBRO/SLOWKING would be if that distinction mattered for a future step.
-- **Tests (+9):** `tests/battleScriptSetyawnOpcode.test.ts` (new, 5): sets
-  `STATUS3_YAWN_TURN(2)` on ordinary landing (zero RNG) / no-ops (fails) when
-  already yawning or status1-nonzero / `ButItFailed` via `jumpifability` for
-  both Vital Spirit and Insomnia, ahead of `setyawn` ever running.
-  `tests/battleScriptHitChainOpcode.test.ts` (+4, new `NO_ACC_CALC_CHECK_
-  LOCK_ON` describe block via `BattleScript_EffectRoar`'s own instance, kept
-  opcode-generic rather than Yawn-specific): ordinary advance (zero RNG),
-  Protect gate (MISSED+B_MSG_PROTECTED), semi-invulnerable bare-jump miss,
-  STATUS3_ALWAYS_HITS barrier. Fixed one now-stale barrier-count test in the
-  same file (its `.find()` for "any non-ACC_CURR_MOVE site" now finds a
-  newly-supported one first; narrowed to the still-genuinely-unsupported
-  subset, corrected its stale "9 sites" count to the real 11).
-- **Live fixture (`tools/battle-lab/mechanic-yawn-landing-off.json`, GULPIN
-  vs MAGIKARP filler, `bin/oracle lab`):** opponent `status3` observed
-  **0 → 4096 (0x1000, `STATUS3_YAWN_TURN(2)`) → 2048 (0x800,
-  `STATUS3_YAWN_TURN(1)`)** across frames 160/180/300/320 — the middle value
-  is Cmd_setyawn's own write, byte-for-byte my `BATTLE_SCRIPT_STATUS3_YAWN_
-  TURN_2` constant; the drop to 2048 by frame 320 is the REAL ROM's own
-  `ENDTURN_YAWN` decrement already firing once (Rung 2, not yet built in
-  this engine) — free live corroboration of Rung 2's own decrement math
-  ahead of landing it. Frame 180 screenshot: "GULPIN used YAWN!"; frame 300:
-  status3 still 4096 (pre-decrement). Second fixture
-  (`mechanic-yawn-vitalspirit-blocked-off.json`, opponent MANKEY,
-  ability 72/Vital Spirit): `status3` stays **0** the whole trace; frame 300
-  screenshot: "Foe MANKEY's VITAL SPIRIT made it ineffective!" — confirms the
-  `ButItFailed` branch live, satisfying the brief's "if stageable in-cap"
-  ask (it was).
-- **Next:** Rung 2 (`ENDTURN_YAWN` end-turn case, `runYawnTick` in
-  `battleEndTurnOrchestration.ts`) is fully scoped by the design doc and
-  partially de-risked by this session's own findings: `cancelBattleScript
-  MultiTurnMoves` (the doc assumed this needed building) **already exists**
-  (`battleScriptMultiTurnCancellation.ts`, used by `battleScriptAction
-  Admission.ts`) — Rung 2 can call it directly, no new helper needed. The
-  `UproarWakeUpCheck`-omission citation was re-verified this session
-  (`STATUS2_UPROAR`/`MOVE_EFFECT_UPROAR` are never set by any production
-  code — confirmed by grep, not assumed) and holds. Not started this session
-  (time went to the accuracycheck fix + two live fixtures instead) — next
-  worker can start directly from `docs/yawn-thrash-endturn-design.md` §2/
-  Rung 2 plus this entry's own de-risking notes.
-- **Notes:** no PAPERCUT. Ratchet moved deliberately (named above); census
-  pins moved deliberately (named above, both effect/move counts and the
-  weighted-delta shortfall explanation). Spent more of the time budget than
-  planned on the accuracycheck gap and the tier-filter cross-check, so Rung 2
-  is banked as the next step rather than rushed — per the brief's own
-  time-split allowance ("Rung 1 alone is a complete, committable step").

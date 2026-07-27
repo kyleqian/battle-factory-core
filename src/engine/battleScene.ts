@@ -595,6 +595,7 @@ import {
   resolveTurn1RockSlideHpEndpoints,
 } from "./turn1RockSlidePresentationStaging.ts";
 import { resolveTurn4RockSlideHpEndpoints } from "./turn4RockSlidePresentationStaging.ts";
+import { resolveTurn3RockSlideHpEndpoints } from "./turn3RockSlidePresentationStaging.ts";
 import {
   resolveTurn5EndeavorAttackLines,
   resolveTurn5EndeavorHpEndpoints,
@@ -1382,6 +1383,17 @@ const anchorOpponentAfterTurn4Hp = 1;
  * kernel event at all).
  */
 const TURN4_ROCKSLIDE_HP = resolveTurn4RockSlideHpEndpoints();
+
+/**
+ * Presentation-seam retirement (`docs/presentation-seam-scout.md` §10.2/
+ * §10.3 step 1): turn 3's own ROCK_SLIDE HP endpoints (88 -> 41), now with an
+ * independent staged proof (`turn3RockSlidePresentationStaging.ts`),
+ * byte-identical to the `anchorOpponentAfterTurn2Hp`/`anchorOpponentAfterTurn3Hp`
+ * literal pair. `drawTurn3RockSlideAttack`/`drawTurn3RockSlideTurnEndSettledMenu`
+ * read this instead of those two literals directly; both literals stay
+ * defined and in use elsewhere (steady-state reads §10.1/§10.3 leave alone).
+ */
+const TURN3_ROCKSLIDE_HP = resolveTurn3RockSlideHpEndpoints();
 
 /**
  * S7 slice J (docs/battle-turn-notes.md §13/§23): Onix's own post-turn-5-
@@ -6674,8 +6686,10 @@ const TURN3_ROCKSLIDE_MENU_REDRAW_DELAY = 669; // pressTick+669 = 4356 (hard cut
  * S7 slice H: the battlefield base + rocks + shake + Grovyle's own HP drain
  * for turn 3's ROCK_SLIDE window - identical shape to turn 1's own
  * `drawRockSlideAttack`, parameterized by `TURN3_ROCKSLIDE_PRESS_TICK` and
- * turn 3's own HP endpoints (`anchorOpponentAfterTurn2Hp`(88) ->
- * `anchorOpponentAfterTurn3Hp`(41)). Unlike turn 1 (where Onix stays at
+ * turn 3's own HP endpoints, now the staged `TURN3_ROCKSLIDE_HP` pair
+ * (88 -> 41, `docs/presentation-seam-scout.md` §10.3 step 1, byte-identical
+ * to the `anchorOpponentAfterTurn2Hp`/`anchorOpponentAfterTurn3Hp` literals).
+ * Unlike turn 1 (where Onix stays at
  * full HP(117) the whole window, so `drawMenuHealthboxPlayer`'s own stale
  * full-HP harvest is already correct), Onix already carries ENDEAVOR's own
  * damage (117->88) by this point - the caller (`drawTurn3RockSlideWindow`)
@@ -6692,7 +6706,7 @@ function drawTurn3RockSlideAttack(fb: Uint8Array, t: number): void {
   }
   drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y);
   const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick);
-  const opponentHp = rockSlideOpponentHp(t, pressTick, anchorOpponentAfterTurn2Hp, anchorOpponentAfterTurn3Hp);
+  const opponentHp = rockSlideOpponentHp(t, pressTick, TURN3_ROCKSLIDE_HP.from, TURN3_ROCKSLIDE_HP.to);
   const opponentContent = opponentHealthboxContentForHp(opponentHp);
   drawSendOutHealthbox(fb, 0, opponentContent);
   if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2, opponentContent);
@@ -6721,7 +6735,8 @@ function turn3RockSlideResettledBounceTick(t: number): number {
  * S7 slice H: turn 3's own turn-end resettled action menu - same shape as
  * `drawDragonBreathTurnEndSettledMenu` (turn 2's own analogue): reuse
  * `drawActionMenuIdleContent`'s flat harvest for everything but the
- * opponent healthbox (overdrawn at Grovyle's real settled HP, 41), and
+ * opponent healthbox (overdrawn at Grovyle's real settled HP, now the staged
+ * `TURN3_ROCKSLIDE_HP.to`, 41), and
  * track the LIVE resettled bounce offset for Onix's own HP overlay (88 -
  * `menuIdleBase`'s own harvest bakes Onix at full HP 117, stale here just
  * like every earlier settled-menu variant in this turn sequence).
@@ -6729,7 +6744,7 @@ function turn3RockSlideResettledBounceTick(t: number): number {
 function drawTurn3RockSlideTurnEndSettledMenu(fb: Uint8Array, t: number): void {
   const bounceTick = turn3RockSlideResettledBounceTick(t);
   drawActionMenuIdleContent(fb, bounceTick, false);
-  drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(anchorOpponentAfterTurn3Hp));
+  drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(TURN3_ROCKSLIDE_HP.to));
   drawPlayerHealthboxHpOverlay(fb, anchorPlayerAfterTurn3Hp, menuIdleBounce(bounceTick).healthboxY2);
 }
 
@@ -6742,6 +6757,14 @@ function drawTurn3RockSlideTurnEndSettledMenu(fb: Uint8Array, t: number): void {
  * `drawTurn3EndeavorText` before handing off here - see that function's own
  * doc). Deliberately stops at the settled menu's own live idle hold -
  * turn 4's own reopen input (tick 4892) is out of scope this session.
+ *
+ * Presentation-seam wiring (`docs/presentation-seam-scout.md` §10.3 step 2):
+ * the attack phase's own "ONIX used\nROCK SLIDE!" text now reads window 2's
+ * already-resolved `TURN1_ROCKSLIDE_ATTACK_LINE1/2`
+ * (`turn1RockSlidePresentationStaging.ts`) instead of the raw
+ * `ROCK_SLIDE_LINE1`/`ROCK_SLIDE_LINE2` literals -- same move/same attacker/
+ * same prefix, so the resolved content is byte-identical; no new staging
+ * needed, the fourth and final ROCK_SLIDE call site to make this swap.
  */
 function drawTurn3RockSlideWindow(fb: Uint8Array, t: number): void {
   const pressTick = TURN3_ROCKSLIDE_PRESS_TICK;
@@ -6755,7 +6778,7 @@ function drawTurn3RockSlideWindow(fb: Uint8Array, t: number): void {
   drawPlayerHealthboxHpOverlay(fb, anchorPlayerAfterTurn3Hp);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   if (t < textClearTick) {
-    drawMessageTextLines(fb, ROCK_SLIDE_LINE1, ROCK_SLIDE_LINE2, rockSlideTextVisibleChars(t, pressTick));
+    drawMessageTextLines(fb, TURN1_ROCKSLIDE_ATTACK_LINE1, TURN1_ROCKSLIDE_ATTACK_LINE2, rockSlideTextVisibleChars(t, pressTick));
   }
 }
 
