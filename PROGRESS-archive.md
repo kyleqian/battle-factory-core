@@ -1,4 +1,28 @@
 ---
+## 512 — [SUPERVISOR 2026-07-27 ~12:10] round 5 verified + merged; round 6 dispatched
+
+- **State:** master green at **250 files / 3422 tests**, build clean. Round
+  5 landed: #47's per-slot funcResult value propagation (entry 511;
+  supervisor reran suite/build + CV verify script ALL PASS on main tree;
+  both §27 index-1 fixtures reproduce — deterministic Hail +1 in the carry
+  case, genuine 4-way tie in the clean case; ISSUES #47 trimmed to only
+  the 7 writes-conditionally predecessors' live-verification residual) ∥
+  side §12 prep-scout banked (merged from `worker/side-20260727-113020`,
+  cleaned): next window = `turn6-featherdance.json`, 90/90 re-pinned live
+  (supervisor reran compare in-worktree), full input inventory + staged
+  kernel-event proof + ordered wiring plan at doc §12.1-12.4.
+- **Round 6 (dispatched):** main → `B_SCR_OP_NEGATIVEDAMAGE`
+  (EFFECT_ABSORB/DREAM_EATER, 49 weighted, current top census blocker)
+  then `B_SCR_OP_TRYSETREST` (EFFECT_REST, 49) per entry 509's handoff ∥
+  side → live fixtures for #47's 7 writes-conditionally predecessors
+  (§27.1 handlers 11, 15-17, 20-22; validate the shipped derived
+  conditions as predecessor shapes; contradictions are findings, not
+  fixes).
+- **Next:** verify round 6; round 7 candidates = §12 wiring
+  (turn6-featherdance, main) ∥ §24.5 sites 5/6/7 (side); then wind-down
+  (deadline 15:28).
+
+---
 ## 511 — [BOUNDED WORKER 2026-07-27 ~13:10] ISSUES #47 closed for its full write-audit scope: per-slot funcResult value propagation across the whole CV pass, driven by doc §27.1
 
 - **State:** tree green at **249 files / 3414 tests** (+5 over session

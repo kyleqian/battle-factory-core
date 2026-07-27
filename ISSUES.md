@@ -5,58 +5,6 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #47 — CV weather stale-`funcResult` carry: 7 writes-conditionally handlers' derived-but-unstaged predecessor conditions
-
-**Symptom (the sole remaining sub-case): `factoryAiDecisionPolicy.ts`'s
-`chooseFactoryAiScoredDecision` now simulates `AI_THINKING_STRUCT->funcResult`
-value-level across the WHOLE `AI_CheckViability` pass (all 4 movesetIndex
-slots, not just the first scripted one) per
-`docs/factory-ai-checkviability-ground-truth.md` §27.1's exhaustive
-per-handler write audit (all 22 ported `AI_CV_*` handlers, `factoryAiCheck
-Viability.ts`'s own `funcResultAfter` return on every dispatch branch):
-13 writes-never handlers pass the running value through unchanged; the 2
-writes-always handlers (`AI_CV_Pursuit`, `AI_CV_AttackDown`) replace it with
-their own derived written value (collision-mapped against `AI_WEATHER_*`
-0-3, the same mechanism `ABILITY_ID_IN_WEATHER_RANGE`/the new
-`TYPE_ID_IN_WEATHER_RANGE` already model for Channel 1); the 7
-writes-conditionally handlers (`AI_CV_DefenseUp`/`SpDefUp`/`LightScreen`/
-`Reflect`/`SunnyDay`/`Hail`/`RainDance`, doc §27.1 rows 11/15-17/20-22) each
-derive their own written-or-passthrough value from the exact branch
-conditions the handler's own body already reads (HP%, last-move power/type,
-weather, ability) — not guessed, not left unmodeled.
-
-**What's confirmed, not guessed:** the two live-oracle-staged fixtures doc
-§27 added (`mechanic-factory-ai-cv-hail-movesetindex1-{writesnever-carry,
-writesalways-clean}-off.json`, weather move at moveset index **1**, one
-behind a writes-never predecessor and one behind a writes-always
-predecessor) both reproduce exactly — the previously-confirmed divergence
-(3-way tie instead of the ROM's deterministic Hail pick) is gone, and the
-writes-always fixture's clean 4-way tie is unchanged
-(`tests/factoryAiScoredDecision.test.ts`'s new movesetIndex-1 describe
-block, both seeds; `tools/probe/verify-factory-ai-checkviability-ground-
-truth.ts` ALL PASS as ORACLE observations, untouched).
-
-**What's still a residual, not closed:** no live fixture places a weather
-move behind one of the **7 writes-conditionally** handlers specifically
-(only behind a writes-never and a writes-always predecessor were staged
-this round — new fixture staging is out of scope for a single closing
-step). Their own derived conditions/values (e.g. `AI_CV_DefenseUp`/`SpDefUp`'s
-own Gate C 200-roll + last-move power/type write; `AI_CV_RainDance`'s own
-Gate S ability-write feeding its own weather chain) are read straight from
-the audited assembly + `Cmd_get_*` bodies, not guessed — but have not been
-positively confirmed against real hardware for the specific "weather move
-sits behind ONE OF THESE SEVEN" shape. Existing per-handler unit tests
-(`tests/factoryAiCheckViability.test.ts`) cover each handler's own
-score/HP/ability/weather gates directly, just not this specific
-between-slot propagation angle.
-
-**Leads:** a future worker would need to stage a live fixture placing the
-weather move at moveset index 1-3 behind one of the 7 (e.g. Bulk Up/Harden
-at index 0, Hail at index 1, controlling AI_USER's own HP% to force the
-Gate C 200-roll's fall-through branch) to positively confirm
-`statUpLastMoveFuncResultAfter`/`rainDanceFuncResultAfter`'s own derived
-values against real hardware.
-
 ## #41 — Production engine modules import canonical RAM recordings
 
 **Symptom:** shipped `src/engine/` code reads recorded state from the single

@@ -15,6 +15,33 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 515 — [SUPERVISOR 2026-07-27 ~13:20] round 6 verified + merged; ISSUES #47 CLOSED and deleted; final round dispatched
+
+- **State:** master green at **252 files / 3446 tests**, build clean, census
+  **100/214 effects, 201/355 moves, 162/276 Factory-L50, 2206/2957 weighted
+  (74.6%)**. Round 6 landed: NEGATIVEDAMAGE + TRYSETREST (entry 513) ∥ §12
+  wiring (entry 514; supervisor reran compares live: turn6-featherdance
+  90/90, turn5-faint 110/110) ∥ side §27.5 (merged from
+  `worker/side-20260727-120806`, cleaned; verify script rerun in-worktree
+  ALL PASS): AI_CV_RainDance live-verified as a writes-conditionally
+  PREDECESSOR in a controlled A/B pair — **shipped model CONFIRMED both
+  directions**.
+- **ISSUES #47 deleted (supervisor decision, this commit):** the engine's
+  per-slot funcResult value model is implemented for all 22 CV handlers
+  (entry 511) and live-validated across all three write classes — 
+  writes-never, writes-always (§27.4), and writes-conditionally (§27.5) — 
+  5 dedicated fixtures + 2 net-score reproductions, zero contradictions.
+  The 6 conditional predecessors not individually staged are recorded in
+  §27.5 as optional validation breadth with the exact recipe, not open
+  debt.
+- **Final round (dispatched, shortened caps):** main → next census set
+  `B_SCR_OP_JUMPIFSTAT`+`PLAYSTATCHANGEANIMATION` (5 effects, 45 weighted,
+  entry 513's handoff) ∥ side → §24.5 recipe-only relay sites 5/6/7 (as
+  many as fit).
+- **Next:** verify final round, wind-down (deadline 15:28): animation-main
+  fold check, final union verify, session summary.
+
+---
 ## 514 — [BOUNDED WORKER 2026-07-27 ~13:35] §12.3 wiring landed: turn6-featherdance.json kickoff text sourced from kernel events, via a new opponent-target/two-sourceLabel bridge
 
 - **State:** tree green at **252 files / 3446 tests** (+3 over session start
@@ -138,28 +165,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   worker, time budget) rather than start a 5-effect set without room to land
   it with the same full-committed-script-per-effect rigor.
 - **Notes:** no PAPERCUT.
-
----
-## 512 — [SUPERVISOR 2026-07-27 ~12:10] round 5 verified + merged; round 6 dispatched
-
-- **State:** master green at **250 files / 3422 tests**, build clean. Round
-  5 landed: #47's per-slot funcResult value propagation (entry 511;
-  supervisor reran suite/build + CV verify script ALL PASS on main tree;
-  both §27 index-1 fixtures reproduce — deterministic Hail +1 in the carry
-  case, genuine 4-way tie in the clean case; ISSUES #47 trimmed to only
-  the 7 writes-conditionally predecessors' live-verification residual) ∥
-  side §12 prep-scout banked (merged from `worker/side-20260727-113020`,
-  cleaned): next window = `turn6-featherdance.json`, 90/90 re-pinned live
-  (supervisor reran compare in-worktree), full input inventory + staged
-  kernel-event proof + ordered wiring plan at doc §12.1-12.4.
-- **Round 6 (dispatched):** main → `B_SCR_OP_NEGATIVEDAMAGE`
-  (EFFECT_ABSORB/DREAM_EATER, 49 weighted, current top census blocker)
-  then `B_SCR_OP_TRYSETREST` (EFFECT_REST, 49) per entry 509's handoff ∥
-  side → live fixtures for #47's 7 writes-conditionally predecessors
-  (§27.1 handlers 11, 15-17, 20-22; validate the shipped derived
-  conditions as predecessor shapes; contradictions are findings, not
-  fixes).
-- **Next:** verify round 6; round 7 candidates = §12 wiring
-  (turn6-featherdance, main) ∥ §24.5 sites 5/6/7 (side); then wind-down
-  (deadline 15:28).
 
