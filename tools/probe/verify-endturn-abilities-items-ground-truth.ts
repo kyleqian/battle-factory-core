@@ -13,6 +13,7 @@ import { oracleUrlForProfile } from "../compare/oracleProfiles.ts";
 const SPEEDBOOST_SCENARIO = "tools/battle-lab/mechanic-endturn-speedboost-off.json";
 const RAINDISH_SCENARIO = "tools/battle-lab/mechanic-endturn-raindish-off.json";
 const SHEDSKIN_SCENARIO = "tools/battle-lab/mechanic-endturn-shedskin-off.json";
+const RESTOREHP_SITRUS_SCENARIO = "tools/battle-lab/mechanic-endturn-items1-restorehp-sitrus-off.json";
 
 // include/constants/pokemon.h STAT_SPEED index into statStages[]; battle_util.h B_WEATHER_RAIN_TEMPORARY=1<<0.
 const STAT_SPEED = 3;
@@ -31,6 +32,7 @@ interface BattlerState {
   status1: number;
   hp: number;
   maxHp: number;
+  item: number;
 }
 
 interface CaptureState {
@@ -178,6 +180,41 @@ async function main(): Promise<void> {
     "Shed Skin cures at frame 5582: status1 -> 0 (full clear, not masked), exactly ONE new Random() draw from 5581 (battle_util.c:2620-2641, (Random()%3)==0)",
     ssCure.battlers.player.status1 === 0 && ssCure.rngValue !== ssPreCure.rngValue,
     `5581 status1=${ssPreCure.battlers.player.status1} rng=${ssPreCure.rngValue}, 5582 status1=${ssCure.battlers.player.status1} rng=${ssCure.rngValue}`,
+  );
+
+  console.log("\n=== ENDTURN_ITEMS1: HOLD_EFFECT_RESTORE_HP (Sitrus Berry, doc §6 addendum) ===");
+  const restoreHp = await runScenario(RESTOREHP_SITRUS_SCENARIO);
+
+  const rhp0 = at(restoreHp, 0);
+  check(
+    "LOTAD holds Sitrus Berry (142), full HP (115) at frame 0",
+    rhp0.battlers.player.item === 142 && rhp0.battlers.player.hp === 115,
+    `item=${rhp0.battlers.player.item}, hp=${rhp0.battlers.player.hp}`,
+  );
+
+  const rhpDrop = at(restoreHp, 4570);
+  const rhpDropPost = at(restoreHp, 4571);
+  check(
+    "the 6th real Pound hit drops LOTAD to 45 (<=floor(115/2)=57) at frame 4571, below the RESTORE_HP gate",
+    rhpDrop.battlers.player.hp === 58 && rhpDropPost.battlers.player.hp === 45,
+    `4570 hp=${rhpDrop.battlers.player.hp}, 4571 hp=${rhpDropPost.battlers.player.hp}`,
+  );
+
+  const rhpPreHeal = at(restoreHp, 4907);
+  const rhpHealed = at(restoreHp, 4908);
+  check(
+    "ENDTURN_ITEMS1 heals exactly +30 (Sitrus's own holdEffectParam) at frame 4908, zero new Random() draws (battle_util.c:3337-3345)",
+    rhpPreHeal.battlers.player.hp === 45 && rhpHealed.battlers.player.hp === 75 &&
+      rhpPreHeal.rngValue === rhpHealed.rngValue,
+    `4907 hp=${rhpPreHeal.battlers.player.hp} rng=${rhpPreHeal.rngValue}, 4908 hp=${rhpHealed.battlers.player.hp} rng=${rhpHealed.rngValue}`,
+  );
+
+  const rhpConsumed = at(restoreHp, 4909);
+  check(
+    "the berry is consumed (item -> ITEM_NONE) the frame after the heal lands, zero new Random() draws",
+    rhpHealed.battlers.player.item === 142 && rhpConsumed.battlers.player.item === 0 &&
+      rhpHealed.rngValue === rhpConsumed.rngValue,
+    `4908 item=${rhpHealed.battlers.player.item} rng=${rhpHealed.rngValue}, 4909 item=${rhpConsumed.battlers.player.item} rng=${rhpConsumed.rngValue}`,
   );
 
   console.log(`\n${failCount === 0 ? "ALL CHECKS PASSED" : "SOME CHECKS FAILED"} (${passCount} pass, ${failCount} fail)`);
