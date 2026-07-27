@@ -15045,7 +15045,7 @@ export function renderSceneOnMovePresentation(
     // zeroed x2 instead of the idle offset still bleeding through the lag
     // (dense-swept this session).
     const targetTouched = view.age >= CONFUSION_WINDOW2_START_AGE + 1;
-    if (view.targetScale.active) {
+    if (view.targetBlendActive) {
       // Same defect-A mechanism as FUTURE_SIGHT's attacker (see its own
       // comment above): `monbg ANIM_DEF_PARTNER`'s frozen copy tracks the
       // live x2/y2 shake offset (`Task_UpdateMonBg` re-pans it every tick)
@@ -15074,6 +15074,19 @@ export function renderSceneOnMovePresentation(
         targetTouched ? view.targetX2 : 0,
       );
     } else {
+      if (view.targetScale.active) {
+        // Same asymmetric tail state already proven exact by FUTURE_SIGHT:
+        // objMode/affineMode have reverted after one display tick, while
+        // the two-tick-lagged matrix remains non-neutral and monbg's
+        // frozen native-position copy has not yet been cleared.
+        drawSpriteSheet(
+          fb,
+          targetSprite.tileset,
+          targetSprite.palette,
+          view.target.geometry.spriteCorner.x + (targetTouched ? monbgTargetX2 : 0),
+          view.target.geometry.spriteCorner.y,
+        );
+      }
       drawSpriteSheetAffineStretch(
         fb,
         targetSprite.tileset,
@@ -15204,7 +15217,7 @@ export function renderSceneOnMovePresentation(
     // display-lagged by 2 ticks, so the hand-off away from the pre-window
     // idle offset has to happen one tick later too.
     const targetTouched = view.age >= PSYCHIC_WINDOW2_START_AGE + 1;
-    if (view.targetScale.active) {
+    if (view.targetBlendActive) {
       // Same defect-A mechanism as CONFUSION's own target (see its own
       // comment above): monbg ANIM_DEF_PARTNER's frozen copy tracks the
       // live x2/y2 shake offset even though its tile content is never
@@ -15233,6 +15246,15 @@ export function renderSceneOnMovePresentation(
         targetTouched ? view.targetX2 : 0,
       );
     } else {
+      if (view.targetScale.active) {
+        drawSpriteSheet(
+          fb,
+          targetSprite.tileset,
+          targetSprite.palette,
+          view.target.geometry.spriteCorner.x + (targetTouched ? monbgTargetX2 : 0),
+          view.target.geometry.spriteCorner.y,
+        );
+      }
       drawSpriteSheetAffineStretch(
         fb,
         targetSprite.tileset,

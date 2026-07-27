@@ -134,6 +134,7 @@ import {
   confusionAttackerShakeDisplayX2,
   confusionBgBldyAtAge,
   confusionBgIsPsychic,
+  confusionTargetShakeDisplayX2,
   confusionTargetEffectAtAge,
   type ConfusionAttackerEffect,
   type ConfusionTargetEffect,
@@ -143,6 +144,7 @@ import {
   psychicAttackerShakeDisplayX2,
   psychicBgBldyAtAge,
   psychicBgIsPsychic,
+  psychicTargetShakeDisplayX2,
   psychicTargetEffectAtAge,
   type PsychicAttackerEffect,
   type PsychicTargetEffect,
@@ -978,6 +980,7 @@ export interface SceneOnConfusionView extends ConfusionAttackerEffect, Confusion
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
+  readonly targetBlendActive: boolean;
   readonly bgBldy: number;
   readonly bgIsPsychic: boolean;
 }
@@ -986,6 +989,7 @@ export interface SceneOnPsychicView extends PsychicAttackerEffect, PsychicTarget
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
+  readonly targetBlendActive: boolean;
   readonly bgBldy: number;
   readonly bgIsPsychic: boolean;
 }
@@ -1493,30 +1497,23 @@ export function sceneOnConfusionView(
   // creation-boundary transitional value (frame119's own defect) that the
   // old formula's over-eager zero-clamp missed.
   const attackerX2 = confusionAttackerShakeDisplayX2(state.age);
-  // Tried this session, RAM-instrument in hand: unifying `active` onto the
-  // SAME age-2 read as the magnitude (removing the age-1 splice below
-  // entirely) was the natural "no genuine intermediate" hypothesis for
-  // frame147/176 too. Empirically refuted by the dense comparator: it left
-  // frame147 unchanged (1460px) and made frame176 far WORSE (33px -> 881px)
-  // - the same regression the original rung-13 session already found when
-  // forcing consistency the other direction. The active/inactive edge
-  // genuinely does reach the display one tick ahead of the magnitude across
-  // nearly the whole window (RAM-confirmed, `dump-scale-window-oam-scanline
-  // .py`); frame147/176 are the two ticks where that edge itself is off by
-  // one, not evidence the splice is wrong in general. Reverted to the
-  // proven splice; the window-2 boundary remainder stays open (see this
-  // session's own ANIMATION_PROGRESS.md entry) rather than trading a 3-frame
-  // remainder for a worse one via an unproven "shared" fix.
-  const targetActive = confusionTargetEffectAtAge(state.age - 1).targetScale.active;
-  const targetScale = { ...targetEffect.targetScale, active: targetActive };
+  // OAM objMode/affineMode reaches the display after one tick, while the
+  // matrix magnitude reaches it after two. Keep those edges separate, as
+  // sceneOnFutureSightView already does for the identical
+  // ScaleMonAndRestore(..., objMode=1) mechanism. At the restore tail this
+  // produces a real transitional state: normal/single-size OBJ mode with
+  // the prior non-neutral matrix still displayed.
+  const targetBlendActive =
+    confusionTargetEffectAtAge(state.age - 1).targetScale.active;
   return {
     age: state.age,
     attacker: state.config.attacker,
     target: state.config.target,
     attackerObjY: attackerTint.attackerObjY,
     attackerX2,
-    targetScale,
-    targetX2: targetEffect.targetX2,
+    targetScale: targetEffect.targetScale,
+    targetBlendActive,
+    targetX2: confusionTargetShakeDisplayX2(state.age),
     bgBldy: confusionBgBldyAtAge(state.age),
     bgIsPsychic: confusionBgIsPsychic(state.age),
   };
@@ -1545,19 +1542,17 @@ export function sceneOnPsychicView(
   // `psychicAttackerShakeDisplayX2`'s own doc).
   const attackerX2 = psychicAttackerShakeDisplayX2(state.age);
   const targetEffect = psychicTargetEffectAtAge(state.age - 2);
-  // Window-2's own active/magnitude splice is UNCHANGED (see
-  // `sceneOnConfusionView`'s own comment: unifying it was tried and
-  // empirically refuted this session, not applied here either).
-  const targetActive = psychicTargetEffectAtAge(state.age - 1).targetScale.active;
-  const targetScale = { ...targetEffect.targetScale, active: targetActive };
+  const targetBlendActive =
+    psychicTargetEffectAtAge(state.age - 1).targetScale.active;
   return {
     age: state.age,
     attacker: state.config.attacker,
     target: state.config.target,
     attackerObjY: attackerTint.attackerObjY,
     attackerX2,
-    targetScale,
-    targetX2: targetEffect.targetX2,
+    targetScale: targetEffect.targetScale,
+    targetBlendActive,
+    targetX2: psychicTargetShakeDisplayX2(state.age),
     bgBldy: psychicBgBldyAtAge(state.age),
     bgIsPsychic: psychicBgIsPsychic(state.age),
   };
