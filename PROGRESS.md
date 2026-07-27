@@ -15,6 +15,78 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 516 — [BOUNDED WORKER 2026-07-27 ~14:00] B_SCR_OP_JUMPIFSTAT + B_SCR_OP_PLAYSTATCHANGEANIMATION registered; EFFECT_TICKLE/COSMIC_POWER/BULK_UP/CALM_MIND/DRAGON_DANCE executable end to end
+
+- **State:** tree green at **255 files / 3484 tests** (+3 files / +38 tests
+  over session start 252/3446: new `battleScriptJumpifstatOpcode.test.ts`
+  12 tests, `battleScriptPlaystatchangeanimationOpcode.test.ts` 19 tests,
+  `battleScriptStatSetupEffects.test.ts` 7 full-committed-script tests; plus
+  the production-handler-count assertion in `battleScriptRulesContext.test.ts`
+  updated 115→117), `npm run build` clean. `executableFrontierRatchet.test.ts`
+  unmoved (**0 new barriers** — both opcodes are fully source-complete, no
+  `unsupported-branch` needed by either).
+- **Did:** per entry 513's handoff, registered both opcodes of the ranked
+  set (`battleScriptJumpifstatOpcode.ts`, `battleScriptPlaystatchangeanimationOpcode.ts`).
+  (1) `Cmd_jumpifstat`: a pure `statStages[stat]` read + conditional jump,
+  all 6 `CMP_*` arms implemented from source (only 4 are exercised by the
+  program's 18 concrete call sites — `COMMON_BITS`/`NO_COMMON_BITS` never
+  appear — but all 6 are real switch arms, not silently defaulted, per the
+  brief's explicit ask). Eagerly validated at registration against all 18
+  concrete call sites (matches the `SETBYTE`/`STATBUFFCHANGE`/`ORBYTE`
+  precedent for zero-barrier opcodes), since every one resolves to a known
+  `STAT_*`/`MIN_STAT_STAGE`/`MAX_STAT_STAGE` combination. (2)
+  `Cmd_playstatchangeanimation`: derived what it actually does to battle
+  STATE rather than its (out-of-scope) animation — it never mutates a stat
+  stage (that stays owned by the later `setstatchanger`+`statbuffchange`
+  pair already registered); it only decides whether a `B_ANIM_STATS_CHANGE`
+  controller event queues at all and flips `gBattleScripting.statAnimPlayed`
+  so a multi-stat move's second/third call in the same script doesn't
+  re-queue. Ported both families exactly: the "goes up" family has **no**
+  ability/Mist gate at all (source-verified — only "goes down" does), and
+  "goes down" applies the identical Mist/Clear Body/White Smoke/Keen
+  Eye+ACC/Hyper Cutter+ATK guard `changeStatBuffs` already applies to the
+  real write, bypassed entirely when `STAT_CHANGE_CANT_PREVENT` is set.
+  Eagerly validated against all **15** concrete call sites (not just the 5
+  target effects' own — also `BattleScript_AtkDefDown`/`SAtkDown2`/
+  `AllStatsUp`/`EffectMemento`'s shared-tail call sites, which exercise
+  `STAT_CHANGE_BY_TWO`/`CANT_PREVENT`/a 5-stat mask; those effects
+  themselves remain blocked on other opcodes — trymemento/setatkhptozero/
+  curse/jumpiftype2 — out of this step's scope). Zero barriers in either
+  opcode: both source functions have no unhandled branch to guard.
+- **Tests:** isolated-dispatch coverage for both opcodes (all 6 `CMP_*`
+  arms via a synthetic-operand harness matching `jumpifbyte`'s own
+  precedent for its unexercised comparators; every playstatchangeanimation
+  branch — 0/1/2+ changeable-stat counts, each ability/Mist block scoped to
+  its own stat, `CANT_PREVENT` bypass, `BY_TWO`'s -2/+2 id family,
+  `MULTIPLE_STATS`'s count<2 skip + `statAnimPlayed` flip, controller-busy
+  block) PLUS full committed-script walks to a genuine `{kind:"terminal",
+  opcodeName:"B_SCR_OP_END"}` halt for all 5 effects: Tickle's own
+  accuracy-checked two-stat-lower success (exactly 1 RNG roll) and its
+  both-already-MIN_STAT_STAGE `BattleScript_CantLowerMultipleStats` fail
+  tail; Cosmic Power/Bulk Up/Calm Mind/Dragon Dance's zero-RNG two-stat
+  raises, each confirmed 6→7 on its own two stats, plus Bulk Up's
+  both-already-MAX_STAT_STAGE `BattleScript_CantRaiseMultipleStats` fail
+  tail (shared by all four "goes up" scripts). No hidden per-operand
+  barrier surfaced (entry 507's standing warning) — every walk ran clean
+  on the first source-derived attempt once BS_TARGET vs BS_ATTACKER
+  selector roles were set correctly per script.
+- **Census (before → after):** 100/214 → **105/214** effects, 201/355 →
+  **206/355** moves, 162/276 → **167/276** Factory-L50 unweighted, 2206/2957
+  → **2251/2957** weighted (+45, exactly this set's weight). Doc
+  regenerated and committed with the code. New top blocker:
+  `B_SCR_OP_TRYINFATUATING` (EFFECT_ATTRACT, 45 weighted).
+- **Next:** `B_SCR_OP_TRYINFATUATING` (EFFECT_ATTRACT) is the regenerated
+  doc's new top-ranked set — one opcode, one effect, 45 weighted.
+- **Notes:** no PAPERCUT. One in-session process note: a `tsc --noEmit`
+  type-fix (`BattleScriptRulesBattler` → `BattleScriptRulesBattlerState` in
+  the new playstatchangeanimation file) was made and verified correct
+  early, but its file edit was accidentally left out of the next `git add`
+  — caught by a routine `git status` check before the census commit, fixed
+  in a small follow-up commit with no behavior change. Worth double-checking
+  `git status` is clean immediately after any `tsc`-driven fix, not just
+  before the final wrap-up.
+
+---
 ## 515 — [SUPERVISOR 2026-07-27 ~13:20] round 6 verified + merged; ISSUES #47 CLOSED and deleted; final round dispatched
 
 - **State:** master green at **252 files / 3446 tests**, build clean, census
@@ -98,71 +170,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   line would regress the already-pixel-correct literal by one glyph — this
   trace's own 90/90 doesn't need it (out of captured range), so it wasn't
   fixed this pass.
-- **Notes:** no PAPERCUT.
-
----
-## 513 — [BOUNDED WORKER 2026-07-27 ~12:35] B_SCR_OP_NEGATIVEDAMAGE + B_SCR_OP_TRYSETREST registered; EFFECT_ABSORB/EFFECT_DREAM_EATER/EFFECT_REST executable end to end
-
-- **State:** tree green at **252 files / 3443 tests** (+2 files / +21 tests
-  over session start 250/3422: new `battleScriptNegativedamageOpcode.test.ts`
-  11 tests, new `battleScriptTrysetrestOpcode.test.ts` 10 tests; plus one
-  `alreadyStatusedMoveAttempt` field-list assertion updated in
-  `battleScriptRulesContext.test.ts`), `npm run build` clean.
-  `executableFrontierRatchet.test.ts` unmoved (0 new barriers —
-  `battleScriptSwitchinOpcode.ts`'s existing `various`-dispatch barrier stays
-  pinned at 8; widening its modeled id set with a new case is not a new
-  barrier).
-- **Did:** per entry 509's handoff, in ranked order: (1) registered
-  `B_SCR_OP_NEGATIVEDAMAGE` (`Cmd_negativedamage`,
-  `battleScriptNegativedamageOpcode.ts`) — `gBattleMoveDamage =
-  -(gHpDealt/2)`, min-1 clamp; verified (not assumed) that
-  `Cmd_datahpupdate`'s negative-damage HP-gain branch
-  (`battleScriptHitChainOpcode.ts:1985-2010`) was already source-exact and
-  already correctly omits `hpDealt` on that branch — nothing to fix there,
-  the new opcode is a clean 15-line read-halve-write. (2) registered
-  `B_SCR_OP_TRYSETREST` (`Cmd_trysetrest`, `battleScriptTrysetrestOpcode.ts`)
-  — reassigns `selectorRoles.target = attacker` (source's `gBattlerTarget =
-  gBattlerAttacker`, so the shared `BattleScript_PresentHealTarget` tail's
-  `BS_TARGET` heal lands on the right battler), full-HP fail jump,
-  status1 unconditionally REPLACED (not OR'd) with `STATUS1_SLEEP_TURN(3)` —
-  Rest cures any other status in the same write — synced to the party mirror
-  + `set-battler-status-data` event exactly like `SetMoveEffect`'s own sleep
-  write. Investigating the "already-asleep-under-Rest" fail nuance the brief
-  flagged surfaced a real finding: choosing Rest directly while already
-  asleep never reaches `BattleScript_RestIsAlreadyAsleep` — the script's own
-  leading `attackcanceler` (`AtkCanceler_UnableToUseMove`'s `CANCELER_ASLEEP`
-  case, `battle_util.c:2015-2058`) redirects to `BattleScript_MoveUsedIsAsleep`
-  first, since Rest is neither Snore nor Sleep Talk — proven live in an
-  isolated-dispatch test rather than assumed. `BattleScript_RestIsAlreadyAsleep`
-  itself is real (only reachable via `Cmd_jumptocalledmove`, e.g. Sleep Talk
-  picking Rest — unregistered, out of scope) and is exercised directly:
-  widened the already-registered `various`-dispatch barrier
-  (`battleScriptSwitchinOpcode.ts`) with `VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT`
-  (23), backed by a new `alreadyStatusedMoveAttempt` rules-context field, so
-  `setalreadystatusedmoveattempt` no longer halts.
-- **Tests:** both new files pin exact rounding via isolated dispatch (even
-  halving, odd truncation, the 0/1→-1 min-clamp, full-HP fail still writing
-  `battleMoveDamage`/reassigning `target` per source's unconditional writes,
-  the Poison→cured-by-Rest status1 replacement) AND full committed-script
-  walks to genuine terminal ends: EFFECT_ABSORB/EFFECT_DREAM_EATER drain
-  (target HP clipped to a small value so `gHpDealt` is deterministic
-  regardless of the raw damage roll, pinning `floor(5/2)`/`floor(7/2)`
-  end-to-end), EFFECT_DREAM_EATER-vs-awake-target (no negativedamage reached
-  at all), EFFECT_REST success/cures-status/full-HP-fail, the
-  attackcanceler-intercepts-first finding, and `BattleScript_RestIsAlreadyAsleep`
-  itself. All real RNG ledgers (Rest draws none; Absorb/Dream Eater draw
-  whatever damagecalc's own pipeline needs).
-- **Census (before → after):** 97/214 → **100/214** effects, 195/355 →
-  **201/355** moves, 157/276 → **162/276** Factory-L50 unweighted, 2108/2957
-  → **2206/2957** weighted (+98, exactly NEGATIVEDAMAGE's 49 + TRYSETREST's
-  49). Doc regenerated (`npx tsx tools/report/executable-frontier-census.ts`)
-  and committed with the code. New top blocker:
-  `B_SCR_OP_JUMPIFSTAT`/`B_SCR_OP_PLAYSTATCHANGEANIMATION` (5 effects —
-  EFFECT_TICKLE/COSMIC_POWER/BULK_UP/CALM_MIND/DRAGON_DANCE, 45 weighted).
-- **Next:** continue kernel census breadth: `B_SCR_OP_JUMPIFSTAT` +
-  `B_SCR_OP_PLAYSTATCHANGEANIMATION` (45 weighted, 5 effects) is the
-  regenerated doc's new top-ranked set. Stopped here deliberately (bounded
-  worker, time budget) rather than start a 5-effect set without room to land
-  it with the same full-committed-script-per-effect rigor.
 - **Notes:** no PAPERCUT.
 

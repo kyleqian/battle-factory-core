@@ -1,4 +1,70 @@
 ---
+## 513 — [BOUNDED WORKER 2026-07-27 ~12:35] B_SCR_OP_NEGATIVEDAMAGE + B_SCR_OP_TRYSETREST registered; EFFECT_ABSORB/EFFECT_DREAM_EATER/EFFECT_REST executable end to end
+
+- **State:** tree green at **252 files / 3443 tests** (+2 files / +21 tests
+  over session start 250/3422: new `battleScriptNegativedamageOpcode.test.ts`
+  11 tests, new `battleScriptTrysetrestOpcode.test.ts` 10 tests; plus one
+  `alreadyStatusedMoveAttempt` field-list assertion updated in
+  `battleScriptRulesContext.test.ts`), `npm run build` clean.
+  `executableFrontierRatchet.test.ts` unmoved (0 new barriers —
+  `battleScriptSwitchinOpcode.ts`'s existing `various`-dispatch barrier stays
+  pinned at 8; widening its modeled id set with a new case is not a new
+  barrier).
+- **Did:** per entry 509's handoff, in ranked order: (1) registered
+  `B_SCR_OP_NEGATIVEDAMAGE` (`Cmd_negativedamage`,
+  `battleScriptNegativedamageOpcode.ts`) — `gBattleMoveDamage =
+  -(gHpDealt/2)`, min-1 clamp; verified (not assumed) that
+  `Cmd_datahpupdate`'s negative-damage HP-gain branch
+  (`battleScriptHitChainOpcode.ts:1985-2010`) was already source-exact and
+  already correctly omits `hpDealt` on that branch — nothing to fix there,
+  the new opcode is a clean 15-line read-halve-write. (2) registered
+  `B_SCR_OP_TRYSETREST` (`Cmd_trysetrest`, `battleScriptTrysetrestOpcode.ts`)
+  — reassigns `selectorRoles.target = attacker` (source's `gBattlerTarget =
+  gBattlerAttacker`, so the shared `BattleScript_PresentHealTarget` tail's
+  `BS_TARGET` heal lands on the right battler), full-HP fail jump,
+  status1 unconditionally REPLACED (not OR'd) with `STATUS1_SLEEP_TURN(3)` —
+  Rest cures any other status in the same write — synced to the party mirror
+  + `set-battler-status-data` event exactly like `SetMoveEffect`'s own sleep
+  write. Investigating the "already-asleep-under-Rest" fail nuance the brief
+  flagged surfaced a real finding: choosing Rest directly while already
+  asleep never reaches `BattleScript_RestIsAlreadyAsleep` — the script's own
+  leading `attackcanceler` (`AtkCanceler_UnableToUseMove`'s `CANCELER_ASLEEP`
+  case, `battle_util.c:2015-2058`) redirects to `BattleScript_MoveUsedIsAsleep`
+  first, since Rest is neither Snore nor Sleep Talk — proven live in an
+  isolated-dispatch test rather than assumed. `BattleScript_RestIsAlreadyAsleep`
+  itself is real (only reachable via `Cmd_jumptocalledmove`, e.g. Sleep Talk
+  picking Rest — unregistered, out of scope) and is exercised directly:
+  widened the already-registered `various`-dispatch barrier
+  (`battleScriptSwitchinOpcode.ts`) with `VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT`
+  (23), backed by a new `alreadyStatusedMoveAttempt` rules-context field, so
+  `setalreadystatusedmoveattempt` no longer halts.
+- **Tests:** both new files pin exact rounding via isolated dispatch (even
+  halving, odd truncation, the 0/1→-1 min-clamp, full-HP fail still writing
+  `battleMoveDamage`/reassigning `target` per source's unconditional writes,
+  the Poison→cured-by-Rest status1 replacement) AND full committed-script
+  walks to genuine terminal ends: EFFECT_ABSORB/EFFECT_DREAM_EATER drain
+  (target HP clipped to a small value so `gHpDealt` is deterministic
+  regardless of the raw damage roll, pinning `floor(5/2)`/`floor(7/2)`
+  end-to-end), EFFECT_DREAM_EATER-vs-awake-target (no negativedamage reached
+  at all), EFFECT_REST success/cures-status/full-HP-fail, the
+  attackcanceler-intercepts-first finding, and `BattleScript_RestIsAlreadyAsleep`
+  itself. All real RNG ledgers (Rest draws none; Absorb/Dream Eater draw
+  whatever damagecalc's own pipeline needs).
+- **Census (before → after):** 97/214 → **100/214** effects, 195/355 →
+  **201/355** moves, 157/276 → **162/276** Factory-L50 unweighted, 2108/2957
+  → **2206/2957** weighted (+98, exactly NEGATIVEDAMAGE's 49 + TRYSETREST's
+  49). Doc regenerated (`npx tsx tools/report/executable-frontier-census.ts`)
+  and committed with the code. New top blocker:
+  `B_SCR_OP_JUMPIFSTAT`/`B_SCR_OP_PLAYSTATCHANGEANIMATION` (5 effects —
+  EFFECT_TICKLE/COSMIC_POWER/BULK_UP/CALM_MIND/DRAGON_DANCE, 45 weighted).
+- **Next:** continue kernel census breadth: `B_SCR_OP_JUMPIFSTAT` +
+  `B_SCR_OP_PLAYSTATCHANGEANIMATION` (45 weighted, 5 effects) is the
+  regenerated doc's new top-ranked set. Stopped here deliberately (bounded
+  worker, time budget) rather than start a 5-effect set without room to land
+  it with the same full-committed-script-per-effect rigor.
+- **Notes:** no PAPERCUT.
+
+---
 ## 512 — [SUPERVISOR 2026-07-27 ~12:10] round 5 verified + merged; round 6 dispatched
 
 - **State:** master green at **250 files / 3422 tests**, build clean. Round
