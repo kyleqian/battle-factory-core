@@ -36,11 +36,16 @@ def main() -> None:
     def sprite(slot: int) -> dict:
         base = sprites + slot * 0x44
         matrix = matrices + ((u16(base + 2) >> 9) & 0x1f) * 8
+        matrix_num = (u16(base + 2) >> 9) & 0x1f
+        hw_matrix = 0x07000006 + matrix_num * 0x20
         return {"slot":slot,"attr0":u16(base),"attr1":u16(base+2),"attr2":u16(base+4),
                 "x":s16(base+0x20),"y":s16(base+0x22),"x2":s16(base+0x24),"y2":s16(base+0x26),
                 "template":oracle.read_u32(base+0x14),"callback":oracle.read_u32(base+0x1c),
                 "subpriority":oracle.read_u8(base+0x43),
                 "matrix":{"a":s16(matrix),"b":s16(matrix+2),"c":s16(matrix+4),"d":s16(matrix+6)},
+                "hardwareMatrix":{"a":s16(hw_matrix),"b":s16(hw_matrix+8),"c":s16(hw_matrix+16),"d":s16(hw_matrix+24)},
+                "tileBytes":[oracle.read_u8(0x06010000 + ((u16(base+4) & 0x3ff) + i) * 32 + j)
+                             for i in range(4) for j in range(32)],
                 "data":[s16(base+0x2e+i*2) for i in range(8)]}
     def battler(i: int) -> dict: return sprite(oracle.read_u8(battler_ids + i))
     def active_tasks() -> list[dict]:
@@ -51,6 +56,14 @@ def main() -> None:
             func = oracle.read_u32(base)
             if func in task_funcs:
                 result.append({"slot":slot,"func":func,"data":[s16(base+8+i*2) for i in range(16)]})
+        return result
+    def poison_hardware_oam() -> list[dict]:
+        result = []
+        for slot in range(128):
+            base = 0x07000000 + slot * 8
+            attr0, attr1, attr2 = u16(base), u16(base+2), u16(base+4)
+            if (attr2 & 0x3ff) in (0x131, 0x135):
+                result.append({"slot":slot,"attr0":attr0,"attr1":attr1,"attr2":attr2})
         return result
     rows = []
     def capture(frame: int) -> None:
@@ -68,6 +81,7 @@ def main() -> None:
           "player":snap["battlers"]["player"],"opponent":snap["battlers"]["opponent"],
           "playerSprite":battler(0),"opponentSprite":battler(1),"sprites":active,
           "tasks":active_tasks(),"fadedPalette":[u16(faded+i*2) for i in range(512)],
+          "hardwareOam":poison_hardware_oam(),
           "bldcnt":u16(0x04000050),"bldalpha":u16(0x04000052)})
     frame = 0
     capture(frame)

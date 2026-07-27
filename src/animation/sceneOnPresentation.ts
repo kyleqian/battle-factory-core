@@ -140,6 +140,11 @@ import {
   type WaterGunSprite,
 } from "./waterGun.ts";
 import {
+  acidEffectAtAge,
+  acidSpritesBackToFrontAtAge,
+  type AcidSprite,
+} from "./acid.ts";
+import {
   earthquakeAnimationAtAge,
   type EarthquakeAnimationState,
 } from "./earthquake.ts";
@@ -259,6 +264,7 @@ export interface SceneOnPresentationBattler {
     | "LOUDRED"
     | "DUSTOX"
     | "HORSEA"
+    | "EKANS"
     | "SHUPPET"
     | "PLUSLE";
   readonly geometry: SceneOnBattlerGeometry;
@@ -685,6 +691,15 @@ export interface SceneOnWaterGunConfig {
   readonly projectileOrigin: Readonly<{ x: number; y: number }>;
 }
 
+export interface SceneOnAcidConfig {
+  readonly move: "ACID";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source `GetBattlerSpriteCoord2(attacker, X_2/Y_PIC_OFFSET)`. */
+  readonly projectileOrigin: Readonly<{ x: number; y: number }>;
+}
+
 export interface SceneOnEarthquakeConfig {
   readonly move: "EARTHQUAKE";
   readonly attacker: SceneOnPresentationBattler;
@@ -751,6 +766,7 @@ export type SceneOnMoveConfig =
   | SceneOnMilkDrinkConfig
   | SceneOnSupersonicConfig
   | SceneOnWaterGunConfig
+  | SceneOnAcidConfig
   | SceneOnEarthquakeConfig
   | SceneOnFutureSightConfig
   | SceneOnConfusionConfig
@@ -778,6 +794,15 @@ export interface SceneOnWaterGunView {
   readonly target: SceneOnPresentationBattler;
   readonly targetOffset: Readonly<{ x2: number; y2: number }>;
   readonly sprites: readonly WaterGunSprite[];
+}
+
+export interface SceneOnAcidView {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly targetOffset: Readonly<{ x2: number; y2: number }>;
+  readonly defenderPaletteY: number;
+  readonly sprites: readonly AcidSprite[];
 }
 
 export interface SceneOnEarthquakeView extends EarthquakeAnimationState {
@@ -1632,6 +1657,33 @@ export function sceneOnWaterGunView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...waterGunEffectAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.projectileOrigin,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age` is ticks since the first `gAcidPoisonBubbleSpriteTemplate` callback. */
+export function sceneOnAcidView(
+  state: SceneOnMovePresentationState,
+): SceneOnAcidView {
+  if (state.config.move !== "ACID") {
+    throw new Error(`expected ACID presentation, got ${state.config.move}`);
+  }
+  const effect = acidEffectAtAge(
+    state.age,
+    state.config.attacker.geometry.side,
+    state.config.projectileOrigin,
+    state.config.target.geometry.animationCenter,
+  );
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...effect,
+    sprites: acidSpritesBackToFrontAtAge(
       state.age,
       state.config.attacker.geometry.side,
       state.config.projectileOrigin,

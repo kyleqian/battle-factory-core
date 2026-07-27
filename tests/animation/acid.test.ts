@@ -42,7 +42,7 @@ describe("MOVE_ACID source-relative reducer", () => {
     expect([29, 30, 31, 32, 33, 48, 49].map((age) => player(age).targetOffset.x2))
       .toEqual([0, 2, -2, -2, 2, -2, 0]);
     expect(player(30).defenderPaletteY).toBe(0);
-    expect(player(33).defenderPaletteY).toBeGreaterThan(0);
+    expect(player(35).defenderPaletteY).toBeGreaterThan(0);
     expect(player(90).defenderPaletteY).toBe(0);
   });
 });

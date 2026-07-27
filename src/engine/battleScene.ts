@@ -538,6 +538,7 @@ import recoverAsset from "../animation/assets/recover.json" with { type: "json" 
 import milkDrinkAsset from "../animation/assets/milk-drink.json" with { type: "json" };
 import supersonicAsset from "../animation/assets/supersonic.json" with { type: "json" };
 import waterGunAsset from "../animation/assets/water-gun.json" with { type: "json" };
+import acidAsset from "../animation/assets/acid.json" with { type: "json" };
 import menuHealthboxPlayerAsset from "../assets/gen/menu-healthbox-player.json" with { type: "json" };
 import summaryBallAsset from "../assets/gen/summary-ball.json" with { type: "json" };
 import battleAnimBallOpenAsset from "../assets/gen/battle-anim-ball-open.json" with { type: "json" };
@@ -630,6 +631,7 @@ import {
   sceneOnMilkDrinkView,
   sceneOnSupersonicView,
   sceneOnWaterGunView,
+  sceneOnAcidView,
   sceneOnEarthquakeView,
   sceneOnFutureSightView,
   sceneOnConfusionView,
@@ -921,6 +923,11 @@ const waterGunArt = waterGunAsset as {
   waterImpact: { tileset: Tileset; palette: RgbColor[] };
   horseaBack: { tileset: Tileset; palette: RgbColor[] };
   horseaFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const acidArt = acidAsset as {
+  poisonBubble: { tileset: Tileset; palette: RgbColor[] };
+  ekansBack: { tileset: Tileset; palette: RgbColor[] };
+  ekansFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const MURKROW_CORNER = { x: 144, y: 19 };
 const menuHealthboxPlayer = menuHealthboxPlayerAsset as SendOutHealthboxContentAsset;
@@ -14990,6 +14997,147 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "IVYSAUR used" : "Foe IVYSAUR used",
       "GROWTH!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "ACID") {
+    const view = sceneOnAcidView(state);
+    // OAM and faded OBJ palette writes become visible on the following
+    // VBlank. The reducer itself remains the same-tick RAM model.
+    const displayed = sceneOnAcidView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "EKANS"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "EKANS"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged ACID pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const ekansSource = playerToOpponent ? acidArt.ekansBack : acidArt.ekansFront;
+    const ekansSprite = playerToOpponent
+      ? ekansSource
+      : {
+          ...ekansSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: ekansSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const onixSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    const targetIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    const targetOffset = state.age <= 31
+      ? targetIdle
+      : displayed.targetOffset;
+    drawSpriteSheetAffineStretch(
+      fb,
+      onixSprite.tileset,
+      onixSprite.palette,
+      view.target.geometry.spriteCorner.x,
+      view.target.geometry.spriteCorner.y,
+      256,
+      256,
+      targetIdle.y2,
+      { r: 247, g: 0, b: 255 },
+      displayed.defenderPaletteY,
+      false,
+      targetOffset.x2,
+    );
+    if (opponentToPlayer) {
+      drawSpriteSheet(
+        fb,
+        ekansSprite.tileset,
+        ekansSprite.palette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+      );
+    }
+    for (const sprite of displayed.sprites) {
+      const tile = sprite.frame * 4;
+      const art = {
+        columns: 2,
+        rows: 2,
+        tiles: acidArt.poisonBubble.tileset.tiles.slice(tile, tile + 4),
+      };
+      drawSpriteSheetAffineRotate(
+        fb,
+        art,
+        acidArt.poisonBubble.palette,
+        sprite.x,
+        sprite.y,
+        sprite.xScale,
+        0,
+        0,
+        sprite.yScale,
+        undefined,
+        true,
+      );
+    }
+    // The battler's lower OAM index wins over Acid's same-priority objects
+    // while an arc is still crossing the attacker silhouette.
+    if (playerToOpponent) {
+      drawSpriteSheet(
+        fb,
+        ekansSprite.tileset,
+        ekansSprite.palette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+      );
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "EKANS";
+    const playerSpecies = playerToOpponent ? "EKANS" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "EKANS used" : "Foe EKANS used",
+      "ACID!",
       99,
     );
     return;
