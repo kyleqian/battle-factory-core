@@ -176,6 +176,71 @@ describe("runBattleEndTurnOrchestration (BattleTurnPassed equivalent)", () => {
   });
 
   it(
+    "(ISSUES #46) the full ProtectStruct table clears once per turn on the next-turn transition "
+      + "(TurnValuesCleanUp(FALSE), docs/counter-retaliation-design.md §2.4) -- every modeled field, "
+      + "on every battler, not just the one an admission reducer happened to overwrite",
+    () => {
+      const stale: Partial<BattleScriptRulesBattler> = {
+        protected: 1,
+        endured: 1,
+        chargingTurn: 1,
+        targetNotAffected: 1,
+        flag2Unknown: 1,
+        prlzImmobility: 1,
+        confusionSelfDmg: 1,
+        loveImmobility: 1,
+        bounceMove: 1,
+        stealMove: 1,
+        helpingHand: 1,
+        usedDisabledMove: 1,
+        usedTauntedMove: 1,
+        usedImprisonedMove: 1,
+        flinchImmobility: 1,
+        protectPhysicalDmg: 14,
+        protectPhysicalBattlerId: 0,
+        protectSpecialDmg: 8,
+        protectSpecialBattlerId: 1,
+      };
+      const rc = context({
+        battlers: [
+          { ...battler({ side: 0 }), ...stale } as BattleScriptRulesBattler,
+          { ...battler({ side: 1, partyIndex: 2 }), ...stale } as BattleScriptRulesBattler,
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+      const initial = scratchState(rc, 1);
+      const result = runBattleEndTurnOrchestration(program, handlers, initial);
+      expect(result.kind).toBe("next-turn");
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      for (const id of [0, 1] as const) {
+        expect(result.state.rulesContext.battlers[id]).toMatchObject({
+          protected: 0,
+          endured: 0,
+          chargingTurn: 0,
+          targetNotAffected: 0,
+          flag2Unknown: 0,
+          prlzImmobility: 0,
+          confusionSelfDmg: 0,
+          loveImmobility: 0,
+          bounceMove: 0,
+          stealMove: 0,
+          helpingHand: 0,
+          usedDisabledMove: 0,
+          usedTauntedMove: 0,
+          usedImprisonedMove: 0,
+          flinchImmobility: 0,
+          protectPhysicalDmg: 0,
+          protectPhysicalBattlerId: 0,
+          protectSpecialDmg: 0,
+          protectSpecialBattlerId: 0,
+        });
+      }
+    },
+  );
+
+  it(
     "(a) burn ticks maxHP/8 at end-turn across two consecutive turns -- doc's live 105 -> 92 -> 79 "
       + "ledger (docs/end-turn-ground-truth.md §2a), zero RNG, battler AND party slot both synced",
     () => {
