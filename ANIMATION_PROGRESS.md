@@ -46,6 +46,40 @@ animation. A status caused by a move is not part of that move's animation.
 
 ## Current resumable state (2026-07-27)
 
+Coverage is **43/276 exact, 3 partial, 230 unsupported**. HYPER FANG is exact
+through the shared Scene-ON seam at **107/107 player-back + 107/107
+opponent-front** complete-body component and framebuffer frames, reproduced
+twice fresh. POISON FANG remains **104/104** in both orientations as the
+source-identical fang regression control.
+
+## HYPER FANG promoted to exact; contest/target-side selector track established (2026-07-27)
+
+**Verdict:** `MOVE_HYPER_FANG` is exact. Complete legal mechanicLab parties
+stage RATICATE from the real Level-50 Factory set 302 in both orientations,
+constrain all four active choices to HYPER FANG, and constrain ONIX to TACKLE.
+The strengthened comparator matches the complete first animation body at
+**107/107 player-back** (oracle 82-188) and **107/107 opponent-front**
+(86-192), each reproduced twice fresh.
+
+**Source reducer/evidence:** battle execution honestly takes
+`AnimTask_IsContest`'s false result. `AnimTask_IsTargetPlayerSide` is proven
+through both results, selecting `BG_IMPACT_OPPONENT` and `BG_IMPACT_PLAYER`.
+The reducer ports both hardware fade ramps and target-side tilemaps, reuses
+Poison Fang's `gFangSpriteTemplate` only because the source identity is
+literal, and independently pins Hyper Fang's `AnimTask_ShakeMon(0,10,10,1)`,
+`SE_M_BITE`/`SE_M_LEER` target panning, restore, display latches, and teardown.
+
+**Renderer/controls:** impact/RATICATE assets are reproducibly extracted and
+the shared seam renders both target-relative backgrounds, fang, shake, field
+chrome, raw RGB, and cleanup from relative animation age. POISON FANG remains
+**104/104** component and framebuffer exact in both orientations. Contest
+state was not fabricated. MEGA PUNCH, MEGA KICK, SOLAR BEAM, FOCUS PUNCH, and
+all other selector siblings remain unsupported without independent complete
+dense acceptance. No absolute ticks, screenshots, coordinate/RGB fitting,
+unsupported barriers, or import-boundary widening were added.
+
+## Previous current state (2026-07-27)
+
 Coverage is **42/276 exact, 3 partial, 231 unsupported**. POISON TAIL is exact
 through the shared Scene-ON seam at **187/187 player-back + 187/187
 opponent-front** complete-body component and framebuffer frames, reproduced

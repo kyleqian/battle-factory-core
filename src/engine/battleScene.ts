@@ -403,6 +403,7 @@
 //    module-level STATUS note above.
 
 import type { RgbColor } from "./bg.ts";
+import { fillFramebuffer } from "./framebuffer.ts";
 import { drawText, measureText, type FontData } from "./font.ts";
 import { blendComponentToWhite } from "./paletteFade.ts";
 import {
@@ -547,6 +548,7 @@ import acidAsset from "../animation/assets/acid.json" with { type: "json" };
 import sludgeAsset from "../animation/assets/sludge.json" with { type: "json" };
 import sludgeBombAsset from "../animation/assets/sludgeBomb.json" with { type: "json" };
 import poisonFangAsset from "../animation/assets/poisonFang.json" with { type: "json" };
+import hyperFangAsset from "../animation/assets/hyperFang.json" with { type: "json" };
 import poisonTailAsset from "../animation/assets/poisonTail.json" with { type: "json" };
 import toxicAsset from "../animation/assets/toxic.json" with { type: "json" };
 import hardenAsset from "../animation/assets/harden.json" with { type: "json" };
@@ -654,6 +656,7 @@ import {
   sceneOnSludgeView,
   sceneOnSludgeBombView,
   sceneOnPoisonFangView,
+  sceneOnHyperFangView,
   sceneOnPoisonTailView,
   sceneOnToxicView,
   sceneOnEarthquakeView,
@@ -983,6 +986,15 @@ const poisonFangArt = poisonFangAsset as {
   poisonBubble: { tileset: Tileset; palette: RgbColor[] };
   zubatBack: { tileset: Tileset; palette: RgbColor[] };
   zubatFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const hyperFangArt = hyperFangAsset as {
+  fang: { tileset: Tileset; palette: RgbColor[] };
+  impact: {
+    tileset: Tileset; palette: RgbColor[];
+    opponentTilemap: Tilemap; playerTilemap: Tilemap;
+  };
+  raticateBack: { tileset: Tileset; palette: RgbColor[] };
+  raticateFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const poisonTailArt = poisonTailAsset as {
   metal: { tileset: Tileset; tilemap: Tilemap; palette: RgbColor[] };
@@ -15558,6 +15570,148 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "SEVIPER used" : "Foe SEVIPER used",
       "POISON TAIL!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "HYPER_FANG") {
+    const view = sceneOnHyperFangView(state);
+    const displayed = sceneOnHyperFangView({ ...state, age: state.age - 1 });
+    const affineDisplayed = sceneOnHyperFangView({ ...state, age: state.age - 2 });
+    const playerToOpponent =
+      view.attacker.species === "RATICATE"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "RATICATE"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged HYPER_FANG pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const darken = (palette: readonly RgbColor[]) =>
+      palette.map((color) => {
+        const packed = mgbaDarkenColor(
+          color.r | (color.g << 8) | (color.b << 16),
+          view.background.bldy,
+        );
+        return {
+          r: packed & 0xff,
+          g: (packed >>> 8) & 0xff,
+          b: (packed >>> 16) & 0xff,
+        };
+      });
+    if (view.background.impact) {
+      const base = darken(hyperFangArt.impact.palette)[0]!;
+      fillFramebuffer(fb, base.r, base.g, base.b);
+      drawExtractedTileBg(fb, {
+        tileset: hyperFangArt.impact.tileset,
+        tilemap: view.background.variant === "player"
+          ? hyperFangArt.impact.playerTilemap
+          : hyperFangArt.impact.opponentTilemap,
+        subpalettes: [darken(hyperFangArt.impact.palette)],
+      });
+    } else {
+      drawExtractedTileBg(fb, {
+        tileset: battleBg.static.tileset,
+        tilemap: battleBg.static.tilemap,
+        subpalettes: battleBg.palette.map(darken),
+      });
+    }
+    const raticateSource = playerToOpponent
+      ? hyperFangArt.raticateBack
+      : hyperFangArt.raticateFront;
+    const raticateSprite = playerToOpponent ? raticateSource : {
+      ...raticateSource,
+      tileset: {
+        columns: 8, rows: 8, tiles: raticateSource.tileset.tiles.slice(0, 64),
+      },
+    };
+    const onixSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    const targetOffset = state.age <= 46
+      ? targetIdle
+      : state.age === 47
+        ? { x2: 0, y2: 10 }
+        : affineDisplayed.targetOffset;
+    drawSpriteSheet(
+      fb,
+      onixSprite.tileset,
+      onixSprite.palette,
+      view.target.geometry.spriteCorner.x + targetOffset.x2,
+      view.target.geometry.spriteCorner.y + targetOffset.y2,
+    );
+    drawSpriteSheet(
+      fb,
+      raticateSprite.tileset,
+      raticateSprite.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const hardwareSprites = displayed.sprites.length > 0
+      ? displayed.sprites
+      : state.age === 59 ? affineDisplayed.sprites : [];
+    for (const sprite of hardwareSprites) {
+      const currentFang = view.sprites[0];
+      const delayed = affineDisplayed.sprites[0] ?? sprite;
+      const frame = state.age === 34 || state.age === 50 || state.age === 54
+        ? delayed.frame
+        : currentFang?.frame ?? delayed.frame;
+      drawSpriteSheetAffineRotate(
+        fb,
+        {
+          columns: 4,
+          rows: 4,
+          tiles: hyperFangArt.fang.tileset.tiles.slice(frame * 16, frame * 16 + 16),
+        },
+        hyperFangArt.fang.palette,
+        delayed.x,
+        delayed.y,
+        delayed.xScale,
+        0,
+        0,
+        delayed.yScale,
+      );
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "RATICATE";
+    const playerSpecies = playerToOpponent ? "RATICATE" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "RATICATE used" : "Foe RATICATE used",
+      "HYPER FANG!",
       99,
     );
     return;

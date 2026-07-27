@@ -14,7 +14,7 @@ describe("MOVE_HYPER_FANG source-relative reducer", () => {
     });
   });
 
-  it("reuses the source-identical fang program and ports ShakeMon(3,0,10,1)", () => {
+  it("reuses the source-identical fang program and ports ShakeMon(0,10,10,1)", () => {
     const effect = (age: number) =>
       hyperFangEffectAtAge(age, "opponent", { x: 176, y: 42 });
     expect(effect(25).sprites).toHaveLength(0);
@@ -24,8 +24,8 @@ describe("MOVE_HYPER_FANG source-relative reducer", () => {
     expect(effect(57).sprites[0]).toMatchObject({ kind: "fang", frame: 3 });
     expect(effect(58).sprites).toHaveLength(0);
     expect([45, 46, 47, 48, 49, 64].map(
-      (age) => effect(age).targetOffset.x2,
-    )).toEqual([0, 0, 0, 3, 3, 0]);
+      (age) => effect(age).targetOffset.y2,
+    )).toEqual([0, 0, 0, 10, 10, 0]);
   });
 
   it("ports the impact-background fade, side selection, restore, and teardown", () => {
@@ -35,9 +35,9 @@ describe("MOVE_HYPER_FANG source-relative reducer", () => {
       (age) => [effect(age).background.impact, effect(age).background.bldy],
     )).toEqual([
       [false, 0], [false, 1], [false, 16], [false, 16],
-      [true, 15], [true, 1], [true, 0],
+      [true, 16], [true, 4], [true, 3],
       [true, 0], [true, 1], [true, 16], [true, 16],
-      [false, 1], [false, 0], [false, 0], [false, 0],
+      [false, 4], [false, 3], [false, 0], [false, 0],
     ]);
     expect(effect(106)).toMatchObject({
       contest: false,

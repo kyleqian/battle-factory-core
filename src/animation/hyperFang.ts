@@ -40,10 +40,10 @@ export function hyperFangEffectAtAge(
   const fang = poisonFangEffectAtAge(age - 26, "player", targetCenter)
     .sprites.filter((sprite) => sprite.kind === "fang");
   const firstFade = age >= 9 && age <= 44
-    ? age <= 24 ? age - 8 : Math.max(0, 41 - age)
+    ? age <= 24 ? age - 8 : Math.max(0, 44 - age)
     : 0;
   const restoreFade = age >= 70 && age <= 105
-    ? age <= 85 ? age - 69 : Math.max(0, 102 - age)
+    ? age <= 85 ? age - 69 : Math.max(0, 105 - age)
     : 0;
   return {
     contest: branch.contest,
@@ -55,7 +55,7 @@ export function hyperFangEffectAtAge(
     },
     targetOffset: age < 46
       ? { x2: 0, y2: 0 }
-      : shakeMonOffsetAtTick(3, 0, 10, 1, age - 45),
+      : shakeMonOffsetAtTick(0, 10, 10, 1, age - 45),
     sprites: fang,
   };
 }

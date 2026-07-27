@@ -171,6 +171,10 @@ import {
   type PoisonFangSprite,
 } from "./poisonFang.ts";
 import {
+  hyperFangEffectAtAge,
+  type HyperFangEffect,
+} from "./hyperFang.ts";
+import {
   poisonTailAtAge,
   type PoisonTailState,
 } from "./poisonTail.ts";
@@ -325,6 +329,7 @@ export interface SceneOnPresentationBattler {
     | "EKANS"
     | "GRIMER"
     | "ZUBAT"
+    | "RATICATE"
     | "SKIPLOOM"
     | "RELICANTH"
     | "LUNATONE"
@@ -800,6 +805,13 @@ export interface SceneOnPoisonFangConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnHyperFangConfig {
+  readonly move: "HYPER_FANG";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnPoisonTailConfig {
   readonly move: "POISON_TAIL";
   readonly attacker: SceneOnPresentationBattler;
@@ -935,6 +947,7 @@ export type SceneOnMoveConfig =
   | SceneOnSludgeConfig
   | SceneOnSludgeBombConfig
   | SceneOnPoisonFangConfig
+  | SceneOnHyperFangConfig
   | SceneOnPoisonTailConfig
   | SceneOnToxicConfig
   | SceneOnEarthquakeConfig
@@ -1006,6 +1019,12 @@ export interface SceneOnPoisonFangView {
   readonly targetOffset: Readonly<{ x2: number; y2: number }>;
   readonly defenderPaletteY: number;
   readonly sprites: readonly PoisonFangSprite[];
+}
+
+export interface SceneOnHyperFangView extends HyperFangEffect {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
 }
 
 export interface SceneOnPoisonTailView extends PoisonTailState {
@@ -2042,6 +2061,25 @@ export function sceneOnPoisonFangView(
     ...poisonFangEffectAtAge(
       state.age,
       state.config.attacker.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is Hyper Fang's initial SE_M_BITE display frame. */
+export function sceneOnHyperFangView(
+  state: SceneOnMovePresentationState,
+): SceneOnHyperFangView {
+  if (state.config.move !== "HYPER_FANG") {
+    throw new Error(`expected HYPER_FANG presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...hyperFangEffectAtAge(
+      state.age,
+      state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,
     ),
   };

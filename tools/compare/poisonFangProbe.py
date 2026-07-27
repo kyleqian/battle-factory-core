@@ -4,9 +4,10 @@ from __future__ import annotations
 import hashlib, json, subprocess, sys
 from pathlib import Path
 
-if len(sys.argv) != 4:
-    raise SystemExit("usage: sludgeProbe.py <scenario> <output.json> <rgb-dir>")
+if len(sys.argv) not in (4, 5):
+    raise SystemExit("usage: poisonFangProbe.py <scenario> <output.json> <rgb-dir> [move-id]")
 SCENARIO, OUTPUT, RGB_DIR = Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3])
+MOVE_ID = int(sys.argv[4]) if len(sys.argv) == 5 else 305
 ROOT = Path(__file__).resolve().parents[2]
 HARNESS = next(p for p in (ROOT, *ROOT.parents) if (p / "oracle" / "emerald_core.py").is_file())
 sys.path.insert(0, str(HARNESS / "oracle"))
@@ -14,7 +15,16 @@ from battle_lab import BattleLab, validate_request  # noqa: E402
 from emerald_core import EmeraldOracle  # noqa: E402
 
 def main() -> None:
-    request = validate_request(json.loads(SCENARIO.read_text()), "battle-scene-on")
+    raw_request = json.loads(SCENARIO.read_text())
+    if MOVE_ID == 158:
+        parties = raw_request["overrides"]["parties"]
+        for side in ("player", "opponent"):
+            mon = parties[side][0]
+            if mon["species"] == 41:
+                mon.update({"species": 20, "nature": 3, "moves": [158] * 4})
+                mon["evs"] = {"hp": 0, "attack": 255, "defense": 0,
+                              "speed": 255, "spAttack": 0, "spDefense": 0}
+    request = validate_request(raw_request, "battle-scene-on")
     reference = (ROOT / "reference" / "pokeemerald").resolve()
     oracle = EmeraldOracle(reference / "pokeemerald.gba", reference / "pokeemerald.map", HARNESS / "oracle" / "bootstrap" / "factory.json")
     lab = BattleLab(oracle, "battle-scene-on")
@@ -27,8 +37,12 @@ def main() -> None:
     song_table = oracle.symbols["gSongTable"]
     nm = subprocess.run(["arm-none-eabi-nm", str(reference / "pokeemerald.elf")], check=True, capture_output=True, text=True).stdout
     symbols = {line.split()[2]: int(line.split()[0], 16) | 1 for line in nm.splitlines() if len(line.split()) == 3}
-    templates = {name: oracle.symbols[name] for name in ("gFangSpriteTemplate", "gPoisonBubbleSpriteTemplate")}
-    task_names = ("AnimTask_ShakeMon", "AnimTask_ShakeMon_Step", "AnimTask_BlendColorCycle", "AnimTask_BlendColorCycleLoop")
+    template_names = ("gFangSpriteTemplate",) if MOVE_ID == 158 else (
+        "gFangSpriteTemplate", "gPoisonBubbleSpriteTemplate")
+    templates = {name: oracle.symbols[name] for name in template_names}
+    task_names = ("AnimTask_ShakeMon", "AnimTask_ShakeMon_Step",
+                  "AnimTask_BlendColorCycle", "AnimTask_BlendColorCycleLoop",
+                  "Task_FadeToBg")
     task_funcs = {symbols[name] for name in task_names}
     def u16(a: int) -> int: return oracle.read_u8(a) | (oracle.read_u8(a + 1) << 8)
     def s16(a: int) -> int:
@@ -62,7 +76,7 @@ def main() -> None:
     rows = []
     def capture(frame: int) -> None:
         snap = lab.snapshot()
-        if snap["engine"]["currentMove"] != 305: return
+        if snap["engine"]["currentMove"] != MOVE_ID: return
         active = []
         for slot in range(64):
             base = sprites + slot * 0x44
@@ -82,7 +96,8 @@ def main() -> None:
                  "tracks":[{"flags":oracle.read_u8(se1_tracks+i*0x50),
                             "pan":s8(se1_tracks+i*0x50+0x14),
                             "panX":s8(se1_tracks+i*0x50+0x15)} for i in range(3)]},
-          "bldcnt":u16(0x04000050),"bldalpha":u16(0x04000052)})
+          "bldcnt":u16(0x04000050),"bldalpha":u16(0x04000052),
+          "bldy":u16(0x04000054)})
     frame = 0
     capture(frame)
     for segment in request["trace"]["segments"]:
@@ -91,6 +106,7 @@ def main() -> None:
     OUTPUT.write_text(json.dumps({"schema":"poison-fang-dense-evidence/v1","setup":setup,
       "templates":templates,"taskFuncs":{name:symbols[name] for name in task_names},
       "songHeaders":{"SE_M_BITE":oracle.read_u32(song_table+161*8),
+                     "SE_M_LEER":oracle.read_u32(song_table+192*8),
                      "SE_M_TOXIC":oracle.read_u32(song_table+148*8)},"frames":rows}) + "\n")
     print(f"wrote {OUTPUT} ({len(rows)} frames; {rows[0]['frame'] if rows else '-'}..{rows[-1]['frame'] if rows else '-'})")
 main()
