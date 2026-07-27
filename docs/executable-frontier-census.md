@@ -10,10 +10,10 @@ Answers ROADMAP S10's Executable-frontier reset question directly: not "how many
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 108 | 214 | 50.5% |
-| Moves (unweighted, all 355) | 209 | 355 | 58.9% |
-| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 170 | 276 | 61.6% |
-| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2321 | 2957 | 78.5% |
+| Effect scripts | 111 | 214 | 51.9% |
+| Moves (unweighted, all 355) | 217 | 355 | 61.1% |
+| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 177 | 276 | 64.1% |
+| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2378 | 2957 | 80.4% |
 
 "Executable" means every opcode on every statically reachable path from the effect's entry script has a dispatch entry today (registered barriers included, per ROADMAP S10 §1's (a)/(b) policy). It is not a semantic-correctness claim -- see Caveats.
 
@@ -25,8 +25,6 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | --- | --- | --- | --- | --- |
 | `B_SCR_OP_FINISHACTION`, `B_SCR_OP_FORCERANDOMSWITCH`, `B_SCR_OP_RETURNTOBALL`, `B_SCR_OP_SWITCHOUTABILITIES` | 1 (EFFECT_ROAR) | 2 | 2 | 40 |
 | `B_SCR_OP_CLEARSEMIINVULNERABLEBIT`, `B_SCR_OP_CLEARSTATUSFROMEFFECT`, `B_SCR_OP_SETSEMIINVULNERABLEBIT` | 1 (EFFECT_SEMI_INVULNERABLE) | 4 | 4 | 32 |
-| `B_SCR_OP_TRYHEALHALFHEALTH` | 2 (EFFECT_RESTORE_HP, EFFECT_SOFTBOILED) | 4 | 3 | 29 |
-| `B_SCR_OP_TRYKO`, `B_SCR_OP_TRYSETDESTINYBONDTOHAPPEN` | 1 (EFFECT_OHKO) | 4 | 4 | 28 |
 | `B_SCR_OP_SETATKHPTOZERO`, `B_SCR_OP_TRYEXPLOSION` | 1 (EFFECT_EXPLOSION) | 2 | 2 | 25 |
 | `B_SCR_OP_INITMULTIHITSTRING`, `B_SCR_OP_JUMPIFHASNOHP` | 4 (EFFECT_MULTI_HIT, EFFECT_DOUBLE_HIT, EFFECT_TWINEEDLE, EFFECT_TRIPLE_KICK) | 16 | 10 | 23 |
 | `B_SCR_OP_REMAININGHPTOPOWER` | 1 (EFFECT_FLAIL) | 2 | 2 | 20 |
@@ -48,6 +46,8 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_TRYSETFUTUREATTACK` | 1 (EFFECT_FUTURE_SIGHT) | 2 | 1 | 5 |
 | `B_SCR_OP_DISABLELASTUSEDATTACK` | 1 (EFFECT_DISABLE) | 1 | 1 | 5 |
 | `B_SCR_OP_FURYCUTTERCALC` | 1 (EFFECT_FURY_CUTTER) | 1 | 1 | 5 |
+| `B_SCR_OP_SETFORCEDTARGET` | 1 (EFFECT_FOLLOW_ME) | 1 | 1 | 5 |
+| `B_SCR_OP_SETMINIMIZE` | 1 (EFFECT_MINIMIZE) | 1 | 1 | 5 |
 
 ## Per-effect detail
 
@@ -85,13 +85,13 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_MULTI_HIT | `BattleScript_EffectMultiHit` | blocked-on-opcodes | `B_SCR_OP_INITMULTIHITSTRING`, `B_SCR_OP_JUMPIFHASNOHP` (edge branch only) | - | 12 | 6 (9) |
 | EFFECT_CONVERSION | `BattleScript_EffectConversion` | blocked-on-opcodes | `B_SCR_OP_TRYCONVERSIONTYPECHANGE` (main path) | - | 1 | 0 (0) |
 | EFFECT_FLINCH_HIT | `BattleScript_EffectFlinchHit` | executable | - | - | 6 | 5 (103) |
-| EFFECT_RESTORE_HP | `BattleScript_EffectRestoreHp` | blocked-on-opcodes | `B_SCR_OP_TRYHEALHALFHEALTH` (main path) | - | 2 | 1 (22) |
+| EFFECT_RESTORE_HP | `BattleScript_EffectRestoreHp` | executable | - | - | 2 | 1 (22) |
 | EFFECT_TOXIC | `BattleScript_EffectToxic` | executable | - | - | 1 | 1 (26) |
 | EFFECT_PAY_DAY | `BattleScript_EffectPayDay` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_PAYDAY is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 1 | 0 (0) |
 | EFFECT_LIGHT_SCREEN | `BattleScript_EffectLightScreen` | executable | - | - | 1 | 1 (23) |
 | EFFECT_TRI_ATTACK | `BattleScript_EffectTriAttack` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_TRI_ATTACK is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 1 | 1 (8) |
 | EFFECT_REST | `BattleScript_EffectRest` | executable | - | - | 1 | 1 (49) |
-| EFFECT_OHKO | `BattleScript_EffectOHKO` | blocked-on-opcodes | `B_SCR_OP_TRYKO`, `B_SCR_OP_TRYSETDESTINYBONDTOHAPPEN` (edge branch only) | - | 4 | 4 (28) |
+| EFFECT_OHKO | `BattleScript_EffectOHKO` | executable | - | - | 4 | 4 (28) |
 | EFFECT_RAZOR_WIND | `BattleScript_EffectRazorWind` | blocked-on-opcodes | `B_SCR_OP_CLEARSTATUSFROMEFFECT` (edge branch only) | Cmd_seteffectprimary dispatch: MOVE_EFFECT_CHARGING is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522<br>Cmd_seteffectwithchance dispatch: MOVE_EFFECT_CHARGING is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 1 | 1 (2) |
 | EFFECT_SUPER_FANG | `BattleScript_EffectSuperFang` | blocked-on-opcodes | `B_SCR_OP_DAMAGETOHALFTARGETHP` (edge branch only) | - | 1 | 1 (1) |
 | EFFECT_DRAGON_RAGE | `BattleScript_EffectDragonRage` | executable | - | - | 1 | 1 (1) |
@@ -210,7 +210,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_BEAT_UP | `BattleScript_EffectBeatUp` | blocked-on-opcodes | `B_SCR_OP_TRYDOBEATUP` (edge branch only) | - | 1 | 0 (0) |
 | EFFECT_SEMI_INVULNERABLE | `BattleScript_EffectSemiInvulnerable` | blocked-on-opcodes | `B_SCR_OP_CLEARSTATUSFROMEFFECT`, `B_SCR_OP_SETSEMIINVULNERABLEBIT`, `B_SCR_OP_CLEARSEMIINVULNERABLEBIT` (edge branch only) | Cmd_seteffectprimary dispatch: MOVE_EFFECT_CHARGING is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522<br>Cmd_seteffectwithchance dispatch: MOVE_EFFECT_CHARGING is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 4 | 4 (32) |
 | EFFECT_DEFENSE_CURL | `BattleScript_EffectDefenseCurl` | blocked-on-opcodes | `B_SCR_OP_SETDEFENSECURLBIT` (main path) | - | 1 | 1 (6) |
-| EFFECT_SOFTBOILED | `BattleScript_EffectSoftboiled` | blocked-on-opcodes | `B_SCR_OP_TRYHEALHALFHEALTH` (main path) | - | 2 | 2 (7) |
+| EFFECT_SOFTBOILED | `BattleScript_EffectSoftboiled` | executable | - | - | 2 | 2 (7) |
 | EFFECT_FAKE_OUT | `BattleScript_EffectFakeOut` | blocked-on-opcodes | `B_SCR_OP_JUMPIFNOTFIRSTTURN` (main path) | - | 1 | 1 (15) |
 | EFFECT_UPROAR | `BattleScript_EffectUproar` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_UPROAR is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 1 | 1 (1) |
 | EFFECT_STOCKPILE | `BattleScript_EffectStockpile` | blocked-on-opcodes | `B_SCR_OP_STOCKPILE` (main path) | - | 1 | 1 (2) |
