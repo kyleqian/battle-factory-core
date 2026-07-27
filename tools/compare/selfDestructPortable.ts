@@ -3,6 +3,12 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { selfDestructAtAge } from "../../src/animation/selfDestruct.ts";
+import {
+  createSceneOnMovePresentation,
+  sceneOnSelfDestructView,
+  type SceneOnPresentationBattler,
+} from "../../src/animation/sceneOnPresentation.ts";
+import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 
 interface Fixture {
   scenario: string; probe: string;
@@ -10,6 +16,14 @@ interface Fixture {
   appStage: { presentationAge: number };
   attackerSide: "player" | "opponent";
   attackerCenter: { x: number; y: number };
+  attacker: SceneOnPresentationBattler;
+  target: SceneOnPresentationBattler;
+  fieldProfile: {
+    playerHp: number; playerMaxHp: number;
+    opponentHp: number; opponentMaxHp: number;
+    playerGender?: "male" | "female";
+    opponentGender?: "male" | "female";
+  };
 }
 interface Frame {
   frame: number;
@@ -25,11 +39,12 @@ const fixturePath = process.argv[2]
 const fixture = JSON.parse(readFileSync(resolve(fixturePath), "utf8")) as Fixture;
 const scratch = mkdtempSync(join(tmpdir(), "pokebench-self-destruct-portable-"));
 const output = join(scratch, "probe.json");
+const rgbDir = join(scratch, "rgb");
 const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));
 const run = spawnSync("python3", [
   join(root, "tools/run-mgba-probe.py"), output, "--",
   join(vendor, "mgba-venv/bin/python"), resolve(root, fixture.probe),
-  resolve(root, fixture.scenario), output, join(scratch, "rgb"),
+  resolve(root, fixture.scenario), output, rgbDir,
 ], { cwd: root, encoding: "utf8" });
 if (run.stdout) process.stdout.write(run.stdout);
 if (run.stderr) process.stderr.write(run.stderr);
@@ -51,12 +66,21 @@ const blend = (color: number, coefficient: number) => {
 };
 const failures: string[] = [];
 let matches = 0;
+let framebufferMatches = 0;
+const framebufferMismatches: number[] = [];
+const stage = createSceneOnMovePresentation({
+  move: "SELF_DESTRUCT",
+  attacker: fixture.attacker,
+  target: fixture.target,
+  fieldProfile: fixture.fieldProfile,
+});
 for (let frame = fixture.denseWindow.startFrame;
   frame <= fixture.denseWindow.endFrame; frame += 1) {
   const age = fixture.appStage.presentationAge + frame - fixture.denseWindow.startFrame;
   const oracle = frames.get(frame);
   if (!oracle) throw new Error(`probe omitted frame ${frame}`);
   const expected = selfDestructAtAge(age, fixture.attackerSide, fixture.attackerCenter);
+  const seam = sceneOnSelfDestructView({ ...stage, age });
   const oracleSprites = oracle.sprites.map((sprite) =>
     `${sprite.x},${sprite.y},${sprite.attr2 & 1023}`,
   ).sort();
@@ -78,15 +102,44 @@ for (let frame = fixture.denseWindow.startFrame;
     && (oracle.se1.tracks[0]?.panX ?? 0)
       === (fixture.attackerSide === "player" ? -64 : 63)
   );
-  if (spriteShape && shakeShape && paletteShape && soundShape) matches += 1;
+  const seamShape = seam.battlerX2 === expected.battlerX2
+    && seam.attackerPaletteY === expected.attackerPaletteY
+    && seam.explosions.length === expected.explosions.length;
+  if (spriteShape && shakeShape && paletteShape && soundShape && seamShape) {
+    matches += 1;
+  }
   else failures.push(
-    `frame ${frame}/age ${age}: sprites=${spriteShape} shake=${shakeShape} palette=${paletteShape} sound=${soundShape}`,
+    `frame ${frame}/age ${age}: sprites=${spriteShape} shake=${shakeShape} palette=${paletteShape} sound=${soundShape} seam=${seamShape}`,
   );
+  const engine: EngineState = {
+    ...createInitialState(), rngMode: "frontierBattle",
+    sceneOnPresentation: { ...stage, age },
+  };
+  const app = render(engine);
+  const rgb = readFileSync(
+    join(rgbDir, `${String(frame).padStart(5, "0")}.rgb`),
+  );
+  let exact = true;
+  for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
+    if (
+      app[pixel * 4] !== rgb[pixel * 3]
+      || app[pixel * 4 + 1] !== rgb[pixel * 3 + 1]
+      || app[pixel * 4 + 2] !== rgb[pixel * 3 + 2]
+    ) {
+      exact = false;
+      break;
+    }
+  }
+  if (exact) framebufferMatches += 1;
+  else framebufferMismatches.push(age);
 }
 const total = fixture.denseWindow.endFrame - fixture.denseWindow.startFrame + 1;
-console.log(`SELF_DESTRUCT source components ${matches}/${total}`);
-if (matches !== total) {
+console.log(
+  `SELF_DESTRUCT source components ${matches}/${total}; framebuffer ${framebufferMatches}/${total}`,
+);
+if (matches !== total || framebufferMatches !== total) {
   console.error(failures.slice(0, 30).join("\n"));
+  console.error(`framebuffer mismatch ages: ${framebufferMismatches.join(",")}`);
   console.error(`scratch: ${scratch}`);
   process.exit(1);
 }

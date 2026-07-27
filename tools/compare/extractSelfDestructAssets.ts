@@ -1,5 +1,5 @@
 // Reproducible source extraction for MOVE_SELF_DESTRUCT and its real
-// Level-50 Factory set-298 SUDOWOODO carrier.
+// Level-50 Factory set-298 SUDOWOODO carrier and the legal SHUCKLE control.
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -33,6 +33,10 @@ writeFileSync(out, `${JSON.stringify({
       "graphics/pokemon/sudowoodo/back.png; FRONTIER_MON_SUDOWOODO_2 set 298",
     sudowoodoFront:
       "graphics/pokemon/sudowoodo/anim_front.png frame 0; FRONTIER_MON_SUDOWOODO_2 set 298",
+    shuckleBack:
+      "graphics/pokemon/shuckle/back.png; legal slower SELF DESTRUCT control",
+    shuckleFront:
+      "graphics/pokemon/shuckle/anim_front.png frame 0; legal slower SELF DESTRUCT control",
   },
   explosion: sprite("graphics/battle_anims/sprites/explosion.png"),
   sudowoodoBack: sprite(
@@ -42,6 +46,14 @@ writeFileSync(out, `${JSON.stringify({
   sudowoodoFront: sprite(
     "graphics/pokemon/sudowoodo/anim_front.png",
     "graphics/pokemon/sudowoodo/normal.pal",
+  ),
+  shuckleBack: sprite(
+    "graphics/pokemon/shuckle/back.png",
+    "graphics/pokemon/shuckle/normal.pal",
+  ),
+  shuckleFront: sprite(
+    "graphics/pokemon/shuckle/anim_front.png",
+    "graphics/pokemon/shuckle/normal.pal",
   ),
 })}\n`);
 console.log(`wrote ${out}`);

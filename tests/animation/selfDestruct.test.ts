@@ -4,6 +4,10 @@ import {
   SELF_DESTRUCT_EXPLOSION_OFFSETS,
   selfDestructAtAge,
 } from "../../src/animation/selfDestruct.ts";
+import {
+  createSceneOnMovePresentation,
+  sceneOnSelfDestructView,
+} from "../../src/animation/sceneOnPresentation.ts";
 
 describe("MOVE_SELF_DESTRUCT source-relative reducer", () => {
   const player = (age: number) =>
@@ -43,5 +47,43 @@ describe("MOVE_SELF_DESTRUCT source-relative reducer", () => {
     expect([0, 1, 2, 17, 18, 94, 95, 96, 109, 110, 111].map(
       (age) => player(age).attackerPaletteY,
     )).toEqual([0, 0, 1, 8, 9, 9, 8, 8, 1, 1, 0]);
+  });
+
+  it("exposes the complete body through the relative Scene-ON seam", () => {
+    const stage = createSceneOnMovePresentation({
+      move: "SELF_DESTRUCT",
+      attacker: {
+        species: "SUDOWOODO",
+        geometry: {
+          side: "player",
+          spriteCorner: { x: 40, y: 56 },
+          animationCenter: { x: 72, y: 88 },
+          battlePositionCenter: { x: 72, y: 80 },
+        },
+      },
+      target: {
+        species: "SHUCKLE",
+        geometry: {
+          side: "opponent",
+          spriteCorner: { x: 144, y: 17 },
+          animationCenter: { x: 176, y: 49 },
+          battlePositionCenter: { x: 176, y: 40 },
+        },
+      },
+      fieldProfile: {
+        playerHp: 0,
+        playerMaxHp: 177,
+        opponentHp: 95,
+        opponentMaxHp: 95,
+      },
+    });
+    expect(sceneOnSelfDestructView({ ...stage, age: 72 })).toMatchObject({
+      age: 72,
+      battlerX2: -6,
+      attackerPaletteY: 9,
+      explosions: expect.arrayContaining([
+        expect.objectContaining({ spawnIndex: 9, x: 88, y: 96 }),
+      ]),
+    });
   });
 });

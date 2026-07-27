@@ -550,6 +550,7 @@ import sludgeBombAsset from "../animation/assets/sludgeBomb.json" with { type: "
 import poisonFangAsset from "../animation/assets/poisonFang.json" with { type: "json" };
 import hyperFangAsset from "../animation/assets/hyperFang.json" with { type: "json" };
 import swaggerAsset from "../animation/assets/swagger.json" with { type: "json" };
+import selfDestructAsset from "../animation/assets/selfDestruct.json" with { type: "json" };
 import poisonTailAsset from "../animation/assets/poisonTail.json" with { type: "json" };
 import toxicAsset from "../animation/assets/toxic.json" with { type: "json" };
 import hardenAsset from "../animation/assets/harden.json" with { type: "json" };
@@ -659,6 +660,7 @@ import {
   sceneOnPoisonFangView,
   sceneOnHyperFangView,
   sceneOnSwaggerView,
+  sceneOnSelfDestructView,
   sceneOnPoisonTailView,
   sceneOnToxicView,
   sceneOnEarthquakeView,
@@ -1003,6 +1005,13 @@ const swaggerArt = swaggerAsset as {
   anger: { tileset: Tileset; palette: RgbColor[] };
   rattataBack: { tileset: Tileset; palette: RgbColor[] };
   rattataFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const selfDestructArt = selfDestructAsset as {
+  explosion: { tileset: Tileset; palette: RgbColor[] };
+  sudowoodoBack: { tileset: Tileset; palette: RgbColor[] };
+  sudowoodoFront: { tileset: Tileset; palette: RgbColor[] };
+  shuckleBack: { tileset: Tileset; palette: RgbColor[] };
+  shuckleFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const poisonTailArt = poisonTailAsset as {
   metal: { tileset: Tileset; tilemap: Tilemap; palette: RgbColor[] };
@@ -15720,6 +15729,131 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "RATICATE used" : "Foe RATICATE used",
       "HYPER FANG!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SELF_DESTRUCT") {
+    const view = sceneOnSelfDestructView(state);
+    // Age zero begins after the first transfer; later palette writes reach
+    // hardware on the following display.
+    const paletteDisplayed = sceneOnSelfDestructView({
+      ...state,
+      age: state.age === 0 ? 0 : state.age - 1,
+    });
+    const shakeDisplayedX2 = state.age === 0
+      ? 0
+      : sceneOnSelfDestructView({ ...state, age: state.age - 2 }).battlerX2;
+    const playerToOpponent =
+      view.attacker.species === "SUDOWOODO"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "SUDOWOODO"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged SELF_DESTRUCT pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const sudowoodo = playerToOpponent
+      ? selfDestructArt.sudowoodoBack
+      : {
+          ...selfDestructArt.sudowoodoFront,
+          tileset: subTileset(selfDestructArt.sudowoodoFront.tileset, 0, 8),
+        };
+    const shuckle = playerToOpponent
+      ? {
+          ...selfDestructArt.shuckleFront,
+          tileset: subTileset(selfDestructArt.shuckleFront.tileset, 0, 8),
+        }
+      : selfDestructArt.shuckleBack;
+    const red = { r: 255, g: 0, b: 0 };
+    const sudowoodoPalette = blendPaletteToward(
+      sudowoodo.palette,
+      red,
+      paletteDisplayed.attackerPaletteY,
+    );
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    const opponent = playerToOpponent ? shuckle : {
+      ...sudowoodo,
+      palette: sudowoodoPalette,
+    };
+    const player = playerToOpponent ? {
+      ...sudowoodo,
+      palette: sudowoodoPalette,
+    } : shuckle;
+    drawSpriteSheet(
+      fb,
+      opponent.tileset,
+      opponent.palette,
+      (playerToOpponent ? view.target : view.attacker).geometry.spriteCorner.x
+        + shakeDisplayedX2,
+      (playerToOpponent ? view.target : view.attacker).geometry.spriteCorner.y,
+    );
+    drawSpriteSheet(
+      fb,
+      player.tileset,
+      player.palette,
+      (playerToOpponent ? view.attacker : view.target).geometry.spriteCorner.x
+        + shakeDisplayedX2,
+      (playerToOpponent ? view.attacker : view.target).geometry.spriteCorner.y,
+    );
+    const explosionsDisplayed = sceneOnSelfDestructView({
+      ...state,
+      age: state.age - 1,
+    });
+    // Equal-priority OBJ ties prefer the earlier hardware-OAM entry.
+    // Convert SortSprites' descending-Y hardware order to painter order;
+    // equal-Y sprites retain the older slot on top.
+    const explosionsInDrawOrder = [...explosionsDisplayed.explosions].sort(
+      (a, b) => a.y - b.y || b.spawnIndex - a.spawnIndex,
+    );
+    for (const explosion of explosionsInDrawOrder) {
+      drawSpriteSheet(
+        fb,
+        subTileset(selfDestructArt.explosion.tileset, explosion.frame * 4, 4),
+        selfDestructArt.explosion.palette,
+        explosion.x - 16,
+        explosion.y - 16,
+      );
+    }
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "SHUCKLE" : "SUDOWOODO",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "SUDOWOODO" : "SHUCKLE",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "SUDOWOODO used" : "Foe SUDOWOODO used",
+      "SELFDESTRUCT!",
       99,
     );
     return;

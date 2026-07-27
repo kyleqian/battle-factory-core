@@ -56,7 +56,8 @@ function explosionAtAge(
 /**
  * Source-shaped first `Move_SELF_DESTRUCT` animation body.
  *
- * Age zero is the first displayed `gExplosionSpriteTemplate` instance.
+ * Age zero is the first software-OAM `gExplosionSpriteTemplate` instance;
+ * hardware OAM displays it one presentation frame later.
  * Damage, fainting, and the result/controller sequence are deliberately absent.
  */
 export function selfDestructAtAge(

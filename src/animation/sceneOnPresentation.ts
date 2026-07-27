@@ -179,6 +179,10 @@ import {
   type SwaggerState,
 } from "./swagger.ts";
 import {
+  selfDestructAtAge,
+  type SelfDestructState,
+} from "./selfDestruct.ts";
+import {
   poisonTailAtAge,
   type PoisonTailState,
 } from "./poisonTail.ts";
@@ -345,7 +349,9 @@ export interface SceneOnPresentationBattler {
     | "ALTARIA"
     | "AZURILL"
     | "CLAMPERL"
-    | "SEVIPER";
+    | "SEVIPER"
+    | "SUDOWOODO"
+    | "SHUCKLE";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -826,6 +832,13 @@ export interface SceneOnSwaggerConfig {
   readonly breathOrigin: Readonly<{ x: number; y: number }>;
 }
 
+export interface SceneOnSelfDestructConfig {
+  readonly move: "SELF_DESTRUCT";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnPoisonTailConfig {
   readonly move: "POISON_TAIL";
   readonly attacker: SceneOnPresentationBattler;
@@ -963,6 +976,7 @@ export type SceneOnMoveConfig =
   | SceneOnPoisonFangConfig
   | SceneOnHyperFangConfig
   | SceneOnSwaggerConfig
+  | SceneOnSelfDestructConfig
   | SceneOnPoisonTailConfig
   | SceneOnToxicConfig
   | SceneOnEarthquakeConfig
@@ -1043,6 +1057,12 @@ export interface SceneOnHyperFangView extends HyperFangEffect {
 }
 
 export interface SceneOnSwaggerView extends SwaggerState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSelfDestructView extends SelfDestructState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -2123,6 +2143,27 @@ export function sceneOnSwaggerView(
       state.config.breathOrigin,
       state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is the first software-OAM explosion sprite. */
+export function sceneOnSelfDestructView(
+  state: SceneOnMovePresentationState,
+): SceneOnSelfDestructView {
+  if (state.config.move !== "SELF_DESTRUCT") {
+    throw new Error(
+      `expected SELF_DESTRUCT presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...selfDestructAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.battlePositionCenter,
     ),
   };
 }
