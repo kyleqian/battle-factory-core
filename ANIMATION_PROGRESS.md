@@ -44,6 +44,45 @@ animation. A status caused by a move is not part of that move's animation.
   presentation seam and all source- or evidence-required variants are covered.
 - No entry means unsupported.
 
+## Knock Off component checkpoint: lunge + in-place shake ported; move remains unsupported (2026-07-26)
+
+**Verdict:** no move-level promotion and no dense numerator/denominator is
+claimed. A complete-party Scene-ON mechanicLab fixture now stages player-back
+SHUPPET (the species of real Factory Knock Off carrier set **62**) against
+opponent-front ONIX. The move executes normally from `gCurrentMove=282` at
+frame 39 and exposes its body at frames 81-115, but it is not yet wired through
+the shared app seam, so this is an honest evidence checkpoint rather than a
+partial acceptance entry.
+
+**Source inventory and implementation:** `Move_KNOCK_OFF` owns
+`gHorizontalLungeSpriteTemplate`, `gKnockOffStrikeSpriteTemplate`,
+`complex_palette_blend`, the basic hitsplat,
+`gSlideMonToOffsetSpriteTemplate`, `gSlideMonToOriginalPosSpriteTemplate`, and
+`AnimTask_ShakeMonInPlace` (plus `ANIM_TAG_SLAM_HIT_2`/`ANIM_TAG_IMPACT`).
+New generic reducers port `DoHorizontalLunge`/its two callback handoffs and
+`AnimTask_ShakeMonInPlace`'s synchronous creation step. Fresh Scene-ON RAM/frame
+evidence pins Knock Off's player lunge at frames 81-91 to
+**0,6,12,18,24,24,24,18,12,6,0**; the two peak holds are the distinct
+Translate→Reverse callback assignments, not fitted delays. The existing
+`slideMon.ts` already ports both slide callbacks. Tier-1 tests cover side
+mirroring, callback lifetime, Knock Off's `(4,6)` lunge and `(0,3,6,1)` shake,
+plus SUPER FANG's first `(1,0,20,1)` shake arguments.
+
+**Sibling audit / named boundary:** SUPER FANG directly consumes both new
+components, but still owns its fang sprite, blend-in/out task, palette blend,
+and independent dense window. SECRET POWER is environment-dispatched; the
+Factory building path selects `Move_STRENGTH`, while its union spans both new
+components and many unrelated environment-specific bodies. Neither sibling is
+promoted. Knock Off still needs strike-asset extraction/rendering, palette
+blend, hitsplat ordering, simultaneous slide/shake composition, seam wiring,
+and a complete dense framebuffer comparison (then opposite orientation only if
+source/oracle evidence requires it).
+
+**Evidence:** `tools/battle-lab/mechanic-knock-off-shuppet-onix.json`,
+`src/animation/horizontalLunge.ts`,
+`src/animation/shakeMonInPlace.ts`, and their Tier-1 tests. Baseline and final
+verification are recorded in the worker handoff.
+
 Start with one representative attacker/target. Add variants only when source
 inspection or comparison identifies a dependency: attacker side, front/back
 orientation, battler dimensions or anchors, palette/silhouette, transformed or

@@ -741,6 +741,21 @@
         "MOVE_DIVE"
       ],
       "goal": "FLY exactly proves a phase-relative, side-parameterized two-turn charge/strike reducer, source-derived player-back MURKROW art, and a reusable framebuffer/healthbox/controller adapter in both legal orientations. Opponent windows are 151/151 and 248/248; player windows are 147/147 and 244/244, all with zero exclusions. The canonical charge/miss window is also 213/213 after its flattened layered-scene path reused the established opponent terrain cutoff through the generic affine-stretch clip parameter. BOUNCE exactly proves both charge bodies at 24/24, no-status strike/controller windows at 299/299 opponent-front and 197/197 player-back, and the successful-paralysis strike/controller/menu variant at 450/450; its Status_Paralysis electricity asset/spawns and AnimTask_ShakeMon2 framebuffer handoff now live in a reusable move-agnostic visual component. DIVE remains unsupported without independent dense move evidence."
+    },
+    {
+      "id": "knock-off-lunge-shake",
+      "components": [
+        "sprite:gHorizontalLungeSpriteTemplate",
+        "task:AnimTask_ShakeMonInPlace",
+        "sprite:gSlideMonToOffsetSpriteTemplate",
+        "sprite:gSlideMonToOriginalPosSpriteTemplate"
+      ],
+      "representatives": [
+        "MOVE_KNOCK_OFF",
+        "MOVE_SUPER_FANG",
+        "MOVE_SECRET_POWER"
+      ],
+      "goal": "Evidence checkpoint only; no move is promoted. MOVE_KNOCK_OFF is staged with complete legal mechanicLab parties using SHUPPET, the species from real Factory carrier set 62. Its player-side 4x6 horizontal lunge is RAM/frame observed at oracle frames 81-91 and the generic callback reducer reproduces the exact 0,6,12,18,24,24,24,18,12,6,0 sequence, including both callback-handoff holds. AnimTask_ShakeMonInPlace is ported as the literal source state machine, and the pre-existing generic slideMon reducer covers both slide templates. Remaining before any Knock Off partial/exact claim: wire the move through the shared presentation seam; extract/render gKnockOffStrikeSpriteTemplate and ANIM_TAG_SLAM_HIT_2; model complex_palette_blend, basic hitsplat/OAM ordering, simultaneous target slide/shake composition, and prove a complete dense framebuffer window (plus opposite orientation if evidence requires it). Sibling audit: SUPER_FANG directly reuses both newly ported components but also needs gSuperFangSpriteTemplate, AnimTask_BlendMonInAndOut, palette blend, and its own dense acceptance. SECRET_POWER dispatches by battle environment; the Factory building branch goes to Move_STRENGTH and the source component union includes both new components plus many environment-specific bodies, so it cannot inherit acceptance from Knock Off."
     }
   ],
   "variantAudits": {

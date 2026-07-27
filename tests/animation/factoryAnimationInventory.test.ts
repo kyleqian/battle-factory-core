@@ -119,6 +119,17 @@ describe("animation coverage ledger", () => {
         "MOVE_THUNDER_PUNCH",
       ],
     });
+    expect(
+      queuedAnimationComponentTracks().find(
+        (track) => track.id === "knock-off-lunge-shake",
+      ),
+    ).toMatchObject({
+      representatives: [
+        "MOVE_KNOCK_OFF",
+        "MOVE_SUPER_FANG",
+        "MOVE_SECRET_POWER",
+      ],
+    });
     const punchNeighbors = relatedAnimationMoves("MOVE_FIRE_PUNCH", 12).map(
       (move) => move.move,
     );
