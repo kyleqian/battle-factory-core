@@ -1,6 +1,8 @@
 export const EARTHQUAKE_SHAKE_INTENSITY = 10;
 export const EARTHQUAKE_SHAKE_MAX_TIME = 50;
-export const EARTHQUAKE_PALETTE_START_AGES = [10, 26] as const;
+// The script interpreter's delay scheduler lands the commands 13 and 31
+// display ticks after the simultaneous shake-task creation tick.
+export const EARTHQUAKE_PALETTE_START_AGES = [13, 31] as const;
 
 export interface HorizontalShakeState {
   readonly active: boolean;
@@ -84,16 +86,16 @@ export interface ComplexPaletteBlendState {
 export function earthquakePaletteAtAge(age: number): ComplexPaletteBlendState {
   for (const startAge of EARTHQUAKE_PALETTE_START_AGES) {
     const local = age - startAge;
-    if (local < 0 || local > 8) continue;
-    if (local <= 3) {
+    if (local < 0 || local > 7) continue;
+    if (local <= 2) {
       return {
-        active: true, timer: 3 - local, remainingBlends: 1,
+        active: true, timer: 2 - local, remainingBlends: 1,
         color: "black", coefficient: 14,
       };
     }
     return {
       active: true,
-      timer: Math.max(0, 7 - local),
+      timer: Math.max(0, 6 - local),
       remainingBlends: 0,
       color: "white",
       coefficient: 14,

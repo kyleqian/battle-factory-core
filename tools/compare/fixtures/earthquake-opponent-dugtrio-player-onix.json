@@ -1,0 +1,14 @@
+{
+  "schema":"scene-on-portable-component/v1",
+  "oracleProfile":"battle-scene-on",
+  "scenario":"tools/battle-lab/mechanic-earthquake-opponent-dugtrio-player-onix.json",
+  "probe":"tools/compare/earthquakeProbe.py",
+  "pair":"DUGTRIO real Level-50 Factory set-372 carrier opponent-front -> ONIX player-back",
+  "move":"EARTHQUAKE",
+  "denseWindow":{"startFrame":84,"endFrame":280},
+  "appStage":{"presentationAge":1},
+  "initialBattlerX2":{"player":0,"opponent":0},
+  "attacker":{"species":"DUGTRIO","geometry":{"side":"opponent","spriteCorner":{"x":144,"y":21},"animationCenter":{"x":176,"y":53},"battlePositionCenter":{"x":176,"y":40}}},
+  "target":{"species":"ONIX","geometry":{"side":"player","spriteCorner":{"x":40,"y":48},"animationCenter":{"x":72,"y":88},"battlePositionCenter":{"x":72,"y":80}}},
+  "fieldProfile":{"playerHp":110,"playerMaxHp":110,"opponentHp":110,"opponentMaxHp":110,"playerGender":"male","opponentGender":"male"}
+}

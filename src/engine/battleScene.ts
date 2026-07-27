@@ -18943,7 +18943,14 @@ export function renderSceneOnMovePresentation(
 
   if (state.config.move === "EARTHQUAKE") {
     const view = sceneOnEarthquakeView(state);
+    // BG3HOFS, OAM x2, and faded palette RAM are transferred at the next
+    // VBlank. OAM was built before the task callbacks and therefore trails
+    // the live battler x2 by a second callback/display epoch.
     const displayed = sceneOnEarthquakeView({ ...state, age: state.age - 1 });
+    const displayedBattlers = sceneOnEarthquakeView({
+      ...state,
+      age: state.age - 2,
+    });
     const playerToOpponent =
       view.attacker.species === "DUGTRIO"
       && view.attacker.geometry.side === "player"
@@ -18976,14 +18983,14 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? dugtrioBackSprite.tileset : onixBackSprite.tileset,
       playerToOpponent ? dugtrioBackSprite.palette : onixBackSprite.palette,
-      player.geometry.spriteCorner.x + displayed.shake.battlerX2,
+      player.geometry.spriteCorner.x + displayedBattlers.playerBattlerX2,
       player.geometry.spriteCorner.y,
     );
     drawSpriteSheet(
       fb,
       playerToOpponent ? onixFrontSprite.tileset : dugtrioFrontSprite.tileset,
       playerToOpponent ? onixFrontSprite.palette : dugtrioFrontSprite.palette,
-      opponent.geometry.spriteCorner.x + displayed.shake.battlerX2,
+      opponent.geometry.spriteCorner.x + displayedBattlers.opponentBattlerX2,
       opponent.geometry.spriteCorner.y,
     );
     const opponentSpecies = playerToOpponent ? "ONIX" : "DUGTRIO";

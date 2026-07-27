@@ -33,29 +33,29 @@ describe("MOVE_EARTHQUAKE source reducers", () => {
   });
 
   it("replays both literal delay-3/count-1 black14-to-white14 BG pulses", () => {
-    expect(earthquakePaletteAtAge(9).active).toBe(false);
-    expect(earthquakePaletteAtAge(10)).toEqual({
-      active: true, timer: 3, remainingBlends: 1,
+    expect(earthquakePaletteAtAge(12).active).toBe(false);
+    expect(earthquakePaletteAtAge(13)).toEqual({
+      active: true, timer: 2, remainingBlends: 1,
       color: "black", coefficient: 14,
     });
-    expect(earthquakePaletteAtAge(13)).toMatchObject({
+    expect(earthquakePaletteAtAge(15)).toMatchObject({
       timer: 0, remainingBlends: 1, color: "black",
     });
-    expect(earthquakePaletteAtAge(14)).toMatchObject({
+    expect(earthquakePaletteAtAge(16)).toMatchObject({
       remainingBlends: 0, color: "white",
     });
-    expect(earthquakePaletteAtAge(18)).toMatchObject({
+    expect(earthquakePaletteAtAge(20)).toMatchObject({
       active: true, color: "white",
     });
-    expect(earthquakePaletteAtAge(19).active).toBe(false);
-    expect(earthquakePaletteAtAge(26).color).toBe("black");
-    expect(earthquakePaletteAtAge(35).active).toBe(false);
+    expect(earthquakePaletteAtAge(21).active).toBe(false);
+    expect(earthquakePaletteAtAge(31).color).toBe("black");
+    expect(earthquakePaletteAtAge(39).active).toBe(false);
   });
 
   it("composes the simultaneous task and palette state without mechanics", () => {
-    expect(earthquakeAnimationAtAge(10)).toEqual({
-      shake: horizontalShakeAtAge(10, 10, 50),
-      palette: earthquakePaletteAtAge(10),
+    expect(earthquakeAnimationAtAge(13)).toEqual({
+      shake: horizontalShakeAtAge(13, 10, 50),
+      palette: earthquakePaletteAtAge(13),
     });
   });
 });

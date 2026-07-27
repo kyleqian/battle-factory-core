@@ -690,6 +690,8 @@ export interface SceneOnEarthquakeConfig {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source sprite x2 values retained until ShakeBattlers' first callback update. */
+  readonly initialBattlerX2: Readonly<{ player: number; opponent: number }>;
 }
 
 export interface SceneOnFutureSightConfig {
@@ -782,6 +784,8 @@ export interface SceneOnEarthquakeView extends EarthquakeAnimationState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
+  readonly playerBattlerX2: number;
+  readonly opponentBattlerX2: number;
 }
 
 export interface SceneOnFirePunchView {
@@ -1643,11 +1647,19 @@ export function sceneOnEarthquakeView(
   if (state.config.move !== "EARTHQUAKE") {
     throw new Error(`expected EARTHQUAKE presentation, got ${state.config.move}`);
   }
+  const animation = earthquakeAnimationAtAge(state.age);
+  const beforeFirstShakeWrite = state.age < 2;
   return {
     age: state.age,
     attacker: state.config.attacker,
     target: state.config.target,
-    ...earthquakeAnimationAtAge(state.age),
+    ...animation,
+    playerBattlerX2: beforeFirstShakeWrite
+      ? state.config.initialBattlerX2.player
+      : animation.shake.battlerX2,
+    opponentBattlerX2: beforeFirstShakeWrite
+      ? state.config.initialBattlerX2.opponent
+      : animation.shake.battlerX2,
   };
 }
 
