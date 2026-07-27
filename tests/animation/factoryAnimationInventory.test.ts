@@ -68,11 +68,11 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // SELF DESTRUCT adds a dense two-orientation component-only partial.
+        // SELF DESTRUCT closes both dense directions through the shared seam.
         unsupported: 228,
         staged: 0,
-        partial: 4,
-        exact: 44,
+        partial: 3,
+        exact: 45,
       },
       {
         tier: "openOnly",

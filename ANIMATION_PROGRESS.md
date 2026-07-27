@@ -46,7 +46,41 @@ animation. A status caused by a move is not part of that move's animation.
 
 ## Current resumable state (2026-07-27)
 
-Coverage is **44/276 exact, 4 partial, 228 unsupported**. SELF DESTRUCT is an
+Coverage is **45/276 exact, 3 partial, 228 unsupported**. SELF DESTRUCT is exact
+through the shared Scene-ON seam at **113/113 player-back + 113/113
+opponent-front** complete-body component and raw-RGB framebuffer frames,
+reproduced twice fresh. DRAGON BREATH remains **85/85** in both orientations
+as the exact ShakeMon2/palette regression control.
+
+## SELF DESTRUCT promoted to exact; explosion sprite track established (2026-07-27)
+
+**Verdict:** `MOVE_SELF_DESTRUCT` is exact. Complete legal mechanicLab parties
+stage SUDOWOODO from real Level-50 Factory set 298 in both orientations,
+constrain every active choice to SELF DESTRUCT, and use slower SHUCKLE with
+TACKLE. The strengthened comparator matches the complete first move-owned body
+at **113/113 player-back** (oracle 82-194) and **113/113 opponent-front**
+(86-198), for both source components and the shared-seam raw-RGB framebuffer,
+each reproduced twice fresh.
+
+**Source reducer/renderer:** the existing reducer's ten explosion instances,
+mirrored offsets, 4/5/5/5 cells, both visible battlers' ShakeMon2, attacker-only
+red 0→9→0 palette ramps, ten sound restarts, and teardown now feed a typed
+Scene-ON Self Destruct config/view. The compositor renders reproducibly
+extracted SUDOWOODO, SHUCKLE, and explosion art with source palette ramps,
+the one-display palette/explosion OAM latches, ShakeMon2's neutral first
+hardware frame plus two-display latch, source `SortSprites` Y ordering,
+audio-neutral field chrome, and complete cleanup.
+
+**Controls/scope:** DRAGON BREATH remains **85/85 component + 85/85
+framebuffer** in both orientations on fresh control runs. Damage resolution,
+fainting, health-bar loss, controller, turn, RNG, and facility state remain
+outside this move-owned body. EXPLOSION, PRESENT, DYNAMIC PUNCH, and all other
+siblings remain unsupported. No absolute ticks, screenshots, canonical
+imports, unsupported barriers, or boundary widening were added.
+
+## Previous current state (2026-07-27)
+
+Coverage was **44/276 exact, 4 partial, 228 unsupported**. SELF DESTRUCT was an
 honest partial checkpoint: its complete first move-owned source-component body
 matches the Scene-ON oracle at **113/113 player-back + 113/113 opponent-front**
 frames, reproduced twice fresh, but it is not wired through the shared renderer
