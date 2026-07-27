@@ -5429,3 +5429,204 @@ covering the 4 fixtures above. Every prior scenario (§9, §11.5, §12.1,
 ```sh
 node --experimental-strip-types tools/probe/verify-factory-ai-checkviability-ground-truth.ts
 ```
+
+## 27. 2026-07-27 addendum #17: ISSUES #47's movesetIndex-1-3 remainder — the per-handler `funcResult` write audit (all 22 ported `AI_CV_*` handlers), and the first live fixtures placing a weather move behind another real move in the same CV pass
+
+Bounded side-lane worker session (Battle Scene OFF oracle), same no-`src/`-
+changes contract as every addendum above. Scope: ISSUES #47's own precisely-
+scoped remainder (PROGRESS entry 504) — `factoryAiDecisionPolicy.ts` threads
+`AI_TryToFaint`'s own pass-exit `funcResult` classification into
+`AI_CheckViability`'s **first actually-scripted slot only**
+(`staleFuncResultFallback`, doc §25.10.1/§25.10.3's Channel 2), but whether
+that stale carry survives an intervening CV-pass slot's own dispatch — i.e.
+reaches a weather move sitting at moveset index **1, 2, or 3** rather than
+index 0 — was left genuinely unknown, since answering it requires auditing
+every other already-ported `AI_CV_*` handler's own `funcResult` side
+effects, not just the weather trio's own bodies (already fully covered by
+§25). This session does that audit exhaustively (§27.1) and stages the
+first live fixtures that isolate the index-1 case directly (§27.2-§27.4).
+
+### 27.1 The audit: every ported `AI_CV_*` handler, does its own script body ever write `funcResult`?
+
+Enumerated read-only from `src/engine/factoryAiCheckViability.ts`'s own
+`runCheckViability` dispatch shell (`:2489-2951`) — every `move.effect ===`
+branch that calls a `runCv*` helper, cross-referenced against each handler's
+real body in `reference/pokeemerald/data/battle_ai_scripts.s` and every
+`get_*`-family opcode it uses against `src/battle_ai_script_commands.c`'s
+own `sBattleAICmdTable[]` (`:160-261`, confirms macro name → `Cmd_*`
+function is a straight 1:1 opcode mapping, not guessed) and each `Cmd_*`
+function's own body (not guessed from its name — several `get_*` commands,
+e.g. `get_considered_move_power`, never touch `funcResult` at all despite
+the name, and several non-`get_*` commands like `is_of_type`/
+`is_first_turn_for`/`count_usable_party_mons` DO). This is the complete
+22-handler set (matches doc §25.10.3's own "22-handler `AI_CV_*` program"
+count exactly — every effect the engine's dispatch shell currently routes to
+a real handler, not a sample).
+
+**Classification key**: *writes-never* — no instruction in the handler's own
+body (any branch) ever writes `AI_THINKING_STRUCT->funcResult`, so any
+incoming carry (from `AI_TryToFaint`'s own pass-exit, or from an even
+earlier CV-pass slot) survives this handler's own dispatch completely
+intact. *writes-always* — every reachable path through the handler writes
+`funcResult` at least once before returning, so any incoming carry is
+destroyed regardless of battle state. *writes-conditionally* — some paths
+write, some don't; the branch condition is named exactly, since (per
+§27.2-§27.4 below) that condition is exactly what a next fixture needs to
+force one way or the other.
+
+| # | Handler(s) | Effects dispatched | Citation | Classification | Branch conditions |
+| - | --- | --- | --- | --- | --- |
+| 1 | `AI_CV_SpeedDown` | `EFFECT_SPEED_DOWN`, `_2` | `:1142-1151` | **writes-never** | Only `if_target_faster` (→`Cmd_if_user_goes`, `battle_ai_script_commands.c:1268-1274`, confirmed no `funcResult` touch) and `if_random_less_than`; no `get_*` call anywhere in the body. |
+| 2 | `AI_CV_SpeedDownFromChance` | `EFFECT_SPEED_DOWN_HIT` | `:1136-1141` | **writes-never** | Three `if_move` compares (`Cmd_if_move`, not a `funcResult`-writer) that `goto` into `AI_CV_SpeedDown`'s own body (handler 1, also writes-never) on a match, or fall through to a bare `end` (no write at all) on no match. |
+| 3 | `AI_CV_Pursuit` | `EFFECT_PURSUIT` | `:2018-2035` | **writes-ALWAYS** | First instruction, unconditionally: `is_first_turn_for AI_USER` → `Cmd_is_first_turn_for` (`battle_ai_script_commands.c:2102-2114`, single unconditional assignment `funcResult = gDisableStructs[battler].isFirstTurn`, line 2111) — no gate precedes it, so this handler writes on **every** call regardless of any other state. (If AI_USER's own first-turn check then passes, `get_target_type1`/`get_target_type2` → `Cmd_get_type`, always-write, `:1115-1138` — write again, conditionally, but irrelevant since the handler already wrote unconditionally.) |
+| 4 | `AI_CV_HighCrit` | `EFFECT_HIGH_CRITICAL`, `EFFECT_BLAZE_KICK`, `EFFECT_POISON_TAIL` | `:1449-1460` | **writes-never** | Only `if_type_effectiveness` (`Cmd_if_type_effectiveness`, `:1515-1559`, confirmed not in the `funcResult`-write set) and `if_random_less_than`. |
+| 5 | `AI_CV_AlwaysHit` | `EFFECT_ALWAYS_HIT` | `:1075-1088` | **writes-never** | Only `if_stat_level_{more,less}_than` and `if_random_less_than`. |
+| 6 | `AI_CV_VitalThrow` | `EFFECT_VITAL_THROW` | `:1536-1545` | **writes-never** | Only `if_target_faster`, `if_hp_{more,less}_than`, `if_random_less_than`. |
+| 7 | `AI_CV_AttackDown` | `EFFECT_ATTACK_DOWN`, `_2` | `:1090-1110` | **writes-ALWAYS** | Every branch from the handler's own entry point converges at label `AI_CV_AttackDown4` (there is no `goto`/jump edge that reaches `end` before it) — its own unconditional `get_target_type1` (`Cmd_get_type`, always-write) always fires. `get_target_type2` fires conditionally (only if type1 isn't in `AI_CV_AttackDown_PhysicalTypeList`), irrelevant since the handler already wrote unconditionally via type1. |
+| 8 | `AI_CV_DefenseDown` | `EFFECT_DEFENSE_DOWN`, `_2` | `:1124-1134` | **writes-never** | Only `if_hp_{more,less}_than`, `if_stat_level_more_than`, `if_random_less_than`; no `get_*` call. |
+| 9 | `AI_CV_SpDefDown` | `EFFECT_SPECIAL_DEFENSE_DOWN`, `_2` | `:1186-1196` | **writes-never** | Byte-for-byte `AI_CV_DefenseDown`'s own shape with `STAT_SPDEF`. |
+| 10 | `AI_CV_AttackUp` | `EFFECT_ATTACK_UP`, `_2` | `:896-913` | **writes-never** | Only `if_stat_level_less_than`, `if_hp_{more,less,not_equal}`, `if_random_less_than`; no `get_*` call. |
+| 11 | `AI_CV_DefenseUp` | `EFFECT_DEFENSE_UP`, `_2`, `EFFECT_BULK_UP` | `:915-942` | **writes-conditionally** | `get_last_used_bank_move AI_TARGET` (`Cmd_get_last_used_battler_move`, always-write when reached, `:1242-1250`) + `get_move_power_from_result` (`Cmd_get_move_power_from_result`, always-write, `:2158-2164`) fire iff AI_USER's own HP% is in **[40,70)**, OR (HP≥70% AND a `if_random_less_than 200` draw at `:927` — a real `Random()` consumed regardless of outcome — takes the ~22% "don't exit early" branch). If that read power is nonzero, TWO more writes fire (`get_last_used_bank_move` again + `get_move_type_from_result`, `Cmd_get_move_type_from_result`, always-write, `:2151-2157`). **Never** writes if AI_USER HP<40% (`AI_CV_DefenseUp_ScoreDown2` short-circuit, `:929`) or (HP≥70% AND the 200-roll succeeds, ~78% — `:927` exits straight to `AI_CV_DefenseUp_End`). |
+| 12 | `AI_CV_AccuracyDown` | `EFFECT_ACCURACY_DOWN`, `_2` | `:1198-1233` | **writes-never** | Only `if_hp_*`, `if_stat_level_*`, `if_{not_}status{2,3}`, `if_random_less_than`; no `get_*` call anywhere in the body. |
+| 13 | `AI_CV_SpeedUp` | `EFFECT_SPEED_UP`, `_2` | `:956-965` | **writes-never** | Only `if_target_faster`, `if_random_less_than`. |
+| 14 | `AI_CV_SpAtkUp` | `EFFECT_SPECIAL_ATTACK_UP`, `_2` | `:967-984` | **writes-never** | Byte-for-byte `AI_CV_AttackUp`'s own shape with `STAT_SPATK`. |
+| 15 | `AI_CV_SpDefUp` | `EFFECT_SPECIAL_DEFENSE_UP`, `_2`, `EFFECT_COSMIC_POWER`, `EFFECT_CALM_MIND` | `:986-1013` | **writes-conditionally** | Byte-for-byte `AI_CV_DefenseUp`'s own gate topology and odds (handler 11), `STAT_SPDEF` swapped in and the type-list check polarity inverted (`if_in_bytes` vs. `AI_CV_DefenseUp`'s `if_not_in_bytes`) — identical write condition. |
+| 16 | `AI_CV_LightScreen` | `EFFECT_LIGHT_SCREEN` | `:1373-1383` | **writes-conditionally** | `get_target_type1` (always-write when reached) fires iff AI_USER HP≥50% (a deterministic HP check — no `Random()` needed to *reach* this write, unlike `DefenseUp`/`SpDefUp`'s own 22%-chance gate). **Never** writes if AI_USER HP<50% (`AI_CV_LightScreen_ScoreDown2` short-circuit, `:1374`). |
+| 17 | `AI_CV_Reflect` | `EFFECT_REFLECT` | `:1492-1502` | **writes-conditionally** | Identical shape/gate to `AI_CV_LightScreen` (handler 16). |
+| 18 | `AI_CV_EvasionUp` | `EFFECT_EVASION_UP`, `_2`, `EFFECT_MINIMIZE` | `:1037-1073` | **writes-never** | Only `if_hp_*`, `if_stat_level_*`, `if_{not_}status{2,3}`, `if_random_less_than`; no `get_*` call. |
+| 19 | `AI_CV_EvasionDown` | `EFFECT_EVASION_DOWN`, `_2` | `:1235-1245` | **writes-never** | Same shape as `AI_CV_DefenseDown`/`AI_CV_SpDefDown` with `STAT_EVASION`. |
+| 20 | `AI_CV_SunnyDay` | `EFFECT_SUNNY_DAY` | `:2060-2075` | **writes-conditionally** (Channel 2 itself) | `get_weather` (`Cmd_get_weather`, `:1644-1665`) fires only if AI_USER HP≥40% (`:2061` gates the call itself) — and even then, `Cmd_get_weather` **only writes when a real weather bit is set**; the `AI_WEATHER_NONE` sentinel assignment (`:1651-1653`) is `#ifdef BUGFIX`-gated and `BUGFIX` is undefined in this pinned checkout (`include/config.h:48`, doc §25.10.1). Net: in a **genuinely weatherless battle this handler never writes `funcResult`, regardless of AI_USER's own HP** — the same underlying bug this doc's §25.10 names, viewed from the "does it destroy an incoming carry" angle rather than "does it fabricate one." |
+| 21 | `AI_CV_Hail` | `EFFECT_HAIL` | `:2261-2276` | **writes-conditionally** | Identical shape/gate to `AI_CV_SunnyDay` (handler 20). |
+| 22 | `AI_CV_RainDance` | `EFFECT_RAIN_DANCE` | `:2037-2058` | **writes-conditionally**, most complex of the 22 | Up to two `get_ability AI_USER` calls (`Cmd_get_ability`, always-write when reached, `:1350-1405`) gated by doc §25.9's own Gate P/S/R, plus one `get_weather` call (Channel 2, same as handlers 20-21). Full breakdown: **(a)** NOT user-faster (`if_user_faster` false, `:2038`) → Gate S's own `get_ability AI_USER` ALWAYS writes. **(b)** user-faster AND AI_USER HP<40% (`:2042`) → **no write at all** — falls straight to `AI_CV_RainDance_ScoreDown1`/`End`; this is the exact branch PROGRESS entry 504's own `staleFuncResultFallback` threading gates its engine-side fallback on (`userFaster`-only), because it is the one branch of the one weather handler with a non-trivial preamble that can leave the CV pass's very first slot provably untouched. **(c)** user-faster AND HP≥40% → `get_weather` (Channel 2, conditional per handler 20's own note) fires; if none of HAIL/SUN/SANDSTORM match, Gate R's own second `get_ability AI_USER` (`:2047`) ALWAYS writes. |
+
+**Summary**: 13 of 22 ported handlers are **writes-never** (1, 2, 4-6, 8-10,
+12-14, 18-19) — a carry surviving into a later CV-pass slot behind any one
+of these, alone, is unconditionally guaranteed. 2 of 22 are
+**writes-always** (3, 7) — a carry is unconditionally destroyed the moment
+either of these runs. 7 of 22 are **writes-conditionally** (11, 15-17,
+20-22) — whether the carry survives depends on named, source-derived battle
+state (mostly AI_USER's own HP%, plus one target-last-move-power read and
+the weather trio's own Channel 2 gates), not a coin flip and not
+underivable, just state-dependent. No handler was left unclassified.
+
+### 27.2 Fixture design: isolating movesetIndex 1 directly, one writes-never predecessor and one writes-always predecessor
+
+Both fixtures place `MOVE_HAIL` (258) at **movesetIndex 1** — the doc's
+first fixture pair to do so; every fixture in §25/§25.9/§25.10 placed the
+weather move at index 0, which is exactly the slot the engine's own
+`staleFuncResultFallback` already models. Opponent (AI_USER) = Dugtrio (51,
+base Speed 120, single source of `AI_CV_SpeedDown`'s own established
+zero-draw `-3` fixture, `mechanic-factory-ai-cv-speeddown-opponent-faster-
+off.json`, doc §6/§9); target (player) = Shuckle (213, base Speed 5 —
+always slower, so `if_target_faster` deterministically takes the non-jump
+branch; typing Bug/Rock lands inside **both**
+`AI_CV_AttackDown_PhysicalTypeList` (deterministic zero-draw `AI_CV_AttackDown`
+score) **and** safely outside the `AI_WEATHER_*` 0-3 id range for every
+value either predecessor handler could leave in `funcResult`
+(`TYPE_BUG`=6, `include/constants/pokemon.h:12`); ability Sturdy=5 keeps the
+CBM-pass Channel 1 collision silent throughout, matching this doc's own
+established "safe target" convention, §25.9.3/§25.10.2). No weather is ever
+established (single turn only), so `get_weather` itself never writes
+(BUGFIX-undefined) — whatever `funcResult` holds when `AI_CV_Hail`'s own
+dispatch reads it is entirely determined by what movesetIndex 0's own
+handler did.
+
+- **`mechanic-factory-ai-cv-hail-movesetindex1-writesnever-carry-off.json`**:
+  opponent moveset `[MOVE_STRING_SHOT(81), MOVE_HAIL(258), MOVE_SPLASH(150)
+  x2]`. `AI_CV_SpeedDown` (audit handler 1, writes-never) takes its own
+  established deterministic `-3` branch (AI_USER Dugtrio is faster) without
+  touching `funcResult` — so the TTF-pass exit (`MOVE_POWER_OTHER`=0=
+  `AI_WEATHER_SUN`, from the last 0-power filler slot, doc §25.10.1) is
+  **still sitting there, untouched**, when `AI_CV_Hail`'s own `get_weather`
+  (movesetIndex 1) reads it. **Prediction (source)**: net CV scores `-3`
+  (String Shot), `+1` (Hail, Sun-branch stale hit), `0`, `0` (Splash x2) —
+  Hail must win turn 1's pick outright, deterministically, both seeds.
+- **`mechanic-factory-ai-cv-hail-movesetindex1-writesalways-clean-off.json`**:
+  opponent moveset `[MOVE_GROWL(45), MOVE_HAIL(258), MOVE_SPLASH(150) x2]`.
+  `AI_CV_AttackDown` (audit handler 7, writes-always) always reaches its own
+  unconditional `get_target_type1` — Shuckle's neutral ATK stage and >70%
+  HP both take the zero-draw fallthrough straight into `AI_CV_AttackDown4`,
+  so Growl itself nets a deterministic zero-draw `0`, but `funcResult` gets
+  overwritten with `TYPE_BUG`(6) in the process. By the time `AI_CV_Hail`'s
+  own `get_weather` (movesetIndex 1) reads `funcResult`, the TTF-pass exit
+  carry is **already gone**, replaced by 6 — none of Hail's own Sun/Rain/
+  Sandstorm checks (0/1/2) match. **Prediction (source)**: net CV scores `0`
+  (Growl), `0` (Hail, clean — no stale hit), `0`, `0` (Splash x2) — all four
+  slots tie at zero, so Hail must **never** win turn 1's pick (a real
+  `Random()`-driven tie-break governs which of the other three slots does;
+  not asserted, since the audit's own claim is only about `AI_CV_Hail`'s own
+  score, not the tie-break RNG stream).
+
+### 27.3 Live ledger (oracle-verified, both seeds, both reruns)
+
+| Fixture | Opponent PP @ frame 0 | Opponent PP @ frame 732 | Result |
+| --- | --- | --- | --- |
+| `...writesnever-carry-off` | `[40, 10, 40, 40]` | `[40, 9, 40, 40]` | Slot 1 (Hail) **wins**, deterministically, both seeds (1, 99), byte-identical across both reruns each. Exact match to the writes-never prediction. |
+| `...writesalways-clean-off` | `[40, 10, 40, 40]` | seed 1: `[39, 10, 40, 40]`; seed 99: `[40, 10, 39, 40]` | Slot 1 (Hail) is **never** touched in either seed — slot 0 (Growl) wins seed 1, slot 2 (Splash) wins seed 99 (the predicted 4-way tie's own real `Random()` tie-break, landing on a different slot per seed, exactly as expected for a genuine tie — not asserted by seed, only that Hail's own slot never wins). Exact match to the writes-always prediction. |
+
+Both fixtures: opponent HP stays comfortably above the 40% no-confound
+floor through frame 732 in every run (Hail's own `<40%` HP-gate branch never
+spuriously fires). Wired into
+`tools/probe/verify-factory-ai-checkviability-ground-truth.ts`'s new
+`MOVESETINDEX_CARRY_SCENARIOS` array (2 entries) +
+`verifyMovesetIndexCarryScenario` runner (frame 0→732 PP-delta read on the
+weather slot specifically, not slot 0 — every earlier `WeatherPickScenarioSpec`
+fixture hardcodes slot 0 as the weather move, which no longer holds here).
+Full script run this session: **ALL PASS, 0 failures**, run twice
+(reproduce with `node --experimental-strip-types
+tools/probe/verify-factory-ai-checkviability-ground-truth.ts`) — every one
+of the doc's pre-existing checks (§9, §11.5, §12.1, §13.4, §14.6, §15.5,
+§16.5, §17.7, §18.7, §19.7, §20.5, §21.5, §22.6, §23.6, §24.8, §25.7, §26.4)
+unchanged and still green.
+
+### 27.4 Verdict: current engine model vs. the ROM, per fixture — the finding the main lane needs
+
+**`...writesnever-carry-off` (moveset index 1, writes-never predecessor):
+DIVERGES.** The ROM deterministically picks Hail (net `+1`, beating String
+Shot's `-3` and both Splash's `0`). The current engine — per PROGRESS entry
+504's own documented design, `factoryAiDecisionPolicy.ts`'s caller supplies
+`staleFuncResultFallback` **only** to the CV pass's movesetIndex-0 call — 
+would score `AI_CV_Hail` at movesetIndex 1 with `currentWeather = undefined`
+and no fallback, i.e. the clean weatherless branch: `0`, not `+1`. Fed this
+exact fixture, the engine's own net scores would be `-3, 0, 0, 0` — a
+**3-way tie** needing a `Random()` tie-break among slots 1-3, not the ROM's
+own deterministic pick of slot 1 alone. This is precisely the divergence
+ISSUES #47 flagged as possible and left unmodeled rather than guessed — now
+confirmed live, in the direction "carry survives further than the engine
+currently accounts for."
+
+**`...writesalways-clean-off` (moveset index 1, writes-always predecessor):
+NO DIVERGENCE.** The ROM's own real 4-way tie (Growl/Hail/Splash/Splash all
+net `0`, Hail never wins) matches what the engine would **also** compute for
+this exact fixture — the engine already treats `currentWeather` as clean/
+undefined for any non-first CV slot, and here that happens to be the ROM's
+own real answer too, since `AI_CV_AttackDown`'s own unconditional write
+genuinely destroys the carry before Hail ever reads it. This fixture doesn't
+close any gap; it **positively confirms** the audit's own writes-always
+classification (handler 7) rather than exposing a new one — included
+precisely because a "does the fixture behave as hand-derived" check on the
+*other* side of the audit's own claim is exactly what would falsify a wrong
+writes-always/writes-never classification if the source-reading in §27.1
+had gotten a branch wrong.
+
+**What this settles, and what's still open**: ISSUES #47's remainder asked
+whether the carry survives an intervening slot "once an earlier CV slot's
+real handler has run" — the answer, now live-verified rather than derived
+alone, is: **it depends entirely on that earlier handler's own write
+classification**, exactly as §27.1's audit predicts, with zero surprises in
+either direction for the two classes tested here (writes-never,
+writes-always). The 7 **writes-conditionally** handlers (§27.1's own list:
+11, 15-17, 20-22) are not live-tested by this session — their own carry
+survival is a further function of runtime battle state (AI_USER's HP band,
+mostly) layered on top of the same mechanism, plausible to derive from
+§27.1's own conditions directly but not staged live here (time-capped; a
+future fixture would need to additionally control AI_USER's own HP% at the
+moveset-index-0 slot, on top of everything this session's two fixtures
+already control). **No `src/` change made** (out of scope for this step,
+per the brief); the engine's own `staleFuncResultFallback` design (first-
+scripted-slot-only) remains exactly as PROGRESS entry 504 left it — this
+session only sharpens what a future porter would need to weigh if Factory-
+facing AI parity for this specific remainder is ever prioritized: threading
+a full per-slot `funcResult` simulation across the CV pass (using §27.1's
+own per-handler write table directly) rather than the current single-slot
+fallback.
