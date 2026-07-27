@@ -8,7 +8,7 @@ import {
 describe("Move_POISON_TAIL source-relative reducer", () => {
   it("reuses permanent MetallicShine and mirrors the horizontal lunge", () => {
     const player = poisonTailAtAge(103, "player", { x: 72, y: 90 }, { x: 176, y: 42 });
-    const opponent = poisonTailAtAge(103, "opponent", { x: 176, y: 42 }, { x: 72, y: 80 });
+    const opponent = poisonTailAtAge(103, "opponent", { x: 176, y: 48 }, { x: 72, y: 88 });
     expect(player.attackerX2).toBe(4);
     expect(opponent.attackerX2).toBe(-4);
     expect(player.metallic.attackerGrayscale).toBe(true);
@@ -29,8 +29,14 @@ describe("Move_POISON_TAIL source-relative reducer", () => {
 
   it("delegates all six literal PoisonBubblesEffect spawns to the exact shared reducer", () => {
     const atFirst = poisonTailAtAge(122, "player", { x: 72, y: 90 }, { x: 176, y: 42 });
-    const atLast = poisonTailAtAge(162, "player", { x: 72, y: 90 }, { x: 176, y: 42 });
+    const cleanupStall = poisonTailAtAge(124, "player", { x: 72, y: 90 }, { x: 176, y: 42 });
+    const afterStall = poisonTailAtAge(126, "player", { x: 72, y: 90 }, { x: 176, y: 42 });
+    const beforeSecond = poisonTailAtAge(131, "player", { x: 72, y: 90 }, { x: 176, y: 42 });
+    const atLast = poisonTailAtAge(164, "player", { x: 72, y: 90 }, { x: 176, y: 42 });
     expect(atFirst.bubbles.map((sprite) => sprite.spawnIndex)).toEqual([0]);
+    expect(cleanupStall.bubbles[0]?.xScale).toBe(394);
+    expect(afterStall.bubbles[0]?.xScale).toBe(383);
+    expect(beforeSecond.bubbles.map((sprite) => sprite.spawnIndex)).toEqual([0]);
     expect(atLast.bubbles.map((sprite) => sprite.spawnIndex)).toContain(5);
   });
 
@@ -67,8 +73,8 @@ describe("Move_POISON_TAIL source-relative reducer", () => {
       age: 122,
       attackerX2: 0,
       targetX2: 0,
-      monbg: true,
-      alpha: true,
+      monbg: false,
+      alpha: false,
       attackerPaletteRestored: true,
     });
     expect(view.bubbles.map((sprite) => sprite.spawnIndex)).toEqual([0]);

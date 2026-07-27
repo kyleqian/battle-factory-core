@@ -1,0 +1,38 @@
+{
+  "schema": "scene-on-portable-component/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-poison-tail-opponent-seviper-player-onix.json",
+  "probe": "tools/compare/poisonTailProbe.py",
+  "pair": "SEVIPER real Factory set-239 Poison Tail carrier opponent-front -> ONIX player-back",
+  "move": "POISON_TAIL",
+  "denseWindow": { "startFrame": 226, "endFrame": 412 },
+  "appStage": { "presentationAge": 0 },
+  "attackerSide": "opponent",
+  "targetSide": "player",
+  "attacker": {
+    "species": "SEVIPER",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 16 },
+      "animationCenter": { "x": 176, "y": 48 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 48 },
+      "animationCenter": { "x": 72, "y": 88 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 110,
+    "playerMaxHp": 110,
+    "opponentHp": 168,
+    "opponentMaxHp": 180,
+    "playerGender": "male",
+    "opponentGender": "male"
+  }
+}

@@ -142,6 +142,33 @@ function poisonBubbleAtLocalAge(
 }
 
 /**
+ * Shared `PoisonBubblesEffect` sprite body with caller-relative interpreter
+ * spawn ages. Most callers use the direct SLUDGE cadence; callers whose
+ * preceding command/DMA handoff adds display latches can supply the literal
+ * source-probed creation ages without duplicating bubble motion or OAM reuse.
+ */
+export function poisonBubblesAtAge(
+  age: number,
+  attackerSide: "player" | "opponent",
+  targetCenter: Readonly<{ x: number; y: number }>,
+  startAges: readonly number[] = SLUDGE_POISON_BUBBLE_START_AGES,
+  localAgeAt: (localAge: number, spawnIndex: number) => number
+    = (localAge) => localAge,
+): readonly SludgeSprite[] {
+  const sprites: SludgeSprite[] = [];
+  for (let index = 0; index < startAges.length; index += 1) {
+    const sprite = poisonBubbleAtLocalAge(
+      localAgeAt(age - startAges[index]!, index),
+      index,
+      attackerSide,
+      targetCenter,
+    );
+    if (sprite) sprites.push(sprite);
+  }
+  return sprites;
+}
+
+/**
  * Complete source-relative visual body for Move_SLUDGE, with age zero at
  * gSludgeProjectileSpriteTemplate's creation callback.
  */
@@ -156,15 +183,7 @@ export function sludgeEffectAtAge(
     age, attackerSide, projectileOrigin, targetCenter,
   );
   if (projectile) sprites.push(projectile);
-  for (let index = 0; index < SLUDGE_POISON_BUBBLE_START_AGES.length; index += 1) {
-    const sprite = poisonBubbleAtLocalAge(
-      age - SLUDGE_POISON_BUBBLE_START_AGES[index]!,
-      index,
-      attackerSide,
-      targetCenter,
-    );
-    if (sprite) sprites.push(sprite);
-  }
+  sprites.push(...poisonBubblesAtAge(age, attackerSide, targetCenter));
   return {
     // A script-created visual task receives its synchronous initializer step
     // and the same frame's RunTasks step before this displayed latch.

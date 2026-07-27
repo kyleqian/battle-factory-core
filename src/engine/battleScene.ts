@@ -15422,10 +15422,6 @@ export function renderSceneOnMovePresentation(
     // has its own source-pinned two-display setup, while later OBJ writes
     // become visible one display after their reducer state.
     const displayed = sceneOnPoisonTailView({ ...state, age: state.age - 1 });
-    const targetDisplayed = sceneOnPoisonTailView({
-      ...state,
-      age: state.age - 2,
-    });
     const playerToOpponent =
       view.attacker.species === "SEVIPER"
       && view.attacker.geometry.side === "player"
@@ -15459,10 +15455,10 @@ export function renderSceneOnMovePresentation(
     const targetIdle = playerToOpponent
       ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
       : { x2: 0, y2: 0 };
-    const targetX2 = state.age < 113
+    const targetX2 = state.age <= 111
       ? targetIdle.x2
-      : targetDisplayed.targetX2;
-    const attackerPalette = state.age >= 2
+      : displayed.targetX2;
+    const attackerPalette = state.age >= 3
       && !displayed.attackerPaletteRestored
       ? blendPaletteToward(seviperSprite.palette, poisonTint, 11)
       : seviperSprite.palette;
