@@ -798,6 +798,78 @@ const DRAW_COUNT_SCENARIOS: DrawCountScenarioSpec[] = [
     expectedTotalSteps: { 1: 8, 99: 8 },
     checkCrossSeedStable: true,
   },
+  // AI_CV_LightScreen (data/battle_ai_scripts.s:1373-1393, doc §23) and
+  // AI_CV_Reflect (:1492-1514) -- the simplest CBM+CV pair yet: each CBM
+  // half is a single if_side_affecting check against the opponent's OWN
+  // side status (Score_Minus8), and each CV half is Gate A (opponent's OWN
+  // hp < 50 -> deterministic ScoreDown2) then Gates B/C (target's OWN type1/
+  // type2 in a type list -> deterministic End) then exactly 1
+  // if_random_less_than 50 draw site. Byte-for-byte identical topology
+  // between LightScreen and Reflect on BOTH the CBM and CV sides -- the
+  // first pair in this doc with zero sibling divergence either way -- the
+  // only difference is which SIDE_STATUS_*/type-list is referenced.
+  // LightScreen's 8-type SpecialTypeList and Reflect's 9-type
+  // PhysicalTypeList are exact complements (all 17 Gen 3 types, no overlap),
+  // so the same two target species serve both pairs with reach/control
+  // simply swapping: Shuckle (213, Bug/Rock, single ability Sturdy) is
+  // LightScreen's reach (neither type in the special list) and Reflect's
+  // control (both types in the physical list); Vulpix (37, pure Fire,
+  // single ability Flash Fire) is the opposite. Opponent (AI_USER) is
+  // Anorith (390), all 4 slots the dispatch move under test
+  // (MOVE_LIGHT_SCREEN 113 / MOVE_REFLECT 115, both already 0 power/0
+  // accuracy/self-target by their own game data); the target's own move in
+  // every fixture is MOVE_HARDEN (106, 0 power/0 accuracy/self-target) so
+  // NO damage occurs on either side at all -- the opponent's HP is held at
+  // its own max for the whole trace by construction, a first for this doc's
+  // CBM-blocked-pair series (every prior pair needed at least a one-turn
+  // real hit to pin HP state). Attribution probe (window 0 732, seed 1)
+  // confirms no Cmd_accuracycheck row in any of the 4 fixtures (both moves
+  // are 0-accuracy) and no Cmd_get_ability row (both targets single-
+  // ability); the clean +4 delta (10 vs 6) is entirely
+  // Cmd_if_random_less_than, the "N=4 slots x 1 draw" shape (matching
+  // AttackDown's own DRAW SITE 2, §14.4), not the DefenseUp/SpDefUp
+  // family's unresolved 5-6 anomaly (§18.4/§22.4). LightScreen's and
+  // Reflect's own reach/control ledgers are numerically identical to each
+  // other in every row, confirming the zero-divergence finding at the
+  // instrument level too. Gate A (opponent HP < 50%) is not staged this
+  // session -- would need a real-damage fixture variant, contradicting this
+  // design's own zero-damage isolation.
+  {
+    label:
+      "AI_CV_LightScreen, target (player, Shuckle, Bug/Rock) type is NOT in AI_CV_LightScreen_SpecialTypeList -- reachable branch (data/battle_ai_scripts.s:1373-1393), opponent dispatch move MOVE_LIGHT_SCREEN: opponent (AI_USER, Anorith) HP held at 120/120 (100%, Gate A false) by construction (target's MOVE_HARDEN never damages), Gates B/C both false, falls through to the :1379 if_random_less_than 50 draw site",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-lightscreen-reach-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 10, 99: 10 },
+    checkCrossSeedStable: true,
+  },
+  {
+    label:
+      "AI_CV_LightScreen, target (player, Vulpix, pure Fire) type IS in AI_CV_LightScreen_SpecialTypeList -- control, opponent dispatch move MOVE_LIGHT_SCREEN: Gate B matches immediately on type1, deterministic zero-draw End, opponent HP held at 120/120 (100%) by construction",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-lightscreen-control-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 6, 99: 6 },
+    checkCrossSeedStable: true,
+  },
+  {
+    label:
+      "AI_CV_Reflect, target (player, Vulpix, pure Fire) type is NOT in AI_CV_Reflect_PhysicalTypeList -- reachable branch (data/battle_ai_scripts.s:1492-1514), opponent dispatch move MOVE_REFLECT: numerically identical ledger to the LightScreen reach fixture above, confirming both handlers are structurally twins",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-reflect-reach-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 10, 99: 10 },
+    checkCrossSeedStable: true,
+  },
+  {
+    label:
+      "AI_CV_Reflect, target (player, Shuckle, Bug/Rock) type IS in AI_CV_Reflect_PhysicalTypeList -- control, opponent dispatch move MOVE_REFLECT: numerically identical ledger to the LightScreen control fixture above, confirming both handlers are structurally twins",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-reflect-control-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 6, 99: 6 },
+    checkCrossSeedStable: true,
+  },
 ];
 
 function totalPpUsed(ppBefore: number[], ppAfter: number[]): number {
