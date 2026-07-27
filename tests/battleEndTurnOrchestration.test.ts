@@ -25,6 +25,7 @@ const STATUS2_WRAPPED_MASK = (1 << 13) | (1 << 14) | (1 << 15);
 /** include/abilities.h:68. */
 const ABILITY_LIQUID_OOZE = 64;
 /** include/constants/items.h -- docs/endturn-abilities-items-ground-truth.md §5 slice 4's own ten held items. */
+const ITEM_BERRY_JUICE = 44;
 const ITEM_CHERI_BERRY = 133;
 const ITEM_CHESTO_BERRY = 134;
 const ITEM_PECHA_BERRY = 135;
@@ -69,6 +70,9 @@ const STATUS2_LOCK_CONFUSE_TURN_1 = (1 << 10) & STATUS2_LOCK_CONFUSE_MASK;
 const STATUS2_LOCK_CONFUSE_TURN_2 = (2 << 10) & STATUS2_LOCK_CONFUSE_MASK;
 const STATUS2_LOCK_CONFUSE_TURN_3 = (3 << 10) & STATUS2_LOCK_CONFUSE_MASK;
 const STATUS2_MULTIPLETURNS = 1 << 12;
+/** src/data/gen/moves.json -- gBattleMoves[].pp (base PP), doc §6 addendum's RESTORE_PP tests. */
+const MOVE_TACKLE = 33;
+const MOVE_HYDRO_PUMP = 56;
 
 function battler(changes: Partial<BattleScriptRulesBattler> & { maxHP?: number } = {}): BattleScriptRulesBattler {
   return Object.freeze({
@@ -940,54 +944,169 @@ describe("runBattleEndTurnOrchestration (BattleTurnPassed equivalent)", () => {
         expect(result.state.rulesContext.battlers[1]!.item).toBe(ITEM_CHERI_BERRY);
       });
 
+      describe(
+        "(d) RESTORE_HP (Sitrus/Oran/Berry Juice) and RESTORE_PP (Leppa) -- doc §6 addendum, "
+          + "battle_util.c:3337-3373",
+        () => {
+          it("Sitrus Berry heals hp<=floor(maxHP/2) by its own holdEffectParam (30), item consumed, zero RNG", () => {
+            const rc = context({
+              battlers: [
+                battler({ side: 0 }),
+                battler({ side: 1, hp: 40, maxHP: 100, item: ITEM_SITRUS_BERRY, partyIndex: 2 }),
+                battler({ side: 0 }),
+                battler({ side: 1 }),
+              ],
+              party: { player: sixSlots(100), opponent: sixSlots(0, 0, 40) },
+            });
+            const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+            const initial = scratchState(rc, 1);
+            const result = runBattleEndTurnOrchestration(program, handlers, initial);
+            expect(result.kind).toBe("next-turn");
+            if (result.kind !== "next-turn") throw new Error("expected next-turn");
+            expect(result.state.rulesContext.battlers[1]!.hp).toBe(70); // 40 + 30
+            expect(result.state.rulesContext.party.opponent[2]!.hp).toBe(70); // datahpupdate's own party HP mirror sync
+            expect(result.state.rulesContext.battlers[1]!.item).toBe(0); // consumed (ITEM_NONE)
+            expect(result.state.rng.calls).toBe(initial.rng.calls);
+          });
+
+          it("Sitrus Berry fires exactly at hp === floor(maxHP/2) (inclusive boundary)", () => {
+            const rc = context({
+              battlers: [
+                battler({ side: 0 }),
+                battler({ side: 1, hp: 50, maxHP: 100, item: ITEM_SITRUS_BERRY, partyIndex: 2 }),
+                battler({ side: 0 }),
+                battler({ side: 1 }),
+              ],
+            });
+            const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+            const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
+            expect(result.kind).toBe("next-turn");
+            if (result.kind !== "next-turn") throw new Error("expected next-turn");
+            expect(result.state.rulesContext.battlers[1]!.hp).toBe(80); // 50 + 30
+            expect(result.state.rulesContext.battlers[1]!.item).toBe(0);
+          });
+
+          it("Sitrus Berry does not fire one HP above the gate (real gate, not blanket possession)", () => {
+            const rc = context({
+              battlers: [
+                battler({ side: 0 }),
+                battler({ side: 1, hp: 51, maxHP: 100, item: ITEM_SITRUS_BERRY, partyIndex: 2 }),
+                battler({ side: 0 }),
+                battler({ side: 1 }),
+              ],
+            });
+            const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+            const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
+            expect(result.kind).toBe("next-turn");
+            if (result.kind !== "next-turn") throw new Error("expected next-turn");
+            expect(result.state.rulesContext.battlers[1]!.hp).toBe(51); // unchanged
+            expect(result.state.rulesContext.battlers[1]!.item).toBe(ITEM_SITRUS_BERRY); // not consumed
+          });
+
+          it("Berry Juice's heal is capped at maxHP, not the raw holdEffectParam (20)", () => {
+            const rc = context({
+              battlers: [
+                battler({ side: 0 }),
+                battler({ side: 1, hp: 10, maxHP: 20, item: ITEM_BERRY_JUICE, partyIndex: 2 }),
+                battler({ side: 0 }),
+                battler({ side: 1 }),
+              ],
+            });
+            const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+            const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
+            expect(result.kind).toBe("next-turn");
+            if (result.kind !== "next-turn") throw new Error("expected next-turn");
+            // naive heal would be 10+20=30 > maxHP(20) -- capped to exactly maxHP, never overshooting.
+            expect(result.state.rulesContext.battlers[1]!.hp).toBe(20);
+            expect(result.state.rulesContext.battlers[1]!.item).toBe(0);
+          });
+
+          it("Leppa Berry restores the first zero-PP move slot by its own holdEffectParam (10), item consumed, zero RNG", () => {
+            const rc = context({
+              battlers: [
+                battler({ side: 0 }),
+                battler({
+                  side: 1, hp: 100, maxHP: 100, item: ITEM_LEPPA_BERRY,
+                  moves: [MOVE_TACKLE, 0, 0, 0], pp: [0, 0, 0, 0], partyIndex: 2,
+                }),
+                battler({ side: 0 }),
+                battler({ side: 1 }),
+              ],
+            });
+            const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+            const initial = scratchState(rc, 1);
+            const result = runBattleEndTurnOrchestration(program, handlers, initial);
+            expect(result.kind).toBe("next-turn");
+            if (result.kind !== "next-turn") throw new Error("expected next-turn");
+            expect(result.state.rulesContext.battlers[1]!.pp).toEqual([10, 0, 0, 0]); // MOVE_TACKLE base pp 35, param 10
+            expect(result.state.rulesContext.battlers[1]!.item).toBe(0);
+            expect(result.state.rng.calls).toBe(initial.rng.calls);
+          });
+
+          it("Leppa Berry's restore is capped at the move's own base PP (Hydro Pump: 5, not the raw param 10)", () => {
+            const rc = context({
+              battlers: [
+                battler({ side: 0 }),
+                battler({
+                  side: 1, hp: 100, maxHP: 100, item: ITEM_LEPPA_BERRY,
+                  moves: [MOVE_HYDRO_PUMP, 0, 0, 0], pp: [0, 0, 0, 0], partyIndex: 2,
+                }),
+                battler({ side: 0 }),
+                battler({ side: 1 }),
+              ],
+            });
+            const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+            const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
+            expect(result.kind).toBe("next-turn");
+            if (result.kind !== "next-turn") throw new Error("expected next-turn");
+            expect(result.state.rulesContext.battlers[1]!.pp).toEqual([5, 0, 0, 0]); // MOVE_HYDRO_PUMP base pp 5 < param 10
+            expect(result.state.rulesContext.battlers[1]!.item).toBe(0);
+          });
+
+          it("Leppa Berry picks the FIRST zero-PP slot, skipping an earlier non-zero-PP move (slot-selection semantics)", () => {
+            const rc = context({
+              battlers: [
+                battler({ side: 0 }),
+                battler({
+                  side: 1, hp: 100, maxHP: 100, item: ITEM_LEPPA_BERRY,
+                  moves: [MOVE_TACKLE, MOVE_HYDRO_PUMP, 0, 0], pp: [20, 0, 0, 0], partyIndex: 2,
+                }),
+                battler({ side: 0 }),
+                battler({ side: 1 }),
+              ],
+            });
+            const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+            const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
+            expect(result.kind).toBe("next-turn");
+            if (result.kind !== "next-turn") throw new Error("expected next-turn");
+            // slot 0 (Tackle, pp 20) is untouched; slot 1 (Hydro Pump) is the first zero-PP slot, capped at 5.
+            expect(result.state.rulesContext.battlers[1]!.pp).toEqual([20, 5, 0, 0]);
+            expect(result.state.rulesContext.battlers[1]!.item).toBe(0);
+          });
+
+          it("Leppa Berry does not fire when no move slot is at exactly 0 PP", () => {
+            const rc = context({
+              battlers: [
+                battler({ side: 0 }),
+                battler({
+                  side: 1, hp: 100, maxHP: 100, item: ITEM_LEPPA_BERRY,
+                  moves: [MOVE_TACKLE, 0, 0, 0], pp: [1, 0, 0, 0], partyIndex: 2,
+                }),
+                battler({ side: 0 }),
+                battler({ side: 1 }),
+              ],
+            });
+            const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+            const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
+            expect(result.kind).toBe("next-turn");
+            if (result.kind !== "next-turn") throw new Error("expected next-turn");
+            expect(result.state.rulesContext.battlers[1]!.pp).toEqual([1, 0, 0, 0]);
+            expect(result.state.rulesContext.battlers[1]!.item).toBe(ITEM_LEPPA_BERRY); // not consumed
+          });
+        },
+      );
+
       describe("(b) unsupported-branch/case-barrier: real hold effects this slice does not implement", () => {
-        it("Sitrus Berry (RESTORE_HP) barriers when its real HP<=maxHP/2 gate is true", () => {
-          const rc = context({
-            battlers: [
-              battler({ side: 0 }),
-              battler({ side: 1, hp: 40, maxHP: 100, item: ITEM_SITRUS_BERRY, partyIndex: 2 }),
-              battler({ side: 0 }),
-              battler({ side: 1 }),
-            ],
-          });
-          const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
-          const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
-          expect(result.kind).toBe("case-barrier");
-          if (result.kind !== "case-barrier") throw new Error("expected case-barrier");
-          expect(result.caseName).toBe("ENDTURN_ITEMS1");
-          expect(result.detail).toContain("HOLD_EFFECT_RESTORE_HP");
-        });
-
-        it("Sitrus Berry does NOT barrier above the HP<=maxHP/2 gate (real gate, not blanket possession)", () => {
-          const rc = context({
-            battlers: [
-              battler({ side: 0 }),
-              battler({ side: 1, hp: 90, maxHP: 100, item: ITEM_SITRUS_BERRY, partyIndex: 2 }),
-              battler({ side: 0 }),
-              battler({ side: 1 }),
-            ],
-          });
-          const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
-          const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
-          expect(result.kind).toBe("next-turn");
-        });
-
-        it("Leppa Berry (RESTORE_PP) barriers when a real move is at 0 PP", () => {
-          const rc = context({
-            battlers: [
-              battler({ side: 0 }),
-              battler({ side: 1, hp: 100, maxHP: 100, item: ITEM_LEPPA_BERRY, moves: [33, 0, 0, 0], pp: [0, 0, 0, 0], partyIndex: 2 }),
-              battler({ side: 0 }),
-              battler({ side: 1 }),
-            ],
-          });
-          const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
-          const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
-          expect(result.kind).toBe("case-barrier");
-          if (result.kind !== "case-barrier") throw new Error("expected case-barrier");
-          expect(result.detail).toContain("HOLD_EFFECT_RESTORE_PP");
-        });
-
         it("Ganlon Berry (DEFENSE_UP, zero Factory L50 carriers per doc §2b) barriers on possession", () => {
           const rc = context({
             battlers: [
@@ -1172,17 +1291,16 @@ describe("runBattleEndTurnOrchestration (BattleTurnPassed equivalent)", () => {
         );
 
         it(
-          "Sitrus Berry's RESTORE_HP case-barrier does NOT fire at ITEMS2 even though burn drops HP below its "
-            + "threshold mid-tick (source never even reaches the RESTORE_HP case at ITEMS2, battle_util.c:3337-3345 -- "
-            + "RESTORE_PP and the zero-carrier UNREACHABLE_AT_FACTORY_L50 set share the identical `!moveTurn &&` gate "
-            + "shape, verified by direct code read, but have no modeled mid-tick PP/possession mutator in this engine "
-            + "to exercise the same live before/after transition)",
+          "Sitrus Berry's RESTORE_HP does NOT fire at ITEMS2 even though burn drops HP below its threshold "
+            + "mid-tick (source's own moveTurn gate, battle_util.c:3337 -- RESTORE_PP shares the identical "
+            + "`!moveTurn &&` gate shape, verified by direct code read, but has no modeled mid-tick PP mutator "
+            + "in this engine to exercise the same live before/after transition)",
           () => {
             const rc = context({
               battlers: [
                 battler({ side: 0 }),
-                // hp=55 > floor(100/2)=50 at ITEMS1 -- does not barrier there. Burn deals floor(100/8)=12,
-                // dropping hp to 43 (<=50) BEFORE ITEMS2 runs. An ungated ITEMS2 call would spuriously barrier.
+                // hp=55 > floor(100/2)=50 at ITEMS1 -- does not fire there. Burn deals floor(100/8)=12,
+                // dropping hp to 43 (<=50) BEFORE ITEMS2 runs. An ungated ITEMS2 call would spuriously heal.
                 battler({ side: 1, hp: 55, maxHP: 100, item: ITEM_SITRUS_BERRY, status1: STATUS1_BURN, partyIndex: 2 }),
                 battler({ side: 0 }),
                 battler({ side: 1 }),
@@ -1191,10 +1309,10 @@ describe("runBattleEndTurnOrchestration (BattleTurnPassed equivalent)", () => {
             });
             const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
             const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
-            expect(result.kind).toBe("next-turn"); // NOT case-barrier
+            expect(result.kind).toBe("next-turn");
             if (result.kind !== "next-turn") throw new Error("expected next-turn");
-            expect(result.state.rulesContext.battlers[1]!.hp).toBe(43); // burn only: 55 - floor(100/8)
-            expect(result.state.rulesContext.battlers[1]!.item).toBe(ITEM_SITRUS_BERRY);
+            expect(result.state.rulesContext.battlers[1]!.hp).toBe(43); // burn only: 55 - floor(100/8), no heal
+            expect(result.state.rulesContext.battlers[1]!.item).toBe(ITEM_SITRUS_BERRY); // not consumed
           },
         );
       });

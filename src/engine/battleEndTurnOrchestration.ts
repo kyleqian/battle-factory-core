@@ -49,6 +49,8 @@ import {
 import type { BattleScriptBattlerId } from "./battleScriptEvents.ts";
 import {
   resolveBattleScriptBattlerHoldEffect,
+  resolveBattleScriptBattlerHoldEffectParam,
+  resolveBattleScriptMoveBasePp,
   wasBattleScriptBattlerUnableToUseMove,
   withBattleScriptPartyMemberStatus1,
   type BattleScriptRulesBattlerState,
@@ -98,6 +100,10 @@ const BERRY_CURE_FRZ_END2_LABEL = "BattleScript_BerryCureFrzEnd2";
 const BERRY_CURE_SLP_END2_LABEL = "BattleScript_BerryCureSlpEnd2";
 const BERRY_CURE_CONFUSION_END2_LABEL = "BattleScript_BerryCureConfusionEnd2";
 const BERRY_CURE_CHOSEN_STATUS_END2_LABEL = "BattleScript_BerryCureChosenStatusEnd2";
+/** `battle_util.c:3337-3345`'s own consumed-heal label (Sitrus/Oran/Berry Juice) -- distinct from Leftovers' persistent `ITEM_HEAL_HP_END2_LABEL` (docs/endturn-abilities-items-ground-truth.md §1c). */
+const ITEM_HEAL_HP_REMOVE_ITEM_LABEL = "BattleScript_ItemHealHP_RemoveItem";
+/** `battle_util.c:3347-3373` (Leppa). */
+const BERRY_PP_HEAL_END2_LABEL = "BattleScript_BerryPPHealEnd2";
 /**
  * Higher than battleScriptFaintedActionsOrchestration.ts's own per-script
  * ceiling (64): the DoTurnDmg-family scripts' printstring/waitmessage pair
@@ -190,21 +196,22 @@ const B_MSG_CURED_PROBLEM = 0;
 const B_MSG_NORMALIZED_STATUS = 1;
 
 /**
- * Hold effects real (Factory-legal, doc §2b) but out of this slice's own
- * ten-case registration, each barriered on its own genuine trigger
- * condition (never blanket "any holder"): `RESTORE_HP`'s heal-amount and
- * `RESTORE_PP`'s move-slot/PP-bonus machinery are both real extra plumbing
- * this slice's brief scoped to a later pass, not this doc's "no new opcode"
- * ten. Threading their own cheap gates (HP <= maxHP/2; a real zero-PP move)
- * costs nothing extra and keeps the barrier honest -- a full-HP Sitrus
- * holder or an undamaged-PP Leppa holder correctly advances silently, same
- * as source's own no-op case.
+ * `HOLD_EFFECT_RESTORE_HP`'s own gate (`battle_util.c:3337`, Sitrus/Oran/
+ * Berry Juice, doc §2b/§5 slice 4 follow-up): `hp <= floor(maxHP/2)`, u16
+ * integer division, exact.
  */
 function restoreHpGateFires(b: BattleScriptRulesBattlerLike): boolean {
   return b.hp <= Math.floor(b.maxHP / 2);
 }
-function restorePpGateFires(b: BattleScriptRulesBattlerLike): boolean {
-  return b.moves.some((move, index) => move !== 0 && b.pp[index] === 0);
+/**
+ * `HOLD_EFFECT_RESTORE_PP`'s own move-slot search (`battle_util.c:3347-3373`,
+ * Leppa): the FIRST move slot (0..3) with a real move and exactly 0 PP --
+ * source's own `for` loop breaks there, matching a plain `findIndex`, not a
+ * "some zero-PP slot" existence check. Returns -1 (no-op, matches source's
+ * `i == MAX_MON_MOVES` fallthrough) when no slot qualifies.
+ */
+function restorePpSlot(b: BattleScriptRulesBattlerLike): number {
+  return b.moves.findIndex((move, index) => move !== 0 && b.pp[index] === 0);
 }
 
 type BattleScriptRulesBattlerLike = BattleScriptRulesContext["battlers"][number];
@@ -923,18 +930,19 @@ function runStatus1CureTick(
  * Backs BOTH `ItemBattleEffects` call sites -- `ENDTURN_ITEMS1`
  * (`moveTurn = FALSE`, `battle_util.c:3331-3622`) and `ENDTURN_ITEMS2`
  * (`moveTurn = TRUE`, docs/yawn-thrash-endturn-design.md §5): Leftovers, the
- * 8 zero-RNG cure berries, White Herb, and Liechi/Salac/Petaya -- every
- * reachable Factory-legal case this doc names. Every other real switch case
- * this function does not implement barriers on its own genuine trigger
- * condition (RESTORE_HP/RESTORE_PP) or on mere possession (the 4
+ * 8 zero-RNG cure berries, White Herb, Liechi/Salac/Petaya, and now
+ * RESTORE_HP/RESTORE_PP (Sitrus/Oran/Berry Juice, Leppa -- doc §6 addendum)
+ * -- every reachable Factory-legal case this doc names. The only real switch
+ * cases this function does not implement barrier on mere possession (the 4
  * zero-carrier stat/crit berries + 5 confuse berries, doc §2b -- their own
  * HP-threshold gate needs an unmodeled per-item `battlerHoldEffectParam`
- * table no live Factory carrier will ever exercise). `moveTurn` gates four
- * rows per §5's table -- Leftovers, the stat-up berries, and the
- * RESTORE_HP/RESTORE_PP/unreachable case-barriers all short-circuit to
+ * table no live Factory carrier will ever exercise). `moveTurn` gates five
+ * rows per §5's table -- Leftovers, the stat-up berries, RESTORE_HP,
+ * RESTORE_PP, and the unreachable case-barriers all short-circuit to
  * `"advance"` (source's own case does nothing at all when `moveTurn` is
- * true, `battle_util.c:3244-3255,3401,3429-3442`) -- White Herb and the 8
- * cure branches carry no such gate (`:3384,3500-3594`) and stay unconditional.
+ * true, `battle_util.c:3244-3255,3337,3348,3401,3429-3442`) -- White Herb and
+ * the 8 cure branches carry no such gate (`:3384,3500-3594`) and stay
+ * unconditional.
  */
 function runItemsTick(
   program: BattleScriptProgram,
@@ -1020,17 +1028,33 @@ function runItemsTick(
     return runTickScript(program, handlers, state, rc, battler, BERRY_CURE_CHOSEN_STATUS_END2_LABEL);
   }
 
-  if (holdEffect === HOLD_EFFECT_RESTORE_HP && !moveTurn && restoreHpGateFires(b)) {
-    return Object.freeze({
-      kind: "case-barrier", state,
-      detail: "HOLD_EFFECT_RESTORE_HP (Sitrus/Oran/Berry Juice): heal-amount holdEffectParam lookup + removeitem's own end2 variant is not wired this slice (battle_util.c:3335-3345)",
-    });
+  if (holdEffect === HOLD_EFFECT_RESTORE_HP) {
+    if (moveTurn || !restoreHpGateFires(b)) return Object.freeze({ kind: "advance", state });
+    // battle_util.c:3337-3345: gBattleMoveDamage = min(param, maxHP - hp), negated -- BattleScript_ItemHealHP_RemoveItem's
+    // own healthbarupdate/datahpupdate pair applies it (and syncs the party HP mirror), removeitem then consumes the berry.
+    const param = resolveBattleScriptBattlerHoldEffectParam(state.rulesContext, battler);
+    const heal = Math.min(param, b.maxHP - b.hp);
+    const rc = Object.freeze({ ...state.rulesContext, battleMoveDamage: -heal });
+    return runTickScript(program, handlers, state, rc, battler, ITEM_HEAL_HP_REMOVE_ITEM_LABEL);
   }
-  if (holdEffect === HOLD_EFFECT_RESTORE_PP && !moveTurn && restorePpGateFires(b)) {
-    return Object.freeze({
-      kind: "case-barrier", state,
-      detail: "HOLD_EFFECT_RESTORE_PP (Leppa): move-slot/PP-bonus recompute + BtlController_EmitSetMonData(REQUEST_PPMOVE1_BATTLE) is not wired this slice (battle_util.c:3347-3373)",
-    });
+  if (holdEffect === HOLD_EFFECT_RESTORE_PP) {
+    const slot = moveTurn ? -1 : restorePpSlot(b);
+    if (slot === -1) return Object.freeze({ kind: "advance", state });
+    // battle_util.c:3347-3373: changedPP = min(pp[slot] + param, CalculatePPWithBonus(move, ppBonuses, slot)); since
+    // pp[slot] is 0 here (restorePpSlot's own gate) this is min(param, maxPP). Factory rentals are always built via
+    // CreateMon/CreateMonWithEVSpreadNatureOTID (battle_factory.c:435,476,812), which zero ppBonuses -- ZeroMonData's
+    // own struct-clear -- so maxPP is exactly the base gBattleMoves[move].pp, never a PP-Up-inflated value, for every
+    // real Leppa carrier (LAPRAS, NIDOKING, doc §2b). No party-level PP mirror exists in this engine at all (unlike
+    // the status1 cure rows' withBattleScriptPartyMemberStatus1) -- only the active battler's own `pp` tuple (Cmd_
+    // ppreduce's own single source of truth) is patched, collapsing source's controller round trip into one atomic
+    // tick, the same simplification already established for every other landed end-turn case (doc §6).
+    const move = b.moves[slot]!;
+    const param = resolveBattleScriptBattlerHoldEffectParam(state.rulesContext, battler);
+    const maxPp = resolveBattleScriptMoveBasePp(move);
+    const restoredPp = Math.min(param, maxPp);
+    const pp = b.pp.map((value, index) => (index === slot ? restoredPp : value)) as unknown as BattleScriptRulesBattlerState["pp"];
+    const rc = withBattler(state.rulesContext, battler, { pp });
+    return runTickScript(program, handlers, state, rc, battler, BERRY_PP_HEAL_END2_LABEL);
   }
   const statUpStatId = STAT_UP_BERRIES.get(holdEffect);
   if (statUpStatId !== undefined) {

@@ -709,6 +709,12 @@ type GeneratedMoveTypeRow = Readonly<{
 type GeneratedItemHoldEffectRow = Readonly<{
   itemId: number;
   holdEffectId: number;
+  holdEffectParam: number;
+}>;
+
+type GeneratedMoveBasePpRow = Readonly<{
+  id: number;
+  pp: number;
 }>;
 
 // include/constants/pokemon.h:6-23. The order is the numeric TYPE_* ABI.
@@ -789,6 +795,20 @@ const GENERATED_MOVE_TARGETS = new Map<number, number>(
 const GENERATED_ITEM_HOLD_EFFECTS = new Map<number, number>(
   (itemHoldEffectsData.items as readonly GeneratedItemHoldEffectRow[]).map(
     ({ itemId, holdEffectId }) => [itemId, holdEffectId],
+  ),
+);
+
+/** reference/pokeemerald/src/data/items.h's own per-item `.holdEffectParam` field (docs/endturn-abilities-items-ground-truth.md §2b: Sitrus 30, Oran 10, Berry Juice 20, Leppa 10 -- verified directly against items.h, not assumed). */
+const GENERATED_ITEM_HOLD_EFFECT_PARAMS = new Map<number, number>(
+  (itemHoldEffectsData.items as readonly GeneratedItemHoldEffectRow[]).map(
+    ({ itemId, holdEffectParam }) => [itemId, requireUnsigned(holdEffectParam, 0xff, `gItems[${itemId}].holdEffectParam`)],
+  ),
+);
+
+/** gBattleMoves[move].pp (base PP, before any PP Up bonus -- battle_util.c:3347-3373's own `CalculatePPWithBonus` input). */
+const GENERATED_MOVE_BASE_PP = new Map<number, number>(
+  (movesData.moves as readonly GeneratedMoveBasePpRow[]).map(
+    ({ id, pp }) => [id, requireUnsigned(pp, 0xff, `gBattleMoves[${id}].pp`)],
   ),
 );
 
@@ -1183,6 +1203,36 @@ export function resolveBattleScriptBattlerHoldEffect(
   return item === BATTLE_SCRIPT_ITEM_ENIGMA_BERRY
     ? context.enigmaBerryHoldEffects[battler]
     : (GENERATED_ITEM_HOLD_EFFECTS.get(item) ?? 0);
+}
+
+/**
+ * `battlerHoldEffectParam` (`GetItemHoldEffectParam`, `battle_util.c:3300`) --
+ * the per-item amount `HOLD_EFFECT_RESTORE_HP`/`RESTORE_PP` read directly
+ * (doc §2b/§5 slice 4 follow-up). No Enigma Berry special case: unlike
+ * `resolveBattleScriptBattlerHoldEffect`, source's own Enigma-Berry param
+ * comes from a separate in-battle struct (`gEnigmaBerries[battler]`) this
+ * engine does not model at all -- moot, since no Enigma Berry is
+ * Factory-legal (doc §1c), so this plain item-table lookup is exact for
+ * every real carrier.
+ */
+export function resolveBattleScriptBattlerHoldEffectParam(
+  context: BattleScriptRulesContext,
+  battler: BattleScriptBattlerId,
+): number {
+  const item = context.battlers[battler].item;
+  if (item >= BATTLE_SCRIPT_ITEMS_COUNT) {
+    throw new Error(`item ${item} is outside the source gItems corpus`);
+  }
+  return GENERATED_ITEM_HOLD_EFFECT_PARAMS.get(item) ?? 0;
+}
+
+/** Resolves the source u8 gBattleMoves[move].pp field (base PP, no PP Up bonus -- see resolveBattleScriptBattlerHoldEffectParam's own caller for why Factory rentals never carry one). */
+export function resolveBattleScriptMoveBasePp(move: number): number {
+  const pp = GENERATED_MOVE_BASE_PP.get(move);
+  if (pp === undefined) {
+    throw new Error(`move ${move} has no source-derived gBattleMoves pp`);
+  }
+  return pp;
 }
 
 /**
