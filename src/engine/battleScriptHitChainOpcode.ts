@@ -1732,12 +1732,16 @@ function createHealthbarupdateOpcodeHandler(
  * Seed's own end-turn ticks -- docs/ingrain-leechseed-wrap-ground-truth.md
  * §2a/§2b) is a plain HP write clamped at maxHP, with none of the positive
  * branch's bide/shellBell/physical-special bookkeeping (source has no such
- * code on this branch at all). Physical/special bookkeeping reuses the already-modeled
- * gSpecialStatuses[battler].{physicalDmg,specialDmg} fields (added for
- * Cmd_moveend); gProtectStructs' parallel copy and physicalBattlerId/
- * specialBattlerId (Counter/Mirror Coat's own attacker attribution) have no
- * reader anywhere in this engine's currently modeled scope and are not
- * tracked, matching the shellBellDmg/gBideDmg-via-gBattleScripting omissions
+ * code on this branch at all). Physical/special bookkeeping writes both
+ * parallel copies source writes together:
+ * gSpecialStatuses[battler].{physicalDmg,specialDmg} (added for Cmd_moveend's
+ * Rage/Defrost, cleared every action) and gProtectStructs[battler].
+ * {physicalDmg,specialDmg,physicalBattlerId,specialBattlerId} (Counter/
+ * Mirror Coat's own attacker attribution, modeled as protectPhysicalDmg/
+ * protectPhysicalBattlerId/protectSpecialDmg/protectSpecialBattlerId,
+ * cleared once per turn -- docs/counter-retaliation-design.md §1.2/§2.3
+ * explains why these cannot share a field despite the identical value),
+ * matching the shellBellDmg/gBideDmg-via-gBattleScripting omissions
  * elsewhere in this rung. The real (non-substitute, non-negative-damage) HP
  * write also lands in the party slice at this battler's own side/partyIndex
  * (docs/faint-outcome-ground-truth.md §3.2's sync point), keeping
@@ -1846,11 +1850,17 @@ function createDatahpupdateOpcodeHandler(
     if (noPassiveUpdate) {
       const moveType = resolveMoveTypeName(rulesContext, rulesContext.currentMove);
       const physical = isTypePhysical(moveType);
+      const retaliationBattlerId = isTargetOperand
+        ? requireBattlerRole(rulesContext, "attacker")
+        : requireBattlerRole(rulesContext, "target");
       battlerChanges = {
         ...battlerChanges,
         specialStatus: physical
           ? Object.freeze({ ...battlerState.specialStatus, physicalDmg: dealt })
           : Object.freeze({ ...battlerState.specialStatus, specialDmg: dealt }),
+        ...(physical
+          ? { protectPhysicalDmg: dealt, protectPhysicalBattlerId: retaliationBattlerId }
+          : { protectSpecialDmg: dealt, protectSpecialBattlerId: retaliationBattlerId }),
       };
     }
     hitMarker = (hitMarker & ~HITMARKER_PASSIVE_HP_UPDATE) >>> 0;

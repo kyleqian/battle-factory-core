@@ -1409,7 +1409,20 @@ describe("production datahpupdate (Cmd_datahpupdate) dispatch -- the rung's real
     expect(result.state.rulesContext.hpDealt).toBe(14);
     expect(result.state.events[0]).toMatchObject({ kind: "hp-change", battler: 1, from: 136, to: 122 });
     expect(result.state.rulesContext.battlers[1]!.specialStatus.physicalDmg).toBe(14); // TACKLE is NORMAL: physical
+    expect(result.state.rulesContext.battlers[1]!.protectPhysicalDmg).toBe(14); // ProtectStruct's parallel copy (Counter's own input)
+    expect(result.state.rulesContext.battlers[1]!.protectPhysicalBattlerId).toBe(0); // gBattlerAttacker
+    expect(result.state.rulesContext.battlers[1]!.protectSpecialDmg).toBe(0);
     expect(result.state.scheduler.pendingControllerBattlers).toContain(1);
+  });
+
+  it("special-type hit also writes protectSpecialDmg/protectSpecialBattlerId, not the physical pair (Mirror Coat's own input)", () => {
+    const rc = context(0, {}, { battleMoveDamage: 14, currentMove: PSYWAVE }, { hp: 136 });
+    const { result } = stepAtOpcode("B_SCR_OP_DATAHPUPDATE", rc);
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battlers[1]!.specialStatus.specialDmg).toBe(14);
+    expect(result.state.rulesContext.battlers[1]!.protectSpecialDmg).toBe(14);
+    expect(result.state.rulesContext.battlers[1]!.protectSpecialBattlerId).toBe(0); // gBattlerAttacker
+    expect(result.state.rulesContext.battlers[1]!.protectPhysicalDmg).toBe(0);
   });
 
   it("killing hit: HP clamps to 0, hpDealt is the remaining HP not the full damage (KO scenario's 90 -> 0)", () => {
