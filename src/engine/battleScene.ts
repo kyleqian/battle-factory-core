@@ -532,6 +532,7 @@ import ballDisplayAsset from "../assets/gen/battle-interface-ball-display.json" 
 import battleHealthboxAsset from "../assets/gen/battle-healthbox.json" with { type: "json" };
 import downArrowAsset from "../assets/gen/battle-interface-down-arrow.json" with { type: "json" };
 import opponentFrontSpritesAsset from "../assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
+import kadabraFrontSpriteAsset from "../animation/assets/kadabra-front.json" with { type: "json" };
 import menuHealthboxPlayerAsset from "../assets/gen/menu-healthbox-player.json" with { type: "json" };
 import summaryBallAsset from "../assets/gen/summary-ball.json" with { type: "json" };
 import battleAnimBallOpenAsset from "../assets/gen/battle-anim-ball-open.json" with { type: "json" };
@@ -881,6 +882,7 @@ const dugtrioFrontSprite = (opponentFrontSpritesAsset as Record<string, Opponent
 const charmeleonFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).CHARMELEON!;
 const haunterFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).HAUNTER!;
 const ivysaurFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).IVYSAUR!;
+const kadabraFrontSprite = kadabraFrontSpriteAsset as OpponentFrontSpriteAsset;
 const MURKROW_CORNER = { x: 144, y: 19 };
 const menuHealthboxPlayer = menuHealthboxPlayerAsset as SendOutHealthboxContentAsset;
 const battleAnimRocks = battleAnimRocksAsset as BattleAnimRocksAsset;
@@ -14803,18 +14805,18 @@ export function renderSceneOnMovePresentation(
       && view.attacker.geometry.side === "player"
       && view.target.species === "ONIX"
       && view.target.geometry.side === "opponent";
-    // Only the player-attacker orientation is staged so far (no KADABRA
-    // front sprite extracted yet) - the family map's own derivation says
-    // the OBJ-row/task arithmetic is side-uniform, so the opposite
-    // orientation is expected to need no new mechanism, only the missing
-    // sprite; left for a future session per this step's time budget.
-    if (!playerToOpponent) {
+    const opponentToPlayer =
+      view.attacker.species === "KADABRA"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
         `unsupported staged FUTURE_SIGHT pair ${view.attacker.species}(${view.attacker.geometry.side})->${view.target.species}(${view.target.geometry.side})`,
       );
     }
-    const attackerSprite = kadabraBackSprite;
-    const targetSprite = onixFrontSprite;
+    const attackerSprite = playerToOpponent ? kadabraBackSprite : kadabraFrontSprite;
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const gpuDarken = (palette: readonly RgbColor[]) =>
       palette.map((color) => {
         const packed = mgbaDarkenColor(
@@ -14995,17 +14997,18 @@ export function renderSceneOnMovePresentation(
       && view.attacker.geometry.side === "player"
       && view.target.species === "ONIX"
       && view.target.geometry.side === "opponent";
-    // Only the player-attacker orientation is staged so far (no KADABRA
-    // front sprite extracted yet) - same family-map derivation as
-    // FUTURE_SIGHT: the OBJ-row/task arithmetic is expected side-uniform,
-    // left for a future session per this step's own time budget.
-    if (!playerToOpponent) {
+    const opponentToPlayer =
+      view.attacker.species === "KADABRA"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
         `unsupported staged CONFUSION pair ${view.attacker.species}(${view.attacker.geometry.side})->${view.target.species}(${view.target.geometry.side})`,
       );
     }
-    const attackerSprite = kadabraBackSprite;
-    const targetSprite = onixFrontSprite;
+    const attackerSprite = playerToOpponent ? kadabraBackSprite : kadabraFrontSprite;
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const gpuDarken = (palette: readonly RgbColor[]) =>
       palette.map((color) => {
         const packed = mgbaDarkenColor(
@@ -15037,7 +15040,9 @@ export function renderSceneOnMovePresentation(
     // FUTURE_SIGHT/GROWTH "ONIX starts at x2=+1" finding) until window 2's
     // own AnimTask_ShakeMon/AnimTask_ScaleMonAndRestore pair takes
     // ownership of it at CONFUSION_WINDOW2_START_AGE (confusion.ts).
-    const targetIdle = speciesFrontIdleRestOffset(view.target.species);
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffset(view.target.species)
+      : null;
     // +1 past the raw creation age: the live x2 read is now display-lagged
     // by 2 ticks (see sceneOnConfusionView's own module doc), so the
     // hand-off away from the pre-window idle offset has to happen one tick
@@ -15168,18 +15173,18 @@ export function renderSceneOnMovePresentation(
       && view.attacker.geometry.side === "player"
       && view.target.species === "ONIX"
       && view.target.geometry.side === "opponent";
-    // Only the player-attacker orientation is staged so far (no KADABRA
-    // front sprite extracted yet) - same family-map derivation as
-    // CONFUSION/FUTURE_SIGHT: the OBJ-row/task arithmetic is expected
-    // side-uniform, left for a future session per this step's own time
-    // budget.
-    if (!playerToOpponent) {
+    const opponentToPlayer =
+      view.attacker.species === "KADABRA"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
         `unsupported staged PSYCHIC pair ${view.attacker.species}(${view.attacker.geometry.side})->${view.target.species}(${view.target.geometry.side})`,
       );
     }
-    const attackerSprite = kadabraBackSprite;
-    const targetSprite = onixFrontSprite;
+    const attackerSprite = playerToOpponent ? kadabraBackSprite : kadabraFrontSprite;
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const gpuDarken = (palette: readonly RgbColor[]) =>
       palette.map((color) => {
         const packed = mgbaDarkenColor(
@@ -15211,7 +15216,9 @@ export function renderSceneOnMovePresentation(
     // CONFUSION/FUTURE_SIGHT/GROWTH "ONIX starts at x2=+1" finding) until
     // window 2's own AnimTask_ShakeMon/AnimTask_ScaleMonAndRestore pair
     // takes ownership of it at PSYCHIC_WINDOW2_START_AGE (psychic.ts).
-    const targetIdle = speciesFrontIdleRestOffset(view.target.species);
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffset(view.target.species)
+      : null;
     // +1 past the raw creation age, same reasoning as CONFUSION's own
     // handoff (sceneOnConfusionView's module doc): the live x2 read is
     // display-lagged by 2 ticks, so the hand-off away from the pre-window
