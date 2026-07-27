@@ -15,6 +15,43 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 521 — [BOUNDED WORKER 2026-07-27 ~15:30] `turn2-endeavor.json` kickoff text/HP re-driven from kernel events (§13.3 landed)
+
+- **State:** tree green at **268 files / 3560 tests** (unchanged count —
+  this step wires already-tested staging-module exports into production
+  code, no new test file), `npm run build` clean.
+  `executableFrontierRatchet.test.ts` unmoved (6/6, zero new barriers).
+- **Did:** executed `docs/presentation-seam-scout.md` §13.3's plan exactly
+  as written (§13.5 completion note appended). `battleScene.ts`'s
+  `drawTurn2KickoffText` now sources its ENDEAVOR kickoff text
+  (`TURN2_ENDEAVOR_ATTACK_LINE1/2`, `:6905`) and `endeavorOnixHp`'s
+  `startHp`/`endHp` (`TURN2_ENDEAVOR_HP.from`/`.to`, `:6896`) from
+  `turn2EndeavorPresentationStaging.ts`'s
+  `resolveTurn2EndeavorAttackLines()`/`resolveTurn2EndeavorHpEndpoints()`
+  (module-load-resolved consts, same shape turn 5's sibling call site
+  already uses) instead of the raw `TURN_KICKOFF_LINE1`/`TURN2_KICKOFF_LINE2`/
+  `anchorPlayerBattler.hp`/`anchorPlayerAfterTurnHp` reads. Step 3
+  (`anchorOpponentAfterTurnHp`'s squish overlay, `:6881`) stayed a literal
+  per the plan's own scoping. Zero bridge edits — the staging module already
+  called the shared `resolveRockSlidePresentationWindowContent` bridge, as
+  predicted. **No literal died**: `TURN_KICKOFF_LINE1`/`TURN2_KICKOFF_LINE2`
+  stay defined and live at turn 3's own repeat call site (`:6985`). Every
+  §13.3 citation checked out against `HEAD` before editing — no design-doc
+  slip this time.
+- **Acceptance (live, this session):** full sweep run BEFORE the change (on
+  pristine `HEAD`) matched every recorded count exactly, then AFTER
+  reproduced them byte-identically: `turn2-endeavor.json` 77/77 (twice, incl.
+  a determinism check), `turn2-endeavor-drain.json` 237/237,
+  `turn2-dragonbreath.json` 237/237, `turn2-dragonbreath-projectiles.json`
+  61/61, `turn3-endeavor.json` 192/192, `turn3-rockslide.json` 256/256,
+  `turn1-rockslide.json` 256/256, `turn5-rockslide.json` 256/256,
+  `turn4-doubleteam.json` 250/250, `turn6-featherdance.json` 90/90.
+- **Next:** either `turn6-statfall.json`'s wiring (unblocked since entry
+  520's apostrophe-charmap fix, zero new staged proof needed per §13's own
+  table) or the Roar/multi-hit registration side scouted in round 2.
+- **Notes:** no PAPERCUT. One commit for the wiring + docs.
+
+---
 ## 520 — [SUPERVISOR 2026-07-27 ~15:15] round 1 verified + merged (3 workers, all green); apostrophe-charmap prerequisite FIXED; round 2 dispatched
 
 - **State:** master green at **268 files / 3560 tests** (union of entry 519's
@@ -128,19 +165,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   census regen.
 
 ---
-## 518 — [SUPERVISOR ORIENT 2026-07-27 ~14:30] animation-main folded (SWAGGER + SELF_DESTRUCT exact); round 1 dispatched
-
-- **State:** master green at **3520 tests** (fold merge `b1f86cd`),
-  `npm run build` clean, oracle services fresh (both profiles PASS). Folded
-  6 animation commits (tip `3dcf03c`): SWAGGER and SELF_DESTRUCT promoted
-  exact — animation coverage now **45/276 exact, 3 partial**. The animation
-  supervisor's own session wound down clean (no worker branches or stale
-  worktrees on their side).
-- **Round 1 (dispatched):** main → top-2 ranked census sets
-  `B_SCR_OP_TRYINFATUATING` (EFFECT_ATTRACT, 45 weighted) +
-  `B_SCR_OP_JUMPIFCONFUSEDANDSTATMAXED` (EFFECT_SWAGGER + EFFECT_FLATTER,
-  25 weighted) ∥ side → §13 presentation prep-scout (scout picks the next
-  window by §10's smallest-input-surface method; the §12.3-step-3
-  apostrophe-charmap residual is documented context, not fixed there).
-- **Next:** verify round 1; continue ranked-table descent + seam cadence;
-  §24.5 sites 6/7 + §19.5 sites 3-6 recipe-only breadth remain optional.
