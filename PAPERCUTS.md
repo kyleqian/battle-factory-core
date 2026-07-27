@@ -490,3 +490,22 @@ worker (PROGRESS entry 13).
 - **Cost each:** ~2 min.
 - **Workaround:** always pass `-o` to a scratch path; adding
   `battle-lab-output/` to `.gitignore` would retire this.
+
+## Mash-rep counts for staged multi-turn fixtures don't transfer between move-animation classes
+
+- **What:** every staged mechanicLab fixture that needs "exactly N real
+  executed turns" calibrates its button-mash rep count empirically, and the
+  plateau depends on the move's own animation/message cost — §19.5's
+  Sand Attack pair needed 40/30 reps (stat-change animation), §24.5's
+  Double Team site-2 pair needed a fresh ~15-round-trip sweep because the
+  self-buff class shares no baseline with the target-driven class. No
+  central rep-count table per move class exists, so each new class starts
+  from scratch.
+- **Hits:** 2 (§19.5 DRAW SITE 2, 2026-07-26; §24.5 DRAW SITE 2,
+  2026-07-27 — ~25 min).
+- **Cost each:** ~15-25 min.
+- **Workaround:** record each calibrated (move, per-turn rep count, tail
+  length) triple in the ground-truth doc next to its fixture; a small
+  committed table in `tools/battle-lab/README.md` indexed by animation
+  class would let new fixtures start from a sibling's number instead of
+  zero.
