@@ -889,6 +889,7 @@ const knockOffArt = knockOffAsset as {
   strike: { tileset: Tileset; palette: RgbColor[] };
   shuppetBack: { tileset: Tileset; palette: RgbColor[] };
   plusleBack: { tileset: Tileset; palette: RgbColor[] };
+  plusleFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const MURKROW_CORNER = { x: 144, y: 19 };
 const menuHealthboxPlayer = menuHealthboxPlayerAsset as SendOutHealthboxContentAsset;
@@ -14443,7 +14444,12 @@ export function renderSceneOnMovePresentation(
       && view.attacker.geometry.side === "player"
       && view.target.species === "ONIX"
       && view.target.geometry.side === "opponent";
-    if (!playerToOpponent) {
+    const opponentToPlayer =
+      view.attacker.species === "PLUSLE"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
         `unsupported staged KNOCK_OFF pair ${view.attacker.species}->${view.target.species}`,
       );
@@ -14458,8 +14464,12 @@ export function renderSceneOnMovePresentation(
     );
     drawSpriteSheetAffineStretch(
       fb,
-      onixFrontSprite.tileset,
-      onixFrontSprite.palette,
+      playerToOpponent
+        ? onixFrontSprite.tileset
+        : onixBackSprite.tileset,
+      playerToOpponent
+        ? onixFrontSprite.palette
+        : onixBackSprite.palette,
       view.target.geometry.spriteCorner.x,
       view.target.geometry.spriteCorner.y,
       256,
@@ -14468,27 +14478,33 @@ export function renderSceneOnMovePresentation(
       white,
       paletteCoeff,
       false,
-      view.targetOamOffset.x2 + (view.animationAge < 17 ? 1 : 0),
+      view.targetOamOffset.x2
+        + (playerToOpponent && view.animationAge < 17 ? 1 : 0),
     );
     if (view.strike) {
       const strikeStep = view.animationAge - 6;
-      const rotation = -4 * strikeStep;
+      const rotation = (view.strike.mirrored ? 4 : -4) * strikeStep;
       const radians = rotation * 2 * Math.PI / 256;
-      const pa = Math.trunc(256 * Math.cos(radians));
-      const pc = Math.trunc(256 * Math.sin(radians));
+      const cosine = Math.trunc(256 * Math.cos(radians));
+      const sine = Math.trunc(256 * Math.sin(radians));
+      const pa = view.strike.mirrored ? -cosine : cosine;
+      const pb = view.strike.mirrored ? sine : -sine;
+      const pc = sine;
+      const pd = cosine;
       const frame = subTileset(knockOffArt.strike.tileset, view.strike.sheetFrame * 8, 8);
       drawSpriteSheetAffineRotate(
         fb,
         frame,
         knockOffArt.strike.palette,
-        view.target.geometry.animationCenter.x - 16
+        view.target.geometry.animationCenter.x
+          + (view.strike.mirrored ? 16 : -16)
           + ((GBA_SINE_TABLE_256[(view.strike.angle + 64) & 0xff]! * 20) >> 8),
         view.target.geometry.animationCenter.y - 16
           + ((GBA_SINE_TABLE_256[view.strike.angle]! * 20) >> 8),
         pa,
-        -pc,
+        pb,
         pc,
-        pa,
+        pd,
         undefined,
         false,
       );
@@ -14509,8 +14525,12 @@ export function renderSceneOnMovePresentation(
     }
     drawSpriteSheetAffineStretch(
       fb,
-      knockOffArt.plusleBack.tileset,
-      knockOffArt.plusleBack.palette,
+      playerToOpponent
+        ? knockOffArt.plusleBack.tileset
+        : knockOffArt.plusleFront.tileset,
+      playerToOpponent
+        ? knockOffArt.plusleBack.palette
+        : knockOffArt.plusleFront.palette,
       view.attacker.geometry.spriteCorner.x,
       view.attacker.geometry.spriteCorner.y,
       256,
@@ -14525,7 +14545,7 @@ export function renderSceneOnMovePresentation(
       fb,
       0,
       composeOpponentHealthbox(healthboxAssemblyAssets, {
-        name: "ONIX",
+        name: playerToOpponent ? "ONIX" : "PLUSLE",
         level: 50,
         gender: state.config.fieldProfile.opponentGender ?? "male",
         hpFraction:
@@ -14537,7 +14557,7 @@ export function renderSceneOnMovePresentation(
     drawComposedPlayerHealthbox(
       fb,
       composePlayerHealthbox(playerHealthboxAssets, {
-        name: "PLUSLE",
+        name: playerToOpponent ? "PLUSLE" : "ONIX",
         level: 50,
         gender: state.config.fieldProfile.playerGender ?? "male",
         hpFraction:
@@ -14549,7 +14569,12 @@ export function renderSceneOnMovePresentation(
       }),
     );
     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
-    drawMessageTextLines(fb, "PLUSLE used", "KNOCK OFF!", 99);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "PLUSLE used" : "Foe PLUSLE used",
+      "KNOCK OFF!",
+      99,
+    );
     return;
   }
 

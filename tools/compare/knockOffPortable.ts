@@ -79,14 +79,25 @@ for (let frame = fixture.denseWindow.startFrame;
   const age = fixture.appStage.firstFramePresentationAge
     + frame - fixture.denseWindow.startFrame;
   const view = sceneOnKnockOffView({ ...stage, age });
+  const attackerRecord =
+    view.attacker.geometry.side === "player"
+      ? record.playerSprite
+      : record.opponentSprite;
+  const targetRecord =
+    view.target.geometry.side === "player"
+      ? record.playerSprite
+      : record.opponentSprite;
   const strike = record.knockOffStrikeSprites[0];
   const expectedStrike = view.strike && (() => {
     const x2 = (GBA_SINE_TABLE_256[(view.strike.angle + 64) & 0xff]! * 20) >> 8;
     const y2 = (GBA_SINE_TABLE_256[view.strike.angle]! * 20) >> 8;
-    const radians = (-4 * (age - 6)) * 2 * Math.PI / 256;
-    const a = Math.trunc(256 * Math.cos(radians));
-    const c = Math.trunc(256 * Math.sin(radians));
-    return { x2, y2, a, b: -c, c, d: a };
+    const rotation = (view.strike.mirrored ? 4 : -4) * (age - 6);
+    const radians = rotation * 2 * Math.PI / 256;
+    const cosine = Math.trunc(256 * Math.cos(radians));
+    const sine = Math.trunc(256 * Math.sin(radians));
+    return view.strike.mirrored
+      ? { x2, y2, a: -cosine, b: sine, c: sine, d: cosine }
+      : { x2, y2, a: cosine, b: -sine, c: sine, d: cosine };
   })();
   const strikeMatches = (!strike && !expectedStrike) || (
     strike !== undefined && expectedStrike !== null
@@ -94,19 +105,24 @@ for (let frame = fixture.denseWindow.startFrame;
     && strike.a === expectedStrike.a && strike.b === expectedStrike.b
     && strike.c === expectedStrike.c && strike.d === expectedStrike.d
   );
-  const targetIdle = age < 17 ? 1 : 0;
+  const targetIdle =
+    view.target.species === "ONIX"
+    && view.target.geometry.side === "opponent"
+    && age < 17
+      ? 1
+      : 0;
   const componentMatches =
-    record.playerSprite.x2 === view.attackerOffset.x2
-    && record.playerSprite.y2 === view.attackerOffset.y2
-    && record.opponentSprite.x2 === view.targetOffset.x2 + targetIdle
-    && record.opponentSprite.y2 === view.targetOffset.y2
+    attackerRecord.x2 === view.attackerOffset.x2
+    && attackerRecord.y2 === view.attackerOffset.y2
+    && targetRecord.x2 === view.targetOffset.x2 + targetIdle
+    && targetRecord.y2 === view.targetOffset.y2
     && (record.basicHitsplatSprites.length > 0) === view.hitsplatVisible
     && strikeMatches;
   if (componentMatches) componentMatching += 1;
   else if (mismatches.length < 12) {
-    mismatches.push(`${frame}/age${age}: attacker=${record.playerSprite.x2},${record.playerSprite.y2}`
+    mismatches.push(`${frame}/age${age}: attacker=${attackerRecord.x2},${attackerRecord.y2}`
       + `/${view.attackerOffset.x2},${view.attackerOffset.y2}`
-      + ` target=${record.opponentSprite.x2},${record.opponentSprite.y2}`
+      + ` target=${targetRecord.x2},${targetRecord.y2}`
       + `/${view.targetOffset.x2 + targetIdle},${view.targetOffset.y2}`
       + ` strike=${strikeMatches} hit=${record.basicHitsplatSprites.length}/${view.hitsplatVisible}`);
   }
