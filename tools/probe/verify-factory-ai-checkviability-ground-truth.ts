@@ -1032,6 +1032,70 @@ const DRAW_COUNT_SCENARIOS: DrawCountScenarioSpec[] = [
     expectedTotalSteps: { 1: 7, 99: 7 },
     checkCrossSeedStable: true,
   },
+
+  // AI_CV_EvasionUp DRAW SITE 2 (data/battle_ai_scripts.s:1043, doc §24.5's
+  // own "cheapest of the four remaining sites" recipe) -- 2026-07-27
+  // follow-up side-lane session. Gate B (:1042) is gated purely on the
+  // OPPONENT'S OWN evasion stage (>=9 skips), settable directly by 3 real
+  // executed turns of the opponent's own forced MOVE_DOUBLE_TEAM kit (self-
+  // targeted, 0 accuracy -- cannot miss, so the stage build is fully
+  // deterministic: 6->7->8->9) -- unlike DRAW SITE 5/6/7 below, no second
+  // move or relay is needed at all. Both fixtures hold the PLAYER (target)
+  // at all 4 slots MOVE_SPLASH (150) -- opponent (AI_USER, Machamp, single
+  // ability Guts, reused verbatim from 24.2) HP never moves off 165/165
+  // (100%) for the entire trace, the same "zero-damage isolation" already
+  // proven by the `evasionup-fullhp-reach` fixture (24.2) -- which also
+  // means Gate A (:1038, opponent HP<90 skips DRAW SITE 1) stays FALSE every
+  // single decision, so DRAW SITE 1 fires on every reachable turn (a flat,
+  // shared +4 baseline in both fixtures, not a confound: reach and control
+  // share the identical turn-1/turn-2 prefix by construction). This
+  // corrects the recipe's own prior text (24.5, pre-live-verification),
+  // which said to hold "Gate A held false (opponent HP kept >=90% throughout)
+  // to avoid DRAW SITE 1 contaminating the same window" -- backwards from
+  // the assembly's own semantics (`if_hp_less_than AI_USER, 90,
+  // AI_CV_EvasionUp2`: HP<90 is what SKIPS DRAW SITE 1, HP>=90 REACHES it,
+  // confirmed both by direct re-read of 24.1's own Gate A bullet and by the
+  // already-live-verified `fullhp-reach`/`midhp-control` pair, 24.2-24.3) --
+  // this session deliberately does NOT chase that now-moot isolation and
+  // instead reports the real, oracle-measured totals. PREDICTED (before
+  // running, from the transcribed handler body): reach = 3 executed turns
+  // (decisions 1-3, each: DRAW SITE 1 fires x4, DRAW SITE 2 gated false/
+  // skipped since evasion is still <9) + 1 phantom 4th decision (evasion now
+  // 9, DRAW SITE 1 STILL fires x4 since HP is still 100%, AND DRAW SITE 2
+  // now fires x4) -- so reach's own handler-branch draws total 4+4+4+8=20,
+  // vs control's 2 executed turns + 1 phantom 3rd decision (DRAW SITE 1 x4
+  // each, DRAW SITE 2 never fires) = 4+4+4=12, a branch-level delta of +8
+  // (the extra decision's own recurring DRAW SITE 1 x4, plus DRAW SITE 2's
+  // own clean N=4-slots x4) on top of one whole extra decision's non-branch
+  // baseline (BattleAI_SetupAIData/BattleTurnPassed/ChooseMoveOrAction_
+  // Singles, ~6 more, doc §24.4). OBSERVED (live, both seeds, reproduced
+  // twice each): reach total Random() calls (frame 0->2064) = 34; control
+  // (frame 0->1614) = 20 -- delta +14, matching the predicted +8 branch
+  // delta plus the one extra decision's own ~6 baseline exactly. PP used
+  // confirms turn count directly (3 vs 2, opponent's forced Double Team
+  // slots), and the reach/control split needed zero navigation at all
+  // (unlike DRAW SITE 5/6/7, which need a genuine two-move opponent kit) --
+  // just a calibrated mash-rep count (74 reps for reach, 49 for control,
+  // both with a wide empirically-confirmed no-overshoot margin, tools/
+  // battle-lab/mechanic-factory-ai-cv-evasionup-site2-{reach,control}-off.json).
+  {
+    label:
+      "AI_CV_EvasionUp, opponent (AI_USER, Machamp) own evasion stage built to 9 by 3 real executed MOVE_DOUBLE_TEAM turns (HP held at 165/165 throughout, target MOVE_SPLASH x4) -- DRAW SITE 2 reachable branch (data/battle_ai_scripts.s:1042-1044): Gate B (if_stat_level_less_than USER,EVASION,9) is false once the stage hits 9 on the phantom 4th-decision re-read, falling through into the :1043 if_random_less_than 128 roll once per identical MOVE_DOUBLE_TEAM slot -- DRAW SITE 1 (:1039) also fires every decision in this fixture (opponent HP never drops below the 90% Gate A threshold), a flat shared baseline with the control fixture below, not part of DRAW SITE 2's own signature",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-evasionup-site2-reach-off.json",
+    finalFrame: 2064,
+    expectedPpUsed: 3,
+    expectedTotalSteps: { 1: 34, 99: 34 },
+    checkCrossSeedStable: true,
+  },
+  {
+    label:
+      "AI_CV_EvasionUp, opponent (AI_USER, Machamp) own evasion stage built to only 8 by 2 real executed MOVE_DOUBLE_TEAM turns (same HP/target setup) -- deterministic zero-draw control for DRAW SITE 2: Gate B (evasion stage 8 < 9) stays true on the phantom 3rd-decision re-read, skipping the :1043 roll entirely -- same DRAW SITE 1 baseline as the reach fixture (both share the identical turn-1/turn-2 prefix), isolating DRAW SITE 2's own contribution to the delta",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-evasionup-site2-control-off.json",
+    finalFrame: 1614,
+    expectedPpUsed: 2,
+    expectedTotalSteps: { 1: 20, 99: 20 },
+    checkCrossSeedStable: true,
+  },
 ];
 
 // AI_CV_EvasionUp Gates C/D toxic-poison chain (data/battle_ai_scripts.s:

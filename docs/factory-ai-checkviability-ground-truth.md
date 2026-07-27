@@ -3723,7 +3723,7 @@ green. **Run twice this session, ALL PASS both times.** Reproduce with:
 node --experimental-strip-types tools/probe/verify-factory-ai-checkviability-ground-truth.ts
 ```
 
-## 24. 2026-07-26 addendum #14: `AI_CBM_EvasionUp` + `AI_CV_EvasionUp` and `AI_CBM_EvasionDown` + `AI_CV_EvasionDown` — the largest remaining CV handler by draw-site count, 2 of 8 live-verified, and a byte-for-byte "Down"-family twin
+## 24. 2026-07-26 addendum #14: `AI_CBM_EvasionUp` + `AI_CV_EvasionUp` and `AI_CBM_EvasionDown` + `AI_CV_EvasionDown` — the largest remaining CV handler by draw-site count, 5 of 8 live-verified (updated by two follow-up side-lane sessions, §24.5), and a byte-for-byte "Down"-family twin
 
 Prep-scout session (side lane, Battle Scene OFF), same no-`src/`-changes
 contract. Goal per this step's brief: `AI_CV_EvasionUp` (`data/
@@ -4078,7 +4078,82 @@ site, §23.4) that the anomaly is specific to the last-move-type-list code
 region those two handlers share, not a general property of "a draw site
 sitting last before `End`."
 
-### 24.5 DRAW SITE 3/4 (toxic-poison chain) — live-verified this follow-up session; 4 sites remain recipe-only
+### 24.5 DRAW SITE 2 (evasion-stage build) and DRAW SITE 3/4 (toxic-poison chain) — both live-verified; 3 sites remain recipe-only
+
+**DRAW SITE 2, live-verified** (`:1043`, `score -1`, reached iff the
+**opponent's own** evasion stage is already ≥ 9) — a second follow-up
+side-lane session (Battle Scene OFF oracle) staged this session's own recipe
+below almost verbatim: opponent (`AI_USER`, under test, both fixtures)
+**Machamp** (68, single ability Guts, reused verbatim from 24.2), all 4 slots
+**`MOVE_DOUBLE_TEAM`** (104, self-targeted, 0 accuracy — cannot miss, so the
+3-turn stage build 6→7→8→9 is fully deterministic, no reroll risk). Target
+(player, both fixtures) **Anorith** (390, single ability Battle Armor), all 4
+slots **`MOVE_SPLASH`** (150) — the same zero-damage isolation `evasionup-
+fullhp-reach` already proved (24.2): Machamp's own HP never moves off
+165/165 (100%) for the entire trace.
+
+- **`evasionup-site2-reach`**: 3 real executed turns of Double Team (stage
+  6→7→8→9), then the trailing phantom 4th-turn re-decision reads the stage at
+  9 — Gate B (`:1042`, opponent's own evasion stage < 9) is now false,
+  falling through into the DRAW SITE 2 roll.
+- **`evasionup-site2-control`**: only 2 real executed turns (stage 6→7→8),
+  phantom 3rd-turn re-decision reads 8 — Gate B stays true, deterministic
+  zero-draw skip of DRAW SITE 2 (same "stop one turn earlier" control shape
+  as `evasionup-toxicchain-control` below).
+
+**This session's own live evidence corrects the recipe's prior text**
+(the "not attempted this session" note this bullet used to carry said to
+hold "Gate A held false (opponent HP kept ≥ 90% throughout...) to avoid DRAW
+SITE 1 contaminating the same window" — backwards from Gate A's own assembly
+semantics: `if_hp_less_than AI_USER, 90, AI_CV_EvasionUp2` (`:1038`) means HP
+**< 90%** is what *skips* DRAW SITE 1 (branch taken), and HP **≥ 90%** is what
+*reaches* it (falls through) — the exact opposite polarity the old recipe
+text named, confirmed both by 24.1's own Gate A bullet ("opponent's own HP <
+90% skips DRAW SITE 1 entirely... ≥ 90% reaches it") and by the
+already-live-verified `fullhp-reach`/`midhp-control` pair (24.2-24.3, whose
+own 100%-HP fixture was built specifically to *reach* DRAW SITE 1). Rather
+than chase the now-moot "avoid DRAW SITE 1" isolation, this session just
+measures the real total: with Machamp held at 100% HP throughout (Gate A
+always false), **DRAW SITE 1 fires on every single reachable decision in
+both fixtures** — a flat, shared baseline present identically in reach and
+control (both share the identical turn-1/turn-2 prefix by construction, so
+this baseline cancels in the delta, not a confound).
+
+**Analytical prediction (before running), from the transcribed handler
+body**: reach = 3 executed-turn decisions (DRAW SITE 1 fires ×4 each, DRAW
+SITE 2 gated off) + 1 phantom 4th decision (DRAW SITE 1 STILL fires ×4 since
+HP is still 100%, AND DRAW SITE 2 now fires ×4) → handler-branch draws total
+4+4+4+8 = **20**. Control = 2 executed-turn decisions + 1 phantom 3rd
+decision (DRAW SITE 1 ×4 each, DRAW SITE 2 never fires) → 4+4+4 = **12**. A
+predicted branch-level delta of **+8** (DRAW SITE 2's own clean N=4-slots×1
+draw, plus one more recurring DRAW SITE 1×4 from reach's extra decision),
+plus one whole extra decision's own non-branch baseline (`BattleAI_
+SetupAIData`/`BattleTurnPassed`/`ChooseMoveOrAction_Singles`, ~6 more per
+decision, §24.4) on top.
+
+**Live ledger** (oracle-verified, both seeds, both reruns deterministic; PP
+used confirms turn count directly since Double Team is Machamp's only legal
+choice):
+
+| Fixture | Seed | Opponent PP used | Opponent HP (start→end) | Total `Random()` calls, frame 0→final | Determinism (2 runs) |
+| --- | -: | -: | --- | -: | --- |
+| `evasionup-site2-reach` (frame 0→2064) | 1 | 3 | 165→165 (100%) | **34** | identical |
+| `evasionup-site2-reach` (frame 0→2064) | 99 | 3 | 165→165 (100%) | **34** | identical |
+| `evasionup-site2-control` (frame 0→1614) | 1 | 2 | 165→165 (100%) | **20** | identical |
+| `evasionup-site2-control` (frame 0→1614) | 99 | 2 | 165→165 (100%) | **20** | identical |
+
+Delta **+14** matches the predicted **+8** branch-level delta plus the one
+extra decision's own **~6** non-branch baseline exactly — the same
+accounting discipline every prior pair in this doc uses (§15.3/§19.4/§19.5/
+§22.4/24.4). Both fixtures are individually cross-seed-stable (34/34, 20/20)
+and reproduce identically across two full reruns each. Unlike DRAW SITE 5/6/7
+below, this site needed **zero navigation** (the opponent's own kit never
+needs a second move — the doc's own "cheapest of the four remaining sites"
+call, confirmed live) — only a calibrated mash-rep count (74 reps for reach,
+49 for control, both with a wide empirically-confirmed no-overshoot margin
+before the next real turn's own move would otherwise get blindly confirmed;
+`tools/battle-lab/mechanic-factory-ai-cv-evasionup-site2-{reach,control}-
+off.json`).
 
 **DRAW SITE 3 / DRAW SITE 4, live-verified** (`:1048`/`:1050`, target
 `STATUS1_TOXIC_POISON`) — this follow-up side-lane session (Battle Scene OFF
@@ -4174,18 +4249,8 @@ same decision, which the old model cannot produce at all. This is the live
 corroboration `docs/factory-ai-draw-discrepancy-probe.md` §7.4 asked a
 future session to add.
 
-The 4 remaining sites below are still recipe-only:
+The 3 remaining sites below are still recipe-only:
 
-- **DRAW SITE 2** (`:1043`, `score -1`, reached iff the **opponent's own**
-  evasion stage is already ≥ 9): stage it with the identical-4-slots
-  `MOVE_DOUBLE_TEAM` kit itself — 3 executed turns raise the stage 6→7→8→9,
-  then a 4th turn's (or phantom) decision reaches the roll with Gate A held
-  false (opponent HP kept ≥ 90% throughout, e.g. via a 0-power target move)
-  to avoid DRAW SITE 1 contaminating the same window. Cheapest of the four
-  remaining sites — the opponent's own kit does not need a second move at
-  all, unlike sites 5-7 below. Not attempted this session for time (same
-  status as every prior pair's own unstaged "already-built-3-stages" gate,
-  §17.5/§18.6/§19.5/§21.2/§22.5).
 - **DRAW SITE 5** (`:1054`, `score +3`, target `STATUS3_LEECHSEED`): same
   mixed-moveset obstacle DRAW SITE 3/4 used to have, substituting `EFFECT_
   LEECH_SEED` for `EFFECT_TOXIC` — now that the two-Pokémon relay recipe
@@ -4210,8 +4275,8 @@ The 4 remaining sites below are still recipe-only:
    draw sites' exact odds and score deltas, `EvasionUp`'s own
    `AI_USER`-vs-`AI_TARGET` Gate I flip vs `AccuracyDown` (the exact kind of
    trap this doc's "never copy a sibling's gate map" rule exists to catch,
-   §17/§18/§21/§22), and live-verified twin/triple fixtures proving 2 of
-   `EvasionUp`'s 8 sites and `EvasionDown`'s 1 site end-to-end.
+   §17/§18/§21/§22), and live-verified fixtures proving 5 of `EvasionUp`'s 8
+   sites (1, 2, 3, 4, 8) and `EvasionDown`'s 1 site end-to-end.
 2. **A worked example of a disjoint-threshold twin-site handler**: unlike
    `AccuracyDown`'s two gates sharing one 70% threshold (allowing a 2-
    fixture design, §19.3), `EvasionUp`'s Gate A (90%) and Gate H (70%) are
@@ -4225,16 +4290,19 @@ The 4 remaining sites below are still recipe-only:
    is `MOVE_SWEET_SCENT` (`EFFECT_EVASION_DOWN_2` contributes zero). No
    correction to §5's table is needed — both "Exec moves: 1" entries are
    correct, now with a named move behind each.
-4. **4 explicit, citation-backed recipes** (24.5) for a future porter,
-   each naming exactly why it needs more than the identical-4-slots trick
-   (a real, unforced AI pick between two structurally different moves, or a
-   multi-turn stat-stage build) — the same discipline §19.5 established for
-   `AccuracyDown`'s own unstaged sites. A follow-up side-lane session closed
-   DRAW SITE 3/4 (the toxic-poison chain) with the two-Pokémon opponent
-   relay recipe §19.5 itself suggested — live per-site attribution confirms
-   the chained-fall-through model from `docs/factory-ai-draw-discrepancy-
-   probe.md` §7.1/§7.3 (commit 20f09bb), not the pre-fix "two mutually
-   exclusive single-draw sites" model (24.5).
+4. **3 explicit, citation-backed recipes** (24.5) remain for a future porter
+   (DRAW SITE 5/6/7, all needing a genuine mixed-moveset AI pick or a
+   Ghost-typed opponent), each naming exactly why it needs more than the
+   identical-4-slots trick — the same discipline §19.5 established for
+   `AccuracyDown`'s own unstaged sites. Two follow-up side-lane sessions
+   closed the other three: DRAW SITE 3/4 (the toxic-poison chain) with the
+   two-Pokémon opponent relay recipe §19.5 itself suggested — live per-site
+   attribution confirms the chained-fall-through model from `docs/factory-ai-
+   draw-discrepancy-probe.md` §7.1/§7.3 (commit 20f09bb), not the pre-fix
+   "two mutually exclusive single-draw sites" model — and DRAW SITE 2 (the
+   evasion-stage build) with a 3-turn/2-turn executed-turn-count pair, zero
+   navigation needed, whose live evidence also corrected the recipe's own
+   prior Gate A polarity error (24.5).
 
 ### 24.7 Confirm-or-correct: census cross-check for `EVASION_UP`/`MINIMIZE`/`EVASION_DOWN`
 
@@ -4281,6 +4349,11 @@ node --experimental-strip-types tools/probe/verify-factory-ai-checkviability-gro
 `evasionup-toxicchain-{reach,control}` pair (24.5) — every prior scenario
 unchanged and still green. **Full script run live this session: 350
 PASS, 0 FAIL, `ALL PASS`.**
+
+**Second follow-up side-lane session (2026-07-27) extended it again** with
+the `evasionup-site2-{reach,control}` pair (24.5) — every prior scenario
+unchanged and still green. **Full script run live this session, twice: 428
+PASS, 0 FAIL, `ALL PASS` both times.**
 
 ## 25. 2026-07-26 addendum #15: `AI_CBM_RainDance` + `AI_CV_RainDance`, `AI_CBM_SunnyDay` + `AI_CV_SunnyDay`, `AI_CBM_Hail` + `AI_CV_Hail` — the weather trio, §5's own open CBM-weather question answered, and a real `RainDance`/`SunnyDay` sibling divergence
 
