@@ -27,6 +27,8 @@ const SLAM = 21; // EFFECT_HIT, power 80, accuracy 75, TYPE_NORMAL
 const ROCK_SLIDE = 157; // EFFECT_FLINCH_HIT, power 75, accuracy 90, MOVE_TARGET_BOTH
 const EARTHQUAKE = 89; // EFFECT_EARTHQUAKE, power 100, accuracy 100, MOVE_TARGET_FOES_AND_ALLY
 const ABILITY_PRESSURE = 46;
+const COUNTER = 68; // EFFECT_COUNTER, power 1, accuracy 100, TYPE_FIGHTING
+const MIRROR_COAT = 243; // EFFECT_MIRROR_COAT, power 1, accuracy 100, TYPE_PSYCHIC
 
 function battler(changes: Partial<BattleScriptRulesBattler> & { maxHP?: number } = {}): BattleScriptRulesBattler {
   return Object.freeze({
@@ -1352,6 +1354,83 @@ describe("EFFECT_ENDEAVOR: full committed script, live-oracle-pinned ground trut
       if (result.kind !== "advanced") throw new Error("expected advance");
       expect(result.state.programCounter).toBe(labelPc("BattleScript_ButItFailed"));
       expect(result.state.rng.calls).toBe(0);
+      expect(steps).toBeLessThan(50);
+    },
+  );
+});
+
+/**
+ * FRONTIER GATE: EFFECT_COUNTER/EFFECT_MIRROR_COAT's real committed scripts
+ * (`BattleScript_EffectCounter`/`BattleScript_EffectMirrorCoat` --
+ * attackcanceler, counter/mirrorcoatdamagecalculator, accuracycheck,
+ * attackstring, ppreduce, typecalc2, adjustsetdamage, goto
+ * BattleScript_HitFromAtkAnimation) now run end to end through this
+ * session's new opcodes, landing in the same generic hit-chain tail every
+ * other EFFECT_HIT-family move already proves reachable. `protectPhysicalDmg`/
+ * `protectSpecialDmg` are seeded directly here (proven as a real write-through
+ * of `Cmd_datahpupdate` by the datahpupdate describe block above) --
+ * matching the committed ledger `Cmd_counterdamagecalculator`/
+ * `Cmd_mirrorcoatdamagecalculator` themselves read, mid-turn, from an
+ * earlier action's hit. Ground truth pinned live this session (`bin/oracle
+ * lab tools/battle-lab/mechanic-fixed-damage-{counter,mirrorcoat}-{hit,fail}.json`,
+ * docs/counter-retaliation-design.md §4 step 7): Electrode (opponent) vs
+ * Shuckle (player) at Level 50, Pound/Water Gun then Counter/Mirror Coat.
+ */
+describe("EFFECT_COUNTER / EFFECT_MIRROR_COAT: full committed script, live-oracle-pinned ground truth", () => {
+  it(
+    "Counter success: reaches BattleScript_HitFromAtkAnimation with gBattleMoveDamage 4 "
+      + "(live oracle: Electrode's Pound dealt 2 to Shuckle, Shuckle's Counter dealt 4 back)",
+    () => {
+      const rc = context(0, { protectPhysicalDmg: 2, protectPhysicalBattlerId: 1 }, { currentMove: COUNTER }, { hp: 100 });
+      const { result, steps } = runUntilLabel("BattleScript_EffectCounter", "BattleScript_HitFromAtkAnimation", rc);
+      expect(result.kind).toBe("advanced");
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_HitFromAtkAnimation"));
+      expect(result.state.rulesContext.battleMoveDamage).toBe(4);
+      expect(result.state.rulesContext.selectorRoles.target).toBe(1);
+      expect(steps).toBeLessThan(50);
+    },
+  );
+
+  it(
+    "Counter fail: no physical hit recorded this turn -- jumps straight to BattleScript_FailedFromAtkString "
+      + "(live oracle: Electrode's Growl is a status move, no HP change either side)",
+    () => {
+      const rc = context(0, {}, { currentMove: COUNTER }, { hp: 100 });
+      const { result, steps } = runUntilLabel("BattleScript_EffectCounter", "BattleScript_FailedFromAtkString", rc);
+      expect(result.kind).toBe("advanced");
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_FailedFromAtkString"));
+      expect(result.state.rulesContext.battleMoveDamage).toBe(0);
+      expect(steps).toBeLessThan(50);
+    },
+  );
+
+  it(
+    "Mirror Coat success: reaches BattleScript_HitFromAtkAnimation with gBattleMoveDamage 32 "
+      + "(live oracle: Electrode's Water Gun dealt 16 to Shuckle, Shuckle's Mirror Coat dealt 32 back)",
+    () => {
+      const rc = context(0, { protectSpecialDmg: 16, protectSpecialBattlerId: 1 }, { currentMove: MIRROR_COAT }, { hp: 100 });
+      const { result, steps } = runUntilLabel("BattleScript_EffectMirrorCoat", "BattleScript_HitFromAtkAnimation", rc);
+      expect(result.kind).toBe("advanced");
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_HitFromAtkAnimation"));
+      expect(result.state.rulesContext.battleMoveDamage).toBe(32);
+      expect(result.state.rulesContext.selectorRoles.target).toBe(1);
+      expect(steps).toBeLessThan(50);
+    },
+  );
+
+  it(
+    "Mirror Coat fail: no special hit recorded this turn -- jumps straight to BattleScript_FailedFromAtkString "
+      + "(live oracle: Electrode's Growl is a status move, no HP change either side)",
+    () => {
+      const rc = context(0, {}, { currentMove: MIRROR_COAT }, { hp: 100 });
+      const { result, steps } = runUntilLabel("BattleScript_EffectMirrorCoat", "BattleScript_FailedFromAtkString", rc);
+      expect(result.kind).toBe("advanced");
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_FailedFromAtkString"));
+      expect(result.state.rulesContext.battleMoveDamage).toBe(0);
       expect(steps).toBeLessThan(50);
     },
   );
