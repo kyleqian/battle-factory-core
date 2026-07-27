@@ -518,6 +518,10 @@ import {
   DRAGON_RAGE_FRAMEBUFFER_FIRE_SPIT_AGE_LAG,
   DRAGON_RAGE_FRAMEBUFFER_FIRE_PLUME_AGE_LAG,
 } from "../animation/dragonRage.ts";
+import {
+  compositeGbaObjScanlines,
+  type GbaObjRaster,
+} from "../animation/gbaObjCompositor.ts";
 
 import battleAnimRocksAsset from "../assets/gen/battle-anim-rocks.json" with { type: "json" };
 import battleAnimMudSandAsset from "../assets/gen/battle-anim-mud-sand.json" with { type: "json" };
@@ -666,6 +670,7 @@ import {
   SHADOW_PUNCH_TRACE_BLEND_COEFF,
 } from "../animation/shadowPunch.ts";
 import { speciesFrontIdleRestOffset } from "../animation/speciesIdleAnim.ts";
+import { encoreTargetX2AtAge } from "../animation/encore.ts";
 import { dragonClawDisplayedAttackerShakeY } from "../animation/dragonClaw.ts";
 import {
   SITRUS_ITEM_HEAL_TEXT_FIRST_AGE,
@@ -2597,8 +2602,7 @@ function drawSpriteSheetHFlip(
   }
 }
 
-function markAffineDoubleSpriteMask(
-  mask: Uint8Array,
+function affineDoubleSpriteMaskRaster(
   tileset: Tileset,
   centerX: number,
   centerY: number,
@@ -2606,9 +2610,20 @@ function markAffineDoubleSpriteMask(
   pb: number,
   pc: number,
   pd: number,
-): void {
+): {
+  readonly x: number;
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
+  readonly pixels: readonly (RgbColor | null)[];
+} {
   const width = tileset.columns * 8;
   const height = tileset.rows * 8;
+  const rasterWidth = width * 2;
+  const rasterHeight = height * 2;
+  const marker = { r: 0, g: 0, b: 0 };
+  const pixels: (RgbColor | null)[] =
+    new Array(rasterWidth * rasterHeight).fill(null);
   // GBA affine-double OBJ sampling, in the same integer form as the PPU:
   // the destination box is twice the declared OBJ size, its reference point
   // remains the declared-size center, and the signed 8.8 matrix maps each
@@ -2628,12 +2643,41 @@ function markAffineDoubleSpriteMask(
         + Math.floor(sourceX / 8)
       ];
       if (!tile?.[(sourceY % 8) * 8 + (sourceX % 8)]) continue;
-      const x = centerX + dx, y = centerY + dy;
-      if (x >= 0 && x < 240 && y >= 0 && y < 160) {
-        mask[y * 240 + x] = 1;
-      }
+      pixels[localY * rasterWidth + localX] = marker;
     }
   }
+  return {
+    x: centerX - width,
+    y: centerY - height,
+    width: rasterWidth,
+    height: rasterHeight,
+    pixels,
+  };
+}
+
+function spriteSheetRaster(
+  tileset: Tileset,
+  palette: readonly RgbColor[],
+  hFlip = false,
+): {
+  readonly width: number;
+  readonly height: number;
+  readonly pixels: readonly (RgbColor | null)[];
+} {
+  const width = tileset.columns * 8;
+  const height = tileset.rows * 8;
+  const pixels: (RgbColor | null)[] = new Array(width * height).fill(null);
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      const sourceX = hFlip ? width - 1 - x : x;
+      const tile = tileset.tiles[
+        Math.floor(y / 8) * tileset.columns + Math.floor(sourceX / 8)
+      ];
+      const index = tile?.[(y % 8) * 8 + (sourceX % 8)] ?? 0;
+      if (index !== 0) pixels[y * width + x] = palette[index] ?? null;
+    }
+  }
+  return { width, height, pixels };
 }
 
 /**
@@ -16068,6 +16112,7 @@ export function renderSceneOnMovePresentation(
   if (state.config.move === "ENCORE") {
     const view = sceneOnEncoreView(state);
     const displayed = sceneOnEncoreView({ ...state, age: state.age - 1 });
+    const displayedTarget = sceneOnEncoreView({ ...state, age: state.age - 2 });
     const fieldProfile = state.config.fieldProfile;
     const playerToOpponent =
       view.attacker.species === "MINUN"
@@ -16097,122 +16142,194 @@ export function renderSceneOnMovePresentation(
           },
         };
     const onixSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
-    const normalField = new Uint8Array(fb.length);
-    const drawNormalField = (targetFb: Uint8Array) => {
-      drawTileBg(
-        targetFb,
-        battleBg.static.tileset,
-        battleBg.static.tilemap,
-        battleBg.palette,
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+
+    const opponentHealthbox = composeOpponentHealthbox(
+      healthboxAssemblyAssets,
+      {
+        name: playerToOpponent ? "ONIX" : "MINUN",
+        level: 50,
+        gender: playerToOpponent ? "male" : "female",
+        hpFraction: fieldProfile.opponentHp / fieldProfile.opponentMaxHp,
+        status: "none",
+      },
+    );
+    const playerHealthbox = composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerToOpponent ? "MINUN" : "ONIX",
+      level: 50,
+      gender: playerToOpponent ? "female" : "male",
+      hpFraction: fieldProfile.playerHp / fieldProfile.playerMaxHp,
+      status: "none",
+      currentHp: fieldProfile.playerHp,
+      maxHp: fieldProfile.playerMaxHp,
+    });
+    const minunRaster = spriteSheetRaster(
+      minunSprite.tileset,
+      minunSprite.palette,
+    );
+    const onixRaster = spriteSheetRaster(
+      onixSprite.tileset,
+      onixSprite.palette,
+    );
+    const rasters: GbaObjRaster<RgbColor>[] = [];
+    const cycleOnly = (
+      oamIndex: number,
+      declaredWidth: number,
+      x: number,
+      y: number,
+      width: number,
+      height: number,
+    ): GbaObjRaster<RgbColor> => ({
+      oamIndex,
+      priority: 0,
+      mode: "normal",
+      declaredWidth,
+      x,
+      y,
+      width,
+      height,
+      pixels: new Array(width * height).fill(null),
+    });
+    // The five HP/icon sub-OBJs have already been CPU-composited into the
+    // two healthbox canvases.  Keep their source OAM fetch costs as
+    // transparent entries so the scanline budget remains faithful.
+    rasters.push(
+      cycleOnly(0, 32, 158, 88, 32, 8),
+      cycleOnly(1, 32, 190, 88, 32, 8),
+      cycleOnly(2, 32, 36, 30, 32, 8),
+      cycleOnly(3, 32, 68, 30, 32, 8),
+      cycleOnly(4, 8, 20, 30, 8, 8),
+      {
+        oamIndex: 5,
+        priority: 0,
+        mode: "normal",
+        declaredWidth: 128,
+        x: PLAYER_HEALTHBOX_FRAME_ORIGIN.x,
+        y: PLAYER_HEALTHBOX_FRAME_ORIGIN.y,
+        ...playerHealthbox,
+      },
+      {
+        oamIndex: 7,
+        priority: 0,
+        mode: "normal",
+        declaredWidth: 128,
+        x: HEALTHBOX_FRAME_ORIGIN.x,
+        y: HEALTHBOX_FRAME_ORIGIN.y,
+        ...opponentHealthbox,
+      },
+    );
+
+    const initialTargetX2 = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX")?.x2 ?? 0
+      : 0;
+    const targetX2 = encoreTargetX2AtAge(
+      displayedTarget.age,
+      view.attacker.geometry.side,
+      initialTargetX2,
+    );
+    rasters.push(
+      {
+        oamIndex: playerToOpponent ? 13 : 15,
+        priority: 2,
+        mode: "normal",
+        declaredWidth: 64,
+        x: view.attacker.geometry.spriteCorner.x,
+        y: view.attacker.geometry.spriteCorner.y,
+        ...minunRaster,
+      },
+      {
+        oamIndex: playerToOpponent ? 15 : 10,
+        priority: 2,
+        mode: "normal",
+        declaredWidth: 64,
+        x: view.target.geometry.spriteCorner.x + targetX2,
+        // AnimTask_SwayMon is created after this frame's sprite callback and
+        // OAM-build epochs. Its first write therefore reaches the framebuffer
+        // two reducer ages after RAM, then follows that stable transfer lag.
+        // The component comparator keeps checking current RAM y2 separately.
+        y: view.target.geometry.spriteCorner.y + displayedTarget.targetY2,
+        ...onixRaster,
+      },
+    );
+
+    const normalHandIndices = playerToOpponent ? [11, 12] : [13, 14];
+    const windowHandIndices = playerToOpponent ? [10, 9] : [12, 11];
+    for (let index = 0; index < displayed.hands.length; index += 1) {
+      const hand = displayed.hands[index]!;
+      const raster = spriteSheetRaster(
+        encoreArt.clappingHand.tileset,
+        encoreArt.clappingHand.palette,
+        hand.hFlip,
       );
-      const drawMinun = () => drawSpriteSheet(
-        targetFb,
-        minunSprite.tileset,
-        minunSprite.palette,
-        view.attacker.geometry.spriteCorner.x,
-        view.attacker.geometry.spriteCorner.y,
-      );
-      const targetRestX = playerToOpponent
-        ? speciesFrontIdleRestOffset("ONIX")?.x2 ?? 0
-        : 0;
-      const drawOnix = () => drawSpriteSheet(
-        targetFb,
-        onixSprite.tileset,
-        onixSprite.palette,
-        view.target.geometry.spriteCorner.x + targetRestX,
-        view.target.geometry.spriteCorner.y + view.targetY2,
-      );
-      // GBA priority order: opponent-front below player-back.
-      if (playerToOpponent) {
-        drawOnix();
-        drawMinun();
-      } else {
-        drawMinun();
-        drawOnix();
+      const common = {
+        priority: 2 as const,
+        declaredWidth: 32,
+        x: hand.centerX + hand.x2 - 16,
+        y: hand.centerY - 16,
+        ...raster,
+      };
+      rasters.push({
+        ...common,
+        oamIndex: normalHandIndices[index]!,
+        mode: "normal",
+      });
+      if (view.objWindowEnabled) {
+        rasters.push({
+          ...common,
+          oamIndex: windowHandIndices[index]!,
+          mode: "objWindow",
+        });
       }
-      drawSendOutHealthbox(
-        targetFb,
-        0,
-        composeOpponentHealthbox(healthboxAssemblyAssets, {
-          name: playerToOpponent ? "ONIX" : "MINUN",
-          level: 50,
-          gender: playerToOpponent ? "male" : "female",
-          hpFraction: fieldProfile.opponentHp / fieldProfile.opponentMaxHp,
-          status: "none",
-        }),
-      );
-      drawComposedPlayerHealthbox(
-        targetFb,
-        composePlayerHealthbox(playerHealthboxAssets, {
-          name: playerToOpponent ? "MINUN" : "ONIX",
-          level: 50,
-          gender: playerToOpponent ? "female" : "male",
-          hpFraction: fieldProfile.playerHp / fieldProfile.playerMaxHp,
-          status: "none",
-          currentHp: fieldProfile.playerHp,
-          maxHp: fieldProfile.playerMaxHp,
-        }),
-      );
-    };
-    drawNormalField(normalField);
-    fb.set(normalField);
-    if (view.bldy > 0) {
-      for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
-        const offset = pixel * 4;
-        const packed = mgbaDarkenColor(
-          fb[offset]! | (fb[offset + 1]! << 8) | (fb[offset + 2]! << 16),
-          view.bldy,
-        );
-        fb[offset] = packed & 0xff;
-        fb[offset + 1] = (packed >>> 8) & 0xff;
-        fb[offset + 2] = (packed >>> 16) & 0xff;
-      }
     }
-    const restoreMask = new Uint8Array(240 * 160);
-    if (view.win1Enabled) {
-      restoreMask.fill(1, 120 * 240);
+
+    const spotlight = view.spotlight ?? displayed.spotlight;
+    if (view.objWindowEnabled && spotlight) {
+      const displayedSpotlight = displayed.spotlight ?? spotlight;
+      rasters.push({
+        oamIndex: playerToOpponent ? 14 : 9,
+        priority: 2,
+        mode: "objWindow",
+        declaredWidth: 64,
+        affine: true,
+        doubleSize: true,
+        ...affineDoubleSpriteMaskRaster(
+          encoreArt.spotlight.tileset,
+          displayedSpotlight.centerX + displayedSpotlight.x2,
+          displayedSpotlight.centerY,
+          spotlight.pa,
+          spotlight.pb,
+          spotlight.pc,
+          spotlight.pd,
+        ),
+      });
     }
-    if (view.objWindowEnabled && view.spotlight) {
-      markAffineDoubleSpriteMask(
-        restoreMask,
-        encoreArt.spotlight.tileset,
-        view.spotlight.centerX + view.spotlight.x2,
-        view.spotlight.centerY,
-        view.spotlight.pa,
-        view.spotlight.pb,
-        view.spotlight.pc,
-        view.spotlight.pd,
-      );
-    }
-    for (let pixel = 0; pixel < restoreMask.length; pixel += 1) {
-      if (!restoreMask[pixel]) continue;
+
+    const composite = compositeGbaObjScanlines(240, 160, rasters);
+    for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
+      const normalPixel = composite.normalPixels[pixel];
       const offset = pixel * 4;
-      fb[offset] = normalField[offset]!;
-      fb[offset + 1] = normalField[offset + 1]!;
-      fb[offset + 2] = normalField[offset + 2]!;
-    }
-    // Each normal hand is covered by its identical OBJ-window copy, so
-    // color effects are disabled for every opaque hand texel.
-    for (const hand of displayed.hands) {
-      const x = hand.centerX + hand.x2 - 16;
-      const y = hand.centerY - 16;
-      if (hand.hFlip) {
-        drawSpriteSheetHFlip(
-          fb,
-          encoreArt.clappingHand.tileset,
-          encoreArt.clappingHand.palette,
-          x,
-          y,
-        );
-      } else {
-        drawSpriteSheet(
-          fb,
-          encoreArt.clappingHand.tileset,
-          encoreArt.clappingHand.palette,
-          x,
-          y,
-        );
+      if (normalPixel) {
+        fb[offset] = normalPixel.r;
+        fb[offset + 1] = normalPixel.g;
+        fb[offset + 2] = normalPixel.b;
       }
+      const y = Math.floor(pixel / 240);
+      const inWin1 = view.win1Enabled && y >= 120;
+      if (view.bldy === 0 || inWin1 || composite.objWindowMask[pixel]) {
+        continue;
+      }
+      const packed = mgbaDarkenColor(
+        fb[offset]! | (fb[offset + 1]! << 8) | (fb[offset + 2]! << 16),
+        view.bldy,
+      );
+      fb[offset] = packed & 0xff;
+      fb[offset + 1] = (packed >>> 8) & 0xff;
+      fb[offset + 2] = (packed >>> 16) & 0xff;
     }
     drawTileBg(
       fb,

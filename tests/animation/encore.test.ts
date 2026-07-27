@@ -4,6 +4,7 @@ import {
   encoreBldyAtAge,
   encoreHandsAtAge,
   encoreSpotlightAtAge,
+  encoreTargetX2AtAge,
   encoreTargetY2AtAge,
 } from "../../src/animation/encore.ts";
 
@@ -53,6 +54,8 @@ describe("Encore source reducer", () => {
     expect(encoreTargetY2AtAge(60, "player")).toBe(-1);
     expect(encoreTargetY2AtAge(60, "opponent")).toBe(2);
     expect(encoreTargetY2AtAge(167, "player")).toBe(0);
+    expect(encoreTargetX2AtAge(165, "player", 1)).toBe(1);
+    expect(encoreTargetX2AtAge(166, "player", 1)).toBe(0);
     const player = encoreAtAge(
       60, "player", { x: 72, y: 80 }, { x: 176, y: 40 },
     );
