@@ -171,6 +171,10 @@ import {
   type PoisonFangSprite,
 } from "./poisonFang.ts";
 import {
+  poisonTailAtAge,
+  type PoisonTailState,
+} from "./poisonTail.ts";
+import {
   toxicEffectAtAge,
   type ToxicSprite,
 } from "./toxic.ts";
@@ -330,7 +334,8 @@ export interface SceneOnPresentationBattler {
     | "SABLEYE"
     | "ALTARIA"
     | "AZURILL"
-    | "CLAMPERL";
+    | "CLAMPERL"
+    | "SEVIPER";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -795,6 +800,13 @@ export interface SceneOnPoisonFangConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnPoisonTailConfig {
+  readonly move: "POISON_TAIL";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnToxicConfig {
   readonly move: "TOXIC";
   readonly attacker: SceneOnPresentationBattler;
@@ -923,6 +935,7 @@ export type SceneOnMoveConfig =
   | SceneOnSludgeConfig
   | SceneOnSludgeBombConfig
   | SceneOnPoisonFangConfig
+  | SceneOnPoisonTailConfig
   | SceneOnToxicConfig
   | SceneOnEarthquakeConfig
   | SceneOnHardenConfig
@@ -993,6 +1006,12 @@ export interface SceneOnPoisonFangView {
   readonly targetOffset: Readonly<{ x2: number; y2: number }>;
   readonly defenderPaletteY: number;
   readonly sprites: readonly PoisonFangSprite[];
+}
+
+export interface SceneOnPoisonTailView extends PoisonTailState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
 }
 
 export interface SceneOnToxicView {
@@ -2023,6 +2042,26 @@ export function sceneOnPoisonFangView(
     ...poisonFangEffectAtAge(
       state.age,
       state.config.attacker.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is the MetallicShine initializer's first displayed frame. */
+export function sceneOnPoisonTailView(
+  state: SceneOnMovePresentationState,
+): SceneOnPoisonTailView {
+  if (state.config.move !== "POISON_TAIL") {
+    throw new Error(`expected POISON_TAIL presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...poisonTailAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
       state.config.target.geometry.animationCenter,
     ),
   };

@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { poisonTailAtAge } from "../../src/animation/poisonTail.ts";
+import {
+  createSceneOnMovePresentation,
+  sceneOnPoisonTailView,
+} from "../../src/animation/sceneOnPresentation.ts";
 
 describe("Move_POISON_TAIL source-relative reducer", () => {
   it("reuses permanent MetallicShine and mirrors the horizontal lunge", () => {
@@ -28,5 +32,45 @@ describe("Move_POISON_TAIL source-relative reducer", () => {
     const atLast = poisonTailAtAge(162, "player", { x: 72, y: 90 }, { x: 176, y: 42 });
     expect(atFirst.bubbles.map((sprite) => sprite.spawnIndex)).toEqual([0]);
     expect(atLast.bubbles.map((sprite) => sprite.spawnIndex)).toContain(5);
+  });
+
+  it("exposes the same reducer through the relative Scene-ON presentation seam", () => {
+    const state = createSceneOnMovePresentation({
+      move: "POISON_TAIL",
+      attacker: {
+        species: "SEVIPER",
+        geometry: {
+          side: "player",
+          spriteCorner: { x: 40, y: 51 },
+          animationCenter: { x: 72, y: 83 },
+          battlePositionCenter: { x: 72, y: 80 },
+        },
+      },
+      target: {
+        species: "ONIX",
+        geometry: {
+          side: "opponent",
+          spriteCorner: { x: 144, y: 10 },
+          animationCenter: { x: 176, y: 42 },
+          battlePositionCenter: { x: 176, y: 40 },
+        },
+      },
+      fieldProfile: {
+        playerHp: 168,
+        playerMaxHp: 180,
+        opponentHp: 110,
+        opponentMaxHp: 110,
+      },
+    });
+    const view = sceneOnPoisonTailView({ ...state, age: 122 });
+    expect(view).toMatchObject({
+      age: 122,
+      attackerX2: 0,
+      targetX2: 0,
+      monbg: true,
+      alpha: true,
+      attackerPaletteRestored: true,
+    });
+    expect(view.bubbles.map((sprite) => sprite.spawnIndex)).toEqual([0]);
   });
 });

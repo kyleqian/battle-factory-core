@@ -547,6 +547,7 @@ import acidAsset from "../animation/assets/acid.json" with { type: "json" };
 import sludgeAsset from "../animation/assets/sludge.json" with { type: "json" };
 import sludgeBombAsset from "../animation/assets/sludgeBomb.json" with { type: "json" };
 import poisonFangAsset from "../animation/assets/poisonFang.json" with { type: "json" };
+import poisonTailAsset from "../animation/assets/poisonTail.json" with { type: "json" };
 import toxicAsset from "../animation/assets/toxic.json" with { type: "json" };
 import hardenAsset from "../animation/assets/harden.json" with { type: "json" };
 import calmMindAsset from "../animation/assets/calm-mind.json" with { type: "json" };
@@ -653,6 +654,7 @@ import {
   sceneOnSludgeView,
   sceneOnSludgeBombView,
   sceneOnPoisonFangView,
+  sceneOnPoisonTailView,
   sceneOnToxicView,
   sceneOnEarthquakeView,
   sceneOnHardenView,
@@ -981,6 +983,13 @@ const poisonFangArt = poisonFangAsset as {
   poisonBubble: { tileset: Tileset; palette: RgbColor[] };
   zubatBack: { tileset: Tileset; palette: RgbColor[] };
   zubatFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const poisonTailArt = poisonTailAsset as {
+  metal: { tileset: Tileset; tilemap: Tilemap; palette: RgbColor[] };
+  impact: { tileset: Tileset; palette: RgbColor[] };
+  poisonBubble: { tileset: Tileset; palette: RgbColor[] };
+  seviperBack: { tileset: Tileset; palette: RgbColor[] };
+  seviperFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const toxicArt = toxicAsset as {
   toxicBubble: { tileset: Tileset; palette: RgbColor[] };
@@ -2831,8 +2840,9 @@ function drawMetallicShineMasked(
   corner: Readonly<{ x: number; y: number }>,
   scrollX: number,
   scrollY: number,
+  metal: { tileset: Tileset; tilemap: Tilemap; palette: RgbColor[] }
+    = hardenArt.metal,
 ): void {
-  const metal = hardenArt.metal;
   const mapWidth = metal.tilemap.width * 8;
   const mapHeight = metal.tilemap.height * 8;
   for (let sy = 0; sy < attacker.tileset.rows * 8; sy += 1) {
@@ -15400,6 +15410,158 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "CLAMPERL used" : "Foe CLAMPERL used",
       "TOXIC!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "POISON_TAIL") {
+    const view = sceneOnPoisonTailView(state);
+    // Task, sprite, and palette RAM is transferred through the shared
+    // BuildOamBuffer/VBlank seam. MetallicShine's interpreter initializer
+    // has its own source-pinned two-display setup, while later OBJ writes
+    // become visible one display after their reducer state.
+    const displayed = sceneOnPoisonTailView({ ...state, age: state.age - 1 });
+    const targetDisplayed = sceneOnPoisonTailView({
+      ...state,
+      age: state.age - 2,
+    });
+    const playerToOpponent =
+      view.attacker.species === "SEVIPER"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "SEVIPER"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged POISON_TAIL pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const seviperSource = playerToOpponent
+      ? poisonTailArt.seviperBack
+      : poisonTailArt.seviperFront;
+    const seviperSprite = playerToOpponent
+      ? seviperSource
+      : {
+          ...seviperSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: seviperSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const onixSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const poisonTint = { r: 198, g: 49, b: 189 };
+    const targetIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    const targetX2 = state.age < 113
+      ? targetIdle.x2
+      : targetDisplayed.targetX2;
+    const attackerPalette = state.age >= 2
+      && !displayed.attackerPaletteRestored
+      ? blendPaletteToward(seviperSprite.palette, poisonTint, 11)
+      : seviperSprite.palette;
+
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    drawSpriteSheet(
+      fb,
+      onixSprite.tileset,
+      onixSprite.palette,
+      view.target.geometry.spriteCorner.x + targetX2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    const target2Backdrop = fb.slice();
+    drawSpriteSheet(
+      fb,
+      seviperSprite.tileset,
+      attackerPalette,
+      view.attacker.geometry.spriteCorner.x + displayed.attackerX2,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    if (state.age >= 2 && displayed.metallic.metalBgLoaded) {
+      drawMetallicShineMasked(
+        fb,
+        seviperSprite,
+        view.attacker.geometry.spriteCorner,
+        displayed.metallic.bg1X,
+        displayed.metallic.bg1Y,
+        poisonTailArt.metal,
+      );
+    }
+    if (displayed.hitsplatVisible) {
+      drawSpriteSheetAffineStretchBlendedOverFb(
+        fb,
+        poisonTailArt.impact.tileset,
+        poisonTailArt.impact.palette,
+        view.target.geometry.animationCenter.x - 16,
+        view.target.geometry.animationCenter.y - 16,
+        372,
+        372,
+        12,
+        8,
+        false,
+        target2Backdrop,
+      );
+    }
+    for (const sprite of displayed.bubbles) {
+      drawSpriteSheetAffineRotate(
+        fb,
+        {
+          columns: 2,
+          rows: 2,
+          tiles: poisonTailArt.poisonBubble.tileset.tiles.slice(0, 4),
+        },
+        poisonTailArt.poisonBubble.palette,
+        sprite.x,
+        sprite.y,
+        sprite.xScale,
+        0,
+        0,
+        sprite.yScale,
+      );
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "SEVIPER";
+    const playerSpecies = playerToOpponent ? "SEVIPER" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "SEVIPER used" : "Foe SEVIPER used",
+      "POISON TAIL!",
       99,
     );
     return;
