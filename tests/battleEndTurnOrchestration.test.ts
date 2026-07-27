@@ -960,4 +960,116 @@ describe("runBattleEndTurnOrchestration (BattleTurnPassed equivalent)", () => {
       });
     },
   );
+
+  describe(
+    "(g) ENDTURN_ITEMS2 (ItemBattleEffects(ITEMEFFECT_MOVE_END, battler, TRUE), docs/yawn-thrash-endturn-design.md §5, Rung 3)",
+    () => {
+      describe("moveTurn gate: no-double-fire regression, one per §5's must-gate row", () => {
+        it("Leftovers heals exactly once per tick (ITEMS1 only) -- an ungated ITEMS2 call would heal a second time", () => {
+          const rc = context({
+            battlers: [
+              battler({ side: 0 }),
+              battler({ side: 1, hp: 100, maxHP: 160, item: ITEM_LEFTOVERS, partyIndex: 2 }),
+              battler({ side: 0 }),
+              battler({ side: 1 }),
+            ],
+            party: { player: sixSlots(100), opponent: sixSlots(0, 0, 100) },
+          });
+          const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+          const initial = scratchState(rc, 1);
+          const result = runBattleEndTurnOrchestration(program, handlers, initial);
+          expect(result.kind).toBe("next-turn");
+          if (result.kind !== "next-turn") throw new Error("expected next-turn");
+          // 100 + floor(160/16) = 110 -- NOT 120, which is what a second, ungated ITEMS2 heal would produce.
+          expect(result.state.rulesContext.battlers[1]!.hp).toBe(110);
+          expect(result.state.rulesContext.party.opponent[2]!.hp).toBe(110);
+          expect(result.state.rulesContext.battlers[1]!.item).toBe(ITEM_LEFTOVERS);
+          expect(result.state.rng.calls).toBe(initial.rng.calls);
+        });
+
+        it(
+          "Liechi Berry does NOT fire at ITEMS2 even though burn drops HP below its threshold mid-tick "
+            + "(stat-up berries gate on !moveTurn -- battle_util.c:3245 -- so they only ever check at ITEMS1)",
+          () => {
+            const rc = context({
+              battlers: [
+                battler({ side: 0 }),
+                // hp=30 > floor(100/4)=25 at ITEMS1 -- does not fire there. Burn then deals floor(100/8)=12,
+                // dropping hp to 18 (<=25) BEFORE ITEMS2 runs. An ungated ITEMS2 call would newly satisfy the
+                // threshold and fire a spurious stat raise; the moveTurn gate must suppress it regardless.
+                battler({ side: 1, hp: 30, maxHP: 100, item: ITEM_LIECHI_BERRY, status1: STATUS1_BURN, partyIndex: 2 }),
+                battler({ side: 0 }),
+                battler({ side: 1 }),
+              ],
+              party: { player: sixSlots(100), opponent: sixSlots(0, 0, 30) },
+            });
+            const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+            const initial = scratchState(rc, 1);
+            const result = runBattleEndTurnOrchestration(program, handlers, initial);
+            expect(result.kind).toBe("next-turn");
+            if (result.kind !== "next-turn") throw new Error("expected next-turn");
+            expect(result.state.rulesContext.battlers[1]!.hp).toBe(18); // burn only: 30 - floor(100/8)
+            expect(result.state.rulesContext.battlers[1]!.statStages[STAT_ATK]).toBe(6); // unchanged
+            expect(result.state.rulesContext.battlers[1]!.item).toBe(ITEM_LIECHI_BERRY); // not consumed
+            expect(result.state.rng.calls).toBe(initial.rng.calls); // burn + (non-firing) Liechi both draw zero RNG
+          },
+        );
+
+        it(
+          "Sitrus Berry's RESTORE_HP case-barrier does NOT fire at ITEMS2 even though burn drops HP below its "
+            + "threshold mid-tick (source never even reaches the RESTORE_HP case at ITEMS2, battle_util.c:3337-3345 -- "
+            + "RESTORE_PP and the zero-carrier UNREACHABLE_AT_FACTORY_L50 set share the identical `!moveTurn &&` gate "
+            + "shape, verified by direct code read, but have no modeled mid-tick PP/possession mutator in this engine "
+            + "to exercise the same live before/after transition)",
+          () => {
+            const rc = context({
+              battlers: [
+                battler({ side: 0 }),
+                // hp=55 > floor(100/2)=50 at ITEMS1 -- does not barrier there. Burn deals floor(100/8)=12,
+                // dropping hp to 43 (<=50) BEFORE ITEMS2 runs. An ungated ITEMS2 call would spuriously barrier.
+                battler({ side: 1, hp: 55, maxHP: 100, item: ITEM_SITRUS_BERRY, status1: STATUS1_BURN, partyIndex: 2 }),
+                battler({ side: 0 }),
+                battler({ side: 1 }),
+              ],
+              party: { player: sixSlots(100), opponent: sixSlots(0, 0, 55) },
+            });
+            const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+            const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
+            expect(result.kind).toBe("next-turn"); // NOT case-barrier
+            if (result.kind !== "next-turn") throw new Error("expected next-turn");
+            expect(result.state.rulesContext.battlers[1]!.hp).toBe(43); // burn only: 55 - floor(100/8)
+            expect(result.state.rulesContext.battlers[1]!.item).toBe(ITEM_SITRUS_BERRY);
+          },
+        );
+      });
+
+      it(
+        "REAL TRIGGER: a Chesto Berry cures the sleep status ENDTURN_YAWN itself just wrote, in the SAME "
+          + "end-turn pass, before ITEMS1 ever saw it (docs/yawn-thrash-endturn-design.md §5's worked example: "
+          + "ITEMS1 runs before YAWN sets status1, so the cure is invisible to that tick's ITEMS1 and can only "
+          + "fire at ITEMS2) -- negative companion for 'no double heal' is the Leftovers test above",
+        () => {
+          const rc = context({
+            battlers: [
+              battler({ side: 0 }),
+              battler({ side: 1, status3: STATUS3_YAWN_TURN_1, item: ITEM_CHESTO_BERRY, partyIndex: 2 }),
+              battler({ side: 0 }),
+              battler({ side: 1 }),
+            ],
+          });
+          const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+          const initial = scratchState(rc, 1);
+          const result = runBattleEndTurnOrchestration(program, handlers, initial);
+          expect(result.kind).toBe("next-turn");
+          if (result.kind !== "next-turn") throw new Error("expected next-turn");
+          // Yawn's own transition already cleared the counter; the cure (ITEMS2) then clears the sleep it just wrote.
+          expect(result.state.rulesContext.battlers[1]!.status3 & STATUS3_YAWN_MASK).toBe(0);
+          expect(result.state.rulesContext.battlers[1]!.status1).toBe(0); // cured in the SAME pass, never "felt"
+          expect(result.state.rulesContext.party.opponent[2]!.status1).toBe(0);
+          expect(result.state.rulesContext.battlers[1]!.item).toBe(0); // consumed
+          expect(result.state.rng.calls).toBe(initial.rng.calls + 1); // only Yawn's own sleep-turn roll; the cure draws none
+        },
+      );
+    },
+  );
 });

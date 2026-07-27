@@ -805,28 +805,35 @@ function runStatus1CureTick(
 }
 
 /**
- * `ENDTURN_ITEMS1` (`ItemBattleEffects(ITEMEFFECT_NORMAL, battler, FALSE)`,
- * `battle_util.c:3331-3622`, docs/endturn-abilities-items-ground-truth.md
- * §1c/§5 slices 4-5): Leftovers, the 8 zero-RNG cure berries, White Herb, and
- * (slice 5) Liechi/Salac/Petaya -- every reachable Factory-legal case this
- * doc names. Every other real switch case this function does not implement
- * barriers on its own genuine trigger condition (RESTORE_HP/RESTORE_PP) or on
- * mere possession (the 4 zero-carrier stat/crit berries + 5 confuse berries,
- * doc §2b -- their own HP-threshold gate needs an unmodeled per-item
- * `battlerHoldEffectParam` table no live Factory carrier will ever exercise).
+ * Backs BOTH `ItemBattleEffects` call sites -- `ENDTURN_ITEMS1`
+ * (`moveTurn = FALSE`, `battle_util.c:3331-3622`) and `ENDTURN_ITEMS2`
+ * (`moveTurn = TRUE`, docs/yawn-thrash-endturn-design.md §5): Leftovers, the
+ * 8 zero-RNG cure berries, White Herb, and Liechi/Salac/Petaya -- every
+ * reachable Factory-legal case this doc names. Every other real switch case
+ * this function does not implement barriers on its own genuine trigger
+ * condition (RESTORE_HP/RESTORE_PP) or on mere possession (the 4
+ * zero-carrier stat/crit berries + 5 confuse berries, doc §2b -- their own
+ * HP-threshold gate needs an unmodeled per-item `battlerHoldEffectParam`
+ * table no live Factory carrier will ever exercise). `moveTurn` gates four
+ * rows per §5's table -- Leftovers, the stat-up berries, and the
+ * RESTORE_HP/RESTORE_PP/unreachable case-barriers all short-circuit to
+ * `"advance"` (source's own case does nothing at all when `moveTurn` is
+ * true, `battle_util.c:3244-3255,3401,3429-3442`) -- White Herb and the 8
+ * cure branches carry no such gate (`:3384,3500-3594`) and stay unconditional.
  */
 function runItemsTick(
   program: BattleScriptProgram,
   handlers: Handlers,
   state: MachineState,
   battler: BattleScriptBattlerId,
+  moveTurn: boolean,
 ): ItemsTickOutcome {
   const b = state.rulesContext.battlers[battler];
   if (b.hp === 0) return Object.freeze({ kind: "advance", state });
   const holdEffect = resolveBattleScriptBattlerHoldEffect(state.rulesContext, battler);
 
   if (holdEffect === HOLD_EFFECT_LEFTOVERS) {
-    if (b.hp >= b.maxHP) return Object.freeze({ kind: "advance", state });
+    if (moveTurn || b.hp >= b.maxHP) return Object.freeze({ kind: "advance", state });
     const heal = Math.min(floorDivAtLeastOne(b.maxHP, 16), b.maxHP - b.hp);
     const rc = Object.freeze({ ...state.rulesContext, battleMoveDamage: -heal });
     return runTickScript(program, handlers, state, rc, battler, ITEM_HEAL_HP_END2_LABEL);
@@ -898,13 +905,13 @@ function runItemsTick(
     return runTickScript(program, handlers, state, rc, battler, BERRY_CURE_CHOSEN_STATUS_END2_LABEL);
   }
 
-  if (holdEffect === HOLD_EFFECT_RESTORE_HP && restoreHpGateFires(b)) {
+  if (holdEffect === HOLD_EFFECT_RESTORE_HP && !moveTurn && restoreHpGateFires(b)) {
     return Object.freeze({
       kind: "case-barrier", state,
       detail: "HOLD_EFFECT_RESTORE_HP (Sitrus/Oran/Berry Juice): heal-amount holdEffectParam lookup + removeitem's own end2 variant is not wired this slice (battle_util.c:3335-3345)",
     });
   }
-  if (holdEffect === HOLD_EFFECT_RESTORE_PP && restorePpGateFires(b)) {
+  if (holdEffect === HOLD_EFFECT_RESTORE_PP && !moveTurn && restorePpGateFires(b)) {
     return Object.freeze({
       kind: "case-barrier", state,
       detail: "HOLD_EFFECT_RESTORE_PP (Leppa): move-slot/PP-bonus recompute + BtlController_EmitSetMonData(REQUEST_PPMOVE1_BATTLE) is not wired this slice (battle_util.c:3347-3373)",
@@ -912,7 +919,7 @@ function runItemsTick(
   }
   const statUpStatId = STAT_UP_BERRIES.get(holdEffect);
   if (statUpStatId !== undefined) {
-    if (b.hp > Math.floor(b.maxHP / STAT_UP_BERRY_HOLD_EFFECT_PARAM) || b.statStages[statUpStatId]! >= MAX_STAT_STAGE) {
+    if (moveTurn || b.hp > Math.floor(b.maxHP / STAT_UP_BERRY_HOLD_EFFECT_PARAM) || b.statStages[statUpStatId]! >= MAX_STAT_STAGE) {
       return Object.freeze({ kind: "advance", state });
     }
     // battle_util.c:3244-3255/3429-3442 (SET_STATCHANGER(stat, 1, FALSE) = statId | (1 << 4)) -- Cmd_statbuffchange
@@ -931,7 +938,7 @@ function runItemsTick(
     HOLD_EFFECT_CONFUSE_BITTER, HOLD_EFFECT_CONFUSE_SOUR,
     HOLD_EFFECT_DEFENSE_UP, HOLD_EFFECT_SP_DEFENSE_UP, HOLD_EFFECT_CRITICAL_UP, HOLD_EFFECT_RANDOM_STAT_UP,
   ]);
-  if (UNREACHABLE_AT_FACTORY_L50.has(holdEffect)) {
+  if (!moveTurn && UNREACHABLE_AT_FACTORY_L50.has(holdEffect)) {
     return Object.freeze({
       kind: "case-barrier", state,
       detail: `HOLD_EFFECT ${holdEffect}: zero Factory L50 carriers (doc §2b) -- not wired, barriered on mere `
@@ -973,15 +980,17 @@ type BattlerLoopResult =
  * this, but `turnEffectsTracker` walks the enum's integer values, not
  * source-file position). Ingrain/Leech Seed/Wrap/Yawn are now fully wired
  * (docs/ingrain-leechseed-wrap-ground-truth.md §5 slices 1-3;
- * docs/yawn-thrash-endturn-design.md §2 for Yawn); every other
- * reachable-but-unmodeled case gates on whatever real bit/field this engine
- * already tracks and barriers if it's ever actually set (currently never,
- * since no move/ability effect in this engine sets any of them yet) -- a
- * real, live check, not a blanket skip. Cases with no modeled trigger state
- * at all (Uproar, Encore, Charge) are documented, permanently-inert no-ops
- * today; Lock-On is skipped per the doc's own dead-for-Factory finding
- * (B15); Abilities/Items1/Items2 are pure-C breadth explicitly out of this
- * doc's scope (B2/B3/B19).
+ * docs/yawn-thrash-endturn-design.md §2 for Yawn); Items1/Items2 both call
+ * the same `runItemsTick` with `moveTurn` false/true respectively
+ * (docs/yawn-thrash-endturn-design.md §5 -- Items2 is no longer a no-op);
+ * every other reachable-but-unmodeled case gates on whatever real bit/field
+ * this engine already tracks and barriers if it's ever actually set
+ * (currently never, since no move/ability effect in this engine sets any of
+ * them yet) -- a real, live check, not a blanket skip. Cases with no modeled
+ * trigger state at all (Uproar, Encore, Charge) are documented,
+ * permanently-inert no-ops today; Lock-On is skipped per the doc's own
+ * dead-for-Factory finding (B15); Abilities remains pure-C breadth
+ * explicitly out of this doc's scope (B2).
  */
 function runDoBattlerEndTurnEffects(
   program: BattleScriptProgram,
@@ -1012,7 +1021,7 @@ function runDoBattlerEndTurnEffects(
     }
     state = abilities.state;
 
-    const items1 = runItemsTick(program, handlers, state, battler);
+    const items1 = runItemsTick(program, handlers, state, battler, false);
     if (items1.kind === "opcode-barrier") {
       return Object.freeze({ kind: "opcode-barrier", state: items1.state, instruction: items1.instruction });
     }
@@ -1074,7 +1083,18 @@ function runDoBattlerEndTurnEffects(
     }
     if (yawn.kind === "outcome-decided") return Object.freeze({ kind: "outcome-decided", state: yawn.state });
     state = yawn.state;
-    // ENDTURN_ITEMS2: pure-C item breadth, explicitly out of scope (doc B3/B19) -- no-op.
+
+    const items2 = runItemsTick(program, handlers, state, battler, true);
+    if (items2.kind === "opcode-barrier") {
+      return Object.freeze({ kind: "opcode-barrier", state: items2.state, instruction: items2.instruction });
+    }
+    if (items2.kind === "case-barrier") {
+      return Object.freeze({ kind: "case-barrier", state: items2.state, caseName: "ENDTURN_ITEMS2", detail: items2.detail });
+    }
+    if (items2.kind === "fired" && items2.state.rulesContext.battleOutcome !== 0) {
+      return Object.freeze({ kind: "outcome-decided", state: items2.state });
+    }
+    state = items2.state;
   }
   return Object.freeze({ kind: "clean", state });
 }
