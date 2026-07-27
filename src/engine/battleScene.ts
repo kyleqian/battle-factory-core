@@ -534,6 +534,15 @@ import downArrowAsset from "../assets/gen/battle-interface-down-arrow.json" with
 import opponentFrontSpritesAsset from "../assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
 import kadabraFrontSpriteAsset from "../animation/assets/kadabra-front.json" with { type: "json" };
 import knockOffAsset from "../animation/assets/knock-off.json" with { type: "json" };
+import recoverAsset from "../animation/assets/recover.json" with { type: "json" };
+import synthesisAsset from "../animation/assets/synthesis.json" with { type: "json" };
+import milkDrinkAsset from "../animation/assets/milk-drink.json" with { type: "json" };
+import supersonicAsset from "../animation/assets/supersonic.json" with { type: "json" };
+import waterGunAsset from "../animation/assets/water-gun.json" with { type: "json" };
+import acidAsset from "../animation/assets/acid.json" with { type: "json" };
+import hardenAsset from "../animation/assets/harden.json" with { type: "json" };
+import calmMindAsset from "../animation/assets/calm-mind.json" with { type: "json" };
+import shadowBallAsset from "../animation/assets/shadow-ball.json" with { type: "json" };
 import menuHealthboxPlayerAsset from "../assets/gen/menu-healthbox-player.json" with { type: "json" };
 import summaryBallAsset from "../assets/gen/summary-ball.json" with { type: "json" };
 import battleAnimBallOpenAsset from "../assets/gen/battle-anim-ball-open.json" with { type: "json" };
@@ -624,6 +633,16 @@ import {
   sceneOnDragonRageView,
   sceneOnShadowPunchView,
   sceneOnGrowthView,
+  sceneOnRecoverView,
+  sceneOnSynthesisView,
+  sceneOnMilkDrinkView,
+  sceneOnSupersonicView,
+  sceneOnWaterGunView,
+  sceneOnAcidView,
+  sceneOnEarthquakeView,
+  sceneOnHardenView,
+  sceneOnCalmMindView,
+  sceneOnShadowBallView,
   sceneOnFutureSightView,
   sceneOnConfusionView,
   sceneOnPsychicView,
@@ -891,6 +910,55 @@ const knockOffArt = knockOffAsset as {
   strike: { tileset: Tileset; palette: RgbColor[] };
   shuppetBack: { tileset: Tileset; palette: RgbColor[] };
   plusleBack: { tileset: Tileset; palette: RgbColor[] };
+  plusleFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const recoverArt = recoverAsset as {
+  orbs: { tileset: Tileset; palette: RgbColor[] };
+  blueStar: { tileset: Tileset; palette: RgbColor[] };
+};
+const synthesisArt = synthesisAsset as {
+  sparkle2: { tileset: Tileset; palette: RgbColor[] };
+  blueStar: { tileset: Tileset; palette: RgbColor[] };
+  skiploomBack: { tileset: Tileset; palette: RgbColor[] };
+  skiploomFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const milkDrinkArt = milkDrinkAsset as {
+  milkBottle: { tileset: Tileset; palette: RgbColor[] };
+  thinRing: { tileset: Tileset; palette: RgbColor[] };
+  blueStar: { tileset: Tileset; palette: RgbColor[] };
+  miltankBack: { tileset: Tileset; palette: RgbColor[] };
+  miltankFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const supersonicArt = supersonicAsset as {
+  goldRing: { tileset: Tileset; palette: RgbColor[] };
+  dustoxBack: { tileset: Tileset; palette: RgbColor[] };
+  dustoxFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const waterGunArt = waterGunAsset as {
+  smallBubbles: { tileset: Tileset; palette: RgbColor[] };
+  waterImpact: { tileset: Tileset; palette: RgbColor[] };
+  horseaBack: { tileset: Tileset; palette: RgbColor[] };
+  horseaFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const acidArt = acidAsset as {
+  poisonBubble: { tileset: Tileset; palette: RgbColor[] };
+  ekansBack: { tileset: Tileset; palette: RgbColor[] };
+  ekansFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const hardenArt = hardenAsset as {
+  metal: { tileset: Tileset; tilemap: Tilemap; palette: RgbColor[] };
+  relicanthBack: { tileset: Tileset; palette: RgbColor[] };
+  relicanthFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const calmMindArt = calmMindAsset as {
+  thinRing: { tileset: Tileset; palette: RgbColor[] };
+  lunatoneBack: { tileset: Tileset; palette: RgbColor[] };
+  lunatoneFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const shadowBallArt = shadowBallAsset as {
+  shadowBall: { tileset: Tileset; palette: RgbColor[] };
+  sableyeBack: { tileset: Tileset; palette: RgbColor[] };
+  sableyeFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const MURKROW_CORNER = { x: 144, y: 19 };
 const menuHealthboxPlayer = menuHealthboxPlayerAsset as SendOutHealthboxContentAsset;
@@ -2582,6 +2650,57 @@ function drawTileBg(fb: Uint8Array, tileset: Tileset, tilemap: Tilemap, subpalet
       const c = subpalettes[entry.palette]?.[idx];
       if (!c) continue;
       setPixel(fb, screenX, screenY, c);
+    }
+  }
+}
+
+function grayscalePalette(palette: readonly RgbColor[]): RgbColor[] {
+  return palette.map((color) => {
+    const gray5 = Math.floor(
+      ((color.r >> 3) + (color.g >> 3) + (color.b >> 3)) / 3,
+    );
+    const gray8 = (gray5 << 3) | (gray5 >> 2);
+    return { r: gray8, g: gray8, b: gray8 };
+  });
+}
+
+/** BG1 metal-shine layer, clipped by the invisible attacker OBJ-window copy. */
+function drawMetallicShineMasked(
+  fb: Uint8Array,
+  attacker: { tileset: Tileset; palette: RgbColor[] },
+  corner: Readonly<{ x: number; y: number }>,
+  scrollX: number,
+  scrollY: number,
+): void {
+  const metal = hardenArt.metal;
+  const mapWidth = metal.tilemap.width * 8;
+  const mapHeight = metal.tilemap.height * 8;
+  for (let sy = 0; sy < attacker.tileset.rows * 8; sy += 1) {
+    for (let sx = 0; sx < attacker.tileset.columns * 8; sx += 1) {
+      const attackerTile = attacker.tileset.tiles[
+        Math.floor(sy / 8) * attacker.tileset.columns + Math.floor(sx / 8)
+      ];
+      if (!attackerTile?.[(sy % 8) * 8 + (sx % 8)]) continue;
+      const x = corner.x + sx, y = corner.y + sy;
+      if (x < 0 || x >= 240 || y < 0 || y >= 160) continue;
+      const mx = ((x + scrollX) % mapWidth + mapWidth) % mapWidth;
+      const my = ((y + scrollY) % mapHeight + mapHeight) % mapHeight;
+      const entry = metal.tilemap.entries[
+        Math.floor(my / 8) * metal.tilemap.width + Math.floor(mx / 8)
+      ];
+      if (!entry) continue;
+      const tile = metal.tileset.tiles[entry.tile];
+      if (!tile) continue;
+      const tx = entry.hFlip ? 7 - (mx % 8) : mx % 8;
+      const ty = entry.vFlip ? 7 - (my % 8) : my % 8;
+      const index = tile[ty * 8 + tx]!;
+      if (index === 0) continue;
+      const shine = metal.palette[index];
+      if (!shine) continue;
+      const o = (y * 240 + x) * 4;
+      fb[o] = blendChannel(shine.r, fb[o]!, 8, 12);
+      fb[o + 1] = blendChannel(shine.g, fb[o + 1]!, 8, 12);
+      fb[o + 2] = blendChannel(shine.b, fb[o + 2]!, 8, 12);
     }
   }
 }
@@ -12109,6 +12228,20 @@ function drawStaticBgShiftedY(fb: Uint8Array, shiftY: number, fadeY = 0, palette
   }
 }
 
+/** BG3HOFS sampling for `AnimTask_ShakePlatforms`. */
+function drawStaticBgShiftedX(
+  fb: Uint8Array,
+  shiftX: number,
+  paletteOverride?: RgbColor[][],
+): void {
+  for (let screenY = 0; screenY < 160; screenY += 1) {
+    for (let screenX = 0; screenX < 240; screenX += 1) {
+      const c = staticBgPixel(screenX + shiftX, screenY, paletteOverride);
+      if (c) setPixel(fb, screenX, screenY, c);
+    }
+  }
+}
+
 /** The real opponent healthbox sprite's own `y2` wobble (`rockSlideHealthboxWobbleY2`) - same erase-then-redraw-translated shape as `drawDoubleTeamClones`' Grovyle erase, reusing `opponentHealthboxContent`/`HEALTHBOX_FRAME_ORIGIN` (`drawSendOutHealthbox`'s own asset, translated vertically here instead of horizontally). `content` defaults to the full-HP compositor result (every existing ROCK_SLIDE caller's own domain, where the wobble window falls entirely before the drain starts) - S7 slice E2b's DRAGON_BREATH caller passes Grovyle's real (already-101, not yet re-drained) content explicitly since its own hit-flash window also falls before ITS drain starts, but at a HP that isn't this module's full-send-out value. */
 function drawOpponentHealthboxWobble(fb: Uint8Array, dy: number, content: ReturnType<typeof composeOpponentHealthbox> = opponentHealthboxContent): void {
   const { width, height, pixels } = content;
@@ -14490,7 +14623,12 @@ export function renderSceneOnMovePresentation(
       && view.attacker.geometry.side === "player"
       && view.target.species === "ONIX"
       && view.target.geometry.side === "opponent";
-    if (!playerToOpponent) {
+    const opponentToPlayer =
+      view.attacker.species === "PLUSLE"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
         `unsupported staged KNOCK_OFF pair ${view.attacker.species}->${view.target.species}`,
       );
@@ -14505,8 +14643,12 @@ export function renderSceneOnMovePresentation(
     );
     drawSpriteSheetAffineStretch(
       fb,
-      onixFrontSprite.tileset,
-      onixFrontSprite.palette,
+      playerToOpponent
+        ? onixFrontSprite.tileset
+        : onixBackSprite.tileset,
+      playerToOpponent
+        ? onixFrontSprite.palette
+        : onixBackSprite.palette,
       view.target.geometry.spriteCorner.x,
       view.target.geometry.spriteCorner.y,
       256,
@@ -14515,27 +14657,33 @@ export function renderSceneOnMovePresentation(
       white,
       paletteCoeff,
       false,
-      view.targetOamOffset.x2 + (view.animationAge < 17 ? 1 : 0),
+      view.targetOamOffset.x2
+        + (playerToOpponent && view.animationAge < 17 ? 1 : 0),
     );
     if (view.strike) {
       const strikeStep = view.animationAge - 6;
-      const rotation = -4 * strikeStep;
+      const rotation = (view.strike.mirrored ? 4 : -4) * strikeStep;
       const radians = rotation * 2 * Math.PI / 256;
-      const pa = Math.trunc(256 * Math.cos(radians));
-      const pc = Math.trunc(256 * Math.sin(radians));
+      const cosine = Math.trunc(256 * Math.cos(radians));
+      const sine = Math.trunc(256 * Math.sin(radians));
+      const pa = view.strike.mirrored ? -cosine : cosine;
+      const pb = view.strike.mirrored ? sine : -sine;
+      const pc = sine;
+      const pd = cosine;
       const frame = subTileset(knockOffArt.strike.tileset, view.strike.sheetFrame * 8, 8);
       drawSpriteSheetAffineRotate(
         fb,
         frame,
         knockOffArt.strike.palette,
-        view.target.geometry.animationCenter.x - 16
+        view.target.geometry.animationCenter.x
+          + (view.strike.mirrored ? 16 : -16)
           + ((GBA_SINE_TABLE_256[(view.strike.angle + 64) & 0xff]! * 20) >> 8),
         view.target.geometry.animationCenter.y - 16
           + ((GBA_SINE_TABLE_256[view.strike.angle]! * 20) >> 8),
         pa,
-        -pc,
+        pb,
         pc,
-        pa,
+        pd,
         undefined,
         false,
       );
@@ -14556,8 +14704,12 @@ export function renderSceneOnMovePresentation(
     }
     drawSpriteSheetAffineStretch(
       fb,
-      knockOffArt.plusleBack.tileset,
-      knockOffArt.plusleBack.palette,
+      playerToOpponent
+        ? knockOffArt.plusleBack.tileset
+        : knockOffArt.plusleFront.tileset,
+      playerToOpponent
+        ? knockOffArt.plusleBack.palette
+        : knockOffArt.plusleFront.palette,
       view.attacker.geometry.spriteCorner.x,
       view.attacker.geometry.spriteCorner.y,
       256,
@@ -14572,7 +14724,7 @@ export function renderSceneOnMovePresentation(
       fb,
       0,
       composeOpponentHealthbox(healthboxAssemblyAssets, {
-        name: "ONIX",
+        name: playerToOpponent ? "ONIX" : "PLUSLE",
         level: 50,
         gender: state.config.fieldProfile.opponentGender ?? "male",
         hpFraction:
@@ -14584,7 +14736,7 @@ export function renderSceneOnMovePresentation(
     drawComposedPlayerHealthbox(
       fb,
       composePlayerHealthbox(playerHealthboxAssets, {
-        name: "PLUSLE",
+        name: playerToOpponent ? "PLUSLE" : "ONIX",
         level: 50,
         gender: state.config.fieldProfile.playerGender ?? "male",
         hpFraction:
@@ -14596,7 +14748,12 @@ export function renderSceneOnMovePresentation(
       }),
     );
     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
-    drawMessageTextLines(fb, "PLUSLE used", "KNOCK OFF!", 99);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "PLUSLE used" : "Foe PLUSLE used",
+      "KNOCK OFF!",
+      99,
+    );
     return;
   }
 
@@ -14967,6 +15124,1287 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "IVYSAUR used" : "Foe IVYSAUR used",
       "GROWTH!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "ACID") {
+    const view = sceneOnAcidView(state);
+    // OAM and faded OBJ palette writes become visible on the following
+    // VBlank. The reducer itself remains the same-tick RAM model.
+    const displayed = sceneOnAcidView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "EKANS"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "EKANS"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged ACID pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const ekansSource = playerToOpponent ? acidArt.ekansBack : acidArt.ekansFront;
+    const ekansSprite = playerToOpponent
+      ? ekansSource
+      : {
+          ...ekansSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: ekansSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const onixSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    const targetIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    const targetOffset = state.age <= 31
+      ? targetIdle
+      : displayed.targetOffset;
+    drawSpriteSheetAffineStretch(
+      fb,
+      onixSprite.tileset,
+      onixSprite.palette,
+      view.target.geometry.spriteCorner.x,
+      view.target.geometry.spriteCorner.y,
+      256,
+      256,
+      targetIdle.y2,
+      { r: 247, g: 0, b: 255 },
+      displayed.defenderPaletteY,
+      false,
+      targetOffset.x2,
+    );
+    if (opponentToPlayer) {
+      drawSpriteSheet(
+        fb,
+        ekansSprite.tileset,
+        ekansSprite.palette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+      );
+    }
+    for (const sprite of displayed.sprites) {
+      const tile = sprite.frame * 4;
+      const art = {
+        columns: 2,
+        rows: 2,
+        tiles: acidArt.poisonBubble.tileset.tiles.slice(tile, tile + 4),
+      };
+      drawSpriteSheetAffineRotate(
+        fb,
+        art,
+        acidArt.poisonBubble.palette,
+        sprite.x,
+        sprite.y,
+        sprite.xScale,
+        0,
+        0,
+        sprite.yScale,
+        undefined,
+        true,
+      );
+    }
+    // The battler's lower OAM index wins over Acid's same-priority objects
+    // while an arc is still crossing the attacker silhouette.
+    if (playerToOpponent) {
+      drawSpriteSheet(
+        fb,
+        ekansSprite.tileset,
+        ekansSprite.palette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+      );
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "EKANS";
+    const playerSpecies = playerToOpponent ? "EKANS" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "EKANS used" : "Foe EKANS used",
+      "ACID!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "WATER_GUN") {
+    const view = sceneOnWaterGunView(state);
+    // Sprite OAM reaches the displayed framebuffer one VBlank after RAM.
+    const displayed = sceneOnWaterGunView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "HORSEA"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "HORSEA"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged WATER_GUN pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const horseaSource = playerToOpponent
+      ? waterGunArt.horseaBack
+      : waterGunArt.horseaFront;
+    const horseaSprite = playerToOpponent
+      ? horseaSource
+      : {
+          ...horseaSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: horseaSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const onixSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    const nonObjTarget2 = fb.slice();
+    const displayedTargetOffset = opponentToPlayer && state.age === 41
+      ? { x2: 0, y2: 0 }
+      : playerToOpponent && state.age <= 40
+        ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+        : state.age <= 0
+          ? { x2: 0, y2: 0 }
+          : displayed.targetOffset;
+    const targetIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX")
+      : null;
+    // `monbg ANIM_DEF_PARTNER` moves the target battler into BG2. It is
+    // therefore the real target-2 layer for the semi-transparent water OBJ,
+    // while the attacker remains an OBJ and must not participate in blend.
+    drawSpriteSheet(
+      nonObjTarget2,
+      onixSprite.tileset,
+      onixSprite.palette,
+      view.target.geometry.spriteCorner.x + displayedTargetOffset.x2,
+      view.target.geometry.spriteCorner.y + (targetIdle?.y2 ?? 0),
+    );
+    const drawWaterGunSprites = (kind: "projectile" | "impact") => {
+      const sprites = displayed.sprites
+        .filter((sprite) =>
+          (kind === "projectile") === (sprite.kind === "projectile")
+        )
+        // The hitsplat takes the first free OAM slot; lower OAM indices win
+        // same-priority OBJ overlap, so paint it after its first droplet.
+        .sort((a, b) => Number(a.kind === "hitsplat") - Number(b.kind === "hitsplat"));
+      for (const sprite of sprites) {
+        const art = sprite.kind === "hitsplat"
+          ? waterGunArt.waterImpact
+          : {
+              palette: waterGunArt.smallBubbles.palette,
+              tileset: {
+                columns: 2,
+                rows: 2,
+                tiles: waterGunArt.smallBubbles.tileset.tiles.slice(
+                  sprite.frame * 4,
+                  sprite.frame * 4 + 4,
+                ),
+              },
+            };
+        drawSpriteSheetAffineRotateBlendedOverFb(
+          fb, nonObjTarget2, art.tileset, art.palette,
+          sprite.x, sprite.y, sprite.xScale, sprite.rotB, sprite.rotC,
+          sprite.yScale, 12, 8, sprite.kind === "droplet",
+        );
+      }
+    };
+    if (playerToOpponent) {
+      drawSpriteSheet(
+        fb,
+        horseaSprite.tileset,
+        horseaSprite.palette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+      );
+      drawSpriteSheet(
+        fb,
+        onixSprite.tileset,
+        onixSprite.palette,
+        view.target.geometry.spriteCorner.x + displayedTargetOffset.x2,
+        view.target.geometry.spriteCorner.y + (targetIdle?.y2 ?? 0),
+      );
+    } else {
+      drawSpriteSheet(
+        fb,
+        horseaSprite.tileset,
+        horseaSprite.palette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+      );
+      drawSpriteSheet(
+        fb,
+        onixSprite.tileset,
+        onixSprite.palette,
+        view.target.geometry.spriteCorner.x + displayedTargetOffset.x2,
+        view.target.geometry.spriteCorner.y,
+      );
+    }
+    drawWaterGunSprites("projectile");
+    drawWaterGunSprites("impact");
+    const opponentSpecies = playerToOpponent ? "ONIX" : "HORSEA";
+    const playerSpecies = playerToOpponent ? "HORSEA" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "HORSEA used" : "Foe HORSEA used",
+      "WATER GUN!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SUPERSONIC") {
+    const view = sceneOnSupersonicView(state);
+    // Captured OAM is transferred to the framebuffer one VBlank later.
+    const displayed = sceneOnSupersonicView({ ...state, age: state.age - 1 });
+    const displayedAttackerOffset = state.age <= 0
+      ? { x2: 0, y2: 0 }
+      : displayed.attackerOffset;
+    const playerToOpponent =
+      view.attacker.species === "DUSTOX"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "DUSTOX"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged SUPERSONIC pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const dustoxSource = playerToOpponent
+      ? supersonicArt.dustoxBack
+      : supersonicArt.dustoxFront;
+    const dustoxSprite = playerToOpponent
+      ? dustoxSource
+      : {
+          ...dustoxSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: dustoxSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const onixSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    const drawSupersonicRings = () => {
+      // The two source sides inherit opposite persistent `sSpriteOrder`
+      // histories from their separately loaded battler chrome. Preserve
+      // that side-dependent OAM tie order for same-subpriority rings.
+      const ringPaintOrder = playerToOpponent
+        ? displayed.rings
+        : Array.from(displayed.rings).reverse();
+      for (const ring of ringPaintOrder) {
+        drawSpriteSheetAffineRotate(
+          fb,
+          supersonicArt.goldRing.tileset,
+          supersonicArt.goldRing.palette,
+          ring.x,
+          ring.y,
+          ring.xScale,
+          0,
+          0,
+          ring.yScale,
+          undefined,
+          true,
+        );
+      }
+    };
+    if (playerToOpponent) {
+      const idle = speciesFrontIdleRestOffset("ONIX");
+      drawSpriteSheet(
+        fb,
+        onixSprite.tileset,
+        onixSprite.palette,
+        view.target.geometry.spriteCorner.x + (idle?.x2 ?? 0),
+        view.target.geometry.spriteCorner.y + (idle?.y2 ?? 0),
+      );
+      drawSpriteSheet(
+        fb,
+        dustoxSprite.tileset,
+        dustoxSprite.palette,
+        view.attacker.geometry.spriteCorner.x + displayedAttackerOffset.x2,
+        view.attacker.geometry.spriteCorner.y + displayedAttackerOffset.y2,
+      );
+    } else {
+      drawSpriteSheet(
+        fb,
+        dustoxSprite.tileset,
+        dustoxSprite.palette,
+        view.attacker.geometry.spriteCorner.x + displayedAttackerOffset.x2,
+        view.attacker.geometry.spriteCorner.y + displayedAttackerOffset.y2,
+      );
+      drawSpriteSheet(
+        fb,
+        onixSprite.tileset,
+        onixSprite.palette,
+        view.target.geometry.spriteCorner.x,
+        view.target.geometry.spriteCorner.y,
+      );
+    }
+    drawSupersonicRings();
+    const opponentSpecies = playerToOpponent ? "ONIX" : "DUSTOX";
+    const playerSpecies = playerToOpponent ? "DUSTOX" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "DUSTOX used" : "Foe DUSTOX used",
+      "SUPERSONIC!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "HARDEN") {
+    const view = sceneOnHardenView(state);
+    const displayed = sceneOnHardenView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "RELICANTH"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "RELICANTH"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged HARDEN pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSource = playerToOpponent
+      ? hardenArt.relicanthBack : hardenArt.relicanthFront;
+    const attackerSprite = playerToOpponent
+      ? attackerSource
+      : {
+          ...attackerSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: attackerSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffset(view.target.species)
+      : null;
+    drawSpriteSheet(
+      fb,
+      targetSprite.tileset,
+      targetSprite.palette,
+      view.target.geometry.spriteCorner.x + (targetIdle?.x2 ?? 0),
+      view.target.geometry.spriteCorner.y + (targetIdle?.y2 ?? 0),
+    );
+    drawSpriteSheet(
+      fb,
+      attackerSprite.tileset,
+      state.age >= 2 && displayed.attackerGrayscale
+        ? grayscalePalette(attackerSprite.palette)
+        : attackerSprite.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    if (state.age >= 2 && displayed.metalBgLoaded) {
+      drawMetallicShineMasked(
+        fb,
+        attackerSprite,
+        view.attacker.geometry.spriteCorner,
+        displayed.bg1X,
+        displayed.bg1Y,
+      );
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "RELICANTH";
+    const playerSpecies = playerToOpponent ? "RELICANTH" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "RELICANTH used" : "Foe RELICANTH used",
+      "HARDEN!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "CALM_MIND") {
+    const view = sceneOnCalmMindView(state);
+    // OAM/palette writes become visible on the following display latch.
+    const displayed = sceneOnCalmMindView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "LUNATONE"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "LUNATONE"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged CALM_MIND pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSource = playerToOpponent
+      ? calmMindArt.lunatoneBack : calmMindArt.lunatoneFront;
+    const attackerSprite = playerToOpponent
+      ? attackerSource
+      : {
+          ...attackerSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: attackerSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const dark = { r: 0, g: 0, b: 0 };
+    const paletteBlendY = state.age >= 84
+      ? view.paletteBlendY
+      : displayed.paletteBlendY;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      blendPaletteBanksToward(
+        battleBg.palette,
+        dark,
+        paletteBlendY,
+      ),
+    );
+    if (!displayed.nonAttackerInvisible) {
+      const targetIdle = view.target.geometry.side === "opponent"
+        ? speciesFrontIdleRestOffset(view.target.species)
+        : null;
+      drawSpriteSheet(
+        fb,
+        targetSprite.tileset,
+        blendPaletteToward(
+          targetSprite.palette,
+          dark,
+          paletteBlendY,
+        ),
+        view.target.geometry.spriteCorner.x + (targetIdle?.x2 ?? 0),
+        view.target.geometry.spriteCorner.y + (targetIdle?.y2 ?? 0),
+      );
+    }
+    // `monbg` moves the attacker below OBJ; every semi-transparent ring is
+    // therefore composited over the attacker silhouette.
+    drawSpriteSheet(
+      fb,
+      attackerSprite.tileset,
+      attackerSprite.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    // Same-subpriority source order: older rings win OAM order and are drawn
+    // last among rings.
+    for (const ring of [...displayed.rings].reverse()) {
+      drawSpriteSheetAffineStretch(
+        fb,
+        calmMindArt.thinRing.tileset,
+        calmMindArt.thinRing.palette,
+        view.attacker.geometry.animationCenter.x - 32,
+        view.attacker.geometry.animationCenter.y - 32,
+        ring.oamScale,
+        ring.oamScale,
+        0,
+        dark,
+        0,
+        true,
+      );
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "LUNATONE";
+    const playerSpecies = playerToOpponent ? "LUNATONE" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "LUNATONE used" : "Foe LUNATONE used",
+      "CALM MIND!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SHADOW_BALL") {
+    const view = sceneOnShadowBallView(state);
+    const displayed = sceneOnShadowBallView({ ...state, age: state.age - 1 });
+    const displayedTarget = view.displayedTargetOffset;
+    const playerToOpponent =
+      view.attacker.species === "SABLEYE"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "SABLEYE"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged SHADOW_BALL pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const sableyeSource = playerToOpponent
+      ? shadowBallArt.sableyeBack
+      : shadowBallArt.sableyeFront;
+    const sableyeSprite = playerToOpponent
+      ? sableyeSource
+      : {
+          ...sableyeSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: sableyeSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const onixSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const gpuDarken = (palette: readonly RgbColor[]) =>
+      palette.map((color) => {
+        const packed = mgbaDarkenColor(
+          color.r | (color.g << 8) | (color.b << 16),
+          view.backgroundBldy,
+        );
+        return {
+          r: packed & 0xff,
+          g: (packed >>> 8) & 0xff,
+          b: (packed >>> 16) & 0xff,
+        };
+      });
+    if (view.backgroundGhost) {
+      drawExtractedTileBg(fb, {
+        tileset: battleAnimGhostBg.tileset,
+        tilemap: battleAnimGhostBg.tilemap,
+        subpalettes: [gpuDarken(battleAnimGhostBg.palette)],
+      });
+    } else {
+      drawExtractedTileBg(fb, {
+        tileset: battleBg.static.tileset,
+        tilemap: battleBg.static.tilemap,
+        subpalettes: battleBg.palette.map(gpuDarken),
+      });
+    }
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffset(view.target.species)
+      : null;
+    const targetRest = state.age <= 96
+      ? { x2: targetIdle?.x2 ?? 0, y2: targetIdle?.y2 ?? 0 }
+      : { x2: 0, y2: 0 };
+    const shakeActive =
+      displayedTarget.x2 !== 0 || displayedTarget.y2 !== 0;
+    // Creation is not transferred to hardware OAM until the following
+    // frame; live callbacks thereafter update the already-owned OAM slot in
+    // the same display pass, while destruction leaves one terminal frame.
+    const displayedBall = state.age === 55 || !displayed.sprite
+      ? null
+      : {
+          ...(view.sprite ?? displayed.sprite),
+          // OAM coordinates are transferred one frame after software
+          // sprite state, while the already-owned affine matrix is current.
+          x: displayed.sprite.x,
+          y: displayed.sprite.y,
+          ...(!view.sprite
+            ? (() => {
+                const rotation =
+                  ((displayed.sprite.localAge + 2) * 10) & 0xff;
+                const radians = rotation * 2 * Math.PI / 256;
+                const cosine = Math.trunc(256 * Math.cos(radians));
+                const sine = Math.trunc(256 * Math.sin(radians));
+                return {
+                  pa: cosine,
+                  pb: sine === 0 ? 0 : -sine,
+                  pc: sine,
+                  pd: cosine,
+                };
+              })()
+            : {}),
+        };
+    const drawShadowBall = () => {
+      if (!displayedBall) return;
+      drawSpriteSheetAffineRotate(
+        fb,
+        shadowBallArt.shadowBall.tileset,
+        shadowBallArt.shadowBall.palette,
+        displayedBall.x,
+        displayedBall.y,
+        displayedBall.pa,
+        displayedBall.pb,
+        displayedBall.pc,
+        displayedBall.pd,
+        undefined,
+        false,
+      );
+    };
+    const drawSableye = () => drawSpriteSheet(
+      fb,
+      sableyeSprite.tileset,
+      sableyeSprite.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    drawSpriteSheet(
+      fb,
+      onixSprite.tileset,
+      onixSprite.palette,
+      view.target.geometry.spriteCorner.x
+        + (shakeActive
+          ? displayedTarget.x2
+          : targetRest.x2),
+      view.target.geometry.spriteCorner.y
+        + (shakeActive
+          ? displayedTarget.y2
+          : targetRest.y2),
+    );
+    if (opponentToPlayer) drawSableye();
+    drawShadowBall();
+    // Source subpriority 2 keeps the projectile below the attacker sprite
+    // for player-back geometry; opponent-front OAM ordering is reversed.
+    if (playerToOpponent) drawSableye();
+    const opponentSpecies = playerToOpponent ? "ONIX" : "SABLEYE";
+    const playerSpecies = playerToOpponent ? "SABLEYE" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "SABLEYE used" : "Foe SABLEYE used",
+      "SHADOW BALL!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SYNTHESIS") {
+    const view = sceneOnSynthesisView(state);
+    const displayed = sceneOnSynthesisView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "SKIPLOOM"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "SKIPLOOM"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged SYNTHESIS pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSource = playerToOpponent
+      ? synthesisArt.skiploomBack : synthesisArt.skiploomFront;
+    const attackerSprite = playerToOpponent
+      ? attackerSource
+      : {
+          ...attackerSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: attackerSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffset(view.target.species)
+      : null;
+    drawSpriteSheet(
+      fb,
+      targetSprite.tileset,
+      targetSprite.palette,
+      view.target.geometry.spriteCorner.x + (targetIdle?.x2 ?? 0),
+      view.target.geometry.spriteCorner.y + (targetIdle?.y2 ?? 0),
+    );
+    drawSpriteSheetAffineStretch(
+      fb,
+      attackerSprite.tileset,
+      attackerSprite.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+      256,
+      256,
+      0,
+      { r: 222, g: 255, b: 148 },
+      displayed.attackerObjY,
+      false,
+    );
+    const displayedSprites = [
+      ...displayed.sprites.filter((sprite) => sprite.kind === "grantingStar")
+        .reverse(),
+      ...displayed.sprites.filter((sprite) => sprite.kind === "star"),
+    ];
+    for (const sprite of displayedSprites) {
+      const art = sprite.kind === "grantingStar"
+        ? synthesisArt.sparkle2 : synthesisArt.blueStar;
+      const spriteTileset: Tileset = {
+        columns: 4,
+        rows: 4,
+        tiles: art.tileset.tiles.slice(
+          sprite.frame * 16,
+          sprite.frame * 16 + 16,
+        ),
+      };
+      drawSpriteSheet(
+        fb,
+        spriteTileset,
+        art.palette,
+        sprite.x - 16,
+        sprite.y - 16,
+      );
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "SKIPLOOM";
+    const playerSpecies = playerToOpponent ? "SKIPLOOM" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "SKIPLOOM used" : "Foe SKIPLOOM used",
+      "SYNTHESIS!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "RECOVER") {
+    const view = sceneOnRecoverView(state);
+    const displayed = sceneOnRecoverView({ ...state, age: state.age - 1 });
+    const displayedSprites = displayed.sprites;
+    const playerToOpponent =
+      view.attacker.species === "KADABRA"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "KADABRA"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged RECOVER pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSprite = playerToOpponent ? kadabraBackSprite : kadabraFrontSprite;
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffset(view.target.species)
+      : null;
+    drawSpriteSheet(
+      fb,
+      targetSprite.tileset,
+      targetSprite.palette,
+      view.target.geometry.spriteCorner.x + (targetIdle?.x2 ?? 0),
+      view.target.geometry.spriteCorner.y + (targetIdle?.y2 ?? 0),
+    );
+    drawSpriteSheetAffineStretch(
+      fb,
+      attackerSprite.tileset,
+      attackerSprite.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+      256,
+      256,
+      0,
+      { r: 255, g: 255, b: 90 },
+      displayed.attackerObjY,
+      false,
+    );
+    const objTarget2 = fb.slice();
+    const orbTileset: Tileset = {
+      columns: 2,
+      rows: 2,
+      tiles: recoverArt.orbs.tileset.tiles.slice(8, 12),
+    };
+    for (const sprite of displayedSprites) {
+      if (sprite.kind === "orb") {
+        drawSpriteSheetAffineRotateBlendedOverFb(
+          fb,
+          objTarget2,
+          orbTileset,
+          recoverArt.orbs.palette,
+          sprite.x,
+          sprite.y,
+          sprite.xScale,
+          0,
+          0,
+          sprite.yScale,
+          12,
+          8,
+          false,
+        );
+      } else {
+        const starTileset: Tileset = {
+          columns: 4,
+          rows: 4,
+          tiles: recoverArt.blueStar.tileset.tiles.slice(
+            sprite.frame * 16,
+            sprite.frame * 16 + 16,
+          ),
+        };
+        drawSpriteSheet(
+          fb,
+          starTileset,
+          recoverArt.blueStar.palette,
+          sprite.x - 16,
+          sprite.y - 16,
+        );
+      }
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "KADABRA";
+    const playerSpecies = playerToOpponent ? "KADABRA" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "KADABRA used" : "Foe KADABRA used",
+      "RECOVER!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "MILK_DRINK") {
+    const view = sceneOnMilkDrinkView(state);
+    const displayed = sceneOnMilkDrinkView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "MILTANK"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "MILTANK"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged MILK_DRINK pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const miltankSource = playerToOpponent
+      ? milkDrinkArt.miltankBack
+      : milkDrinkArt.miltankFront;
+    const miltankSprite = playerToOpponent
+      ? miltankSource
+      : {
+          ...miltankSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: miltankSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const onixSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    if (playerToOpponent) {
+      const idle = speciesFrontIdleRestOffset("ONIX");
+      drawSpriteSheet(
+        fb,
+        onixSprite.tileset,
+        onixSprite.palette,
+        view.target.geometry.spriteCorner.x + (idle?.x2 ?? 0),
+        view.target.geometry.spriteCorner.y + (idle?.y2 ?? 0),
+      );
+      drawSpriteSheet(
+        fb,
+        miltankSprite.tileset,
+        miltankSprite.palette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+      );
+    } else {
+      drawSpriteSheet(
+        fb,
+        miltankSprite.tileset,
+        miltankSprite.palette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+      );
+      drawSpriteSheet(
+        fb,
+        onixSprite.tileset,
+        onixSprite.palette,
+        view.target.geometry.spriteCorner.x,
+        view.target.geometry.spriteCorner.y,
+      );
+    }
+    const nonObjTarget2 = fb.slice();
+    const currentBottle = view.sprites.find((sprite) => sprite.kind === "bottle");
+    for (const sprite of displayed.sprites) {
+      if (sprite.kind === "bottle") {
+        if (sprite.invisible) continue;
+        drawSpriteSheetAffineRotateBlendedOverFb(
+          fb,
+          nonObjTarget2,
+          milkDrinkArt.milkBottle.tileset,
+          milkDrinkArt.milkBottle.palette,
+          sprite.x,
+          sprite.y,
+          sprite.xScale,
+          sprite.rotB,
+          sprite.rotC,
+          sprite.yScale,
+          currentBottle?.kind === "bottle" ? currentBottle.eva : sprite.eva,
+          currentBottle?.kind === "bottle" ? currentBottle.evb : sprite.evb,
+          false,
+        );
+      } else if (sprite.kind === "ring") {
+        drawSpriteSheetAffineRotate(
+          fb,
+          milkDrinkArt.thinRing.tileset,
+          milkDrinkArt.thinRing.palette,
+          sprite.x,
+          sprite.y,
+          sprite.xScale,
+          0,
+          0,
+          sprite.yScale,
+          undefined,
+          true,
+        );
+      } else {
+        const starTileset: Tileset = {
+          columns: 4,
+          rows: 4,
+          tiles: milkDrinkArt.blueStar.tileset.tiles.slice(
+            sprite.frame * 16,
+            sprite.frame * 16 + 16,
+          ),
+        };
+        drawSpriteSheet(
+          fb,
+          starTileset,
+          milkDrinkArt.blueStar.palette,
+          sprite.x - 16,
+          sprite.y - 16,
+        );
+      }
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "MILTANK";
+    const playerSpecies = playerToOpponent ? "MILTANK" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "MILTANK used" : "Foe MILTANK used",
+      "MILK DRINK!",
       99,
     );
     return;
@@ -18312,6 +19750,95 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "HAUNTER used" : "Foe HAUNTER used",
       "SHADOW PUNCH!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "EARTHQUAKE") {
+    const view = sceneOnEarthquakeView(state);
+    // BG3HOFS, OAM x2, and faded palette RAM are transferred at the next
+    // VBlank. OAM was built before the task callbacks and therefore trails
+    // the live battler x2 by a second callback/display epoch.
+    const displayed = sceneOnEarthquakeView({ ...state, age: state.age - 1 });
+    const displayedBattlers = sceneOnEarthquakeView({
+      ...state,
+      age: state.age - 2,
+    });
+    const playerToOpponent =
+      view.attacker.species === "DUGTRIO"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "DUGTRIO"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged EARTHQUAKE pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const tint = displayed.palette.color === "black"
+      ? { r: 0, g: 0, b: 0 }
+      : { r: 255, g: 255, b: 255 };
+    const bgPalette = displayed.palette.active
+      ? blendPaletteBanksToward(
+          battleBg.palette,
+          tint,
+          displayed.palette.coefficient,
+        )
+      : battleBg.palette;
+    drawStaticBgShiftedX(fb, displayed.shake.platformX, bgPalette);
+    const player = playerToOpponent ? view.attacker : view.target;
+    const opponent = playerToOpponent ? view.target : view.attacker;
+    drawSpriteSheet(
+      fb,
+      playerToOpponent ? dugtrioBackSprite.tileset : onixBackSprite.tileset,
+      playerToOpponent ? dugtrioBackSprite.palette : onixBackSprite.palette,
+      player.geometry.spriteCorner.x + displayedBattlers.playerBattlerX2,
+      player.geometry.spriteCorner.y,
+    );
+    drawSpriteSheet(
+      fb,
+      playerToOpponent ? onixFrontSprite.tileset : dugtrioFrontSprite.tileset,
+      playerToOpponent ? onixFrontSprite.palette : dugtrioFrontSprite.palette,
+      opponent.geometry.spriteCorner.x + displayedBattlers.opponentBattlerX2,
+      opponent.geometry.spriteCorner.y,
+    );
+    const opponentSpecies = playerToOpponent ? "ONIX" : "DUGTRIO";
+    const playerSpecies = playerToOpponent ? "DUGTRIO" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "DUGTRIO used" : "Foe DUGTRIO used",
+      "EARTHQUAKE!",
       99,
     );
     return;

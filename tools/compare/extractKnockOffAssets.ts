@@ -1,5 +1,5 @@
-// Reproducible dev-time extraction for MOVE_KNOCK_OFF's staged player
-// orientation. Runtime code consumes only the generated JSON.
+// Reproducible dev-time extraction for MOVE_KNOCK_OFF's staged orientations.
+// Runtime code consumes only the generated JSON.
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -27,7 +27,9 @@ function sprite(path: string, palettePath?: string) {
 const data = {
   source: {
     strike: "graphics/battle_anims/sprites/slam_hit_2.png; gKnockOffStrikeSpriteTemplate",
-    attacker: "graphics/pokemon/shuppet/back.png; gMonBackPic_Shuppet",
+    shuppetBack: "graphics/pokemon/shuppet/back.png; gMonBackPic_Shuppet",
+    plusleBack: "graphics/pokemon/plusle/back.png; gMonBackPic_Plusle",
+    plusleFront: "graphics/pokemon/plusle/front.png; gMonFrontPic_Plusle",
   },
   strike: sprite("graphics/battle_anims/sprites/slam_hit_2.png"),
   shuppetBack: sprite(
@@ -36,6 +38,10 @@ const data = {
   ),
   plusleBack: sprite(
     "graphics/pokemon/plusle/back.png",
+    "graphics/pokemon/plusle/normal.pal",
+  ),
+  plusleFront: sprite(
+    "graphics/pokemon/plusle/front.png",
     "graphics/pokemon/plusle/normal.pal",
   ),
 };

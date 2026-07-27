@@ -9,6 +9,14 @@ import {
   type FirePunchResolutionState,
 } from "./firePunch.ts";
 import {
+  metallicShineAtAge,
+  type MetallicShineState,
+} from "./metallicShine.ts";
+import {
+  calmMindAtAge,
+  type CalmMindState,
+} from "./calmMind.ts";
+import {
   FAINT_ATTACK_ANIMATION_PROFILE,
   faintAttackAttackerEva,
   faintAttackAttackerOffset,
@@ -124,6 +132,35 @@ import {
   type GrowthAnimationState,
 } from "./growth.ts";
 import {
+  recoverEffectAtAge,
+  type RecoverEffectSprite,
+} from "./recover.ts";
+import {
+  synthesisEffectAtAge,
+  type SynthesisSprite,
+} from "./synthesis.ts";
+import {
+  milkDrinkEffectAtAge,
+  type MilkDrinkEffectSprite,
+} from "./milkDrink.ts";
+import {
+  supersonicEffectAtAge,
+  type SupersonicRingSprite,
+} from "./supersonic.ts";
+import {
+  waterGunEffectAtAge,
+  type WaterGunSprite,
+} from "./waterGun.ts";
+import {
+  acidEffectAtAge,
+  acidSpritesBackToFrontAtAge,
+  type AcidSprite,
+} from "./acid.ts";
+import {
+  earthquakeAnimationAtAge,
+  type EarthquakeAnimationState,
+} from "./earthquake.ts";
+import {
   futureSightAttackerEffectAtAge,
   futureSightBgBldyAtAge,
   futureSightBgIsPsychic,
@@ -209,6 +246,16 @@ import {
   knockOffTargetOamOffsetAtAge,
   type KnockOffBodyState,
 } from "./knockOff.ts";
+import {
+  shadowBallBackgroundBldy,
+  shadowBallBackgroundIsGhost,
+  shadowBallDisplayedTargetShakeAtAge,
+  shadowBallLoopSoundAtAge,
+  shadowBallSpriteAtAge,
+  shadowBallTargetShakeAtAge,
+  type LoopSeAdjustPanningState,
+  type ShadowBallSprite,
+} from "./shadowBall.ts";
 
 export type SceneOnBattlerSide = "player" | "opponent";
 
@@ -235,8 +282,17 @@ export interface SceneOnPresentationBattler {
     | "HAUNTER"
     | "IVYSAUR"
     | "KADABRA"
+    | "MILTANK"
+    | "LOUDRED"
+    | "DUSTOX"
+    | "HORSEA"
+    | "EKANS"
+    | "SKIPLOOM"
+    | "RELICANTH"
+    | "LUNATONE"
     | "SHUPPET"
-    | "PLUSLE";
+    | "PLUSLE"
+    | "SABLEYE";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -631,6 +687,90 @@ export interface SceneOnGrowthConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnRecoverConfig {
+  readonly move: "RECOVER";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+export interface SceneOnSynthesisConfig {
+  readonly move: "SYNTHESIS";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+export interface SceneOnMilkDrinkConfig {
+  readonly move: "MILK_DRINK";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+export interface SceneOnSupersonicConfig {
+  readonly move: "SUPERSONIC";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+export interface SceneOnWaterGunConfig {
+  readonly move: "WATER_GUN";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source `GetBattlerSpriteCoord2(attacker, X_2/Y_PIC_OFFSET)`. */
+  readonly projectileOrigin: Readonly<{ x: number; y: number }>;
+}
+
+export interface SceneOnAcidConfig {
+  readonly move: "ACID";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source `GetBattlerSpriteCoord2(attacker, X_2/Y_PIC_OFFSET)`. */
+  readonly projectileOrigin: Readonly<{ x: number; y: number }>;
+}
+
+export interface SceneOnEarthquakeConfig {
+  readonly move: "EARTHQUAKE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source sprite x2 values retained until ShakeBattlers' first callback update. */
+  readonly initialBattlerX2: Readonly<{ player: number; opponent: number }>;
+}
+
+export interface SceneOnHardenConfig {
+  readonly move: "HARDEN";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source battler sprite `x/y`, used to initialize BG1_X/BG1_Y. */
+  readonly attackerSpriteCenter: Readonly<{ x: number; y: number }>;
+}
+
+export interface SceneOnCalmMindConfig {
+  readonly move: "CALM_MIND";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<
+    Omit<SceneOnDragonRageFieldProfile, "playerGender" | "opponentGender">
+    & {
+      readonly playerGender?: "male" | "female" | "none";
+      readonly opponentGender?: "male" | "female" | "none";
+    }
+  >;
+}
+
+export interface SceneOnShadowBallConfig {
+  readonly move: "SHADOW_BALL";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnFutureSightConfig {
   readonly move: "FUTURE_SIGHT";
   readonly attacker: SceneOnPresentationBattler;
@@ -684,6 +824,16 @@ export type SceneOnMoveConfig =
   | SceneOnDragonRageConfig
   | SceneOnShadowPunchConfig
   | SceneOnGrowthConfig
+  | SceneOnRecoverConfig
+  | SceneOnSynthesisConfig
+  | SceneOnMilkDrinkConfig
+  | SceneOnSupersonicConfig
+  | SceneOnWaterGunConfig
+  | SceneOnAcidConfig
+  | SceneOnEarthquakeConfig
+  | SceneOnHardenConfig
+  | SceneOnCalmMindConfig
+  | SceneOnShadowBallConfig
   | SceneOnFutureSightConfig
   | SceneOnConfusionConfig
   | SceneOnPsychicConfig
@@ -694,6 +844,63 @@ export interface SceneOnMovePresentationState<
 > {
   readonly age: number;
   readonly config: TConfig;
+}
+
+export interface SceneOnSupersonicView {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly attackerOffset: Readonly<{ x2: number; y2: number }>;
+  readonly rings: readonly SupersonicRingSprite[];
+}
+
+export interface SceneOnWaterGunView {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly targetOffset: Readonly<{ x2: number; y2: number }>;
+  readonly sprites: readonly WaterGunSprite[];
+}
+
+export interface SceneOnAcidView {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly targetOffset: Readonly<{ x2: number; y2: number }>;
+  readonly defenderPaletteY: number;
+  readonly sprites: readonly AcidSprite[];
+}
+
+export interface SceneOnEarthquakeView extends EarthquakeAnimationState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly playerBattlerX2: number;
+  readonly opponentBattlerX2: number;
+}
+
+export interface SceneOnHardenView extends MetallicShineState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnCalmMindView extends CalmMindState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnShadowBallView {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly backgroundGhost: boolean;
+  readonly backgroundBldy: number;
+  readonly sprite: ShadowBallSprite | null;
+  readonly targetOffset: Readonly<{ x2: number; y2: number }>;
+  readonly displayedTargetOffset: Readonly<{ x2: number; y2: number }>;
+  readonly loopSound: LoopSeAdjustPanningState | null;
 }
 
 export interface SceneOnFirePunchView {
@@ -976,6 +1183,29 @@ export interface SceneOnGrowthView extends GrowthAnimationState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnRecoverView {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly attackerObjY: number;
+  readonly sprites: readonly RecoverEffectSprite[];
+}
+
+export interface SceneOnSynthesisView {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly attackerObjY: number;
+  readonly sprites: readonly SynthesisSprite[];
+}
+
+export interface SceneOnMilkDrinkView {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly sprites: readonly MilkDrinkEffectSprite[];
 }
 
 export interface SceneOnFutureSightView extends FutureSightAttackerEffect {
@@ -1451,6 +1681,215 @@ export function sceneOnGrowthView(
     target: state.config.target,
     attackerScale: scaleState.attackerScale,
     attackerObjY: tintState.attackerObjY,
+  };
+}
+
+/** `age` is ticks since the first RecoverAbsorbEffect orb creation. */
+export function sceneOnRecoverView(
+  state: SceneOnMovePresentationState,
+): SceneOnRecoverView {
+  if (state.config.move !== "RECOVER") {
+    throw new Error(`expected RECOVER presentation, got ${state.config.move}`);
+  }
+  const effect = recoverEffectAtAge(
+    state.age,
+    state.config.attacker.geometry.side,
+    state.config.attacker.geometry.animationCenter,
+  );
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...effect,
+  };
+}
+
+/** `age` is ticks since the first GrantingStarsEffect sprite creation. */
+export function sceneOnSynthesisView(
+  state: SceneOnMovePresentationState,
+): SceneOnSynthesisView {
+  if (state.config.move !== "SYNTHESIS") {
+    throw new Error(`expected SYNTHESIS presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...synthesisEffectAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age` is ticks since the milk bottle's creation callback. */
+export function sceneOnMilkDrinkView(
+  state: SceneOnMovePresentationState,
+): SceneOnMilkDrinkView {
+  if (state.config.move !== "MILK_DRINK") {
+    throw new Error(`expected MILK_DRINK presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    sprites: milkDrinkEffectAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age` is ticks since the first `gSupersonicRingSpriteTemplate` creation. */
+export function sceneOnSupersonicView(
+  state: SceneOnMovePresentationState,
+): SceneOnSupersonicView {
+  if (state.config.move !== "SUPERSONIC") {
+    throw new Error(`expected SUPERSONIC presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...supersonicEffectAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age` is ticks since `gWaterGunProjectileSpriteTemplate` creation. */
+export function sceneOnWaterGunView(
+  state: SceneOnMovePresentationState,
+): SceneOnWaterGunView {
+  if (state.config.move !== "WATER_GUN") {
+    throw new Error(`expected WATER_GUN presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...waterGunEffectAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.projectileOrigin,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age` is ticks since the first `gAcidPoisonBubbleSpriteTemplate` callback. */
+export function sceneOnAcidView(
+  state: SceneOnMovePresentationState,
+): SceneOnAcidView {
+  if (state.config.move !== "ACID") {
+    throw new Error(`expected ACID presentation, got ${state.config.move}`);
+  }
+  const effect = acidEffectAtAge(
+    state.age,
+    state.config.attacker.geometry.side,
+    state.config.projectileOrigin,
+    state.config.target.geometry.animationCenter,
+  );
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...effect,
+    sprites: acidSpritesBackToFrontAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.projectileOrigin,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is the two simultaneous HorizontalShake task creation tick. */
+export function sceneOnEarthquakeView(
+  state: SceneOnMovePresentationState,
+): SceneOnEarthquakeView {
+  if (state.config.move !== "EARTHQUAKE") {
+    throw new Error(`expected EARTHQUAKE presentation, got ${state.config.move}`);
+  }
+  const animation = earthquakeAnimationAtAge(state.age);
+  const beforeFirstShakeWrite = state.age < 2;
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...animation,
+    playerBattlerX2: beforeFirstShakeWrite
+      ? state.config.initialBattlerX2.player
+      : animation.shake.battlerX2,
+    opponentBattlerX2: beforeFirstShakeWrite
+      ? state.config.initialBattlerX2.opponent
+      : animation.shake.battlerX2,
+  };
+}
+
+/** `age=0` is the MetallicShine initializer's first displayed frame. */
+export function sceneOnHardenView(
+  state: SceneOnMovePresentationState,
+): SceneOnHardenView {
+  if (state.config.move !== "HARDEN") {
+    throw new Error(`expected HARDEN presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...metallicShineAtAge(
+      state.age,
+      state.config.attackerSpriteCenter.x,
+      state.config.attackerSpriteCenter.y,
+      false,
+    ),
+  };
+}
+
+/** `age=0` is the settled field immediately before the script's `monbg`. */
+export function sceneOnCalmMindView(
+  state: SceneOnMovePresentationState,
+): SceneOnCalmMindView {
+  if (state.config.move !== "CALM_MIND") {
+    throw new Error(`expected CALM_MIND presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...calmMindAtAge(state.age),
+  };
+}
+
+/** `age=0` is the `fadetobg BG_GHOST` creation tick. */
+export function sceneOnShadowBallView(
+  state: SceneOnMovePresentationState,
+): SceneOnShadowBallView {
+  if (state.config.move !== "SHADOW_BALL") {
+    throw new Error(`expected SHADOW_BALL presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    backgroundGhost: shadowBallBackgroundIsGhost(state.age),
+    backgroundBldy: shadowBallBackgroundBldy(state.age),
+    sprite: shadowBallSpriteAtAge(state.age, {
+      attackerCenter: state.config.attacker.geometry.animationCenter,
+      targetCenter: state.config.target.geometry.animationCenter,
+    }),
+    targetOffset: shadowBallTargetShakeAtAge(state.age),
+    displayedTargetOffset: shadowBallDisplayedTargetShakeAtAge(state.age),
+    loopSound: shadowBallLoopSoundAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+    ),
   };
 }
 

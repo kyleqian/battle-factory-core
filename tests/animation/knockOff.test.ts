@@ -1,8 +1,14 @@
 import { describe, expect, it } from "vitest";
+import knockOffAsset from "../../src/animation/assets/knock-off.json" with { type: "json" };
 import {
   knockOffBodyAtAge,
   knockOffTargetOamOffsetAtAge,
 } from "../../src/animation/knockOff.ts";
+import {
+  createSceneOnMovePresentation,
+  sceneOnKnockOffView,
+} from "../../src/animation/sceneOnPresentation.ts";
+import { createInitialState, render } from "../../src/engine/core.ts";
 
 describe("MOVE_KNOCK_OFF source-relative body", () => {
   it("composes the player lunge, strike, slide, and target shake epochs", () => {
@@ -67,5 +73,61 @@ describe("MOVE_KNOCK_OFF source-relative body", () => {
       { x2: 2, y2: 2 },
       { x2: 0, y2: 0 },
     ]);
+  });
+
+  it("pins the source-derived PLUSLE front asset required by the opposite orientation", () => {
+    expect(knockOffAsset.source.plusleFront).toBe(
+      "graphics/pokemon/plusle/front.png; gMonFrontPic_Plusle",
+    );
+    expect(knockOffAsset.plusleFront.tileset).toMatchObject({
+      columns: 8,
+      rows: 8,
+    });
+    expect(knockOffAsset.plusleFront.palette).toHaveLength(16);
+    expect(knockOffAsset.plusleFront.tileset.tiles)
+      .not.toEqual(knockOffAsset.plusleBack.tileset.tiles);
+  });
+
+  it("preserves opponent-front to player-back geometry through the shared seam", () => {
+    const state = createSceneOnMovePresentation({
+      move: "KNOCK_OFF",
+      attacker: {
+        species: "PLUSLE",
+        geometry: {
+          side: "opponent",
+          spriteCorner: { x: 144, y: 22 },
+          animationCenter: { x: 176, y: 54 },
+          battlePositionCenter: { x: 176, y: 40 },
+        },
+      },
+      target: {
+        species: "ONIX",
+        geometry: {
+          side: "player",
+          spriteCorner: { x: 40, y: 48 },
+          animationCenter: { x: 72, y: 88 },
+          battlePositionCenter: { x: 72, y: 80 },
+        },
+      },
+      fieldProfile: {
+        playerHp: 110,
+        playerMaxHp: 110,
+        opponentHp: 135,
+        opponentMaxHp: 135,
+        playerGender: "male",
+        opponentGender: "male",
+      },
+    });
+    const strikeFrame = { ...state, age: 8 };
+    expect(sceneOnKnockOffView(strikeFrame)).toMatchObject({
+      attacker: { species: "PLUSLE", geometry: { side: "opponent" } },
+      target: { species: "ONIX", geometry: { side: "player" } },
+      strike: { mirrored: true, angle: 170 },
+    });
+    expect(render({
+      ...createInitialState(),
+      rngMode: "frontierBattle",
+      sceneOnPresentation: strikeFrame,
+    })).toHaveLength(240 * 160 * 4);
   });
 });

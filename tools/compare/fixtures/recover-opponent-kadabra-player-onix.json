@@ -1,0 +1,14 @@
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-recover-opponent-kadabra-player-onix.json",
+  "probe": "tools/compare/recoverProbe.py",
+  "pair": "KADABRA (opponent-front, Factory RECOVER carrier) -> ONIX (player-back)",
+  "move": "RECOVER",
+  "orientation": "opponent-to-player",
+  "appStage": {"oracleFrame":615,"presentationAge":0},
+  "denseWindow": {"startFrame":615,"endFrame":783},
+  "attacker": {"species":"KADABRA","geometry":{"side":"opponent","spriteCorner":{"x":144,"y":13},"animationCenter":{"x":176,"y":45},"battlePositionCenter":{"x":176,"y":40}}},
+  "target": {"species":"ONIX","geometry":{"side":"player","spriteCorner":{"x":40,"y":48},"animationCenter":{"x":72,"y":88},"battlePositionCenter":{"x":72,"y":80}}},
+  "fieldProfile": {"playerHp":110,"playerMaxHp":110,"opponentHp":96,"opponentMaxHp":115,"playerGender":"male","opponentGender":"male"}
+}

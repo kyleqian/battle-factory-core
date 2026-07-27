@@ -1,0 +1,14 @@
+{
+  "schema":"scene-on-portable-component/v1",
+  "oracleProfile":"battle-scene-on",
+  "scenario":"tools/battle-lab/mechanic-water-gun-player-horsea-opponent-onix.json",
+  "probe":"tools/compare/waterGunProbe.py",
+  "pair":"HORSEA Factory set 60 carrier and player-back presentation chrome -> ONIX opponent-front",
+  "move":"WATER_GUN",
+  "denseWindow":{"startFrame":83,"endFrame":193},
+  "appStage":{"presentationAge":0},
+  "projectileOrigin":{"x":72,"y":97},
+  "attacker":{"species":"HORSEA","geometry":{"side":"player","spriteCorner":{"x":40,"y":57},"animationCenter":{"x":72,"y":104},"battlePositionCenter":{"x":72,"y":80}}},
+  "target":{"species":"ONIX","geometry":{"side":"opponent","spriteCorner":{"x":144,"y":10},"animationCenter":{"x":176,"y":42},"battlePositionCenter":{"x":176,"y":40}}},
+  "fieldProfile":{"playerHp":105,"playerMaxHp":105,"opponentHp":110,"opponentMaxHp":110,"playerGender":"male","opponentGender":"male"}
+}

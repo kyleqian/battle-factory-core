@@ -2,23 +2,235 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_SHADOW_BALL",
+      "status": "exact",
+      "covered": [
+        "complete legal Level-50 mechanicLab parties stage SABLEYE, the real Factory set-268 SHADOW BALL carrier, with Quirky nature, HP/ATK/SPATK EV spread, Lum Berry, and all four active choices legally constrained to SHADOW BALL; ONIX is constrained to TACKLE",
+        "player-back SABLEYE complete move-owned Scene-ON body at oracle frames 256-403: source task/sprite/OAM/matrix/register/palette/raw-RGB evidence 148/148 and shared-seam framebuffer 148/148, reproduced twice",
+        "opponent-front SABLEYE complete move-owned Scene-ON body at oracle frames 260-407: source task/sprite/OAM/matrix/register/palette/raw-RGB evidence 148/148 and shared-seam framebuffer 148/148, reproduced twice",
+        "BG_GHOST fade/wait/restore pipeline; complete SoundTask_LoopSEAdjustPanning five-play/pan schedule; ANIM_TAG_SHADOW_BALL and gShadowBallSpriteTemplate; continuous +10 affine rotation; all three AnimShadowBall 16/16/8 travel/pause/target phases with signed Q4 truncation and side geometry; impact sound boundary; target AnimTask_ShakeMon2(4,0,8,1); side-specific launch OAM ordering; cleanup"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-shadow-ball-player-sableye-opponent-onix.json",
+        "tools/battle-lab/mechanic-shadow-ball-opponent-sableye-player-onix.json",
+        "tools/compare/fixtures/shadow-ball-player-sableye-opponent-onix.json",
+        "tools/compare/fixtures/shadow-ball-opponent-sableye-player-onix.json",
+        "tools/compare/shadowBallPortable.ts",
+        "tools/compare/shadowBallProbe.py",
+        "tools/compare/extractShadowBallAssets.ts",
+        "src/animation/shadowBall.ts",
+        "tests/animation/shadowBall.test.ts"
+      ]
+    },
+    {
+      "move": "MOVE_CALM_MIND",
+      "status": "exact",
+      "covered": [
+        "complete legal Level-50 mechanicLab parties stage LUNATONE with the real Factory set-327 species, Quiet nature, HP/DEF EV spread, Lax Incense, and four legally constrained CALM MIND choices; ONIX is constrained to TACKLE",
+        "player-back LUNATONE complete move-owned Scene-ON body at oracle frames 294-394: source task/palette/software+hardware-OAM/register/raw-RGB evidence 101/101 and shared-seam framebuffer 101/101, reproduced twice",
+        "opponent-front LUNATONE complete move-owned Scene-ON body at oracle frames 294-394: source task/palette/software+hardware-OAM/register/raw-RGB evidence 101/101 and shared-seam framebuffer 101/101, reproduced twice",
+        "AnimTask_BlendBattleAnimPalExclude selects BG banks and every visible non-attacker battler palette; monbg ANIM_ATK_PARTNER ownership; SetAllNonAttackersInvisiblity hide/reveal; all three gThinRingShrinkingSpriteTemplate delay-14 bodies with source affine accumulator, OBJ-alpha mode, 30-callback lifetime, low-slot reuse, and OAM ordering; reverse palette blend and cleanup"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-calm-mind-player-lunatone-opponent-onix.json",
+        "tools/battle-lab/mechanic-calm-mind-opponent-lunatone-player-onix.json",
+        "tools/compare/fixtures/calm-mind-player-lunatone-opponent-onix.json",
+        "tools/compare/fixtures/calm-mind-opponent-lunatone-player-onix.json",
+        "tools/compare/calmMindPortable.ts",
+        "tools/compare/calmMindProbe.py",
+        "tools/compare/extractCalmMindAssets.ts",
+        "src/animation/calmMind.ts",
+        "tests/animation/calmMind.test.ts"
+      ]
+    },
+    {
+      "move": "MOVE_HARDEN",
+      "status": "exact",
+      "covered": [
+        "complete legal Level-50 mechanicLab parties stage RELICANTH with the real Factory set-259 species/nature/EV spread/item and all four active choices legally constrained to HARDEN; ONIX is constrained to TACKLE",
+        "player-back RELICANTH complete move-owned Scene-ON body at oracle frames 292-392: source component/task/RAM/register/hardware-palette/software+hardware-OAM 101/101 and shared-seam framebuffer 101/101, reproduced twice",
+        "opponent-front RELICANTH complete move-owned Scene-ON body at oracle frames 292-392: source component/task/RAM/register/hardware-palette/software+hardware-OAM 101/101 and shared-seam framebuffer 101/101, reproduced twice",
+        "SoundTask_LoopSEAdjustPanning presence; complete AnimTask_MetallicShine 4px BG1_X sweep/wrap body; extracted gMetalShineGfx/Palette/Tilemap; invisible attacker copy and OBJ-window mask; grayscale attacker palette and permanent=FALSE restoration; WIN/DISPCNT/BLDCNT/BLDALPHA/BG1 attributes; ClearBattleAnimBg wait and teardown display latches"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-harden-player-relicanth-opponent-onix.json",
+        "tools/battle-lab/mechanic-harden-opponent-relicanth-player-onix.json",
+        "tools/compare/fixtures/harden-player-relicanth-opponent-onix.json",
+        "tools/compare/fixtures/harden-opponent-relicanth-player-onix.json",
+        "tools/compare/hardenPortable.ts",
+        "tools/compare/hardenProbe.py",
+        "tools/compare/extractHardenAssets.ts",
+        "src/animation/metallicShine.ts",
+        "tests/animation/metallicShine.test.ts"
+      ]
+    },
+    {
+      "move": "MOVE_SYNTHESIS",
+      "status": "exact",
+      "covered": [
+        "complete legal Level-50 mechanicLab parties stage SKIPLOOM, the real Factory set-129 SYNTHESIS carrier, while stock TACKLE damage creates missing HP without transient-state injection",
+        "player-back SKIPLOOM complete move-owned Scene-ON body at oracle frames 609-738: source component/task/RAM/palette 130/130 and shared-seam framebuffer 130/130, reproduced twice",
+        "opponent-front SKIPLOOM complete move-owned Scene-ON body at oracle frames 220-349: source component/task/RAM/palette 130/130 and shared-seam framebuffer 130/130, reproduced twice",
+        "ANIM_TAG_SPARKLE_2 and source carrier chrome; the literal delay-2 two-leg attacker blend_color_cycle; both gGrantingStarsSpriteTemplate fixed-point/frame-animation bodies from GrantingStarsEffect; the unload/delay/load boundary; and the complete already-shared HealingEffect without duplication"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-synthesis-player-skiploom-opponent-onix.json",
+        "tools/battle-lab/mechanic-synthesis-opponent-skiploom-player-onix.json",
+        "tools/compare/fixtures/synthesis-player-skiploom-opponent-onix.json",
+        "tools/compare/fixtures/synthesis-opponent-skiploom-player-onix.json",
+        "tools/compare/synthesisPortable.ts",
+        "tools/compare/synthesisProbe.py",
+        "tools/compare/extractSynthesisAssets.ts",
+        "src/animation/synthesis.ts",
+        "tests/animation/synthesis.test.ts",
+        "tests/animation/blendColorCycle.test.ts",
+        "tests/animation/recover.test.ts"
+      ]
+    },
+    {
+      "move": "MOVE_ACID",
+      "status": "exact",
+      "covered": [
+        "complete legal Level-50 mechanicLab parties stage EKANS, the real Factory set-53 ACID carrier, with all four active choices constrained to ACID and the opposing ONIX constrained to TACKLE",
+        "player-back EKANS to opponent-front ONIX complete move-owned Scene-ON body at oracle frames 76-206: source component/task/RAM/palette 131/131 and shared-seam framebuffer 131/131, reproduced twice",
+        "opponent-front EKANS to player-back ONIX complete move-owned Scene-ON body at oracle frames 80-210: source component/task/RAM/palette 131/131 and shared-seam framebuffer 131/131, reproduced twice",
+        "ANIM_TAG_POISON_BUBBLE; all three literal gAcidPoisonBubbleSpriteTemplate 40-callback arcs with attacker-side mirroring, animation selection, and average target positions; both literal AnimTask_ShakeMon2(target/defender partner,2,0,10,1) calls with singles visibility; defender-side delay-2 blend_color_cycle; all five delayed gAcidPoisonDropletSpriteTemplate fixed-point/affine bodies; monbg/clearmonbg; persistent source sSpriteOrder; OAM, palette, and display latches"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-acid-player-ekans-opponent-onix.json",
+        "tools/battle-lab/mechanic-acid-opponent-ekans-player-onix.json",
+        "tools/compare/fixtures/acid-player-ekans-opponent-onix.json",
+        "tools/compare/fixtures/acid-opponent-ekans-player-onix.json",
+        "tools/compare/acidPortable.ts",
+        "tools/compare/acidProbe.py",
+        "tools/compare/extractAcidAssets.ts",
+        "src/animation/acid.ts",
+        "tests/animation/acid.test.ts",
+        "tests/animation/shakeMon2.test.ts",
+        "tests/animation/spriteOrder.test.ts"
+      ]
+    },
+    {
+      "move": "MOVE_EARTHQUAKE",
+      "status": "exact",
+      "covered": [
+        "complete legal Level-50 mechanicLab parties stage DUGTRIO, a real Factory set-372 EARTHQUAKE carrier, with all four active choices constrained to EARTHQUAKE and the opposing ONIX constrained to TACKLE",
+        "player-back DUGTRIO to opponent-front ONIX complete move-owned Scene-ON body at oracle frames 80-276: source task/RAM/palette 197/197 and shared-seam framebuffer 197/197, reproduced twice",
+        "opponent-front DUGTRIO to player-back ONIX complete move-owned Scene-ON body at oracle frames 84-280: source task/RAM/palette 197/197 and shared-seam framebuffer 197/197, reproduced twice",
+        "both simultaneous literal AnimTask_HorizontalShake calls (platforms and every visible battler, intensity 10, max time 50), the source task scheduler and 13-to-0 decay, BG3_X, battler x2 including pre-first-write front-idle residue, both literal BG-only complex_palette_blend pulses (delay 3, count 1, black14 to white14), palette sprite state, and BG palette RAM"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-earthquake-player-dugtrio-opponent-onix.json",
+        "tools/battle-lab/mechanic-earthquake-opponent-dugtrio-player-onix.json",
+        "tools/compare/fixtures/earthquake-player-dugtrio-opponent-onix.json",
+        "tools/compare/fixtures/earthquake-opponent-dugtrio-player-onix.json",
+        "tools/compare/earthquakePortable.ts",
+        "tools/compare/earthquakeProbe.py",
+        "src/animation/earthquake.ts",
+        "tests/animation/earthquake.test.ts"
+      ]
+    },
+    {
+      "move": "MOVE_WATER_GUN",
+      "status": "exact",
+      "covered": [
+        "complete legal Level-50 mechanicLab parties stage HORSEA, the real Factory set-60 WATER GUN carrier, with all four active choices constrained to WATER GUN and the opposing ONIX constrained to TACKLE",
+        "player-back HORSEA to opponent-front ONIX complete move-owned Scene-ON body at oracle frames 83-193: source component/RAM 111/111 and shared-seam framebuffer 111/111, reproduced twice",
+        "opponent-front HORSEA to player-back ONIX complete move-owned Scene-ON body at oracle frames 87-197: source component/RAM 111/111 and shared-seam framebuffer 111/111, reproduced twice",
+        "ANIM_TAG_SMALL_BUBBLES and ANIM_TAG_WATER_IMPACT assets; gWaterGunProjectileSpriteTemplate's complete 40-callback horizontal arc; gWaterHitSplatSpriteTemplate affine program 2; all three delayed gWaterGunDropletSpriteTemplate fixed-point/looping-affine bodies; splitbgprio/monbg/setalpha/blendoff/clearmonbg; target BG2 alpha target; and only the literal AnimTask_ShakeMon2(target,1,0,8,1) tuple"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-water-gun-player-horsea-opponent-onix.json",
+        "tools/battle-lab/mechanic-water-gun-opponent-horsea-player-onix.json",
+        "tools/compare/fixtures/water-gun-player-horsea-opponent-onix.json",
+        "tools/compare/fixtures/water-gun-opponent-horsea-player-onix.json",
+        "tools/compare/waterGunPortable.ts",
+        "tools/compare/waterGunProbe.py",
+        "tools/compare/extractWaterGunAssets.ts",
+        "src/animation/waterGun.ts",
+        "tests/animation/waterGun.test.ts",
+        "tests/animation/shakeMon2.test.ts"
+      ]
+    },
+    {
+      "move": "MOVE_SUPERSONIC",
+      "status": "exact",
+      "covered": [
+        "complete legal Level-50 mechanicLab parties stage a real Factory LOUDRED SUPERSONIC carrier in battle RAM with all four active choices constrained to SUPERSONIC and the opposing ONIX constrained to TACKLE",
+        "player-back route chrome to opponent-front ONIX complete move-owned Scene-ON body at oracle frames 80-130: source component/RAM 51/51 and shared-seam framebuffer 51/51, reproduced twice",
+        "opponent-front route chrome to player-back ONIX complete move-owned Scene-ON body at oracle frames 84-134: source component/RAM 51/51 and shared-seam framebuffer 51/51, reproduced twice",
+        "all six literal SupersonicRing calls, ANIM_TAG_GOLD_RING, gSupersonicRingSpriteTemplate growing affine program, 30-tick TranslateAnimSpriteToTargetMonLocation fixed-point body, attacker-side geometry, splitbgprio_foes, monbg/setalpha/blendoff/clearmonbg, and the already-proven literal AnimTask_ShakeMon2(attacker,2,0,8,1) tuple"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-supersonic-player-loudred-opponent-onix.json",
+        "tools/battle-lab/mechanic-supersonic-opponent-loudred-player-onix.json",
+        "tools/compare/fixtures/supersonic-player-loudred-opponent-onix.json",
+        "tools/compare/fixtures/supersonic-opponent-loudred-player-onix.json",
+        "tools/compare/supersonicPortable.ts",
+        "tools/compare/supersonicProbe.py",
+        "src/animation/supersonic.ts",
+        "tests/animation/supersonic.test.ts",
+        "tests/animation/shakeMon2.test.ts"
+      ]
+    },
+    {
+      "move": "MOVE_MILK_DRINK",
+      "status": "exact",
+      "covered": [
+        "complete legal Level-50 mechanicLab parties use MILTANK set 411, a real Factory MILK DRINK carrier, and legally constrained TACKLE; turn 1 stages damage through stock battle flow rather than injected HP",
+        "player-back MILTANK complete move-owned Scene-ON body at oracle frames 617-802: source component/RAM 186/186 and shared-seam framebuffer 186/186, reproduced twice",
+        "opponent-front MILTANK complete move-owned Scene-ON body at oracle frames 621-806: source component/RAM 186/186 and shared-seam framebuffer 186/186, reproduced twice",
+        "gMilkBottleSpriteTemplate's AnimMilkBottle blend-in/hold/affine-wobble/fall/blend-out body, ANIM_TAG_MILK_BOTTLE, gThinRingExpandingSpriteTemplate affine program 1 and terminal hold, ANIM_TAG_THIN_RING, monbg/clearmonbg display latches, and HealingEffect2's four target-side gHealingBlueStarSpriteTemplate sprites"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-milk-drink-player-miltank-opponent-onix.json",
+        "tools/battle-lab/mechanic-milk-drink-opponent-miltank-player-onix.json",
+        "tools/compare/fixtures/milk-drink-player-miltank-opponent-onix.json",
+        "tools/compare/fixtures/milk-drink-opponent-miltank-player-onix.json",
+        "tools/compare/milkDrinkPortable.ts",
+        "tools/compare/milkDrinkProbe.py",
+        "src/animation/milkDrink.ts",
+        "tests/animation/milkDrink.test.ts"
+      ]
+    },
+    {
+      "move": "MOVE_RECOVER",
+      "status": "exact",
+      "covered": [
+        "complete legal Level-50 mechanicLab parties use KADABRA, a real Factory RECOVER carrier, and legally constrained TACKLE; the first turn stages damage through stock battle flow rather than injected HP",
+        "player-back KADABRA complete move-owned Scene-ON body at oracle frames 611-779: source component/RAM 169/169 and shared-seam framebuffer 169/169, reproduced twice",
+        "opponent-front KADABRA complete move-owned Scene-ON body at oracle frames 615-783: source component/RAM 169/169 and shared-seam framebuffer 169/169, reproduced twice",
+        "all 21 RecoverAbsorbEffect gPowerAbsorptionOrbSpriteTemplate spawns, ANIM_TAG_ORBS affine shrink and signed side geometry, six-leg odd-swing blend_color_cycle, monbg/setalpha/blendoff teardown, and HealingEffect's four ANIM_TAG_BLUE_STAR sprites/frame program"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-recover-player-kadabra-opponent-onix.json",
+        "tools/battle-lab/mechanic-recover-opponent-kadabra-player-onix.json",
+        "tools/compare/fixtures/recover-player-kadabra-opponent-onix.json",
+        "tools/compare/fixtures/recover-opponent-kadabra-player-onix.json",
+        "tools/compare/recoverPortable.ts",
+        "tools/compare/recoverProbe.py",
+        "src/animation/recover.ts",
+        "tests/animation/recover.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_KNOCK_OFF",
-      "status": "partial",
+      "status": "exact",
       "covered": [
         "legal Scene-ON source route with complete SHUPPET party override, staged player orientation against opponent-front ONIX",
         "complete staged-orientation move-owned oracle frames 70-128: source component/RAM 59/59 and shared-seam framebuffer 59/59, reproduced twice",
-        "player lunge, target slide/shake/return task roles and callback-to-OAM transfer ordering, strike orbit/two-sheet/HLE affine program, 372x372 hitsplat, complex palette epoch, corners, healthboxes, and the fixture's preloaded PLUSLE display chrome"
+        "legal Scene-ON opposite source route with complete opponent SHUPPET and player ONIX parties; complete opponent-front PLUSLE to player-back ONIX chrome body at oracle frames 74-132: source component/RAM 59/59 and shared-seam framebuffer 59/59, reproduced twice",
+        "both attacker orientations for lunge, target slide/shake/return task roles and callback-to-OAM transfer ordering, strike orbit/two-sheet/side-selected HLE affine program and literal x argument mirror, 372x372 hitsplat, complex palette epoch, source front/back chrome, corners, and healthboxes"
       ],
       "evidence": [
         "tools/battle-lab/mechanic-knock-off-shuppet-onix.json",
+        "tools/battle-lab/mechanic-knock-off-opponent-shuppet-player-onix.json",
         "tools/compare/fixtures/knock-off-player-shuppet-opponent-onix.json",
+        "tools/compare/fixtures/knock-off-opponent-onix-player-plusle.json",
         "tools/compare/knockOffPortable.ts",
         "tools/probe/run-battle-lab-rgb.py",
         "src/animation/knockOff.ts",
         "tests/animation/knockOff.test.ts"
-      ],
-      "remaining": [
-        "opposite attacker orientation"
       ]
     },
     {
@@ -664,6 +876,68 @@
   ],
   "componentTracks": [
     {
+      "id": "loop-se-adjust-panning",
+      "components": [
+        "soundTask:SoundTask_LoopSEAdjustPanning"
+      ],
+      "representatives": [
+        "MOVE_SHADOW_BALL",
+        "MOVE_ICE_BEAM",
+        "MOVE_PSYBEAM",
+        "MOVE_AURORA_BEAM",
+        "MOVE_HYPER_BEAM",
+        "MOVE_PSYWAVE",
+        "MOVE_TRI_ATTACK"
+      ],
+      "goal": "MOVE_SHADOW_BALL independently proves its complete 5/5/0/5 LoopSEAdjustPanning task schedule and full ghost-BG/projectile/impact/shake/restore body in both orientations at 148/148 task/sprite/OAM/matrix/register/palette/raw-RGB and framebuffer frames, reproduced twice. No sibling is promoted. ICE BEAM needs its BG darken/restore, two outer-crystal beam starters, eleven IceBeamCreateCrystals groups, target blue blend, target ShakeMon2, terminal inner crystals, IceCrystalEffectShort, monbg/splitbgprio/alpha teardown, and its distinct 4/4/0/10 sound schedule. PSYBEAM needs SetPsychicBackground/UnsetPsychicBackground, eleven GoldRing groups, target SwayMon, two-leg target blend_color_cycle, and its distinct 3/4/0/15 sound schedule. AURORA BEAM needs BG_AURORA fade/restore, rotating rainbow-ring palette task, ten four-ring groups, both target ShakeMon2 tasks, script arg-7 lifetime gate, and its distinct 3/6/0/10 sound schedule. HYPER BEAM needs full BG blackout/restore, attacker ShakeMon2 and Y-shake, flashing orb palette, twenty-five HyperBeamOrbs groups, target ShakeMon2, both target palette blends, and its distinct 1/15/0/5 sound schedule. PSYWAVE needs SetPsychicBackground/UnsetPsychicBackground, StartSinAnimTimer, twelve blue-ring sprites, four-leg target blend_color_cycle, and its distinct 2/9/0/10 sound schedule. TRI ATTACK needs the translating triangle, two initial sound/delay legs, BG blackout, eight fire scatters plus patterned shake, three lightning strikes plus inversion/patterned shake, the final ice body, and its distinct 5/6/0/7 sound schedule. Every sibling remains unsupported pending independent complete dense move evidence."
+    },
+    {
+      "id": "blend-battle-anim-palette-exclude",
+      "components": [
+        "task:AnimTask_BlendBattleAnimPalExclude"
+      ],
+      "representatives": [
+        "MOVE_CALM_MIND",
+        "MOVE_SKY_ATTACK",
+        "MOVE_DESTINY_BOND",
+        "MOVE_HEAL_BELL",
+        "MOVE_LUSTER_PURGE",
+        "MOVE_SILVER_WIND"
+      ],
+      "goal": "MOVE_CALM_MIND independently proves its complete exclude-attacker BG/non-attacker black blend, attacker-partner monbg, non-attacker hide/reveal, three delay-14 shrinking affine/OBJ-alpha thin rings, reverse blend, and cleanup in both orientations at 101/101 task/palette/software+hardware-OAM/register/raw-RGB and framebuffer frames, reproduced twice. HARDEN 101/101, SYNTHESIS 130/130, and BIND 45/45 remain exact in both orientations after the renderer change. No sibling is promoted. SKY ATTACK needs independent evidence for both two-turn branches: its normal-opponent setup uses ordinary palette selectors rather than Exclude, while the attacker-partner setup uses Exclude around monbg/alpha, attacker black/white blends, HorizontalShake, and the separate sky-BG/bird/impact/fade strike body. DESTINY BOND needs the BG_GHOST fade/restore pipeline, gDestinyBondWhiteShadow task, attacker ShakeMonInPlace, its partner-excluding two-leg gray palette body, and cleanup. HEAL BELL needs its bell, twelve palette-managed music notes, three HealBellRing expanding-ring/palette groups, two distinct sparkling stars, asset unload/reload boundaries, and the final blended expanding ring with its separate Exclude selector/colors. LUSTER PURGE needs the psychic BG and screen-to-white pipeline, luster circle, white-alpha particle/palette blends, six random hitsplats with sound tasks, target HorizontalShake, reverse blend, and cleanup. SILVER WIND needs side-specific BUG BGs, sliding BG, splitbgprio/monbg, eighteen independently parameterized big/medium/small sparkle sprites, initial and reverse target-excluding black blends, and restore cleanup. Every sibling remains unsupported pending its own complete dense move evidence."
+    },
+    {
+      "id": "metallic-shine",
+      "components": [
+        "visualCommand:metallic_shine"
+      ],
+      "representatives": [
+        "MOVE_HARDEN",
+        "MOVE_STEEL_WING",
+        "MOVE_IRON_TAIL",
+        "MOVE_METAL_CLAW",
+        "MOVE_IRON_DEFENSE",
+        "MOVE_POISON_TAIL"
+      ],
+      "goal": "MOVE_HARDEN independently proves the complete permanent=FALSE MetallicShine body in both orientations at 101/101 component/task/RAM/register/hardware-palette/software+hardware-OAM and framebuffer frames, reproduced twice. No sibling is promoted. STEEL WING additionally needs ANIM_TAG_GUST/IMPACT, TranslateMonElliptical, AnimateGustTornadoPalette, paired GustToTarget sprites, attacker slide/return, two hitsplats, monbg/splitbgprio/alpha teardown, and its second sound loop. IRON TAIL uses permanent=TRUE and additionally needs HorizontalLunge, impact hitsplat, target ShakeMon, explicit set_original_pal, monbg/alpha teardown. METAL CLAW additionally needs two lunge passes, four gClawSlash sprites across two animations, and two target Y-shake tasks. IRON DEFENSE overlaps permanent=FALSE but additionally runs a concurrent delay-8/count-2 BG-only white-alpha complex_palette_blend body and uses a distinct sound. POISON TAIL uses permanent=TRUE with custom RGB(24,6,23), then needs lunge/hitsplat/target ShakeMon, explicit palette restore, monbg/alpha teardown, and PoisonBubblesEffect. Every sibling remains unsupported pending its own independent complete dense acceptance."
+    },
+    {
+      "id": "horizontal-shake-complex-bg-palette",
+      "components": [
+        "task:AnimTask_HorizontalShake",
+        "visualCommand:complex_palette_blend"
+      ],
+      "representatives": [
+        "MOVE_EARTHQUAKE",
+        "MOVE_FISSURE",
+        "MOVE_SKY_ATTACK",
+        "MOVE_MAGNITUDE",
+        "MOVE_ERUPTION",
+        "MOVE_LUSTER_PURGE"
+      ],
+      "goal": "MOVE_EARTHQUAKE independently proves its complete dual literal (10,50) platform/all-battler HorizontalShake body and two delay-3/count-1 BG-only black14-to-white14 palette pulses in both orientations at 197/197 task/RAM/palette and framebuffer frames, reproduced twice. No sibling is promoted. HorizontalShake audit: FISSURE additionally needs three dirt-plume groups plus the fissure BG/position/restore pipeline and shakes only the target; SKY ATTACK needs both two-turn charge/strike bodies, attacker-only (2,16) shakes, bird/projectile/hitsplat components; MAGNITUDE uses move-power-derived intensity (literal zero), two sequential platform/all-battler shake pairs, and its own magnitude result choreography; ERUPTION uses distinct (8,60) shakes plus its eruption launch/rain/fire body; LUSTER PURGE uses target-only (5,14) shake plus psychic-background, luster-orb, sparkle, and palette bodies. Complex-palette Level-50 audit: the already-exact KNOCK OFF, BLAZE KICK, and AERIAL ACE retain independent acceptance; MEGA PUNCH and MEGA KICK still need their impact-background/fist/hitsplat bodies; GUILLOTINE its cutter/background body; TAKE DOWN and DOUBLE-EDGE their distinct contact/recoil choreography; FISSURE and MAGNITUDE retain the remainders above; CRABHAMMER needs slide/shake/eight bubble pairs; EXPLOSION its orb/explosion pipeline; SUPER FANG its fang sprite and BlendMonInAndOut; REVERSAL its power branch; FURY CUTTER its hit-count branch; MEGAHORN and CROSS CHOP their distinct strike sprites/tasks; MIST BALL its fog BG/projectile pipeline; SIGNAL BEAM its beam sprites and target palette cycle; IRON DEFENSE its complete defense-up visual body. Source also shows SKULL BASH uses the same BG-only black14-to-white14 pulse inside a distinct two-turn body, but the generated Level-50 component graph does not currently attribute that command edge. Every named unsupported move remains unsupported pending independent complete dense evidence."
+    },
+    {
       "id": "elemental-punch",
       "components": [
         "asset:ANIM_TAG_HANDS_AND_FEET",
@@ -775,7 +1049,127 @@
         "MOVE_SUPER_FANG",
         "MOVE_SECRET_POWER"
       ],
-      "goal": "Evidence checkpoint only; no move is promoted. MOVE_KNOCK_OFF is staged with complete legal mechanicLab parties using SHUPPET, the species from real Factory carrier set 62; the fixture now commits every Scene ON capture frame 70-130. Its player-side 4x6 horizontal lunge is RAM/frame observed at oracle frames 81-91 and the generic callback reducer reproduces the exact 0,6,12,18,24,24,24,18,12,6,0 sequence, including both callback-handoff holds. AnimTask_ShakeMonInPlace is ported as the literal source state machine, and the pre-existing generic slideMon reducer covers both slide templates. knockOff.ts now composes those reducers with AnimKnockOffStrike's source-relative two-frame orbit/side mirror, complex-palette epoch, hitsplat lifetime, and both attacker slide phases; Tier-1 tests cover player and opponent side formulas. tools/compare/extractKnockOffAssets.ts reproducibly extracts ANIM_TAG_SLAM_HIT_2 plus the staged SHUPPET back sprite into src/animation/assets/knock-off.json. Remaining before any Knock Off partial/exact claim: wire through the shared presentation seam; densely verify strike affine matrix, palette/OAM display lags, same-tick slide-helper ordering, hitsplat scale/order, corners/healthboxes, and the complete framebuffer body; then stage the opposite orientation before exact closure. Sibling audit: SUPER_FANG directly reuses both newly ported components but also needs gSuperFangSpriteTemplate, AnimTask_BlendMonInAndOut, palette blend, and its own dense acceptance. SECRET_POWER dispatches by battle environment; the Factory building branch goes to Move_STRENGTH and the source component union includes both new components plus many environment-specific bodies, so it cannot inherit acceptance from Knock Off."
+      "goal": "MOVE_KNOCK_OFF is exact through the shared Scene-ON seam in both source-required orientations: player-back PLUSLE to opponent-front ONIX and opponent-front PLUSLE to player-back ONIX are each 59/59 component/RAM and 59/59 framebuffer frames, reproduced twice. HorizontalLunge, ShakeMonInPlace, and both SlideMon helpers remain one source-relative implementation; the opposite route adds only source-selected PLUSLE front/ONIX back chrome and AnimKnockOffStrike's declared player-target affine/x-argument mirror. BIND remains 45/45 in both orientations twice as a seam regression. Sibling batch verdicts remain independent: SUPER_FANG is unsupported because its complete body additionally requires gSuperFangSpriteTemplate, AnimTask_BlendMonInAndOut, palette blend, and its own dense acceptance; SECRET_POWER is unsupported because the Factory building environment dispatches to Move_STRENGTH and other environments dispatch to distinct move bodies. Neither sibling is promoted by shared reducer coverage."
+    },
+    {
+      "id": "acid-poison-bubble",
+      "components": [
+        "asset:ANIM_TAG_POISON_BUBBLE",
+        "sprite:gAcidPoisonBubbleSpriteTemplate",
+        "sprite:gAcidPoisonDropletSpriteTemplate",
+        "task:AnimTask_ShakeMon2",
+        "visualCommand:blend_color_cycle",
+        "visualCommand:monbg",
+        "visualCommand:clearmonbg"
+      ],
+      "representatives": [
+        "MOVE_ACID",
+        "MOVE_TOXIC",
+        "MOVE_SLUDGE",
+        "MOVE_SLUDGE_BOMB",
+        "MOVE_POISON_FANG",
+        "MOVE_POISON_TAIL"
+      ],
+      "goal": "MOVE_ACID independently proves its complete three-arc, dual-ShakeMon2, defender palette-cycle, and five-droplet body in both orientations at 131/131 component/task/RAM/palette and framebuffer frames, reproduced twice. No sibling is promoted. TOXIC needs the distinct ANIM_TAG_TOXIC_BUBBLE, two four-sprite ToxicBubbles waves, and the separate six-sprite rising PoisonBubblesEffect. SLUDGE needs gSludgeProjectileSpriteTemplate, its target AnimTask_ShakeMon tuple, delay-1 target blend, and PoisonBubblesEffect. SLUDGE BOMB needs ten delayed sludge projectiles, a distinct (3,0,15,1) ShakeMon2, delay-1 target blend, twelve gSludgeBombHitParticleSpriteTemplate fixed-point bodies, waitsound, and PoisonBubblesEffect. POISON FANG needs ANIM_TAG_FANG_ATTACK/gFangSpriteTemplate, target ShakeMon, a four-leg delay-0 palette cycle, and PoisonBubblesEffect. POISON TAIL needs metallic_shine, attacker lunge, impact hitsplat, target ShakeMon, alpha/monbg teardown, and PoisonBubblesEffect. Every sibling remains unsupported pending independent complete dense evidence."
+    },
+    {
+      "id": "water-gun-small-bubbles-water-impact",
+      "components": [
+        "asset:ANIM_TAG_SMALL_BUBBLES",
+        "asset:ANIM_TAG_WATER_IMPACT",
+        "sprite:gWaterGunProjectileSpriteTemplate",
+        "sprite:gWaterGunDropletSpriteTemplate",
+        "sprite:gWaterHitSplatSpriteTemplate",
+        "task:AnimTask_ShakeMon2",
+        "visualCommand:splitbgprio",
+        "visualCommand:monbg",
+        "visualCommand:setalpha",
+        "visualCommand:blendoff",
+        "visualCommand:clearmonbg"
+      ],
+      "representatives": [
+        "MOVE_WATER_GUN",
+        "MOVE_BUBBLE_BEAM",
+        "MOVE_SECRET_POWER",
+        "MOVE_DIVE",
+        "MOVE_MIST_BALL",
+        "MOVE_FAKE_TEARS",
+        "MOVE_WATER_PULSE",
+        "MOVE_HYDRO_PUMP",
+        "MOVE_CRABHAMMER",
+        "MOVE_WATER_SPOUT"
+      ],
+      "goal": "MOVE_WATER_GUN independently proves its complete projectile/hitsplat/three-droplet body and target-BG2 alpha compositor in both orientations at 111/111 component/RAM and framebuffer frames, reproduced twice. ShakeMon2, BIND, and SUPERSONIC remain exact regression controls. No sibling is promoted. SMALL_BUBBLES audit: BUBBLE BEAM needs its 18 large gWaterBubbleProjectile sprites, SwayMon, and WaterBubblesEffectShort; SECRET POWER environment-dispatches to distinct complete scripts (the Factory building route is STRENGTH, pond is BUBBLE BEAM); DIVE needs both two-turn splash/spray setup and strike RisingWaterHitEffect; MIST BALL needs its translating mist ball, target shakes/palette tasks, and full fog BG pipeline; FAKE TEARS uses the tag only for BlendParticle and needs RockMonBackAndForth plus eight thought-bubble/music-note tear sprites; WATER PULSE needs five independently parameterized bubble sprites, three blue rings, target shake, and whole-BG palette blend. WATER_IMPACT audit: HYDRO PUMP needs its paired orb beam stream, sine timer, attacker/target shakes, and repeated hitsplats; CRABHAMMER needs its palette blend, attacker slide/return, target shake, and eight ice-crystal bubble pairs; SECRET POWER and DIVE retain the distinct bodies above; WATER SPOUT needs WaterSpoutLaunch and WaterSpoutRain with glowy-blue-orb launch/rain geometry. Every sibling remains unsupported pending its own complete dense evidence."
+    },
+    {
+      "id": "splitbgprio-foes-sonic-ring",
+      "components": [
+        "visualCommand:splitbgprio_foes",
+        "asset:ANIM_TAG_GOLD_RING",
+        "sprite:gSupersonicRingSpriteTemplate",
+        "subroutine:SupersonicRing",
+        "task:AnimTask_ShakeMon2"
+      ],
+      "representatives": [
+        "MOVE_SUPERSONIC",
+        "MOVE_METAL_SOUND",
+        "MOVE_ABSORB",
+        "MOVE_MEGA_DRAIN",
+        "MOVE_DREAM_EATER",
+        "MOVE_FLAME_WHEEL",
+        "MOVE_GIGA_DRAIN",
+        "MOVE_WILL_O_WISP"
+      ],
+      "goal": "MOVE_SUPERSONIC independently proves its six-ring, side-relative translation/affine body and splitbgprio_foes seam in both orientations at 51/51 component/RAM and framebuffer frames, reproduced twice. ShakeMon2 and BIND remain exact controls. No sibling is promoted: METAL SOUND needs its distinct large metal-wave template and pan sequence; ABSORB needs eight sine drain orbs, hitsplat/shake, and green blend; MEGA DRAIN needs paired 16-orb stronger-green drain; DREAM EATER needs psychic background, target scale/shakes, and 24 drain orbs; FLAME WHEEL needs outward fire spiral, lunge/return, fire spread, and BlendMonInAndOut; GIGA DRAIN needs 24 orbs and its high-green blend; WILL-O-WISP needs wisp orb/fire templates, panning task, and both splitbgprio_all and splitbgprio_foes. Each remains unsupported pending independent complete dense evidence."
+    },
+    {
+      "id": "sparkle-2-granting-stars",
+      "components": [
+        "asset:ANIM_TAG_SPARKLE_2",
+        "sprite:gGrantingStarsSpriteTemplate",
+        "sprite:gSparklingStarsSpriteTemplate",
+        "subroutine:GrantingStarsEffect",
+        "visualCommand:blend_color_cycle"
+      ],
+      "representatives": [
+        "MOVE_SYNTHESIS",
+        "MOVE_HEAL_BELL",
+        "MOVE_WISH",
+        "MOVE_REFRESH",
+        "MOVE_AROMATHERAPY",
+        "MOVE_COSMIC_POWER"
+      ],
+      "goal": "MOVE_SYNTHESIS independently proves its complete delay-2 attacker blend, two GrantingStarsEffect stars, unload/delay/load boundary, and shared HealingEffect in both orientations at 130/130 component/task/RAM/palette and framebuffer frames, reproduced twice. No sibling is promoted. HEAL BELL needs its bell, twelve music-note sprites with palette allocation/free, three HealBellRing thin-ring/palette tasks, gSparklingStarsSpriteTemplate's distinct callback/geometry, and its blended thin-ring/palette finale. WISH needs ANIM_TAG_GOLD_STARS, the black-BG fade pipeline, panning, gWishStarSpriteTemplate, and its delay before GrantingStarsEffect. REFRESH needs AnimTask_StatusClearedEffect, field/battler palette restoration, and its thin-ring body around GrantingStarsEffect. AROMATHERAPY loads SPARKLE_2 but needs nine small/big flower sprites, green BG blend and monbg lifecycle, thin ring, and HealingEffect2 rather than GrantingStarsEffect. COSMIC POWER needs non-attacker palette fades, the BG_COSMIC load/slide/restore pipeline, sound tasks, delay, and two GrantingStarsEffect calls. Each sibling remains unsupported pending independent complete dense evidence."
+    },
+    {
+      "id": "healing-blue-star",
+      "components": [
+        "subroutine:HealingEffect",
+        "subroutine:HealingEffect2",
+        "asset:ANIM_TAG_BLUE_STAR",
+        "sprite:gHealingBlueStarSpriteTemplate",
+        "subroutine:RecoverAbsorbEffect",
+        "visualCommand:create_power_absorption_orb_sprite",
+        "asset:ANIM_TAG_ORBS",
+        "asset:ANIM_TAG_MILK_BOTTLE",
+        "sprite:gMilkBottleSpriteTemplate",
+        "asset:ANIM_TAG_THIN_RING",
+        "sprite:gThinRingExpandingSpriteTemplate"
+      ],
+      "representatives": [
+        "MOVE_RECOVER",
+        "MOVE_ABSORB",
+        "MOVE_MEGA_DRAIN",
+        "MOVE_SOFT_BOILED",
+        "MOVE_DREAM_EATER",
+        "MOVE_GIGA_DRAIN",
+        "MOVE_MILK_DRINK",
+        "MOVE_PRESENT",
+        "MOVE_SYNTHESIS",
+        "MOVE_MOONLIGHT",
+        "MOVE_SWALLOW"
+      ],
+      "goal": "MOVE_RECOVER proves the complete three-wave RecoverAbsorbEffect plus attacker HealingEffect body in both orientations at 169/169 component/RAM and framebuffer frames, reproduced twice. MOVE_MILK_DRINK independently proves its complete bottle/thin-ring/target HealingEffect2 body in both orientations at 186/186 component/RAM and framebuffer frames, reproduced twice. MOVE_SYNTHESIS independently proves its complete GrantingStarsEffect/blend/load-boundary/attacker HealingEffect body in both orientations at 130/130 component/task/RAM/palette and framebuffer frames, reproduced twice. RECOVER remains 169/169, MILK DRINK 186/186, and BIND 45/45 in both orientations as regression controls. No other sibling is promoted: ABSORB needs its 8-orb sine drain/hitsplat/green field body; MEGA_DRAIN its paired 16-orb stronger-green body; DREAM_EATER its psychic-background/target-scale-and-shake/24-orb body; GIGA_DRAIN its 24-orb/high-green body; SOFT_BOILED has a distinct breaking-egg pair, attacker shake, two offset affine-program-0 thin rings, palette blend, and target HealingEffect2 body and needs its own dense move evidence; PRESENT has a distinct common moving item-bag body plus conditional five-explosion damage body or nine-green-particle healing body before target HealingEffect2, and needs dense evidence for both conditional outcomes; MOONLIGHT needs its blackout/moon/alpha/sparkle pipeline; and SWALLOW needs its move-turn-dependent deform/shake/blue-orb multiplicity. Each remains unsupported pending its own complete dense acceptance."
     }
   ],
   "variantAudits": {

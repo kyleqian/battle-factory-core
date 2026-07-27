@@ -68,12 +68,11 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // Knock Off's staged player body is an honest 54/59 framebuffer
-        // partial; the psychic-family exact counts remain unchanged.
-        unsupported: 249,
+        // SHADOW BALL is exact in both required orientations.
+        unsupported: 239,
         staged: 0,
-        partial: 4,
-        exact: 23,
+        partial: 3,
+        exact: 34,
       },
       {
         tier: "openOnly",
@@ -111,12 +110,39 @@ describe("animation coverage ledger", () => {
   });
 
   it("uses the source dependency graph for non-exclusive work grouping", () => {
-    expect(queuedAnimationComponentTracks()[0]).toMatchObject({
-      id: "elemental-punch",
+    expect(
+      queuedAnimationComponentTracks().find(
+        (track) => track.id === "elemental-punch",
+      ),
+    ).toMatchObject({
+      representatives: ["MOVE_FIRE_PUNCH", "MOVE_ICE_PUNCH", "MOVE_THUNDER_PUNCH"],
+    });
+    expect(
+      queuedAnimationComponentTracks().find(
+        (track) => track.id === "horizontal-shake-complex-bg-palette",
+      ),
+    ).toMatchObject({
       representatives: [
-        "MOVE_FIRE_PUNCH",
-        "MOVE_ICE_PUNCH",
-        "MOVE_THUNDER_PUNCH",
+        "MOVE_EARTHQUAKE",
+        "MOVE_FISSURE",
+        "MOVE_SKY_ATTACK",
+        "MOVE_MAGNITUDE",
+        "MOVE_ERUPTION",
+        "MOVE_LUSTER_PURGE",
+      ],
+    });
+    expect(
+      queuedAnimationComponentTracks().find(
+        (track) => track.id === "acid-poison-bubble",
+      ),
+    ).toMatchObject({
+      representatives: [
+        "MOVE_ACID",
+        "MOVE_TOXIC",
+        "MOVE_SLUDGE",
+        "MOVE_SLUDGE_BOMB",
+        "MOVE_POISON_FANG",
+        "MOVE_POISON_TAIL",
       ],
     });
     expect(
