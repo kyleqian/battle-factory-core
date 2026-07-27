@@ -2340,7 +2340,7 @@ scenario (§9, §11.5, §12.1, §13.4, §14.6, §15.5, §16.5, §17.7) unchanged
 still
 green. **Run twice this session, ALL PASS both times.**
 
-## 19. 2026-07-26 addendum #9: `AI_CBM_AccDown` + `AI_CV_AccuracyDown` — the largest remaining pair (7 `if_random_less_than` sites), 3 of 7 live-verified across two fixture pairs (§19.3/§19.4 original, §19.5 DRAW SITE 2 added by a follow-up side-lane session), 4 documented recipe-only
+## 19. 2026-07-26 addendum #9: `AI_CBM_AccDown` + `AI_CV_AccuracyDown` — the largest remaining pair (7 `if_random_less_than` sites), 5 of 7 live-verified across three fixture pairs (§19.3/§19.4 original, §19.5 DRAW SITEs 2/3/4 added by follow-up side-lane sessions), 2 confirmed unstageable (§19.5)
 
 Seventh follow-up scout session (side lane, Battle Scene OFF), same
 no-`src/`-changes contract. Goal: bank ground truth for the largest
