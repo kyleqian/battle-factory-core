@@ -495,6 +495,15 @@ independent parallel track** (does not block 1-3-6, and 6 can equally be
 satisfied by 3's own Yawn-only fixture without 4-5 ever landing).
 
 ### Rung 1 -- `SETYAWN` + widen `JUMPIFABILITY` (independent, cheapest)
+**LANDED, PROGRESS entry 494.** Both fixes shipped as scoped; also required
+fixing a real gap this doc's own §0 census missed -- `accuracycheck`'s
+`NO_ACC_CALC_CHECK_LOCK_ON` operand form (Yawn's own accuracy check) was
+narrowed to `ACC_CURR_MOVE` only and would have halted. Fixed generically
+(`accuracycheckNoAccCalcCheckLockOn`, `battleScriptHitChainOpcode.ts`), not
+Yawn-specifically. Also: this section's own "14 unique carrier species" (§1c)
+was counted against the raw 882-entry catalog with no Level-50 rental-tier
+filter; the real weighted delta is 10 entries / 8 species (GULPIN included
+in the excluded six) -- see entry 494 for the full breakdown.
 - **Goal:** make `EFFECT_YAWN`'s move-execution script fully executable.
 - **Opcodes/cases:** new `B_SCR_OP_SETYAWN` (`Cmd_setyawn`, §1a); widen
   `JUMPIFABILITY_VALUES` with `ABILITY_VITAL_SPIRIT`/`ABILITY_INSOMNIA` (§1b).

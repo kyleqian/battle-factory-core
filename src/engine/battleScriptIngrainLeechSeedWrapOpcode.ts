@@ -167,11 +167,22 @@ const ABILITY_LIQUID_OOZE = 64;
 const ABILITY_LIMBER = 7;
 const ABILITY_IMMUNITY = 17;
 const ABILITY_OWN_TEMPO = 20;
+/**
+ * include/abilities.h -- widened per docs/yawn-thrash-endturn-design.md §1b:
+ * `BattleScript_EffectYawn`'s own two ability-immunity checks, both with real
+ * Factory L50 carriers (Vital Spirit: MANKEY/PRIMEAPE, DELIBIRD, VIGOROTH;
+ * Insomnia: DROWZEE/HYPNO, HOOTHOOT/NOCTOWL, SPINARAK/ARIADOS, MURKROW,
+ * SHUPPET, BANETTE -- checked live against battle-frontier-mons.json).
+ */
+const ABILITY_VITAL_SPIRIT = 72;
+const ABILITY_INSOMNIA = 15;
 const JUMPIFABILITY_VALUES: ReadonlyMap<string, number> = new Map([
   ["ABILITY_LIQUID_OOZE", ABILITY_LIQUID_OOZE],
   ["ABILITY_LIMBER", ABILITY_LIMBER],
   ["ABILITY_IMMUNITY", ABILITY_IMMUNITY],
   ["ABILITY_OWN_TEMPO", ABILITY_OWN_TEMPO],
+  ["ABILITY_VITAL_SPIRIT", ABILITY_VITAL_SPIRIT],
+  ["ABILITY_INSOMNIA", ABILITY_INSOMNIA],
 ]);
 /** Exported so tools/report/executable-frontier-census.ts's jumpifability value-coverage check never drifts from what this opcode actually dispatches (same live-import precedent as SET_MOVE_EFFECT_SUPPORTED_BYTES). */
 export const JUMPIFABILITY_SUPPORTED_ABILITY_NAMES: ReadonlySet<string> = new Set(JUMPIFABILITY_VALUES.keys());
@@ -182,9 +193,10 @@ export const JUMPIFABILITY_SUPPORTED_ABILITY_NAMES: ReadonlySet<string> = new Se
  * every one of this opcode's concrete call sites this engine registers uses
  * one of those two, never the BS_ATTACKER_SIDE/BS_NOT_ATTACKER_SIDE
  * `AbilityBattleEffects` side-check branches) and, per
- * docs/status-cluster-ground-truth.md, the four concrete ability ids this
- * widening covers (Liquid Ooze for Leech Seed, Immunity/Limber/Own Tempo for
- * the primary status-move cluster). `RecordAbilityBattle`/
+ * docs/status-cluster-ground-truth.md and docs/yawn-thrash-endturn-design.md
+ * §1b, the six concrete ability ids this widening covers (Liquid Ooze for
+ * Leech Seed, Immunity/Limber/Own Tempo for the primary status-move cluster,
+ * Vital Spirit/Insomnia for Yawn). `RecordAbilityBattle`/
  * `gBattleScripting.battlerWithAbility` are the same untracked AI-history
  * bookkeeping `Cmd_cleareffectsonfaint`'s own doc comment already established
  * has no reader in this engine's scope.

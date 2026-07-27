@@ -70,6 +70,10 @@ export const BATTLE_SCRIPT_STATUS3_UNDERGROUND = 1 << 7;
 export const BATTLE_SCRIPT_STATUS3_MINIMIZED = 1 << 8;
 export const BATTLE_SCRIPT_STATUS3_ROOTED = 1 << 10;
 export const BATTLE_SCRIPT_STATUS3_UNDERWATER = 1 << 18;
+/** include/constants/battle.h:168 -- the 2-bit yawn-countdown field (bits 11-12), "number of turns to sleep". */
+export const BATTLE_SCRIPT_STATUS3_YAWN = ((1 << 11) | (1 << 12)) >>> 0;
+/** include/constants/battle.h:169 -- STATUS3_YAWN_TURN(2), the fresh-countdown value `Cmd_setyawn` writes on success. */
+export const BATTLE_SCRIPT_STATUS3_YAWN_TURN_2 = ((2 << 11) & BATTLE_SCRIPT_STATUS3_YAWN) >>> 0;
 /** include/constants/battle.h:158-159 -- the seeder's battler id (bits 0-1) plus the "is seeded" bit. */
 export const BATTLE_SCRIPT_STATUS3_LEECHSEED_BATTLER_MASK = (1 << 0) | (1 << 1);
 export const BATTLE_SCRIPT_STATUS3_LEECHSEED = 1 << 2;

@@ -317,14 +317,16 @@ describe("production accuracycheck (Cmd_accuracycheck) dispatch", () => {
   });
 
   describe("(b) unsupported-branch barriers", () => {
-    it("halts on non-ACC_CURR_MOVE call sites (9 exist in the committed program, none on the hit chain)", () => {
-      const nonAccCurrMove = program.instructions.find(
-        (i) => i.opcodeName === "B_SCR_OP_ACCURACYCHECK" && i.operands[1]?.expression !== "ACC_CURR_MOVE",
+    it("halts on the remaining non-ACC_CURR_MOVE, non-NO_ACC_CALC_CHECK_LOCK_ON call sites (11 total non-ACC_CURR_MOVE sites; 8 use NO_ACC_CALC_CHECK_LOCK_ON, real since docs/yawn-thrash-endturn-design.md Rung 1; bare NO_ACC_CALC (1) and explicit-move-id (MOVE_FUTURE_SIGHT/MOVE_DOOM_DESIRE, 2) remain barriered)", () => {
+      const stillUnsupported = program.instructions.find(
+        (i) => i.opcodeName === "B_SCR_OP_ACCURACYCHECK"
+          && i.operands[1]?.expression !== "ACC_CURR_MOVE"
+          && i.operands[1]?.expression !== "NO_ACC_CALC_CHECK_LOCK_ON",
       );
-      expect(nonAccCurrMove).toBeDefined();
+      expect(stillUnsupported).toBeDefined();
       const rc = context(0);
       const { execution } = stepFrom("BattleScript_HitFromAccCheck", rc, 1);
-      const patched = Object.freeze({ ...execution.state, programCounter: nonAccCurrMove!.programCounter });
+      const patched = Object.freeze({ ...execution.state, programCounter: stillUnsupported!.programCounter });
       const result = stepBattleScriptMachine(program, patched, execution.handlers);
       expect(result.kind).toBe("halted");
       expect(result.state.haltReason).toMatchObject({
@@ -347,6 +349,56 @@ describe("production accuracycheck (Cmd_accuracycheck) dispatch", () => {
       expect(result.kind).toBe("halted");
       expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 1020 });
     });
+  });
+});
+
+/**
+ * `Cmd_accuracycheck`'s `NO_ACC_CALC_CHECK_LOCK_ON` bypass branch
+ * (`battle_script_commands.c:1103-1113`, docs/yawn-thrash-endturn-design.md
+ * Rung 1 -- newly real, not previously exercised: `BattleScript_EffectYawn`
+ * is one of 8 committed sites using this literal). Exercised generically via
+ * `BattleScript_EffectRoar`'s own accuracycheck instance (not Yawn's -- that
+ * full script is covered separately by tests/battleScriptSetyawnOpcode.test.ts)
+ * to prove the opcode-level dispatch, not any one move's script.
+ */
+describe("production accuracycheck (Cmd_accuracycheck) NO_ACC_CALC_CHECK_LOCK_ON dispatch", () => {
+  const noAccCalcPc = findPcInLabel("B_SCR_OP_ACCURACYCHECK", "BattleScript_EffectRoar");
+
+  it("ordinary case: advances with zero RNG, no MOVE_RESULT_MISSED", () => {
+    const rc = context(0);
+    const { result } = stepAtProgramCounter(noAccCalcPc, rc, 1);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rng.calls).toBe(0);
+    expect(result.state.rulesContext.moveResultFlags & 1).toBe(0);
+  });
+
+  it("Protect: jumps to the fail label with MOVE_RESULT_MISSED + B_MSG_PROTECTED, zero RNG", () => {
+    const rc = context(0, {}, {}, { protected: 1 });
+    const { result } = stepAtProgramCounter(noAccCalcPc, rc, 1);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.programCounter).toBe(labelPc("BattleScript_ButItFailed"));
+    expect(result.state.rng.calls).toBe(0);
+    expect(result.state.rulesContext.moveResultFlags & 1).toBe(1);
+    expect(result.state.rulesContext.missType).toBe(1); // B_MSG_PROTECTED
+  });
+
+  it("semi-invulnerable (underground): bare jump to the fail label, no MOVE_RESULT_MISSED set, zero RNG", () => {
+    const rc = context(0, {}, {}, { status3: 1 << 7 });
+    const { result } = stepAtProgramCounter(noAccCalcPc, rc, 1);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.programCounter).toBe(labelPc("BattleScript_ButItFailed"));
+    expect(result.state.rng.calls).toBe(0);
+    expect(result.state.rulesContext.moveResultFlags & 1).toBe(0);
+  });
+
+  it("(b) unsupported-branch: STATUS3_ALWAYS_HITS halts (Lock-On, battlerWithSureHit unmodeled -- provably unreachable today, never set by any production code)", () => {
+    const rc = context(0, {}, {}, { status3: 1 << 3 });
+    const { result } = stepAtProgramCounter(noAccCalcPc, rc, 1);
+    expect(result.kind).toBe("halted");
+    expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 1105 });
   });
 });
 

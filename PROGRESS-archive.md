@@ -1,4 +1,82 @@
 ---
+## 491 — [BOUNDED WORKER 2026-07-26 ~23:50] Landed the DefenseUp/SpDefUp DRAW SITE 4/5 chain fix (entry 490's own finding) + whole-surface audit found and fixed a second instance in EvasionUp
+
+- **State:** tree committed and green at **231 test files / 3195 tests**
+  (+4 over entry 490's 3191), `npm run build` clean. Census re-run
+  byte-identical (92/214 effects, 187/355 moves, 150/276 Factory-L50,
+  1884/2957 weighted, all 32 checks pass, `git status --porcelain docs/
+  executable-frontier-census.md` empty). `executableFrontierRatchet.test.ts`
+  barrier counts unmoved (6/6 green, no new barrier). Three commits: the
+  DefenseUp/SpDefUp fix, the EvasionUp fix, and the audit-doc update.
+- **Did (RUNG 1):** fixed `runCvDefenseUp`/`runCvSpDefUp`
+  (`factoryAiCheckViability.ts`) per entry 490's own sized recommendation:
+  DRAW SITE 4's own failure (roll >= 60) no longer applies `-2` on the spot
+  — it now chains into a second draw at DRAW SITE 5 (same `<60`-stops
+  semantics), and `-2` fires only when BOTH rolls fail (`(196/256)^2 ≈
+  58.65%`, not the old single-roll ~76.6%). Corrected both functions' own
+  doc comments, which had claimed DRAW SITE 4/5 were "mutually exclusive"
+  (the exact claim entry 490's probe disproved). Added three-outcome
+  Tier-1 tests for both handlers (pass@4, fail@4+pass@5, fail@4+fail@5).
+  **Mask-7 reconciliation (brief's own requested numbers):** the
+  `AI_CV_DefenseUp`/`AI_CV_SpDefUp` mask-7 fixture-reproduction tests in
+  `factoryAiScoredDecision.test.ts` previously hard-coded **4**
+  check-viability draws (the "always 4" derivation entry 490 showed was
+  wrong); re-run against the fixed handler at the same seed, all three
+  physical-list fixtures now reproduce **7** draws (2+2+1+2 across the 4
+  slots: fail+fail, fail+fail, pass, fail+pass) — inside the fixed model's
+  own valid `[4,8]` range. This test's own RNG-stream offset is a
+  construction convenience, not a replay of the live ROM's frame, so its 7
+  does not need to equal the live probe's own 6 number-for-number, and the
+  two don't need to reconcile against each other — what reconciles to
+  **zero unexplained** is the mechanism itself: every draw count anywhere
+  (live probe's 6, this test's 7, the `[4,8]` theoretical range) is now
+  fully explained by "each of the 4 slots draws once (passes) or twice
+  (fails and chains)," with no residual unattributed component, superseding
+  the old comments' "EXACTLY 4" claim.
+- **Did (RUNG 2 — whole-surface audit):** mechanically cross-checked all 46
+  `if_random_less_than` sites across the 18 dispatched `AI_CV_*` handlers
+  (of the file's 144 total) against their literal assembly fall-through,
+  full table in `docs/factory-ai-draw-discrepancy-probe.md` §7.2. Found a
+  SECOND, independent instance of the identical defect class in
+  `AI_CV_EvasionUp`'s Gates C/D (DRAW SITE 3/4, `:1048-1050`) — ported
+  (entry 489) as two mutually-exclusive single-draw sites keyed on the
+  opponent's own HP band, but the real assembly chains DRAW SITE 3's own
+  failure (roll >= 80, reached only when target is toxic-poisoned AND own
+  HP <= 50%) straight into DRAW SITE 4's own roll, byte-for-byte the same
+  shape as DefenseUp's bug. This is exactly the brief's own predicted
+  highest-risk shape: `AI_CV_EvasionUp`'s one banked live fixture (§24.3)
+  never sets target toxic-poison status, so it could never have exercised
+  this branch at all — a fixture gap, not a probe gap, only findable by
+  reading the assembly. Fixed the same way (chain + three-outcome tests:
+  pass@3, fail@3+pass@4, fail@3+fail@4); the direct `own HP > 50%` entry to
+  DRAW SITE 4 alone (unaffected, not part of the chain) stays as-is. Every
+  OTHER site across all 18 handlers confirmed OK: either a self-contained
+  deterministic `score`/`goto` action, or an already-correctly-modeled
+  chain (`AI_CV_HighCrit`, `AI_CV_VitalThrow`, both already used the
+  `jumpedToEnd`/fallthrough-roll pattern this step's fixes now also use).
+  Confirmed the CBM side is genuinely if_random-free (`grep -c
+  if_random_less_than` over `AI_CheckBadMove`'s own `:51-651` range = 0) —
+  trivially clean of this defect class as the brief predicted, verified not
+  assumed.
+- **Next:** entry 490's own carried Next list stands, minus the item this
+  step closed: weather trio (RainDance/SunnyDay/Hail, §25, last 3 of 22 CV
+  handlers, explicitly out of THIS step's scope); §19.5's unstaged
+  AccuracyDown sites 2-6 (now confirmed structurally safe by this step's
+  audit — no chain risk there, just never independently live-verified);
+  §24's own newly-surfaced follow-up from §7.4: a live oracle fixture for
+  `AI_CV_EvasionUp`'s toxic-poisoned + own-HP<=50% branch does not exist
+  yet in `tools/battle-lab/` — building one and rerunning §2's own
+  `attribute-factory-ai-cv-drawsite-callers.py` probe (parameterized by
+  `DRAW_SITE_TABLE`) against it would give this fix the same live
+  corroboration `DefenseUp`/`SpDefUp` already have, but wasn't in this
+  step's scope or time budget; ENDTURN_ITEMS2 after Yawn/Thrash.
+- **Notes:** no PAPERCUT. Time split roughly matched the brief's guidance —
+  rung 1 (fix + tests + reconciliation) landed at ~30min elapsed, leaving
+  enough room to run the full rung-2 audit (not just a partial table with a
+  named remainder) and land its own fix + tests green, with the doc/
+  PROGRESS writeup absorbing the reserved tail.
+
+---
 ## 490 — [BOUNDED WORKER 2026-07-26 ~23:45] §18/§22 "5-6 draws not 4" anomaly SOLVED by instrument — real engine gap found, not fixed (probe-only step)
 
 - **State:** tree committed and green at **231 files / 3191 tests** (unchanged

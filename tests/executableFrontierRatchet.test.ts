@@ -92,7 +92,21 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // barriers retire for real -- both effect bytes are now live switch cases
   // (SLEEP's Uproar/ability re-check + drawn duration, TOXIC's status1 write)
   // reached from BattleScript_EffectSleep/_EffectToxic via that opcode.
-  ["src/engine/battleScriptHitChainOpcode.ts", 22],
+  // 22 -> 23 (docs/yawn-thrash-endturn-design.md Rung 1): Cmd_accuracycheck's
+  // top-level operand-form gate narrows from "only ACC_CURR_MOVE" to "only
+  // ACC_CURR_MOVE or NO_ACC_CALC_CHECK_LOCK_ON" -- a real widening, not a new
+  // barrier (8 of 11 non-ACC_CURR_MOVE call sites, including
+  // BattleScript_EffectYawn's own, now execute instead of halting). The net
+  // +1 is the new `accuracycheckNoAccCalcCheckLockOn` helper's own
+  // STATUS3_ALWAYS_HITS gate, a distinct call site mirroring the
+  // ACC_CURR_MOVE branch's identical existing Lock-On barrier (line ~741) --
+  // provably unreachable today (STATUS3_ALWAYS_HITS is never set by any
+  // production code, per battleScriptSwitchinOpcode.ts's own read-only
+  // precedent) but kept as a loud, named barrier rather than silently
+  // assumed away, per this codebase's own house style. Reachability-tested:
+  // tests/battleScriptHitChainOpcode.test.ts "production accuracycheck
+  // (Cmd_accuracycheck) NO_ACC_CALC_CHECK_LOCK_ON dispatch".
+  ["src/engine/battleScriptHitChainOpcode.ts", 23],
   ["src/engine/battleScriptAttackCancelerOpcode.ts", 5],
   ["src/engine/battleScriptMoveEndOpcode.ts", 7],
   ["src/engine/battleScriptJumpifbyteOpcode.ts", 1],

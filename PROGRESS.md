@@ -14,6 +14,113 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > entry 468's animation items are the animation supervisor's backlog now.
 
 ---
+## 494 — [BOUNDED WORKER 2026-07-27 ~01:15] Yawn Rung 1 landed (SETYAWN + JUMPIFABILITY widening) — plus a real accuracycheck gap the design doc's own census missed
+
+- **State:** tree green at **232 files / 3276 tests** (+9 over entry 493's
+  3267), `npm run build` clean. Census: 93/214 effects (+1), 188/355 moves
+  (+1), 151/276 Factory-L50 unweighted (+1), 1894/2957 weighted (**+10, not
+  the design doc's ~14** — see below), all 32 checks pass.
+  `executableFrontierRatchet.test.ts`: **`battleScriptHitChainOpcode.ts`
+  barrier pin moved 22→23, named and justified in the ratchet's own comment**
+  — a real widening (8 of 11 non-`ACC_CURR_MOVE` `accuracycheck` sites now
+  execute instead of halting) that adds exactly one new named barrier
+  (`STATUS3_ALWAYS_HITS`/Lock-On, mirroring the existing `ACC_CURR_MOVE`
+  branch's identical barrier, provably unreachable today).
+- **Did:** landed `docs/yawn-thrash-endturn-design.md` Rung 1 exactly as
+  scoped — new `battleScriptSetyawnOpcode.ts` (`Cmd_setyawn`,
+  `battle_script_commands.c:9352-9364`, two-branch jump on
+  `STATUS3_YAWN|status1` gate, writes `STATUS3_YAWN_TURN(2)`), two new
+  `BATTLE_SCRIPT_STATUS3_YAWN`/`_TURN_2` constants, and widened
+  `JUMPIFABILITY_VALUES` (`battleScriptIngrainLeechSeedWrapOpcode.ts`) with
+  `ABILITY_VITAL_SPIRIT`(72)/`ABILITY_INSOMNIA`(15). No (b) barrier material
+  needed for either, confirming the doc's own claim.
+- **CONFIRM-OR-CORRECT finding (real, not assumed):** the doc's own §0 opcode
+  census marked `accuracycheck BattleScript_ButItFailed,
+  NO_ACC_CALC_CHECK_LOCK_ON` — Yawn's own accuracy check — "`[registered]`"
+  because `B_SCR_OP_ACCURACYCHECK` has a dispatch entry, but that entry was
+  narrowed to ONLY the `ACC_CURR_MOVE` operand form; the `NO_ACC_CALC_CHECK_
+  LOCK_ON` literal (a completely different source branch, `battle_script_
+  commands.c:1103-1113`, that skips the `Random()` accuracy roll entirely)
+  hit `unsupportedBranch` every time — confirmed live via a debug run before
+  writing any fix. This would have blocked Rung 1's own pass-through test
+  outright, so it was in-scope to fix, not deferred: added
+  `accuracycheckNoAccCalcCheckLockOn` (sure-hit Lock-On barrier reusing the
+  `ACC_CURR_MOVE` branch's own precedent; semi-invulnerable bare-jump miss;
+  `JumpIfMoveAffectedByProtect(0)`'s Protect gate, which reads `gCurrentMove`
+  for its flag check despite the literal `0` argument). Net effect: **Yawn's
+  own move-use side draws ZERO `Random()` calls** (not 1, as I first assumed
+  by analogy to Thunder Wave's `ACC_CURR_MOVE` accuracy roll) — this actually
+  matches, not contradicts, the design doc's own §2 remark that end-turn's
+  sleep-turn roll is "the only `Random()` in end-turn" for the whole Yawn
+  mechanic. 7 of the 8 `NO_ACC_CALC_CHECK_LOCK_ON` sites besides Yawn's own
+  remain barriered behind their own separate unregistered opcodes (Roar,
+  OHKO, Mimic, Pain Split, Curse, Role Play, Skill Swap) — this fix only
+  widens the shared opcode's operand-form dispatch, it doesn't newly unblock
+  any of those scripts end-to-end.
+- **Second finding, in the census refresh itself:** the doc's §1c "14 unique
+  Factory L50 carrier species" for `MOVE_YAWN` was counted against the raw
+  882-entry `battle-frontier-mons.json` catalog with no tier filter. The
+  census's own weighted metric restricts to `factory-round-policy.json`'s
+  `rentalSelection.ranges.level50` (a union of real `GetFactoryMonId` rank
+  bands, effectively indices 110-849 of the 882) — 6 of the doc's 14 species
+  (WOOPER, TOGEPI, SLUGMA, SLAKOTH, **GULPIN**, SLOWPOKE, all at catalog
+  indices <110) fall outside every modeled Level-50 rental-rank band, leaving
+  8 species / 10 catalog entries (WARTORTLE, TOGETIC, WALREIN, SLAKING ×3,
+  QUAGSIRE, SLOWBRO, SLOWKING, URSARING) — exactly the census's own
+  precomputed `frontierMonCount:10, speciesCount:8` for `MOVE_YAWN`, and
+  exactly the +10 observed. GULPIN (the brief's own suggested live-fixture
+  species) is one of the excluded six — the live fixture below still proves
+  the mechanic correctly (mechanicLab's `overrides.parties` explicitly
+  permits any species regardless of real rental-draft legality), it just
+  isn't itself evidence of a Level-50-legal encounter; QUAGSIRE or
+  SLOWBRO/SLOWKING would be if that distinction mattered for a future step.
+- **Tests (+9):** `tests/battleScriptSetyawnOpcode.test.ts` (new, 5): sets
+  `STATUS3_YAWN_TURN(2)` on ordinary landing (zero RNG) / no-ops (fails) when
+  already yawning or status1-nonzero / `ButItFailed` via `jumpifability` for
+  both Vital Spirit and Insomnia, ahead of `setyawn` ever running.
+  `tests/battleScriptHitChainOpcode.test.ts` (+4, new `NO_ACC_CALC_CHECK_
+  LOCK_ON` describe block via `BattleScript_EffectRoar`'s own instance, kept
+  opcode-generic rather than Yawn-specific): ordinary advance (zero RNG),
+  Protect gate (MISSED+B_MSG_PROTECTED), semi-invulnerable bare-jump miss,
+  STATUS3_ALWAYS_HITS barrier. Fixed one now-stale barrier-count test in the
+  same file (its `.find()` for "any non-ACC_CURR_MOVE site" now finds a
+  newly-supported one first; narrowed to the still-genuinely-unsupported
+  subset, corrected its stale "9 sites" count to the real 11).
+- **Live fixture (`tools/battle-lab/mechanic-yawn-landing-off.json`, GULPIN
+  vs MAGIKARP filler, `bin/oracle lab`):** opponent `status3` observed
+  **0 → 4096 (0x1000, `STATUS3_YAWN_TURN(2)`) → 2048 (0x800,
+  `STATUS3_YAWN_TURN(1)`)** across frames 160/180/300/320 — the middle value
+  is Cmd_setyawn's own write, byte-for-byte my `BATTLE_SCRIPT_STATUS3_YAWN_
+  TURN_2` constant; the drop to 2048 by frame 320 is the REAL ROM's own
+  `ENDTURN_YAWN` decrement already firing once (Rung 2, not yet built in
+  this engine) — free live corroboration of Rung 2's own decrement math
+  ahead of landing it. Frame 180 screenshot: "GULPIN used YAWN!"; frame 300:
+  status3 still 4096 (pre-decrement). Second fixture
+  (`mechanic-yawn-vitalspirit-blocked-off.json`, opponent MANKEY,
+  ability 72/Vital Spirit): `status3` stays **0** the whole trace; frame 300
+  screenshot: "Foe MANKEY's VITAL SPIRIT made it ineffective!" — confirms the
+  `ButItFailed` branch live, satisfying the brief's "if stageable in-cap"
+  ask (it was).
+- **Next:** Rung 2 (`ENDTURN_YAWN` end-turn case, `runYawnTick` in
+  `battleEndTurnOrchestration.ts`) is fully scoped by the design doc and
+  partially de-risked by this session's own findings: `cancelBattleScript
+  MultiTurnMoves` (the doc assumed this needed building) **already exists**
+  (`battleScriptMultiTurnCancellation.ts`, used by `battleScriptAction
+  Admission.ts`) — Rung 2 can call it directly, no new helper needed. The
+  `UproarWakeUpCheck`-omission citation was re-verified this session
+  (`STATUS2_UPROAR`/`MOVE_EFFECT_UPROAR` are never set by any production
+  code — confirmed by grep, not assumed) and holds. Not started this session
+  (time went to the accuracycheck fix + two live fixtures instead) — next
+  worker can start directly from `docs/yawn-thrash-endturn-design.md` §2/
+  Rung 2 plus this entry's own de-risking notes.
+- **Notes:** no PAPERCUT. Ratchet moved deliberately (named above); census
+  pins moved deliberately (named above, both effect/move counts and the
+  weighted-delta shortfall explanation). Spent more of the time budget than
+  planned on the accuracycheck gap and the tier-filter cross-check, so Rung 2
+  is banked as the next step rather than rushed — per the brief's own
+  time-split allowance ("Rung 1 alone is a complete, committable step").
+
+---
 ## 493 — [BOUNDED WORKER 2026-07-27 ~00:45] AI_CV_SpeedDownFromChance ported — genuine 22/22 CV handlers now, closing the §14-§25 program
 
 - **State:** tree committed and green at **231 files / 3267 tests** (+23 over
@@ -220,82 +327,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   table instead of trusting the brief's own "22/22 if true" framing at face
   value — worth the time given the brief explicitly asked for a
   confirm-or-correct, and the correction is real (see above).
-
----
-## 491 — [BOUNDED WORKER 2026-07-26 ~23:50] Landed the DefenseUp/SpDefUp DRAW SITE 4/5 chain fix (entry 490's own finding) + whole-surface audit found and fixed a second instance in EvasionUp
-
-- **State:** tree committed and green at **231 test files / 3195 tests**
-  (+4 over entry 490's 3191), `npm run build` clean. Census re-run
-  byte-identical (92/214 effects, 187/355 moves, 150/276 Factory-L50,
-  1884/2957 weighted, all 32 checks pass, `git status --porcelain docs/
-  executable-frontier-census.md` empty). `executableFrontierRatchet.test.ts`
-  barrier counts unmoved (6/6 green, no new barrier). Three commits: the
-  DefenseUp/SpDefUp fix, the EvasionUp fix, and the audit-doc update.
-- **Did (RUNG 1):** fixed `runCvDefenseUp`/`runCvSpDefUp`
-  (`factoryAiCheckViability.ts`) per entry 490's own sized recommendation:
-  DRAW SITE 4's own failure (roll >= 60) no longer applies `-2` on the spot
-  — it now chains into a second draw at DRAW SITE 5 (same `<60`-stops
-  semantics), and `-2` fires only when BOTH rolls fail (`(196/256)^2 ≈
-  58.65%`, not the old single-roll ~76.6%). Corrected both functions' own
-  doc comments, which had claimed DRAW SITE 4/5 were "mutually exclusive"
-  (the exact claim entry 490's probe disproved). Added three-outcome
-  Tier-1 tests for both handlers (pass@4, fail@4+pass@5, fail@4+fail@5).
-  **Mask-7 reconciliation (brief's own requested numbers):** the
-  `AI_CV_DefenseUp`/`AI_CV_SpDefUp` mask-7 fixture-reproduction tests in
-  `factoryAiScoredDecision.test.ts` previously hard-coded **4**
-  check-viability draws (the "always 4" derivation entry 490 showed was
-  wrong); re-run against the fixed handler at the same seed, all three
-  physical-list fixtures now reproduce **7** draws (2+2+1+2 across the 4
-  slots: fail+fail, fail+fail, pass, fail+pass) — inside the fixed model's
-  own valid `[4,8]` range. This test's own RNG-stream offset is a
-  construction convenience, not a replay of the live ROM's frame, so its 7
-  does not need to equal the live probe's own 6 number-for-number, and the
-  two don't need to reconcile against each other — what reconciles to
-  **zero unexplained** is the mechanism itself: every draw count anywhere
-  (live probe's 6, this test's 7, the `[4,8]` theoretical range) is now
-  fully explained by "each of the 4 slots draws once (passes) or twice
-  (fails and chains)," with no residual unattributed component, superseding
-  the old comments' "EXACTLY 4" claim.
-- **Did (RUNG 2 — whole-surface audit):** mechanically cross-checked all 46
-  `if_random_less_than` sites across the 18 dispatched `AI_CV_*` handlers
-  (of the file's 144 total) against their literal assembly fall-through,
-  full table in `docs/factory-ai-draw-discrepancy-probe.md` §7.2. Found a
-  SECOND, independent instance of the identical defect class in
-  `AI_CV_EvasionUp`'s Gates C/D (DRAW SITE 3/4, `:1048-1050`) — ported
-  (entry 489) as two mutually-exclusive single-draw sites keyed on the
-  opponent's own HP band, but the real assembly chains DRAW SITE 3's own
-  failure (roll >= 80, reached only when target is toxic-poisoned AND own
-  HP <= 50%) straight into DRAW SITE 4's own roll, byte-for-byte the same
-  shape as DefenseUp's bug. This is exactly the brief's own predicted
-  highest-risk shape: `AI_CV_EvasionUp`'s one banked live fixture (§24.3)
-  never sets target toxic-poison status, so it could never have exercised
-  this branch at all — a fixture gap, not a probe gap, only findable by
-  reading the assembly. Fixed the same way (chain + three-outcome tests:
-  pass@3, fail@3+pass@4, fail@3+fail@4); the direct `own HP > 50%` entry to
-  DRAW SITE 4 alone (unaffected, not part of the chain) stays as-is. Every
-  OTHER site across all 18 handlers confirmed OK: either a self-contained
-  deterministic `score`/`goto` action, or an already-correctly-modeled
-  chain (`AI_CV_HighCrit`, `AI_CV_VitalThrow`, both already used the
-  `jumpedToEnd`/fallthrough-roll pattern this step's fixes now also use).
-  Confirmed the CBM side is genuinely if_random-free (`grep -c
-  if_random_less_than` over `AI_CheckBadMove`'s own `:51-651` range = 0) —
-  trivially clean of this defect class as the brief predicted, verified not
-  assumed.
-- **Next:** entry 490's own carried Next list stands, minus the item this
-  step closed: weather trio (RainDance/SunnyDay/Hail, §25, last 3 of 22 CV
-  handlers, explicitly out of THIS step's scope); §19.5's unstaged
-  AccuracyDown sites 2-6 (now confirmed structurally safe by this step's
-  audit — no chain risk there, just never independently live-verified);
-  §24's own newly-surfaced follow-up from §7.4: a live oracle fixture for
-  `AI_CV_EvasionUp`'s toxic-poisoned + own-HP<=50% branch does not exist
-  yet in `tools/battle-lab/` — building one and rerunning §2's own
-  `attribute-factory-ai-cv-drawsite-callers.py` probe (parameterized by
-  `DRAW_SITE_TABLE`) against it would give this fix the same live
-  corroboration `DefenseUp`/`SpDefUp` already have, but wasn't in this
-  step's scope or time budget; ENDTURN_ITEMS2 after Yawn/Thrash.
-- **Notes:** no PAPERCUT. Time split roughly matched the brief's guidance —
-  rung 1 (fix + tests + reconciliation) landed at ~30min elapsed, leaving
-  enough room to run the full rung-2 audit (not just a partial table with a
-  named remainder) and land its own fix + tests green, with the doc/
-  PROGRESS writeup absorbing the reserved tail.
 

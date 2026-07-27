@@ -10,10 +10,10 @@ Answers ROADMAP S10's Executable-frontier reset question directly: not "how many
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 92 | 214 | 43.0% |
-| Moves (unweighted, all 355) | 187 | 355 | 52.7% |
-| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 150 | 276 | 54.3% |
-| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 1884 | 2957 | 63.7% |
+| Effect scripts | 93 | 214 | 43.5% |
+| Moves (unweighted, all 355) | 188 | 355 | 53.0% |
+| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 151 | 276 | 54.7% |
+| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 1894 | 2957 | 64.1% |
 
 "Executable" means every opcode on every statically reachable path from the effect's entry script has a dispatch entry today (registered barriers included, per ROADMAP S10 §1's (a)/(b) policy). It is not a semantic-correctness claim -- see Caveats.
 
@@ -47,7 +47,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_JUMPIFNODAMAGE` | 1 (EFFECT_FOCUS_PUNCH) | 1 | 1 | 11 |
 | `B_SCR_OP_SETDESTINYBOND` | 1 (EFFECT_DESTINY_BOND) | 1 | 1 | 10 |
 | `B_SCR_OP_SETSUBSTITUTE` | 1 (EFFECT_SUBSTITUTE) | 1 | 1 | 10 |
-| `B_SCR_OP_SETYAWN` | 1 (EFFECT_YAWN) | 1 | 1 | 10 |
+| `B_SCR_OP_TRYCHOOSESLEEPTALKMOVE` | 1 (EFFECT_SLEEP_TALK) | 1 | 1 | 8 |
 
 ## Per-effect detail
 
@@ -240,7 +240,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_RECYCLE | `BattleScript_EffectRecycle` | blocked-on-opcodes | `B_SCR_OP_TRYRECYCLEITEM` (main path) | - | 1 | 1 (1) |
 | EFFECT_REVENGE | `BattleScript_EffectRevenge` | blocked-on-opcodes | `B_SCR_OP_DOUBLEDAMAGEDEALTIFDAMAGED` (main path) | - | 1 | 1 (3) |
 | EFFECT_BRICK_BREAK | `BattleScript_EffectBrickBreak` | executable | - | - | 1 | 1 (46) |
-| EFFECT_YAWN | `BattleScript_EffectYawn` | blocked-on-opcodes | `B_SCR_OP_SETYAWN` (edge branch only) | Cmd_jumpifability: ABILITY_VITAL_SPIRIT is outside the engine's widened ability set (battleScriptIngrainLeechSeedWrapOpcode.ts) -- battle_script_commands.c:3105<br>Cmd_jumpifability: ABILITY_INSOMNIA is outside the engine's widened ability set (battleScriptIngrainLeechSeedWrapOpcode.ts) -- battle_script_commands.c:3105 | 1 | 1 (10) |
+| EFFECT_YAWN | `BattleScript_EffectYawn` | executable | - | - | 1 | 1 (10) |
 | EFFECT_KNOCK_OFF | `BattleScript_EffectKnockOff` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_KNOCK_OFF is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 1 | 1 (7) |
 | EFFECT_ENDEAVOR | `BattleScript_EffectEndeavor` | executable | - | - | 1 | 1 (4) |
 | EFFECT_ERUPTION | `BattleScript_EffectEruption` | blocked-on-opcodes | `B_SCR_OP_SCALEDAMAGEBYHEALTHRATIO` (main path) | - | 2 | 2 (2) |

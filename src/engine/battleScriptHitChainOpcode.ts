@@ -696,22 +696,92 @@ function checkWonderGuardAndLevitate(
 }
 
 /**
- * Cmd_accuracycheck (battle_script_commands.c:1099-1189). Only the
- * `ACC_CURR_MOVE` argument form is source-complete: BattleScript_EffectHit
- * and 54 of the program's other 55 accuracycheck sites use it, while the
- * `NO_ACC_CALC`/`NO_ACC_CALC_CHECK_LOCK_ON`/explicit-deferred-move top branch
- * (9 sites, none on the hit chain) is an explicit barrier.
+ * Cmd_accuracycheck's `NO_ACC_CALC`/`NO_ACC_CALC_CHECK_LOCK_ON` bypass branch
+ * (`battle_script_commands.c:1103-1113`), narrowed to the
+ * `NO_ACC_CALC_CHECK_LOCK_ON` literal -- `BattleScript_EffectYawn`'s own
+ * accuracycheck (docs/yawn-thrash-endturn-design.md, Rung 1: the design
+ * doc's own §0 opcode census marked this opcode ID "[registered]" without
+ * catching that this specific operand form was still unhandled -- verified
+ * against source this session, not assumed). Computes NO accuracy roll at
+ * all: either an unconditional sure-hit (Lock-On/Mind-Reader,
+ * `STATUS3_ALWAYS_HITS` -- barriered here exactly like the `ACC_CURR_MOVE`
+ * branch below, and for the same reason: `gDisableStructs.battlerWithSureHit`
+ * is not modeled. Provably unreachable today regardless, since
+ * `battleScriptSwitchinOpcode.ts`'s own read-only precedent confirms no
+ * production code ever sets `STATUS3_ALWAYS_HITS`), a semi-invulnerable miss
+ * (a bare jump to the fail label -- source's own `JumpIfMoveAffectedByProtect`
+ * is never reached down this sub-branch, so no `MOVE_RESULT_MISSED` flag or
+ * `missType` is set here, unlike the Protect-gate branch below), or
+ * `JumpIfMoveAffectedByProtect(0)`'s own Protect gate. That gate's
+ * `DEFENDER_IS_PROTECTED` macro reads `gCurrentMove` (the real move) for its
+ * flag check regardless of the literal `0` argument -- the `0` only ever
+ * feeds `JumpIfMoveFailed`'s `else`-branch `AbilityBattleEffects`/Destiny
+ * Bond tail, which is unreachable whenever Protect was the reason for
+ * jumping in the first place (the `if` branch taken instead).
+ */
+function accuracycheckNoAccCalcCheckLockOn(
+  context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
+): BattleScriptCommandTransition<BattleScriptRulesContext> {
+  const rulesContext = context.state.rulesContext;
+  const attacker = requireBattlerRole(rulesContext, "attacker");
+  const target = requireBattlerRole(rulesContext, "target");
+  const targetBattler = rulesContext.battlers[target];
+
+  if ((targetBattler.status3 & BATTLE_SCRIPT_STATUS3_ALWAYS_HITS) !== 0) {
+    return unsupportedBranch(
+      context,
+      "AccuracyCalcHelper's STATUS3_ALWAYS_HITS Lock-On/Mind-Reader sure-hit branch needs "
+        + "gDisableStructs[target].battlerWithSureHit, which this engine does not model yet",
+      "battle_script_commands.c",
+      1105,
+    );
+  }
+
+  const semiInvulnerableMask = (
+    BATTLE_SCRIPT_STATUS3_ON_AIR | BATTLE_SCRIPT_STATUS3_UNDERGROUND | BATTLE_SCRIPT_STATUS3_UNDERWATER
+  ) >>> 0;
+  if ((targetBattler.status3 & semiInvulnerableMask) !== 0) {
+    const failOperand = context.instruction.operands[0]!;
+    const entry = resolveBattleScriptLabel(context.program, failOperand.expression);
+    if (!entry) throw new Error(`accuracycheck: committed program has no label ${failOperand.expression}`);
+    return transitionBattleScriptCommand(context, Object.freeze({ kind: "jump", programCounter: entry.programCounter }));
+  }
+
+  if (isDefenderProtected(targetBattler, rulesContext.currentMove)) {
+    const withFlags = Object.freeze({
+      ...rulesContext,
+      moveResultFlags: (rulesContext.moveResultFlags | BATTLE_SCRIPT_MOVE_RESULT_MISSED) >>> 0,
+      missType: B_MSG_PROTECTED,
+    });
+    return jumpToMissTarget(context, withFlags, attacker, target, context.state.rng);
+  }
+
+  return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }));
+}
+
+/**
+ * Cmd_accuracycheck (battle_script_commands.c:1099-1189). Two argument forms
+ * are source-complete: `ACC_CURR_MOVE` (`BattleScript_EffectHit` and 53 of
+ * the program's other accuracycheck sites) and `NO_ACC_CALC_CHECK_LOCK_ON`
+ * (`accuracycheckNoAccCalcCheckLockOn` above, `BattleScript_EffectYawn`'s own
+ * site -- 1 of 8 sites using this literal, the rest still barriered behind
+ * their own separate unregistered opcodes). Bare `NO_ACC_CALC` and any
+ * explicit-deferred-move literal remain an explicit barrier: no committed
+ * script this engine reaches uses them.
  */
 export const accuracycheckOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (
   context,
 ) => {
   const moveOperand = context.instruction.operands[1];
+  if (moveOperand?.expression === "NO_ACC_CALC_CHECK_LOCK_ON") {
+    return accuracycheckNoAccCalcCheckLockOn(context);
+  }
   if (!moveOperand || moveOperand.expression !== "ACC_CURR_MOVE") {
     return unsupportedBranch(
       context,
       `Cmd_accuracycheck's non-ACC_CURR_MOVE move argument `
-        + `(${moveOperand?.expression ?? "<missing>"}) -- the NO_ACC_CALC/NO_ACC_CALC_CHECK_LOCK_ON/`
-        + "explicit-deferred-move top branch is not used by BattleScript_EffectHit's hit chain",
+        + `(${moveOperand?.expression ?? "<missing>"}) -- the NO_ACC_CALC/`
+        + "explicit-deferred-move top branch is not used by any committed script this engine reaches",
       "battle_script_commands.c",
       1103,
     );
