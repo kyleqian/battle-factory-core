@@ -1310,6 +1310,36 @@ const WEATHER_PICK_SCENARIOS: WeatherPickScenarioSpec[] = [
     afterFrame: 700,
     hpBand: "below40",
   },
+  // 2026-07-27 second follow-up side-lane session: doc §25.6 item 4
+  // (`get_weather`'s own `AI_WEATHER_NONE` stale-read bug, BUGFIX undefined
+  // in this pinned build, `src/battle_ai_script_commands.c:1644-1665`) --
+  // the last of §25.6's four items, live-staged for the first time. See doc
+  // §25.10 for the full derivation of both stale-read channels these three
+  // fixtures isolate.
+  {
+    label:
+      "get_weather stale-read, CBM channel: opponent (AI_USER) = Huntail (374), moveset [HAIL, SPLASH x3]; target = Ninjask (302, single ability Speed Boost=3, abilities={SPEED_BOOST,NONE}) -- weather never established (AI_WEATHER_NONE). AI_CheckBadMove's own universal preamble (`AI_CheckBadMove_CheckSoundproof`, data/battle_ai_scripts.s:93) runs `get_ability AI_TARGET` immediately before AI_CBM_Hail's own `get_weather` (:522), with no intervening funcResult write -- Speed Boost's ability id (3) numerically equals AI_WEATHER_HAIL (3, include/constants/battle_ai.h:26-30), so the stale read matches and Score_Minus8 fires (CBM: -8) even though weather is genuinely NONE. Separately, AI_TryToFaint's own per-move preamble (`get_how_powerful_move_is`, unconditional for every movesetIndex) leaves funcResult=MOVE_POWER_OTHER(0) after evaluating the last Splash filler slot, and MOVE_POWER_OTHER(0) numerically equals AI_WEATHER_SUN(0) -- AI_CheckViability's own preamble never rereads ability or power before dispatching to AI_CV_Hail, so this stale 0 flows straight into AI_CV_Hail's own `get_weather` (:2263) and matches its own Sun branch (CV: +1). Net -8 (CBM) + +1 (CV) + 0 (TryToFaint, Hail can't faint) = -7, deterministically below Splash's established 0 baseline -- Hail must never win the turn-1 pick, both seeds.",
+    path: "tools/battle-lab/mechanic-factory-ai-hail-staleweather-collision-off.json",
+    expectedSlot0Wins: false,
+    beforeFrame: 0,
+    afterFrame: 732,
+  },
+  {
+    label:
+      "get_weather stale-read, CV channel in isolation (control): identical to the CBM-channel fixture above except target = Anorith (390, Battle Armor, ability id=4, outside the AI_WEATHER_* 0-3 range -- CBM channel silenced by construction, matching the doc's own established Gate-S/Gate-R stale-read-safety recipe). The CV channel is target-ability-independent (it never reads target ability at all -- it's fed by AI_TryToFaint's own tail state, constant across any target species), so it fires exactly as above: CV's own stale get_weather reads MOVE_POWER_OTHER(0)==AI_WEATHER_SUN(0) and scores +1. Net 0 (CBM, silenced) + +1 (CV) + 0 (TryToFaint) = +1, above Splash's 0 baseline -- Hail must ALWAYS win the turn-1 pick despite a target ability chosen specifically to be safe from the (previously the only known) ability-collision channel -- direct live proof the CV channel is a second, independent, target-ability-independent manifestation of the same BUGFIX-undefined bug.",
+    path: "tools/battle-lab/mechanic-factory-ai-hail-staleweather-control-off.json",
+    expectedSlot0Wins: true,
+    beforeFrame: 0,
+    afterFrame: 732,
+  },
+  {
+    label:
+      "get_weather stale-read, CV channel re-attribution check on the banked Gate R fixture: identical setup to `raindance-gates-raindish-reach` (doc §25.9.3) -- Lotad (295) vs Shuckle (213), moveset [RAIN_DANCE, GROWL x3] -- except `abilitySlot: 0` (Swift Swim) instead of `abilitySlot: 1` (Rain Dish), removing Gate R's own tail bonus entirely. Lotad (speed 50) still outruns Shuckle (speed 25), so Gate P still routes past Gate S regardless of which ability is active (Gate S is only checked when NOT user-faster, doc §25.9.1's own note that Gate S is never reached in this matchup either way). If Gate R's own ability-tail check were truly what fired in the original banked fixture, removing Rain Dish should drop Rain Dance's net score from +1 to 0 (tied with Growl's 0, ambiguous). If instead the CV channel's own stale Sun match (Gate W2, the same mechanism as the two fixtures above) is what actually fires -- independent of Rain Dish -- Rain Dance should still win deterministically. Net prediction per the CV-channel hypothesis: Rain Dance wins the turn-1 pick despite having no Rain Dish, exactly like the original fixture -- suggesting the original Gate R fixture's own live result was caused by this same stale-read bug, not by Gate R's own instructions, even though the numeric score/pick observable cannot distinguish the two (both land on +1).",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-raindance-noraindish-stalesun-off.json",
+    expectedSlot0Wins: true,
+    beforeFrame: 0,
+    afterFrame: 732,
+  },
 ];
 
 async function verifyWeatherPickScenario(spec: WeatherPickScenarioSpec): Promise<void> {
