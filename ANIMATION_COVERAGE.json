@@ -230,6 +230,29 @@
       ]
     },
     {
+      "move": "MOVE_TOXIC",
+      "status": "exact",
+      "covered": [
+        "complete legal Level-50 mechanicLab parties stage CLAMPERL, the real Factory set-134 TOXIC carrier, in both player-back and opponent-front orientations, with all four active choices constrained to TOXIC and ONIX constrained to TACKLE",
+        "player-back CLAMPERL to opponent-front ONIX complete first move-animation script body at oracle frames 219-437: source component/callback/software+hardware-OAM/affine/audio and shared-seam raw-RGB framebuffer match 219/219, reproduced twice fresh",
+        "opponent-front CLAMPERL to player-back ONIX complete first move-animation script body at oracle frames 219-437: the same strengthened component and shared-seam framebuffer surface matches 219/219, reproduced twice fresh",
+        "source reducer ports both literal four-sprite ToxicBubbles calls, their 17-display-frame script cadence, mirrored target geometry, 20-callback four-frame animation, OAM allocation/reuse, AnimSpriteOnMonPos lifetime, and all fourteen SE_M_TOXIC target-pan restarts; the final six sprites reuse the exact shared PoisonBubblesEffect reducer without duplication",
+        "ANIM_TAG_TOXIC_BUBBLE, ANIM_TAG_POISON_BUBBLE, and CLAMPERL back/front art are reproducibly extracted; software and hardware OAM plus one-frame affine matrix latches and complete cleanup are dense-checked; SLUDGE remains 102/102 and POISON_FANG remains 104/104 in both orientations"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-toxic-player-clamperl-opponent-onix.json",
+        "tools/battle-lab/mechanic-toxic-opponent-clamperl-player-onix.json",
+        "tools/compare/fixtures/toxic-player-clamperl-opponent-onix.json",
+        "tools/compare/fixtures/toxic-opponent-clamperl-player-onix.json",
+        "tools/compare/toxicPortable.ts",
+        "tools/compare/toxicProbe.py",
+        "tools/compare/extractToxicAssets.ts",
+        "src/animation/assets/toxic.json",
+        "src/animation/toxic.ts",
+        "tests/animation/toxic.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_EARTHQUAKE",
       "status": "exact",
       "covered": [
@@ -1207,7 +1230,9 @@
     {
       "id": "acid-poison-bubble",
       "components": [
+        "asset:ANIM_TAG_TOXIC_BUBBLE",
         "asset:ANIM_TAG_POISON_BUBBLE",
+        "sprite:gToxicBubbleSpriteTemplate",
         "sprite:gAcidPoisonBubbleSpriteTemplate",
         "sprite:gAcidPoisonDropletSpriteTemplate",
         "sprite:gSludgeProjectileSpriteTemplate",
@@ -1227,7 +1252,7 @@
         "MOVE_POISON_FANG",
         "MOVE_POISON_TAIL"
       ],
-      "goal": "MOVE_ACID, MOVE_SLUDGE, and MOVE_POISON_FANG are exact representatives. MOVE_ACID independently proves its complete three-arc, dual-ShakeMon2, defender palette-cycle, and five-droplet body in both orientations at 131/131 component/task/RAM/palette and framebuffer frames, reproduced twice. MOVE_SLUDGE independently proves its complete projectile/ShakeMon/blend-task/PoisonBubblesEffect body, extracted art, hardware latches, seven sound boundaries, and shared-seam framebuffer in both orientations at 102/102, reproduced twice fresh. MOVE_POISON_FANG independently proves its fang/contact-ShakeMon/four-leg delay-0 palette-cycle complete body through the shared Scene-ON seam in both orientations at 104/104 component and framebuffer frames, reproduced twice fresh; it reuses SLUDGE's shared PoisonBubblesEffect reducer but is promoted only by its own complete dense body. TOXIC remains unsupported and still needs ANIM_TAG_TOXIC_BUBBLE plus two four-sprite ToxicBubbles waves before its separate six-sprite PoisonBubblesEffect. SLUDGE BOMB remains unsupported and still needs ten delayed sludge projectiles, distinct (3,0,15,1) ShakeMon2, delay-1 target blend, twelve gSludgeBombHitParticleSpriteTemplate bodies, and waitsound. POISON TAIL remains unsupported and still needs metallic_shine, attacker lunge, impact hitsplat, target ShakeMon, alpha/monbg teardown, and its own complete evidence. Shared PoisonBubblesEffect code does not promote any unsupported sibling."
+      "goal": "MOVE_ACID, MOVE_SLUDGE, MOVE_POISON_FANG, and MOVE_TOXIC are exact representatives. MOVE_ACID independently proves its complete three-arc, dual-ShakeMon2, defender palette-cycle, and five-droplet body in both orientations at 131/131 component/task/RAM/palette and framebuffer frames, reproduced twice. MOVE_SLUDGE independently proves its complete projectile/ShakeMon/blend-task/PoisonBubblesEffect body, extracted art, hardware latches, seven sound boundaries, and shared-seam framebuffer in both orientations at 102/102, reproduced twice fresh. MOVE_POISON_FANG independently proves its fang/contact-ShakeMon/four-leg delay-0 palette-cycle body through the shared Scene-ON seam in both orientations at 104/104 component and framebuffer frames, reproduced twice fresh. MOVE_TOXIC independently proves ANIM_TAG_TOXIC_BUBBLE, both four-sprite ToxicBubbles waves, their OAM/audio/timing/cleanup, then reuses the exact shared PoisonBubblesEffect reducer; its complete body is 219/219 component and framebuffer frames in both orientations, reproduced twice fresh. SLUDGE and POISON_FANG remain exact controls in both orientations. SLUDGE BOMB remains unsupported and still needs ten delayed sludge projectiles, distinct (3,0,15,1) ShakeMon2, delay-1 target blend, twelve gSludgeBombHitParticleSpriteTemplate bodies, and waitsound. POISON TAIL remains unsupported and still needs metallic_shine, attacker lunge, impact hitsplat, target ShakeMon, alpha/monbg teardown, and its own complete evidence. Shared PoisonBubblesEffect code does not promote either unsupported sibling."
     },
     {
       "id": "water-gun-small-bubbles-water-impact",

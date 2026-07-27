@@ -68,11 +68,11 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // POISON FANG closes its two-orientation shared-seam framebuffer evidence.
-        unsupported: 234,
+        // TOXIC closes its two-orientation shared-seam framebuffer evidence.
+        unsupported: 233,
         staged: 0,
         partial: 3,
-        exact: 39,
+        exact: 40,
       },
       {
         tier: "openOnly",

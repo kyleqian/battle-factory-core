@@ -46,10 +46,36 @@ animation. A status caused by a move is not part of that move's animation.
 
 ## Current resumable state (2026-07-27)
 
-Coverage is **39/276 exact, 3 partial, 234 unsupported**. POISON FANG is exact
-through the shared Scene-ON seam at strengthened **104/104 player-back +
-104/104 opponent-front** component and framebuffer frames, reproduced twice
-fresh. TOXIC, SLUDGE BOMB, and POISON TAIL remain unsupported.
+Coverage is **40/276 exact, 3 partial, 233 unsupported**. TOXIC is exact
+through the shared Scene-ON seam at strengthened **219/219 player-back +
+219/219 opponent-front** component and framebuffer frames, reproduced twice
+fresh. SLUDGE BOMB and POISON TAIL remain unsupported.
+
+## TOXIC promoted to exact; ToxicBubbles joins poison track (2026-07-27)
+
+**Verdict:** `MOVE_TOXIC` is exact. Complete legal Scene-ON mechanicLab
+parties use CLAMPERL, the real Level-50 Factory set-134 carrier, in both
+required orientations with all four choices constrained to TOXIC and ONIX
+constrained to TACKLE. The strengthened comparator matches the complete first
+move-animation script body at **219/219 player-back** (oracle 219-437) and
+**219/219 opponent-front** (219-437), each reproduced twice fresh.
+
+**Source reducer/evidence:** both literal four-sprite `ToxicBubbles` calls use
+their source 17-display-frame cadence, mirrored target geometry, four-frame
+20-callback animation, OAM slot reuse, `AnimSpriteOnMonPos` lifetime, and
+eight `SE_M_TOXIC` target-pan restarts. After the source wait and delay, the
+final six sprites reuse SLUDGE's exact `PoisonBubblesEffect` reducer unchanged,
+including affine terminal clamp and its six additional sound restarts. Dense
+evidence checks callbacks, software and hardware OAM, one-frame affine matrix
+latches, audio, cleanup, raw RGB, and the shared-seam framebuffer.
+
+**Renderer/assets/controls:** Toxic/poison bubble art and both CLAMPERL
+orientations are reproducibly extracted. `sceneOnPresentation`/`battleScene`
+render the complete body and cleanup through relative ages. SLUDGE remains
+**102/102** and POISON FANG **104/104** in both orientations as exact controls.
+No absolute ticks, screenshots, coordinate/RGB fitting, exclusions, new
+unsupported barriers, or import-boundary widening were added. SLUDGE BOMB and
+POISON TAIL remain unsupported; no sibling was promoted.
 
 ## POISON FANG promoted to exact; fang contact joins poison track (2026-07-27)
 
