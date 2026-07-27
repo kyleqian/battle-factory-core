@@ -3413,3 +3413,270 @@ still green. **Run twice this session, ALL PASS both times.** Reproduce with:
 ```sh
 node --experimental-strip-types tools/probe/verify-factory-ai-checkviability-ground-truth.ts
 ```
+
+## 23. 2026-07-26 addendum #13: `AI_CBM_LightScreen` + `AI_CV_LightScreen` and `AI_CBM_Reflect` + `AI_CV_Reflect` — the simplest CBM+CV pair yet, and the first with zero sibling divergence on either side
+
+Prep-scout session (side lane, Battle Scene OFF), same no-`src/`-changes
+contract. Goal per this step's brief: the next CBM+CV port after
+CosmicPower/CalmMind — `AI_CBM_LightScreen`/`AI_CV_LightScreen` and
+`AI_CBM_Reflect`/`AI_CV_Reflect`, four handlers total (two CBM, two CV,
+unlike §22's three-handler CosmicPower/CalmMind/SpDefUp shape). The brief
+named a specific trap to check for (§21/§22 each found a real LightScreen-
+vs-Reflect-shaped divergence, i.e. a sibling pair in the same doc diverging
+in one number or one branch polarity): re-derived below, and the honest
+answer this time is that there **is no divergence** on either side — the
+first pair in this doc's CBM-blocked series where that check comes back
+clean both ways.
+
+### 23.1 All four bodies, cited and fully parsed
+
+```
+AI_CBM_LightScreen:                     (data/battle_ai_scripts.s:354-356)
+	if_side_affecting AI_USER, SIDE_STATUS_LIGHTSCREEN, Score_Minus8
+	end
+
+AI_CBM_Reflect:                         (data/battle_ai_scripts.s:393-395)
+	if_side_affecting AI_USER, SIDE_STATUS_REFLECT, Score_Minus8
+	end
+```
+
+Two instructions each, zero `if_random_less_than`, zero `get_ability` —
+the single-condition check is against the opponent's (`AI_USER`) **own
+side status**, not a stat stage: `SIDE_STATUS_REFLECT` = `(1 << 0)`,
+`SIDE_STATUS_LIGHTSCREEN` = `(1 << 1)` (`include/constants/battle.h:
+210-211`) — distinct bit flags confirming these are genuinely independent
+side-condition reads, not aliases of one flag. Dispatch confirms both are
+distinct targets: `if_effect EFFECT_LIGHT_SCREEN, AI_CBM_LightScreen`
+(`data/battle_ai_scripts.s:126`), `if_effect EFFECT_REFLECT, AI_CBM_Reflect`
+(`:147`) — matching the brief's own anchors exactly. Structurally this is
+the **smallest CBM handler shape found in this doc to date**: simpler than
+the 2-instruction single-stat "Up" family (`AI_CBM_SpDefUp` etc.,
+§17.1/§18.1/§20.1/§21.1/§22.1) and the 3-instruction dual-stat
+`CosmicPower`/`CalmMind` (§22.1) — no stat-stage read, no ability query, no
+type check, just one side-status bit test.
+
+**Divergence check, CBM side: none.** Byte-for-byte identical shape between
+`LightScreen` and `Reflect`; the only difference is which `SIDE_STATUS_*`
+flag is tested, and both use the identical `Score_Minus8` penalty. Re-
+verified directly against the raw assembly, not assumed.
+
+```
+AI_CV_LightScreen:                      (data/battle_ai_scripts.s:1373-1382)
+	if_hp_less_than AI_USER, 50, AI_CV_LightScreen_ScoreDown2        ; :1374 Gate A (opponent's OWN hp)
+	get_target_type1                                                  ; :1375
+	if_in_bytes AI_CV_LightScreen_SpecialTypeList, AI_CV_LightScreen_End ; :1376 Gate B (target's type1)
+	get_target_type2                                                  ; :1377
+	if_in_bytes AI_CV_LightScreen_SpecialTypeList, AI_CV_LightScreen_End ; :1378 Gate C (target's type2)
+	if_random_less_than 50, AI_CV_LightScreen_End                     ; :1379 DRAW SITE
+AI_CV_LightScreen_ScoreDown2:
+	score -2
+AI_CV_LightScreen_End:
+	end
+
+AI_CV_LightScreen_SpecialTypeList:      (data/battle_ai_scripts.s:1385-1393)
+	.byte TYPE_FIRE, TYPE_WATER, TYPE_GRASS, TYPE_ELECTRIC, TYPE_PSYCHIC,
+	      TYPE_ICE, TYPE_DRAGON, TYPE_DARK, -1
+
+AI_CV_Reflect:                          (data/battle_ai_scripts.s:1492-1501)
+	if_hp_less_than AI_USER, 50, AI_CV_Reflect_ScoreDown2             ; :1493 Gate A (opponent's OWN hp)
+	get_target_type1                                                  ; :1494
+	if_in_bytes AI_CV_Reflect_PhysicalTypeList, AI_CV_Reflect_End     ; :1495 Gate B (target's type1)
+	get_target_type2                                                  ; :1496
+	if_in_bytes AI_CV_Reflect_PhysicalTypeList, AI_CV_Reflect_End     ; :1497 Gate C (target's type2)
+	if_random_less_than 50, AI_CV_Reflect_End                         ; :1498 DRAW SITE
+AI_CV_Reflect_ScoreDown2:
+	score -2
+AI_CV_Reflect_End:
+	end
+
+AI_CV_Reflect_PhysicalTypeList:         (data/battle_ai_scripts.s:1504-1514)
+	.byte TYPE_NORMAL, TYPE_FIGHTING, TYPE_FLYING, TYPE_POISON, TYPE_GROUND,
+	      TYPE_ROCK, TYPE_BUG, TYPE_GHOST, TYPE_STEEL, -1
+```
+
+Dispatch confirms both are distinct targets, matching the brief's own
+anchors: `if_effect EFFECT_LIGHT_SCREEN, AI_CV_LightScreen`
+(`data/battle_ai_scripts.s:680`), `if_effect EFFECT_REFLECT, AI_CV_Reflect`
+(`:702`). Exactly **1** `if_random_less_than` site each — the fewest of any
+CBM-blocked pair documented so far (`AttackDown` had 2, `DefenseUp`/
+`SpDefUp` had 5, `AccDown` had 7, §14/§18/§19/§22).
+
+**Divergence check, CV side: also none**, beyond the necessarily-different
+type-list *contents* (a "special" list for `LightScreen`, a "physical" list
+for `Reflect` — Gen 3's pre-physical/special-split, per-type damage-category
+convention). Same HP threshold (`50`), same draw odds (`50`/256, ~19.5%),
+same instruction count, same topology, on both sides — independently
+re-derived from the raw assembly per the doc's own standing rule
+(§17/§18/§21/§22 each found a real divergence this way); this time the
+answer comes back clean. This makes `LightScreen`/`Reflect` the **first
+fully twin-symmetric pair** in the whole doc — both the CBM half and the CV
+half are structurally identical between siblings, differing only in which
+flag/list they reference.
+
+**Structural comparison vs the `DefenseUp`/`SpDefUp` family (§18, §22)**:
+those handlers read the **target's last-used move type**
+(`get_last_used_bank_move` + `get_move_type_from_result`) — a dynamic,
+turn-history-dependent signal — and have two HP thresholds (Gates C/D) plus
+a last-move-power-zero check (Gate E) ahead of the type-list gate (Gate F).
+`LightScreen`/`Reflect` instead read the **target's own innate type**
+directly (`get_target_type1`/`get_target_type2`) — a static, species-level
+signal needing no move history — and have only one HP threshold (Gate A)
+with no Gates D/E at all: 3 gates plus 1 draw total, the shortest CV body
+in the whole physical/special-list sub-family. Also notable: `LightScreen`'s
+8-type `SpecialTypeList` and `Reflect`'s 9-type `PhysicalTypeList` together
+cover **all 17 Gen 3 types with no overlap and no gap** — every species'
+type falls in exactly one list, unlike `DefenseUp`/`SpDefUp`'s single shared
+9-type physical list (where the complement is "not physical," not a second
+named list). This complementary-list structure is what lets 23.2's twin
+fixtures reuse the exact same two target species for both pairs with the
+reach/control roles simply swapping.
+
+### 23.2 Design: zero move-damage needed at all — a first for this doc's CBM-blocked-pair series
+
+Opponent (`AI_USER`, under test, all 4 fixtures): Anorith (390), reused
+verbatim from §15-18/§21/§22 for consistency, though its Battle Armor is
+moot here — no damage occurs in these fixtures at all (see below), so no
+crit-calc confound is even possible. Target (player, varies per fixture):
+Shuckle (213, Bug/Rock, single ability `{STURDY, NONE}`) or Vulpix (37,
+pure Fire, single ability `{FLASH_FIRE, NONE}`) — both single-ability
+species, closing the §14.2-discovered `Cmd_get_ability` ability-guessing
+confound. This matters even though neither `AI_CV_LightScreen`/
+`AI_CV_Reflect` nor their own CBM handlers call `get_ability`:
+`AI_CheckBadMove`'s own shared prefix (`AI_CheckBadMove_CheckSoundproof`'s
+`get_ability AI_TARGET`, `:92`) runs before **every** effect dispatch
+regardless of which handler it reaches, so the confound must be closed for
+any CBM-blocked-pair fixture, not only ones whose own body reads ability.
+
+Two dispatch-move pairs, one per handler under test — both real Factory-
+legal status moves that are **already** 0 power / 0 accuracy / self-target
+by their own game data, no need to hand-pick an unrelated 0/0 move class
+this time: `MOVE_LIGHT_SCREEN` (113, `EFFECT_LIGHT_SCREEN`, Psychic,
+`data/battle_moves.h:1472-1483`) and `MOVE_REFLECT` (115, `EFFECT_REFLECT`,
+Psychic, `:1498-1509`), both `.accuracy = 0`, `.target = MOVE_TARGET_USER`.
+
+Target's own move in **every** fixture: `MOVE_HARDEN` (106,
+`EFFECT_DEFENSE_UP`, 0 power, 0 accuracy, `MOVE_TARGET_USER`,
+`data/battle_moves.h:1381-1392`) — a self-targeting move that never touches
+the opponent. Because neither side's move can deal damage, the opponent's
+HP is held at its own max for the entire trace **by construction**, live-
+confirmed in 23.3 — no HP-banding recipe, no fixed-damage move pairing, and
+no multi-turn setup are needed at all to keep Gate A (`if_hp_less_than
+AI_USER, 50`) permanently false. This is a first for this doc's
+CBM-blocked-pair series: every prior pair since §14 needed at least a
+one-turn real hit (or an explicit no-damage-move confirmation) to pin the
+opponent's HP state; here zero damage of any kind occurs on either side
+(neither `Cmd_critcalc` nor `Cmd_adjustnormaldamage` is ever called, 23.4).
+
+Because `LightScreen`'s `SpecialTypeList` and `Reflect`'s
+`PhysicalTypeList` are exact complements (23.1), the same two target
+species serve both pairs, with reach/control simply swapping:
+
+- **`AI_CBM_LightScreen`/`AI_CV_LightScreen` fixtures**: opponent all 4
+  slots `MOVE_LIGHT_SCREEN` (113).
+  - **Reach** (`mechanic-factory-ai-cv-lightscreen-reach-off.json`):
+    target = Shuckle (213, Bug/Rock) — **neither** type is in
+    `AI_CV_LightScreen_SpecialTypeList` — falls through Gates B/C into the
+    DRAW SITE.
+  - **Control** (`mechanic-factory-ai-cv-lightscreen-control-off.json`):
+    target = Vulpix (37, pure Fire) — Fire **is** in the special list —
+    Gate B matches immediately, deterministic zero-draw `End`.
+- **`AI_CBM_Reflect`/`AI_CV_Reflect` fixtures**: opponent all 4 slots
+  `MOVE_REFLECT` (115).
+  - **Reach** (`mechanic-factory-ai-cv-reflect-reach-off.json`): target =
+    Vulpix (37, pure Fire) — Fire is **not** in
+    `AI_CV_Reflect_PhysicalTypeList` — falls through into the DRAW SITE.
+  - **Control** (`mechanic-factory-ai-cv-reflect-control-off.json`): target
+    = Shuckle (213, Bug/Rock) — **both** types are in the physical list —
+    Gate B matches immediately, deterministic zero-draw `End`.
+
+Same capture shape as every prior CBM-blocked pair (`[A, wait 30, A, wait
+700]`, `captureFrames [0,100,300,732]`). Gate A (opponent HP < 50%) is not
+staged this session — doing so would require real damage from the target,
+which contradicts this design's own zero-damage isolation; a future porter
+would need a separate, HP-banded fixture pair for that gate, same
+"not attempted, time-capped" status as every prior pair's own unstaged
+gates (§17.5/§18.6/§21.2/§22.5 item 4).
+
+### 23.3 Live ledger (oracle-verified, both seeds, both handlers, both runs)
+
+| Fixture | Seed | Opponent PP used | Opponent HP (start→end) | Total `Random()` calls, frame 0→732 | Determinism (2 runs) |
+| --- | -: | -: | --- | -: | --- |
+| LightScreen reach (Shuckle) | 1 | 1 | 120→120 (100%) | **10** | identical |
+| LightScreen reach (Shuckle) | 99 | 1 | 120→120 (100%) | **10** | identical |
+| LightScreen control (Vulpix) | 1 | 1 | 120→120 (100%) | **6** | identical |
+| LightScreen control (Vulpix) | 99 | 1 | 120→120 (100%) | **6** | identical |
+| Reflect reach (Vulpix) | 1 | 1 | 120→120 (100%) | **10** | identical |
+| Reflect reach (Vulpix) | 99 | 1 | 120→120 (100%) | **10** | identical |
+| Reflect control (Shuckle) | 1 | 1 | 120→120 (100%) | **6** | identical |
+| Reflect control (Shuckle) | 99 | 1 | 120→120 (100%) | **6** | identical |
+
+Every fixture is individually cross-seed-stable (10/10 or 6/6) — the clean
+shape, not the `DefenseUp`/`SpDefUp` family's own "5-6, not 4" anomaly
+(§18.4/§22.4). Both handlers' reach and control totals are **numerically
+identical to each other** (10 vs 10, 6 vs 6) — expected, since 23.1 already
+established zero structural divergence between the two CV bodies and
+neither dispatch move's own effect touches the opponent's HP or the
+target's type.
+
+### 23.4 Attribution (`tools/probe/attribute-factory-ai-random-callers.py`, window `0 732`, via `tools/run-mgba-probe.py`, seed 1)
+
+| Caller function | LightScreen reach | LightScreen control | Reflect reach | Reflect control |
+| --- | -: | -: | -: | -: |
+| `BattleAI_SetupAIData+0x83` | 4 | 4 | 4 | 4 |
+| `BattleTurnPassed+0x157` | 1 | 1 | 1 | 1 |
+| `ChooseMoveOrAction_Singles+0xf7` | 1 | 1 | 1 | 1 |
+| `Cmd_if_random_less_than+0x7` | **4** | **0** | **4** | **0** |
+| **Total** | **10** | **6** | **10** | **6** |
+
+No `Cmd_accuracycheck` row in **any** of the four tables — both `MOVE_LIGHT_
+SCREEN`/`MOVE_REFLECT` (opponent) and `MOVE_HARDEN` (target) have
+`.accuracy = 0` and self-target, so neither side ever draws an accuracy
+roll. This is the first CBM-blocked pair in the doc where accuracy rolls
+are absent entirely, rather than merely canceling identically between
+fixtures (contrast `AttackDown`'s Growl, accuracy 100, §14.3-§14.4). No
+`Cmd_get_ability` row either — both Shuckle and Vulpix are single-ability
+species, closing 23.2's confound live. The **+4** delta is entirely
+`Cmd_if_random_less_than`, and it is the clean "N=4 slots × 1 draw" shape
+(matching `AttackDown`'s own DRAW SITE 2, §14.4) rather than the
+`DefenseUp`/`SpDefUp` family's unresolved 5-6-draw anomaly (§18.4/§22.4) —
+consistent with this handler's draw site sitting as the *last* instruction
+before `End`/`ScoreDown2` with no further gates in its tail, the same
+topological position `AttackDown`'s own clean site occupies.
+
+### 23.5 What this unblocks
+
+1. **The pair's own port**: exact instruction lists for all four handlers,
+   every gate's real precondition, both type lists in full, both draw
+   sites' exact odds, and a live-verified twin-fixture pair per handler
+   proving the type-list gate's own contribution end-to-end — with the
+   added simplification that no damage-roll or HP-banding machinery is
+   needed for a future porter to reproduce Gate A's own "opponent full HP"
+   precondition (it's the deterministic default, not staged state).
+2. **Confirms the brief's own divergence-check instruction found nothing to
+   report, honestly**: re-derived independently from the raw assembly on
+   both the CBM side and the CV side, LightScreen and Reflect are twins in
+   every respect except which flag/list they reference — the first pair in
+   this doc's CBM-blocked series where that's true both ways, worth stating
+   plainly rather than manufacturing a divergence that isn't there.
+3. **A second data point for the "clean N=4" vs "5-6 anomaly" open question**
+   (§18.4/§22.4): this pair's own DRAW SITE is clean (4, not 5-6),
+   reinforcing 22.4's hypothesis that the anomaly is intrinsic to
+   `DefenseUp`/`SpDefUp`'s own shared last-move-branch tail code region,
+   not a general property of "a type-list gate followed by a draw."
+4. **Gate A** (opponent's own HP < 50%) remains unstaged live this session —
+   would need a real-damage fixture variant, out of scope for this
+   zero-damage isolation design; left for a future porter alongside the
+   other still-open DRAW-SITE-adjacent gates in this doc (§18.6 item 4,
+   §22.5 item 4).
+
+### 23.6 Verify script status
+
+`tools/probe/verify-factory-ai-checkviability-ground-truth.ts` extended
+this session with `AI_CV_LightScreen`'s and `AI_CV_Reflect`'s 4 fixtures
+total (23.2-23.3) — every prior scenario (§9, §11.5, §12.1, §13.4, §14.6,
+§15.5, §16.5, §17.7, §18.7, §19.7, §20.5, §21.5, §22.6) unchanged and still
+green. **Run twice this session, ALL PASS both times.** Reproduce with:
+
+```sh
+node --experimental-strip-types tools/probe/verify-factory-ai-checkviability-ground-truth.ts
+```
