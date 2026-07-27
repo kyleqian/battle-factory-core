@@ -51,6 +51,37 @@ substitute state, multi-turn/multi-hit state, or another explicit script input.
 Every status needs a committed ON-profile trace; `exact` cannot retain a known
 remainder.
 
+## Psychic-family opposite orientation closed: CONFUSION/PSYCHIC promoted to exact; FUTURE_SIGHT stays exact (2026-07-26)
+
+**Verdict:** opponent-front KADABRA attacking player-back ONIX is exact through
+the shared Scene-ON seam for all three family moves. `MOVE_CONFUSION` and
+`MOVE_PSYCHIC` promote `partial` → **`exact`**; `MOVE_FUTURE_SIGHT` remains
+**`exact`**. Census: **23/276 exact, 3 partial**.
+
+**Source/geometry:** all move tasks and psychic-background branches are
+side-agnostic. The actual new dependencies were KADABRA's battle
+`anim_front.png` (frame 0 genuinely differs from generic `front.png`), front
+coords **56×56 / yOffset 5** (corner `(144,13)`, animation center `(176,45)`),
+frame program **0×12, 1×45, 0×15**, and `ANIM_GROW_VIBRATE`. That family ends
+through `ResetSpriteAfterAnim`, leaving identity affine and zero `x2/y2`;
+ONIX is now player-back, so its opponent-front idle residual does not apply.
+The runtime asset stays under `src/animation/assets/`; shared generated
+catalogs and boundary ratchets are unchanged.
+
+**Implementation/evidence:** the three `battleScene.ts` cases select
+KADABRA front/back and ONIX back/front solely by battler side; no timing,
+absolute-frame, damage, RNG, turn, or facility branch changed. Complete legal
+mechanicLab party fixtures stage the opposite orientation. Fresh results,
+each reproduced twice: CONFUSION opponent **140/140** (frames 85-224),
+PSYCHIC opponent **140/140** (83-222), FUTURE_SIGHT opponent **114/114**
+(81-194). Existing player orientations reproduced twice at **140/140,
+140/140, 114/114**. Regression gates twice in both orientations: GROWTH
+**63/63 component + framebuffer**, BIND **45/45 component + framebuffer**.
+
+**Verification:** Tier-1 asset/geometry/side tests added; **227 test files /
+3041 tests** and production build green. Implementation commit:
+`abc5474 feat(animation): close psychic opposite orientation`.
+
 ## Psychic-family window-2 boundary closed through the shared mode/matrix seam: CONFUSION 140/140, PSYCHIC 140/140 (2026-07-26)
 
 **Verdict:** the remaining boundary frames are exact with no absolute-tick or
@@ -109,26 +140,3 @@ green; coverage census remains **21/276 exact, 5 partial**.
 **Next action for a future session:** 2 frames remain on each move (CONFUSION: 147/176; PSYCHIC: 174, plus its own already-known window-1 defect is now closed) — all window-2 splice-boundary ticks. Closing them needs a genuinely different, asymmetric correction to the active-edge threshold alone (not a blanket unification, which this session proved makes things worse) — e.g. investigate whether the active edge itself needs its OWN off-by-one at exactly the 2 boundary ticks while keeping the current lag everywhere else, the same shape of fix window 1 just got. Separately, unchanged from prior sessions: PSYCHIC's opposite orientation (KADABRA front sprite) and CONFUSION's second orientation remain open.
 
 **Housekeeping (this session):** moved the "Defect A closed... MOVE_FUTURE_SIGHT promoted to exact" entry to `ANIMATION_PROGRESS-archive.md` to keep ~3 live (AGENTS.md's convention) after adding this session's new top entry.
-
-## MOVE_PSYCHIC staged: 137/140, byte-identical to CONFUSION's own three-frame remainder — psychic family now fully staged (2026-07-26)
-
-**Verdict: cheap-once-staged confirmed exactly as the ledger predicted.** `Move_PSYCHIC` (`battle_anim_scripts.s:4733-4748`) is byte-for-byte CONFUSION's own script shape, differing only in three literal argv values (blend tint color, target shake amplitude, target scale delta). No genuinely new task, curve, or palette mechanism appeared, so no RAM-probe-first gate was triggered beyond the routine per-move timeline probe. `MOVE_PSYCHIC` lands `partial` at 137/140 — the exact same count, and the exact same three relative-age boundary frames, as CONFUSION's own still-open banked remainder.
-
-**Enumeration (rung 1, before writing code):** compared the real script against the already-proven CONFUSION component set — `monbg`/`SetPsychicBackground`/`setalpha`/`AnimTask_ShakeMon2`/`blend_color_cycle`/`AnimTask_ShakeMon`/`AnimTask_ScaleMonAndRestore` (objMode=1 blend path)/`UnsetPsychicBackground` are all identical instructions in identical order to `Move_CONFUSION`. Only three argv literals differ: `blend_color_cycle`'s target color (`RGB(31,23,0)`, not `RGB_WHITE`), the target `AnimTask_ShakeMon`'s x amplitude (`5`, not `3`), and the target `AnimTask_ScaleMonAndRestore`'s xDelta/yDelta (`-6,-6`, not `-4,-4`). KADABRA confirmed as the real carrier via `src/data/gen/battle-frontier-mons.json` (`FRONTIER_MON_KADABRA_2`), not assumed from the family map alone.
-
-**RAM-probed (rung 2):** new fixture `tools/battle-lab/mechanic-psychic-kadabra-onix.json` (same KADABRA/ONIX pair, zero new sprite extraction), probed via the already-committed `tools/probe/dump-future-sight-psychicbg.py` (no new probe script), oracle ticks 70-260. This move's own `fadetobg BG_PSYCHIC` creation tick (age 0) lands at oracle tick 79 — 2 ticks earlier than CONFUSION/FUTURE_SIGHT's own tick 81 (shorter "PSYCHIC!" message text), a difference that lands entirely in the fixture's own age-0 anchor. Every RELATIVE age matched CONFUSION's own already-coded constants exactly: window 1 (attacker shake+blend, task `data[5]=767=RGB(31,23,0)` packed BGR555 confirming the real blend task) creates at age 37; window 2 (target shake+scale, task data reads `-6,-6,duration=15` directly, RAM matrix `250`/`244` at ticks 144/145) creates at age 65; fade 2 starts at age 101 with the identical 16/20/36 ramp/hold/ramp shape; the BG-palette-2 rotation pause lands at the same breakpoint age 97.
-
-**Port (rung 3):** `src/animation/psychic.ts` reuses `blendColorCycleObjYAtAge`/`scaleMonAndRestoreAtAge`/`shakeMonOffsetAtTick`/`shakeMon2OffsetAtTick`/`psychicBackground.ts` verbatim — zero new mechanism code. Tier-1-pinned (`tests/animation/psychic.test.ts`, 13/13, every constant checked against the probe output including the two directly-probed matrix values 250/244). Wired `sceneOnPsychicView` + `SceneOnPsychicConfig`/`View` into `sceneOnPresentation.ts` and a `battleScene.ts` `MOVE_PSYCHIC` draw case mirroring `MOVE_CONFUSION`'s structure exactly, with `PSYCHIC_BLEND_TINT_COLOR` (`RGB(31,23,0)` expanded 5-bit-to-8-bit as `(255,189,0)`, the same `(v5<<3)|(v5>>2)` expansion `RGB_WHITE` already uses) standing in for CONFUSION's hardcoded white attacker tint.
-
-**Dense window (rung 4):** applied CONFUSION's own known lag conventions directly (window-1 shake -2, window-2 OAM-shadow -2 on target x2/scale, monbg copy -1, tint -1 — hardware-level, move-independent OAM-shadow-copy/framebuffer-capture latencies, not move-specific formulas) rather than a blind sweep, then verified by evidence: `tools/compare/psychicPortable.ts` landed **137/140 on the first run**, reproduced byte-identical on a second run (same 3 mismatched frames, same bbox sizes both times). The 3 remaining frames (117, 145, 174 — relative ages 38, 66, 95) sit at the EXACT SAME relative ages as CONFUSION's own still-open remainder (frames 119/147/176, ages 38/66/95): window 1's own creation-tick boundary, window 2's own creation-tick boundary, and window 2's own tail boundary. Strong evidence this is the identical banked defect transferring unchanged, not a new one — per this step's own OUT OF SCOPE list (CONFUSION's 3-frame remainder), not chased further here.
-
-**Coverage (rung 5).** `MOVE_PSYCHIC`: new, `partial`, 137/140 (`psychicPortable.ts`, reproduced twice, byte-identical both times). Regression gates green, reproduced twice each: `MOVE_FUTURE_SIGHT` 114/114 ×2, `MOVE_CONFUSION` 137/140 ×2 (unchanged, its own 3-frame remainder is the same banked class, not chased here), `MOVE_GROWTH` 63/63 both orientations ×2 each, `MOVE_BIND` 45/45 both orientations ×2 each.
-
-**Evidence.** `npm test` 2672/2672. `npm run build` green.
-
-**Next action for a future session:** the psychic family's third and final sibling is now staged; all three (`GROWTH`'s own zero-new-mechanism representative aside) share the exact same 3-frame creation/tail-boundary remainder class. A future session chasing CONFUSION's 3-frame remainder (per that entry's own note: model the active/magnitude edges as a genuine 2-tick ramp rather than a hard step) should close all three moves' remainders together, not just CONFUSION's — they're evidently the same underlying mechanism, not three independent defects. Separately: PSYCHIC's opposite orientation (KADABRA front sprite, not yet extracted) remains open, same as CONFUSION/FUTURE_SIGHT's own still-open opposite-orientation gap.
-
-**Housekeeping (this session):** moved the "Defect A's texture-space
-instrument run to exhaustion" entry to `ANIMATION_PROGRESS-archive.md` to
-keep ~3 live (AGENTS.md's convention) after adding this session's new top
-entry.

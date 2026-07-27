@@ -4,6 +4,15 @@ Older dated sections moved out of `ANIMATION_PROGRESS.md` to keep that
 file lean (`AGENTS.md`'s ~3-most-recent convention). Git history has the
 full record regardless; this file is a read-only reference.
 
+## MOVE_PSYCHIC initially staged at 137/140 before shared boundary and orientation closure (2026-07-26)
+
+`Move_PSYCHIC` was proven byte-for-byte the CONFUSION script shape except for
+its RGB(31,23,0) attacker tint, +5 target shake, and -6/-6 target scale
+literals. The first player-back KADABRA → opponent-front ONIX dense port
+landed at 137/140 twice, with its three mismatches at the same relative
+creation/tail ages as CONFUSION. Later live-ledger entries record the shared
+boundary fix to 140/140 and the opposite-orientation acceptance.
+
 ## CONFUSION's banked OAM x-lag fixed: window 2 108/140 → 137/140; stays `partial`, 3 boundary-tick frames named as the honest remainder (2026-07-26)
 
 **Verdict: real fix landed, closing 29 of 32 previously-failing frames. `MOVE_CONFUSION` stays `partial` (137/140, not the required complete 140/140) — the 3 remaining frames are all creation/tail-boundary ticks, the same class as the already-known window-1 frame-119 issue, named honestly rather than promoted past.**
