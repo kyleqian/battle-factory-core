@@ -61,7 +61,7 @@ Usage: tools/run-subagent.sh [options] "step brief for the worker"
   -w, --worktree        alias for --lane side
       --animation-worktree
                         alias for --lane animation
-      --lane NAME       main, side, or animation. Side/animation use fresh
+  -l, --lane NAME       main, side, or animation. Side/animation use fresh
                         worktrees and must not touch shared docs.
       --log FILE        provider event log path
       --brief-file FILE read the step brief verbatim from a file
@@ -94,7 +94,7 @@ while [[ $# -gt 0 ]]; do
     --cap-minutes=*)  CAP_MINUTES="${1#*=}"; shift ;;
     -w|--worktree)    LANE="side"; shift ;;
     --animation-worktree|--animation-lane) LANE="animation"; shift ;;
-    --lane)           LANE="${2:?--lane needs main, side, or animation}"; shift 2 ;;
+    -l|--lane)        LANE="${2:?--lane needs main, side, or animation}"; shift 2 ;;
     --lane=*)         LANE="${1#*=}"; shift ;;
     -p|--provider)    PROVIDER="${2:?--provider needs a name}"; shift 2 ;;
     --provider=*)     PROVIDER="${1#*=}"; shift ;;

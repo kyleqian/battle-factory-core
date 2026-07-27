@@ -41,7 +41,7 @@ Usage: ./run-supervisor.sh [options]
       (no options)      interactive supervisor session, hard-capped at 6h
   -c, --cap-hours N     hard cap in hours (default 6)
       --headless        unattended run (stream view, like run-agent.sh)
-      --lane NAME       main (default) or animation. The animation lane runs
+  -l, --lane NAME       main (default) or animation. The animation lane runs
                         the separate animation-program supervisor inside the
                         persistent .worktrees/animation-main worktree on
                         branch animation-main (per ANIMATION_SUPERVISOR.md);
@@ -74,7 +74,7 @@ while [[ $# -gt 0 ]]; do
     --headless)       HEADLESS=1; shift ;;
     -c|--cap-hours)   CAP_HOURS="${2:?--cap-hours needs a number}"; shift 2 ;;
     --cap-hours=*)    CAP_HOURS="${1#*=}"; shift ;;
-    --lane)           LANE="${2:?--lane needs main or animation}"; shift 2 ;;
+    -l|--lane)        LANE="${2:?--lane needs main or animation}"; shift 2 ;;
     --lane=*)         LANE="${1#*=}"; shift ;;
     -p|--provider)    PROVIDER="${2:?--provider needs a name}"; shift 2 ;;
     --provider=*)     PROVIDER="${1#*=}"; shift ;;
