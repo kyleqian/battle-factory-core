@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Dense MOVE_SELF_DESTRUCT evidence for legal Scene-ON fixtures."""
+"""Dense SELF DESTRUCT / EXPLOSION evidence for legal Scene-ON fixtures."""
 from __future__ import annotations
 import hashlib, json, subprocess, sys
 from pathlib import Path
@@ -64,7 +64,7 @@ def main() -> None:
     rows = []
     def capture(frame: int) -> None:
         snap = lab.snapshot()
-        if snap["engine"]["currentMove"] != 120: return
+        if snap["engine"]["currentMove"] not in (120, 153): return
         active = []
         for slot in range(64):
             base = sprites + slot * 0x44
@@ -92,7 +92,8 @@ def main() -> None:
             oracle.advance(segment.get("buttons", [])); frame += 1; capture(frame)
     OUTPUT.write_text(json.dumps({"schema":"self-destruct-dense-evidence/v1","setup":setup,
       "templates":templates,"taskFuncs":{name:symbols[name] for name in task_names},
-      "songHeaders":{"SE_M_SELF_DESTRUCT":oracle.read_u32(song_table+177*8)},
+      "songHeaders":{"SE_M_SELF_DESTRUCT":oracle.read_u32(song_table+177*8),
+                     "SE_M_EXPLOSION":oracle.read_u32(song_table+178*8)},
       "frames":rows}) + "\n")
     print(f"wrote {OUTPUT} ({len(rows)} frames; {rows[0]['frame'] if rows else '-'}..{rows[-1]['frame'] if rows else '-'})")
 main()
