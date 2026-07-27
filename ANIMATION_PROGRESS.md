@@ -46,22 +46,21 @@ animation. A status caused by a move is not part of that move's animation.
 
 ## Current resumable state (2026-07-27)
 
-Coverage is **37/276 exact, 4 partial, 235 unsupported**. SLUDGE is partial:
-its complete sprite/task/palette body is **102/102 player-back + 102/102
-opponent-front** dense source-component frames. Sound, asset extraction, raw
-RGB, shared-seam framebuffer, controls, and twice-fresh reproduction remain,
-so exact promotion is explicitly withheld. TOXIC,
-SLUDGE BOMB, POISON FANG, and POISON TAIL remain unsupported.
+Coverage is **38/276 exact, 3 partial, 235 unsupported**. SLUDGE is exact
+through the shared Scene-ON seam at strengthened **102/102 player-back +
+102/102 opponent-front** component and framebuffer frames, reproduced twice
+fresh. TOXIC, SLUDGE BOMB, POISON FANG, and POISON TAIL remain unsupported.
 
-## SLUDGE source-component checkpoint; PoisonBubblesEffect established (2026-07-27)
+## SLUDGE promoted to exact; PoisonBubblesEffect established (2026-07-27)
 
-**Verdict:** `MOVE_SLUDGE` is partial. Complete legal Scene-ON mechanicLab
+**Verdict:** `MOVE_SLUDGE` is exact. Complete legal Scene-ON mechanicLab
 parties use GRIMER, the real Level-50 Factory set-110 carrier, in both required
 orientations with all four choices constrained to SLUDGE and ONIX constrained
-to TACKLE. The strengthened source-component comparator matches the complete
-sprite/task body at **102/102 player-back** (oracle 218-319) and **102/102
-opponent-front** (230-331), including faded/hardware target palette latches
-and all seven source sound boundaries.
+to TACKLE. The strengthened comparator matches the complete sprite/task body
+and shared-seam raw-RGB framebuffer at **102/102 player-back** (oracle
+218-319) and **102/102 opponent-front** (230-331), each reproduced twice
+fresh, including faded/hardware target palette latches and all seven source
+sound boundaries.
 
 **Source reducer/evidence:** the reducer ports
 `gSludgeProjectileSpriteTemplate`'s 40-callback mirrored horizontal arc,
@@ -71,7 +70,10 @@ same-frame display step; the delay-1 two-leg target blend task shape; and all
 six literal `PoisonBubblesEffect` spawns with side-relative x offsets,
 eight-frame displayed cadence, rising/sway callbacks, affine terminal clamp,
 OAM low-slot reuse, and cleanup. The live comparator caught signed GBA sine
-rounding and opponent-side offset mirroring rather than fitting either.
+rounding and opponent-side offset mirroring rather than fitting either. The
+closure pass additionally pinned the script-created ShakeMon initializer's
+first hardware latch and `SortSprites`' side-relative projectile/attacker
+overlap order.
 
 The comparator also proves every source-derived coefficient of the complete
 RGB(30,0,31) target palette cycle and the hardware palette's one-frame-behind
@@ -79,12 +81,14 @@ transfer latch in both orientations. `SE_M_BUBBLE3` attacker-pan plus every
 six-frame-script/eight-display-frame `SE_M_TOXIC` restart prove their song
 headers, restart flags, and side-relative pan latches.
 
-**Exact remainder:** reproducibly extract poison-bubble art;
-wire the renderer through `sceneOnPresentation`/`battleScene`; close raw RGB,
-field/text/healthboxes, cleanup, and shared-seam framebuffer in both
-orientations; reproduce twice and rerun SING plus ACID or BIND controls.
-No absolute ticks, screenshots, coordinate/RGB fitting, exclusions,
-unsupported barriers, or import-boundary widening were added.
+**Renderer/evidence closure:** poison-bubble projectile/bubble art and both
+GRIMER orientations are reproducibly extracted. `sceneOnPresentation` and
+`battleScene` render the projectile, target shake and hardware-latched palette
+cycle, all six affine bubbles in source OAM order, field/text/healthboxes, and
+cleanup. SING remains **245/245 player-back + 248/248 opponent-front** and
+ACID remains **131/131** in both orientations as exact controls. No absolute
+ticks, screenshots, coordinate/RGB fitting, exclusions, unsupported barriers,
+or import-boundary widening were added.
 
 **Sibling audit (all unsupported):** TOXIC still needs its separate toxic
 asset and two four-sprite waves; SLUDGE BOMB needs ten projectile calls,

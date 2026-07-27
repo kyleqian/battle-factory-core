@@ -68,11 +68,11 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // SLUDGE adds a two-orientation dense source-component checkpoint.
+        // SLUDGE closes its two-orientation shared-seam framebuffer evidence.
         unsupported: 235,
         staged: 0,
-        partial: 4,
-        exact: 37,
+        partial: 3,
+        exact: 38,
       },
       {
         tier: "openOnly",
