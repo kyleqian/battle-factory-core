@@ -2,6 +2,27 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_HARDEN",
+      "status": "exact",
+      "covered": [
+        "complete legal Level-50 mechanicLab parties stage RELICANTH with the real Factory set-259 species/nature/EV spread/item and all four active choices legally constrained to HARDEN; ONIX is constrained to TACKLE",
+        "player-back RELICANTH complete move-owned Scene-ON body at oracle frames 292-392: source component/task/RAM/register/hardware-palette/software+hardware-OAM 101/101 and shared-seam framebuffer 101/101, reproduced twice",
+        "opponent-front RELICANTH complete move-owned Scene-ON body at oracle frames 292-392: source component/task/RAM/register/hardware-palette/software+hardware-OAM 101/101 and shared-seam framebuffer 101/101, reproduced twice",
+        "SoundTask_LoopSEAdjustPanning presence; complete AnimTask_MetallicShine 4px BG1_X sweep/wrap body; extracted gMetalShineGfx/Palette/Tilemap; invisible attacker copy and OBJ-window mask; grayscale attacker palette and permanent=FALSE restoration; WIN/DISPCNT/BLDCNT/BLDALPHA/BG1 attributes; ClearBattleAnimBg wait and teardown display latches"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-harden-player-relicanth-opponent-onix.json",
+        "tools/battle-lab/mechanic-harden-opponent-relicanth-player-onix.json",
+        "tools/compare/fixtures/harden-player-relicanth-opponent-onix.json",
+        "tools/compare/fixtures/harden-opponent-relicanth-player-onix.json",
+        "tools/compare/hardenPortable.ts",
+        "tools/compare/hardenProbe.py",
+        "tools/compare/extractHardenAssets.ts",
+        "src/animation/metallicShine.ts",
+        "tests/animation/metallicShine.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_SYNTHESIS",
       "status": "exact",
       "covered": [
@@ -812,6 +833,21 @@
     "MOVE_BIND"
   ],
   "componentTracks": [
+    {
+      "id": "metallic-shine",
+      "components": [
+        "visualCommand:metallic_shine"
+      ],
+      "representatives": [
+        "MOVE_HARDEN",
+        "MOVE_STEEL_WING",
+        "MOVE_IRON_TAIL",
+        "MOVE_METAL_CLAW",
+        "MOVE_IRON_DEFENSE",
+        "MOVE_POISON_TAIL"
+      ],
+      "goal": "MOVE_HARDEN independently proves the complete permanent=FALSE MetallicShine body in both orientations at 101/101 component/task/RAM/register/hardware-palette/software+hardware-OAM and framebuffer frames, reproduced twice. No sibling is promoted. STEEL WING additionally needs ANIM_TAG_GUST/IMPACT, TranslateMonElliptical, AnimateGustTornadoPalette, paired GustToTarget sprites, attacker slide/return, two hitsplats, monbg/splitbgprio/alpha teardown, and its second sound loop. IRON TAIL uses permanent=TRUE and additionally needs HorizontalLunge, impact hitsplat, target ShakeMon, explicit set_original_pal, monbg/alpha teardown. METAL CLAW additionally needs two lunge passes, four gClawSlash sprites across two animations, and two target Y-shake tasks. IRON DEFENSE overlaps permanent=FALSE but additionally runs a concurrent delay-8/count-2 BG-only white-alpha complex_palette_blend body and uses a distinct sound. POISON TAIL uses permanent=TRUE with custom RGB(24,6,23), then needs lunge/hitsplat/target ShakeMon, explicit palette restore, monbg/alpha teardown, and PoisonBubblesEffect. Every sibling remains unsupported pending its own independent complete dense acceptance."
+    },
     {
       "id": "horizontal-shake-complex-bg-palette",
       "components": [

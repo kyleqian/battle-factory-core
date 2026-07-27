@@ -4,6 +4,14 @@ Older dated sections moved out of `ANIMATION_PROGRESS.md` to keep that
 file lean (`AGENTS.md`'s ~3-most-recent convention). Git history has the
 full record regardless; this file is a read-only reference.
 
+## EARTHQUAKE exact track entry archived (2026-07-27)
+
+`MOVE_EARTHQUAKE` remains exact at **197/197 ×2** in both orientations,
+covering both literal HorizontalShake tasks, the two BG palette pulses, and
+their display latches. Full evidence and sibling verdicts remain authoritative
+in `ANIMATION_COVERAGE.json`; this live entry moved here only to retain roughly
+three current sections.
+
 ## WATER GUN exact track entry archived (2026-07-26)
 
 `MOVE_WATER_GUN` remains exact at **111/111 ×2** in both orientations,

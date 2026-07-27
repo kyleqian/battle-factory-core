@@ -44,6 +44,43 @@ animation. A status caused by a move is not part of that move's animation.
   presentation seam and all source- or evidence-required variants are covered.
 - No entry means unsupported.
 
+## HARDEN promoted to exact; MetallicShine track established (2026-07-27)
+
+**Verdict:** `MOVE_HARDEN` is exact through the shared Scene-ON seam in both
+required orientations, each reproduced twice. Player-back and opponent-front
+RELICANTH are each **101/101 component/task/RAM/register/hardware-palette/
+software+hardware-OAM and framebuffer frames** (oracle 292-392). Census:
+**32/276 exact, 3 partial, 241 unsupported**.
+
+**Source/probe:** complete legal mechanicLab parties stage RELICANTH with the
+real Level-50 Factory set-259 species, Sassy nature, three-way EV spread, and
+Liechi Berry; every active choice is constrained to HARDEN and ONIX to TACKLE.
+The source reducer ports all three 128px sweeps at 4px/callback, BG1_X wraps,
+BG1 metal-shine gfx/tilemap/palette, invisible attacker copy/OBJ-window mask,
+grayscale palette and permanent=FALSE restoration, WIN/DISPCNT/BLDCNT/
+BLDALPHA/BG1 attributes, `ClearBattleAnimBg`, and teardown. The dense probe
+pins the two-capture initializer, the two-capture clear wait, palette/OAM
+display latches, full hardware registers, palette, OAM, VRAM hash, and RGB.
+The source loop-sound command was audited; no sound task row survives into
+the probe-visible move-owned visual window.
+
+**Sibling audit (no promotions):** STEEL WING still needs its gust pair,
+elliptical translation, palette task, slide/return, dual hitsplats, and alpha/
+monbg body; IRON TAIL needs permanent=TRUE, lunge/hitsplat/ShakeMon, explicit
+palette restore, and alpha/monbg body; METAL CLAW needs two lunges, four claw
+slashes, and two Y-shakes; IRON DEFENSE adds its concurrent delay-8/count-2
+white-alpha BG blend; POISON TAIL uses permanent=TRUE with custom
+RGB(24,6,23), then needs lunge/hitsplat/ShakeMon, restore/alpha/monbg, and
+PoisonBubblesEffect. All remain unsupported without independent dense move
+acceptance.
+
+**Evidence/controls:** reproducible legal fixtures, asset extractor, dense
+probe, portable comparator, and focused Tier-1 reducer tests are committed.
+Acceptance is **101/101 ×2 in both orientations**. After the final renderer
+change EARTHQUAKE remains **197/197**, ACID **131/131**, and BIND **45/45**,
+each in both orientations. Palette/reducer/import-boundary tests remain green;
+the boundary did not widen.
+
 ## SYNTHESIS promoted to exact; SPARKLE_2 / GrantingStars track established (2026-07-27)
 
 **Verdict:** `MOVE_SYNTHESIS` is exact through the shared Scene-ON seam in
@@ -115,46 +152,6 @@ Tier-1 tests are committed. Acceptance is **131/131 ×2 in both
 orientations**. After the final renderer change WATER GUN remains **111/111**,
 SUPERSONIC **51/51**, and BIND **45/45**, both orientations; ShakeMon2 and
 the animation import boundary remain green.
-
-## EARTHQUAKE promoted to exact; HorizontalShake / complex BG-palette track established (2026-07-27)
-
-**Verdict:** `MOVE_EARTHQUAKE` is exact through the shared Scene-ON seam in
-both required orientations, each reproduced twice. Player-back DUGTRIO is
-**197/197 task/RAM/palette and framebuffer frames** (oracle 80-276);
-opponent-front DUGTRIO is **197/197** (84-280). Census: **29/276 exact, 3
-partial, 244 unsupported**.
-
-**Source/probe:** complete legal mechanicLab parties stage DUGTRIO, the real
-Level-50 Factory set-372 carrier, with all four choices constrained to
-EARTHQUAKE; ONIX is constrained to TACKLE. The reducer ports the simultaneous
-`AnimTask_HorizontalShake(platforms,10,50)` and
-`AnimTask_HorizontalShake(all battlers,10,50)` tasks, including the source
-two-tick scheduler, 13-to-0 decay, BG3_X, every visible battler x2, and the
-front-sprite residue retained before the first shake write. Both BG-only
-`complex_palette_blend(delay=3,count=1,black14,white14)` commands are pinned
-at source-scheduled ages 13 and 31 against palette-sprite data and all 256
-faded BG palette entries. The framebuffer seam separately models BG3/palette
-at a one-frame display latch and battler OAM at two frames.
-
-**Sibling audit (no promotions):** all six Level-50 HorizontalShake moves
-were inspected. FISSURE retains target-only shake plus dirt plumes and the
-fissure BG pipeline; SKY ATTACK has two-turn charge/strike, attacker-only
-(2,16) shakes, bird/projectile/hitsplat bodies; MAGNITUDE has power-derived
-intensity and two sequential shake pairs; ERUPTION has distinct (8,60)
-shakes plus its eruption body; LUSTER PURGE has target-only (5,14) shake plus
-psychic BG/orb/sparkle/palette bodies. The 21 Level-50
-`complex_palette_blend` graph siblings were audited in
-`ANIMATION_COVERAGE.json`: already-exact KNOCK OFF, BLAZE KICK, and AERIAL
-ACE retain independent evidence; every named unsupported sibling has a
-distinct incomplete body and remains unsupported. Source additionally shows
-SKULL BASH's same literal BG pulse on a component-graph edge not currently
-attributed to its Level-50 root.
-
-**Evidence/controls:** legal fixtures, reproducible dense probe, portable
-comparator, and focused Tier-1 tests are committed. Acceptance is **197/197
-×2 in both orientations**. WATER GUN remains **111/111**, SUPERSONIC
-**51/51**, and BIND **45/45**, both orientations, after the final renderer
-change. The animation import boundary did not widen.
 
 Start with one representative attacker/target. Add variants only when source
 inspection or comparison identifies a dependency: attacker side, front/back
