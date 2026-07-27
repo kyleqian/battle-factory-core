@@ -1387,6 +1387,248 @@ async function verifyLeechSeedScenario(spec: LeechSeedScenarioSpec): Promise<voi
   }
 }
 
+// AI_CV_AccuracyDown Gate D / DRAW SITE 3 (data/battle_ai_scripts.s:1209-1210,
+// doc §19.5's "same two-Pokemon relay §19.5 itself suggested" recipe) --
+// 2026-07-27 third follow-up side-lane session. Direct port of the
+// EvasionUp toxic-chain relay (§24.5) with MOVE_DOUBLE_TEAM (104) swapped
+// for MOVE_SAND_ATTACK (28) on Shuckle's kit -- opponent slot 0 = Magikarp
+// (129, level 5, 18 max HP), all 4 slots MOVE_TOXIC (92), forced; target
+// (player) Anorith (390, single ability Battle Armor), turn 1 MOVE_SPLASH
+// (150), turn 2 MOVE_SEISMIC_TOSS (69) OHKOs Magikarp; the opponent
+// auto-sends Shuckle (213, single ability Sturdy, base Speed 5, all 4 slots
+// MOVE_SAND_ATTACK), switching in fresh at 95/95. Unlike EvasionUp's own
+// toxic-chain (whose Gate D/D' pair adds an opponent-HP sub-branch between
+// DRAW SITE 3/4), AccuracyDown's Gate D (`:1209 if_not_status AI_TARGET,
+// STATUS1_TOXIC_POISON`) routes DIRECTLY to DRAW SITE 3 (`:1210`) with no HP
+// band involved -- so this fixture needs only the SAME 2 real turns
+// `evasionup-toxicchain-control` already proved safe (no 3rd turn, no fresh
+// mash-rep calibration), reusing that file's exact button trace verbatim.
+// PREDICTED (before running, from the transcribed handler body, §19.1):
+// Gate A (Shuckle/AI_USER HP<70%? no, 95/95) falls through to Gate B
+// (Anorith/AI_TARGET HP>70%? yes, toxic ticks 120->99 but 99/120=82.5%
+// still >70%) -- jumps straight to AccuracyDown3, DRAW SITE 1 skipped (0
+// draws). Gate C (Shuckle's own ACC stage >4? yes, fresh switch-in default
+// 6) skips DRAW SITE 2 (0 draws). Gate D (target toxic? YES) falls through
+// into DRAW SITE 3 (:1210), firing once per identical MOVE_SAND_ATTACK slot
+// = 4 draws. Gate E (leechseeded? no) skips DRAW SITE 4 (0). Gate F
+// (Shuckle's own rooted? no) skips DRAW SITE 5 (0). Gate G (cursed? no)
+// skips DRAW SITE 6 (0). Gate H (Shuckle HP>70%? yes, 100%) jumps straight
+// to End, skipping the tail (Gates I/J/K, DRAW SITE 7, 0 draws). Total
+// handler-branch draws predicted = 4 (DRAW SITE 3 only). Baseline (Magikarp
+// Toxic + Anorith Splash/Seismic Toss prefix, identical species/turns to
+// EvasionUp's own `toxicchain-control` fixture) is already live-verified at
+// 15 (that fixture's own observed total of 23, minus its own 8 handler
+// draws -- site1 x4 + site4 x4, §24.5's per-site table) -- so total
+// predicted = 15 + 4 = 19. The zero-draw control needs no new fixture: every
+// existing AccuracyDown fixture in this doc (`lowhp-reach`, `fullhp-
+// control`, `accdown-reach`, `accdown-control`) never applies
+// STATUS1_TOXIC_POISON to its target, so Gate D already reads true-skip
+// (0 draws) in all four -- the same "CONTROL B, already proven, not
+// re-staged" pattern §24.5 established. OBSERVED (live, both seeds, both
+// reruns identical): target (Anorith) toxic-poisoned (`status.kind ===
+// "toxic"`, counter 2) at 99/120 (82.5%, still >70% -- Gate B unaffected);
+// opponent (Shuckle) switched in fresh at 95/95, PP untouched
+// ([15,15,15,15], confirming zero real Shuckle turns); total Random() calls
+// frame 0->1842 = **19**, identical both seeds (1, 99), identical across
+// both reruns each -- matching the prediction exactly, confirming the
+// engine's ported model (no engine touched this session; this is a
+// verification-only finding, not a divergence).
+interface ToxicSite3ScenarioSpec {
+  label: string;
+  path: string;
+  finalFrame: number;
+  expectedOpponentSpecies: number;
+  expectedOpponentHp: number;
+  expectedOpponentMaxHp: number;
+  expectedTotalSteps: Record<number, number>;
+  checkCrossSeedStable: boolean;
+}
+
+const ACCURACYDOWN_TOXICCHAIN_SCENARIOS: ToxicSite3ScenarioSpec[] = [
+  {
+    label:
+      "AI_CV_AccuracyDown, target (player, Anorith) toxic-poisoned, opponent (AI_USER) switched to Shuckle fresh at 95/95 -- REACH: Gate D (`if_not_status AI_TARGET, STATUS1_TOXIC_POISON`, data/battle_ai_scripts.s:1209) is false (target IS toxic-poisoned), falling through into the `:1210 if_random_less_than 70` roll once per identical MOVE_SAND_ATTACK slot (DRAW SITE 3) -- DRAW SITE 1 (:1202) stays skipped in this fixture (both battlers' HP still >70%, unlike EvasionUp's own 90%-threshold Gate A), so DRAW SITE 3 is the ONLY handler-branch draw this decision contributes",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-accuracydown-toxicchain-reach-off.json",
+    finalFrame: 1842,
+    expectedOpponentSpecies: 213,
+    expectedOpponentHp: 95,
+    expectedOpponentMaxHp: 95,
+    expectedTotalSteps: { 1: 19, 99: 19 },
+    checkCrossSeedStable: true,
+  },
+];
+
+async function verifyToxicSite3Scenario(spec: ToxicSite3ScenarioSpec): Promise<void> {
+  console.log(`\n=== ${spec.label} ===`);
+  const perSeedTotals: number[] = [];
+  for (const seed of SEEDS) {
+    const run1 = await runScenario(spec.path, seed);
+    const run2 = await runScenario(spec.path, seed);
+
+    const f0a = run1.get(0)!;
+    const f0b = run2.get(0)!;
+    check(
+      `seed ${seed}: frame 0 identical across reruns (determinism)`,
+      JSON.stringify(f0a) === JSON.stringify(f0b),
+      "initial state differs between runs",
+    );
+
+    const fEndA = run1.get(spec.finalFrame)!;
+    const fEndB = run2.get(spec.finalFrame)!;
+    check(
+      `seed ${seed}: frame ${spec.finalFrame} identical across reruns (determinism)`,
+      JSON.stringify(fEndA) === JSON.stringify(fEndB),
+      "final state differs between runs",
+    );
+
+    check(
+      `seed ${seed}: target (player, Anorith) is toxic-poisoned at frame ${spec.finalFrame} (Gate D prerequisite)`,
+      fEndA.battlers.player.status?.kind === "toxic",
+      `observed status ${JSON.stringify(fEndA.battlers.player.status)}`,
+    );
+
+    check(
+      `seed ${seed}: opponent (AI_USER) is species ${spec.expectedOpponentSpecies} (Shuckle, switched in after Magikarp fainted)`,
+      fEndA.battlers.opponent.species === spec.expectedOpponentSpecies,
+      `observed species ${fEndA.battlers.opponent.species}`,
+    );
+
+    check(
+      `seed ${seed}: opponent (AI_USER) HP is ${spec.expectedOpponentHp}/${spec.expectedOpponentMaxHp} (fresh switch-in, no real Shuckle turn executed)`,
+      fEndA.battlers.opponent.hp === spec.expectedOpponentHp && fEndA.battlers.opponent.maxHp === spec.expectedOpponentMaxHp,
+      `observed hp ${fEndA.battlers.opponent.hp}/${fEndA.battlers.opponent.maxHp}`,
+    );
+
+    const f0 = run1.get(0)!;
+    const totalSteps = stepsToReach(f0.rngValue, fEndA.rngValue, spec.expectedTotalSteps[seed]! + 20);
+    check(
+      `seed ${seed}: exactly ${spec.expectedTotalSteps[seed]} total Random() calls from frame 0 to frame ${spec.finalFrame}`,
+      totalSteps === spec.expectedTotalSteps[seed],
+      `forward-search found ${totalSteps === null ? "no match" : `step ${totalSteps}`}`,
+    );
+    perSeedTotals.push(totalSteps ?? -1);
+
+    console.log(
+      `  seed ${seed}: opponent hp=${fEndA.battlers.opponent.hp}/${fEndA.battlers.opponent.maxHp}, total steps 0->${spec.finalFrame}=${totalSteps}`,
+    );
+  }
+
+  if (spec.checkCrossSeedStable) {
+    check(
+      `count stability: total-step count is identical across seeds ${SEEDS.join(" and ")} (${JSON.stringify(perSeedTotals)})`,
+      perSeedTotals.every((n) => n === perSeedTotals[0]),
+      `per-seed totals differ: ${JSON.stringify(perSeedTotals)}`,
+    );
+  }
+}
+
+// AI_CV_AccuracyDown Gate E / DRAW SITE 4 (data/battle_ai_scripts.s:1213-1214,
+// doc §19.5) -- 2026-07-27 third follow-up side-lane session. Same relay as
+// DRAW SITE 3 above, EFFECT_TOXIC swapped for EFFECT_LEECH_SEED (a
+// byte-for-byte reuse of `evasionup-leechseed-reach`'s own party/trace,
+// §24.5, with Shuckle's MOVE_DOUBLE_TEAM swapped for MOVE_SAND_ATTACK).
+// PREDICTED (before running): Gate D skips (target not toxic), Gate E
+// (`:1213 if_not_status3 AI_TARGET, STATUS3_LEECHSEED`) is false (target IS
+// leech-seeded), falling through into DRAW SITE 4 for 4 draws; DRAW SITE 1
+// stays skipped (both battlers' HP band unaffected); baseline 15 (identical
+// Magikarp/Anorith prefix, same as DRAW SITE 3) -> predicted total = 19.
+// OBSERVED (live, both seeds, both reruns): target leech-seeded
+// (status3 bit set, volatile.leechSeededBy="opponent") at 90/120 (75%,
+// still >70%); opponent (Shuckle) fresh at 95/95, PP untouched; total
+// Random() calls frame 0->1788 = 19, identical both seeds and both reruns
+// -- matches the prediction exactly.
+interface LeechSite4ScenarioSpec {
+  label: string;
+  path: string;
+  finalFrame: number;
+  expectedOpponentSpecies: number;
+  expectedOpponentHp: number;
+  expectedOpponentMaxHp: number;
+  expectedTotalSteps: Record<number, number>;
+  checkCrossSeedStable: boolean;
+}
+
+const ACCURACYDOWN_LEECHSEEDCHAIN_SCENARIOS: LeechSite4ScenarioSpec[] = [
+  {
+    label:
+      "AI_CV_AccuracyDown, target (player, Anorith) leech-seeded, opponent (AI_USER) switched to Shuckle fresh at 95/95 -- REACH: Gate E (`if_not_status3 AI_TARGET, STATUS3_LEECHSEED`, data/battle_ai_scripts.s:1213) is false (target IS leech-seeded), falling through into the `:1214 if_random_less_than 70` roll once per identical MOVE_SAND_ATTACK slot (DRAW SITE 4) -- DRAW SITE 1 (:1202) stays skipped in this fixture (both battlers' HP still >70% even after 2 leech-seed drains), so DRAW SITE 4 is the ONLY handler-branch draw this decision contributes",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-accuracydown-leechseedchain-reach-off.json",
+    finalFrame: 1788,
+    expectedOpponentSpecies: 213,
+    expectedOpponentHp: 95,
+    expectedOpponentMaxHp: 95,
+    expectedTotalSteps: { 1: 19, 99: 19 },
+    checkCrossSeedStable: true,
+  },
+];
+
+const STATUS3_LEECHSEED_ACCDOWN = 1 << 2;
+
+async function verifyLeechSite4Scenario(spec: LeechSite4ScenarioSpec): Promise<void> {
+  console.log(`\n=== ${spec.label} ===`);
+  const perSeedTotals: number[] = [];
+  for (const seed of SEEDS) {
+    const run1 = await runScenario(spec.path, seed);
+    const run2 = await runScenario(spec.path, seed);
+
+    const f0a = run1.get(0)!;
+    const f0b = run2.get(0)!;
+    check(
+      `seed ${seed}: frame 0 identical across reruns (determinism)`,
+      JSON.stringify(f0a) === JSON.stringify(f0b),
+      "initial state differs between runs",
+    );
+
+    const fEndA = run1.get(spec.finalFrame)!;
+    const fEndB = run2.get(spec.finalFrame)!;
+    check(
+      `seed ${seed}: frame ${spec.finalFrame} identical across reruns (determinism)`,
+      JSON.stringify(fEndA) === JSON.stringify(fEndB),
+      "final state differs between runs",
+    );
+
+    check(
+      `seed ${seed}: target (player, Anorith) is leech-seeded at frame ${spec.finalFrame} (Gate E prerequisite, STATUS3_LEECHSEED bit set)`,
+      ((fEndA.battlers.player.status3 ?? 0) & STATUS3_LEECHSEED_ACCDOWN) !== 0 &&
+        fEndA.battlers.player.volatile?.leechSeededBy === "opponent",
+      `observed status3=${fEndA.battlers.player.status3}, leechSeededBy=${fEndA.battlers.player.volatile?.leechSeededBy}`,
+    );
+
+    check(
+      `seed ${seed}: opponent (AI_USER) is species ${spec.expectedOpponentSpecies} (Shuckle, switched in after Magikarp fainted)`,
+      fEndA.battlers.opponent.species === spec.expectedOpponentSpecies,
+      `observed species ${fEndA.battlers.opponent.species}`,
+    );
+
+    check(
+      `seed ${seed}: opponent (AI_USER) HP is ${spec.expectedOpponentHp}/${spec.expectedOpponentMaxHp} (fresh switch-in, no real Shuckle turn executed)`,
+      fEndA.battlers.opponent.hp === spec.expectedOpponentHp && fEndA.battlers.opponent.maxHp === spec.expectedOpponentMaxHp,
+      `observed hp ${fEndA.battlers.opponent.hp}/${fEndA.battlers.opponent.maxHp}`,
+    );
+
+    const f0 = run1.get(0)!;
+    const totalSteps = stepsToReach(f0.rngValue, fEndA.rngValue, spec.expectedTotalSteps[seed]! + 20);
+    check(
+      `seed ${seed}: exactly ${spec.expectedTotalSteps[seed]} total Random() calls from frame 0 to frame ${spec.finalFrame}`,
+      totalSteps === spec.expectedTotalSteps[seed],
+      `forward-search found ${totalSteps === null ? "no match" : `step ${totalSteps}`}`,
+    );
+    perSeedTotals.push(totalSteps ?? -1);
+
+    console.log(
+      `  seed ${seed}: opponent hp=${fEndA.battlers.opponent.hp}/${fEndA.battlers.opponent.maxHp}, total steps 0->${spec.finalFrame}=${totalSteps}`,
+    );
+  }
+
+  if (spec.checkCrossSeedStable) {
+    check(
+      `count stability: total-step count is identical across seeds ${SEEDS.join(" and ")} (${JSON.stringify(perSeedTotals)})`,
+      perSeedTotals.every((n) => n === perSeedTotals[0]),
+      `per-seed totals differ: ${JSON.stringify(perSeedTotals)}`,
+    );
+  }
+}
+
 // AI_CV_RainDance/SunnyDay/Hail (data/battle_ai_scripts.s:2037-2059/2060-2076/
 // 2261-2278, doc §25) + their AI_CBM_RainDance/SunnyDay/Hail siblings
 // (:490-493/495-498/522-525): all six handlers are genuinely 0-`if_random`
@@ -2041,6 +2283,12 @@ async function main(): Promise<void> {
   }
   for (const spec of EVASIONUP_LEECHSEED_SCENARIOS) {
     await verifyLeechSeedScenario(spec);
+  }
+  for (const spec of ACCURACYDOWN_TOXICCHAIN_SCENARIOS) {
+    await verifyToxicSite3Scenario(spec);
+  }
+  for (const spec of ACCURACYDOWN_LEECHSEEDCHAIN_SCENARIOS) {
+    await verifyLeechSite4Scenario(spec);
   }
   for (const spec of WEATHER_PICK_SCENARIOS) {
     await verifyWeatherPickScenario(spec);

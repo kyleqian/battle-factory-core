@@ -2611,7 +2611,7 @@ precondition's own necessary cost, not part of the handler, same pattern
 `Cmd_get_ability` appears in neither table, confirming both species'
 single-ability kits close the §14.2 confound as designed.
 
-### 19.5 DRAW SITE 2 — live-staged and verified this follow-up session; 4 sites remain recipe-only
+### 19.5 DRAW SITE 2/3/4 — live-staged and verified across two follow-up sessions; 2 sites remain recipe-only, confirmed still blocked
 
 Sites 3/4/5/6 (`:1210/1214/1218/1222`) share a structural obstacle none of
 this doc's "identical 4 slots" fixtures can solve alone: **every one of
@@ -2675,30 +2675,108 @@ staged and live-verified it.
   SITE 2, N=4 slots × 1 draw) + 2 `Cmd_accuracycheck` (the player's own 2
   real Sand Attack hits landing on Machamp, absent from the control's 2
   Splash turns).
-- **DRAW SITE 3** (`:1210`, `score +2`, target `STATUS1_TOXIC_POISON`):
-  needs a real `EFFECT_TOXIC` move to land on the target from the
-  opponent's own moveset — since the opponent's kit must carry BOTH a Toxic
-  move AND an `AccuracyDown` candidate in different slots, turn 1's AI pick
-  between them is a genuine, unforced decision (not solvable by making all
-  4 slots identical). Needs either real AI-scoring modeling to predict
-  which move turn 1 picks, or a two-battler relay (one opponent Pokémon
-  whose entire kit is Toxic lands the status and faints/switches, a second
-  with the identical-slots `AccuracyDown` trick moves next).
-- **DRAW SITE 4** (`:1214`, `score +2`, target `STATUS3_LEECHSEED`): same
-  obstacle and same recipe shape as DRAW SITE 3, substituting
-  `EFFECT_LEECH_SEED` for `EFFECT_TOXIC`.
+- **DRAW SITE 3, live-verified this follow-up side-lane session**
+  (`:1210`, `score +2`, target `STATUS1_TOXIC_POISON`) — the two-battler
+  relay this recipe named above (§19.5's own prior revision), staged
+  directly: `mechanic-factory-ai-cv-accuracydown-toxicchain-reach-off.json`
+  is a byte-for-byte reuse of `evasionup-toxicchain-control`'s own party/
+  trace (§24.5) with `AI_CV_EvasionUp`'s `MOVE_DOUBLE_TEAM` (104) swapped
+  for `AI_CV_AccuracyDown`'s own dispatch move `MOVE_SAND_ATTACK` (28) on
+  Shuckle's kit — nothing else changed, because AccuracyDown's own Gate D
+  (`:1209 if_not_status AI_TARGET, STATUS1_TOXIC_POISON`) routes directly to
+  DRAW SITE 3 with **no** opponent-HP sub-branch (unlike EvasionUp's own
+  Gate C/D pair, §24.5), so the exact same 2-turn shape (no 3rd turn) that
+  `evasionup-toxicchain-control` already proved safe carries over verbatim:
+  opponent party slot 0 = Magikarp (129, level 5, 18 max HP), all 4 slots
+  `MOVE_TOXIC` (92, forced); target (player) Anorith (390, single ability
+  Battle Armor), turn 1 `MOVE_SPLASH`, turn 2 `MOVE_SEISMIC_TOSS` OHKOs
+  Magikarp; opponent auto-sends Shuckle (213, single ability Sturdy, base
+  Speed 5, all 4 slots `MOVE_SAND_ATTACK`), fresh at 95/95. **PREDICTED**
+  (before running, from the transcribed handler body, §19.1): Gate A
+  (Shuckle/`AI_USER` HP<70%? no) falls through to Gate B (Anorith/
+  `AI_TARGET` HP>70%? toxic ticks will have chipped Anorith some, but still
+  expected >70%) — jumps straight past DRAW SITE 1 (0 draws, unlike
+  EvasionUp's own 90%-threshold Gate A which always reaches it). Gate C
+  (Shuckle's own ACC stage >4? yes, fresh switch-in default 6) skips DRAW
+  SITE 2 (0 draws). Gate D (target toxic? **yes**) falls through into DRAW
+  SITE 3, firing once per identical `MOVE_SAND_ATTACK` slot = **4 draws**.
+  Gates E/F/G all skip (0 draws each — not leech-seeded/rooted/cursed). Gate
+  H (Shuckle HP>70%? yes, 100%) jumps straight to `End`, skipping the tail
+  (0 draws). Total handler-branch draws predicted = **4** (DRAW SITE 3
+  only). Baseline (the identical Magikarp/Anorith prefix) is already
+  live-verified at 15 by `evasionup-toxicchain-control`'s own ledger (its
+  observed total 23, minus its own 8 handler draws — site 1 ×4 + site 4 ×4,
+  §24.5's per-site table) — so **predicted total = 15 + 4 = 19**. The
+  zero-draw control needs no new fixture: every existing `AccuracyDown`
+  fixture in this doc (`lowhp-reach`, `fullhp-control`, `accdown-reach`,
+  `accdown-control`) never applies toxic to its target, so Gate D already
+  reads true-skip (0 draws) in all four — the same "CONTROL B, already
+  proven, not re-staged" pattern §24.5 established. **OBSERVED** (live, both
+  seeds, both reruns each, frame 0→1842): target (Anorith) toxic-poisoned
+  (`status.kind === "toxic"`, counter 2) at 99/120 (82.5%, still >70% — Gate
+  B unaffected as predicted); opponent (Shuckle) switched in fresh at
+  95/95, PP untouched (`[15,15,15,15]`, confirming zero real Shuckle turns);
+  total `Random()` calls frame 0→1842 = **19**, identical both seeds (1, 99)
+  and identical across both reruns each — **matches the prediction exactly**.
+  Not a divergence: this confirms the model, no engine touched.
+- **DRAW SITE 4, live-verified this follow-up side-lane session**
+  (`:1214`, `score +2`, target `STATUS3_LEECHSEED`) — the same relay,
+  `EFFECT_TOXIC` swapped for `EFFECT_LEECH_SEED`:
+  `mechanic-factory-ai-cv-accuracydown-leechseedchain-reach-off.json`, a
+  byte-for-byte reuse of `evasionup-leechseed-reach`'s own party/trace
+  (§24.5) with Shuckle's `MOVE_DOUBLE_TEAM` (104) swapped for `MOVE_
+  SAND_ATTACK` (28); opponent slot 0 = Magikarp, all 4 slots `MOVE_LEECH_
+  SEED` (73). **PREDICTED** (before running): identical gate walk to DRAW
+  SITE 3 above except Gate D now skips (target not toxic, only
+  leech-seeded) and Gate E (`:1213 if_not_status3 AI_TARGET,
+  STATUS3_LEECHSEED`) is false (target **is** leech-seeded), falling
+  through into DRAW SITE 4 for **4 draws**; DRAW SITE 1 stays skipped
+  pending confirmation that leech-seed's own per-turn chip damage keeps
+  Anorith's HP fraction >70% (an incidental, non-handler quantity this
+  session left to observation rather than hand-derived, same discipline as
+  every prior "read off the actual HP" fixture in this doc); baseline again
+  15 (`evasionup-leechseed-reach`'s own observed total 23, minus its own 8
+  handler draws — site 1 ×4 + site 5 ×4, §24.5) → **predicted total =
+  15 + 4 = 19**. **OBSERVED** (live, both seeds, both reruns each, frame
+  0→1788): target (Anorith) leech-seeded (`status3` bit set,
+  `volatile.leechSeededBy === "opponent"`) at 90/120 (75%, still >70% —
+  confirming the open incidental question above, two 1/8-max-HP drains
+  landing both banked seeds, deterministic both seeds); opponent (Shuckle)
+  fresh at 95/95, PP untouched; total `Random()` calls frame 0→1788 =
+  **19**, identical both seeds and both reruns each — **matches the
+  prediction exactly**. Not a divergence: model confirmed, no engine
+  touched.
+- **Both new fixtures wired into `tools/probe/verify-factory-ai-
+  checkviability-ground-truth.ts`** (`ACCURACYDOWN_TOXICCHAIN_SCENARIOS`/
+  `verifyToxicSite3Scenario` for DRAW SITE 3,
+  `ACCURACYDOWN_LEECHSEEDCHAIN_SCENARIOS`/`verifyLeechSite4Scenario` for
+  DRAW SITE 4) — the full accumulated script (every prior scenario in this
+  doc, §9 through §27.5, plus these 2 new ones) run live this session,
+  three times total: **499 PASS, 0 FAIL, exit 0** on the final two runs (the
+  first of the three predates DRAW SITE 4 being wired in, see below). Each
+  new fixture was also independently rerun twice per seed directly against
+  the oracle (outside the verify script) before being wired in, confirming
+  determinism at the fixture level first.
 - **DRAW SITE 5** (`:1218`, `score +1`, **opponent's own** `STATUS3_ROOTED`,
-  i.e. Ingrain): same mixed-moveset obstacle, but the move is
-  self-targeted (`EFFECT_INGRAIN`, `MOVE_TARGET_USER`) — no accuracy roll
-  of its own to land, and the opponent's own `AI_CBM_Ingrain` handler
-  typically scores self-buffs favorably, which may make winning the turn-1
-  pick more predictable than sites 3/4's target-directed moves (not
-  verified this session).
-- **DRAW SITE 6** (`:1222`, `score +2`, target `STATUS2_CURSED`): needs a
-  Ghost-typed opponent with `EFFECT_CURSE` in its kit (Curse's own dual
-  behavior — self-stat-boost for non-Ghost users, HP-cost target-curse for
-  Ghost users — means the opponent's typing is itself part of the
-  precondition), same mixed-moveset/real-pick obstacle as sites 3/4.
+  i.e. Ingrain) and **DRAW SITE 6** (`:1222`, `score +2`, target
+  `STATUS2_CURSED`) **remain recipe-only, attempted and confirmed still
+  blocked this session** — these are NOT the same obstacle shape as sites
+  3/4 above, and the two-battler relay that solved sites 3/4 (and
+  EvasionUp's own analogous sites, §24.5) does **not** transfer: sites 3/4's
+  status lives on the **target**, which persists across the *opponent's*
+  switch (relaying to a second opponent party member changes nothing about
+  the target's own status). Sites 5/6's status lives on the **opponent
+  itself** (`AI_USER`) — the exact same Pokémon that must ALSO be scored for
+  the `AccuracyDown`-dispatching candidate move, and switching a battler out
+  clears its own volatile `status3`/`status2` flags entirely, so no relay
+  can preserve Ingrain/Curse state across an opponent-side switch. The only
+  way to reach either site is a genuine mixed moveset on the SAME opponent
+  Pokémon (Ingrain or Curse in one slot, the `AccuracyDown` candidate in the
+  others) with a real, unforced AI pick landing on the status move on turn
+  1 — full analysis, the ruled-out PP-exhaustion alternative, and the new
+  `EFFECT_INGRAIN`-has-no-CV-handler source finding are written up in
+  §24.5's own entry for the byte-for-byte identical `EvasionUp` obstacle
+  (DRAW SITE 6/7 there), which applies here unchanged.
 
 ### 19.6 What this unblocks
 
@@ -4078,7 +4156,7 @@ site, §23.4) that the anomaly is specific to the last-move-type-list code
 region those two handlers share, not a general property of "a draw site
 sitting last before `End`."
 
-### 24.5 DRAW SITE 2 (evasion-stage build), DRAW SITE 3/4 (toxic-poison chain), and DRAW SITE 5 (leech-seed chain) — all three live-verified; 2 sites remain recipe-only
+### 24.5 DRAW SITE 2 (evasion-stage build), DRAW SITE 3/4 (toxic-poison chain), and DRAW SITE 5 (leech-seed chain) — all three live-verified; 2 sites remain recipe-only, confirmed still blocked by a 4th follow-up session
 
 **DRAW SITE 2, live-verified** (`:1043`, `score -1`, reached iff the
 **opponent's own** evasion stage is already ≥ 9) — a second follow-up
@@ -4319,18 +4397,90 @@ zero real Shuckle turns executed in this window — only the phantom decision
 fired, isolating DRAW SITE 5 cleanly the same way every other single-decision
 capture in this doc does.
 
-The 2 remaining sites below are still recipe-only, not attempted this
-session (time-capped — see §24.8):
+The 2 remaining sites below were **actively attempted this follow-up
+side-lane session** (a fourth), not merely re-noted, and are confirmed still
+unstageable within budget — the staging API legitimately cannot reach the
+state either site needs, for a reason that does **not** apply to the
+toxic/leech-seed chains just above:
+
+**Why the sites 3/4/5-above two-battler relay cannot transfer here.** That
+relay works because the status it plants (`STATUS1_TOXIC_POISON`/
+`STATUS3_LEECHSEED`) lives on the **target** — switching the *opponent's*
+active Pokémon (Magikarp → Shuckle) never touches the target's own status,
+so the second, freshly-switched-in opponent Pokémon can be scored cleanly
+against a precondition that's already true. DRAW SITE 6/7's own status
+(`STATUS3_ROOTED` for Ingrain, `STATUS2_CURSED` for the target under Curse)
+is different in kind for site 6 specifically: Ingrain's flag lives on the
+**opponent itself** (`AI_USER`) — the exact same battler that must also be
+scored for `MOVE_DOUBLE_TEAM` afterward. Switching that battler out (the
+relay's whole mechanism) clears its own volatile `status3` on the way out,
+so a second party member can never inherit a first party member's Ingrain
+state — there is no relay-shaped fix available at all, only a genuine mixed
+moveset (Ingrain **and** Double Team in the same Pokémon's own 4 slots) with
+turn 1's AI pick landing on Ingrain.
+
+**A mixed moveset means a real, unforced AI pick — checked directly against
+the source this session, not assumed.** `AI_CBM_Ingrain`
+(`data/battle_ai_scripts.s:550-552`): `if_status3 AI_USER, STATUS3_ROOTED,
+Score_Minus10` then `end` — a trivial, deterministic 0-cost check pre-Ingrain
+(no penalty for trying it fresh). **New finding this session**: a full grep
+of the CV dispatch table (`if_effect EFFECT_.*, AI_CV_`) finds **no entry for
+`EFFECT_INGRAIN` at all** — every other effect this doc has examined
+dispatches to a named `AI_CV_*` handler on the viability side; Ingrain has
+only the CBM-side entry (`:199 if_effect EFFECT_INGRAIN, AI_CBM_Ingrain`)
+and silently falls through to the CV dispatch table's own default/no-match
+case instead of a dedicated handler — meaning even a from-scratch hand
+derivation of "does Ingrain outscore Double Team on turn 1" would need to
+trace that default fallthrough path too, not just one more named handler.
+Compounding this: `MOVE_DOUBLE_TEAM`'s own CV score at battle start is
+itself `Random()`-dependent (DRAW SITE 1, ~60.9% chance of `score +3`, else
+`+0`, §24.1) — so even with Ingrain's own score in hand, the comparison
+itself could be seed-dependent, exactly the "genuine, unforced pick" shape
+this doc's §19.5 already named as out of scope, now confirmed from both
+sides of the comparison rather than assumed from one.
+
+**PP-exhaustion considered and ruled out as a forcing mechanism** (a
+staging-API idea this session checked before concluding the pick is
+genuinely unforced): giving Double Team's slots lower current PP than
+Ingrain's to force Ingrain as the sole legal turn-1 choice doesn't work
+because PP starts full (or full-plus-PP-Ups) for every slot — there is no
+staging-legal way to *pre-deplete* PP without real turns actually using it
+up first (the "stage as real moves" rule), and using it up requires the
+move to already be chosen over Ingrain repeatedly — the exact AI-pick
+question being begged. Running it the other way (let Double Team win every
+early turn, burning its own PP down until it hits 0 and Ingrain becomes the
+only legal move) fails for a different reason: once Double Team reaches 0
+PP it is no longer a viable candidate move at all, so `AI_CV_EvasionUp`
+would never be invoked for it again in the SAME decision Ingrain's own
+status is finally true — the two conditions (Double Team still scoreable,
+Ingrain already set) can't coexist under this mechanism.
 
 - **DRAW SITE 6** (`:1058`, `score +2`, **opponent's own** `STATUS3_ROOTED`,
-  i.e. Ingrain): same mixed-moveset obstacle as site 5, but self-targeted
-  (`EFFECT_INGRAIN`, `MOVE_TARGET_USER` — no accuracy roll of its own to
-  land), the same "may be more predictable to force the turn-1 pick, not
-  verified" caveat §19.5 flagged for `AccuracyDown`'s own analogous site.
-- **DRAW SITE 7** (`:1062`, `score +3`, target `STATUS2_CURSED`): needs a
-  Ghost-typed opponent with `EFFECT_CURSE` in its kit — same
-  typing-is-part-of-the-precondition obstacle §19.5 named for
-  `AccuracyDown`'s own site 6.
+  i.e. Ingrain): confirmed still blocked, per the analysis above — needs
+  either a full AI move-scoring port (out of scope for a docs+fixtures
+  side-lane step) or empirical trial of a genuine mixed `[Ingrain, Double
+  Team, Double Team, Double Team]` kit, which even if run would need BOTH
+  seeds to land on Ingrain turn 1 by chance to be usable, with no source-level
+  guarantee that outcome is stable (see the `Random()`-dependent Double Team
+  score above) — judged not worth the remaining time budget this session
+  after the source-level check above.
+- **DRAW SITE 7** (`:1062`, `score +3`, target `STATUS2_CURSED`): same
+  category obstacle — needs a Ghost-typed opponent with `EFFECT_CURSE` in
+  its kit (Curse's own dual behavior — self-stat-boost for non-Ghost users,
+  HP-cost target-curse for Ghost users — makes the opponent's typing itself
+  part of the precondition), **and** unlike Ingrain, `EFFECT_CURSE` DOES
+  have its own dedicated CV handler (`AI_CV_Curse`, `data/
+  battle_ai_scripts.s:1870-1891`, itself containing 3 more `if_random_less_
+  than` sites, `:1876/1880/1884` — an entirely separate handler this doc has
+  not yet examined) that would additionally contend for the turn-1 score
+  against Double Team — the same mixed-moveset/genuine-pick obstacle as
+  DRAW SITE 6, with an even less tractable scoring comparison (two handlers
+  with their own `Random()`-dependent scores on both sides, not one).
+  Confirmed still blocked this session for the same reason as DRAW SITE 6.
+
+Both remain explicit, citation-backed recipes for a future porter with a
+real AI move-scoring model (or the patience for a wide empirical sweep) to
+pick up — not a bare "not staged" note.
 
 ### 24.6 What this unblocks
 
