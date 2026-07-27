@@ -2577,16 +2577,26 @@ function markAffineDoubleSpriteMask(
   centerX: number,
   centerY: number,
   pa: number,
+  pb: number,
+  pc: number,
   pd: number,
 ): void {
   const width = tileset.columns * 8;
   const height = tileset.rows * 8;
-  for (let dy = -height; dy < height; dy += 1) {
-    const sourceY = ((dy * pd) >> 8) + height / 2;
-    if (sourceY < 0 || sourceY >= height) continue;
-    for (let dx = -width; dx < width; dx += 1) {
-      const sourceX = ((dx * pa) >> 8) + width / 2;
+  // GBA affine-double OBJ sampling, in the same integer form as the PPU:
+  // the destination box is twice the declared OBJ size, its reference point
+  // remains the declared-size center, and the signed 8.8 matrix maps each
+  // destination pixel back into source texel space.  Keep the full 2x2
+  // matrix even though Encore's extracted spotlight currently has pb=pc=0;
+  // transformed OBJ-window users are not restricted to axis-aligned scale.
+  for (let localY = 0; localY < height * 2; localY += 1) {
+    const dy = localY - height;
+    for (let localX = 0; localX < width * 2; localX += 1) {
+      const dx = localX - width;
+      const sourceX = Math.floor((pa * dx + pb * dy) / 256) + width / 2;
+      const sourceY = Math.floor((pc * dx + pd * dy) / 256) + height / 2;
       if (sourceX < 0 || sourceX >= width) continue;
+      if (sourceY < 0 || sourceY >= height) continue;
       const tile = tileset.tiles[
         Math.floor(sourceY / 8) * tileset.columns
         + Math.floor(sourceX / 8)
@@ -16122,6 +16132,8 @@ export function renderSceneOnMovePresentation(
         view.spotlight.centerX + view.spotlight.x2,
         view.spotlight.centerY,
         view.spotlight.pa,
+        view.spotlight.pb,
+        view.spotlight.pc,
         view.spotlight.pd,
       );
     }

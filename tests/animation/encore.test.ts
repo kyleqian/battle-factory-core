@@ -34,7 +34,10 @@ describe("Encore source reducer", () => {
     const target = { x: 176, y: 40 };
     expect(encoreSpotlightAtAge(42, target)).toBeNull();
     expect(encoreSpotlightAtAge(43, target))
-      .toMatchObject({ centerX: 176, centerY: 32, x2: 0, pa: 4096, pd: 170 });
+      .toMatchObject({
+        centerX: 176, centerY: 32, x2: 0,
+        pa: 4096, pb: 0, pc: 0, pd: 170,
+      });
     expect(encoreSpotlightAtAge(63, target)?.pa).toBe(204);
     expect(encoreSpotlightAtAge(84, target)?.x2).toBe(9);
     expect(encoreSpotlightAtAge(105, target)?.x2).toBe(0);

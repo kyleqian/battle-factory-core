@@ -82,13 +82,14 @@ distinct centered/attacker-pan sounds. All remain unsupported.
 opponent-front, KNOCK OFF **59/59** in both orientations, and BIND **45/45**
 in both orientations, all framebuffer-exact.
 
-## ENCORE legal evidence checkpoint; PlaySE2WithPanning track not promoted (2026-07-27)
+## ENCORE transformed-OBJ checkpoint; PlaySE2WithPanning track not promoted (2026-07-27)
 
 **Verdict:** `MOVE_ENCORE` remains unsupported. The source/task reducer is
 exact for the complete 215-frame move-owned body in both player-back and
-opponent-front MINUN orientations (**215/215 component frames**), but the
-shared-seam framebuffer is only **43/215** and **89/215**, respectively.
-Coverage census and ratchets therefore remain unchanged.
+opponent-front MINUN orientations (**215/215 strengthened component frames**),
+but the shared-seam framebuffer remains only **43/215** and **89/215**,
+respectively, reproduced after the final change. Coverage census and ratchets
+therefore remain unchanged.
 
 **Source/probe:** complete legal mechanicLab parties use the real challenge-0
 Level-50 carrier `FRONTIER_MON_MINUN_1` set 187 (species 354, Docile, HP/DEF
@@ -98,16 +99,26 @@ both HardwarePaletteFade directions, spotlight affine/sweep, four clapping-hand
 sprites, the immediate `SE_M_ENCORE2` PlaySE2WithPanning event at relative age
 60 with target pan (+63 player attacker / -63 opponent attacker), the signed
 SwayMon body, window/register lifetimes, and teardown. Independent live probes
-reproduce the component result.
+reproduce the component result. The comparator now additionally checks every
+hand's x/y/x2/y2, facing matrix and clap counter; the spotlight's software
+position plus hardware OAM affine-double position, matrix number, full signed
+PA/PB/PC/PD matrix and one-frame x2 display latch; and WIN0/register latches.
+This closes the prior evidence hole where 215/215 omitted affine matrix/OAM/
+window state.
 
 **Bounded remainder:** the first player-orientation framebuffer residual is
 relative age 43, 15 pixels at x175-177/y74-80; later residuals expand with the
 affine OBJ-window spotlight and clapping-hand OAM interaction. The opposite
 orientation first differs at age 43, 20 pixels at x72/y24-43, then includes
 the player-back target sprite/OAM interaction. The extracted spotlight VRAM
-matches the source asset byte-for-byte, and task/sprite/register/sway state is
-already exact; completing acceptance needs a general GBA transformed
-OBJ-window scanline/OAM-budget compositor, not coordinate fitting.
+matches the source asset byte-for-byte, and task/sprite/register/sway/OAM
+matrix state is exact. `battleScene.ts` now uses the source/GBA affine-double
+destination box and signed 8.8 full 2×2 inverse matrix (PB/PC included rather
+than assuming axis-aligned scale), with integer source clipping. Completing
+acceptance still needs the remaining general GBA per-scanline OAM evaluation,
+budget/order and normal+OBJ-window pair arbitration plus WIN1/OBJWIN
+color-effect masking; no coordinate fitting, exclusions, or comparator
+weakening was introduced.
 
 **Sibling audit/controls:** SKY ATTACK uses `SE_M_SKY_UPPERCUT` at attacker
 pan; SUPERPOWER uses `SE_M_EARTHQUAKE` at center; FLATTER shares

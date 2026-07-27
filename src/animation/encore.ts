@@ -21,6 +21,8 @@ export interface EncoreSpotlight {
   readonly x2: number;
   /** Hardware affine matrix parameters used for inverse texel sampling. */
   readonly pa: number;
+  readonly pb: number;
+  readonly pc: number;
   readonly pd: number;
 }
 
@@ -118,6 +120,8 @@ export function encoreSpotlightAtAge(
     centerY: targetCenter.y - 8,
     x2: spotlightX2(age),
     pa,
+    pb: 0,
+    pc: 0,
     pd: 170,
   };
 }

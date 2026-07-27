@@ -30,13 +30,20 @@ interface Fixture {
   };
 }
 interface ProbeSprite {
-  readonly template: number; readonly x2: number; readonly y2: number;
+  readonly template: number;
+  readonly x: number; readonly y: number;
+  readonly x2: number; readonly y2: number;
+  readonly matrixNum: number;
+  readonly data: readonly number[];
 }
 interface ProbeFrame {
   readonly frame: number;
   readonly registers: {
     readonly DISPCNT: number; readonly WIN1V: number;
-    readonly WININ: number; readonly WINOUT: number; readonly BLDY: number;
+    readonly WIN0H: number; readonly WIN1H: number;
+    readonly WIN0V: number; readonly WIN1V: number;
+    readonly WININ: number; readonly WINOUT: number;
+    readonly BLDCNT: number; readonly BLDALPHA: number; readonly BLDY: number;
   };
   readonly battlerSprites: readonly ProbeSprite[];
   readonly effectSprites: readonly ProbeSprite[];
@@ -80,6 +87,46 @@ let firstFramebufferDiff: string | null = null;
 const sampledFramebufferDiffs: string[] = [];
 const componentDiffs: string[] = [];
 
+function hardwareAffineMatrix(
+  hardwareOam: string,
+  matrixNum: number,
+): readonly [number, number, number, number] {
+  const bytes = Buffer.from(hardwareOam, "hex");
+  const s16 = (offset: number) => bytes.readInt16LE(offset);
+  const base = matrixNum * 32;
+  return [
+    s16(base + 6), s16(base + 14),
+    s16(base + 22), s16(base + 30),
+  ];
+}
+
+function hardwareSpotlightOam(hardwareOam: string): {
+  readonly centerX: number; readonly centerY: number;
+  readonly matrixNum: number;
+} | null {
+  const bytes = Buffer.from(hardwareOam, "hex");
+  for (let index = 0; index < 128; index += 1) {
+    const offset = index * 8;
+    const a0 = bytes.readUInt16LE(offset);
+    const a1 = bytes.readUInt16LE(offset + 2);
+    const affine = (a0 & 0x100) !== 0;
+    const doubleSize = (a0 & 0x200) !== 0;
+    const objWindow = ((a0 >>> 10) & 3) === 2;
+    const square64 = ((a0 >>> 14) & 3) === 0
+      && ((a1 >>> 14) & 3) === 3;
+    if (!affine || !doubleSize || !objWindow || !square64) continue;
+    const left = (a1 & 0x1ff) >= 256 ? (a1 & 0x1ff) - 512 : a1 & 0x1ff;
+    const topByte = a0 & 0xff;
+    const top = topByte >= 160 ? topByte - 256 : topByte;
+    return {
+      centerX: left + 64,
+      centerY: top + 64,
+      matrixNum: (a1 >>> 9) & 31,
+    };
+  }
+  return null;
+}
+
 for (
   let frame = fixture.denseWindow.startFrame;
   frame <= fixture.denseWindow.endFrame;
@@ -89,6 +136,7 @@ for (
     + frame - fixture.denseWindow.startFrame;
   const state = { ...stage, age };
   const view = sceneOnEncoreView(state);
+  const displayedView = sceneOnEncoreView({ ...state, age: age - 1 });
   const oracle = frames.get(frame);
   if (!oracle) throw new Error(`probe omitted frame ${frame}`);
   const hands = oracle.effectSprites.filter((sprite) =>
@@ -98,15 +146,54 @@ for (
   const targetIndex = fixture.target.geometry.side === "player" ? 0 : 1;
   const handsMatch = hands.length === view.hands.length
     && handWindows.length === view.hands.length
-    && hands.every((hand, index) => hand.x2 === view.hands[index]!.x2)
-    && handWindows.every((hand, index) => hand.x2 === view.hands[index]!.x2);
+    && hands.every((hand, index) => {
+      const expected = view.hands[index]!;
+      return hand.x === expected.centerX
+        && hand.y === expected.centerY
+        && hand.x2 === expected.x2
+        && hand.y2 === 0
+        && hand.data[0] === expected.remainingClaps
+        && hand.matrixNum === (expected.hFlip ? 8 : 0);
+    })
+    && handWindows.every((hand, index) => {
+      const expected = view.hands[index]!;
+      return hand.x === expected.centerX
+        && hand.y === expected.centerY
+        && hand.x2 === expected.x2
+        && hand.y2 === 0
+        && hand.data[0] === expected.remainingClaps
+        && hand.matrixNum === (expected.hFlip ? 8 : 0);
+    });
   const spotlight = oracle.effectSprites.find((sprite) =>
     sprite.template === probe.symbols.gSpotlightSpriteTemplate);
   const spotlightExpected = age >= 42 && age <= 168;
+  const hardwareSpotlight = hardwareSpotlightOam(oracle.hardwareOam);
+  const spotlightMatrix = hardwareSpotlight === null
+    ? null
+    : hardwareAffineMatrix(
+        oracle.hardwareOam,
+        hardwareSpotlight.matrixNum,
+      );
   const spotlightMatch = (spotlight !== undefined) === spotlightExpected
-    && (!view.spotlight || spotlight?.x2 === view.spotlight.x2);
+    && (!view.spotlight || (
+      spotlight?.x === view.spotlight.centerX
+      && spotlight.y === view.spotlight.centerY
+      && spotlight.x2 === view.spotlight.x2
+      && spotlight.y2 === 0
+      && hardwareSpotlight?.centerX
+        === (displayedView.spotlight?.centerX ?? view.spotlight.centerX)
+          + (displayedView.spotlight?.x2 ?? view.spotlight.x2)
+      && hardwareSpotlight.centerY === view.spotlight.centerY
+      && spotlightMatrix?.[0] === view.spotlight.pa
+      && spotlightMatrix[1] === view.spotlight.pb
+      && spotlightMatrix[2] === view.spotlight.pc
+      && spotlightMatrix[3] === view.spotlight.pd
+    ));
   const registersMatch =
     oracle.registers.BLDY === view.bldy
+    && oracle.registers.WIN0H === 0
+    && oracle.registers.WIN0V === 0
+    && oracle.registers.BLDALPHA === 0
     && Boolean(oracle.registers.DISPCNT & 0x4000)
       === (age >= fixture.windowSchedule.win1FirstAge
         && age <= fixture.windowSchedule.win1LastAge)
