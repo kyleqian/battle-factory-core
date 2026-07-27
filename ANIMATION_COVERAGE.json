@@ -2,6 +2,28 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_WATER_GUN",
+      "status": "exact",
+      "covered": [
+        "complete legal Level-50 mechanicLab parties stage HORSEA, the real Factory set-60 WATER GUN carrier, with all four active choices constrained to WATER GUN and the opposing ONIX constrained to TACKLE",
+        "player-back HORSEA to opponent-front ONIX complete move-owned Scene-ON body at oracle frames 83-193: source component/RAM 111/111 and shared-seam framebuffer 111/111, reproduced twice",
+        "opponent-front HORSEA to player-back ONIX complete move-owned Scene-ON body at oracle frames 87-197: source component/RAM 111/111 and shared-seam framebuffer 111/111, reproduced twice",
+        "ANIM_TAG_SMALL_BUBBLES and ANIM_TAG_WATER_IMPACT assets; gWaterGunProjectileSpriteTemplate's complete 40-callback horizontal arc; gWaterHitSplatSpriteTemplate affine program 2; all three delayed gWaterGunDropletSpriteTemplate fixed-point/looping-affine bodies; splitbgprio/monbg/setalpha/blendoff/clearmonbg; target BG2 alpha target; and only the literal AnimTask_ShakeMon2(target,1,0,8,1) tuple"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-water-gun-player-horsea-opponent-onix.json",
+        "tools/battle-lab/mechanic-water-gun-opponent-horsea-player-onix.json",
+        "tools/compare/fixtures/water-gun-player-horsea-opponent-onix.json",
+        "tools/compare/fixtures/water-gun-opponent-horsea-player-onix.json",
+        "tools/compare/waterGunPortable.ts",
+        "tools/compare/waterGunProbe.py",
+        "tools/compare/extractWaterGunAssets.ts",
+        "src/animation/waterGun.ts",
+        "tests/animation/waterGun.test.ts",
+        "tests/animation/shakeMon2.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_SUPERSONIC",
       "status": "exact",
       "covered": [
@@ -837,6 +859,35 @@
         "MOVE_SECRET_POWER"
       ],
       "goal": "MOVE_KNOCK_OFF is exact through the shared Scene-ON seam in both source-required orientations: player-back PLUSLE to opponent-front ONIX and opponent-front PLUSLE to player-back ONIX are each 59/59 component/RAM and 59/59 framebuffer frames, reproduced twice. HorizontalLunge, ShakeMonInPlace, and both SlideMon helpers remain one source-relative implementation; the opposite route adds only source-selected PLUSLE front/ONIX back chrome and AnimKnockOffStrike's declared player-target affine/x-argument mirror. BIND remains 45/45 in both orientations twice as a seam regression. Sibling batch verdicts remain independent: SUPER_FANG is unsupported because its complete body additionally requires gSuperFangSpriteTemplate, AnimTask_BlendMonInAndOut, palette blend, and its own dense acceptance; SECRET_POWER is unsupported because the Factory building environment dispatches to Move_STRENGTH and other environments dispatch to distinct move bodies. Neither sibling is promoted by shared reducer coverage."
+    },
+    {
+      "id": "water-gun-small-bubbles-water-impact",
+      "components": [
+        "asset:ANIM_TAG_SMALL_BUBBLES",
+        "asset:ANIM_TAG_WATER_IMPACT",
+        "sprite:gWaterGunProjectileSpriteTemplate",
+        "sprite:gWaterGunDropletSpriteTemplate",
+        "sprite:gWaterHitSplatSpriteTemplate",
+        "task:AnimTask_ShakeMon2",
+        "visualCommand:splitbgprio",
+        "visualCommand:monbg",
+        "visualCommand:setalpha",
+        "visualCommand:blendoff",
+        "visualCommand:clearmonbg"
+      ],
+      "representatives": [
+        "MOVE_WATER_GUN",
+        "MOVE_BUBBLE_BEAM",
+        "MOVE_SECRET_POWER",
+        "MOVE_DIVE",
+        "MOVE_MIST_BALL",
+        "MOVE_FAKE_TEARS",
+        "MOVE_WATER_PULSE",
+        "MOVE_HYDRO_PUMP",
+        "MOVE_CRABHAMMER",
+        "MOVE_WATER_SPOUT"
+      ],
+      "goal": "MOVE_WATER_GUN independently proves its complete projectile/hitsplat/three-droplet body and target-BG2 alpha compositor in both orientations at 111/111 component/RAM and framebuffer frames, reproduced twice. ShakeMon2, BIND, and SUPERSONIC remain exact regression controls. No sibling is promoted. SMALL_BUBBLES audit: BUBBLE BEAM needs its 18 large gWaterBubbleProjectile sprites, SwayMon, and WaterBubblesEffectShort; SECRET POWER environment-dispatches to distinct complete scripts (the Factory building route is STRENGTH, pond is BUBBLE BEAM); DIVE needs both two-turn splash/spray setup and strike RisingWaterHitEffect; MIST BALL needs its translating mist ball, target shakes/palette tasks, and full fog BG pipeline; FAKE TEARS uses the tag only for BlendParticle and needs RockMonBackAndForth plus eight thought-bubble/music-note tear sprites; WATER PULSE needs five independently parameterized bubble sprites, three blue rings, target shake, and whole-BG palette blend. WATER_IMPACT audit: HYDRO PUMP needs its paired orb beam stream, sine timer, attacker/target shakes, and repeated hitsplats; CRABHAMMER needs its palette blend, attacker slide/return, target shake, and eight ice-crystal bubble pairs; SECRET POWER and DIVE retain the distinct bodies above; WATER SPOUT needs WaterSpoutLaunch and WaterSpoutRain with glowy-blue-orb launch/rain geometry. Every sibling remains unsupported pending its own complete dense evidence."
     },
     {
       "id": "splitbgprio-foes-sonic-ring",

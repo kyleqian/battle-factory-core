@@ -68,11 +68,11 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // SUPERSONIC is exact in both required orientations.
-        unsupported: 246,
+        // WATER GUN is exact in both required orientations.
+        unsupported: 245,
         staged: 0,
         partial: 3,
-        exact: 27,
+        exact: 28,
       },
       {
         tier: "openOnly",
