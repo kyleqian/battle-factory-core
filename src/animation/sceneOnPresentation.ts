@@ -140,6 +140,10 @@ import {
   type WaterGunSprite,
 } from "./waterGun.ts";
 import {
+  earthquakeAnimationAtAge,
+  type EarthquakeAnimationState,
+} from "./earthquake.ts";
+import {
   futureSightAttackerEffectAtAge,
   futureSightBgBldyAtAge,
   futureSightBgIsPsychic,
@@ -681,6 +685,13 @@ export interface SceneOnWaterGunConfig {
   readonly projectileOrigin: Readonly<{ x: number; y: number }>;
 }
 
+export interface SceneOnEarthquakeConfig {
+  readonly move: "EARTHQUAKE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnFutureSightConfig {
   readonly move: "FUTURE_SIGHT";
   readonly attacker: SceneOnPresentationBattler;
@@ -738,6 +749,7 @@ export type SceneOnMoveConfig =
   | SceneOnMilkDrinkConfig
   | SceneOnSupersonicConfig
   | SceneOnWaterGunConfig
+  | SceneOnEarthquakeConfig
   | SceneOnFutureSightConfig
   | SceneOnConfusionConfig
   | SceneOnPsychicConfig
@@ -764,6 +776,12 @@ export interface SceneOnWaterGunView {
   readonly target: SceneOnPresentationBattler;
   readonly targetOffset: Readonly<{ x2: number; y2: number }>;
   readonly sprites: readonly WaterGunSprite[];
+}
+
+export interface SceneOnEarthquakeView extends EarthquakeAnimationState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
 }
 
 export interface SceneOnFirePunchView {
@@ -1615,6 +1633,21 @@ export function sceneOnWaterGunView(
       state.config.projectileOrigin,
       state.config.target.geometry.animationCenter,
     ),
+  };
+}
+
+/** `age=0` is the two simultaneous HorizontalShake task creation tick. */
+export function sceneOnEarthquakeView(
+  state: SceneOnMovePresentationState,
+): SceneOnEarthquakeView {
+  if (state.config.move !== "EARTHQUAKE") {
+    throw new Error(`expected EARTHQUAKE presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...earthquakeAnimationAtAge(state.age),
   };
 }
 

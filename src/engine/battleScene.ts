@@ -630,6 +630,7 @@ import {
   sceneOnMilkDrinkView,
   sceneOnSupersonicView,
   sceneOnWaterGunView,
+  sceneOnEarthquakeView,
   sceneOnFutureSightView,
   sceneOnConfusionView,
   sceneOnPsychicView,
@@ -12093,6 +12094,20 @@ function drawStaticBgShiftedY(fb: Uint8Array, shiftY: number, fadeY = 0, palette
   }
 }
 
+/** BG3HOFS sampling for `AnimTask_ShakePlatforms`. */
+function drawStaticBgShiftedX(
+  fb: Uint8Array,
+  shiftX: number,
+  paletteOverride?: RgbColor[][],
+): void {
+  for (let screenY = 0; screenY < 160; screenY += 1) {
+    for (let screenX = 0; screenX < 240; screenX += 1) {
+      const c = staticBgPixel(screenX + shiftX, screenY, paletteOverride);
+      if (c) setPixel(fb, screenX, screenY, c);
+    }
+  }
+}
+
 /** The real opponent healthbox sprite's own `y2` wobble (`rockSlideHealthboxWobbleY2`) - same erase-then-redraw-translated shape as `drawDoubleTeamClones`' Grovyle erase, reusing `opponentHealthboxContent`/`HEALTHBOX_FRAME_ORIGIN` (`drawSendOutHealthbox`'s own asset, translated vertically here instead of horizontally). `content` defaults to the full-HP compositor result (every existing ROCK_SLIDE caller's own domain, where the wobble window falls entirely before the drain starts) - S7 slice E2b's DRAGON_BREATH caller passes Grovyle's real (already-101, not yet re-drained) content explicitly since its own hit-flash window also falls before ITS drain starts, but at a HP that isn't this module's full-send-out value. */
 function drawOpponentHealthboxWobble(fb: Uint8Array, dy: number, content: ReturnType<typeof composeOpponentHealthbox> = opponentHealthboxContent): void {
   const { width, height, pixels } = content;
@@ -18921,6 +18936,88 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "HAUNTER used" : "Foe HAUNTER used",
       "SHADOW PUNCH!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "EARTHQUAKE") {
+    const view = sceneOnEarthquakeView(state);
+    const displayed = sceneOnEarthquakeView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "DUGTRIO"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "DUGTRIO"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged EARTHQUAKE pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const tint = displayed.palette.color === "black"
+      ? { r: 0, g: 0, b: 0 }
+      : { r: 255, g: 255, b: 255 };
+    const bgPalette = displayed.palette.active
+      ? blendPaletteBanksToward(
+          battleBg.palette,
+          tint,
+          displayed.palette.coefficient,
+        )
+      : battleBg.palette;
+    drawStaticBgShiftedX(fb, displayed.shake.platformX, bgPalette);
+    const player = playerToOpponent ? view.attacker : view.target;
+    const opponent = playerToOpponent ? view.target : view.attacker;
+    drawSpriteSheet(
+      fb,
+      playerToOpponent ? dugtrioBackSprite.tileset : onixBackSprite.tileset,
+      playerToOpponent ? dugtrioBackSprite.palette : onixBackSprite.palette,
+      player.geometry.spriteCorner.x + displayed.shake.battlerX2,
+      player.geometry.spriteCorner.y,
+    );
+    drawSpriteSheet(
+      fb,
+      playerToOpponent ? onixFrontSprite.tileset : dugtrioFrontSprite.tileset,
+      playerToOpponent ? onixFrontSprite.palette : dugtrioFrontSprite.palette,
+      opponent.geometry.spriteCorner.x + displayed.shake.battlerX2,
+      opponent.geometry.spriteCorner.y,
+    );
+    const opponentSpecies = playerToOpponent ? "ONIX" : "DUGTRIO";
+    const playerSpecies = playerToOpponent ? "DUGTRIO" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "DUGTRIO used" : "Foe DUGTRIO used",
+      "EARTHQUAKE!",
       99,
     );
     return;
