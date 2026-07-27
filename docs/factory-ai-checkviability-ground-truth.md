@@ -4138,3 +4138,473 @@ Reproduce with:
 ```sh
 node --experimental-strip-types tools/probe/verify-factory-ai-checkviability-ground-truth.ts
 ```
+
+## 25. 2026-07-26 addendum #15: `AI_CBM_RainDance` + `AI_CV_RainDance`, `AI_CBM_SunnyDay` + `AI_CV_SunnyDay`, `AI_CBM_Hail` + `AI_CV_Hail` — the weather trio, §5's own open CBM-weather question answered, and a real `RainDance`/`SunnyDay` sibling divergence
+
+Side-lane prep-scout session (Battle Scene OFF oracle), same no-`src/`-changes
+contract as every prior addendum — **no `factoryAiCheckBadMove.ts`/
+`factoryAiCheckViability.ts`/`factoryAiDecisionPolicy.ts` edits**. Scope per
+this step's brief: the last 3 of the 22-handler program
+(`AI_CV_RainDance`/`SunnyDay`/`Hail`, §5's own table), with priority on §5's
+closing paragraph, which explicitly flagged its own uncertainty: "CBM's table
+routes all weather effects through a shared non-existent-named handler check
+— a follow-up worker should verify CBM's own weather-effect entries before
+assuming they're equally cheap." That guess is answered first, then all
+three `AI_CV_*` bodies are independently re-derived (not assumed identical),
+then all three handler pairs are staged and live-verified.
+
+### 25.1 The open question, answered: CBM does **not** share a weather handler — three separate, byte-for-byte-identical 2-instruction handlers
+
+Direct read of `AI_CheckBadMove`'s own dispatch table
+(`data/battle_ai_scripts.s:65-213`, the same table §4 already fully
+enumerated):
+
+```
+if_effect EFFECT_RAIN_DANCE, AI_CBM_RainDance   ; :178
+if_effect EFFECT_SUNNY_DAY, AI_CBM_SunnyDay     ; :179
+...
+if_effect EFFECT_HAIL, AI_CBM_Hail              ; :191
+```
+
+Three **distinct, individually named** target labels — not a shared handler,
+not a "non-existent-named" fallthrough. §5's own worry was reasonable (the
+audit trail up to that point had never actually looked past the dispatch
+table's own target names for these three rows) but the guess itself was
+wrong. Each body, in full:
+
+```
+AI_CBM_RainDance:                       (data/battle_ai_scripts.s:490-493)
+	get_weather
+	if_equal AI_WEATHER_RAIN, Score_Minus8
+	end
+
+AI_CBM_SunnyDay:                        (data/battle_ai_scripts.s:495-498)
+	get_weather
+	if_equal AI_WEATHER_SUN, Score_Minus8
+	end
+
+AI_CBM_Hail:                            (data/battle_ai_scripts.s:522-525)
+	get_weather
+	if_equal AI_WEATHER_HAIL, Score_Minus8
+	end
+```
+
+**Zero divergence between the three** — literally the same 3-instruction
+shape (`get_weather; if_equal <OWN_WEATHER_CONSTANT>, Score_Minus8; end`),
+differing only in which `AI_WEATHER_*` constant each checks
+(`AI_WEATHER_SUN=0`, `AI_WEATHER_RAIN=1`, `AI_WEATHER_SANDSTORM=2`,
+`AI_WEATHER_HAIL=3`, `include/constants/battle_ai.h:26-30`). This is the
+**smallest CBM handler shape found in this doc to date** — even smaller than
+`LightScreen`/`Reflect`'s own 2-instruction body (§23.1; those still need a
+`if_side_affecting` read plus the branch, this one needs a full
+`get_weather` opcode plus the branch, same instruction count either way, but
+weather-trio's own three siblings are *exactly* identical to each other,
+where `LightScreen`/`Reflect` differ by which flag they test — this is the
+**first fully byte-for-byte-identical CBM triplet** in the whole doc, not
+just a twin pair). No `get_ability` call, no item/species gate, no
+Cloud Nine/Air Lock check anywhere in any of the three — `Cmd_get_weather`
+(`src/battle_ai_script_commands.c:1644-1665`) reads `gBattleWeather`
+directly with **no ability filtering at all** (Cloud Nine/Air Lock only
+suppress weather's *in-battle effects* elsewhere in the engine, never the
+AI's own `get_weather` read). **Confirms §5's "all three CBM-blocked" row**
+(`EFFECT_RAIN_DANCE`/`SUNNY_DAY`/`HAIL` are indeed all three in
+`AI_CHECK_BAD_MOVE_TABLE_EFFECTS`, lines 178/179/191 above) while correcting
+its "shared handler" mechanism guess.
+
+**New finding, not asked for but load-bearing for a porter**: `Cmd_get_weather`
+has a real, live ROM bug in this pinned build. Its own source
+(`src/battle_ai_script_commands.c:1644-1665`) only assigns
+`AI_THINKING_STRUCT->funcResult` when a real weather bit is set; the
+`AI_WEATHER_NONE` sentinel assignment is gated behind `#ifdef BUGFIX`
+(`:1651-1653`), and `BUGFIX` is **commented out** in this pinned checkout
+(`include/config.h:48`, `//#define BUGFIX`). So when `gBattleWeather` has
+**none** of the four bits set, `get_weather`'s result is whatever
+`funcResult` was left holding by the *previous* AI script command — for
+`AI_CBM_RainDance`/`SunnyDay`/`Hail` specifically, that's the universal
+preamble's own `get_ability AI_TARGET` call
+(`AI_CheckBadMove_CheckSoundproof`, `:93`), i.e. the **target's real ability
+ID** (0-77), not a true "no weather" sentinel. A target whose ability ID
+happens to equal `AI_WEATHER_RAIN`(1)/`SUN`(0)/`SANDSTORM`(2)/`HAIL`(3) would
+make `get_weather` read as that bogus "weather" on a genuinely weatherless
+battle (e.g. any target with `ABILITY_NONE`(0) reads as `AI_WEATHER_SUN`).
+**Not triggered by any of this session's own fixtures** (every one below
+establishes a real, non-`NONE` weather state live before the decision turn
+being measured), so it does not touch this addendum's own live-verified
+claims — flagged for the porter as a real, citable ROM quirk with an exact
+mechanism, left **recipe-only** (needs a genuinely weatherless battle at the
+moment `AI_CheckBadMove` first dispatches a weather-effect move, plus a
+target with a specific ability ID, to demonstrate live — not attempted this
+session, time-capped). A porter should decide deliberately whether to
+replicate this bug or treat `AI_WEATHER_NONE` cleanly; either is a choice,
+not an accident, once documented.
+
+### 25.2 The three `AI_CV_*` bodies, independently re-derived — `RainDance` genuinely diverges from its own siblings
+
+§5 described all three as "HP gate + `get_weather` compare chain, no roll
+anywhere" and treated them as a matched set. Re-deriving each independently,
+not assuming the family resemblance holds (per this doc's own standing
+divergence-check rule, §17/§18/§21/§22/§23):
+
+```
+AI_CV_SunnyDay:                         (data/battle_ai_scripts.s:2060-2075)
+	if_hp_less_than AI_USER, 40, AI_CV_SunnyDay_ScoreDown1  ; Gate H (own HP)
+	get_weather
+	if_equal AI_WEATHER_HAIL, AI_CV_SunnyDay2                ; Gate W1
+	if_equal AI_WEATHER_RAIN, AI_CV_SunnyDay2                ; Gate W2
+	if_equal AI_WEATHER_SANDSTORM, AI_CV_SunnyDay2           ; Gate W3
+	goto AI_CV_SunnyDay_End                                  ; own weather / none -> 0
+AI_CV_SunnyDay2:
+	score +1
+	goto AI_CV_SunnyDay_End
+AI_CV_SunnyDay_ScoreDown1:
+	score -1
+AI_CV_SunnyDay_End:
+	end
+
+AI_CV_Hail:                             (data/battle_ai_scripts.s:2261-2276)
+	if_hp_less_than AI_USER, 40, AI_CV_Hail_ScoreDown1       ; Gate H (own HP)
+	get_weather
+	if_equal AI_WEATHER_SUN, AI_CV_Hail2                      ; Gate W1
+	if_equal AI_WEATHER_RAIN, AI_CV_Hail2                     ; Gate W2
+	if_equal AI_WEATHER_SANDSTORM, AI_CV_Hail2                ; Gate W3
+	goto AI_CV_Hail_End                                       ; own weather / none -> 0
+AI_CV_Hail2:
+	score +1
+	goto AI_CV_Hail_End
+AI_CV_Hail_ScoreDown1:
+	score -1
+AI_CV_Hail_End:
+	end
+```
+
+`SunnyDay` and `Hail` **are** twins: identical topology (1 HP gate + a
+3-way `get_weather` chain checking the *other three* weather values + a
+deterministic-zero fallthrough), identical HP threshold (40), identical
+score deltas (+1/-1), zero `if_random_less_than` in either. The only
+difference is which weather constant is excluded from each one's own
+"other three" list (`SunnyDay` excludes Sun and checks
+Hail/Rain/Sandstorm; `Hail` excludes Hail and checks Sun/Rain/Sandstorm) —
+exactly what you'd expect from "the move that sets weather X scores +1 for
+casting it into any weather that ISN'T X or none."
+
+```
+AI_CV_RainDance:                        (data/battle_ai_scripts.s:2037-2058)
+	if_user_faster AI_CV_RainDance2         ; Gate P (relative Speed, own side)
+	get_ability AI_USER
+	if_equal ABILITY_SWIFT_SWIM, AI_CV_RainDance3            ; Gate S (own ability, bypass)
+AI_CV_RainDance2:
+	if_hp_less_than AI_USER, 40, AI_CV_RainDance_ScoreDown1  ; Gate H (own HP)
+	get_weather
+	if_equal AI_WEATHER_HAIL, AI_CV_RainDance3                ; Gate W1
+	if_equal AI_WEATHER_SUN, AI_CV_RainDance3                 ; Gate W2
+	if_equal AI_WEATHER_SANDSTORM, AI_CV_RainDance3            ; Gate W3
+	get_ability AI_USER
+	if_equal ABILITY_RAIN_DISH, AI_CV_RainDance3               ; Gate R (own ability, tail bonus)
+	goto AI_CV_RainDance_End                                   ; own weather / none, no Rain Dish -> 0
+AI_CV_RainDance3:
+	score +1
+	goto AI_CV_RainDance_End
+AI_CV_RainDance_ScoreDown1:
+	score -1
+AI_CV_RainDance_End:
+	end
+```
+
+**`RainDance` genuinely diverges** — this is a real instance of the exact
+trap this step's brief called out ("`SunnyDay`/`Hail` sitting 200 lines
+apart from `RainDance` is a hint they may diverge"), independently
+re-confirmed from source, not assumed: `RainDance` has **7** conditional
+instructions (Gates P/S/H/W1/W2/W3/R) against `SunnyDay`/`Hail`'s **4**
+(Gates H/W1/W2/W3) — two entire extra gates that have no counterpart in
+either sibling:
+
+- **Gate P + Gate S (prologue, unique to `RainDance`)**: if the AI's own
+  battler is faster than the target (`if_user_faster`, resolved via
+  `GetWhoStrikesFirst`, §25.3), skip straight to the normal HP/weather gate
+  chain (Gate H). If **not** faster, check the AI's **own** ability
+  (`get_ability AI_USER`) for `ABILITY_SWIFT_SWIM`; if it matches, jump
+  straight to the `score +1` branch (`AI_CV_RainDance3`), **bypassing the HP
+  gate and the weather chain entirely** — a slower Swift-Swim user gets +1
+  for casting Rain Dance regardless of its own HP band or the current
+  weather (since Swift Swim doubles Speed in Rain, turning a slower user
+  into a faster one). Neither `SunnyDay` (no Chlorophyll-equivalent bypass,
+  despite Chlorophyll being the exact parallel ability for Sun) nor `Hail`
+  (no Gen 3 ability doubles Speed in Hail) has anything resembling this.
+- **Gate R (tail, unique to `RainDance`)**: after the weather chain fails to
+  match Hail/Sun/Sandstorm (i.e. weather is already Rain, or none), a
+  **second** `get_ability AI_USER` call checks for `ABILITY_RAIN_DISH`; if
+  present, +1 anyway (a Rain Dish holder wants rain regardless of whether
+  it's already raining — note this can coexist with `AI_CBM_RainDance`'s own
+  `-8` for the same move when weather is already Rain, since CBM and CV are
+  independent score contributions, not a single guarded path). `SunnyDay`
+  has no `ABILITY_SOLAR_POWER`/`ABILITY_LEAF_GUARD`-equivalent tail bonus;
+  `Hail` has no ability-tail bonus either.
+
+Both extra gates read the AI's **own** ability (`AI_USER`), not the
+target's — `Cmd_get_ability`'s own body
+(`src/battle_ai_script_commands.c:1350-1401`) branches on
+`gActiveBattler != battler`: when the queried battler *is* the one currently
+thinking (`AI_USER`, always true for `get_ability AI_USER`), it takes the
+direct-read branch ("The AI knows its own ability", `:1400`) — **no
+`Random()` call, no ability-guessing confound**, unlike the universal CBM
+preamble's own `get_ability AI_TARGET` (`:93`, guesses between a two-
+ability target's slots via `Random() & 1` when neither of the three known-
+without-guessing abilities applies, `:1380-1387`) — the reason every
+CBM-blocked-pair fixture since §14.2 has needed a single-ability *target*
+species regardless of whether that pair's own body reads ability at all.
+
+Exact `if_random_less_than` count for all three: **0**. §5's "genuinely
+0-`if_random`" claim holds for the roll-instruction count on all three, but
+its "no roll anywhere" framing for `RainDance` is incomplete — see §25.3.
+
+### 25.3 New finding: `if_user_faster`'s own C helper can draw `Random()` — a doc-wide subtlety this session traced to its source for the first time
+
+`if_user_faster` (`RainDance`'s Gate P) compiles to `if_user_goes 0, ptr`
+(`asm/macros/battle_ai_script.inc:599-601`), which calls
+`Cmd_if_user_goes` → `GetWhoStrikesFirst(sBattler_AI, gBattlerTarget, TRUE)`
+(`src/battle_ai_script_commands.c:1268-1274`). Reading that C function in
+full (`src/battle_main.c:4595-4763`) for the first time in this doc's own
+history: on a genuine Speed tie (`speedBattler1 == speedBattler2`), it draws
+`Random() & 1` to break the tie (`:4728` and `:4745`, the priority-move and
+zero-priority branches respectively) — a **hidden `Random()` consumption
+inside a C helper**, invisible to this doc's own "`if_random_less_than`
+instruction count" metric, since it's not an AI-script opcode at all.
+`if_user_faster` itself is used **exactly once** in the entire AI script
+(only here); its inverse-polarity sibling `if_target_faster` is used **20
+times** elsewhere (`AI_CV_SpeedDown` §6 included) — meaning this same hidden
+draw-on-tie has been a latent possibility in every one of those 20 sites
+too, not something unique to `RainDance`. This session is the first to trace
+`GetWhoStrikesFirst`'s own body far enough to name the exact mechanism
+rather than just avoiding ties by convention (`docs/factory-ai-ground-
+truth.md`'s and this doc's own "faster species in the damage role" rule,
+until now undocumented *why* a tie is risky beyond message-order). All six
+fixtures below use Anorith (base Speed 75) against Shuckle (base Speed 5) —
+never tied — so this draw is confirmed absent from this session's own live
+counts, not merely assumed absent.
+
+Separately (not new, but relevant to reading the fixtures' PP data below):
+`ChooseMoveOrAction_Singles`'s own final move-pick step always draws exactly
+one `Random()` regardless of whether the top score is unique or tied
+(`return consideredMoveArray[Random() % numOfBestMoves]`,
+`src/battle_ai_script_commands.c:445`) — with `numOfBestMoves == 1` (a clear
+winner) `Random() % 1` is always `0`, so the *result* is fully deterministic
+even though a draw still occurs. This is what makes every fixture's own
+"turn 2" pick below cross-seed-stable **by construction**, once its own net
+score is proven nonzero (25.4) — no tie-break uncertainty survives into the
+decision this addendum actually measures, only into the throwaway turn-1
+setup move (next section).
+
+### 25.4 Fixture design: 0-`if_random` handlers on **both** sides of the pair force a pick-based design, not a draw-count one
+
+Every prior CBM-blocked pair in this doc (§14-§24) used the
+`DRAW_COUNT_SCENARIOS` technique: give the opponent 4 identical
+dispatch-triggering slots and compare **total `Random()` call counts**
+between a "reach" and a "control" fixture, because the handler under test
+has at least one real `if_random_less_than` site whose presence/absence
+shows up as a count delta. **That technique has no signal here** — all six
+handlers (three CBM, three CV) are 0-`if_random`; a reachable branch and an
+unreached one both draw exactly zero from the handler itself. The only
+live-observable channel left is the AI's own **final move pick**, so this
+addendum reuses `AI_CV_SpeedDown`'s original design instead (§6: an
+unequal, non-tied moveset, not four identical slots), extended to two real
+turns because — unlike `SpeedDown`'s pure-Speed gate, knowable at
+team-build time — a **pre-existing weather state** has to be staged by a
+real move first (per this step's brief and the standing "never inject
+transient state" rule).
+
+**Species (all six fixtures)**: opponent (`AI_USER`, the battler under
+test) = Anorith (390, single ability Battle Armor, base Speed 75); player
+(`AI_TARGET`) = Shuckle (213, single ability Sturdy, base Speed 5, Bug/Rock)
+— the exact pairing already proven zero-baseline for a `MOVE_GROWL` control
+by §6/§14 (`AI_CBM_AttackDown`'s own gate needs `ATK == MIN_STAT_STAGE` or
+`ABILITY_HYPER_CUTTER`, neither true; `AI_CV_AttackDown`'s own type-list
+gate matches Shuckle's Bug type1 immediately, §6). Single-ability species on
+**both** sides closes two independent confounds at once: the universal CBM
+preamble's own `get_ability AI_TARGET` (Soundproof check, `:93`, guesses on
+a two-ability *target*, §14.2) and — new this session — would matter for
+`AI_CV_RainDance`'s own `get_ability AI_USER` calls too, except those never
+guess regardless of ability count (25.2) — Anorith's single ability was
+chosen for consistency with every other fixture in this doc, not because
+`RainDance`'s own gates required it.
+
+**Opponent moveset (all six)**: `[TEST_WEATHER_MOVE, MOVE_GROWL(45),
+MOVE_GROWL(45), MOVE_GROWL(45)]` — deliberately **not** four identical
+slots (unlike §11-§24's convention), because a pick-based design needs a
+real alternative to lose or win against. Both the test move and Growl are
+0-power (ties `AI_TryToFaint`'s "most powerful" comparison at exactly 0 for
+all four slots, §6) and Growl's own CBM+CV contribution is 0 in this exact
+matchup (established above) — so the *only* thing that can move the AI's
+own final pick between the test move and Growl is the weather-trio
+handlers' own score contribution, isolating it cleanly.
+
+**Player moveset**: four identical copies of one real weather-setting move
+— forced single legal choice, same "constrain the AI/controller to one
+option" convention `tools/battle-lab/README.md` describes for the opponent
+side, applied here to the player side instead, since it's the player's turn
+that has to *deterministically* stage weather. Two turns, `[A, A]` per turn
+(mash pattern, `N` reps of `[A(2f), wait(18f)]` — robust to `Hail`'s own
+extra end-of-turn chip-damage message boxes that `Rain`/`Sun` don't have,
+discovered live this session when a hand-timed `[A,wait30,A,wait700]`x2
+block **desynced** for `Hail` specifically and silently failed to execute
+turn 2 at all within the window; the mash pattern fixed it by construction,
+since it needs no exact message-box count).
+
+**Why turn order is fixed (opponent faster)**: on turn 1, weather does not
+exist yet at decision time (both sides' actions for a turn are scored
+simultaneously, before either executes), so the opponent's own turn-1
+score is a genuine 4-way tie (`ChooseMoveOrAction_Singles`'s own
+`Random() % 4`, confirmed live below to actually land on different slots
+across the two banked seeds for some fixtures) — **irrelevant to this
+design**, because the opponent (Anorith, base Speed 75) is faster than the
+player (Shuckle, base Speed 5) and therefore moves *first* every turn: even
+if the opponent's own turn-1 tie-break happens to select the weather move,
+the player's own weather-setting move resolves *second* and unconditionally
+overwrites whatever weather state resulted, since Gen 3 weather moves
+always succeed (reset duration) rather than fail when recasting the same
+weather. Turn 1's outcome is therefore **provably irrelevant** to the
+weather state turn 2 observes — confirmed empirically, not just argued (see
+25.5's actual per-seed PP traces, where turn 1's own pick visibly differs
+by seed for some fixtures with no effect on turn 2's result).
+
+**Two fixtures per handler** (six total), naming `<handler>-cbmreach` /
+`<handler>-cvreach` rather than this doc's usual `reach`/`control` (more
+accurate here — each fixture demonstrates one handler's own reach branch
+while the *other* handler in the pair is provably quiet, not a zero
+baseline for both):
+
+| Fixture | Turn-1 weather target (player) | `AI_CBM_*` (weather == own type?) | `AI_CV_*` weather-chain (own type excluded) | Net score, slot 0 | Turn-2 prediction |
+| --- | --- | --- | --- | -: | --- |
+| `<handler>-cbmreach` | same as `TEST_WEATHER_MOVE`'s own type | **fires, -8** | doesn't match (own type excluded from its chain) → 0 | **-8** | never slot 0 |
+| `<handler>-cvreach` | Sandstorm (common to all three chains) | doesn't match (weather != own type) → 0 | matches (Sandstorm always in the "other three" list) → **+1** | **+1** | always slot 0 |
+
+Sandstorm was chosen as the universal `cvreach` trigger specifically because
+it's the one weather value common to **all three** handlers' own "other
+three" list (`RainDance` checks Hail/Sun/Sandstorm, `SunnyDay` checks
+Hail/Rain/Sandstorm, `Hail` checks Sun/Rain/Sandstorm) — confirmed directly
+from 25.2's own transcribed bodies, not assumed.
+
+### 25.5 Live ledger — 6 fixtures × 2 seeds = 12/12 exact matches, all with a real, causally-attributable pick flip
+
+Opponent PP read at frame 700 (turn 1 fully settled, including its own
+end-of-turn weather-damage tick where applicable) and frame 1600 (turn 2
+fully settled) — the delta isolates turn 2's own decision regardless of
+what turn 1's own (irrelevant, per 25.4) tie-break did:
+
+| Fixture | Seed | Opponent PP @700 | Opponent PP @1600 | Turn-2 pick | Opponent HP @1600 |
+| --- | -: | --- | --- | --- | -: |
+| `raindance-cbmreach` (weather=Rain) | 1 | `[4,40,39,40]` | `[4,40,38,40]` | Growl (slot 2) | 120/120 (100%) |
+| `raindance-cbmreach` | 99 | `[4,40,39,40]` | `[4,40,39,39]` | Growl (slot 3) | 120/120 (100%) |
+| `raindance-cvreach` (weather=Sandstorm) | 1 | `[3,40,40,40]` | `[2,40,40,40]` | **Rain Dance (slot 0)** | 120/120 (100%) |
+| `raindance-cvreach` | 99 | `[3,40,40,40]` | `[2,40,40,40]` | **Rain Dance (slot 0)** | 120/120 (100%) |
+| `sunnyday-cbmreach` (weather=Sun) | 1 | `[4,40,39,40]` | `[4,40,38,40]` | Growl (slot 2) | 120/120 (100%) |
+| `sunnyday-cbmreach` | 99 | `[5,39,39,40]` | `[5,39,38,40]` | Growl (slot 2) | 120/120 (100%) |
+| `sunnyday-cvreach` (weather=Sandstorm) | 1 | `[3,40,40,40]` | `[2,40,40,40]` | **Sunny Day (slot 0)** | 120/120 (100%) |
+| `sunnyday-cvreach` | 99 | `[4,40,39,40]` | `[3,40,39,40]` | **Sunny Day (slot 0)** | 120/120 (100%) |
+| `hail-cbmreach` (weather=Hail) | 1 | `[9,40,40,40]` | `[9,40,39,40]` | Growl (slot 2) | 106/120 (88%) |
+| `hail-cbmreach` | 99 | `[9,40,40,40]` | `[9,40,39,40]` | Growl (slot 2) | 106/120 (88%) |
+| `hail-cvreach` (weather=Sandstorm) | 1 | `[8,40,40,40]` | `[7,40,40,40]` | **Hail (slot 0)** | 120/120 (100%) |
+| `hail-cvreach` | 99 | `[8,40,40,40]` | `[7,40,40,40]` | **Hail (slot 0)** | 120/120 (100%) |
+
+**12/12 exact matches to 25.4's predicted table**: every `cbmreach` fixture
+never touches slot 0 between frame 700 and 1600 (Growl wins instead, from
+whichever of slots 1-3 the standing tie-break lands on); every `cvreach`
+fixture always picks slot 0. Note `raindance-cbmreach`/`sunnyday-cbmreach`
+seed 99's own turn-1 PP (`[4,...]`/`[5,39,...]` at frame 700, vs `[4,...]`/
+`[4,40,...]` at seed 1) confirms turn 1's tie-break genuinely differs by
+seed for some fixtures — exactly the "irrelevant to turn 2" claim 25.4 made,
+demonstrated live rather than just argued. `hail-cbmreach`'s own opponent HP
+drops to 88% by frame 1600 (two turns of `Hail`'s own end-of-turn 1/16
+chip damage, absent from `Rain`/`Sun`) — still comfortably above the
+handlers' own `<40%` HP gate, confirmed not a confound.
+
+### 25.6 Not staged live this session (recipe-only, time-capped)
+
+1. **`RainDance`'s own Gate P/S bypass** (slower user + `ABILITY_SWIFT_SWIM`
+   → deterministic +1, skipping the HP gate and weather chain entirely):
+   needs a Swift-Swim-ability species as the opponent, slower than the
+   target, with weather held at any non-Rain state (to prove the bypass
+   fires even where the normal chain would score 0) — not attempted, no
+   Swift-Swim-ability species chosen this session.
+2. **`RainDance`'s own Gate R tail bonus** (`ABILITY_RAIN_DISH` → +1 even
+   when weather is already Rain or unset): needs a Rain-Dish-ability
+   species as the opponent — not attempted. Note this can coexist with
+   `AI_CBM_RainDance`'s own `-8` when weather is already Rain (CBM and CV
+   are independent score contributions), so a live fixture would show a net
+   `-7`, not a clean `+1` — worth flagging so a future worker doesn't expect
+   the same simple pick-flip this addendum's own six fixtures show.
+3. **The `<40%` HP-gate branch** (own HP < 40% → `-1`, all three handlers,
+   independent of weather): this session's own zero-damage-by-construction
+   design (Growl deals no damage, weather moves deal no damage to their own
+   user) never exercises it live. Directly reusable recipe: any prior
+   pair's own "hit `AI_USER` to <X%" fixture (`AI_CV_DefenseDown`/
+   `VitalThrow`'s Machamp-`MOVE_VITAL_THROW`-vs-Anorith recipe, §13/§15,
+   86-102 damage / 15-28% remaining, comfortably under 40%) transplants
+   directly — just add a real turn-1 hit before the weather-establishing
+   turn.
+4. **`get_weather`'s own stale-read bug** (25.1): needs a genuinely
+   weatherless battle at the moment a weather-effect move is first
+   dispatched, plus a target with a specific ability ID — not attempted.
+
+### 25.7 Verify script status
+
+`tools/probe/verify-factory-ai-checkviability-ground-truth.ts` extended
+this session with a new `WEATHER_PICK_SCENARIOS` array + `verifyWeatherPickScenario`
+runner (distinct from `SCENARIOS`/`DRAW_COUNT_SCENARIOS` — this pair reads a
+frame-700→1600 PP delta rather than a frame-0→N delta or a total-step count,
+per 25.4's design) covering all 6 fixtures above. Every prior scenario (§9,
+§11.5, §12.1, §13.4, §14.6, §15.5, §16.5, §17.7, §18.7, §19.7, §20.5,
+§21.5, §22.6, §23.6, §24.8) unchanged and still green. **73 checks, 0
+failures, run live this session.** Reproduce with:
+
+```sh
+node --experimental-strip-types tools/probe/verify-factory-ai-checkviability-ground-truth.ts
+```
+
+### 25.8 Porter's summary — exact handler-by-handler port checklist
+
+**`AI_CBM_RainDance`/`SunnyDay`/`Hail`** (§25.1): one shared helper,
+parameterized by the `AI_WEATHER_*` constant to match — `get_weather;
+if (weather === OWN) score -= 8`. No new battler-state input beyond current
+weather (already needed for the CV side and, per §5.4, already landed as a
+side effect of PROGRESS entry 460's screens/weather registration). **Zero
+divergence to port separately** — implement once, parameterize three call
+sites.
+
+**`AI_CV_SunnyDay`/`Hail`** (§25.2): also one shared helper, parameterized
+by (a) the `AI_WEATHER_*` constant to exclude and (b) the three-value
+"other weather" match set (trivially `ALL_FOUR \ {OWN, NONE}`, i.e. always
+the other three real weather values, never `NONE`) — `if (ownHp% < 40)
+score -= 1; else if (weather in otherThree) score += 1`. Inputs needed:
+own HP% (already needed by several other ported handlers, e.g.
+`AttackDown`/`DefenseDown`), current weather (already needed by CBM above).
+
+**`AI_CV_RainDance`** (§25.2): needs its own bespoke body, **not** the
+`SunnyDay`/`Hail` shared helper — same HP/weather core plus two new reads:
+(1) **the AI's own ability** (`AI_USER`, not the opponent's — a direct
+field read, never the two-ability guessing heuristic `AI_TARGET` reads
+elsewhere, so no `Random()`-consuming confound to replicate); (2) **is the
+AI's own battler faster than the target** — the *same* underlying
+computation `AI_CV_SpeedDown`/`SpeedUp` and 18 other sites already need
+(`if_target_faster`), just the inverted comparison target
+(`if_user_faster`), including the same hidden tie-break `Random()` draw
+(§25.3) if a port ever reaches a genuine Speed tie — reuse whatever
+"who goes first" primitive those handlers already require, don't
+reimplement. Full gate order: user-faster? → (no) own-ability==Swift Swim?
+→ +1 bypass (skip HP/weather entirely) → (fall through / user-faster) →
+own HP<40%? → -1 → else weather-chain (Hail/Sun/Sandstorm → +1) → else
+own-ability==Rain Dish? → +1 → else 0.
+
+**Shared-tail reuse across the whole trio**: the HP-gate + 3-way-weather-
+chain-with-fallthrough shape (Gates H/W1/W2/W3) is identical in all three
+CV bodies — a single parameterized helper `weatherSetterCvScore(ownHp,
+weather, ownWeatherConstant)` covers `SunnyDay`/`Hail` completely and covers
+`RainDance`'s own Gate H/W1/W2/W3 span (everything after the Gate P/S
+prologue and before the Gate R tail) — only the prologue and tail need
+`RainDance`-specific code, not the whole body.
+
+**Not required for this port, but real**: `get_weather`'s own
+`AI_WEATHER_NONE` stale-read bug (§25.1) is a genuine source-level quirk a
+porter should decide about explicitly (replicate for byte-exact AI parity,
+or clean it up) rather than discover by accident; it only matters for a
+`AI_CheckBadMove`/`AI_CheckViability` weather-effect dispatch on a battle
+that has had **zero** weather set at any point so far this battle.

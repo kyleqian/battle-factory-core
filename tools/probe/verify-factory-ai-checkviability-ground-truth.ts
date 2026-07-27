@@ -972,6 +972,134 @@ const DRAW_COUNT_SCENARIOS: DrawCountScenarioSpec[] = [
   },
 ];
 
+// AI_CV_RainDance/SunnyDay/Hail (data/battle_ai_scripts.s:2037-2059/2060-2076/
+// 2261-2278, doc §25) + their AI_CBM_RainDance/SunnyDay/Hail siblings
+// (:490-493/495-498/522-525): all six handlers are genuinely 0-`if_random`
+// (no `if_random_less_than` anywhere in the CBM or CV body for any of the
+// three), so the DRAW_COUNT_SCENARIOS technique above (compare total
+// Random() call counts with all 4 opponent slots identical) has NO signal to
+// read -- CBM's score change and CV's score change never touch Random() at
+// all. The only live-observable channel is the AI's own final MOVE PICK, so
+// these fixtures follow SCENARIOS' pick-based design instead (opponent
+// moveset [TEST_WEATHER_MOVE, MOVE_GROWL x3], the same zero-baseline Growl
+// control established by AI_CV_SpeedDown/AttackDown, §6/§14), extended to
+// two real turns: turn 1 (player, all 4 slots the SAME real weather move,
+// forced choice) establishes a PRE-EXISTING weather state live (never
+// injected); turn 2 is the opponent's first decision made under that
+// already-established weather, isolated by reading the opponent's PP delta
+// between frame 700 (turn 1 fully settled, including its own end-of-turn
+// weather-damage tick) and frame 1600 (turn 2 fully settled). Each handler
+// gets two fixtures: "cbmreach" (turn 1 sets the WEATHER MOVE'S OWN matching
+// weather, e.g. Rain for AI_CV_RainDance -- AI_CBM_*'s Score_Minus8 fires,
+// AI_CV_*'s own weather-chain does NOT match its own type, so CV stays quiet
+// -- net negative, turn 2 must never re-pick slot 0) and "cvreach" (turn 1
+// sets Sandstorm -- common to all three handlers' own "+1" weather-chain
+// bucket, confirmed by source: RainDance checks HAIL/SUN/SANDSTORM,
+// SunnyDay checks HAIL/RAIN/SANDSTORM, Hail checks SUN/RAIN/SANDSTORM --
+// AI_CBM_*'s own gate does NOT match Sandstorm, so CBM stays quiet, CV's own
+// +1 fires alone -- net positive, turn 2 must always pick slot 0). Live-
+// verified 6/6 fixtures x 2 seeds = 12/12 exact matches to this prediction
+// (tools/battle-lab/... probes, this session).
+interface WeatherPickScenarioSpec {
+  label: string;
+  path: string;
+  // true = the handler's own reach branch is expected to WIN (AI picks slot
+  // 0, the weather move, turn 2); false = expected to LOSE (AI picks one of
+  // slots 1-3, Growl, turn 2; slot 0 is never touched between frame 700 and
+  // frame 1600).
+  expectedSlot0Wins: boolean;
+}
+
+const WEATHER_PICK_SCENARIOS: WeatherPickScenarioSpec[] = [
+  {
+    label:
+      "AI_CBM_RainDance + AI_CV_RainDance, weather pre-set to Rain by a real turn-1 move -- AI_CBM_RainDance's Score_Minus8 fires (data/battle_ai_scripts.s:490-493, get_weather==AI_WEATHER_RAIN), AI_CV_RainDance's own weather-chain does NOT match (Rain isn't in its Hail/Sun/Sandstorm list, :2043-2046) -- net negative, turn 2 must never re-pick Rain Dance",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-raindance-cbmreach-off.json",
+    expectedSlot0Wins: false,
+  },
+  {
+    label:
+      "AI_CBM_RainDance + AI_CV_RainDance, weather pre-set to Sandstorm by a real turn-1 move -- AI_CBM_RainDance's gate does not match (weather != Rain), AI_CV_RainDance's weather-chain DOES match Sandstorm (:2046, score +1) -- net positive, turn 2 must pick Rain Dance",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-raindance-cvreach-off.json",
+    expectedSlot0Wins: true,
+  },
+  {
+    label:
+      "AI_CBM_SunnyDay + AI_CV_SunnyDay, weather pre-set to Sun by a real turn-1 move -- AI_CBM_SunnyDay's Score_Minus8 fires (:495-498, get_weather==AI_WEATHER_SUN), AI_CV_SunnyDay's own weather-chain does NOT match (Sun isn't in its Hail/Rain/Sandstorm list, :2062-2065) -- net negative, turn 2 must never re-pick Sunny Day",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-sunnyday-cbmreach-off.json",
+    expectedSlot0Wins: false,
+  },
+  {
+    label:
+      "AI_CBM_SunnyDay + AI_CV_SunnyDay, weather pre-set to Sandstorm by a real turn-1 move -- AI_CBM_SunnyDay's gate does not match, AI_CV_SunnyDay's weather-chain DOES match Sandstorm (:2065, score +1) -- net positive, turn 2 must pick Sunny Day",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-sunnyday-cvreach-off.json",
+    expectedSlot0Wins: true,
+  },
+  {
+    label:
+      "AI_CBM_Hail + AI_CV_Hail, weather pre-set to Hail by a real turn-1 move -- AI_CBM_Hail's Score_Minus8 fires (:522-525, get_weather==AI_WEATHER_HAIL), AI_CV_Hail's own weather-chain does NOT match (Hail isn't in its Sun/Rain/Sandstorm list, :2264-2266) -- net negative, turn 2 must never re-pick Hail",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-hail-cbmreach-off.json",
+    expectedSlot0Wins: false,
+  },
+  {
+    label:
+      "AI_CBM_Hail + AI_CV_Hail, weather pre-set to Sandstorm by a real turn-1 move -- AI_CBM_Hail's gate does not match, AI_CV_Hail's weather-chain DOES match Sandstorm (:2266, score +1) -- net positive, turn 2 must pick Hail",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-hail-cvreach-off.json",
+    expectedSlot0Wins: true,
+  },
+];
+
+async function verifyWeatherPickScenario(spec: WeatherPickScenarioSpec): Promise<void> {
+  console.log(`\n=== ${spec.label} ===`);
+  for (const seed of SEEDS) {
+    const run1 = await runScenario(spec.path, seed);
+    const run2 = await runScenario(spec.path, seed);
+
+    const f0a = run1.get(0)!;
+    const f0b = run2.get(0)!;
+    check(
+      `seed ${seed}: frame 0 identical across reruns (determinism)`,
+      JSON.stringify(f0a) === JSON.stringify(f0b),
+      "initial state differs between runs",
+    );
+
+    const f700 = run1.get(700)!;
+    const f1600 = run1.get(1600)!;
+    const before = f700.battlers.opponent.pp;
+    const after = f1600.battlers.opponent.pp;
+
+    const slot0Delta = before[0]! - after[0]!;
+    const othersDelta = [1, 2, 3].map((i) => before[i]! - after[i]!);
+
+    if (spec.expectedSlot0Wins) {
+      check(
+        `seed ${seed}: turn-2 pick is slot 0 (the weather move) -- PP drops by exactly 1, slots 1-3 untouched`,
+        slot0Delta === 1 && othersDelta.every((d) => d === 0),
+        `observed opponent PP ${JSON.stringify(before)} -> ${JSON.stringify(after)}`,
+      );
+    } else {
+      check(
+        `seed ${seed}: turn-2 pick is NEVER slot 0 -- slot 0 PP untouched, exactly one of slots 1-3 (Growl) drops by 1`,
+        slot0Delta === 0 && othersDelta.filter((d) => d === 1).length === 1 && othersDelta.every((d) => d === 0 || d === 1),
+        `observed opponent PP ${JSON.stringify(before)} -> ${JSON.stringify(after)}`,
+      );
+    }
+
+    // Opponent HP must stay well above the handlers' own <40% gate throughout
+    // (Hail's own end-of-turn chip damage is the only source of HP loss in
+    // these fixtures -- Growl/weather moves never deal damage) so the CV
+    // body's own if_hp_less_than gate stays false in both turns, isolating
+    // the weather-chain branch this fixture actually targets.
+    check(
+      `seed ${seed}: opponent HP stays >=40% through frame 1600 (no HP-gate confound)`,
+      f1600.battlers.opponent.hp >= 0.4 * f0a.battlers.opponent.hp,
+      `opponent HP ${f0a.battlers.opponent.hp} -> ${f1600.battlers.opponent.hp}`,
+    );
+
+    console.log(`  seed ${seed}: opponent PP @700=${JSON.stringify(before)} @1600=${JSON.stringify(after)}`);
+  }
+}
+
 function totalPpUsed(ppBefore: number[], ppAfter: number[]): number {
   let used = 0;
   for (let i = 0; i < ppBefore.length; i++) used += ppBefore[i]! - ppAfter[i]!;
@@ -1031,6 +1159,9 @@ async function main(): Promise<void> {
   }
   for (const spec of DRAW_COUNT_SCENARIOS) {
     await verifyDrawCountScenario(spec);
+  }
+  for (const spec of WEATHER_PICK_SCENARIOS) {
+    await verifyWeatherPickScenario(spec);
   }
 
   console.log(`\n${failures === 0 ? "ALL PASS" : `${failures} FAILURE(S)`}`);
