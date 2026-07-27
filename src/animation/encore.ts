@@ -124,14 +124,32 @@ export function encoreSpotlightAtAge(
 
 export function encoreTargetY2AtAge(
   age: number,
-  targetSide: "player" | "opponent",
+  attackerSide: "player" | "opponent",
 ): number {
-  if (age < ENCORE_SWAY_FIRST_AGE || age >= 167) return 0;
-  const callback = age - ENCORE_SWAY_FIRST_AGE + 1;
-  const waveIndex = (callback * 6) & 0xff;
-  const sine = (GBA_SINE_TABLE_256[waveIndex]! * 8) >> 8;
-  const magnitude = Math.abs(sine);
-  return targetSide === "player" ? magnitude : -magnitude;
+  if (age < ENCORE_SWAY_FIRST_AGE) return 0;
+  let sineIndex = 0;
+  let highHalf = 0;
+  let lowHalf = 1;
+  let sways = 5;
+  let y2 = 0;
+  for (let callbackAge = ENCORE_SWAY_FIRST_AGE; callbackAge <= age; callbackAge += 1) {
+    sineIndex = (sineIndex + 1536) & 0xffff;
+    const waveIndex = sineIndex >>> 8;
+    const amplitude = attackerSide === "player" ? 8 : -8;
+    const sine = (GBA_SINE_TABLE_256[waveIndex]! * amplitude) >> 8;
+    const magnitude = Math.abs(sine);
+    y2 = attackerSide === "player" ? -magnitude : magnitude;
+    if (
+      (waveIndex >= 0x80 && highHalf === 0 && lowHalf === 1)
+      || (waveIndex < 0x7f && highHalf === 1 && lowHalf === 0)
+    ) {
+      highHalf ^= 1;
+      lowHalf ^= 1;
+      sways -= 1;
+      if (sways === 0) return 0;
+    }
+  }
+  return y2;
 }
 
 export function encoreAtAge(
@@ -143,14 +161,11 @@ export function encoreAtAge(
   const playSe2 = age === ENCORE_SWAY_FIRST_AGE;
   return {
     bldy: encoreBldyAtAge(age),
-    win1Enabled: age >= 0 && age < 213,
+    win1Enabled: age >= 0 && age < 212,
     objWindowEnabled: age >= ENCORE_SPRITES_FIRST_AGE && age < 169,
     hands: encoreHandsAtAge(age, attackerCenter),
     spotlight: encoreSpotlightAtAge(age, targetCenter),
-    targetY2: encoreTargetY2AtAge(
-      age,
-      attackerSide === "player" ? "opponent" : "player",
-    ),
+    targetY2: encoreTargetY2AtAge(age, attackerSide),
     playSe2,
     playSe2Pan: playSe2 ? (attackerSide === "player" ? 63 : -63) : null,
   };

@@ -543,6 +543,7 @@ import acidAsset from "../animation/assets/acid.json" with { type: "json" };
 import hardenAsset from "../animation/assets/harden.json" with { type: "json" };
 import calmMindAsset from "../animation/assets/calm-mind.json" with { type: "json" };
 import shadowBallAsset from "../animation/assets/shadow-ball.json" with { type: "json" };
+import encoreAsset from "../animation/assets/encore.json" with { type: "json" };
 import menuHealthboxPlayerAsset from "../assets/gen/menu-healthbox-player.json" with { type: "json" };
 import summaryBallAsset from "../assets/gen/summary-ball.json" with { type: "json" };
 import battleAnimBallOpenAsset from "../assets/gen/battle-anim-ball-open.json" with { type: "json" };
@@ -641,6 +642,7 @@ import {
   sceneOnHardenView,
   sceneOnCalmMindView,
   sceneOnShadowBallView,
+  sceneOnEncoreView,
   sceneOnFutureSightView,
   sceneOnConfusionView,
   sceneOnPsychicView,
@@ -957,6 +959,12 @@ const shadowBallArt = shadowBallAsset as {
   shadowBall: { tileset: Tileset; palette: RgbColor[] };
   sableyeBack: { tileset: Tileset; palette: RgbColor[] };
   sableyeFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const encoreArt = encoreAsset as {
+  spotlight: { tileset: Tileset; palette: RgbColor[] };
+  clappingHand: { tileset: Tileset; palette: RgbColor[] };
+  minunBack: { tileset: Tileset; palette: RgbColor[] };
+  minunFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const MURKROW_CORNER = { x: 144, y: 19 };
 const menuHealthboxPlayer = menuHealthboxPlayerAsset as SendOutHealthboxContentAsset;
@@ -2528,6 +2536,57 @@ function drawSpriteSheet(fb: Uint8Array, tileset: Tileset, palette: RgbColor[], 
   for (let ty = 0; ty < tileset.rows; ty += 1) {
     for (let tx = 0; tx < tileset.columns; tx += 1) {
       drawSpriteSheetTile(fb, tileset, palette, ty * tileset.columns + tx, ox + tx * 8, oy + ty * 8);
+    }
+  }
+}
+
+function drawSpriteSheetHFlip(
+  fb: Uint8Array,
+  tileset: Tileset,
+  palette: RgbColor[],
+  ox: number,
+  oy: number,
+): void {
+  const width = tileset.columns * 8;
+  for (let sy = 0; sy < tileset.rows * 8; sy += 1) {
+    for (let sx = 0; sx < width; sx += 1) {
+      const sourceX = width - 1 - sx;
+      const tile = tileset.tiles[
+        Math.floor(sy / 8) * tileset.columns + Math.floor(sourceX / 8)
+      ];
+      const index = tile?.[(sy % 8) * 8 + (sourceX % 8)] ?? 0;
+      if (index === 0) continue;
+      const color = palette[index];
+      if (color) setPixel(fb, ox + sx, oy + sy, color);
+    }
+  }
+}
+
+function markAffineDoubleSpriteMask(
+  mask: Uint8Array,
+  tileset: Tileset,
+  centerX: number,
+  centerY: number,
+  pa: number,
+  pd: number,
+): void {
+  const width = tileset.columns * 8;
+  const height = tileset.rows * 8;
+  for (let dy = -height; dy < height; dy += 1) {
+    const sourceY = ((dy * pd) >> 8) + height / 2;
+    if (sourceY < 0 || sourceY >= height) continue;
+    for (let dx = -width; dx < width; dx += 1) {
+      const sourceX = ((dx * pa) >> 8) + width / 2;
+      if (sourceX < 0 || sourceX >= width) continue;
+      const tile = tileset.tiles[
+        Math.floor(sourceY / 8) * tileset.columns
+        + Math.floor(sourceX / 8)
+      ];
+      if (!tile?.[(sourceY % 8) * 8 + (sourceX % 8)]) continue;
+      const x = centerX + dx, y = centerY + dy;
+      if (x >= 0 && x < 240 && y >= 0 && y < 160) {
+        mask[y * 240 + x] = 1;
+      }
     }
   }
 }
@@ -15935,6 +15994,168 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "SABLEYE used" : "Foe SABLEYE used",
       "SHADOW BALL!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "ENCORE") {
+    const view = sceneOnEncoreView(state);
+    const displayed = sceneOnEncoreView({ ...state, age: state.age - 1 });
+    const fieldProfile = state.config.fieldProfile;
+    const playerToOpponent =
+      view.attacker.species === "MINUN"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "MINUN"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged ENCORE pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const minunSource = playerToOpponent
+      ? encoreArt.minunBack : encoreArt.minunFront;
+    const minunSprite = playerToOpponent
+      ? minunSource
+      : {
+          ...minunSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: minunSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const onixSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const normalField = new Uint8Array(fb.length);
+    const drawNormalField = (targetFb: Uint8Array) => {
+      drawTileBg(
+        targetFb,
+        battleBg.static.tileset,
+        battleBg.static.tilemap,
+        battleBg.palette,
+      );
+      const drawMinun = () => drawSpriteSheet(
+        targetFb,
+        minunSprite.tileset,
+        minunSprite.palette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+      );
+      const targetRestX = playerToOpponent
+        ? speciesFrontIdleRestOffset("ONIX")?.x2 ?? 0
+        : 0;
+      const drawOnix = () => drawSpriteSheet(
+        targetFb,
+        onixSprite.tileset,
+        onixSprite.palette,
+        view.target.geometry.spriteCorner.x + targetRestX,
+        view.target.geometry.spriteCorner.y + view.targetY2,
+      );
+      // GBA priority order: opponent-front below player-back.
+      if (playerToOpponent) {
+        drawOnix();
+        drawMinun();
+      } else {
+        drawMinun();
+        drawOnix();
+      }
+      drawSendOutHealthbox(
+        targetFb,
+        0,
+        composeOpponentHealthbox(healthboxAssemblyAssets, {
+          name: playerToOpponent ? "ONIX" : "MINUN",
+          level: 50,
+          gender: playerToOpponent ? "male" : "female",
+          hpFraction: fieldProfile.opponentHp / fieldProfile.opponentMaxHp,
+          status: "none",
+        }),
+      );
+      drawComposedPlayerHealthbox(
+        targetFb,
+        composePlayerHealthbox(playerHealthboxAssets, {
+          name: playerToOpponent ? "MINUN" : "ONIX",
+          level: 50,
+          gender: playerToOpponent ? "female" : "male",
+          hpFraction: fieldProfile.playerHp / fieldProfile.playerMaxHp,
+          status: "none",
+          currentHp: fieldProfile.playerHp,
+          maxHp: fieldProfile.playerMaxHp,
+        }),
+      );
+    };
+    drawNormalField(normalField);
+    fb.set(normalField);
+    if (view.bldy > 0) {
+      for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
+        const offset = pixel * 4;
+        const packed = mgbaDarkenColor(
+          fb[offset]! | (fb[offset + 1]! << 8) | (fb[offset + 2]! << 16),
+          view.bldy,
+        );
+        fb[offset] = packed & 0xff;
+        fb[offset + 1] = (packed >>> 8) & 0xff;
+        fb[offset + 2] = (packed >>> 16) & 0xff;
+      }
+    }
+    const restoreMask = new Uint8Array(240 * 160);
+    if (view.win1Enabled) {
+      restoreMask.fill(1, 120 * 240);
+    }
+    if (view.objWindowEnabled && view.spotlight) {
+      markAffineDoubleSpriteMask(
+        restoreMask,
+        encoreArt.spotlight.tileset,
+        view.spotlight.centerX + view.spotlight.x2,
+        view.spotlight.centerY,
+        view.spotlight.pa,
+        view.spotlight.pd,
+      );
+    }
+    for (let pixel = 0; pixel < restoreMask.length; pixel += 1) {
+      if (!restoreMask[pixel]) continue;
+      const offset = pixel * 4;
+      fb[offset] = normalField[offset]!;
+      fb[offset + 1] = normalField[offset + 1]!;
+      fb[offset + 2] = normalField[offset + 2]!;
+    }
+    // Each normal hand is covered by its identical OBJ-window copy, so
+    // color effects are disabled for every opaque hand texel.
+    for (const hand of displayed.hands) {
+      const x = hand.centerX + hand.x2 - 16;
+      const y = hand.centerY - 16;
+      if (hand.hFlip) {
+        drawSpriteSheetHFlip(
+          fb,
+          encoreArt.clappingHand.tileset,
+          encoreArt.clappingHand.palette,
+          x,
+          y,
+        );
+      } else {
+        drawSpriteSheet(
+          fb,
+          encoreArt.clappingHand.tileset,
+          encoreArt.clappingHand.palette,
+          x,
+          y,
+        );
+      }
+    }
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "MINUN used" : "Foe MINUN used",
+      "ENCORE!",
       99,
     );
     return;

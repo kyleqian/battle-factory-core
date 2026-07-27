@@ -90,6 +90,11 @@ def main() -> None:
             "tasks": active_tasks(), "battlerSprites": [sprite(i) for i in ids],
             "activeSprites": [sprite(i) for i in active],
             "effectSprites": [sprite(i) for i in active if oracle.read_u32(sprites + i * 0x44 + 0x14) in templates.values()],
+            "spotlightTiles": next((
+                block(0x06010000 + (u16(sprites + i * 0x44 + 4) & 0x3ff) * 32, 0x800).hex()
+                for i in active
+                if oracle.read_u32(sprites + i * 0x44 + 0x14) == templates["gSpotlightSpriteTemplate"]
+            ), None),
             "fadedPalette": [u16(faded + i * 2) for i in range(512)],
             "unfadedPalette": [u16(unfaded + i * 2) for i in range(512)],
             "hardwarePalette": [u16(0x5000000 + i * 2) for i in range(512)],

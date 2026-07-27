@@ -4,6 +4,14 @@ Older dated sections moved out of `ANIMATION_PROGRESS.md` to keep that
 file lean (`AGENTS.md`'s ~3-most-recent convention). Git history has the
 full record regardless; this file is a read-only reference.
 
+## HARDEN exact track entry archived (2026-07-27)
+
+`MOVE_HARDEN` remains exact at **101/101 ×2** in both orientations, covering
+MetallicShine, its invisible attacker OBJ-window copy, palette transformation,
+BG1 sweep, display registers, and teardown. Full evidence and sibling verdicts
+remain authoritative in `ANIMATION_COVERAGE.json`; this live entry moved here
+only to retain roughly three current sections.
+
 ## SYNTHESIS exact track entry archived (2026-07-27)
 
 `MOVE_SYNTHESIS` remains exact at **130/130 ×2** in both orientations,

@@ -256,6 +256,10 @@ import {
   type LoopSeAdjustPanningState,
   type ShadowBallSprite,
 } from "./shadowBall.ts";
+import {
+  encoreAtAge,
+  type EncoreState,
+} from "./encore.ts";
 
 export type SceneOnBattlerSide = "player" | "opponent";
 
@@ -292,6 +296,7 @@ export interface SceneOnPresentationBattler {
     | "LUNATONE"
     | "SHUPPET"
     | "PLUSLE"
+    | "MINUN"
     | "SABLEYE";
   readonly geometry: SceneOnBattlerGeometry;
 }
@@ -771,6 +776,13 @@ export interface SceneOnShadowBallConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnEncoreConfig {
+  readonly move: "ENCORE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnFutureSightConfig {
   readonly move: "FUTURE_SIGHT";
   readonly attacker: SceneOnPresentationBattler;
@@ -834,6 +846,7 @@ export type SceneOnMoveConfig =
   | SceneOnHardenConfig
   | SceneOnCalmMindConfig
   | SceneOnShadowBallConfig
+  | SceneOnEncoreConfig
   | SceneOnFutureSightConfig
   | SceneOnConfusionConfig
   | SceneOnPsychicConfig
@@ -869,6 +882,12 @@ export interface SceneOnAcidView {
   readonly targetOffset: Readonly<{ x2: number; y2: number }>;
   readonly defenderPaletteY: number;
   readonly sprites: readonly AcidSprite[];
+}
+
+export interface SceneOnEncoreView extends EncoreState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
 }
 
 export interface SceneOnEarthquakeView extends EarthquakeAnimationState {
@@ -1889,6 +1908,26 @@ export function sceneOnShadowBallView(
     loopSound: shadowBallLoopSoundAtAge(
       state.age,
       state.config.attacker.geometry.side,
+    ),
+  };
+}
+
+/** `age=0` is AnimTask_CreateSpotlight / HardwarePaletteFade creation. */
+export function sceneOnEncoreView(
+  state: SceneOnMovePresentationState,
+): SceneOnEncoreView {
+  if (state.config.move !== "ENCORE") {
+    throw new Error(`expected ENCORE presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...encoreAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.battlePositionCenter,
+      state.config.target.geometry.battlePositionCenter,
     ),
   };
 }

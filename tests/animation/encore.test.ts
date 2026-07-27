@@ -46,10 +46,10 @@ describe("Encore source reducer", () => {
   });
 
   it("ports the side-oriented five-sway target task and PlaySE2 boundary", () => {
-    expect(encoreTargetY2AtAge(59, "opponent")).toBe(0);
-    expect(encoreTargetY2AtAge(60, "opponent")).toBe(-1);
-    expect(encoreTargetY2AtAge(60, "player")).toBe(1);
-    expect(encoreTargetY2AtAge(167, "opponent")).toBe(0);
+    expect(encoreTargetY2AtAge(59, "player")).toBe(0);
+    expect(encoreTargetY2AtAge(60, "player")).toBe(-1);
+    expect(encoreTargetY2AtAge(60, "opponent")).toBe(2);
+    expect(encoreTargetY2AtAge(167, "player")).toBe(0);
     const player = encoreAtAge(
       60, "player", { x: 72, y: 80 }, { x: 176, y: 40 },
     );

@@ -44,6 +44,42 @@ animation. A status caused by a move is not part of that move's animation.
   presentation seam and all source- or evidence-required variants are covered.
 - No entry means unsupported.
 
+## ENCORE legal evidence checkpoint; PlaySE2WithPanning track not promoted (2026-07-27)
+
+**Verdict:** `MOVE_ENCORE` remains unsupported. The source/task reducer is
+exact for the complete 215-frame move-owned body in both player-back and
+opponent-front MINUN orientations (**215/215 component frames**), but the
+shared-seam framebuffer is only **43/215** and **89/215**, respectively.
+Coverage census and ratchets therefore remain unchanged.
+
+**Source/probe:** complete legal mechanicLab parties use the real challenge-0
+Level-50 carrier `FRONTIER_MON_MINUN_1` set 187 (species 354, Docile, HP/DEF
+EVs, Salac Berry, SPARK/CHARM/ENCORE/HELPING HAND) and stage a real preceding
+move before legally selecting ENCORE. The reducer ports Create/RemoveSpotlight,
+both HardwarePaletteFade directions, spotlight affine/sweep, four clapping-hand
+sprites, the immediate `SE_M_ENCORE2` PlaySE2WithPanning event at relative age
+60 with target pan (+63 player attacker / -63 opponent attacker), the signed
+SwayMon body, window/register lifetimes, and teardown. Independent live probes
+reproduce the component result.
+
+**Bounded remainder:** the first player-orientation framebuffer residual is
+relative age 43, 15 pixels at x175-177/y74-80; later residuals expand with the
+affine OBJ-window spotlight and clapping-hand OAM interaction. The opposite
+orientation first differs at age 43, 20 pixels at x72/y24-43, then includes
+the player-back target sprite/OAM interaction. The extracted spotlight VRAM
+matches the source asset byte-for-byte, and task/sprite/register/sway state is
+already exact; completing acceptance needs a general GBA transformed
+OBJ-window scanline/OAM-budget compositor, not coordinate fitting.
+
+**Sibling audit/controls:** SKY ATTACK uses `SE_M_SKY_UPPERCUT` at attacker
+pan; SUPERPOWER uses `SE_M_EARTHQUAKE` at center; FLATTER shares
+`SE_M_ENCORE2` at target pan but has a distinct flatter spotlight/confetti
+body; RETURN conditionally schedules repeated `SE_M_TAIL_WHIP` attacker-pan
+tasks across power branches; COSMIC POWER uses `SE_M_COSMIC_POWER` centered
+and retains its cosmic BG/palette/star body. None is promoted. SHADOW BALL
+remains **148/148**, HARDEN **101/101**, and BIND **45/45** in both
+orientations.
+
 ## SHADOW BALL promoted to exact; LoopSEAdjustPanning track established (2026-07-27)
 
 **Verdict:** `MOVE_SHADOW_BALL` is exact through the shared Scene-ON seam in
@@ -111,43 +147,6 @@ portable comparator, and focused Tier-1 reducer tests are committed.
 Acceptance is **101/101 ×2 in both orientations**. After the final renderer
 change HARDEN remains **101/101**, SYNTHESIS **130/130**, and BIND **45/45**,
 each in both orientations. The animation import boundary did not widen.
-
-## HARDEN promoted to exact; MetallicShine track established (2026-07-27)
-
-**Verdict:** `MOVE_HARDEN` is exact through the shared Scene-ON seam in both
-required orientations, each reproduced twice. Player-back and opponent-front
-RELICANTH are each **101/101 component/task/RAM/register/hardware-palette/
-software+hardware-OAM and framebuffer frames** (oracle 292-392). Census:
-**32/276 exact, 3 partial, 241 unsupported**.
-
-**Source/probe:** complete legal mechanicLab parties stage RELICANTH with the
-real Level-50 Factory set-259 species, Sassy nature, three-way EV spread, and
-Liechi Berry; every active choice is constrained to HARDEN and ONIX to TACKLE.
-The source reducer ports all three 128px sweeps at 4px/callback, BG1_X wraps,
-BG1 metal-shine gfx/tilemap/palette, invisible attacker copy/OBJ-window mask,
-grayscale palette and permanent=FALSE restoration, WIN/DISPCNT/BLDCNT/
-BLDALPHA/BG1 attributes, `ClearBattleAnimBg`, and teardown. The dense probe
-pins the two-capture initializer, the two-capture clear wait, palette/OAM
-display latches, full hardware registers, palette, OAM, VRAM hash, and RGB.
-The source loop-sound command was audited; no sound task row survives into
-the probe-visible move-owned visual window.
-
-**Sibling audit (no promotions):** STEEL WING still needs its gust pair,
-elliptical translation, palette task, slide/return, dual hitsplats, and alpha/
-monbg body; IRON TAIL needs permanent=TRUE, lunge/hitsplat/ShakeMon, explicit
-palette restore, and alpha/monbg body; METAL CLAW needs two lunges, four claw
-slashes, and two Y-shakes; IRON DEFENSE adds its concurrent delay-8/count-2
-white-alpha BG blend; POISON TAIL uses permanent=TRUE with custom
-RGB(24,6,23), then needs lunge/hitsplat/ShakeMon, restore/alpha/monbg, and
-PoisonBubblesEffect. All remain unsupported without independent dense move
-acceptance.
-
-**Evidence/controls:** reproducible legal fixtures, asset extractor, dense
-probe, portable comparator, and focused Tier-1 reducer tests are committed.
-Acceptance is **101/101 ×2 in both orientations**. After the final renderer
-change EARTHQUAKE remains **197/197**, ACID **131/131**, and BIND **45/45**,
-each in both orientations. Palette/reducer/import-boundary tests remain green;
-the boundary did not widen.
 
 Start with one representative attacker/target. Add variants only when source
 inspection or comparison identifies a dependency: attacker side, front/back
