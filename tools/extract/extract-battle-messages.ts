@@ -83,17 +83,61 @@ const placeholders = [...placeholderSection.matchAll(/^(B_\w+)\s*=\s*FD\s+([0-9A
 if (placeholders.length < 50) throw new Error(`expected 50+ placeholder tokens, parsed ${placeholders.length}`);
 const placeholderTokens = new Set(placeholders.map((p) => p.token));
 
+// --- charmap glyph aliasing (straight-vs-curly apostrophe) ------------------
+// battle_message.c's `_("...")` string literals are typed with a plain ASCII
+// apostrophe ('), but charmap.txt aliases that source character to the SAME
+// byte (0xB4) as the curly apostrophe ('’' = B4 vs '\'' = B4) - an
+// ASCII-typing convenience for the source, not a distinct in-game glyph, so
+// every straight apostrophe the extractor pulls out of a template must be
+// decoded to the curly glyph the font actually renders. Confirmed to be the
+// ONLY such English-glyph alias in the charmap (every other duplicate-byte
+// entry pairs a Latin char with an unrelated Japanese kana char, irrelevant
+// to this English extraction) by checking every `'<char>' = HH` entry for
+// byte collisions.
+const charmapEntries = [...charmapTxt.matchAll(/^'((?:\\.|[^'])+)'\s*=\s*([0-9A-Fa-f]{2})\s*$/gm)].map((m) => ({
+  char: m[1] === "\\'" ? "'" : m[1]!,
+  byte: m[2]!.toUpperCase(),
+}));
+const charmapCharsByByte = new Map<string, string[]>();
+for (const { char, byte } of charmapEntries) {
+  const chars = charmapCharsByByte.get(byte) ?? [];
+  chars.push(char);
+  charmapCharsByByte.set(byte, chars);
+}
+const straightApostropheByte = charmapEntries.find((e) => e.char === "'")?.byte;
+const curlyApostrophe = charmapCharsByByte.get(straightApostropheByte ?? "")?.find((c) => c !== "'");
+if (straightApostropheByte !== "B4" || curlyApostrophe !== "’") {
+  throw new Error(
+    `charmap apostrophe aliasing changed: byte=${straightApostropheByte} alias=${JSON.stringify(curlyApostrophe)} - update the decode below`,
+  );
+}
+
 // --- sText_*/gText_* template string definitions ---------------------------
 
 function parseTemplateDefs(text: string): Map<string, string> {
   const out = new Map<string, string>();
   for (const m of text.matchAll(/const u8 (?:s|g)(Text_\w+)\[\]\s*=\s*_\(\s*"([^"]*)"\s*\);/g)) {
-    out.set(`${m[0]!.includes(" gText_") ? "g" : "s"}${m[1]!}`, m[2]!);
+    const decoded = m[2]!.replaceAll("'", curlyApostrophe);
+    out.set(`${m[0]!.includes(" gText_") ? "g" : "s"}${m[1]!}`, decoded);
   }
   return out;
 }
 const templateDefs = parseTemplateDefs(battleMessageC);
 if (templateDefs.size < 500) throw new Error(`expected 500+ sText_/gText_ definitions, parsed ${templateDefs.size}`);
+
+// Sweep for any OTHER charmap byte whose multiple char aliases both actually
+// appear across the extracted English text - i.e. a live version of the same
+// straight-vs-decoded ambiguity apostrophe had. (Byte-collision entries that
+// never co-occur in real template text, e.g. Latin/Japanese dual-use slots,
+// aren't a decode bug here and are skipped.)
+const allTemplateText = [...templateDefs.values()].join("\n");
+for (const [byte, chars] of charmapCharsByByte) {
+  if (byte === straightApostropheByte || chars.length < 2) continue;
+  const present = chars.filter((c) => allTemplateText.includes(c));
+  if (present.length > 1) {
+    throw new Error(`charmap byte ${byte} has multiple aliases actually used in template text: ${JSON.stringify(present)}`);
+  }
+}
 
 // --- gBattleStringsTable[] --------------------------------------------------
 
@@ -225,13 +269,13 @@ const spotChecks: [string, string][] = [
   ["STRINGID_STATROSE", "rose!"],
   ["STRINGID_STATFELL", "fell!"],
   ["STRINGID_CRITICALHIT", "A critical hit!"],
-  ["STRINGID_SUPEREFFECTIVE", "It's super effective!"],
-  ["STRINGID_NOTVERYEFFECTIVE", "It's not very effective…"],
+  ["STRINGID_SUPEREFFECTIVE", "It’s super effective!"],
+  ["STRINGID_NOTVERYEFFECTIVE", "It’s not very effective…"],
   ["STRINGID_PKMNFLINCHED", "{B_ATK_NAME_WITH_PREFIX} flinched!"],
   ["STRINGID_ATTACKERFAINTED", "{B_ATK_NAME_WITH_PREFIX}\\nfainted!\\p"],
   ["STRINGID_TARGETFAINTED", "{B_DEF_NAME_WITH_PREFIX}\\nfainted!\\p"],
-  ["STRINGID_ATTACKMISSED", "{B_ATK_NAME_WITH_PREFIX}'s\\nattack missed!"],
-  ["STRINGID_DEFENDERSSTATROSE", "{B_DEF_NAME_WITH_PREFIX}'s {B_BUFF1}\\n{B_BUFF2}"],
+  ["STRINGID_ATTACKMISSED", "{B_ATK_NAME_WITH_PREFIX}’s\\nattack missed!"],
+  ["STRINGID_DEFENDERSSTATROSE", "{B_DEF_NAME_WITH_PREFIX}’s {B_BUFF1}\\n{B_BUFF2}"],
 ];
 for (const [symbol, want] of spotChecks) {
   const got = bySymbol.get(symbol)?.template;

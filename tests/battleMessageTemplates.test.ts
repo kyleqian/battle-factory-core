@@ -36,21 +36,21 @@ describe("battle-message-templates.json (S7 groundwork item 4: battle-message TE
     // text) - the same stat-stage change RAM-confirmed in this dossier's §7
     // item 2 (gBattleMons[1].statStages[STAT_EVASION] 6->7 at tick 1959).
     const defenderStatRose = bySymbol.get("STRINGID_DEFENDERSSTATROSE")!;
-    expect(defenderStatRose.template).toBe("{B_DEF_NAME_WITH_PREFIX}'s {B_BUFF1}\\n{B_BUFF2}");
+    expect(defenderStatRose.template).toBe("{B_DEF_NAME_WITH_PREFIX}’s {B_BUFF1}\\n{B_BUFF2}");
     expect(bySymbol.get("STRINGID_STATROSE")!.template).toBe("rose!");
     const evasion = battleMessages.statNames.find((s) => s.stat === "STAT_EVASION");
     expect(evasion?.name).toBe("evasiveness");
   });
 
   it("covers the standard variant families the brief named", () => {
-    expect(bySymbol.get("STRINGID_SUPEREFFECTIVE")!.template).toBe("It's super effective!");
-    expect(bySymbol.get("STRINGID_NOTVERYEFFECTIVE")!.template).toBe("It's not very effective…");
+    expect(bySymbol.get("STRINGID_SUPEREFFECTIVE")!.template).toBe("It’s super effective!");
+    expect(bySymbol.get("STRINGID_NOTVERYEFFECTIVE")!.template).toBe("It’s not very effective…");
     expect(bySymbol.get("STRINGID_CRITICALHIT")!.template).toBe("A critical hit!");
-    expect(bySymbol.get("STRINGID_ATTACKMISSED")!.template).toBe("{B_ATK_NAME_WITH_PREFIX}'s\\nattack missed!");
+    expect(bySymbol.get("STRINGID_ATTACKMISSED")!.template).toBe("{B_ATK_NAME_WITH_PREFIX}’s\\nattack missed!");
     expect(bySymbol.get("STRINGID_PKMNFLINCHED")!.template).toBe("{B_ATK_NAME_WITH_PREFIX} flinched!");
     expect(bySymbol.get("STRINGID_ATTACKERFAINTED")!.template).toBe("{B_ATK_NAME_WITH_PREFIX}\\nfainted!\\p");
     expect(bySymbol.get("STRINGID_TARGETFAINTED")!.template).toBe("{B_DEF_NAME_WITH_PREFIX}\\nfainted!\\p");
-    expect(bySymbol.get("STRINGID_ATTACKERSSTATFELL")!.template).toBe("{B_ATK_NAME_WITH_PREFIX}'s {B_BUFF1}\\n{B_BUFF2}");
+    expect(bySymbol.get("STRINGID_ATTACKERSSTATFELL")!.template).toBe("{B_ATK_NAME_WITH_PREFIX}’s {B_BUFF1}\\n{B_BUFF2}");
     expect(bySymbol.get("STRINGID_STATFELL")!.template).toBe("fell!");
   });
 

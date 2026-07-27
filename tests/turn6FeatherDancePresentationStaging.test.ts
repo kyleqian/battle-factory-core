@@ -55,10 +55,9 @@ describe("turn6FeatherDancePresentationStaging: staged real FEATHER_DANCE oppone
     expect(lines).toEqual(["Foe PIDGEOTTO used", "FEATHERDANCE!"]);
   });
 
-  it("resolveTurn6AtkFellLines resolves line 2 (\"harshly fell!\") byte-identical to TURN6_ATKFELL_LINE2, but line 1 diverges from TURN6_ATKFELL_LINE1 by exactly one glyph: the extracted battle-message-templates.json segment for \"'s \" is a straight ASCII apostrophe, not the curly U+2019 the real font/charmap actually uses (battleMenu.ts:1559's own doc note) -- a real, newly-exposed residual (docs/presentation-seam-scout.md §12), not a bug in this staging module", () => {
+  it("resolveTurn6AtkFellLines resolves byte-identical to TURN6_ATKFELL_LINE1/2 (battleMenu.ts:1559-1560), curly apostrophe included -- the straight-vs-curly glyph residual docs/presentation-seam-scout.md §12.2/§12.3 step 3 named is fixed at the extractor layer (tools/extract/extract-battle-messages.ts's charmap-derived apostrophe decode)", () => {
     const lines = resolveTurn6AtkFellLines();
-    expect(lines).toEqual(["ONIX's ATTACK", "harshly fell!"]); // straight apostrophe -- see this test's own name
-    expect(lines[1]).toBe("harshly fell!");
+    expect(lines).toEqual(["ONIX’s ATTACK", "harshly fell!"]);
   });
 
   it("resolveTurn6FeatherDanceWindowContent resolves the kickoff message, the ATK stat-stage-change, and the stat-fell message through presentationEventWindowBridge.ts's own new bridge (docs/presentation-seam-scout.md §12.3 step 1), purely from the staged event stream's own provenance", () => {

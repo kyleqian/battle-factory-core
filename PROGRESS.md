@@ -15,6 +15,119 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 520 — [SUPERVISOR 2026-07-27 ~15:15] round 1 verified + merged (3 workers, all green); apostrophe-charmap prerequisite FIXED; round 2 dispatched
+
+- **State:** master green at **268 files / 3560 tests** (union of entry 519's
+  main-lane step + two side merges), `npm run build` clean, both side
+  worktrees removed, zero unmerged branches. Census **108/214 effects,
+  209/355 moves, 2321/2957 weighted (78.5%)**.
+- **Side merges (both verified in-worktree first, live compare reruns by
+  supervisor):** (1) §13 prep-scout — `docs/presentation-seam-scout.md` §13
+  picks `turn2-endeavor.json` (77 frames, smallest unblocked genuinely-new
+  window; comparator re-pinned 77/77 twice + 9-trace sweep; staging module
+  `turn2EndeavorPresentationStaging.ts` committed unwired, 9 tests). Scout
+  also proved `turn6-statfall.json` is *directly* apostrophe-blocked (its
+  committed capture renders past the curly ’ in "ONIX’s ATTACK") and
+  `turn11-featherdance.json` doubly so. (2) That prerequisite is now FIXED:
+  root cause `tools/extract/extract-battle-messages.ts` never applied
+  charmap.txt:87-88's `'\'' = B4` alias — extractor now decodes it (with a
+  loud byte/glyph assertion), 129/365 templates corrected apostrophe-only
+  (structural diff verified), generic dual-alias sweep found no other
+  affected glyph class, 2 new resolver pins + 2 stale pins updated; zero
+  drift across 4 resolver-driven traces + literal-driven turn6-statfall
+  127/127 (supervisor reran resolver tests 13/13 + turn6-featherdance 90/90
+  + turn1-rockslide 256/256 live).
+- **Round 2 (dispatched):** main → §13.3 wiring (`turn2-endeavor.json`
+  kickoff text from kernel events, acceptance 77/77 + §13.3's regression
+  sweep) ∥ side → design/prep scout for the new top census set:
+  EFFECT_ROAR's `FORCERANDOMSWITCH`/`INITMULTIHITSTRING`/`JUMPIFHASNOHP`
+  trio (40) + the overlapping multi-hit pair row (4 effects, 23) — ground
+  truth + registration plan for a round-3 main step.
+- **Next:** verify round 2; then either the turn6-statfall wiring (now
+  unblocked, zero new staged proof needed per §13's table) or the Roar/
+  multi-hit registration, per what's banked.
+
+---
+## 519 — [BOUNDED WORKER 2026-07-27 ~15:00] B_SCR_OP_TRYINFATUATING + B_SCR_OP_JUMPIFCONFUSEDANDSTATMAXED registered; EFFECT_ATTRACT/EFFECT_SWAGGER/EFFECT_FLATTER executable end to end
+
+- **State:** tree green at **267 files / 3549 tests** (worker wrote 269;
+  supervisor corrected against a live `npm test` run) (+99 tests
+  over session start 263/3512: `battleScriptTryinfatuatingOpcode.test.ts`
+  15 tests, `battleScriptJumpifconfusedandstatmaxedOpcode.test.ts` 13 tests,
+  plus 2 existing test files updated for the barrier narrowing below and 2
+  attack-canceler fixture files updated for the new `personality` battler
+  field), `npm run build` clean. `executableFrontierRatchet.test.ts`
+  unmoved (**0 new barrier call sites** — both new opcodes are fully
+  source-complete; the two barrier *narrowings* below reuse existing
+  `unsupportedBranch` call sites, same file/line, just a tighter trigger
+  condition).
+- **Did:** registered both opcodes of round 1's set. (1) `Cmd_tryinfatuating`
+  (`battleScriptTryinfatuatingOpcode.ts`): Oblivious block (hardcoded jump,
+  not the operand ptr), the same-gender/genderless-attacker/genderless-
+  target/already-infatuated-with-anyone OR-chain (all four collapse to the
+  operand's one fail ptr), success write of
+  `STATUS2_INFATUATED_WITH(attacker)` — reused `statusInfatuatedWithBit`
+  (newly exported from `battleScriptHitChainOpcode.ts`, previously a private
+  helper for `Cmd_cleareffectsonfaint`'s clear) so the write is *provably*
+  the same bit `advanceBattleScriptAttackCancelerInLove`'s admission phase
+  already reads (composition test in the new file). Gender inputs needed a
+  minimal kernel addition: a `personality` battler field (mirrors
+  `gBattleMons[battler].personality`; source rereads species/personality
+  from the party mon, but this engine has no Transform species/personality
+  divergence yet, so they're always identical) plus a new `genderRatio`
+  column on `species-stats.json` (extractor widened to parse
+  `species_info.h`'s `.genderRatio` — a `MON_MALE`/`MON_FEMALE`/
+  `MON_GENDERLESS` literal or `PERCENT_FEMALE(percent)`, truncated on
+  assignment) — reused the existing `monGender.ts` per-mon half unchanged.
+  (2) `Cmd_jumpifconfusedandstatmaxed`
+  (`battleScriptJumpifconfusedandstatmaxedOpcode.ts`): a pure
+  `STATUS2_CONFUSION` + `statStages[stat]==MAX_STAT_STAGE` read, always
+  against `gBattlerTarget` directly (no battler operand in the macro at
+  all). Zero barriers in either new opcode.
+- **Standing-warning barriers found and widened (entries 507/515's own
+  warning, budgeted for):** proving Attract's Oblivious tail live surfaced
+  two existing barriers that over-fired on ability *membership* where
+  source only acts on the matching *status*: (a) `accuracycheck`'s
+  `JumpIfMoveFailed` ability-absorbing check barriered on ANY nonzero
+  target ability; `AbilityBattleEffects(ABILITYEFFECT_ABSORBING)`
+  (`battle_util.c:2679-2729`) only special-cases three (Volt Absorb/Water
+  Absorb/Flash Fire) — narrowed to those three, every other ability
+  (Oblivious included) now falls through exactly like source. (b)
+  `Cmd_moveend`'s `MOVEEND_IMMUNITY_ABILITIES` barriered whenever a battler
+  held one of 8 status-curing abilities at all; source
+  (`battle_util.c:2873-2954`) only cures when that ability's own status bit
+  is *also* set (e.g. Oblivious only fires on actual infatuation) — added
+  `immunityAbilityCuresStatus`'s per-ability status gate. Both are
+  narrowings of an existing `unsupportedBranch` call site (same file/line),
+  not new barrier surfaces; updated the two pre-existing tests that relied
+  on the old over-broad trigger to construct genuine reachability instead.
+- **Tests:** isolated dispatch for every distinct fail reason of both
+  opcodes (all 4 confused×maxed combinations for jumpifconfusedandstatmaxed
+  across both its concrete call sites; Oblivious/same-gender/genderless×2/
+  already-infatuated-with-a-third-battler for tryinfatuating) PLUS full
+  committed-script walks to a genuine `{kind:"terminal",
+  opcodeName:"B_SCR_OP_END"}` halt for all three effects: Attract's success
+  (opposite genders, status bit confirmed set, 1 RNG roll) and all four
+  fail tails (each a real distinct root cause, not just prose-glossed);
+  Swagger/Flatter's success (stat raise composing through
+  setstatchanger+statbuffchange, confusion via seteffectprimary, 2 RNG
+  rolls) and their own jumpifconfusedandstatmaxed edge branch (confused AND
+  maxed, 1 RNG roll) plus the "maxed but not confused" and Own-Tempo-blocks-
+  confusion non-edge variants.
+- **Census (before → after):** 105/214 → **108/214** effects, 206/355 →
+  **209/355** moves, 167/276 → **170/276** Factory-L50 unweighted, 2251/2957
+  → **2321/2957** weighted (+70, exactly 45+25 — matches the predicted flip
+  precisely, no shortfall). Doc regenerated and committed with the code.
+  New top blocker: `B_SCR_OP_FORCERANDOMSWITCH`/`INITMULTIHITSTRING`/
+  `JUMPIFHASNOHP` (EFFECT_ROAR, 40 weighted).
+- **Next:** continue the ranked-table descent — EFFECT_ROAR's opcode trio
+  is the regenerated doc's new top-ranked set.
+- **Notes:** no PAPERCUT. Commits landed one per green rung: genderRatio
+  extraction, opcode registration + kernel `personality` field, EFFECT_
+  ATTRACT tests + the two barrier widenings, EFFECT_SWAGGER/FLATTER tests,
+  census regen.
+
+---
 ## 518 — [SUPERVISOR ORIENT 2026-07-27 ~14:30] animation-main folded (SWAGGER + SELF_DESTRUCT exact); round 1 dispatched
 
 - **State:** master green at **3520 tests** (fold merge `b1f86cd`),
@@ -31,123 +144,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   apostrophe-charmap residual is documented context, not fixed there).
 - **Next:** verify round 1; continue ranked-table descent + seam cadence;
   §24.5 sites 6/7 + §19.5 sites 3-6 recipe-only breadth remain optional.
-
----
-## 517 — [SUPERVISOR WIND-DOWN 2026-07-27 ~14:00] session complete: 7 rounds / 14 workers, all verified and merged
-
-- **State (final):** tree committed and green at **263 files / 3512 tests**
-  (session start: 245/3363; 247/3370 after the orient animation fold),
-  `npm run build` clean, clean `git status`, zero unmerged side branches,
-  zero stale worktrees, `animation-main` folded twice (11 commits at
-  orient — fast-forward onto the live animation supervisor's own
-  sync-merge — and 32 at wind-down: Poison Tail/Hyper Fang/Sludge
-  Bomb/Toxic tooling; animation coverage now 43/276 exact; 0 unfolded at
-  close, later commits fold next orient). **No DEFERRED entries — nothing
-  blocks the next `run-supervisor.sh`.** All 14 workers across 7 rounds
-  completed (0 failures, 0 salvages, no usage limits).
-- **Census:** 94/214 → **105/214 effects**, 191/355 → **206/355 moves**,
-  153/276 → **167/276 Factory-L50**, 1900/2957 → **2251/2957 weighted
-  (64.3% → 76.1%)** via 4 ranked-table sets: EARTHQUAKE target-iteration
-  pair (+147, incl. a hidden per-operand `Cmd_bicword` barrier the census
-  cannot see — standing warning recorded), SETPROTECTLIKE (+61, new
-  `protectUses` field + real block/endure composition proofs),
-  NEGATIVEDAMAGE+TRYSETREST (+98), JUMPIFSTAT+PLAYSTATCHANGEANIMATION
-  (+45). Next top blocker: `B_SCR_OP_TRYINFATUATING` (EFFECT_ATTRACT, 45).
-- **ISSUES #47 closed and deleted** in 3 pipelined rounds: logic-ID-major
-  restructure + Channel 2 first-slot model (entry 504) → side evidence
-  pack (§27 22-handler write audit + index-1 fixtures, live divergence
-  confirmed) → per-slot funcResult value propagation (entry 511) → §27.5
-  conditional-predecessor A/B pair CONFIRMED. 5 dedicated fixtures, zero
-  contradictions; remaining 6 unstaged predecessors = optional breadth
-  (§27.5 recipe), not debt.
-- **Presentation seam:** two windows re-driven from kernel events —
-  `turn4-doubleteam.json` kickoff (§11.3, 250/250 preserved) and
-  `turn6-featherdance.json` (§12.3, 90/90; first opponent-target,
-  two-sourceLabel bridge) — plus §12 prep-scout banked and executed in the
-  same session. ENDTURN `RESTORE_HP`/`RESTORE_PP` registered with a live
-  Sitrus fixture (+30 heal at the exact ≤50% gate, zero draws, berry
-  consumed). CV ground truth: §24.5 DRAW SITEs 2 and 5 live-verified
-  (2 recipe-only remain: 6 ingrain, 7 curse) incl. a real Gate-A polarity
-  correction.
-- **Next (in order):** TRYINFATUATING census set (then descend the ranked
-  table); next presentation prep-scout (§13) per the §8-§12 cadence —
-  note entry 514's apostrophe-charmap prerequisite before wiring
-  `TURN6_ATKFELL` text; §24.5 sites 6/7 + §19.5 sites 3-6 (recipe-only);
-  ISSUES #41/#39 keep retiring window by window.
-- **Notes:** 1 new PAPERCUTS entry (mash-rep calibration doesn't transfer
-  between move-animation classes, 2 hits). Entry 516's process note: check
-  `git status` right after any tsc-triggered fix. Oracle services fresh
-  all session. The user's `codex/oracle-tooling-papercuts` worktree left
-  untouched.
-
----
-## 516 — [BOUNDED WORKER 2026-07-27 ~14:00] B_SCR_OP_JUMPIFSTAT + B_SCR_OP_PLAYSTATCHANGEANIMATION registered; EFFECT_TICKLE/COSMIC_POWER/BULK_UP/CALM_MIND/DRAGON_DANCE executable end to end
-
-- **State:** tree green at **255 files / 3484 tests** (+3 files / +38 tests
-  over session start 252/3446: new `battleScriptJumpifstatOpcode.test.ts`
-  12 tests, `battleScriptPlaystatchangeanimationOpcode.test.ts` 19 tests,
-  `battleScriptStatSetupEffects.test.ts` 7 full-committed-script tests; plus
-  the production-handler-count assertion in `battleScriptRulesContext.test.ts`
-  updated 115→117), `npm run build` clean. `executableFrontierRatchet.test.ts`
-  unmoved (**0 new barriers** — both opcodes are fully source-complete, no
-  `unsupported-branch` needed by either).
-- **Did:** per entry 513's handoff, registered both opcodes of the ranked
-  set (`battleScriptJumpifstatOpcode.ts`, `battleScriptPlaystatchangeanimationOpcode.ts`).
-  (1) `Cmd_jumpifstat`: a pure `statStages[stat]` read + conditional jump,
-  all 6 `CMP_*` arms implemented from source (only 4 are exercised by the
-  program's 18 concrete call sites — `COMMON_BITS`/`NO_COMMON_BITS` never
-  appear — but all 6 are real switch arms, not silently defaulted, per the
-  brief's explicit ask). Eagerly validated at registration against all 18
-  concrete call sites (matches the `SETBYTE`/`STATBUFFCHANGE`/`ORBYTE`
-  precedent for zero-barrier opcodes), since every one resolves to a known
-  `STAT_*`/`MIN_STAT_STAGE`/`MAX_STAT_STAGE` combination. (2)
-  `Cmd_playstatchangeanimation`: derived what it actually does to battle
-  STATE rather than its (out-of-scope) animation — it never mutates a stat
-  stage (that stays owned by the later `setstatchanger`+`statbuffchange`
-  pair already registered); it only decides whether a `B_ANIM_STATS_CHANGE`
-  controller event queues at all and flips `gBattleScripting.statAnimPlayed`
-  so a multi-stat move's second/third call in the same script doesn't
-  re-queue. Ported both families exactly: the "goes up" family has **no**
-  ability/Mist gate at all (source-verified — only "goes down" does), and
-  "goes down" applies the identical Mist/Clear Body/White Smoke/Keen
-  Eye+ACC/Hyper Cutter+ATK guard `changeStatBuffs` already applies to the
-  real write, bypassed entirely when `STAT_CHANGE_CANT_PREVENT` is set.
-  Eagerly validated against all **15** concrete call sites (not just the 5
-  target effects' own — also `BattleScript_AtkDefDown`/`SAtkDown2`/
-  `AllStatsUp`/`EffectMemento`'s shared-tail call sites, which exercise
-  `STAT_CHANGE_BY_TWO`/`CANT_PREVENT`/a 5-stat mask; those effects
-  themselves remain blocked on other opcodes — trymemento/setatkhptozero/
-  curse/jumpiftype2 — out of this step's scope). Zero barriers in either
-  opcode: both source functions have no unhandled branch to guard.
-- **Tests:** isolated-dispatch coverage for both opcodes (all 6 `CMP_*`
-  arms via a synthetic-operand harness matching `jumpifbyte`'s own
-  precedent for its unexercised comparators; every playstatchangeanimation
-  branch — 0/1/2+ changeable-stat counts, each ability/Mist block scoped to
-  its own stat, `CANT_PREVENT` bypass, `BY_TWO`'s -2/+2 id family,
-  `MULTIPLE_STATS`'s count<2 skip + `statAnimPlayed` flip, controller-busy
-  block) PLUS full committed-script walks to a genuine `{kind:"terminal",
-  opcodeName:"B_SCR_OP_END"}` halt for all 5 effects: Tickle's own
-  accuracy-checked two-stat-lower success (exactly 1 RNG roll) and its
-  both-already-MIN_STAT_STAGE `BattleScript_CantLowerMultipleStats` fail
-  tail; Cosmic Power/Bulk Up/Calm Mind/Dragon Dance's zero-RNG two-stat
-  raises, each confirmed 6→7 on its own two stats, plus Bulk Up's
-  both-already-MAX_STAT_STAGE `BattleScript_CantRaiseMultipleStats` fail
-  tail (shared by all four "goes up" scripts). No hidden per-operand
-  barrier surfaced (entry 507's standing warning) — every walk ran clean
-  on the first source-derived attempt once BS_TARGET vs BS_ATTACKER
-  selector roles were set correctly per script.
-- **Census (before → after):** 100/214 → **105/214** effects, 201/355 →
-  **206/355** moves, 162/276 → **167/276** Factory-L50 unweighted, 2206/2957
-  → **2251/2957** weighted (+45, exactly this set's weight). Doc
-  regenerated and committed with the code. New top blocker:
-  `B_SCR_OP_TRYINFATUATING` (EFFECT_ATTRACT, 45 weighted).
-- **Next:** `B_SCR_OP_TRYINFATUATING` (EFFECT_ATTRACT) is the regenerated
-  doc's new top-ranked set — one opcode, one effect, 45 weighted.
-- **Notes:** no PAPERCUT. One in-session process note: a `tsc --noEmit`
-  type-fix (`BattleScriptRulesBattler` → `BattleScriptRulesBattlerState` in
-  the new playstatchangeanimation file) was made and verified correct
-  early, but its file edit was accidentally left out of the next `git add`
-  — caught by a routine `git status` check before the census commit, fixed
-  in a small follow-up commit with no behavior change. Worth double-checking
-  `git status` is clean immediately after any `tsc`-driven fix, not just
-  before the final wrap-up.

@@ -229,12 +229,18 @@ describe("production moveend (Cmd_moveend) registration", () => {
       expect(result.state.rulesContext.moveendState).toBe(10); // paused at MOVEEND_ATTACKER_VISIBLE
     });
 
-    it("halts on MOVEEND_IMMUNITY_ABILITIES' status-curing branch (ABILITY_LIMBER, any battler)", () => {
-      const rc = context(0, {}, { moveendState: 4 }, { ability: 7 });
+    it("halts on MOVEEND_IMMUNITY_ABILITIES' status-curing branch (ABILITY_LIMBER, any battler) only when that battler's own matching status bit is actually set -- ability membership alone is a no-op in source (battle_util.c:2892-2898's own `if` gate)", () => {
+      const STATUS1_PARALYSIS = 1 << 6;
+      const rc = context(0, {}, { moveendState: 4 }, { ability: 7, status1: STATUS1_PARALYSIS });
       const { result } = stepAtMoveend(rc);
       expect(result.kind).toBe("halted");
       if (result.kind !== "halted") throw new Error("expected halted");
       expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 2876 });
+
+      const rcNoStatus = context(0, {}, { moveendState: 4 }, { ability: 7 });
+      const { result: passThrough } = stepAtMoveend(rcNoStatus);
+      if (passThrough.kind !== "advanced") throw new Error(`expected advanced, got ${passThrough.kind}`);
+      expect(passThrough.state.rulesContext.moveendState).toBe(10); // Limber held but not paralyzed -- no cure, no barrier
     });
 
     it("MOVEEND_IMMUNITY_ABILITIES passes through when no battler holds a curing ability", () => {
