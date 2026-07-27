@@ -533,3 +533,77 @@ re-run clean:
   controller-synced script tail) — this engine's `runTickScript` correctly
   collapses both into one atomic tick, the same simplification already
   established for every other landed end-turn case.
+
+## 7. RESTORE_HP / RESTORE_PP registration (side lane, this session)
+
+The two remaining barriered-but-Factory-reachable rows from §1c/§2b are now
+wired into `runItemsTick`: `HOLD_EFFECT_RESTORE_HP` (Sitrus/Oran/Berry Juice,
+45 Factory-legal entries) and `HOLD_EFFECT_RESTORE_PP` (Leppa, LAPRAS/
+NIDOKING only, 2 entries). Both needed one piece of plumbing this codebase
+did not expose yet even though the underlying data already existed:
+`gItems[item].holdEffectParam` (present in `src/data/gen/item-hold-
+effects.json` all along, just not read by any resolver) and `gBattleMoves[
+move].pp` (`src/data/gen/moves.json`'s own `pp` field). Both are now exposed
+from `battleScriptRulesContext.ts` as `resolveBattleScriptBattlerHoldEffect
+Param`/`resolveBattleScriptMoveBasePp`, verified directly against
+`reference/pokeemerald/src/data/items.h` (Sitrus 30, Oran 10, Berry Juice
+20, Leppa 10 — read at source lines 592/1693/1708/1751, not assumed from the
+generated table alone).
+
+**RESTORE_HP** (`battle_util.c:3337-3345`): `hp <= floor(maxHP/2)` gates the
+heal, amount is `min(holdEffectParam, maxHP - hp)`, applied via
+`BattleScript_ItemHealHP_RemoveItem`'s own `healthbarupdate`/`datahpupdate`
+pair (already-registered opcodes — no new script-side work), which also
+syncs the party HP mirror for free (the same `withBattleScriptPartyMemberHp`
+call site Leftovers already exercises). `removeitem` then consumes the
+berry, same as every other consumed-berry row.
+
+**RESTORE_PP** (`battle_util.c:3347-3373`): source searches the move slots
+0..3 for the FIRST slot with a real move and exactly 0 PP (a `findIndex`
+shape, not an existence check — a `some()`-style gate would pick the wrong
+slot whenever slot 0 has partial PP and a later slot is at 0). The restore
+amount is `min(holdEffectParam, CalculatePPWithBonus(move, ppBonuses,
+slot))`; since Factory rentals are always built via `CreateMon`/
+`CreateMonWithEVSpreadNatureOTID` (`battle_factory.c:435,476,812`), which
+zero `ppBonuses` (`ZeroMonData`'s own struct-clear — confirmed by reading
+`CreateMon`'s call chain, not assumed), `CalculatePPWithBonus` collapses to
+the plain base `gBattleMoves[move].pp` for every real Leppa carrier — no PP
+Up modeling was needed. `BattleScript_BerryPPHealEnd2` itself has no
+PP-writing opcode at all (source's own `BtlController_EmitSetMonData(
+REQUEST_PPMOVE1_BATTLE...)` call happens in C, before the script even
+starts) — the PP patch is applied directly via `withBattler` before running
+the script, the same shape the status1 cure rows already use. This engine
+has no party-level PP mirror at all (`BattleScriptPartyMemberState` only
+tracks species/isEgg/hp/status1/moves), so unlike the cure rows' `withBattle
+ScriptPartyMemberStatus1` call, there is nothing to sync there — only the
+active battler's own `pp` tuple (`Cmd_ppreduce`'s existing single source of
+truth) is patched, collapsing source's controller round trip into the same
+atomic tick already established for every other landed end-turn case.
+
+**Live fixture** (`tools/battle-lab/mechanic-endturn-items1-restorehp-
+sitrus-off.json`, rerunnable via `tools/probe/verify-endturn-abilities-
+items-ground-truth.ts`, confirmed run twice for determinism): LOTAD (item
+142, Sitrus Berry) vs MAGIKARP's real repeated Pound, 13 turns. Frame
+4570→4571: the 6th Pound hit drops LOTAD from 58 to 45 hp (`<=
+floor(115/2)=57`, satisfying the gate). Frame 4907→4908: `ENDTURN_ITEMS1`
+heals exactly +30 (Sitrus's own `holdEffectParam`, `min(30, 115-45)=30`,
+uncapped here), `rngValue` bit-identical across the boundary (zero new
+`Random()` draws). Frame 4908→4909: item clears 142→0 the very next frame
+(no multi-frame gap this time, unlike Cheri's — this script's `removeitem`
+sits right after `datahpupdate` with no intervening `printstring`/
+`waitmessage` pair between them and the heal), `rngValue` still unchanged.
+RESTORE_PP has no live fixture this session (time budget went to nailing
+RESTORE_HP's live boundary first, per the brief's own "one live RESTORE_HP
+verification is the bar") — its Tier-1 coverage (fire, threshold-adjacent
+slot semantics, PP cap, moveTurn gate) is analytically exact from the same
+source read, cross-checked against the generated `moves.json`/`item-hold-
+effects.json` tables, but not independently oracle-verified live.
+
+`tests/executableFrontierRatchet.test.ts`'s `PINNED_BARRIER_COUNTS` ratchet
+is untouched by this registration: it only counts literal `unsupportedBranch(`
+call sites in the opcode-handler modules it pins, and `battleEndTurnOrchestration.ts`
+has never called `unsupportedBranch` — its `"case-barrier"` return kind (used
+for the still-real-but-unimplemented zero-carrier stat/crit and confuse-berry
+rows) is a different mechanism this ratchet does not track at all, so no pin
+needed updating for this session's removal of the RESTORE_HP/RESTORE_PP
+barriers.
