@@ -1,4 +1,22 @@
 ---
+## 518 — [SUPERVISOR ORIENT 2026-07-27 ~14:30] animation-main folded (SWAGGER + SELF_DESTRUCT exact); round 1 dispatched
+
+- **State:** master green at **3520 tests** (fold merge `b1f86cd`),
+  `npm run build` clean, oracle services fresh (both profiles PASS). Folded
+  6 animation commits (tip `3dcf03c`): SWAGGER and SELF_DESTRUCT promoted
+  exact — animation coverage now **45/276 exact, 3 partial**. The animation
+  supervisor's own session wound down clean (no worker branches or stale
+  worktrees on their side).
+- **Round 1 (dispatched):** main → top-2 ranked census sets
+  `B_SCR_OP_TRYINFATUATING` (EFFECT_ATTRACT, 45 weighted) +
+  `B_SCR_OP_JUMPIFCONFUSEDANDSTATMAXED` (EFFECT_SWAGGER + EFFECT_FLATTER,
+  25 weighted) ∥ side → §13 presentation prep-scout (scout picks the next
+  window by §10's smallest-input-surface method; the §12.3-step-3
+  apostrophe-charmap residual is documented context, not fixed there).
+- **Next:** verify round 1; continue ranked-table descent + seam cadence;
+  §24.5 sites 6/7 + §19.5 sites 3-6 recipe-only breadth remain optional.
+
+---
 ## 517 — [SUPERVISOR WIND-DOWN 2026-07-27 ~14:00] session complete: 7 rounds / 14 workers, all verified and merged
 
 - **State (final):** tree committed and green at **263 files / 3512 tests**

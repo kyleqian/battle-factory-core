@@ -2305,3 +2305,56 @@ growth already folded in ahead of this session — re-counted live, not
 copied from §12.4). `npm run build` clean.
 `executableFrontierRatchet.test.ts` unmoved (6/6, zero new barriers, no
 canonical recording import added).
+
+### 13.5 Wiring landed, 2026-07-27 (main lane, bounded worker)
+
+§13.3's plan executed steps 1/2/4 exactly as written; step 3
+(`anchorOpponentAfterTurnHp`'s own steady overlay in `drawEndeavorSquish`,
+`:6881`) left as the named out-of-this-step's-own-scope residual the plan
+itself called it — Grovyle's own steady HP during the squish choreography,
+not a drain endpoint of this window's own hit chain. Every §13.3 citation
+(`battleScene.ts:6905`/`:6896`/`:6965`/`:6881`) was re-verified against this
+worktree's own `HEAD` before editing and matched exactly — no design-doc
+slip found this time.
+
+`battleScene.ts` gained two module-level consts,
+`TURN2_ENDEAVOR_ATTACK_LINE1`/`LINE2` and `TURN2_ENDEAVOR_HP`, resolved once
+at module load from `turn2EndeavorPresentationStaging.ts`'s
+`resolveTurn2EndeavorAttackLines()`/`resolveTurn2EndeavorHpEndpoints()` —
+the same "resolve once at module load" shape `TURN5_ENDEAVOR_ATTACK_LINE1/2`/
+`TURN5_ENDEAVOR_HP` already established for turn 5's own sibling call site.
+`drawTurn2KickoffText`'s own ENDEAVOR-text branch (step 1, `:6905`) now draws
+`TURN2_ENDEAVOR_ATTACK_LINE1/2` instead of the raw `TURN_KICKOFF_LINE1`/
+`TURN2_KICKOFF_LINE2` literals; its own `endeavorOnixHp` call (step 2,
+`:6896`) now sources `startHp`/`endHp` from `TURN2_ENDEAVOR_HP.from`/`.to`
+instead of the direct `anchorPlayerBattler.hp`/`anchorPlayerAfterTurnHp`
+reads. **Zero bridge edits** — the staging module already called the shared
+`resolveRockSlidePresentationWindowContent` bridge function (its existing
+`attackStringScriptLabel` override parameter), exactly as §13.2/the brief's
+own out-of-scope note predicted; no rework was needed.
+
+**No literal died.** `TURN_KICKOFF_LINE1`/`TURN2_KICKOFF_LINE2`
+(`battleMenu.ts:1086`/`:2635`) stay defined and in active use by turn 3's own
+repeat-ENDEAVOR call site (`drawTurn3EndeavorText`, `battleScene.ts:6985`,
+verified still reading the raw literals directly) and turn 1's own
+`drawTurnKickoffText` — only `drawTurn2KickoffText`'s own one call site was
+retired from reading them directly. `anchorPlayerBattler.hp`/
+`anchorPlayerAfterTurnHp` themselves stay defined and in use elsewhere in
+this file (turn 3's own `endeavorOnixHp` call, `drawTurnEndSettledMenu`,
+`drawActionMenuIdleContent`'s default param, several healthbox-overlay call
+sites) — only this window's own two reads were superseded.
+
+**Acceptance, re-verified this session:** the full sweep run BEFORE this
+change (on the pristine `HEAD`) matched every recorded count exactly —
+`turn2-endeavor.json` 77/77, `turn2-endeavor-drain.json` 237/237,
+`turn2-dragonbreath.json` 237/237, `turn2-dragonbreath-projectiles.json`
+61/61, `turn3-endeavor.json` 192/192, `turn3-rockslide.json` 256/256,
+`turn1-rockslide.json` 256/256, `turn5-rockslide.json` 256/256,
+`turn4-doubleteam.json` 250/250, `turn6-featherdance.json` 90/90 — no
+pre-existing drift. Re-run AFTER the change reproduced every one of those
+counts byte-identically, including a second `turn2-endeavor.json` run for a
+determinism check (77/77 twice). `npm test` **268 files, 3560 tests**
+unchanged from this session's own start (no new test file — this step wires
+already-tested staging-module exports into production code, adds no new
+bridge surface to test). `npm run build` clean.
+`executableFrontierRatchet.test.ts` unmoved (6/6, zero new barriers).

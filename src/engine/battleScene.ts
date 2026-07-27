@@ -629,6 +629,10 @@ import {
   resolveTurn5EndeavorHpEndpoints,
 } from "./turn5EndeavorPresentationStaging.ts";
 import {
+  resolveTurn2EndeavorAttackLines,
+  resolveTurn2EndeavorHpEndpoints,
+} from "./turn2EndeavorPresentationStaging.ts";
+import {
   sceneOnDoubleTeamView,
   sceneOnBindView,
   sceneOnDragonBreathView,
@@ -6874,6 +6878,22 @@ function drawDragonBreathTurnEndSettledMenu(fb: Uint8Array, t: number, pressTick
  * turn-3 resettled action menu at `DRAGONBREATH_MENU_REDRAW_DELAY`
  * (`drawDragonBreathTurnEndSettledMenu`).
  */
+/**
+ * Presentation-seam wiring, window 6 (`docs/presentation-seam-scout.md`
+ * §13.3 steps 1-2): resolved from the REAL staged MOVE_ENDEAVOR kernel event
+ * stream (`turn2EndeavorPresentationStaging.ts`), not the raw
+ * `TURN_KICKOFF_LINE1`/`TURN2_KICKOFF_LINE2`/`anchorPlayerBattler.hp`/
+ * `anchorPlayerAfterTurnHp` reads this window's own call site used before --
+ * byte-identical values (117 -> 101, "Foe GROVYLE used"/"ENDEAVOR!"), same
+ * "wire what's proven, not just what's pixel-exercised" shape §11.5/§12.5
+ * already landed for turn 4/turn 6. `TURN_KICKOFF_LINE1`/`TURN2_KICKOFF_LINE2`
+ * themselves stay defined and in use by turn 3's own repeat call site
+ * (`drawTurn3EndeavorText`, below) -- only THIS window's own call site is
+ * superseded.
+ */
+const [TURN2_ENDEAVOR_ATTACK_LINE1, TURN2_ENDEAVOR_ATTACK_LINE2] = resolveTurn2EndeavorAttackLines();
+const TURN2_ENDEAVOR_HP = resolveTurn2EndeavorHpEndpoints();
+
 function drawTurn2KickoffText(fb: Uint8Array, t: number, pressTick: number): void {
   const dragonBreathStart = dragonBreathTextStartTick(pressTick);
   if (t >= dragonBreathStart && t >= pressTick + DRAGONBREATH_MENU_REDRAW_DELAY) {
@@ -6899,7 +6919,7 @@ function drawTurn2KickoffText(fb: Uint8Array, t: number, pressTick: number): voi
   // ENDEAVOR's own unmodeled attack-animation window, ticks ~3003-3097 -
   // see battleMenu.ts's own slice E1b doc) this resolves to the anchor HP,
   // a no-op.
-  const onixHp = endeavorOnixHp(t, pressTick, anchorPlayerBattler.hp, anchorPlayerAfterTurnHp);
+  const onixHp = endeavorOnixHp(t, pressTick, TURN2_ENDEAVOR_HP.from, TURN2_ENDEAVOR_HP.to);
   drawPlayerHealthboxHpOverlay(fb, onixHp);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   if (t >= dragonBreathStart) {
@@ -6908,7 +6928,7 @@ function drawTurn2KickoffText(fb: Uint8Array, t: number, pressTick: number): voi
     }
     return;
   }
-  drawMessageTextLines(fb, TURN_KICKOFF_LINE1, TURN2_KICKOFF_LINE2, turn2KickoffTextVisibleChars(t, pressTick));
+  drawMessageTextLines(fb, TURN2_ENDEAVOR_ATTACK_LINE1, TURN2_ENDEAVOR_ATTACK_LINE2, turn2KickoffTextVisibleChars(t, pressTick));
 }
 
 /**
