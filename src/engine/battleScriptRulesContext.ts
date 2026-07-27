@@ -44,6 +44,8 @@ import { createBattleScriptTargetIterationOpcodeHandlers } from "./battleScriptT
 import { createBattleScriptProtectlikeOpcodeHandlers } from "./battleScriptProtectlikeOpcode.ts";
 import { createBattleScriptNegativedamageOpcodeHandlers } from "./battleScriptNegativedamageOpcode.ts";
 import { createBattleScriptTrysetrestOpcodeHandlers } from "./battleScriptTrysetrestOpcode.ts";
+import { createBattleScriptJumpifstatOpcodeHandlers } from "./battleScriptJumpifstatOpcode.ts";
+import { createBattleScriptPlaystatchangeanimationOpcodeHandlers } from "./battleScriptPlaystatchangeanimationOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -2205,6 +2207,11 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptProtectlikeOpcodeHandlers(program),
     ...createBattleScriptNegativedamageOpcodeHandlers(program),
     ...createBattleScriptTrysetrestOpcodeHandlers(program),
+    ...createBattleScriptJumpifstatOpcodeHandlers(program, resolveRulesBattlerForBattleScript),
+    ...createBattleScriptPlaystatchangeanimationOpcodeHandlers(program, {
+      isControllerIdle: sourceExternalPorts.isControllerIdle,
+      resolveBattlerForBattleScript: resolveRulesBattlerForBattleScript,
+    }),
   });
 }
 
