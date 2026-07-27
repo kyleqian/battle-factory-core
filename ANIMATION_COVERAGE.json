@@ -2,6 +2,30 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_DRAGON_CLAW",
+      "status": "exact",
+      "covered": [
+        "complete legal Level-50 mechanicLab parties stage ALTARIA from real Factory set 412 in both player-back and opponent-front orientations, with all active choices legally constrained to DRAGON CLAW; ONIX is constrained to TACKLE",
+        "player-back ALTARIA complete move-owned Scene-ON body at oracle frames 82-218: strengthened source component/task/sprite/OAM/global-coordinate/palette/audio evidence 137/137 and shared-seam framebuffer 137/137, reproduced twice",
+        "opponent-front ALTARIA complete move-owned Scene-ON body at oracle frames 86-222: strengthened source component/task/sprite/OAM/global-coordinate/palette/audio evidence 137/137 and shared-seam framebuffer 137/137, reproduced twice",
+        "both AnimTask_BlendBattleAnimPal directions and coefficients through faded and hardware palette latches; attacker ShakeMon and both HorizontalLunge phases; both DragonClawFireSpiral calls and all 24 FireSpin sprites; both paired claw groups and target global-Y shakes; both target-pan SoundTask_PlaySE1WithPanning boundaries; source SortSprites OAM-Y/creation ordering; normal field chrome, text, healthboxes, and cleanup"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-dragon-claw-player-altaria-opponent-onix.json",
+        "tools/battle-lab/mechanic-dragon-claw-opponent-altaria-player-onix.json",
+        "tools/compare/fixtures/dragon-claw-player-altaria-opponent-onix.json",
+        "tools/compare/fixtures/dragon-claw-opponent-altaria-player-onix.json",
+        "tools/compare/dragonClawPortable.ts",
+        "tools/compare/dragonClawProbe.py",
+        "tools/compare/extractDragonClawAssets.ts",
+        "src/animation/assets/dragon-claw.json",
+        "src/animation/dragonClaw.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/dragonClaw.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_SHADOW_BALL",
       "status": "exact",
       "covered": [
@@ -888,7 +912,7 @@
         "MOVE_LUSTER_PURGE",
         "MOVE_COSMIC_POWER"
       ],
-      "goal": "MOVE_DRAGON_CLAW remains unsupported: its complete 137-frame source reducer is component-exact in both player-back and opponent-front ALTARIA orientations (137/137 each) through sceneOnPresentation, but the shared battleScene framebuffer renderer is an explicit 0/137 checkpoint in both orientations. Legal challenge-0 mechanicLab contexts inject complete parties around real Level-50 Factory set-412 ALTARIA_1 data and constrain stock choices without transient state. The reducer covers the forward/reverse attacker palette tasks, ShakeMon, both DragonClawFireSpiral calls, both HorizontalLunge helpers, all 24 FireSpin spawns, both paired claw groups, both target Y-shakes, the two target-pan SoundTask_PlaySE1WithPanning events, and cleanup. No sibling is promoted. SKY ATTACK retains both two-turn selector branches, black/white charge blends and shake, plus sky BG/bird/fade/impact strike. RETURN requires every friendship-power branch, repeated Tail Whip sound tasks, dips/lunges/hitsplats/shakes, and branch-specific timing. FLATTER needs spotlight create/remove, hardware palette fades, vertical dips, 38 confetti sprites, and both attacker/target sound events. LUSTER PURGE needs psychic/white BG transitions, circle and particle blends, six RNG-positioned hitsplats/sounds, target shake, and restore. COSMIC POWER needs non-attacker blends, cosmic BG slide/restore, two granting stars, and its distinct centered/attacker-pan sounds. Each remains unsupported pending independent complete dense framebuffer evidence."
+      "goal": "MOVE_DRAGON_CLAW independently proves SoundTask_PlaySE1WithPanning and its complete palette/shake/lunge/FireSpin/claw/cleanup body in both orientations at 137/137 strengthened source component/task/sprite/OAM/global-coordinate/palette/audio and shared-seam framebuffer frames, reproduced twice. No sibling is promoted. SKY ATTACK retains both two-turn selector branches, black/white charge blends and shake, plus sky BG/bird/fade/impact strike. RETURN requires every friendship-power branch, repeated Tail Whip sound tasks, dips/lunges/hitsplats/shakes, and branch-specific timing. FLATTER needs spotlight create/remove, hardware palette fades, vertical dips, 38 confetti sprites, and both attacker/target sound events. LUSTER PURGE needs psychic/white BG transitions, circle and particle blends, six RNG-positioned hitsplats/sounds, target shake, and restore. COSMIC POWER needs non-attacker blends, cosmic BG slide/restore, two granting stars, and its distinct centered/attacker-pan sounds. Each remains unsupported pending independent complete dense framebuffer evidence."
     },
     {
       "id": "loop-se-adjust-panning",

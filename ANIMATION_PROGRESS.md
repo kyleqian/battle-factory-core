@@ -44,30 +44,30 @@ animation. A status caused by a move is not part of that move's animation.
   presentation seam and all source- or evidence-required variants are covered.
 - No entry means unsupported.
 
-## DRAGON CLAW component checkpoint; PlaySE1WithPanning track not promoted (2026-07-27)
+## DRAGON CLAW promoted to exact; PlaySE1WithPanning track established (2026-07-27)
 
-**Verdict:** `MOVE_DRAGON_CLAW` remains unsupported. Its complete move-owned
-137-frame source reducer is exact in both player-back and opponent-front
-ALTARIA orientations (**137/137 component frames** each), but the shared-seam
-framebuffer is an explicit **0/137** checkpoint in both. Coverage census and
-ratchets remain unchanged at **34/276 exact, 3 partial, 239 unsupported**.
+**Verdict:** `MOVE_DRAGON_CLAW` is exact through the shared Scene-ON seam in
+both required orientations, each reproduced twice. Player-back and
+opponent-front ALTARIA are each **137/137 strengthened component and
+framebuffer frames** (oracle 82-218 and 86-222). Census: **35/276 exact,
+3 partial, 238 unsupported**.
 
-**Source/probe:** legal challenge-0 mechanicLab contexts inject three complete
-records matching real Level-50 Factory `FRONTIER_MON_ALTARIA_1` set 412
-(Docile, HP/ATK EVs, Cheri Berry) and constrain stock choices to DRAGON CLAW;
-ONIX is constrained to TACKLE. The phase-relative reducer covers both palette
-tasks, attacker ShakeMon, both DragonClawFireSpiral calls, both horizontal
-lunges, all 24 FireSpin sprites, both paired claw groups, both target Y-shakes,
-the two `SE_M_RAZOR_WIND` target-pan PlaySE1 events, and cleanup. The dense
-probe pins tasks, sprites, OAM, registers, palettes, and raw RGB; extracted
-ember/claw/ALTARIA assets are reproducible.
+**Source/probe:** legal challenge-0 mechanicLab contexts use complete parties
+around real Level-50 Factory `FRONTIER_MON_ALTARIA_1` set 412 and constrain
+stock choices without transient state. Supervisor-requested evidence now
+checks the target `gSpriteCoordOffsetY`, both forward/reverse palette-task
+boundaries and coefficients, faded plus hardware attacker palettes, transient
+SE1 song/pan restarts, sprite callbacks/lifetimes, and allocation uniqueness
+in addition to the existing FireSpin/claw/attacker reducer. That stronger pass
+found and fixed the reverse task's true age-93 start and the target shake's
+local-age-10 restore.
 
-**Bounded remainder:** `sceneOnDragonClawView` is wired, but `battleScene.ts`
-intentionally throws a named component-only checkpoint before drawing. The
-portable comparator therefore reports component **137/137** and framebuffer
-**0/137** in each orientation. Acceptance needs the extracted ALTARIA/Onix
-field chrome, attacker palette blend, FireSpin/claw OAM ordering, global target
-Y offset, and cleanup display latches rendered through the shared seam.
+**Renderer:** `battleScene.ts` now draws the extracted ALTARIA/Onix field,
+hardware-latched attacker palette, task-driven ShakeMon plus both lunge phases,
+all FireSpin and claw sprites, target global-Y shake, text/healthboxes, and
+cleanup. Effect composition ports `SortSprites`: equal-priority sprites order
+by final OAM Y (including y2), then source creation order. No absolute battle
+ticks, screenshots, exclusions, or new unsupported barriers were added.
 
 **Sibling audit (no promotions):** SKY ATTACK retains both two-turn
 charge/strike branches and sky/bird/fade/impact body; RETURN retains every
@@ -78,9 +78,9 @@ blends, six RNG hitsplats/sounds, target shake, and restore; COSMIC POWER
 retains non-attacker blends, cosmic BG slide/restore, two granting stars, and
 distinct centered/attacker-pan sounds. All remain unsupported.
 
-**Controls:** after the final seam wiring, AERIAL ACE remains **232/232**
-player-back and **236/236** opponent-front, KNOCK OFF **59/59** in both
-orientations, and BIND **45/45** in both orientations, all framebuffer-exact.
+**Controls:** AERIAL ACE remains **232/232** player-back and **236/236**
+opponent-front, KNOCK OFF **59/59** in both orientations, and BIND **45/45**
+in both orientations, all framebuffer-exact.
 
 ## ENCORE legal evidence checkpoint; PlaySE2WithPanning track not promoted (2026-07-27)
 

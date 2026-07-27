@@ -68,11 +68,11 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // SHADOW BALL is exact in both required orientations.
-        unsupported: 239,
+        // DRAGON CLAW is exact in both required orientations.
+        unsupported: 238,
         staged: 0,
         partial: 3,
-        exact: 34,
+        exact: 35,
       },
       {
         tier: "openOnly",
