@@ -17,6 +17,9 @@ const SEEDS = [1, 99] as const;
 interface BattlerState {
   pp: number[];
   hp: number;
+  maxHp?: number;
+  species?: number;
+  status?: { kind: string };
 }
 
 interface CaptureState {
@@ -989,6 +992,7 @@ const DRAW_COUNT_SCENARIOS: DrawCountScenarioSpec[] = [
     expectedTotalSteps: { 1: 12, 99: 12 },
     checkCrossSeedStable: true,
   },
+
   // AI_CV_EvasionDown (data/battle_ai_scripts.s:1235-1245, doc §24): byte-for-
   // byte the same control-flow shape as AI_CV_DefenseDown/AI_CV_SpDefDown
   // (§15/§16) -- STAT_DEF/STAT_SPDEF swapped for STAT_EVASION, re-derived
@@ -1029,6 +1033,153 @@ const DRAW_COUNT_SCENARIOS: DrawCountScenarioSpec[] = [
     checkCrossSeedStable: true,
   },
 ];
+
+// AI_CV_EvasionUp Gates C/D toxic-poison chain (data/battle_ai_scripts.s:
+// 1046-1050, doc §7.3's chained-fall-through fix, commit 20f09bb) -- side-lane
+// live corroboration, docs/factory-ai-checkviability-ground-truth.md §24.5.
+// Two-Pokemon opponent relay (the doc's own §19.5 recipe for AccuracyDown's
+// analogous toxic sites, applied here): opponent slot 0 = Magikarp (129,
+// level 5), all 4 slots MOVE_TOXIC (92) -- forced (all 4 slots identical),
+// so its real turn-1 use against the target is not a genuine, unforced AI
+// pick between two moves, sidestepping the "mixed moveset" obstacle §24.5
+// named for these sites. Target (player) Anorith (390, single ability
+// Battle Armor), all 4 slots MOVE_SEISMIC_TOSS (69, EFFECT_LEVEL_DAMAGE,
+// fixed 50 dmg = Anorith's level). Turn 1: Magikarp uses Toxic on Anorith
+// (lands both banked seeds); Anorith Splashes (harmless). Turn 2: Anorith
+// Seismic Tosses Magikarp (18 max HP @ level 5, OHKO) -- opponent auto-sends
+// its second party slot, Shuckle (213, single ability Sturdy, base Speed 5,
+// deliberately SLOWER than Anorith's 75 so Anorith's own Seismic Toss always
+// resolves BEFORE Shuckle's own Double Team raises its evasion -- an early
+// Magikarp-for-both-slots draft, base Speed 80 > Anorith's 75, showed a real
+// same-turn confound here: Double Team's self-evasion-boost landing first
+// made the same-turn Seismic Toss's accuracy check probabilistic instead of
+// guaranteed, the same bug class §19.2/§19.5 named for AccuracyDown's own
+// dispatch move; Shuckle's low Speed closes it), all 4 slots MOVE_DOUBLE_TEAM
+// (104). REACH continues: turn 3, Anorith Seismic Tosses Shuckle again (95
+// max HP, one 50-dmg hit -> 45/95, 47.4%, comfortably <=50%) -- the trailing
+// phantom decision (this doc's own "only the phantom next-decision is
+// observable" mechanism, §11.0) then reads target-toxic=true AND opponent-
+// own-HP<=50%, the chain's own reach condition. CONTROL A stops right after
+// turn 2 (Shuckle switches in fresh, undamaged 95/95, still >50%) -- same
+// toxic prerequisite, opposite HP band, single-site branch. Per-DRAW-SITE
+// attribution (tools/probe/attribute-factory-ai-cv-drawsite-callers.py,
+// window 0-finalFrame, both seeds) is the load-bearing evidence, not just
+// the raw total: CONTROL shows AI_CV_EvasionUp4 x4, AI_CV_EvasionUp3 x0 --
+// site 3 literally never fires when own HP>50 (Gate D routes straight past
+// it). REACH shows AI_CV_EvasionUp3 x4 (ALWAYS drawn, one per identical
+// slot, regardless of outcome) plus AI_CV_EvasionUp4 x6 (seed 1) / x7 (seed
+// 99) -- decomposing as the earlier still-100%-HP decision's own direct-
+// entry site-4 contribution (4, matching CONTROL's shape) PLUS 2 (seed 1) /
+// 3 (seed 99) EXTRA site-4 draws from the <=50% decision's own chain, i.e.
+// 2-3 of the 4 slots' own DRAW SITE 3 roll fell through into a second roll
+// at DRAW SITE 4 -- exactly the chained-fall-through model docs/factory-ai-
+// draw-discrepancy-probe.md §7.1/§7.3 fixed (commit 20f09bb), landing inside
+// the model's own valid [4,8] range every time, never both mutually
+// exclusive single draws. The raw per-run totals below (frame 0->finalFrame,
+// via the RNG forward-search) are the cheap proxy this verify script checks
+// on every run; the per-site breakdown is recorded in the doc for the full
+// mechanism-level story.
+interface ToxicChainScenarioSpec {
+  label: string;
+  path: string;
+  finalFrame: number;
+  expectedOpponentSpecies: number;
+  expectedOpponentHp: number;
+  expectedOpponentMaxHp: number;
+  expectedTotalSteps: Record<number, number>;
+  checkCrossSeedStable: boolean;
+}
+
+const EVASIONUP_TOXICCHAIN_SCENARIOS: ToxicChainScenarioSpec[] = [
+  {
+    label:
+      "AI_CV_EvasionUp, target (player, Anorith) toxic-poisoned AND opponent (AI_USER, Shuckle) own HP <=50% (45/95, 47.4%) -- REACH: Gate D routes to DRAW SITE 3 first (data/battle_ai_scripts.s:1048), whose own fall-through chains into DRAW SITE 4 (:1050); attribution confirms DRAW SITE 3 fires 4x (mandatory, one per identical slot) and DRAW SITE 4 fires more than the direct-entry baseline of 4 (2-3 extra, per-slot chain-dependent) -- the chained-fall-through model, not two mutually exclusive single-draw sites",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-evasionup-toxicchain-reach-off.json",
+    finalFrame: 1920,
+    expectedOpponentSpecies: 213,
+    expectedOpponentHp: 45,
+    expectedOpponentMaxHp: 95,
+    expectedTotalSteps: { 1: 41, 99: 42 },
+    checkCrossSeedStable: false,
+  },
+  {
+    label:
+      "AI_CV_EvasionUp, target (player, Anorith) toxic-poisoned AND opponent (AI_USER, Shuckle) own HP >50% (95/95, fresh switch-in) -- CONTROL A: Gate D routes straight to DRAW SITE 4 alone (data/battle_ai_scripts.s:1047), DRAW SITE 3 never reached -- single-site branch, same toxic prerequisite as REACH, opposite HP band",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-evasionup-toxicchain-control-off.json",
+    finalFrame: 1842,
+    expectedOpponentSpecies: 213,
+    expectedOpponentHp: 95,
+    expectedOpponentMaxHp: 95,
+    expectedTotalSteps: { 1: 23, 99: 23 },
+    checkCrossSeedStable: true,
+  },
+];
+
+async function verifyToxicChainScenario(spec: ToxicChainScenarioSpec): Promise<void> {
+  console.log(`\n=== ${spec.label} ===`);
+  const perSeedTotals: number[] = [];
+  for (const seed of SEEDS) {
+    const run1 = await runScenario(spec.path, seed);
+    const run2 = await runScenario(spec.path, seed);
+
+    const f0a = run1.get(0)!;
+    const f0b = run2.get(0)!;
+    check(
+      `seed ${seed}: frame 0 identical across reruns (determinism)`,
+      JSON.stringify(f0a) === JSON.stringify(f0b),
+      "initial state differs between runs",
+    );
+
+    const fEndA = run1.get(spec.finalFrame)!;
+    const fEndB = run2.get(spec.finalFrame)!;
+    check(
+      `seed ${seed}: frame ${spec.finalFrame} identical across reruns (determinism)`,
+      JSON.stringify(fEndA) === JSON.stringify(fEndB),
+      "final state differs between runs",
+    );
+
+    check(
+      `seed ${seed}: target (player, Anorith) is toxic-poisoned at frame ${spec.finalFrame} (Gate C prerequisite)`,
+      fEndA.battlers.player.status?.kind === "toxic",
+      `observed status ${JSON.stringify(fEndA.battlers.player.status)}`,
+    );
+
+    check(
+      `seed ${seed}: opponent (AI_USER) is species ${spec.expectedOpponentSpecies} (Shuckle, switched in after Magikarp fainted)`,
+      fEndA.battlers.opponent.species === spec.expectedOpponentSpecies,
+      `observed species ${fEndA.battlers.opponent.species}`,
+    );
+
+    check(
+      `seed ${seed}: opponent (AI_USER) HP is ${spec.expectedOpponentHp}/${spec.expectedOpponentMaxHp}`,
+      fEndA.battlers.opponent.hp === spec.expectedOpponentHp && fEndA.battlers.opponent.maxHp === spec.expectedOpponentMaxHp,
+      `observed hp ${fEndA.battlers.opponent.hp}/${fEndA.battlers.opponent.maxHp}`,
+    );
+
+    const f0 = run1.get(0)!;
+    const totalSteps = stepsToReach(f0.rngValue, fEndA.rngValue, spec.expectedTotalSteps[seed]! + 20);
+    check(
+      `seed ${seed}: exactly ${spec.expectedTotalSteps[seed]} total Random() calls from frame 0 to frame ${spec.finalFrame}`,
+      totalSteps === spec.expectedTotalSteps[seed],
+      `forward-search found ${totalSteps === null ? "no match" : `step ${totalSteps}`}`,
+    );
+    perSeedTotals.push(totalSteps ?? -1);
+
+    console.log(
+      `  seed ${seed}: opponent hp=${fEndA.battlers.opponent.hp}/${fEndA.battlers.opponent.maxHp}, total steps 0->${spec.finalFrame}=${totalSteps}`,
+    );
+  }
+
+  if (spec.checkCrossSeedStable) {
+    check(
+      `count stability: total-step count is identical across seeds ${SEEDS.join(" and ")} (${JSON.stringify(perSeedTotals)})`,
+      perSeedTotals.every((n) => n === perSeedTotals[0]),
+      `per-seed totals differ: ${JSON.stringify(perSeedTotals)}`,
+    );
+  } else {
+    console.log(`  (cross-seed stability intentionally not asserted -- the chain's per-slot fall-through count is RNG-dependent, see scenario comment)`);
+  }
+}
 
 // AI_CV_RainDance/SunnyDay/Hail (data/battle_ai_scripts.s:2037-2059/2060-2076/
 // 2261-2278, doc §25) + their AI_CBM_RainDance/SunnyDay/Hail siblings
@@ -1217,6 +1368,9 @@ async function main(): Promise<void> {
   }
   for (const spec of DRAW_COUNT_SCENARIOS) {
     await verifyDrawCountScenario(spec);
+  }
+  for (const spec of EVASIONUP_TOXICCHAIN_SCENARIOS) {
+    await verifyToxicChainScenario(spec);
   }
   for (const spec of WEATHER_PICK_SCENARIOS) {
     await verifyWeatherPickScenario(spec);
