@@ -3668,3 +3668,336 @@ describe("AI_CV_EvasionDown (docs/factory-ai-checkviability-ground-truth.md §24
     expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
   });
 });
+
+const MOVE_RAIN_DANCE_CV = 240; // EFFECT_RAIN_DANCE
+const MOVE_SUNNY_DAY_CV = 241; // EFFECT_SUNNY_DAY
+const MOVE_HAIL_CV = 258; // EFFECT_HAIL
+
+// data/battle_ai_scripts.s:2060-2075/:2261-2276, docs/factory-ai-
+// checkviability-ground-truth.md §25.2: the weather trio's twin siblings --
+// 1 HP gate + a 3-way get_weather chain over the OTHER three weather
+// values, zero if_random_less_than anywhere in either body (§25.4), so no
+// rng seed sensitivity to cover -- only HP%/weather combinations.
+describe("AI_CV_SunnyDay / AI_CV_Hail (docs/factory-ai-checkviability-ground-truth.md §25.2)", () => {
+  function weatherBattler(hp: number, currentWeather: 0 | 1 | 2 | 3 | undefined, maxHp = 100) {
+    return Object.freeze({
+      speed: 100, speedStage: 6, types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+      isFirstTurn: 0, evasionStage: 6, accStage: 6, atkStage: 6, defStage: 6, spDefStage: 6,
+      hp, maxHp, currentWeather,
+    });
+  }
+  const NEUTRAL_TARGET = weatherBattler(100, undefined);
+
+  it.each([
+    ["AI_CV_SunnyDay", MOVE_SUNNY_DAY_CV],
+    ["AI_CV_Hail", MOVE_HAIL_CV],
+  ])("%s: own HP 39%% (< 40): scores -1 with zero draws even when weather would otherwise match", (_label, moveId) => {
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId,
+      attacker: weatherBattler(39, 2), // Sandstorm -- in both handlers' "other three" list, would otherwise be +1
+      target: NEUTRAL_TARGET,
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: -1 });
+  });
+
+  it.each([
+    ["AI_CV_SunnyDay", MOVE_SUNNY_DAY_CV],
+    ["AI_CV_Hail", MOVE_HAIL_CV],
+  ])("%s: own HP exactly 40%% (NOT < 40): falls through to the weather chain instead of the deterministic -1", (_label, moveId) => {
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId,
+      attacker: weatherBattler(40, undefined), // no weather match -> 0, not -1
+      target: NEUTRAL_TARGET,
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+  });
+
+  it("AI_CV_SunnyDay: weather Hail/Rain/Sandstorm (the 'other three', excludes Sun) each score +1 with zero draws", () => {
+    for (const weather of [3, 1, 2] as const) {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_SUNNY_DAY_CV,
+        attacker: weatherBattler(100, weather),
+        target: NEUTRAL_TARGET,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 1 });
+    }
+  });
+
+  it("AI_CV_SunnyDay: own weather (Sun) scores 0, zero draws -- excluded from its own chain", () => {
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_SUNNY_DAY_CV,
+      attacker: weatherBattler(100, 0),
+      target: NEUTRAL_TARGET,
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+  });
+
+  it("AI_CV_SunnyDay: omitted weather (undefined) scores 0, zero draws -- never matches any AI_WEATHER_* constant", () => {
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_SUNNY_DAY_CV,
+      attacker: weatherBattler(100, undefined),
+      target: NEUTRAL_TARGET,
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+  });
+
+  it("AI_CV_Hail: weather Sun/Rain/Sandstorm (the 'other three', excludes Hail) each score +1 with zero draws", () => {
+    for (const weather of [0, 1, 2] as const) {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_HAIL_CV,
+        attacker: weatherBattler(100, weather),
+        target: NEUTRAL_TARGET,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 1 });
+    }
+  });
+
+  it("AI_CV_Hail: own weather (Hail) scores 0, zero draws -- excluded from its own chain", () => {
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_HAIL_CV,
+      attacker: weatherBattler(100, 3),
+      target: NEUTRAL_TARGET,
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+  });
+
+  it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
+    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
+  });
+});
+
+// data/battle_ai_scripts.s:2037-2058, docs/factory-ai-checkviability-
+// ground-truth.md §25.2/§25.3: the ONE weather-trio sibling that genuinely
+// diverges from SunnyDay/Hail's shared shape -- an if_user_faster/Swift-Swim
+// bypass prologue (Gates P/S) wrapping the SAME HP/weather span, plus a
+// Rain-Dish tail bonus (Gate R). Re-derived independently from the raw
+// assembly per the doc's own standing divergence-check rule, not assumed
+// from the sibling shape. Gate P's `if_user_faster` reuses the exact
+// GetWhoStrikesFirst/tie-break-Random() machinery `AI_CV_SpeedDown`'s own
+// `target-faster-tie` already ports (doc §25.3) -- same seeds (3/8) reused
+// here to exercise the tie-break parity/odd branch.
+describe("AI_CV_RainDance (docs/factory-ai-checkviability-ground-truth.md §25.2/§25.3)", () => {
+  const EXTRAS = Object.freeze({
+    types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+    isFirstTurn: 0, evasionStage: 6, accStage: 6, atkStage: 6, defStage: 6, spDefStage: 6,
+  });
+  function raindanceBattler(opts: Readonly<{
+    speed: number;
+    hp?: number;
+    maxHp?: number;
+    ability?: string;
+    currentWeather?: 0 | 1 | 2 | 3;
+  }>) {
+    return Object.freeze({
+      speed: opts.speed, speedStage: 6, ...EXTRAS,
+      hp: opts.hp ?? 100, maxHp: opts.maxHp ?? 100,
+      ability: opts.ability, currentWeather: opts.currentWeather,
+    });
+  }
+  const FASTER = 120;
+  const SLOWER = 5;
+
+  describe("Gate P (if_user_faster) + Gate S (Swift Swim bypass, only checked when NOT user-faster)", () => {
+    it("user strictly faster: skips Gate S/Swift-Swim entirely (present but irrelevant), zero draws, proceeds straight to Gate H/weather", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_RAIN_DANCE_CV,
+        attacker: raindanceBattler({ speed: FASTER, hp: 100, ability: "ABILITY_SWIFT_SWIM", currentWeather: undefined }),
+        target: raindanceBattler({ speed: SLOWER }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      // user faster -> Gate H (hp 100 >= 40) -> weather chain (none, no match) -> Gate R (Swift Swim != Rain Dish) -> 0.
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+
+    it("user NOT faster, own ability Swift Swim: deterministic +1 bypass -- own HP<40% (would normally score -1) is never read", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_RAIN_DANCE_CV,
+        attacker: raindanceBattler({ speed: SLOWER, hp: 10, ability: "ABILITY_SWIFT_SWIM" }),
+        target: raindanceBattler({ speed: FASTER }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 1 });
+    });
+
+    it("user NOT faster, own ability NOT Swift Swim: falls through into the normal Gate H/weather chain (own HP<40% applies -1)", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_RAIN_DANCE_CV,
+        attacker: raindanceBattler({ speed: SLOWER, hp: 10, ability: "ABILITY_NONE" }),
+        target: raindanceBattler({ speed: FASTER }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: -1 });
+    });
+
+    it("omitted ability defaults to ABILITY_NONE, not a false Swift-Swim match", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_RAIN_DANCE_CV,
+        attacker: raindanceBattler({ speed: SLOWER, hp: 100 }),
+        target: raindanceBattler({ speed: FASTER }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      // NOT faster, ability defaults ABILITY_NONE != Swift Swim -> weather chain: hp100>=40, weather undefined -> Gate R: ABILITY_NONE != Rain Dish -> 0.
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+
+    it("an exact speed tie still burns GetWhoStrikesFirst's own Random() call (doc §25.3) -- even tie-roll resolves to userFaster, skipping Gate S", () => {
+      const TIED = raindanceBattler({ speed: 100, hp: 100, ability: "ABILITY_SWIFT_SWIM" });
+      // seed 8 -> tie-roll randomValue 3634 is EVEN -> strikesFirst stays 0 -> userFaster=true (same seed as AI_CV_SpeedDown's own "evenTie" case).
+      const result = runCheckViability({
+        rng: { value: 8, calls: 0 },
+        moveId: MOVE_RAIN_DANCE_CV,
+        attacker: TIED,
+        target: TIED,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(0); // userFaster -> Gate H (100>=40) -> weather chain (none) -> Gate R (Swift Swim != Rain Dish) -> 0.
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "user-faster-tie", strikesFirst: 0 });
+      expect(result.rng.calls).toBe(1);
+    });
+
+    it("an exact speed tie resolved to the target (odd tie-roll): userFaster=false -> Gate S checked, Swift Swim present -> +1 bypass", () => {
+      const TIED = raindanceBattler({ speed: 100, hp: 10, ability: "ABILITY_SWIFT_SWIM" }); // low HP would be -1 if the bypass didn't fire
+      // seed 3 -> tie-roll randomValue 50515 is ODD -> strikesFirst=2 -> userFaster=false (same seed as AI_CV_SpeedDown's own "oddTie" case).
+      const result = runCheckViability({
+        rng: { value: 3, calls: 0 },
+        moveId: MOVE_RAIN_DANCE_CV,
+        attacker: TIED,
+        target: TIED,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(1);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "user-faster-tie", strikesFirst: 2 });
+    });
+  });
+
+  describe("Gate H / weather chain (shared span, reached whenever the Gate P/S prologue doesn't short-circuit)", () => {
+    it("own HP 39% (< 40): scores -1, zero draws -- Rain Dish never checked even when present", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_RAIN_DANCE_CV,
+        attacker: raindanceBattler({ speed: FASTER, hp: 39, ability: "ABILITY_RAIN_DISH", currentWeather: 1 }),
+        target: raindanceBattler({ speed: SLOWER }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: -1 });
+    });
+
+    it("own HP exactly 40% (NOT < 40): falls through into the weather chain instead of the deterministic -1", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_RAIN_DANCE_CV,
+        attacker: raindanceBattler({ speed: FASTER, hp: 40, currentWeather: 3 }), // Hail -- in the other-three list
+        target: raindanceBattler({ speed: SLOWER }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 1 });
+    });
+
+    it.each([3, 0, 2] as const)("weather %i (Hail/Sun/Sandstorm, the 'other three' excluding Rain): scores +1, zero draws, Rain Dish never checked", (weather) => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_RAIN_DANCE_CV,
+        attacker: raindanceBattler({ speed: FASTER, hp: 100, currentWeather: weather, ability: "ABILITY_NONE" }),
+        target: raindanceBattler({ speed: SLOWER }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 1 });
+    });
+
+    it("own weather already Rain (own type, excluded from the chain): falls through to Gate R", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_RAIN_DANCE_CV,
+        attacker: raindanceBattler({ speed: FASTER, hp: 100, currentWeather: 1, ability: "ABILITY_NONE" }),
+        target: raindanceBattler({ speed: SLOWER }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+  });
+
+  describe("Gate R tail (own ability == Rain Dish, only reached when the weather chain falls all the way through)", () => {
+    it("own weather already Rain + own ability Rain Dish: scores +1 -- can coexist with AI_CBM_RainDance's own -8 (independent score contributions, doc §25.6 item 2)", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_RAIN_DANCE_CV,
+        attacker: raindanceBattler({ speed: FASTER, hp: 100, currentWeather: 1, ability: "ABILITY_RAIN_DISH" }),
+        target: raindanceBattler({ speed: SLOWER }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 1 });
+    });
+
+    it("own weather none (undefined) + own ability Rain Dish: scores +1 -- wants rain regardless of current weather", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_RAIN_DANCE_CV,
+        attacker: raindanceBattler({ speed: FASTER, hp: 100, currentWeather: undefined, ability: "ABILITY_RAIN_DISH" }),
+        target: raindanceBattler({ speed: SLOWER }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 1 });
+    });
+
+    it("own weather none + own ability NOT Rain Dish: scores 0, the true deterministic-zero fallthrough", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_RAIN_DANCE_CV,
+        attacker: raindanceBattler({ speed: FASTER, hp: 100, currentWeather: undefined, ability: "ABILITY_NONE" }),
+        target: raindanceBattler({ speed: SLOWER }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+  });
+
+  it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
+    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
+  });
+});
