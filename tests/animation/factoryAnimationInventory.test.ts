@@ -68,13 +68,12 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // MOVE_PSYCHIC staged this session (psychic family's third sibling,
-        // partial at 137/140 same as CONFUSION's own remainder class):
-        // unsupported 251->250, partial 4->5, deliberate per AGENTS.md.
+        // Psychic-family opposite orientations close CONFUSION/PSYCHIC's
+        // sole remaining variant gap: partial 5->3, exact 21->23.
         unsupported: 250,
         staged: 0,
-        partial: 5,
-        exact: 21,
+        partial: 3,
+        exact: 23,
       },
       {
         tier: "openOnly",
@@ -118,6 +117,17 @@ describe("animation coverage ledger", () => {
         "MOVE_FIRE_PUNCH",
         "MOVE_ICE_PUNCH",
         "MOVE_THUNDER_PUNCH",
+      ],
+    });
+    expect(
+      queuedAnimationComponentTracks().find(
+        (track) => track.id === "knock-off-lunge-shake",
+      ),
+    ).toMatchObject({
+      representatives: [
+        "MOVE_KNOCK_OFF",
+        "MOVE_SUPER_FANG",
+        "MOVE_SECRET_POWER",
       ],
     });
     const punchNeighbors = relatedAnimationMoves("MOVE_FIRE_PUNCH", 12).map(

@@ -4,6 +4,7 @@ import {
   psychicBgBldyAtAge,
   psychicBgIsPsychic,
   psychicBgPaletteRowAtAge,
+  psychicTargetShakeDisplayX2,
   psychicTargetEffectAtAge,
 } from "../../src/animation/psychic.ts";
 import {
@@ -147,8 +148,8 @@ describe("MOVE_PSYCHIC's sceneOnPsychicView display lag", () => {
   const base = createSceneOnMovePresentation(config);
   const viewAt = (age: number) => sceneOnPsychicView({ ...base, age });
 
-  it("target x2/scale magnitude trail the RAM-exact psychicTargetEffectAtAge formula by 2 ticks", () => {
-    for (const age of [66, 67, 68, 69, 70, 79, 90, 93, 94]) {
+  it("target scale magnitude and post-creation x2 trail the RAM-exact target formula by 2 ticks", () => {
+    for (const age of [67, 68, 69, 70, 79, 90, 93, 94]) {
       const shifted = psychicTargetEffectAtAge(age - 2);
       expect(viewAt(age).targetX2).toBe(shifted.targetX2);
       expect(viewAt(age).targetScale.xScale).toBe(shifted.targetScale.xScale);
@@ -156,8 +157,17 @@ describe("MOVE_PSYCHIC's sceneOnPsychicView display lag", () => {
     }
   });
 
-  it("the active/inactive edge leads the magnitude read by one more tick (same asymmetry as CONFUSION)", () => {
-    expect(viewAt(66).targetScale).toEqual({ active: true, xScale: 256, yScale: 256 });
+  it("separates objMode/double-size activity from the two-tick-lagged matrix magnitude", () => {
+    expect(viewAt(66).targetBlendActive).toBe(true);
+    expect(viewAt(66).targetScale).toEqual({ active: false, xScale: 256, yScale: 256 });
+    expect(viewAt(95).targetBlendActive).toBe(false);
+    expect(viewAt(95).targetScale).toEqual({ active: true, xScale: 250, yScale: 250 });
+  });
+
+  it("transfers the target shake creation latch through PSYCHIC's own +5 amplitude", () => {
+    expect(psychicTargetEffectAtAge(65).targetX2).toBe(0);
+    expect(psychicTargetShakeDisplayX2(66)).toBe(5);
+    expect(psychicTargetShakeDisplayX2(67)).toBe(0);
   });
 
   it("attacker shake shows the creation-tick transitional value one tick earlier, same shared fix as CONFUSION's own frame119 (this move's own argv is byte-identical: xOffset=1)", () => {

@@ -4,6 +4,7 @@ import {
   confusionBgBldyAtAge,
   confusionBgIsPsychic,
   confusionBgPaletteRowAtAge,
+  confusionTargetShakeDisplayX2,
   confusionTargetEffectAtAge,
 } from "../../src/animation/confusion.ts";
 import {
@@ -160,8 +161,8 @@ describe("MOVE_CONFUSION's sceneOnConfusionView display lag (this session's fix)
   const base = createSceneOnMovePresentation(config);
   const viewAt = (age: number) => sceneOnConfusionView({ ...base, age });
 
-  it("target x2/scale magnitude trail the RAM-exact confusionTargetEffectAtAge formula by 2 ticks", () => {
-    for (const age of [66, 67, 68, 69, 70, 79, 90, 93, 94]) {
+  it("target scale magnitude and post-creation x2 trail the RAM-exact target formula by 2 ticks", () => {
+    for (const age of [67, 68, 69, 70, 79, 90, 93, 94]) {
       const shifted = confusionTargetEffectAtAge(age - 2);
       expect(viewAt(age).targetX2).toBe(shifted.targetX2);
       expect(viewAt(age).targetScale.xScale).toBe(shifted.targetScale.xScale);
@@ -171,24 +172,29 @@ describe("MOVE_CONFUSION's sceneOnConfusionView display lag (this session's fix)
 
   it("pins concrete oracle-tick values across the window (age = oracle tick - 81)", () => {
     expect(viewAt(65).targetScale.active).toBe(false); // tick146: task not yet displayed
-    expect(viewAt(66).targetScale).toEqual({ active: true, xScale: 256, yScale: 256 }); // tick147
+    expect(viewAt(66).targetScale).toEqual({ active: false, xScale: 256, yScale: 256 }); // tick147: matrix not displayed yet
+    expect(viewAt(66).targetBlendActive).toBe(true); // objMode/double-size already displayed
+    expect(viewAt(66).targetX2).toBe(3); // tick147: raw creation-latch OAM value
     expect(viewAt(67).targetScale.xScale).toBe(252); // tick148
     expect(viewAt(68).targetX2).toBe(0); // tick149
     expect(viewAt(69).targetX2).toBe(3); // tick150
     expect(viewAt(79).targetScale.xScale).toBe(204); // tick160, scale-curve trough
   });
 
-  it("the active/inactive edge leads the magnitude read by one more tick (a separate, smaller lag)", () => {
-    // age 66 (tick147): active already true, but the magnitude read (age-2
-    // = 64, still pre-window) hasn't started ramping - xScale stays neutral
-    // for exactly this one tick, a real transitional state, not a bug.
-    expect(viewAt(66).targetScale).toEqual({ active: true, xScale: 256, yScale: 256 });
-    // age 95 (tick176, window tail): the active edge has already flipped
-    // off, but the magnitude read (age-2 = 93) is still mid-ramp (252, not
-    // 256) - deliberately NOT forced to neutral here (see this function's
-    // own comment: forcing neutral was tried and made the dense comparator
-    // worse, growing tick176's residual from 33px to 881px).
-    expect(viewAt(95).targetScale).toEqual({ active: false, xScale: 252, yScale: 252 });
+  it("separates objMode/double-size activity from the two-tick-lagged matrix magnitude", () => {
+    // Creation: mode arrives first, while the matrix is still neutral.
+    expect(viewAt(66).targetBlendActive).toBe(true);
+    expect(viewAt(66).targetScale).toEqual({ active: false, xScale: 256, yScale: 256 });
+    // Restore tail: mode has reverted, while the prior 252 matrix and
+    // frozen monbg underlay remain visible for one final tick.
+    expect(viewAt(95).targetBlendActive).toBe(false);
+    expect(viewAt(95).targetScale).toEqual({ active: true, xScale: 252, yScale: 252 });
+  });
+
+  it("pins the target shake's raw creation-latch display value separately from readable RAM", () => {
+    expect(confusionTargetEffectAtAge(65).targetX2).toBe(0); // tick146 post-task RAM
+    expect(confusionTargetShakeDisplayX2(66)).toBe(3); // tick147 framebuffer
+    expect(confusionTargetShakeDisplayX2(67)).toBe(0);
   });
 
   it("attacker shake shows the creation-tick transitional value one tick earlier than the old formula (frame119's own fix, RAM-probed via confusion-boundary-instrument.ts)", () => {

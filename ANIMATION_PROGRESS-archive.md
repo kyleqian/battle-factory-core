@@ -4,6 +4,31 @@ Older dated sections moved out of `ANIMATION_PROGRESS.md` to keep that
 file lean (`AGENTS.md`'s ~3-most-recent convention). Git history has the
 full record regardless; this file is a read-only reference.
 
+## MOVE_PSYCHIC initially staged at 137/140 before shared boundary and orientation closure (2026-07-26)
+
+`Move_PSYCHIC` was proven byte-for-byte the CONFUSION script shape except for
+its RGB(31,23,0) attacker tint, +5 target shake, and -6/-6 target scale
+literals. The first player-back KADABRA → opponent-front ONIX dense port
+landed at 137/140 twice, with its three mismatches at the same relative
+creation/tail ages as CONFUSION. Later live-ledger entries record the shared
+boundary fix to 140/140 and the opposite-orientation acceptance.
+
+## CONFUSION's banked OAM x-lag fixed: window 2 108/140 → 137/140; stays `partial`, 3 boundary-tick frames named as the honest remainder (2026-07-26)
+
+**Verdict: real fix landed, closing 29 of 32 previously-failing frames. `MOVE_CONFUSION` stays `partial` (137/140, not the required complete 140/140) — the 3 remaining frames are all creation/tail-boundary ticks, the same class as the already-known window-1 frame-119 issue, named honestly rather than promoted past.**
+
+**Instrument first (rung 12):** re-probed the full shake window on both windows via the already-committed `dump-scale-window-oam-scanline.py` (new script `tools/compare/scratch/confusion-oam-shadow-lag-probe.mjs`, committed for reproducibility) — reading the sprite struct's own `x2` field and its OAM-shadow `attr1` x bitfield at the identical instant, not a display-timing artifact. Result: `oamX(tick) == x(tick) + x2(tick-1) + centerToCornerVecX(tick)` holds for **28/29 window-2 ticks and 17/18 window-1 ticks** (the lone miss each time is the shake task's own creation tick, already absorbed by `confusion.ts`'s "+1" idiom) — a real, uniform **one-tick OAM-copy latency** present on BOTH `AnimTask_ShakeMon` and `AnimTask_ShakeMon2` alike, contradicting `sceneOnConfusionView`'s old "window 2 needs no lag" claim (which rested on a 13/30 sampled-pixel check at a single tick near the scale curve's own extremum, where a lag error is nearly invisible). The matrix (`gOamMatrices`) carries no analogous RAM-internal lag of its own (exact at zero shift, all 31 ticks) — but FUTURE_SIGHT's own attacker scale (the same `scaleMonAndRestoreAtAge`/`FUTURE_SIGHT_SCALE_PARAMS` mechanism) already documents a two-tick **display** lag, so the same was expected here too, independent of the x2 finding.
+
+**Fix (rung 13):** `sceneOnConfusionView`'s target x2/scale now read at `state.age-2`, matching window 1's own already-coded shake lag exactly (the OAM-shadow latency + the same generic one-tick framebuffer-capture lag established everywhere else in this codebase). Dense sweep of every integer shift 0-4 (`tools/compare/scratch/confusion-cached-compare.ts`) confirmed -2 on BOTH shake and scale together is the real mechanism (either alone: unchanged at 108/140; both together: 122/140, every interior EVEN tick byte-exact). Two secondary corrections found by continuing the sweep: the `monbg` frozen copy is repanned by its own task (`Task_UpdateMonBg`), not the live sprite's shake task, so it only carries the generic one-tick capture lag (-1) — `battleScene.ts` now reads its x2 separately; and `targetTouched` (the idle-offset/window-2 handoff) moves one tick later to match the now-lagged x2 read. A third asymmetry (the active/inactive edge reaches the display one tick AHEAD of the numeric magnitude — RAM-confirmed same-tick for affineMode/objMode) closed the remaining transitional ticks. One dead end recorded in the code's own comment: forcing xScale/yScale to neutral 256 whenever the active edge reads false seemed "more correct" but made the comparator WORSE (frame176's residual grew from 33px to 881px) — kept the empirically-validated version instead.
+
+**Coverage.** `MOVE_CONFUSION`: stays `partial`, **108/140 → 137/140** (`confusionPortable.ts`, reproduced twice, fresh oracle run both times). Remaining 3 frames: 119 (window 1's own creation-tick boundary, unchanged, still uninvestigated), 147 (window 2's own creation-tick boundary — the active-edge and magnitude reads disagree for exactly this one tick), 176 (window 2's tail boundary, reduced from 881px to 33px but not fully closed). Bounded time was spent on all three within this session's cap; none closed further without speculative per-tick special-casing beyond what the dense sweep already justified. Regression gates green, reproduced twice each, both orientations: `futureSightPortable.ts` 114/114, `growthPortable.ts` 63/63, `bindPortable.ts` 45/45 (component + framebuffer).
+
+**New Tier-1 tests** (`tests/animation/confusion.test.ts`) pin `sceneOnConfusionView`'s corrected values against literal oracle-tick numbers, including the active/magnitude read-parity asymmetry.
+
+**Evidence.** `npm test` 2637/2637. `npm run build` green.
+
+**Next action for a future session:** MOVE_PSYCHIC (this family's third sibling) and the second CONFUSION orientation remain unstarted — this session's own mandate made PSYCHIC staging conditional on a full CONFUSION close, which didn't happen, so it was correctly left untouched. The 3 remaining boundary-tick frames (119, 147, 176) are all narrow, single-tick transitional cases; a future session could try modeling the active/magnitude edges as a genuine 2-tick ramp (rather than a hard step) if it wants to chase them further, but the returns are small (3 frames out of 140).
+
 ## Defect A closed: DISPCNT-OBJ-off capture names the 2nd blend target directly, formula verified exact — `MOVE_FUTURE_SIGHT` promoted to `exact` (114/114); `MOVE_CONFUSION` stays `partial`, blocked on its own already-banked OAM x-lag, not the blend (2026-07-26)
 
 **Verdict: real fix landed. `MOVE_FUTURE_SIGHT` is now `exact`, dense window fully green (114/114, reproduced twice), both regression gates green (reproduced twice each, both orientations). `MOVE_CONFUSION`'s own blend mechanism is now correctly implemented and formula-verified, but a separate, already-banked defect (one-tick OAM x-lag on the target's own shake, rung 8) keeps its window at `partial`, 108/140 — confirmed a true no-op there via stash-and-diff, not a swallowed regression.**

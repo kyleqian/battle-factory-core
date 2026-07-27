@@ -214,3 +214,18 @@ export function psychicTargetEffectAtAge(age: number): PsychicTargetEffect {
     ).x2,
   };
 }
+
+/**
+ * Same source-derived creation-latch display formula as CONFUSION's target
+ * shake. Only the script amplitude differs (+5 here versus +3 there);
+ * PSYCHIC's dense creation-edge frame independently confirms the transfer.
+ */
+export function psychicTargetShakeDisplayX2(displayAge: number): number {
+  return shakeMonOffsetAtTick(
+    TARGET_SHAKE.xOffset,
+    TARGET_SHAKE.yOffset,
+    TARGET_SHAKE.numTimes,
+    TARGET_SHAKE.frameDelay,
+    displayAge - PSYCHIC_WINDOW2_START_AGE - 1,
+  ).x2;
+}

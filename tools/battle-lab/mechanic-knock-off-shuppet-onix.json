@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "mode": "mechanicLab",
+  "profile": "battle-scene-on",
+  "level": 50,
+  "challengeNum": 0,
+  "battleNum": 0,
+  "trainerId": 50,
+  "playerSetIds": [156, 149, 180],
+  "opponentSetIds": [135, 188, 184],
+  "seed": 305419897,
+  "overrides": {
+    "parties": {
+      "player": [
+        {"species":353,"level":50,"nature":15,"ivs":{"hp":31,"attack":31,"defense":31,"speed":31,"spAttack":31,"spDefense":31},"evs":{"hp":0,"attack":0,"defense":0,"speed":0,"spAttack":0,"spDefense":0},"moves":[282,282,282,282],"ppUps":[0,0,0,0],"item":0,"abilitySlot":0,"friendship":70},
+        {"species":353,"level":50,"nature":15,"ivs":{"hp":31,"attack":31,"defense":31,"speed":31,"spAttack":31,"spDefense":31},"evs":{"hp":0,"attack":0,"defense":0,"speed":0,"spAttack":0,"spDefense":0},"moves":[282,282,282,282],"ppUps":[0,0,0,0],"item":0,"abilitySlot":0,"friendship":70},
+        {"species":353,"level":50,"nature":15,"ivs":{"hp":31,"attack":31,"defense":31,"speed":31,"spAttack":31,"spDefense":31},"evs":{"hp":0,"attack":0,"defense":0,"speed":0,"spAttack":0,"spDefense":0},"moves":[282,282,282,282],"ppUps":[0,0,0,0],"item":0,"abilitySlot":0,"friendship":70}
+      ],
+      "opponent": [
+        {"species":95,"level":50,"nature":0,"ivs":{"hp":31,"attack":31,"defense":31,"speed":31,"spAttack":31,"spDefense":31},"evs":{"hp":0,"attack":0,"defense":0,"speed":0,"spAttack":0,"spDefense":0},"moves":[33,33,33,33],"ppUps":[0,0,0,0],"item":0,"abilitySlot":0,"friendship":70},
+        {"species":95,"level":50,"nature":0,"ivs":{"hp":31,"attack":31,"defense":31,"speed":31,"spAttack":31,"spDefense":31},"evs":{"hp":0,"attack":0,"defense":0,"speed":0,"spAttack":0,"spDefense":0},"moves":[33,33,33,33],"ppUps":[0,0,0,0],"item":0,"abilitySlot":0,"friendship":70},
+        {"species":95,"level":50,"nature":0,"ivs":{"hp":31,"attack":31,"defense":31,"speed":31,"spAttack":31,"spDefense":31},"evs":{"hp":0,"attack":0,"defense":0,"speed":0,"spAttack":0,"spDefense":0},"moves":[33,33,33,33],"ppUps":[0,0,0,0],"item":0,"abilitySlot":0,"friendship":70}
+      ]
+    }
+  },
+  "trace": {
+    "segments": [
+      {"frames":2,"buttons":["A"]},
+      {"frames":30,"buttons":[]},
+      {"frames":2,"buttons":["A"]},
+      {"frames":700,"buttons":[]}
+    ],
+    "captureFrames": [70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130]
+  }
+}

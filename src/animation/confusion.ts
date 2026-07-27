@@ -207,3 +207,25 @@ export function confusionTargetEffectAtAge(age: number): ConfusionTargetEffect {
     ).x2,
   };
 }
+
+/**
+ * Display-layer counterpart to the RAM-sample-aligned target shake above.
+ * The creation tick is asymmetric: `AnimTask_ShakeMon` writes `xOffset`
+ * before its synchronous first step clears it, so the OAM shadow captures
+ * the raw +3 creation value even though the first readable post-task RAM
+ * sample is already 0. After that one tick, the established OAM-copy plus
+ * framebuffer lag is the ordinary two ticks. Fresh
+ * `dump-scale-window-oam-scanline.py` evidence: oracle tick 146 has
+ * `x2=0` but `oamExtra=3`; the dense framebuffer displays that +3 at tick
+ * 147. Querying the literal source sequence at
+ * `displayAge - startAge - 1` preserves both facts without a frame patch.
+ */
+export function confusionTargetShakeDisplayX2(displayAge: number): number {
+  return shakeMonOffsetAtTick(
+    TARGET_SHAKE.xOffset,
+    TARGET_SHAKE.yOffset,
+    TARGET_SHAKE.numTimes,
+    TARGET_SHAKE.frameDelay,
+    displayAge - CONFUSION_WINDOW2_START_AGE - 1,
+  ).x2;
+}
