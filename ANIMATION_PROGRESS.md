@@ -44,6 +44,40 @@ animation. A status caused by a move is not part of that move's animation.
   presentation seam and all source- or evidence-required variants are covered.
 - No entry means unsupported.
 
+## SHADOW BALL promoted to exact; LoopSEAdjustPanning track established (2026-07-27)
+
+**Verdict:** `MOVE_SHADOW_BALL` is exact through the shared Scene-ON seam in
+both required orientations, each reproduced twice. Player-back and opponent-
+front SABLEYE are each **148/148 task/sprite/OAM/matrix/register/palette/raw-
+RGB and framebuffer frames** (oracle 256-403 and 260-407). Census: **34/276
+exact, 3 partial, 239 unsupported**.
+
+**Source/probe:** complete legal mechanicLab parties stage SABLEYE, the real
+Level-50 Factory set-268 carrier, with SHADOW BALL and TACKLE legally
+constrained. The reducer ports the BG_GHOST fade/wait/restore pipeline, the
+complete five-play/pan LoopSEAdjustPanning schedule, ANIM_TAG_SHADOW_BALL,
+gShadowBallSpriteTemplate's continuous affine rotation, all three 16/16/8
+AnimShadowBall fixed-point phases, impact boundary, target
+AnimTask_ShakeMon2(4,0,8,1), side-specific launch OAM order, and cleanup.
+
+**Sibling audit (no promotions):** ICE BEAM retains its crystal stream,
+palette bodies, target shake, ice finale, and alpha/monbg lifecycle; PSYBEAM
+retains psychic BG, eleven ring groups, SwayMon, and target palette cycle;
+AURORA BEAM retains aurora BG, rotating palette, forty rings, two shakes, and
+arg-7 gate; HYPER BEAM retains blackout, attacker/target shakes, flashing
+orb palette, 25 orb groups, and target blends; PSYWAVE retains psychic BG,
+sine timer, twelve rings, and target palette cycle; TRI ATTACK retains its
+triangle, blackout, fire, lightning/inversion, ice, and patterned-shake
+bodies. Their distinct sound argv schedules are recorded in
+`ANIMATION_COVERAGE.json`; all remain unsupported without independent
+complete dense move evidence.
+
+**Evidence/controls:** legal fixtures, reproducible extractor, dense probe,
+portable comparator, and focused Tier-1 tests are committed. Acceptance is
+**148/148 ×2 in both orientations**. After the final renderer change CALM
+MIND remains **101/101**, HARDEN **101/101**, and BIND **45/45**, each in
+both orientations. The animation import boundary did not widen.
+
 ## CALM MIND promoted to exact; palette-exclusion track established (2026-07-27)
 
 **Verdict:** `MOVE_CALM_MIND` is exact through the shared Scene-ON seam in
@@ -114,40 +148,6 @@ Acceptance is **101/101 ×2 in both orientations**. After the final renderer
 change EARTHQUAKE remains **197/197**, ACID **131/131**, and BIND **45/45**,
 each in both orientations. Palette/reducer/import-boundary tests remain green;
 the boundary did not widen.
-
-## SYNTHESIS promoted to exact; SPARKLE_2 / GrantingStars track established (2026-07-27)
-
-**Verdict:** `MOVE_SYNTHESIS` is exact through the shared Scene-ON seam in
-both required orientations, each reproduced twice. Player-back SKIPLOOM is
-**130/130 component/task/RAM/palette and framebuffer frames** (oracle
-609-738); opponent-front SKIPLOOM is **130/130** (220-349). Census:
-**31/276 exact, 3 partial, 242 unsupported**.
-
-**Source/probe:** complete legal mechanicLab parties stage SKIPLOOM, the real
-Level-50 Factory set-129 carrier. Stock TACKLE damage creates missing HP; no
-transient battle state is injected. The reducer ports the literal delay-2
-two-leg attacker `blend_color_cycle` (0→16→0), both
-`gGrantingStarsSpriteTemplate` fixed-point/frame-animation bodies from
-`GrantingStarsEffect`, the asset unload/delay/load boundary, and the full
-already-shared `HealingEffect`. `ANIM_TAG_SPARKLE_2`, SKIPLOOM front/back
-chrome, source OAM ordering, palette coefficients, and carrier tile VRAM are
-extracted or probed reproducibly.
-
-**Sibling audit (no promotions):** HEAL BELL still needs its bell, twelve
-palette-managed music notes, three HealBellRing tasks, the distinct
-`gSparklingStarsSpriteTemplate`, and finale; WISH needs gold stars, black-BG
-fade/pan, wish star, and delay; REFRESH needs StatusClearedEffect, palette
-restore, and thin ring; AROMATHERAPY needs nine flowers, green BG/monbg,
-thin ring, and `HealingEffect2`; COSMIC POWER needs its non-attacker palette
-fades, cosmic BG pipeline, sound tasks, delay, and two GrantingStars calls.
-All remain unsupported pending independent complete dense acceptance.
-
-**Evidence/controls:** legal fixtures, reproducible extractor, dense
-task/OAM/palette/RGB probe, portable comparator, and focused Tier-1 tests are
-committed. Acceptance is **130/130 ×2 in both orientations**. After the final
-renderer change RECOVER remains **169/169**, MILK DRINK **186/186**, and BIND
-**45/45**, each in both orientations. The shared blend-color-cycle and
-HealingEffect tests and animation import boundary remain green.
 
 Start with one representative attacker/target. Add variants only when source
 inspection or comparison identifies a dependency: attacker side, front/back

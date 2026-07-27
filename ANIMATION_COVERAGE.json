@@ -2,6 +2,27 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_SHADOW_BALL",
+      "status": "exact",
+      "covered": [
+        "complete legal Level-50 mechanicLab parties stage SABLEYE, the real Factory set-268 SHADOW BALL carrier, with Quirky nature, HP/ATK/SPATK EV spread, Lum Berry, and all four active choices legally constrained to SHADOW BALL; ONIX is constrained to TACKLE",
+        "player-back SABLEYE complete move-owned Scene-ON body at oracle frames 256-403: source task/sprite/OAM/matrix/register/palette/raw-RGB evidence 148/148 and shared-seam framebuffer 148/148, reproduced twice",
+        "opponent-front SABLEYE complete move-owned Scene-ON body at oracle frames 260-407: source task/sprite/OAM/matrix/register/palette/raw-RGB evidence 148/148 and shared-seam framebuffer 148/148, reproduced twice",
+        "BG_GHOST fade/wait/restore pipeline; complete SoundTask_LoopSEAdjustPanning five-play/pan schedule; ANIM_TAG_SHADOW_BALL and gShadowBallSpriteTemplate; continuous +10 affine rotation; all three AnimShadowBall 16/16/8 travel/pause/target phases with signed Q4 truncation and side geometry; impact sound boundary; target AnimTask_ShakeMon2(4,0,8,1); side-specific launch OAM ordering; cleanup"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-shadow-ball-player-sableye-opponent-onix.json",
+        "tools/battle-lab/mechanic-shadow-ball-opponent-sableye-player-onix.json",
+        "tools/compare/fixtures/shadow-ball-player-sableye-opponent-onix.json",
+        "tools/compare/fixtures/shadow-ball-opponent-sableye-player-onix.json",
+        "tools/compare/shadowBallPortable.ts",
+        "tools/compare/shadowBallProbe.py",
+        "tools/compare/extractShadowBallAssets.ts",
+        "src/animation/shadowBall.ts",
+        "tests/animation/shadowBall.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_CALM_MIND",
       "status": "exact",
       "covered": [
@@ -854,6 +875,22 @@
     "MOVE_BIND"
   ],
   "componentTracks": [
+    {
+      "id": "loop-se-adjust-panning",
+      "components": [
+        "soundTask:SoundTask_LoopSEAdjustPanning"
+      ],
+      "representatives": [
+        "MOVE_SHADOW_BALL",
+        "MOVE_ICE_BEAM",
+        "MOVE_PSYBEAM",
+        "MOVE_AURORA_BEAM",
+        "MOVE_HYPER_BEAM",
+        "MOVE_PSYWAVE",
+        "MOVE_TRI_ATTACK"
+      ],
+      "goal": "MOVE_SHADOW_BALL independently proves its complete 5/5/0/5 LoopSEAdjustPanning task schedule and full ghost-BG/projectile/impact/shake/restore body in both orientations at 148/148 task/sprite/OAM/matrix/register/palette/raw-RGB and framebuffer frames, reproduced twice. No sibling is promoted. ICE BEAM needs its BG darken/restore, two outer-crystal beam starters, eleven IceBeamCreateCrystals groups, target blue blend, target ShakeMon2, terminal inner crystals, IceCrystalEffectShort, monbg/splitbgprio/alpha teardown, and its distinct 4/4/0/10 sound schedule. PSYBEAM needs SetPsychicBackground/UnsetPsychicBackground, eleven GoldRing groups, target SwayMon, two-leg target blend_color_cycle, and its distinct 3/4/0/15 sound schedule. AURORA BEAM needs BG_AURORA fade/restore, rotating rainbow-ring palette task, ten four-ring groups, both target ShakeMon2 tasks, script arg-7 lifetime gate, and its distinct 3/6/0/10 sound schedule. HYPER BEAM needs full BG blackout/restore, attacker ShakeMon2 and Y-shake, flashing orb palette, twenty-five HyperBeamOrbs groups, target ShakeMon2, both target palette blends, and its distinct 1/15/0/5 sound schedule. PSYWAVE needs SetPsychicBackground/UnsetPsychicBackground, StartSinAnimTimer, twelve blue-ring sprites, four-leg target blend_color_cycle, and its distinct 2/9/0/10 sound schedule. TRI ATTACK needs the translating triangle, two initial sound/delay legs, BG blackout, eight fire scatters plus patterned shake, three lightning strikes plus inversion/patterned shake, the final ice body, and its distinct 5/6/0/7 sound schedule. Every sibling remains unsupported pending independent complete dense move evidence."
+    },
     {
       "id": "blend-battle-anim-palette-exclude",
       "components": [
