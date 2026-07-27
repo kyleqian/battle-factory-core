@@ -1,4 +1,9 @@
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
+import {
+  mkdtempSync,
+  readFileSync,
+  realpathSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
@@ -12,6 +17,8 @@ import {
   sceneOnRazorLeafView,
   type SceneOnPresentationBattler,
 } from "../../src/animation/sceneOnPresentation.ts";
+import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
+import { PNG } from "pngjs";
 
 interface Fixture {
   scenario: string;
@@ -50,11 +57,12 @@ const fixturePath = process.argv[2]
 const fixture = JSON.parse(readFileSync(resolve(fixturePath), "utf8")) as Fixture;
 const scratch = mkdtempSync(join(tmpdir(), "pokebench-razor-leaf-portable-"));
 const output = join(scratch, "probe.json");
+const rgbDir = join(scratch, "rgb");
 const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));
 const run = spawnSync("python3", [
   join(root, "tools/run-mgba-probe.py"), output, "--",
   join(vendor, "mgba-venv/bin/python"), resolve(root, fixture.probe),
-  resolve(root, fixture.scenario), output,
+  resolve(root, fixture.scenario), output, rgbDir,
 ], { cwd: root, encoding: "utf8" });
 if (run.stdout) process.stdout.write(run.stdout);
 if (run.stderr) process.stderr.write(run.stderr);
@@ -125,6 +133,9 @@ function hardwareShape(
 
 const failures: string[] = [];
 let matches = 0;
+let framebufferMatches = 0;
+const framebufferMismatches: string[] = [];
+let wroteDiagnostic = false;
 for (
   let frame = fixture.denseWindow.startFrame;
   frame <= fixture.denseWindow.endFrame;
@@ -202,13 +213,63 @@ for (
       + (software ? "" : `\n actual=${JSON.stringify(actualSoftware)}\n expect=${JSON.stringify(expectedSoftware)}`),
     );
   }
+  const engine: EngineState = {
+    ...createInitialState(),
+    rngMode: "frontierBattle",
+    sceneOnPresentation: { ...stage, age },
+  };
+  const app = render(engine);
+  const rgb = readFileSync(
+    join(rgbDir, `${String(frame).padStart(5, "0")}.rgb`),
+  );
+  let diffPixels = 0;
+  for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
+    if (
+      app[pixel * 4] !== rgb[pixel * 3]
+      || app[pixel * 4 + 1] !== rgb[pixel * 3 + 1]
+      || app[pixel * 4 + 2] !== rgb[pixel * 3 + 2]
+    ) diffPixels += 1;
+  }
+  if (diffPixels === 0) framebufferMatches += 1;
+  else {
+    framebufferMismatches.push(`${age}:${diffPixels}`);
+    if (!wroteDiagnostic) {
+      const oracleRgba = Buffer.alloc(240 * 160 * 4);
+      const diffRgba = Buffer.alloc(240 * 160 * 4);
+      for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
+        oracleRgba[pixel * 4] = rgb[pixel * 3]!;
+        oracleRgba[pixel * 4 + 1] = rgb[pixel * 3 + 1]!;
+        oracleRgba[pixel * 4 + 2] = rgb[pixel * 3 + 2]!;
+        oracleRgba[pixel * 4 + 3] = 255;
+        if (
+          app[pixel * 4] !== rgb[pixel * 3]
+          || app[pixel * 4 + 1] !== rgb[pixel * 3 + 1]
+          || app[pixel * 4 + 2] !== rgb[pixel * 3 + 2]
+        ) {
+          diffRgba[pixel * 4] = 255;
+          diffRgba[pixel * 4 + 3] = 255;
+        }
+      }
+      writeFileSync(join(scratch, `oracle-age-${age}.png`), PNG.sync.write({
+        width: 240, height: 160, data: oracleRgba,
+      }));
+      writeFileSync(join(scratch, `app-age-${age}.png`), PNG.sync.write({
+        width: 240, height: 160, data: Buffer.from(app),
+      }));
+      writeFileSync(join(scratch, `diff-age-${age}.png`), PNG.sync.write({
+        width: 240, height: 160, data: diffRgba,
+      }));
+      wroteDiagnostic = true;
+    }
+  }
 }
 const total = fixture.denseWindow.endFrame - fixture.denseWindow.startFrame + 1;
 console.log(
-  `RAZOR_LEAF source components + typed seam ${matches}/${total}; raw RGB 0/${total} unattempted`,
+  `RAZOR_LEAF source components + typed seam ${matches}/${total}; framebuffer ${framebufferMatches}/${total}`,
 );
-if (matches !== total) {
+if (matches !== total || framebufferMatches !== total) {
   console.error(failures.slice(0, 20).join("\n"));
+  console.error(`framebuffer mismatch age:pixels: ${framebufferMismatches.join(",")}`);
   console.error(`scratch: ${scratch}`);
   process.exit(1);
 }

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Dense source-component evidence for legal Scene-ON RAZOR LEAF fixtures."""
+"""Dense component and raw-RGB evidence for legal Scene-ON RAZOR LEAF fixtures."""
 from __future__ import annotations
-import json, subprocess, sys
+import hashlib, json, subprocess, sys
 from pathlib import Path
 
-if len(sys.argv) != 3:
-    raise SystemExit("usage: razorLeafProbe.py <scenario> <output.json>")
-SCENARIO, OUTPUT = Path(sys.argv[1]), Path(sys.argv[2])
+if len(sys.argv) != 4:
+    raise SystemExit("usage: razorLeafProbe.py <scenario> <output.json> <rgb-dir>")
+SCENARIO, OUTPUT, RGB_DIR = Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3])
 ROOT = Path(__file__).resolve().parents[2]
 HARNESS = next(p for p in (ROOT, *ROOT.parents) if (p / "oracle" / "emerald_core.py").is_file())
 sys.path.insert(0, str(HARNESS / "oracle"))
@@ -63,6 +63,7 @@ def main() -> None:
                                "data": [s16(base+8+i*2) for i in range(16)]})
         return result
     rows = []
+    RGB_DIR.mkdir(parents=True, exist_ok=True)
     def capture(frame: int) -> None:
         snap = lab.snapshot()
         if snap["engine"]["currentMove"] != 75: return
@@ -73,7 +74,10 @@ def main() -> None:
                 item = sprite(slot)
                 if item["template"] in templates.values(): active.append(item)
         se1_info, se1_tracks = oracle.symbols["gMPlayInfo_SE1"], oracle.symbols["gMPlayTrack_SE1"]
-        rows.append({"frame": frame, "playerSprite": battler(0), "opponentSprite": battler(1),
+        rgb = oracle.screen_rgb()
+        (RGB_DIR / f"{frame:05d}.rgb").write_bytes(rgb)
+        rows.append({"frame": frame, "sha256": hashlib.sha256(rgb).hexdigest(),
+          "playerSprite": battler(0), "opponentSprite": battler(1),
           "sprites": active, "tasks": active_shakes(),
           "hardwareOam": [[u16(0x07000000+i*8+j) for j in (0,2,4)] for i in range(128)],
           "fadedPalette": [u16(faded+i*2) for i in range(512)],

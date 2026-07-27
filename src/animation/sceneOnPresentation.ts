@@ -1015,6 +1015,7 @@ export type SceneOnMoveConfig =
   | SceneOnSelfDestructConfig
   | SceneOnExplosionConfig
   | SceneOnDynamicPunchConfig
+  | SceneOnRazorLeafConfig
   | SceneOnPoisonTailConfig
   | SceneOnToxicConfig
   | SceneOnEarthquakeConfig
@@ -2274,7 +2275,7 @@ export function sceneOnDynamicPunchView(
 
 /** `age=0` is the first monbg/alpha display of the complete source body. */
 export function sceneOnRazorLeafView(
-  state: SceneOnMovePresentationState<SceneOnRazorLeafConfig>,
+  state: SceneOnMovePresentationState,
 ): SceneOnRazorLeafView {
   if (state.config.move !== "RAZOR_LEAF") {
     throw new Error(

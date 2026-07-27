@@ -553,6 +553,7 @@ import swaggerAsset from "../animation/assets/swagger.json" with { type: "json" 
 import selfDestructAsset from "../animation/assets/selfDestruct.json" with { type: "json" };
 import explosionAsset from "../animation/assets/explosion.json" with { type: "json" };
 import dynamicPunchAsset from "../animation/assets/dynamicPunch.json" with { type: "json" };
+import razorLeafAsset from "../animation/assets/razorLeaf.json" with { type: "json" };
 import poisonTailAsset from "../animation/assets/poisonTail.json" with { type: "json" };
 import toxicAsset from "../animation/assets/toxic.json" with { type: "json" };
 import hardenAsset from "../animation/assets/harden.json" with { type: "json" };
@@ -671,6 +672,7 @@ import {
   sceneOnSelfDestructView,
   sceneOnExplosionView,
   sceneOnDynamicPunchView,
+  sceneOnRazorLeafView,
   sceneOnPoisonTailView,
   sceneOnToxicView,
   sceneOnEarthquakeView,
@@ -1032,6 +1034,12 @@ const dynamicPunchArt = dynamicPunchAsset as {
   hitmonchanFront: { tileset: Tileset; palette: RgbColor[] };
   fist: { tileset: Tileset; palette: RgbColor[] };
   hitsplat: { tileset: Tileset; palette: RgbColor[] };
+};
+const razorLeafArt = razorLeafAsset as {
+  weepinbellBack: { tileset: Tileset; palette: RgbColor[] };
+  weepinbellFront: { tileset: Tileset; palette: RgbColor[] };
+  leaf: { tileset: Tileset; palette: RgbColor[] };
+  cutter: { tileset: Tileset; palette: RgbColor[] };
 };
 const poisonTailArt = poisonTailAsset as {
   metal: { tileset: Tileset; tilemap: Tilemap; palette: RgbColor[] };
@@ -2747,6 +2755,35 @@ function drawSpriteSheetHFlip(
       if (index === 0) continue;
       const color = palette[index];
       if (color) setPixel(fb, ox + sx, oy + sy, color);
+    }
+  }
+}
+
+function drawSpriteSheetFlipped(
+  fb: Uint8Array,
+  tileset: Tileset,
+  palette: RgbColor[],
+  ox: number,
+  oy: number,
+  hFlip: boolean,
+  vFlip: boolean,
+): void {
+  const width = tileset.columns * 8;
+  const height = tileset.rows * 8;
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      const sourceX = hFlip ? width - 1 - x : x;
+      const sourceY = vFlip ? height - 1 - y : y;
+      const tile = tileset.tiles[
+        Math.floor(sourceY / 8) * tileset.columns
+        + Math.floor(sourceX / 8)
+      ];
+      const index = tile?.[
+        (sourceY % 8) * 8 + (sourceX % 8)
+      ] ?? 0;
+      if (index === 0) continue;
+      const color = palette[index];
+      if (color) setPixel(fb, ox + x, oy + y, color);
     }
   }
 }
@@ -15825,6 +15862,154 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "RATICATE used" : "Foe RATICATE used",
       "HYPER FANG!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "RAZOR_LEAF") {
+    const view = sceneOnRazorLeafView(state);
+    // Effect callbacks update software OAM after the current buffer transfer.
+    // ShakeMon2 uses the same task-to-battler-OAM display latch as the exact
+    // DYNAMIC_PUNCH control immediately below.
+    const effectsDisplayed = sceneOnRazorLeafView({
+      ...state,
+      age: state.age - 1,
+    });
+    const targetDisplayed = sceneOnRazorLeafView({
+      ...state,
+      age: state.age === 0 ? 0 : state.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "WEEPINBELL"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "WEEPINBELL"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged RAZOR_LEAF pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const weepinbell = playerToOpponent
+      ? razorLeafArt.weepinbellBack
+      : {
+          ...razorLeafArt.weepinbellFront,
+          tileset: subTileset(razorLeafArt.weepinbellFront.tileset, 0, 8),
+        };
+    const shuckle = playerToOpponent
+      ? {
+          ...selfDestructArt.shuckleFront,
+          tileset: subTileset(selfDestructArt.shuckleFront.tileset, 0, 8),
+        }
+      : selfDestructArt.shuckleBack;
+    const leaves = [...effectsDisplayed.particles].sort(
+      (a, b) =>
+        (a.y + a.y2) - (b.y + b.y2)
+        // Stable exact-Y ties retain the inherited source slot order here:
+        // the earlier particle paints first and the later particle wins.
+        || a.spawnIndex - b.spawnIndex,
+    );
+    const cutters = [...effectsDisplayed.cutters].sort(
+      (a, b) =>
+        (a.y + a.y2) - (b.y + b.y2)
+        || b.index - a.index,
+    );
+    const drawWeepinbell = () => drawSpriteSheet(
+      fb,
+      weepinbell.tileset,
+      weepinbell.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const drawShuckle = () => drawSpriteSheet(
+      fb,
+      shuckle.tileset,
+      shuckle.palette,
+      view.target.geometry.spriteCorner.x + targetDisplayed.targetX2,
+      view.target.geometry.spriteCorner.y,
+    );
+    const drawLeaves = () => {
+      for (const leaf of leaves) {
+        drawSpriteSheet(
+          fb,
+          subTileset(
+            razorLeafArt.leaf.tileset,
+            leaf.tileOffset / razorLeafArt.leaf.tileset.columns,
+            2,
+          ),
+          razorLeafArt.leaf.palette,
+          leaf.x + leaf.x2 - 8,
+          leaf.y + leaf.y2 - 8,
+        );
+      }
+    };
+    const drawCutters = () => {
+      for (const cutter of cutters) {
+        drawSpriteSheetFlipped(
+          fb,
+          razorLeafArt.cutter.tileset,
+          razorLeafArt.cutter.palette,
+          cutter.x + cutter.x2 - 16,
+          cutter.y + cutter.y2 - 8,
+          cutter.hFlip,
+          cutter.vFlip,
+        );
+      }
+    };
+
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    // Source SortSprites painter order. The loaded `monbg ANIM_DEF_PARTNER`
+    // targets the absent partner in these legal singles fixtures, so no live
+    // battler is copied to BG; BLDALPHA 12/8 consequently has no visible
+    // semi-transparent OBJ consumer.
+    if (playerToOpponent) {
+      drawShuckle();
+      drawCutters();
+      drawWeepinbell();
+      drawLeaves();
+    } else {
+      drawWeepinbell();
+      drawLeaves();
+      drawShuckle();
+      drawCutters();
+    }
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "SHUCKLE" : "WEEPINBELL",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "WEEPINBELL" : "SHUCKLE",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "WEEPINBELL used" : "Foe WEEPINBELL used",
+      "RAZOR LEAF!",
       99,
     );
     return;
