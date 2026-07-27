@@ -68,10 +68,10 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // ENCORE is exact in both required orientations.
-        unsupported: 237,
+        // SING has dense component evidence in both required orientations.
+        unsupported: 236,
         staged: 0,
-        partial: 3,
+        partial: 4,
         exact: 36,
       },
       {
