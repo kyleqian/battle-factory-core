@@ -188,9 +188,9 @@
       "status": "partial",
       "covered": [
         "complete legal Level-50 mechanicLab parties stage GRIMER from real Factory set 110 in both player-back and opponent-front orientations, with all four active choices legally constrained to SLUDGE and ONIX constrained to TACKLE",
-        "player-back GRIMER to opponent-front ONIX complete sprite/task body at oracle frames 218-319: source projectile, all six poison bubbles, target ShakeMon argv/lifetime, blend_color_cycle argv/lifetime, software OAM slots/positions/matrices, and cleanup match 102/102 dense component frames",
-        "opponent-front GRIMER to player-back ONIX complete sprite/task body at oracle frames 230-331: the same strengthened source component surface matches 102/102 dense frames",
-        "source reducer ports gSludgeProjectileSpriteTemplate's 40-callback mirrored horizontal arc and looping affine program; the animation-script visual-task display latch; and PoisonBubblesEffect's six literal side-mirrored offsets, eight-frame displayed spawn cadence, rising/sway callbacks, affine terminal clamp, OAM allocation/reuse, and cleanup"
+        "player-back GRIMER to opponent-front ONIX complete sprite/task/palette body at oracle frames 218-319: source projectile, all six poison bubbles, target ShakeMon, blend_color_cycle, software OAM slots/positions/matrices, faded target rows, one-frame hardware palette transfer latches, and cleanup match 102/102 dense component frames",
+        "opponent-front GRIMER to player-back ONIX complete sprite/task/palette/audio body at oracle frames 230-331: the same strengthened source component surface matches 102/102 dense frames",
+        "source reducer ports gSludgeProjectileSpriteTemplate's 40-callback mirrored horizontal arc and looping affine program; the animation-script visual-task display latch; and PoisonBubblesEffect's six literal side-mirrored offsets, eight-frame displayed spawn cadence, rising/sway callbacks, affine terminal clamp, OAM allocation/reuse, and cleanup; SE_M_BUBBLE3 attacker-pan plus all six SE_M_TOXIC target-pan song headers/restart flags/pan latches match at their source boundaries"
       ],
       "evidence": [
         "tools/battle-lab/mechanic-sludge-player-grimer-opponent-onix.json",
@@ -202,7 +202,7 @@
         "src/animation/sludge.ts",
         "tests/animation/sludge.test.ts"
       ],
-      "remaining": "Compare the selected target faded palette and hardware OBJ palette latches across the complete delay-1 RGB(30,0,31) cycle; probe SE_M_BUBBLE3 attacker-pan and all six SE_M_TOXIC target-pan boundaries; reproducibly extract poison-bubble art; render projectile, shake, palette, six bubbles, field/text/healthboxes and cleanup through the shared seam; then obtain raw-RGB/framebuffer exact evidence in both orientations twice and rerun SING plus ACID or BIND controls."
+      "remaining": "Reproducibly extract poison-bubble art; render projectile, shake, palette, six bubbles, field/text/healthboxes and cleanup through the shared seam; then obtain raw-RGB/framebuffer exact evidence in both orientations twice and rerun SING plus ACID or BIND controls."
     },
     {
       "move": "MOVE_EARTHQUAKE",
@@ -1202,7 +1202,7 @@
         "MOVE_POISON_FANG",
         "MOVE_POISON_TAIL"
       ],
-      "goal": "MOVE_ACID independently proves its complete three-arc, dual-ShakeMon2, defender palette-cycle, and five-droplet body in both orientations at 131/131 component/task/RAM/palette and framebuffer frames, reproduced twice. MOVE_SLUDGE is partial: its complete projectile/ShakeMon/blend-task/PoisonBubblesEffect software component body is 102/102 dense frames in both orientations, but target palette hardware latches, sound boundaries, extracted asset rendering, raw RGB, shared-seam framebuffer, controls, and twice-fresh reproduction remain. TOXIC remains unsupported and still needs ANIM_TAG_TOXIC_BUBBLE plus two four-sprite ToxicBubbles waves before its separate six-sprite PoisonBubblesEffect. SLUDGE BOMB remains unsupported and still needs ten delayed sludge projectiles, distinct (3,0,15,1) ShakeMon2, delay-1 target blend, twelve gSludgeBombHitParticleSpriteTemplate bodies, and waitsound. POISON FANG remains unsupported and still needs ANIM_TAG_FANG_ATTACK/gFangSpriteTemplate, target ShakeMon, and its four-leg delay-0 palette cycle. POISON TAIL remains unsupported and still needs metallic_shine, attacker lunge, impact hitsplat, target ShakeMon, alpha/monbg teardown, and its own complete evidence. Shared PoisonBubblesEffect code does not promote any sibling."
+      "goal": "MOVE_ACID independently proves its complete three-arc, dual-ShakeMon2, defender palette-cycle, and five-droplet body in both orientations at 131/131 component/task/RAM/palette and framebuffer frames, reproduced twice. MOVE_SLUDGE is partial: its complete projectile/ShakeMon/blend-task/PoisonBubblesEffect component body, faded target palette, hardware transfer latches, and seven sound boundaries are 102/102 dense frames in both orientations, but extracted asset rendering, raw RGB, shared-seam framebuffer, controls, and twice-fresh reproduction remain. TOXIC remains unsupported and still needs ANIM_TAG_TOXIC_BUBBLE plus two four-sprite ToxicBubbles waves before its separate six-sprite PoisonBubblesEffect. SLUDGE BOMB remains unsupported and still needs ten delayed sludge projectiles, distinct (3,0,15,1) ShakeMon2, delay-1 target blend, twelve gSludgeBombHitParticleSpriteTemplate bodies, and waitsound. POISON FANG remains unsupported and still needs ANIM_TAG_FANG_ATTACK/gFangSpriteTemplate, target ShakeMon, and its four-leg delay-0 palette cycle. POISON TAIL remains unsupported and still needs metallic_shine, attacker lunge, impact hitsplat, target ShakeMon, alpha/monbg teardown, and its own complete evidence. Shared PoisonBubblesEffect code does not promote any sibling."
     },
     {
       "id": "water-gun-small-bubbles-water-impact",

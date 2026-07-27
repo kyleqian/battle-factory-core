@@ -2,7 +2,10 @@ import { spawnSync } from "node:child_process";
 import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
-import { sludgeEffectAtAge } from "../../src/animation/sludge.ts";
+import {
+  sludgeEffectAtAge,
+  sludgeTargetPaletteYAtAge,
+} from "../../src/animation/sludge.ts";
 
 interface Fixture {
   readonly scenario: string;
@@ -21,10 +24,17 @@ interface ProbeSprite {
 }
 interface ProbeFrame {
   readonly frame: number;
-  readonly playerSprite: { readonly x2: number; readonly y2: number };
-  readonly opponentSprite: { readonly x2: number; readonly y2: number };
+  readonly playerSprite: { readonly x2: number; readonly y2: number; readonly attr2: number };
+  readonly opponentSprite: { readonly x2: number; readonly y2: number; readonly attr2: number };
   readonly sprites: readonly ProbeSprite[];
   readonly tasks: readonly { readonly func: number; readonly data: readonly number[] }[];
+  readonly fadedPalette: readonly number[];
+  readonly unfadedPalette: readonly number[];
+  readonly hardwarePalette: readonly number[];
+  readonly se1: {
+    readonly songHeader: number; readonly status: number;
+    readonly tracks: readonly { readonly flags: number; readonly panX: number }[];
+  };
 }
 
 const root = resolve(dirname(new URL(import.meta.url).pathname), "../..");
@@ -45,6 +55,7 @@ if (run.status !== 0) process.exit(run.status ?? 1);
 const probe = JSON.parse(readFileSync(output, "utf8")) as {
   readonly templates: Readonly<Record<string, number>>;
   readonly taskFuncs: Readonly<Record<string, number>>;
+  readonly songHeaders: Readonly<Record<"SE_M_BUBBLE3" | "SE_M_TOXIC", number>>;
   readonly frames: readonly ProbeFrame[];
 };
 const frames = new Map(probe.frames.map((frame) => [frame.frame, frame]));
@@ -52,6 +63,14 @@ const key = (sprite: {
   readonly kind: string; readonly oamSlot: number; readonly x: number; readonly y: number;
   readonly xScale: number; readonly yScale: number;
 }) => [sprite.kind, sprite.oamSlot, sprite.x, sprite.y, sprite.xScale, sprite.yScale].join(":");
+const blendPaletteColor = (color: number, coeff: number, target = 31774) => {
+  const channel = (shift: number) => {
+    const from = (color >> shift) & 31;
+    const to = (target >> shift) & 31;
+    return from + (((to - from) * coeff) >> 4);
+  };
+  return channel(0) | (channel(5) << 5) | (channel(10) << 10);
+};
 let matches = 0;
 const mismatches: string[] = [];
 for (let frame = fixture.denseWindow.startFrame; frame <= fixture.denseWindow.endFrame; frame += 1) {
@@ -92,13 +111,42 @@ for (let frame = fixture.denseWindow.startFrame; frame <= fixture.denseWindow.en
     : blend.length === 1
       && blend[0]!.data[0] === 4 && blend[0]!.data[1] === 1
       && blend[0]!.data[4] === 12 && blend[0]!.data[5] === 31774;
+  const targetPaletteStart = 256 + ((target.attr2 >> 12) & 0xf) * 16;
+  const unfadedRow = oracle.unfadedPalette.slice(targetPaletteStart, targetPaletteStart + 16);
+  const fadedRow = oracle.fadedPalette.slice(targetPaletteStart, targetPaletteStart + 16);
+  const hardwareRow = oracle.hardwarePalette.slice(targetPaletteStart, targetPaletteStart + 16);
+  const paletteCoefficients = Array.from({ length: 13 }, (_, coefficient) => coefficient)
+    .filter((coefficient) => unfadedRow.every(
+      (color, index) => blendPaletteColor(color, coefficient) === fadedRow[index],
+    ));
+  const prior = frames.get(frame - 1);
+  const hardwareExpected = prior
+    ? prior.fadedPalette.slice(targetPaletteStart, targetPaletteStart + 16)
+    : fadedRow;
+  const expectedCoefficient = sludgeTargetPaletteYAtAge(age);
+  const paletteShape = paletteCoefficients.includes(expectedCoefficient)
+    && JSON.stringify(hardwareExpected) === JSON.stringify(hardwareRow);
+  const toxicSoundAge = [41, 49, 57, 65, 73, 81].includes(age);
+  const soundBoundary = age === 0 || toxicSoundAge;
+  const expectedSong = age === 0
+    ? probe.songHeaders.SE_M_BUBBLE3
+    : probe.songHeaders.SE_M_TOXIC;
+  const expectedPan = age === 0
+    ? (fixture.attackerSide === "player" ? -64 : 63)
+    : (fixture.targetSide === "player" ? -63 : 63);
+  const soundShape = !soundBoundary || (
+    oracle.se1.songHeader === expectedSong
+    && oracle.se1.status === 0
+    && oracle.se1.tracks[0]?.flags === 131
+    && oracle.se1.tracks[0]?.panX === expectedPan
+  );
   if (JSON.stringify(expectedSprites) === JSON.stringify(actualSprites)
       && predictedTargetX2 === target.x2
       && predicted.targetOffset.y2 === target.y2
-      && shakeShape && blendShape) {
+      && shakeShape && blendShape && paletteShape && soundShape) {
     matches += 1;
   } else {
-    mismatches.push(`frame ${frame}: sprites predicted=${expectedSprites} actual=${actualSprites}; target predicted=${predictedTargetX2},${predicted.targetOffset.y2} actual=${target.x2},${target.y2}; tasks shake=${shake.length} blend=${blend.length}`);
+    mismatches.push(`frame ${frame}: sprites predicted=${expectedSprites} actual=${actualSprites}; target predicted=${predictedTargetX2},${predicted.targetOffset.y2} actual=${target.x2},${target.y2}; tasks shake=${shake.length} blend=${blend.length}; palette predicted=${expectedCoefficient} actual=${paletteCoefficients} hwPriorLatch=${JSON.stringify(hardwareExpected) === JSON.stringify(hardwareRow)}; soundBoundary=${soundBoundary} sound=${oracle.se1.songHeader}/${oracle.se1.status}/${oracle.se1.tracks[0]?.flags}/${oracle.se1.tracks[0]?.panX} expected=${expectedSong}/0/131/${expectedPan}`);
   }
 }
 const total = fixture.denseWindow.endFrame - fixture.denseWindow.startFrame + 1;

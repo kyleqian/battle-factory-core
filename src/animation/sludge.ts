@@ -36,6 +36,19 @@ export interface SludgeEffect {
   readonly sprites: readonly SludgeSprite[];
 }
 
+/**
+ * Target OBJ/BG palette coefficient for SLUDGE's literal delay=1,
+ * num_blends=2, 0<->12 blend_color_cycle. Each coefficient is exposed for
+ * three display ticks; the source palette-fade completion path holds the
+ * peak before the reverse leg.
+ */
+export function sludgeTargetPaletteYAtAge(age: number): number {
+  if (age < 44) return 0;
+  if (age <= 59) return Math.min(12, 2 + 2 * Math.floor((age - 44) / 3));
+  if (age < 68) return 12;
+  return Math.max(0, 10 - 2 * Math.floor((age - 68) / 3));
+}
+
 function poisonBubbleAtLocalAge(
   local: number,
   spawnIndex: number,

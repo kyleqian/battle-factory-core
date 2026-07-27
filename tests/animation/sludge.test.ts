@@ -3,6 +3,7 @@ import {
   SLUDGE_POISON_BUBBLE_OFFSETS,
   SLUDGE_POISON_BUBBLE_START_AGES,
   sludgeEffectAtAge,
+  sludgeTargetPaletteYAtAge,
 } from "../../src/animation/sludge.ts";
 
 describe("MOVE_SLUDGE source-relative reducer", () => {
@@ -42,5 +43,11 @@ describe("MOVE_SLUDGE source-relative reducer", () => {
     expect([40, 41, 42, 43, 44, 45, 46, 47, 48, 49].map(
       (age) => player(age).targetOffset.x2,
     )).toEqual([0, 0, 0, 3, 3, 0, 0, 3, 3, 0]);
+  });
+
+  it("ports the delay-1 two-leg target palette cycle", () => {
+    expect([41, 43, 44, 46, 47, 59, 60, 67, 68, 71, 80, 83, 87].map(
+      sludgeTargetPaletteYAtAge,
+    )).toEqual([0, 0, 2, 2, 4, 12, 12, 12, 10, 8, 2, 0, 0]);
   });
 });

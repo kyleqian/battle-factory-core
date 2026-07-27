@@ -21,7 +21,10 @@ def main() -> None:
     setup = lab.prepare(request)
     RGB_DIR.mkdir()
     sprites, matrices, tasks = oracle.symbols["gSprites"], oracle.symbols["gOamMatrices"], oracle.symbols["gTasks"]
-    battler_ids, faded = oracle.symbols["gBattlerSpriteIds"], oracle.symbols["gPlttBufferFaded"]
+    battler_ids = oracle.symbols["gBattlerSpriteIds"]
+    faded, unfaded = oracle.symbols["gPlttBufferFaded"], oracle.symbols["gPlttBufferUnfaded"]
+    se1_info, se1_tracks = oracle.symbols["gMPlayInfo_SE1"], oracle.symbols["gMPlayTrack_SE1"]
+    song_table = oracle.symbols["gSongTable"]
     nm = subprocess.run(["arm-none-eabi-nm", str(reference / "pokeemerald.elf")], check=True, capture_output=True, text=True).stdout
     symbols = {line.split()[2]: int(line.split()[0], 16) | 1 for line in nm.splitlines() if len(line.split()) == 3}
     templates = {name: oracle.symbols[name] for name in ("gSludgeProjectileSpriteTemplate", "gPoisonBubbleSpriteTemplate")}
@@ -31,6 +34,9 @@ def main() -> None:
     def s16(a: int) -> int:
         v = u16(a)
         return v - 0x10000 if v >= 0x8000 else v
+    def s8(a: int) -> int:
+        v = oracle.read_u8(a)
+        return v - 0x100 if v >= 0x80 else v
     def sprite(slot: int) -> dict:
         base = sprites + slot * 0x44
         matrix_num = (u16(base + 2) >> 9) & 0x1f
@@ -69,7 +75,13 @@ def main() -> None:
           "player":snap["battlers"]["player"],"opponent":snap["battlers"]["opponent"],
           "playerSprite":battler(0),"opponentSprite":battler(1),"sprites":active,
           "tasks":active_tasks(),"fadedPalette":[u16(faded+i*2) for i in range(512)],
+          "unfadedPalette":[u16(unfaded+i*2) for i in range(512)],
+          "hardwarePalette":[u16(0x05000000+i*2) for i in range(512)],
           "hardwareOam":[[u16(0x07000000+i*8+j) for j in (0,2,4)] for i in range(128)],
+          "se1":{"songHeader":oracle.read_u32(se1_info),"status":oracle.read_u32(se1_info+4),
+                 "tracks":[{"flags":oracle.read_u8(se1_tracks+i*0x50),
+                            "pan":s8(se1_tracks+i*0x50+0x14),
+                            "panX":s8(se1_tracks+i*0x50+0x15)} for i in range(3)]},
           "bldcnt":u16(0x04000050),"bldalpha":u16(0x04000052)})
     frame = 0
     capture(frame)
@@ -77,6 +89,8 @@ def main() -> None:
         for _ in range(segment["frames"]):
             oracle.advance(segment.get("buttons", [])); frame += 1; capture(frame)
     OUTPUT.write_text(json.dumps({"schema":"sludge-dense-evidence/v1","setup":setup,
-      "templates":templates,"taskFuncs":{name:symbols[name] for name in task_names},"frames":rows}) + "\n")
+      "templates":templates,"taskFuncs":{name:symbols[name] for name in task_names},
+      "songHeaders":{"SE_M_BUBBLE3":oracle.read_u32(song_table+126*8),
+                     "SE_M_TOXIC":oracle.read_u32(song_table+148*8)},"frames":rows}) + "\n")
     print(f"wrote {OUTPUT} ({len(rows)} frames; {rows[0]['frame'] if rows else '-'}..{rows[-1]['frame'] if rows else '-'})")
 main()

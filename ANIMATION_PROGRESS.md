@@ -47,10 +47,10 @@ animation. A status caused by a move is not part of that move's animation.
 ## Current resumable state (2026-07-27)
 
 Coverage is **37/276 exact, 4 partial, 235 unsupported**. SLUDGE is partial:
-its complete sprite/task body is **102/102 player-back + 102/102 opponent-
-front** dense source-component frames. Palette hardware latches, sound,
-asset extraction, raw RGB, shared-seam framebuffer, controls, and twice-fresh
-reproduction remain, so exact promotion is explicitly withheld. TOXIC,
+its complete sprite/task/palette body is **102/102 player-back + 102/102
+opponent-front** dense source-component frames. Sound, asset extraction, raw
+RGB, shared-seam framebuffer, controls, and twice-fresh reproduction remain,
+so exact promotion is explicitly withheld. TOXIC,
 SLUDGE BOMB, POISON FANG, and POISON TAIL remain unsupported.
 
 ## SLUDGE source-component checkpoint; PoisonBubblesEffect established (2026-07-27)
@@ -60,7 +60,8 @@ parties use GRIMER, the real Level-50 Factory set-110 carrier, in both required
 orientations with all four choices constrained to SLUDGE and ONIX constrained
 to TACKLE. The strengthened source-component comparator matches the complete
 sprite/task body at **102/102 player-back** (oracle 218-319) and **102/102
-opponent-front** (230-331).
+opponent-front** (230-331), including faded/hardware target palette latches
+and all seven source sound boundaries.
 
 **Source reducer/evidence:** the reducer ports
 `gSludgeProjectileSpriteTemplate`'s 40-callback mirrored horizontal arc,
@@ -72,9 +73,13 @@ eight-frame displayed cadence, rising/sway callbacks, affine terminal clamp,
 OAM low-slot reuse, and cleanup. The live comparator caught signed GBA sine
 rounding and opponent-side offset mirroring rather than fitting either.
 
-**Exact remainder:** compare selected target faded/hardware palette rows for
-the complete RGB(30,0,31) cycle; capture attacker-pan `SE_M_BUBBLE3` and six
-target-pan `SE_M_TOXIC` boundaries; reproducibly extract poison-bubble art;
+The comparator also proves every source-derived coefficient of the complete
+RGB(30,0,31) target palette cycle and the hardware palette's one-frame-behind
+transfer latch in both orientations. `SE_M_BUBBLE3` attacker-pan plus every
+six-frame-script/eight-display-frame `SE_M_TOXIC` restart prove their song
+headers, restart flags, and side-relative pan latches.
+
+**Exact remainder:** reproducibly extract poison-bubble art;
 wire the renderer through `sceneOnPresentation`/`battleScene`; close raw RGB,
 field/text/healthboxes, cleanup, and shared-seam framebuffer in both
 orientations; reproduce twice and rerun SING plus ACID or BIND controls.
