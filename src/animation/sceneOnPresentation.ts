@@ -163,6 +163,10 @@ import {
   type SludgeSprite,
 } from "./sludge.ts";
 import {
+  poisonFangEffectAtAge,
+  type PoisonFangSprite,
+} from "./poisonFang.ts";
+import {
   earthquakeAnimationAtAge,
   type EarthquakeAnimationState,
 } from "./earthquake.ts";
@@ -308,6 +312,7 @@ export interface SceneOnPresentationBattler {
     | "HORSEA"
     | "EKANS"
     | "GRIMER"
+    | "ZUBAT"
     | "SKIPLOOM"
     | "RELICANTH"
     | "LUNATONE"
@@ -766,6 +771,13 @@ export interface SceneOnSludgeConfig {
   readonly projectileOrigin: Readonly<{ x: number; y: number }>;
 }
 
+export interface SceneOnPoisonFangConfig {
+  readonly move: "POISON_FANG";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnEarthquakeConfig {
   readonly move: "EARTHQUAKE";
   readonly attacker: SceneOnPresentationBattler;
@@ -885,6 +897,7 @@ export type SceneOnMoveConfig =
   | SceneOnWaterGunConfig
   | SceneOnAcidConfig
   | SceneOnSludgeConfig
+  | SceneOnPoisonFangConfig
   | SceneOnEarthquakeConfig
   | SceneOnHardenConfig
   | SceneOnCalmMindConfig
@@ -936,6 +949,15 @@ export interface SceneOnSludgeView {
   readonly targetOffset: Readonly<{ x2: number; y2: number }>;
   readonly defenderPaletteY: number;
   readonly sprites: readonly SludgeSprite[];
+}
+
+export interface SceneOnPoisonFangView {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly targetOffset: Readonly<{ x2: number; y2: number }>;
+  readonly defenderPaletteY: number;
+  readonly sprites: readonly PoisonFangSprite[];
 }
 
 export interface SceneOnEncoreView extends EncoreState {
@@ -1920,6 +1942,25 @@ export function sceneOnSludgeView(
       state.age,
       state.config.attacker.geometry.side,
       state.config.projectileOrigin,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age` is ticks since `gFangSpriteTemplate` creation. */
+export function sceneOnPoisonFangView(
+  state: SceneOnMovePresentationState,
+): SceneOnPoisonFangView {
+  if (state.config.move !== "POISON_FANG") {
+    throw new Error(`expected POISON_FANG presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...poisonFangEffectAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
       state.config.target.geometry.animationCenter,
     ),
   };

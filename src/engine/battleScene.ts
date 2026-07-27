@@ -545,6 +545,7 @@ import supersonicAsset from "../animation/assets/supersonic.json" with { type: "
 import waterGunAsset from "../animation/assets/water-gun.json" with { type: "json" };
 import acidAsset from "../animation/assets/acid.json" with { type: "json" };
 import sludgeAsset from "../animation/assets/sludge.json" with { type: "json" };
+import poisonFangAsset from "../animation/assets/poisonFang.json" with { type: "json" };
 import hardenAsset from "../animation/assets/harden.json" with { type: "json" };
 import calmMindAsset from "../animation/assets/calm-mind.json" with { type: "json" };
 import shadowBallAsset from "../animation/assets/shadow-ball.json" with { type: "json" };
@@ -648,6 +649,7 @@ import {
   sceneOnWaterGunView,
   sceneOnAcidView,
   sceneOnSludgeView,
+  sceneOnPoisonFangView,
   sceneOnEarthquakeView,
   sceneOnHardenView,
   sceneOnCalmMindView,
@@ -964,6 +966,12 @@ const sludgeArt = sludgeAsset as {
   poisonBubble: { tileset: Tileset; palette: RgbColor[] };
   grimerBack: { tileset: Tileset; palette: RgbColor[] };
   grimerFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const poisonFangArt = poisonFangAsset as {
+  fang: { tileset: Tileset; palette: RgbColor[] };
+  poisonBubble: { tileset: Tileset; palette: RgbColor[] };
+  zubatBack: { tileset: Tileset; palette: RgbColor[] };
+  zubatFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const hardenArt = hardenAsset as {
   metal: { tileset: Tileset; tilemap: Tilemap; palette: RgbColor[] };
@@ -15261,6 +15269,130 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "IVYSAUR used" : "Foe IVYSAUR used",
       "GROWTH!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "POISON_FANG") {
+    const view = sceneOnPoisonFangView(state);
+    const displayed = sceneOnPoisonFangView({ ...state, age: state.age - 1 });
+    const targetDisplayed = sceneOnPoisonFangView({ ...state, age: state.age - 2 });
+    const playerToOpponent =
+      view.attacker.species === "ZUBAT"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "ZUBAT"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged POISON_FANG pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const zubatSource = playerToOpponent
+      ? poisonFangArt.zubatBack
+      : poisonFangArt.zubatFront;
+    const zubatSprite = playerToOpponent ? zubatSource : {
+      ...zubatSource,
+      tileset: {
+        columns: 8, rows: 8, tiles: zubatSource.tileset.tiles.slice(0, 64),
+      },
+    };
+    const onixSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    const targetIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    const targetX2 = state.age <= 12
+      ? targetIdle.x2
+      : state.age === 13
+        ? 3
+        : targetDisplayed.targetOffset.x2;
+    drawSpriteSheetAffineStretch(
+      fb,
+      onixSprite.tileset,
+      onixSprite.palette,
+      view.target.geometry.spriteCorner.x,
+      view.target.geometry.spriteCorner.y,
+      256,
+      256,
+      targetIdle.y2,
+      { r: 214, g: 0, b: 214 },
+      displayed.defenderPaletteY,
+      false,
+      targetX2,
+    );
+    drawSpriteSheet(
+      fb,
+      zubatSprite.tileset,
+      zubatSprite.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    for (const sprite of displayed.sprites) {
+      const source = sprite.kind === "fang"
+        ? poisonFangArt.fang
+        : poisonFangArt.poisonBubble;
+      const currentFang = view.sprites.find((item) => item.kind === "fang");
+      const frame = sprite.kind === "fang"
+        ? (currentFang?.frame ?? sprite.frame)
+        : 0;
+      const start = sprite.kind === "fang" ? frame * 16 : 0;
+      drawSpriteSheetAffineRotate(
+        fb,
+        {
+          columns: sprite.kind === "fang" ? 4 : 2,
+          rows: sprite.kind === "fang" ? 4 : 2,
+          tiles: source.tileset.tiles.slice(
+            start,
+            start + (sprite.kind === "fang" ? 16 : 4),
+          ),
+        },
+        source.palette,
+        sprite.x,
+        sprite.y,
+        sprite.xScale,
+        0,
+        0,
+        sprite.yScale,
+      );
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "ZUBAT";
+    const playerSpecies = playerToOpponent ? "ZUBAT" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "ZUBAT used" : "Foe ZUBAT used",
+      "POISON FANG!",
       99,
     );
     return;
