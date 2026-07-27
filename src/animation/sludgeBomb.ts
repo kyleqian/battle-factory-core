@@ -49,8 +49,8 @@ function hitParticleAtLocalAge(
   let dy = s16(Math.trunc((offset.y * 256) / duration));
   let accumX = 0;
   let accumY = 0;
-  const decX = Math.trunc(targetCenter.x / duration);
-  const decY = Math.trunc((targetCenter.x + offset.x) / duration);
+  const decX = Math.trunc(dx / duration);
+  const decY = Math.trunc(dy / duration);
   for (let callback = 0; callback <= localAge; callback += 1) {
     remaining -= 1;
     accumX = s16(accumX + dx);
