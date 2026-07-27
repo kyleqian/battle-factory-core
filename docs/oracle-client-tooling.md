@@ -52,5 +52,13 @@ Passed entries are skipped. Failed, interrupted (`running`), and pending
 entries are attempted again. Output is compact by default; pass `--verbose`
 on the initial or resumed command for per-frame comparison lines.
 
+## Per-frame mismatch bounds
+
+The standard `npm run compare` output includes an inclusive
+`bbox=minX,minY-maxX,maxY` for every mismatched frame. The same structured
+`bounds` value is stored beside that frame in `manifest.json`, so a dense
+window can contain several independently visible defect regions without a
+throwaway image-analysis script.
+
 For the frame/input numbering shared by the Oracle and app comparator, see
 `docs/oracle-frame-semantics.md`.
