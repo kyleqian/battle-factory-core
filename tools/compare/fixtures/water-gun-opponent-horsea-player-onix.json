@@ -3,7 +3,7 @@
   "oracleProfile":"battle-scene-on",
   "scenario":"tools/battle-lab/mechanic-water-gun-opponent-horsea-player-onix.json",
   "probe":"tools/compare/waterGunProbe.py",
-  "pair":"HORSEA Factory set 60 carrier in battle RAM, DUSTOX opponent-front route chrome -> ONIX player-back",
+  "pair":"HORSEA Factory set 60 carrier and opponent-front presentation chrome -> ONIX player-back",
   "move":"WATER_GUN",
   "denseWindow":{"startFrame":87,"endFrame":197},
   "appStage":{"presentationAge":0},
