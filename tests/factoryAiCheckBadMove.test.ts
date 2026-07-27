@@ -1289,3 +1289,75 @@ describe("AI_CBM_EvasionDown + CheckIfAbilityBlocksStatChange (docs/factory-ai-c
     });
   });
 });
+
+// data/battle_ai_scripts.s:490-493/:495-498/:522-525, docs/factory-ai-
+// checkviability-ground-truth.md §25.1: the twelfth and final CBM-blocked
+// pair's own CBM third -- three separately named dispatch targets, but
+// byte-for-byte identical 3-instruction bodies (`get_weather; if_equal
+// <OWN>, Score_Minus8; end`). Zero get_ability/stat-stage reads at all, so
+// the SHUCKLE target above (irrelevant to this handler) still works fine.
+describe("AI_CBM_RainDance / AI_CBM_SunnyDay / AI_CBM_Hail (docs/factory-ai-checkviability-ground-truth.md §25.1)", () => {
+  const MOVE_RAIN_DANCE = 240;
+  const MOVE_SUNNY_DAY = 241;
+  const MOVE_HAIL = 258;
+
+  const SHUCKLE: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 213,
+    types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+    knownAbility: null,
+    realAbility: "ABILITY_STURDY",
+    speedStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+  });
+
+  function withWeather(currentWeather: 0 | 1 | 2 | 3 | undefined): FactoryAiCheckBadMoveAttacker {
+    return Object.freeze({ atkStage: 6, defStage: 6, currentWeather });
+  }
+
+  it.each([
+    ["AI_CBM_RainDance", MOVE_RAIN_DANCE, 1 as const],
+    ["AI_CBM_SunnyDay", MOVE_SUNNY_DAY, 0 as const],
+    ["AI_CBM_Hail", MOVE_HAIL, 3 as const],
+  ])("%s scores -8 with zero draws when current weather already equals the move's own type", (_label, moveId, ownWeather) => {
+    const result = run(moveId, SHUCKLE, undefined, withWeather(ownWeather));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -8 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it.each([
+    ["AI_CBM_RainDance", MOVE_RAIN_DANCE, 1 as const],
+    ["AI_CBM_SunnyDay", MOVE_SUNNY_DAY, 0 as const],
+    ["AI_CBM_Hail", MOVE_HAIL, 3 as const],
+  ])("%s scores 0 when current weather is a DIFFERENT weather (cross-weather irrelevance)", (_label, moveId, ownWeather) => {
+    // Pick any weather constant that isn't this handler's own.
+    const other = ([0, 1, 2, 3] as const).find((w) => w !== ownWeather)!;
+    const result = run(moveId, SHUCKLE, undefined, withWeather(other));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+
+  it.each([
+    ["AI_CBM_RainDance", MOVE_RAIN_DANCE],
+    ["AI_CBM_SunnyDay", MOVE_SUNNY_DAY],
+    ["AI_CBM_Hail", MOVE_HAIL],
+  ])("%s scores 0 with zero draws when currentWeather is omitted (no weather bit set)", (_label, moveId) => {
+    const result = run(moveId, SHUCKLE, undefined, withWeather(undefined));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("the three bodies are byte-for-byte identical shape (doc §25.1) -- confirmed by cross-handler parity: RainDance under Sun scores the same as SunnyDay under Sun would under RainDance's own constant swapped in", () => {
+    // RainDance's own weather (Rain=1) does nothing to SunnyDay (own weather Sun=0);
+    // conversely Sun does nothing to RainDance. Parity check: swapping the
+    // move AND the weather together reproduces the -8/0 split symmetrically.
+    const rainUnderRain = run(MOVE_RAIN_DANCE, SHUCKLE, undefined, withWeather(1));
+    const sunnyUnderSun = run(MOVE_SUNNY_DAY, SHUCKLE, undefined, withWeather(0));
+    const hailUnderHail = run(MOVE_HAIL, SHUCKLE, undefined, withWeather(3));
+    expect(rainUnderRain).toMatchObject({ kind: "scored", scoreDelta: -8 });
+    expect(sunnyUnderSun).toMatchObject({ kind: "scored", scoreDelta: -8 });
+    expect(hailUnderHail).toMatchObject({ kind: "scored", scoreDelta: -8 });
+  });
+});

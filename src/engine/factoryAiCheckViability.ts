@@ -76,11 +76,29 @@
  * since this is an UP handler raising the opponent's own stat.
  * `AI_CV_EvasionDown` is confirmed byte-for-byte the same shape as
  * `AI_CV_DefenseDown`/`AI_CV_SpDefDown` with `STAT_EVASION` swapped in,
- * reusing the shared `runCvStatDown` body). The other ~72 are not ported
- * this round (a separate, much larger phased body of work per the audit's
- * §3), so a move that reaches one of THOSE must not silently score zero.
+ * reusing the shared `runCvStatDown` body), and `EFFECT_SUNNY_DAY`/
+ * `EFFECT_HAIL`/`EFFECT_RAIN_DANCE` (`AI_CV_SunnyDay`/`AI_CV_Hail`/
+ * `AI_CV_RainDance`, `runCvSunnyDay`/`runCvHail`/`runCvRainDance` below,
+ * `:2060-2075`/`:2261-2276`/`:2037-2058`, doc §25 -- the twelfth and final
+ * CBM-blocked pair's own CV third, and the last 3 of the 22-handler program.
+ * `SunnyDay`/`Hail` are exact twins (1 HP gate + a 3-way `get_weather` chain
+ * over the OTHER three weather values, zero `if_random_less_than`);
+ * `RainDance` genuinely diverges with its own extra Speed-order/Swift-Swim
+ * bypass prologue and Rain-Dish tail bonus (doc §25.2/§25.3), independently
+ * re-derived per the doc's own standing divergence-check rule rather than
+ * assumed identical to its siblings). The other ~69 are not ported this
+ * round (a separate, much larger phased body of work per the audit's §3),
+ * so a move that reaches one of THOSE must not silently score zero.
  */
-import { MOVES_BY_ID, TYPE_EFFECTIVENESS } from "./factoryAiCheckBadMove.ts";
+import {
+  AI_WEATHER_HAIL,
+  AI_WEATHER_RAIN,
+  AI_WEATHER_SANDSTORM,
+  AI_WEATHER_SUN,
+  MOVES_BY_ID,
+  TYPE_EFFECTIVENESS,
+  type AiWeatherValue,
+} from "./factoryAiCheckBadMove.ts";
 import type { BattleRngState } from "./battleDecisionBoundary.ts";
 import { applyStab, applyTypeEffectiveness, DEFAULT_STAT_STAGE } from "./damageCalc.ts";
 import { advanceRngValue } from "./rng.ts";
@@ -214,6 +232,27 @@ export type FactoryAiCheckViabilityBattler = Readonly<{
    * Optional, defaulting to `false`.
    */
   isCursed?: boolean;
+  /**
+   * The AI's own real ability (`get_ability AI_USER`, a direct field read --
+   * NEVER the two-ability-guessing heuristic `get_ability AI_TARGET` uses
+   * elsewhere, so no `Random()`-consuming confound) -- `AI_CV_RainDance`'s
+   * Gate S (Swift Swim bypass) and Gate R (Rain Dish tail bonus), doc §25.2.
+   * Only AI_USER's own copy is ever read; carried on both sides for the same
+   * shape-symmetry convention as `isFirstTurn`/`lastUsedMoveId` above.
+   * Optional, defaulting to `"ABILITY_NONE"` -- no prior ported handler
+   * needed the attacker's own real ability, so this is a genuinely new input.
+   */
+  ability?: string;
+  /**
+   * Current weather, `AI_WEATHER_*`-encoded (0=Sun/1=Rain/2=Sandstorm/
+   * 3=Hail) -- `AI_CV_SunnyDay`/`Hail`/`RainDance`'s own `get_weather` read
+   * (doc §25.2), the same encoding `factoryAiCheckBadMove.ts`'s CBM weather
+   * trio reads. Only AI_USER's own copy is ever read; carried on both sides
+   * for shape symmetry. Optional, defaulting to `undefined` (no weather bit
+   * set) -- never equals any of the four `AI_WEATHER_*` values, so it never
+   * matches any of the three handlers' own weather-chain gates.
+   */
+  currentWeather?: AiWeatherValue;
 }>;
 
 export type FactoryAiCheckViabilityDraw =
@@ -221,6 +260,17 @@ export type FactoryAiCheckViabilityDraw =
     ordinal: number;
     reason: string;
     kind: "target-faster-tie";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    strikesFirst: 0 | 1 | 2;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    /** `AI_CV_RainDance`'s own Gate P (`if_user_faster`, doc §25.3) -- the SAME hidden-tie-break-`Random()` mechanism `target-faster-tie` above already ports, inverse polarity comparison. */
+    kind: "user-faster-tie";
     before: BattleRngState;
     after: BattleRngState;
     rawRngValue: number;
@@ -2193,6 +2243,167 @@ function runCvEvasionUp(input: Readonly<{
   return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: succeeded8 ? score - 2 : score });
 }
 
+/** `AI_CV_SunnyDay`'s own "other three" weather values (excludes its own type, Sun) -- doc §25.2. */
+const SUNNY_DAY_OTHER_THREE: ReadonlySet<AiWeatherValue> = new Set([AI_WEATHER_HAIL, AI_WEATHER_RAIN, AI_WEATHER_SANDSTORM]);
+/** `AI_CV_Hail`'s own "other three" weather values (excludes its own type, Hail) -- doc §25.2. */
+const HAIL_OTHER_THREE: ReadonlySet<AiWeatherValue> = new Set([AI_WEATHER_SUN, AI_WEATHER_RAIN, AI_WEATHER_SANDSTORM]);
+/** `AI_CV_RainDance`'s own "other three" weather values (excludes its own type, Rain) -- doc §25.2. */
+const RAIN_DANCE_OTHER_THREE: ReadonlySet<AiWeatherValue> = new Set([AI_WEATHER_HAIL, AI_WEATHER_SUN, AI_WEATHER_SANDSTORM]);
+
+/**
+ * Shared Gate H / weather-chain span for `AI_CV_SunnyDay`/`Hail` (their
+ * entire body) and `AI_CV_RainDance` (everything between its own Gate P/S
+ * prologue and Gate R tail), per doc §25.8's own named factoring:
+ *
+ * ```
+ * if_hp_less_than AI_USER, 40, ScoreDown1   ; Gate H (own HP)
+ * get_weather
+ * if_equal <other #1>, Bonus                 ; Gate W1
+ * if_equal <other #2>, Bonus                 ; Gate W2
+ * if_equal <other #3>, Bonus                 ; Gate W3
+ * goto End                                    ; own weather / none -> 0 (RainDance: falls to Gate R instead)
+ * Bonus: score +1; goto End
+ * ScoreDown1: score -1
+ * ```
+ *
+ * Zero `if_random_less_than` anywhere in this span (doc §25.2/§25.4) -- pure
+ * function of HP% and weather, no RNG threading needed.
+ */
+function weatherSetterCvScore(input: Readonly<{
+  attackerHp: number;
+  attackerMaxHp: number;
+  currentWeather: AiWeatherValue | undefined;
+  otherThree: ReadonlySet<AiWeatherValue>;
+}>): 1 | 0 | -1 {
+  const hpPercent = Math.floor((100 * input.attackerHp) / input.attackerMaxHp);
+  if (hpPercent < 40) return -1;
+  if (input.currentWeather !== undefined && input.otherThree.has(input.currentWeather)) return 1;
+  return 0;
+}
+
+/**
+ * `AI_CV_SunnyDay` (`data/battle_ai_scripts.s:2060-2075`, doc §25.2) -- the
+ * whole body is `weatherSetterCvScore`'s shared span, own type Sun excluded.
+ */
+function runCvSunnyDay(input: Readonly<{
+  rng: BattleRngState;
+  attackerHp: number;
+  attackerMaxHp: number;
+  currentWeather: AiWeatherValue | undefined;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const scoreDelta = weatherSetterCvScore({
+    attackerHp: input.attackerHp,
+    attackerMaxHp: input.attackerMaxHp,
+    currentWeather: input.currentWeather,
+    otherThree: SUNNY_DAY_OTHER_THREE,
+  });
+  return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta });
+}
+
+/**
+ * `AI_CV_Hail` (`data/battle_ai_scripts.s:2261-2276`, doc §25.2) --
+ * `SunnyDay`'s exact twin: same `weatherSetterCvScore` span, own type Hail
+ * excluded instead of Sun.
+ */
+function runCvHail(input: Readonly<{
+  rng: BattleRngState;
+  attackerHp: number;
+  attackerMaxHp: number;
+  currentWeather: AiWeatherValue | undefined;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const scoreDelta = weatherSetterCvScore({
+    attackerHp: input.attackerHp,
+    attackerMaxHp: input.attackerMaxHp,
+    currentWeather: input.currentWeather,
+    otherThree: HAIL_OTHER_THREE,
+  });
+  return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta });
+}
+
+/**
+ * `AI_CV_RainDance` (`data/battle_ai_scripts.s:2037-2058`, doc §25.2) -- the
+ * one weather-trio sibling that genuinely diverges (7 conditional
+ * instructions vs `SunnyDay`/`Hail`'s 4):
+ *
+ * ```
+ * AI_CV_RainDance:
+ *     if_user_faster AI_CV_RainDance2         ; Gate P (relative Speed)
+ *     get_ability AI_USER
+ *     if_equal ABILITY_SWIFT_SWIM, AI_CV_RainDance3   ; Gate S (bypass)
+ * AI_CV_RainDance2:
+ *     <weatherSetterCvScore span, own type Rain excluded>   ; Gate H/W1/W2/W3
+ *     get_ability AI_USER
+ *     if_equal ABILITY_RAIN_DISH, AI_CV_RainDance3    ; Gate R (tail bonus)
+ *     goto End
+ * AI_CV_RainDance3: score +1
+ * ```
+ *
+ * Gate P (`if_user_faster` = `if_user_goes 0`, doc §25.3): jumps straight to
+ * the shared span (Gate H) whenever `GetWhoStrikesFirst(AI_USER, AI_TARGET,
+ * tieRoll)` returns exactly 0 -- AI_USER strictly faster, OR a genuine speed
+ * tie broken to AI_USER (`strikesFirst === 0`, the SAME
+ * `getWhoStrikesFirst`/tie-break-`Random()` machinery `runCvSpeedDown`'s own
+ * `target-faster-tie` already ports, inverse comparison target). Only when
+ * AI_USER is NOT faster does Gate S run: a direct (non-guessing) own-ability
+ * read for Swift Swim, which bypasses the HP gate and weather chain entirely
+ * with a deterministic `+1` (a slower Swift-Swim user turns faster in Rain).
+ * Falling through the shared span without a HP/weather hit (own weather is
+ * already Rain, or none) reaches Gate R: a second own-ability read for Rain
+ * Dish, `+1` if present (can coexist with `AI_CBM_RainDance`'s own `-8` when
+ * weather is already Rain -- CBM/CV are independent score contributions, doc
+ * §25.6 item 2), else `0`.
+ */
+function runCvRainDance(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+
+  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
+  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+
+  let tieRoll = 0;
+  let tieDraw: ReturnType<typeof nextDraw> | null = null;
+  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-user-faster-tie`);
+    rng = tieDraw.after;
+    tieRoll = tieDraw.randomValue;
+    ordinal += 1;
+  }
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  if (tieDraw) {
+    draws.push(Object.freeze({ ...tieDraw, kind: "user-faster-tie" as const, strikesFirst }));
+  }
+  // Gate P: if_user_faster = if_user_goes 0 -- jumps on EXACTLY 0 (user
+  // strictly faster, or a tie broken to the user).
+  const userFaster = strikesFirst === 0;
+  const ownAbility = input.attacker.ability ?? "ABILITY_NONE";
+
+  if (!userFaster && ownAbility === "ABILITY_SWIFT_SWIM") {
+    // Gate S bypass: +1, HP gate and weather chain never reached.
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: 1 });
+  }
+
+  const spanScore = weatherSetterCvScore({
+    attackerHp: input.attacker.hp,
+    attackerMaxHp: input.attacker.maxHp,
+    currentWeather: input.attacker.currentWeather,
+    otherThree: RAIN_DANCE_OTHER_THREE,
+  });
+  if (spanScore !== 0) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: spanScore });
+  }
+  // Span fell all the way through (own HP >= 40%, weather didn't match) --
+  // Gate R tail: own ability == Rain Dish.
+  const rainDish = ownAbility === "ABILITY_RAIN_DISH";
+  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: rainDish ? 1 : 0 });
+}
+
 /** `AI_CheckViability` for one move slot (`:652-775` dispatch shell only). */
 export function runCheckViability(input: Readonly<{
   rng: BattleRngState;
@@ -2560,6 +2771,56 @@ export function runCheckViability(input: Readonly<{
       rng: evasionDown.rng,
       draws: evasionDown.draws,
       scoreDelta: evasionDown.scoreDelta,
+    });
+  }
+
+  if (move.effect === "EFFECT_SUNNY_DAY") {
+    // The weather trio's second CV half (doc §25) -- AI_USER's own HP/weather only.
+    const sunnyDay = runCvSunnyDay({
+      rng: input.rng,
+      attackerHp: input.attacker.hp,
+      attackerMaxHp: input.attacker.maxHp,
+      currentWeather: input.attacker.currentWeather,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: sunnyDay.rng,
+      draws: sunnyDay.draws,
+      scoreDelta: sunnyDay.scoreDelta,
+    });
+  }
+
+  if (move.effect === "EFFECT_HAIL") {
+    // The weather trio's third CV half (doc §25).
+    const hail = runCvHail({
+      rng: input.rng,
+      attackerHp: input.attacker.hp,
+      attackerMaxHp: input.attacker.maxHp,
+      currentWeather: input.attacker.currentWeather,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: hail.rng,
+      draws: hail.draws,
+      scoreDelta: hail.scoreDelta,
+    });
+  }
+
+  if (move.effect === "EFFECT_RAIN_DANCE") {
+    // The twelfth (weather-trio) CBM-blocked pair's own CV third (doc §25) --
+    // the one sibling with its own bespoke Speed/ability-reading prologue and tail.
+    const rainDance = runCvRainDance({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: rainDance.rng,
+      draws: rainDance.draws,
+      scoreDelta: rainDance.scoreDelta,
     });
   }
 

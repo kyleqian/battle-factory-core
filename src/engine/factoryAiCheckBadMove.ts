@@ -86,7 +86,15 @@
  * half -- the same bare-MIN_STAT_STAGE-plus-shared-tail shape as
  * `AI_CBM_DefenseDown`/`AI_CBM_SpDefDown`, converging with
  * `factoryAiCheckViability.ts`'s `AI_CV_EvasionUp`/`AI_CV_EvasionDown`
- * (doc §24).
+ * (doc §24); and `EFFECT_RAIN_DANCE`/`EFFECT_SUNNY_DAY`/`EFFECT_HAIL` ->
+ * `AI_CBM_RainDance`/`AI_CBM_SunnyDay`/`AI_CBM_Hail` (`:490-493`/`:495-498`/
+ * `:522-525`, `runCbmRainDance`/`runCbmSunnyDay`/`runCbmHail` below, doc
+ * §25.1), the twelfth and final CBM-blocked pair's own CBM third -- three
+ * separately named dispatch targets (not a shared handler), but
+ * byte-for-byte identical 3-instruction bodies (`get_weather; if_equal
+ * <OWN_WEATHER>, Score_Minus8; end`), converging with
+ * `factoryAiCheckViability.ts`'s `AI_CV_RainDance`/`AI_CV_SunnyDay`/
+ * `AI_CV_Hail` (doc §25) -- completes all 22 reachable `AI_CV_*` handlers.
  */
 import movesData from "../data/gen/moves.json" with { type: "json" };
 import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
@@ -108,6 +116,23 @@ const SPECIES_BY_ID: ReadonlyMap<number, SpeciesRow> = new Map(
 );
 
 export const TYPE_EFFECTIVENESS = typeEffectivenessData.typeEffectiveness as readonly TypeEffectivenessEntry[];
+
+/**
+ * `AI_WEATHER_*` (`include/constants/battle_ai.h:27-30`), the encoding
+ * `Cmd_get_weather` (`battle_ai_script_commands.c:1644-1665`) writes to
+ * `AI_THINKING_STRUCT->funcResult` -- NOT `gBattleWeather`'s own raw bit
+ * layout. Shared by the weather-trio CBM+CV handlers (doc §25.1/§25.2)
+ * below and by `factoryAiCheckViability.ts`.
+ */
+export const AI_WEATHER_SUN = 0;
+export const AI_WEATHER_RAIN = 1;
+export const AI_WEATHER_SANDSTORM = 2;
+export const AI_WEATHER_HAIL = 3;
+export type AiWeatherValue =
+  | typeof AI_WEATHER_SUN
+  | typeof AI_WEATHER_RAIN
+  | typeof AI_WEATHER_SANDSTORM
+  | typeof AI_WEATHER_HAIL;
 
 /** `sIgnoredPowerfulMoveEffects` (`battle_ai_script_commands.c:266-281`). */
 export const IGNORED_POWERFUL_MOVE_EFFECTS: ReadonlySet<string> = new Set([
@@ -276,6 +301,16 @@ export type FactoryAiCheckBadMoveAttacker = Readonly<{
    * `speedStage`/`spAtkStage`/`spDefStage` above.
    */
   evasionStage?: number;
+  /**
+   * Current weather, `AI_WEATHER_*`-encoded (0=Sun/1=Rain/2=Sandstorm/3=Hail)
+   * -- `AI_CBM_RainDance`/`SunnyDay`/`Hail`'s own `get_weather` read (doc
+   * §25.1). Optional, defaulting to `undefined` (no weather bit set, matching
+   * the real battle-start state) -- same optional/default convention as
+   * `speedStage`/`lightScreenUp` above. `undefined` never equals any of the
+   * four `AI_WEATHER_*` values, so it never fires any of the three handlers'
+   * own equality gate, the correct outcome for "no weather" either way.
+   */
+  currentWeather?: AiWeatherValue;
 }>;
 
 export type FactoryAiCheckBadMoveDraw = Readonly<{
@@ -699,6 +734,39 @@ function runCbmEvasionDown(
   return runCbmStatDownViaSharedTail(target.evasionStage ?? DEFAULT_STAT_STAGE, target, rng, ordinal, reason);
 }
 
+/**
+ * `AI_CBM_RainDance`/`AI_CBM_SunnyDay`/`AI_CBM_Hail` (`data/battle_ai_scripts.s:490-493`/
+ * `:495-498`/`:522-525`, doc §25.1) -- three separate, individually named
+ * dispatch targets (not a shared handler, correcting an earlier doc's own
+ * "shared handler" guess), but byte-for-byte the same 3-instruction body:
+ *
+ * ```
+ * AI_CBM_<Weather>:
+ *     get_weather
+ *     if_equal AI_WEATHER_<OWN>, Score_Minus8
+ *     end
+ * ```
+ *
+ * Zero `get_ability` calls, zero stat-stage reads, zero ability/item gate --
+ * the smallest CBM handler shape in the doc. One parameterized helper covers
+ * all three, differing only in which `AI_WEATHER_*` constant each checks.
+ */
+function runCbmWeatherSetter(currentWeather: AiWeatherValue | undefined, ownWeatherConstant: AiWeatherValue): number {
+  return currentWeather === ownWeatherConstant ? -8 : 0;
+}
+
+function runCbmRainDance(currentWeather: AiWeatherValue | undefined): number {
+  return runCbmWeatherSetter(currentWeather, AI_WEATHER_RAIN);
+}
+
+function runCbmSunnyDay(currentWeather: AiWeatherValue | undefined): number {
+  return runCbmWeatherSetter(currentWeather, AI_WEATHER_SUN);
+}
+
+function runCbmHail(currentWeather: AiWeatherValue | undefined): number {
+  return runCbmWeatherSetter(currentWeather, AI_WEATHER_HAIL);
+}
+
 export function typeMultiplierTenths(attackingType: string, defendingTypes: readonly [string, string]): number {
   const distinct = defendingTypes[0] === defendingTypes[1] ? [defendingTypes[0]] : defendingTypes;
   let mult = 10;
@@ -1000,6 +1068,39 @@ export function runCheckBadMovePreamble(input: Readonly<{
       rng: evasionDown.rng,
       draws: Object.freeze(draws),
       scoreDelta: evasionDown.scoreDelta,
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_RAIN_DANCE -> AI_CBM_RainDance, the
+  // twelfth (weather-trio) CBM-blocked pair's own CBM half (doc §25).
+  if (move.effect === "EFFECT_RAIN_DANCE") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmRainDance(input.attacker.currentWeather),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_SUNNY_DAY -> AI_CBM_SunnyDay, the
+  // weather trio's second CBM half (doc §25).
+  if (move.effect === "EFFECT_SUNNY_DAY") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmSunnyDay(input.attacker.currentWeather),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_HAIL -> AI_CBM_Hail, the weather
+  // trio's third CBM half (doc §25).
+  if (move.effect === "EFFECT_HAIL") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmHail(input.attacker.currentWeather),
     });
   }
 
