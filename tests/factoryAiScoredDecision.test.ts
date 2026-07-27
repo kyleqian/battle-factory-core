@@ -314,6 +314,99 @@ describe("AI_CV_SpeedDown mask-7 fixture reproduction (docs/factory-ai-checkviab
   });
 });
 
+// AI_CV_SpeedDownFromChance (data/battle_ai_scripts.s:1136-1141,
+// docs/factory-ai-checkviability-ground-truth.md §5's table row, §4's
+// footnote, §10's porter note) -- the 22nd and last reachable CV handler.
+//
+// NOTE on this describe block's relationship to the doc's own §6 fixtures
+// (tools/battle-lab/mechanic-factory-ai-cv-speeddown-{opponent-faster,
+// opponent-slower}-off.json, reproduced by the describe block directly
+// above): those two fixtures dispatch MOVE_STRING_SHOT, whose effect is
+// EFFECT_SPEED_DOWN -- a DIRECT dispatch to AI_CV_SpeedDown, not
+// EFFECT_SPEED_DOWN_HIT/AI_CV_SpeedDownFromChance. They do NOT exercise
+// this handler's own code path (confirmed by inspecting the fixture JSON's
+// `moves` field: move ID 81 = MOVE_STRING_SHOT). No live-oracle fixture
+// exists yet for any of SpeedDownFromChance's 6 covered moves (checked
+// tools/battle-lab/ -- fixture authoring is out of scope for this step), so
+// this block instead drives the REAL mask-7 dispatcher
+// (chooseFactoryAiScoredDecision, the same CBM->TryToFaint->CV pipeline the
+// §6 block above exercises) with a hand-built view using the actual
+// dispatching/non-dispatching moves, same Dugtrio/Shuckle speed-differential
+// species pair as §6's own fixtures. This is genuine mask-7 pipeline
+// coverage of the new dispatch wiring, just not tied to a banked live-oracle
+// ledger the way §6's own two fixtures are -- assertions below are scoped to
+// the check-viability phase specifically (not total draw counts), since Icy
+// Wind is a real 55-power move and its own type matchup against Dugtrio
+// (Ice vs Ground/Ground, 4x) can additionally engage AI_TryToFaint's own
+// x4-effective if_random_less_than gate -- an orthogonal, already-ported
+// mechanism, not something this step re-verifies.
+describe("AI_CV_SpeedDownFromChance mask-7 pipeline coverage (real dispatcher, no banked oracle fixture yet)", () => {
+  const MOVE_ICY_WIND_MASK7 = 196; // EFFECT_SPEED_DOWN_HIT -- redirects into AI_CV_SpeedDown
+  const MOVE_BUBBLE_BEAM_MASK7 = 61; // EFFECT_SPEED_DOWN_HIT -- falls through to a genuine zero
+
+  const SPEED_EXTRAS = Object.freeze({
+    statStages: NEUTRAL_STAGES,
+    isFirstTurn: 2,
+    hp: 100, maxHp: 100,
+  });
+  const DUGTRIO = Object.freeze({ types: ["TYPE_GROUND", "TYPE_GROUND"] as const, attack: 80, defense: 50, spAttack: 50, spDefense: 70, speed: 120, level: 50, ...SPEED_EXTRAS });
+  const SHUCKLE = Object.freeze({ types: ["TYPE_BUG", "TYPE_ROCK"] as const, attack: 10, defense: 230, spAttack: 10, spDefense: 230, speed: 5, level: 50, ...SPEED_EXTRAS });
+  function shuckleTarget(): FactoryAiScoredTargetView {
+    return Object.freeze({ species: 213, ...SHUCKLE, ability: "ABILITY_STURDY", knownAbility: null });
+  }
+  function dugtrioTarget(): FactoryAiScoredTargetView {
+    return Object.freeze({ species: 51, ...DUGTRIO, ability: "ABILITY_ARENA_TRAP", knownAbility: null });
+  }
+  function speedDownFromChanceView(moveId: number, attacker: FactoryAiScoredBattlerView, target: FactoryAiScoredTargetView): FactoryAiScoredView {
+    return Object.freeze({
+      schema: "factory-ai-scored-view/v1",
+      mode: "factory-level-50-singles",
+      active: Object.freeze({ aiBattler: 1 as const, targetBattler: 0 as const }),
+      factory: Object.freeze({ levelMode: 0 as const, battleMode: 0 as const, factoryWinStreak: 28, trainerOpponentId: 222 }),
+      moves: [moveId, MOVE_SPLASH, MOVE_SPLASH, MOVE_SPLASH] as const,
+      attacker,
+      target,
+    });
+  }
+  function cvPhaseDraws(result: ReturnType<typeof chooseFactoryAiScoredDecision>) {
+    return result.trace.draws.filter((d) => "phase" in d && d.phase === "check-viability");
+  }
+
+  it("Icy Wind redirects: opponent (AI_USER) faster -> AI_CV_SpeedDown's deterministic -3 branch, zero CV draws", () => {
+    const view = speedDownFromChanceView(MOVE_ICY_WIND_MASK7, DUGTRIO, shuckleTarget());
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 1, calls: 0 } });
+    expect(cvPhaseDraws(result)).toHaveLength(0);
+    expect(result.trace.slotScores[0]).toMatchObject({ checkViabilityDelta: -3 });
+  });
+
+  it("Icy Wind redirects: opponent (AI_USER) slower -> AI_CV_SpeedDown's probabilistic branch, exactly one CV draw", () => {
+    const view = speedDownFromChanceView(MOVE_ICY_WIND_MASK7, SHUCKLE, dugtrioTarget());
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 1, calls: 0 } });
+    const cvDraws = cvPhaseDraws(result);
+    expect(cvDraws).toHaveLength(1);
+    expect(cvDraws[0]).toMatchObject({ kind: "speed-down-roll" });
+    expect(result.trace.slotScores[0]!.checkViabilityDelta).toBeGreaterThanOrEqual(0); // 0 or +2, both valid outcomes of the roll
+  });
+
+  it("Bubblebeam falls through to AI_CV_SpeedDownFromChance's own `end`: zero CV draws, zero CV delta, regardless of who is faster", () => {
+    const fasterUser = chooseFactoryAiScoredDecision({
+      view: speedDownFromChanceView(MOVE_BUBBLE_BEAM_MASK7, DUGTRIO, shuckleTarget()),
+      request: fourSlotRequest,
+      rng: { value: 1, calls: 0 },
+    });
+    expect(cvPhaseDraws(fasterUser)).toHaveLength(0);
+    expect(fasterUser.trace.slotScores[0]).toMatchObject({ checkViabilityDelta: 0 });
+
+    const slowerUser = chooseFactoryAiScoredDecision({
+      view: speedDownFromChanceView(MOVE_BUBBLE_BEAM_MASK7, SHUCKLE, dugtrioTarget()),
+      request: fourSlotRequest,
+      rng: { value: 1, calls: 0 },
+    });
+    expect(cvPhaseDraws(slowerUser)).toHaveLength(0);
+    expect(slowerUser.trace.slotScores[0]).toMatchObject({ checkViabilityDelta: 0 });
+  });
+});
+
 const MOVE_PURSUIT = 228; // EFFECT_PURSUIT
 const MOVE_SLASH = 163; // EFFECT_HIGH_CRITICAL
 

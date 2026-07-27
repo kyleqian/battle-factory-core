@@ -4001,3 +4001,181 @@ describe("AI_CV_RainDance (docs/factory-ai-checkviability-ground-truth.md §25.2
     expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
   });
 });
+
+// data/battle_ai_scripts.s:1136-1141, docs/factory-ai-checkviability-ground-truth.md
+// §5's table row, §4's footnote, §10's porter note. The 22nd and last
+// reachable CV handler, completing the §14-§25 program. Zero if_random
+// sites of its own -- a plain `if_move` literal-ID compare against 3 of its
+// 6 covered moves that `goto`s into AI_CV_SpeedDown's own label; the other 3
+// fall through to a genuine, deterministic `end` (score 0, zero draws).
+// Real-source color confirming the split isn't arbitrary: the 3 redirecting
+// moves (Icy Wind/Rock Tomb/Mud Shot) all carry secondaryEffectChance 100
+// (the speed drop ALWAYS happens on a hit); the 3 falling through
+// (Bubblebeam/Constrict/Bubble) all carry secondaryEffectChance 10 -- the AI
+// only bothers scoring the speed-down bonus for the moves where it's
+// guaranteed, per move data, not by reading the chance field at runtime.
+describe("AI_CV_SpeedDownFromChance (docs/factory-ai-checkviability-ground-truth.md §5's table row, §4's footnote)", () => {
+  const MOVE_ICY_WIND = 196; // redirects -- secondaryEffectChance 100
+  const MOVE_ROCK_TOMB = 317; // redirects -- secondaryEffectChance 100
+  const MOVE_MUD_SHOT = 341; // redirects -- secondaryEffectChance 100
+  const MOVE_BUBBLE_BEAM = 61; // falls through to `end` -- secondaryEffectChance 10
+  const MOVE_CONSTRICT = 132; // falls through to `end` -- secondaryEffectChance 10
+  const MOVE_BUBBLE = 145; // falls through to `end` -- secondaryEffectChance 10
+
+  const EXTRAS = Object.freeze({
+    types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+    isFirstTurn: 0,
+    evasionStage: 6,
+    accStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+    hp: 100,
+    maxHp: 100,
+  });
+  const FASTER_USER = Object.freeze({ speed: 120, speedStage: 6, ...EXTRAS }); // target NOT faster
+  const SLOWER_USER = Object.freeze({ speed: 5, speedStage: 6, ...EXTRAS }); // target faster
+  const FASTER_TARGET = Object.freeze({ speed: 120, speedStage: 6, ...EXTRAS });
+  const SLOWER_TARGET = Object.freeze({ speed: 5, speedStage: 6, ...EXTRAS });
+
+  describe("redirecting moves (Icy Wind/Rock Tomb/Mud Shot) land in AI_CV_SpeedDown's own body", () => {
+    it.each([
+      ["Icy Wind", MOVE_ICY_WIND],
+      ["Rock Tomb", MOVE_ROCK_TOMB],
+      ["Mud Shot", MOVE_MUD_SHOT],
+    ])("%s: deterministic -3, zero draws, when the target is not faster", (_label, moveId) => {
+      const rng = { value: 249_678_687, calls: 0 };
+      const result = runCheckViability({
+        rng,
+        moveId,
+        attacker: FASTER_USER,
+        target: SLOWER_TARGET,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng, draws: [], scoreDelta: -3 });
+    });
+
+    it.each([
+      ["Icy Wind", MOVE_ICY_WIND],
+      ["Rock Tomb", MOVE_ROCK_TOMB],
+      ["Mud Shot", MOVE_MUD_SHOT],
+    ])("%s: draws exactly one if_random_less_than 70 roll, scores 0 when it lands < 70", (_label, moveId) => {
+      const result = runCheckViability({
+        rng: { value: 4, calls: 0 }, // seed 4 -> randomValue % 256 = 25 (< 70)
+        moveId,
+        attacker: SLOWER_USER,
+        target: FASTER_TARGET,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(0);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "speed-down-roll", succeeded: false });
+    });
+
+    it.each([
+      ["Icy Wind", MOVE_ICY_WIND],
+      ["Rock Tomb", MOVE_ROCK_TOMB],
+      ["Mud Shot", MOVE_MUD_SHOT],
+    ])("%s: draws exactly one if_random_less_than 70 roll, scores +2 when it lands >= 70", (_label, moveId) => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 }, // seed 1 -> randomValue % 256 = 198 (>= 70)
+        moveId,
+        attacker: SLOWER_USER,
+        target: FASTER_TARGET,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(2);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "speed-down-roll", succeeded: true });
+    });
+
+    it("an exact speed tie still burns GetWhoStrikesFirst's own Random() call, same quirk AI_CV_SpeedDown itself pins", () => {
+      const TIED = Object.freeze({ speed: 100, speedStage: 6, ...EXTRAS });
+      const result = runCheckViability({
+        rng: { value: 3, calls: 0 }, // seed 3 -> odd tie-roll -> strikesFirst 2, NOT target-faster
+        moveId: MOVE_ICY_WIND,
+        attacker: TIED,
+        target: TIED,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(-3);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "target-faster-tie", strikesFirst: 2 });
+    });
+
+    it.each([
+      ["deterministic branch", { value: 249_678_687, calls: 0 }, FASTER_USER, SLOWER_TARGET],
+      ["probabilistic-fail branch", { value: 4, calls: 0 }, SLOWER_USER, FASTER_TARGET],
+      ["probabilistic-succeed branch", { value: 1, calls: 0 }, SLOWER_USER, FASTER_TARGET],
+    ] as const)("redirect-equivalence: Icy Wind's post-gate scoring is byte-identical to MOVE_STRING_SHOT's own EFFECT_SPEED_DOWN dispatch (%s)", (_label, rngSeed, attacker, target) => {
+      const viaRedirect = runCheckViability({
+        rng: { ...rngSeed },
+        moveId: MOVE_ICY_WIND,
+        attacker,
+        target,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      const viaDirect = runCheckViability({
+        rng: { ...rngSeed },
+        moveId: MOVE_STRING_SHOT,
+        attacker,
+        target,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(viaRedirect).toEqual(viaDirect);
+    });
+  });
+
+  describe("fall-through moves (Bubblebeam/Constrict/Bubble) hit the handler's own `end` -- genuine zero, not a stub", () => {
+    it.each([
+      ["Bubblebeam", MOVE_BUBBLE_BEAM],
+      ["Constrict", MOVE_CONSTRICT],
+      ["Bubble", MOVE_BUBBLE],
+    ])("%s: zero score, zero draws, regardless of relative speed (target faster)", (_label, moveId) => {
+      const rng = { value: 1, calls: 0 };
+      const result = runCheckViability({
+        rng,
+        moveId,
+        attacker: SLOWER_USER,
+        target: FASTER_TARGET,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng, draws: [], scoreDelta: 0 });
+    });
+
+    it.each([
+      ["Bubblebeam", MOVE_BUBBLE_BEAM],
+      ["Constrict", MOVE_CONSTRICT],
+      ["Bubble", MOVE_BUBBLE],
+    ])("%s: zero score, zero draws, regardless of relative speed (target not faster)", (_label, moveId) => {
+      const rng = { value: 1, calls: 0 };
+      const result = runCheckViability({
+        rng,
+        moveId,
+        attacker: FASTER_USER,
+        target: SLOWER_TARGET,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng, draws: [], scoreDelta: 0 });
+    });
+  });
+
+  it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
+    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
+  });
+});
