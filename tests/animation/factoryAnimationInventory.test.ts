@@ -68,11 +68,11 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // DYNAMIC PUNCH adds complete component evidence but remains partial.
+        // DYNAMIC PUNCH is exact through the shared framebuffer seam.
         unsupported: 226,
         staged: 0,
-        partial: 4,
-        exact: 46,
+        partial: 3,
+        exact: 47,
       },
       {
         tier: "openOnly",

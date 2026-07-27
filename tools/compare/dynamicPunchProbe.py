@@ -4,9 +4,9 @@ from __future__ import annotations
 import hashlib, json, subprocess, sys
 from pathlib import Path
 
-if len(sys.argv) != 3:
-    raise SystemExit("usage: dynamicPunchProbe.py <scenario> <output.json>")
-SCENARIO, OUTPUT = Path(sys.argv[1]), Path(sys.argv[2])
+if len(sys.argv) != 4:
+    raise SystemExit("usage: dynamicPunchProbe.py <scenario> <output.json> <rgb-dir>")
+SCENARIO, OUTPUT, RGB_DIR = Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3])
 ROOT = Path(__file__).resolve().parents[2]
 HARNESS = next(p for p in (ROOT, *ROOT.parents) if (p / "oracle" / "emerald_core.py").is_file())
 sys.path.insert(0, str(HARNESS / "oracle"))
@@ -68,6 +68,7 @@ def main() -> None:
                                "data": [s16(base+8+i*2) for i in range(16)]})
         return result
     rows = []
+    RGB_DIR.mkdir(parents=True, exist_ok=True)
     def capture(frame: int) -> None:
         snap = lab.snapshot()
         if snap["engine"]["currentMove"] != 223: return
@@ -78,6 +79,7 @@ def main() -> None:
                 item = sprite(slot)
                 if item["template"] in templates.values(): active.append(item)
         rgb = oracle.screen_rgb()
+        (RGB_DIR / f"{frame:05d}.rgb").write_bytes(rgb)
         rows.append({"frame": frame, "sha256": hashlib.sha256(rgb).hexdigest(),
           "player": snap["battlers"]["player"], "opponent": snap["battlers"]["opponent"],
           "playerSprite": battler(0), "opponentSprite": battler(1), "sprites": active,

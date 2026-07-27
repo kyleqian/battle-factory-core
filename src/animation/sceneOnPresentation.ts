@@ -1002,6 +1002,7 @@ export type SceneOnMoveConfig =
   | SceneOnSwaggerConfig
   | SceneOnSelfDestructConfig
   | SceneOnExplosionConfig
+  | SceneOnDynamicPunchConfig
   | SceneOnPoisonTailConfig
   | SceneOnToxicConfig
   | SceneOnEarthquakeConfig
@@ -1023,10 +1024,8 @@ export interface SceneOnMovePresentationState<
   readonly config: TConfig;
 }
 
-export interface SceneOnDynamicPunchPresentationState {
-  readonly age: number;
-  readonly config: SceneOnDynamicPunchConfig;
-}
+export type SceneOnDynamicPunchPresentationState =
+  SceneOnMovePresentationState<SceneOnDynamicPunchConfig>;
 
 export interface SceneOnSupersonicView {
   readonly age: number;
@@ -2231,7 +2230,7 @@ export function sceneOnExplosionView(
 
 /** `age=0` is the first software-OAM fist/hitsplat display. */
 export function sceneOnDynamicPunchView(
-  state: SceneOnDynamicPunchPresentationState,
+  state: SceneOnMovePresentationState,
 ): SceneOnDynamicPunchView {
   if (state.config.move !== "DYNAMIC_PUNCH") {
     throw new Error(

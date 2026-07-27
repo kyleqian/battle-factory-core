@@ -552,6 +552,7 @@ import hyperFangAsset from "../animation/assets/hyperFang.json" with { type: "js
 import swaggerAsset from "../animation/assets/swagger.json" with { type: "json" };
 import selfDestructAsset from "../animation/assets/selfDestruct.json" with { type: "json" };
 import explosionAsset from "../animation/assets/explosion.json" with { type: "json" };
+import dynamicPunchAsset from "../animation/assets/dynamicPunch.json" with { type: "json" };
 import poisonTailAsset from "../animation/assets/poisonTail.json" with { type: "json" };
 import toxicAsset from "../animation/assets/toxic.json" with { type: "json" };
 import hardenAsset from "../animation/assets/harden.json" with { type: "json" };
@@ -669,6 +670,7 @@ import {
   sceneOnSwaggerView,
   sceneOnSelfDestructView,
   sceneOnExplosionView,
+  sceneOnDynamicPunchView,
   sceneOnPoisonTailView,
   sceneOnToxicView,
   sceneOnEarthquakeView,
@@ -1024,6 +1026,12 @@ const selfDestructArt = selfDestructAsset as {
 const explosionArt = explosionAsset as {
   glalieBack: { tileset: Tileset; palette: RgbColor[] };
   glalieFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const dynamicPunchArt = dynamicPunchAsset as {
+  hitmonchanBack: { tileset: Tileset; palette: RgbColor[] };
+  hitmonchanFront: { tileset: Tileset; palette: RgbColor[] };
+  fist: { tileset: Tileset; palette: RgbColor[] };
+  hitsplat: { tileset: Tileset; palette: RgbColor[] };
 };
 const poisonTailArt = poisonTailAsset as {
   metal: { tileset: Tileset; tilemap: Tilemap; palette: RgbColor[] };
@@ -15799,6 +15807,139 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "RATICATE used" : "Foe RATICATE used",
       "HYPER FANG!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "DYNAMIC_PUNCH") {
+    const view = sceneOnDynamicPunchView(state);
+    // Source sprite callbacks write software OAM after the current hardware
+    // buffer has been built. Effects transfer one display later; battler
+    // task offsets take the established two-display task/OAM path.
+    const effectsDisplayed = sceneOnDynamicPunchView({
+      ...state,
+      age: state.age - 1,
+    });
+    const targetDisplayed = sceneOnDynamicPunchView({
+      ...state,
+      age: state.age === 0 ? 0 : state.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "HITMONCHAN"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "HITMONCHAN"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged DYNAMIC_PUNCH pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const hitmonchan = playerToOpponent
+      ? dynamicPunchArt.hitmonchanBack
+      : {
+          ...dynamicPunchArt.hitmonchanFront,
+          tileset: subTileset(dynamicPunchArt.hitmonchanFront.tileset, 0, 8),
+        };
+    const shuckle = playerToOpponent
+      ? {
+          ...selfDestructArt.shuckleFront,
+          tileset: subTileset(selfDestructArt.shuckleFront.tileset, 0, 8),
+        }
+      : selfDestructArt.shuckleBack;
+
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    drawSpriteSheet(
+      fb,
+      shuckle.tileset,
+      shuckle.palette,
+      view.target.geometry.spriteCorner.x + targetDisplayed.targetX2,
+      view.target.geometry.spriteCorner.y + targetDisplayed.targetY2,
+    );
+    // monbg moves the target to a BG layer. The selected OBJ layer is
+    // target-1, so each topmost effect samples this same pre-OBJ target/BG
+    // surface rather than cumulatively blending against older effect OBJs.
+    const effectBackdrop = fb.slice();
+    if (effectsDisplayed.hitsplatVisible) {
+      drawSpriteSheetAffineStretchBlendedOverFb(
+        fb,
+        dynamicPunchArt.hitsplat.tileset,
+        dynamicPunchArt.hitsplat.palette,
+        effectsDisplayed.hitsplatPosition.x - 16,
+        effectsDisplayed.hitsplatPosition.y - 16,
+        256,
+        256,
+        12,
+        8,
+        false,
+        effectBackdrop,
+      );
+    }
+    if (effectsDisplayed.fistVisible) {
+      drawSpriteSheet(
+        fb,
+        subTileset(dynamicPunchArt.fist.tileset, 0, 4),
+        dynamicPunchArt.fist.palette,
+        effectsDisplayed.fistPosition.x - 16,
+        effectsDisplayed.fistPosition.y - 16,
+      );
+    }
+    const explosionsInDrawOrder = [...effectsDisplayed.explosions].sort(
+      (a, b) => a.y - b.y || b.spawnIndex - a.spawnIndex,
+    );
+    for (const explosion of explosionsInDrawOrder) {
+      drawSpriteSheet(
+        fb,
+        subTileset(selfDestructArt.explosion.tileset, explosion.frame * 4, 4),
+        selfDestructArt.explosion.palette,
+        explosion.x - 16,
+        explosion.y - 16,
+      );
+    }
+    drawSpriteSheet(
+      fb,
+      hitmonchan.tileset,
+      hitmonchan.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "SHUCKLE" : "HITMONCHAN",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "HITMONCHAN" : "SHUCKLE",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "HITMONCHAN used" : "Foe HITMONCHAN used",
+      "DYNAMICPUNCH!",
       99,
     );
     return;

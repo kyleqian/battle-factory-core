@@ -46,11 +46,39 @@ animation. A status caused by a move is not part of that move's animation.
 
 ## Current resumable state (2026-07-27)
 
-Coverage is **46/276 exact, 4 partial, 226 unsupported**. DYNAMIC PUNCH is an
-honest partial: its complete first move-owned source-component body matches
-**75/75 player-back + 75/75 opponent-front** frames through a typed relative
-Scene-ON seam, reproduced twice fresh. Shared-seam raw-RGB is **0/75 attempted**
-in each orientation because battleScene assets/drawing are not wired.
+Coverage is **47/276 exact, 3 partial, 226 unsupported**. DYNAMIC PUNCH is
+exact through the shared Scene-ON seam at **75/75 player-back + 75/75
+opponent-front** component, typed-seam, hardware-transfer, and raw-RGB frames,
+reproduced twice fresh.
+
+## DYNAMIC PUNCH promoted exact; monbg impact display path closed (2026-07-27)
+
+**Verdict:** `MOVE_DYNAMIC_PUNCH` is exact. Legal mechanicLab parties stage
+HITMONCHAN from real Level-50 Factory set 339 (species 107) in both
+orientations, constrain all choices to DYNAMIC PUNCH, and use slower SHUCKLE
+with TACKLE. Complete oracle frames 101-175 player-back and 105-179
+opponent-front match **75/75** source components, typed seam, hardware OAM/
+palette checks, and raw RGB, twice from fresh snapshots.
+
+**Renderer/evidence:** HITMONCHAN back/front plus fist/hitsplat art is
+reproducibly extracted and byte-for-byte tested. The narrow battleScene case
+ports the one-display target offset and effect-OAM transfer, target monbg copy
+as hitsplat alpha target-2, opaque fist/explosions, source explosion ordering,
+field chrome, and cleanup. Fixture HP now records the source-true pre-damage
+95/95 SHUCKLE display; damage remains outside this move-owned window.
+
+**Commands/controls:** `node --experimental-strip-types
+tools/compare/dynamicPunchPortable.ts <fixture>` → 75/75 component+seam and
+75/75 framebuffer for both fixtures twice; `explosionPortable.ts` → 212/212
+both orientations; `selfDestructPortable.ts` → 113/113 both orientations.
+No absolute ticks, screenshots, coordinate/RGB fitting, canonical imports,
+unsupported barriers, or boundary widening were added.
+
+## Previous current state (2026-07-27)
+
+Coverage was **46/276 exact, 4 partial, 226 unsupported**. DYNAMIC PUNCH was
+partial at 75/75 source-component + typed-seam frames in both orientations,
+with shared-seam raw RGB still unwired at 0/75.
 
 ## DYNAMIC PUNCH component body closed; framebuffer remainder bounded (2026-07-27)
 

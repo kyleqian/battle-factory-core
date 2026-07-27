@@ -8,7 +8,7 @@
         "complete legal Level-50 Scene-ON mechanicLab parties stage SUDOWOODO, the real Factory set-298 SELF DESTRUCT carrier (Hardy, SpDef/HP), in both player-back and opponent-front orientations; all four active choices are constrained to SELF DESTRUCT and a slower SHUCKLE is constrained to TACKLE",
         "complete first move-owned body at oracle frames 82-194 player-back and 86-198 opponent-front: all ten gExplosionSpriteTemplate instances, four animation cells, mirrored attacker geometry, both visible battler ShakeMon2 offsets, attacker-only 0->9->0 red palette ramps, ten SE_M_SELF_DESTRUCT restart/pan boundaries, and the shared-seam raw-RGB framebuffer match 113/113 in each orientation, reproduced twice fresh",
         "ANIM_TAG_EXPLOSION plus SUDOWOODO/SHUCKLE art in both orientations are reproducibly extracted; the renderer ports the one-display palette/explosion OAM latches, ShakeMon2's neutral first hardware frame and subsequent two-display latch, source SortSprites Y ordering, audio-neutral field chrome, and complete teardown",
-        "the move-owned animation body stops before damage resolution, fainting, health-bar loss, controller, turn, RNG, and facility ownership; EXPLOSION has independent complete dense acceptance, DYNAMIC_PUNCH has independent partial component evidence, and PRESENT plus every other sibling remain unsupported"
+        "the move-owned animation body stops before damage resolution, fainting, health-bar loss, controller, turn, RNG, and facility ownership; EXPLOSION and DYNAMIC_PUNCH have independent complete dense acceptance, while PRESENT plus every other sibling remain unsupported"
       ],
       "evidence": [
         "tools/battle-lab/mechanic-self-destruct-player-sudowoodo-opponent-shuckle.json",
@@ -33,7 +33,7 @@
         "complete first move-owned body matches 212/212 source-component, typed relative-seam, and raw-RGB framebuffer frames at oracle 76-287 player-back and 80-291 opponent-front, reproduced twice fresh: both literal Explosion1 calls and all ten gExplosionSpriteTemplate instances, mirrored geometry and four animation cells, both visible battlers' AnimTask_ShakeMon2(8,0,40,1), nine complex F_PAL_BG red/black alternations, cleanup gap, white coefficient-16 hold, coefficient 15->0 fade, all ten SE_M_EXPLOSION restart/pan boundaries, and final teardown",
         "GLALIE back/front art is reproducibly source-extracted, while the already-proved explosion and SHUCKLE field assets are reused; the shared renderer ports the one-display BG-palette/explosion-OAM latches, ShakeMon2's neutral first hardware frame plus two-display latch, source SortSprites Y ordering, audio-neutral field chrome, and final palette restore",
         "the portable comparator retains all 212 original software sprites, hardware OAM, affine matrix, task, faded/unfaded/hardware palette, blend-register, audio, and cleanup checks, and independently requires the same 212 typed-seam and raw-RGB frames; SELF DESTRUCT remains 113/113 and DRAGON BREATH 85/85 component plus framebuffer exact in both orientations as fresh regression controls",
-        "PRESENT remains unsupported: its moving item bag precedes a conditional target-relative five-explosion damage branch or a distinct nine-particle healing branch plus HealingEffect2; DYNAMIC PUNCH now has independent complete source-component evidence but remains partial pending shared battleScene framebuffer acceptance"
+        "PRESENT remains unsupported: its moving item bag precedes a conditional target-relative five-explosion damage branch or a distinct nine-particle healing branch plus HealingEffect2; DYNAMIC PUNCH now has independent complete component, typed-seam, and framebuffer acceptance"
       ],
       "evidence": [
         "tools/battle-lab/mechanic-explosion-player-glalie-opponent-shuckle.json",
@@ -52,12 +52,13 @@
     },
     {
       "move": "MOVE_DYNAMIC_PUNCH",
-      "status": "partial",
+      "status": "exact",
       "covered": [
         "complete legal Level-50 Scene-ON mechanicLab parties stage HITMONCHAN, the real Factory set-339 DYNAMIC PUNCH carrier (Adamant, Defense/HP), in both player-back and opponent-front orientations; Emerald species constant 107 is read directly from include/constants/species.h, all four active choices are constrained to DYNAMIC PUNCH, and slower SHUCKLE is constrained to TACKLE",
         "complete first move-owned source-component body matches 75/75 frames at oracle 101-175 player-back and 105-179 opponent-front, reproduced twice fresh: target monbg plus BLDALPHA 12/8 lifecycle, gFistFootSpriteTemplate duration and target picture-offset geometry, animation-0 gBasicHitSplatSpriteTemplate software/affine matrices, AnimTask_ShakeMon(5,0,7,1), five literal target-relative gExplosionSpriteTemplate instances with animation argv 1 and picture-offset argv 1, AnimTask_ShakeMon2(5,0,28,1), SE_M_VITAL_THROW2 plus five target-pan SE_M_SELF_DESTRUCT restart boundaries, register cleanup, and typed relative seam teardown",
         "the source reducer reuses the exact explosion sprite reducer only for literal gExplosionSpriteTemplate identity and compatible offsets/cell program; the distinct DYNAMIC PUNCH prelude and target selection are independently ported and densely checked",
-        "raw-RGB framebuffer acceptance is 0/75 attempted in each orientation: no HITMONCHAN/fist/hitsplat assets or battleScene draw/OAM transfer wiring were landed, so the move is partial rather than exact; hardware OAM/palette latch checks and shared-seam cleanup pixels remain the precise closure work",
+        "the shared Scene-ON compositor matches all 75/75 raw-RGB frames in both orientations, reproduced twice fresh, with source-derived HITMONCHAN back/front, fist, hitsplat, explosion, SHUCKLE, field chrome, and healthbox art; the comparator independently checks software sprites, affine matrices, hardware OAM transfer counts, hardware/faded palette identity, blend registers, target-pan audio, typed-seam teardown, and framebuffer equality",
+        "the hardware display path keeps the monbg target copy as the hitsplat's alpha target-2, transfers the target ShakeMon/ShakeMon2 offset after one display, leaves the fist and explosions opaque, preserves source SortSprites explosion ordering, and restores the unmodified field at ages 72-74; EXPLOSION 212/212 and SELF DESTRUCT 113/113 remain exact in both orientations as dense controls",
         "PRESENT was source-audited only and remains unsupported: its common moving item bag precedes a conditional five-explosion damage branch or a distinct nine-green-particle healing branch plus HealingEffect2, none of which has independent dense move evidence"
       ],
       "evidence": [
@@ -67,12 +68,14 @@
         "tools/compare/fixtures/dynamic-punch-opponent-hitmonchan-player-shuckle.json",
         "tools/compare/dynamicPunchPortable.ts",
         "tools/compare/dynamicPunchProbe.py",
+        "tools/compare/extractDynamicPunchAssets.ts",
+        "src/animation/assets/dynamicPunch.json",
         "src/animation/dynamicPunch.ts",
         "src/animation/selfDestruct.ts",
         "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
         "tests/animation/dynamicPunch.test.ts"
-      ],
-      "remaining": "Shared-seam raw-RGB acceptance is 0/75 attempted in both orientations. Extract reproducible HITMONCHAN back/front plus hands-and-feet and impact assets; wire DYNAMIC_PUNCH through battleScene's animation-only compositor; then require all 75 software/hardware OAM, affine matrix, palette/register, audio, cleanup, typed-seam, and raw-RGB frames in both orientations twice fresh. Do not promote until that complete framebuffer surface is exact."
+      ]
     },
     {
       "move": "MOVE_SWAGGER",
@@ -1196,7 +1199,7 @@
         "MOVE_PRESENT",
         "MOVE_DYNAMIC_PUNCH"
       ],
-      "goal": "MOVE_SELF_DESTRUCT is exact at 113/113 and MOVE_EXPLOSION at 212/212 component plus raw-RGB framebuffer frames in both orientations. MOVE_DYNAMIC_PUNCH independently proves its complete 75-frame source-component and typed relative-seam body twice in both orientations but remains partial at raw-RGB 0/75 pending assets, battleScene draw/OAM latches, and shared-seam framebuffer acceptance. PRESENT still needs its moving bag plus independently accepted damage/heal branches. No sibling is promoted without its own complete dense move acceptance."
+      "goal": "MOVE_SELF_DESTRUCT is exact at 113/113, MOVE_EXPLOSION at 212/212, and MOVE_DYNAMIC_PUNCH at 75/75 component, typed-seam, hardware-transfer, and raw-RGB framebuffer frames in both orientations. PRESENT still needs its moving bag plus independently accepted damage/heal branches. No sibling is promoted without its own complete dense move acceptance."
     },
     {
       "id": "anger-mark-grow-breath",
