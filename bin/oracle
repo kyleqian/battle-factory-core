@@ -9,6 +9,8 @@ Then:                     bin/oracle info
                           bin/oracle lab tools/battle-lab/factory-varied.json -o /tmp/lab
                           bin/oracle symbols gSaveBlock1Ptr gMain
                           bin/oracle symbols --prefix gPlayer
+
+Frame and input numbering is defined in docs/oracle-frame-semantics.md.
 """
 
 from __future__ import annotations
