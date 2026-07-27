@@ -246,6 +246,17 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // (b) barrier, reachability-tested in
   // tests/battleScriptProtectlikeOpcode.test.ts.
   ["src/engine/battleScriptProtectlikeOpcode.ts", 1],
+  // B_SCR_OP_TRYKO registration (EFFECT_OHKO, ranked-table row 5, alongside
+  // B_SCR_OP_TRYSETDESTINYBONDTOHAPPEN/B_SCR_OP_TRYHEALHALFHEALTH which both
+  // register with zero barriers): Cmd_tryKO's own HOLD_EFFECT_FOCUS_BAND
+  // roll needs gSpecialStatuses[target].focusBanded (the same unmodeled
+  // subsystem Cmd_adjustnormaldamage/Cmd_adjustsetdamage already barrier on
+  // -- a distinct call site, not a narrowing); its STATUS3_ALWAYS_HITS
+  // Lock-On/Mind-Reader branch needs gDisableStructs[target].
+  // battlerWithSureHit (unmodeled, and per accuracycheck's own established
+  // finding, never actually set by any production code path). 2 total, both
+  // reachability-tested in tests/battleScriptTryKOOpcode.test.ts.
+  ["src/engine/battleScriptTryKOOpcode.ts", 2],
 ]);
 
 function recordingImportsIn(file: string): string[] {

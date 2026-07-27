@@ -1,4 +1,37 @@
 ---
+## 520 — [SUPERVISOR 2026-07-27 ~15:15] round 1 verified + merged (3 workers, all green); apostrophe-charmap prerequisite FIXED; round 2 dispatched
+
+- **State:** master green at **268 files / 3560 tests** (union of entry 519's
+  main-lane step + two side merges), `npm run build` clean, both side
+  worktrees removed, zero unmerged branches. Census **108/214 effects,
+  209/355 moves, 2321/2957 weighted (78.5%)**.
+- **Side merges (both verified in-worktree first, live compare reruns by
+  supervisor):** (1) §13 prep-scout — `docs/presentation-seam-scout.md` §13
+  picks `turn2-endeavor.json` (77 frames, smallest unblocked genuinely-new
+  window; comparator re-pinned 77/77 twice + 9-trace sweep; staging module
+  `turn2EndeavorPresentationStaging.ts` committed unwired, 9 tests). Scout
+  also proved `turn6-statfall.json` is *directly* apostrophe-blocked (its
+  committed capture renders past the curly ’ in "ONIX’s ATTACK") and
+  `turn11-featherdance.json` doubly so. (2) That prerequisite is now FIXED:
+  root cause `tools/extract/extract-battle-messages.ts` never applied
+  charmap.txt:87-88's `'\'' = B4` alias — extractor now decodes it (with a
+  loud byte/glyph assertion), 129/365 templates corrected apostrophe-only
+  (structural diff verified), generic dual-alias sweep found no other
+  affected glyph class, 2 new resolver pins + 2 stale pins updated; zero
+  drift across 4 resolver-driven traces + literal-driven turn6-statfall
+  127/127 (supervisor reran resolver tests 13/13 + turn6-featherdance 90/90
+  + turn1-rockslide 256/256 live).
+- **Round 2 (dispatched):** main → §13.3 wiring (`turn2-endeavor.json`
+  kickoff text from kernel events, acceptance 77/77 + §13.3's regression
+  sweep) ∥ side → design/prep scout for the new top census set:
+  EFFECT_ROAR's `FORCERANDOMSWITCH`/`INITMULTIHITSTRING`/`JUMPIFHASNOHP`
+  trio (40) + the overlapping multi-hit pair row (4 effects, 23) — ground
+  truth + registration plan for a round-3 main step.
+- **Next:** verify round 2; then either the turn6-statfall wiring (now
+  unblocked, zero new staged proof needed per §13's table) or the Roar/
+  multi-hit registration, per what's banked.
+
+---
 ## 519 — [BOUNDED WORKER 2026-07-27 ~15:00] B_SCR_OP_TRYINFATUATING + B_SCR_OP_JUMPIFCONFUSEDANDSTATMAXED registered; EFFECT_ATTRACT/EFFECT_SWAGGER/EFFECT_FLATTER executable end to end
 
 - **State:** tree green at **267 files / 3549 tests** (worker wrote 269;

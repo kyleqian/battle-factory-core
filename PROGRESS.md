@@ -15,6 +15,110 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 523 — [BOUNDED WORKER 2026-07-27 ~16:30] B_SCR_OP_TRYHEALHALFHEALTH + B_SCR_OP_TRYKO + B_SCR_OP_TRYSETDESTINYBONDTOHAPPEN registered; EFFECT_RESTORE_HP/EFFECT_SOFTBOILED/EFFECT_OHKO executable end to end
+
+- **State:** tree green at **270 files / 3587 tests** (+2 files / +27 tests
+  over session start 268/3560: new `battleScriptTryhealhalfhealthOpcode.test.ts`
+  12 tests, new `battleScriptTryKOOpcode.test.ts` 18 tests — folds
+  `Cmd_trysetdestinybondtohappen`'s own dispatch tests in too, since it's a
+  one-line wrapper — plus `battleScriptHitChainOpcode.test.ts`'s
+  resultmessage barrier test net +1 (one stale barrier test replaced by two
+  real-behavior tests) and `battleScriptRulesContext.test.ts`'s
+  production-handler-count assertion updated 119→122), `npm run build`
+  clean. **CENSUS REGEN DEFERRED per this step's special instruction** (a
+  parallel side-lane worker is rewriting `tools/report/executable-frontier-
+  census.ts` this round) — neither the generator nor
+  `docs/executable-frontier-census.md` were run or edited. **Predicted
+  flip, hand-verified against the committed doc's own row-4/row-5 numbers:
+  108→111/214 effects, 209→217/355 moves, 170→177/276 Factory-L50
+  unweighted (3+4), 2321→2378/2957 weighted (29+28) — **+3 effects / +8
+  moves unweighted / +57 weighted exactly, no correction needed, matches
+  the brief's own prediction to the digit.**
+- **Did:** registered all three ranked-table-row-4/row-5 opcodes.
+  (1) `Cmd_tryhealhalfhealth` (`battleScriptTryhealhalfhealthOpcode.ts`):
+  both concrete call sites (`BattleScript_EffectRestoreHp`'s `BS_ATTACKER`
+  form, reassigning `target=attacker`; `BattleScript_EffectSoftboiled`'s
+  `BS_TARGET` form, no reassignment) — `floor(maxHP/2)`, min-1 clamped,
+  negated; full-HP fail jumps to the operand pointer. Zero barriers.
+  (2) `Cmd_tryKO` (`battleScriptTryKOOpcode.ts`, EFFECT_OHKO's own
+  accuracy/level formula, NOT the standard accuracycheck path — OHKO's own
+  `accuracycheck` uses the already-registered `NO_ACC_CALC_CHECK_LOCK_ON`
+  no-roll bypass first): Sturdy block (real, hardcoded jump to
+  `BattleScript_SturdyPreventsOHKO`, not the operand ptr — same shape as
+  `Cmd_tryinfatuating`'s Oblivious block), the real `chance = accuracy +
+  (atkLevel - targetLevel)` formula with its hard level-gate override (a
+  would-be-successful roll still misses, as "unaffected" not "missed",
+  whenever the target out-levels the attacker — the level-too-high fail
+  tail), the Endure interaction (reuses the already-modeled `endured` field,
+  clips to hp-1, `MOVE_RESULT_FOE_ENDURED`), and plain-KO success (damage =
+  target's full current HP, `MOVE_RESULT_ONE_HIT_KO`). Two named (b)
+  barriers, both source-derived, both reachability-tested: the
+  `HOLD_EFFECT_FOCUS_BAND` roll (`gSpecialStatuses[target].focusBanded`
+  unmodeled — same subsystem gap `Cmd_adjustnormaldamage`/
+  `Cmd_adjustsetdamage` already carry, a distinct call site not a
+  narrowing) and `STATUS3_ALWAYS_HITS` (Lock-On/Mind-Reader,
+  `gDisableStructs.battlerWithSureHit` unmodeled — per accuracycheck's own
+  established finding, never actually set by any production code path).
+  (3) `Cmd_trysetdestinybondtohappen`
+  (`battleScriptTrysetdestinybondtohappenOpcode.ts`): a bare wrapper, zero
+  barriers, zero RNG.
+- **Hidden barrier the brief asked to budget for, found and widened:**
+  `Cmd_resultmessage`'s `MOVE_RESULT_ONE_HIT_KO` handling (both the
+  exact-match switch case and the combined-bits default case) was an
+  existing named (b) barrier ("OHKO subsystem unmodeled") sitting behind
+  the already-registered `resultmessage` opcode — exactly the class of gap
+  entries 515/519 both hit. Widened both: the exact-match case is a plain
+  `STRINGID_ONEHITKO` print (no cursor push, source-verified); the combined
+  case (e.g. `SUPER_EFFECTIVE|ONE_HIT_KO`, reachable whenever an OHKO move's
+  type happens to be super-effective) jumps to `BattleScript_OneHitKOMsg`
+  clearing `ONE_HIT_KO|SUPER_EFFECTIVE|NOT_VERY_EFFECTIVE`, same shape as
+  the already-working `FOE_ENDURED` combined case. `gKOFailedStringIds`
+  added to the existing `printfromtable` data table (zero code path change,
+  data-driven) so `BattleScript_KOFail`'s own miss/unaffected message
+  resolves too. `MOVE_RESULT_FOE_HUNG_ON` stays barriered (Focus Band
+  subsystem, structurally unreachable now that `Cmd_tryKO` itself barriers
+  Focus Band unconditionally).
+- **Real bug found and fixed (not an ISSUES entry — fixed within this same
+  step, since it's the identical source function this step needed to port):**
+  `Cmd_accuracycheck`'s existing `advancePastAccuracyCheck` helper computed
+  `TrySetDestinyBondToHappen`'s effect onto the wrong field — the
+  **attacker's own `status2 |= STATUS2_DESTINY_BOND`** bit, never read by
+  anything, instead of the real `hitMarker |= HITMARKER_DESTINYBOND` that
+  `Cmd_tryfaintmon`'s own barrier (`:3184`, same file) actually reads.
+  Provably dormant until now: `EFFECT_DESTINY_BOND` (the move) is still
+  unregistered, so no committed script could ever make a target's
+  `STATUS2_DESTINY_BOND` true, and zero existing tests exercised this
+  computation at all. Extracted into one shared, now-correct
+  `applyTrySetDestinyBondToHappen` helper (exported from
+  `battleScriptHitChainOpcode.ts`) reused by both real call sites —
+  accuracycheck's own success path and the new standalone opcode — so
+  they're provably consistent by construction, with a new test pinning the
+  fixed behavior (hitMarker set, attacker's status2 left untouched).
+- **Tests:** isolated dispatch for every distinct branch of all three
+  opcodes (both tryhealhalfhealth operand forms incl. the 1-HP-max
+  min-clamp edge; tryKO's Sturdy/both barriers/miss/level-too-high/success/
+  Endure, each with an exact RNG-roll-count assertion) PLUS full
+  committed-script walks to a genuine `{kind:"terminal",
+  opcodeName:"B_SCR_OP_END"}` halt for all three effects: RESTORE_HP
+  success + full-HP fail tail, SOFTBOILED success + full-HP fail tail (real
+  script divergence from RESTORE_HP confirmed and cited: RestoreHp prints
+  its own `STRINGID_PKMNREGAINEDHEALTH` tail directly off `BS_ATTACKER`,
+  `battle_scripts_1.s:676-685`, never sharing a label; Softboiled instead
+  falls into the shared `BattleScript_PresentHealTarget` label Rest's own
+  success path also re-enters, `:2031-2034`), OHKO success (2 RNG rolls:
+  tryKO's own + `seteffectwithchance`'s always-drawn effect-chance roll,
+  confirmed real via source's own `&&` short-circuit order), OHKO miss tail
+  (1 roll), OHKO level-too-high fail tail, and the Sturdy block tail (0
+  rolls).
+- **Next:** continue the ranked-table descent once the census regenerates
+  post-merge (predicted next: the Roar trio, corrected by a parallel scout
+  per this step's own brief, or the multi-hit pair).
+- **Notes:** no PAPERCUT. Commits landed one per green rung: tryhealhalfhealth
+  + its tests, the destinyBond helper fix + resultmessage barrier widening
+  + tryKO/trysetdestinybondtohappen + their tests, ratchet/handler-count pin
+  updates.
+
+---
 ## 522 — [BOUNDED WORKER 2026-07-27 ~16:00] `turn6-statfall.json` ATK-fell text re-driven from kernel events (§12.3 step 3 landed); banner gate (step 4) found to need disproportionate new surface
 
 - **State:** tree green at **268 files / 3560 tests** (unchanged count —
