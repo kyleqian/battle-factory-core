@@ -720,3 +720,7 @@ traced from `reference/pokeemerald/` (`battle_script_commands.c`,
 and `src/data/gen/*` (read-only). No fixtures were staged (§3 explains the
 scope call); no `docs/executable-frontier-census.md` edits (generated,
 supervisor-owned); no `PROGRESS.md`/`ISSUES.md` edits (side-lane contract).
+
+**Follow-up (later session):** the census's control-flow extraction bug
+this doc's §1 identified is fixed in `tools/report/executable-frontier-census.ts`
+and the doc is regenerated -- see `docs/executable-frontier-census.md`.
