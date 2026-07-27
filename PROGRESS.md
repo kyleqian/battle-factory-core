@@ -15,6 +15,44 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 524 — [SUPERVISOR 2026-07-27 ~16:35] rounds 2-4 verified + merged; census extractor FIXED (Roar row was fabricated); census 80.4% weighted; round 5 dispatched
+
+- **State:** master green at **271 files / 3597 tests**, `npm run build`
+  clean, zero unmerged branches, zero stale worktrees. Census regenerated on
+  the union: **111/214 effects, 217/355 moves, 2378/2957 weighted (80.4%)**
+  — entry 523's predicted +57 flip confirmed exactly, all 36 self-checks
+  pass (4 new exact-set pins).
+- **Seam program this session:** turn2-endeavor (§13.3, 77/77) and
+  turn6-statfall ATK-fell text (§12.3 step 3, 127/127) both wired from
+  kernel events; §14 prep-scout banked for turn11-featherdance (178/178
+  re-pinned twice; clamp string is STRINGID_STATSWONTDECREASE, zero
+  animation events, ZERO new bridge surface needed — existing turn-6 bridge
+  resolves it; resolver byte-identity to the curly-glyph literals
+  confirmed).
+- **Census correction (side rounds 2-3, verified by supervisor against raw
+  source):** EFFECT_ROAR's ranked-table row was a control-flow extractor
+  fabrication — the walker missed operand-carried jump edges (170 across
+  ~60 mnemonics) and fabricated a fallthrough from Roar's script into the
+  physically-adjacent EffectMultiHit. Fixed generically in the census's
+  graph-consumption layer (labelOperands synthesis + case-by-case-audited
+  fallthrough suppression: only forcerandomswitch never falls through, per
+  battle_script_commands.c:7164-7386); Roar's true set is FOUR opcodes
+  (FINISHACTION/FORCERANDOMSWITCH/RETURNTOBALL/SWITCHOUTABILITIES) + a
+  Suction Cups jumpifability widening; EFFECT_RAGE gained a previously
+  invisible CLEARSTATUSFROMEFFECT blocker (second real bug, same class).
+  Scout dossier: docs/roar-multihit-registration-scout.md (14-rung plan +
+  multi-hit per-operand gaps: JUMPIFHALFWORD gChosenMove, JUMPIFBYTE
+  MOVE_RESULT_FOE_ENDURED, TRIPLE_KICK power-ramp + hit-counter ptr).
+- **Round 5 (dispatched):** main → Roar + multi-hit cluster registration
+  per the scout's 14-rung plan (5 effects / 18 moves / 63 weighted
+  predicted) ∥ side → live-stage the remaining recipe-only AI CV draw
+  sites (§24.5 sites 6 ingrain / 7 curse, then §19.5's 4).
+- **Next:** verify round 5; round 6 main = turn11-featherdance wiring
+  (§14.3); then EXPLOSION pair (25) / SEMI_INVULNERABLE trio (32) as time
+  allows; wind-down from ~19:40 (fold animation-main again — their session
+  is live).
+
+---
 ## 523 — [BOUNDED WORKER 2026-07-27 ~16:30] B_SCR_OP_TRYHEALHALFHEALTH + B_SCR_OP_TRYKO + B_SCR_OP_TRYSETDESTINYBONDTOHAPPEN registered; EFFECT_RESTORE_HP/EFFECT_SOFTBOILED/EFFECT_OHKO executable end to end
 
 - **State:** tree green at **270 files / 3587 tests** (+2 files / +27 tests
@@ -163,75 +201,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   glyph class, now unblocked, a later step per this brief's own out-of-scope
   note) or the Roar/multi-hit registration side scouted in round 2.
 - **Notes:** no PAPERCUT. One commit for the wiring + docs.
-
----
-## 521 — [BOUNDED WORKER 2026-07-27 ~15:30] `turn2-endeavor.json` kickoff text/HP re-driven from kernel events (§13.3 landed)
-
-- **State:** tree green at **268 files / 3560 tests** (unchanged count —
-  this step wires already-tested staging-module exports into production
-  code, no new test file), `npm run build` clean.
-  `executableFrontierRatchet.test.ts` unmoved (6/6, zero new barriers).
-- **Did:** executed `docs/presentation-seam-scout.md` §13.3's plan exactly
-  as written (§13.5 completion note appended). `battleScene.ts`'s
-  `drawTurn2KickoffText` now sources its ENDEAVOR kickoff text
-  (`TURN2_ENDEAVOR_ATTACK_LINE1/2`, `:6905`) and `endeavorOnixHp`'s
-  `startHp`/`endHp` (`TURN2_ENDEAVOR_HP.from`/`.to`, `:6896`) from
-  `turn2EndeavorPresentationStaging.ts`'s
-  `resolveTurn2EndeavorAttackLines()`/`resolveTurn2EndeavorHpEndpoints()`
-  (module-load-resolved consts, same shape turn 5's sibling call site
-  already uses) instead of the raw `TURN_KICKOFF_LINE1`/`TURN2_KICKOFF_LINE2`/
-  `anchorPlayerBattler.hp`/`anchorPlayerAfterTurnHp` reads. Step 3
-  (`anchorOpponentAfterTurnHp`'s squish overlay, `:6881`) stayed a literal
-  per the plan's own scoping. Zero bridge edits — the staging module already
-  called the shared `resolveRockSlidePresentationWindowContent` bridge, as
-  predicted. **No literal died**: `TURN_KICKOFF_LINE1`/`TURN2_KICKOFF_LINE2`
-  stay defined and live at turn 3's own repeat call site (`:6985`). Every
-  §13.3 citation checked out against `HEAD` before editing — no design-doc
-  slip this time.
-- **Acceptance (live, this session):** full sweep run BEFORE the change (on
-  pristine `HEAD`) matched every recorded count exactly, then AFTER
-  reproduced them byte-identically: `turn2-endeavor.json` 77/77 (twice, incl.
-  a determinism check), `turn2-endeavor-drain.json` 237/237,
-  `turn2-dragonbreath.json` 237/237, `turn2-dragonbreath-projectiles.json`
-  61/61, `turn3-endeavor.json` 192/192, `turn3-rockslide.json` 256/256,
-  `turn1-rockslide.json` 256/256, `turn5-rockslide.json` 256/256,
-  `turn4-doubleteam.json` 250/250, `turn6-featherdance.json` 90/90.
-- **Next:** either `turn6-statfall.json`'s wiring (unblocked since entry
-  520's apostrophe-charmap fix, zero new staged proof needed per §13's own
-  table) or the Roar/multi-hit registration side scouted in round 2.
-- **Notes:** no PAPERCUT. One commit for the wiring + docs.
-
----
-## 520 — [SUPERVISOR 2026-07-27 ~15:15] round 1 verified + merged (3 workers, all green); apostrophe-charmap prerequisite FIXED; round 2 dispatched
-
-- **State:** master green at **268 files / 3560 tests** (union of entry 519's
-  main-lane step + two side merges), `npm run build` clean, both side
-  worktrees removed, zero unmerged branches. Census **108/214 effects,
-  209/355 moves, 2321/2957 weighted (78.5%)**.
-- **Side merges (both verified in-worktree first, live compare reruns by
-  supervisor):** (1) §13 prep-scout — `docs/presentation-seam-scout.md` §13
-  picks `turn2-endeavor.json` (77 frames, smallest unblocked genuinely-new
-  window; comparator re-pinned 77/77 twice + 9-trace sweep; staging module
-  `turn2EndeavorPresentationStaging.ts` committed unwired, 9 tests). Scout
-  also proved `turn6-statfall.json` is *directly* apostrophe-blocked (its
-  committed capture renders past the curly ’ in "ONIX’s ATTACK") and
-  `turn11-featherdance.json` doubly so. (2) That prerequisite is now FIXED:
-  root cause `tools/extract/extract-battle-messages.ts` never applied
-  charmap.txt:87-88's `'\'' = B4` alias — extractor now decodes it (with a
-  loud byte/glyph assertion), 129/365 templates corrected apostrophe-only
-  (structural diff verified), generic dual-alias sweep found no other
-  affected glyph class, 2 new resolver pins + 2 stale pins updated; zero
-  drift across 4 resolver-driven traces + literal-driven turn6-statfall
-  127/127 (supervisor reran resolver tests 13/13 + turn6-featherdance 90/90
-  + turn1-rockslide 256/256 live).
-- **Round 2 (dispatched):** main → §13.3 wiring (`turn2-endeavor.json`
-  kickoff text from kernel events, acceptance 77/77 + §13.3's regression
-  sweep) ∥ side → design/prep scout for the new top census set:
-  EFFECT_ROAR's `FORCERANDOMSWITCH`/`INITMULTIHITSTRING`/`JUMPIFHASNOHP`
-  trio (40) + the overlapping multi-hit pair row (4 effects, 23) — ground
-  truth + registration plan for a round-3 main step.
-- **Next:** verify round 2; then either the turn6-statfall wiring (now
-  unblocked, zero new staged proof needed per §13's table) or the Roar/
-  multi-hit registration, per what's banked.
-
----

@@ -1,4 +1,76 @@
 ---
+## 521 — [BOUNDED WORKER 2026-07-27 ~15:30] `turn2-endeavor.json` kickoff text/HP re-driven from kernel events (§13.3 landed)
+
+- **State:** tree green at **268 files / 3560 tests** (unchanged count —
+  this step wires already-tested staging-module exports into production
+  code, no new test file), `npm run build` clean.
+  `executableFrontierRatchet.test.ts` unmoved (6/6, zero new barriers).
+- **Did:** executed `docs/presentation-seam-scout.md` §13.3's plan exactly
+  as written (§13.5 completion note appended). `battleScene.ts`'s
+  `drawTurn2KickoffText` now sources its ENDEAVOR kickoff text
+  (`TURN2_ENDEAVOR_ATTACK_LINE1/2`, `:6905`) and `endeavorOnixHp`'s
+  `startHp`/`endHp` (`TURN2_ENDEAVOR_HP.from`/`.to`, `:6896`) from
+  `turn2EndeavorPresentationStaging.ts`'s
+  `resolveTurn2EndeavorAttackLines()`/`resolveTurn2EndeavorHpEndpoints()`
+  (module-load-resolved consts, same shape turn 5's sibling call site
+  already uses) instead of the raw `TURN_KICKOFF_LINE1`/`TURN2_KICKOFF_LINE2`/
+  `anchorPlayerBattler.hp`/`anchorPlayerAfterTurnHp` reads. Step 3
+  (`anchorOpponentAfterTurnHp`'s squish overlay, `:6881`) stayed a literal
+  per the plan's own scoping. Zero bridge edits — the staging module already
+  called the shared `resolveRockSlidePresentationWindowContent` bridge, as
+  predicted. **No literal died**: `TURN_KICKOFF_LINE1`/`TURN2_KICKOFF_LINE2`
+  stay defined and live at turn 3's own repeat call site (`:6985`). Every
+  §13.3 citation checked out against `HEAD` before editing — no design-doc
+  slip this time.
+- **Acceptance (live, this session):** full sweep run BEFORE the change (on
+  pristine `HEAD`) matched every recorded count exactly, then AFTER
+  reproduced them byte-identically: `turn2-endeavor.json` 77/77 (twice, incl.
+  a determinism check), `turn2-endeavor-drain.json` 237/237,
+  `turn2-dragonbreath.json` 237/237, `turn2-dragonbreath-projectiles.json`
+  61/61, `turn3-endeavor.json` 192/192, `turn3-rockslide.json` 256/256,
+  `turn1-rockslide.json` 256/256, `turn5-rockslide.json` 256/256,
+  `turn4-doubleteam.json` 250/250, `turn6-featherdance.json` 90/90.
+- **Next:** either `turn6-statfall.json`'s wiring (unblocked since entry
+  520's apostrophe-charmap fix, zero new staged proof needed per §13's own
+  table) or the Roar/multi-hit registration side scouted in round 2.
+- **Notes:** no PAPERCUT. One commit for the wiring + docs.
+
+---
+## 520 — [SUPERVISOR 2026-07-27 ~15:15] round 1 verified + merged (3 workers, all green); apostrophe-charmap prerequisite FIXED; round 2 dispatched
+
+- **State:** master green at **268 files / 3560 tests** (union of entry 519's
+  main-lane step + two side merges), `npm run build` clean, both side
+  worktrees removed, zero unmerged branches. Census **108/214 effects,
+  209/355 moves, 2321/2957 weighted (78.5%)**.
+- **Side merges (both verified in-worktree first, live compare reruns by
+  supervisor):** (1) §13 prep-scout — `docs/presentation-seam-scout.md` §13
+  picks `turn2-endeavor.json` (77 frames, smallest unblocked genuinely-new
+  window; comparator re-pinned 77/77 twice + 9-trace sweep; staging module
+  `turn2EndeavorPresentationStaging.ts` committed unwired, 9 tests). Scout
+  also proved `turn6-statfall.json` is *directly* apostrophe-blocked (its
+  committed capture renders past the curly ’ in "ONIX’s ATTACK") and
+  `turn11-featherdance.json` doubly so. (2) That prerequisite is now FIXED:
+  root cause `tools/extract/extract-battle-messages.ts` never applied
+  charmap.txt:87-88's `'\'' = B4` alias — extractor now decodes it (with a
+  loud byte/glyph assertion), 129/365 templates corrected apostrophe-only
+  (structural diff verified), generic dual-alias sweep found no other
+  affected glyph class, 2 new resolver pins + 2 stale pins updated; zero
+  drift across 4 resolver-driven traces + literal-driven turn6-statfall
+  127/127 (supervisor reran resolver tests 13/13 + turn6-featherdance 90/90
+  + turn1-rockslide 256/256 live).
+- **Round 2 (dispatched):** main → §13.3 wiring (`turn2-endeavor.json`
+  kickoff text from kernel events, acceptance 77/77 + §13.3's regression
+  sweep) ∥ side → design/prep scout for the new top census set:
+  EFFECT_ROAR's `FORCERANDOMSWITCH`/`INITMULTIHITSTRING`/`JUMPIFHASNOHP`
+  trio (40) + the overlapping multi-hit pair row (4 effects, 23) — ground
+  truth + registration plan for a round-3 main step.
+- **Next:** verify round 2; then either the turn6-statfall wiring (now
+  unblocked, zero new staged proof needed per §13's table) or the Roar/
+  multi-hit registration, per what's banked.
+
+---
+
+---
 ## 520 — [SUPERVISOR 2026-07-27 ~15:15] round 1 verified + merged (3 workers, all green); apostrophe-charmap prerequisite FIXED; round 2 dispatched
 
 - **State:** master green at **268 files / 3560 tests** (union of entry 519's
