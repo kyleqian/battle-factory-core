@@ -2813,3 +2813,175 @@ describe("AI_CV_SpDefUp (docs/factory-ai-checkviability-ground-truth.md §22.1)"
     expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
   });
 });
+
+const MOVE_LIGHT_SCREEN_CV = 113; // EFFECT_LIGHT_SCREEN
+const MOVE_REFLECT_CV = 115; // EFFECT_REFLECT
+
+// data/battle_ai_scripts.s:1373-1382/1492-1501, docs/factory-ai-checkviability-
+// ground-truth.md §23.1: the tenth CBM-blocked pair's own CV half
+// (AI_CBM_LightScreen/AI_CBM_Reflect, the CBM side, are in
+// factoryAiCheckBadMove.test.ts) -- the first fully twin-symmetric pair in
+// this doc, byte-for-byte identical shape between siblings differing only in
+// which type list is referenced. seed 1 -> randomValue % 256 = 198 (>= 50,
+// draw succeeds); seed 4 -> 25 (< 50, draw fails).
+describe("AI_CV_LightScreen / AI_CV_Reflect (docs/factory-ai-checkviability-ground-truth.md §23.1)", () => {
+  function sideScreenAttacker(hp: number, maxHp = 100) {
+    return Object.freeze({
+      speed: 100, speedStage: 6, types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+      isFirstTurn: 0, evasionStage: 6, accStage: 6, atkStage: 6, defStage: 6, spDefStage: 6, hp, maxHp,
+    });
+  }
+  function sideScreenTarget(types: readonly [string, string]) {
+    return Object.freeze({
+      speed: 100, speedStage: 6, types,
+      isFirstTurn: 0, evasionStage: 6, accStage: 6, atkStage: 6, defStage: 6, spDefStage: 6, hp: 100, maxHp: 100,
+    });
+  }
+
+  describe("Gate A (AI_USER's own hp < 50 -- ScoreDown2, zero draws, no further gates read)", () => {
+    it("AI_CV_LightScreen: hp exactly 49% (< 50): scores -2 with zero draws regardless of target type", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_LIGHT_SCREEN_CV,
+        attacker: sideScreenAttacker(49),
+        target: sideScreenTarget(["TYPE_FIRE", "TYPE_FIRE"]),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: -2 });
+    });
+
+    it("AI_CV_Reflect: hp exactly 49% (< 50): scores -2 with zero draws regardless of target type", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_REFLECT_CV,
+        attacker: sideScreenAttacker(49),
+        target: sideScreenTarget(["TYPE_NORMAL", "TYPE_NORMAL"]),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: -2 });
+    });
+
+    it("hp exactly 50% (NOT < 50): falls through to Gates B/C instead of the deterministic -2", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_LIGHT_SCREEN_CV,
+        attacker: sideScreenAttacker(50),
+        target: sideScreenTarget(["TYPE_FIRE", "TYPE_FIRE"]), // Gate B matches -> deterministic 0, not -2
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+  });
+
+  describe("Gates B/C (target's own type1/type2 vs the type list) -- LightScreen's 8-type special list, Reflect's 9-type physical list, exact complements", () => {
+    it("AI_CV_LightScreen: type1 alone in the special list (Fire): jumps to End, zero draws", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_LIGHT_SCREEN_CV,
+        attacker: sideScreenAttacker(100),
+        target: sideScreenTarget(["TYPE_FIRE", "TYPE_NORMAL"]),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+
+    it("AI_CV_LightScreen: type2 alone in the special list (type1 not, Gate B misses): jumps to End, zero draws", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_LIGHT_SCREEN_CV,
+        attacker: sideScreenAttacker(100),
+        target: sideScreenTarget(["TYPE_NORMAL", "TYPE_DRAGON"]),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+
+    it("AI_CV_LightScreen: neither type in the special list (Bug/Rock, Shuckle-shaped): falls through to the DRAW SITE", () => {
+      const result = runCheckViability({
+        rng: { value: 4, calls: 0 }, // roll < 50 -> succeeded false -> score 0
+        moveId: MOVE_LIGHT_SCREEN_CV,
+        attacker: sideScreenAttacker(100),
+        target: sideScreenTarget(["TYPE_BUG", "TYPE_ROCK"]),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(0);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "light-screen-roll", succeeded: false });
+    });
+
+    it("AI_CV_Reflect: type1 alone in the physical list (Bug, Shuckle-shaped): jumps to End, zero draws", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_REFLECT_CV,
+        attacker: sideScreenAttacker(100),
+        target: sideScreenTarget(["TYPE_BUG", "TYPE_ROCK"]),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+
+    it("AI_CV_Reflect: neither type in the physical list (pure Fire, Vulpix-shaped): falls through to the DRAW SITE", () => {
+      const result = runCheckViability({
+        rng: { value: 4, calls: 0 }, // roll < 50 -> succeeded false -> score 0
+        moveId: MOVE_REFLECT_CV,
+        attacker: sideScreenAttacker(100),
+        target: sideScreenTarget(["TYPE_FIRE", "TYPE_FIRE"]),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(0);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "reflect-roll", succeeded: false });
+    });
+  });
+
+  describe("DRAW SITE (if_random_less_than 50, only reached when neither type is listed)", () => {
+    it("AI_CV_LightScreen: roll >= 50 applies the -2", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 }, // randomValue % 256 = 198 (>= 50)
+        moveId: MOVE_LIGHT_SCREEN_CV,
+        attacker: sideScreenAttacker(100),
+        target: sideScreenTarget(["TYPE_BUG", "TYPE_ROCK"]),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(-2);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "light-screen-roll", succeeded: true });
+    });
+
+    it("AI_CV_Reflect: roll >= 50 applies the -2", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 }, // randomValue % 256 = 198 (>= 50)
+        moveId: MOVE_REFLECT_CV,
+        attacker: sideScreenAttacker(100),
+        target: sideScreenTarget(["TYPE_FIRE", "TYPE_FIRE"]),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(-2);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "reflect-roll", succeeded: true });
+    });
+  });
+
+  it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
+    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
+  });
+});

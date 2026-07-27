@@ -1,4 +1,42 @@
 ---
+## 481 — [USER-DIRECTED 2026-07-26 ~20:00] Separate animation supervisor stood up: `--lane animation` launcher, `animation-main` branch + persistent worktree, session-boundary merge protocol
+
+- **State:** tree committed and green (226 files / 3035 tests, build green —
+  unchanged from entry 480; this step is launcher + docs + branch plumbing,
+  zero engine/test changes). New branch `animation-main` created at this
+  commit with its persistent worktree at `.worktrees/animation-main`
+  (npm deps installed, `reference` symlinked, suite green in the worktree).
+- **Did:** `run-supervisor.sh` gained `--lane main|animation`: the animation
+  lane bootstraps/reuses the persistent worktree, cds into it, gates on
+  `ANIMATION_DEFERRED.md` (new, lane-scoped — DEFERRED.md no longer blocks
+  animation sessions or vice versa), ensures only the Battle-Scene-ON
+  oracle, defaults `POKEBENCH_ORACLE_URL` to ON, and launches with an
+  animation-specific prompt pointing at `ANIMATION_SUPERVISOR.md` (new
+  guide). Both supervisors may run concurrently, either provider
+  (`--provider claude|codex` orthogonal to `--lane`). Merge protocol
+  (recorded in both guides): inbound `master`→`animation-main` by the
+  animation supervisor at its session start; outbound
+  `animation-main`→`master` only by the main supervisor at orient (git
+  itself blocks the animation worktree from writing `master` while the main
+  tree has it checked out). Worker launching needed zero changes —
+  `tools/run-subagent.sh` self-scopes to the tree it's invoked from (lane
+  locks, worktrees, branches all base off `animation-main` there).
+  SUPERVISOR.md's pause note replaced with the permanent split protocol +
+  fold-at-orient instruction; main launcher prompt updated to match.
+- **Next:** main program — unchanged (entry 479's list: Counter/Mirror Coat
+  per `docs/counter-retaliation-design.md` + ISSUES #46 first). Animation
+  program — entry 468's deferred items, now via
+  `./run-supervisor.sh --lane animation`: window-2 splice defect class
+  (CONFUSION/PSYCHIC each 138/140), PSYCHIC opposite orientation, next
+  coverage track from `npm run animation:coverage`.
+- **Notes:** the per-move draw cases inside `battleScene.ts` remain the one
+  shared surface; carving them into a registry consumed via
+  `sceneOnPresentation.ts` is the named follow-up if fold conflicts ever
+  stop being boring. First animation session will hit the
+  `ANIMATION_PROGRESS.md` layout note (entry 480, archived to
+  `PROGRESS-archive.md`) for the new paths.
+
+---
 ## 480 — [USER-DIRECTED 2026-07-26 ~19:20] Animation lane modularized: `src/animation/` + `tests/animation/` split out of the engine
 
 - **State:** tree committed and green at **226 files / 3035 tests** (entry

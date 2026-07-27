@@ -67,7 +67,14 @@
  * single-stat `AI_CBM_SpDefUp` (`EFFECT_SPECIAL_DEFENSE_UP(_2)`'s own CBM
  * target, doc §22.1 -- out of this pair's scope, still an unsupported
  * branch). Both converge with `EFFECT_SPECIAL_DEFENSE_UP(_2)` on the single
- * shared `AI_CV_SpDefUp` CV handler (doc §22).
+ * shared `AI_CV_SpDefUp` CV handler (doc §22); and `EFFECT_LIGHT_SCREEN`/
+ * `EFFECT_REFLECT` -> `AI_CBM_LightScreen`/`AI_CBM_Reflect` (`:354-356`/
+ * `:393-395`, `runCbmLightScreen`/`runCbmReflect` below, doc §23.1), the
+ * tenth CBM-blocked pair's own CBM half and the smallest CBM handler shape
+ * in this doc to date -- a single `if_side_affecting AI_USER,
+ * SIDE_STATUS_*` bit test with zero stat-stage read, zero `get_ability`
+ * call, converging with `factoryAiCheckViability.ts`'s `AI_CV_LightScreen`/
+ * `AI_CV_Reflect` (doc §23).
  */
 import movesData from "../data/gen/moves.json" with { type: "json" };
 import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
@@ -231,6 +238,20 @@ export type FactoryAiCheckBadMoveAttacker = Readonly<{
    * same default/rationale as `speedStage`/`spAtkStage` above.
    */
   spDefStage?: number;
+  /**
+   * AI_USER's own `SIDE_STATUS_LIGHTSCREEN` bit -- `AI_CBM_LightScreen`'s
+   * single `if_side_affecting AI_USER` gate (doc §23.1). Optional, defaulting
+   * to `false` (screen not up) -- same optional/default convention as
+   * `speedStage`/`spAtkStage`/`spDefStage` above, but a boolean side-status
+   * flag rather than a 0..12 stat stage.
+   */
+  lightScreenUp?: boolean;
+  /**
+   * AI_USER's own `SIDE_STATUS_REFLECT` bit -- `AI_CBM_Reflect`'s single
+   * `if_side_affecting AI_USER` gate (doc §23.1). Optional, defaulting to
+   * `false`, same convention as `lightScreenUp` above.
+   */
+  reflectUp?: boolean;
 }>;
 
 export type FactoryAiCheckBadMoveDraw = Readonly<{
@@ -587,6 +608,34 @@ function runCbmCalmMind(attackerSpAtkStage: number, attackerSpDefStage: number):
   return runCbmSpAtkUp(attackerSpAtkStage) + (attackerSpDefStage === MAX_STAT_STAGE ? -8 : 0);
 }
 
+/**
+ * `AI_CBM_LightScreen` (`data/battle_ai_scripts.s:354-356`, doc §23.1):
+ *
+ * ```
+ * AI_CBM_LightScreen:
+ *     if_side_affecting AI_USER, SIDE_STATUS_LIGHTSCREEN, Score_Minus8
+ *     end
+ * ```
+ *
+ * The smallest CBM handler shape in this doc to date: a single side-status
+ * bit test against AI_USER's OWN side, zero stat-stage read, zero
+ * `get_ability` call -- simpler even than the bare `MAX_STAT_STAGE` stat-UP
+ * gates (`AI_CBM_AttackUp` etc.).
+ */
+function runCbmLightScreen(attackerLightScreenUp: boolean): number {
+  return attackerLightScreenUp ? -8 : 0;
+}
+
+/**
+ * `AI_CBM_Reflect` (`:393-395`, doc §23.1) -- byte-for-byte the same
+ * single-instruction shape as `AI_CBM_LightScreen` with `SIDE_STATUS_REFLECT`
+ * swapped in (a distinct bit, `include/constants/battle.h:210-211`, not an
+ * alias of `SIDE_STATUS_LIGHTSCREEN`).
+ */
+function runCbmReflect(attackerReflectUp: boolean): number {
+  return attackerReflectUp ? -8 : 0;
+}
+
 export function typeMultiplierTenths(attackingType: string, defendingTypes: readonly [string, string]): number {
   const distinct = defendingTypes[0] === defendingTypes[1] ? [defendingTypes[0]] : defendingTypes;
   let mult = 10;
@@ -835,6 +884,30 @@ export function runCheckBadMovePreamble(input: Readonly<{
         input.attacker.spAtkStage ?? DEFAULT_STAT_STAGE,
         input.attacker.spDefStage ?? DEFAULT_STAT_STAGE,
       ),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_LIGHT_SCREEN -> AI_CBM_LightScreen,
+  // the tenth CBM-blocked pair's own CBM half (doc §23) -- a single
+  // AI_USER-own-side-status bit test, zero stat-stage/ability reads.
+  if (move.effect === "EFFECT_LIGHT_SCREEN") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmLightScreen(input.attacker.lightScreenUp ?? false),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_REFLECT -> AI_CBM_Reflect, the tenth
+  // CBM-blocked pair's other CBM half (doc §23), same shape as LightScreen
+  // above with SIDE_STATUS_REFLECT swapped in.
+  if (move.effect === "EFFECT_REFLECT") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmReflect(input.attacker.reflectUp ?? false),
     });
   }
 

@@ -1059,3 +1059,74 @@ describe("AI_CBM_AccDown + CheckIfAbilityBlocksStatChange (docs/factory-ai-check
     expect([...MOVES_BY_ID.values()].some((m) => m.effect === "EFFECT_ACCURACY_DOWN_2")).toBe(false);
   });
 });
+
+// data/battle_ai_scripts.s:354-356/393-395, docs/factory-ai-checkviability-ground-truth.md
+// §23.1: the tenth CBM-blocked pair's own CBM half -- the smallest CBM
+// handler shape in this doc to date, a single AI_USER-own-side-status bit
+// test with zero stat-stage read and zero get_ability call.
+describe("AI_CBM_LightScreen / AI_CBM_Reflect (docs/factory-ai-checkviability-ground-truth.md §23.1)", () => {
+  const MOVE_LIGHT_SCREEN = 113; // EFFECT_LIGHT_SCREEN
+  const MOVE_REFLECT = 115; // EFFECT_REFLECT
+
+  // Single-ability (Sturdy) target, same species/rationale as the
+  // AttackUp/DefenseUp/BulkUp/SpeedUp/SpAtkUp/CosmicPower/CalmMind blocks'
+  // own SHUCKLE above.
+  const SHUCKLE: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 213,
+    types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+    knownAbility: null,
+    realAbility: "ABILITY_STURDY",
+    speedStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+  });
+
+  it("AI_CBM_LightScreen: scores -8 when AI_USER's own light screen is up", () => {
+    const result = run(MOVE_LIGHT_SCREEN, SHUCKLE, undefined, Object.freeze({ atkStage: 6, defStage: 6, lightScreenUp: true }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -8 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("AI_CBM_LightScreen: scores 0 with zero draws when AI_USER's own light screen is not up", () => {
+    const result = run(MOVE_LIGHT_SCREEN, SHUCKLE, undefined, Object.freeze({ atkStage: 6, defStage: 6, lightScreenUp: false }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("AI_CBM_LightScreen: omitted lightScreenUp defaults to false (not up) -- scores 0", () => {
+    const result = run(MOVE_LIGHT_SCREEN, SHUCKLE, undefined, Object.freeze({ atkStage: 6, defStage: 6 }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+
+  it("AI_CBM_LightScreen: AI_USER's own reflectUp is irrelevant to this gate (distinct SIDE_STATUS_* bits)", () => {
+    const result = run(MOVE_LIGHT_SCREEN, SHUCKLE, undefined, Object.freeze({ atkStage: 6, defStage: 6, reflectUp: true }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+
+  it("AI_CBM_Reflect: scores -8 when AI_USER's own reflect is up", () => {
+    const result = run(MOVE_REFLECT, SHUCKLE, undefined, Object.freeze({ atkStage: 6, defStage: 6, reflectUp: true }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -8 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("AI_CBM_Reflect: scores 0 with zero draws when AI_USER's own reflect is not up", () => {
+    const result = run(MOVE_REFLECT, SHUCKLE, undefined, Object.freeze({ atkStage: 6, defStage: 6, reflectUp: false }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("AI_CBM_Reflect: omitted reflectUp defaults to false (not up) -- scores 0", () => {
+    const result = run(MOVE_REFLECT, SHUCKLE, undefined, Object.freeze({ atkStage: 6, defStage: 6 }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+
+  it("AI_CBM_Reflect: AI_USER's own lightScreenUp is irrelevant to this gate (distinct SIDE_STATUS_* bits)", () => {
+    const result = run(MOVE_REFLECT, SHUCKLE, undefined, Object.freeze({ atkStage: 6, defStage: 6, lightScreenUp: true }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+});

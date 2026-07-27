@@ -1692,3 +1692,130 @@ describe("AI_CV_SpDefUp mask-7 fixture reproduction (docs/factory-ai-checkviabil
     expect(phaseDraws(reachCalm, "check-viability")).toHaveLength(phaseDraws(reachCosmic, "check-viability").length);
   });
 });
+
+const MOVE_LIGHT_SCREEN_MASK7 = 113; // EFFECT_LIGHT_SCREEN
+const MOVE_REFLECT_MASK7 = 115; // EFFECT_REFLECT
+
+// docs/factory-ai-checkviability-ground-truth.md §23.2/§23.3's four fixtures
+// (tools/battle-lab/mechanic-factory-ai-cv-{lightscreen,reflect}-{reach,
+// control}-off.json) -- the tenth CBM-blocked pair, reproduced through the
+// REAL mask-7 dispatcher end to end now that AI_CBM_LightScreen/
+// AI_CBM_Reflect and AI_CV_LightScreen/AI_CV_Reflect are all ported. Opponent
+// (AI_USER) = Anorith (same species/stats as the DefenseDown/DefenseUp/
+// SpAtkUp/SpDefUp blocks above), stays at full 120/120 HP in EVERY fixture --
+// unlike every prior CBM-blocked pair, doc §23.2 needs zero move-damage or
+// HP-banding at all, since Gate A only cares whether that HP is < 50% (never
+// true here). LightScreen's 8-type special list and Reflect's 9-type
+// physical list are exact complements (doc §23.1), so the same two target
+// species (Shuckle 213 Bug/Rock, single ability Sturdy; Vulpix 37 pure Fire,
+// single ability Flash Fire -- both closing the CBM preamble's own
+// get_ability confound) serve both pairs with reach/control simply swapping:
+// Shuckle is LightScreen's reach (neither type listed) / Reflect's control
+// (both types listed); Vulpix is LightScreen's control (Fire listed) /
+// Reflect's reach (Fire not listed). Same "4 clean check-viability draws"
+// policy-own-draws model every prior block establishes: the oracle's own
+// live window totals (§23.3: reach 10/10, control 6/6 cross-seed) are a
+// documented superset (the extra +1 is BattleTurnPassed, outside
+// chooseFactoryAiScoredDecision's own scope, doc §23.4) -- reach's own
+// policy total is 4 setup + 4 CV + 1 tie = 9; control's is 4 setup + 0 CV +
+// 1 tie = 5.
+describe("AI_CV_LightScreen / AI_CV_Reflect mask-7 fixture reproduction (docs/factory-ai-checkviability-ground-truth.md §23.2/§23.3)", () => {
+  function anorithSideScreenAttacker(): FactoryAiScoredBattlerView {
+    return Object.freeze({
+      types: ["TYPE_ROCK", "TYPE_BUG"] as const,
+      attack: 115, defense: 70, spAttack: 60, spDefense: 70, speed: 95, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp: 120, maxHp: 120,
+    });
+  }
+  function shuckleSideScreenTarget(): FactoryAiScoredTargetView {
+    return Object.freeze({
+      species: 213,
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+      attack: 10, defense: 230, spAttack: 10, spDefense: 230, speed: 5, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp: 100, maxHp: 100, ability: "ABILITY_STURDY", knownAbility: null,
+    });
+  }
+  function vulpixSideScreenTarget(): FactoryAiScoredTargetView {
+    return Object.freeze({
+      species: 37,
+      types: ["TYPE_FIRE", "TYPE_FIRE"] as const,
+      attack: 41, defense: 40, spAttack: 50, spDefense: 65, speed: 65, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp: 100, maxHp: 100, ability: "ABILITY_FLASH_FIRE", knownAbility: null,
+    });
+  }
+  function sideScreenView(moveId: number, target: FactoryAiScoredTargetView): FactoryAiScoredView {
+    return Object.freeze({
+      schema: "factory-ai-scored-view/v1",
+      mode: "factory-level-50-singles",
+      active: Object.freeze({ aiBattler: 1 as const, targetBattler: 0 as const }),
+      factory: Object.freeze({ levelMode: 0 as const, battleMode: 0 as const, factoryWinStreak: 28, trainerOpponentId: 222 }),
+      moves: [moveId, moveId, moveId, moveId] as const,
+      attacker: anorithSideScreenAttacker(),
+      target,
+    });
+  }
+  function phaseDraws(result: ReturnType<typeof chooseFactoryAiScoredDecision>, phase: "check-bad-move" | "try-to-faint" | "check-viability") {
+    return result.trace.draws.filter((d) => "phase" in d && d.phase === phase);
+  }
+
+  it.each([1, 99])("LightScreen reach fixture (Shuckle target, Bug/Rock -- neither type in the special list), seed %i: all 4 identical slots independently reach the DRAW SITE -- exactly 4 check-viability draws, zero CBM/TryToFaint draws, 9 total policy draws", (seed) => {
+    const view = sideScreenView(MOVE_LIGHT_SCREEN_MASK7, shuckleSideScreenTarget());
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+    expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+    expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+    const cvDraws = phaseDraws(result, "check-viability");
+    expect(cvDraws).toHaveLength(4);
+    expect(cvDraws.every((d) => "kind" in d && d.kind === "light-screen-roll")).toBe(true);
+    expect(result.trace.draws).toHaveLength(4 /* setup */ + 4 /* CV roll x4 slots */ + 1 /* tie */);
+  });
+
+  it.each([1, 99])("LightScreen control fixture (Vulpix target, pure Fire -- IS in the special list), seed %i: Gate B matches immediately for all 4 slots -- zero check-viability draws, zero CBM/TryToFaint draws, 5 total policy draws", (seed) => {
+    const view = sideScreenView(MOVE_LIGHT_SCREEN_MASK7, vulpixSideScreenTarget());
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+    expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+    expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+    expect(phaseDraws(result, "check-viability")).toHaveLength(0);
+    expect(result.trace.draws).toHaveLength(4 /* setup */ + 1 /* tie */);
+  });
+
+  it.each([1, 99])("Reflect reach fixture (Vulpix target, pure Fire -- NOT in the physical list), seed %i: all 4 identical slots independently reach the DRAW SITE -- exactly 4 check-viability draws, zero CBM/TryToFaint draws, 9 total policy draws", (seed) => {
+    const view = sideScreenView(MOVE_REFLECT_MASK7, vulpixSideScreenTarget());
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+    expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+    expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+    const cvDraws = phaseDraws(result, "check-viability");
+    expect(cvDraws).toHaveLength(4);
+    expect(cvDraws.every((d) => "kind" in d && d.kind === "reflect-roll")).toBe(true);
+    expect(result.trace.draws).toHaveLength(4 /* setup */ + 4 /* CV roll x4 slots */ + 1 /* tie */);
+  });
+
+  it.each([1, 99])("Reflect control fixture (Shuckle target, Bug/Rock -- both types in the physical list), seed %i: Gate B matches immediately for all 4 slots -- zero check-viability draws, zero CBM/TryToFaint draws, 5 total policy draws", (seed) => {
+    const view = sideScreenView(MOVE_REFLECT_MASK7, shuckleSideScreenTarget());
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+    expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+    expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+    expect(phaseDraws(result, "check-viability")).toHaveLength(0);
+    expect(result.trace.draws).toHaveLength(4 /* setup */ + 1 /* tie */);
+  });
+
+  it("LightScreen and Reflect produce numerically identical draw counts on their own respective reach fixtures (doc §23.3's own cross-handler parity)", () => {
+    const lightScreenReach = chooseFactoryAiScoredDecision({
+      view: sideScreenView(MOVE_LIGHT_SCREEN_MASK7, shuckleSideScreenTarget()),
+      request: fourSlotRequest,
+      rng: { value: 1, calls: 0 },
+    });
+    const reflectReach = chooseFactoryAiScoredDecision({
+      view: sideScreenView(MOVE_REFLECT_MASK7, vulpixSideScreenTarget()),
+      request: fourSlotRequest,
+      rng: { value: 1, calls: 0 },
+    });
+    expect(reflectReach.trace.draws).toHaveLength(lightScreenReach.trace.draws.length);
+    expect(phaseDraws(reflectReach, "check-viability")).toHaveLength(phaseDraws(lightScreenReach, "check-viability").length);
+  });
+});

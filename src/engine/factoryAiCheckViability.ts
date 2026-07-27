@@ -54,9 +54,17 @@
  * `STAT_SPDEF` for `STAT_DEF`, EXCEPT Gate F's `if_in_bytes` polarity is
  * INVERTED vs `DefenseUp`'s own `if_not_in_bytes` -- the correct in-universe
  * semantics for Special Defense's own mirror-image relationship to physical
- * damage, doc §22.1). The other ~76 are not ported this round (a separate,
- * much larger phased body of work per the audit's §3), so a move that
- * reaches one of THOSE must not silently score zero.
+ * damage, doc §22.1), and `EFFECT_LIGHT_SCREEN`/`EFFECT_REFLECT`
+ * (`AI_CV_LightScreen`/`AI_CV_Reflect`, `runCvLightScreen`/`runCvReflect`
+ * below, `:1373-1393`/`:1492-1514`, doc §23 -- the tenth CBM-blocked pair's
+ * own CV half, the first fully twin-symmetric pair in this doc: one HP gate
+ * on AI_USER's OWN hp, then the TARGET's own innate type1/type2 against a
+ * type list -- `LightScreen`'s 8-type special list, `Reflect`'s 9-type
+ * physical list, exact complements covering all 17 Gen 3 types -- and
+ * exactly 1 draw site each, the shortest CV body in the whole
+ * physical/special-list sub-family). The other ~74 are not ported this
+ * round (a separate, much larger phased body of work per the audit's §3),
+ * so a move that reaches one of THOSE must not silently score zero.
  */
 import { MOVES_BY_ID, TYPE_EFFECTIVENESS } from "./factoryAiCheckBadMove.ts";
 import type { BattleRngState } from "./battleDecisionBoundary.ts";
@@ -361,6 +369,16 @@ export type FactoryAiCheckViabilityDraw =
     ordinal: number;
     reason: string;
     kind: "sp-def-up-roll-1" | "sp-def-up-roll-2" | "sp-def-up-roll-3" | "sp-def-up-roll-4" | "sp-def-up-roll-5";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    succeeded: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind: "light-screen-roll" | "reflect-roll";
     before: BattleRngState;
     after: BattleRngState;
     rawRngValue: number;
@@ -1580,6 +1598,103 @@ function runCvSpDefUp(input: Readonly<{
   return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
 }
 
+const AI_CV_LIGHT_SCREEN_SPECIAL_TYPES: ReadonlySet<string> = new Set([
+  "TYPE_FIRE", "TYPE_WATER", "TYPE_GRASS", "TYPE_ELECTRIC", "TYPE_PSYCHIC", "TYPE_ICE", "TYPE_DRAGON", "TYPE_DARK",
+]);
+
+const AI_CV_REFLECT_PHYSICAL_TYPES: ReadonlySet<string> = new Set([
+  "TYPE_NORMAL", "TYPE_FIGHTING", "TYPE_FLYING", "TYPE_POISON", "TYPE_GROUND", "TYPE_ROCK", "TYPE_BUG", "TYPE_GHOST", "TYPE_STEEL",
+]);
+
+/**
+ * Shared body for `AI_CV_LightScreen` (`data/battle_ai_scripts.s:1373-1382`,
+ * doc §23.1) and `AI_CV_Reflect` (`:1492-1501`, doc §23.1) -- byte-for-byte
+ * the same shape, differing only in which type list is checked:
+ *
+ * ```
+ * AI_CV_LightScreen:
+ *     if_hp_less_than AI_USER, 50, AI_CV_LightScreen_ScoreDown2        ; Gate A (opponent's OWN hp)
+ *     get_target_type1
+ *     if_in_bytes AI_CV_LightScreen_SpecialTypeList, AI_CV_LightScreen_End ; Gate B (target's type1)
+ *     get_target_type2
+ *     if_in_bytes AI_CV_LightScreen_SpecialTypeList, AI_CV_LightScreen_End ; Gate C (target's type2)
+ *     if_random_less_than 50, AI_CV_LightScreen_End                    ; DRAW SITE
+ * AI_CV_LightScreen_ScoreDown2:
+ *     score -2
+ * AI_CV_LightScreen_End:
+ *     end
+ * ```
+ *
+ * Gate A (AI_USER's own hp < 50%) jumps straight to the -2 penalty, zero
+ * draws -- the opponent's own HP is never staged in this doc's own §23.2
+ * fixtures (no damage occurs at all), so this gate is unstaged live, doc
+ * §23.5 item 4. Falling through, Gates B/C (`get_target_type1`/`2` +
+ * `if_in_bytes`) are zero-RNG `AI_THINKING_STRUCT->funcResult` reads -- this
+ * port computes the combined type-list membership once, same simplification
+ * `runCvAttackDown`'s own Gates E/F already make. Type IN the list jumps to
+ * `End` (score 0, zero draws); type NOT in the list falls through to the
+ * single DRAW SITE: `if_random_less_than 50` jump (roll < 50, ~19.5%) skips
+ * the `-2`; falling through (roll >= 50, ~80.5%) applies it -- the same
+ * polarity every other ported handler's roll already uses.
+ */
+function runCvSideScreenTypeGate(
+  kind: "light-screen-roll" | "reflect-roll",
+  typeList: ReadonlySet<string>,
+  input: Readonly<{
+    rng: BattleRngState;
+    attackerHp: number;
+    attackerMaxHp: number;
+    targetTypes: readonly [string, string];
+    drawOrdinalStart: number;
+    reasonPrefix: string;
+  }>,
+): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const hpPercent = Math.floor((100 * input.attackerHp) / input.attackerMaxHp);
+  if (hpPercent < 50) {
+    return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: -2 });
+  }
+
+  const isListedType = typeList.has(input.targetTypes[0]) || typeList.has(input.targetTypes[1]);
+  if (isListedType) {
+    return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: 0 });
+  }
+
+  const roll = nextDraw(input.rng, input.drawOrdinalStart, `${input.reasonPrefix}-roll`);
+  const succeeded = roll.randomValue % 256 >= 50;
+  const draws: FactoryAiCheckViabilityDraw[] = [Object.freeze({ ...roll, kind, succeeded })];
+  return Object.freeze({ rng: roll.after, draws: Object.freeze(draws), scoreDelta: succeeded ? -2 : 0 });
+}
+
+function runCvLightScreen(input: Readonly<{
+  rng: BattleRngState;
+  attackerHp: number;
+  attackerMaxHp: number;
+  targetTypes: readonly [string, string];
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  return runCvSideScreenTypeGate("light-screen-roll", AI_CV_LIGHT_SCREEN_SPECIAL_TYPES, input);
+}
+
+/**
+ * `AI_CV_Reflect` (`:1492-1501`, doc §23.1) -- `runCvSideScreenTypeGate`'s
+ * shared body with `AI_CV_Reflect_PhysicalTypeList` (`:1504-1514`), a
+ * genuinely distinct 9-type list from `AI_CV_AttackDown_PhysicalTypeList`/
+ * `AI_CV_DEFENSE_UP_PHYSICAL_TYPES` above (those exclude Flying/Poison/Ghost;
+ * this one includes them, doc §23.1) -- not reused, kept as its own named
+ * constant.
+ */
+function runCvReflect(input: Readonly<{
+  rng: BattleRngState;
+  attackerHp: number;
+  attackerMaxHp: number;
+  targetTypes: readonly [string, string];
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  return runCvSideScreenTypeGate("reflect-roll", AI_CV_REFLECT_PHYSICAL_TYPES, input);
+}
+
 /**
  * `AI_CV_AccuracyDown` (`data/battle_ai_scripts.s:1198-1234`,
  * `docs/factory-ai-checkviability-ground-truth.md` §19.1) -- the largest
@@ -2033,6 +2148,42 @@ export function runCheckViability(input: Readonly<{
       rng: spDefUp.rng,
       draws: spDefUp.draws,
       scoreDelta: spDefUp.scoreDelta,
+    });
+  }
+
+  if (move.effect === "EFFECT_LIGHT_SCREEN") {
+    // The tenth CBM-blocked pair's own CV half (doc §23).
+    const lightScreen = runCvLightScreen({
+      rng: input.rng,
+      attackerHp: input.attacker.hp,
+      attackerMaxHp: input.attacker.maxHp,
+      targetTypes: input.target.types,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: lightScreen.rng,
+      draws: lightScreen.draws,
+      scoreDelta: lightScreen.scoreDelta,
+    });
+  }
+
+  if (move.effect === "EFFECT_REFLECT") {
+    // The tenth CBM-blocked pair's other CV half (doc §23).
+    const reflect = runCvReflect({
+      rng: input.rng,
+      attackerHp: input.attacker.hp,
+      attackerMaxHp: input.attacker.maxHp,
+      targetTypes: input.target.types,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: reflect.rng,
+      draws: reflect.draws,
+      scoreDelta: reflect.scoreDelta,
     });
   }
 
