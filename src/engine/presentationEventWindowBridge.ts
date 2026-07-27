@@ -105,3 +105,64 @@ export function resolveRockSlidePresentationWindowContent(
     hp: Object.freeze({ battler: hpChangeEvent.battler, from: hpChangeEvent.from, to: hpChangeEvent.to }),
   });
 }
+
+/**
+ * docs/presentation-seam-scout.md §11.2/§11.3 step 1's own mapping row for
+ * `turn4-doubleteam.json`'s kickoff phase (`drawTurn4KickoffText`,
+ * `battleScene.ts`): a genuinely NEW shape, not a relabeled reuse of
+ * `resolveRockSlidePresentationWindowContent` above -- this window's own real
+ * event stream never contains an `hp-change` at all (DOUBLE_TEAM is a
+ * self-targeted, non-damaging status move, §11.2's own dedicated test
+ * assertion), so `{message, hp}` does not fit. Both signals this window
+ * actually has -- the kickoff `message{messageId:"STRINGID_USEDMOVE"}` and the
+ * evasion `stat-stage-change` -- are real, present, and co-located under the
+ * SAME `sourceLabel` in the real script
+ * (`reference/pokeemerald/data/battle_scripts_1.s:487-494`,
+ * `BattleScript_EffectEvasionUp` -> shared
+ * `BattleScript_EffectStatUp`/`...StatUpAfterAtkCanceler`), so a single
+ * `sourceLabel` check identifies this window's own content, same "identify
+ * from provenance, never a turn number" discipline as every sibling bridge
+ * function above.
+ */
+export const EFFECT_STAT_UP_AFTER_ATK_CANCELER_SCRIPT_LABEL = "BattleScript_EffectStatUpAfterAtkCanceler";
+
+export type DoubleTeamKickoffPresentationWindowContent = Readonly<{
+  message: Readonly<{ messageId: string; substitutions: readonly string[] }>;
+  statChange: Readonly<{ battler: number; stat: string; from: number; to: number }>;
+}>;
+
+/**
+ * Answers "are we in the DOUBLE_TEAM kickoff's own message + evasion-rise
+ * presentation content" from the event stream's own provenance. Returns
+ * `null` (not a guess) when either signal is absent -- both the real
+ * `BattleScript_EffectStatUpAfterAtkCanceler`-labeled `message` and the
+ * same-labeled `stat-stage-change` must be present for this window to be
+ * genuinely active.
+ */
+export function resolveDoubleTeamKickoffPresentationWindowContent(
+  events: readonly BattleScriptSemanticEvent[],
+  statUpScriptLabel: string = EFFECT_STAT_UP_AFTER_ATK_CANCELER_SCRIPT_LABEL,
+): DoubleTeamKickoffPresentationWindowContent | null {
+  const messageEvent = events.find(
+    (event) => event.kind === "message" && event.provenance.sourceLabel === statUpScriptLabel,
+  );
+  if (!messageEvent || messageEvent.kind !== "message") return null;
+
+  const statChangeEvent = events.find(
+    (event) => event.kind === "stat-stage-change" && event.provenance.sourceLabel === statUpScriptLabel,
+  );
+  if (!statChangeEvent || statChangeEvent.kind !== "stat-stage-change") return null;
+
+  return Object.freeze({
+    message: Object.freeze({
+      messageId: messageEvent.messageId,
+      substitutions: messageEvent.substitutions,
+    }),
+    statChange: Object.freeze({
+      battler: statChangeEvent.battler,
+      stat: statChangeEvent.stat,
+      from: statChangeEvent.from,
+      to: statChangeEvent.to,
+    }),
+  });
+}
