@@ -13,9 +13,11 @@ import type {
   BattleScriptProgram,
 } from "./battleScriptProgram.ts";
 import { resolveBattleScriptLabel } from "./battleScriptProgram.ts";
+import type { BattleScriptBattlerSelectorResolverPort } from "./battleScriptSourceCommands.ts";
 
 export type BattleScriptMultiHitRulesContext = Readonly<{
   multiHitCounter: number;
+  battlers: readonly Readonly<{ hp: number }>[];
 }>;
 
 export type BattleScriptByteResolverPort<
@@ -75,9 +77,26 @@ function unavailableByteReason<
   });
 }
 
+function unavailableBattlerReason<
+  RulesContext extends BattleScriptMultiHitRulesContext,
+>(
+  context: BattleScriptOpcodeHandlerContext<RulesContext>,
+  operand: BattleScriptOperand,
+): BattleScriptBlockReason {
+  return Object.freeze({
+    kind: "source-context-unavailable",
+    programCounter: context.state.programCounter,
+    opcodeId: context.instruction.opcodeId,
+    opcodeName: context.instruction.opcodeName,
+    port: "resolve-battler-for-battle-script",
+    operandExpression: operand.expression,
+  });
+}
+
 /**
  * Source-mapped multi-hit rules mutations: Cmd_setmultihit,
- * Cmd_decrementmultihit, and Cmd_setmultihitcounter.
+ * Cmd_decrementmultihit, Cmd_setmultihitcounter, Cmd_initmultihitstring, and
+ * Cmd_jumpifhasnohp (docs/roar-multihit-registration-scout.md §4 rungs 2-3).
  *
  * The byte-expression resolver is an injected source-context boundary. This
  * handler never parses assembly expressions or pointer addresses. Conditional
@@ -88,6 +107,7 @@ export function createBattleScriptRuleCommandHandlers<
 >(
   program: BattleScriptProgram,
   resolveByteOperand: BattleScriptByteResolverPort<RulesContext>,
+  resolveBattlerForBattleScript: BattleScriptBattlerSelectorResolverPort<RulesContext> = () => null,
 ): BattleScriptOpcodeHandlers<RulesContext> {
   const handlers: Record<number, BattleScriptOpcodeHandler<RulesContext>> =
     Object.create(null) as Record<number, BattleScriptOpcodeHandler<RulesContext>>;
@@ -236,6 +256,62 @@ export function createBattleScriptRuleCommandHandlers<
       context,
       Object.freeze({ kind: "advance" }),
       { rulesContext, rng },
+    );
+  });
+
+  /**
+   * `Cmd_initmultihitstring` (`battle_script_commands.c:7157-7161`):
+   * `PREPARE_BYTE_NUMBER_BUFFER(gBattleScripting.multihitString, 1, 0)`, a
+   * zero-operand text-formatting buffer init. The one byte of that buffer
+   * with any real reader elsewhere in the source (`multihitString[4]` aka
+   * `sMULTIHIT_STRING + 4`, Triple Kick's own hit-landed counter) has no
+   * writer OR reader anywhere in this engine yet -- `Cmd_addbyte`'s own
+   * registration (`battleScriptDamagingWeatherOpcode.ts`) already names that
+   * exact pointer as an explicit (b) barrier, so modeling this opcode's
+   * zeroing write here would be dead state with no consumer. Source-complete
+   * as a pure advance until that barrier is widened.
+   */
+  install("B_SCR_OP_INITMULTIHITSTRING", (context) => {
+    return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }));
+  });
+
+  /**
+   * `Cmd_jumpifhasnohp` (`battle_script_commands.c:9609-9617`): resolve the
+   * selector battler, jump on `hp === 0`, else fall through. No RNG, no
+   * writes.
+   */
+  install("B_SCR_OP_JUMPIFHASNOHP", (context) => {
+    const [battlerOperand, ptrOperand] = context.instruction.operands;
+    if (
+      !battlerOperand
+      || !ptrOperand
+      || context.instruction.operands.length !== 2
+      || battlerOperand.widthBytes !== 1
+      || ptrOperand.widthBytes !== 4
+    ) {
+      return haltForInvalidOperand(
+        context,
+        battlerOperand?.expression ?? "<missing>",
+        `${context.instruction.operands.length} operands; width ${battlerOperand?.widthBytes ?? "<missing>"}`,
+      );
+    }
+
+    const battler = resolveBattlerForBattleScript(context, battlerOperand);
+    if (battler === null) {
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "block", reason: unavailableBattlerReason(context, battlerOperand) }),
+      );
+    }
+
+    if (context.state.rulesContext.battlers[battler]!.hp !== 0) {
+      return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }));
+    }
+    const target = resolveBattleScriptLabel(context.program, ptrOperand.expression);
+    if (!target) throw new Error(`Cmd_jumpifhasnohp: unresolved jump target ${ptrOperand.expression}`);
+    return transitionBattleScriptCommand(
+      context,
+      Object.freeze({ kind: "jump", programCounter: target.programCounter }),
     );
   });
 

@@ -476,6 +476,17 @@ export type BattleScriptRulesContext = Readonly<
     /** Source u8 gLastUsedAbility. */
     lastUsedAbility: number;
     multiHitCounter: number;
+    /**
+     * Source u8 gBattleScripting.multihitString[4] (`sMULTIHIT_STRING + 4`,
+     * `include/constants/battle_script_commands.h:260`) -- the hits-landed
+     * counter every multi-hit family script's own `BattleScript_DoMultiHit`
+     * shared tail increments unconditionally (`addbyte sMULTIHIT_STRING + 4,
+     * 1`, real for MULTI_HIT/DOUBLE_HIT/TWINEEDLE too, not Triple-Kick-only
+     * as docs/roar-multihit-registration-scout.md §1d's own table
+     * characterized it -- found live this session running the committed
+     * script rather than trusting the dossier).
+     */
+    multiHitStringCounter: number;
     multistringChooser: number;
     /** Source u16 gBattleScripting.animArg1 -- the only field Cmd_playanimation's sB_ANIM_ARG1 operand dereferences (animArg2 is never read by playanimation). */
     animArg1: number;
@@ -646,6 +657,7 @@ export type BattleScriptRulesContextInput = Readonly<{
   statAnimPlayed?: number;
   animArg1?: number;
   tripleKickPower?: number;
+  multiHitStringCounter?: number;
   twoTurnStringId?: number;
   /** Omitted slots default to species 0 (empty) -- Cmd_checkteamslost's own species-nonzero gate excludes them. */
   party?: Readonly<{
@@ -2033,6 +2045,7 @@ export function createBattleScriptRulesContext(
     statAnimPlayed: requireUnsigned(input.statAnimPlayed ?? 0, 0xff, "statAnimPlayed"),
     animArg1: requireUnsigned(input.animArg1 ?? 0, 0xffff, "animArg1"),
     tripleKickPower: requireUnsigned(input.tripleKickPower ?? 0, 0xffff, "tripleKickPower"),
+    multiHitStringCounter: requireUnsigned(input.multiHitStringCounter ?? 0, 0xff, "multiHitStringCounter"),
     twoTurnStringId: requireUnsigned(input.twoTurnStringId ?? 0, 0xff, "twoTurnStringId"),
     sideStatuses: Object.freeze([
       requireUnsigned(input.sideStatuses?.[0] ?? 0, 0xffff_ffff, "sideStatuses[0]") >>> 0,
@@ -2175,7 +2188,7 @@ export function createBattleScriptStatusRulesHandlers(
   return Object.freeze({
     ...createBattleScriptControlHandlers<BattleScriptRulesContext>(program),
     ...createBattleScriptSourceCommandHandlers(program, sourcePorts),
-    ...createBattleScriptRuleCommandHandlers(program, resolveByteOperand),
+    ...createBattleScriptRuleCommandHandlers(program, resolveByteOperand, resolveRulesBattlerForBattleScript),
     ...createBattleScriptMoveValuesCommandHandlers<BattleScriptRulesContext>(
       program,
     ),

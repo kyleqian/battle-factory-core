@@ -137,6 +137,16 @@ const ATOMIC_VALUES = Object.freeze({
    * EffectParalyze, DoTripleKickAttack, FuryCutterHit) resolve too.
    */
   MOVE_RESULT_NO_EFFECT: (1 << 0) | (1 << 3) | (1 << 5),
+  /**
+   * `include/constants/battle.h:226` -- `1 << 6`. Widened per
+   * docs/roar-multihit-registration-scout.md §4 rung 5: every multi-hit
+   * iteration's `jumpifbyte CMP_COMMON_BITS, gMoveResultFlags,
+   * MOVE_RESULT_FOE_ENDURED, ...` Endure re-check (`BattleScript_DoMultiHit`/
+   * `BattleScript_DoTripleKickAttack`), read through the already-registered
+   * `Cmd_jumpifbyte` dispatcher unchanged (this file's shared value table is
+   * its comparand resolver).
+   */
+  MOVE_RESULT_FOE_ENDURED: 1 << 6,
 } as const);
 
 const SETBYTE_VALUES: Readonly<Record<string, number>> = Object.freeze({

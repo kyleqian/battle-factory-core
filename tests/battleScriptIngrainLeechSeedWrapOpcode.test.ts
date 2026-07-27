@@ -287,13 +287,21 @@ describe("(b) unsupported-branch barriers -- COPYARRAY/JUMPIFABILITY/MANIPULATED
     expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch" });
   });
 
-  it("Cmd_jumpifability halts on any ability other than ABILITY_LIQUID_OOZE (e.g. Roar's own Suction Cups check)", () => {
+  it("Cmd_jumpifability no longer halts on ABILITY_SUCTION_CUPS (docs/roar-multihit-registration-scout.md §4 rung 1; real value 21, not the dossier's cited 31)", () => {
+    const ABILITY_SUCTION_CUPS = 21;
     const pc = program.instructions.find(
       (instruction) => instruction.source.label === "BattleScript_EffectRoar" && instruction.opcodeName === "B_SCR_OP_JUMPIFABILITY",
     )!.programCounter;
-    const { result } = stepAtProgramCounter(pc, context());
-    expect(result.kind).toBe("halted");
-    expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch" });
+
+    const { result: absent } = stepAtProgramCounter(pc, context({}, {}, { ability: 0 }));
+    if (absent.kind !== "advanced") throw new Error("expected advance");
+    expect(absent.state.programCounter).toBe(pc + 1);
+
+    const { result: present } = stepAtProgramCounter(pc, context({}, {}, { ability: ABILITY_SUCTION_CUPS }));
+    if (present.kind !== "advanced") throw new Error("expected advance (jump)");
+    const target = program.instructions.find((i) => i.source.label === "BattleScript_AbilityPreventsPhasingOut");
+    expect(target).toBeDefined();
+    expect(present.state.programCounter).toBe(target!.programCounter);
   });
 
   it("Cmd_manipulatedamage halts on any mode other than DMG_CHANGE_SIGN (e.g. Struggle's own recoil-from-miss halving)", () => {

@@ -143,11 +143,19 @@ describe("production jumpifhalfword (Cmd_jumpifhalfword) dispatch", () => {
   });
 
   describe("(b) unsupported-branch barrier", () => {
-    it("halts on an unmodeled memHword pointer (gChosenMove, BattleScript_MultiHitLoop's own Sleep Talk check)", () => {
+    it("no longer halts on gChosenMove (docs/roar-multihit-registration-scout.md §4 rung 4 widened it; BattleScript_MultiHitLoop's own Sleep Talk gate)", () => {
+      const MOVE_SLEEP_TALK = 214;
       const pc = findJumpifhalfwordPc("BattleScript_MultiHitLoop", (ops) => ops[1] === "gChosenMove");
-      const { result } = stepAtProgramCounter(pc, context());
-      expect(result.kind).toBe("halted");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch" });
+
+      const { result: ordinary } = stepAtProgramCounter(pc, context({ chosenMove: MOVE_TACKLE }));
+      if (ordinary.kind !== "advanced") throw new Error("expected advance");
+      expect(ordinary.state.programCounter).toBe(pc + 1);
+
+      const { result: sleepTalk } = stepAtProgramCounter(pc, context({ chosenMove: MOVE_SLEEP_TALK }));
+      if (sleepTalk.kind !== "advanced") throw new Error("expected advance (jump)");
+      const target = program.instructions.find((i) => i.source.label === "BattleScript_DoMultiHit");
+      expect(target).toBeDefined();
+      expect(sleepTalk.state.programCounter).toBe(target!.programCounter);
     });
 
     it("halts on an unmodeled memHword pointer (gBattleWeather, EFFECT_SOLAR_BEAM's own first-turn check)", () => {

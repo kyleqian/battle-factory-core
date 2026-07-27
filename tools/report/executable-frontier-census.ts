@@ -658,14 +658,18 @@ const validationChecks: Array<() => void> = [
     "B_SCR_OP_RETURNTOBALL",
     "B_SCR_OP_FINISHACTION",
   ]),
-  // The multi-hit pair's own blocker set is unchanged by the control-flow fix
-  // (it was never the source of the bogus edge -- Roar's fabricated
-  // fallthrough only ever pointed INTO it): still exactly INITMULTIHITSTRING
-  // + JUMPIFHASNOHP, now correctly labeled "(edge branch only)" instead of
-  // "(main path)" now that an upstream accuracycheck fork is recognized.
-  () => requireExactMissingOpcodes("EFFECT_MULTI_HIT", ["B_SCR_OP_INITMULTIHITSTRING", "B_SCR_OP_JUMPIFHASNOHP"]),
-  () => requireExactMissingOpcodes("EFFECT_DOUBLE_HIT", ["B_SCR_OP_INITMULTIHITSTRING", "B_SCR_OP_JUMPIFHASNOHP"]),
-  () => requireExactMissingOpcodes("EFFECT_TWINEEDLE", ["B_SCR_OP_INITMULTIHITSTRING", "B_SCR_OP_JUMPIFHASNOHP"]),
+  // Registration checkpoint (2026-07-27, docs/roar-multihit-registration-
+  // scout.md §4 rungs 2-6): B_SCR_OP_INITMULTIHITSTRING/B_SCR_OP_JUMPIFHASNOHP
+  // registered, plus the JUMPIFHALFWORD (gChosenMove) and JUMPIFBYTE
+  // (MOVE_RESULT_FOE_ENDURED) per-operand widenings and two further hidden
+  // barriers found live running the committed scripts (COPYARRAY's
+  // cEFFECT_CHOOSER<-sMULTIHIT_EFFECT tuple, and the sMULTIHIT_STRING+4
+  // hits-landed counter's ADDBYTE write / gBattleTextBuff1 COPYARRAY read --
+  // both real on every multi-hit iteration, not Triple-Kick-only as the
+  // scout dossier's §1d table claimed). All three now genuinely executable.
+  () => requireExecutable("EFFECT_MULTI_HIT"),
+  () => requireExecutable("EFFECT_DOUBLE_HIT"),
+  () => requireExecutable("EFFECT_TWINEEDLE"),
 ];
 
 let validationFailed = false;
@@ -912,14 +916,22 @@ lines.push(
 );
 lines.push(
   "- `EFFECT_ROAR` blocked on exactly `B_SCR_OP_FORCERANDOMSWITCH`, `B_SCR_OP_SWITCHOUTABILITIES`, "
-  + "`B_SCR_OP_RETURNTOBALL`, `B_SCR_OP_FINISHACTION` -- a control-flow extractor fix this session "
-  + "(docs/roar-multihit-registration-scout.md): the graph previously fabricated a fallthrough edge from "
+  + "`B_SCR_OP_RETURNTOBALL`, `B_SCR_OP_FINISHACTION` -- a control-flow extractor fix (2026-07-27, "
+  + "docs/roar-multihit-registration-scout.md): the graph previously fabricated a fallthrough edge from "
   + "`forcerandomswitch` into the physically-next label (`BattleScript_EffectMultiHit`), which wrongly "
   + "credited `INITMULTIHITSTRING`/`JUMPIFHASNOHP` to this row; the corrected walk instead follows "
   + "`forcerandomswitch`'s real two-way branch (its own fail-pointer operand, plus the hardcoded, "
-  + "bytecode-invisible `BattleScript_SuccessForceOut` success target). `EFFECT_MULTI_HIT`/`EFFECT_DOUBLE_HIT`/"
-  + "`EFFECT_TWINEEDLE` are pinned unchanged at exactly `B_SCR_OP_INITMULTIHITSTRING`, "
-  + "`B_SCR_OP_JUMPIFHASNOHP` to confirm the fix only removed the bogus edge into them, not their own real one",
+  + "bytecode-invisible `BattleScript_SuccessForceOut` success target). Still blocked, scout §4 rungs 10-14",
+);
+lines.push(
+  "- `EFFECT_MULTI_HIT`, `EFFECT_DOUBLE_HIT`, `EFFECT_TWINEEDLE` each executable (2026-07-27, scout §4 "
+  + "rungs 2-6: `B_SCR_OP_INITMULTIHITSTRING`/`B_SCR_OP_JUMPIFHASNOHP` registered, `JUMPIFHALFWORD`/"
+  + "`JUMPIFBYTE` per-operand widenings for `gChosenMove`/`MOVE_RESULT_FOE_ENDURED`, plus two further "
+  + "hidden barriers found running the committed scripts live rather than trusting the scout dossier -- "
+  + "`COPYARRAY`'s `cEFFECT_CHOOSER<-sMULTIHIT_EFFECT` tuple, and the `sMULTIHIT_STRING+4` hits-landed "
+  + "counter's `ADDBYTE` write / `gBattleTextBuff1` `COPYARRAY` read, both real on every multi-hit "
+  + "iteration, not Triple-Kick-only as the dossier's §1d table claimed). `EFFECT_TRIPLE_KICK` remains "
+  + "blocked (scout §4 rungs 7-9: dynamic base-power plumbing + its own hit-counter byte reader)",
 );
 lines.push("");
 lines.push("All checks passed for this run.");

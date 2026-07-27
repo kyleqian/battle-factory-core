@@ -1,4 +1,50 @@
 ---
+## 522 — [BOUNDED WORKER 2026-07-27 ~16:00] `turn6-statfall.json` ATK-fell text re-driven from kernel events (§12.3 step 3 landed); banner gate (step 4) found to need disproportionate new surface
+
+- **State:** tree green at **268 files / 3560 tests** (unchanged count —
+  wires an already-tested staging-module export into production code, no
+  new test file), `npm run build` clean. `executableFrontierRatchet.test.ts`
+  unmoved (6/6, zero new barriers).
+- **Did:** executed `docs/presentation-seam-scout.md` §12.3 steps 3/4
+  (§12.6 completion note appended). Step 3: `battleScene.ts` gained
+  `TURN6_ATKFELL_KICKOFF_LINE1/2` (module-load-resolved from
+  `turn6FeatherDancePresentationStaging.ts`'s already-staged
+  `resolveTurn6AtkFellLines()`, unblocked by entry 520's charmap fix);
+  `drawTurn6FeatherDanceKickoffText`'s own `atkFellStart` branch (`:9151`)
+  now draws these instead of the raw `TURN6_ATKFELL_LINE1/2` literals. Zero
+  bridge edits — entry 514's `resolveFeatherDanceKickoffPresentationWindowContent`
+  already returned everything needed. **No literal died**: `TURN6_ATKFELL_
+  LINE1/2` stay defined and live at turns 7/8's own repeat call sites
+  (`:9397`/`:9586`, verified unchanged). Step 4 (the stat-fall banner gate,
+  `drawTurn6StatFallBanner`/`turn6StatFallEva`): investigated and found
+  **not cleanly wireable** — `turn6StatFallEva`'s tick-window gate is real
+  presentation-native animation timing (no kernel-event/timestamp
+  equivalent, §8.4 Option A re-confirmed a 6th time), and
+  `drawTurn6StatFallBanner`'s hardcoded ONIX/attack/decrease selection is
+  already exactly consistent with the kernel's real `stat-stage-change`
+  (no live branch to redirect). Driving it "for real" would force either
+  editing turns 7/8's own out-of-scope call sites (the function is a shared
+  helper) or building a 7-way stat-to-palette-key translation table for six
+  stat values this window never produces (a real naming mismatch too:
+  `battleScriptEvents.ts`'s hyphenated `special-attack`/`special-defense`
+  vs. `StatAnimBannerAsset`'s camelCase `spAttack`/`spDefense`) — exactly
+  the disproportionate-new-surface case the brief's own escape valve names.
+  Landed step 3 alone, per the brief's own instruction that this finding is
+  a success, not a failure.
+- **Acceptance (live, this session):** full sweep run BEFORE the change (on
+  pristine `HEAD`) matched every recorded count exactly, then AFTER
+  reproduced them byte-identically: `turn6-statfall.json` 127/127 (twice,
+  incl. a determinism check), `turn6-featherdance.json` 90/90,
+  `turn6-rockslide-a.json` 255/255, `turn6-feathers.json` 235/235,
+  `turn6-menu.json` 44/44, `turn1-rockslide.json` 256/256,
+  `turn5-rockslide.json` 256/256, `turn4-doubleteam.json` 250/250,
+  `turn2-endeavor.json` 77/77.
+- **Next:** either `turn11-featherdance.json`'s own ATK-floor wiring (same
+  glyph class, now unblocked, a later step per this brief's own out-of-scope
+  note) or the Roar/multi-hit registration side scouted in round 2.
+- **Notes:** no PAPERCUT. One commit for the wiring + docs.
+
+---
 ## 521 — [BOUNDED WORKER 2026-07-27 ~15:30] `turn2-endeavor.json` kickoff text/HP re-driven from kernel events (§13.3 landed)
 
 - **State:** tree green at **268 files / 3560 tests** (unchanged count —

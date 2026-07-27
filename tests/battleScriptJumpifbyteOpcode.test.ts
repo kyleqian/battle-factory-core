@@ -147,16 +147,19 @@ describe("production jumpifbyte (Cmd_jumpifbyte) dispatch", () => {
       expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch" });
     });
 
-    it("halts on an unmodeled comparison value (MOVE_RESULT_FOE_ENDURED, gMoveResultFlags itself is modeled)", () => {
-      // MOVE_RESULT_MISSED/MOVE_RESULT_NO_EFFECT (and two other OR'd combos) resolve as of the
-      // EFFECT_ENDEAVOR registration (seam-scout §9.2, battleScriptSetByte.ts's shared value
-      // universe) -- BattleScript_DoMultiHit's own MOVE_RESULT_FOE_ENDURED comparand does not.
+    it("no longer halts on MOVE_RESULT_FOE_ENDURED (docs/roar-multihit-registration-scout.md §4 rung 5 widened the shared value universe; BattleScript_DoMultiHit's own Endure re-check)", () => {
       const pc = findJumpifbytePc(
         (ops) => ops[1] === "gMoveResultFlags" && ops[2] === "MOVE_RESULT_FOE_ENDURED",
       );
-      const { result } = stepAtProgramCounter(pc, context());
-      expect(result.kind).toBe("halted");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch" });
+      const { result: notEndured } = stepAtProgramCounter(pc, context({ moveResultFlags: 0 }));
+      if (notEndured.kind !== "advanced") throw new Error("expected advance");
+      expect(notEndured.state.programCounter).toBe(pc + 1);
+
+      const { result: endured } = stepAtProgramCounter(pc, context({ moveResultFlags: 1 << 6 }));
+      if (endured.kind !== "advanced") throw new Error("expected advance (jump)");
+      const target = program.instructions.find((i) => i.source.label === "BattleScript_MultiHitPrintStrings");
+      expect(target).toBeDefined();
+      expect(endured.state.programCounter).toBe(target!.programCounter);
     });
 
     it("no longer halts on MOVE_RESULT_MISSED (EFFECT_ENDEAVOR registration widened the shared value universe)", () => {

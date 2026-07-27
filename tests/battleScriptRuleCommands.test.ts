@@ -50,12 +50,14 @@ type FixtureRules = Readonly<{
   multiHitCounter: number;
   marker: "rule-command";
   party: readonly string[];
+  battlers: readonly Readonly<{ hp: number }>[];
 }>;
 
-function rules(multiHitCounter = 9): FixtureRules {
+function rules(multiHitCounter = 9, battlerHp: readonly number[] = [100, 100, 100, 100]): FixtureRules {
   return Object.freeze({
     multiHitCounter,
     marker: "rule-command",
+    battlers: Object.freeze(battlerHp.map((hp) => Object.freeze({ hp }))),
     party: Object.freeze(["ONIX", "MAGBY"]),
   });
 }
@@ -94,8 +96,21 @@ function stateAt(
 
 function handlers(
   resolveByteOperand: BattleScriptByteResolverPort<FixtureRules>,
+  resolveBattlerForBattleScript?: (
+    context: Parameters<BattleScriptByteResolverPort<FixtureRules>>[0],
+    operand: Parameters<BattleScriptByteResolverPort<FixtureRules>>[1],
+  ) => 0 | 1 | 2 | 3 | null,
 ): BattleScriptOpcodeHandlers<FixtureRules> {
-  return createBattleScriptRuleCommandHandlers(program, resolveByteOperand);
+  return createBattleScriptRuleCommandHandlers(program, resolveByteOperand, resolveBattlerForBattleScript);
+}
+
+function battlerSelectorResolver(
+  _context: Parameters<BattleScriptByteResolverPort<FixtureRules>>[0],
+  operand: Parameters<BattleScriptByteResolverPort<FixtureRules>>[1],
+): 0 | 1 | 2 | 3 | null {
+  if (operand.expression === "BS_ATTACKER") return 0;
+  if (operand.expression === "BS_TARGET") return 1;
+  return null;
 }
 
 function literalResolver(
@@ -1112,5 +1127,103 @@ describe("source-mapped Battle Script DECREMENTMULTIHIT rule command", () => {
     expect(result.state.scheduler).toBe(initial.scheduler);
     expect(result.state.rng).toBe(initial.rng);
     expect(result.state.events).toBe(initial.events);
+  });
+});
+
+function initmultihitstringOccurrences(): readonly BattleScriptInstruction[] {
+  return program.instructions.filter(
+    (instruction) => instruction.opcodeName === "B_SCR_OP_INITMULTIHITSTRING",
+  );
+}
+
+function jumpifhasnohpOccurrences(): readonly BattleScriptInstruction[] {
+  return program.instructions.filter(
+    (instruction) => instruction.opcodeName === "B_SCR_OP_JUMPIFHASNOHP",
+  );
+}
+
+describe("source-mapped Battle Script INITMULTIHITSTRING rule command (docs/roar-multihit-registration-scout.md §4 rung 2)", () => {
+  it("registers B_SCR_OP_INITMULTIHITSTRING at all four concrete committed call sites", () => {
+    const starts = initmultihitstringOccurrences();
+    expect(starts.map((i) => i.source.label)).toEqual([
+      "BattleScript_EffectMultiHit",
+      "BattleScript_EffectDoubleHit",
+      "BattleScript_EffectTwineedle",
+      "BattleScript_EffectTripleKick",
+    ]);
+  });
+
+  it("advances unconditionally, zero RNG, zero rules mutation (Cmd_initmultihitstring's only reader-carrying byte, multihitString[4]/sMULTIHIT_STRING+4, has no writer or reader anywhere in this engine yet)", () => {
+    const instruction = initmultihitstringOccurrences()[0]!;
+    const initial = stateAt(instruction, rules());
+    const transition = handlers(literalResolver)[instruction.opcodeId]!(Object.freeze({
+      program,
+      instruction,
+      state: initial,
+    }));
+    expect(transition.control).toEqual({ kind: "advance" });
+    expect(transition.rulesContext).toBe(initial.rulesContext);
+    expect(transition.rng).toBe(initial.rng);
+  });
+});
+
+describe("source-mapped Battle Script JUMPIFHASNOHP rule command (docs/roar-multihit-registration-scout.md §4 rung 3)", () => {
+  it("registers B_SCR_OP_JUMPIFHASNOHP at all five concrete committed call sites", () => {
+    const starts = jumpifhasnohpOccurrences();
+    expect(starts.map((i) => i.source.label)).toEqual([
+      "BattleScript_MultiHitLoop",
+      "BattleScript_MultiHitLoop",
+      "BattleScript_TripleKickLoop",
+      "BattleScript_TripleKickLoop",
+      "BattleScript_TeeterDanceLoop",
+    ]);
+  });
+
+  const attackerCheck = jumpifhasnohpOccurrences()[0]!; // BS_ATTACKER, BattleScript_MultiHitLoop
+  const targetCheck = jumpifhasnohpOccurrences()[1]!; // BS_TARGET, BattleScript_MultiHitLoop
+
+  it("neither battler at 0 HP: advances (falls through 6 bytes)", () => {
+    const initial = stateAt(targetCheck, rules(9, [100, 100, 100, 100]));
+    const transition = handlers(literalResolver, battlerSelectorResolver)[targetCheck.opcodeId]!(Object.freeze({
+      program,
+      instruction: targetCheck,
+      state: initial,
+    }));
+    expect(transition.control).toEqual({ kind: "advance" });
+  });
+
+  it("BS_ATTACKER at 0 HP: jumps to the operand pointer (BattleScript_MultiHitEnd)", () => {
+    const initial = stateAt(attackerCheck, rules(9, [0, 100, 100, 100]));
+    const transition = handlers(literalResolver, battlerSelectorResolver)[attackerCheck.opcodeId]!(Object.freeze({
+      program,
+      instruction: attackerCheck,
+      state: initial,
+    }));
+    const target = resolveBattleScriptLabel(program, "BattleScript_MultiHitEnd")!;
+    expect(transition.control).toEqual({ kind: "jump", programCounter: target.programCounter });
+  });
+
+  it("BS_TARGET at 0 HP: jumps to the operand pointer (BattleScript_MultiHitPrintStrings)", () => {
+    const initial = stateAt(targetCheck, rules(9, [100, 0, 100, 100]));
+    const transition = handlers(literalResolver, battlerSelectorResolver)[targetCheck.opcodeId]!(Object.freeze({
+      program,
+      instruction: targetCheck,
+      state: initial,
+    }));
+    const target = resolveBattleScriptLabel(program, "BattleScript_MultiHitPrintStrings")!;
+    expect(transition.control).toEqual({ kind: "jump", programCounter: target.programCounter });
+  });
+
+  it("blocks with source-context-unavailable when the battler selector port cannot resolve", () => {
+    const initial = stateAt(targetCheck, rules());
+    const transition = handlers(literalResolver, () => null)[targetCheck.opcodeId]!(Object.freeze({
+      program,
+      instruction: targetCheck,
+      state: initial,
+    }));
+    expect(transition.control).toMatchObject({
+      kind: "block",
+      reason: { kind: "source-context-unavailable", port: "resolve-battler-for-battle-script" },
+    });
   });
 });

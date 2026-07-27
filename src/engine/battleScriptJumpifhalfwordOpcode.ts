@@ -13,11 +13,14 @@
  * `gCurrentMove` against a literal move id. Every hit-chain effect in the
  * committed program funnels through this instruction first, Surf or not, so
  * `gCurrentMove` is the load-bearing memHword pointer this engine models.
- * Every other concrete jumpifhalfword call site in the committed program
- * compares a different, unmodeled pointer (`gChosenMove`, `gBattleWeather`,
- * `gTrainerBattleOpponent_A`) and is a named (b) barrier -- those effects
- * (EFFECT_MULTI_HIT, EFFECT_SOLAR_BEAM, EFFECT_SEMI_INVULNERABLE...) remain
- * blocked on their own separate missing opcodes regardless.
+ * `gChosenMove` (the multi-hit family's own Sleep-Talk gate,
+ * `BattleScript_MultiHitLoop`/`BattleScript_TripleKickLoop`) is also modeled,
+ * per docs/roar-multihit-registration-scout.md §4 rung 4. Every other
+ * concrete jumpifhalfword call site in the committed program compares a
+ * different, unmodeled pointer (`gBattleWeather`, `gTrainerBattleOpponent_A`)
+ * and is a named (b) barrier -- those effects (EFFECT_SOLAR_BEAM,
+ * EFFECT_SEMI_INVULNERABLE...) remain blocked on their own separate missing
+ * opcodes regardless.
  */
 import movesData from "../data/gen/moves.json" with { type: "json" };
 import {
@@ -65,7 +68,14 @@ const MOVE_ID_BY_NAME: ReadonlyMap<string, number> = new Map(
 /**
  * The memHword pointer universe this engine can resolve today:
  * `BattleScript_EffectHit`'s own Surf guard, the only reachable jumpifhalfword
- * call site under Level-50 Factory singles.
+ * call site under Level-50 Factory singles -- plus `gChosenMove`, widened
+ * per docs/roar-multihit-registration-scout.md §4 rung 4: every multi-hit
+ * effect's `jumpifhalfword CMP_EQUAL, gChosenMove, MOVE_SLEEP_TALK, ...`
+ * Sleep-Talk gate (`BattleScript_MultiHitLoop`/`BattleScript_TripleKickLoop`).
+ * `gChosenMove` is the move actually selected before Sleep-Talk substitution
+ * (distinct from `gCurrentMove`, the move actually executing), already a
+ * durable `BattleScriptRulesContext` field (`chosenMove`,
+ * `battleScriptRulesContext.ts:494`).
  */
 function readJumpifhalfwordMemHword(
   rules: BattleScriptRulesContext,
@@ -73,6 +83,7 @@ function readJumpifhalfwordMemHword(
 ): number | null {
   switch (expression) {
     case "gCurrentMove": return rules.currentMove;
+    case "gChosenMove": return rules.chosenMove;
     default: return null;
   }
 }
