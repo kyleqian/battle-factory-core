@@ -128,6 +128,10 @@ import {
   type RecoverEffectSprite,
 } from "./recover.ts";
 import {
+  milkDrinkEffectAtAge,
+  type MilkDrinkEffectSprite,
+} from "./milkDrink.ts";
+import {
   futureSightAttackerEffectAtAge,
   futureSightBgBldyAtAge,
   futureSightBgIsPsychic,
@@ -239,6 +243,7 @@ export interface SceneOnPresentationBattler {
     | "HAUNTER"
     | "IVYSAUR"
     | "KADABRA"
+    | "MILTANK"
     | "SHUPPET"
     | "PLUSLE";
   readonly geometry: SceneOnBattlerGeometry;
@@ -642,6 +647,13 @@ export interface SceneOnRecoverConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnMilkDrinkConfig {
+  readonly move: "MILK_DRINK";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnFutureSightConfig {
   readonly move: "FUTURE_SIGHT";
   readonly attacker: SceneOnPresentationBattler;
@@ -696,6 +708,7 @@ export type SceneOnMoveConfig =
   | SceneOnShadowPunchConfig
   | SceneOnGrowthConfig
   | SceneOnRecoverConfig
+  | SceneOnMilkDrinkConfig
   | SceneOnFutureSightConfig
   | SceneOnConfusionConfig
   | SceneOnPsychicConfig
@@ -996,6 +1009,13 @@ export interface SceneOnRecoverView {
   readonly target: SceneOnPresentationBattler;
   readonly attackerObjY: number;
   readonly sprites: readonly RecoverEffectSprite[];
+}
+
+export interface SceneOnMilkDrinkView {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly sprites: readonly MilkDrinkEffectSprite[];
 }
 
 export interface SceneOnFutureSightView extends FutureSightAttackerEffect {
@@ -1491,6 +1511,25 @@ export function sceneOnRecoverView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...effect,
+  };
+}
+
+/** `age` is ticks since the milk bottle's creation callback. */
+export function sceneOnMilkDrinkView(
+  state: SceneOnMovePresentationState,
+): SceneOnMilkDrinkView {
+  if (state.config.move !== "MILK_DRINK") {
+    throw new Error(`expected MILK_DRINK presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    sprites: milkDrinkEffectAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+    ),
   };
 }
 

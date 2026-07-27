@@ -535,6 +535,7 @@ import opponentFrontSpritesAsset from "../assets/gen/battle-opponent-front-sprit
 import kadabraFrontSpriteAsset from "../animation/assets/kadabra-front.json" with { type: "json" };
 import knockOffAsset from "../animation/assets/knock-off.json" with { type: "json" };
 import recoverAsset from "../animation/assets/recover.json" with { type: "json" };
+import milkDrinkAsset from "../animation/assets/milk-drink.json" with { type: "json" };
 import menuHealthboxPlayerAsset from "../assets/gen/menu-healthbox-player.json" with { type: "json" };
 import summaryBallAsset from "../assets/gen/summary-ball.json" with { type: "json" };
 import battleAnimBallOpenAsset from "../assets/gen/battle-anim-ball-open.json" with { type: "json" };
@@ -624,6 +625,7 @@ import {
   sceneOnShadowPunchView,
   sceneOnGrowthView,
   sceneOnRecoverView,
+  sceneOnMilkDrinkView,
   sceneOnFutureSightView,
   sceneOnConfusionView,
   sceneOnPsychicView,
@@ -896,6 +898,13 @@ const knockOffArt = knockOffAsset as {
 const recoverArt = recoverAsset as {
   orbs: { tileset: Tileset; palette: RgbColor[] };
   blueStar: { tileset: Tileset; palette: RgbColor[] };
+};
+const milkDrinkArt = milkDrinkAsset as {
+  milkBottle: { tileset: Tileset; palette: RgbColor[] };
+  thinRing: { tileset: Tileset; palette: RgbColor[] };
+  blueStar: { tileset: Tileset; palette: RgbColor[] };
+  miltankBack: { tileset: Tileset; palette: RgbColor[] };
+  miltankFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const MURKROW_CORNER = { x: 144, y: 19 };
 const menuHealthboxPlayer = menuHealthboxPlayerAsset as SendOutHealthboxContentAsset;
@@ -15084,6 +15093,169 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "KADABRA used" : "Foe KADABRA used",
       "RECOVER!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "MILK_DRINK") {
+    const view = sceneOnMilkDrinkView(state);
+    const displayed = sceneOnMilkDrinkView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "MILTANK"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "MILTANK"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged MILK_DRINK pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const miltankSource = playerToOpponent
+      ? milkDrinkArt.miltankBack
+      : milkDrinkArt.miltankFront;
+    const miltankSprite = playerToOpponent
+      ? miltankSource
+      : {
+          ...miltankSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: miltankSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const onixSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    if (playerToOpponent) {
+      const idle = speciesFrontIdleRestOffset("ONIX");
+      drawSpriteSheet(
+        fb,
+        onixSprite.tileset,
+        onixSprite.palette,
+        view.target.geometry.spriteCorner.x + (idle?.x2 ?? 0),
+        view.target.geometry.spriteCorner.y + (idle?.y2 ?? 0),
+      );
+      drawSpriteSheet(
+        fb,
+        miltankSprite.tileset,
+        miltankSprite.palette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+      );
+    } else {
+      drawSpriteSheet(
+        fb,
+        miltankSprite.tileset,
+        miltankSprite.palette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+      );
+      drawSpriteSheet(
+        fb,
+        onixSprite.tileset,
+        onixSprite.palette,
+        view.target.geometry.spriteCorner.x,
+        view.target.geometry.spriteCorner.y,
+      );
+    }
+    const nonObjTarget2 = fb.slice();
+    for (const sprite of displayed.sprites) {
+      if (sprite.kind === "bottle") {
+        if (sprite.invisible) continue;
+        drawSpriteSheetAffineRotateBlendedOverFb(
+          fb,
+          nonObjTarget2,
+          milkDrinkArt.milkBottle.tileset,
+          milkDrinkArt.milkBottle.palette,
+          sprite.x,
+          sprite.y,
+          sprite.xScale,
+          sprite.rotB,
+          sprite.rotC,
+          sprite.yScale,
+          sprite.eva,
+          sprite.evb,
+          false,
+        );
+      } else if (sprite.kind === "ring") {
+        drawSpriteSheetAffineRotate(
+          fb,
+          milkDrinkArt.thinRing.tileset,
+          milkDrinkArt.thinRing.palette,
+          sprite.x,
+          sprite.y,
+          sprite.xScale,
+          0,
+          0,
+          sprite.yScale,
+          undefined,
+          true,
+        );
+      } else {
+        const starTileset: Tileset = {
+          columns: 4,
+          rows: 4,
+          tiles: milkDrinkArt.blueStar.tileset.tiles.slice(
+            sprite.frame * 16,
+            sprite.frame * 16 + 16,
+          ),
+        };
+        drawSpriteSheet(
+          fb,
+          starTileset,
+          milkDrinkArt.blueStar.palette,
+          sprite.x - 16,
+          sprite.y - 16,
+        );
+      }
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "MILTANK";
+    const playerSpecies = playerToOpponent ? "MILTANK" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "MILTANK used" : "Foe MILTANK used",
+      "MILK DRINK!",
       99,
     );
     return;

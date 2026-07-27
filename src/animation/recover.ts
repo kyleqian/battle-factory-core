@@ -53,13 +53,46 @@ export interface RecoverEffectSprite {
   readonly spawnIndex: number;
 }
 
-function starFrameAtLocalAge(age: number): number | null {
+export function healingBlueStarFrameAtLocalAge(age: number): number | null {
   let offset = 0;
   for (let i = 0; i < RECOVER_STAR_FRAME_DURATIONS.length; i++) {
     offset += RECOVER_STAR_FRAME_DURATIONS[i]!;
     if (age < offset) return RECOVER_STAR_FRAMES[i]!;
   }
   return null;
+}
+
+export const HEALING_BLUE_STAR_OFFSETS = Object.freeze([
+  Object.freeze({ x: 0, y: -5 }),
+  Object.freeze({ x: -15, y: 10 }),
+  Object.freeze({ x: -15, y: -15 }),
+  Object.freeze({ x: 10, y: -5 }),
+] as const);
+
+/** Shared literal `HealingEffect`/`HealingEffect2` blue-star component. */
+export function healingBlueStarsAtAge(
+  age: number,
+  side: "player" | "opponent",
+  center: Readonly<{ x: number; y: number }>,
+): readonly RecoverEffectSprite[] {
+  const sprites: RecoverEffectSprite[] = [];
+  for (let index = 0; index < HEALING_BLUE_STAR_OFFSETS.length; index++) {
+    const local = age - index * RECOVER_STAR_SPAWN_PERIOD;
+    if (local < 0) continue;
+    const frame = healingBlueStarFrameAtLocalAge(local);
+    if (frame === null) continue;
+    const offset = HEALING_BLUE_STAR_OFFSETS[index]!;
+    sprites.push({
+      kind: "star",
+      x: center.x + (side === "player" ? offset.x : -offset.x),
+      y: center.y + offset.y,
+      frame,
+      xScale: 256,
+      yScale: 256,
+      spawnIndex: index,
+    });
+  }
+  return sprites;
 }
 
 /**
@@ -105,31 +138,11 @@ export function recoverEffectAtAge(
     });
   }
 
-  for (let index = 0; index < 4; index++) {
-    const local =
-      age - RECOVER_HEALING_START_AGE - index * RECOVER_STAR_SPAWN_PERIOD;
-    if (local < 0) continue;
-    const frame = starFrameAtLocalAge(local);
-    if (frame === null) continue;
-    const offsets = RECOVER_ORB_ARGS[index]!;
-    // HealingEffect's literal argv are not the first four orb argv.
-    const starOffsets = [
-      { x: 0, y: -5 },
-      { x: -15, y: 10 },
-      { x: -15, y: -15 },
-      { x: 10, y: -5 },
-    ] as const;
-    const offset = starOffsets[index] ?? offsets;
-    sprites.push({
-      kind: "star",
-      x: center.x + (side === "player" ? offset.x : -offset.x),
-      y: center.y + offset.y,
-      frame,
-      xScale: 256,
-      yScale: 256,
-      spawnIndex: index,
-    });
-  }
+  sprites.push(...healingBlueStarsAtAge(
+    age - RECOVER_HEALING_START_AGE,
+    side,
+    center,
+  ));
 
   return {
     attackerObjY: blendColorCycleObjYAtAge(age, RECOVER_BLEND_TIMING),
