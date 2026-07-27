@@ -36,6 +36,21 @@ export interface SludgeEffect {
   readonly sprites: readonly SludgeSprite[];
 }
 
+/** Source OAM priority: lower OBJ slots win equal-priority overlaps. */
+export function sludgeSpritesBackToFrontAtAge(
+  age: number,
+  attackerSide: "player" | "opponent",
+  projectileOrigin: Readonly<{ x: number; y: number }>,
+  targetCenter: Readonly<{ x: number; y: number }>,
+): readonly SludgeSprite[] {
+  return [...sludgeEffectAtAge(
+    age,
+    attackerSide,
+    projectileOrigin,
+    targetCenter,
+  ).sprites].sort((a, b) => b.oamSlot - a.oamSlot);
+}
+
 /**
  * Target OBJ/BG palette coefficient for SLUDGE's literal delay=1,
  * num_blends=2, 0<->12 blend_color_cycle. Each coefficient is exposed for
@@ -47,6 +62,20 @@ export function sludgeTargetPaletteYAtAge(age: number): number {
   if (age <= 59) return Math.min(12, 2 + 2 * Math.floor((age - 44) / 3));
   if (age < 68) return 12;
   return Math.max(0, 10 - 2 * Math.floor((age - 68) / 3));
+}
+
+/**
+ * Displayed battler offset after the script-created ShakeMon initializer.
+ * The creation frame's synchronous initializer plus RunTasks step exposes
+ * the first +3 write before the steady two-display task/OAM pipeline.
+ */
+export function sludgeDisplayedTargetOffsetAtAge(
+  age: number,
+  baselineX2: number,
+): Readonly<{ x2: number; y2: number }> {
+  if (age <= 41) return { x2: baselineX2, y2: 0 };
+  if (age === 42) return { x2: 3, y2: 0 };
+  return shakeMonOffsetAtTick(3, 0, 5, 1, age - 42);
 }
 
 function poisonBubbleAtLocalAge(

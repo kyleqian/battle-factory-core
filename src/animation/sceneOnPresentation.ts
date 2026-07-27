@@ -157,6 +157,12 @@ import {
   type AcidSprite,
 } from "./acid.ts";
 import {
+  sludgeEffectAtAge,
+  sludgeSpritesBackToFrontAtAge,
+  sludgeTargetPaletteYAtAge,
+  type SludgeSprite,
+} from "./sludge.ts";
+import {
   earthquakeAnimationAtAge,
   type EarthquakeAnimationState,
 } from "./earthquake.ts";
@@ -301,6 +307,7 @@ export interface SceneOnPresentationBattler {
     | "DUSTOX"
     | "HORSEA"
     | "EKANS"
+    | "GRIMER"
     | "SKIPLOOM"
     | "RELICANTH"
     | "LUNATONE"
@@ -750,6 +757,15 @@ export interface SceneOnAcidConfig {
   readonly projectileOrigin: Readonly<{ x: number; y: number }>;
 }
 
+export interface SceneOnSludgeConfig {
+  readonly move: "SLUDGE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source `GetBattlerSpriteCoord2(attacker, X_2/Y_PIC_OFFSET)`. */
+  readonly projectileOrigin: Readonly<{ x: number; y: number }>;
+}
+
 export interface SceneOnEarthquakeConfig {
   readonly move: "EARTHQUAKE";
   readonly attacker: SceneOnPresentationBattler;
@@ -868,6 +884,7 @@ export type SceneOnMoveConfig =
   | SceneOnSupersonicConfig
   | SceneOnWaterGunConfig
   | SceneOnAcidConfig
+  | SceneOnSludgeConfig
   | SceneOnEarthquakeConfig
   | SceneOnHardenConfig
   | SceneOnCalmMindConfig
@@ -910,6 +927,15 @@ export interface SceneOnAcidView {
   readonly targetOffset: Readonly<{ x2: number; y2: number }>;
   readonly defenderPaletteY: number;
   readonly sprites: readonly AcidSprite[];
+}
+
+export interface SceneOnSludgeView {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly targetOffset: Readonly<{ x2: number; y2: number }>;
+  readonly defenderPaletteY: number;
+  readonly sprites: readonly SludgeSprite[];
 }
 
 export interface SceneOnEncoreView extends EncoreState {
@@ -1863,6 +1889,34 @@ export function sceneOnAcidView(
     target: state.config.target,
     ...effect,
     sprites: acidSpritesBackToFrontAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.projectileOrigin,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age` is ticks since `gSludgeProjectileSpriteTemplate` creation. */
+export function sceneOnSludgeView(
+  state: SceneOnMovePresentationState,
+): SceneOnSludgeView {
+  if (state.config.move !== "SLUDGE") {
+    throw new Error(`expected SLUDGE presentation, got ${state.config.move}`);
+  }
+  const effect = sludgeEffectAtAge(
+    state.age,
+    state.config.attacker.geometry.side,
+    state.config.projectileOrigin,
+    state.config.target.geometry.animationCenter,
+  );
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    targetOffset: effect.targetOffset,
+    defenderPaletteY: sludgeTargetPaletteYAtAge(state.age),
+    sprites: sludgeSpritesBackToFrontAtAge(
       state.age,
       state.config.attacker.geometry.side,
       state.config.projectileOrigin,

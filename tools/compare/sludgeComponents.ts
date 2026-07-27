@@ -6,6 +6,16 @@ import {
   sludgeEffectAtAge,
   sludgeTargetPaletteYAtAge,
 } from "../../src/animation/sludge.ts";
+import {
+  createSceneOnMovePresentation,
+  sceneOnSludgeView,
+  type SceneOnPresentationBattler,
+} from "../../src/animation/sceneOnPresentation.ts";
+import {
+  createInitialState,
+  render,
+  type EngineState,
+} from "../../src/engine/core.ts";
 
 interface Fixture {
   readonly scenario: string;
@@ -16,6 +26,14 @@ interface Fixture {
   readonly attackerSide: "player" | "opponent";
   readonly targetCenter: Readonly<{ x: number; y: number }>;
   readonly targetSide: "player" | "opponent";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: {
+    readonly playerHp: number; readonly playerMaxHp: number;
+    readonly opponentHp: number; readonly opponentMaxHp: number;
+    readonly playerGender?: "male" | "female";
+    readonly opponentGender?: "male" | "female";
+  };
 }
 interface ProbeSprite {
   readonly slot: number; readonly template: number;
@@ -72,7 +90,17 @@ const blendPaletteColor = (color: number, coeff: number, target = 31774) => {
   return channel(0) | (channel(5) << 5) | (channel(10) << 10);
 };
 let matches = 0;
+let framebufferMatches = 0;
 const mismatches: string[] = [];
+const framebufferMismatches: string[] = [];
+let firstFramebufferDiff: string | null = null;
+const stage = createSceneOnMovePresentation({
+  move: "SLUDGE",
+  attacker: fixture.attacker,
+  target: fixture.target,
+  projectileOrigin: fixture.projectileOrigin,
+  fieldProfile: fixture.fieldProfile,
+});
 for (let frame = fixture.denseWindow.startFrame; frame <= fixture.denseWindow.endFrame; frame += 1) {
   const age = fixture.appStage.presentationAge + frame - fixture.denseWindow.startFrame;
   const predicted = sludgeEffectAtAge(
@@ -140,18 +168,71 @@ for (let frame = fixture.denseWindow.startFrame; frame <= fixture.denseWindow.en
     && oracle.se1.tracks[0]?.flags === 131
     && oracle.se1.tracks[0]?.panX === expectedPan
   );
+  const seamState = { ...stage, age };
+  const seamView = sceneOnSludgeView(seamState);
+  const seamShape = JSON.stringify(
+    seamView.sprites.map(key).sort(),
+  ) === JSON.stringify(expectedSprites)
+    && seamView.targetOffset.x2 === predicted.targetOffset.x2
+    && seamView.targetOffset.y2 === predicted.targetOffset.y2
+    && seamView.defenderPaletteY === expectedCoefficient;
   if (JSON.stringify(expectedSprites) === JSON.stringify(actualSprites)
       && predictedTargetX2 === target.x2
       && predicted.targetOffset.y2 === target.y2
-      && shakeShape && blendShape && paletteShape && soundShape) {
+      && shakeShape && blendShape && paletteShape && soundShape && seamShape) {
     matches += 1;
   } else {
-    mismatches.push(`frame ${frame}: sprites predicted=${expectedSprites} actual=${actualSprites}; target predicted=${predictedTargetX2},${predicted.targetOffset.y2} actual=${target.x2},${target.y2}; tasks shake=${shake.length} blend=${blend.length}; palette predicted=${expectedCoefficient} actual=${paletteCoefficients} hwPriorLatch=${JSON.stringify(hardwareExpected) === JSON.stringify(hardwareRow)}; soundBoundary=${soundBoundary} sound=${oracle.se1.songHeader}/${oracle.se1.status}/${oracle.se1.tracks[0]?.flags}/${oracle.se1.tracks[0]?.panX} expected=${expectedSong}/0/131/${expectedPan}`);
+    mismatches.push(`frame ${frame}: sprites predicted=${expectedSprites} actual=${actualSprites}; target predicted=${predictedTargetX2},${predicted.targetOffset.y2} actual=${target.x2},${target.y2}; tasks shake=${shake.length} blend=${blend.length}; palette predicted=${expectedCoefficient} actual=${paletteCoefficients} hwPriorLatch=${JSON.stringify(hardwareExpected) === JSON.stringify(hardwareRow)}; soundBoundary=${soundBoundary} sound=${oracle.se1.songHeader}/${oracle.se1.status}/${oracle.se1.tracks[0]?.flags}/${oracle.se1.tracks[0]?.panX} expected=${expectedSong}/0/131/${expectedPan}; seam=${seamShape}`);
+  }
+
+  const engine: EngineState = {
+    ...createInitialState(),
+    rngMode: "frontierBattle",
+    sceneOnPresentation: seamState,
+  };
+  const app = render(engine);
+  const oracleRgb = readFileSync(
+    join(rgbDir, `${String(frame).padStart(5, "0")}.rgb`),
+  );
+  let exact = true;
+  let count = 0;
+  let minX = 240, minY = 160, maxX = -1, maxY = -1;
+  for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
+    const rgb = pixel * 3;
+    const rgba = pixel * 4;
+    if (
+      app[rgba] === oracleRgb[rgb]
+      && app[rgba + 1] === oracleRgb[rgb + 1]
+      && app[rgba + 2] === oracleRgb[rgb + 2]
+    ) continue;
+    exact = false;
+    count += 1;
+    const x = pixel % 240;
+    const y = Math.floor(pixel / 240);
+    minX = Math.min(minX, x); minY = Math.min(minY, y);
+    maxX = Math.max(maxX, x); maxY = Math.max(maxY, y);
+  }
+  if (exact) {
+    framebufferMatches += 1;
+  } else {
+    if (firstFramebufferDiff === null) {
+      firstFramebufferDiff =
+        `first framebuffer diff at frame ${frame}: ${count}px bbox ${minX},${minY}-${maxX},${maxY}`;
+    }
+    framebufferMismatches.push(
+      `${frame}:${count}:${minX},${minY}-${maxX},${maxY}`,
+    );
   }
 }
 const total = fixture.denseWindow.endFrame - fixture.denseWindow.startFrame + 1;
-console.log(`SLUDGE source components ${matches}/${total}`);
-if (matches !== total) {
+console.log(
+  `SLUDGE source components ${matches}/${total}; framebuffer ${framebufferMatches}/${total}`,
+);
+if (matches !== total || framebufferMatches !== total) {
+  if (firstFramebufferDiff) console.error(firstFramebufferDiff);
+  if (framebufferMismatches.length) {
+    console.error(`framebuffer mismatches ${framebufferMismatches.join(" ")}`);
+  }
   console.error(mismatches.slice(0, 12).join("\n"));
   console.error(`scratch: ${scratch}`);
   process.exit(1);

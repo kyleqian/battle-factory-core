@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   SLUDGE_POISON_BUBBLE_OFFSETS,
   SLUDGE_POISON_BUBBLE_START_AGES,
+  sludgeDisplayedTargetOffsetAtAge,
   sludgeEffectAtAge,
+  sludgeSpritesBackToFrontAtAge,
   sludgeTargetPaletteYAtAge,
 } from "../../src/animation/sludge.ts";
 
@@ -37,12 +39,18 @@ describe("MOVE_SLUDGE source-relative reducer", () => {
     });
     expect(player(101).sprites).toHaveLength(1);
     expect(player(102).sprites).toHaveLength(0);
+    expect(sludgeSpritesBackToFrontAtAge(
+      58, "player", { x: 72, y: 100 }, { x: 176, y: 42 },
+    ).map((sprite) => sprite.oamSlot)).toEqual([5, 4, 3]);
   });
 
   it("uses the literal target ShakeMon argv (3, 0, 5, 1)", () => {
     expect([40, 41, 42, 43, 44, 45, 46, 47, 48, 49].map(
       (age) => player(age).targetOffset.x2,
     )).toEqual([0, 0, 0, 3, 3, 0, 0, 3, 3, 0]);
+    expect([40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50].map(
+      (age) => sludgeDisplayedTargetOffsetAtAge(age, 1).x2,
+    )).toEqual([1, 1, 3, 0, 0, 3, 3, 0, 0, 3, 3]);
   });
 
   it("ports the delay-1 two-leg target palette cycle", () => {

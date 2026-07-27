@@ -544,6 +544,7 @@ import milkDrinkAsset from "../animation/assets/milk-drink.json" with { type: "j
 import supersonicAsset from "../animation/assets/supersonic.json" with { type: "json" };
 import waterGunAsset from "../animation/assets/water-gun.json" with { type: "json" };
 import acidAsset from "../animation/assets/acid.json" with { type: "json" };
+import sludgeAsset from "../animation/assets/sludge.json" with { type: "json" };
 import hardenAsset from "../animation/assets/harden.json" with { type: "json" };
 import calmMindAsset from "../animation/assets/calm-mind.json" with { type: "json" };
 import shadowBallAsset from "../animation/assets/shadow-ball.json" with { type: "json" };
@@ -646,6 +647,7 @@ import {
   sceneOnSupersonicView,
   sceneOnWaterGunView,
   sceneOnAcidView,
+  sceneOnSludgeView,
   sceneOnEarthquakeView,
   sceneOnHardenView,
   sceneOnCalmMindView,
@@ -674,6 +676,7 @@ import {
 import { speciesFrontIdleRestOffset } from "../animation/speciesIdleAnim.ts";
 import { encoreTargetX2AtAge } from "../animation/encore.ts";
 import { dragonClawDisplayedAttackerShakeY } from "../animation/dragonClaw.ts";
+import { sludgeDisplayedTargetOffsetAtAge } from "../animation/sludge.ts";
 import {
   SITRUS_ITEM_HEAL_TEXT_FIRST_AGE,
   SITRUS_ITEM_TEXT_CLEAR_AGE,
@@ -956,6 +959,11 @@ const acidArt = acidAsset as {
   poisonBubble: { tileset: Tileset; palette: RgbColor[] };
   ekansBack: { tileset: Tileset; palette: RgbColor[] };
   ekansFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const sludgeArt = sludgeAsset as {
+  poisonBubble: { tileset: Tileset; palette: RgbColor[] };
+  grimerBack: { tileset: Tileset; palette: RgbColor[] };
+  grimerFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const hardenArt = hardenAsset as {
   metal: { tileset: Tileset; tilemap: Tilemap; palette: RgbColor[] };
@@ -15253,6 +15261,155 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "IVYSAUR used" : "Foe IVYSAUR used",
       "GROWTH!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SLUDGE") {
+    const view = sceneOnSludgeView(state);
+    // Tasks/sprites update RAM after this display's OAM and palette transfer.
+    const displayed = sceneOnSludgeView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "GRIMER"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "GRIMER"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged SLUDGE pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const grimerSource = playerToOpponent
+      ? sludgeArt.grimerBack
+      : sludgeArt.grimerFront;
+    const grimerSprite = playerToOpponent
+      ? grimerSource
+      : {
+          ...grimerSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: grimerSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const onixSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    const targetIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    // Script-created task writes pass through RunTasks, BuildOamBuffer, then
+    // the following VBlank: battler x2 therefore trails reducer RAM by two
+    // displays, one more than the effect sprites and palette transfer.
+    const targetOffset = sludgeDisplayedTargetOffsetAtAge(
+      state.age,
+      targetIdle.x2,
+    );
+    drawSpriteSheetAffineStretch(
+      fb,
+      onixSprite.tileset,
+      onixSprite.palette,
+      view.target.geometry.spriteCorner.x,
+      view.target.geometry.spriteCorner.y,
+      256,
+      256,
+      targetIdle.y2,
+      { r: 247, g: 0, b: 255 },
+      displayed.defenderPaletteY,
+      false,
+      targetOffset.x2,
+    );
+    const drawSludgeSprite = (
+      sprite: (typeof displayed.sprites)[number],
+    ) => {
+      const tile = sprite.kind === "projectile" ? 8 : 0;
+      const art = {
+        columns: 2,
+        rows: 2,
+        tiles: sludgeArt.poisonBubble.tileset.tiles.slice(tile, tile + 4),
+      };
+      drawSpriteSheetAffineRotate(
+        fb,
+        art,
+        sludgeArt.poisonBubble.palette,
+        sprite.x,
+        sprite.y,
+        sprite.xScale,
+        0,
+        0,
+        sprite.yScale,
+        undefined,
+        sprite.kind === "projectile",
+      );
+    };
+    const drawProjectiles = () => {
+      for (const sprite of displayed.sprites) {
+        if (sprite.kind === "projectile") drawSludgeSprite(sprite);
+      }
+    };
+    const drawGrimer = () => drawSpriteSheet(
+        fb,
+        grimerSprite.tileset,
+        grimerSprite.palette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+      );
+    // SortSprites' side-relative battler subpriority puts the player-back
+    // attacker over its launch, but the opponent-front launch over Grimer.
+    // Poison bubbles retain their low OAM indices and appear over the target.
+    if (playerToOpponent) drawProjectiles();
+    drawGrimer();
+    if (opponentToPlayer) drawProjectiles();
+    for (const sprite of displayed.sprites) {
+      if (sprite.kind === "poisonBubble") drawSludgeSprite(sprite);
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "GRIMER";
+    const playerSpecies = playerToOpponent ? "GRIMER" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "GRIMER used" : "Foe GRIMER used",
+      "SLUDGE!",
       99,
     );
     return;
