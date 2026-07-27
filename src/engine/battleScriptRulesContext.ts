@@ -46,6 +46,8 @@ import { createBattleScriptNegativedamageOpcodeHandlers } from "./battleScriptNe
 import { createBattleScriptTrysetrestOpcodeHandlers } from "./battleScriptTrysetrestOpcode.ts";
 import { createBattleScriptJumpifstatOpcodeHandlers } from "./battleScriptJumpifstatOpcode.ts";
 import { createBattleScriptPlaystatchangeanimationOpcodeHandlers } from "./battleScriptPlaystatchangeanimationOpcode.ts";
+import { createBattleScriptTryinfatuatingOpcodeHandlers } from "./battleScriptTryinfatuatingOpcode.ts";
+import { createBattleScriptJumpifconfusedandstatmaxedOpcodeHandlers } from "./battleScriptJumpifconfusedandstatmaxedOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -208,6 +210,17 @@ type BattleScriptMoveEndBattlerMetadata = Readonly<{
   types: readonly [string, string];
   /** Source gBattleMons[battler].species - Lucky Punch/Stick's species-gated crit stage boost. */
   species: number;
+  /**
+   * Source gBattleMons[battler].personality. Cmd_tryinfatuating rereads
+   * species/personality from the party mon via GetMonData rather than
+   * gBattleMons directly (battle_script_commands.c:7656-7671), but this
+   * engine has no Transform species/personality divergence yet
+   * (B_SCR_OP_TRANSFORMDATAEXECUTION is unregistered), so the party value
+   * and gBattleMons[battler].personality are always identical -- reading it
+   * off the already-modeled per-battler state is exact, matching the
+   * `species` field above's own precedent.
+   */
+  personality: number;
   /** Source gBattleMons[battler].{attack,defense,spAttack,spDefense,level} - CalculateBaseDamage's raw stat inputs. */
   attack: number;
   defense: number;
@@ -308,6 +321,7 @@ export type BattleScriptRulesBattler = BattleScriptRulesBattlerBase & Readonly<{
   protectSpecialBattlerId?: BattleScriptBattlerId;
   types?: readonly [string, string];
   species?: number;
+  personality?: number;
   attack?: number;
   defense?: number;
   spAttack?: number;
@@ -1812,6 +1826,7 @@ export function createBattleScriptRulesContext(
       })(),
     ) as unknown as readonly [string, string],
     species: requireUnsigned(battler.species ?? 0, 0xffff, `battlers[${index}].species`),
+    personality: requireUnsigned(battler.personality ?? 0, 0xffff_ffff, `battlers[${index}].personality`) >>> 0,
     attack: requireUnsigned(battler.attack ?? 0, 0xffff, `battlers[${index}].attack`),
     defense: requireUnsigned(battler.defense ?? 0, 0xffff, `battlers[${index}].defense`),
     spAttack: requireUnsigned(battler.spAttack ?? 0, 0xffff, `battlers[${index}].spAttack`),
@@ -2212,6 +2227,8 @@ export function createBattleScriptStatusRulesHandlers(
       isControllerIdle: sourceExternalPorts.isControllerIdle,
       resolveBattlerForBattleScript: resolveRulesBattlerForBattleScript,
     }),
+    ...createBattleScriptTryinfatuatingOpcodeHandlers(program),
+    ...createBattleScriptJumpifconfusedandstatmaxedOpcodeHandlers(program),
   });
 }
 

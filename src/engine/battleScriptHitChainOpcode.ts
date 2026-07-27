@@ -3213,7 +3213,8 @@ const DEFAULT_STAT_STAGES = Object.freeze([
   DEFAULT_STAT_STAGE, DEFAULT_STAT_STAGE, DEFAULT_STAT_STAGE, DEFAULT_STAT_STAGE,
 ]) as unknown as BattleScriptStatStages;
 
-function statusInfatuatedWithBit(battler: BattleScriptBattlerId): number {
+/** include/constants/battle.h:143 `STATUS2_INFATUATED_WITH(battler)` -- exported so Cmd_tryinfatuating's write and this file's own cleareffectsonfaint clear share the identical bit formula. */
+export function statusInfatuatedWithBit(battler: BattleScriptBattlerId): number {
   return (1 << (16 + battler)) >>> 0;
 }
 
