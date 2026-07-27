@@ -1,4 +1,1308 @@
 ---
+## 499 — [BOUNDED WORKER 2026-07-27 ~03:45] Thrash Rung 5 landed: ENDTURN_THRASH end-turn case (lock countdown + final-turn confusion transition) — plus a real design-doc gap in the ThrashConfuses gating condition
+
+- **State:** tree green at **235 files / 3311 tests** (+6 tests over this
+  session's own starting baseline, 235/3305 — that starting count already
+  included a side-lane merge landed after entry 498 was written, not a
+  discrepancy), `npm run build` clean. Census re-run **byte-identical**
+  (94/214 effects, 191/355 moves, 153/276 Factory-L50, 1900/2957 weighted,
+  `git status --porcelain docs/executable-frontier-census.md` empty) —
+  expected and confirmed: like Rungs 2/3, this is an end-turn-tick reducer
+  change, not a move-execution dispatch change, so the census (which only
+  walks move scripts) has nothing new to count. `executableFrontierRatchet
+  .test.ts` unmoved (6/6 green, zero new barriers — this rung wires an
+  *existing* reachable case-barrier into a real reducer rather than adding
+  an `unsupportedBranch` call site).
+- **Did:** landed `docs/yawn-thrash-endturn-design.md` §4/Rung 5 exactly as
+  scoped. New `runThrashTick` in `battleEndTurnOrchestration.ts`, replacing
+  the `:1183`-area case-barrier (`STATUS2_LOCK_CONFUSE set but
+  BattleScript_ThrashConfuses is not wired`) Rung 4 made live for the first
+  time: (1) decrements `STATUS2_LOCK_CONFUSE` by one turn unit (new
+  `BATTLE_SCRIPT_STATUS2_LOCK_CONFUSE_TURN_1` constant in
+  `battleScriptSourceConstants.ts`, same shape as Yawn's own `_TURN_1`);
+  (2) `WasUnableToUseMove` takes priority over the lock-expiry branch — this
+  rung's own required first action (per the design doc's `UNVERIFIED` flag)
+  found it **already fully ported** as `wasBattleScriptBattlerUnableToUseMove`
+  (`battleScriptRulesContext.ts:892-906`, the exact 9-flag OR-chain, already
+  exercised by `battleScriptMoveEndControllers.ts:209`) — not a gap to fill,
+  same "already built, just verify" shape as Rung 4's own `gLockedMoves`
+  finding; when true, the shared `cancelBattleScriptMultiTurnMoves` helper
+  (already landed for Yawn/admission) clears the WHOLE lock outright, no
+  confusion, regardless of counter value; (3) on the lock-expiry branch,
+  extracted `applyConfusionMoveEffect`'s own state-mutation body into a new
+  exported `applyConfusionStatus2Mutation` (`battleScriptHitChainOpcode.ts`)
+  — same Own-Tempo/already-confused early-out + `(Random() % 4) + 2` duration
+  roll + status2 write, now shared by both the move-execution CONFUSION case
+  and this end-turn call site instead of duplicated; refactor is behavior-
+  preserving (`applyConfusionMoveEffect`'s own existing tests all still pass
+  unchanged). Ported the `hp === 0` early-out too (`SetMoveEffect`'s own
+  generic gate, not primary-gated, unlike the dead Shield-Dust/Safeguard/
+  Substitute checks — those three ARE dead here, cited why in-file).
+- **Real citation gap found and fixed (verify-each-citation bar, same class
+  as Rung 4's `jumpifstatus2` finding):** the design doc's §4 prose
+  characterizes the reducer as "run `BattleScript_ThrashConfuses` via
+  `runTickScript`" without naming source's own inner gate,
+  `if (status2 & STATUS2_CONFUSION) BattleScriptExecute(BattleScript_
+  ThrashConfuses)` (`battle_util.c:1688-1689`) — verified directly against
+  source this session: the script only runs when `SetMoveEffect`'s own
+  confusion branch actually wrote the bit (i.e. NOT Own Tempo, NOT hp===0).
+  An Own-Tempo-holding or fainted lock-in target clears its lock **silently
+  — no script, no message** — ported as an explicit `mutation.confused`
+  branch, not assumed unconditional. Also verified live: source's own
+  `!(status2 & STATUS2_CONFUSION)` outer gate (guarding the whole SetMoveEffect
+  call) is genuinely LIVE at this call site (an opponent's own confusion
+  move could pre-empt it), unlike `applyThrashMoveEffect`'s dead inner
+  check — flagged explicitly rather than assumed dead by analogy.
+- **Rung 4's own remainder note (WasUnableToUseMove `UNVERIFIED`) resolved:**
+  confirmed already-built, cited above — no new module touched for it.
+- **Tier-1 (+6, new "ENDTURN_THRASH" describe block in
+  `tests/battleEndTurnOrchestration.test.ts`):** mid-lock decrement (no
+  confusion, zero RNG); final-turn transition (MULTIPLETURNS clears,
+  `STATUS2_CONFUSION` lands via the exact `(Random() % 4) + 2` roll, exactly
+  1 RNG draw, `result.kind === "next-turn"` proving `BattleScript_
+  ThrashConfuses` runs cleanly to its own `end2` — the brief's own asked-for
+  pass-through test); `WasUnableToUseMove` (flinchImmobility) cancelling the
+  whole lock outright even on what would've been the final turn, zero RNG;
+  already-confused-from-another-source blocking the transition (MULTIPLETURNS
+  still clears, existing confusion duration untouched); Own Tempo blocking
+  the confusion write silently (zero RNG, no script); no-lock-bit-set no-op.
+  The `hp === 0` gate is ported but **not independently Tier-1-pinned**
+  (documented in-file): constructing a battler at hp===0 through the full
+  `runBattleEndTurnOrchestration` harness always routes into
+  `HandleFaintedMonActions`'s own switch-decision barrier
+  (`GetMostSuitableMonToSwitchInto`'s unmodeled AI_CalcDmg fallback)
+  regardless of Thrash state — confirmed live with a plain hp===0 probe
+  fixture carrying zero Thrash state, same barrier — staging a genuine
+  same-pass faint plus a real switch decision is out of proportion here.
+- **Live fixture: NOT attempted — Tier-1-only**, an explicitly acceptable
+  resting point per the brief. Rung 4's own TAUROS live-fixture remainder
+  (lock-in bits across turns + confusion onset, read-only) is still open;
+  folding it into one TAUROS fixture spanning lock-in start through
+  confusion onset is the natural live-fixture followup, not attempted this
+  session (time went to the citation-verification finding above instead).
+- **Next:** Rung 6 (a second `ENDTURN_ITEMS2` trigger fixture, Persim Berry
+  curing Thrash-fresh confusion — verification-only, zero new code per the
+  design doc's own §7) is next on the ladder and explicitly NOT started per
+  this step's own scope boundary — the next session's natural first brief.
+  The TAUROS live-fixture remainder (Rung 4+5 combined) is also open, either
+  as Rung 6's own prerequisite live-proof or a parallel pickup.
+- **Notes:** no PAPERCUT. Archived entry 496 to `PROGRESS-archive.md` to
+  keep this ledger at 3 entries. The `BattleScriptExecute` conditional gap
+  (a real blocker the design doc's own prose glossed over) was the only real
+  deviation from plan — found by tracing the source's own nested `if`
+  directly rather than trusting the prose summary, fixed narrowly via the
+  `mutation.confused` branch, and named here per the brief's own
+  prove-or-refute bar.
+
+---
+## 498 — [BOUNDED WORKER 2026-07-27 ~03:05] Thrash Rung 4 landed: CONFUSEIFREPEATINGATTACKENDS + MOVE_EFFECT_THRASH lock-in start — plus a real jumpifstatus2 gap the design doc's own citation table missed
+
+- **State:** tree green at **234 files / 3300 tests** (+1 file/+7 tests over
+  entry 497's 233/3293), `npm run build` clean. `executableFrontierRatchet
+  .test.ts` unmoved (6/6 green, **zero new barriers** — the new opcode file
+  has no `unsupportedBranch` call at all, same shape as Rung 1's
+  `battleScriptSetyawnOpcode.ts`; widening `JUMPIFSTATUS2_VALUES`'s Map
+  doesn't add a call site either). Census: **94/214 effects (+1), 191/355
+  moves (+3), 153/276 Factory-L50 unweighted (+2), 1900/2957 weighted (+6)**
+  — `EFFECT_RAMPAGE` flips `blocked-on-opcodes` → `executable`; smaller than
+  the design doc's own raw-catalog estimate (9 entries, 2+2+5 unweighted)
+  because that count wasn't rental-tier-filtered, same shape as Rung 1's own
+  raw-vs-weighted correction (entry 494).
+- **UNVERIFIED item resolved (this rung's own required first action,
+  design doc §3):** `gLockedMoves[battler]`/forced-repeat-move selection is
+  **NOT modeled anywhere in this engine, and deliberately stays that way.**
+  Grepped `battleScriptActionAdmission.ts`'s existing `STATUS2_MULTIPLETURNS`
+  references first, per the brief — all of them are Bide's own counter/
+  clearing-owner tracking (`:3163-3379`) or the no-PP-block check
+  (`:3696-3710`); none reads `gLockedMoves` or re-derives which move a
+  battler uses. Source's real reader is `HandleAction_UseMove`
+  (`battle_util.c:79-135`), the per-battler "which move does this turn
+  execute" dispatcher that runs once per action, *before*
+  `Cmd_attackcanceler`/this engine's Battle Script machine ever starts —
+  grepped for it directly (`HandleAction_UseMove`, `gChosenMoveByBattler`,
+  `noValidMoves`, `encoredMove`) across `src/`: zero hits outside doc-comment
+  citations. Confirmed architecturally, not just by absence: every call site
+  that starts a move's execution anywhere in this codebase
+  (`factoryBattleScriptFullTurnDecision.ts:568-599`'s `buildActionContext`/
+  `runMoveAction`, every Tier-1/battle-lab fixture) takes the move id as a
+  **given external input**, never derives it internally — there is no
+  ported `HandleAction_UseMove` equivalent for `gLockedMoves` to plug into
+  at any layer. Landed the same way `runYawnTick` (Rung 2) omitted
+  `UproarWakeUpCheck` and `applySetMoveEffect`'s own `MOVE_EFFECT_SLEEP`/
+  `MOVE_EFFECT_FREEZE` cases already omit `CancelMultiTurnMoves`: cited,
+  proven-unobservable state writes are skipped, not ported as dead fields.
+  Not a Rung 4b split — there was no subsystem-sized gap to split, only a
+  one-line write with no reader anywhere in scope.
+- **Real citation gap found and fixed (verify-each-citation bar, not a
+  planned deliverable):** the design doc's §3 script enumeration marked
+  `jumpifstatus2 BS_ATTACKER, STATUS2_MULTIPLETURNS, BattleScript_
+  EffectRampage2` as `[registered]` — true only for the bare *opcode*;
+  `Cmd_jumpifstatus2`'s operand-VALUE narrowing (`battleScriptStatbuffchangeOpcode.ts`'s
+  `JUMPIFSTATUS2_VALUES` map) covered only `STATUS2_SUBSTITUTE`/
+  `STATUS2_CONFUSION`, not `STATUS2_MULTIPLETURNS` — confirmed live: a
+  from-`BattleScript_EffectRampage` pass-through test halted on
+  `unsupported-branch` at this exact instruction, on the very first
+  Thrash-family use, before `confuseifrepeatingattackends` was ever
+  reached. Widened the Map with `STATUS2_MULTIPLETURNS` (same (a)-real,
+  same-shape widening as the existing CONFUSION entry) — real, reachable,
+  load-bearing for every Thrash/Outrage/Petal Dance use, not (b) material.
+  Zero ratchet impact (widening the Map isn't a new `unsupportedBranch` call
+  site). Fixed two now-stale pre-existing tests that depended on the old
+  gap: `battleScriptStatbuffchangeOpcode.test.ts`'s barrier test (picked
+  "first non-SUBSTITUTE jumpifstatus2 site" as its halt example, which was
+  exactly this Rampage instruction — repointed to an explicit still-
+  unsupported set) and `battleScriptRulesContext.test.ts`'s 109-handler
+  inventory test (now 110, `+140`).
+- **Did:** new `battleScriptConfuseifrepeatingattackendsOpcode.ts`
+  (`Cmd_confuseifrepeatingattackends`, `battle_script_commands.c:7131-7136`,
+  zero operands, no jump target — stages `moveEffectByte = MOVE_EFFECT_THRASH
+  |MOVE_EFFECT_AFFECTS_USER` only when the attacker isn't already
+  `STATUS2_LOCK_CONFUSE`'d, else leaves it untouched, always advances),
+  registered under `B_SCR_OP_CONFUSEIFREPEATINGATTACKENDS` (opcodeId 140) in
+  `battleScriptRulesContext.ts`. New `applyThrashMoveEffect` case in
+  `battleScriptHitChainOpcode.ts`'s `applySetMoveEffect` (`MOVE_EFFECT_THRASH`
+  = 53, widened into `SET_MOVE_EFFECT_SUPPORTED_BYTES`): single early-out on
+  `STATUS2_LOCK_CONFUSE` already set (source's own inner `if` is dead here —
+  `sStatusFlagsForMoveEffects[MOVE_EFFECT_THRASH] == STATUS2_LOCK_CONFUSE`
+  means the shared family-B early-out already excludes it, verified by
+  direct read of `:2523-2524`, same single-early-out shape as
+  `applyFlinchMoveEffect`/`applyWrapMoveEffect`), else sets
+  `STATUS2_MULTIPLETURNS | STATUS2_LOCK_CONFUSE_TURN((Random()&1)+2)` and
+  **advances (no script call)** — unlike every status1-family case and
+  `MOVE_EFFECT_CONFUSION`, `SetMoveEffect`'s own THRASH case just `break`s.
+- **Tier-1 (+7, new `tests/battleScriptConfuseifrepeatingattackendsOpcode
+  .test.ts`):** direct opcode tests (stages the byte when unlocked, leaves
+  it untouched when locked, zero RNG either way); `applySetMoveEffect` case
+  tests via the established `stepAtSetEffectWithChance`-style direct-PC-patch
+  convention (Wrap's own precedent) — not-locked path draws exactly 2 RNG
+  calls (seteffectwithchance's own unconditional percentChance roll,
+  MOVE_THRASH's `secondaryEffectChance=100` still calls `Random()` per house
+  convention, plus the nested duration draw), turns land in [2,3], attacker
+  only (target untouched, confirming `MOVE_EFFECT_AFFECTS_USER` routing);
+  already-locked path draws exactly 1 (seteffectwithchance's own roll only,
+  no nested draw). Plus the pass-through test the brief asked for: real
+  script wiring from `BattleScript_EffectRampage` through attackcanceler/
+  accuracycheck/attackstring/(jumpifstatus2)/ppreduce/confuseifrepeatingatt
+  ackends into `BattleScript_HitFromCritCalc`, both fresh (ppreduce runs,
+  byte staged) and already-mid-lock (jumpifstatus2 skips straight to
+  `BattleScript_EffectRampage2`, ppreduce does NOT re-run) — the **lock-in
+  START runs to completion**, per this rung's own scope (the confusion END
+  is Rung 5, not attempted). Stops at `BattleScript_HitFromCritCalc`'s own
+  entry rather than running through real damage calc, matching this
+  codebase's established convention (`battleScriptHitChainOpcode.test.ts`'s
+  own `stepAtOpcode` comment: "critcalc/damagecalc/typecalc all recompute
+  battleMoveDamage from the battlers' raw stats, which a focused
+  single-opcode test does not want to also have to set up realistically").
+- **Live fixture: NOT attempted this session — Tier-1-only.** Per the
+  brief's own time-split guidance, landing the opcode+case+citation-gap-fix
+  with tests green is the deepest committable resting point; a real TAUROS
+  (`MOVE_THRASH`, Factory-L50 carrier per the design doc's own table)
+  live-fixture observation of the lock-in bits landing is the clean
+  remainder for whoever picks this back up (either finishing Rung 4's own
+  live corroboration, or folding it into Rung 5's own TAUROS fixture per
+  §7's Rung 5 pass-through test description, which already plans to extend
+  "Rung 4's TAUROS fixture").
+- **Next:** Rung 5 (`ENDTURN_THRASH` — wiring the already-scaffolded
+  case-barrier at `battleEndTurnOrchestration.ts` into a real reducer,
+  extracting/reusing `applyConfusionMoveEffect`'s state-mutation logic and
+  calling `BattleScript_ThrashConfuses` via `runTickScript`, **never**
+  `BattleScript_MoveEffectConfusion` per §4's load-bearing discard finding)
+  is next per the design doc's own ladder — explicitly out of scope for
+  this step and not started. Landing Rung 4 makes `ENDTURN_THRASH`'s
+  case-barrier live for the first time (any battler with `STATUS2_LOCK_
+  CONFUSE` now reaches its next end-turn pass) — this is the ratchet
+  working as intended (loud, named barrier) if some future fixture reaches
+  it before Rung 5 lands, not a regression. `WasUnableToUseMove`
+  (`battle_util.c:890-902`) is Rung 5's own first UNVERIFIED action per the
+  design doc, unstarted here.
+- **Notes:** no PAPERCUT. Archived entry 495 to `PROGRESS-archive.md` to
+  keep this ledger at 3 entries. The `jumpifstatus2` gap (a real blocker
+  the design doc's own census missed, same shape as Rung 1's accuracycheck
+  gap) was the only real deviation from plan — found by verifying the
+  citation live rather than trusting the table, fixed narrowly, and named
+  here per the brief's own prove-or-refute bar.
+
+---
+## 497 — [BOUNDED WORKER 2026-07-27 ~02:40] `turn3-rockslide.json` wired from kernel semantic events — closes the entire Grovyle ROCK_SLIDE HP chain (turns 1/3/4/5 all staged now)
+
+- **State:** tree green at **233 files / 3293 tests** (unchanged — this step
+  is pure wiring, no new tests; matches the count already banked at the
+  `docs/presentation-seam-scout.md` §10 prep-scout commit, `e5465e4`),
+  `npm run build` clean. `executableFrontierRatchet.test.ts` unmoved (6/6
+  green, no new barrier — this step touches zero opcodes).
+- **Did:** executed §10.3's ordered wiring plan exactly, in `battleScene.ts`
+  only (the staging module `turn3RockSlidePresentationStaging.ts` and its
+  test landed with §10, unwired — consumed here, not rebuilt): (1) imported
+  `resolveTurn3RockSlideHpEndpoints` and hoisted a module-level
+  `TURN3_ROCKSLIDE_HP` constant (mirroring `TURN4_ROCKSLIDE_HP`'s own
+  pattern); `drawTurn3RockSlideAttack` (`:6707`) and
+  `drawTurn3RockSlideTurnEndSettledMenu` (`:6744`) now read
+  `TURN3_ROCKSLIDE_HP.from`/`.to` instead of the direct
+  `anchorOpponentAfterTurn2Hp`/`anchorOpponentAfterTurn3Hp` literal reads;
+  (2) `drawTurn3RockSlideWindow`'s attack-text branch now reads the
+  already-resolved `TURN1_ROCKSLIDE_ATTACK_LINE1/2` constants instead of the
+  raw `ROCK_SLIDE_LINE1`/`ROCK_SLIDE_LINE2` literals — the fourth and final
+  ROCK_SLIDE call site to make this swap (turns 1/5 already had; turn 4 never
+  needed to). (3) Left `anchorPlayerAfterTurn3Hp`'s steady overlay (Onix's own
+  HP, not a drain endpoint of this window) as a literal, per §10.3 step 3's
+  own "narrow to what's actually unblocked" instruction — named, not
+  silently skipped. No new rendering branches; choreography helpers
+  (`rockSlideBg3Y`/`rockSlideRockState`/etc.) untouched, byte-for-byte, per
+  §10.2's own "zero code changes needed" finding.
+- **Acceptance (§10.4's bar, all re-run this session from this lane's
+  Battle-Scene-OFF oracle, `127.0.0.1:8014`):** `turn3-rockslide.json`
+  **256/256** (both swaps landed clean on the first try — no bisection
+  needed), re-run twice for determinism, both 256/256. Named adjacent
+  regression sweep, all at their recorded counts, unchanged:
+  `turn3-endeavor.json` 192/192, `turn1-rockslide.json` 256/256,
+  `turn4-rockslide.json` 250/250, `turn5-rockslide.json` 256/256,
+  `turn5-faint.json` 110/110, `turn4-doubleteam.json` 250/250,
+  `turn4-menu.json` 44/44. `npm test` (233/3293) and `npm run build` both
+  green. Only `src/engine/battleScene.ts` touched (`git status --porcelain`
+  confirms); no docs/presentation-seam-scout.md edits (owned by this round's
+  side scout, per the step brief).
+- **Next:** the Grovyle ROCK_SLIDE HP chain (turns 1/3/4/5) is now fully
+  kernel-staged end to end — ISSUES #39's window-by-window retirement path
+  has one complete, closed arc as a template. Per §10's own "candidates
+  weighed" table, the next cheapest unconverted window is `turn3-endeavor.json`
+  (ONE new staged hit chain, 101->88, reusing `turn5EndeavorPresentationStaging
+  .ts`'s already-proven MOVE_ENDEAVOR pattern — same zero-new-code shape this
+  step just used) or `turn4-doubleteam.json`'s STAT_ROSE banner, now
+  possibly unblocked by this week's fresh `stat-stage-change` production
+  emission-site finding (§10's own intro note) but NOT yet verified live —
+  a future prep-scout's job, not assumed here. Yawn/Thrash rungs 4-6 remain
+  the other MAIN-lane program track (entry 496's own Next), independent of
+  this presentation-seam work.
+- **Notes:** no PAPERCUT. Archived entry 494 to `PROGRESS-archive.md` to keep
+  this ledger at 3 entries. Both §10.3 swaps were exactly as clean as the
+  scout claimed — no divergence to bisect, no literal left un-swapped beyond
+  the one §10.3 itself named as a residual (`anchorPlayerAfterTurn3Hp`).
+
+---
+## 496 — [BOUNDED WORKER 2026-07-27 ~02:10] Yawn Rung 3 landed: ENDTURN_ITEMS2 registered with real moveTurn gating — the item the whole Yawn track was roadmapped to unblock (entries 460-464) is now live
+
+- **State:** tree green at **232 files / 3286 tests** (+4 over entry 495's
+  3282), `npm run build` clean. Census re-run **byte-identical** (93/214
+  effects, 188/355 moves, 151/276 Factory-L50, 1894/2957 weighted, all 32
+  checks pass, `git status --porcelain docs/executable-frontier-census.md`
+  empty) — expected and confirmed: like Rung 2, this is an end-turn-tick
+  reducer change, not a move-execution dispatch change, so the census (which
+  only walks move scripts) has nothing new to count.
+  `executableFrontierRatchet.test.ts` unmoved (6/6 green, no new barrier —
+  zero new opcodes, per the design doc's own "zero additional opcode work"
+  finding, now proven true in practice not just analytically).
+- **Did:** landed `docs/yawn-thrash-endturn-design.md` §5/Rung 3 exactly as
+  scoped, re-verifying every row of §5's gate table against the raw C
+  switch (`battle_util.c:3257-3625`) rather than trusting the table blind —
+  confirmed both `ENDTURN_ITEMS1` and `ENDTURN_ITEMS2` call the exact SAME
+  `ItemBattleEffects(ITEMEFFECT_NORMAL, battler, moveTurn)` caseID
+  (`battle_util.c:1500-1505`), only the boolean differs (the design doc's
+  own prose didn't name the caseID explicitly; a first-draft test docstring
+  mislabeled it `ITEMEFFECT_MOVE_END` — a different, unrelated caseID used
+  elsewhere — caught during this session's own re-verification and fixed).
+  `runItemsTick` (`battleEndTurnOrchestration.ts:818`) now takes a
+  `moveTurn: boolean` fourth parameter; per §5's table, four rows
+  short-circuit to `"advance"` when `moveTurn` is true — `HOLD_EFFECT_
+  LEFTOVERS`, the Liechi/Salac/Petaya stat-up berries, and the `RESTORE_HP`/
+  `RESTORE_PP`/`UNREACHABLE_AT_FACTORY_L50` case-barriers (source's own case
+  does nothing at all at ITEMS2, so a barrier there would be spurious) —
+  White Herb and the 8 zero-RNG cure branches stay unconditional (no gate in
+  source). The `:992`-area `// ENDTURN_ITEMS2: ... no-op.` comment is
+  replaced with the real second call site (`moveTurn=true`), positioned
+  right after `ENDTURN_YAWN` per the real `turnEffectsTracker` enum order.
+- **Tier-1 (+4, `tests/battleEndTurnOrchestration.test.ts`, new "(g)
+  ENDTURN_ITEMS2" describe block):** three no-double-fire regression tests,
+  one per gated row class, each constructed so the row's fire condition is
+  **false at ITEMS1 but would turn true by ITEMS2** via an intervening burn
+  tick (the one modeled mid-tick HP mutator), proving the gate suppresses it
+  even then — not just when the condition was already false throughout:
+  **"Leftovers heals exactly once per tick"** (100/160 HP, heals to 110 —
+  NOT 120, which an ungated second ITEMS2 heal would produce); **"Liechi
+  Berry does NOT fire at ITEMS2 even though burn drops HP below its
+  threshold mid-tick"** (30 HP > 25-threshold at ITEMS1, burn deals 12 →
+  18 HP <=25 by ITEMS2, ATK stage stays 6, item uneaten); **"Sitrus Berry's
+  RESTORE_HP case-barrier does NOT fire at ITEMS2"** (55 HP > 50-threshold
+  at ITEMS1, burn deals 12 → 43 HP <=50 by ITEMS2, result stays "next-turn"
+  not "case-barrier"). Named in-file: `RESTORE_PP`/`UNREACHABLE_AT_
+  FACTORY_L50` share the identical `!moveTurn &&` gate shape (verified by
+  direct code read) but have no modeled mid-tick PP/possession mutator to
+  exercise the same live before/after transition — not silently skipped,
+  explicitly called out as structurally unexercisable this rung. Plus the
+  brief's own called-for **REAL TRIGGER test**: a Chesto-Berry holder with
+  `STATUS3_YAWN_TURN_1` — Yawn's own transition writes the sleep bit, then
+  the SAME tick's `ENDTURN_ITEMS2` cures it before the sleep status is ever
+  "felt" (final `status1===0`, item consumed, exactly 1 RNG draw — Yawn's
+  own sleep-turn roll, the cure itself costs none), reusing Rung 2's staged
+  lifecycle as the vehicle per the brief.
+- **Live fixture (`tools/battle-lab/mechanic-yawn-endturn-items2-chesto-
+  off.json`, extends Rung 2's GULPIN-vs-MAGIKARP fixture with MAGIKARP now
+  holding a Chesto Berry, item 134):** confirms the engine's real-trigger
+  test against the ROM itself, not just analytically. Trajectory (frames
+  from a dense binary search, `/tmp` scratch captures, final curated list
+  banked in the fixture): **status1 0 → 5 at frame 1260** (`ENDTURN_YAWN`'s
+  sleep transition, "Foe MAGIKARP fell asleep!", matches Rung 2's own
+  ledger) → **status1 5 → 0 between frames 1308-1310** (the C-side
+  `status1 &= ~STATUS1_SLEEP` write happens as `BattleScript_
+  BerryCureSlpEnd2` starts, BEFORE its own message text even changes on
+  screen — the message still reads "fell asleep" through 1310) → **item
+  134 → 0 between frames 1462-1464** (screenshot: "Foe MAGIKARP's CHESTO
+  BERRY woke it from its sleep!", the script's own `removeitem` opcode
+  running ~150 frames after the C-side status write, same
+  status-clears-before-item-consumes delay pattern independently confirmed
+  against the ALREADY-BANKED `mechanic-endturn-items1-cure-par-off.json`
+  fixture, frames 613 vs 751). All within the SAME end-turn pass — no
+  further player input occurred after MAGIKARP's own turn-2 action, and the
+  whole Yawn→sleep→Chesto-cure sequence resolved automatically. This is the
+  design doc §5's own worked example, now live-proven both ways (engine
+  Tier-1 test + ROM oracle trace agree on final state).
+- **Next:** Rung 3 (ITEMS2, this step) closes the critical path 1→2→3 to
+  `ENDTURN_ITEMS2`. Rungs 4-6 (Thrash-family: `CONFUSEIFREPEATINGATTACKENDS`
+  + `MOVE_EFFECT_THRASH` move-execution, then `ENDTURN_THRASH`, then a
+  second `ENDTURN_ITEMS2` fixture via Persim Berry) are independent,
+  lower-priority follow-ups per the design doc's own §7 ladder — explicitly
+  out of scope for this step, next MAIN-lane program item if session time
+  allows. Rung 4's own first action (reading `battleScriptActionAdmission.ts`
+  for `gLockedMoves`/forced-repeat-move wiring) is un-started.
+- **Notes:** no PAPERCUT. Ratchet/census both unmoved, as expected and
+  confirmed (named above). Landed comfortably inside the ~40-minute
+  first-half guidance (moveTurn threading + gates + no-double-fire tests),
+  leaving the remainder for the live fixture (the harder half, per entry
+  495's own precedent of binary-searching transition frames) — both halves
+  finished inside the overall cap, so no remainder needs naming beyond
+  Rungs 4-6 above.
+
+---
+## 495 — [BOUNDED WORKER 2026-07-27 ~01:40] Yawn Rung 2 landed: ENDTURN_YAWN end-turn case (countdown decrement + real sleep transition) — live fixture reproduces the ROM's full 2-turn trajectory including the AND-chain firing
+
+- **State:** tree green at **232 files / 3282 tests** (+6 over entry 494's
+  3276), `npm run build` clean. Census re-run byte-identical (93/214
+  effects, 188/355 moves, 151/276 Factory-L50, 1894/2957 weighted, all 32
+  checks pass, `git status --porcelain docs/executable-frontier-census.md`
+  empty) — expected: this rung is an end-turn-tick reducer, not a
+  move-execution dispatch change, so the census (which only walks move
+  scripts) has nothing new to count; the real delta is qualitative
+  (`ENDTURN_YAWN`'s silent no-op comment is now a live-modeled case).
+  `executableFrontierRatchet.test.ts` unmoved (6/6 green, no new barrier —
+  this rung wires an *existing* reachable case rather than adding an
+  unsupported-branch barrier).
+- **Did:** landed `docs/yawn-thrash-endturn-design.md` §2 exactly as scoped.
+  New `runYawnTick` in `battleEndTurnOrchestration.ts`, replacing the
+  `:991`-area no-op comment in `runDoBattlerEndTurnEffects`: (1) decrements
+  `STATUS3_YAWN` by one turn unit every pass the mask is nonzero (new
+  `BATTLE_SCRIPT_STATUS3_YAWN_TURN_1` constant in
+  `battleScriptSourceConstants.ts`, mirroring Rung 1's `_TURN_2`); (2) on
+  the pass that empties the counter, runs the exact AND-chain
+  (`!status1 && ability != VITAL_SPIRIT/INSOMNIA`, reusing Rung 1's own
+  ability ids as a plain equality check, no opcode) before calling the
+  ALREADY-LANDED `cancelBattleScriptMultiTurnMoves`
+  (`battleScriptMultiTurnCancellation.ts`, confirmed by entry 494's own
+  de-risking note — no new helper needed) and drawing the sleep-turn RNG
+  (`(Random() & 3) + 2`, attributed to `BattleScript_YawnMakesAsleep`'s own
+  entry instruction, same "draw before the script starts" convention
+  `runShedSkinTick` established); (3) writes the raw sleep-turn count
+  directly into `status1` (guaranteed zero going in, so no OR needed,
+  unlike every other family-A status write) and syncs the party mirror;
+  (4) runs `BattleScript_YawnMakesAsleep` via the plain `runTickScript`
+  primitive (`BattleScriptExecute`+`end2`, no `END3` — confirmed opcode-
+  complete by Rung 1's own census). One real wiring detail Rung 1's own
+  scoping note didn't call out: `BattleScript_YawnMakesAsleep` reads
+  `BS_EFFECT_BATTLER` for all three of its battler-selector opcodes
+  (`statusanimation`/`updatestatusicon`/`makevisible`, matching source's own
+  `gEffectBattler = gActiveBattler`), but `enterTickBattlerContext` only
+  ever sets the `attacker` role (documented as narrowed to it, since every
+  prior DoTurnDmg-family script only reads `BS_ATTACKER`) — `runYawnTick`
+  sets `selectorRoles.effectBattler` explicitly itself, the first tick
+  reducer in this file that needs to. Re-verified against the raw C switch
+  body (`battle_util.c:1753-1771`, quoted in full) that Yawn's case has NO
+  `hp != 0` guard (unlike Curse/Wrap, which do) — the reducer correctly
+  omits one. `UproarWakeUpCheck`'s omission (STATUS2_UPROAR never set by
+  any production code) is cited in the reducer's own doc comment, not
+  re-verified again this session (already confirmed twice: doc §2 and entry
+  494's de-risking note).
+- **Tier-1 (+6, `tests/battleEndTurnOrchestration.test.ts`):** new `ENDTURN_
+  YAWN` describe block — first-pass decrement only (`TURN(2)->TURN(1)`,
+  zero RNG); second-pass transition (`TURN(1)->0`, `status1` sleep-turn
+  write matching the raw-byte convention, party mirror sync, exactly 1 RNG
+  draw, seed-pinned like the file's existing Shed Skin precedent: seed
+  919694434's first draw gives `(randomValue&3)+2 == 3`); each AND-chain
+  blocker still decrements to zero but does NOT transition (statused
+  target, Vital Spirit, Insomnia — 3 tests); no-yawn-set pure no-op. All
+  assert the RNG-draw-count convention (zero on decrement-only, one on
+  transition) explicitly.
+- **Live fixture (`tools/battle-lab/mechanic-yawn-endturn-transition-off.json`,
+  new sibling extending Rung 1's GULPIN-vs-MAGIKARP fixture with a second
+  turn's worth of input past the original 900-frame idle window):**
+  opponent (MAGIKARP) `status3` observed **0 → 4096/0x1000 (frame 180,
+  `setyawn`) → 2048/0x800 (frame 320, turn 1's `ENDTURN_YAWN` decrement,
+  matches Rung 1's own preview) → 0 (frame 1260, turn 2's `ENDTURN_YAWN`
+  decrement emptying the counter)**; `status1` observed **0 → 5** at the
+  SAME frame 1260 (`STATUS1_SLEEP_TURN(5)`, within the real 2-5 turn range,
+  raw-byte value with no OR — matches the engine's write exactly). Frame
+  1260 screenshot: "Foe MAGIKARP fell asleep!" (`STRINGID_PKMNFELLASLEEP`),
+  confirming `BattleScript_YawnMakesAsleep` actually ran. Between frames
+  320 and 1200 status3/status1 sit frozen at 2048/0 (confirmed at 900,
+  1080, 1100, 1120, 1200 during binary-search narrowing) because turn 2
+  needs its own manual FIGHT-menu input in this harness (message
+  `waitmessage`s auto-advance on their own timer; the top-level action menu
+  does not) — the added second `A`-press pair supplies exactly that, GULPIN
+  re-attempting Yawn on an already-yawning target (silently fails,
+  `ButItFailed`, no new state) while MAGIKARP's own end-turn tick empties
+  the counter and transitions. This is the ROM's real 2-turn countdown
+  end-to-end, not just Rung 1's single-decrement preview.
+- **Next:** Rung 3 (`ENDTURN_ITEMS2` + `moveTurn` gating) is explicitly the
+  next MAIN-lane brief per the design doc's own ladder — out of scope for
+  this step and deliberately not started (its `moveTurn`-threading work
+  deserves its own fresh cap, per this step's own brief). Rungs 4-6
+  (Thrash-family) remain independent, lower-priority follow-ups per the
+  design doc's own headline finding (Yawn alone unblocks `ENDTURN_ITEMS2`).
+- **Notes:** no PAPERCUT. Ratchet/census both unmoved, as expected for an
+  end-turn-tick wiring step (named above). Time split roughly matched the
+  brief's guidance: reducer + Tier-1 landed well inside 40 minutes, live
+  fixture extension (the trickiest part — finding where the harness froze
+  waiting for turn-2 input, then binary-searching the transition frame)
+  took the remainder but stayed inside the cap.
+
+---
+## 494 — [BOUNDED WORKER 2026-07-27 ~01:15] Yawn Rung 1 landed (SETYAWN + JUMPIFABILITY widening) — plus a real accuracycheck gap the design doc's own census missed
+
+- **State:** tree green at **232 files / 3276 tests** (+9 over entry 493's
+  3267), `npm run build` clean. Census: 93/214 effects (+1), 188/355 moves
+  (+1), 151/276 Factory-L50 unweighted (+1), 1894/2957 weighted (**+10, not
+  the design doc's ~14** — see below), all 32 checks pass.
+  `executableFrontierRatchet.test.ts`: **`battleScriptHitChainOpcode.ts`
+  barrier pin moved 22→23, named and justified in the ratchet's own comment**
+  — a real widening (8 of 11 non-`ACC_CURR_MOVE` `accuracycheck` sites now
+  execute instead of halting) that adds exactly one new named barrier
+  (`STATUS3_ALWAYS_HITS`/Lock-On, mirroring the existing `ACC_CURR_MOVE`
+  branch's identical barrier, provably unreachable today).
+- **Did:** landed `docs/yawn-thrash-endturn-design.md` Rung 1 exactly as
+  scoped — new `battleScriptSetyawnOpcode.ts` (`Cmd_setyawn`,
+  `battle_script_commands.c:9352-9364`, two-branch jump on
+  `STATUS3_YAWN|status1` gate, writes `STATUS3_YAWN_TURN(2)`), two new
+  `BATTLE_SCRIPT_STATUS3_YAWN`/`_TURN_2` constants, and widened
+  `JUMPIFABILITY_VALUES` (`battleScriptIngrainLeechSeedWrapOpcode.ts`) with
+  `ABILITY_VITAL_SPIRIT`(72)/`ABILITY_INSOMNIA`(15). No (b) barrier material
+  needed for either, confirming the doc's own claim.
+- **CONFIRM-OR-CORRECT finding (real, not assumed):** the doc's own §0 opcode
+  census marked `accuracycheck BattleScript_ButItFailed,
+  NO_ACC_CALC_CHECK_LOCK_ON` — Yawn's own accuracy check — "`[registered]`"
+  because `B_SCR_OP_ACCURACYCHECK` has a dispatch entry, but that entry was
+  narrowed to ONLY the `ACC_CURR_MOVE` operand form; the `NO_ACC_CALC_CHECK_
+  LOCK_ON` literal (a completely different source branch, `battle_script_
+  commands.c:1103-1113`, that skips the `Random()` accuracy roll entirely)
+  hit `unsupportedBranch` every time — confirmed live via a debug run before
+  writing any fix. This would have blocked Rung 1's own pass-through test
+  outright, so it was in-scope to fix, not deferred: added
+  `accuracycheckNoAccCalcCheckLockOn` (sure-hit Lock-On barrier reusing the
+  `ACC_CURR_MOVE` branch's own precedent; semi-invulnerable bare-jump miss;
+  `JumpIfMoveAffectedByProtect(0)`'s Protect gate, which reads `gCurrentMove`
+  for its flag check despite the literal `0` argument). Net effect: **Yawn's
+  own move-use side draws ZERO `Random()` calls** (not 1, as I first assumed
+  by analogy to Thunder Wave's `ACC_CURR_MOVE` accuracy roll) — this actually
+  matches, not contradicts, the design doc's own §2 remark that end-turn's
+  sleep-turn roll is "the only `Random()` in end-turn" for the whole Yawn
+  mechanic. 7 of the 8 `NO_ACC_CALC_CHECK_LOCK_ON` sites besides Yawn's own
+  remain barriered behind their own separate unregistered opcodes (Roar,
+  OHKO, Mimic, Pain Split, Curse, Role Play, Skill Swap) — this fix only
+  widens the shared opcode's operand-form dispatch, it doesn't newly unblock
+  any of those scripts end-to-end.
+- **Second finding, in the census refresh itself:** the doc's §1c "14 unique
+  Factory L50 carrier species" for `MOVE_YAWN` was counted against the raw
+  882-entry `battle-frontier-mons.json` catalog with no tier filter. The
+  census's own weighted metric restricts to `factory-round-policy.json`'s
+  `rentalSelection.ranges.level50` (a union of real `GetFactoryMonId` rank
+  bands, effectively indices 110-849 of the 882) — 6 of the doc's 14 species
+  (WOOPER, TOGEPI, SLUGMA, SLAKOTH, **GULPIN**, SLOWPOKE, all at catalog
+  indices <110) fall outside every modeled Level-50 rental-rank band, leaving
+  8 species / 10 catalog entries (WARTORTLE, TOGETIC, WALREIN, SLAKING ×3,
+  QUAGSIRE, SLOWBRO, SLOWKING, URSARING) — exactly the census's own
+  precomputed `frontierMonCount:10, speciesCount:8` for `MOVE_YAWN`, and
+  exactly the +10 observed. GULPIN (the brief's own suggested live-fixture
+  species) is one of the excluded six — the live fixture below still proves
+  the mechanic correctly (mechanicLab's `overrides.parties` explicitly
+  permits any species regardless of real rental-draft legality), it just
+  isn't itself evidence of a Level-50-legal encounter; QUAGSIRE or
+  SLOWBRO/SLOWKING would be if that distinction mattered for a future step.
+- **Tests (+9):** `tests/battleScriptSetyawnOpcode.test.ts` (new, 5): sets
+  `STATUS3_YAWN_TURN(2)` on ordinary landing (zero RNG) / no-ops (fails) when
+  already yawning or status1-nonzero / `ButItFailed` via `jumpifability` for
+  both Vital Spirit and Insomnia, ahead of `setyawn` ever running.
+  `tests/battleScriptHitChainOpcode.test.ts` (+4, new `NO_ACC_CALC_CHECK_
+  LOCK_ON` describe block via `BattleScript_EffectRoar`'s own instance, kept
+  opcode-generic rather than Yawn-specific): ordinary advance (zero RNG),
+  Protect gate (MISSED+B_MSG_PROTECTED), semi-invulnerable bare-jump miss,
+  STATUS3_ALWAYS_HITS barrier. Fixed one now-stale barrier-count test in the
+  same file (its `.find()` for "any non-ACC_CURR_MOVE site" now finds a
+  newly-supported one first; narrowed to the still-genuinely-unsupported
+  subset, corrected its stale "9 sites" count to the real 11).
+- **Live fixture (`tools/battle-lab/mechanic-yawn-landing-off.json`, GULPIN
+  vs MAGIKARP filler, `bin/oracle lab`):** opponent `status3` observed
+  **0 → 4096 (0x1000, `STATUS3_YAWN_TURN(2)`) → 2048 (0x800,
+  `STATUS3_YAWN_TURN(1)`)** across frames 160/180/300/320 — the middle value
+  is Cmd_setyawn's own write, byte-for-byte my `BATTLE_SCRIPT_STATUS3_YAWN_
+  TURN_2` constant; the drop to 2048 by frame 320 is the REAL ROM's own
+  `ENDTURN_YAWN` decrement already firing once (Rung 2, not yet built in
+  this engine) — free live corroboration of Rung 2's own decrement math
+  ahead of landing it. Frame 180 screenshot: "GULPIN used YAWN!"; frame 300:
+  status3 still 4096 (pre-decrement). Second fixture
+  (`mechanic-yawn-vitalspirit-blocked-off.json`, opponent MANKEY,
+  ability 72/Vital Spirit): `status3` stays **0** the whole trace; frame 300
+  screenshot: "Foe MANKEY's VITAL SPIRIT made it ineffective!" — confirms the
+  `ButItFailed` branch live, satisfying the brief's "if stageable in-cap"
+  ask (it was).
+- **Next:** Rung 2 (`ENDTURN_YAWN` end-turn case, `runYawnTick` in
+  `battleEndTurnOrchestration.ts`) is fully scoped by the design doc and
+  partially de-risked by this session's own findings: `cancelBattleScript
+  MultiTurnMoves` (the doc assumed this needed building) **already exists**
+  (`battleScriptMultiTurnCancellation.ts`, used by `battleScriptAction
+  Admission.ts`) — Rung 2 can call it directly, no new helper needed. The
+  `UproarWakeUpCheck`-omission citation was re-verified this session
+  (`STATUS2_UPROAR`/`MOVE_EFFECT_UPROAR` are never set by any production
+  code — confirmed by grep, not assumed) and holds. Not started this session
+  (time went to the accuracycheck fix + two live fixtures instead) — next
+  worker can start directly from `docs/yawn-thrash-endturn-design.md` §2/
+  Rung 2 plus this entry's own de-risking notes.
+- **Notes:** no PAPERCUT. Ratchet moved deliberately (named above); census
+  pins moved deliberately (named above, both effect/move counts and the
+  weighted-delta shortfall explanation). Spent more of the time budget than
+  planned on the accuracycheck gap and the tier-filter cross-check, so Rung 2
+  is banked as the next step rather than rushed — per the brief's own
+  time-split allowance ("Rung 1 alone is a complete, committable step").
+
+---
+## 493 — [BOUNDED WORKER 2026-07-27 ~00:45] AI_CV_SpeedDownFromChance ported — genuine 22/22 CV handlers now, closing the §14-§25 program
+
+- **State:** tree committed and green at **231 files / 3267 tests** (+23 over
+  entry 492's 3244), `npm run build` clean. Census re-run byte-identical
+  (92/214 effects, 187/355 moves, 150/276 Factory-L50, 1884/2957 weighted,
+  all 32 checks pass, `git status --porcelain docs/executable-frontier-
+  census.md` empty — AI-decision subsystem, not effect-execution).
+  `executableFrontierRatchet.test.ts` unmoved (6/6 green, no new barrier).
+- **CONFIRM-OR-CORRECT (per brief):** `EFFECT_SPEED_DOWN_HIT` had **no**
+  dispatch entry in `factoryAiCheckViability.ts` — it sat only in
+  `AI_CHECK_VIABILITY_TABLE_EFFECTS`'s barriered set (confirmed by grep),
+  i.e. it hit the `"factory-ai-check-viability"` unsupported-branch barrier
+  for every one of its 6 moves before this session. Also checked whether the
+  brief's own framing ("§6's ledger was staged VIA this handler's
+  ICY_WIND/ROCK_TOMB/MUD_SHOT path") was accurate: **it was not** — inspected
+  `tools/battle-lab/mechanic-factory-ai-cv-speeddown-opponent-{faster,
+  slower}-off.json` directly; both dispatch move ID 81 (`MOVE_STRING_SHOT`,
+  `EFFECT_SPEED_DOWN`, a DIRECT dispatch to the already-ported
+  `AI_CV_SpeedDown`), not any of `SpeedDownFromChance`'s 6 covered moves.
+  §10's *recommendation* (stage a future fixture via ICY_WIND to avoid a CBM
+  dependency) got conflated with what §6 actually staged. Net effect: no
+  existing fixture/test exercised this handler's own code before this
+  session, and none of §6's two banked fixtures do even now — flagged below.
+- **Did:** re-derived the handler body from the raw assembly, not the doc's
+  gloss (`reference/pokeemerald/data/battle_ai_scripts.s:1136-1141`): a
+  plain `if_move` literal-ID compare (`Cmd_if_move`, zero `if_random_less_
+  than` sites of its own) against 3 of its 6 covered moves
+  (`MOVE_ICY_WIND`/`MOVE_ROCK_TOMB`/`MOVE_MUD_SHOT`) that `goto`s straight
+  into `AI_CV_SpeedDown`'s own label; the other 3
+  (`MOVE_BUBBLE_BEAM`/`MOVE_CONSTRICT`/`MOVE_BUBBLE`) fall through to `end`
+  (genuine zero). Cross-checked against move data: the 3 redirecting moves
+  all carry `secondaryEffectChance: 100`, the 3 falling through all carry
+  `secondaryEffectChance: 10` — confirms "FromChance" names the in-game move
+  *category*, not anything the handler itself reads; it never inspects a
+  chance datum, only the literal move ID. `factoryAiCheckViability.ts`:
+  added `runCvSpeedDownFromChance` — calls `runCvSpeedDown(input)` directly
+  for the 3 redirect moves (no duplicated gate/roll logic, per brief), else
+  returns zero score/zero draws — and wired `EFFECT_SPEED_DOWN_HIT` to it in
+  `runCheckViability`, ahead of the barrier check. **No new input field
+  needed** in `FactoryAiCheckViabilityBattler`/`FactoryAiScoredBattlerView`/
+  `factoryAiDecisionPolicy.ts` (confirmed by grep): `moveId` was already
+  plumbed through the one production construction site for the
+  `MOVES_BY_ID` lookup every handler dispatch uses. Corrected two stale
+  doc-comments while in the area: this file's own top-of-file comment
+  ("except five, dispatched before that barrier check" — already stale
+  before this session, long past five) now cites the doc's §5 table instead
+  of a numeral that always drifts; `factoryAiCheckBadMove.ts`'s top comment
+  wrongly claimed the weather-trio session already "completes all 22
+  reachable `AI_CV_*` handlers" (it completed the 12th and last CBM-blocked
+  *pair*; `SpeedDownFromChance` is CV-only-reachable, no CBM counterpart,
+  and is the actual 22nd/last — landed this session).
+- **Tests:** `tests/factoryAiCheckViability.test.ts` 253→273 (+20): both
+  redirect branches (deterministic -3 / probabilistic 0 or +2) × all 3
+  redirecting moves, the shared speed-tie quirk, both fall-through branches
+  × all 3 non-redirecting moves (zero score/draws regardless of relative
+  speed), and a redirect-equivalence check (Icy Wind's post-gate result is
+  byte-identical to `MOVE_STRING_SHOT`'s own direct `EFFECT_SPEED_DOWN`
+  dispatch, same rng/battlers, across all 3 branch shapes).
+  `tests/factoryAiScoredDecision.test.ts` 106→109 (+3): real mask-7
+  dispatcher (`chooseFactoryAiScoredDecision`) end-to-end coverage of the
+  new `EFFECT_SPEED_DOWN_HIT` wiring (Icy Wind redirect, both speed
+  directions; Bubblebeam fall-through, both directions), scoped to the
+  check-viability phase's own draws/delta rather than total draw counts
+  (Icy Wind is a real 55-power move whose Ice-vs-Ground/Ground matchup can
+  also engage `AI_TryToFaint`'s own orthogonal x4-effective gate). **Named
+  gap, explicitly flagged in-file:** no live-oracle fixture exists for any
+  of `SpeedDownFromChance`'s 6 moves (checked `tools/battle-lab/` — none
+  named `speeddownfromchance*`), and creating one was out of this step's
+  scope (`tools/battle-lab` fixtures are read-only per the brief) — the
+  mask-7 coverage above is real dispatcher coverage, not a banked live
+  ledger the way §6's own two fixtures are. Ran §6's two existing fixture-
+  reproduction tests as a regression check only (still green, confirming
+  the new dispatch branch didn't disturb `EFFECT_SPEED_DOWN`'s neighboring
+  direct-dispatch path) — they do not newly cover this handler.
+- **Recount vs the doc's own §5 table: 22/22, true this time.** All 22
+  reachable `AI_CV_*` handlers named in
+  `docs/factory-ai-checkviability-ground-truth.md` §5 now have a dispatch
+  entry in `factoryAiCheckViability.ts`. This does **not** mean the whole
+  `AI_CheckViability` script is ported — §5's 22 are the subset with ≥1
+  currently-executable triggering move; ~68 more handlers exist in the full
+  90-handler dispatch table (doc §0 item 2, audit §3) and remain barriered,
+  a separate uncounted phase.
+- **Next:** the §14-§25 program (all 22 reachable CV handlers) is complete;
+  no further `AI_CV_*` work is scoped by that doc. Carried from entry 492:
+  §19.5's unstaged `AccuracyDown` sites 2-6; §24's own follow-up (a live
+  oracle fixture for `AI_CV_EvasionUp`'s toxic-poisoned + own-HP<=50%
+  branch); §25.6's 4 not-staged-live items (Swift Swim bypass, Rain Dish
+  tail, the `<40%` HP-gate branch, `get_weather`'s `AI_WEATHER_NONE`
+  stale-read bug — all covered by Tier-1 tests, none live-oracle-verified);
+  a new one from this session: a live-oracle fixture for
+  `AI_CV_SpeedDownFromChance` itself (ICY_WIND-redirect and BUBBLE_BEAM-
+  fall-through variants, Dugtrio/Shuckle-shaped like §6's own) would upgrade
+  this step's mask-7 pipeline coverage to a banked ledger — fixture
+  authoring is side-lane/out-of-this-lane's-current-scope work, not main's;
+  ENDTURN_ITEMS2 after Yawn/Thrash remains the next MAIN-lane program item.
+- **Notes:** no PAPERCUT. Landed well inside the cap, as briefed (smallest
+  port of the program) — spent the saved time on the confirm-or-correct
+  (the brief's own §6-staging claim didn't hold up) and on closing two
+  stale doc-comments discovered while reading the surrounding code, rather
+  than leaving them to compound.
+
+---
+## 492 — [BOUNDED WORKER 2026-07-27 ~00:15] §25 weather-trio CBM+CV pair ported (RainDance/SunnyDay/Hail) — 21/22 CV handlers now ported, NOT 22/22 (one real handler remains, see Next)
+
+- **State:** tree committed and green at **231 files / 3244 tests** (+49
+  over entry 491's 3195), `npm run build` clean. Census re-run
+  byte-identical (92/214 effects, 187/355 moves, 150/276 Factory-L50,
+  1884/2957 weighted, all 32 checks pass, `git status --porcelain docs/
+  executable-frontier-census.md` empty — AI-decision subsystem, not
+  effect-execution). `executableFrontierRatchet.test.ts` barrier counts
+  unmoved (6/6 green, no new barrier). Three commits: CBM trio + wiring +
+  CBM tests; CV handler bodies (already included in the first commit); CV
+  handler-level tests; mask-7 fixture-reproduction tests.
+- **Did:** landed §25's full six-handler weather trio per its ground truth
+  (`docs/factory-ai-checkviability-ground-truth.md` §25, supervisor-verified
+  live). (1) `factoryAiCheckBadMove.ts`: `runCbmRainDance`/`SunnyDay`/`Hail`
+  — §25.1 confirmed all three are three SEPARATELY NAMED dispatch targets
+  (not a shared handler, correcting §5's own "shared handler" guess) but
+  byte-for-byte identical 3-instruction bodies (`get_weather; if_equal <OWN
+  AI_WEATHER_*>, Score_Minus8; end`) — one parameterized helper covers all
+  three. Added `AI_WEATHER_SUN/RAIN/SANDSTORM/HAIL` constants + `AiWeatherValue`
+  type (0-3, the AI's OWN `get_weather` encoding, NOT `gBattleWeather`'s raw
+  bits — a distinct existing `rulesContext.weather` field elsewhere in the
+  engine uses the raw-bit encoding, confirmed by grep before assuming §5.4's
+  "already landed" claim; it hadn't, for this subsystem) and optional
+  `currentWeather?: AiWeatherValue` to `FactoryAiCheckBadMoveAttacker`, `undefined`
+  defaulting to "no weather bit set" (never equals any of the four
+  constants, so it never fires any handler's gate either way — the pinned
+  ROM's own `AI_WEATHER_NONE` stale-read bug, §25.1, is real but NOT
+  reachable by any of this step's staged/tested flows, so it is not modeled
+  or cited beyond this note per the brief's own citation instruction). (2)
+  `factoryAiCheckViability.ts`: `runCvSunnyDay`/`runCvHail` share a
+  `weatherSetterCvScore` helper (HP<40%→-1, else weather in the "other
+  three" real values→+1, else 0 — zero `if_random_less_than`, confirmed
+  independently from the raw assembly per §25.2, NOT assumed identical
+  siblings). `runCvRainDance` is genuinely bespoke (7 conditional
+  instructions vs the twins' 4, §25.2/§25.8): Gate P (`if_user_faster`,
+  reusing the SAME `getWhoStrikesFirst`/tie-break-`Random()` machinery
+  `AI_CV_SpeedDown`'s own `target-faster-tie` already ports, inverse
+  comparison target — a new `"user-faster-tie"` draw kind) → Gate S (own
+  ability == Swift Swim bypass, +1, skips HP/weather entirely) → the SAME
+  `weatherSetterCvScore` span → Gate R tail (own ability == Rain Dish, +1,
+  only reached when the span falls all the way through). Added `ability?:
+  string` (AI_USER's own real ability, direct field read — the FIRST
+  handler in this doc needing the attacker's own real ability, distinct
+  from the target-guessing `ability`/`knownAbility` pair every prior
+  handler used) and `currentWeather?` to `FactoryAiCheckViabilityBattler`.
+  (3) `factoryAiDecisionPolicy.ts`: wired both new optional fields through
+  `FactoryAiScoredBattlerView` (attacker-side only — both CBM and CV read
+  the same `view.attacker.currentWeather`/`.ability`). **Construction-site
+  grep performed** (`FactoryAiCheckBadMoveTarget\|Attacker` construction +
+  `runCheckViability(`/`runCheckBadMovePreamble(` call sites across `src/`):
+  confirms `factoryAiDecisionPolicy.ts` remains the ONLY production
+  construction site for both extended input types, both fully wired — no
+  repeat of entry 483's gap. (4) Tests: 114 CBM tests (+10: own-weather/
+  cross-weather/omitted-weather per handler, cross-handler byte-identity
+  parity), 253 CV tests (+37: SunnyDay/Hail's shared span per HP boundary +
+  each "other three" value + own-weather exclusion; RainDance's Gate P
+  including both the deterministic and hidden-tie-break-draw cases at the
+  SAME seeds `AI_CV_SpeedDown`'s own tie tests use, Gate S, Gate H/weather
+  span, Gate R), 106 mask-7 tests (+12: ALL SIX §25 fixtures — raindance/
+  sunnyday/hail × cbmreach/cvreach, 2 seeds each — reproducing the doc's own
+  pick-based design: `cbmreach` nets -8/0, AI picks a Growl slot, never slot
+  0; `cvreach` nets 0/+1, AI always picks slot 0, no tie; policy-own draws
+  reconcile to a clean 5 in all twelve cases — setup(4)+CBM(0, single-ability
+  Shuckle target)+TryToFaint(0, all 0-power moves)+CV(0, deterministic span
+  + zero-draw AttackDown control)+tie(1) — with zero residual, since §25.4's
+  own design deliberately abandoned the draw-count channel for this section,
+  so there is no live draw-count window to reconcile against beyond
+  confirming the mechanism draws nothing extra).
+- **CORRECTION to the brief's own "22/22 if true" framing — it is NOT true:**
+  re-derived the count from the ground truth doc's own master table (§5,
+  "all 22 reachable handlers") rather than trusting the brief's phrasing.
+  21 of 22 are now ported; **`AI_CV_SpeedDownFromChance` (`EFFECT_SPEED_DOWN_HIT`,
+  `data/battle_ai_scripts.s:1136-1141`) is the one that remains** — confirmed
+  by grep, `EFFECT_SPEED_DOWN_HIT` sits only in `AI_CHECK_VIABILITY_TABLE_
+  EFFECTS`'s barriered set, no dispatch entry exists. It was never in this
+  step's scope (§25 is the weather trio only) and was already correctly
+  flagged as future work in doc §10/§4 — this entry just makes the exact gap
+  explicit rather than letting "last 3 of 22" language get misread as "then
+  we're done." Per the doc's own footnote (§4/§5.216-229): it's CBM-free (no
+  paired `AI_CBM_*` handler needed, 0 `if_random` of its own) and literally
+  forwards 3 of its 6 covered moves (`MOVE_ICY_WIND`/`MOVE_ROCK_TOMB`/
+  `MOVE_MUD_SHOT`, matched by exact `if_move` ID) into the ALREADY-PORTED
+  `runCvSpeedDown`'s own body verbatim; the other 3 (`MOVE_BUBBLEBEAM`/
+  `MOVE_CONSTRICT`/`MOVE_BUBBLE`) fall through to a deterministic zero. This
+  is a small, well-scoped follow-up (an `if_move`-keyed redirect wrapping
+  the existing handler, not new handler logic) — a strong next-step
+  candidate given how little new code it needs.
+- **Next:** `AI_CV_SpeedDownFromChance` (`EFFECT_SPEED_DOWN_HIT`) closes the
+  true 22/22 — small, CBM-free, redirects into the already-ported
+  `runCvSpeedDown` (see above). Otherwise entry 491's own carried Next list
+  stands: §19.5's unstaged AccuracyDown sites 2-6; §24's own follow-up from
+  §7.4 (a live oracle fixture for `AI_CV_EvasionUp`'s toxic-poisoned +
+  own-HP<=50% branch); §25.6's own 4 not-staged-live items (Swift Swim
+  bypass, Rain Dish tail, the `<40%` HP-gate branch, `get_weather`'s own
+  `AI_WEATHER_NONE` stale-read bug — all recipe-only per the doc, all now
+  covered by this entry's own Tier-1 handler-level tests even though not
+  live-oracle-verified); ENDTURN_ITEMS2 after Yawn/Thrash.
+- **Notes:** no PAPERCUT. Time split beat the brief's own guidance: all
+  three rungs (CBM trio, CV SunnyDay+Hail+RainDance together, mask-7
+  fixtures) landed green well inside the 40-minute mark, each as its own
+  commit, leaving room to re-derive the handler count from the doc's master
+  table instead of trusting the brief's own "22/22 if true" framing at face
+  value — worth the time given the brief explicitly asked for a
+  confirm-or-correct, and the correction is real (see above).
+
+---
+## 491 — [BOUNDED WORKER 2026-07-26 ~23:50] Landed the DefenseUp/SpDefUp DRAW SITE 4/5 chain fix (entry 490's own finding) + whole-surface audit found and fixed a second instance in EvasionUp
+
+- **State:** tree committed and green at **231 test files / 3195 tests**
+  (+4 over entry 490's 3191), `npm run build` clean. Census re-run
+  byte-identical (92/214 effects, 187/355 moves, 150/276 Factory-L50,
+  1884/2957 weighted, all 32 checks pass, `git status --porcelain docs/
+  executable-frontier-census.md` empty). `executableFrontierRatchet.test.ts`
+  barrier counts unmoved (6/6 green, no new barrier). Three commits: the
+  DefenseUp/SpDefUp fix, the EvasionUp fix, and the audit-doc update.
+- **Did (RUNG 1):** fixed `runCvDefenseUp`/`runCvSpDefUp`
+  (`factoryAiCheckViability.ts`) per entry 490's own sized recommendation:
+  DRAW SITE 4's own failure (roll >= 60) no longer applies `-2` on the spot
+  — it now chains into a second draw at DRAW SITE 5 (same `<60`-stops
+  semantics), and `-2` fires only when BOTH rolls fail (`(196/256)^2 ≈
+  58.65%`, not the old single-roll ~76.6%). Corrected both functions' own
+  doc comments, which had claimed DRAW SITE 4/5 were "mutually exclusive"
+  (the exact claim entry 490's probe disproved). Added three-outcome
+  Tier-1 tests for both handlers (pass@4, fail@4+pass@5, fail@4+fail@5).
+  **Mask-7 reconciliation (brief's own requested numbers):** the
+  `AI_CV_DefenseUp`/`AI_CV_SpDefUp` mask-7 fixture-reproduction tests in
+  `factoryAiScoredDecision.test.ts` previously hard-coded **4**
+  check-viability draws (the "always 4" derivation entry 490 showed was
+  wrong); re-run against the fixed handler at the same seed, all three
+  physical-list fixtures now reproduce **7** draws (2+2+1+2 across the 4
+  slots: fail+fail, fail+fail, pass, fail+pass) — inside the fixed model's
+  own valid `[4,8]` range. This test's own RNG-stream offset is a
+  construction convenience, not a replay of the live ROM's frame, so its 7
+  does not need to equal the live probe's own 6 number-for-number, and the
+  two don't need to reconcile against each other — what reconciles to
+  **zero unexplained** is the mechanism itself: every draw count anywhere
+  (live probe's 6, this test's 7, the `[4,8]` theoretical range) is now
+  fully explained by "each of the 4 slots draws once (passes) or twice
+  (fails and chains)," with no residual unattributed component, superseding
+  the old comments' "EXACTLY 4" claim.
+- **Did (RUNG 2 — whole-surface audit):** mechanically cross-checked all 46
+  `if_random_less_than` sites across the 18 dispatched `AI_CV_*` handlers
+  (of the file's 144 total) against their literal assembly fall-through,
+  full table in `docs/factory-ai-draw-discrepancy-probe.md` §7.2. Found a
+  SECOND, independent instance of the identical defect class in
+  `AI_CV_EvasionUp`'s Gates C/D (DRAW SITE 3/4, `:1048-1050`) — ported
+  (entry 489) as two mutually-exclusive single-draw sites keyed on the
+  opponent's own HP band, but the real assembly chains DRAW SITE 3's own
+  failure (roll >= 80, reached only when target is toxic-poisoned AND own
+  HP <= 50%) straight into DRAW SITE 4's own roll, byte-for-byte the same
+  shape as DefenseUp's bug. This is exactly the brief's own predicted
+  highest-risk shape: `AI_CV_EvasionUp`'s one banked live fixture (§24.3)
+  never sets target toxic-poison status, so it could never have exercised
+  this branch at all — a fixture gap, not a probe gap, only findable by
+  reading the assembly. Fixed the same way (chain + three-outcome tests:
+  pass@3, fail@3+pass@4, fail@3+fail@4); the direct `own HP > 50%` entry to
+  DRAW SITE 4 alone (unaffected, not part of the chain) stays as-is. Every
+  OTHER site across all 18 handlers confirmed OK: either a self-contained
+  deterministic `score`/`goto` action, or an already-correctly-modeled
+  chain (`AI_CV_HighCrit`, `AI_CV_VitalThrow`, both already used the
+  `jumpedToEnd`/fallthrough-roll pattern this step's fixes now also use).
+  Confirmed the CBM side is genuinely if_random-free (`grep -c
+  if_random_less_than` over `AI_CheckBadMove`'s own `:51-651` range = 0) —
+  trivially clean of this defect class as the brief predicted, verified not
+  assumed.
+- **Next:** entry 490's own carried Next list stands, minus the item this
+  step closed: weather trio (RainDance/SunnyDay/Hail, §25, last 3 of 22 CV
+  handlers, explicitly out of THIS step's scope); §19.5's unstaged
+  AccuracyDown sites 2-6 (now confirmed structurally safe by this step's
+  audit — no chain risk there, just never independently live-verified);
+  §24's own newly-surfaced follow-up from §7.4: a live oracle fixture for
+  `AI_CV_EvasionUp`'s toxic-poisoned + own-HP<=50% branch does not exist
+  yet in `tools/battle-lab/` — building one and rerunning §2's own
+  `attribute-factory-ai-cv-drawsite-callers.py` probe (parameterized by
+  `DRAW_SITE_TABLE`) against it would give this fix the same live
+  corroboration `DefenseUp`/`SpDefUp` already have, but wasn't in this
+  step's scope or time budget; ENDTURN_ITEMS2 after Yawn/Thrash.
+- **Notes:** no PAPERCUT. Time split roughly matched the brief's guidance —
+  rung 1 (fix + tests + reconciliation) landed at ~30min elapsed, leaving
+  enough room to run the full rung-2 audit (not just a partial table with a
+  named remainder) and land its own fix + tests green, with the doc/
+  PROGRESS writeup absorbing the reserved tail.
+
+---
+## 490 — [BOUNDED WORKER 2026-07-26 ~23:45] §18/§22 "5-6 draws not 4" anomaly SOLVED by instrument — real engine gap found, not fixed (probe-only step)
+
+- **State:** tree committed and green at **231 files / 3191 tests** (unchanged
+  from entry 489 — this was an INSTRUMENT/PROBE step, no `src/` edits per
+  scope), `npm run build` clean. Two new files only: `tools/probe/attribute-
+  factory-ai-cv-drawsite-callers.py` and `docs/factory-ai-draw-discrepancy-
+  probe.md` (does NOT edit `docs/factory-ai-checkviability-ground-truth.md`,
+  side-owned this round, per brief).
+- **Did:** attributed, by exact caller, the recurring "5-6 draws where the
+  branch derivation predicts 4" anomaly first flagged at §18.4
+  (`AI_CV_DefenseUp`) and recurring at §22.3-22.4 (`AI_CV_SpDefUp`).
+  **Verdict: real engine port gap, not noise, not outside the AI-decision
+  subsystem.** Extended the precedent probe
+  (`attribute-factory-ai-random-callers.py`) with a second disambiguator:
+  `gAIScriptPtr` (`battle_ai_script_commands.c:154`, EWRAM `0x0203ab38`)
+  still points at the *start* of the firing `if_random_less_than`
+  instruction at the moment `Random()` is entered (`Cmd_if_random_less_than`
+  only advances it after the call returns) — reading it alongside the
+  existing `cpu.lr` read resolves *which* of the AI script's 144
+  `if_random_less_than` sites fired, closing the gap the old probe couldn't
+  (its own caller resolution bottoms out at the one shared C function every
+  site returns through). Root cause, confirmed BOTH by a raw ROM byte
+  disassembly (`arm-none-eabi-nm` label addresses + manual opcode decode
+  against `sBattleAICmdTable`) AND live single-step instrument evidence (5
+  fixture runs, all `PASS`, all fully reconciled): `AI_CV_DefenseUp`'s DRAW
+  SITE 4 (`if_random_less_than 60, ...End`, `:936`) does not cleanly
+  terminate on failure — its fall-through target (`+6` bytes) is DRAW SITE
+  5's *own* instruction (`:938`), byte-for-byte identical for `AI_CV_SpDefUp`
+  (`:1011`/`:1013`). Reaching this branch means 1 draw (23.4%, site4
+  succeeds) or 2 draws (76.6%, site4 fails and chains into site5) **per
+  move-slot invocation** — 4 identical slots × 1-or-2 draws explains the
+  5-8 realized range exactly (doc's observed 5-6/13-14 are ordinary draws
+  from this distribution, not a second anomaly). Confirmed the ported
+  `runCvDefenseUp`/`runCvSpDefUp` (`factoryAiCheckViability.ts:1528-1534`,
+  `:1664-1670`) both draw once at DRAW SITE 4 and return unconditionally —
+  missing the chain into DRAW SITE 5. This is a real behavioral gap, not
+  cosmetic: under-draws `Random()` by 1 whenever site4 fails (~76.6% of the
+  time reached), AND over-applies the -2 score penalty (port's ~76.6% vs
+  the real ROM's ~58.65%, since BOTH rolls must fail for the penalty, not
+  just the first) — a close-score tie could flip which move Factory AI
+  picks. Sized the exact fix shape in the new doc §5 (shared-helper chain,
+  matching both handlers' near-identical bodies) but did NOT implement it
+  or touch the Tier-1 tests that currently pin the wrong "always 4" derived
+  count — out of scope this step, flagged as next-step work. 5 live probe
+  runs this session (all seed 1, window `0 732`, oracle `127.0.0.1:8014`):
+  `defenseup-physicallastmove` (14 total, 6 handler draws, 4×site4+2×site5),
+  `defenseup-lowhp-control` (14 total, same split, second independent
+  fixture), `defenseup-nonphysicallastmove` (8 total, **0** handler draws —
+  negative control, Gate F routes away entirely, confirms the probe doesn't
+  fabricate a draw), `spdefup-cosmicpower-reach` (14 total, same 4×site4+2×
+  site5 split, confirms the SAME shape on the second handler, not just
+  derived by analogy), `spdefup-cosmicpower-control` (8 total, 0 handler
+  draws, negative control mirrors DefenseUp's). All `known-outside`/
+  `hit-chain-proc` caller composition matches §18.4's/§22.4's own prior
+  (coarser) tables exactly — this doesn't contradict the old probe, it
+  resolves what its shared-LR bucket actually was.
+- **Next:** the sized fix from doc §5 — replace both handlers' single-draw
+  DRAW SITE 4 block with the real draw4→(if fail)draw5→(if both fail)-2
+  chain, likely as one shared helper given the two handlers' near-identical
+  bodies (matching entry 489's own `runCvStatDown`-style precedent), then
+  update the Tier-1 tests currently pinning the wrong "always 4" count.
+  Otherwise entry 489's own carried Next list stands: weather trio
+  (RainDance/SunnyDay/Hail, §25, last 3 of 22 CV handlers); §19.5's unstaged
+  AccuracyDown sites 2-6; §24.5's unexercised `AI_CV_EvasionUp` draw sites;
+  ENDTURN_ITEMS2 after Yawn/Thrash.
+- **Notes:** no PAPERCUT. Time went almost entirely into the instrument
+  design + root-cause derivation (byte-level ROM disassembly to compute
+  exact DRAW SITE addresses ahead of the live run, so the single-step pass
+  could positively classify every hit on the first try) rather than
+  breadth — per the brief's own time-split guidance, this fully closes
+  DefenseUp §18.4 AND, with budget left over, independently reproduces the
+  identical finding on SpDefUp §22.3-22.4 live (not just derived by
+  analogy), settling the "2-handler-wide, not a one-off" question the brief
+  posed.
+
+---
+## 489 — [BOUNDED WORKER 2026-07-26 ~23:10] EvasionUp/EvasionDown CBM+CV pair ported (§24, eleventh pair — largest CV handler in the doc)
+
+- **State:** tree committed and green at **231 files / 3191 tests** (+60 over
+  entry 488's 3131), `npm run build` clean (`tsc -b && vite build`). Census
+  **unchanged at 92/214 effects, 187/355 moves, 150/276 Factory-L50,
+  1884/2957 weighted, all 32 self-checks pass** (reran
+  `tools/report/executable-frontier-census.ts` live: byte-identical, `git
+  status --porcelain docs/executable-frontier-census.md` empty — this
+  AI-decision port touches `battle_ai_scripts.s`, not the effect-execution
+  subsystem the census measures). `executableFrontierRatchet.test.ts`'s
+  per-module barrier counts **unmoved** (6/6 green, no new barrier).
+- **Did:** landed §24's full four-handler pair per its ground truth
+  (`docs/factory-ai-checkviability-ground-truth.md` §24, merged prior round,
+  supervisor-verified live). (1) `factoryAiCheckBadMove.ts`: added
+  `runCbmEvasionUp` (bare 2-instruction MAX_STAT_STAGE-on-AI_USER's-own-stage
+  gate, same shape as AttackUp/DefenseUp/etc — `EFFECT_MINIMIZE` shares this
+  handler despite being blocked-on-opcodes for move execution, doc §24.7) and
+  `runCbmEvasionDown` (reuses the existing shared `runCbmStatDownViaSharedTail`
+  body verbatim, same shape as DefenseDown/SpDefDown — no dedicated
+  evasion-immunity ability exists in Gen 3). Added optional `evasionStage?`
+  to both `FactoryAiCheckBadMoveTarget` and `FactoryAiCheckBadMoveAttacker`
+  (same `?? DEFAULT_STAT_STAGE` convention as `accStage`/`spDefStage`). (2)
+  `factoryAiCheckViability.ts`: added `runCvEvasionUp` — the largest CV
+  handler ported in this doc, 8 `if_random_less_than` sites, re-derived
+  independently from the raw assembly per the brief (NOT copied from
+  `AI_CV_AccuracyDown` despite the structural similarity) — three real
+  divergences confirmed: DRAW SITE 1 has no Gate B companion (single 90%-HP
+  gate, not AccuracyDown's own two-gate 70% shape); Gate A's own threshold is
+  90 not 70; Gate I reads `AI_USER`'s own evasion stage, not `AI_TARGET`'s
+  (operand flips because this is an UP handler on the opponent's own stat).
+  Zero new `FactoryAiCheckViabilityBattler` fields needed — `evasionStage`,
+  `isRooted`, `isToxicPoisoned`, `isLeechSeeded`, `isCursed` were all already
+  present from §19's AccuracyDown port. Added `runCvEvasionDown`, confirmed
+  byte-for-byte identical to DefenseDown/SpDefDown, reusing the shared
+  `runCvStatDown` body with a new `"evasion-down-roll"` kind parameter. (3)
+  `factoryAiDecisionPolicy.ts`: wired the two new optional CBM fields
+  (`evasionStage` on both `targetForCbm`/`attackerForCbm`) — the CV
+  construction sites needed **zero** changes, every field the new handlers
+  read was already threaded through from §19's own wiring. **Construction-site
+  grep performed** (`grep -rn "FactoryAiCheckBadMove(Target|Attacker)"` /
+  `"runCheckViability("` across `src/`): confirms `factoryAiDecisionPolicy.ts`
+  is the ONLY production construction site for each input type, and both are
+  now fully wired — no repeat of entry 483's `spDefStage` gap. (4) Tests: 15
+  CBM tests (both handlers' gate true/false/omitted/vestigial-effect cases),
+  37 CV handler-level tests (all 8 EvasionUp gates/sites individually plus a
+  6-draw non-mutually-exclusive composite, all 3 named §24.1 divergences
+  explicitly proven, EvasionDown's DefenseDown-identical shape), 8 mask-7/
+  mask-1 `chooseFactoryAiScoredDecision` end-to-end tests reproducing ALL
+  FIVE §24 fixtures (policy-own draws: EvasionUp fullhp-reach/lowhp-reach =
+  4 setup + 4 CV + 1 tie = 9 each, midhp-control = 4 setup + 0 CV + 1 tie = 5;
+  EvasionDown lowhp-reach = 9, fullhp-control = 5 — the doc's own live window
+  totals of 10/8/12/13/7 are a documented superset, same subset relationship
+  every prior pair already established) plus a mask-1 CBM-wiring isolation
+  test (entry-485 precedent: `AI_CV_EvasionUp` reads the same `evasionStage`
+  under mask 7, so mask 1 was required to isolate the CBM-only -10 delta).
+  60 tests total, following the §23 port pattern (entry 484) exactly.
+- **Next:** only the weather trio remains (RainDance/SunnyDay/Hail, §25 —
+  the last 3 of 22 CV handlers, out of this step's scope per the brief).
+  Otherwise entry 485's own carried Next list stands: §19.5's unstaged
+  AccuracyDown sites 2-6 (mixed movesets); §24.5's own 6 unexercised
+  `AI_CV_EvasionUp` draw sites (same mixed-moveset/multi-turn-build obstacle
+  class); §18 5-6-draw window discrepancy (`DefenseUp`/`SpDefUp`, probe
+  candidate, sRandCount attribution); ENDTURN_ITEMS2 after Yawn/Thrash;
+  presentation-seam program is fully closed (entry 488).
+- **Notes:** no PAPERCUT. Time split held: CBM pair + CV EvasionDown + full
+  CV EvasionUp (8-site handler) + all fixtures landed as one green rung
+  inside the ~40-minute budget, so no partial-rung split was needed this
+  session.
+
+---
+## 488 — [BOUNDED WORKER 2026-07-26 ~22:30] turn-4 ROCK_SLIDE settle staged + wired — presentation-seam §9's last residual gap CLOSED
+
+- **State:** tree committed and green at **231 files / 3131 tests** (+1
+  file/+7 tests over entry 487), `npm run build` clean. Census unchanged
+  (reran `tools/report/executable-frontier-census.ts` live: byte-identical,
+  no diff — **92/214 effects, 187/355 moves, 150/276 Factory-L50, 1884/2957
+  weighted, all 32 checks pass**); `executableFrontierRatchet.test.ts`'s
+  per-module barrier counts unmoved (6/6 green, no new barrier — this step
+  touches no unsupported-branch code). Two commits: `65f2f4d` (rung 1,
+  staging module + tests) and the rung-2 wiring commit (`battleScene.ts`).
+- **Did:** closed the ONE real remaining item of the presentation-seam §9
+  program (entries 465/468/487's own named residual: `anchorOpponentAfterTurn4Hp`'s
+  `from`-endpoint had no staged proof).
+  - **Rung 1:** `src/engine/turn4RockSlidePresentationStaging.ts` (new),
+    mirrors `turn1RockSlidePresentationStaging.ts` verbatim — stages a real
+    Onix ROCK_SLIDE → Grovyle hit chain (41 → 1, 40 damage, non-crit,
+    non-faint) through the unmodified `resolveRockSlidePresentationWindowContent`
+    bridge. **The RNG seed (3051035979) is turn 4's own real recorded value**,
+    not fabricated: derived from `battle1-grovyle-faint-ram-dump.json`'s own
+    `rngLedger` (already committed/already imported for
+    `anchorPlayerAfterTurn3Hp`/`anchorOpponentAfterTurn3Hp`) — specifically
+    its four single-step entries at ticks 5316/5340/5343/5569 — independently
+    corroborated by `battleScene.ts`'s own already-committed
+    `drawTurn4KickoffText` doc comment, which separately cites the identical
+    three ticks for accuracy/crit/damage-lock rolls. Staging it reproduces
+    41 → 1 byte-identical, ending exactly at the ledger's own next recorded
+    value. 7 new Tier-1 tests (event sequence, message content, hp-change
+    endpoints, health-bar delta, bridge resolution, no faint-family event).
+  - **Rung 2:** wired every mandatory consumer named in the brief —
+    `drawTurn4RockSlideAttack`/`drawTurn4RockSlideTurnEndSettledMenu`'s
+    `rockSlideOpponentHp`/`opponentHealthboxContentForHp` calls,
+    `drawTurn4RockSlideWindow`'s attack text (now
+    `TURN1_ROCKSLIDE_ATTACK_LINE1/2`, byte-identical content per §9.3 — it
+    was still raw `ROCK_SLIDE_LINE1/2` literals), and **the residual gap
+    itself**: `drawTurn5RockSlideAttack`'s own `rockSlideOpponentHp` `from`
+    endpoint now reads the staged settle instead of the bare literal — not
+    circular (the turn-4 module stages Grovyle's PRE-turn-4 hp and computes
+    ITS OWN settle independently). Also did the OPTIONAL item:
+    `drawMenuIdleBaseWithOpponentHp`'s `turn4Resolved` arm (turn2/turn3 arms
+    untouched, per scope). `anchorOpponentAfterTurn3Hp`/`anchorOpponentAfterTurn4Hp`
+    both kept (still read by turn 3's own window and `drawEndeavorSquish`'s
+    steady-state read respectively — only the re-driven reads were retired).
+  - Updated `docs/presentation-seam-scout.md` §9's own top status block with
+    a second STATUS UPDATE note recording closure (matching entry 487's own
+    precedent of correcting stale carried-forward summaries at the source).
+- **Acceptance (all live this session, oracle `127.0.0.1:8014`):**
+  `npm run compare -- turn4-rockslide.json --summary` **250/250** (recorded,
+  `docs/battle-turn-notes.md`); regression sweep, **zero drops**:
+  `turn5-rockslide.json` **256/256**, `turn1-rockslide.json` **256/256**,
+  `turn5-faint.json` **110/110**, `turn4-doubleteam.json` **250/250**
+  (confirmed pre-existing/unaffected by diffing against the rung-1 commit
+  before any rung-2 edit — `docs/battle-turn-notes.md`'s own `249/249`
+  mentions are stale copy-paste from an older trace revision, not a
+  regression target), `turn4-menu.json` **44/44**, `turn3-rockslide.json`
+  **256/256**.
+- **Next:** presentation-seam §9 is now FULLY CLOSED — no more items in that
+  program. Resume entry 485/487's own carried Next list: EvasionUp/
+  EvasionDown/weather-trio pairs (last 6 of 22 CV handlers); §19.5's unstaged
+  AccuracyDown sites 2-6; §18 5-6-draw window discrepancy (recurring for
+  `SpDefUp` too, §22.3-22.4 — probe candidate, sRandCount attribution);
+  ENDTURN_ITEMS2 after Yawn/Thrash; `SpDefUp`/§23 DRAW SITE recipe-only
+  leftovers.
+- **Notes:** no PAPERCUT. Sourcing the RNG seed from an already-committed
+  asset (rather than a fresh/uncommitted probe, the pattern §9.1 flagged as
+  a debt for the OTHER three turn-4/5 HP constants) is worth naming as a
+  reusable technique for `anchorPlayerAfterTurn5Hp` if that one is ever
+  tackled — it too may have a real ledger hiding in an already-imported
+  fixture rather than needing a fresh probe.
+
+---
+## 487 — [BOUNDED WORKER 2026-07-26 ~22:00] assigned step already done — verified, not redone
+
+- **State:** tree unchanged at **230 files / 3124 tests**, build green,
+  census unchanged **92/214 effects, 187/355 moves, 150/276 Factory-L50,
+  1884/2957 weighted** (reran the census tool live: byte-identical, no
+  diff). No code commits this session — the assigned step turned out to be
+  fully complete already; only this doc/ledger correction is new.
+- **Did:** was briefed to (rung 1) register `B_SCR_OP_SETDAMAGETOHEALTHDIFFERENCE`/
+  `B_SCR_OP_BICBYTE`/`B_SCR_OP_ADJUSTSETDAMAGE` and (rung 2) wire seam
+  window 3 (`turn5-rockslide.json`'s attack branch) per
+  `docs/presentation-seam-scout.md` §9.4. Both rungs were **already landed**
+  in `PROGRESS-archive.md` entries 464 (`4758e8c`, the 3 opcodes,
+  EFFECT_ENDEAVOR executable) and 465 (the full §9.4 wiring: real
+  `MOVE_ENDEAVOR` staging, `drawTurn5EndeavorText`, `drawTurn5RockSlideWindow`'s
+  attack branch, `drawTurn5RockSlideAttack`'s `rockSlideOpponentHp` `to`
+  endpoint) — both from earlier the same day, well before this ledger's
+  current top-3 entries. Confirmed by reading the current source directly
+  (`battleScriptSetByte.ts`'s `createBattleScriptBicbyteCommandHandlers`,
+  `battleScriptHitChainOpcode.ts`'s `adjustsetdamage`/
+  `setdamagetohealthdifference`, `battleScene.ts:7049-7063,7541,11885-11893`
+  all matching entry 465's own description exactly, down to the named
+  residual gap), then re-ran the full acceptance bar live: `npm test`
+  230/230 files, `npm run build` clean, `npm run compare -- turn5-rockslide.json
+  --summary` **256/256**, `turn1-rockslide.json` **256/256**, `turn5-faint.json`
+  **110/110** — all match entry 465's own recorded numbers exactly, zero
+  regression. Root-caused why the brief re-assigned finished work: entry
+  468 correctly scoped the one still-open remainder as "seam-scout §9 items
+  **1/5**" (the `anchorOpponentAfterTurn4Hp` `from`-endpoint gap, entry
+  465's own named residual — needs a new turn-4 settle staging module, not
+  a redo of §9.4's plan); that `1/5` qualifier was silently dropped across
+  entries 484-486's carried-forward Next notes, reading as if all of §9
+  were still open. Added a status note to `docs/presentation-seam-scout.md`
+  §9's own top (pointing at entries 464/465 and the real remainder) so this
+  doesn't recur.
+- **Next:** the ONE real remaining item from the original §9 scope: a
+  turn-4 RockSlide-settle staging module to give `anchorOpponentAfterTurn4Hp`
+  a non-circular staged proof (currently a literal, entry 465's own named
+  gap) — NOT another pass at rungs 1-2. Otherwise, entry 485's own Next list
+  stands unchanged: EvasionUp/EvasionDown/weather-trio pairs (last 6 of 22
+  CV handlers), §19.5's unstaged AccuracyDown sites 2-6, §18 5-6-draw window
+  discrepancy, ENDTURN_ITEMS2 after Yawn/Thrash, `SpDefUp`/§23 DRAW SITE
+  recipe-only leftovers.
+- **Notes:** no PAPERCUT in the harness sense, but flagging the process gap
+  for the supervisor: carried-forward "Next" notes that summarize a doc
+  section by name (e.g. "seam-scout §9 items") lose precision fast when
+  re-summarized entry over entry — prefer naming the exact remaining
+  sub-item (as entry 468 originally did) over the section name alone.
+
+---
+## 486 — [SUPERVISOR SESSION START 2026-07-26 ~21:55] orient + animation fold
+
+- **State:** folded `animation-main` into master at orient (fast-forward to
+  `f422a97` — their baseline merge of master plus 2 Knock Off commits:
+  `96dfd06` partial seam wiring, `f958878` player OAM transfer fix). Union
+  verified green: **230 files / 3124 tests**, `npm run build` clean, both
+  oracle services fresh (`check-oracle-freshness.sh` PASS). The animation
+  supervisor session is LIVE concurrently (started 21:50); commits it lands
+  after `f422a97` fold next orient.
+- **Session plan (paired rounds):** main lane consumes the banked seam §9
+  prep (register the 3 ENDEAVOR opcodes, then wire window 3
+  `turn5-rockslide.json` attack branch per `docs/presentation-seam-scout.md`
+  §9.4); side lane prep-scouts §24 EvasionUp/EvasionDown ground truth (the
+  largest remaining CV handler, 8 draw sites). Then port §24, stage the
+  weather trio (§25, incl. the CBM weather-entry verification §5 flagged),
+  and continue down entry 485's Next list as rounds allow.
+
+---
+## 485 — [SUPERVISOR WIND-DOWN 2026-07-26 ~21:20] session summary
+
+- **State:** tree committed and green at **230 files / 3123 tests**, build
+  green. Census **92/214 effects, 187/355 moves, 150/276 Factory-L50,
+  1884/2957 weighted** (session start: 90/214, 185/355, 148/276,
+  1830/2957), all 32 self-checks pass. Single main worktree, zero unmerged
+  side branches, zero stale worktrees, clean `git status`. **No DEFERRED
+  entries — nothing blocks the next `run-supervisor.sh`.** No usage/rate
+  limits; all 5 workers ran to completion.
+- **Session (3 rounds / 5 workers over 2 lanes + 1 supervisor fix + 1 fold):**
+  - **Round 1:** Counter/Mirror Coat registered end-to-end (entry 482,
+    ISSUES #46 closed, +54 weighted, supervisor-rerun live probe all 8
+    scenarios PASS) ∥ side §22 ground truth (CosmicPower/CalmMind +
+    `AI_CV_SpDefUp`, 4 fixtures, supervisor-rerun verify ALL PASS, Gate F
+    `if_in_bytes` inversion re-verified against raw assembly).
+  - **Round 2:** §22 pair ported (entry 483, ninth pair, 27 tests) ∥ side
+    §23 ground truth (LightScreen/Reflect, 4 fixtures, supervisor-rerun
+    ALL PASS + assembly spot-check of the twin CV bodies/type lists).
+  - **Round 3:** §23 four-handler pair ported (entry 484, tenth pair,
+    29 tests, 13.8 min).
+  - **Supervisor fix (`c4ea1d6`):** round-3 worker flagged that entry 483's
+    `spDefStage` was never wired into `factoryAiDecisionPolicy.ts`'s
+    `attackerForCbm` — maxed SPDEF could not reach the CosmicPower/CalmMind
+    -8 gates in real decisions. Wired + mask-1 regression test (mask 7
+    can't isolate it: `AI_CV_SpDefUp` reads the same stage for its own -1).
+  - **Animation fold (wind-down):** `animation-main` (7 commits: psychic
+    orientation closure, Knock Off components) merged into master; union
+    suite 230/3123 + build green. The animation supervisor was still
+    mid-session at fold time (worker `animation-20260726-205051` live);
+    commits it lands after `960b6b9` fold next session.
+- **Next (in order):** EvasionUp/EvasionDown/weather-trio pairs (the last
+  6 of 22 CV handlers — LightScreen/Reflect done this session); §19.5's
+  unstaged AccuracyDown sites 2-6 (mixed movesets); §18 5-6-draw window
+  discrepancy (now recurring for `SpDefUp` too, §22.3-22.4 — probe
+  candidate, sRandCount attribution); ENDTURN_ITEMS2 after Yawn/Thrash;
+  `SpDefUp`/§23 DRAW SITE recipe-only leftovers. Seam — turn-4
+  `anchorOpponentAfterTurn4Hp` staging gap + seam-scout §9 items (carried
+  from entry 468, untouched again — AI-pair track was prioritized).
+- **Notes:** zero PAPERCUTS flagged by any worker. Established cadence
+  held: paired rounds (main port ∥ side prep-scout for the next pair),
+  supervisor-verified every merge with own reruns. Oracle services fresh
+  all session.
+
+---
+## 484 — [2026-07-26] LightScreen/Reflect CBM+CV pair ported (§23, tenth pair)
+
+- **State:** tree committed and green at **226 files / 3109 tests** (+28
+  over entry 483's 3081), build green (`tsc -b && vite build`). Census
+  **unchanged at 92/214 effects, 187/355 moves, 150/276 Factory-L50,
+  1884/2957 weighted, all 32 self-checks pass** (reran
+  `tools/report/executable-frontier-census.ts`: byte-identical, no diff —
+  this AI-decision port touches `battle_ai_scripts.s`, not the effect-
+  execution subsystem the census measures). `executableFrontierRatchet
+  .test.ts`'s per-module barrier counts **unmoved** (no new barrier; both
+  effects already had existing table-lookup fallback entries).
+- **Did:** landed §23's full four-handler pair per its ground truth
+  (`docs/factory-ai-checkviability-ground-truth.md` §23, merged prior round,
+  supervisor-verified ALL PASS both seeds). (1) `factoryAiCheckBadMove.ts`:
+  added `runCbmLightScreen`/`runCbmReflect` — the smallest CBM handler shape
+  in the doc to date, a single AI_USER-own-`SIDE_STATUS_*`-bit test with
+  zero stat-stage read and zero `get_ability` call. Added `lightScreenUp?`/
+  `reflectUp?` booleans to `FactoryAiCheckBadMoveAttacker` (same optional/
+  default-false convention as `spDefStage?` etc., entry 483). (2)
+  `factoryAiCheckViability.ts`: added `runCvLightScreen`/`runCvReflect`,
+  sharing one body (`runCvSideScreenTypeGate`, the `DefenseDown`/`SpDefDown`
+  shared-body-plus-`kind`-parameter precedent) — one HP gate on AI_USER's
+  OWN hp, then the TARGET's own innate type1/type2 against a type list
+  (LightScreen's 8-type special list / Reflect's 9-type physical list, exact
+  complements covering all 17 Gen 3 types), then a single draw site. No new
+  `FactoryAiCheckViabilityBattler` fields needed — `attacker.hp`/`maxHp` and
+  `target.types` already existed. (3) `factoryAiDecisionPolicy.ts`: wired
+  the two new CBM boolean fields onto `FactoryAiScoredBattlerView` and into
+  `attackerForCbm`; the CV side needed zero wiring changes (its two inputs
+  were already threaded through). (4) Tests: 8 CBM gate tests (both
+  handlers' true/false/omitted/cross-flag-irrelevance cases), 12 CV
+  handler-level tests (Gate A, Gates B/C on both type lists, DRAW SITE both
+  polarities, for both handlers), 9 mask-7 `chooseFactoryAiScoredDecision`
+  end-to-end tests reproducing §23.2/§23.3's Anorith/Shuckle/Vulpix
+  reach/control fixtures (policy-own-draws: reach = 4 setup + 4 CV + 1 tie =
+  9, control = 4 setup + 0 + 1 tie = 5; oracle's own live totals 10/6 are a
+  documented superset, the extra +1 being `BattleTurnPassed`, outside this
+  policy's scope, doc §23.4) plus a LightScreen≡Reflect cross-handler draw-
+  count parity check — 29 tests total, following the SpDefUp port pattern
+  (entry 483) exactly. Uniquely for this pair, per §23.2, zero HP-banding or
+  damage staging was needed in any fixture (Gate A only cares about AI_USER's
+  own hp, which stays at its construction-time full value throughout).
+- **Next:** EvasionUp/EvasionDown/weather-trio pairs (the last 6 of 22 CV
+  handlers); §19.5's unstaged AccuracyDown sites 2-6 (need mixed movesets);
+  entry 476's §18 5-6-draw window discrepancy (probe candidate, sRandCount
+  attribution); ENDTURN_ITEMS2 after Yawn/Thrash; Gate A (opponent HP<50%)
+  for LightScreen/Reflect remains unstaged live (doc §23.5 item 4, would
+  need a real-damage fixture variant, out of scope for this zero-damage
+  design). Seam — turn-4 `anchorOpponentAfterTurn4Hp` staging gap and
+  seam-scout §9 items remain carried from entry 468. Animation program is
+  independent (its own supervisor, entry 481, archived).
+- **Notes:** no ISSUES.md changes (none were open on this pair). No
+  PAPERCUTS this step.
+
+---
+## 483 — [2026-07-26] SpDefUp/CosmicPower/CalmMind CBM+CV pair ported (§22)
+
+- **State:** tree committed and green at **226 files / 3081 tests** (+27
+  over entry 482's 3054), build green (`tsc -b && vite build`). Census
+  **unchanged at 92/214 effects, 187/355 moves, 150/276 Factory-L50,
+  1884/2957 weighted, all 32 self-checks pass** — this AI-decision port
+  touches a wholly separate subsystem (`battle_ai_scripts.s`) from the one
+  the census measures (`battle_scripts_1.s` effect execution), so no
+  refresh was expected or needed; reran `tools/report/executable-frontier-
+  census.ts` to confirm (file byte-identical, no diff). `executableFrontier
+  Ratchet.test.ts`'s per-module barrier counts **unmoved** (no new
+  unsupported-branch barrier — this step only widened reachability of four
+  effects already present in each file's own table-lookup fallback set).
+- **Did:** landed §22's full pair per its exact ground truth (`docs/factory-
+  ai-checkviability-ground-truth.md` §22, merged last round at `c5d0848`).
+  (1) `factoryAiCheckBadMove.ts`: added `runCbmCosmicPower`/`runCbmCalmMind`
+  — two genuinely SEPARATE dual-stat handlers (the `AI_CBM_BulkUp`/
+  `DragonDance` shape, §18.1 precedent), not aliases of each other or of
+  `AI_CBM_DefenseUp`/`AI_CBM_SpAtkUp`: `CosmicPower` composes
+  `runCbmDefenseUp` (DEF, -10) + inlines SPDEF (-8); `CalmMind` composes
+  `runCbmSpAtkUp` (SPATK, -10) + inlines SPDEF (-8) — exactly mirroring how
+  `runCbmBulkUp` already composes `runCbmAttackUp`. Added `spDefStage?`
+  to `FactoryAiCheckBadMoveAttacker` (same optional/`DEFAULT_STAT_STAGE`
+  convention as `speedStage`/`spAtkStage`). (2) `factoryAiCheckViability.ts`:
+  added `runCvSpDefUp`, the single shared CV target for all four dispatching
+  effects (`EFFECT_SPECIAL_DEFENSE_UP(_2)`/`EFFECT_COSMIC_POWER`/
+  `EFFECT_CALM_MIND`) — byte-for-byte `AI_CV_DefenseUp`'s own gate topology
+  and odds (`STAT_DEF`→`STAT_SPDEF`) with Gate F's **`if_in_bytes` polarity
+  INVERTED** vs `DefenseUp`'s own `if_not_in_bytes` (re-verified against the
+  raw assembly per §22.1, not copied from the sibling) — reused the existing
+  `AI_CV_DEFENSE_UP_PHYSICAL_TYPES` set directly rather than duplicating an
+  identical byte list under a second name. (3) Tier-1 tests: 10 CBM tests
+  (both handlers' independent/combined/omitted-field gates), 12 CV
+  handler-level tests (Gates A-F, DRAW SITES 1-5, Gate F's inverted verdict
+  proven on the same Seismic Toss/Dragon Rage moves `DefenseUp`'s own tests
+  use, plus a pass-through barrier check), 5 mask-7
+  `chooseFactoryAiScoredDecision` end-to-end reproduction tests (Anorith/
+  Machamp, both dispatch moves × both reach/control fixtures, policy-own-
+  draws model: reach = clean 4 `sp-def-up-roll-4` draws, control =
+  deterministic 0, CosmicPower≡CalmMind draw-count parity) — 27 tests
+  total, following the SpeedUp/SpAtkUp (§20/§21, entry 478) port pattern
+  exactly. The oracle's own live window totals (control 8/8, reach 14/13,
+  §22.3) are a documented superset (extra per-slot draws outside this
+  engine's own AI-decision scope, plus the still-unresolved "5-6 not 4"
+  anomaly §18.4/§22.3-22.4 first flagged for `DefenseUp` and now confirmed
+  recurring here) — same subset relationship every prior HP-banded/last-
+  move pair (`DefenseUp`/`AccuracyDown`) already established, not a
+  mismatch; not independently re-verified against the live oracle this
+  round (that verification is the already-merged, supervisor-rerun §22.6
+  ground truth work, not this porting step).
+- **Next:** LightScreen/Reflect/EvasionUp/EvasionDown/weather-trio pairs
+  (the last 8 of 22 CV handlers, a side-lane scout is staging §23
+  concurrently); §19.5's unstaged AccuracyDown sites 2-6 (need mixed
+  movesets); entry 476's §18 5-6-draw window discrepancy (probe candidate,
+  sRandCount attribution — now a 2-handler-wide anomaly per this step);
+  ENDTURN_ITEMS2 after Yawn/Thrash. DRAW SITE 1/2/3 + site 5's empty-last-
+  move sub-case remain documented recipe-only for `SpDefUp` too (same
+  deferred status as every prior pair). Seam — turn-4
+  `anchorOpponentAfterTurn4Hp` staging gap and seam-scout §9 items remain
+  carried from entry 468. Animation program is independent (its own
+  supervisor, entry 481).
+- **Notes:** no ISSUES.md changes (none were open on this pair). No
+  PAPERCUTS this step.
+
+---
 ## 482 — [2026-07-26] Counter/Mirror Coat registered end-to-end (closes ISSUES #46)
 
 - **State:** tree committed and green at **226 files / 3054 tests** (+19

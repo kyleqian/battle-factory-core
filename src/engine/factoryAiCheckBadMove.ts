@@ -74,7 +74,30 @@
  * in this doc to date -- a single `if_side_affecting AI_USER,
  * SIDE_STATUS_*` bit test with zero stat-stage read, zero `get_ability`
  * call, converging with `factoryAiCheckViability.ts`'s `AI_CV_LightScreen`/
- * `AI_CV_Reflect` (doc §23).
+ * `AI_CV_Reflect` (doc §23); and `EFFECT_EVASION_UP(_2)`/`EFFECT_MINIMIZE`
+ * -> `AI_CBM_EvasionUp` (`:273-275`, `runCbmEvasionUp` below, doc §24.1),
+ * the eleventh CBM-blocked pair's own CBM half -- byte-for-byte the same
+ * bare 2-instruction MAX_STAT_STAGE-on-AI_USER's-own-stage shape as
+ * `AI_CBM_AttackUp` et al. with `STAT_EVASION` swapped in (`EFFECT_MINIMIZE`
+ * shares this single-stat handler, not `BulkUp`/`CosmicPower`/`CalmMind`'s
+ * dual-stat shape, since Minimize only ever raises evasion); and
+ * `EFFECT_EVASION_DOWN(_2)` -> `AI_CBM_EvasionDown` (`:306-312`,
+ * `runCbmEvasionDown` below, doc §24.1), the eleventh pair's other CBM
+ * half -- the same bare-MIN_STAT_STAGE-plus-shared-tail shape as
+ * `AI_CBM_DefenseDown`/`AI_CBM_SpDefDown`, converging with
+ * `factoryAiCheckViability.ts`'s `AI_CV_EvasionUp`/`AI_CV_EvasionDown`
+ * (doc §24); and `EFFECT_RAIN_DANCE`/`EFFECT_SUNNY_DAY`/`EFFECT_HAIL` ->
+ * `AI_CBM_RainDance`/`AI_CBM_SunnyDay`/`AI_CBM_Hail` (`:490-493`/`:495-498`/
+ * `:522-525`, `runCbmRainDance`/`runCbmSunnyDay`/`runCbmHail` below, doc
+ * §25.1), the twelfth and final CBM-blocked pair's own CBM third -- three
+ * separately named dispatch targets (not a shared handler), but
+ * byte-for-byte identical 3-instruction bodies (`get_weather; if_equal
+ * <OWN_WEATHER>, Score_Minus8; end`), converging with
+ * `factoryAiCheckViability.ts`'s `AI_CV_RainDance`/`AI_CV_SunnyDay`/
+ * `AI_CV_Hail` (doc §25) -- the last of the twelve CBM-blocked pairs. The
+ * 22nd and last reachable CV handler overall, `AI_CV_SpeedDownFromChance`
+ * (doc §5's table), is CV-only-reachable and has no CBM counterpart, so it
+ * has no entry in this file.
  */
 import movesData from "../data/gen/moves.json" with { type: "json" };
 import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
@@ -96,6 +119,40 @@ const SPECIES_BY_ID: ReadonlyMap<number, SpeciesRow> = new Map(
 );
 
 export const TYPE_EFFECTIVENESS = typeEffectivenessData.typeEffectiveness as readonly TypeEffectivenessEntry[];
+
+/**
+ * `AI_WEATHER_*` (`include/constants/battle_ai.h:27-30`), the encoding
+ * `Cmd_get_weather` (`battle_ai_script_commands.c:1644-1665`) writes to
+ * `AI_THINKING_STRUCT->funcResult` -- NOT `gBattleWeather`'s own raw bit
+ * layout. Shared by the weather-trio CBM+CV handlers (doc §25.1/§25.2)
+ * below and by `factoryAiCheckViability.ts`.
+ */
+export const AI_WEATHER_SUN = 0;
+export const AI_WEATHER_RAIN = 1;
+export const AI_WEATHER_SANDSTORM = 2;
+export const AI_WEATHER_HAIL = 3;
+export type AiWeatherValue =
+  | typeof AI_WEATHER_SUN
+  | typeof AI_WEATHER_RAIN
+  | typeof AI_WEATHER_SANDSTORM
+  | typeof AI_WEATHER_HAIL;
+
+/**
+ * `include/constants/abilities.h`'s own ability-ID enum, restricted to the
+ * only four IDs (0-3) that can ever equal an `AI_WEATHER_*` constant --
+ * `Cmd_get_weather`'s stale-`funcResult` bug (doc §25.10.1): every ability ID
+ * from 4 upward can never collide with a weather compare, so this table only
+ * needs these four entries to fully answer "does this ability's raw ID land
+ * in the collision range" -- not a special case for Ninjask, the general
+ * ability-name-to-ID mapping just has no other members that matter for an
+ * `if_equal AI_WEATHER_*` compare.
+ */
+const ABILITY_ID_IN_WEATHER_RANGE: ReadonlyMap<string, AiWeatherValue> = new Map([
+  ["ABILITY_NONE", AI_WEATHER_SUN], // id 0
+  ["ABILITY_STENCH", AI_WEATHER_RAIN], // id 1
+  ["ABILITY_DRIZZLE", AI_WEATHER_SANDSTORM], // id 2
+  ["ABILITY_SPEED_BOOST", AI_WEATHER_HAIL], // id 3
+]);
 
 /** `sIgnoredPowerfulMoveEffects` (`battle_ai_script_commands.c:266-281`). */
 export const IGNORED_POWERFUL_MOVE_EFFECTS: ReadonlySet<string> = new Set([
@@ -202,6 +259,12 @@ export type FactoryAiCheckBadMoveTarget = Readonly<{
    * this file's test suite needs updating.
    */
   accStage?: number;
+  /**
+   * Current EVASION stat stage, 0..12 -- `AI_CBM_EvasionDown`'s MIN_STAT_STAGE
+   * gate (doc §24.1). Optional, defaulting to `DEFAULT_STAT_STAGE` (6) --
+   * same convention/rationale as `accStage` above.
+   */
+  evasionStage?: number;
 }>;
 
 /**
@@ -252,6 +315,22 @@ export type FactoryAiCheckBadMoveAttacker = Readonly<{
    * `false`, same convention as `lightScreenUp` above.
    */
   reflectUp?: boolean;
+  /**
+   * AI_USER's own EVASION stat stage, 0..12 -- `AI_CBM_EvasionUp`'s own
+   * MAX_STAT_STAGE gate (doc §24.1). Optional, same default/rationale as
+   * `speedStage`/`spAtkStage`/`spDefStage` above.
+   */
+  evasionStage?: number;
+  /**
+   * Current weather, `AI_WEATHER_*`-encoded (0=Sun/1=Rain/2=Sandstorm/3=Hail)
+   * -- `AI_CBM_RainDance`/`SunnyDay`/`Hail`'s own `get_weather` read (doc
+   * §25.1). Optional, defaulting to `undefined` (no weather bit set, matching
+   * the real battle-start state) -- same optional/default convention as
+   * `speedStage`/`lightScreenUp` above. `undefined` never equals any of the
+   * four `AI_WEATHER_*` values, so it never fires any of the three handlers'
+   * own equality gate, the correct outcome for "no weather" either way.
+   */
+  currentWeather?: AiWeatherValue;
 }>;
 
 export type FactoryAiCheckBadMoveDraw = Readonly<{
@@ -636,6 +715,103 @@ function runCbmReflect(attackerReflectUp: boolean): number {
   return attackerReflectUp ? -8 : 0;
 }
 
+/**
+ * `AI_CBM_EvasionUp` (`data/battle_ai_scripts.s:273-275`, doc §24.1):
+ *
+ * ```
+ * AI_CBM_EvasionUp:
+ *     if_stat_level_equal AI_USER, STAT_EVASION, MAX_STAT_STAGE, Score_Minus10
+ *     end
+ * ```
+ *
+ * Byte-for-byte the same bare 2-instruction MAX_STAT_STAGE-on-AI_USER's-own
+ * -stage shape as `AI_CBM_AttackUp`/`AI_CBM_DefenseUp`/`AI_CBM_SpeedUp`/
+ * `AI_CBM_SpAtkUp` with `STAT_EVASION` swapped in -- zero `get_ability`
+ * calls, no shared tail. Dispatch: `EFFECT_EVASION_UP`/`EFFECT_EVASION_UP_2`
+ * (`:114,139`) AND `EFFECT_MINIMIZE` (`:163`) all converge here -- Minimize
+ * shares this single-stat shape (not `AI_CBM_BulkUp`/`CosmicPower`/
+ * `CalmMind`'s separate dual-stat pattern) because it only ever raises
+ * STAT_EVASION.
+ */
+function runCbmEvasionUp(attackerEvasionStage: number): number {
+  return attackerEvasionStage === MAX_STAT_STAGE ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_EvasionDown` (`data/battle_ai_scripts.s:306-312`, doc §24.1) --
+ * the same bare MIN_STAT_STAGE-gate-plus-direct-goto-to-the-shared-tail
+ * shape `AI_CBM_DefenseDown`/`AI_CBM_SpDefDown` already established (no
+ * intervening own-ability short-circuit like `AttackDown`/`AccDown`'s Hyper
+ * Cutter/Keen Eye -- there is no dedicated evasion-immunity ability in
+ * Gen 3). Dispatch: `EFFECT_EVASION_DOWN`/`EFFECT_EVASION_DOWN_2` (`:121,146`).
+ */
+function runCbmEvasionDown(
+  target: FactoryAiCheckBadMoveTarget,
+  rng: BattleRngState,
+  ordinal: number,
+  reason: string,
+): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckBadMoveDraw[]; scoreDelta: number }> {
+  return runCbmStatDownViaSharedTail(target.evasionStage ?? DEFAULT_STAT_STAGE, target, rng, ordinal, reason);
+}
+
+/**
+ * `AI_CBM_RainDance`/`AI_CBM_SunnyDay`/`AI_CBM_Hail` (`data/battle_ai_scripts.s:490-493`/
+ * `:495-498`/`:522-525`, doc §25.1) -- three separate, individually named
+ * dispatch targets (not a shared handler, correcting an earlier doc's own
+ * "shared handler" guess), but byte-for-byte the same 3-instruction body:
+ *
+ * ```
+ * AI_CBM_<Weather>:
+ *     get_weather
+ *     if_equal AI_WEATHER_<OWN>, Score_Minus8
+ *     end
+ * ```
+ *
+ * Zero `get_ability` calls, zero stat-stage reads, zero ability/item gate --
+ * the smallest CBM handler shape in the doc. One parameterized helper covers
+ * all three, differing only in which `AI_WEATHER_*` constant each checks.
+ *
+ * **`get_weather`'s own stale-`funcResult` bug, Channel 1 (doc §25.10.1/.3)**:
+ * `Cmd_get_weather` (`battle_ai_script_commands.c:1644-1665`) only writes
+ * `funcResult` when a real weather bit is set -- the `AI_WEATHER_NONE`
+ * sentinel write is `#ifdef BUGFIX`-gated and `BUGFIX` is commented out in
+ * this pinned checkout. So on a genuinely weatherless battle (`currentWeather
+ * === undefined` here), `get_weather`'s read is whatever the *previous* AI
+ * script command left in `funcResult` -- for these three handlers
+ * specifically, that's always `AI_CheckBadMove`'s own universal preamble
+ * (`AI_CheckBadMove_CheckSoundproof`, `data/battle_ai_scripts.s:93`), which
+ * runs `get_ability AI_TARGET` immediately before every effect dispatch, for
+ * every move. `staleAbilityGuess` below is exactly that preamble's own
+ * already-computed guess (`runCheckBadMovePreamble`'s `soundproofGuess`,
+ * same call, same slot, same script) -- not a fresh read, no new RNG draw,
+ * just reusing the value this same pass already produced. Only ability IDs
+ * 0-3 (`ABILITY_ID_IN_WEATHER_RANGE` above) can ever collide with an
+ * `AI_WEATHER_*` constant; every other ability leaves the compare as
+ * genuine non-equality, matching the clean "no weather" outcome anyway.
+ */
+function runCbmWeatherSetter(
+  currentWeather: AiWeatherValue | undefined,
+  staleAbilityGuess: string,
+  ownWeatherConstant: AiWeatherValue,
+): number {
+  const funcResult = currentWeather !== undefined
+    ? currentWeather
+    : ABILITY_ID_IN_WEATHER_RANGE.get(staleAbilityGuess);
+  return funcResult === ownWeatherConstant ? -8 : 0;
+}
+
+function runCbmRainDance(currentWeather: AiWeatherValue | undefined, staleAbilityGuess: string): number {
+  return runCbmWeatherSetter(currentWeather, staleAbilityGuess, AI_WEATHER_RAIN);
+}
+
+function runCbmSunnyDay(currentWeather: AiWeatherValue | undefined, staleAbilityGuess: string): number {
+  return runCbmWeatherSetter(currentWeather, staleAbilityGuess, AI_WEATHER_SUN);
+}
+
+function runCbmHail(currentWeather: AiWeatherValue | undefined, staleAbilityGuess: string): number {
+  return runCbmWeatherSetter(currentWeather, staleAbilityGuess, AI_WEATHER_HAIL);
+}
+
 export function typeMultiplierTenths(attackingType: string, defendingTypes: readonly [string, string]): number {
   const distinct = defendingTypes[0] === defendingTypes[1] ? [defendingTypes[0]] : defendingTypes;
   let mult = 10;
@@ -908,6 +1084,68 @@ export function runCheckBadMovePreamble(input: Readonly<{
       rng,
       draws: Object.freeze(draws),
       scoreDelta: runCbmReflect(input.attacker.reflectUp ?? false),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_EVASION_UP(_2)/EFFECT_MINIMIZE ->
+  // AI_CBM_EvasionUp, the eleventh CBM-blocked pair's own CBM half (doc §24)
+  // -- reads AI_USER's own state, same shape as AttackUp/DefenseUp/etc.
+  if (
+    move.effect === "EFFECT_EVASION_UP"
+    || move.effect === "EFFECT_EVASION_UP_2"
+    || move.effect === "EFFECT_MINIMIZE"
+  ) {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmEvasionUp(input.attacker.evasionStage ?? DEFAULT_STAT_STAGE),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_EVASION_DOWN(_2) -> AI_CBM_EvasionDown,
+  // the eleventh CBM-blocked pair's other CBM half (doc §24).
+  if (move.effect === "EFFECT_EVASION_DOWN" || move.effect === "EFFECT_EVASION_DOWN_2") {
+    const evasionDown = runCbmEvasionDown(target, rng, ordinal, `${input.reasonPrefix}-evasion-down`);
+    for (const draw of evasionDown.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: evasionDown.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: evasionDown.scoreDelta,
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_RAIN_DANCE -> AI_CBM_RainDance, the
+  // twelfth (weather-trio) CBM-blocked pair's own CBM half (doc §25).
+  if (move.effect === "EFFECT_RAIN_DANCE") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmRainDance(input.attacker.currentWeather, soundproofGuess),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_SUNNY_DAY -> AI_CBM_SunnyDay, the
+  // weather trio's second CBM half (doc §25).
+  if (move.effect === "EFFECT_SUNNY_DAY") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmSunnyDay(input.attacker.currentWeather, soundproofGuess),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_HAIL -> AI_CBM_Hail, the weather
+  // trio's third CBM half (doc §25).
+  if (move.effect === "EFFECT_HAIL") {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmHail(input.attacker.currentWeather, soundproofGuess),
     });
   }
 

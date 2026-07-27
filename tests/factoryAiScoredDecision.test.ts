@@ -314,6 +314,99 @@ describe("AI_CV_SpeedDown mask-7 fixture reproduction (docs/factory-ai-checkviab
   });
 });
 
+// AI_CV_SpeedDownFromChance (data/battle_ai_scripts.s:1136-1141,
+// docs/factory-ai-checkviability-ground-truth.md §5's table row, §4's
+// footnote, §10's porter note) -- the 22nd and last reachable CV handler.
+//
+// NOTE on this describe block's relationship to the doc's own §6 fixtures
+// (tools/battle-lab/mechanic-factory-ai-cv-speeddown-{opponent-faster,
+// opponent-slower}-off.json, reproduced by the describe block directly
+// above): those two fixtures dispatch MOVE_STRING_SHOT, whose effect is
+// EFFECT_SPEED_DOWN -- a DIRECT dispatch to AI_CV_SpeedDown, not
+// EFFECT_SPEED_DOWN_HIT/AI_CV_SpeedDownFromChance. They do NOT exercise
+// this handler's own code path (confirmed by inspecting the fixture JSON's
+// `moves` field: move ID 81 = MOVE_STRING_SHOT). No live-oracle fixture
+// exists yet for any of SpeedDownFromChance's 6 covered moves (checked
+// tools/battle-lab/ -- fixture authoring is out of scope for this step), so
+// this block instead drives the REAL mask-7 dispatcher
+// (chooseFactoryAiScoredDecision, the same CBM->TryToFaint->CV pipeline the
+// §6 block above exercises) with a hand-built view using the actual
+// dispatching/non-dispatching moves, same Dugtrio/Shuckle speed-differential
+// species pair as §6's own fixtures. This is genuine mask-7 pipeline
+// coverage of the new dispatch wiring, just not tied to a banked live-oracle
+// ledger the way §6's own two fixtures are -- assertions below are scoped to
+// the check-viability phase specifically (not total draw counts), since Icy
+// Wind is a real 55-power move and its own type matchup against Dugtrio
+// (Ice vs Ground/Ground, 4x) can additionally engage AI_TryToFaint's own
+// x4-effective if_random_less_than gate -- an orthogonal, already-ported
+// mechanism, not something this step re-verifies.
+describe("AI_CV_SpeedDownFromChance mask-7 pipeline coverage (real dispatcher, no banked oracle fixture yet)", () => {
+  const MOVE_ICY_WIND_MASK7 = 196; // EFFECT_SPEED_DOWN_HIT -- redirects into AI_CV_SpeedDown
+  const MOVE_BUBBLE_BEAM_MASK7 = 61; // EFFECT_SPEED_DOWN_HIT -- falls through to a genuine zero
+
+  const SPEED_EXTRAS = Object.freeze({
+    statStages: NEUTRAL_STAGES,
+    isFirstTurn: 2,
+    hp: 100, maxHp: 100,
+  });
+  const DUGTRIO = Object.freeze({ types: ["TYPE_GROUND", "TYPE_GROUND"] as const, attack: 80, defense: 50, spAttack: 50, spDefense: 70, speed: 120, level: 50, ...SPEED_EXTRAS });
+  const SHUCKLE = Object.freeze({ types: ["TYPE_BUG", "TYPE_ROCK"] as const, attack: 10, defense: 230, spAttack: 10, spDefense: 230, speed: 5, level: 50, ...SPEED_EXTRAS });
+  function shuckleTarget(): FactoryAiScoredTargetView {
+    return Object.freeze({ species: 213, ...SHUCKLE, ability: "ABILITY_STURDY", knownAbility: null });
+  }
+  function dugtrioTarget(): FactoryAiScoredTargetView {
+    return Object.freeze({ species: 51, ...DUGTRIO, ability: "ABILITY_ARENA_TRAP", knownAbility: null });
+  }
+  function speedDownFromChanceView(moveId: number, attacker: FactoryAiScoredBattlerView, target: FactoryAiScoredTargetView): FactoryAiScoredView {
+    return Object.freeze({
+      schema: "factory-ai-scored-view/v1",
+      mode: "factory-level-50-singles",
+      active: Object.freeze({ aiBattler: 1 as const, targetBattler: 0 as const }),
+      factory: Object.freeze({ levelMode: 0 as const, battleMode: 0 as const, factoryWinStreak: 28, trainerOpponentId: 222 }),
+      moves: [moveId, MOVE_SPLASH, MOVE_SPLASH, MOVE_SPLASH] as const,
+      attacker,
+      target,
+    });
+  }
+  function cvPhaseDraws(result: ReturnType<typeof chooseFactoryAiScoredDecision>) {
+    return result.trace.draws.filter((d) => "phase" in d && d.phase === "check-viability");
+  }
+
+  it("Icy Wind redirects: opponent (AI_USER) faster -> AI_CV_SpeedDown's deterministic -3 branch, zero CV draws", () => {
+    const view = speedDownFromChanceView(MOVE_ICY_WIND_MASK7, DUGTRIO, shuckleTarget());
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 1, calls: 0 } });
+    expect(cvPhaseDraws(result)).toHaveLength(0);
+    expect(result.trace.slotScores[0]).toMatchObject({ checkViabilityDelta: -3 });
+  });
+
+  it("Icy Wind redirects: opponent (AI_USER) slower -> AI_CV_SpeedDown's probabilistic branch, exactly one CV draw", () => {
+    const view = speedDownFromChanceView(MOVE_ICY_WIND_MASK7, SHUCKLE, dugtrioTarget());
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 1, calls: 0 } });
+    const cvDraws = cvPhaseDraws(result);
+    expect(cvDraws).toHaveLength(1);
+    expect(cvDraws[0]).toMatchObject({ kind: "speed-down-roll" });
+    expect(result.trace.slotScores[0]!.checkViabilityDelta).toBeGreaterThanOrEqual(0); // 0 or +2, both valid outcomes of the roll
+  });
+
+  it("Bubblebeam falls through to AI_CV_SpeedDownFromChance's own `end`: zero CV draws, zero CV delta, regardless of who is faster", () => {
+    const fasterUser = chooseFactoryAiScoredDecision({
+      view: speedDownFromChanceView(MOVE_BUBBLE_BEAM_MASK7, DUGTRIO, shuckleTarget()),
+      request: fourSlotRequest,
+      rng: { value: 1, calls: 0 },
+    });
+    expect(cvPhaseDraws(fasterUser)).toHaveLength(0);
+    expect(fasterUser.trace.slotScores[0]).toMatchObject({ checkViabilityDelta: 0 });
+
+    const slowerUser = chooseFactoryAiScoredDecision({
+      view: speedDownFromChanceView(MOVE_BUBBLE_BEAM_MASK7, SHUCKLE, dugtrioTarget()),
+      request: fourSlotRequest,
+      rng: { value: 1, calls: 0 },
+    });
+    expect(cvPhaseDraws(slowerUser)).toHaveLength(0);
+    expect(slowerUser.trace.slotScores[0]).toMatchObject({ checkViabilityDelta: 0 });
+  });
+});
+
 const MOVE_PURSUIT = 228; // EFFECT_PURSUIT
 const MOVE_SLASH = 163; // EFFECT_HIGH_CRITICAL
 
@@ -1187,25 +1280,29 @@ const MOVE_DRAGON_RAGE_LAST = 82; // Dragon, NOT in the list
 // numbers against this exact matchup), same "construct the decisive
 // post-turn-1 state" precedent as every block above.
 //
-// Draw-count reconciliation (per this step's brief): the doc's own live
-// ledger (§18.4) shows 6 (seed 1) / 5 (seed 99) total Cmd_if_random_less_than
-// calls for BOTH physical-list fixtures (Vital Throw, Seismic Toss) --
-// explicitly NOT the "N identical slots x 1 draw" pattern every other
-// handler in this doc produces, and the doc itself says outright it could
-// not identify the extra 1-2 draws' source ("This session did not
-// single-step the flagged frame", §18.4). This port's own branch-by-branch
-// derivation from the SAME cited assembly (§18.1) is unambiguous: 4
-// identical MOVE_HARDEN slots, each independently reaching Gate E (power
-// != 0) then Gate F (type in the physical list) then DRAW SITE 4 exactly
-// once, deterministically (no loop, no conditional redraw within a single
-// slot's evaluation) -- so the handler's own contribution is EXACTLY 4, not
-// 5-6. Reconciled: this port's ported logic is provably correct against the
-// cited assembly (verified below); the doc's raw 5-6 must come from
-// something outside AI_CV_DefenseUp's own body that its own session did not
-// isolate (the doc's own attribution table lumped it into the
-// Cmd_if_random_less_than bucket, so it is a real, uncredited extra draw
-// somewhere in the real ROM's frame window, not a flaw in this derivation) --
-// left exactly as open as the doc itself left it, not silently resolved.
+// Draw-count reconciliation (per docs/factory-ai-draw-discrepancy-probe.md,
+// which supersedes this comment's own prior "EXACTLY 4" claim): the doc's
+// own live ledger (§18.4) showed 5-6 total Cmd_if_random_less_than calls for
+// the physical-list fixtures, which an earlier session here could not
+// reconcile against a naive "4 identical slots x 1 draw" derivation and left
+// as an open, unattributed extra. The probe doc's own live single-step
+// instrumentation (its §3.1/§3.2, watching gAIScriptPtr itself, not just the
+// shared C-level return address) positively identified the missing site:
+// DRAW SITE 4's own failure (roll >= 60) falls straight through into DRAW
+// SITE 5's own instruction with no gate between them (probe doc §4, raw ROM
+// byte offsets) -- so each of the 4 identical slots draws once (pass, stops)
+// or TWICE (fails at site 4, chains into site 5), not always once. Fixed
+// below (`runCvDefenseUp`'s own DRAW SITE 4/5 chain) and confirmed here: this
+// exact fixture (seed 1, Vital Throw and Seismic Toss both) now reproduces 7
+// check-viability draws -- slot 1 fail@4+fail@5 (2 draws, -2), slot 2
+// fail@4+fail@5 (2 draws, -2), slot 3 pass@4 (1 draw, no penalty), slot 4
+// fail@4+pass@5 (2 draws, no penalty) -- squarely inside the fixed model's
+// own [4,8]-draw range (4 slots x 1-or-2 draws each), not the old buggy
+// model's fixed-4. This test's own seed/ordinal position is NOT the live
+// ROM's own RNG stream, so its 7 does not need to equal the doc's raw 5-6
+// number-for-number; what's reconciled is the MECHANISM (chained, variable
+// per-slot draw count) that the old "always 4" derivation and the old port
+// both missed.
 describe("AI_CV_DefenseUp mask-7 fixture reproduction (docs/factory-ai-checkviability-ground-truth.md §18.3/§18.4)", () => {
   const MOVE_DEFENSE_UP_MOVESET = [
     MOVE_HARDEN_DEFENSE_UP, MOVE_HARDEN_DEFENSE_UP, MOVE_HARDEN_DEFENSE_UP, MOVE_HARDEN_DEFENSE_UP,
@@ -1247,22 +1344,37 @@ describe("AI_CV_DefenseUp mask-7 fixture reproduction (docs/factory-ai-checkviab
     return result.trace.draws.filter((d) => "phase" in d && d.phase === phase);
   }
 
-  it("physical fixture #1 (Vital Throw, doc's own 55/120 = 45.8% HP figure): exactly 4 check-viability draws (DRAW SITE 4, one per identical Harden slot), zero CBM/TryToFaint draws", () => {
+  it("physical fixture #1 (Vital Throw, doc's own 55/120 = 45.8% HP figure): 7 check-viability draws -- DRAW SITE 4 chains into DRAW SITE 5 whenever the first roll fails, zero CBM/TryToFaint draws", () => {
     const view = defenseUpView(anorithAttacker(55), machampTarget(MOVE_VITAL_THROW_LAST));
     const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 1, calls: 0 } });
     expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
     expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
     const cvDraws = phaseDraws(result, "check-viability");
-    expect(cvDraws).toHaveLength(4);
-    expect(cvDraws.every((d) => "kind" in d && d.kind === "defense-up-roll-4")).toBe(true);
+    // slot 1: fail@4+fail@5 (-2); slot 2: fail@4+fail@5 (-2); slot 3: pass@4
+    // (no penalty); slot 4: fail@4+pass@5 (no penalty). 2+2+1+2 = 7 draws.
+    expect(cvDraws.map((d) => ("kind" in d ? d.kind : null))).toEqual([
+      "defense-up-roll-4", "defense-up-roll-5",
+      "defense-up-roll-4", "defense-up-roll-5",
+      "defense-up-roll-4",
+      "defense-up-roll-4", "defense-up-roll-5",
+    ]);
+    expect(cvDraws.map((d) => ("succeeded" in d ? d.succeeded : null))).toEqual([
+      true, true, true, true, false, true, false,
+    ]);
+    expect(result.trace.draws).toHaveLength(4 /* setup */ + 7 /* check-viability */ + 1 /* tie */);
   });
 
-  it("physical fixture #2 (Seismic Toss, doc's own 70/120 = 58.3% HP figure): exactly 4 check-viability draws, same code path as Vital Throw", () => {
+  it("physical fixture #2 (Seismic Toss, doc's own 70/120 = 58.3% HP figure): identical 7-draw chain, same code path as Vital Throw", () => {
     const view = defenseUpView(anorithAttacker(70), machampTarget(MOVE_SEISMIC_TOSS_LAST));
     const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 1, calls: 0 } });
     const cvDraws = phaseDraws(result, "check-viability");
-    expect(cvDraws).toHaveLength(4);
-    expect(cvDraws.every((d) => "kind" in d && d.kind === "defense-up-roll-4")).toBe(true);
+    expect(cvDraws.map((d) => ("kind" in d ? d.kind : null))).toEqual([
+      "defense-up-roll-4", "defense-up-roll-5",
+      "defense-up-roll-4", "defense-up-roll-5",
+      "defense-up-roll-4",
+      "defense-up-roll-4", "defense-up-roll-5",
+    ]);
+    expect(result.trace.draws).toHaveLength(4 /* setup */ + 7 /* check-viability */ + 1 /* tie */);
   });
 
   it("non-physical flip (Dragon Rage, doc's own 80/120 = 66.7% HP figure): deterministic ZERO check-viability draws -- Gate F jumps straight to the -2 penalty, matching the doc's own live ledger exactly", () => {
@@ -1604,14 +1716,18 @@ const MOVE_CALM_MIND_MASK7 = 347; // EFFECT_CALM_MIND
 // deterministic zero-draw path) and Dragon Rage (non-physical, NOT in the
 // list) is the REACH fixture (falls through to DRAW SITE 4) -- the exact
 // opposite of DefenseUp's own naming, per §22.2's own explicit warning
-// against copying DefenseUp's move-to-name assignment blind. Same "4 clean
-// check-viability draws" policy-own-draws model the DefenseUp block above
-// established: the oracle's own live window totals (§22.3: reach 14/13,
-// control 8/8 cross-seed) include extra per-slot Random() calls outside
-// chooseFactoryAiScoredDecision's own scope plus the still-unresolved
-// "5-6, not 4" anomaly (§18.4/§22.3-22.4) this port does not model -- a
-// documented subset, same relationship every prior HP-banded/last-move pair
-// (DefenseUp/AccuracyDown) already established, not a mismatch.
+// against copying DefenseUp's move-to-name assignment blind. Same chained
+// DRAW SITE 4/5 model the DefenseUp block above establishes (docs/factory-
+// ai-draw-discrepancy-probe.md §4: byte-identical topology, confirmed live
+// on this second handler too, probe doc §3.4) -- reusing the SAME species/
+// stats/moveset-count shape as the DefenseUp fixture above puts this
+// fixture's own CV phase at the identical RNG-stream offset, so it
+// reproduces the identical 7-draw chain (slot1/2 fail@4+fail@5, slot3
+// pass@4, slot4 fail@4+pass@5). The oracle's own live window totals (§22.3:
+// reach 14/13, control 8/8 cross-seed) include extra per-slot Random() calls
+// outside chooseFactoryAiScoredDecision's own scope -- a documented subset,
+// same relationship every prior HP-banded/last-move pair (DefenseUp/
+// AccuracyDown) already established, not a mismatch.
 describe("AI_CV_SpDefUp mask-7 fixture reproduction (docs/factory-ai-checkviability-ground-truth.md §22.2/§22.3)", () => {
   function anorithAttacker(hp: number): FactoryAiScoredBattlerView {
     return Object.freeze({
@@ -1655,14 +1771,20 @@ describe("AI_CV_SpDefUp mask-7 fixture reproduction (docs/factory-ai-checkviabil
   it.each([
     ["CosmicPower", MOVE_COSMIC_POWER_MASK7],
     ["CalmMind", MOVE_CALM_MIND_MASK7],
-  ])("%s reach fixture (Dragon Rage last, Anorith 80/120 = 66.7%%): Gate F NOT in the physical list -- falls through to DRAW SITE 4, exactly 4 check-viability draws, zero CBM/TryToFaint draws", (_label, moveId) => {
+  ])("%s reach fixture (Dragon Rage last, Anorith 80/120 = 66.7%%): Gate F NOT in the physical list -- falls through to DRAW SITE 4, which chains into DRAW SITE 5 on failure -- 7 check-viability draws, identical to DefenseUp's own physical fixture (same RNG-stream offset), zero CBM/TryToFaint draws", (_label, moveId) => {
     const view = spDefUpView(moveId, anorithAttacker(80), machampTarget(MOVE_DRAGON_RAGE_LAST));
     const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 1, calls: 0 } });
     expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
     expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
     const cvDraws = phaseDraws(result, "check-viability");
-    expect(cvDraws).toHaveLength(4);
-    expect(cvDraws.every((d) => "kind" in d && d.kind === "sp-def-up-roll-4")).toBe(true);
+    // Same 2+2+1+2 = 7 shape as AI_CV_DefenseUp's own physical fixture above.
+    expect(cvDraws.map((d) => ("kind" in d ? d.kind : null))).toEqual([
+      "sp-def-up-roll-4", "sp-def-up-roll-5",
+      "sp-def-up-roll-4", "sp-def-up-roll-5",
+      "sp-def-up-roll-4",
+      "sp-def-up-roll-4", "sp-def-up-roll-5",
+    ]);
+    expect(result.trace.draws).toHaveLength(4 /* setup */ + 7 /* check-viability */ + 1 /* tie */);
   });
 
   it.each([
@@ -1849,5 +1971,336 @@ describe("AI_CV_LightScreen / AI_CV_Reflect mask-7 fixture reproduction (docs/fa
     });
     expect(reflectReach.trace.draws).toHaveLength(lightScreenReach.trace.draws.length);
     expect(phaseDraws(reflectReach, "check-viability")).toHaveLength(phaseDraws(lightScreenReach, "check-viability").length);
+  });
+});
+
+const MOVE_DOUBLE_TEAM_MASK7 = 104; // EFFECT_EVASION_UP
+
+// docs/factory-ai-checkviability-ground-truth.md §24.2/§24.3's three fixtures
+// (tools/battle-lab/mechanic-factory-ai-cv-evasionup-{fullhp-reach,
+// midhp-control,lowhp-reach}-off.json) -- the eleventh CBM-blocked pair's own
+// UP half, reproduced through the REAL mask-7 dispatcher end to end.
+// Opponent (AI_USER, under test) = Machamp (species 68, same stats as the
+// SpDefUp block's own target above -- here Machamp is the ATTACKER, not the
+// target, since Double Team is Machamp's own move), all 4 slots MOVE_DOUBLE_
+// TEAM; target (player) = Anorith (species 390, single ability Battle Armor
+// -- closes the universal CBM preamble's own get_ability confound). Because
+// Gate A's own 90% threshold and Gate H's own 70% threshold are disjoint
+// bands (doc §24.1/§24.2), three fixtures are needed (not two, unlike
+// AccuracyDown's own shared-threshold twin-site design): fullhp-reach isolates
+// DRAW SITE 1, midhp-control is a shared zero-draw control for BOTH sites,
+// lowhp-reach isolates DRAW SITE 8. Every fixture constructs Machamp's own
+// evasion stage at 7 (not 6) directly -- Double Team's own real turn-1 use
+// has already raised it by the time the phantom next-decision runs (doc
+// §24.1's own finding, same "construct the post-real-move state directly"
+// precedent the AttackUp block's own POST_SWORDS_DANCE_STAGES established).
+// Policy-own-draws model: fullhp-reach/lowhp-reach = 4 setup + 4 CV + 1 tie =
+// 9; midhp-control = 4 setup + 0 CV + 1 tie = 5 (doc §24.3's own live window
+// totals of 10/8/12 are a documented superset, the same relationship every
+// prior pair already established).
+describe("AI_CV_EvasionUp mask-7 fixture reproduction (docs/factory-ai-checkviability-ground-truth.md §24.2/§24.3)", () => {
+  const POST_DOUBLE_TEAM_STAGES = Object.freeze({ ...NEUTRAL_STAGES, evasion: 7 });
+
+  function machampAttacker(hp: number, maxHp = 165): FactoryAiScoredBattlerView {
+    return Object.freeze({
+      types: ["TYPE_FIGHTING", "TYPE_FIGHTING"] as const,
+      attack: 150, defense: 100, spAttack: 85, spDefense: 105, speed: 75, level: 50,
+      statStages: POST_DOUBLE_TEAM_STAGES,
+      isFirstTurn: 0,
+      hp, maxHp,
+    });
+  }
+  function anorithTarget(hp = 100, maxHp = 100): FactoryAiScoredTargetView {
+    return Object.freeze({
+      species: 390,
+      types: ["TYPE_ROCK", "TYPE_BUG"] as const,
+      attack: 115, defense: 70, spAttack: 60, spDefense: 70, speed: 95, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp, maxHp, ability: "ABILITY_BATTLE_ARMOR", knownAbility: null,
+    });
+  }
+  function evasionUpView(attacker: FactoryAiScoredBattlerView, target: FactoryAiScoredTargetView): FactoryAiScoredView {
+    return Object.freeze({
+      schema: "factory-ai-scored-view/v1",
+      mode: "factory-level-50-singles",
+      active: Object.freeze({ aiBattler: 1 as const, targetBattler: 0 as const }),
+      factory: Object.freeze({ levelMode: 0 as const, battleMode: 0 as const, factoryWinStreak: 28, trainerOpponentId: 222 }),
+      moves: [MOVE_DOUBLE_TEAM_MASK7, MOVE_DOUBLE_TEAM_MASK7, MOVE_DOUBLE_TEAM_MASK7, MOVE_DOUBLE_TEAM_MASK7] as const,
+      attacker,
+      target,
+    });
+  }
+  function phaseDraws(result: ReturnType<typeof chooseFactoryAiScoredDecision>, phase: "check-bad-move" | "try-to-faint" | "check-viability") {
+    return result.trace.draws.filter((d) => "phase" in d && d.phase === phase);
+  }
+
+  it("fullhp-reach fixture (Machamp 165/165 = 100%): Gate A true for all 4 identical slots -- exactly 4 check-viability draws (DRAW SITE 1), zero CBM/TryToFaint draws", () => {
+    const view = evasionUpView(machampAttacker(165), anorithTarget());
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 1, calls: 0 } });
+    expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+    expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+    const cvDraws = phaseDraws(result, "check-viability");
+    expect(cvDraws).toHaveLength(4);
+    expect(cvDraws.every((d) => "kind" in d && d.kind === "evasion-up-roll-1")).toBe(true);
+    expect(result.trace.draws).toHaveLength(4 /* setup */ + 4 /* CV roll x4 slots */ + 1 /* tie */);
+  });
+
+  it("midhp-control fixture (Machamp 125/165 = 75%, Dragon Rage's fixed 40 damage): strictly between both gates' own disjoint thresholds -- a shared deterministic zero-draw control for BOTH sites", () => {
+    const view = evasionUpView(machampAttacker(125), anorithTarget());
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 1, calls: 0 } });
+    expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+    expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+    expect(phaseDraws(result, "check-viability")).toHaveLength(0);
+    expect(result.trace.draws).toHaveLength(4 /* setup */ + 1 /* tie */);
+  });
+
+  it("lowhp-reach fixture (Machamp 115/165 = 69%, Seismic Toss's fixed level-50 damage): Gate H false, Gate I false (evasion already 7, not the neutral 6) -- exactly 4 check-viability draws (DRAW SITE 8)", () => {
+    const view = evasionUpView(machampAttacker(115), anorithTarget());
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 1, calls: 0 } });
+    expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+    expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+    const cvDraws = phaseDraws(result, "check-viability");
+    expect(cvDraws).toHaveLength(4);
+    expect(cvDraws.every((d) => "kind" in d && d.kind === "evasion-up-roll-8")).toBe(true);
+    expect(result.trace.draws).toHaveLength(4 /* setup */ + 4 /* CV roll x4 slots */ + 1 /* tie */);
+  });
+
+  it("wiring: the attacker's own maxed EVASION stage reaches the CBM handler through the real dispatcher (mask 1 isolates CheckBadMove: -10 on every slot vs the neutral-stage run; same entry-483/485 wiring-gap precedent -- AI_CV_EvasionUp reads the same stage under mask 7, so mask 1 is required to isolate CBM's own delta)", () => {
+    function mask1View(attacker: FactoryAiScoredBattlerView): FactoryAiScoredView {
+      const base = evasionUpView(attacker, anorithTarget());
+      return Object.freeze({ ...base, factory: Object.freeze({ ...base.factory, factoryWinStreak: 14 }) });
+    }
+    const neutral = chooseFactoryAiScoredDecision({
+      view: mask1View(machampAttacker(115)),
+      request: fourSlotRequest,
+      rng: { value: 1, calls: 0 },
+    });
+    const maxed = chooseFactoryAiScoredDecision({
+      view: mask1View(Object.freeze({
+        ...machampAttacker(115),
+        statStages: Object.freeze({ ...NEUTRAL_STAGES, evasion: MAX_STAT_STAGE }),
+      })),
+      request: fourSlotRequest,
+      rng: { value: 1, calls: 0 },
+    });
+    expect(maxed.trace.mask).toBe(1);
+    expect(maxed.trace.executedScoringScripts).toEqual(["check-bad-move"]);
+    expect(phaseDraws(maxed, "check-bad-move")).toHaveLength(0);
+    expect(maxed.trace.slotScores.map((s) => s.finalScore)).toEqual(
+      neutral.trace.slotScores.map((s) => s.finalScore - 10),
+    );
+  });
+});
+
+const MOVE_SWEET_SCENT_MASK7 = 230; // EFFECT_EVASION_DOWN
+
+// docs/factory-ai-checkviability-ground-truth.md §24.2/§24.3's twin fixtures
+// (tools/battle-lab/mechanic-factory-ai-cv-evasiondown-{lowhp-reach,
+// fullhp-control}-off.json) -- the eleventh CBM-blocked pair's own DOWN half,
+// confirmed byte-for-byte the same shape as DefenseDown/SpDefDown (doc
+// §24.1), reusing that exact fixture recipe verbatim: opponent (AI_USER) =
+// Anorith, all 4 slots MOVE_SWEET_SCENT; target (player) = Machamp, single
+// assignable ability Guts. Same live-verified HP endpoints as the
+// DefenseDown/SpDefDown/VitalThrow blocks above (22/120=18% seed 1,
+// 30/120=25% seed 99 for reach; 120/120=100% for control).
+describe("AI_CV_EvasionDown mask-7 fixture reproduction (docs/factory-ai-checkviability-ground-truth.md §24.2/§24.3)", () => {
+  function anorithAttacker(hp: number): FactoryAiScoredBattlerView {
+    return Object.freeze({
+      types: ["TYPE_ROCK", "TYPE_BUG"] as const,
+      attack: 115, defense: 70, spAttack: 60, spDefense: 70, speed: 95, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp, maxHp: 120,
+    });
+  }
+  function machampTarget(): FactoryAiScoredTargetView {
+    return Object.freeze({
+      species: 68,
+      types: ["TYPE_FIGHTING", "TYPE_FIGHTING"] as const,
+      attack: 150, defense: 100, spAttack: 85, spDefense: 105, speed: 75, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp: 165, maxHp: 165, ability: "ABILITY_GUTS", knownAbility: null,
+    });
+  }
+  function evasionDownView(attacker: FactoryAiScoredBattlerView): FactoryAiScoredView {
+    return Object.freeze({
+      schema: "factory-ai-scored-view/v1",
+      mode: "factory-level-50-singles",
+      active: Object.freeze({ aiBattler: 1 as const, targetBattler: 0 as const }),
+      factory: Object.freeze({ levelMode: 0 as const, battleMode: 0 as const, factoryWinStreak: 28, trainerOpponentId: 222 }),
+      moves: [MOVE_SWEET_SCENT_MASK7, MOVE_SWEET_SCENT_MASK7, MOVE_SWEET_SCENT_MASK7, MOVE_SWEET_SCENT_MASK7] as const,
+      attacker,
+      target: machampTarget(),
+    });
+  }
+  function phaseDraws(result: ReturnType<typeof chooseFactoryAiScoredDecision>, phase: "check-bad-move" | "try-to-faint" | "check-viability") {
+    return result.trace.draws.filter((d) => "phase" in d && d.phase === phase);
+  }
+  function assertPicksSweetScent(view: FactoryAiScoredView, result: ReturnType<typeof chooseFactoryAiScoredDecision>) {
+    expect(result.submission.decision).toMatchObject({ kind: "use-move" });
+    if (result.submission.decision.kind === "use-move") {
+      expect(view.moves[result.submission.decision.moveSlot]).toBe(MOVE_SWEET_SCENT_MASK7);
+    }
+  }
+
+  it("reach fixture, seed 1 (Anorith at 22/120 HP = 18%): Gate A true for all 4 identical Sweet Scent slots, exactly 4 check-viability draws, zero CBM/TryToFaint draws, picks Sweet Scent", () => {
+    const view = evasionDownView(anorithAttacker(22));
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 1, calls: 0 } });
+    expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+    expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+    const cvDraws = phaseDraws(result, "check-viability");
+    expect(cvDraws).toHaveLength(4);
+    expect(cvDraws.every((d) => "kind" in d && d.kind === "evasion-down-roll")).toBe(true);
+    assertPicksSweetScent(view, result);
+  });
+
+  it("reach fixture, seed 99 (Anorith at 30/120 HP = 25%): exactly 4 check-viability draws, picks Sweet Scent", () => {
+    const view = evasionDownView(anorithAttacker(30));
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 99, calls: 0 } });
+    const cvDraws = phaseDraws(result, "check-viability");
+    expect(cvDraws).toHaveLength(4);
+    expect(cvDraws.every((d) => "kind" in d && d.kind === "evasion-down-roll")).toBe(true);
+    assertPicksSweetScent(view, result);
+  });
+
+  it.each([1, 99])("control fixture (Anorith stays at full 120/120 HP -- Gate A false, Gate B true at neutral EVASION stage), seed %i: deterministic zero check-viability draws, picks Sweet Scent", (seed) => {
+    const view = evasionDownView(anorithAttacker(120));
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+    expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+    expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+    expect(phaseDraws(result, "check-viability")).toHaveLength(0);
+    assertPicksSweetScent(view, result);
+  });
+});
+
+const MOVE_RAIN_DANCE_MASK7 = 240; // EFFECT_RAIN_DANCE
+const MOVE_SUNNY_DAY_MASK7 = 241; // EFFECT_SUNNY_DAY
+const MOVE_HAIL_MASK7 = 258; // EFFECT_HAIL
+const MOVE_GROWL_MASK7 = 45; // EFFECT_ATTACK_DOWN -- zero CBM/CV contribution against this exact pairing (established below)
+
+// docs/factory-ai-checkviability-ground-truth.md §25.4/§25.5: the twelfth
+// (and final) CBM-blocked pair -- ALL SIX handlers (3 CBM, 3 CV) are
+// 0-if_random, so unlike every prior pair this section's own draw-count
+// technique has no signal (a reachable and an unreached branch both draw
+// zero from the handler itself, doc §25.4). The only live-observable
+// channel is the AI's own final PICK, so these fixtures reproduce that pick
+// directly rather than a draw count: opponent (AI_USER) = Anorith (single
+// ability Battle Armor -- neither Swift Swim nor Rain Dish, genuinely
+// neutral for RainDance's own extra gates too), moveset
+// [<weather move>, Growl, Growl, Growl]; target (player) = Shuckle (single
+// ability Sturdy, Bug/Rock -- the same pairing §6/§14 already proved a
+// zero-baseline Growl control for: CBM's AttackDown gate needs target ATK
+// == MIN_STAT_STAGE or ABILITY_HYPER_CUTTER, neither true; CV's AttackDown
+// gate matches Shuckle's Bug/Rock physical-type list immediately, zero
+// draws either way since Shuckle is single-ability). Anorith faster than
+// Shuckle (95 vs 5) means RainDance's own Gate P (if_user_faster) resolves
+// deterministically true with zero draws in every fixture below -- the
+// hidden tie-break Random() (doc §25.3) and the Swift-Swim/Rain-Dish gates
+// are exercised by the handler-level tests above instead (doc §25.6 items
+// 1-2, not staged live by the doc's own session either).
+// `cbmreach` (weather == the move's own type): CBM fires -8, CV's chain
+// excludes the move's own type so it stays 0 -- net -8, AI picks a Growl
+// slot (never slot 0). `cvreach` (weather == Sandstorm, common to all three
+// handlers' own "other three" list): CBM doesn't match (0), CV matches
+// (+1) -- net +1, AI picks slot 0 (the weather move) always, no tie.
+// Policy-own draws: every one of these twelve cases is setup(4) + CBM(0,
+// single-ability target) + TryToFaint(0, all four moves are 0-power) +
+// CV(0, deterministic weather-trio span + zero-draw AttackDown control) +
+// tie(1) = 5 -- reconciles cleanly to the doc's own "genuinely 0-if_random"
+// finding with zero residual (this section abandoned the draw-count
+// channel entirely, so there is no live draw-count window to reconcile
+// against beyond confirming the mechanism draws nothing extra).
+describe("AI_CV_RainDance / AI_CV_SunnyDay / AI_CV_Hail mask-7 fixture reproduction (docs/factory-ai-checkviability-ground-truth.md §25.4/§25.5)", () => {
+  function anorithWeatherAttacker(currentWeather: 0 | 1 | 2 | 3): FactoryAiScoredBattlerView {
+    return Object.freeze({
+      types: ["TYPE_ROCK", "TYPE_BUG"] as const,
+      attack: 115, defense: 70, spAttack: 60, spDefense: 70, speed: 95, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp: 120, maxHp: 120,
+      ability: "ABILITY_BATTLE_ARMOR",
+      currentWeather,
+    });
+  }
+  function shuckleWeatherTarget(): FactoryAiScoredTargetView {
+    return Object.freeze({
+      species: 213,
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+      attack: 10, defense: 230, spAttack: 10, spDefense: 230, speed: 5, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp: 100, maxHp: 100, ability: "ABILITY_STURDY", knownAbility: null,
+    });
+  }
+  function weatherView(weatherMoveId: number, currentWeather: 0 | 1 | 2 | 3): FactoryAiScoredView {
+    return Object.freeze({
+      schema: "factory-ai-scored-view/v1",
+      mode: "factory-level-50-singles",
+      active: Object.freeze({ aiBattler: 1 as const, targetBattler: 0 as const }),
+      factory: Object.freeze({ levelMode: 0 as const, battleMode: 0 as const, factoryWinStreak: 28, trainerOpponentId: 222 }),
+      moves: [weatherMoveId, MOVE_GROWL_MASK7, MOVE_GROWL_MASK7, MOVE_GROWL_MASK7] as const,
+      attacker: anorithWeatherAttacker(currentWeather),
+      target: shuckleWeatherTarget(),
+    });
+  }
+  function phaseDraws(result: ReturnType<typeof chooseFactoryAiScoredDecision>, phase: "check-bad-move" | "try-to-faint" | "check-viability") {
+    return result.trace.draws.filter((d) => "phase" in d && d.phase === phase);
+  }
+
+  const AI_WEATHER_SUN = 0 as const;
+  const AI_WEATHER_RAIN = 1 as const;
+  const AI_WEATHER_SANDSTORM = 2 as const;
+  const AI_WEATHER_HAIL = 3 as const;
+
+  const HANDLERS = [
+    { label: "raindance", moveId: MOVE_RAIN_DANCE_MASK7, ownWeather: AI_WEATHER_RAIN },
+    { label: "sunnyday", moveId: MOVE_SUNNY_DAY_MASK7, ownWeather: AI_WEATHER_SUN },
+    { label: "hail", moveId: MOVE_HAIL_MASK7, ownWeather: AI_WEATHER_HAIL },
+  ] as const;
+
+  describe.each(HANDLERS)("$label", ({ moveId, ownWeather }) => {
+    it.each([1, 99])("cbmreach (weather == own type), seed %i: net -8 (CBM -8, CV 0) -- AI picks a Growl slot, never slot 0, with setup(4)+CBM(0)+TryToFaint(0)+CV(0)+tie(1)=5 total draws", (seed) => {
+      const view = weatherView(moveId, ownWeather);
+      const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+      expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+      expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+      expect(phaseDraws(result, "check-viability")).toHaveLength(0);
+      expect(result.trace.draws).toHaveLength(5);
+      expect(result.trace.slotScores[0]).toMatchObject({ checkBadMoveDelta: -8, checkViabilityDelta: 0, finalScore: 92 });
+      for (const slot of [1, 2, 3]) {
+        expect(result.trace.slotScores[slot]).toMatchObject({ checkBadMoveDelta: 0, checkViabilityDelta: 0, finalScore: 100 });
+      }
+      expect(result.submission.decision).toMatchObject({ kind: "use-move" });
+      if (result.submission.decision.kind === "use-move") {
+        expect(result.submission.decision.moveSlot).not.toBe(0);
+        expect(view.moves[result.submission.decision.moveSlot]).toBe(MOVE_GROWL_MASK7);
+      }
+    });
+
+    it.each([1, 99])("cvreach (weather == Sandstorm, common to all three handlers' own 'other three'), seed %i: net +1 (CBM 0, CV +1) -- AI always picks slot 0 (the weather move), no tie, with setup(4)+CBM(0)+TryToFaint(0)+CV(0)+tie(1)=5 total draws", (seed) => {
+      const view = weatherView(moveId, AI_WEATHER_SANDSTORM);
+      const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+      expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+      expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+      expect(phaseDraws(result, "check-viability")).toHaveLength(0);
+      expect(result.trace.draws).toHaveLength(5);
+      expect(result.trace.slotScores[0]).toMatchObject({ checkBadMoveDelta: 0, checkViabilityDelta: 1, finalScore: 101 });
+      for (const slot of [1, 2, 3]) {
+        expect(result.trace.slotScores[slot]).toMatchObject({ checkBadMoveDelta: 0, checkViabilityDelta: 0, finalScore: 100 });
+      }
+      expect(result.trace.bestMoveSlots).toEqual([0]);
+      expect(result.submission.decision).toMatchObject({ kind: "use-move", moveSlot: 0 });
+    });
+  });
+
+  it("cross-handler parity (doc §25.1): the three CBM bodies are byte-identical -- each cbmreach fixture's own -8 is bit-for-bit the same magnitude regardless of which handler fires", () => {
+    const deltas = HANDLERS.map(({ moveId, ownWeather }) => {
+      const view = weatherView(moveId, ownWeather);
+      const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 1, calls: 0 } });
+      return result.trace.slotScores[0]!.checkBadMoveDelta;
+    });
+    expect(deltas).toEqual([-8, -8, -8]);
   });
 });

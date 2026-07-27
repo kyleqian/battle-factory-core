@@ -22,6 +22,7 @@ import {
 import { advanceRngValue } from "./rng.ts";
 import {
   runCheckBadMovePreamble,
+  type AiWeatherValue,
   type FactoryAiCheckBadMoveAttacker,
   type FactoryAiCheckBadMoveDraw,
   type FactoryAiCheckBadMoveTarget,
@@ -505,6 +506,20 @@ export type FactoryAiScoredBattlerView = Readonly<{
   lightScreenUp?: boolean;
   /** `gSideStatuses[] & SIDE_STATUS_REFLECT` -- source-required for `AI_CBM_Reflect`'s own gate (AI_USER's OWN side only, doc §23.1). Optional, defaulting to `false`. */
   reflectUp?: boolean;
+  /**
+   * The battler's own real ability (`get_ability AI_USER`, a direct field
+   * read, never the target-guessing heuristic) -- source-required for
+   * `AI_CV_RainDance`'s Gate S/R (attacker's own copy only, doc §25.2).
+   * Optional, defaulting to `"ABILITY_NONE"`.
+   */
+  ability?: string;
+  /**
+   * Current weather, `AI_WEATHER_*`-encoded (0=Sun/1=Rain/2=Sandstorm/
+   * 3=Hail) -- source-required for `AI_CBM_RainDance`/`SunnyDay`/`Hail` and
+   * `AI_CV_SunnyDay`/`Hail`/`RainDance` (attacker's own copy only, doc
+   * §25.1/§25.2). Optional, defaulting to `undefined` (no weather bit set).
+   */
+  currentWeather?: AiWeatherValue;
 }>;
 
 export type FactoryAiScoredTargetView = FactoryAiScoredBattlerView & Readonly<{
@@ -720,6 +735,7 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     defStage: view.target.statStages.def,
     spDefStage: view.target.statStages.spDef,
     accStage: view.target.statStages.acc,
+    evasionStage: view.target.statStages.evasion,
   });
   const attackerForCbm: FactoryAiCheckBadMoveAttacker = Object.freeze({
     atkStage: view.attacker.statStages.atk,
@@ -729,6 +745,8 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     spDefStage: view.attacker.statStages.spDef,
     lightScreenUp: view.attacker.lightScreenUp,
     reflectUp: view.attacker.reflectUp,
+    evasionStage: view.attacker.statStages.evasion,
+    currentWeather: view.attacker.currentWeather,
   });
 
   const executedScoringScripts: ("check-bad-move" | "try-to-faint" | "check-viability")[] = [
@@ -812,6 +830,8 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
           hp: view.attacker.hp,
           maxHp: view.attacker.maxHp,
           isRooted: view.attacker.isRooted,
+          ability: view.attacker.ability,
+          currentWeather: view.attacker.currentWeather,
         },
         target: {
           speed: view.target.speed,

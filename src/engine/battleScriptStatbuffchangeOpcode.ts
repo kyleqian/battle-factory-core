@@ -10,7 +10,10 @@
  * B_ANIM_SUN_CONTINUES for the end-turn weather field loop's own continues
  * scripts, see `createPlayanimationOpcodeHandler`'s own doc for the branch
  * this widening ports), `B_SCR_OP_JUMPIFSTATUS2`
- * (`Cmd_jumpifstatus2`, :3093-3103, the DOWN family's Substitute early-out),
+ * (`Cmd_jumpifstatus2`, :3093-3103, the DOWN family's Substitute early-out,
+ * `EFFECT_CONFUSE`'s already-confused check, and -- docs/yawn-thrash-endturn-
+ * design.md §3, Rung 4 -- `BattleScript_EffectRampage`'s own
+ * already-locked-in STATUS2_MULTIPLETURNS skip),
  * and `B_SCR_OP_ORBYTE` (`Cmd_orbyte`, :3864-3869, only reachable via
  * ChangeStatBuffs' own Protect branch -> BattleScript_ButItFailed).
  *
@@ -290,9 +293,25 @@ function createPlayanimationOpcodeHandler(
 const STATUS2_SUBSTITUTE = 1 << 24;
 /** include/constants/battle.h:129 -- STATUS2_CONFUSION = 1<<0 | 1<<1 | 1<<2. EFFECT_CONFUSE's own already-confused check (docs/status-cluster-ground-truth.md); matches BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_CONFUSION elsewhere, declared locally for the same import-cycle reason as STATUS2_SUBSTITUTE above. */
 const STATUS2_CONFUSION = 0x7;
+/**
+ * include/constants/battle.h:139 -- STATUS2_MULTIPLETURNS = 1<<12.
+ * `BattleScript_EffectRampage`'s own already-locked-in skip
+ * (`jumpifstatus2 BS_ATTACKER, STATUS2_MULTIPLETURNS, BattleScript_
+ * EffectRampage2`, docs/yawn-thrash-endturn-design.md §3, Rung 4) --
+ * a real gap the design doc's own opcode census missed (it checked that
+ * `Cmd_jumpifstatus2` the OPCODE was registered, not that this specific
+ * operand VALUE was in the narrowed set; without this entry every
+ * Thrash/Outrage/Petal Dance script hits this instruction's own
+ * unsupported-branch barrier on its very first use, before
+ * `confuseifrepeatingattackends` is ever reached). Matches
+ * BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS elsewhere, declared
+ * locally for the same import-cycle reason as STATUS2_SUBSTITUTE above.
+ */
+const STATUS2_MULTIPLETURNS = 1 << 12;
 const JUMPIFSTATUS2_VALUES: ReadonlyMap<string, number> = new Map([
   ["STATUS2_SUBSTITUTE", STATUS2_SUBSTITUTE],
   ["STATUS2_CONFUSION", STATUS2_CONFUSION],
+  ["STATUS2_MULTIPLETURNS", STATUS2_MULTIPLETURNS],
 ]);
 
 function createJumpifstatus2OpcodeHandler(

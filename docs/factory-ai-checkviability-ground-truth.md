@@ -2340,7 +2340,7 @@ scenario (§9, §11.5, §12.1, §13.4, §14.6, §15.5, §16.5, §17.7) unchanged
 still
 green. **Run twice this session, ALL PASS both times.**
 
-## 19. 2026-07-26 addendum #9: `AI_CBM_AccDown` + `AI_CV_AccuracyDown` — the largest remaining pair (7 `if_random_less_than` sites), 2 of 7 live-verified in one fixture pair, 5 documented recipe-only
+## 19. 2026-07-26 addendum #9: `AI_CBM_AccDown` + `AI_CV_AccuracyDown` — the largest remaining pair (7 `if_random_less_than` sites), 3 of 7 live-verified across two fixture pairs (§19.3/§19.4 original, §19.5 DRAW SITE 2 added by a follow-up side-lane session), 4 documented recipe-only
 
 Seventh follow-up scout session (side lane, Battle Scene OFF), same
 no-`src/`-changes contract. Goal: bank ground truth for the largest
@@ -2611,32 +2611,70 @@ precondition's own necessary cost, not part of the handler, same pattern
 `Cmd_get_ability` appears in neither table, confirming both species'
 single-ability kits close the §14.2 confound as designed.
 
-### 19.5 The 5 unexercised draw sites — recipes, not fixtures, for a future porter
+### 19.5 DRAW SITE 2 — live-staged and verified this follow-up session; 4 sites remain recipe-only
 
-Sites 2/3/4/5/6 (`:1206/1210/1214/1218/1222`) share a structural obstacle
-none of this doc's "identical 4 slots" fixtures can solve alone: **every
-one of them needs the SAME opponent to use two structurally different real
-moves across two turns** (a status/stage-setting move, then the
-`AccuracyDown` candidate under test) — which means a genuinely mixed
-moveset and a real AI *pick* between them, not a forced single legal
-choice. That is qualitatively harder than every fixture in this doc so far
-(all of which either force a single legal move via 4 identical slots, or
-read a state-independent species property) and was correctly out of this
-session's remaining budget after landing sites 1+7 live.
+Sites 3/4/5/6 (`:1210/1214/1218/1222`) share a structural obstacle none of
+this doc's "identical 4 slots" fixtures can solve alone: **every one of
+them needs the SAME opponent to use two structurally different real moves
+across two turns** (a status/stage-setting move, then the `AccuracyDown`
+candidate under test) — which means a genuinely mixed moveset and a real
+AI *pick* between them, not a forced single legal choice. That is
+qualitatively harder than every fixture in this doc so far (all of which
+either force a single legal move via 4 identical slots, or read a
+state-independent species property) and remains out of budget. **DRAW SITE
+2 does not share that obstacle** — it turned out to be gated purely on the
+**opponent's own** ACC stat stage, settable directly by the **player's**
+own actions with the opponent's moveset held at 4 identical
+`MOVE_SAND_ATTACK` slots throughout — and a follow-up side-lane session
+staged and live-verified it.
 
-- **DRAW SITE 2** (`:1206`, `score -2`, reached iff the **opponent's own**
-  ACC stat stage is already ≤ 4): stage the opponent's own ACC stage down
-  by 2 real hits *before* evaluating its `AccuracyDown` candidate — recipe:
-  turns 1-2, the **player** (not AI-gated) uses a real accuracy-lowering
-  move (e.g. `MOVE_SAND_ATTACK`) against the opponent twice (6→5→4); turn 3,
-  re-evaluate the opponent's own `AI_CV_AccuracyDown` candidate with Gate A
-  false (opponent HP still 100%, keep it undamaged to isolate this gate
-  alone) and Gate C now false (stage 4, not `>4`). No opponent-side status
-  moves needed — the opponent's moveset can stay all-4-identical
-  `MOVE_SAND_ATTACK` throughout, since it's the **player's** actions (not
-  the AI's own decision) that set the precondition. This is the cheapest of
-  the five remaining sites — a real future candidate, not attempted this
-  session for time.
+- **DRAW SITE 2** (`:1206`, `score -2`, reached iff the opponent's own ACC
+  stat stage is already ≤ 4) — **live-verified**, fixture pair
+  `mechanic-factory-ai-cv-accuracydown-accdown-{reach,control}-off.json`.
+  Opponent (`AI_USER`, under test) **Machamp** (68, single ability Guts),
+  all 4 slots `MOVE_SAND_ATTACK` (28), reused verbatim from 19.3/19.4.
+  Target (player, `AI_TARGET`) is **Pidgey** (16, single ability Keen Eye,
+  Normal/Flying) instead of Anorith — the recipe above (§19.5, prior
+  revision) under-specified one thing, corrected here with live evidence:
+  since the **player's own** move must itself be a real accuracy-lowering
+  hit against the opponent (to actually lower Machamp's ACC stage 6→5→4
+  over 2 turns), and the opponent's forced kit is ALSO all `MOVE_SAND_
+  ATTACK`, the opponent's own move reciprocally targets the player every
+  turn too — an unprotected target's own ACC stage would fall in step,
+  making the player's own later Sand Attack accuracy rolls against Machamp
+  probabilistic (a compounding, cross-turn version of 19.2's ordering
+  confound, found live while staging this site: an early Anorith-as-target
+  draft showed seed-dependent PP/HP drift from exactly this). **Fix**:
+  Pidgey closes the confound twice over — `MOVE_SAND_ATTACK` is Ground-type
+  and cannot touch a Flying-type target at all (type immunity, resolved
+  before any accuracy roll), and Keen Eye independently blocks any
+  accuracy-lowering effect from landing on its holder regardless of type
+  (`src/battle_script_commands.c:4144`, `Cmd_statbuffchange`'s own
+  `ability == ABILITY_KEEN_EYE && currStat == STAT_ACC` short-circuit) — so
+  the player's own Sand Attack against Machamp stays a deterministic 100%
+  hit both turns, and Machamp's own ACC stage falls 6→5→4 exactly on
+  schedule. 2 real executed turns (mash-button reps calibrated separately
+  per fixture — Sand Attack's own stat-change animation makes each button
+  rep "worth" less real-turn progress than Splash's animation-free turns,
+  confirmed live by testing both fixtures at several tail lengths up to
+  2000 frames and finding a stable "exactly 2 PP used" plateau at 40 reps
+  for the reach fixture and 30 reps for the control — an uncalibrated
+  shared rep count silently let an early control draft execute a genuine
+  3rd real turn instead of stopping at the reach fixture's own phantom 3rd
+  decision, breaking turn-count parity between the twins) bring Machamp's
+  ACC to 4 (Gate C now false) while both battlers' HP stay at 100%
+  throughout (0-power moves both sides, cleanly skipping DRAW SITE 1 via
+  Gates A/B same as 19.3/19.4). The phantom 3rd-turn re-decision then
+  reaches the `:1206 if_random_less_than 80` roll once per identical
+  `MOVE_SAND_ATTACK` slot. Live ledger (both seeds, both reruns
+  deterministic): reach fixture (frame 0→1500) — PP used 2, opponent/target
+  HP 165→165/115→115 (both fixtures), total `Random()` calls **20** (both
+  seeds); control fixture (target `MOVE_SPLASH` instead, frame 0→1300) — PP
+  used 2, total `Random()` calls **14** (both seeds). Delta **+6** matches
+  the analytical prediction exactly: +4 `Cmd_if_random_less_than` (DRAW
+  SITE 2, N=4 slots × 1 draw) + 2 `Cmd_accuracycheck` (the player's own 2
+  real Sand Attack hits landing on Machamp, absent from the control's 2
+  Splash turns).
 - **DRAW SITE 3** (`:1210`, `score +2`, target `STATUS1_TOXIC_POISON`):
   needs a real `EFFECT_TOXIC` move to land on the target from the
   opponent's own moveset — since the opponent's kit must carry BOTH a Toxic
@@ -2668,26 +2706,30 @@ session's remaining budget after landing sites 1+7 live.
    AccDown` and `AI_CV_AccuracyDown`, every one of the 7 draw sites' real
    preconditions and odds, the `ABILITY_KEEN_EYE` divergence from every
    other stat-down CBM handler in this doc (confirmed live, not assumed),
-   the `EFFECT_ACCURACY_DOWN_2` vestigial-constant finding, and a
-   live-verified twin fixture proving 2 of the 7 sites end-to-end (the
-   `N-slots × 2-sites = 8` clean shape).
-2. **A new confound class named for future porters** (§19.2): a dispatch
-   move whose own effect changes the SAME battler that also deals the
-   turn's real, accuracy-checked damage needs an explicit move-order
-   argument (Speed comparison), not just "pick any two established
-   species" — the first fixture in this doc to need one.
-3. **5 explicit, citation-backed recipes** (§19.5) for a future porter to
-   pick up directly, each naming exactly why it needs more than this
-   session's "identical 4 slots" trick (a real, unforced AI pick between
-   two structurally different moves) rather than leaving them as a bare
-   "not staged" note.
+   the `EFFECT_ACCURACY_DOWN_2` vestigial-constant finding, and live-verified
+   fixtures proving 3 of the 7 sites end-to-end (the original `N-slots ×
+   2-sites = 8` twin, plus DRAW SITE 2's own pair).
+2. **Two named confound classes for future porters**: §19.2's single-turn
+   ordering bug (a dispatch move whose own effect changes the SAME battler
+   that also deals the turn's real, accuracy-checked damage needs an
+   explicit move-order argument) and this follow-up session's **cross-turn**
+   variant (§19.5, DRAW SITE 2) — staging a multi-turn precondition with the
+   SAME move family on both sides needs the *receiving* battler protected
+   (type immunity and/or a blocking ability) from the reciprocal effect, or
+   the precondition-setting turns themselves become probabilistic.
+3. **4 explicit, citation-backed recipes** (§19.5) remaining for a future
+   porter to pick up directly, each naming exactly why it needs more than
+   this session's "identical 4 slots" trick (a real, unforced AI pick
+   between two structurally different moves) rather than leaving them as a
+   bare "not staged" note.
 
 ### 19.7 Verify script status
 
 `tools/probe/verify-factory-ai-checkviability-ground-truth.ts` extended
-this session with `AI_CV_AccuracyDown`'s 2 fixtures (19.3/19.4) — every
-prior scenario (§9, §11.5, §12.1, §13.4, §14.6, §15.5, §16.5, §17.7, §18.7)
-unchanged and still green. **Run twice this session, ALL PASS both times.**
+this session with `AI_CV_AccuracyDown`'s original 2 fixtures (19.3/19.4);
+extended again by a follow-up side-lane session with DRAW SITE 2's own
+reach/control pair (19.5) — every prior scenario unchanged and still green.
+**Run twice this session, ALL PASS both times.**
 
 ## 20. 2026-07-26 addendum #10: `AI_CBM_SpeedUp` + `AI_CV_SpeedUp` — the third stat-UP pair, and the first whose gate is relative Speed, not the opponent's own HP/stat-stage
 
@@ -3676,6 +3718,1640 @@ this session with `AI_CV_LightScreen`'s and `AI_CV_Reflect`'s 4 fixtures
 total (23.2-23.3) — every prior scenario (§9, §11.5, §12.1, §13.4, §14.6,
 §15.5, §16.5, §17.7, §18.7, §19.7, §20.5, §21.5, §22.6) unchanged and still
 green. **Run twice this session, ALL PASS both times.** Reproduce with:
+
+```sh
+node --experimental-strip-types tools/probe/verify-factory-ai-checkviability-ground-truth.ts
+```
+
+## 24. 2026-07-26 addendum #14: `AI_CBM_EvasionUp` + `AI_CV_EvasionUp` and `AI_CBM_EvasionDown` + `AI_CV_EvasionDown` — the largest remaining CV handler by draw-site count, 2 of 8 live-verified, and a byte-for-byte "Down"-family twin
+
+Prep-scout session (side lane, Battle Scene OFF), same no-`src/`-changes
+contract. Goal per this step's brief: `AI_CV_EvasionUp` (`data/
+battle_ai_scripts.s:1037-1074`, 8 `if_random_less_than` sites per §5's own
+table — the largest remaining CV handler in this doc, `AccuracyDown`'s 7
+being the previous record, §19) and `AI_CV_EvasionDown` (`:1235-1246`, 1
+site), plus their `AI_CBM_*` counterparts, independently re-derived from
+`AI_CheckBadMove`'s own dispatch table rather than assumed from any sibling
+— the brief was explicit that "same shape as sibling" has already produced
+6+ documented errors in this doc's history.
+
+### 24.1 All four real bodies, cited and fully parsed
+
+```
+AI_CBM_EvasionUp:                       (data/battle_ai_scripts.s:273-275)
+	if_stat_level_equal AI_USER, STAT_EVASION, MAX_STAT_STAGE, Score_Minus10  ; user's OWN evasion stage == 12 -> -10, end
+	end                                                                       ; else 0, end
+```
+
+Two instructions, zero `if_random_less_than`, **zero `get_ability` calls at
+all** — the same "Up"-family shape as `AttackUp`/`DefenseUp`/`SpeedUp`/
+`SpAtkUp`/`SpDefUp`/`AccUp` (§17.1/§18.1/§20.1/§21.1/§22.1, `AI_CBM_AccUp`
+itself sits immediately above this handler at `:269-271`): reads only
+`AI_USER`'s own stat stage, never touches `AI_TARGET`, so the §14.2
+ability-guess confound cannot occur here by construction, not by species
+choice. Dispatch table confirms three separate effects converge on this one
+handler: `if_effect EFFECT_EVASION_UP, AI_CBM_EvasionUp` (`:114`),
+`if_effect EFFECT_EVASION_UP_2, AI_CBM_EvasionUp` (`:139`), `if_effect
+EFFECT_MINIMIZE, AI_CBM_EvasionUp` (`:163`) — `Minimize`'s own CBM side
+shares `AttackUp`'s single-handler shape (not `BulkUp`/`CosmicPower`/
+`CalmMind`'s separate-dual-stat-handler pattern, §22.1), because Minimize
+only ever raises the one stat (`STAT_EVASION`).
+
+```
+AI_CBM_EvasionDown:                     (data/battle_ai_scripts.s:306-312)
+	if_stat_level_equal AI_TARGET, STAT_EVASION, MIN_STAT_STAGE, Score_Minus10  ; target EVASION stage == 0 -> -10, end
+CheckIfAbilityBlocksStatChange:         (shared tail, :308-312)
+	get_ability AI_TARGET
+	if_equal ABILITY_CLEAR_BODY, Score_Minus10
+	if_equal ABILITY_WHITE_SMOKE, Score_Minus10
+	end
+```
+
+`AI_CBM_EvasionDown`'s own label sits directly **above** the shared
+`CheckIfAbilityBlocksStatChange` tail in source order (execution falls
+through, no explicit `goto` needed) — the same "plain" 1-instruction-plus-
+shared-tail shape as `AI_CBM_DefenseDown`/`AI_CBM_SpAtkDown`/`AI_CBM_SpDefDown`
+(§15.1/§16.1), confirmed by direct read, **not** `AI_CBM_AttackDown`/
+`AI_CBM_AccDown`'s extra own-ability short-circuit (Hyper Cutter/Keen Eye,
+§14.1/§19.1) — there is no dedicated "evasion-immunity" ability in Gen 3 to
+gate on, so this handler has no third branch to miss. Dispatch table:
+`if_effect EFFECT_EVASION_DOWN, AI_CBM_EvasionDown` (`:121`), `if_effect
+EFFECT_EVASION_DOWN_2, AI_CBM_EvasionDown` (`:146`).
+
+```
+AI_CV_EvasionUp:                        (data/battle_ai_scripts.s:1037-1074)
+	if_hp_less_than AI_USER, 90, AI_CV_EvasionUp2                    ; :1038 Gate A (opponent's OWN hp)
+	if_random_less_than 100, AI_CV_EvasionUp2                        ; :1039 DRAW SITE 1
+	score +3
+AI_CV_EvasionUp2:
+	if_stat_level_less_than AI_USER, STAT_EVASION, 9, AI_CV_EvasionUp3  ; :1042 Gate B (opponent's OWN evasion stage)
+	if_random_less_than 128, AI_CV_EvasionUp3                        ; :1043 DRAW SITE 2
+	score -1
+AI_CV_EvasionUp3:
+	if_not_status AI_TARGET, STATUS1_TOXIC_POISON, AI_CV_EvasionUp5  ; :1046 Gate C (target toxic-poisoned?)
+	if_hp_more_than AI_USER, 50, AI_CV_EvasionUp4                    ; :1047 Gate D (opponent's OWN hp, only if Gate C true)
+	if_random_less_than 80, AI_CV_EvasionUp5                         ; :1048 DRAW SITE 3
+AI_CV_EvasionUp4:
+	if_random_less_than 50, AI_CV_EvasionUp5                         ; :1050 DRAW SITE 4
+	score +3
+AI_CV_EvasionUp5:
+	if_not_status3 AI_TARGET, STATUS3_LEECHSEED, AI_CV_EvasionUp6    ; :1053 Gate E (target leech-seeded?)
+	if_random_less_than 70, AI_CV_EvasionUp6                         ; :1054 DRAW SITE 5
+	score +3
+AI_CV_EvasionUp6:
+	if_not_status3 AI_USER, STATUS3_ROOTED, AI_CV_EvasionUp7         ; :1057 Gate F (opponent's OWN Ingrain flag)
+	if_random_less_than 128, AI_CV_EvasionUp7                        ; :1058 DRAW SITE 6
+	score +2
+AI_CV_EvasionUp7:
+	if_not_status2 AI_TARGET, STATUS2_CURSED, AI_CV_EvasionUp8       ; :1061 Gate G (target cursed?)
+	if_random_less_than 70, AI_CV_EvasionUp8                         ; :1062 DRAW SITE 7
+	score +3
+AI_CV_EvasionUp8:
+	if_hp_more_than AI_USER, 70, AI_CV_EvasionUp_End                 ; :1065 Gate H (opponent's OWN hp)
+	if_stat_level_equal AI_USER, STAT_EVASION, DEFAULT_STAT_STAGE, AI_CV_EvasionUp_End  ; :1066 Gate I (opponent's OWN evasion stage)
+	if_hp_less_than AI_USER, 40, AI_CV_EvasionUp_ScoreDown2          ; :1067 Gate J
+	if_hp_less_than AI_TARGET, 40, AI_CV_EvasionUp_ScoreDown2        ; :1068 Gate K
+	if_random_less_than 70, AI_CV_EvasionUp_End                      ; :1069 DRAW SITE 8
+AI_CV_EvasionUp_ScoreDown2:
+	score -2
+AI_CV_EvasionUp_End:
+	end
+```
+
+Exactly **8** `if_random_less_than` sites (`:1039,1043,1048,1050,1054,1058,
+1062,1069`), matching §3/§5's corrected count. **Divergence check against
+`AI_CV_AccuracyDown` (§19.1), the closest structural sibling — re-derived
+independently, not assumed**: both handlers share the four status-gated
+draw sites (toxic/leechseed/rooted/cursed, `+2`/`+2`/`+1`/`+2` for
+AccuracyDown vs `+3`/`+3`/`+2`/`+3` here — the score deltas differ, the
+odds do not: 70/70/128/70 both handlers) and a structurally identical
+`Gate H/I/J/K` + final-draw tail. But **three real divergences**, all
+confirmed from the raw assembly, none inherited from AccuracyDown's shape:
+
+1. **Gate A/DRAW SITE 1 has no Gate B companion.** AccuracyDown's own DRAW
+   SITE 1 has *two* independent routes in (either battler's HP ≤ 70%,
+   §19.1). EvasionUp's DRAW SITE 1 has exactly **one** gate (opponent's own
+   HP < 90% skips; ≥ 90% reaches) — `AI_TARGET`'s HP is never read anywhere
+   near this site. A porter who copied AccuracyDown's two-gate shape here
+   would silently add a nonexistent second reach path.
+2. **The HP threshold at Gate A is 90, not 70.** AccuracyDown's equivalent
+   gate uses `70`. EvasionUp's own default full-HP battle start (100% ≥
+   90%) *already* satisfies Gate A with zero staging — the cheapest reach
+   condition of any draw site documented in this doc (24.2).
+3. **Gate I reads `AI_USER`, not `AI_TARGET`.** AccuracyDown's own Gate I
+   checks the *target's* ACC stage == default (because `AccuracyDown`
+   lowers the target's stat, so the "have we already touched this stat"
+   check must read the target). EvasionUp raises the **opponent's own**
+   evasion, so the analogous "already touched" check correctly reads
+   `AI_USER`'s own evasion stage == `DEFAULT_STAT_STAGE` instead — the
+   operand flips because the stat being tracked belongs to a different
+   battler for an UP handler than for a DOWN handler. This is the same
+   family of `AI_USER`/`AI_TARGET`-operand divergence the brief warned
+   about, now confirmed on a gate that is structurally present in both
+   siblings but reads a different battler in each.
+
+Full branch enumeration:
+
+- **Gate A** (`:1038`): opponent's own HP < 90% skips DRAW SITE 1 entirely
+  (`AI_CV_EvasionUp2`, no score, no draw). **≥ 90% reaches it** — true by
+  default at full HP, no staging needed (24.2).
+- **DRAW SITE 1** (`:1039`): 100/256 (~39.1%) skip, else (~60.9%) `score
+  +3`.
+- **Gate B** (`:1042`): opponent's own evasion stage < 9 (true at battle
+  start, default 6) skips DRAW SITE 2. Only a battler whose own evasion has
+  already been raised to 9-11 by a prior real hit reaches it — a 3-turn
+  build, not staged this session (24.5).
+- **DRAW SITE 2** (`:1043`): 128/256 (50%) skip, else (50%) `score -1`.
+- **Gate C** (`:1046`): target **not** toxic-poisoned skips straight to
+  `EvasionUp5` (Gates D and DRAW SITE 3/4 both unreached). Only a target the
+  opponent has *already* badly-poisoned reaches the D/DRAW SITE 3-4 pair —
+  needs a real `EFFECT_TOXIC` move in the opponent's own kit, a mixed-
+  moveset/genuine-AI-pick obstacle, not staged (24.5, same obstacle class as
+  `AccuracyDown`'s own sites 3/4, §19.5).
+- **Gate D** (`:1047`, only reached if Gate C true): opponent's own HP > 50%
+  routes to `EvasionUp4` (**DRAW SITE 4**, `:1050`, 50/256 skip, else `score
+  +3`); HP ≤ 50% falls straight into **DRAW SITE 3** (`:1048`, 80/256 skip,
+  else `score +3`, then falls through to `EvasionUp5` without a further
+  score). Two mutually exclusive draw sites gated by the same HP split, both
+  behind the same toxic-poison precondition.
+- **Gate E** (`:1053`): target **not** leech-seeded skips DRAW SITE 5. Same
+  mixed-moveset obstacle as Gate C, needs `EFFECT_LEECH_SEED` in the
+  opponent's kit, not staged.
+- **DRAW SITE 5** (`:1054`): 70/256 (~27.3%) skip, else `score +3`.
+- **Gate F** (`:1057`): opponent's **own** `STATUS3_ROOTED` (Ingrain)
+  absent skips DRAW SITE 6. Self-targeted precondition (no accuracy roll
+  needed to land Ingrain on oneself) but still needs a second, structurally
+  different move in the opponent's own kit alongside the Double-Team-style
+  dispatch move — a genuine AI pick between two moves across two turns, not
+  solvable by the identical-4-slots trick alone, not staged (24.5).
+- **DRAW SITE 6** (`:1058`): 128/256 (50%) skip, else `score +2`.
+- **Gate G** (`:1061`): target **not** cursed skips DRAW SITE 7. Needs a
+  Ghost-typed opponent with `EFFECT_CURSE` in its kit, same mixed-moveset
+  obstacle as Gates C/E, not staged.
+- **DRAW SITE 7** (`:1062`): 70/256 (~27.3%) skip, else `score +3`.
+- **Gate H** (`:1065`): opponent's own HP > 70% jumps straight to `End`,
+  **skipping the entire tail** (Gate I, J, K, DRAW SITE 8). ≤ 70% continues.
+- **Gate I** (`:1066`): opponent's own evasion stage == `DEFAULT_STAT_STAGE`
+  (6) jumps to `End`. Because the dispatch move (Double Team) is a
+  self-buff that has already executed once by the time the phantom next-
+  decision runs (§11.0/§17.2's "only the phantom decision is observable"
+  mechanism), the opponent's own evasion reads **7**, not 6, at that point
+  — Gate I is false and the tail continues. The exact same "dispatch move's
+  own prior effect changes a later gate" finding §19.1 made for
+  `AccuracyDown`'s Gate I, reproduced here on the opposite operand
+  (`AI_USER` instead of `AI_TARGET`) because EvasionUp's dispatch move is
+  self-targeted rather than target-targeted.
+- **Gates J/K** (`:1067/1068`): opponent HP < 40% OR target HP < 40% jump
+  straight to the deterministic `score -2`, skipping DRAW SITE 8.
+- **DRAW SITE 8** (`:1069`): 70/256 (~27.3%) skip to `End` (no score
+  change), else (~72.7%) falls into `ScoreDown2` (`score -2`) — same
+  topological position (last instruction before `End`/`ScoreDown2`, no
+  further gates in its own tail) as `AccuracyDown`'s own clean DRAW SITE 7
+  (§19.4) and `LightScreen`/`Reflect`'s single site (§23.4), **not**
+  `DefenseUp`/`SpDefUp`'s unresolved 5-6-draw anomaly (§18.4/§22.4) —
+  confirmed clean at the instrument level below (24.3-24.4).
+
+```
+AI_CV_EvasionDown:                      (data/battle_ai_scripts.s:1235-1246)
+	if_hp_less_than AI_USER, 70, AI_CV_EvasionDown2                     ; :1236 Gate A (opponent's OWN hp)
+	if_stat_level_more_than AI_TARGET, STAT_EVASION, 3, AI_CV_EvasionDown3  ; :1237 Gate B (only reached if Gate A false)
+AI_CV_EvasionDown2:
+	if_random_less_than 50, AI_CV_EvasionDown3                          ; :1239 DRAW SITE
+	score -2
+AI_CV_EvasionDown3:
+	if_hp_more_than AI_TARGET, 70, AI_CV_EvasionDown_End                ; :1242 Gate C (target's OWN hp)
+	score -2
+AI_CV_EvasionDown_End:
+	end
+```
+
+Exactly **1** `if_random_less_than` site (`:1239`), matching §3/§5's
+corrected count. **Divergence check against `AI_CV_DefenseDown`/
+`AI_CV_SpDefDown` (§15.1/§16.1) — re-derived independently: none.**
+Byte-for-byte identical topology, `STAT_DEF`/`STAT_SPDEF` swapped for
+`STAT_EVASION`, same `70`/`50`/`70` thresholds and odds, same `score -2` on
+every non-skip branch. This is the second "zero-divergence" pair in this
+doc after `LightScreen`/`Reflect` (§23.1) — but here the twin is a
+*different* handler in the *same* family (Down-stat-with-opponent-HP-gate),
+not two effects sharing one handler.
+
+### 24.2 Design
+
+**`AI_CV_EvasionUp`, three fixtures isolating DRAW SITE 1 and DRAW SITE 8
+(the only two reachable without a mixed-moveset AI pick)**: opponent
+(`AI_USER`, under test, all fixtures) **Machamp** (species 68, single
+ability `{GUTS, NONE}` — closes the universal `AI_CheckBadMove_
+CheckSoundproof` prefix's `get_ability AI_TARGET` confound, §14.2/§23.2,
+which applies to every CBM-blocked-pair fixture regardless of whether the
+handler itself reads ability), all 4 slots **`MOVE_DOUBLE_TEAM`** (104,
+`EFFECT_EVASION_UP`, 0 power, 0 accuracy, `MOVE_TARGET_USER` —
+`data/battle_moves.h:1355-1365`, raises the user's own evasion by 1 stage,
+`data/battle_scripts_1.s:487-488`). Target (player, all fixtures)
+**Anorith** (species 390, single ability `{BATTLE_ARMOR, NONE}`, reused
+verbatim from §15-18/§21-23), move varies per fixture. Because Gate A's own
+threshold (90%) and Gate H's own threshold (70%) are disjoint bands, **no
+single opponent HP value can simultaneously reach DRAW SITE 1 and the tail**
+— unlike `AccuracyDown`'s own twin-site fixture (§19.3, both gates share the
+same 70% threshold) this pair needs three fixtures, not two, to cover both
+sites plus a shared zero-draw baseline:
+
+- **`evasionup-fullhp-reach`** (DRAW SITE 1): target's move is
+  **`MOVE_SPLASH`** (150, 0 power, no effect) — Machamp's HP never moves
+  (165/165, 100%, ≥ 90%), so Gate A is false **by construction, no damage
+  staging required at all** (the same "zero-damage isolation" trick §23.2
+  established for `LightScreen`/`Reflect`'s own Gate A) and DRAW SITE 1
+  fires. Gate H is also true at 100% HP, so the tail (DRAW SITE 8) stays
+  deterministically unreached in this same fixture — the two sites cannot
+  contaminate each other here.
+- **`evasionup-midhp-control`** (shared zero-draw baseline for BOTH sites):
+  target's move is **`MOVE_DRAGON_RAGE`** (82, `EFFECT_DRAGON_RAGE`, fixed
+  40 damage, no roll, `data/battle_scripts_1.s`, reused verbatim from
+  §22.2) — Machamp 165→125 (75.8%), landing **inside the (70%,90%) gap
+  between both gates' own thresholds**: Gate A is true (75.8% < 90%, skips
+  DRAW SITE 1) and Gate H is also true (75.8% > 70%, skips the entire
+  tail). This single fixture is a genuine deterministic zero-draw control
+  for both isolations at once — no HP value could do double duty this way
+  for `AccuracyDown` (whose two gates shared one threshold) or for
+  `LightScreen`/`Reflect` (whose only gate has no companion draw site to
+  cross-contaminate).
+- **`evasionup-lowhp-reach`** (DRAW SITE 8): target's move is **`MOVE_
+  SEISMIC_TOSS`** (69, `EFFECT_LEVEL_DAMAGE`, fixed damage = user's level,
+  no roll, reused verbatim from §19.3/§22.2) — Machamp 165→115 (69.7%).
+  Gate A is true (69.7% < 90%, DRAW SITE 1 skipped); Gate H is false
+  (69.7% ≤ 70%, tail continues); Gate I is false because Double Team's own
+  self-effect has already raised Machamp's evasion stage 6→7 by the time
+  the phantom next-decision reads it (24.1's own finding); Gates J/K are
+  both false (Machamp 69.7% ≥ 40%, Anorith undamaged at 100% ≥ 40%) — falls
+  through into DRAW SITE 8.
+
+Same capture shape as every prior CBM-blocked pair (`[A, wait 30, A, wait
+700]`, `captureFrames [0,100,300,732]`). DRAW SITE 2 (opponent's own
+evasion stage already built to 9-11) and DRAW SITES 3/4/5/6/7 (target
+toxic/leechseed/cursed or opponent's own Ingrain — all four needing a
+genuine, unforced AI pick between two structurally different moves in the
+opponent's own kit) are not staged this session — same obstacle class
+`AccuracyDown`'s own sites 2-6 already documented (§19.5), recipes below
+(24.5).
+
+**`AI_CV_EvasionDown`, twin fixtures reusing §15's `DefenseDown` design
+verbatim (only the dispatch move changes)**: opponent (`AI_USER`, under
+test, both fixtures) **Anorith** (390, single ability Battle Armor — blocks
+`Cmd_critcalc`'s `Random()` call entirely, no crit-overshoot risk), all 4
+slots **`MOVE_SWEET_SCENT`** (230, `EFFECT_EVASION_DOWN`, 0 power, 100
+accuracy, `MOVE_TARGET_BOTH`, `data/battle_moves.h:2993-3003`). Target
+(player, both fixtures) **Machamp** (68, single ability Guts). Gate A alone
+decides reachability in both fixtures (opponent's own HP < 70%), exactly
+`DefenseDown`'s own shape (§15.2) — Gate B (target's own evasion stage > 3)
+is irrelevant to this isolation since Gate A's own true/false branch
+already decides everything needed:
+
+- **`evasiondown-lowhp-reach`**: player (Machamp) all 4 slots **`MOVE_
+  VITAL_THROW`** (233, `EFFECT_VITAL_THROW`, hardcoded always-hit —
+  `src/battle_script_commands.c:1090`, `EFFECT_ALWAYS_HIT ||
+  EFFECT_VITAL_THROW` bypasses `Cmd_accuracycheck`'s own `Random()` call
+  entirely) — turn 1 lands the sized hit (86-102 damage, §13.2's own
+  verified range against Anorith's 120 max HP), dropping Anorith to
+  22/120 (18%, seed 1) or 30/120 (25%, seed 99), both comfortably under
+  Gate A's 70% threshold; the phantom decision's Gate A fires true,
+  reaching the draw site.
+- **`evasiondown-fullhp-control`**: player's 4 slots are **`MOVE_SPLASH`**
+  instead — Anorith's HP never moves, Gate A stays false, Gate B (Machamp's
+  evasion stage, untouched at 6) stays true, deterministic zero-draw skip.
+
+### 24.3 Live ledger (oracle-verified, both seeds, both handlers, both runs)
+
+| Fixture | Seed | Opponent PP used | Opponent HP (start→end) | Total `Random()` calls, frame 0→732 | Determinism (2 runs) |
+| --- | -: | -: | --- | -: | --- |
+| EvasionUp fullhp-reach (Splash) | 1 | 1 | 165→165 (100%) | **10** | identical |
+| EvasionUp fullhp-reach (Splash) | 99 | 1 | 165→165 (100%) | **10** | identical |
+| EvasionUp midhp-control (Dragon Rage) | 1 | 1 | 165→125 (75.8%) | **8** | identical |
+| EvasionUp midhp-control (Dragon Rage) | 99 | 1 | 165→125 (75.8%) | **8** | identical |
+| EvasionUp lowhp-reach (Seismic Toss) | 1 | 1 | 165→115 (69.7%) | **12** | identical |
+| EvasionUp lowhp-reach (Seismic Toss) | 99 | 1 | 165→115 (69.7%) | **12** | identical |
+| EvasionDown lowhp-reach (Vital Throw) | 1 | 1 | 120→22 (18%) | **13** | identical |
+| EvasionDown lowhp-reach (Vital Throw) | 99 | 1 | 120→30 (25%) | **13** | identical |
+| EvasionDown fullhp-control (Splash) | 1 | 1 | 120→120 (100%) | **7** | identical |
+| EvasionDown fullhp-control (Splash) | 99 | 1 | 120→120 (100%) | **7** | identical |
+
+Every fixture is individually cross-seed-stable (10/10, 8/8, 12/12, 13/13,
+7/7) — the clean shape, matching `EvasionDown`'s own numerically-identical
+ledger to `DefenseDown`'s (13/13 reach, 7/7 control, §15.3) and confirming
+`EvasionUp`'s own two draw sites both avoid the `DefenseUp`/`SpDefUp`
+family's unresolved 5-6-draw anomaly.
+
+### 24.4 Attribution (`tools/probe/attribute-factory-ai-random-callers.py`, window `0 732`, via `tools/run-mgba-probe.py`, seed 1)
+
+| Caller function | UP fullhp-reach | UP midhp-control | UP lowhp-reach | DOWN lowhp-reach | DOWN fullhp-control |
+| --- | -: | -: | -: | -: | -: |
+| `BattleAI_SetupAIData+0x83` | 4 | 4 | 4 | 4 | 4 |
+| `BattleTurnPassed+0x157` | 1 | 1 | 1 | 1 | 1 |
+| `ChooseMoveOrAction_Singles+0xf7` | 1 | 1 | 1 | 1 | 1 |
+| `Cmd_accuracycheck+0x305` | 0 | 1 | 1 | 1 | 1 |
+| `Cmd_adjustnormaldamage+0x7` | 0 | 0 | 0 | 1 | 0 |
+| `Cmd_seteffectwithchance+0x81` | 0 | 1 | 1 | 1 | 0 |
+| `Cmd_if_random_less_than+0x7` | **4** | **0** | **4** | **4** | **0** |
+| **Total** | **10** | **8** | **12** | **13** | **7** |
+
+`Cmd_get_ability` appears in **none** of the five tables — both Machamp and
+Anorith's single-ability kits close the universal `AI_CheckBadMove` prefix
+confound (§14.2/§23.2), and `AI_CBM_EvasionUp` has no `get_ability` call of
+its own to add a second draw (24.1). `EvasionUp`'s `fullhp-reach` fixture
+has **zero** `Cmd_accuracycheck`/`Cmd_seteffectwithchance` rows — both
+`MOVE_DOUBLE_TEAM` and `MOVE_SPLASH` are 0-accuracy/no-effect, the first
+CBM-blocked-pair fixture pair since `LightScreen`/`Reflect` (§23.4) with a
+row that clean. `midhp-control`'s and `lowhp-reach`'s own `+1`/`+1`
+(`Cmd_accuracycheck`/`Cmd_seteffectwithchance`) are `MOVE_DRAGON_RAGE`/
+`MOVE_SEISMIC_TOSS` actually connecting — the flipped precondition's own
+necessary cost, not part of the handler (same accounting discipline as
+every prior pair, §15.3/§19.4/§22.4). `EvasionDown`'s own reach/control
+split (`+1 Cmd_adjustnormaldamage`, `+4 Cmd_if_random_less_than`, `+1
+Cmd_seteffectwithchance` for reach; a constant `Cmd_accuracycheck=1` in
+both, `MOVE_SWEET_SCENT`'s own roll, never `MOVE_VITAL_THROW`'s per 24.1's
+citation) is numerically **identical** to `DefenseDown`'s own attribution
+table (§15.3) in every row, confirming the byte-for-byte topology match at
+the instrument level, not just on paper. Both of `EvasionUp`'s reach
+fixtures show the clean **`+4`** `Cmd_if_random_less_than` delta (N=4
+identical slots × 1 draw), not the `DefenseUp`/`SpDefUp` family's
+unresolved 5-6 anomaly (§18.4/§22.4) — a third confirmation (after
+`AccuracyDown`'s DRAW SITE 7, §19.4, and `LightScreen`/`Reflect`'s single
+site, §23.4) that the anomaly is specific to the last-move-type-list code
+region those two handlers share, not a general property of "a draw site
+sitting last before `End`."
+
+### 24.5 DRAW SITE 3/4 (toxic-poison chain) — live-verified this follow-up session; 4 sites remain recipe-only
+
+**DRAW SITE 3 / DRAW SITE 4, live-verified** (`:1048`/`:1050`, target
+`STATUS1_TOXIC_POISON`) — this follow-up side-lane session (Battle Scene OFF
+oracle) closed the "genuine, unforced AI pick between two structurally
+different moves" obstacle the recipe below used to name, using the
+**two-Pokémon opponent relay** `docs/factory-ai-checkviability-ground-
+truth.md` §19.5 itself suggested for `AccuracyDown`'s analogous sites 3/4
+("one opponent Pokémon whose entire kit is Toxic lands the status and
+faints/switches, a second with the identical-slots candidate moves next"):
+opponent party slot 0 = **Magikarp** (129, level 5 — the low level is the
+whole trick, shrinking its max HP to 18 so a single `MOVE_SEISMIC_TOSS` hit
+is a guaranteed OHKO regardless of the roll), all 4 slots **`MOVE_TOXIC`**
+(92) — forced (4 identical slots), so its real turn-1 use against the
+target is not an unforced pick at all. Target (player) **Anorith** (390,
+single ability Battle Armor, reused verbatim from §13-23), all 4 slots
+**`MOVE_SEISMIC_TOSS`** (69, `EFFECT_LEVEL_DAMAGE`, fixed 50 dmg = Anorith's
+level, reused verbatim from §18.3/§19.3/§24.2). Opponent party slot 1 = the
+handler under test, **Shuckle** (213, single ability Sturdy, base Speed 5),
+all 4 slots **`MOVE_DOUBLE_TEAM`** (104).
+
+Turn 1: Magikarp (forced) uses Toxic on Anorith — lands both banked seeds
+(85% accuracy, not hard-guaranteed, but empirically confirmed live at both
+seed 1 and seed 99); Anorith Splashes (harmless, no retaliation risk while
+Magikarp is still needed alive to move). Turn 2: Anorith Seismic Tosses
+Magikarp (18 max HP, OHKO) — the opponent auto-sends Shuckle, switching in
+fresh at 95/95 (100%). **A new same-turn confound found live, closed by
+species choice, not staging**: an early draft used Magikarp (base Speed 80)
+for *both* opponent slots — since Magikarp is faster than Anorith (base
+Speed 75), Shuckle's own `MOVE_DOUBLE_TEAM` (raising its own evasion stage,
+executing *first* within the turn) would land before Anorith's *same-turn*
+Seismic Toss resolved, turning what should be Seismic Toss's guaranteed-hit
+100-accuracy check into a real, probabilistic ~85.7%-chance roll against the
+now-raised evasion stage — the exact same bug class §19.2/§19.5 already
+named for `AccuracyDown`'s own dispatch move (a same-turn move-order
+confound), just triggered here by the SECOND opponent Pokémon's own
+self-buff instead of the dispatch move itself. **Fix**: Shuckle's base Speed
+5 (vs. Anorith's 75) guarantees Anorith always moves first, so every Seismic
+Toss against it lands as a deterministic 50 damage with the target's evasion
+still at its pre-turn value.
+
+- **`evasionup-toxicchain-reach`** (REACH — the chain itself): after turn 2,
+  the trace continues into **turn 3** — Anorith Seismic Tosses Shuckle again
+  (95→45, 47.4%, comfortably ≤ 50%). The trailing phantom decision (this
+  doc's own "only the phantom next-decision is observable" mechanism, §11.0)
+  then reads target-toxic = true **and** opponent-own-HP ≤ 50% — Gate D's
+  reach condition for DRAW SITE 3's own chain.
+- **`evasionup-toxicchain-control`** (CONTROL A — same toxic prerequisite,
+  opposite HP band): the trace stops right after turn 2, capturing the
+  trailing phantom decision with Shuckle still fresh at 95/95 (> 50%) — Gate
+  D routes straight to DRAW SITE 4 alone, DRAW SITE 3 never reached.
+- **CONTROL B (no toxic) — already proven, not re-staged**: none of §24.3's
+  three existing `AI_CV_EvasionUp` fixtures (`fullhp-reach`, `midhp-control`,
+  `lowhp-reach`) ever apply `STATUS1_TOXIC_POISON` to the target, and Gate C
+  (`:1046`) is checked unconditionally on every pass regardless of the
+  opponent's own HP band — so all three already live-verified fixtures are
+  standing proof that Gates C/D and DRAW SITES 3/4 stay at zero draws when
+  the target isn't toxic-poisoned. No new fixture needed for this leg.
+
+**Live ledger, per-DRAW-SITE attribution**
+(`tools/probe/attribute-factory-ai-cv-drawsite-callers.py`, run against the
+handler's own real ROM addresses even though the script's checked-in
+`DRAW_SITE_TABLE` only names `DefenseUp`/`SpDefUp` — every `EvasionUp`-family
+hit still resolves to its own exact `AI_CV_EvasionUp*+0x<offset>` label via
+the script's `ai-decision-other-script` fallback path, which is what the
+table below transcribes; both seeds, window `0`→finalFrame):
+
+| Fixture | Seed | Opponent end state | `AI_CV_EvasionUp` (site 1) | `AI_CV_EvasionUp3` (site 3) | `AI_CV_EvasionUp4` (site 4) | `AI_CV_EvasionUp8` (site 8) | Total `Random()` (frame 0→final) |
+| --- | -: | --- | -: | -: | -: | -: | -: |
+| REACH | 1 | Shuckle 45/95 (47.4%) | 4 | **4** | **6** | 4 | 41 |
+| REACH | 99 | Shuckle 45/95 (47.4%) | 4 | **4** | **7** | 4 | 42 |
+| CONTROL A | 1 | Shuckle 95/95 (100%) | 4 | **0** | **4** | 0 | 23 |
+| CONTROL A | 99 | Shuckle 95/95 (100%) | 4 | **0** | **4** | 0 | 23 |
+
+**Oracle corroborates the chained model from `docs/factory-ai-draw-
+discrepancy-probe.md` §7.1/§7.3 (commit 20f09bb) exactly, with numbers**:
+CONTROL A's own DRAW SITE 3 count is **zero** in both seeds — when the
+opponent's own HP is > 50%, Gate D routes straight past DRAW SITE 3 entirely
+(the pre-fix port's "mutually exclusive" comment was correct about *this*
+half). REACH's own DRAW SITE 3 count is a flat **4** in both seeds — one
+draw per identical `MOVE_DOUBLE_TEAM` slot, *unconditionally*, regardless of
+each roll's own outcome, exactly the "a second draw is mandatory" chain
+shape, never fewer. DRAW SITE 4's own count decomposes cleanly: both REACH
+fixtures carry CONTROL's own direct-entry baseline of 4 (from the *earlier*,
+still-100%-HP decision computed right after turn 2, before Anorith's turn-3
+hit lands) **plus** 2 (seed 1) / 3 (seed 99) *extra* draws — exactly the
+number of the 4 identical slots whose own DRAW SITE 3 roll fell through
+(`>= 80`) into a second roll at DRAW SITE 4, landing inside the fixed
+model's own valid `[4, 8]`-draw range every time. Had the pre-fix "two
+mutually exclusive single-draw sites" model still been live, REACH's own
+DRAW SITE 3 count would have had to be **zero** whenever DRAW SITE 4 fired
+(and vice versa) — the oracle shows both firing together, non-zero, in the
+same decision, which the old model cannot produce at all. This is the live
+corroboration `docs/factory-ai-draw-discrepancy-probe.md` §7.4 asked a
+future session to add.
+
+The 4 remaining sites below are still recipe-only:
+
+- **DRAW SITE 2** (`:1043`, `score -1`, reached iff the **opponent's own**
+  evasion stage is already ≥ 9): stage it with the identical-4-slots
+  `MOVE_DOUBLE_TEAM` kit itself — 3 executed turns raise the stage 6→7→8→9,
+  then a 4th turn's (or phantom) decision reaches the roll with Gate A held
+  false (opponent HP kept ≥ 90% throughout, e.g. via a 0-power target move)
+  to avoid DRAW SITE 1 contaminating the same window. Cheapest of the four
+  remaining sites — the opponent's own kit does not need a second move at
+  all, unlike sites 5-7 below. Not attempted this session for time (same
+  status as every prior pair's own unstaged "already-built-3-stages" gate,
+  §17.5/§18.6/§19.5/§21.2/§22.5).
+- **DRAW SITE 5** (`:1054`, `score +3`, target `STATUS3_LEECHSEED`): same
+  mixed-moveset obstacle DRAW SITE 3/4 used to have, substituting `EFFECT_
+  LEECH_SEED` for `EFFECT_TOXIC` — now that the two-Pokémon relay recipe
+  above is live-proven, this site is a straightforward re-application of the
+  same trick (a second opponent party slot whose entire kit is the new
+  status move) rather than an open question.
+- **DRAW SITE 6** (`:1058`, `score +2`, **opponent's own** `STATUS3_ROOTED`,
+  i.e. Ingrain): same mixed-moveset obstacle as site 5, but self-targeted
+  (`EFFECT_INGRAIN`, `MOVE_TARGET_USER` — no accuracy roll of its own to
+  land), the same "may be more predictable to force the turn-1 pick, not
+  verified" caveat §19.5 flagged for `AccuracyDown`'s own analogous site.
+- **DRAW SITE 7** (`:1062`, `score +3`, target `STATUS2_CURSED`): needs a
+  Ghost-typed opponent with `EFFECT_CURSE` in its kit — same
+  typing-is-part-of-the-precondition obstacle §19.5 named for
+  `AccuracyDown`'s own site 6.
+
+### 24.6 What this unblocks
+
+1. **Both pairs' own port**: exact instruction lists for all four handlers,
+   every gate's real precondition and operand (`AI_USER` vs `AI_TARGET`,
+   independently re-derived rather than copied from either sibling), the
+   draw sites' exact odds and score deltas, `EvasionUp`'s own
+   `AI_USER`-vs-`AI_TARGET` Gate I flip vs `AccuracyDown` (the exact kind of
+   trap this doc's "never copy a sibling's gate map" rule exists to catch,
+   §17/§18/§21/§22), and live-verified twin/triple fixtures proving 2 of
+   `EvasionUp`'s 8 sites and `EvasionDown`'s 1 site end-to-end.
+2. **A worked example of a disjoint-threshold twin-site handler**: unlike
+   `AccuracyDown`'s two gates sharing one 70% threshold (allowing a 2-
+   fixture design, §19.3), `EvasionUp`'s Gate A (90%) and Gate H (70%) are
+   disjoint, forcing a 3-fixture design with one shared zero-draw control —
+   documented as a reusable pattern for any future handler whose own gates
+   don't happen to share a threshold.
+3. **Confirms the census's "1 executable move" count for both handlers, with
+   the missing detail the brief asked for**: `EFFECT_EVASION_UP`'s 1 move is
+   `MOVE_DOUBLE_TEAM` (both `EFFECT_EVASION_UP_2` and `EFFECT_MINIMIZE`
+   contribute zero to that count — see 24.7); `EFFECT_EVASION_DOWN`'s 1 move
+   is `MOVE_SWEET_SCENT` (`EFFECT_EVASION_DOWN_2` contributes zero). No
+   correction to §5's table is needed — both "Exec moves: 1" entries are
+   correct, now with a named move behind each.
+4. **4 explicit, citation-backed recipes** (24.5) for a future porter,
+   each naming exactly why it needs more than the identical-4-slots trick
+   (a real, unforced AI pick between two structurally different moves, or a
+   multi-turn stat-stage build) — the same discipline §19.5 established for
+   `AccuracyDown`'s own unstaged sites. A follow-up side-lane session closed
+   DRAW SITE 3/4 (the toxic-poison chain) with the two-Pokémon opponent
+   relay recipe §19.5 itself suggested — live per-site attribution confirms
+   the chained-fall-through model from `docs/factory-ai-draw-discrepancy-
+   probe.md` §7.1/§7.3 (commit 20f09bb), not the pre-fix "two mutually
+   exclusive single-draw sites" model (24.5).
+
+### 24.7 Confirm-or-correct: census cross-check for `EVASION_UP`/`MINIMIZE`/`EVASION_DOWN`
+
+Per this step's brief, checked directly against `docs/executable-frontier-
+census.md` rather than assumed:
+
+| Effect | Census classification | Real moves | Notes |
+| --- | --- | -: | --- |
+| `EFFECT_EVASION_UP` | `executable` | 1 (`MOVE_DOUBLE_TEAM`) | dispatches to `AI_CBM_EvasionUp`/`AI_CV_EvasionUp` |
+| `EFFECT_EVASION_UP_2` | `executable` | **0** | routes to generic `BattleScript_EffectHit`, no move anywhere uses it — same vestigial-constant shape §19.1 found for `EFFECT_ACCURACY_DOWN_2` |
+| `EFFECT_MINIMIZE` | **`blocked-on-opcodes`** (`B_SCR_OP_SETMINIMIZE`) | 1 (`MOVE_MINIMIZE`) | **not** executable through the current port despite dispatching to the same `AI_CBM_EvasionUp`/`AI_CV_EvasionUp` handlers as `EFFECT_EVASION_UP` — §5's "1 executable move" count for `EvasionUp` is entirely `Double Team`'s, not `Minimize`'s |
+| `EFFECT_EVASION_DOWN` | `executable` | 1 (`MOVE_SWEET_SCENT`) | dispatches to `AI_CBM_EvasionDown`/`AI_CV_EvasionDown` |
+| `EFFECT_EVASION_DOWN_2` | `executable` | **0** | same vestigial-constant shape as `EVASION_UP_2` |
+
+Confirms §5's table (`EvasionUp` "1 exec move", `EvasionDown` "1 exec
+move") is correct, but the census alone doesn't say *which* move backs that
+count — `MOVE_MINIMIZE` (`EFFECT_MINIMIZE`, `data/battle_moves.h:1394-1404`,
+`.effect = EFFECT_MINIMIZE`) is real, Factory-legal, and shares `Double
+Team`'s own dispatch target on both the CBM and CV sides (24.1), but is
+presently `blocked-on-opcodes` in this run's own TS port (needs
+`B_SCR_OP_SETMINIMIZE`, unrelated to `AI_CheckViability` itself) — this
+does **not** block live-oracle staging (the real ROM has no such
+restriction; a `MOVE_MINIMIZE`-dispatched fixture would work identically to
+`MOVE_DOUBLE_TEAM` on the oracle, since both share the same `+1`-evasion
+effect and the same handler pair) but a porter relying on the census's
+"executable moves" count to decide what a player could *actually select* in
+the ported engine today should use `Double Team`, not `Minimize`, until the
+opcode is ported.
+
+### 24.8 Verify script status
+
+`tools/probe/verify-factory-ai-checkviability-ground-truth.ts` extended
+this session with `AI_CV_EvasionUp`'s 3 fixtures and `AI_CV_EvasionDown`'s 2
+fixtures (24.2-24.3) — every prior scenario (§9, §11.5, §12.1, §13.4,
+§14.6, §15.5, §16.5, §17.7, §18.7, §19.7, §20.5, §21.5, §22.6, §23.6)
+unchanged and still green. **Run twice this session, ALL PASS both times.**
+Reproduce with:
+
+```sh
+node --experimental-strip-types tools/probe/verify-factory-ai-checkviability-ground-truth.ts
+```
+
+**Follow-up side-lane session (2026-07-27) extended it again** with the
+`evasionup-toxicchain-{reach,control}` pair (24.5) — every prior scenario
+unchanged and still green. **Full script run live this session: 350
+PASS, 0 FAIL, `ALL PASS`.**
+
+## 25. 2026-07-26 addendum #15: `AI_CBM_RainDance` + `AI_CV_RainDance`, `AI_CBM_SunnyDay` + `AI_CV_SunnyDay`, `AI_CBM_Hail` + `AI_CV_Hail` — the weather trio, §5's own open CBM-weather question answered, and a real `RainDance`/`SunnyDay` sibling divergence
+
+Side-lane prep-scout session (Battle Scene OFF oracle), same no-`src/`-changes
+contract as every prior addendum — **no `factoryAiCheckBadMove.ts`/
+`factoryAiCheckViability.ts`/`factoryAiDecisionPolicy.ts` edits**. Scope per
+this step's brief: the last 3 of the 22-handler program
+(`AI_CV_RainDance`/`SunnyDay`/`Hail`, §5's own table), with priority on §5's
+closing paragraph, which explicitly flagged its own uncertainty: "CBM's table
+routes all weather effects through a shared non-existent-named handler check
+— a follow-up worker should verify CBM's own weather-effect entries before
+assuming they're equally cheap." That guess is answered first, then all
+three `AI_CV_*` bodies are independently re-derived (not assumed identical),
+then all three handler pairs are staged and live-verified.
+
+### 25.1 The open question, answered: CBM does **not** share a weather handler — three separate, byte-for-byte-identical 2-instruction handlers
+
+Direct read of `AI_CheckBadMove`'s own dispatch table
+(`data/battle_ai_scripts.s:65-213`, the same table §4 already fully
+enumerated):
+
+```
+if_effect EFFECT_RAIN_DANCE, AI_CBM_RainDance   ; :178
+if_effect EFFECT_SUNNY_DAY, AI_CBM_SunnyDay     ; :179
+...
+if_effect EFFECT_HAIL, AI_CBM_Hail              ; :191
+```
+
+Three **distinct, individually named** target labels — not a shared handler,
+not a "non-existent-named" fallthrough. §5's own worry was reasonable (the
+audit trail up to that point had never actually looked past the dispatch
+table's own target names for these three rows) but the guess itself was
+wrong. Each body, in full:
+
+```
+AI_CBM_RainDance:                       (data/battle_ai_scripts.s:490-493)
+	get_weather
+	if_equal AI_WEATHER_RAIN, Score_Minus8
+	end
+
+AI_CBM_SunnyDay:                        (data/battle_ai_scripts.s:495-498)
+	get_weather
+	if_equal AI_WEATHER_SUN, Score_Minus8
+	end
+
+AI_CBM_Hail:                            (data/battle_ai_scripts.s:522-525)
+	get_weather
+	if_equal AI_WEATHER_HAIL, Score_Minus8
+	end
+```
+
+**Zero divergence between the three** — literally the same 3-instruction
+shape (`get_weather; if_equal <OWN_WEATHER_CONSTANT>, Score_Minus8; end`),
+differing only in which `AI_WEATHER_*` constant each checks
+(`AI_WEATHER_SUN=0`, `AI_WEATHER_RAIN=1`, `AI_WEATHER_SANDSTORM=2`,
+`AI_WEATHER_HAIL=3`, `include/constants/battle_ai.h:26-30`). This is the
+**smallest CBM handler shape found in this doc to date** — even smaller than
+`LightScreen`/`Reflect`'s own 2-instruction body (§23.1; those still need a
+`if_side_affecting` read plus the branch, this one needs a full
+`get_weather` opcode plus the branch, same instruction count either way, but
+weather-trio's own three siblings are *exactly* identical to each other,
+where `LightScreen`/`Reflect` differ by which flag they test — this is the
+**first fully byte-for-byte-identical CBM triplet** in the whole doc, not
+just a twin pair). No `get_ability` call, no item/species gate, no
+Cloud Nine/Air Lock check anywhere in any of the three — `Cmd_get_weather`
+(`src/battle_ai_script_commands.c:1644-1665`) reads `gBattleWeather`
+directly with **no ability filtering at all** (Cloud Nine/Air Lock only
+suppress weather's *in-battle effects* elsewhere in the engine, never the
+AI's own `get_weather` read). **Confirms §5's "all three CBM-blocked" row**
+(`EFFECT_RAIN_DANCE`/`SUNNY_DAY`/`HAIL` are indeed all three in
+`AI_CHECK_BAD_MOVE_TABLE_EFFECTS`, lines 178/179/191 above) while correcting
+its "shared handler" mechanism guess.
+
+**New finding, not asked for but load-bearing for a porter**: `Cmd_get_weather`
+has a real, live ROM bug in this pinned build. Its own source
+(`src/battle_ai_script_commands.c:1644-1665`) only assigns
+`AI_THINKING_STRUCT->funcResult` when a real weather bit is set; the
+`AI_WEATHER_NONE` sentinel assignment is gated behind `#ifdef BUGFIX`
+(`:1651-1653`), and `BUGFIX` is **commented out** in this pinned checkout
+(`include/config.h:48`, `//#define BUGFIX`). So when `gBattleWeather` has
+**none** of the four bits set, `get_weather`'s result is whatever
+`funcResult` was left holding by the *previous* AI script command — for
+`AI_CBM_RainDance`/`SunnyDay`/`Hail` specifically, that's the universal
+preamble's own `get_ability AI_TARGET` call
+(`AI_CheckBadMove_CheckSoundproof`, `:93`), i.e. the **target's real ability
+ID** (0-77), not a true "no weather" sentinel. A target whose ability ID
+happens to equal `AI_WEATHER_RAIN`(1)/`SUN`(0)/`SANDSTORM`(2)/`HAIL`(3) would
+make `get_weather` read as that bogus "weather" on a genuinely weatherless
+battle (e.g. any target with `ABILITY_NONE`(0) reads as `AI_WEATHER_SUN`).
+**Not triggered by any of this session's own fixtures** (every one below
+establishes a real, non-`NONE` weather state live before the decision turn
+being measured), so it does not touch this addendum's own live-verified
+claims — flagged for the porter as a real, citable ROM quirk with an exact
+mechanism, left **recipe-only** (needs a genuinely weatherless battle at the
+moment `AI_CheckBadMove` first dispatches a weather-effect move, plus a
+target with a specific ability ID, to demonstrate live — not attempted this
+session, time-capped). A porter should decide deliberately whether to
+replicate this bug or treat `AI_WEATHER_NONE` cleanly; either is a choice,
+not an accident, once documented.
+
+### 25.2 The three `AI_CV_*` bodies, independently re-derived — `RainDance` genuinely diverges from its own siblings
+
+§5 described all three as "HP gate + `get_weather` compare chain, no roll
+anywhere" and treated them as a matched set. Re-deriving each independently,
+not assuming the family resemblance holds (per this doc's own standing
+divergence-check rule, §17/§18/§21/§22/§23):
+
+```
+AI_CV_SunnyDay:                         (data/battle_ai_scripts.s:2060-2075)
+	if_hp_less_than AI_USER, 40, AI_CV_SunnyDay_ScoreDown1  ; Gate H (own HP)
+	get_weather
+	if_equal AI_WEATHER_HAIL, AI_CV_SunnyDay2                ; Gate W1
+	if_equal AI_WEATHER_RAIN, AI_CV_SunnyDay2                ; Gate W2
+	if_equal AI_WEATHER_SANDSTORM, AI_CV_SunnyDay2           ; Gate W3
+	goto AI_CV_SunnyDay_End                                  ; own weather / none -> 0
+AI_CV_SunnyDay2:
+	score +1
+	goto AI_CV_SunnyDay_End
+AI_CV_SunnyDay_ScoreDown1:
+	score -1
+AI_CV_SunnyDay_End:
+	end
+
+AI_CV_Hail:                             (data/battle_ai_scripts.s:2261-2276)
+	if_hp_less_than AI_USER, 40, AI_CV_Hail_ScoreDown1       ; Gate H (own HP)
+	get_weather
+	if_equal AI_WEATHER_SUN, AI_CV_Hail2                      ; Gate W1
+	if_equal AI_WEATHER_RAIN, AI_CV_Hail2                     ; Gate W2
+	if_equal AI_WEATHER_SANDSTORM, AI_CV_Hail2                ; Gate W3
+	goto AI_CV_Hail_End                                       ; own weather / none -> 0
+AI_CV_Hail2:
+	score +1
+	goto AI_CV_Hail_End
+AI_CV_Hail_ScoreDown1:
+	score -1
+AI_CV_Hail_End:
+	end
+```
+
+`SunnyDay` and `Hail` **are** twins: identical topology (1 HP gate + a
+3-way `get_weather` chain checking the *other three* weather values + a
+deterministic-zero fallthrough), identical HP threshold (40), identical
+score deltas (+1/-1), zero `if_random_less_than` in either. The only
+difference is which weather constant is excluded from each one's own
+"other three" list (`SunnyDay` excludes Sun and checks
+Hail/Rain/Sandstorm; `Hail` excludes Hail and checks Sun/Rain/Sandstorm) —
+exactly what you'd expect from "the move that sets weather X scores +1 for
+casting it into any weather that ISN'T X or none."
+
+```
+AI_CV_RainDance:                        (data/battle_ai_scripts.s:2037-2058)
+	if_user_faster AI_CV_RainDance2         ; Gate P (relative Speed, own side)
+	get_ability AI_USER
+	if_equal ABILITY_SWIFT_SWIM, AI_CV_RainDance3            ; Gate S (own ability, bypass)
+AI_CV_RainDance2:
+	if_hp_less_than AI_USER, 40, AI_CV_RainDance_ScoreDown1  ; Gate H (own HP)
+	get_weather
+	if_equal AI_WEATHER_HAIL, AI_CV_RainDance3                ; Gate W1
+	if_equal AI_WEATHER_SUN, AI_CV_RainDance3                 ; Gate W2
+	if_equal AI_WEATHER_SANDSTORM, AI_CV_RainDance3            ; Gate W3
+	get_ability AI_USER
+	if_equal ABILITY_RAIN_DISH, AI_CV_RainDance3               ; Gate R (own ability, tail bonus)
+	goto AI_CV_RainDance_End                                   ; own weather / none, no Rain Dish -> 0
+AI_CV_RainDance3:
+	score +1
+	goto AI_CV_RainDance_End
+AI_CV_RainDance_ScoreDown1:
+	score -1
+AI_CV_RainDance_End:
+	end
+```
+
+**`RainDance` genuinely diverges** — this is a real instance of the exact
+trap this step's brief called out ("`SunnyDay`/`Hail` sitting 200 lines
+apart from `RainDance` is a hint they may diverge"), independently
+re-confirmed from source, not assumed: `RainDance` has **7** conditional
+instructions (Gates P/S/H/W1/W2/W3/R) against `SunnyDay`/`Hail`'s **4**
+(Gates H/W1/W2/W3) — two entire extra gates that have no counterpart in
+either sibling:
+
+- **Gate P + Gate S (prologue, unique to `RainDance`)**: if the AI's own
+  battler is faster than the target (`if_user_faster`, resolved via
+  `GetWhoStrikesFirst`, §25.3), skip straight to the normal HP/weather gate
+  chain (Gate H). If **not** faster, check the AI's **own** ability
+  (`get_ability AI_USER`) for `ABILITY_SWIFT_SWIM`; if it matches, jump
+  straight to the `score +1` branch (`AI_CV_RainDance3`), **bypassing the HP
+  gate and the weather chain entirely** — a slower Swift-Swim user gets +1
+  for casting Rain Dance regardless of its own HP band or the current
+  weather (since Swift Swim doubles Speed in Rain, turning a slower user
+  into a faster one). Neither `SunnyDay` (no Chlorophyll-equivalent bypass,
+  despite Chlorophyll being the exact parallel ability for Sun) nor `Hail`
+  (no Gen 3 ability doubles Speed in Hail) has anything resembling this.
+- **Gate R (tail, unique to `RainDance`)**: after the weather chain fails to
+  match Hail/Sun/Sandstorm (i.e. weather is already Rain, or none), a
+  **second** `get_ability AI_USER` call checks for `ABILITY_RAIN_DISH`; if
+  present, +1 anyway (a Rain Dish holder wants rain regardless of whether
+  it's already raining — note this can coexist with `AI_CBM_RainDance`'s own
+  `-8` for the same move when weather is already Rain, since CBM and CV are
+  independent score contributions, not a single guarded path). `SunnyDay`
+  has no `ABILITY_SOLAR_POWER`/`ABILITY_LEAF_GUARD`-equivalent tail bonus;
+  `Hail` has no ability-tail bonus either.
+
+Both extra gates read the AI's **own** ability (`AI_USER`), not the
+target's — `Cmd_get_ability`'s own body
+(`src/battle_ai_script_commands.c:1350-1401`) branches on
+`gActiveBattler != battler`: when the queried battler *is* the one currently
+thinking (`AI_USER`, always true for `get_ability AI_USER`), it takes the
+direct-read branch ("The AI knows its own ability", `:1400`) — **no
+`Random()` call, no ability-guessing confound**, unlike the universal CBM
+preamble's own `get_ability AI_TARGET` (`:93`, guesses between a two-
+ability target's slots via `Random() & 1` when neither of the three known-
+without-guessing abilities applies, `:1380-1387`) — the reason every
+CBM-blocked-pair fixture since §14.2 has needed a single-ability *target*
+species regardless of whether that pair's own body reads ability at all.
+
+Exact `if_random_less_than` count for all three: **0**. §5's "genuinely
+0-`if_random`" claim holds for the roll-instruction count on all three, but
+its "no roll anywhere" framing for `RainDance` is incomplete — see §25.3.
+
+### 25.3 New finding: `if_user_faster`'s own C helper can draw `Random()` — a doc-wide subtlety this session traced to its source for the first time
+
+`if_user_faster` (`RainDance`'s Gate P) compiles to `if_user_goes 0, ptr`
+(`asm/macros/battle_ai_script.inc:599-601`), which calls
+`Cmd_if_user_goes` → `GetWhoStrikesFirst(sBattler_AI, gBattlerTarget, TRUE)`
+(`src/battle_ai_script_commands.c:1268-1274`). Reading that C function in
+full (`src/battle_main.c:4595-4763`) for the first time in this doc's own
+history: on a genuine Speed tie (`speedBattler1 == speedBattler2`), it draws
+`Random() & 1` to break the tie (`:4728` and `:4745`, the priority-move and
+zero-priority branches respectively) — a **hidden `Random()` consumption
+inside a C helper**, invisible to this doc's own "`if_random_less_than`
+instruction count" metric, since it's not an AI-script opcode at all.
+`if_user_faster` itself is used **exactly once** in the entire AI script
+(only here); its inverse-polarity sibling `if_target_faster` is used **20
+times** elsewhere (`AI_CV_SpeedDown` §6 included) — meaning this same hidden
+draw-on-tie has been a latent possibility in every one of those 20 sites
+too, not something unique to `RainDance`. This session is the first to trace
+`GetWhoStrikesFirst`'s own body far enough to name the exact mechanism
+rather than just avoiding ties by convention (`docs/factory-ai-ground-
+truth.md`'s and this doc's own "faster species in the damage role" rule,
+until now undocumented *why* a tie is risky beyond message-order). All six
+fixtures below use Anorith (base Speed 75) against Shuckle (base Speed 5) —
+never tied — so this draw is confirmed absent from this session's own live
+counts, not merely assumed absent.
+
+Separately (not new, but relevant to reading the fixtures' PP data below):
+`ChooseMoveOrAction_Singles`'s own final move-pick step always draws exactly
+one `Random()` regardless of whether the top score is unique or tied
+(`return consideredMoveArray[Random() % numOfBestMoves]`,
+`src/battle_ai_script_commands.c:445`) — with `numOfBestMoves == 1` (a clear
+winner) `Random() % 1` is always `0`, so the *result* is fully deterministic
+even though a draw still occurs. This is what makes every fixture's own
+"turn 2" pick below cross-seed-stable **by construction**, once its own net
+score is proven nonzero (25.4) — no tie-break uncertainty survives into the
+decision this addendum actually measures, only into the throwaway turn-1
+setup move (next section).
+
+### 25.4 Fixture design: 0-`if_random` handlers on **both** sides of the pair force a pick-based design, not a draw-count one
+
+Every prior CBM-blocked pair in this doc (§14-§24) used the
+`DRAW_COUNT_SCENARIOS` technique: give the opponent 4 identical
+dispatch-triggering slots and compare **total `Random()` call counts**
+between a "reach" and a "control" fixture, because the handler under test
+has at least one real `if_random_less_than` site whose presence/absence
+shows up as a count delta. **That technique has no signal here** — all six
+handlers (three CBM, three CV) are 0-`if_random`; a reachable branch and an
+unreached one both draw exactly zero from the handler itself. The only
+live-observable channel left is the AI's own **final move pick**, so this
+addendum reuses `AI_CV_SpeedDown`'s original design instead (§6: an
+unequal, non-tied moveset, not four identical slots), extended to two real
+turns because — unlike `SpeedDown`'s pure-Speed gate, knowable at
+team-build time — a **pre-existing weather state** has to be staged by a
+real move first (per this step's brief and the standing "never inject
+transient state" rule).
+
+**Species (all six fixtures)**: opponent (`AI_USER`, the battler under
+test) = Anorith (390, single ability Battle Armor, base Speed 75); player
+(`AI_TARGET`) = Shuckle (213, single ability Sturdy, base Speed 5, Bug/Rock)
+— the exact pairing already proven zero-baseline for a `MOVE_GROWL` control
+by §6/§14 (`AI_CBM_AttackDown`'s own gate needs `ATK == MIN_STAT_STAGE` or
+`ABILITY_HYPER_CUTTER`, neither true; `AI_CV_AttackDown`'s own type-list
+gate matches Shuckle's Bug type1 immediately, §6). Single-ability species on
+**both** sides closes two independent confounds at once: the universal CBM
+preamble's own `get_ability AI_TARGET` (Soundproof check, `:93`, guesses on
+a two-ability *target*, §14.2) and — new this session — would matter for
+`AI_CV_RainDance`'s own `get_ability AI_USER` calls too, except those never
+guess regardless of ability count (25.2) — Anorith's single ability was
+chosen for consistency with every other fixture in this doc, not because
+`RainDance`'s own gates required it.
+
+**Opponent moveset (all six)**: `[TEST_WEATHER_MOVE, MOVE_GROWL(45),
+MOVE_GROWL(45), MOVE_GROWL(45)]` — deliberately **not** four identical
+slots (unlike §11-§24's convention), because a pick-based design needs a
+real alternative to lose or win against. Both the test move and Growl are
+0-power (ties `AI_TryToFaint`'s "most powerful" comparison at exactly 0 for
+all four slots, §6) and Growl's own CBM+CV contribution is 0 in this exact
+matchup (established above) — so the *only* thing that can move the AI's
+own final pick between the test move and Growl is the weather-trio
+handlers' own score contribution, isolating it cleanly.
+
+**Player moveset**: four identical copies of one real weather-setting move
+— forced single legal choice, same "constrain the AI/controller to one
+option" convention `tools/battle-lab/README.md` describes for the opponent
+side, applied here to the player side instead, since it's the player's turn
+that has to *deterministically* stage weather. Two turns, `[A, A]` per turn
+(mash pattern, `N` reps of `[A(2f), wait(18f)]` — robust to `Hail`'s own
+extra end-of-turn chip-damage message boxes that `Rain`/`Sun` don't have,
+discovered live this session when a hand-timed `[A,wait30,A,wait700]`x2
+block **desynced** for `Hail` specifically and silently failed to execute
+turn 2 at all within the window; the mash pattern fixed it by construction,
+since it needs no exact message-box count).
+
+**Why turn order is fixed (opponent faster)**: on turn 1, weather does not
+exist yet at decision time (both sides' actions for a turn are scored
+simultaneously, before either executes), so the opponent's own turn-1
+score is a genuine 4-way tie (`ChooseMoveOrAction_Singles`'s own
+`Random() % 4`, confirmed live below to actually land on different slots
+across the two banked seeds for some fixtures) — **irrelevant to this
+design**, because the opponent (Anorith, base Speed 75) is faster than the
+player (Shuckle, base Speed 5) and therefore moves *first* every turn: even
+if the opponent's own turn-1 tie-break happens to select the weather move,
+the player's own weather-setting move resolves *second* and unconditionally
+overwrites whatever weather state resulted, since Gen 3 weather moves
+always succeed (reset duration) rather than fail when recasting the same
+weather. Turn 1's outcome is therefore **provably irrelevant** to the
+weather state turn 2 observes — confirmed empirically, not just argued (see
+25.5's actual per-seed PP traces, where turn 1's own pick visibly differs
+by seed for some fixtures with no effect on turn 2's result).
+
+**Two fixtures per handler** (six total), naming `<handler>-cbmreach` /
+`<handler>-cvreach` rather than this doc's usual `reach`/`control` (more
+accurate here — each fixture demonstrates one handler's own reach branch
+while the *other* handler in the pair is provably quiet, not a zero
+baseline for both):
+
+| Fixture | Turn-1 weather target (player) | `AI_CBM_*` (weather == own type?) | `AI_CV_*` weather-chain (own type excluded) | Net score, slot 0 | Turn-2 prediction |
+| --- | --- | --- | --- | -: | --- |
+| `<handler>-cbmreach` | same as `TEST_WEATHER_MOVE`'s own type | **fires, -8** | doesn't match (own type excluded from its chain) → 0 | **-8** | never slot 0 |
+| `<handler>-cvreach` | Sandstorm (common to all three chains) | doesn't match (weather != own type) → 0 | matches (Sandstorm always in the "other three" list) → **+1** | **+1** | always slot 0 |
+
+Sandstorm was chosen as the universal `cvreach` trigger specifically because
+it's the one weather value common to **all three** handlers' own "other
+three" list (`RainDance` checks Hail/Sun/Sandstorm, `SunnyDay` checks
+Hail/Rain/Sandstorm, `Hail` checks Sun/Rain/Sandstorm) — confirmed directly
+from 25.2's own transcribed bodies, not assumed.
+
+### 25.5 Live ledger — 6 fixtures × 2 seeds = 12/12 exact matches, all with a real, causally-attributable pick flip
+
+Opponent PP read at frame 700 (turn 1 fully settled, including its own
+end-of-turn weather-damage tick where applicable) and frame 1600 (turn 2
+fully settled) — the delta isolates turn 2's own decision regardless of
+what turn 1's own (irrelevant, per 25.4) tie-break did:
+
+| Fixture | Seed | Opponent PP @700 | Opponent PP @1600 | Turn-2 pick | Opponent HP @1600 |
+| --- | -: | --- | --- | --- | -: |
+| `raindance-cbmreach` (weather=Rain) | 1 | `[4,40,39,40]` | `[4,40,38,40]` | Growl (slot 2) | 120/120 (100%) |
+| `raindance-cbmreach` | 99 | `[4,40,39,40]` | `[4,40,39,39]` | Growl (slot 3) | 120/120 (100%) |
+| `raindance-cvreach` (weather=Sandstorm) | 1 | `[3,40,40,40]` | `[2,40,40,40]` | **Rain Dance (slot 0)** | 120/120 (100%) |
+| `raindance-cvreach` | 99 | `[3,40,40,40]` | `[2,40,40,40]` | **Rain Dance (slot 0)** | 120/120 (100%) |
+| `sunnyday-cbmreach` (weather=Sun) | 1 | `[4,40,39,40]` | `[4,40,38,40]` | Growl (slot 2) | 120/120 (100%) |
+| `sunnyday-cbmreach` | 99 | `[5,39,39,40]` | `[5,39,38,40]` | Growl (slot 2) | 120/120 (100%) |
+| `sunnyday-cvreach` (weather=Sandstorm) | 1 | `[3,40,40,40]` | `[2,40,40,40]` | **Sunny Day (slot 0)** | 120/120 (100%) |
+| `sunnyday-cvreach` | 99 | `[4,40,39,40]` | `[3,40,39,40]` | **Sunny Day (slot 0)** | 120/120 (100%) |
+| `hail-cbmreach` (weather=Hail) | 1 | `[9,40,40,40]` | `[9,40,39,40]` | Growl (slot 2) | 106/120 (88%) |
+| `hail-cbmreach` | 99 | `[9,40,40,40]` | `[9,40,39,40]` | Growl (slot 2) | 106/120 (88%) |
+| `hail-cvreach` (weather=Sandstorm) | 1 | `[8,40,40,40]` | `[7,40,40,40]` | **Hail (slot 0)** | 120/120 (100%) |
+| `hail-cvreach` | 99 | `[8,40,40,40]` | `[7,40,40,40]` | **Hail (slot 0)** | 120/120 (100%) |
+
+**12/12 exact matches to 25.4's predicted table**: every `cbmreach` fixture
+never touches slot 0 between frame 700 and 1600 (Growl wins instead, from
+whichever of slots 1-3 the standing tie-break lands on); every `cvreach`
+fixture always picks slot 0. Note `raindance-cbmreach`/`sunnyday-cbmreach`
+seed 99's own turn-1 PP (`[4,...]`/`[5,39,...]` at frame 700, vs `[4,...]`/
+`[4,40,...]` at seed 1) confirms turn 1's tie-break genuinely differs by
+seed for some fixtures — exactly the "irrelevant to turn 2" claim 25.4 made,
+demonstrated live rather than just argued. `hail-cbmreach`'s own opponent HP
+drops to 88% by frame 1600 (two turns of `Hail`'s own end-of-turn 1/16
+chip damage, absent from `Rain`/`Sun`) — still comfortably above the
+handlers' own `<40%` HP gate, confirmed not a confound.
+
+### 25.6 Not staged live this session (recipe-only, time-capped)
+
+1. **`RainDance`'s own Gate P/S bypass** (slower user + `ABILITY_SWIFT_SWIM`
+   → deterministic +1, skipping the HP gate and weather chain entirely):
+   needs a Swift-Swim-ability species as the opponent, slower than the
+   target, with weather held at any non-Rain state (to prove the bypass
+   fires even where the normal chain would score 0) — not attempted, no
+   Swift-Swim-ability species chosen this session. **Live-verified by a
+   2026-07-27 follow-up side-lane session, see §25.9.**
+2. **`RainDance`'s own Gate R tail bonus** (`ABILITY_RAIN_DISH` → +1 even
+   when weather is already Rain or unset): needs a Rain-Dish-ability
+   species as the opponent — not attempted. Note this can coexist with
+   `AI_CBM_RainDance`'s own `-8` when weather is already Rain (CBM and CV
+   are independent score contributions), so a live fixture would show a net
+   `-7`, not a clean `+1` — worth flagging so a future worker doesn't expect
+   the same simple pick-flip this addendum's own six fixtures show. **Live-
+   verified by a 2026-07-27 follow-up side-lane session (weather held at
+   NONE rather than Rain, to isolate Gate R's own +1 cleanly from CBM's -8 —
+   see §25.9 for why "any non-Rain state" in this item's own original text
+   is not quite right).**
+3. **The `<40%` HP-gate branch** (own HP < 40% → `-1`, all three handlers,
+   independent of weather): this session's own zero-damage-by-construction
+   design (Growl deals no damage, weather moves deal no damage to their own
+   user) never exercises it live. Directly reusable recipe: any prior
+   pair's own "hit `AI_USER` to <X%" fixture (`AI_CV_DefenseDown`/
+   `VitalThrow`'s Machamp-`MOVE_VITAL_THROW`-vs-Anorith recipe, §13/§15,
+   86-102 damage / 15-28% remaining, comfortably under 40%) transplants
+   directly — just add a real turn-1 hit before the weather-establishing
+   turn. **Live-verified by a 2026-07-27 follow-up side-lane session, see
+   §25.9 — the direct transplant needed one adjustment (Splash instead of
+   Growl for the filler slots, §25.9's own confound note).**
+4. **`get_weather`'s own stale-read bug** (25.1): needs a genuinely
+   weatherless battle at the moment a weather-effect move is first
+   dispatched, plus a target with a specific ability ID — not attempted.
+   Still not attempted as of the 2026-07-27 follow-up (out of that
+   session's own assigned scope) — two of that session's three fixtures
+   (Gate S, Gate R) *do* run a genuinely weatherless battle at decision
+   time, but both deliberately chose a target ability ID (4, 5) outside
+   `AI_WEATHER_*`'s `0-3` range specifically to avoid tripping this bug as
+   an unwanted confound, so their own passing result does not confirm or
+   deny it — it remains exactly as open as before.
+
+### 25.7 Verify script status
+
+`tools/probe/verify-factory-ai-checkviability-ground-truth.ts` extended
+this session with a new `WEATHER_PICK_SCENARIOS` array + `verifyWeatherPickScenario`
+runner (distinct from `SCENARIOS`/`DRAW_COUNT_SCENARIOS` — this pair reads a
+frame-700→1600 PP delta rather than a frame-0→N delta or a total-step count,
+per 25.4's design) covering all 6 fixtures above. Every prior scenario (§9,
+§11.5, §12.1, §13.4, §14.6, §15.5, §16.5, §17.7, §18.7, §19.7, §20.5,
+§21.5, §22.6, §23.6, §24.8) unchanged and still green. **73 checks, 0
+failures, run live this session.** Reproduce with:
+
+```sh
+node --experimental-strip-types tools/probe/verify-factory-ai-checkviability-ground-truth.ts
+```
+
+**2026-07-27 follow-up side-lane session extended it again** with 3 more
+`WEATHER_PICK_SCENARIOS` entries (§25.9) — `WeatherPickScenarioSpec` gained
+optional `beforeFrame`/`afterFrame`/`hpBand` fields so the same runner covers
+the new fixtures' different capture windows and the one fixture that
+*targets* the `<40%` band instead of avoiding it. Every prior scenario
+unchanged and still green. **Full script run live this session: 48 checks
+tail-visible, `ALL PASS`, 0 failures, exit code 0** (the run also re-verified
+all pre-existing scenarios; none regressed).
+
+### 25.8 Porter's summary — exact handler-by-handler port checklist
+
+**`AI_CBM_RainDance`/`SunnyDay`/`Hail`** (§25.1): one shared helper,
+parameterized by the `AI_WEATHER_*` constant to match — `get_weather;
+if (weather === OWN) score -= 8`. No new battler-state input beyond current
+weather (already needed for the CV side and, per §5.4, already landed as a
+side effect of PROGRESS entry 460's screens/weather registration). **Zero
+divergence to port separately** — implement once, parameterize three call
+sites.
+
+**`AI_CV_SunnyDay`/`Hail`** (§25.2): also one shared helper, parameterized
+by (a) the `AI_WEATHER_*` constant to exclude and (b) the three-value
+"other weather" match set (trivially `ALL_FOUR \ {OWN, NONE}`, i.e. always
+the other three real weather values, never `NONE`) — `if (ownHp% < 40)
+score -= 1; else if (weather in otherThree) score += 1`. Inputs needed:
+own HP% (already needed by several other ported handlers, e.g.
+`AttackDown`/`DefenseDown`), current weather (already needed by CBM above).
+
+**`AI_CV_RainDance`** (§25.2): needs its own bespoke body, **not** the
+`SunnyDay`/`Hail` shared helper — same HP/weather core plus two new reads:
+(1) **the AI's own ability** (`AI_USER`, not the opponent's — a direct
+field read, never the two-ability guessing heuristic `AI_TARGET` reads
+elsewhere, so no `Random()`-consuming confound to replicate); (2) **is the
+AI's own battler faster than the target** — the *same* underlying
+computation `AI_CV_SpeedDown`/`SpeedUp` and 18 other sites already need
+(`if_target_faster`), just the inverted comparison target
+(`if_user_faster`), including the same hidden tie-break `Random()` draw
+(§25.3) if a port ever reaches a genuine Speed tie — reuse whatever
+"who goes first" primitive those handlers already require, don't
+reimplement. Full gate order: user-faster? → (no) own-ability==Swift Swim?
+→ +1 bypass (skip HP/weather entirely) → (fall through / user-faster) →
+own HP<40%? → -1 → else weather-chain (Hail/Sun/Sandstorm → +1) → else
+own-ability==Rain Dish? → +1 → else 0.
+
+**Shared-tail reuse across the whole trio**: the HP-gate + 3-way-weather-
+chain-with-fallthrough shape (Gates H/W1/W2/W3) is identical in all three
+CV bodies — a single parameterized helper `weatherSetterCvScore(ownHp,
+weather, ownWeatherConstant)` covers `SunnyDay`/`Hail` completely and covers
+`RainDance`'s own Gate H/W1/W2/W3 span (everything after the Gate P/S
+prologue and before the Gate R tail) — only the prologue and tail need
+`RainDance`-specific code, not the whole body.
+
+**Not required for this port, but real**: `get_weather`'s own
+`AI_WEATHER_NONE` stale-read bug (§25.1) is a genuine source-level quirk a
+porter should decide about explicitly (replicate for byte-exact AI parity,
+or clean it up) rather than discover by accident; it only matters for a
+`AI_CheckBadMove`/`AI_CheckViability` weather-effect dispatch on a battle
+that has had **zero** weather set at any point so far this battle.
+
+## 25.9 2026-07-27 follow-up side-lane session: `AI_CV_RainDance`'s Gate S bypass, Gate R tail bonus, and the shared `<40%` HP-gate branch — all 3 of §25.6's remaining items live-verified, engine port confirmed correct
+
+Bounded side-lane worker session (Battle Scene OFF oracle), same no-`src/`
+contract as every addendum above — `factoryAiCheckViability.ts`'s already-
+ported `runCvRainDance`/`runCvSunnyDay`/`runCvHail`/`weatherSetterCvScore`
+(§25.8's own port, landed the same day this addendum's predecessor was
+written) were read **read-only**, exactly to know which branch each new
+fixture needed to light up, per this step's own brief. All three of §25.6's
+still-open items (Gate P/S bypass, Gate R tail bonus, the `<40%` HP gate)
+are closed this session with one fixture apiece (not reach/control pairs,
+given the time budget — causal attribution instead comes from comparing
+against this doc's own well-established `Growl`=0/`Splash`=0 baselines,
+§6/§14/§25.4, rather than a matched control fixture). Item 4
+(`get_weather`'s stale-read bug) remains open, out of this session's own
+assigned scope — see §25.6 item 4's own updated note for why the two
+weatherless fixtures below don't accidentally settle it either way.
+
+### 25.9.1 Species selection: cross-checked against the real dex, not assumed
+
+§25.6's own items 1/2 asked for a single-ability Swift Swim carrier and a
+Rain Dish carrier. Direct grep of `reference/pokeemerald/src/data/pokemon/
+species_info.h` for both abilities (not assumed from memory):
+
+- **Swift Swim, single-ability** (`{ABILITY_SWIFT_SWIM, ABILITY_NONE}`):
+  Horsea, Magikarp, Kingdra, Surskit, Luvdisc, Feebas, Huntail, Gorebyss —
+  all confirmed present in `gBattleFrontierMons`
+  (`reference/pokeemerald/src/data/battle_frontier/battle_frontier_mons.h`),
+  i.e. real Factory rentals. **Huntail** (species 374, base Speed 52 → level
+  50 stat 72) chosen for the Gate S fixture, paired against **Anorith**
+  (390, Battle Armor, base Speed 75 → level 50 stat 95) as target — a clean
+  23-stat non-tied gap, Anorith reused verbatim from every prior addendum.
+- **Rain Dish**: grepping the same file for `ABILITY_RAIN_DISH` at all
+  finds **no single-ability carrier anywhere in Emerald's dex** — Lotad,
+  Lombre, and Ludicolo are the only three species with the ability, and all
+  three pair it with Swift Swim in slot 0 (`{ABILITY_SWIFT_SWIM,
+  ABILITY_RAIN_DISH}`). §25.6 item 1's own "single-ability discipline"
+  request is therefore unsatisfiable for Rain Dish specifically — but per
+  §25.2/§25.3 (already established, re-confirmed by reading
+  `Cmd_get_ability` directly, `src/battle_ai_script_commands.c:1350-1401`
+  this session too): the guessing branch only executes when `gActiveBattler
+  != battler`, which is never true for a `get_ability AI_USER` query (the
+  querying battler *is* `sBattler_AI` by construction) — so Gate S and Gate
+  R's own ability reads take the direct `gBattleMons[battler].ability` path
+  **unconditionally**, regardless of how many abilities the species has.
+  Lotad (295) with `abilitySlot: 1` (the existing `mechanicLab` override
+  field, already used by `tools/battle-lab/mechanic-endturn-raindish-off.json`'s
+  own precedent) deterministically forces Rain Dish with zero guessing risk
+  — used for the Gate R fixture, paired against **Shuckle** (213, Sturdy,
+  base Speed 5 → level 50 stat 25) as target, reused verbatim from every
+  prior weather-trio fixture. Lotad's own level 50 Speed stat (30 base → 50)
+  comfortably exceeds Shuckle's 25, so Gate P (`if_user_faster`) already
+  routes past Gate S before Gate R is ever reached — Lotad's own ability
+  slot 0 (Swift Swim) is never even queried in this fixture, confirming the
+  two gates are independently testable.
+
+### 25.9.2 Why "any non-Rain state" (§25.6 item 1's own original wording) undersells what Gate S's isolation actually needs
+
+Re-deriving from §25.2's own transcribed body rather than trusting item 1's
+paraphrase: `RainDance`'s weather chain (Gates W1-W3) matches **all three
+non-Rain real weather values** (Hail/Sun/Sandstorm) — so staging *any* of
+them would let the ordinary weather chain alone produce `+1`, indistinguishable
+from Gate S's own bypass. The only state that leaves the ordinary chain
+silent (a true `0`, not just "not Rain") is **weather held at `AI_WEATHER_NONE`
+(never established at all this battle)** — Gates W1-W3 only match real
+weather values, and `RainDance`'s own "no weather" fallthrough is 0 same as
+Rain's. Both new ability-gate fixtures (Gate S, Gate R) therefore hold
+weather at `NONE` for the whole trace: a **single real turn** suffices (no
+weather-establishing turn 1 needed at all, unlike every §25.4 fixture),
+reusing this doc's original single-turn `SCENARIOS` capture shape (`[A(2),
+wait(30), A(2), wait(700)]`, `captureFrames [0,100,300,732]`, §6/§13) instead
+of the two-turn mash pattern. This also sidesteps the `get_weather`
+stale-read bug (§25.1) as a live confound: both target species' own ability
+IDs (Anorith/Battle Armor=4, Shuckle/Sturdy=5) sit outside the `AI_WEATHER_*`
+range (`0`-`3`), so even if the bug's stale `funcResult` leaks through
+`AI_CBM_RainDance`'s own `get_weather` call, the subsequent `if_equal
+AI_WEATHER_RAIN` compare can never spuriously match — confirmed not just
+argued, since both fixtures' own `Growl`-vs-`RainDance` net score prediction
+(`+1`) only holds if `AI_CBM_RainDance` truly stays quiet.
+
+### 25.9.3 Fixture design: Gate S (`raindance-gates-swiftswim-reach`) and Gate R (`raindance-gates-raindish-reach`)
+
+Both fixtures: opponent (`AI_USER`, the `RainDance` caster under test)
+moveset `[MOVE_RAIN_DANCE(240), MOVE_GROWL(45) x3]` — `Growl`'s own baseline
+against a Bug-type1 target (Anorith or Shuckle, both established zero via
+`AI_CV_AttackDown`'s own Gate E physical-type-list match, §6/§14/§25.4)
+holds at `0` in a fresh single-turn battle (Gate A: target ATK stage ==
+`DEFAULT_STAT_STAGE`, true at battle start, skips straight past Gates B/C/D1
+to Gate E, which matches Bug type1 immediately, zero draws either way).
+
+- **Gate S** (opponent = Huntail, single-ability Swift Swim, speed 72 <
+  Anorith target's 95 → `userFaster` false → Gate S's own `get_ability
+  AI_USER` finds Swift Swim → **+1**, HP/weather chain never reached at
+  all): predicted net score `+1` (CV) `+ 0` (CBM, weather stays `NONE`) `=
+  +1`, beating `Growl`'s `0` — Rain Dance must win the real turn-1 pick,
+  both seeds.
+- **Gate R** (opponent = Lotad, `abilitySlot: 1` → Rain Dish, speed 50 >
+  Shuckle target's 25 → Gate P already routes past Gate S regardless of
+  ability → HP gate false (full HP) → weather chain: `NONE` isn't
+  Hail/Sun/Sandstorm → falls through to Gate R's own `get_ability AI_USER`
+  → Rain Dish found → **+1**): predicted net score `+1` (CV) `+ 0` (CBM) `=
+  +1` — Rain Dance must win the real turn-1 pick, both seeds.
+
+### 25.9.4 Fixture design: the `<40%` HP-gate branch (`raindance-hpgate-reach`) — a same-turn confound found live, closed by a move swap, not staging
+
+§25.6 item 3's own recipe ("transplant `VitalThrow`'s Machamp-vs-Anorith
+damage-sizing directly, add a real turn-1 hit before the weather-establishing
+turn") was followed **with one change discovered live, not anticipated from
+source alone**. First attempt reused this addendum's own `Growl` filler
+slots verbatim (`[RAIN_DANCE, GROWL x3]` for Anorith, `[VITAL_THROW x4]` for
+Machamp) on the exact two-turn mash trace §25.4/§25.5 already banked
+(`raindance-cvreach`'s own 60-rep segment array, `captureFrames
+[0,700,1600]`). Two problems surfaced empirically:
+
+1. **A same-turn stacking confound, the same class §14.2/§19.2/§24.5 have
+   each independently found once already**: if turn 1's own 4-way tie
+   (`RainDance`/`Growl`×3, all scored `0` at full HP) happens to land on
+   `Growl`, Machamp's own ATK stage drops to 5 — breaking `AI_CV_AttackDown`'s
+   own Gate A precondition (`target ATK stage == DEFAULT_STAT_STAGE`) for
+   turn 2's read, so `Growl`'s own baseline silently shifts from `0` to `-2`
+   depending on which slot won a tie-break outside this fixture's control.
+   **Fix**: swap the 3 filler slots from `Growl` to `MOVE_SPLASH` (150) — a
+   genuine no-op move with no `AI_CheckBadMove`/`AI_CheckViability` dispatch
+   entry at all, so its `0` baseline holds regardless of what turn 1's own
+   tie-break does to it. (Both seeds banked below happened to pick slot 0,
+   `RainDance`, on turn 1 either way — but the fix removes the *dependency*
+   on that, not just this run's luck.)
+2. **The two-turn mash timing itself, re-discovered for a different move
+   than §25.4's own Hail-chip-damage case**: reusing `raindance-cvreach`'s
+   own 60-rep/1600-frame mash verbatim, with `MOVE_VITAL_THROW` in Machamp's
+   own slots instead of a weather move, executes **3 real turns**, not 2 —
+   `MOVE_VITAL_THROW` has fewer message boxes than a weather-setting move
+   (no "It started to rain!"-style text), so the same input budget that
+   safely produces exactly 2 turns for a weather move gets through 3 turns'
+   worth of `VITAL_THROW` dialogue instead, and Machamp's own moveset (all 4
+   slots `VITAL_THROW`, unconditionally) delivers a **second** hit on turn 2
+   that finishes off the already-`<40%` Anorith (34/21 HP against another
+   86-102-damage roll), fainting it and auto-switching in the filler mon
+   before frame 1600 — confirmed empirically with a frame-by-frame sweep
+   (`oppHp` hits `0` and `oppSpecies` flips from 390 to 1 between frames 800
+   and 1200 in an unmodified copy of the 60-rep trace). **Fix**: since Anorith
+   moves first each turn (95 > 75, no tie), its own turn-2 PP decrement is
+   already observable *before* Machamp's own turn-2 hit lands — a
+   **narrower** mash window (35 reps, 700 frames of `[A(2),wait(18)]`, then
+   400 frames of pure silent wait with no further input, so no 3rd turn's
+   own prompt is ever pressed) reads cleanly: `beforeFrame=400` (turn 1
+   fully settled, before turn 2 starts) and `afterFrame=700` (turn 2's own
+   decision already resolved, Anorith not yet fainted). Empirically
+   reconfirmed determinism-stable across 2 reruns × 2 seeds before banking.
+
+Prediction: turn 2, Anorith's own HP is already `<40%` from turn 1's real
+hit — Gate H fires (`if_hp_less_than AI_USER,40`) **before `get_weather` is
+ever called**, so this branch's own `-1` is unconditional regardless of
+whatever weather turn 1's own tie-break happened to leave behind (`RainDance`
+winning turn 1 would set real Rain for 5 turns; irrelevant, since Gate H
+short-circuits ahead of the weather read entirely — confirmed structurally
+from §25.2's own transcribed body, not just asserted). Net score `-1` (CV)
+`+` (`0` or `-8` from CBM, depending on turn 1's leftover weather, both
+comfortably negative either way) `< 0` (`Splash`'s baseline) — `Rain Dance`
+must never win turn 2's pick, `Splash` always does, both seeds.
+
+### 25.9.5 Live ledger — 3 fixtures × 2 seeds = 6/6 exact matches to the predictions above
+
+| Fixture | Seed | Opponent PP (before → after) | Pick | Opponent HP at read |
+| --- | -: | --- | --- | -: |
+| `raindance-gates-swiftswim-reach` (Gate S) | 1 | `[5,40,40,40]`@0 → `[4,40,40,40]`@732 | **Rain Dance (slot 0)** | 130/130 (100%) |
+| `raindance-gates-swiftswim-reach` | 99 | `[5,40,40,40]`@0 → `[4,40,40,40]`@732 | **Rain Dance (slot 0)** | 130/130 (100%) |
+| `raindance-gates-raindish-reach` (Gate R) | 1 | `[5,40,40,40]`@0 → `[4,40,40,40]`@732 | **Rain Dance (slot 0)** | 115/115 (100%) |
+| `raindance-gates-raindish-reach` | 99 | `[5,40,40,40]`@0 → `[4,40,40,40]`@732 | **Rain Dance (slot 0)** | 115/115 (100%) |
+| `raindance-hpgate-reach` (`<40%` HP gate) | 1 | `[4,40,40,40]`@400 → `[4,40,40,39]`@700 | Splash (slot 3), never slot 0 | 34/120 (28%) |
+| `raindance-hpgate-reach` | 99 | `[4,40,40,40]`@400 → `[4,39,40,40]`@700 | Splash (slot 1), never slot 0 | 21/120 (18%) |
+
+**6/6 exact matches, all causally attributable to the exact gate the doc's
+own porter checklist (§25.8) names**: Gate S and Gate R each show Rain Dance
+winning the real turn-1 pick deterministically both seeds (matching the
+predicted `+1` net score against `Growl`'s established `0`); the HP-gate
+fixture shows Rain Dance never touched between the post-turn-1 and
+post-turn-2 reads, with Splash (whichever slot won turn 1's own irrelevant
+tie) taking turn 2 instead, both seeds — and the fixture's own precondition
+(`opponent HP genuinely <40%` by the read frame) is independently confirmed
+live (28%/18% remaining), not just assumed from the hand-computed 86-102
+damage range. **No port bug found** — `runCvRainDance`'s existing
+implementation (`src/engine/factoryAiCheckViability.ts:2414-2463`, ported
+and unit-tested but never before oracle-corroborated on these 3 branches)
+produces exactly the ROM's own behavior on all three previously-recipe-only
+paths. This closes out the "never-live-staged branch hides real port bugs"
+risk this step's brief named (`docs/factory-ai-draw-discrepancy-probe.md`
+§7's `DefenseUp`/`SpDefUp`/`EvasionUp` chained-draw-site precedents) for
+`RainDance` specifically — all 7 of its own conditional gates (P/S/H/W1/W2/
+W3/R) now have live oracle corroboration, not just assembly + unit tests.
+
+### 25.9.6 Verify script status
+
+`tools/probe/verify-factory-ai-checkviability-ground-truth.ts`'s
+`WeatherPickScenarioSpec`/`verifyWeatherPickScenario` (§25.7) extended with
+optional `beforeFrame`/`afterFrame` fields (default `700`/`1600`, unchanged
+for all 6 pre-existing weather-trio fixtures) and an `hpBand` field
+(`"above40"` default, asserting the pre-existing "no HP-gate confound"
+invariant; `"below40"` for this session's own HP-gate fixture, asserting the
+opposite — that the precondition genuinely held). All three new fixtures
+added to `WEATHER_PICK_SCENARIOS` with their own tuned frame windows (`0`/
+`732` for the two single-turn ability-gate fixtures, `400`/`700` for the
+HP-gate fixture, §25.9.4). **Full script run live this session, both
+seeds, twice each for determinism: `ALL PASS`, 0 failures, exit code 0** —
+every prior scenario (§9, §11.5, §12.1, §13.4, §14.6, §15.5, §16.5, §17.7,
+§18.7, §19.7, §20.5, §21.5, §22.6, §23.6, §24.8, §25.7) unchanged and still
+green. Reproduce with:
+### 25.9.7 What remains open
+
+§25.6 item 4 (`get_weather`'s `AI_WEATHER_NONE` stale-read bug) is
+**unchanged** — still not attempted, still recipe-only, still exactly as
+described there. Both of this session's own weatherless fixtures (Gate S,
+Gate R) deliberately chose target ability IDs (4, 5) outside the bug's
+`0`-`3` collision range specifically to keep it from confounding their own
+results (§25.9.2) — a future worker reproducing it would need the *opposite*
+choice (a target whose ability ID lands inside `0`-`3`) as its own dedicated
+fixture, not a byproduct of these two.
+
+### 25.10 2026-07-27 second follow-up side-lane session: `get_weather`'s own stale-read bug (§25.6 item 4, the last open item), live-staged — TWO independent Factory-reachable channels found, not one, and the engine's ported handlers diverge from the real ROM in both
+
+Bounded side-lane worker session (Battle Scene OFF oracle), same no-`src/`-
+edits contract as every addendum above. Scope: characterize §25.6 item 4
+from source, stage a live fixture that discriminates stale-vs-fresh, and
+settle whether `factoryAiCheckBadMove.ts`/`factoryAiCheckViability.ts`'s
+already-ported weather handlers (read **read-only**) agree with the real
+ROM's actual behavior in the affected flow.
+
+#### 25.10.1 The mechanism, pinned exactly — and a second channel §25.1/§25.6 never named
+
+`Cmd_get_weather` (`src/battle_ai_script_commands.c:1644-1665`) only writes
+`AI_THINKING_STRUCT->funcResult` when a real weather bit is set; the
+`AI_WEATHER_NONE` sentinel assignment is `#ifdef BUGFIX`-gated (`:1651-1653`)
+and `BUGFIX` is commented out in this pinned checkout
+(`include/config.h:48`). So in a genuinely weatherless battle
+(`gBattleWeather == 0`), `get_weather` leaves `funcResult` holding whatever
+the *previous* AI script command wrote — and `AI_THINKING_STRUCT` is zeroed
+**once** per battler-decision (`BattleAI_SetupAIData`,
+`battle_ai_script_commands.c:312-380`), not per move and not per logic pass
+(`BattleAI_DoAIProcessing`, `:572-616`, resets `gAIScriptPtr` to the current
+logic's table entry for every `movesetIndex` but never touches
+`funcResult`). For a Factory battle at `challengeNum >= 4` (or vs the
+Frontier Brain), `GetAiScriptsInBattleFactory` (`src/battle_factory.c:889-911`)
+sets `aiFlags = AI_SCRIPT_CHECK_BAD_MOVE | AI_SCRIPT_TRY_TO_FAINT |
+AI_SCRIPT_CHECK_VIABILITY`, executed in that bit order (`aiLogicId` 0/1/2,
+`ChooseMoveOrAction_Singles`, `:396-415`) across all 4 movesetIndex slots
+per pass, all sharing the one un-zeroed `funcResult` for the whole decision.
+
+**Channel 1 (CBM, the mechanism §25.1 already named)**: `AI_CheckBadMove`'s
+own universal preamble (`AI_CheckBadMove_CheckSoundproof`,
+`data/battle_ai_scripts.s:93`) runs `get_ability AI_TARGET` immediately
+before the effect dispatch, for **every** move, regardless of whether the
+move's own effect has a handler. `Cmd_get_ability` (`:1350-1401`) takes the
+direct `gBattleMons[battler].ability` read (no `Random()` guess) for a
+single-ability target species. `AI_CBM_RainDance`/`SunnyDay`/`Hail`
+(`:490-493`/`:495-498`/`:522-525`) each open with `get_weather` as their
+**first** instruction — so a genuinely weatherless dispatch reads the
+target's real ability id straight through. Collision requires the target's
+ability id to land in `AI_WEATHER_*`'s `0`-`3` range
+(`include/constants/battle_ai.h:26-30`: Sun=0/Rain=1/Sandstorm=2/Hail=3).
+Ability id 0 (`ABILITY_NONE`) is never a real species ability (no dex entry
+has it as ability slot 0); id 1 (`ABILITY_STENCH`) has no single-ability
+carrier in this dex (Gulpin/Swalot pair it with Sticky Hold); id 2
+(`ABILITY_DRIZZLE`)'s only single-ability carrier is Groudon, not a Factory
+rental. **Id 3 (`ABILITY_SPEED_BOOST`) is single-ability on Ninjask (302,
+`abilities={SPEED_BOOST,NONE}`, species_info.h:8393-8397), and Ninjask is a
+real Factory rental** (`src/data/battle_frontier/battle_frontier_mons.h:1670,2405`)
+— the collision the brief asked for is reachable, via `AI_CBM_Hail` specifically
+(id 3 == `AI_WEATHER_HAIL`).
+
+**Channel 2 (CV, not named by §25.1/§25.6/§25.9 — found this session while
+tracing Channel 1's own boundary conditions)**: `AI_CheckViability`'s own
+preamble (`data/battle_ai_scripts.s:652-655`) is just `if_target_is_ally
+AI_Ret` — no universal ability or power read before its own effect dispatch,
+unlike CBM. But `AI_TryToFaint`'s own per-move preamble
+(`:2616-2622`) unconditionally runs `get_how_powerful_move_is`
+(`Cmd_get_how_powerful_move_is`, `battle_ai_script_commands.c:1174-1240`)
+whenever `if_can_faint` is false (`Cmd_if_can_faint`, `:1743-1770`, never
+itself touches `funcResult`) — true for any 0/1-power move, which always
+sets `funcResult = MOVE_POWER_OTHER` (`= 0`,
+`include/constants/battle_ai.h:33`, line 1236 of the C source). Since
+`AI_SCRIPT_TRY_TO_FAINT` (logic id 1) runs immediately before
+`AI_SCRIPT_CHECK_VIABILITY` (logic id 2) and both iterate all 4
+`movesetIndex` slots without resetting `funcResult` between passes, **any
+Factory decision whose last moveset slot (index 3) is a real move with power
+≤1** (i.e. essentially every filler slot in every weather-trio fixture in
+this doc, `Growl`/`Splash` both included) leaves `funcResult =
+MOVE_POWER_OTHER(0)` sitting there when `AI_CV_RainDance`/`SunnyDay`/`Hail`'s
+own `get_weather` call runs next — and `MOVE_POWER_OTHER(0)` numerically
+equals `AI_WEATHER_SUN(0)`. All three CV handlers' own weather chains
+include a Sun check (`RainDance`/`Hail` check Sun directly; `SunnyDay`
+excludes Sun but that's irrelevant here since `SunnyDay`'s own chain is
+Hail/Rain/Sandstorm), so this second channel spuriously scores `+1` in a
+genuinely weatherless battle — **independent of the target's ability
+entirely**, unlike Channel 1. This channel is reachable by essentially every
+"reach" fixture already banked in §25.4-§25.9 (any single-turn weatherless
+fixture with 0-power filler moves in slot 3), not just a specially-chosen
+target.
+
+#### 25.10.2 Three fixtures staged, all matching their predictions exactly, both seeds, deterministic (no ties)
+
+Predictions were fixed before running (below), per the mechanism above.
+Opponent (`AI_USER`) = Huntail (374, arbitrary — `Hail` has no `AI_USER`-side
+ability/speed gate to confound), moveset `[MOVE_HAIL(258), MOVE_SPLASH(150)
+x3]` for the first two; `raindance-noraindish-stalesun` reuses Gate R's own
+exact setup with one field changed.
+
+| Fixture | Target (ability id) | Prediction (source) | Live result, both seeds |
+| --- | --- | --- | --- |
+| `mechanic-factory-ai-hail-staleweather-collision-off.json` | Ninjask (Speed Boost=3, **collides** with both channels: CBM=-8 via Hail-id match, CV=+1 via Sun-id match) | net **-7**, Hail must lose to Splash(0) | opponent PP `[10,40,40,40]→[10,40,40,39]` — Hail (slot 0) **never** touched, a Splash slot drops. Exact match. |
+| `mechanic-factory-ai-hail-staleweather-control-off.json` | Anorith (Battle Armor=4, **outside** 0-3, CBM channel silenced) | net **+1** (CV channel alone, target-independent) — Hail must beat Splash(0) despite the "safe" ability choice | opponent PP `[10,40,40,40]→[9,40,40,40]` — Hail (slot 0) **wins**. Exact match. |
+| `mechanic-factory-ai-cv-raindance-noraindish-stalesun-off.json` (Lotad `abilitySlot:0`=Swift Swim instead of §25.9's `abilitySlot:1`=Rain Dish, vs Shuckle, same moveset as the banked Gate R fixture) | N/A (attacker-ability re-attribution check) | if CV channel fires: Rain Dance wins (+1) **despite no Rain Dish**; if Gate R's own tail were the true mechanism: tie (0) | opponent PP `[5,40,40,40]→[4,40,40,40]` — Rain Dance **wins**, identical margin to the original Gate R fixture, **with Rain Dish removed**. |
+
+All three: 2/2 seeds identical, deterministic (no tie-break noise — the
+score gaps are large enough that no `Random()`-based tie-break is ever
+consulted). Wired into `tools/probe/verify-factory-ai-checkviability-ground-truth.ts`'s
+`WEATHER_PICK_SCENARIOS` array (3 new entries, `beforeFrame:0`/`afterFrame:732`,
+the established single-turn shape). **Full script run this session: ALL
+PASS, 0 failures** (every one of the doc's 79+ pre-existing checks
+unchanged and still green; reproduce with
+`node --experimental-strip-types tools/probe/verify-factory-ai-checkviability-ground-truth.ts`).
+
+The third fixture is a re-attribution check on already-banked evidence, not
+new scope creep: it shows the original `raindance-gates-raindish-reach`
+fixture's own live `+1` (§25.9.3/§25.9.5, claimed there as confirmation of
+Gate R's ability-tail bonus) is **at least as well explained** by Channel 2
+firing at Gate W2 (the Sun branch of `RainDance`'s own weather chain, which
+comes *before* Gate R's tail check in instruction order) as by Gate R
+itself — removing Rain Dish entirely reproduces the identical `+1` margin.
+This doesn't overturn §25.9's own *numeric* claim (the engine's `+1` for
+that fixture is still correct, and Gate R's own code is still exercised
+correctly whenever it *is* reached, e.g. genuinely via a future fixture that
+also avoids the Sun-collision), but its *causal attribution* — "confirms
+Gate R correctly ported" — is unconfirmed by that fixture specifically,
+since the live ROM path for it almost certainly never reached Gate R's own
+two instructions at all. Left as a documentation note, not a new open item:
+no `src/` changes, no fixture retraction (the fixture's own numeric claim
+still holds).
+
+#### 25.10.3 Verdict
+
+**(a) Does the pinned ROM exhibit the stale read in a Factory-reachable
+flow?** Yes, confirmed live — and via **two independent channels**, not the
+one §25.1/§25.6 anticipated. Channel 1 (CBM, ability-id collision) requires
+a specific single-ability target (Ninjask, id 3, only reachable for
+`AI_CBM_Hail`); Channel 2 (CV, `MOVE_POWER_OTHER`/`AI_WEATHER_SUN` id
+collision via `AI_TryToFaint`'s own tail state) requires no special ability
+at all and fires in essentially any weatherless Factory decision with a
+low-power filler in the last moveset slot — a much larger blast radius than
+the brief's own framing assumed.
+
+**(b) What value does the ROM actually use there?** Channel 1: the target's
+real ability id (read via `AI_CheckBadMove_CheckSoundproof`'s own
+`get_ability AI_TARGET`). Channel 2: `MOVE_POWER_OTHER` (`=0`, read via
+`AI_TryToFaint`'s own `get_how_powerful_move_is` on the last moveset slot) —
+which happens to equal `AI_WEATHER_SUN`, so every affected CV weather
+handler spuriously takes its own "some other real weather is active" `+1`
+branch.
+
+**(c) Does the engine's ported handler agree or diverge?** **Diverges,
+in both fixtures.** `runCbmWeatherSetter`
+(`src/engine/factoryAiCheckBadMove.ts:757-758`, `return currentWeather ===
+ownWeatherConstant ? -8 : 0`) and `weatherSetterCvScore`
+(`src/engine/factoryAiCheckViability.ts:2330-2340`, `return 0` when
+`currentWeather` doesn't match the "other three" set) both take a clean
+`currentWeather?: AiWeatherValue` input, documented at its own definition
+site (`src/engine/factoryAiDecisionPolicy.ts:516-522`, "Optional, defaulting
+to `undefined` (no weather bit set)") — a correct, garbage-free model of
+"no weather," with no mechanism to read a stale ability id or a stale
+move-power classification. Fed `currentWeather = undefined` (the correct
+value for both live fixtures above), the engine computes Hail's total score
+as exactly **0** in both cases — tied with Splash's own 0. The real ROM's
+live, verified score is **-7** (collision fixture) and **+1** (control
+fixture) respectively — neither matches the engine's `0`, and the two
+fixtures diverge from the engine in *opposite directions*, confirming the
+mismatch isn't a single sign error but a genuine missing mechanism (the
+engine was always going to disagree here, by design — porting either stale-
+read channel byte-for-byte would mean threading target-ability and
+last-moveset-slot-power state into the weather handlers' own clean
+interface, which §25.8's own porter note already flagged as a deliberate
+choice a porter should make explicitly, not an oversight).
+
+**No `src/` change made** (out of scope for this step). This closes §25.6
+item 4 — the last of that section's four open items — with a live-verified
+divergence, not an infeasibility proof: staging was possible, and the
+engine's already-ported handlers do not reproduce either channel, by
+design and now by live evidence. A future porter should decide explicitly
+whether Factory-facing AI parity requires replicating one or both channels
+(Channel 1 needs a `target ability id` input on the weather CBM handlers;
+Channel 2 needs the AI's own last-considered-move power classification
+threaded across the CBM/TryToFaint/CV boundary — a much more invasive change
+than any other handler in this doc's own 22-handler `AI_CV_*` program, since
+every other handler's own state is self-contained within its own script
+body) or to leave the bug un-replicated as a deliberate simplification.
+
+
+## 26. 2026-07-27 addendum #16: `AI_CV_SpeedDownFromChance`'s own redirect path, live-verified — closes PROGRESS entry 493's no-live-ledger flag
+
+Side-lane GROUND-TRUTH-ONLY session (Battle Scene OFF oracle), same no-
+`src/`-changes contract as every prior addendum. `AI_CV_SpeedDownFromChance`
+was ported this session as the 22nd and final `AI_CV_*` handler (PROGRESS
+entry 493) with dispatcher/unit tests but **zero banked live ledger** — §6's
+own `AI_CV_SpeedDown` fixtures dispatch `MOVE_STRING_SHOT`
+(`EFFECT_SPEED_DOWN`, direct dispatch, `:1142`), never one of
+`AI_CV_SpeedDownFromChance`'s own 6 `EFFECT_SPEED_DOWN_HIT` moves
+(`:1136-1141`). This addendum closes that gap: two new fixture pairs prove
+(1) the redirect itself — 3 of the 6 moves (`MOVE_ICY_WIND`, `MOVE_ROCK_TOMB`,
+`MOVE_MUD_SHOT`) really do land inside `AI_CV_SpeedDown`'s own draw site when
+dispatched live, matching §4's footnote/§10's recommendation exactly — and
+(2) the redirect boundary — the other 3 (`MOVE_BUBBLE_BEAM`, `MOVE_CONSTRICT`,
+`MOVE_BUBBLE`) really do fall through to a genuine, state-independent zero.
+
+**Format choice**: a new top-level section, not a §6 addendum. §6 is already
+long and closes with its own "Not yet banked" note that this session
+directly answers; every other follow-up in this doc that adds ground truth
+for a *different* handler (or, here, a structurally different dispatch path
+into an *already-verified* handler) got its own `## N. 2026-0M-DD addendum
+#K` section (§11-§25), never an inline edit to an earlier section — keeping
+§6 byte-for-byte as originally banked preserves its own "fully executed,
+live-verified" closing state as a citable snapshot, and matches every prior
+session's own practice of appending rather than rewriting.
+
+### 26.1 Source re-derivation (read-only, no `src/` changes)
+
+```
+AI_CV_SpeedDownFromChance:                (data/battle_ai_scripts.s:1136-1141)
+    if_move MOVE_ICY_WIND, AI_CV_SpeedDown
+    if_move MOVE_ROCK_TOMB, AI_CV_SpeedDown
+    if_move MOVE_MUD_SHOT, AI_CV_SpeedDown
+    end
+```
+
+Three plain `u16` move-ID compares (`Cmd_if_move`, not an
+`if_random`/effect-chance read despite the "FromChance" name — the name
+describes the dispatching moves' own in-game category, a chance-on-hit
+secondary effect, not anything this handler itself inspects) that `goto`
+into `AI_CV_SpeedDown`'s **own label** on a match — real control-flow entry
+into that handler's own instructions, not a duplicated copy — and fall
+through to `end` (zero score, zero draws, unconditionally, for every battle
+state) on no match. `EFFECT_SPEED_DOWN_HIT` covers 6 executable moves total
+(`src/engine/factoryAiCheckViability.ts:616-663`'s own
+`runCvSpeedDownFromChance`, ported this session, re-derives this exactly):
+`MOVE_ICY_WIND` (196), `MOVE_ROCK_TOMB` (317), `MOVE_MUD_SHOT` (341) redirect;
+`MOVE_BUBBLE_BEAM` (61), `MOVE_CONSTRICT` (132), `MOVE_BUBBLE` (145) fall
+through. All 6 have real power (10-65) and sub-100 secondary-effect chance
+for 3 of them (`BUBBLE_BEAM`/`CONSTRICT`/`BUBBLE`, all 10%) or a forced 100%
+for the redirecting 3 (`ICY_WIND`/`ROCK_TOMB`/`MUD_SHOT`) — irrelevant to
+this handler (the AI script's own dispatch never reads secondary-effect
+chance, only the move ID), but relevant to fixture design (§26.2): unlike
+§6's `MOVE_STRING_SHOT` (0 power), every one of these 6 moves does real
+damage, so `AI_TryToFaint`'s "not most powerful" `-1` no longer ties for free
+— the fixture design below sidesteps this by using **identical moves in all
+4 opponent slots** (a tie against itself) rather than §6's mixed-moveset
+"equal-baseline control" trick, reading total `Random()` **count**, not
+**which slot wins** (the same DRAW_COUNT_SCENARIOS technique §11 onward
+already established for handlers whose own triggering move has real power).
+
+### 26.2 Fixture design: identical-slots + Dugtrio/Shuckle speed-role swap, extended to a redirect/fallthrough 2×2
+
+All four new fixtures reuse §6's own Dugtrio (species 51, base Speed 120) /
+Shuckle (species 213, base Speed 5) pair verbatim — strictly ordered speeds
+(120 vs. 5, never a tie, so `getWhoStrikesFirst`'s own hidden tie-break
+`Random()` call, §25.3, never fires) and both single-ability species (no
+`Cmd_get_ability` guess-draw confound, §14.2's finding). All 4 opponent
+slots carry the **same** move (unlike §6's mixed String Shot/Growl design —
+unnecessary here since the read channel is total draw count, not which slot
+wins) and the player's own moveset is `MOVE_SPLASH` (150) ×4 — the "Splash-
+not-Growl filler" lesson this doc's own later sessions converged on (§21.2,
+§24.3, §24.5): Splash costs the window **zero** `Random()` of its own,
+whereas Growl would need a fresh type-list argument to reach its own zero
+baseline, an unnecessary confound when the filler's only job is "resolve
+harmlessly." Same frame-100→732 window §6 established (not frame 0 — §6's
+own documented reason still applies: swapping which side is faster swaps
+move order, so frame 0's `rngValue` already has turn 1's decision baked in;
+starting the count at frame 100 avoids re-litigating a pick that already
+happened before the trace's first capture).
+
+**Redirect pair** (`MOVE_ICY_WIND` ×4, one of the 3 redirecting moves):
+
+- **`redirect-reach`**: opponent (`AI_USER`, the handler under test) =
+  Shuckle (slower) — `if_target_faster` true → `AI_CV_SpeedDown`'s own
+  `if_random_less_than 70` fires (`:1148`).
+- **`redirect-control`**: opponent = Dugtrio (faster) — `if_target_faster`
+  false → deterministic `-3`, zero draws from the handler.
+
+**Fallthrough boundary pair** (`MOVE_CONSTRICT` ×4, one of the 3 NON-
+redirecting moves — chosen over `BUBBLE_BEAM`/`BUBBLE` arbitrarily, all 3
+take the identical zero-touch `end` path with no move-specific distinction
+inside this handler): the SAME two speed roles, to prove the redirect
+boundary rather than just assert it —
+
+- **`fallthrough-boundary`**: opponent = Shuckle (slower — same role as
+  `redirect-reach`) — `if_move` never matches; unconditional zero draws
+  regardless of the reachable speed state.
+- **`fallthrough-speedswap`**: opponent = Dugtrio (faster — same role as
+  `redirect-control`) — same unconditional zero.
+
+**Prediction, branch-by-branch, written before running**: `runCvSpeedDown`
+(`src/engine/factoryAiCheckViability.ts:574-614`) draws once per identical
+dispatch slot when reachable (§11/§12's "N identical slots → N draws per
+reachable decision" finding), and this doc's own convention (§6) already
+established that a single-input-turn capture window includes both the real
+turn-1 decision AND a trailing **phantom** turn-2 re-decision (computed,
+never executed) — for a handler whose only gate is relative Speed (fixed at
+team-build time, unlike VitalThrow/AlwaysHit's HP/stage-dependent gates),
+nothing changes between those two decisions, so both should reach the same
+branch. Qualitative prediction: `redirect-reach`'s total is nonzero and
+strictly greater than `redirect-control`'s (the roll fires in the former,
+never in the latter); both `fallthrough` fixtures' totals should be
+unaffected by speed role (the handler contributes exactly zero in both,
+by construction — `runCvSpeedDownFromChance` returns `{ rng: input.rng,
+draws: [], scoreDelta: 0 }` unconditionally for a non-matching `moveId`,
+never reading speed at all).
+
+### 26.3 Live ledger (oracle-verified, both seeds, both reruns)
+
+| Fixture | Opponent (AI_USER) | Move ×4 | Speed role | Total `Random()`, frame 100→732 |
+| --- | --- | --- | --- | -: |
+| `redirect-reach` | Shuckle | `MOVE_ICY_WIND` (redirects) | slower (reach) | **24** (seeds 1, 99) |
+| `redirect-control` | Dugtrio | `MOVE_ICY_WIND` (redirects) | faster (control) | **7** (seeds 1, 99) |
+| `fallthrough-boundary` | Shuckle | `MOVE_CONSTRICT` (falls through) | slower (same role as reach) | **18** (seeds 1, 99) |
+| `fallthrough-speedswap` | Dugtrio | `MOVE_CONSTRICT` (falls through) | faster (same role as control) | **7** (seeds 1, 99) |
+
+All four fixtures reproduced byte-identical frame-0 state across two runs at
+each seed (the determinism requirement) and identical totals across seeds 1
+and 99 (cross-seed count stability) — 4 fixtures × 2 seeds × 2 reruns each,
+every one landing exactly on its predicted qualitative shape.
+
+**The redirect confirms live**: `redirect-reach` (24) is strictly greater
+than `redirect-control` (7) for the **identical move** — the only variable
+that changed is which side is faster, i.e. exactly `AI_CV_SpeedDown`'s own
+gate (`:1142`, `if_target_faster`). This is only possible if
+`MOVE_ICY_WIND` really does land inside `AI_CV_SpeedDown`'s own body when
+dispatched through `AI_CV_SpeedDownFromChance` — the redirect the ported
+`runCvSpeedDownFromChance` claims, now live-verified rather than asserted
+from static analysis alone.
+
+**The boundary confirms live, and pins down the redirect's own exact
+contribution**: `fallthrough-speedswap` (7) is **exactly equal** to
+`redirect-control` (7) — in the "opponent faster" configuration, the two
+different moves (Icy Wind vs. Constrict) cost an identical number of
+`Random()` calls, meaning this configuration's non-handler baseline
+(accuracy check, damage roll, secondary-effect-chance roll — none of them
+handler-attributable) does not actually differ between these two moves at
+this window's granularity. That licenses reading the "opponent slower"
+configuration's own delta cleanly: `redirect-reach` (24) − `fallthrough-
+boundary` (18) = **+6**, present only for the redirecting move, at the
+IDENTICAL speed role and IDENTICAL species pair — an isolated, live-verified
+measurement of `AI_CV_SpeedDown`'s own draw-site contribution when reached
+via the redirect, structurally the same "N identical slots → N draws" shape
+as every prior pair in this doc, though the exact figure (+6, not a bare +4
+or the naively doubled +8 the prediction guessed for "real decision +
+phantom re-decision, 4 slots each") was not pinned exactly before running —
+consistent with this doc's own standing caveat (§6, §12) that the frame-
+100→732 window's total describes the **whole** post-turn-1 window, phantom
+re-decision included, not a clean per-decision breakdown; a future worker
+wanting the exact per-decision split should reach for
+`tools/probe/attribute-factory-ai-random-callers.py` (directly reusable
+against these fixtures, not run this session for time — same status §6 left
+it in).
+
+**No contradiction found**: the ported redirect (`MOVE_ICY_WIND`/
+`MOVE_ROCK_TOMB`/`MUD_SHOT` → `AI_CV_SpeedDown`'s own body;
+`MOVE_BUBBLE_BEAM`/`MOVE_CONSTRICT`/`MOVE_BUBBLE` → zero) matches the oracle
+exactly. **This closes PROGRESS entry 493's "22nd and final CV handler,
+ZERO banked live ledger" flag** — `AI_CV_SpeedDownFromChance` now has the
+same live-oracle standing as all 21 other reachable `AI_CV_*` handlers in
+this doc.
+
+### 26.4 Verify script status
+
+`tools/probe/verify-factory-ai-checkviability-ground-truth.ts` extended this
+session with a new `SPEEDDOWNFROMCHANCE_REDIRECT_SCENARIOS` array +
+`verifyRedirectScenario` runner (frame-100→732 total-step count, same shape
+as `SCENARIOS`'s own runner minus the "which slot won" pick check — all 4
+opponent slots are identical here, so there is no cross-slot pick to read)
+covering the 4 fixtures above. Every prior scenario (§9, §11.5, §12.1,
+§13.4, §14.6, §15.5, §16.5, §17.7, §18.7, §19.7, §20.5, §21.5, §22.6,
+§23.6, §24.8, §25.7) unchanged and still green. Reproduce with:
 
 ```sh
 node --experimental-strip-types tools/probe/verify-factory-ai-checkviability-ground-truth.ts

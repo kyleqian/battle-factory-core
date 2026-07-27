@@ -1854,8 +1854,17 @@ describe("AI_CV_DefenseUp (docs/factory-ai-checkviability-ground-truth.md §18.1
       expect(result.draws[0]).toMatchObject({ kind: "defense-up-roll-5", succeeded: false });
     });
 
-    it("last move power != 0, type IN the physical list (Vital Throw, Fighting): Gate F routes to DRAW SITE 4", () => {
-      // seed 4 -> randomValue % 256 = 25 (< 60, skips the -2).
+    // DRAW SITE 4 and DRAW SITE 5 are a CHAINED pair, not two independent
+    // alternatives (docs/factory-ai-draw-discrepancy-probe.md §4): DRAW SITE
+    // 4's own failure (roll >= 60) falls straight through into DRAW SITE 5's
+    // own roll with no gate between them, and the -2 penalty only fires if
+    // THAT roll also fails (roll >= 60). Three outcomes, one seed each (all
+    // reuse this file's own established seed convention): pass@4 (seed 4:
+    // 25 < 60, stops after 1 draw); fail@4+pass@5 (seed 1: 198 >= 60 chains,
+    // then 33 < 60 stops, 2 draws, no penalty); fail@4+fail@5 (seed 5: 223
+    // >= 60 chains, then 171 >= 60, 2 draws, -2 penalty).
+    it("last move power != 0, type IN the physical list (Vital Throw, Fighting): pass@4 -- roll < 60 stops with a single draw, no penalty", () => {
+      // seed 4 -> randomValue % 256 = 25 (< 60, stops here).
       const result = runCheckViability({
         rng: { value: 4, calls: 0 },
         moveId: MOVE_HARDEN_DEFENSE_UP,
@@ -1871,8 +1880,8 @@ describe("AI_CV_DefenseUp (docs/factory-ai-checkviability-ground-truth.md §18.1
       expect(result.draws[0]).toMatchObject({ kind: "defense-up-roll-4", succeeded: false });
     });
 
-    it("last move power != 0, type IN the physical list: roll >= 60 at DRAW SITE 4 applies the -2", () => {
-      // seed 1 -> randomValue % 256 = 198 (>= 60).
+    it("last move power != 0, type IN the physical list: fail@4+pass@5 -- DRAW SITE 4's own failure falls through to DRAW SITE 5, whose own roll < 60 still stops with no penalty", () => {
+      // seed 1's chain: draw4 = 198 (>= 60, falls through); draw5 (next) = 33 (< 60, stops).
       const result = runCheckViability({
         rng: { value: 1, calls: 0 },
         moveId: MOVE_HARDEN_DEFENSE_UP,
@@ -1883,9 +1892,28 @@ describe("AI_CV_DefenseUp (docs/factory-ai-checkviability-ground-truth.md §18.1
       });
       expect(result.kind).toBe("scored");
       if (result.kind !== "scored") throw new Error("unreachable");
-      expect(result.scoreDelta).toBe(-2);
-      expect(result.draws).toHaveLength(1);
+      expect(result.scoreDelta).toBe(0);
+      expect(result.draws).toHaveLength(2);
       expect(result.draws[0]).toMatchObject({ kind: "defense-up-roll-4", succeeded: true });
+      expect(result.draws[1]).toMatchObject({ kind: "defense-up-roll-5", succeeded: false });
+    });
+
+    it("last move power != 0, type IN the physical list: fail@4+fail@5 -- only a SECOND failed roll applies the -2 penalty", () => {
+      // seed 5's chain: draw4 = 223 (>= 60, falls through); draw5 (next) = 171 (>= 60, applies -2).
+      const result = runCheckViability({
+        rng: { value: 5, calls: 0 },
+        moveId: MOVE_HARDEN_DEFENSE_UP,
+        attacker: defenseUpAttacker(6, 50),
+        target: defenseUpTarget(MOVE_VITAL_THROW_PHYSICAL_LAST),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(-2);
+      expect(result.draws).toHaveLength(2);
+      expect(result.draws[0]).toMatchObject({ kind: "defense-up-roll-4", succeeded: true });
+      expect(result.draws[1]).toMatchObject({ kind: "defense-up-roll-5", succeeded: true });
     });
 
     it("last move power != 0, type NOT in the physical list (Dragon Rage, Dragon): Gate F jumps straight to the -2, skipping BOTH remaining draw sites", () => {
@@ -2754,8 +2782,12 @@ describe("AI_CV_SpDefUp (docs/factory-ai-checkviability-ground-truth.md §22.1)"
       expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: -2 });
     });
 
-    it("last move power != 0, type NOT in the physical list (Dragon Rage, Dragon): Gate F is INVERTED -- falls through to DRAW SITE 4 (the opposite of DefenseUp's own Gate F verdict for this exact move)", () => {
-      // seed 4 -> randomValue % 256 = 25 (< 60, skips the -2).
+    // Same chained DRAW SITE 4/5 pair as AI_CV_DefenseUp's own (byte-for-byte
+    // identical topology past Gate F, docs/factory-ai-draw-discrepancy-probe.md
+    // §4) -- three outcomes, same seed convention: pass@4 (seed 4), fail@4+
+    // pass@5 (seed 1), fail@4+fail@5 (seed 5).
+    it("last move power != 0, type NOT in the physical list (Dragon Rage, Dragon): Gate F is INVERTED -- falls through to DRAW SITE 4; pass@4 stops with a single draw, no penalty", () => {
+      // seed 4 -> randomValue % 256 = 25 (< 60, stops here).
       const result = runCheckViability({
         rng: { value: 4, calls: 0 },
         moveId: MOVE_CALM_MIND_SPDEF_UP,
@@ -2771,8 +2803,8 @@ describe("AI_CV_SpDefUp (docs/factory-ai-checkviability-ground-truth.md §22.1)"
       expect(result.draws[0]).toMatchObject({ kind: "sp-def-up-roll-4", succeeded: false });
     });
 
-    it("last move power != 0, type NOT in the physical list: roll >= 60 at DRAW SITE 4 applies the -2", () => {
-      // seed 1 -> randomValue % 256 = 198 (>= 60).
+    it("last move power != 0, type NOT in the physical list: fail@4+pass@5 -- DRAW SITE 4's own failure falls through to DRAW SITE 5, whose own roll < 60 still stops with no penalty", () => {
+      // seed 1's chain: draw4 = 198 (>= 60, falls through); draw5 (next) = 33 (< 60, stops).
       const result = runCheckViability({
         rng: { value: 1, calls: 0 },
         moveId: MOVE_CALM_MIND_SPDEF_UP,
@@ -2783,9 +2815,28 @@ describe("AI_CV_SpDefUp (docs/factory-ai-checkviability-ground-truth.md §22.1)"
       });
       expect(result.kind).toBe("scored");
       if (result.kind !== "scored") throw new Error("unreachable");
-      expect(result.scoreDelta).toBe(-2);
-      expect(result.draws).toHaveLength(1);
+      expect(result.scoreDelta).toBe(0);
+      expect(result.draws).toHaveLength(2);
       expect(result.draws[0]).toMatchObject({ kind: "sp-def-up-roll-4", succeeded: true });
+      expect(result.draws[1]).toMatchObject({ kind: "sp-def-up-roll-5", succeeded: false });
+    });
+
+    it("last move power != 0, type NOT in the physical list: fail@4+fail@5 -- only a SECOND failed roll applies the -2 penalty", () => {
+      // seed 5's chain: draw4 = 223 (>= 60, falls through); draw5 (next) = 171 (>= 60, applies -2).
+      const result = runCheckViability({
+        rng: { value: 5, calls: 0 },
+        moveId: MOVE_CALM_MIND_SPDEF_UP,
+        attacker: spDefUpAttacker(6, 50),
+        target: spDefUpTarget(MOVE_DRAGON_RAGE_NONPHYSICAL_LAST),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(-2);
+      expect(result.draws).toHaveLength(2);
+      expect(result.draws[0]).toMatchObject({ kind: "sp-def-up-roll-4", succeeded: true });
+      expect(result.draws[1]).toMatchObject({ kind: "sp-def-up-roll-5", succeeded: true });
     });
 
     it("omitted lastUsedMoveId defaults to MOVE_NONE (0), the real battle-start default -- same code path as a genuine 0-power last move", () => {
@@ -2977,6 +3028,1149 @@ describe("AI_CV_LightScreen / AI_CV_Reflect (docs/factory-ai-checkviability-grou
       expect(result.scoreDelta).toBe(-2);
       expect(result.draws).toHaveLength(1);
       expect(result.draws[0]).toMatchObject({ kind: "reflect-roll", succeeded: true });
+    });
+  });
+
+  it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
+    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
+  });
+});
+
+const MOVE_DOUBLE_TEAM_CV = 104; // EFFECT_EVASION_UP
+const MOVE_MINIMIZE_CV = 107; // EFFECT_MINIMIZE -- shares this same handler (doc §24.1/§24.7)
+
+// data/battle_ai_scripts.s:1037-1074, docs/factory-ai-checkviability-ground-truth.md
+// §24.1: the eleventh CBM-blocked pair's own CV half (AI_CBM_EvasionUp, the
+// CBM side, is in factoryAiCheckBadMove.test.ts) -- the largest ported CV
+// handler in this doc, 8 if_random_less_than sites. Re-derived independently
+// from the raw assembly, NOT assumed from AI_CV_AccuracyDown's own shape
+// despite the structural similarity -- three real divergences (doc §24.1):
+// DRAW SITE 1 has no Gate B companion (single 90%-HP gate, not
+// AccuracyDown's own two-gate 70% shape); Gate A's own threshold is 90 not
+// 70; Gate I reads AI_USER's own evasion stage, not AI_TARGET's (the operand
+// flips because this handler raises the OPPONENT's own stat).
+// seed 1 -> randomValue % 256 = 198 (>= every site's own threshold, succeeds
+// everywhere); seed 4 -> 25 (< every threshold, fails everywhere) -- same
+// two-seed convention every prior handler in this file already established.
+// Baseline battler sits at hp 80% (opponent) -- strictly between Gate A's
+// 90% and Gate H's 70% thresholds, so NEITHER DRAW SITE 1 nor the entire
+// tail (Gates I/J/K, DRAW SITE 8) fires by construction, the same
+// "disjoint-threshold shared zero-draw control" shape doc §24.2 designed for
+// the live fixtures.
+describe("AI_CV_EvasionUp (docs/factory-ai-checkviability-ground-truth.md §24.1)", () => {
+  function evasionUpAttacker(overrides: Record<string, unknown> = {}) {
+    return Object.freeze({
+      speed: 100, speedStage: 6, types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+      isFirstTurn: 0, evasionStage: 6, accStage: 6, atkStage: 6, defStage: 6, spDefStage: 6,
+      hp: 80, maxHp: 100,
+      ...overrides,
+    });
+  }
+  function evasionUpTarget(overrides: Record<string, unknown> = {}) {
+    return Object.freeze({
+      speed: 100, speedStage: 6, types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+      isFirstTurn: 0, evasionStage: 6, accStage: 6, atkStage: 6, defStage: 6, spDefStage: 6,
+      hp: 100, maxHp: 100,
+      ...overrides,
+    });
+  }
+
+  it("EFFECT_EVASION_UP and EFFECT_MINIMIZE dispatch identically (doc §24.7: Minimize shares this handler despite being blocked-on-opcodes for move execution itself, unrelated to this AI-decision port)", () => {
+    for (const moveId of [MOVE_DOUBLE_TEAM_CV, MOVE_MINIMIZE_CV]) {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId,
+        attacker: evasionUpAttacker({ hp: 90 }),
+        target: evasionUpTarget(),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "evasion-up-roll-1", succeeded: true });
+      expect(result.scoreDelta).toBe(3);
+    }
+  });
+
+  it("EFFECT_EVASION_UP_2 is a vestigial constant with zero real moves (doc §24.7) -- confirmed absent from the generated move table, not independently dispatch-testable through a real move ID", () => {
+    expect([...MOVES_BY_ID.values()].some((m) => m.effect === "EFFECT_EVASION_UP_2")).toBe(false);
+  });
+
+  describe("Gate A / DRAW SITE 1 (opponent's OWN hp >= 90% -- no Gate B companion, doc §24.1 divergence 1)", () => {
+    it("opponent HP exactly 90% (>= 90): reaches DRAW SITE 1; roll >= 100 applies +3", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_DOUBLE_TEAM_CV,
+        attacker: evasionUpAttacker({ hp: 90 }),
+        target: evasionUpTarget(),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "evasion-up-roll-1", succeeded: true });
+      expect(result.scoreDelta).toBe(3);
+    });
+
+    it("roll < 100 skips the +3", () => {
+      const result = runCheckViability({
+        rng: { value: 4, calls: 0 },
+        moveId: MOVE_DOUBLE_TEAM_CV,
+        attacker: evasionUpAttacker({ hp: 90 }),
+        target: evasionUpTarget(),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "evasion-up-roll-1", succeeded: false });
+      expect(result.scoreDelta).toBe(0);
+    });
+
+    it("opponent HP 89% (< 90): DRAW SITE 1 skipped entirely; also skips the entire tail (89 > 70 -> Gate H) -- zero draws total", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_DOUBLE_TEAM_CV,
+        attacker: evasionUpAttacker({ hp: 89 }),
+        target: evasionUpTarget(),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+
+    it("doc §24.1 divergence 1: the TARGET's own hp is NEVER read by this gate -- even a very low target hp adds no second route into DRAW SITE 1 (unlike AccuracyDown's own two-gate DRAW SITE 1)", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_DOUBLE_TEAM_CV,
+        attacker: evasionUpAttacker(), // hp 80% -- baseline gap, Gate A false
+        target: evasionUpTarget({ hp: 5 }), // very low target hp, irrelevant here
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+  });
+
+  describe("Gate B / DRAW SITE 2 (opponent's OWN evasion stage already >= 9)", () => {
+    it("evasion stage 9: reaches DRAW SITE 2; roll >= 128 applies -1", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_DOUBLE_TEAM_CV,
+        attacker: evasionUpAttacker({ evasionStage: 9 }),
+        target: evasionUpTarget(),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "evasion-up-roll-2", succeeded: true });
+      expect(result.scoreDelta).toBe(-1);
+    });
+
+    it("evasion stage 8 (< 9): DRAW SITE 2 skipped -- 0 draws", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_DOUBLE_TEAM_CV,
+        attacker: evasionUpAttacker({ evasionStage: 8 }),
+        target: evasionUpTarget(),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+  });
+
+  // Gates C/D's own opponent-HP band picks the ENTRY point, not two mutually
+  // exclusive single-draw sites (docs/factory-ai-draw-discrepancy-probe.md
+  // §7): own HP > 50% jumps straight to DRAW SITE 4 alone (unaffected by the
+  // fix below). Own HP <= 50% reaches DRAW SITE 3 first, whose own failure
+  // (roll >= 80) chains straight into DRAW SITE 4's own roll -- the SAME
+  // DefenseUp-style chain, three outcomes: pass@3 (seed 4), fail@3+pass@4
+  // (seed 1), fail@3+fail@4 (seed 2).
+  describe("Gates C/D / DRAW SITEs 3-4 (own hp band picks the entry point; <= 50% chains DRAW SITE 3's own failure into DRAW SITE 4, same shape as AI_CV_DefenseUp's own DRAW SITE 4/5)", () => {
+    it("target toxic-poisoned + opponent's OWN hp > 50%: routes to DRAW SITE 4 only (direct entry, not part of the chain); roll >= 50 applies +3", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_DOUBLE_TEAM_CV,
+        attacker: evasionUpAttacker(), // hp 80% (> 50)
+        target: evasionUpTarget({ isToxicPoisoned: true }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "evasion-up-roll-4", succeeded: true });
+      expect(result.scoreDelta).toBe(3);
+    });
+
+    it("target toxic-poisoned + opponent's OWN hp <= 50%: pass@3 -- roll < 80 stops with a single draw, no bonus", () => {
+      // seed 4 -> randomValue % 256 = 25 (< 80, stops here).
+      const result = runCheckViability({
+        rng: { value: 4, calls: 0 },
+        moveId: MOVE_DOUBLE_TEAM_CV,
+        attacker: evasionUpAttacker({ hp: 45 }), // <= 50 -- Gate I (default evasion) stops the tail cleanly after
+        target: evasionUpTarget({ isToxicPoisoned: true }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "evasion-up-roll-3", succeeded: false });
+      expect(result.scoreDelta).toBe(0);
+    });
+
+    it("target toxic-poisoned + opponent's OWN hp <= 50%: fail@3+pass@4 -- DRAW SITE 3's own failure chains into DRAW SITE 4, whose own roll < 50 still stops with no bonus", () => {
+      // seed 1's chain: draw3 = 198 (>= 80, chains); draw4 (next) = 33 (< 50, stops).
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_DOUBLE_TEAM_CV,
+        attacker: evasionUpAttacker({ hp: 45 }),
+        target: evasionUpTarget({ isToxicPoisoned: true }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(2);
+      expect(result.draws[0]).toMatchObject({ kind: "evasion-up-roll-3", succeeded: true });
+      expect(result.draws[1]).toMatchObject({ kind: "evasion-up-roll-4", succeeded: false });
+      expect(result.scoreDelta).toBe(0);
+    });
+
+    it("target toxic-poisoned + opponent's OWN hp <= 50%: fail@3+fail@4 -- only a SECOND failed roll applies the +3", () => {
+      // seed 2's chain: draw3 = 140 (>= 80, chains); draw4 (next) = 195 (>= 50, applies +3).
+      const result = runCheckViability({
+        rng: { value: 2, calls: 0 },
+        moveId: MOVE_DOUBLE_TEAM_CV,
+        attacker: evasionUpAttacker({ hp: 45 }),
+        target: evasionUpTarget({ isToxicPoisoned: true }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(2);
+      expect(result.draws[0]).toMatchObject({ kind: "evasion-up-roll-3", succeeded: true });
+      expect(result.draws[1]).toMatchObject({ kind: "evasion-up-roll-4", succeeded: true });
+      expect(result.scoreDelta).toBe(3);
+    });
+
+    it("target NOT toxic-poisoned: neither DRAW SITE 3 nor 4 fires, regardless of HP band", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_DOUBLE_TEAM_CV,
+        attacker: evasionUpAttacker({ hp: 45 }),
+        target: evasionUpTarget(),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+  });
+
+  describe("Gate E / DRAW SITE 5 (target leech-seeded)", () => {
+    it("target leech-seeded: reaches DRAW SITE 5; roll >= 70 applies +3", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_DOUBLE_TEAM_CV,
+        attacker: evasionUpAttacker(),
+        target: evasionUpTarget({ isLeechSeeded: true }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "evasion-up-roll-5", succeeded: true });
+      expect(result.scoreDelta).toBe(3);
+    });
+
+    it("target not leech-seeded: DRAW SITE 5 skipped -- 0 draws", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_DOUBLE_TEAM_CV,
+        attacker: evasionUpAttacker(),
+        target: evasionUpTarget(),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+  });
+
+  describe("Gate F / DRAW SITE 6 (opponent's OWN rooted/Ingrain flag)", () => {
+    it("opponent's OWN rooted flag: reaches DRAW SITE 6; roll >= 128 applies +2", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_DOUBLE_TEAM_CV,
+        attacker: evasionUpAttacker({ isRooted: true }),
+        target: evasionUpTarget(),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "evasion-up-roll-6", succeeded: true });
+      expect(result.scoreDelta).toBe(2);
+    });
+
+    it("the TARGET's own rooted flag is NEVER read by this gate -- 0 draws despite the target being rooted", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_DOUBLE_TEAM_CV,
+        attacker: evasionUpAttacker({ isRooted: false }),
+        target: evasionUpTarget({ isRooted: true }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+  });
+
+  describe("Gate G / DRAW SITE 7 (target cursed)", () => {
+    it("target cursed: reaches DRAW SITE 7; roll >= 70 applies +3", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_DOUBLE_TEAM_CV,
+        attacker: evasionUpAttacker(),
+        target: evasionUpTarget({ isCursed: true }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "evasion-up-roll-7", succeeded: true });
+      expect(result.scoreDelta).toBe(3);
+    });
+
+    it("target not cursed: DRAW SITE 7 skipped -- 0 draws", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_DOUBLE_TEAM_CV,
+        attacker: evasionUpAttacker(),
+        target: evasionUpTarget(),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+  });
+
+  it("Gate B plus Gates D/E/F/G all fire together in one pass (not mutually exclusive with each other, only C/D internally are) -- 6 draws total", () => {
+    // seed 1's chain: 198 (site2, >=128 -> -1), 33 (site4, <50 -> +0),
+    // 238 (site5, >=70 -> +3), 183 (site6, >=128 -> +2), 227 (site7, >=70 -> +3),
+    // 168 (site8, >=70 -> -2). Total: -1+0+3+2+3-2 = 5.
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_DOUBLE_TEAM_CV,
+      attacker: evasionUpAttacker({ hp: 69, evasionStage: 9, isRooted: true }), // < 90 skips site1; Gate H false (69<=70); Gate I false (9 != 6)
+      target: evasionUpTarget({ isToxicPoisoned: true, isLeechSeeded: true, isCursed: true }),
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result.kind).toBe("scored");
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(6);
+    expect(result.draws.map((d) => d.kind)).toEqual([
+      "evasion-up-roll-2",
+      "evasion-up-roll-4",
+      "evasion-up-roll-5",
+      "evasion-up-roll-6",
+      "evasion-up-roll-7",
+      "evasion-up-roll-8",
+    ]);
+    expect(result.draws.map((d) => (d as { succeeded: boolean }).succeeded)).toEqual([
+      true, false, true, true, true, true,
+    ]);
+    expect(result.scoreDelta).toBe(5);
+  });
+
+  describe("Gate H (opponent's own HP > 70%: clean stop, skips Gates I/J/K and DRAW SITE 8 entirely)", () => {
+    it("opponent HP 71%, evasion stage 9 (Gate B still fires independently -- different gate, same pass, unaffected by the tail's own fate)", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_DOUBLE_TEAM_CV,
+        attacker: evasionUpAttacker({ hp: 71, evasionStage: 9 }),
+        target: evasionUpTarget(),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "evasion-up-roll-2" });
+    });
+
+    it("isolated: opponent HP 71%, evasion stage at neutral (6, Gate B also false) -- zero draws anywhere in the handler", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_DOUBLE_TEAM_CV,
+        attacker: evasionUpAttacker({ hp: 71 }),
+        target: evasionUpTarget(),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+  });
+
+  describe("Gate I (opponent's OWN evasion stage back at DEFAULT_STAT_STAGE: clean stop -- doc §24.1 divergence 3, AI_USER not AI_TARGET)", () => {
+    it("opponent HP exactly 70% (Gate H false, continues), evasion stage still 6 (neutral): stops at Gate I, 0 draws", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_DOUBLE_TEAM_CV,
+        attacker: evasionUpAttacker({ hp: 70 }),
+        target: evasionUpTarget(),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+
+    it("opponent's own evasion stage 7 (already raised by this same dispatch move's own real prior use, doc §24.1/§24.2): does NOT stop -- falls through toward DRAW SITE 8", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_DOUBLE_TEAM_CV,
+        attacker: evasionUpAttacker({ hp: 70, evasionStage: 7 }),
+        target: evasionUpTarget(),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "evasion-up-roll-8" });
+    });
+
+    it("doc §24.1 divergence 3: this gate reads AI_USER's own evasion stage, not AI_TARGET's -- the target's own non-neutral evasion stage is irrelevant and does NOT prevent the clean stop", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_DOUBLE_TEAM_CV,
+        attacker: evasionUpAttacker({ hp: 70 }), // own evasion stage still 6 -- stops
+        target: evasionUpTarget({ evasionStage: 9 }), // target's own stage is non-neutral, but irrelevant here
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+  });
+
+  describe("Gates J/K (either battler < 40% HP skips DRAW SITE 8 straight to the deterministic -2)", () => {
+    it("Gate J: opponent's own HP 35% (< 40) -- deterministic -2, no DRAW SITE 8", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_DOUBLE_TEAM_CV,
+        attacker: evasionUpAttacker({ hp: 35, evasionStage: 7 }), // < 70 -> Gate H false; evasionStage 7 -> Gate I false
+        target: evasionUpTarget(),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: -2 });
+    });
+
+    it("Gate K: target's own HP 35% (< 40) -- deterministic -2, no DRAW SITE 8", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_DOUBLE_TEAM_CV,
+        attacker: evasionUpAttacker({ hp: 70, evasionStage: 7 }),
+        target: evasionUpTarget({ hp: 35 }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: -2 });
+    });
+  });
+
+  describe("DRAW SITE 8 (both battlers in [40,70]% HP -- OPPOSITE polarity, same shape as AccuracyDown's own DRAW SITE 7)", () => {
+    it("roll >= 70 (fall through): applies the -2", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_DOUBLE_TEAM_CV,
+        attacker: evasionUpAttacker({ hp: 50, evasionStage: 7 }),
+        target: evasionUpTarget({ hp: 50 }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "evasion-up-roll-8", succeeded: true });
+      expect(result.scoreDelta).toBe(-2);
+    });
+
+    it("roll < 70 (jump to End): NO further score change", () => {
+      const result = runCheckViability({
+        rng: { value: 4, calls: 0 },
+        moveId: MOVE_DOUBLE_TEAM_CV,
+        attacker: evasionUpAttacker({ hp: 50, evasionStage: 7 }),
+        target: evasionUpTarget({ hp: 50 }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "evasion-up-roll-8", succeeded: false });
+      expect(result.scoreDelta).toBe(0);
+    });
+  });
+
+  it("still barriers every other reachable CV handler untouched by this narrowing (pass-through, EFFECT_EVASION_UP block)", () => {
+    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
+  });
+});
+
+const MOVE_SWEET_SCENT_CV = 230; // EFFECT_EVASION_DOWN
+
+// data/battle_ai_scripts.s:1235-1246, docs/factory-ai-checkviability-ground-truth.md
+// §24.1: the eleventh CBM-blocked pair's other CV half -- confirmed
+// byte-for-byte the same topology as AI_CV_DefenseDown/AI_CV_SpDefDown
+// (STAT_EVASION swapped in, same 70/50/70 thresholds and odds, same score -2
+// on every non-skip branch), reusing the identical shared runCvStatDown body.
+describe("AI_CV_EvasionDown (docs/factory-ai-checkviability-ground-truth.md §24.1)", () => {
+  function evasionDownAttacker(hp: number, maxHp = 100) {
+    return Object.freeze({
+      speed: 100, speedStage: 6, types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+      isFirstTurn: 0, evasionStage: 6, accStage: 6, atkStage: 6, defStage: 6, spDefStage: 6, hp, maxHp,
+    });
+  }
+  function evasionDownTarget(evasionStage: number, hp: number, maxHp = 100) {
+    return Object.freeze({
+      speed: 100, speedStage: 6, types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+      isFirstTurn: 0, evasionStage, accStage: 6, atkStage: 6, defStage: 6, spDefStage: 6, hp, maxHp,
+    });
+  }
+
+  it("Gate A false (attacker HP 100% >= 70) + Gate B true (target EVASION stage 6 > 3): skips the draw site entirely, zero draws, zero score", () => {
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_SWEET_SCENT_CV,
+      attacker: evasionDownAttacker(100),
+      target: evasionDownTarget(6, 100),
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+  });
+
+  it("EFFECT_EVASION_DOWN_2 is a vestigial constant with zero real moves (doc §24.7) -- confirmed absent from the generated move table, not independently dispatch-testable through a real move ID", () => {
+    expect([...MOVES_BY_ID.values()].some((m) => m.effect === "EFFECT_EVASION_DOWN_2")).toBe(false);
+  });
+
+  describe("Gate C (if_hp_more_than AI_TARGET, 70 -- the target's OWN hp, a plain fallthrough past the draw site)", () => {
+    it("target HP exactly 71% (>70): skips the -2, still zero draws (Gate A/B both skip the roll)", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_SWEET_SCENT_CV,
+        attacker: evasionDownAttacker(100),
+        target: evasionDownTarget(6, 71),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+
+    it("target HP exactly 70% (NOT >70): applies the -2, still zero draws", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_SWEET_SCENT_CV,
+        attacker: evasionDownAttacker(100),
+        target: evasionDownTarget(6, 70),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: -2 });
+    });
+  });
+
+  describe("Gate A (attacker's own HP < 70): reaches the draw site unconditionally, regardless of Gate B", () => {
+    it("roll < 50 skips the -2 (one draw, zero score)", () => {
+      const result = runCheckViability({
+        rng: { value: 4, calls: 0 },
+        moveId: MOVE_SWEET_SCENT_CV,
+        attacker: evasionDownAttacker(69),
+        target: evasionDownTarget(6, 100),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(0);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "evasion-down-roll", succeeded: false });
+      expect(result.rng.calls).toBe(1);
+    });
+
+    it("roll >= 50 applies the -2 (one draw)", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_SWEET_SCENT_CV,
+        attacker: evasionDownAttacker(69),
+        target: evasionDownTarget(6, 100),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(-2);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "evasion-down-roll", succeeded: true });
+      expect(result.rng.calls).toBe(1);
+    });
+  });
+
+  it("Gate A false, Gate B false (target EVASION stage 3 <= 3): falls through into the SAME draw site the Gate A path would have jumped to, one draw", () => {
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_SWEET_SCENT_CV,
+      attacker: evasionDownAttacker(100),
+      target: evasionDownTarget(3, 100),
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result.kind).toBe("scored");
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.scoreDelta).toBe(-2);
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "evasion-down-roll", succeeded: true });
+  });
+
+  it("the draw site's own -2 and Gate C's own -2 are NOT mutually exclusive: both fire in one pass, total -4", () => {
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_SWEET_SCENT_CV,
+      attacker: evasionDownAttacker(50),
+      target: evasionDownTarget(6, 50),
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result.kind).toBe("scored");
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.scoreDelta).toBe(-4);
+    expect(result.draws).toHaveLength(1);
+    expect(result.draws[0]).toMatchObject({ kind: "evasion-down-roll", succeeded: true });
+    expect(result.rng.calls).toBe(1);
+  });
+
+  it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
+    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
+  });
+});
+
+const MOVE_RAIN_DANCE_CV = 240; // EFFECT_RAIN_DANCE
+const MOVE_SUNNY_DAY_CV = 241; // EFFECT_SUNNY_DAY
+const MOVE_HAIL_CV = 258; // EFFECT_HAIL
+
+// data/battle_ai_scripts.s:2060-2075/:2261-2276, docs/factory-ai-
+// checkviability-ground-truth.md §25.2: the weather trio's twin siblings --
+// 1 HP gate + a 3-way get_weather chain over the OTHER three weather
+// values, zero if_random_less_than anywhere in either body (§25.4), so no
+// rng seed sensitivity to cover -- only HP%/weather combinations.
+describe("AI_CV_SunnyDay / AI_CV_Hail (docs/factory-ai-checkviability-ground-truth.md §25.2)", () => {
+  function weatherBattler(hp: number, currentWeather: 0 | 1 | 2 | 3 | undefined, maxHp = 100) {
+    return Object.freeze({
+      speed: 100, speedStage: 6, types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+      isFirstTurn: 0, evasionStage: 6, accStage: 6, atkStage: 6, defStage: 6, spDefStage: 6,
+      hp, maxHp, currentWeather,
+    });
+  }
+  const NEUTRAL_TARGET = weatherBattler(100, undefined);
+
+  it.each([
+    ["AI_CV_SunnyDay", MOVE_SUNNY_DAY_CV],
+    ["AI_CV_Hail", MOVE_HAIL_CV],
+  ])("%s: own HP 39%% (< 40): scores -1 with zero draws even when weather would otherwise match", (_label, moveId) => {
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId,
+      attacker: weatherBattler(39, 2), // Sandstorm -- in both handlers' "other three" list, would otherwise be +1
+      target: NEUTRAL_TARGET,
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: -1 });
+  });
+
+  it.each([
+    ["AI_CV_SunnyDay", MOVE_SUNNY_DAY_CV],
+    ["AI_CV_Hail", MOVE_HAIL_CV],
+  ])("%s: own HP exactly 40%% (NOT < 40): falls through to the weather chain instead of the deterministic -1", (_label, moveId) => {
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId,
+      attacker: weatherBattler(40, undefined), // no weather match -> 0, not -1
+      target: NEUTRAL_TARGET,
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+  });
+
+  it("AI_CV_SunnyDay: weather Hail/Rain/Sandstorm (the 'other three', excludes Sun) each score +1 with zero draws", () => {
+    for (const weather of [3, 1, 2] as const) {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_SUNNY_DAY_CV,
+        attacker: weatherBattler(100, weather),
+        target: NEUTRAL_TARGET,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 1 });
+    }
+  });
+
+  it("AI_CV_SunnyDay: own weather (Sun) scores 0, zero draws -- excluded from its own chain", () => {
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_SUNNY_DAY_CV,
+      attacker: weatherBattler(100, 0),
+      target: NEUTRAL_TARGET,
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+  });
+
+  it("AI_CV_SunnyDay: omitted weather (undefined) scores 0, zero draws -- never matches any AI_WEATHER_* constant", () => {
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_SUNNY_DAY_CV,
+      attacker: weatherBattler(100, undefined),
+      target: NEUTRAL_TARGET,
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+  });
+
+  it("AI_CV_Hail: weather Sun/Rain/Sandstorm (the 'other three', excludes Hail) each score +1 with zero draws", () => {
+    for (const weather of [0, 1, 2] as const) {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_HAIL_CV,
+        attacker: weatherBattler(100, weather),
+        target: NEUTRAL_TARGET,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 1 });
+    }
+  });
+
+  it("AI_CV_Hail: own weather (Hail) scores 0, zero draws -- excluded from its own chain", () => {
+    const result = runCheckViability({
+      rng: { value: 1, calls: 0 },
+      moveId: MOVE_HAIL_CV,
+      attacker: weatherBattler(100, 3),
+      target: NEUTRAL_TARGET,
+      drawOrdinalStart: 1,
+      reasonPrefix: "test",
+    });
+    expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+  });
+
+  it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
+    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
+  });
+});
+
+// data/battle_ai_scripts.s:2037-2058, docs/factory-ai-checkviability-
+// ground-truth.md §25.2/§25.3: the ONE weather-trio sibling that genuinely
+// diverges from SunnyDay/Hail's shared shape -- an if_user_faster/Swift-Swim
+// bypass prologue (Gates P/S) wrapping the SAME HP/weather span, plus a
+// Rain-Dish tail bonus (Gate R). Re-derived independently from the raw
+// assembly per the doc's own standing divergence-check rule, not assumed
+// from the sibling shape. Gate P's `if_user_faster` reuses the exact
+// GetWhoStrikesFirst/tie-break-Random() machinery `AI_CV_SpeedDown`'s own
+// `target-faster-tie` already ports (doc §25.3) -- same seeds (3/8) reused
+// here to exercise the tie-break parity/odd branch.
+describe("AI_CV_RainDance (docs/factory-ai-checkviability-ground-truth.md §25.2/§25.3)", () => {
+  const EXTRAS = Object.freeze({
+    types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+    isFirstTurn: 0, evasionStage: 6, accStage: 6, atkStage: 6, defStage: 6, spDefStage: 6,
+  });
+  function raindanceBattler(opts: Readonly<{
+    speed: number;
+    hp?: number;
+    maxHp?: number;
+    ability?: string;
+    currentWeather?: 0 | 1 | 2 | 3;
+  }>) {
+    return Object.freeze({
+      speed: opts.speed, speedStage: 6, ...EXTRAS,
+      hp: opts.hp ?? 100, maxHp: opts.maxHp ?? 100,
+      ability: opts.ability, currentWeather: opts.currentWeather,
+    });
+  }
+  const FASTER = 120;
+  const SLOWER = 5;
+
+  describe("Gate P (if_user_faster) + Gate S (Swift Swim bypass, only checked when NOT user-faster)", () => {
+    it("user strictly faster: skips Gate S/Swift-Swim entirely (present but irrelevant), zero draws, proceeds straight to Gate H/weather", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_RAIN_DANCE_CV,
+        attacker: raindanceBattler({ speed: FASTER, hp: 100, ability: "ABILITY_SWIFT_SWIM", currentWeather: undefined }),
+        target: raindanceBattler({ speed: SLOWER }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      // user faster -> Gate H (hp 100 >= 40) -> weather chain (none, no match) -> Gate R (Swift Swim != Rain Dish) -> 0.
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+
+    it("user NOT faster, own ability Swift Swim: deterministic +1 bypass -- own HP<40% (would normally score -1) is never read", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_RAIN_DANCE_CV,
+        attacker: raindanceBattler({ speed: SLOWER, hp: 10, ability: "ABILITY_SWIFT_SWIM" }),
+        target: raindanceBattler({ speed: FASTER }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 1 });
+    });
+
+    it("user NOT faster, own ability NOT Swift Swim: falls through into the normal Gate H/weather chain (own HP<40% applies -1)", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_RAIN_DANCE_CV,
+        attacker: raindanceBattler({ speed: SLOWER, hp: 10, ability: "ABILITY_NONE" }),
+        target: raindanceBattler({ speed: FASTER }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: -1 });
+    });
+
+    it("omitted ability defaults to ABILITY_NONE, not a false Swift-Swim match", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_RAIN_DANCE_CV,
+        attacker: raindanceBattler({ speed: SLOWER, hp: 100 }),
+        target: raindanceBattler({ speed: FASTER }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      // NOT faster, ability defaults ABILITY_NONE != Swift Swim -> weather chain: hp100>=40, weather undefined -> Gate R: ABILITY_NONE != Rain Dish -> 0.
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+
+    it("an exact speed tie still burns GetWhoStrikesFirst's own Random() call (doc §25.3) -- even tie-roll resolves to userFaster, skipping Gate S", () => {
+      const TIED = raindanceBattler({ speed: 100, hp: 100, ability: "ABILITY_SWIFT_SWIM" });
+      // seed 8 -> tie-roll randomValue 3634 is EVEN -> strikesFirst stays 0 -> userFaster=true (same seed as AI_CV_SpeedDown's own "evenTie" case).
+      const result = runCheckViability({
+        rng: { value: 8, calls: 0 },
+        moveId: MOVE_RAIN_DANCE_CV,
+        attacker: TIED,
+        target: TIED,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(0); // userFaster -> Gate H (100>=40) -> weather chain (none) -> Gate R (Swift Swim != Rain Dish) -> 0.
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "user-faster-tie", strikesFirst: 0 });
+      expect(result.rng.calls).toBe(1);
+    });
+
+    it("an exact speed tie resolved to the target (odd tie-roll): userFaster=false -> Gate S checked, Swift Swim present -> +1 bypass", () => {
+      const TIED = raindanceBattler({ speed: 100, hp: 10, ability: "ABILITY_SWIFT_SWIM" }); // low HP would be -1 if the bypass didn't fire
+      // seed 3 -> tie-roll randomValue 50515 is ODD -> strikesFirst=2 -> userFaster=false (same seed as AI_CV_SpeedDown's own "oddTie" case).
+      const result = runCheckViability({
+        rng: { value: 3, calls: 0 },
+        moveId: MOVE_RAIN_DANCE_CV,
+        attacker: TIED,
+        target: TIED,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(1);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "user-faster-tie", strikesFirst: 2 });
+    });
+  });
+
+  describe("Gate H / weather chain (shared span, reached whenever the Gate P/S prologue doesn't short-circuit)", () => {
+    it("own HP 39% (< 40): scores -1, zero draws -- Rain Dish never checked even when present", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_RAIN_DANCE_CV,
+        attacker: raindanceBattler({ speed: FASTER, hp: 39, ability: "ABILITY_RAIN_DISH", currentWeather: 1 }),
+        target: raindanceBattler({ speed: SLOWER }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: -1 });
+    });
+
+    it("own HP exactly 40% (NOT < 40): falls through into the weather chain instead of the deterministic -1", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_RAIN_DANCE_CV,
+        attacker: raindanceBattler({ speed: FASTER, hp: 40, currentWeather: 3 }), // Hail -- in the other-three list
+        target: raindanceBattler({ speed: SLOWER }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 1 });
+    });
+
+    it.each([3, 0, 2] as const)("weather %i (Hail/Sun/Sandstorm, the 'other three' excluding Rain): scores +1, zero draws, Rain Dish never checked", (weather) => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_RAIN_DANCE_CV,
+        attacker: raindanceBattler({ speed: FASTER, hp: 100, currentWeather: weather, ability: "ABILITY_NONE" }),
+        target: raindanceBattler({ speed: SLOWER }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 1 });
+    });
+
+    it("own weather already Rain (own type, excluded from the chain): falls through to Gate R", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_RAIN_DANCE_CV,
+        attacker: raindanceBattler({ speed: FASTER, hp: 100, currentWeather: 1, ability: "ABILITY_NONE" }),
+        target: raindanceBattler({ speed: SLOWER }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+  });
+
+  describe("Gate R tail (own ability == Rain Dish, only reached when the weather chain falls all the way through)", () => {
+    it("own weather already Rain + own ability Rain Dish: scores +1 -- can coexist with AI_CBM_RainDance's own -8 (independent score contributions, doc §25.6 item 2)", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_RAIN_DANCE_CV,
+        attacker: raindanceBattler({ speed: FASTER, hp: 100, currentWeather: 1, ability: "ABILITY_RAIN_DISH" }),
+        target: raindanceBattler({ speed: SLOWER }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 1 });
+    });
+
+    it("own weather none (undefined) + own ability Rain Dish: scores +1 -- wants rain regardless of current weather", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_RAIN_DANCE_CV,
+        attacker: raindanceBattler({ speed: FASTER, hp: 100, currentWeather: undefined, ability: "ABILITY_RAIN_DISH" }),
+        target: raindanceBattler({ speed: SLOWER }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 1 });
+    });
+
+    it("own weather none + own ability NOT Rain Dish: scores 0, the true deterministic-zero fallthrough", () => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 },
+        moveId: MOVE_RAIN_DANCE_CV,
+        attacker: raindanceBattler({ speed: FASTER, hp: 100, currentWeather: undefined, ability: "ABILITY_NONE" }),
+        target: raindanceBattler({ speed: SLOWER }),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    });
+  });
+
+  it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
+    const result = run({ value: 1, calls: 0 }, MOVE_HAZE);
+    expect(result).toMatchObject({ kind: "unsupported-branch", effect: "EFFECT_HAZE" });
+  });
+});
+
+// data/battle_ai_scripts.s:1136-1141, docs/factory-ai-checkviability-ground-truth.md
+// §5's table row, §4's footnote, §10's porter note. The 22nd and last
+// reachable CV handler, completing the §14-§25 program. Zero if_random
+// sites of its own -- a plain `if_move` literal-ID compare against 3 of its
+// 6 covered moves that `goto`s into AI_CV_SpeedDown's own label; the other 3
+// fall through to a genuine, deterministic `end` (score 0, zero draws).
+// Real-source color confirming the split isn't arbitrary: the 3 redirecting
+// moves (Icy Wind/Rock Tomb/Mud Shot) all carry secondaryEffectChance 100
+// (the speed drop ALWAYS happens on a hit); the 3 falling through
+// (Bubblebeam/Constrict/Bubble) all carry secondaryEffectChance 10 -- the AI
+// only bothers scoring the speed-down bonus for the moves where it's
+// guaranteed, per move data, not by reading the chance field at runtime.
+describe("AI_CV_SpeedDownFromChance (docs/factory-ai-checkviability-ground-truth.md §5's table row, §4's footnote)", () => {
+  const MOVE_ICY_WIND = 196; // redirects -- secondaryEffectChance 100
+  const MOVE_ROCK_TOMB = 317; // redirects -- secondaryEffectChance 100
+  const MOVE_MUD_SHOT = 341; // redirects -- secondaryEffectChance 100
+  const MOVE_BUBBLE_BEAM = 61; // falls through to `end` -- secondaryEffectChance 10
+  const MOVE_CONSTRICT = 132; // falls through to `end` -- secondaryEffectChance 10
+  const MOVE_BUBBLE = 145; // falls through to `end` -- secondaryEffectChance 10
+
+  const EXTRAS = Object.freeze({
+    types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+    isFirstTurn: 0,
+    evasionStage: 6,
+    accStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+    hp: 100,
+    maxHp: 100,
+  });
+  const FASTER_USER = Object.freeze({ speed: 120, speedStage: 6, ...EXTRAS }); // target NOT faster
+  const SLOWER_USER = Object.freeze({ speed: 5, speedStage: 6, ...EXTRAS }); // target faster
+  const FASTER_TARGET = Object.freeze({ speed: 120, speedStage: 6, ...EXTRAS });
+  const SLOWER_TARGET = Object.freeze({ speed: 5, speedStage: 6, ...EXTRAS });
+
+  describe("redirecting moves (Icy Wind/Rock Tomb/Mud Shot) land in AI_CV_SpeedDown's own body", () => {
+    it.each([
+      ["Icy Wind", MOVE_ICY_WIND],
+      ["Rock Tomb", MOVE_ROCK_TOMB],
+      ["Mud Shot", MOVE_MUD_SHOT],
+    ])("%s: deterministic -3, zero draws, when the target is not faster", (_label, moveId) => {
+      const rng = { value: 249_678_687, calls: 0 };
+      const result = runCheckViability({
+        rng,
+        moveId,
+        attacker: FASTER_USER,
+        target: SLOWER_TARGET,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng, draws: [], scoreDelta: -3 });
+    });
+
+    it.each([
+      ["Icy Wind", MOVE_ICY_WIND],
+      ["Rock Tomb", MOVE_ROCK_TOMB],
+      ["Mud Shot", MOVE_MUD_SHOT],
+    ])("%s: draws exactly one if_random_less_than 70 roll, scores 0 when it lands < 70", (_label, moveId) => {
+      const result = runCheckViability({
+        rng: { value: 4, calls: 0 }, // seed 4 -> randomValue % 256 = 25 (< 70)
+        moveId,
+        attacker: SLOWER_USER,
+        target: FASTER_TARGET,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(0);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "speed-down-roll", succeeded: false });
+    });
+
+    it.each([
+      ["Icy Wind", MOVE_ICY_WIND],
+      ["Rock Tomb", MOVE_ROCK_TOMB],
+      ["Mud Shot", MOVE_MUD_SHOT],
+    ])("%s: draws exactly one if_random_less_than 70 roll, scores +2 when it lands >= 70", (_label, moveId) => {
+      const result = runCheckViability({
+        rng: { value: 1, calls: 0 }, // seed 1 -> randomValue % 256 = 198 (>= 70)
+        moveId,
+        attacker: SLOWER_USER,
+        target: FASTER_TARGET,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(2);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "speed-down-roll", succeeded: true });
+    });
+
+    it("an exact speed tie still burns GetWhoStrikesFirst's own Random() call, same quirk AI_CV_SpeedDown itself pins", () => {
+      const TIED = Object.freeze({ speed: 100, speedStage: 6, ...EXTRAS });
+      const result = runCheckViability({
+        rng: { value: 3, calls: 0 }, // seed 3 -> odd tie-roll -> strikesFirst 2, NOT target-faster
+        moveId: MOVE_ICY_WIND,
+        attacker: TIED,
+        target: TIED,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(-3);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "target-faster-tie", strikesFirst: 2 });
+    });
+
+    it.each([
+      ["deterministic branch", { value: 249_678_687, calls: 0 }, FASTER_USER, SLOWER_TARGET],
+      ["probabilistic-fail branch", { value: 4, calls: 0 }, SLOWER_USER, FASTER_TARGET],
+      ["probabilistic-succeed branch", { value: 1, calls: 0 }, SLOWER_USER, FASTER_TARGET],
+    ] as const)("redirect-equivalence: Icy Wind's post-gate scoring is byte-identical to MOVE_STRING_SHOT's own EFFECT_SPEED_DOWN dispatch (%s)", (_label, rngSeed, attacker, target) => {
+      const viaRedirect = runCheckViability({
+        rng: { ...rngSeed },
+        moveId: MOVE_ICY_WIND,
+        attacker,
+        target,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      const viaDirect = runCheckViability({
+        rng: { ...rngSeed },
+        moveId: MOVE_STRING_SHOT,
+        attacker,
+        target,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(viaRedirect).toEqual(viaDirect);
+    });
+  });
+
+  describe("fall-through moves (Bubblebeam/Constrict/Bubble) hit the handler's own `end` -- genuine zero, not a stub", () => {
+    it.each([
+      ["Bubblebeam", MOVE_BUBBLE_BEAM],
+      ["Constrict", MOVE_CONSTRICT],
+      ["Bubble", MOVE_BUBBLE],
+    ])("%s: zero score, zero draws, regardless of relative speed (target faster)", (_label, moveId) => {
+      const rng = { value: 1, calls: 0 };
+      const result = runCheckViability({
+        rng,
+        moveId,
+        attacker: SLOWER_USER,
+        target: FASTER_TARGET,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng, draws: [], scoreDelta: 0 });
+    });
+
+    it.each([
+      ["Bubblebeam", MOVE_BUBBLE_BEAM],
+      ["Constrict", MOVE_CONSTRICT],
+      ["Bubble", MOVE_BUBBLE],
+    ])("%s: zero score, zero draws, regardless of relative speed (target not faster)", (_label, moveId) => {
+      const rng = { value: 1, calls: 0 };
+      const result = runCheckViability({
+        rng,
+        moveId,
+        attacker: FASTER_USER,
+        target: SLOWER_TARGET,
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result).toEqual({ kind: "scored", rng, draws: [], scoreDelta: 0 });
     });
   });
 

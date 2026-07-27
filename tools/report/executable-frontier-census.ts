@@ -192,6 +192,7 @@ const MOVE_EFFECT_ID_BY_NAME: Readonly<Record<string, number>> = Object.freeze({
   MOVE_EFFECT_SP_DEF_MINUS_2: 50,
   MOVE_EFFECT_ACC_MINUS_2: 51,
   MOVE_EFFECT_EVS_MINUS_2: 52,
+  MOVE_EFFECT_THRASH: 53,
 });
 const NAMED_MOVE_EFFECT_IDS = new Set(Object.values(MOVE_EFFECT_ID_BY_NAME));
 

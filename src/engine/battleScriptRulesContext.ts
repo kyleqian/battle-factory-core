@@ -38,6 +38,8 @@ import { createBattleScriptTryCastformDataChangeOpcodeHandlers } from "./battleS
 import { createBattleScriptIngrainLeechSeedWrapOpcodeHandlers } from "./battleScriptIngrainLeechSeedWrapOpcode.ts";
 import { createBattleScriptRemoveitemOpcodeHandlers } from "./battleScriptRemoveitemOpcode.ts";
 import { createBattleScriptStatusPrimaryOpcodeHandlers } from "./battleScriptStatusPrimaryOpcode.ts";
+import { createBattleScriptSetyawnOpcodeHandlers } from "./battleScriptSetyawnOpcode.ts";
+import { createBattleScriptConfuseifrepeatingattackendsOpcodeHandlers } from "./battleScriptConfuseifrepeatingattackendsOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -2120,6 +2122,8 @@ export function createBattleScriptStatusRulesHandlers(
       resolveBattlerForBattleScript: resolveRulesBattlerForBattleScript,
     }),
     ...createBattleScriptStatusPrimaryOpcodeHandlers(program, resolveRulesBattlerForBattleScript),
+    ...createBattleScriptSetyawnOpcodeHandlers(program),
+    ...createBattleScriptConfuseifrepeatingattackendsOpcodeHandlers(program),
   });
 }
 

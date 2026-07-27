@@ -54,6 +54,21 @@ const STATUS1_SLEEP_3_TURNS = 3;
 const STAT_ATK = 1;
 const STAT_SPEED = 3;
 const STAT_SPATK = 4;
+/** include/constants/battle.h:168-169 -- STATUS3_YAWN's 2-bit turn counter (bits 11-12), docs/yawn-thrash-endturn-design.md §2. */
+const STATUS3_YAWN_MASK = (1 << 11) | (1 << 12);
+const STATUS3_YAWN_TURN_1 = (1 << 11) & STATUS3_YAWN_MASK;
+const STATUS3_YAWN_TURN_2 = (2 << 11) & STATUS3_YAWN_MASK;
+/** include/constants/abilities.h -- same ids as Rung 1's `JUMPIFABILITY_VALUES` widening. */
+const ABILITY_VITAL_SPIRIT = 72;
+const ABILITY_INSOMNIA = 15;
+/** include/constants/abilities.h:24 -- Own Tempo, docs/yawn-thrash-endturn-design.md §4's confusion-onset blocker. */
+const ABILITY_OWN_TEMPO = 20;
+/** include/constants/battle.h:137-139 -- STATUS2_LOCK_CONFUSE's 2-bit turn counter (bits 10-11) plus STATUS2_MULTIPLETURNS (bit 12), docs/yawn-thrash-endturn-design.md §4. */
+const STATUS2_LOCK_CONFUSE_MASK = (1 << 10) | (1 << 11);
+const STATUS2_LOCK_CONFUSE_TURN_1 = (1 << 10) & STATUS2_LOCK_CONFUSE_MASK;
+const STATUS2_LOCK_CONFUSE_TURN_2 = (2 << 10) & STATUS2_LOCK_CONFUSE_MASK;
+const STATUS2_LOCK_CONFUSE_TURN_3 = (3 << 10) & STATUS2_LOCK_CONFUSE_MASK;
+const STATUS2_MULTIPLETURNS = 1 << 12;
 
 function battler(changes: Partial<BattleScriptRulesBattler> & { maxHP?: number } = {}): BattleScriptRulesBattler {
   return Object.freeze({
@@ -473,6 +488,270 @@ describe("runBattleEndTurnOrchestration (BattleTurnPassed equivalent)", () => {
     expect(result.state.rng.calls).toBe(initial.rng.calls);
   });
 
+  describe("ENDTURN_THRASH (battle_util.c:1674-1695, docs/yawn-thrash-endturn-design.md §4)", () => {
+    it("mid-lock: counter decrements (TURN(3) -> TURN(2)), MULTIPLETURNS stays set, no confusion, zero RNG", () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0 }),
+          battler({ side: 1, status2: STATUS2_LOCK_CONFUSE_TURN_3 | STATUS2_MULTIPLETURNS, partyIndex: 2 }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+      const initial = scratchState(rc, 1);
+      const result = runBattleEndTurnOrchestration(program, handlers, initial);
+      expect(result.kind).toBe("next-turn");
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      const b1 = result.state.rulesContext.battlers[1]!;
+      expect(b1.status2 & STATUS2_LOCK_CONFUSE_MASK).toBe(STATUS2_LOCK_CONFUSE_TURN_2);
+      expect(b1.status2 & STATUS2_MULTIPLETURNS).not.toBe(0);
+      expect(b1.status2 & STATUS2_CONFUSION).toBe(0);
+      expect(result.state.rng.calls).toBe(initial.rng.calls);
+    });
+
+    it("final turn: lock expires and the confusion transition fires -- MULTIPLETURNS clears, STATUS2_CONFUSION lands via the exact (Random() % 4) + 2 roll, exactly 1 RNG draw, BattleScript_ThrashConfuses runs cleanly to its own end2 (seed 919694434 -> (randomValue%4)+2 == 3)", () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0 }),
+          battler({ side: 1, status2: STATUS2_LOCK_CONFUSE_TURN_1 | STATUS2_MULTIPLETURNS, partyIndex: 2 }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+      const initial = scratchState(rc, 1);
+      const result = runBattleEndTurnOrchestration(program, handlers, initial);
+      expect(result.kind).toBe("next-turn"); // proves BattleScript_ThrashConfuses ran to its own end2, no opcode-barrier
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      const b1 = result.state.rulesContext.battlers[1]!;
+      expect(b1.status2 & STATUS2_LOCK_CONFUSE_MASK).toBe(0);
+      expect(b1.status2 & STATUS2_MULTIPLETURNS).toBe(0);
+      expect(b1.status2 & STATUS2_CONFUSION).toBe(3);
+      expect(result.state.rng.calls).toBe(initial.rng.calls + 1);
+    });
+
+    it("WasUnableToUseMove (flinchImmobility) takes priority over the lock-expiry branch: CancelMultiTurnMoves clears the WHOLE lock outright, no confusion, zero RNG -- even on what would have been the final turn", () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0 }),
+          battler({
+            side: 1,
+            status2: STATUS2_LOCK_CONFUSE_TURN_1 | STATUS2_MULTIPLETURNS,
+            flinchImmobility: 1,
+            partyIndex: 2,
+          }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+      const initial = scratchState(rc, 1);
+      const result = runBattleEndTurnOrchestration(program, handlers, initial);
+      expect(result.kind).toBe("next-turn");
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      const b1 = result.state.rulesContext.battlers[1]!;
+      expect(b1.status2).toBe(0); // LOCK_CONFUSE + MULTIPLETURNS both cleared by CancelMultiTurnMoves, no CONFUSION set
+      expect(result.state.rng.calls).toBe(initial.rng.calls);
+    });
+
+    it("already confused from another source blocks the transition (source's own outer `!(status2 & STATUS2_CONFUSION)` gate, live here -- nothing earlier in this case excludes it): MULTIPLETURNS still clears, but the existing confusion duration is untouched, zero RNG", () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0 }),
+          battler({
+            side: 1,
+            status2: STATUS2_LOCK_CONFUSE_TURN_1 | STATUS2_MULTIPLETURNS | 2, // pre-existing STATUS2_CONFUSION = 2 turns
+            partyIndex: 2,
+          }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+      const initial = scratchState(rc, 1);
+      const result = runBattleEndTurnOrchestration(program, handlers, initial);
+      expect(result.kind).toBe("next-turn");
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      const b1 = result.state.rulesContext.battlers[1]!;
+      expect(b1.status2 & STATUS2_LOCK_CONFUSE_MASK).toBe(0);
+      expect(b1.status2 & STATUS2_MULTIPLETURNS).toBe(0);
+      expect(b1.status2 & STATUS2_CONFUSION).toBe(2); // untouched, not re-rolled
+      expect(result.state.rng.calls).toBe(initial.rng.calls);
+    });
+
+    it("Own Tempo blocks SetMoveEffect's own confusion branch: the lock clears silently, no script, no message, zero RNG (source's own `if (status2 & STATUS2_CONFUSION) BattleScriptExecute(...)` guard never fires)", () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0 }),
+          battler({
+            side: 1,
+            status2: STATUS2_LOCK_CONFUSE_TURN_1 | STATUS2_MULTIPLETURNS,
+            ability: ABILITY_OWN_TEMPO,
+            partyIndex: 2,
+          }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+      const initial = scratchState(rc, 1);
+      const result = runBattleEndTurnOrchestration(program, handlers, initial);
+      expect(result.kind).toBe("next-turn");
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      const b1 = result.state.rulesContext.battlers[1]!;
+      expect(b1.status2).toBe(0);
+      expect(result.state.rng.calls).toBe(initial.rng.calls);
+    });
+
+    // A fainted lock-in target (hp === 0) is ALSO ported (runThrashTick mirrors
+    // applySetMoveEffect's own non-primary-gated hp===0 early-out,
+    // battleScriptHitChainOpcode.ts:2326-2328) but is not independently
+    // Tier-1-pinned here: constructing a battler at hp===0 through this full
+    // orchestration harness always routes into `HandleFaintedMonActions`'s own
+    // switch-decision barrier (`GetMostSuitableMonToSwitchInto`'s AI_CalcDmg
+    // fallback, unmodeled) regardless of Thrash state -- verified live this
+    // rung with a plain hp===0 fixture carrying zero Thrash state, same
+    // barrier. Staging a genuine same-pass faint (e.g. via Leech Seed damage
+    // landing on 0 immediately before this battler's own THRASH case) plus a
+    // real switch decision is out of proportion for this rung's own scope.
+
+    it("no lock-in bit set at all: pure no-op, zero RNG", () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0 }),
+          battler({ side: 1, partyIndex: 2 }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+      const initial = scratchState(rc, 1);
+      const result = runBattleEndTurnOrchestration(program, handlers, initial);
+      expect(result.kind).toBe("next-turn");
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      expect(result.state.rulesContext.battlers[1]!.status2).toBe(0);
+      expect(result.state.rng.calls).toBe(initial.rng.calls);
+    });
+  });
+
+  describe("ENDTURN_YAWN (battle_util.c:1753-1771, docs/yawn-thrash-endturn-design.md §2)", () => {
+    it("first end-turn pass only decrements the counter (TURN(2) -> TURN(1)), no sleep transition, zero RNG", () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0 }),
+          battler({ side: 1, status3: STATUS3_YAWN_TURN_2, partyIndex: 2 }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+      const initial = scratchState(rc, 1);
+      const result = runBattleEndTurnOrchestration(program, handlers, initial);
+      expect(result.kind).toBe("next-turn");
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      expect(result.state.rulesContext.battlers[1]!.status3 & STATUS3_YAWN_MASK).toBe(STATUS3_YAWN_TURN_1);
+      expect(result.state.rulesContext.battlers[1]!.status1).toBe(0);
+      expect(result.state.rng.calls).toBe(initial.rng.calls);
+    });
+
+    it("second end-turn pass empties the counter and fires the real sleep transition: status1 sleep-turn write, cancelMultiTurnMoves, exactly 1 RNG draw (seed 919694434 -> (randomValue&3)+2 == 3)", () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0 }),
+          battler({ side: 1, status3: STATUS3_YAWN_TURN_1, partyIndex: 2 }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+      const initial = scratchState(rc, 1);
+      const result = runBattleEndTurnOrchestration(program, handlers, initial);
+      expect(result.kind).toBe("next-turn");
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      expect(result.state.rulesContext.battlers[1]!.status3 & STATUS3_YAWN_MASK).toBe(0);
+      expect(result.state.rulesContext.battlers[1]!.status1).toBe(3); // STATUS1_SLEEP_TURN(3), 2-5 turn range
+      expect(result.state.rulesContext.party.opponent[2]!.status1).toBe(3);
+      expect(result.state.rng.calls).toBe(initial.rng.calls + 1);
+    });
+
+    it("does not transition when status1 is already set (statused-target AND-chain blocker) -- still decrements to zero", () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0 }),
+          battler({ side: 1, status3: STATUS3_YAWN_TURN_1, status1: STATUS1_BURN, partyIndex: 2 }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+      const initial = scratchState(rc, 1);
+      const result = runBattleEndTurnOrchestration(program, handlers, initial);
+      expect(result.kind).toBe("next-turn");
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      expect(result.state.rulesContext.battlers[1]!.status3 & STATUS3_YAWN_MASK).toBe(0);
+      expect(result.state.rulesContext.battlers[1]!.status1).toBe(STATUS1_BURN); // unchanged, not overwritten by sleep
+      expect(result.state.rng.calls).toBe(initial.rng.calls);
+    });
+
+    it("does not transition when the target has Vital Spirit (AND-chain blocker)", () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0 }),
+          battler({ side: 1, status3: STATUS3_YAWN_TURN_1, ability: ABILITY_VITAL_SPIRIT, partyIndex: 2 }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+      const initial = scratchState(rc, 1);
+      const result = runBattleEndTurnOrchestration(program, handlers, initial);
+      expect(result.kind).toBe("next-turn");
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      expect(result.state.rulesContext.battlers[1]!.status3 & STATUS3_YAWN_MASK).toBe(0);
+      expect(result.state.rulesContext.battlers[1]!.status1).toBe(0);
+      expect(result.state.rng.calls).toBe(initial.rng.calls);
+    });
+
+    it("does not transition when the target has Insomnia (AND-chain blocker)", () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0 }),
+          battler({ side: 1, status3: STATUS3_YAWN_TURN_1, ability: ABILITY_INSOMNIA, partyIndex: 2 }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+      const initial = scratchState(rc, 1);
+      const result = runBattleEndTurnOrchestration(program, handlers, initial);
+      expect(result.kind).toBe("next-turn");
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      expect(result.state.rulesContext.battlers[1]!.status3 & STATUS3_YAWN_MASK).toBe(0);
+      expect(result.state.rulesContext.battlers[1]!.status1).toBe(0);
+      expect(result.state.rng.calls).toBe(initial.rng.calls);
+    });
+
+    it("no yawn counter set at all: pure no-op, zero RNG", () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0 }),
+          battler({ side: 1, partyIndex: 2 }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+      const initial = scratchState(rc, 1);
+      const result = runBattleEndTurnOrchestration(program, handlers, initial);
+      expect(result.kind).toBe("next-turn");
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      expect(result.state.rulesContext.battlers[1]!.status3).toBe(0);
+      expect(result.state.rulesContext.battlers[1]!.status1).toBe(0);
+      expect(result.state.rng.calls).toBe(initial.rng.calls);
+    });
+  });
+
   describe(
     "(f) ENDTURN_ITEMS1 (ItemBattleEffects(ITEMEFFECT_NORMAL, battler, FALSE), docs/endturn-abilities-items-ground-truth.md §1c/§5 slice 4)",
     () => {
@@ -834,6 +1113,157 @@ describe("runBattleEndTurnOrchestration (BattleTurnPassed equivalent)", () => {
           expect(result.state.rulesContext.battlers[1]!.item).toBe(ITEM_PETAYA_BERRY); // not consumed
         });
       });
+    },
+  );
+
+  describe(
+    "(g) ENDTURN_ITEMS2 (ItemBattleEffects(ITEMEFFECT_NORMAL, battler, TRUE) -- SAME caseID as ITEMS1, only moveTurn "
+      + "differs, battle_util.c:1500-1505 -- docs/yawn-thrash-endturn-design.md §5, Rung 3)",
+    () => {
+      describe("moveTurn gate: no-double-fire regression, one per §5's must-gate row", () => {
+        it("Leftovers heals exactly once per tick (ITEMS1 only) -- an ungated ITEMS2 call would heal a second time", () => {
+          const rc = context({
+            battlers: [
+              battler({ side: 0 }),
+              battler({ side: 1, hp: 100, maxHP: 160, item: ITEM_LEFTOVERS, partyIndex: 2 }),
+              battler({ side: 0 }),
+              battler({ side: 1 }),
+            ],
+            party: { player: sixSlots(100), opponent: sixSlots(0, 0, 100) },
+          });
+          const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+          const initial = scratchState(rc, 1);
+          const result = runBattleEndTurnOrchestration(program, handlers, initial);
+          expect(result.kind).toBe("next-turn");
+          if (result.kind !== "next-turn") throw new Error("expected next-turn");
+          // 100 + floor(160/16) = 110 -- NOT 120, which is what a second, ungated ITEMS2 heal would produce.
+          expect(result.state.rulesContext.battlers[1]!.hp).toBe(110);
+          expect(result.state.rulesContext.party.opponent[2]!.hp).toBe(110);
+          expect(result.state.rulesContext.battlers[1]!.item).toBe(ITEM_LEFTOVERS);
+          expect(result.state.rng.calls).toBe(initial.rng.calls);
+        });
+
+        it(
+          "Liechi Berry does NOT fire at ITEMS2 even though burn drops HP below its threshold mid-tick "
+            + "(stat-up berries gate on !moveTurn -- battle_util.c:3245 -- so they only ever check at ITEMS1)",
+          () => {
+            const rc = context({
+              battlers: [
+                battler({ side: 0 }),
+                // hp=30 > floor(100/4)=25 at ITEMS1 -- does not fire there. Burn then deals floor(100/8)=12,
+                // dropping hp to 18 (<=25) BEFORE ITEMS2 runs. An ungated ITEMS2 call would newly satisfy the
+                // threshold and fire a spurious stat raise; the moveTurn gate must suppress it regardless.
+                battler({ side: 1, hp: 30, maxHP: 100, item: ITEM_LIECHI_BERRY, status1: STATUS1_BURN, partyIndex: 2 }),
+                battler({ side: 0 }),
+                battler({ side: 1 }),
+              ],
+              party: { player: sixSlots(100), opponent: sixSlots(0, 0, 30) },
+            });
+            const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+            const initial = scratchState(rc, 1);
+            const result = runBattleEndTurnOrchestration(program, handlers, initial);
+            expect(result.kind).toBe("next-turn");
+            if (result.kind !== "next-turn") throw new Error("expected next-turn");
+            expect(result.state.rulesContext.battlers[1]!.hp).toBe(18); // burn only: 30 - floor(100/8)
+            expect(result.state.rulesContext.battlers[1]!.statStages[STAT_ATK]).toBe(6); // unchanged
+            expect(result.state.rulesContext.battlers[1]!.item).toBe(ITEM_LIECHI_BERRY); // not consumed
+            expect(result.state.rng.calls).toBe(initial.rng.calls); // burn + (non-firing) Liechi both draw zero RNG
+          },
+        );
+
+        it(
+          "Sitrus Berry's RESTORE_HP case-barrier does NOT fire at ITEMS2 even though burn drops HP below its "
+            + "threshold mid-tick (source never even reaches the RESTORE_HP case at ITEMS2, battle_util.c:3337-3345 -- "
+            + "RESTORE_PP and the zero-carrier UNREACHABLE_AT_FACTORY_L50 set share the identical `!moveTurn &&` gate "
+            + "shape, verified by direct code read, but have no modeled mid-tick PP/possession mutator in this engine "
+            + "to exercise the same live before/after transition)",
+          () => {
+            const rc = context({
+              battlers: [
+                battler({ side: 0 }),
+                // hp=55 > floor(100/2)=50 at ITEMS1 -- does not barrier there. Burn deals floor(100/8)=12,
+                // dropping hp to 43 (<=50) BEFORE ITEMS2 runs. An ungated ITEMS2 call would spuriously barrier.
+                battler({ side: 1, hp: 55, maxHP: 100, item: ITEM_SITRUS_BERRY, status1: STATUS1_BURN, partyIndex: 2 }),
+                battler({ side: 0 }),
+                battler({ side: 1 }),
+              ],
+              party: { player: sixSlots(100), opponent: sixSlots(0, 0, 55) },
+            });
+            const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+            const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
+            expect(result.kind).toBe("next-turn"); // NOT case-barrier
+            if (result.kind !== "next-turn") throw new Error("expected next-turn");
+            expect(result.state.rulesContext.battlers[1]!.hp).toBe(43); // burn only: 55 - floor(100/8)
+            expect(result.state.rulesContext.battlers[1]!.item).toBe(ITEM_SITRUS_BERRY);
+          },
+        );
+      });
+
+      it(
+        "REAL TRIGGER: a Chesto Berry cures the sleep status ENDTURN_YAWN itself just wrote, in the SAME "
+          + "end-turn pass, before ITEMS1 ever saw it (docs/yawn-thrash-endturn-design.md §5's worked example: "
+          + "ITEMS1 runs before YAWN sets status1, so the cure is invisible to that tick's ITEMS1 and can only "
+          + "fire at ITEMS2) -- negative companion for 'no double heal' is the Leftovers test above",
+        () => {
+          const rc = context({
+            battlers: [
+              battler({ side: 0 }),
+              battler({ side: 1, status3: STATUS3_YAWN_TURN_1, item: ITEM_CHESTO_BERRY, partyIndex: 2 }),
+              battler({ side: 0 }),
+              battler({ side: 1 }),
+            ],
+          });
+          const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+          const initial = scratchState(rc, 1);
+          const result = runBattleEndTurnOrchestration(program, handlers, initial);
+          expect(result.kind).toBe("next-turn");
+          if (result.kind !== "next-turn") throw new Error("expected next-turn");
+          // Yawn's own transition already cleared the counter; the cure (ITEMS2) then clears the sleep it just wrote.
+          expect(result.state.rulesContext.battlers[1]!.status3 & STATUS3_YAWN_MASK).toBe(0);
+          expect(result.state.rulesContext.battlers[1]!.status1).toBe(0); // cured in the SAME pass, never "felt"
+          expect(result.state.rulesContext.party.opponent[2]!.status1).toBe(0);
+          expect(result.state.rulesContext.battlers[1]!.item).toBe(0); // consumed
+          expect(result.state.rng.calls).toBe(initial.rng.calls + 1); // only Yawn's own sleep-turn roll; the cure draws none
+        },
+      );
+
+      it(
+        "REAL TRIGGER (Rung 6, docs/yawn-thrash-endturn-design.md §7): a Persim Berry cures the confusion "
+          + "ENDTURN_THRASH itself just wrote on the lock's final turn, in the SAME end-turn pass -- ITEMS2's "
+          + "OTHER real trigger class (the Chesto/Yawn test above is the first), proving the SAME moveTurn-gated "
+          + "HOLD_EFFECT_CURE_CONFUSION branch (already item-agnostic since Rung 3, no new code) fires off a "
+          + "Thrash-family source instead of Yawn -- TAUROS/MOVE_THRASH is the named Factory-L50 carrier (§3's "
+          + "table), modeled here at the status2/item level per this reducer's own existing convention",
+        () => {
+          const rc = context({
+            battlers: [
+              battler({ side: 0 }),
+              battler({
+                side: 1,
+                status2: STATUS2_LOCK_CONFUSE_TURN_1 | STATUS2_MULTIPLETURNS, // lock's final turn, mirrors the ENDTURN_THRASH suite's own transition case
+                item: ITEM_PERSIM_BERRY,
+                partyIndex: 2,
+              }),
+              battler({ side: 0 }),
+              battler({ side: 1 }),
+            ],
+          });
+          const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+          const initial = scratchState(rc, 1);
+          const result = runBattleEndTurnOrchestration(program, handlers, initial);
+          expect(result.kind).toBe("next-turn");
+          if (result.kind !== "next-turn") throw new Error("expected next-turn");
+          const b1 = result.state.rulesContext.battlers[1]!;
+          // ENDTURN_THRASH's own transition already cleared the lock; the cure (ITEMS2) then clears the
+          // confusion it just wrote -- never "felt" as a lost turn, same shape as the Chesto/Yawn sibling above.
+          expect(b1.status2 & STATUS2_LOCK_CONFUSE_MASK).toBe(0);
+          expect(b1.status2 & STATUS2_MULTIPLETURNS).toBe(0);
+          expect(b1.status2 & STATUS2_CONFUSION).toBe(0);
+          expect(b1.item).toBe(0); // consumed
+          // seed 919694434 -> (randomValue % 4) + 2 == 3, Thrash's own duration roll; the cure draws none.
+          expect(result.state.rng.calls).toBe(initial.rng.calls + 1);
+        },
+      );
     },
   );
 });

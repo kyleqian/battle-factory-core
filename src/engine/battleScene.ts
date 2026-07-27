@@ -605,6 +605,8 @@ import {
   resolveTurn1DoubleTeamKickoffLines,
   resolveTurn1RockSlideHpEndpoints,
 } from "./turn1RockSlidePresentationStaging.ts";
+import { resolveTurn4RockSlideHpEndpoints } from "./turn4RockSlidePresentationStaging.ts";
+import { resolveTurn3RockSlideHpEndpoints } from "./turn3RockSlidePresentationStaging.ts";
 import {
   resolveTurn5EndeavorAttackLines,
   resolveTurn5EndeavorHpEndpoints,
@@ -1453,6 +1455,30 @@ const anchorOpponentAfterTurn3Hp = (
  * literal in `npm run compare`).
  */
 const anchorOpponentAfterTurn4Hp = 1;
+
+/**
+ * Presentation-seam retirement, the turn-4 settle staging gap
+ * (`docs/presentation-seam-scout.md` §9.3/§9.4 step 5's own named residual,
+ * entries 465/468/487): `anchorOpponentAfterTurn4Hp`'s own literal above now
+ * has an independent staged proof (`turn4RockSlidePresentationStaging.ts`),
+ * byte-identical (41 -> 1). Consumers below read this instead of the bare
+ * literal; `anchorOpponentAfterTurn4Hp` itself stays defined and in use by
+ * `drawEndeavorSquish`'s own steady-state read (`:7056` as of this pass -- a
+ * different, non-drain, read §9.3's own mapping table already found needs no
+ * kernel event at all).
+ */
+const TURN4_ROCKSLIDE_HP = resolveTurn4RockSlideHpEndpoints();
+
+/**
+ * Presentation-seam retirement (`docs/presentation-seam-scout.md` §10.2/
+ * §10.3 step 1): turn 3's own ROCK_SLIDE HP endpoints (88 -> 41), now with an
+ * independent staged proof (`turn3RockSlidePresentationStaging.ts`),
+ * byte-identical to the `anchorOpponentAfterTurn2Hp`/`anchorOpponentAfterTurn3Hp`
+ * literal pair. `drawTurn3RockSlideAttack`/`drawTurn3RockSlideTurnEndSettledMenu`
+ * read this instead of those two literals directly; both literals stay
+ * defined and in use elsewhere (steady-state reads §10.1/§10.3 leave alone).
+ */
+const TURN3_ROCKSLIDE_HP = resolveTurn3RockSlideHpEndpoints();
 
 /**
  * S7 slice J (docs/battle-turn-notes.md §13/§23): Onix's own post-turn-5-
@@ -5342,11 +5368,11 @@ function drawMenuIdleBaseWithOpponentHp(fb: Uint8Array, turn1Resolved: boolean, 
   drawRect(fb, menuIdleBase);
   if (turn1Resolved) {
     // S7 slice J: `turn4Resolved` selects Grovyle's own post-turn-4-ROCK_SLIDE
-    // hp (1, `anchorOpponentAfterTurn4Hp`) instead of turn 3's own settle
-    // (41) once turn 4 has ALSO resolved - every render path reachable once
-    // turn 5's own FIGHT submenu reopens needs this, same shape
-    // `turn3Resolved`'s own S7 slice I addition already established.
-    const hp = turn4Resolved ? anchorOpponentAfterTurn4Hp : turn3Resolved ? anchorOpponentAfterTurn3Hp : turn2Resolved ? anchorOpponentAfterTurn2Hp : anchorOpponentAfterTurnHp;
+    // hp (1, `TURN4_ROCKSLIDE_HP.to` - staged, see its own doc) instead of
+    // turn 3's own settle (41) once turn 4 has ALSO resolved - every render
+    // path reachable once turn 5's own FIGHT submenu reopens needs this, same
+    // shape `turn3Resolved`'s own S7 slice I addition already established.
+    const hp = turn4Resolved ? TURN4_ROCKSLIDE_HP.to : turn3Resolved ? anchorOpponentAfterTurn3Hp : turn2Resolved ? anchorOpponentAfterTurn2Hp : anchorOpponentAfterTurnHp;
     drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(hp));
   }
 }
@@ -6857,8 +6883,10 @@ const TURN3_ROCKSLIDE_MENU_REDRAW_DELAY = 669; // pressTick+669 = 4356 (hard cut
  * S7 slice H: the battlefield base + rocks + shake + Grovyle's own HP drain
  * for turn 3's ROCK_SLIDE window - identical shape to turn 1's own
  * `drawRockSlideAttack`, parameterized by `TURN3_ROCKSLIDE_PRESS_TICK` and
- * turn 3's own HP endpoints (`anchorOpponentAfterTurn2Hp`(88) ->
- * `anchorOpponentAfterTurn3Hp`(41)). Unlike turn 1 (where Onix stays at
+ * turn 3's own HP endpoints, now the staged `TURN3_ROCKSLIDE_HP` pair
+ * (88 -> 41, `docs/presentation-seam-scout.md` §10.3 step 1, byte-identical
+ * to the `anchorOpponentAfterTurn2Hp`/`anchorOpponentAfterTurn3Hp` literals).
+ * Unlike turn 1 (where Onix stays at
  * full HP(117) the whole window, so `drawMenuHealthboxPlayer`'s own stale
  * full-HP harvest is already correct), Onix already carries ENDEAVOR's own
  * damage (117->88) by this point - the caller (`drawTurn3RockSlideWindow`)
@@ -6875,7 +6903,7 @@ function drawTurn3RockSlideAttack(fb: Uint8Array, t: number): void {
   }
   drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y);
   const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick);
-  const opponentHp = rockSlideOpponentHp(t, pressTick, anchorOpponentAfterTurn2Hp, anchorOpponentAfterTurn3Hp);
+  const opponentHp = rockSlideOpponentHp(t, pressTick, TURN3_ROCKSLIDE_HP.from, TURN3_ROCKSLIDE_HP.to);
   const opponentContent = opponentHealthboxContentForHp(opponentHp);
   drawSendOutHealthbox(fb, 0, opponentContent);
   if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2, opponentContent);
@@ -6904,7 +6932,8 @@ function turn3RockSlideResettledBounceTick(t: number): number {
  * S7 slice H: turn 3's own turn-end resettled action menu - same shape as
  * `drawDragonBreathTurnEndSettledMenu` (turn 2's own analogue): reuse
  * `drawActionMenuIdleContent`'s flat harvest for everything but the
- * opponent healthbox (overdrawn at Grovyle's real settled HP, 41), and
+ * opponent healthbox (overdrawn at Grovyle's real settled HP, now the staged
+ * `TURN3_ROCKSLIDE_HP.to`, 41), and
  * track the LIVE resettled bounce offset for Onix's own HP overlay (88 -
  * `menuIdleBase`'s own harvest bakes Onix at full HP 117, stale here just
  * like every earlier settled-menu variant in this turn sequence).
@@ -6912,7 +6941,7 @@ function turn3RockSlideResettledBounceTick(t: number): number {
 function drawTurn3RockSlideTurnEndSettledMenu(fb: Uint8Array, t: number): void {
   const bounceTick = turn3RockSlideResettledBounceTick(t);
   drawActionMenuIdleContent(fb, bounceTick, false);
-  drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(anchorOpponentAfterTurn3Hp));
+  drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(TURN3_ROCKSLIDE_HP.to));
   drawPlayerHealthboxHpOverlay(fb, anchorPlayerAfterTurn3Hp, menuIdleBounce(bounceTick).healthboxY2);
 }
 
@@ -6925,6 +6954,14 @@ function drawTurn3RockSlideTurnEndSettledMenu(fb: Uint8Array, t: number): void {
  * `drawTurn3EndeavorText` before handing off here - see that function's own
  * doc). Deliberately stops at the settled menu's own live idle hold -
  * turn 4's own reopen input (tick 4892) is out of scope this session.
+ *
+ * Presentation-seam wiring (`docs/presentation-seam-scout.md` §10.3 step 2):
+ * the attack phase's own "ONIX used\nROCK SLIDE!" text now reads window 2's
+ * already-resolved `TURN1_ROCKSLIDE_ATTACK_LINE1/2`
+ * (`turn1RockSlidePresentationStaging.ts`) instead of the raw
+ * `ROCK_SLIDE_LINE1`/`ROCK_SLIDE_LINE2` literals -- same move/same attacker/
+ * same prefix, so the resolved content is byte-identical; no new staging
+ * needed, the fourth and final ROCK_SLIDE call site to make this swap.
  */
 function drawTurn3RockSlideWindow(fb: Uint8Array, t: number): void {
   const pressTick = TURN3_ROCKSLIDE_PRESS_TICK;
@@ -6938,7 +6975,7 @@ function drawTurn3RockSlideWindow(fb: Uint8Array, t: number): void {
   drawPlayerHealthboxHpOverlay(fb, anchorPlayerAfterTurn3Hp);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   if (t < textClearTick) {
-    drawMessageTextLines(fb, ROCK_SLIDE_LINE1, ROCK_SLIDE_LINE2, rockSlideTextVisibleChars(t, pressTick));
+    drawMessageTextLines(fb, TURN1_ROCKSLIDE_ATTACK_LINE1, TURN1_ROCKSLIDE_ATTACK_LINE2, rockSlideTextVisibleChars(t, pressTick));
   }
 }
 
@@ -7050,9 +7087,9 @@ export const TURN4_ROCKSLIDE_MENU_REDRAW_DELAY = 661; // pressTick+661 = 5586 (h
  * for turn 4's ROCK_SLIDE window - identical shape to turn 1's/turn 3's own
  * `drawRockSlideAttack`/`drawTurn3RockSlideAttack`, parameterized by
  * `TURN4_CONFIRM_PRESS_TICK` (a REAL press, no synthetic anchor needed - see
- * `drawTurn4KickoffText`'s own doc) and turn 4's own HP endpoints
- * (`anchorOpponentAfterTurn3Hp`(41) -> `anchorOpponentAfterTurn4Hp`(1) - a
- * 1-HP survival, not a faint, §13's own ledger).
+ * `drawTurn4KickoffText`'s own doc) and turn 4's own HP endpoints, now the
+ * staged `TURN4_ROCKSLIDE_HP` pair (41 -> 1 - a 1-HP survival, not a faint,
+ * §13's own ledger; `turn4RockSlidePresentationStaging.ts`'s own doc).
  */
 function drawTurn4RockSlideAttack(fb: Uint8Array, t: number): void {
   const pressTick = TURN4_CONFIRM_PRESS_TICK;
@@ -7063,7 +7100,7 @@ function drawTurn4RockSlideAttack(fb: Uint8Array, t: number): void {
   }
   drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y);
   const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick);
-  const opponentHp = rockSlideOpponentHp(t, pressTick, anchorOpponentAfterTurn3Hp, anchorOpponentAfterTurn4Hp);
+  const opponentHp = rockSlideOpponentHp(t, pressTick, TURN4_ROCKSLIDE_HP.from, TURN4_ROCKSLIDE_HP.to);
   const opponentContent = opponentHealthboxContentForHp(opponentHp);
   drawSendOutHealthbox(fb, 0, opponentContent);
   if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2, opponentContent);
@@ -7081,11 +7118,11 @@ function turn4RockSlideResettledBounceTick(t: number): number {
   return t - (TURN4_CONFIRM_PRESS_TICK + TURN4_ROCKSLIDE_MENU_REDRAW_DELAY) + (MENU_IDLE_BLANK_END_TICK + 1);
 }
 
-/** S7 slice I: turn 4's own turn-end resettled action menu - same shape as `drawTurn3RockSlideTurnEndSettledMenu`, keyed off Grovyle's real settled HP (1, a 1-HP survival) and Onix's own (unchanged this turn, 88). */
+/** S7 slice I: turn 4's own turn-end resettled action menu - same shape as `drawTurn3RockSlideTurnEndSettledMenu`, keyed off Grovyle's real settled HP (1, a 1-HP survival, now the staged `TURN4_ROCKSLIDE_HP.to`) and Onix's own (unchanged this turn, 88). */
 function drawTurn4RockSlideTurnEndSettledMenu(fb: Uint8Array, t: number): void {
   const bounceTick = turn4RockSlideResettledBounceTick(t);
   drawActionMenuIdleContent(fb, bounceTick, false);
-  drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(anchorOpponentAfterTurn4Hp));
+  drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(TURN4_ROCKSLIDE_HP.to));
   drawPlayerHealthboxHpOverlay(fb, anchorPlayerAfterTurn3Hp, menuIdleBounce(bounceTick).healthboxY2);
 }
 
@@ -7094,6 +7131,15 @@ function drawTurn4RockSlideTurnEndSettledMenu(fb: Uint8Array, t: number): void {
  * shape as `drawTurn3RockSlideWindow` (attack animation + held "ONIX used
  * \nROCK SLIDE!" text, text-clear, hard-cut to the resettled menu). Turn 5's
  * own reopen input (tick 5926) is out of scope this session.
+ *
+ * Presentation-seam wiring (`docs/presentation-seam-scout.md` §9.3's own
+ * "byte-identical content" finding): the attack phase's own "ONIX used
+ * \nROCK SLIDE!" text now reads window 2's already-resolved
+ * `TURN1_ROCKSLIDE_ATTACK_LINE1/2` (`turn1RockSlidePresentationStaging.ts`)
+ * instead of the raw `ROCK_SLIDE_LINE1`/`ROCK_SLIDE_LINE2` literals -- same
+ * move/same attacker/same prefix, so the resolved content is byte-identical;
+ * no new staging needed, matching `drawTurn5RockSlideWindow`'s own already-
+ * wired attack branch (§9.4 step 4).
  */
 function drawTurn4RockSlideWindow(fb: Uint8Array, t: number): void {
   const pressTick = TURN4_CONFIRM_PRESS_TICK;
@@ -7121,8 +7167,8 @@ function drawTurn4RockSlideWindow(fb: Uint8Array, t: number): void {
       line2 = STAT_ROSE_LINE2;
       chars = statRoseTextVisibleChars(t, pressTick);
     } else {
-      line1 = ROCK_SLIDE_LINE1;
-      line2 = ROCK_SLIDE_LINE2;
+      line1 = TURN1_ROCKSLIDE_ATTACK_LINE1;
+      line2 = TURN1_ROCKSLIDE_ATTACK_LINE2;
       chars = rockSlideTextVisibleChars(t, pressTick);
     }
     drawMessageTextLines(fb, line1, line2, chars);
@@ -7728,12 +7774,13 @@ export function turn5SitrusRingMatrix(t: number): { pa: number; pb: number; pc: 
  * `rockSlideOpponentHp` drain (below) is the SAME KO
  * `turn5FaintPresentationStaging.ts` already stages for the fainted-branch
  * window (§7) -- this is a second, EARLIER consumption point of that
- * identical staged chain, not a new staged run. Only the `to` endpoint is
- * wired: the `from` endpoint (`anchorOpponentAfterTurn4Hp`) is fed INTO that
- * staged chain's own Grovyle precondition, so reading it back out of the
- * chain's own event would be circular, not independent proof -- it stays a
- * literal for this pass (named as a residual gap, `docs/presentation-seam-
- * scout.md` §9.4 rung 5's own note).
+ * identical staged chain, not a new staged run. The `from` endpoint, formerly
+ * the bare `anchorOpponentAfterTurn4Hp` literal (named as §9.4 rung 5's own
+ * residual gap, entries 465/468/487), now reads `TURN4_ROCKSLIDE_HP.to` --
+ * `turn4RockSlidePresentationStaging.ts`'s own independent staged proof of
+ * that exact settle (41 -> 1), not circular: that module stages Grovyle's
+ * PRE-turn-4 hp (41) and independently computes the turn-4 hit's own
+ * settle, it does not consume this window's value.
  */
 const TURN5_ROCKSLIDE_OPPONENT_TO_HP = resolveTurn5FaintWindowKoHp();
 
@@ -7817,7 +7864,7 @@ function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number 
     );
   }
   const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick);
-  const opponentHp = rockSlideOpponentHp(t, pressTick, anchorOpponentAfterTurn4Hp, TURN5_ROCKSLIDE_OPPONENT_TO_HP);
+  const opponentHp = rockSlideOpponentHp(t, pressTick, TURN4_ROCKSLIDE_HP.to, TURN5_ROCKSLIDE_OPPONENT_TO_HP);
   if (t < GROVYLE_HEALTHBOX_VANISH_TICK) {
     const opponentContent = opponentHealthboxContentForHp(opponentHp);
     drawSendOutHealthbox(fb, 0, opponentContent);

@@ -19,6 +19,7 @@ import {
 } from "./battleScriptMachine.ts";
 import {
   resolveBattleScriptLabel,
+  type BattleScriptInstruction,
   type BattleScriptOperand,
   type BattleScriptProgram,
 } from "./battleScriptProgram.ts";
@@ -211,6 +212,8 @@ const MOVE_EFFECT_CONFUSION = 7;
 const MOVE_EFFECT_FLINCH = 8;
 /** include/constants/battle.h:260 -- SetMoveEffect's Wrap-family case (docs/ingrain-leechseed-wrap-ground-truth.md §1c/§5 slice 2). */
 const MOVE_EFFECT_WRAP = 13;
+/** include/constants/battle.h:300 -- SetMoveEffect's Thrash-family lock-in case (docs/yawn-thrash-endturn-design.md §3, Rung 4). */
+const MOVE_EFFECT_THRASH = 53;
 /**
  * `gTrappingMoves` (`battle_message.c:1256-1264`) -- the fixed 6-move family
  * MOVE_EFFECT_WRAP's own duration/message dispatch indexes by, in this exact
@@ -430,6 +433,7 @@ export const SET_MOVE_EFFECT_SUPPORTED_BYTES: ReadonlySet<number> = new Set<numb
   MOVE_EFFECT_CONFUSION,
   MOVE_EFFECT_FLINCH,
   MOVE_EFFECT_WRAP,
+  MOVE_EFFECT_THRASH,
   ...Object.keys(STAT_MOVE_EFFECT_TABLE).map(Number),
 ]);
 
@@ -696,22 +700,92 @@ function checkWonderGuardAndLevitate(
 }
 
 /**
- * Cmd_accuracycheck (battle_script_commands.c:1099-1189). Only the
- * `ACC_CURR_MOVE` argument form is source-complete: BattleScript_EffectHit
- * and 54 of the program's other 55 accuracycheck sites use it, while the
- * `NO_ACC_CALC`/`NO_ACC_CALC_CHECK_LOCK_ON`/explicit-deferred-move top branch
- * (9 sites, none on the hit chain) is an explicit barrier.
+ * Cmd_accuracycheck's `NO_ACC_CALC`/`NO_ACC_CALC_CHECK_LOCK_ON` bypass branch
+ * (`battle_script_commands.c:1103-1113`), narrowed to the
+ * `NO_ACC_CALC_CHECK_LOCK_ON` literal -- `BattleScript_EffectYawn`'s own
+ * accuracycheck (docs/yawn-thrash-endturn-design.md, Rung 1: the design
+ * doc's own §0 opcode census marked this opcode ID "[registered]" without
+ * catching that this specific operand form was still unhandled -- verified
+ * against source this session, not assumed). Computes NO accuracy roll at
+ * all: either an unconditional sure-hit (Lock-On/Mind-Reader,
+ * `STATUS3_ALWAYS_HITS` -- barriered here exactly like the `ACC_CURR_MOVE`
+ * branch below, and for the same reason: `gDisableStructs.battlerWithSureHit`
+ * is not modeled. Provably unreachable today regardless, since
+ * `battleScriptSwitchinOpcode.ts`'s own read-only precedent confirms no
+ * production code ever sets `STATUS3_ALWAYS_HITS`), a semi-invulnerable miss
+ * (a bare jump to the fail label -- source's own `JumpIfMoveAffectedByProtect`
+ * is never reached down this sub-branch, so no `MOVE_RESULT_MISSED` flag or
+ * `missType` is set here, unlike the Protect-gate branch below), or
+ * `JumpIfMoveAffectedByProtect(0)`'s own Protect gate. That gate's
+ * `DEFENDER_IS_PROTECTED` macro reads `gCurrentMove` (the real move) for its
+ * flag check regardless of the literal `0` argument -- the `0` only ever
+ * feeds `JumpIfMoveFailed`'s `else`-branch `AbilityBattleEffects`/Destiny
+ * Bond tail, which is unreachable whenever Protect was the reason for
+ * jumping in the first place (the `if` branch taken instead).
+ */
+function accuracycheckNoAccCalcCheckLockOn(
+  context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
+): BattleScriptCommandTransition<BattleScriptRulesContext> {
+  const rulesContext = context.state.rulesContext;
+  const attacker = requireBattlerRole(rulesContext, "attacker");
+  const target = requireBattlerRole(rulesContext, "target");
+  const targetBattler = rulesContext.battlers[target];
+
+  if ((targetBattler.status3 & BATTLE_SCRIPT_STATUS3_ALWAYS_HITS) !== 0) {
+    return unsupportedBranch(
+      context,
+      "AccuracyCalcHelper's STATUS3_ALWAYS_HITS Lock-On/Mind-Reader sure-hit branch needs "
+        + "gDisableStructs[target].battlerWithSureHit, which this engine does not model yet",
+      "battle_script_commands.c",
+      1105,
+    );
+  }
+
+  const semiInvulnerableMask = (
+    BATTLE_SCRIPT_STATUS3_ON_AIR | BATTLE_SCRIPT_STATUS3_UNDERGROUND | BATTLE_SCRIPT_STATUS3_UNDERWATER
+  ) >>> 0;
+  if ((targetBattler.status3 & semiInvulnerableMask) !== 0) {
+    const failOperand = context.instruction.operands[0]!;
+    const entry = resolveBattleScriptLabel(context.program, failOperand.expression);
+    if (!entry) throw new Error(`accuracycheck: committed program has no label ${failOperand.expression}`);
+    return transitionBattleScriptCommand(context, Object.freeze({ kind: "jump", programCounter: entry.programCounter }));
+  }
+
+  if (isDefenderProtected(targetBattler, rulesContext.currentMove)) {
+    const withFlags = Object.freeze({
+      ...rulesContext,
+      moveResultFlags: (rulesContext.moveResultFlags | BATTLE_SCRIPT_MOVE_RESULT_MISSED) >>> 0,
+      missType: B_MSG_PROTECTED,
+    });
+    return jumpToMissTarget(context, withFlags, attacker, target, context.state.rng);
+  }
+
+  return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }));
+}
+
+/**
+ * Cmd_accuracycheck (battle_script_commands.c:1099-1189). Two argument forms
+ * are source-complete: `ACC_CURR_MOVE` (`BattleScript_EffectHit` and 53 of
+ * the program's other accuracycheck sites) and `NO_ACC_CALC_CHECK_LOCK_ON`
+ * (`accuracycheckNoAccCalcCheckLockOn` above, `BattleScript_EffectYawn`'s own
+ * site -- 1 of 8 sites using this literal, the rest still barriered behind
+ * their own separate unregistered opcodes). Bare `NO_ACC_CALC` and any
+ * explicit-deferred-move literal remain an explicit barrier: no committed
+ * script this engine reaches uses them.
  */
 export const accuracycheckOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (
   context,
 ) => {
   const moveOperand = context.instruction.operands[1];
+  if (moveOperand?.expression === "NO_ACC_CALC_CHECK_LOCK_ON") {
+    return accuracycheckNoAccCalcCheckLockOn(context);
+  }
   if (!moveOperand || moveOperand.expression !== "ACC_CURR_MOVE") {
     return unsupportedBranch(
       context,
       `Cmd_accuracycheck's non-ACC_CURR_MOVE move argument `
-        + `(${moveOperand?.expression ?? "<missing>"}) -- the NO_ACC_CALC/NO_ACC_CALC_CHECK_LOCK_ON/`
-        + "explicit-deferred-move top branch is not used by BattleScript_EffectHit's hit chain",
+        + `(${moveOperand?.expression ?? "<missing>"}) -- the NO_ACC_CALC/`
+        + "explicit-deferred-move top branch is not used by any committed script this engine reaches",
       "battle_script_commands.c",
       1103,
     );
@@ -2268,6 +2342,9 @@ function applySetMoveEffect(
     if (effectByte === MOVE_EFFECT_WRAP) {
       return applyWrapMoveEffect(context, baseRulesContext, effectBattler);
     }
+    if (effectByte === MOVE_EFFECT_THRASH) {
+      return applyThrashMoveEffect(context, baseRulesContext, effectBattler);
+    }
     const statEntry = STAT_MOVE_EFFECT_TABLE[effectByte];
     if (statEntry) {
       return applyStatMoveEffect(context, baseRulesContext, effectByte, statEntry, affectsUser, attacker, target);
@@ -2481,49 +2558,78 @@ function applySetMoveEffect(
   return finishStatusWrite(newStatus1);
 }
 
+export type BattleScriptConfusionStatus2MutationResult = Readonly<{
+  rulesContext: BattleScriptRulesContext;
+  rng: BattleScriptRngState;
+  /** Whether STATUS2_CONFUSION was freshly written (Own Tempo/already-confused both leave this false). */
+  confused: boolean;
+}>;
+
 /**
- * SetMoveEffect's family-B shared early-out plus its MOVE_EFFECT_CONFUSION
- * case (battle_script_commands.c:2524,2533-2546 --
+ * SetMoveEffect's MOVE_EFFECT_CONFUSION case, state mutation only
+ * (battle_script_commands.c:2524,2533-2546 --
  * docs/stat-change-confusion-ground-truth.md S1.6). The shared early-out
  * (`status2 & sStatusFlagsForMoveEffects[byte]`, byte=CONFUSION resolves to
  * the full STATUS2_CONFUSION mask) and the case's own identical `status2 &
  * STATUS2_CONFUSION` recheck are the same test in practice -- this ports
  * them as one combined condition alongside the Own Tempo ability check.
+ * Factored out of the script-transition wrapper so `ENDTURN_THRASH`'s own
+ * direct `SetMoveEffect(TRUE, 0)` call site (`battle_util.c:1686-1689`,
+ * docs/yawn-thrash-endturn-design.md §4, `battleEndTurnOrchestration.ts`'s
+ * `runThrashTick`) can reuse the identical state machinery without going
+ * through a Battle Script opcode transition.
+ */
+export function applyConfusionStatus2Mutation(
+  rulesContext: BattleScriptRulesContext,
+  rng: BattleScriptRngState,
+  instruction: BattleScriptInstruction,
+  effectBattler: BattleScriptBattlerId,
+): BattleScriptConfusionStatus2MutationResult {
+  const effectBattlerState = rulesContext.battlers[effectBattler];
+  const alreadyConfused = (effectBattlerState.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_CONFUSION) !== 0;
+  if (effectBattlerState.ability === ABILITY_OWN_TEMPO || alreadyConfused) {
+    return Object.freeze({ rulesContext, rng, confused: false });
+  }
+
+  const { rng: nextRng, randomValue } = drawBattleScriptRng(
+    rng,
+    instruction,
+    "SetMoveEffect confusion duration ((Random() % 4) + 2)",
+  );
+  const turns = (randomValue % 4) + 2;
+  const nextRulesContext = withBattler(rulesContext, effectBattler, {
+    status2: (effectBattlerState.status2 | turns) >>> 0,
+  });
+  return Object.freeze({ rulesContext: nextRulesContext, rng: nextRng, confused: true });
+}
+
+/**
  * Zero new opcodes: all 4 BattleScript_MoveEffectConfusion ops
  * (chosenstatus2animation/printstring/waitmessage/return) are already
- * registered. The only new surface is the `(Random() % 4) + 2` duration
- * draw and the plain status2 write (guaranteed-zero bits per the early-out,
- * so `|=` and `=` are equivalent here).
+ * registered. The only new surface `applyConfusionStatus2Mutation` adds is
+ * the `(Random() % 4) + 2` duration draw and the plain status2 write
+ * (guaranteed-zero bits per the early-out, so `|=` and `=` are equivalent
+ * here).
  */
 function applyConfusionMoveEffect(
   context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
   baseRulesContext: BattleScriptRulesContext,
   effectBattler: BattleScriptBattlerId,
 ): BattleScriptCommandTransition<BattleScriptRulesContext> {
-  const effectBattlerState = baseRulesContext.battlers[effectBattler];
-  const alreadyConfused = (effectBattlerState.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_CONFUSION) !== 0;
-  if (effectBattlerState.ability === ABILITY_OWN_TEMPO || alreadyConfused) {
+  const mutation = applyConfusionStatus2Mutation(baseRulesContext, context.state.rng, context.instruction, effectBattler);
+  if (!mutation.confused) {
     return transitionBattleScriptCommand(
       context,
       Object.freeze({ kind: "advance" }),
-      { rulesContext: baseRulesContext },
+      { rulesContext: mutation.rulesContext },
     );
   }
 
-  const { rng, randomValue } = drawBattleScriptRng(
-    context.state.rng,
-    context.instruction,
-    "SetMoveEffect confusion duration ((Random() % 4) + 2)",
-  );
-  const turns = (randomValue % 4) + 2;
-  const nextRulesContext = withBattler(baseRulesContext, effectBattler, {
-    status2: (effectBattlerState.status2 | turns) >>> 0,
-  });
   const programCounter = resolveRequiredLabelProgramCounter(context.program, "BattleScript_MoveEffectConfusion");
   return transitionBattleScriptCommand(
     context,
     Object.freeze({ kind: "call", programCounter }),
-    { rulesContext: nextRulesContext, rng },
+    { rulesContext: mutation.rulesContext, rng: mutation.rng },
   );
 }
 
@@ -2646,6 +2752,77 @@ function applyWrapMoveEffect(
   return transitionBattleScriptCommand(
     context,
     Object.freeze({ kind: "call", programCounter }),
+    { rulesContext: nextRulesContext, rng },
+  );
+}
+
+/**
+ * SetMoveEffect's MOVE_EFFECT_THRASH case (`battle_script_commands.c:2851-
+ * 2860`, docs/yawn-thrash-endturn-design.md §3, Rung 4). Thrash/Outrage/
+ * Petal Dance's lock-in start: `sStatusFlagsForMoveEffects[MOVE_EFFECT_THRASH]
+ * == STATUS2_LOCK_CONFUSE` (`:624`), so the shared family-B early-out
+ * (`status2 & sStatusFlagsForMoveEffects[byte]`, `:2523-2524`) already
+ * excludes this case whenever `STATUS2_LOCK_CONFUSE` is set -- the case
+ * body's own inner `if (status2 & STATUS2_LOCK_CONFUSE) { instr++; }` can
+ * never observe TRUE and is not a second check here, matching
+ * `applyFlinchMoveEffect`/`applyWrapMoveEffect`'s own single-early-out shape
+ * for their respective already-set bits. On the real (not-yet-locked) path:
+ * sets `STATUS2_MULTIPLETURNS`, draws the `(Random() & 1) + 2`-turn lock
+ * duration into `STATUS2_LOCK_CONFUSE_TURN` (`battle.h:138`, an unmasked
+ * `(num) << 10` write -- 2 or 3 both fit the 2-bit field with no carry into
+ * `STATUS2_MULTIPLETURNS`'s own bit 12), and -- unlike every status1-family
+ * case above -- never pushes/jumps to a script at all: `SetMoveEffect`'s own
+ * switch just `break`s, so `BattleScript_EffectRampage2`'s `goto
+ * BattleScript_HitFromCritCalc` tail (already run before `seteffectwithchance`
+ * reaches this dispatch) is genuinely the whole move; `"advance"` is the
+ * correct transition, not a `"call"`.
+ *
+ * `gLockedMoves[gEffectBattler] = gCurrentMove` is deliberately NOT ported.
+ * Source reads it back exactly once, in `HandleAction_UseMove`
+ * (`battle_util.c:109`) -- the per-battler "which move does this turn
+ * execute" selector that runs once per battler action, before
+ * `Cmd_attackcanceler`/this engine's Battle Script machine ever starts.
+ * This engine has no ported equivalent of `HandleAction_UseMove` anywhere
+ * (confirmed by grep: zero references outside doc citations) -- every call
+ * site that starts a move's execution (`factoryBattleScriptFullTurnDecision
+ * .ts`'s `buildActionContext`/`runMoveAction`, every battle-lab/Tier-1 test)
+ * takes the move id as a given external input, never derives it internally.
+ * So `gLockedMoves` has no read-back consumer in this codebase at any layer
+ * -- the same "state written but provably unobservable here" shape this
+ * function's own MOVE_EFFECT_SLEEP/MOVE_EFFECT_FREEZE cases already use to
+ * omit `CancelMultiTurnMoves(gEffectBattler)`, not a gap to fill later.
+ */
+function applyThrashMoveEffect(
+  context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
+  baseRulesContext: BattleScriptRulesContext,
+  effectBattler: BattleScriptBattlerId,
+): BattleScriptCommandTransition<BattleScriptRulesContext> {
+  const effectBattlerState = baseRulesContext.battlers[effectBattler];
+  const alreadyLocked = (effectBattlerState.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_LOCK_CONFUSE) !== 0;
+  if (alreadyLocked) {
+    return transitionBattleScriptCommand(
+      context,
+      Object.freeze({ kind: "advance" }),
+      { rulesContext: baseRulesContext },
+    );
+  }
+
+  const { rng, randomValue } = drawBattleScriptRng(
+    context.state.rng,
+    context.instruction,
+    "SetMoveEffect Thrash-family lock-in duration ((Random() & 1) + 2)",
+  );
+  const turns = (randomValue & 1) + 2;
+  const nextRulesContext = withBattler(baseRulesContext, effectBattler, {
+    status2: (
+      effectBattlerState.status2
+      | BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS
+      | (turns << 10)
+    ) >>> 0,
+  });
+  return transitionBattleScriptCommand(
+    context,
+    Object.freeze({ kind: "advance" }),
     { rulesContext: nextRulesContext, rng },
   );
 }

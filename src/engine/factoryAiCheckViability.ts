@@ -9,8 +9,10 @@
  * handlers) falls straight through to the trailing `end` with a genuine,
  * complete zero score / zero draws -- not a stub for that path. A move
  * whose effect DOES have an entry halts with a named
- * `"factory-ai-check-viability"` unsupported-branch barrier -- except five,
- * dispatched before that barrier check: `EFFECT_SPEED_DOWN(_2)` (`AI_CV_SpeedDown`,
+ * `"factory-ai-check-viability"` unsupported-branch barrier -- except the
+ * following (all 22 reachable handlers per
+ * `docs/factory-ai-checkviability-ground-truth.md` §5's table, dispatched
+ * before that barrier check): `EFFECT_SPEED_DOWN(_2)` (`AI_CV_SpeedDown`,
  * `runCvSpeedDown` below, `data/battle_ai_scripts.s:1142-1152`,
  * `docs/factory-ai-checkviability-ground-truth.md` §6), `EFFECT_PURSUIT`
  * (`AI_CV_Pursuit`, `runCvPursuit` below, `:2018-2036`, doc §11.1),
@@ -62,11 +64,50 @@
  * type list -- `LightScreen`'s 8-type special list, `Reflect`'s 9-type
  * physical list, exact complements covering all 17 Gen 3 types -- and
  * exactly 1 draw site each, the shortest CV body in the whole
- * physical/special-list sub-family). The other ~74 are not ported this
- * round (a separate, much larger phased body of work per the audit's §3),
- * so a move that reaches one of THOSE must not silently score zero.
+ * physical/special-list sub-family), and `EFFECT_EVASION_UP`/
+ * `EFFECT_EVASION_UP_2`/`EFFECT_MINIMIZE` and `EFFECT_EVASION_DOWN`/
+ * `EFFECT_EVASION_DOWN_2` (`AI_CV_EvasionUp`/`AI_CV_EvasionDown`,
+ * `runCvEvasionUp`/`runCvEvasionDown` below, `:1037-1074`/`:1235-1246`,
+ * doc §24 -- the eleventh CBM-blocked pair's own CV half. `AI_CV_EvasionUp`
+ * is the largest ported CV handler in this doc, 8 `if_random_less_than`
+ * sites -- structurally close to `AI_CV_AccuracyDown`'s own 7-site shape
+ * but re-derived independently per doc §24.1, which found three real
+ * divergences: DRAW SITE 1 has no Gate B companion (a single 90%-HP gate,
+ * not AccuracyDown's own two-gate 70% shape), Gate A's own HP threshold is
+ * 90 not 70, and Gate I reads AI_USER's own evasion stage (not AI_TARGET's)
+ * since this is an UP handler raising the opponent's own stat.
+ * `AI_CV_EvasionDown` is confirmed byte-for-byte the same shape as
+ * `AI_CV_DefenseDown`/`AI_CV_SpDefDown` with `STAT_EVASION` swapped in,
+ * reusing the shared `runCvStatDown` body), and `EFFECT_SUNNY_DAY`/
+ * `EFFECT_HAIL`/`EFFECT_RAIN_DANCE` (`AI_CV_SunnyDay`/`AI_CV_Hail`/
+ * `AI_CV_RainDance`, `runCvSunnyDay`/`runCvHail`/`runCvRainDance` below,
+ * `:2060-2075`/`:2261-2276`/`:2037-2058`, doc §25 -- the twelfth CBM-blocked
+ * pair's own CV third. `SunnyDay`/`Hail` are exact twins (1 HP gate + a
+ * 3-way `get_weather` chain over the OTHER three weather values, zero
+ * `if_random_less_than`); `RainDance` genuinely diverges with its own extra
+ * Speed-order/Swift-Swim bypass prologue and Rain-Dish tail bonus (doc
+ * §25.2/§25.3), independently re-derived per the doc's own standing
+ * divergence-check rule rather than assumed identical to its siblings), and
+ * `EFFECT_SPEED_DOWN_HIT` (`AI_CV_SpeedDownFromChance`,
+ * `runCvSpeedDownFromChance` below, `:1136-1141`, doc §5's table row/§4's
+ * footnote/§10 -- the 22nd and last reachable handler, completing this
+ * program. Zero `if_random_less_than` sites of its own: a plain `if_move`
+ * literal-ID match against 3 of its 6 covered moves that `goto`s straight
+ * into `AI_CV_SpeedDown`'s own label -- reused verbatim via `runCvSpeedDown`,
+ * not reimplemented -- with the other 3 moves falling through to a genuine
+ * zero). The other ~68 are not ported this round (a separate, much larger
+ * phased body of work per the audit's §3), so a move that reaches one of
+ * THOSE must not silently score zero.
  */
-import { MOVES_BY_ID, TYPE_EFFECTIVENESS } from "./factoryAiCheckBadMove.ts";
+import {
+  AI_WEATHER_HAIL,
+  AI_WEATHER_RAIN,
+  AI_WEATHER_SANDSTORM,
+  AI_WEATHER_SUN,
+  MOVES_BY_ID,
+  TYPE_EFFECTIVENESS,
+  type AiWeatherValue,
+} from "./factoryAiCheckBadMove.ts";
 import type { BattleRngState } from "./battleDecisionBoundary.ts";
 import { applyStab, applyTypeEffectiveness, DEFAULT_STAT_STAGE } from "./damageCalc.ts";
 import { advanceRngValue } from "./rng.ts";
@@ -200,6 +241,27 @@ export type FactoryAiCheckViabilityBattler = Readonly<{
    * Optional, defaulting to `false`.
    */
   isCursed?: boolean;
+  /**
+   * The AI's own real ability (`get_ability AI_USER`, a direct field read --
+   * NEVER the two-ability-guessing heuristic `get_ability AI_TARGET` uses
+   * elsewhere, so no `Random()`-consuming confound) -- `AI_CV_RainDance`'s
+   * Gate S (Swift Swim bypass) and Gate R (Rain Dish tail bonus), doc §25.2.
+   * Only AI_USER's own copy is ever read; carried on both sides for the same
+   * shape-symmetry convention as `isFirstTurn`/`lastUsedMoveId` above.
+   * Optional, defaulting to `"ABILITY_NONE"` -- no prior ported handler
+   * needed the attacker's own real ability, so this is a genuinely new input.
+   */
+  ability?: string;
+  /**
+   * Current weather, `AI_WEATHER_*`-encoded (0=Sun/1=Rain/2=Sandstorm/
+   * 3=Hail) -- `AI_CV_SunnyDay`/`Hail`/`RainDance`'s own `get_weather` read
+   * (doc §25.2), the same encoding `factoryAiCheckBadMove.ts`'s CBM weather
+   * trio reads. Only AI_USER's own copy is ever read; carried on both sides
+   * for shape symmetry. Optional, defaulting to `undefined` (no weather bit
+   * set) -- never equals any of the four `AI_WEATHER_*` values, so it never
+   * matches any of the three handlers' own weather-chain gates.
+   */
+  currentWeather?: AiWeatherValue;
 }>;
 
 export type FactoryAiCheckViabilityDraw =
@@ -207,6 +269,17 @@ export type FactoryAiCheckViabilityDraw =
     ordinal: number;
     reason: string;
     kind: "target-faster-tie";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    strikesFirst: 0 | 1 | 2;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    /** `AI_CV_RainDance`'s own Gate P (`if_user_faster`, doc §25.3) -- the SAME hidden-tie-break-`Random()` mechanism `target-faster-tie` above already ports, inverse polarity comparison. */
+    kind: "user-faster-tie";
     before: BattleRngState;
     after: BattleRngState;
     rawRngValue: number;
@@ -328,6 +401,16 @@ export type FactoryAiCheckViabilityDraw =
   | Readonly<{
     ordinal: number;
     reason: string;
+    kind: "evasion-down-roll";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    succeeded: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
     kind: "attack-up-roll-1" | "attack-up-roll-2" | "attack-up-roll-3";
     before: BattleRngState;
     after: BattleRngState;
@@ -396,6 +479,24 @@ export type FactoryAiCheckViabilityDraw =
       | "accuracy-down-roll-5"
       | "accuracy-down-roll-6"
       | "accuracy-down-roll-7";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    succeeded: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind:
+      | "evasion-up-roll-1"
+      | "evasion-up-roll-2"
+      | "evasion-up-roll-3"
+      | "evasion-up-roll-4"
+      | "evasion-up-roll-5"
+      | "evasion-up-roll-6"
+      | "evasion-up-roll-7"
+      | "evasion-up-roll-8";
     before: BattleRngState;
     after: BattleRngState;
     rawRngValue: number;
@@ -510,6 +611,55 @@ function runCvSpeedDown(input: Readonly<{
   const succeeded = rollDraw.randomValue % 256 >= 70;
   draws.push(Object.freeze({ ...rollDraw, kind: "speed-down-roll" as const, succeeded }));
   return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: succeeded ? 2 : 0 });
+}
+
+const MOVE_ICY_WIND = 196;
+const MOVE_ROCK_TOMB = 317;
+const MOVE_MUD_SHOT = 341;
+
+/**
+ * `AI_CV_SpeedDownFromChance` (`data/battle_ai_scripts.s:1136-1141`,
+ * `docs/factory-ai-checkviability-ground-truth.md` §5's table row, §4's
+ * footnote, §10's porter note):
+ *
+ * ```
+ * AI_CV_SpeedDownFromChance:
+ *     if_move MOVE_ICY_WIND, AI_CV_SpeedDown
+ *     if_move MOVE_ROCK_TOMB, AI_CV_SpeedDown
+ *     if_move MOVE_MUD_SHOT, AI_CV_SpeedDown
+ *     end
+ * ```
+ *
+ * `EFFECT_SPEED_DOWN_HIT` covers 6 executable moves (`MOVE_ICY_WIND`,
+ * `MOVE_ROCK_TOMB`, `MOVE_MUD_SHOT`, `MOVE_BUBBLE_BEAM`, `MOVE_CONSTRICT`,
+ * `MOVE_BUBBLE`). The handler's own body has ZERO `if_random_less_than`
+ * sites and reads nothing but the literal move ID currently under
+ * consideration (`if_move`, a plain `u16` compare, `Cmd_if_move` --
+ * NOT a read of any effect-chance/secondary-effect-probability datum
+ * despite the "FromChance" name; that name describes the in-game MOVE
+ * CATEGORY the 6 dispatching moves belong to (a chance-on-hit secondary
+ * effect), not anything this handler itself inspects -- re-derived from
+ * the raw assembly, not assumed from the name). Exactly 3 of the 6
+ * (`ICY_WIND`/`ROCK_TOMB`/`MUD_SHOT`) `goto` into `AI_CV_SpeedDown`'s OWN
+ * label -- the real ROM's control flow lands inside that handler's own
+ * instructions, not a copy -- so this port calls `runCvSpeedDown` directly
+ * for those three, unmodified (no duplicated gate/roll logic). The other 3
+ * (`BUBBLE_BEAM`/`CONSTRICT`/`BUBBLE`) fall through the un-matched `if_move`
+ * chain straight to `end`: a genuine, deterministic zero score/zero draws
+ * for every battle state, not a stub.
+ */
+function runCvSpeedDownFromChance(input: Readonly<{
+  rng: BattleRngState;
+  moveId: number;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  if (input.moveId === MOVE_ICY_WIND || input.moveId === MOVE_ROCK_TOMB || input.moveId === MOVE_MUD_SHOT) {
+    return runCvSpeedDown(input);
+  }
+  return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: 0 });
 }
 
 /**
@@ -1069,7 +1219,7 @@ function runCvAttackDown(input: Readonly<{
  * site's own reachability: true skips its own `-2`, false applies it.
  */
 function runCvStatDown(
-  kind: "defense-down-roll" | "sp-def-down-roll",
+  kind: "defense-down-roll" | "sp-def-down-roll" | "evasion-down-roll",
   input: Readonly<{
     rng: BattleRngState;
     attackerHp: number;
@@ -1140,6 +1290,36 @@ function runCvSpDefDown(input: Readonly<{
     attackerHp: input.attackerHp,
     attackerMaxHp: input.attackerMaxHp,
     targetStatStage: input.targetSpDefStage,
+    targetHp: input.targetHp,
+    targetMaxHp: input.targetMaxHp,
+    drawOrdinalStart: input.drawOrdinalStart,
+    reasonPrefix: input.reasonPrefix,
+  });
+}
+
+/**
+ * `AI_CV_EvasionDown` (`data/battle_ai_scripts.s:1235-1246`, doc §24.1) --
+ * confirmed byte-for-byte the same topology as `AI_CV_DefenseDown`/
+ * `AI_CV_SpDefDown` above (`STAT_EVASION` swapped in, same `70`/`50`/`70`
+ * thresholds and odds, same `score -2` on every non-skip branch) -- reuses
+ * the identical shared `runCvStatDown` body rather than a parallel
+ * implementation.
+ */
+function runCvEvasionDown(input: Readonly<{
+  rng: BattleRngState;
+  attackerHp: number;
+  attackerMaxHp: number;
+  targetEvasionStage: number;
+  targetHp: number;
+  targetMaxHp: number;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  return runCvStatDown("evasion-down-roll", {
+    rng: input.rng,
+    attackerHp: input.attackerHp,
+    attackerMaxHp: input.attackerMaxHp,
+    targetStatStage: input.targetEvasionStage,
     targetHp: input.targetHp,
     targetMaxHp: input.targetMaxHp,
     drawOrdinalStart: input.drawOrdinalStart,
@@ -1374,10 +1554,22 @@ const AI_CV_DEFENSE_UP_PHYSICAL_TYPES: ReadonlySet<string> = new Set([
  * by this branch) skips straight to `DefenseUp5`'s own roll; power != 0 AND
  * type in the (larger, 9-type) `AI_CV_DefenseUp_PhysicalTypes` list reaches
  * DRAW SITE 4; power != 0 and NOT in the list jumps straight to the `-2`
- * penalty, skipping both remaining draw sites. DRAW SITE 4 and DRAW SITE 5
- * are mutually exclusive (Gate E routes to exactly one) and share the
- * identical `if_random_less_than 60` shape: JUMP (roll < 60, ~23.4%) skips
- * the `-2`; falling through (roll >= 60, ~76.6%) applies it.
+ * penalty, skipping both remaining draw sites. **DRAW SITE 4 and DRAW SITE 5
+ * are NOT mutually exclusive** -- `docs/factory-ai-draw-discrepancy-probe.md`
+ * §4 confirms, via raw ROM byte disassembly and live single-step
+ * instrumentation, that DRAW SITE 4's own failure path (roll >= 60) is
+ * literally DRAW SITE 5's own instruction address (`AI_CV_DefenseUp4`'s +6
+ * bytes == `AI_CV_DefenseUp5`'s own label, no gate between them) -- reaching
+ * DRAW SITE 4 at all means either 1 draw (roll < 60, ~23.4%, stops with no
+ * penalty) or 2 draws (roll >= 60, ~76.6%, falls through into DRAW SITE 5's
+ * own `if_random_less_than 60` roll, which only THEN decides the `-2`: stops
+ * with no penalty on its own roll < 60, ~23.4%, or applies `-2` on roll >=
+ * 60, ~76.6%). Net probability of the `-2` penalty given DRAW SITE 4 is
+ * reached at all: `(196/256)^2 ~= 58.65%`, not the naive single-roll 76.6%.
+ * Gate E's own direct jump into `DefenseUp5` is a SEPARATE, single-draw path
+ * to the identical site -- the two entry paths share the site's kind label
+ * (`"defense-up-roll-5"`) because they are the same physical assembly
+ * instruction, not because they are the same logical event.
  */
 function runCvDefenseUp(input: Readonly<{
   rng: BattleRngState;
@@ -1453,12 +1645,27 @@ function runCvDefenseUp(input: Readonly<{
     return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score - 2 });
   }
 
-  // DRAW SITE 4.
+  // DRAW SITE 4: if_random_less_than 60, End (roll<60, ~23.4%, stops here).
+  // Its own failure (roll>=60, ~76.6%) does NOT apply the penalty directly --
+  // there is no gate between them (data/battle_ai_scripts.s:936-938), so
+  // execution falls straight through into DRAW SITE 5's own instruction
+  // immediately below (the SAME site the Gate E jump above reaches
+  // directly). Only a second failed roll applies the -2 penalty.
   const draw4 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw4`);
   rng = draw4.after;
+  ordinal += 1;
   const succeeded4 = draw4.randomValue % 256 >= 60;
   draws.push(Object.freeze({ ...draw4, kind: "defense-up-roll-4" as const, succeeded: succeeded4 }));
-  if (succeeded4) score -= 2;
+  if (!succeeded4) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+  }
+
+  // DRAW SITE 5, reached here via DRAW SITE 4's own fall-through.
+  const draw5 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw5`);
+  rng = draw5.after;
+  const succeeded5 = draw5.randomValue % 256 >= 60;
+  draws.push(Object.freeze({ ...draw5, kind: "defense-up-roll-5" as const, succeeded: succeeded5 }));
+  if (succeeded5) score -= 2;
   return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
 }
 
@@ -1514,6 +1721,12 @@ function runCvDefenseUp(input: Readonly<{
  * an identical byte list under a second name -- `AI_CV_SpDefUp_PhysicalTypes`
  * (`:1015-1025`) is a distinct assembly symbol at a different address, but
  * doc §22.1 confirms its 9-type contents are byte-for-byte identical.
+ * DRAW SITE 4 and DRAW SITE 5 share `AI_CV_DefenseUp`'s own chained (NOT
+ * mutually exclusive) shape byte-for-byte -- see `runCvDefenseUp`'s own doc
+ * comment above and `docs/factory-ai-draw-discrepancy-probe.md` §4: DRAW
+ * SITE 4's own failure (roll >= 60) falls straight through into DRAW SITE
+ * 5's own roll, which alone decides the `-2` (net ~58.65%, not a naive
+ * single-roll ~76.6%).
  */
 function runCvSpDefUp(input: Readonly<{
   rng: BattleRngState;
@@ -1589,12 +1802,26 @@ function runCvSpDefUp(input: Readonly<{
     return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score - 2 });
   }
 
-  // DRAW SITE 4 (reached when NOT in the physical list).
+  // DRAW SITE 4 (reached when NOT in the physical list): if_random_less_than
+  // 60, End (roll<60, ~23.4%, stops here). Its own failure (roll>=60,
+  // ~76.6%) falls straight through into DRAW SITE 5's own instruction
+  // immediately below (same site the Gate E jump above reaches directly) --
+  // only a second failed roll applies the -2 penalty.
   const draw4 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw4`);
   rng = draw4.after;
+  ordinal += 1;
   const succeeded4 = draw4.randomValue % 256 >= 60;
   draws.push(Object.freeze({ ...draw4, kind: "sp-def-up-roll-4" as const, succeeded: succeeded4 }));
-  if (succeeded4) score -= 2;
+  if (!succeeded4) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+  }
+
+  // DRAW SITE 5, reached here via DRAW SITE 4's own fall-through.
+  const draw5 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw5`);
+  rng = draw5.after;
+  const succeeded5 = draw5.randomValue % 256 >= 60;
+  draws.push(Object.freeze({ ...draw5, kind: "sp-def-up-roll-5" as const, succeeded: succeeded5 }));
+  if (succeeded5) score -= 2;
   return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
 }
 
@@ -1868,6 +2095,373 @@ function runCvAccuracyDown(input: Readonly<{
   return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: succeeded7 ? score - 2 : score });
 }
 
+/**
+ * `AI_CV_EvasionUp` (`data/battle_ai_scripts.s:1037-1074`,
+ * `docs/factory-ai-checkviability-ground-truth.md` §24.1) -- the largest
+ * ported `AI_CV_*` handler in this doc, 8 `if_random_less_than` sites:
+ *
+ * ```
+ * AI_CV_EvasionUp:
+ *     if_hp_less_than AI_USER, 90, AI_CV_EvasionUp2                    ; Gate A (opponent's OWN hp)
+ *     if_random_less_than 100, AI_CV_EvasionUp2                        ; DRAW SITE 1
+ *     score +3
+ * AI_CV_EvasionUp2:
+ *     if_stat_level_less_than AI_USER, STAT_EVASION, 9, AI_CV_EvasionUp3  ; Gate B (opponent's OWN evasion stage)
+ *     if_random_less_than 128, AI_CV_EvasionUp3                        ; DRAW SITE 2
+ *     score -1
+ * AI_CV_EvasionUp3:
+ *     if_not_status AI_TARGET, STATUS1_TOXIC_POISON, AI_CV_EvasionUp5  ; Gate C (target toxic-poisoned?)
+ *     if_hp_more_than AI_USER, 50, AI_CV_EvasionUp4                    ; Gate D (opponent's OWN hp, only if Gate C true)
+ *     if_random_less_than 80, AI_CV_EvasionUp5                         ; DRAW SITE 3
+ * AI_CV_EvasionUp4:
+ *     if_random_less_than 50, AI_CV_EvasionUp5                         ; DRAW SITE 4
+ *     score +3
+ * AI_CV_EvasionUp5:
+ *     if_not_status3 AI_TARGET, STATUS3_LEECHSEED, AI_CV_EvasionUp6    ; Gate E (target leech-seeded?)
+ *     if_random_less_than 70, AI_CV_EvasionUp6                         ; DRAW SITE 5
+ *     score +3
+ * AI_CV_EvasionUp6:
+ *     if_not_status3 AI_USER, STATUS3_ROOTED, AI_CV_EvasionUp7         ; Gate F (opponent's OWN Ingrain flag)
+ *     if_random_less_than 128, AI_CV_EvasionUp7                        ; DRAW SITE 6
+ *     score +2
+ * AI_CV_EvasionUp7:
+ *     if_not_status2 AI_TARGET, STATUS2_CURSED, AI_CV_EvasionUp8       ; Gate G (target cursed?)
+ *     if_random_less_than 70, AI_CV_EvasionUp8                         ; DRAW SITE 7
+ *     score +3
+ * AI_CV_EvasionUp8:
+ *     if_hp_more_than AI_USER, 70, AI_CV_EvasionUp_End                 ; Gate H (opponent's OWN hp)
+ *     if_stat_level_equal AI_USER, STAT_EVASION, DEFAULT_STAT_STAGE, AI_CV_EvasionUp_End  ; Gate I (opponent's OWN evasion stage)
+ *     if_hp_less_than AI_USER, 40, AI_CV_EvasionUp_ScoreDown2          ; Gate J
+ *     if_hp_less_than AI_TARGET, 40, AI_CV_EvasionUp_ScoreDown2        ; Gate K
+ *     if_random_less_than 70, AI_CV_EvasionUp_End                      ; DRAW SITE 8
+ * AI_CV_EvasionUp_ScoreDown2:
+ *     score -2
+ * AI_CV_EvasionUp_End:
+ *     end
+ * ```
+ *
+ * Re-derived independently from the raw assembly, NOT copied from
+ * `AI_CV_AccuracyDown`'s own shape despite the structural similarity (both
+ * share the four status-gated sites -- toxic/leechseed/rooted/cursed -- and
+ * the Gate H/I/J/K tail). Three real divergences (doc §24.1): (1) DRAW SITE
+ * 1 has no Gate B companion -- a single opponent-HP gate, not AccuracyDown's
+ * own two-independent-routes shape; (2) Gate A's own HP threshold is 90, not
+ * 70; (3) Gate I reads `AI_USER`'s own evasion stage, not `AI_TARGET`'s --
+ * the operand flips because EvasionUp raises the OPPONENT's own stat, unlike
+ * AccuracyDown which lowers the target's.
+ *
+ * Gates C/D (`:1046-1047`) gate DRAW SITE 3/DRAW SITE 4 as a pair only
+ * reached at all when the target is toxic-poisoned (Gate C); the opponent's
+ * OWN hp then picks the ENTRY point, NOT two mutually exclusive single-draw
+ * alternatives (this comment's own prior claim, disproved by docs/factory-
+ * ai-draw-discrepancy-probe.md §7, the same audit that found this): > 50%
+ * jumps straight to DRAW SITE 4 alone (one draw); <= 50% reaches DRAW SITE 3
+ * first, and DRAW SITE 3's own failure (roll >= 80) falls straight through
+ * into DRAW SITE 4's own roll immediately below with no gate between them
+ * (`data/battle_ai_scripts.s:1048-1050`) -- the SAME chained-pair shape
+ * `AI_CV_DefenseUp`'s own DRAW SITE 4/5 has (`runCvDefenseUp`'s own doc
+ * comment above). So this branch burns 0 draws (Gate C false), 1 draw (Gate
+ * D true, or Gate C true + DRAW SITE 3 succeeds), or 2 draws (Gate C true,
+ * own hp <= 50%, DRAW SITE 3 fails and chains into DRAW SITE 4) -- unlike
+ * AccuracyDown's own four independent (non-exclusive, always-single-draw)
+ * status gates. DRAW SITE 8 (`:1069`) shares AccuracyDown's own DRAW SITE 7
+ * OPPOSITE polarity: jump (roll < 70) is the no-op; falling through (roll >=
+ * 70) is what applies the tail's `-2`.
+ */
+function runCvEvasionUp(input: Readonly<{
+  rng: BattleRngState;
+  attackerHp: number;
+  attackerMaxHp: number;
+  attackerEvasionStage: number;
+  attackerIsRooted: boolean;
+  targetHp: number;
+  targetMaxHp: number;
+  targetIsToxicPoisoned: boolean;
+  targetIsLeechSeeded: boolean;
+  targetIsCursed: boolean;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let score = 0;
+
+  const attackerHpPercent = Math.floor((100 * input.attackerHp) / input.attackerMaxHp);
+  const targetHpPercent = Math.floor((100 * input.targetHp) / input.targetMaxHp);
+
+  // Gate A -> DRAW SITE 1: opponent's OWN hp >= 90% (no Gate B companion,
+  // unlike AccuracyDown's own two-gate DRAW SITE 1 -- doc §24.1 divergence 1).
+  if (attackerHpPercent >= 90) {
+    const draw1 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw1`);
+    rng = draw1.after;
+    ordinal += 1;
+    const succeeded1 = draw1.randomValue % 256 >= 100;
+    draws.push(Object.freeze({ ...draw1, kind: "evasion-up-roll-1" as const, succeeded: succeeded1 }));
+    if (succeeded1) score += 3;
+  }
+
+  // Gate B -> DRAW SITE 2: opponent's OWN evasion stage already >= 9.
+  if (input.attackerEvasionStage >= 9) {
+    const draw2 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw2`);
+    rng = draw2.after;
+    ordinal += 1;
+    const succeeded2 = draw2.randomValue % 256 >= 128;
+    draws.push(Object.freeze({ ...draw2, kind: "evasion-up-roll-2" as const, succeeded: succeeded2 }));
+    if (succeeded2) score -= 1;
+  }
+
+  // Gates C/D -> DRAW SITE 3/4: target toxic-poisoned reaches this pair at
+  // all. The opponent's OWN hp band picks the ENTRY point, NOT two mutually
+  // exclusive single-draw sites (a prior version of this comment's own
+  // claim, disproved by docs/factory-ai-draw-discrepancy-probe.md §7): own
+  // HP > 50% jumps straight to DRAW SITE 4 (a single, independent draw); own
+  // HP <= 50% reaches DRAW SITE 3 first, whose own failure (roll >= 80) falls
+  // straight through into DRAW SITE 4's own roll immediately below -- no
+  // gate between them (data/battle_ai_scripts.s:1048-1050) -- the SAME
+  // chained-pair shape `AI_CV_DefenseUp`'s own DRAW SITE 4/5 has. Only a
+  // second failed roll (DRAW SITE 4's own, roll >= 50) applies the `+3`.
+  if (input.targetIsToxicPoisoned) {
+    if (attackerHpPercent > 50) {
+      const draw4 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw4`);
+      rng = draw4.after;
+      ordinal += 1;
+      const succeeded4 = draw4.randomValue % 256 >= 50;
+      draws.push(Object.freeze({ ...draw4, kind: "evasion-up-roll-4" as const, succeeded: succeeded4 }));
+      if (succeeded4) score += 3;
+    } else {
+      const draw3 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw3`);
+      rng = draw3.after;
+      ordinal += 1;
+      const succeeded3 = draw3.randomValue % 256 >= 80;
+      draws.push(Object.freeze({ ...draw3, kind: "evasion-up-roll-3" as const, succeeded: succeeded3 }));
+      if (succeeded3) {
+        // DRAW SITE 3's own failure falls straight through into DRAW SITE 4.
+        const draw4 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw4`);
+        rng = draw4.after;
+        ordinal += 1;
+        const succeeded4 = draw4.randomValue % 256 >= 50;
+        draws.push(Object.freeze({ ...draw4, kind: "evasion-up-roll-4" as const, succeeded: succeeded4 }));
+        if (succeeded4) score += 3;
+      }
+    }
+  }
+
+  // Gate E -> DRAW SITE 5: target leech-seeded.
+  if (input.targetIsLeechSeeded) {
+    const draw5 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw5`);
+    rng = draw5.after;
+    ordinal += 1;
+    const succeeded5 = draw5.randomValue % 256 >= 70;
+    draws.push(Object.freeze({ ...draw5, kind: "evasion-up-roll-5" as const, succeeded: succeeded5 }));
+    if (succeeded5) score += 3;
+  }
+
+  // Gate F -> DRAW SITE 6: opponent's OWN rooted (Ingrain) flag.
+  if (input.attackerIsRooted) {
+    const draw6 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw6`);
+    rng = draw6.after;
+    ordinal += 1;
+    const succeeded6 = draw6.randomValue % 256 >= 128;
+    draws.push(Object.freeze({ ...draw6, kind: "evasion-up-roll-6" as const, succeeded: succeeded6 }));
+    if (succeeded6) score += 2;
+  }
+
+  // Gate G -> DRAW SITE 7: target cursed.
+  if (input.targetIsCursed) {
+    const draw7 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw7`);
+    rng = draw7.after;
+    ordinal += 1;
+    const succeeded7 = draw7.randomValue % 256 >= 70;
+    draws.push(Object.freeze({ ...draw7, kind: "evasion-up-roll-7" as const, succeeded: succeeded7 }));
+    if (succeeded7) score += 3;
+  }
+
+  // Gate H: opponent's own HP > 70% -- clean stop, skips the entire tail.
+  if (attackerHpPercent > 70) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+  }
+  // Gate I: opponent's OWN evasion stage back at neutral -- clean stop.
+  // AI_USER here, not AI_TARGET (doc §24.1 divergence 3): the operand flips
+  // because EvasionUp raises the opponent's own stat, not the target's.
+  if (input.attackerEvasionStage === DEFAULT_STAT_STAGE) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+  }
+  // Gates J/K: either battler <40% HP skips DRAW SITE 8, deterministic -2.
+  if (attackerHpPercent < 40 || targetHpPercent < 40) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score - 2 });
+  }
+  // DRAW SITE 8: OPPOSITE polarity -- jump (roll<70) is the no-op; falling
+  // through (roll>=70) is what applies the -2 (same shape as AccuracyDown's
+  // own DRAW SITE 7).
+  const draw8 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw8`);
+  rng = draw8.after;
+  const succeeded8 = draw8.randomValue % 256 >= 70;
+  draws.push(Object.freeze({ ...draw8, kind: "evasion-up-roll-8" as const, succeeded: succeeded8 }));
+  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: succeeded8 ? score - 2 : score });
+}
+
+/** `AI_CV_SunnyDay`'s own "other three" weather values (excludes its own type, Sun) -- doc §25.2. */
+const SUNNY_DAY_OTHER_THREE: ReadonlySet<AiWeatherValue> = new Set([AI_WEATHER_HAIL, AI_WEATHER_RAIN, AI_WEATHER_SANDSTORM]);
+/** `AI_CV_Hail`'s own "other three" weather values (excludes its own type, Hail) -- doc §25.2. */
+const HAIL_OTHER_THREE: ReadonlySet<AiWeatherValue> = new Set([AI_WEATHER_SUN, AI_WEATHER_RAIN, AI_WEATHER_SANDSTORM]);
+/** `AI_CV_RainDance`'s own "other three" weather values (excludes its own type, Rain) -- doc §25.2. */
+const RAIN_DANCE_OTHER_THREE: ReadonlySet<AiWeatherValue> = new Set([AI_WEATHER_HAIL, AI_WEATHER_SUN, AI_WEATHER_SANDSTORM]);
+
+/**
+ * Shared Gate H / weather-chain span for `AI_CV_SunnyDay`/`Hail` (their
+ * entire body) and `AI_CV_RainDance` (everything between its own Gate P/S
+ * prologue and Gate R tail), per doc §25.8's own named factoring:
+ *
+ * ```
+ * if_hp_less_than AI_USER, 40, ScoreDown1   ; Gate H (own HP)
+ * get_weather
+ * if_equal <other #1>, Bonus                 ; Gate W1
+ * if_equal <other #2>, Bonus                 ; Gate W2
+ * if_equal <other #3>, Bonus                 ; Gate W3
+ * goto End                                    ; own weather / none -> 0 (RainDance: falls to Gate R instead)
+ * Bonus: score +1; goto End
+ * ScoreDown1: score -1
+ * ```
+ *
+ * Zero `if_random_less_than` anywhere in this span (doc §25.2/§25.4) -- pure
+ * function of HP% and weather, no RNG threading needed.
+ */
+function weatherSetterCvScore(input: Readonly<{
+  attackerHp: number;
+  attackerMaxHp: number;
+  currentWeather: AiWeatherValue | undefined;
+  otherThree: ReadonlySet<AiWeatherValue>;
+}>): 1 | 0 | -1 {
+  const hpPercent = Math.floor((100 * input.attackerHp) / input.attackerMaxHp);
+  if (hpPercent < 40) return -1;
+  if (input.currentWeather !== undefined && input.otherThree.has(input.currentWeather)) return 1;
+  return 0;
+}
+
+/**
+ * `AI_CV_SunnyDay` (`data/battle_ai_scripts.s:2060-2075`, doc §25.2) -- the
+ * whole body is `weatherSetterCvScore`'s shared span, own type Sun excluded.
+ */
+function runCvSunnyDay(input: Readonly<{
+  rng: BattleRngState;
+  attackerHp: number;
+  attackerMaxHp: number;
+  currentWeather: AiWeatherValue | undefined;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const scoreDelta = weatherSetterCvScore({
+    attackerHp: input.attackerHp,
+    attackerMaxHp: input.attackerMaxHp,
+    currentWeather: input.currentWeather,
+    otherThree: SUNNY_DAY_OTHER_THREE,
+  });
+  return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta });
+}
+
+/**
+ * `AI_CV_Hail` (`data/battle_ai_scripts.s:2261-2276`, doc §25.2) --
+ * `SunnyDay`'s exact twin: same `weatherSetterCvScore` span, own type Hail
+ * excluded instead of Sun.
+ */
+function runCvHail(input: Readonly<{
+  rng: BattleRngState;
+  attackerHp: number;
+  attackerMaxHp: number;
+  currentWeather: AiWeatherValue | undefined;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const scoreDelta = weatherSetterCvScore({
+    attackerHp: input.attackerHp,
+    attackerMaxHp: input.attackerMaxHp,
+    currentWeather: input.currentWeather,
+    otherThree: HAIL_OTHER_THREE,
+  });
+  return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta });
+}
+
+/**
+ * `AI_CV_RainDance` (`data/battle_ai_scripts.s:2037-2058`, doc §25.2) -- the
+ * one weather-trio sibling that genuinely diverges (7 conditional
+ * instructions vs `SunnyDay`/`Hail`'s 4):
+ *
+ * ```
+ * AI_CV_RainDance:
+ *     if_user_faster AI_CV_RainDance2         ; Gate P (relative Speed)
+ *     get_ability AI_USER
+ *     if_equal ABILITY_SWIFT_SWIM, AI_CV_RainDance3   ; Gate S (bypass)
+ * AI_CV_RainDance2:
+ *     <weatherSetterCvScore span, own type Rain excluded>   ; Gate H/W1/W2/W3
+ *     get_ability AI_USER
+ *     if_equal ABILITY_RAIN_DISH, AI_CV_RainDance3    ; Gate R (tail bonus)
+ *     goto End
+ * AI_CV_RainDance3: score +1
+ * ```
+ *
+ * Gate P (`if_user_faster` = `if_user_goes 0`, doc §25.3): jumps straight to
+ * the shared span (Gate H) whenever `GetWhoStrikesFirst(AI_USER, AI_TARGET,
+ * tieRoll)` returns exactly 0 -- AI_USER strictly faster, OR a genuine speed
+ * tie broken to AI_USER (`strikesFirst === 0`, the SAME
+ * `getWhoStrikesFirst`/tie-break-`Random()` machinery `runCvSpeedDown`'s own
+ * `target-faster-tie` already ports, inverse comparison target). Only when
+ * AI_USER is NOT faster does Gate S run: a direct (non-guessing) own-ability
+ * read for Swift Swim, which bypasses the HP gate and weather chain entirely
+ * with a deterministic `+1` (a slower Swift-Swim user turns faster in Rain).
+ * Falling through the shared span without a HP/weather hit (own weather is
+ * already Rain, or none) reaches Gate R: a second own-ability read for Rain
+ * Dish, `+1` if present (can coexist with `AI_CBM_RainDance`'s own `-8` when
+ * weather is already Rain -- CBM/CV are independent score contributions, doc
+ * §25.6 item 2), else `0`.
+ */
+function runCvRainDance(input: Readonly<{
+  rng: BattleRngState;
+  attacker: FactoryAiCheckViabilityBattler;
+  target: FactoryAiCheckViabilityBattler;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+
+  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
+  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+
+  let tieRoll = 0;
+  let tieDraw: ReturnType<typeof nextDraw> | null = null;
+  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-user-faster-tie`);
+    rng = tieDraw.after;
+    tieRoll = tieDraw.randomValue;
+    ordinal += 1;
+  }
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  if (tieDraw) {
+    draws.push(Object.freeze({ ...tieDraw, kind: "user-faster-tie" as const, strikesFirst }));
+  }
+  // Gate P: if_user_faster = if_user_goes 0 -- jumps on EXACTLY 0 (user
+  // strictly faster, or a tie broken to the user).
+  const userFaster = strikesFirst === 0;
+  const ownAbility = input.attacker.ability ?? "ABILITY_NONE";
+
+  if (!userFaster && ownAbility === "ABILITY_SWIFT_SWIM") {
+    // Gate S bypass: +1, HP gate and weather chain never reached.
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: 1 });
+  }
+
+  const spanScore = weatherSetterCvScore({
+    attackerHp: input.attacker.hp,
+    attackerMaxHp: input.attacker.maxHp,
+    currentWeather: input.attacker.currentWeather,
+    otherThree: RAIN_DANCE_OTHER_THREE,
+  });
+  if (spanScore !== 0) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: spanScore });
+  }
+  // Span fell all the way through (own HP >= 40%, weather didn't match) --
+  // Gate R tail: own ability == Rain Dish.
+  const rainDish = ownAbility === "ABILITY_RAIN_DISH";
+  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: rainDish ? 1 : 0 });
+}
+
 /** `AI_CheckViability` for one move slot (`:652-775` dispatch shell only). */
 export function runCheckViability(input: Readonly<{
   rng: BattleRngState;
@@ -1893,6 +2487,23 @@ export function runCheckViability(input: Readonly<{
       rng: speedDown.rng,
       draws: speedDown.draws,
       scoreDelta: speedDown.scoreDelta,
+    });
+  }
+
+  if (move.effect === "EFFECT_SPEED_DOWN_HIT") {
+    const speedDownFromChance = runCvSpeedDownFromChance({
+      rng: input.rng,
+      moveId: input.moveId,
+      attacker: input.attacker,
+      target: input.target,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: speedDownFromChance.rng,
+      draws: speedDownFromChance.draws,
+      scoreDelta: speedDownFromChance.scoreDelta,
     });
   }
 
@@ -2184,6 +2795,107 @@ export function runCheckViability(input: Readonly<{
       rng: reflect.rng,
       draws: reflect.draws,
       scoreDelta: reflect.scoreDelta,
+    });
+  }
+
+  if (
+    move.effect === "EFFECT_EVASION_UP"
+    || move.effect === "EFFECT_EVASION_UP_2"
+    || move.effect === "EFFECT_MINIMIZE"
+  ) {
+    // The eleventh CBM-blocked pair's own CV half (doc §24) -- EFFECT_MINIMIZE
+    // dispatches to the identical AI_CV_EvasionUp despite being
+    // blocked-on-opcodes for move execution itself (doc §24.7), unrelated to
+    // this AI-decision port.
+    const evasionUp = runCvEvasionUp({
+      rng: input.rng,
+      attackerHp: input.attacker.hp,
+      attackerMaxHp: input.attacker.maxHp,
+      attackerEvasionStage: input.attacker.evasionStage,
+      attackerIsRooted: input.attacker.isRooted ?? false,
+      targetHp: input.target.hp,
+      targetMaxHp: input.target.maxHp,
+      targetIsToxicPoisoned: input.target.isToxicPoisoned ?? false,
+      targetIsLeechSeeded: input.target.isLeechSeeded ?? false,
+      targetIsCursed: input.target.isCursed ?? false,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: evasionUp.rng,
+      draws: evasionUp.draws,
+      scoreDelta: evasionUp.scoreDelta,
+    });
+  }
+
+  if (move.effect === "EFFECT_EVASION_DOWN" || move.effect === "EFFECT_EVASION_DOWN_2") {
+    // The eleventh CBM-blocked pair's other CV half (doc §24).
+    const evasionDown = runCvEvasionDown({
+      rng: input.rng,
+      attackerHp: input.attacker.hp,
+      attackerMaxHp: input.attacker.maxHp,
+      targetEvasionStage: input.target.evasionStage,
+      targetHp: input.target.hp,
+      targetMaxHp: input.target.maxHp,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: evasionDown.rng,
+      draws: evasionDown.draws,
+      scoreDelta: evasionDown.scoreDelta,
+    });
+  }
+
+  if (move.effect === "EFFECT_SUNNY_DAY") {
+    // The weather trio's second CV half (doc §25) -- AI_USER's own HP/weather only.
+    const sunnyDay = runCvSunnyDay({
+      rng: input.rng,
+      attackerHp: input.attacker.hp,
+      attackerMaxHp: input.attacker.maxHp,
+      currentWeather: input.attacker.currentWeather,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: sunnyDay.rng,
+      draws: sunnyDay.draws,
+      scoreDelta: sunnyDay.scoreDelta,
+    });
+  }
+
+  if (move.effect === "EFFECT_HAIL") {
+    // The weather trio's third CV half (doc §25).
+    const hail = runCvHail({
+      rng: input.rng,
+      attackerHp: input.attacker.hp,
+      attackerMaxHp: input.attacker.maxHp,
+      currentWeather: input.attacker.currentWeather,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: hail.rng,
+      draws: hail.draws,
+      scoreDelta: hail.scoreDelta,
+    });
+  }
+
+  if (move.effect === "EFFECT_RAIN_DANCE") {
+    // The twelfth (weather-trio) CBM-blocked pair's own CV third (doc §25) --
+    // the one sibling with its own bespoke Speed/ability-reading prologue and tail.
+    const rainDance = runCvRainDance({
+      rng: input.rng,
+      attacker: input.attacker,
+      target: input.target,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: rainDance.rng,
+      draws: rainDance.draws,
+      scoreDelta: rainDance.scoreDelta,
     });
   }
 

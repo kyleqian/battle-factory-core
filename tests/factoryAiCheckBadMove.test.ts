@@ -1130,3 +1130,329 @@ describe("AI_CBM_LightScreen / AI_CBM_Reflect (docs/factory-ai-checkviability-gr
     expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
   });
 });
+
+// data/battle_ai_scripts.s:273-275, docs/factory-ai-checkviability-ground-truth.md
+// §24.1: the eleventh CBM-blocked pair's own CBM half -- byte-for-byte the
+// same bare 2-instruction MAX_STAT_STAGE-on-AI_USER's-own-stage shape as
+// AI_CBM_AttackUp/DefenseUp/SpeedUp/SpAtkUp with STAT_EVASION swapped in.
+describe("AI_CBM_EvasionUp (docs/factory-ai-checkviability-ground-truth.md §24.1)", () => {
+  const MOVE_DOUBLE_TEAM = 104; // EFFECT_EVASION_UP
+  const MOVE_MINIMIZE = 107; // EFFECT_MINIMIZE -- shares this same single-stat handler
+
+  // Single-ability (Sturdy) target, same rationale as the AttackUp/DefenseUp/
+  // BulkUp block's own SHUCKLE above -- isolates the zero-RNG gate from the
+  // universal preamble's own soundproof guess.
+  const SHUCKLE: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 213,
+    types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+    knownAbility: null,
+    realAbility: "ABILITY_STURDY",
+    speedStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+  });
+
+  function withEvasionAttacker(evasionStage: number): FactoryAiCheckBadMoveAttacker {
+    return Object.freeze({ atkStage: 6, defStage: 6, evasionStage });
+  }
+
+  it.each([
+    ["Double Team (EFFECT_EVASION_UP)", MOVE_DOUBLE_TEAM],
+    ["Minimize (EFFECT_MINIMIZE, shares this same handler per doc §24.1/§24.7)", MOVE_MINIMIZE],
+  ])("%s scores -10 with zero draws when AI_USER's own EVASION stage is already MAX_STAT_STAGE (12)", (_label, moveId) => {
+    const result = run(moveId, SHUCKLE, undefined, withEvasionAttacker(12));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it.each([11, 7, 6, 0])("scores 0 with zero draws when AI_USER's own EVASION stage is %i (not maxed)", (evasionStage) => {
+    const result = run(MOVE_DOUBLE_TEAM, SHUCKLE, undefined, withEvasionAttacker(evasionStage));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("omitted evasionStage defaults to DEFAULT_STAT_STAGE (6), not MAX_STAT_STAGE -- scores 0", () => {
+    const result = run(MOVE_DOUBLE_TEAM, SHUCKLE, undefined, Object.freeze({ atkStage: 6, defStage: 6 }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+
+  it("EFFECT_EVASION_UP_2 is a vestigial constant with zero real moves (doc §24.7) -- not independently testable through a real move ID, confirmed absent from the generated move table", () => {
+    expect([...MOVES_BY_ID.values()].some((m) => m.effect === "EFFECT_EVASION_UP_2")).toBe(false);
+  });
+});
+
+// data/battle_ai_scripts.s:306-312, docs/factory-ai-checkviability-ground-truth.md
+// §24.1: the eleventh CBM-blocked pair's other CBM half -- the same bare
+// MIN_STAT_STAGE-gate-plus-shared-tail shape AI_CBM_DefenseDown/SpDefDown
+// already established (no own-ability short-circuit like AttackDown/AccDown's
+// Hyper Cutter/Keen Eye -- no dedicated evasion-immunity ability in Gen 3).
+describe("AI_CBM_EvasionDown + CheckIfAbilityBlocksStatChange (docs/factory-ai-checkviability-ground-truth.md §24.1)", () => {
+  const MOVE_SWEET_SCENT = 230; // EFFECT_EVASION_DOWN
+
+  const SHUCKLE: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 213,
+    types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+    knownAbility: null,
+    realAbility: "ABILITY_STURDY",
+    speedStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+    evasionStage: 6,
+  });
+
+  it("scores -10 with zero draws when the target's EVASION stage is already MIN_STAT_STAGE", () => {
+    const atMinEvasion: FactoryAiCheckBadMoveTarget = { ...SHUCKLE, evasionStage: 0 };
+    const result = run(MOVE_SWEET_SCENT, atMinEvasion);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("defaults an omitted evasionStage to DEFAULT_STAT_STAGE (6), not MIN_STAT_STAGE -- doesn't short-circuit", () => {
+    const { evasionStage: _omit, ...withoutEvasionStage } = SHUCKLE;
+    const result = run(MOVE_SWEET_SCENT, withoutEvasionStage as FactoryAiCheckBadMoveTarget);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+
+  it("an ambiguous two-ability target (neither ability is Clear Body nor White Smoke) draws exactly twice -- the universal preamble's own soundproof guess, plus the shared tail's own -- and scores 0", () => {
+    const ambiguous: FactoryAiCheckBadMoveTarget = {
+      species: 193,
+      types: ["TYPE_BUG", "TYPE_FLYING"],
+      knownAbility: null,
+      realAbility: "ABILITY_SPEED_BOOST",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      evasionStage: 6,
+    };
+    const result = run(MOVE_SWEET_SCENT, ambiguous);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(2);
+    expect(result.draws.map((d) => d.reason)).toEqual([
+      "test-slot-soundproof",
+      "test-slot-evasion-down-shared-tail",
+    ]);
+  });
+
+  it("scores -10 when the shared tail's known ability is Clear Body, zero draws", () => {
+    const knownClearBody: FactoryAiCheckBadMoveTarget = {
+      species: 72, // SPECIES_TENTACOOL: Clear Body / Liquid Ooze
+      types: ["TYPE_WATER", "TYPE_POISON"],
+      knownAbility: "ABILITY_CLEAR_BODY",
+      realAbility: "ABILITY_CLEAR_BODY",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      evasionStage: 6,
+    };
+    const result = run(MOVE_SWEET_SCENT, knownClearBody);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("scores -10 with zero draws for a single-ability White Smoke target (shared tail's own free guess)", () => {
+    const whiteSmoke: FactoryAiCheckBadMoveTarget = {
+      species: 321, // SPECIES_TORKOAL: White Smoke is its only ability
+      types: ["TYPE_FIRE", "TYPE_FIRE"],
+      knownAbility: null,
+      realAbility: "ABILITY_WHITE_SMOKE",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      evasionStage: 6,
+    };
+    const result = run(MOVE_SWEET_SCENT, whiteSmoke);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("EFFECT_EVASION_DOWN_2 is a vestigial constant with zero real moves (doc §24.7) -- not independently testable through a real move ID, confirmed absent from the generated move table", () => {
+    expect([...MOVES_BY_ID.values()].some((m) => m.effect === "EFFECT_EVASION_DOWN_2")).toBe(false);
+  });
+
+  it("still barriers every other reachable CBM handler untouched by this narrowing (pass-through, EFFECT_HAZE)", () => {
+    const result = run(MOVE_HAZE, SHUCKLE);
+    expect(result).toMatchObject({
+      kind: "unsupported-branch",
+      barrier: "factory-ai-check-bad-move",
+      effect: "EFFECT_HAZE",
+    });
+  });
+});
+
+// data/battle_ai_scripts.s:490-493/:495-498/:522-525, docs/factory-ai-
+// checkviability-ground-truth.md §25.1: the twelfth and final CBM-blocked
+// pair's own CBM third -- three separately named dispatch targets, but
+// byte-for-byte identical 3-instruction bodies (`get_weather; if_equal
+// <OWN>, Score_Minus8; end`). Zero get_ability/stat-stage reads at all, so
+// the SHUCKLE target above (irrelevant to this handler) still works fine.
+describe("AI_CBM_RainDance / AI_CBM_SunnyDay / AI_CBM_Hail (docs/factory-ai-checkviability-ground-truth.md §25.1)", () => {
+  const MOVE_RAIN_DANCE = 240;
+  const MOVE_SUNNY_DAY = 241;
+  const MOVE_HAIL = 258;
+
+  const SHUCKLE: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 213,
+    types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+    knownAbility: null,
+    realAbility: "ABILITY_STURDY",
+    speedStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+  });
+
+  function withWeather(currentWeather: 0 | 1 | 2 | 3 | undefined): FactoryAiCheckBadMoveAttacker {
+    return Object.freeze({ atkStage: 6, defStage: 6, currentWeather });
+  }
+
+  it.each([
+    ["AI_CBM_RainDance", MOVE_RAIN_DANCE, 1 as const],
+    ["AI_CBM_SunnyDay", MOVE_SUNNY_DAY, 0 as const],
+    ["AI_CBM_Hail", MOVE_HAIL, 3 as const],
+  ])("%s scores -8 with zero draws when current weather already equals the move's own type", (_label, moveId, ownWeather) => {
+    const result = run(moveId, SHUCKLE, undefined, withWeather(ownWeather));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -8 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it.each([
+    ["AI_CBM_RainDance", MOVE_RAIN_DANCE, 1 as const],
+    ["AI_CBM_SunnyDay", MOVE_SUNNY_DAY, 0 as const],
+    ["AI_CBM_Hail", MOVE_HAIL, 3 as const],
+  ])("%s scores 0 when current weather is a DIFFERENT weather (cross-weather irrelevance)", (_label, moveId, ownWeather) => {
+    // Pick any weather constant that isn't this handler's own.
+    const other = ([0, 1, 2, 3] as const).find((w) => w !== ownWeather)!;
+    const result = run(moveId, SHUCKLE, undefined, withWeather(other));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+
+  it.each([
+    ["AI_CBM_RainDance", MOVE_RAIN_DANCE],
+    ["AI_CBM_SunnyDay", MOVE_SUNNY_DAY],
+    ["AI_CBM_Hail", MOVE_HAIL],
+  ])("%s scores 0 with zero draws when currentWeather is omitted (no weather bit set)", (_label, moveId) => {
+    const result = run(moveId, SHUCKLE, undefined, withWeather(undefined));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("the three bodies are byte-for-byte identical shape (doc §25.1) -- confirmed by cross-handler parity: RainDance under Sun scores the same as SunnyDay under Sun would under RainDance's own constant swapped in", () => {
+    // RainDance's own weather (Rain=1) does nothing to SunnyDay (own weather Sun=0);
+    // conversely Sun does nothing to RainDance. Parity check: swapping the
+    // move AND the weather together reproduces the -8/0 split symmetrically.
+    const rainUnderRain = run(MOVE_RAIN_DANCE, SHUCKLE, undefined, withWeather(1));
+    const sunnyUnderSun = run(MOVE_SUNNY_DAY, SHUCKLE, undefined, withWeather(0));
+    const hailUnderHail = run(MOVE_HAIL, SHUCKLE, undefined, withWeather(3));
+    expect(rainUnderRain).toMatchObject({ kind: "scored", scoreDelta: -8 });
+    expect(sunnyUnderSun).toMatchObject({ kind: "scored", scoreDelta: -8 });
+    expect(hailUnderHail).toMatchObject({ kind: "scored", scoreDelta: -8 });
+  });
+
+  // `get_weather`'s own stale-`funcResult` bug, Channel 1 (ground truth doc
+  // §25.10.1/.3, ISSUES #47): on a genuinely weatherless dispatch
+  // (currentWeather === undefined), get_weather reads whatever the universal
+  // preamble's own get_ability AI_TARGET call (the soundproof check, same
+  // script, same slot) left behind -- the target's real ability ID, not a
+  // clean "no weather" sentinel. Mechanism-level cases below force a specific
+  // ability via `knownAbility` (bypassing species lookup, zero draws either
+  // way) to cover all four IDs the AI_WEATHER_* range can ever collide with
+  // (0-3); the species-level cases after that reproduce §25.10.2's own two
+  // live fixtures verbatim (Ninjask id 3, Anorith id 4).
+  describe("get_weather's own stale-funcResult bug, Channel 1: universal preamble's get_ability AI_TARGET leaks into a weatherless read (doc §25.10)", () => {
+    function knownAbilityTarget(knownAbility: string): FactoryAiCheckBadMoveTarget {
+      return { ...SHUCKLE, knownAbility };
+    }
+
+    it.each([
+      ["AI_CBM_SunnyDay", MOVE_SUNNY_DAY, "ABILITY_NONE"], // id 0 == AI_WEATHER_SUN
+      ["AI_CBM_RainDance", MOVE_RAIN_DANCE, "ABILITY_STENCH"], // id 1 == AI_WEATHER_RAIN
+      ["AI_CBM_Hail", MOVE_HAIL, "ABILITY_SPEED_BOOST"], // id 3 == AI_WEATHER_HAIL
+    ])("%s scores -8 with zero draws when weatherless and the target's ability ID collides with its own weather constant", (_label, moveId, knownAbility) => {
+      const result = run(moveId, knownAbilityTarget(knownAbility), undefined, withWeather(undefined));
+      expect(result).toMatchObject({ kind: "scored", scoreDelta: -8 });
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(0);
+    });
+
+    it.each([
+      ["AI_CBM_RainDance", MOVE_RAIN_DANCE],
+      ["AI_CBM_SunnyDay", MOVE_SUNNY_DAY],
+      ["AI_CBM_Hail", MOVE_HAIL],
+    ])("%s stays 0 when weatherless and the target's ability ID (2, Drizzle) collides with none of the three CBM handlers' own constant (Sandstorm is never a CBM-checked type)", (_label, moveId) => {
+      const result = run(moveId, knownAbilityTarget("ABILITY_DRIZZLE"), undefined, withWeather(undefined));
+      expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    });
+
+    it("AI_CBM_Hail stays 0 when weatherless and the target's colliding ability ID belongs to a DIFFERENT handler's own constant (id 1 == Rain, not Hail)", () => {
+      const result = run(MOVE_HAIL, knownAbilityTarget("ABILITY_STENCH"), undefined, withWeather(undefined));
+      expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    });
+
+    // Real Factory-reachable species, reproducing §25.10.2's own two live
+    // fixtures' CBM-side contribution exactly (both single-ability species,
+    // so nextGetAbilityDraw's own species lookup returns ability0 directly,
+    // zero draws -- no `knownAbility` override needed).
+    const NINJASK: FactoryAiCheckBadMoveTarget = Object.freeze({
+      species: 302,
+      types: ["TYPE_BUG", "TYPE_FLYING"] as const,
+      knownAbility: null,
+      realAbility: "ABILITY_SPEED_BOOST",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+    });
+    const ANORITH: FactoryAiCheckBadMoveTarget = Object.freeze({
+      species: 390,
+      types: ["TYPE_ROCK", "TYPE_BUG"] as const,
+      knownAbility: null,
+      realAbility: "ABILITY_BATTLE_ARMOR",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+    });
+
+    it("`hail-staleweather-collision` (doc §25.10.2): Ninjask (Speed Boost, id 3) weatherless -- AI_CBM_Hail scores -8 with zero draws, the collision's own CBM contribution to the ROM's live net -7", () => {
+      const result = run(MOVE_HAIL, NINJASK, undefined, withWeather(undefined));
+      expect(result).toMatchObject({ kind: "scored", scoreDelta: -8 });
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(0);
+    });
+
+    it.each([
+      ["AI_CBM_RainDance", MOVE_RAIN_DANCE],
+      ["AI_CBM_SunnyDay", MOVE_SUNNY_DAY],
+    ])("%s stays 0 for the same weatherless Ninjask target -- the collision is Hail-specific (id 3 matches only AI_WEATHER_HAIL)", (_label, moveId) => {
+      const result = run(moveId, NINJASK, undefined, withWeather(undefined));
+      expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    });
+
+    it("`hail-staleweather-control` (doc §25.10.2): Anorith (Battle Armor, id 4) weatherless -- outside the 0-3 collision range, AI_CBM_Hail stays 0, silencing this channel so the ROM's live net +1 is Channel 2 alone", () => {
+      const result = run(MOVE_HAIL, ANORITH, undefined, withWeather(undefined));
+      expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(0);
+    });
+
+    it("a genuinely set weather always wins over the stale ability read, even for a colliding-ID target (Ninjask, id 3) -- the clean path is untouched", () => {
+      const realRain = run(MOVE_RAIN_DANCE, NINJASK, undefined, withWeather(1));
+      const realSandstormAgainstHail = run(MOVE_HAIL, NINJASK, undefined, withWeather(2));
+      expect(realRain).toMatchObject({ kind: "scored", scoreDelta: -8 }); // real weather == RainDance's own type
+      expect(realSandstormAgainstHail).toMatchObject({ kind: "scored", scoreDelta: 0 }); // real weather != Hail's own type
+    });
+  });
+});
