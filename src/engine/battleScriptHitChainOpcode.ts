@@ -153,7 +153,7 @@ const SPECIES_FARFETCHD = 83;
 const SPECIES_CHANSEY = 113;
 
 /** hold_effects.h ids (item-hold-effects.json's `holdEffectId`). */
-const HOLD_EFFECT_ID_FOCUS_BAND = 39;
+export const HOLD_EFFECT_ID_FOCUS_BAND = 39;
 const HOLD_EFFECT_ID_SCOPE_LENS = 41;
 const HOLD_EFFECT_ID_LUCKY_PUNCH = 63;
 const HOLD_EFFECT_ID_STICK = 66;
@@ -360,6 +360,8 @@ const PRINTFROMTABLE_TABLES: Readonly<Record<string, readonly string[]>> = Objec
     "STRINGID_PKMNTRAPPEDINVORTEX",
     "STRINGID_PKMNTRAPPEDBYSANDTOMB",
   ]),
+  /** battle_message.c:1108-1111 -- BattleScript_KOFail's own table (Cmd_tryKO, battleScriptTryKOOpcode.ts), B_MSG_KO_MISS(0)/KO_UNAFFECTED(1). */
+  gKOFailedStringIds: Object.freeze(["STRINGID_ATTACKMISSED", "STRINGID_PKMNUNAFFECTED"]),
 });
 
 const MOVE_EFFECT_LABEL_BY_BYTE: Readonly<Record<number, string>> = Object.freeze({
@@ -634,17 +636,52 @@ function jumpToMissTarget(
 }
 
 /**
- * JumpIfMoveFailed's "not failed" branch: TrySetDestinyBondToHappen
- * (battle_util.c:8285-8294, fully modeled) plus AbilityBattleEffects
- * (ABILITYEFFECT_ABSORBING, ...) -- that switch (battle_util.c:2679-2729)
- * only special-cases three abilities (Volt Absorb/Water Absorb/Flash Fire,
- * each needing a full HP-drain/immunity redirect this engine does not model
- * yet); every other ability -- including ABILITY_NONE -- falls through with
- * `effect` staying 0, so `AbilityBattleEffects` returns FALSE and
- * `JumpIfMoveFailed` proceeds exactly like the none-ability case. Barriering
- * only the three real switch cases (not "any nonzero ability") matters here:
- * Attract's own Oblivious block (`Cmd_tryinfatuating`, a later opcode in the
- * same script) needs to walk straight through this accuracycheck first.
+ * TrySetDestinyBondToHappen (battle_script_commands.c:8285-8294): sets the
+ * shared per-action `hitMarker`'s `HITMARKER_DESTINYBOND` bit (consumed later
+ * by `Cmd_tryfaintmon`'s own barrier, `:3184` in this file) when the TARGET
+ * currently carries `STATUS2_DESTINY_BOND` (from using the move on some
+ * earlier turn), the two battlers are on opposite sides, and no Grudge has
+ * already consumed this hitmarker slot this action. Exported so both of
+ * TrySetDestinyBondToHappen's two real call sites -- `JumpIfMoveFailed`'s
+ * "not failed" branch below (every `ACC_CURR_MOVE` accuracycheck site) and
+ * the standalone `Cmd_trysetdestinybondtohappen` opcode
+ * (`battleScriptTrysetdestinybondtohappenOpcode.ts`, `BattleScript_EffectOHKO`'s
+ * own post-tryKO call, needed because OHKO's `NO_ACC_CALC_CHECK_LOCK_ON`
+ * accuracycheck bypass never reaches `JumpIfMoveFailed` at all) -- share one
+ * provably-identical implementation. Previously this miscomputed the write as
+ * the ATTACKER's own `status2 |= STATUS2_DESTINY_BOND` (a different field
+ * entirely, and never read by anything -- `Cmd_tryfaintmon` reads
+ * `hitMarker`, not any battler's `status2`); harmless today only because
+ * `EFFECT_DESTINY_BOND` itself is unregistered, so no committed script could
+ * ever make the target's `STATUS2_DESTINY_BOND` true. Fixed here rather than
+ * carried forward, since this step needs the exact same computation for real.
+ */
+export function applyTrySetDestinyBondToHappen(
+  rulesContext: BattleScriptRulesContext,
+  attacker: BattleScriptBattlerId,
+  target: BattleScriptBattlerId,
+): BattleScriptRulesContext {
+  const attackerBattler = rulesContext.battlers[attacker];
+  const targetBattler = rulesContext.battlers[target];
+  const destinyBond = (targetBattler.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_DESTINY_BOND) !== 0
+    && attackerBattler.side !== targetBattler.side
+    && (rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_GRUDGE) === 0;
+  if (!destinyBond) return rulesContext;
+  return Object.freeze({ ...rulesContext, hitMarker: (rulesContext.hitMarker | HITMARKER_DESTINYBOND) >>> 0 });
+}
+
+/**
+ * JumpIfMoveFailed's "not failed" branch: TrySetDestinyBondToHappen (above)
+ * plus AbilityBattleEffects (ABILITYEFFECT_ABSORBING, ...) -- that switch
+ * (battle_util.c:2679-2729) only special-cases three abilities (Volt Absorb/
+ * Water Absorb/Flash Fire, each needing a full HP-drain/immunity redirect
+ * this engine does not model yet); every other ability -- including
+ * ABILITY_NONE -- falls through with `effect` staying 0, so
+ * `AbilityBattleEffects` returns FALSE and `JumpIfMoveFailed` proceeds
+ * exactly like the none-ability case. Barriering only the three real switch
+ * cases (not "any nonzero ability") matters here: Attract's own Oblivious
+ * block (`Cmd_tryinfatuating`, a later opcode in the same script) needs to
+ * walk straight through this accuracycheck first.
  */
 function advancePastAccuracyCheck(
   context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
@@ -653,7 +690,6 @@ function advancePastAccuracyCheck(
   target: BattleScriptBattlerId,
   rng: BattleScriptRngState,
 ): BattleScriptCommandTransition<BattleScriptRulesContext> {
-  const attackerBattler = rulesContext.battlers[attacker];
   const targetBattler = rulesContext.battlers[target];
   if (
     targetBattler.ability === ABILITY_VOLT_ABSORB
@@ -668,16 +704,7 @@ function advancePastAccuracyCheck(
       1020,
     );
   }
-  const sideAttacker = attackerBattler.side;
-  const sideTarget = targetBattler.side;
-  const destinyBond = (targetBattler.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_DESTINY_BOND) !== 0
-    && sideAttacker !== sideTarget
-    && (rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_GRUDGE) === 0;
-  const nextRulesContext = destinyBond
-    ? withBattler(rulesContext, attacker, {
-      status2: (attackerBattler.status2 | BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_DESTINY_BOND) >>> 0,
-    })
-    : rulesContext;
+  const nextRulesContext = applyTrySetDestinyBondToHappen(rulesContext, attacker, target);
   return transitionBattleScriptCommand(
     context,
     Object.freeze({ kind: "advance" }),
@@ -2131,11 +2158,16 @@ type ResultMessageOutcome =
  * Cmd_resultmessage's stringId selection (battle_script_commands.c:2063-2128):
  * a switch on exact single-flag values, falling to a default if-chain of bit
  * tests when the flags don't exactly match one case (both phases modeled
- * here, in the source's own priority order). MOVE_RESULT_ONE_HIT_KO and
- * MOVE_RESULT_FOE_HUNG_ON are barriered -- both subsystems (BattleScript_
- * OneHitKOMsg's OHKO handling, BattleScript_FocusBandActivates' gLastUsedItem/
- * gPotentialItemEffectBattler) are unmodeled anywhere in this engine, gated
- * strictly on the corresponding flag bit actually being set.
+ * here, in the source's own priority order). The exact-match
+ * MOVE_RESULT_ONE_HIT_KO case is a plain `STRINGID_ONEHITKO` print (source
+ * never pushes a cursor here, unlike its combined-bits sibling below) --
+ * now that Cmd_tryKO/EFFECT_OHKO are registered (this step), this is a real
+ * reachable case, not a barrier. MOVE_RESULT_FOE_HUNG_ON stays barriered:
+ * BattleScript_FocusBandActivates' gLastUsedItem/gPotentialItemEffectBattler
+ * subsystem remains unmodeled anywhere in this engine (Cmd_tryKO's own
+ * Focus Band branch is itself a named barrier, so no committed script can
+ * make this flag combination true yet, but the case stays a named barrier
+ * rather than silently omitted).
  */
 function classifyResultMessage(resultBits: number): ResultMessageOutcome {
   switch (resultBits) {
@@ -2144,11 +2176,7 @@ function classifyResultMessage(resultBits: number): ResultMessageOutcome {
     case MOVE_RESULT_NOT_VERY_EFFECTIVE:
       return Object.freeze({ kind: "string", stringId: "STRINGID_NOTVERYEFFECTIVE" });
     case MOVE_RESULT_ONE_HIT_KO:
-      return Object.freeze({
-        kind: "barrier",
-        construct: "MOVE_RESULT_ONE_HIT_KO (STRINGID_ONEHITKO print path, OHKO subsystem unmodeled)",
-        sourceLine: 2071,
-      });
+      return Object.freeze({ kind: "string", stringId: "STRINGID_ONEHITKO" });
     case MOVE_RESULT_FOE_ENDURED:
       return Object.freeze({ kind: "string", stringId: "STRINGID_PKMNENDUREDHIT" });
     case BATTLE_SCRIPT_MOVE_RESULT_FAILED:
@@ -2167,9 +2195,9 @@ function classifyResultMessage(resultBits: number): ResultMessageOutcome {
       }
       if ((resultBits & MOVE_RESULT_ONE_HIT_KO) !== 0) {
         return Object.freeze({
-          kind: "barrier",
-          construct: "combined MOVE_RESULT_ONE_HIT_KO (BattleScript_OneHitKOMsg, OHKO subsystem unmodeled)",
-          sourceLine: 2095,
+          kind: "jump",
+          label: "BattleScript_OneHitKOMsg",
+          clearMask: (MOVE_RESULT_ONE_HIT_KO | MOVE_RESULT_SUPER_EFFECTIVE | MOVE_RESULT_NOT_VERY_EFFECTIVE) >>> 0,
         });
       }
       if ((resultBits & MOVE_RESULT_FOE_ENDURED) !== 0) {

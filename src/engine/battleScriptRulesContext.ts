@@ -48,6 +48,9 @@ import { createBattleScriptJumpifstatOpcodeHandlers } from "./battleScriptJumpif
 import { createBattleScriptPlaystatchangeanimationOpcodeHandlers } from "./battleScriptPlaystatchangeanimationOpcode.ts";
 import { createBattleScriptTryinfatuatingOpcodeHandlers } from "./battleScriptTryinfatuatingOpcode.ts";
 import { createBattleScriptJumpifconfusedandstatmaxedOpcodeHandlers } from "./battleScriptJumpifconfusedandstatmaxedOpcode.ts";
+import { createBattleScriptTryhealhalfhealthOpcodeHandlers } from "./battleScriptTryhealhalfhealthOpcode.ts";
+import { createBattleScriptTryKOOpcodeHandlers } from "./battleScriptTryKOOpcode.ts";
+import { createBattleScriptTrysetdestinybondtohappenOpcodeHandlers } from "./battleScriptTrysetdestinybondtohappenOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -2229,6 +2232,9 @@ export function createBattleScriptStatusRulesHandlers(
     }),
     ...createBattleScriptTryinfatuatingOpcodeHandlers(program),
     ...createBattleScriptJumpifconfusedandstatmaxedOpcodeHandlers(program),
+    ...createBattleScriptTryhealhalfhealthOpcodeHandlers(program),
+    ...createBattleScriptTryKOOpcodeHandlers(program),
+    ...createBattleScriptTrysetdestinybondtohappenOpcodeHandlers(program),
   });
 }
 

@@ -1889,14 +1889,24 @@ describe("production resultmessage (Cmd_resultmessage) dispatch", () => {
     expect(result.state.callStack.length).toBe(1);
   });
 
-  describe("(b) unsupported-branch barriers", () => {
-    it("halts on MOVE_RESULT_ONE_HIT_KO (OHKO subsystem unmodeled)", () => {
-      const rc = context(0, {}, { moveResultFlags: 1 << 4 });
-      const { result } = stepAtOpcode("B_SCR_OP_RESULTMESSAGE", rc);
-      expect(result.kind).toBe("halted");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 2071 });
-    });
+  it("MOVE_RESULT_ONE_HIT_KO alone: exact-match case prints STRINGID_ONEHITKO directly, no jump (EFFECT_OHKO registration -- this case is real now, not a barrier)", () => {
+    const rc = context(0, {}, { moveResultFlags: 1 << 4 });
+    const { result } = stepAtOpcode("B_SCR_OP_RESULTMESSAGE", rc);
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.events[0]).toMatchObject({ kind: "message", messageId: "STRINGID_ONEHITKO" });
+  });
 
+  it("MOVE_RESULT_ONE_HIT_KO combined with SUPER_EFFECTIVE: jumps (call-current) to BattleScript_OneHitKOMsg, clearing ONE_HIT_KO/SUPER_EFFECTIVE/NOT_VERY_EFFECTIVE", () => {
+    const rc = context(0, {}, { moveResultFlags: (1 << 1) | (1 << 4) });
+    const { result } = stepAtOpcode("B_SCR_OP_RESULTMESSAGE", rc);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.programCounter).toBe(labelPc("BattleScript_OneHitKOMsg"));
+    expect(result.state.rulesContext.moveResultFlags).toBe(0);
+    expect(result.state.callStack.length).toBe(1);
+  });
+
+  describe("(b) unsupported-branch barriers", () => {
     it("halts on MOVE_RESULT_FOE_HUNG_ON (Focus Band subsystem unmodeled)", () => {
       const rc = context(0, {}, { moveResultFlags: 1 << 7 });
       const { result } = stepAtOpcode("B_SCR_OP_RESULTMESSAGE", rc);
