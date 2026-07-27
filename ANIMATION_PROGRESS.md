@@ -44,39 +44,40 @@ animation. A status caused by a move is not part of that move's animation.
   presentation seam and all source- or evidence-required variants are covered.
 - No entry means unsupported.
 
-## Knock Off staged orientation exact: 59/59 dense player-orientation body (2026-07-26)
+## Knock Off opposite orientation closed; promoted to exact (2026-07-26)
 
-**Verdict:** `MOVE_KNOCK_OFF` remains **partial**, but its staged orientation
-is now exact. The complete
-move-owned Scene-ON interval (oracle frames 70-128; frames 129-130 begin the
-separately-owned generic hit blink) is **59/59 component/RAM** and **59/59
-framebuffer** through the shared seam, reproduced twice. The move itself is
-not promoted to exact because the opposite orientation remains named and
-unattempted.
+**Verdict:** `MOVE_KNOCK_OFF` promotes **partial → exact**. Its complete
+move-owned Scene-ON body is source component/RAM-exact and framebuffer-exact
+through the shared seam in both required orientations, each reproduced twice:
+player-back PLUSLE → opponent-front ONIX is **59/59** (oracle 70-128), and
+opponent-front PLUSLE → player-back ONIX is **59/59** (74-132). Census:
+**24/276 exact, 3 partial**.
 
-**Resolved display facts:** live RAM pins `gBattleAnimAttacker=0` (player) and
-`gBattleAnimTarget=1` (opponent). The lunge moves the player; the slide-out and
-final return move the target because their literal argv[0] is 1, while the
-first simultaneous return helper's argv[0] is 0 and is a no-op on the already
-restored attacker. Strike orbit, two sheets, HLE affine matrices, hitsplat
-372×372 matrix/lifetime, palette epoch, healthboxes, corners, and the shared
-one-display OAM/palette transfer are densely checked. The last five silhouette
-frames close through callback/OAM ordering: ShakeMonInPlace's creation write
-enters OAM immediately, its later writes trail the absolute slide state by one
-additional transfer, and SlideMonToOriginalPos's later callback write wins once
-the return begins. This is source-relative and has no oracle-frame or battle
-branch. The legal source route
-loads PLUSLE chrome before mechanicLab replaces the complete party with
-SHUPPET, so the oracle truthfully displays PLUSLE art/name over SHUPPET battle
-RAM; the seam fixture records that display-boundary fact explicitly rather
-than pretending the preloaded chrome changed.
+**Source/geometry:** the complete legal opposite mechanicLab fixture places
+SHUPPET in opponent battle RAM and ONIX in player battle RAM, while the source
+route's already-loaded chrome truthfully remains opponent-front PLUSLE and
+player-back ONIX. HorizontalLunge, ShakeMonInPlace, SlideMonToOffset, and
+SlideMonToOriginalPos required no new timing or species variant. The only new
+display dependency is source-declared: `AnimKnockOffStrike` starts affine
+program 1 when the target is player-side (`xScale=-256`, `rotation=+4`) and
+applies literal argv[0] with `x -= -16` instead of the opponent target's
+`x += -16`. PLUSLE's 40×48/yOffset-14 front source uses corner `(144,22)`;
+ONIX reuses the established player-back corner `(40,48)`. All selection is by
+battler side/species geometry—no oracle frame, turn, damage, RNG, or facility
+branch.
 
-**Evidence:** `tools/compare/knockOffPortable.ts`,
-`tools/compare/fixtures/knock-off-player-shuppet-opponent-onix.json`,
-`tools/probe/run-battle-lab-rgb.py`, `src/animation/knockOff.ts`, and focused
-Tier-1 tests. KNOCK_OFF reproduced **59/59 twice**; BIND remained **45/45** in
-both orientations. SUPER_FANG and SECRET_POWER remain unsupported; shared
-reducers do not promote either sibling.
+**Evidence:** new legal fixture
+`mechanic-knock-off-opponent-shuppet-player-onix.json`, portable fixture
+`knock-off-opponent-onix-player-plusle.json`, generalized
+`knockOffPortable.ts`, source-extracted PLUSLE front art, and focused Tier-1
+asset/geometry/seam tests. Fresh acceptance: KNOCK_OFF **59/59 component +
+framebuffer ×2 in both orientations**. BIND regression: **45/45 component +
+framebuffer ×2 in both orientations**. `MOVE_SUPER_FANG` stays unsupported:
+its full body additionally needs `gSuperFangSpriteTemplate`,
+`AnimTask_BlendMonInAndOut`, palette blend, and independent dense evidence.
+`MOVE_SECRET_POWER` stays unsupported: the Factory building branch dispatches
+to `Move_STRENGTH`, while other environments dispatch to distinct bodies.
+Shared reducers promote neither sibling. Implementation commit: `a6df4ee`.
 
 Start with one representative attacker/target. Add variants only when source
 inspection or comparison identifies a dependency: attacker side, front/back

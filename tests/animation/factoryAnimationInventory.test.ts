@@ -68,12 +68,11 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // Knock Off's staged player body is an honest 54/59 framebuffer
-        // partial; the psychic-family exact counts remain unchanged.
+        // Knock Off is exact in both required orientations at 59/59.
         unsupported: 249,
         staged: 0,
-        partial: 4,
-        exact: 23,
+        partial: 3,
+        exact: 24,
       },
       {
         tier: "openOnly",

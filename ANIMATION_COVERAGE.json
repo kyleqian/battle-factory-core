@@ -3,22 +3,22 @@
   "entries": [
     {
       "move": "MOVE_KNOCK_OFF",
-      "status": "partial",
+      "status": "exact",
       "covered": [
         "legal Scene-ON source route with complete SHUPPET party override, staged player orientation against opponent-front ONIX",
         "complete staged-orientation move-owned oracle frames 70-128: source component/RAM 59/59 and shared-seam framebuffer 59/59, reproduced twice",
-        "player lunge, target slide/shake/return task roles and callback-to-OAM transfer ordering, strike orbit/two-sheet/HLE affine program, 372x372 hitsplat, complex palette epoch, corners, healthboxes, and the fixture's preloaded PLUSLE display chrome"
+        "legal Scene-ON opposite source route with complete opponent SHUPPET and player ONIX parties; complete opponent-front PLUSLE to player-back ONIX chrome body at oracle frames 74-132: source component/RAM 59/59 and shared-seam framebuffer 59/59, reproduced twice",
+        "both attacker orientations for lunge, target slide/shake/return task roles and callback-to-OAM transfer ordering, strike orbit/two-sheet/side-selected HLE affine program and literal x argument mirror, 372x372 hitsplat, complex palette epoch, source front/back chrome, corners, and healthboxes"
       ],
       "evidence": [
         "tools/battle-lab/mechanic-knock-off-shuppet-onix.json",
+        "tools/battle-lab/mechanic-knock-off-opponent-shuppet-player-onix.json",
         "tools/compare/fixtures/knock-off-player-shuppet-opponent-onix.json",
+        "tools/compare/fixtures/knock-off-opponent-onix-player-plusle.json",
         "tools/compare/knockOffPortable.ts",
         "tools/probe/run-battle-lab-rgb.py",
         "src/animation/knockOff.ts",
         "tests/animation/knockOff.test.ts"
-      ],
-      "remaining": [
-        "opposite attacker orientation"
       ]
     },
     {
@@ -775,7 +775,7 @@
         "MOVE_SUPER_FANG",
         "MOVE_SECRET_POWER"
       ],
-      "goal": "Evidence checkpoint only; no move is promoted. MOVE_KNOCK_OFF is staged with complete legal mechanicLab parties using SHUPPET, the species from real Factory carrier set 62; the fixture now commits every Scene ON capture frame 70-130. Its player-side 4x6 horizontal lunge is RAM/frame observed at oracle frames 81-91 and the generic callback reducer reproduces the exact 0,6,12,18,24,24,24,18,12,6,0 sequence, including both callback-handoff holds. AnimTask_ShakeMonInPlace is ported as the literal source state machine, and the pre-existing generic slideMon reducer covers both slide templates. knockOff.ts now composes those reducers with AnimKnockOffStrike's source-relative two-frame orbit/side mirror, complex-palette epoch, hitsplat lifetime, and both attacker slide phases; Tier-1 tests cover player and opponent side formulas. tools/compare/extractKnockOffAssets.ts reproducibly extracts ANIM_TAG_SLAM_HIT_2 plus the staged SHUPPET back sprite into src/animation/assets/knock-off.json. Remaining before any Knock Off partial/exact claim: wire through the shared presentation seam; densely verify strike affine matrix, palette/OAM display lags, same-tick slide-helper ordering, hitsplat scale/order, corners/healthboxes, and the complete framebuffer body; then stage the opposite orientation before exact closure. Sibling audit: SUPER_FANG directly reuses both newly ported components but also needs gSuperFangSpriteTemplate, AnimTask_BlendMonInAndOut, palette blend, and its own dense acceptance. SECRET_POWER dispatches by battle environment; the Factory building branch goes to Move_STRENGTH and the source component union includes both new components plus many environment-specific bodies, so it cannot inherit acceptance from Knock Off."
+      "goal": "MOVE_KNOCK_OFF is exact through the shared Scene-ON seam in both source-required orientations: player-back PLUSLE to opponent-front ONIX and opponent-front PLUSLE to player-back ONIX are each 59/59 component/RAM and 59/59 framebuffer frames, reproduced twice. HorizontalLunge, ShakeMonInPlace, and both SlideMon helpers remain one source-relative implementation; the opposite route adds only source-selected PLUSLE front/ONIX back chrome and AnimKnockOffStrike's declared player-target affine/x-argument mirror. BIND remains 45/45 in both orientations twice as a seam regression. Sibling batch verdicts remain independent: SUPER_FANG is unsupported because its complete body additionally requires gSuperFangSpriteTemplate, AnimTask_BlendMonInAndOut, palette blend, and its own dense acceptance; SECRET_POWER is unsupported because the Factory building environment dispatches to Move_STRENGTH and other environments dispatch to distinct move bodies. Neither sibling is promoted by shared reducer coverage."
     }
   ],
   "variantAudits": {
