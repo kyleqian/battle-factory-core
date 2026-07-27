@@ -1,11 +1,14 @@
-# `AI_CV_DefenseUp` / `AI_CV_SpDefUp` "5-6 draws, not 4" — instrument-attributed, root cause found
+# `AI_CV_DefenseUp` / `AI_CV_SpDefUp` "5-6 draws, not 4" — instrument-attributed, root cause found and fixed
 
-Status: read-only instrument/probe report, MAIN lane, Battle Scene OFF
-oracle (`http://127.0.0.1:8014`). No `src/` edits this step (a finding, not
-a fix — see §5). Does not edit
-`docs/factory-ai-checkviability-ground-truth.md` (side-owned this round);
-this file stands alone and a future session should fold a pointer into that
-doc's §18.4/§22.3-22.4.
+Status: MAIN lane, Battle Scene OFF oracle (`http://127.0.0.1:8014`). §§1-6
+are the original probe-only session (no `src/` edits, a finding not a fix).
+**§7 (new) is a follow-up MAIN-lane step that landed the fix §5 sized** --
+`runCvDefenseUp`/`runCvSpDefUp` now model the real DRAW SITE 4/5 chain (see
+§7.1) -- and audited every OTHER ported `AI_CV_*` handler for the same
+defect class, finding and fixing one more instance in `AI_CV_EvasionUp`
+(§7.2/§7.3). Does not edit `docs/factory-ai-checkviability-ground-truth.md`
+(side-owned this round); this file stands alone and a future session should
+fold a pointer into that doc's §18.4/§22.3-22.4/§24.1.
 
 ## TL;DR
 
@@ -257,7 +260,7 @@ slots succeed on their first roll) and 8 (all four slots fail their first
 roll) — the doc's own observed 5-6 (and cross-seed 13/14 window totals) are
 simply draws from that same distribution, not a second anomaly.
 
-## 5. The engine gap (finding only — not fixed this step, per brief scope)
+## 5. The engine gap (finding only — this section is the ORIGINAL probe-only session's own framing; fixed in §7.1 below)
 
 `src/engine/factoryAiCheckViability.ts`:
 
@@ -329,3 +332,172 @@ exits non-zero (after still writing its JSON) if the PASS check fails, so a
 future rerun after a `src/` fix, or against `spdefup-calmmind-*` (byte-
 identical dispatch to `cosmicpower-*` per doc §22.3, not independently rerun
 this session for time), self-validates the same way.
+
+## 7. Rung 2: the fix, and a whole-surface audit for the same defect class
+
+Follow-up MAIN-lane step (Battle Scene OFF oracle). Landed the fix §5
+sized, then mechanically audited every OTHER ported `AI_CV_*` handler in
+`src/engine/factoryAiCheckViability.ts` against `reference/pokeemerald/data/
+battle_ai_scripts.s` for the identical defect class: for each
+`if_random_less_than` site in a dispatched handler's own range, is its
+literal fall-through (the very next instruction in the assembly, taken on a
+failed roll) another `if_random_less_than` (a **chain** — a second draw is
+mandatory, and any score/goto attached to the FIRST site alone is wrong) or
+a deterministic action (`score ±N` / `goto` / label fall-into-a-gate — a
+single, self-contained draw, safe to model independently)? The CBM side
+(`AI_CheckBadMove`, `data/battle_ai_scripts.s:51-651`) has **zero**
+`if_random_less_than` occurrences anywhere in its body (confirmed by direct
+grep over that exact line range) — the brief's own expectation that it is
+"if_random-free" and therefore trivially clean of this defect class is
+CONFIRMED, not just assumed.
+
+### 7.1 The fix (rung 1)
+
+`runCvDefenseUp`/`runCvSpDefUp` (`factoryAiCheckViability.ts`) now draw at
+DRAW SITE 4; a roll `< 60` stops immediately with no penalty (unchanged);
+a roll `>= 60` no longer applies `-2` on the spot — it draws again at DRAW
+SITE 5 (same `< 60` stop / `>= 60` semantics), and `-2` fires only when
+*that* second roll also fails. Net penalty probability given the branch is
+reached: `(196/256)^2 ≈ 58.65%`, matching §4's derivation exactly, not the
+old single-roll ~76.6%. Tier-1: three-outcome tests added for both handlers
+(pass@4, fail@4+pass@5, fail@4+fail@5) — `tests/factoryAiCheckViability.test.ts`.
+
+**Mask-7 fixture reconciliation (the brief's own requested before/after
+numbers):** the two mask-7 physical-list reproduction tests in
+`tests/factoryAiScoredDecision.test.ts` (`AI_CV_DefenseUp` §18.3/§18.4
+block) and the `AI_CV_SpDefUp` reach fixture (§22.2/§22.3 block) previously
+asserted a hard-coded **4** check-viability draws per fixture (the "always
+4, one per identical Harden/CosmicPower slot" derivation this doc's own §1
+already showed was wrong). Re-run against the FIXED handler at the exact
+same seed (1) and RNG-stream offset: all three now reproduce **7** draws
+(slot-by-slot: fail@4+fail@5 / fail@4+fail@5 / pass@4 / fail@4+pass@5 = 2+2+1+2
+= 7), landing inside the fixed model's own valid `[4,8]`-draw range (4 slots
+× 1-or-2 draws each) instead of the old buggy model's impossible-to-miss
+fixed 4. This test's own RNG seed/ordinal position is a construction-site
+convenience, not a replay of the live ROM's own RNG stream at the fixture's
+real frame — so its 7 does not need to equal §3.1's live-probed 6
+number-for-number (different position in the same LCG stream almost never
+lands on the same values), and the two numbers do NOT need to reconcile
+against each other. **What reconciles to exactly zero unexplained is the
+MECHANISM**: before this step, "5-6 draws when 4 were derived" was an open,
+unattributed anomaly (§18.4/§22.3-22.4's own original wording); after this
+step, every draw count observed anywhere (the live probe's 6, this test's
+7, and the theoretical `[4,8]` range) is fully explained by the same single
+rule — each of the 4 identical slots independently draws once (passes) or
+twice (fails and chains) — with no residual unattributed component. The
+handler's own contribution is no longer claimed to be "EXACTLY 4"; the old
+per-fixture doc comments asserting that (both in
+`tests/factoryAiScoredDecision.test.ts` and in `runCvDefenseUp`'s own
+source-level doc comment, which separately claimed DRAW SITE 4/5 were
+"mutually exclusive") have been corrected in place, not left standing next
+to the fix.
+
+### 7.2 The audit table
+
+One row per `if_random_less_than` site inside each of the 18 dispatched
+`AI_CV_*` handler bodies (`factoryAiCheckViability.ts`'s own `runCheckViability`
+dispatch shell, `:2172` on — the complete list of move-effect names that
+reach a real handler, confirmed by grep, not estimated). "Fall-through kind"
+is the literal next instruction after a *failed* roll, read straight off
+`reference/pokeemerald/data/battle_ai_scripts.s`. "Port models it?" is
+OK (the port's own control flow matches) or BUG (it doesn't — chain
+collapsed into a single draw + immediate action).
+
+| Handler | Site (asm line) | Fall-through kind | Port models it? |
+| --- | --- | --- | --- |
+| `AI_CV_SpeedDown` | `:1148` | `score +2` (deterministic) | OK |
+| `AI_CV_Pursuit` | `:2032` | `score +1` (deterministic) | OK |
+| `AI_CV_HighCrit` | `:1454` (site 1) | **chain** → `AI_CV_HighCrit2`'s own roll (`:1457`) | OK (already modeled: `jumpedToEnd`/fallthrough-roll pair) |
+| `AI_CV_HighCrit` | `:1457` (site 2) | `score +1` (deterministic) | OK |
+| `AI_CV_AlwaysHit` | `:1085` | `score +1` (deterministic; `ScoreUp1`'s own `score +1` falls into this SAME site, not a second draw) | OK |
+| `AI_CV_VitalThrow` | `:1540` (midband) | **chain** → `AI_CV_VitalThrow2`'s own roll (`:1542`) | OK (already modeled: `jumpedToEnd`/fallthrough-roll pair) |
+| `AI_CV_VitalThrow` | `:1542` (site 2) | `score -1` (deterministic) | OK |
+| `AI_CV_AttackDown` | `:1097` (site 1) | `score -2` (deterministic) | OK |
+| `AI_CV_AttackDown` | `:1107` (site 2) | `score -2` (deterministic) | OK |
+| `AI_CV_DefenseDown` | `:1128` | `score -2` (deterministic) | OK |
+| `AI_CV_SpDefDown` | `:1190` | `score -2` (deterministic) | OK |
+| `AI_CV_AttackUp` | `:898` (site 1) | `score -1` + `goto AttackUp3` (deterministic) | OK |
+| `AI_CV_AttackUp` | `:904` (site 2) | `score +2` (deterministic) | OK |
+| `AI_CV_AttackUp` | `:909` (site 3) | `score -2` (deterministic) | OK |
+| `AI_CV_DefenseUp` | `:917` (site 1) | `score -1` + `goto DefenseUp3` (deterministic) | OK |
+| `AI_CV_DefenseUp` | `:923` (site 2) | `score +2` (deterministic) | OK |
+| `AI_CV_DefenseUp` | `:927` (site 3) | falls into `DefenseUp4`'s own HP gate (deterministic, no roll immediately) | OK |
+| `AI_CV_DefenseUp` | `:936` (site 4) | **chain** → `AI_CV_DefenseUp5`'s own roll (`:938`) | **was BUG — FIXED this step (§7.1)** |
+| `AI_CV_DefenseUp` | `:938` (site 5) | `score -2` (deterministic, terminal) | OK |
+| `AI_CV_AccuracyDown` | `:1202`/`:1206`/`:1210`/`:1214`/`:1218`/`:1222` (sites 1-6) | `score ±N` each (deterministic) | OK (all 6 — includes the brief's own highest-risk "never staged live" sites) |
+| `AI_CV_AccuracyDown` | `:1229` (site 7) | `score -2` (deterministic, terminal, OPPOSITE polarity) | OK |
+| `AI_CV_SpeedUp` | `:962` | `score +3` (deterministic) | OK |
+| `AI_CV_SpAtkUp` | `:969` (site 1) | `score -1` + `goto SpAtkUp3` (deterministic) | OK |
+| `AI_CV_SpAtkUp` | `:975` (site 2) | `score +2` (deterministic) | OK |
+| `AI_CV_SpAtkUp` | `:980` (site 3) | `score -2` (deterministic) | OK |
+| `AI_CV_SpDefUp` | `:988` (site 1) | `score -1` + `goto SpDefUp3` (deterministic) | OK |
+| `AI_CV_SpDefUp` | `:994` (site 2) | `score +2` (deterministic) | OK |
+| `AI_CV_SpDefUp` | `:998` (site 3) | falls into `SpDefUp4`'s own HP gate (deterministic) | OK |
+| `AI_CV_SpDefUp` | `:1007` (site 4) | **chain** → `AI_CV_SpDefUp5`'s own roll (`:1009`) | **was BUG — FIXED this step (§7.1), byte-identical to DefenseUp** |
+| `AI_CV_SpDefUp` | `:1009` (site 5) | `score -2` (deterministic, terminal) | OK |
+| `AI_CV_LightScreen` | `:1379` | `score -2` (deterministic, terminal) | OK |
+| `AI_CV_Reflect` | `:1498` | `score -2` (deterministic, terminal) | OK |
+| `AI_CV_EvasionUp` | `:1039` (site 1) | `score +3` (deterministic) | OK |
+| `AI_CV_EvasionUp` | `:1043` (site 2) | `score -1` (deterministic) | OK |
+| `AI_CV_EvasionUp` | `:1048` (site 3) | **chain** → `AI_CV_EvasionUp4`'s own roll (`:1050`) | **was BUG — found by THIS audit, FIXED this step (§7.3)** |
+| `AI_CV_EvasionUp` | `:1050` (site 4) | `score +3` (deterministic, terminal from the chain; also a separate direct-entry site when own HP > 50%) | OK |
+| `AI_CV_EvasionUp` | `:1054` (site 5) | `score +3` (deterministic) | OK |
+| `AI_CV_EvasionUp` | `:1058` (site 6) | `score +2` (deterministic) | OK |
+| `AI_CV_EvasionUp` | `:1062` (site 7) | `score +3` (deterministic) | OK |
+| `AI_CV_EvasionUp` | `:1069` (site 8) | `score -2` (deterministic, terminal, OPPOSITE polarity) | OK |
+| `AI_CV_EvasionDown` | `:1239` | `score -2` (deterministic) | OK |
+
+46 sites audited across all 18 dispatched handlers (the remaining ~98 of
+the file's 144 total `if_random_less_than` sites belong to handlers this
+port never dispatches — e.g. `AI_CV_Rest`, `AI_CV_Trap`, `AI_CV_Confuse`,
+`AI_CV_RainDance` — out of this audit's scope, not silently skipped). Two
+BUGs found, both fixed this step; every other site's fall-through is either
+a self-contained deterministic action or an already-correctly-modeled
+chain (`HighCrit`, `VitalThrow`).
+
+### 7.3 `AI_CV_EvasionUp`'s own instance (found by this audit, not by a fixture)
+
+`AI_CV_EvasionUp`'s Gates C/D (`:1046-1050`, only reached when the target is
+toxic-poisoned) were ported (`runCvEvasionUp`, entry 489) as two **mutually
+exclusive** single-draw sites, keyed on the opponent's own HP: > 50% reaches
+DRAW SITE 4 alone; <= 50% reaches DRAW SITE 3 alone. The port's own doc
+comment stated this explicitly ("never both in the same pass"). The raw
+assembly disproves it exactly the same way §4 disproved `DefenseUp`'s
+"DRAW SITE 4/5 are two alternatives": `AI_CV_EvasionUp4`'s own label sits
+immediately below DRAW SITE 3's own `if_random_less_than 80, ...5`
+instruction with nothing between them, so a failed DRAW SITE 3 roll
+(`>= 80`) falls straight into DRAW SITE 4's OWN roll — the identical
+chain shape, one handler and one branch-condition later in the same file.
+This site was flagged by the brief as high-risk *precisely because* the
+one banked live fixture for `AI_CV_EvasionUp` (§24.3's mask-7
+reproduction) never sets the target's toxic-poison status, so it could
+never have exercised Gates C/D at all, let alone the `<= 50%` HP band that
+hides the chain — a fixture gap, not a probe gap; this bug could only be
+found by reading the assembly, which is exactly what this audit did.
+Fixed the same way as §7.1 (chain the failure into a second draw; three-
+outcome Tier-1 tests: pass@3, fail@3+pass@4, fail@3+fail@4). The direct
+`own HP > 50%` entry into DRAW SITE 4 alone is untouched — it was never
+part of the chain and stays a single, independent draw.
+
+### 7.4 What this audit did NOT re-verify
+
+This audit is a **static, mechanical cross-check** (source-vs-port control
+flow only) — it does not re-run live oracle fixtures against every
+handler's own probability distribution (that would be a much larger
+per-handler live-probe campaign, out of this step's time budget). Where a
+handler's own body was already covered by a live-staged fixture (most of
+them — every handler except the ones the brief names below), that fixture's
+own draw-COUNT assertions remain the load-bearing check that the STATIC
+analysis here is consistent with a REAL run; where a handler was flagged in
+the brief as never staged live at all (`AI_CV_AccuracyDown` sites 2-6,
+`AI_CV_EvasionUp` sites 2-7 before this step), this audit's own static
+result is the only evidence for those specific sites' fall-through shape —
+still a real, source-level finding (the assembly does not lie about its own
+byte layout), just not independently corroborated by a fresh oracle
+capture the way §3's live single-step instrumentation corroborated §4's own
+byte walk for `DefenseUp`/`SpDefUp`. A future session with oracle time to
+spare could extend §2's own `attribute-factory-ai-cv-drawsite-callers.py`
+probe (parameterized by `DRAW_SITE_TABLE`) to `AI_CV_EvasionUp`'s own toxic-
+poisoned/low-HP fixture (none currently staged in `tools/battle-lab/` —
+would need a new fixture, not just a new probe run) for the same live
+corroboration this doc's §3 already has for `DefenseUp`/`SpDefUp`.
