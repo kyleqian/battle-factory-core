@@ -68,11 +68,11 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // EARTHQUAKE is exact in both required orientations.
-        unsupported: 244,
+        // ACID is exact in both required orientations.
+        unsupported: 243,
         staged: 0,
         partial: 3,
-        exact: 29,
+        exact: 30,
       },
       {
         tier: "openOnly",
@@ -129,6 +129,20 @@ describe("animation coverage ledger", () => {
         "MOVE_MAGNITUDE",
         "MOVE_ERUPTION",
         "MOVE_LUSTER_PURGE",
+      ],
+    });
+    expect(
+      queuedAnimationComponentTracks().find(
+        (track) => track.id === "acid-poison-bubble",
+      ),
+    ).toMatchObject({
+      representatives: [
+        "MOVE_ACID",
+        "MOVE_TOXIC",
+        "MOVE_SLUDGE",
+        "MOVE_SLUDGE_BOMB",
+        "MOVE_POISON_FANG",
+        "MOVE_POISON_TAIL",
       ],
     });
     expect(

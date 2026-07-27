@@ -2,6 +2,29 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_ACID",
+      "status": "exact",
+      "covered": [
+        "complete legal Level-50 mechanicLab parties stage EKANS, the real Factory set-53 ACID carrier, with all four active choices constrained to ACID and the opposing ONIX constrained to TACKLE",
+        "player-back EKANS to opponent-front ONIX complete move-owned Scene-ON body at oracle frames 76-206: source component/task/RAM/palette 131/131 and shared-seam framebuffer 131/131, reproduced twice",
+        "opponent-front EKANS to player-back ONIX complete move-owned Scene-ON body at oracle frames 80-210: source component/task/RAM/palette 131/131 and shared-seam framebuffer 131/131, reproduced twice",
+        "ANIM_TAG_POISON_BUBBLE; all three literal gAcidPoisonBubbleSpriteTemplate 40-callback arcs with attacker-side mirroring, animation selection, and average target positions; both literal AnimTask_ShakeMon2(target/defender partner,2,0,10,1) calls with singles visibility; defender-side delay-2 blend_color_cycle; all five delayed gAcidPoisonDropletSpriteTemplate fixed-point/affine bodies; monbg/clearmonbg; persistent source sSpriteOrder; OAM, palette, and display latches"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-acid-player-ekans-opponent-onix.json",
+        "tools/battle-lab/mechanic-acid-opponent-ekans-player-onix.json",
+        "tools/compare/fixtures/acid-player-ekans-opponent-onix.json",
+        "tools/compare/fixtures/acid-opponent-ekans-player-onix.json",
+        "tools/compare/acidPortable.ts",
+        "tools/compare/acidProbe.py",
+        "tools/compare/extractAcidAssets.ts",
+        "src/animation/acid.ts",
+        "tests/animation/acid.test.ts",
+        "tests/animation/shakeMon2.test.ts",
+        "tests/animation/spriteOrder.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_EARTHQUAKE",
       "status": "exact",
       "covered": [
@@ -895,6 +918,27 @@
         "MOVE_SECRET_POWER"
       ],
       "goal": "MOVE_KNOCK_OFF is exact through the shared Scene-ON seam in both source-required orientations: player-back PLUSLE to opponent-front ONIX and opponent-front PLUSLE to player-back ONIX are each 59/59 component/RAM and 59/59 framebuffer frames, reproduced twice. HorizontalLunge, ShakeMonInPlace, and both SlideMon helpers remain one source-relative implementation; the opposite route adds only source-selected PLUSLE front/ONIX back chrome and AnimKnockOffStrike's declared player-target affine/x-argument mirror. BIND remains 45/45 in both orientations twice as a seam regression. Sibling batch verdicts remain independent: SUPER_FANG is unsupported because its complete body additionally requires gSuperFangSpriteTemplate, AnimTask_BlendMonInAndOut, palette blend, and its own dense acceptance; SECRET_POWER is unsupported because the Factory building environment dispatches to Move_STRENGTH and other environments dispatch to distinct move bodies. Neither sibling is promoted by shared reducer coverage."
+    },
+    {
+      "id": "acid-poison-bubble",
+      "components": [
+        "asset:ANIM_TAG_POISON_BUBBLE",
+        "sprite:gAcidPoisonBubbleSpriteTemplate",
+        "sprite:gAcidPoisonDropletSpriteTemplate",
+        "task:AnimTask_ShakeMon2",
+        "visualCommand:blend_color_cycle",
+        "visualCommand:monbg",
+        "visualCommand:clearmonbg"
+      ],
+      "representatives": [
+        "MOVE_ACID",
+        "MOVE_TOXIC",
+        "MOVE_SLUDGE",
+        "MOVE_SLUDGE_BOMB",
+        "MOVE_POISON_FANG",
+        "MOVE_POISON_TAIL"
+      ],
+      "goal": "MOVE_ACID independently proves its complete three-arc, dual-ShakeMon2, defender palette-cycle, and five-droplet body in both orientations at 131/131 component/task/RAM/palette and framebuffer frames, reproduced twice. No sibling is promoted. TOXIC needs the distinct ANIM_TAG_TOXIC_BUBBLE, two four-sprite ToxicBubbles waves, and the separate six-sprite rising PoisonBubblesEffect. SLUDGE needs gSludgeProjectileSpriteTemplate, its target AnimTask_ShakeMon tuple, delay-1 target blend, and PoisonBubblesEffect. SLUDGE BOMB needs ten delayed sludge projectiles, a distinct (3,0,15,1) ShakeMon2, delay-1 target blend, twelve gSludgeBombHitParticleSpriteTemplate fixed-point bodies, waitsound, and PoisonBubblesEffect. POISON FANG needs ANIM_TAG_FANG_ATTACK/gFangSpriteTemplate, target ShakeMon, a four-leg delay-0 palette cycle, and PoisonBubblesEffect. POISON TAIL needs metallic_shine, attacker lunge, impact hitsplat, target ShakeMon, alpha/monbg teardown, and PoisonBubblesEffect. Every sibling remains unsupported pending independent complete dense evidence."
     },
     {
       "id": "water-gun-small-bubbles-water-impact",

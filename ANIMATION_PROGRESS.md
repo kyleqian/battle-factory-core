@@ -44,6 +44,44 @@ animation. A status caused by a move is not part of that move's animation.
   presentation seam and all source- or evidence-required variants are covered.
 - No entry means unsupported.
 
+## ACID promoted to exact; poison-bubble track established (2026-07-27)
+
+**Verdict:** `MOVE_ACID` is exact through the shared Scene-ON seam in both
+required orientations, each reproduced twice. Player-back EKANS is **131/131
+component/task/RAM/palette and framebuffer frames** (oracle 76-206);
+opponent-front EKANS is **131/131** (80-210). Census: **30/276 exact, 3
+partial, 243 unsupported**.
+
+**Source/probe:** complete legal mechanicLab parties stage EKANS, the real
+Level-50 Factory set-53 carrier, with all four choices constrained to ACID;
+ONIX is constrained to TACKLE. The reducer ports all three literal
+`gAcidPoisonBubbleSpriteTemplate` 40-callback arcs, attacker-side mirroring,
+animation selection and average target geometry; both literal
+`AnimTask_ShakeMon2(target/defender partner,2,0,10,1)` calls (only the target
+has a visible singles sprite); the defender-side delay-2 two-leg
+`blend_color_cycle`; and all five delayed fixed-point/looping-affine
+`gAcidPoisonDropletSpriteTemplate` bodies. The Scene-ON compositor preserves
+`monbg`/`clearmonbg`, faded BG+OBJ palette rows, one-frame position/affine
+display latches, side-specific battler overlap, and the shared persistent
+`sSpriteOrder` reducer's y sort, destruction, and low-slot reuse.
+
+**Sibling audit (no promotions):** TOXIC retains two four-sprite
+`ToxicBubbles` waves plus the separate six-sprite `PoisonBubblesEffect`;
+SLUDGE needs its sludge projectile, target ShakeMon, delay-1 blend, and
+PoisonBubblesEffect; SLUDGE BOMB needs ten projectiles, twelve hit particles,
+its distinct ShakeMon2/blend/waitsound body, and PoisonBubblesEffect; POISON
+FANG needs the fang sprite, target ShakeMon, four-leg palette cycle, and
+PoisonBubblesEffect; POISON TAIL needs metallic shine, lunge, hitsplat,
+ShakeMon, alpha/monbg teardown, and PoisonBubblesEffect. All remain
+unsupported without independent dense move acceptance.
+
+**Evidence/controls:** legal fixtures, reproducible extractor, dense
+task/OAM/hardware-OAM/palette/RGB probe, portable comparator, and focused
+Tier-1 tests are committed. Acceptance is **131/131 ×2 in both
+orientations**. After the final renderer change WATER GUN remains **111/111**,
+SUPERSONIC **51/51**, and BIND **45/45**, both orientations; ShakeMon2 and
+the animation import boundary remain green.
+
 ## EARTHQUAKE promoted to exact; HorizontalShake / complex BG-palette track established (2026-07-27)
 
 **Verdict:** `MOVE_EARTHQUAKE` is exact through the shared Scene-ON seam in
@@ -124,47 +162,6 @@ animation import boundary remain green.
 **Verification:** **234 test files / 3141 tests green**; production build
 green; coverage self-check reports **28/276 exact, 3 partial, 245
 unsupported**.
-
-## SUPERSONIC promoted to exact; splitbgprio_foes / sonic-ring track established (2026-07-26)
-
-**Verdict:** `MOVE_SUPERSONIC` is exact through the shared Scene-ON seam in
-both required orientations, each reproduced twice. The player-back route is
-**51/51 component/RAM and framebuffer frames** (oracle 80-130); the
-opponent-front route is **51/51** (84-134). Census: **27/276 exact, 3
-partial, 246 unsupported**.
-
-**Source/probe:** complete legal mechanicLab parties stage LOUDRED, the real
-Level-50 Factory set-144 carrier, with all four active choices constrained to
-SUPERSONIC; ONIX is constrained to TACKLE. The reducer covers all six literal
-`SupersonicRing` calls at the source scheduler's four-display-tick cadence,
-`ANIM_TAG_GOLD_RING`, `gSupersonicRingSpriteTemplate`'s growing affine program,
-the complete 30-tick `TranslateAnimSpriteToTargetMonLocation` fixed-point
-body, `splitbgprio_foes`, `monbg`/`setalpha`/`blendoff`/`clearmonbg`, and the
-already-proven literal `AnimTask_ShakeMon2(attacker,2,0,8,1)` tuple. The
-mechanicLab RAM override truthfully retains the route's already-loaded DUSTOX
-chrome, as Knock Off's established seam precedent does; semantic carrier and
-presentation chrome are explicit separate fixture inputs.
-
-**Display dependencies:** rings are normal (not semi-transparent) OBJ despite
-the script's alpha command. Position/affine OAM transfers one VBlank after
-component RAM. Same-subpriority ring overlap inherits the route's persistent
-side-specific `sSpriteOrder`; selection is by attacker side, never oracle
-frame. Both complete orientations pin this variant.
-
-**Sibling audit (no promotions):** METAL SOUND needs its large metal-wave
-template/pan body; ABSORB its eight sine drain orbs, hitsplat/shake, and green
-blend; MEGA DRAIN its paired 16-orb stronger-green body; DREAM EATER its
-psychic background, target scale/shakes, and 24 orbs; FLAME WHEEL its outward
-fire spiral, lunge/return, fire spread, and BlendMonInAndOut; GIGA DRAIN its
-24-orb/high-green body; WILL-O-WISP its wisp orb/fire templates, panning task,
-and both split commands. All remain unsupported without independent complete
-dense evidence.
-
-**Evidence/controls:** committed legal fixtures, reproducible extractor,
-dense RAM/RGB probe, portable comparator, and focused Tier-1 reducer tests.
-Fresh acceptance is **51/51 ×2 in both orientations**. BIND remains **45/45**
-in both orientations and ShakeMon2's exact Tier-1 control stays green. The
-animation/engine import boundary did not widen.
 
 Start with one representative attacker/target. Add variants only when source
 inspection or comparison identifies a dependency: attacker side, front/back
