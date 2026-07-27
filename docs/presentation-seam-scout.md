@@ -1977,3 +1977,331 @@ every one of those counts byte-identically. `npm test` **252/252 files,
 own test count is unchanged, one existing assertion updated in place).
 `npm run build` clean. `executableFrontierRatchet.test.ts` unmoved (6/6,
 zero new barriers).
+
+## 13. Prep-scout for the NEXT window, 2026-07-27 (`turn2-endeavor.json`), side lane
+
+Read-only recon plus one unwired staging module/test — the same §8-§12
+contract (recon + staged proof + plan, **no production wiring**). This
+session touches no `battleScene.ts`, `presentationEventWindowBridge.ts`, or
+any other production file. All line numbers below are re-verified against
+this worktree's own `HEAD` (`bbd6e23`, the commit recording §12.5's landed
+wiring).
+
+### Candidates weighed (smallest input surface, not by interest)
+
+Per this brief's own instruction, this session also weighs the "capture-
+range EXTENSION" candidate §12.3 steps 3/4 named as future work, alongside
+fresh windows, honestly rather than defaulting to either:
+
+| trace | frames | leaf function(s) | own new work needed | blocked on |
+| --- | --- | --- | --- | --- |
+| `turn6-statfall.json` (EXTENSION-shaped: already a committed, separate trace covering §12.3 steps 3/4's own named residual — `drawTurn6StatFallBanner`'s BG1 graphic and the START of `TURN6_ATKFELL_LINE1/2`) | 127 (range 7558-7684) | `drawTurn6FeatherDanceKickoffText`'s own `eva`/`atkFellStart` branches, `battleScene.ts:9354-9361` | **ZERO new staged proof** — §12.2's own `turn6FeatherDancePresentationStaging.ts` already staged and proved this EXACT event chain (`stat-stage-change{6->4}`, `STATS_CHANGE` animation arg `46`, `STRINGID_DEFENDERSSTATFELL` message); only wiring is left | **the KNOWN PREREQUISITE**, hit directly — verified fresh this session: `turn6AtkFellTextStartTick(pressTick)=7659`, and at this trace's own last captured tick (7684, offset 25) `turn6AtkFellTextVisibleChars` = 26, past the 5th character of `"ONIX’s ATTACK"` — the curly apostrophe IS pixel-exercised by this trace's own committed capture, not just a future extension's problem |
+| `turn7-feathers.json` | 145 (range 8439-8583) | `drawTurn7FeatherDanceKickoffText`'s kickoff-text branch, `:9346-9362` | **ZERO new staged proof** — this trace's own captured range sits entirely inside `docs/turn7-notes.md`'s own documented kickoff-text-and-animation hold (~8396-8685, re-verified §13.1), before turn 7's own ATK-fell transition (8686+) — the rendered text is byte-identical to the ALREADY-resolved `TURN6_FEATHERDANCE_KICKOFF_LINE1/2` (same attacker, same move, same `STRINGID_USEDMOVE`), a pure literal-swap wiring step, nothing new to stage | **nothing** — but also nothing NEW to prove for §13.2's own deliverable; the genuinely new fact this turn holds (ATK 4->2, a second application) sits past this trace's own captured range, groundwork only |
+| `turn8-feathers.json` | 162 (range 9468-9629) | `drawTurn8FeatherDanceKickoffText`'s kickoff-text branch, `:9535-9552` | same shape as the row above (turn 8's own kickoff-text-only capture, verified against `docs/turn8-notes.md`'s own table: kickoff settles 9468, animation churns to ~9738, this trace ends 9629 — before the ATK-fell transition) | same as the row above — zero new work, zero new proof |
+| `turn9-quickattack.json` / `turn9-quickattack-b.json` | 169 (10818-10986) / 77 (10945-11109) | `drawTurn9QuickAttackWindow`, `:10340-10360` | a genuine new HP-chain (Pidgeotto's QUICK_ATTACK vs. Onix, real damage) PLUS a genuinely new message class ("It's not very effective...", `TURN9_NOTVERYEFFECTIVE_LINE`, not yet seen in any wired window) — real, substantial new work | heavy animation-lane content sharing this same window (hitsplat/shake/flicker, `docs/battle-turn-notes.md` §36-§41's own still-open pixel residuals) — bigger and messier surface than a clean single-content leaf |
+| `turn10-aerialace.json` | 93 (12345-12437, per §12's own survey) | `drawTurn10AerialAceWindow` | rejected again, same reason §12 already gave: **partially unmodeled** — mechanism 3's own residual and mechanism 4's reverted render are still-open pixel gaps (`docs/battle-turn-notes.md` §42-§44), not a clean, fully-solved pick |
+| `turn11-featherdance.json` | 178 (13352-13529) | `drawTurn11FeatherDanceWindow`, `:11403+` | a genuinely new message class (the ATK-floor "won't go lower!" clamp text) | **the apostrophe residual, TWICE over** — `TURN11_ATKFLOOR_LINE1`/`LINE2` = `"ONIX’s ATTACK"` / `"won’t go lower!"` (`battleScene.ts:11242-11243`), both curly-apostrophe-bearing, both within this trace's own captured range (`docs/battle-turn-notes.md:6957`: "kickoff text typing + hold + ATK-floor message transition + reveal + hold") — worse-blocked than `turn6-statfall.json` above, and bigger |
+| `turn13-sandattack.json` | 190 (15420-15650) | `drawTurn13SandAttackWindow`, `:11745+` | a genuinely NEW bridge shape (opponent-target ACCURACY-stat-down, not ATK — same `stat-stage-change` kind, different `stat` value) — real, substantial new work, no apostrophe in its own text (`"Foe PIDGEOTTO used"`/`"SAND-ATTACK!"`, `:11775-11776`) | size alone (190 frames, plus a target-accuracy banner mechanism this dossier hasn't staged before) — not the smallest surface today |
+| `turn12-rockslide-miss.json` | 38 frames, but SPARSE across a 749-tick span (14625-15374) | spans kickoff text, ROCK_SLIDE attack, the miss message, AND the turn-13 resettled menu — four+ already-distinct functions, not one bounded leaf | the MISS message itself is new (a `message` event with no `hp-change`), but reusing `TURN8_MISS_LINE1/2` verbatim (`docs/battle-turn-notes.md:6963`) | **not a single bounded leaf function** — same "not a clean pick" reasoning §12 used to reject the turn 13/15/17 KO/party/loss family, just at smaller scale; wiring it would touch multiple dispatchers for one small new fact |
+| turn 13/15/17 KO/party/loss family (`turn13-switchin.json` 242, `turn15-party-select.json` 200, `turn15/17`-rung traces 16-255) | — | `drawTurn15PartySelectWindow` + ~15 helpers | rejected again, unchanged from §12's own verdict | still an order of magnitude larger than any single-leaf pick; the `switch` semantic event (`battleScriptEvents.ts:159`) re-confirmed live this session to still have **zero** production emission sites (`grep -rn 'kind: "switch"' src/engine/*.ts` finds only the type declaration and the unrelated `BattleCommandDecision` namespace in `battleDecisionBoundary.ts`) — no change since §12 |
+| `turn2-endeavor.json` | **77** (2894-2999) | `drawTurn2KickoffText`'s ENDEAVOR-text branch, `:6871-6906` | **ONE new staged hit chain** (Grovyle's turn-2 ENDEAVOR, Onix 117->101) reusing the ALREADY-proven `resolveRockSlidePresentationWindowContent`/`BattleScript_EffectEndeavor` shape `turn5EndeavorPresentationStaging.ts` established — same "parameterization, not a rebuild" shape §10 used for `turn3-rockslide.json` | **nothing** — no apostrophe in "Foe GROVYLE used"/"ENDEAVOR!", real RNG seed independently round-trip-verified against `battle1-turn2-ram-dump.json`'s own committed ledger |
+| `turn2-endeavor-drain.json` / `turn2-dragonbreath.json` | 237 / 237 | same `drawTurn2KickoffText`, extended further (drain + DRAGON_BREATH half) | same ENDEAVOR work as the row above, PLUS DRAGON_BREATH's own separate hit chain | bigger surface than the row above for the SAME core new work — rejected on that basis, same discipline §3 used for `turn1-kickoff.json` |
+
+**Pick: `turn2-endeavor.json`.** The two closest competitors are genuinely
+different failure modes, not ties:
+
+- `turn6-statfall.json` needs **zero new staged proof** (§12.2 already proved
+  its exact event chain) but is **directly blocked** by the KNOWN
+  PREREQUISITE glyph residual — re-verified fresh this session (not assumed
+  from §12's own framing): this trace's own last captured tick (7684) sits
+  26 characters into `"ONIX’s ATTACK\nharshly fell!"`, past the apostrophe.
+  Per this brief's own tiebreak instruction ("if two candidates are
+  otherwise close, prefer the one not blocked on it"), and this one is
+  *directly*, not just adjacently, blocked.
+- `turn7-feathers.json`/`turn8-feathers.json` are **not blocked** and need
+  **zero bridge work**, but also have **zero new content to stage** for
+  §13.2's own deliverable (their own captured ranges render byte-identical
+  text to what §12.2 already proved) — a valid but hollow pick for a
+  checkpoint whose own §13.2 asks for "staged kernel-event proof ... proving
+  what the kernel emits TODAY for this window's own content."
+
+`turn2-endeavor.json` is the smallest candidate that is BOTH unblocked AND
+genuinely new: a real, un-staged hit chain (turn 2's own ENDEAVOR, distinct
+HP endpoints and RNG seed from turn 5's already-wired instance), smaller by
+frame count (77) than every other genuinely-new candidate (`turn6-statfall.json`
+127, `turn9-quickattack-b.json` 77 but heavier/messier, `turn9-quickattack.json`
+169, `turn11-featherdance.json` 178, `turn13-sandattack.json` 190), and
+closes another simple, well-precedented link in the ENDEAVOR family (turn 5's
+own third use is already wired; turn 2's first use and turn 3's second use,
+named "genuinely comparable" but deprioritized in §10 purely for
+ROCK_SLIDE-arc-closure reasons that no longer apply, are still both open —
+turn 2 is the smaller of the two by frame count, 77 vs. `turn3-endeavor.json`'s
+192).
+
+### 13.1 Every input `turn2-endeavor.json` consumes today (re-verified against `HEAD`)
+
+**Dispatch-routing chain**, `drawFightSubmenuWindow` (`battleScene.ts:5636-5784`):
+
+| input | line(s) | condition to REACH this window |
+| --- | --- | --- |
+| `turn14Resolved`…`turn5Resolved` | `:5656-5740` | all false (else routes to turns 6-15's own dedicated dispatchers) |
+| `sm.openElapsed`/`sm.closeElapsed` | `:5741,5755` | both past their own DMA-wait/close windows (ordinary settled-submenu path) |
+| `sm.confirmElapsed !== null` | `:5762` | true — turn 2's own real A-confirm press already landed, `pressTick = TICK0 + sm.confirmElapsed` = `TURN2_CONFIRM_PRESS_TICK` = 2945 (`:6773`) |
+| `(sm.cursor === 2 \|\| turn2Resolved) && !inTurn4DoubleTeamWindow` ternary | `:5773-5774` | `sm.cursor === 2` is true (DRAGON_BREATH slot, this turn's real cursor position) and `inTurn4DoubleTeamWindow` (`turn3Resolved && !turn4Resolved`) is false (turn 3 hasn't happened yet in this window) — selects `turn2KickoffTextStartTick(pressTick)` = 2954 |
+| `t >= textStart` | `:5775` | true for most of this trace's own capture range (2954-2999); the leading ticks (2894-2953) render the pre-press idle/press-transient frames of the SAME outer function's fallthrough path, not `drawTurn2KickoffText` itself |
+| `sm.cursor === 2` | `:5781` | **true** — the one condition that actually selects `drawTurn2KickoffText(fb, t, pressTick)` (`:5782`); every check above it is a false/pass-through gate, same "scheduler/PC state, no content mapping" class every prior window's own dispatch chain already established |
+
+**`drawTurn2KickoffText`'s own body** (`battleScene.ts:6871-6906`):
+
+| input | line(s) | condition / role in THIS window |
+| --- | --- | --- |
+| `dragonBreathStart = dragonBreathTextStartTick(pressTick)` = 2945+`DRAGONBREATH_TEXT_START_DELAY`(192, `:6561`) = 3137 | `:6872-6873,6899` | **false** for this trace's entire capture range (max captured tick 2999 < 3137) — the DRAGON_BREATH half (Onix's own later move, a separate hit chain) is never reached by this trace at all, genuinely out of scope, not glossed over |
+| `drawEndeavorSquish(fb, t, pressTick, anchorOpponentAfterTurnHp, turn2KickoffBounceTick(t, pressTick), ROCK_SLIDE_MOVE_POWER)` | `:6881` | presentation-native squish/blend/droplet choreography (`:6515-6543`), `false` outside its own local window (`ENDEAVOR_SQUISH_TABLE`'s length, `t - pressTick - ENDEAVOR_SQUISH_START_DELAY`) — same "Option A, no kernel timestamp dependency" finding §8.4 already established for this whole function family, re-confirmed here a sixth time |
+| `endeavorOnixHp(t, pressTick, anchorPlayerBattler.hp, anchorPlayerAfterTurnHp)` | `:6896`, formula at `battleMenu.ts:2701-2703` (`ENDEAVOR_HP_DRAIN_START_DELAY`=153, `:2685`) | drain start = pressTick+153 = 3098, **past this trace's own last captured tick (2999)** — the HP-bar drain itself is NEVER pixel-exercised by this specific committed trace (same "real but out-of-capture-range residual" class §12.1 found for the stat-fall banner); the call is a clamped no-op for every `t` in this trace's own range, matching `drawPlayerHealthboxHpOverlay`'s own no-op guard (`battleScene.ts:1682`, `hp === anchorPlayerBattler.hp`) |
+| `TURN_KICKOFF_LINE1`/`TURN2_KICKOFF_LINE2` ("Foe GROVYLE used"/"ENDEAVOR!", `battleMenu.ts:1086`/`:2635`) | `:6905` | the ONE content this trace's own captured frames actually render, via `turn2KickoffTextVisibleChars(t, pressTick)` (`battleMenu.ts:2656-2660`, `turn2KickoffTextStartTick`=pressTick+9, `:2651-2653`, total 26 chars) — fully typed and holding by tick 2980 (2954+26), well within this trace's own 2894-2999 range |
+
+**RAM-dump / HP-constant reads** — re-verified against each constant's own
+definition, same "evidence over inference" discipline every prior scout used:
+
+| constant | value | real source | line(s) |
+| --- | --- | --- | --- |
+| `anchorPlayerBattler.hp` | 117 | asset read: `battle1-turn2-ram-dump.json`'s `battlerSnapshots.before_turn2.battler0.hp` (Onix, full HP, unchanged all of turn 1) | `battleScene.ts:1478-1480` |
+| `anchorPlayerAfterTurnHp` | 101 | asset read: same file, `after_turn2.battler0.hp` (Onix's post-ENDEAVOR settle) | `:1482-1484` |
+| `anchorOpponentAfterTurnHp` | 101 | asset read: `battle1-turn1-ram-dump.json`'s `battlerSnapshots.after_turn.battler1.hp` (Grovyle's own post-turn-1-ROCK_SLIDE settle — this window's own ENDEAVOR attacker HP, steady throughout) | `:1145-1147` |
+
+All three are ALREADY asset-backed real values (same "no fresh RAM probing
+needed, only a staged kernel proof" shape §10.1 found for `turn3-rockslide.json`).
+
+**Hidden-state finding this brief's own §11/§12 precedent asks to flag:**
+`drawEndeavorSquish`'s own `opponentHp` parameter (`anchorOpponentAfterTurnHp`,
+101) is Grovyle's — the ATTACKER's — own steady HP, rendered on ITS healthbox
+during the squish animation, not a drain endpoint of this window's own hit
+chain at all (Grovyle isn't hit by its own ENDEAVOR). Its `stalePower`
+parameter (`ROCK_SLIDE_MOVE_POWER`, 75, `battleScene.ts:6324`) is a genuine
+game-mechanic quirk (`gBattleMovePower`'s own staleness — ENDEAVOR inherits
+whatever power value the PRECEDING move left there, per the function's own
+doc, `:6509-6513`) that affects the squish's own shake intensity but is
+presentation-native, not kernel content — same "no plausible mapping" class
+every prior window's own non-content parameter already established.
+
+**Tick anchors** (all `pressTick`-relative offsets): `TURN2_CONFIRM_PRESS_TICK`
+=2945 (real press, `battleScene.ts:6773`), `turn2KickoffTextStartTick`=+9
+(`battleMenu.ts:2651-2653`), `ENDEAVOR_HP_DRAIN_START_DELAY`=+153 (`:2685`,
+out-of-range residual for this trace), `dragonBreathTextStartTick`=+192
+(`battleScene.ts:6561-6564`, out-of-scope for this trace entirely) — all
+presentation-native, same "not a kernel gap" finding §8.4's Option A already
+established, re-confirmed here a seventh time.
+
+### 13.2 Staged proof: what the kernel emits today for this window's own content
+
+EFFECT_ENDEAVOR has been executable since before this session (entry 464's
+own registration, already exercised by `turn5EndeavorPresentationStaging.ts`)
+— no opcode-registration research needed, only a real hit chain at THIS
+turn's own real HP endpoints and RNG seed.
+`src/engine/turn2EndeavorPresentationStaging.ts` (new, **unwired** — not
+imported by `battleScene.ts` or any production file) mirrors
+`turn5EndeavorPresentationStaging.ts`'s pattern verbatim: real Onix/Grovyle
+level-50 stats (the same `tests/damageCalc.test.ts`-sourced blocks every
+sibling module uses), real MOVE_ENDEAVOR (id 283), Grovyle (side 1) attacking
+Onix (side 0) at this window's own real endpoints — Onix (target) 117,
+Grovyle (attacker) 101, both read fresh this session from
+`src/data/gen/battle1-turn2-ram-dump.json`'s own committed
+`battlerSnapshots` (`before_turn2.battler0.hp`=117,
+`battle1-turn1-ram-dump.json`'s `after_turn.battler1.hp`=101 — the SAME
+asset `anchorOpponentAfterTurnHp` already reads in `battleScene.ts`).
+
+**The RNG seed is turn 2's own real recorded value, identified (not
+guessed) from `battle1-turn2-ram-dump.json`'s own already-committed
+`rngLedger`** (9 entries, read fresh this session). The ledger's FIRST
+entry (`atTick: 2983, fromValue: 4098214719, steps: 1, toValue: 2002721862`)
+is the sole candidate for Grovyle's own ENDEAVOR accuracy roll — 38 ticks
+after `TURN2_CONFIRM_PRESS_TICK` (2945), a single `Random()` step, and every
+LATER entry attributes cleanly to DRAGON_BREATH's own 4-roll group
+(3121/3135/3161/3164) then turn-pass/AI-cluster rolls from 3318 onward — the
+same "4-roll group / AI-cluster tail" shapes `turn3RockSlidePresentationStaging.ts`'s
+own module doc already established for this ledger family. **Verified live
+this session, not guessed**: this exact seed forward-steps through the real
+gen-3 LCG (`src/engine/rng.ts`'s own `advanceRngValue`, NOT plain `Number`
+arithmetic — a first attempt using `(1103515245 * seed + 24691) >>> 0`
+silently lost precision past float64's 53-bit exact-integer range and
+produced a WRONG value, `2002721792` instead of the ledger's real
+`2002721862`; caught by this module's own round-trip test, corrected to
+reuse `rng.ts`'s own `BigInt`-based step function) to EXACTLY the ledger's
+own recorded `toValue` — `tests/turn2EndeavorPresentationStaging.test.ts`'s
+own dedicated assertion, 8 further assertions on the staged run itself:
+
+```
+targetHpAfter: 101   (117 -> 101, byte-identical to battleScene.ts's own
+                       anchorPlayerBattler.hp/anchorPlayerAfterTurnHp pair
+                       -- the real recorded turn-2 settle)
+event kinds, in order:
+  message                       {messageId:"STRINGID_USEDMOVE", substitutions:[]}
+  set-battler-pp-data           {battler:1, movePosition:0, pp:14}
+  animation                     {animationId:"MOVE_ANIMATION", battler:1, arguments:[...]}
+  play-se                       (neutral-effectiveness hit sound)
+  animation                     {animationId:"HIT_ANIMATION", battler:0, arguments:[]}
+  health-bar-update              {battler:0, healthValue:16}
+  hp-change                     {battler:0, from:117, to:101}
+  set-battler-sprite-visibility {battler:1, invisible:false}   (moveend pass-through)
+  set-battler-sprite-visibility {battler:0, invisible:false}   (moveend pass-through)
+```
+
+Byte-for-byte the same shape as `turn5EndeavorPresentationStaging.ts`'s own
+event list (`message`/`set-battler-pp-data`/`animation`x2/`play-se`/
+`health-bar-update`/`hp-change`/`set-battler-sprite-visibility`x2, no
+`resultmessage` — ENDEAVOR's own `bicbyte` unconditionally clears both
+effectiveness flags before `resultmessage` runs, same finding turn 5's
+module already made, re-exercised not re-derived). `attackstring`'s own
+`sourceLabel` is `BattleScript_EffectEndeavor` (not
+`BattleScript_HitFromAtkString` — this script's own `attackstring`/
+`ppreduce` execute directly under its own top label), `hp-change`'s is
+`BattleScript_HitFromAtkAnimation` (the trailing `goto`'s real jump target)
+— `resolveRockSlidePresentationWindowContent`'s existing
+`attackStringScriptLabel` override parameter bridges this unchanged, **zero
+bridge edits needed**, the third time this exact override has been reused
+(turn 3's ROCK_SLIDE needed no override; turn 5's and now turn 2's own
+ENDEAVOR instances both do).
+
+**What this staged run does and does not prove:** it proves the real
+ENDEAVOR hit-chain mechanism reproduces turn 2's OWN specific recorded roll
+(117->101, not merely "a real roll") using turn 2's OWN real ledger seed —
+the RNG-seed identification is this module's own genuinely new work; the
+`message`/`hp-change`/bridge mechanism itself was already proven twice over
+by its own siblings (turn 3's ROCK_SLIDE, turn 5's own ENDEAVOR instance)
+and is not re-derived here, only re-exercised. **The HP-drain endpoint
+itself is NOT pixel-exercised by `turn2-endeavor.json`'s own committed
+capture** (§13.1: the drain starts at pressTick+153=3098, past this trace's
+last captured tick 2999) — proven and staged regardless, useful groundwork
+for a future capture-range extension of this same window (the same
+"groundwork, not required for THIS trace's own acceptance bar" shape §12.2/
+§12.3 already established for `turn6-featherdance.json`'s own ATK-fell/
+stat-fall content).
+
+**Mapping table** (turn-N input -> kernel event / gap), current as of this
+staged run:
+
+| turn-N input | kernel replacement | today |
+| --- | --- | --- |
+| `turn14Resolved`…`turn5Resolved`/`sm.cursor`/`turn2KickoffTextStartTick` handoff dispatch chain (§13.1) | none — scheduler/PC state | **no plausible mapping**, same gap-7 class every prior window found |
+| `TURN_KICKOFF_LINE1`/`TURN2_KICKOFF_LINE2` ("Foe GROVYLE used\nENDEAVOR!") | `message{messageId:"STRINGID_USEDMOVE"}` | **fully proven, re-derived from a real run of THIS turn's own script** — `resolveTurn2EndeavorAttackLines` (this module) resolves to `["Foe GROVYLE used", "ENDEAVOR!"]`, byte-identical, AND byte-identical to `turn5EndeavorPresentationStaging.ts`'s own output (same attacker/move) — this IS pixel-exercised by the committed trace (captured ticks 2954-2999) |
+| `anchorPlayerBattler.hp` (117) | `hp-change`'s `from` | **emitted today, proven this session**: staged run's own event has `from: 117` |
+| `anchorPlayerAfterTurnHp` (101) | `hp-change`'s `to` | **emitted today, proven this session**: staged run's own event has `to: 101` — the real recorded settle. NOT pixel-exercised by this trace's own captured frames (drain opens at pressTick+153=3098, past tick 2999, §13.1) — staged and proven regardless, groundwork for a future capture-range extension |
+| `endeavorOnixHp(t, pressTick, from, to)` interpolation | `hp-change{from,to}` as the two endpoints | **fully unblocked**, no gap-4 kernel growth needed (Option A, same finding every sibling ENDEAVOR/ROCK_SLIDE module already established) |
+| `anchorOpponentAfterTurnHp` (101, Grovyle's own steady overlay in `drawEndeavorSquish`) | not an `hp-change` endpoint in THIS window's own chain (Grovyle is the attacker, not hit) | **no kernel event needed for this specific read**, same "steady-state read, not a drain endpoint" finding every prior sibling module's own mapping table already made |
+| `TURN2_CONFIRM_PRESS_TICK`/`turn2KickoffBounceTick` (bounce-overlay tick) | n/a — presentation-only timing, not battle content | not applicable, same class as every prior window's own non-content tick anchors |
+| `drawEndeavorSquish` choreography (squish/blend/droplets, `ENDEAVOR_SQUISH_TABLE`) | `animation{animationId:"MOVE_ANIMATION"/"HIT_ANIMATION"}` | **kind emitted today, proven** (this run's own `animation` events) — gap 6 (no frame-by-frame payload) unchanged, same as every prior window |
+| effectiveness SFX | `play-se` | **emitted today, proven**. Still moot for this checkpoint's own oracle (pixel-only, gap 8, unchanged) |
+| `dragonBreathTextStartTick`/DRAGON_BREATH half (Onix's own later move) | out of scope — a SEPARATE hit chain, never reached by this trace at all (§13.1) | not applicable to this window |
+
+### 13.3 Ordered wiring plan (acceptance: `turn2-endeavor.json` still passes at 77/77, regression sweep over the adjacent ENDEAVOR/kickoff traces unchanged)
+
+This window's own text has NO apostrophe — the KNOWN PREREQUISITE resolver
+fix is **not** a blocking substep for this specific wiring plan (unlike
+`turn6-statfall.json`'s own path, named above and left for whoever picks
+that candidate up next).
+
+1. Wire `drawTurn2KickoffText`'s ENDEAVOR-text branch (`battleScene.ts:6905`)
+   to source its two message lines from
+   `turn2EndeavorPresentationStaging.ts`'s `resolveTurn2EndeavorAttackLines()`
+   instead of the raw `TURN_KICKOFF_LINE1`/`TURN2_KICKOFF_LINE2` literals —
+   byte-identical content, mechanical swap (§8.5/§10.3's own precedent
+   shape). `TURN_KICKOFF_LINE1`/`TURN2_KICKOFF_LINE2` themselves stay
+   defined and in use by turn 3's own repeat ENDEAVOR call site
+   (`:6965`, out of this step's own scope, same "only this window's own
+   call site retired" discipline §12.5 established for
+   `TURN6_FEATHERDANCE_LINE1/2`).
+2. Wire `endeavorOnixHp`'s own `startHp`/`endHp` arguments at `:6896` to
+   `turn2EndeavorPresentationStaging.ts`'s `resolveTurn2EndeavorHpEndpoints()`
+   `{from, to}` instead of the direct `anchorPlayerBattler.hp`/
+   `anchorPlayerAfterTurnHp` reads — byte-identical values (117, 101), zero
+   pixel change expected since this trace's own capture never reaches the
+   drain (§13.1/§13.2's own named residual) but the wiring closes the real
+   kernel-proof gap regardless, matching this checkpoint's own "wire what's
+   proven, not just what's pixel-exercised" convention (§9.3/§10.3 already
+   did this for out-of-capture-range endpoints too).
+3. `anchorOpponentAfterTurnHp`'s own steady overlay in `drawEndeavorSquish`
+   (`:6881`, Grovyle's own hp during this window) stays a direct literal for
+   this pass — not a drain endpoint of THIS window's own hit chain (§13.2's
+   own mapping-table row), same "narrow to what's actually unblocked"
+   discipline every prior window's own plan used for its adjacent
+   out-of-scope reads.
+4. Re-run `npm run compare -- turn2-endeavor.json` and confirm it still
+   matches at **77/77** (recorded count) before/after, PLUS a regression
+   sweep of `turn2-endeavor-drain.json` (237/237, the SAME function
+   extended further — most likely to catch a step-2 HP-endpoint regression
+   since it actually renders the drain), `turn2-dragonbreath.json` (237/237,
+   shares this trace's own idle/press prefix then extends into the DRAGON_
+   BREATH half untouched by this plan), `turn2-dragonbreath-projectiles.json`
+   (61/61), `turn3-endeavor.json` (192/192, the SAME `TURN_KICKOFF_LINE1`/
+   `TURN2_KICKOFF_LINE2` literals' other live call site — most likely to
+   catch a step-1 regression if the swap is scoped too broadly),
+   `turn3-rockslide.json` (256/256), `turn1-rockslide.json` (256/256),
+   `turn5-rockslide.json` (256/256), `turn4-doubleteam.json` (250/250), and
+   `turn6-featherdance.json` (90/90) — the checkpoint's own established
+   acceptance bar, matching the exact live counts §13.4 already re-pinned
+   this session.
+
+**Residual named for whoever picks up `turn6-statfall.json` next** (not this
+plan's own scope): wiring `TURN6_ATKFELL_LINE1/2`/the stat-fall banner needs
+the apostrophe-glyph resolver fix FIRST, per the KNOWN PREREQUISITE — either
+a charmap-aware post-process in `resolveBattleStringLines`
+(`battleStringResolver.ts`) or a corrected `battle-message-templates.json`
+extraction (curly `’` in the source template's `'s ` run,
+`tools/extract/extract-battle-messages.ts`), confirmed THIS session to be
+directly pixel-exercised by that trace's own already-committed capture (not
+merely a future-extension concern) — named here precisely so the next
+worker who picks that candidate doesn't rediscover the blocker from scratch.
+
+### 13.4 Comparator re-pin
+
+Ran twice live this session (determinism check), plus a named
+adjacent-trace regression sweep, from this worktree, against this lane's
+Battle Scene OFF oracle (`127.0.0.1:8014`):
+
+```
+$ npm run compare -- turn2-endeavor.json --summary   (run 1)
+77/77 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn2-endeavor.json --summary   (run 2, determinism check)
+77/77 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn2-endeavor-drain.json --summary
+237/237 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn2-dragonbreath.json --summary
+237/237 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn2-dragonbreath-projectiles.json --summary
+61/61 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn3-endeavor.json --summary
+192/192 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn3-rockslide.json --summary
+256/256 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn1-rockslide.json --summary
+256/256 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn5-rockslide.json --summary
+256/256 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn4-doubleteam.json --summary
+250/250 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn6-featherdance.json --summary
+90/90 frames matched -> tools/compare/out/latest
+```
+
+`turn2-endeavor.json` matches its recorded count (77/77) both runs —
+re-pinned live, this is the baseline the wiring step (§13.3) must preserve.
+Every adjacent trace re-confirms its own already-established count
+unchanged, proving this session's read-only recon (plus the new unwired
+`turn2EndeavorPresentationStaging.ts` module) touched nothing live. `npm test`
+**266 files, 3529 tests** (250/3417 at §12.4's own baseline + 3 from §12.5's
+own landed wiring [252/3446] + 9 new from this session's own
+`turn2EndeavorPresentationStaging.test.ts`, plus other worktree-independent
+growth already folded in ahead of this session — re-counted live, not
+copied from §12.4). `npm run build` clean.
+`executableFrontierRatchet.test.ts` unmoved (6/6, zero new barriers, no
+canonical recording import added).
