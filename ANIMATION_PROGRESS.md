@@ -46,6 +46,40 @@ animation. A status caused by a move is not part of that move's animation.
 
 ## Current resumable state (2026-07-27)
 
+Coverage is **46/276 exact, 4 partial, 226 unsupported**. DYNAMIC PUNCH is an
+honest partial: its complete first move-owned source-component body matches
+**75/75 player-back + 75/75 opponent-front** frames through a typed relative
+Scene-ON seam, reproduced twice fresh. Shared-seam raw-RGB is **0/75 attempted**
+in each orientation because battleScene assets/drawing are not wired.
+
+## DYNAMIC PUNCH component body closed; framebuffer remainder bounded (2026-07-27)
+
+**Verdict:** `MOVE_DYNAMIC_PUNCH` is partial. Legal mechanicLab parties stage
+HITMONCHAN from real Level-50 Factory set 339 (Emerald source species constant
+107) in both orientations, constrain all four choices to DYNAMIC PUNCH, and
+use slower SHUCKLE with TACKLE. Dense component plus typed-seam evidence is
+**75/75** at oracle 101-175 player-back and 105-179 opponent-front, twice fresh.
+
+**Source reducer/evidence:** the independent reducer ports target monbg and
+alpha 12/8, the fist duration/target picture-offset position, animation-0
+hitsplat and affine identity, `ShakeMon(5,0,7,1)`, the five literal
+target-relative explosion instances, `ShakeMon2(5,0,28,1)`, target-pan sound
+boundaries, and teardown. Literal `gExplosionSpriteTemplate` identity reuses
+the existing exact explosion reducer only where its argv/offset program agrees.
+PRESENT was audited and remains unsupported: its moving bag and conditional
+damage/heal branches require independent dense evidence.
+
+**Precise remainder:** extract HITMONCHAN/fist/hitsplat art; wire only the
+animation drawing path through battleScene; prove software/hardware OAM,
+palette/matrix/register latches, audio, cleanup, and raw RGB at 75/75 in both
+orientations twice. Until then framebuffer exact is **0/75**, not exact.
+EXPLOSION remains **212/212** and SELF DESTRUCT **113/113** component plus
+framebuffer exact in both orientations. No absolute ticks, screenshots,
+coordinate/RGB fitting, canonical imports, unsupported barriers, or boundary
+widening were added.
+
+## Previous current state (2026-07-27)
+
 Coverage is **46/276 exact, 3 partial, 227 unsupported**. EXPLOSION is exact
 through the shared Scene-ON seam at **212/212 player-back + 212/212
 opponent-front** complete-body component, typed relative-seam, and raw-RGB
