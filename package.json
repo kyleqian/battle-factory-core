@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "test": "vitest run --no-watch --pool=forks --testTimeout=20000",
     "compare": "node --experimental-strip-types tools/compare/run.ts",
+    "compare:batch": "node --experimental-strip-types tools/compare/batch.ts",
     "animation:coverage": "node --experimental-strip-types tools/animation/report.ts",
     "animation:components": "node --experimental-strip-types tools/extract/extract-battle-animation-components.ts",
     "extract:level50-move-parameterization": "node --experimental-strip-types tools/extract/extract-level50-move-parameterization.ts",
