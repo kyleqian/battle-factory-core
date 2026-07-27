@@ -68,11 +68,11 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // RAZOR LEAF adds a source-only partial; raw RGB remains unattempted.
+        // RAZOR LEAF closes its complete source and raw-RGB body.
         unsupported: 225,
         staged: 0,
-        partial: 4,
-        exact: 47,
+        partial: 3,
+        exact: 48,
       },
       {
         tier: "openOnly",

@@ -46,10 +46,30 @@ animation. A status caused by a move is not part of that move's animation.
 
 ## Current resumable state (2026-07-27)
 
-Coverage is **47/276 exact, 4 partial, 225 unsupported**. RAZOR LEAF is partial
-at **139/139 player-back + 139/139 opponent-front** complete source-component
-and typed-seam frames, reproduced twice fresh. Raw RGB remains explicitly
-**0/139 unattempted** in each orientation.
+Coverage is **48/276 exact, 3 partial, 225 unsupported**. RAZOR LEAF is exact
+through the shared Scene-ON seam at **139/139 player-back + 139/139
+opponent-front** complete component, hardware-transfer, and raw-RGB frames,
+reproduced twice fresh.
+
+## RAZOR LEAF promoted exact; leaf/cutter display path closed (2026-07-27)
+
+**Verdict:** `MOVE_RAZOR_LEAF` is exact. Legal challenge-0 parties retain real
+set-165 WEEPINBELL in both orientations with every active choice constrained
+to RAZOR LEAF and slower SHUCKLE constrained to TACKLE. Complete oracle
+windows 91-229 player-back and 95-233 opponent-front match **139/139**
+component, typed-seam, hardware-transfer, and raw-RGB frames twice fresh.
+
+**Renderer/evidence:** WEEPINBELL back/front plus LEAF/RAZOR_LEAF art and
+palettes regenerate byte-for-byte. The narrow battleScene case ports the
+one-display effect OAM latch, target ShakeMon2 latch, source subpriority/Y
+ordering including stable exact-Y slot ties, absent-partner singles monbg
+no-op, alpha 12/8 register lifetime, field chrome, and cleanup.
+
+**Controls/scope:** DYNAMIC PUNCH remains **75/75**, EXPLOSION **212/212**,
+and SELF DESTRUCT **113/113** component plus framebuffer exact in both
+orientations. SECRET POWER, MAGICAL LEAF, LEAF BLADE, and TWISTER remain
+unsupported. No absolute ticks, screenshots, canonical imports, unsupported
+barriers, controller/state changes, or boundary widening were added.
 
 ## RAZOR LEAF source-component body closed; framebuffer remainder bounded (2026-07-27)
 
