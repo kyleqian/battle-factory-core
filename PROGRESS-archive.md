@@ -1,4 +1,100 @@
 ---
+## 499 — [BOUNDED WORKER 2026-07-27 ~03:45] Thrash Rung 5 landed: ENDTURN_THRASH end-turn case (lock countdown + final-turn confusion transition) — plus a real design-doc gap in the ThrashConfuses gating condition
+
+- **State:** tree green at **235 files / 3311 tests** (+6 tests over this
+  session's own starting baseline, 235/3305 — that starting count already
+  included a side-lane merge landed after entry 498 was written, not a
+  discrepancy), `npm run build` clean. Census re-run **byte-identical**
+  (94/214 effects, 191/355 moves, 153/276 Factory-L50, 1900/2957 weighted,
+  `git status --porcelain docs/executable-frontier-census.md` empty) —
+  expected and confirmed: like Rungs 2/3, this is an end-turn-tick reducer
+  change, not a move-execution dispatch change, so the census (which only
+  walks move scripts) has nothing new to count. `executableFrontierRatchet
+  .test.ts` unmoved (6/6 green, zero new barriers — this rung wires an
+  *existing* reachable case-barrier into a real reducer rather than adding
+  an `unsupportedBranch` call site).
+- **Did:** landed `docs/yawn-thrash-endturn-design.md` §4/Rung 5 exactly as
+  scoped. New `runThrashTick` in `battleEndTurnOrchestration.ts`, replacing
+  the `:1183`-area case-barrier (`STATUS2_LOCK_CONFUSE set but
+  BattleScript_ThrashConfuses is not wired`) Rung 4 made live for the first
+  time: (1) decrements `STATUS2_LOCK_CONFUSE` by one turn unit (new
+  `BATTLE_SCRIPT_STATUS2_LOCK_CONFUSE_TURN_1` constant in
+  `battleScriptSourceConstants.ts`, same shape as Yawn's own `_TURN_1`);
+  (2) `WasUnableToUseMove` takes priority over the lock-expiry branch — this
+  rung's own required first action (per the design doc's `UNVERIFIED` flag)
+  found it **already fully ported** as `wasBattleScriptBattlerUnableToUseMove`
+  (`battleScriptRulesContext.ts:892-906`, the exact 9-flag OR-chain, already
+  exercised by `battleScriptMoveEndControllers.ts:209`) — not a gap to fill,
+  same "already built, just verify" shape as Rung 4's own `gLockedMoves`
+  finding; when true, the shared `cancelBattleScriptMultiTurnMoves` helper
+  (already landed for Yawn/admission) clears the WHOLE lock outright, no
+  confusion, regardless of counter value; (3) on the lock-expiry branch,
+  extracted `applyConfusionMoveEffect`'s own state-mutation body into a new
+  exported `applyConfusionStatus2Mutation` (`battleScriptHitChainOpcode.ts`)
+  — same Own-Tempo/already-confused early-out + `(Random() % 4) + 2` duration
+  roll + status2 write, now shared by both the move-execution CONFUSION case
+  and this end-turn call site instead of duplicated; refactor is behavior-
+  preserving (`applyConfusionMoveEffect`'s own existing tests all still pass
+  unchanged). Ported the `hp === 0` early-out too (`SetMoveEffect`'s own
+  generic gate, not primary-gated, unlike the dead Shield-Dust/Safeguard/
+  Substitute checks — those three ARE dead here, cited why in-file).
+- **Real citation gap found and fixed (verify-each-citation bar, same class
+  as Rung 4's `jumpifstatus2` finding):** the design doc's §4 prose
+  characterizes the reducer as "run `BattleScript_ThrashConfuses` via
+  `runTickScript`" without naming source's own inner gate,
+  `if (status2 & STATUS2_CONFUSION) BattleScriptExecute(BattleScript_
+  ThrashConfuses)` (`battle_util.c:1688-1689`) — verified directly against
+  source this session: the script only runs when `SetMoveEffect`'s own
+  confusion branch actually wrote the bit (i.e. NOT Own Tempo, NOT hp===0).
+  An Own-Tempo-holding or fainted lock-in target clears its lock **silently
+  — no script, no message** — ported as an explicit `mutation.confused`
+  branch, not assumed unconditional. Also verified live: source's own
+  `!(status2 & STATUS2_CONFUSION)` outer gate (guarding the whole SetMoveEffect
+  call) is genuinely LIVE at this call site (an opponent's own confusion
+  move could pre-empt it), unlike `applyThrashMoveEffect`'s dead inner
+  check — flagged explicitly rather than assumed dead by analogy.
+- **Rung 4's own remainder note (WasUnableToUseMove `UNVERIFIED`) resolved:**
+  confirmed already-built, cited above — no new module touched for it.
+- **Tier-1 (+6, new "ENDTURN_THRASH" describe block in
+  `tests/battleEndTurnOrchestration.test.ts`):** mid-lock decrement (no
+  confusion, zero RNG); final-turn transition (MULTIPLETURNS clears,
+  `STATUS2_CONFUSION` lands via the exact `(Random() % 4) + 2` roll, exactly
+  1 RNG draw, `result.kind === "next-turn"` proving `BattleScript_
+  ThrashConfuses` runs cleanly to its own `end2` — the brief's own asked-for
+  pass-through test); `WasUnableToUseMove` (flinchImmobility) cancelling the
+  whole lock outright even on what would've been the final turn, zero RNG;
+  already-confused-from-another-source blocking the transition (MULTIPLETURNS
+  still clears, existing confusion duration untouched); Own Tempo blocking
+  the confusion write silently (zero RNG, no script); no-lock-bit-set no-op.
+  The `hp === 0` gate is ported but **not independently Tier-1-pinned**
+  (documented in-file): constructing a battler at hp===0 through the full
+  `runBattleEndTurnOrchestration` harness always routes into
+  `HandleFaintedMonActions`'s own switch-decision barrier
+  (`GetMostSuitableMonToSwitchInto`'s unmodeled AI_CalcDmg fallback)
+  regardless of Thrash state — confirmed live with a plain hp===0 probe
+  fixture carrying zero Thrash state, same barrier — staging a genuine
+  same-pass faint plus a real switch decision is out of proportion here.
+- **Live fixture: NOT attempted — Tier-1-only**, an explicitly acceptable
+  resting point per the brief. Rung 4's own TAUROS live-fixture remainder
+  (lock-in bits across turns + confusion onset, read-only) is still open;
+  folding it into one TAUROS fixture spanning lock-in start through
+  confusion onset is the natural live-fixture followup, not attempted this
+  session (time went to the citation-verification finding above instead).
+- **Next:** Rung 6 (a second `ENDTURN_ITEMS2` trigger fixture, Persim Berry
+  curing Thrash-fresh confusion — verification-only, zero new code per the
+  design doc's own §7) is next on the ladder and explicitly NOT started per
+  this step's own scope boundary — the next session's natural first brief.
+  The TAUROS live-fixture remainder (Rung 4+5 combined) is also open, either
+  as Rung 6's own prerequisite live-proof or a parallel pickup.
+- **Notes:** no PAPERCUT. Archived entry 496 to `PROGRESS-archive.md` to
+  keep this ledger at 3 entries. The `BattleScriptExecute` conditional gap
+  (a real blocker the design doc's own prose glossed over) was the only real
+  deviation from plan — found by tracing the source's own nested `if`
+  directly rather than trusting the prose summary, fixed narrowly via the
+  `mutation.confused` branch, and named here per the brief's own
+  prove-or-refute bar.
+
+---
 ## 498 — [BOUNDED WORKER 2026-07-27 ~03:05] Thrash Rung 4 landed: CONFUSEIFREPEATINGATTACKENDS + MOVE_EFFECT_THRASH lock-in start — plus a real jumpifstatus2 gap the design doc's own citation table missed
 
 - **State:** tree green at **234 files / 3300 tests** (+1 file/+7 tests over
