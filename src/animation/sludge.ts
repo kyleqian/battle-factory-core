@@ -21,6 +21,44 @@ const PROJECTILE_MATRICES = [
   250, 240, 232, 224, 217, 210, 203, 197, 191, 186, 186,
 ] as const;
 
+/** Shared `gSludgeProjectileSpriteTemplate` callback body. */
+export function sludgeProjectileAtLocalAge(
+  localAge: number,
+  attackerSide: "player" | "opponent",
+  projectileOrigin: Readonly<{ x: number; y: number }>,
+  targetCenter: Readonly<{ x: number; y: number }>,
+  spawnIndex = 0,
+  oamSlot = 3,
+): SludgeSprite | undefined {
+  if (localAge < 0 || localAge >= SLUDGE_PROJECTILE_DURATION) return undefined;
+  const startX = projectileOrigin.x + (attackerSide === "player" ? 20 : -20);
+  const callbacks = localAge + 1;
+  const arcAngle = Math.trunc(
+    (Math.trunc(0x8000 / SLUDGE_PROJECTILE_DURATION) * callbacks) / 256,
+  ) & 0xff;
+  const matrix = PROJECTILE_MATRICES[localAge % PROJECTILE_MATRICES.length]!;
+  return {
+    kind: "projectile",
+    x: startX + linearTranslationOffsetAfterCallbacks(
+      linearTranslationDeltaQ8(targetCenter.x - startX, SLUDGE_PROJECTILE_DURATION),
+      callbacks,
+      SLUDGE_PROJECTILE_DURATION,
+    ),
+    y: projectileOrigin.y + linearTranslationOffsetAfterCallbacks(
+      linearTranslationDeltaQ8(
+        targetCenter.y - projectileOrigin.y,
+        SLUDGE_PROJECTILE_DURATION,
+      ),
+      callbacks,
+      SLUDGE_PROJECTILE_DURATION,
+    ) + Math.floor((GBA_SINE_TABLE_256[arcAngle]! * -30) / 256),
+    xScale: matrix,
+    yScale: matrix,
+    spawnIndex,
+    oamSlot,
+  };
+}
+
 export interface SludgeSprite {
   readonly kind: "projectile" | "poisonBubble";
   readonly x: number;
@@ -114,37 +152,10 @@ export function sludgeEffectAtAge(
   targetCenter: Readonly<{ x: number; y: number }>,
 ): SludgeEffect {
   const sprites: SludgeSprite[] = [];
-  if (age >= 0 && age < SLUDGE_PROJECTILE_DURATION) {
-    const startX = projectileOrigin.x + (attackerSide === "player" ? 20 : -20);
-    const callbacks = age + 1;
-    const arcAngle = Math.trunc(
-      (Math.trunc(0x8000 / SLUDGE_PROJECTILE_DURATION) * callbacks) / 256,
-    ) & 0xff;
-    const matrix = PROJECTILE_MATRICES[age % PROJECTILE_MATRICES.length]!;
-    sprites.push({
-      kind: "projectile",
-      x: startX + linearTranslationOffsetAfterCallbacks(
-        linearTranslationDeltaQ8(
-          targetCenter.x - startX,
-          SLUDGE_PROJECTILE_DURATION,
-        ),
-        callbacks,
-        SLUDGE_PROJECTILE_DURATION,
-      ),
-      y: projectileOrigin.y + linearTranslationOffsetAfterCallbacks(
-        linearTranslationDeltaQ8(
-          targetCenter.y - projectileOrigin.y,
-          SLUDGE_PROJECTILE_DURATION,
-        ),
-        callbacks,
-        SLUDGE_PROJECTILE_DURATION,
-      ) + Math.floor((GBA_SINE_TABLE_256[arcAngle]! * -30) / 256),
-      xScale: matrix,
-      yScale: matrix,
-      spawnIndex: 0,
-      oamSlot: 3,
-    });
-  }
+  const projectile = sludgeProjectileAtLocalAge(
+    age, attackerSide, projectileOrigin, targetCenter,
+  );
+  if (projectile) sprites.push(projectile);
   for (let index = 0; index < SLUDGE_POISON_BUBBLE_START_AGES.length; index += 1) {
     const sprite = poisonBubbleAtLocalAge(
       age - SLUDGE_POISON_BUBBLE_START_AGES[index]!,
