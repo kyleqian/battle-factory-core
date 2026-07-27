@@ -44,6 +44,40 @@ animation. A status caused by a move is not part of that move's animation.
   presentation seam and all source- or evidence-required variants are covered.
 - No entry means unsupported.
 
+## CALM MIND promoted to exact; palette-exclusion track established (2026-07-27)
+
+**Verdict:** `MOVE_CALM_MIND` is exact through the shared Scene-ON seam in
+both required orientations, each reproduced twice. Player-back and opponent-
+front LUNATONE are each **101/101 task/palette/software+hardware-OAM/register/
+raw-RGB and framebuffer frames** (oracle 294-394). Census: **33/276 exact,
+3 partial, 240 unsupported**.
+
+**Source/probe:** complete legal mechanicLab parties stage the real Level-50
+Factory set-327 LUNATONE_2 species, Quiet nature, HP/DEF EV spread, and Lax
+Incense, with CALM MIND and TACKLE legally constrained. The reducer ports
+`BlendBattleAnimPalExclude`'s BG/every-non-attacker selection, attacker-partner
+`monbg`, non-attacker hide/reveal, all three delay-14 shrinking thin rings
+with affine/OBJ-alpha lifetime and low-slot OAM ordering, the reverse palette
+blend, and cleanup. The dense probe pins task data, battler visibility,
+software/hardware OAM, palettes, registers, and raw RGB.
+
+**Sibling audit (no promotions):** SKY ATTACK retains both two-turn branches,
+its distinct selector paths, shake/white-flash charge and sky/bird/impact
+strike; DESTINY BOND needs ghost BG, white shadow, attacker shake, gray blend,
+and restore; HEAL BELL needs its bell, twelve managed notes, three expanding
+ring/palette groups, two sparkling stars, asset boundaries, and blended-ring
+finale; LUSTER PURGE needs the psychic/white BG pipeline, circle/particle
+blends, six random hitsplats, target shake, reverse blend, and cleanup; SILVER
+WIND needs side-specific sliding BUG BGs, splitbgprio/monbg, eighteen sparkles,
+both target-excluding blends, and restore. All remain unsupported without
+independent complete dense move evidence.
+
+**Evidence/controls:** legal fixtures, reproducible extractor, dense probe,
+portable comparator, and focused Tier-1 reducer tests are committed.
+Acceptance is **101/101 ×2 in both orientations**. After the final renderer
+change HARDEN remains **101/101**, SYNTHESIS **130/130**, and BIND **45/45**,
+each in both orientations. The animation import boundary did not widen.
+
 ## HARDEN promoted to exact; MetallicShine track established (2026-07-27)
 
 **Verdict:** `MOVE_HARDEN` is exact through the shared Scene-ON seam in both
@@ -114,44 +148,6 @@ committed. Acceptance is **130/130 ×2 in both orientations**. After the final
 renderer change RECOVER remains **169/169**, MILK DRINK **186/186**, and BIND
 **45/45**, each in both orientations. The shared blend-color-cycle and
 HealingEffect tests and animation import boundary remain green.
-
-## ACID promoted to exact; poison-bubble track established (2026-07-27)
-
-**Verdict:** `MOVE_ACID` is exact through the shared Scene-ON seam in both
-required orientations, each reproduced twice. Player-back EKANS is **131/131
-component/task/RAM/palette and framebuffer frames** (oracle 76-206);
-opponent-front EKANS is **131/131** (80-210). Census: **30/276 exact, 3
-partial, 243 unsupported**.
-
-**Source/probe:** complete legal mechanicLab parties stage EKANS, the real
-Level-50 Factory set-53 carrier, with all four choices constrained to ACID;
-ONIX is constrained to TACKLE. The reducer ports all three literal
-`gAcidPoisonBubbleSpriteTemplate` 40-callback arcs, attacker-side mirroring,
-animation selection and average target geometry; both literal
-`AnimTask_ShakeMon2(target/defender partner,2,0,10,1)` calls (only the target
-has a visible singles sprite); the defender-side delay-2 two-leg
-`blend_color_cycle`; and all five delayed fixed-point/looping-affine
-`gAcidPoisonDropletSpriteTemplate` bodies. The Scene-ON compositor preserves
-`monbg`/`clearmonbg`, faded BG+OBJ palette rows, one-frame position/affine
-display latches, side-specific battler overlap, and the shared persistent
-`sSpriteOrder` reducer's y sort, destruction, and low-slot reuse.
-
-**Sibling audit (no promotions):** TOXIC retains two four-sprite
-`ToxicBubbles` waves plus the separate six-sprite `PoisonBubblesEffect`;
-SLUDGE needs its sludge projectile, target ShakeMon, delay-1 blend, and
-PoisonBubblesEffect; SLUDGE BOMB needs ten projectiles, twelve hit particles,
-its distinct ShakeMon2/blend/waitsound body, and PoisonBubblesEffect; POISON
-FANG needs the fang sprite, target ShakeMon, four-leg palette cycle, and
-PoisonBubblesEffect; POISON TAIL needs metallic shine, lunge, hitsplat,
-ShakeMon, alpha/monbg teardown, and PoisonBubblesEffect. All remain
-unsupported without independent dense move acceptance.
-
-**Evidence/controls:** legal fixtures, reproducible extractor, dense
-task/OAM/hardware-OAM/palette/RGB probe, portable comparator, and focused
-Tier-1 tests are committed. Acceptance is **131/131 ×2 in both
-orientations**. After the final renderer change WATER GUN remains **111/111**,
-SUPERSONIC **51/51**, and BIND **45/45**, both orientations; ShakeMon2 and
-the animation import boundary remain green.
 
 Start with one representative attacker/target. Add variants only when source
 inspection or comparison identifies a dependency: attacker side, front/back

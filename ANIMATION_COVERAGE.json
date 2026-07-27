@@ -2,6 +2,27 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_CALM_MIND",
+      "status": "exact",
+      "covered": [
+        "complete legal Level-50 mechanicLab parties stage LUNATONE with the real Factory set-327 species, Quiet nature, HP/DEF EV spread, Lax Incense, and four legally constrained CALM MIND choices; ONIX is constrained to TACKLE",
+        "player-back LUNATONE complete move-owned Scene-ON body at oracle frames 294-394: source task/palette/software+hardware-OAM/register/raw-RGB evidence 101/101 and shared-seam framebuffer 101/101, reproduced twice",
+        "opponent-front LUNATONE complete move-owned Scene-ON body at oracle frames 294-394: source task/palette/software+hardware-OAM/register/raw-RGB evidence 101/101 and shared-seam framebuffer 101/101, reproduced twice",
+        "AnimTask_BlendBattleAnimPalExclude selects BG banks and every visible non-attacker battler palette; monbg ANIM_ATK_PARTNER ownership; SetAllNonAttackersInvisiblity hide/reveal; all three gThinRingShrinkingSpriteTemplate delay-14 bodies with source affine accumulator, OBJ-alpha mode, 30-callback lifetime, low-slot reuse, and OAM ordering; reverse palette blend and cleanup"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-calm-mind-player-lunatone-opponent-onix.json",
+        "tools/battle-lab/mechanic-calm-mind-opponent-lunatone-player-onix.json",
+        "tools/compare/fixtures/calm-mind-player-lunatone-opponent-onix.json",
+        "tools/compare/fixtures/calm-mind-opponent-lunatone-player-onix.json",
+        "tools/compare/calmMindPortable.ts",
+        "tools/compare/calmMindProbe.py",
+        "tools/compare/extractCalmMindAssets.ts",
+        "src/animation/calmMind.ts",
+        "tests/animation/calmMind.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_HARDEN",
       "status": "exact",
       "covered": [
@@ -833,6 +854,21 @@
     "MOVE_BIND"
   ],
   "componentTracks": [
+    {
+      "id": "blend-battle-anim-palette-exclude",
+      "components": [
+        "task:AnimTask_BlendBattleAnimPalExclude"
+      ],
+      "representatives": [
+        "MOVE_CALM_MIND",
+        "MOVE_SKY_ATTACK",
+        "MOVE_DESTINY_BOND",
+        "MOVE_HEAL_BELL",
+        "MOVE_LUSTER_PURGE",
+        "MOVE_SILVER_WIND"
+      ],
+      "goal": "MOVE_CALM_MIND independently proves its complete exclude-attacker BG/non-attacker black blend, attacker-partner monbg, non-attacker hide/reveal, three delay-14 shrinking affine/OBJ-alpha thin rings, reverse blend, and cleanup in both orientations at 101/101 task/palette/software+hardware-OAM/register/raw-RGB and framebuffer frames, reproduced twice. HARDEN 101/101, SYNTHESIS 130/130, and BIND 45/45 remain exact in both orientations after the renderer change. No sibling is promoted. SKY ATTACK needs independent evidence for both two-turn branches: its normal-opponent setup uses ordinary palette selectors rather than Exclude, while the attacker-partner setup uses Exclude around monbg/alpha, attacker black/white blends, HorizontalShake, and the separate sky-BG/bird/impact/fade strike body. DESTINY BOND needs the BG_GHOST fade/restore pipeline, gDestinyBondWhiteShadow task, attacker ShakeMonInPlace, its partner-excluding two-leg gray palette body, and cleanup. HEAL BELL needs its bell, twelve palette-managed music notes, three HealBellRing expanding-ring/palette groups, two distinct sparkling stars, asset unload/reload boundaries, and the final blended expanding ring with its separate Exclude selector/colors. LUSTER PURGE needs the psychic BG and screen-to-white pipeline, luster circle, white-alpha particle/palette blends, six random hitsplats with sound tasks, target HorizontalShake, reverse blend, and cleanup. SILVER WIND needs side-specific BUG BGs, sliding BG, splitbgprio/monbg, eighteen independently parameterized big/medium/small sparkle sprites, initial and reverse target-excluding black blends, and restore cleanup. Every sibling remains unsupported pending its own complete dense move evidence."
+    },
     {
       "id": "metallic-shine",
       "components": [

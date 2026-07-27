@@ -2431,3 +2431,40 @@ its full body additionally needs `gSuperFangSpriteTemplate`,
 `MOVE_SECRET_POWER` stays unsupported: the Factory building branch dispatches
 to `Move_STRENGTH`, while other environments dispatch to distinct bodies.
 Shared reducers promote neither sibling. Implementation commit: `a6df4ee`.
+## ACID promoted to exact; poison-bubble track established (2026-07-27)
+
+**Verdict:** `MOVE_ACID` is exact through the shared Scene-ON seam in both
+required orientations, each reproduced twice. Player-back EKANS is **131/131
+component/task/RAM/palette and framebuffer frames** (oracle 76-206);
+opponent-front EKANS is **131/131** (80-210). Census: **30/276 exact, 3
+partial, 243 unsupported**.
+
+**Source/probe:** complete legal mechanicLab parties stage EKANS, the real
+Level-50 Factory set-53 carrier, with all four choices constrained to ACID;
+ONIX is constrained to TACKLE. The reducer ports all three literal
+`gAcidPoisonBubbleSpriteTemplate` 40-callback arcs, attacker-side mirroring,
+animation selection and average target geometry; both literal
+`AnimTask_ShakeMon2(target/defender partner,2,0,10,1)` calls (only the target
+has a visible singles sprite); the defender-side delay-2 two-leg
+`blend_color_cycle`; and all five delayed fixed-point/looping-affine
+`gAcidPoisonDropletSpriteTemplate` bodies. The Scene-ON compositor preserves
+`monbg`/`clearmonbg`, faded BG+OBJ palette rows, one-frame position/affine
+display latches, side-specific battler overlap, and the shared persistent
+`sSpriteOrder` reducer's y sort, destruction, and low-slot reuse.
+
+**Sibling audit (no promotions):** TOXIC retains two four-sprite
+`ToxicBubbles` waves plus the separate six-sprite `PoisonBubblesEffect`;
+SLUDGE needs its sludge projectile, target ShakeMon, delay-1 blend, and
+PoisonBubblesEffect; SLUDGE BOMB needs ten projectiles, twelve hit particles,
+its distinct ShakeMon2/blend/waitsound body, and PoisonBubblesEffect; POISON
+FANG needs the fang sprite, target ShakeMon, four-leg palette cycle, and
+PoisonBubblesEffect; POISON TAIL needs metallic shine, lunge, hitsplat,
+ShakeMon, alpha/monbg teardown, and PoisonBubblesEffect. All remain
+unsupported without independent dense move acceptance.
+
+**Evidence/controls:** legal fixtures, reproducible extractor, dense
+task/OAM/hardware-OAM/palette/RGB probe, portable comparator, and focused
+Tier-1 tests are committed. Acceptance is **131/131 ×2 in both
+orientations**. After the final renderer change WATER GUN remains **111/111**,
+SUPERSONIC **51/51**, and BIND **45/45**, both orientations; ShakeMon2 and
+the animation import boundary remain green.
