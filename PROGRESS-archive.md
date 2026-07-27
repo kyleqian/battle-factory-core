@@ -1,4 +1,59 @@
 ---
+## 484 — [2026-07-26] LightScreen/Reflect CBM+CV pair ported (§23, tenth pair)
+
+- **State:** tree committed and green at **226 files / 3109 tests** (+28
+  over entry 483's 3081), build green (`tsc -b && vite build`). Census
+  **unchanged at 92/214 effects, 187/355 moves, 150/276 Factory-L50,
+  1884/2957 weighted, all 32 self-checks pass** (reran
+  `tools/report/executable-frontier-census.ts`: byte-identical, no diff —
+  this AI-decision port touches `battle_ai_scripts.s`, not the effect-
+  execution subsystem the census measures). `executableFrontierRatchet
+  .test.ts`'s per-module barrier counts **unmoved** (no new barrier; both
+  effects already had existing table-lookup fallback entries).
+- **Did:** landed §23's full four-handler pair per its ground truth
+  (`docs/factory-ai-checkviability-ground-truth.md` §23, merged prior round,
+  supervisor-verified ALL PASS both seeds). (1) `factoryAiCheckBadMove.ts`:
+  added `runCbmLightScreen`/`runCbmReflect` — the smallest CBM handler shape
+  in the doc to date, a single AI_USER-own-`SIDE_STATUS_*`-bit test with
+  zero stat-stage read and zero `get_ability` call. Added `lightScreenUp?`/
+  `reflectUp?` booleans to `FactoryAiCheckBadMoveAttacker` (same optional/
+  default-false convention as `spDefStage?` etc., entry 483). (2)
+  `factoryAiCheckViability.ts`: added `runCvLightScreen`/`runCvReflect`,
+  sharing one body (`runCvSideScreenTypeGate`, the `DefenseDown`/`SpDefDown`
+  shared-body-plus-`kind`-parameter precedent) — one HP gate on AI_USER's
+  OWN hp, then the TARGET's own innate type1/type2 against a type list
+  (LightScreen's 8-type special list / Reflect's 9-type physical list, exact
+  complements covering all 17 Gen 3 types), then a single draw site. No new
+  `FactoryAiCheckViabilityBattler` fields needed — `attacker.hp`/`maxHp` and
+  `target.types` already existed. (3) `factoryAiDecisionPolicy.ts`: wired
+  the two new CBM boolean fields onto `FactoryAiScoredBattlerView` and into
+  `attackerForCbm`; the CV side needed zero wiring changes (its two inputs
+  were already threaded through). (4) Tests: 8 CBM gate tests (both
+  handlers' true/false/omitted/cross-flag-irrelevance cases), 12 CV
+  handler-level tests (Gate A, Gates B/C on both type lists, DRAW SITE both
+  polarities, for both handlers), 9 mask-7 `chooseFactoryAiScoredDecision`
+  end-to-end tests reproducing §23.2/§23.3's Anorith/Shuckle/Vulpix
+  reach/control fixtures (policy-own-draws: reach = 4 setup + 4 CV + 1 tie =
+  9, control = 4 setup + 0 + 1 tie = 5; oracle's own live totals 10/6 are a
+  documented superset, the extra +1 being `BattleTurnPassed`, outside this
+  policy's scope, doc §23.4) plus a LightScreen≡Reflect cross-handler draw-
+  count parity check — 29 tests total, following the SpDefUp port pattern
+  (entry 483) exactly. Uniquely for this pair, per §23.2, zero HP-banding or
+  damage staging was needed in any fixture (Gate A only cares about AI_USER's
+  own hp, which stays at its construction-time full value throughout).
+- **Next:** EvasionUp/EvasionDown/weather-trio pairs (the last 6 of 22 CV
+  handlers); §19.5's unstaged AccuracyDown sites 2-6 (need mixed movesets);
+  entry 476's §18 5-6-draw window discrepancy (probe candidate, sRandCount
+  attribution); ENDTURN_ITEMS2 after Yawn/Thrash; Gate A (opponent HP<50%)
+  for LightScreen/Reflect remains unstaged live (doc §23.5 item 4, would
+  need a real-damage fixture variant, out of scope for this zero-damage
+  design). Seam — turn-4 `anchorOpponentAfterTurn4Hp` staging gap and
+  seam-scout §9 items remain carried from entry 468. Animation program is
+  independent (its own supervisor, entry 481, archived).
+- **Notes:** no ISSUES.md changes (none were open on this pair). No
+  PAPERCUTS this step.
+
+---
 ## 483 — [2026-07-26] SpDefUp/CosmicPower/CalmMind CBM+CV pair ported (§22)
 
 - **State:** tree committed and green at **226 files / 3081 tests** (+27

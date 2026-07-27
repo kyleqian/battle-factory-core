@@ -591,6 +591,24 @@ already-landed checkpoint conversion is untouched by this session's work.
 
 ## 9. Prep-scout for the NEXT window, 2026-07-26 (`turn5-rockslide.json`)
 
+> **STATUS UPDATE (2026-07-26, later same day): §9.4's own 6-rung wiring
+> plan is DONE.** Rung 1 (the 3 opcodes, §9.2) landed in `PROGRESS-archive
+> .md` entry 464 (`4758e8c`); rungs 2-6 (real `MOVE_ENDEAVOR` staging +
+> `battleScene.ts` wiring) landed in entry 465, re-pinned live at
+> `turn5-rockslide.json` 256/256, `turn1-rockslide.json` 256/256,
+> `turn5-faint.json` 110/110 (plus a 14-trace sweep). The ONE item this
+> section's own plan left open is the `anchorOpponentAfterTurn4Hp` `from`-
+> endpoint residual gap entry 465 named explicitly (§9.4 step 5) — it needs
+> a NEW turn-4 RockSlide-settle staging module before it can be wired for
+> real, not a redo of this section's own plan. A later PROGRESS entry
+> (468) correctly scoped this as "seam-scout §9 items **1/5**"; that `1/5`
+> qualifier was dropped in later carried-forward summaries (484-486),
+> which is what caused this exact already-done plan to be re-briefed to a
+> worker on 2026-07-26 ~22:00 (re-verified still green, zero code changes,
+> see that session's PROGRESS entry). Read this whole section for the
+> ORIGINAL recon/design record; for current status, trust this note over
+> the prose below.
+
 Read-only recon plus one unwired staging module/test (no `battleScene.ts` or
 other production edit — same contract §8 used for `turn1-rockslide.json`,
 which landed on the first wiring try). Since §8 was written, **both windows
