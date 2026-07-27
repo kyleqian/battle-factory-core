@@ -4,6 +4,8 @@ import {
   SYNTHESIS_BLEND_TIMING,
   SYNTHESIS_GRANTING_STAR_DURATION,
   SYNTHESIS_HEALING_START_AGE,
+  synthesisAttackerObjYAtAge,
+  synthesisBlendTaskActiveAtAge,
   synthesisEffectAtAge,
 } from "../../src/animation/synthesis.ts";
 import { blendColorCycleLegDuration } from "../../src/animation/blendColorCycle.ts";
@@ -17,21 +19,26 @@ describe("MOVE_SYNTHESIS source-relative body", () => {
     expect(blendColorCycleLegDuration(
       SYNTHESIS_BLEND_TIMING.legs[0]!, 2, false,
     )).toBe(21);
+    expect([0, 3, 4, 31, 32, 41, 42, 69, 70].map(
+      synthesisAttackerObjYAtAge,
+    )).toEqual([0, 0, 2, 14, 16, 16, 14, 2, 0]);
+    expect([74, 75].map(synthesisBlendTaskActiveAtAge))
+      .toEqual([true, false]);
   });
 
   it("loops all eight seven-tick GrantingStars frames through duration 60", () => {
-    expect([0, 6, 7, 55, 56, 60, 61].map(grantingStarFrameAtLocalAge))
+    expect([0, 5, 6, 54, 55, 60, 61].map(grantingStarFrameAtLocalAge))
       .toEqual([0, 0, 1, 7, 0, 0, null]);
     expect(SYNTHESIS_GRANTING_STAR_DURATION).toBe(60);
   });
 
-  it("creates both stars eight ticks apart and mirrors only their x offsets", () => {
-    const player = synthesisEffectAtAge(8, "player", { x: 72, y: 80 });
-    const opponent = synthesisEffectAtAge(8, "opponent", { x: 176, y: 40 });
+  it("creates both stars across the literal delay-8 interpreter boundary and mirrors only x", () => {
+    const player = synthesisEffectAtAge(10, "player", { x: 72, y: 101 });
+    const opponent = synthesisEffectAtAge(10, "opponent", { x: 176, y: 43 });
     expect(player.sprites.filter((sprite) => sprite.kind === "grantingStar"))
       .toHaveLength(2);
     expect(player.sprites[0]!.x - 72).toBe(-(opponent.sprites[0]!.x - 176));
-    expect(player.sprites[0]!.y - 80).toBe(opponent.sprites[0]!.y - 40);
+    expect(player.sprites[0]!.y - 101).toBe(opponent.sprites[0]!.y - 43);
   });
 
   it("reuses the shared HealingEffect only after the unload/delay/load boundary", () => {

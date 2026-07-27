@@ -2,7 +2,6 @@ import {
   linearTranslationOffsetAfterCallbacks,
 } from "./animLinearTranslation.ts";
 import {
-  blendColorCycleObjYAtAge,
   type BlendColorCycleTiming,
 } from "./blendColorCycle.ts";
 import {
@@ -18,13 +17,17 @@ export const SYNTHESIS_BLEND_TIMING: Readonly<BlendColorCycleTiming> =
     deltaY: 2,
   });
 
-export const SYNTHESIS_GRANTING_STAR_STARTS = [0, 8] as const;
+// The script's literal `delay 8` spans ten rendered callback ticks: the
+// interpreter consumes its own command ticks around the delay counter.
+export const SYNTHESIS_GRANTING_STAR_STARTS = [0, 10] as const;
 export const SYNTHESIS_GRANTING_STAR_ARGS = Object.freeze([
   Object.freeze({ x: -15, y: 0 }),
   Object.freeze({ x: 12, y: -5 }),
 ] as const);
 export const SYNTHESIS_GRANTING_STAR_DURATION = 60;
-export const SYNTHESIS_HEALING_START_AGE = 70;
+// The second granting star's terminal callback, unload, literal delay 1,
+// and compressed BLUE_STAR load leave the first HealingEffect star at 82.
+export const SYNTHESIS_HEALING_START_AGE = 82;
 
 export interface SynthesisSprite {
   readonly kind: "grantingStar" | "star";
@@ -36,10 +39,24 @@ export interface SynthesisSprite {
   readonly spawnIndex: number;
 }
 
+/** Literal delay-2 OBJ-half coefficient, RAM-probed across the whole task. */
+export function synthesisAttackerObjYAtAge(age: number): number {
+  if (age < 4) return 0;
+  if (age < 32) return 2 * Math.floor(age / 4);
+  if (age < 42) return 16;
+  if (age < 70) return 14 - 2 * Math.floor((age - 42) / 4);
+  return 0;
+}
+
+export function synthesisBlendTaskActiveAtAge(age: number): boolean {
+  return age >= 0 && age <= 74;
+}
+
 /** The eight literal seven-tick frames loop for the full 60-tick translation. */
 export function grantingStarFrameAtLocalAge(age: number): number | null {
   if (age < 0 || age > SYNTHESIS_GRANTING_STAR_DURATION) return null;
-  return Math.floor(age / 7) % 8;
+  // AnimateSprites consumes one of the seven frame ticks on creation.
+  return Math.floor((age + 1) / 7) % 8;
 }
 
 /**
@@ -89,7 +106,7 @@ export function synthesisEffectAtAge(
   })));
 
   return {
-    attackerObjY: blendColorCycleObjYAtAge(age, SYNTHESIS_BLEND_TIMING),
+    attackerObjY: synthesisAttackerObjYAtAge(age),
     sprites,
   };
 }

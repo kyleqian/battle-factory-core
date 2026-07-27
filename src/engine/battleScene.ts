@@ -15473,8 +15473,18 @@ export function renderSceneOnMovePresentation(
         `unsupported staged SYNTHESIS pair ${view.attacker.species}->${view.target.species}`,
       );
     }
-    const attackerSprite = playerToOpponent
+    const attackerSource = playerToOpponent
       ? synthesisArt.skiploomBack : synthesisArt.skiploomFront;
+    const attackerSprite = playerToOpponent
+      ? attackerSource
+      : {
+          ...attackerSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: attackerSource.tileset.tiles.slice(0, 64),
+          },
+        };
     const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
     drawTileBg(
       fb,
@@ -15505,7 +15515,12 @@ export function renderSceneOnMovePresentation(
       displayed.attackerObjY,
       false,
     );
-    for (const sprite of displayed.sprites) {
+    const displayedSprites = [
+      ...displayed.sprites.filter((sprite) => sprite.kind === "grantingStar")
+        .reverse(),
+      ...displayed.sprites.filter((sprite) => sprite.kind === "star"),
+    ];
+    for (const sprite of displayedSprites) {
       const art = sprite.kind === "grantingStar"
         ? synthesisArt.sparkle2 : synthesisArt.blueStar;
       const spriteTileset: Tileset = {
