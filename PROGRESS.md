@@ -14,6 +14,97 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > entry 468's animation items are the animation supervisor's backlog now.
 
 ---
+## 495 — [BOUNDED WORKER 2026-07-27 ~01:40] Yawn Rung 2 landed: ENDTURN_YAWN end-turn case (countdown decrement + real sleep transition) — live fixture reproduces the ROM's full 2-turn trajectory including the AND-chain firing
+
+- **State:** tree green at **232 files / 3282 tests** (+6 over entry 494's
+  3276), `npm run build` clean. Census re-run byte-identical (93/214
+  effects, 188/355 moves, 151/276 Factory-L50, 1894/2957 weighted, all 32
+  checks pass, `git status --porcelain docs/executable-frontier-census.md`
+  empty) — expected: this rung is an end-turn-tick reducer, not a
+  move-execution dispatch change, so the census (which only walks move
+  scripts) has nothing new to count; the real delta is qualitative
+  (`ENDTURN_YAWN`'s silent no-op comment is now a live-modeled case).
+  `executableFrontierRatchet.test.ts` unmoved (6/6 green, no new barrier —
+  this rung wires an *existing* reachable case rather than adding an
+  unsupported-branch barrier).
+- **Did:** landed `docs/yawn-thrash-endturn-design.md` §2 exactly as scoped.
+  New `runYawnTick` in `battleEndTurnOrchestration.ts`, replacing the
+  `:991`-area no-op comment in `runDoBattlerEndTurnEffects`: (1) decrements
+  `STATUS3_YAWN` by one turn unit every pass the mask is nonzero (new
+  `BATTLE_SCRIPT_STATUS3_YAWN_TURN_1` constant in
+  `battleScriptSourceConstants.ts`, mirroring Rung 1's `_TURN_2`); (2) on
+  the pass that empties the counter, runs the exact AND-chain
+  (`!status1 && ability != VITAL_SPIRIT/INSOMNIA`, reusing Rung 1's own
+  ability ids as a plain equality check, no opcode) before calling the
+  ALREADY-LANDED `cancelBattleScriptMultiTurnMoves`
+  (`battleScriptMultiTurnCancellation.ts`, confirmed by entry 494's own
+  de-risking note — no new helper needed) and drawing the sleep-turn RNG
+  (`(Random() & 3) + 2`, attributed to `BattleScript_YawnMakesAsleep`'s own
+  entry instruction, same "draw before the script starts" convention
+  `runShedSkinTick` established); (3) writes the raw sleep-turn count
+  directly into `status1` (guaranteed zero going in, so no OR needed,
+  unlike every other family-A status write) and syncs the party mirror;
+  (4) runs `BattleScript_YawnMakesAsleep` via the plain `runTickScript`
+  primitive (`BattleScriptExecute`+`end2`, no `END3` — confirmed opcode-
+  complete by Rung 1's own census). One real wiring detail Rung 1's own
+  scoping note didn't call out: `BattleScript_YawnMakesAsleep` reads
+  `BS_EFFECT_BATTLER` for all three of its battler-selector opcodes
+  (`statusanimation`/`updatestatusicon`/`makevisible`, matching source's own
+  `gEffectBattler = gActiveBattler`), but `enterTickBattlerContext` only
+  ever sets the `attacker` role (documented as narrowed to it, since every
+  prior DoTurnDmg-family script only reads `BS_ATTACKER`) — `runYawnTick`
+  sets `selectorRoles.effectBattler` explicitly itself, the first tick
+  reducer in this file that needs to. Re-verified against the raw C switch
+  body (`battle_util.c:1753-1771`, quoted in full) that Yawn's case has NO
+  `hp != 0` guard (unlike Curse/Wrap, which do) — the reducer correctly
+  omits one. `UproarWakeUpCheck`'s omission (STATUS2_UPROAR never set by
+  any production code) is cited in the reducer's own doc comment, not
+  re-verified again this session (already confirmed twice: doc §2 and entry
+  494's de-risking note).
+- **Tier-1 (+6, `tests/battleEndTurnOrchestration.test.ts`):** new `ENDTURN_
+  YAWN` describe block — first-pass decrement only (`TURN(2)->TURN(1)`,
+  zero RNG); second-pass transition (`TURN(1)->0`, `status1` sleep-turn
+  write matching the raw-byte convention, party mirror sync, exactly 1 RNG
+  draw, seed-pinned like the file's existing Shed Skin precedent: seed
+  919694434's first draw gives `(randomValue&3)+2 == 3`); each AND-chain
+  blocker still decrements to zero but does NOT transition (statused
+  target, Vital Spirit, Insomnia — 3 tests); no-yawn-set pure no-op. All
+  assert the RNG-draw-count convention (zero on decrement-only, one on
+  transition) explicitly.
+- **Live fixture (`tools/battle-lab/mechanic-yawn-endturn-transition-off.json`,
+  new sibling extending Rung 1's GULPIN-vs-MAGIKARP fixture with a second
+  turn's worth of input past the original 900-frame idle window):**
+  opponent (MAGIKARP) `status3` observed **0 → 4096/0x1000 (frame 180,
+  `setyawn`) → 2048/0x800 (frame 320, turn 1's `ENDTURN_YAWN` decrement,
+  matches Rung 1's own preview) → 0 (frame 1260, turn 2's `ENDTURN_YAWN`
+  decrement emptying the counter)**; `status1` observed **0 → 5** at the
+  SAME frame 1260 (`STATUS1_SLEEP_TURN(5)`, within the real 2-5 turn range,
+  raw-byte value with no OR — matches the engine's write exactly). Frame
+  1260 screenshot: "Foe MAGIKARP fell asleep!" (`STRINGID_PKMNFELLASLEEP`),
+  confirming `BattleScript_YawnMakesAsleep` actually ran. Between frames
+  320 and 1200 status3/status1 sit frozen at 2048/0 (confirmed at 900,
+  1080, 1100, 1120, 1200 during binary-search narrowing) because turn 2
+  needs its own manual FIGHT-menu input in this harness (message
+  `waitmessage`s auto-advance on their own timer; the top-level action menu
+  does not) — the added second `A`-press pair supplies exactly that, GULPIN
+  re-attempting Yawn on an already-yawning target (silently fails,
+  `ButItFailed`, no new state) while MAGIKARP's own end-turn tick empties
+  the counter and transitions. This is the ROM's real 2-turn countdown
+  end-to-end, not just Rung 1's single-decrement preview.
+- **Next:** Rung 3 (`ENDTURN_ITEMS2` + `moveTurn` gating) is explicitly the
+  next MAIN-lane brief per the design doc's own ladder — out of scope for
+  this step and deliberately not started (its `moveTurn`-threading work
+  deserves its own fresh cap, per this step's own brief). Rungs 4-6
+  (Thrash-family) remain independent, lower-priority follow-ups per the
+  design doc's own headline finding (Yawn alone unblocks `ENDTURN_ITEMS2`).
+- **Notes:** no PAPERCUT. Ratchet/census both unmoved, as expected for an
+  end-turn-tick wiring step (named above). Time split roughly matched the
+  brief's guidance: reducer + Tier-1 landed well inside 40 minutes, live
+  fixture extension (the trickiest part — finding where the harness froze
+  waiting for turn-2 input, then binary-searching the transition frame)
+  took the remainder but stayed inside the cap.
+
+---
 ## 494 — [BOUNDED WORKER 2026-07-27 ~01:15] Yawn Rung 1 landed (SETYAWN + JUMPIFABILITY widening) — plus a real accuracycheck gap the design doc's own census missed
 
 - **State:** tree green at **232 files / 3276 tests** (+9 over entry 493's
@@ -223,108 +314,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   than leaving them to compound.
 
 ---
-## 492 — [BOUNDED WORKER 2026-07-27 ~00:15] §25 weather-trio CBM+CV pair ported (RainDance/SunnyDay/Hail) — 21/22 CV handlers now ported, NOT 22/22 (one real handler remains, see Next)
-
-- **State:** tree committed and green at **231 files / 3244 tests** (+49
-  over entry 491's 3195), `npm run build` clean. Census re-run
-  byte-identical (92/214 effects, 187/355 moves, 150/276 Factory-L50,
-  1884/2957 weighted, all 32 checks pass, `git status --porcelain docs/
-  executable-frontier-census.md` empty — AI-decision subsystem, not
-  effect-execution). `executableFrontierRatchet.test.ts` barrier counts
-  unmoved (6/6 green, no new barrier). Three commits: CBM trio + wiring +
-  CBM tests; CV handler bodies (already included in the first commit); CV
-  handler-level tests; mask-7 fixture-reproduction tests.
-- **Did:** landed §25's full six-handler weather trio per its ground truth
-  (`docs/factory-ai-checkviability-ground-truth.md` §25, supervisor-verified
-  live). (1) `factoryAiCheckBadMove.ts`: `runCbmRainDance`/`SunnyDay`/`Hail`
-  — §25.1 confirmed all three are three SEPARATELY NAMED dispatch targets
-  (not a shared handler, correcting §5's own "shared handler" guess) but
-  byte-for-byte identical 3-instruction bodies (`get_weather; if_equal <OWN
-  AI_WEATHER_*>, Score_Minus8; end`) — one parameterized helper covers all
-  three. Added `AI_WEATHER_SUN/RAIN/SANDSTORM/HAIL` constants + `AiWeatherValue`
-  type (0-3, the AI's OWN `get_weather` encoding, NOT `gBattleWeather`'s raw
-  bits — a distinct existing `rulesContext.weather` field elsewhere in the
-  engine uses the raw-bit encoding, confirmed by grep before assuming §5.4's
-  "already landed" claim; it hadn't, for this subsystem) and optional
-  `currentWeather?: AiWeatherValue` to `FactoryAiCheckBadMoveAttacker`, `undefined`
-  defaulting to "no weather bit set" (never equals any of the four
-  constants, so it never fires any handler's gate either way — the pinned
-  ROM's own `AI_WEATHER_NONE` stale-read bug, §25.1, is real but NOT
-  reachable by any of this step's staged/tested flows, so it is not modeled
-  or cited beyond this note per the brief's own citation instruction). (2)
-  `factoryAiCheckViability.ts`: `runCvSunnyDay`/`runCvHail` share a
-  `weatherSetterCvScore` helper (HP<40%→-1, else weather in the "other
-  three" real values→+1, else 0 — zero `if_random_less_than`, confirmed
-  independently from the raw assembly per §25.2, NOT assumed identical
-  siblings). `runCvRainDance` is genuinely bespoke (7 conditional
-  instructions vs the twins' 4, §25.2/§25.8): Gate P (`if_user_faster`,
-  reusing the SAME `getWhoStrikesFirst`/tie-break-`Random()` machinery
-  `AI_CV_SpeedDown`'s own `target-faster-tie` already ports, inverse
-  comparison target — a new `"user-faster-tie"` draw kind) → Gate S (own
-  ability == Swift Swim bypass, +1, skips HP/weather entirely) → the SAME
-  `weatherSetterCvScore` span → Gate R tail (own ability == Rain Dish, +1,
-  only reached when the span falls all the way through). Added `ability?:
-  string` (AI_USER's own real ability, direct field read — the FIRST
-  handler in this doc needing the attacker's own real ability, distinct
-  from the target-guessing `ability`/`knownAbility` pair every prior
-  handler used) and `currentWeather?` to `FactoryAiCheckViabilityBattler`.
-  (3) `factoryAiDecisionPolicy.ts`: wired both new optional fields through
-  `FactoryAiScoredBattlerView` (attacker-side only — both CBM and CV read
-  the same `view.attacker.currentWeather`/`.ability`). **Construction-site
-  grep performed** (`FactoryAiCheckBadMoveTarget\|Attacker` construction +
-  `runCheckViability(`/`runCheckBadMovePreamble(` call sites across `src/`):
-  confirms `factoryAiDecisionPolicy.ts` remains the ONLY production
-  construction site for both extended input types, both fully wired — no
-  repeat of entry 483's gap. (4) Tests: 114 CBM tests (+10: own-weather/
-  cross-weather/omitted-weather per handler, cross-handler byte-identity
-  parity), 253 CV tests (+37: SunnyDay/Hail's shared span per HP boundary +
-  each "other three" value + own-weather exclusion; RainDance's Gate P
-  including both the deterministic and hidden-tie-break-draw cases at the
-  SAME seeds `AI_CV_SpeedDown`'s own tie tests use, Gate S, Gate H/weather
-  span, Gate R), 106 mask-7 tests (+12: ALL SIX §25 fixtures — raindance/
-  sunnyday/hail × cbmreach/cvreach, 2 seeds each — reproducing the doc's own
-  pick-based design: `cbmreach` nets -8/0, AI picks a Growl slot, never slot
-  0; `cvreach` nets 0/+1, AI always picks slot 0, no tie; policy-own draws
-  reconcile to a clean 5 in all twelve cases — setup(4)+CBM(0, single-ability
-  Shuckle target)+TryToFaint(0, all 0-power moves)+CV(0, deterministic span
-  + zero-draw AttackDown control)+tie(1) — with zero residual, since §25.4's
-  own design deliberately abandoned the draw-count channel for this section,
-  so there is no live draw-count window to reconcile against beyond
-  confirming the mechanism draws nothing extra).
-- **CORRECTION to the brief's own "22/22 if true" framing — it is NOT true:**
-  re-derived the count from the ground truth doc's own master table (§5,
-  "all 22 reachable handlers") rather than trusting the brief's phrasing.
-  21 of 22 are now ported; **`AI_CV_SpeedDownFromChance` (`EFFECT_SPEED_DOWN_HIT`,
-  `data/battle_ai_scripts.s:1136-1141`) is the one that remains** — confirmed
-  by grep, `EFFECT_SPEED_DOWN_HIT` sits only in `AI_CHECK_VIABILITY_TABLE_
-  EFFECTS`'s barriered set, no dispatch entry exists. It was never in this
-  step's scope (§25 is the weather trio only) and was already correctly
-  flagged as future work in doc §10/§4 — this entry just makes the exact gap
-  explicit rather than letting "last 3 of 22" language get misread as "then
-  we're done." Per the doc's own footnote (§4/§5.216-229): it's CBM-free (no
-  paired `AI_CBM_*` handler needed, 0 `if_random` of its own) and literally
-  forwards 3 of its 6 covered moves (`MOVE_ICY_WIND`/`MOVE_ROCK_TOMB`/
-  `MOVE_MUD_SHOT`, matched by exact `if_move` ID) into the ALREADY-PORTED
-  `runCvSpeedDown`'s own body verbatim; the other 3 (`MOVE_BUBBLEBEAM`/
-  `MOVE_CONSTRICT`/`MOVE_BUBBLE`) fall through to a deterministic zero. This
-  is a small, well-scoped follow-up (an `if_move`-keyed redirect wrapping
-  the existing handler, not new handler logic) — a strong next-step
-  candidate given how little new code it needs.
-- **Next:** `AI_CV_SpeedDownFromChance` (`EFFECT_SPEED_DOWN_HIT`) closes the
-  true 22/22 — small, CBM-free, redirects into the already-ported
-  `runCvSpeedDown` (see above). Otherwise entry 491's own carried Next list
-  stands: §19.5's unstaged AccuracyDown sites 2-6; §24's own follow-up from
-  §7.4 (a live oracle fixture for `AI_CV_EvasionUp`'s toxic-poisoned +
-  own-HP<=50% branch); §25.6's own 4 not-staged-live items (Swift Swim
-  bypass, Rain Dish tail, the `<40%` HP-gate branch, `get_weather`'s own
-  `AI_WEATHER_NONE` stale-read bug — all recipe-only per the doc, all now
-  covered by this entry's own Tier-1 handler-level tests even though not
-  live-oracle-verified); ENDTURN_ITEMS2 after Yawn/Thrash.
-- **Notes:** no PAPERCUT. Time split beat the brief's own guidance: all
-  three rungs (CBM trio, CV SunnyDay+Hail+RainDance together, mask-7
-  fixtures) landed green well inside the 40-minute mark, each as its own
-  commit, leaving room to re-derive the handler count from the doc's master
-  table instead of trusting the brief's own "22/22 if true" framing at face
-  value — worth the time given the brief explicitly asked for a
-  confirm-or-correct, and the correction is real (see above).
 
