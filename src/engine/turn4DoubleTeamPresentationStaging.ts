@@ -75,6 +75,10 @@ import {
 } from "./battleScriptMachine.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 import type { BattleScriptSemanticEvent } from "./battleScriptEvents.ts";
+import {
+  resolveDoubleTeamKickoffPresentationWindowContent,
+  type DoubleTeamKickoffPresentationWindowContent,
+} from "./presentationEventWindowBridge.ts";
 import { resolveBattleNameWithPrefix, resolveBattleStringLines, resolveMoveNameExclaim } from "./battleStringResolver.ts";
 import speciesNamesAsset from "../data/gen/species-names.json" with { type: "json" };
 
@@ -267,18 +271,34 @@ function acknowledgePendingControllers(
 }
 
 /**
+ * The PC-to-window bridge (`docs/presentation-seam-scout.md` §11.3 step 1)
+ * applied to this staged run: extracts the DOUBLE_TEAM kickoff's own message +
+ * evasion-rise content purely from provenance, never a turn number.
+ */
+export function resolveTurn4DoubleTeamWindowContent(): DoubleTeamKickoffPresentationWindowContent {
+  const { events } = stageTurn4DoubleTeamHitChain();
+  const content = resolveDoubleTeamKickoffPresentationWindowContent(events);
+  if (!content) {
+    throw new Error(
+      "turn4DoubleTeamPresentationStaging: staged hit chain did not produce the DOUBLE_TEAM kickoff window's own event pair",
+    );
+  }
+  return content;
+}
+
+/**
  * `TURN_KICKOFF_LINE1`/`LINE2`'s real content ("Foe GROVYLE used\nDOUBLE
  * TEAM!") -- mechanically identical mapping to every sibling module's own
  * attackstring row (`Cmd_attackstring` emits the fixed `STRINGID_USEDMOVE`
  * regardless of which move is used, `battleScriptHitChainOpcode.ts:754-757`),
- * re-derived here from THIS staged run's own real event stream (not merely
- * asserted by analogy the way `turn1RockSlidePresentationStaging.ts`'s own
- * `resolveTurn1DoubleTeamKickoffLines` does) -- see the module's own test for
- * the live proof that this run's own `message` events actually contain
- * `STRINGID_USEDMOVE`.
+ * re-derived here from THIS staged run's own real event stream via
+ * `resolveTurn4DoubleTeamWindowContent` above (not merely asserted by analogy
+ * the way `turn1RockSlidePresentationStaging.ts`'s own
+ * `resolveTurn1DoubleTeamKickoffLines` does).
  */
 export function resolveTurn4DoubleTeamKickoffLines(): readonly string[] {
-  return resolveBattleStringLines("STRINGID_USEDMOVE", {
+  const content = resolveTurn4DoubleTeamWindowContent();
+  return resolveBattleStringLines(content.message.messageId, {
     B_ATK_NAME_WITH_PREFIX: () =>
       resolveBattleNameWithPrefix({ side: "opponent", isTrainerBattle: true, nickname: speciesDisplayName(SPECIES_GROVYLE) }),
     B_BUFF2: () => resolveMoveNameExclaim(MOVE_DOUBLE_TEAM),

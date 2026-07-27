@@ -15,6 +15,49 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 506 — [BOUNDED WORKER 2026-07-27 ~10:25] §11.3's 5-step `turn4-doubleteam.json` kickoff wiring landed, 250/250 preserved, regression sweep clean
+
+- **State:** tree green at **247 files / 3385 tests** (+4 over session start
+  247/3381: 3 new `presentationEventWindowBridge.test.ts` cases + 1 new
+  `turn4DoubleTeamPresentationStaging.test.ts` case), `npm run build` clean,
+  `executableFrontierRatchet.test.ts` unmoved (6/6, zero new barriers).
+- **Did:** executed `docs/presentation-seam-scout.md` §11.3's plan exactly
+  (completion note at its new §11.5). (1) `presentationEventWindowBridge.ts`
+  gained `resolveDoubleTeamKickoffPresentationWindowContent`, a genuinely
+  new `{message, statChange}` shape (no `hp` field), keyed on
+  `sourceLabel === "BattleScript_EffectStatUpAfterAtkCanceler"` for both the
+  `STRINGID_USEDMOVE` message and the evasion `stat-stage-change` (§11.2's
+  own proven co-located pair). (2) `turn4DoubleTeamPresentationStaging.ts`
+  gained `resolveTurn4DoubleTeamWindowContent` (stages the real chain, calls
+  the new bridge) and `resolveTurn4DoubleTeamKickoffLines` now reads
+  `content.message.messageId` from that bridge instead of hardcoding the
+  `"STRINGID_USEDMOVE"` literal directly — this closes a doc/code gap the
+  module's own comment already claimed but the code didn't yet do.
+  `battleScene.ts`'s `drawTurn4KickoffText` now draws
+  `TURN4_DOUBLETEAM_KICKOFF_LINE1/2` (resolved once at module load) instead
+  of the raw `TURN_KICKOFF_LINE1`/`LINE2` literals; `drawDoubleTeamClones`/
+  `drawStatsBanner` choreography untouched, left ungated on `statChange`
+  (scout named this optional; existing dispatch booleans already reproduce
+  the pixels, gating adds risk with no pixel benefit). Steps 3/4 (steady HP
+  overlays, PP-readout starting-PP assumption) left as named residuals per
+  the plan, not touched.
+- **No literal died:** `TURN_KICKOFF_LINE1`/`LINE2` (`battleMenu.ts:1086,1088`)
+  stay defined, still used by turn 1's/turn 2's own kickoff text and
+  `drawTurn4RockSlideWindow`'s own dead (unreachable in this trace)
+  pre-`statRoseStart` branch — only `drawTurn4KickoffText`'s one call site
+  stopped reading them directly.
+- **Acceptance:** regression sweep run BEFORE the change matched every
+  recorded count with zero pre-existing drift, then re-run AFTER with
+  byte-identical results both times — `turn4-doubleteam.json` 250/250 (x2),
+  `turn4-rockslide.json` 250/250, `turn1-rockslide.json` 256/256,
+  `turn3-rockslide.json` 256/256, `turn3-endeavor.json` 192/192,
+  `turn5-rockslide.json` 256/256, `turn5-faint.json` 110/110.
+- **Next:** ISSUES #47's movesetIndex-1-3 remainder; §19.5 sites 3-6 /
+  §24.5 recipe-only live staging (side); Rung 6/Rung 4 TAUROS is CLOSED
+  (entry 502) — do not re-brief it.
+- **Notes:** no PAPERCUT.
+
+---
 ## 505 — [SUPERVISOR 2026-07-27 ~10:15] round 1 verified + merged; round 2 dispatched
 
 - **State:** master green at **247 files / 3381 tests**, build clean, census
@@ -106,30 +149,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   remainders; §19.5 sites 3-6 / §24.5 recipe-only live staging.
 - **Notes:** no PAPERCUT. Archived entry 501 to `PROGRESS-archive.md` to
   keep this ledger at 3 live entries (504/503/502).
-
----
-## 503 — [SUPERVISOR ORIENT 2026-07-27 ~09:35] new session: animation-main folded (fast-forward onto the live animation supervisor's own sync-merge); round 1 dispatched
-
-- **State:** union baseline verified green at **247 files / 3370 tests**
-  (245/3363 + animation's Dragon Claw/Encore work), `npm run build` clean,
-  both oracle services fresh (`check-oracle-freshness.sh` PASS). No DEFERRED
-  entries. Hard deadline this session: **15:28**.
-- **Fold:** `master..animation-main` had 11 commits (Dragon Claw exact 35/276,
-  Encore strengthened checkpoint). The live animation supervisor session had
-  just merged master into `animation-main` (cd27abf), so the fold resolved as
-  a fast-forward of master onto that union — both branches now at cd27abf;
-  union suite + build verified here. No "For the main program:" note in the
-  animation ledger top entry.
-- **Round 1 (dispatched, 2 lanes, genuinely disjoint):** main → ISSUES #47
-  Channel 2 with the supervisor decision made: **option (a), logic-ID-major
-  restructure** of `chooseFactoryAiScoredDecision` matching the ROM's proven
-  CBM(0-3)→TTF(0-3)→CV(0-3) order (option (b)'s preview rejected — it leaves
-  the movesetIndex-1-3 carry a permanent guess; (a) models the mechanism),
-  then the 3 staged fixtures' mask-7 net-score tests (-7/+1/+1). Side →
-  ENDTURN_ITEMS1 `RESTORE_HP`/`RESTORE_PP` registration (45 + 2 Factory-legal
-  carriers, doc §1/§2b), the two barriered reachable rows, with a live Sitrus
-  fixture per the Chesto/Persim pattern.
-- **Next:** verify round 1; then §11 wiring for `turn4-doubleteam.json`
-  (main) ∥ §19.5 sites 3-6 / §24.5 recipe-only live staging (side, freed
-  once #47 stops touching the AI verify surface).
 

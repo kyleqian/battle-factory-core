@@ -1,4 +1,30 @@
 ---
+## 503 — [SUPERVISOR ORIENT 2026-07-27 ~09:35] new session: animation-main folded (fast-forward onto the live animation supervisor's own sync-merge); round 1 dispatched
+
+- **State:** union baseline verified green at **247 files / 3370 tests**
+  (245/3363 + animation's Dragon Claw/Encore work), `npm run build` clean,
+  both oracle services fresh (`check-oracle-freshness.sh` PASS). No DEFERRED
+  entries. Hard deadline this session: **15:28**.
+- **Fold:** `master..animation-main` had 11 commits (Dragon Claw exact 35/276,
+  Encore strengthened checkpoint). The live animation supervisor session had
+  just merged master into `animation-main` (cd27abf), so the fold resolved as
+  a fast-forward of master onto that union — both branches now at cd27abf;
+  union suite + build verified here. No "For the main program:" note in the
+  animation ledger top entry.
+- **Round 1 (dispatched, 2 lanes, genuinely disjoint):** main → ISSUES #47
+  Channel 2 with the supervisor decision made: **option (a), logic-ID-major
+  restructure** of `chooseFactoryAiScoredDecision` matching the ROM's proven
+  CBM(0-3)→TTF(0-3)→CV(0-3) order (option (b)'s preview rejected — it leaves
+  the movesetIndex-1-3 carry a permanent guess; (a) models the mechanism),
+  then the 3 staged fixtures' mask-7 net-score tests (-7/+1/+1). Side →
+  ENDTURN_ITEMS1 `RESTORE_HP`/`RESTORE_PP` registration (45 + 2 Factory-legal
+  carriers, doc §1/§2b), the two barriered reachable rows, with a live Sitrus
+  fixture per the Chesto/Persim pattern.
+- **Next:** verify round 1; then §11 wiring for `turn4-doubleteam.json`
+  (main) ∥ §19.5 sites 3-6 / §24.5 recipe-only live staging (side, freed
+  once #47 stops touching the AI verify surface).
+
+---
 ## 502 — [SUPERVISOR FINAL CLOSE 2026-07-27 ~03:35] extension round folded; session complete
 
 - **State (final):** tree committed and green at **245 files / 3363 tests**,

@@ -1543,3 +1543,44 @@ session's read-only recon (plus the new unwired
 `turn4DoubleTeamPresentationStaging.ts` module) touched nothing live in
 either lane's own scope. `npm test` (234 files, 3298 tests) and `npm run
 build` both green in this worktree at the same commit.
+
+### 11.5 Wiring landed, 2026-07-27 (main lane, bounded worker)
+
+§11.3's 5-step plan executed as written. `presentationEventWindowBridge.ts`
+gained `resolveDoubleTeamKickoffPresentationWindowContent` (step 1, the
+`{message, statChange}` shape keyed on
+`BattleScript_EffectStatUpAfterAtkCanceler`, no `hp` field).
+`turn4DoubleTeamPresentationStaging.ts` gained
+`resolveTurn4DoubleTeamWindowContent` (stages the chain, calls the new
+bridge) and `resolveTurn4DoubleTeamKickoffLines` now reads
+`content.message.messageId` from that bridge output instead of hardcoding
+the `"STRINGID_USEDMOVE"` string literal directly — closing the doc/code gap
+this module's own comment already claimed ("re-derived ... from THIS staged
+run's own real event stream") but the code didn't yet do. `battleScene.ts`'s
+`drawTurn4KickoffText` (step 2) now draws
+`TURN4_DOUBLETEAM_KICKOFF_LINE1/2` (resolved once at module load from the
+staged run) instead of the raw `TURN_KICKOFF_LINE1`/`LINE2` literals;
+`drawDoubleTeamClones`/`drawStatsBanner`'s own firing was left ungated on
+`statChange` (the scout's own step-2 note called this optional — the
+existing dispatch booleans already reproduce the pixels correctly, and
+gating added risk with no pixel benefit). Steps 3/4 (steady HP overlays,
+PP-readout assumption) left untouched as directed — both still named,
+unwired residuals.
+
+**No literal died.** `TURN_KICKOFF_LINE1`/`LINE2` (`battleMenu.ts:1086,1088`)
+stay defined and in active use by every OTHER turn's own kickoff/held-text
+call site in `battleScene.ts` (turn 1's `drawTurnKickoffText`, turn 2's
+`drawTurn2KickoffText`, and `drawTurn4RockSlideWindow`'s own dead
+pre-`statRoseStart` branch, unreachable in this trace per §11's own preamble
+correction) — only `drawTurn4KickoffText`'s own one call site was retired
+from reading them directly.
+
+**Acceptance, re-verified this session:** baseline sweep run BEFORE the
+change matched every recorded count exactly (no pre-existing drift), then
+re-run AFTER the change with byte-identical results — `turn4-doubleteam.json`
+250/250 (two runs), `turn4-rockslide.json` 250/250, `turn1-rockslide.json`
+256/256, `turn3-rockslide.json` 256/256, `turn3-endeavor.json` 192/192,
+`turn5-rockslide.json` 256/256, `turn5-faint.json` 110/110. `npm test`
+247/247 files, 3385/3385 tests (+4 over this session's own start: 3 new
+bridge tests + 1 new staging-module test). `npm run build` clean.
+`executableFrontierRatchet.test.ts` unmoved (6/6, zero new barriers).

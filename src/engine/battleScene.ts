@@ -606,6 +606,7 @@ import {
   resolveTurn1RockSlideHpEndpoints,
 } from "./turn1RockSlidePresentationStaging.ts";
 import { resolveTurn4RockSlideHpEndpoints } from "./turn4RockSlidePresentationStaging.ts";
+import { resolveTurn4DoubleTeamKickoffLines } from "./turn4DoubleTeamPresentationStaging.ts";
 import { resolveTurn3RockSlideHpEndpoints } from "./turn3RockSlidePresentationStaging.ts";
 import {
   resolveTurn5EndeavorAttackLines,
@@ -1468,6 +1469,21 @@ const anchorOpponentAfterTurn4Hp = 1;
  * kernel event at all).
  */
 const TURN4_ROCKSLIDE_HP = resolveTurn4RockSlideHpEndpoints();
+
+/**
+ * Presentation-seam retirement (`docs/presentation-seam-scout.md` §11.3 step
+ * 2): turn 4's own DOUBLE_TEAM kickoff text ("Foe GROVYLE used\nDOUBLE
+ * TEAM!"), now re-derived from `turn4DoubleTeamPresentationStaging.ts`'s own
+ * staged real event stream via `presentationEventWindowBridge.ts`'s new
+ * `resolveDoubleTeamKickoffPresentationWindowContent` bridge, rather than the
+ * raw `TURN_KICKOFF_LINE1`/`LINE2` literals -- byte-identical content (same
+ * `STRINGID_USEDMOVE` template, same Grovyle/DOUBLE_TEAM splice), but now
+ * identified from provenance (`BattleScript_EffectStatUpAfterAtkCanceler`),
+ * not merely asserted by analogy to turn 1's own kickoff text. `TURN_KICKOFF_
+ * LINE1`/`LINE2` themselves stay defined and in use by every other turn's own
+ * kickoff/held-text call site in this file.
+ */
+const [TURN4_DOUBLETEAM_KICKOFF_LINE1, TURN4_DOUBLETEAM_KICKOFF_LINE2] = resolveTurn4DoubleTeamKickoffLines();
 
 /**
  * Presentation-seam retirement (`docs/presentation-seam-scout.md` §10.2/
@@ -7043,6 +7059,13 @@ function turn4KickoffBounceTick(t: number, pressTick: number): number {
  * instead. Hands off into `drawTurn4RockSlideWindow` past
  * `STATS_BANNER_END_DELAY`, the same shape turn 1's own dispatcher
  * (`drawFightSubmenuWindow`) used inline.
+ *
+ * Presentation-seam wiring (`docs/presentation-seam-scout.md` §11.3 step 2):
+ * the held text itself now reads `TURN4_DOUBLETEAM_KICKOFF_LINE1/2` (resolved
+ * from this window's own staged real event stream) instead of the raw
+ * `TURN_KICKOFF_LINE1`/`LINE2` literals -- `drawDoubleTeamClones`/
+ * `drawStatsBanner`'s own choreography stays byte-for-byte unchanged (no
+ * kernel-timestamp input needed for either, §8.4 Option A).
  */
 function drawTurn4KickoffText(fb: Uint8Array, t: number, pressTick: number): void {
   if (t - pressTick > STATS_BANNER_END_DELAY) {
@@ -7052,7 +7075,7 @@ function drawTurn4KickoffText(fb: Uint8Array, t: number, pressTick: number): voi
   const bounceTick = turn4KickoffBounceTick(t, pressTick);
   drawActionMenuIdleContent(fb, bounceTick, true, true, anchorPlayerAfterTurn3Hp, true);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
-  drawMessageTextLines(fb, TURN_KICKOFF_LINE1, TURN_KICKOFF_LINE2, turnKickoffTextVisibleChars(t, pressTick));
+  drawMessageTextLines(fb, TURN4_DOUBLETEAM_KICKOFF_LINE1, TURN4_DOUBLETEAM_KICKOFF_LINE2, turnKickoffTextVisibleChars(t, pressTick));
   if (!drawDoubleTeamClones(fb, t, pressTick, "a")) drawStatsBanner(fb, t, pressTick);
 }
 

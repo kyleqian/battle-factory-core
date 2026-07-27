@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   resolveTurn4DoubleTeamKickoffLines,
+  resolveTurn4DoubleTeamWindowContent,
   stageTurn4DoubleTeamHitChain,
 } from "../src/engine/turn4DoubleTeamPresentationStaging.ts";
 
@@ -45,5 +46,13 @@ describe("turn4DoubleTeamPresentationStaging: staged real DOUBLE_TEAM self-targe
   it("resolveTurn4DoubleTeamKickoffLines resolves to \"Foe GROVYLE used\\nDOUBLE TEAM!\", byte-identical to TURN_KICKOFF_LINE1/2's own hardcoded literal (battleMenu.ts:1086,1088)", () => {
     const lines = resolveTurn4DoubleTeamKickoffLines();
     expect(lines).toEqual(["Foe GROVYLE used", "DOUBLE TEAM!"]);
+  });
+
+  it("resolveTurn4DoubleTeamWindowContent resolves both the kickoff message and the evasion stat-stage-change through presentationEventWindowBridge.ts's own new bridge (docs/presentation-seam-scout.md §11.3 step 1)", () => {
+    const content = resolveTurn4DoubleTeamWindowContent();
+    expect(content).toEqual({
+      message: { messageId: "STRINGID_USEDMOVE", substitutions: [] },
+      statChange: { battler: 1, stat: "evasion", from: 7, to: 8 },
+    });
   });
 });
