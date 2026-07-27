@@ -46,11 +46,35 @@ animation. A status caused by a move is not part of that move's animation.
 
 ## Current resumable state (2026-07-27)
 
-Coverage is **45/276 exact, 3 partial, 228 unsupported**. SELF DESTRUCT is exact
+Coverage is **45/276 exact, 4 partial, 227 unsupported**. EXPLOSION's complete
+source-component body is **212/212 player-back + 212/212 opponent-front**,
+reproduced twice fresh, but shared-seam framebuffer acceptance is not wired, so
+the move is partial. SELF DESTRUCT remains exact
 through the shared Scene-ON seam at **113/113 player-back + 113/113
 opponent-front** complete-body component and raw-RGB framebuffer frames,
 reproduced twice fresh. DRAGON BREATH remains **85/85** in both orientations
 as the exact ShakeMon2/palette regression control.
+
+## EXPLOSION complete source-component body closed; shared seam remains (2026-07-27)
+
+**Verdict:** `MOVE_EXPLOSION` is partial. Complete legal mechanicLab parties
+stage GLALIE from real Level-50 Factory set 495 in both orientations and
+constrain active choices legally. The source reducer and portable comparator
+match **212/212** frames at oracle 78-289 player-back and 82-293 opponent-front,
+twice fresh.
+
+**Closed component body:** both literal `Explosion1` calls, ten explosion
+sprites, mirrored geometry/four cells, both visible battlers'
+`AnimTask_ShakeMon2(8,0,40,1)`, nine complex BG red/black alternations, cleanup
+gap, coefficient-16 white hold, 15→0 fade, all ten `SE_M_EXPLOSION` boundaries,
+OAM/matrices/palette hardware transfer, registers, and teardown. SELF DESTRUCT
+stays **113/113 component + framebuffer** in both orientations on fresh runs.
+
+**Precise remainder:** `sceneOnPresentation`/`battleScene` wiring and GLALIE
+art were not landed, so raw-RGB acceptance is **0/212 attempted** in either
+orientation. PRESENT remains unsupported pending its moving bag plus separate
+damage/heal branches; DYNAMIC PUNCH remains unsupported pending its
+monbg/alpha/fist/hitsplat/ShakeMon prelude and target-pan explosion sequence.
 
 ## SELF DESTRUCT promoted to exact; explosion sprite track established (2026-07-27)
 
