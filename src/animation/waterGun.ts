@@ -6,12 +6,12 @@ import {
 import { shakeMon2OffsetAtTick } from "./shakeMon2.ts";
 
 export const WATER_GUN_PROJECTILE_DURATION = 40;
-export const WATER_GUN_DROPLET_START_AGES = [42, 62, 82] as const;
+export const WATER_GUN_DROPLET_START_AGES = [41, 53, 65] as const;
 export const WATER_GUN_DROPLET_DURATIONS = [55, 50, 45] as const;
 export const WATER_GUN_DROPLET_OFFSETS = [
-  { x: 0, y: -15, targetX: 0, targetY: 15 },
-  { x: 15, y: -20, targetX: 0, targetY: 15 },
-  { x: -15, y: -10, targetX: 0, targetY: 10 },
+  { x: 0, y: -15, targetX: 0, targetY: 40 },
+  { x: 15, y: -20, targetX: 15, targetY: 30 },
+  { x: -15, y: -10, targetX: -15, targetY: 35 },
 ] as const;
 
 export interface WaterGunSprite {
@@ -50,14 +50,14 @@ function inverseAffine(scaleX: number, scaleY: number, angle: number) {
 export function waterGunEffectAtAge(
   age: number,
   attackerSide: "player" | "opponent",
-  attackerCenter: Readonly<{ x: number; y: number }>,
+  attackerOrigin: Readonly<{ x: number; y: number }>,
   targetCenter: Readonly<{ x: number; y: number }>,
 ): WaterGunEffect {
   const sprites: WaterGunSprite[] = [];
   if (age >= 0 && age < WATER_GUN_PROJECTILE_DURATION) {
     const callbacks = age + 1;
-    const startX = attackerCenter.x + (attackerSide === "player" ? 20 : -20);
-    const startY = attackerCenter.y;
+    const startX = attackerOrigin.x + (attackerSide === "player" ? 20 : -20);
+    const startY = attackerOrigin.y;
     const dx = targetCenter.x - startX;
     const dy = targetCenter.y - startY;
     const arcAngle = Math.trunc((Math.trunc(0x8000 / 40) * callbacks) / 256) & 0xff;
@@ -68,21 +68,23 @@ export function waterGunEffectAtAge(
       ),
       y: startY + linearTranslationOffsetAfterCallbacks(
         linearTranslationDeltaQ8(dy, 40), callbacks, 40,
-      ) + Math.trunc((GBA_SINE_TABLE_256[arcAngle]! * -25) / 256),
+      ) + Math.floor((GBA_SINE_TABLE_256[arcAngle]! * -25) / 256),
       frame: 0,
       ...inverseAffine(256, 256, 0),
       spawnIndex: 0,
     });
   }
 
-  if (age >= 42 && age <= 50) {
-    const scale = 256 + 0xd8;
+  if (age >= 41 && age <= 50) {
     sprites.push({
       kind: "hitsplat",
       x: targetCenter.x,
       y: targetCenter.y,
       frame: 0,
-      ...inverseAffine(scale, scale, 0),
+      xScale: 372,
+      rotB: 0,
+      rotC: 0,
+      yScale: 372,
       spawnIndex: 0,
     });
   }
@@ -90,28 +92,37 @@ export function waterGunEffectAtAge(
   for (let index = 0; index < WATER_GUN_DROPLET_START_AGES.length; index += 1) {
     const local = age - WATER_GUN_DROPLET_START_AGES[index]!;
     const duration = WATER_GUN_DROPLET_DURATIONS[index]!;
-    if (local < 0 || local >= duration) continue;
+    if (local < 0 || local > duration) continue;
     const offset = WATER_GUN_DROPLET_OFFSETS[index]!;
+    const sideX = attackerSide === "player" ? offset.x : -offset.x;
     const callbacks = local + 1;
-    const scalePhase = callbacks % 12;
-    const scaleX = 256 + (scalePhase < 6 ? -16 * scalePhase : -16 * (12 - scalePhase));
-    const scaleY = 256 + (scalePhase < 6 ? 16 * scalePhase : 16 * (12 - scalePhase));
+    const dropletMatrices = [
+      [292, 227], [315, 215], [341, 204], [372, 195], [409, 186], [372, 195],
+      [341, 204], [315, 215], [292, 227], [273, 240], [256, 256], [273, 240],
+    ] as const;
+    const [xScale, yScale] = dropletMatrices[local % 12]!;
     sprites.push({
       kind: "droplet",
-      x: targetCenter.x + offset.x + linearTranslationOffsetAfterCallbacks(
-        linearTranslationDeltaQ8(offset.targetX - offset.x, duration), callbacks, duration,
+      x: targetCenter.x + sideX + linearTranslationOffsetAfterCallbacks(
+        linearTranslationDeltaQ8(
+          (attackerSide === "player" ? offset.targetX : -offset.targetX) - sideX,
+          duration,
+        ), callbacks, duration,
       ),
       y: targetCenter.y + offset.y + linearTranslationOffsetAfterCallbacks(
         linearTranslationDeltaQ8(offset.targetY - offset.y, duration), callbacks, duration,
       ),
       frame: 1,
-      ...inverseAffine(scaleX, scaleY, 0),
+      xScale,
+      rotB: 0,
+      rotC: 0,
+      yScale,
       spawnIndex: index,
     });
   }
 
   return {
-    targetOffset: shakeMon2OffsetAtTick(1, 0, 8, 1, age - 42),
+    targetOffset: shakeMon2OffsetAtTick(1, 0, 8, 1, age - 40),
     sprites,
   };
 }

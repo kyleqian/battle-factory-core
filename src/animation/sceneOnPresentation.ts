@@ -136,6 +136,10 @@ import {
   type SupersonicRingSprite,
 } from "./supersonic.ts";
 import {
+  waterGunEffectAtAge,
+  type WaterGunSprite,
+} from "./waterGun.ts";
+import {
   futureSightAttackerEffectAtAge,
   futureSightBgBldyAtAge,
   futureSightBgIsPsychic,
@@ -250,6 +254,7 @@ export interface SceneOnPresentationBattler {
     | "MILTANK"
     | "LOUDRED"
     | "DUSTOX"
+    | "HORSEA"
     | "SHUPPET"
     | "PLUSLE";
   readonly geometry: SceneOnBattlerGeometry;
@@ -667,6 +672,15 @@ export interface SceneOnSupersonicConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnWaterGunConfig {
+  readonly move: "WATER_GUN";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source `GetBattlerSpriteCoord2(attacker, X_2/Y_PIC_OFFSET)`. */
+  readonly projectileOrigin: Readonly<{ x: number; y: number }>;
+}
+
 export interface SceneOnFutureSightConfig {
   readonly move: "FUTURE_SIGHT";
   readonly attacker: SceneOnPresentationBattler;
@@ -723,6 +737,7 @@ export type SceneOnMoveConfig =
   | SceneOnRecoverConfig
   | SceneOnMilkDrinkConfig
   | SceneOnSupersonicConfig
+  | SceneOnWaterGunConfig
   | SceneOnFutureSightConfig
   | SceneOnConfusionConfig
   | SceneOnPsychicConfig
@@ -741,6 +756,14 @@ export interface SceneOnSupersonicView {
   readonly target: SceneOnPresentationBattler;
   readonly attackerOffset: Readonly<{ x2: number; y2: number }>;
   readonly rings: readonly SupersonicRingSprite[];
+}
+
+export interface SceneOnWaterGunView {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly targetOffset: Readonly<{ x2: number; y2: number }>;
+  readonly sprites: readonly WaterGunSprite[];
 }
 
 export interface SceneOnFirePunchView {
@@ -1570,6 +1593,26 @@ export function sceneOnSupersonicView(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.animationCenter,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age` is ticks since `gWaterGunProjectileSpriteTemplate` creation. */
+export function sceneOnWaterGunView(
+  state: SceneOnMovePresentationState,
+): SceneOnWaterGunView {
+  if (state.config.move !== "WATER_GUN") {
+    throw new Error(`expected WATER_GUN presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...waterGunEffectAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.projectileOrigin,
       state.config.target.geometry.animationCenter,
     ),
   };

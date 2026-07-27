@@ -537,6 +537,7 @@ import knockOffAsset from "../animation/assets/knock-off.json" with { type: "jso
 import recoverAsset from "../animation/assets/recover.json" with { type: "json" };
 import milkDrinkAsset from "../animation/assets/milk-drink.json" with { type: "json" };
 import supersonicAsset from "../animation/assets/supersonic.json" with { type: "json" };
+import waterGunAsset from "../animation/assets/water-gun.json" with { type: "json" };
 import menuHealthboxPlayerAsset from "../assets/gen/menu-healthbox-player.json" with { type: "json" };
 import summaryBallAsset from "../assets/gen/summary-ball.json" with { type: "json" };
 import battleAnimBallOpenAsset from "../assets/gen/battle-anim-ball-open.json" with { type: "json" };
@@ -628,6 +629,7 @@ import {
   sceneOnRecoverView,
   sceneOnMilkDrinkView,
   sceneOnSupersonicView,
+  sceneOnWaterGunView,
   sceneOnFutureSightView,
   sceneOnConfusionView,
   sceneOnPsychicView,
@@ -912,6 +914,12 @@ const supersonicArt = supersonicAsset as {
   goldRing: { tileset: Tileset; palette: RgbColor[] };
   dustoxBack: { tileset: Tileset; palette: RgbColor[] };
   dustoxFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const waterGunArt = waterGunAsset as {
+  smallBubbles: { tileset: Tileset; palette: RgbColor[] };
+  waterImpact: { tileset: Tileset; palette: RgbColor[] };
+  horseaBack: { tileset: Tileset; palette: RgbColor[] };
+  horseaFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const MURKROW_CORNER = { x: 144, y: 19 };
 const menuHealthboxPlayer = menuHealthboxPlayerAsset as SendOutHealthboxContentAsset;
@@ -14967,6 +14975,170 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "IVYSAUR used" : "Foe IVYSAUR used",
       "GROWTH!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "WATER_GUN") {
+    const view = sceneOnWaterGunView(state);
+    // Sprite OAM reaches the displayed framebuffer one VBlank after RAM.
+    const displayed = sceneOnWaterGunView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "HORSEA"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "HORSEA"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged WATER_GUN pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const horseaSource = playerToOpponent
+      ? waterGunArt.horseaBack
+      : waterGunArt.horseaFront;
+    const horseaSprite = playerToOpponent
+      ? horseaSource
+      : {
+          ...horseaSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: horseaSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const onixSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    const nonObjTarget2 = fb.slice();
+    const displayedTargetOffset = opponentToPlayer && state.age === 41
+      ? { x2: 0, y2: 0 }
+      : playerToOpponent && state.age <= 40
+        ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+        : state.age <= 0
+          ? { x2: 0, y2: 0 }
+          : displayed.targetOffset;
+    const targetIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX")
+      : null;
+    // `monbg ANIM_DEF_PARTNER` moves the target battler into BG2. It is
+    // therefore the real target-2 layer for the semi-transparent water OBJ,
+    // while the attacker remains an OBJ and must not participate in blend.
+    drawSpriteSheet(
+      nonObjTarget2,
+      onixSprite.tileset,
+      onixSprite.palette,
+      view.target.geometry.spriteCorner.x + displayedTargetOffset.x2,
+      view.target.geometry.spriteCorner.y + (targetIdle?.y2 ?? 0),
+    );
+    const drawWaterGunSprites = (kind: "projectile" | "impact") => {
+      const sprites = displayed.sprites
+        .filter((sprite) =>
+          (kind === "projectile") === (sprite.kind === "projectile")
+        )
+        // The hitsplat takes the first free OAM slot; lower OAM indices win
+        // same-priority OBJ overlap, so paint it after its first droplet.
+        .sort((a, b) => Number(a.kind === "hitsplat") - Number(b.kind === "hitsplat"));
+      for (const sprite of sprites) {
+        const art = sprite.kind === "hitsplat"
+          ? waterGunArt.waterImpact
+          : {
+              palette: waterGunArt.smallBubbles.palette,
+              tileset: {
+                columns: 2,
+                rows: 2,
+                tiles: waterGunArt.smallBubbles.tileset.tiles.slice(
+                  sprite.frame * 4,
+                  sprite.frame * 4 + 4,
+                ),
+              },
+            };
+        drawSpriteSheetAffineRotateBlendedOverFb(
+          fb, nonObjTarget2, art.tileset, art.palette,
+          sprite.x, sprite.y, sprite.xScale, sprite.rotB, sprite.rotC,
+          sprite.yScale, 12, 8, sprite.kind === "droplet",
+        );
+      }
+    };
+    if (playerToOpponent) {
+      drawSpriteSheet(
+        fb,
+        horseaSprite.tileset,
+        horseaSprite.palette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+      );
+      drawSpriteSheet(
+        fb,
+        onixSprite.tileset,
+        onixSprite.palette,
+        view.target.geometry.spriteCorner.x + displayedTargetOffset.x2,
+        view.target.geometry.spriteCorner.y + (targetIdle?.y2 ?? 0),
+      );
+    } else {
+      drawSpriteSheet(
+        fb,
+        horseaSprite.tileset,
+        horseaSprite.palette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+      );
+      drawSpriteSheet(
+        fb,
+        onixSprite.tileset,
+        onixSprite.palette,
+        view.target.geometry.spriteCorner.x + displayedTargetOffset.x2,
+        view.target.geometry.spriteCorner.y,
+      );
+    }
+    drawWaterGunSprites("projectile");
+    drawWaterGunSprites("impact");
+    const opponentSpecies = playerToOpponent ? "ONIX" : "HORSEA";
+    const playerSpecies = playerToOpponent ? "HORSEA" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "HORSEA used" : "Foe HORSEA used",
+      "WATER GUN!",
       99,
     );
     return;

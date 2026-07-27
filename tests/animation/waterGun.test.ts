@@ -8,7 +8,7 @@ import {
 
 describe("MOVE_WATER_GUN source-relative reducer", () => {
   const player = (age: number) =>
-    waterGunEffectAtAge(age, "player", { x: 72, y: 104 }, { x: 176, y: 42 });
+    waterGunEffectAtAge(age, "player", { x: 72, y: 97 }, { x: 176, y: 42 });
 
   it("ports the literal 40-tick projectile arc and mirrors its x origin", () => {
     expect(WATER_GUN_PROJECTILE_DURATION).toBe(40);
@@ -22,7 +22,7 @@ describe("MOVE_WATER_GUN source-relative reducer", () => {
   });
 
   it("ports all three literal delayed droplet calls and durations", () => {
-    expect(WATER_GUN_DROPLET_START_AGES).toEqual([42, 62, 82]);
+    expect(WATER_GUN_DROPLET_START_AGES).toEqual([41, 53, 65]);
     expect(WATER_GUN_DROPLET_DURATIONS).toEqual([55, 50, 45]);
     expect(WATER_GUN_DROPLET_START_AGES.map((age, index) =>
       player(age).sprites.some((sprite) =>
@@ -32,7 +32,7 @@ describe("MOVE_WATER_GUN source-relative reducer", () => {
   });
 
   it("uses only the source literal target ShakeMon2 (1,0,8,1) tuple", () => {
-    expect([41, 42, 43, 44, 55, 56, 57].map((age) => player(age).targetOffset.x2))
+    expect([39, 40, 41, 42, 53, 54, 55].map((age) => player(age).targetOffset.x2))
       .toEqual([0, 1, -1, -1, -1, -1, 0]);
   });
 });
