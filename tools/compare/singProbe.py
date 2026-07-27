@@ -40,6 +40,9 @@ def main() -> None:
     battler_ids = oracle.symbols["gBattlerSpriteIds"]
     faded = oracle.symbols["gPlttBufferFaded"]
     unfaded = oracle.symbols["gPlttBufferUnfaded"]
+    anim_script_active = oracle.symbols["gAnimScriptActive"]
+    visual_task_count = oracle.symbols["gAnimVisualTaskCount"]
+    sound_task_count = oracle.symbols["gAnimSoundTaskCount"]
     note_template = oracle.symbols["gWavyMusicNotesSpriteTemplate"]
     nm = subprocess.run(
         ["arm-none-eabi-nm", str(reference / "pokeemerald.elf")],
@@ -120,6 +123,9 @@ def main() -> None:
             "frame": frame,
             "sha256": hashlib.sha256(rgb).hexdigest(),
             "attacker": snapshot["engine"]["activeBattler"],
+            "animScriptActive": oracle.read_u8(anim_script_active),
+            "visualTaskCount": oracle.read_u8(visual_task_count),
+            "soundTaskCount": oracle.read_u8(sound_task_count),
             "tasks": active_tasks(),
             "battlerSprites": [sprite(slot) for slot in battler_sprite_slots],
             "notes": [

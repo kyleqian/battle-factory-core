@@ -46,13 +46,50 @@ animation. A status caused by a move is not part of that move's animation.
 
 ## Current resumable state (2026-07-27)
 
-Coverage is **36/276 exact, 3 partial, 237 unsupported**. ENCORE is exact at
-**215/215 strengthened component and framebuffer frames** in both required
-MINUN→ONIX orientations, reproduced twice. Its reusable GBA OBJ compositor now
-models ascending-OAM scanline evaluation, cycle budgets, normal/OBJ-window
-arbitration, and WIN1/OBJWIN color-effect masks. Select the next bounded
-component from `npm run animation:coverage`. Animation-main is green at this
-checkpoint.
+Coverage is **36/276 exact, 4 partial, 236 unsupported**. SING has a
+source-derived 12-note/path/palette-index/pan reducer and portable dense
+component evidence across its first complete move-animation script block:
+**245/245 player-back + 248/248 opponent-front**, each reproduced twice fresh.
+It remains partial because extracted art, affine hardware OAM, rainbow
+allocation/free, monbg/clearmonbg and shared-seam RGB/framebuffer closure are
+not yet implemented. Resume that precisely bounded remainder; do not promote
+the four audited siblings without their own complete dense evidence.
+Animation-main is green at this checkpoint.
+
+## SING partial evidence checkpoint; ANIM_TAG_MUSIC_NOTES track established (2026-07-27)
+
+**Verdict:** `MOVE_SING` is partial, not exact. Complete legal Scene-ON
+mechanicLab parties stage AZURILL from real Factory set 1 in both player-back
+and opponent-front orientations, with all four active choices constrained to
+SING and ONIX constrained to TACKLE. The portable comparator matches note/task
+state for the complete first move-animation script block at **245/245
+player-back** (oracle 213-457; notes 220-362) and **248/248 opponent-front**
+(oracle 215-462; notes 222-367), each reproduced twice fresh. The dense probe
+also captures registers, battler priority, full OBJ palettes, raw OAM and RGB,
+but those fields are evidence inputs rather than claimed matches.
+
+**Source reducer:** all twelve `gWavyMusicNotesSpriteTemplate` spawn ages,
+animation indices/vFlip, signed fixed-point paths, sine y2 values, four
+cycling rainbow palette indices, repeating affine scale program, and
+side-relative `panse` task boundaries are ported and Tier-1 pinned. No absolute
+battle ticks, screenshots, coordinate/RGB fitting, exclusions, comparator
+weakening, engine imports, or unsupported barriers were added.
+
+**Precisely bounded remainder:** reproducibly extract MUSIC_NOTES art; compare
+hardware affine matrices and palette allocation/free/latches; port the
+`monbg ANIM_DEF_PARTNER` clone/priority/OAM and `clearmonbg` cleanup lifecycle;
+then wire SING through `sceneOnPresentation`/`battleScene` and close raw RGB
+plus shared-seam framebuffer in both orientations. Re-run ENCORE and BIND as
+exact controls. Until all of that closes, SING remains partial.
+
+**Sibling audit (all unsupported):** BELLY DRUM has six alternating purple-hand
+hits, six ShakeMon tasks, six slow flying-note arcs and attacker-pan sounds;
+TEETER DANCE has its movement task, five fast flying-note paths/sounds and
+DUCK asset; FAKE TEARS has a distinct SMALL_BUBBLES blend,
+RockMonBackAndForth, looped tail-whip audio and eight thought-bubble/music-note
+tear sprites; GRASS WHISTLE fixes all twelve notes to palette index 1/no
+cycling and wraps them in whole-BG green blend/restore with its own pan sweep.
+None has independent complete dense evidence, so none is promoted.
 
 ## DRAGON CLAW promoted to exact; PlaySE1WithPanning track established (2026-07-27)
 

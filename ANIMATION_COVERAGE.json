@@ -2,6 +2,28 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_SING",
+      "status": "partial",
+      "covered": [
+        "complete legal Scene-ON mechanicLab parties stage AZURILL from real Factory set 1 in both player-back and opponent-front orientations; all four active choices are legally constrained to SING and ONIX is constrained to TACKLE",
+        "source reducer ports all 12 gWavyMusicNotesSpriteTemplate spawn ages, animation indices and vFlip, signed fixed-point paths, sine y2, four cycling rainbow palette indices, repeating affine scale program, and both side-relative panse sweep boundaries",
+        "portable dense component comparator matches note/task state across the first complete move-animation script block at 245/245 player-back and 248/248 opponent-front frames, reproduced twice fresh; raw RGB is captured but not claimed matching"
+      ],
+      "remaining": [
+        "extract ANIM_TAG_MUSIC_NOTES tiles/palette reproducibly and verify affine hardware OAM matrices plus palette allocation/free and hardware palette latches",
+        "port and compare monbg/clearmonbg clone, priority, OAM, and cleanup lifecycle across the full 245/248-frame body",
+        "wire SING through sceneOnPresentation and battleScene, then achieve shared-seam raw-RGB/framebuffer equality for both orientations; rerun ENCORE and BIND exact controls"
+      ],
+      "evidence": [
+        "tools/compare/fixtures/sing-player-azurill-opponent-onix.json",
+        "tools/compare/fixtures/sing-opponent-azurill-player-onix.json",
+        "tools/compare/singPortable.ts",
+        "tools/compare/singProbe.py",
+        "src/animation/sing.ts",
+        "tests/animation/sing.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_ENCORE",
       "status": "exact",
       "covered": [
@@ -925,6 +947,25 @@
     "MOVE_BIND"
   ],
   "componentTracks": [
+    {
+      "id": "music-notes",
+      "components": [
+        "asset:ANIM_TAG_MUSIC_NOTES",
+        "sprite:gWavyMusicNotesSpriteTemplate",
+        "sprite:gFastFlyingMusicNotesSpriteTemplate",
+        "sprite:gSlowFlyingMusicNotesSpriteTemplate",
+        "task:AnimTask_MusicNotesRainbowBlend",
+        "task:AnimTask_MusicNotesClearRainbowBlend"
+      ],
+      "representatives": [
+        "MOVE_SING",
+        "MOVE_BELLY_DRUM",
+        "MOVE_TEETER_DANCE",
+        "MOVE_FAKE_TEARS",
+        "MOVE_GRASS_WHISTLE"
+      ],
+      "goal": "MOVE_SING is partial: its source reducer and portable dense comparator prove all 12 gWavyMusicNotesSpriteTemplate spawn/path/animation/palette-index states plus the side-relative pan sweep across the complete first animation-script block in both orientations (245/245 player-back, 248/248 opponent-front, each reproduced twice), but no framebuffer match is claimed until extracted art, affine hardware OAM, rainbow allocation/free, monbg/clearmonbg, priority and cleanup are closed through the shared seam. No sibling is promoted. BELLY DRUM has six alternating purple-hand hits, six ShakeMon tasks, six gSlowFlyingMusicNotesSpriteTemplate arcs with distinct animation/palette/phase argv, attacker-pan sounds, and rainbow cleanup. TEETER DANCE has AnimTask_TeeterDanceMovement, five gFastFlyingMusicNotesSpriteTemplate paths at three signed offsets, five attacker-pan sounds, and ANIM_TAG_DUCK. FAKE TEARS only loads MUSIC_NOTES for its distinct thought-bubble/music-note tear macro body and additionally needs SMALL_BUBBLES BlendParticle, RockMonBackAndForth, four looped tail-whip sounds, and eight type-varied tear sprites. GRASS WHISTLE shares the 12 wavy-note geometry but fixes every initial palette to index 1 with no cycling, uses a green whole-BG blend/restore instead of monbg, and has its distinct grass-whistle pan sweep. Every sibling remains unsupported pending its own complete dense evidence."
+    },
     {
       "id": "play-se1-with-panning",
       "components": [
