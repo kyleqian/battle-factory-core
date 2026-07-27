@@ -5,31 +5,74 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #47 — Ported weather AI handlers diverge from the ROM's `get_weather` stale-read bug in Factory-reachable flows
+## #47 — CV weather AI handlers still diverge from the ROM's `get_weather` stale-read bug (Channel 2 only — Channel 1/CBM fixed this session)
 
-**Symptom:** `runCbmRainDance`/`SunnyDay`/`Hail` (CBM) and
-`weatherSetterCvScore`/`runCvRainDance` (CV) consume a clean `currentWeather`
-input, but the pinned ROM's `Cmd_get_weather` (BUGFIX undefined) reads a
-stale `funcResult` in two live-verified Factory-reachable channels — so the
-engine scores 0 where the real AI scores -7 (Hail vs. an ability-id-0-3
-target such as Ninjask/Speed Boost=3, CBM channel) or +1 (the
-`get_how_powerful_move_is` `MOVE_POWER_OTHER(0)` ≡ `AI_WEATHER_SUN`
-collision, CV channel — fires regardless of target ability).
+**Symptom (Channel 2 remainder only — Channel 1 closed, see below):**
+`weatherSetterCvScore`/`runCvRainDance`/`SunnyDay`/`Hail` (CV,
+`factoryAiCheckViability.ts`) still consume a clean `currentWeather` input,
+but the pinned ROM's `Cmd_get_weather` (BUGFIX undefined) reads a stale
+`funcResult` on a genuinely weatherless dispatch — `AI_TryToFaint`'s own
+`get_how_powerful_move_is` leaves `funcResult = MOVE_POWER_OTHER(0)` after
+its last-processed movesetIndex slot (any real move with power ≤1, e.g. a
+Splash/Growl filler), and `MOVE_POWER_OTHER(0)` ≡ `AI_WEATHER_SUN`, so
+`AI_CV_RainDance`/`Hail` (both check Sun in their own "other three" chain;
+`AI_CV_SunnyDay` does not, since Sun is its own excluded type — confirmed
+from §25.2's transcribed bodies, not affected by this channel) spuriously
+score +1 in a genuinely weatherless battle, independent of target ability.
+Ground truth, mechanism, and 1 live fixture: doc §25.10.
 
-**Confirmed** (2026-07-27, supervisor-verified live): ground truth doc
-§25.10 — mechanism from source with citations, 3 fixtures
-(`mechanic-factory-ai-hail-staleweather-{collision,control}-off.json`,
-`mechanic-factory-ai-cv-raindance-noraindish-stalesun-off.json`), 2 seeds,
-all predictions exact; verify-script scenarios committed and ALL PASS.
-§25.9's Rain Dish fixture's numeric result stands but its causal
-attribution was Channel 2, not Gate R (corrected in §25.10).
+**Channel 1 (CBM ability-id collision) fixed this session
+(2026-07-27):** `runCbmRainDance`/`SunnyDay`/`Hail`
+(`src/engine/factoryAiCheckBadMove.ts`) now model the stale channel
+faithfully — `AI_CheckBadMove`'s own universal preamble (`get_ability
+AI_TARGET`, the soundproof check) runs immediately before every one of these
+three handlers in the same script/slot, so a weatherless dispatch's
+`get_weather` reads that same-pass ability guess (`soundproofGuess`,
+already computed, no new draw) instead of a clean sentinel. A small
+ability-name→ID table (`ABILITY_ID_IN_WEATHER_RANGE`, only the 4 IDs that
+can ever number-collide with `AI_WEATHER_*`) answers the collision
+generically, not a Ninjask special case. Pinned by
+`tests/factoryAiCheckBadMove.test.ts`'s new "Channel 1" describe block
+(mechanism-level cases across all 4 IDs + the real Ninjask/Anorith species
+from doc §25.10.2). No existing test needed a value change (every prior CBM
+weather test used Shuckle, ability id 5, outside the collision range).
 
-**Leads:** the fix is a deliberate port decision — model the stale
-`funcResult` channel (the AI script interpreter's own register) rather than
-a clean weather input, per the mission's match-the-real-game bar. Ground
-truth is complete; a bounded main-lane step can consume §25.10 directly.
-Watch the mask-7 fixture-reproduction tests whose expected scores would
-shift in colliding flows.
+**Why Channel 2 is NOT a same-shape fix (new finding this session,
+blocking a quick close):** the real ROM's `ChooseMoveOrAction_Singles`
+(`battle_ai_script_commands.c:395-416`) calls `BattleAI_DoAIProcessing`
+once per `aiLogicId` (CheckBadMove, then TryToFaint, then CheckViability),
+and `BattleAI_DoAIProcessing` itself (`:572-616`) loops all 4 movesetIndex
+slots to completion *within* that one call before returning — i.e. the real
+execution order is CBM(slot0..3), **then** TTF(slot0..3), **then**
+CV(slot0..3), never interleaved across logic IDs. The engine's
+`chooseFactoryAiScoredDecision` (`factoryAiDecisionPolicy.ts`) instead runs
+CBM/TTF/CV **per slot** (CBM0,TTF0,CV0,CBM1,TTF1,CV1,...) — harmless for
+every handler ported so far (this doc's own fixture convention avoids any
+CBM/TTF draw so interleaving order never shows up in a draw count or
+score), but Channel 2 specifically needs TryToFaint's **slot-3**
+classification available before CheckViability's **slot-0** dispatch runs —
+chronologically inverted in the engine's current per-slot loop. Modeling
+Channel 2 correctly needs either (a) restructuring the scoring loop into
+three full logic-ID-major passes matching the real ROM, or (b) a narrower
+prepass that previews TryToFaint's last-slot classification (mechanically
+safe — `computeMostPowerful`/`canFaint` are both RNG-free, so a preview call
+doesn't perturb the committed draw sequence) — but (b) still needs a
+decision on what happens when the weather move sits in movesetIndex 1-3
+(CV's own within-pass carry, never live-verified) rather than silently
+guessing. Left open rather than shipped as an approximation, per the
+mission's "do not ship a half-model that silently changes non-colliding
+flows" bar.
+
+**Leads:** doc §25.10 has the full mechanism/citations; the 2 remaining
+fixtures needing the fix (`mechanic-factory-ai-hail-staleweather-{collision,
+control}-off.json` — net -7/+1, both need Channel 2's own +1 on top of
+Channel 1's now-correct CBM contribution — and
+`mechanic-factory-ai-cv-raindance-noraindish-stalesun-off.json`, Channel 2
+alone, net +1) are staged and verify-script-wired, ALL PASS as ORACLE
+observations (untouched this session). A future worker should pick (a) or
+(b) above deliberately, then re-derive the mask-7 net-score reproduction
+tests for these 3 fixtures (still not landed — engine currently scores 0/0/0
+for them, not -7/+1/+1, since only Channel 1 is modeled).
 
 ## #41 — Production engine modules import canonical RAM recordings
 

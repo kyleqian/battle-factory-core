@@ -137,6 +137,23 @@ export type AiWeatherValue =
   | typeof AI_WEATHER_SANDSTORM
   | typeof AI_WEATHER_HAIL;
 
+/**
+ * `include/constants/abilities.h`'s own ability-ID enum, restricted to the
+ * only four IDs (0-3) that can ever equal an `AI_WEATHER_*` constant --
+ * `Cmd_get_weather`'s stale-`funcResult` bug (doc §25.10.1): every ability ID
+ * from 4 upward can never collide with a weather compare, so this table only
+ * needs these four entries to fully answer "does this ability's raw ID land
+ * in the collision range" -- not a special case for Ninjask, the general
+ * ability-name-to-ID mapping just has no other members that matter for an
+ * `if_equal AI_WEATHER_*` compare.
+ */
+const ABILITY_ID_IN_WEATHER_RANGE: ReadonlyMap<string, AiWeatherValue> = new Map([
+  ["ABILITY_NONE", AI_WEATHER_SUN], // id 0
+  ["ABILITY_STENCH", AI_WEATHER_RAIN], // id 1
+  ["ABILITY_DRIZZLE", AI_WEATHER_SANDSTORM], // id 2
+  ["ABILITY_SPEED_BOOST", AI_WEATHER_HAIL], // id 3
+]);
+
 /** `sIgnoredPowerfulMoveEffects` (`battle_ai_script_commands.c:266-281`). */
 export const IGNORED_POWERFUL_MOVE_EFFECTS: ReadonlySet<string> = new Set([
   "EFFECT_EXPLOSION",
@@ -753,21 +770,46 @@ function runCbmEvasionDown(
  * Zero `get_ability` calls, zero stat-stage reads, zero ability/item gate --
  * the smallest CBM handler shape in the doc. One parameterized helper covers
  * all three, differing only in which `AI_WEATHER_*` constant each checks.
+ *
+ * **`get_weather`'s own stale-`funcResult` bug, Channel 1 (doc §25.10.1/.3)**:
+ * `Cmd_get_weather` (`battle_ai_script_commands.c:1644-1665`) only writes
+ * `funcResult` when a real weather bit is set -- the `AI_WEATHER_NONE`
+ * sentinel write is `#ifdef BUGFIX`-gated and `BUGFIX` is commented out in
+ * this pinned checkout. So on a genuinely weatherless battle (`currentWeather
+ * === undefined` here), `get_weather`'s read is whatever the *previous* AI
+ * script command left in `funcResult` -- for these three handlers
+ * specifically, that's always `AI_CheckBadMove`'s own universal preamble
+ * (`AI_CheckBadMove_CheckSoundproof`, `data/battle_ai_scripts.s:93`), which
+ * runs `get_ability AI_TARGET` immediately before every effect dispatch, for
+ * every move. `staleAbilityGuess` below is exactly that preamble's own
+ * already-computed guess (`runCheckBadMovePreamble`'s `soundproofGuess`,
+ * same call, same slot, same script) -- not a fresh read, no new RNG draw,
+ * just reusing the value this same pass already produced. Only ability IDs
+ * 0-3 (`ABILITY_ID_IN_WEATHER_RANGE` above) can ever collide with an
+ * `AI_WEATHER_*` constant; every other ability leaves the compare as
+ * genuine non-equality, matching the clean "no weather" outcome anyway.
  */
-function runCbmWeatherSetter(currentWeather: AiWeatherValue | undefined, ownWeatherConstant: AiWeatherValue): number {
-  return currentWeather === ownWeatherConstant ? -8 : 0;
+function runCbmWeatherSetter(
+  currentWeather: AiWeatherValue | undefined,
+  staleAbilityGuess: string,
+  ownWeatherConstant: AiWeatherValue,
+): number {
+  const funcResult = currentWeather !== undefined
+    ? currentWeather
+    : ABILITY_ID_IN_WEATHER_RANGE.get(staleAbilityGuess);
+  return funcResult === ownWeatherConstant ? -8 : 0;
 }
 
-function runCbmRainDance(currentWeather: AiWeatherValue | undefined): number {
-  return runCbmWeatherSetter(currentWeather, AI_WEATHER_RAIN);
+function runCbmRainDance(currentWeather: AiWeatherValue | undefined, staleAbilityGuess: string): number {
+  return runCbmWeatherSetter(currentWeather, staleAbilityGuess, AI_WEATHER_RAIN);
 }
 
-function runCbmSunnyDay(currentWeather: AiWeatherValue | undefined): number {
-  return runCbmWeatherSetter(currentWeather, AI_WEATHER_SUN);
+function runCbmSunnyDay(currentWeather: AiWeatherValue | undefined, staleAbilityGuess: string): number {
+  return runCbmWeatherSetter(currentWeather, staleAbilityGuess, AI_WEATHER_SUN);
 }
 
-function runCbmHail(currentWeather: AiWeatherValue | undefined): number {
-  return runCbmWeatherSetter(currentWeather, AI_WEATHER_HAIL);
+function runCbmHail(currentWeather: AiWeatherValue | undefined, staleAbilityGuess: string): number {
+  return runCbmWeatherSetter(currentWeather, staleAbilityGuess, AI_WEATHER_HAIL);
 }
 
 export function typeMultiplierTenths(attackingType: string, defendingTypes: readonly [string, string]): number {
@@ -1081,7 +1123,7 @@ export function runCheckBadMovePreamble(input: Readonly<{
       kind: "scored",
       rng,
       draws: Object.freeze(draws),
-      scoreDelta: runCbmRainDance(input.attacker.currentWeather),
+      scoreDelta: runCbmRainDance(input.attacker.currentWeather, soundproofGuess),
     });
   }
 
@@ -1092,7 +1134,7 @@ export function runCheckBadMovePreamble(input: Readonly<{
       kind: "scored",
       rng,
       draws: Object.freeze(draws),
-      scoreDelta: runCbmSunnyDay(input.attacker.currentWeather),
+      scoreDelta: runCbmSunnyDay(input.attacker.currentWeather, soundproofGuess),
     });
   }
 
@@ -1103,7 +1145,7 @@ export function runCheckBadMovePreamble(input: Readonly<{
       kind: "scored",
       rng,
       draws: Object.freeze(draws),
-      scoreDelta: runCbmHail(input.attacker.currentWeather),
+      scoreDelta: runCbmHail(input.attacker.currentWeather, soundproofGuess),
     });
   }
 

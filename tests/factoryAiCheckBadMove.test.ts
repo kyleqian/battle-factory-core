@@ -1360,4 +1360,99 @@ describe("AI_CBM_RainDance / AI_CBM_SunnyDay / AI_CBM_Hail (docs/factory-ai-chec
     expect(sunnyUnderSun).toMatchObject({ kind: "scored", scoreDelta: -8 });
     expect(hailUnderHail).toMatchObject({ kind: "scored", scoreDelta: -8 });
   });
+
+  // `get_weather`'s own stale-`funcResult` bug, Channel 1 (ground truth doc
+  // §25.10.1/.3, ISSUES #47): on a genuinely weatherless dispatch
+  // (currentWeather === undefined), get_weather reads whatever the universal
+  // preamble's own get_ability AI_TARGET call (the soundproof check, same
+  // script, same slot) left behind -- the target's real ability ID, not a
+  // clean "no weather" sentinel. Mechanism-level cases below force a specific
+  // ability via `knownAbility` (bypassing species lookup, zero draws either
+  // way) to cover all four IDs the AI_WEATHER_* range can ever collide with
+  // (0-3); the species-level cases after that reproduce §25.10.2's own two
+  // live fixtures verbatim (Ninjask id 3, Anorith id 4).
+  describe("get_weather's own stale-funcResult bug, Channel 1: universal preamble's get_ability AI_TARGET leaks into a weatherless read (doc §25.10)", () => {
+    function knownAbilityTarget(knownAbility: string): FactoryAiCheckBadMoveTarget {
+      return { ...SHUCKLE, knownAbility };
+    }
+
+    it.each([
+      ["AI_CBM_SunnyDay", MOVE_SUNNY_DAY, "ABILITY_NONE"], // id 0 == AI_WEATHER_SUN
+      ["AI_CBM_RainDance", MOVE_RAIN_DANCE, "ABILITY_STENCH"], // id 1 == AI_WEATHER_RAIN
+      ["AI_CBM_Hail", MOVE_HAIL, "ABILITY_SPEED_BOOST"], // id 3 == AI_WEATHER_HAIL
+    ])("%s scores -8 with zero draws when weatherless and the target's ability ID collides with its own weather constant", (_label, moveId, knownAbility) => {
+      const result = run(moveId, knownAbilityTarget(knownAbility), undefined, withWeather(undefined));
+      expect(result).toMatchObject({ kind: "scored", scoreDelta: -8 });
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(0);
+    });
+
+    it.each([
+      ["AI_CBM_RainDance", MOVE_RAIN_DANCE],
+      ["AI_CBM_SunnyDay", MOVE_SUNNY_DAY],
+      ["AI_CBM_Hail", MOVE_HAIL],
+    ])("%s stays 0 when weatherless and the target's ability ID (2, Drizzle) collides with none of the three CBM handlers' own constant (Sandstorm is never a CBM-checked type)", (_label, moveId) => {
+      const result = run(moveId, knownAbilityTarget("ABILITY_DRIZZLE"), undefined, withWeather(undefined));
+      expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    });
+
+    it("AI_CBM_Hail stays 0 when weatherless and the target's colliding ability ID belongs to a DIFFERENT handler's own constant (id 1 == Rain, not Hail)", () => {
+      const result = run(MOVE_HAIL, knownAbilityTarget("ABILITY_STENCH"), undefined, withWeather(undefined));
+      expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    });
+
+    // Real Factory-reachable species, reproducing §25.10.2's own two live
+    // fixtures' CBM-side contribution exactly (both single-ability species,
+    // so nextGetAbilityDraw's own species lookup returns ability0 directly,
+    // zero draws -- no `knownAbility` override needed).
+    const NINJASK: FactoryAiCheckBadMoveTarget = Object.freeze({
+      species: 302,
+      types: ["TYPE_BUG", "TYPE_FLYING"] as const,
+      knownAbility: null,
+      realAbility: "ABILITY_SPEED_BOOST",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+    });
+    const ANORITH: FactoryAiCheckBadMoveTarget = Object.freeze({
+      species: 390,
+      types: ["TYPE_ROCK", "TYPE_BUG"] as const,
+      knownAbility: null,
+      realAbility: "ABILITY_BATTLE_ARMOR",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+    });
+
+    it("`hail-staleweather-collision` (doc §25.10.2): Ninjask (Speed Boost, id 3) weatherless -- AI_CBM_Hail scores -8 with zero draws, the collision's own CBM contribution to the ROM's live net -7", () => {
+      const result = run(MOVE_HAIL, NINJASK, undefined, withWeather(undefined));
+      expect(result).toMatchObject({ kind: "scored", scoreDelta: -8 });
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(0);
+    });
+
+    it.each([
+      ["AI_CBM_RainDance", MOVE_RAIN_DANCE],
+      ["AI_CBM_SunnyDay", MOVE_SUNNY_DAY],
+    ])("%s stays 0 for the same weatherless Ninjask target -- the collision is Hail-specific (id 3 matches only AI_WEATHER_HAIL)", (_label, moveId) => {
+      const result = run(moveId, NINJASK, undefined, withWeather(undefined));
+      expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    });
+
+    it("`hail-staleweather-control` (doc §25.10.2): Anorith (Battle Armor, id 4) weatherless -- outside the 0-3 collision range, AI_CBM_Hail stays 0, silencing this channel so the ROM's live net +1 is Channel 2 alone", () => {
+      const result = run(MOVE_HAIL, ANORITH, undefined, withWeather(undefined));
+      expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.draws).toHaveLength(0);
+    });
+
+    it("a genuinely set weather always wins over the stale ability read, even for a colliding-ID target (Ninjask, id 3) -- the clean path is untouched", () => {
+      const realRain = run(MOVE_RAIN_DANCE, NINJASK, undefined, withWeather(1));
+      const realSandstormAgainstHail = run(MOVE_HAIL, NINJASK, undefined, withWeather(2));
+      expect(realRain).toMatchObject({ kind: "scored", scoreDelta: -8 }); // real weather == RainDance's own type
+      expect(realSandstormAgainstHail).toMatchObject({ kind: "scored", scoreDelta: 0 }); // real weather != Hail's own type
+    });
+  });
 });
