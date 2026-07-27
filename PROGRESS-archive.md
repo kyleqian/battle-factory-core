@@ -1,4 +1,26 @@
 ---
+## 508 — [SUPERVISOR 2026-07-27 ~11:30] rounds 2-3 verified + merged; round 4 dispatched
+
+- **State:** master green at **248 files / 3395 tests**, build clean. Landed
+  and supervisor-verified this block: §11 turn4-doubleteam kickoff wiring
+  (entry 506; compare 250/250 + sweep rerun by supervisor) ∥ census
+  EFFECT_EARTHQUAKE set (entry 507; 95/214 effects, 2047/2957 weighted,
+  +147 — largest single win) ∥ side §24.5 DRAW SITE 2 live-verified
+  (merged from `worker/side-20260727-101228`, cleaned; CV verify script
+  rerun in-worktree by supervisor, ALL PASS; includes a real Gate-A
+  polarity correction to the doc's prior recipe text; sites 5/6/7 honestly
+  not attempted — calibration cost, PAPERCUTS entry added, 2 hits).
+- **Round 4 (dispatched):** main → `B_SCR_OP_SETPROTECTLIKE` per entry
+  507's handoff (new `protectUses` field, MULTISTRING_CHOOSER check, OOB
+  edge decision), then NEGATIVEDAMAGE/TRYSETREST as cap allows ∥ side →
+  ISSUES #47 movesetIndex-1-3 remainder EVIDENCE (per-handler funcResult
+  write audit from `battle_ai_scripts.s` + live fixtures isolating a
+  weather move at CV index 1-3, carry-survives and carry-destroyed
+  classes; no src edits — main consumes it next round).
+- **Next:** verify round 4; round 5 = main closes #47 from side's
+  evidence ∥ side §24.5 sites 5/6/7 or §12 prep-scout.
+
+---
 ## 507 — [BOUNDED WORKER 2026-07-27 ~11:20] Kernel census breadth: B_SCR_OP_JUMPIFNEXTTARGETVALID + B_SCR_OP_SELECTFIRSTVALIDTARGET registered, EFFECT_EARTHQUAKE executable end to end; SETPROTECTLIKE/NEGATIVEDAMAGE/TRYSETREST not started
 
 - **State:** tree green at **248 files / 3395 tests** (+1 file / +10 tests

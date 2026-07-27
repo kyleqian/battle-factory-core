@@ -15,6 +15,79 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 511 — [BOUNDED WORKER 2026-07-27 ~13:10] ISSUES #47 closed for its full write-audit scope: per-slot funcResult value propagation across the whole CV pass, driven by doc §27.1
+
+- **State:** tree green at **249 files / 3414 tests** (+5 over session
+  start 249/3409 — the 2 new §27 fixture reproductions x2 seeds each + 1
+  banked tie-break-ledger test; zero existing-test churn, confirmed by a
+  full pre-edit/post-edit `npm test` diff), `npm run build` clean.
+  `executableFrontierRatchet.test.ts` unmoved (no new barriers — this was a
+  pure value-derivation change, no new unsupported branches). Census
+  re-run **byte-identical** (97/214 effects, 195/355 moves, 157/276
+  Factory-L50, 2108/2957 weighted, `git status --porcelain docs/
+  executable-frontier-census.md` empty).
+  `tools/probe/verify-factory-ai-checkviability-ground-truth.ts` reran
+  **ALL PASS** (49/49 checks, 0 failures) — every pre-existing check
+  (§9-§26.4) plus the 2 new §27 movesetIndex-1 fixtures, all as ORACLE
+  observations.
+- **Did:** replaced `factoryAiDecisionPolicy.ts`'s first-scripted-slot-only
+  `staleFuncResultFallback` with a full per-slot `AI_THINKING_STRUCT->
+  funcResult` value simulation threaded across all 4 `AI_CheckViability`
+  slots, driven directly by doc §27.1's exhaustive per-handler write audit
+  (side lane's evidence pack from entry 510's round 4). `runCheckViability`
+  (`factoryAiCheckViability.ts`) now returns `funcResultAfter` on every
+  dispatch branch: the 13 writes-never handlers pass the running value
+  through unchanged (added at the dispatch-shell call sites, no handler
+  body touched); the 2 writes-always handlers (`AI_CV_Pursuit`,
+  `AI_CV_AttackDown`) replace it with their own derived written value —
+  re-read straight from the assembly (`Cmd_is_first_turn_for`/`Cmd_get_type`
+  bodies), not assumed from the audit's prose — collision-mapped against
+  `AI_WEATHER_*` 0-3 via a new `TYPE_ID_IN_WEATHER_RANGE` map (Channel 1's
+  `ABILITY_ID_IN_WEATHER_RANGE`, now exported, is the exact same mechanism
+  for ability writes); the 7 writes-conditionally handlers (`DefenseUp`/
+  `SpDefUp`/`LightScreen`/`Reflect`/`SunnyDay`/`Hail`/`RainDance`) each
+  derive their own written-or-passthrough value from the SAME branch state
+  the handler's own score computation already reads (HP%, last-move
+  power/type via `MOVES_BY_ID`, ability, weather) — including
+  `AI_CV_RainDance`'s own Gate S ability-write feeding its own weather
+  chain when reached, correctly modeled for the exit-value computation
+  without perturbing its existing (deliberately simplified) score formula,
+  so zero ledger churn. Every derivation traced against
+  `reference/pokeemerald/data/battle_ai_scripts.s` and
+  `src/battle_ai_script_commands.c`'s own `Cmd_*` bodies directly, not
+  guessed — no sub-case was left unmodeled.
+- **Tests:** new describe block in `tests/factoryAiScoredDecision.test.ts`
+  reproducing doc §27's 2 live fixtures exactly —
+  `mechanic-factory-ai-cv-hail-movesetindex1-writesnever-carry-off` (net
+  -3/+1/0/0, Hail wins turn 1 deterministically, NO tie — the exact
+  divergence entry 510/doc §27.4 confirmed live is now closed) and
+  `...writesalways-clean-off` (net 0/0/0/0, genuine 4-way tie, unchanged);
+  plus a banked tie-break-ledger test for the second fixture's own
+  deterministic RNG outcome (seed 1 → slot 3, seed 99 → slot 1 — Hail
+  winning THIS synthetic unit test's own fair tie is not evidence against
+  the model, since it's a different RNG stream than the oracle's; the
+  oracle's own 2 seeds separately landed on 2 different non-Hail slots,
+  matching the same "genuine tie" conclusion). 13 existing direct-handler
+  unit tests in `tests/factoryAiCheckViability.test.ts` needed their
+  `toEqual` assertions extended with the new (correctly-derived)
+  `funcResultAfter` field — pure additive assertions, no existing
+  score/draw/rng expectation changed.
+- **ISSUES #47 trimmed, not deleted:** the original symptom (per-slot
+  funcResult unmodeled) is closed — all 22 ported `AI_CV_*` handlers now
+  have a derived, implemented `funcResultAfter`. What remains: the 7
+  writes-conditionally handlers' own derived conditions have not been
+  live-oracle-verified with a fixture that places the weather move behind
+  ONE OF THOSE SEVEN specifically (only a writes-never and a writes-always
+  predecessor were staged this round; new fixture staging was out of scope
+  for this step). Trimmed entry states this precisely as a named residual,
+  not guessed, with a lead for the next fixture design.
+- **Next:** round 6 candidates per entry 510 — main:
+  NEGATIVEDAMAGE/TRYSETREST census sets ∥ side: §24.5 sites 5/6/7 or a
+  #47-residual live fixture (weather move behind one of the 7
+  writes-conditionally handlers) if prioritized.
+- **Notes:** no PAPERCUT.
+
+---
 ## 510 — [SUPERVISOR 2026-07-27 ~12:35] round 4 verified + merged; round 5 dispatched
 
 - **State:** master green at **249 files / 3409 tests**, build clean, census
@@ -129,26 +202,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   rather than assuming free — budget similarly for a full end-to-end test
   per set, not just opcode dispatch.
 - **Notes:** no PAPERCUT.
-
----
-## 508 — [SUPERVISOR 2026-07-27 ~11:30] rounds 2-3 verified + merged; round 4 dispatched
-
-- **State:** master green at **248 files / 3395 tests**, build clean. Landed
-  and supervisor-verified this block: §11 turn4-doubleteam kickoff wiring
-  (entry 506; compare 250/250 + sweep rerun by supervisor) ∥ census
-  EFFECT_EARTHQUAKE set (entry 507; 95/214 effects, 2047/2957 weighted,
-  +147 — largest single win) ∥ side §24.5 DRAW SITE 2 live-verified
-  (merged from `worker/side-20260727-101228`, cleaned; CV verify script
-  rerun in-worktree by supervisor, ALL PASS; includes a real Gate-A
-  polarity correction to the doc's prior recipe text; sites 5/6/7 honestly
-  not attempted — calibration cost, PAPERCUTS entry added, 2 hits).
-- **Round 4 (dispatched):** main → `B_SCR_OP_SETPROTECTLIKE` per entry
-  507's handoff (new `protectUses` field, MULTISTRING_CHOOSER check, OOB
-  edge decision), then NEGATIVEDAMAGE/TRYSETREST as cap allows ∥ side →
-  ISSUES #47 movesetIndex-1-3 remainder EVIDENCE (per-handler funcResult
-  write audit from `battle_ai_scripts.s` + live fixtures isolating a
-  weather move at CV index 1-3, carry-survives and carry-destroyed
-  classes; no src edits — main consumes it next round).
-- **Next:** verify round 4; round 5 = main closes #47 from side's
-  evidence ∥ side §24.5 sites 5/6/7 or §12 prep-scout.
-
