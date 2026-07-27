@@ -137,12 +137,31 @@ edit.
 
 ## Parallel workers (max 3: main, side, animation)
 
-> **TEMPORARY — animation lane PAUSED (user directive, 2026-07-26).** Do not
-> brief or launch `--lane animation` workers, and skip the
-> `ANIMATION_PROGRESS.md` orientation step, until the user removes this note.
-> The user is weighing a separate animation supervisor/worktree split;
-> animation items in `PROGRESS.md` "Next" lists are deferred, not abandoned.
-> Spend the freed lane budget on main and side work.
+> **The animation program runs under its own supervisor (user directive,
+> 2026-07-26).** `./run-supervisor.sh --lane animation` launches it in the
+> persistent worktree `.worktrees/animation-main` on branch `animation-main`
+> (guide: `ANIMATION_SUPERVISOR.md`); it may run concurrently with you.
+> Consequences for you:
+>
+> - **Never brief or launch `--lane animation` workers**, and skip the
+>   `ANIMATION_PROGRESS.md` orientation step — that ledger, the animation
+>   coverage work, `src/animation/**`, and `tests/animation/**` belong to the
+>   animation supervisor.
+> - **Fold at orient:** if `git log --oneline master..animation-main` is
+>   non-empty, merge `animation-main` into `master` from the main tree,
+>   rerun `npm test` + `npm run build` on the union, and record the fold in
+>   your `PROGRESS.md` entry (its ANIMATION_PROGRESS.md top entry may carry
+>   a "For the main program:" line — read it). Check again at wind-down; an
+>   unfolded `animation-main` is fine to leave, but say so in the wind-down
+>   entry.
+> - `.worktrees/animation-main` is **permanent** — never remove it or count
+>   it as a stale worktree; worker worktrees and `worker/animation-*`
+>   branches nested under it are the animation supervisor's to clean, not
+>   yours.
+> - `tests/animation/animationBoundaryRatchet.test.ts` pins the
+>   engine/animation import boundary from both sides; if one of your steps
+>   needs to widen it, that is a cross-program decision — record it, don't
+>   slip it in.
 
 The launcher exposes:
 
@@ -160,19 +179,12 @@ serializes its trace calls.
 
 Parallelize only genuinely disjoint steps: different files and fixtures,
 neither depending on the other's unmerged interface work. The natural split
-is main owning the round/core interface, side owning staged scenarios or
-source-derived data, and animation owning modules behind the presentation
-seam. The animation lane is encouraged when a bounded module is ready, but do
-not invent filler work just to occupy it. There is still one supervisor and
-one integration plan—not independent supervisors racing branches.
-
-For animation, read `ANIMATION_PROGRESS.md` and run `npm run
-animation:coverage`. Brief one bounded, non-exclusive component track from
-`ANIMATION_COVERAGE.json`: name the components, one representative, and the
-sibling moves to batch-check. A move is still the acceptance unit, so shared
-code never promotes siblings without their own dense evidence. Keep the lane
-replenished while independent main work remains. Require both animation
-ledgers to be updated; a canonical window alone remains `partial`.
+is main owning the round/core interface and side owning staged scenarios or
+source-derived data. Each program still has one supervisor and one
+integration plan: you integrate main+side on `master`; the animation
+supervisor integrates its lane on `animation-main` (its briefing rules live
+in `ANIMATION_SUPERVISOR.md`); the fold-at-orient protocol above is the only
+place the two meet.
 
 What makes the worktree lanes safe:
 

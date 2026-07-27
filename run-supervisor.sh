@@ -41,6 +41,11 @@ Usage: ./run-supervisor.sh [options]
       (no options)      interactive supervisor session, hard-capped at 6h
   -c, --cap-hours N     hard cap in hours (default 6)
       --headless        unattended run (stream view, like run-agent.sh)
+      --lane NAME       main (default) or animation. The animation lane runs
+                        the separate animation-program supervisor inside the
+                        persistent .worktrees/animation-main worktree on
+                        branch animation-main (per ANIMATION_SUPERVISOR.md);
+                        both supervisors may run concurrently.
   -p, --provider NAME   claude (default) or codex
   -m, --model NAME      supervisor model (provider default)
   -e, --effort EFFORT   Codex reasoning effort (default high)
@@ -49,13 +54,15 @@ Usage: ./run-supervisor.sh [options]
   -h, --help            show this help
 Environment overrides: SUPERVISOR_PROVIDER, SUPERVISOR_MODEL,
 SUPERVISOR_REASONING_EFFORT. Legacy MODEL remains supported.
-Exit 6 means DEFERRED.md has an unresolved question that must be resolved
-before another supervisor session can start.
+Exit 6 means the lane's deferred file (DEFERRED.md for main,
+ANIMATION_DEFERRED.md for animation) has an unresolved question that must be
+resolved before another supervisor session can start in that lane.
 EOF
 }
 
 HEADLESS="${HEADLESS:-0}"
 CAP_HOURS="${CAP_HOURS:-6}"
+LANE="${SUPERVISOR_LANE:-main}"
 PROVIDER="${SUPERVISOR_PROVIDER:-claude}"
 MODEL="${SUPERVISOR_MODEL:-${MODEL:-}}"
 REASONING_EFFORT="${SUPERVISOR_REASONING_EFFORT:-}"
@@ -67,6 +74,8 @@ while [[ $# -gt 0 ]]; do
     --headless)       HEADLESS=1; shift ;;
     -c|--cap-hours)   CAP_HOURS="${2:?--cap-hours needs a number}"; shift 2 ;;
     --cap-hours=*)    CAP_HOURS="${1#*=}"; shift ;;
+    --lane)           LANE="${2:?--lane needs main or animation}"; shift 2 ;;
+    --lane=*)         LANE="${1#*=}"; shift ;;
     -p|--provider)    PROVIDER="${2:?--provider needs a name}"; shift 2 ;;
     --provider=*)     PROVIDER="${1#*=}"; shift ;;
     -m|--model)       MODEL="${2:?--model needs a model name}"; shift 2 ;;
@@ -89,10 +98,41 @@ if [[ ! "$PROVIDER" =~ ^(claude|codex)$ ]]; then
   echo "run-supervisor: unsupported provider '$PROVIDER' (expected claude or codex)" >&2
   exit 2
 fi
-if [[ "$PRINT_CONFIG" != "1" && -f DEFERRED.md ]] \
-    && grep -qE '^## D[0-9]+ .*OPEN:' DEFERRED.md; then
-  echo "run-supervisor: refusing to start — DEFERRED.md has unresolved user-level decisions:" >&2
-  grep -E '^## D[0-9]+ .*OPEN:' DEFERRED.md >&2
+if [[ ! "$LANE" =~ ^(main|animation)$ ]]; then
+  echo "run-supervisor: unsupported lane '$LANE' (expected main or animation)" >&2
+  exit 2
+fi
+
+# The animation supervisor lives in a persistent worktree on its own branch
+# (single-writer: only that session commits to animation-main; only the main
+# tree can commit to master). Bootstrap it if missing, then run from it —
+# everything after this cd (tools, docs, worker launches) self-scopes there.
+if [[ "$LANE" == "animation" && "$PRINT_CONFIG" != "1" \
+      && "$(git rev-parse --abbrev-ref HEAD)" != "animation-main" ]]; then
+  ANIM_WT="$(pwd)/.worktrees/animation-main"
+  if [[ ! -d "$ANIM_WT" ]]; then
+    if git show-ref --verify --quiet refs/heads/animation-main; then
+      git worktree add "$ANIM_WT" animation-main >/dev/null
+    else
+      git worktree add -b animation-main "$ANIM_WT" master >/dev/null
+    fi
+    echo "animation worktree created at $ANIM_WT (branch animation-main)"
+  fi
+  [[ -e "$ANIM_WT/reference" ]] || ln -s "$(pwd)/reference" "$ANIM_WT/reference"
+  cd "$ANIM_WT"
+  if [[ ! -d node_modules ]]; then
+    echo "animation worktree: installing deps (one-time npm install) ..."
+    npm install --no-audit --no-fund >/tmp/emerald-factory-animation-main-setup.log 2>&1 \
+      || { echo "run-supervisor: npm install failed; see /tmp/emerald-factory-animation-main-setup.log" >&2; exit 1; }
+  fi
+fi
+
+DEFERRED_FILE="DEFERRED.md"
+[[ "$LANE" == "animation" ]] && DEFERRED_FILE="ANIMATION_DEFERRED.md"
+if [[ "$PRINT_CONFIG" != "1" && -f "$DEFERRED_FILE" ]] \
+    && grep -qE '^## D[0-9]+ .*OPEN:' "$DEFERRED_FILE"; then
+  echo "run-supervisor: refusing to start — $DEFERRED_FILE has unresolved user-level decisions:" >&2
+  grep -E '^## D[0-9]+ .*OPEN:' "$DEFERRED_FILE" >&2
   echo "Resolve and remove those entries before launching another long supervisor session." >&2
   exit 6
 fi
@@ -124,6 +164,8 @@ CODEX_LOG_ROOT="${POKEBENCH_CODEX_LOG_DIR:-${POKEBENCH_AGENT_LOG_DIR:-$(pwd)/.co
 if [[ -z "$SUPERVISOR_LOG" ]]; then
   if [[ "$PROVIDER" == "codex" ]]; then
     SUPERVISOR_LOG="$CODEX_LOG_ROOT/supervisor/headless-$(date +%Y%m%d-%H%M%S)-$$.jsonl"
+  elif [[ "$LANE" == "animation" ]]; then
+    SUPERVISOR_LOG="/tmp/emerald-factory-animation-supervisor.jsonl"
   else
     SUPERVISOR_LOG="/tmp/emerald-factory-supervisor.jsonl"
   fi
@@ -138,6 +180,7 @@ fi
 # requests a mixed-provider setup.
 export POKEBENCH_WORKER_PROVIDER="$PROVIDER"
 if [[ "$PRINT_CONFIG" == "1" ]]; then
+  echo "supervisor_lane=$LANE"
   echo "supervisor_provider=$PROVIDER"
   echo "supervisor_model=$MODEL"
   echo "supervisor_effort=${REASONING_EFFORT:-n/a}"
@@ -157,20 +200,32 @@ export POKEBENCH_HARNESS_ROOT="$HARNESS_ROOT"
 source tools/oracle-profiles.sh
 MAIN_ORACLE_URL="${POKEBENCH_MAIN_ORACLE_URL:-http://127.0.0.1:8014}"
 ANIMATION_ORACLE_URL="${POKEBENCH_ANIMATION_ORACLE_URL:-http://127.0.0.1:8012}"
-pokebench_ensure_oracle_profile \
-  "$HARNESS_ROOT" battle-scene-off "$MAIN_ORACLE_URL" \
-  /tmp/emerald-factory-oracle-off.log
+# Each supervisor lane ensures only the oracle profile it uses;
+# ensure is validate-or-start, so concurrent supervisors sharing a service
+# is safe. The animation supervisor never needs the OFF profile.
+if [[ "$LANE" == "main" ]]; then
+  pokebench_ensure_oracle_profile \
+    "$HARNESS_ROOT" battle-scene-off "$MAIN_ORACLE_URL" \
+    /tmp/emerald-factory-oracle-off.log
+  echo "Main oracle (Battle Scene OFF) up at $MAIN_ORACLE_URL"
+fi
 pokebench_ensure_oracle_profile \
   "$HARNESS_ROOT" battle-scene-on "$ANIMATION_ORACLE_URL" \
   /tmp/emerald-factory-oracle-on.log
-echo "Main oracle (Battle Scene OFF) up at $MAIN_ORACLE_URL"
 echo "Animation oracle (Battle Scene ON) up at $ANIMATION_ORACLE_URL"
 export POKEBENCH_MAIN_ORACLE_URL="$MAIN_ORACLE_URL"
 export POKEBENCH_ANIMATION_ORACLE_URL="$ANIMATION_ORACLE_URL"
-# Direct bin/oracle/probe calls in the supervisor default to the main OFF
-# profile. Profile-aware compare traces still route legacy/ON traces to 8012.
-export POKEBENCH_ORACLE_URL="$MAIN_ORACLE_URL"
-export POKEBENCH_ORACLE_PROFILE=battle-scene-off
+if [[ "$LANE" == "animation" ]]; then
+  # The animation supervisor's own bin/oracle/probe calls default to the ON
+  # profile it verifies against.
+  export POKEBENCH_ORACLE_URL="$ANIMATION_ORACLE_URL"
+  export POKEBENCH_ORACLE_PROFILE=battle-scene-on
+else
+  # Direct bin/oracle/probe calls in the supervisor default to the main OFF
+  # profile. Profile-aware compare traces still route legacy/ON traces to 8012.
+  export POKEBENCH_ORACLE_URL="$MAIN_ORACLE_URL"
+  export POKEBENCH_ORACLE_PROFILE=battle-scene-off
+fi
 
 CAP_SECONDS="$(awk "BEGIN { printf \"%d\", $CAP_HOURS * 3600 }")"
 DEADLINE_EPOCH=$(( $(date +%s) + CAP_SECONDS ))
@@ -179,12 +234,21 @@ DEADLINE_HUMAN="$(date -r "$DEADLINE_EPOCH" '+%Y-%m-%d %H:%M' 2>/dev/null \
 
 CONTINUITY_NOTE="Run autonomously through the full session cap while useful in-scope work remains. Do not ask the user questions mid-session, send decision notifications, or end a turn awaiting a reply. Exercise your best evidence-backed judgment for reversible on-scope choices. If a material choice genuinely cannot be made safely, record it in DEFERRED.md, continue independent safe work, and summarize it only at wind-down."
 
-if [[ "$PROVIDER" == "codex" ]]; then
-  DELEGATION_NOTE="For Codex workers, choose the worker tier by task: Terra/high only for bounded probes, extraction, or mechanical docs; Sol/medium for normal implementation; Sol/high for cross-layer architecture or the first evidence-driven repair after a failed worker. The launcher offers main and side-worktree lanes (the animation lane is temporarily paused by user directive); use parallel lanes when their ownership is genuinely disjoint. Invoke each ./tools/run-subagent.sh call directly in its own execution-tool session without shell backgrounding, '&', or nohup. A yielded call is still running; retain its handle and launch another lane only when the briefs are independent."
+if [[ "$LANE" == "animation" ]]; then
+  if [[ "$PROVIDER" == "codex" ]]; then
+    DELEGATION_NOTE="For Codex workers, choose the worker tier by task: Terra/high only for bounded probes, extraction, or mechanical docs; Sol/medium for normal implementation; Sol/high for cross-layer architecture or the first evidence-driven repair after a failed worker. Invoke each ./tools/run-subagent.sh call directly in its own execution-tool session without shell backgrounding, '&', or nohup. A yielded call is still running; retain its handle and wait on it."
+  else
+    DELEGATION_NOTE="Launch ./tools/run-subagent.sh workers in the background."
+  fi
+  PROMPT="You are the ANIMATION supervisor for this run. Read ANIMATION_SUPERVISOR.md, AGENTS.md, and ANIMATION_PROGRESS.md before dispatching anything. You are in the persistent animation-main worktree and you are that branch's only writer: begin by merging master in (git merge --no-edit master), rerun npm test and npm run build as your baseline, then drive one bounded animation coverage step at a time via ./tools/run-subagent.sh --lane animation from this tree — one worker at a time, animation lane only, verify each result yourself, merge each verified worker branch into animation-main from this tree, and never write master or the main program's docs (PROGRESS.md/ISSUES.md/ROADMAP.md/DEFERRED.md). Your ledger is ANIMATION_PROGRESS.md; your deferral file is ANIMATION_DEFERRED.md. ${DELEGATION_NOTE} Hard deadline for this whole session: ${DEADLINE_HUMAN} (epoch ${DEADLINE_EPOCH}); wind down cleanly before it with animation-main committed and green so the main supervisor's fold stays boring. ${CONTINUITY_NOTE}"
 else
-  DELEGATION_NOTE="Launch ./tools/run-subagent.sh workers in the background. The main and side-worktree lanes may run concurrently when their briefs and files are genuinely disjoint (the animation lane is temporarily paused by user directive)."
+  if [[ "$PROVIDER" == "codex" ]]; then
+    DELEGATION_NOTE="For Codex workers, choose the worker tier by task: Terra/high only for bounded probes, extraction, or mechanical docs; Sol/medium for normal implementation; Sol/high for cross-layer architecture or the first evidence-driven repair after a failed worker. The launcher offers main and side-worktree lanes; use parallel lanes when their ownership is genuinely disjoint. The animation program belongs to the separate animation supervisor (ANIMATION_SUPERVISOR.md) — never brief or launch animation-lane workers from this session. Invoke each ./tools/run-subagent.sh call directly in its own execution-tool session without shell backgrounding, '&', or nohup. A yielded call is still running; retain its handle and launch another lane only when the briefs are independent."
+  else
+    DELEGATION_NOTE="Launch ./tools/run-subagent.sh workers in the background. The main and side-worktree lanes may run concurrently when their briefs and files are genuinely disjoint. The animation program belongs to the separate animation supervisor (ANIMATION_SUPERVISOR.md) — never brief or launch animation-lane workers from this session."
+  fi
+  PROMPT="You are the supervisor for this run. Read SUPERVISOR.md, AGENTS.md, and the authoritative reset at the top of ROADMAP S8 before dispatching anything. The old canonical Battle-2 turn march is stopped: drive the generic seven-battle round controller and presentation seam against the Battle Scene OFF oracle. During your orient step, if branch animation-main has commits master lacks (git log --oneline master..animation-main), fold it: merge animation-main into master from the main tree, rerun npm test and npm run build on the union, and record the fold in your PROGRESS.md entry. Delegate bounded steps via ./tools/run-subagent.sh, verify each result yourself, and continue, fix, or defer a genuinely unresolved decision without interrupting the session. ${DELEGATION_NOTE} Hard deadline for this whole session: ${DEADLINE_HUMAN} (epoch ${DEADLINE_EPOCH}); wind down cleanly before it. ${CONTINUITY_NOTE}"
 fi
-PROMPT="You are the supervisor for this run. Read SUPERVISOR.md, AGENTS.md, and the authoritative reset at the top of ROADMAP S8 before dispatching anything. The old canonical Battle-2 turn march is stopped: drive the generic seven-battle round controller and presentation seam against the Battle Scene OFF oracle. TEMPORARY (user directive, 2026-07-26): the animation lane is paused — do not launch animation-lane workers or brief animation coverage work this session; put that compute into the main and side lanes instead. Delegate bounded steps via ./tools/run-subagent.sh, verify each result yourself, and continue, fix, or defer a genuinely unresolved decision without interrupting the session. ${DELEGATION_NOTE} Hard deadline for this whole session: ${DEADLINE_HUMAN} (epoch ${DEADLINE_EPOCH}); wind down cleanly before it. ${CONTINUITY_NOTE}"
 
 if [[ "$HEADLESS" == "1" ]]; then
   mkdir -p "$(dirname "$SUPERVISOR_LOG")"
@@ -215,8 +279,10 @@ else
   if [[ "$PROVIDER" == "claude" ]]; then
     # Preserve warm-bison's original Claude Remote Control launch and shell
     # watchdog path exactly.
+    RC_PREFIX="emerald-factory"
+    [[ "$LANE" == "animation" ]] && RC_PREFIX="emerald-factory-anim"
     POKEBENCH_ROLE=supervisor claude --remote-control \
-      --remote-control-session-name-prefix emerald-factory \
+      --remote-control-session-name-prefix "$RC_PREFIX" \
       --model "$MODEL" --dangerously-skip-permissions "$PROMPT" &
   else
     TIMEOUT_MESSAGE="run-supervisor: ${CAP_HOURS}h cap reached — stopping supervisor"
