@@ -163,6 +163,10 @@ import {
   type SludgeSprite,
 } from "./sludge.ts";
 import {
+  sludgeBombEffectAtAge,
+  type SludgeBombSprite,
+} from "./sludgeBomb.ts";
+import {
   poisonFangEffectAtAge,
   type PoisonFangSprite,
 } from "./poisonFang.ts";
@@ -776,6 +780,14 @@ export interface SceneOnSludgeConfig {
   readonly projectileOrigin: Readonly<{ x: number; y: number }>;
 }
 
+export interface SceneOnSludgeBombConfig {
+  readonly move: "SLUDGE_BOMB";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly projectileOrigin: Readonly<{ x: number; y: number }>;
+}
+
 export interface SceneOnPoisonFangConfig {
   readonly move: "POISON_FANG";
   readonly attacker: SceneOnPresentationBattler;
@@ -909,6 +921,7 @@ export type SceneOnMoveConfig =
   | SceneOnWaterGunConfig
   | SceneOnAcidConfig
   | SceneOnSludgeConfig
+  | SceneOnSludgeBombConfig
   | SceneOnPoisonFangConfig
   | SceneOnToxicConfig
   | SceneOnEarthquakeConfig
@@ -962,6 +975,15 @@ export interface SceneOnSludgeView {
   readonly targetOffset: Readonly<{ x2: number; y2: number }>;
   readonly defenderPaletteY: number;
   readonly sprites: readonly SludgeSprite[];
+}
+
+export interface SceneOnSludgeBombView {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly targetOffset: Readonly<{ x2: number; y2: number }>;
+  readonly defenderPaletteY: number;
+  readonly sprites: readonly SludgeBombSprite[];
 }
 
 export interface SceneOnPoisonFangView {
@@ -1959,6 +1981,26 @@ export function sceneOnSludgeView(
     targetOffset: effect.targetOffset,
     defenderPaletteY: sludgeTargetPaletteYAtAge(state.age),
     sprites: sludgeSpritesBackToFrontAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.projectileOrigin,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age` is ticks since the first of ten sludge projectile creations. */
+export function sceneOnSludgeBombView(
+  state: SceneOnMovePresentationState,
+): SceneOnSludgeBombView {
+  if (state.config.move !== "SLUDGE_BOMB") {
+    throw new Error(`expected SLUDGE_BOMB presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...sludgeBombEffectAtAge(
       state.age,
       state.config.attacker.geometry.side,
       state.config.projectileOrigin,

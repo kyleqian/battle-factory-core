@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Dense MOVE_SLUDGE source-component evidence for legal Scene-ON fixtures."""
+"""Dense MOVE_SLUDGE / MOVE_SLUDGE_BOMB evidence for legal Scene-ON fixtures."""
 from __future__ import annotations
 import hashlib, json, subprocess, sys
 from pathlib import Path
@@ -27,8 +27,12 @@ def main() -> None:
     song_table = oracle.symbols["gSongTable"]
     nm = subprocess.run(["arm-none-eabi-nm", str(reference / "pokeemerald.elf")], check=True, capture_output=True, text=True).stdout
     symbols = {line.split()[2]: int(line.split()[0], 16) | 1 for line in nm.splitlines() if len(line.split()) == 3}
-    templates = {name: oracle.symbols[name] for name in ("gSludgeProjectileSpriteTemplate", "gPoisonBubbleSpriteTemplate")}
-    task_names = ("AnimTask_ShakeMon", "AnimTask_ShakeMon_Step", "AnimTask_BlendColorCycle", "AnimTask_BlendColorCycleLoop")
+    templates = {name: oracle.symbols[name] for name in (
+        "gSludgeProjectileSpriteTemplate", "gPoisonBubbleSpriteTemplate",
+        "gSludgeBombHitParticleSpriteTemplate")}
+    task_names = ("AnimTask_ShakeMon", "AnimTask_ShakeMon_Step",
+                  "AnimTask_ShakeMon2", "AnimTask_ShakeMon2_Step",
+                  "AnimTask_BlendColorCycle", "AnimTask_BlendColorCycleLoop")
     task_funcs = {symbols[name] for name in task_names}
     def u16(a: int) -> int: return oracle.read_u8(a) | (oracle.read_u8(a + 1) << 8)
     def s16(a: int) -> int:
@@ -62,7 +66,7 @@ def main() -> None:
     rows = []
     def capture(frame: int) -> None:
         snap = lab.snapshot()
-        if snap["engine"]["currentMove"] != 124: return
+        if snap["engine"]["currentMove"] not in (124, 188): return
         active = []
         for slot in range(64):
             base = sprites + slot * 0x44
@@ -91,6 +95,7 @@ def main() -> None:
     OUTPUT.write_text(json.dumps({"schema":"sludge-dense-evidence/v1","setup":setup,
       "templates":templates,"taskFuncs":{name:symbols[name] for name in task_names},
       "songHeaders":{"SE_M_BUBBLE3":oracle.read_u32(song_table+126*8),
-                     "SE_M_TOXIC":oracle.read_u32(song_table+148*8)},"frames":rows}) + "\n")
+                     "SE_M_TOXIC":oracle.read_u32(song_table+148*8),
+                     "SE_M_DIG":oracle.read_u32(song_table+175*8)},"frames":rows}) + "\n")
     print(f"wrote {OUTPUT} ({len(rows)} frames; {rows[0]['frame'] if rows else '-'}..{rows[-1]['frame'] if rows else '-'})")
 main()

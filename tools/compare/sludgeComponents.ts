@@ -7,7 +7,13 @@ import {
   sludgeTargetPaletteYAtAge,
 } from "../../src/animation/sludge.ts";
 import {
+  SLUDGE_BOMB_HIT_START_AGES,
+  SLUDGE_BOMB_PROJECTILE_START_AGES,
+  sludgeBombEffectAtAge,
+} from "../../src/animation/sludgeBomb.ts";
+import {
   createSceneOnMovePresentation,
+  sceneOnSludgeBombView,
   sceneOnSludgeView,
   type SceneOnPresentationBattler,
 } from "../../src/animation/sceneOnPresentation.ts";
@@ -18,6 +24,7 @@ import {
 } from "../../src/engine/core.ts";
 
 interface Fixture {
+  readonly move?: "SLUDGE" | "SLUDGE_BOMB";
   readonly scenario: string;
   readonly probe: string;
   readonly denseWindow: { readonly startFrame: number; readonly endFrame: number };
@@ -73,7 +80,7 @@ if (run.status !== 0) process.exit(run.status ?? 1);
 const probe = JSON.parse(readFileSync(output, "utf8")) as {
   readonly templates: Readonly<Record<string, number>>;
   readonly taskFuncs: Readonly<Record<string, number>>;
-  readonly songHeaders: Readonly<Record<"SE_M_BUBBLE3" | "SE_M_TOXIC", number>>;
+  readonly songHeaders: Readonly<Record<"SE_M_BUBBLE3" | "SE_M_TOXIC" | "SE_M_DIG", number>>;
   readonly frames: readonly ProbeFrame[];
 };
 const frames = new Map(probe.frames.map((frame) => [frame.frame, frame]));
@@ -94,8 +101,9 @@ let framebufferMatches = 0;
 const mismatches: string[] = [];
 const framebufferMismatches: string[] = [];
 let firstFramebufferDiff: string | null = null;
+const isBomb = fixture.move === "SLUDGE_BOMB";
 const stage = createSceneOnMovePresentation({
-  move: "SLUDGE",
+  move: isBomb ? "SLUDGE_BOMB" : "SLUDGE",
   attacker: fixture.attacker,
   target: fixture.target,
   projectileOrigin: fixture.projectileOrigin,
@@ -103,15 +111,22 @@ const stage = createSceneOnMovePresentation({
 });
 for (let frame = fixture.denseWindow.startFrame; frame <= fixture.denseWindow.endFrame; frame += 1) {
   const age = fixture.appStage.presentationAge + frame - fixture.denseWindow.startFrame;
-  const predicted = sludgeEffectAtAge(
-    age, fixture.attackerSide, fixture.projectileOrigin, fixture.targetCenter,
-  );
+  const predicted = isBomb
+    ? sludgeBombEffectAtAge(
+        age, fixture.attackerSide, fixture.projectileOrigin, fixture.targetCenter,
+      )
+    : sludgeEffectAtAge(
+        age, fixture.attackerSide, fixture.projectileOrigin, fixture.targetCenter,
+      );
   const oracle = frames.get(frame);
   if (!oracle) throw new Error(`probe omitted frame ${frame}`);
   const expectedSprites = predicted.sprites.map(key).sort();
   const actualSprites = oracle.sprites.map((sprite) => key({
     kind: sprite.template === probe.templates.gSludgeProjectileSpriteTemplate
-      ? "projectile" : "poisonBubble",
+      ? "projectile"
+      : sprite.template === probe.templates.gSludgeBombHitParticleSpriteTemplate
+        ? "hitParticle"
+        : "poisonBubble",
     oamSlot: sprite.slot,
     x: sprite.x + sprite.x2,
     y: sprite.y + sprite.y2,
@@ -120,21 +135,26 @@ for (let frame = fixture.denseWindow.startFrame; frame <= fixture.denseWindow.en
   })).sort();
   const target = fixture.targetSide === "player" ? oracle.playerSprite : oracle.opponentSprite;
   const baselineTargetX2 = fixture.targetSide === "opponent" ? 1 : 0;
-  const predictedTargetX2 = age < 41 ? baselineTargetX2 : predicted.targetOffset.x2;
+  const predictedTargetX2 = age < (isBomb ? 50 : 41)
+    ? baselineTargetX2
+    : predicted.targetOffset.x2;
   const shake = oracle.tasks.filter((task) =>
-    task.func === probe.taskFuncs.AnimTask_ShakeMon
-    || task.func === probe.taskFuncs.AnimTask_ShakeMon_Step
+    task.func === probe.taskFuncs[isBomb ? "AnimTask_ShakeMon2" : "AnimTask_ShakeMon"]
+    || task.func === probe.taskFuncs[isBomb ? "AnimTask_ShakeMon2_Step" : "AnimTask_ShakeMon_Step"]
   );
   const blend = oracle.tasks.filter((task) =>
     task.func === probe.taskFuncs.AnimTask_BlendColorCycle
     || task.func === probe.taskFuncs.AnimTask_BlendColorCycleLoop
   );
-  const shakeShape = age < 41 || age > 48
+  const shakeShape = age < (isBomb ? 50 : 41) || age > (isBomb ? 77 : 48)
     ? shake.length === 0
     : shake.length === 1
-      && shake[0]!.data[2] === 1 && shake[0]!.data[4] === 3
-      && shake[0]!.data[5] === 0;
-  const blendShape = age < 41 || age > 87
+      && (isBomb
+        ? shake[0]!.data[1] >= 1 && shake[0]!.data[1] <= 14
+          && shake[0]!.data[4] === 3 && shake[0]!.data[5] === 0
+        : shake[0]!.data[2] === 1 && shake[0]!.data[4] === 3
+          && shake[0]!.data[5] === 0);
+  const blendShape = age < (isBomb ? 50 : 41) || age > (isBomb ? 96 : 87)
     ? blend.length === 0
     : blend.length === 1
       && blend[0]!.data[0] === 4 && blend[0]!.data[1] === 1
@@ -151,15 +171,23 @@ for (let frame = fixture.denseWindow.startFrame; frame <= fixture.denseWindow.en
   const hardwareExpected = prior
     ? prior.fadedPalette.slice(targetPaletteStart, targetPaletteStart + 16)
     : fadedRow;
-  const expectedCoefficient = sludgeTargetPaletteYAtAge(age);
+  const expectedCoefficient = isBomb
+    ? predicted.defenderPaletteY
+    : sludgeTargetPaletteYAtAge(age);
   const paletteShape = paletteCoefficients.includes(expectedCoefficient)
     && JSON.stringify(hardwareExpected) === JSON.stringify(hardwareRow);
-  const toxicSoundAge = [41, 49, 57, 65, 73, 81].includes(age);
-  const soundBoundary = age === 0 || toxicSoundAge;
-  const expectedSong = age === 0
+  const toxicSoundAge = (isBomb
+    ? [98, 106, 114, 122, 130, 138]
+    : [41, 49, 57, 65, 73, 81]).includes(age);
+  const projectileSoundAge = (isBomb
+    ? SLUDGE_BOMB_PROJECTILE_START_AGES
+    : [0]).includes(age as never);
+  const digSoundAge = isBomb && SLUDGE_BOMB_HIT_START_AGES.includes(age as never);
+  const soundBoundary = projectileSoundAge || digSoundAge || toxicSoundAge;
+  const expectedSong = projectileSoundAge
     ? probe.songHeaders.SE_M_BUBBLE3
-    : probe.songHeaders.SE_M_TOXIC;
-  const expectedPan = age === 0
+    : digSoundAge ? probe.songHeaders.SE_M_DIG : probe.songHeaders.SE_M_TOXIC;
+  const expectedPan = projectileSoundAge
     ? (fixture.attackerSide === "player" ? -64 : 63)
     : (fixture.targetSide === "player" ? -63 : 63);
   const soundShape = !soundBoundary || (
@@ -169,7 +197,9 @@ for (let frame = fixture.denseWindow.startFrame; frame <= fixture.denseWindow.en
     && oracle.se1.tracks[0]?.panX === expectedPan
   );
   const seamState = { ...stage, age };
-  const seamView = sceneOnSludgeView(seamState);
+  const seamView = isBomb
+    ? sceneOnSludgeBombView(seamState)
+    : sceneOnSludgeView(seamState);
   const seamShape = JSON.stringify(
     seamView.sprites.map(key).sort(),
   ) === JSON.stringify(expectedSprites)
@@ -226,7 +256,7 @@ for (let frame = fixture.denseWindow.startFrame; frame <= fixture.denseWindow.en
 }
 const total = fixture.denseWindow.endFrame - fixture.denseWindow.startFrame + 1;
 console.log(
-  `SLUDGE source components ${matches}/${total}; framebuffer ${framebufferMatches}/${total}`,
+  `${isBomb ? "SLUDGE BOMB" : "SLUDGE"} source components ${matches}/${total}; framebuffer ${framebufferMatches}/${total}`,
 );
 if (matches !== total || framebufferMatches !== total) {
   if (firstFramebufferDiff) console.error(firstFramebufferDiff);

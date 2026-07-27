@@ -1,0 +1,37 @@
+{
+  "schema": "scene-on-portable-component/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-sludge-bomb-opponent-weepinbell-player-onix.json",
+  "probe": "tools/compare/sludgeProbe.py",
+  "pair": "WEEPINBELL real Factory set-270 Sludge Bomb carrier opponent-front -> ONIX player-back",
+  "move": "SLUDGE_BOMB",
+  "denseWindow": { "startFrame": 89, "endFrame": 248 },
+  "appStage": { "presentationAge": 0 },
+  "projectileOrigin": { "x": 176, "y": 51 },
+  "attackerSide": "opponent",
+  "targetCenter": { "x": 72, "y": 88 },
+  "targetSide": "player",
+  "attacker": {
+    "species": "WEEPINBELL",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 19 },
+      "animationCenter": { "x": 176, "y": 51 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 48 },
+      "animationCenter": { "x": 72, "y": 88 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 110, "playerMaxHp": 110,
+    "opponentHp": 140, "opponentMaxHp": 140,
+    "playerGender": "male", "opponentGender": "male"
+  }
+}

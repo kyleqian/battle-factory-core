@@ -545,6 +545,7 @@ import supersonicAsset from "../animation/assets/supersonic.json" with { type: "
 import waterGunAsset from "../animation/assets/water-gun.json" with { type: "json" };
 import acidAsset from "../animation/assets/acid.json" with { type: "json" };
 import sludgeAsset from "../animation/assets/sludge.json" with { type: "json" };
+import sludgeBombAsset from "../animation/assets/sludgeBomb.json" with { type: "json" };
 import poisonFangAsset from "../animation/assets/poisonFang.json" with { type: "json" };
 import toxicAsset from "../animation/assets/toxic.json" with { type: "json" };
 import hardenAsset from "../animation/assets/harden.json" with { type: "json" };
@@ -650,6 +651,7 @@ import {
   sceneOnWaterGunView,
   sceneOnAcidView,
   sceneOnSludgeView,
+  sceneOnSludgeBombView,
   sceneOnPoisonFangView,
   sceneOnToxicView,
   sceneOnEarthquakeView,
@@ -968,6 +970,11 @@ const sludgeArt = sludgeAsset as {
   poisonBubble: { tileset: Tileset; palette: RgbColor[] };
   grimerBack: { tileset: Tileset; palette: RgbColor[] };
   grimerFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const sludgeBombArt = sludgeBombAsset as {
+  poisonBubble: { tileset: Tileset; palette: RgbColor[] };
+  weepinbellBack: { tileset: Tileset; palette: RgbColor[] };
+  weepinbellFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const poisonFangArt = poisonFangAsset as {
   fang: { tileset: Tileset; palette: RgbColor[] };
@@ -15522,36 +15529,41 @@ export function renderSceneOnMovePresentation(
     return;
   }
 
-  if (state.config.move === "SLUDGE") {
-    const view = sceneOnSludgeView(state);
+  if (state.config.move === "SLUDGE" || state.config.move === "SLUDGE_BOMB") {
+    const isBomb = state.config.move === "SLUDGE_BOMB";
+    const view = isBomb ? sceneOnSludgeBombView(state) : sceneOnSludgeView(state);
     // Tasks/sprites update RAM after this display's OAM and palette transfer.
-    const displayed = sceneOnSludgeView({ ...state, age: state.age - 1 });
+    const displayed = isBomb
+      ? sceneOnSludgeBombView({ ...state, age: state.age - 1 })
+      : sceneOnSludgeView({ ...state, age: state.age - 1 });
+    const displayedSprites = displayed.sprites;
+    const attackerSpecies = isBomb ? "WEEPINBELL" : "GRIMER";
     const playerToOpponent =
-      view.attacker.species === "GRIMER"
+      view.attacker.species === attackerSpecies
       && view.attacker.geometry.side === "player"
       && view.target.species === "ONIX"
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "GRIMER"
+      view.attacker.species === attackerSpecies
       && view.attacker.geometry.side === "opponent"
       && view.target.species === "ONIX"
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
-        `unsupported staged SLUDGE pair ${view.attacker.species}->${view.target.species}`,
+        `unsupported staged ${state.config.move} pair ${view.attacker.species}->${view.target.species}`,
       );
     }
-    const grimerSource = playerToOpponent
-      ? sludgeArt.grimerBack
-      : sludgeArt.grimerFront;
-    const grimerSprite = playerToOpponent
-      ? grimerSource
+    const attackerSource = isBomb
+      ? (playerToOpponent ? sludgeBombArt.weepinbellBack : sludgeBombArt.weepinbellFront)
+      : (playerToOpponent ? sludgeArt.grimerBack : sludgeArt.grimerFront);
+    const attackerSprite = playerToOpponent
+      ? attackerSource
       : {
-          ...grimerSource,
+          ...attackerSource,
           tileset: {
             columns: 8,
             rows: 8,
-            tiles: grimerSource.tileset.tiles.slice(0, 64),
+            tiles: attackerSource.tileset.tiles.slice(0, 64),
           },
         };
     const onixSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
@@ -15567,10 +15579,14 @@ export function renderSceneOnMovePresentation(
     // Script-created task writes pass through RunTasks, BuildOamBuffer, then
     // the following VBlank: battler x2 therefore trails reducer RAM by two
     // displays, one more than the effect sprites and palette transfer.
-    const targetOffset = sludgeDisplayedTargetOffsetAtAge(
-      state.age,
-      targetIdle.x2,
-    );
+    const targetOffset = isBomb
+      ? (state.age <= 50
+          ? targetIdle
+          : sceneOnSludgeBombView({
+              ...state,
+              age: state.age === 51 ? 52 : state.age - 2,
+            }).targetOffset)
+      : sludgeDisplayedTargetOffsetAtAge(state.age, targetIdle.x2);
     drawSpriteSheetAffineStretch(
       fb,
       onixSprite.tileset,
@@ -15588,16 +15604,17 @@ export function renderSceneOnMovePresentation(
     const drawSludgeSprite = (
       sprite: (typeof displayed.sprites)[number],
     ) => {
-      const tile = sprite.kind === "projectile" ? 8 : 0;
+      const tile = sprite.kind === "poisonBubble" ? 0 : 8;
+      const poisonArt = isBomb ? sludgeBombArt.poisonBubble : sludgeArt.poisonBubble;
       const art = {
         columns: 2,
         rows: 2,
-        tiles: sludgeArt.poisonBubble.tileset.tiles.slice(tile, tile + 4),
+        tiles: poisonArt.tileset.tiles.slice(tile, tile + 4),
       };
       drawSpriteSheetAffineRotate(
         fb,
         art,
-        sludgeArt.poisonBubble.palette,
+        poisonArt.palette,
         sprite.x,
         sprite.y,
         sprite.xScale,
@@ -15609,14 +15626,14 @@ export function renderSceneOnMovePresentation(
       );
     };
     const drawProjectiles = () => {
-      for (const sprite of displayed.sprites) {
+      for (const sprite of displayedSprites) {
         if (sprite.kind === "projectile") drawSludgeSprite(sprite);
       }
     };
     const drawGrimer = () => drawSpriteSheet(
         fb,
-        grimerSprite.tileset,
-        grimerSprite.palette,
+        attackerSprite.tileset,
+        attackerSprite.palette,
         view.attacker.geometry.spriteCorner.x,
         view.attacker.geometry.spriteCorner.y,
       );
@@ -15626,11 +15643,13 @@ export function renderSceneOnMovePresentation(
     if (playerToOpponent) drawProjectiles();
     drawGrimer();
     if (opponentToPlayer) drawProjectiles();
-    for (const sprite of displayed.sprites) {
-      if (sprite.kind === "poisonBubble") drawSludgeSprite(sprite);
+    for (const sprite of displayedSprites) {
+      if (sprite.kind === "poisonBubble" || sprite.kind === "hitParticle") {
+        drawSludgeSprite(sprite);
+      }
     }
-    const opponentSpecies = playerToOpponent ? "ONIX" : "GRIMER";
-    const playerSpecies = playerToOpponent ? "GRIMER" : "ONIX";
+    const opponentSpecies = playerToOpponent ? "ONIX" : attackerSpecies;
+    const playerSpecies = playerToOpponent ? attackerSpecies : "ONIX";
     drawSendOutHealthbox(
       fb,
       0,
@@ -15664,8 +15683,8 @@ export function renderSceneOnMovePresentation(
     );
     drawMessageTextLines(
       fb,
-      playerToOpponent ? "GRIMER used" : "Foe GRIMER used",
-      "SLUDGE!",
+      playerToOpponent ? `${attackerSpecies} used` : `Foe ${attackerSpecies} used`,
+      isBomb ? "SLUDGE BOMB!" : "SLUDGE!",
       99,
     );
     return;

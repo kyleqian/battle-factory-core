@@ -42,7 +42,7 @@ function hitParticleAtLocalAge(
   spawnIndex: number,
   oamSlot: number,
 ): SludgeBombSprite | undefined {
-  if (localAge < 0 || localAge >= 20) return undefined;
+  if (localAge < 0 || localAge >= 19) return undefined;
   const duration = 20;
   let remaining = duration;
   let dx = s16(Math.trunc((offset.x * 256) / duration));
