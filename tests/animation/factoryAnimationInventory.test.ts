@@ -68,11 +68,11 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // SLUDGE closes its two-orientation shared-seam framebuffer evidence.
-        unsupported: 235,
+        // POISON FANG closes its two-orientation shared-seam framebuffer evidence.
+        unsupported: 234,
         staged: 0,
         partial: 3,
-        exact: 38,
+        exact: 39,
       },
       {
         tier: "openOnly",
