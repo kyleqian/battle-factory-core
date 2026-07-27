@@ -68,11 +68,11 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // EXPLOSION closes both component directions but not the shared seam.
+        // EXPLOSION closes both directions through the shared Scene-ON seam.
         unsupported: 227,
         staged: 0,
-        partial: 4,
-        exact: 45,
+        partial: 3,
+        exact: 46,
       },
       {
         tier: "openOnly",

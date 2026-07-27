@@ -1,4 +1,9 @@
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
+import {
+  mkdtempSync,
+  readFileSync,
+  realpathSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
@@ -7,13 +12,33 @@ import {
   explosionAtAge,
   type ExplosionBackgroundBlend,
 } from "../../src/animation/explosion.ts";
+import {
+  createSceneOnMovePresentation,
+  sceneOnExplosionView,
+  type SceneOnPresentationBattler,
+} from "../../src/animation/sceneOnPresentation.ts";
+import {
+  createInitialState,
+  render,
+  type EngineState,
+} from "../../src/engine/core.ts";
+import { PNG } from "pngjs";
 
 interface Fixture {
   scenario: string;
   probe: string;
   denseWindow: { startFrame: number; endFrame: number };
+  appStage: { presentationAge: number };
   attackerSide: "player" | "opponent";
   attackerCenter: { x: number; y: number };
+  attacker: SceneOnPresentationBattler;
+  target: SceneOnPresentationBattler;
+  fieldProfile: {
+    playerHp: number; playerMaxHp: number;
+    opponentHp: number; opponentMaxHp: number;
+    playerGender?: "male" | "female";
+    opponentGender?: "male" | "female";
+  };
 }
 
 interface Frame {
@@ -83,12 +108,24 @@ function targetFor(state: ExplosionBackgroundBlend): number {
 
 const failures: string[] = [];
 let matches = 0;
+let seamMatches = 0;
+let framebufferMatches = 0;
+const framebufferMismatches: number[] = [];
+let firstFramebufferDiagnosticWritten = false;
+const stage = createSceneOnMovePresentation({
+  move: "EXPLOSION",
+  attacker: fixture.attacker,
+  target: fixture.target,
+  fieldProfile: fixture.fieldProfile,
+});
 for (let frame = fixture.denseWindow.startFrame;
   frame <= fixture.denseWindow.endFrame; frame += 1) {
-  const age = frame - fixture.denseWindow.startFrame;
+  const age =
+    fixture.appStage.presentationAge + frame - fixture.denseWindow.startFrame;
   const oracle = frames.get(frame);
   if (!oracle) throw new Error(`probe omitted frame ${frame}`);
   const expected = explosionAtAge(age, fixture.attackerSide, fixture.attackerCenter);
+  const seam = sceneOnExplosionView({ ...stage, age });
   const oracleSprites = oracle.sprites.map((sprite) =>
     `${sprite.x},${sprite.y},${sprite.attr2 & 1023}`,
   ).sort();
@@ -141,12 +178,77 @@ for (let frame = fixture.denseWindow.startFrame;
   else failures.push(
     `frame ${frame}/age ${age}: sprites=${sprites} matrices=${matrices} shake=${shake} bg=${bg} hardwarePalette=${hardwarePalette} audio=${audio} tasks=${tasks} registers=${registers} hardwareOam=${hardwareOam}(${activeHardwareExplosionCount}/${previous.explosions.length})`,
   );
+  if (
+    seam.battlerX2 === expected.battlerX2
+    && seam.backgroundBlend.kind === expected.backgroundBlend.kind
+    && seam.backgroundBlend.coefficient === expected.backgroundBlend.coefficient
+    && JSON.stringify(seam.explosions) === JSON.stringify(expected.explosions)
+  ) {
+    seamMatches += 1;
+  }
+  const engine: EngineState = {
+    ...createInitialState(),
+    rngMode: "frontierBattle",
+    sceneOnPresentation: { ...stage, age },
+  };
+  const app = render(engine);
+  const rgb = readFileSync(
+    join(rgbDir, `${String(frame).padStart(5, "0")}.rgb`),
+  );
+  let exact = true;
+  let diffPixels = 0;
+  const oracleRgba = Buffer.alloc(240 * 160 * 4);
+  const diffRgba = Buffer.alloc(240 * 160 * 4);
+  for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
+    oracleRgba[pixel * 4] = rgb[pixel * 3]!;
+    oracleRgba[pixel * 4 + 1] = rgb[pixel * 3 + 1]!;
+    oracleRgba[pixel * 4 + 2] = rgb[pixel * 3 + 2]!;
+    oracleRgba[pixel * 4 + 3] = 255;
+    if (
+      app[pixel * 4] !== rgb[pixel * 3]
+      || app[pixel * 4 + 1] !== rgb[pixel * 3 + 1]
+      || app[pixel * 4 + 2] !== rgb[pixel * 3 + 2]
+    ) {
+      exact = false;
+      diffPixels += 1;
+      diffRgba[pixel * 4] = 255;
+      diffRgba[pixel * 4 + 3] = 255;
+    }
+  }
+  if (exact) framebufferMatches += 1;
+  else {
+    framebufferMismatches.push(age);
+    if (!firstFramebufferDiagnosticWritten) {
+      writeFileSync(
+        join(scratch, `oracle-age-${age}.png`),
+        PNG.sync.write({ width: 240, height: 160, data: oracleRgba }),
+      );
+      writeFileSync(
+        join(scratch, `app-age-${age}.png`),
+        PNG.sync.write({ width: 240, height: 160, data: Buffer.from(app) }),
+      );
+      writeFileSync(
+        join(scratch, `diff-age-${age}.png`),
+        PNG.sync.write({ width: 240, height: 160, data: diffRgba }),
+      );
+      console.error(`first framebuffer mismatch age ${age}: ${diffPixels} pixels`);
+      firstFramebufferDiagnosticWritten = true;
+    }
+  }
 }
 
 const total = fixture.denseWindow.endFrame - fixture.denseWindow.startFrame + 1;
-console.log(`EXPLOSION source components ${matches}/${total}`);
-if (total !== EXPLOSION_BODY_LAST_AGE + 1 || matches !== total) {
+console.log(
+  `EXPLOSION source components ${matches}/${total}; seam ${seamMatches}/${total}; framebuffer ${framebufferMatches}/${total}`,
+);
+if (
+  total !== EXPLOSION_BODY_LAST_AGE + 1
+  || matches !== total
+  || seamMatches !== total
+  || framebufferMatches !== total
+) {
   console.error(failures.slice(0, 40).join("\n"));
+  console.error(`framebuffer mismatch ages: ${framebufferMismatches.join(",")}`);
   console.error(`scratch: ${scratch}`);
   process.exit(1);
 }

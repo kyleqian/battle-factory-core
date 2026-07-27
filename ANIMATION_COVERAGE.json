@@ -8,7 +8,7 @@
         "complete legal Level-50 Scene-ON mechanicLab parties stage SUDOWOODO, the real Factory set-298 SELF DESTRUCT carrier (Hardy, SpDef/HP), in both player-back and opponent-front orientations; all four active choices are constrained to SELF DESTRUCT and a slower SHUCKLE is constrained to TACKLE",
         "complete first move-owned body at oracle frames 82-194 player-back and 86-198 opponent-front: all ten gExplosionSpriteTemplate instances, four animation cells, mirrored attacker geometry, both visible battler ShakeMon2 offsets, attacker-only 0->9->0 red palette ramps, ten SE_M_SELF_DESTRUCT restart/pan boundaries, and the shared-seam raw-RGB framebuffer match 113/113 in each orientation, reproduced twice fresh",
         "ANIM_TAG_EXPLOSION plus SUDOWOODO/SHUCKLE art in both orientations are reproducibly extracted; the renderer ports the one-display palette/explosion OAM latches, ShakeMon2's neutral first hardware frame and subsequent two-display latch, source SortSprites Y ordering, audio-neutral field chrome, and complete teardown",
-        "the move-owned animation body stops before damage resolution, fainting, health-bar loss, controller, turn, RNG, and facility ownership; EXPLOSION, PRESENT, DYNAMIC_PUNCH, and every other sibling remain unsupported without independent dense acceptance"
+        "the move-owned animation body stops before damage resolution, fainting, health-bar loss, controller, turn, RNG, and facility ownership; EXPLOSION now has independent complete dense acceptance, while PRESENT, DYNAMIC_PUNCH, and every other sibling remain unsupported"
       ],
       "evidence": [
         "tools/battle-lab/mechanic-self-destruct-player-sudowoodo-opponent-shuckle.json",
@@ -27,12 +27,12 @@
     },
     {
       "move": "MOVE_EXPLOSION",
-      "status": "partial",
+      "status": "exact",
       "covered": [
-        "complete legal Level-50 Scene-ON mechanicLab parties stage GLALIE, the real Factory set-495 EXPLOSION carrier (Quirky, Speed/Attack), in both player-back and opponent-front orientations; all four active choices are constrained to EXPLOSION and slower SHUCKLE is constrained to TACKLE",
-        "complete first move-owned source-component body matches 212/212 frames at oracle 78-289 player-back and 82-293 opponent-front, reproduced twice fresh: both literal Explosion1 calls and all ten gExplosionSpriteTemplate instances, mirrored geometry and four animation cells, both visible battlers' AnimTask_ShakeMon2(8,0,40,1), nine complex F_PAL_BG red/black alternations, cleanup gap, white coefficient-16 hold, coefficient 15->0 fade, all ten SE_M_EXPLOSION restart/pan boundaries, and final teardown",
-        "the portable comparator checks software sprites, hardware OAM transfer, affine matrices, task lifetimes, faded/unfaded/hardware palettes, blend registers, audio, and cleanup across every frame; SELF DESTRUCT remains 113/113 component plus raw-RGB framebuffer exact in both orientations as the regression control",
-        "precise exact remainder: EXPLOSION is not wired through sceneOnPresentation/battleScene and has 0/212 shared-seam raw-RGB framebuffer frames attempted in either orientation; extract both GLALIE orientations, port the same palette/OAM display latches through the shared renderer, and require 212/212 framebuffer acceptance in both orientations twice fresh before promotion",
+        "complete legal Level-50 Scene-ON mechanicLab parties stage GLALIE, the real Factory set-495 EXPLOSION carrier (Quirky, Speed/Attack), in both player-back and opponent-front orientations; all four active choices are constrained to EXPLOSION and slower SHUCKLE is constrained to TACKLE; the prior mislabeled species-362 DUSCLOPS override was corrected to Emerald's source ID 347 before acceptance",
+        "complete first move-owned body matches 212/212 source-component, typed relative-seam, and raw-RGB framebuffer frames at oracle 76-287 player-back and 80-291 opponent-front, reproduced twice fresh: both literal Explosion1 calls and all ten gExplosionSpriteTemplate instances, mirrored geometry and four animation cells, both visible battlers' AnimTask_ShakeMon2(8,0,40,1), nine complex F_PAL_BG red/black alternations, cleanup gap, white coefficient-16 hold, coefficient 15->0 fade, all ten SE_M_EXPLOSION restart/pan boundaries, and final teardown",
+        "GLALIE back/front art is reproducibly source-extracted, while the already-proved explosion and SHUCKLE field assets are reused; the shared renderer ports the one-display BG-palette/explosion-OAM latches, ShakeMon2's neutral first hardware frame plus two-display latch, source SortSprites Y ordering, audio-neutral field chrome, and final palette restore",
+        "the portable comparator retains all 212 original software sprites, hardware OAM, affine matrix, task, faded/unfaded/hardware palette, blend-register, audio, and cleanup checks, and independently requires the same 212 typed-seam and raw-RGB frames; SELF DESTRUCT remains 113/113 and DRAGON BREATH 85/85 component plus framebuffer exact in both orientations as fresh regression controls",
         "PRESENT remains unsupported: its moving item bag precedes a conditional target-relative five-explosion damage branch or a distinct nine-particle healing branch plus HealingEffect2; DYNAMIC PUNCH remains unsupported: its monbg/alpha, fist, hitsplat, ShakeMon prelude and target-pan five-explosion sequence require independent complete dense acceptance"
       ],
       "evidence": [
@@ -42,10 +42,13 @@
         "tools/compare/fixtures/explosion-opponent-glalie-player-shuckle.json",
         "tools/compare/explosionPortable.ts",
         "tools/compare/selfDestructProbe.py",
+        "tools/compare/extractExplosionAssets.ts",
+        "src/animation/assets/explosion.json",
         "src/animation/explosion.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
         "tests/animation/explosion.test.ts"
-      ],
-      "remaining": "Shared presentation-seam framebuffer wiring is not implemented: EXPLOSION has 0/212 raw-RGB frames attempted in both required orientations. Extract set-495 GLALIE back/front art, add the relative sceneOnPresentation view and battleScene draw case, reproduce the component comparator unchanged, and require 212/212 shared-seam framebuffer matches in both orientations twice fresh before exact promotion."
+      ]
     },
     {
       "move": "MOVE_SWAGGER",
@@ -1169,7 +1172,7 @@
         "MOVE_PRESENT",
         "MOVE_DYNAMIC_PUNCH"
       ],
-      "goal": "MOVE_SELF_DESTRUCT is exact at 113/113 component plus raw-RGB framebuffer frames in both orientations. MOVE_EXPLOSION independently proves its complete 212-frame source-component body in both orientations, twice fresh, and remains partial only because shared-seam framebuffer wiring is 0/212 attempted. PRESENT still needs its moving bag plus independently accepted damage/heal branches; DYNAMIC PUNCH still needs its punch/background/hitsplat prelude plus target-pan explosion body. No sibling is promoted without its own complete dense move acceptance."
+      "goal": "MOVE_SELF_DESTRUCT is exact at 113/113 component plus raw-RGB framebuffer frames in both orientations. MOVE_EXPLOSION independently proves its complete 212-frame source-component, typed relative-seam, and raw-RGB framebuffer body in both orientations, twice fresh. PRESENT still needs its moving bag plus independently accepted damage/heal branches; DYNAMIC PUNCH still needs its punch/background/hitsplat prelude plus target-pan explosion body. No sibling is promoted without its own complete dense move acceptance."
     },
     {
       "id": "anger-mark-grow-breath",

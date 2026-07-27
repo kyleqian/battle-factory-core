@@ -46,35 +46,37 @@ animation. A status caused by a move is not part of that move's animation.
 
 ## Current resumable state (2026-07-27)
 
-Coverage is **45/276 exact, 4 partial, 227 unsupported**. EXPLOSION's complete
-source-component body is **212/212 player-back + 212/212 opponent-front**,
-reproduced twice fresh, but shared-seam framebuffer acceptance is not wired, so
-the move is partial. SELF DESTRUCT remains exact
-through the shared Scene-ON seam at **113/113 player-back + 113/113
-opponent-front** complete-body component and raw-RGB framebuffer frames,
-reproduced twice fresh. DRAGON BREATH remains **85/85** in both orientations
-as the exact ShakeMon2/palette regression control.
+Coverage is **46/276 exact, 3 partial, 227 unsupported**. EXPLOSION is exact
+through the shared Scene-ON seam at **212/212 player-back + 212/212
+opponent-front** complete-body component, typed relative-seam, and raw-RGB
+framebuffer frames, reproduced twice fresh. SELF DESTRUCT remains **113/113**
+and DRAGON BREATH **85/85** component + framebuffer exact in both orientations
+as fresh explosion/OAM/ShakeMon2/palette regression controls.
 
-## EXPLOSION complete source-component body closed; shared seam remains (2026-07-27)
+## EXPLOSION promoted exact; legal set-495 fixture corrected (2026-07-27)
 
-**Verdict:** `MOVE_EXPLOSION` is partial. Complete legal mechanicLab parties
-stage GLALIE from real Level-50 Factory set 495 in both orientations and
-constrain active choices legally. The source reducer and portable comparator
-match **212/212** frames at oracle 78-289 player-back and 82-293 opponent-front,
+**Verdict:** `MOVE_EXPLOSION` is exact. Complete legal mechanicLab parties
+stage GLALIE from real Level-50 Factory set 495 in both orientations, constrain
+all active choices to EXPLOSION, and use slower SHUCKLE with TACKLE. The
+strengthened comparator matches **212/212 component + typed seam + raw-RGB
+framebuffer** frames at oracle 76-287 player-back and 80-291 opponent-front,
 twice fresh.
 
-**Closed component body:** both literal `Explosion1` calls, ten explosion
-sprites, mirrored geometry/four cells, both visible battlers'
-`AnimTask_ShakeMon2(8,0,40,1)`, nine complex BG red/black alternations, cleanup
-gap, coefficient-16 white hold, 15→0 fade, all ten `SE_M_EXPLOSION` boundaries,
-OAM/matrices/palette hardware transfer, registers, and teardown. SELF DESTRUCT
-stays **113/113 component + framebuffer** in both orientations on fresh runs.
+**Renderer/evidence:** the prior files labeled GLALIE injected internal species
+362 (DUSCLOPS); acceptance first corrected them to Emerald's source ID 347,
+which also source-shifted kickoff two frames and supplied the real 155 HP and
+back/front geometry. GLALIE art is reproducibly extracted; the renderer reuses
+the proven explosion/SHUCKLE assets and ports all ten explosion sprites, both
+visible battlers' ShakeMon2 latches, nine complex BG red/black alternations,
+cleanup gap, white hold, 15→0 fade, source OAM ordering, chrome, and teardown.
 
-**Precise remainder:** `sceneOnPresentation`/`battleScene` wiring and GLALIE
-art were not landed, so raw-RGB acceptance is **0/212 attempted** in either
-orientation. PRESENT remains unsupported pending its moving bag plus separate
-damage/heal branches; DYNAMIC PUNCH remains unsupported pending its
-monbg/alpha/fist/hitsplat/ShakeMon prelude and target-pan explosion sequence.
+**Controls/scope:** SELF DESTRUCT remains **113/113** and DRAGON BREATH
+**85/85** component + framebuffer exact in both orientations on fresh runs.
+PRESENT remains unsupported pending its moving bag and distinct damage/heal
+branches; DYNAMIC PUNCH remains unsupported pending its monbg/alpha/fist/
+hitsplat/ShakeMon prelude and target-pan explosion sequence. No absolute ticks,
+screenshots, coordinate/RGB fitting, exclusions, unsupported barriers,
+canonical imports, or boundary widening were added.
 
 ## SELF DESTRUCT promoted to exact; explosion sprite track established (2026-07-27)
 

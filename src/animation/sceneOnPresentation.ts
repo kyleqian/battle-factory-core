@@ -183,6 +183,10 @@ import {
   type SelfDestructState,
 } from "./selfDestruct.ts";
 import {
+  explosionAtAge,
+  type ExplosionState,
+} from "./explosion.ts";
+import {
   poisonTailAtAge,
   type PoisonTailState,
 } from "./poisonTail.ts";
@@ -351,7 +355,8 @@ export interface SceneOnPresentationBattler {
     | "CLAMPERL"
     | "SEVIPER"
     | "SUDOWOODO"
-    | "SHUCKLE";
+    | "SHUCKLE"
+    | "GLALIE";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -839,6 +844,13 @@ export interface SceneOnSelfDestructConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnExplosionConfig {
+  readonly move: "EXPLOSION";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnPoisonTailConfig {
   readonly move: "POISON_TAIL";
   readonly attacker: SceneOnPresentationBattler;
@@ -977,6 +989,7 @@ export type SceneOnMoveConfig =
   | SceneOnHyperFangConfig
   | SceneOnSwaggerConfig
   | SceneOnSelfDestructConfig
+  | SceneOnExplosionConfig
   | SceneOnPoisonTailConfig
   | SceneOnToxicConfig
   | SceneOnEarthquakeConfig
@@ -1063,6 +1076,12 @@ export interface SceneOnSwaggerView extends SwaggerState {
 }
 
 export interface SceneOnSelfDestructView extends SelfDestructState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnExplosionView extends ExplosionState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -2161,6 +2180,25 @@ export function sceneOnSelfDestructView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...selfDestructAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.battlePositionCenter,
+    ),
+  };
+}
+
+/** `age=0` is the first software-OAM explosion sprite and BG blend. */
+export function sceneOnExplosionView(
+  state: SceneOnMovePresentationState,
+): SceneOnExplosionView {
+  if (state.config.move !== "EXPLOSION") {
+    throw new Error(`expected EXPLOSION presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...explosionAtAge(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.battlePositionCenter,

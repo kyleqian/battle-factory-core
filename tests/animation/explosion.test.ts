@@ -4,6 +4,10 @@ import {
   explosionAtAge,
   explosionBackgroundBlendAtAge,
 } from "../../src/animation/explosion.ts";
+import {
+  createSceneOnMovePresentation,
+  sceneOnExplosionView,
+} from "../../src/animation/sceneOnPresentation.ts";
 
 describe("MOVE_EXPLOSION complete source-component reducer", () => {
   const player = (age: number) =>
@@ -54,5 +58,48 @@ describe("MOVE_EXPLOSION complete source-component reducer", () => {
       backgroundBlend: { kind: "none", coefficient: 0 },
     });
     expect(player(212).active).toBe(false);
+  });
+
+  it("threads legal GLALIE geometry through the relative Scene-ON seam", () => {
+    const stage = createSceneOnMovePresentation({
+      move: "EXPLOSION",
+      attacker: {
+        species: "GLALIE",
+        geometry: {
+          side: "player",
+          spriteCorner: { x: 40, y: 60 },
+          animationCenter: { x: 72, y: 92 },
+          battlePositionCenter: { x: 72, y: 80 },
+        },
+      },
+      target: {
+        species: "SHUCKLE",
+        geometry: {
+          side: "opponent",
+          spriteCorner: { x: 144, y: 17 },
+          animationCenter: { x: 176, y: 49 },
+          battlePositionCenter: { x: 176, y: 40 },
+        },
+      },
+      fieldProfile: {
+        playerHp: 0,
+        playerMaxHp: 155,
+        opponentHp: 95,
+        opponentMaxHp: 95,
+      },
+    });
+    expect(sceneOnExplosionView({ ...stage, age: 17 })).toMatchObject({
+      age: 17,
+      attacker: stage.config.attacker,
+      target: stage.config.target,
+      battlerX2: -8,
+      backgroundBlend: { kind: "red", coefficient: 8 },
+    });
+    expect(sceneOnExplosionView({ ...stage, age: 17 }).explosions)
+      .toEqual(player(17).explosions);
+    expect(() => sceneOnExplosionView({
+      ...stage,
+      config: { ...stage.config, move: "SELF_DESTRUCT" },
+    })).toThrow("expected EXPLOSION presentation");
   });
 });

@@ -551,6 +551,7 @@ import poisonFangAsset from "../animation/assets/poisonFang.json" with { type: "
 import hyperFangAsset from "../animation/assets/hyperFang.json" with { type: "json" };
 import swaggerAsset from "../animation/assets/swagger.json" with { type: "json" };
 import selfDestructAsset from "../animation/assets/selfDestruct.json" with { type: "json" };
+import explosionAsset from "../animation/assets/explosion.json" with { type: "json" };
 import poisonTailAsset from "../animation/assets/poisonTail.json" with { type: "json" };
 import toxicAsset from "../animation/assets/toxic.json" with { type: "json" };
 import hardenAsset from "../animation/assets/harden.json" with { type: "json" };
@@ -663,6 +664,7 @@ import {
   sceneOnHyperFangView,
   sceneOnSwaggerView,
   sceneOnSelfDestructView,
+  sceneOnExplosionView,
   sceneOnPoisonTailView,
   sceneOnToxicView,
   sceneOnEarthquakeView,
@@ -1014,6 +1016,10 @@ const selfDestructArt = selfDestructAsset as {
   sudowoodoFront: { tileset: Tileset; palette: RgbColor[] };
   shuckleBack: { tileset: Tileset; palette: RgbColor[] };
   shuckleFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const explosionArt = explosionAsset as {
+  glalieBack: { tileset: Tileset; palette: RgbColor[] };
+  glalieFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const poisonTailArt = poisonTailAsset as {
   metal: { tileset: Tileset; tilemap: Tilemap; palette: RgbColor[] };
@@ -15898,6 +15904,129 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "SUDOWOODO used" : "Foe SUDOWOODO used",
       "SELFDESTRUCT!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "EXPLOSION") {
+    const view = sceneOnExplosionView(state);
+    const paletteDisplayed = sceneOnExplosionView({
+      ...state,
+      age: state.age - 1,
+    }).backgroundBlend;
+    const shakeDisplayedX2 = state.age === 0
+      ? 0
+      : sceneOnExplosionView({ ...state, age: state.age - 2 }).battlerX2;
+    const explosionsDisplayed = sceneOnExplosionView({
+      ...state,
+      age: state.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "GLALIE"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "GLALIE"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged EXPLOSION pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const glalie = playerToOpponent
+      ? explosionArt.glalieBack
+      : {
+          ...explosionArt.glalieFront,
+          tileset: subTileset(explosionArt.glalieFront.tileset, 0, 8),
+        };
+    const shuckle = playerToOpponent
+      ? {
+          ...selfDestructArt.shuckleFront,
+          tileset: subTileset(selfDestructArt.shuckleFront.tileset, 0, 8),
+        }
+      : selfDestructArt.shuckleBack;
+    const blendTarget = paletteDisplayed.kind === "red"
+      ? { r: 214, g: 66, b: 66 }
+      : paletteDisplayed.kind === "white"
+        ? { r: 255, g: 255, b: 255 }
+        : { r: 0, g: 0, b: 0 };
+    const backgroundPalettes = blendPaletteBanksToward(
+      battleBg.palette,
+      blendTarget,
+      paletteDisplayed.coefficient,
+    );
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      backgroundPalettes,
+    );
+    const opponent = playerToOpponent ? shuckle : glalie;
+    const player = playerToOpponent ? glalie : shuckle;
+    drawSpriteSheet(
+      fb,
+      opponent.tileset,
+      opponent.palette,
+      (playerToOpponent ? view.target : view.attacker).geometry.spriteCorner.x
+        + shakeDisplayedX2,
+      (playerToOpponent ? view.target : view.attacker).geometry.spriteCorner.y,
+    );
+    drawSpriteSheet(
+      fb,
+      player.tileset,
+      player.palette,
+      (playerToOpponent ? view.attacker : view.target).geometry.spriteCorner.x
+        + shakeDisplayedX2,
+      (playerToOpponent ? view.attacker : view.target).geometry.spriteCorner.y,
+    );
+    const explosionsInDrawOrder = [...explosionsDisplayed.explosions].sort(
+      (a, b) => a.y - b.y || b.spawnIndex - a.spawnIndex,
+    );
+    for (const explosion of explosionsInDrawOrder) {
+      drawSpriteSheet(
+        fb,
+        subTileset(selfDestructArt.explosion.tileset, explosion.frame * 4, 4),
+        selfDestructArt.explosion.palette,
+        explosion.x - 16,
+        explosion.y - 16,
+      );
+    }
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "SHUCKLE" : "GLALIE",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "GLALIE" : "SHUCKLE",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "GLALIE used" : "Foe GLALIE used",
+      "EXPLOSION!",
       99,
     );
     return;
