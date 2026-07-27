@@ -2435,3 +2435,77 @@ describe("get_weather's own stale-funcResult bug, Channel 2: AI_TryToFaint's las
     expect(result.submission.decision).toMatchObject({ kind: "use-move", moveSlot: 0 });
   });
 });
+
+// ISSUES #47's movesetIndex-1-3 remainder (doc §27): Channel 2's carry no
+// longer stops dead at the CV pass's own first scripted slot -- it's
+// simulated value-level, slot by slot, across the WHOLE pass per §27.1's
+// exhaustive per-handler funcResult write audit. These two blocks reproduce
+// doc §27's own two live-oracle-staged fixtures exactly
+// (`tools/battle-lab/mechanic-factory-ai-cv-hail-movesetindex1-{writesnever-
+// carry,writesalways-clean}-off.json`) -- both place MOVE_HAIL at moveset
+// index 1, one behind a writes-never predecessor (AI_CV_SpeedDown, doc §27.1
+// handler 1) and one behind a writes-always predecessor (AI_CV_AttackDown,
+// handler 7). Species/moveset/stats lifted verbatim from doc §27.2 -- same
+// Dugtrio (AI_USER, base Speed 120)/Shuckle (target, base Speed 5, Bug/Rock,
+// Sturdy) matchup this doc's own §6/§9/§14.5 fixtures already established.
+describe("get_weather's own stale-funcResult carry surviving an intervening CV-pass slot, Channel 2 value-level propagation (doc §27, ISSUES #47)", () => {
+  const MOVE_STRING_SHOT_IDX1 = 81; // EFFECT_SPEED_DOWN -- writes-never predecessor (doc §27.1 handler 1)
+  const MOVE_GROWL_IDX1 = 45; // EFFECT_ATTACK_DOWN -- writes-always predecessor (doc §27.1 handler 7)
+  const MOVE_HAIL_IDX1 = 258; // EFFECT_HAIL, at movesetIndex 1 in both fixtures below
+  const MOVE_SPLASH_IDX1 = 150;
+
+  const DUGTRIO = Object.freeze({
+    types: ["TYPE_GROUND", "TYPE_GROUND"] as const,
+    attack: 80, defense: 50, spAttack: 50, spDefense: 70, speed: 120, level: 50,
+    statStages: NEUTRAL_STAGES,
+    isFirstTurn: 2,
+    hp: 100, maxHp: 100,
+  });
+  const SHUCKLE = Object.freeze({
+    types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+    attack: 10, defense: 230, spAttack: 10, spDefense: 230, speed: 5, level: 50,
+    statStages: NEUTRAL_STAGES,
+    isFirstTurn: 2,
+    hp: 100, maxHp: 100,
+  });
+  function shuckleTarget(): FactoryAiScoredTargetView {
+    return Object.freeze({ species: 213, ...SHUCKLE, ability: "ABILITY_STURDY", knownAbility: null });
+  }
+  function movesetIndex1View(moveset: readonly [number, number, number, number]): FactoryAiScoredView {
+    return Object.freeze({
+      schema: "factory-ai-scored-view/v1",
+      mode: "factory-level-50-singles",
+      active: Object.freeze({ aiBattler: 1 as const, targetBattler: 0 as const }),
+      factory: Object.freeze({ levelMode: 0 as const, battleMode: 0 as const, factoryWinStreak: 28, trainerOpponentId: 222 }),
+      moves: moveset,
+      attacker: DUGTRIO,
+      target: shuckleTarget(),
+    });
+  }
+
+  it.each([1, 99])("`mechanic-factory-ai-cv-hail-movesetindex1-writesnever-carry-off`, seed %i (doc §27.2/§27.4): AI_CV_SpeedDown's own -3 branch never writes funcResult, so the TTF-pass exit (Sun, from the 0-power filler slots) is still sitting there when Hail's own get_weather reads it at index 1 -- net -3/+1/0/0, Hail must win turn 1 deterministically, NO tie", (seed) => {
+    const view = movesetIndex1View([MOVE_STRING_SHOT_IDX1, MOVE_HAIL_IDX1, MOVE_SPLASH_IDX1, MOVE_SPLASH_IDX1]);
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+    expect(result.trace.slotScores.map((s) => s.checkViabilityDelta)).toEqual([-3, 1, 0, 0]);
+    expect(result.trace.slotScores.map((s) => s.finalScore)).toEqual([97, 101, 100, 100]);
+    expect(result.trace.bestMoveSlots).toEqual([1]);
+    expect(result.submission.decision).toMatchObject({ kind: "use-move", moveSlot: 1 });
+  });
+
+  it.each([1, 99])("`mechanic-factory-ai-cv-hail-movesetindex1-writesalways-clean-off`, seed %i (doc §27.2/§27.4): AI_CV_AttackDown's own Gates E/F ALWAYS write funcResult = target type1 (TYPE_BUG, outside the AI_WEATHER_* 0-3 collision range) before Hail's own get_weather reads it at index 1 -- the TTF-pass carry is already destroyed, net 0/0/0/0, a genuine 4-way tie, Hail's own slot never scores above the other three", (seed) => {
+    const view = movesetIndex1View([MOVE_GROWL_IDX1, MOVE_HAIL_IDX1, MOVE_SPLASH_IDX1, MOVE_SPLASH_IDX1]);
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+    expect(result.trace.slotScores.map((s) => s.checkViabilityDelta)).toEqual([0, 0, 0, 0]);
+    expect(result.trace.slotScores.map((s) => s.finalScore)).toEqual([100, 100, 100, 100]);
+    expect(result.trace.bestMoveSlots).toEqual([0, 1, 2, 3]);
+    expect(result.trace.tie.modulus).toBe(4);
+  });
+
+  it("this fixture's own tie-break ledger, banked (not a claim about the real ROM's own RNG stream, only this deterministic simulation's): seed 1 lands on slot 3, seed 99 lands on slot 1 -- Hail winning here is a property of a genuinely fair 4-way tie, not evidence against the writes-always classification (doc §27.3 draws the same conclusion from the real oracle's own two different seeds landing on two different non-Hail slots)", () => {
+    const view = movesetIndex1View([MOVE_GROWL_IDX1, MOVE_HAIL_IDX1, MOVE_SPLASH_IDX1, MOVE_SPLASH_IDX1]);
+    const seed1 = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 1, calls: 0 } });
+    expect(seed1.trace.tie.index).toBe(3);
+    const seed99 = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 99, calls: 0 } });
+    expect(seed99.trace.tie.index).toBe(1);
+  });
+});

@@ -871,17 +871,18 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     // AI_Ret`) never itself writes `funcResult`, so the FIRST slot this pass
     // actually scripts (movesetIndex resets to 0 entering every new
     // `aiLogicId`, `battle_ai_script_commands.c:411-413`) reads exactly the
-    // TryToFaint pass's own exit value above. This port doesn't audit every
-    // `AI_CV_*` handler's own `funcResult` side effects, so once one slot's
-    // real handler has run, the carry is no longer provably intact for the
-    // next slot and is not threaded further -- a weather move sitting behind
-    // another real move's own CV dispatch (movesetIndex 1-3) is the one
-    // remaining gap named in ISSUES #47.
-    let cvCarryStillIntact = true;
+    // TryToFaint pass's own exit value above. From there, `funcResultAfter`
+    // is simulated value-level, slot by slot, across the WHOLE pass, per
+    // doc §27.1's exhaustive per-handler write audit (ISSUES #47's
+    // movesetIndex-1-3 remainder) -- not just a single-slot carry/no-carry
+    // boolean: a writes-never handler leaves the running value untouched, a
+    // writes-always handler replaces it with its own written value
+    // (`runCheckViability`'s own `funcResultAfter` return), and a
+    // writes-conditionally handler does either, per its own audited branch.
+    let cvFuncResult: AiWeatherValue | undefined = ttfExitFuncResult;
     for (const slotAcc of slotAccumulators) {
       if (!slotAcc.legal) continue;
-      const staleFuncResultFallback = cvCarryStillIntact ? ttfExitFuncResult : undefined;
-      cvCarryStillIntact = false;
+      const staleFuncResultFallback = cvFuncResult;
       const cv = runCheckViability({
         rng,
         moveId: slotAcc.moveId,
@@ -933,6 +934,7 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
         draws.push(Object.freeze({ ...draw, phase: "check-viability" as const, moveSlot: slotAcc.moveSlot }));
       }
       slotAcc.checkViabilityDelta = cv.scoreDelta;
+      cvFuncResult = cv.funcResultAfter;
     }
   }
 

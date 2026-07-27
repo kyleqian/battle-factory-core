@@ -147,7 +147,7 @@ export type AiWeatherValue =
  * ability-name-to-ID mapping just has no other members that matter for an
  * `if_equal AI_WEATHER_*` compare.
  */
-const ABILITY_ID_IN_WEATHER_RANGE: ReadonlyMap<string, AiWeatherValue> = new Map([
+export const ABILITY_ID_IN_WEATHER_RANGE: ReadonlyMap<string, AiWeatherValue> = new Map([
   ["ABILITY_NONE", AI_WEATHER_SUN], // id 0
   ["ABILITY_STENCH", AI_WEATHER_RAIN], // id 1
   ["ABILITY_DRIZZLE", AI_WEATHER_SANDSTORM], // id 2

@@ -2779,7 +2779,9 @@ describe("AI_CV_SpDefUp (docs/factory-ai-checkviability-ground-truth.md §22.1)"
         drawOrdinalStart: 1,
         reasonPrefix: "test",
       });
-      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: -2 });
+      // Gate F's own get_move_type_from_result writes funcResult = TYPE_FIGHTING
+      // (1), which collides with AI_WEATHER_RAIN -- doc §27.1 handler 15.
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: -2, funcResultAfter: 1 });
     });
 
     // Same chained DRAW SITE 4/5 pair as AI_CV_DefenseUp's own (byte-for-byte
@@ -3728,7 +3730,8 @@ describe("AI_CV_SunnyDay / AI_CV_Hail (docs/factory-ai-checkviability-ground-tru
         drawOrdinalStart: 1,
         reasonPrefix: "test",
       });
-      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 1 });
+      // get_weather always writes funcResult = currentWeather when it's set.
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 1, funcResultAfter: weather });
     }
   });
 
@@ -3741,7 +3744,7 @@ describe("AI_CV_SunnyDay / AI_CV_Hail (docs/factory-ai-checkviability-ground-tru
       drawOrdinalStart: 1,
       reasonPrefix: "test",
     });
-    expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0, funcResultAfter: 0 });
   });
 
   it("AI_CV_SunnyDay: omitted weather (undefined) scores 0, zero draws -- never matches any AI_WEATHER_* constant", () => {
@@ -3766,7 +3769,7 @@ describe("AI_CV_SunnyDay / AI_CV_Hail (docs/factory-ai-checkviability-ground-tru
         drawOrdinalStart: 1,
         reasonPrefix: "test",
       });
-      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 1 });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 1, funcResultAfter: weather });
     }
   });
 
@@ -3779,7 +3782,7 @@ describe("AI_CV_SunnyDay / AI_CV_Hail (docs/factory-ai-checkviability-ground-tru
       drawOrdinalStart: 1,
       reasonPrefix: "test",
     });
-    expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+    expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0, funcResultAfter: 3 });
   });
 
   it("still barriers every other reachable CV handler untouched by this narrowing (pass-through)", () => {
@@ -3854,7 +3857,10 @@ describe("AI_CV_RainDance (docs/factory-ai-checkviability-ground-truth.md §25.2
         drawOrdinalStart: 1,
         reasonPrefix: "test",
       });
-      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: -1 });
+      // !userFaster -> Gate S's own get_ability AI_USER always wrote funcResult
+      // = ABILITY_NONE's id (0) before the HP<40% short-circuit, doc §27.1
+      // handler 22.
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: -1, funcResultAfter: 0 });
     });
 
     it("omitted ability defaults to ABILITY_NONE, not a false Swift-Swim match", () => {
@@ -3867,7 +3873,10 @@ describe("AI_CV_RainDance (docs/factory-ai-checkviability-ground-truth.md §25.2
         reasonPrefix: "test",
       });
       // NOT faster, ability defaults ABILITY_NONE != Swift Swim -> weather chain: hp100>=40, weather undefined -> Gate R: ABILITY_NONE != Rain Dish -> 0.
-      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+      // Gate S's own write (ABILITY_NONE's id, 0) feeds the weather-chain's
+      // own stale read since weather is unset, and 0 == AI_WEATHER_SUN IS in
+      // the "other three" -- it matches, jumping away with that same value.
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0, funcResultAfter: 0 });
     });
 
     it("an exact speed tie still burns GetWhoStrikesFirst's own Random() call (doc §25.3) -- even tie-roll resolves to userFaster, skipping Gate S", () => {
@@ -3930,7 +3939,8 @@ describe("AI_CV_RainDance (docs/factory-ai-checkviability-ground-truth.md §25.2
         drawOrdinalStart: 1,
         reasonPrefix: "test",
       });
-      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 1 });
+      // get_weather always writes funcResult = currentWeather when it's set.
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 1, funcResultAfter: 3 });
     });
 
     it.each([3, 0, 2] as const)("weather %i (Hail/Sun/Sandstorm, the 'other three' excluding Rain): scores +1, zero draws, Rain Dish never checked", (weather) => {
@@ -3942,7 +3952,7 @@ describe("AI_CV_RainDance (docs/factory-ai-checkviability-ground-truth.md §25.2
         drawOrdinalStart: 1,
         reasonPrefix: "test",
       });
-      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 1 });
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 1, funcResultAfter: weather });
     });
 
     it("own weather already Rain (own type, excluded from the chain): falls through to Gate R", () => {
@@ -3954,7 +3964,10 @@ describe("AI_CV_RainDance (docs/factory-ai-checkviability-ground-truth.md §25.2
         drawOrdinalStart: 1,
         reasonPrefix: "test",
       });
-      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+      // Weather set to Rain (excluded from RainDance's own "other three") ->
+      // get_weather still writes it, but no match -> falls to Gate R, which
+      // re-writes funcResult = ABILITY_NONE's own id (0).
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0, funcResultAfter: 0 });
     });
   });
 
@@ -3992,7 +4005,8 @@ describe("AI_CV_RainDance (docs/factory-ai-checkviability-ground-truth.md §25.2
         drawOrdinalStart: 1,
         reasonPrefix: "test",
       });
-      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0 });
+      // Gate R's own get_ability AI_USER re-write: ABILITY_NONE's own id (0).
+      expect(result).toEqual({ kind: "scored", rng: { value: 1, calls: 0 }, draws: [], scoreDelta: 0, funcResultAfter: 0 });
     });
   });
 

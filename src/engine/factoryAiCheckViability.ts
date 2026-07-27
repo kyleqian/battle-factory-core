@@ -100,6 +100,7 @@
  * THOSE must not silently score zero.
  */
 import {
+  ABILITY_ID_IN_WEATHER_RANGE,
   AI_WEATHER_HAIL,
   AI_WEATHER_RAIN,
   AI_WEATHER_SANDSTORM,
@@ -114,6 +115,53 @@ import { advanceRngValue } from "./rng.ts";
 import { effectiveSpeed, getWhoStrikesFirst, type TurnOrderBattler } from "./turnOrder.ts";
 
 const U16_MAX = 0xffff;
+
+/**
+ * Type-name -> `AI_WEATHER_*` collision id, the CV-side twin of
+ * `ABILITY_ID_IN_WEATHER_RANGE` (`factoryAiCheckBadMove.ts`, Channel 1) --
+ * `funcResult` is a raw int register, so any `AI_CV_*` handler that writes a
+ * TYPE id (`include/constants/pokemon.h:6-23`, 0-17) can re-collide with an
+ * `AI_WEATHER_*` constant (0-3) exactly the same way a written ability id
+ * can. Only the four lowest type ids -- `TYPE_NORMAL`(0)/`TYPE_FIGHTING`(1)/
+ * `TYPE_FLYING`(2)/`TYPE_POISON`(3) -- ever collide; every other type ID
+ * (4 upward) can never equal an `if_equal AI_WEATHER_*` compare.
+ */
+const TYPE_ID_IN_WEATHER_RANGE: ReadonlyMap<string, AiWeatherValue> = new Map([
+  ["TYPE_NORMAL", AI_WEATHER_SUN], // id 0
+  ["TYPE_FIGHTING", AI_WEATHER_RAIN], // id 1
+  ["TYPE_FLYING", AI_WEATHER_SANDSTORM], // id 2
+  ["TYPE_POISON", AI_WEATHER_HAIL], // id 3
+]);
+
+/** Collision-maps a written TYPE name onto `AI_WEATHER_*`, or `undefined` if its raw id can never collide (>=4). */
+function typeFuncResultCollision(typeName: string): AiWeatherValue | undefined {
+  return TYPE_ID_IN_WEATHER_RANGE.get(typeName);
+}
+
+/** Collision-maps a written ABILITY name onto `AI_WEATHER_*`, or `undefined` if its raw id can never collide (>=4). Channel 1's own map, reused for any CV handler that writes `get_ability`'s result (`AI_CV_RainDance`'s Gate S/R). */
+function abilityFuncResultCollision(abilityName: string): AiWeatherValue | undefined {
+  return ABILITY_ID_IN_WEATHER_RANGE.get(abilityName);
+}
+
+/**
+ * Shared value formula for every `AI_CV_*` handler whose body reads
+ * `get_target_type1` then, ONLY if type1 doesn't match `matchList`,
+ * `get_target_type2` (`AI_CV_AttackDown`'s Gates E/F, `AI_CV_LightScreen`/
+ * `AI_CV_Reflect`'s own single gate) -- `Cmd_get_type` is a pure write of
+ * whichever type it was asked for (`battle_ai_script_commands.c:1115-1136`),
+ * so the LAST type read before either an `if_in_bytes` jump or a fallthrough
+ * is exactly type1 (if it matched, or the compare was never reached for
+ * type2) or type2 (in every other case, matched or not, since no third
+ * `get_type` follows) -- never a mix.
+ */
+function typeChainFuncResultAfter(
+  types: readonly [string, string],
+  matchList: ReadonlySet<string>,
+): AiWeatherValue | undefined {
+  return matchList.has(types[0])
+    ? typeFuncResultCollision(types[0])
+    : typeFuncResultCollision(types[1]);
+}
 
 /**
  * Every `EFFECT_*` with an `if_effect` entry in `AI_CheckViability`
@@ -510,6 +558,17 @@ export type FactoryAiCheckViabilityResult =
     rng: BattleRngState;
     draws: readonly FactoryAiCheckViabilityDraw[];
     scoreDelta: number;
+    /**
+     * `AI_THINKING_STRUCT->funcResult` as this slot's own dispatched handler
+     * leaves it, per the doc §27.1 per-handler write audit -- `undefined`
+     * either because the incoming carry (`staleFuncResultFallback`) was
+     * itself `undefined`/never written over, or because a write DID happen
+     * but its own raw value can never collide with an `AI_WEATHER_*`
+     * constant (0-3). The caller threads this into the NEXT dispatched
+     * slot's own `staleFuncResultFallback` to simulate the whole pass, not
+     * just the first scripted slot (ISSUES #47's movesetIndex-1-3 remainder).
+     */
+    funcResultAfter: AiWeatherValue | undefined;
   }>
   | Readonly<{
     kind: "unsupported-branch";
@@ -763,19 +822,46 @@ function runCvSpeedUp(input: Readonly<{
  * (hardcoded types, not a read of Pursuit's own Dark type or a real type
  * effectiveness lookup).
  */
+/**
+ * `AI_CV_Pursuit`'s own writes-ALWAYS `funcResult` exit value (doc §27.1
+ * handler 3): `is_first_turn_for AI_USER` writes unconditionally first
+ * (`funcResult = isFirstTurn`, 0-2). If nonzero, that value survives
+ * untouched (no further write on this path) -- always collision-mapped
+ * in-range since 1/2 are themselves valid `AI_WEATHER_*` ids. If zero, the
+ * handler re-reads target type1 (twice, checked against GHOST then
+ * PSYCHIC) then type2 (twice, same checks) -- EVERY `if_equal` compare that
+ * takes the jump to `AI_CV_Pursuit2` does so immediately after a
+ * `get_target_typeX` write of exactly the value it just compared, and the
+ * one non-jumping fallthrough path's last write is also type2 (the second,
+ * redundant type2 read) -- so the exit value is always type1 (if type1 is
+ * Ghost or Psychic) or type2 (in every other case, matched or not).
+ */
+function pursuitFuncResultAfter(attackerIsFirstTurn: number, targetTypes: readonly [string, string]): AiWeatherValue | undefined {
+  if (attackerIsFirstTurn !== 0) {
+    // Only 1 or 2 reach here -- both already valid AI_WEATHER_* ids.
+    return attackerIsFirstTurn as AiWeatherValue;
+  }
+  const [t1] = targetTypes;
+  if (t1 === "TYPE_GHOST" || t1 === "TYPE_PSYCHIC") {
+    return typeFuncResultCollision(t1);
+  }
+  return typeFuncResultCollision(targetTypes[1]);
+}
+
 function runCvPursuit(input: Readonly<{
   rng: BattleRngState;
   attackerIsFirstTurn: number;
   targetTypes: readonly [string, string];
   drawOrdinalStart: number;
   reasonPrefix: string;
-}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number; funcResultAfter: AiWeatherValue | undefined }> {
+  const funcResultAfter = pursuitFuncResultAfter(input.attackerIsFirstTurn, input.targetTypes);
   if (input.attackerIsFirstTurn !== 0) {
-    return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: 0 });
+    return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: 0, funcResultAfter });
   }
   const isGhostOrPsychic = input.targetTypes.some((t) => t === "TYPE_GHOST" || t === "TYPE_PSYCHIC");
   if (!isGhostOrPsychic) {
-    return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: 0 });
+    return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: 0, funcResultAfter });
   }
 
   const draw = nextDraw(input.rng, input.drawOrdinalStart, `${input.reasonPrefix}-roll`);
@@ -786,6 +872,7 @@ function runCvPursuit(input: Readonly<{
     rng: draw.after,
     draws: Object.freeze([Object.freeze({ ...draw, kind: "pursuit-roll" as const, succeeded })]),
     scoreDelta: succeeded ? 1 : 0,
+    funcResultAfter,
   });
 }
 
@@ -1144,7 +1231,7 @@ function runCvAttackDown(input: Readonly<{
   targetTypes: readonly [string, string];
   drawOrdinalStart: number;
   reasonPrefix: string;
-}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number; funcResultAfter: AiWeatherValue | undefined }> {
   const draws: FactoryAiCheckViabilityDraw[] = [];
   let rng = input.rng;
   let ordinal = input.drawOrdinalStart;
@@ -1171,10 +1258,14 @@ function runCvAttackDown(input: Readonly<{
     score -= 2;
   }
 
+  // Gates E/F ALWAYS execute (AI_CV_AttackDown4 is reached unconditionally,
+  // doc §27.1 handler 7, writes-ALWAYS) -- funcResultAfter doesn't depend on
+  // any earlier gate/draw outcome above.
+  const funcResultAfter = typeChainFuncResultAfter(input.targetTypes, AI_CV_ATTACK_DOWN_PHYSICAL_TYPES);
   const isPhysicalType = AI_CV_ATTACK_DOWN_PHYSICAL_TYPES.has(input.targetTypes[0])
     || AI_CV_ATTACK_DOWN_PHYSICAL_TYPES.has(input.targetTypes[1]);
   if (isPhysicalType) {
-    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter });
   }
 
   const draw2 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw2`);
@@ -1183,7 +1274,7 @@ function runCvAttackDown(input: Readonly<{
   draws.push(Object.freeze({ ...draw2, kind: "attack-down-roll-2" as const, succeeded: succeeded2 }));
   if (succeeded2) score -= 2;
 
-  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter });
 }
 
 /**
@@ -1571,15 +1662,33 @@ const AI_CV_DEFENSE_UP_PHYSICAL_TYPES: ReadonlySet<string> = new Set([
  * (`"defense-up-roll-5"`) because they are the same physical assembly
  * instruction, not because they are the same logical event.
  */
+/**
+ * `AI_CV_DefenseUp`/`AI_CV_SpDefUp`'s shared Gates E/F write value (doc
+ * §27.1 handlers 11/15, writes-conditionally): `get_last_used_bank_move
+ * AI_TARGET` + `get_move_power_from_result` always write when reached
+ * (Gate D passed) -- if that power is exactly 0, no further write occurs
+ * (`AI_CV_*5`'s own `if_random_less_than` doesn't write), so the exit value
+ * IS literally 0 (== `AI_WEATHER_SUN`). If nonzero, a second
+ * `get_last_used_bank_move` + `get_move_type_from_result` always overwrites
+ * with the move's own TYPE id next -- collision-mapped -- and nothing
+ * further writes afterward regardless of the physical-type-list branch
+ * either handler takes from there.
+ */
+function statUpLastMoveFuncResultAfter(lastMove: { power: number; type: string }): AiWeatherValue | undefined {
+  if (lastMove.power === 0) return AI_WEATHER_SUN;
+  return typeFuncResultCollision(lastMove.type);
+}
+
 function runCvDefenseUp(input: Readonly<{
   rng: BattleRngState;
   attackerDefStage: number;
   attackerHp: number;
   attackerMaxHp: number;
   targetLastUsedMoveId: number;
+  funcResultCarry: AiWeatherValue | undefined;
   drawOrdinalStart: number;
   reasonPrefix: string;
-}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number; funcResultAfter: AiWeatherValue | undefined }> {
   let rng = input.rng;
   let ordinal = input.drawOrdinalStart;
   const draws: FactoryAiCheckViabilityDraw[] = [];
@@ -1616,20 +1725,22 @@ function runCvDefenseUp(input: Readonly<{
     const fellThrough = draw3.randomValue % 256 >= 200;
     draws.push(Object.freeze({ ...draw3, kind: "defense-up-roll-3" as const, succeeded: fellThrough }));
     if (!fellThrough) {
-      return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+      // Never reaches Gate D -- no write at all this dispatch (doc §27.1).
+      return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter: input.funcResultCarry });
     }
   }
 
-  // DefenseUp4: Gate D -- own HP < 40% skips straight to the -2 penalty.
+  // DefenseUp4: Gate D -- own HP < 40% skips straight to the -2 penalty, no write.
   if (hpPercent < 40) {
-    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score - 2 });
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score - 2, funcResultAfter: input.funcResultCarry });
   }
 
-  // Gates E/F: the TARGET's own last-used move power/type.
+  // Gates E/F: the TARGET's own last-used move power/type -- ALWAYS written from here on.
   const lastMove = MOVES_BY_ID.get(input.targetLastUsedMoveId);
   if (!lastMove) {
     throw new Error(`factory-ai-check-viability: unknown last-used move ${input.targetLastUsedMoveId}`);
   }
+  const funcResultAfter = statUpLastMoveFuncResultAfter(lastMove);
 
   if (lastMove.power === 0) {
     // DefenseUp5, DRAW SITE 5.
@@ -1638,11 +1749,11 @@ function runCvDefenseUp(input: Readonly<{
     const succeeded5 = draw5.randomValue % 256 >= 60;
     draws.push(Object.freeze({ ...draw5, kind: "defense-up-roll-5" as const, succeeded: succeeded5 }));
     if (succeeded5) score -= 2;
-    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter });
   }
 
   if (!AI_CV_DEFENSE_UP_PHYSICAL_TYPES.has(lastMove.type)) {
-    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score - 2 });
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score - 2, funcResultAfter });
   }
 
   // DRAW SITE 4: if_random_less_than 60, End (roll<60, ~23.4%, stops here).
@@ -1657,7 +1768,7 @@ function runCvDefenseUp(input: Readonly<{
   const succeeded4 = draw4.randomValue % 256 >= 60;
   draws.push(Object.freeze({ ...draw4, kind: "defense-up-roll-4" as const, succeeded: succeeded4 }));
   if (!succeeded4) {
-    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter });
   }
 
   // DRAW SITE 5, reached here via DRAW SITE 4's own fall-through.
@@ -1666,7 +1777,7 @@ function runCvDefenseUp(input: Readonly<{
   const succeeded5 = draw5.randomValue % 256 >= 60;
   draws.push(Object.freeze({ ...draw5, kind: "defense-up-roll-5" as const, succeeded: succeeded5 }));
   if (succeeded5) score -= 2;
-  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter });
 }
 
 /**
@@ -1734,9 +1845,10 @@ function runCvSpDefUp(input: Readonly<{
   attackerHp: number;
   attackerMaxHp: number;
   targetLastUsedMoveId: number;
+  funcResultCarry: AiWeatherValue | undefined;
   drawOrdinalStart: number;
   reasonPrefix: string;
-}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number; funcResultAfter: AiWeatherValue | undefined }> {
   let rng = input.rng;
   let ordinal = input.drawOrdinalStart;
   const draws: FactoryAiCheckViabilityDraw[] = [];
@@ -1772,20 +1884,21 @@ function runCvSpDefUp(input: Readonly<{
     const fellThrough = draw3.randomValue % 256 >= 200;
     draws.push(Object.freeze({ ...draw3, kind: "sp-def-up-roll-3" as const, succeeded: fellThrough }));
     if (!fellThrough) {
-      return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+      return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter: input.funcResultCarry });
     }
   }
 
-  // SpDefUp4: Gate D -- own HP < 40% skips straight to the -2 penalty.
+  // SpDefUp4: Gate D -- own HP < 40% skips straight to the -2 penalty, no write.
   if (hpPercent < 40) {
-    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score - 2 });
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score - 2, funcResultAfter: input.funcResultCarry });
   }
 
-  // Gates E/F: the TARGET's own last-used move power/type.
+  // Gates E/F: the TARGET's own last-used move power/type -- ALWAYS written from here on.
   const lastMove = MOVES_BY_ID.get(input.targetLastUsedMoveId);
   if (!lastMove) {
     throw new Error(`factory-ai-check-viability: unknown last-used move ${input.targetLastUsedMoveId}`);
   }
+  const funcResultAfter = statUpLastMoveFuncResultAfter(lastMove);
 
   if (lastMove.power === 0) {
     // SpDefUp5, DRAW SITE 5.
@@ -1794,12 +1907,12 @@ function runCvSpDefUp(input: Readonly<{
     const succeeded5 = draw5.randomValue % 256 >= 60;
     draws.push(Object.freeze({ ...draw5, kind: "sp-def-up-roll-5" as const, succeeded: succeeded5 }));
     if (succeeded5) score -= 2;
-    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter });
   }
 
   // Gate F, INVERTED vs DefenseUp: type IS in the physical list -> straight to ScoreDown2.
   if (AI_CV_DEFENSE_UP_PHYSICAL_TYPES.has(lastMove.type)) {
-    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score - 2 });
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score - 2, funcResultAfter });
   }
 
   // DRAW SITE 4 (reached when NOT in the physical list): if_random_less_than
@@ -1813,7 +1926,7 @@ function runCvSpDefUp(input: Readonly<{
   const succeeded4 = draw4.randomValue % 256 >= 60;
   draws.push(Object.freeze({ ...draw4, kind: "sp-def-up-roll-4" as const, succeeded: succeeded4 }));
   if (!succeeded4) {
-    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter });
   }
 
   // DRAW SITE 5, reached here via DRAW SITE 4's own fall-through.
@@ -1822,7 +1935,7 @@ function runCvSpDefUp(input: Readonly<{
   const succeeded5 = draw5.randomValue % 256 >= 60;
   draws.push(Object.freeze({ ...draw5, kind: "sp-def-up-roll-5" as const, succeeded: succeeded5 }));
   if (succeeded5) score -= 2;
-  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter });
 }
 
 const AI_CV_LIGHT_SCREEN_SPECIAL_TYPES: ReadonlySet<string> = new Set([
@@ -1872,24 +1985,30 @@ function runCvSideScreenTypeGate(
     attackerHp: number;
     attackerMaxHp: number;
     targetTypes: readonly [string, string];
+    funcResultCarry: AiWeatherValue | undefined;
     drawOrdinalStart: number;
     reasonPrefix: string;
   }>,
-): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number; funcResultAfter: AiWeatherValue | undefined }> {
   const hpPercent = Math.floor((100 * input.attackerHp) / input.attackerMaxHp);
   if (hpPercent < 50) {
-    return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: -2 });
+    // ScoreDown2 short-circuit, no get_type call at all -- no write.
+    return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: -2, funcResultAfter: input.funcResultCarry });
   }
 
+  // get_target_type1 (always reached from here) -> if_in_bytes; else
+  // get_target_type2 -> if_in_bytes; either way the last type read is the
+  // exit value (same shared shape as AI_CV_AttackDown's own Gates E/F).
+  const funcResultAfter = typeChainFuncResultAfter(input.targetTypes, typeList);
   const isListedType = typeList.has(input.targetTypes[0]) || typeList.has(input.targetTypes[1]);
   if (isListedType) {
-    return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: 0 });
+    return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: 0, funcResultAfter });
   }
 
   const roll = nextDraw(input.rng, input.drawOrdinalStart, `${input.reasonPrefix}-roll`);
   const succeeded = roll.randomValue % 256 >= 50;
   const draws: FactoryAiCheckViabilityDraw[] = [Object.freeze({ ...roll, kind, succeeded })];
-  return Object.freeze({ rng: roll.after, draws: Object.freeze(draws), scoreDelta: succeeded ? -2 : 0 });
+  return Object.freeze({ rng: roll.after, draws: Object.freeze(draws), scoreDelta: succeeded ? -2 : 0, funcResultAfter });
 }
 
 function runCvLightScreen(input: Readonly<{
@@ -1897,9 +2016,10 @@ function runCvLightScreen(input: Readonly<{
   attackerHp: number;
   attackerMaxHp: number;
   targetTypes: readonly [string, string];
+  funcResultCarry: AiWeatherValue | undefined;
   drawOrdinalStart: number;
   reasonPrefix: string;
-}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number; funcResultAfter: AiWeatherValue | undefined }> {
   return runCvSideScreenTypeGate("light-screen-roll", AI_CV_LIGHT_SCREEN_SPECIAL_TYPES, input);
 }
 
@@ -1916,9 +2036,10 @@ function runCvReflect(input: Readonly<{
   attackerHp: number;
   attackerMaxHp: number;
   targetTypes: readonly [string, string];
+  funcResultCarry: AiWeatherValue | undefined;
   drawOrdinalStart: number;
   reasonPrefix: string;
-}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number; funcResultAfter: AiWeatherValue | undefined }> {
   return runCvSideScreenTypeGate("reflect-roll", AI_CV_REFLECT_PHYSICAL_TYPES, input);
 }
 
@@ -2342,12 +2463,18 @@ function weatherSetterCvScore(input: Readonly<{
    */
   staleFuncResultFallback: AiWeatherValue | undefined;
   otherThree: ReadonlySet<AiWeatherValue>;
-}>): 1 | 0 | -1 {
+}>): Readonly<{ scoreDelta: 1 | 0 | -1; funcResultAfter: AiWeatherValue | undefined }> {
   const hpPercent = Math.floor((100 * input.attackerHp) / input.attackerMaxHp);
-  if (hpPercent < 40) return -1;
-  const funcResult = input.currentWeather ?? input.staleFuncResultFallback;
-  if (funcResult !== undefined && input.otherThree.has(funcResult)) return 1;
-  return 0;
+  if (hpPercent < 40) {
+    // ScoreDown1 short-circuit, before get_weather ever runs -- no write.
+    return Object.freeze({ scoreDelta: -1 as const, funcResultAfter: input.staleFuncResultFallback });
+  }
+  // get_weather writes funcResult = currentWeather only when a real weather
+  // bit is set (Channel 2's own BUGFIX-gated sentinel); otherwise the
+  // incoming carry survives this call untouched -- same formula either way.
+  const funcResultAfter = input.currentWeather ?? input.staleFuncResultFallback;
+  const scoreDelta = funcResultAfter !== undefined && input.otherThree.has(funcResultAfter) ? 1 as const : 0 as const;
+  return Object.freeze({ scoreDelta, funcResultAfter });
 }
 
 /**
@@ -2360,15 +2487,15 @@ function runCvSunnyDay(input: Readonly<{
   attackerMaxHp: number;
   currentWeather: AiWeatherValue | undefined;
   staleFuncResultFallback: AiWeatherValue | undefined;
-}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
-  const scoreDelta = weatherSetterCvScore({
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number; funcResultAfter: AiWeatherValue | undefined }> {
+  const { scoreDelta, funcResultAfter } = weatherSetterCvScore({
     attackerHp: input.attackerHp,
     attackerMaxHp: input.attackerMaxHp,
     currentWeather: input.currentWeather,
     staleFuncResultFallback: input.staleFuncResultFallback,
     otherThree: SUNNY_DAY_OTHER_THREE,
   });
-  return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta });
+  return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta, funcResultAfter });
 }
 
 /**
@@ -2382,15 +2509,15 @@ function runCvHail(input: Readonly<{
   attackerMaxHp: number;
   currentWeather: AiWeatherValue | undefined;
   staleFuncResultFallback: AiWeatherValue | undefined;
-}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
-  const scoreDelta = weatherSetterCvScore({
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number; funcResultAfter: AiWeatherValue | undefined }> {
+  const { scoreDelta, funcResultAfter } = weatherSetterCvScore({
     attackerHp: input.attackerHp,
     attackerMaxHp: input.attackerMaxHp,
     currentWeather: input.currentWeather,
     staleFuncResultFallback: input.staleFuncResultFallback,
     otherThree: HAIL_OTHER_THREE,
   });
-  return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta });
+  return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta, funcResultAfter });
 }
 
 /**
@@ -2426,6 +2553,46 @@ function runCvHail(input: Readonly<{
  * weather is already Rain -- CBM/CV are independent score contributions, doc
  * §25.6 item 2), else `0`.
  */
+/**
+ * `AI_CV_RainDance`'s own exit `funcResult` value (doc §27.1 handler 22,
+ * writes-conditionally, the most complex of the 22) -- computed
+ * independently of `scoreDelta` below (which keeps its own, deliberately
+ * simplified `!userFaster` treatment of the weather-chain's own stale-read,
+ * unchanged from PROGRESS entry 504, to avoid perturbing any committed
+ * score). Gate S's own `get_ability AI_USER` (`:2039`) ALWAYS writes when
+ * `!userFaster`, so the shared span's own `get_weather` -- when weather is
+ * unset -- reads THAT write, not the slot-to-slot carry; and Gate R's own
+ * second `get_ability AI_USER` (`:2047`) re-reads the SAME (unchanged)
+ * ability whenever the span falls all the way through without a weather
+ * match, so the exit value is `ownAbilityCollision` in every `!userFaster`
+ * sub-path regardless of which branch of the chain actually fired.
+ */
+function rainDanceFuncResultAfter(input: Readonly<{
+  userFaster: boolean;
+  ownAbility: string;
+  attackerHp: number;
+  attackerMaxHp: number;
+  currentWeather: AiWeatherValue | undefined;
+  staleFuncResultFallback: AiWeatherValue | undefined;
+}>): AiWeatherValue | undefined {
+  const ownAbilityCollision = abilityFuncResultCollision(input.ownAbility);
+  if (!input.userFaster && input.ownAbility === "ABILITY_SWIFT_SWIM") {
+    return ownAbilityCollision;
+  }
+  const hpPercent = Math.floor((100 * input.attackerHp) / input.attackerMaxHp);
+  if (hpPercent < 40) {
+    return !input.userFaster ? ownAbilityCollision : input.staleFuncResultFallback;
+  }
+  if (input.currentWeather !== undefined) {
+    return RAIN_DANCE_OTHER_THREE.has(input.currentWeather) ? input.currentWeather : ownAbilityCollision;
+  }
+  const carryIntoWeatherCheck = !input.userFaster ? ownAbilityCollision : input.staleFuncResultFallback;
+  if (carryIntoWeatherCheck !== undefined && RAIN_DANCE_OTHER_THREE.has(carryIntoWeatherCheck)) {
+    return carryIntoWeatherCheck;
+  }
+  return ownAbilityCollision;
+}
+
 function runCvRainDance(input: Readonly<{
   rng: BattleRngState;
   attacker: FactoryAiCheckViabilityBattler;
@@ -2433,7 +2600,7 @@ function runCvRainDance(input: Readonly<{
   staleFuncResultFallback: AiWeatherValue | undefined;
   drawOrdinalStart: number;
   reasonPrefix: string;
-}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number; funcResultAfter: AiWeatherValue | undefined }> {
   const draws: FactoryAiCheckViabilityDraw[] = [];
   let rng = input.rng;
   let ordinal = input.drawOrdinalStart;
@@ -2457,32 +2624,42 @@ function runCvRainDance(input: Readonly<{
   // strictly faster, or a tie broken to the user).
   const userFaster = strikesFirst === 0;
   const ownAbility = input.attacker.ability ?? "ABILITY_NONE";
+  const funcResultAfter = rainDanceFuncResultAfter({
+    userFaster,
+    ownAbility,
+    attackerHp: input.attacker.hp,
+    attackerMaxHp: input.attacker.maxHp,
+    currentWeather: input.attacker.currentWeather,
+    staleFuncResultFallback: input.staleFuncResultFallback,
+  });
 
   if (!userFaster && ownAbility === "ABILITY_SWIFT_SWIM") {
     // Gate S bypass: +1, HP gate and weather chain never reached.
-    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: 1 });
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: 1, funcResultAfter });
   }
 
   // Gate S's own `get_ability AI_USER` (data/battle_ai_scripts.s:2039)
   // overwrites funcResult with the AI's own ability id whenever it runs (not
   // user-faster, whether or not that ability turned out to be Swift Swim) --
-  // this port doesn't model that read as its own stale-funcResult channel,
-  // so the TryToFaint carry is only known-valid for the shared span's own
-  // `get_weather` when Gate P's jump skipped Gate S entirely (user-faster).
+  // this port doesn't model that read as its own stale-funcResult channel
+  // for SCORE purposes, so the TryToFaint carry is only known-valid for the
+  // shared span's own `get_weather` when Gate P's jump skipped Gate S
+  // entirely (user-faster). `funcResultAfter` above models it fully, for
+  // the NEXT slot's own carry.
   const spanScore = weatherSetterCvScore({
     attackerHp: input.attacker.hp,
     attackerMaxHp: input.attacker.maxHp,
     currentWeather: input.attacker.currentWeather,
     staleFuncResultFallback: userFaster ? input.staleFuncResultFallback : undefined,
     otherThree: RAIN_DANCE_OTHER_THREE,
-  });
+  }).scoreDelta;
   if (spanScore !== 0) {
-    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: spanScore });
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: spanScore, funcResultAfter });
   }
   // Span fell all the way through (own HP >= 40%, weather didn't match) --
   // Gate R tail: own ability == Rain Dish.
   const rainDish = ownAbility === "ABILITY_RAIN_DISH";
-  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: rainDish ? 1 : 0 });
+  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: rainDish ? 1 : 0, funcResultAfter });
 }
 
 /** `AI_CheckViability` for one move slot (`:652-775` dispatch shell only). */
@@ -2506,6 +2683,12 @@ export function runCheckViability(input: Readonly<{
 }>): FactoryAiCheckViabilityResult {
   const move = MOVES_BY_ID.get(input.moveId);
   if (!move) throw new Error(`factory-ai-check-viability: unknown move ${input.moveId}`);
+  // The incoming funcResult carry for THIS slot's own dispatch -- every
+  // branch below either passes it straight through unchanged (13
+  // writes-never handlers + the not-yet-ported fallback, doc §27.1) or
+  // overrides it with a handler-computed `funcResultAfter` (the 2
+  // writes-always + 7 writes-conditionally handlers).
+  const funcResultCarry = input.staleFuncResultFallback;
 
   if (move.effect === "EFFECT_SPEED_DOWN" || move.effect === "EFFECT_SPEED_DOWN_2") {
     const speedDown = runCvSpeedDown({
@@ -2520,6 +2703,7 @@ export function runCheckViability(input: Readonly<{
       rng: speedDown.rng,
       draws: speedDown.draws,
       scoreDelta: speedDown.scoreDelta,
+      funcResultAfter: funcResultCarry,
     });
   }
 
@@ -2537,6 +2721,7 @@ export function runCheckViability(input: Readonly<{
       rng: speedDownFromChance.rng,
       draws: speedDownFromChance.draws,
       scoreDelta: speedDownFromChance.scoreDelta,
+      funcResultAfter: funcResultCarry,
     });
   }
 
@@ -2553,6 +2738,7 @@ export function runCheckViability(input: Readonly<{
       rng: pursuit.rng,
       draws: pursuit.draws,
       scoreDelta: pursuit.scoreDelta,
+      funcResultAfter: pursuit.funcResultAfter,
     });
   }
 
@@ -2574,6 +2760,7 @@ export function runCheckViability(input: Readonly<{
       rng: highCrit.rng,
       draws: highCrit.draws,
       scoreDelta: highCrit.scoreDelta,
+      funcResultAfter: funcResultCarry,
     });
   }
 
@@ -2590,6 +2777,7 @@ export function runCheckViability(input: Readonly<{
       rng: alwaysHit.rng,
       draws: alwaysHit.draws,
       scoreDelta: alwaysHit.scoreDelta,
+      funcResultAfter: funcResultCarry,
     });
   }
 
@@ -2606,6 +2794,7 @@ export function runCheckViability(input: Readonly<{
       rng: vitalThrow.rng,
       draws: vitalThrow.draws,
       scoreDelta: vitalThrow.scoreDelta,
+      funcResultAfter: funcResultCarry,
     });
   }
 
@@ -2626,6 +2815,7 @@ export function runCheckViability(input: Readonly<{
       rng: attackDown.rng,
       draws: attackDown.draws,
       scoreDelta: attackDown.scoreDelta,
+      funcResultAfter: attackDown.funcResultAfter,
     });
   }
 
@@ -2645,6 +2835,7 @@ export function runCheckViability(input: Readonly<{
       rng: defenseDown.rng,
       draws: defenseDown.draws,
       scoreDelta: defenseDown.scoreDelta,
+      funcResultAfter: funcResultCarry,
     });
   }
 
@@ -2664,6 +2855,7 @@ export function runCheckViability(input: Readonly<{
       rng: spDefDown.rng,
       draws: spDefDown.draws,
       scoreDelta: spDefDown.scoreDelta,
+      funcResultAfter: funcResultCarry,
     });
   }
 
@@ -2681,6 +2873,7 @@ export function runCheckViability(input: Readonly<{
       rng: attackUp.rng,
       draws: attackUp.draws,
       scoreDelta: attackUp.scoreDelta,
+      funcResultAfter: funcResultCarry,
     });
   }
 
@@ -2698,6 +2891,7 @@ export function runCheckViability(input: Readonly<{
       attackerHp: input.attacker.hp,
       attackerMaxHp: input.attacker.maxHp,
       targetLastUsedMoveId: input.target.lastUsedMoveId ?? MOVE_NONE,
+      funcResultCarry,
       drawOrdinalStart: input.drawOrdinalStart,
       reasonPrefix: input.reasonPrefix,
     });
@@ -2706,6 +2900,7 @@ export function runCheckViability(input: Readonly<{
       rng: defenseUp.rng,
       draws: defenseUp.draws,
       scoreDelta: defenseUp.scoreDelta,
+      funcResultAfter: defenseUp.funcResultAfter,
     });
   }
 
@@ -2732,6 +2927,7 @@ export function runCheckViability(input: Readonly<{
       rng: accuracyDown.rng,
       draws: accuracyDown.draws,
       scoreDelta: accuracyDown.scoreDelta,
+      funcResultAfter: funcResultCarry,
     });
   }
 
@@ -2748,6 +2944,7 @@ export function runCheckViability(input: Readonly<{
       rng: speedUp.rng,
       draws: speedUp.draws,
       scoreDelta: speedUp.scoreDelta,
+      funcResultAfter: funcResultCarry,
     });
   }
 
@@ -2765,6 +2962,7 @@ export function runCheckViability(input: Readonly<{
       rng: spAtkUp.rng,
       draws: spAtkUp.draws,
       scoreDelta: spAtkUp.scoreDelta,
+      funcResultAfter: funcResultCarry,
     });
   }
 
@@ -2784,6 +2982,7 @@ export function runCheckViability(input: Readonly<{
       attackerHp: input.attacker.hp,
       attackerMaxHp: input.attacker.maxHp,
       targetLastUsedMoveId: input.target.lastUsedMoveId ?? MOVE_NONE,
+      funcResultCarry,
       drawOrdinalStart: input.drawOrdinalStart,
       reasonPrefix: input.reasonPrefix,
     });
@@ -2792,6 +2991,7 @@ export function runCheckViability(input: Readonly<{
       rng: spDefUp.rng,
       draws: spDefUp.draws,
       scoreDelta: spDefUp.scoreDelta,
+      funcResultAfter: spDefUp.funcResultAfter,
     });
   }
 
@@ -2802,6 +3002,7 @@ export function runCheckViability(input: Readonly<{
       attackerHp: input.attacker.hp,
       attackerMaxHp: input.attacker.maxHp,
       targetTypes: input.target.types,
+      funcResultCarry,
       drawOrdinalStart: input.drawOrdinalStart,
       reasonPrefix: input.reasonPrefix,
     });
@@ -2810,6 +3011,7 @@ export function runCheckViability(input: Readonly<{
       rng: lightScreen.rng,
       draws: lightScreen.draws,
       scoreDelta: lightScreen.scoreDelta,
+      funcResultAfter: lightScreen.funcResultAfter,
     });
   }
 
@@ -2820,6 +3022,7 @@ export function runCheckViability(input: Readonly<{
       attackerHp: input.attacker.hp,
       attackerMaxHp: input.attacker.maxHp,
       targetTypes: input.target.types,
+      funcResultCarry,
       drawOrdinalStart: input.drawOrdinalStart,
       reasonPrefix: input.reasonPrefix,
     });
@@ -2828,6 +3031,7 @@ export function runCheckViability(input: Readonly<{
       rng: reflect.rng,
       draws: reflect.draws,
       scoreDelta: reflect.scoreDelta,
+      funcResultAfter: reflect.funcResultAfter,
     });
   }
 
@@ -2859,6 +3063,7 @@ export function runCheckViability(input: Readonly<{
       rng: evasionUp.rng,
       draws: evasionUp.draws,
       scoreDelta: evasionUp.scoreDelta,
+      funcResultAfter: funcResultCarry,
     });
   }
 
@@ -2879,6 +3084,7 @@ export function runCheckViability(input: Readonly<{
       rng: evasionDown.rng,
       draws: evasionDown.draws,
       scoreDelta: evasionDown.scoreDelta,
+      funcResultAfter: funcResultCarry,
     });
   }
 
@@ -2889,13 +3095,14 @@ export function runCheckViability(input: Readonly<{
       attackerHp: input.attacker.hp,
       attackerMaxHp: input.attacker.maxHp,
       currentWeather: input.attacker.currentWeather,
-      staleFuncResultFallback: input.staleFuncResultFallback,
+      staleFuncResultFallback: funcResultCarry,
     });
     return Object.freeze({
       kind: "scored",
       rng: sunnyDay.rng,
       draws: sunnyDay.draws,
       scoreDelta: sunnyDay.scoreDelta,
+      funcResultAfter: sunnyDay.funcResultAfter,
     });
   }
 
@@ -2906,13 +3113,14 @@ export function runCheckViability(input: Readonly<{
       attackerHp: input.attacker.hp,
       attackerMaxHp: input.attacker.maxHp,
       currentWeather: input.attacker.currentWeather,
-      staleFuncResultFallback: input.staleFuncResultFallback,
+      staleFuncResultFallback: funcResultCarry,
     });
     return Object.freeze({
       kind: "scored",
       rng: hail.rng,
       draws: hail.draws,
       scoreDelta: hail.scoreDelta,
+      funcResultAfter: hail.funcResultAfter,
     });
   }
 
@@ -2923,7 +3131,7 @@ export function runCheckViability(input: Readonly<{
       rng: input.rng,
       attacker: input.attacker,
       target: input.target,
-      staleFuncResultFallback: input.staleFuncResultFallback,
+      staleFuncResultFallback: funcResultCarry,
       drawOrdinalStart: input.drawOrdinalStart,
       reasonPrefix: input.reasonPrefix,
     });
@@ -2932,6 +3140,7 @@ export function runCheckViability(input: Readonly<{
       rng: rainDance.rng,
       draws: rainDance.draws,
       scoreDelta: rainDance.scoreDelta,
+      funcResultAfter: rainDance.funcResultAfter,
     });
   }
 
@@ -2943,10 +3152,15 @@ export function runCheckViability(input: Readonly<{
       moveId: input.moveId,
     });
   }
+  // No `if_effect` entry at all for this move's effect -- no AI script
+  // command from AI_CheckViability's own dispatch chain runs for this slot,
+  // so funcResult is untouched (doc §27.1's own framing extends naturally:
+  // zero handler dispatch is the ultimate writes-never case).
   return Object.freeze({
     kind: "scored",
     rng: input.rng,
     draws: Object.freeze([]) as readonly FactoryAiCheckViabilityDraw[],
     scoreDelta: 0,
+    funcResultAfter: funcResultCarry,
   });
 }
