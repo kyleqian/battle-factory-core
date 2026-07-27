@@ -68,11 +68,11 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // POISON TAIL has a bounded two-orientation component checkpoint.
+        // POISON TAIL is dense-exact through both Scene-ON orientations.
         unsupported: 231,
         staged: 0,
-        partial: 4,
-        exact: 41,
+        partial: 3,
+        exact: 42,
       },
       {
         tier: "openOnly",

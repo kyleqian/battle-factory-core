@@ -46,38 +46,37 @@ animation. A status caused by a move is not part of that move's animation.
 
 ## Current resumable state (2026-07-27)
 
-Coverage is **41/276 exact, 4 partial, 231 unsupported**. POISON TAIL has a
-clean partial checkpoint using complete legal Scene-ON parties with the real
-Level-50 Factory SEVIPER set-239 carrier in both orientations. Fresh probes
-cover current-move frames **180-563 player-back** and **176-563
-opponent-front**; move-owned component activity closes at frame 410. A
-hermetic source-relative reducer reuses exact MetallicShine, horizontal
-lunge, ShakeMon, and PoisonBubblesEffect components. It is not exact:
-strengthened dense component/OAM/palette/audio/hardware comparison and the
-shared-seam framebuffer renderer remain.
+Coverage is **42/276 exact, 3 partial, 231 unsupported**. POISON TAIL is exact
+through the shared Scene-ON seam at **187/187 player-back + 187/187
+opponent-front** complete-body component and framebuffer frames, reproduced
+twice fresh. HARDEN remains **101/101** and SLUDGE BOMB remains **160/160**
+in both orientations as exact controls.
 
-## POISON TAIL partial checkpoint; remaining acid-poison sibling bounded (2026-07-27)
+## POISON TAIL promoted to exact; permanent custom MetallicShine variant closed (2026-07-27)
 
-**Verdict:** `MOVE_POISON_TAIL` is partial, not exact. Complete legal
-mechanicLab parties stage SEVIPER from real Factory set 239 (Hardy, HP/ATK,
-Scope Lens), constrain all four choices to POISON TAIL, and constrain ONIX
-to TACKLE in both orientations. Fresh probes reproduce the complete
-current-move interval and expose the custom permanent RGB(24,6,23)
-MetallicShine, mirrored attacker lunge, impact hitsplat, target ShakeMon,
-palette/monbg/alpha teardown, and six shared poison bubbles.
+**Verdict:** `MOVE_POISON_TAIL` is exact. Complete legal mechanicLab parties
+stage SEVIPER from real Factory set 239 (Hardy, HP/ATK, Scope Lens), constrain
+all four choices to POISON TAIL, and constrain ONIX to TACKLE in both
+orientations. The strengthened comparator matches the complete first
+move-animation body at **187/187 player-back** (oracle 226-412) and **187/187
+opponent-front** (226-412), each reproduced twice fresh.
 
-**Implementation/evidence:** `poisonTailAtAge` composes the existing exact
-reducers rather than duplicating them; extracted assets include metal mask,
-impact, poison bubble, and both SEVIPER orientations. Tier-1 tests pin
-mirroring, ordering, teardown, and the six-spawn handoff. No engine wiring,
+**Source reducer/evidence:** `poisonTailAtAge` composes the existing exact
+MetallicShine, horizontal lunge, ShakeMon, impact, and PoisonBubblesEffect
+machinery. Closure pinned the permanent RGB(24,6,23) attacker palette and
+one-display hardware transfer, the three shine sweeps/mask/register teardown,
+the mirrored lunge and target-relative player-back Y_PIC_OFFSET=88, and the
+first bubble's two-display cleanup handoff before the remaining literal
+122/132/140/148/156/164 spawn cadence. The shared bubble motion/OAM reducer
+remains single-source rather than duplicated.
+
+**Renderer/controls:** `sceneOnPresentation`/`battleScene` render the extracted
+SEVIPER orientations, metal mask, impact, poison bubbles, field chrome, custom
+palette, monbg/alpha latches, software/hardware OAM and affine transfers, all
+SE1 restart boundaries, and final cleanup through the relative seam. HARDEN
+is still **101/101** and SLUDGE BOMB **160/160** in both orientations. No
 absolute ticks, screenshots, coordinate/RGB fitting, exclusions, unsupported
-barriers, or import-boundary widening were added.
-
-**Exact remainder:** add a portable comparator over the complete move-owned
-body in both orientations checking tasks, sprites, software/hardware OAM and
-affine state, palettes, audio, monbg/register latches, cleanup, raw RGB, and
-the shared-seam framebuffer. Until all frames pass twice fresh, this remains
-partial and the acid-poison-bubble track is not closed.
+barriers, import-boundary widening, or sibling promotions were added.
 
 ## Previous current state (2026-07-27)
 

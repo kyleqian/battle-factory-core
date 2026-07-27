@@ -139,23 +139,25 @@
     },
     {
       "move": "MOVE_POISON_TAIL",
-      "status": "partial",
+      "status": "exact",
       "covered": [
         "complete legal Level-50 mechanicLab parties stage SEVIPER with the real Factory set-239 species, Hardy nature, HP/ATK EV spread, Scope Lens, and four legally constrained POISON TAIL choices; ONIX is constrained to TACKLE",
-        "fresh player-back and opponent-front Scene-ON probes cover the complete current-move interval and independently expose the permanent custom-color MetallicShine, mirrored lunge, impact, six-tick target ShakeMon, monbg/alpha cleanup, and all six PoisonBubblesEffect sprites",
-        "a hermetic source-relative reducer reuses MetallicShine, horizontalLunge, ShakeMon, and the exact shared PoisonBubblesEffect without duplicating their reducers",
-        "partial only: the strengthened complete-window component/OAM/palette/audio/hardware comparator and shared-seam framebuffer renderer are not yet implemented"
+        "player-back SEVIPER complete move-owned Scene-ON body at oracle frames 226-412: source component/task/register/palette/software+hardware-OAM/affine/audio 187/187 and shared-seam framebuffer 187/187, reproduced twice fresh",
+        "opponent-front SEVIPER complete move-owned Scene-ON body at oracle frames 226-412: source component/task/register/palette/software+hardware-OAM/affine/audio 187/187 and shared-seam framebuffer 187/187, reproduced twice fresh",
+        "the source-relative reducer reuses MetallicShine, horizontalLunge, ShakeMon, impact, and the shared PoisonBubblesEffect; it pins permanent RGB(24,6,23), mirrored lunge, player-back target Y_PIC_OFFSET=88, the first bubble cleanup stall, literal bubble cadence, monbg/alpha and palette teardown, SE1 restarts, raw RGB, and cleanup"
       ],
       "evidence": [
         "tools/battle-lab/mechanic-poison-tail-player-seviper-opponent-onix.json",
         "tools/battle-lab/mechanic-poison-tail-opponent-seviper-player-onix.json",
+        "tools/compare/fixtures/poison-tail-player-seviper-opponent-onix.json",
+        "tools/compare/fixtures/poison-tail-opponent-seviper-player-onix.json",
+        "tools/compare/poisonTailPortable.ts",
         "tools/compare/poisonTailProbe.py",
         "tools/compare/poisonTailMetallicProbe.py",
         "tools/compare/extractPoisonTailAssets.ts",
         "src/animation/poisonTail.ts",
         "tests/animation/poisonTail.test.ts"
-      ],
-      "remaining": "Implement the strengthened portable comparator and shared-seam renderer for the complete move-owned body in both orientations. Require every task/sprite, software+hardware OAM and affine state, palettes, SE1 boundaries, monbg/register latches, cleanup, raw RGB, and framebuffer frame to match twice fresh before promotion."
+      ]
     },
     {
       "move": "MOVE_SYNTHESIS",
@@ -1138,7 +1140,7 @@
         "MOVE_IRON_DEFENSE",
         "MOVE_POISON_TAIL"
       ],
-      "goal": "MOVE_HARDEN independently proves the complete permanent=FALSE MetallicShine body in both orientations at 101/101 component/task/RAM/register/hardware-palette/software+hardware-OAM and framebuffer frames, reproduced twice. POISON TAIL is partial: legal set-239 SEVIPER probes in both orientations and a hermetic reducer establish permanent=TRUE custom RGB(24,6,23), lunge/hitsplat/ShakeMon ordering, explicit restore/monbg/alpha teardown, and the shared PoisonBubblesEffect, but it still needs a strengthened complete-window comparator plus shared-seam framebuffer evidence. STEEL WING, IRON TAIL, METAL CLAW, and IRON DEFENSE remain unsupported pending their own evidence."
+      "goal": "MOVE_HARDEN independently proves the complete permanent=FALSE MetallicShine body in both orientations at 101/101 component/task/RAM/register/hardware-palette/software+hardware-OAM and framebuffer frames, reproduced twice. MOVE_POISON_TAIL independently proves permanent=TRUE custom RGB(24,6,23), three shine sweeps, mirrored lunge/hitsplat/ShakeMon, explicit palette/monbg/alpha teardown, and the shared PoisonBubblesEffect at 187/187 component/hardware/audio and framebuffer frames in both orientations, reproduced twice. HARDEN remains 101/101 in both orientations after the renderer change. STEEL WING, IRON TAIL, METAL CLAW, and IRON DEFENSE remain unsupported pending their own evidence."
     },
     {
       "id": "horizontal-shake-complex-bg-palette",
@@ -1296,7 +1298,7 @@
         "MOVE_POISON_FANG",
         "MOVE_POISON_TAIL"
       ],
-      "goal": "MOVE_ACID, MOVE_SLUDGE, MOVE_SLUDGE_BOMB, MOVE_POISON_FANG, and MOVE_TOXIC are exact representatives. POISON TAIL is partial: legal set-239 SEVIPER probes in both orientations and a hermetic source-relative reducer cover metallic_shine, mirrored lunge, impact, ShakeMon, teardown, and all six shared poison bubbles; exact still requires strengthened complete-window component/hardware/audio and shared-seam framebuffer evidence. Shared poison reducers alone do not promote it."
+      "goal": "MOVE_ACID, MOVE_TOXIC, MOVE_SLUDGE, MOVE_SLUDGE_BOMB, MOVE_POISON_FANG, and MOVE_POISON_TAIL are exact representatives. POISON TAIL independently proves its permanent custom MetallicShine, mirrored lunge, impact, ShakeMon, palette/monbg/alpha teardown, player-back target geometry, caller-relative first-bubble cleanup stall, all six shared poison bubbles, SE1 restarts, software/hardware OAM and affine latches, raw RGB, and shared-seam framebuffer at 187/187 in both orientations, reproduced twice. SLUDGE BOMB remains 160/160 in both orientations after the shared reducer/renderer changes. Shared poison reducers alone do not promote any other move."
     },
     {
       "id": "water-gun-small-bubbles-water-impact",
