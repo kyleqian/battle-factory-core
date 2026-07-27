@@ -20,6 +20,8 @@ interface BattlerState {
   maxHp?: number;
   species?: number;
   status?: { kind: string };
+  status3?: number;
+  volatile?: { leechSeededBy: "player" | "opponent" | null };
 }
 
 interface CaptureState {
@@ -1245,6 +1247,146 @@ async function verifyToxicChainScenario(spec: ToxicChainScenarioSpec): Promise<v
   }
 }
 
+// AI_CV_EvasionUp Gate E / DRAW SITE 5 (data/battle_ai_scripts.s:1053-1054,
+// doc §24.5's "straightforward re-application of the [toxic-chain] trick"
+// recipe) -- 2026-07-27 second follow-up side-lane session. Same two-Pokemon
+// opponent relay as the toxic chain above, EFFECT_TOXIC swapped for
+// EFFECT_LEECH_SEED: opponent slot 0 = Magikarp (129, level 5, 18 max HP),
+// all 4 slots MOVE_LEECH_SEED (73) -- forced, so turn 1's cast on the target
+// is not a genuine AI pick. Target (player) Anorith (390, single ability
+// Battle Armor), turn 1 MOVE_SPLASH (150, harmless), turn 2 MOVE_SEISMIC_TOSS
+// (69, fixed 50 dmg) OHKOs Magikarp; the opponent auto-sends Shuckle (213,
+// single ability Sturdy, base Speed 5, all 4 slots MOVE_DOUBLE_TEAM), fresh
+// at 95/95. The trailing phantom decision (this doc's own "only the phantom
+// next-decision is observable" mechanism, §11.0) reads Gate C false (target
+// NOT toxic-poisoned in this fixture, so Gates C/D and DRAW SITES 3/4 stay
+// unreached, straight fall-through to EvasionUp5) then Gate E (`:1053
+// if_not_status3 AI_TARGET, STATUS3_LEECHSEED`) false -- the target IS
+// leech-seeded -- falling into the `:1054 if_random_less_than 70` roll once
+// per identical MOVE_DOUBLE_TEAM slot. Gate A is also false every decision
+// (Shuckle's own HP never drops below the 90% threshold), so DRAW SITE 1
+// fires x4 too, identically to every other EvasionUp fixture in this doc --
+// a flat shared baseline, not part of DRAW SITE 5's own signature. PREDICTED
+// (before running, from the transcribed handler body): a single captured
+// decision (the phantom one; no real Shuckle turn executes in this window)
+// draws DRAW SITE 1 (x4, Gate A false) + DRAW SITE 5 (x4, Gate E false) = 8
+// handler-branch draws, plus Magikarp's own turn-1/turn-2 AI decisions
+// (EFFECT_LEECH_SEED dispatches to the shared AI_CV_Toxic handler,
+// data/battle_ai_scripts.s:711 -- an unrelated handler with its own
+// `if_random` sites, contributing its own, separately-accounted draws to the
+// same window) and the fixed per-decision baseline (BattleAI_SetupAIData/
+// BattleTurnPassed/ChooseMoveOrAction_Singles, §24.4). The zero-draw control
+// for Gate E/DRAW SITE 5 does NOT need a fresh fixture: every other
+// EvasionUp fixture already live-verified in this doc (`fullhp-reach`,
+// `midhp-control`, `lowhp-reach`, `site2-reach`, `site2-control`,
+// `toxicchain-reach`, `toxicchain-control`) never applies
+// STATUS3_LEECHSEED to its target, so Gate E already reads true (skip) in
+// all seven -- the same "CONTROL B, already proven, not re-staged" pattern
+// §24.5 itself established for Gates C/D's toxic prerequisite. OBSERVED
+// (live, both seeds, reproduced twice each): total Random() calls (frame
+// 0->1788) = 23, identical both seeds, identical across both reruns; target
+// leech-seeded (status3 bit 2 set, volatile.leechSeededBy="opponent") and
+// opponent switched to Shuckle at a fresh, untouched 95/95 (PP all 15,
+// confirming zero real Shuckle turns executed -- only the phantom decision
+// fired). Calibration needed its own mash-rep count distinct from the toxic
+// chain's (29 reps before the turn-2 menu opens, vs the toxic chain's 24 --
+// Leech Seed's own "a seed was planted!" message evidently costs more
+// dismiss-frames than Toxic's "was badly poisoned!" in this harness, found
+// empirically by sweeping rep counts and reading off PP/species/HP rather
+// than assumed) -- confirmed via `tools/battle-lab/mechanic-factory-ai-cv-
+// evasionup-leechseed-reach-off.json`.
+const STATUS3_LEECHSEED = 1 << 2;
+
+interface LeechSeedScenarioSpec {
+  label: string;
+  path: string;
+  finalFrame: number;
+  expectedOpponentSpecies: number;
+  expectedOpponentHp: number;
+  expectedOpponentMaxHp: number;
+  expectedTotalSteps: Record<number, number>;
+  checkCrossSeedStable: boolean;
+}
+
+const EVASIONUP_LEECHSEED_SCENARIOS: LeechSeedScenarioSpec[] = [
+  {
+    label:
+      "AI_CV_EvasionUp, target (player, Anorith) leech-seeded, opponent (AI_USER) switched to Shuckle fresh at 95/95 -- REACH: Gate E (`if_not_status3 AI_TARGET, STATUS3_LEECHSEED`, data/battle_ai_scripts.s:1053) is false (target IS leech-seeded), falling through into the `:1054 if_random_less_than 70` roll once per identical MOVE_DOUBLE_TEAM slot (DRAW SITE 5) -- DRAW SITE 1 (:1039) also fires every decision in this fixture (Shuckle's own HP never drops below the 90% Gate A threshold), the same flat shared baseline every other EvasionUp fixture in this doc carries",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-evasionup-leechseed-reach-off.json",
+    finalFrame: 1788,
+    expectedOpponentSpecies: 213,
+    expectedOpponentHp: 95,
+    expectedOpponentMaxHp: 95,
+    expectedTotalSteps: { 1: 23, 99: 23 },
+    checkCrossSeedStable: true,
+  },
+];
+
+async function verifyLeechSeedScenario(spec: LeechSeedScenarioSpec): Promise<void> {
+  console.log(`\n=== ${spec.label} ===`);
+  const perSeedTotals: number[] = [];
+  for (const seed of SEEDS) {
+    const run1 = await runScenario(spec.path, seed);
+    const run2 = await runScenario(spec.path, seed);
+
+    const f0a = run1.get(0)!;
+    const f0b = run2.get(0)!;
+    check(
+      `seed ${seed}: frame 0 identical across reruns (determinism)`,
+      JSON.stringify(f0a) === JSON.stringify(f0b),
+      "initial state differs between runs",
+    );
+
+    const fEndA = run1.get(spec.finalFrame)!;
+    const fEndB = run2.get(spec.finalFrame)!;
+    check(
+      `seed ${seed}: frame ${spec.finalFrame} identical across reruns (determinism)`,
+      JSON.stringify(fEndA) === JSON.stringify(fEndB),
+      "final state differs between runs",
+    );
+
+    check(
+      `seed ${seed}: target (player, Anorith) is leech-seeded at frame ${spec.finalFrame} (Gate E prerequisite, STATUS3_LEECHSEED bit set)`,
+      ((fEndA.battlers.player.status3 ?? 0) & STATUS3_LEECHSEED) !== 0 &&
+        fEndA.battlers.player.volatile?.leechSeededBy === "opponent",
+      `observed status3=${fEndA.battlers.player.status3}, leechSeededBy=${fEndA.battlers.player.volatile?.leechSeededBy}`,
+    );
+
+    check(
+      `seed ${seed}: opponent (AI_USER) is species ${spec.expectedOpponentSpecies} (Shuckle, switched in after Magikarp fainted)`,
+      fEndA.battlers.opponent.species === spec.expectedOpponentSpecies,
+      `observed species ${fEndA.battlers.opponent.species}`,
+    );
+
+    check(
+      `seed ${seed}: opponent (AI_USER) HP is ${spec.expectedOpponentHp}/${spec.expectedOpponentMaxHp} (fresh switch-in, no real Shuckle turn executed)`,
+      fEndA.battlers.opponent.hp === spec.expectedOpponentHp && fEndA.battlers.opponent.maxHp === spec.expectedOpponentMaxHp,
+      `observed hp ${fEndA.battlers.opponent.hp}/${fEndA.battlers.opponent.maxHp}`,
+    );
+
+    const f0 = run1.get(0)!;
+    const totalSteps = stepsToReach(f0.rngValue, fEndA.rngValue, spec.expectedTotalSteps[seed]! + 20);
+    check(
+      `seed ${seed}: exactly ${spec.expectedTotalSteps[seed]} total Random() calls from frame 0 to frame ${spec.finalFrame}`,
+      totalSteps === spec.expectedTotalSteps[seed],
+      `forward-search found ${totalSteps === null ? "no match" : `step ${totalSteps}`}`,
+    );
+    perSeedTotals.push(totalSteps ?? -1);
+
+    console.log(
+      `  seed ${seed}: opponent hp=${fEndA.battlers.opponent.hp}/${fEndA.battlers.opponent.maxHp}, total steps 0->${spec.finalFrame}=${totalSteps}`,
+    );
+  }
+
+  if (spec.checkCrossSeedStable) {
+    check(
+      `count stability: total-step count is identical across seeds ${SEEDS.join(" and ")} (${JSON.stringify(perSeedTotals)})`,
+      perSeedTotals.every((n) => n === perSeedTotals[0]),
+      `per-seed totals differ: ${JSON.stringify(perSeedTotals)}`,
+    );
+  }
+}
+
 // AI_CV_RainDance/SunnyDay/Hail (data/battle_ai_scripts.s:2037-2059/2060-2076/
 // 2261-2278, doc §25) + their AI_CBM_RainDance/SunnyDay/Hail siblings
 // (:490-493/495-498/522-525): all six handlers are genuinely 0-`if_random`
@@ -1896,6 +2038,9 @@ async function main(): Promise<void> {
   }
   for (const spec of EVASIONUP_TOXICCHAIN_SCENARIOS) {
     await verifyToxicChainScenario(spec);
+  }
+  for (const spec of EVASIONUP_LEECHSEED_SCENARIOS) {
+    await verifyLeechSeedScenario(spec);
   }
   for (const spec of WEATHER_PICK_SCENARIOS) {
     await verifyWeatherPickScenario(spec);
