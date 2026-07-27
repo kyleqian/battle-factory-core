@@ -1226,6 +1226,44 @@ describe("runBattleEndTurnOrchestration (BattleTurnPassed equivalent)", () => {
           expect(result.state.rng.calls).toBe(initial.rng.calls + 1); // only Yawn's own sleep-turn roll; the cure draws none
         },
       );
+
+      it(
+        "REAL TRIGGER (Rung 6, docs/yawn-thrash-endturn-design.md §7): a Persim Berry cures the confusion "
+          + "ENDTURN_THRASH itself just wrote on the lock's final turn, in the SAME end-turn pass -- ITEMS2's "
+          + "OTHER real trigger class (the Chesto/Yawn test above is the first), proving the SAME moveTurn-gated "
+          + "HOLD_EFFECT_CURE_CONFUSION branch (already item-agnostic since Rung 3, no new code) fires off a "
+          + "Thrash-family source instead of Yawn -- TAUROS/MOVE_THRASH is the named Factory-L50 carrier (§3's "
+          + "table), modeled here at the status2/item level per this reducer's own existing convention",
+        () => {
+          const rc = context({
+            battlers: [
+              battler({ side: 0 }),
+              battler({
+                side: 1,
+                status2: STATUS2_LOCK_CONFUSE_TURN_1 | STATUS2_MULTIPLETURNS, // lock's final turn, mirrors the ENDTURN_THRASH suite's own transition case
+                item: ITEM_PERSIM_BERRY,
+                partyIndex: 2,
+              }),
+              battler({ side: 0 }),
+              battler({ side: 1 }),
+            ],
+          });
+          const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+          const initial = scratchState(rc, 1);
+          const result = runBattleEndTurnOrchestration(program, handlers, initial);
+          expect(result.kind).toBe("next-turn");
+          if (result.kind !== "next-turn") throw new Error("expected next-turn");
+          const b1 = result.state.rulesContext.battlers[1]!;
+          // ENDTURN_THRASH's own transition already cleared the lock; the cure (ITEMS2) then clears the
+          // confusion it just wrote -- never "felt" as a lost turn, same shape as the Chesto/Yawn sibling above.
+          expect(b1.status2 & STATUS2_LOCK_CONFUSE_MASK).toBe(0);
+          expect(b1.status2 & STATUS2_MULTIPLETURNS).toBe(0);
+          expect(b1.status2 & STATUS2_CONFUSION).toBe(0);
+          expect(b1.item).toBe(0); // consumed
+          // seed 919694434 -> (randomValue % 4) + 2 == 3, Thrash's own duration roll; the cure draws none.
+          expect(result.state.rng.calls).toBe(initial.rng.calls + 1);
+        },
+      );
     },
   );
 });
