@@ -2,6 +2,26 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_EARTHQUAKE",
+      "status": "exact",
+      "covered": [
+        "complete legal Level-50 mechanicLab parties stage DUGTRIO, a real Factory set-372 EARTHQUAKE carrier, with all four active choices constrained to EARTHQUAKE and the opposing ONIX constrained to TACKLE",
+        "player-back DUGTRIO to opponent-front ONIX complete move-owned Scene-ON body at oracle frames 80-276: source task/RAM/palette 197/197 and shared-seam framebuffer 197/197, reproduced twice",
+        "opponent-front DUGTRIO to player-back ONIX complete move-owned Scene-ON body at oracle frames 84-280: source task/RAM/palette 197/197 and shared-seam framebuffer 197/197, reproduced twice",
+        "both simultaneous literal AnimTask_HorizontalShake calls (platforms and every visible battler, intensity 10, max time 50), the source task scheduler and 13-to-0 decay, BG3_X, battler x2 including pre-first-write front-idle residue, both literal BG-only complex_palette_blend pulses (delay 3, count 1, black14 to white14), palette sprite state, and BG palette RAM"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-earthquake-player-dugtrio-opponent-onix.json",
+        "tools/battle-lab/mechanic-earthquake-opponent-dugtrio-player-onix.json",
+        "tools/compare/fixtures/earthquake-player-dugtrio-opponent-onix.json",
+        "tools/compare/fixtures/earthquake-opponent-dugtrio-player-onix.json",
+        "tools/compare/earthquakePortable.ts",
+        "tools/compare/earthquakeProbe.py",
+        "src/animation/earthquake.ts",
+        "tests/animation/earthquake.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_WATER_GUN",
       "status": "exact",
       "covered": [
@@ -746,6 +766,22 @@
     "MOVE_BIND"
   ],
   "componentTracks": [
+    {
+      "id": "horizontal-shake-complex-bg-palette",
+      "components": [
+        "task:AnimTask_HorizontalShake",
+        "visualCommand:complex_palette_blend"
+      ],
+      "representatives": [
+        "MOVE_EARTHQUAKE",
+        "MOVE_FISSURE",
+        "MOVE_SKY_ATTACK",
+        "MOVE_MAGNITUDE",
+        "MOVE_ERUPTION",
+        "MOVE_LUSTER_PURGE"
+      ],
+      "goal": "MOVE_EARTHQUAKE independently proves its complete dual literal (10,50) platform/all-battler HorizontalShake body and two delay-3/count-1 BG-only black14-to-white14 palette pulses in both orientations at 197/197 task/RAM/palette and framebuffer frames, reproduced twice. No sibling is promoted. HorizontalShake audit: FISSURE additionally needs three dirt-plume groups plus the fissure BG/position/restore pipeline and shakes only the target; SKY ATTACK needs both two-turn charge/strike bodies, attacker-only (2,16) shakes, bird/projectile/hitsplat components; MAGNITUDE uses move-power-derived intensity (literal zero), two sequential platform/all-battler shake pairs, and its own magnitude result choreography; ERUPTION uses distinct (8,60) shakes plus its eruption launch/rain/fire body; LUSTER PURGE uses target-only (5,14) shake plus psychic-background, luster-orb, sparkle, and palette bodies. Complex-palette Level-50 audit: the already-exact KNOCK OFF, BLAZE KICK, and AERIAL ACE retain independent acceptance; MEGA PUNCH and MEGA KICK still need their impact-background/fist/hitsplat bodies; GUILLOTINE its cutter/background body; TAKE DOWN and DOUBLE-EDGE their distinct contact/recoil choreography; FISSURE and MAGNITUDE retain the remainders above; CRABHAMMER needs slide/shake/eight bubble pairs; EXPLOSION its orb/explosion pipeline; SUPER FANG its fang sprite and BlendMonInAndOut; REVERSAL its power branch; FURY CUTTER its hit-count branch; MEGAHORN and CROSS CHOP their distinct strike sprites/tasks; MIST BALL its fog BG/projectile pipeline; SIGNAL BEAM its beam sprites and target palette cycle; IRON DEFENSE its complete defense-up visual body. Source also shows SKULL BASH uses the same BG-only black14-to-white14 pulse inside a distinct two-turn body, but the generated Level-50 component graph does not currently attribute that command edge. Every named unsupported move remains unsupported pending independent complete dense evidence."
+    },
     {
       "id": "elemental-punch",
       "components": [

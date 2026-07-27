@@ -44,6 +44,46 @@ animation. A status caused by a move is not part of that move's animation.
   presentation seam and all source- or evidence-required variants are covered.
 - No entry means unsupported.
 
+## EARTHQUAKE promoted to exact; HorizontalShake / complex BG-palette track established (2026-07-27)
+
+**Verdict:** `MOVE_EARTHQUAKE` is exact through the shared Scene-ON seam in
+both required orientations, each reproduced twice. Player-back DUGTRIO is
+**197/197 task/RAM/palette and framebuffer frames** (oracle 80-276);
+opponent-front DUGTRIO is **197/197** (84-280). Census: **29/276 exact, 3
+partial, 244 unsupported**.
+
+**Source/probe:** complete legal mechanicLab parties stage DUGTRIO, the real
+Level-50 Factory set-372 carrier, with all four choices constrained to
+EARTHQUAKE; ONIX is constrained to TACKLE. The reducer ports the simultaneous
+`AnimTask_HorizontalShake(platforms,10,50)` and
+`AnimTask_HorizontalShake(all battlers,10,50)` tasks, including the source
+two-tick scheduler, 13-to-0 decay, BG3_X, every visible battler x2, and the
+front-sprite residue retained before the first shake write. Both BG-only
+`complex_palette_blend(delay=3,count=1,black14,white14)` commands are pinned
+at source-scheduled ages 13 and 31 against palette-sprite data and all 256
+faded BG palette entries. The framebuffer seam separately models BG3/palette
+at a one-frame display latch and battler OAM at two frames.
+
+**Sibling audit (no promotions):** all six Level-50 HorizontalShake moves
+were inspected. FISSURE retains target-only shake plus dirt plumes and the
+fissure BG pipeline; SKY ATTACK has two-turn charge/strike, attacker-only
+(2,16) shakes, bird/projectile/hitsplat bodies; MAGNITUDE has power-derived
+intensity and two sequential shake pairs; ERUPTION has distinct (8,60)
+shakes plus its eruption body; LUSTER PURGE has target-only (5,14) shake plus
+psychic BG/orb/sparkle/palette bodies. The 21 Level-50
+`complex_palette_blend` graph siblings were audited in
+`ANIMATION_COVERAGE.json`: already-exact KNOCK OFF, BLAZE KICK, and AERIAL
+ACE retain independent evidence; every named unsupported sibling has a
+distinct incomplete body and remains unsupported. Source additionally shows
+SKULL BASH's same literal BG pulse on a component-graph edge not currently
+attributed to its Level-50 root.
+
+**Evidence/controls:** legal fixtures, reproducible dense probe, portable
+comparator, and focused Tier-1 tests are committed. Acceptance is **197/197
+×2 in both orientations**. WATER GUN remains **111/111**, SUPERSONIC
+**51/51**, and BIND **45/45**, both orientations, after the final renderer
+change. The animation import boundary did not widen.
+
 ## WATER GUN promoted to exact; small-bubbles / water-impact track established (2026-07-26)
 
 **Verdict:** `MOVE_WATER_GUN` is exact through the shared Scene-ON seam in
@@ -125,93 +165,6 @@ dense RAM/RGB probe, portable comparator, and focused Tier-1 reducer tests.
 Fresh acceptance is **51/51 ×2 in both orientations**. BIND remains **45/45**
 in both orientations and ShakeMon2's exact Tier-1 control stays green. The
 animation/engine import boundary did not widen.
-
-## MILK DRINK promoted to exact; HealingEffect2 / thin-ring family represented (2026-07-26)
-
-**Verdict:** `MOVE_MILK_DRINK` is exact through the shared Scene-ON seam in
-both required orientations, each reproduced twice: player-back MILTANK is
-**186/186** component/RAM and framebuffer frames (oracle 617-802), and
-opponent-front MILTANK is **186/186** (621-806). Census: **26/276 exact, 3
-partial, 247 unsupported**.
-
-**Source/probe:** complete legal mechanicLab parties use MILTANK Factory set
-411, with all four active choices constrained to MILK DRINK; ONIX is
-constrained to TACKLE. Turn 1 stages real stock-engine damage and turn 2
-supplies the accepted healing body. The relative reducer covers
-`gMilkBottleSpriteTemplate` / `AnimMilkBottle`'s alternating blend, hold,
-affine wobble, fall, and blend-out; `ANIM_TAG_MILK_BOTTLE`; affine program 1
-and terminal hold for `gThinRingExpandingSpriteTemplate` /
-`ANIM_TAG_THIN_RING`; `monbg`/`clearmonbg`; and target-side `HealingEffect2`.
-The blue stars reuse RECOVER's shared frame/geometry component only where the
-literal args match. RAM evidence additionally pins `clearmonbg`'s two
-sprite-animation ticks before the first HealingEffect2 child, and framebuffer
-evidence pins bottle OAM at a one-frame latch while its blend registers are
-current-frame.
-
-**Sibling audit (no promotions):** `MOVE_SOFT_BOILED` has a distinct
-two-sprite breaking-egg body, attacker shake, palette blend, and two
-offset affine-program-0 thin rings before target `HealingEffect2`.
-`MOVE_PRESENT` has a common moving item-bag body followed conditionally by
-either five explosions or nine green healing particles before target
-`HealingEffect2`. Each needs its own complete dense move evidence, with
-PRESENT requiring both conditional outcomes.
-
-**Evidence/controls:** committed legal fixtures, reproducible sprite
-extractor, dense RAM/RGB probe, portable comparator, and focused Tier-1
-tests. Fresh acceptance is **186/186 ×2 in both orientations**. RECOVER
-remains **169/169** and BIND **45/45**, both orientations, as regression
-controls. Implementation commits: `51206b4`, `e752c6e`.
-
-**Verification:** **232 test files / 3135 tests green**; production build
-green; coverage self-check reports **26/276 exact, 3 partial, 247
-unsupported**. The animation-owned coverage ratchet advanced by exactly this
-one accepted move; the animation/engine import-boundary ratchet did not widen.
-
-## Healing blue-star track established; RECOVER promoted to exact (2026-07-26)
-
-**Verdict:** `MOVE_RECOVER` is the sole promoted acceptance unit. Its complete
-move-owned Scene-ON body is source component/RAM-exact and framebuffer-exact
-through the shared seam in both required orientations, each reproduced twice:
-player-back KADABRA is **169/169** (oracle 611-779), and opponent-front
-KADABRA is **169/169** (615-783). Census: **25/276 exact, 3 partial**.
-
-**Source/probe:** complete legal mechanicLab parties use KADABRA, a real
-Level-50 Factory RECOVER carrier, with all four choices constrained to
-RECOVER; ONIX is legally constrained to TACKLE. Turn 1 stages real damage
-through the stock battle engine, and turn 2 supplies the accepted healing
-body—no HP injection or transient override. The shared reducer covers all 21
-literal `RecoverAbsorbEffect` spawns, `gPowerAbsorptionOrbSpriteTemplate`'s
-Q8.8 translation and affine shrink, side-mirrored attacker geometry,
-`ANIM_TAG_ORBS`, the six-leg 0↔11 yellow palette cycle,
-`monbg/setalpha/blendoff`, and `HealingEffect`'s four
-`gHealingBlueStarSpriteTemplate` sprites and complete frame program. The only
-shared timing generalization is source-shaped: a non-divisible 11/2 palette
-swing needs one clamp-transfer tick beyond an even swing; GROWTH's established
-0↔8 durations remain unchanged.
-
-**Sibling audit (no promotions):** ABSORB still needs its 8 sine drain orbs,
-hitsplat/shake, and green field blend; MEGA_DRAIN its paired 16-orb stronger
-green body; DREAM_EATER its psychic background, target scale/shakes, and
-24-orb body; GIGA_DRAIN its 24-orb/high-green body; SOFT_BOILED its breaking
-egg, thin rings, shake, and target-side `HealingEffect2`; MILK_DRINK its milk
-bottle, thin ring, and `HealingEffect2`; PRESENT both conditional bag/explosion
-and green-particle heal branches plus target healing; SYNTHESIS its
-`GrantingStarsEffect` and 0→16 attacker blend; MOONLIGHT its blackout, moon,
-alpha tasks, and sparkle pipeline; SWALLOW its move-turn-dependent deform,
-shakes, and blue-orb multiplicity. All ten remain unsupported pending their
-own complete dense evidence.
-
-**Evidence/controls:** fixtures, dense RAM/RGB probe, source asset extractor,
-portable comparator, and Tier-1 reducer tests are committed in `2218cc2` and
-`a48b361`. Fresh acceptance is **169/169 component + framebuffer ×2 in both
-orientations**. GROWTH remains **63/63** and BIND **45/45**, each in both
-orientations, as self-target/palette and seam controls. The non-exclusive
-`healing-blue-star` track is registered in `ANIMATION_COVERAGE.json`; only
-RECOVER has an exact coverage entry.
-
-**Verification:** **231 test files / 3131 tests green**; production build
-green; coverage self-check reports **25/276 exact, 3 partial, 248
-unsupported**.
 
 Start with one representative attacker/target. Add variants only when source
 inspection or comparison identifies a dependency: attacker side, front/back

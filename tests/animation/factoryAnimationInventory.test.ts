@@ -68,11 +68,11 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // WATER GUN is exact in both required orientations.
-        unsupported: 245,
+        // EARTHQUAKE is exact in both required orientations.
+        unsupported: 244,
         staged: 0,
         partial: 3,
-        exact: 28,
+        exact: 29,
       },
       {
         tier: "openOnly",
@@ -110,12 +110,25 @@ describe("animation coverage ledger", () => {
   });
 
   it("uses the source dependency graph for non-exclusive work grouping", () => {
-    expect(queuedAnimationComponentTracks()[0]).toMatchObject({
-      id: "elemental-punch",
+    expect(
+      queuedAnimationComponentTracks().find(
+        (track) => track.id === "elemental-punch",
+      ),
+    ).toMatchObject({
+      representatives: ["MOVE_FIRE_PUNCH", "MOVE_ICE_PUNCH", "MOVE_THUNDER_PUNCH"],
+    });
+    expect(
+      queuedAnimationComponentTracks().find(
+        (track) => track.id === "horizontal-shake-complex-bg-palette",
+      ),
+    ).toMatchObject({
       representatives: [
-        "MOVE_FIRE_PUNCH",
-        "MOVE_ICE_PUNCH",
-        "MOVE_THUNDER_PUNCH",
+        "MOVE_EARTHQUAKE",
+        "MOVE_FISSURE",
+        "MOVE_SKY_ATTACK",
+        "MOVE_MAGNITUDE",
+        "MOVE_ERUPTION",
+        "MOVE_LUSTER_PURGE",
       ],
     });
     expect(

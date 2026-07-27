@@ -4,6 +4,16 @@ Older dated sections moved out of `ANIMATION_PROGRESS.md` to keep that
 file lean (`AGENTS.md`'s ~3-most-recent convention). Git history has the
 full record regardless; this file is a read-only reference.
 
+## MILK DRINK and RECOVER healing-track entries archived (2026-07-26)
+
+`MOVE_MILK_DRINK` remains exact at **186/186 ×2** in both orientations,
+covering the milk bottle, thin ring, `HealingEffect2`, and display latches.
+`MOVE_RECOVER` remains exact at **169/169 ×2** in both orientations, covering
+21 absorption orbs, the odd-swing palette cycle, and `HealingEffect`. Their
+full evidence paths and sibling audits remain authoritative in
+`ANIMATION_COVERAGE.json` and git history; they moved here only to keep the
+living ledger to roughly three current entries.
+
 ## Psychic-family opposite orientation closure (2026-07-26)
 
 CONFUSION and PSYCHIC promoted from partial to exact and FUTURE_SIGHT stayed
