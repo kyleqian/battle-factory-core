@@ -68,11 +68,11 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // SYNTHESIS is exact in both required orientations.
-        unsupported: 242,
+        // HARDEN is exact in both required orientations.
+        unsupported: 241,
         staged: 0,
         partial: 3,
-        exact: 31,
+        exact: 32,
       },
       {
         tier: "openOnly",
