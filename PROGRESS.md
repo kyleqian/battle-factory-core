@@ -15,6 +15,32 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 510 — [SUPERVISOR 2026-07-27 ~12:35] round 4 verified + merged; round 5 dispatched
+
+- **State:** master green at **249 files / 3409 tests**, build clean, census
+  **97/214 effects, 195/355 moves, 157/276 Factory-L50, 2108/2957 weighted
+  (71.3%)**. Round 4 landed: SETPROTECTLIKE (entry 509; supervisor reran
+  suite/build/census on main tree) ∥ side #47-remainder evidence pack
+  (merged from `worker/side-20260727-105421`, cleaned; CV verify script
+  rerun in-worktree ALL PASS): doc §27 = complete 22-handler funcResult
+  write audit + 2 live index-1 fixtures. **Live-confirmed divergence:**
+  writes-never predecessor → ROM's TTF carry survives into slot 1's Hail
+  (deterministic net +1 pick) where the engine's first-slot-only fallback
+  yields a 3-way tie + spurious tie-break draw; writes-always predecessor
+  → confirmed clean (audit classification positively validated).
+- **Round 5 (dispatched):** main → close ISSUES #47 via per-slot
+  funcResult propagation across the CV pass using §27.1's write table
+  (value-level, not just carry/no-carry — a writes-always handler's own
+  written value can itself re-collide, Channel-1-style), acceptance = the
+  2 new fixtures' decision/ledger reproduction + all prior ledgers
+  unchanged; 7 writes-conditionally handlers (§27.1: 11, 15-17, 20-22)
+  may stay a named live-verification residual ∥ side → §12 prep-scout for
+  the next presentation window (§10/§11 contract: read-only recon + one
+  unwired staging module + comparator re-pin, self-picked smallest).
+- **Next:** verify round 5; round 6 candidates = NEGATIVEDAMAGE/TRYSETREST
+  census sets (main) ∥ §24.5 sites 5/6/7 (side); then wind-down.
+
+---
 ## 509 — [BOUNDED WORKER 2026-07-27 ~12:20] B_SCR_OP_SETPROTECTLIKE registered, EFFECT_PROTECT/EFFECT_ENDURE executable end to end; NEGATIVEDAMAGE/TRYSETREST not started (ran out of step budget)
 
 - **State:** tree green at **249 files / 3409 tests** (+1 file / +14 tests
@@ -125,82 +151,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   classes; no src edits — main consumes it next round).
 - **Next:** verify round 4; round 5 = main closes #47 from side's
   evidence ∥ side §24.5 sites 5/6/7 or §12 prep-scout.
-
----
-## 507 — [BOUNDED WORKER 2026-07-27 ~11:20] Kernel census breadth: B_SCR_OP_JUMPIFNEXTTARGETVALID + B_SCR_OP_SELECTFIRSTVALIDTARGET registered, EFFECT_EARTHQUAKE executable end to end; SETPROTECTLIKE/NEGATIVEDAMAGE/TRYSETREST not started
-
-- **State:** tree green at **248 files / 3395 tests** (+1 file / +10 tests
-  over session start 247/3385: new `battleScriptTargetIterationOpcode.test.ts`
-  (8 tests), +1 EFFECT_EARTHQUAKE integration test, +1 new `Cmd_bicword`
-  pass-through test), `npm run build` clean.
-  `executableFrontierRatchet.test.ts`: +1 deliberate, named barrier
-  (`battleScriptTargetIterationOpcode.ts`, 1 — the doubles-only
-  `jumpifnexttargetvalid` next-target scan, reachability-tested).
-- **Did:** registered the census's own named top blocker exactly as
-  briefed: `Cmd_selectfirstvalidtarget` has no `BATTLE_TYPE_DOUBLE` branch
-  in source at all (same skip-attacker/skip-absent loop for singles and
-  doubles), so it registers (a) source-complete with zero barriers.
-  `Cmd_jumpifnexttargetvalid` DOES branch on `BATTLE_TYPE_DOUBLE`
-  (`battle_script_commands.c:6594`); its `else` arm (singles) is an
-  unconditional fallthrough (never jumps), and the `if` arm's own
-  incrementing next-target scan (continuing a multi-target spread-move
-  loop to another battler slot) is a named (b) barrier, unreachable for
-  Level-50 singles, reachability-tested with an explicit doubles fixture.
-  **Hidden second blocker found and fixed:** the census's static walk
-  marks `Cmd_bicword` "registered" (opcode present) without checking which
-  *operand values* are modeled — EFFECT_EARTHQUAKE's real singles path
-  (target not underground) hits `bicword gHitMarker,
-  HITMARKER_IGNORE_UNDERGROUND`, which was still an existing (b) barrier
-  (only `BattleScript_DamagingWeatherContinuesEnd`'s own 4-bit clear was
-  modeled). Widened `Cmd_bicword` to also accept this exact sibling pair
-  (the natural counterpart to `Cmd_orword`'s already-registered set of the
-  same bit) — same 1 barrier call site in the file, narrower trigger
-  (only `BattleScript_MoveUsedWokeUp`'s `HITMARKER_WAKE_UP_CLEAR` remains),
-  so `PINNED_BARRIER_COUNTS` for that module is unchanged. Without this
-  fix, Earthquake would have looked executable in the census but halted
-  on every real singles run — worth flagging for the remaining ranked-table
-  sets below: **a census "0 missing opcodes" is not proof of a live run;
-  budget time to actually execute each flipped effect's full script.**
-- **Tests:** `tests/battleScriptTargetIterationOpcode.test.ts` (new, 8
-  tests: both opcodes' dispatch in isolation, singles + doubles, the
-  doubles barrier's reachability, the "no valid target" invariant throw).
-  `tests/battleScriptHitChainOpcode.test.ts` gained a full
-  `EFFECT_EARTHQUAKE: full committed script` integration test — the real
-  committed script from `BattleScript_EffectEarthquake` through to its own
-  `end`, proving Earthquake's actual semantics (not just reachability):
-  plain-hit damage lands, the exact 3-roll ground-truth ledger
-  (accuracycheck, critcalc, adjustnormaldamage — no 4th
-  `seteffectwithchance` roll, since Earthquake sets no secondary move
-  effect), and `jumpifnexttargetvalid` genuinely falls through in
-  singles rather than looping back.
-- **Census re-run (before → after):** 94/214 → **95/214** effects,
-  191/355 → **192/355** moves, 153/276 → **154/276** Factory-L50
-  unweighted, **1900/2957 → 2047/2957** weighted (+147, exactly
-  EFFECT_EARTHQUAKE's weight). EFFECT_EXPLOSION and EFFECT_MAGNITUDE both
-  lost the two shared target-iteration opcodes from their own remaining
-  blocker lists (still blocked on their own separate opcodes:
-  TRYEXPLOSION/SETATKHPTOZERO, MAGNITUDEDAMAGECALCULATION respectively).
-  Doc regenerated and committed with the code.
-- **Next (ranked table, in order, none started):** `B_SCR_OP_SETPROTECTLIKE`
-  (EFFECT_PROTECT/EFFECT_ENDURE, 61 weighted) — scoped and NOT a quick
-  follow-up: needs a brand-new persistent per-battler `protectUses` field
-  (currently explicitly untracked, see `battleScriptHitChainOpcode.ts`'s
-  `cleareffectsonfaint` doc comment), which once modeled also turns
-  `cleareffectsonfaint`'s existing "zero it on faint" behavior from a
-  no-op into a real write needing its own test; `Cmd_setprotectlike` also
-  needs `gBattleCommunication[MULTISTRING_CHOOSER]` message-table
-  selection (verify that value's already-modeled printfromtable/message
-  path actually covers `B_MSG_PROTECTED_ITSELF`/`B_MSG_BRACED_ITSELF`/
-  `B_MSG_PROTECT_FAILED` before assuming it's free) and a decision on the
-  `protectUses >= 4` OOB table read (structurally possible after 4
-  consecutive successful Protects, vanishingly unlikely — likely its own
-  named (b) barrier). Then `B_SCR_OP_NEGATIVEDAMAGE` (EFFECT_ABSORB/
-  DREAM_EATER, 49) and `B_SCR_OP_TRYSETREST` (EFFECT_REST, 49), both
-  entirely unexamined this session. Given this session's Earthquake
-  experience, budget real time per set for a live end-to-end Tier-1 test,
-  not just the opcode's own dispatch, since the census cannot see
-  per-operand barriers on opcodes it already considers "registered."
-- **Notes:** no PAPERCUT. Archived entry 504 to `PROGRESS-archive.md` to
-  keep this ledger at 3 live entries (507/506/505).
-
 
