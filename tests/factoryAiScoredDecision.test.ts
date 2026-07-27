@@ -2304,3 +2304,134 @@ describe("AI_CV_RainDance / AI_CV_SunnyDay / AI_CV_Hail mask-7 fixture reproduct
     expect(deltas).toEqual([-8, -8, -8]);
   });
 });
+
+// `get_weather`'s own stale-funcResult bug, Channel 2 (docs/factory-ai-
+// checkviability-ground-truth.md §25.10.1/§25.10.3, ISSUES #47): the real
+// ROM's `ChooseMoveOrAction_Singles`/`BattleAI_DoAIProcessing`
+// (`battle_ai_script_commands.c:395-416,572-616`) runs each `aiLogicId` to
+// completion across all 4 movesetIndex slots before advancing -- CBM(0..3),
+// then TTF(0..3), then CV(0..3) -- so `AI_TryToFaint`'s own last-processed
+// slot's `get_how_powerful_move_is` classification (always
+// `MOVE_POWER_OTHER`/Sun for a real power<=1 filler move in the last slot)
+// leaks into `AI_CheckViability`'s own FIRST scripted slot's `get_weather`
+// read whenever weather is genuinely unset. These three describe blocks
+// reproduce the doc's own three staged, live-oracle-verified fixtures'
+// mask-7 net scores exactly (species/moveset/ability lifted verbatim from
+// `tools/battle-lab/mechanic-factory-ai-hail-staleweather-{collision,
+// control}-off.json` and `mechanic-factory-ai-cv-raindance-noraindish-
+// stalesun-off.json`; stat fields other than speed/HP are placeholders --
+// every candidate move here has power <=1, so `estimateDamage` never runs
+// and only speed (Rain Dance's own Gate P) and HP% (the shared weather
+// span's own Gate H) are ever read).
+describe("get_weather's own stale-funcResult bug, Channel 2: AI_TryToFaint's last-scripted-slot classification leaks into AI_CheckViability's first-scripted-slot get_weather (doc §25.10, ISSUES #47)", () => {
+  const MOVE_SPLASH = 150;
+  const MOVE_GROWL = 45;
+
+  function huntailAttacker(): FactoryAiScoredBattlerView {
+    return Object.freeze({
+      types: ["TYPE_WATER", "TYPE_WATER"] as const,
+      attack: 100, defense: 100, spAttack: 100, spDefense: 100, speed: 60, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp: 100, maxHp: 100,
+      ability: "ABILITY_SWIFT_SWIM",
+      currentWeather: undefined,
+    });
+  }
+  function ninjaskTarget(): FactoryAiScoredTargetView {
+    return Object.freeze({
+      species: 302, // SPECIES_NINJASK: single ability, Speed Boost (id 3 == AI_WEATHER_HAIL)
+      types: ["TYPE_BUG", "TYPE_FLYING"] as const,
+      attack: 90, defense: 45, spAttack: 50, spDefense: 50, speed: 160, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp: 100, maxHp: 100, ability: "ABILITY_SPEED_BOOST", knownAbility: null,
+    });
+  }
+  function anorithTarget(): FactoryAiScoredTargetView {
+    return Object.freeze({
+      species: 390, // SPECIES_ANORITH: single ability, Battle Armor (id 4, outside the 0-3 collision range)
+      types: ["TYPE_ROCK", "TYPE_BUG"] as const,
+      attack: 95, defense: 50, spAttack: 40, spDefense: 50, speed: 75, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp: 100, maxHp: 100, ability: "ABILITY_BATTLE_ARMOR", knownAbility: null,
+    });
+  }
+  function hailView(target: FactoryAiScoredTargetView): FactoryAiScoredView {
+    return Object.freeze({
+      schema: "factory-ai-scored-view/v1",
+      mode: "factory-level-50-singles",
+      active: Object.freeze({ aiBattler: 1 as const, targetBattler: 0 as const }),
+      factory: Object.freeze({ levelMode: 0 as const, battleMode: 0 as const, factoryWinStreak: 28, trainerOpponentId: 222 }),
+      moves: [MOVE_HAIL_MASK7, MOVE_SPLASH, MOVE_SPLASH, MOVE_SPLASH] as const,
+      attacker: huntailAttacker(),
+      target,
+    });
+  }
+
+  it.each([1, 99])("`mechanic-factory-ai-hail-staleweather-collision-off`, seed %i (doc §25.10.2): Huntail's Hail vs weatherless Ninjask -- net -7 (CBM -8 ability-id collision + TTF 0 + CV +1 stale-Sun carry), Hail must never win turn 1", (seed) => {
+    const view = hailView(ninjaskTarget());
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+    expect(result.trace.slotScores[0]).toMatchObject({
+      checkBadMoveDelta: -8,
+      tryToFaintDelta: 0,
+      checkViabilityDelta: 1,
+      finalScore: 93,
+    });
+    expect(result.trace.bestMoveSlots).not.toContain(0);
+    expect(result.submission.decision).toMatchObject({ kind: "use-move" });
+    if (result.submission.decision.kind === "use-move") {
+      expect(view.moves[result.submission.decision.moveSlot]).toBe(MOVE_SPLASH);
+    }
+  });
+
+  it.each([1, 99])("`mechanic-factory-ai-hail-staleweather-control-off`, seed %i (doc §25.10.2): Huntail's Hail vs weatherless Anorith (id 4, outside the collision range, CBM channel silenced) -- net +1 (CV's stale-Sun carry alone), Hail must always win turn 1", (seed) => {
+    const view = hailView(anorithTarget());
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+    expect(result.trace.slotScores[0]).toMatchObject({
+      checkBadMoveDelta: 0,
+      tryToFaintDelta: 0,
+      checkViabilityDelta: 1,
+      finalScore: 101,
+    });
+    expect(result.trace.bestMoveSlots).toEqual([0]);
+    expect(result.submission.decision).toMatchObject({ kind: "use-move", moveSlot: 0 });
+  });
+
+  it.each([1, 99])("`mechanic-factory-ai-cv-raindance-noraindish-stalesun-off`, seed %i (doc §25.10.2): Lotad (Swift Swim, abilitySlot 0, speed 50 -- user-faster over Shuckle's 25, so Gate P skips Gate S/Rain Dish entirely) Rain Dance vs Shuckle -- net +1 (CV's stale-Sun carry at Gate W2, before Gate R's own tail is ever reached), Rain Dance must win turn 1 despite having no Rain Dish", (seed) => {
+    const view: FactoryAiScoredView = Object.freeze({
+      schema: "factory-ai-scored-view/v1",
+      mode: "factory-level-50-singles",
+      active: Object.freeze({ aiBattler: 1 as const, targetBattler: 0 as const }),
+      factory: Object.freeze({ levelMode: 0 as const, battleMode: 0 as const, factoryWinStreak: 28, trainerOpponentId: 222 }),
+      moves: [MOVE_RAIN_DANCE_MASK7, MOVE_GROWL, MOVE_GROWL, MOVE_GROWL] as const,
+      attacker: Object.freeze({
+        types: ["TYPE_WATER", "TYPE_GRASS"] as const, // SPECIES_LOTAD
+        attack: 30, defense: 30, spAttack: 40, spDefense: 50, speed: 50, level: 50,
+        statStages: NEUTRAL_STAGES,
+        isFirstTurn: 0,
+        hp: 100, maxHp: 100,
+        ability: "ABILITY_SWIFT_SWIM", // abilitySlot 0, NOT Rain Dish (abilitySlot 1)
+        currentWeather: undefined,
+      }),
+      target: Object.freeze({
+        species: 213, // SPECIES_SHUCKLE: single ability, Sturdy (id 5, outside the collision range)
+        types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+        attack: 10, defense: 230, spAttack: 10, spDefense: 230, speed: 25, level: 50,
+        statStages: NEUTRAL_STAGES,
+        isFirstTurn: 0,
+        hp: 100, maxHp: 100, ability: "ABILITY_STURDY", knownAbility: null,
+      }),
+    });
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+    expect(result.trace.slotScores[0]).toMatchObject({
+      checkBadMoveDelta: 0,
+      tryToFaintDelta: 0,
+      checkViabilityDelta: 1,
+      finalScore: 101,
+    });
+    expect(result.trace.bestMoveSlots).toEqual([0]);
+    expect(result.submission.decision).toMatchObject({ kind: "use-move", moveSlot: 0 });
+  });
+});

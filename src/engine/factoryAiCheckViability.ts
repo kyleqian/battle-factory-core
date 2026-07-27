@@ -2331,11 +2331,22 @@ function weatherSetterCvScore(input: Readonly<{
   attackerHp: number;
   attackerMaxHp: number;
   currentWeather: AiWeatherValue | undefined;
+  /**
+   * `get_weather`'s own stale-`funcResult` fallback, Channel 2 (doc
+   * §25.10.1) -- non-`undefined` only when the caller (`factoryAiDecision
+   * Policy.ts`'s `ttfExitFuncResult`/`cvCarryStillIntact`) has proven no AI
+   * script command has written `funcResult` since `AI_TryToFaint`'s own pass
+   * ended. Consulted only when `currentWeather` is itself genuinely unset,
+   * the same shape as `runCbmWeatherSetter`'s `staleAbilityGuess` fallback
+   * (Channel 1, `factoryAiCheckBadMove.ts`).
+   */
+  staleFuncResultFallback: AiWeatherValue | undefined;
   otherThree: ReadonlySet<AiWeatherValue>;
 }>): 1 | 0 | -1 {
   const hpPercent = Math.floor((100 * input.attackerHp) / input.attackerMaxHp);
   if (hpPercent < 40) return -1;
-  if (input.currentWeather !== undefined && input.otherThree.has(input.currentWeather)) return 1;
+  const funcResult = input.currentWeather ?? input.staleFuncResultFallback;
+  if (funcResult !== undefined && input.otherThree.has(funcResult)) return 1;
   return 0;
 }
 
@@ -2348,11 +2359,13 @@ function runCvSunnyDay(input: Readonly<{
   attackerHp: number;
   attackerMaxHp: number;
   currentWeather: AiWeatherValue | undefined;
+  staleFuncResultFallback: AiWeatherValue | undefined;
 }>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
   const scoreDelta = weatherSetterCvScore({
     attackerHp: input.attackerHp,
     attackerMaxHp: input.attackerMaxHp,
     currentWeather: input.currentWeather,
+    staleFuncResultFallback: input.staleFuncResultFallback,
     otherThree: SUNNY_DAY_OTHER_THREE,
   });
   return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta });
@@ -2368,11 +2381,13 @@ function runCvHail(input: Readonly<{
   attackerHp: number;
   attackerMaxHp: number;
   currentWeather: AiWeatherValue | undefined;
+  staleFuncResultFallback: AiWeatherValue | undefined;
 }>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
   const scoreDelta = weatherSetterCvScore({
     attackerHp: input.attackerHp,
     attackerMaxHp: input.attackerMaxHp,
     currentWeather: input.currentWeather,
+    staleFuncResultFallback: input.staleFuncResultFallback,
     otherThree: HAIL_OTHER_THREE,
   });
   return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta });
@@ -2415,6 +2430,7 @@ function runCvRainDance(input: Readonly<{
   rng: BattleRngState;
   attacker: FactoryAiCheckViabilityBattler;
   target: FactoryAiCheckViabilityBattler;
+  staleFuncResultFallback: AiWeatherValue | undefined;
   drawOrdinalStart: number;
   reasonPrefix: string;
 }>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
@@ -2447,10 +2463,17 @@ function runCvRainDance(input: Readonly<{
     return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: 1 });
   }
 
+  // Gate S's own `get_ability AI_USER` (data/battle_ai_scripts.s:2039)
+  // overwrites funcResult with the AI's own ability id whenever it runs (not
+  // user-faster, whether or not that ability turned out to be Swift Swim) --
+  // this port doesn't model that read as its own stale-funcResult channel,
+  // so the TryToFaint carry is only known-valid for the shared span's own
+  // `get_weather` when Gate P's jump skipped Gate S entirely (user-faster).
   const spanScore = weatherSetterCvScore({
     attackerHp: input.attacker.hp,
     attackerMaxHp: input.attacker.maxHp,
     currentWeather: input.attacker.currentWeather,
+    staleFuncResultFallback: userFaster ? input.staleFuncResultFallback : undefined,
     otherThree: RAIN_DANCE_OTHER_THREE,
   });
   if (spanScore !== 0) {
@@ -2468,6 +2491,16 @@ export function runCheckViability(input: Readonly<{
   moveId: number;
   attacker: FactoryAiCheckViabilityBattler;
   target: FactoryAiCheckViabilityBattler;
+  /**
+   * `get_weather`'s own stale-`funcResult` fallback, Channel 2 (doc
+   * §25.10.1) -- forwarded to the weather-trio handlers below only, and only
+   * when `attacker.currentWeather` is itself unset. The caller
+   * (`factoryAiDecisionPolicy.ts`) supplies a concrete value only for the
+   * pass's own first actually-scripted slot, where it alone can prove no AI
+   * script command has touched `funcResult` since `AI_TryToFaint`'s pass
+   * ended. Optional, defaulting to `undefined` (no known carry).
+   */
+  staleFuncResultFallback?: AiWeatherValue;
   drawOrdinalStart: number;
   reasonPrefix: string;
 }>): FactoryAiCheckViabilityResult {
@@ -2856,6 +2889,7 @@ export function runCheckViability(input: Readonly<{
       attackerHp: input.attacker.hp,
       attackerMaxHp: input.attacker.maxHp,
       currentWeather: input.attacker.currentWeather,
+      staleFuncResultFallback: input.staleFuncResultFallback,
     });
     return Object.freeze({
       kind: "scored",
@@ -2872,6 +2906,7 @@ export function runCheckViability(input: Readonly<{
       attackerHp: input.attacker.hp,
       attackerMaxHp: input.attacker.maxHp,
       currentWeather: input.attacker.currentWeather,
+      staleFuncResultFallback: input.staleFuncResultFallback,
     });
     return Object.freeze({
       kind: "scored",
@@ -2888,6 +2923,7 @@ export function runCheckViability(input: Readonly<{
       rng: input.rng,
       attacker: input.attacker,
       target: input.target,
+      staleFuncResultFallback: input.staleFuncResultFallback,
       drawOrdinalStart: input.drawOrdinalStart,
       reasonPrefix: input.reasonPrefix,
     });

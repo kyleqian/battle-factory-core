@@ -22,6 +22,9 @@ import {
 import { advanceRngValue } from "./rng.ts";
 import {
   runCheckBadMovePreamble,
+  AI_WEATHER_RAIN,
+  AI_WEATHER_SANDSTORM,
+  AI_WEATHER_SUN,
   type AiWeatherValue,
   type FactoryAiCheckBadMoveAttacker,
   type FactoryAiCheckBadMoveDraw,
@@ -29,6 +32,7 @@ import {
 } from "./factoryAiCheckBadMove.ts";
 import {
   runTryToFaint,
+  type FactoryAiMostPowerful,
   type FactoryAiTryToFaintBattler,
   type FactoryAiTryToFaintDraw,
   type FactoryAiTryToFaintTarget,
@@ -654,12 +658,38 @@ function scoredViewAt(value: unknown): FactoryAiScoredView {
 }
 
 /**
- * Mask-1/mask-7 Factory move chooser: setup (identical to mask 0) + per-slot
- * `AI_CheckBadMove` (always), then -- mask 7 only -- `AI_TryToFaint` and
- * `AI_CheckViability`, in that fixed source order (`gBattleAI_ScriptsTable`,
- * §1.1), then the same unconditional tie draw. A slot whose script halts on
- * a named unsupported-branch barrier fails the whole decision loudly (no
- * score can be computed for that slot) rather than silently no-op'ing.
+ * `Cmd_get_how_powerful_move_is`'s own `funcResult` write
+ * (`battle_ai_script_commands.c:1228-1236`) -- `MOVE_MOST_POWERFUL`(2),
+ * `MOVE_NOT_MOST_POWERFUL`(1), `MOVE_POWER_OTHER`(0)
+ * (`include/constants/battle_ai.h:33-35`) numerically double as
+ * `AI_WEATHER_SANDSTORM`/`RAIN`/`SUN` respectively -- the numeric collision
+ * `get_weather`'s stale-read bug (Channel 2, doc §25.10.1) rides on when
+ * `AI_TryToFaint`'s pass runs immediately before `AI_CheckViability`'s own.
+ */
+const MOST_POWERFUL_TO_FUNC_RESULT: Readonly<Record<FactoryAiMostPowerful, AiWeatherValue>> = Object.freeze({
+  "power-other": AI_WEATHER_SUN,
+  "not-most-powerful": AI_WEATHER_RAIN,
+  "most-powerful": AI_WEATHER_SANDSTORM,
+});
+
+/**
+ * Mask-1/mask-7 Factory move chooser: setup (identical to mask 0) + three
+ * full logic-ID-major passes over all 4 movesetIndex slots -- `AI_CheckBadMove`
+ * (always), then -- mask 7 only -- `AI_TryToFaint`, then `AI_CheckViability`
+ * -- matching the real ROM's own `ChooseMoveOrAction_Singles`/
+ * `BattleAI_DoAIProcessing` loop (`battle_ai_script_commands.c:395-416,
+ * 572-616`: one `aiLogicId` runs to completion across all 4 slots before the
+ * next logic ID starts), not the per-slot interleave (CBM0,TTF0,CV0,CBM1,...)
+ * this function used to run (ISSUES #47). `AI_THINKING_STRUCT->funcResult` is
+ * never reset within a decision (`BattleAI_SetupAIData` zeroes it once, before
+ * `aiLogicId` 0 starts) -- `ttfExitFuncResult`/`cvCarryStillIntact` below
+ * thread the one Factory-reachable consequence of that (Channel 2's stale
+ * `get_weather` read at the CV pass's own first scripted slot; see
+ * `weatherSetterCvScore`'s own fallback param in `factoryAiCheckViability.ts`)
+ * without claiming to model every handler's own `funcResult` side effects. A
+ * slot whose script halts on a named unsupported-branch barrier fails the
+ * whole decision loudly (no score can be computed for that slot) rather than
+ * silently no-op'ing.
  */
 export function chooseFactoryAiScoredDecision(input: Readonly<{
   view: FactoryAiScoredView;
@@ -754,68 +784,107 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
   ];
   if (mask === 7) executedScoringScripts.push("try-to-faint", "check-viability");
 
-  const slotScores: FactoryAiScoredSlot[] = [];
+  type ScoredSlotAccumulator = {
+    moveSlot: BattleMoveSlot;
+    moveId: number;
+    legal: boolean;
+    checkBadMoveDelta: number | null;
+    tryToFaintDelta: number | null;
+    checkViabilityDelta: number | null;
+  };
+  const slotAccumulators: ScoredSlotAccumulator[] = [];
   for (let slot = 0; slot < MAX_MON_MOVES; slot += 1) {
     const moveSlot = slot as BattleMoveSlot;
-    const moveId = view.moves[moveSlot];
-    const legal = legalBySlot.has(moveSlot);
-    if (!legal) {
-      slotScores.push(Object.freeze({
-        moveSlot,
-        moveId,
-        legal,
-        initialScore: DEFAULT_MOVE_SCORE,
-        checkBadMoveDelta: null,
-        tryToFaintDelta: null,
-        checkViabilityDelta: null,
-        finalScore: 0,
-      }));
-      continue;
-    }
+    slotAccumulators.push({
+      moveSlot,
+      moveId: view.moves[moveSlot],
+      legal: legalBySlot.has(moveSlot),
+      checkBadMoveDelta: null,
+      tryToFaintDelta: null,
+      checkViabilityDelta: null,
+    });
+  }
 
+  // Pass 1: AI_CheckBadMove, movesetIndex 0..3 (always -- mask 1 or 7). An
+  // illegal slot's `moveConsidered` is 0 in the real ROM (BattleAI_DoAIProcessing,
+  // `:591-598`), which runs no AI command at all for that slot in any logic
+  // ID -- `funcResult` stays untouched, matching this port's own `continue`.
+  for (const slotAcc of slotAccumulators) {
+    if (!slotAcc.legal) continue;
     const cbm = runCheckBadMovePreamble({
       rng,
-      moveId,
+      moveId: slotAcc.moveId,
       target: targetForCbm,
       attacker: attackerForCbm,
       drawOrdinalStart: draws.length + 1,
-      reasonPrefix: `slot-${slot}-check-bad-move`,
+      reasonPrefix: `slot-${slotAcc.moveSlot}-check-bad-move`,
     });
     if (cbm.kind === "unsupported-branch") {
       throw new Error(
-        `Factory AI check-bad-move barrier: slot ${slot} move ${moveId} effect ${cbm.effect}`,
+        `Factory AI check-bad-move barrier: slot ${slotAcc.moveSlot} move ${slotAcc.moveId} effect ${cbm.effect}`,
       );
     }
     rng = cbm.rng;
     for (const draw of cbm.draws) {
-      draws.push(Object.freeze({ ...draw, phase: "check-bad-move" as const, moveSlot }));
+      draws.push(Object.freeze({ ...draw, phase: "check-bad-move" as const, moveSlot: slotAcc.moveSlot }));
     }
-    let score = DEFAULT_MOVE_SCORE + cbm.scoreDelta;
-    let tryToFaintDelta: number | null = null;
-    let checkViabilityDelta: number | null = null;
+    slotAcc.checkBadMoveDelta = cbm.scoreDelta;
+  }
 
-    if (mask === 7) {
+  // `get_weather`'s own stale-`funcResult` carry from AI_TryToFaint's pass
+  // into AI_CheckViability's pass, Channel 2 (doc §25.10.1) -- the funcResult
+  // value TryToFaint's own last-processed slot that actually invoked
+  // `get_how_powerful_move_is` left behind. `Cmd_if_can_faint` never touches
+  // `funcResult` (`battle_ai_script_commands.c:1743-1770`), so a can-faint
+  // slot (where `get_how_powerful_move_is` never runs) leaves the running
+  // value from its predecessor untouched -- `runTryToFaint`'s own
+  // `mostPowerful: null` return already signals exactly that case.
+  let ttfExitFuncResult: AiWeatherValue | undefined;
+
+  if (mask === 7) {
+    // Pass 2: AI_TryToFaint, movesetIndex 0..3.
+    for (const slotAcc of slotAccumulators) {
+      if (!slotAcc.legal) continue;
       const ttf = runTryToFaint({
         rng,
-        moveId,
-        movesetIndex: moveSlot,
+        moveId: slotAcc.moveId,
+        movesetIndex: slotAcc.moveSlot,
         moveset: view.moves,
         simulatedRng,
         attacker: view.attacker as FactoryAiTryToFaintBattler,
         target: view.target as FactoryAiTryToFaintTarget,
         drawOrdinalStart: draws.length + 1,
-        reasonPrefix: `slot-${slot}-try-to-faint`,
+        reasonPrefix: `slot-${slotAcc.moveSlot}-try-to-faint`,
       });
       rng = ttf.rng;
       for (const draw of ttf.draws) {
-        draws.push(Object.freeze({ ...draw, phase: "try-to-faint" as const, moveSlot }));
+        draws.push(Object.freeze({ ...draw, phase: "try-to-faint" as const, moveSlot: slotAcc.moveSlot }));
       }
-      score += ttf.scoreDelta;
-      tryToFaintDelta = ttf.scoreDelta;
+      slotAcc.tryToFaintDelta = ttf.scoreDelta;
+      if (ttf.mostPowerful !== null) {
+        ttfExitFuncResult = MOST_POWERFUL_TO_FUNC_RESULT[ttf.mostPowerful];
+      }
+    }
 
+    // Pass 3: AI_CheckViability, movesetIndex 0..3. `AI_CheckViability`'s own
+    // preamble (`data/battle_ai_scripts.s:652-655`, `if_target_is_ally
+    // AI_Ret`) never itself writes `funcResult`, so the FIRST slot this pass
+    // actually scripts (movesetIndex resets to 0 entering every new
+    // `aiLogicId`, `battle_ai_script_commands.c:411-413`) reads exactly the
+    // TryToFaint pass's own exit value above. This port doesn't audit every
+    // `AI_CV_*` handler's own `funcResult` side effects, so once one slot's
+    // real handler has run, the carry is no longer provably intact for the
+    // next slot and is not threaded further -- a weather move sitting behind
+    // another real move's own CV dispatch (movesetIndex 1-3) is the one
+    // remaining gap named in ISSUES #47.
+    let cvCarryStillIntact = true;
+    for (const slotAcc of slotAccumulators) {
+      if (!slotAcc.legal) continue;
+      const staleFuncResultFallback = cvCarryStillIntact ? ttfExitFuncResult : undefined;
+      cvCarryStillIntact = false;
       const cv = runCheckViability({
         rng,
-        moveId,
+        moveId: slotAcc.moveId,
         attacker: {
           speed: view.attacker.speed,
           speedStage: view.attacker.statStages.speed,
@@ -850,33 +919,51 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
           isLeechSeeded: view.target.isLeechSeeded,
           isCursed: view.target.isCursed,
         },
+        staleFuncResultFallback,
         drawOrdinalStart: draws.length + 1,
-        reasonPrefix: `slot-${slot}-check-viability`,
+        reasonPrefix: `slot-${slotAcc.moveSlot}-check-viability`,
       });
       if (cv.kind === "unsupported-branch") {
         throw new Error(
-          `Factory AI check-viability barrier: slot ${slot} move ${moveId} effect ${cv.effect}`,
+          `Factory AI check-viability barrier: slot ${slotAcc.moveSlot} move ${slotAcc.moveId} effect ${cv.effect}`,
         );
       }
       rng = cv.rng;
       for (const draw of cv.draws) {
-        draws.push(Object.freeze({ ...draw, phase: "check-viability" as const, moveSlot }));
+        draws.push(Object.freeze({ ...draw, phase: "check-viability" as const, moveSlot: slotAcc.moveSlot }));
       }
-      score += cv.scoreDelta;
-      checkViabilityDelta = cv.scoreDelta;
+      slotAcc.checkViabilityDelta = cv.scoreDelta;
     }
-
-    slotScores.push(Object.freeze({
-      moveSlot,
-      moveId,
-      legal,
-      initialScore: DEFAULT_MOVE_SCORE,
-      checkBadMoveDelta: cbm.scoreDelta,
-      tryToFaintDelta,
-      checkViabilityDelta,
-      finalScore: score,
-    }));
   }
+
+  const slotScores: FactoryAiScoredSlot[] = slotAccumulators.map((slotAcc) => {
+    if (!slotAcc.legal) {
+      return Object.freeze({
+        moveSlot: slotAcc.moveSlot,
+        moveId: slotAcc.moveId,
+        legal: false,
+        initialScore: DEFAULT_MOVE_SCORE,
+        checkBadMoveDelta: null,
+        tryToFaintDelta: null,
+        checkViabilityDelta: null,
+        finalScore: 0,
+      });
+    }
+    const finalScore = DEFAULT_MOVE_SCORE
+      + (slotAcc.checkBadMoveDelta ?? 0)
+      + (slotAcc.tryToFaintDelta ?? 0)
+      + (slotAcc.checkViabilityDelta ?? 0);
+    return Object.freeze({
+      moveSlot: slotAcc.moveSlot,
+      moveId: slotAcc.moveId,
+      legal: true,
+      initialScore: DEFAULT_MOVE_SCORE,
+      checkBadMoveDelta: slotAcc.checkBadMoveDelta,
+      tryToFaintDelta: slotAcc.tryToFaintDelta,
+      checkViabilityDelta: slotAcc.checkViabilityDelta,
+      finalScore,
+    });
+  });
 
   const legalScores = slotScores.filter((slot) => slot.legal);
   const bestScore = Math.max(...legalScores.map((slot) => slot.finalScore));
