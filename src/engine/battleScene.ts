@@ -536,6 +536,7 @@ import kadabraFrontSpriteAsset from "../animation/assets/kadabra-front.json" wit
 import knockOffAsset from "../animation/assets/knock-off.json" with { type: "json" };
 import recoverAsset from "../animation/assets/recover.json" with { type: "json" };
 import milkDrinkAsset from "../animation/assets/milk-drink.json" with { type: "json" };
+import supersonicAsset from "../animation/assets/supersonic.json" with { type: "json" };
 import menuHealthboxPlayerAsset from "../assets/gen/menu-healthbox-player.json" with { type: "json" };
 import summaryBallAsset from "../assets/gen/summary-ball.json" with { type: "json" };
 import battleAnimBallOpenAsset from "../assets/gen/battle-anim-ball-open.json" with { type: "json" };
@@ -626,6 +627,7 @@ import {
   sceneOnGrowthView,
   sceneOnRecoverView,
   sceneOnMilkDrinkView,
+  sceneOnSupersonicView,
   sceneOnFutureSightView,
   sceneOnConfusionView,
   sceneOnPsychicView,
@@ -905,6 +907,11 @@ const milkDrinkArt = milkDrinkAsset as {
   blueStar: { tileset: Tileset; palette: RgbColor[] };
   miltankBack: { tileset: Tileset; palette: RgbColor[] };
   miltankFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const supersonicArt = supersonicAsset as {
+  goldRing: { tileset: Tileset; palette: RgbColor[] };
+  loudredBack: { tileset: Tileset; palette: RgbColor[] };
+  loudredFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const MURKROW_CORNER = { x: 144, y: 19 };
 const menuHealthboxPlayer = menuHealthboxPlayerAsset as SendOutHealthboxContentAsset;
@@ -14960,6 +14967,137 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "IVYSAUR used" : "Foe IVYSAUR used",
       "GROWTH!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SUPERSONIC") {
+    const view = sceneOnSupersonicView(state);
+    // Captured OAM is transferred to the framebuffer one VBlank later.
+    const displayed = sceneOnSupersonicView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "LOUDRED"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "LOUDRED"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged SUPERSONIC pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const loudredSource = playerToOpponent
+      ? supersonicArt.loudredBack
+      : supersonicArt.loudredFront;
+    const loudredSprite = playerToOpponent
+      ? loudredSource
+      : {
+          ...loudredSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: loudredSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const onixSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    if (playerToOpponent) {
+      const idle = speciesFrontIdleRestOffset("ONIX");
+      drawSpriteSheet(
+        fb,
+        onixSprite.tileset,
+        onixSprite.palette,
+        view.target.geometry.spriteCorner.x + (idle?.x2 ?? 0),
+        view.target.geometry.spriteCorner.y + (idle?.y2 ?? 0),
+      );
+      drawSpriteSheet(
+        fb,
+        loudredSprite.tileset,
+        loudredSprite.palette,
+        view.attacker.geometry.spriteCorner.x + displayed.attackerOffset.x2,
+        view.attacker.geometry.spriteCorner.y + displayed.attackerOffset.y2,
+      );
+    } else {
+      drawSpriteSheet(
+        fb,
+        loudredSprite.tileset,
+        loudredSprite.palette,
+        view.attacker.geometry.spriteCorner.x + displayed.attackerOffset.x2,
+        view.attacker.geometry.spriteCorner.y + displayed.attackerOffset.y2,
+      );
+      drawSpriteSheet(
+        fb,
+        onixSprite.tileset,
+        onixSprite.palette,
+        view.target.geometry.spriteCorner.x,
+        view.target.geometry.spriteCorner.y,
+      );
+    }
+    const nonObjTarget2 = fb.slice();
+    for (const ring of displayed.rings) {
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb,
+        nonObjTarget2,
+        supersonicArt.goldRing.tileset,
+        supersonicArt.goldRing.palette,
+        ring.x,
+        ring.y,
+        ring.xScale,
+        0,
+        0,
+        ring.yScale,
+        12,
+        8,
+        true,
+      );
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "LOUDRED";
+    const playerSpecies = playerToOpponent ? "LOUDRED" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "LOUDRED used" : "Foe LOUDRED used",
+      "SUPERSONIC!",
       99,
     );
     return;

@@ -132,6 +132,10 @@ import {
   type MilkDrinkEffectSprite,
 } from "./milkDrink.ts";
 import {
+  supersonicEffectAtAge,
+  type SupersonicRingSprite,
+} from "./supersonic.ts";
+import {
   futureSightAttackerEffectAtAge,
   futureSightBgBldyAtAge,
   futureSightBgIsPsychic,
@@ -244,6 +248,7 @@ export interface SceneOnPresentationBattler {
     | "IVYSAUR"
     | "KADABRA"
     | "MILTANK"
+    | "LOUDRED"
     | "SHUPPET"
     | "PLUSLE";
   readonly geometry: SceneOnBattlerGeometry;
@@ -654,6 +659,13 @@ export interface SceneOnMilkDrinkConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnSupersonicConfig {
+  readonly move: "SUPERSONIC";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnFutureSightConfig {
   readonly move: "FUTURE_SIGHT";
   readonly attacker: SceneOnPresentationBattler;
@@ -709,6 +721,7 @@ export type SceneOnMoveConfig =
   | SceneOnGrowthConfig
   | SceneOnRecoverConfig
   | SceneOnMilkDrinkConfig
+  | SceneOnSupersonicConfig
   | SceneOnFutureSightConfig
   | SceneOnConfusionConfig
   | SceneOnPsychicConfig
@@ -719,6 +732,14 @@ export interface SceneOnMovePresentationState<
 > {
   readonly age: number;
   readonly config: TConfig;
+}
+
+export interface SceneOnSupersonicView {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly attackerOffset: Readonly<{ x2: number; y2: number }>;
+  readonly rings: readonly SupersonicRingSprite[];
 }
 
 export interface SceneOnFirePunchView {
@@ -1529,6 +1550,26 @@ export function sceneOnMilkDrinkView(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age` is ticks since the first `gSupersonicRingSpriteTemplate` creation. */
+export function sceneOnSupersonicView(
+  state: SceneOnMovePresentationState,
+): SceneOnSupersonicView {
+  if (state.config.move !== "SUPERSONIC") {
+    throw new Error(`expected SUPERSONIC presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...supersonicEffectAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+      state.config.target.geometry.animationCenter,
     ),
   };
 }
