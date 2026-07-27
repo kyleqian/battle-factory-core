@@ -1,4 +1,27 @@
 ---
+## 505 — [SUPERVISOR 2026-07-27 ~10:15] round 1 verified + merged; round 2 dispatched
+
+- **State:** master green at **247 files / 3381 tests**, build clean, census
+  byte-identical on the union. Round 1 both lanes landed and verified:
+  main's #47 Channel 2 close (entry 504 below; CV verify script rerun ALL
+  PASS by supervisor on the main tree) ∥ side's ENDTURN_ITEMS1
+  `RESTORE_HP`/`RESTORE_PP` registration (merged from
+  `worker/side-20260727-093552`, worktree/branch cleaned; endturn verify
+  script rerun by supervisor in-worktree, 17/17 ALL PASS incl. the new live
+  Sitrus fixture: hp 45≤57 gate at frame 4571, +30 heal at 4908 with zero
+  new draws, berry consumed next frame). Side's named remainder:
+  RESTORE_PP has Tier-1 + source pinning but no live fixture (2 carriers).
+- **Round 2 (dispatched):** main → §11.3's 5-step `turn4-doubleteam.json`
+  kickoff-phase wiring (new `{message, statChange}` bridge shape keyed on
+  `BattleScript_EffectStatUpAfterAtkCanceler`, acceptance 250/250 preserved
+  + the §11.4 regression sweep) ∥ side → §24.5 recipe-only CV draw sites,
+  DRAW SITE 2 first (cheapest: opponent's own low HP, no mixed kit), then
+  relay-pattern sites as cap allows.
+- **Next:** verify round 2; then §19.5 sites / #47 movesetIndex-1-3
+  remainder as later rounds. (Drift scrub: entry 504's carried "Rung 6/
+  Rung 4 TAUROS" Next item is STALE — the Yawn/Thrash ladder closed 6/6 in
+  entry 502, incl. Rung 4's TAUROS remainder; do not re-brief it.)
+---
 ## 504 — [BOUNDED WORKER 2026-07-27 ~10:10] ISSUES #47 CLOSED for its live-verified shape: logic-ID-major restructure (option a) landed, Channel 2 modeled, 3 staged fixtures reproduce exactly; trimmed to one precisely-scoped, underivable remainder
 
 - **State:** tree green at **247 files / 3376 tests** (+6 over session start
