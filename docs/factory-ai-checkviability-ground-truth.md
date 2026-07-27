@@ -4667,14 +4667,19 @@ handlers' own `<40%` HP gate, confirmed not a confound.
    needs a Swift-Swim-ability species as the opponent, slower than the
    target, with weather held at any non-Rain state (to prove the bypass
    fires even where the normal chain would score 0) — not attempted, no
-   Swift-Swim-ability species chosen this session.
+   Swift-Swim-ability species chosen this session. **Live-verified by a
+   2026-07-27 follow-up side-lane session, see §25.9.**
 2. **`RainDance`'s own Gate R tail bonus** (`ABILITY_RAIN_DISH` → +1 even
    when weather is already Rain or unset): needs a Rain-Dish-ability
    species as the opponent — not attempted. Note this can coexist with
    `AI_CBM_RainDance`'s own `-8` when weather is already Rain (CBM and CV
    are independent score contributions), so a live fixture would show a net
    `-7`, not a clean `+1` — worth flagging so a future worker doesn't expect
-   the same simple pick-flip this addendum's own six fixtures show.
+   the same simple pick-flip this addendum's own six fixtures show. **Live-
+   verified by a 2026-07-27 follow-up side-lane session (weather held at
+   NONE rather than Rain, to isolate Gate R's own +1 cleanly from CBM's -8 —
+   see §25.9 for why "any non-Rain state" in this item's own original text
+   is not quite right).**
 3. **The `<40%` HP-gate branch** (own HP < 40% → `-1`, all three handlers,
    independent of weather): this session's own zero-damage-by-construction
    design (Growl deals no damage, weather moves deal no damage to their own
@@ -4683,10 +4688,19 @@ handlers' own `<40%` HP gate, confirmed not a confound.
    `VitalThrow`'s Machamp-`MOVE_VITAL_THROW`-vs-Anorith recipe, §13/§15,
    86-102 damage / 15-28% remaining, comfortably under 40%) transplants
    directly — just add a real turn-1 hit before the weather-establishing
-   turn.
+   turn. **Live-verified by a 2026-07-27 follow-up side-lane session, see
+   §25.9 — the direct transplant needed one adjustment (Splash instead of
+   Growl for the filler slots, §25.9's own confound note).**
 4. **`get_weather`'s own stale-read bug** (25.1): needs a genuinely
    weatherless battle at the moment a weather-effect move is first
    dispatched, plus a target with a specific ability ID — not attempted.
+   Still not attempted as of the 2026-07-27 follow-up (out of that
+   session's own assigned scope) — two of that session's three fixtures
+   (Gate S, Gate R) *do* run a genuinely weatherless battle at decision
+   time, but both deliberately chose a target ability ID (4, 5) outside
+   `AI_WEATHER_*`'s `0-3` range specifically to avoid tripping this bug as
+   an unwanted confound, so their own passing result does not confirm or
+   deny it — it remains exactly as open as before.
 
 ### 25.7 Verify script status
 
@@ -4702,6 +4716,15 @@ failures, run live this session.** Reproduce with:
 ```sh
 node --experimental-strip-types tools/probe/verify-factory-ai-checkviability-ground-truth.ts
 ```
+
+**2026-07-27 follow-up side-lane session extended it again** with 3 more
+`WEATHER_PICK_SCENARIOS` entries (§25.9) — `WeatherPickScenarioSpec` gained
+optional `beforeFrame`/`afterFrame`/`hpBand` fields so the same runner covers
+the new fixtures' different capture windows and the one fixture that
+*targets* the `<40%` band instead of avoiding it. Every prior scenario
+unchanged and still green. **Full script run live this session: 48 checks
+tail-visible, `ALL PASS`, 0 failures, exit code 0** (the run also re-verified
+all pre-existing scenarios; none regressed).
 
 ### 25.8 Porter's summary — exact handler-by-handler port checklist
 
@@ -4751,3 +4774,225 @@ porter should decide about explicitly (replicate for byte-exact AI parity,
 or clean it up) rather than discover by accident; it only matters for a
 `AI_CheckBadMove`/`AI_CheckViability` weather-effect dispatch on a battle
 that has had **zero** weather set at any point so far this battle.
+
+## 25.9 2026-07-27 follow-up side-lane session: `AI_CV_RainDance`'s Gate S bypass, Gate R tail bonus, and the shared `<40%` HP-gate branch — all 3 of §25.6's remaining items live-verified, engine port confirmed correct
+
+Bounded side-lane worker session (Battle Scene OFF oracle), same no-`src/`
+contract as every addendum above — `factoryAiCheckViability.ts`'s already-
+ported `runCvRainDance`/`runCvSunnyDay`/`runCvHail`/`weatherSetterCvScore`
+(§25.8's own port, landed the same day this addendum's predecessor was
+written) were read **read-only**, exactly to know which branch each new
+fixture needed to light up, per this step's own brief. All three of §25.6's
+still-open items (Gate P/S bypass, Gate R tail bonus, the `<40%` HP gate)
+are closed this session with one fixture apiece (not reach/control pairs,
+given the time budget — causal attribution instead comes from comparing
+against this doc's own well-established `Growl`=0/`Splash`=0 baselines,
+§6/§14/§25.4, rather than a matched control fixture). Item 4
+(`get_weather`'s stale-read bug) remains open, out of this session's own
+assigned scope — see §25.6 item 4's own updated note for why the two
+weatherless fixtures below don't accidentally settle it either way.
+
+### 25.9.1 Species selection: cross-checked against the real dex, not assumed
+
+§25.6's own items 1/2 asked for a single-ability Swift Swim carrier and a
+Rain Dish carrier. Direct grep of `reference/pokeemerald/src/data/pokemon/
+species_info.h` for both abilities (not assumed from memory):
+
+- **Swift Swim, single-ability** (`{ABILITY_SWIFT_SWIM, ABILITY_NONE}`):
+  Horsea, Magikarp, Kingdra, Surskit, Luvdisc, Feebas, Huntail, Gorebyss —
+  all confirmed present in `gBattleFrontierMons`
+  (`reference/pokeemerald/src/data/battle_frontier/battle_frontier_mons.h`),
+  i.e. real Factory rentals. **Huntail** (species 374, base Speed 52 → level
+  50 stat 72) chosen for the Gate S fixture, paired against **Anorith**
+  (390, Battle Armor, base Speed 75 → level 50 stat 95) as target — a clean
+  23-stat non-tied gap, Anorith reused verbatim from every prior addendum.
+- **Rain Dish**: grepping the same file for `ABILITY_RAIN_DISH` at all
+  finds **no single-ability carrier anywhere in Emerald's dex** — Lotad,
+  Lombre, and Ludicolo are the only three species with the ability, and all
+  three pair it with Swift Swim in slot 0 (`{ABILITY_SWIFT_SWIM,
+  ABILITY_RAIN_DISH}`). §25.6 item 1's own "single-ability discipline"
+  request is therefore unsatisfiable for Rain Dish specifically — but per
+  §25.2/§25.3 (already established, re-confirmed by reading
+  `Cmd_get_ability` directly, `src/battle_ai_script_commands.c:1350-1401`
+  this session too): the guessing branch only executes when `gActiveBattler
+  != battler`, which is never true for a `get_ability AI_USER` query (the
+  querying battler *is* `sBattler_AI` by construction) — so Gate S and Gate
+  R's own ability reads take the direct `gBattleMons[battler].ability` path
+  **unconditionally**, regardless of how many abilities the species has.
+  Lotad (295) with `abilitySlot: 1` (the existing `mechanicLab` override
+  field, already used by `tools/battle-lab/mechanic-endturn-raindish-off.json`'s
+  own precedent) deterministically forces Rain Dish with zero guessing risk
+  — used for the Gate R fixture, paired against **Shuckle** (213, Sturdy,
+  base Speed 5 → level 50 stat 25) as target, reused verbatim from every
+  prior weather-trio fixture. Lotad's own level 50 Speed stat (30 base → 50)
+  comfortably exceeds Shuckle's 25, so Gate P (`if_user_faster`) already
+  routes past Gate S before Gate R is ever reached — Lotad's own ability
+  slot 0 (Swift Swim) is never even queried in this fixture, confirming the
+  two gates are independently testable.
+
+### 25.9.2 Why "any non-Rain state" (§25.6 item 1's own original wording) undersells what Gate S's isolation actually needs
+
+Re-deriving from §25.2's own transcribed body rather than trusting item 1's
+paraphrase: `RainDance`'s weather chain (Gates W1-W3) matches **all three
+non-Rain real weather values** (Hail/Sun/Sandstorm) — so staging *any* of
+them would let the ordinary weather chain alone produce `+1`, indistinguishable
+from Gate S's own bypass. The only state that leaves the ordinary chain
+silent (a true `0`, not just "not Rain") is **weather held at `AI_WEATHER_NONE`
+(never established at all this battle)** — Gates W1-W3 only match real
+weather values, and `RainDance`'s own "no weather" fallthrough is 0 same as
+Rain's. Both new ability-gate fixtures (Gate S, Gate R) therefore hold
+weather at `NONE` for the whole trace: a **single real turn** suffices (no
+weather-establishing turn 1 needed at all, unlike every §25.4 fixture),
+reusing this doc's original single-turn `SCENARIOS` capture shape (`[A(2),
+wait(30), A(2), wait(700)]`, `captureFrames [0,100,300,732]`, §6/§13) instead
+of the two-turn mash pattern. This also sidesteps the `get_weather`
+stale-read bug (§25.1) as a live confound: both target species' own ability
+IDs (Anorith/Battle Armor=4, Shuckle/Sturdy=5) sit outside the `AI_WEATHER_*`
+range (`0`-`3`), so even if the bug's stale `funcResult` leaks through
+`AI_CBM_RainDance`'s own `get_weather` call, the subsequent `if_equal
+AI_WEATHER_RAIN` compare can never spuriously match — confirmed not just
+argued, since both fixtures' own `Growl`-vs-`RainDance` net score prediction
+(`+1`) only holds if `AI_CBM_RainDance` truly stays quiet.
+
+### 25.9.3 Fixture design: Gate S (`raindance-gates-swiftswim-reach`) and Gate R (`raindance-gates-raindish-reach`)
+
+Both fixtures: opponent (`AI_USER`, the `RainDance` caster under test)
+moveset `[MOVE_RAIN_DANCE(240), MOVE_GROWL(45) x3]` — `Growl`'s own baseline
+against a Bug-type1 target (Anorith or Shuckle, both established zero via
+`AI_CV_AttackDown`'s own Gate E physical-type-list match, §6/§14/§25.4)
+holds at `0` in a fresh single-turn battle (Gate A: target ATK stage ==
+`DEFAULT_STAT_STAGE`, true at battle start, skips straight past Gates B/C/D1
+to Gate E, which matches Bug type1 immediately, zero draws either way).
+
+- **Gate S** (opponent = Huntail, single-ability Swift Swim, speed 72 <
+  Anorith target's 95 → `userFaster` false → Gate S's own `get_ability
+  AI_USER` finds Swift Swim → **+1**, HP/weather chain never reached at
+  all): predicted net score `+1` (CV) `+ 0` (CBM, weather stays `NONE`) `=
+  +1`, beating `Growl`'s `0` — Rain Dance must win the real turn-1 pick,
+  both seeds.
+- **Gate R** (opponent = Lotad, `abilitySlot: 1` → Rain Dish, speed 50 >
+  Shuckle target's 25 → Gate P already routes past Gate S regardless of
+  ability → HP gate false (full HP) → weather chain: `NONE` isn't
+  Hail/Sun/Sandstorm → falls through to Gate R's own `get_ability AI_USER`
+  → Rain Dish found → **+1**): predicted net score `+1` (CV) `+ 0` (CBM) `=
+  +1` — Rain Dance must win the real turn-1 pick, both seeds.
+
+### 25.9.4 Fixture design: the `<40%` HP-gate branch (`raindance-hpgate-reach`) — a same-turn confound found live, closed by a move swap, not staging
+
+§25.6 item 3's own recipe ("transplant `VitalThrow`'s Machamp-vs-Anorith
+damage-sizing directly, add a real turn-1 hit before the weather-establishing
+turn") was followed **with one change discovered live, not anticipated from
+source alone**. First attempt reused this addendum's own `Growl` filler
+slots verbatim (`[RAIN_DANCE, GROWL x3]` for Anorith, `[VITAL_THROW x4]` for
+Machamp) on the exact two-turn mash trace §25.4/§25.5 already banked
+(`raindance-cvreach`'s own 60-rep segment array, `captureFrames
+[0,700,1600]`). Two problems surfaced empirically:
+
+1. **A same-turn stacking confound, the same class §14.2/§19.2/§24.5 have
+   each independently found once already**: if turn 1's own 4-way tie
+   (`RainDance`/`Growl`×3, all scored `0` at full HP) happens to land on
+   `Growl`, Machamp's own ATK stage drops to 5 — breaking `AI_CV_AttackDown`'s
+   own Gate A precondition (`target ATK stage == DEFAULT_STAT_STAGE`) for
+   turn 2's read, so `Growl`'s own baseline silently shifts from `0` to `-2`
+   depending on which slot won a tie-break outside this fixture's control.
+   **Fix**: swap the 3 filler slots from `Growl` to `MOVE_SPLASH` (150) — a
+   genuine no-op move with no `AI_CheckBadMove`/`AI_CheckViability` dispatch
+   entry at all, so its `0` baseline holds regardless of what turn 1's own
+   tie-break does to it. (Both seeds banked below happened to pick slot 0,
+   `RainDance`, on turn 1 either way — but the fix removes the *dependency*
+   on that, not just this run's luck.)
+2. **The two-turn mash timing itself, re-discovered for a different move
+   than §25.4's own Hail-chip-damage case**: reusing `raindance-cvreach`'s
+   own 60-rep/1600-frame mash verbatim, with `MOVE_VITAL_THROW` in Machamp's
+   own slots instead of a weather move, executes **3 real turns**, not 2 —
+   `MOVE_VITAL_THROW` has fewer message boxes than a weather-setting move
+   (no "It started to rain!"-style text), so the same input budget that
+   safely produces exactly 2 turns for a weather move gets through 3 turns'
+   worth of `VITAL_THROW` dialogue instead, and Machamp's own moveset (all 4
+   slots `VITAL_THROW`, unconditionally) delivers a **second** hit on turn 2
+   that finishes off the already-`<40%` Anorith (34/21 HP against another
+   86-102-damage roll), fainting it and auto-switching in the filler mon
+   before frame 1600 — confirmed empirically with a frame-by-frame sweep
+   (`oppHp` hits `0` and `oppSpecies` flips from 390 to 1 between frames 800
+   and 1200 in an unmodified copy of the 60-rep trace). **Fix**: since Anorith
+   moves first each turn (95 > 75, no tie), its own turn-2 PP decrement is
+   already observable *before* Machamp's own turn-2 hit lands — a
+   **narrower** mash window (35 reps, 700 frames of `[A(2),wait(18)]`, then
+   400 frames of pure silent wait with no further input, so no 3rd turn's
+   own prompt is ever pressed) reads cleanly: `beforeFrame=400` (turn 1
+   fully settled, before turn 2 starts) and `afterFrame=700` (turn 2's own
+   decision already resolved, Anorith not yet fainted). Empirically
+   reconfirmed determinism-stable across 2 reruns × 2 seeds before banking.
+
+Prediction: turn 2, Anorith's own HP is already `<40%` from turn 1's real
+hit — Gate H fires (`if_hp_less_than AI_USER,40`) **before `get_weather` is
+ever called**, so this branch's own `-1` is unconditional regardless of
+whatever weather turn 1's own tie-break happened to leave behind (`RainDance`
+winning turn 1 would set real Rain for 5 turns; irrelevant, since Gate H
+short-circuits ahead of the weather read entirely — confirmed structurally
+from §25.2's own transcribed body, not just asserted). Net score `-1` (CV)
+`+` (`0` or `-8` from CBM, depending on turn 1's leftover weather, both
+comfortably negative either way) `< 0` (`Splash`'s baseline) — `Rain Dance`
+must never win turn 2's pick, `Splash` always does, both seeds.
+
+### 25.9.5 Live ledger — 3 fixtures × 2 seeds = 6/6 exact matches to the predictions above
+
+| Fixture | Seed | Opponent PP (before → after) | Pick | Opponent HP at read |
+| --- | -: | --- | --- | -: |
+| `raindance-gates-swiftswim-reach` (Gate S) | 1 | `[5,40,40,40]`@0 → `[4,40,40,40]`@732 | **Rain Dance (slot 0)** | 130/130 (100%) |
+| `raindance-gates-swiftswim-reach` | 99 | `[5,40,40,40]`@0 → `[4,40,40,40]`@732 | **Rain Dance (slot 0)** | 130/130 (100%) |
+| `raindance-gates-raindish-reach` (Gate R) | 1 | `[5,40,40,40]`@0 → `[4,40,40,40]`@732 | **Rain Dance (slot 0)** | 115/115 (100%) |
+| `raindance-gates-raindish-reach` | 99 | `[5,40,40,40]`@0 → `[4,40,40,40]`@732 | **Rain Dance (slot 0)** | 115/115 (100%) |
+| `raindance-hpgate-reach` (`<40%` HP gate) | 1 | `[4,40,40,40]`@400 → `[4,40,40,39]`@700 | Splash (slot 3), never slot 0 | 34/120 (28%) |
+| `raindance-hpgate-reach` | 99 | `[4,40,40,40]`@400 → `[4,39,40,40]`@700 | Splash (slot 1), never slot 0 | 21/120 (18%) |
+
+**6/6 exact matches, all causally attributable to the exact gate the doc's
+own porter checklist (§25.8) names**: Gate S and Gate R each show Rain Dance
+winning the real turn-1 pick deterministically both seeds (matching the
+predicted `+1` net score against `Growl`'s established `0`); the HP-gate
+fixture shows Rain Dance never touched between the post-turn-1 and
+post-turn-2 reads, with Splash (whichever slot won turn 1's own irrelevant
+tie) taking turn 2 instead, both seeds — and the fixture's own precondition
+(`opponent HP genuinely <40%` by the read frame) is independently confirmed
+live (28%/18% remaining), not just assumed from the hand-computed 86-102
+damage range. **No port bug found** — `runCvRainDance`'s existing
+implementation (`src/engine/factoryAiCheckViability.ts:2414-2463`, ported
+and unit-tested but never before oracle-corroborated on these 3 branches)
+produces exactly the ROM's own behavior on all three previously-recipe-only
+paths. This closes out the "never-live-staged branch hides real port bugs"
+risk this step's brief named (`docs/factory-ai-draw-discrepancy-probe.md`
+§7's `DefenseUp`/`SpDefUp`/`EvasionUp` chained-draw-site precedents) for
+`RainDance` specifically — all 7 of its own conditional gates (P/S/H/W1/W2/
+W3/R) now have live oracle corroboration, not just assembly + unit tests.
+
+### 25.9.6 Verify script status
+
+`tools/probe/verify-factory-ai-checkviability-ground-truth.ts`'s
+`WeatherPickScenarioSpec`/`verifyWeatherPickScenario` (§25.7) extended with
+optional `beforeFrame`/`afterFrame` fields (default `700`/`1600`, unchanged
+for all 6 pre-existing weather-trio fixtures) and an `hpBand` field
+(`"above40"` default, asserting the pre-existing "no HP-gate confound"
+invariant; `"below40"` for this session's own HP-gate fixture, asserting the
+opposite — that the precondition genuinely held). All three new fixtures
+added to `WEATHER_PICK_SCENARIOS` with their own tuned frame windows (`0`/
+`732` for the two single-turn ability-gate fixtures, `400`/`700` for the
+HP-gate fixture, §25.9.4). **Full script run live this session, both
+seeds, twice each for determinism: `ALL PASS`, 0 failures, exit code 0** —
+every prior scenario (§9, §11.5, §12.1, §13.4, §14.6, §15.5, §16.5, §17.7,
+§18.7, §19.7, §20.5, §21.5, §22.6, §23.6, §24.8, §25.7) unchanged and still
+green. Reproduce with:
+
+```sh
+node --experimental-strip-types tools/probe/verify-factory-ai-checkviability-ground-truth.ts
+```
+
+### 25.9.7 What remains open
+
+§25.6 item 4 (`get_weather`'s `AI_WEATHER_NONE` stale-read bug) is
+**unchanged** — still not attempted, still recipe-only, still exactly as
+described there. Both of this session's own weatherless fixtures (Gate S,
+Gate R) deliberately chose target ability IDs (4, 5) outside the bug's
+`0`-`3` collision range specifically to keep it from confounding their own
+results (§25.9.2) — a future worker reproducing it would need the *opposite*
+choice (a target whose ability ID lands inside `0`-`3`) as its own dedicated
+fixture, not a byproduct of these two.

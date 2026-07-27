@@ -1217,6 +1217,28 @@ interface WeatherPickScenarioSpec {
   // slots 1-3, Growl, turn 2; slot 0 is never touched between frame 700 and
   // frame 1600).
   expectedSlot0Wins: boolean;
+  // "before"/"after" capture frames read for the PP-delta check. Default
+  // 700/1600 (the original 2-turn weather-establishing design, §25.4-25.5).
+  // The three RainDance-gate fixtures added by the 2026-07-27 follow-up
+  // side-lane session (§25.6 items 1-3) don't need a pre-existing weather
+  // state, so they use different windows: the two single-turn ability-gate
+  // fixtures (Gate S/Gate R) read 0->732 (this doc's original single-turn
+  // SCENARIOS shape, §6/§13); the HP-gate fixture reads 400->700 (post-
+  // turn-1-settle -> post-turn-2-decision, tuned narrower than 700/1600
+  // because MOVE_VITAL_THROW's own fewer message boxes make the standard
+  // 700/1600 window run long enough for a 3rd real turn to execute and
+  // faint the opponent, corrupting the read -- see the fixture's own doc
+  // section for the empirical timing trace).
+  beforeFrame?: number;
+  afterFrame?: number;
+  // "above40" (default): the HP-gate confound check asserts opponent HP
+  // stays >=40% throughout (every original weather-trio fixture keeps HP
+  // high by construction, isolating the weather-chain branch). "below40":
+  // the 2026-07-27 HP-gate fixture instead *targets* the <40% branch, so the
+  // check is inverted to assert HP legitimately dropped under 40% by the
+  // "after" frame (confirming the gate's own precondition was really met,
+  // not just assumed).
+  hpBand?: "above40" | "below40";
 }
 
 const WEATHER_PICK_SCENARIOS: WeatherPickScenarioSpec[] = [
@@ -1256,6 +1278,38 @@ const WEATHER_PICK_SCENARIOS: WeatherPickScenarioSpec[] = [
     path: "tools/battle-lab/mechanic-factory-ai-cv-hail-cvreach-off.json",
     expectedSlot0Wins: true,
   },
+  // 2026-07-27 follow-up side-lane session: the 3 recipe-only AI_CV_RainDance
+  // branches named in doc §25.6 items 1-3 (Gate P/S Swift Swim bypass, Gate
+  // R Rain Dish tail bonus, the <40% HP-gate branch). All three are single
+  // fixtures (not reach/control pairs) given the step's time budget --
+  // causal attribution instead comes from comparing against this doc's own
+  // well-established Growl=0/Splash=0 baselines (§6/§14/§25.4-25.5), not a
+  // matched control fixture.
+  {
+    label:
+      "AI_CV_RainDance Gate P/S: opponent (AI_USER) = Huntail (374, single ability Swift Swim, speed 72 < Anorith target's 95, so NOT user-faster) -- Gate S's own get_ability AI_USER read finds Swift Swim and bypasses the HP/weather chain entirely, +1 (data/battle_ai_scripts.s:2039-2041); weather never established this battle (stays AI_WEATHER_NONE) so AI_CBM_RainDance's own gate stays quiet (target Anorith's ability id=4, safe from the get_weather AI_WEATHER_NONE stale-read bug documented in doc §25.1: even if the bug fires, funcResult=4 can't equal any of the 0-3 AI_WEATHER_* constants) -- net +1, single turn, Rain Dance must win the real turn-1 pick over 3x Growl(0, Anorith's Bug type1 zeroes AI_CV_AttackDown's own Gate E)",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-raindance-gates-swiftswim-reach-off.json",
+    expectedSlot0Wins: true,
+    beforeFrame: 0,
+    afterFrame: 732,
+  },
+  {
+    label:
+      "AI_CV_RainDance Gate R: opponent (AI_USER) = Lotad (295, abilitySlot 1 forces ABILITY_RAIN_DISH -- no single-ability Rain Dish carrier exists in Emerald's dex, Lotad/Lombre/Ludicolo all pair it with Swift Swim, but Cmd_get_ability's AI_USER read is a direct gBattleMons[].ability read that never guesses regardless of the species' own ability count, doc §25.2/§25.3, so the dual-ability confound that matters elsewhere for AI_TARGET reads does not apply here), speed 50 > Shuckle target's 25 so Gate P already skips Gate S -- weather never established (AI_WEATHER_NONE), the shared weatherSetterCvScore span falls through with 0, Gate R's own get_ability AI_USER finds Rain Dish, +1 (data/battle_ai_scripts.s:2053-2055); AI_CBM_RainDance stays quiet (target Shuckle ability Sturdy id=5, same stale-read safety margin as above) -- net +1, single turn, Rain Dance must win the real turn-1 pick over 3x Growl(0, Shuckle's Bug type1 baseline, §25.4)",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-raindance-gates-raindish-reach-off.json",
+    expectedSlot0Wins: true,
+    beforeFrame: 0,
+    afterFrame: 732,
+  },
+  {
+    label:
+      "AI_CV_RainDance <40% HP gate: opponent (AI_USER) = Anorith (390, Battle Armor, speed 95 > Machamp target's 75 so Gate P skips Gate S regardless of ability) at full HP turn 1, moveset [RAIN_DANCE, SPLASH x3] (Splash instead of Growl for the 3 filler slots -- Growl would itself lower Machamp's own ATK stage if picked turn 1, breaking AI_CV_AttackDown's own Gate A precondition for turn 2's read and confounding the baseline; Splash is a genuine no-op move with no CBM/CV dispatch entry at all, so its 0 baseline holds regardless of what turn 1 does); Machamp (68, all 4 slots MOVE_VITAL_THROW, the §13.2 Anorith/Machamp damage-sizing recipe transplanted verbatim, 86-102 dmg / 15-28% HP remaining, comfortably under the 40% gate) lands turn 1's hit -- turn 2's real decision hits Gate H (own HP<40%) BEFORE weather is ever read, deterministic -1 (data/battle_ai_scripts.s:2043-2044); net negative regardless of what weather turn 1 happened to leave behind (Gate H short-circuits before get_weather is ever called) -- Rain Dance must never win turn 2's pick, Splash always does",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-raindance-hpgate-reach-off.json",
+    expectedSlot0Wins: false,
+    beforeFrame: 400,
+    afterFrame: 700,
+    hpBand: "below40",
+  },
 ];
 
 async function verifyWeatherPickScenario(spec: WeatherPickScenarioSpec): Promise<void> {
@@ -1272,10 +1326,12 @@ async function verifyWeatherPickScenario(spec: WeatherPickScenarioSpec): Promise
       "initial state differs between runs",
     );
 
-    const f700 = run1.get(700)!;
-    const f1600 = run1.get(1600)!;
-    const before = f700.battlers.opponent.pp;
-    const after = f1600.battlers.opponent.pp;
+    const beforeFrame = spec.beforeFrame ?? 700;
+    const afterFrame = spec.afterFrame ?? 1600;
+    const fBefore = run1.get(beforeFrame)!;
+    const fAfter = run1.get(afterFrame)!;
+    const before = fBefore.battlers.opponent.pp;
+    const after = fAfter.battlers.opponent.pp;
 
     const slot0Delta = before[0]! - after[0]!;
     const othersDelta = [1, 2, 3].map((i) => before[i]! - after[i]!);
@@ -1288,24 +1344,38 @@ async function verifyWeatherPickScenario(spec: WeatherPickScenarioSpec): Promise
       );
     } else {
       check(
-        `seed ${seed}: turn-2 pick is NEVER slot 0 -- slot 0 PP untouched, exactly one of slots 1-3 (Growl) drops by 1`,
+        `seed ${seed}: turn-2 pick is NEVER slot 0 -- slot 0 PP untouched, exactly one of slots 1-3 (Growl/Splash) drops by 1`,
         slot0Delta === 0 && othersDelta.filter((d) => d === 1).length === 1 && othersDelta.every((d) => d === 0 || d === 1),
         `observed opponent PP ${JSON.stringify(before)} -> ${JSON.stringify(after)}`,
       );
     }
 
-    // Opponent HP must stay well above the handlers' own <40% gate throughout
-    // (Hail's own end-of-turn chip damage is the only source of HP loss in
-    // these fixtures -- Growl/weather moves never deal damage) so the CV
-    // body's own if_hp_less_than gate stays false in both turns, isolating
-    // the weather-chain branch this fixture actually targets.
-    check(
-      `seed ${seed}: opponent HP stays >=40% through frame 1600 (no HP-gate confound)`,
-      f1600.battlers.opponent.hp >= 0.4 * f0a.battlers.opponent.hp,
-      `opponent HP ${f0a.battlers.opponent.hp} -> ${f1600.battlers.opponent.hp}`,
-    );
+    if (spec.hpBand === "below40") {
+      // The 2026-07-27 HP-gate fixture deliberately drives the opponent
+      // under 40% via a real turn-1 hit (§13.2's Anorith/Machamp Vital
+      // Throw recipe, transplanted verbatim) -- confirm that precondition
+      // actually held live, not just assumed from the hand-computed 86-102
+      // damage range.
+      check(
+        `seed ${seed}: opponent HP is genuinely <40% by frame ${afterFrame} (the HP-gate fixture's own precondition)`,
+        fAfter.battlers.opponent.hp < 0.4 * f0a.battlers.opponent.hp,
+        `opponent HP ${f0a.battlers.opponent.hp} -> ${fAfter.battlers.opponent.hp}`,
+      );
+    } else {
+      // Opponent HP must stay well above the handlers' own <40% gate
+      // throughout (Hail's own end-of-turn chip damage is the only source
+      // of HP loss in these fixtures -- Growl/weather moves never deal
+      // damage) so the CV body's own if_hp_less_than gate stays false in
+      // both turns, isolating the weather-chain branch this fixture
+      // actually targets.
+      check(
+        `seed ${seed}: opponent HP stays >=40% through frame ${afterFrame} (no HP-gate confound)`,
+        fAfter.battlers.opponent.hp >= 0.4 * f0a.battlers.opponent.hp,
+        `opponent HP ${f0a.battlers.opponent.hp} -> ${fAfter.battlers.opponent.hp}`,
+      );
+    }
 
-    console.log(`  seed ${seed}: opponent PP @700=${JSON.stringify(before)} @1600=${JSON.stringify(after)}`);
+    console.log(`  seed ${seed}: opponent PP @${beforeFrame}=${JSON.stringify(before)} @${afterFrame}=${JSON.stringify(after)}`);
   }
 }
 
