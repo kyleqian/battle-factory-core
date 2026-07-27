@@ -264,6 +264,12 @@ import {
   dragonClawAtAge,
   type DragonClawState,
 } from "./dragonClaw.ts";
+import {
+  singNotesBackToFrontAtAge,
+  singPanTaskAtAge,
+  type SingNote,
+  type SingPanTask,
+} from "./sing.ts";
 
 export type SceneOnBattlerSide = "player" | "opponent";
 
@@ -302,7 +308,8 @@ export interface SceneOnPresentationBattler {
     | "PLUSLE"
     | "MINUN"
     | "SABLEYE"
-    | "ALTARIA";
+    | "ALTARIA"
+    | "AZURILL";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -795,6 +802,13 @@ export interface SceneOnDragonClawConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnSingConfig {
+  readonly move: "SING";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnFutureSightConfig {
   readonly move: "FUTURE_SIGHT";
   readonly attacker: SceneOnPresentationBattler;
@@ -860,6 +874,7 @@ export type SceneOnMoveConfig =
   | SceneOnShadowBallConfig
   | SceneOnEncoreConfig
   | SceneOnDragonClawConfig
+  | SceneOnSingConfig
   | SceneOnFutureSightConfig
   | SceneOnConfusionConfig
   | SceneOnPsychicConfig
@@ -907,6 +922,15 @@ export interface SceneOnDragonClawView extends DragonClawState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSingView {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly notes: readonly SingNote[];
+  readonly pan: SingPanTask | null;
+  readonly targetInMonBg: boolean;
 }
 
 export interface SceneOnEarthquakeView extends EarthquakeAnimationState {
@@ -1967,6 +1991,34 @@ export function sceneOnDragonClawView(
       attackerCenter: state.config.attacker.geometry.battlePositionCenter,
       targetCenter: state.config.target.geometry.animationCenter,
     }),
+  };
+}
+
+/** `age=0` is the first active frame of SING's move animation script. */
+export function sceneOnSingView(
+  state: SceneOnMovePresentationState,
+): SceneOnSingView {
+  if (state.config.move !== "SING") {
+    throw new Error(`expected SING presentation, got ${state.config.move}`);
+  }
+  const noteAge = state.age - 7;
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    notes: singNotesBackToFrontAtAge(
+      noteAge,
+      state.config.attacker.geometry.animationCenter,
+      state.config.target.geometry.animationCenter,
+    ),
+    pan: singPanTaskAtAge(noteAge, state.config.attacker.geometry.side),
+    // Task_InitUpdateMonBg hides the target four relative frames after
+    // script activation; Cmd_clearmonbg restores it after the final note.
+    targetInMonBg:
+      state.age >= 4
+      && state.age <= (
+        state.config.attacker.geometry.side === "player" ? 150 : 153
+      ),
   };
 }
 

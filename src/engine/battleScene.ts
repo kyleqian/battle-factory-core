@@ -549,6 +549,7 @@ import calmMindAsset from "../animation/assets/calm-mind.json" with { type: "jso
 import shadowBallAsset from "../animation/assets/shadow-ball.json" with { type: "json" };
 import encoreAsset from "../animation/assets/encore.json" with { type: "json" };
 import dragonClawAsset from "../animation/assets/dragon-claw.json" with { type: "json" };
+import singAsset from "../animation/assets/sing.json" with { type: "json" };
 import menuHealthboxPlayerAsset from "../assets/gen/menu-healthbox-player.json" with { type: "json" };
 import summaryBallAsset from "../assets/gen/summary-ball.json" with { type: "json" };
 import battleAnimBallOpenAsset from "../assets/gen/battle-anim-ball-open.json" with { type: "json" };
@@ -651,6 +652,7 @@ import {
   sceneOnShadowBallView,
   sceneOnEncoreView,
   sceneOnDragonClawView,
+  sceneOnSingView,
   sceneOnFutureSightView,
   sceneOnConfusionView,
   sceneOnPsychicView,
@@ -981,6 +983,11 @@ const dragonClawArt = dragonClawAsset as {
   clawSlash: { tileset: Tileset; palette: RgbColor[] };
   altariaBack: { tileset: Tileset; palette: RgbColor[] };
   altariaFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const singArt = singAsset as {
+  musicNotes: { tileset: Tileset; palettes: RgbColor[][] };
+  azurillBack: { tileset: Tileset; palette: RgbColor[] };
+  azurillFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const MURKROW_CORNER = { x: 144, y: 19 };
 const menuHealthboxPlayer = menuHealthboxPlayerAsset as SendOutHealthboxContentAsset;
@@ -15928,6 +15935,180 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "LUNATONE used" : "Foe LUNATONE used",
       "CALM MIND!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SING") {
+    const view = sceneOnSingView(state);
+    const displayed = sceneOnSingView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "AZURILL"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "AZURILL"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged SING pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const azurillSource = playerToOpponent
+      ? singArt.azurillBack : singArt.azurillFront;
+    const azurill = playerToOpponent
+      ? azurillSource
+      : {
+          ...azurillSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: azurillSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    const onixIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x + onixIdle.x2,
+      view.target.geometry.spriteCorner.y + onixIdle.y2,
+    );
+    const fieldProfile = state.config.fieldProfile;
+    const opponentHealthbox = composeOpponentHealthbox(
+      healthboxAssemblyAssets,
+      {
+        name: playerToOpponent ? "ONIX" : "AZURILL",
+        level: 50,
+        gender: "male",
+        hpFraction: fieldProfile.opponentHp / fieldProfile.opponentMaxHp,
+        status: "none",
+      },
+    );
+    const playerHealthbox = composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerToOpponent ? "AZURILL" : "ONIX",
+      level: 50,
+      gender: "male",
+      hpFraction: fieldProfile.playerHp / fieldProfile.playerMaxHp,
+      status: "none",
+      currentHp: fieldProfile.playerHp,
+      maxHp: fieldProfile.playerMaxHp,
+    });
+    const cycleOnly = (
+      oamIndex: number,
+      declaredWidth: number,
+      x: number,
+      y: number,
+      width: number,
+      height: number,
+    ): GbaObjRaster<RgbColor> => ({
+      oamIndex,
+      priority: 0,
+      mode: "normal",
+      declaredWidth,
+      x,
+      y,
+      width,
+      height,
+      pixels: new Array(width * height).fill(null),
+    });
+    const rasters: GbaObjRaster<RgbColor>[] = [
+      cycleOnly(0, 32, 158, 88, 32, 8),
+      cycleOnly(1, 32, 190, 88, 32, 8),
+      cycleOnly(2, 32, 36, 30, 32, 8),
+      cycleOnly(3, 32, 68, 30, 32, 8),
+      cycleOnly(4, 8, 20, 30, 8, 8),
+      {
+        oamIndex: 5, priority: 0, mode: "normal", declaredWidth: 128,
+        x: PLAYER_HEALTHBOX_FRAME_ORIGIN.x,
+        y: PLAYER_HEALTHBOX_FRAME_ORIGIN.y,
+        ...playerHealthbox,
+      },
+      {
+        oamIndex: 7, priority: 0, mode: "normal", declaredWidth: 128,
+        x: HEALTHBOX_FRAME_ORIGIN.x,
+        y: HEALTHBOX_FRAME_ORIGIN.y,
+        ...opponentHealthbox,
+      },
+      {
+        oamIndex: 9, priority: 2, mode: "normal", declaredWidth: 64,
+        x: view.attacker.geometry.spriteCorner.x,
+        y: view.attacker.geometry.spriteCorner.y,
+        ...spriteSheetRaster(azurill.tileset, azurill.palette),
+      },
+    ];
+    // The monbg copy is already in the BG stack above. Keep the real target
+    // OBJ only across its hardware-visible setup/teardown boundary.
+    const monBgLastAge = playerToOpponent ? 150 : 153;
+    if (state.age <= 5 || state.age >= monBgLastAge + 2) {
+      rasters.push({
+        oamIndex: 10, priority: 2, mode: "normal", declaredWidth: 64,
+        x: view.target.geometry.spriteCorner.x + onixIdle.x2,
+        y: view.target.geometry.spriteCorner.y + onixIdle.y2,
+        ...spriteSheetRaster(onix.tileset, onix.palette),
+      });
+    }
+    const drawNotes = () => {
+      for (const note of displayed.notes) {
+      const current = view.notes.find((candidate) => candidate.index === note.index);
+      if (!current) continue;
+      const frame: Tileset = {
+        columns: 2,
+        rows: 2,
+        tiles: singArt.musicNotes.tileset.tiles.slice(
+          note.tileOffset,
+          note.tileOffset + 4,
+        ),
+      };
+      drawSpriteSheetAffineRotate(
+        fb,
+        // OBJ h/v flip bits are matrix-number bits while affine mode is
+        // active; the positive hardware matrix therefore samples the source
+        // frame unflipped even when the AnimCmd retained a vFlip flag.
+        frame,
+        singArt.musicNotes.palettes[note.paletteIndex]!,
+        note.x,
+        note.y + note.y2,
+        current.affinePaPd,
+        0,
+        0,
+        current.affinePaPd,
+      );
+      }
+    };
+    if (playerToOpponent) drawNotes();
+    const composite = compositeGbaObjScanlines(240, 160, rasters);
+    for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
+      const color = composite.normalPixels[pixel];
+      if (!color) continue;
+      const offset = pixel * 4;
+      fb[offset] = color.r;
+      fb[offset + 1] = color.g;
+      fb[offset + 2] = color.b;
+    }
+    if (opponentToPlayer) {
+      drawNotes();
+      drawSendOutHealthbox(fb, 0, opponentHealthbox);
+      drawComposedPlayerHealthbox(fb, playerHealthbox);
+    }
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "AZURILL used" : "Foe AZURILL used",
+      "SING!",
       99,
     );
     return;

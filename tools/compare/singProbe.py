@@ -63,6 +63,12 @@ def main() -> None:
             "AnimTask_MusicNotesRainbowBlend",
             "AnimTask_MusicNotesClearRainbowBlend",
             "Task_PanFromInitialToTarget",
+            "Task_InitUpdateMonBg",
+            "Task_UpdateMonBg",
+            "Task_ClearMonBg",
+            "sMonAnimTaskIdArray",
+            "sSpritePaletteTags",
+            "sSpriteOrder",
         )
     }
 
@@ -78,6 +84,9 @@ def main() -> None:
 
     def sprite(slot: int) -> dict:
         base = sprites + slot * 0x44
+        attr0 = u16(base)
+        attr1 = u16(base + 2)
+        attr2 = u16(base + 4)
         return {
             "slot": slot,
             "template": oracle.read_u32(base + 0x14),
@@ -91,6 +100,11 @@ def main() -> None:
             "priority": (oracle.read_u8(base + 5) >> 2) & 3,
             "paletteNum": (oracle.read_u8(base + 5) >> 4) & 15,
             "matrixNum": (oracle.read_u8(base + 3) >> 1) & 31,
+            "affineMode": (attr0 >> 8) & 3,
+            "objMode": (attr0 >> 10) & 3,
+            "tileNum": attr2 & 0x3FF,
+            "subpriority": oracle.read_u8(base + 0x43),
+            "invisible": bool(oracle.read_u8(base + 0x3E) & 4),
             "data": [s16(base + 0x2E + index * 2) for index in range(8)],
         }
 
@@ -107,6 +121,16 @@ def main() -> None:
         return result
 
     rows = []
+    battle_mons = oracle.symbols["gBattleMons"]
+
+    def battle_mon(slot: int) -> dict:
+        base = battle_mons + slot * 0x58
+        return {
+            "species": u16(base),
+            "hp": u16(base + 0x28),
+            "maxHp": u16(base + 0x2C),
+            "status1": oracle.read_u32(base + 0x4C),
+        }
 
     def capture(frame: int) -> None:
         snapshot = lab.snapshot()
@@ -123,11 +147,20 @@ def main() -> None:
             "frame": frame,
             "sha256": hashlib.sha256(rgb).hexdigest(),
             "attacker": snapshot["engine"]["activeBattler"],
+            "engine": snapshot["engine"],
+            "battleMons": [battle_mon(slot) for slot in range(2)],
             "animScriptActive": oracle.read_u8(anim_script_active),
             "visualTaskCount": oracle.read_u8(visual_task_count),
             "soundTaskCount": oracle.read_u8(sound_task_count),
             "tasks": active_tasks(),
             "battlerSprites": [sprite(slot) for slot in battler_sprite_slots],
+            "battlerObjTiles": [
+                block(
+                    0x06010000 + sprite(slot)["tileNum"] * 32,
+                    0x800,
+                ).hex()
+                for slot in battler_sprite_slots
+            ],
             "notes": [
                 sprite(slot) for slot in active_slots
                 if oracle.read_u32(sprites + slot * 0x44 + 0x14) == note_template
@@ -155,6 +188,18 @@ def main() -> None:
                 u16(0x5000200 + index * 2) for index in range(256)
             ],
             "hardwareOam": block(0x7000000, 0x400).hex(),
+            "spritePaletteTags": [
+                u16(watched["sSpritePaletteTags"] + index * 2)
+                for index in range(16)
+            ],
+            "monAnimTaskIds": [
+                oracle.read_u8(watched["sMonAnimTaskIdArray"] + index)
+                for index in range(2)
+            ],
+            "spriteOrder": [
+                oracle.read_u8(watched["sSpriteOrder"] + index)
+                for index in range(64)
+            ],
         })
 
     frame = 0

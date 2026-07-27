@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   SING_NOTE_SPAWN_AGES,
+  singNoteAffinePaPdAtLocalAge,
+  singNotesBackToFrontAtAge,
   singNotesAtAge,
   singNoteScaleAtLocalAge,
   singPanTaskAtAge,
@@ -55,6 +57,8 @@ describe("Sing source reducer", () => {
   it("ports the repeating 16-up/16-down affine scale program", () => {
     expect([1, 16, 17, 32, 33].map(singNoteScaleAtLocalAge))
       .toEqual([268, 448, 436, 256, 268]);
+    expect([1, 2, 16, 17, 32, 33].map(singNoteAffinePaPdAtLocalAge))
+      .toEqual([244, 234, 146, 150, 256, 244]);
   });
 
   it("ports both side-relative pan sweep boundaries", () => {
@@ -64,5 +68,18 @@ describe("Sing source reducer", () => {
     expect(singPanTaskAtAge(0, "opponent")).toMatchObject({ currentPan: 61 });
     expect(singPanTaskAtAge(61, "opponent")).toMatchObject({ currentPan: -61 });
     expect(singPanTaskAtAge(62, "opponent")).toBeNull();
+  });
+
+  it("reuses persistent source sprite ordering across exact-y note ties", () => {
+    expect(singNotesBackToFrontAtAge(
+      54,
+      { x: 72, y: 98 },
+      { x: 176, y: 42 },
+    ).map((note) => note.index)).toEqual([1, 2, 0, 3, 4, 5, 6, 8, 7]);
+    expect(singNotesBackToFrontAtAge(
+      90,
+      { x: 176, y: 55 },
+      { x: 72, y: 88 },
+    ).map((note) => note.index)).toEqual([9, 8, 10, 7, 11, 6, 5, 4, 3]);
   });
 });
