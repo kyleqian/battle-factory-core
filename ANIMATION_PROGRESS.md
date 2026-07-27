@@ -44,6 +44,31 @@ animation. A status caused by a move is not part of that move's animation.
   presentation seam and all source- or evidence-required variants are covered.
 - No entry means unsupported.
 
+## Knock Off source-body checkpoint: full relative composition and assets banked; move remains unsupported (2026-07-26)
+
+**Verdict:** no move-level promotion and no framebuffer numerator/denominator
+is claimed. The bounded session did not safely reach shared-seam wiring plus a
+complete dense comparison, so this is an honest material evidence checkpoint,
+not a partial acceptance claim.
+
+**Did:** `knockOff.ts` composes the already-proven horizontal lunge and
+in-place shake reducers with the generic slide reducers, the two-frame
+`AnimKnockOffStrike` orbit/side mirror, the complex-palette epoch, and the
+basic hitsplat lifetime on a source-relative clock derived only from the
+script's delay commands. Tier-1 tests pin the complete player-side epoch and
+the source-declared opponent-side mirrors. A reproducible dev-time extractor
+now writes the only new staged-orientation runtime art:
+`ANIM_TAG_SLAM_HIT_2` and SHUPPET's back sprite. The mechanicLab fixture now
+commits every capture frame 70-130 so the next worker can inspect the full
+lead-in/body/tail rather than only endpoints.
+
+**Narrow remainder:** wire this body through `sceneOnPresentation.ts` and
+`battleScene.ts`; verify the strike affine matrix, palette/OAM display lags,
+same-tick competing slide-helper ordering, hitsplat scale/order, SHUPPET
+corner, healthboxes, and complete framebuffer body against the dense Scene ON
+fixture. Then stage the opposite orientation before exact closure. SUPER_FANG
+and SECRET_POWER remain unsupported and receive no inherited acceptance.
+
 ## Knock Off component checkpoint: lunge + in-place shake ported; move remains unsupported (2026-07-26)
 
 **Verdict:** no move-level promotion and no dense numerator/denominator is
