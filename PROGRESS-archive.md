@@ -1,4 +1,80 @@
 ---
+## 490 — [BOUNDED WORKER 2026-07-26 ~23:45] §18/§22 "5-6 draws not 4" anomaly SOLVED by instrument — real engine gap found, not fixed (probe-only step)
+
+- **State:** tree committed and green at **231 files / 3191 tests** (unchanged
+  from entry 489 — this was an INSTRUMENT/PROBE step, no `src/` edits per
+  scope), `npm run build` clean. Two new files only: `tools/probe/attribute-
+  factory-ai-cv-drawsite-callers.py` and `docs/factory-ai-draw-discrepancy-
+  probe.md` (does NOT edit `docs/factory-ai-checkviability-ground-truth.md`,
+  side-owned this round, per brief).
+- **Did:** attributed, by exact caller, the recurring "5-6 draws where the
+  branch derivation predicts 4" anomaly first flagged at §18.4
+  (`AI_CV_DefenseUp`) and recurring at §22.3-22.4 (`AI_CV_SpDefUp`).
+  **Verdict: real engine port gap, not noise, not outside the AI-decision
+  subsystem.** Extended the precedent probe
+  (`attribute-factory-ai-random-callers.py`) with a second disambiguator:
+  `gAIScriptPtr` (`battle_ai_script_commands.c:154`, EWRAM `0x0203ab38`)
+  still points at the *start* of the firing `if_random_less_than`
+  instruction at the moment `Random()` is entered (`Cmd_if_random_less_than`
+  only advances it after the call returns) — reading it alongside the
+  existing `cpu.lr` read resolves *which* of the AI script's 144
+  `if_random_less_than` sites fired, closing the gap the old probe couldn't
+  (its own caller resolution bottoms out at the one shared C function every
+  site returns through). Root cause, confirmed BOTH by a raw ROM byte
+  disassembly (`arm-none-eabi-nm` label addresses + manual opcode decode
+  against `sBattleAICmdTable`) AND live single-step instrument evidence (5
+  fixture runs, all `PASS`, all fully reconciled): `AI_CV_DefenseUp`'s DRAW
+  SITE 4 (`if_random_less_than 60, ...End`, `:936`) does not cleanly
+  terminate on failure — its fall-through target (`+6` bytes) is DRAW SITE
+  5's *own* instruction (`:938`), byte-for-byte identical for `AI_CV_SpDefUp`
+  (`:1011`/`:1013`). Reaching this branch means 1 draw (23.4%, site4
+  succeeds) or 2 draws (76.6%, site4 fails and chains into site5) **per
+  move-slot invocation** — 4 identical slots × 1-or-2 draws explains the
+  5-8 realized range exactly (doc's observed 5-6/13-14 are ordinary draws
+  from this distribution, not a second anomaly). Confirmed the ported
+  `runCvDefenseUp`/`runCvSpDefUp` (`factoryAiCheckViability.ts:1528-1534`,
+  `:1664-1670`) both draw once at DRAW SITE 4 and return unconditionally —
+  missing the chain into DRAW SITE 5. This is a real behavioral gap, not
+  cosmetic: under-draws `Random()` by 1 whenever site4 fails (~76.6% of the
+  time reached), AND over-applies the -2 score penalty (port's ~76.6% vs
+  the real ROM's ~58.65%, since BOTH rolls must fail for the penalty, not
+  just the first) — a close-score tie could flip which move Factory AI
+  picks. Sized the exact fix shape in the new doc §5 (shared-helper chain,
+  matching both handlers' near-identical bodies) but did NOT implement it
+  or touch the Tier-1 tests that currently pin the wrong "always 4" derived
+  count — out of scope this step, flagged as next-step work. 5 live probe
+  runs this session (all seed 1, window `0 732`, oracle `127.0.0.1:8014`):
+  `defenseup-physicallastmove` (14 total, 6 handler draws, 4×site4+2×site5),
+  `defenseup-lowhp-control` (14 total, same split, second independent
+  fixture), `defenseup-nonphysicallastmove` (8 total, **0** handler draws —
+  negative control, Gate F routes away entirely, confirms the probe doesn't
+  fabricate a draw), `spdefup-cosmicpower-reach` (14 total, same 4×site4+2×
+  site5 split, confirms the SAME shape on the second handler, not just
+  derived by analogy), `spdefup-cosmicpower-control` (8 total, 0 handler
+  draws, negative control mirrors DefenseUp's). All `known-outside`/
+  `hit-chain-proc` caller composition matches §18.4's/§22.4's own prior
+  (coarser) tables exactly — this doesn't contradict the old probe, it
+  resolves what its shared-LR bucket actually was.
+- **Next:** the sized fix from doc §5 — replace both handlers' single-draw
+  DRAW SITE 4 block with the real draw4→(if fail)draw5→(if both fail)-2
+  chain, likely as one shared helper given the two handlers' near-identical
+  bodies (matching entry 489's own `runCvStatDown`-style precedent), then
+  update the Tier-1 tests currently pinning the wrong "always 4" count.
+  Otherwise entry 489's own carried Next list stands: weather trio
+  (RainDance/SunnyDay/Hail, §25, last 3 of 22 CV handlers); §19.5's unstaged
+  AccuracyDown sites 2-6; §24.5's unexercised `AI_CV_EvasionUp` draw sites;
+  ENDTURN_ITEMS2 after Yawn/Thrash.
+- **Notes:** no PAPERCUT. Time went almost entirely into the instrument
+  design + root-cause derivation (byte-level ROM disassembly to compute
+  exact DRAW SITE addresses ahead of the live run, so the single-step pass
+  could positively classify every hit on the first try) rather than
+  breadth — per the brief's own time-split guidance, this fully closes
+  DefenseUp §18.4 AND, with budget left over, independently reproduces the
+  identical finding on SpDefUp §22.3-22.4 live (not just derived by
+  analogy), settling the "2-handler-wide, not a one-off" question the brief
+  posed.
+
+---
 ## 489 — [BOUNDED WORKER 2026-07-26 ~23:10] EvasionUp/EvasionDown CBM+CV pair ported (§24, eleventh pair — largest CV handler in the doc)
 
 - **State:** tree committed and green at **231 files / 3191 tests** (+60 over

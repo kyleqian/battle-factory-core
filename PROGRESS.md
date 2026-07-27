@@ -14,6 +14,108 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > entry 468's animation items are the animation supervisor's backlog now.
 
 ---
+## 493 — [BOUNDED WORKER 2026-07-27 ~00:45] AI_CV_SpeedDownFromChance ported — genuine 22/22 CV handlers now, closing the §14-§25 program
+
+- **State:** tree committed and green at **231 files / 3267 tests** (+23 over
+  entry 492's 3244), `npm run build` clean. Census re-run byte-identical
+  (92/214 effects, 187/355 moves, 150/276 Factory-L50, 1884/2957 weighted,
+  all 32 checks pass, `git status --porcelain docs/executable-frontier-
+  census.md` empty — AI-decision subsystem, not effect-execution).
+  `executableFrontierRatchet.test.ts` unmoved (6/6 green, no new barrier).
+- **CONFIRM-OR-CORRECT (per brief):** `EFFECT_SPEED_DOWN_HIT` had **no**
+  dispatch entry in `factoryAiCheckViability.ts` — it sat only in
+  `AI_CHECK_VIABILITY_TABLE_EFFECTS`'s barriered set (confirmed by grep),
+  i.e. it hit the `"factory-ai-check-viability"` unsupported-branch barrier
+  for every one of its 6 moves before this session. Also checked whether the
+  brief's own framing ("§6's ledger was staged VIA this handler's
+  ICY_WIND/ROCK_TOMB/MUD_SHOT path") was accurate: **it was not** — inspected
+  `tools/battle-lab/mechanic-factory-ai-cv-speeddown-opponent-{faster,
+  slower}-off.json` directly; both dispatch move ID 81 (`MOVE_STRING_SHOT`,
+  `EFFECT_SPEED_DOWN`, a DIRECT dispatch to the already-ported
+  `AI_CV_SpeedDown`), not any of `SpeedDownFromChance`'s 6 covered moves.
+  §10's *recommendation* (stage a future fixture via ICY_WIND to avoid a CBM
+  dependency) got conflated with what §6 actually staged. Net effect: no
+  existing fixture/test exercised this handler's own code before this
+  session, and none of §6's two banked fixtures do even now — flagged below.
+- **Did:** re-derived the handler body from the raw assembly, not the doc's
+  gloss (`reference/pokeemerald/data/battle_ai_scripts.s:1136-1141`): a
+  plain `if_move` literal-ID compare (`Cmd_if_move`, zero `if_random_less_
+  than` sites of its own) against 3 of its 6 covered moves
+  (`MOVE_ICY_WIND`/`MOVE_ROCK_TOMB`/`MOVE_MUD_SHOT`) that `goto`s straight
+  into `AI_CV_SpeedDown`'s own label; the other 3
+  (`MOVE_BUBBLE_BEAM`/`MOVE_CONSTRICT`/`MOVE_BUBBLE`) fall through to `end`
+  (genuine zero). Cross-checked against move data: the 3 redirecting moves
+  all carry `secondaryEffectChance: 100`, the 3 falling through all carry
+  `secondaryEffectChance: 10` — confirms "FromChance" names the in-game move
+  *category*, not anything the handler itself reads; it never inspects a
+  chance datum, only the literal move ID. `factoryAiCheckViability.ts`:
+  added `runCvSpeedDownFromChance` — calls `runCvSpeedDown(input)` directly
+  for the 3 redirect moves (no duplicated gate/roll logic, per brief), else
+  returns zero score/zero draws — and wired `EFFECT_SPEED_DOWN_HIT` to it in
+  `runCheckViability`, ahead of the barrier check. **No new input field
+  needed** in `FactoryAiCheckViabilityBattler`/`FactoryAiScoredBattlerView`/
+  `factoryAiDecisionPolicy.ts` (confirmed by grep): `moveId` was already
+  plumbed through the one production construction site for the
+  `MOVES_BY_ID` lookup every handler dispatch uses. Corrected two stale
+  doc-comments while in the area: this file's own top-of-file comment
+  ("except five, dispatched before that barrier check" — already stale
+  before this session, long past five) now cites the doc's §5 table instead
+  of a numeral that always drifts; `factoryAiCheckBadMove.ts`'s top comment
+  wrongly claimed the weather-trio session already "completes all 22
+  reachable `AI_CV_*` handlers" (it completed the 12th and last CBM-blocked
+  *pair*; `SpeedDownFromChance` is CV-only-reachable, no CBM counterpart,
+  and is the actual 22nd/last — landed this session).
+- **Tests:** `tests/factoryAiCheckViability.test.ts` 253→273 (+20): both
+  redirect branches (deterministic -3 / probabilistic 0 or +2) × all 3
+  redirecting moves, the shared speed-tie quirk, both fall-through branches
+  × all 3 non-redirecting moves (zero score/draws regardless of relative
+  speed), and a redirect-equivalence check (Icy Wind's post-gate result is
+  byte-identical to `MOVE_STRING_SHOT`'s own direct `EFFECT_SPEED_DOWN`
+  dispatch, same rng/battlers, across all 3 branch shapes).
+  `tests/factoryAiScoredDecision.test.ts` 106→109 (+3): real mask-7
+  dispatcher (`chooseFactoryAiScoredDecision`) end-to-end coverage of the
+  new `EFFECT_SPEED_DOWN_HIT` wiring (Icy Wind redirect, both speed
+  directions; Bubblebeam fall-through, both directions), scoped to the
+  check-viability phase's own draws/delta rather than total draw counts
+  (Icy Wind is a real 55-power move whose Ice-vs-Ground/Ground matchup can
+  also engage `AI_TryToFaint`'s own orthogonal x4-effective gate). **Named
+  gap, explicitly flagged in-file:** no live-oracle fixture exists for any
+  of `SpeedDownFromChance`'s 6 moves (checked `tools/battle-lab/` — none
+  named `speeddownfromchance*`), and creating one was out of this step's
+  scope (`tools/battle-lab` fixtures are read-only per the brief) — the
+  mask-7 coverage above is real dispatcher coverage, not a banked live
+  ledger the way §6's own two fixtures are. Ran §6's two existing fixture-
+  reproduction tests as a regression check only (still green, confirming
+  the new dispatch branch didn't disturb `EFFECT_SPEED_DOWN`'s neighboring
+  direct-dispatch path) — they do not newly cover this handler.
+- **Recount vs the doc's own §5 table: 22/22, true this time.** All 22
+  reachable `AI_CV_*` handlers named in
+  `docs/factory-ai-checkviability-ground-truth.md` §5 now have a dispatch
+  entry in `factoryAiCheckViability.ts`. This does **not** mean the whole
+  `AI_CheckViability` script is ported — §5's 22 are the subset with ≥1
+  currently-executable triggering move; ~68 more handlers exist in the full
+  90-handler dispatch table (doc §0 item 2, audit §3) and remain barriered,
+  a separate uncounted phase.
+- **Next:** the §14-§25 program (all 22 reachable CV handlers) is complete;
+  no further `AI_CV_*` work is scoped by that doc. Carried from entry 492:
+  §19.5's unstaged `AccuracyDown` sites 2-6; §24's own follow-up (a live
+  oracle fixture for `AI_CV_EvasionUp`'s toxic-poisoned + own-HP<=50%
+  branch); §25.6's 4 not-staged-live items (Swift Swim bypass, Rain Dish
+  tail, the `<40%` HP-gate branch, `get_weather`'s `AI_WEATHER_NONE`
+  stale-read bug — all covered by Tier-1 tests, none live-oracle-verified);
+  a new one from this session: a live-oracle fixture for
+  `AI_CV_SpeedDownFromChance` itself (ICY_WIND-redirect and BUBBLE_BEAM-
+  fall-through variants, Dugtrio/Shuckle-shaped like §6's own) would upgrade
+  this step's mask-7 pipeline coverage to a banked ledger — fixture
+  authoring is side-lane/out-of-this-lane's-current-scope work, not main's;
+  ENDTURN_ITEMS2 after Yawn/Thrash remains the next MAIN-lane program item.
+- **Notes:** no PAPERCUT. Landed well inside the cap, as briefed (smallest
+  port of the program) — spent the saved time on the confirm-or-correct
+  (the brief's own §6-staging claim didn't hold up) and on closing two
+  stale doc-comments discovered while reading the surrounding code, rather
+  than leaving them to compound.
+
+---
 ## 492 — [BOUNDED WORKER 2026-07-27 ~00:15] §25 weather-trio CBM+CV pair ported (RainDance/SunnyDay/Hail) — 21/22 CV handlers now ported, NOT 22/22 (one real handler remains, see Next)
 
 - **State:** tree committed and green at **231 files / 3244 tests** (+49
@@ -197,80 +299,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   named remainder) and land its own fix + tests green, with the doc/
   PROGRESS writeup absorbing the reserved tail.
 
----
-## 490 — [BOUNDED WORKER 2026-07-26 ~23:45] §18/§22 "5-6 draws not 4" anomaly SOLVED by instrument — real engine gap found, not fixed (probe-only step)
-
-- **State:** tree committed and green at **231 files / 3191 tests** (unchanged
-  from entry 489 — this was an INSTRUMENT/PROBE step, no `src/` edits per
-  scope), `npm run build` clean. Two new files only: `tools/probe/attribute-
-  factory-ai-cv-drawsite-callers.py` and `docs/factory-ai-draw-discrepancy-
-  probe.md` (does NOT edit `docs/factory-ai-checkviability-ground-truth.md`,
-  side-owned this round, per brief).
-- **Did:** attributed, by exact caller, the recurring "5-6 draws where the
-  branch derivation predicts 4" anomaly first flagged at §18.4
-  (`AI_CV_DefenseUp`) and recurring at §22.3-22.4 (`AI_CV_SpDefUp`).
-  **Verdict: real engine port gap, not noise, not outside the AI-decision
-  subsystem.** Extended the precedent probe
-  (`attribute-factory-ai-random-callers.py`) with a second disambiguator:
-  `gAIScriptPtr` (`battle_ai_script_commands.c:154`, EWRAM `0x0203ab38`)
-  still points at the *start* of the firing `if_random_less_than`
-  instruction at the moment `Random()` is entered (`Cmd_if_random_less_than`
-  only advances it after the call returns) — reading it alongside the
-  existing `cpu.lr` read resolves *which* of the AI script's 144
-  `if_random_less_than` sites fired, closing the gap the old probe couldn't
-  (its own caller resolution bottoms out at the one shared C function every
-  site returns through). Root cause, confirmed BOTH by a raw ROM byte
-  disassembly (`arm-none-eabi-nm` label addresses + manual opcode decode
-  against `sBattleAICmdTable`) AND live single-step instrument evidence (5
-  fixture runs, all `PASS`, all fully reconciled): `AI_CV_DefenseUp`'s DRAW
-  SITE 4 (`if_random_less_than 60, ...End`, `:936`) does not cleanly
-  terminate on failure — its fall-through target (`+6` bytes) is DRAW SITE
-  5's *own* instruction (`:938`), byte-for-byte identical for `AI_CV_SpDefUp`
-  (`:1011`/`:1013`). Reaching this branch means 1 draw (23.4%, site4
-  succeeds) or 2 draws (76.6%, site4 fails and chains into site5) **per
-  move-slot invocation** — 4 identical slots × 1-or-2 draws explains the
-  5-8 realized range exactly (doc's observed 5-6/13-14 are ordinary draws
-  from this distribution, not a second anomaly). Confirmed the ported
-  `runCvDefenseUp`/`runCvSpDefUp` (`factoryAiCheckViability.ts:1528-1534`,
-  `:1664-1670`) both draw once at DRAW SITE 4 and return unconditionally —
-  missing the chain into DRAW SITE 5. This is a real behavioral gap, not
-  cosmetic: under-draws `Random()` by 1 whenever site4 fails (~76.6% of the
-  time reached), AND over-applies the -2 score penalty (port's ~76.6% vs
-  the real ROM's ~58.65%, since BOTH rolls must fail for the penalty, not
-  just the first) — a close-score tie could flip which move Factory AI
-  picks. Sized the exact fix shape in the new doc §5 (shared-helper chain,
-  matching both handlers' near-identical bodies) but did NOT implement it
-  or touch the Tier-1 tests that currently pin the wrong "always 4" derived
-  count — out of scope this step, flagged as next-step work. 5 live probe
-  runs this session (all seed 1, window `0 732`, oracle `127.0.0.1:8014`):
-  `defenseup-physicallastmove` (14 total, 6 handler draws, 4×site4+2×site5),
-  `defenseup-lowhp-control` (14 total, same split, second independent
-  fixture), `defenseup-nonphysicallastmove` (8 total, **0** handler draws —
-  negative control, Gate F routes away entirely, confirms the probe doesn't
-  fabricate a draw), `spdefup-cosmicpower-reach` (14 total, same 4×site4+2×
-  site5 split, confirms the SAME shape on the second handler, not just
-  derived by analogy), `spdefup-cosmicpower-control` (8 total, 0 handler
-  draws, negative control mirrors DefenseUp's). All `known-outside`/
-  `hit-chain-proc` caller composition matches §18.4's/§22.4's own prior
-  (coarser) tables exactly — this doesn't contradict the old probe, it
-  resolves what its shared-LR bucket actually was.
-- **Next:** the sized fix from doc §5 — replace both handlers' single-draw
-  DRAW SITE 4 block with the real draw4→(if fail)draw5→(if both fail)-2
-  chain, likely as one shared helper given the two handlers' near-identical
-  bodies (matching entry 489's own `runCvStatDown`-style precedent), then
-  update the Tier-1 tests currently pinning the wrong "always 4" count.
-  Otherwise entry 489's own carried Next list stands: weather trio
-  (RainDance/SunnyDay/Hail, §25, last 3 of 22 CV handlers); §19.5's unstaged
-  AccuracyDown sites 2-6; §24.5's unexercised `AI_CV_EvasionUp` draw sites;
-  ENDTURN_ITEMS2 after Yawn/Thrash.
-- **Notes:** no PAPERCUT. Time went almost entirely into the instrument
-  design + root-cause derivation (byte-level ROM disassembly to compute
-  exact DRAW SITE addresses ahead of the live run, so the single-step pass
-  could positively classify every hit on the first try) rather than
-  breadth — per the brief's own time-split guidance, this fully closes
-  DefenseUp §18.4 AND, with budget left over, independently reproduces the
-  identical finding on SpDefUp §22.3-22.4 live (not just derived by
-  analogy), settling the "2-handler-wide, not a one-off" question the brief
-  posed.
-
----
