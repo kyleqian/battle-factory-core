@@ -876,6 +876,21 @@
   ],
   "componentTracks": [
     {
+      "id": "play-se1-with-panning",
+      "components": [
+        "task:SoundTask_PlaySE1WithPanning"
+      ],
+      "representatives": [
+        "MOVE_DRAGON_CLAW",
+        "MOVE_SKY_ATTACK",
+        "MOVE_RETURN",
+        "MOVE_FLATTER",
+        "MOVE_LUSTER_PURGE",
+        "MOVE_COSMIC_POWER"
+      ],
+      "goal": "MOVE_DRAGON_CLAW remains unsupported: its complete 137-frame source reducer is component-exact in both player-back and opponent-front ALTARIA orientations (137/137 each) through sceneOnPresentation, but the shared battleScene framebuffer renderer is an explicit 0/137 checkpoint in both orientations. Legal challenge-0 mechanicLab contexts inject complete parties around real Level-50 Factory set-412 ALTARIA_1 data and constrain stock choices without transient state. The reducer covers the forward/reverse attacker palette tasks, ShakeMon, both DragonClawFireSpiral calls, both HorizontalLunge helpers, all 24 FireSpin spawns, both paired claw groups, both target Y-shakes, the two target-pan SoundTask_PlaySE1WithPanning events, and cleanup. No sibling is promoted. SKY ATTACK retains both two-turn selector branches, black/white charge blends and shake, plus sky BG/bird/fade/impact strike. RETURN requires every friendship-power branch, repeated Tail Whip sound tasks, dips/lunges/hitsplats/shakes, and branch-specific timing. FLATTER needs spotlight create/remove, hardware palette fades, vertical dips, 38 confetti sprites, and both attacker/target sound events. LUSTER PURGE needs psychic/white BG transitions, circle and particle blends, six RNG-positioned hitsplats/sounds, target shake, and restore. COSMIC POWER needs non-attacker blends, cosmic BG slide/restore, two granting stars, and its distinct centered/attacker-pan sounds. Each remains unsupported pending independent complete dense framebuffer evidence."
+    },
+    {
       "id": "loop-se-adjust-panning",
       "components": [
         "soundTask:SoundTask_LoopSEAdjustPanning"

@@ -44,6 +44,44 @@ animation. A status caused by a move is not part of that move's animation.
   presentation seam and all source- or evidence-required variants are covered.
 - No entry means unsupported.
 
+## DRAGON CLAW component checkpoint; PlaySE1WithPanning track not promoted (2026-07-27)
+
+**Verdict:** `MOVE_DRAGON_CLAW` remains unsupported. Its complete move-owned
+137-frame source reducer is exact in both player-back and opponent-front
+ALTARIA orientations (**137/137 component frames** each), but the shared-seam
+framebuffer is an explicit **0/137** checkpoint in both. Coverage census and
+ratchets remain unchanged at **34/276 exact, 3 partial, 239 unsupported**.
+
+**Source/probe:** legal challenge-0 mechanicLab contexts inject three complete
+records matching real Level-50 Factory `FRONTIER_MON_ALTARIA_1` set 412
+(Docile, HP/ATK EVs, Cheri Berry) and constrain stock choices to DRAGON CLAW;
+ONIX is constrained to TACKLE. The phase-relative reducer covers both palette
+tasks, attacker ShakeMon, both DragonClawFireSpiral calls, both horizontal
+lunges, all 24 FireSpin sprites, both paired claw groups, both target Y-shakes,
+the two `SE_M_RAZOR_WIND` target-pan PlaySE1 events, and cleanup. The dense
+probe pins tasks, sprites, OAM, registers, palettes, and raw RGB; extracted
+ember/claw/ALTARIA assets are reproducible.
+
+**Bounded remainder:** `sceneOnDragonClawView` is wired, but `battleScene.ts`
+intentionally throws a named component-only checkpoint before drawing. The
+portable comparator therefore reports component **137/137** and framebuffer
+**0/137** in each orientation. Acceptance needs the extracted ALTARIA/Onix
+field chrome, attacker palette blend, FireSpin/claw OAM ordering, global target
+Y offset, and cleanup display latches rendered through the shared seam.
+
+**Sibling audit (no promotions):** SKY ATTACK retains both two-turn
+charge/strike branches and sky/bird/fade/impact body; RETURN retains every
+friendship-power branch and its dips/lunges/hitsplats/shakes; FLATTER retains
+spotlight/hardware fades, dips, 38 confetti sprites, and attacker/target sound
+events; LUSTER PURGE retains psychic/white BG transitions, circle/particle
+blends, six RNG hitsplats/sounds, target shake, and restore; COSMIC POWER
+retains non-attacker blends, cosmic BG slide/restore, two granting stars, and
+distinct centered/attacker-pan sounds. All remain unsupported.
+
+**Controls:** after the final seam wiring, AERIAL ACE remains **232/232**
+player-back and **236/236** opponent-front, KNOCK OFF **59/59** in both
+orientations, and BIND **45/45** in both orientations, all framebuffer-exact.
+
 ## ENCORE legal evidence checkpoint; PlaySE2WithPanning track not promoted (2026-07-27)
 
 **Verdict:** `MOVE_ENCORE` remains unsupported. The source/task reducer is
@@ -113,40 +151,6 @@ portable comparator, and focused Tier-1 tests are committed. Acceptance is
 **148/148 ×2 in both orientations**. After the final renderer change CALM
 MIND remains **101/101**, HARDEN **101/101**, and BIND **45/45**, each in
 both orientations. The animation import boundary did not widen.
-
-## CALM MIND promoted to exact; palette-exclusion track established (2026-07-27)
-
-**Verdict:** `MOVE_CALM_MIND` is exact through the shared Scene-ON seam in
-both required orientations, each reproduced twice. Player-back and opponent-
-front LUNATONE are each **101/101 task/palette/software+hardware-OAM/register/
-raw-RGB and framebuffer frames** (oracle 294-394). Census: **33/276 exact,
-3 partial, 240 unsupported**.
-
-**Source/probe:** complete legal mechanicLab parties stage the real Level-50
-Factory set-327 LUNATONE_2 species, Quiet nature, HP/DEF EV spread, and Lax
-Incense, with CALM MIND and TACKLE legally constrained. The reducer ports
-`BlendBattleAnimPalExclude`'s BG/every-non-attacker selection, attacker-partner
-`monbg`, non-attacker hide/reveal, all three delay-14 shrinking thin rings
-with affine/OBJ-alpha lifetime and low-slot OAM ordering, the reverse palette
-blend, and cleanup. The dense probe pins task data, battler visibility,
-software/hardware OAM, palettes, registers, and raw RGB.
-
-**Sibling audit (no promotions):** SKY ATTACK retains both two-turn branches,
-its distinct selector paths, shake/white-flash charge and sky/bird/impact
-strike; DESTINY BOND needs ghost BG, white shadow, attacker shake, gray blend,
-and restore; HEAL BELL needs its bell, twelve managed notes, three expanding
-ring/palette groups, two sparkling stars, asset boundaries, and blended-ring
-finale; LUSTER PURGE needs the psychic/white BG pipeline, circle/particle
-blends, six random hitsplats, target shake, reverse blend, and cleanup; SILVER
-WIND needs side-specific sliding BUG BGs, splitbgprio/monbg, eighteen sparkles,
-both target-excluding blends, and restore. All remain unsupported without
-independent complete dense move evidence.
-
-**Evidence/controls:** legal fixtures, reproducible extractor, dense probe,
-portable comparator, and focused Tier-1 reducer tests are committed.
-Acceptance is **101/101 ×2 in both orientations**. After the final renderer
-change HARDEN remains **101/101**, SYNTHESIS **130/130**, and BIND **45/45**,
-each in both orientations. The animation import boundary did not widen.
 
 Start with one representative attacker/target. Add variants only when source
 inspection or comparison identifies a dependency: attacker side, front/back

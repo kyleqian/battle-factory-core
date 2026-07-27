@@ -2484,3 +2484,12 @@ Tier-1 tests are committed. Acceptance is **131/131 ×2 in both
 orientations**. After the final renderer change WATER GUN remains **111/111**,
 SUPERSONIC **51/51**, and BIND **45/45**, both orientations; ShakeMon2 and
 the animation import boundary remain green.
+## CALM MIND promoted to exact; palette-exclusion track established (2026-07-27)
+
+`MOVE_CALM_MIND` is exact through the shared Scene-ON seam in both required
+LUNATONE orientations, each reproduced twice at **101/101 component and
+framebuffer frames**. The source reducer covers the complete
+BlendBattleAnimPalExclude/monbg/non-attacker visibility, three shrinking thin
+rings, reverse blend, and cleanup body. SKY ATTACK, DESTINY BOND, HEAL BELL,
+LUSTER PURGE, and SILVER WIND retained distinct remainders and were not
+promoted. See git history for the full former live-ledger entry.
