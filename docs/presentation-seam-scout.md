@@ -608,6 +608,26 @@ already-landed checkpoint conversion is untouched by this session's work.
 > see that session's PROGRESS entry). Read this whole section for the
 > ORIGINAL recon/design record; for current status, trust this note over
 > the prose below.
+>
+> **STATUS UPDATE 2 (2026-07-26, later still): the last residual item is
+> ALSO closed.** `turn4RockSlidePresentationStaging.ts` (new) stages the real
+> turn-4 Onix ROCK_SLIDE -> Grovyle hit chain (41 -> 1), sourcing its own RNG
+> seed from `battle1-grovyle-faint-ram-dump.json`'s already-committed/
+> already-imported `rngLedger` (not a fresh probe) — independently
+> corroborated by `battleScene.ts`'s own `drawTurn4KickoffText` doc comment,
+> which separately cites the exact same 3 ticks for accuracy/crit/damage-lock.
+> `battleScene.ts` wires `drawTurn4RockSlideAttack`/
+> `drawTurn4RockSlideTurnEndSettledMenu`'s HP endpoints, `drawTurn4RockSlideWindow`'s
+> attack text (now `TURN1_ROCKSLIDE_ATTACK_LINE1/2`, byte-identical content),
+> `drawMenuIdleBaseWithOpponentHp`'s `turn4Resolved` arm, and — the residual
+> gap itself — `drawTurn5RockSlideAttack`'s own `rockSlideOpponentHp` `from`
+> endpoint, all off this staged proof instead of the bare
+> `anchorOpponentAfterTurn4Hp` literal. Re-pinned live: `turn4-rockslide.json`
+> 250/250, regression sweep unchanged (`turn5-rockslide.json` 256/256,
+> `turn1-rockslide.json` 256/256, `turn5-faint.json` 110/110,
+> `turn4-doubleteam.json` 250/250, `turn4-menu.json` 44/44,
+> `turn3-rockslide.json` 256/256). §9's own scope is now fully closed — no
+> more residual items.
 
 Read-only recon plus one unwired staging module/test (no `battleScene.ts` or
 other production edit — same contract §8 used for `turn1-rockslide.json`,

@@ -1,4 +1,48 @@
 ---
+## 485 — [SUPERVISOR WIND-DOWN 2026-07-26 ~21:20] session summary
+
+- **State:** tree committed and green at **230 files / 3123 tests**, build
+  green. Census **92/214 effects, 187/355 moves, 150/276 Factory-L50,
+  1884/2957 weighted** (session start: 90/214, 185/355, 148/276,
+  1830/2957), all 32 self-checks pass. Single main worktree, zero unmerged
+  side branches, zero stale worktrees, clean `git status`. **No DEFERRED
+  entries — nothing blocks the next `run-supervisor.sh`.** No usage/rate
+  limits; all 5 workers ran to completion.
+- **Session (3 rounds / 5 workers over 2 lanes + 1 supervisor fix + 1 fold):**
+  - **Round 1:** Counter/Mirror Coat registered end-to-end (entry 482,
+    ISSUES #46 closed, +54 weighted, supervisor-rerun live probe all 8
+    scenarios PASS) ∥ side §22 ground truth (CosmicPower/CalmMind +
+    `AI_CV_SpDefUp`, 4 fixtures, supervisor-rerun verify ALL PASS, Gate F
+    `if_in_bytes` inversion re-verified against raw assembly).
+  - **Round 2:** §22 pair ported (entry 483, ninth pair, 27 tests) ∥ side
+    §23 ground truth (LightScreen/Reflect, 4 fixtures, supervisor-rerun
+    ALL PASS + assembly spot-check of the twin CV bodies/type lists).
+  - **Round 3:** §23 four-handler pair ported (entry 484, tenth pair,
+    29 tests, 13.8 min).
+  - **Supervisor fix (`c4ea1d6`):** round-3 worker flagged that entry 483's
+    `spDefStage` was never wired into `factoryAiDecisionPolicy.ts`'s
+    `attackerForCbm` — maxed SPDEF could not reach the CosmicPower/CalmMind
+    -8 gates in real decisions. Wired + mask-1 regression test (mask 7
+    can't isolate it: `AI_CV_SpDefUp` reads the same stage for its own -1).
+  - **Animation fold (wind-down):** `animation-main` (7 commits: psychic
+    orientation closure, Knock Off components) merged into master; union
+    suite 230/3123 + build green. The animation supervisor was still
+    mid-session at fold time (worker `animation-20260726-205051` live);
+    commits it lands after `960b6b9` fold next session.
+- **Next (in order):** EvasionUp/EvasionDown/weather-trio pairs (the last
+  6 of 22 CV handlers — LightScreen/Reflect done this session); §19.5's
+  unstaged AccuracyDown sites 2-6 (mixed movesets); §18 5-6-draw window
+  discrepancy (now recurring for `SpDefUp` too, §22.3-22.4 — probe
+  candidate, sRandCount attribution); ENDTURN_ITEMS2 after Yawn/Thrash;
+  `SpDefUp`/§23 DRAW SITE recipe-only leftovers. Seam — turn-4
+  `anchorOpponentAfterTurn4Hp` staging gap + seam-scout §9 items (carried
+  from entry 468, untouched again — AI-pair track was prioritized).
+- **Notes:** zero PAPERCUTS flagged by any worker. Established cadence
+  held: paired rounds (main port ∥ side prep-scout for the next pair),
+  supervisor-verified every merge with own reruns. Oracle services fresh
+  all session.
+
+---
 ## 484 — [2026-07-26] LightScreen/Reflect CBM+CV pair ported (§23, tenth pair)
 
 - **State:** tree committed and green at **226 files / 3109 tests** (+28
