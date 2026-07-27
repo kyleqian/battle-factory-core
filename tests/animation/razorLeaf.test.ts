@@ -1,5 +1,9 @@
-import { readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { mkdtempSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import razorLeafAsset from "../../src/animation/assets/razorLeaf.json" with { type: "json" };
 import {
   RAZOR_LEAF_BODY_LAST_AGE,
   RAZOR_LEAF_CUTTER_FIRST_AGE,
@@ -138,5 +142,48 @@ describe("MOVE_RAZOR_LEAF source-relative reducer", () => {
       expect(carrier).toMatchObject({ species: 70, nature: 17 });
       expect(Math.min(...fixture.playerSetIds, ...fixture.opponentSetIds)).toBe(165);
     }
+  });
+
+  it("pins source-derived carrier, particle, and cutter art", () => {
+    expect(razorLeafAsset.source).toMatchObject({
+      weepinbellBack: expect.stringContaining("set 165"),
+      weepinbellFront: expect.stringContaining("SPECIES_WEEPINBELL 70"),
+      leaf: expect.stringContaining("ANIM_TAG_LEAF"),
+      cutter: expect.stringContaining("ANIM_TAG_RAZOR_LEAF"),
+    });
+    expect(razorLeafAsset.weepinbellBack.tileset).toMatchObject({
+      columns: 8,
+      rows: 8,
+    });
+    expect(razorLeafAsset.weepinbellFront.tileset).toMatchObject({
+      columns: 8,
+      rows: 16,
+    });
+    expect(razorLeafAsset.leaf.tileset).toMatchObject({
+      columns: 2,
+      rows: 18,
+    });
+    expect(razorLeafAsset.cutter.tileset).toMatchObject({
+      columns: 4,
+      rows: 2,
+    });
+  });
+
+  it("re-extracts the carrier and both loaded leaf tags byte-for-byte", () => {
+    const directory = mkdtempSync(join(tmpdir(), "razor-leaf-assets-"));
+    const output = join(directory, "razorLeaf.json");
+    execFileSync(
+      process.execPath,
+      [
+        "--experimental-strip-types",
+        "tools/compare/extractRazorLeafAssets.ts",
+        "--out",
+        output,
+      ],
+      { stdio: "pipe" },
+    );
+    expect(readFileSync(output)).toEqual(
+      readFileSync("src/animation/assets/razorLeaf.json"),
+    );
   });
 });
