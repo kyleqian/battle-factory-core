@@ -68,10 +68,10 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // EXPLOSION closes both directions through the shared Scene-ON seam.
-        unsupported: 227,
+        // DYNAMIC PUNCH adds complete component evidence but remains partial.
+        unsupported: 226,
         staged: 0,
-        partial: 3,
+        partial: 4,
         exact: 46,
       },
       {
