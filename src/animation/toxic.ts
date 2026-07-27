@@ -26,6 +26,7 @@ export function toxicEffectAtAge(
   age: number,
   attackerSide: "player" | "opponent",
   targetCenter: Readonly<{ x: number; y: number }>,
+  poisonTargetCenter: Readonly<{ x: number; y: number }> = targetCenter,
 ): readonly ToxicSprite[] {
   const sprites: ToxicSprite[] = [];
   for (let index = 0; index < TOXIC_LARGE_BUBBLE_START_AGES.length; index += 1) {
@@ -46,8 +47,8 @@ export function toxicEffectAtAge(
   const bubbles = sludgeEffectAtAge(
     age - 116,
     attackerSide,
-    targetCenter,
-    targetCenter,
+    poisonTargetCenter,
+    poisonTargetCenter,
   ).sprites.filter((sprite): sprite is SludgeSprite =>
     sprite.kind === "poisonBubble"
   );

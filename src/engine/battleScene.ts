@@ -546,6 +546,7 @@ import waterGunAsset from "../animation/assets/water-gun.json" with { type: "jso
 import acidAsset from "../animation/assets/acid.json" with { type: "json" };
 import sludgeAsset from "../animation/assets/sludge.json" with { type: "json" };
 import poisonFangAsset from "../animation/assets/poisonFang.json" with { type: "json" };
+import toxicAsset from "../animation/assets/toxic.json" with { type: "json" };
 import hardenAsset from "../animation/assets/harden.json" with { type: "json" };
 import calmMindAsset from "../animation/assets/calm-mind.json" with { type: "json" };
 import shadowBallAsset from "../animation/assets/shadow-ball.json" with { type: "json" };
@@ -650,6 +651,7 @@ import {
   sceneOnAcidView,
   sceneOnSludgeView,
   sceneOnPoisonFangView,
+  sceneOnToxicView,
   sceneOnEarthquakeView,
   sceneOnHardenView,
   sceneOnCalmMindView,
@@ -972,6 +974,12 @@ const poisonFangArt = poisonFangAsset as {
   poisonBubble: { tileset: Tileset; palette: RgbColor[] };
   zubatBack: { tileset: Tileset; palette: RgbColor[] };
   zubatFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const toxicArt = toxicAsset as {
+  toxicBubble: { tileset: Tileset; palette: RgbColor[] };
+  poisonBubble: { tileset: Tileset; palette: RgbColor[] };
+  clamperlBack: { tileset: Tileset; palette: RgbColor[] };
+  clamperlFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const hardenArt = hardenAsset as {
   metal: { tileset: Tileset; tilemap: Tilemap; palette: RgbColor[] };
@@ -15269,6 +15277,122 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "IVYSAUR used" : "Foe IVYSAUR used",
       "GROWTH!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "TOXIC") {
+    const view = sceneOnToxicView(state);
+    // Sprite RAM is copied into hardware OAM on the following VBlank.
+    const displayed = sceneOnToxicView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "CLAMPERL"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "CLAMPERL"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged TOXIC pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const clamperlSource = playerToOpponent
+      ? toxicArt.clamperlBack
+      : toxicArt.clamperlFront;
+    const clamperlSprite = playerToOpponent ? clamperlSource : {
+      ...clamperlSource,
+      tileset: {
+        columns: 8, rows: 8, tiles: clamperlSource.tileset.tiles.slice(0, 64),
+      },
+    };
+    const onixSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    const targetIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    drawSpriteSheet(
+      fb,
+      onixSprite.tileset,
+      onixSprite.palette,
+      view.target.geometry.spriteCorner.x + targetIdle.x2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    drawSpriteSheet(
+      fb,
+      clamperlSprite.tileset,
+      clamperlSprite.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    for (const sprite of displayed.sprites) {
+      if (sprite.kind === "toxicBubble") {
+        drawSpriteSheet(
+          fb,
+          {
+            columns: 2, rows: 4,
+            tiles: toxicArt.toxicBubble.tileset.tiles.slice(
+              sprite.frame * 8,
+              sprite.frame * 8 + 8,
+            ),
+          },
+          toxicArt.toxicBubble.palette,
+          sprite.x - 8,
+          sprite.y - 16,
+        );
+      } else {
+        drawSpriteSheetAffineRotate(
+          fb,
+          {
+            columns: 2, rows: 2,
+            tiles: toxicArt.poisonBubble.tileset.tiles.slice(0, 4),
+          },
+          toxicArt.poisonBubble.palette,
+          sprite.x,
+          sprite.y,
+          sprite.xScale,
+          0,
+          0,
+          sprite.yScale,
+        );
+      }
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "CLAMPERL";
+    const playerSpecies = playerToOpponent ? "CLAMPERL" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "CLAMPERL used" : "Foe CLAMPERL used",
+      "TOXIC!",
       99,
     );
     return;

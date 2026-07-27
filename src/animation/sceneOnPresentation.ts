@@ -167,6 +167,10 @@ import {
   type PoisonFangSprite,
 } from "./poisonFang.ts";
 import {
+  toxicEffectAtAge,
+  type ToxicSprite,
+} from "./toxic.ts";
+import {
   earthquakeAnimationAtAge,
   type EarthquakeAnimationState,
 } from "./earthquake.ts";
@@ -321,7 +325,8 @@ export interface SceneOnPresentationBattler {
     | "MINUN"
     | "SABLEYE"
     | "ALTARIA"
-    | "AZURILL";
+    | "AZURILL"
+    | "CLAMPERL";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -778,6 +783,13 @@ export interface SceneOnPoisonFangConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnToxicConfig {
+  readonly move: "TOXIC";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnEarthquakeConfig {
   readonly move: "EARTHQUAKE";
   readonly attacker: SceneOnPresentationBattler;
@@ -898,6 +910,7 @@ export type SceneOnMoveConfig =
   | SceneOnAcidConfig
   | SceneOnSludgeConfig
   | SceneOnPoisonFangConfig
+  | SceneOnToxicConfig
   | SceneOnEarthquakeConfig
   | SceneOnHardenConfig
   | SceneOnCalmMindConfig
@@ -958,6 +971,13 @@ export interface SceneOnPoisonFangView {
   readonly targetOffset: Readonly<{ x2: number; y2: number }>;
   readonly defenderPaletteY: number;
   readonly sprites: readonly PoisonFangSprite[];
+}
+
+export interface SceneOnToxicView {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly sprites: readonly ToxicSprite[];
 }
 
 export interface SceneOnEncoreView extends EncoreState {
@@ -1961,6 +1981,26 @@ export function sceneOnPoisonFangView(
     ...poisonFangEffectAtAge(
       state.age,
       state.config.attacker.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age` is ticks since the first `gToxicBubbleSpriteTemplate` creation. */
+export function sceneOnToxicView(
+  state: SceneOnMovePresentationState,
+): SceneOnToxicView {
+  if (state.config.move !== "TOXIC") {
+    throw new Error(`expected TOXIC presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    sprites: toxicEffectAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.target.geometry.battlePositionCenter,
       state.config.target.geometry.animationCenter,
     ),
   };

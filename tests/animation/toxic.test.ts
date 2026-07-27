@@ -7,7 +7,7 @@ import {
 
 describe("MOVE_TOXIC source-relative reducer", () => {
   const effect = (age: number, side: "player" | "opponent" = "player") =>
-    toxicEffectAtAge(age, side, { x: 176, y: 40 });
+    toxicEffectAtAge(age, side, { x: 176, y: 40 }, { x: 176, y: 42 });
 
   it("ports both four-sprite ToxicBubbles calls and their animation", () => {
     expect(TOXIC_LARGE_BUBBLE_START_AGES).toEqual([0, 17, 34, 51, 68, 85, 102, 119]);
