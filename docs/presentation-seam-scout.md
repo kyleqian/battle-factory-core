@@ -2358,3 +2358,98 @@ unchanged from this session's own start (no new test file — this step wires
 already-tested staging-module exports into production code, adds no new
 bridge surface to test). `npm run build` clean.
 `executableFrontierRatchet.test.ts` unmoved (6/6, zero new barriers).
+
+### 12.6 `turn6-statfall.json` wiring: step 3 landed, step 4 found to need disproportionate new surface, 2026-07-27 (main lane, bounded worker)
+
+Executes §12.3 steps 3/4, unblocked by entry 520's extractor charmap fix
+(129/365 templates corrected, `resolveBattleStringLines` output now
+byte-identical to every already-committed literal, including this window's
+own curly apostrophe). Every citation in the brief
+(`turn6AtkFellTextStartTick(pressTick)=7659`, the trace's last captured tick
+7684 rendering 26 chars into "ONIX's ATTACK harshly fell!", the
+`battleScene.ts:9354-9361` pre-drift line range) was re-verified against this
+worktree's own `HEAD` before editing — the live function sat at `:9115-9137`
+pre-this-edit (`drawTurn6FeatherDanceKickoffText`'s own `atkFellStart` branch
+at `:9131-9136`, its `TURN6_ATKFELL_LINE1`/`LINE2` call at `:9133`), the drift
+itself just accumulated line growth from intervening sessions, no citation
+was actually wrong. Post-edit (this session's own const-block insertion
+shifting later code down 18 lines) the same function sits at `:9133-9155`,
+its `atkFellStart` branch at `:9149-9154`, its now-retired-literal call site
+at `:9151`.
+
+**Step 3 (landed).** `battleScene.ts` gained a module-level const pair,
+`TURN6_ATKFELL_KICKOFF_LINE1`/`LINE2`, resolved once at module load from
+`turn6FeatherDancePresentationStaging.ts`'s already-staged, already-tested
+`resolveTurn6AtkFellLines()` — the same "resolve once at module load" shape
+`TURN6_FEATHERDANCE_KICKOFF_LINE1/2` (§12.5) and `TURN2_ENDEAVOR_ATTACK_LINE1/2`
+(§13.5) already established. `drawTurn6FeatherDanceKickoffText`'s own
+`atkFellStart` branch (`:9151`) now draws these instead of the raw
+`TURN6_ATKFELL_LINE1`/`LINE2` literals. **Zero bridge edits** — step 1's
+existing `resolveFeatherDanceKickoffPresentationWindowContent` bridge
+function (entry 514/§12.5) already returned everything `resolveTurn6AtkFellLines()`
+needed (`statFellMessage.messageId`, `statChange.from`/`.to`); no rework was
+needed, and `tests/turn6FeatherDancePresentationStaging.test.ts`'s own
+pre-existing equivalence assertion (`resolveTurn6AtkFellLines()` byte-identical
+to `TURN6_ATKFELL_LINE1/2`, curly apostrophe included) passed unmodified,
+confirming the charmap fix's own claim before this step ever touched
+production code.
+
+**No literal died.** `TURN6_ATKFELL_LINE1`/`LINE2` (`battleMenu.ts:1559-1560`)
+stay defined and in active use by turn 7's and turn 8's own repeat-FEATHER_DANCE
+call sites (`drawTurn7FeatherDanceKickoffText`'s own call at `:9397`,
+`drawTurn8FeatherDanceKickoffText`'s own call at `:9586`, both verified live
+via `grep` before and after editing) — only
+`drawTurn6FeatherDanceKickoffText`'s own one call site (`:9151`) was retired
+from reading them directly, exactly as scoped.
+
+**Step 4 (found to need disproportionate new surface, not landed).** The
+brief's own escape valve applies. `turn6StatFallEva`'s existence check (its
+own tick-window gate, `d` in `[229,309]`) is real RAM-derived animation
+timing with no kernel-event equivalent (semantic events carry no ticks) —
+already established as NOT a kernel gap by §8.4 Option A, and this checkpoint
+re-confirms that finding a sixth time for this exact function family; there
+is no turn-local *boolean* here to replace; the WHEN is already the correct
+shape. The WHAT — `drawTurn6StatFallBanner`'s hardcoded ONIX corner/tileset
+and its wrapped `drawStatDecreaseBannerForBattler`'s hardcoded
+`statAnimBanner.palettes.attack`/`tilemaps.decrease` selection — is already
+exactly consistent with the kernel's real
+`stat-stage-change{battler:0,stat:"attack",from:6,to:4}` (§12.2), so there is
+no live decision branch left to redirect, only an assertable-but-unenforced
+consistency. Making that consistency kernel-*driven* rather than
+kernel-*consistent* runs into a real, concrete obstacle checked directly, not
+assumed: `drawTurn6StatFallBanner` is a **shared** helper, called unchanged
+by turn 7's and turn 8's own out-of-scope draw functions
+(`battleScene.ts:9393` and `:9582` respectively) with the exact same
+eva/pressTick shape. Threading a kernel-derived stat/direction
+parameter through it would force one of two disproportionate moves: (a) add
+a new parameter and edit turn 7/8's own call sites to pass it too (both
+explicitly out of scope for this step), or (b) build a full
+`"attack"|"defense"|"speed"|"special-attack"|"special-defense"|"accuracy"|"evasion"`
+-to-`palettes`-key translation table (`stat-stage-change`'s own type,
+`battleScriptEvents.ts:148`, uses hyphenated `special-attack`/`special-defense`;
+`StatAnimBannerAsset`'s own palette keys, `:886`, use camelCase
+`spAttack`/`spDefense` — a real naming mismatch, not just a lookup) to cover
+six stat values this window will never produce, for a call site whose real
+output this session's own regression sweep proves is already correct. Both
+are exactly the "6-optional-parameter generalization for a single second
+caller" shape this file's own established style explicitly avoids
+(`drawStatsBanner`'s own doc, `:9107-9122`, choosing a plain copy over
+threading new optional params through a shared function for one caller) —
+new surface disproportionate to the one caller that would use it, per the
+brief's own criterion for reporting over improvising. **Landing step 3 alone
+as this step's committed rung**, per the brief's own instruction that this
+finding is a success, not a failure.
+
+**Acceptance, re-verified this session:** the full regression sweep run
+BEFORE this change (on the pristine `HEAD`) matched every recorded count
+exactly — `turn6-statfall.json` 127/127, `turn6-featherdance.json` 90/90,
+`turn6-rockslide-a.json` 255/255, `turn6-feathers.json` 235/235,
+`turn6-menu.json` 44/44, `turn1-rockslide.json` 256/256, `turn5-rockslide.json`
+256/256, `turn4-doubleteam.json` 250/250, `turn2-endeavor.json` 77/77 — no
+pre-existing drift. Re-run AFTER the change reproduced every one of those
+counts byte-identically, including a second `turn6-statfall.json` run for a
+determinism check (127/127 twice). `npm test` **268 files, 3560 tests**
+unchanged from this session's own start (no new test file — this step wires
+an already-tested staging-module export into production code, adds no new
+bridge surface to test). `npm run build` clean.
+`executableFrontierRatchet.test.ts` unmoved (6/6, zero new barriers).

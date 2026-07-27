@@ -621,7 +621,7 @@ import {
 } from "./turn1RockSlidePresentationStaging.ts";
 import { resolveTurn4RockSlideHpEndpoints } from "./turn4RockSlidePresentationStaging.ts";
 import { resolveTurn4DoubleTeamKickoffLines } from "./turn4DoubleTeamPresentationStaging.ts";
-import { resolveTurn6FeatherDanceKickoffLines } from "./turn6FeatherDancePresentationStaging.ts";
+import { resolveTurn6AtkFellLines, resolveTurn6FeatherDanceKickoffLines } from "./turn6FeatherDancePresentationStaging.ts";
 import { resolveTurn3RockSlideHpEndpoints } from "./turn3RockSlidePresentationStaging.ts";
 import {
   resolveTurn5EndeavorAttackLines,
@@ -1590,6 +1590,24 @@ const [TURN4_DOUBLETEAM_KICKOFF_LINE1, TURN4_DOUBLETEAM_KICKOFF_LINE2] = resolve
  * own one call site was retired from reading them directly.
  */
 const [TURN6_FEATHERDANCE_KICKOFF_LINE1, TURN6_FEATHERDANCE_KICKOFF_LINE2] = resolveTurn6FeatherDanceKickoffLines();
+
+/**
+ * Presentation-seam retirement (`docs/presentation-seam-scout.md` §12.3 step
+ * 3, unblocked by entry 520's extractor charmap fix): turn 6's own ATK-fell
+ * banner text ("ONIX’s ATTACK\nharshly fell!"), now re-derived from
+ * `turn6FeatherDancePresentationStaging.ts`'s own staged
+ * `stat-stage-change`/`STRINGID_DEFENDERSSTATFELL` pair via
+ * `resolveTurn6AtkFellLines` -- byte-identical content, including the curly
+ * apostrophe (`tests/turn6FeatherDancePresentationStaging.test.ts`'s own
+ * equivalence assertion), but now identified from provenance
+ * (`BattleScript_StatDownPrintString`), not a bare literal.
+ * `TURN6_ATKFELL_LINE1`/`LINE2` themselves stay defined and in use by turns
+ * 7/8's own repeat-FEATHER_DANCE call sites in this file
+ * (`drawTurn7FeatherDanceKickoffText`/`drawTurn8FeatherDanceKickoffText`,
+ * out of this step's own scope) -- only `drawTurn6FeatherDanceKickoffText`'s
+ * own one call site was retired from reading them directly.
+ */
+const [TURN6_ATKFELL_KICKOFF_LINE1, TURN6_ATKFELL_KICKOFF_LINE2] = resolveTurn6AtkFellLines();
 
 /**
  * Presentation-seam retirement (`docs/presentation-seam-scout.md` §10.2/
@@ -9130,7 +9148,7 @@ function drawTurn6FeatherDanceKickoffText(fb: Uint8Array, t: number, pressTick: 
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   const atkFellStart = turn6AtkFellTextStartTick(pressTick);
   if (t >= atkFellStart) {
-    drawMessageTextLines(fb, TURN6_ATKFELL_LINE1, TURN6_ATKFELL_LINE2, turn6AtkFellTextVisibleChars(t, pressTick));
+    drawMessageTextLines(fb, TURN6_ATKFELL_KICKOFF_LINE1, TURN6_ATKFELL_KICKOFF_LINE2, turn6AtkFellTextVisibleChars(t, pressTick));
   } else {
     drawMessageTextLines(fb, TURN6_FEATHERDANCE_KICKOFF_LINE1, TURN6_FEATHERDANCE_KICKOFF_LINE2, turn6FeatherDanceTextVisibleChars(t, pressTick));
   }
