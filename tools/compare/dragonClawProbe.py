@@ -23,6 +23,8 @@ def main() -> None:
     sprites, tasks = oracle.symbols["gSprites"], oracle.symbols["gTasks"]
     battler_ids = oracle.symbols["gBattlerSpriteIds"]
     faded, unfaded = oracle.symbols["gPlttBufferFaded"], oracle.symbols["gPlttBufferUnfaded"]
+    global_sprite_y = oracle.symbols["gSpriteCoordOffsetY"]
+    se1_info, se1_tracks = oracle.symbols["gMPlayInfo_SE1"], oracle.symbols["gMPlayTrack_SE1"]
     templates = {
         name: oracle.symbols[name] for name in (
             "gFireSpinSpriteTemplate", "gClawSlashSpriteTemplate",
@@ -33,10 +35,12 @@ def main() -> None:
     all_symbols = {line.split()[2]: int(line.split()[0], 16) | 1 for line in nm.splitlines() if len(line.split()) == 3}
     watched = {
         name: all_symbols[name] for name in (
-            "AnimTask_BlendBattleAnimPal", "AnimTask_BlendBattleAnimPal_Step",
+            "AnimTask_BlendBattleAnimPal", "AnimTask_BlendSpriteColor_Step2",
             "AnimTask_ShakeMon", "AnimTask_ShakeMon_Step",
             "SoundTask_PlaySE1WithPanning", "AnimParticleInVortex",
             "AnimParticleInVortex_Step", "AnimClawSlash",
+            "RunStoredCallbackWhenAnimEnds",
+            "DestroyAnimSprite",
             "AnimHorizontalLunge", "AnimShakeMonOrBattlePlatforms",
             "AnimShakeMonOrBattlePlatforms_Step",
         ) if name in all_symbols
@@ -45,6 +49,9 @@ def main() -> None:
     def s16(a: int) -> int:
         v = u16(a)
         return v - 0x10000 if v >= 0x8000 else v
+    def s8(a: int) -> int:
+        v = oracle.read_u8(a)
+        return v - 0x100 if v >= 0x80 else v
     def block(addr: int, size: int) -> bytes: return bytes(oracle.read_u8(addr + i) for i in range(size))
     def sprite(slot: int) -> dict:
         base = sprites + slot * 0x44
@@ -53,6 +60,7 @@ def main() -> None:
             "callback": oracle.read_u32(base + 0x1c), "raw": block(base, 0x44).hex(),
             "x": s16(base + 0x20), "y": s16(base + 0x22),
             "x2": s16(base + 0x24), "y2": s16(base + 0x26),
+            "paletteNum": u16(base + 4) >> 12,
             "animNum": oracle.read_u8(base + 0x2b),
             "data": [s16(base + 0x2e + i * 2) for i in range(8)],
         }
@@ -80,6 +88,16 @@ def main() -> None:
                 "BLDALPHA": 0x4000052, "BLDY": 0x4000054,
             }.items()},
             "tasks": active_tasks(), "battlerSprites": [sprite(i) for i in ids],
+            "globalSpriteCoordOffsetY": s16(global_sprite_y),
+            "se1": {
+                "songHeader": oracle.read_u32(se1_info),
+                "status": oracle.read_u32(se1_info + 4),
+                "tracks": [{
+                    "flags": oracle.read_u8(se1_tracks + i * 0x50),
+                    "pan": s8(se1_tracks + i * 0x50 + 0x14),
+                    "panX": s8(se1_tracks + i * 0x50 + 0x15),
+                } for i in range(3)],
+            },
             "activeSprites": active_sprites,
             "effectSprites": {
                 name: [value for value in active_sprites if value["template"] == template]

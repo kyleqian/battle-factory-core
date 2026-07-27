@@ -544,6 +544,7 @@ import hardenAsset from "../animation/assets/harden.json" with { type: "json" };
 import calmMindAsset from "../animation/assets/calm-mind.json" with { type: "json" };
 import shadowBallAsset from "../animation/assets/shadow-ball.json" with { type: "json" };
 import encoreAsset from "../animation/assets/encore.json" with { type: "json" };
+import dragonClawAsset from "../animation/assets/dragon-claw.json" with { type: "json" };
 import menuHealthboxPlayerAsset from "../assets/gen/menu-healthbox-player.json" with { type: "json" };
 import summaryBallAsset from "../assets/gen/summary-ball.json" with { type: "json" };
 import battleAnimBallOpenAsset from "../assets/gen/battle-anim-ball-open.json" with { type: "json" };
@@ -643,6 +644,7 @@ import {
   sceneOnCalmMindView,
   sceneOnShadowBallView,
   sceneOnEncoreView,
+  sceneOnDragonClawView,
   sceneOnFutureSightView,
   sceneOnConfusionView,
   sceneOnPsychicView,
@@ -662,6 +664,7 @@ import {
   SHADOW_PUNCH_TRACE_BLEND_COEFF,
 } from "../animation/shadowPunch.ts";
 import { speciesFrontIdleRestOffset } from "../animation/speciesIdleAnim.ts";
+import { dragonClawDisplayedAttackerShakeY } from "../animation/dragonClaw.ts";
 import {
   SITRUS_ITEM_HEAL_TEXT_FIRST_AGE,
   SITRUS_ITEM_TEXT_CLEAR_AGE,
@@ -965,6 +968,12 @@ const encoreArt = encoreAsset as {
   clappingHand: { tileset: Tileset; palette: RgbColor[] };
   minunBack: { tileset: Tileset; palette: RgbColor[] };
   minunFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const dragonClawArt = dragonClawAsset as {
+  smallEmber: { tileset: Tileset; palette: RgbColor[] };
+  clawSlash: { tileset: Tileset; palette: RgbColor[] };
+  altariaBack: { tileset: Tileset; palette: RgbColor[] };
+  altariaFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const MURKROW_CORNER = { x: 144, y: 19 };
 const menuHealthboxPlayer = menuHealthboxPlayerAsset as SendOutHealthboxContentAsset;
@@ -20019,9 +20028,177 @@ export function renderSceneOnMovePresentation(
   }
 
   if (state.config.move === "DRAGON_CLAW") {
-    throw new Error(
-      "DRAGON_CLAW framebuffer renderer checkpoint: component reducer only",
+    const view = sceneOnDragonClawView(state);
+    const displayed = sceneOnDragonClawView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "ALTARIA"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "ALTARIA"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged DRAGON_CLAW pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const altariaSource = playerToOpponent
+      ? dragonClawArt.altariaBack
+      : dragonClawArt.altariaFront;
+    const altaria = playerToOpponent
+      ? altariaSource
+      : {
+          ...altariaSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: altariaSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const attackerPalette = blendPaletteToward(
+      altaria.palette,
+      { r: 255, g: 156, b: 0 },
+      view.hardwarePaletteCoefficient,
     );
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    const drawAltaria = () => drawSpriteSheet(
+      fb,
+      altaria.tileset,
+      attackerPalette,
+      view.attacker.geometry.spriteCorner.x + displayed.attackerOffset.x2,
+      view.attacker.geometry.spriteCorner.y
+        + dragonClawDisplayedAttackerShakeY(state.age),
+    );
+    const onixIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    const drawOnix = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x + onixIdle.x2,
+      view.target.geometry.spriteCorner.y + onixIdle.y2
+        + displayed.targetGlobalY,
+    );
+    // Both battlers use OBJ priority 2; their source subpriorities place
+    // opponent-front below player-back.
+    if (playerToOpponent) {
+      drawOnix();
+      drawAltaria();
+    } else {
+      drawAltaria();
+      drawOnix();
+    }
+    type DragonClawEffect =
+      | { readonly kind: "fire"; readonly y: number; readonly spawnAge: number;
+          readonly x: number; readonly x2: number; readonly y2: number;
+          readonly animationFrame: number }
+      | { readonly kind: "claw"; readonly y: number; readonly spawnAge: number;
+          readonly x: number; readonly animation: 0 | 1;
+          readonly animationFrame: number };
+    const effects: DragonClawEffect[] = [
+      ...displayed.fireSpin.map((sprite) => ({
+        kind: "fire" as const,
+        ...sprite,
+      })),
+      ...displayed.slashes.map((sprite) => ({
+        kind: "claw" as const,
+        ...sprite,
+      })),
+    ];
+    // `SortSprites` orders equal-priority sprites by descending OAM Y, so
+    // software back-to-front composition draws ascending center Y.
+    const effectOamY = (effect: DragonClawEffect) =>
+      effect.y + (effect.kind === "fire" ? effect.y2 : 0) - 16;
+    effects.sort((a, b) =>
+      effectOamY(a) - effectOamY(b) || a.spawnAge - b.spawnAge);
+    for (const effect of effects) {
+      if (effect.kind === "fire") {
+        drawSpriteSheet(
+          fb,
+          subTileset(
+            dragonClawArt.smallEmber.tileset,
+            effect.animationFrame * 4,
+            4,
+          ),
+          dragonClawArt.smallEmber.palette,
+          effect.x + effect.x2 - 16,
+          effect.y + effect.y2 - 16,
+        );
+      } else {
+        const claw = subTileset(
+          dragonClawArt.clawSlash.tileset,
+          effect.animationFrame * 4,
+          4,
+        );
+        if (effect.animation === 1) {
+          drawSpriteSheetHFlip(
+            fb,
+            claw,
+            dragonClawArt.clawSlash.palette,
+            effect.x - 16,
+            effect.y - 16,
+          );
+        } else {
+          drawSpriteSheet(
+            fb,
+            claw,
+            dragonClawArt.clawSlash.palette,
+            effect.x - 16,
+            effect.y - 16,
+          );
+        }
+      }
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "ALTARIA";
+    const playerSpecies = playerToOpponent ? "ALTARIA" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "ALTARIA used" : "Foe ALTARIA used",
+      "DRAGON CLAW!",
+      99,
+    );
+    return;
   }
 
   const view = sceneOnFirePunchView(state);

@@ -41,6 +41,8 @@ export interface DragonClawState {
   readonly fireSpin: readonly DragonClawFireSpin[];
   readonly slashes: readonly DragonClawSlash[];
   readonly blendDirection: "forward" | "reverse" | null;
+  readonly fadedPaletteCoefficient: number;
+  readonly hardwarePaletteCoefficient: number;
   readonly soundEvents: readonly DragonClawSoundEvent[];
 }
 
@@ -120,12 +122,38 @@ export function dragonClawSlashesAtAge(
 function targetShakeY(age: number): number {
   for (const spawn of [53, 69]) {
     const local = age - spawn;
-    if (local < 0 || local > 10) continue;
+    if (local < 0 || local >= 10) continue;
     // `shake_mon_or_platform -4,1,10,SHAKE_MON_Y`: the invisible helper
     // negates velocity at init and alternates the global coordinate offset.
     return local === 0 ? 0 : Math.floor((local + 1) / 2) % 2 ? 4 : 0;
   }
   return 0;
+}
+
+/**
+ * `AnimTask_BlendBattleAnimPal(..., delay=4, from, to, color)` applies the
+ * initial coefficient immediately, then advances it after each fifth task
+ * callback. The reverse task is created at age 93. `gPlttBufferFaded` is
+ * updated by the task in the current callback, while palette RAM is copied
+ * on the following display latch.
+ */
+export function dragonClawFadedPaletteCoefficient(age: number): number {
+  if (age < 9) return 0;
+  if (age < 44) return Math.floor((age - 4) / 5);
+  if (age < 101) return 8;
+  return Math.max(0, 8 - Math.floor((age - 96) / 5));
+}
+
+/**
+ * `AnimTask_ShakeMon` is task-driven rather than sprite-callback-driven.
+ * Its first callback is run during script setup, producing one early OAM
+ * pulse; after that, the normal two-frame cadence is latched one display
+ * epoch after the task state observed by the dense probe.
+ */
+export function dragonClawDisplayedAttackerShakeY(age: number): number {
+  if (age === 2) return 2;
+  if (age < 5 || age > 30) return 0;
+  return Math.floor((age - 5) / 2) % 2 === 0 ? 2 : 0;
 }
 
 export function dragonClawAtAge(
@@ -148,9 +176,11 @@ export function dragonClawAtAge(
     targetGlobalY: targetShakeY(age),
     fireSpin: dragonClawFireSpinAtAge(age, geometry),
     slashes: dragonClawSlashesAtAge(age, geometry),
-    blendDirection: age >= 1 && age < 49
-      ? "forward" : age >= 97 && age <= DRAGON_CLAW_END_AGE
+    blendDirection: age >= 1 && age < 44
+      ? "forward" : age >= 93 && age < DRAGON_CLAW_END_AGE
         ? "reverse" : null,
+    fadedPaletteCoefficient: dragonClawFadedPaletteCoefficient(age),
+    hardwarePaletteCoefficient: dragonClawFadedPaletteCoefficient(age - 1),
     soundEvents: [53, 69].includes(age)
       ? [{
           age,

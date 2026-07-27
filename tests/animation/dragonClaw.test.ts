@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   DRAGON_CLAW_END_AGE,
   dragonClawAtAge,
+  dragonClawDisplayedAttackerShakeY,
+  dragonClawFadedPaletteCoefficient,
   dragonClawFireSpinAtAge,
   dragonClawSlashesAtAge,
 } from "../../src/animation/dragonClaw.ts";
@@ -55,10 +57,21 @@ describe("Dragon Claw source reducer", () => {
     expect(dragonClawAtAge(54, PLAYER).targetGlobalY).toBe(4);
     expect(dragonClawAtAge(55, PLAYER).targetGlobalY).toBe(4);
     expect(dragonClawAtAge(56, PLAYER).targetGlobalY).toBe(0);
+    expect(dragonClawAtAge(63, PLAYER).targetGlobalY).toBe(0);
     expect(dragonClawAtAge(53, PLAYER).soundEvents[0])
       .toMatchObject({ song: "SE_M_RAZOR_WIND", pan: 63 });
     expect(dragonClawAtAge(69, OPPONENT).soundEvents[0]?.pan).toBe(-63);
-    expect(dragonClawAtAge(97, PLAYER).blendDirection).toBe("reverse");
+    expect(dragonClawAtAge(93, PLAYER).blendDirection).toBe("reverse");
+    expect(dragonClawAtAge(136, PLAYER).blendDirection).toBeNull();
+    expect([
+      0, 0, 1, 7, 8, 8, 7, 1, 0,
+    ]).toEqual([
+      -1, 8, 9, 39, 44, 100, 101, 131, 136,
+    ].map(dragonClawFadedPaletteCoefficient));
+    expect(dragonClawAtAge(136, PLAYER).hardwarePaletteCoefficient).toBe(1);
+    expect([0, 2, 0, 2, 2, 0, 0]).toEqual(
+      [1, 2, 3, 5, 6, 7, 31].map(dragonClawDisplayedAttackerShakeY),
+    );
     expect(dragonClawAtAge(DRAGON_CLAW_END_AGE + 1, PLAYER))
       .toMatchObject({ blendDirection: null, fireSpin: [], slashes: [] });
   });
