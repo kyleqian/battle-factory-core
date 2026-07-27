@@ -13,6 +13,103 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+
+---
+## 499 — [BOUNDED WORKER 2026-07-27 ~03:45] Thrash Rung 5 landed: ENDTURN_THRASH end-turn case (lock countdown + final-turn confusion transition) — plus a real design-doc gap in the ThrashConfuses gating condition
+
+- **State:** tree green at **235 files / 3311 tests** (+6 tests over this
+  session's own starting baseline, 235/3305 — that starting count already
+  included a side-lane merge landed after entry 498 was written, not a
+  discrepancy), `npm run build` clean. Census re-run **byte-identical**
+  (94/214 effects, 191/355 moves, 153/276 Factory-L50, 1900/2957 weighted,
+  `git status --porcelain docs/executable-frontier-census.md` empty) —
+  expected and confirmed: like Rungs 2/3, this is an end-turn-tick reducer
+  change, not a move-execution dispatch change, so the census (which only
+  walks move scripts) has nothing new to count. `executableFrontierRatchet
+  .test.ts` unmoved (6/6 green, zero new barriers — this rung wires an
+  *existing* reachable case-barrier into a real reducer rather than adding
+  an `unsupportedBranch` call site).
+- **Did:** landed `docs/yawn-thrash-endturn-design.md` §4/Rung 5 exactly as
+  scoped. New `runThrashTick` in `battleEndTurnOrchestration.ts`, replacing
+  the `:1183`-area case-barrier (`STATUS2_LOCK_CONFUSE set but
+  BattleScript_ThrashConfuses is not wired`) Rung 4 made live for the first
+  time: (1) decrements `STATUS2_LOCK_CONFUSE` by one turn unit (new
+  `BATTLE_SCRIPT_STATUS2_LOCK_CONFUSE_TURN_1` constant in
+  `battleScriptSourceConstants.ts`, same shape as Yawn's own `_TURN_1`);
+  (2) `WasUnableToUseMove` takes priority over the lock-expiry branch — this
+  rung's own required first action (per the design doc's `UNVERIFIED` flag)
+  found it **already fully ported** as `wasBattleScriptBattlerUnableToUseMove`
+  (`battleScriptRulesContext.ts:892-906`, the exact 9-flag OR-chain, already
+  exercised by `battleScriptMoveEndControllers.ts:209`) — not a gap to fill,
+  same "already built, just verify" shape as Rung 4's own `gLockedMoves`
+  finding; when true, the shared `cancelBattleScriptMultiTurnMoves` helper
+  (already landed for Yawn/admission) clears the WHOLE lock outright, no
+  confusion, regardless of counter value; (3) on the lock-expiry branch,
+  extracted `applyConfusionMoveEffect`'s own state-mutation body into a new
+  exported `applyConfusionStatus2Mutation` (`battleScriptHitChainOpcode.ts`)
+  — same Own-Tempo/already-confused early-out + `(Random() % 4) + 2` duration
+  roll + status2 write, now shared by both the move-execution CONFUSION case
+  and this end-turn call site instead of duplicated; refactor is behavior-
+  preserving (`applyConfusionMoveEffect`'s own existing tests all still pass
+  unchanged). Ported the `hp === 0` early-out too (`SetMoveEffect`'s own
+  generic gate, not primary-gated, unlike the dead Shield-Dust/Safeguard/
+  Substitute checks — those three ARE dead here, cited why in-file).
+- **Real citation gap found and fixed (verify-each-citation bar, same class
+  as Rung 4's `jumpifstatus2` finding):** the design doc's §4 prose
+  characterizes the reducer as "run `BattleScript_ThrashConfuses` via
+  `runTickScript`" without naming source's own inner gate,
+  `if (status2 & STATUS2_CONFUSION) BattleScriptExecute(BattleScript_
+  ThrashConfuses)` (`battle_util.c:1688-1689`) — verified directly against
+  source this session: the script only runs when `SetMoveEffect`'s own
+  confusion branch actually wrote the bit (i.e. NOT Own Tempo, NOT hp===0).
+  An Own-Tempo-holding or fainted lock-in target clears its lock **silently
+  — no script, no message** — ported as an explicit `mutation.confused`
+  branch, not assumed unconditional. Also verified live: source's own
+  `!(status2 & STATUS2_CONFUSION)` outer gate (guarding the whole SetMoveEffect
+  call) is genuinely LIVE at this call site (an opponent's own confusion
+  move could pre-empt it), unlike `applyThrashMoveEffect`'s dead inner
+  check — flagged explicitly rather than assumed dead by analogy.
+- **Rung 4's own remainder note (WasUnableToUseMove `UNVERIFIED`) resolved:**
+  confirmed already-built, cited above — no new module touched for it.
+- **Tier-1 (+6, new "ENDTURN_THRASH" describe block in
+  `tests/battleEndTurnOrchestration.test.ts`):** mid-lock decrement (no
+  confusion, zero RNG); final-turn transition (MULTIPLETURNS clears,
+  `STATUS2_CONFUSION` lands via the exact `(Random() % 4) + 2` roll, exactly
+  1 RNG draw, `result.kind === "next-turn"` proving `BattleScript_
+  ThrashConfuses` runs cleanly to its own `end2` — the brief's own asked-for
+  pass-through test); `WasUnableToUseMove` (flinchImmobility) cancelling the
+  whole lock outright even on what would've been the final turn, zero RNG;
+  already-confused-from-another-source blocking the transition (MULTIPLETURNS
+  still clears, existing confusion duration untouched); Own Tempo blocking
+  the confusion write silently (zero RNG, no script); no-lock-bit-set no-op.
+  The `hp === 0` gate is ported but **not independently Tier-1-pinned**
+  (documented in-file): constructing a battler at hp===0 through the full
+  `runBattleEndTurnOrchestration` harness always routes into
+  `HandleFaintedMonActions`'s own switch-decision barrier
+  (`GetMostSuitableMonToSwitchInto`'s unmodeled AI_CalcDmg fallback)
+  regardless of Thrash state — confirmed live with a plain hp===0 probe
+  fixture carrying zero Thrash state, same barrier — staging a genuine
+  same-pass faint plus a real switch decision is out of proportion here.
+- **Live fixture: NOT attempted — Tier-1-only**, an explicitly acceptable
+  resting point per the brief. Rung 4's own TAUROS live-fixture remainder
+  (lock-in bits across turns + confusion onset, read-only) is still open;
+  folding it into one TAUROS fixture spanning lock-in start through
+  confusion onset is the natural live-fixture followup, not attempted this
+  session (time went to the citation-verification finding above instead).
+- **Next:** Rung 6 (a second `ENDTURN_ITEMS2` trigger fixture, Persim Berry
+  curing Thrash-fresh confusion — verification-only, zero new code per the
+  design doc's own §7) is next on the ladder and explicitly NOT started per
+  this step's own scope boundary — the next session's natural first brief.
+  The TAUROS live-fixture remainder (Rung 4+5 combined) is also open, either
+  as Rung 6's own prerequisite live-proof or a parallel pickup.
+- **Notes:** no PAPERCUT. Archived entry 496 to `PROGRESS-archive.md` to
+  keep this ledger at 3 entries. The `BattleScriptExecute` conditional gap
+  (a real blocker the design doc's own prose glossed over) was the only real
+  deviation from plan — found by tracing the source's own nested `if`
+  directly rather than trusting the prose summary, fixed narrowly via the
+  `mutation.confused` branch, and named here per the brief's own
+  prove-or-refute bar.
+
 ---
 ## 498 — [BOUNDED WORKER 2026-07-27 ~03:05] Thrash Rung 4 landed: CONFUSEIFREPEATINGATTACKENDS + MOVE_EFFECT_THRASH lock-in start — plus a real jumpifstatus2 gap the design doc's own citation table missed
 
@@ -196,97 +293,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   this ledger at 3 entries. Both §10.3 swaps were exactly as clean as the
   scout claimed — no divergence to bisect, no literal left un-swapped beyond
   the one §10.3 itself named as a residual (`anchorPlayerAfterTurn3Hp`).
-
----
-## 496 — [BOUNDED WORKER 2026-07-27 ~02:10] Yawn Rung 3 landed: ENDTURN_ITEMS2 registered with real moveTurn gating — the item the whole Yawn track was roadmapped to unblock (entries 460-464) is now live
-
-- **State:** tree green at **232 files / 3286 tests** (+4 over entry 495's
-  3282), `npm run build` clean. Census re-run **byte-identical** (93/214
-  effects, 188/355 moves, 151/276 Factory-L50, 1894/2957 weighted, all 32
-  checks pass, `git status --porcelain docs/executable-frontier-census.md`
-  empty) — expected and confirmed: like Rung 2, this is an end-turn-tick
-  reducer change, not a move-execution dispatch change, so the census (which
-  only walks move scripts) has nothing new to count.
-  `executableFrontierRatchet.test.ts` unmoved (6/6 green, no new barrier —
-  zero new opcodes, per the design doc's own "zero additional opcode work"
-  finding, now proven true in practice not just analytically).
-- **Did:** landed `docs/yawn-thrash-endturn-design.md` §5/Rung 3 exactly as
-  scoped, re-verifying every row of §5's gate table against the raw C
-  switch (`battle_util.c:3257-3625`) rather than trusting the table blind —
-  confirmed both `ENDTURN_ITEMS1` and `ENDTURN_ITEMS2` call the exact SAME
-  `ItemBattleEffects(ITEMEFFECT_NORMAL, battler, moveTurn)` caseID
-  (`battle_util.c:1500-1505`), only the boolean differs (the design doc's
-  own prose didn't name the caseID explicitly; a first-draft test docstring
-  mislabeled it `ITEMEFFECT_MOVE_END` — a different, unrelated caseID used
-  elsewhere — caught during this session's own re-verification and fixed).
-  `runItemsTick` (`battleEndTurnOrchestration.ts:818`) now takes a
-  `moveTurn: boolean` fourth parameter; per §5's table, four rows
-  short-circuit to `"advance"` when `moveTurn` is true — `HOLD_EFFECT_
-  LEFTOVERS`, the Liechi/Salac/Petaya stat-up berries, and the `RESTORE_HP`/
-  `RESTORE_PP`/`UNREACHABLE_AT_FACTORY_L50` case-barriers (source's own case
-  does nothing at all at ITEMS2, so a barrier there would be spurious) —
-  White Herb and the 8 zero-RNG cure branches stay unconditional (no gate in
-  source). The `:992`-area `// ENDTURN_ITEMS2: ... no-op.` comment is
-  replaced with the real second call site (`moveTurn=true`), positioned
-  right after `ENDTURN_YAWN` per the real `turnEffectsTracker` enum order.
-- **Tier-1 (+4, `tests/battleEndTurnOrchestration.test.ts`, new "(g)
-  ENDTURN_ITEMS2" describe block):** three no-double-fire regression tests,
-  one per gated row class, each constructed so the row's fire condition is
-  **false at ITEMS1 but would turn true by ITEMS2** via an intervening burn
-  tick (the one modeled mid-tick HP mutator), proving the gate suppresses it
-  even then — not just when the condition was already false throughout:
-  **"Leftovers heals exactly once per tick"** (100/160 HP, heals to 110 —
-  NOT 120, which an ungated second ITEMS2 heal would produce); **"Liechi
-  Berry does NOT fire at ITEMS2 even though burn drops HP below its
-  threshold mid-tick"** (30 HP > 25-threshold at ITEMS1, burn deals 12 →
-  18 HP <=25 by ITEMS2, ATK stage stays 6, item uneaten); **"Sitrus Berry's
-  RESTORE_HP case-barrier does NOT fire at ITEMS2"** (55 HP > 50-threshold
-  at ITEMS1, burn deals 12 → 43 HP <=50 by ITEMS2, result stays "next-turn"
-  not "case-barrier"). Named in-file: `RESTORE_PP`/`UNREACHABLE_AT_
-  FACTORY_L50` share the identical `!moveTurn &&` gate shape (verified by
-  direct code read) but have no modeled mid-tick PP/possession mutator to
-  exercise the same live before/after transition — not silently skipped,
-  explicitly called out as structurally unexercisable this rung. Plus the
-  brief's own called-for **REAL TRIGGER test**: a Chesto-Berry holder with
-  `STATUS3_YAWN_TURN_1` — Yawn's own transition writes the sleep bit, then
-  the SAME tick's `ENDTURN_ITEMS2` cures it before the sleep status is ever
-  "felt" (final `status1===0`, item consumed, exactly 1 RNG draw — Yawn's
-  own sleep-turn roll, the cure itself costs none), reusing Rung 2's staged
-  lifecycle as the vehicle per the brief.
-- **Live fixture (`tools/battle-lab/mechanic-yawn-endturn-items2-chesto-
-  off.json`, extends Rung 2's GULPIN-vs-MAGIKARP fixture with MAGIKARP now
-  holding a Chesto Berry, item 134):** confirms the engine's real-trigger
-  test against the ROM itself, not just analytically. Trajectory (frames
-  from a dense binary search, `/tmp` scratch captures, final curated list
-  banked in the fixture): **status1 0 → 5 at frame 1260** (`ENDTURN_YAWN`'s
-  sleep transition, "Foe MAGIKARP fell asleep!", matches Rung 2's own
-  ledger) → **status1 5 → 0 between frames 1308-1310** (the C-side
-  `status1 &= ~STATUS1_SLEEP` write happens as `BattleScript_
-  BerryCureSlpEnd2` starts, BEFORE its own message text even changes on
-  screen — the message still reads "fell asleep" through 1310) → **item
-  134 → 0 between frames 1462-1464** (screenshot: "Foe MAGIKARP's CHESTO
-  BERRY woke it from its sleep!", the script's own `removeitem` opcode
-  running ~150 frames after the C-side status write, same
-  status-clears-before-item-consumes delay pattern independently confirmed
-  against the ALREADY-BANKED `mechanic-endturn-items1-cure-par-off.json`
-  fixture, frames 613 vs 751). All within the SAME end-turn pass — no
-  further player input occurred after MAGIKARP's own turn-2 action, and the
-  whole Yawn→sleep→Chesto-cure sequence resolved automatically. This is the
-  design doc §5's own worked example, now live-proven both ways (engine
-  Tier-1 test + ROM oracle trace agree on final state).
-- **Next:** Rung 3 (ITEMS2, this step) closes the critical path 1→2→3 to
-  `ENDTURN_ITEMS2`. Rungs 4-6 (Thrash-family: `CONFUSEIFREPEATINGATTACKENDS`
-  + `MOVE_EFFECT_THRASH` move-execution, then `ENDTURN_THRASH`, then a
-  second `ENDTURN_ITEMS2` fixture via Persim Berry) are independent,
-  lower-priority follow-ups per the design doc's own §7 ladder — explicitly
-  out of scope for this step, next MAIN-lane program item if session time
-  allows. Rung 4's own first action (reading `battleScriptActionAdmission.ts`
-  for `gLockedMoves`/forced-repeat-move wiring) is un-started.
-- **Notes:** no PAPERCUT. Ratchet/census both unmoved, as expected and
-  confirmed (named above). Landed comfortably inside the ~40-minute
-  first-half guidance (moveTurn threading + gates + no-double-fire tests),
-  leaving the remainder for the live fixture (the harder half, per entry
-  495's own precedent of binary-searching transition frames) — both halves
-  finished inside the overall cap, so no remainder needs naming beyond
-  Rungs 4-6 above.
 

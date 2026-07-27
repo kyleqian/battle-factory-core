@@ -1,4 +1,97 @@
 ---
+## 496 — [BOUNDED WORKER 2026-07-27 ~02:10] Yawn Rung 3 landed: ENDTURN_ITEMS2 registered with real moveTurn gating — the item the whole Yawn track was roadmapped to unblock (entries 460-464) is now live
+
+- **State:** tree green at **232 files / 3286 tests** (+4 over entry 495's
+  3282), `npm run build` clean. Census re-run **byte-identical** (93/214
+  effects, 188/355 moves, 151/276 Factory-L50, 1894/2957 weighted, all 32
+  checks pass, `git status --porcelain docs/executable-frontier-census.md`
+  empty) — expected and confirmed: like Rung 2, this is an end-turn-tick
+  reducer change, not a move-execution dispatch change, so the census (which
+  only walks move scripts) has nothing new to count.
+  `executableFrontierRatchet.test.ts` unmoved (6/6 green, no new barrier —
+  zero new opcodes, per the design doc's own "zero additional opcode work"
+  finding, now proven true in practice not just analytically).
+- **Did:** landed `docs/yawn-thrash-endturn-design.md` §5/Rung 3 exactly as
+  scoped, re-verifying every row of §5's gate table against the raw C
+  switch (`battle_util.c:3257-3625`) rather than trusting the table blind —
+  confirmed both `ENDTURN_ITEMS1` and `ENDTURN_ITEMS2` call the exact SAME
+  `ItemBattleEffects(ITEMEFFECT_NORMAL, battler, moveTurn)` caseID
+  (`battle_util.c:1500-1505`), only the boolean differs (the design doc's
+  own prose didn't name the caseID explicitly; a first-draft test docstring
+  mislabeled it `ITEMEFFECT_MOVE_END` — a different, unrelated caseID used
+  elsewhere — caught during this session's own re-verification and fixed).
+  `runItemsTick` (`battleEndTurnOrchestration.ts:818`) now takes a
+  `moveTurn: boolean` fourth parameter; per §5's table, four rows
+  short-circuit to `"advance"` when `moveTurn` is true — `HOLD_EFFECT_
+  LEFTOVERS`, the Liechi/Salac/Petaya stat-up berries, and the `RESTORE_HP`/
+  `RESTORE_PP`/`UNREACHABLE_AT_FACTORY_L50` case-barriers (source's own case
+  does nothing at all at ITEMS2, so a barrier there would be spurious) —
+  White Herb and the 8 zero-RNG cure branches stay unconditional (no gate in
+  source). The `:992`-area `// ENDTURN_ITEMS2: ... no-op.` comment is
+  replaced with the real second call site (`moveTurn=true`), positioned
+  right after `ENDTURN_YAWN` per the real `turnEffectsTracker` enum order.
+- **Tier-1 (+4, `tests/battleEndTurnOrchestration.test.ts`, new "(g)
+  ENDTURN_ITEMS2" describe block):** three no-double-fire regression tests,
+  one per gated row class, each constructed so the row's fire condition is
+  **false at ITEMS1 but would turn true by ITEMS2** via an intervening burn
+  tick (the one modeled mid-tick HP mutator), proving the gate suppresses it
+  even then — not just when the condition was already false throughout:
+  **"Leftovers heals exactly once per tick"** (100/160 HP, heals to 110 —
+  NOT 120, which an ungated second ITEMS2 heal would produce); **"Liechi
+  Berry does NOT fire at ITEMS2 even though burn drops HP below its
+  threshold mid-tick"** (30 HP > 25-threshold at ITEMS1, burn deals 12 →
+  18 HP <=25 by ITEMS2, ATK stage stays 6, item uneaten); **"Sitrus Berry's
+  RESTORE_HP case-barrier does NOT fire at ITEMS2"** (55 HP > 50-threshold
+  at ITEMS1, burn deals 12 → 43 HP <=50 by ITEMS2, result stays "next-turn"
+  not "case-barrier"). Named in-file: `RESTORE_PP`/`UNREACHABLE_AT_
+  FACTORY_L50` share the identical `!moveTurn &&` gate shape (verified by
+  direct code read) but have no modeled mid-tick PP/possession mutator to
+  exercise the same live before/after transition — not silently skipped,
+  explicitly called out as structurally unexercisable this rung. Plus the
+  brief's own called-for **REAL TRIGGER test**: a Chesto-Berry holder with
+  `STATUS3_YAWN_TURN_1` — Yawn's own transition writes the sleep bit, then
+  the SAME tick's `ENDTURN_ITEMS2` cures it before the sleep status is ever
+  "felt" (final `status1===0`, item consumed, exactly 1 RNG draw — Yawn's
+  own sleep-turn roll, the cure itself costs none), reusing Rung 2's staged
+  lifecycle as the vehicle per the brief.
+- **Live fixture (`tools/battle-lab/mechanic-yawn-endturn-items2-chesto-
+  off.json`, extends Rung 2's GULPIN-vs-MAGIKARP fixture with MAGIKARP now
+  holding a Chesto Berry, item 134):** confirms the engine's real-trigger
+  test against the ROM itself, not just analytically. Trajectory (frames
+  from a dense binary search, `/tmp` scratch captures, final curated list
+  banked in the fixture): **status1 0 → 5 at frame 1260** (`ENDTURN_YAWN`'s
+  sleep transition, "Foe MAGIKARP fell asleep!", matches Rung 2's own
+  ledger) → **status1 5 → 0 between frames 1308-1310** (the C-side
+  `status1 &= ~STATUS1_SLEEP` write happens as `BattleScript_
+  BerryCureSlpEnd2` starts, BEFORE its own message text even changes on
+  screen — the message still reads "fell asleep" through 1310) → **item
+  134 → 0 between frames 1462-1464** (screenshot: "Foe MAGIKARP's CHESTO
+  BERRY woke it from its sleep!", the script's own `removeitem` opcode
+  running ~150 frames after the C-side status write, same
+  status-clears-before-item-consumes delay pattern independently confirmed
+  against the ALREADY-BANKED `mechanic-endturn-items1-cure-par-off.json`
+  fixture, frames 613 vs 751). All within the SAME end-turn pass — no
+  further player input occurred after MAGIKARP's own turn-2 action, and the
+  whole Yawn→sleep→Chesto-cure sequence resolved automatically. This is the
+  design doc §5's own worked example, now live-proven both ways (engine
+  Tier-1 test + ROM oracle trace agree on final state).
+- **Next:** Rung 3 (ITEMS2, this step) closes the critical path 1→2→3 to
+  `ENDTURN_ITEMS2`. Rungs 4-6 (Thrash-family: `CONFUSEIFREPEATINGATTACKENDS`
+  + `MOVE_EFFECT_THRASH` move-execution, then `ENDTURN_THRASH`, then a
+  second `ENDTURN_ITEMS2` fixture via Persim Berry) are independent,
+  lower-priority follow-ups per the design doc's own §7 ladder — explicitly
+  out of scope for this step, next MAIN-lane program item if session time
+  allows. Rung 4's own first action (reading `battleScriptActionAdmission.ts`
+  for `gLockedMoves`/forced-repeat-move wiring) is un-started.
+- **Notes:** no PAPERCUT. Ratchet/census both unmoved, as expected and
+  confirmed (named above). Landed comfortably inside the ~40-minute
+  first-half guidance (moveTurn threading + gates + no-double-fire tests),
+  leaving the remainder for the live fixture (the harder half, per entry
+  495's own precedent of binary-searching transition frames) — both halves
+  finished inside the overall cap, so no remainder needs naming beyond
+  Rungs 4-6 above.
+
+---
 ## 495 — [BOUNDED WORKER 2026-07-27 ~01:40] Yawn Rung 2 landed: ENDTURN_YAWN end-turn case (countdown decrement + real sleep transition) — live fixture reproduces the ROM's full 2-turn trajectory including the AND-chain firing
 
 - **State:** tree green at **232 files / 3282 tests** (+6 over entry 494's

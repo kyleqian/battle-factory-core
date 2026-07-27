@@ -61,6 +61,14 @@ const STATUS3_YAWN_TURN_2 = (2 << 11) & STATUS3_YAWN_MASK;
 /** include/constants/abilities.h -- same ids as Rung 1's `JUMPIFABILITY_VALUES` widening. */
 const ABILITY_VITAL_SPIRIT = 72;
 const ABILITY_INSOMNIA = 15;
+/** include/constants/abilities.h:24 -- Own Tempo, docs/yawn-thrash-endturn-design.md §4's confusion-onset blocker. */
+const ABILITY_OWN_TEMPO = 20;
+/** include/constants/battle.h:137-139 -- STATUS2_LOCK_CONFUSE's 2-bit turn counter (bits 10-11) plus STATUS2_MULTIPLETURNS (bit 12), docs/yawn-thrash-endturn-design.md §4. */
+const STATUS2_LOCK_CONFUSE_MASK = (1 << 10) | (1 << 11);
+const STATUS2_LOCK_CONFUSE_TURN_1 = (1 << 10) & STATUS2_LOCK_CONFUSE_MASK;
+const STATUS2_LOCK_CONFUSE_TURN_2 = (2 << 10) & STATUS2_LOCK_CONFUSE_MASK;
+const STATUS2_LOCK_CONFUSE_TURN_3 = (3 << 10) & STATUS2_LOCK_CONFUSE_MASK;
+const STATUS2_MULTIPLETURNS = 1 << 12;
 
 function battler(changes: Partial<BattleScriptRulesBattler> & { maxHP?: number } = {}): BattleScriptRulesBattler {
   return Object.freeze({
@@ -478,6 +486,153 @@ describe("runBattleEndTurnOrchestration (BattleTurnPassed equivalent)", () => {
     expect(result.state.rulesContext.battlers[1]!.status2 & STATUS2_WRAPPED_MASK).toBe(0);
     expect(result.state.rulesContext.battlers[1]!.hp).toBe(170); // unchanged -- release deals no damage
     expect(result.state.rng.calls).toBe(initial.rng.calls);
+  });
+
+  describe("ENDTURN_THRASH (battle_util.c:1674-1695, docs/yawn-thrash-endturn-design.md §4)", () => {
+    it("mid-lock: counter decrements (TURN(3) -> TURN(2)), MULTIPLETURNS stays set, no confusion, zero RNG", () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0 }),
+          battler({ side: 1, status2: STATUS2_LOCK_CONFUSE_TURN_3 | STATUS2_MULTIPLETURNS, partyIndex: 2 }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+      const initial = scratchState(rc, 1);
+      const result = runBattleEndTurnOrchestration(program, handlers, initial);
+      expect(result.kind).toBe("next-turn");
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      const b1 = result.state.rulesContext.battlers[1]!;
+      expect(b1.status2 & STATUS2_LOCK_CONFUSE_MASK).toBe(STATUS2_LOCK_CONFUSE_TURN_2);
+      expect(b1.status2 & STATUS2_MULTIPLETURNS).not.toBe(0);
+      expect(b1.status2 & STATUS2_CONFUSION).toBe(0);
+      expect(result.state.rng.calls).toBe(initial.rng.calls);
+    });
+
+    it("final turn: lock expires and the confusion transition fires -- MULTIPLETURNS clears, STATUS2_CONFUSION lands via the exact (Random() % 4) + 2 roll, exactly 1 RNG draw, BattleScript_ThrashConfuses runs cleanly to its own end2 (seed 919694434 -> (randomValue%4)+2 == 3)", () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0 }),
+          battler({ side: 1, status2: STATUS2_LOCK_CONFUSE_TURN_1 | STATUS2_MULTIPLETURNS, partyIndex: 2 }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+      const initial = scratchState(rc, 1);
+      const result = runBattleEndTurnOrchestration(program, handlers, initial);
+      expect(result.kind).toBe("next-turn"); // proves BattleScript_ThrashConfuses ran to its own end2, no opcode-barrier
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      const b1 = result.state.rulesContext.battlers[1]!;
+      expect(b1.status2 & STATUS2_LOCK_CONFUSE_MASK).toBe(0);
+      expect(b1.status2 & STATUS2_MULTIPLETURNS).toBe(0);
+      expect(b1.status2 & STATUS2_CONFUSION).toBe(3);
+      expect(result.state.rng.calls).toBe(initial.rng.calls + 1);
+    });
+
+    it("WasUnableToUseMove (flinchImmobility) takes priority over the lock-expiry branch: CancelMultiTurnMoves clears the WHOLE lock outright, no confusion, zero RNG -- even on what would have been the final turn", () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0 }),
+          battler({
+            side: 1,
+            status2: STATUS2_LOCK_CONFUSE_TURN_1 | STATUS2_MULTIPLETURNS,
+            flinchImmobility: 1,
+            partyIndex: 2,
+          }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+      const initial = scratchState(rc, 1);
+      const result = runBattleEndTurnOrchestration(program, handlers, initial);
+      expect(result.kind).toBe("next-turn");
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      const b1 = result.state.rulesContext.battlers[1]!;
+      expect(b1.status2).toBe(0); // LOCK_CONFUSE + MULTIPLETURNS both cleared by CancelMultiTurnMoves, no CONFUSION set
+      expect(result.state.rng.calls).toBe(initial.rng.calls);
+    });
+
+    it("already confused from another source blocks the transition (source's own outer `!(status2 & STATUS2_CONFUSION)` gate, live here -- nothing earlier in this case excludes it): MULTIPLETURNS still clears, but the existing confusion duration is untouched, zero RNG", () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0 }),
+          battler({
+            side: 1,
+            status2: STATUS2_LOCK_CONFUSE_TURN_1 | STATUS2_MULTIPLETURNS | 2, // pre-existing STATUS2_CONFUSION = 2 turns
+            partyIndex: 2,
+          }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+      const initial = scratchState(rc, 1);
+      const result = runBattleEndTurnOrchestration(program, handlers, initial);
+      expect(result.kind).toBe("next-turn");
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      const b1 = result.state.rulesContext.battlers[1]!;
+      expect(b1.status2 & STATUS2_LOCK_CONFUSE_MASK).toBe(0);
+      expect(b1.status2 & STATUS2_MULTIPLETURNS).toBe(0);
+      expect(b1.status2 & STATUS2_CONFUSION).toBe(2); // untouched, not re-rolled
+      expect(result.state.rng.calls).toBe(initial.rng.calls);
+    });
+
+    it("Own Tempo blocks SetMoveEffect's own confusion branch: the lock clears silently, no script, no message, zero RNG (source's own `if (status2 & STATUS2_CONFUSION) BattleScriptExecute(...)` guard never fires)", () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0 }),
+          battler({
+            side: 1,
+            status2: STATUS2_LOCK_CONFUSE_TURN_1 | STATUS2_MULTIPLETURNS,
+            ability: ABILITY_OWN_TEMPO,
+            partyIndex: 2,
+          }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+      const initial = scratchState(rc, 1);
+      const result = runBattleEndTurnOrchestration(program, handlers, initial);
+      expect(result.kind).toBe("next-turn");
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      const b1 = result.state.rulesContext.battlers[1]!;
+      expect(b1.status2).toBe(0);
+      expect(result.state.rng.calls).toBe(initial.rng.calls);
+    });
+
+    // A fainted lock-in target (hp === 0) is ALSO ported (runThrashTick mirrors
+    // applySetMoveEffect's own non-primary-gated hp===0 early-out,
+    // battleScriptHitChainOpcode.ts:2326-2328) but is not independently
+    // Tier-1-pinned here: constructing a battler at hp===0 through this full
+    // orchestration harness always routes into `HandleFaintedMonActions`'s own
+    // switch-decision barrier (`GetMostSuitableMonToSwitchInto`'s AI_CalcDmg
+    // fallback, unmodeled) regardless of Thrash state -- verified live this
+    // rung with a plain hp===0 fixture carrying zero Thrash state, same
+    // barrier. Staging a genuine same-pass faint (e.g. via Leech Seed damage
+    // landing on 0 immediately before this battler's own THRASH case) plus a
+    // real switch decision is out of proportion for this rung's own scope.
+
+    it("no lock-in bit set at all: pure no-op, zero RNG", () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0 }),
+          battler({ side: 1, partyIndex: 2 }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+      const initial = scratchState(rc, 1);
+      const result = runBattleEndTurnOrchestration(program, handlers, initial);
+      expect(result.kind).toBe("next-turn");
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      expect(result.state.rulesContext.battlers[1]!.status2).toBe(0);
+      expect(result.state.rng.calls).toBe(initial.rng.calls);
+    });
   });
 
   describe("ENDTURN_YAWN (battle_util.c:1753-1771, docs/yawn-thrash-endturn-design.md §2)", () => {

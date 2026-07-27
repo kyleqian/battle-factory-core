@@ -76,6 +76,8 @@ export const BATTLE_SCRIPT_STATUS3_YAWN = ((1 << 11) | (1 << 12)) >>> 0;
 export const BATTLE_SCRIPT_STATUS3_YAWN_TURN_2 = ((2 << 11) & BATTLE_SCRIPT_STATUS3_YAWN) >>> 0;
 /** include/constants/battle.h:169 -- STATUS3_YAWN_TURN(1), the one-turn decrement `ENDTURN_YAWN` subtracts each end-turn pass (`battle_util.c:1756`). */
 export const BATTLE_SCRIPT_STATUS3_YAWN_TURN_1 = ((1 << 11) & BATTLE_SCRIPT_STATUS3_YAWN) >>> 0;
+/** include/constants/battle.h:138 -- STATUS2_LOCK_CONFUSE_TURN(1), the one-turn decrement `ENDTURN_THRASH` subtracts each end-turn pass (`battle_util.c:1677`). */
+export const BATTLE_SCRIPT_STATUS2_LOCK_CONFUSE_TURN_1 = ((1 << 10) & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_LOCK_CONFUSE) >>> 0;
 /** include/constants/battle.h:158-159 -- the seeder's battler id (bits 0-1) plus the "is seeded" bit. */
 export const BATTLE_SCRIPT_STATUS3_LEECHSEED_BATTLER_MASK = (1 << 0) | (1 << 1);
 export const BATTLE_SCRIPT_STATUS3_LEECHSEED = 1 << 2;

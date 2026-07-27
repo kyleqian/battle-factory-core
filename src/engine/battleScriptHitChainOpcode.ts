@@ -19,6 +19,7 @@ import {
 } from "./battleScriptMachine.ts";
 import {
   resolveBattleScriptLabel,
+  type BattleScriptInstruction,
   type BattleScriptOperand,
   type BattleScriptProgram,
 } from "./battleScriptProgram.ts";
@@ -2557,49 +2558,78 @@ function applySetMoveEffect(
   return finishStatusWrite(newStatus1);
 }
 
+export type BattleScriptConfusionStatus2MutationResult = Readonly<{
+  rulesContext: BattleScriptRulesContext;
+  rng: BattleScriptRngState;
+  /** Whether STATUS2_CONFUSION was freshly written (Own Tempo/already-confused both leave this false). */
+  confused: boolean;
+}>;
+
 /**
- * SetMoveEffect's family-B shared early-out plus its MOVE_EFFECT_CONFUSION
- * case (battle_script_commands.c:2524,2533-2546 --
+ * SetMoveEffect's MOVE_EFFECT_CONFUSION case, state mutation only
+ * (battle_script_commands.c:2524,2533-2546 --
  * docs/stat-change-confusion-ground-truth.md S1.6). The shared early-out
  * (`status2 & sStatusFlagsForMoveEffects[byte]`, byte=CONFUSION resolves to
  * the full STATUS2_CONFUSION mask) and the case's own identical `status2 &
  * STATUS2_CONFUSION` recheck are the same test in practice -- this ports
  * them as one combined condition alongside the Own Tempo ability check.
+ * Factored out of the script-transition wrapper so `ENDTURN_THRASH`'s own
+ * direct `SetMoveEffect(TRUE, 0)` call site (`battle_util.c:1686-1689`,
+ * docs/yawn-thrash-endturn-design.md §4, `battleEndTurnOrchestration.ts`'s
+ * `runThrashTick`) can reuse the identical state machinery without going
+ * through a Battle Script opcode transition.
+ */
+export function applyConfusionStatus2Mutation(
+  rulesContext: BattleScriptRulesContext,
+  rng: BattleScriptRngState,
+  instruction: BattleScriptInstruction,
+  effectBattler: BattleScriptBattlerId,
+): BattleScriptConfusionStatus2MutationResult {
+  const effectBattlerState = rulesContext.battlers[effectBattler];
+  const alreadyConfused = (effectBattlerState.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_CONFUSION) !== 0;
+  if (effectBattlerState.ability === ABILITY_OWN_TEMPO || alreadyConfused) {
+    return Object.freeze({ rulesContext, rng, confused: false });
+  }
+
+  const { rng: nextRng, randomValue } = drawBattleScriptRng(
+    rng,
+    instruction,
+    "SetMoveEffect confusion duration ((Random() % 4) + 2)",
+  );
+  const turns = (randomValue % 4) + 2;
+  const nextRulesContext = withBattler(rulesContext, effectBattler, {
+    status2: (effectBattlerState.status2 | turns) >>> 0,
+  });
+  return Object.freeze({ rulesContext: nextRulesContext, rng: nextRng, confused: true });
+}
+
+/**
  * Zero new opcodes: all 4 BattleScript_MoveEffectConfusion ops
  * (chosenstatus2animation/printstring/waitmessage/return) are already
- * registered. The only new surface is the `(Random() % 4) + 2` duration
- * draw and the plain status2 write (guaranteed-zero bits per the early-out,
- * so `|=` and `=` are equivalent here).
+ * registered. The only new surface `applyConfusionStatus2Mutation` adds is
+ * the `(Random() % 4) + 2` duration draw and the plain status2 write
+ * (guaranteed-zero bits per the early-out, so `|=` and `=` are equivalent
+ * here).
  */
 function applyConfusionMoveEffect(
   context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
   baseRulesContext: BattleScriptRulesContext,
   effectBattler: BattleScriptBattlerId,
 ): BattleScriptCommandTransition<BattleScriptRulesContext> {
-  const effectBattlerState = baseRulesContext.battlers[effectBattler];
-  const alreadyConfused = (effectBattlerState.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_CONFUSION) !== 0;
-  if (effectBattlerState.ability === ABILITY_OWN_TEMPO || alreadyConfused) {
+  const mutation = applyConfusionStatus2Mutation(baseRulesContext, context.state.rng, context.instruction, effectBattler);
+  if (!mutation.confused) {
     return transitionBattleScriptCommand(
       context,
       Object.freeze({ kind: "advance" }),
-      { rulesContext: baseRulesContext },
+      { rulesContext: mutation.rulesContext },
     );
   }
 
-  const { rng, randomValue } = drawBattleScriptRng(
-    context.state.rng,
-    context.instruction,
-    "SetMoveEffect confusion duration ((Random() % 4) + 2)",
-  );
-  const turns = (randomValue % 4) + 2;
-  const nextRulesContext = withBattler(baseRulesContext, effectBattler, {
-    status2: (effectBattlerState.status2 | turns) >>> 0,
-  });
   const programCounter = resolveRequiredLabelProgramCounter(context.program, "BattleScript_MoveEffectConfusion");
   return transitionBattleScriptCommand(
     context,
     Object.freeze({ kind: "call", programCounter }),
-    { rulesContext: nextRulesContext, rng },
+    { rulesContext: mutation.rulesContext, rng: mutation.rng },
   );
 }
 
