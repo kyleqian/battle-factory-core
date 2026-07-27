@@ -44,6 +44,47 @@ animation. A status caused by a move is not part of that move's animation.
   presentation seam and all source- or evidence-required variants are covered.
 - No entry means unsupported.
 
+## SUPERSONIC promoted to exact; splitbgprio_foes / sonic-ring track established (2026-07-26)
+
+**Verdict:** `MOVE_SUPERSONIC` is exact through the shared Scene-ON seam in
+both required orientations, each reproduced twice. The player-back route is
+**51/51 component/RAM and framebuffer frames** (oracle 80-130); the
+opponent-front route is **51/51** (84-134). Census: **27/276 exact, 3
+partial, 246 unsupported**.
+
+**Source/probe:** complete legal mechanicLab parties stage LOUDRED, the real
+Level-50 Factory set-144 carrier, with all four active choices constrained to
+SUPERSONIC; ONIX is constrained to TACKLE. The reducer covers all six literal
+`SupersonicRing` calls at the source scheduler's four-display-tick cadence,
+`ANIM_TAG_GOLD_RING`, `gSupersonicRingSpriteTemplate`'s growing affine program,
+the complete 30-tick `TranslateAnimSpriteToTargetMonLocation` fixed-point
+body, `splitbgprio_foes`, `monbg`/`setalpha`/`blendoff`/`clearmonbg`, and the
+already-proven literal `AnimTask_ShakeMon2(attacker,2,0,8,1)` tuple. The
+mechanicLab RAM override truthfully retains the route's already-loaded DUSTOX
+chrome, as Knock Off's established seam precedent does; semantic carrier and
+presentation chrome are explicit separate fixture inputs.
+
+**Display dependencies:** rings are normal (not semi-transparent) OBJ despite
+the script's alpha command. Position/affine OAM transfers one VBlank after
+component RAM. Same-subpriority ring overlap inherits the route's persistent
+side-specific `sSpriteOrder`; selection is by attacker side, never oracle
+frame. Both complete orientations pin this variant.
+
+**Sibling audit (no promotions):** METAL SOUND needs its large metal-wave
+template/pan body; ABSORB its eight sine drain orbs, hitsplat/shake, and green
+blend; MEGA DRAIN its paired 16-orb stronger-green body; DREAM EATER its
+psychic background, target scale/shakes, and 24 orbs; FLAME WHEEL its outward
+fire spiral, lunge/return, fire spread, and BlendMonInAndOut; GIGA DRAIN its
+24-orb/high-green body; WILL-O-WISP its wisp orb/fire templates, panning task,
+and both split commands. All remain unsupported without independent complete
+dense evidence.
+
+**Evidence/controls:** committed legal fixtures, reproducible extractor,
+dense RAM/RGB probe, portable comparator, and focused Tier-1 reducer tests.
+Fresh acceptance is **51/51 ×2 in both orientations**. BIND remains **45/45**
+in both orientations and ShakeMon2's exact Tier-1 control stays green. The
+animation/engine import boundary did not widen.
+
 ## MILK DRINK promoted to exact; HealingEffect2 / thin-ring family represented (2026-07-26)
 
 **Verdict:** `MOVE_MILK_DRINK` is exact through the shared Scene-ON seam in
@@ -130,41 +171,6 @@ RECOVER has an exact coverage entry.
 **Verification:** **231 test files / 3131 tests green**; production build
 green; coverage self-check reports **25/276 exact, 3 partial, 248
 unsupported**.
-
-## Knock Off opposite orientation closed; promoted to exact (2026-07-26)
-
-**Verdict:** `MOVE_KNOCK_OFF` promotes **partial → exact**. Its complete
-move-owned Scene-ON body is source component/RAM-exact and framebuffer-exact
-through the shared seam in both required orientations, each reproduced twice:
-player-back PLUSLE → opponent-front ONIX is **59/59** (oracle 70-128), and
-opponent-front PLUSLE → player-back ONIX is **59/59** (74-132). Census:
-**24/276 exact, 3 partial**.
-
-**Source/geometry:** the complete legal opposite mechanicLab fixture places
-SHUPPET in opponent battle RAM and ONIX in player battle RAM, while the source
-route's already-loaded chrome truthfully remains opponent-front PLUSLE and
-player-back ONIX. HorizontalLunge, ShakeMonInPlace, SlideMonToOffset, and
-SlideMonToOriginalPos required no new timing or species variant. The only new
-display dependency is source-declared: `AnimKnockOffStrike` starts affine
-program 1 when the target is player-side (`xScale=-256`, `rotation=+4`) and
-applies literal argv[0] with `x -= -16` instead of the opponent target's
-`x += -16`. PLUSLE's 40×48/yOffset-14 front source uses corner `(144,22)`;
-ONIX reuses the established player-back corner `(40,48)`. All selection is by
-battler side/species geometry—no oracle frame, turn, damage, RNG, or facility
-branch.
-
-**Evidence:** new legal fixture
-`mechanic-knock-off-opponent-shuppet-player-onix.json`, portable fixture
-`knock-off-opponent-onix-player-plusle.json`, generalized
-`knockOffPortable.ts`, source-extracted PLUSLE front art, and focused Tier-1
-asset/geometry/seam tests. Fresh acceptance: KNOCK_OFF **59/59 component +
-framebuffer ×2 in both orientations**. BIND regression: **45/45 component +
-framebuffer ×2 in both orientations**. `MOVE_SUPER_FANG` stays unsupported:
-its full body additionally needs `gSuperFangSpriteTemplate`,
-`AnimTask_BlendMonInAndOut`, palette blend, and independent dense evidence.
-`MOVE_SECRET_POWER` stays unsupported: the Factory building branch dispatches
-to `Move_STRENGTH`, while other environments dispatch to distinct bodies.
-Shared reducers promote neither sibling. Implementation commit: `a6df4ee`.
 
 Start with one representative attacker/target. Add variants only when source
 inspection or comparison identifies a dependency: attacker side, front/back

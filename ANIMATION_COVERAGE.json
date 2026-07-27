@@ -2,6 +2,27 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_SUPERSONIC",
+      "status": "exact",
+      "covered": [
+        "complete legal Level-50 mechanicLab parties stage a real Factory LOUDRED SUPERSONIC carrier in battle RAM with all four active choices constrained to SUPERSONIC and the opposing ONIX constrained to TACKLE",
+        "player-back route chrome to opponent-front ONIX complete move-owned Scene-ON body at oracle frames 80-130: source component/RAM 51/51 and shared-seam framebuffer 51/51, reproduced twice",
+        "opponent-front route chrome to player-back ONIX complete move-owned Scene-ON body at oracle frames 84-134: source component/RAM 51/51 and shared-seam framebuffer 51/51, reproduced twice",
+        "all six literal SupersonicRing calls, ANIM_TAG_GOLD_RING, gSupersonicRingSpriteTemplate growing affine program, 30-tick TranslateAnimSpriteToTargetMonLocation fixed-point body, attacker-side geometry, splitbgprio_foes, monbg/setalpha/blendoff/clearmonbg, and the already-proven literal AnimTask_ShakeMon2(attacker,2,0,8,1) tuple"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-supersonic-player-loudred-opponent-onix.json",
+        "tools/battle-lab/mechanic-supersonic-opponent-loudred-player-onix.json",
+        "tools/compare/fixtures/supersonic-player-loudred-opponent-onix.json",
+        "tools/compare/fixtures/supersonic-opponent-loudred-player-onix.json",
+        "tools/compare/supersonicPortable.ts",
+        "tools/compare/supersonicProbe.py",
+        "src/animation/supersonic.ts",
+        "tests/animation/supersonic.test.ts",
+        "tests/animation/shakeMon2.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_MILK_DRINK",
       "status": "exact",
       "covered": [
@@ -816,6 +837,27 @@
         "MOVE_SECRET_POWER"
       ],
       "goal": "MOVE_KNOCK_OFF is exact through the shared Scene-ON seam in both source-required orientations: player-back PLUSLE to opponent-front ONIX and opponent-front PLUSLE to player-back ONIX are each 59/59 component/RAM and 59/59 framebuffer frames, reproduced twice. HorizontalLunge, ShakeMonInPlace, and both SlideMon helpers remain one source-relative implementation; the opposite route adds only source-selected PLUSLE front/ONIX back chrome and AnimKnockOffStrike's declared player-target affine/x-argument mirror. BIND remains 45/45 in both orientations twice as a seam regression. Sibling batch verdicts remain independent: SUPER_FANG is unsupported because its complete body additionally requires gSuperFangSpriteTemplate, AnimTask_BlendMonInAndOut, palette blend, and its own dense acceptance; SECRET_POWER is unsupported because the Factory building environment dispatches to Move_STRENGTH and other environments dispatch to distinct move bodies. Neither sibling is promoted by shared reducer coverage."
+    },
+    {
+      "id": "splitbgprio-foes-sonic-ring",
+      "components": [
+        "visualCommand:splitbgprio_foes",
+        "asset:ANIM_TAG_GOLD_RING",
+        "sprite:gSupersonicRingSpriteTemplate",
+        "subroutine:SupersonicRing",
+        "task:AnimTask_ShakeMon2"
+      ],
+      "representatives": [
+        "MOVE_SUPERSONIC",
+        "MOVE_METAL_SOUND",
+        "MOVE_ABSORB",
+        "MOVE_MEGA_DRAIN",
+        "MOVE_DREAM_EATER",
+        "MOVE_FLAME_WHEEL",
+        "MOVE_GIGA_DRAIN",
+        "MOVE_WILL_O_WISP"
+      ],
+      "goal": "MOVE_SUPERSONIC independently proves its six-ring, side-relative translation/affine body and splitbgprio_foes seam in both orientations at 51/51 component/RAM and framebuffer frames, reproduced twice. ShakeMon2 and BIND remain exact controls. No sibling is promoted: METAL SOUND needs its distinct large metal-wave template and pan sequence; ABSORB needs eight sine drain orbs, hitsplat/shake, and green blend; MEGA DRAIN needs paired 16-orb stronger-green drain; DREAM EATER needs psychic background, target scale/shakes, and 24 drain orbs; FLAME WHEEL needs outward fire spiral, lunge/return, fire spread, and BlendMonInAndOut; GIGA DRAIN needs 24 orbs and its high-green blend; WILL-O-WISP needs wisp orb/fire templates, panning task, and both splitbgprio_all and splitbgprio_foes. Each remains unsupported pending independent complete dense evidence."
     },
     {
       "id": "healing-blue-star",

@@ -15020,7 +15020,7 @@ export function renderSceneOnMovePresentation(
       // that side-dependent OAM tie order for same-subpriority rings.
       const ringPaintOrder = playerToOpponent
         ? displayed.rings
-        : displayed.rings.toReversed();
+        : Array.from(displayed.rings).reverse();
       for (const ring of ringPaintOrder) {
         drawSpriteSheetAffineRotate(
           fb,
