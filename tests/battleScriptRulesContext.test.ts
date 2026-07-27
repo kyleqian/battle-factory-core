@@ -168,6 +168,7 @@ describe("source-shaped Battle Script rules context", () => {
     const created = createBattleScriptRulesContext(source);
     expect(Object.keys(created).sort()).toEqual([
       "absentBattlerFlags",
+      "alreadyStatusedMoveAttempt",
       "animArg1",
       "animTargetsHit",
       "animTurn",
@@ -446,7 +447,7 @@ describe("source-shaped Battle Script rules context", () => {
 });
 
 describe("production status rules handler and execution seam", () => {
-  it("composes all 113 source-safe controls, source, multi-hit, cleanup, SETBYTE, BICBYTE, attackcanceler, hit-chain, move-end, jumpifbyte, jumpifword, jumpifhalfword, jumpifstatus3condition, orword, openpartyscreen, switchin, getexp, checkteamslost, statbuffchange, set-side-status, set-weather, damaging-weather, trycastformdatachange, ingrain/leechseed/wrap, removeitem, status-primary (SETEFFECTPRIMARY/JUMPIFSTATUS/JUMPIFTYPE/JUMPIFSIDEAFFECTING/JUMPIFCANTMAKEASLEEP, docs/status-cluster-ground-truth.md), fixed-damage/TYPECALC2 (DMGTOLEVEL/PSYWAVEDAMAGEEFFECT/TYPECALC2/REMOVELIGHTSCREENREFLECT, docs/fixed-damage-cluster-ground-truth.md), Counter/Mirror Coat (COUNTERDAMAGECALCULATOR/MIRRORCOATDAMAGECALCULATOR, docs/counter-retaliation-design.md), setyawn (SETYAWN, docs/yawn-thrash-endturn-design.md §1a), confuseifrepeatingattackends (CONFUSEIFREPEATINGATTACKENDS, docs/yawn-thrash-endturn-design.md §3, Rung 4), target-iteration (JUMPIFNEXTTARGETVALID/SELECTFIRSTVALIDTARGET, executable-frontier census's EFFECT_EARTHQUAKE registration), and setprotectlike (SETPROTECTLIKE, EFFECT_PROTECT/EFFECT_ENDURE registration) handlers once", () => {
+  it("composes all 115 source-safe controls, source, multi-hit, cleanup, SETBYTE, BICBYTE, attackcanceler, hit-chain, move-end, jumpifbyte, jumpifword, jumpifhalfword, jumpifstatus3condition, orword, openpartyscreen, switchin, getexp, checkteamslost, statbuffchange, set-side-status, set-weather, damaging-weather, trycastformdatachange, ingrain/leechseed/wrap, removeitem, status-primary (SETEFFECTPRIMARY/JUMPIFSTATUS/JUMPIFTYPE/JUMPIFSIDEAFFECTING/JUMPIFCANTMAKEASLEEP, docs/status-cluster-ground-truth.md), fixed-damage/TYPECALC2 (DMGTOLEVEL/PSYWAVEDAMAGEEFFECT/TYPECALC2/REMOVELIGHTSCREENREFLECT, docs/fixed-damage-cluster-ground-truth.md), Counter/Mirror Coat (COUNTERDAMAGECALCULATOR/MIRRORCOATDAMAGECALCULATOR, docs/counter-retaliation-design.md), setyawn (SETYAWN, docs/yawn-thrash-endturn-design.md §1a), confuseifrepeatingattackends (CONFUSEIFREPEATINGATTACKENDS, docs/yawn-thrash-endturn-design.md §3, Rung 4), target-iteration (JUMPIFNEXTTARGETVALID/SELECTFIRSTVALIDTARGET, executable-frontier census's EFFECT_EARTHQUAKE registration), setprotectlike (SETPROTECTLIKE, EFFECT_PROTECT/EFFECT_ENDURE registration), trysetrest (TRYSETREST, EFFECT_REST registration), and negativedamage (NEGATIVEDAMAGE, EFFECT_ABSORB/EFFECT_DREAM_EATER registration) handlers once", () => {
     const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts());
     expect(Object.keys(handlers).map(Number).sort((a, b) => a - b)).toEqual([
       0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12,
@@ -455,7 +456,7 @@ describe("production status rules handler and execution seam", () => {
       45, 46, 47, 49, 50, 51, 53, 54, 56, 57, 58, 60,
       61, 62, 63, 65, 69, 70, 71, 73, 74, 76, 77, 78, 80, 81,
       82, 83, 84, 85, 86, 92, 97, 98, 100, 101, 102, 104,
-      105, 106, 111, 115, 118, 119, 122, 125, 126, 127, 128, 131, 132, 137, 140, 141, 146,
+      105, 106, 111, 115, 118, 119, 122, 125, 126, 127, 128, 129, 131, 132, 136, 137, 140, 141, 146,
       149, 150, 152, 153, 159, 160, 161, 162, 184, 187, 194, 200, 213, 215, 216, 231, 238, 248,
     ]);
   });

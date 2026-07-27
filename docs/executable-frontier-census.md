@@ -4,16 +4,16 @@ Generated 2026-07-27. Rerun: `npx tsx tools/report/executable-frontier-census.ts
 
 Answers ROADMAP S10's Executable-frontier reset question directly: not "how many opcodes are registered" but **how many of the 355 moves can the kernel execute end-to-end today, and what exactly blocks each of the rest.** Every `BattleScript_Effect*` entry in the committed topology (`src/data/gen/battle-script-topology.json` + `battle-script-graph.json`) is walked for full opcode reachability (branches, goto/call targets, the shared hit-chain tail) against the opcode set the engine currently registers (read live from `src/engine/battleScriptRulesContext.ts`'s `createBattleScriptStatusRulesHandlers`, so this doc cannot drift from what the engine actually installs).
 
-**Key finding:** the single highest-leverage next registration is `B_SCR_OP_NEGATIVEDAMAGE` -- registering exactly that set would flip **2 effects / 5 moves (4 Factory-L50, 49 weighted)** from blocked to executable in one step (EFFECT_ABSORB, EFFECT_DREAM_EATER) -- the largest single entry in the ranked table below. This paragraph is generated fresh from the current registered-opcode set every run, so it always names today's actual top blocker, not a past one -- see PROGRESS.md for the registration history (e.g. the 2026-07-25 B_SCR_OP_JUMPIFHALFWORD/JUMPIFSTATUS3CONDITION/ORWORD entry-chokepoint trio).
+**Key finding:** the single highest-leverage next registration is `B_SCR_OP_JUMPIFSTAT`, `B_SCR_OP_PLAYSTATCHANGEANIMATION` -- registering exactly that set would flip **5 effects / 5 moves (5 Factory-L50, 45 weighted)** from blocked to executable in one step (EFFECT_TICKLE, EFFECT_COSMIC_POWER, EFFECT_BULK_UP, EFFECT_CALM_MIND, EFFECT_DRAGON_DANCE) -- the largest single entry in the ranked table below. This paragraph is generated fresh from the current registered-opcode set every run, so it always names today's actual top blocker, not a past one -- see PROGRESS.md for the registration history (e.g. the 2026-07-25 B_SCR_OP_JUMPIFHALFWORD/JUMPIFSTATUS3CONDITION/ORWORD entry-chokepoint trio).
 
 ## Headline counts
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 97 | 214 | 45.3% |
-| Moves (unweighted, all 355) | 195 | 355 | 54.9% |
-| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 157 | 276 | 56.9% |
-| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2108 | 2957 | 71.3% |
+| Effect scripts | 100 | 214 | 46.7% |
+| Moves (unweighted, all 355) | 201 | 355 | 56.6% |
+| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 162 | 276 | 58.7% |
+| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2206 | 2957 | 74.6% |
 
 "Executable" means every opcode on every statically reachable path from the effect's entry script has a dispatch entry today (registered barriers included, per ROADMAP S10 §1's (a)/(b) policy). It is not a semantic-correctness claim -- see Caveats.
 
@@ -23,8 +23,6 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 
 | Missing opcode(s) | Effects unlocked | Moves unlocked (unweighted) | Factory-L50 moves (unweighted) | Factory-L50 weighted |
 | --- | --- | --- | --- | --- |
-| `B_SCR_OP_NEGATIVEDAMAGE` | 2 (EFFECT_ABSORB, EFFECT_DREAM_EATER) | 5 | 4 | 49 |
-| `B_SCR_OP_TRYSETREST` | 1 (EFFECT_REST) | 1 | 1 | 49 |
 | `B_SCR_OP_JUMPIFSTAT`, `B_SCR_OP_PLAYSTATCHANGEANIMATION` | 5 (EFFECT_TICKLE, EFFECT_COSMIC_POWER, EFFECT_BULK_UP, EFFECT_CALM_MIND, EFFECT_DRAGON_DANCE) | 5 | 5 | 45 |
 | `B_SCR_OP_TRYINFATUATING` | 1 (EFFECT_ATTRACT) | 1 | 1 | 45 |
 | `B_SCR_OP_FORCERANDOMSWITCH`, `B_SCR_OP_INITMULTIHITSTRING`, `B_SCR_OP_JUMPIFHASNOHP` | 1 (EFFECT_ROAR) | 2 | 2 | 40 |
@@ -48,6 +46,8 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_TRYCHOOSESLEEPTALKMOVE` | 1 (EFFECT_SLEEP_TALK) | 1 | 1 | 8 |
 | `B_SCR_OP_TRYWISH` | 1 (EFFECT_WISH) | 1 | 1 | 8 |
 | `B_SCR_OP_ROLLOUTDAMAGECALCULATION` | 1 (EFFECT_ROLLOUT) | 2 | 2 | 7 |
+| `B_SCR_OP_GETSECRETPOWEREFFECT` | 1 (EFFECT_SECRET_POWER) | 1 | 1 | 6 |
+| `B_SCR_OP_SETDEFENSECURLBIT` | 1 (EFFECT_DEFENSE_CURL) | 1 | 1 | 6 |
 
 ## Per-effect detail
 
@@ -56,12 +56,12 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_HIT | `BattleScript_EffectHit` | executable | - | - | 24 | 12 (162) |
 | EFFECT_SLEEP | `BattleScript_EffectSleep` | executable | - | - | 6 | 6 (39) |
 | EFFECT_POISON_HIT | `BattleScript_EffectPoisonHit` | executable | - | - | 4 | 3 (44) |
-| EFFECT_ABSORB | `BattleScript_EffectAbsorb` | blocked-on-opcodes | `B_SCR_OP_NEGATIVEDAMAGE` (main path) | - | 4 | 3 (43) |
+| EFFECT_ABSORB | `BattleScript_EffectAbsorb` | executable | - | - | 4 | 3 (43) |
 | EFFECT_BURN_HIT | `BattleScript_EffectBurnHit` | executable | - | - | 5 | 5 (76) |
 | EFFECT_FREEZE_HIT | `BattleScript_EffectFreezeHit` | executable | - | - | 4 | 3 (109) |
 | EFFECT_PARALYZE_HIT | `BattleScript_EffectParalyzeHit` | executable | - | - | 8 | 7 (137) |
 | EFFECT_EXPLOSION | `BattleScript_EffectExplosion` | blocked-on-opcodes | `B_SCR_OP_TRYEXPLOSION`, `B_SCR_OP_SETATKHPTOZERO` (main path) | - | 2 | 2 (25) |
-| EFFECT_DREAM_EATER | `BattleScript_EffectDreamEater` | blocked-on-opcodes | `B_SCR_OP_NEGATIVEDAMAGE` (edge branch only) | - | 1 | 1 (6) |
+| EFFECT_DREAM_EATER | `BattleScript_EffectDreamEater` | executable | - | - | 1 | 1 (6) |
 | EFFECT_MIRROR_MOVE | `BattleScript_EffectMirrorMove` | blocked-on-opcodes | `B_SCR_OP_TRYMIRRORMOVE` (main path) | - | 1 | 0 (0) |
 | EFFECT_ATTACK_UP | `BattleScript_EffectAttackUp` | executable | - | - | 3 | 1 (1) |
 | EFFECT_DEFENSE_UP | `BattleScript_EffectDefenseUp` | executable | - | - | 2 | 1 (1) |
@@ -90,7 +90,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_PAY_DAY | `BattleScript_EffectPayDay` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_PAYDAY is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 1 | 0 (0) |
 | EFFECT_LIGHT_SCREEN | `BattleScript_EffectLightScreen` | executable | - | - | 1 | 1 (23) |
 | EFFECT_TRI_ATTACK | `BattleScript_EffectTriAttack` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_TRI_ATTACK is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 1 | 1 (8) |
-| EFFECT_REST | `BattleScript_EffectRest` | blocked-on-opcodes | `B_SCR_OP_TRYSETREST` (edge branch only) | - | 1 | 1 (49) |
+| EFFECT_REST | `BattleScript_EffectRest` | executable | - | - | 1 | 1 (49) |
 | EFFECT_OHKO | `BattleScript_EffectOHKO` | blocked-on-opcodes | `B_SCR_OP_TRYKO`, `B_SCR_OP_TRYSETDESTINYBONDTOHAPPEN` (edge branch only) | - | 4 | 4 (28) |
 | EFFECT_RAZOR_WIND | `BattleScript_EffectRazorWind` | blocked-on-opcodes | `B_SCR_OP_CLEARSTATUSFROMEFFECT` (edge branch only) | Cmd_seteffectprimary dispatch: MOVE_EFFECT_CHARGING is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522<br>Cmd_seteffectwithchance dispatch: MOVE_EFFECT_CHARGING is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 1 | 1 (2) |
 | EFFECT_SUPER_FANG | `BattleScript_EffectSuperFang` | blocked-on-opcodes | `B_SCR_OP_DAMAGETOHALFTARGETHP` (main path) | - | 1 | 1 (1) |

@@ -42,6 +42,8 @@ import { createBattleScriptSetyawnOpcodeHandlers } from "./battleScriptSetyawnOp
 import { createBattleScriptConfuseifrepeatingattackendsOpcodeHandlers } from "./battleScriptConfuseifrepeatingattackendsOpcode.ts";
 import { createBattleScriptTargetIterationOpcodeHandlers } from "./battleScriptTargetIterationOpcode.ts";
 import { createBattleScriptProtectlikeOpcodeHandlers } from "./battleScriptProtectlikeOpcode.ts";
+import { createBattleScriptNegativedamageOpcodeHandlers } from "./battleScriptNegativedamageOpcode.ts";
+import { createBattleScriptTrysetrestOpcodeHandlers } from "./battleScriptTrysetrestOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -484,6 +486,15 @@ export type BattleScriptRulesContext = Readonly<
     monToSwitchIntoId: BattleScriptMoveEndHalfwords;
     /** Source u8 gBattleStruct->absentBattlerFlags, separate from the global mask. */
     battleStructAbsentBattlerFlags: number;
+    /**
+     * Source u8 gBattleStruct->alreadyStatusedMoveAttempt, per-battler bits
+     * (Cmd_various's VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT case,
+     * battleScriptSwitchinOpcode.ts). Only ever read by Battle Arena
+     * (battle_arena.c:594), a facility this engine does not model -- tracked
+     * anyway so BattleScript_RestIsAlreadyAsleep's own
+     * setalreadystatusedmoveattempt write is exact rather than skipped.
+     */
+    alreadyStatusedMoveAttempt: number;
     /** Source u8 gBattleStruct->dynamicMoveType. */
     dynamicMoveType: number;
     /** Source u8 gEnigmaBerries[MAX_BATTLERS_COUNT].holdEffect values. */
@@ -585,6 +596,7 @@ export type BattleScriptRulesContextInput = Readonly<{
   changedItems?: readonly number[];
   monToSwitchIntoId?: readonly number[];
   battleStructAbsentBattlerFlags?: number;
+  alreadyStatusedMoveAttempt?: number;
   dynamicMoveType?: number;
   enigmaBerryHoldEffects?: readonly number[];
   moveHistory?: Readonly<{
@@ -1970,6 +1982,11 @@ export function createBattleScriptRulesContext(
       0x0f,
       "battleStructAbsentBattlerFlags",
     ),
+    alreadyStatusedMoveAttempt: requireUnsigned(
+      input.alreadyStatusedMoveAttempt ?? 0,
+      0x0f,
+      "alreadyStatusedMoveAttempt",
+    ),
     dynamicMoveType: requireUnsigned(input.dynamicMoveType ?? 0, 0xff, "dynamicMoveType"),
     enigmaBerryHoldEffects,
     moveHistory,
@@ -2186,6 +2203,8 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptConfuseifrepeatingattackendsOpcodeHandlers(program),
     ...createBattleScriptTargetIterationOpcodeHandlers(program),
     ...createBattleScriptProtectlikeOpcodeHandlers(program),
+    ...createBattleScriptNegativedamageOpcodeHandlers(program),
+    ...createBattleScriptTrysetrestOpcodeHandlers(program),
   });
 }
 

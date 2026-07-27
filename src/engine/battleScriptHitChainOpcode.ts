@@ -343,6 +343,10 @@ const PRINTFROMTABLE_TABLES: Readonly<Record<string, readonly string[]>> = Objec
     "STRINGID_PKMNBRACEDITSELF",
     "STRINGID_BUTITFAILED",
   ]),
+  /** battle_message.c:1120-1124 -- BattleScript_EffectAbsorb's own table, B_MSG_ABSORB(0)/ABSORB_OOZE(1). */
+  gAbsorbDrainStringIds: Object.freeze(["STRINGID_PKMNENERGYDRAINED", "STRINGID_ITSUCKEDLIQUIDOOZE"]),
+  /** battle_message.c:969-973 -- BattleScript_EffectRest's own table (Cmd_trysetrest, battleScriptTrysetrestOpcode.ts), B_MSG_REST(0)/REST_STATUSED(1). */
+  gRestUsedStringIds: Object.freeze(["STRINGID_PKMNWENTTOSLEEP", "STRINGID_PKMNSLEPTHEALTHY"]),
   /** battle_message.c:1038-1045 -- indexed by the move's own position in gTrappingMoves, not MULTISTRING_CHOOSER's usual small enum. */
   gWrappedStringIds: Object.freeze([
     "STRINGID_PKMNSQUEEZEDBYBIND",

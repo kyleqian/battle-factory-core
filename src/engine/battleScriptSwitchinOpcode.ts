@@ -121,10 +121,23 @@ function controllerBusyBlock(
   return transitionBattleScriptCommand(context, Object.freeze({ kind: "block", reason }));
 }
 
-/** include/constants/battle_script_commands.h -- the one `various` id this file resolves; every other case name stays unrecognized (barriers). */
+/**
+ * include/constants/battle_script_commands.h -- the two `various` ids this
+ * file resolves; every other case name stays unrecognized (barriers).
+ * VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT (23, battle_script_commands.c:
+ * 6480-6482) widens this existing barrier's modeled operand set --
+ * BattleScript_RestIsAlreadyAsleep's own `setalreadystatusedmoveattempt
+ * BS_ATTACKER` (a `various` macro expansion) reaches it. The write
+ * (`gBattleStruct->alreadyStatusedMoveAttempt |= gBitTable[gActiveBattler]`)
+ * is only ever read by Battle Arena (battle_arena.c:594), unmodeled here --
+ * tracked purely so this reachable script doesn't halt on an avoidable
+ * barrier.
+ */
 const VARIOUS_RESET_PLAYER_FAINTED = 7;
+const VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT = 23;
 const NAMED_BYTE_CONSTANTS = new Map<string, number>([
   ["VARIOUS_RESET_PLAYER_FAINTED", VARIOUS_RESET_PLAYER_FAINTED],
+  ["VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT", VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT],
 ]);
 
 function resolveByteLiteral(expression: string): number | null {
@@ -418,7 +431,7 @@ function createVariousOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRul
       throw new Error(`invalid B_SCR_OP_VARIOUS shape at program counter ${context.state.programCounter}`);
     }
     const id = resolveByteLiteral(idOperand.expression);
-    if (id !== VARIOUS_RESET_PLAYER_FAINTED) {
+    if (id !== VARIOUS_RESET_PLAYER_FAINTED && id !== VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT) {
       return unsupportedBranch(
         context,
         `Cmd_various case ${idOperand.expression} is not modeled`,
@@ -432,6 +445,15 @@ function createVariousOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRul
       );
     }
     const rules = context.state.rulesContext;
+
+    if (id === VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT) {
+      const alreadyStatusedMoveAttempt = (rules.alreadyStatusedMoveAttempt | (1 << battler)) >>> 0;
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        { rulesContext: Object.freeze({ ...rules, alreadyStatusedMoveAttempt }) },
+      );
+    }
     const { battleTypeFlags, battlersCount } = rules.battleTopology;
     const bothAlive = battlersCount > 1
       && rules.battlers[0].hp !== 0
