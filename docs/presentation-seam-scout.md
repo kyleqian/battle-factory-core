@@ -1901,3 +1901,79 @@ files, 3417/3417 tests** (+1 file/+8 tests over this session's own start —
 one new staging-module test file only). `npm run build` clean.
 `executableFrontierRatchet.test.ts` unmoved (zero new barriers, no canonical
 recording import added).
+
+### 12.5 Wiring landed, 2026-07-27 (main lane, bounded worker)
+
+§12.3's plan executed for steps 1/2/5 as written; steps 3/4 left as the
+named, out-of-this-trace's-scope residuals the plan itself called them (no
+mismatch found — the bridge shape §12.2/§12.3 predicted fit the real event
+stream exactly).
+
+`presentationEventWindowBridge.ts` gained
+`resolveFeatherDanceKickoffPresentationWindowContent` (step 1): the first
+OPPONENT-target sibling in this family, and the first to read from TWO
+`sourceLabel`s — `BattleScript_EffectStatDown` for the `message{STRINGID_
+USEDMOVE}` + `stat-stage-change` pair, `BattleScript_StatDownPrintString`
+for the separate `STRINGID_DEFENDERSSTATFELL` message — returning
+`{message, statChange, statFellMessage}` (no `hp` field, per §12.2's own
+"no damage component" finding). `presentationEventWindowBridge.test.ts`
+gained 3 new cases (the happy-path triad plus 2 null-guard cases exercising
+the new two-`sourceLabel` shape specifically).
+
+`turn6FeatherDancePresentationStaging.ts`'s own local (pre-wiring)
+extraction in `resolveTurn6FeatherDanceWindowContent` is retired in favor of
+calling the new bridge function directly — same "stage the chain, then call
+the shared bridge" shape §11.5 established for
+`turn4DoubleTeamPresentationStaging.ts`. `resolveTurn6FeatherDanceKickoffLines`
+now reads `content.message.messageId` from the bridge output instead of
+hardcoding the `"STRINGID_USEDMOVE"` literal directly (closing the same
+doc/code gap class §11.5 closed for turn 4); `resolveTurn6AtkFellLines`
+(still unwired, step 3) now reads `content.statFellMessage.messageId`/
+`content.statChange.{from,to}` from the same bridge output instead of the
+old ad hoc `statFell` field names. `turn6FeatherDancePresentationStaging.test.ts`'s
+own final assertion updated to match the bridge's return shape (`message`/
+`statChange`/`statFellMessage`, each carrying `substitutions` where
+applicable) — mechanical, no behavior change (byte-identical values).
+
+`battleScene.ts`'s `drawTurn6FeatherDanceKickoffText` (step 2) now draws
+`TURN6_FEATHERDANCE_KICKOFF_LINE1/2` (a new constant, resolved once at
+module load from the staged run via `resolveTurn6FeatherDanceKickoffLines`)
+in its own FEATHERDANCE-text branch, instead of the raw `TURN6_FEATHERDANCE_
+LINE1`/`LINE2` literals. Nothing else in that function changed: the
+feather-sprite choreography, the `eva`/stat-fall-banner gate, the
+`atkFellStart` branch (still reading the raw `TURN6_ATKFELL_LINE1/2`
+literals directly, per step 3's own prerequisite), and the ROCK_SLIDE
+handoff are all byte-for-byte unchanged.
+
+**No literal died.** `TURN6_FEATHERDANCE_LINE1`/`LINE2` (`battleScene.ts:
+8860-8861`) stay defined and in use by every OTHER turn's own repeat-
+FEATHER_DANCE kickoff call site in this file — `drawTurn7FeatherDanceKickoffText`,
+`drawTurn8FeatherDanceKickoffText`, `drawTurn11FeatherDanceWindow` (turns
+7/8/11's own 2nd/3rd/4th uses of the identical text, all explicitly out of
+this step's own scope, §12's own selection note) — only
+`drawTurn6FeatherDanceKickoffText`'s own one call site was retired from
+reading them directly. `TURN6_ATKFELL_LINE1/2` (`battleMenu.ts:1559-1560`)
+are untouched entirely (step 3 not executed this pass, per the brief's own
+out-of-scope list and §12.3's own prerequisite note about the glyph
+residual).
+
+**No mismatch found.** The bridge shape §12.2/§12.3 predicted — a
+two-`sourceLabel` read, the first opponent-target case in this dossier —
+fit the real event stream exactly as staged: no rework was needed once the
+bridge function was written against the same event dump §12.2 already
+captured.
+
+**Acceptance, re-verified this session:** the full §12.4 regression sweep
+run BEFORE this change (on the pristine `HEAD`, via `git stash`) matched
+every recorded count exactly — `turn6-featherdance.json` 90/90,
+`turn6-rockslide-a.json` 255/255, `turn6-statfall.json` 127/127,
+`turn6-feathers.json` 235/235, `turn6-menu.json` 44/44,
+`turn1-rockslide.json` 256/256, `turn5-rockslide.json` 256/256,
+`turn4-doubleteam.json` 250/250 — no pre-existing drift. Re-run AFTER the
+change (`turn6-featherdance.json` twice, for a determinism check) reproduced
+every one of those counts byte-identically. `npm test` **252/252 files,
+3446/3446 tests** (+3 over this session's own start, 252/3443 — the 3 new
+`presentationEventWindowBridge.test.ts` cases only; `turn6FeatherDancePresentationStaging.test.ts`'s
+own test count is unchanged, one existing assertion updated in place).
+`npm run build` clean. `executableFrontierRatchet.test.ts` unmoved (6/6,
+zero new barriers).

@@ -61,11 +61,12 @@ describe("turn6FeatherDancePresentationStaging: staged real FEATHER_DANCE oppone
     expect(lines[1]).toBe("harshly fell!");
   });
 
-  it("resolveTurn6FeatherDanceWindowContent resolves both the kickoff message and the ATK stat-stage-change purely from the staged event stream's own provenance", () => {
+  it("resolveTurn6FeatherDanceWindowContent resolves the kickoff message, the ATK stat-stage-change, and the stat-fell message through presentationEventWindowBridge.ts's own new bridge (docs/presentation-seam-scout.md §12.3 step 1), purely from the staged event stream's own provenance", () => {
     const content = resolveTurn6FeatherDanceWindowContent();
     expect(content).toEqual({
-      message: { messageId: "STRINGID_USEDMOVE" },
-      statFell: { messageId: "STRINGID_DEFENDERSSTATFELL", battler: 0, stat: "attack", from: 6, to: 4 },
+      message: { messageId: "STRINGID_USEDMOVE", substitutions: [] },
+      statChange: { battler: 0, stat: "attack", from: 6, to: 4 },
+      statFellMessage: { messageId: "STRINGID_DEFENDERSSTATFELL", substitutions: [] },
     });
   });
 });

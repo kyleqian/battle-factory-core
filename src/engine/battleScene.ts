@@ -607,6 +607,7 @@ import {
 } from "./turn1RockSlidePresentationStaging.ts";
 import { resolveTurn4RockSlideHpEndpoints } from "./turn4RockSlidePresentationStaging.ts";
 import { resolveTurn4DoubleTeamKickoffLines } from "./turn4DoubleTeamPresentationStaging.ts";
+import { resolveTurn6FeatherDanceKickoffLines } from "./turn6FeatherDancePresentationStaging.ts";
 import { resolveTurn3RockSlideHpEndpoints } from "./turn3RockSlidePresentationStaging.ts";
 import {
   resolveTurn5EndeavorAttackLines,
@@ -1484,6 +1485,26 @@ const TURN4_ROCKSLIDE_HP = resolveTurn4RockSlideHpEndpoints();
  * kickoff/held-text call site in this file.
  */
 const [TURN4_DOUBLETEAM_KICKOFF_LINE1, TURN4_DOUBLETEAM_KICKOFF_LINE2] = resolveTurn4DoubleTeamKickoffLines();
+
+/**
+ * Presentation-seam retirement (`docs/presentation-seam-scout.md` §12.3 step
+ * 2): turn 6's own FEATHER_DANCE kickoff text ("Foe PIDGEOTTO used\n
+ * FEATHERDANCE!"), now re-derived from `turn6FeatherDancePresentationStaging.ts`'s
+ * own staged real event stream via `presentationEventWindowBridge.ts`'s new
+ * `resolveFeatherDanceKickoffPresentationWindowContent` bridge (the first
+ * OPPONENT-target sibling to `resolveDoubleTeamKickoffPresentationWindowContent`
+ * above), rather than the raw `TURN6_FEATHERDANCE_LINE1`/`LINE2` literals --
+ * byte-identical content (same `STRINGID_USEDMOVE` template, same
+ * Pidgeotto/FEATHER_DANCE splice), but now identified from provenance
+ * (`BattleScript_EffectStatDown`), not a bare literal. `TURN6_FEATHERDANCE_
+ * LINE1`/`LINE2` themselves stay defined and in use by every OTHER turn's own
+ * repeat-FEATHER_DANCE kickoff call site in this file (turns 7/8/11's own
+ * 2nd/3rd/4th uses, `drawTurn7FeatherDanceKickoffText`/
+ * `drawTurn8FeatherDanceKickoffText`/`drawTurn11FeatherDanceWindow` --
+ * out of this step's own scope, §12.3) -- only `drawTurn6FeatherDanceKickoffText`'s
+ * own one call site was retired from reading them directly.
+ */
+const [TURN6_FEATHERDANCE_KICKOFF_LINE1, TURN6_FEATHERDANCE_KICKOFF_LINE2] = resolveTurn6FeatherDanceKickoffLines();
 
 /**
  * Presentation-seam retirement (`docs/presentation-seam-scout.md` §10.2/
@@ -8970,7 +8991,7 @@ function drawTurn6FeatherDanceKickoffText(fb: Uint8Array, t: number, pressTick: 
   if (t >= atkFellStart) {
     drawMessageTextLines(fb, TURN6_ATKFELL_LINE1, TURN6_ATKFELL_LINE2, turn6AtkFellTextVisibleChars(t, pressTick));
   } else {
-    drawMessageTextLines(fb, TURN6_FEATHERDANCE_LINE1, TURN6_FEATHERDANCE_LINE2, turn6FeatherDanceTextVisibleChars(t, pressTick));
+    drawMessageTextLines(fb, TURN6_FEATHERDANCE_KICKOFF_LINE1, TURN6_FEATHERDANCE_KICKOFF_LINE2, turn6FeatherDanceTextVisibleChars(t, pressTick));
   }
 }
 

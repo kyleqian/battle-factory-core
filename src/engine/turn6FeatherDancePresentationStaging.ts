@@ -1,19 +1,18 @@
 /**
- * Presentation-seam retirement, prep-scout for `turn6-featherdance.json`
- * (ISSUES #39/#41, `docs/presentation-seam-scout.md` §12). Mirrors
- * `turn4DoubleTeamPresentationStaging.ts`'s ORIGINAL (pre-wiring) shape --
- * stage a real hit chain through the registered kernel opcodes and capture
- * its own semantic event stream -- for Pidgeotto's own turn-6 FEATHER_DANCE
- * use (the kickoff half of `drawTurn6FeatherDanceKickoffText`,
+ * Presentation-seam retirement, `turn6-featherdance.json` (ISSUES #39/#41,
+ * `docs/presentation-seam-scout.md` §12, wired per §12.3 steps 1-2). Stages
+ * a real hit chain through the registered kernel opcodes and reads this
+ * window's own content from the result via
+ * `presentationEventWindowBridge.ts`'s `resolveFeatherDanceKickoffPresentation
+ * WindowContent` -- for Pidgeotto's own turn-6 FEATHER_DANCE use (the
+ * kickoff half of `drawTurn6FeatherDanceKickoffText`,
  * `battleScene.ts:8953-8975`; the ROCK_SLIDE tail of that same function
  * handing off to `drawTurn6RockSlideWindow` is a DIFFERENT, already-
- * documented-unwired mechanism, out of this module's own scope). **Unwired**
- * -- not imported by `battleScene.ts` or any other production file, and this
- * module does NOT add a new resolver to `presentationEventWindowBridge.ts`
- * (out of this prep-scout's own read-only-recon-plus-one-staging-module
- * contract) -- the message/stat-change extraction below is local to this
- * file only, exactly the shape `turn4DoubleTeamPresentationStaging.ts` had
- * BEFORE §11.5's wiring step added the shared bridge function.
+ * documented-unwired mechanism, out of this module's own scope). Imported by
+ * `battleScene.ts` for the kickoff text only (`TURN6_FEATHERDANCE_LINE1/2`'s
+ * own replacement); the ATK-fell text (`resolveTurn6AtkFellLines`, below)
+ * stays unwired -- §12.3 step 3 names a real prerequisite (a resolver glyph
+ * fix) this trace's own 90/90 acceptance bar does not need.
  *
  * Ground truth, not fabricated: species/stats are ONIX's and PIDGEOTTO's
  * real level-50 RAM-confirmed battle stats (`docs/turn6-notes.md` §4's own
@@ -72,6 +71,10 @@ import {
 } from "./battleScriptMachine.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 import type { BattleScriptSemanticEvent } from "./battleScriptEvents.ts";
+import {
+  resolveFeatherDanceKickoffPresentationWindowContent,
+  type FeatherDanceKickoffPresentationWindowContent,
+} from "./presentationEventWindowBridge.ts";
 import { resolveBattleNameWithPrefix, resolveBattleStringLines, resolveMoveNameExclaim } from "./battleStringResolver.ts";
 import speciesNamesAsset from "../data/gen/species-names.json" with { type: "json" };
 import battleMessageTemplates from "../data/gen/battle-message-templates.json" with { type: "json" };
@@ -303,43 +306,21 @@ function acknowledgePendingControllers(
   return next;
 }
 
-export type Turn6FeatherDanceWindowContent = Readonly<{
-  message: Readonly<{ messageId: "STRINGID_USEDMOVE" }>;
-  statFell: Readonly<{ messageId: "STRINGID_DEFENDERSSTATFELL"; battler: number; stat: string; from: number; to: number }>;
-}>;
-
 /**
- * Local (non-bridge) extraction of this window's own two content events from
- * the staged run's real event stream -- the same shape
- * `resolveDoubleTeamKickoffPresentationWindowContent` in
- * `presentationEventWindowBridge.ts` has for turn 4's own analogous window,
- * but kept local to this file since adding a new resolver to that shared
- * production file is out of this prep-scout's own scope (§12.3 names it for
- * the next wiring worker instead).
+ * The PC-to-window bridge (`docs/presentation-seam-scout.md` §12.3 step 1)
+ * applied to this staged run: extracts the FEATHER_DANCE kickoff's own
+ * message + ATK-drop + stat-fell content purely from provenance, never a
+ * turn number.
  */
-export function resolveTurn6FeatherDanceWindowContent(): Turn6FeatherDanceWindowContent {
+export function resolveTurn6FeatherDanceWindowContent(): FeatherDanceKickoffPresentationWindowContent {
   const { events } = stageTurn6FeatherDanceHitChain();
-  const messageEvents = events.filter((e): e is Extract<BattleScriptSemanticEvent, { kind: "message" }> => e.kind === "message");
-  const usedMove = messageEvents.find((e) => e.messageId === "STRINGID_USEDMOVE");
-  const statFellMessage = messageEvents.find((e) => e.messageId === "STRINGID_DEFENDERSSTATFELL");
-  const statEvent = events.find(
-    (e): e is Extract<BattleScriptSemanticEvent, { kind: "stat-stage-change" }> => e.kind === "stat-stage-change",
-  );
-  if (!usedMove || !statFellMessage || !statEvent) {
+  const content = resolveFeatherDanceKickoffPresentationWindowContent(events);
+  if (!content) {
     throw new Error(
       "turn6FeatherDancePresentationStaging: staged hit chain did not produce this window's own expected event triad",
     );
   }
-  return Object.freeze({
-    message: Object.freeze({ messageId: "STRINGID_USEDMOVE" as const }),
-    statFell: Object.freeze({
-      messageId: "STRINGID_DEFENDERSSTATFELL" as const,
-      battler: statEvent.battler,
-      stat: statEvent.stat,
-      from: statEvent.from,
-      to: statEvent.to,
-    }),
-  });
+  return content;
 }
 
 /**
@@ -348,10 +329,12 @@ export function resolveTurn6FeatherDanceWindowContent(): Turn6FeatherDanceWindow
  * module's own attackstring row (`Cmd_attackstring` emits the fixed
  * `STRINGID_USEDMOVE` regardless of which move is used,
  * `battleScriptHitChainOpcode.ts:754-757`), re-derived here from THIS staged
- * run's own real event stream, not merely asserted by analogy.
+ * run's own real event stream via `resolveTurn6FeatherDanceWindowContent`
+ * above (not merely asserted by analogy).
  */
 export function resolveTurn6FeatherDanceKickoffLines(): readonly string[] {
-  return resolveBattleStringLines("STRINGID_USEDMOVE", {
+  const content = resolveTurn6FeatherDanceWindowContent();
+  return resolveBattleStringLines(content.message.messageId, {
     B_ATK_NAME_WITH_PREFIX: () =>
       resolveBattleNameWithPrefix({ side: "opponent", isTrainerBattle: true, nickname: speciesDisplayName(SPECIES_PIDGEOTTO) }),
     B_BUFF2: () => resolveMoveNameExclaim(MOVE_FEATHER_DANCE),
@@ -366,14 +349,15 @@ export function resolveTurn6FeatherDanceKickoffLines(): readonly string[] {
  * 6 -> 4): `B_DEF_NAME_WITH_PREFIX` is ONIX's own player-side name (no "Foe "
  * prefix, matching this window's own already-committed literal), `B_BUFF1`
  * is `statNames`'s own "ATTACK" entry, `B_BUFF2` is `statFellBuff2`'s own
- * magnitude-2 "harshly fell!" case.
+ * magnitude-2 "harshly fell!" case. Still unwired (§12.3 step 3's own
+ * prerequisite glyph fix, not this trace's own 90/90 acceptance bar).
  */
 export function resolveTurn6AtkFellLines(): readonly string[] {
   const content = resolveTurn6FeatherDanceWindowContent();
-  return resolveBattleStringLines(content.statFell.messageId, {
+  return resolveBattleStringLines(content.statFellMessage.messageId, {
     B_DEF_NAME_WITH_PREFIX: () =>
       resolveBattleNameWithPrefix({ side: "player", isTrainerBattle: true, nickname: speciesDisplayName(SPECIES_ONIX) }),
     B_BUFF1: () => statDisplayName("STAT_ATK"),
-    B_BUFF2: () => statFellBuff2(content.statFell.from, content.statFell.to),
+    B_BUFF2: () => statFellBuff2(content.statChange.from, content.statChange.to),
   });
 }

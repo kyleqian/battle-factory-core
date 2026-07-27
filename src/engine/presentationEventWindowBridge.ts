@@ -166,3 +166,76 @@ export function resolveDoubleTeamKickoffPresentationWindowContent(
     }),
   });
 }
+
+/**
+ * docs/presentation-seam-scout.md §12.2/§12.3 step 1's own mapping row for
+ * `turn6-featherdance.json`'s kickoff phase (`drawTurn6FeatherDanceKickoffText`,
+ * `battleScene.ts`): the first OPPONENT-target sibling to
+ * `resolveDoubleTeamKickoffPresentationWindowContent` above (every prior
+ * wired stat-change window was self-target) -- and a genuinely different
+ * shape, not just a different label to pass through the same two-signal
+ * pattern. This window's own kickoff message + ATK-drop `stat-stage-change`
+ * share ONE `sourceLabel` (`BattleScript_EffectStatDown`,
+ * `reference/pokeemerald/data/battle_scripts_1.s:534-553`), but the
+ * ATK-fell text (`STRINGID_DEFENDERSSTATFELL`) sits under a SEPARATE
+ * `sourceLabel` (`BattleScript_StatDownPrintString`) -- confirmed live in
+ * this staged run's own event dump, §12.2 -- so this resolver reads from TWO
+ * `sourceLabel`s, not one.
+ */
+export const EFFECT_STAT_DOWN_SCRIPT_LABEL = "BattleScript_EffectStatDown";
+export const STAT_DOWN_PRINT_STRING_SCRIPT_LABEL = "BattleScript_StatDownPrintString";
+
+export type FeatherDanceKickoffPresentationWindowContent = Readonly<{
+  message: Readonly<{ messageId: string; substitutions: readonly string[] }>;
+  statChange: Readonly<{ battler: number; stat: string; from: number; to: number }>;
+  statFellMessage: Readonly<{ messageId: string; substitutions: readonly string[] }>;
+}>;
+
+/**
+ * Answers "are we in the FEATHER_DANCE kickoff's own message + ATK-drop
+ * presentation content" from the event stream's own provenance. Returns
+ * `null` (not a guess) when any of the three signals is absent -- the real
+ * `BattleScript_EffectStatDown`-labeled `message` and same-labeled
+ * `stat-stage-change`, PLUS the separately-labeled
+ * `BattleScript_StatDownPrintString` stat-fell `message`, must all be
+ * present for this window to be genuinely active. No `hp` field at all
+ * (matching §12.2's own "no damage component" finding, unlike
+ * `resolveRockSlidePresentationWindowContent` above).
+ */
+export function resolveFeatherDanceKickoffPresentationWindowContent(
+  events: readonly BattleScriptSemanticEvent[],
+  statDownScriptLabel: string = EFFECT_STAT_DOWN_SCRIPT_LABEL,
+  statFellScriptLabel: string = STAT_DOWN_PRINT_STRING_SCRIPT_LABEL,
+): FeatherDanceKickoffPresentationWindowContent | null {
+  const messageEvent = events.find(
+    (event) => event.kind === "message" && event.provenance.sourceLabel === statDownScriptLabel,
+  );
+  if (!messageEvent || messageEvent.kind !== "message") return null;
+
+  const statChangeEvent = events.find(
+    (event) => event.kind === "stat-stage-change" && event.provenance.sourceLabel === statDownScriptLabel,
+  );
+  if (!statChangeEvent || statChangeEvent.kind !== "stat-stage-change") return null;
+
+  const statFellMessageEvent = events.find(
+    (event) => event.kind === "message" && event.provenance.sourceLabel === statFellScriptLabel,
+  );
+  if (!statFellMessageEvent || statFellMessageEvent.kind !== "message") return null;
+
+  return Object.freeze({
+    message: Object.freeze({
+      messageId: messageEvent.messageId,
+      substitutions: messageEvent.substitutions,
+    }),
+    statChange: Object.freeze({
+      battler: statChangeEvent.battler,
+      stat: statChangeEvent.stat,
+      from: statChangeEvent.from,
+      to: statChangeEvent.to,
+    }),
+    statFellMessage: Object.freeze({
+      messageId: statFellMessageEvent.messageId,
+      substitutions: statFellMessageEvent.substitutions,
+    }),
+  });
+}
