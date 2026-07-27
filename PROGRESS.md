@@ -15,6 +15,52 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 522 — [BOUNDED WORKER 2026-07-27 ~16:00] `turn6-statfall.json` ATK-fell text re-driven from kernel events (§12.3 step 3 landed); banner gate (step 4) found to need disproportionate new surface
+
+- **State:** tree green at **268 files / 3560 tests** (unchanged count —
+  wires an already-tested staging-module export into production code, no
+  new test file), `npm run build` clean. `executableFrontierRatchet.test.ts`
+  unmoved (6/6, zero new barriers).
+- **Did:** executed `docs/presentation-seam-scout.md` §12.3 steps 3/4
+  (§12.6 completion note appended). Step 3: `battleScene.ts` gained
+  `TURN6_ATKFELL_KICKOFF_LINE1/2` (module-load-resolved from
+  `turn6FeatherDancePresentationStaging.ts`'s already-staged
+  `resolveTurn6AtkFellLines()`, unblocked by entry 520's charmap fix);
+  `drawTurn6FeatherDanceKickoffText`'s own `atkFellStart` branch (`:9151`)
+  now draws these instead of the raw `TURN6_ATKFELL_LINE1/2` literals. Zero
+  bridge edits — entry 514's `resolveFeatherDanceKickoffPresentationWindowContent`
+  already returned everything needed. **No literal died**: `TURN6_ATKFELL_
+  LINE1/2` stay defined and live at turns 7/8's own repeat call sites
+  (`:9397`/`:9586`, verified unchanged). Step 4 (the stat-fall banner gate,
+  `drawTurn6StatFallBanner`/`turn6StatFallEva`): investigated and found
+  **not cleanly wireable** — `turn6StatFallEva`'s tick-window gate is real
+  presentation-native animation timing (no kernel-event/timestamp
+  equivalent, §8.4 Option A re-confirmed a 6th time), and
+  `drawTurn6StatFallBanner`'s hardcoded ONIX/attack/decrease selection is
+  already exactly consistent with the kernel's real `stat-stage-change`
+  (no live branch to redirect). Driving it "for real" would force either
+  editing turns 7/8's own out-of-scope call sites (the function is a shared
+  helper) or building a 7-way stat-to-palette-key translation table for six
+  stat values this window never produces (a real naming mismatch too:
+  `battleScriptEvents.ts`'s hyphenated `special-attack`/`special-defense`
+  vs. `StatAnimBannerAsset`'s camelCase `spAttack`/`spDefense`) — exactly
+  the disproportionate-new-surface case the brief's own escape valve names.
+  Landed step 3 alone, per the brief's own instruction that this finding is
+  a success, not a failure.
+- **Acceptance (live, this session):** full sweep run BEFORE the change (on
+  pristine `HEAD`) matched every recorded count exactly, then AFTER
+  reproduced them byte-identically: `turn6-statfall.json` 127/127 (twice,
+  incl. a determinism check), `turn6-featherdance.json` 90/90,
+  `turn6-rockslide-a.json` 255/255, `turn6-feathers.json` 235/235,
+  `turn6-menu.json` 44/44, `turn1-rockslide.json` 256/256,
+  `turn5-rockslide.json` 256/256, `turn4-doubleteam.json` 250/250,
+  `turn2-endeavor.json` 77/77.
+- **Next:** either `turn11-featherdance.json`'s own ATK-floor wiring (same
+  glyph class, now unblocked, a later step per this brief's own out-of-scope
+  note) or the Roar/multi-hit registration side scouted in round 2.
+- **Notes:** no PAPERCUT. One commit for the wiring + docs.
+
+---
 ## 521 — [BOUNDED WORKER 2026-07-27 ~15:30] `turn2-endeavor.json` kickoff text/HP re-driven from kernel events (§13.3 landed)
 
 - **State:** tree green at **268 files / 3560 tests** (unchanged count —
@@ -83,85 +129,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Next:** verify round 2; then either the turn6-statfall wiring (now
   unblocked, zero new staged proof needed per §13's table) or the Roar/
   multi-hit registration, per what's banked.
-
----
-## 519 — [BOUNDED WORKER 2026-07-27 ~15:00] B_SCR_OP_TRYINFATUATING + B_SCR_OP_JUMPIFCONFUSEDANDSTATMAXED registered; EFFECT_ATTRACT/EFFECT_SWAGGER/EFFECT_FLATTER executable end to end
-
-- **State:** tree green at **267 files / 3549 tests** (worker wrote 269;
-  supervisor corrected against a live `npm test` run) (+99 tests
-  over session start 263/3512: `battleScriptTryinfatuatingOpcode.test.ts`
-  15 tests, `battleScriptJumpifconfusedandstatmaxedOpcode.test.ts` 13 tests,
-  plus 2 existing test files updated for the barrier narrowing below and 2
-  attack-canceler fixture files updated for the new `personality` battler
-  field), `npm run build` clean. `executableFrontierRatchet.test.ts`
-  unmoved (**0 new barrier call sites** — both new opcodes are fully
-  source-complete; the two barrier *narrowings* below reuse existing
-  `unsupportedBranch` call sites, same file/line, just a tighter trigger
-  condition).
-- **Did:** registered both opcodes of round 1's set. (1) `Cmd_tryinfatuating`
-  (`battleScriptTryinfatuatingOpcode.ts`): Oblivious block (hardcoded jump,
-  not the operand ptr), the same-gender/genderless-attacker/genderless-
-  target/already-infatuated-with-anyone OR-chain (all four collapse to the
-  operand's one fail ptr), success write of
-  `STATUS2_INFATUATED_WITH(attacker)` — reused `statusInfatuatedWithBit`
-  (newly exported from `battleScriptHitChainOpcode.ts`, previously a private
-  helper for `Cmd_cleareffectsonfaint`'s clear) so the write is *provably*
-  the same bit `advanceBattleScriptAttackCancelerInLove`'s admission phase
-  already reads (composition test in the new file). Gender inputs needed a
-  minimal kernel addition: a `personality` battler field (mirrors
-  `gBattleMons[battler].personality`; source rereads species/personality
-  from the party mon, but this engine has no Transform species/personality
-  divergence yet, so they're always identical) plus a new `genderRatio`
-  column on `species-stats.json` (extractor widened to parse
-  `species_info.h`'s `.genderRatio` — a `MON_MALE`/`MON_FEMALE`/
-  `MON_GENDERLESS` literal or `PERCENT_FEMALE(percent)`, truncated on
-  assignment) — reused the existing `monGender.ts` per-mon half unchanged.
-  (2) `Cmd_jumpifconfusedandstatmaxed`
-  (`battleScriptJumpifconfusedandstatmaxedOpcode.ts`): a pure
-  `STATUS2_CONFUSION` + `statStages[stat]==MAX_STAT_STAGE` read, always
-  against `gBattlerTarget` directly (no battler operand in the macro at
-  all). Zero barriers in either new opcode.
-- **Standing-warning barriers found and widened (entries 507/515's own
-  warning, budgeted for):** proving Attract's Oblivious tail live surfaced
-  two existing barriers that over-fired on ability *membership* where
-  source only acts on the matching *status*: (a) `accuracycheck`'s
-  `JumpIfMoveFailed` ability-absorbing check barriered on ANY nonzero
-  target ability; `AbilityBattleEffects(ABILITYEFFECT_ABSORBING)`
-  (`battle_util.c:2679-2729`) only special-cases three (Volt Absorb/Water
-  Absorb/Flash Fire) — narrowed to those three, every other ability
-  (Oblivious included) now falls through exactly like source. (b)
-  `Cmd_moveend`'s `MOVEEND_IMMUNITY_ABILITIES` barriered whenever a battler
-  held one of 8 status-curing abilities at all; source
-  (`battle_util.c:2873-2954`) only cures when that ability's own status bit
-  is *also* set (e.g. Oblivious only fires on actual infatuation) — added
-  `immunityAbilityCuresStatus`'s per-ability status gate. Both are
-  narrowings of an existing `unsupportedBranch` call site (same file/line),
-  not new barrier surfaces; updated the two pre-existing tests that relied
-  on the old over-broad trigger to construct genuine reachability instead.
-- **Tests:** isolated dispatch for every distinct fail reason of both
-  opcodes (all 4 confused×maxed combinations for jumpifconfusedandstatmaxed
-  across both its concrete call sites; Oblivious/same-gender/genderless×2/
-  already-infatuated-with-a-third-battler for tryinfatuating) PLUS full
-  committed-script walks to a genuine `{kind:"terminal",
-  opcodeName:"B_SCR_OP_END"}` halt for all three effects: Attract's success
-  (opposite genders, status bit confirmed set, 1 RNG roll) and all four
-  fail tails (each a real distinct root cause, not just prose-glossed);
-  Swagger/Flatter's success (stat raise composing through
-  setstatchanger+statbuffchange, confusion via seteffectprimary, 2 RNG
-  rolls) and their own jumpifconfusedandstatmaxed edge branch (confused AND
-  maxed, 1 RNG roll) plus the "maxed but not confused" and Own-Tempo-blocks-
-  confusion non-edge variants.
-- **Census (before → after):** 105/214 → **108/214** effects, 206/355 →
-  **209/355** moves, 167/276 → **170/276** Factory-L50 unweighted, 2251/2957
-  → **2321/2957** weighted (+70, exactly 45+25 — matches the predicted flip
-  precisely, no shortfall). Doc regenerated and committed with the code.
-  New top blocker: `B_SCR_OP_FORCERANDOMSWITCH`/`INITMULTIHITSTRING`/
-  `JUMPIFHASNOHP` (EFFECT_ROAR, 40 weighted).
-- **Next:** continue the ranked-table descent — EFFECT_ROAR's opcode trio
-  is the regenerated doc's new top-ranked set.
-- **Notes:** no PAPERCUT. Commits landed one per green rung: genderRatio
-  extraction, opcode registration + kernel `personality` field, EFFECT_
-  ATTRACT tests + the two barrier widenings, EFFECT_SWAGGER/FLATTER tests,
-  census regen.
 
 ---
