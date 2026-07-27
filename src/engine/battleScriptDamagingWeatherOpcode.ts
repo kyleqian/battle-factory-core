@@ -50,6 +50,7 @@ import {
   BATTLE_SCRIPT_HITMARKER_GRUDGE,
   BATTLE_SCRIPT_HITMARKER_IGNORE_BIDE,
   BATTLE_SCRIPT_HITMARKER_IGNORE_SUBSTITUTE,
+  BATTLE_SCRIPT_HITMARKER_IGNORE_UNDERGROUND,
   BATTLE_SCRIPT_HITMARKER_PASSIVE_HP_UPDATE,
   BATTLE_SCRIPT_STATUS3_UNDERGROUND,
   BATTLE_SCRIPT_STATUS3_UNDERWATER,
@@ -260,13 +261,16 @@ function createAddbyteHandler(): BattleScriptOpcodeHandler<BattleScriptRulesCont
 }
 
 /**
- * `Cmd_bicword` (`battle_script_commands.c:3905-3912`). Only the loop's own
+ * `Cmd_bicword` (`battle_script_commands.c:3905-3912`). Two of its three
+ * concrete call sites are modeled: `BattleScript_DamagingWeatherContinuesEnd`'s
  * `bicword gHitMarker, HITMARKER_IGNORE_BIDE | HITMARKER_IGNORE_SUBSTITUTE |
- * HITMARKER_PASSIVE_HP_UPDATE | HITMARKER_GRUDGE`
- * (`BattleScript_DamagingWeatherContinuesEnd`) is modeled; the other two
- * concrete call sites (`HitsAllNoUndergroundBonus`'s single-bit clear,
- * `MoveUsedWokeUp`'s `HITMARKER_WAKE_UP_CLEAR`) are the single named barrier
- * below.
+ * HITMARKER_PASSIVE_HP_UPDATE | HITMARKER_GRUDGE`, and (executable-frontier
+ * census, EFFECT_EARTHQUAKE registration) `BattleScript_HitsAllNoUndergroundBonus`'s
+ * `bicword gHitMarker, HITMARKER_IGNORE_UNDERGROUND` -- the exact sibling clear
+ * to `Cmd_orword`'s already-registered set of the same bit
+ * (`BattleScript_HitsAllWithUndergroundBonusLoop`'s underground branch,
+ * `battleScriptOrwordOpcode.ts`). `MoveUsedWokeUp`'s
+ * `HITMARKER_WAKE_UP_CLEAR` remains the single named barrier below.
  */
 const BICWORD_DAMAGING_WEATHER_VALUE =
   "HITMARKER_IGNORE_BIDE | HITMARKER_IGNORE_SUBSTITUTE | HITMARKER_PASSIVE_HP_UPDATE | HITMARKER_GRUDGE";
@@ -276,11 +280,19 @@ const BICWORD_DAMAGING_WEATHER_MASK =
     | BATTLE_SCRIPT_HITMARKER_PASSIVE_HP_UPDATE
     | BATTLE_SCRIPT_HITMARKER_GRUDGE) >>> 0;
 
+const BICWORD_ACCEPTED_MASK_BY_VALUE: ReadonlyMap<string, number> = new Map([
+  [BICWORD_DAMAGING_WEATHER_VALUE, BICWORD_DAMAGING_WEATHER_MASK],
+  ["HITMARKER_IGNORE_UNDERGROUND", BATTLE_SCRIPT_HITMARKER_IGNORE_UNDERGROUND],
+]);
+
 function createBicwordHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
   return (context) => {
     const [ptrOperand, valueOperand] = context.instruction.operands;
     const rules = context.state.rulesContext;
-    if (ptrOperand!.expression !== "gHitMarker" || valueOperand!.expression !== BICWORD_DAMAGING_WEATHER_VALUE) {
+    const mask = ptrOperand!.expression === "gHitMarker"
+      ? BICWORD_ACCEPTED_MASK_BY_VALUE.get(valueOperand!.expression)
+      : undefined;
+    if (mask === undefined) {
       return unsupportedBranch(
         context,
         `Cmd_bicword's operand (${ptrOperand!.expression}, ${valueOperand!.expression}) is not modeled`,
@@ -290,7 +302,7 @@ function createBicwordHandler(): BattleScriptOpcodeHandler<BattleScriptRulesCont
     }
     const nextRules = Object.freeze({
       ...rules,
-      hitMarker: (rules.hitMarker & ~BICWORD_DAMAGING_WEATHER_MASK) >>> 0,
+      hitMarker: (rules.hitMarker & ~mask) >>> 0,
     });
     return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }), { rulesContext: nextRules });
   };

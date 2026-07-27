@@ -236,10 +236,12 @@ describe("production damaging-weather opcode dispatch (screens/weather registrat
     });
   });
 
-  describe("Cmd_bicword -- modeled site vs. barrier", () => {
+  describe("Cmd_bicword -- modeled sites vs. barrier", () => {
     const pc = findPc("B_SCR_OP_BICWORD", "BattleScript_DamagingWeatherContinuesEnd");
-    const barrierPc = findPc("B_SCR_OP_BICWORD", "BattleScript_HitsAllNoUndergroundBonus");
+    const undergroundPc = findPc("B_SCR_OP_BICWORD", "BattleScript_HitsAllNoUndergroundBonus");
+    const barrierPc = findPc("B_SCR_OP_BICWORD", "BattleScript_MoveUsedWokeUp");
     const BITS = (1 << 5) | (1 << 8) | (1 << 20) | (1 << 24); // IGNORE_BIDE | IGNORE_SUBSTITUTE | PASSIVE_HP_UPDATE | GRUDGE
+    const HITMARKER_IGNORE_UNDERGROUND = 1 << 17;
 
     it("(pass-through) clears exactly the four named HITMARKER_* bits", () => {
       const rc = context({ hitMarker: BITS | (1 << 0) });
@@ -248,7 +250,19 @@ describe("production damaging-weather opcode dispatch (screens/weather registrat
       expect(result.state.rulesContext.hitMarker).toBe(1 << 0);
     });
 
-    it("(unsupported-branch) barriers on an unmodeled bicword value (HitsAllNoUndergroundBonus's single-bit clear)", () => {
+    it(
+      "(pass-through, executable-frontier census EFFECT_EARTHQUAKE registration) "
+        + "BattleScript_HitsAllNoUndergroundBonus's own single-bit clear -- the exact sibling of "
+        + "Cmd_orword's already-registered HITMARKER_IGNORE_UNDERGROUND set",
+      () => {
+        const rc = context({ hitMarker: HITMARKER_IGNORE_UNDERGROUND | (1 << 0) });
+        const { result } = stepAtProgramCounter(undergroundPc, rc);
+        if (result.kind !== "advanced") throw new Error("expected advance");
+        expect(result.state.rulesContext.hitMarker).toBe(1 << 0);
+      },
+    );
+
+    it("(unsupported-branch) barriers on an unmodeled bicword value (BattleScript_MoveUsedWokeUp's HITMARKER_WAKE_UP_CLEAR)", () => {
       const { result } = stepAtProgramCounter(barrierPc, context());
       expect(result.kind).toBe("halted");
       if (result.kind !== "halted") throw new Error("expected halted");

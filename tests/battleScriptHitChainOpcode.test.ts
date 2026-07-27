@@ -3219,6 +3219,132 @@ describe("RUNG 4 integration: opcode 0 -> ... -> seteffectwithchance -> tryfaint
 });
 
 describe(
+  "EFFECT_EARTHQUAKE: full committed script, executable-frontier census's own top-ranked next "
+    + "registration (B_SCR_OP_JUMPIFNEXTTARGETVALID + B_SCR_OP_SELECTFIRSTVALIDTARGET, the census's "
+    + "single largest entry -- 1 Factory-L50 move, 147 weighted)",
+  () => {
+    it(
+      "singles: resolves as a plain hit end to end -- selectfirstvalidtarget overwrites the target "
+        + "role, the underground-bonus branch is skipped (target not underground), real damage lands "
+        + "with no secondary-effect RNG draw (Earthquake sets no move effect), and "
+        + "jumpifnexttargetvalid falls through (singles never loops back to hit another battler) all "
+        + "the way to the script's own end",
+      () => {
+        const rc = context(0, { attack: 60, level: 50 }, { currentMove: EARTHQUAKE }, { defense: 50 });
+        // printstring STRINGID_EMPTYSTRING3 (Earthquake's own no-secondary-effect filler print) genuinely
+        // sets messageDisplayActive, so its own `waitmessage 1` (a literal halfword, not a named constant)
+        // needs a real port answer -- unlike the two earlier `waitmessage B_WAIT_TIME_LONG` calls, which
+        // fall through immediately because critmessage/resultmessage never set that flag in the first place.
+        const earthquakePorts = externalPorts({
+          resolveHalfwordOperand: (_context, operand) => (operand.expression === "1" ? 1 : null),
+        });
+        const execution = createBattleScriptStatusRulesExecution(
+          program,
+          "BattleScript_EffectEarthquake",
+          rc,
+          1,
+          earthquakePorts,
+        );
+        const handlers = execution.handlers;
+
+        let result = stepBattleScriptMachine(program, execution.state, handlers); // attackcanceler (opcode 0)
+        if (result.kind !== "advanced") throw new Error(`attackcanceler did not advance: ${result.kind}`);
+        result = stepBattleScriptMachine(program, result.state, handlers); // attackstring
+        if (result.kind !== "advanced") throw new Error(`attackstring did not advance: ${result.kind}`);
+        result = stepBattleScriptMachine(program, result.state, handlers); // ppreduce
+        if (result.kind !== "advanced") throw new Error(`ppreduce did not advance: ${result.kind}`);
+        expect(result.state.rulesContext.battlers[0]!.pp[0]).toBe(34);
+
+        result = stepBattleScriptMachine(program, result.state, handlers); // selectfirstvalidtarget (NEW)
+        if (result.kind !== "advanced") throw new Error(`selectfirstvalidtarget did not advance: ${result.kind}`);
+        expect(result.state.rulesContext.selectorRoles.target).toBe(1);
+        expect(result.state.programCounter).toBe(labelPc("BattleScript_HitsAllWithUndergroundBonusLoop"));
+
+        result = stepBattleScriptMachine(program, result.state, handlers); // movevaluescleanup
+        if (result.kind !== "advanced") throw new Error(`movevaluescleanup did not advance: ${result.kind}`);
+        result = stepBattleScriptMachine(program, result.state, handlers); // jumpifnostatus3: target not underground, jumps
+        if (result.kind !== "advanced") throw new Error(`jumpifnostatus3 did not advance: ${result.kind}`);
+        expect(result.state.programCounter).toBe(labelPc("BattleScript_HitsAllNoUndergroundBonus"));
+
+        result = stepBattleScriptMachine(program, result.state, handlers); // bicword gHitMarker, HITMARKER_IGNORE_UNDERGROUND
+        if (result.kind !== "advanced") throw new Error(`bicword did not advance: ${result.kind}`);
+        result = stepBattleScriptMachine(program, result.state, handlers); // setbyte sDMG_MULTIPLIER, 1
+        if (result.kind !== "advanced") throw new Error(`setbyte did not advance: ${result.kind}`);
+        expect(result.state.rulesContext.dmgMultiplier).toBe(1);
+        expect(result.state.programCounter).toBe(labelPc("BattleScript_DoHitAllWithUndergroundBonus"));
+
+        result = stepBattleScriptMachine(program, result.state, handlers); // accuracycheck: always hits (100 accuracy)
+        if (result.kind !== "advanced") throw new Error(`accuracycheck did not advance: ${result.kind}`);
+        expect(result.state.rng.calls).toBe(1);
+        result = stepBattleScriptMachine(program, result.state, handlers); // critcalc
+        if (result.kind !== "advanced") throw new Error(`critcalc did not advance: ${result.kind}`);
+        result = stepBattleScriptMachine(program, result.state, handlers); // damagecalc
+        if (result.kind !== "advanced") throw new Error(`damagecalc did not advance: ${result.kind}`);
+        result = stepBattleScriptMachine(program, result.state, handlers); // typecalc
+        if (result.kind !== "advanced") throw new Error(`typecalc did not advance: ${result.kind}`);
+        result = stepBattleScriptMachine(program, result.state, handlers); // adjustnormaldamage
+        if (result.kind !== "advanced") throw new Error(`adjustnormaldamage did not advance: ${result.kind}`);
+        expect(result.state.rulesContext.battleMoveDamage).toBeGreaterThan(0);
+
+        for (const label of RUNG_3_LABELS) {
+          if (result.kind !== "advanced") throw new Error(`${label} did not advance: ${result.kind}`);
+          result = stepBattleScriptMachine(program, result.state, handlers);
+        }
+        if (result.kind !== "advanced") throw new Error(`expected advance before printstring, got ${result.kind}`);
+        expect(result.state.rulesContext.battlers[1]!.hp).toBeLessThan(100); // datahpupdate dealt real damage
+
+        result = stepBattleScriptMachine(program, result.state, handlers); // printstring STRINGID_EMPTYSTRING3
+        if (result.kind !== "advanced") throw new Error(`printstring did not advance: ${result.kind}`);
+        result = stepBattleScriptMachine(program, result.state, handlers); // waitmessage 1
+        if (result.kind !== "advanced") throw new Error(`waitmessage did not advance: ${result.kind}`);
+        result = stepBattleScriptMachine(program, result.state, handlers); // tryfaintmon: no faint, target survives
+        if (result.kind !== "advanced") throw new Error(`tryfaintmon did not advance: ${result.kind}`);
+        expect(result.state.callStack.length).toBe(0);
+        // accuracycheck, critcalc, adjustnormaldamage -- exactly the ground-truth 3-roll hit ledger with
+        // no 4th (seteffectwithchance) draw, since Earthquake sets no secondary move effect at all.
+        expect(result.state.rng.calls).toBe(3);
+        expect(result.state.rng.ledger.map((entry) => entry.reason)).toEqual([
+          "accuracycheck",
+          "critcalc",
+          "adjustnormaldamage",
+        ]);
+
+        result = stepBattleScriptMachine(program, result.state, handlers); // setbyte sMOVEEND_STATE, 0 (moveendto)
+        if (result.kind !== "advanced") throw new Error(`setbyte did not advance: ${result.kind}`);
+        expect(result.state.rulesContext.moveendState).toBe(0);
+
+        const moveendPc = result.state.programCounter;
+        let state = ackAllPending(result.state);
+        let stepped = stepBattleScriptMachine(program, state, handlers);
+        let moveendResumptions = 0;
+        while (stepped.kind === "advanced" && stepped.state.programCounter === moveendPc) {
+          moveendResumptions += 1;
+          if (moveendResumptions > 17) throw new Error("Cmd_moveend did not converge on MOVEEND_COUNT");
+          state = ackAllPending(stepped.state);
+          stepped = stepBattleScriptMachine(program, state, handlers);
+        }
+        if (stepped.kind !== "advanced") throw new Error(`moveend did not complete: ${stepped.kind}`);
+        // moveendto MOVEEND_NEXT_TARGET (mode 2, endState 16) forces MOVEEND_COUNT the instant state
+        // 16 is reached, WITHOUT running its body -- the script's own jumpifnexttargetvalid instruction
+        // does that job instead (data/battle_scripts_1.s:1868-1869).
+        expect(stepped.state.rulesContext.moveendState).toBe(17);
+        expect(stepped.state.programCounter).toBe(moveendPc + 1);
+
+        const jumped = stepBattleScriptMachine(program, stepped.state, handlers); // jumpifnexttargetvalid (NEW)
+        if (jumped.kind !== "advanced") throw new Error(`jumpifnexttargetvalid did not advance: ${jumped.kind}`);
+        // Singles: falls through to the very next instruction, never loops back to hit another battler.
+        expect(jumped.state.programCounter).toBe(stepped.state.programCounter + 1);
+
+        const finished = stepBattleScriptMachine(program, jumped.state, handlers); // end
+        expect(finished.kind).toBe("halted");
+        if (finished.kind !== "halted") throw new Error("expected halted");
+        expect(finished.state.haltReason).toMatchObject({ kind: "terminal", opcodeName: "B_SCR_OP_END" });
+      },
+    );
+  },
+);
+
+describe(
   "SetMoveEffect integration proof: KADABRA Body Slam vs. MAGNETON "
     + "(docs/set-move-effect-ground-truth.md §2, tools/battle-lab/mechanic-set-move-effect-paralysis-off.json)",
   () => {

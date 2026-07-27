@@ -227,6 +227,16 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // narrowing at all -- every one of its 3 concrete call sites is the same
   // shape, so it contributes zero barriers.
   ["src/engine/battleScriptStatusPrimaryOpcode.ts", 3],
+  // Executable-frontier census's own top-ranked next registration:
+  // B_SCR_OP_JUMPIFNEXTTARGETVALID + B_SCR_OP_SELECTFIRSTVALIDTARGET (flips
+  // EFFECT_EARTHQUAKE executable). Cmd_selectfirstvalidtarget has no
+  // BATTLE_TYPE_DOUBLE branch at all (same loop for singles and doubles) and
+  // registers with zero barriers. Cmd_jumpifnexttargetvalid's own
+  // BATTLE_TYPE_DOUBLE next-target scan (continuing a multi-target
+  // spread-move loop to another battler slot) is unreachable for Level-50
+  // singles -- its one named barrier, reachability-tested in
+  // tests/battleScriptTargetIterationOpcode.test.ts.
+  ["src/engine/battleScriptTargetIterationOpcode.ts", 1],
 ]);
 
 function recordingImportsIn(file: string): string[] {

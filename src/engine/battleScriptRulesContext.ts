@@ -40,6 +40,7 @@ import { createBattleScriptRemoveitemOpcodeHandlers } from "./battleScriptRemove
 import { createBattleScriptStatusPrimaryOpcodeHandlers } from "./battleScriptStatusPrimaryOpcode.ts";
 import { createBattleScriptSetyawnOpcodeHandlers } from "./battleScriptSetyawnOpcode.ts";
 import { createBattleScriptConfuseifrepeatingattackendsOpcodeHandlers } from "./battleScriptConfuseifrepeatingattackendsOpcode.ts";
+import { createBattleScriptTargetIterationOpcodeHandlers } from "./battleScriptTargetIterationOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -2174,6 +2175,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptStatusPrimaryOpcodeHandlers(program, resolveRulesBattlerForBattleScript),
     ...createBattleScriptSetyawnOpcodeHandlers(program),
     ...createBattleScriptConfuseifrepeatingattackendsOpcodeHandlers(program),
+    ...createBattleScriptTargetIterationOpcodeHandlers(program),
   });
 }
 
