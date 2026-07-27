@@ -870,6 +870,106 @@ const DRAW_COUNT_SCENARIOS: DrawCountScenarioSpec[] = [
     expectedTotalSteps: { 1: 6, 99: 6 },
     checkCrossSeedStable: true,
   },
+  // AI_CV_EvasionUp (data/battle_ai_scripts.s:1037-1073, doc §24): the largest
+  // remaining CV handler by draw-site count (8 if_random_less_than sites),
+  // 2 of 8 live-verified across 3 fixtures. Opponent (AI_USER, under test)
+  // Machamp (68, single ability Guts), all 4 slots MOVE_DOUBLE_TEAM (104,
+  // EFFECT_EVASION_UP, 0 power/0 accuracy/self-target). Target (player)
+  // Anorith (390, single ability Battle Armor), move varies per fixture.
+  // DRAW SITE 1 (:1039) is gated by Gate A alone (opponent's OWN hp >= 90%
+  // reaches; < 90% skips) -- the reach case is the UNDAMAGED default (target
+  // Splash), no HP-banding needed. DRAW SITE 8 (:1069, the handler's tail)
+  // needs Gate H false (opponent HP <= 70%) AND Gate I false (opponent's OWN
+  // evasion stage != DEFAULT_STAT_STAGE, satisfied because Double Team's own
+  // self-buff has already executed by the time the phantom next-decision
+  // reads it, same "dispatch move's own prior effect" mechanism doc §19.1's
+  // AccuracyDown Gate I established) AND Gates J/K false (both HP >= 40%) --
+  // reached via target MOVE_SEISMIC_TOSS (69, dmgtolevel fixed 50 dmg,
+  // Machamp 165->115, 69.7%). The middle fixture (target MOVE_DRAGON_RAGE,
+  // 82, fixed 40 dmg, Machamp 165->125, 75.8%) sits in the (70%,90%) gap
+  // between both gates' own thresholds -- Gate A false (skips site 1) AND
+  // Gate H true (skips the entire tail, including site 8) -- a genuine
+  // deterministic zero-draw control shared by both isolations, since no
+  // single HP value can simultaneously satisfy site 1's reach (>=90%) and
+  // sit inside site 8's own reach band (<=70%). Attribution probe (window
+  // 0 732, seed 1) confirms both reach fixtures are the clean "N=4 slots x 1
+  // draw" shape (not the DefenseUp/SpDefUp family's 5-6 anomaly, doc
+  // §18.4/§22.4) -- fullhp-reach is 10 = 6 baseline + 4 Cmd_if_random_less_than
+  // (site 1) with zero Cmd_accuracycheck/Cmd_seteffectwithchance (both moves
+  // are 0-accuracy/no-effect); midhp-control is 8 = 6 baseline + 1
+  // Cmd_accuracycheck + 1 Cmd_seteffectwithchance (Dragon Rage actually
+  // connecting) + zero draws; lowhp-reach is 12 = 6 baseline + 1
+  // Cmd_accuracycheck + 4 Cmd_if_random_less_than (site 8) + 1
+  // Cmd_seteffectwithchance (Seismic Toss actually connecting). Cmd_get_ability
+  // appears in none of the three tables (both species single-ability, and
+  // AI_CBM_EvasionUp itself has no get_ability call at all -- same "Up"-family
+  // shape as AttackUp/DefenseUp/SpeedUp/SpAtkUp/SpDefUp/AccUp, doc §17.1).
+  {
+    label:
+      "AI_CV_EvasionUp, opponent (AI_USER, Machamp) HP stays 100% (target MOVE_SPLASH) -- DRAW SITE 1 reachable branch (data/battle_ai_scripts.s:1037-1073): Gate A (if_hp_less_than USER,90) is false at full HP, falling through into the :1039 if_random_less_than 100 roll once per identical MOVE_DOUBLE_TEAM slot; Gate H (opponent HP>70) is also true, so the tail/DRAW SITE 8 stays deterministically skipped in this same fixture",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-evasionup-fullhp-reach-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 10, 99: 10 },
+    checkCrossSeedStable: true,
+  },
+  {
+    label:
+      "AI_CV_EvasionUp, opponent (AI_USER, Machamp) HP hit to 125/165 (75.8%, target MOVE_DRAGON_RAGE) -- deterministic zero-draw control for BOTH DRAW SITE 1 and DRAW SITE 8: Gate A (hp<90) is true (skips site 1) and Gate H (hp>70) is also true (skips the entire tail, including site 8) -- no single HP value can reach either site from this band",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-evasionup-midhp-control-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 8, 99: 8 },
+    checkCrossSeedStable: true,
+  },
+  {
+    label:
+      "AI_CV_EvasionUp, opponent (AI_USER, Machamp) HP hit to 115/165 (69.7%, target MOVE_SEISMIC_TOSS) -- DRAW SITE 8 reachable branch (data/battle_ai_scripts.s:1064-1069): Gate A (hp<90) true skips site 1; Gate H (hp<=70) false continues the tail; Gate I (opponent's own evasion stage != default) false because Double Team already raised it 6->7 by the phantom next-decision; Gates J/K (both hp>=40) false; falls through into the :1069 if_random_less_than 70 roll once per identical slot",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-evasionup-lowhp-reach-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 12, 99: 12 },
+    checkCrossSeedStable: true,
+  },
+  // AI_CV_EvasionDown (data/battle_ai_scripts.s:1235-1245, doc §24): byte-for-
+  // byte the same control-flow shape as AI_CV_DefenseDown/AI_CV_SpDefDown
+  // (§15/§16) -- STAT_DEF/STAT_SPDEF swapped for STAT_EVASION, re-derived
+  // independently from the raw assembly (not assumed) and confirmed clean,
+  // no divergence. Reuses §15's exact Anorith(AI_USER)/Machamp(AI_TARGET)
+  // fixture design verbatim, only the opponent's dispatch move changes
+  // (MOVE_SWEET_SCENT, 230, EFFECT_EVASION_DOWN, 0 power, 100 accuracy,
+  // MOVE_TARGET_BOTH). Numerically identical ledger to DefenseDown's own
+  // (13/13 reach, 7/7 control) is expected: same gate structure, same
+  // 0-power/100-accuracy dispatch move, same Vital Throw damage band
+  // (Anorith 120->22, 18%, comfortably under the <70% Gate A threshold).
+  // Attribution probe (window 0 732, seed 1) confirms the same clean split
+  // as DefenseDown: reach 13 = 6 baseline + 1 Cmd_accuracycheck (Sweet
+  // Scent's own roll -- Vital Throw itself never calls Random() for
+  // accuracy, EFFECT_VITAL_THROW is hardcoded always-hit,
+  // src/battle_script_commands.c:1090) + 1 Cmd_adjustnormaldamage + 4
+  // Cmd_if_random_less_than (the :1239 draw site, clean N=4) + 1
+  // Cmd_seteffectwithchance; control 7 = 6 baseline + 1 Cmd_accuracycheck
+  // (Sweet Scent again, constant across both fixtures) + zero draws (Gate A
+  // false, Gate B true by default). Cmd_get_ability appears in neither
+  // table (both species single-ability).
+  {
+    label:
+      "AI_CV_EvasionDown, opponent (AI_USER, Anorith) HP hit to <70% by a real turn-1 move -- reachable branch (data/battle_ai_scripts.s:1235-1245): if_hp_less_than USER,70 (Gate A) routes straight to the :1239 if_random_less_than 50 draw site, which fires once per identical MOVE_SWEET_SCENT slot on the phantom next-turn re-decision",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-evasiondown-lowhp-reach-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 13, 99: 13 },
+    checkCrossSeedStable: true,
+  },
+  {
+    label:
+      "AI_CV_EvasionDown, opponent (AI_USER, Anorith) HP stays 100% -- control (same opponent/species/turn count, player uses MOVE_SPLASH instead of MOVE_VITAL_THROW): Gate A (if_hp_less_than USER,70) is false and Gate B (target evasion stage > 3, default 6) is true, routing straight to AI_CV_EvasionDown3 before the :1239 roll is ever reached, deterministic zero draws from the handler itself",
+    path: "tools/battle-lab/mechanic-factory-ai-cv-evasiondown-fullhp-control-off.json",
+    finalFrame: 732,
+    expectedPpUsed: 1,
+    expectedTotalSteps: { 1: 7, 99: 7 },
+    checkCrossSeedStable: true,
+  },
 ];
 
 function totalPpUsed(ppBefore: number[], ppAfter: number[]): number {

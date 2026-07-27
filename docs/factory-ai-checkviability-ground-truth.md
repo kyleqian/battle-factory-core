@@ -3680,3 +3680,461 @@ green. **Run twice this session, ALL PASS both times.** Reproduce with:
 ```sh
 node --experimental-strip-types tools/probe/verify-factory-ai-checkviability-ground-truth.ts
 ```
+
+## 24. 2026-07-26 addendum #14: `AI_CBM_EvasionUp` + `AI_CV_EvasionUp` and `AI_CBM_EvasionDown` + `AI_CV_EvasionDown` — the largest remaining CV handler by draw-site count, 2 of 8 live-verified, and a byte-for-byte "Down"-family twin
+
+Prep-scout session (side lane, Battle Scene OFF), same no-`src/`-changes
+contract. Goal per this step's brief: `AI_CV_EvasionUp` (`data/
+battle_ai_scripts.s:1037-1074`, 8 `if_random_less_than` sites per §5's own
+table — the largest remaining CV handler in this doc, `AccuracyDown`'s 7
+being the previous record, §19) and `AI_CV_EvasionDown` (`:1235-1246`, 1
+site), plus their `AI_CBM_*` counterparts, independently re-derived from
+`AI_CheckBadMove`'s own dispatch table rather than assumed from any sibling
+— the brief was explicit that "same shape as sibling" has already produced
+6+ documented errors in this doc's history.
+
+### 24.1 All four real bodies, cited and fully parsed
+
+```
+AI_CBM_EvasionUp:                       (data/battle_ai_scripts.s:273-275)
+	if_stat_level_equal AI_USER, STAT_EVASION, MAX_STAT_STAGE, Score_Minus10  ; user's OWN evasion stage == 12 -> -10, end
+	end                                                                       ; else 0, end
+```
+
+Two instructions, zero `if_random_less_than`, **zero `get_ability` calls at
+all** — the same "Up"-family shape as `AttackUp`/`DefenseUp`/`SpeedUp`/
+`SpAtkUp`/`SpDefUp`/`AccUp` (§17.1/§18.1/§20.1/§21.1/§22.1, `AI_CBM_AccUp`
+itself sits immediately above this handler at `:269-271`): reads only
+`AI_USER`'s own stat stage, never touches `AI_TARGET`, so the §14.2
+ability-guess confound cannot occur here by construction, not by species
+choice. Dispatch table confirms three separate effects converge on this one
+handler: `if_effect EFFECT_EVASION_UP, AI_CBM_EvasionUp` (`:114`),
+`if_effect EFFECT_EVASION_UP_2, AI_CBM_EvasionUp` (`:139`), `if_effect
+EFFECT_MINIMIZE, AI_CBM_EvasionUp` (`:163`) — `Minimize`'s own CBM side
+shares `AttackUp`'s single-handler shape (not `BulkUp`/`CosmicPower`/
+`CalmMind`'s separate-dual-stat-handler pattern, §22.1), because Minimize
+only ever raises the one stat (`STAT_EVASION`).
+
+```
+AI_CBM_EvasionDown:                     (data/battle_ai_scripts.s:306-312)
+	if_stat_level_equal AI_TARGET, STAT_EVASION, MIN_STAT_STAGE, Score_Minus10  ; target EVASION stage == 0 -> -10, end
+CheckIfAbilityBlocksStatChange:         (shared tail, :308-312)
+	get_ability AI_TARGET
+	if_equal ABILITY_CLEAR_BODY, Score_Minus10
+	if_equal ABILITY_WHITE_SMOKE, Score_Minus10
+	end
+```
+
+`AI_CBM_EvasionDown`'s own label sits directly **above** the shared
+`CheckIfAbilityBlocksStatChange` tail in source order (execution falls
+through, no explicit `goto` needed) — the same "plain" 1-instruction-plus-
+shared-tail shape as `AI_CBM_DefenseDown`/`AI_CBM_SpAtkDown`/`AI_CBM_SpDefDown`
+(§15.1/§16.1), confirmed by direct read, **not** `AI_CBM_AttackDown`/
+`AI_CBM_AccDown`'s extra own-ability short-circuit (Hyper Cutter/Keen Eye,
+§14.1/§19.1) — there is no dedicated "evasion-immunity" ability in Gen 3 to
+gate on, so this handler has no third branch to miss. Dispatch table:
+`if_effect EFFECT_EVASION_DOWN, AI_CBM_EvasionDown` (`:121`), `if_effect
+EFFECT_EVASION_DOWN_2, AI_CBM_EvasionDown` (`:146`).
+
+```
+AI_CV_EvasionUp:                        (data/battle_ai_scripts.s:1037-1074)
+	if_hp_less_than AI_USER, 90, AI_CV_EvasionUp2                    ; :1038 Gate A (opponent's OWN hp)
+	if_random_less_than 100, AI_CV_EvasionUp2                        ; :1039 DRAW SITE 1
+	score +3
+AI_CV_EvasionUp2:
+	if_stat_level_less_than AI_USER, STAT_EVASION, 9, AI_CV_EvasionUp3  ; :1042 Gate B (opponent's OWN evasion stage)
+	if_random_less_than 128, AI_CV_EvasionUp3                        ; :1043 DRAW SITE 2
+	score -1
+AI_CV_EvasionUp3:
+	if_not_status AI_TARGET, STATUS1_TOXIC_POISON, AI_CV_EvasionUp5  ; :1046 Gate C (target toxic-poisoned?)
+	if_hp_more_than AI_USER, 50, AI_CV_EvasionUp4                    ; :1047 Gate D (opponent's OWN hp, only if Gate C true)
+	if_random_less_than 80, AI_CV_EvasionUp5                         ; :1048 DRAW SITE 3
+AI_CV_EvasionUp4:
+	if_random_less_than 50, AI_CV_EvasionUp5                         ; :1050 DRAW SITE 4
+	score +3
+AI_CV_EvasionUp5:
+	if_not_status3 AI_TARGET, STATUS3_LEECHSEED, AI_CV_EvasionUp6    ; :1053 Gate E (target leech-seeded?)
+	if_random_less_than 70, AI_CV_EvasionUp6                         ; :1054 DRAW SITE 5
+	score +3
+AI_CV_EvasionUp6:
+	if_not_status3 AI_USER, STATUS3_ROOTED, AI_CV_EvasionUp7         ; :1057 Gate F (opponent's OWN Ingrain flag)
+	if_random_less_than 128, AI_CV_EvasionUp7                        ; :1058 DRAW SITE 6
+	score +2
+AI_CV_EvasionUp7:
+	if_not_status2 AI_TARGET, STATUS2_CURSED, AI_CV_EvasionUp8       ; :1061 Gate G (target cursed?)
+	if_random_less_than 70, AI_CV_EvasionUp8                         ; :1062 DRAW SITE 7
+	score +3
+AI_CV_EvasionUp8:
+	if_hp_more_than AI_USER, 70, AI_CV_EvasionUp_End                 ; :1065 Gate H (opponent's OWN hp)
+	if_stat_level_equal AI_USER, STAT_EVASION, DEFAULT_STAT_STAGE, AI_CV_EvasionUp_End  ; :1066 Gate I (opponent's OWN evasion stage)
+	if_hp_less_than AI_USER, 40, AI_CV_EvasionUp_ScoreDown2          ; :1067 Gate J
+	if_hp_less_than AI_TARGET, 40, AI_CV_EvasionUp_ScoreDown2        ; :1068 Gate K
+	if_random_less_than 70, AI_CV_EvasionUp_End                      ; :1069 DRAW SITE 8
+AI_CV_EvasionUp_ScoreDown2:
+	score -2
+AI_CV_EvasionUp_End:
+	end
+```
+
+Exactly **8** `if_random_less_than` sites (`:1039,1043,1048,1050,1054,1058,
+1062,1069`), matching §3/§5's corrected count. **Divergence check against
+`AI_CV_AccuracyDown` (§19.1), the closest structural sibling — re-derived
+independently, not assumed**: both handlers share the four status-gated
+draw sites (toxic/leechseed/rooted/cursed, `+2`/`+2`/`+1`/`+2` for
+AccuracyDown vs `+3`/`+3`/`+2`/`+3` here — the score deltas differ, the
+odds do not: 70/70/128/70 both handlers) and a structurally identical
+`Gate H/I/J/K` + final-draw tail. But **three real divergences**, all
+confirmed from the raw assembly, none inherited from AccuracyDown's shape:
+
+1. **Gate A/DRAW SITE 1 has no Gate B companion.** AccuracyDown's own DRAW
+   SITE 1 has *two* independent routes in (either battler's HP ≤ 70%,
+   §19.1). EvasionUp's DRAW SITE 1 has exactly **one** gate (opponent's own
+   HP < 90% skips; ≥ 90% reaches) — `AI_TARGET`'s HP is never read anywhere
+   near this site. A porter who copied AccuracyDown's two-gate shape here
+   would silently add a nonexistent second reach path.
+2. **The HP threshold at Gate A is 90, not 70.** AccuracyDown's equivalent
+   gate uses `70`. EvasionUp's own default full-HP battle start (100% ≥
+   90%) *already* satisfies Gate A with zero staging — the cheapest reach
+   condition of any draw site documented in this doc (24.2).
+3. **Gate I reads `AI_USER`, not `AI_TARGET`.** AccuracyDown's own Gate I
+   checks the *target's* ACC stage == default (because `AccuracyDown`
+   lowers the target's stat, so the "have we already touched this stat"
+   check must read the target). EvasionUp raises the **opponent's own**
+   evasion, so the analogous "already touched" check correctly reads
+   `AI_USER`'s own evasion stage == `DEFAULT_STAT_STAGE` instead — the
+   operand flips because the stat being tracked belongs to a different
+   battler for an UP handler than for a DOWN handler. This is the same
+   family of `AI_USER`/`AI_TARGET`-operand divergence the brief warned
+   about, now confirmed on a gate that is structurally present in both
+   siblings but reads a different battler in each.
+
+Full branch enumeration:
+
+- **Gate A** (`:1038`): opponent's own HP < 90% skips DRAW SITE 1 entirely
+  (`AI_CV_EvasionUp2`, no score, no draw). **≥ 90% reaches it** — true by
+  default at full HP, no staging needed (24.2).
+- **DRAW SITE 1** (`:1039`): 100/256 (~39.1%) skip, else (~60.9%) `score
+  +3`.
+- **Gate B** (`:1042`): opponent's own evasion stage < 9 (true at battle
+  start, default 6) skips DRAW SITE 2. Only a battler whose own evasion has
+  already been raised to 9-11 by a prior real hit reaches it — a 3-turn
+  build, not staged this session (24.5).
+- **DRAW SITE 2** (`:1043`): 128/256 (50%) skip, else (50%) `score -1`.
+- **Gate C** (`:1046`): target **not** toxic-poisoned skips straight to
+  `EvasionUp5` (Gates D and DRAW SITE 3/4 both unreached). Only a target the
+  opponent has *already* badly-poisoned reaches the D/DRAW SITE 3-4 pair —
+  needs a real `EFFECT_TOXIC` move in the opponent's own kit, a mixed-
+  moveset/genuine-AI-pick obstacle, not staged (24.5, same obstacle class as
+  `AccuracyDown`'s own sites 3/4, §19.5).
+- **Gate D** (`:1047`, only reached if Gate C true): opponent's own HP > 50%
+  routes to `EvasionUp4` (**DRAW SITE 4**, `:1050`, 50/256 skip, else `score
+  +3`); HP ≤ 50% falls straight into **DRAW SITE 3** (`:1048`, 80/256 skip,
+  else `score +3`, then falls through to `EvasionUp5` without a further
+  score). Two mutually exclusive draw sites gated by the same HP split, both
+  behind the same toxic-poison precondition.
+- **Gate E** (`:1053`): target **not** leech-seeded skips DRAW SITE 5. Same
+  mixed-moveset obstacle as Gate C, needs `EFFECT_LEECH_SEED` in the
+  opponent's kit, not staged.
+- **DRAW SITE 5** (`:1054`): 70/256 (~27.3%) skip, else `score +3`.
+- **Gate F** (`:1057`): opponent's **own** `STATUS3_ROOTED` (Ingrain)
+  absent skips DRAW SITE 6. Self-targeted precondition (no accuracy roll
+  needed to land Ingrain on oneself) but still needs a second, structurally
+  different move in the opponent's own kit alongside the Double-Team-style
+  dispatch move — a genuine AI pick between two moves across two turns, not
+  solvable by the identical-4-slots trick alone, not staged (24.5).
+- **DRAW SITE 6** (`:1058`): 128/256 (50%) skip, else `score +2`.
+- **Gate G** (`:1061`): target **not** cursed skips DRAW SITE 7. Needs a
+  Ghost-typed opponent with `EFFECT_CURSE` in its kit, same mixed-moveset
+  obstacle as Gates C/E, not staged.
+- **DRAW SITE 7** (`:1062`): 70/256 (~27.3%) skip, else `score +3`.
+- **Gate H** (`:1065`): opponent's own HP > 70% jumps straight to `End`,
+  **skipping the entire tail** (Gate I, J, K, DRAW SITE 8). ≤ 70% continues.
+- **Gate I** (`:1066`): opponent's own evasion stage == `DEFAULT_STAT_STAGE`
+  (6) jumps to `End`. Because the dispatch move (Double Team) is a
+  self-buff that has already executed once by the time the phantom next-
+  decision runs (§11.0/§17.2's "only the phantom decision is observable"
+  mechanism), the opponent's own evasion reads **7**, not 6, at that point
+  — Gate I is false and the tail continues. The exact same "dispatch move's
+  own prior effect changes a later gate" finding §19.1 made for
+  `AccuracyDown`'s Gate I, reproduced here on the opposite operand
+  (`AI_USER` instead of `AI_TARGET`) because EvasionUp's dispatch move is
+  self-targeted rather than target-targeted.
+- **Gates J/K** (`:1067/1068`): opponent HP < 40% OR target HP < 40% jump
+  straight to the deterministic `score -2`, skipping DRAW SITE 8.
+- **DRAW SITE 8** (`:1069`): 70/256 (~27.3%) skip to `End` (no score
+  change), else (~72.7%) falls into `ScoreDown2` (`score -2`) — same
+  topological position (last instruction before `End`/`ScoreDown2`, no
+  further gates in its own tail) as `AccuracyDown`'s own clean DRAW SITE 7
+  (§19.4) and `LightScreen`/`Reflect`'s single site (§23.4), **not**
+  `DefenseUp`/`SpDefUp`'s unresolved 5-6-draw anomaly (§18.4/§22.4) —
+  confirmed clean at the instrument level below (24.3-24.4).
+
+```
+AI_CV_EvasionDown:                      (data/battle_ai_scripts.s:1235-1246)
+	if_hp_less_than AI_USER, 70, AI_CV_EvasionDown2                     ; :1236 Gate A (opponent's OWN hp)
+	if_stat_level_more_than AI_TARGET, STAT_EVASION, 3, AI_CV_EvasionDown3  ; :1237 Gate B (only reached if Gate A false)
+AI_CV_EvasionDown2:
+	if_random_less_than 50, AI_CV_EvasionDown3                          ; :1239 DRAW SITE
+	score -2
+AI_CV_EvasionDown3:
+	if_hp_more_than AI_TARGET, 70, AI_CV_EvasionDown_End                ; :1242 Gate C (target's OWN hp)
+	score -2
+AI_CV_EvasionDown_End:
+	end
+```
+
+Exactly **1** `if_random_less_than` site (`:1239`), matching §3/§5's
+corrected count. **Divergence check against `AI_CV_DefenseDown`/
+`AI_CV_SpDefDown` (§15.1/§16.1) — re-derived independently: none.**
+Byte-for-byte identical topology, `STAT_DEF`/`STAT_SPDEF` swapped for
+`STAT_EVASION`, same `70`/`50`/`70` thresholds and odds, same `score -2` on
+every non-skip branch. This is the second "zero-divergence" pair in this
+doc after `LightScreen`/`Reflect` (§23.1) — but here the twin is a
+*different* handler in the *same* family (Down-stat-with-opponent-HP-gate),
+not two effects sharing one handler.
+
+### 24.2 Design
+
+**`AI_CV_EvasionUp`, three fixtures isolating DRAW SITE 1 and DRAW SITE 8
+(the only two reachable without a mixed-moveset AI pick)**: opponent
+(`AI_USER`, under test, all fixtures) **Machamp** (species 68, single
+ability `{GUTS, NONE}` — closes the universal `AI_CheckBadMove_
+CheckSoundproof` prefix's `get_ability AI_TARGET` confound, §14.2/§23.2,
+which applies to every CBM-blocked-pair fixture regardless of whether the
+handler itself reads ability), all 4 slots **`MOVE_DOUBLE_TEAM`** (104,
+`EFFECT_EVASION_UP`, 0 power, 0 accuracy, `MOVE_TARGET_USER` —
+`data/battle_moves.h:1355-1365`, raises the user's own evasion by 1 stage,
+`data/battle_scripts_1.s:487-488`). Target (player, all fixtures)
+**Anorith** (species 390, single ability `{BATTLE_ARMOR, NONE}`, reused
+verbatim from §15-18/§21-23), move varies per fixture. Because Gate A's own
+threshold (90%) and Gate H's own threshold (70%) are disjoint bands, **no
+single opponent HP value can simultaneously reach DRAW SITE 1 and the tail**
+— unlike `AccuracyDown`'s own twin-site fixture (§19.3, both gates share the
+same 70% threshold) this pair needs three fixtures, not two, to cover both
+sites plus a shared zero-draw baseline:
+
+- **`evasionup-fullhp-reach`** (DRAW SITE 1): target's move is
+  **`MOVE_SPLASH`** (150, 0 power, no effect) — Machamp's HP never moves
+  (165/165, 100%, ≥ 90%), so Gate A is false **by construction, no damage
+  staging required at all** (the same "zero-damage isolation" trick §23.2
+  established for `LightScreen`/`Reflect`'s own Gate A) and DRAW SITE 1
+  fires. Gate H is also true at 100% HP, so the tail (DRAW SITE 8) stays
+  deterministically unreached in this same fixture — the two sites cannot
+  contaminate each other here.
+- **`evasionup-midhp-control`** (shared zero-draw baseline for BOTH sites):
+  target's move is **`MOVE_DRAGON_RAGE`** (82, `EFFECT_DRAGON_RAGE`, fixed
+  40 damage, no roll, `data/battle_scripts_1.s`, reused verbatim from
+  §22.2) — Machamp 165→125 (75.8%), landing **inside the (70%,90%) gap
+  between both gates' own thresholds**: Gate A is true (75.8% < 90%, skips
+  DRAW SITE 1) and Gate H is also true (75.8% > 70%, skips the entire
+  tail). This single fixture is a genuine deterministic zero-draw control
+  for both isolations at once — no HP value could do double duty this way
+  for `AccuracyDown` (whose two gates shared one threshold) or for
+  `LightScreen`/`Reflect` (whose only gate has no companion draw site to
+  cross-contaminate).
+- **`evasionup-lowhp-reach`** (DRAW SITE 8): target's move is **`MOVE_
+  SEISMIC_TOSS`** (69, `EFFECT_LEVEL_DAMAGE`, fixed damage = user's level,
+  no roll, reused verbatim from §19.3/§22.2) — Machamp 165→115 (69.7%).
+  Gate A is true (69.7% < 90%, DRAW SITE 1 skipped); Gate H is false
+  (69.7% ≤ 70%, tail continues); Gate I is false because Double Team's own
+  self-effect has already raised Machamp's evasion stage 6→7 by the time
+  the phantom next-decision reads it (24.1's own finding); Gates J/K are
+  both false (Machamp 69.7% ≥ 40%, Anorith undamaged at 100% ≥ 40%) — falls
+  through into DRAW SITE 8.
+
+Same capture shape as every prior CBM-blocked pair (`[A, wait 30, A, wait
+700]`, `captureFrames [0,100,300,732]`). DRAW SITE 2 (opponent's own
+evasion stage already built to 9-11) and DRAW SITES 3/4/5/6/7 (target
+toxic/leechseed/cursed or opponent's own Ingrain — all four needing a
+genuine, unforced AI pick between two structurally different moves in the
+opponent's own kit) are not staged this session — same obstacle class
+`AccuracyDown`'s own sites 2-6 already documented (§19.5), recipes below
+(24.5).
+
+**`AI_CV_EvasionDown`, twin fixtures reusing §15's `DefenseDown` design
+verbatim (only the dispatch move changes)**: opponent (`AI_USER`, under
+test, both fixtures) **Anorith** (390, single ability Battle Armor — blocks
+`Cmd_critcalc`'s `Random()` call entirely, no crit-overshoot risk), all 4
+slots **`MOVE_SWEET_SCENT`** (230, `EFFECT_EVASION_DOWN`, 0 power, 100
+accuracy, `MOVE_TARGET_BOTH`, `data/battle_moves.h:2993-3003`). Target
+(player, both fixtures) **Machamp** (68, single ability Guts). Gate A alone
+decides reachability in both fixtures (opponent's own HP < 70%), exactly
+`DefenseDown`'s own shape (§15.2) — Gate B (target's own evasion stage > 3)
+is irrelevant to this isolation since Gate A's own true/false branch
+already decides everything needed:
+
+- **`evasiondown-lowhp-reach`**: player (Machamp) all 4 slots **`MOVE_
+  VITAL_THROW`** (233, `EFFECT_VITAL_THROW`, hardcoded always-hit —
+  `src/battle_script_commands.c:1090`, `EFFECT_ALWAYS_HIT ||
+  EFFECT_VITAL_THROW` bypasses `Cmd_accuracycheck`'s own `Random()` call
+  entirely) — turn 1 lands the sized hit (86-102 damage, §13.2's own
+  verified range against Anorith's 120 max HP), dropping Anorith to
+  22/120 (18%, seed 1) or 30/120 (25%, seed 99), both comfortably under
+  Gate A's 70% threshold; the phantom decision's Gate A fires true,
+  reaching the draw site.
+- **`evasiondown-fullhp-control`**: player's 4 slots are **`MOVE_SPLASH`**
+  instead — Anorith's HP never moves, Gate A stays false, Gate B (Machamp's
+  evasion stage, untouched at 6) stays true, deterministic zero-draw skip.
+
+### 24.3 Live ledger (oracle-verified, both seeds, both handlers, both runs)
+
+| Fixture | Seed | Opponent PP used | Opponent HP (start→end) | Total `Random()` calls, frame 0→732 | Determinism (2 runs) |
+| --- | -: | -: | --- | -: | --- |
+| EvasionUp fullhp-reach (Splash) | 1 | 1 | 165→165 (100%) | **10** | identical |
+| EvasionUp fullhp-reach (Splash) | 99 | 1 | 165→165 (100%) | **10** | identical |
+| EvasionUp midhp-control (Dragon Rage) | 1 | 1 | 165→125 (75.8%) | **8** | identical |
+| EvasionUp midhp-control (Dragon Rage) | 99 | 1 | 165→125 (75.8%) | **8** | identical |
+| EvasionUp lowhp-reach (Seismic Toss) | 1 | 1 | 165→115 (69.7%) | **12** | identical |
+| EvasionUp lowhp-reach (Seismic Toss) | 99 | 1 | 165→115 (69.7%) | **12** | identical |
+| EvasionDown lowhp-reach (Vital Throw) | 1 | 1 | 120→22 (18%) | **13** | identical |
+| EvasionDown lowhp-reach (Vital Throw) | 99 | 1 | 120→30 (25%) | **13** | identical |
+| EvasionDown fullhp-control (Splash) | 1 | 1 | 120→120 (100%) | **7** | identical |
+| EvasionDown fullhp-control (Splash) | 99 | 1 | 120→120 (100%) | **7** | identical |
+
+Every fixture is individually cross-seed-stable (10/10, 8/8, 12/12, 13/13,
+7/7) — the clean shape, matching `EvasionDown`'s own numerically-identical
+ledger to `DefenseDown`'s (13/13 reach, 7/7 control, §15.3) and confirming
+`EvasionUp`'s own two draw sites both avoid the `DefenseUp`/`SpDefUp`
+family's unresolved 5-6-draw anomaly.
+
+### 24.4 Attribution (`tools/probe/attribute-factory-ai-random-callers.py`, window `0 732`, via `tools/run-mgba-probe.py`, seed 1)
+
+| Caller function | UP fullhp-reach | UP midhp-control | UP lowhp-reach | DOWN lowhp-reach | DOWN fullhp-control |
+| --- | -: | -: | -: | -: | -: |
+| `BattleAI_SetupAIData+0x83` | 4 | 4 | 4 | 4 | 4 |
+| `BattleTurnPassed+0x157` | 1 | 1 | 1 | 1 | 1 |
+| `ChooseMoveOrAction_Singles+0xf7` | 1 | 1 | 1 | 1 | 1 |
+| `Cmd_accuracycheck+0x305` | 0 | 1 | 1 | 1 | 1 |
+| `Cmd_adjustnormaldamage+0x7` | 0 | 0 | 0 | 1 | 0 |
+| `Cmd_seteffectwithchance+0x81` | 0 | 1 | 1 | 1 | 0 |
+| `Cmd_if_random_less_than+0x7` | **4** | **0** | **4** | **4** | **0** |
+| **Total** | **10** | **8** | **12** | **13** | **7** |
+
+`Cmd_get_ability` appears in **none** of the five tables — both Machamp and
+Anorith's single-ability kits close the universal `AI_CheckBadMove` prefix
+confound (§14.2/§23.2), and `AI_CBM_EvasionUp` has no `get_ability` call of
+its own to add a second draw (24.1). `EvasionUp`'s `fullhp-reach` fixture
+has **zero** `Cmd_accuracycheck`/`Cmd_seteffectwithchance` rows — both
+`MOVE_DOUBLE_TEAM` and `MOVE_SPLASH` are 0-accuracy/no-effect, the first
+CBM-blocked-pair fixture pair since `LightScreen`/`Reflect` (§23.4) with a
+row that clean. `midhp-control`'s and `lowhp-reach`'s own `+1`/`+1`
+(`Cmd_accuracycheck`/`Cmd_seteffectwithchance`) are `MOVE_DRAGON_RAGE`/
+`MOVE_SEISMIC_TOSS` actually connecting — the flipped precondition's own
+necessary cost, not part of the handler (same accounting discipline as
+every prior pair, §15.3/§19.4/§22.4). `EvasionDown`'s own reach/control
+split (`+1 Cmd_adjustnormaldamage`, `+4 Cmd_if_random_less_than`, `+1
+Cmd_seteffectwithchance` for reach; a constant `Cmd_accuracycheck=1` in
+both, `MOVE_SWEET_SCENT`'s own roll, never `MOVE_VITAL_THROW`'s per 24.1's
+citation) is numerically **identical** to `DefenseDown`'s own attribution
+table (§15.3) in every row, confirming the byte-for-byte topology match at
+the instrument level, not just on paper. Both of `EvasionUp`'s reach
+fixtures show the clean **`+4`** `Cmd_if_random_less_than` delta (N=4
+identical slots × 1 draw), not the `DefenseUp`/`SpDefUp` family's
+unresolved 5-6 anomaly (§18.4/§22.4) — a third confirmation (after
+`AccuracyDown`'s DRAW SITE 7, §19.4, and `LightScreen`/`Reflect`'s single
+site, §23.4) that the anomaly is specific to the last-move-type-list code
+region those two handlers share, not a general property of "a draw site
+sitting last before `End`."
+
+### 24.5 The 6 unexercised `AI_CV_EvasionUp` draw sites — recipes, not fixtures, for a future porter
+
+- **DRAW SITE 2** (`:1043`, `score -1`, reached iff the **opponent's own**
+  evasion stage is already ≥ 9): stage it with the identical-4-slots
+  `MOVE_DOUBLE_TEAM` kit itself — 3 executed turns raise the stage 6→7→8→9,
+  then a 4th turn's (or phantom) decision reaches the roll with Gate A held
+  false (opponent HP kept ≥ 90% throughout, e.g. via a 0-power target move)
+  to avoid DRAW SITE 1 contaminating the same window. Cheapest of the six
+  remaining sites — the opponent's own kit does not need a second move at
+  all, unlike sites 3-7 below. Not attempted this session for time (same
+  status as every prior pair's own unstaged "already-built-3-stages" gate,
+  §17.5/§18.6/§19.5/§21.2/§22.5).
+- **DRAW SITE 3 / DRAW SITE 4** (`:1048`/`:1050`, `score +3` each, target
+  `STATUS1_TOXIC_POISON`): needs a real `EFFECT_TOXIC` move in the
+  opponent's own kit alongside `MOVE_DOUBLE_TEAM` — a genuine, unforced
+  turn-1 AI pick between two structurally different moves (not solvable by
+  4 identical slots), same obstacle §19.5 named for `AccuracyDown`'s own
+  sites 3/4. Once toxic-poisoned, Gate D further splits on the **opponent's
+  own** HP (> 50% → site 4, ≤ 50% → site 3) — both reachable from the same
+  staged precondition, differing only in which HP band the opponent sits.
+- **DRAW SITE 5** (`:1054`, `score +3`, target `STATUS3_LEECHSEED`): same
+  mixed-moveset obstacle, substituting `EFFECT_LEECH_SEED` for `EFFECT_
+  TOXIC`.
+- **DRAW SITE 6** (`:1058`, `score +2`, **opponent's own** `STATUS3_ROOTED`,
+  i.e. Ingrain): same mixed-moveset obstacle as sites 3-5, but self-targeted
+  (`EFFECT_INGRAIN`, `MOVE_TARGET_USER` — no accuracy roll of its own to
+  land), the same "may be more predictable to force the turn-1 pick, not
+  verified" caveat §19.5 flagged for `AccuracyDown`'s own analogous site.
+- **DRAW SITE 7** (`:1062`, `score +3`, target `STATUS2_CURSED`): needs a
+  Ghost-typed opponent with `EFFECT_CURSE` in its kit — same
+  typing-is-part-of-the-precondition obstacle §19.5 named for
+  `AccuracyDown`'s own site 6.
+
+### 24.6 What this unblocks
+
+1. **Both pairs' own port**: exact instruction lists for all four handlers,
+   every gate's real precondition and operand (`AI_USER` vs `AI_TARGET`,
+   independently re-derived rather than copied from either sibling), the
+   draw sites' exact odds and score deltas, `EvasionUp`'s own
+   `AI_USER`-vs-`AI_TARGET` Gate I flip vs `AccuracyDown` (the exact kind of
+   trap this doc's "never copy a sibling's gate map" rule exists to catch,
+   §17/§18/§21/§22), and live-verified twin/triple fixtures proving 2 of
+   `EvasionUp`'s 8 sites and `EvasionDown`'s 1 site end-to-end.
+2. **A worked example of a disjoint-threshold twin-site handler**: unlike
+   `AccuracyDown`'s two gates sharing one 70% threshold (allowing a 2-
+   fixture design, §19.3), `EvasionUp`'s Gate A (90%) and Gate H (70%) are
+   disjoint, forcing a 3-fixture design with one shared zero-draw control —
+   documented as a reusable pattern for any future handler whose own gates
+   don't happen to share a threshold.
+3. **Confirms the census's "1 executable move" count for both handlers, with
+   the missing detail the brief asked for**: `EFFECT_EVASION_UP`'s 1 move is
+   `MOVE_DOUBLE_TEAM` (both `EFFECT_EVASION_UP_2` and `EFFECT_MINIMIZE`
+   contribute zero to that count — see 24.7); `EFFECT_EVASION_DOWN`'s 1 move
+   is `MOVE_SWEET_SCENT` (`EFFECT_EVASION_DOWN_2` contributes zero). No
+   correction to §5's table is needed — both "Exec moves: 1" entries are
+   correct, now with a named move behind each.
+4. **6 explicit, citation-backed recipes** (24.5) for a future porter,
+   each naming exactly why it needs more than the identical-4-slots trick
+   (a real, unforced AI pick between two structurally different moves, or a
+   multi-turn stat-stage build) — the same discipline §19.5 established for
+   `AccuracyDown`'s own unstaged sites.
+
+### 24.7 Confirm-or-correct: census cross-check for `EVASION_UP`/`MINIMIZE`/`EVASION_DOWN`
+
+Per this step's brief, checked directly against `docs/executable-frontier-
+census.md` rather than assumed:
+
+| Effect | Census classification | Real moves | Notes |
+| --- | --- | -: | --- |
+| `EFFECT_EVASION_UP` | `executable` | 1 (`MOVE_DOUBLE_TEAM`) | dispatches to `AI_CBM_EvasionUp`/`AI_CV_EvasionUp` |
+| `EFFECT_EVASION_UP_2` | `executable` | **0** | routes to generic `BattleScript_EffectHit`, no move anywhere uses it — same vestigial-constant shape §19.1 found for `EFFECT_ACCURACY_DOWN_2` |
+| `EFFECT_MINIMIZE` | **`blocked-on-opcodes`** (`B_SCR_OP_SETMINIMIZE`) | 1 (`MOVE_MINIMIZE`) | **not** executable through the current port despite dispatching to the same `AI_CBM_EvasionUp`/`AI_CV_EvasionUp` handlers as `EFFECT_EVASION_UP` — §5's "1 executable move" count for `EvasionUp` is entirely `Double Team`'s, not `Minimize`'s |
+| `EFFECT_EVASION_DOWN` | `executable` | 1 (`MOVE_SWEET_SCENT`) | dispatches to `AI_CBM_EvasionDown`/`AI_CV_EvasionDown` |
+| `EFFECT_EVASION_DOWN_2` | `executable` | **0** | same vestigial-constant shape as `EVASION_UP_2` |
+
+Confirms §5's table (`EvasionUp` "1 exec move", `EvasionDown` "1 exec
+move") is correct, but the census alone doesn't say *which* move backs that
+count — `MOVE_MINIMIZE` (`EFFECT_MINIMIZE`, `data/battle_moves.h:1394-1404`,
+`.effect = EFFECT_MINIMIZE`) is real, Factory-legal, and shares `Double
+Team`'s own dispatch target on both the CBM and CV sides (24.1), but is
+presently `blocked-on-opcodes` in this run's own TS port (needs
+`B_SCR_OP_SETMINIMIZE`, unrelated to `AI_CheckViability` itself) — this
+does **not** block live-oracle staging (the real ROM has no such
+restriction; a `MOVE_MINIMIZE`-dispatched fixture would work identically to
+`MOVE_DOUBLE_TEAM` on the oracle, since both share the same `+1`-evasion
+effect and the same handler pair) but a porter relying on the census's
+"executable moves" count to decide what a player could *actually select* in
+the ported engine today should use `Double Team`, not `Minimize`, until the
+opcode is ported.
+
+### 24.8 Verify script status
+
+`tools/probe/verify-factory-ai-checkviability-ground-truth.ts` extended
+this session with `AI_CV_EvasionUp`'s 3 fixtures and `AI_CV_EvasionDown`'s 2
+fixtures (24.2-24.3) — every prior scenario (§9, §11.5, §12.1, §13.4,
+§14.6, §15.5, §16.5, §17.7, §18.7, §19.7, §20.5, §21.5, §22.6, §23.6)
+unchanged and still green. **Run twice this session, ALL PASS both times.**
+Reproduce with:
+
+```sh
+node --experimental-strip-types tools/probe/verify-factory-ai-checkviability-ground-truth.ts
+```
