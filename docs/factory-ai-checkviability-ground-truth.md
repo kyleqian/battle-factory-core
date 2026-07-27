@@ -3013,3 +3013,403 @@ this session with `AI_CV_SpAtkUp`'s 2 fixtures (§21.2/§21.3) — every prior
 scenario (§9, §11.5, §12.1, §13.4, §14.6, §15.5, §16.5, §17.7, §18.7, §19.7,
 §20.5) unchanged and still green. **Run twice this session, ALL PASS both
 times.**
+
+## 22. 2026-07-26 addendum #12: `AI_CBM_CosmicPower` + `AI_CBM_CalmMind` + `AI_CV_SpDefUp` — two separate CBM handlers converging on `DefenseUp`'s CV shape, with Gate F's polarity confirmed inverted
+
+Prep-scout session (side lane, Battle Scene OFF), same no-`src/`-changes
+contract. Goal per this step's brief: the next CBM+CV port after
+Counter/Mirror Coat — `AI_CBM_CosmicPower` + `AI_CBM_CalmMind` +
+whichever CV handler(s) `EFFECT_COSMIC_POWER`/`EFFECT_CALM_MIND` reach. Entry
+477's side-merge groundwork flag (unstaged `SpDefUp` stretch, PROGRESS-archive
+entry 477) named two things to re-derive rather than assume: (1) CBM is
+**two separate handlers** (`AI_CBM_CosmicPower`, `AI_CBM_CalmMind`), unlike
+every prior CBM+CV pair in this doc (§14-§21) where one CBM handler paired
+with one CV handler; (2) Gate F's `if_in_bytes` is **inverted** vs
+`AI_CV_DefenseUp`'s own `if_not_in_bytes` (§18.1). Both re-derived directly
+from the raw assembly below, not from the flag's own prose — the flag turned
+out accurate on both counts, and the live fixtures independently confirm the
+inversion's actual behavioral consequence (22.3-22.4), which the flag itself
+did not attempt to characterize.
+
+### 22.1 All three real bodies, cited and fully parsed
+
+```
+AI_CBM_CosmicPower:                     (data/battle_ai_scripts.s:576-579)
+	if_stat_level_equal AI_USER, STAT_DEF, MAX_STAT_STAGE, Score_Minus10
+	if_stat_level_equal AI_USER, STAT_SPDEF, MAX_STAT_STAGE, Score_Minus8
+	end
+```
+
+Three instructions, zero `if_random_less_than`, zero `get_ability` — byte-for-
+byte the same shape as the already-staged `AI_CBM_BulkUp` (`:581-584`, §18.1:
+checks the user's own ATK then DEF stage) and `AI_CBM_DragonDance`
+(`:595-598`, checks ATK then Speed) — the general "checks both stats this
+move raises, in raise order, `-10` for the first and `-8` for the second"
+pattern this doc's own §18.1 already established, applied here to `Cosmic
+Power`'s own two raised stats (DEF, then SPDEF). Confirmed against the real
+`BattleScript_EffectCosmicPower` (`data/battle_scripts_1.s:2687-2698`):
+`jumpifstat ATTACKER,CMP_LESS_THAN,STAT_DEF,MAX_STAT_STAGE,...` then
+`jumpifstat ATTACKER,CMP_EQUAL,STAT_SPDEF,MAX_STAT_STAGE,...` — DEF first,
+SPDEF second, matching the CBM handler's own check order exactly.
+
+```
+AI_CBM_CalmMind:                        (data/battle_ai_scripts.s:590-593)
+	if_stat_level_equal AI_USER, STAT_SPATK, MAX_STAT_STAGE, Score_Minus10
+	if_stat_level_equal AI_USER, STAT_SPDEF, MAX_STAT_STAGE, Score_Minus8
+	end
+```
+
+Same three-instruction shape, `STAT_SPATK` then `STAT_SPDEF`. Confirmed
+against `BattleScript_EffectCalmMind` (`:2741-2761`): SPATK stat-change first,
+SPDEF second — again matching check order. **A real, if unsurprising,
+divergence from the `AttackUp`/`DefenseUp`/`SpeedUp`/`SpAtkUp`/`SpDefUp`
+family's own 2-instruction "single stat" shape (§17.1/§18.1/§20.1/§21.1,
+`AI_CBM_SpDefUp` itself at `:265-267` below)**: these are genuinely separate,
+dual-stat handlers, each independently coded per §18.1's `BulkUp`/`DragonDance`
+precedent rather than composed from the single-stat handlers — e.g.
+`AI_CBM_CosmicPower` does **not** `goto AI_CBM_DefenseUp` after its own DEF
+check; it inlines the DEF check itself, and would silently diverge from
+`AI_CBM_DefenseUp` if a future edit changed one handler's `Score_Minus10`
+threshold without the other. Dispatch table confirms both are distinct
+targets, not aliases: `if_effect EFFECT_COSMIC_POWER, AI_CBM_CosmicPower`
+(`:209`), `if_effect EFFECT_CALM_MIND, AI_CBM_CalmMind` (`:212`) — two
+`if_effect` lines, two labels, two bodies.
+
+For completeness (not part of this pair, cited only because it sits directly
+between the two above in source order and is this family's actual "single
+stat" sibling):
+
+```
+AI_CBM_SpDefUp:                         (data/battle_ai_scripts.s:265-267)
+	if_stat_level_equal AI_USER, STAT_SPDEF, MAX_STAT_STAGE, Score_Minus10
+	end
+```
+
+Same 2-instruction shape as `AttackUp`/`DefenseUp`/`SpeedUp`/`SpAtkUp`
+(§17.1/§18.1/§20.1/§21.1) with `STAT_SPDEF` swapped in. Dispatch
+(`data/battle_ai_scripts.s:112,137`): `EFFECT_SPECIAL_DEFENSE_UP` and
+`EFFECT_SPECIAL_DEFENSE_UP_2` route here on the **CBM side only** — this is
+the fourth respect in which a stat-up pair's CBM and CV halves diverge in
+their effect-to-handler mapping (after `AttackUp`/`DefenseUp`/`BulkUp`,
+§17.1, and `SpAtkUp`/`SpDefUp` here): `EFFECT_SPECIAL_DEFENSE_UP{,_2}` gets
+its own single-stat CBM handler, while `EFFECT_COSMIC_POWER`/`EFFECT_CALM_
+MIND` each get a separate dual-stat CBM handler — but **all four** effects
+converge on the exact same CV handler, derived next.
+
+**Which CV handler(s) do `EFFECT_COSMIC_POWER`/`EFFECT_CALM_MIND` reach?**
+Re-derived from the CV dispatch table directly (`data/battle_ai_scripts.s`),
+not assumed from the CBM table's own structure:
+
+```
+:663  if_effect EFFECT_SPECIAL_DEFENSE_UP,   AI_CV_SpDefUp
+:692  if_effect EFFECT_SPECIAL_DEFENSE_UP_2, AI_CV_SpDefUp
+:770  if_effect EFFECT_COSMIC_POWER,         AI_CV_SpDefUp
+:774  if_effect EFFECT_CALM_MIND,            AI_CV_SpDefUp
+```
+
+All four lines target the same label, `AI_CV_SpDefUp` — confirming the
+brief's own expectation. Unlike the CBM side (one single-stat handler plus
+two separate dual-stat handlers), the CV side has **exactly one** handler for
+this whole effect family; `AI_CBM_CosmicPower`/`AI_CBM_CalmMind`'s own
+dual-stat bodies have no CV-side counterpart to mirror (there is no
+`AI_CV_CosmicPower` or `AI_CV_CalmMind` at all).
+
+```
+AI_CV_SpDefUp:                          (data/battle_ai_scripts.s:986-1013)
+	if_stat_level_less_than AI_USER, STAT_SPDEF, 9, AI_CV_SpDefUp2  ; :987 Gate A (opponent's OWN SpDef stage)
+	if_random_less_than 100, AI_CV_SpDefUp3                         ; :988 DRAW SITE 1
+	score -1
+	goto AI_CV_SpDefUp3
+
+AI_CV_SpDefUp2:
+	if_hp_not_equal AI_USER, 100, AI_CV_SpDefUp3                    ; :993 Gate B (opponent's OWN hp)
+	if_random_less_than 128, AI_CV_SpDefUp3                         ; :994 DRAW SITE 2
+	score +2
+AI_CV_SpDefUp3:
+	if_hp_less_than AI_USER, 70, AI_CV_SpDefUp4                     ; :997 Gate C (opponent's OWN hp, same direction as DefenseUp)
+	if_random_less_than 200, AI_CV_SpDefUp_End                       ; :998 DRAW SITE 3
+AI_CV_SpDefUp4:
+	if_hp_less_than AI_USER, 40, AI_CV_SpDefUp_ScoreDown2           ; :1000 Gate D (opponent's OWN hp)
+	get_last_used_bank_move AI_TARGET                                ; :1001 -- TARGET's last move, not AI_USER's
+	get_move_power_from_result                                       ; :1002
+	if_equal 0, AI_CV_SpDefUp5                                       ; :1003 Gate E (last move power == 0)
+	get_last_used_bank_move AI_TARGET                                ; :1004
+	get_move_type_from_result                                        ; :1005
+	if_in_bytes AI_CV_SpDefUp_PhysicalTypes, AI_CV_SpDefUp_ScoreDown2 ; :1006 Gate F -- INVERTED polarity vs DefenseUp
+	if_random_less_than 60, AI_CV_SpDefUp_End                         ; :1007 DRAW SITE 4
+AI_CV_SpDefUp5:
+	if_random_less_than 60, AI_CV_SpDefUp_End                         ; :1009 DRAW SITE 5
+AI_CV_SpDefUp_ScoreDown2:
+	score -2
+AI_CV_SpDefUp_End:
+	end
+
+AI_CV_SpDefUp_PhysicalTypes:            (data/battle_ai_scripts.s:1015-1025)
+	.byte TYPE_NORMAL, TYPE_FIGHTING, TYPE_POISON, TYPE_GROUND, TYPE_FLYING,
+	      TYPE_ROCK, TYPE_BUG, TYPE_GHOST, TYPE_STEEL, -1
+```
+
+Exactly **5** `if_random_less_than` sites (`:988`, `:994`, `:998`, `:1007`,
+`:1009`), matching `AI_CV_DefenseUp`'s own count (§18.1) exactly. Gates
+A/B/C/D and the physical-types table's own byte list are **byte-for-byte
+identical** to `AI_CV_DefenseUp` (`STAT_DEF` → `STAT_SPDEF` in Gates A/B
+only; the odds `100`/`128`/`200`/`60`/`60` are the same five numbers at the
+same five positions) — re-verified directly against the raw assembly rather
+than assumed from the sibling, per this doc's own standing rule (§17/§18/§21
+each caught a real divergence this way; here the check comes back clean for
+every gate **except one**.
+
+**The one real structural break, exactly where entry 477's flag said to
+look: Gate F's polarity is inverted.** `AI_CV_DefenseUp`'s own Gate F
+(`:935`) is `if_not_in_bytes AI_CV_DefenseUp_PhysicalTypes,
+AI_CV_DefenseUp_ScoreDown2` — the target's last move type **NOT** being in
+the physical-types list routes to the deterministic `score -2` stop, and
+**being** in the list falls through to DRAW SITE 4. `AI_CV_SpDefUp`'s own
+Gate F (`:1006`) is `if_in_bytes AI_CV_SpDefUp_PhysicalTypes,
+AI_CV_SpDefUp_ScoreDown2` — the exact opposite polarity: the target's last
+move type **being** in the (identical) physical-types list routes to the
+deterministic stop, and **NOT** being in the list falls through to DRAW SITE
+4. This is not an arbitrary asymmetry: it is the correct in-universe
+semantics for the two stats these handlers gate. `DefenseUp` cares whether
+the target's last move was physical (Defense mitigates it, so a *non*-
+physical last move means the stat raise wasn't useful — penalize).
+`SpDefUp`/`CosmicPower`/`CalmMind` care whether the target's last move was
+physical too, but from the opposite side (Special Defense does *not*
+mitigate physical damage, so a physical last move means the SpDef raise
+wasn't useful — penalize). Same table, same list, opposite jump condition,
+both correct for their own stat — exactly the kind of trap this doc's
+"never copy a sibling's gate map" rule (§17/§18/§21) exists to catch, this
+time on an opcode's polarity rather than a numeric operand (§21.1) or a
+branch direction alone (§18.1's Gate C, which had no accompanying semantic
+list to invert). Full branch enumeration (identical topology to `DefenseUp`,
+§18.1, substituting the Gate F polarity):
+
+- **Gate A** (`:987`): opponent's own SPDEF stage < 9 (true at battle start,
+  `DEFAULT_STAT_STAGE` = 6) routes to `SpDefUp2`, **skipping DRAW SITE 1**.
+  Not staged this session (needs a 2-turn SPDEF-stage build to 9-11, same
+  "not attempted, time-capped" status as every prior pair's DRAW SITE 1,
+  §17.5/§18.6/§21.2).
+- **DRAW SITE 1** (`:988`): 100/256 (~39.1%) skip, else `score -1`, same
+  shape as `AttackUp`/`DefenseUp`/`SpAtkUp`'s own DRAW SITE 1.
+- **Gate B** (`:993`, only reached if Gate A true): opponent's own HP != 100%
+  routes to `SpDefUp3`, **skipping DRAW SITE 2**. Not staged this session
+  (same status as Gate A/DRAW SITE 1 — both require the opponent's own
+  SPDEF stage already built to 9-11).
+- **DRAW SITE 2** (`:994`): 128/256 (50%) skip, else `score +2`.
+- **Gate C** (`:997`, always reached): opponent's own HP < 70% routes into
+  `SpDefUp4` (the last-move branch); HP >= 70% falls through to DRAW SITE 3
+  instead. Same direction as `DefenseUp`'s own Gate C (**not** `AttackUp`'s
+  inverted direction, §18.1) — re-confirmed here as a real, not coincidental,
+  family split: `AttackUp`/`SpAtkUp` (raise the user's own offense) use one
+  Gate C direction, `DefenseUp`/`SpDefUp` (raise the user's own defense)
+  use the other.
+- **DRAW SITE 3** (`:998`, only reached if Gate C false): 200/256 (~78.1%)
+  skip to `End`; failure (~21.9%) falls through into `SpDefUp4` anyway — not
+  staged this session (needs the opponent's own HP held at exactly >=70%,
+  same status as `DefenseUp`'s own unstaged DRAW SITE 3, §18.6 item 4).
+- **Gate D** (`:1000`, reached whenever `SpDefUp4` is entered): opponent's
+  own HP < 40% routes straight to `ScoreDown2`, skipping the last-move
+  branch entirely. This session's fixtures hold HP in the deterministic
+  **[40,70)%** band (Gate C true, Gate D false), identical to `DefenseUp`'s
+  own design (§18.3).
+- **Gate E** (`:1003`, only reached if Gate D false): target's last-used
+  move power == 0 (true for `MOVE_NONE`/any 0-power move, including
+  never-having-moved — §18.2's finding transfers unchanged, same
+  `gLastMoves`/`MOVEEND_UPDATE_LAST_MOVES` mechanism, not re-derived here)
+  routes to `SpDefUp5` (**DRAW SITE 5**, `:1009`, 60/256 skip). Not staged
+  this session — same "empty and 0-power-move are the same code path,
+  needs a genuine 2-turn moveset flip to isolate 'empty' specifically"
+  status §18.2 already documented for `DefenseUp`.
+- **Gate F** (`:1006`, only reached if Gate E false, i.e. last move has
+  nonzero power): target's last move type **IS** in
+  `AI_CV_SpDefUp_PhysicalTypes` routes straight to `ScoreDown2` — the
+  inverted polarity documented above. **NOT** in the list falls through to
+  **DRAW SITE 4** (`:1007`, 60/256 skip). This session's twin fixtures
+  isolate exactly this gate (22.2-22.4).
+
+### 22.2 Design: `DefenseUp`'s exact HP-banded last-used-move recipe (§18.3) reused verbatim, reach/control naming inverted by Gate F's own polarity
+
+Opponent (`AI_USER`, under test, all fixtures): **Anorith** (species 390,
+reused verbatim from §15-18/§21 — Battle Armor blocks `Cmd_critcalc`'s
+`Random()` call entirely, no crit-driven HP-band or KO risk). Target
+(player, all fixtures): **Machamp** (species 68, reused verbatim, single
+ability `{GUTS, NONE}` — closes the §14.2/§20.2 ability-guess confound the
+same way it has in every prior pair since §14). Neither `AI_CV_SpDefUp` nor
+either `AI_CBM_*` handler reads the target's own stats/type/ability
+directly — only the target's *last move* — so Machamp's kit is otherwise
+irrelevant, same as `DefenseUp` (§18.3).
+
+Two dispatch-move pairs, one per handler under test, both **0 power,
+accuracy 0** (self-target, always hits, no `Cmd_accuracycheck` draw — same
+class of move as `MOVE_HARDEN`/`MOVE_SWORDS_DANCE`/`MOVE_GROWTH` in every
+prior CBM-blocked UP pair):
+
+- **`AI_CBM_CosmicPower` fixtures**: opponent all 4 slots `MOVE_COSMIC_
+  POWER` (322, `EFFECT_COSMIC_POWER`, Psychic, `data/battle_moves.h:4189-
+  4197`) — raises the opponent's own DEF and SPDEF one stage each
+  (`BattleScript_EffectCosmicPower`, 22.1).
+- **`AI_CBM_CalmMind` fixtures**: opponent all 4 slots `MOVE_CALM_MIND`
+  (347, `EFFECT_CALM_MIND`, Psychic, `data/battle_moves.h:4514-4522`) —
+  raises the opponent's own SPATK and SPDEF one stage each
+  (`BattleScript_EffectCalmMind`, 22.1).
+
+To land Anorith's HP inside the deterministic **[40,70)%** band (Gate C
+true, Gate D false) *and* control exactly what Gate E/F read, the player's
+own turn-1 attacking move again does double duty exactly as `DefenseUp`'s
+own design (§18.3) — it deals the damage that sets the band **and** is the
+move `gLastMoves[player]` holds by the time the phantom next-turn decision
+(§11.0/§17.2) reads it. Both fixed-damage moves already verified against
+this exact Anorith/Machamp pairing in §18.3/§18.5 are reused verbatim,
+**with no re-derivation of their damage needed**: neither move's damage
+formula depends on DEF, SPATK, or SPDEF, so `Cosmic Power`'s DEF+SPDEF raise
+and `Calm Mind`'s SPATK+SPDEF raise are both irrelevant to the HP outcome
+(a live-confirmed fact, 22.4 — not assumed, since §18.5 already burned this
+exact assumption once for `MOVE_VITAL_THROW`'s roll-based damage against a
+DEF-raising dispatch move):
+
+- `MOVE_SEISMIC_TOSS` (69, Fighting — **in** `AI_CV_SpDefUp_PhysicalTypes`,
+  `EFFECT_LEVEL_DAMAGE`, `dmgtolevel` — fixed damage equal to the user's
+  level, no roll, no crit calc): 120→70 (58.3%), inside [40,70).
+- `MOVE_DRAGON_RAGE` (82, Dragon — **not** in the list, `EFFECT_DRAGON_
+  RAGE`, `setword gBattleMoveDamage,40` — fixed 40 damage, no roll): 120→80
+  (66.7%), inside [40,70).
+
+**Because Gate F's polarity is inverted vs `DefenseUp`, the reach/control
+assignment inverts too — the third time this doc has had to invert a
+sibling's move-to-name convention rather than copy it (after `AttackUp`
+vs `DefenseDown`/`SpDefDown`, §17.3, and here again vs `DefenseUp`
+specifically):** `DefenseUp`'s own physical-list fixtures (Seismic Toss,
+Vital Throw) were its **reach** fixtures (physical → falls through to DRAW
+SITE 4) and its non-physical fixture (Dragon Rage) was its **control**
+(non-physical → deterministic `ScoreDown2`, §18.3-§18.4). Here it is the
+opposite: **Seismic Toss (physical) is now the control** (physical → Gate F
+now jumps straight to `ScoreDown2`, deterministic zero handler draws) and
+**Dragon Rage (non-physical) is now the reach fixture** (non-physical →
+falls through Gate F into DRAW SITE 4). Naming tracks which fixture reaches
+the draw site under test, exactly per §17.3's own rule — copying `DefenseUp`'s
+own move-to-name assignment blind would have swapped reach and control here
+too.
+
+Four fixtures, one seed-parameterized JSON file per handler × role
+(`tools/battle-lab/mechanic-factory-ai-cv-spdefup-cosmicpower-reach-off.json`,
+`-cosmicpower-control-off.json`, `-calmmind-reach-off.json`,
+`-calmmind-control-off.json`), same capture shape as every prior
+CBM-blocked pair (`[A, wait 30, A, wait 700]`, `captureFrames
+[0,100,300,732]`):
+
+- **Reach** (`-cosmicpower-reach-off.json` / `-calmmind-reach-off.json`):
+  target uses `MOVE_DRAGON_RAGE` (82) x4 — Anorith drops to 80/120 (66.7%),
+  Gate F is false (Dragon, not in the physical list), falling through to
+  **DRAW SITE 4** (`:1007`).
+- **Control** (`-cosmicpower-control-off.json` / `-calmmind-control-off.json`):
+  target uses `MOVE_SEISMIC_TOSS` (69) x4 — Anorith drops to 70/120
+  (58.3%), Gate F is true (Fighting, in the physical list), routing straight
+  to `AI_CV_SpDefUp_ScoreDown2` — a fully deterministic, zero-draw path
+  through the entire handler tail.
+
+DRAW SITE 1/2/3 (Gates A/B/C's own SPDEF-stage-already-built and HP==100%
+preconditions) and DRAW SITE 5 (Gate E's "last move truly empty" sub-case)
+are not staged this session — same "not attempted, time-capped" status as
+every prior pair's own unstaged sites (§17.5/§18.6/§21.2).
+
+### 22.3 Live ledger (oracle-verified, both seeds, both handlers, both runs)
+
+| Fixture | Seed | Opponent PP used | Opponent HP (start→end) | Total `Random()` calls, frame 0→732 | Determinism (2 runs) |
+| --- | -: | -: | --- | -: | --- |
+| CosmicPower reach (Dragon Rage) | 1 | 1 | 120→80 (66.7%) | **14** | identical |
+| CosmicPower reach (Dragon Rage) | 99 | 1 | 120→80 (66.7%) | **13** | identical |
+| CosmicPower control (Seismic Toss) | 1 | 1 | 120→70 (58.3%) | **8** | identical |
+| CosmicPower control (Seismic Toss) | 99 | 1 | 120→70 (58.3%) | **8** | identical |
+| CalmMind reach (Dragon Rage) | 1 | 1 | 120→80 (66.7%) | **14** | identical |
+| CalmMind reach (Dragon Rage) | 99 | 1 | 120→80 (66.7%) | **13** | identical |
+| CalmMind control (Seismic Toss) | 1 | 1 | 120→70 (58.3%) | **8** | identical |
+| CalmMind control (Seismic Toss) | 99 | 1 | 120→70 (58.3%) | **8** | identical |
+
+Both handlers' control fixtures are cleanly cross-seed-stable (8/8); both
+handlers' reach fixtures reproduce the
+exact same **non-clean 14/13 pattern** `DefenseUp`'s own physical-list
+fixtures already flagged (§18.4) — not the clean "N=4 slots × 1 draw"
+shape every `AttackUp`-family handler showed (§17/§20/§21) — confirming
+that anomaly is a property of *reaching this handler's last-move branch
+tail* (DRAW SITE 4/5's own code region), not of any specific move or of
+`DefenseUp` specifically. CosmicPower and CalmMind's ledgers are **numerically
+identical** to each other in every row — expected, since both dispatch to
+the same `AI_CV_SpDefUp` body and neither `Cosmic Power`'s DEF+SPDEF raise
+nor `Calm Mind`'s SPATK+SPDEF raise affects `MOVE_DRAGON_RAGE`/`MOVE_SEISMIC_
+TOSS`'s fixed damage.
+
+### 22.4 Attribution (`tools/probe/attribute-factory-ai-random-callers.py`, window `0 732`, via `tools/run-mgba-probe.py`, seed 1)
+
+| Caller function | CosmicPower reach | CosmicPower control | CalmMind reach |
+| --- | -: | -: | -: |
+| `BattleAI_SetupAIData+0x83` | 4 | 4 | 4 |
+| `BattleTurnPassed+0x157` | 1 | 1 | 1 |
+| `ChooseMoveOrAction_Singles+0xf7` | 1 | 1 | 1 |
+| `Cmd_accuracycheck+0x305` | 1 | 1 | 1 |
+| `Cmd_seteffectwithchance+0x81` | 1 | 1 | 1 |
+| `Cmd_if_random_less_than+0x7` | **6** | **0** | **6** |
+| **Total** | **14** | **8** | **14** |
+
+`Cmd_get_ability` appears in **none** of the three tables — Machamp's
+single-ability kit and Anorith's own 0-power/0-accuracy dispatch move both
+close the confound, same as every prior stat-up pair since `SpeedUp`
+(§20.2/§20.4). The control fixture's **zero** `Cmd_if_random_less_than`
+draws is the direct, live-confirmed consequence of Gate F's inverted
+polarity: where `DefenseUp`'s own non-physical (Dragon Rage) fixture was
+the zero-draw one (§18.4), here it is the **physical** (Seismic Toss)
+fixture that zeroes out, and the **non-physical** (Dragon Rage) fixture
+that reaches the tail instead — the provable flip the brief's own gate
+re-derivation demanded, now confirmed at the instrument level, not just
+read off the assembly. The reach fixtures' own 6-draw (not 4-draw) count
+reproduces `DefenseUp`'s own unresolved "5-6, not the clean N=4" anomaly
+(§18.4) exactly — still not single-stepped to its exact per-slot source by
+this session (same open item, now confirmed to recur on this handler too,
+strengthening the case that it's intrinsic to `AI_CV_SpDefUp`/`AI_CV_
+DefenseUp`'s shared DRAW SITE 4/5 code shape rather than a fluke of
+`DefenseUp`'s own original fixture choice).
+
+### 22.5 What this unblocks
+
+1. **The pair's own port**: exact instruction lists for both `AI_CBM_*`
+   handlers (confirmed genuinely separate, dual-stat bodies, not aliases of
+   each other or of `AI_CBM_SpDefUp`) and `AI_CV_SpDefUp` (confirmed as the
+   single shared CV target for all four dispatching effects), every gate's
+   real precondition, the physical-types table (byte-identical to
+   `DefenseUp`'s own), and a citation-backed, live-confirmed resolution of
+   Gate F's inverted polarity — the exact trap entry 477's flag named,
+   independently re-derived from the assembly and then independently
+   reproduced at the instrument level (22.3-22.4), not merely trusted from
+   the flag's own one-line note.
+2. **Confirms the brief's own two claims were both accurate**: two separate
+   CBM handlers (not one shared handler, unlike the CV side), and Gate F's
+   polarity is genuinely inverted (not a typo or false alarm in the
+   groundwork flag) — while additionally establishing *why* the inversion
+   is correct (Special Defense's own real-game relationship to physical
+   damage is the mirror image of Defense's), a level of justification the
+   flag itself did not attempt.
+3. **A second independent recurrence of `DefenseUp`'s own "5-6, not 4"
+   draw-count anomaly** (§18.4, 22.3-22.4) on a different handler pair
+   entirely — raises confidence this is a real, reproducible property of
+   this handler's own DRAW SITE 4/5 code region (shared verbatim between
+   `AI_CV_DefenseUp` and `AI_CV_SpDefUp`) rather than noise specific to one
+   fixture's move choice; still flagged, not resolved, for a future porter
+   to single-step.
+4. **DRAW SITE 1/2/3** (Gates A/B/C's own SPDEF-stage-already-built-to-9-11
+   and HP==100% preconditions) and **DRAW SITE 5** (Gate E's "genuinely
+   empty last move" sub-case, as distinct from "any 0-power last move")
+   remain unstaged live this session — same status, and same reasons
+   (§18.2's 2-turn-moveset-flip requirement for DRAW SITE 5; a 2-turn
+   stat-stage build for DRAW SITE 1/3), as `DefenseUp`'s own still-open
+   items (§18.6 item 4).
+
+### 22.6 Verify script status
+
+`tools/probe/verify-factory-ai-checkviability-ground-truth.ts` extended
+this session with `AI_CV_SpDefUp`'s 4 fixtures (22.2-22.3, both `CosmicPower`
+and `CalmMind` dispatch moves) — every prior scenario (§9, §11.5, §12.1,
+§13.4, §14.6, §15.5, §16.5, §17.7, §18.7, §19.7, §20.5, §21.5) unchanged and
+still green. **Run twice this session, ALL PASS both times.** Reproduce with:
+
+```sh
+node --experimental-strip-types tools/probe/verify-factory-ai-checkviability-ground-truth.ts
+```
