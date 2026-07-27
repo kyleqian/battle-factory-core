@@ -128,6 +128,10 @@ import {
   type RecoverEffectSprite,
 } from "./recover.ts";
 import {
+  synthesisEffectAtAge,
+  type SynthesisSprite,
+} from "./synthesis.ts";
+import {
   milkDrinkEffectAtAge,
   type MilkDrinkEffectSprite,
 } from "./milkDrink.ts";
@@ -265,6 +269,7 @@ export interface SceneOnPresentationBattler {
     | "DUSTOX"
     | "HORSEA"
     | "EKANS"
+    | "SKIPLOOM"
     | "SHUPPET"
     | "PLUSLE";
   readonly geometry: SceneOnBattlerGeometry;
@@ -668,6 +673,13 @@ export interface SceneOnRecoverConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnSynthesisConfig {
+  readonly move: "SYNTHESIS";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnMilkDrinkConfig {
   readonly move: "MILK_DRINK";
   readonly attacker: SceneOnPresentationBattler;
@@ -763,6 +775,7 @@ export type SceneOnMoveConfig =
   | SceneOnShadowPunchConfig
   | SceneOnGrowthConfig
   | SceneOnRecoverConfig
+  | SceneOnSynthesisConfig
   | SceneOnMilkDrinkConfig
   | SceneOnSupersonicConfig
   | SceneOnWaterGunConfig
@@ -1101,6 +1114,14 @@ export interface SceneOnRecoverView {
   readonly target: SceneOnPresentationBattler;
   readonly attackerObjY: number;
   readonly sprites: readonly RecoverEffectSprite[];
+}
+
+export interface SceneOnSynthesisView {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly attackerObjY: number;
+  readonly sprites: readonly SynthesisSprite[];
 }
 
 export interface SceneOnMilkDrinkView {
@@ -1603,6 +1624,25 @@ export function sceneOnRecoverView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...effect,
+  };
+}
+
+/** `age` is ticks since the first GrantingStarsEffect sprite creation. */
+export function sceneOnSynthesisView(
+  state: SceneOnMovePresentationState,
+): SceneOnSynthesisView {
+  if (state.config.move !== "SYNTHESIS") {
+    throw new Error(`expected SYNTHESIS presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...synthesisEffectAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+    ),
   };
 }
 

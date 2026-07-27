@@ -535,6 +535,7 @@ import opponentFrontSpritesAsset from "../assets/gen/battle-opponent-front-sprit
 import kadabraFrontSpriteAsset from "../animation/assets/kadabra-front.json" with { type: "json" };
 import knockOffAsset from "../animation/assets/knock-off.json" with { type: "json" };
 import recoverAsset from "../animation/assets/recover.json" with { type: "json" };
+import synthesisAsset from "../animation/assets/synthesis.json" with { type: "json" };
 import milkDrinkAsset from "../animation/assets/milk-drink.json" with { type: "json" };
 import supersonicAsset from "../animation/assets/supersonic.json" with { type: "json" };
 import waterGunAsset from "../animation/assets/water-gun.json" with { type: "json" };
@@ -628,6 +629,7 @@ import {
   sceneOnShadowPunchView,
   sceneOnGrowthView,
   sceneOnRecoverView,
+  sceneOnSynthesisView,
   sceneOnMilkDrinkView,
   sceneOnSupersonicView,
   sceneOnWaterGunView,
@@ -905,6 +907,12 @@ const knockOffArt = knockOffAsset as {
 const recoverArt = recoverAsset as {
   orbs: { tileset: Tileset; palette: RgbColor[] };
   blueStar: { tileset: Tileset; palette: RgbColor[] };
+};
+const synthesisArt = synthesisAsset as {
+  sparkle2: { tileset: Tileset; palette: RgbColor[] };
+  blueStar: { tileset: Tileset; palette: RgbColor[] };
+  skiploomBack: { tileset: Tileset; palette: RgbColor[] };
+  skiploomFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const milkDrinkArt = milkDrinkAsset as {
   milkBottle: { tileset: Tileset; palette: RgbColor[] };
@@ -15442,6 +15450,117 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "DUSTOX used" : "Foe DUSTOX used",
       "SUPERSONIC!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SYNTHESIS") {
+    const view = sceneOnSynthesisView(state);
+    const displayed = sceneOnSynthesisView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "SKIPLOOM"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "SKIPLOOM"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged SYNTHESIS pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSprite = playerToOpponent
+      ? synthesisArt.skiploomBack : synthesisArt.skiploomFront;
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffset(view.target.species)
+      : null;
+    drawSpriteSheet(
+      fb,
+      targetSprite.tileset,
+      targetSprite.palette,
+      view.target.geometry.spriteCorner.x + (targetIdle?.x2 ?? 0),
+      view.target.geometry.spriteCorner.y + (targetIdle?.y2 ?? 0),
+    );
+    drawSpriteSheetAffineStretch(
+      fb,
+      attackerSprite.tileset,
+      attackerSprite.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+      256,
+      256,
+      0,
+      { r: 222, g: 255, b: 148 },
+      displayed.attackerObjY,
+      false,
+    );
+    for (const sprite of displayed.sprites) {
+      const art = sprite.kind === "grantingStar"
+        ? synthesisArt.sparkle2 : synthesisArt.blueStar;
+      const spriteTileset: Tileset = {
+        columns: 4,
+        rows: 4,
+        tiles: art.tileset.tiles.slice(
+          sprite.frame * 16,
+          sprite.frame * 16 + 16,
+        ),
+      };
+      drawSpriteSheet(
+        fb,
+        spriteTileset,
+        art.palette,
+        sprite.x - 16,
+        sprite.y - 16,
+      );
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "SKIPLOOM";
+    const playerSpecies = playerToOpponent ? "SKIPLOOM" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "SKIPLOOM used" : "Foe SKIPLOOM used",
+      "SYNTHESIS!",
       99,
     );
     return;
