@@ -15,6 +15,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 505 — [SUPERVISOR 2026-07-27 ~10:15] round 1 verified + merged; round 2 dispatched
+
+- **State:** master green at **247 files / 3381 tests**, build clean, census
+  byte-identical on the union. Round 1 both lanes landed and verified:
+  main's #47 Channel 2 close (entry 504 below; CV verify script rerun ALL
+  PASS by supervisor on the main tree) ∥ side's ENDTURN_ITEMS1
+  `RESTORE_HP`/`RESTORE_PP` registration (merged from
+  `worker/side-20260727-093552`, worktree/branch cleaned; endturn verify
+  script rerun by supervisor in-worktree, 17/17 ALL PASS incl. the new live
+  Sitrus fixture: hp 45≤57 gate at frame 4571, +30 heal at 4908 with zero
+  new draws, berry consumed next frame). Side's named remainder:
+  RESTORE_PP has Tier-1 + source pinning but no live fixture (2 carriers).
+- **Round 2 (dispatched):** main → §11.3's 5-step `turn4-doubleteam.json`
+  kickoff-phase wiring (new `{message, statChange}` bridge shape keyed on
+  `BattleScript_EffectStatUpAfterAtkCanceler`, acceptance 250/250 preserved
+  + the §11.4 regression sweep) ∥ side → §24.5 recipe-only CV draw sites,
+  DRAW SITE 2 first (cheapest: opponent's own low HP, no mixed kit), then
+  relay-pattern sites as cap allows.
+- **Next:** verify round 2; then §19.5 sites / Rung-4 TAUROS / #47
+  movesetIndex-1-3 remainder as later rounds.
+
+---
 ## 504 — [BOUNDED WORKER 2026-07-27 ~10:10] ISSUES #47 CLOSED for its live-verified shape: logic-ID-major restructure (option a) landed, Channel 2 modeled, 3 staged fixtures reproduce exactly; trimmed to one precisely-scoped, underivable remainder
 
 - **State:** tree green at **247 files / 3376 tests** (+6 over session start
@@ -108,33 +130,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Next:** verify round 1; then §11 wiring for `turn4-doubleteam.json`
   (main) ∥ §19.5 sites 3-6 / §24.5 recipe-only live staging (side, freed
   once #47 stops touching the AI verify surface).
-
----
-## 502 — [SUPERVISOR FINAL CLOSE 2026-07-27 ~03:35] extension round folded; session complete
-
-- **State (final):** tree committed and green at **245 files / 3363 tests**,
-  build clean, full CV verify script ALL PASS on the final merged tree,
-  census 94/214 effects, 191/355 moves, 153/276 Factory-L50, 1900/2957
-  weighted. Zero unmerged side branches, zero stale worktrees, clean
-  `git status`, `animation-main` fully folded (0 unfolded commits at close;
-  the animation supervisor session may still be live — later commits fold
-  next orient). **No DEFERRED entries — nothing blocks the next
-  `run-supervisor.sh`.** All 18 workers across 14 rounds completed (1
-  salvage).
-- **Extension round (after entry 500's summary):** ISSUES #47 Channel 1
-  (CBM ability-id stale-read collision) fixed faithfully with a generic
-  collision model, +12 tests, zero existing-test churn (entry 501);
-  Channel 2 exposed a REAL architectural finding — the engine's per-slot
-  CBM/TTF/CV interleave vs. the ROM's logic-ID-major order — and was
-  correctly NOT shipped as a guess; #47 is trimmed to that precisely-scoped
-  remainder with both candidate fixes named. ∥ **Yawn/Thrash ladder CLOSED
-  6/6**: Rung 6's Persim-via-Thrash same-pass fixture matched predictions
-  on both seeds with zero src edits, also closing Rung 4's TAUROS
-  remainder.
-- **Next (in order):** ISSUES #47 Channel 2 (pick logic-ID-major
-  restructure vs. scoped TTF preview, then land the 3 fixtures' mask-7
-  net-score tests); §11 wiring for `turn4-doubleteam.json` (scout banked,
-  new bridge shape named); remaining recipe-only sites (§19.5 sites 3-6,
-  §24.5 leech-seed/ingrain/curse); ENDTURN items breadth. Entry 500
-  (archived) has the full session summary.
 

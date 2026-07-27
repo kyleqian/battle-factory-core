@@ -1,4 +1,33 @@
 ---
+## 502 — [SUPERVISOR FINAL CLOSE 2026-07-27 ~03:35] extension round folded; session complete
+
+- **State (final):** tree committed and green at **245 files / 3363 tests**,
+  build clean, full CV verify script ALL PASS on the final merged tree,
+  census 94/214 effects, 191/355 moves, 153/276 Factory-L50, 1900/2957
+  weighted. Zero unmerged side branches, zero stale worktrees, clean
+  `git status`, `animation-main` fully folded (0 unfolded commits at close;
+  the animation supervisor session may still be live — later commits fold
+  next orient). **No DEFERRED entries — nothing blocks the next
+  `run-supervisor.sh`.** All 18 workers across 14 rounds completed (1
+  salvage).
+- **Extension round (after entry 500's summary):** ISSUES #47 Channel 1
+  (CBM ability-id stale-read collision) fixed faithfully with a generic
+  collision model, +12 tests, zero existing-test churn (entry 501);
+  Channel 2 exposed a REAL architectural finding — the engine's per-slot
+  CBM/TTF/CV interleave vs. the ROM's logic-ID-major order — and was
+  correctly NOT shipped as a guess; #47 is trimmed to that precisely-scoped
+  remainder with both candidate fixes named. ∥ **Yawn/Thrash ladder CLOSED
+  6/6**: Rung 6's Persim-via-Thrash same-pass fixture matched predictions
+  on both seeds with zero src edits, also closing Rung 4's TAUROS
+  remainder.
+- **Next (in order):** ISSUES #47 Channel 2 (pick logic-ID-major
+  restructure vs. scoped TTF preview, then land the 3 fixtures' mask-7
+  net-score tests); §11 wiring for `turn4-doubleteam.json` (scout banked,
+  new bridge shape named); remaining recipe-only sites (§19.5 sites 3-6,
+  §24.5 leech-seed/ingrain/curse); ENDTURN items breadth. Entry 500
+  (archived) has the full session summary.
+
+---
 ## 501 — [BOUNDED WORKER 2026-07-27 ~04:05] ISSUES #47 Channel 1 (CBM ability-id collision) fixed; Channel 2 (CV) precisely scoped as a real remainder, not shipped
 
 - **State:** tree green at **245 files / 3362 tests** (+12 over session
