@@ -61,6 +61,7 @@ type GraphStatement = {
   rawOperands?: string;
   operandTokens: string[];
   opcodeBindings?: string[];
+  labelOperands?: string[];
 };
 type GraphLabel = { name: string; line: number; sigil: string; nextLabel: string | null; statements: GraphStatement[] };
 type GraphEdgeEnd = { label: string; line: number } | null;
@@ -107,12 +108,12 @@ for (const label of graph.labels) {
     statementByKey.set(nodeKey(label.name, statement.line), { ...statement, label: label.name });
   }
 }
-const edgesFromKey = new Map<string, GraphEdge[]>();
+const rawEdgesFromKey = new Map<string, GraphEdge[]>();
 for (const edge of graph.controlFlow.edges) {
   const key = nodeKey(edge.from.label, edge.from.line);
-  const bucket = edgesFromKey.get(key);
+  const bucket = rawEdgesFromKey.get(key);
   if (bucket) bucket.push(edge);
-  else edgesFromKey.set(key, [edge]);
+  else rawEdgesFromKey.set(key, [edge]);
 }
 const continuationByCallKey = new Map<string, { label: string; line: number }>();
 for (const entry of graph.controlFlow.callsiteContinuations) {
@@ -130,6 +131,113 @@ function firstInstruction(labelName: string, guard: Set<string> = new Set()): { 
   if (!label.nextLabel) throw new Error(`empty label ${labelName} has no successor to resolve through`);
   return firstInstruction(label.nextLabel, guard);
 }
+
+// ---------------------------------------------------------------------------
+// Control-flow correction pass (extractor mechanism-level fix, ROADMAP S10 /
+// docs/roar-multihit-registration-scout.md §1).
+//
+// tools/extract/extract-battle-script-graph.ts only recognizes an
+// instruction's script-pointer operand as a jump target when the opcode name
+// matches a fixed pattern (`B_SCR_OP_JUMPIF*`, plus a short unconditional
+// allowlist: GOTO/JUMPTOCALLEDMOVE/CALL/RETURN/END*). Many other opcodes
+// carry a genuine script-pointer operand under a differently-named "ptr"
+// macro parameter (accuracycheck's failPtr, statbuffchange's jumpptr,
+// forcerandomswitch's ptr, decrementmultihit's loop-back value, ...) that the
+// name pattern does not recognize, so the committed graph records zero jump
+// edge for them. This pass derives the missing edges straight from the
+// graph's own `labelOperands` (the extractor already resolves each raw
+// operand token against the real label set -- it just doesn't wire that
+// resolution into `controlFlow.edges` for non-pattern-matched opcodes), so it
+// needs no opcode allowlist of its own: any statement with a label operand
+// not already covered by an existing jump/call edge from that exact
+// statement gets one synthesized here. This can only make an effect look
+// MORE blocked than the committed graph claims, never less -- the same
+// "safe direction" bias already documented for the call/return caveat below
+// -- and it never removes a correctly-modeled jumpif*/goto/call edge.
+//
+// Bug (b) -- forcerandomswitch's fabricated fallthrough. Verified against
+// battle_script_commands.c:7164-7183/7185-7386 this session: Cmd_
+// forcerandomswitch (via TryDoForceSwitchOut) always OVERWRITES
+// gBattlescriptCurrInstr itself -- either to this instruction's own ptr
+// operand (fail) or to the hardcoded, bytecode-invisible
+// BattleScript_SuccessForceOut label (success, :7181) -- there is no
+// `gBattlescriptCurrInstr += N` anywhere on its control path, unlike every
+// other audited "ptr"-operand opcode this session (accuracycheck,
+// statbuffchange, tryhealhalfhealth, trymemento, handlelearnnewmove,
+// checkteamslost all genuinely advance to their assembly successor on the
+// non-jump branch, confirmed by reading each Cmd_* handler). Because the
+// extractor doesn't recognize FORCERANDOMSWITCH as a control opcode at all,
+// it fabricates a fallthrough into whatever label happens to sit next in the
+// .s file (BattleScript_EffectMultiHit, purely by file layout, since Roar
+// happens to precede MultiHit in data/battle_scripts_1.s) -- this is the
+// exact mechanism that falsely credited INITMULTIHITSTRING/JUMPIFHASNOHP to
+// EFFECT_ROAR. NEVER_FALLS_THROUGH_OPCODES is this one audited exception,
+// not a blanket assumption: every other statement's existing fallthrough
+// edge is left untouched.
+const NEVER_FALLS_THROUGH_OPCODES = new Set(["B_SCR_OP_FORCERANDOMSWITCH"]);
+
+// forcerandomswitch's success target is a THIRD dynamic-dispatch category
+// alongside this census's one previously-documented case
+// (B_SCR_OP_JUMPTOCALLEDMOVE, a genuinely runtime-computed target with no
+// static label operand at all -- see the "Dynamic dispatch" caveat below):
+// a target that IS fixed at compile time, just never spelled as a bytecode
+// operand, because battle_script_commands.c writes
+// `gBattlescriptCurrInstr = BattleScript_SuccessForceOut` directly (:7181)
+// rather than reading an operand. Since the target is statically known, it
+// is modeled as a real jump edge to a real label (so the walk actually
+// visits BattleScript_SuccessForceOut/BattleScript_TrainerBattleForceOut and
+// discovers SWITCHOUTABILITIES/RETURNTOBALL), not as an unresolvable
+// dynamic-jump note the way JUMPTOCALLEDMOVE is.
+const HARDCODED_SUCCESS_TARGETS: Readonly<Record<string, string>> = Object.freeze({
+  B_SCR_OP_FORCERANDOMSWITCH: "BattleScript_SuccessForceOut",
+});
+
+function getOrInitEdgeBucket(map: Map<string, GraphEdge[]>, key: string): GraphEdge[] {
+  const existing = map.get(key);
+  if (existing) return existing;
+  const created: GraphEdge[] = [];
+  map.set(key, created);
+  return created;
+}
+
+const correctedEdgesFromKey = new Map<string, GraphEdge[]>();
+for (const [key, edges] of rawEdgesFromKey) correctedEdgesFromKey.set(key, [...edges]);
+
+let missingJumpEdgesSynthesized = 0;
+let fabricatedFallthroughsSuppressed = 0;
+for (const label of graph.labels) {
+  for (const statement of label.statements) {
+    if (statement.kind !== "instruction") continue;
+    const key = nodeKey(label.name, statement.line);
+    const bindings = statement.opcodeBindings ?? [];
+
+    if (bindings.some((opcode) => NEVER_FALLS_THROUGH_OPCODES.has(opcode))) {
+      const bucket = getOrInitEdgeBucket(correctedEdgesFromKey, key);
+      const withoutFallthrough = bucket.filter((edge) => edge.kind !== "fallthrough");
+      fabricatedFallthroughsSuppressed += bucket.length - withoutFallthrough.length;
+      correctedEdgesFromKey.set(key, withoutFallthrough);
+    }
+
+    for (const opcode of bindings) {
+      const hardcodedTarget = HARDCODED_SUCCESS_TARGETS[opcode];
+      if (!hardcodedTarget) continue;
+      const bucket = getOrInitEdgeBucket(correctedEdgesFromKey, key);
+      bucket.push({ from: { label: label.name, line: statement.line }, to: firstInstruction(hardcodedTarget), kind: "jump" });
+    }
+
+    for (const target of statement.labelOperands ?? []) {
+      const bucket = getOrInitEdgeBucket(correctedEdgesFromKey, key);
+      const alreadyCovered = bucket.some(
+        (edge) => (edge.kind === "jump" || edge.kind === "call") && edge.to !== null && edge.to.label === target,
+      );
+      if (alreadyCovered) continue;
+      bucket.push({ from: { label: label.name, line: statement.line }, to: firstInstruction(target), kind: "jump" });
+      missingJumpEdgesSynthesized += 1;
+    }
+  }
+}
+
+const edgesFromKey = correctedEdgesFromKey;
 
 // ---------------------------------------------------------------------------
 // The one deliberate semantic exception: Cmd_seteffectwithchance's
@@ -305,7 +413,16 @@ function walk(entryLabel: string, allowConditionalForks: boolean): WalkResult {
     }
 
     const outgoing = edgesFromKey.get(nodeKey(node.label, node.line)) ?? [];
-    const isConditionalFork = outgoing.some((e) => e.kind === "fallthrough") && outgoing.some((e) => e.kind === "jump");
+    // A fork is "more than one live continuation" generically -- not just the
+    // fallthrough+jump shape a single jumpif* produces. This also covers a
+    // corrected forcerandomswitch statement (two jump edges, zero fallthrough,
+    // since §-above suppresses its fabricated one) and any statement with
+    // multiple synthesized jump edges (e.g. handlelearnnewmove's two ptr
+    // operands). `call`/`end`/`return` are excluded because they are not
+    // runtime-conditional here: a call's continuation is unconditional
+    // (handled below regardless of fork status) and end/return are terminal.
+    const liveContinuations = outgoing.filter((e) => e.kind !== "call" && e.kind !== "end" && e.kind !== "return");
+    const isConditionalFork = liveContinuations.length > 1;
 
     for (const edge of outgoing) {
       if (edge.kind === "end" || edge.kind === "return") continue; // terminal on this path
@@ -408,6 +525,31 @@ function requireBlockedMentioning(effectName: string, needle: string): void {
   }
 }
 
+// Pins the EXACT missing-opcode set, not just a substring -- unlike
+// requireBlockedMentioning, this fails if the set gains or loses an entry,
+// so a future regression of the forcerandomswitch control-flow fix (e.g. the
+// fabricated-fallthrough bug reappearing, or the corrected switch-out tail
+// silently dropping an opcode) fails loudly instead of quietly passing a
+// substring check.
+function requireExactMissingOpcodes(effectName: string, expectedOpcodes: string[]): void {
+  const report = reportByEffectId.get(effectIdByName(effectName))!;
+  if (report.classification.kind !== "blocked-on-opcodes") {
+    throw new Error(
+      `ground-truth drift: ${effectName} expected blocked-on-opcodes, got ${report.classification.kind}`,
+    );
+  }
+  const actual = [...report.classification.missingOpcodes].sort();
+  const expected = [...expectedOpcodes].sort();
+  const matches = actual.length === expected.length && actual.every((opcode, index) => opcode === expected[index]);
+  if (!matches) {
+    throw new Error(
+      `ground-truth drift: ${effectName} expected exact missing-opcode set [${expected.join(", ")}], got `
+      + `[${actual.join(", ")}] -- if this is a legitimate topology change, update this pin with evidence, `
+      + "don't just relax it",
+    );
+  }
+}
+
 const validationChecks: Array<() => void> = [
   // Registration checkpoint (2026-07-25): B_SCR_OP_JUMPIFHALFWORD,
   // B_SCR_OP_JUMPIFSTATUS3CONDITION, and B_SCR_OP_ORWORD are now registered,
@@ -484,10 +626,46 @@ const validationChecks: Array<() => void> = [
   // engine's widened 4-value set. These four rows were PROGRESS 473's own
   // named false positives -- pinned blocked now that the census actually
   // checks the operand, not just the opcode name.
+  // EFFECT_RAGE's own blocked-on-opcodes/blocked-on-subsystem KIND moved this
+  // session (see below) because the control-flow fix newly walks its
+  // previously-unreachable BattleScript_RageMiss branch (accuracycheck's
+  // failPtr operand, never modeled as an edge before this fix) and discovers
+  // a genuine B_SCR_OP_CLEARSTATUSFROMEFFECT gap there; this check's own
+  // needle-substring assertion still passes unmodified either way, since it
+  // checks both missingOpcodes and subsystemNotes together.
   () => requireBlockedMentioning("EFFECT_RAGE", "MOVE_EFFECT_RAGE"),
   () => requireBlockedMentioning("EFFECT_MEAN_LOOK", "MOVE_EFFECT_PREVENT_ESCAPE"),
   () => requireBlockedMentioning("EFFECT_NIGHTMARE", "MOVE_EFFECT_NIGHTMARE"),
   () => requireBlockedMentioning("EFFECT_WILL_O_WISP", "ABILITY_WATER_VEIL"),
+  // Control-flow extractor fix regression pins (this session,
+  // docs/roar-multihit-registration-scout.md "Headline correction" + §1).
+  // EFFECT_ROAR's real blocker set, walked through its actual C-side success
+  // continuation (BattleScript_SuccessForceOut -> BattleScript_
+  // TrainerBattleForceOut, battle_script_commands.c:7181) instead of the
+  // previous bogus fallthrough into BattleScript_EffectMultiHit. If this ever
+  // reports INITMULTIHITSTRING/JUMPIFHASNOHP again, the forcerandomswitch
+  // control-flow fix (NEVER_FALLS_THROUGH_OPCODES /
+  // HARDCODED_SUCCESS_TARGETS above) regressed. FINISHACTION is a real find,
+  // not a mismatch with the scout's 3-opcode prediction: it sits on the
+  // not-taken (BATTLE_TYPE_TRAINER == false) side of BattleScript_
+  // SuccessForceOut's own jumpifbattletype fork, which this census's full
+  // walk always visits (see Caveats -- it does not model runtime battle-type
+  // dominance), even though that branch is structurally dead for Level-50
+  // Factory singles.
+  () => requireExactMissingOpcodes("EFFECT_ROAR", [
+    "B_SCR_OP_FORCERANDOMSWITCH",
+    "B_SCR_OP_SWITCHOUTABILITIES",
+    "B_SCR_OP_RETURNTOBALL",
+    "B_SCR_OP_FINISHACTION",
+  ]),
+  // The multi-hit pair's own blocker set is unchanged by the control-flow fix
+  // (it was never the source of the bogus edge -- Roar's fabricated
+  // fallthrough only ever pointed INTO it): still exactly INITMULTIHITSTRING
+  // + JUMPIFHASNOHP, now correctly labeled "(edge branch only)" instead of
+  // "(main path)" now that an upstream accuracycheck fork is recognized.
+  () => requireExactMissingOpcodes("EFFECT_MULTI_HIT", ["B_SCR_OP_INITMULTIHITSTRING", "B_SCR_OP_JUMPIFHASNOHP"]),
+  () => requireExactMissingOpcodes("EFFECT_DOUBLE_HIT", ["B_SCR_OP_INITMULTIHITSTRING", "B_SCR_OP_JUMPIFHASNOHP"]),
+  () => requireExactMissingOpcodes("EFFECT_TWINEEDLE", ["B_SCR_OP_INITMULTIHITSTRING", "B_SCR_OP_JUMPIFHASNOHP"]),
 ];
 
 let validationFailed = false;
@@ -732,6 +910,17 @@ lines.push(
   + "is now derived from the engine's own exported `SET_MOVE_EFFECT_SUPPORTED_BYTES`, which spreads "
   + "`STAT_MOVE_EFFECT_TABLE`'s keys, instead of a hand list that predated that table's registration)",
 );
+lines.push(
+  "- `EFFECT_ROAR` blocked on exactly `B_SCR_OP_FORCERANDOMSWITCH`, `B_SCR_OP_SWITCHOUTABILITIES`, "
+  + "`B_SCR_OP_RETURNTOBALL`, `B_SCR_OP_FINISHACTION` -- a control-flow extractor fix this session "
+  + "(docs/roar-multihit-registration-scout.md): the graph previously fabricated a fallthrough edge from "
+  + "`forcerandomswitch` into the physically-next label (`BattleScript_EffectMultiHit`), which wrongly "
+  + "credited `INITMULTIHITSTRING`/`JUMPIFHASNOHP` to this row; the corrected walk instead follows "
+  + "`forcerandomswitch`'s real two-way branch (its own fail-pointer operand, plus the hardcoded, "
+  + "bytecode-invisible `BattleScript_SuccessForceOut` success target). `EFFECT_MULTI_HIT`/`EFFECT_DOUBLE_HIT`/"
+  + "`EFFECT_TWINEEDLE` are pinned unchanged at exactly `B_SCR_OP_INITMULTIHITSTRING`, "
+  + "`B_SCR_OP_JUMPIFHASNOHP` to confirm the fix only removed the bogus edge into them, not their own real one",
+);
 lines.push("");
 lines.push("All checks passed for this run.");
 lines.push("");
@@ -773,9 +962,30 @@ lines.push(
   + "reconverges to the same later instruction. This under-claims \"main path\" rather than over-claiming it.",
 );
 lines.push(
-  "- **Dynamic dispatch.** `B_SCR_OP_JUMPTOCALLEDMOVE` (Metronome/Sleep Talk/Assist-style \"run another "
-  + "move's effect script\") has a runtime-computed target with no static label operand; those three call "
-  + "sites are reported as a subsystem note (dynamic move-effect dispatch), not walked further.",
+  "- **Dynamic dispatch, two categories.** `B_SCR_OP_JUMPTOCALLEDMOVE` (Metronome/Sleep Talk/Assist-style "
+  + "\"run another move's effect script\") has a runtime-computed target with no static label operand; those "
+  + "call sites are reported as a subsystem note (dynamic move-effect dispatch), not walked further. Separately, "
+  + "`B_SCR_OP_FORCERANDOMSWITCH`'s success target (`BattleScript_SuccessForceOut`) is fixed at compile time but "
+  + "never spelled as a bytecode operand -- `Cmd_forcerandomswitch` writes `gBattlescriptCurrInstr` directly "
+  + "(`battle_script_commands.c:7181`) instead of reading one. Since that target IS statically known, it is "
+  + "modeled as a real jump edge (`HARDCODED_SUCCESS_TARGETS` in this tool) so the walk actually visits it, "
+  + "unlike the genuinely-unresolvable `JUMPTOCALLEDMOVE` case.",
+);
+lines.push(
+  "- **Control-flow correction pass.** `src/data/gen/battle-script-graph.json`'s edge extractor "
+  + "(`tools/extract/extract-battle-script-graph.ts`) only recognizes a script-pointer operand as a jump "
+  + "target when the opcode name matches a fixed pattern (`B_SCR_OP_JUMPIF*`, plus a short unconditional "
+  + "allowlist). Opcodes with a differently-named pointer operand (`accuracycheck`'s failPtr, "
+  + "`statbuffchange`'s jumpptr, `forcerandomswitch`'s ptr, ...) get zero jump edge from the committed graph. "
+  + "This tool corrects that mechanically from the graph's own `labelOperands` (already computed per "
+  + "statement, just not wired into every edge) rather than opcode-by-opcode: any statement with a label "
+  + "operand not already covered by an existing jump/call edge gets one synthesized, which can only make an "
+  + "effect look more blocked than the committed graph claims, never less. The one further correction needed "
+  + "is `B_SCR_OP_FORCERANDOMSWITCH` specifically: audited against `battle_script_commands.c` this session, "
+  + "it never falls through to its assembly successor on any branch (unlike every other audited \"ptr\"-operand "
+  + "opcode, which do genuinely advance on the non-jump branch), so its one fabricated fallthrough edge is "
+  + "suppressed rather than kept alongside the added jump edges (`NEVER_FALLS_THROUGH_OPCODES` in this tool). "
+  + "See docs/roar-multihit-registration-scout.md for the EFFECT_ROAR case this was found from.",
 );
 lines.push(
   "- **Factory-L50 legality** is taken directly from the topology's own precomputed "
@@ -792,5 +1002,8 @@ console.log(
   + `Moves (unweighted): ${headline.movesExecutable}/${headline.movesTotal}\n`
   + `Factory-L50 moves (unweighted): ${headline.factoryMovesExecutableUnweighted}/${headline.factoryMovesTotalUnweighted}\n`
   + `Factory-L50 moves (weighted): ${headline.factoryWeightedExecutable}/${headline.factoryWeightedTotal}\n`
-  + `All ${validationChecks.length} ground-truth validation checks passed.`,
+  + `All ${validationChecks.length} ground-truth validation checks passed.\n`
+  + `Control-flow correction pass: ${missingJumpEdgesSynthesized} missing jump edge(s) synthesized from `
+  + `labelOperands, ${fabricatedFallthroughsSuppressed} fabricated fallthrough edge(s) suppressed `
+  + "(NEVER_FALLS_THROUGH_OPCODES).",
 );
