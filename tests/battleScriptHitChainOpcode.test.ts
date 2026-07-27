@@ -54,6 +54,10 @@ function battler(changes: Partial<BattleScriptRulesBattler> & { maxHP?: number }
     statStages: changes.statStages ?? [6, 6, 6, 6, 6, 6, 6, 6],
     protected: changes.protected,
     ppNotAffectedByPressure: changes.ppNotAffectedByPressure,
+    protectPhysicalDmg: changes.protectPhysicalDmg,
+    protectPhysicalBattlerId: changes.protectPhysicalBattlerId,
+    protectSpecialDmg: changes.protectSpecialDmg,
+    protectSpecialBattlerId: changes.protectSpecialBattlerId,
     types: changes.types ?? (["TYPE_NORMAL", "TYPE_NORMAL"] as const),
     species: changes.species ?? 0,
     attack: changes.attack ?? 0,
@@ -1143,6 +1147,142 @@ describe("production adjustsetdamage (Cmd_adjustsetdamage) dispatch", () => {
       if (result.kind !== "advanced") throw new Error("expected advance");
       expect(result.state.rulesContext.battleMoveDamage).toBe(9);
     });
+  });
+});
+
+describe("production counterdamagecalculator (Cmd_counterdamagecalculator) dispatch -- Counter's own three-gate retaliation", () => {
+  it("registers B_SCR_OP_COUNTERDAMAGECALCULATOR", () => {
+    expect(program.instructions.find((i) => i.opcodeName === "B_SCR_OP_COUNTERDAMAGECALCULATOR")).toBeDefined();
+  });
+
+  it("success: doubles the recorded physical hit and redirects gBattlerTarget to the recorded hitter", () => {
+    const rc = context(0, { protectPhysicalDmg: 14, protectPhysicalBattlerId: 1 }, {}, { hp: 100 });
+    const { result } = stepAtOpcode("B_SCR_OP_COUNTERDAMAGECALCULATOR", rc);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battleMoveDamage).toBe(28);
+    expect(result.state.rulesContext.selectorRoles.target).toBe(1);
+  });
+
+  it("success in doubles: redirects away from the pre-existing target to the actual recorded hitter", () => {
+    const doublesTopology = Object.freeze({
+      battlersCount: 4 as const,
+      battleTypeFlags: BATTLE_SCRIPT_BATTLE_TYPE_DOUBLE,
+      battlerPositions: [0, 1, 2, 3] as const,
+    });
+    const rc = context(0, {}, {
+      battleTopology: doublesTopology,
+      battlers: [
+        battler({ side: 0, protectPhysicalDmg: 14, protectPhysicalBattlerId: 3 }), // attacker (Counter user)
+        battler({ side: 1 }), // pre-existing target -- must NOT be who gets hit
+        battler({ side: 0 }), // attacker's ally
+        battler({ side: 1, hp: 77 }), // the actual opposing-side battler that hit the attacker
+      ],
+    });
+    const { result } = stepAtOpcode("B_SCR_OP_COUNTERDAMAGECALCULATOR", rc);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battleMoveDamage).toBe(28);
+    expect(result.state.rulesContext.selectorRoles.target).toBe(3);
+  });
+
+  it("failure gate (a): no physical hit recorded (protectPhysicalDmg 0) jumps to BattleScript_FailedFromAtkString and sets ppNotAffectedByPressure", () => {
+    const rc = context(0, {}, {}, { hp: 100 });
+    const { result } = stepAtOpcode("B_SCR_OP_COUNTERDAMAGECALCULATOR", rc);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.programCounter).toBe(labelPc("BattleScript_FailedFromAtkString"));
+    expect(result.state.rulesContext.battleMoveDamage).toBe(0);
+    expect(result.state.rulesContext.battlers[0]!.ppNotAffectedByPressure).toBe(1);
+  });
+
+  it("failure gate (b): recorded hitter is on the attacker's own side (ally fire never retaliates)", () => {
+    const rc = context(0, {}, {
+      battlers: [
+        battler({ side: 0, protectPhysicalDmg: 14, protectPhysicalBattlerId: 2 }),
+        battler({ side: 1 }),
+        battler({ side: 0, hp: 100 }), // same side as the attacker
+        battler({ side: 1 }),
+      ],
+    });
+    const { result } = stepAtOpcode("B_SCR_OP_COUNTERDAMAGECALCULATOR", rc);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.programCounter).toBe(labelPc("BattleScript_FailedFromAtkString"));
+    expect(result.state.rulesContext.battlers[0]!.ppNotAffectedByPressure).toBe(1);
+  });
+
+  it("failure gate (c): the recorded hitter has since fainted", () => {
+    const rc = context(0, { protectPhysicalDmg: 14, protectPhysicalBattlerId: 1 }, {}, { hp: 0 });
+    const { result } = stepAtOpcode("B_SCR_OP_COUNTERDAMAGECALCULATOR", rc);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.programCounter).toBe(labelPc("BattleScript_FailedFromAtkString"));
+    expect(result.state.rulesContext.battlers[0]!.ppNotAffectedByPressure).toBe(1);
+  });
+
+  it("a recorded SPECIAL hit does not satisfy Counter's own (physical-only) gate", () => {
+    const rc = context(0, { protectSpecialDmg: 14, protectSpecialBattlerId: 1 }, {}, { hp: 100 });
+    const { result } = stepAtOpcode("B_SCR_OP_COUNTERDAMAGECALCULATOR", rc);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.programCounter).toBe(labelPc("BattleScript_FailedFromAtkString"));
+  });
+});
+
+describe("production mirrorcoatdamagecalculator (Cmd_mirrorcoatdamagecalculator) dispatch -- byte-for-byte Counter twin, special fields", () => {
+  it("registers B_SCR_OP_MIRRORCOATDAMAGECALCULATOR", () => {
+    expect(program.instructions.find((i) => i.opcodeName === "B_SCR_OP_MIRRORCOATDAMAGECALCULATOR")).toBeDefined();
+  });
+
+  it("success: doubles the recorded special hit and redirects gBattlerTarget to the recorded hitter", () => {
+    const rc = context(0, { protectSpecialDmg: 8, protectSpecialBattlerId: 1 }, {}, { hp: 100 });
+    const { result } = stepAtOpcode("B_SCR_OP_MIRRORCOATDAMAGECALCULATOR", rc);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battleMoveDamage).toBe(16);
+    expect(result.state.rulesContext.selectorRoles.target).toBe(1);
+  });
+
+  it("failure gate (a): no special hit recorded (protectSpecialDmg 0) jumps to BattleScript_FailedFromAtkString and sets ppNotAffectedByPressure", () => {
+    const rc = context(0, {}, {}, { hp: 100 });
+    const { result } = stepAtOpcode("B_SCR_OP_MIRRORCOATDAMAGECALCULATOR", rc);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.programCounter).toBe(labelPc("BattleScript_FailedFromAtkString"));
+    expect(result.state.rulesContext.battleMoveDamage).toBe(0);
+    expect(result.state.rulesContext.battlers[0]!.ppNotAffectedByPressure).toBe(1);
+  });
+
+  it("failure gate (b): recorded hitter is on the attacker's own side", () => {
+    const rc = context(0, {}, {
+      battlers: [
+        battler({ side: 0, protectSpecialDmg: 8, protectSpecialBattlerId: 2 }),
+        battler({ side: 1 }),
+        battler({ side: 0, hp: 100 }),
+        battler({ side: 1 }),
+      ],
+    });
+    const { result } = stepAtOpcode("B_SCR_OP_MIRRORCOATDAMAGECALCULATOR", rc);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.programCounter).toBe(labelPc("BattleScript_FailedFromAtkString"));
+  });
+
+  it("failure gate (c): the recorded hitter has since fainted", () => {
+    const rc = context(0, { protectSpecialDmg: 8, protectSpecialBattlerId: 1 }, {}, { hp: 0 });
+    const { result } = stepAtOpcode("B_SCR_OP_MIRRORCOATDAMAGECALCULATOR", rc);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.programCounter).toBe(labelPc("BattleScript_FailedFromAtkString"));
+  });
+
+  it("a recorded PHYSICAL hit does not satisfy Mirror Coat's own (special-only) gate", () => {
+    const rc = context(0, { protectPhysicalDmg: 8, protectPhysicalBattlerId: 1 }, {}, { hp: 100 });
+    const { result } = stepAtOpcode("B_SCR_OP_MIRRORCOATDAMAGECALCULATOR", rc);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.programCounter).toBe(labelPc("BattleScript_FailedFromAtkString"));
   });
 });
 
