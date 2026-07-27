@@ -62,9 +62,23 @@
  * type list -- `LightScreen`'s 8-type special list, `Reflect`'s 9-type
  * physical list, exact complements covering all 17 Gen 3 types -- and
  * exactly 1 draw site each, the shortest CV body in the whole
- * physical/special-list sub-family). The other ~74 are not ported this
- * round (a separate, much larger phased body of work per the audit's §3),
- * so a move that reaches one of THOSE must not silently score zero.
+ * physical/special-list sub-family), and `EFFECT_EVASION_UP`/
+ * `EFFECT_EVASION_UP_2`/`EFFECT_MINIMIZE` and `EFFECT_EVASION_DOWN`/
+ * `EFFECT_EVASION_DOWN_2` (`AI_CV_EvasionUp`/`AI_CV_EvasionDown`,
+ * `runCvEvasionUp`/`runCvEvasionDown` below, `:1037-1074`/`:1235-1246`,
+ * doc §24 -- the eleventh CBM-blocked pair's own CV half. `AI_CV_EvasionUp`
+ * is the largest ported CV handler in this doc, 8 `if_random_less_than`
+ * sites -- structurally close to `AI_CV_AccuracyDown`'s own 7-site shape
+ * but re-derived independently per doc §24.1, which found three real
+ * divergences: DRAW SITE 1 has no Gate B companion (a single 90%-HP gate,
+ * not AccuracyDown's own two-gate 70% shape), Gate A's own HP threshold is
+ * 90 not 70, and Gate I reads AI_USER's own evasion stage (not AI_TARGET's)
+ * since this is an UP handler raising the opponent's own stat.
+ * `AI_CV_EvasionDown` is confirmed byte-for-byte the same shape as
+ * `AI_CV_DefenseDown`/`AI_CV_SpDefDown` with `STAT_EVASION` swapped in,
+ * reusing the shared `runCvStatDown` body). The other ~72 are not ported
+ * this round (a separate, much larger phased body of work per the audit's
+ * §3), so a move that reaches one of THOSE must not silently score zero.
  */
 import { MOVES_BY_ID, TYPE_EFFECTIVENESS } from "./factoryAiCheckBadMove.ts";
 import type { BattleRngState } from "./battleDecisionBoundary.ts";
@@ -328,6 +342,16 @@ export type FactoryAiCheckViabilityDraw =
   | Readonly<{
     ordinal: number;
     reason: string;
+    kind: "evasion-down-roll";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    succeeded: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
     kind: "attack-up-roll-1" | "attack-up-roll-2" | "attack-up-roll-3";
     before: BattleRngState;
     after: BattleRngState;
@@ -396,6 +420,24 @@ export type FactoryAiCheckViabilityDraw =
       | "accuracy-down-roll-5"
       | "accuracy-down-roll-6"
       | "accuracy-down-roll-7";
+    before: BattleRngState;
+    after: BattleRngState;
+    rawRngValue: number;
+    randomValue: number;
+    succeeded: boolean;
+  }>
+  | Readonly<{
+    ordinal: number;
+    reason: string;
+    kind:
+      | "evasion-up-roll-1"
+      | "evasion-up-roll-2"
+      | "evasion-up-roll-3"
+      | "evasion-up-roll-4"
+      | "evasion-up-roll-5"
+      | "evasion-up-roll-6"
+      | "evasion-up-roll-7"
+      | "evasion-up-roll-8";
     before: BattleRngState;
     after: BattleRngState;
     rawRngValue: number;
@@ -1069,7 +1111,7 @@ function runCvAttackDown(input: Readonly<{
  * site's own reachability: true skips its own `-2`, false applies it.
  */
 function runCvStatDown(
-  kind: "defense-down-roll" | "sp-def-down-roll",
+  kind: "defense-down-roll" | "sp-def-down-roll" | "evasion-down-roll",
   input: Readonly<{
     rng: BattleRngState;
     attackerHp: number;
@@ -1140,6 +1182,36 @@ function runCvSpDefDown(input: Readonly<{
     attackerHp: input.attackerHp,
     attackerMaxHp: input.attackerMaxHp,
     targetStatStage: input.targetSpDefStage,
+    targetHp: input.targetHp,
+    targetMaxHp: input.targetMaxHp,
+    drawOrdinalStart: input.drawOrdinalStart,
+    reasonPrefix: input.reasonPrefix,
+  });
+}
+
+/**
+ * `AI_CV_EvasionDown` (`data/battle_ai_scripts.s:1235-1246`, doc §24.1) --
+ * confirmed byte-for-byte the same topology as `AI_CV_DefenseDown`/
+ * `AI_CV_SpDefDown` above (`STAT_EVASION` swapped in, same `70`/`50`/`70`
+ * thresholds and odds, same `score -2` on every non-skip branch) -- reuses
+ * the identical shared `runCvStatDown` body rather than a parallel
+ * implementation.
+ */
+function runCvEvasionDown(input: Readonly<{
+  rng: BattleRngState;
+  attackerHp: number;
+  attackerMaxHp: number;
+  targetEvasionStage: number;
+  targetHp: number;
+  targetMaxHp: number;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  return runCvStatDown("evasion-down-roll", {
+    rng: input.rng,
+    attackerHp: input.attackerHp,
+    attackerMaxHp: input.attackerMaxHp,
+    targetStatStage: input.targetEvasionStage,
     targetHp: input.targetHp,
     targetMaxHp: input.targetMaxHp,
     drawOrdinalStart: input.drawOrdinalStart,
@@ -1868,6 +1940,187 @@ function runCvAccuracyDown(input: Readonly<{
   return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: succeeded7 ? score - 2 : score });
 }
 
+/**
+ * `AI_CV_EvasionUp` (`data/battle_ai_scripts.s:1037-1074`,
+ * `docs/factory-ai-checkviability-ground-truth.md` §24.1) -- the largest
+ * ported `AI_CV_*` handler in this doc, 8 `if_random_less_than` sites:
+ *
+ * ```
+ * AI_CV_EvasionUp:
+ *     if_hp_less_than AI_USER, 90, AI_CV_EvasionUp2                    ; Gate A (opponent's OWN hp)
+ *     if_random_less_than 100, AI_CV_EvasionUp2                        ; DRAW SITE 1
+ *     score +3
+ * AI_CV_EvasionUp2:
+ *     if_stat_level_less_than AI_USER, STAT_EVASION, 9, AI_CV_EvasionUp3  ; Gate B (opponent's OWN evasion stage)
+ *     if_random_less_than 128, AI_CV_EvasionUp3                        ; DRAW SITE 2
+ *     score -1
+ * AI_CV_EvasionUp3:
+ *     if_not_status AI_TARGET, STATUS1_TOXIC_POISON, AI_CV_EvasionUp5  ; Gate C (target toxic-poisoned?)
+ *     if_hp_more_than AI_USER, 50, AI_CV_EvasionUp4                    ; Gate D (opponent's OWN hp, only if Gate C true)
+ *     if_random_less_than 80, AI_CV_EvasionUp5                         ; DRAW SITE 3
+ * AI_CV_EvasionUp4:
+ *     if_random_less_than 50, AI_CV_EvasionUp5                         ; DRAW SITE 4
+ *     score +3
+ * AI_CV_EvasionUp5:
+ *     if_not_status3 AI_TARGET, STATUS3_LEECHSEED, AI_CV_EvasionUp6    ; Gate E (target leech-seeded?)
+ *     if_random_less_than 70, AI_CV_EvasionUp6                         ; DRAW SITE 5
+ *     score +3
+ * AI_CV_EvasionUp6:
+ *     if_not_status3 AI_USER, STATUS3_ROOTED, AI_CV_EvasionUp7         ; Gate F (opponent's OWN Ingrain flag)
+ *     if_random_less_than 128, AI_CV_EvasionUp7                        ; DRAW SITE 6
+ *     score +2
+ * AI_CV_EvasionUp7:
+ *     if_not_status2 AI_TARGET, STATUS2_CURSED, AI_CV_EvasionUp8       ; Gate G (target cursed?)
+ *     if_random_less_than 70, AI_CV_EvasionUp8                         ; DRAW SITE 7
+ *     score +3
+ * AI_CV_EvasionUp8:
+ *     if_hp_more_than AI_USER, 70, AI_CV_EvasionUp_End                 ; Gate H (opponent's OWN hp)
+ *     if_stat_level_equal AI_USER, STAT_EVASION, DEFAULT_STAT_STAGE, AI_CV_EvasionUp_End  ; Gate I (opponent's OWN evasion stage)
+ *     if_hp_less_than AI_USER, 40, AI_CV_EvasionUp_ScoreDown2          ; Gate J
+ *     if_hp_less_than AI_TARGET, 40, AI_CV_EvasionUp_ScoreDown2        ; Gate K
+ *     if_random_less_than 70, AI_CV_EvasionUp_End                      ; DRAW SITE 8
+ * AI_CV_EvasionUp_ScoreDown2:
+ *     score -2
+ * AI_CV_EvasionUp_End:
+ *     end
+ * ```
+ *
+ * Re-derived independently from the raw assembly, NOT copied from
+ * `AI_CV_AccuracyDown`'s own shape despite the structural similarity (both
+ * share the four status-gated sites -- toxic/leechseed/rooted/cursed -- and
+ * the Gate H/I/J/K tail). Three real divergences (doc §24.1): (1) DRAW SITE
+ * 1 has no Gate B companion -- a single opponent-HP gate, not AccuracyDown's
+ * own two-independent-routes shape; (2) Gate A's own HP threshold is 90, not
+ * 70; (3) Gate I reads `AI_USER`'s own evasion stage, not `AI_TARGET`'s --
+ * the operand flips because EvasionUp raises the OPPONENT's own stat, unlike
+ * AccuracyDown which lowers the target's.
+ *
+ * Gates C/D (`:1046-1047`) mutually exclusive DRAW SITE 3/DRAW SITE 4: only
+ * reached at all when the target is toxic-poisoned (Gate C), then split by
+ * the opponent's OWN hp (> 50% -> DRAW SITE 4 only; <= 50% -> DRAW SITE 3
+ * only) -- never both in the same pass, unlike AccuracyDown's own four
+ * independent (non-exclusive) status gates. DRAW SITE 8 (`:1069`) shares
+ * AccuracyDown's own DRAW SITE 7 OPPOSITE polarity: jump (roll < 70) is the
+ * no-op; falling through (roll >= 70) is what applies the tail's `-2`.
+ */
+function runCvEvasionUp(input: Readonly<{
+  rng: BattleRngState;
+  attackerHp: number;
+  attackerMaxHp: number;
+  attackerEvasionStage: number;
+  attackerIsRooted: boolean;
+  targetHp: number;
+  targetMaxHp: number;
+  targetIsToxicPoisoned: boolean;
+  targetIsLeechSeeded: boolean;
+  targetIsCursed: boolean;
+  drawOrdinalStart: number;
+  reasonPrefix: string;
+}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let score = 0;
+
+  const attackerHpPercent = Math.floor((100 * input.attackerHp) / input.attackerMaxHp);
+  const targetHpPercent = Math.floor((100 * input.targetHp) / input.targetMaxHp);
+
+  // Gate A -> DRAW SITE 1: opponent's OWN hp >= 90% (no Gate B companion,
+  // unlike AccuracyDown's own two-gate DRAW SITE 1 -- doc §24.1 divergence 1).
+  if (attackerHpPercent >= 90) {
+    const draw1 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw1`);
+    rng = draw1.after;
+    ordinal += 1;
+    const succeeded1 = draw1.randomValue % 256 >= 100;
+    draws.push(Object.freeze({ ...draw1, kind: "evasion-up-roll-1" as const, succeeded: succeeded1 }));
+    if (succeeded1) score += 3;
+  }
+
+  // Gate B -> DRAW SITE 2: opponent's OWN evasion stage already >= 9.
+  if (input.attackerEvasionStage >= 9) {
+    const draw2 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw2`);
+    rng = draw2.after;
+    ordinal += 1;
+    const succeeded2 = draw2.randomValue % 256 >= 128;
+    draws.push(Object.freeze({ ...draw2, kind: "evasion-up-roll-2" as const, succeeded: succeeded2 }));
+    if (succeeded2) score -= 1;
+  }
+
+  // Gates C/D -> DRAW SITE 3/4: target toxic-poisoned reaches this pair at
+  // all; the opponent's OWN hp band then picks exactly one of the two
+  // mutually exclusive sites.
+  if (input.targetIsToxicPoisoned) {
+    if (attackerHpPercent > 50) {
+      const draw4 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw4`);
+      rng = draw4.after;
+      ordinal += 1;
+      const succeeded4 = draw4.randomValue % 256 >= 50;
+      draws.push(Object.freeze({ ...draw4, kind: "evasion-up-roll-4" as const, succeeded: succeeded4 }));
+      if (succeeded4) score += 3;
+    } else {
+      const draw3 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw3`);
+      rng = draw3.after;
+      ordinal += 1;
+      const succeeded3 = draw3.randomValue % 256 >= 80;
+      draws.push(Object.freeze({ ...draw3, kind: "evasion-up-roll-3" as const, succeeded: succeeded3 }));
+      if (succeeded3) score += 3;
+    }
+  }
+
+  // Gate E -> DRAW SITE 5: target leech-seeded.
+  if (input.targetIsLeechSeeded) {
+    const draw5 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw5`);
+    rng = draw5.after;
+    ordinal += 1;
+    const succeeded5 = draw5.randomValue % 256 >= 70;
+    draws.push(Object.freeze({ ...draw5, kind: "evasion-up-roll-5" as const, succeeded: succeeded5 }));
+    if (succeeded5) score += 3;
+  }
+
+  // Gate F -> DRAW SITE 6: opponent's OWN rooted (Ingrain) flag.
+  if (input.attackerIsRooted) {
+    const draw6 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw6`);
+    rng = draw6.after;
+    ordinal += 1;
+    const succeeded6 = draw6.randomValue % 256 >= 128;
+    draws.push(Object.freeze({ ...draw6, kind: "evasion-up-roll-6" as const, succeeded: succeeded6 }));
+    if (succeeded6) score += 2;
+  }
+
+  // Gate G -> DRAW SITE 7: target cursed.
+  if (input.targetIsCursed) {
+    const draw7 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw7`);
+    rng = draw7.after;
+    ordinal += 1;
+    const succeeded7 = draw7.randomValue % 256 >= 70;
+    draws.push(Object.freeze({ ...draw7, kind: "evasion-up-roll-7" as const, succeeded: succeeded7 }));
+    if (succeeded7) score += 3;
+  }
+
+  // Gate H: opponent's own HP > 70% -- clean stop, skips the entire tail.
+  if (attackerHpPercent > 70) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+  }
+  // Gate I: opponent's OWN evasion stage back at neutral -- clean stop.
+  // AI_USER here, not AI_TARGET (doc §24.1 divergence 3): the operand flips
+  // because EvasionUp raises the opponent's own stat, not the target's.
+  if (input.attackerEvasionStage === DEFAULT_STAT_STAGE) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score });
+  }
+  // Gates J/K: either battler <40% HP skips DRAW SITE 8, deterministic -2.
+  if (attackerHpPercent < 40 || targetHpPercent < 40) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score - 2 });
+  }
+  // DRAW SITE 8: OPPOSITE polarity -- jump (roll<70) is the no-op; falling
+  // through (roll>=70) is what applies the -2 (same shape as AccuracyDown's
+  // own DRAW SITE 7).
+  const draw8 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw8`);
+  rng = draw8.after;
+  const succeeded8 = draw8.randomValue % 256 >= 70;
+  draws.push(Object.freeze({ ...draw8, kind: "evasion-up-roll-8" as const, succeeded: succeeded8 }));
+  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: succeeded8 ? score - 2 : score });
+}
+
 /** `AI_CheckViability` for one move slot (`:652-775` dispatch shell only). */
 export function runCheckViability(input: Readonly<{
   rng: BattleRngState;
@@ -2184,6 +2437,57 @@ export function runCheckViability(input: Readonly<{
       rng: reflect.rng,
       draws: reflect.draws,
       scoreDelta: reflect.scoreDelta,
+    });
+  }
+
+  if (
+    move.effect === "EFFECT_EVASION_UP"
+    || move.effect === "EFFECT_EVASION_UP_2"
+    || move.effect === "EFFECT_MINIMIZE"
+  ) {
+    // The eleventh CBM-blocked pair's own CV half (doc §24) -- EFFECT_MINIMIZE
+    // dispatches to the identical AI_CV_EvasionUp despite being
+    // blocked-on-opcodes for move execution itself (doc §24.7), unrelated to
+    // this AI-decision port.
+    const evasionUp = runCvEvasionUp({
+      rng: input.rng,
+      attackerHp: input.attacker.hp,
+      attackerMaxHp: input.attacker.maxHp,
+      attackerEvasionStage: input.attacker.evasionStage,
+      attackerIsRooted: input.attacker.isRooted ?? false,
+      targetHp: input.target.hp,
+      targetMaxHp: input.target.maxHp,
+      targetIsToxicPoisoned: input.target.isToxicPoisoned ?? false,
+      targetIsLeechSeeded: input.target.isLeechSeeded ?? false,
+      targetIsCursed: input.target.isCursed ?? false,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: evasionUp.rng,
+      draws: evasionUp.draws,
+      scoreDelta: evasionUp.scoreDelta,
+    });
+  }
+
+  if (move.effect === "EFFECT_EVASION_DOWN" || move.effect === "EFFECT_EVASION_DOWN_2") {
+    // The eleventh CBM-blocked pair's other CV half (doc §24).
+    const evasionDown = runCvEvasionDown({
+      rng: input.rng,
+      attackerHp: input.attacker.hp,
+      attackerMaxHp: input.attacker.maxHp,
+      targetEvasionStage: input.target.evasionStage,
+      targetHp: input.target.hp,
+      targetMaxHp: input.target.maxHp,
+      drawOrdinalStart: input.drawOrdinalStart,
+      reasonPrefix: input.reasonPrefix,
+    });
+    return Object.freeze({
+      kind: "scored",
+      rng: evasionDown.rng,
+      draws: evasionDown.draws,
+      scoreDelta: evasionDown.scoreDelta,
     });
   }
 

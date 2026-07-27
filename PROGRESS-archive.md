@@ -1,4 +1,22 @@
 ---
+## 486 — [SUPERVISOR SESSION START 2026-07-26 ~21:55] orient + animation fold
+
+- **State:** folded `animation-main` into master at orient (fast-forward to
+  `f422a97` — their baseline merge of master plus 2 Knock Off commits:
+  `96dfd06` partial seam wiring, `f958878` player OAM transfer fix). Union
+  verified green: **230 files / 3124 tests**, `npm run build` clean, both
+  oracle services fresh (`check-oracle-freshness.sh` PASS). The animation
+  supervisor session is LIVE concurrently (started 21:50); commits it lands
+  after `f422a97` fold next orient.
+- **Session plan (paired rounds):** main lane consumes the banked seam §9
+  prep (register the 3 ENDEAVOR opcodes, then wire window 3
+  `turn5-rockslide.json` attack branch per `docs/presentation-seam-scout.md`
+  §9.4); side lane prep-scouts §24 EvasionUp/EvasionDown ground truth (the
+  largest remaining CV handler, 8 draw sites). Then port §24, stage the
+  weather trio (§25, incl. the CBM weather-entry verification §5 flagged),
+  and continue down entry 485's Next list as rounds allow.
+
+---
 ## 485 — [SUPERVISOR WIND-DOWN 2026-07-26 ~21:20] session summary
 
 - **State:** tree committed and green at **230 files / 3123 tests**, build

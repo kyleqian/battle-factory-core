@@ -74,7 +74,19 @@
  * in this doc to date -- a single `if_side_affecting AI_USER,
  * SIDE_STATUS_*` bit test with zero stat-stage read, zero `get_ability`
  * call, converging with `factoryAiCheckViability.ts`'s `AI_CV_LightScreen`/
- * `AI_CV_Reflect` (doc §23).
+ * `AI_CV_Reflect` (doc §23); and `EFFECT_EVASION_UP(_2)`/`EFFECT_MINIMIZE`
+ * -> `AI_CBM_EvasionUp` (`:273-275`, `runCbmEvasionUp` below, doc §24.1),
+ * the eleventh CBM-blocked pair's own CBM half -- byte-for-byte the same
+ * bare 2-instruction MAX_STAT_STAGE-on-AI_USER's-own-stage shape as
+ * `AI_CBM_AttackUp` et al. with `STAT_EVASION` swapped in (`EFFECT_MINIMIZE`
+ * shares this single-stat handler, not `BulkUp`/`CosmicPower`/`CalmMind`'s
+ * dual-stat shape, since Minimize only ever raises evasion); and
+ * `EFFECT_EVASION_DOWN(_2)` -> `AI_CBM_EvasionDown` (`:306-312`,
+ * `runCbmEvasionDown` below, doc §24.1), the eleventh pair's other CBM
+ * half -- the same bare-MIN_STAT_STAGE-plus-shared-tail shape as
+ * `AI_CBM_DefenseDown`/`AI_CBM_SpDefDown`, converging with
+ * `factoryAiCheckViability.ts`'s `AI_CV_EvasionUp`/`AI_CV_EvasionDown`
+ * (doc §24).
  */
 import movesData from "../data/gen/moves.json" with { type: "json" };
 import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
@@ -202,6 +214,12 @@ export type FactoryAiCheckBadMoveTarget = Readonly<{
    * this file's test suite needs updating.
    */
   accStage?: number;
+  /**
+   * Current EVASION stat stage, 0..12 -- `AI_CBM_EvasionDown`'s MIN_STAT_STAGE
+   * gate (doc §24.1). Optional, defaulting to `DEFAULT_STAT_STAGE` (6) --
+   * same convention/rationale as `accStage` above.
+   */
+  evasionStage?: number;
 }>;
 
 /**
@@ -252,6 +270,12 @@ export type FactoryAiCheckBadMoveAttacker = Readonly<{
    * `false`, same convention as `lightScreenUp` above.
    */
   reflectUp?: boolean;
+  /**
+   * AI_USER's own EVASION stat stage, 0..12 -- `AI_CBM_EvasionUp`'s own
+   * MAX_STAT_STAGE gate (doc §24.1). Optional, same default/rationale as
+   * `speedStage`/`spAtkStage`/`spDefStage` above.
+   */
+  evasionStage?: number;
 }>;
 
 export type FactoryAiCheckBadMoveDraw = Readonly<{
@@ -636,6 +660,45 @@ function runCbmReflect(attackerReflectUp: boolean): number {
   return attackerReflectUp ? -8 : 0;
 }
 
+/**
+ * `AI_CBM_EvasionUp` (`data/battle_ai_scripts.s:273-275`, doc §24.1):
+ *
+ * ```
+ * AI_CBM_EvasionUp:
+ *     if_stat_level_equal AI_USER, STAT_EVASION, MAX_STAT_STAGE, Score_Minus10
+ *     end
+ * ```
+ *
+ * Byte-for-byte the same bare 2-instruction MAX_STAT_STAGE-on-AI_USER's-own
+ * -stage shape as `AI_CBM_AttackUp`/`AI_CBM_DefenseUp`/`AI_CBM_SpeedUp`/
+ * `AI_CBM_SpAtkUp` with `STAT_EVASION` swapped in -- zero `get_ability`
+ * calls, no shared tail. Dispatch: `EFFECT_EVASION_UP`/`EFFECT_EVASION_UP_2`
+ * (`:114,139`) AND `EFFECT_MINIMIZE` (`:163`) all converge here -- Minimize
+ * shares this single-stat shape (not `AI_CBM_BulkUp`/`CosmicPower`/
+ * `CalmMind`'s separate dual-stat pattern) because it only ever raises
+ * STAT_EVASION.
+ */
+function runCbmEvasionUp(attackerEvasionStage: number): number {
+  return attackerEvasionStage === MAX_STAT_STAGE ? -10 : 0;
+}
+
+/**
+ * `AI_CBM_EvasionDown` (`data/battle_ai_scripts.s:306-312`, doc §24.1) --
+ * the same bare MIN_STAT_STAGE-gate-plus-direct-goto-to-the-shared-tail
+ * shape `AI_CBM_DefenseDown`/`AI_CBM_SpDefDown` already established (no
+ * intervening own-ability short-circuit like `AttackDown`/`AccDown`'s Hyper
+ * Cutter/Keen Eye -- there is no dedicated evasion-immunity ability in
+ * Gen 3). Dispatch: `EFFECT_EVASION_DOWN`/`EFFECT_EVASION_DOWN_2` (`:121,146`).
+ */
+function runCbmEvasionDown(
+  target: FactoryAiCheckBadMoveTarget,
+  rng: BattleRngState,
+  ordinal: number,
+  reason: string,
+): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckBadMoveDraw[]; scoreDelta: number }> {
+  return runCbmStatDownViaSharedTail(target.evasionStage ?? DEFAULT_STAT_STAGE, target, rng, ordinal, reason);
+}
+
 export function typeMultiplierTenths(attackingType: string, defendingTypes: readonly [string, string]): number {
   const distinct = defendingTypes[0] === defendingTypes[1] ? [defendingTypes[0]] : defendingTypes;
   let mult = 10;
@@ -908,6 +971,35 @@ export function runCheckBadMovePreamble(input: Readonly<{
       rng,
       draws: Object.freeze(draws),
       scoreDelta: runCbmReflect(input.attacker.reflectUp ?? false),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_EVASION_UP(_2)/EFFECT_MINIMIZE ->
+  // AI_CBM_EvasionUp, the eleventh CBM-blocked pair's own CBM half (doc §24)
+  // -- reads AI_USER's own state, same shape as AttackUp/DefenseUp/etc.
+  if (
+    move.effect === "EFFECT_EVASION_UP"
+    || move.effect === "EFFECT_EVASION_UP_2"
+    || move.effect === "EFFECT_MINIMIZE"
+  ) {
+    return Object.freeze({
+      kind: "scored",
+      rng,
+      draws: Object.freeze(draws),
+      scoreDelta: runCbmEvasionUp(input.attacker.evasionStage ?? DEFAULT_STAT_STAGE),
+    });
+  }
+
+  // AI_CheckBadMove_CheckEffect: EFFECT_EVASION_DOWN(_2) -> AI_CBM_EvasionDown,
+  // the eleventh CBM-blocked pair's other CBM half (doc §24).
+  if (move.effect === "EFFECT_EVASION_DOWN" || move.effect === "EFFECT_EVASION_DOWN_2") {
+    const evasionDown = runCbmEvasionDown(target, rng, ordinal, `${input.reasonPrefix}-evasion-down`);
+    for (const draw of evasionDown.draws) draws.push(draw);
+    return Object.freeze({
+      kind: "scored",
+      rng: evasionDown.rng,
+      draws: Object.freeze(draws),
+      scoreDelta: evasionDown.scoreDelta,
     });
   }
 

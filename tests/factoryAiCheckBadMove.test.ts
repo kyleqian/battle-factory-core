@@ -1130,3 +1130,162 @@ describe("AI_CBM_LightScreen / AI_CBM_Reflect (docs/factory-ai-checkviability-gr
     expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
   });
 });
+
+// data/battle_ai_scripts.s:273-275, docs/factory-ai-checkviability-ground-truth.md
+// §24.1: the eleventh CBM-blocked pair's own CBM half -- byte-for-byte the
+// same bare 2-instruction MAX_STAT_STAGE-on-AI_USER's-own-stage shape as
+// AI_CBM_AttackUp/DefenseUp/SpeedUp/SpAtkUp with STAT_EVASION swapped in.
+describe("AI_CBM_EvasionUp (docs/factory-ai-checkviability-ground-truth.md §24.1)", () => {
+  const MOVE_DOUBLE_TEAM = 104; // EFFECT_EVASION_UP
+  const MOVE_MINIMIZE = 107; // EFFECT_MINIMIZE -- shares this same single-stat handler
+
+  // Single-ability (Sturdy) target, same rationale as the AttackUp/DefenseUp/
+  // BulkUp block's own SHUCKLE above -- isolates the zero-RNG gate from the
+  // universal preamble's own soundproof guess.
+  const SHUCKLE: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 213,
+    types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+    knownAbility: null,
+    realAbility: "ABILITY_STURDY",
+    speedStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+  });
+
+  function withEvasionAttacker(evasionStage: number): FactoryAiCheckBadMoveAttacker {
+    return Object.freeze({ atkStage: 6, defStage: 6, evasionStage });
+  }
+
+  it.each([
+    ["Double Team (EFFECT_EVASION_UP)", MOVE_DOUBLE_TEAM],
+    ["Minimize (EFFECT_MINIMIZE, shares this same handler per doc §24.1/§24.7)", MOVE_MINIMIZE],
+  ])("%s scores -10 with zero draws when AI_USER's own EVASION stage is already MAX_STAT_STAGE (12)", (_label, moveId) => {
+    const result = run(moveId, SHUCKLE, undefined, withEvasionAttacker(12));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it.each([11, 7, 6, 0])("scores 0 with zero draws when AI_USER's own EVASION stage is %i (not maxed)", (evasionStage) => {
+    const result = run(MOVE_DOUBLE_TEAM, SHUCKLE, undefined, withEvasionAttacker(evasionStage));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("omitted evasionStage defaults to DEFAULT_STAT_STAGE (6), not MAX_STAT_STAGE -- scores 0", () => {
+    const result = run(MOVE_DOUBLE_TEAM, SHUCKLE, undefined, Object.freeze({ atkStage: 6, defStage: 6 }));
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+
+  it("EFFECT_EVASION_UP_2 is a vestigial constant with zero real moves (doc §24.7) -- not independently testable through a real move ID, confirmed absent from the generated move table", () => {
+    expect([...MOVES_BY_ID.values()].some((m) => m.effect === "EFFECT_EVASION_UP_2")).toBe(false);
+  });
+});
+
+// data/battle_ai_scripts.s:306-312, docs/factory-ai-checkviability-ground-truth.md
+// §24.1: the eleventh CBM-blocked pair's other CBM half -- the same bare
+// MIN_STAT_STAGE-gate-plus-shared-tail shape AI_CBM_DefenseDown/SpDefDown
+// already established (no own-ability short-circuit like AttackDown/AccDown's
+// Hyper Cutter/Keen Eye -- no dedicated evasion-immunity ability in Gen 3).
+describe("AI_CBM_EvasionDown + CheckIfAbilityBlocksStatChange (docs/factory-ai-checkviability-ground-truth.md §24.1)", () => {
+  const MOVE_SWEET_SCENT = 230; // EFFECT_EVASION_DOWN
+
+  const SHUCKLE: FactoryAiCheckBadMoveTarget = Object.freeze({
+    species: 213,
+    types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+    knownAbility: null,
+    realAbility: "ABILITY_STURDY",
+    speedStage: 6,
+    atkStage: 6,
+    defStage: 6,
+    spDefStage: 6,
+    evasionStage: 6,
+  });
+
+  it("scores -10 with zero draws when the target's EVASION stage is already MIN_STAT_STAGE", () => {
+    const atMinEvasion: FactoryAiCheckBadMoveTarget = { ...SHUCKLE, evasionStage: 0 };
+    const result = run(MOVE_SWEET_SCENT, atMinEvasion);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("defaults an omitted evasionStage to DEFAULT_STAT_STAGE (6), not MIN_STAT_STAGE -- doesn't short-circuit", () => {
+    const { evasionStage: _omit, ...withoutEvasionStage } = SHUCKLE;
+    const result = run(MOVE_SWEET_SCENT, withoutEvasionStage as FactoryAiCheckBadMoveTarget);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+  });
+
+  it("an ambiguous two-ability target (neither ability is Clear Body nor White Smoke) draws exactly twice -- the universal preamble's own soundproof guess, plus the shared tail's own -- and scores 0", () => {
+    const ambiguous: FactoryAiCheckBadMoveTarget = {
+      species: 193,
+      types: ["TYPE_BUG", "TYPE_FLYING"],
+      knownAbility: null,
+      realAbility: "ABILITY_SPEED_BOOST",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      evasionStage: 6,
+    };
+    const result = run(MOVE_SWEET_SCENT, ambiguous);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: 0 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(2);
+    expect(result.draws.map((d) => d.reason)).toEqual([
+      "test-slot-soundproof",
+      "test-slot-evasion-down-shared-tail",
+    ]);
+  });
+
+  it("scores -10 when the shared tail's known ability is Clear Body, zero draws", () => {
+    const knownClearBody: FactoryAiCheckBadMoveTarget = {
+      species: 72, // SPECIES_TENTACOOL: Clear Body / Liquid Ooze
+      types: ["TYPE_WATER", "TYPE_POISON"],
+      knownAbility: "ABILITY_CLEAR_BODY",
+      realAbility: "ABILITY_CLEAR_BODY",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      evasionStage: 6,
+    };
+    const result = run(MOVE_SWEET_SCENT, knownClearBody);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("scores -10 with zero draws for a single-ability White Smoke target (shared tail's own free guess)", () => {
+    const whiteSmoke: FactoryAiCheckBadMoveTarget = {
+      species: 321, // SPECIES_TORKOAL: White Smoke is its only ability
+      types: ["TYPE_FIRE", "TYPE_FIRE"],
+      knownAbility: null,
+      realAbility: "ABILITY_WHITE_SMOKE",
+      speedStage: 6,
+      atkStage: 6,
+      defStage: 6,
+      spDefStage: 6,
+      evasionStage: 6,
+    };
+    const result = run(MOVE_SWEET_SCENT, whiteSmoke);
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result.draws).toHaveLength(0);
+  });
+
+  it("EFFECT_EVASION_DOWN_2 is a vestigial constant with zero real moves (doc §24.7) -- not independently testable through a real move ID, confirmed absent from the generated move table", () => {
+    expect([...MOVES_BY_ID.values()].some((m) => m.effect === "EFFECT_EVASION_DOWN_2")).toBe(false);
+  });
+
+  it("still barriers every other reachable CBM handler untouched by this narrowing (pass-through, EFFECT_HAZE)", () => {
+    const result = run(MOVE_HAZE, SHUCKLE);
+    expect(result).toMatchObject({
+      kind: "unsupported-branch",
+      barrier: "factory-ai-check-bad-move",
+      effect: "EFFECT_HAZE",
+    });
+  });
+});

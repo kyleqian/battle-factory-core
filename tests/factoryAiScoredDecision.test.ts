@@ -1851,3 +1851,204 @@ describe("AI_CV_LightScreen / AI_CV_Reflect mask-7 fixture reproduction (docs/fa
     expect(phaseDraws(reflectReach, "check-viability")).toHaveLength(phaseDraws(lightScreenReach, "check-viability").length);
   });
 });
+
+const MOVE_DOUBLE_TEAM_MASK7 = 104; // EFFECT_EVASION_UP
+
+// docs/factory-ai-checkviability-ground-truth.md §24.2/§24.3's three fixtures
+// (tools/battle-lab/mechanic-factory-ai-cv-evasionup-{fullhp-reach,
+// midhp-control,lowhp-reach}-off.json) -- the eleventh CBM-blocked pair's own
+// UP half, reproduced through the REAL mask-7 dispatcher end to end.
+// Opponent (AI_USER, under test) = Machamp (species 68, same stats as the
+// SpDefUp block's own target above -- here Machamp is the ATTACKER, not the
+// target, since Double Team is Machamp's own move), all 4 slots MOVE_DOUBLE_
+// TEAM; target (player) = Anorith (species 390, single ability Battle Armor
+// -- closes the universal CBM preamble's own get_ability confound). Because
+// Gate A's own 90% threshold and Gate H's own 70% threshold are disjoint
+// bands (doc §24.1/§24.2), three fixtures are needed (not two, unlike
+// AccuracyDown's own shared-threshold twin-site design): fullhp-reach isolates
+// DRAW SITE 1, midhp-control is a shared zero-draw control for BOTH sites,
+// lowhp-reach isolates DRAW SITE 8. Every fixture constructs Machamp's own
+// evasion stage at 7 (not 6) directly -- Double Team's own real turn-1 use
+// has already raised it by the time the phantom next-decision runs (doc
+// §24.1's own finding, same "construct the post-real-move state directly"
+// precedent the AttackUp block's own POST_SWORDS_DANCE_STAGES established).
+// Policy-own-draws model: fullhp-reach/lowhp-reach = 4 setup + 4 CV + 1 tie =
+// 9; midhp-control = 4 setup + 0 CV + 1 tie = 5 (doc §24.3's own live window
+// totals of 10/8/12 are a documented superset, the same relationship every
+// prior pair already established).
+describe("AI_CV_EvasionUp mask-7 fixture reproduction (docs/factory-ai-checkviability-ground-truth.md §24.2/§24.3)", () => {
+  const POST_DOUBLE_TEAM_STAGES = Object.freeze({ ...NEUTRAL_STAGES, evasion: 7 });
+
+  function machampAttacker(hp: number, maxHp = 165): FactoryAiScoredBattlerView {
+    return Object.freeze({
+      types: ["TYPE_FIGHTING", "TYPE_FIGHTING"] as const,
+      attack: 150, defense: 100, spAttack: 85, spDefense: 105, speed: 75, level: 50,
+      statStages: POST_DOUBLE_TEAM_STAGES,
+      isFirstTurn: 0,
+      hp, maxHp,
+    });
+  }
+  function anorithTarget(hp = 100, maxHp = 100): FactoryAiScoredTargetView {
+    return Object.freeze({
+      species: 390,
+      types: ["TYPE_ROCK", "TYPE_BUG"] as const,
+      attack: 115, defense: 70, spAttack: 60, spDefense: 70, speed: 95, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp, maxHp, ability: "ABILITY_BATTLE_ARMOR", knownAbility: null,
+    });
+  }
+  function evasionUpView(attacker: FactoryAiScoredBattlerView, target: FactoryAiScoredTargetView): FactoryAiScoredView {
+    return Object.freeze({
+      schema: "factory-ai-scored-view/v1",
+      mode: "factory-level-50-singles",
+      active: Object.freeze({ aiBattler: 1 as const, targetBattler: 0 as const }),
+      factory: Object.freeze({ levelMode: 0 as const, battleMode: 0 as const, factoryWinStreak: 28, trainerOpponentId: 222 }),
+      moves: [MOVE_DOUBLE_TEAM_MASK7, MOVE_DOUBLE_TEAM_MASK7, MOVE_DOUBLE_TEAM_MASK7, MOVE_DOUBLE_TEAM_MASK7] as const,
+      attacker,
+      target,
+    });
+  }
+  function phaseDraws(result: ReturnType<typeof chooseFactoryAiScoredDecision>, phase: "check-bad-move" | "try-to-faint" | "check-viability") {
+    return result.trace.draws.filter((d) => "phase" in d && d.phase === phase);
+  }
+
+  it("fullhp-reach fixture (Machamp 165/165 = 100%): Gate A true for all 4 identical slots -- exactly 4 check-viability draws (DRAW SITE 1), zero CBM/TryToFaint draws", () => {
+    const view = evasionUpView(machampAttacker(165), anorithTarget());
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 1, calls: 0 } });
+    expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+    expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+    const cvDraws = phaseDraws(result, "check-viability");
+    expect(cvDraws).toHaveLength(4);
+    expect(cvDraws.every((d) => "kind" in d && d.kind === "evasion-up-roll-1")).toBe(true);
+    expect(result.trace.draws).toHaveLength(4 /* setup */ + 4 /* CV roll x4 slots */ + 1 /* tie */);
+  });
+
+  it("midhp-control fixture (Machamp 125/165 = 75%, Dragon Rage's fixed 40 damage): strictly between both gates' own disjoint thresholds -- a shared deterministic zero-draw control for BOTH sites", () => {
+    const view = evasionUpView(machampAttacker(125), anorithTarget());
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 1, calls: 0 } });
+    expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+    expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+    expect(phaseDraws(result, "check-viability")).toHaveLength(0);
+    expect(result.trace.draws).toHaveLength(4 /* setup */ + 1 /* tie */);
+  });
+
+  it("lowhp-reach fixture (Machamp 115/165 = 69%, Seismic Toss's fixed level-50 damage): Gate H false, Gate I false (evasion already 7, not the neutral 6) -- exactly 4 check-viability draws (DRAW SITE 8)", () => {
+    const view = evasionUpView(machampAttacker(115), anorithTarget());
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 1, calls: 0 } });
+    expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+    expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+    const cvDraws = phaseDraws(result, "check-viability");
+    expect(cvDraws).toHaveLength(4);
+    expect(cvDraws.every((d) => "kind" in d && d.kind === "evasion-up-roll-8")).toBe(true);
+    expect(result.trace.draws).toHaveLength(4 /* setup */ + 4 /* CV roll x4 slots */ + 1 /* tie */);
+  });
+
+  it("wiring: the attacker's own maxed EVASION stage reaches the CBM handler through the real dispatcher (mask 1 isolates CheckBadMove: -10 on every slot vs the neutral-stage run; same entry-483/485 wiring-gap precedent -- AI_CV_EvasionUp reads the same stage under mask 7, so mask 1 is required to isolate CBM's own delta)", () => {
+    function mask1View(attacker: FactoryAiScoredBattlerView): FactoryAiScoredView {
+      const base = evasionUpView(attacker, anorithTarget());
+      return Object.freeze({ ...base, factory: Object.freeze({ ...base.factory, factoryWinStreak: 14 }) });
+    }
+    const neutral = chooseFactoryAiScoredDecision({
+      view: mask1View(machampAttacker(115)),
+      request: fourSlotRequest,
+      rng: { value: 1, calls: 0 },
+    });
+    const maxed = chooseFactoryAiScoredDecision({
+      view: mask1View(Object.freeze({
+        ...machampAttacker(115),
+        statStages: Object.freeze({ ...NEUTRAL_STAGES, evasion: MAX_STAT_STAGE }),
+      })),
+      request: fourSlotRequest,
+      rng: { value: 1, calls: 0 },
+    });
+    expect(maxed.trace.mask).toBe(1);
+    expect(maxed.trace.executedScoringScripts).toEqual(["check-bad-move"]);
+    expect(phaseDraws(maxed, "check-bad-move")).toHaveLength(0);
+    expect(maxed.trace.slotScores.map((s) => s.finalScore)).toEqual(
+      neutral.trace.slotScores.map((s) => s.finalScore - 10),
+    );
+  });
+});
+
+const MOVE_SWEET_SCENT_MASK7 = 230; // EFFECT_EVASION_DOWN
+
+// docs/factory-ai-checkviability-ground-truth.md §24.2/§24.3's twin fixtures
+// (tools/battle-lab/mechanic-factory-ai-cv-evasiondown-{lowhp-reach,
+// fullhp-control}-off.json) -- the eleventh CBM-blocked pair's own DOWN half,
+// confirmed byte-for-byte the same shape as DefenseDown/SpDefDown (doc
+// §24.1), reusing that exact fixture recipe verbatim: opponent (AI_USER) =
+// Anorith, all 4 slots MOVE_SWEET_SCENT; target (player) = Machamp, single
+// assignable ability Guts. Same live-verified HP endpoints as the
+// DefenseDown/SpDefDown/VitalThrow blocks above (22/120=18% seed 1,
+// 30/120=25% seed 99 for reach; 120/120=100% for control).
+describe("AI_CV_EvasionDown mask-7 fixture reproduction (docs/factory-ai-checkviability-ground-truth.md §24.2/§24.3)", () => {
+  function anorithAttacker(hp: number): FactoryAiScoredBattlerView {
+    return Object.freeze({
+      types: ["TYPE_ROCK", "TYPE_BUG"] as const,
+      attack: 115, defense: 70, spAttack: 60, spDefense: 70, speed: 95, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp, maxHp: 120,
+    });
+  }
+  function machampTarget(): FactoryAiScoredTargetView {
+    return Object.freeze({
+      species: 68,
+      types: ["TYPE_FIGHTING", "TYPE_FIGHTING"] as const,
+      attack: 150, defense: 100, spAttack: 85, spDefense: 105, speed: 75, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp: 165, maxHp: 165, ability: "ABILITY_GUTS", knownAbility: null,
+    });
+  }
+  function evasionDownView(attacker: FactoryAiScoredBattlerView): FactoryAiScoredView {
+    return Object.freeze({
+      schema: "factory-ai-scored-view/v1",
+      mode: "factory-level-50-singles",
+      active: Object.freeze({ aiBattler: 1 as const, targetBattler: 0 as const }),
+      factory: Object.freeze({ levelMode: 0 as const, battleMode: 0 as const, factoryWinStreak: 28, trainerOpponentId: 222 }),
+      moves: [MOVE_SWEET_SCENT_MASK7, MOVE_SWEET_SCENT_MASK7, MOVE_SWEET_SCENT_MASK7, MOVE_SWEET_SCENT_MASK7] as const,
+      attacker,
+      target: machampTarget(),
+    });
+  }
+  function phaseDraws(result: ReturnType<typeof chooseFactoryAiScoredDecision>, phase: "check-bad-move" | "try-to-faint" | "check-viability") {
+    return result.trace.draws.filter((d) => "phase" in d && d.phase === phase);
+  }
+  function assertPicksSweetScent(view: FactoryAiScoredView, result: ReturnType<typeof chooseFactoryAiScoredDecision>) {
+    expect(result.submission.decision).toMatchObject({ kind: "use-move" });
+    if (result.submission.decision.kind === "use-move") {
+      expect(view.moves[result.submission.decision.moveSlot]).toBe(MOVE_SWEET_SCENT_MASK7);
+    }
+  }
+
+  it("reach fixture, seed 1 (Anorith at 22/120 HP = 18%): Gate A true for all 4 identical Sweet Scent slots, exactly 4 check-viability draws, zero CBM/TryToFaint draws, picks Sweet Scent", () => {
+    const view = evasionDownView(anorithAttacker(22));
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 1, calls: 0 } });
+    expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+    expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+    const cvDraws = phaseDraws(result, "check-viability");
+    expect(cvDraws).toHaveLength(4);
+    expect(cvDraws.every((d) => "kind" in d && d.kind === "evasion-down-roll")).toBe(true);
+    assertPicksSweetScent(view, result);
+  });
+
+  it("reach fixture, seed 99 (Anorith at 30/120 HP = 25%): exactly 4 check-viability draws, picks Sweet Scent", () => {
+    const view = evasionDownView(anorithAttacker(30));
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 99, calls: 0 } });
+    const cvDraws = phaseDraws(result, "check-viability");
+    expect(cvDraws).toHaveLength(4);
+    expect(cvDraws.every((d) => "kind" in d && d.kind === "evasion-down-roll")).toBe(true);
+    assertPicksSweetScent(view, result);
+  });
+
+  it.each([1, 99])("control fixture (Anorith stays at full 120/120 HP -- Gate A false, Gate B true at neutral EVASION stage), seed %i: deterministic zero check-viability draws, picks Sweet Scent", (seed) => {
+    const view = evasionDownView(anorithAttacker(120));
+    const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+    expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+    expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+    expect(phaseDraws(result, "check-viability")).toHaveLength(0);
+    assertPicksSweetScent(view, result);
+  });
+});
