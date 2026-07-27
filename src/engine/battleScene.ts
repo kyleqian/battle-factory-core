@@ -540,6 +540,7 @@ import milkDrinkAsset from "../animation/assets/milk-drink.json" with { type: "j
 import supersonicAsset from "../animation/assets/supersonic.json" with { type: "json" };
 import waterGunAsset from "../animation/assets/water-gun.json" with { type: "json" };
 import acidAsset from "../animation/assets/acid.json" with { type: "json" };
+import hardenAsset from "../animation/assets/harden.json" with { type: "json" };
 import menuHealthboxPlayerAsset from "../assets/gen/menu-healthbox-player.json" with { type: "json" };
 import summaryBallAsset from "../assets/gen/summary-ball.json" with { type: "json" };
 import battleAnimBallOpenAsset from "../assets/gen/battle-anim-ball-open.json" with { type: "json" };
@@ -635,6 +636,7 @@ import {
   sceneOnWaterGunView,
   sceneOnAcidView,
   sceneOnEarthquakeView,
+  sceneOnHardenView,
   sceneOnFutureSightView,
   sceneOnConfusionView,
   sceneOnPsychicView,
@@ -936,6 +938,11 @@ const acidArt = acidAsset as {
   poisonBubble: { tileset: Tileset; palette: RgbColor[] };
   ekansBack: { tileset: Tileset; palette: RgbColor[] };
   ekansFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const hardenArt = hardenAsset as {
+  metal: { tileset: Tileset; tilemap: Tilemap; palette: RgbColor[] };
+  relicanthBack: { tileset: Tileset; palette: RgbColor[] };
+  relicanthFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const MURKROW_CORNER = { x: 144, y: 19 };
 const menuHealthboxPlayer = menuHealthboxPlayerAsset as SendOutHealthboxContentAsset;
@@ -2603,6 +2610,57 @@ function drawTileBg(fb: Uint8Array, tileset: Tileset, tilemap: Tilemap, subpalet
       const c = subpalettes[entry.palette]?.[idx];
       if (!c) continue;
       setPixel(fb, screenX, screenY, c);
+    }
+  }
+}
+
+function grayscalePalette(palette: readonly RgbColor[]): RgbColor[] {
+  return palette.map((color) => {
+    const gray5 = Math.floor(
+      ((color.r >> 3) + (color.g >> 3) + (color.b >> 3)) / 3,
+    );
+    const gray8 = (gray5 << 3) | (gray5 >> 2);
+    return { r: gray8, g: gray8, b: gray8 };
+  });
+}
+
+/** BG1 metal-shine layer, clipped by the invisible attacker OBJ-window copy. */
+function drawMetallicShineMasked(
+  fb: Uint8Array,
+  attacker: { tileset: Tileset; palette: RgbColor[] },
+  corner: Readonly<{ x: number; y: number }>,
+  scrollX: number,
+  scrollY: number,
+): void {
+  const metal = hardenArt.metal;
+  const mapWidth = metal.tilemap.width * 8;
+  const mapHeight = metal.tilemap.height * 8;
+  for (let sy = 0; sy < attacker.tileset.rows * 8; sy += 1) {
+    for (let sx = 0; sx < attacker.tileset.columns * 8; sx += 1) {
+      const attackerTile = attacker.tileset.tiles[
+        Math.floor(sy / 8) * attacker.tileset.columns + Math.floor(sx / 8)
+      ];
+      if (!attackerTile?.[(sy % 8) * 8 + (sx % 8)]) continue;
+      const x = corner.x + sx, y = corner.y + sy;
+      if (x < 0 || x >= 240 || y < 0 || y >= 160) continue;
+      const mx = ((x + scrollX) % mapWidth + mapWidth) % mapWidth;
+      const my = ((y + scrollY) % mapHeight + mapHeight) % mapHeight;
+      const entry = metal.tilemap.entries[
+        Math.floor(my / 8) * metal.tilemap.width + Math.floor(mx / 8)
+      ];
+      if (!entry) continue;
+      const tile = metal.tileset.tiles[entry.tile];
+      if (!tile) continue;
+      const tx = entry.hFlip ? 7 - (mx % 8) : mx % 8;
+      const ty = entry.vFlip ? 7 - (my % 8) : my % 8;
+      const index = tile[ty * 8 + tx]!;
+      if (index === 0) continue;
+      const shine = metal.palette[index];
+      if (!shine) continue;
+      const o = (y * 240 + x) * 4;
+      fb[o] = blendChannel(shine.r, fb[o]!, 8, 12);
+      fb[o + 1] = blendChannel(shine.g, fb[o + 1]!, 8, 12);
+      fb[o + 2] = blendChannel(shine.b, fb[o + 2]!, 8, 12);
     }
   }
 }
@@ -15450,6 +15508,113 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "DUSTOX used" : "Foe DUSTOX used",
       "SUPERSONIC!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "HARDEN") {
+    const view = sceneOnHardenView(state);
+    const displayed = sceneOnHardenView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "RELICANTH"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "RELICANTH"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged HARDEN pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSource = playerToOpponent
+      ? hardenArt.relicanthBack : hardenArt.relicanthFront;
+    const attackerSprite = playerToOpponent
+      ? attackerSource
+      : {
+          ...attackerSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: attackerSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffset(view.target.species)
+      : null;
+    drawSpriteSheet(
+      fb,
+      targetSprite.tileset,
+      targetSprite.palette,
+      view.target.geometry.spriteCorner.x + (targetIdle?.x2 ?? 0),
+      view.target.geometry.spriteCorner.y + (targetIdle?.y2 ?? 0),
+    );
+    drawSpriteSheet(
+      fb,
+      attackerSprite.tileset,
+      displayed.attackerGrayscale
+        ? grayscalePalette(attackerSprite.palette)
+        : attackerSprite.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    if (displayed.metalBgLoaded) {
+      drawMetallicShineMasked(
+        fb,
+        attackerSprite,
+        view.attacker.geometry.spriteCorner,
+        displayed.bg1X,
+        displayed.bg1Y,
+      );
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "RELICANTH";
+    const playerSpecies = playerToOpponent ? "RELICANTH" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "RELICANTH used" : "Foe RELICANTH used",
+      "HARDEN!",
       99,
     );
     return;

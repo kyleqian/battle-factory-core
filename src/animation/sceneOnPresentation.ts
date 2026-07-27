@@ -9,6 +9,10 @@ import {
   type FirePunchResolutionState,
 } from "./firePunch.ts";
 import {
+  metallicShineAtAge,
+  type MetallicShineState,
+} from "./metallicShine.ts";
+import {
   FAINT_ATTACK_ANIMATION_PROFILE,
   faintAttackAttackerEva,
   faintAttackAttackerOffset,
@@ -270,6 +274,7 @@ export interface SceneOnPresentationBattler {
     | "HORSEA"
     | "EKANS"
     | "SKIPLOOM"
+    | "RELICANTH"
     | "SHUPPET"
     | "PLUSLE";
   readonly geometry: SceneOnBattlerGeometry;
@@ -721,6 +726,15 @@ export interface SceneOnEarthquakeConfig {
   readonly initialBattlerX2: Readonly<{ player: number; opponent: number }>;
 }
 
+export interface SceneOnHardenConfig {
+  readonly move: "HARDEN";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source battler sprite `x/y`, used to initialize BG1_X/BG1_Y. */
+  readonly attackerSpriteCenter: Readonly<{ x: number; y: number }>;
+}
+
 export interface SceneOnFutureSightConfig {
   readonly move: "FUTURE_SIGHT";
   readonly attacker: SceneOnPresentationBattler;
@@ -781,6 +795,7 @@ export type SceneOnMoveConfig =
   | SceneOnWaterGunConfig
   | SceneOnAcidConfig
   | SceneOnEarthquakeConfig
+  | SceneOnHardenConfig
   | SceneOnFutureSightConfig
   | SceneOnConfusionConfig
   | SceneOnPsychicConfig
@@ -824,6 +839,12 @@ export interface SceneOnEarthquakeView extends EarthquakeAnimationState {
   readonly target: SceneOnPresentationBattler;
   readonly playerBattlerX2: number;
   readonly opponentBattlerX2: number;
+}
+
+export interface SceneOnHardenView extends MetallicShineState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
 }
 
 export interface SceneOnFirePunchView {
@@ -1752,6 +1773,26 @@ export function sceneOnEarthquakeView(
     opponentBattlerX2: beforeFirstShakeWrite
       ? state.config.initialBattlerX2.opponent
       : animation.shake.battlerX2,
+  };
+}
+
+/** `age=0` is the MetallicShine initializer's first displayed frame. */
+export function sceneOnHardenView(
+  state: SceneOnMovePresentationState,
+): SceneOnHardenView {
+  if (state.config.move !== "HARDEN") {
+    throw new Error(`expected HARDEN presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...metallicShineAtAge(
+      state.age,
+      state.config.attackerSpriteCenter.x,
+      state.config.attackerSpriteCenter.y,
+      false,
+    ),
   };
 }
 
