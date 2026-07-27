@@ -8,7 +8,7 @@
 import { readFileSync } from "node:fs";
 import {
   createSceneOnMovePresentation,
-} from "../../../src/engine/sceneOnPresentation.ts";
+} from "../../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render } from "../../../src/engine/core.ts";
 import { getMonGender } from "../../../src/engine/monGender.ts";
 

@@ -5,7 +5,7 @@ import { readFileSync } from "node:fs";
 import { join, resolve, dirname } from "node:path";
 import {
   createSceneOnMovePresentation,
-} from "../../../src/engine/sceneOnPresentation.ts";
+} from "../../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../../src/engine/core.ts";
 
 const root = resolve(dirname(new URL(import.meta.url).pathname), "../../..");

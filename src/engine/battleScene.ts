@@ -502,14 +502,14 @@ import {
 } from "./battleMenu.ts";
 import { buildFightMoveset, drawFightSubmenuText } from "./fightSubmenuText.ts";
 import { rentalMoveset, type ActiveMonMoveset } from "./battleSetup.ts";
-import { turn6FeatherSprites, turn7FeatherSprites, turn8FeatherSprites, compareFeatherDrawOrder, type FeatherRenderSprite } from "./featherDance.ts";
+import { turn6FeatherSprites, turn7FeatherSprites, turn8FeatherSprites, compareFeatherDrawOrder, type FeatherRenderSprite } from "../animation/featherDance.ts";
 import {
   dragonBreathEmbersInFrontOfAttacker,
   dragonBreathFireSprites,
   DRAGON_BREATH_FRAMEBUFFER_OAM_AGE_LAG,
   DRAGON_BREATH_FRAMEBUFFER_PALETTE_AGE_LAG,
-} from "./dragonBreath.ts";
-import { flamethrowerDisplayedBattlerOffsetsAtAge } from "./flamethrower.ts";
+} from "../animation/dragonBreath.ts";
+import { flamethrowerDisplayedBattlerOffsetsAtAge } from "../animation/flamethrower.ts";
 import {
   dragonRageSchedule,
   orderFirePlumesForDraw,
@@ -517,7 +517,7 @@ import {
   DRAGON_RAGE_FRAMEBUFFER_SLIDE_AGE_LAG,
   DRAGON_RAGE_FRAMEBUFFER_FIRE_SPIT_AGE_LAG,
   DRAGON_RAGE_FRAMEBUFFER_FIRE_PLUME_AGE_LAG,
-} from "./dragonRage.ts";
+} from "../animation/dragonRage.ts";
 
 import battleAnimRocksAsset from "../assets/gen/battle-anim-rocks.json" with { type: "json" };
 import battleAnimMudSandAsset from "../assets/gen/battle-anim-mud-sand.json" with { type: "json" };
@@ -624,20 +624,20 @@ import {
   sceneOnConfusionView,
   sceneOnPsychicView,
   type SceneOnMovePresentationState,
-} from "./sceneOnPresentation.ts";
+} from "../animation/sceneOnPresentation.ts";
 import {
   extremeSpeedBackgroundVariant,
   extremeSpeedImpactAtAge,
-} from "./extremeSpeed.ts";
-import { futureSightBgPaletteRowAtAge } from "./futureSight.ts";
-import { confusionBgPaletteRowAtAge, CONFUSION_WINDOW2_START_AGE, confusionTargetEffectAtAge } from "./confusion.ts";
-import { psychicBgPaletteRowAtAge, PSYCHIC_WINDOW2_START_AGE, psychicTargetEffectAtAge, PSYCHIC_BLEND_TINT_COLOR } from "./psychic.ts";
+} from "../animation/extremeSpeed.ts";
+import { futureSightBgPaletteRowAtAge } from "../animation/futureSight.ts";
+import { confusionBgPaletteRowAtAge, CONFUSION_WINDOW2_START_AGE, confusionTargetEffectAtAge } from "../animation/confusion.ts";
+import { psychicBgPaletteRowAtAge, PSYCHIC_WINDOW2_START_AGE, psychicTargetEffectAtAge, PSYCHIC_BLEND_TINT_COLOR } from "../animation/psychic.ts";
 import {
   SHADOW_PUNCH_ATTACKER_FRAMEBUFFER_LAG,
   SHADOW_PUNCH_TRACE_ALPHA,
   SHADOW_PUNCH_TRACE_BLEND_COEFF,
-} from "./shadowPunch.ts";
-import { speciesFrontIdleRestOffset } from "./speciesIdleAnim.ts";
+} from "../animation/shadowPunch.ts";
+import { speciesFrontIdleRestOffset } from "../animation/speciesIdleAnim.ts";
 import {
   SITRUS_ITEM_HEAL_TEXT_FIRST_AGE,
   SITRUS_ITEM_TEXT_CLEAR_AGE,
@@ -647,11 +647,11 @@ import {
   sitrusRotationAtAge,
   sitrusStarPlacementAtAge,
   sitrusTintCoeffAtAge,
-} from "./heldItemHeal.ts";
+} from "../animation/heldItemHeal.ts";
 import {
   aerialAceSliceBase,
   aerialAceTargetSpriteXAtAge,
-} from "./aerialAce.ts";
+} from "../animation/aerialAce.ts";
 import {
   FIRE_PUNCH_REDUCER_EPOCH_AGE,
   TURN17_FIRE_PUNCH_FIRST_ANIMATION_OWNED_AGE,
@@ -664,7 +664,7 @@ import {
   faintAttackResolutionTiming,
   faintAttackTargetShakeX2,
   type FaintAttackResolutionHp,
-} from "./faintAttack.ts";
+} from "../animation/faintAttack.ts";
 import {
   FIRE_PUNCH_BURN_MESSAGE_AGE,
   FIRE_PUNCH_BURN_MESSAGE_CLEAR_AGE,
@@ -684,7 +684,7 @@ import {
   firePunchResolutionState,
   firePunchTargetBlendCoeff,
   firePunchTurn17MenuBounceTick,
-} from "./firePunch.ts";
+} from "../animation/firePunch.ts";
 import battle1TurnRamDumpAsset from "../data/gen/battle1-turn1-ram-dump.json" with { type: "json" };
 import battle1Turn2RamDumpAsset from "../data/gen/battle1-turn2-ram-dump.json" with { type: "json" };
 import battle1GrovyleFaintRamDumpAsset from "../data/gen/battle1-grovyle-faint-ram-dump.json" with { type: "json" };
@@ -8609,7 +8609,7 @@ export function turn6FeatherDanceTextVisibleChars(t: number, pressTick: number):
  */
 /**
  * S7 slice N-3: the 8 `gFallingFeatherSpriteTemplate` sprites, RAM-table
- * driven (`turn6FeatherSprites`, `src/engine/featherDance.ts`'s own module
+ * driven (`turn6FeatherSprites`, `src/animation/featherDance.ts`'s own module
  * doc explains why a table instead of a from-scratch port). Drawn via the
  * shared generic affine blit (`drawSpriteSheetAffineRotate`, `doubleSizeBox:
  * false` - ISSUES #30 class (b): real `gFallingFeatherSpriteTemplate` OAM
@@ -8645,7 +8645,7 @@ function drawFeatherSpriteList(
   }
 }
 
-/** `sprite.oam.priority` (`GetBattlerSpriteBGPriority(battler)+1` while `unk2` is in [64,191], base otherwise, `src/engine/featherDance.ts`) - Onix's own on-field sprite sits at the SAME base priority; empirically bisected this session (z-order scratch compares against the oracle) that the +1 ("far side of the flap") group draws BEHIND Onix while the base-priority group draws IN FRONT, matching a real depth toggle as each feather swings past the target. */
+/** `sprite.oam.priority` (`GetBattlerSpriteBGPriority(battler)+1` while `unk2` is in [64,191], base otherwise, `src/animation/featherDance.ts`) - Onix's own on-field sprite sits at the SAME base priority; empirically bisected this session (z-order scratch compares against the oracle) that the +1 ("far side of the flap") group draws BEHIND Onix while the base-priority group draws IN FRONT, matching a real depth toggle as each feather swings past the target. */
 const FEATHER_BASE_PRIORITY_CUTOFF = 3;
 
 /**
@@ -13774,7 +13774,7 @@ function drawTurn16PostSwitchField(
   faintAttackTargetHp: FaintAttackResolutionHp = { startHp: 138, endHp: 79 },
   explicitOpponent: { hp: number; status: "none" | "burn" } | null = null,
   firePunchEpochAge: number = TURN16_FIRE_PUNCH_FIRST_OWNED_AGE,
-  firePunchProfile: import("./firePunch.ts").FirePunchResolutionProfile | null = null,
+  firePunchProfile: import("../animation/firePunch.ts").FirePunchResolutionProfile | null = null,
 ): void {
   const releaseTick = partySendOutReleaseLogicalTick(partyElapsed);
   const bounce = menuIdleBounce(bounceTick);

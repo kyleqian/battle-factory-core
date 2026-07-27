@@ -13,7 +13,7 @@ import {
   createSceneOnMovePresentation,
   ONIX_TO_GROVYLE_DOUBLE_TEAM_PROFILE,
   type SceneOnDoubleTeamConfig,
-} from "../../src/engine/sceneOnPresentation.ts";
+} from "../../src/animation/sceneOnPresentation.ts";
 
 interface PortableBattler {
   readonly species: "ONIX" | "GROVYLE";

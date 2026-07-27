@@ -11,8 +11,8 @@
 import { readFileSync } from "node:fs";
 import battleBackSprites from "../../../src/assets/gen/battle-back-sprites.json" with { type: "json" };
 import battleOpponentFrontSprites from "../../../src/assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
-import { futureSightAttackerEffectAtAge } from "../../../src/engine/futureSight.ts";
-import { confusionTargetEffectAtAge } from "../../../src/engine/confusion.ts";
+import { futureSightAttackerEffectAtAge } from "../../../src/animation/futureSight.ts";
+import { confusionTargetEffectAtAge } from "../../../src/animation/confusion.ts";
 
 const move = process.argv[2]; // FUTURE_SIGHT | CONFUSION
 const rgbDir = process.argv[3];

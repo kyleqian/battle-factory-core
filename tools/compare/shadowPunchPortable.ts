@@ -6,7 +6,7 @@ import {
   createSceneOnMovePresentation,
   sceneOnShadowPunchView,
   type SceneOnPresentationBattler,
-} from "../../src/engine/sceneOnPresentation.ts";
+} from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 
 interface Fixture {

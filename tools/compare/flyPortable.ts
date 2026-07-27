@@ -13,7 +13,7 @@ import {
   PLAYER_MURKROW_TO_OPPONENT_ONIX_FLY_PRESENTATION,
   type SceneOnFaintAttackFieldProfile,
   type SceneOnFlyConfig,
-} from "../../src/engine/sceneOnPresentation.ts";
+} from "../../src/animation/sceneOnPresentation.ts";
 
 interface Fixture {
   readonly scenario: string;

@@ -13,7 +13,7 @@ import { readFileSync } from "node:fs";
 import {
   sceneOnConfusionView,
   type SceneOnPresentationBattler,
-} from "../../../src/engine/sceneOnPresentation.ts";
+} from "../../../src/animation/sceneOnPresentation.ts";
 
 const path = process.argv[2];
 if (!path) throw new Error("usage: confusion-boundary-instrument.ts <probe-output.json>");

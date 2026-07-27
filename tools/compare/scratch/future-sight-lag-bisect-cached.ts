@@ -2,14 +2,14 @@
 // re-check the KADABRA attacker-box residual against the CURRENT
 // sceneOnFutureSightView (whatever (scaleLag, tintLag) is hardcoded there
 // right now), without re-invoking the oracle. Edit the two lag constants in
-// src/engine/sceneOnPresentation.ts between runs to bisect - this script
+// src/animation/sceneOnPresentation.ts between runs to bisect - this script
 // just makes each recheck ~1s instead of ~7s (no emulator respawn).
 import { readFileSync } from "node:fs";
 import { join, resolve, dirname } from "node:path";
 import {
   createSceneOnMovePresentation,
   type SceneOnPresentationBattler,
-} from "../../../src/engine/sceneOnPresentation.ts";
+} from "../../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../../src/engine/core.ts";
 import { getMonGender } from "../../../src/engine/monGender.ts";
 

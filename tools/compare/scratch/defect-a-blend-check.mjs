@@ -24,7 +24,7 @@ import {
   futureSightBgPaletteRowAtAge,
   futureSightBgBldyAtAge,
   futureSightBgIsPsychic,
-} from "../../../src/engine/futureSight.ts";
+} from "../../../src/animation/futureSight.ts";
 
 const rgbDir = process.argv[2];
 const tick = Number(process.argv[3]);

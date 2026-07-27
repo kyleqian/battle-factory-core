@@ -8,7 +8,7 @@ import {
   sceneOnThunderPunchView,
   type SceneOnFaintAttackFieldProfile,
   type SceneOnPresentationBattler,
-} from "../../src/engine/sceneOnPresentation.ts";
+} from "../../src/animation/sceneOnPresentation.ts";
 
 interface Fixture {
   readonly scenario: string;

@@ -33,7 +33,7 @@ import { readFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { renderAppTrace } from "../compare/appTrace.ts";
 import { runOracleTrace, type Trace } from "../compare/oracleClient.ts";
-import { compareFeatherDrawOrder, turn6FeatherSprites } from "../../src/engine/featherDance.ts";
+import { compareFeatherDrawOrder, turn6FeatherSprites } from "../../src/animation/featherDance.ts";
 import { patchFullLayer, uniformPolicy } from "./render-feather-halftexel-candidates.ts";
 import featherPaletteAsset from "../../src/assets/gen/battle-anim-white-feather.json" with { type: "json" };
 

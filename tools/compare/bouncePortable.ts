@@ -13,7 +13,7 @@ import {
   SPOINK_TO_ONIX_BOUNCE_PRESENTATION,
   type SceneOnBounceConfig,
   type SceneOnFaintAttackFieldProfile,
-} from "../../src/engine/sceneOnPresentation.ts";
+} from "../../src/animation/sceneOnPresentation.ts";
 
 interface Fixture {
   readonly scenario: string;

@@ -9,11 +9,11 @@ import { dirname, join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
-import { FAINT_ATTACK_ANIMATION_PROFILE } from "../../src/engine/faintAttack.ts";
+import { FAINT_ATTACK_ANIMATION_PROFILE } from "../../src/animation/faintAttack.ts";
 import {
   createSceneOnMovePresentation,
   type SceneOnFaintAttackConfig,
-} from "../../src/engine/sceneOnPresentation.ts";
+} from "../../src/animation/sceneOnPresentation.ts";
 
 interface PortableFixture {
   readonly probe: string;

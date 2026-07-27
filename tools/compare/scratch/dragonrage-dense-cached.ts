@@ -16,7 +16,7 @@ function oracleRgbAt(frame: number): Buffer {
   return readFileSync(join(scratch, "rgb", `${String(frame).padStart(5, "0")}.rgb`));
 }
 
-const { createSceneOnMovePresentation } = await import("../../../src/engine/sceneOnPresentation.ts");
+const { createSceneOnMovePresentation } = await import("../../../src/animation/sceneOnPresentation.ts");
 const stage = createSceneOnMovePresentation({
   move: "DRAGON_RAGE",
   attacker: fixture.attacker,

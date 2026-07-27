@@ -13,7 +13,7 @@ import { dirname, join, resolve } from "node:path";
 import {
   createSceneOnMovePresentation,
   sceneOnDragonRageView,
-} from "../../../src/engine/sceneOnPresentation.ts";
+} from "../../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../../src/engine/core.ts";
 
 const root = resolve(dirname(new URL(import.meta.url).pathname), "../../..");

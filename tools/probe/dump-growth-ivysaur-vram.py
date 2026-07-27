@@ -15,7 +15,7 @@ ONIX's `RAPID_H_HOPS`); VRAM tile bytes and the 16-color OBJ palette
 to `src/assets/gen/battle-back-sprites.json`/`battle-opponent-front-
 sprites.json`'s own IVYSAUR entries at every probed tick, including window
 ticks - ruling out an extraction/decode bug too. The actual cause (see
-`sceneOnGrowthView`'s own doc, `src/engine/sceneOnPresentation.ts`) was a
+`sceneOnGrowthView`'s own doc, `src/animation/sceneOnPresentation.ts`) was a
 captured-framebuffer display lag relative to the live OAM matrix write, not
 anything this probe's own instruments (VRAM/palette/x2/y2) could see -
 those are all correct at every tick; the mismatch is a rendering-pipeline

@@ -13,7 +13,7 @@ import {
   createSceneOnMovePresentation,
   type SceneOnFirePunchConfig,
   type SceneOnFaintAttackFieldProfile,
-} from "../../src/engine/sceneOnPresentation.ts";
+} from "../../src/animation/sceneOnPresentation.ts";
 
 interface PortableFixture {
   readonly move?: "FIRE_PUNCH" | "ICE_PUNCH";

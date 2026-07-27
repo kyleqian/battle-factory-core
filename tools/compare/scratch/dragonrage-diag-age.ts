@@ -2,7 +2,7 @@
 // (produced by dragonrage-lag-bisect.ts or dragonrage-dense-cached.ts's own
 // oracle run) - usage: dragonrage-diag-age.ts <age> <scratchDir>.
 import { readFileSync } from "node:fs";
-import { createSceneOnMovePresentation } from "../../../src/engine/sceneOnPresentation.ts";
+import { createSceneOnMovePresentation } from "../../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render } from "../../../src/engine/core.ts";
 
 const age = Number(process.argv[2] ?? 80);

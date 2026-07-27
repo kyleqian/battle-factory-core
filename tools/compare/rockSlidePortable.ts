@@ -13,7 +13,7 @@ import {
   createSceneOnMovePresentation,
   GROVYLE_TO_ONIX_ROCK_SLIDE_PROFILE,
   type SceneOnRockSlideConfig,
-} from "../../src/engine/sceneOnPresentation.ts";
+} from "../../src/animation/sceneOnPresentation.ts";
 
 interface PortableBattler {
   readonly species: "ONIX" | "GROVYLE";

@@ -6,8 +6,8 @@ import {
   createSceneOnMovePresentation,
   sceneOnGrowthView,
   type SceneOnPresentationBattler,
-} from "../../src/engine/sceneOnPresentation.ts";
-import { growthAnimationAtAge } from "../../src/engine/growth.ts";
+} from "../../src/animation/sceneOnPresentation.ts";
+import { growthAnimationAtAge } from "../../src/animation/growth.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 import { getMonGender } from "../../src/engine/monGender.ts";
 

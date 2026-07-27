@@ -13,7 +13,7 @@ import {
   PIDGEOTTO_TO_ONIX_AERIAL_ACE_PRESENTATION,
   PLAYER_PIDGEOTTO_TO_OPPONENT_ONIX_AERIAL_ACE_PRESENTATION,
   type SceneOnFaintAttackFieldProfile,
-} from "../../src/engine/sceneOnPresentation.ts";
+} from "../../src/animation/sceneOnPresentation.ts";
 
 interface Fixture {
   readonly scenario: string;

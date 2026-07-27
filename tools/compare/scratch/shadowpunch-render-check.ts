@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { PNG } from "pngjs";
-import { createSceneOnMovePresentation } from "../../../src/engine/sceneOnPresentation.ts";
+import { createSceneOnMovePresentation } from "../../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render } from "../../../src/engine/core.ts";
 
 const fixture = JSON.parse(readFileSync(process.argv[2]!, "utf8"));

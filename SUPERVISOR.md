@@ -179,7 +179,10 @@ What makes the worktree lanes safe:
 - **Shared docs are yours on both worktree lanes.** Their workers are
   contract-bound not to edit `PROGRESS.md`/`ISSUES.md` (two branches rewriting
   the same ledger top entry is a guaranteed conflict). The animation worker
-  does own `ANIMATION_PROGRESS.md` and `ANIMATION_COVERAGE.json`.
+  does own `ANIMATION_PROGRESS.md`, `ANIMATION_COVERAGE.json`, and (since
+  2026-07-26, PROGRESS entry 480) the `src/animation/`+`tests/animation/`
+  directories — `tests/animation/animationBoundaryRatchet.test.ts` pins the
+  engine/animation import boundary.
 - **Verify in the worktree, then merge.** Run the step's acceptance checks
   inside the worktree (`git -C .worktrees/<id> log`, run tests there), then
   from the main tree: `git merge worker/<id>`, re-run `npm test` and

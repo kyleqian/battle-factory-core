@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import {
   createSceneOnMovePresentation,
   sceneOnShadowPunchView,
-} from "../../../src/engine/sceneOnPresentation.ts";
+} from "../../../src/animation/sceneOnPresentation.ts";
 
 const fixture = JSON.parse(readFileSync("tools/compare/fixtures/shadow-punch-player-haunter-opponent-onix.json", "utf8"));
 const stage = createSceneOnMovePresentation({

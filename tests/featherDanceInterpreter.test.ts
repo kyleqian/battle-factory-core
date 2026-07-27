@@ -3,14 +3,14 @@ import {
   turn6FeatherSprites,
   turn7FeatherSprites,
   turn8FeatherSprites,
-} from "../src/engine/featherDance.ts";
+} from "../src/animation/featherDance.ts";
 import turn6FeatherProbe from "../src/data/gen/turn6-feather-sprites-probe.json" with { type: "json" };
 import turn7FeatherProbe from "../src/data/gen/turn7-feather-sprites-probe.json" with { type: "json" };
 import turn8FeatherProbe from "../src/data/gen/turn8-feather-sprites-probe.json" with { type: "json" };
 
 // These three RAM-probe JSONs (twice-run byte-identical, i.e. real hardware
 // state) are the falsification target for ANIMATION_PROGRESS.md's 2026-07-24
-// anim-script interpreter spike: `src/engine/featherDance.ts` no longer
+// anim-script interpreter spike: `src/animation/featherDance.ts` no longer
 // reads them in production (ISSUES #40 retired) - they're kept here purely
 // as dev-time test evidence that the ported `AnimFallingFeather`/`_Step`
 // callback, driven by the anim-script interpreter's own spawn schedule,

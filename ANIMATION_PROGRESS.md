@@ -6,6 +6,15 @@ in `battle-animation-components.json`. Evidence, move acceptance, and
 non-exclusive component tracks live in `ANIMATION_COVERAGE.json`. Run
 `npm run animation:coverage` for the working view.
 
+> **Layout (since 2026-07-26, PROGRESS entry 480):** animation-lane modules
+> live in `src/animation/` and their tests in `tests/animation/` — no longer
+> mixed into `src/engine/`. `tests/animation/animationBoundaryRatchet.test.ts`
+> pins the import boundary (animation→engine: `battleMenu`/`bg`/`rng` only;
+> engine→animation: `battleScene.ts`+`core.ts` only; kernel/AI imports
+> forbidden). Comparators stay in `tools/compare/`. Path citations in this
+> file and the coverage JSON are updated; `ANIMATION_PROGRESS-archive.md`
+> keeps historical `src/engine/` paths as written.
+
 ## Priority and acceptance
 
 1. Level 50 Factory: all **276** reachable, executable moves (`MOVE_NONE`
@@ -52,7 +61,7 @@ remainder.
 
 **Window 2's splice (frame147/176, and PSYCHIC's frame174) tried and REFUTED as one shared mechanism.** The natural unification hypothesis: drop the separate age-1 `targetActive` read, use the same age-2 read as the magnitude for both (no "genuine intermediate" — `scaleMonAndRestoreAtAge` already returns `{active, xScale, yScale}` as one unit). Tested directly against the dense comparator: frame147 unchanged (1460px, still the whole target silhouette), frame176 **regressed** 33px → 881px — reproducing almost exactly the regression the original rung-13 session already found trying the mirror-image fix ("forcing xScale to neutral whenever [the less-lagged read] is inactive" also grew 176's residual to 881px). The age-1-leads-age-2 splice is empirically correct for nearly the entire window-2 tail (RAM-confirmed via the OAM-scanline probe); frame147/176 are the two ticks where that edge itself is off by one, not evidence the splice is wrong in general. Per this lane's own no-per-tick-patch rule: **refuted, banked, not special-cased.** Reverted to the proven splice.
 
-**Coverage.** `MOVE_CONFUSION`: stays `partial`, 137/140 → **138/140** (`confusionPortable.ts`). `MOVE_PSYCHIC`: stays `partial`, 137/140 → **138/140** (`psychicPortable.ts`), mirrored fix (not independently re-probed — the family's byte-identical script/argv already established every relative age transfers unchanged). New Tier-1 tests (`tests/confusion.test.ts`, `tests/psychic.test.ts`) pin both display-formula fixes against literal RAM-probed oracle-tick values. Regression gates green, reproduced **once each** (this session's time cap did not allow the mandated second repro — flagged honestly, not silently skipped): `futureSightPortable.ts` 114/114, `growthPortable.ts` 63/63 both orientations, `bindPortable.ts` 45/45 both orientations.
+**Coverage.** `MOVE_CONFUSION`: stays `partial`, 137/140 → **138/140** (`confusionPortable.ts`). `MOVE_PSYCHIC`: stays `partial`, 137/140 → **138/140** (`psychicPortable.ts`), mirrored fix (not independently re-probed — the family's byte-identical script/argv already established every relative age transfers unchanged). New Tier-1 tests (`tests/animation/confusion.test.ts`, `tests/animation/psychic.test.ts`) pin both display-formula fixes against literal RAM-probed oracle-tick values. Regression gates green, reproduced **once each** (this session's time cap did not allow the mandated second repro — flagged honestly, not silently skipped): `futureSightPortable.ts` 114/114, `growthPortable.ts` 63/63 both orientations, `bindPortable.ts` 45/45 both orientations.
 
 **Evidence.** `npm test` 2709/2709. `npm run build` green.
 
@@ -68,7 +77,7 @@ remainder.
 
 **RAM-probed (rung 2):** new fixture `tools/battle-lab/mechanic-psychic-kadabra-onix.json` (same KADABRA/ONIX pair, zero new sprite extraction), probed via the already-committed `tools/probe/dump-future-sight-psychicbg.py` (no new probe script), oracle ticks 70-260. This move's own `fadetobg BG_PSYCHIC` creation tick (age 0) lands at oracle tick 79 — 2 ticks earlier than CONFUSION/FUTURE_SIGHT's own tick 81 (shorter "PSYCHIC!" message text), a difference that lands entirely in the fixture's own age-0 anchor. Every RELATIVE age matched CONFUSION's own already-coded constants exactly: window 1 (attacker shake+blend, task `data[5]=767=RGB(31,23,0)` packed BGR555 confirming the real blend task) creates at age 37; window 2 (target shake+scale, task data reads `-6,-6,duration=15` directly, RAM matrix `250`/`244` at ticks 144/145) creates at age 65; fade 2 starts at age 101 with the identical 16/20/36 ramp/hold/ramp shape; the BG-palette-2 rotation pause lands at the same breakpoint age 97.
 
-**Port (rung 3):** `src/engine/psychic.ts` reuses `blendColorCycleObjYAtAge`/`scaleMonAndRestoreAtAge`/`shakeMonOffsetAtTick`/`shakeMon2OffsetAtTick`/`psychicBackground.ts` verbatim — zero new mechanism code. Tier-1-pinned (`tests/psychic.test.ts`, 13/13, every constant checked against the probe output including the two directly-probed matrix values 250/244). Wired `sceneOnPsychicView` + `SceneOnPsychicConfig`/`View` into `sceneOnPresentation.ts` and a `battleScene.ts` `MOVE_PSYCHIC` draw case mirroring `MOVE_CONFUSION`'s structure exactly, with `PSYCHIC_BLEND_TINT_COLOR` (`RGB(31,23,0)` expanded 5-bit-to-8-bit as `(255,189,0)`, the same `(v5<<3)|(v5>>2)` expansion `RGB_WHITE` already uses) standing in for CONFUSION's hardcoded white attacker tint.
+**Port (rung 3):** `src/animation/psychic.ts` reuses `blendColorCycleObjYAtAge`/`scaleMonAndRestoreAtAge`/`shakeMonOffsetAtTick`/`shakeMon2OffsetAtTick`/`psychicBackground.ts` verbatim — zero new mechanism code. Tier-1-pinned (`tests/animation/psychic.test.ts`, 13/13, every constant checked against the probe output including the two directly-probed matrix values 250/244). Wired `sceneOnPsychicView` + `SceneOnPsychicConfig`/`View` into `sceneOnPresentation.ts` and a `battleScene.ts` `MOVE_PSYCHIC` draw case mirroring `MOVE_CONFUSION`'s structure exactly, with `PSYCHIC_BLEND_TINT_COLOR` (`RGB(31,23,0)` expanded 5-bit-to-8-bit as `(255,189,0)`, the same `(v5<<3)|(v5>>2)` expansion `RGB_WHITE` already uses) standing in for CONFUSION's hardcoded white attacker tint.
 
 **Dense window (rung 4):** applied CONFUSION's own known lag conventions directly (window-1 shake -2, window-2 OAM-shadow -2 on target x2/scale, monbg copy -1, tint -1 — hardware-level, move-independent OAM-shadow-copy/framebuffer-capture latencies, not move-specific formulas) rather than a blind sweep, then verified by evidence: `tools/compare/psychicPortable.ts` landed **137/140 on the first run**, reproduced byte-identical on a second run (same 3 mismatched frames, same bbox sizes both times). The 3 remaining frames (117, 145, 174 — relative ages 38, 66, 95) sit at the EXACT SAME relative ages as CONFUSION's own still-open remainder (frames 119/147/176, ages 38/66/95): window 1's own creation-tick boundary, window 2's own creation-tick boundary, and window 2's own tail boundary. Strong evidence this is the identical banked defect transferring unchanged, not a new one — per this step's own OUT OF SCOPE list (CONFUSION's 3-frame remainder), not chased further here.
 
@@ -93,7 +102,7 @@ entry.
 
 **Coverage.** `MOVE_CONFUSION`: stays `partial`, **108/140 → 137/140** (`confusionPortable.ts`, reproduced twice, fresh oracle run both times). Remaining 3 frames: 119 (window 1's own creation-tick boundary, unchanged, still uninvestigated), 147 (window 2's own creation-tick boundary — the active-edge and magnitude reads disagree for exactly this one tick), 176 (window 2's tail boundary, reduced from 881px to 33px but not fully closed). Bounded time was spent on all three within this session's cap; none closed further without speculative per-tick special-casing beyond what the dense sweep already justified. Regression gates green, reproduced twice each, both orientations: `futureSightPortable.ts` 114/114, `growthPortable.ts` 63/63, `bindPortable.ts` 45/45 (component + framebuffer).
 
-**New Tier-1 tests** (`tests/confusion.test.ts`) pin `sceneOnConfusionView`'s corrected values against literal oracle-tick numbers, including the active/magnitude read-parity asymmetry.
+**New Tier-1 tests** (`tests/animation/confusion.test.ts`) pin `sceneOnConfusionView`'s corrected values against literal oracle-tick numbers, including the active/magnitude read-parity asymmetry.
 
 **Evidence.** `npm test` 2637/2637. `npm run build` green.
 

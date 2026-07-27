@@ -1,4 +1,4 @@
-import { createSceneOnMovePresentation } from "../../../src/engine/sceneOnPresentation.ts";
+import { createSceneOnMovePresentation } from "../../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render } from "../../../src/engine/core.ts";
 
 const stage = createSceneOnMovePresentation({

@@ -6,7 +6,7 @@
 // (like GROWTH's own matrix), and what the actual framebuffer-vs-RAM lag is.
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { futureSightAttackerEffectAtAge, FUTURE_SIGHT_ATTACKER_EFFECT_START_AGE } from "../../../src/engine/futureSight.ts";
+import { futureSightAttackerEffectAtAge, FUTURE_SIGHT_ATTACKER_EFFECT_START_AGE } from "../../../src/animation/futureSight.ts";
 
 const scratch = process.argv[2]!;
 const probe = JSON.parse(readFileSync(join(scratch, "probe.json"), "utf8")) as {

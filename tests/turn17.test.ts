@@ -30,7 +30,7 @@ import {
 } from "../src/engine/battleScene.ts";
 import {
   TURN17_FIRE_PUNCH_RESOLUTION,
-} from "../src/engine/firePunch.ts";
+} from "../src/animation/firePunch.ts";
 import { createInitialState, tick } from "../src/engine/core.ts";
 import { CLOSED_FIGHT_SUBMENU_STATE } from "../src/engine/battleMenu.ts";
 

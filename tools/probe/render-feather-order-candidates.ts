@@ -26,7 +26,7 @@ import {
   turn7FeatherSprites,
   turn8FeatherSprites,
   type FeatherRenderSprite,
-} from "../../src/engine/featherDance.ts";
+} from "../../src/animation/featherDance.ts";
 import battleAnimWhiteFeatherAsset from "../../src/assets/gen/battle-anim-white-feather.json" with { type: "json" };
 
 interface Tileset {

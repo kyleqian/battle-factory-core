@@ -6,9 +6,9 @@ import {
   createSceneOnMovePresentation,
   sceneOnDragonBreathView,
   type SceneOnPresentationBattler,
-} from "../../src/engine/sceneOnPresentation.ts";
+} from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
-import type { DragonBreathFireGeometry } from "../../src/engine/dragonBreath.ts";
+import type { DragonBreathFireGeometry } from "../../src/animation/dragonBreath.ts";
 import { PNG } from "pngjs";
 
 interface Fixture {

@@ -142,7 +142,7 @@ import {
 import {
   advanceSceneOnMovePresentation,
   type SceneOnMovePresentationState,
-} from "./sceneOnPresentation.ts";
+} from "../animation/sceneOnPresentation.ts";
 import {
   actionMenuInputReady,
   battle2PreTurnRngCalls,

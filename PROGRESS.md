@@ -11,6 +11,39 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > not abandoned). See the matching note in SUPERVISOR.md.
 
 ---
+## 480 — [USER-DIRECTED 2026-07-26 ~19:20] Animation lane modularized: `src/animation/` + `tests/animation/` split out of the engine
+
+- **State:** tree committed and green at **226 files / 3035 tests** (entry
+  479's 225/3032 + the new boundary-ratchet file's 3 tests), build green.
+  Pure mechanical move — zero behavior changes, all existing tests pass
+  unmodified apart from import paths.
+- **Did:** moved the 39 animation-lane-owned modules (per-move bodies +
+  anim helpers + `sceneOnPresentation.ts`) from `src/engine/` to
+  `src/animation/`, and their 34 test files (+ `factoryAnimationInventory`)
+  to `tests/animation/`. Ownership was derived mechanically from merge
+  history + consumer analysis: every moved module was imported only by
+  `battleScene.ts`, `core.ts`, or sibling animation modules.
+  `ballAnim`/`kabutoSendOut`/`magbySendOut`/`summaryFrontAnimation` stay in
+  the engine (draft/send-out canonical flow, not animation-lane). Tools did
+  NOT move (`tools/compare` is mixed shared/animation; recorded evidence
+  commands stay rerunnable) — their imports were rewritten in place, as were
+  path strings in `ANIMATION_COVERAGE.json`/`ANIMATION_PROGRESS.md` and the
+  generated `battle-move-anim-scripts.json` (extractor updated to match).
+  New `tests/animation/animationBoundaryRatchet.test.ts` pins the boundary:
+  animation→engine imports allowed only for
+  `battleMenu.ts`/`bg.ts`/`rng.ts` (shared infra); animation never imports
+  the kernel/AI; engine consumes animation only from
+  `battleScene.ts`+`core.ts`. Widening any list is an explicit decision.
+- **Next:** unchanged from entry 479 (Counter/Mirror Coat etc.). This split
+  is groundwork for the animation-lane-as-separate-supervisor plan the user
+  is evaluating (see the directive note above); the animation lane itself
+  stays paused.
+- **Notes:** future animation work lives under `src/animation/**` +
+  `tests/animation/**`; the per-move draw cases inside `battleScene.ts`
+  remain the one shared surface (carving them into a registry is the named
+  follow-up if the separate-supervisor plan proceeds).
+
+---
 ## 479 — [SUPERVISOR WIND-DOWN 2026-07-26 ~15:50] session summary
 
 - **State:** tree committed and green at **225 files / 3032 tests**, build

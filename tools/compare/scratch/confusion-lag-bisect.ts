@@ -10,7 +10,7 @@ import {
   confusionBgBldyAtAge,
   confusionBgIsPsychic,
   confusionBgPaletteRowAtAge,
-} from "../../../src/engine/confusion.ts";
+} from "../../../src/animation/confusion.ts";
 
 const scratch = process.argv[2]!;
 const probe = JSON.parse(readFileSync(join(scratch, "probe.json"), "utf8")) as {

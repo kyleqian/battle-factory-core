@@ -9,7 +9,7 @@ import {
   PLAYER_PIDGEOTTO_TO_OPPONENT_ONIX_QUICK_ATTACK_PRESENTATION,
   PIDGEOTTO_TO_ONIX_QUICK_ATTACK_PRESENTATION,
   type SceneOnFaintAttackFieldProfile,
-} from "../../src/engine/sceneOnPresentation.ts";
+} from "../../src/animation/sceneOnPresentation.ts";
 
 interface Fixture {
   readonly scenario: string;

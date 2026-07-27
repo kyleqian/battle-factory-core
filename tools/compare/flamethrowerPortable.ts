@@ -6,9 +6,9 @@ import {
   createSceneOnMovePresentation,
   sceneOnFlamethrowerView,
   type SceneOnPresentationBattler,
-} from "../../src/engine/sceneOnPresentation.ts";
+} from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
-import type { FlamethrowerGeometry } from "../../src/engine/flamethrower.ts";
+import type { FlamethrowerGeometry } from "../../src/animation/flamethrower.ts";
 import { PNG } from "pngjs";
 
 interface Fixture {

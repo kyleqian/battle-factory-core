@@ -6,9 +6,9 @@ import {
   createSceneOnMovePresentation,
   sceneOnEmberView,
   type SceneOnPresentationBattler,
-} from "../../src/engine/sceneOnPresentation.ts";
+} from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
-import type { EmberGeometry } from "../../src/engine/ember.ts";
+import type { EmberGeometry } from "../../src/animation/ember.ts";
 import { PNG } from "pngjs";
 
 interface Fixture {

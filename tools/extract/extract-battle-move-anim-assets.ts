@@ -674,7 +674,7 @@ function writeJson(path: string, data: unknown): void {
       main: featherDanceMainSteps,
       createspriteArgvMapping: featherDanceArgvMapping,
       totalFeatherSprites: 8,
-      callback: "AnimFallingFeather / AnimFallingFeather_Step (src/battle_anim_flying.c:572-893), ported directly in src/engine/featherDance.ts - see ANIMATION_PROGRESS.md's 2026-07-24 anim-script interpreter spike",
+      callback: "AnimFallingFeather / AnimFallingFeather_Step (src/battle_anim_flying.c:572-893), ported directly in src/animation/featherDance.ts - see ANIMATION_PROGRESS.md's 2026-07-24 anim-script interpreter spike",
     },
     MIST_BALL: {
       source: "reference/pokeemerald/data/battle_anim_scripts.s:3955-3973 (Move_MIST_BALL)",
@@ -702,7 +702,7 @@ function writeJson(path: string, data: unknown): void {
       createspriteArgvMappings: {
         AnimTask_AttackerPunchWithTrace: attackerPunchWithTraceArgvMapping,
       },
-      callback: "AnimTask_AttackerPunchWithTrace ported directly in src/engine/shadowPunch.ts (RAM-probed, both attacker orientations, dump-shadowpunch-full.py) - see ANIMATION_PROGRESS.md's 2026-07-25 SHADOW_PUNCH section.",
+      callback: "AnimTask_AttackerPunchWithTrace ported directly in src/animation/shadowPunch.ts (RAM-probed, both attacker orientations, dump-shadowpunch-full.py) - see ANIMATION_PROGRESS.md's 2026-07-25 SHADOW_PUNCH section.",
     },
   });
 }

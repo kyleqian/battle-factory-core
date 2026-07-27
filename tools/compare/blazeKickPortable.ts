@@ -6,8 +6,8 @@ import {
   createSceneOnMovePresentation,
   sceneOnBlazeKickView,
   type SceneOnPresentationBattler,
-} from "../../src/engine/sceneOnPresentation.ts";
-import type { BlazeKickGeometry } from "../../src/engine/blazeKick.ts";
+} from "../../src/animation/sceneOnPresentation.ts";
+import type { BlazeKickGeometry } from "../../src/animation/blazeKick.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 
 interface Fixture {

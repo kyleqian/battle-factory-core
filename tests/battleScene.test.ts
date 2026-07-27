@@ -155,7 +155,7 @@ import turn3MenuBouncerRawProbe from "../src/data/gen/turn3-menu-bouncer-raw-pro
 import turn6BounceBlipProbe from "../src/data/gen/turn6-bounce-blip-probe.json" with { type: "json" };
 import turn7BounceBlipProbe from "../src/data/gen/turn7-bounce-blip-probe.json" with { type: "json" };
 import turn8BounceBlipProbe from "../src/data/gen/turn8-bounce-blip-probe.json" with { type: "json" };
-import { turn6FeatherSprites, turn7FeatherSprites, turn8FeatherSprites, compareFeatherDrawOrder } from "../src/engine/featherDance.ts";
+import { turn6FeatherSprites, turn7FeatherSprites, turn8FeatherSprites, compareFeatherDrawOrder } from "../src/animation/featherDance.ts";
 
 function pixelAt(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
@@ -1901,7 +1901,7 @@ describe("ISSUES #30 class (b) fix: drawSpriteSheetAffineRotate's doubleSizeBox 
   });
 });
 
-describe("S7 slice N-3: turn6FeatherSprites (src/engine/featherDance.ts) - RAM-table-driven (not a from-scratch port, see the module's own doc for why), +1 render lag bisected against the oracle this session", () => {
+describe("S7 slice N-3: turn6FeatherSprites (src/animation/featherDance.ts) - RAM-table-driven (not a from-scratch port, see the module's own doc for why), +1 render lag bisected against the oracle this session", () => {
   it("is empty before the window and once every feather has despawned", () => {
     expect(turn6FeatherSprites(7404)).toEqual([]); // render 7404 -> RAM 7403, before spawn
     expect(turn6FeatherSprites(7600)).toEqual([]); // well past every sprite's own despawn tick

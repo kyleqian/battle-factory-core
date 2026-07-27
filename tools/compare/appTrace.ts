@@ -17,7 +17,7 @@ import {
   createSceneOnMovePresentation,
   ONIX_TO_GROVYLE_FIRE_PUNCH_GEOMETRY,
   ONIX_TO_GROVYLE_FIRE_PUNCH_PROFILE,
-} from "../../src/engine/sceneOnPresentation.ts";
+} from "../../src/animation/sceneOnPresentation.ts";
 import {
   createFactoryTerminalLossPresentation,
   createFactoryTerminalRoundWonPresentation,

@@ -15,14 +15,14 @@ import {
   PLAYER_PIDGEOTTO_TO_OPPONENT_ONIX_SAND_ATTACK_PRESENTATION,
   sceneOnMudSlapView,
   type SceneOnFaintAttackFieldProfile,
-} from "../../src/engine/sceneOnPresentation.ts";
+} from "../../src/animation/sceneOnPresentation.ts";
 import type {
   SandAttackAnimationProfile,
-} from "../../src/engine/sandAttack.ts";
+} from "../../src/animation/sandAttack.ts";
 import {
   mudSlapSourceMudAtAge,
   type MudSlapAnimationProfile,
-} from "../../src/engine/mudSlap.ts";
+} from "../../src/animation/mudSlap.ts";
 
 interface Fixture {
   readonly move: "SAND_ATTACK" | "MUD_SLAP";

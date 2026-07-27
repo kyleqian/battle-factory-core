@@ -2,7 +2,7 @@
 """MOVE_GROWTH's two components: `AnimTask_BlendColorCycle` (the family's
 shared, still-unported task state machine, `battle_anim_normal.c:447-506`)
 and `AnimTask_ScaleMonAndRestore` (already ported generically in
-src/engine/bind.ts, proven via MOVE_BIND - this probe re-confirms it applies
+src/animation/bind.ts, proven via MOVE_BIND - this probe re-confirms it applies
 unchanged to GROWTH's own argv: xDelta=-3, yDelta=-3, duration=16,
 ANIM_ATTACKER).
 

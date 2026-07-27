@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { PNG } from "pngjs";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
-import { createSceneOnMovePresentation } from "../../src/engine/sceneOnPresentation.ts";
+import { createSceneOnMovePresentation } from "../../src/animation/sceneOnPresentation.ts";
 
 interface Fixture {
   scenario: string;

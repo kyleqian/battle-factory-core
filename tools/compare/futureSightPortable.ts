@@ -6,7 +6,7 @@ import {
   createSceneOnMovePresentation,
   sceneOnFutureSightView,
   type SceneOnPresentationBattler,
-} from "../../src/engine/sceneOnPresentation.ts";
+} from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 import { getMonGender } from "../../src/engine/monGender.ts";
 

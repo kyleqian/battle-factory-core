@@ -38,7 +38,7 @@ import { execFileSync } from "node:child_process";
 import { renderAppTrace } from "../compare/appTrace.ts";
 import { runOracleTrace, type Trace } from "../compare/oracleClient.ts";
 import { drawSpriteSheetAffineRotate } from "../../src/engine/battleScene.ts";
-import { compareFeatherDrawOrder, turn6FeatherSprites, type FeatherRenderSprite } from "../../src/engine/featherDance.ts";
+import { compareFeatherDrawOrder, turn6FeatherSprites, type FeatherRenderSprite } from "../../src/animation/featherDance.ts";
 import battleAnimWhiteFeatherAsset from "../../src/assets/gen/battle-anim-white-feather.json" with { type: "json" };
 
 interface Tileset {
