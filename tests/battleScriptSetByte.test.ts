@@ -335,7 +335,8 @@ describe("source-complete Cmd_bicbyte", () => {
     };
 
     expect(() => createBattleScriptBicbyteCommandHandlers(replace(0, "gUnknownByte"))).toThrow(/unknown .* pointer/);
-    expect(() => createBattleScriptBicbyteCommandHandlers(replace(1, "MOVE_RESULT_FOE_ENDURED"))).toThrow(/unknown .* mask/);
+    // MOVE_RESULT_FOE_ENDURED is no longer unknown (docs/roar-multihit-registration-scout.md §4 rung 5 widened the shared value universe) -- use a genuinely unmapped mask spelling.
+    expect(() => createBattleScriptBicbyteCommandHandlers(replace(1, "MOVE_RESULT_NOT_A_REAL_MASK"))).toThrow(/unknown .* mask/);
 
     const withoutOne = Object.freeze({
       ...program,

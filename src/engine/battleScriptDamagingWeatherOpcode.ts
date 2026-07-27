@@ -232,7 +232,17 @@ function createWeatherdamageHandler(): BattleScriptOpcodeHandler<BattleScriptRul
  * resolvable literal. Left rejected: `sMULTIHIT_STRING + 4`/
  * `sTRIPLE_KICK_POWER` (Triple Kick/multi-hit's own buffers -- the former's
  * pointer isn't in the shared universe at all, the latter's delta `10` isn't
- * a resolvable SETBYTE literal even though its pointer is) -- the single
+ * a resolvable SETBYTE literal even though its pointer is) -- except
+ * `sMULTIHIT_STRING + 4` is now also modeled (docs/roar-multihit-
+ * registration-scout.md §4 rung 2 follow-up, found live running the multi-hit
+ * family's committed script: this hits-landed counter is written on every
+ * multi-hit iteration, not just Triple Kick's, so it could not stay deferred
+ * to a later rung). It is not part of the shared SETBYTE pointer universe
+ * (never a `setbyte` lvalue, only ever incremented) so it is read/written
+ * directly against its own dedicated `multiHitStringCounter` rules field
+ * rather than folded into `BATTLE_SCRIPT_SETBYTE_POINTER_EXPRESSIONS` (which
+ * asserts every listed pointer has a concrete `setbyte` site -- this one
+ * never does). `sTRIPLE_KICK_POWER`'s delta `10` still rejects -- the single
  * named barrier below.
  */
 function createAddbyteHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
@@ -241,6 +251,23 @@ function createAddbyteHandler(): BattleScriptOpcodeHandler<BattleScriptRulesCont
     const rules = context.state.rulesContext;
     const pointer = ptrOperand!.expression;
     const delta = byteOperand ? resolveBattleScriptSetByteValue(byteOperand.expression) : null;
+
+    if (pointer === "sMULTIHIT_STRING + 4") {
+      if (delta === null) {
+        return unsupportedBranch(
+          context,
+          `Cmd_addbyte's operand (${pointer}, ${byteOperand!.expression}) is not modeled`,
+          "battle_script_commands.c",
+          3823,
+        );
+      }
+      const nextRules = Object.freeze({
+        ...rules,
+        multiHitStringCounter: (rules.multiHitStringCounter + delta) & 0xff,
+      });
+      return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }), { rulesContext: nextRules });
+    }
+
     const current = BATTLE_SCRIPT_SETBYTE_POINTER_EXPRESSIONS.includes(pointer as never)
       ? readBattleScriptRulesByte(rules, pointer)
       : null;

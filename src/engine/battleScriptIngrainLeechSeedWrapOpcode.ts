@@ -29,6 +29,7 @@ import {
 } from "./battleScriptMachine.ts";
 import { resolveBattleScriptLabel, type BattleScriptProgram } from "./battleScriptProgram.ts";
 import { isBattlerOfType, unsupportedBranch, withBattler } from "./battleScriptHitChainOpcode.ts";
+import { readBattleScriptRulesByte, writeBattleScriptRulesByte } from "./battleScriptSetByte.ts";
 import {
   BATTLE_SCRIPT_MOVE_RESULT_MISSED,
   BATTLE_SCRIPT_STATUS3_LEECHSEED,
@@ -115,13 +116,21 @@ function createSetseededHandler(): BattleScriptOpcodeHandler<BattleScriptRulesCo
 }
 
 /**
- * `Cmd_copyarray` (`battle_script_commands.c:3837-3848`), covers two
- * concrete 4-byte tuples: `BattleScript_LeechSeedTurnDrain`'s own
+ * `Cmd_copyarray` (`battle_script_commands.c:3837-3848`), covers three
+ * concrete tuples: `BattleScript_LeechSeedTurnDrain`'s own
  * `copyword gBattleMoveDamage, gHpDealt` (the just-dealt drain amount copied
- * back into the damage register before the sign flip/Liquid Ooze branch) and
+ * back into the damage register before the sign flip/Liquid Ooze branch),
  * `BattleScript_EffectEndeavor`'s own reverse pair -- `copyword gHpDealt,
  * gBattleMoveDamage` right after `setdamagetohealthdifference`, then
- * `copyword gBattleMoveDamage, gHpDealt` again after typecalc/bicbyte.
+ * `copyword gBattleMoveDamage, gHpDealt` again after typecalc/bicbyte -- and
+ * (hidden per-operand barrier found live this session, running the multi-hit
+ * family's own committed script rather than trusting
+ * docs/roar-multihit-registration-scout.md's §1c table, which had marked
+ * this whole opcode "yes" already registered) `BattleScript_DoMultiHit`'s own
+ * `copybyte cEFFECT_CHOOSER, sMULTIHIT_EFFECT` (macro sugar for
+ * `copyarray ..., 1`) -- a plain 1-byte copy between two pointers already in
+ * the shared `SETBYTE`/`JUMPIFBYTE` byte universe (`battleScriptSetByte.ts`),
+ * reused verbatim rather than duplicating field access.
  * Endeavor stashes its own just-computed set-damage into gHpDealt before
  * typecalc can multiply gBattleMoveDamage by STAB/type-effectiveness, then
  * restores it unmodified afterward -- the move's real damage is genuinely
@@ -145,6 +154,30 @@ function createCopyarrayHandler(): BattleScriptOpcodeHandler<BattleScriptRulesCo
     if (size === "0x4" && dst === "gHpDealt" && src === "gBattleMoveDamage") {
       const nextRulesContext = Object.freeze({ ...rulesContext, hpDealt: rulesContext.battleMoveDamage });
       return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }), { rulesContext: nextRulesContext });
+    }
+    if (size === "0x1" && dst === "cEFFECT_CHOOSER" && src === "sMULTIHIT_EFFECT") {
+      const value = readBattleScriptRulesByte(rulesContext, "sMULTIHIT_EFFECT");
+      const nextRulesContext = value === null ? null : writeBattleScriptRulesByte(rulesContext, "cEFFECT_CHOOSER", value);
+      if (nextRulesContext === null) {
+        throw new Error("Cmd_copyarray: cEFFECT_CHOOSER<-sMULTIHIT_EFFECT became undecodable");
+      }
+      return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }), { rulesContext: nextRulesContext });
+    }
+    /**
+     * `BattleScript_MultiHitPrintStrings`'s own `copyarray gBattleTextBuff1,
+     * sMULTIHIT_STRING, 6` (also found live this session, on the multi-hit
+     * family's normal happy path, right before `printstring
+     * STRINGID_HITXTIMES`): copies the whole 6-byte digit-substitution text
+     * buffer into the display text-buff register. Pure presentation-string
+     * plumbing -- `gBattleTextBuff1`'s byte contents have no reader anywhere
+     * in this engine's rules scope (message substitution is abstracted
+     * through the `prepareMessage`/`STRINGID_*` port, not raw text-buffer
+     * bytes, the same boundary `Cmd_initmultihitstring`'s own doc comment
+     * already established for this buffer's first 4 bytes). Zero rules
+     * mutation, a pure advance.
+     */
+    if (size === "6" && dst === "gBattleTextBuff1" && src === "sMULTIHIT_STRING") {
+      return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }));
     }
     return unsupportedBranch(
       context,
@@ -176,6 +209,15 @@ const ABILITY_OWN_TEMPO = 20;
  */
 const ABILITY_VITAL_SPIRIT = 72;
 const ABILITY_INSOMNIA = 15;
+/**
+ * `include/constants/abilities.h:25` -- **21**, not the `31` the scout dossier
+ * (`docs/roar-multihit-registration-scout.md` §4 rung 1) cited (31 is
+ * `ABILITY_LIGHTNING_ROD`); re-verified directly against the pinned header
+ * per this step's standing re-derive-every-citation rule. `BattleScript_
+ * EffectRoar`'s own `jumpifability BS_TARGET, ABILITY_SUCTION_CUPS, ...`
+ * (`data/battle_scripts_1.s:596`) needs this value.
+ */
+const ABILITY_SUCTION_CUPS = 21;
 const JUMPIFABILITY_VALUES: ReadonlyMap<string, number> = new Map([
   ["ABILITY_LIQUID_OOZE", ABILITY_LIQUID_OOZE],
   ["ABILITY_LIMBER", ABILITY_LIMBER],
@@ -183,6 +225,7 @@ const JUMPIFABILITY_VALUES: ReadonlyMap<string, number> = new Map([
   ["ABILITY_OWN_TEMPO", ABILITY_OWN_TEMPO],
   ["ABILITY_VITAL_SPIRIT", ABILITY_VITAL_SPIRIT],
   ["ABILITY_INSOMNIA", ABILITY_INSOMNIA],
+  ["ABILITY_SUCTION_CUPS", ABILITY_SUCTION_CUPS],
 ]);
 /** Exported so tools/report/executable-frontier-census.ts's jumpifability value-coverage check never drifts from what this opcode actually dispatches (same live-import precedent as SET_MOVE_EFFECT_SUPPORTED_BYTES). */
 export const JUMPIFABILITY_SUPPORTED_ABILITY_NAMES: ReadonlySet<string> = new Set(JUMPIFABILITY_VALUES.keys());
@@ -194,9 +237,10 @@ export const JUMPIFABILITY_SUPPORTED_ABILITY_NAMES: ReadonlySet<string> = new Se
  * one of those two, never the BS_ATTACKER_SIDE/BS_NOT_ATTACKER_SIDE
  * `AbilityBattleEffects` side-check branches) and, per
  * docs/status-cluster-ground-truth.md and docs/yawn-thrash-endturn-design.md
- * §1b, the six concrete ability ids this widening covers (Liquid Ooze for
+ * §1b, the seven concrete ability ids this widening covers (Liquid Ooze for
  * Leech Seed, Immunity/Limber/Own Tempo for the primary status-move cluster,
- * Vital Spirit/Insomnia for Yawn). `RecordAbilityBattle`/
+ * Vital Spirit/Insomnia for Yawn, Suction Cups for Roar per
+ * docs/roar-multihit-registration-scout.md §4 rung 1). `RecordAbilityBattle`/
  * `gBattleScripting.battlerWithAbility` are the same untracked AI-history
  * bookkeeping `Cmd_cleareffectsonfaint`'s own doc comment already established
  * has no reader in this engine's scope.
