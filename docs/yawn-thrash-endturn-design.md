@@ -616,6 +616,18 @@ in the excluded six) -- see entry 494 for the full breakdown.
   After, the lock-in START is simulatable (the END -- confusion -- is Rung 5).
 - **Size:** medium (the `gLockedMoves` uncertainty is the risk; split if it
   turns out large per the first-action check above).
+- **TAUROS live-fixture remainder CLOSED, by Rung 6's own fixture
+  (`tools/battle-lab/mechanic-thrash-endturn-items2-persim-off.json`,
+  2026-07-27).** The lock-in bits observed on the ROM after the first
+  Thrash use's own end-turn decrement -- `status2 == 0x1800`
+  (`STATUS2_MULTIPLETURNS | STATUS2_LOCK_CONFUSE_TURN(2)`, i.e. a fresh
+  `(Random()&1)+2 == 3` roll immediately decremented once by that same
+  turn's `ENDTURN_THRASH` pass) -- **match this rung's own Tier-1 model
+  exactly**, same masks as `battleEndTurnOrchestration.test.ts`'s
+  `STATUS2_LOCK_CONFUSE_TURN_2 | STATUS2_MULTIPLETURNS` fixture value. Two
+  seeds observed (see Rung 6 below); both landed lock-in on turn 1's first
+  use with no divergence from the ported model. No further live-fixture
+  work needed for Rung 4.
 
 ### Rung 5 -- `ENDTURN_THRASH` end-turn case (depends on Rung 4)
 - **Goal:** wire the already-scaffolded case-barrier
@@ -657,6 +669,91 @@ in the excluded six) -- see entry 494 for the full breakdown.
   tick, mirroring Rung 3's Chesto/Yawn fixture structurally.
 - **Size:** trivial, folds into Rung 3 or 5's own landing commit as an extra
   fixture rather than a standalone step if convenient.
+
+**LANDED (verification-only, bounded worker session 2026-07-27) -- ladder
+CLOSED 6/6.** Zero `src/` edits, exactly as scoped.
+
+**Prediction (written before running the fixture):** TAUROS locks into
+Thrash on first use (`STATUS2_MULTIPLETURNS|STATUS2_LOCK_CONFUSE_TURN((Random()&1)+2)`),
+the counter decrements once per end-turn pass including the turn it was
+set; on whichever turn it hits zero, `ENDTURN_THRASH`'s own confusion
+write (`(Random()%4)+2` duration) fires in the SAME pass `ENDTURN_ITEMS2`
+runs, and since the holder's Persim Berry maps to the already-generic,
+item-agnostic `HOLD_EFFECT_CURE_CONFUSION` branch (landed Rung 3, no
+Chesto-specific logic), the cure should fire immediately after, in that
+same end-turn pass -- confusion never "felt" as a lost turn, same shape as
+Rung 3's Chesto/Yawn sibling. No gap expected; Rungs 3 and 5 already built
+every piece this trigger needs.
+
+**Engine test (`tests/battleEndTurnOrchestration.test.ts`, new "REAL
+TRIGGER (Rung 6...)" case in the "(g) ENDTURN_ITEMS2" describe block):**
+staged a battler on the lock's final turn
+(`STATUS2_LOCK_CONFUSE_TURN_1|STATUS2_MULTIPLETURNS`, mirroring the
+ENDTURN_THRASH suite's own transition fixture) holding `ITEM_PERSIM_BERRY`.
+**Passed on the first run, zero `src/` edits** -- confirms the prediction
+exactly: `STATUS2_CONFUSION` lands then clears in the same pass, item
+consumed (`b1.item === 0`), exactly 1 RNG draw (Thrash's own duration
+roll; the cure draws none, same as Chesto's).
+
+**Live fixture
+(`tools/battle-lab/mechanic-thrash-endturn-items2-persim-off.json`):**
+`overrides.parties` TAUROS (species 128), `MOVE_THRASH` x4, Persim Berry
+(item 140), Bold nature + 0 Attack IV (keeps its own damage output low so
+the opponent survives the full multi-turn lock without a mid-lock faint,
+which would otherwise route into the unrelated switch-decision flow) vs.
+ONIX (species 95, `MOVE_TACKLE` filler, Bold nature, 252 HP/252 Def EVs --
+picked for its real high Defense stat so Tauros's un-boosted Thrash hits
+don't threaten to KO it across 2-3 turns; the first attempt used the
+Chesto fixture's own Magikarp filler and one-shot it turn 1, which froze
+the trace at the post-faint switch-in step -- the actual blocker named
+below). Turn 1: two `A` presses (open FIGHT, confirm the move -- all four
+slots are `MOVE_THRASH`, so any slot works); every following turn is the
+ROM's own forced-repeat move selection (`gLockedMoves`, Rung 4's own
+already-wired finding) and needs **zero player input**, confirmed live --
+plain frame waits (four 900-frame blocks) carry the whole multi-turn lock
+to completion with no stall. Run twice (`seed: 1`, checked in; `seed: 2`,
+scratch-verified only) via `bin/oracle lab ... -o <dir>` and read back
+`manifest.json`'s per-capture `state.battlers.player` fields directly
+(`status2`, `item`, `volatile.confusionTurns`) -- no text/message field is
+exposed by the lab's semantic capture, so the numeric state transitions
+are the evidence, same convention as every other Tier-1 fixture in this
+ladder.
+
+**Observed ROM trajectory, seed 1 (checked-in fixture) -- exactly matches
+prediction, no divergence found:**
+
+| Frame | `status2` (hex) | `confusionTurns` | `item` | Opponent HP | Reading |
+| --- | --- | --- | --- | --- | --- |
+| 0-180 | `0x0` | 0 | 140 | 142→131 | pre-battle / turn 1 in flight |
+| 300-320 | `0x1800` | 0 | 140 | 131 | turn 1 done: fresh roll was 3 (`(Random()&1)+2`), already decremented once by turn 1's own `ENDTURN_THRASH` pass to `STATUS2_MULTIPLETURNS\|STATUS2_LOCK_CONFUSE_TURN(2)` -- **byte-identical to Rung 4's own Tier-1 fixture value**, closing Rung 4's remainder (see its own section above) |
+| 900 | `0x5` | 5 | 140 | 110 | turns 2 AND 3 both resolved (forced-repeat needed no input, so both ran within the same 900-frame wait block): lock expired, `STATUS2_CONFUSION` freshly written with a `(Random()%4)+2 == 5` roll -- Persim not yet consumed, caught mid-pass |
+| 1220 | `0x0` | 0 | **0** | 110 | cure completed: confusion cleared, berry consumed, all in the SAME end-turn pass as the write above -- the confusion status is never "felt" |
+| 1800-3610 | `0x0` | 0 | 0 | 110 | stable -- no regression, no re-trigger, no further RNG draws |
+
+**Seed 2 (scratch-verified, not checked in -- confirms robustness across a
+different RNG roll, not re-committed as a second fixture file per this
+rung's own "trivial" sizing):** same shape, different rolls -- lock-in
+lands at frame 320 (`0x1800`, same value), confusion write at frame 900
+with duration roll `3` instead of `5` (`confusionTurns: 3`), cure complete
+by frame 1220 (`item: 0`, `status2: 0x0`), stable through 3610. Confirms
+the trajectory is not a lucky single-seed artifact.
+
+**Real blocker found and worked around (worth recording, not a design-doc
+gap):** the FIRST fixture attempt reused the Chesto sibling's exact
+Magikarp filler (species 129, `MOVE_TACKLE`, default IVs/nature) -- Tauros
+with an Adamant-boosted, full-IV Attack stat one-shot it on turn 1
+(`opponent hp 95→0`). The trace then froze solid from frame 320 through
+3610 with zero further state change (`rngValue`, `status2`, both HPs all
+static) -- the opponent's post-faint replacement send-in did not resolve
+within the buffered wait, unlike a plain end-of-turn message. Not
+investigated further (out of this rung's scope -- a Thrash-carrier vs.
+low-bulk-filler mid-lock-faint interaction, not the `ENDTURN_ITEMS2`
+mechanism this rung exists to prove) -- worked around by giving the
+opponent enough effective bulk (Onix, defense-invested) to survive the
+whole lock without fainting, which is also the more faithful staging of
+"the SAME end-turn pass" claim this rung is actually about. Flagging this
+as a possible papercut/gap for whoever next stages a live multi-turn
+damaging-move fixture against a fragile filler: **fainting mid-multi-turn-lock is UNVERIFIED against this engine and was not exercised by this rung.**
 
 ## First brief (near-copy-paste for the supervisor)
 
