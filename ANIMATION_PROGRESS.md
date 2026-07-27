@@ -46,27 +46,24 @@ animation. A status caused by a move is not part of that move's animation.
 
 ## Current resumable state (2026-07-27)
 
-Coverage is **36/276 exact, 4 partial, 236 unsupported**. SING has a
-source-derived 12-note/path/palette-index/pan reducer and portable dense
-component evidence across its first complete move-animation script block:
-**245/245 player-back + 248/248 opponent-front**, each reproduced twice fresh.
-It remains partial because extracted art, affine hardware OAM, rainbow
-allocation/free, monbg/clearmonbg and shared-seam RGB/framebuffer closure are
-not yet implemented. Resume that precisely bounded remainder; do not promote
-the four audited siblings without their own complete dense evidence.
-Animation-main is green at this checkpoint.
+Coverage is **37/276 exact, 3 partial, 236 unsupported**. SING is exact for
+its complete first animation-script block in both required orientations:
+**245/245 player-back + 248/248 opponent-front** strengthened component/OAM/
+matrix/palette/monbg and raw-RGB/shared-seam framebuffer frames, reproduced
+twice fresh. The four audited siblings remain unsupported without independent
+complete dense evidence. Animation-main is green at this checkpoint.
 
-## SING partial evidence checkpoint; ANIM_TAG_MUSIC_NOTES track established (2026-07-27)
+## SING promoted to exact; ANIM_TAG_MUSIC_NOTES track established (2026-07-27)
 
-**Verdict:** `MOVE_SING` is partial, not exact. Complete legal Scene-ON
+**Verdict:** `MOVE_SING` is exact. Complete legal Scene-ON
 mechanicLab parties stage AZURILL from real Factory set 1 in both player-back
 and opponent-front orientations, with all four active choices constrained to
-SING and ONIX constrained to TACKLE. The portable comparator matches note/task
-state for the complete first move-animation script block at **245/245
+SING and ONIX constrained to TACKLE. The strengthened portable comparator
+matches the complete first move-animation script block at **245/245
 player-back** (oracle 213-457; notes 220-362) and **248/248 opponent-front**
-(oracle 215-462; notes 222-367), each reproduced twice fresh. The dense probe
-also captures registers, battler priority, full OBJ palettes, raw OAM and RGB,
-but those fields are evidence inputs rather than claimed matches.
+(oracle 215-462; notes 222-367), each reproduced twice fresh, for component
+state, affine hardware OAM/matrices, palette latches/allocation, monbg
+visibility/cleanup, raw RGB, and the shared-seam framebuffer.
 
 **Source reducer:** all twelve `gWavyMusicNotesSpriteTemplate` spawn ages,
 animation indices/vFlip, signed fixed-point paths, sine y2 values, four
@@ -75,12 +72,14 @@ side-relative `panse` task boundaries are ported and Tier-1 pinned. No absolute
 battle ticks, screenshots, coordinate/RGB fitting, exclusions, comparator
 weakening, engine imports, or unsupported barriers were added.
 
-**Precisely bounded remainder:** reproducibly extract MUSIC_NOTES art; compare
-hardware affine matrices and palette allocation/free/latches; port the
-`monbg ANIM_DEF_PARTNER` clone/priority/OAM and `clearmonbg` cleanup lifecycle;
-then wire SING through `sceneOnPresentation`/`battleScene` and close raw RGB
-plus shared-seam framebuffer in both orientations. Re-run ENCORE and BIND as
-exact controls. Until all of that closes, SING remains partial.
+**Renderer/evidence closure:** MUSIC_NOTES art, all four source rainbow
+palettes, and both AZURILL orientations are reproducibly extracted. The
+reducer ports reciprocal affine hardware matrices and side-dependent monbg
+cleanup ages. Note composition reuses the shared persistent `sSpriteOrder`
+scheduler with the same live-probed allocation seed in both orientations;
+this closed the final exact-y overlaps without coordinate or RGB fitting.
+`sceneOnPresentation`/`battleScene` render the full body through relative
+ages and shared field/OBJ mechanisms. ENCORE and BIND remain exact controls.
 
 **Sibling audit (all unsupported):** BELLY DRUM has six alternating purple-hand
 hits, six ShakeMon tasks, six slow flying-note arcs and attacker-pan sounds;

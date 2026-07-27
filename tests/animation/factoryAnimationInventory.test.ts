@@ -68,11 +68,11 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // SING has dense component evidence in both required orientations.
+        // SING is exact through the shared Scene-ON seam in both orientations.
         unsupported: 236,
         staged: 0,
-        partial: 4,
-        exact: 36,
+        partial: 3,
+        exact: 37,
       },
       {
         tier: "openOnly",
