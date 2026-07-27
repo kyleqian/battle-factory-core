@@ -5,6 +5,32 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
+## #47 — Ported weather AI handlers diverge from the ROM's `get_weather` stale-read bug in Factory-reachable flows
+
+**Symptom:** `runCbmRainDance`/`SunnyDay`/`Hail` (CBM) and
+`weatherSetterCvScore`/`runCvRainDance` (CV) consume a clean `currentWeather`
+input, but the pinned ROM's `Cmd_get_weather` (BUGFIX undefined) reads a
+stale `funcResult` in two live-verified Factory-reachable channels — so the
+engine scores 0 where the real AI scores -7 (Hail vs. an ability-id-0-3
+target such as Ninjask/Speed Boost=3, CBM channel) or +1 (the
+`get_how_powerful_move_is` `MOVE_POWER_OTHER(0)` ≡ `AI_WEATHER_SUN`
+collision, CV channel — fires regardless of target ability).
+
+**Confirmed** (2026-07-27, supervisor-verified live): ground truth doc
+§25.10 — mechanism from source with citations, 3 fixtures
+(`mechanic-factory-ai-hail-staleweather-{collision,control}-off.json`,
+`mechanic-factory-ai-cv-raindance-noraindish-stalesun-off.json`), 2 seeds,
+all predictions exact; verify-script scenarios committed and ALL PASS.
+§25.9's Rain Dish fixture's numeric result stands but its causal
+attribution was Channel 2, not Gate R (corrected in §25.10).
+
+**Leads:** the fix is a deliberate port decision — model the stale
+`funcResult` channel (the AI script interpreter's own register) rather than
+a clean weather input, per the mission's match-the-real-game bar. Ground
+truth is complete; a bounded main-lane step can consume §25.10 directly.
+Watch the mask-7 fixture-reproduction tests whose expected scores would
+shift in colliding flows.
+
 ## #41 — Production engine modules import canonical RAM recordings
 
 **Symptom:** shipped `src/engine/` code reads recorded state from the single
