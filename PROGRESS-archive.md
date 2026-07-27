@@ -1,4 +1,74 @@
 ---
+## 489 — [BOUNDED WORKER 2026-07-26 ~23:10] EvasionUp/EvasionDown CBM+CV pair ported (§24, eleventh pair — largest CV handler in the doc)
+
+- **State:** tree committed and green at **231 files / 3191 tests** (+60 over
+  entry 488's 3131), `npm run build` clean (`tsc -b && vite build`). Census
+  **unchanged at 92/214 effects, 187/355 moves, 150/276 Factory-L50,
+  1884/2957 weighted, all 32 self-checks pass** (reran
+  `tools/report/executable-frontier-census.ts` live: byte-identical, `git
+  status --porcelain docs/executable-frontier-census.md` empty — this
+  AI-decision port touches `battle_ai_scripts.s`, not the effect-execution
+  subsystem the census measures). `executableFrontierRatchet.test.ts`'s
+  per-module barrier counts **unmoved** (6/6 green, no new barrier).
+- **Did:** landed §24's full four-handler pair per its ground truth
+  (`docs/factory-ai-checkviability-ground-truth.md` §24, merged prior round,
+  supervisor-verified live). (1) `factoryAiCheckBadMove.ts`: added
+  `runCbmEvasionUp` (bare 2-instruction MAX_STAT_STAGE-on-AI_USER's-own-stage
+  gate, same shape as AttackUp/DefenseUp/etc — `EFFECT_MINIMIZE` shares this
+  handler despite being blocked-on-opcodes for move execution, doc §24.7) and
+  `runCbmEvasionDown` (reuses the existing shared `runCbmStatDownViaSharedTail`
+  body verbatim, same shape as DefenseDown/SpDefDown — no dedicated
+  evasion-immunity ability exists in Gen 3). Added optional `evasionStage?`
+  to both `FactoryAiCheckBadMoveTarget` and `FactoryAiCheckBadMoveAttacker`
+  (same `?? DEFAULT_STAT_STAGE` convention as `accStage`/`spDefStage`). (2)
+  `factoryAiCheckViability.ts`: added `runCvEvasionUp` — the largest CV
+  handler ported in this doc, 8 `if_random_less_than` sites, re-derived
+  independently from the raw assembly per the brief (NOT copied from
+  `AI_CV_AccuracyDown` despite the structural similarity) — three real
+  divergences confirmed: DRAW SITE 1 has no Gate B companion (single 90%-HP
+  gate, not AccuracyDown's own two-gate 70% shape); Gate A's own threshold is
+  90 not 70; Gate I reads `AI_USER`'s own evasion stage, not `AI_TARGET`'s
+  (operand flips because this is an UP handler on the opponent's own stat).
+  Zero new `FactoryAiCheckViabilityBattler` fields needed — `evasionStage`,
+  `isRooted`, `isToxicPoisoned`, `isLeechSeeded`, `isCursed` were all already
+  present from §19's AccuracyDown port. Added `runCvEvasionDown`, confirmed
+  byte-for-byte identical to DefenseDown/SpDefDown, reusing the shared
+  `runCvStatDown` body with a new `"evasion-down-roll"` kind parameter. (3)
+  `factoryAiDecisionPolicy.ts`: wired the two new optional CBM fields
+  (`evasionStage` on both `targetForCbm`/`attackerForCbm`) — the CV
+  construction sites needed **zero** changes, every field the new handlers
+  read was already threaded through from §19's own wiring. **Construction-site
+  grep performed** (`grep -rn "FactoryAiCheckBadMove(Target|Attacker)"` /
+  `"runCheckViability("` across `src/`): confirms `factoryAiDecisionPolicy.ts`
+  is the ONLY production construction site for each input type, and both are
+  now fully wired — no repeat of entry 483's `spDefStage` gap. (4) Tests: 15
+  CBM tests (both handlers' gate true/false/omitted/vestigial-effect cases),
+  37 CV handler-level tests (all 8 EvasionUp gates/sites individually plus a
+  6-draw non-mutually-exclusive composite, all 3 named §24.1 divergences
+  explicitly proven, EvasionDown's DefenseDown-identical shape), 8 mask-7/
+  mask-1 `chooseFactoryAiScoredDecision` end-to-end tests reproducing ALL
+  FIVE §24 fixtures (policy-own draws: EvasionUp fullhp-reach/lowhp-reach =
+  4 setup + 4 CV + 1 tie = 9 each, midhp-control = 4 setup + 0 CV + 1 tie = 5;
+  EvasionDown lowhp-reach = 9, fullhp-control = 5 — the doc's own live window
+  totals of 10/8/12/13/7 are a documented superset, same subset relationship
+  every prior pair already established) plus a mask-1 CBM-wiring isolation
+  test (entry-485 precedent: `AI_CV_EvasionUp` reads the same `evasionStage`
+  under mask 7, so mask 1 was required to isolate the CBM-only -10 delta).
+  60 tests total, following the §23 port pattern (entry 484) exactly.
+- **Next:** only the weather trio remains (RainDance/SunnyDay/Hail, §25 —
+  the last 3 of 22 CV handlers, out of this step's scope per the brief).
+  Otherwise entry 485's own carried Next list stands: §19.5's unstaged
+  AccuracyDown sites 2-6 (mixed movesets); §24.5's own 6 unexercised
+  `AI_CV_EvasionUp` draw sites (same mixed-moveset/multi-turn-build obstacle
+  class); §18 5-6-draw window discrepancy (`DefenseUp`/`SpDefUp`, probe
+  candidate, sRandCount attribution); ENDTURN_ITEMS2 after Yawn/Thrash;
+  presentation-seam program is fully closed (entry 488).
+- **Notes:** no PAPERCUT. Time split held: CBM pair + CV EvasionDown + full
+  CV EvasionUp (8-site handler) + all fixtures landed as one green rung
+  inside the ~40-minute budget, so no partial-rung split was needed this
+  session.
+
+---
 ## 488 — [BOUNDED WORKER 2026-07-26 ~22:30] turn-4 ROCK_SLIDE settle staged + wired — presentation-seam §9's last residual gap CLOSED
 
 - **State:** tree committed and green at **231 files / 3131 tests** (+1

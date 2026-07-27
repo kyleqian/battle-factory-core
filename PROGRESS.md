@@ -14,6 +14,112 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > entry 468's animation items are the animation supervisor's backlog now.
 
 ---
+## 492 — [BOUNDED WORKER 2026-07-27 ~00:15] §25 weather-trio CBM+CV pair ported (RainDance/SunnyDay/Hail) — 21/22 CV handlers now ported, NOT 22/22 (one real handler remains, see Next)
+
+- **State:** tree committed and green at **231 files / 3244 tests** (+49
+  over entry 491's 3195), `npm run build` clean. Census re-run
+  byte-identical (92/214 effects, 187/355 moves, 150/276 Factory-L50,
+  1884/2957 weighted, all 32 checks pass, `git status --porcelain docs/
+  executable-frontier-census.md` empty — AI-decision subsystem, not
+  effect-execution). `executableFrontierRatchet.test.ts` barrier counts
+  unmoved (6/6 green, no new barrier). Three commits: CBM trio + wiring +
+  CBM tests; CV handler bodies (already included in the first commit); CV
+  handler-level tests; mask-7 fixture-reproduction tests.
+- **Did:** landed §25's full six-handler weather trio per its ground truth
+  (`docs/factory-ai-checkviability-ground-truth.md` §25, supervisor-verified
+  live). (1) `factoryAiCheckBadMove.ts`: `runCbmRainDance`/`SunnyDay`/`Hail`
+  — §25.1 confirmed all three are three SEPARATELY NAMED dispatch targets
+  (not a shared handler, correcting §5's own "shared handler" guess) but
+  byte-for-byte identical 3-instruction bodies (`get_weather; if_equal <OWN
+  AI_WEATHER_*>, Score_Minus8; end`) — one parameterized helper covers all
+  three. Added `AI_WEATHER_SUN/RAIN/SANDSTORM/HAIL` constants + `AiWeatherValue`
+  type (0-3, the AI's OWN `get_weather` encoding, NOT `gBattleWeather`'s raw
+  bits — a distinct existing `rulesContext.weather` field elsewhere in the
+  engine uses the raw-bit encoding, confirmed by grep before assuming §5.4's
+  "already landed" claim; it hadn't, for this subsystem) and optional
+  `currentWeather?: AiWeatherValue` to `FactoryAiCheckBadMoveAttacker`, `undefined`
+  defaulting to "no weather bit set" (never equals any of the four
+  constants, so it never fires any handler's gate either way — the pinned
+  ROM's own `AI_WEATHER_NONE` stale-read bug, §25.1, is real but NOT
+  reachable by any of this step's staged/tested flows, so it is not modeled
+  or cited beyond this note per the brief's own citation instruction). (2)
+  `factoryAiCheckViability.ts`: `runCvSunnyDay`/`runCvHail` share a
+  `weatherSetterCvScore` helper (HP<40%→-1, else weather in the "other
+  three" real values→+1, else 0 — zero `if_random_less_than`, confirmed
+  independently from the raw assembly per §25.2, NOT assumed identical
+  siblings). `runCvRainDance` is genuinely bespoke (7 conditional
+  instructions vs the twins' 4, §25.2/§25.8): Gate P (`if_user_faster`,
+  reusing the SAME `getWhoStrikesFirst`/tie-break-`Random()` machinery
+  `AI_CV_SpeedDown`'s own `target-faster-tie` already ports, inverse
+  comparison target — a new `"user-faster-tie"` draw kind) → Gate S (own
+  ability == Swift Swim bypass, +1, skips HP/weather entirely) → the SAME
+  `weatherSetterCvScore` span → Gate R tail (own ability == Rain Dish, +1,
+  only reached when the span falls all the way through). Added `ability?:
+  string` (AI_USER's own real ability, direct field read — the FIRST
+  handler in this doc needing the attacker's own real ability, distinct
+  from the target-guessing `ability`/`knownAbility` pair every prior
+  handler used) and `currentWeather?` to `FactoryAiCheckViabilityBattler`.
+  (3) `factoryAiDecisionPolicy.ts`: wired both new optional fields through
+  `FactoryAiScoredBattlerView` (attacker-side only — both CBM and CV read
+  the same `view.attacker.currentWeather`/`.ability`). **Construction-site
+  grep performed** (`FactoryAiCheckBadMoveTarget\|Attacker` construction +
+  `runCheckViability(`/`runCheckBadMovePreamble(` call sites across `src/`):
+  confirms `factoryAiDecisionPolicy.ts` remains the ONLY production
+  construction site for both extended input types, both fully wired — no
+  repeat of entry 483's gap. (4) Tests: 114 CBM tests (+10: own-weather/
+  cross-weather/omitted-weather per handler, cross-handler byte-identity
+  parity), 253 CV tests (+37: SunnyDay/Hail's shared span per HP boundary +
+  each "other three" value + own-weather exclusion; RainDance's Gate P
+  including both the deterministic and hidden-tie-break-draw cases at the
+  SAME seeds `AI_CV_SpeedDown`'s own tie tests use, Gate S, Gate H/weather
+  span, Gate R), 106 mask-7 tests (+12: ALL SIX §25 fixtures — raindance/
+  sunnyday/hail × cbmreach/cvreach, 2 seeds each — reproducing the doc's own
+  pick-based design: `cbmreach` nets -8/0, AI picks a Growl slot, never slot
+  0; `cvreach` nets 0/+1, AI always picks slot 0, no tie; policy-own draws
+  reconcile to a clean 5 in all twelve cases — setup(4)+CBM(0, single-ability
+  Shuckle target)+TryToFaint(0, all 0-power moves)+CV(0, deterministic span
+  + zero-draw AttackDown control)+tie(1) — with zero residual, since §25.4's
+  own design deliberately abandoned the draw-count channel for this section,
+  so there is no live draw-count window to reconcile against beyond
+  confirming the mechanism draws nothing extra).
+- **CORRECTION to the brief's own "22/22 if true" framing — it is NOT true:**
+  re-derived the count from the ground truth doc's own master table (§5,
+  "all 22 reachable handlers") rather than trusting the brief's phrasing.
+  21 of 22 are now ported; **`AI_CV_SpeedDownFromChance` (`EFFECT_SPEED_DOWN_HIT`,
+  `data/battle_ai_scripts.s:1136-1141`) is the one that remains** — confirmed
+  by grep, `EFFECT_SPEED_DOWN_HIT` sits only in `AI_CHECK_VIABILITY_TABLE_
+  EFFECTS`'s barriered set, no dispatch entry exists. It was never in this
+  step's scope (§25 is the weather trio only) and was already correctly
+  flagged as future work in doc §10/§4 — this entry just makes the exact gap
+  explicit rather than letting "last 3 of 22" language get misread as "then
+  we're done." Per the doc's own footnote (§4/§5.216-229): it's CBM-free (no
+  paired `AI_CBM_*` handler needed, 0 `if_random` of its own) and literally
+  forwards 3 of its 6 covered moves (`MOVE_ICY_WIND`/`MOVE_ROCK_TOMB`/
+  `MOVE_MUD_SHOT`, matched by exact `if_move` ID) into the ALREADY-PORTED
+  `runCvSpeedDown`'s own body verbatim; the other 3 (`MOVE_BUBBLEBEAM`/
+  `MOVE_CONSTRICT`/`MOVE_BUBBLE`) fall through to a deterministic zero. This
+  is a small, well-scoped follow-up (an `if_move`-keyed redirect wrapping
+  the existing handler, not new handler logic) — a strong next-step
+  candidate given how little new code it needs.
+- **Next:** `AI_CV_SpeedDownFromChance` (`EFFECT_SPEED_DOWN_HIT`) closes the
+  true 22/22 — small, CBM-free, redirects into the already-ported
+  `runCvSpeedDown` (see above). Otherwise entry 491's own carried Next list
+  stands: §19.5's unstaged AccuracyDown sites 2-6; §24's own follow-up from
+  §7.4 (a live oracle fixture for `AI_CV_EvasionUp`'s toxic-poisoned +
+  own-HP<=50% branch); §25.6's own 4 not-staged-live items (Swift Swim
+  bypass, Rain Dish tail, the `<40%` HP-gate branch, `get_weather`'s own
+  `AI_WEATHER_NONE` stale-read bug — all recipe-only per the doc, all now
+  covered by this entry's own Tier-1 handler-level tests even though not
+  live-oracle-verified); ENDTURN_ITEMS2 after Yawn/Thrash.
+- **Notes:** no PAPERCUT. Time split beat the brief's own guidance: all
+  three rungs (CBM trio, CV SunnyDay+Hail+RainDance together, mask-7
+  fixtures) landed green well inside the 40-minute mark, each as its own
+  commit, leaving room to re-derive the handler count from the doc's master
+  table instead of trusting the brief's own "22/22 if true" framing at face
+  value — worth the time given the brief explicitly asked for a
+  confirm-or-correct, and the correction is real (see above).
+
+---
 ## 491 — [BOUNDED WORKER 2026-07-26 ~23:50] Landed the DefenseUp/SpDefUp DRAW SITE 4/5 chain fix (entry 490's own finding) + whole-surface audit found and fixed a second instance in EvasionUp
 
 - **State:** tree committed and green at **231 test files / 3195 tests**
@@ -166,75 +272,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   identical finding on SpDefUp §22.3-22.4 live (not just derived by
   analogy), settling the "2-handler-wide, not a one-off" question the brief
   posed.
-
----
-## 489 — [BOUNDED WORKER 2026-07-26 ~23:10] EvasionUp/EvasionDown CBM+CV pair ported (§24, eleventh pair — largest CV handler in the doc)
-
-- **State:** tree committed and green at **231 files / 3191 tests** (+60 over
-  entry 488's 3131), `npm run build` clean (`tsc -b && vite build`). Census
-  **unchanged at 92/214 effects, 187/355 moves, 150/276 Factory-L50,
-  1884/2957 weighted, all 32 self-checks pass** (reran
-  `tools/report/executable-frontier-census.ts` live: byte-identical, `git
-  status --porcelain docs/executable-frontier-census.md` empty — this
-  AI-decision port touches `battle_ai_scripts.s`, not the effect-execution
-  subsystem the census measures). `executableFrontierRatchet.test.ts`'s
-  per-module barrier counts **unmoved** (6/6 green, no new barrier).
-- **Did:** landed §24's full four-handler pair per its ground truth
-  (`docs/factory-ai-checkviability-ground-truth.md` §24, merged prior round,
-  supervisor-verified live). (1) `factoryAiCheckBadMove.ts`: added
-  `runCbmEvasionUp` (bare 2-instruction MAX_STAT_STAGE-on-AI_USER's-own-stage
-  gate, same shape as AttackUp/DefenseUp/etc — `EFFECT_MINIMIZE` shares this
-  handler despite being blocked-on-opcodes for move execution, doc §24.7) and
-  `runCbmEvasionDown` (reuses the existing shared `runCbmStatDownViaSharedTail`
-  body verbatim, same shape as DefenseDown/SpDefDown — no dedicated
-  evasion-immunity ability exists in Gen 3). Added optional `evasionStage?`
-  to both `FactoryAiCheckBadMoveTarget` and `FactoryAiCheckBadMoveAttacker`
-  (same `?? DEFAULT_STAT_STAGE` convention as `accStage`/`spDefStage`). (2)
-  `factoryAiCheckViability.ts`: added `runCvEvasionUp` — the largest CV
-  handler ported in this doc, 8 `if_random_less_than` sites, re-derived
-  independently from the raw assembly per the brief (NOT copied from
-  `AI_CV_AccuracyDown` despite the structural similarity) — three real
-  divergences confirmed: DRAW SITE 1 has no Gate B companion (single 90%-HP
-  gate, not AccuracyDown's own two-gate 70% shape); Gate A's own threshold is
-  90 not 70; Gate I reads `AI_USER`'s own evasion stage, not `AI_TARGET`'s
-  (operand flips because this is an UP handler on the opponent's own stat).
-  Zero new `FactoryAiCheckViabilityBattler` fields needed — `evasionStage`,
-  `isRooted`, `isToxicPoisoned`, `isLeechSeeded`, `isCursed` were all already
-  present from §19's AccuracyDown port. Added `runCvEvasionDown`, confirmed
-  byte-for-byte identical to DefenseDown/SpDefDown, reusing the shared
-  `runCvStatDown` body with a new `"evasion-down-roll"` kind parameter. (3)
-  `factoryAiDecisionPolicy.ts`: wired the two new optional CBM fields
-  (`evasionStage` on both `targetForCbm`/`attackerForCbm`) — the CV
-  construction sites needed **zero** changes, every field the new handlers
-  read was already threaded through from §19's own wiring. **Construction-site
-  grep performed** (`grep -rn "FactoryAiCheckBadMove(Target|Attacker)"` /
-  `"runCheckViability("` across `src/`): confirms `factoryAiDecisionPolicy.ts`
-  is the ONLY production construction site for each input type, and both are
-  now fully wired — no repeat of entry 483's `spDefStage` gap. (4) Tests: 15
-  CBM tests (both handlers' gate true/false/omitted/vestigial-effect cases),
-  37 CV handler-level tests (all 8 EvasionUp gates/sites individually plus a
-  6-draw non-mutually-exclusive composite, all 3 named §24.1 divergences
-  explicitly proven, EvasionDown's DefenseDown-identical shape), 8 mask-7/
-  mask-1 `chooseFactoryAiScoredDecision` end-to-end tests reproducing ALL
-  FIVE §24 fixtures (policy-own draws: EvasionUp fullhp-reach/lowhp-reach =
-  4 setup + 4 CV + 1 tie = 9 each, midhp-control = 4 setup + 0 CV + 1 tie = 5;
-  EvasionDown lowhp-reach = 9, fullhp-control = 5 — the doc's own live window
-  totals of 10/8/12/13/7 are a documented superset, same subset relationship
-  every prior pair already established) plus a mask-1 CBM-wiring isolation
-  test (entry-485 precedent: `AI_CV_EvasionUp` reads the same `evasionStage`
-  under mask 7, so mask 1 was required to isolate the CBM-only -10 delta).
-  60 tests total, following the §23 port pattern (entry 484) exactly.
-- **Next:** only the weather trio remains (RainDance/SunnyDay/Hail, §25 —
-  the last 3 of 22 CV handlers, out of this step's scope per the brief).
-  Otherwise entry 485's own carried Next list stands: §19.5's unstaged
-  AccuracyDown sites 2-6 (mixed movesets); §24.5's own 6 unexercised
-  `AI_CV_EvasionUp` draw sites (same mixed-moveset/multi-turn-build obstacle
-  class); §18 5-6-draw window discrepancy (`DefenseUp`/`SpDefUp`, probe
-  candidate, sRandCount attribution); ENDTURN_ITEMS2 after Yawn/Thrash;
-  presentation-seam program is fully closed (entry 488).
-- **Notes:** no PAPERCUT. Time split held: CBM pair + CV EvasionDown + full
-  CV EvasionUp (8-site handler) + all fixtures landed as one green rung
-  inside the ~40-minute budget, so no partial-rung split was needed this
-  session.
 
 ---

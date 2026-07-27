@@ -2081,3 +2081,133 @@ describe("AI_CV_EvasionDown mask-7 fixture reproduction (docs/factory-ai-checkvi
     assertPicksSweetScent(view, result);
   });
 });
+
+const MOVE_RAIN_DANCE_MASK7 = 240; // EFFECT_RAIN_DANCE
+const MOVE_SUNNY_DAY_MASK7 = 241; // EFFECT_SUNNY_DAY
+const MOVE_HAIL_MASK7 = 258; // EFFECT_HAIL
+const MOVE_GROWL_MASK7 = 45; // EFFECT_ATTACK_DOWN -- zero CBM/CV contribution against this exact pairing (established below)
+
+// docs/factory-ai-checkviability-ground-truth.md §25.4/§25.5: the twelfth
+// (and final) CBM-blocked pair -- ALL SIX handlers (3 CBM, 3 CV) are
+// 0-if_random, so unlike every prior pair this section's own draw-count
+// technique has no signal (a reachable and an unreached branch both draw
+// zero from the handler itself, doc §25.4). The only live-observable
+// channel is the AI's own final PICK, so these fixtures reproduce that pick
+// directly rather than a draw count: opponent (AI_USER) = Anorith (single
+// ability Battle Armor -- neither Swift Swim nor Rain Dish, genuinely
+// neutral for RainDance's own extra gates too), moveset
+// [<weather move>, Growl, Growl, Growl]; target (player) = Shuckle (single
+// ability Sturdy, Bug/Rock -- the same pairing §6/§14 already proved a
+// zero-baseline Growl control for: CBM's AttackDown gate needs target ATK
+// == MIN_STAT_STAGE or ABILITY_HYPER_CUTTER, neither true; CV's AttackDown
+// gate matches Shuckle's Bug/Rock physical-type list immediately, zero
+// draws either way since Shuckle is single-ability). Anorith faster than
+// Shuckle (95 vs 5) means RainDance's own Gate P (if_user_faster) resolves
+// deterministically true with zero draws in every fixture below -- the
+// hidden tie-break Random() (doc §25.3) and the Swift-Swim/Rain-Dish gates
+// are exercised by the handler-level tests above instead (doc §25.6 items
+// 1-2, not staged live by the doc's own session either).
+// `cbmreach` (weather == the move's own type): CBM fires -8, CV's chain
+// excludes the move's own type so it stays 0 -- net -8, AI picks a Growl
+// slot (never slot 0). `cvreach` (weather == Sandstorm, common to all three
+// handlers' own "other three" list): CBM doesn't match (0), CV matches
+// (+1) -- net +1, AI picks slot 0 (the weather move) always, no tie.
+// Policy-own draws: every one of these twelve cases is setup(4) + CBM(0,
+// single-ability target) + TryToFaint(0, all four moves are 0-power) +
+// CV(0, deterministic weather-trio span + zero-draw AttackDown control) +
+// tie(1) = 5 -- reconciles cleanly to the doc's own "genuinely 0-if_random"
+// finding with zero residual (this section abandoned the draw-count
+// channel entirely, so there is no live draw-count window to reconcile
+// against beyond confirming the mechanism draws nothing extra).
+describe("AI_CV_RainDance / AI_CV_SunnyDay / AI_CV_Hail mask-7 fixture reproduction (docs/factory-ai-checkviability-ground-truth.md §25.4/§25.5)", () => {
+  function anorithWeatherAttacker(currentWeather: 0 | 1 | 2 | 3): FactoryAiScoredBattlerView {
+    return Object.freeze({
+      types: ["TYPE_ROCK", "TYPE_BUG"] as const,
+      attack: 115, defense: 70, spAttack: 60, spDefense: 70, speed: 95, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp: 120, maxHp: 120,
+      ability: "ABILITY_BATTLE_ARMOR",
+      currentWeather,
+    });
+  }
+  function shuckleWeatherTarget(): FactoryAiScoredTargetView {
+    return Object.freeze({
+      species: 213,
+      types: ["TYPE_BUG", "TYPE_ROCK"] as const,
+      attack: 10, defense: 230, spAttack: 10, spDefense: 230, speed: 5, level: 50,
+      statStages: NEUTRAL_STAGES,
+      isFirstTurn: 0,
+      hp: 100, maxHp: 100, ability: "ABILITY_STURDY", knownAbility: null,
+    });
+  }
+  function weatherView(weatherMoveId: number, currentWeather: 0 | 1 | 2 | 3): FactoryAiScoredView {
+    return Object.freeze({
+      schema: "factory-ai-scored-view/v1",
+      mode: "factory-level-50-singles",
+      active: Object.freeze({ aiBattler: 1 as const, targetBattler: 0 as const }),
+      factory: Object.freeze({ levelMode: 0 as const, battleMode: 0 as const, factoryWinStreak: 28, trainerOpponentId: 222 }),
+      moves: [weatherMoveId, MOVE_GROWL_MASK7, MOVE_GROWL_MASK7, MOVE_GROWL_MASK7] as const,
+      attacker: anorithWeatherAttacker(currentWeather),
+      target: shuckleWeatherTarget(),
+    });
+  }
+  function phaseDraws(result: ReturnType<typeof chooseFactoryAiScoredDecision>, phase: "check-bad-move" | "try-to-faint" | "check-viability") {
+    return result.trace.draws.filter((d) => "phase" in d && d.phase === phase);
+  }
+
+  const AI_WEATHER_SUN = 0 as const;
+  const AI_WEATHER_RAIN = 1 as const;
+  const AI_WEATHER_SANDSTORM = 2 as const;
+  const AI_WEATHER_HAIL = 3 as const;
+
+  const HANDLERS = [
+    { label: "raindance", moveId: MOVE_RAIN_DANCE_MASK7, ownWeather: AI_WEATHER_RAIN },
+    { label: "sunnyday", moveId: MOVE_SUNNY_DAY_MASK7, ownWeather: AI_WEATHER_SUN },
+    { label: "hail", moveId: MOVE_HAIL_MASK7, ownWeather: AI_WEATHER_HAIL },
+  ] as const;
+
+  describe.each(HANDLERS)("$label", ({ moveId, ownWeather }) => {
+    it.each([1, 99])("cbmreach (weather == own type), seed %i: net -8 (CBM -8, CV 0) -- AI picks a Growl slot, never slot 0, with setup(4)+CBM(0)+TryToFaint(0)+CV(0)+tie(1)=5 total draws", (seed) => {
+      const view = weatherView(moveId, ownWeather);
+      const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+      expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+      expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+      expect(phaseDraws(result, "check-viability")).toHaveLength(0);
+      expect(result.trace.draws).toHaveLength(5);
+      expect(result.trace.slotScores[0]).toMatchObject({ checkBadMoveDelta: -8, checkViabilityDelta: 0, finalScore: 92 });
+      for (const slot of [1, 2, 3]) {
+        expect(result.trace.slotScores[slot]).toMatchObject({ checkBadMoveDelta: 0, checkViabilityDelta: 0, finalScore: 100 });
+      }
+      expect(result.submission.decision).toMatchObject({ kind: "use-move" });
+      if (result.submission.decision.kind === "use-move") {
+        expect(result.submission.decision.moveSlot).not.toBe(0);
+        expect(view.moves[result.submission.decision.moveSlot]).toBe(MOVE_GROWL_MASK7);
+      }
+    });
+
+    it.each([1, 99])("cvreach (weather == Sandstorm, common to all three handlers' own 'other three'), seed %i: net +1 (CBM 0, CV +1) -- AI always picks slot 0 (the weather move), no tie, with setup(4)+CBM(0)+TryToFaint(0)+CV(0)+tie(1)=5 total draws", (seed) => {
+      const view = weatherView(moveId, AI_WEATHER_SANDSTORM);
+      const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: seed, calls: 0 } });
+      expect(phaseDraws(result, "check-bad-move")).toHaveLength(0);
+      expect(phaseDraws(result, "try-to-faint")).toHaveLength(0);
+      expect(phaseDraws(result, "check-viability")).toHaveLength(0);
+      expect(result.trace.draws).toHaveLength(5);
+      expect(result.trace.slotScores[0]).toMatchObject({ checkBadMoveDelta: 0, checkViabilityDelta: 1, finalScore: 101 });
+      for (const slot of [1, 2, 3]) {
+        expect(result.trace.slotScores[slot]).toMatchObject({ checkBadMoveDelta: 0, checkViabilityDelta: 0, finalScore: 100 });
+      }
+      expect(result.trace.bestMoveSlots).toEqual([0]);
+      expect(result.submission.decision).toMatchObject({ kind: "use-move", moveSlot: 0 });
+    });
+  });
+
+  it("cross-handler parity (doc §25.1): the three CBM bodies are byte-identical -- each cbmreach fixture's own -8 is bit-for-bit the same magnitude regardless of which handler fires", () => {
+    const deltas = HANDLERS.map(({ moveId, ownWeather }) => {
+      const view = weatherView(moveId, ownWeather);
+      const result = chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 1, calls: 0 } });
+      return result.trace.slotScores[0]!.checkBadMoveDelta;
+    });
+    expect(deltas).toEqual([-8, -8, -8]);
+  });
+});
