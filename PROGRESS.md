@@ -19,7 +19,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 - **State:** tree green at **270 files / 3587 tests** (+2 files / +27 tests
   over session start 268/3560: new `battleScriptTryhealhalfhealthOpcode.test.ts`
-  12 tests, new `battleScriptTryKOOpcode.test.ts` 18 tests — folds
+  8 tests, new `battleScriptTryKOOpcode.test.ts` 18 tests — folds
   `Cmd_trysetdestinybondtohappen`'s own dispatch tests in too, since it's a
   one-line wrapper — plus `battleScriptHitChainOpcode.test.ts`'s
   resultmessage barrier test net +1 (one stale barrier test replaced by two
