@@ -15,6 +15,54 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 517 — [SUPERVISOR WIND-DOWN 2026-07-27 ~14:00] session complete: 7 rounds / 14 workers, all verified and merged
+
+- **State (final):** tree committed and green at **263 files / 3512 tests**
+  (session start: 245/3363; 247/3370 after the orient animation fold),
+  `npm run build` clean, clean `git status`, zero unmerged side branches,
+  zero stale worktrees, `animation-main` folded twice (11 commits at
+  orient — fast-forward onto the live animation supervisor's own
+  sync-merge — and 32 at wind-down: Poison Tail/Hyper Fang/Sludge
+  Bomb/Toxic tooling; animation coverage now 43/276 exact; 0 unfolded at
+  close, later commits fold next orient). **No DEFERRED entries — nothing
+  blocks the next `run-supervisor.sh`.** All 14 workers across 7 rounds
+  completed (0 failures, 0 salvages, no usage limits).
+- **Census:** 94/214 → **105/214 effects**, 191/355 → **206/355 moves**,
+  153/276 → **167/276 Factory-L50**, 1900/2957 → **2251/2957 weighted
+  (64.3% → 76.1%)** via 4 ranked-table sets: EARTHQUAKE target-iteration
+  pair (+147, incl. a hidden per-operand `Cmd_bicword` barrier the census
+  cannot see — standing warning recorded), SETPROTECTLIKE (+61, new
+  `protectUses` field + real block/endure composition proofs),
+  NEGATIVEDAMAGE+TRYSETREST (+98), JUMPIFSTAT+PLAYSTATCHANGEANIMATION
+  (+45). Next top blocker: `B_SCR_OP_TRYINFATUATING` (EFFECT_ATTRACT, 45).
+- **ISSUES #47 closed and deleted** in 3 pipelined rounds: logic-ID-major
+  restructure + Channel 2 first-slot model (entry 504) → side evidence
+  pack (§27 22-handler write audit + index-1 fixtures, live divergence
+  confirmed) → per-slot funcResult value propagation (entry 511) → §27.5
+  conditional-predecessor A/B pair CONFIRMED. 5 dedicated fixtures, zero
+  contradictions; remaining 6 unstaged predecessors = optional breadth
+  (§27.5 recipe), not debt.
+- **Presentation seam:** two windows re-driven from kernel events —
+  `turn4-doubleteam.json` kickoff (§11.3, 250/250 preserved) and
+  `turn6-featherdance.json` (§12.3, 90/90; first opponent-target,
+  two-sourceLabel bridge) — plus §12 prep-scout banked and executed in the
+  same session. ENDTURN `RESTORE_HP`/`RESTORE_PP` registered with a live
+  Sitrus fixture (+30 heal at the exact ≤50% gate, zero draws, berry
+  consumed). CV ground truth: §24.5 DRAW SITEs 2 and 5 live-verified
+  (2 recipe-only remain: 6 ingrain, 7 curse) incl. a real Gate-A polarity
+  correction.
+- **Next (in order):** TRYINFATUATING census set (then descend the ranked
+  table); next presentation prep-scout (§13) per the §8-§12 cadence —
+  note entry 514's apostrophe-charmap prerequisite before wiring
+  `TURN6_ATKFELL` text; §24.5 sites 6/7 + §19.5 sites 3-6 (recipe-only);
+  ISSUES #41/#39 keep retiring window by window.
+- **Notes:** 1 new PAPERCUTS entry (mash-rep calibration doesn't transfer
+  between move-animation classes, 2 hits). Entry 516's process note: check
+  `git status` right after any tsc-triggered fix. Oracle services fresh
+  all session. The user's `codex/oracle-tooling-papercuts` worktree left
+  untouched.
+
+---
 ## 516 — [BOUNDED WORKER 2026-07-27 ~14:00] B_SCR_OP_JUMPIFSTAT + B_SCR_OP_PLAYSTATCHANGEANIMATION registered; EFFECT_TICKLE/COSMIC_POWER/BULK_UP/CALM_MIND/DRAGON_DANCE executable end to end
 
 - **State:** tree green at **255 files / 3484 tests** (+3 files / +38 tests
@@ -112,63 +160,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   many as fit).
 - **Next:** verify final round, wind-down (deadline 15:28): animation-main
   fold check, final union verify, session summary.
-
----
-## 514 — [BOUNDED WORKER 2026-07-27 ~13:35] §12.3 wiring landed: turn6-featherdance.json kickoff text sourced from kernel events, via a new opponent-target/two-sourceLabel bridge
-
-- **State:** tree green at **252 files / 3446 tests** (+3 over session start
-  252/3443 — 3 new `presentationEventWindowBridge.test.ts` cases only; no
-  new test files), `npm run build` clean. `executableFrontierRatchet.test.ts`
-  unmoved (6/6, zero new barriers). Full `docs/presentation-seam-scout.md`
-  §12.4 regression sweep run BEFORE this change (pristine `HEAD`, via `git
-  stash`) matched every recorded count exactly (no pre-existing drift), then
-  re-run AFTER byte-identically: `turn6-featherdance.json` 90/90 (twice, a
-  determinism check), `turn6-rockslide-a.json` 255/255, `turn6-statfall.json`
-  127/127, `turn6-feathers.json` 235/235, `turn6-menu.json` 44/44,
-  `turn1-rockslide.json` 256/256, `turn5-rockslide.json` 256/256,
-  `turn4-doubleteam.json` 250/250.
-- **Did:** executed §12.3's ordered wiring plan steps 1/2/5 (steps 3/4 named
-  as out-of-this-trace's-scope prerequisites, not executed, exactly as the
-  plan itself specified). (1) `presentationEventWindowBridge.ts` gained
-  `resolveFeatherDanceKickoffPresentationWindowContent` — the first
-  OPPONENT-target sibling to `resolveDoubleTeamKickoffPresentationWindowContent`,
-  and the first to read from TWO `sourceLabel`s (`BattleScript_EffectStatDown`
-  for the kickoff `message{STRINGID_USEDMOVE}` + ATK `stat-stage-change`
-  pair, `BattleScript_StatDownPrintString` for the separately-labeled
-  `STRINGID_DEFENDERSSTATFELL` message), returning `{message, statChange,
-  statFellMessage}` (no `hp` field — this move deals no damage). (2)
-  `turn6FeatherDancePresentationStaging.ts`'s own pre-wiring local extraction
-  retired in favor of calling this bridge directly (same "stage the chain,
-  call the shared bridge" shape entry 506/§11.5 established for turn 4);
-  `resolveTurn6FeatherDanceKickoffLines` now reads `content.message.messageId`
-  from the bridge instead of a hardcoded literal, closing the same doc/code
-  gap class §11.5 closed. (3) `battleScene.ts`'s
-  `drawTurn6FeatherDanceKickoffText` now draws a new
-  `TURN6_FEATHERDANCE_KICKOFF_LINE1/2` constant (resolved once at module load)
-  in its own FEATHERDANCE-text branch — every other part of that function
-  (sprite choreography, stat-fall-banner gate, `atkFellStart` branch, ROCK_SLIDE
-  handoff) and every OTHER turn's own repeat-FEATHER_DANCE call site (turns
-  7/8/11) stayed byte-for-byte untouched, per the plan's own scope. **No
-  literal died:** `TURN6_FEATHERDANCE_LINE1/2` and `TURN6_ATKFELL_LINE1/2`
-  both stay defined and in active use elsewhere. **No mismatch found:** the
-  two-`sourceLabel` bridge shape §12.2/§12.3 predicted fit the real staged
-  event stream exactly, no rework needed.
-- **Tests:** `presentationEventWindowBridge.test.ts` +3 cases (happy-path
-  triad, plus 2 null-guard cases specifically exercising the new
-  two-`sourceLabel` read). `turn6FeatherDancePresentationStaging.test.ts`'s
-  final assertion updated to the bridge's return shape (mechanical, values
-  byte-identical, test count unchanged).
-- **Docs:** `docs/presentation-seam-scout.md` §12.5 completion note added,
-  mirroring §11.5's format (what landed, what didn't die, acceptance
-  numbers).
-- **Next:** side lane's own next prep-scout pick (per the standing §8-§12
-  cadence) — or, if this main lane continues the presentation-seam thread
-  itself, §12.3 step 3 (the `TURN6_ATKFELL_LINE1/2` wiring) is now blocked on
-  a real prerequisite: `resolveBattleStringLines`'s own straight-vs-curly
-  apostrophe residual (§12.2) needs a charmap-aware post-process or a
-  corrected `battle-message-templates.json` extraction FIRST, or wiring that
-  line would regress the already-pixel-correct literal by one glyph — this
-  trace's own 90/90 doesn't need it (out of captured range), so it wasn't
-  fixed this pass.
-- **Notes:** no PAPERCUT.
 

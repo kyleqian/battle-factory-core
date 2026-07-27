@@ -1,4 +1,63 @@
 ---
+## 514 — [BOUNDED WORKER 2026-07-27 ~13:35] §12.3 wiring landed: turn6-featherdance.json kickoff text sourced from kernel events, via a new opponent-target/two-sourceLabel bridge
+
+- **State:** tree green at **252 files / 3446 tests** (+3 over session start
+  252/3443 — 3 new `presentationEventWindowBridge.test.ts` cases only; no
+  new test files), `npm run build` clean. `executableFrontierRatchet.test.ts`
+  unmoved (6/6, zero new barriers). Full `docs/presentation-seam-scout.md`
+  §12.4 regression sweep run BEFORE this change (pristine `HEAD`, via `git
+  stash`) matched every recorded count exactly (no pre-existing drift), then
+  re-run AFTER byte-identically: `turn6-featherdance.json` 90/90 (twice, a
+  determinism check), `turn6-rockslide-a.json` 255/255, `turn6-statfall.json`
+  127/127, `turn6-feathers.json` 235/235, `turn6-menu.json` 44/44,
+  `turn1-rockslide.json` 256/256, `turn5-rockslide.json` 256/256,
+  `turn4-doubleteam.json` 250/250.
+- **Did:** executed §12.3's ordered wiring plan steps 1/2/5 (steps 3/4 named
+  as out-of-this-trace's-scope prerequisites, not executed, exactly as the
+  plan itself specified). (1) `presentationEventWindowBridge.ts` gained
+  `resolveFeatherDanceKickoffPresentationWindowContent` — the first
+  OPPONENT-target sibling to `resolveDoubleTeamKickoffPresentationWindowContent`,
+  and the first to read from TWO `sourceLabel`s (`BattleScript_EffectStatDown`
+  for the kickoff `message{STRINGID_USEDMOVE}` + ATK `stat-stage-change`
+  pair, `BattleScript_StatDownPrintString` for the separately-labeled
+  `STRINGID_DEFENDERSSTATFELL` message), returning `{message, statChange,
+  statFellMessage}` (no `hp` field — this move deals no damage). (2)
+  `turn6FeatherDancePresentationStaging.ts`'s own pre-wiring local extraction
+  retired in favor of calling this bridge directly (same "stage the chain,
+  call the shared bridge" shape entry 506/§11.5 established for turn 4);
+  `resolveTurn6FeatherDanceKickoffLines` now reads `content.message.messageId`
+  from the bridge instead of a hardcoded literal, closing the same doc/code
+  gap class §11.5 closed. (3) `battleScene.ts`'s
+  `drawTurn6FeatherDanceKickoffText` now draws a new
+  `TURN6_FEATHERDANCE_KICKOFF_LINE1/2` constant (resolved once at module load)
+  in its own FEATHERDANCE-text branch — every other part of that function
+  (sprite choreography, stat-fall-banner gate, `atkFellStart` branch, ROCK_SLIDE
+  handoff) and every OTHER turn's own repeat-FEATHER_DANCE call site (turns
+  7/8/11) stayed byte-for-byte untouched, per the plan's own scope. **No
+  literal died:** `TURN6_FEATHERDANCE_LINE1/2` and `TURN6_ATKFELL_LINE1/2`
+  both stay defined and in active use elsewhere. **No mismatch found:** the
+  two-`sourceLabel` bridge shape §12.2/§12.3 predicted fit the real staged
+  event stream exactly, no rework needed.
+- **Tests:** `presentationEventWindowBridge.test.ts` +3 cases (happy-path
+  triad, plus 2 null-guard cases specifically exercising the new
+  two-`sourceLabel` read). `turn6FeatherDancePresentationStaging.test.ts`'s
+  final assertion updated to the bridge's return shape (mechanical, values
+  byte-identical, test count unchanged).
+- **Docs:** `docs/presentation-seam-scout.md` §12.5 completion note added,
+  mirroring §11.5's format (what landed, what didn't die, acceptance
+  numbers).
+- **Next:** side lane's own next prep-scout pick (per the standing §8-§12
+  cadence) — or, if this main lane continues the presentation-seam thread
+  itself, §12.3 step 3 (the `TURN6_ATKFELL_LINE1/2` wiring) is now blocked on
+  a real prerequisite: `resolveBattleStringLines`'s own straight-vs-curly
+  apostrophe residual (§12.2) needs a charmap-aware post-process or a
+  corrected `battle-message-templates.json` extraction FIRST, or wiring that
+  line would regress the already-pixel-correct literal by one glyph — this
+  trace's own 90/90 doesn't need it (out of captured range), so it wasn't
+  fixed this pass.
+- **Notes:** no PAPERCUT.
+
+---
 ## 513 — [BOUNDED WORKER 2026-07-27 ~12:35] B_SCR_OP_NEGATIVEDAMAGE + B_SCR_OP_TRYSETREST registered; EFFECT_ABSORB/EFFECT_DREAM_EATER/EFFECT_REST executable end to end
 
 - **State:** tree green at **252 files / 3443 tests** (+2 files / +21 tests
