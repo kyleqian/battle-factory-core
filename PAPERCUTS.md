@@ -478,3 +478,15 @@ worker (PROGRESS entry 13).
 - **Workaround:** copy `tools/compare/scratch/future-sight-per-frame-bbox.ts`
   as the starting point; a shared `--per-frame-bbox` flag on the portable
   harness template would retire this.
+
+## `bin/oracle lab` with no `-o` writes untracked `battle-lab-output/` into the tree
+
+- **What:** running `bin/oracle lab <scenario>` without an explicit `-o`
+  drops its captures into `battle-lab-output/` at the invoking tree's root,
+  which is not gitignored — it shows up in `git status` and must be
+  manually removed before committing (worktree workers notice it while
+  staging their own commits).
+- **Hits:** 1 (2026-07-26 evening, §24 Evasion scout).
+- **Cost each:** ~2 min.
+- **Workaround:** always pass `-o` to a scratch path; adding
+  `battle-lab-output/` to `.gitignore` would retire this.
