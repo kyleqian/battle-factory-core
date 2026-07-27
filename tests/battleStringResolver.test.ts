@@ -44,4 +44,29 @@ describe("battleStringResolver (S10 presentation-seam checkpoint, gap 5)", () =>
     });
     expect(lines).toEqual(["ONIX", "fainted!"]);
   });
+
+  // docs/presentation-seam-scout.md §12.2/§12.3 step 3: the extractor used to
+  // carry battle_message.c's raw straight ASCII apostrophe into the template
+  // JSON instead of decoding it to the curly glyph (U+2019) charmap.txt
+  // aliases it to (the byte the font actually renders). Pins the fix at the
+  // resolver layer so a regression shows up here, not just in the extractor.
+  it("STRINGID_DEFENDERSSTATFELL resolves with the curly apostrophe glyph, matching turn6-statfall.json's pixel-confirmed \"ONIX’s ATTACK harshly fell!\" capture", () => {
+    const lines = resolveBattleStringLines("STRINGID_DEFENDERSSTATFELL", {
+      B_DEF_NAME_WITH_PREFIX: () =>
+        resolveBattleNameWithPrefix({ side: "player", isTrainerBattle: true, nickname: "ONIX" }),
+      B_BUFF1: () => "ATTACK",
+      B_BUFF2: () => "harshly fell!",
+    });
+    expect(lines).toEqual(["ONIX’s ATTACK", "harshly fell!"]);
+    expect(lines[0]).not.toContain("'");
+  });
+
+  it("STRINGID_ATTACKMISSED (a second swept template) resolves with the curly apostrophe glyph too, not just STRINGID_DEFENDERSSTATFELL", () => {
+    const lines = resolveBattleStringLines("STRINGID_ATTACKMISSED", {
+      B_ATK_NAME_WITH_PREFIX: () =>
+        resolveBattleNameWithPrefix({ side: "opponent", isTrainerBattle: true, nickname: "GROVYLE" }),
+    });
+    expect(lines).toEqual(["Foe GROVYLE’s", "attack missed!"]);
+    expect(lines[0]).not.toContain("'");
+  });
 });
