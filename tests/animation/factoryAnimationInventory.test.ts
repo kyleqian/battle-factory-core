@@ -68,10 +68,10 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // DYNAMIC PUNCH is exact through the shared framebuffer seam.
-        unsupported: 226,
+        // RAZOR LEAF adds a source-only partial; raw RGB remains unattempted.
+        unsupported: 225,
         staged: 0,
-        partial: 3,
+        partial: 4,
         exact: 47,
       },
       {

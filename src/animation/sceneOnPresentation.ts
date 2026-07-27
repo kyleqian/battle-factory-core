@@ -191,6 +191,10 @@ import {
   type DynamicPunchState,
 } from "./dynamicPunch.ts";
 import {
+  razorLeafAtAge,
+  type RazorLeafState,
+} from "./razorLeaf.ts";
+import {
   poisonTailAtAge,
   type PoisonTailState,
 } from "./poisonTail.ts";
@@ -361,7 +365,8 @@ export interface SceneOnPresentationBattler {
     | "SUDOWOODO"
     | "SHUCKLE"
     | "GLALIE"
-    | "HITMONCHAN";
+    | "HITMONCHAN"
+    | "WEEPINBELL";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -863,6 +868,13 @@ export interface SceneOnDynamicPunchConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnRazorLeafConfig {
+  readonly move: "RAZOR_LEAF";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnPoisonTailConfig {
   readonly move: "POISON_TAIL";
   readonly attacker: SceneOnPresentationBattler;
@@ -1018,7 +1030,7 @@ export type SceneOnMoveConfig =
   | SceneOnKnockOffConfig;
 
 export interface SceneOnMovePresentationState<
-  TConfig extends SceneOnMoveConfig = SceneOnMoveConfig,
+  TConfig extends SceneOnMoveConfig | SceneOnRazorLeafConfig = SceneOnMoveConfig,
 > {
   readonly age: number;
   readonly config: TConfig;
@@ -1026,6 +1038,8 @@ export interface SceneOnMovePresentationState<
 
 export type SceneOnDynamicPunchPresentationState =
   SceneOnMovePresentationState<SceneOnDynamicPunchConfig>;
+export type SceneOnRazorLeafPresentationState =
+  SceneOnMovePresentationState<SceneOnRazorLeafConfig>;
 
 export interface SceneOnSupersonicView {
   readonly age: number;
@@ -1104,6 +1118,12 @@ export interface SceneOnExplosionView extends ExplosionState {
 }
 
 export interface SceneOnDynamicPunchView extends DynamicPunchState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnRazorLeafView extends RazorLeafState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -1622,7 +1642,9 @@ function assertIntegerPoint(
  * geometry only: damage, RNG, move legality, turn order, and round state are
  * supplied as immutable inputs and never resolved or mutated here.
  */
-export function createSceneOnMovePresentation<TConfig extends SceneOnMoveConfig>(
+export function createSceneOnMovePresentation<
+  TConfig extends SceneOnMoveConfig | SceneOnRazorLeafConfig,
+>(
   config: TConfig,
 ): SceneOnMovePresentationState<TConfig> {
   if (config.attacker.geometry.side === config.target.geometry.side) {
@@ -2246,6 +2268,28 @@ export function sceneOnDynamicPunchView(
       state.config.attacker.geometry.side,
       state.config.target.geometry.animationCenter,
       state.config.target.geometry.battlePositionCenter,
+    ),
+  };
+}
+
+/** `age=0` is the first monbg/alpha display of the complete source body. */
+export function sceneOnRazorLeafView(
+  state: SceneOnMovePresentationState<SceneOnRazorLeafConfig>,
+): SceneOnRazorLeafView {
+  if (state.config.move !== "RAZOR_LEAF") {
+    throw new Error(
+      `expected RAZOR_LEAF presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...razorLeafAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+      state.config.target.geometry.animationCenter,
     ),
   };
 }

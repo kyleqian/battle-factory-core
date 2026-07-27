@@ -46,7 +46,37 @@ animation. A status caused by a move is not part of that move's animation.
 
 ## Current resumable state (2026-07-27)
 
-Coverage is **47/276 exact, 3 partial, 226 unsupported**. DYNAMIC PUNCH is
+Coverage is **47/276 exact, 4 partial, 225 unsupported**. RAZOR LEAF is partial
+at **139/139 player-back + 139/139 opponent-front** complete source-component
+and typed-seam frames, reproduced twice fresh. Raw RGB remains explicitly
+**0/139 unattempted** in each orientation.
+
+## RAZOR LEAF source-component body closed; framebuffer remainder bounded (2026-07-27)
+
+**Verdict:** `MOVE_RAZOR_LEAF` is partial. Corrected challenge-0 mechanicLab
+parties use only legal set IDs 165-170 in the 110-199 source range. Species 70
+WEEPINBELL is the real set-165 carrier in both orientations, all active choices
+are RAZOR LEAF, and slower SHUCKLE is constrained to TACKLE. Complete windows
+91-229 player-back and 95-233 opponent-front match **139/139** twice fresh.
+
+**Source reducer/evidence:** all ten literal leaf callbacks, both
+`gRazorLeafCutterSpriteTemplate` instances (including `target_both=TRUE`
+singles behavior), target ShakeMon2 plus the immediately-aborted absent-partner
+task, monbg/alpha, three sound programs, software/hardware OAM, palette and
+register transfers, typed seam, and teardown are dense-equal. DYNAMIC PUNCH
+remains **75/75 component + framebuffer** exact in both orientations.
+
+**Precise remainder:** raw RGB is **0/139 unattempted**. Extract WEEPINBELL
+back/front and LEAF/RAZOR_LEAF art/palettes reproducibly; wire only the
+battleScene animation draw path; prove BG copy/alpha, source OAM ordering,
+palette/register latches, field chrome, cleanup, and 139/139 raw RGB twice.
+SECRET POWER, MAGICAL LEAF, LEAF BLADE, and TWISTER remain unsupported. No
+`battleScene.ts` edit, absolute ticks, screenshots, canonical imports,
+unsupported barriers, or boundary widening were added.
+
+## Previous current state (2026-07-27)
+
+Coverage was **47/276 exact, 3 partial, 226 unsupported**. DYNAMIC PUNCH was
 exact through the shared Scene-ON seam at **75/75 player-back + 75/75
 opponent-front** component, typed-seam, hardware-transfer, and raw-RGB frames,
 reproduced twice fresh.

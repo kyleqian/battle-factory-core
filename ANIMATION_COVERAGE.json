@@ -78,6 +78,29 @@
       ]
     },
     {
+      "move": "MOVE_RAZOR_LEAF",
+      "status": "partial",
+      "covered": [
+        "complete legal challenge-0 Scene-ON mechanicLab bases use only schedule IDs 165-170, all inside the source 110-199 range, in both orientations; species 70 WEEPINBELL is the real set-165 RAZOR LEAF carrier, all four active choices are constrained to RAZOR LEAF, and slower SHUCKLE is constrained to TACKLE",
+        "the complete move-owned source-component window matches 139/139 frames at oracle 91-229 player-back and 95-233 opponent-front, reproduced twice fresh through a typed sceneOnPresentation seam: monbg/alpha 12/8 lifecycle, all ten literal gRazorLeafParticleSpriteTemplate callbacks, both gRazorLeafCutterSpriteTemplate instances with target_both TRUE singles resolving to the visible target, target AnimTask_ShakeMon2(2,0,8,1), the immediately-aborted absent defender-partner task, three sound programs, and teardown",
+        "dense evidence checks signed particle sway and upward/fall callback phases, cutter Q8.8 linear/single-sine arcs and flip animation, software OAM, one-display hardware OAM transfer, faded/hardware palette identity, blend registers, target offsets, source pan/restart boundaries, and complete typed-seam equality in both orientations",
+        "raw RGB is explicitly 0/139 unattempted in both orientations: exact still requires reproducibly extracting WEEPINBELL back/front plus ANIM_TAG_LEAF and ANIM_TAG_RAZOR_LEAF art/palettes, wiring only the animation draw path through battleScene, then proving source OAM ordering, BG copy/alpha composition, palette/register latches, field chrome, cleanup, and 139/139 raw-RGB framebuffer equality twice fresh",
+        "DYNAMIC PUNCH remains 75/75 component, typed-seam, hardware-transfer, and framebuffer exact in both orientations as a fresh control; SECRET POWER, MAGICAL LEAF, LEAF BLADE, TWISTER, and every other leaf sibling remain unsupported without independent complete dense move acceptance"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-razor-leaf-player-weepinbell-opponent-shuckle.json",
+        "tools/battle-lab/mechanic-razor-leaf-opponent-weepinbell-player-shuckle.json",
+        "tools/compare/fixtures/razor-leaf-player-weepinbell-opponent-shuckle.json",
+        "tools/compare/fixtures/razor-leaf-opponent-weepinbell-player-shuckle.json",
+        "tools/compare/razorLeafPortable.ts",
+        "tools/compare/razorLeafProbe.py",
+        "src/animation/razorLeaf.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "tests/animation/razorLeaf.test.ts"
+      ],
+      "remaining": "Raw RGB is 0/139 unattempted in both orientations. Exact requires reproducibly extracting WEEPINBELL back/front plus ANIM_TAG_LEAF and ANIM_TAG_RAZOR_LEAF art/palettes; wiring only the animation drawing path through battleScene; and proving source OAM ordering, BG copy/alpha composition, palette/register latches, field chrome, cleanup, and 139/139 raw-RGB framebuffer equality twice fresh in both orientations. No framebuffer renderer or asset extraction was attempted in this source-only checkpoint."
+    },
+    {
       "move": "MOVE_SWAGGER",
       "status": "exact",
       "covered": [
@@ -1184,6 +1207,27 @@
     "MOVE_BIND"
   ],
   "componentTracks": [
+    {
+      "id": "razor-leaf-particle-cutter",
+      "components": [
+        "asset:ANIM_TAG_LEAF",
+        "asset:ANIM_TAG_RAZOR_LEAF",
+        "task:AnimTask_ShakeMon2",
+        "visualCommand:create_razor_leaf_particle_sprite",
+        "visualCommand:create_razor_leaf_cutter_sprite",
+        "visualCommand:monbg",
+        "visualCommand:setalpha",
+        "visualCommand:clearmonbg",
+        "visualCommand:blendoff"
+      ],
+      "representatives": [
+        "MOVE_RAZOR_LEAF",
+        "MOVE_SECRET_POWER",
+        "MOVE_MAGICAL_LEAF",
+        "MOVE_LEAF_BLADE"
+      ],
+      "goal": "MOVE_RAZOR_LEAF independently proves its complete 139-frame source-component and typed-seam body in both orientations twice fresh, including ten leaf particles, both target_both TRUE singles cutters, target plus aborted absent-partner ShakeMon2 requests, sounds, hardware transfer facts, and teardown. It remains partial at raw RGB 0/139 pending reproducible leaf/cutter/WEEPINBELL assets and battleScene draw wiring. SECRET POWER, MAGICAL LEAF, LEAF BLADE, and TWISTER remain unsupported pending independent complete dense evidence."
+    },
     {
       "id": "explosion-sprite-self-destruct",
       "components": [
