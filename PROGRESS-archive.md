@@ -1,4 +1,73 @@
 ---
+## 504 — [BOUNDED WORKER 2026-07-27 ~10:10] ISSUES #47 CLOSED for its live-verified shape: logic-ID-major restructure (option a) landed, Channel 2 modeled, 3 staged fixtures reproduce exactly; trimmed to one precisely-scoped, underivable remainder
+
+- **State:** tree green at **247 files / 3376 tests** (+6 over session start
+  247/3370), `npm run build` clean, `executableFrontierRatchet.test.ts`
+  unmoved (6/6, zero new barriers). Census re-run **byte-identical**
+  (94/214 effects, 191/355 moves, 153/276 Factory-L50, 1900/2957 weighted,
+  `git status --porcelain docs/executable-frontier-census.md` empty). Full
+  `tools/probe/verify-factory-ai-checkviability-ground-truth.ts` reran
+  **ALL PASS, exit 0** (all pre-existing checks + the 3 new weather-stale
+  fixtures, all as ORACLE observations, `src/` untouched by that script).
+- **Did:** implemented the supervisor's option (a) from entry 501's
+  blocker: `chooseFactoryAiScoredDecision` (`factoryAiDecisionPolicy.ts`)
+  now runs three full logic-ID-major passes over all 4 movesetIndex slots
+  — CBM(0..3), then (mask 7) TTF(0..3), then CV(0..3) — matching
+  `ChooseMoveOrAction_Singles`/`BattleAI_DoAIProcessing`
+  (`battle_ai_script_commands.c:395-416,572-616`) exactly, replacing the
+  old per-slot CBM/TTF/CV interleave. Verified via full `npm test` (247/247
+  files, only +6 new tests, **zero existing-test churn** — confirms the
+  doc's own claim that every fixture to date avoids a same-decision
+  CBM/TTF draw, so reordering never perturbs a committed RNG value) before
+  touching Channel 2 at all. **Channel 2 modeled**: `AI_TryToFaint`'s own
+  `Cmd_get_how_powerful_move_is` writes `funcResult` to
+  `MOVE_POWER_OTHER`/`MOVE_NOT_MOST_POWERFUL`/`MOVE_MOST_POWERFUL` (0/1/2,
+  confirmed directly from `battle_ai_script_commands.c:1174-1240` +
+  `include/constants/battle_ai.h:33-35`) — numerically
+  `AI_WEATHER_SUN`/`RAIN`/`SANDSTORM` — and `Cmd_if_can_faint` never
+  touches it, so a running `ttfExitFuncResult` (updated only on a
+  non-null `mostPowerful`) exactly reproduces the real register's value
+  after TTF's whole pass. Threaded into `runCheckViability` as a new
+  `staleFuncResultFallback` param (mirrors Channel 1's
+  `staleAbilityGuess` shape in `factoryAiCheckBadMove.ts`), consulted only
+  when `currentWeather` is unset, and supplied by the caller **only for
+  the CV pass's first actually-scripted slot** (`AI_CheckViability`'s own
+  preamble never writes `funcResult`, so that slot alone is provably
+  intact) — traced `AI_CV_RainDance`'s own Gate S (`get_ability AI_USER`)
+  far enough to confirm it ALSO overwrites `funcResult` whenever it runs
+  (not-user-faster), so the fallback is additionally gated off in that
+  branch (`userFaster` only) rather than applied blindly.
+- **Tests:** new "Channel 2" describe block in
+  `tests/factoryAiScoredDecision.test.ts` (+6 tests, 2 seeds x 3 fixtures)
+  reproducing all 3 of doc §25.10's staged fixtures' mask-7 net scores
+  exactly — `hail-staleweather-collision` (Ninjask, net -7, Hail never
+  wins), `hail-staleweather-control` (Anorith, net +1, Hail always wins),
+  `cv-raindance-noraindish-stalesun` (Lotad no-Rain-Dish, net +1, Rain
+  Dance always wins) — species/moveset/ability lifted verbatim from the
+  3 staged battle-lab fixtures; verified every filler slot nets exactly 0
+  (Splash always, Growl-vs-Shuckle per the doc's own established
+  baseline) and that no stray RNG draw fires (checked type-effectiveness
+  arithmetic by hand for all 4 slots in all 3 fixtures before writing
+  assertions, then confirmed empirically via a scratch probe against the
+  real engine — zero quadruple-effective rolls, zero ability-guess draws,
+  5 total draws in every case, matching the doc's own "deterministic,
+  both seeds identical" claim).
+- **Scope closed vs. left open:** ISSUES #47 trimmed (not deleted) to the
+  one sub-case that is genuinely underivable without new evidence: a
+  weather move sitting at CV moveset index 1-3, behind another real
+  move's own CV dispatch at an earlier index in the same pass — whether
+  that earlier handler's own script writes `funcResult` before the
+  weather handler's `get_weather` runs would require auditing every
+  other already-ported `AI_CV_*` handler's own side effects, and no
+  fixture (staged or banked) isolates this sub-case. Not guessed.
+- **Next:** ISSUES #47's movesetIndex-1-3 remainder (needs a new live
+  fixture + a per-handler funcResult audit, not a quick follow-up); §11
+  wiring for `turn4-doubleteam.json`; Rung 6/Rung 4 TAUROS live-fixture
+  remainders; §19.5 sites 3-6 / §24.5 recipe-only live staging.
+- **Notes:** no PAPERCUT. Archived entry 501 to `PROGRESS-archive.md` to
+  keep this ledger at 3 live entries (504/503/502).
+
+---
 ## 503 — [SUPERVISOR ORIENT 2026-07-27 ~09:35] new session: animation-main folded (fast-forward onto the live animation supervisor's own sync-merge); round 1 dispatched
 
 - **State:** union baseline verified green at **247 files / 3370 tests**
