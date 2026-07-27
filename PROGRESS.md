@@ -14,6 +14,50 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > entry 468's animation items are the animation supervisor's backlog now.
 
 ---
+## 485 — [SUPERVISOR WIND-DOWN 2026-07-26 ~21:20] session summary
+
+- **State:** tree committed and green at **230 files / 3123 tests**, build
+  green. Census **92/214 effects, 187/355 moves, 150/276 Factory-L50,
+  1884/2957 weighted** (session start: 90/214, 185/355, 148/276,
+  1830/2957), all 32 self-checks pass. Single main worktree, zero unmerged
+  side branches, zero stale worktrees, clean `git status`. **No DEFERRED
+  entries — nothing blocks the next `run-supervisor.sh`.** No usage/rate
+  limits; all 5 workers ran to completion.
+- **Session (3 rounds / 5 workers over 2 lanes + 1 supervisor fix + 1 fold):**
+  - **Round 1:** Counter/Mirror Coat registered end-to-end (entry 482,
+    ISSUES #46 closed, +54 weighted, supervisor-rerun live probe all 8
+    scenarios PASS) ∥ side §22 ground truth (CosmicPower/CalmMind +
+    `AI_CV_SpDefUp`, 4 fixtures, supervisor-rerun verify ALL PASS, Gate F
+    `if_in_bytes` inversion re-verified against raw assembly).
+  - **Round 2:** §22 pair ported (entry 483, ninth pair, 27 tests) ∥ side
+    §23 ground truth (LightScreen/Reflect, 4 fixtures, supervisor-rerun
+    ALL PASS + assembly spot-check of the twin CV bodies/type lists).
+  - **Round 3:** §23 four-handler pair ported (entry 484, tenth pair,
+    29 tests, 13.8 min).
+  - **Supervisor fix (`c4ea1d6`):** round-3 worker flagged that entry 483's
+    `spDefStage` was never wired into `factoryAiDecisionPolicy.ts`'s
+    `attackerForCbm` — maxed SPDEF could not reach the CosmicPower/CalmMind
+    -8 gates in real decisions. Wired + mask-1 regression test (mask 7
+    can't isolate it: `AI_CV_SpDefUp` reads the same stage for its own -1).
+  - **Animation fold (wind-down):** `animation-main` (7 commits: psychic
+    orientation closure, Knock Off components) merged into master; union
+    suite 230/3123 + build green. The animation supervisor was still
+    mid-session at fold time (worker `animation-20260726-205051` live);
+    commits it lands after `960b6b9` fold next session.
+- **Next (in order):** EvasionUp/EvasionDown/weather-trio pairs (the last
+  6 of 22 CV handlers — LightScreen/Reflect done this session); §19.5's
+  unstaged AccuracyDown sites 2-6 (mixed movesets); §18 5-6-draw window
+  discrepancy (now recurring for `SpDefUp` too, §22.3-22.4 — probe
+  candidate, sRandCount attribution); ENDTURN_ITEMS2 after Yawn/Thrash;
+  `SpDefUp`/§23 DRAW SITE recipe-only leftovers. Seam — turn-4
+  `anchorOpponentAfterTurn4Hp` staging gap + seam-scout §9 items (carried
+  from entry 468, untouched again — AI-pair track was prioritized).
+- **Notes:** zero PAPERCUTS flagged by any worker. Established cadence
+  held: paired rounds (main port ∥ side prep-scout for the next pair),
+  supervisor-verified every merge with own reruns. Oracle services fresh
+  all session.
+
+---
 ## 484 — [2026-07-26] LightScreen/Reflect CBM+CV pair ported (§23, tenth pair)
 
 - **State:** tree committed and green at **226 files / 3109 tests** (+28
@@ -132,75 +176,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   supervisor, entry 481).
 - **Notes:** no ISSUES.md changes (none were open on this pair). No
   PAPERCUTS this step.
-
----
-## 482 — [2026-07-26] Counter/Mirror Coat registered end-to-end (closes ISSUES #46)
-
-- **State:** tree committed and green at **226 files / 3054 tests** (+19
-  tests over entry 481's 3035), build green (`tsc -b && vite build`).
-  Census **92/214 effects, 187/355 moves, 150/276 Factory-L50, 1884/2957
-  weighted** (was 90/214/185/355/148/276/1830/2957; +54 weighted, exactly
-  entry 479's estimate — EFFECT_COUNTER +40, EFFECT_MIRROR_COAT +14), all
-  32 self-checks pass. `executableFrontierRatchet.test.ts`'s per-module
-  barrier counts **unmoved** (no new unsupported-branch barrier added).
-  `battleScriptRulesContext.test.ts`'s opcode-handler-count pin moved
-  106→108 (the 2 new opcodes).
-- **Did:** landed `docs/counter-retaliation-design.md` §4's full 8-step
-  checklist in 5 commits. (1) Added `protectPhysicalDmg`/
-  `protectPhysicalBattlerId`/`protectSpecialDmg`/`protectSpecialBattlerId`
-  to `BattleScriptMoveEndBattlerMetadata`/`BattleScriptRulesBattler` +
-  the materialization loop + the 3 zero-construction sites. (2) Wired
-  `createDatahpupdateOpcodeHandler`'s physical/special branches to also
-  write the 2 new fields each (stale doc comment corrected). (3) Added
-  the full-`ProtectStruct`-table per-turn clear at
-  `mapFaintedActionsResult`'s `"no-fainted-battlers"` branch — **this is
-  the ISSUES #46 fix**: every modeled `ProtectStruct` bit on every
-  battler now resets once per turn, matching source's
-  `TurnValuesCleanUp(FALSE)`, instead of persisting forever once set.
-  Deleted the mislabeled top-of-function `flinchImmobility` clear it
-  superseded (it never matched `TurnValuesCleanUp(TRUE)`'s real
-  protected/endured-only semantics and was redundant with the new tail
-  clear). (4) Registered `B_SCR_OP_COUNTERDAMAGECALCULATOR`/
-  `B_SCR_OP_MIRRORCOATDAMAGECALCULATOR` per §1.4's exact 3-gate success
-  branch + `ppNotAffectedByPressure` failure branch; Follow Me redirect
-  is a structural no-op (this engine's `BattleScriptSideTimerState` has
-  no `followmeTimer` field at all). (5)/(6) TYPECALC2 and both
-  `BattleScript_EffectCounter`/`EffectMirrorCoat` script blocks were
-  already present (entry 479/pre-existing) — re-verified fresh, no
-  changes needed. (7) Added 2 new Mirror Coat live battle-lab fixtures
-  (prep-scout §1d: not yet fixtured) and reran
-  `tools/probe/verify-fixed-damage-cluster-ground-truth.ts` against the
-  live Battle Scene OFF oracle: **all 8 scenarios PASS** (Counter hit
-  2→4 both seeds; Mirror Coat hit 16→32 seed 1 / 15→30 seed 4; both
-  fail cases 0/0). (8) `npm test` stayed green throughout — no test
-  pinned the pre-existing cross-turn staleness bug, so no test needed
-  fixing.
-- **Side merge (supervisor, same round):** §22 ground truth for the
-  SpDefUp/CosmicPower/CalmMind pair staged and merged at `c5d0848` —
-  4 live-verified fixtures (`mechanic-factory-ai-cv-spdefup-*`), ledgers
-  control 8/8, reach 14/13 (reproduces §18's 5-6-draw anomaly on the
-  shared DRAW SITE 4/5 region), CosmicPower ≡ CalmMind numerically
-  (same `AI_CV_SpDefUp` body); Gate F `if_in_bytes` inversion vs
-  DefenseUp supervisor-verified against raw assembly; verify command
-  `node --experimental-strip-types
-  tools/probe/verify-factory-ai-checkviability-ground-truth.ts`
-  rerun by supervisor: ALL PASS. DRAW SITE 1/2/3 + site 5's empty-last-
-  move sub-case documented recipe-only (same status as prior pairs).
-- **Next:** SpDefUp/CosmicPower/CalmMind CBM+CV pair **port** (ground
-  truth ready, §22); then
-  LightScreen/Reflect/EvasionUp/EvasionDown/weather-trio pairs (the last
-  8 of 22 CV handlers); §19.5's unstaged AccuracyDown sites 2-6 (need
-  mixed movesets); entry 476's §18 5-6-draw window discrepancy (probe
-  candidate, sRandCount attribution); ENDTURN_ITEMS2 after Yawn/Thrash.
-  Seam — turn-4 `anchorOpponentAfterTurn4Hp` staging gap and seam-scout
-  §9 items remain carried from entry 468. Animation program is
-  independent now (entry 481's separate supervisor).
-- **Notes:** 26 new Tier-1 tests total (13 opcode-level success/failure-
-  gate/cross-gate-isolation, 4 full-committed-script live-oracle-pinned
-  reproduction, 1 per-turn-clear-across-all-battlers, 2 datahpupdate
-  write-through, 2 attack-canceler helper-fixups, 4 misc). DisableStruct
-  `isFirstTurn`/rechargeTimer` decrements and substitute-status2 sync
-  stayed out of scope per the design doc (noted for a future struct, not
-  modeled). No PAPERCUTS this step.
-
 
