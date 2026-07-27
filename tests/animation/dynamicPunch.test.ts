@@ -1,4 +1,9 @@
+import { execFileSync } from "node:child_process";
+import { mkdtempSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import dynamicPunchAsset from "../../src/animation/assets/dynamicPunch.json" with { type: "json" };
 import {
   DYNAMIC_PUNCH_BODY_LAST_AGE,
   DYNAMIC_PUNCH_EXPLOSION_FIRST_AGE,
@@ -110,5 +115,48 @@ describe("MOVE_DYNAMIC_PUNCH source-relative reducer", () => {
         expect.objectContaining({ spawnIndex: 1, x: 200, y: 16 }),
       ]),
     });
+  });
+
+  it("pins source-derived set-339 carrier and effect art", () => {
+    expect(dynamicPunchAsset.source).toMatchObject({
+      hitmonchanBack: expect.stringContaining("set 339"),
+      hitmonchanFront: expect.stringContaining("SPECIES_HITMONCHAN 107"),
+      fist: expect.stringContaining("gFistFootSpriteTemplate anim 0"),
+      hitsplat: expect.stringContaining("gBasicHitSplatSpriteTemplate anim 0"),
+    });
+    expect(dynamicPunchAsset.hitmonchanBack.tileset).toMatchObject({
+      columns: 8,
+      rows: 8,
+    });
+    expect(dynamicPunchAsset.hitmonchanFront.tileset).toMatchObject({
+      columns: 8,
+      rows: 16,
+    });
+    expect(dynamicPunchAsset.fist.tileset).toMatchObject({
+      columns: 4,
+      rows: 16,
+    });
+    expect(dynamicPunchAsset.hitsplat.tileset).toMatchObject({
+      columns: 4,
+      rows: 4,
+    });
+  });
+
+  it("re-extracts the carrier and effect art byte-for-byte", () => {
+    const directory = mkdtempSync(join(tmpdir(), "dynamic-punch-assets-"));
+    const output = join(directory, "dynamicPunch.json");
+    execFileSync(
+      process.execPath,
+      [
+        "--experimental-strip-types",
+        "tools/compare/extractDynamicPunchAssets.ts",
+        "--out",
+        output,
+      ],
+      { stdio: "pipe" },
+    );
+    expect(readFileSync(output)).toEqual(
+      readFileSync("src/animation/assets/dynamicPunch.json"),
+    );
   });
 });
