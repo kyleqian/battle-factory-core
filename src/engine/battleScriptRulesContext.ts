@@ -65,6 +65,7 @@ import { createBattleScriptRemainingHpToPowerOpcodeHandlers } from "./battleScri
 import { createBattleScriptFriendshipToDamageOpcodeHandlers } from "./battleScriptFriendshipToDamageOpcode.ts";
 import { createBattleScriptCopyFoeStatsOpcodeHandlers } from "./battleScriptCopyFoeStatsOpcode.ts";
 import { createBattleScriptJumpifcantswitchOpcodeHandlers } from "./battleScriptJumpifcantswitchOpcode.ts";
+import { createBattleScriptJumpifnodamageOpcodeHandlers } from "./battleScriptJumpifnodamageOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -2288,6 +2289,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptFriendshipToDamageOpcodeHandlers(program),
     ...createBattleScriptCopyFoeStatsOpcodeHandlers(program),
     ...createBattleScriptJumpifcantswitchOpcodeHandlers(program),
+    ...createBattleScriptJumpifnodamageOpcodeHandlers(program),
   });
 }
 

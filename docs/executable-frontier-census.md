@@ -4,16 +4,16 @@ Generated 2026-07-28. Rerun: `npx tsx tools/report/executable-frontier-census.ts
 
 Answers ROADMAP S10's Executable-frontier reset question directly: not "how many opcodes are registered" but **how many of the 355 moves can the kernel execute end-to-end today, and what exactly blocks each of the rest.** Every `BattleScript_Effect*` entry in the committed topology (`src/data/gen/battle-script-topology.json` + `battle-script-graph.json`) is walked for full opcode reachability (branches, goto/call targets, the shared hit-chain tail) against the opcode set the engine currently registers (read live from `src/engine/battleScriptRulesContext.ts`'s `createBattleScriptStatusRulesHandlers`, so this doc cannot drift from what the engine actually installs).
 
-**Key finding:** the single highest-leverage next registration is `B_SCR_OP_JUMPIFNODAMAGE` -- registering exactly that set would flip **1 effect / 1 move (1 Factory-L50, 11 weighted)** from blocked to executable in one step (EFFECT_FOCUS_PUNCH) -- the largest single entry in the ranked table below. This paragraph is generated fresh from the current registered-opcode set every run, so it always names today's actual top blocker, not a past one -- see PROGRESS.md for the registration history (e.g. the 2026-07-25 B_SCR_OP_JUMPIFHALFWORD/JUMPIFSTATUS3CONDITION/ORWORD entry-chokepoint trio).
+**Key finding:** the single highest-leverage next registration is `B_SCR_OP_SETDESTINYBOND` -- registering exactly that set would flip **1 effect / 1 move (1 Factory-L50, 10 weighted)** from blocked to executable in one step (EFFECT_DESTINY_BOND) -- the largest single entry in the ranked table below. This paragraph is generated fresh from the current registered-opcode set every run, so it always names today's actual top blocker, not a past one -- see PROGRESS.md for the registration history (e.g. the 2026-07-25 B_SCR_OP_JUMPIFHALFWORD/JUMPIFSTATUS3CONDITION/ORWORD entry-chokepoint trio).
 
 ## Headline counts
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 132 | 214 | 61.7% |
-| Moves (unweighted, all 355) | 256 | 355 | 72.1% |
-| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 208 | 276 | 75.4% |
-| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2631 | 2957 | 89.0% |
+| Effect scripts | 133 | 214 | 62.1% |
+| Moves (unweighted, all 355) | 257 | 355 | 72.4% |
+| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 209 | 276 | 75.7% |
+| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2642 | 2957 | 89.3% |
 
 "Executable" means every opcode on every statically reachable path from the effect's entry script has a dispatch entry today (registered barriers included, per ROADMAP S10 §1's (a)/(b) policy). It is not a semantic-correctness claim -- see Caveats.
 
@@ -23,7 +23,6 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 
 | Missing opcode(s) | Effects unlocked | Moves unlocked (unweighted) | Factory-L50 moves (unweighted) | Factory-L50 weighted |
 | --- | --- | --- | --- | --- |
-| `B_SCR_OP_JUMPIFNODAMAGE` | 1 (EFFECT_FOCUS_PUNCH) | 1 | 1 | 11 |
 | `B_SCR_OP_SETDESTINYBOND` | 1 (EFFECT_DESTINY_BOND) | 1 | 1 | 10 |
 | `B_SCR_OP_SETSUBSTITUTE` | 1 (EFFECT_SUBSTITUTE) | 1 | 1 | 10 |
 | `B_SCR_OP_JUMPTOCALLEDMOVE`, `B_SCR_OP_TRYCHOOSESLEEPTALKMOVE` | 1 (EFFECT_SLEEP_TALK) | 1 | 1 | 8 |
@@ -48,6 +47,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_DOUBLEDAMAGEDEALTIFDAMAGED` | 1 (EFFECT_REVENGE) | 1 | 1 | 3 |
 | `B_SCR_OP_TRYSETMAGICCOAT` | 1 (EFFECT_MAGIC_COAT) | 1 | 1 | 3 |
 | `B_SCR_OP_TRYSETSPIKES` | 1 (EFFECT_SPIKES) | 1 | 1 | 3 |
+| `B_SCR_OP_SCALEDAMAGEBYHEALTHRATIO` | 1 (EFFECT_ERUPTION) | 2 | 2 | 2 |
 
 ## Per-effect detail
 
@@ -223,7 +223,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_WILL_O_WISP | `BattleScript_EffectWillOWisp` | blocked-on-subsystem | - | Cmd_jumpifability: ABILITY_WATER_VEIL is outside the engine's widened ability set (battleScriptIngrainLeechSeedWrapOpcode.ts) -- battle_script_commands.c:3105 | 1 | 1 (10) |
 | EFFECT_MEMENTO | `BattleScript_EffectMemento` | blocked-on-opcodes | `B_SCR_OP_TRYMEMENTO` (edge branch only) | - | 1 | 1 (1) |
 | EFFECT_FACADE | `BattleScript_EffectFacade` | executable | - | - | 1 | 1 (19) |
-| EFFECT_FOCUS_PUNCH | `BattleScript_EffectFocusPunch` | blocked-on-opcodes | `B_SCR_OP_JUMPIFNODAMAGE` (main path) | - | 1 | 1 (11) |
+| EFFECT_FOCUS_PUNCH | `BattleScript_EffectFocusPunch` | executable | - | - | 1 | 1 (11) |
 | EFFECT_SMELLINGSALT | `BattleScript_EffectSmellingsalt` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_REMOVE_PARALYSIS is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 1 | 1 (1) |
 | EFFECT_FOLLOW_ME | `BattleScript_EffectFollowMe` | blocked-on-opcodes | `B_SCR_OP_SETFORCEDTARGET` (main path) | - | 1 | 1 (5) |
 | EFFECT_NATURE_POWER | `BattleScript_EffectNaturePower` | blocked-on-opcodes | `B_SCR_OP_CALLENVIRONMENTATTACK` (main path) | - | 1 | 0 (0) |
