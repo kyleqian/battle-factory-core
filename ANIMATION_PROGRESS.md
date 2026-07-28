@@ -44,6 +44,25 @@ animation. A status caused by a move is not part of that move's animation.
   presentation seam and all source- or evidence-required variants are covered.
 - No entry means unsupported.
 
+## MOVE_SPARK promoted exact; shared framebuffer closed (2026-07-27)
+
+**Verdict:** `MOVE_SPARK` is exact. Both legal set-187 MINUN orientations
+match **115/115** complete source-component, typed-seam, raw-RGB, and shared
+framebuffer body frames plus **2/2** cleanup frames, reproduced twice fresh.
+The narrow renderer reuses the literal source-tagged ENCORE MINUN,
+SELF_DESTRUCT SHUCKLE, generated SPARK_2, and DYNAMIC PUNCH IMPACT art; it
+ports source OAM ordering/matrices/flips, explicit allocator tie state, the
+one-display palette/effect transfer, HorizontalLunge, animation-2 impact,
+source ShakeMon display latch, field/chrome/text, and ages 115-116 teardown.
+
+**Controls/scope:** ENCORE remains **215/215** and DYNAMIC PUNCH **75/75**
+component plus framebuffer exact in both orientations. The optional full
+BOUNCE paralysis-window comparator is not a usable exact control at current
+branch baseline (**87/450**, failures begin before its status component);
+the SPARK change leaves `statusAnimation.ts` byte-untouched and its focused
+tests green. THUNDERBOLT, THUNDER_WAVE, ZAP CANNON, and THUNDER SHOCK remain
+unsupported. Coverage is now **50 exact / 3 partial / 223 unsupported**.
+
 ## MOVE_SPARK promoted partial; complete source body closed (2026-07-27)
 
 **Verdict:** `MOVE_SPARK` is partial. The legal set-187 MINUN fixtures match

@@ -3,14 +3,15 @@
   "entries": [
     {
       "move": "MOVE_SPARK",
-      "status": "partial",
+      "status": "exact",
       "covered": [
         "complete legal Level-50 Scene-ON mechanicLab parties stage MINUN, the real Factory set-187 SPARK carrier, in both player-back and opponent-front orientations against slower constrained SHUCKLE",
         "complete move-owned source-component windows 79-193 player-back and 83-197 opponent-front match 115/115 dense reducer and typed-seam frames twice fresh, with no excluded frames; the minimal ages-115-116 cleanup tail is separately 2/2 twice in both orientations",
         "every literal source sprite is identity-preserving and exact for creation order, software slot/subpriority, tile/priority, affine/hidden/flip flags and matrix: six affine gSparkElectricitySpriteTemplate instances, eight flashing sprites, the invisible HorizontalLunge controller, impact, and all eight post-impact ElectricityEffect sprites",
         "hardware OAM is derived from reducer prior state with exact source order and matrices; opponent-front initial callback/affine allocation state and persistent same-Y tie order are explicit fixture/runtime inputs rather than an attacker-side or MINUN rule",
         "three precise BG/attacker palette ramps and resets plus target 0-to-6-to-0 are compared against unfaded, faded, and hardware palette buffers; all five sound restarts and the intervening channel/pan continuity and terminal absence are pinned; age 115 clears effect OAM/tasks/offsets and age 116 releases both asset palette tags",
-        "software rendering assets, the battleScene draw path, framebuffer composition, and raw-RGB equality are deliberately absent; those are the precise remainder before exact"
+        "the shared Scene-ON compositor matches raw RGB and the complete framebuffer 115/115 body plus 2/2 cleanup frames in both orientations, reproduced twice fresh; it reuses literal source-tagged MINUN art from ENCORE, SHUCKLE from exact destruction paths, generated ANIM_TAG_SPARK_2, and ANIM_TAG_IMPACT from DYNAMIC PUNCH",
+        "the narrow renderer composes source SortSprites priority/subpriority/Y/allocator-tie order, all affine matrices and flips, live BG/attacker/target palette transfers, HorizontalLunge, the animation-2 impact and source AnimTask_ShakeMon display latch, field battlers, healthboxes, chrome, text, and teardown without logical battle, RNG, or controller ownership"
       ],
       "evidence": [
         "tools/battle-lab/mechanic-spark-player-minun-opponent-shuckle.json",
@@ -19,11 +20,16 @@
         "tools/compare/fixtures/spark-opponent-minun-player-shuckle.json",
         "tools/compare/sparkEvidence.ts",
         "tools/compare/sparkProbe.py",
+        "src/assets/gen/battle-anim-spark-2.json",
+        "src/animation/assets/encore.json",
+        "src/animation/assets/dynamicPunch.json",
+        "src/animation/assets/selfDestruct.json",
         "src/animation/spark.ts",
         "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "src/engine/core.ts",
         "tests/animation/spark.test.ts"
-      ],
-      "remaining": "Extract source-derived MINUN back/front, SHUCKLE back/front, ANIM_TAG_SPARK_2, and ANIM_TAG_IMPACT render assets; add the narrow live draw/composition path and require 115/115 raw-RGB plus shared-seam framebuffer equality in both orientations twice fresh before exact."
+      ]
     },
     {
       "move": "MOVE_SELF_DESTRUCT",
@@ -1545,7 +1551,7 @@
         "MOVE_THUNDER_WAVE",
         "MOVE_ZAP_CANNON"
       ],
-      "goal": "MOVE_SPARK is partial: legal set-187 MINUN fixtures match the strengthened complete 115/115 source-component and typed-seam body plus 2/2 cleanup tail in both orientations twice fresh. Identity/order/slot/subpriority/OAM flags/flips/matrices, reducer-derived hardware transfer, exact palette coefficients/buffers, five audio restart/continuity/stop intervals, battler offsets, tasks, assets and teardown are pinned. Explicit fixture scheduler/allocation inputs explain the opponent-front initial affine state without a side/species rule. Renderer assets, battleScene drawing, framebuffer composition, and raw-RGB equality remain before exact. THUNDERBOLT, THUNDER_WAVE, ZAP_CANNON, and THUNDER_SHOCK each retain distinct complete scripts and remain unsupported without their own evidence."
+      "goal": "MOVE_SPARK is exact: legal set-187 MINUN fixtures match the complete 115/115 source-component, typed-seam, raw-RGB, and shared-framebuffer body plus 2/2 cleanup tail in both orientations twice fresh. Identity/order/slot/subpriority/OAM flags/flips/matrices, explicit allocator state, hardware transfer, live palettes, five audio intervals, HorizontalLunge, animation-2 impact, source ShakeMon display latch, field/chrome/text, assets, and teardown are pinned. THUNDERBOLT, THUNDER_WAVE, ZAP_CANNON, and THUNDER_SHOCK each retain distinct complete scripts and remain unsupported without their own evidence."
     },
     {
       "id": "knock-off-lunge-shake",

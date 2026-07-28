@@ -878,6 +878,8 @@ export interface SceneOnSparkConfig {
   /** Explicit scheduler/allocation state at the flashing-sprite creation tick. */
   readonly flashingInitialCallbackAdvances?: readonly number[];
   readonly flashingInitialAffineAdvances?: readonly number[];
+  /** Reducer-independent source `SortSprites` tie order for allocated slots. */
+  readonly hardwareTieSlotOrder?: readonly number[];
 }
 
 export interface SceneOnSelfDestructConfig {
@@ -1046,6 +1048,7 @@ export type SceneOnMoveConfig =
   | SceneOnHyperFangConfig
   | SceneOnSwaggerConfig
   | SceneOnTauntConfig
+  | SceneOnSparkConfig
   | SceneOnSelfDestructConfig
   | SceneOnExplosionConfig
   | SceneOnDynamicPunchConfig
@@ -1065,7 +1068,7 @@ export type SceneOnMoveConfig =
   | SceneOnKnockOffConfig;
 
 export interface SceneOnMovePresentationState<
-  TConfig extends SceneOnMoveConfig | SceneOnSparkConfig = SceneOnMoveConfig,
+  TConfig extends SceneOnMoveConfig = SceneOnMoveConfig,
 > {
   readonly age: number;
   readonly config: TConfig;

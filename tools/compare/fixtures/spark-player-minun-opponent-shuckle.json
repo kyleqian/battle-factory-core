@@ -22,7 +22,7 @@
   "hardwareTieSlotOrder": [12, 7, 3, 4, 5, 9, 10, 11],
   "fieldProfile": {"playerHp":167,"playerMaxHp":167,"opponentHp":127,"opponentMaxHp":127,"playerGender":"female","opponentGender":"male"},
   "acceptance": {
-    "status": "partial",
-    "note": "Complete source-component and typed-seam evidence only; renderer and raw-RGB/framebuffer parity remain."
+    "status": "exact",
+    "note": "Complete source-component, typed-seam, raw-RGB, and shared-framebuffer evidence through ages 0-116."
   }
 }

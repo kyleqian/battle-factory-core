@@ -1,4 +1,8 @@
 import { describe, expect, it } from "vitest";
+import encoreAsset from "../../src/animation/assets/encore.json" with { type: "json" };
+import dynamicPunchAsset from "../../src/animation/assets/dynamicPunch.json" with { type: "json" };
+import selfDestructAsset from "../../src/animation/assets/selfDestruct.json" with { type: "json" };
+import spark2Asset from "../../src/assets/gen/battle-anim-spark-2.json" with { type: "json" };
 import {
   SPARK_ASSET_CLEANUP_AGE,
   SPARK_FLASH_CREATION_AGE,
@@ -13,6 +17,10 @@ import {
   sceneOnSparkView,
   type SceneOnPresentationBattler,
 } from "../../src/animation/sceneOnPresentation.ts";
+import {
+  createInitialState,
+  render,
+} from "../../src/engine/core.ts";
 
 const player = {
   side: "player" as const,
@@ -95,6 +103,12 @@ describe("MOVE_SPARK source reducer", () => {
     expect(sparkAtAge(SPARK_IMPACT_CREATION_AGE, player, opponent))
       .toMatchObject({
         impactVisible: true,
+        impact: {
+          tileNum: 305,
+          affineMode: "normal",
+          objMode: "blend",
+          matrix: { a: 372, b: 0, c: 0, d: 372 },
+        },
         soundRestart: "SE_M_HYPER_BEAM",
         soundPanSide: "opponent",
         targetOffset: { x2: 0, y2: 0 },
@@ -206,6 +220,7 @@ describe("MOVE_SPARK typed presentation seam", () => {
       targetPictureOffset: { x: 176, y: 47 },
       attackerBgPriority: 2,
       targetBgPriority: 1,
+      hardwareTieSlotOrder: [12, 7, 3, 4, 5, 9, 10, 11],
       fieldProfile: {
         playerHp: 110, playerMaxHp: 110,
         opponentHp: 100, opponentMaxHp: 100,
@@ -219,5 +234,62 @@ describe("MOVE_SPARK typed presentation seam", () => {
       ...stage,
       config: { ...stage.config, move: "TAUNT" } as never,
     })).toThrow("expected SPARK presentation");
+  });
+
+  it("pins the literal reusable assets and their source provenance", () => {
+    expect(encoreAsset.source).toMatchObject({
+      minunBack: expect.stringContaining("FRONTIER_MON_MINUN_1 set 187"),
+      minunFront: expect.stringContaining("anim_front.png frame 0"),
+    });
+    expect(selfDestructAsset.source).toMatchObject({
+      shuckleBack: expect.stringContaining("shuckle/back.png"),
+      shuckleFront: expect.stringContaining("shuckle/anim_front.png frame 0"),
+    });
+    expect(dynamicPunchAsset.source.hitsplat)
+      .toContain("gBasicHitSplatSpriteTemplate");
+    expect(spark2Asset.source).toContain("ANIM_TAG_SPARK_2");
+    expect(spark2Asset.frames).toMatchObject({
+      columns: 2,
+      rows: 2,
+      list: expect.arrayContaining([
+        expect.arrayContaining([expect.any(Array)]),
+      ]),
+    });
+  });
+
+  it("renders body, source OAM teardown, and asset cleanup through core", () => {
+    const stage = createSceneOnMovePresentation({
+      move: "SPARK",
+      attacker: battler("MINUN", "player"),
+      target: battler("SHUCKLE", "opponent"),
+      attackerPictureOffset: { x: 72, y: 96 },
+      targetPictureOffset: { x: 176, y: 40 },
+      targetImpactPosition: { x: 176, y: 49 },
+      attackerBgPriority: 2,
+      targetBgPriority: 1,
+      flashingInitialCallbackAdvances: Array(8).fill(0),
+      flashingInitialAffineAdvances: Array(8).fill(0),
+      hardwareTieSlotOrder: [12, 7, 3, 4, 5, 9, 10, 11],
+      fieldProfile: {
+        playerHp: 167,
+        playerMaxHp: 167,
+        opponentHp: 127,
+        opponentMaxHp: 127,
+        playerGender: "female",
+        opponentGender: "male",
+      },
+    });
+    const frame = (age: number) => render({
+      ...createInitialState(),
+      rngMode: "frontierBattle",
+      sceneOnPresentation: { ...stage, age },
+    });
+    expect(frame(0)).not.toEqual(frame(SPARK_FLASH_CREATION_AGE + 1));
+    expect(frame(SPARK_TARGET_EFFECT_CREATION_AGE + 1))
+      .not.toEqual(frame(SPARK_TARGET_EFFECT_CREATION_AGE));
+    expect(frame(SPARK_TEARDOWN_AGE - 1))
+      .not.toEqual(frame(SPARK_TEARDOWN_AGE));
+    expect(frame(SPARK_TEARDOWN_AGE))
+      .toEqual(frame(SPARK_ASSET_CLEANUP_AGE));
   });
 });
