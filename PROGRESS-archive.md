@@ -1,4 +1,169 @@
 ---
+## 604 — [BOUNDED MAIN WORKER 2026-07-28 ~06:22] Encore shared seams repaired and pinned
+
+- **State:** committed `6e6bd33`; tree green at **366 files / 4229 tests**, focused
+  Encore/end-turn/switch/ratchet coverage **112/112**, production build, and
+  `git diff --check`.
+- **Did:** added exact RNG value/ledger ownership and full-turn proofs for
+  both sides' automatic encored choices, slot/target/PP use, multi-turn lock
+  precedence, successful script order, and repeat failure. Pinned end-turn
+  decrement, timer/PP expiry messages, silent slot-overwrite cleanup, and
+  ordinary/Baton Pass switch cleanup. Repaired the audited `battle_util.c`
+  discrepancy: an overwritten stored slot now clears all execution-owned
+  Encore fields and uses the live slot move instead of being misclassified as
+  Struggle.
+- **Next:** supervisor verify this repair and resume finite Stage 8 selection.
+- **Notes:** no oracle claim, unsupported barrier, recording import,
+  presentation/controller/round widening, issue removal, or census change.
+
+---
+## 603 — [BOUNDED MAIN WORKER 2026-07-28 ~06:14] Encore executes through shared choice/lifetime paths
+
+- **State:** committed `b2e406a` + `a954fd3` + `c6f3b09`; tree green at **365 files /
+  4221 tests**, production build, both oracle infos, census regeneration,
+  ratchets **6/6**, and `git diff --check`. Census is exactly **159/214
+  effects, 288/355 moves, 236/276 Factory-L50 distinct, 2764/2957
+  weighted**, all **42/42**.
+- **Did:** globally registered five-byte `B_SCR_OP_TRYSETENCORE` (`0xa4`)
+  with source pointer branches, first matching move-slot/PP predicates, and
+  the setter-owned exact 3–6 RNG draw. Shared state now carries the full
+  Encore fields; move limitations and full-turn choice auto-confirm the
+  forced slot, end-turn orchestration decrements and expires on timer/slot
+  rewrite/zero PP through `BattleScript_EncoredNoMore`, and every switch
+  (including Baton Pass) clears Encore. Actual action execution retains the
+  source's higher-priority multi-turn lock before Encore.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next source-complete target.
+- **Notes:** handler inventory **166→167**. No unsupported barrier, recording
+  import, private RNG/controller/event seam, presentation/tick/round-controller
+  widening, issue removal, or DEFERRED item.
+
+---
+## 602 — [SUPERVISOR VERIFY 2026-07-28 ~06:08] Focus Energy accepted
+
+- **State:** independently reviewed and verified the union green at focused
+  opcode/full-turn/crit/switch/evidence/ratchet coverage **348/348** plus
+  production build, census regeneration, all **42/42** validation checks,
+  and `git diff --check`. Census is exactly **158/214 effects, 287/355
+  moves, 235/276 Factory-L50 distinct, 2760/2957 weighted**.
+- **Did:** accepted global Focus Energy `0x9a`, the real script's duplicate
+  bypass, shared capped critical-hit stage consumer, and source switch
+  lifetime after source/diff review. Both attacker selectors and the
+  defensive duplicate opcode branch are pinned; the public full-turn path
+  proves exact PP/message/status order and repeat failure without a private
+  move path.
+- **Next:** select the next source-complete generic effect; keep the
+  seven-battle round controller and shared presentation seam authoritative.
+- **Notes:** handler inventory is **166**. No new unsupported barrier,
+  recording import, local RNG/controller/event seam, presentation/tick
+  branch, issue removal, or DEFERRED item. Animation branch remains
+  intentionally unmerged after orient.
+
+---
+## 599 — [BOUNDED MAIN WORKER 2026-07-28 ~05:58] Spikes executes across shared switch-in path
+
+- **State:** committed `9b8473e` + `db739ac`; tree green at **361 files /
+  4202 tests**, focused opcode/switch/faint/full-turn/ratchet coverage
+  **308/308**, production build, both oracle infos, ratchets **6/6**, and
+  `git diff --check`. Census is exactly **157/214 effects, 286/355 moves,
+  234/276 Factory-L50 distinct, 2758/2957 weighted**, all **42/42** checks.
+- **Did:** globally registered five-byte `B_SCR_OP_TRYSETSPIKES` (`0xb0`)
+  with exact failure pointer/opposite ownership and both-side `spikesAmount`.
+  The shared switch-in scripts now execute layer **1/8, 1/6, 1/4** HP,
+  min-1, Flying/Levitate immunity, damaged-guard set/clear, HP/message/
+  controller order, and faint pop/jump topology. Public two-turn decision
+  proof persists one layer and switches grounded Rhyhorn **155→136**.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next source-complete target; do not widen Rapid Spin here.
+- **Notes:** handler inventory **164→165**; unsupported barriers deliberately
+  shrink switch-in **10→9** and hit-chain **22→21**, with none added. Rapid
+  Spin remains a named source-backed remainder: `EFFECT_RAPID_SPIN` stops at
+  the existing `MOVE_EFFECT_RAPIDSPIN` barrier before `rapidspinfree`, so its
+  bit/counter clear was not widened. No recording import, private handler,
+  generic controller/tick/presentation branch, issue removal, or RNG seam.
+
+---
+## 598 — [SUPERVISOR VERIFY 2026-07-28 ~05:31] Low Kick accepted; Spikes evidence folded
+
+- **State:** reviewed union green at **360 files / 4186 tests** and focused
+  extraction/opcode/full-turn/evidence/ratchet coverage **60/60**;
+  production build, both-oracle info, census regeneration, ratchets **6/6**,
+  and `git diff --check` pass. Census is exactly **156/214 effects,
+  285/355 moves, 233/276 Factory-L50 distinct, 2755/2957 weighted**, all
+  **42/42**.
+- **Did:** accepted global Low Kick `0xdd`, source-derived species weights,
+  complete bracket/ownership matrix, and shared PP/accuracy/type/damage/
+  cleanup full-turn proof after source/diff/extractor review. Folded Spikes
+  source/OFF evidence and independently replayed exact manifest
+  `42ce4988…2604c742`: opponent Spikes, a real player switch, grounded
+  Rhyhorn **155→136** (`floor(155/8)`), then a second real set to layer 2.
+- **Next:** register five-byte `B_SCR_OP_TRYSETSPIKES` and remove the
+  matching switch-in barrier through a general side-condition seam. Prove
+  opposing-side ownership, all 0→1→2→3/failure branches, Pressure exemption,
+  persistent layers, Flying/Levitate immunity, one-switch guard, exact
+  1/8–1/6–1/4 damage, messages/HP events, Rapid Spin removal, and no leak.
+  Expected census: **157/214, 286/355, 234/276, 2758/2957**.
+- **Notes:** handler inventory is **164**. Spikes script PC/stack, all hidden
+  counters/flags, immunity cases, and non-public layer edges remain source-
+  pinned. No new unsupported/import ratchet, recording import, private
+  handler, presentation/tick branch, issue removal, DEFERRED item, or oracle
+  lifecycle action. Animation branch remains intentionally unmerged after
+  its post-orient advance.
+
+---
+## 597 — [BOUNDED MAIN WORKER 2026-07-28 ~05:28] Low Kick executes through shared damage
+
+- **State:** committed `6e96b30` + `28d2294` + `103881c` + `ff8c8c6`;
+  tree green at **359 files / 4183 tests**, focused
+  opcode/rules/hit-chain/action/full-turn coverage **294/294**, production
+  build, ratchets **6/6**, both oracle infos, and `git diff --check`.
+  Census is exactly **156/214 effects, 285/355 moves, 233/276 Factory-L50
+  distinct, 2755/2957 weighted**, all **42/42** checks.
+- **Did:** extended the pinned species extractor with Pokédex hectogram
+  weights for all 386 real Pokédex entries. The 25 unreachable OLD_UNOWN
+  compatibility ids remain explicitly absent. The handler proves all 12
+  strict bracket edges, arbitrary catalog rows, both target ids, immutable
+  ownership, and exact one-byte PC with unchanged RNG/events/scheduler.
+- **Next:** supervisor verify this bounded executable-frontier increment and
+  select the next source-complete registration target.
+- **Notes:** handler inventory is **164**. No recording import, local
+  RNG/controller/message work, private move path, unsupported barrier, or
+  ratchet change. Generic Machoke→Chansey Low Kick proves PP, shared
+  accuracy/type/damage/HP and effectiveness messages, opponent Splash, and
+  `dynamicBasePower` reset at the next decision.
+
+---
+## 596 — [SUPERVISOR VERIFY 2026-07-28 ~05:20] Magic Coat accepted; Low Kick evidence folded
+
+- **State:** reviewed union green at **357 files / 4161 tests** and focused
+  **43/43**; production build, both-oracle info, census regeneration,
+  ratchets **6/6**, and `git diff --check` pass. Census is exactly
+  **155/214 effects, 284/355 moves, 232/276 Factory-L50 distinct,
+  2753/2957 weighted**, all **42/42**.
+- **Did:** accepted global Magic Coat `0xdf`, source Pressure delegation,
+  shared bounce script/retarget execution, and generic full-turn reflected
+  Tail Whip proof after source/diff review. Folded Low Kick `0xdd`
+  source/OFF evidence and independently replayed both exact manifests:
+  Chansey `d5b814ed…6d6649e5` proves the **60**-power tier and Snorlax
+  `037869eb…6604b94` the **120**-power tier, with real PP, HP, and message
+  outcomes.
+- **Next:** register operand-free
+  `B_SCR_OP_WEIGHTDAMAGECALCULATION` globally. Read target species weight
+  through source-derived data, set `gDynamicBasePower` to the exact six-
+  bracket value, advance one byte with no local RNG/controller work, and
+  prove all strict boundaries plus Low Kick's shared damage/reset full-turn
+  path. Expected census:
+  **156/214, 285/355, 233/276, 2755/2957**.
+- **Notes:** handler inventory is **163**. Low Kick PC, target selector,
+  dynamic-power intermediate/reset, and all six brackets remain source-
+  pinned; public receipts distinguish two tiers. Magic Coat deliberately
+  retired one attack-canceler barrier (**5→4**). No new unsupported/import ratchet,
+  recording import, private handler, controller widening,
+  animation/presentation/tick branch, issue removal, DEFERRED item, or oracle
+  lifecycle action. Animation branch remains intentionally unmerged after
+  its post-orient advance.
+
+---
 ## 595 — [BOUNDED MAIN WORKER 2026-07-28 ~05:17] Magic Coat executes through shared reflection
 
 - **State:** committed `eea67d6` + `df318e2` + `ab50198`; tree green at
@@ -134,6 +299,24 @@
   required census. Switch/faint/Baton-Pass clearing remains source-bounded.
   No unsupported/import ratchet change, recording import, private handler,
   animation/presentation/tick branch, issue removal, DEFERRED item, or oracle
+  lifecycle action.
+
+---
+## 600 — [SUPERVISOR VERIFY 2026-07-28 ~05:55] Spikes accepted; Focus Energy evidence folded
+
+- **State:** reviewed union green at **362 files / 4206 tests** and focused
+  **330/330**; production build, both-oracle info, census regeneration,
+  ratchets **6/6**, and `git diff --check` pass. Census is exactly
+  **157/214 effects, 286/355 moves, 234/276 Factory-L50 distinct,
+  2758/2957 weighted**, all **42/42**.
+- **Did:** accepted Spikes `0xb0` plus the shared persistent side-condition,
+  switch-in damage/message/controller/guard/faint paths after source/diff and
+  public forced-switch review. Folded the repaired complete-party Focus
+  Energy source/OFF packet and independently replayed exact manifest
+  `e96bcff2…12d489c1`.
+- **Next:** register `B_SCR_OP_SETFOCUSENERGY` globally.
+- **Notes:** handler inventory is **165**. No recording import, private
+  handler, presentation/tick branch, issue removal, DEFERRED item, or oracle
   lifecycle action.
 
 ---
@@ -947,28 +1130,6 @@
   expose raw `ProtectStruct` receipt words; source pins their reset/write
   sites. No production recording import, oracle lifecycle action, animation
   edit, DEFERRED item, or PAPERCUT.
-
----
-## 549 — [BOUNDED MAIN WORKER 2026-07-27 ~22:48] Focus Punch executes both damage-receipt routes
-
-- **State:** tree green at **304 files / 3887 tests**; build, oracle
-  freshness, and `git diff --check` pass. Census is **133/214 effects,
-  257/355 moves, 209/276 Factory-L50 distinct, 2642/2957 weighted**, exact
-  **+1/+1/+1/+11**, with all **42/42** checks.
-- **Did:** committed `769f538`, registering the sole five-byte opcode
-  `0xcf` / `Cmd_jumpifnodamage`. It reads the attacker's existing
-  ProtectStruct physical/special receipts: either nonzero falls through;
-  both zero jump exactly to `BattleScript_HitFromAccCheck`. Genuine Focus
-  Punch walks now reach their own `END` through lost-focus and hit-chain
-  routes, including PP **20→19**, Starmie **135→66**, and exact RNG ledgers.
-- **Next:** source-scout and register the newly generated top blocker
-  `B_SCR_OP_SETDESTINYBOND` / `EFFECT_DESTINY_BOND` (expected
-  **+1/+1/+1/+10**) from targeted OFF evidence.
-- **Notes:** the generic full-turn proof shows Swift's real
-  `datahpupdate` receipt survives action cleanup into lost focus, while
-  Light Screen leaves zero receipts; the existing next-turn owner resets
-  both fields. No new plumbing, unsupported barrier/ratchet change,
-  recording import, oracle lifecycle action, animation edit, or PAPERCUT.
 
 ---
 ## 547 — [SUPERVISOR SOURCE REVIEW 2026-07-27 ~22:18] Baton Pass registration tightened before acceptance
@@ -24062,3 +24223,27 @@ both verify scripts/census independently re-verified before this entry.)*
   recording import, private handler, animation/presentation/tick branch,
   scenario/evidence mutation, issue removal, DEFERRED item, or oracle
   lifecycle action.
+## 601 — [BOUNDED MAIN WORKER 2026-07-28 ~06:05] Focus Energy executes through shared crit/lifetime paths
+
+- **State:** committed `52ee5ed` + `d60f1eb` + `1658239` + `ebfbe8f`; tree green at
+  **364 files / 4214 tests**, focused opcode/rules/full-turn/crit/switch/
+  evidence/ratchet coverage **348/348**, production build, both oracle infos,
+  ratchets **6/6**, and `git diff --check`. Census is exactly **158/214
+  effects, 287/355 moves, 235/276 Factory-L50 distinct, 2760/2957 weighted**,
+  all **42/42** checks.
+- **Did:** globally registered operand-free one-byte
+  `B_SCR_OP_SETFOCUSENERGY` (`0x9a`) with exact attacker-owned success and
+  defensive duplicate branches/selectors. The real effect now executes
+  PP/message/status order and pre-opcode repeat failure through the shared
+  full-turn path; shared `Cmd_critcalc` consumes the existing capped +2-stage
+  calculator. The source switch seam clears the bit ordinarily and retains
+  it through Baton Pass.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next source-complete target.
+- **Notes:** handler inventory **165→166**. Focus Energy and its public guard
+  add no RNG/controller/event work, private move path, unsupported barrier,
+  recording import, presentation/tick/controller widening, issue removal, or
+  DEFERRED item. The public repeated use spends PP, preserves the bit, and
+  reaches `BattleScript_ButItFailed` before `setfocusenergy`.
+
+---

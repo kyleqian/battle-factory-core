@@ -89,6 +89,8 @@ const YAWN_MAKES_ASLEEP_LABEL = "BattleScript_YawnMakesAsleep";
 const THRASH_CONFUSES_LABEL = "BattleScript_ThrashConfuses";
 /** `ENDTURN_DISABLE`'s expiry script (`battle_scripts_1.s:3363-3367`). */
 const DISABLED_NO_MORE_LABEL = "BattleScript_DisabledNoMore";
+/** `ENDTURN_ENCORE`'s expiry script (`battle_scripts_1.s:3374-3377`). */
+const ENCORED_NO_MORE_LABEL = "BattleScript_EncoredNoMore";
 /** `ENDTURN_WISH`'s delayed-heal script (`battle_scripts_1.s:3589-3610`). */
 const WISH_COMES_TRUE_LABEL = "BattleScript_WishComesTrue";
 /** `HandleWishPerishSongOnTurnEnd` state 0's delayed-attack script. */
@@ -1271,7 +1273,44 @@ function runDoBattlerEndTurnEffects(
     }
     if (disable.kind === "outcome-decided") return Object.freeze({ kind: "outcome-decided", state: disable.state });
     state = disable.state;
-    // ENDTURN_ENCORE: no modeled encoreTimer/encoredMove -- inert no-op today (doc B14).
+    const encoreSource = state.rulesContext.battlers[battler];
+    if (encoreSource.encoreTimer !== 0) {
+      const slotMatches =
+        encoreSource.moves[encoreSource.encoredMovePos] === encoreSource.encoredMove;
+      if (!slotMatches) {
+        state = Object.freeze({
+          ...state,
+          rulesContext: withBattler(state.rulesContext, battler, {
+            encoredMove: 0,
+            encoreTimer: 0,
+          }),
+        });
+      } else {
+        const encoreTimer = encoreSource.encoreTimer - 1;
+        const expires = encoreTimer === 0 || encoreSource.pp[encoreSource.encoredMovePos] === 0;
+        const rulesContext = withBattler(state.rulesContext, battler, {
+          encoreTimer: expires ? 0 : encoreTimer,
+          ...(expires ? { encoredMove: 0 } : {}),
+        });
+        if (expires) {
+          const encore = applyTickOutcome(runTickScript(
+            program,
+            handlers,
+            state,
+            rulesContext,
+            battler,
+            ENCORED_NO_MORE_LABEL,
+          ));
+          if (encore.kind === "opcode-barrier") {
+            return Object.freeze({ kind: "opcode-barrier", state: encore.state, instruction: encore.instruction });
+          }
+          if (encore.kind === "outcome-decided") return Object.freeze({ kind: "outcome-decided", state: encore.state });
+          state = encore.state;
+        } else {
+          state = Object.freeze({ ...state, rulesContext });
+        }
+      }
+    }
     // ENDTURN_LOCK_ON: doc-proven dead for Factory (zero MOVE_LOCK_ON/MOVE_MIND_READER carriers, B15) -- skipped, not silently ignored.
     // ENDTURN_CHARGE: no modeled chargeTimer/STATUS3_CHARGED_UP -- inert no-op today (doc B16).
     // ENDTURN_TAUNT (`battle_util.c:1748-1752`): unlike Disable/Encore,

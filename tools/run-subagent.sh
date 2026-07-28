@@ -3,7 +3,7 @@
 #
 # Launches one fresh headless worker. The default remains the original Claude
 # worker (claude-sonnet-5); a Codex supervisor automatically selects the Codex
-# worker profile (gpt-5.6-sol at medium effort). Codex max mode instead locks
+# worker profile (gpt-5.6-sol at high effort). Codex max mode instead locks
 # workers to gpt-5.6-sol and defaults them to xhigh. The transcript is
 # summarized to a fixed-size handoff and retained in the log file named below.
 # Killing a worker at any point is safe —
@@ -17,13 +17,14 @@
 #     -p, --provider NAME   claude (default) or codex
 #     -M, --max-mode        Codex Sol/xhigh worker profile
 #     -m, --model NAME      worker model (provider default)
-#     -e, --effort EFFORT   Codex reasoning effort (default medium)
+#     -e, --effort EFFORT   Codex reasoning effort (high; max mode also xhigh)
 #     -w, --worktree        alias for --lane side
 #         --animation-worktree
 #                           alias for --lane animation
 #         --lane NAME       main, side, or animation
 #         --log FILE        provider event log path
 #         --brief-file FILE read the step brief verbatim from a file
+#         --read-only       audit only; require a clean tree but no commit
 #     -h, --help            show this help
 #
 # Concurrency is capped at THREE workers, mechanically: main, side, and
@@ -61,7 +62,7 @@ Usage: tools/run-subagent.sh [options] "step brief for the worker"
   -M, --max-mode        Codex all-Sol profile: fixes the model at
                         gpt-5.6-sol and defaults effort to xhigh
   -m, --model NAME      worker model (provider default)
-  -e, --effort EFFORT   Codex reasoning effort (default medium)
+  -e, --effort EFFORT   Codex reasoning effort (high; max mode also xhigh)
   -w, --worktree        alias for --lane side
       --animation-worktree
                         alias for --lane animation
@@ -69,6 +70,8 @@ Usage: tools/run-subagent.sh [options] "step brief for the worker"
                         worktrees and must not touch shared docs.
       --log FILE        provider event log path
       --brief-file FILE read the step brief verbatim from a file
+      --read-only       run an audit that must leave no edits or commits
+      --audit           alias for --read-only
       --print-config    print the resolved profile without launching
   -h, --help            show this help
 Environment overrides: WORKER_PROVIDER, WORKER_MODEL, WORKER_REASONING_EFFORT,
@@ -78,7 +81,8 @@ Exits with the worker's status; 42 means an account usage/rate limit stopped it
 (either this worker's own, or a sibling's — a 42 in one lane cancels the others).
 Exit 4 means the requested lane already has a live worker (max 3 concurrent:
 one each in main, side, and animation).
-Exit 5 means a Codex worker violated the clean/committed postflight contract.
+Exit 5 means a Codex worker violated its postflight contract (clean and
+committed for implementation work; clean and uncommitted for read-only work).
 EOF
 }
 
@@ -93,6 +97,7 @@ if [[ "${WORKTREE:-0}" == "1" ]]; then LANE="side"; fi
 BRIEF=""
 BRIEF_FILE=""
 PRINT_CONFIG=0
+READ_ONLY=0
 PROVIDER_FLAG_SET=0
 MODEL_FLAG_SET=0
 
@@ -115,6 +120,7 @@ while [[ $# -gt 0 ]]; do
     --log=*)          AGENT_LOG="${1#*=}"; shift ;;
     --brief-file)     BRIEF_FILE="${2:?--brief-file needs a path}"; shift 2 ;;
     --brief-file=*)   BRIEF_FILE="${1#*=}"; shift ;;
+    --read-only|--audit) READ_ONLY=1; shift ;;
     --print-config)   PRINT_CONFIG=1; shift ;;
     -h|--help)        usage; exit 0 ;;
     -*) echo "run-subagent: unknown option '$1' (try --help)" >&2; exit 2 ;;
@@ -183,18 +189,21 @@ case "$PROVIDER" in
     ;;
   codex)
     MODEL="${MODEL:-gpt-5.6-sol}"
-    REASONING_EFFORT="${REASONING_EFFORT:-medium}"
-    if [[ ! "$REASONING_EFFORT" =~ ^(none|low|medium|high|xhigh)$ ]]; then
-      echo "run-subagent: unsupported reasoning effort '$REASONING_EFFORT' (maximum allowed: xhigh)" >&2
-      exit 2
-    fi
-    if [[ "$MAX_MODE" != "1" && "$MODEL" == *sol* && "$REASONING_EFFORT" == "xhigh" ]]; then
-      echo "run-subagent: Sol reasoning effort is capped at high outside --max-mode (got '$REASONING_EFFORT')" >&2
-      exit 2
-    fi
     if [[ "$MAX_MODE" == "1" && "$MODEL" != "gpt-5.6-sol" ]]; then
       echo "run-subagent: max mode only permits gpt-5.6-sol workers (got '$MODEL')" >&2
       exit 2
+    fi
+    if [[ "$MAX_MODE" == "1" ]]; then
+      if [[ ! "$REASONING_EFFORT" =~ ^(high|xhigh)$ ]]; then
+        echo "run-subagent: max-mode worker effort must be high or xhigh (got '$REASONING_EFFORT')" >&2
+        exit 2
+      fi
+    else
+      REASONING_EFFORT="${REASONING_EFFORT:-high}"
+      if [[ "$REASONING_EFFORT" != "high" ]]; then
+        echo "run-subagent: ordinary Codex worker effort is fixed at high (got '$REASONING_EFFORT')" >&2
+        exit 2
+      fi
     fi
     command -v codex >/dev/null 2>&1 || { echo "run-subagent: codex CLI not found on PATH" >&2; exit 127; }
     ;;
@@ -227,6 +236,11 @@ if [[ "$PRINT_CONFIG" == "1" ]]; then
   echo "worker_effort=${REASONING_EFFORT:-n/a}"
   echo "max_mode=$MAX_MODE"
   echo "worker_lane=$LANE"
+  if [[ "$READ_ONLY" == "1" ]]; then
+    echo "worker_mode=read-only"
+  else
+    echo "worker_mode=implementation"
+  fi
   if [[ "$LANE" == "animation" ]]; then
     echo "oracle_profile=battle-scene-on"
   else
@@ -349,15 +363,31 @@ fi
 # to the supervisor there — two branches rewriting the same ledger top entry
 # is a guaranteed merge conflict — so the worker reports in its final message
 # and the supervisor folds docs into the merge.
+if [[ "$READ_ONLY" == "1" ]]; then
+  SESSION_OPENING="Follow AGENTS.md. You are one bounded, explicitly read-only audit session with a hard ${CAP_MINUTES}-minute cap. Make no edits and no commits; inspect the assigned scope and return an evidence-backed report."
+  WORKTREE_OWNERSHIP="Work only inside this worktree. Do NOT edit or commit any file, including PROGRESS.md or ISSUES.md."
+  MAIN_OWNERSHIP="Do NOT edit or commit any file, including PROGRESS.md, ISSUES.md, or PAPERCUTS.md."
+  WORKTREE_FINISH_REQUIREMENT="Before finishing: leave the worktree clean. A commit is neither required nor allowed for this audit."
+  MAIN_FINISH_REQUIREMENT="Before finishing: leave the main worktree clean. A commit is neither required nor allowed for this audit."
+else
+  SESSION_OPENING="Follow AGENTS.md. You are one bounded worker session with a hard ${CAP_MINUTES}-minute cap — you can be stopped at any moment, so commit after every green step."
+  WORKTREE_OWNERSHIP="Work only inside this worktree and commit only to this branch. Do NOT edit PROGRESS.md or ISSUES.md (reading them is fine): shared docs for this lane belong to the supervisor, who folds them in when merging your branch — report your results fully in your final message instead."
+  MAIN_OWNERSHIP="Keep the top entry of PROGRESS.md current as you go."
+  WORKTREE_FINISH_REQUIREMENT="Before finishing: npm test and npm run build green, work committed on ${WT_BRANCH}."
+  MAIN_FINISH_REQUIREMENT="Before finishing: npm test and npm run build green, work committed, PROGRESS.md updated."
+fi
+
 if [[ "$IS_WORKTREE" == "1" ]]; then
-  if [[ "$LANE" == "animation" ]]; then
+  if [[ "$READ_ONLY" == "1" ]]; then
+    LANE_CONTRACT="Use the selected ${ORACLE_PROFILE} oracle only for read-only validation relevant to the assigned audit."
+  elif [[ "$LANE" == "animation" ]]; then
     LANE_CONTRACT="This is the animation/presentation lane. Read ANIMATION_PROGRESS.md and run npm run animation:coverage before changing code. Work the assigned non-exclusive component track behind the battle presentation seam: prove one representative, reuse the source-derived components, and batch-check the named siblings. Moves remain independent acceptance units; shared code alone never promotes coverage. Do not own facility progression or shared battle state. Use the Battle Scene ON oracle. You own ANIMATION_PROGRESS.md, ANIMATION_COVERAGE.json, src/animation/**, and tests/animation/** (plus the animation comparators/fixtures under tools/compare/); the only engine files you may touch are battleScene.ts and core.ts, and only their animation draw/wiring cases — tests/animation/animationBoundaryRatchet.test.ts pins the import boundary and widening its lists needs brief-level justification. A canonical window alone is partial; exact requires a complete dense window through the shared seam and every evidence-required variant."
   else
     LANE_CONTRACT="This is the side implementation lane. Prefer source extraction, deterministic scenario staging, data breadth, or another file-disjoint task assigned by the supervisor. Use the Battle Scene OFF oracle."
   fi
-  PROMPT="Follow AGENTS.md. You are one bounded worker session with a hard ${CAP_MINUTES}-minute cap — you can be stopped at any moment, so commit after every green step.
+  PROMPT="${SESSION_OPENING}
 
-You are in the ${LANE} lane, a git worktree on branch ${WT_BRANCH}; sibling workers may be active in other lanes. Work only inside this worktree and commit only to this branch. Do NOT edit PROGRESS.md or ISSUES.md (reading them is fine): shared docs for this lane belong to the supervisor, who folds them in when merging your branch — report your results fully in your final message instead. ${LANE_CONTRACT}
+You are in the ${LANE} lane, a git worktree on branch ${WT_BRANCH}; sibling workers may be active in other lanes. ${WORKTREE_OWNERSHIP} ${LANE_CONTRACT}
 
 Your selected oracle is ${ORACLE_PROFILE} at ${ORACLE_URL}, exported as POKEBENCH_ORACLE_URL and POKEBENCH_ORACLE_PROFILE. Both named oracle URLs are also exported for compare traces.
 
@@ -365,11 +395,11 @@ Your assigned step (from the supervisor):
 ${BRIEF}
 ${CODEX_ACCEPTANCE_GUARDRAILS}
 
-Stay on this step. If it turns out to be blocked or mis-scoped, say exactly why in your final message instead of improvising a different plan. Before finishing: npm test and npm run build green, work committed on ${WT_BRANCH}.
+Stay on this step. If it turns out to be blocked or mis-scoped, say exactly why in your final message instead of improvising a different plan. ${WORKTREE_FINISH_REQUIREMENT}
 
 You are a worker, not the supervisor: SUPERVISOR.md is not for you, and you never launch other agents (run-agent.sh, run-supervisor.sh, tools/run-subagent.sh are off-limits and will refuse you)."
 else
-  PROMPT="Follow AGENTS.md. You are one bounded worker session with a hard ${CAP_MINUTES}-minute cap — you can be stopped at any moment, so commit after every green step and keep the top entry of PROGRESS.md current as you go.
+  PROMPT="${SESSION_OPENING} ${MAIN_OWNERSHIP}
 
 Your assigned step (from the supervisor):
 ${BRIEF}
@@ -377,7 +407,7 @@ ${CODEX_ACCEPTANCE_GUARDRAILS}
 
 This main lane uses the Battle Scene OFF oracle. Follow the finite Stage 8 reset in ROADMAP.md and the worker-lane ownership contract in AGENTS.md; do not resume the retired canonical Battle 2 turn-by-turn march.
 
-Stay on this step. If it turns out to be blocked or mis-scoped, say exactly why in your final message and in PROGRESS.md instead of improvising a different plan. Before finishing: npm test and npm run build green, work committed, PROGRESS.md updated.
+Stay on this step. If it turns out to be blocked or mis-scoped, say exactly why in your final message instead of improvising a different plan. ${MAIN_FINISH_REQUIREMENT}
 
 You are a worker, not the supervisor: SUPERVISOR.md is not for you, and you never launch other agents (run-agent.sh, run-supervisor.sh, tools/run-subagent.sh are off-limits and will refuse you)."
 fi
@@ -454,6 +484,7 @@ fi
 
 status=0
 wait "$agent_pid" || status=$?
+worker_status="$status"
 if [[ -n "$watchdog_pid" ]]; then
   kill "$watchdog_pid" 2>/dev/null || true
   wait "$watchdog_pid" 2>/dev/null || true
@@ -461,7 +492,12 @@ fi
 if [[ "$PROVIDER" == "codex" ]]; then
   CODEX_END_HEAD="$(git -C "$WORK_DIR" rev-parse HEAD)"
   CODEX_END_DIRTY="$(git -C "$WORK_DIR" status --porcelain=v1)"
-  if [[ "$CODEX_END_HEAD" == "$CODEX_START_HEAD" ]]; then
+  if [[ "$READ_ONLY" == "1" ]]; then
+    if [[ "$CODEX_END_HEAD" != "$CODEX_START_HEAD" ]]; then
+      echo "run-subagent: read-only Codex worker created a commit" >&2
+      if [[ "$status" -eq 0 ]]; then status=5; fi
+    fi
+  elif [[ "$CODEX_END_HEAD" == "$CODEX_START_HEAD" ]]; then
     echo "run-subagent: Codex worker produced no commit" >&2
     if [[ "$status" -eq 0 ]]; then status=5; fi
   fi
@@ -491,7 +527,13 @@ if [[ "$IS_WORKTREE" == "1" ]]; then
   echo "$LANE worktree lane done: branch $WT_BRANCH at $WT_PATH (base ${WT_BASE:0:7})"
   echo "commits on the branch:"
   wt_commits="$(git -C "$WT_PATH" log --oneline "${WT_BASE}..HEAD" 2>/dev/null || true)"
-  if [[ -n "$wt_commits" ]]; then echo "$wt_commits" | sed 's/^/  /'; else echo "  (none — for an implementation step, that means it failed)"; fi
+  if [[ -n "$wt_commits" ]]; then
+    echo "$wt_commits" | sed 's/^/  /'
+  elif [[ "$READ_ONLY" == "1" ]]; then
+    echo "  (none — expected for a read-only audit)"
+  else
+    echo "  (none — for an implementation step, that means it failed)"
+  fi
   wt_dirty="$(git -C "$WT_PATH" status --short 2>/dev/null || true)"
   if [[ -n "$wt_dirty" ]]; then
     echo "UNCOMMITTED changes left in the worktree:"
@@ -581,7 +623,7 @@ if [[ "$marker_epoch" =~ ^[0-9]+$ ]] && (( marker_epoch >= LAUNCH_EPOCH )); then
   exit 42
 fi
 # Turn authentication failures into a pointed hint instead of a mystery exit 1.
-if [[ "$status" -ne 0 && -f "$AGENT_LOG" ]] \
+if [[ "$worker_status" -ne 0 && -f "$AGENT_LOG" ]] \
     && grep -qiE 'not logged in|authentication required|unauthorized|401' \
       "$AGENT_LOG" ${CODEX_STDERR_LOG:+"$CODEX_STDERR_LOG"}; then
   if [[ "$PROVIDER" == "claude" ]]; then

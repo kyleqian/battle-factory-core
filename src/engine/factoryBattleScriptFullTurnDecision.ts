@@ -74,6 +74,7 @@ import {
 } from "./battleDecisionBoundary.ts";
 import { handleBattleActionFinished } from "./battleActionFinished.ts";
 import { checkBattleScriptMoveLimitations } from "./battleScriptActionAdmission.ts";
+import { withBattler } from "./battleScriptHitChainOpcode.ts";
 import {
   acknowledgeBattleScriptMachineController,
   createBattleScriptRngState,
@@ -174,6 +175,15 @@ export type FactoryFullTurnBattlerConfig = Readonly<{
   maxHp?: number;
   status1?: number;
   status2?: number;
+  encoreTimer?: number;
+  encoredMove?: number;
+  encoredMovePos?: number;
+  encoreTimerStartValue?: number;
+  /** Source gLastMoves entry for finite status-move staging. */
+  lastMove?: number;
+  /** Source continuation state used by finite multi-turn precedence fixtures. */
+  lockedMove?: number;
+  chosenMovePosition?: number;
   statStages?: readonly [number, number, number, number, number, number, number, number];
   types?: readonly [string, string];
 }>;
@@ -259,6 +269,8 @@ function emptyBattler(side: 0 | 1): BattleScriptRulesBattlerState {
     disableTimerStartValue: 0,
     encoreTimer: 0,
     encoredMove: 0,
+    encoredMovePos: 0,
+    encoreTimerStartValue: 0,
     usedDisabledMove: 0,
     tauntTimer: 0,
     usedTauntedMove: 0,
@@ -324,6 +336,10 @@ function activeBattler(
     statStages: config.statStages ?? NEUTRAL_STAT_STAGES,
     status1: config.status1 ?? 0,
     status2: config.status2 ?? 0,
+    encoreTimer: config.encoreTimer ?? 0,
+    encoredMove: config.encoredMove ?? 0,
+    encoredMovePos: config.encoredMovePos ?? 0,
+    encoreTimerStartValue: config.encoreTimerStartValue ?? 0,
     maxHP: config.maxHp ?? config.hp,
     partyIndex: 0,
   });
@@ -386,6 +402,16 @@ function createInitialRules(config: FactoryFullTurnConfig): FactoryFullTurnDecis
     missType: 0,
     hitMarker: 0,
     multiHitCounter: 0,
+    moveHistory: {
+      lastMoves: [config.player.lastMove ?? 0, config.trainer.lastMove ?? 0, 0, 0],
+    },
+    lockedMoves: [config.player.lockedMove ?? 0, config.trainer.lockedMove ?? 0, 0, 0],
+    chosenMovePositions: [
+      config.player.chosenMovePosition ?? 0,
+      config.trainer.chosenMovePosition ?? 0,
+      0,
+      0,
+    ],
     party: { player: playerParty, opponent: opponentParty },
     battleTopology: {
       battlersCount: 2,
@@ -850,6 +876,17 @@ function lockedMoveDecision(
       & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS
     ) === 0
   ) {
+    if (battlerState.encoreTimer !== 0 && battlerState.encoredMove !== 0) {
+      // battle_util.c:95-112: action selection remains tied to the stored
+      // position. If that slot was overwritten, HandleAction_UseMove clears
+      // Encore and executes the live move now occupying that position.
+      const moveId = battlerState.moves[battlerState.encoredMovePos]!;
+      return Object.freeze({
+        kind: "use-move",
+        moveSlot: battlerState.encoredMovePos as BattleMoveSlot,
+        targetBattler: sourceMoveTarget(moveId, battler),
+      });
+    }
     return null;
   }
   const moveId = rulesContext.lockedMoves[battler]!;
@@ -863,6 +900,25 @@ function lockedMoveDecision(
     kind: "use-move",
     moveSlot: moveSlot as BattleMoveSlot,
     targetBattler: sourceMoveTarget(moveId, battler),
+  });
+}
+
+/** battle_util.c:95-112's execution-time overwritten-slot cleanup. */
+function clearOverwrittenEncoreAtAction(
+  rulesContext: BattleScriptRulesContext,
+  battler: BattleSinglesBattler,
+): BattleScriptRulesContext {
+  const source = rulesContext.battlers[battler]!;
+  if (
+    source.encoreTimer === 0
+    || source.moves[source.encoredMovePos] === source.encoredMove
+  ) {
+    return rulesContext;
+  }
+  return withBattler(rulesContext, battler, {
+    encoredMove: 0,
+    encoredMovePos: 0,
+    encoreTimer: 0,
   });
 }
 
@@ -1207,7 +1263,10 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
     throw new Error("factory full-turn decision requires the trainer's staged singles use-move command");
   }
 
-  const rc0 = rules.rulesContext;
+  const rc0 = clearOverwrittenEncoreAtAction(
+    clearOverwrittenEncoreAtAction(rules.rulesContext, 0),
+    1,
+  );
   const playerMoveSlot = rules.pendingPlayerDecision.moveSlot;
   const trainerMoveSlot = ctx.decision.moveSlot;
   const playerForcedStruggle = usesForcedStruggle(rc0, 0);

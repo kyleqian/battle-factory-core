@@ -31,18 +31,6 @@ Per entry:
 - **Cost each:** rough minutes lost per hit.
 - **Workaround:** the current dodge, if any.
 
-## Oracle freshness helper misresolves the harness from disposable side worktrees
-
-- **What:** `check-oracle-freshness.sh` reported both shared services stale
-  from a disposable `.worktrees/side-*` checkout, while the same PIDs and
-  harness HEAD passed immediately from the main run tree. This leaves a green
-  side worker unable to satisfy its nominal freshness postflight.
-- **Hits:** 1.
-- **Cost each:** ~1 min.
-- **Workaround:** side workers report the result without restarting shared
-  services; the supervisor reruns freshness from the main run root before
-  accepting the branch.
-
 ## Shell command substitution mutates inline worker briefs
 
 - **What:** Markdown backticks embedded in a double-quoted
@@ -52,18 +40,6 @@ Per entry:
 - **Cost each:** ~1 min.
 - **Workaround:** use plain path text or a `--brief-file`; never place
   backticks or `$()` inside a shell-interpolated brief argument.
-
-## Explicitly read-only workers fail the commit-required postflight
-
-- **What:** a bounded supervisor audit was explicitly told to make no edits or
-  commits and returned a complete report from a clean tree, but
-  `run-subagent.sh` still exited 5 because the Codex worker produced no commit
-  (and misleadingly appended an authentication hint).
-- **Hits:** 1.
-- **Cost each:** ~1 min.
-- **Workaround:** treat the report as usable after independently confirming
-  the clean tree; use a normal execution session for future read-only audits
-  until the launcher distinguishes audit success from missing implementation.
 
 ## Concurrent shared-tree edits fail otherwise-clean worker postflight
 
@@ -371,19 +347,6 @@ worker (PROGRESS entry 13).
   step" already implies it; scratch loops that reset tracked files
   should operate on copies under the scratch dir instead.
 
-## ram-probe.py path vocabulary can't extract sub-byte bitfields (2026-07-20)
-
-- **What:** the multi-hop `"path"` spec (added 2026-07-20) reads whole
-  bytes/words only — no shift-and-mask step — so OAM bitfields like
-  `paletteNum` can't be probed directly; the switch-in scout had to
-  drop its materialize-tint verification rather than extend the tool
-  mid-task.
-- **Hits:** 1.
-- **Cost each:** ~5 min + one dropped verification goal.
-- **Workaround:** probe the containing u16 and decode in the analysis
-  script; or a future session adds a `{"op":"mask","shift":N,"mask":M}`
-  step to the path vocabulary (small, backward-compatible).
-
 ## Pixel-sampling a palette-fade table from a screenshot under-resolves steps (2026-07-20)
 
 - **What:** deriving a fade/tint coefficient table by sampling rendered
@@ -490,18 +453,6 @@ worker (PROGRESS entry 13).
 - **Workaround:** copy `tools/compare/scratch/future-sight-per-frame-bbox.ts`
   as the starting point; a shared `--per-frame-bbox` flag on the portable
   harness template would retire this.
-
-## `bin/oracle lab` with no `-o` writes untracked `battle-lab-output/` into the tree
-
-- **What:** running `bin/oracle lab <scenario>` without an explicit `-o`
-  drops its captures into `battle-lab-output/` at the invoking tree's root,
-  which is not gitignored — it shows up in `git status` and must be
-  manually removed before committing (worktree workers notice it while
-  staging their own commits).
-- **Hits:** 1 (2026-07-26 evening, §24 Evasion scout).
-- **Cost each:** ~2 min.
-- **Workaround:** always pass `-o` to a scratch path; adding
-  `battle-lab-output/` to `.gitignore` would retire this.
 
 ## Mash-rep counts for staged multi-turn fixtures don't transfer between move-animation classes
 

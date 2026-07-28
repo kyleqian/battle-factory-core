@@ -5,9 +5,11 @@
 # default remains the original Claude flow (claude-fable-5 supervisor,
 # claude-sonnet-5 workers). Pass --provider codex for the Codex profile
 # (gpt-5.6-sol/high supervisor; Codex-only worker routing defaults to
-# gpt-5.6-sol/medium and may choose Terra/high for bounded probes or Sol/high
-# for architecture-heavy/repair work). Pass --max-mode for the all-Sol
-# profile: a Sol/ultra supervisor with Sol/xhigh workers.
+# gpt-5.6-sol/high and may choose Terra/high for bounded probes or Sol/high
+# for architecture-heavy/repair work). Pass --hybrid for the mixed profile:
+# a Claude Fable supervisor with the same tiered Codex worker routing. Pass
+# --max-mode for the all-Sol profile: a Sol/ultra supervisor with Sol/xhigh
+# workers.
 #
 # By default the supervisor runs in the interactive CLI, autonomously through
 # the full session cap. The terminal remains available for optional user
@@ -24,6 +26,7 @@
 #   ./run-supervisor.sh -c 4          # different cap          (--cap-hours 4)
 #   ./run-supervisor.sh --headless    # unattended, stream view like run-agent.sh
 #   ./run-supervisor.sh --provider codex  # Sol/high supervisor + tiered Codex workers
+#   ./run-supervisor.sh -H            # Fable supervisor + tiered Codex workers
 #   ./run-supervisor.sh --max-mode    # Sol/ultra supervisor + Sol/xhigh workers
 #   ./run-supervisor.sh -m NAME       # override the selected profile's model
 #   ./run-supervisor.sh -e EFFORT     # Codex reasoning effort override
@@ -49,16 +52,21 @@ Usage: ./run-supervisor.sh [options]
                         branch animation-main (per ANIMATION_SUPERVISOR.md);
                         both supervisors may run concurrently.
   -p, --provider NAME   claude (default) or codex
+  -H, --hybrid          Claude Fable supervisor with tiered Codex workers;
+                        shorthand for --provider claude --worker-provider codex
+      --worker-provider NAME
+                        claude (default for Claude) or codex. Codex workers may
+                        be routed per step with run-subagent.sh --model/--effort.
   -M, --max-mode        Codex all-Sol profile: Sol/ultra supervisor and
                         Sol/xhigh workers (also selects --provider codex)
   -m, --model NAME      supervisor model (provider default)
-  -e, --effort EFFORT   Codex reasoning effort (default high)
+  -e, --effort EFFORT   Codex supervisor reasoning effort (default high)
       --log FILE        raw JSONL log for --headless (provider default)
       --print-config    print the resolved profile without launching
   -h, --help            show this help
 Environment overrides: SUPERVISOR_PROVIDER, SUPERVISOR_MODEL,
-SUPERVISOR_REASONING_EFFORT, SUPERVISOR_MAX_MODE. Legacy MODEL remains
-supported.
+SUPERVISOR_REASONING_EFFORT, SUPERVISOR_HYBRID, SUPERVISOR_MAX_MODE,
+WORKER_PROVIDER. Legacy MODEL remains supported.
 Exit 6 means the lane's deferred file (DEFERRED.md for main,
 ANIMATION_DEFERRED.md for animation) has an unresolved question that must be
 resolved before another supervisor session can start in that lane.
@@ -72,6 +80,8 @@ PROVIDER="${SUPERVISOR_PROVIDER:-claude}"
 MODEL="${SUPERVISOR_MODEL:-${MODEL:-}}"
 REASONING_EFFORT="${SUPERVISOR_REASONING_EFFORT:-}"
 MAX_MODE="${SUPERVISOR_MAX_MODE:-0}"
+HYBRID="${SUPERVISOR_HYBRID:-0}"
+WORKER_PROVIDER="${WORKER_PROVIDER:-}"
 SUPERVISOR_LOG="${SUPERVISOR_LOG:-}"
 PRINT_CONFIG=0
 PROVIDER_FLAG_SET=0
@@ -87,6 +97,9 @@ while [[ $# -gt 0 ]]; do
     --lane=*)         LANE="${1#*=}"; shift ;;
     -p|--provider)    PROVIDER="${2:?--provider needs a name}"; PROVIDER_FLAG_SET=1; shift 2 ;;
     --provider=*)     PROVIDER="${1#*=}"; PROVIDER_FLAG_SET=1; shift ;;
+    -H|--hybrid)      HYBRID=1; shift ;;
+    --worker-provider) WORKER_PROVIDER="${2:?--worker-provider needs a name}"; shift 2 ;;
+    --worker-provider=*) WORKER_PROVIDER="${1#*=}"; shift ;;
     -M|--max-mode)    MAX_MODE=1; shift ;;
     -m|--model)       MODEL="${2:?--model needs a model name}"; MODEL_FLAG_SET=1; shift 2 ;;
     --model=*)        MODEL="${1#*=}"; MODEL_FLAG_SET=1; shift ;;
@@ -104,6 +117,14 @@ if [[ ! "$MAX_MODE" =~ ^(0|1)$ ]]; then
   echo "run-supervisor: SUPERVISOR_MAX_MODE must be 0 or 1 (got '$MAX_MODE')" >&2
   exit 2
 fi
+if [[ ! "$HYBRID" =~ ^(0|1)$ ]]; then
+  echo "run-supervisor: SUPERVISOR_HYBRID must be 0 or 1 (got '$HYBRID')" >&2
+  exit 2
+fi
+if [[ "$MAX_MODE" == "1" && "$HYBRID" == "1" ]]; then
+  echo "run-supervisor: --hybrid and --max-mode are different profiles and cannot be combined" >&2
+  exit 2
+fi
 if [[ "$MAX_MODE" == "1" ]]; then
   if [[ "$PROVIDER_FLAG_SET" == "1" && "$PROVIDER" != "codex" ]]; then
     echo "run-supervisor: --max-mode is a Codex-only profile and cannot use provider '$PROVIDER'" >&2
@@ -117,9 +138,32 @@ if [[ "$MAX_MODE" == "1" ]]; then
     echo "run-supervisor: --max-mode fixes supervisor effort at ultra (got '$REASONING_EFFORT')" >&2
     exit 2
   fi
+  if [[ -n "$WORKER_PROVIDER" && "$WORKER_PROVIDER" != "codex" ]]; then
+    echo "run-supervisor: --max-mode only permits Codex workers (got '$WORKER_PROVIDER')" >&2
+    exit 2
+  fi
   PROVIDER=codex
+  WORKER_PROVIDER=codex
   MODEL=gpt-5.6-sol
   REASONING_EFFORT=ultra
+fi
+if [[ "$HYBRID" == "1" ]]; then
+  if [[ "$PROVIDER" != "claude" ]]; then
+    echo "run-supervisor: --hybrid requires a Claude supervisor (got '$PROVIDER')" >&2
+    exit 2
+  fi
+  if [[ -n "$WORKER_PROVIDER" && "$WORKER_PROVIDER" != "codex" ]]; then
+    echo "run-supervisor: --hybrid requires Codex workers (got '$WORKER_PROVIDER')" >&2
+    exit 2
+  fi
+  PROVIDER=claude
+  WORKER_PROVIDER=codex
+fi
+WORKER_PROVIDER="${WORKER_PROVIDER:-$PROVIDER}"
+# The explicit long form is equivalent to --hybrid and receives the same
+# routing guidance in the supervisor prompt.
+if [[ "$PROVIDER" == "claude" && "$WORKER_PROVIDER" == "codex" ]]; then
+  HYBRID=1
 fi
 
 if [[ ! "$CAP_HOURS" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
@@ -128,6 +172,10 @@ if [[ ! "$CAP_HOURS" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
 fi
 if [[ ! "$PROVIDER" =~ ^(claude|codex)$ ]]; then
   echo "run-supervisor: unsupported provider '$PROVIDER' (expected claude or codex)" >&2
+  exit 2
+fi
+if [[ ! "$WORKER_PROVIDER" =~ ^(claude|codex)$ ]]; then
+  echo "run-supervisor: unsupported worker provider '$WORKER_PROVIDER' (expected claude or codex)" >&2
   exit 2
 fi
 if [[ ! "$LANE" =~ ^(main|animation)$ ]]; then
@@ -186,18 +234,18 @@ case "$PROVIDER" in
         exit 2
       fi
     else
-      if [[ ! "$REASONING_EFFORT" =~ ^(none|low|medium|high|xhigh)$ ]]; then
-        echo "run-supervisor: unsupported reasoning effort '$REASONING_EFFORT' (maximum outside --max-mode: xhigh)" >&2
-        exit 2
-      fi
-      if [[ "$MODEL" == *sol* && "$REASONING_EFFORT" == "xhigh" ]]; then
-        echo "run-supervisor: Sol reasoning effort is capped at high outside --max-mode (got '$REASONING_EFFORT')" >&2
+      if [[ "$REASONING_EFFORT" != "high" ]]; then
+        echo "run-supervisor: ordinary Codex supervisor effort is fixed at high (got '$REASONING_EFFORT')" >&2
         exit 2
       fi
     fi
     command -v codex >/dev/null 2>&1 || { echo "run-supervisor: codex CLI not found on PATH" >&2; exit 127; }
     ;;
 esac
+if [[ "$WORKER_PROVIDER" != "$PROVIDER" ]]; then
+  command -v "$WORKER_PROVIDER" >/dev/null 2>&1 \
+    || { echo "run-supervisor: $WORKER_PROVIDER worker CLI not found on PATH" >&2; exit 127; }
+fi
 
 CODEX_LOG_ROOT="${POKEBENCH_CODEX_LOG_DIR:-${POKEBENCH_AGENT_LOG_DIR:-$(pwd)/.codex-logs}}"
 if [[ -z "$SUPERVISOR_LOG" ]]; then
@@ -215,27 +263,51 @@ if [[ "$PROVIDER" != "codex" ]]; then
   codex_git_attribution_disable
 fi
 
-# Workers inherit the selected provider unless WORKER_PROVIDER explicitly
-# requests a mixed-provider setup. Max mode is intentionally stricter: its
-# inherited marker makes the worker launcher reject non-Sol models, and these
-# defaults give every worker the xhigh ceiling requested by the profile.
-export POKEBENCH_WORKER_PROVIDER="$PROVIDER"
+# Workers inherit the resolved worker provider. Max mode is intentionally
+# stricter: its inherited marker makes the worker launcher reject non-Sol
+# models, and these defaults give every worker the xhigh ceiling requested by
+# the profile.
+export WORKER_PROVIDER
+export POKEBENCH_WORKER_PROVIDER="$WORKER_PROVIDER"
 export POKEBENCH_CODEX_MAX_MODE="$MAX_MODE"
 if [[ "$MAX_MODE" == "1" ]]; then
   export WORKER_PROVIDER=codex
   export WORKER_MODEL=gpt-5.6-sol
   export WORKER_REASONING_EFFORT=xhigh
+elif [[ "$WORKER_PROVIDER" == "codex" \
+      && -n "${WORKER_REASONING_EFFORT:-}" \
+      && "$WORKER_REASONING_EFFORT" != "high" ]]; then
+  echo "run-supervisor: ordinary Codex worker effort is fixed at high (got '$WORKER_REASONING_EFFORT')" >&2
+  exit 2
 fi
 if [[ "$PRINT_CONFIG" == "1" ]]; then
+  if [[ "$PROVIDER" == "claude" ]]; then
+    WORKER_LAUNCH_MODE=background
+  else
+    WORKER_LAUNCH_MODE=managed
+  fi
+  if [[ "$MAX_MODE" == "1" ]]; then
+    WORKER_ROUTING=locked-sol
+  elif [[ "$WORKER_PROVIDER" == "codex" ]]; then
+    WORKER_ROUTING=tiered
+  else
+    WORKER_ROUTING=fixed
+  fi
   echo "supervisor_lane=$LANE"
   echo "supervisor_provider=$PROVIDER"
   echo "supervisor_model=$MODEL"
   echo "supervisor_effort=${REASONING_EFFORT:-n/a}"
+  echo "hybrid=$HYBRID"
   echo "max_mode=$MAX_MODE"
-  echo "worker_provider=${WORKER_PROVIDER:-$POKEBENCH_WORKER_PROVIDER}"
-  if [[ "$MAX_MODE" == "1" ]]; then
-    echo "worker_model=$WORKER_MODEL"
-    echo "worker_effort=$WORKER_REASONING_EFFORT"
+  echo "worker_provider=$WORKER_PROVIDER"
+  echo "worker_launch_mode=$WORKER_LAUNCH_MODE"
+  echo "worker_routing=$WORKER_ROUTING"
+  if [[ "$WORKER_PROVIDER" == "codex" ]]; then
+    echo "worker_model=${WORKER_MODEL:-gpt-5.6-sol}"
+    echo "worker_effort=${WORKER_REASONING_EFFORT:-high}"
+  else
+    echo "worker_model=${WORKER_MODEL:-claude-sonnet-5}"
+    echo "worker_effort=n/a"
   fi
   exit 0
 fi
@@ -286,27 +358,26 @@ DEADLINE_HUMAN="$(date -r "$DEADLINE_EPOCH" '+%Y-%m-%d %H:%M' 2>/dev/null \
 
 CONTINUITY_NOTE="Run autonomously through the full session cap while useful in-scope work remains. Do not ask the user questions mid-session, send decision notifications, or end a turn awaiting a reply. Exercise your best evidence-backed judgment for reversible on-scope choices. If a material choice genuinely cannot be made safely, record it in DEFERRED.md, continue independent safe work, and summarize it only at wind-down."
 
-if [[ "$LANE" == "animation" ]]; then
-  if [[ "$PROVIDER" == "codex" ]]; then
-    if [[ "$MAX_MODE" == "1" ]]; then
-      DELEGATION_NOTE="Codex max mode is active: use only gpt-5.6-sol workers. The launcher defaults them to xhigh and rejects Terra or any other worker model; do not override that all-Sol routing. Invoke each ./tools/run-subagent.sh call directly in its own execution-tool session without shell backgrounding, '&', or nohup. A yielded call is still running; retain its handle and wait on it."
-    else
-      DELEGATION_NOTE="For Codex workers, choose the worker tier by task: Terra/high only for bounded probes, extraction, or mechanical docs; Sol/medium for normal implementation; Sol/high for cross-layer architecture or the first evidence-driven repair after a failed worker. Invoke each ./tools/run-subagent.sh call directly in its own execution-tool session without shell backgrounding, '&', or nohup. A yielded call is still running; retain its handle and wait on it."
-    fi
+if [[ "$WORKER_PROVIDER" == "codex" ]]; then
+  if [[ "$MAX_MODE" == "1" ]]; then
+    WORKER_ROUTING_NOTE="Codex max mode is active: use only gpt-5.6-sol workers. The launcher defaults them to xhigh and rejects Terra or any other worker model; do not override that all-Sol routing."
   else
-    DELEGATION_NOTE="Launch ./tools/run-subagent.sh workers in the background."
+    WORKER_ROUTING_NOTE="Workers are Codex at high effort. Choose the model by task: --model gpt-5.6-terra --effort high only for bounded probes, extraction, or mechanical docs; --model gpt-5.6-sol --effort high for implementation, cross-layer architecture, or evidence-driven repair."
   fi
+else
+  WORKER_ROUTING_NOTE="Workers are Claude on the launcher's default claude-sonnet-5 profile unless a step explicitly overrides the worker model."
+fi
+if [[ "$PROVIDER" == "codex" ]]; then
+  WORKER_LAUNCH_NOTE="Invoke each ./tools/run-subagent.sh call directly in its own execution-tool session without shell backgrounding, '&', or nohup. A yielded call is still running; retain its handle and wait on it."
+else
+  WORKER_LAUNCH_NOTE="Start each ./tools/run-subagent.sh launcher as a background shell job because the Claude supervisor's shell call can time out before a worker finishes; retain its PID and output path, poll until that launcher exits, and do not treat the initial shell return as worker completion."
+fi
+
+if [[ "$LANE" == "animation" ]]; then
+  DELEGATION_NOTE="${WORKER_ROUTING_NOTE} ${WORKER_LAUNCH_NOTE}"
   PROMPT="You are the ANIMATION supervisor for this run. Read ANIMATION_SUPERVISOR.md, AGENTS.md, and ANIMATION_PROGRESS.md before dispatching anything. You are in the persistent animation-main worktree and you are that branch's only writer: begin by merging master in (git merge --no-edit master), rerun npm test and npm run build as your baseline, then drive one bounded animation coverage step at a time via ./tools/run-subagent.sh --lane animation from this tree — one worker at a time, animation lane only, verify each result yourself, merge each verified worker branch into animation-main from this tree, and never write master or the main program's docs (PROGRESS.md/ISSUES.md/ROADMAP.md/DEFERRED.md). Your ledger is ANIMATION_PROGRESS.md; your deferral file is ANIMATION_DEFERRED.md. ${DELEGATION_NOTE} Hard deadline for this whole session: ${DEADLINE_HUMAN} (epoch ${DEADLINE_EPOCH}); wind down cleanly before it with animation-main committed and green so the main supervisor's fold stays boring. ${CONTINUITY_NOTE}"
 else
-  if [[ "$PROVIDER" == "codex" ]]; then
-    if [[ "$MAX_MODE" == "1" ]]; then
-      DELEGATION_NOTE="Codex max mode is active: use only gpt-5.6-sol workers. The launcher defaults them to xhigh and rejects Terra or any other worker model; do not override that all-Sol routing. The launcher offers main and side-worktree lanes; use parallel lanes when their ownership is genuinely disjoint. The animation program belongs to the separate animation supervisor (ANIMATION_SUPERVISOR.md) — never brief or launch animation-lane workers from this session. Invoke each ./tools/run-subagent.sh call directly in its own execution-tool session without shell backgrounding, '&', or nohup. A yielded call is still running; retain its handle and launch another lane only when the briefs are independent."
-    else
-      DELEGATION_NOTE="For Codex workers, choose the worker tier by task: Terra/high only for bounded probes, extraction, or mechanical docs; Sol/medium for normal implementation; Sol/high for cross-layer architecture or the first evidence-driven repair after a failed worker. The launcher offers main and side-worktree lanes; use parallel lanes when their ownership is genuinely disjoint. The animation program belongs to the separate animation supervisor (ANIMATION_SUPERVISOR.md) — never brief or launch animation-lane workers from this session. Invoke each ./tools/run-subagent.sh call directly in its own execution-tool session without shell backgrounding, '&', or nohup. A yielded call is still running; retain its handle and launch another lane only when the briefs are independent."
-    fi
-  else
-    DELEGATION_NOTE="Launch ./tools/run-subagent.sh workers in the background. The main and side-worktree lanes may run concurrently when their briefs and files are genuinely disjoint. The animation program belongs to the separate animation supervisor (ANIMATION_SUPERVISOR.md) — never brief or launch animation-lane workers from this session."
-  fi
+  DELEGATION_NOTE="${WORKER_ROUTING_NOTE} ${WORKER_LAUNCH_NOTE} The launcher offers main and side-worktree lanes; use parallel lanes when their ownership is genuinely disjoint. The animation program belongs to the separate animation supervisor (ANIMATION_SUPERVISOR.md) — never brief or launch animation-lane workers from this session."
   PROMPT="You are the supervisor for this run. Read SUPERVISOR.md, AGENTS.md, and the authoritative reset at the top of ROADMAP S8 before dispatching anything. The old canonical Battle-2 turn march is stopped: drive the generic seven-battle round controller and presentation seam against the Battle Scene OFF oracle. During your orient step, if branch animation-main has commits master lacks (git log --oneline master..animation-main), fold it: merge animation-main into master from the main tree, rerun npm test and npm run build on the union, and record the fold in your PROGRESS.md entry. Delegate bounded steps via ./tools/run-subagent.sh, verify each result yourself, and continue, fix, or defer a genuinely unresolved decision without interrupting the session. ${DELEGATION_NOTE} Hard deadline for this whole session: ${DEADLINE_HUMAN} (epoch ${DEADLINE_EPOCH}); wind down cleanly before it. ${CONTINUITY_NOTE}"
 fi
 

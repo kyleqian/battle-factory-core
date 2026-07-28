@@ -109,6 +109,10 @@ function battler(changes: Partial<BattleScriptRulesBattler> & { maxHP?: number }
     partyIndex: changes.partyIndex ?? 0,
     wrappedMove: changes.wrappedMove,
     wrappedBy: changes.wrappedBy,
+    encoreTimer: changes.encoreTimer ?? 0,
+    encoredMove: changes.encoredMove ?? 0,
+    encoredMovePos: changes.encoredMovePos ?? 0,
+    encoreTimerStartValue: changes.encoreTimerStartValue ?? 0,
   }) as unknown as BattleScriptRulesBattler;
 }
 
@@ -184,6 +188,34 @@ function scratchState(rulesContext: BattleScriptRulesContext, attacker: 0 | 1) {
 }
 
 describe("runBattleEndTurnOrchestration (BattleTurnPassed equivalent)", () => {
+  it.each([
+    ["decrements without expiry", { encoreTimer: 3, encoredMove: MOVE_TACKLE, encoredMovePos: 0, moves: [MOVE_TACKLE, 0, 0, 0], pp: [2, 0, 0, 0] }, 2, MOVE_TACKLE, false],
+    ["timer expiry messages", { encoreTimer: 1, encoredMove: MOVE_TACKLE, encoredMovePos: 0, moves: [MOVE_TACKLE, 0, 0, 0], pp: [2, 0, 0, 0] }, 0, 0, true],
+    ["zero-PP expiry messages", { encoreTimer: 3, encoredMove: MOVE_TACKLE, encoredMovePos: 0, moves: [MOVE_TACKLE, 0, 0, 0], pp: [0, 0, 0, 0] }, 0, 0, true],
+    ["slot overwrite clears silently", { encoreTimer: 3, encoredMove: MOVE_TACKLE, encoredMovePos: 0, moves: [MOVE_HYDRO_PUMP, 0, 0, 0], pp: [2, 0, 0, 0] }, 0, 0, false],
+  ] as const)("ENDTURN_ENCORE %s", (_name, changes, timer, move, messages) => {
+    const rc = context({
+      battlers: [
+        battler({ side: 0, ...changes }),
+        battler({ side: 1, partyIndex: 2 }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+    });
+    const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(0));
+    const initial = scratchState(rc, 0);
+    const result = runBattleEndTurnOrchestration(program, handlers, initial);
+    expect(result.kind).toBe("next-turn");
+    if (result.kind !== "next-turn") throw new Error("expected next-turn");
+    expect(result.state.rulesContext.battlers[0]).toMatchObject({
+      encoreTimer: timer,
+      encoredMove: move,
+    });
+    expect(result.state.events.some((event) =>
+      event.kind === "message" && event.messageId === "STRINGID_PKMNENCOREENDED"
+    )).toBe(messages);
+  });
+
   it("no live end-turn condition on either battler: next-turn with zero RNG and an unchanged rulesContext", () => {
     const rc = context();
     const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));

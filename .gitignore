@@ -4,6 +4,7 @@
 /test-results/
 /reference/
 /oracle-output/
+/battle-lab-output/
 /tools/compare/out/
 /tools/probe/out/
 /tools/probe/__pycache__/

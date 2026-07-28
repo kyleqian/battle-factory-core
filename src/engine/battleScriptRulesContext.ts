@@ -81,11 +81,14 @@ import { createBattleScriptGetSecretPowerEffectOpcodeHandlers } from "./battleSc
 import { createBattleScriptTryswapabilitiesOpcodeHandlers } from "./battleScriptTryswapabilitiesOpcode.ts";
 import { createBattleScriptTrysethelpinghandOpcodeHandlers } from "./battleScriptTrysethelpinghandOpcode.ts";
 import { createBattleScriptSettormentOpcodeHandlers } from "./battleScriptSettormentOpcode.ts";
+import { createBattleScriptTrysetencoreOpcodeHandlers } from "./battleScriptTrysetencoreOpcode.ts";
 import { createBattleScriptSettauntOpcodeHandlers } from "./battleScriptSettauntOpcode.ts";
 import { createBattleScriptSetforesightOpcodeHandlers } from "./battleScriptSetforesightOpcode.ts";
+import { createBattleScriptSetfocusenergyOpcodeHandlers } from "./battleScriptSetfocusenergyOpcode.ts";
 import { createBattleScriptDoubleDamageIfDamagedOpcodeHandlers } from "./battleScriptDoubleDamageIfDamagedOpcode.ts";
 import { createBattleScriptTrysetmagiccoatOpcodeHandlers } from "./battleScriptTrysetmagiccoatOpcode.ts";
 import { createBattleScriptWeightDamageOpcodeHandlers } from "./battleScriptWeightDamageOpcode.ts";
+import { createBattleScriptTrysetspikesOpcodeHandlers } from "./battleScriptTrysetspikesOpcode.ts";
 import { createBattleScriptRefreshOpcodeHandlers } from "./battleScriptRefreshOpcode.ts";
 import { createBattleScriptIncrementGameStatOpcodeHandlers } from "./battleScriptIncrementGameStatOpcode.ts";
 import {
@@ -163,6 +166,8 @@ export type BattleScriptSideTimerState = Readonly<{
   /** Source u8 followmeTimer/followmeTarget, consumed by GetMoveTarget. */
   followmeTimer: number;
   followmeTarget: BattleScriptBattlerId;
+  /** Source u8 spikesAmount, paired with SIDE_STATUS_SPIKES. */
+  spikesAmount: number;
 }>;
 
 export type BattleScriptSideTimerInput = Readonly<{
@@ -175,6 +180,7 @@ export type BattleScriptSideTimerInput = Readonly<{
   mistBattlerId?: BattleScriptBattlerId;
   followmeTimer?: number;
   followmeTarget?: BattleScriptBattlerId;
+  spikesAmount?: number;
 }>;
 
 type BattleScriptRulesBattlerBase = Readonly<{
@@ -236,6 +242,8 @@ type BattleScriptMoveEndBattlerMetadata = Readonly<{
   /** Source DisableStruct::encoreTimer/encoredMove, consumed by CheckMoveLimitations. */
   encoreTimer: number;
   encoredMove: number;
+  encoredMovePos: number;
+  encoreTimerStartValue: number;
   /** Source u16 gBattleMons[battler].item. */
   item: number;
   /** Source s8 gBattleMons[battler].statStages[NUM_BATTLE_STATS]. */
@@ -359,6 +367,8 @@ export type BattleScriptRulesBattler = BattleScriptRulesBattlerBase & Readonly<{
   disableTimerStartValue?: number;
   encoreTimer?: number;
   encoredMove?: number;
+  encoredMovePos?: number;
+  encoreTimerStartValue?: number;
   statStages?: readonly number[];
   specialStatus?: Readonly<{
     restoredBattlerSprite?: 0 | 1;
@@ -616,9 +626,9 @@ export type BattleScriptRulesContext = Readonly<
      * weather setter registration (docs/screens-weather-ground-truth.md §2)
      * to genuinely carry REFLECT/LIGHTSCREEN/MIST too, now that
      * Cmd_setreflect/setlightscreen/setmist/setsafeguard are real writers.
-     * SIDE_STATUS_SPIKES (and every other unregistered bit) still can never
-     * be set by any fixture this engine can build -- see
-     * battleScriptSwitchinOpcode.ts's own barrier note.
+     * SIDE_STATUS_SPIKES and its transient SPIKES_DAMAGED guard are also
+     * modeled by trysetspikes/switchineffects. Other unregistered bits still
+     * have no source writer in this engine.
      */
     sideStatuses: readonly [number, number];
     /** Source u8 gSideTimers[side].mistTimer -- ChangeStatBuffs' own Mist guard (0 = inactive). */
@@ -634,6 +644,7 @@ export type BattleScriptRulesContext = Readonly<
      * no pre-existing reader needed it before that registration. Follow Me's
      * timer/target are also carried here for Cmd_setforcedtarget, the existing
      * source-shaped GetMoveTarget reader, and the generic turn-tail cleanup.
+     * spikesAmount is the persistent layer counter paired with sideStatuses.
      */
     sideTimers: readonly [BattleScriptSideTimerState, BattleScriptSideTimerState];
     /** Source u32 gBattleWeather. */
@@ -1715,6 +1726,7 @@ function buildSideTimerState(
     mistBattlerId: requireSideTimerBattlerId(input?.mistBattlerId, `sideTimers[${side}].mistBattlerId`),
     followmeTimer: requireUnsigned(input?.followmeTimer ?? 0, 0xff, `sideTimers[${side}].followmeTimer`),
     followmeTarget: requireSideTimerBattlerId(input?.followmeTarget, `sideTimers[${side}].followmeTarget`),
+    spikesAmount: requireUnsigned(input?.spikesAmount ?? 0, 0xff, `sideTimers[${side}].spikesAmount`),
   });
 }
 
@@ -1823,13 +1835,23 @@ export function createBattleScriptRulesContext(
     ),
     encoreTimer: requireUnsigned(
       battler.encoreTimer ?? 0,
-      0xff,
+      0x0f,
       `battlers[${index}].encoreTimer`,
     ),
     encoredMove: requireUnsigned(
       battler.encoredMove ?? 0,
       0xffff,
       `battlers[${index}].encoredMove`,
+    ),
+    encoredMovePos: requireUnsigned(
+      battler.encoredMovePos ?? 0,
+      3,
+      `battlers[${index}].encoredMovePos`,
+    ),
+    encoreTimerStartValue: requireUnsigned(
+      battler.encoreTimerStartValue ?? 0,
+      0x0f,
+      `battlers[${index}].encoreTimerStartValue`,
     ),
     usedDisabledMove: requireUnsigned(
       battler.usedDisabledMove,
@@ -2467,6 +2489,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptSetDefenseCurlBitOpcodeHandlers(program),
     ...createBattleScriptTrysetfutureattackOpcodeHandlers(program),
     ...createBattleScriptDisablelastusedattackOpcodeHandlers(program),
+    ...createBattleScriptTrysetencoreOpcodeHandlers(program),
     ...createBattleScriptFuryCutterOpcodeHandlers(program),
     ...createBattleScriptSetminimizeOpcodeHandlers(program),
     ...createBattleScriptSetforcedtargetOpcodeHandlers(program),
@@ -2476,8 +2499,10 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptSettormentOpcodeHandlers(program),
     ...createBattleScriptSettauntOpcodeHandlers(program),
     ...createBattleScriptSetforesightOpcodeHandlers(program),
+    ...createBattleScriptSetfocusenergyOpcodeHandlers(program),
     ...createBattleScriptDoubleDamageIfDamagedOpcodeHandlers(program),
     ...createBattleScriptWeightDamageOpcodeHandlers(program),
+    ...createBattleScriptTrysetspikesOpcodeHandlers(program),
     ...createBattleScriptTrysetmagiccoatOpcodeHandlers(program),
     ...createBattleScriptTrysethelpinghandOpcodeHandlers(program),
     ...createBattleScriptTryswapabilitiesOpcodeHandlers(program),

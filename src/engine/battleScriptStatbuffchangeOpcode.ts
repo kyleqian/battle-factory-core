@@ -313,10 +313,13 @@ const STATUS2_CONFUSION = 0x7;
  * locally for the same import-cycle reason as STATUS2_SUBSTITUTE above.
  */
 const STATUS2_MULTIPLETURNS = 1 << 12;
+/** include/constants/battle.h:144 -- Focus Energy's public duplicate guard. */
+const STATUS2_FOCUS_ENERGY = 1 << 20;
 const JUMPIFSTATUS2_VALUES: ReadonlyMap<string, number> = new Map([
   ["STATUS2_SUBSTITUTE", STATUS2_SUBSTITUTE],
   ["STATUS2_CONFUSION", STATUS2_CONFUSION],
   ["STATUS2_MULTIPLETURNS", STATUS2_MULTIPLETURNS],
+  ["STATUS2_FOCUS_ENERGY", STATUS2_FOCUS_ENERGY],
 ]);
 
 function createJumpifstatus2OpcodeHandler(

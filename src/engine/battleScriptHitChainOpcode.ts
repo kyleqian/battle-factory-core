@@ -79,7 +79,7 @@ import {
   applyStab,
   calculateAccuracy,
   calculateBaseDamage,
-  CRITICAL_HIT_CHANCE_ONE_IN,
+  getCriticalHitChanceStage,
   isTypePhysical,
   rollAccuracyHits,
   rollIsCriticalHit,
@@ -261,6 +261,10 @@ const B_MSG_STATUS_HAD_NO_EFFECT = 2;
 
 /** printfromtable's registered small constant tables, each indexed by MULTISTRING_CHOOSER. */
 const PRINTFROMTABLE_TABLES: Readonly<Record<string, readonly string[]>> = Object.freeze({
+  gFocusEnergyUsedStringIds: Object.freeze([
+    "STRINGID_PKMNGETTINGPUMPED",
+    "STRINGID_BUTITFAILED",
+  ]),
   gFutureMoveUsedStringIds: Object.freeze([
     "STRINGID_PKMNFORESAWATTACK",
     "STRINGID_PKMNCHOSEXASDESTINY",
@@ -563,13 +567,9 @@ function blockOnUnavailableMessage(
 }
 
 /**
- * GetBattlerForBattleScript's BS_TARGET/BS_ATTACKER cases, the only two
- * selectors hitanimation/healthbarupdate/datahpupdate are reached with
- * anywhere in the committed program (BattleScript_EffectHit's own chain
- * always uses BS_TARGET; a handful of recoil-family scripts elsewhere use
- * BS_ATTACKER). Other selector cases remain unavailable until their own
- * context is explicit, matching resolveRulesBattlerForBattleScript's own
- * documented scope.
+ * GetBattlerForBattleScript's BS_TARGET/BS_ATTACKER cases plus BS_FAINTED,
+ * which the shared Spikes-on-switch script passes to healthbarupdate and
+ * datahpupdate. Other selector cases remain outside this shared hit/HP seam.
  */
 function resolveHitChainBattlerOperand(
   context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
@@ -578,6 +578,11 @@ function resolveHitChainBattlerOperand(
   const expression = context.instruction.operands[0]?.expression;
   if (expression === "BS_TARGET") return requireBattlerRole(rulesContext, "target");
   if (expression === "BS_ATTACKER") return requireBattlerRole(rulesContext, "attacker");
+  if (expression === "BS_FAINTED") {
+    const fainted = rulesContext.selectorRoles.fainted;
+    if (fainted === null) throw new Error("Battle Script HP command requires a fainted role");
+    return fainted;
+  }
   return "unsupported";
 }
 
@@ -1174,16 +1179,21 @@ export const critcalcOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesC
   const moveRow = requireMoveRow(rulesContext.currentMove);
 
   const holdEffectId = resolveBattleScriptBattlerHoldEffect(rulesContext, attacker);
-  let critChance = 0;
-  if ((attackerBattler.status2 & BATTLE_SCRIPT_STATUS2_FOCUS_ENERGY) !== 0) critChance += 2;
-  if (moveRow.effect === "EFFECT_HIGH_CRITICAL") critChance += 1;
-  if (moveRow.effect === "EFFECT_SKY_ATTACK") critChance += 1;
-  if (moveRow.effect === "EFFECT_BLAZE_KICK") critChance += 1;
-  if (moveRow.effect === "EFFECT_POISON_TAIL") critChance += 1;
-  if (holdEffectId === HOLD_EFFECT_ID_SCOPE_LENS) critChance += 1;
-  if (holdEffectId === HOLD_EFFECT_ID_LUCKY_PUNCH && attackerBattler.species === SPECIES_CHANSEY) critChance += 2;
-  if (holdEffectId === HOLD_EFFECT_ID_STICK && attackerBattler.species === SPECIES_FARFETCHD) critChance += 2;
-  if (critChance >= CRITICAL_HIT_CHANCE_ONE_IN.length) critChance = CRITICAL_HIT_CHANCE_ONE_IN.length - 1;
+  const attackerHoldEffect = holdEffectId === HOLD_EFFECT_ID_SCOPE_LENS
+    ? "HOLD_EFFECT_SCOPE_LENS"
+    : holdEffectId === HOLD_EFFECT_ID_LUCKY_PUNCH
+      ? "HOLD_EFFECT_LUCKY_PUNCH"
+      : holdEffectId === HOLD_EFFECT_ID_STICK
+        ? "HOLD_EFFECT_STICK"
+        : null;
+  const critChance = getCriticalHitChanceStage({
+    focusEnergy:
+      (attackerBattler.status2 & BATTLE_SCRIPT_STATUS2_FOCUS_ENERGY) !== 0,
+    moveEffect: moveRow.effect,
+    attackerHoldEffect,
+    isChansey: attackerBattler.species === SPECIES_CHANSEY,
+    isFarfetchd: attackerBattler.species === SPECIES_FARFETCHD,
+  });
 
   const immune = targetBattler.ability === ABILITY_BATTLE_ARMOR
     || targetBattler.ability === ABILITY_SHELL_ARMOR
@@ -3301,8 +3311,7 @@ function hitMarkerFaintedBit(battler: BattleScriptBattlerId): number {
  * `gBattlescriptCurrInstr[2] != 0`) is assembled only at the Spikes-clearing
  * sites (data/battle_scripts_1.s:2473,2485,2497 and others) -- never by
  * BattleScript_EffectHit's own `tryfaintmon BS_TARGET` (mode FALSE) -- and it
- * needs gSideStatuses' SIDE_STATUS_SPIKES_DAMAGED bit, unmodeled by this
- * engine; barriered whole. The mode-FALSE form's battler selection is a
+ * uses the modeled SIDE_STATUS_SPIKES_DAMAGED guard. The mode-FALSE form's battler selection is a
  * literal `== BS_ATTACKER` comparison in source, not GetBattlerForBattleScript,
  * so any other operand spelling (BS_TARGET, BS_FAINTED, ...) takes the
  * "target" path exactly as source does -- no selector barrier needed.
@@ -3318,13 +3327,44 @@ function createTryfaintmonOpcodeHandler(): BattleScriptOpcodeHandler<BattleScrip
     const mode = context.instruction.operands[1]?.expression;
 
     if (mode === "TRUE") {
-      return unsupportedBranch(
+      const selector = context.instruction.operands[0]?.expression;
+      const activeBattler = selector === "BS_ATTACKER"
+        ? requireBattlerRole(rulesContext, "attacker")
+        : selector === "BS_TARGET"
+        ? requireBattlerRole(rulesContext, "target")
+        : rulesContext.selectorRoles.fainted;
+      if (activeBattler === null) {
+        throw new Error(`tryfaintmon_spikes requires a resolved ${selector} role`);
+      }
+      if ((rulesContext.hitMarker & hitMarkerFaintedBit(activeBattler)) === 0) {
+        return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }));
+      }
+      const pointer = context.instruction.operands[2];
+      const target = pointer?.widthBytes === 4
+        ? resolveBattleScriptLabel(context.program, pointer.expression)
+        : undefined;
+      if (!target) throw new Error(`tryfaintmon_spikes unresolved target ${pointer?.expression ?? "<missing>"}`);
+      if (context.state.callStack.length === 0) {
+        return transitionBattleScriptCommand(context, Object.freeze({
+          kind: "halt",
+          reason: Object.freeze({
+            kind: "return-stack-underflow",
+            programCounter: context.state.programCounter,
+          }),
+        }));
+      }
+      const side = rulesContext.battlers[activeBattler].side;
+      const sideStatuses = [...rulesContext.sideStatuses] as [number, number];
+      sideStatuses[side] = (sideStatuses[side] & ~(1 << 9)) >>> 0;
+      return transitionBattleScriptCommand(
         context,
-        "Cmd_tryfaintmon's tryfaintmon_spikes form (gBattlescriptCurrInstr[2] != 0) needs "
-          + "GetBattlerForBattleScript's full selector set plus gSideStatuses' "
-          + "SIDE_STATUS_SPIKES_DAMAGED clearing, neither modeled by this engine",
-        "battle_script_commands.c",
-        2969,
+        Object.freeze({ kind: "jump-pop", programCounter: target.programCounter }),
+        {
+          rulesContext: Object.freeze({
+            ...rulesContext,
+            sideStatuses: Object.freeze(sideStatuses),
+          }),
+        },
       );
     }
 

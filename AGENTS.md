@@ -24,13 +24,16 @@ cap (`--help` lists the flags).
 **Supervised alternative:** **`./run-supervisor.sh`** runs the two-level flow:
 a supervisor plans one increment at a time, delegates it to a capped
 disposable worker via `tools/run-subagent.sh`, and verifies the result between
-steps. Configuration options live in the launchers (`--help` lists them). If
-your prompt says you're a bounded worker session, you are
-one of those workers: this guide applies to you in full, plus the step brief
-in your prompt — and `SUPERVISOR.md` is *not* for you. **No agent launches
-another full session**: the launchers refuse nested calls (via the
-`POKEBENCH_ROLE` env var each one exports); only the supervisor delegates,
-and only via `tools/run-subagent.sh`.
+steps. Use `./run-supervisor.sh --hybrid` for a Claude Fable supervisor
+(interactive sessions are available through Claude Remote Control) routing
+each step to an appropriate Codex Terra or Sol worker; it otherwise follows
+the same supervised contract. Configuration options live in the launchers
+(`--help` lists them). If your prompt says you're a bounded worker session,
+you are one of those workers: this guide applies to you in full, plus the step
+brief in your prompt — and `SUPERVISOR.md` is *not* for you. **No agent
+launches another full session**: the launchers refuse nested calls (via the
+`POKEBENCH_ROLE` env var each one exports); only the supervisor delegates, and
+only via `tools/run-subagent.sh`.
 
 ## Worker lanes
 
