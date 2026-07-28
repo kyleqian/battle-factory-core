@@ -224,6 +224,10 @@ import {
   type ThunderWaveState,
 } from "./thunderWave.ts";
 import {
+  surfWaveAtAge,
+  type SurfWaveState,
+} from "./surfWave.ts";
+import {
   charmAtAge,
   type CharmState,
 } from "./charm.ts";
@@ -440,7 +444,8 @@ export interface SceneOnPresentationBattler {
     | "LICKITUNG"
     | "WEEPINBELL"
     | "MEOWTH"
-    | "BEEDRILL";
+    | "BEEDRILL"
+    | "WARTORTLE";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -1023,6 +1028,13 @@ export interface SceneOnThunderWaveConfig {
   readonly targetEffectCenter: Readonly<{ x: number; y: number }>;
 }
 
+export interface SceneOnSurfConfig {
+  readonly move: "SURF";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnCharmConfig {
   readonly move: "CHARM";
   readonly attacker: SceneOnPresentationBattler;
@@ -1230,6 +1242,7 @@ export type SceneOnMoveConfig =
   | SceneOnScaryFaceConfig
   | SceneOnSparkConfig
   | SceneOnThunderWaveConfig
+  | SceneOnSurfConfig
   | SceneOnCharmConfig
   | SceneOnCovetConfig
   | SceneOnTailGlowConfig
@@ -1288,6 +1301,8 @@ export type SceneOnSparkPresentationState =
   SceneOnMovePresentationState<SceneOnSparkConfig>;
 export type SceneOnThunderWavePresentationState =
   SceneOnMovePresentationState<SceneOnThunderWaveConfig>;
+export type SceneOnSurfPresentationState =
+  SceneOnMovePresentationState<SceneOnSurfConfig>;
 export type SceneOnCharmPresentationState =
   SceneOnMovePresentationState<SceneOnCharmConfig>;
 export type SceneOnCovetPresentationState =
@@ -1402,6 +1417,12 @@ export interface SceneOnSparkView extends SparkState {
 }
 
 export interface SceneOnThunderWaveView extends ThunderWaveState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSurfView extends SurfWaveState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -2788,6 +2809,21 @@ export function sceneOnThunderWaveView(
       state.config.targetEffectCenter,
       state.config.target.geometry.battlePositionCenter,
     ),
+  };
+}
+
+/** `age=0` is Move_SURF's active source-script offset-zero display. */
+export function sceneOnSurfView(
+  state: SceneOnSurfPresentationState,
+): SceneOnSurfView {
+  if (state.config.move !== "SURF") {
+    throw new Error(`expected SURF presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...surfWaveAtAge(state.age, state.config.attacker.geometry.side),
   };
 }
 

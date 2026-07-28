@@ -14,6 +14,20 @@ const out = outFlag >= 0 && process.argv[outFlag + 1]
   : join(root, "src/animation/assets/surf-wave.json");
 const water = decodeIndexedPng(join(ref, "water.png"));
 const sliced = sliceTiles(water);
+const sourceRoot = join(root, "reference/pokeemerald");
+
+function sprite(path: string, palettePath: string) {
+  const image = decodeIndexedPng(join(sourceRoot, path));
+  const tiles = sliceTiles(image);
+  return {
+    tileset: {
+      columns: tiles.columns,
+      rows: tiles.rows,
+      tiles: tiles.tiles.map((tile) => [...tile.pixels]),
+    },
+    palette: loadJascPal(join(sourceRoot, palettePath)),
+  };
+}
 
 mkdirSync(dirname(out), { recursive: true });
 writeFileSync(out, `${JSON.stringify({
@@ -38,5 +52,13 @@ writeFileSync(out, `${JSON.stringify({
   },
   playerTilemap: [...readFileSync(join(ref, "water_player.bin"))],
   opponentTilemap: [...readFileSync(join(ref, "water_opponent.bin"))],
+  wartortleBack: sprite(
+    "graphics/pokemon/wartortle/back.png",
+    "graphics/pokemon/wartortle/normal.pal",
+  ),
+  wartortleFront: sprite(
+    "graphics/pokemon/wartortle/anim_front.png",
+    "graphics/pokemon/wartortle/normal.pal",
+  ),
 })}\n`);
 console.log(`wrote ${out}`);
