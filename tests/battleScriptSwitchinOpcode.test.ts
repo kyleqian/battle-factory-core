@@ -239,6 +239,8 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
           rolloutTimer: 3,
           furyCutterCounter: 2,
           disabledMove: KARATE_CHOP,
+          disableTimer: 5,
+          disableTimerStartValue: 5,
           tauntTimer: 4,
         }),
         battler({ side: 0 }),
@@ -259,6 +261,8 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     expect(updated.rolloutTimer).toBe(0);
     expect(updated.furyCutterCounter).toBe(0);
     expect(updated.disabledMove).toBe(0);
+    expect(updated.disableTimer).toBe(0);
+    expect(updated.disableTimerStartValue).toBe(0);
     expect(updated.tauntTimer).toBe(0);
     // ability/item/moves/pp are not rebuilt (untracked, see file header) -- ability stays stale.
     expect(updated.ability).toBe(ABILITY_GUTS);

@@ -78,6 +78,7 @@ import {
   createBattleScriptRngState,
   createBattleScriptSchedulerState,
   stepBattleScriptMachine,
+  transitionBattleScriptCommand,
   type BattleScriptMachineState,
   type BattleScriptOpcodeHandlers,
   type BattleScriptSchedulerState,
@@ -106,7 +107,13 @@ import {
   type BattleScriptRulesContext,
   type BattleScriptStatusRulesExternalPorts,
 } from "./battleScriptRulesContext.ts";
-import { BATTLE_SCRIPT_STATUS2_MASKS } from "./battleScriptSourceConstants.ts";
+import {
+  BATTLE_SCRIPT_HITMARKER_NO_ATTACKSTRING,
+  BATTLE_SCRIPT_HITMARKER_NO_PPDEDUCT,
+  BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE,
+  BATTLE_SCRIPT_MOVE_STRUGGLE,
+  BATTLE_SCRIPT_STATUS2_MASKS,
+} from "./battleScriptSourceConstants.ts";
 import { mapFactoryBattleOutcome } from "./factoryBattleScriptTerminalDecision.ts";
 import movesData from "../data/gen/moves.json" with { type: "json" };
 import topologyData from "../data/gen/battle-script-topology.json" with { type: "json" };
@@ -137,6 +144,68 @@ const ZERO_STAT_STAGES = Object.freeze([0, 0, 0, 0, 0, 0, 0, 0] as const);
 
 type MachineState = BattleScriptMachineState<BattleScriptRulesContext>;
 type Handlers = BattleScriptOpcodeHandlers<BattleScriptRulesContext>;
+
+/**
+ * Full-turn controller ownership for Cmd_incrementgamestat. Its only source
+ * side effect is a persistent save statistic for player-side attackers, not
+ * battle state or RNG. Acknowledge its exact two-byte encoding locally so
+ * genuine Struggle can traverse the generic full-turn controller without
+ * broadening the global executable-move census to save-data ownership.
+ */
+function createFullTurnHandlers(
+  ports: BattleScriptStatusRulesExternalPorts,
+): Handlers {
+  const shared = createBattleScriptStatusRulesHandlers(PROGRAM, ports);
+  const instruction = PROGRAM.instructions.find(
+    (candidate) => candidate.opcodeName === "B_SCR_OP_INCREMENTGAMESTAT",
+  );
+  const setEffectInstruction = PROGRAM.instructions.find(
+    (candidate) => candidate.opcodeName === "B_SCR_OP_SETEFFECTWITHCHANCE",
+  );
+  const recoilScript = resolveBattleScriptLabel(PROGRAM, "BattleScript_MoveEffectRecoil");
+  if (
+    !instruction
+    || instruction.opcodeId !== 0x60
+    || instruction.dispatcher !== "Cmd_incrementgamestat"
+    || instruction.operands.length !== 1
+    || instruction.operands[0]?.widthBytes !== 1
+    || !setEffectInstruction
+    || !recoilScript
+  ) {
+    throw new Error("committed Battle Script full-turn controller encoding drifted");
+  }
+  const sharedSetEffect = shared[setEffectInstruction.opcodeId]!;
+  return Object.freeze({
+    ...shared,
+    [instruction.opcodeId]: (context) =>
+      transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" })),
+    [setEffectInstruction.opcodeId]: (context) => {
+      const rules = context.state.rulesContext;
+      // SetMoveEffect's exact MOVE_EFFECT_RECOIL_25 branch for Struggle:
+      // certain + affects-user + effect 14, gHpDealt / 4 (minimum one), then
+      // BattleScriptPush(next) into BattleScript_MoveEffectRecoil.
+      if (
+        rules.currentMove === BATTLE_SCRIPT_MOVE_STRUGGLE
+        && rules.moveEffectByte === (0x80 | 0x40 | 14)
+      ) {
+        const recoilDamage = Math.max(1, Math.trunc(rules.hpDealt / 4));
+        return transitionBattleScriptCommand(
+          context,
+          Object.freeze({ kind: "call", programCounter: recoilScript.programCounter }),
+          {
+            rulesContext: Object.freeze({
+              ...rules,
+              battleMoveDamage: recoilDamage,
+              moveEffectByte: 0,
+              multiHitEffect: 0,
+            }),
+          },
+        );
+      }
+      return sharedSetEffect(context);
+    },
+  });
+}
 
 export type FactoryFullTurnBattlerConfig = Readonly<{
   species: number;
@@ -247,6 +316,8 @@ function emptyBattler(side: 0 | 1): BattleScriptRulesBattlerState {
     rechargeTimer: 0,
     flinchImmobility: 0,
     disabledMove: 0,
+    disableTimer: 0,
+    disableTimerStartValue: 0,
     encoreTimer: 0,
     encoredMove: 0,
     usedDisabledMove: 0,
@@ -608,6 +679,7 @@ function buildActionContext(
   moveId: number,
   moveSlot: BattleMoveSlot,
   target: BattleScriptBattlerId,
+  forcedStruggle: boolean,
 ): BattleScriptRulesContext {
   const chosenMovePositions = Object.freeze(
     priorRulesContext.chosenMovePositions.map((position, battler) =>
@@ -622,6 +694,19 @@ function buildActionContext(
     currentMovePosition: moveSlot,
     chosenMove: moveId,
     chosenMovePositions,
+    // HandleAction_UseMove resets these globals for every acting battler
+    // before BattleScriptExecute (battle_util.c:91-96). Carrying the first
+    // action's completed canceler cursor into the second action would skip
+    // newly-applied admission conditions such as Disable.
+    atkCancelerTracker: 0,
+    critMultiplier: 1,
+    dmgMultiplier: 1,
+    moveResultFlags: 0,
+    multiHitCounter: 0,
+    missType: 0,
+    hitMarker: forcedStruggle
+      ? (priorRulesContext.hitMarker | BATTLE_SCRIPT_HITMARKER_NO_PPDEDUCT) >>> 0
+      : priorRulesContext.hitMarker,
   });
 }
 
@@ -638,6 +723,7 @@ function runMoveAction(
   moveId: number,
   moveSlot: BattleMoveSlot,
   target: BattleScriptBattlerId,
+  forcedStruggle = false,
 ): ActionResult {
   const topology = TOPOLOGY_BY_MOVE.get(moveId);
   if (!topology) throw new Error(`move ${moveId} has no source Battle Script entry`);
@@ -647,6 +733,7 @@ function runMoveAction(
     moveId,
     moveSlot,
     target,
+    forcedStruggle,
   );
   const started = startBattleScriptExecute(program, topology.entryScript, {
     ...priorState,
@@ -768,9 +855,24 @@ function legalMoveDecisions(
 ): readonly BattleMoveDecision[] {
   const locked = lockedMoveDecision(rulesContext, battler);
   if (locked !== null) return Object.freeze([locked]);
-  const moves = rulesContext.battlers[battler]!.moves;
+  const source = rulesContext.battlers[battler]!;
+  const unusable = source.moves.map((moveId, slot) =>
+    moveId === 0
+    || source.pp[slot] === 0
+    || (source.disabledMove !== 0 && moveId === source.disabledMove)
+    || (source.encoreTimer !== 0 && moveId !== source.encoredMove)
+  );
+  if (unusable.every(Boolean)) {
+    const moveSlot = rulesContext.chosenMovePositions[battler] as BattleMoveSlot;
+    return Object.freeze([Object.freeze({
+      kind: "use-move" as const,
+      moveSlot,
+      targetBattler: sourceMoveTarget(BATTLE_SCRIPT_MOVE_STRUGGLE, battler),
+    })]);
+  }
+  const moves = source.moves;
   const legal = moves.flatMap((moveId, slot) =>
-    moveId !== 0
+    !unusable[slot]
       ? [Object.freeze({
           kind: "use-move" as const,
           moveSlot: slot as BattleMoveSlot,
@@ -778,6 +880,20 @@ function legalMoveDecisions(
         })]
       : []);
   return Object.freeze(legal);
+}
+
+function usesForcedStruggle(
+  rulesContext: BattleScriptRulesContext,
+  battler: BattleSinglesBattler,
+): boolean {
+  if (lockedMoveDecision(rulesContext, battler) !== null) return false;
+  const source = rulesContext.battlers[battler]!;
+  return source.moves.every((moveId, slot) =>
+    moveId === 0
+    || source.pp[slot] === 0
+    || (source.disabledMove !== 0 && moveId === source.disabledMove)
+    || (source.encoreTimer !== 0 && moveId !== source.encoredMove)
+  );
 }
 
 /**
@@ -1036,7 +1152,7 @@ function resumeFullTurnForcedSwitch(
   });
 
   const ports = externalPorts();
-  const handlers = createBattleScriptStatusRulesHandlers(PROGRAM, ports);
+  const handlers = createFullTurnHandlers(ports);
   const orchestration = resumeBattleScriptFaintedActionsAfterPlayerChoice(
     PROGRAM,
     handlers,
@@ -1157,8 +1273,14 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
   const rc0 = rules.rulesContext;
   const playerMoveSlot = rules.pendingPlayerDecision.moveSlot;
   const trainerMoveSlot = ctx.decision.moveSlot;
-  const playerMoveId = rc0.battlers[0]!.moves[playerMoveSlot];
-  const trainerMoveId = rc0.battlers[1]!.moves[ctx.decision.moveSlot];
+  const playerForcedStruggle = usesForcedStruggle(rc0, 0);
+  const trainerForcedStruggle = usesForcedStruggle(rc0, 1);
+  const playerMoveId = playerForcedStruggle
+    ? BATTLE_SCRIPT_MOVE_STRUGGLE
+    : rc0.battlers[0]!.moves[playerMoveSlot];
+  const trainerMoveId = trainerForcedStruggle
+    ? BATTLE_SCRIPT_MOVE_STRUGGLE
+    : rc0.battlers[1]!.moves[ctx.decision.moveSlot];
   if (playerMoveId === 0) {
     throw new Error(
       `factory full-turn decision player move slot ${playerMoveSlot} is not usable`,
@@ -1191,7 +1313,7 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
   const mover2Target: BattleScriptBattlerId = playerFirst ? trainerTarget : playerTarget;
 
   const ports = externalPorts();
-  const handlers = createBattleScriptStatusRulesHandlers(PROGRAM, ports);
+  const handlers = createFullTurnHandlers(ports);
   const rngBefore = ctx.rng.snapshot();
 
   const initialState: MachineState = Object.freeze({
@@ -1213,6 +1335,7 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
     mover1MoveId,
     mover1MoveSlot,
     mover1Target,
+    mover1 === 0 ? playerForcedStruggle : trainerForcedStruggle,
   );
   if (action1.kind === "barrier") {
     return finishFullTurn(
@@ -1271,10 +1394,21 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
   // faint1.kind is "no-fainted-battlers" (run action 2) or "resumed" (skip action 2, per cancelallactions).
   let preEndTurnState = handleBattleActionFinished(faint1.state, mover1);
   if (faint1.kind === "no-fainted-battlers") {
+    // RunTurnActionsFunctions clears these action-local bits when advancing
+    // gCurrentTurnActionNumber (battle_main.c:4949-4954). In particular, a
+    // first mover stopped by Disable must not make the second mover disobey.
+    const betweenActionsRules = createBattleScriptRulesContext({
+      ...preEndTurnState.rulesContext,
+      hitMarker: (
+        preEndTurnState.rulesContext.hitMarker
+        & ~BATTLE_SCRIPT_HITMARKER_NO_ATTACKSTRING
+        & ~BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE
+      ) >>> 0,
+    });
     const preAction2State: MachineState = Object.freeze({
       ...preEndTurnState,
       rulesContext: withTurnOrderPositions(
-        preEndTurnState.rulesContext,
+        betweenActionsRules,
         1,
         mover1,
         mover2,
@@ -1288,6 +1422,7 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
       mover2MoveId,
       mover2MoveSlot,
       mover2Target,
+      mover2 === 0 ? playerForcedStruggle : trainerForcedStruggle,
     );
     if (action2.kind === "barrier") {
       return finishFullTurn(

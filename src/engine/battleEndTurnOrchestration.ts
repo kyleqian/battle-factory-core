@@ -87,6 +87,8 @@ const WRAP_ENDS_LABEL = "BattleScript_WrapEnds";
 const YAWN_MAKES_ASLEEP_LABEL = "BattleScript_YawnMakesAsleep";
 /** `ENDTURN_THRASH`'s own lock-expiry confusion script (`battle_scripts_1.s:3790-3794`, docs/yawn-thrash-endturn-design.md §4) -- `BattleScriptExecute`+`end2`, no `END3`. */
 const THRASH_CONFUSES_LABEL = "BattleScript_ThrashConfuses";
+/** `ENDTURN_DISABLE`'s expiry script (`battle_scripts_1.s:3363-3367`). */
+const DISABLED_NO_MORE_LABEL = "BattleScript_DisabledNoMore";
 /** `ENDTURN_WISH`'s delayed-heal script (`battle_scripts_1.s:3589-3610`). */
 const WISH_COMES_TRUE_LABEL = "BattleScript_WishComesTrue";
 /** `HandleWishPerishSongOnTurnEnd` state 0's delayed-attack script. */
@@ -374,6 +376,55 @@ function runTickScript(
     return Object.freeze({ kind: "opcode-barrier", state: run.state, instruction: run.instruction });
   }
   return Object.freeze({ kind: "fired", state: run.state });
+}
+
+/**
+ * `ENDTURN_DISABLE` (`battle_util.c:1696-1720`). A transformed/overwritten
+ * moveset can make the stored move id stale; that clears silently before any
+ * decrement. Normal expiry predecrements the four-bit timer, retains the
+ * original start value, and executes the wear-off script only at zero.
+ */
+function runDisableTick(
+  program: BattleScriptProgram,
+  handlers: Handlers,
+  state: MachineState,
+  battler: BattleScriptBattlerId,
+): TickOutcome {
+  const source = state.rulesContext.battlers[battler];
+  if (source.disableTimer === 0) {
+    return Object.freeze({ kind: "advance", state });
+  }
+  if (!source.moves.includes(source.disabledMove)) {
+    return Object.freeze({
+      kind: "advance",
+      state: Object.freeze({
+        ...state,
+        rulesContext: withBattler(state.rulesContext, battler, {
+          disabledMove: 0,
+          disableTimer: 0,
+        }),
+      }),
+    });
+  }
+  const disableTimer = source.disableTimer - 1;
+  const rulesContext = withBattler(state.rulesContext, battler, {
+    disableTimer,
+    ...(disableTimer === 0 ? { disabledMove: 0 } : {}),
+  });
+  if (disableTimer !== 0) {
+    return Object.freeze({
+      kind: "advance",
+      state: Object.freeze({ ...state, rulesContext }),
+    });
+  }
+  return runTickScript(
+    program,
+    handlers,
+    state,
+    rulesContext,
+    battler,
+    DISABLED_NO_MORE_LABEL,
+  );
 }
 
 type RunToEnd3Result =
@@ -1214,10 +1265,13 @@ function runDoBattlerEndTurnEffects(
     if (thrash.kind === "outcome-decided") return Object.freeze({ kind: "outcome-decided", state: thrash.state });
     state = thrash.state;
 
-    const b2 = state.rulesContext.battlers[battler];
-    if (b2.disabledMove !== 0) {
-      return Object.freeze({ kind: "case-barrier", state, caseName: "ENDTURN_DISABLE", detail: "disabledMove set but the disableTimer decrement/BattleScript_DisabledNoMore path is not wired" });
+    const disable = applyTickOutcome(runDisableTick(program, handlers, state, battler));
+    if (disable.kind === "opcode-barrier") {
+      return Object.freeze({ kind: "opcode-barrier", state: disable.state, instruction: disable.instruction });
     }
+    if (disable.kind === "outcome-decided") return Object.freeze({ kind: "outcome-decided", state: disable.state });
+    state = disable.state;
+    const b2 = state.rulesContext.battlers[battler];
     // ENDTURN_ENCORE: no modeled encoreTimer/encoredMove -- inert no-op today (doc B14).
     // ENDTURN_LOCK_ON: doc-proven dead for Factory (zero MOVE_LOCK_ON/MOVE_MIND_READER carriers, B15) -- skipped, not silently ignored.
     // ENDTURN_CHARGE: no modeled chargeTimer/STATUS3_CHARGED_UP -- inert no-op today (doc B16).

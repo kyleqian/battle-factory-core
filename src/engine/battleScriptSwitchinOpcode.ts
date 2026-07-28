@@ -391,6 +391,8 @@ function createSwitchindataupdateOpcodeHandler(
           truantCounter: 0 as const,
           rechargeTimer: 0,
           disabledMove: 0,
+          disableTimer: 0,
+          disableTimerStartValue: 0,
           usedDisabledMove: 0 as const,
           tauntTimer: 0,
           usedTauntedMove: 0 as const,

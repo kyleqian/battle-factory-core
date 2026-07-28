@@ -3423,7 +3423,7 @@ function replaceAt<T extends readonly number[]>(values: T, index: number, value:
  * (`battleScriptProtectlikeOpcode.ts`'s own field), tested below. The
  * remaining struct-wide DisableStruct/ProtectStruct
  * fields FaintClearSetData zeroes (transformedMonPersonality, encoredMove*,
- * stockpileCounter, disableTimer*, perishSongTimer*,
+ * stockpileCounter, perishSongTimer*,
  * chargeTimer*, battlerWithSureHit, isFirstTurn, truantSwitchInHack,
  * mimickedMoves, ProtectStruct's noValidMoves/fleeType/physicalDmg/
  * specialDmg/physicalBattlerId/specialBattlerId), gActionSelectionCursor/
@@ -3488,6 +3488,8 @@ function createCleareffectsonfaintOpcodeHandler(
           rechargeTimer: 0,
           flinchImmobility: 0 as const,
           disabledMove: 0,
+          disableTimer: 0,
+          disableTimerStartValue: 0,
           usedDisabledMove: 0 as const,
           tauntTimer: 0,
           usedTauntedMove: 0 as const,

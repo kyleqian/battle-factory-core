@@ -73,6 +73,7 @@ import { createBattleScriptTrywishOpcodeHandlers } from "./battleScriptTrywishOp
 import { createBattleScriptRolloutOpcodeHandlers } from "./battleScriptRolloutOpcode.ts";
 import { createBattleScriptSetDefenseCurlBitOpcodeHandlers } from "./battleScriptSetDefenseCurlBitOpcode.ts";
 import { createBattleScriptTrysetfutureattackOpcodeHandlers } from "./battleScriptTrysetfutureattackOpcode.ts";
+import { createBattleScriptDisablelastusedattackOpcodeHandlers } from "./battleScriptDisablelastusedattackOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -213,6 +214,9 @@ type BattleScriptRulesBattlerBase = Readonly<{
 }>;
 
 type BattleScriptMoveEndBattlerMetadata = Readonly<{
+  /** DisableStruct's paired four-bit duration fields. */
+  disableTimer: number;
+  disableTimerStartValue: number;
   /** Source DisableStruct::encoreTimer/encoredMove, consumed by CheckMoveLimitations. */
   encoreTimer: number;
   encoredMove: number;
@@ -335,6 +339,8 @@ export type BattleScriptRulesBattler = BattleScriptRulesBattlerBase & Readonly<{
    * construction boundary. Production constructors supply source values.
    */
   item?: number;
+  disableTimer?: number;
+  disableTimerStartValue?: number;
   encoreTimer?: number;
   encoredMove?: number;
   statStages?: readonly number[];
@@ -1783,6 +1789,16 @@ export function createBattleScriptRulesContext(
       0xffff,
       `battlers[${index}].disabledMove`,
     ),
+    disableTimer: requireUnsigned(
+      battler.disableTimer ?? 0,
+      0x0f,
+      `battlers[${index}].disableTimer`,
+    ),
+    disableTimerStartValue: requireUnsigned(
+      battler.disableTimerStartValue ?? 0,
+      0x0f,
+      `battlers[${index}].disableTimerStartValue`,
+    ),
     encoreTimer: requireUnsigned(
       battler.encoreTimer ?? 0,
       0xff,
@@ -2423,6 +2439,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptRolloutOpcodeHandlers(program),
     ...createBattleScriptSetDefenseCurlBitOpcodeHandlers(program),
     ...createBattleScriptTrysetfutureattackOpcodeHandlers(program),
+    ...createBattleScriptDisablelastusedattackOpcodeHandlers(program),
   });
 }
 

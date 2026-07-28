@@ -230,6 +230,8 @@ function emptyBattler(side: 0 | 1): BattleScriptRulesBattlerState {
     rechargeTimer: 0,
     flinchImmobility: 0,
     disabledMove: 0,
+    disableTimer: 0,
+    disableTimerStartValue: 0,
     encoreTimer: 0,
     encoredMove: 0,
     usedDisabledMove: 0,
