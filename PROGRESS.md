@@ -15,6 +15,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 561 — [BOUNDED MAIN WORKER 2026-07-28 ~00:47] Defense Curl executes source-completely
+
+- **State:** committed `7a96b10` / `7989330` / `e02e90d`; focused **16/16**
+  and production build pass. Census is exactly **139/214 effects, 264/355
+  moves, 216/276 Factory-L50 distinct, 2691/2957 weighted**, all **42/42**
+  checks.
+- **Did:** registered exact operandless `0xbf`
+  `B_SCR_OP_SETDEFENSECURLBIT`: unconditional attacker-only status2 bit-30
+  OR and one-byte advance. Tests pin both attacker identities and persistence
+  when the ordered later +1 Defense change is maxed/fails. The generic
+  full-turn proof now selects Defense Curl from untouched Shuckle state,
+  observes PP **40→39**, Defense **6→7**, and bit 30, then selects Rollout.
+- **Next:** supervisor verify this executable-frontier increment and select
+  the next finite source registration target; do not resume the retired
+  canonical Battle-2 march.
+- **Notes:** controlled seed 32731 preserves zero-call Defense Curl and
+  reproduces merged OFF evidence Rollout PP **20→19**, locked HP
+  **362→327→170→12→0**, and player-win. No barrier/import ratchet increase,
+  recording import, scenario/tick/render branch, animation edit, issue
+  removal, oracle lifecycle action, or PAPERCUT.
+
+---
 ## 560 — [SUPERVISOR VERIFY 2026-07-28 ~00:40] Rollout accepted; Defense Curl evidence merged
 
 - **State:** reviewed union green at **317 files / 3969 tests** and focused
@@ -64,26 +86,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   from its source/evidence-pinned post-state. No barrier/import ratchet
   change, recording import, scenario/tick/render branch, animation edit,
   issue removal, oracle lifecycle action, or PAPERCUT.
-
----
-## 558 — [SUPERVISOR VERIFY 2026-07-28 ~00:07] Wish accepted; Secret Power evidence merged
-
-- **State:** reviewed union green at **314 files / 3954 tests** and focused
-  **105/105**; production build, both-oracle freshness, census regeneration,
-  and `git diff --check` pass. Census is exactly **137/214 effects, 261/355
-  moves, 213/276 Factory-L50 distinct, 2678/2957 weighted**, with all
-  **42/42** checks.
-- **Did:** accepted `a325a3f`/`4b88f14`: exact dual-mode Wish setup/heal,
-  positional counter + party-index state, ordered end-turn decrement, and
-  generic delayed heal reproduce the OFF two-turn outcome without a scenario
-  branch. Merged Secret Power evidence `d2d9653` after source review and two
-  byte-identical OFF replays.
-- **Next:** implement source-complete `B_SCR_OP_SETROLLOUTTIMER` and locked
-  multi-turn Rollout through the generic controller, including Defense Curl
-  power, one-time PP, escalating damage, miss cancellation, and terminal
-  outcome. Expected census is **138/214, 263/355, 215/276, 2685/2957**.
-- **Notes:** Wish matches HP **140→123→106→140**, PP **10→9→8**. Secret
-  Power replay hash is `dce99201…38474f`, with PP **20→19**, HP **362→311**,
-  and paralysis **0→64** in the Factory building environment. No barrier/
-  ratchet increase, recording import, animation edit, DEFERRED item, or
-  oracle lifecycle action.
