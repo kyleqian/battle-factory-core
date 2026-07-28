@@ -31,7 +31,7 @@ mkdirSync(dirname(out), { recursive: true });
 writeFileSync(out, `${JSON.stringify({
   source: {
     carrier:
-      "FRONTIER_MON_LICKITUNG_1 set 269; SPECIES_LICKITUNG 108; complete legal parties",
+      "FRONTIER_MON_LICKITUNG_2 set 269; SPECIES_LICKITUNG 108; complete legal parties",
     back:
       "graphics/pokemon/lickitung/back.png + graphics/pokemon/lickitung/normal.pal",
     front:
