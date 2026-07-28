@@ -220,6 +220,10 @@ import {
   type SparkState,
 } from "./spark.ts";
 import {
+  thunderWaveAtAge,
+  type ThunderWaveState,
+} from "./thunderWave.ts";
+import {
   charmAtAge,
   type CharmState,
 } from "./charm.ts";
@@ -418,6 +422,7 @@ export interface SceneOnPresentationBattler {
     | "SHUPPET"
     | "PLUSLE"
     | "MINUN"
+    | "FLAAFFY"
     | "VOLBEAT"
     | "ZIGZAGOON"
     | "SABLEYE"
@@ -1009,6 +1014,13 @@ export interface SceneOnSparkConfig {
   readonly hardwareTieSlotOrder?: readonly number[];
 }
 
+export interface SceneOnThunderWaveConfig {
+  readonly move: "THUNDER_WAVE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnCharmConfig {
   readonly move: "CHARM";
   readonly attacker: SceneOnPresentationBattler;
@@ -1215,6 +1227,7 @@ export type SceneOnMoveConfig =
   | SceneOnTauntConfig
   | SceneOnScaryFaceConfig
   | SceneOnSparkConfig
+  | SceneOnThunderWaveConfig
   | SceneOnCharmConfig
   | SceneOnCovetConfig
   | SceneOnTailGlowConfig
@@ -1271,6 +1284,8 @@ export type SceneOnReflectPresentationState =
   SceneOnMovePresentationState<SceneOnReflectConfig>;
 export type SceneOnSparkPresentationState =
   SceneOnMovePresentationState<SceneOnSparkConfig>;
+export type SceneOnThunderWavePresentationState =
+  SceneOnMovePresentationState<SceneOnThunderWaveConfig>;
 export type SceneOnCharmPresentationState =
   SceneOnMovePresentationState<SceneOnCharmConfig>;
 export type SceneOnCovetPresentationState =
@@ -1379,6 +1394,12 @@ export interface SceneOnScaryFaceView extends ScaryFaceState {
 }
 
 export interface SceneOnSparkView extends SparkState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnThunderWaveView extends ThunderWaveState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -2742,6 +2763,28 @@ export function sceneOnSparkView(
         bgPriority: state.config.targetBgPriority,
         impactPosition: state.config.targetImpactPosition,
       },
+    ),
+  };
+}
+
+/** `age=0` is Move_THUNDER_WAVE's active source-script offset-zero display. */
+export function sceneOnThunderWaveView(
+  state: SceneOnThunderWavePresentationState,
+): SceneOnThunderWaveView {
+  if (state.config.move !== "THUNDER_WAVE") {
+    throw new Error(
+      `expected THUNDER_WAVE presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...thunderWaveAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.target.geometry.animationCenter,
+      state.config.target.geometry.battlePositionCenter,
     ),
   };
 }

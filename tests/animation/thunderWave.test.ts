@@ -1,6 +1,11 @@
 import { execFileSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
 import { thunderWaveAtAge } from "../../src/animation/thunderWave.ts";
+import {
+  createSceneOnMovePresentation,
+  sceneOnThunderWaveView,
+  type SceneOnThunderWaveConfig,
+} from "../../src/animation/sceneOnPresentation.ts";
 
 describe("MOVE_THUNDER_WAVE source-relative reducer", () => {
   const player = (age: number) =>
@@ -73,5 +78,46 @@ describe("MOVE_THUNDER_WAVE source-relative reducer", () => {
     expect(output).toContain('"move":"MOVE_THUNDER_WAVE"');
     expect(output).toContain('"MOVE_THUNDERBOLT":"unsupported:');
     expect(output).toContain('"MOVE_ZAP_CANNON":"unsupported:');
+  });
+
+  it("exposes only relative age, battler geometry, and field chrome via the seam", () => {
+    const config: SceneOnThunderWaveConfig = {
+      move: "THUNDER_WAVE",
+      attacker: {
+        species: "FLAAFFY",
+        geometry: {
+          side: "player",
+          spriteCorner: { x: 40, y: 57 },
+          animationCenter: { x: 72, y: 89 },
+          battlePositionCenter: { x: 72, y: 80 },
+        },
+      },
+      target: {
+        species: "SHUCKLE",
+        geometry: {
+          side: "opponent",
+          spriteCorner: { x: 144, y: 17 },
+          animationCenter: { x: 176, y: 49 },
+          battlePositionCenter: { x: 176, y: 40 },
+        },
+      },
+      fieldProfile: {
+        playerHp: 145, playerMaxHp: 145,
+        opponentHp: 127, opponentMaxHp: 127,
+      },
+    };
+    const stage = createSceneOnMovePresentation(config);
+    const view = sceneOnThunderWaveView({ ...stage, age: 62 });
+    expect(view).toMatchObject({
+      age: 62,
+      attacker: { species: "FLAAFFY" },
+      target: { species: "SHUCKLE" },
+      backgroundPaletteY: 6,
+      visualTaskCount: 6,
+    });
+    expect(view.bands).toEqual(expect.arrayContaining([
+      expect.objectContaining({ x: 160, y: 33 }),
+      expect.objectContaining({ x: 192, y: 33 }),
+    ]));
   });
 });
