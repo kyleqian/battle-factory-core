@@ -1,4 +1,9 @@
+import { execFileSync } from "node:child_process";
+import { mkdtempSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import tauntAsset from "../../src/animation/assets/taunt.json" with { type: "json" };
 import {
   TAUNT_FIRST_ANGER_CREATION_AGE,
   TAUNT_SECOND_ANGER_CREATION_AGE,
@@ -114,5 +119,45 @@ describe("MOVE_TAUNT source-relative reducer", () => {
       soundRestart: "SE_M_SWAGGER2",
       angerMarks: [{ x: 196, y: 21 }],
     });
+  });
+
+  it("pins source provenance and exact carrier/effect sheet geometry", () => {
+    expect(tauntAsset.source).toMatchObject({
+      murkrowBack: expect.stringContaining("set 184"),
+      murkrowFront: expect.stringContaining("SPECIES_MURKROW 198"),
+      thoughtBubble: expect.stringContaining("ANIM_TAG_THOUGHT_BUBBLE"),
+      finger: expect.stringContaining("ANIM_TAG_FINGER_2"),
+      anger: expect.stringContaining("swagger.json"),
+    });
+    expect(tauntAsset.murkrowBack.tileset).toMatchObject({
+      columns: 8, rows: 8,
+    });
+    expect(tauntAsset.murkrowFront.tileset).toMatchObject({
+      columns: 8, rows: 16,
+    });
+    expect(tauntAsset.thoughtBubble.tileset).toMatchObject({
+      columns: 4, rows: 16,
+    });
+    expect(tauntAsset.finger.tileset).toMatchObject({
+      columns: 4, rows: 12,
+    });
+  });
+
+  it("re-extracts MURKROW and both loaded exclusive tags byte-for-byte", () => {
+    const directory = mkdtempSync(join(tmpdir(), "taunt-assets-"));
+    const output = join(directory, "taunt.json");
+    execFileSync(
+      process.execPath,
+      [
+        "--experimental-strip-types",
+        "tools/compare/extractTauntAssets.ts",
+        "--out",
+        output,
+      ],
+      { stdio: "pipe" },
+    );
+    expect(readFileSync(output)).toEqual(
+      readFileSync("src/animation/assets/taunt.json"),
+    );
   });
 });

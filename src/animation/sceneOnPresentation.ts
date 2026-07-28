@@ -1025,6 +1025,7 @@ export type SceneOnMoveConfig =
   | SceneOnPoisonFangConfig
   | SceneOnHyperFangConfig
   | SceneOnSwaggerConfig
+  | SceneOnTauntConfig
   | SceneOnSelfDestructConfig
   | SceneOnExplosionConfig
   | SceneOnDynamicPunchConfig
@@ -1044,8 +1045,7 @@ export type SceneOnMoveConfig =
   | SceneOnKnockOffConfig;
 
 export interface SceneOnMovePresentationState<
-  TConfig extends SceneOnMoveConfig | SceneOnRazorLeafConfig | SceneOnTauntConfig
-    = SceneOnMoveConfig,
+  TConfig extends SceneOnMoveConfig = SceneOnMoveConfig,
 > {
   readonly age: number;
   readonly config: TConfig;
@@ -2235,7 +2235,7 @@ export function sceneOnSwaggerView(
 
 /** `age=0` is the first displayed thought-bubble software OAM. */
 export function sceneOnTauntView(
-  state: SceneOnTauntPresentationState,
+  state: SceneOnMovePresentationState,
 ): SceneOnTauntView {
   if (state.config.move !== "TAUNT") {
     throw new Error(`expected TAUNT presentation, got ${state.config.move}`);

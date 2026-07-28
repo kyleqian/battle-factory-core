@@ -550,6 +550,7 @@ import sludgeBombAsset from "../animation/assets/sludgeBomb.json" with { type: "
 import poisonFangAsset from "../animation/assets/poisonFang.json" with { type: "json" };
 import hyperFangAsset from "../animation/assets/hyperFang.json" with { type: "json" };
 import swaggerAsset from "../animation/assets/swagger.json" with { type: "json" };
+import tauntAsset from "../animation/assets/taunt.json" with { type: "json" };
 import selfDestructAsset from "../animation/assets/selfDestruct.json" with { type: "json" };
 import explosionAsset from "../animation/assets/explosion.json" with { type: "json" };
 import dynamicPunchAsset from "../animation/assets/dynamicPunch.json" with { type: "json" };
@@ -669,6 +670,7 @@ import {
   sceneOnPoisonFangView,
   sceneOnHyperFangView,
   sceneOnSwaggerView,
+  sceneOnTauntView,
   sceneOnSelfDestructView,
   sceneOnExplosionView,
   sceneOnDynamicPunchView,
@@ -1017,6 +1019,12 @@ const swaggerArt = swaggerAsset as {
   anger: { tileset: Tileset; palette: RgbColor[] };
   rattataBack: { tileset: Tileset; palette: RgbColor[] };
   rattataFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const tauntArt = tauntAsset as {
+  thoughtBubble: { tileset: Tileset; palette: RgbColor[] };
+  finger: { tileset: Tileset; palette: RgbColor[] };
+  murkrowBack: { tileset: Tileset; palette: RgbColor[] };
+  murkrowFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const selfDestructArt = selfDestructAsset as {
   explosion: { tileset: Tileset; palette: RgbColor[] };
@@ -16521,6 +16529,136 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "RATTATA used" : "Foe RATTATA used",
       "SWAGGER!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "TAUNT") {
+    const view = sceneOnTauntView(state);
+    // Sprite callbacks mutate software OAM after the current buffer transfer;
+    // the displayed effect list is therefore the preceding reducer frame.
+    const displayed = sceneOnTauntView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "MURKROW"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "MURKROW"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged TAUNT pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const murkrow = playerToOpponent
+      ? tauntArt.murkrowBack
+      : {
+          ...tauntArt.murkrowFront,
+          tileset: subTileset(tauntArt.murkrowFront.tileset, 0, 8),
+        };
+    const shuckle = playerToOpponent
+      ? {
+          ...selfDestructArt.shuckleFront,
+          tileset: subTileset(selfDestructArt.shuckleFront.tileset, 0, 8),
+        }
+      : selfDestructArt.shuckleBack;
+    const player = playerToOpponent ? murkrow : shuckle;
+    const opponent = playerToOpponent ? shuckle : murkrow;
+
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    // Runtime subpriorities are opponent=40, anger=38, player=30,
+    // thought-bubble=19, finger=18. SortSprites emits descending
+    // subpriority into painter order, independent of attacker orientation.
+    drawSpriteSheet(
+      fb,
+      opponent.tileset,
+      opponent.palette,
+      (playerToOpponent ? view.target : view.attacker).geometry.spriteCorner.x,
+      (playerToOpponent ? view.target : view.attacker).geometry.spriteCorner.y,
+    );
+    for (const mark of displayed.angerMarks) {
+      const matrix = Math.trunc(0x10000 / mark.xScale);
+      drawSpriteSheetAffineRotate(
+        fb,
+        swaggerArt.anger.tileset,
+        swaggerArt.anger.palette,
+        mark.x,
+        mark.y,
+        matrix,
+        0,
+        0,
+        matrix,
+        undefined,
+        false,
+      );
+    }
+    drawSpriteSheet(
+      fb,
+      player.tileset,
+      player.palette,
+      (playerToOpponent ? view.attacker : view.target).geometry.spriteCorner.x,
+      (playerToOpponent ? view.attacker : view.target).geometry.spriteCorner.y,
+    );
+    if (displayed.thoughtBubble) {
+      const bubble = displayed.thoughtBubble;
+      drawSpriteSheetFlipped(
+        fb,
+        subTileset(tauntArt.thoughtBubble.tileset, bubble.frame * 4, 4),
+        tauntArt.thoughtBubble.palette,
+        bubble.x - 16,
+        bubble.y - 16,
+        bubble.hFlip,
+        false,
+      );
+    }
+    if (displayed.finger) {
+      const finger = displayed.finger;
+      drawSpriteSheetFlipped(
+        fb,
+        subTileset(tauntArt.finger.tileset, finger.frame * 4, 4),
+        tauntArt.finger.palette,
+        finger.x - 16,
+        finger.y - 16,
+        finger.hFlip,
+        false,
+      );
+    }
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "SHUCKLE" : "MURKROW",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "MURKROW" : "SHUCKLE",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "MURKROW used" : "Foe MURKROW used",
+      "TAUNT!",
       99,
     );
     return;
