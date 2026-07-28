@@ -22,7 +22,7 @@ def main() -> None:
   def s16(a): v=u16(a); return v-65536 if v>=32768 else v
   def spr(i):
     b=S+i*0x44; m=((u16(b+2)>>9)&31)*8
-    return {"slot":i,"template":o.read_u32(b+0x14),"x":s16(b+0x20),"y":s16(b+0x22),"x2":s16(b+0x24),"y2":s16(b+0x26),"attr":[u16(b),u16(b+2),u16(b+4)],"subpriority":o.read_u8(b+0x43),"data":[s16(b+0x2e+j*2) for j in range(8)],"matrix":[s16(M+m+j) for j in (0,2,4,6)]}
+    return {"slot":i,"template":o.read_u32(b+0x14),"x":s16(b+0x20),"y":s16(b+0x22),"x2":s16(b+0x24),"y2":s16(b+0x26),"attr":[u16(b),u16(b+2),u16(b+4)],"subpriority":o.read_u8(b+0x43),"invisible":bool(o.read_u8(b+0x3e)&4),"data":[s16(b+0x2e+j*2) for j in range(8)],"matrix":[s16(M+m+j) for j in (0,2,4,6)]}
   RGB_DIR.mkdir(parents=True,exist_ok=True); rows=[]
   def cap(frame):
     if lab.snapshot()["engine"]["currentMove"] != 115: return

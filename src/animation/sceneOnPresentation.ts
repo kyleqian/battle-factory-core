@@ -140,6 +140,10 @@ import {
   type AbsorbState,
 } from "./absorb.ts";
 import {
+  reflectAtAge,
+  type ReflectState,
+} from "./reflect.ts";
+import {
   synthesisEffectAtAge,
   type SynthesisSprite,
 } from "./synthesis.ts";
@@ -363,6 +367,8 @@ export interface SceneOnPresentationBattler {
     | "IVYSAUR"
     | "KADABRA"
     | "LOMBRE"
+    | "SHUPPET"
+    | "SHUCKLE"
     | "MILTANK"
     | "LOUDRED"
     | "DUSTOX"
@@ -808,6 +814,17 @@ export interface SceneOnAbsorbConfig {
   }>;
 }
 
+export interface SceneOnReflectConfig {
+  readonly move: "REFLECT";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly allocatorProfile: Readonly<{
+    readonly wall: number;
+    readonly sparkles: readonly number[];
+  }>;
+}
+
 export interface SceneOnSynthesisConfig {
   readonly move: "SYNTHESIS";
   readonly attacker: SceneOnPresentationBattler;
@@ -1086,6 +1103,7 @@ export type SceneOnMoveConfig =
   | SceneOnGrowthConfig
   | SceneOnRecoverConfig
   | SceneOnAbsorbConfig
+  | SceneOnReflectConfig
   | SceneOnSynthesisConfig
   | SceneOnMilkDrinkConfig
   | SceneOnSupersonicConfig
@@ -1136,6 +1154,8 @@ export type SceneOnScaryFacePresentationState =
   SceneOnMovePresentationState<SceneOnScaryFaceConfig>;
 export type SceneOnAbsorbPresentationState =
   SceneOnMovePresentationState<SceneOnAbsorbConfig>;
+export type SceneOnReflectPresentationState =
+  SceneOnMovePresentationState<SceneOnReflectConfig>;
 export type SceneOnSparkPresentationState =
   SceneOnMovePresentationState<SceneOnSparkConfig>;
 export type SceneOnCharmPresentationState =
@@ -1775,7 +1795,7 @@ function assertIntegerPoint(
 export function createSceneOnMovePresentation<
   TConfig extends SceneOnMoveConfig | SceneOnRazorLeafConfig | SceneOnTauntConfig
     | SceneOnSparkConfig | SceneOnCharmConfig | SceneOnScaryFaceConfig
-    | SceneOnAbsorbConfig,
+    | SceneOnAbsorbConfig | SceneOnReflectConfig,
 >(
   config: TConfig,
 ): SceneOnMovePresentationState<TConfig> {
@@ -2147,6 +2167,31 @@ export function sceneOnAbsorbView(
       state.config.absorptionCenter,
       state.config.attacker.geometry.side,
       state.config.healingCenter,
+    ),
+  };
+}
+
+export interface SceneOnReflectView extends ReflectState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+/** `age` is relative to gReflectWallSpriteTemplate's creation pass. */
+export function sceneOnReflectView(
+  state: SceneOnMovePresentationState<SceneOnReflectConfig>,
+): SceneOnReflectView {
+  if (state.config.move !== "REFLECT") {
+    throw new Error(`expected REFLECT presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...reflectAtAge(
+      state.age,
+      state.config.attacker.geometry.battlePositionCenter,
+      state.config.attacker.geometry.side,
     ),
   };
 }

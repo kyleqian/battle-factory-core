@@ -15038,6 +15038,9 @@ export function renderSceneOnMovePresentation(
   fb: Uint8Array,
   state: SceneOnMovePresentationState,
 ): void {
+  if (state.config.move === "REFLECT") {
+    throw new Error("REFLECT software seam is staged; compositor remains unsupported");
+  }
   if (state.config.move === "KNOCK_OFF") {
     // Task/sprite callbacks update RAM after this frame's OAM and palette
     // transfer. The complete move body therefore reaches the framebuffer
