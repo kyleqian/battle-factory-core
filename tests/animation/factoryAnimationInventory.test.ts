@@ -68,11 +68,11 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // SPARK closes its source/hardware/typed seam; rendering remains.
-        unsupported: 223,
+        // SCARY FACE closes the complete software/typed seam as partial.
+        unsupported: 221,
         staged: 0,
         partial: 4,
-        exact: 49,
+        exact: 51,
       },
       {
         tier: "openOnly",

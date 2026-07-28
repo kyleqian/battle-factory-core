@@ -1,4 +1,9 @@
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
+import {
+  mkdtempSync,
+  readFileSync,
+  realpathSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
@@ -11,6 +16,13 @@ import {
   sceneOnSparkView,
   type SceneOnPresentationBattler,
 } from "../../src/animation/sceneOnPresentation.ts";
+import {
+  createInitialState,
+  render,
+  type EngineState,
+} from "../../src/engine/core.ts";
+import { createHash } from "node:crypto";
+import { PNG } from "pngjs";
 
 interface Fixture {
   scenario: string; probe: string;
@@ -40,7 +52,8 @@ interface SoundPlayer {
   tracks: readonly { flags: number; panX: number }[];
 }
 interface Frame {
-  frame: number; visualTaskCount: number; soundTaskCount: number;
+  frame: number; sha256: string;
+  visualTaskCount: number; soundTaskCount: number;
   activeSpriteCount: number;
   playerSprite: Sprite; opponentSprite: Sprite; sprites: readonly Sprite[];
   hardwareOam: readonly (readonly number[])[];
@@ -157,11 +170,12 @@ function verifyRun(fixturePath: string, runNumber: number): void {
   const fixture = JSON.parse(readFileSync(resolve(fixturePath), "utf8")) as Fixture;
   const scratch = mkdtempSync(join(tmpdir(), "pokebench-spark-evidence-"));
   const output = join(scratch, "probe.json");
+  const rgbDir = join(scratch, "rgb");
   const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));
   const run = spawnSync("python3", [
     join(root, "tools/run-mgba-probe.py"), output, "--",
     join(vendor, "mgba-venv/bin/python"), resolve(root, fixture.probe),
-    resolve(root, fixture.scenario), output,
+    resolve(root, fixture.scenario), output, rgbDir,
   ], { cwd: root, encoding: "utf8" });
   if (run.stdout) process.stdout.write(run.stdout);
   if (run.stderr) process.stderr.write(run.stderr);
@@ -179,6 +193,7 @@ function verifyRun(fixturePath: string, runNumber: number): void {
     targetBgPriority: fixture.targetBgPriority,
     flashingInitialCallbackAdvances: fixture.flashingInitialCallbackAdvances,
     flashingInitialAffineAdvances: fixture.flashingInitialAffineAdvances,
+    hardwareTieSlotOrder: fixture.hardwareTieSlotOrder,
     fieldProfile: fixture.fieldProfile,
   });
   const geometry = (battler: SceneOnPresentationBattler, pictureOffset: {
@@ -203,6 +218,9 @@ function verifyRun(fixturePath: string, runNumber: number): void {
   const failures: string[] = [];
   let bodyMatches = 0;
   let cleanupMatches = 0;
+  let bodyFramebufferMatches = 0;
+  let cleanupFramebufferMatches = 0;
+  let wroteDiagnostic = false;
   for (const [index, oracle] of probe.frames.entries()) {
     const age = fixture.appStage.presentationAge + index;
     const expected = sparkAtAge(age, attackerGeometry, targetGeometry);
@@ -306,9 +324,62 @@ function verifyRun(fixturePath: string, runNumber: number): void {
       && attackerSprite.x2 === 0 && attackerSprite.y2 === 0
       && targetSprite.x2 === 0 && targetSprite.y2 === 0
     );
+    const engine: EngineState = {
+      ...createInitialState(),
+      rngMode: "frontierBattle",
+      sceneOnPresentation: { ...stage, age },
+    };
+    const app = render(engine);
+    const rgb = readFileSync(
+      join(rgbDir, `${String(oracle.frame).padStart(5, "0")}.rgb`),
+    );
+    if (createHash("sha256").update(rgb).digest("hex") !== oracle.sha256) {
+      throw new Error(`raw RGB digest mismatch at frame ${oracle.frame}`);
+    }
+    let diffPixels = 0;
+    for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
+      if (
+        app[pixel * 4] !== rgb[pixel * 3]
+        || app[pixel * 4 + 1] !== rgb[pixel * 3 + 1]
+        || app[pixel * 4 + 2] !== rgb[pixel * 3 + 2]
+      ) diffPixels += 1;
+    }
+    const framebuffer = diffPixels === 0;
+    if (framebuffer) {
+      if (index < 115) bodyFramebufferMatches += 1;
+      else cleanupFramebufferMatches += 1;
+    } else if (!wroteDiagnostic) {
+      const oracleRgba = Buffer.alloc(240 * 160 * 4);
+      const diffRgba = Buffer.alloc(240 * 160 * 4);
+      for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
+        oracleRgba[pixel * 4] = rgb[pixel * 3]!;
+        oracleRgba[pixel * 4 + 1] = rgb[pixel * 3 + 1]!;
+        oracleRgba[pixel * 4 + 2] = rgb[pixel * 3 + 2]!;
+        oracleRgba[pixel * 4 + 3] = 255;
+        if (
+          app[pixel * 4] !== rgb[pixel * 3]
+          || app[pixel * 4 + 1] !== rgb[pixel * 3 + 1]
+          || app[pixel * 4 + 2] !== rgb[pixel * 3 + 2]
+        ) {
+          diffRgba[pixel * 4] = 255;
+          diffRgba[pixel * 4 + 3] = 255;
+        }
+      }
+      writeFileSync(join(scratch, `oracle-age-${age}.png`), PNG.sync.write({
+        width: 240, height: 160, data: oracleRgba,
+      }));
+      writeFileSync(join(scratch, `app-age-${age}.png`), PNG.sync.write({
+        width: 240, height: 160, data: Buffer.from(app),
+      }));
+      writeFileSync(join(scratch, `diff-age-${age}.png`), PNG.sync.write({
+        width: 240, height: 160, data: diffRgba,
+      }));
+      process.stderr.write(`diagnostic frames: ${scratch}\n`);
+      wroteDiagnostic = true;
+    }
     const matched = seamMatch && software && lungeMatch && battlers
       && hardware && hardwareMatrices && palette && assets && registers
-      && sound && cleanup;
+      && sound && cleanup && framebuffer;
     if (matched) {
       if (index < 115) bodyMatches += 1;
       else cleanupMatches += 1;
@@ -317,14 +388,17 @@ function verifyRun(fixturePath: string, runNumber: number): void {
         `frame ${oracle.frame}/age ${age}: seam=${seamMatch} software=${software}`
         + ` lunge=${lungeMatch} battlers=${battlers} hw=${hardware}`
         + ` matrices=${hardwareMatrices} palette=${palette} assets=${assets}`
-        + ` registers=${registers} sound=${sound} cleanup=${cleanup}`,
+        + ` registers=${registers} sound=${sound} cleanup=${cleanup}`
+        + ` framebuffer=${framebuffer} diffPixels=${diffPixels}`,
       );
     }
   }
   if (failures.length) throw new Error(failures.slice(0, 30).join("\n"));
   console.log(
     `${fixture.attacker.geometry.side} run ${runNumber}: `
-    + `${bodyMatches}/115 body + ${cleanupMatches}/2 cleanup frames`,
+    + `${bodyMatches}/115 body + ${cleanupMatches}/2 cleanup frames; `
+    + `framebuffer ${bodyFramebufferMatches}/115 + `
+    + `${cleanupFramebufferMatches}/2`,
   );
 }
 

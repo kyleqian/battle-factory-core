@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """Dense source/OAM/palette/audio evidence for legal Scene-ON MOVE_SPARK fixtures."""
 from __future__ import annotations
-import json, subprocess, sys
+import hashlib, json, subprocess, sys
 from pathlib import Path
 
-if len(sys.argv) != 3:
-    raise SystemExit("usage: sparkProbe.py <scenario> <output.json>")
-SCENARIO, OUTPUT = Path(sys.argv[1]), Path(sys.argv[2])
+if len(sys.argv) != 4:
+    raise SystemExit("usage: sparkProbe.py <scenario> <output.json> <rgb-dir>")
+SCENARIO, OUTPUT, RGB_DIR = (
+    Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3])
+)
 ROOT = Path(__file__).resolve().parents[2]
 HARNESS = next(p for p in (ROOT, *ROOT.parents) if (p / "oracle" / "emerald_core.py").is_file())
 sys.path.insert(0, str(HARNESS / "oracle"))
@@ -75,6 +77,7 @@ def main() -> None:
                             "panX": s8(tracks+i*0x50+0x15)} for i in range(3)]}
     attacker = None
     rows = []
+    RGB_DIR.mkdir(parents=True, exist_ok=True)
     def capture(frame: int) -> None:
         nonlocal attacker
         snap = lab.snapshot()
@@ -89,7 +92,10 @@ def main() -> None:
             if oracle.read_u8(base+0x3e) & 1:
                 item = sprite(slot)
                 if item["template"] in templates.values(): active.append(item)
-        rows.append({"frame": frame, "battleAnimAttacker": current_attacker,
+        rgb = oracle.screen_rgb()
+        (RGB_DIR / f"{frame:05d}.rgb").write_bytes(rgb)
+        rows.append({"frame": frame, "sha256": hashlib.sha256(rgb).hexdigest(),
+          "battleAnimAttacker": current_attacker,
           "battleAnimTarget": oracle.read_u8(anim_target),
           "visualTaskCount": oracle.read_u8(visual_count),
           "soundTaskCount": oracle.read_u8(sound_count),

@@ -1,0 +1,13 @@
+{
+  "schema": "scene-on-portable-component/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-scary-face-player-rhyhorn-opponent-shuckle.json",
+  "probe": "tools/compare/scaryFaceProbe.py",
+  "move": "SCARY_FACE",
+  "attackerSide": "player",
+  "denseWindow": {"startFrame": 79, "endFrame": 268},
+  "attackerEyeCenter": {"x": 72, "y": 100},
+  "attacker": {"species": "RHYHORN", "geometry": {"side": "player", "spriteCorner": {"x": 40, "y": 60}, "animationCenter": {"x": 72, "y": 100}, "battlePositionCenter": {"x": 72, "y": 80}}},
+  "target": {"species": "SHUCKLE", "geometry": {"side": "opponent", "spriteCorner": {"x": 144, "y": 17}, "animationCenter": {"x": 176, "y": 49}, "battlePositionCenter": {"x": 176, "y": 40}}},
+  "fieldProfile": {"playerHp": 177, "playerMaxHp": 177, "opponentHp": 95, "opponentMaxHp": 95}
+}

@@ -44,6 +44,68 @@ animation. A status caused by a move is not part of that move's animation.
   presentation seam and all source- or evidence-required variants are covered.
 - No entry means unsupported.
 
+## MOVE_SCARY_FACE promoted partial; complete software/typed seam (2026-07-27)
+
+**Verdict:** `MOVE_SCARY_FACE` is partial. Legal set-133 RHYHORN versus
+constrained SHUCKLE passes the complete move-owned source/software/typed seam
+**190/190** in both orientations, twice fresh, with no excluded body frames
+and a clean boundary before generic speed-stat presentation. Coverage is
+**51 exact / 4 partial / 221 unsupported**.
+
+**Proof:** the reducer and fresh mGBA probe cover both invisible palette
+controllers; side-selected BG1 tilemap/image/palette identity and the complete
+`AnimTask_ScaryFace` 0→14→0 schedule; both side-mirrored EyeSparkle sprites
+and all 0/4/8/4/0 cells; all three source audio restart boundaries; target
+offsets; software task/sprite state; teardown; and the typed Scene-ON seam.
+A real stock-ROM quirk is now explicit: the script literal is
+`ShakeTargetInPattern(20,1,FALSE,pattern0)`, but the task rereads shared
+`gBattleAnimArgs` after the following palette command overwrites it, so legal
+execution uses offset 3/pattern1. Both the literal and every observed runtime
+offset are pinned. GLARE, THUNDER, and TRI ATTACK remain unsupported.
+
+**Exact remainder:** hardware OAM/palette/register transfer, live audio state,
+raw RGB, and shared-framebuffer equality. No renderer or engine file was
+touched.
+
+## MOVE_CHARM promoted exact; magenta-heart compositor closed (2026-07-27)
+
+**Verdict:** `MOVE_CHARM` is exact. Complete legal Scene-ON parties retain the
+real challenge-0 Level-50 set-187 MINUN carrier against slower constrained
+SHUCKLE. Both orientations match **93/93** complete move-owned source,
+typed-seam, software/hardware-OAM, matrix, palette, audio, raw-RGB, and shared
+framebuffer frames twice fresh, with no excluded body frames.
+
+**Renderer/boundary:** the narrow compositor reuses exact SPARK MINUN/SHUCKLE
+field assets and generated MAGENTA_HEART art. It ports the source ordering and
+the observed split display latch (effect OAM one frame; battler task two),
+affine pivot, all three hearts, field/chrome/text, and complete task/OAM/
+palette/audio teardown. Four clear frames are proved after the 93-frame body;
+the later generic stat-stage task begins only afterward and remains excluded.
+SPARK stays exact at **115/115 + 2/2 cleanup** in both orientations twice fresh.
+
+**Scope/siblings:** COVET retains its target ShakeMon2/Dizzy Punch remainder;
+FAKE TEARS and TICKLE retain different task arguments and distinct bodies.
+None is promoted. Coverage is **51 exact / 3 partial / 222 unsupported**.
+
+## MOVE_SPARK promoted exact; shared framebuffer closed (2026-07-27)
+
+**Verdict:** `MOVE_SPARK` is exact. Both legal set-187 MINUN orientations
+match **115/115** complete source-component, typed-seam, raw-RGB, and shared
+framebuffer body frames plus **2/2** cleanup frames, reproduced twice fresh.
+The narrow renderer reuses the literal source-tagged ENCORE MINUN,
+SELF_DESTRUCT SHUCKLE, generated SPARK_2, and DYNAMIC PUNCH IMPACT art; it
+ports source OAM ordering/matrices/flips, explicit allocator tie state, the
+one-display palette/effect transfer, HorizontalLunge, animation-2 impact,
+source ShakeMon display latch, field/chrome/text, and ages 115-116 teardown.
+
+**Controls/scope:** ENCORE remains **215/215** and DYNAMIC PUNCH **75/75**
+component plus framebuffer exact in both orientations. The optional full
+BOUNCE paralysis-window comparator is not a usable exact control at current
+branch baseline (**87/450**, failures begin before its status component);
+the SPARK change leaves `statusAnimation.ts` byte-untouched and its focused
+tests green. THUNDERBOLT, THUNDER_WAVE, ZAP CANNON, and THUNDER SHOCK remain
+unsupported. Coverage is now **50 exact / 3 partial / 223 unsupported**.
+
 ## MOVE_SPARK promoted partial; complete source body closed (2026-07-27)
 
 **Verdict:** `MOVE_SPARK` is partial. The legal set-187 MINUN fixtures match

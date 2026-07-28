@@ -551,6 +551,7 @@ import poisonFangAsset from "../animation/assets/poisonFang.json" with { type: "
 import hyperFangAsset from "../animation/assets/hyperFang.json" with { type: "json" };
 import swaggerAsset from "../animation/assets/swagger.json" with { type: "json" };
 import tauntAsset from "../animation/assets/taunt.json" with { type: "json" };
+import charmAsset from "../animation/assets/charm.json" with { type: "json" };
 import selfDestructAsset from "../animation/assets/selfDestruct.json" with { type: "json" };
 import explosionAsset from "../animation/assets/explosion.json" with { type: "json" };
 import dynamicPunchAsset from "../animation/assets/dynamicPunch.json" with { type: "json" };
@@ -578,6 +579,7 @@ import battleAnimHandsAndFeetAsset from "../assets/gen/battle-anim-hands-and-fee
 import battleAnimIceCrystalsAsset from "../assets/gen/battle-anim-ice-crystals.json" with { type: "json" };
 import battleAnimIceCubeAsset from "../assets/gen/battle-anim-ice-cube.json" with { type: "json" };
 import battleAnimLightningAsset from "../assets/gen/battle-anim-lightning.json" with { type: "json" };
+import battleAnimSpark2Asset from "../assets/gen/battle-anim-spark-2.json" with { type: "json" };
 import battleBackSpritesAsset from "../assets/gen/battle-back-sprites.json" with { type: "json" };
 import battleAnimItemHealAsset from "../assets/gen/battle-anim-item-heal.json" with { type: "json" };
 import fontNormalData from "../data/gen/font-normal.json" with { type: "json" };
@@ -683,6 +685,8 @@ import {
   sceneOnCalmMindView,
   sceneOnShadowBallView,
   sceneOnEncoreView,
+  sceneOnSparkView,
+  sceneOnCharmView,
   sceneOnDragonClawView,
   sceneOnSingView,
   sceneOnFutureSightView,
@@ -690,6 +694,8 @@ import {
   sceneOnPsychicView,
   sceneOnKnockOffView,
   type SceneOnMovePresentationState,
+  type SceneOnSparkPresentationState,
+  type SceneOnCharmPresentationState,
 } from "../animation/sceneOnPresentation.ts";
 import {
   extremeSpeedBackgroundVariant,
@@ -704,6 +710,7 @@ import {
   SHADOW_PUNCH_TRACE_BLEND_COEFF,
 } from "../animation/shadowPunch.ts";
 import { speciesFrontIdleRestOffset } from "../animation/speciesIdleAnim.ts";
+import { shakeMonOffsetAtTick } from "../animation/shakeMon.ts";
 import { encoreTargetX2AtAge } from "../animation/encore.ts";
 import { dragonClawDisplayedAttackerShakeY } from "../animation/dragonClaw.ts";
 import { sludgeDisplayedTargetOffsetAtAge } from "../animation/sludge.ts";
@@ -1083,6 +1090,17 @@ const encoreArt = encoreAsset as {
   clappingHand: { tileset: Tileset; palette: RgbColor[] };
   minunBack: { tileset: Tileset; palette: RgbColor[] };
   minunFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const spark2Art = battleAnimSpark2Asset as {
+  frames: {
+    columns: number;
+    rows: number;
+    list: number[][][];
+  };
+  palette: RgbColor[];
+};
+const charmArt = charmAsset as {
+  magentaHeart: { tileset: Tileset; palette: RgbColor[] };
 };
 const dragonClawArt = dragonClawAsset as {
   smallEmber: { tileset: Tileset; palette: RgbColor[] };
@@ -15885,6 +15903,339 @@ export function renderSceneOnMovePresentation(
       playerToOpponent ? "RATICATE used" : "Foe RATICATE used",
       "HYPER FANG!",
       99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SPARK") {
+    const sparkState = state as SceneOnSparkPresentationState;
+    const view = sceneOnSparkView(sparkState);
+    const displayed = sceneOnSparkView({
+      ...sparkState,
+      age: sparkState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "MINUN"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "MINUN"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged SPARK pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const minunSource = playerToOpponent
+      ? encoreArt.minunBack : encoreArt.minunFront;
+    const minun = playerToOpponent
+      ? minunSource
+      : {
+          ...minunSource,
+          tileset: subTileset(minunSource.tileset, 0, 8),
+        };
+    const shuckle = playerToOpponent
+      ? {
+          ...selfDestructArt.shuckleFront,
+          tileset: subTileset(selfDestructArt.shuckleFront.tileset, 0, 8),
+        }
+      : selfDestructArt.shuckleBack;
+    const yellow = { r: 255, g: 255, b: 181 };
+    const bgPaletteY = view.backgroundPaletteY === 0
+      ? 0 : displayed.backgroundPaletteY;
+    const minunPalette = blendPaletteToward(
+      minun.palette,
+      yellow,
+      displayed.attackerPaletteY,
+    );
+    const shucklePalette = blendPaletteToward(
+      shuckle.palette,
+      yellow,
+      displayed.targetPaletteY,
+    );
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      blendPaletteBanksToward(battleBg.palette, yellow, bgPaletteY),
+    );
+
+    type SparkPainterItem = {
+      priority: number;
+      subpriority: number;
+      top: number;
+      slot: number;
+      draw: () => void;
+    };
+    const items: SparkPainterItem[] = [];
+    const attackerSlot = playerToOpponent ? 13 : 15;
+    const targetSlot = playerToOpponent ? 15 : 10;
+    const attackerPalette = minunPalette;
+    const targetPalette = shucklePalette;
+    const displayedTargetShake = shakeMonOffsetAtTick(
+      3,
+      0,
+      6,
+      1,
+      sparkState.age - 70,
+    );
+    items.push({
+      priority: 2,
+      subpriority: view.attacker.geometry.side === "player" ? 30 : 40,
+      top: view.attacker.geometry.spriteCorner.y + displayed.attackerOffset.y2,
+      slot: attackerSlot,
+      draw: () => drawSpriteSheet(
+        fb,
+        minun.tileset,
+        attackerPalette,
+        view.attacker.geometry.spriteCorner.x + displayed.attackerOffset.x2,
+        view.attacker.geometry.spriteCorner.y + displayed.attackerOffset.y2,
+      ),
+    }, {
+      priority: 2,
+      subpriority: view.target.geometry.side === "player" ? 30 : 40,
+      top: view.target.geometry.spriteCorner.y + displayedTargetShake.y2,
+      slot: targetSlot,
+      draw: () => drawSpriteSheet(
+        fb,
+        shuckle.tileset,
+        targetPalette,
+        view.target.geometry.spriteCorner.x + displayedTargetShake.x2,
+        view.target.geometry.spriteCorner.y + displayedTargetShake.y2,
+      ),
+    });
+
+    const effectView = sparkState.age === 43
+      ? sceneOnSparkView({ ...sparkState, age: -1 })
+      : displayed;
+    for (const sprite of [...effectView.sparks, ...effectView.flashing]) {
+      if (sprite.hidden) continue;
+      const tileIndex = sprite.kind === "spark" ? 0 : sprite.tileIndex;
+      const tileset: Tileset = {
+        columns: spark2Art.frames.columns,
+        rows: spark2Art.frames.rows,
+        tiles: spark2Art.frames.list[tileIndex]!,
+      };
+      items.push({
+        priority: sprite.priority,
+        subpriority: sprite.subpriority,
+        top: sprite.y + sprite.y2 - 8,
+        slot: sprite.slot,
+        draw: () => drawSpriteSheetAffineRotate(
+          fb,
+          tileset,
+          spark2Art.palette,
+          sprite.x + sprite.x2,
+          sprite.y + sprite.y2,
+          sprite.matrix.a,
+          sprite.matrix.b,
+          sprite.matrix.c,
+          sprite.matrix.d,
+          undefined,
+          false,
+        ),
+      });
+    }
+    for (const sprite of effectView.targetElectricity) {
+      items.push({
+        priority: sprite.priority,
+        subpriority: sprite.subpriority,
+        top: sprite.y - 8,
+        slot: sprite.slot,
+        draw: () => drawSpriteSheetFlipped(
+          fb,
+          {
+            columns: spark2Art.frames.columns,
+            rows: spark2Art.frames.rows,
+            tiles: spark2Art.frames.list[sprite.tileIndex]!,
+          },
+          spark2Art.palette,
+          sprite.x - 8,
+          sprite.y - 8,
+          sprite.hFlip,
+          sprite.vFlip,
+        ),
+      });
+    }
+    if (effectView.impact) {
+      const impact = effectView.impact;
+      items.push({
+        priority: impact.priority,
+        subpriority: impact.subpriority,
+        top: impact.y - 16,
+        slot: impact.slot,
+        draw: () => drawSpriteSheetAffineRotate(
+          fb,
+          dynamicPunchArt.hitsplat.tileset,
+          dynamicPunchArt.hitsplat.palette,
+          impact.x,
+          impact.y,
+          impact.matrix.a,
+          impact.matrix.b,
+          impact.matrix.c,
+          impact.matrix.d,
+          undefined,
+          false,
+        ),
+      });
+    }
+    const tieOrder = state.config.hardwareTieSlotOrder ?? [];
+    items.sort((a, b) =>
+      b.priority - a.priority
+      || b.subpriority - a.subpriority
+      || a.top - b.top
+      || tieOrder.indexOf(b.slot) - tieOrder.indexOf(a.slot));
+    for (const item of items) item.draw();
+
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "SHUCKLE" : "MINUN",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "MINUN" : "SHUCKLE",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "MINUN used" : "Foe MINUN used",
+      "SPARK!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "CHARM") {
+    const charmState = state as SceneOnCharmPresentationState;
+    const view = sceneOnCharmView(charmState);
+    const displayed = sceneOnCharmView({ ...charmState, age: charmState.age - 1 });
+    // Battler-task writes reach this captured framebuffer one display later
+    // than ordinary effect-sprite software OAM.
+    const displayedRock = sceneOnCharmView({
+      ...charmState, age: charmState.age - 2,
+    }).rock;
+    const playerToOpponent =
+      view.attacker.species === "MINUN"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "MINUN"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged CHARM pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const minunSource = playerToOpponent
+      ? encoreArt.minunBack : encoreArt.minunFront;
+    const minun = playerToOpponent
+      ? minunSource
+      : { ...minunSource, tileset: subTileset(minunSource.tileset, 0, 8) };
+    const shuckle = playerToOpponent
+      ? {
+          ...selfDestructArt.shuckleFront,
+          tileset: subTileset(selfDestructArt.shuckleFront.tileset, 0, 8),
+        }
+      : selfDestructArt.shuckleBack;
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+
+    type CharmPainterItem = {
+      priority: number; subpriority: number; top: number; slot: number;
+      draw: () => void;
+    };
+    const items: CharmPainterItem[] = [];
+    const attackerSlot = playerToOpponent ? 13 : 15;
+    const targetSlot = playerToOpponent ? 15 : 10;
+    items.push({
+      priority: 2,
+      subpriority: view.attacker.geometry.side === "player" ? 30 : 40,
+      top: view.attacker.geometry.spriteCorner.y + displayedRock.y2,
+      slot: attackerSlot,
+      draw: () => drawSpriteSheetAffineRotate(
+        fb, minun.tileset, minun.palette,
+        view.attacker.geometry.animationCenter.x + displayedRock.x2,
+        view.attacker.geometry.animationCenter.y + displayedRock.y2,
+        displayedRock.matrix.a, displayedRock.matrix.b,
+        displayedRock.matrix.c, displayedRock.matrix.d,
+        undefined, false,
+      ),
+    }, {
+      priority: 2,
+      subpriority: view.target.geometry.side === "player" ? 30 : 40,
+      top: view.target.geometry.spriteCorner.y,
+      slot: targetSlot,
+      draw: () => drawSpriteSheet(
+        fb, shuckle.tileset, shuckle.palette,
+        view.target.geometry.spriteCorner.x, view.target.geometry.spriteCorner.y,
+      ),
+    });
+    for (const heart of displayed.hearts) {
+      items.push({
+        priority: 1,
+        subpriority: view.attacker.geometry.side === "player" ? 31 : 41,
+        top: heart.y + heart.y2 - 8,
+        slot: heart.slot,
+        draw: () => drawSpriteSheet(
+          fb, charmArt.magentaHeart.tileset, charmArt.magentaHeart.palette,
+          heart.x + heart.x2 - 8, heart.y + heart.y2 - 8,
+        ),
+      });
+    }
+    items.sort((a, b) =>
+      b.priority - a.priority || b.subpriority - a.subpriority
+      || a.top - b.top || b.slot - a.slot);
+    for (const item of items) item.draw();
+
+    drawSendOutHealthbox(
+      fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "SHUCKLE" : "MINUN",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb, composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "MINUN" : "SHUCKLE",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb, playerToOpponent ? "MINUN used" : "Foe MINUN used", "CHARM!", 99,
     );
     return;
   }

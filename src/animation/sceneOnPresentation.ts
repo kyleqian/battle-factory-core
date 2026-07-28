@@ -183,9 +183,17 @@ import {
   type TauntState,
 } from "./taunt.ts";
 import {
+  scaryFaceAtAge,
+  type ScaryFaceState,
+} from "./scaryFace.ts";
+import {
   sparkAtAge,
   type SparkState,
 } from "./spark.ts";
+import {
+  charmAtAge,
+  type CharmState,
+} from "./charm.ts";
 import {
   selfDestructAtAge,
   type SelfDestructState,
@@ -371,6 +379,7 @@ export interface SceneOnPresentationBattler {
     | "CLAMPERL"
     | "SEVIPER"
     | "SUDOWOODO"
+    | "RHYHORN"
     | "SHUCKLE"
     | "GLALIE"
     | "HITMONCHAN"
@@ -864,6 +873,15 @@ export interface SceneOnTauntConfig {
   readonly attackerHead: Readonly<{ x: number; y: number }>;
 }
 
+export interface SceneOnScaryFaceConfig {
+  readonly move: "SCARY_FACE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source `InitSpritePosToAnimAttacker(sprite, TRUE)` coordinate. */
+  readonly attackerEyeCenter: Readonly<{ x: number; y: number }>;
+}
+
 export interface SceneOnSparkConfig {
   readonly move: "SPARK";
   readonly attacker: SceneOnPresentationBattler;
@@ -878,6 +896,15 @@ export interface SceneOnSparkConfig {
   /** Explicit scheduler/allocation state at the flashing-sprite creation tick. */
   readonly flashingInitialCallbackAdvances?: readonly number[];
   readonly flashingInitialAffineAdvances?: readonly number[];
+  /** Reducer-independent source `SortSprites` tie order for allocated slots. */
+  readonly hardwareTieSlotOrder?: readonly number[];
+}
+
+export interface SceneOnCharmConfig {
+  readonly move: "CHARM";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
 export interface SceneOnSelfDestructConfig {
@@ -1046,6 +1073,8 @@ export type SceneOnMoveConfig =
   | SceneOnHyperFangConfig
   | SceneOnSwaggerConfig
   | SceneOnTauntConfig
+  | SceneOnSparkConfig
+  | SceneOnCharmConfig
   | SceneOnSelfDestructConfig
   | SceneOnExplosionConfig
   | SceneOnDynamicPunchConfig
@@ -1065,7 +1094,7 @@ export type SceneOnMoveConfig =
   | SceneOnKnockOffConfig;
 
 export interface SceneOnMovePresentationState<
-  TConfig extends SceneOnMoveConfig | SceneOnSparkConfig = SceneOnMoveConfig,
+  TConfig extends SceneOnMoveConfig | SceneOnScaryFaceConfig = SceneOnMoveConfig,
 > {
   readonly age: number;
   readonly config: TConfig;
@@ -1077,8 +1106,12 @@ export type SceneOnRazorLeafPresentationState =
   SceneOnMovePresentationState<SceneOnRazorLeafConfig>;
 export type SceneOnTauntPresentationState =
   SceneOnMovePresentationState<SceneOnTauntConfig>;
+export type SceneOnScaryFacePresentationState =
+  SceneOnMovePresentationState<SceneOnScaryFaceConfig>;
 export type SceneOnSparkPresentationState =
   SceneOnMovePresentationState<SceneOnSparkConfig>;
+export type SceneOnCharmPresentationState =
+  SceneOnMovePresentationState<SceneOnCharmConfig>;
 
 export interface SceneOnSupersonicView {
   readonly age: number;
@@ -1150,7 +1183,19 @@ export interface SceneOnTauntView extends TauntState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnScaryFaceView extends ScaryFaceState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnSparkView extends SparkState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnCharmView extends CharmState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -1695,7 +1740,7 @@ function assertIntegerPoint(
  */
 export function createSceneOnMovePresentation<
   TConfig extends SceneOnMoveConfig | SceneOnRazorLeafConfig | SceneOnTauntConfig
-    | SceneOnSparkConfig,
+    | SceneOnSparkConfig | SceneOnCharmConfig | SceneOnScaryFaceConfig,
 >(
   config: TConfig,
 ): SceneOnMovePresentationState<TConfig> {
@@ -2283,6 +2328,26 @@ export function sceneOnTauntView(
   };
 }
 
+/** `age=0` is the first move-owned to-black palette controller frame. */
+export function sceneOnScaryFaceView(
+  state: SceneOnScaryFacePresentationState,
+): SceneOnScaryFaceView {
+  if (state.config.move !== "SCARY_FACE") {
+    throw new Error(`expected SCARY_FACE presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...scaryFaceAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.target.geometry.side,
+      state.config.attackerEyeCenter,
+    ),
+  };
+}
+
 /** `age=0` is Move_SPARK's first displayed palette/sprite source tick. */
 export function sceneOnSparkView(
   state: SceneOnSparkPresentationState,
@@ -2313,6 +2378,25 @@ export function sceneOnSparkView(
         bgPriority: state.config.targetBgPriority,
         impactPosition: state.config.targetImpactPosition,
       },
+    ),
+  };
+}
+
+/** `age=0` is Move_CHARM's first displayed rock/heart source tick. */
+export function sceneOnCharmView(
+  state: SceneOnCharmPresentationState,
+): SceneOnCharmView {
+  if (state.config.move !== "CHARM") {
+    throw new Error(`expected CHARM presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...charmAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.battlePositionCenter,
     ),
   };
 }
