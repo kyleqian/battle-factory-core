@@ -7,6 +7,7 @@
  * BattleScriptRulesContext.
  */
 import {
+  drawBattleScriptRng,
   markBattleScriptControllerPending,
   transitionBattleScriptCommand,
   type BattleScriptOpcodeHandler,
@@ -15,11 +16,15 @@ import {
 import { resolveBattleScriptLabel, type BattleScriptProgram } from "./battleScriptProgram.ts";
 import { requireBattlerRole, withBattler } from "./battleScriptHitChainOpcode.ts";
 import {
+  resolveBattleScriptCurrentMoveEffect,
+  resolveBattleScriptCurrentMovePower,
   withBattleScriptPartyMemberMovesPp,
   type BattleScriptRulesContext,
 } from "./battleScriptRulesContext.ts";
 import { BATTLE_SCRIPT_STATUS2_TRANSFORMED } from "./battleScriptSourceConstants.ts";
+import { resolveDynamicMoveTarget } from "./battleScriptSleepTalkOpcode.ts";
 import movesData from "../data/gen/moves.json" with { type: "json" };
+import topologyData from "../data/gen/battle-script-topology.json" with { type: "json" };
 
 type MoveRow = Readonly<{ id: number; move: string; pp: number }>;
 const MOVE_BY_NAME = new Map(
@@ -32,6 +37,12 @@ const MOVE_NONE = 0;
 const MOVE_STRUGGLE = 165;
 const MOVE_UNAVAILABLE = 0xffff;
 const MOVE_SKETCH = 166;
+const HITMARKER_ATTACKSTRING_PRINTED = 1 << 10;
+
+type EffectRow = Readonly<{ id: number; entryScript: string }>;
+const EFFECT_ENTRY_BY_ID = new Map(
+  (topologyData.effects as readonly EffectRow[]).map(({ id, entryScript }) => [id, entryScript]),
+);
 
 function requireMove(name: string): number {
   const move = MOVE_BY_NAME.get(name);
@@ -171,6 +182,83 @@ function createSketchHandler(): BattleScriptOpcodeHandler<BattleScriptRulesConte
   };
 }
 
+function readPackedMove(bytes: readonly number[], offset: number): number {
+  return bytes[offset]! | (bytes[offset + 1]! << 8);
+}
+
+function createMirrorMoveHandler(
+  program: BattleScriptProgram,
+): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
+  return (context) => {
+    const rules = context.state.rulesContext;
+    const attacker = requireBattlerRole(rules, "attacker");
+    const candidates: number[] = [];
+    for (let source = 0; source < rules.battleTopology.battlersCount; source += 1) {
+      if (source === attacker) continue;
+      const move = readPackedMove(
+        rules.moveHistory.lastTakenMoveFrom,
+        source * 2 + attacker * 8,
+      );
+      if (move !== MOVE_NONE && move !== MOVE_UNAVAILABLE) candidates.push(move);
+    }
+
+    let selected = readPackedMove(rules.moveHistory.lastTakenMove, attacker * 2);
+    let rng = context.state.rng;
+    if (selected === MOVE_NONE || selected === MOVE_UNAVAILABLE) {
+      if (candidates.length === 0) {
+        return transitionBattleScriptCommand(
+          context,
+          Object.freeze({ kind: "advance" }),
+          {
+            rulesContext: withBattler(rules, attacker, { ppNotAffectedByPressure: 1 }),
+          },
+        );
+      }
+      const draw = drawBattleScriptRng(
+        rng,
+        context.instruction,
+        "trymirrormove-fallback-candidate",
+      );
+      rng = draw.rng;
+      selected = candidates[draw.randomValue % candidates.length]!;
+    }
+
+    const effect = resolveBattleScriptCurrentMoveEffect(selected);
+    const entryName = EFFECT_ENTRY_BY_ID.get(effect);
+    const entry = entryName ? resolveBattleScriptLabel(program, entryName) : undefined;
+    if (!entry) {
+      throw new Error(`Cmd_trymirrormove: move ${selected} effect ${effect} has no script entry`);
+    }
+    const targeted = resolveDynamicMoveTarget(
+      rules,
+      attacker,
+      selected,
+      context.instruction,
+      rng,
+      "mirror-move-selected-target",
+    );
+    return transitionBattleScriptCommand(
+      context,
+      Object.freeze({ kind: "jump", programCounter: entry.programCounter }),
+      {
+        rulesContext: Object.freeze({
+          ...rules,
+          battlers: targeted.battlers,
+          currentMove: selected,
+          currentMoveEffect: effect,
+          currentMovePower: resolveBattleScriptCurrentMovePower(selected),
+          hitMarker: (rules.hitMarker & ~HITMARKER_ATTACKSTRING_PRINTED) >>> 0,
+          selectorRoles: Object.freeze({
+            ...rules.selectorRoles,
+            target: targeted.target,
+          }),
+        }),
+        rng: targeted.rng,
+      },
+    );
+  };
+}
+
 export function createBattleScriptLastMoveOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
@@ -179,6 +267,9 @@ export function createBattleScriptLastMoveOpcodeHandlers(
   );
   const sketch = program.instructions.filter(
     ({ opcodeName }) => opcodeName === "B_SCR_OP_COPYMOVEPERMANENTLY",
+  );
+  const mirrorMove = program.instructions.filter(
+    ({ opcodeName }) => opcodeName === "B_SCR_OP_TRYMIRRORMOVE",
   );
   if (
     mimic.length !== 1
@@ -198,7 +289,16 @@ export function createBattleScriptLastMoveOpcodeHandlers(
   ) {
     throw new Error(`invalid B_SCR_OP_COPYMOVEPERMANENTLY committed shape (${sketch.length})`);
   }
+  if (
+    mirrorMove.length !== 1
+    || mirrorMove[0]!.opcodeId !== 0x7c
+    || mirrorMove[0]!.dispatcher !== "Cmd_trymirrormove"
+    || mirrorMove[0]!.operands.length !== 0
+  ) {
+    throw new Error(`invalid B_SCR_OP_TRYMIRRORMOVE committed shape (${mirrorMove.length})`);
+  }
   return Object.freeze({
+    [mirrorMove[0]!.opcodeId]: createMirrorMoveHandler(program),
     [mimic[0]!.opcodeId]: createMimicHandler(),
     [sketch[0]!.opcodeId]: createSketchHandler(),
   });

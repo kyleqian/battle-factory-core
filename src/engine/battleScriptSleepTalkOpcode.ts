@@ -158,17 +158,19 @@ type TargetResolution = Readonly<{
 function drawTargetRng(
   rng: BattleScriptRngState,
   instruction: BattleScriptInstruction,
+  reason: string,
 ): ReturnType<typeof drawBattleScriptRng> {
-  return drawBattleScriptRng(rng, instruction, "sleep-talk-called-move-target");
+  return drawBattleScriptRng(rng, instruction, reason);
 }
 
 /** Source-complete `GetMoveTarget(gCalledMove, NO_TARGET_OVERRIDE)`. */
-function resolveCalledMoveTarget(
+export function resolveDynamicMoveTarget(
   rules: BattleScriptRulesContext,
   attacker: BattleScriptBattlerId,
   move: number,
   instruction: BattleScriptInstruction,
   initialRng: BattleScriptRngState,
+  rngReason: string,
 ): TargetResolution {
   const moveTarget = resolveBattleScriptMoveTarget(move);
   const topology = rules.battleTopology;
@@ -185,7 +187,7 @@ function resolveCalledMoveTarget(
         target = followMe.followmeTarget;
       } else {
         do {
-          const draw = drawTargetRng(rng, instruction);
+          const draw = drawTargetRng(rng, instruction, rngReason);
           rng = draw.rng;
           target = (draw.randomValue % topology.battlersCount) as BattleScriptBattlerId;
         } while (
@@ -233,7 +235,7 @@ function resolveCalledMoveTarget(
       } else if (
         (topology.battleTypeFlags & BATTLE_SCRIPT_BATTLE_TYPE_DOUBLE) !== 0
       ) {
-        const draw = drawTargetRng(rng, instruction);
+        const draw = drawTargetRng(rng, instruction, rngReason);
         rng = draw.rng;
         const position = attackerSide === 0
           ? ((draw.randomValue & 1) !== 0 ? B_POSITION_OPPONENT_LEFT : B_POSITION_OPPONENT_RIGHT)
@@ -294,12 +296,13 @@ function createTryChooseSleepTalkMoveHandler(
     } while ((unusableMask & (1 << movePosition)) !== 0);
 
     const calledMove = rules.battlers[attacker].moves[movePosition]!;
-    const target = resolveCalledMoveTarget(
+    const target = resolveDynamicMoveTarget(
       rules,
       attacker,
       calledMove,
       context.instruction,
       rng,
+      "sleep-talk-called-move-target",
     );
     const nextRules = Object.freeze({
       ...rules,

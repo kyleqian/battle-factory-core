@@ -10,8 +10,8 @@ Answers ROADMAP S10's Executable-frontier reset question directly: not "how many
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 198 | 214 | 92.5% |
-| Moves (unweighted, all 355) | 338 | 355 | 95.2% |
+| Effect scripts | 199 | 214 | 93.0% |
+| Moves (unweighted, all 355) | 339 | 355 | 95.5% |
 | Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 275 | 276 | 99.6% |
 | Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2955 | 2957 | 99.9% |
 
@@ -33,7 +33,6 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_TRYCONVERSIONTYPECHANGE` | 1 (EFFECT_CONVERSION) | 1 | 0 | 0 |
 | `B_SCR_OP_TRYDOBEATUP` | 1 (EFFECT_BEAT_UP) | 1 | 0 | 0 |
 | `B_SCR_OP_TRYIMPRISON` | 1 (EFFECT_IMPRISON) | 1 | 0 | 0 |
-| `B_SCR_OP_TRYMIRRORMOVE` | 1 (EFFECT_MIRROR_MOVE) | 1 | 0 | 0 |
 | `B_SCR_OP_TRYSETSNATCH` | 1 (EFFECT_SNATCH) | 1 | 0 | 0 |
 
 ## Per-effect detail
@@ -49,7 +48,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_PARALYZE_HIT | `BattleScript_EffectParalyzeHit` | executable | - | - | 8 | 7 (137) |
 | EFFECT_EXPLOSION | `BattleScript_EffectExplosion` | executable | - | - | 2 | 2 (25) |
 | EFFECT_DREAM_EATER | `BattleScript_EffectDreamEater` | executable | - | - | 1 | 1 (6) |
-| EFFECT_MIRROR_MOVE | `BattleScript_EffectMirrorMove` | blocked-on-opcodes | `B_SCR_OP_TRYMIRRORMOVE` (main path) | - | 1 | 0 (0) |
+| EFFECT_MIRROR_MOVE | `BattleScript_EffectMirrorMove` | executable | - | - | 1 | 0 (0) |
 | EFFECT_ATTACK_UP | `BattleScript_EffectAttackUp` | executable | - | - | 3 | 1 (1) |
 | EFFECT_DEFENSE_UP | `BattleScript_EffectDefenseUp` | executable | - | - | 2 | 1 (1) |
 | EFFECT_SPEED_UP | `BattleScript_EffectHit` | executable | - | - | 0 | 0 (0) |
