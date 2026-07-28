@@ -1,4 +1,27 @@
 ---
+## 574 — [BOUNDED MAIN WORKER CORRECTION 2026-07-28 ~03:00] Follow Me clears at both source cleanup calls
+
+- **State:** committed `aeb56de`; tree green at **331 files / 4048 tests**,
+  focused **108/108**, and ratchets **6/6**. Production build, both-oracle
+  freshness/info, census regeneration, and `git diff --check` pass. Census
+  remains exactly **144/214 effects, 270/355 moves, 221/276 Factory-L50
+  distinct, 2716/2957 weighted**, all **42/42**.
+- **Did:** matched `BattleTurnPassed` source order: the shared Follow Me helper
+  clears both timers at entry `TurnValuesCleanUp(TRUE)` before field/battler/
+  faint/delayed barriers, then runs idempotently again at the
+  `TurnValuesCleanUp(FALSE)` tail/terminal completion paths. A live
+  `ENDTURN_ITEMS1` case-barrier proof returns with zero timers while retaining
+  inert targets and all unrelated side fields. `setforcedtarget` now reuses
+  the shared battler-role validator.
+- **Next:** supervisor verify this bounded correction, then select the next
+  finite shared registration target; do not extend the retired Battle-2 march.
+- **Notes:** opcode behavior, handler inventory **153**, full-turn outcome,
+  census, and scenario/manifest hashes `b1015a6a…07f00f` /
+  `e150f267…889ece` are unchanged. No new handler/barrier, ratchet/import,
+  recording, animation/presentation/scenario, issue, oracle lifecycle, or
+  PAPERCUT change.
+
+---
 ## 573 — [BOUNDED MAIN WORKER 2026-07-28 ~02:52] Follow Me executes and expires generically
 
 - **State:** committed `b29ecd1`; tree green at **331 files / 4047 tests**,

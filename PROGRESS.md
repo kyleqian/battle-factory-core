@@ -15,6 +15,31 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 577 — [SUPERVISOR VERIFY 2026-07-28 ~03:20] Secret Power accepted; Torment evidence folded
+
+- **State:** reviewed union green at **335 files / 4063 tests** and focused
+  **35/35**; production build, both-oracle freshness/info, census
+  regeneration, ratchets **6/6**, and `git diff --check` pass. Census is
+  exactly **145/214 effects, 271/355 moves, 222/276 Factory-L50 distinct,
+  2722/2957 weighted**, all **42/42**.
+- **Did:** accepted globally registered Secret Power `0xe4` after an
+  independent exact OFF replay (`dce99201…d38474`) and source/diff review;
+  BUILDING maps to paralysis while the shared hit/effect chain owns PP,
+  damage, status, and four RNG calls. Folded source-only Torment `0xce`
+  evidence with an exact repeat replay (`f7a00036…b28c2`): target-owned
+  `STATUS2_TORMENT`, duplicate PP spend, all-duplicate-move Struggle
+  admission, and persistent active status are pinned.
+- **Next:** implement `B_SCR_OP_SWAPATTACKERWITHTARGET` / Skill Swap globally
+  from the accepted OFF/source evidence, including exact failure predicates,
+  active-only ability exchange, and switch-in restoration. Expected census:
+  **146/214, 272/355, 223/276, 2727/2957**.
+- **Notes:** handler inventory is **154**; Secret Power's action-boundary
+  proof remains target **362→311**, PP **20→19**, status1 **0→64**, final RNG
+  **1633612974 / 4 calls**. Torment is evidence only. No unsupported/import
+  ratchet, private handler, recording import, animation/presentation/tick
+  branch, issue removal, DEFERRED item, or oracle lifecycle action.
+
+---
 ## 576 — [BOUNDED MAIN WORKER 2026-07-28 ~03:15] Secret Power executes through the shared hit/effect chain
 
 - **State:** committed `25fe673`; tree green at **334 files / 4060 tests**,
@@ -62,26 +87,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** handler inventory is **153**; no new unsupported barrier/import
   ratchet, private handler, recording import, animation/presentation/tick
   branch, DEFERRED item, issue removal, or oracle lifecycle action.
-
----
-## 574 — [BOUNDED MAIN WORKER CORRECTION 2026-07-28 ~03:00] Follow Me clears at both source cleanup calls
-
-- **State:** committed `aeb56de`; tree green at **331 files / 4048 tests**,
-  focused **108/108**, and ratchets **6/6**. Production build, both-oracle
-  freshness/info, census regeneration, and `git diff --check` pass. Census
-  remains exactly **144/214 effects, 270/355 moves, 221/276 Factory-L50
-  distinct, 2716/2957 weighted**, all **42/42**.
-- **Did:** matched `BattleTurnPassed` source order: the shared Follow Me helper
-  clears both timers at entry `TurnValuesCleanUp(TRUE)` before field/battler/
-  faint/delayed barriers, then runs idempotently again at the
-  `TurnValuesCleanUp(FALSE)` tail/terminal completion paths. A live
-  `ENDTURN_ITEMS1` case-barrier proof returns with zero timers while retaining
-  inert targets and all unrelated side fields. `setforcedtarget` now reuses
-  the shared battler-role validator.
-- **Next:** supervisor verify this bounded correction, then select the next
-  finite shared registration target; do not extend the retired Battle-2 march.
-- **Notes:** opcode behavior, handler inventory **153**, full-turn outcome,
-  census, and scenario/manifest hashes `b1015a6a…07f00f` /
-  `e150f267…889ece` are unchanged. No new handler/barrier, ratchet/import,
-  recording, animation/presentation/scenario, issue, oracle lifecycle, or
-  PAPERCUT change.
