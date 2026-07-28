@@ -99,7 +99,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_SPECIAL_DEFENSE_UP_2 | `BattleScript_EffectSpecialDefenseUp2` | executable | - | - | 1 | 1 (13) |
 | EFFECT_ACCURACY_UP_2 | `BattleScript_EffectHit` | executable | - | - | 0 | 0 (0) |
 | EFFECT_EVASION_UP_2 | `BattleScript_EffectHit` | executable | - | - | 0 | 0 (0) |
-| EFFECT_TRANSFORM | `BattleScript_EffectTransform` | blocked-on-opcodes | `B_SCR_OP_TRANSFORMDATAEXECUTION` (main path) | Operand gate: B_SCR_OP_PRINTFROMTABLE(gTransformUsedStringIds) -- gTransformUsedStringIds is outside the engine's accepted string-table pointer set (src/engine/battleScriptHitChainOpcode.ts:287; battle_script_commands.c:2184) | 1 | 0 (0) |
+| EFFECT_TRANSFORM | `BattleScript_EffectTransform` | blocked-on-opcodes | `B_SCR_OP_TRANSFORMDATAEXECUTION` (main path) | Operand gate: B_SCR_OP_PRINTFROMTABLE(gTransformUsedStringIds) -- gTransformUsedStringIds is outside the engine's accepted string-table pointer set (src/engine/battleScriptHitChainOpcode.ts:288; battle_script_commands.c:2184) | 1 | 0 (0) |
 | EFFECT_ATTACK_DOWN_2 | `BattleScript_EffectAttackDown2` | executable | - | - | 2 | 2 (8) |
 | EFFECT_DEFENSE_DOWN_2 | `BattleScript_EffectDefenseDown2` | executable | - | - | 1 | 1 (12) |
 | EFFECT_SPEED_DOWN_2 | `BattleScript_EffectSpeedDown2` | executable | - | - | 2 | 2 (24) |
@@ -243,7 +243,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_DOUBLE_EDGE | `BattleScript_EffectDoubleEdge` | executable | - | - | 2 | 1 (52) |
 | EFFECT_TEETER_DANCE | `BattleScript_EffectTeeterDance` | executable | - | - | 1 | 1 (2) |
 | EFFECT_BLAZE_KICK | `BattleScript_EffectBurnHit` | executable | - | - | 1 | 1 (1) |
-| EFFECT_MUD_SPORT | `BattleScript_EffectMudSport` | blocked-on-opcodes | `B_SCR_OP_SETTYPEBASEDHALVERS` (main path) | Operand gate: B_SCR_OP_PRINTFROMTABLE(gSportsUsedStringIds) -- gSportsUsedStringIds is outside the engine's accepted string-table pointer set (src/engine/battleScriptHitChainOpcode.ts:287; battle_script_commands.c:2184) | 1 | 0 (0) |
+| EFFECT_MUD_SPORT | `BattleScript_EffectMudSport` | blocked-on-opcodes | `B_SCR_OP_SETTYPEBASEDHALVERS` (main path) | Operand gate: B_SCR_OP_PRINTFROMTABLE(gSportsUsedStringIds) -- gSportsUsedStringIds is outside the engine's accepted string-table pointer set (src/engine/battleScriptHitChainOpcode.ts:288; battle_script_commands.c:2184) | 1 | 0 (0) |
 | EFFECT_POISON_FANG | `BattleScript_EffectPoisonFang` | executable | - | - | 1 | 1 (2) |
 | EFFECT_WEATHER_BALL | `BattleScript_EffectWeatherBall` | blocked-on-opcodes | `B_SCR_OP_SETWEATHERBALLTYPE` (main path) | - | 1 | 0 (0) |
 | EFFECT_OVERHEAT | `BattleScript_EffectOverheat` | executable | - | - | 2 | 1 (23) |
@@ -252,7 +252,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_SKY_UPPERCUT | `BattleScript_EffectSkyUppercut` | executable | - | - | 1 | 1 (3) |
 | EFFECT_BULK_UP | `BattleScript_EffectBulkUp` | executable | - | - | 1 | 1 (5) |
 | EFFECT_POISON_TAIL | `BattleScript_EffectPoisonHit` | executable | - | - | 1 | 1 (1) |
-| EFFECT_WATER_SPORT | `BattleScript_EffectWaterSport` | blocked-on-opcodes | `B_SCR_OP_SETTYPEBASEDHALVERS` (main path) | Operand gate: B_SCR_OP_PRINTFROMTABLE(gSportsUsedStringIds) -- gSportsUsedStringIds is outside the engine's accepted string-table pointer set (src/engine/battleScriptHitChainOpcode.ts:287; battle_script_commands.c:2184) | 1 | 0 (0) |
+| EFFECT_WATER_SPORT | `BattleScript_EffectWaterSport` | blocked-on-opcodes | `B_SCR_OP_SETTYPEBASEDHALVERS` (main path) | Operand gate: B_SCR_OP_PRINTFROMTABLE(gSportsUsedStringIds) -- gSportsUsedStringIds is outside the engine's accepted string-table pointer set (src/engine/battleScriptHitChainOpcode.ts:288; battle_script_commands.c:2184) | 1 | 0 (0) |
 | EFFECT_CALM_MIND | `BattleScript_EffectCalmMind` | executable | - | - | 1 | 1 (16) |
 | EFFECT_DRAGON_DANCE | `BattleScript_EffectDragonDance` | executable | - | - | 1 | 1 (14) |
 | EFFECT_CAMOUFLAGE | `BattleScript_EffectCamouflage` | blocked-on-opcodes | `B_SCR_OP_SETTYPETOENVIRONMENT` (main path) | - | 1 | 0 (0) |
