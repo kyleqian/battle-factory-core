@@ -85,6 +85,7 @@ import { createBattleScriptTrycopyabilityOpcodeHandlers } from "./battleScriptTr
 import { createBattleScriptTryrecycleitemOpcodeHandlers } from "./battleScriptTryrecycleitemOpcode.ts";
 import { createBattleScriptTryimprisonOpcodeHandlers } from "./battleScriptTryimprisonOpcode.ts";
 import { createBattleScriptSnatchOpcodeHandlers } from "./battleScriptSnatchOpcode.ts";
+import { createBattleScriptBeatUpOpcodeHandlers } from "./battleScriptBeatUpOpcode.ts";
 import { createBattleScriptTrysethelpinghandOpcodeHandlers } from "./battleScriptTrysethelpinghandOpcode.ts";
 import { createBattleScriptTryswapitemsOpcodeHandlers } from "./battleScriptTryswapitemsOpcode.ts";
 import { createBattleScriptSettormentOpcodeHandlers } from "./battleScriptSettormentOpcode.ts";
@@ -2893,6 +2894,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptTryrecycleitemOpcodeHandlers(program),
     ...createBattleScriptTryimprisonOpcodeHandlers(program),
     ...createBattleScriptSnatchOpcodeHandlers(program),
+    ...createBattleScriptBeatUpOpcodeHandlers(program),
   });
 }
 

@@ -4,14 +4,12 @@ Generated 2026-07-28. Rerun: `npx tsx tools/report/executable-frontier-census.ts
 
 Answers ROADMAP S10's Executable-frontier reset question directly: not "how many opcodes are registered" but **how many of the 355 moves can the kernel execute end-to-end today, and what exactly blocks each of the rest.** Every `BattleScript_Effect*` entry in the committed topology (`src/data/gen/battle-script-topology.json` + `battle-script-graph.json`) is walked for full opcode reachability (branches, goto/call targets, the shared hit-chain tail) against the opcode set the engine currently registers (read live from `src/engine/battleScriptRulesContext.ts`'s `createBattleScriptStatusRulesHandlers`, so this doc cannot drift from what the engine actually installs).
 
-**Key finding:** the single highest-leverage next registration is `B_SCR_OP_TRYDOBEATUP` -- registering exactly that set would flip **1 effect / 1 move (0 Factory-L50, 0 weighted)** from blocked to executable in one step (EFFECT_BEAT_UP) -- the largest single entry in the ranked table below. This paragraph is generated fresh from the current registered-opcode set every run, so it always names today's actual top blocker, not a past one -- see PROGRESS.md for the registration history (e.g. the 2026-07-25 B_SCR_OP_JUMPIFHALFWORD/JUMPIFSTATUS3CONDITION/ORWORD entry-chokepoint trio).
-
 ## Headline counts
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 211 | 214 | 98.6% |
-| Moves (unweighted, all 355) | 352 | 355 | 99.2% |
+| Effect scripts | 212 | 214 | 99.1% |
+| Moves (unweighted, all 355) | 353 | 355 | 99.4% |
 | Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 275 | 276 | 99.6% |
 | Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2955 | 2957 | 99.9% |
 
@@ -23,7 +21,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 
 | Missing opcode(s) | Effects unlocked | Moves unlocked (unweighted) | Factory-L50 moves (unweighted) | Factory-L50 weighted |
 | --- | --- | --- | --- | --- |
-| `B_SCR_OP_TRYDOBEATUP` | 1 (EFFECT_BEAT_UP) | 1 | 0 | 0 |
+| _(none -- no effect is blocked purely on missing opcodes)_ | | | | |
 
 ## Per-effect detail
 
@@ -183,7 +181,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_SOLAR_BEAM | `BattleScript_EffectSolarBeam` | executable | - | - | 1 | 1 (16) |
 | EFFECT_THUNDER | `BattleScript_EffectThunder` | executable | - | - | 1 | 1 (15) |
 | EFFECT_TELEPORT | `BattleScript_EffectTeleport` | executable | - | - | 1 | 0 (0) |
-| EFFECT_BEAT_UP | `BattleScript_EffectBeatUp` | blocked-on-opcodes | `B_SCR_OP_TRYDOBEATUP` (edge branch only) | - | 1 | 0 (0) |
+| EFFECT_BEAT_UP | `BattleScript_EffectBeatUp` | executable | - | - | 1 | 0 (0) |
 | EFFECT_SEMI_INVULNERABLE | `BattleScript_EffectSemiInvulnerable` | executable | - | - | 4 | 4 (32) |
 | EFFECT_DEFENSE_CURL | `BattleScript_EffectDefenseCurl` | executable | - | - | 1 | 1 (6) |
 | EFFECT_SOFTBOILED | `BattleScript_EffectSoftboiled` | executable | - | - | 2 | 2 (7) |
