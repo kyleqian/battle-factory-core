@@ -847,22 +847,22 @@ function lockedMoveDecision(
 ): BattleMoveDecision | null {
   const battlerState = rulesContext.battlers[battler]!;
   if (
-    battlerState.encoreTimer !== 0
-    && battlerState.encoredMove !== 0
-    && battlerState.moves[battlerState.encoredMovePos] === battlerState.encoredMove
-  ) {
-    return Object.freeze({
-      kind: "use-move",
-      moveSlot: battlerState.encoredMovePos as BattleMoveSlot,
-      targetBattler: sourceMoveTarget(battlerState.encoredMove, battler),
-    });
-  }
-  if (
     (
       battlerState.status2
       & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS
     ) === 0
   ) {
+    if (
+      battlerState.encoreTimer !== 0
+      && battlerState.encoredMove !== 0
+      && battlerState.moves[battlerState.encoredMovePos] === battlerState.encoredMove
+    ) {
+      return Object.freeze({
+        kind: "use-move",
+        moveSlot: battlerState.encoredMovePos as BattleMoveSlot,
+        targetBattler: sourceMoveTarget(battlerState.encoredMove, battler),
+      });
+    }
     return null;
   }
   const moveId = rulesContext.lockedMoves[battler]!;
