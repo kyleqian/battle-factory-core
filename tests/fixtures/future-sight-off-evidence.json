@@ -1,0 +1,67 @@
+{
+  "schema": "future-sight-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "sourceSha256": {
+    "battle_script_commands.c": "e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c",
+    "battle_scripts_1.s": "4ac3e610b68c11ef0f4e4c0fc62ddba7fda5a8400e43705428868978ec7551a6",
+    "battle_script.inc": "0a8e1c3bdf4c49d07b2e09ff8ab524812a5217b9735106e1b79b6be261a6db7e",
+    "battle_script_commands.h": "842cce6dd704b09b24a49abdca67ee7a8062a2e3a465e1b764fc63c0d230580f",
+    "battle.h": "8ef0355f2345592094c82cfde6641644a6b7157012104736416f8c05f34f0685",
+    "constants_battle.h": "bba2f9d9b3d98fa01b5f0a8f7dede9f2f0be5617c735242b741a7e0c8e4a5d1e",
+    "battle_util.c": "2ba9ee4efe913effa119c8342281745f481910ca1b20cd76b470673062a45fd5",
+    "pokemon.c": "6f474bb05a55e421504f442910ea2faf4e328cce0d0b451879c907e24bdbd797",
+    "battle_moves.h": "8b3d4d143b807807af97ce7288e0cc0ccdd55b6b64ac45824e35a549836b3a0c",
+    "battle_frontier_mons.h": "557c1a97247cbb84357b99035fb11cf0bfe45abe8393a0992fe8146bfc51f67f",
+    "battle_frontier_mons.h.constants": "00fb47e144978d3a24a304047f5463217ac7b535ee6f8719e2adf47cc592387a",
+    "moves.h": "d32746c9ad3ed1bbfbb93712f13e01ab1c43f48a78f3605ef9db5095e8d19d27",
+    "items.h": "8e9aacc0ffbd41ce0092176a89f624b59be300df60c996d718d61119e747dbd4",
+    "pokemon.h": "e0153a94a2fc0f84e6de372494dfb01e88be4d9cf1cbbeca5e56b8a0b645f7e5"
+  },
+  "instruction": {
+    "opcode": 195,
+    "opcodeHex": "0xc3",
+    "length": 5,
+    "operands": [{"width": 4, "encoding": "little-endian relocation pointer", "value": "duplicate-pending failure script target"}],
+    "pc": {"success": "gBattlescriptCurrInstr += 5", "pending": "gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + 1)"}
+  },
+  "sourceBehavior": {
+    "setup": {
+      "owner": "gBattlerTarget positional battler slot",
+      "pendingPredicate": "gWishFutureKnock.futureSightCounter[gBattlerTarget] != 0",
+      "successMutations": [
+        "gSideStatuses[GET_BATTLER_SIDE(gBattlerTarget)] |= SIDE_STATUS_FUTUREATTACK",
+        "futureSightMove[target] = gCurrentMove",
+        "futureSightAttacker[target] = gBattlerAttacker",
+        "futureSightCounter[target] = 3",
+        "futureSightDmg[target] = CalculateBaseDamage(attacker snapshot, target snapshot, current move, target side status, 0, 0, attacker slot, target slot)"
+      ],
+      "duplicate": "BattleScript_EffectFutureSight performs ppreduce before trysetfutureattack; a nonzero target-slot counter branches to BattleScript_ButItFailed with no setup mutation."
+    },
+    "endTurn": "HandleWishPerishSongOnTurnEnd state 0 scans gActiveBattler in positional order 0..gBattlersCount-1, not gBattlerByTurnOrder. Each nonzero futureSightCounter decrements. Only the decrement-to-zero case with active-slot hp != 0 schedules BattleScript_MonTookFutureAttack, restores stored attacker and damage, assigns target = active positional slot, sets shellBellDmg = IGNORE_SHELL_BELL, clears FUTUREATTACK only when both same-side positional counters are zero, and returns immediately.",
+    "switchingAndFaint": "The timer and stored damage are keyed by active positional battler, not party index: a switch before resolution leaves the timer in that slot and targets the replacement. If that slot is faint when its counter reaches zero, the source decrements it to zero but does not execute the delayed script or the in-branch SIDE_STATUS_FUTUREATTACK clear.",
+    "damageTiming": "CalculateBaseDamage runs at setup against then-current attacker/target stats, held-item effects, weather, and target-side Reflect/Light Screen. It returns base damage only; the delayed script has no typecalc or STAB operation. At resolution BattleScript_MonTookFutureAttack reruns the stored move's accuracycheck, then adjustnormaldamage2 applies its random multiplier/endure-or-Focus-Band handling before healthbarupdate/datahpupdate. Future Sight and Doom Desire share this effect/opcode; stored move chooses their setup text, delayed accuracy check, and hit animation.",
+    "protectAndSubstitute": "The delayed script contains no attackcanceler/protect branch, so it does not consult that turn's Protect gate. It also does not set HITMARKER_IGNORE_SUBSTITUTE; therefore ordinary datahpupdate directs a successful delayed hit into an extant Substitute rather than active-mon HP."
+  },
+  "moves": {
+    "futureSight": {"id": 248, "effect": "EFFECT_FUTURE_SIGHT", "power": 80, "type": "TYPE_PSYCHIC", "accuracy": 90, "pp": 15, "flags": 0},
+    "doomDesire": {"id": 353, "effect": "EFFECT_FUTURE_SIGHT", "power": 120, "type": "TYPE_STEEL", "accuracy": 85, "pp": 5, "flags": 0}
+  },
+  "frontierCarrier": {"setId": 169, "name": "FRONTIER_MON_KADABRA_1", "level50Eligible": true, "species": 64, "moves": [93, 272, 248, 50], "item": 214, "itemTable": "BATTLE_FRONTIER_ITEM_TWISTED_SPOON", "evSpread": "F_EV_SPREAD_DEFENSE | F_EV_SPREAD_HP", "nature": 8},
+  "case": {
+    "id": "factory-kadabra-future-sight-delayed-hit-with-duplicate-pending-failure",
+    "scenario": "tools/battle-lab/mechanic-future-sight-kadabra-delayed-hit-off.json",
+    "scenarioSha256": "85fb5401cdab199b8bd3df6510ed6063eadffa81d22e2d90f328ec80744f059d",
+    "repeatability": {"runs": 2, "comparison": "byte-identical full manifest.json", "manifestSha256": "ecd032fba7d13e89c564f051e37a51db4f7392879f15ec2d2f45c3bd23ee2448"},
+    "builtPartyChecksumsValid": [true, true, true, true, true, true],
+    "observed": {
+      "initial": {"frame": 0, "player": {"partyIndex": 0, "hp": 147, "maxHp": 147, "pp": [25, 10, 15, 20]}, "opponent": {"partyIndex": 0, "hp": 140, "maxHp": 140, "pp": [35, 35, 35, 35]}, "sideStatuses": [0, 0], "outcome": 0},
+      "futureSet": {"frame": 300, "currentMove": 248, "player": {"hp": 134, "pp": [25, 10, 14, 20]}, "opponent": {"hp": 140, "pp": [35, 35, 34, 35]}, "sideStatuses": [0, 64]},
+      "pendingAtNextInput": {"frame": 600, "currentMove": 0, "player": {"hp": 134, "pp": [25, 10, 14, 20]}, "sideStatuses": [0, 64]},
+      "duplicatePendingAttempt": {"frame": 1200, "currentMove": 0, "player": {"hp": 120, "pp": [25, 10, 13, 20]}, "opponent": {"hp": 140, "pp": [35, 35, 34, 34]}, "sideStatuses": [0, 64]},
+      "delayedHitScheduled": {"frame": 1700, "currentMove": 0, "player": {"hp": 105, "pp": [25, 10, 12, 20]}, "opponent": {"hp": 140}, "sideStatuses": [0, 0]},
+      "delayedHit": {"frame": 1900, "currentMove": 33, "player": {"hp": 105, "pp": [25, 10, 12, 20]}, "opponent": {"hp": 103, "maxHp": 140, "pp": [35, 35, 33, 34]}, "sideStatuses": [0, 0], "outcome": 0},
+      "settled": {"frame": 2300, "currentMove": 0, "player": {"hp": 105, "pp": [25, 10, 12, 20]}, "opponent": {"hp": 103, "maxHp": 140, "pp": [35, 35, 33, 34]}, "sideStatuses": [0, 0], "outcome": 0}
+    }
+  },
+  "boundedRemainder": "The OFF manifest exposes HP, PP, party indexes, side-status bit 64, controller/current-move state, outcome, checksums, RNG, and framebuffer hashes, but not gWishFutureKnock arrays, gBattleMoveDamage, gBattlerAttacker/Target, script PC, decoded text, or Substitute HP. Those hidden globals and Protect/Substitute/switch/fainted-slot semantics are source-pinned above. The oracle proves a genuine carrier's Future Sight PP 15→14, a duplicate pending attempt consuming PP 14→13 with side bit 64 still set and no target HP loss, then the delayed hit 140→103 and clear to [0,0]. This fixture is evidence only; it adds no production registration."
+}
