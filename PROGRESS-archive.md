@@ -23717,3 +23717,27 @@ both verify scripts/census independently re-verified before this entry.)*
   barrier/import ratchet, recording import, private/controller-local handler,
   animation/presentation/tick branch, scenario/evidence mutation, issue
   removal, or oracle lifecycle action.
+---
+## 583 — [BOUNDED MAIN WORKER 2026-07-28 ~03:56] Torment executes globally
+
+- **State:** committed `5887fc3`; tree green at **340 files / 4090 tests**,
+  focused Torment/receipt/handler coverage **29/29**, and ratchets **6/6**.
+  Production build, both oracle infos, census regeneration, and
+  `git diff --check` pass. Census is exactly **148/214 effects, 274/355
+  moves, 225/276 Factory-L50 distinct, 2736/2957 weighted**, all **42/42**.
+- **Did:** globally registered five-byte `0xce`. Success ORs only canonical
+  `STATUS2_TORMENT` into the resolved target; duplicate jumps to the decoded
+  failure pointer. Both branches own zero local RNG/events and preserve every
+  unrelated field. The generic Factory controller now consumes the shared
+  source-shaped `CheckMoveLimitations` port: every last-move duplicate is
+  withheld, and an all-duplicate moveset exposes one forced Struggle command.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next shared registration target; do not widen the Factory
+  singles controller or extend the retired canonical Battle-2 march.
+- **Notes:** the accepted OFF receipt remains
+  `f7a000367213…e3f16b27ab28c2`: Torment PP **15→14→13**, target status2
+  **0→2147483648**, repeated Tackle slots force Struggle without Tackle PP
+  loss. Handler inventory **156→157** only. No barrier/import ratchet,
+  recording import, private handler, animation/presentation/tick branch,
+  scenario/evidence mutation, issue removal, DEFERRED item, or oracle
+  lifecycle action.
