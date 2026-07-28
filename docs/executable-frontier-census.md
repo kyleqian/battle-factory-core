@@ -10,8 +10,8 @@ Answers ROADMAP S10's Executable-frontier reset question directly: not "how many
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 195 | 214 | 91.1% |
-| Moves (unweighted, all 355) | 335 | 355 | 94.4% |
+| Effect scripts | 196 | 214 | 91.6% |
+| Moves (unweighted, all 355) | 336 | 355 | 94.6% |
 | Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 275 | 276 | 99.6% |
 | Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2955 | 2957 | 99.9% |
 
@@ -28,7 +28,6 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_CALLENVIRONMENTATTACK` | 1 (EFFECT_NATURE_POWER) | 1 | 0 | 0 |
 | `B_SCR_OP_COPYMOVEPERMANENTLY` | 1 (EFFECT_SKETCH) | 1 | 0 | 0 |
 | `B_SCR_OP_MIMICATTACKCOPY` | 1 (EFFECT_MIMIC) | 1 | 0 | 0 |
-| `B_SCR_OP_SETBIDE` | 1 (EFFECT_BIDE) | 1 | 0 | 0 |
 | `B_SCR_OP_SETCHARGE` | 1 (EFFECT_CHARGE) | 1 | 0 | 0 |
 | `B_SCR_OP_SETTYPETOENVIRONMENT` | 1 (EFFECT_CAMOUFLAGE) | 1 | 0 | 0 |
 | `B_SCR_OP_SETTYPETORANDOMRESISTANCE` | 1 (EFFECT_CONVERSION_2) | 1 | 0 | 0 |
@@ -69,7 +68,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_ACCURACY_DOWN | `BattleScript_EffectAccuracyDown` | executable | - | - | 4 | 3 (25) |
 | EFFECT_EVASION_DOWN | `BattleScript_EffectEvasionDown` | executable | - | - | 1 | 1 (3) |
 | EFFECT_HAZE | `BattleScript_EffectHaze` | executable | - | - | 1 | 1 (1) |
-| EFFECT_BIDE | `BattleScript_EffectBide` | blocked-on-opcodes | `B_SCR_OP_SETBIDE` (main path) | - | 1 | 0 (0) |
+| EFFECT_BIDE | `BattleScript_EffectBide` | executable | - | - | 1 | 0 (0) |
 | EFFECT_RAMPAGE | `BattleScript_EffectRampage` | executable | - | - | 3 | 2 (6) |
 | EFFECT_ROAR | `BattleScript_EffectRoar` | executable | - | - | 2 | 2 (40) |
 | EFFECT_MULTI_HIT | `BattleScript_EffectMultiHit` | executable | - | - | 12 | 6 (9) |

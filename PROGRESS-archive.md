@@ -1,4 +1,24 @@
 ---
+## 626 — [BOUNDED MAIN WORKER 2026-07-28 ~12:29] Family-B Cluster 4 source-complete
+
+- **State:** tree green at **392 files / 4487 tests**, production build, OFF
+  oracle info, and `git diff --check`. Census is exactly **189/214 effects,
+  329/355 moves, 269/276 distinct, 2940/2957 weighted**: Pay Day adds
+  **+1/+1/+0/+0** over committed rung (a); all **67** census validations pass.
+- **Did:** added source-exact player-side `level * 5` u16 Pay Day accumulation
+  with wrap saturation and the shared zero-HP exception; registered
+  `givepaydaymoney` with multiplier, link/recorded-link/no-pot exclusions,
+  payout message buffer, and the source 999999 save-money cap.
+- **Next:** supervisor verify commits `4bc6759b` and `510f602c`; Cluster 4 has
+  no remainder, so resume the supervisor's ranked order.
+- **Notes:** Pay Day is intentionally Tier-1/source-only because the census
+  confirms zero Factory-L50 carriers. Tests pin player/opponent side, target
+  faint, saturation, payout/cap, multiplier, exclusions, full script to END,
+  canonical replay, and exact four-draw move / zero-draw payout ledgers. No
+  new barriers, recording imports, presentation, round, tick, roadmap, issue,
+  or oracle-trace changes.
+
+---
 ## 625 — [BOUNDED MAIN WORKER 2026-07-28 ~12:23] Cluster 4 rung (a) item ownership implemented
 
 - **State:** tree green at **392 files / 4479 tests**, production build, and

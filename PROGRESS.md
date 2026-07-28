@@ -15,6 +15,29 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 629 — [BOUNDED MAIN WORKER 2026-07-28 ~13:11] Bide setter and release handoff source-complete
+
+- **State:** tree green at **399 files / 4524 tests**, production build, OFF
+  oracle info, and `git diff --check`. Census is exactly **196/214 effects,
+  336/355 moves, 275/276 distinct, 2955/2957 weighted**: assigned-baseline
+  delta **+1/+1/+0/+0**; all **70** census validations pass.
+- **Did:** registered source-exact `SETBIDE`: two-turn counter, multi-turn
+  lock, current-move lock, and attacker-only accumulated-damage zero. Physical
+  and special `datahpupdate` damage feed the existing accumulator/target; the
+  existing canceler stores, restores the saved target, doubles damage, and
+  selects release/no-energy. Closed the release script's hidden existing-state
+  handoff for `copyword gBattleMoveDamage, sBIDE_DMG`.
+- **Next:** supervisor verify this commit, then take the dossier's last-move
+  family step. Do not expand into Metronome or other tail rows from this worker.
+- **Notes:** full setup, storing, positive release, and no-energy scripts reach
+  END. The release proof accumulates **17 physical + 23 special → 80 damage**
+  and draws exactly once for accuracy (**16838**, seed 1); all other Bide
+  steps draw zero. Canonical replay is exact. Deliberate handler exact-set pin
+  **189→190**; Bide's census opcode blocker is now empty. No new barriers,
+  recording imports, presentation, round, tick, roadmap, issue, or trace
+  changes.
+
+---
 ## 628 — [BOUNDED MAIN WORKER 2026-07-28 ~13:01] Present + Memento + Role Play + Recycle source-complete
 
 - **State:** tree green at **397 files / 4519 tests**, production build, OFF
@@ -59,23 +82,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   blocker and Haze's opcode blocker now require executable/empty; handler
   surface **184→185**. No new barriers, recording imports, presentation,
   round, tick, roadmap, issue, or oracle-trace changes.
-
----
-## 626 — [BOUNDED MAIN WORKER 2026-07-28 ~12:29] Family-B Cluster 4 source-complete
-
-- **State:** tree green at **392 files / 4487 tests**, production build, OFF
-  oracle info, and `git diff --check`. Census is exactly **189/214 effects,
-  329/355 moves, 269/276 distinct, 2940/2957 weighted**: Pay Day adds
-  **+1/+1/+0/+0** over committed rung (a); all **67** census validations pass.
-- **Did:** added source-exact player-side `level * 5` u16 Pay Day accumulation
-  with wrap saturation and the shared zero-HP exception; registered
-  `givepaydaymoney` with multiplier, link/recorded-link/no-pot exclusions,
-  payout message buffer, and the source 999999 save-money cap.
-- **Next:** supervisor verify commits `4bc6759b` and `510f602c`; Cluster 4 has
-  no remainder, so resume the supervisor's ranked order.
-- **Notes:** Pay Day is intentionally Tier-1/source-only because the census
-  confirms zero Factory-L50 carriers. Tests pin player/opponent side, target
-  faint, saturation, payout/cap, multiplier, exclusions, full script to END,
-  canonical replay, and exact four-draw move / zero-draw payout ledgers. No
-  new barriers, recording imports, presentation, round, tick, roadmap, issue,
-  or oracle-trace changes.

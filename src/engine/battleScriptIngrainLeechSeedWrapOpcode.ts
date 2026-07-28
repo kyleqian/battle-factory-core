@@ -15,9 +15,9 @@
  * COPYARRAY/JUMPIFABILITY/MANIPULATEDAMAGE are generic multi-site opcodes
  * (16/18/4 concrete call sites across the whole committed program, one
  * shared opcodeId each) -- only the exact operand tuple this doc's own
- * scope needs is modeled; every other concrete call site (Bide's damage
- * store, Pain Split, remaining jumpifability-gated ability preventions,
- * Beat Up's own damage
+ * scope needs is modeled; later focused registrations have widened selected
+ * COPYARRAY tuples (including Pain Split and Bide), while remaining
+ * jumpifability-gated ability preventions and Beat Up's own damage
  * manipulation, ...) is a single named (b) barrier, the same policy
  * `battleScriptDamagingWeatherOpcode.ts`'s ADDBYTE/BICWORD/
  * JUMPIFARRAYNOTEQUAL handlers already established.
@@ -150,11 +150,14 @@ function createSetseededHandler(): BattleScriptOpcodeHandler<BattleScriptRulesCo
  * `copyarray gDynamicBasePower, sTRIPLE_KICK_POWER, 2`). The source
  * destination is materialized now that both Triple Kick and Flail/Reversal
  * write/read it through Cmd_damagecalc.
+ * Bide's release script also copies its reducer-owned
+ * `gBattleScripting.bideDmg` scratch cell into `gBattleMoveDamage`; this is
+ * the existing state handoff, not a parallel accumulator.
  * Curse's `copybyte gBattlerTarget, gBattlerAttacker` is also a direct
  * selector-role assignment and is modeled without inventing a byte-address
  * layer. The status-prevention and Yawn message-selector tuples are likewise
- * direct role assignments. Every other concrete call site (Pain Split,
- * Bide, ...) remains the single named barrier below.
+ * direct role assignments. Every unrecognized concrete tuple remains the
+ * single named barrier below.
  */
 function createCopyarrayHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
   return (context) => {
@@ -176,6 +179,17 @@ function createCopyarrayHandler(): BattleScriptOpcodeHandler<BattleScriptRulesCo
       const nextRulesContext = Object.freeze({
         ...rulesContext,
         battleMoveDamage: rulesContext.painSplitHp,
+      });
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        { rulesContext: nextRulesContext },
+      );
+    }
+    if (size === "0x4" && dst === "gBattleMoveDamage" && src === "sBIDE_DMG") {
+      const nextRulesContext = Object.freeze({
+        ...rulesContext,
+        battleMoveDamage: rulesContext.scriptingBideDmg,
       });
       return transitionBattleScriptCommand(
         context,

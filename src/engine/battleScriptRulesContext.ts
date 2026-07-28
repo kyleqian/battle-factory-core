@@ -105,6 +105,7 @@ import { createBattleScriptHealpartystatusOpcodeHandlers } from "./battleScriptH
 import { createBattleScriptIncrementGameStatOpcodeHandlers } from "./battleScriptIncrementGameStatOpcode.ts";
 import { createBattleScriptGivepaydaymoneyOpcodeHandlers } from "./battleScriptGivepaydaymoneyOpcode.ts";
 import { createBattleScriptNormalisebuffsOpcodeHandlers } from "./battleScriptNormalisebuffsOpcode.ts";
+import { createBattleScriptSetbideOpcodeHandlers } from "./battleScriptSetbideOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -2746,6 +2747,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptIncrementGameStatOpcodeHandlers(program),
     ...createBattleScriptGivepaydaymoneyOpcodeHandlers(program),
     ...createBattleScriptNormalisebuffsOpcodeHandlers(program),
+    ...createBattleScriptSetbideOpcodeHandlers(program),
     ...createBattleScriptSettormentOpcodeHandlers(program),
     ...createBattleScriptSettauntOpcodeHandlers(program),
     ...createBattleScriptSetforesightOpcodeHandlers(program),

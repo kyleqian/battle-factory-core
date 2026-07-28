@@ -486,7 +486,7 @@ describe("source-shaped Battle Script rules context", () => {
 });
 
 describe("production status rules handler and execution seam", () => {
-  it("composes all 189 source-safe handlers, including Present, Memento, Role Play, Recycle, Pay Day payout, and Haze normalization, once", () => {
+  it("composes all 190 source-safe handlers, including Bide, Present, Memento, Role Play, Recycle, Pay Day payout, and Haze normalization, once", () => {
     const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts());
     expect(Object.keys(handlers).map(Number).sort((a, b) => a - b)).toEqual([
       0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
@@ -495,7 +495,7 @@ describe("production status rules handler and execution seam", () => {
       45, 46, 47, 49, 50, 51, 53, 54, 56, 57, 58, 60,
       61, 62, 63, 65, 66, 67, 69, 70, 71, 72, 73, 74, 76, 77, 78, 79, 80, 81,
       82, 83, 84, 85, 86, 88, 92, 96, 97, 98, 99, 100, 101, 102, 104,
-      105, 106, 111, 115, 118, 119, 120, 121, 122, 123, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 140, 141, 142, 143, 145, 146, 147,
+      105, 106, 111, 115, 118, 119, 120, 121, 122, 123, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 145, 146, 147,
       148, 149, 150, 151, 152, 153, 154, 156, 159, 160, 161, 162, 163, 164, 165, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 187, 188, 189, 190, 191, 192, 193, 194, 195, 197, 198, 199, 200, 201, 202, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 220, 221, 223, 226, 227, 228, 231, 234, 238, 246, 248,
     ]);
   });
