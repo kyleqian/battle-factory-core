@@ -1,4 +1,25 @@
 ---
+## 545 — [SUPERVISOR VERIFY 2026-07-27 ~21:58] Baton Pass OFF evidence merged reproducibly
+
+- **State:** union green at **298 files / 3840 tests**; `npm run build`,
+  freshness, and `git diff --check` pass. Psych Up's census remains
+  **131/214, 255/355, 207/276, 2618/2957**.
+- **Did:** independently replayed and merged `1830a9e`'s legal six-mon
+  `mechanicLab` evidence twice; both manifests hash exactly
+  `f9d042cc…a93`. Mean Look creates `STATUS2_ESCAPE_PREVENTION`, then Baton
+  Pass's encoded `0x81` selector correctly bypasses it, spends PP **40→39**,
+  switches LEDYBA slot 0→BULBASAUR slot 1, transfers the volatile, and keeps
+  RNG at **1621732966** through switch completion.
+- **Next:** register the generated top blocker
+  `B_SCR_OP_JUMPIFCANTSWITCH` / `EFFECT_BATON_PASS` from this source/oracle
+  contract. In ordinary singles, pin pointer-branch vs six-byte advance,
+  bit-7 volatile bypass, both sides, and eligible-party scanning; guard or
+  source-completely implement non-singles topology explicitly.
+- **Notes:** focused **5/5**, full **3840/3840**, build/freshness/diff green.
+  No fabricated no-bench trace, unsupported barrier, recording import,
+  ratchet change, oracle lifecycle action, animation edit, or PAPERCUT.
+
+---
 ## 544 — [SUPERVISOR SOURCE CORRECTION 2026-07-27 ~21:55] Psych Up executes source-completely
 
 - **State:** tree green at **297 files / 3835 tests**; `npm run build`,
