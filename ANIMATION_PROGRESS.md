@@ -1,5 +1,28 @@
 # Animation coverage
 
+## BLUE_LIGHT_WALL / MOVE_REFLECT evidence-and-assets checkpoint (2026-07-27)
+
+**Verdict:** Coverage stays **53 exact / 3 partial / 220 unsupported**.
+`MOVE_REFLECT`, `MOVE_BRICK_BREAK`, and `MOVE_CRUSH_CLAW` remain unsupported;
+this is source/hardware evidence and reproducible asset extraction only, not a
+renderer or framebuffer acceptance claim.
+
+**Evidence:** complete legal Level-50 parties constrain SHUPPET to REFLECT and
+SHUCKLE to TACKLE in both orientations. Fresh Scene-ON mGBA probes capture
+the full `currentMove=REFLECT` envelope at frames **39-246** player-back and
+**39-249** opponent-front, including raw RGB, software allocator/task state,
+template geometry/order, hardware OAM/matrices, palette tags/buffers, and
+blend registers. The move-owned effect body starts with the wall at **72/75**,
+then the three SPARKLE_4 sprites; source identifies alpha/audio lifecycle and
+the `waitforvisualfinish`/`delay 1` cleanup boundary for the next renderer.
+
+**Assets/siblings:** `extractReflectAssets.ts` byte-pins BLUE_LIGHT_WALL as
+the GreenLightWall sheet with its blue palette, and SPARKLE_4 with its distinct
+Sparkle3 palette. Brick Break's `choosetwoturnanim` has independently distinct
+normal and gBrickBreakWall/shard shattered-wall bodies; Crush Claw merely loads
+the wall and instead runs lunge/shake/four claw slashes. Focused tests pass;
+no engine, state, controller, or boundary-ratchet changes.
+
 ## MOVE_ABSORB promoted exact; drain compositor closed (2026-07-27)
 
 **Verdict:** `MOVE_ABSORB` is exact. Legal set-131 LOMBRE versus constrained

@@ -1345,6 +1345,21 @@
   ],
   "componentTracks": [
     {
+      "id": "blue-light-wall-reflect",
+      "components": [
+        "asset:ANIM_TAG_BLUE_LIGHT_WALL",
+        "asset:ANIM_TAG_SPARKLE_4",
+        "sprite:gReflectWallSpriteTemplate",
+        "sprite:gReflectSparkleSpriteTemplate"
+      ],
+      "representatives": [
+        "MOVE_REFLECT",
+        "MOVE_BRICK_BREAK",
+        "MOVE_CRUSH_CLAW"
+      ],
+      "goal": "Checkpoint only: legal complete-party Scene-ON probes capture MOVE_REFLECT frames 39-246 player-back and 39-249 opponent-front (wall begins 72/75; three SPARKLE_4 instances peak together) with source/software/OAM/matrix/palette/register/raw-RGB evidence. Literal BLUE_LIGHT_WALL (GreenLightWall tiles + blue palette) and SPARKLE_4 (its own tiles + Sparkle3 palette) regenerate byte-for-byte. No renderer or acceptance claim: REFLECT remains unsupported until a complete dense move-owned seam/framebuffer implementation and clean teardown are proved. BRICK BREAK remains unsupported because its normal and separate gBrickBreakWall/shard branch are distinct; CRUSH CLAW remains unsupported because it loads but never instantiates the wall and has lunge/shake/four claw-slash body."
+    },
+    {
       "id": "shake-target-in-pattern-scary-face",
       "components": [
         "task:AnimTask_ShakeTargetInPattern",
