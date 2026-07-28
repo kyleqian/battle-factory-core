@@ -15,6 +15,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 543 — [BOUNDED MAIN WORKER 2026-07-27 ~21:43] Full-turn singles requests use source move targets
+
+- **State:** tree green at **296 files / 3829 tests**; `npm run build` and
+  `git diff --check` clean. The unchanged Battle-2 OFF trace remains
+  **16/16 exact**.
+- **Did:** extended the generated full-turn move view with `target` and ported
+  the represented singles branches of `GetMoveTarget`: USER stays on the
+  actor; SELECTED/DEPENDS/BOTH/FOES_AND_ALLY/OPPONENTS_FIELD/RANDOM select the
+  only foe without RNG. Canonical ONIX SANDSTORM slot 3 and KABUTO PROTECT
+  slot 3 now self-target at initial/trainer/next-turn boundaries; all other
+  canonical slots oppose. The existing slot-3 execution/PP proof remains.
+- **Next:** source-completely register `B_SCR_OP_COPYFOESTATS` /
+  `EFFECT_PSYCH_UP`, walk neutral/non-neutral scripts to END, and regenerate
+  the executable-frontier census for exact **+1/+1/+1/+14**.
+- **Notes:** focused **24/24**, full **3829/3829**, build/compare/diff green.
+  No RNG target draw, unsupported barrier, recording import, ratchet change,
+  oracle lifecycle action, animation edit, or PAPERCUT.
+
+---
 ## 542 — [BOUNDED MAIN WORKER 2026-07-27 ~21:33] Full-turn singles requests are move-slot generic
 
 - **State:** tree green at **295 files / 3824 tests**; `npm run build` and
@@ -54,25 +73,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   --check` green. Preserved the concurrent file-disjoint Return/Frustration
   evidence merge. No synthetic eight-draw tail, canonical recording import,
   unsupported barrier, ratchet change, oracle lifecycle action, or PAPERCUT.
-
----
-## 540 — [BOUNDED MAIN WORKER 2026-07-27 ~21:17] Full-turn controller seam source-correct and provenance-bearing
-
-- **State:** tree green at **294 files / 3820 tests**; `npm run build`
-  clean. The direct canonical ONIX/KABUTO full turn reaches player request
-  **3** with HP **117/63**, PP **9/14**, accuracy **5**, and RNG
-  **650807554 / 4 calls**.
-- **Did:** the backward-compatible full-turn config now carries canonical
-  ability/item/four-slot PP/friendship; both submitted move slots reach
-  `currentMovePosition`. One source-documented `HandleAction_ActionFinished`
-  helper clears every represented action field and script stack. Public
-  boundary events preserve immutable interpreter provenance; the former
-  scout barriers are positive direct-config assertions, including two used-
-  move messages, Sand Attack damage **0**, and exact source labels.
-- **Next:** project the immutable semantic events plus request-3 boundary
-  into the existing nine relative Scene-OFF commands/acknowledgements, then
-  replace only `battle2-off-turn1-before-confirm` and reprove the unchanged
-  trace at **16/16**. Do not synthesize the later eight AI/controller draws.
-- **Notes:** focused **28/28**, full **3820/3820**, build green; baseline OFF
-  oracle hash `9c89c741…f297`. No oracle lifecycle action, canonical recording
-  import, unsupported barrier, ratchet change, or PAPERCUT.

@@ -52,8 +52,8 @@
  * `gBattleOutcome` does).
  *
  * Both sides publish one legal decision for every nonzero moveset slot. The
- * same source-shaped helper owns both singles requests, including the
- * opposing battler target, so initial and subsequent turns cannot drift.
+ * same source-shaped GetMoveTarget port owns both singles requests, including
+ * user-targeting moves, so initial and subsequent turns cannot drift.
  */
 import {
   createBattleState,
@@ -116,7 +116,11 @@ const STAT_SPEED = 3;
 /** Real per-script instruction ceiling, matching battleEndTurnOrchestration.ts's own bump for the DoTurnDmg-family scripts' controller round trips. */
 const SCRIPT_BUDGET = 256;
 
-type MoveRow = Readonly<{ id: number; priority: number }>;
+type MoveRow = Readonly<{
+  id: number;
+  priority: number;
+  target: readonly string[];
+}>;
 type TopologyMoveRow = Readonly<{ id: number; entryScript: string }>;
 
 const MOVES_BY_ID = new Map(
@@ -700,24 +704,59 @@ function machineBarrierBoundary(instruction: BattleScriptInstruction, instructio
 }
 
 /**
+ * Singles projection of `GetMoveTarget` (`battle_util.c:3828-3910`) for every
+ * target shape represented by generated `gBattleMoves[]`. Doubles-only
+ * redirection and RANDOM's draw are unreachable with two active battlers:
+ * every non-user shape resolves to the sole opposing active battler without
+ * consuming RNG. Keeping the generated shape strict prevents a future source
+ * expression from silently inheriting the wrong target.
+ */
+function sourceMoveTarget(
+  moveId: number,
+  attacker: BattleSinglesBattler,
+): BattleSinglesBattler {
+  const move = MOVES_BY_ID.get(moveId);
+  if (!move) {
+    throw new Error(`move ${moveId} is absent from generated gBattleMoves`);
+  }
+  if (move.target.length !== 1) {
+    throw new Error(
+      `move ${moveId} has unsupported generated target shape ${move.target.join("|")}`,
+    );
+  }
+  switch (move.target[0]) {
+    case "MOVE_TARGET_USER":
+      return attacker;
+    case "MOVE_TARGET_SELECTED":
+    case "MOVE_TARGET_DEPENDS":
+    case "MOVE_TARGET_BOTH":
+    case "MOVE_TARGET_FOES_AND_ALLY":
+    case "MOVE_TARGET_OPPONENTS_FIELD":
+    case "MOVE_TARGET_RANDOM":
+      return attacker === 0 ? 1 : 0;
+    default:
+      throw new Error(
+        `move ${moveId} has unsupported generated target shape ${move.target[0]}`,
+      );
+  }
+}
+
+/**
  * Source `HandleInputChooseMove` publishes the configured moves in slot
- * order. This full-turn adapter is singles-only, so the other active battler
- * is the authoritative target for either side. A zero move id is an empty
- * slot, not a legal command; `submitBattleDecision` remains the public
- * membership validator for submitted slots.
+ * order. A zero move id is an empty slot, not a legal command;
+ * `submitBattleDecision` remains the public membership validator.
  */
 function legalMoveDecisions(
   rulesContext: BattleScriptRulesContext,
   battler: BattleSinglesBattler,
 ): readonly BattleMoveDecision[] {
-  const targetBattler: BattleSinglesBattler = battler === 0 ? 1 : 0;
   const moves = rulesContext.battlers[battler]!.moves;
   const legal = moves.flatMap((moveId, slot) =>
     moveId !== 0
       ? [Object.freeze({
           kind: "use-move" as const,
           moveSlot: slot as BattleMoveSlot,
-          targetBattler,
+          targetBattler: sourceMoveTarget(moveId, battler),
         })]
       : []);
   return Object.freeze(legal);

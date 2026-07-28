@@ -94,7 +94,7 @@ describe("Battle 2 OFF real-kernel seam scout", () => {
           { kind: "use-move", moveSlot: 0, targetBattler: 1 },
           { kind: "use-move", moveSlot: 1, targetBattler: 1 },
           { kind: "use-move", moveSlot: 2, targetBattler: 1 },
-          { kind: "use-move", moveSlot: 3, targetBattler: 1 },
+          { kind: "use-move", moveSlot: 3, targetBattler: 0 },
         ],
       },
     });
@@ -123,6 +123,18 @@ describe("Battle 2 OFF real-kernel seam scout", () => {
     const { afterPlayer, result } = runCanonicalBattle2Turn();
     expect(afterPlayer.events).toEqual([]);
     expect(afterPlayer.state.rng).toEqual({ value: 3530724670, calls: 0 });
+    expect(afterPlayer.nextRequest).toEqual({
+      kind: "command",
+      requestId: 2,
+      side: "trainer",
+      battler: 1,
+      legalDecisions: [
+        { kind: "use-move", moveSlot: 0, targetBattler: 0 },
+        { kind: "use-move", moveSlot: 1, targetBattler: 0 },
+        { kind: "use-move", moveSlot: 2, targetBattler: 0 },
+        { kind: "use-move", moveSlot: 3, targetBattler: 1 },
+      ],
+    });
     expect(result.nextRequest).toEqual({
       kind: "command",
       requestId: 3,
@@ -132,7 +144,7 @@ describe("Battle 2 OFF real-kernel seam scout", () => {
         { kind: "use-move", moveSlot: 0, targetBattler: 1 },
         { kind: "use-move", moveSlot: 1, targetBattler: 1 },
         { kind: "use-move", moveSlot: 2, targetBattler: 1 },
-        { kind: "use-move", moveSlot: 3, targetBattler: 1 },
+        { kind: "use-move", moveSlot: 3, targetBattler: 0 },
       ],
     });
 
