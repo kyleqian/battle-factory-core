@@ -756,8 +756,12 @@ export type BattleScriptRulesContext = Readonly<
     battleTextBuff1PaydayMoney: number | null;
     /** Typed form of PREPARE_MOVE_BUFFER(gBattleTextBuff1, move). */
     battleTextBuff1Move: number | null;
+    /** Typed form of PREPARE_ITEM_BUFFER(gBattleTextBuff1, item). */
+    battleTextBuff1Item: number | null;
     /** Typed form of PREPARE_BYTE_NUMBER_BUFFER(gBattleTextBuff2, 1, value). */
     battleTextBuff2ByteNumber: number | null;
+    /** Typed form of PREPARE_ITEM_BUFFER(gBattleTextBuff2, item). */
+    battleTextBuff2Item: number | null;
     /**
      * Source gBattlerByTurnOrder[MAX_BATTLERS_COUNT] -- populated by
      * `ENDTURN_ORDER`'s `GetWhoStrikesFirst` insertion sort
@@ -885,7 +889,9 @@ export type BattleScriptRulesContextInput = Readonly<{
   battleTextBuff1ByteNumber?: number | null;
   battleTextBuff1PaydayMoney?: number | null;
   battleTextBuff1Move?: number | null;
+  battleTextBuff1Item?: number | null;
   battleTextBuff2ByteNumber?: number | null;
+  battleTextBuff2Item?: number | null;
   battlerByTurnOrder?: readonly number[];
   currentTurnActionNumber?: number;
 }>;
@@ -2512,10 +2518,18 @@ export function createBattleScriptRulesContext(
       || input.battleTextBuff1Move === undefined
       ? null
       : requireUnsigned(input.battleTextBuff1Move, 0xffff, "battleTextBuff1Move"),
+    battleTextBuff1Item: input.battleTextBuff1Item === null
+      || input.battleTextBuff1Item === undefined
+      ? null
+      : requireUnsigned(input.battleTextBuff1Item, 0xffff, "battleTextBuff1Item"),
     battleTextBuff2ByteNumber: input.battleTextBuff2ByteNumber === null
       || input.battleTextBuff2ByteNumber === undefined
       ? null
       : requireUnsigned(input.battleTextBuff2ByteNumber, 0xff, "battleTextBuff2ByteNumber"),
+    battleTextBuff2Item: input.battleTextBuff2Item === null
+      || input.battleTextBuff2Item === undefined
+      ? null
+      : requireUnsigned(input.battleTextBuff2Item, 0xffff, "battleTextBuff2Item"),
     battlerByTurnOrder: Object.freeze([
       requireUnsigned(input.battlerByTurnOrder?.[0] ?? 0, 3, "battlerByTurnOrder[0]"),
       requireUnsigned(input.battlerByTurnOrder?.[1] ?? 1, 3, "battlerByTurnOrder[1]"),

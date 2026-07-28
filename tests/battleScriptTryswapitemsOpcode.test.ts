@@ -291,6 +291,8 @@ describe("source-complete B_SCR_OP_TRYSWAPITEMS registration", () => {
     ]);
     expect(after.rulesContext.choicedMove).toEqual([0, 0, 0, 0]);
     expect(after.rulesContext.multistringChooser).toBe(2);
+    expect(after.rulesContext.battleTextBuff1Item).toBe(ITEM_LEFTOVERS);
+    expect(after.rulesContext.battleTextBuff2Item).toBe(ITEM_CHOICE_BAND);
     expect(after.scheduler.pendingControllerBattlers).toEqual([0, 1]);
     expect(after.events.slice(-2).map((event) =>
       event.kind === "set-battler-item"
@@ -431,11 +433,15 @@ describe("source-complete B_SCR_OP_TRYSWAPITEMS registration", () => {
     );
     expect(ppEvent?.payload).toMatchObject({ pp: 9 });
     expect(ppEvent?.provenance?.opcodeName).toBe("B_SCR_OP_PPREDUCE");
-    expect(result.events.some(
+    expect(result.events.find(
       ({ payload }) =>
         payload.kind === "message"
-        && payload.messageId === "STRINGID_PKMNSWITCHEDITEMS",
-    )).toBe(true);
+        && payload.messageId === "STRINGID_PKMNOBTAINEDXYOBTAINEDZ",
+    )?.payload).toEqual({
+      kind: "message",
+      messageId: "STRINGID_PKMNOBTAINEDXYOBTAINEDZ",
+      substitutions: ["LEFTOVERS", "CHOICE BAND"],
+    });
     // One accuracy roll for Trick plus Tackle's four standard hit-chain
     // rolls; the direct opcode test above proves tryswapitems adds none.
     expect(result.state.rng.calls).toBe(5);

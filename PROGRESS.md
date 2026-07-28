@@ -15,22 +15,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
-## 630 — [BOUNDED MAIN WORKER 2026-07-28 ~13:16] Sleep/Freeze multi-turn cancellation source-complete
+## 630 — [BOUNDED MAIN WORKER 2026-07-28 ~13:20] Audit fixes #51 and #52 source-complete
 
-- **State:** rung (a) committed green at **398 files / 4527 tests**, production
+- **State:** rungs (a)+(b) committed green at **398 files / 4527 tests**, production
   build, OFF oracle info, and `git diff --check`; census remains
   **196/214 effects, 336/355 moves, 275/276 distinct, 2955/2957 weighted**.
 - **Did:** closed ISSUES #51 by routing successful Sleep and Freeze writes
   through the existing source-complete `CancelMultiTurnMoves` reducer before
-  status1 is written. Tests pin Sleep landing on Rollout, Tri Attack Freeze
-  landing on Uproar/Thrash, and an unrelated-state no-lock control.
-- **Next:** implement ISSUES #52's two typed Trick item buffers, commit green,
-  then take ISSUES #50's ordinary switch-in reconstruction.
+  status1 is written. Closed ISSUES #52 with typed item slots for both Trick
+  buffers in source order; Furret's result event now carries `LEFTOVERS` then
+  `CHOICE BAND`. Tests pin both fixes and the item-context exact-field surface.
+- **Next:** take ISSUES #50's ordinary switch-in reconstruction: extend party
+  derivation inputs, wholesale-rebuild active state, and retain Baton Pass.
 - **Notes:** the reducer clears every engine-owned source field: multi-turn,
   Thrash/Petal Dance lock, Uproar, Bide, semi-invulnerability, Rollout timer,
   and Fury Cutter counter. Source `gLockedMoves` has no engine-owned readback
-  and is correctly not part of `CancelMultiTurnMoves`. No executability,
-  census, barrier, recording-import, presentation, round, tick, roadmap, or
+  and is correctly not part of `CancelMultiTurnMoves`. Trick's display names
+  come from the source-extracted Factory item table. No executability, census,
+  barrier, recording-import, presentation, round, tick, roadmap, or
   canonical-replay pin changed.
 
 ---

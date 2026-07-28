@@ -120,6 +120,7 @@ import {
 import { mapFactoryBattleOutcome } from "./factoryBattleScriptTerminalDecision.ts";
 import movesData from "../data/gen/moves.json" with { type: "json" };
 import topologyData from "../data/gen/battle-script-topology.json" with { type: "json" };
+import frontierHeldItemsData from "../data/gen/battle-frontier-held-items.json" with { type: "json" };
 
 const ADAPTER = "factory-full-turn/v1";
 const B_WAIT_TIME_LONG = 64;
@@ -140,6 +141,11 @@ const MOVES_BY_ID = new Map(
 );
 const TOPOLOGY_BY_MOVE = new Map(
   (topologyData.moves as readonly TopologyMoveRow[]).map((move) => [move.id, move]),
+);
+const FACTORY_ITEM_NAME_BY_ID = new Map(
+  (frontierHeldItemsData.entries as readonly Readonly<{ itemId: number; displayName: string }>[]).map(
+    ({ itemId, displayName }) => [itemId, displayName],
+  ),
 );
 const PROGRAM = loadBattleScriptProgram();
 const NEUTRAL_STAT_STAGES = Object.freeze([6, 6, 6, 6, 6, 6, 6, 6] as const);
@@ -583,14 +589,30 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
   return Object.freeze({
     isControllerIdle: (context: Readonly<{ state: MachineState }>) =>
       context.state.scheduler.pendingControllerBattlers.length === 0,
-    prepareMessage: (_context: unknown, operand: Readonly<{ expression: string }>) =>
-      operand.expression.startsWith("STRINGID_")
-        ? Object.freeze({
-          kind: "message" as const,
-          messageId: operand.expression,
-          substitutions: Object.freeze([]),
-        })
-        : null,
+    prepareMessage: (
+      context: Readonly<{ state: MachineState }>,
+      operand: Readonly<{ expression: string }>,
+    ) => {
+      if (!operand.expression.startsWith("STRINGID_")) return null;
+      const rules = context.state.rulesContext;
+      const itemName = (item: number | null) => item === null
+        ? null
+        : (FACTORY_ITEM_NAME_BY_ID.get(item) ?? `ITEM_${item}`);
+      const buff1 = itemName(rules.battleTextBuff1Item);
+      const buff2 = itemName(rules.battleTextBuff2Item);
+      const substitutions = operand.expression === "STRINGID_PKMNOBTAINEDX"
+        ? (buff1 === null ? [] : [buff1])
+        : operand.expression === "STRINGID_PKMNOBTAINEDX2"
+          ? (buff2 === null ? [] : [buff2])
+          : operand.expression === "STRINGID_PKMNOBTAINEDXYOBTAINEDZ"
+            ? [buff1, buff2].filter((value): value is string => value !== null)
+            : [];
+      return Object.freeze({
+        kind: "message" as const,
+        messageId: operand.expression,
+        substitutions: Object.freeze(substitutions),
+      });
+    },
     prepareSelectionMessage: () => null,
     prepareSelectionMessageFromTable: () => null,
     // Dynamic (not a fixed closure value): the attacker role changes across

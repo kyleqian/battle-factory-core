@@ -24,16 +24,6 @@ and re-derive ability the source way; audit's suggested corroboration probe:
 one OFF mechanicLab trace — Role Play Levitate → switch to different-IV
 rental → RAM-check `gBattleMons` before a Ground move and Hidden Power.
 
-## #52 — Trick omits both PREPARE_ITEM_BUFFER message operands
-
-Audit-confirmed. Source prepares both item buffers before the switched-items
-messages (`battle_script_commands.c:9263-9264`; strings consume
-`{B_BUFF1}`/`{B_BUFF2}`, `battle_message.c:228-230`).
-`battleScriptTryswapitemsOpcode.ts:174-209` carries only the string id — no
-item-name substitutions (rules context has move/number/money buffers, no
-item slots: `battleScriptRulesContext.ts:747-756`). Fix: add the typed item
-buffer slots following the existing substitution pattern and emit both.
-
 ## (audit note, 2026-07-28) Plausible-unconfirmed pair
 
 `seteffectprimary` returns without the `moveEffectByte` clear that

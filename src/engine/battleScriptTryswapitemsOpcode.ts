@@ -206,6 +206,8 @@ function createTryswapitemsHandler(
       changedItems,
       choicedMove,
       multistringChooser,
+      battleTextBuff1Item: newItemAtk,
+      battleTextBuff2Item: oldItemAtk,
     });
 
     let scheduler = markBattleScriptControllerPending(
