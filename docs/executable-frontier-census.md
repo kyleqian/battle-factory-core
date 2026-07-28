@@ -10,10 +10,10 @@ Answers ROADMAP S10's Executable-frontier reset question directly: not "how many
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 148 | 214 | 69.2% |
-| Moves (unweighted, all 355) | 274 | 355 | 77.2% |
-| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 225 | 276 | 81.5% |
-| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2736 | 2957 | 92.5% |
+| Effect scripts | 149 | 214 | 69.6% |
+| Moves (unweighted, all 355) | 275 | 355 | 77.5% |
+| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 226 | 276 | 81.9% |
+| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2738 | 2957 | 92.6% |
 
 "Executable" means every opcode on every statically reachable path from the effect's entry script has a dispatch entry today (registered barriers included, per ROADMAP S10 §1's (a)/(b) policy). It is not a semantic-correctness claim -- see Caveats.
 
@@ -33,7 +33,6 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_TRYSETMAGICCOAT` | 1 (EFFECT_MAGIC_COAT) | 1 | 1 | 3 |
 | `B_SCR_OP_TRYSETSPIKES` | 1 (EFFECT_SPIKES) | 1 | 1 | 3 |
 | `B_SCR_OP_SCALEDAMAGEBYHEALTHRATIO` | 1 (EFFECT_ERUPTION) | 2 | 2 | 2 |
-| `B_SCR_OP_CUREIFBURNEDPARALYZEDORPOISONED` | 1 (EFFECT_REFRESH) | 1 | 1 | 2 |
 | `B_SCR_OP_JUMPIFARRAYEQUAL` | 1 (EFFECT_TEETER_DANCE) | 1 | 1 | 2 |
 | `B_SCR_OP_MAGNITUDEDAMAGECALCULATION` | 1 (EFFECT_MAGNITUDE) | 1 | 1 | 2 |
 | `B_SCR_OP_MAXATTACKHALVEHP` | 1 (EFFECT_BELLY_DRUM) | 1 | 1 | 2 |
@@ -48,6 +47,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_WEIGHTDAMAGECALCULATION` | 1 (EFFECT_LOW_KICK) | 1 | 1 | 2 |
 | `B_SCR_OP_DAMAGETOHALFTARGETHP` | 1 (EFFECT_SUPER_FANG) | 1 | 1 | 1 |
 | `B_SCR_OP_HIDDENPOWERCALC` | 1 (EFFECT_HIDDEN_POWER) | 1 | 1 | 1 |
+| `B_SCR_OP_NORMALISEBUFFS` | 1 (EFFECT_HAZE) | 1 | 1 | 1 |
 
 ## Per-effect detail
 
@@ -246,7 +246,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_ERUPTION | `BattleScript_EffectEruption` | blocked-on-opcodes | `B_SCR_OP_SCALEDAMAGEBYHEALTHRATIO` (main path) | - | 2 | 2 (2) |
 | EFFECT_SKILL_SWAP | `BattleScript_EffectSkillSwap` | executable | - | - | 1 | 1 (5) |
 | EFFECT_IMPRISON | `BattleScript_EffectImprison` | blocked-on-opcodes | `B_SCR_OP_TRYIMPRISON` (main path) | - | 1 | 0 (0) |
-| EFFECT_REFRESH | `BattleScript_EffectRefresh` | blocked-on-opcodes | `B_SCR_OP_CUREIFBURNEDPARALYZEDORPOISONED` (main path) | - | 1 | 1 (2) |
+| EFFECT_REFRESH | `BattleScript_EffectRefresh` | executable | - | - | 1 | 1 (2) |
 | EFFECT_GRUDGE | `BattleScript_EffectGrudge` | blocked-on-opcodes | `B_SCR_OP_TRYSETGRUDGE` (main path) | - | 1 | 1 (2) |
 | EFFECT_SNATCH | `BattleScript_EffectSnatch` | blocked-on-opcodes | `B_SCR_OP_TRYSETSNATCH` (main path) | - | 1 | 0 (0) |
 | EFFECT_LOW_KICK | `BattleScript_EffectLowKick` | blocked-on-opcodes | `B_SCR_OP_WEIGHTDAMAGECALCULATION` (main path) | - | 1 | 1 (2) |
