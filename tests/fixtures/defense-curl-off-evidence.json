@@ -1,0 +1,65 @@
+{
+  "schema": "defense-curl-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "sourceSha256": {
+    "battle_script_commands.c": "e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c",
+    "battle_scripts_1.s": "4ac3e610b68c11ef0f4e4c0fc62ddba7fda5a8400e43705428868978ec7551a6",
+    "battle_script.inc": "0a8e1c3bdf4c49d07b2e09ff8ab524812a5217b9735106e1b79b6be261a6db7e",
+    "battle_script_commands.h": "842cce6dd704b09b24a49abdca67ee7a8062a2e3a465e1b764fc63c0d230580f",
+    "constants_battle.h": "bba2f9d9b3d98fa01b5f0a8f7dede9f2f0be5617c735242b741a7e0c8e4a5d1e",
+    "battle_moves.h": "8b3d4d143b807807af97ce7288e0cc0ccdd55b6b64ac45824e35a549836b3a0c",
+    "battle_frontier_mons.h": "557c1a97247cbb84357b99035fb11cf0bfe45abe8393a0992fe8146bfc51f67f",
+    "battle_frontier_mons.h.constants": "00fb47e144978d3a24a304047f5463217ac7b535ee6f8719e2adf47cc592387a"
+  },
+  "instruction": {
+    "opcode": 191,
+    "opcodeHex": "0xbf",
+    "length": 1,
+    "operandWidths": [],
+    "pc": "gBattlescriptCurrInstr++"
+  },
+  "state": {
+    "owner": "gBattleMons[gBattlerAttacker].status2",
+    "target": "gBattlerTarget is neither read nor written by Cmd_setdefensecurlbit",
+    "bit": "STATUS2_DEFENSE_CURL (1 << 30)",
+    "write": "OR the bit unconditionally; no local failure branch or result-flag write"
+  },
+  "effect": {
+    "move": {"id": 111, "name": "MOVE_DEFENSE_CURL", "effect": "EFFECT_DEFENSE_CURL", "pp": 40},
+    "script": "attackcanceler, attackstring, ppreduce, setdefensecurlbit, setstatchanger STAT_DEF +1, statbuffchange attacker, max-stat message-or-animation branch",
+    "ordering": "The Defense Curl bit is set before the stat-change command. At MAX_STAT_STAGE statbuffchange marks MOVE_RESULT_MISSED because STAT_CHANGE_ALLOW_PTR is set, but the already-written bit is not rolled back."
+  },
+  "rolloutInteraction": {
+    "reader": "Cmd_rolloutdamagecalculation reads STATUS2_DEFENSE_CURL from gBattleMons[gBattlerAttacker].status2 and doubles gDynamicBasePower after its per-hit Rollout ladder.",
+    "sourcePowerLadderWithDefenseCurl": [60, 120, 240, 480, 960],
+    "persistence": "The pinned source has exactly two STATUS2_DEFENSE_CURL references: this setter and Rollout's reader; it supplies no clear in the battle-command source."
+  },
+  "frontierCarrier": {
+    "setId": 432,
+    "name": "FRONTIER_MON_SHUCKLE_1",
+    "level50Eligible": true,
+    "species": 213,
+    "moves": [205, 111, 214, 156],
+    "item": "BATTLE_FRONTIER_ITEM_CHESTO_BERRY",
+    "evSpread": "F_EV_SPREAD_SP_DEFENSE | F_EV_SPREAD_DEFENSE",
+    "nature": "NATURE_BRAVE"
+  },
+  "case": {
+    "id": "factory-shuckle-defense-curl-then-four-rollout-hits",
+    "scenario": "tools/battle-lab/mechanic-rollout-defense-curl-off.json",
+    "scenarioSha256": "fd1e0baee7bec28fa7d85746387e4a91d526f57a660e853f5e277b98e7aab41f",
+    "repeatability": {"runs": 2, "comparison": "byte-identical full manifest.json", "manifestSha256": "4460104ba9d448e255dd46c66f9922b85f4cdb1b77e711c6c1bb96c219479677"},
+    "builtPartyChecksumsValid": [true, true, true, true, true, true],
+    "observed": {
+      "defenseCurl": {"frame": 300, "currentMove": 111, "playerPp": [20, 39, 10, 10], "playerStatus2": 1073741824, "defenseStage": 7, "opponentHp": 362},
+      "postTurnPersistence": {"frame": 666, "currentMove": 0, "playerStatus2": 1073741824, "defenseStage": 7},
+      "rolloutHits": [
+        {"frame": 1100, "playerPp": [19, 39, 10, 10], "playerStatus2": 1073745920, "opponentHp": 327},
+        {"frame": 1500, "playerPp": [19, 39, 10, 10], "playerStatus2": 1073745920, "opponentHp": 170},
+        {"frame": 2100, "playerPp": [19, 39, 10, 10], "playerStatus2": 1073745920, "opponentHp": 12},
+        {"frame": 2500, "playerPp": [19, 39, 10, 10], "playerStatus2": 1073745920, "opponentHp": 0}
+      ]
+    }
+  },
+  "boundedRemainder": "The OFF manifest observes the Defense Curl status2 bit, PP, stat stage, ordinary controller progression, and ensuing Rollout HP results. It does not expose battle-script PC, gDynamicBasePower, or the MAX_STAT_STAGE retry directly; those hidden fields are source-pinned. This evidence adds no production registration or behavior."
+}

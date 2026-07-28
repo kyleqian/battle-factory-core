@@ -1,0 +1,57 @@
+{
+  "schema": "perish-song-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "sourceSha256": {
+    "battle_script_commands.c": "e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c",
+    "battle_scripts_1.s": "4ac3e610b68c11ef0f4e4c0fc62ddba7fda5a8400e43705428868978ec7551a6",
+    "battle_script.inc": "0a8e1c3bdf4c49d07b2e09ff8ab524812a5217b9735106e1b79b6be261a6db7e",
+    "battle_script_commands.h": "842cce6dd704b09b24a49abdca67ee7a8062a2e3a465e1b764fc63c0d230580f",
+    "battle.h": "8ef0355f2345592094c82cfde6641644a6b7157012104736416f8c05f34f0685",
+    "battle_util.c": "2ba9ee4efe913effa119c8342281745f481910ca1b20cd76b470673062a45fd5",
+    "battle_main.c": "ee79b86ff0f681ab783b363135fd84d050e7123bea2a77c5530f2c7ddc8b8408",
+    "battle_moves.h": "8b3d4d143b807807af97ce7288e0cc0ccdd55b6b64ac45824e35a549836b3a0c",
+    "abilities.h": "1c1b93de5d5ff65d8b3066e9b40229b5d30e02842e587e3851a1d708ece1292b",
+    "battle_message.c": "5874441ca8fea30caed82e6762c7a1dca8be9c60c8bf8912b74517d0ef7e0f17"
+  },
+  "instruction": {
+    "opcode": 178,
+    "opcodeHex": "0xb2",
+    "length": 5,
+    "operands": [{"width": 4, "encoding": "little-endian relocation pointer", "value": "all-unaffected failure script target"}],
+    "pc": {"success": "gBattlescriptCurrInstr += 5", "failure": "gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + 1)"},
+    "localRngCalls": 0
+  },
+  "state": {
+    "iteration": "For every i in [0, gBattlersCount), an existing STATUS3_PERISH_SONG bit or ABILITY_SOUNDPROOF increments notAffectedCount. Every other battler receives STATUS3_PERISH_SONG plus perishSongTimer=3 and perishSongTimerStartValue=3 in that battler's DisableStruct.",
+    "failure": "Only when notAffectedCount == gBattlersCount does the opcode take its pointer; partial immunity still succeeds for every eligible battler.",
+    "pressure": "PressurePPLoseOnUsingPerishSong(gBattlerAttacker) runs after the full iteration and before the pointer decision; the opcode itself does not call Random or emit a controller command.",
+    "endTurn": "The Wish/Perish end-turn state walks gBattlerByTurnOrder, skips absent battlers, formats the current timer, then either decrements a nonzero timer and runs BattleScript_PerishSongCountGoesDown or clears STATUS3_PERISH_SONG, sets damage to current HP, and runs BattleScript_PerishSongTakesLife when the timer is already zero."
+  },
+  "effectScript": {
+    "move": {"id": 195, "name": "MOVE_PERISH_SONG", "effect": "EFFECT_PERISH_SONG", "power": 0, "accuracy": 0, "pp": 5, "target": "MOVE_TARGET_USER", "priority": 0},
+    "order": ["attackcanceler", "attackstring", "ppreduce", "trysetperishsong BattleScript_ButItFailed", "attackanimation", "waitanimation", "printstring STRINGID_FAINTINTHREE", "waitmessage B_WAIT_TIME_LONG", "Soundproof message loop", "goto BattleScript_MoveEnd"],
+    "messages": {"success": "STRINGID_FAINTINTHREE", "soundproof": "STRINGID_PKMNSXBLOCKSY2", "countdown": "BattleScript_PerishSongCountGoesDown / STRINGID_PKMNPERISHCOUNTFELL", "faint": "BattleScript_PerishSongTakesLife / STRINGID_PKMNPERISHCOUNTFELL"}
+  },
+  "lifetime": {
+    "ordinarySwitch": "SwitchInClearSetData clears gStatuses3 and zeroes the active DisableStruct for any switch whose current effect is not Baton Pass.",
+    "batonPass": "Baton Pass masks STATUS3_PERISH_SONG in place, zeroes the DisableStruct, then restores both Perish Song timer fields from its pre-clear copy; the countdown therefore transfers rather than clears.",
+    "faint": "FaintClearSetData clears gStatuses3 and zeroes the active DisableStruct after Perish Song's HP-sized passive damage reaches tryfaintmon."
+  },
+  "case": {
+    "id": "lapras-perish-song-chansey-initial-all-affected-failure-countdown-off",
+    "scenario": "tools/battle-lab/mechanic-perish-song-lapras-chansey-off.json",
+    "scenarioSha256": "fbec908519ea38ed20cd6f83190f602698166163a82947d79f7fd3601ea884bf",
+    "repeatability": {"runs": 2, "comparison": "byte-identical full manifest.json", "manifestSha256": "e0f1d6d6488d45e9087afdf60456adf939dfcb93d942e0177b6bfc60a93c6a61"},
+    "builtPartyChecksumsValid": [true, true, true, true, true, true],
+    "observed": {
+      "initial": {"frame": 0, "sha256": "c75563b56aa2fde1baa130824980957cdc0f7679fcd447aa094094451e3dff08", "rngValue": 3034451114, "currentMove": 0, "playerPp": [5, 40, 40, 40], "opponentPp": [35, 35, 35, 35], "playerStatus3": 0, "opponentStatus3": 0, "playerPerishSongTurns": 0, "opponentPerishSongTurns": 0},
+      "initialSet": {"frame": 75, "sha256": "5da783bb9f820d6d18ee466c2ce38c29411e9d9a5d9725ef28a7c2265ef499ec", "rngValue": 3034451114, "currentMove": 195, "playerPp": [4, 40, 40, 40], "opponentPp": [35, 35, 35, 35], "playerStatus3": 32, "opponentStatus3": 32, "playerPerishSongTurns": 3, "opponentPerishSongTurns": 3, "controllerExecFlags": 0},
+      "firstPlayerCountdown": {"frame": 375, "sha256": "82867f24b43f491a192916ab611388474fcc605b67ee6dd5e0cd3171c265a71d", "currentMove": 0, "playerPerishSongTurns": 2, "opponentPerishSongTurns": 3},
+      "firstBothCountdown": {"frame": 475, "sha256": "312c3e0a2c2f922fa3a208ca97359fdc8fe2c71eda2612ca8c0073edf06a13f0", "currentMove": 0, "playerPerishSongTurns": 2, "opponentPerishSongTurns": 2},
+      "allAffectedRepeatFailure": {"frame": 800, "sha256": "48c59bbc2d9861732c8ca2d7e89d7f3292442b03a6fec0f85ebf570a43902f58", "rngValue": 1630250804, "currentMove": 195, "playerPp": [3, 40, 40, 40], "opponentPp": [35, 35, 34, 35], "playerStatus3": 32, "opponentStatus3": 32, "playerPerishSongTurns": 2, "opponentPerishSongTurns": 2, "controllerExecFlags": 0},
+      "secondPlayerCountdown": {"frame": 1050, "sha256": "c8ee6d27ff94c3ab87ff36695afab090942497b3b73534d4647126c44eabae1f", "currentMove": 0, "playerPerishSongTurns": 1, "opponentPerishSongTurns": 2},
+      "secondBothCountdown": {"frame": 1150, "sha256": "dd0b6935d7d42f3d4ee8ee04cb2b16c560511926db90bff4136b3a6aa656d4d0", "currentMove": 0, "playerPerishSongTurns": 1, "opponentPerishSongTurns": 1}
+    }
+  },
+  "boundedRemainder": "This complete-party Battle Scene OFF manifest directly exposes the active status3 bit, Perish Song timer, move, PP, RNG, controller flags, persistent parties, and framebuffer hashes. It proves the initial two-active set, real 3→2→1 countdown persistence in turn order, and a repeat use that spends PP without resetting either timer while both active battlers remain marked. It does not expose script PC, notAffectedCount, DisableStruct start-value nibble, Pressure's private slot choice, controller buffers, the displayed text ID, or a Soundproof active battler. Soundproof handling, partial-immunity success, exact pointer branch, terminal HP-sized faint, ordinary-switch/faint clearing, and Baton Pass transfer are source-pinned only. No production opcode is registered."
+}

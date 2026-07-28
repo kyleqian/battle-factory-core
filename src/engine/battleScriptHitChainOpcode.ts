@@ -218,6 +218,8 @@ const MOVE_EFFECT_FLINCH = 8;
 const MOVE_EFFECT_CHARGING = 12;
 /** include/constants/battle.h:260 -- SetMoveEffect's Wrap-family case (docs/ingrain-leechseed-wrap-ground-truth.md §1c/§5 slice 2). */
 const MOVE_EFFECT_WRAP = 13;
+/** include/constants/battle.h:261 -- shared 25%-of-damage recoil used by Struggle and ordinary recoil moves. */
+const MOVE_EFFECT_RECOIL_25 = 14;
 /** include/constants/battle.h:300 -- SetMoveEffect's Thrash-family lock-in case (docs/yawn-thrash-endturn-design.md §3, Rung 4). */
 const MOVE_EFFECT_THRASH = 53;
 /**
@@ -257,8 +259,16 @@ const B_MSG_ABILITY_PREVENTS_MOVE_STATUS = 0;
 const B_MSG_ABILITY_PREVENTS_ABILITY_STATUS = 1;
 const B_MSG_STATUS_HAD_NO_EFFECT = 2;
 
-/** printfromtable's 7 small constant tables (battle_message.c:1072-1099,1214-1232), 2-3 STRINGID_* entries each, indexed by MULTISTRING_CHOOSER. */
+/** printfromtable's registered small constant tables, each indexed by MULTISTRING_CHOOSER. */
 const PRINTFROMTABLE_TABLES: Readonly<Record<string, readonly string[]>> = Object.freeze({
+  gFutureMoveUsedStringIds: Object.freeze([
+    "STRINGID_PKMNFORESAWATTACK",
+    "STRINGID_PKMNCHOSEXASDESTINY",
+  ]),
+  gSubstituteUsedStringIds: Object.freeze([
+    "STRINGID_PKMNMADESUBSTITUTE",
+    "STRINGID_TOOWEAKFORSUBSTITUTE",
+  ]),
   gGotPoisonedStringIds: Object.freeze(["STRINGID_PKMNWASPOISONED", "STRINGID_PKMNPOISONEDBY"]),
   gGotBurnedStringIds: Object.freeze(["STRINGID_PKMNWASBURNED", "STRINGID_PKMNBURNEDBY"]),
   gGotFrozenStringIds: Object.freeze(["STRINGID_PKMNWASFROZEN", "STRINGID_PKMNFROZENBY"]),
@@ -470,6 +480,7 @@ export const SET_MOVE_EFFECT_SUPPORTED_BYTES: ReadonlySet<number> = new Set<numb
   MOVE_EFFECT_FLINCH,
   MOVE_EFFECT_CHARGING,
   MOVE_EFFECT_WRAP,
+  MOVE_EFFECT_RECOIL_25,
   MOVE_EFFECT_THRASH,
   ...Object.keys(STAT_MOVE_EFFECT_TABLE).map(Number),
 ]);
@@ -659,7 +670,7 @@ function jumpToMissTarget(
 /**
  * TrySetDestinyBondToHappen (battle_script_commands.c:8285-8294): sets the
  * shared per-action `hitMarker`'s `HITMARKER_DESTINYBOND` bit (consumed later
- * by `Cmd_tryfaintmon`'s own barrier, `:3184` in this file) when the TARGET
+ * by `Cmd_tryfaintmon`'s avenging-script branch) when the TARGET
  * currently carries `STATUS2_DESTINY_BOND` (from using the move on some
  * earlier turn), the two battlers are on opposite sides, and no Grudge has
  * already consumed this hitmarker slot this action. Exported so both of
@@ -710,12 +721,14 @@ function advancePastAccuracyCheck(
   attacker: BattleScriptBattlerId,
   target: BattleScriptBattlerId,
   rng: BattleScriptRngState,
+  move: number,
 ): BattleScriptCommandTransition<BattleScriptRulesContext> {
   const targetBattler = rulesContext.battlers[target];
+  const moveType = resolveMoveTypeName(rulesContext, move);
   if (
-    targetBattler.ability === ABILITY_VOLT_ABSORB
-    || targetBattler.ability === ABILITY_WATER_ABSORB
-    || targetBattler.ability === ABILITY_FLASH_FIRE
+    (targetBattler.ability === ABILITY_VOLT_ABSORB && moveType === "TYPE_ELECTRIC")
+    || (targetBattler.ability === ABILITY_WATER_ABSORB && moveType === "TYPE_WATER")
+    || (targetBattler.ability === ABILITY_FLASH_FIRE && moveType === "TYPE_FIRE")
   ) {
     return unsupportedBranch(
       context,
@@ -837,12 +850,13 @@ function accuracycheckNoAccCalcCheckLockOn(
 /**
  * Cmd_accuracycheck (battle_script_commands.c:1099-1189). Two argument forms
  * are source-complete: `ACC_CURR_MOVE` (`BattleScript_EffectHit` and 53 of
- * the program's other accuracycheck sites) and `NO_ACC_CALC_CHECK_LOCK_ON`
+ * the program's other accuracycheck sites), the two explicit delayed-attack
+ * literals (`MOVE_FUTURE_SIGHT`/`MOVE_DOOM_DESIRE`), and
+ * `NO_ACC_CALC_CHECK_LOCK_ON`
  * (`accuracycheckNoAccCalcCheckLockOn` above, `BattleScript_EffectYawn`'s own
  * site -- 1 of 8 sites using this literal, the rest still barriered behind
- * their own separate unregistered opcodes). Bare `NO_ACC_CALC` and any
- * explicit-deferred-move literal remain an explicit barrier: no committed
- * script this engine reaches uses them.
+ * their own separate unregistered opcodes). Bare `NO_ACC_CALC` remains an
+ * explicit barrier.
  */
 export const accuracycheckOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (
   context,
@@ -851,12 +865,17 @@ export const accuracycheckOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptR
   if (moveOperand?.expression === "NO_ACC_CALC_CHECK_LOCK_ON") {
     return accuracycheckNoAccCalcCheckLockOn(context);
   }
-  if (!moveOperand || moveOperand.expression !== "ACC_CURR_MOVE") {
+  const explicitMove = moveOperand?.expression === "MOVE_FUTURE_SIGHT"
+    ? 248
+    : moveOperand?.expression === "MOVE_DOOM_DESIRE"
+      ? 353
+      : null;
+  if (!moveOperand || (moveOperand.expression !== "ACC_CURR_MOVE" && explicitMove === null)) {
     return unsupportedBranch(
       context,
       `Cmd_accuracycheck's non-ACC_CURR_MOVE move argument `
-        + `(${moveOperand?.expression ?? "<missing>"}) -- the NO_ACC_CALC/`
-        + "explicit-deferred-move top branch is not used by any committed script this engine reaches",
+        + `(${moveOperand?.expression ?? "<missing>"}) -- this registered path supports `
+        + "ACC_CURR_MOVE plus Future Sight/Doom Desire's explicit literals",
       "battle_script_commands.c",
       1103,
     );
@@ -867,7 +886,7 @@ export const accuracycheckOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptR
   const target = requireBattlerRole(rulesContext, "target");
   const attackerBattler = rulesContext.battlers[attacker];
   const targetBattler = rulesContext.battlers[target];
-  const move = rulesContext.currentMove;
+  const move = explicitMove ?? rulesContext.currentMove;
   const moveRow = requireMoveRow(move);
   const moveType = resolveMoveTypeName(rulesContext, move);
 
@@ -929,6 +948,7 @@ export const accuracycheckOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptR
       attacker,
       target,
       context.state.rng,
+      move,
     );
   }
 
@@ -973,6 +993,7 @@ export const accuracycheckOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptR
       attacker,
       target,
       rng,
+      move,
     );
   }
 
@@ -1538,13 +1559,13 @@ export const typecalc2OpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRules
  * short-circuits on gate (a) first, so a false gate (a) makes the dummy
  * `hitter` read inert regardless of its value (pure `GetBattlerSide`, no
  * side effect either way) -- this port relies on the same short-circuit.
- * Follow Me's redirect (`gSideTimers[].followmeTimer`) has no field in this
- * engine's `BattleScriptSideTimerState` at all, so it is a structural (not
- * gated) no-op -- retaliation always targets the recorded hitter directly,
- * matching prep-scout §6's "unreachable in L50 singles" finding. Failure
- * writes the real, already-modeled `ppNotAffectedByPressure` field and jumps
- * to the operand's fail target (`BattleScript_FailedFromAtkString` at every
- * real call site).
+ * Follow Me's fields now have shared `BattleScriptSideTimerState` ownership,
+ * but Counter's separate retarget reader is intentionally not widened in
+ * this finite registration unit: it is unobservable in Factory L50 singles
+ * and retaliation still targets the recorded hitter directly, matching
+ * prep-scout §6. Failure writes the real, already-modeled
+ * `ppNotAffectedByPressure` field and jumps to the operand's fail target
+ * (`BattleScript_FailedFromAtkString` at every real call site).
  */
 export const counterdamagecalculatorOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (
   context,
@@ -1629,39 +1650,50 @@ export const mirrorcoatdamagecalculatorOpcodeHandler: BattleScriptOpcodeHandler<
 };
 
 /**
- * Cmd_adjustnormaldamage (battle_script_commands.c:1658-1698): the always-run
- * ApplyRandomDmgMultiplier roll, then the False Swipe/Endure/Focus-Band HP
- * clamp. Focus Band's own roll (`Random() % 100 < param`, gated on the target
+ * Shared body of Cmd_adjustnormaldamage (battle_script_commands.c:1658-1698)
+ * and Cmd_adjustnormaldamage2 (1701-1741). Both consume the random-damage
+ * roll and share Focus Band, Endure, Substitute, flags, and HP semantics.
+ * Their sole source difference is whether EFFECT_FALSE_SWIPE participates in
+ * the survival clamp.
+ *
+ * Focus Band's own roll (`Random() % 100 < param`, gated on the target
  * actually holding it) needs gSpecialStatuses[target].focusBanded, which this
  * engine does not model -- barriered, but ONLY when the target's resolved
  * holdEffect is actually Focus Band, never on the plain (no-item or
  * different-item) path, which is fully implemented per source.
  */
-export const adjustnormaldamageOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (
-  context,
-) => {
+function adjustNormalDamageOpcodeHandler(
+  context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
+  includeFalseSwipe: boolean,
+): ReturnType<BattleScriptOpcodeHandler<BattleScriptRulesContext>> {
   const rulesContext = context.state.rulesContext;
   const target = requireBattlerRole(rulesContext, "target");
   const targetBattler = rulesContext.battlers[target];
+  const commandName = includeFalseSwipe ? "Cmd_adjustnormaldamage" : "Cmd_adjustnormaldamage2";
 
-  const { rng, randomValue } = drawBattleScriptRng(context.state.rng, context.instruction, "adjustnormaldamage");
+  const { rng, randomValue } = drawBattleScriptRng(
+    context.state.rng,
+    context.instruction,
+    includeFalseSwipe ? "adjustnormaldamage" : "adjustnormaldamage2",
+  );
   let damage = applyRandomDamageMultiplier(rulesContext.battleMoveDamage, randomValue);
 
   const holdEffectId = resolveBattleScriptBattlerHoldEffect(rulesContext, target);
   if (holdEffectId === HOLD_EFFECT_ID_FOCUS_BAND) {
     return unsupportedBranch(
       context,
-      "Cmd_adjustnormaldamage's HOLD_EFFECT_FOCUS_BAND roll needs gSpecialStatuses[target].focusBanded, "
+      `${commandName}'s HOLD_EFFECT_FOCUS_BAND roll needs gSpecialStatuses[target].focusBanded, `
         + "which this engine does not model yet",
       "battle_script_commands.c",
-      1677,
+      includeFalseSwipe ? 1677 : 1720,
     );
   }
 
-  const moveRow = requireMoveRow(rulesContext.currentMove);
+  const falseSwipeApplies = includeFalseSwipe
+    && requireMoveRow(rulesContext.currentMove).effect === "EFFECT_FALSE_SWIPE";
   const hasSubstitute = (targetBattler.status2 & BATTLE_SCRIPT_STATUS2_SUBSTITUTE) !== 0;
   const shouldClamp = !hasSubstitute
-    && (moveRow.effect === "EFFECT_FALSE_SWIPE" || targetBattler.endured === 1)
+    && (falseSwipeApplies || targetBattler.endured === 1)
     && targetBattler.hp <= damage;
 
   let moveResultFlags = rulesContext.moveResultFlags;
@@ -1677,7 +1709,15 @@ export const adjustnormaldamageOpcodeHandler: BattleScriptOpcodeHandler<BattleSc
     Object.freeze({ kind: "advance" }),
     { rulesContext: Object.freeze({ ...rulesContext, battleMoveDamage: damage, moveResultFlags }), rng },
   );
-};
+}
+
+export const adjustnormaldamageOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (
+  context,
+) => adjustNormalDamageOpcodeHandler(context, true);
+
+export const adjustnormaldamage2OpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (
+  context,
+) => adjustNormalDamageOpcodeHandler(context, false);
 
 /**
  * Cmd_setdamagetohealthdifference (battle_script_commands.c:9366-9377),
@@ -2421,6 +2461,23 @@ function applySetMoveEffect(
     }
     if (effectByte === MOVE_EFFECT_WRAP) {
       return applyWrapMoveEffect(context, baseRulesContext, effectBattler);
+    }
+    if (effectByte === MOVE_EFFECT_RECOIL_25) {
+      const recoilDamage = Math.max(1, Math.trunc(baseRulesContext.hpDealt / 4));
+      const programCounter = resolveRequiredLabelProgramCounter(
+        context.program,
+        "BattleScript_MoveEffectRecoil",
+      );
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "call", programCounter }),
+        {
+          rulesContext: Object.freeze({
+            ...baseRulesContext,
+            battleMoveDamage: recoilDamage,
+          }),
+        },
+      );
     }
     if (effectByte === MOVE_EFFECT_CHARGING) {
       return applyChargingMoveEffect(context, baseRulesContext, effectBattler);
@@ -3294,11 +3351,29 @@ function createTryfaintmonOpcodeHandler(): BattleScriptOpcodeHandler<BattleScrip
     const targetBattler = rulesContext.battlers[requireBattlerRole(rulesContext, "target")];
 
     if ((hitMarker & HITMARKER_DESTINYBOND) !== 0 && attackerBattler.hp !== 0) {
-      return unsupportedBranch(
+      const faintScript = resolveBattleScriptLabel(context.program, faintTargetLabel);
+      if (!faintScript) throw new Error(`tryfaintmon: committed program has no label ${faintTargetLabel}`);
+      const destinyBond = resolveBattleScriptLabel(context.program, "BattleScript_DestinyBondTakesLife");
+      if (!destinyBond) throw new Error("tryfaintmon: committed program has no BattleScript_DestinyBondTakesLife");
+      const damageOwner = rulesContext.battlers[isAttackerOperand
+        ? requireBattlerRole(rulesContext, "target")
+        : requireBattlerRole(rulesContext, "attacker")];
+      const nextRulesContext = Object.freeze({
+        ...rulesContext,
+        hitMarker: (hitMarker & ~HITMARKER_DESTINYBOND) >>> 0,
+        battleMoveDamage: damageOwner.hp,
+      });
+      return transitionBattleScriptCommand(
         context,
-        "Cmd_tryfaintmon's HITMARKER_DESTINYBOND branch (BattleScript_DestinyBondTakesLife) is not modeled",
-        "battle_script_commands.c",
-        3020,
+        Object.freeze({
+          kind: "call-stack",
+          programCounter: destinyBond.programCounter,
+          returnProgramCounters: Object.freeze([
+            context.state.programCounter + 1,
+            faintScript.programCounter,
+          ]),
+        }),
+        { rulesContext: nextRulesContext },
       );
     }
 
@@ -3368,7 +3443,7 @@ function replaceAt<T extends readonly number[]>(values: T, index: number, value:
  * (`battleScriptProtectlikeOpcode.ts`'s own field), tested below. The
  * remaining struct-wide DisableStruct/ProtectStruct
  * fields FaintClearSetData zeroes (transformedMonPersonality, encoredMove*,
- * stockpileCounter, disableTimer*, perishSongTimer*,
+ * stockpileCounter, perishSongTimer*,
  * chargeTimer*, battlerWithSureHit, isFirstTurn, truantSwitchInHack,
  * mimickedMoves, ProtectStruct's noValidMoves/fleeType/physicalDmg/
  * specialDmg/physicalBattlerId/specialBattlerId), gActionSelectionCursor/
@@ -3433,6 +3508,8 @@ function createCleareffectsonfaintOpcodeHandler(
           rechargeTimer: 0,
           flinchImmobility: 0 as const,
           disabledMove: 0,
+          disableTimer: 0,
+          disableTimerStartValue: 0,
           usedDisabledMove: 0 as const,
           tauntTimer: 0,
           usedTauntedMove: 0 as const,
@@ -3559,6 +3636,7 @@ export function createBattleScriptHitChainOpcodeHandlers(
   install("B_SCR_OP_DMGTOLEVEL", dmgtolevelOpcodeHandler);
   install("B_SCR_OP_PSYWAVEDAMAGEEFFECT", psywavedamageeffectOpcodeHandler);
   install("B_SCR_OP_ADJUSTNORMALDAMAGE", adjustnormaldamageOpcodeHandler);
+  install("B_SCR_OP_ADJUSTNORMALDAMAGE2", adjustnormaldamage2OpcodeHandler);
   install("B_SCR_OP_SETDAMAGETOHEALTHDIFFERENCE", setdamagetohealthdifferenceOpcodeHandler);
   install("B_SCR_OP_ADJUSTSETDAMAGE", adjustsetdamageOpcodeHandler);
   install("B_SCR_OP_COUNTERDAMAGECALCULATOR", counterdamagecalculatorOpcodeHandler);

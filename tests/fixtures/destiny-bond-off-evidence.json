@@ -1,0 +1,61 @@
+{
+  "schema": "destiny-bond-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "source": {
+    "macro": "reference/pokeemerald/asm/macros/battle_script.inc:897-899",
+    "opcodeEnum": "reference/pokeemerald/include/constants/battle_script_commands.h:176",
+    "opcodeDispatch": "reference/pokeemerald/src/battle_script_commands.c:501",
+    "handler": "reference/pokeemerald/src/battle_script_commands.c:8279-8283",
+    "statusBit": "reference/pokeemerald/include/constants/battle.h:149",
+    "turnActionClear": "reference/pokeemerald/src/battle_util.c:314-318,3815-3820",
+    "effectScript": "reference/pokeemerald/data/battle_scripts_1.s:1334-1343",
+    "avengingHook": "reference/pokeemerald/src/battle_script_commands.c:8285-8294,3020-3025",
+    "avengingTerminal": "reference/pokeemerald/data/battle_scripts_1.s:3379-3386",
+    "move": "reference/pokeemerald/src/data/battle_moves.h:2525-2537",
+    "factoryCarrier": "reference/pokeemerald/src/data/battle_frontier/battle_frontier_mons.h:2033-2039",
+    "wobbuffetLearnset": "reference/pokeemerald/src/data/pokemon/level_up_learnsets.h:2775-2780",
+    "snorlaxExplosionTutor": "reference/pokeemerald/src/data/pokemon/tutor_learnsets.h"
+  },
+  "sourceSha256": {
+    "battle_script_commands.c": "e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c",
+    "battle_scripts_1.s": "4ac3e610b68c11ef0f4e4c0fc62ddba7fda5a8400e43705428868978ec7551a6",
+    "battle_script.inc": "0a8e1c3bdf4c49d07b2e09ff8ab524812a5217b9735106e1b79b6be261a6db7e",
+    "battle_script_commands.h": "842cce6dd704b09b24a49abdca67ee7a8062a2e3a465e1b764fc63c0d230580f",
+    "battle.h": "bba2f9d9b3d98fa01b5f0a8f7dede9f2f0be5617c735242b741a7e0c8e4a5d1e",
+    "battle_util.c": "2ba9ee4efe913effa119c8342281745f481910ca1b20cd76b470673062a45fd5",
+    "battle_moves.h": "8b3d4d143b807807af97ce7288e0cc0ccdd55b6b64ac45824e35a549836b3a0c",
+    "battle_frontier_mons.h": "557c1a97247cbb84357b99035fb11cf0bfe45abe8393a0992fe8146bfc51f67f",
+    "level_up_learnsets.h": "a7569a51e3bb0ca4f094830c76c6db45a692c7ed64db21e59bc76a90237599e0",
+    "tutor_learnsets.h": "8b0fa33c75b6fbefcd3379f2c6cbf72be9e32ca34ce785ec83f085afee7f9d97"
+  },
+  "instruction": {
+    "opcode": 170,
+    "opcodeHex": "0xaa",
+    "length": 1,
+    "operandWidths": [],
+    "pc": "unconditionally advances by one byte"
+  },
+  "mutation": {
+    "target": "gBattleMons[gBattlerAttacker].status2",
+    "bit": 33554432,
+    "bitName": "STATUS2_DESTINY_BOND",
+    "lifecycle": "cleared before any ordinary action for that battler by ClearFuryCutterDestinyBondGrudge; the avenging hook transfers it to HITMARKER_DESTINYBOND only when the opposing target faints"
+  },
+  "repeatability": {"runsPerCase": 2, "comparison": "byte-identical full manifest.json", "allMatched": true},
+  "case": {
+    "id": "wobbuffet-bonds-before-slower-snorlax-explosion-and-avenges-the-ko",
+    "scenario": "tools/battle-lab/mechanic-destiny-bond-ko-off.json",
+    "scenarioSha256": "8c329f284002a16bb122107f7a563857396594992c5ce78b88cef62cf44367da",
+    "runManifestSha256": ["12dc947d247e24af225ee9b9047f1d932cab9d68e1962cd3b7b9bbb4248e86d4", "12dc947d247e24af225ee9b9047f1d932cab9d68e1962cd3b7b9bbb4248e86d4"],
+    "builtPartyChecksumsValid": [true, true, true, true, true, true],
+    "captures": [
+      {"frame": 0, "sha256": "4da5ebd5c7d5393cd5bf1cbb33aaba56f6a3d9e670c76f61233144ea89d0bbed", "rngValue": 919694434, "currentMove": 0, "player": {"hp": 265, "pp": [20,20,5,5], "status2": 0}, "opponent": {"hp": 235, "pp": [5,5,5,5], "status2": 0}},
+      {"frame": 120, "sha256": "a18eacfce3751f361ef9e359171202ec229b9984c93ab7247de445336bd19a9b", "rngValue": 919694434, "currentMove": 194, "player": {"hp": 265, "pp": [20,20,5,5], "status2": 0}, "opponent": {"hp": 235, "pp": [5,5,5,5], "status2": 0}},
+      {"frame": 160, "sha256": "34296120a4106b69ca46a09170eded1fe878f54ec28fed10b69e5cc82c215103", "rngValue": 919694434, "currentMove": 194, "player": {"hp": 265, "pp": [20,20,5,4], "status2": 33554432}, "opponent": {"hp": 235, "pp": [5,5,5,5], "status2": 0}},
+      {"frame": 340, "sha256": "b2b9353f216d3b224a659c883bb2cb05e4d037e4d32b9daa88ce668d545f8a6e", "rngValue": 919694434, "currentMove": 153, "player": {"hp": 265, "pp": [20,20,5,4], "status2": 33554432}, "opponent": {"hp": 0, "pp": [5,4,5,5], "status2": 0}},
+      {"frame": 700, "sha256": "fd38c5292b6d206128bcaff90d1d580d6b12f78050796d42406e219a8985a8ba", "rngValue": 3421819359, "currentMove": 153, "player": {"hp": 0, "pp": [20,20,5,4], "status2": 33554432}, "opponent": {"hp": 0, "pp": [5,4,5,5], "status2": 0}},
+      {"frame": 780, "sha256": "9eba93a6ed369c639099de0a38644089f5a57f40fab47228a544a07bfc6393cf", "rngValue": 3421819359, "currentMove": 153, "player": {"hp": 0, "pp": [20,20,5,4], "status2": 0}, "opponent": {"hp": 0, "pp": [5,4,5,5], "status2": 0}}
+    ]
+  },
+  "boundedRemainder": "The lab manifest exposes active status2, PP, HP, controller state and RNG, but not the transient gHitMarker or BattleScript program counter, nor decoded dialogue text. The source pins the exact STRINGID_PKMNTRYINGTOTAKEFOE and STRINGID_PKMNTOOKFOE terminal routes; the two ROM faint outcomes are evidenced by their semantic state and framebuffer hashes. This checkpoint does not implement or register the opcode."
+}

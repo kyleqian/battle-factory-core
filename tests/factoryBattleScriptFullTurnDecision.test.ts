@@ -9,11 +9,15 @@ import {
   submitFactoryAiDecision,
   type FactoryAiScoredView,
 } from "../src/engine/factoryAiDecisionPolicy.ts";
+import { BATTLE_SCRIPT_STATUS3_MINIMIZED } from "../src/engine/battleScriptSourceConstants.ts";
 
 const STRENGTH = 70; // EFFECT_HIT, TYPE_NORMAL -- the banked KO-scenario move (factoryBattleScriptTerminalDecision.test.ts).
 const EMBER = 52; // EFFECT_BURN_HIT, TYPE_FIRE, 10% MOVE_EFFECT_BURN secondary proc.
 const FLAIL = 175; // EFFECT_FLAIL -- writes source gDynamicBasePower before the shared hit chain.
 const FRUSTRATION = 218; // EFFECT_FRUSTRATION -- friendship 0 writes source gDynamicBasePower 102.
+const DOUBLE_TEAM = 104;
+const MINIMIZE = 107;
+const STOMP = 23;
 /** The banked KO-scenario seed (factoryBattleScriptTerminalDecision.test.ts, docs/hit-chain-ground-truth.md). */
 const KO_SCENARIO_RNG_SEED = 919694434;
 /** Brute-force-found: Ember's 10% burn proc actually lands on turn 1 with this seed, per this move's own real hit-chain RNG order (accuracy, crit, damage, secondary-effect-chance). */
@@ -93,6 +97,53 @@ const PLAYER_ATTACKS = Object.freeze({ kind: "use-move" as const, moveSlot: 0 as
 const TRAINER_ATTACKS = Object.freeze({ kind: "use-move" as const, moveSlot: 0 as const, targetBattler: 0 as const });
 
 describe("factory full-turn decision -- decision -> both actions -> end-turn -> next decision boundary", () => {
+  it("makes Stomp deal greater damage after Minimize than after a same-seed +1-evasion Double Team control", () => {
+    const run = (playerMove: typeof MINIMIZE | typeof DOUBLE_TEAM) => {
+      const initial = createFactoryFullTurnBattleState(config({
+        player: {
+          species: 120, moveId: playerMove, attack: 50, defense: 200,
+          pp: [20, 0, 0, 0], spAttack: 50, spDefense: 200, speed: 100, hp: 999,
+        },
+        trainer: {
+          species: 203, moveId: STOMP, attack: 50, defense: 200,
+          pp: [20, 0, 0, 0], spAttack: 50, spDefense: 200, speed: 50, hp: 999,
+        },
+      }));
+      expect(initial.rules.rulesContext.battlers[0]!.status3).toBe(0);
+      expect(initial.rules.rulesContext.battlers[1]!.status3).toBe(0);
+      const afterPlayer = submitFactoryFullTurnDecision(initial, {
+        requestId: 1,
+        side: "player",
+        decision: { kind: "use-move", moveSlot: 0, targetBattler: 0 },
+      });
+      if (afterPlayer.kind !== "decision-required") throw new Error("expected trainer decision");
+      const result = submitFactoryFullTurnDecision(afterPlayer.state, {
+        requestId: 2,
+        side: "trainer",
+        decision: TRAINER_ATTACKS,
+      });
+      if (result.kind !== "decision-required") throw new Error("expected next-turn decision");
+      return result.state.rules.rulesContext;
+    };
+
+    const minimized = run(MINIMIZE);
+    const control = run(DOUBLE_TEAM);
+    expect(minimized.battlers[0]!.pp[0]).toBe(19);
+    expect(control.battlers[0]!.pp[0]).toBe(19);
+    expect(minimized.battlers[0]!.statStages[7]).toBe(7);
+    expect(control.battlers[0]!.statStages[7]).toBe(7);
+    expect(minimized.battlers[0]!.status3 & BATTLE_SCRIPT_STATUS3_MINIMIZED)
+      .toBe(BATTLE_SCRIPT_STATUS3_MINIMIZED);
+    expect(control.battlers[0]!.status3 & BATTLE_SCRIPT_STATUS3_MINIMIZED).toBe(0);
+    expect(minimized.battlers[1]!.pp[0]).toBe(19);
+    expect(control.battlers[1]!.pp[0]).toBe(19);
+    expect(minimized.battlers[0]!.hp).toBe(974);
+    expect(control.battlers[0]!.hp).toBe(987);
+    expect(999 - minimized.battlers[0]!.hp).toBeGreaterThan(999 - control.battlers[0]!.hp);
+    expect(minimized.lockedMoves).toEqual([0, 0, 0, 0]);
+    expect(control.lockedMoves).toEqual([0, 0, 0, 0]);
+  });
+
   it("asks the player, then the trainer, before resolving anything (both sides collected before turn order)", () => {
     const initial = createFactoryFullTurnBattleState(config());
     expect(initial.boundary).toEqual({

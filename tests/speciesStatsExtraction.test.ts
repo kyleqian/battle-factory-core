@@ -19,6 +19,7 @@ type SpeciesStats = {
   baseSpDefense: number;
   abilities: [string, string];
   genderRatio: number;
+  weightHectograms: number | null;
 };
 
 const stats = speciesStatsData.species as SpeciesStats[];
@@ -66,6 +67,7 @@ describe("species-stats.json (complete Emerald base-stat and ability corpus)", (
       baseSpAttack: 30,
       baseSpDefense: 45,
       abilities: ["ABILITY_ROCK_HEAD", "ABILITY_STURDY"],
+      weightHectograms: 2100,
     });
     expect(statsByName.get("SPECIES_OLD_UNOWN_B")).toMatchObject({
       id: 252,
@@ -75,6 +77,19 @@ describe("species-stats.json (complete Emerald base-stat and ability corpus)", (
       abilities: ["ABILITY_NONE", "ABILITY_NONE"],
     });
     expect(statsByName.get("SPECIES_FLYGON")!.abilities).toEqual(["ABILITY_LEVITATE", "ABILITY_LEVITATE"]);
+  });
+
+  it("extracts source Pokédex hectogram weights without inventing legacy compatibility data", () => {
+    expect(statsByName.get("SPECIES_BULBASAUR")!.weightHectograms).toBe(69);
+    expect(statsByName.get("SPECIES_CHANSEY")!.weightHectograms).toBe(346);
+    expect(statsByName.get("SPECIES_SNORLAX")!.weightHectograms).toBe(4600);
+    expect(statsByName.get("SPECIES_DEOXYS")!.weightHectograms).toBe(608);
+    expect(stats.filter(({ weightHectograms }) => weightHectograms === null)
+      .map(({ name }) => name)).toEqual(
+        Array.from({ length: 25 }, (_, index) =>
+          `SPECIES_OLD_UNOWN_${String.fromCharCode("B".charCodeAt(0) + index)}`
+        ),
+      );
   });
 
   it("pins genderRatio's four representable shapes (species_info.h:24,58 + include/constants/pokemon.h:169-171)", () => {

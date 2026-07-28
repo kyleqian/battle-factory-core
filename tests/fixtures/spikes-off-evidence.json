@@ -1,0 +1,65 @@
+{
+  "schema": "spikes-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "sourceSha256": {
+    "battle_script_commands.c": "e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c",
+    "battle_scripts_1.s": "4ac3e610b68c11ef0f4e4c0fc62ddba7fda5a8400e43705428868978ec7551a6",
+    "battle_script.inc": "0a8e1c3bdf4c49d07b2e09ff8ab524812a5217b9735106e1b79b6be261a6db7e",
+    "battle_script_commands.h": "842cce6dd704b09b24a49abdca67ee7a8062a2e3a465e1b764fc63c0d230580f",
+    "constants_battle.h": "bba2f9d9b3d98fa01b5f0a8f7dede9f2f0be5617c735242b741a7e0c8e4a5d1e",
+    "battle.h": "8ef0355f2345592094c82cfde6641644a6b7157012104736416f8c05f34f0685",
+    "battle_main.c": "ee79b86ff0f681ab783b363135fd84d050e7123bea2a77c5530f2c7ddc8b8408",
+    "battle_moves.h": "8b3d4d143b807807af97ce7288e0cc0ccdd55b6b64ac45824e35a549836b3a0c",
+    "moves.h": "d32746c9ad3ed1bbfbb93712f13e01ab1c43f48a78f3605ef9db5095e8d19d27",
+    "battle_frontier_mons.h": "557c1a97247cbb84357b99035fb11cf0bfe45abe8393a0992fe8146bfc51f67f",
+    "battle_frontier_mons.h.constants": "00fb47e144978d3a24a304047f5463217ac7b535ee6f8719e2adf47cc592387a",
+    "battle_message.c": "5874441ca8fea30caed82e6762c7a1dca8be9c60c8bf8912b74517d0ef7e0f17"
+  },
+  "instruction": {
+    "opcode": 176,
+    "opcodeHex": "0xb0",
+    "length": 5,
+    "operands": ["failure pointer (u32)"],
+    "handler": "Cmd_trysetspikes",
+    "ownership": "targetSide = BATTLE_OPPOSITE(GetBattlerSide(gBattlerAttacker)); writes gSideStatuses[targetSide] and gSideTimers[targetSide].spikesAmount",
+    "branches": {
+      "amount0": "success: set SPIKES, 0 -> 1, PC += 5",
+      "amount1": "success: set SPIKES, 1 -> 2, PC += 5",
+      "amount2": "success: set SPIKES, 2 -> 3, PC += 5",
+      "amount3": "failure: set attacker ppNotAffectedByPressure and PC = T1_READ_PTR(PC + 1)",
+      "outOfInvariantAmountAbove3": "source tests equality only, therefore increments; normal source writers cannot create this state"
+    },
+    "localRngCalls": 0,
+    "localControllerCalls": 0
+  },
+  "switchIn": {
+    "guard": "not SPIKES_DAMAGED on the entering battler's own side, SPIKES on that same side, not Flying, and ability is not Levitate",
+    "damage": "maxHP / ((5 - spikesAmount) * 2), integer division; coerce 0 to 1",
+    "layers": {"one": "maxHP / 8", "two": "maxHP / 6", "three": "maxHP / 4"},
+    "immunity": ["TYPE_FLYING", "ABILITY_LEVITATE"],
+    "effect": "sets SIDE_STATUS_SPIKES_DAMAGED, clears entering battler Destiny Bond and HITMARKER_DESTINYBOND, pushes cursor, and runs the selector-specific Spikes script",
+    "cleanup": "normal no-effect completion clears SPIKES_DAMAGED; a Spikes faint path clears it in tryfaintmon; SPIKES and spikesAmount persist across turns and Rapid Spin is the source removal that clears both"
+  },
+  "frontier": {
+    "move": {"id": 191, "name": "MOVE_SPIKES", "effect": "EFFECT_SPIKES", "effectId": 112, "pp": 20, "type": "TYPE_GROUND", "target": "MOVE_TARGET_OPPONENTS_FIELD", "priority": 0, "flags": 0},
+    "level50SetEvidence": "battle_frontier_mons.h has MOVE_SPIKES at lines 1482, 2686, and 3379"
+  },
+  "case": {
+    "scenario": "tools/battle-lab/mechanic-spikes-opponent-set-player-switch-off.json",
+    "scenarioSha256": "3e582345baf432a935aa6ed8318bb14dde407cadf1b1506c6c88739a9f8ee425",
+    "repeatability": {"runs": 2, "comparison": "byte-identical full manifest.json", "manifestSha256": "42ce49883bdd9687f7eb4ea76b161846b9f8b8b82de8df8fbcb973f2604c742d"},
+    "captureContract": {"count": 256, "denseEveryFrame": [1002, 1250], "additionalFrames": [0, 50, 250, 700, 950, 1350, 1606]},
+    "builtPartyChecksumsValid": [true, true, true, true, true, true],
+    "observed": {
+      "initial": {"frame": 0, "sha256": "593bed32bf42260e843d0432758fa7794d1ee9e5afc46ce1ceebd67701efcdbe", "rngValue": 919694434, "sideStatuses": [0,0], "player": {"partyIndex":0,"species":213,"hp":95,"maxHp":95,"pp":[40,40,40,40]}, "opponent":{"pp":[20,20,20,20]}},
+      "spikesSet": {"frame": 50, "sha256": "8f4db58da055c56e8d41a39bc871249581880f808121fca890730b3afab566e0", "rngValue": 919694434, "currentMove":191, "sideStatuses":[16,0], "player":{"partyIndex":0,"species":213,"hp":95,"maxHp":95}, "opponent":{"pp":[20,20,20,20]}, "sideConditions":{"player":{"spikes":1},"opponent":{"spikes":0}}},
+      "firstTurnSettled": {"frame": 700, "sha256": "6c6b97652338ab95a0a60cb27cbb1b0a529b576da499ea455022fa5b9998f52e", "rngValue":1250713408, "sideStatuses":[16,0], "player":{"partyIndex":0,"species":213,"hp":95,"maxHp":95,"pp":[39,40,40,40]}, "opponent":{"pp":[20,20,20,20]}, "sideConditions":{"player":{"spikes":1},"opponent":{"spikes":0}}},
+      "switchDataCommitted": {"frame":1065, "sha256":"fc62baf0742cec63ec35246181dc0fb23ee804a01d5c7d7267946dc43e93137b", "rngValue":1250713408, "sideStatuses":[16,0], "player":{"partyIndex":1,"species":111,"hp":155,"maxHp":155,"pp":[35,35,35,35]}, "sideConditions":{"player":{"spikes":1},"opponent":{"spikes":0}}},
+      "spikesDamageFlagged": {"frame":1203, "sha256":"e439cc7e4f9b7ff655540f038a36eb026c0a7cf4cafc29aac07134c5f9493d28", "rngValue":1250713408, "sideStatuses":[528,0], "player":{"partyIndex":1,"species":111,"hp":155,"maxHp":155}, "sideConditions":{"player":{"spikes":1},"opponent":{"spikes":0}}},
+      "spikesDamage": {"frame":1226, "sha256":"c8c9dbf84685cc663d048d93c67a7f5050e174b42ee668ebc9d1507c816e2441", "rngValue":1250713408, "sideStatuses":[528,0], "player":{"partyIndex":1,"species":111,"hp":136,"maxHp":155}, "sideConditions":{"player":{"spikes":1},"opponent":{"spikes":0}}},
+      "repeatSet": {"frame":1350, "sha256":"06cb848edd47545f3bcc4b2e18cdd2a316dfa3387eb69b71a2d7d3134d73368f", "rngValue":1250713408, "currentMove":191, "sideStatuses":[16,0], "player":{"partyIndex":1,"species":111,"hp":136,"maxHp":155}, "opponent":{"pp":[20,19,20,20]}, "sideConditions":{"player":{"spikes":2},"opponent":{"spikes":0}}},
+      "settled": {"frame":1606, "sha256":"d38194c6e948bd804407fe7bf3febfbbc699071c086fbe4cc0fff6c5da010d5f", "rngValue":2319805938, "sideStatuses":[16,0], "player":{"partyIndex":1,"species":111,"hp":136,"maxHp":155,"pp":[35,35,35,35]}, "opponent":{"pp":[20,19,20,20]}, "sideConditions":{"player":{"spikes":2},"opponent":{"spikes":0}}}
+    }
+  },
+  "boundedRemainder": "The public manifest proves one real opponent-set Spikes layer, a controller-selected non-Flying player switch, the 155 -> 136 HP loss (floor(155/8) = 19), and a second real set raising the player-side counter to two. It does not expose script PC/stack, gBattlerAttacker, gSpecialStatuses attacker PP exemption, gSideTimers.spikesAmount directly, hit markers beyond sideStatuses, or per-command controller traffic. Those facts are source-only. Flying and Levitate immunity plus 0/2/3/failure-counter boundaries are source-pinned, not public-ROM cases in this bounded receipt."
+}

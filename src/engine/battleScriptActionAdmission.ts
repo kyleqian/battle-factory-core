@@ -1,5 +1,7 @@
 import type { BattleScriptBattlerId } from "./battleScriptEvents.ts";
 import {
+  BATTLE_SCRIPT_HOLD_EFFECT_CHOICE_BAND,
+  resolveBattleScriptBattlerHoldEffect,
   resolveBattleScriptCurrentMoveEffect,
   resolveBattleScriptCurrentMovePower,
   type BattleScriptRulesContext,
@@ -26,6 +28,7 @@ import {
   BATTLE_SCRIPT_MOVE_RESULT_MISSED,
   BATTLE_SCRIPT_MOVE_NONE,
   BATTLE_SCRIPT_MOVE_BIDE,
+  BATTLE_SCRIPT_MOVE_LIMITATIONS,
   BATTLE_SCRIPT_MOVE_POUND,
   BATTLE_SCRIPT_MOVE_SLEEP_TALK,
   BATTLE_SCRIPT_MOVE_SNORE,
@@ -2431,6 +2434,88 @@ export function scanBattleScriptImprisonedMoves(
     imprisonedMovesCount,
     isImprisoned: imprisonedMovesCount !== 0,
   });
+}
+
+/**
+ * Immutable `CheckMoveLimitations` port (`battle_util.c:1082-1123`).
+ *
+ * The returned low four bits correspond to the four source move slots.
+ * Encore and Choice Band intentionally remain outside the `check` mask,
+ * matching pret's source order and predicates exactly.
+ */
+export function checkBattleScriptMoveLimitations(
+  rulesContext: BattleScriptRulesContext,
+  battler: BattleScriptBattlerId,
+  unusableMoves: number = 0,
+  check: number = BATTLE_SCRIPT_MOVE_LIMITATIONS.MOVE_LIMITATIONS_ALL,
+): number {
+  if (!Number.isInteger(unusableMoves) || unusableMoves < 0 || unusableMoves > 0xff) {
+    throw new Error(`move limitations initial mask must be a u8, got ${unusableMoves}`);
+  }
+  if (!Number.isInteger(check) || check < 0 || check > 0xff) {
+    throw new Error(`move limitations check mask must be a u8, got ${check}`);
+  }
+  const source = rulesContext.battlers[battler];
+  const lastMove = rulesContext.moveHistory.lastMoves[battler]!;
+  const choicedMove = rulesContext.choicedMove[battler]!;
+  const holdEffect = resolveBattleScriptBattlerHoldEffect(rulesContext, battler);
+  let mask = unusableMoves;
+
+  for (let slot = 0; slot < 4; slot += 1) {
+    const move = source.moves[slot]!;
+    const bit = 1 << slot;
+    if (
+      move === BATTLE_SCRIPT_MOVE_NONE
+      && (check & BATTLE_SCRIPT_MOVE_LIMITATIONS.MOVE_LIMITATION_ZEROMOVE) !== 0
+    ) {
+      mask |= bit;
+    }
+    if (
+      source.pp[slot] === 0
+      && (check & BATTLE_SCRIPT_MOVE_LIMITATIONS.MOVE_LIMITATION_PP) !== 0
+    ) {
+      mask |= bit;
+    }
+    if (
+      move === source.disabledMove
+      && (check & BATTLE_SCRIPT_MOVE_LIMITATIONS.MOVE_LIMITATION_DISABLED) !== 0
+    ) {
+      mask |= bit;
+    }
+    if (
+      move === lastMove
+      && (check & BATTLE_SCRIPT_MOVE_LIMITATIONS.MOVE_LIMITATION_TORMENTED) !== 0
+      && (source.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_TORMENT) !== 0
+    ) {
+      mask |= bit;
+    }
+    if (
+      source.tauntTimer !== 0
+      && (check & BATTLE_SCRIPT_MOVE_LIMITATIONS.MOVE_LIMITATION_TAUNT) !== 0
+      && resolveBattleScriptCurrentMovePower(move) === 0
+    ) {
+      mask |= bit;
+    }
+    if (
+      (check & BATTLE_SCRIPT_MOVE_LIMITATIONS.MOVE_LIMITATION_IMPRISON) !== 0
+      && scanBattleScriptImprisonedMoves(rulesContext, battler, move)
+        .imprisonedMovesCount !== 0
+    ) {
+      mask |= bit;
+    }
+    if (source.encoreTimer !== 0 && source.encoredMove !== move) {
+      mask |= bit;
+    }
+    if (
+      holdEffect === BATTLE_SCRIPT_HOLD_EFFECT_CHOICE_BAND
+      && choicedMove !== BATTLE_SCRIPT_MOVE_NONE
+      && choicedMove !== 0xffff
+      && choicedMove !== move
+    ) {
+      mask |= bit;
+    }
+  }
+  return mask & 0xff;
 }
 
 /**

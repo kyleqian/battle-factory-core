@@ -1,0 +1,78 @@
+{
+  "schema": "wish-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "sourceSha256": {
+    "battle_script_commands.c": "e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c",
+    "battle_scripts_1.s": "4ac3e610b68c11ef0f4e4c0fc62ddba7fda5a8400e43705428868978ec7551a6",
+    "battle_script.inc": "0a8e1c3bdf4c49d07b2e09ff8ab524812a5217b9735106e1b79b6be261a6db7e",
+    "battle_script_commands.h": "842cce6dd704b09b24a49abdca67ee7a8062a2e3a465e1b764fc63c0d230580f",
+    "battle.h": "8ef0355f2345592094c82cfde6641644a6b7157012104736416f8c05f34f0685",
+    "battle_util.c": "2ba9ee4efe913effa119c8342281745f481910ca1b20cd76b470673062a45fd5",
+    "battle_message.c": "5874441ca8fea30caed82e6762c7a1dca8be9c60c8bf8912b74517d0ef7e0f17",
+    "battle_moves.h": "8b3d4d143b807807af97ce7288e0cc0ccdd55b6b64ac45824e35a549836b3a0c",
+    "battle_frontier_mons.h": "557c1a97247cbb84357b99035fb11cf0bfe45abe8393a0992fe8146bfc51f67f",
+    "battle_frontier_mons.h.constants": "00fb47e144978d3a24a304047f5463217ac7b535ee6f8719e2adf47cc592387a",
+    "moves.h": "d32746c9ad3ed1bbfbb93712f13e01ab1c43f48a78f3605ef9db5095e8d19d27",
+    "pokemon.h": "e0153a94a2fc0f84e6de372494dfb01e88be4d9cf1cbbeca5e56b8a0b645f7e5",
+    "items.h": "8e9aacc0ffbd41ce0092176a89f624b59be300df60c996d718d61119e747dbd4"
+  },
+  "instruction": {
+    "opcode": 212,
+    "opcodeHex": "0xd4",
+    "length": 6,
+    "operands": [
+      {"width": 1, "encoding": "literal turn selector", "values": {"setup": 0, "heal": 1}},
+      {"width": 4, "encoding": "little-endian relocation pointer", "value": "failure/full-HP script target"}
+    ],
+    "pc": {
+      "setupSuccess": "gBattlescriptCurrInstr += 6",
+      "setupPendingWish": "gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + 2)",
+      "healNeedsHp": "gBattlescriptCurrInstr += 6",
+      "healAtFullHp": "gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + 2)"
+    }
+  },
+  "sourceBehavior": {
+    "setup": {
+      "owner": "gBattlerAttacker positional battler slot",
+      "successPredicate": "gWishFutureKnock.wishCounter[gBattlerAttacker] == 0",
+      "mutations": [
+        "gWishFutureKnock.wishCounter[gBattlerAttacker] = 2",
+        "gWishFutureKnock.wishMonId[gBattlerAttacker] = gBattlerPartyIndexes[gBattlerAttacker]"
+      ],
+      "pendingFailure": "counter already nonzero: effect script branches to BattleScript_ButItFailed after ordinary ppreduce"
+    },
+    "endTurn": "ENDTURN_WISH walks gBattlerByTurnOrder; each nonzero counter at that positional battler slot decrements, resolves only when it becomes zero and that active battler has hp != 0, then assigns gBattlerTarget = gActiveBattler and executes BattleScript_WishComesTrue.",
+    "heal": {
+      "owner": "gBattlerTarget positional battler slot",
+      "nicknamePartyIndex": "gWishFutureKnock.wishMonId[gBattlerTarget] is prepared into gBattleTextBuff1",
+      "moveDamage": "-(floor(gBattleMons[gBattlerTarget].maxHP / 2), with a zero-to-one fallback)",
+      "fullHpFailure": "does not mutate HP; branches to BattleScript_WishButFullHp"
+    },
+    "messages": {
+      "setup": "effect script is silent after normal attack string/animation",
+      "pendingFailure": "BattleScript_ButItFailed prints STRINGID_BUTITFAILED",
+      "heal": "BattleScript_WishComesTrue prints STRINGID_PKMNWISHCAMETRUE then STRINGID_PKMNREGAINEDHEALTH after healthbarupdate/datahpupdate",
+      "fullHp": "BattleScript_WishButFullHp prints STRINGID_PKMNWISHCAMETRUE then STRINGID_PKMNHPFULL"
+    }
+  },
+  "move": {"id": 273, "effect": "EFFECT_WISH", "pp": 10, "target": "MOVE_TARGET_USER", "priority": 0},
+  "frontierCarrier": {"setId": 638, "name": "FRONTIER_MON_ESPEON_3", "species": 196, "moves": [94, 44, 273, 115], "item": 141, "nature": 15, "level": 50},
+  "repeatability": {"runsPerCase": 2, "comparison": "byte-identical full manifest.json", "allMatched": true},
+  "case": {
+    "id": "espeon-takes-damage-wishes-fails-pending-wish-and-heals-on-delay",
+    "scenario": "tools/battle-lab/mechanic-wish-espeon-delayed-heal-off.json",
+    "scenarioSha256": "cb32b65233dc7533fd6a930aa8c703531f36ed3296230f23a4df23612ead7fac",
+    "runManifestSha256": ["b8f3eaeae97fb6090e52ddc15a45a5740664314147190680ce4b5f8e411840bf", "b8f3eaeae97fb6090e52ddc15a45a5740664314147190680ce4b5f8e411840bf"],
+    "builtPartyChecksumsValid": [true, true, true, true, true, true],
+    "captures": [
+      {"frame": 0, "currentMove": 0, "player": {"partyIndex": 0, "hp": 140, "maxHp": 140, "pp": [10, 25, 10, 20]}, "opponent": {"pp": [35, 35, 35, 35]}},
+      {"frame": 200, "currentMove": 33, "player": {"hp": 123, "maxHp": 140, "pp": [10, 25, 10, 20]}, "opponent": {"pp": [35, 34, 35, 35]}},
+      {"frame": 300, "currentMove": 0, "player": {"hp": 123, "maxHp": 140, "pp": [10, 25, 9, 20]}},
+      {"frame": 700, "currentMove": 0, "player": {"hp": 123, "maxHp": 140, "pp": [10, 25, 9, 20]}},
+      {"frame": 900, "currentMove": 273, "player": {"hp": 106, "maxHp": 140, "pp": [10, 25, 9, 20]}, "opponent": {"pp": [35, 34, 35, 34]}},
+      {"frame": 1000, "currentMove": 273, "player": {"hp": 106, "maxHp": 140, "pp": [10, 25, 8, 20]}},
+      {"frame": 1200, "currentMove": 0, "player": {"hp": 140, "maxHp": 140, "pp": [10, 25, 8, 20]}}
+    ]
+  },
+  "boundedRemainder": "The manifest exposes HP, max HP, PP, active party index, controller state, party checksums, RNG, and framebuffer hashes, but not gWishFutureKnock, gBattleMoveDamage, gBattleTextBuff1, decoded battle text, or script PC. Those internals and their branch/message semantics are source-pinned above. The OFF oracle proves real Tackle damage 140→123, a controller-selected Wish PP decrement 10→9, a second pending Wish failure consuming PP 9→8 while HP stays 106, and the delayed max-HP-capped recovery 106→140 (source heal amount is 70, applied recovery is 34). This fixture remains evidence only; production B_SCR_OP_TRYWISH/EFFECT_WISH execution is pinned separately by battleScriptTrywishOpcode.test.ts."
+}

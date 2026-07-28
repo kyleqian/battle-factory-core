@@ -92,6 +92,7 @@ function input(
     battleOutcome: changes.battleOutcome ?? 0,
     currentMove: changes.currentMove ?? 92,
     currentMovePosition: changes.currentMovePosition ?? 0,
+    gBattleEnvironment: changes.gBattleEnvironment ?? 0,
     lastUsedAbility: changes.lastUsedAbility ?? 0,
     moveResultFlags: changes.moveResultFlags ?? 0xf3,
     dmgMultiplier: changes.dmgMultiplier ?? 7,
@@ -178,14 +179,17 @@ describe("source-shaped Battle Script rules context", () => {
       "battleMoveDamage",
       "battleOutcome",
       "battleStructAbsentBattlerFlags",
+      "battleTextBuff1MonNick",
       "battleTopology",
       "battlerByTurnOrder",
       "battlers",
       "bideDmg",
       "bideTarget",
+      "calledMove",
       "changedItems",
       "choicedMove",
       "chosenMove",
+      "chosenMovePositions",
       "critMultiplier",
       "currentMove",
       "currentMoveEffect",
@@ -196,11 +200,17 @@ describe("source-shaped Battle Script rules context", () => {
       "dynamicBasePower",
       "dynamicMoveType",
       "enigmaBerryHoldEffects",
+      "futureSightAttacker",
+      "futureSightCounter",
+      "futureSightDmg",
+      "futureSightMove",
+      "gBattleEnvironment",
       "giveExpState",
       "hitMarker",
       "hpDealt",
       "lastUsedAbility",
       "learnMoveState",
+      "lockedMoves",
       "lvlBoxState",
       "missType",
       "mistTimers",
@@ -214,6 +224,7 @@ describe("source-shaped Battle Script rules context", () => {
       "multiHitStringCounter",
       "multistringChooser",
       "party",
+      "rolloutTimerStartValues",
       "scriptingBattler",
       "scriptingBideDmg",
       "selectorRoles",
@@ -225,6 +236,8 @@ describe("source-shaped Battle Script rules context", () => {
       "twoTurnStringId",
       "weather",
       "weatherTimer",
+      "wishCounter",
+      "wishMonId",
     ]);
     expect(created.battlers).toHaveLength(4);
     expect(Object.isFrozen(created)).toBe(true);
@@ -233,10 +246,15 @@ describe("source-shaped Battle Script rules context", () => {
     expect(Object.isFrozen(created.bideTarget)).toBe(true);
     expect(Object.isFrozen(created.choicedMove)).toBe(true);
     expect(Object.isFrozen(created.changedItems)).toBe(true);
+    expect(Object.isFrozen(created.chosenMovePositions)).toBe(true);
+    expect(Object.isFrozen(created.lockedMoves)).toBe(true);
+    expect(Object.isFrozen(created.rolloutTimerStartValues)).toBe(true);
     expect(Object.isFrozen(created.enigmaBerryHoldEffects)).toBe(true);
     expect(Object.isFrozen(created.moveHistory)).toBe(true);
     expect(Object.isFrozen(created.battleTopology)).toBe(true);
     expect(Object.isFrozen(created.battleTopology.battlerPositions)).toBe(true);
+    expect(Object.isFrozen(created.wishCounter)).toBe(true);
+    expect(Object.isFrozen(created.wishMonId)).toBe(true);
     expect(Object.isFrozen(created.selectorRoles)).toBe(true);
     expect(created.battlers.every(Object.isFrozen)).toBe(true);
     expect(created.battlers.every((value) => Object.isFrozen(value.pp))).toBe(true);
@@ -255,6 +273,8 @@ describe("source-shaped Battle Script rules context", () => {
       { atkCancelerTracker: 256 },
       { currentMove: 0x1_0000 },
       { currentMovePosition: 4 },
+      { gBattleEnvironment: -1 },
+      { gBattleEnvironment: 256 },
       { lastUsedAbility: 256 },
       { moveResultFlags: 256 },
       { dmgMultiplier: -1 },
@@ -449,17 +469,17 @@ describe("source-shaped Battle Script rules context", () => {
 });
 
 describe("production status rules handler and execution seam", () => {
-  it("composes all 139 source-safe controls, source, multi-hit, cleanup, SETBYTE, BICBYTE, attackcanceler, hit-chain, move-end, jumpifbyte, jumpifword, jumpifhalfword, jumpifstatus3condition, orword, openpartyscreen, switchin, getexp, checkteamslost, statbuffchange, set-side-status, set-weather, damaging-weather, trycastformdatachange, ingrain/leechseed/wrap, removeitem, status-primary (SETEFFECTPRIMARY/JUMPIFSTATUS/JUMPIFTYPE/JUMPIFSIDEAFFECTING/JUMPIFCANTMAKEASLEEP, docs/status-cluster-ground-truth.md), fixed-damage/TYPECALC2 (DMGTOLEVEL/PSYWAVEDAMAGEEFFECT/TYPECALC2/REMOVELIGHTSCREENREFLECT, docs/fixed-damage-cluster-ground-truth.md), Counter/Mirror Coat (COUNTERDAMAGECALCULATOR/MIRRORCOATDAMAGECALCULATOR, docs/counter-retaliation-design.md), setyawn (SETYAWN, docs/yawn-thrash-endturn-design.md §1a), confuseifrepeatingattackends (CONFUSEIFREPEATINGATTACKENDS, docs/yawn-thrash-endturn-design.md §3, Rung 4), target-iteration (JUMPIFNEXTTARGETVALID/SELECTFIRSTVALIDTARGET, executable-frontier census's EFFECT_EARTHQUAKE registration), setprotectlike (SETPROTECTLIKE, EFFECT_PROTECT/EFFECT_ENDURE registration), trysetrest (TRYSETREST, EFFECT_REST registration), negativedamage (NEGATIVEDAMAGE, EFFECT_ABSORB/EFFECT_DREAM_EATER registration), jumpifstat (JUMPIFSTAT), playstatchangeanimation (PLAYSTATCHANGEANIMATION, EFFECT_TICKLE/EFFECT_COSMIC_POWER/EFFECT_BULK_UP/EFFECT_CALM_MIND/EFFECT_DRAGON_DANCE registration), tryinfatuating (TRYINFATUATING, EFFECT_ATTRACT registration), jumpifconfusedandstatmaxed (JUMPIFCONFUSEDANDSTATMAXED, EFFECT_SWAGGER/EFFECT_FLATTER registration), tryhealhalfhealth (TRYHEALHALFHEALTH, EFFECT_RESTORE_HP/EFFECT_SOFTBOILED registration), tryKO (TRYKO, EFFECT_OHKO registration), trysetdestinybondtohappen (TRYSETDESTINYBONDTOHAPPEN, EFFECT_OHKO registration), initmultihitstring/jumpifhasnohp (INITMULTIHITSTRING/JUMPIFHASNOHP, docs/roar-multihit-registration-scout.md §4 rungs 2-3), forcerandomswitch/switchoutabilities/returntoball/finishaction (docs/roar-multihit-registration-scout.md §4 rungs 10-14, EFFECT_ROAR registration), tryexplosion/setatkhptozero (EFFECT_EXPLOSION registration, executable-frontier census's EXPLOSION set), clearstatusfromeffect/setsemiinvulnerablebit/clearsemiinvulnerablebit (docs/semi-invulnerable-registration-scout.md §5 rungs 6-7, EFFECT_SEMI_INVULNERABLE registration), jumpifnotfirstturn/jumpifabilitypresent/recoverbasedonsunlight (EFFECT_FAKE_OUT/EFFECT_SOLAR_BEAM/EFFECT_MORNING_SUN+SYNTHESIS+MOONLIGHT registration), jumpiftype2/cursetarget (EFFECT_CURSE registration), remaininghptopower (EFFECT_FLAIL registration), friendshiptodamagecalculation (EFFECT_RETURN/EFFECT_FRUSTRATION registration), copyfoestats (EFFECT_PSYCH_UP registration), and jumpifcantswitch (EFFECT_BATON_PASS registration) handlers once", () => {
+  it("composes all 164 source-safe handlers, including Low Kick, Magic Coat, Revenge, Foresight, Taunt, Torment, IncrementGameStat, Refresh, Helping Hand, and Skill Swap, once", () => {
     const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts());
     expect(Object.keys(handlers).map(Number).sort((a, b) => a - b)).toEqual([
-      0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12,
+      0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
       13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 24, 25, 26, 27, 28,
       29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43,
       45, 46, 47, 49, 50, 51, 53, 54, 56, 57, 58, 60,
       61, 62, 63, 65, 66, 67, 69, 70, 71, 72, 73, 74, 76, 77, 78, 79, 80, 81,
-      82, 83, 84, 85, 86, 88, 92, 97, 98, 100, 101, 102, 104,
+      82, 83, 84, 85, 86, 88, 92, 96, 97, 98, 99, 100, 101, 102, 104,
       105, 106, 111, 115, 118, 119, 120, 121, 122, 123, 125, 126, 127, 128, 129, 130, 131, 132, 136, 137, 140, 141, 142, 143, 146, 147,
-      149, 150, 151, 152, 153, 159, 160, 161, 162, 171, 172, 175, 180, 182, 184, 187, 189, 192, 194, 197, 198, 200, 213, 215, 216, 226, 227, 231, 238, 246, 248,
+      149, 150, 151, 152, 153, 156, 159, 160, 161, 162, 163, 169, 170, 171, 172, 175, 177, 179, 180, 181, 182, 184, 187, 189, 191, 192, 194, 195, 197, 198, 199, 200, 202, 205, 206, 207, 208, 209, 212, 213, 214, 215, 216, 218, 221, 223, 226, 227, 228, 231, 238, 246, 248,
     ]);
   });
 

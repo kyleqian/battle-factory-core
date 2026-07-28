@@ -1,0 +1,73 @@
+{
+  "schema": "low-kick-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "sourceSha256": {
+    "battle_script_commands.c": "e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c",
+    "battle_scripts_1.s": "4ac3e610b68c11ef0f4e4c0fc62ddba7fda5a8400e43705428868978ec7551a6",
+    "battle_script.inc": "0a8e1c3bdf4c49d07b2e09ff8ab524812a5217b9735106e1b79b6be261a6db7e",
+    "battle_script_commands.h": "842cce6dd704b09b24a49abdca67ee7a8062a2e3a465e1b764fc63c0d230580f",
+    "battle_move_effects.h": "32192c0d0014b5a63edb5b34b8d8475739891eaee66dc610a45d30574879b00e",
+    "battle_moves.h": "8b3d4d143b807807af97ce7288e0cc0ccdd55b6b64ac45824e35a549836b3a0c",
+    "battle.h": "8ef0355f2345592094c82cfde6641644a6b7157012104736416f8c05f34f0685",
+    "battle_util.c": "2ba9ee4efe913effa119c8342281745f481910ca1b20cd76b470673062a45fd5",
+    "pokedex.c": "890b3a29470b37abfa7e890b90da4e17b7ff3f08e332aa2fd7aa6d982342b512",
+    "pokedex.h": "9f4d469d925c5230221d12316603f0c094801e394b7e3dd4a6a03cb441af8914",
+    "pokedex_entries.h": "b830c2dc436790a4d9bacb4794753af689f059000d13004b8e69cfa36907d4ae",
+    "moves.h": "d32746c9ad3ed1bbfbb93712f13e01ab1c43f48a78f3605ef9db5095e8d19d27"
+  },
+  "instruction": {
+    "opcode": 221,
+    "opcodeHex": "0xdd",
+    "length": 1,
+    "operands": [],
+    "target": "gBattlerTarget",
+    "weightLookup": "GetPokedexHeightWeight(SpeciesToNationalPokedexNum(gBattleMons[gBattlerTarget].species), 1)",
+    "destination": "gDynamicBasePower",
+    "pc": "gBattlescriptCurrInstr++",
+    "localRngCalls": 0,
+    "controllerEmissions": 0
+  },
+  "brackets": [
+    {"weightHectograms": "0..99", "weightKilograms": "0.0..9.9", "power": 20},
+    {"weightHectograms": "100..249", "weightKilograms": "10.0..24.9", "power": 40},
+    {"weightHectograms": "250..499", "weightKilograms": "25.0..49.9", "power": 60},
+    {"weightHectograms": "500..999", "weightKilograms": "50.0..99.9", "power": 80},
+    {"weightHectograms": "1000..1999", "weightKilograms": "100.0..199.9", "power": 100},
+    {"weightHectograms": "2000+", "weightKilograms": "200.0+", "power": 120}
+  ],
+  "effect": {
+    "move": {"id": 67, "name": "MOVE_LOW_KICK", "effect": "EFFECT_LOW_KICK", "storedPower": 1, "type": "TYPE_FIGHTING", "accuracy": 100, "pp": 20, "target": "MOVE_TARGET_SELECTED", "priority": 0},
+    "script": ["attackcanceler", "attackstring", "ppreduce", "weightdamagecalculation", "accuracycheck BattleScript_MoveMissedPause, ACC_CURR_MOVE", "goto BattleScript_HitFromCritCalc"],
+    "damageUse": "Cmd_damagecalc passes gDynamicBasePower to CalculateBaseDamage, then applies gCritMultiplier and gBattleScripting.dmgMultiplier; HandleAction_ActionFinished resets gDynamicBasePower to 0.",
+    "failureAndImmunityBoundary": "The opcode does not inspect accuracy, type effectiveness, abilities, Protect, substitute, or hit result. It runs after attackcanceler/attackstring/ppreduce and before accuracycheck; those failure/immunity decisions and their controller/message/RNG work belong to their other script commands."
+  },
+  "cases": [
+    {
+      "name": "Chansey, 346 hg, 60 power",
+      "scenario": "tools/battle-lab/mechanic-low-kick-machoke-chansey-off.json",
+      "scenarioSha256": "26a8aff46ba907cec9cc3aa8477faa6a92000cc42bde1c80ea00f91278e7b180",
+      "repeatability": {"runs": 2, "comparison": "byte-identical full manifest.json", "manifestSha256": "d5b814edeeb1665222a3dd56770ca7616675f223339a953531ed8fbe6d6649e5"},
+      "weight": {"species": 113, "nationalDex": 113, "hectograms": 346, "power": 60},
+      "observed": {
+        "initial": {"frame": 0, "sha256": "58ebfedc785ad9b4dcbb306dc3b29bd9db668864dbcb5860b1a5bc033a08415a", "playerPp": 20, "opponentHp": 357, "opponentPp": 40},
+        "opponentSplash": {"frame": 75, "sha256": "2368daff70fee5935906ff8f747bf5a18b90be193dfdcc2f450a148ba2ed98b3", "playerPp": 20, "opponentHp": 357, "opponentPp": 39},
+        "lowKickPp": {"frame": 225, "sha256": "3b6b513b6e0f57f2aedba84252a04cadf8d5c26d1394e4bf611fb8e25c2c5124", "playerPp": 19, "opponentHp": 357, "opponentPp": 39},
+        "damageAndMessage": {"frame": 550, "sha256": "66670a5d73af621f34a0e3f2c7dcd8634e2cb7209e9d0d958cd77e1331789ec8", "playerPp": 19, "opponentHp": 131, "opponentPp": 39, "message": "It's super effective!"}
+      }
+    },
+    {
+      "name": "Snorlax, 4600 hg, 120 power",
+      "scenario": "tools/battle-lab/mechanic-low-kick-machoke-snorlax-off.json",
+      "scenarioSha256": "5644b6da4a10f76d97ba24751d3c753a0a82f5da3db39101ded2a75ecaa92b2d",
+      "repeatability": {"runs": 2, "comparison": "byte-identical full manifest.json", "manifestSha256": "037869eb267f5234a19045d7818565ce6b01eb862d6f27edb08cedd3b6604b94"},
+      "weight": {"species": 143, "nationalDex": 143, "hectograms": 4600, "power": 120},
+      "observed": {
+        "initial": {"frame": 0, "sha256": "c623b45d2e71c8749cc3ab2f9bcde8ce5e2d127ea9cd820ac53a297d348ff589", "playerPp": 20, "opponentHp": 267, "opponentPp": 40},
+        "lowKickPp": {"frame": 75, "sha256": "6e47efc132857a70797387fa9117bc09e9387b348194fd077a39e40e90a16e4a", "playerPp": 19, "opponentHp": 267, "opponentPp": 40},
+        "damageAndMessage": {"frame": 400, "sha256": "385b2532f222a225882e6fdc7aa14d4eb0e34d1ce1df820b3ab6347593eb5774", "playerPp": 19, "opponentHp": 47, "opponentPp": 40, "message": "It's super effective!"},
+        "opponentSplash": {"frame": 500, "sha256": "6517f401a58624e12d8c11fded8d7e6b4de61a94df7f5cf7fc7b86709707f548", "playerPp": 19, "opponentHp": 47, "opponentPp": 39}
+      }
+    }
+  ],
+  "boundedRemainder": "These public snapshots prove two legal target-weight cases with real PP spending, HP changes, and the visible effectiveness message. They do not expose gBattlescriptCurrInstr, gBattlerTarget, gDynamicBasePower, damage-calculation intermediates, type/immunity predicates, or controller/RNG causality. The full six-bracket lookup, strict boundaries, target selector, PC behavior, reset lifetime, and all failure/immunity ordering are source-pinned."
+}

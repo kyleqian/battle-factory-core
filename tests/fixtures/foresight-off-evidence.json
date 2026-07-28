@@ -1,0 +1,55 @@
+{
+  "schema": "foresight-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "instruction": {
+    "opcode": 177,
+    "opcodeHex": "0xb1",
+    "length": 1,
+    "operands": [],
+    "pc": {"success": "gBattlescriptCurrInstr++"},
+    "owner": "gBattleMons[gBattlerTarget].status2",
+    "bit": {"name": "STATUS2_FORESIGHT", "value": "1 << 29", "unsignedValue": 536870912},
+    "duplicate": {"failureBranch": false, "behavior": "unconditional OR leaves an already-set bit set and advances one byte"},
+    "localRngCalls": 0,
+    "localControllerCalls": 0
+  },
+  "sourceSha256": {
+    "battle_script_commands.c": "e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c",
+    "battle_scripts_1.s": "4ac3e610b68c11ef0f4e4c0fc62ddba7fda5a8400e43705428868978ec7551a6",
+    "battle_script.inc": "0a8e1c3bdf4c49d07b2e09ff8ab524812a5217b9735106e1b79b6be261a6db7e",
+    "battle_script_commands.h": "842cce6dd704b09b24a49abdca67ee7a8062a2e3a465e1b764fc63c0d230580f",
+    "battle.h": "bba2f9d9b3d98fa01b5f0a8f7dede9f2f0be5617c735242b741a7e0c8e4a5d1e",
+    "battle_move_effects.h": "32192c0d0014b5a63edb5b34b8d8475739891eaee66dc610a45d30574879b00e",
+    "battle_main.c": "ee79b86ff0f681ab783b363135fd84d050e7123bea2a77c5530f2c7ddc8b8408",
+    "battle_moves.h": "8b3d4d143b807807af97ce7288e0cc0ccdd55b6b64ac45824e35a549836b3a0c",
+    "battle_frontier_mons.h": "557c1a97247cbb84357b99035fb11cf0bfe45abe8393a0992fe8146bfc51f67f",
+    "battle_frontier_mons.h.constants": "00fb47e144978d3a24a304047f5463217ac7b535ee6f8719e2adf47cc592387a",
+    "battle_factory.c": "7762bf366045ed91a3c280a7e4d20ccc9df9bba305c529ad6b24df2250a072f6"
+  },
+  "effect": {
+    "id": 113,
+    "script": ["attackcanceler", "accuracycheck BattleScript_PrintMoveMissed, ACC_CURR_MOVE", "attackstring", "ppreduce", "setforesight", "attackanimation", "waitanimation", "printstring STRINGID_PKMNIDENTIFIED", "waitmessage B_WAIT_TIME_LONG", "goto BattleScript_MoveEnd"],
+    "moves": [{"id":193,"name":"MOVE_FORESIGHT","power":0,"type":"TYPE_NORMAL","accuracy":100,"pp":40,"target":"MOVE_TARGET_SELECTED","priority":0},{"id":316,"name":"MOVE_ODOR_SLEUTH","power":0,"type":"TYPE_NORMAL","accuracy":100,"pp":40,"target":"MOVE_TARGET_SELECTED","priority":0}],
+    "ppAndRng": "The script puts ppreduce before the one-byte setter. Cmd_setforesight has neither Random() nor a controller emission; the scenario does not attribute whole-turn RNG changes to that command."
+  },
+  "downstream": {
+    "accuracy": "accuracycheck ignores target evasion when target status2 has STATUS2_FORESIGHT, retaining attacker accuracy stage alone.",
+    "immunity": "The type chart's TYPE_FORESIGHT sentinel precedes Normal→Ghost and Fighting→Ghost no-effect rows; five command consumers stop at it only when the target/defender has STATUS2_FORESIGHT.",
+    "lifetime": "Normal switch and faint zero active status2. Baton Pass masks status2 to a list that excludes STATUS2_FORESIGHT."
+  },
+  "frontierCarrier": {"setId": 178, "name": "FRONTIER_MON_MACHOKE_1", "level50Eligible": true, "species": 67, "moves": [67,157,193,184], "itemTableId": "BATTLE_FRONTIER_ITEM_FOCUS_BAND", "nature": 3, "evs": {"hp":255,"attack":0,"defense":0,"speed":0,"spAttack":0,"spDefense":255}},
+  "case": {
+    "scenario": "tools/battle-lab/mechanic-foresight-machoke-haunter-off.json",
+    "scenarioSha256": "5c10cc955440e0e20ded476b6320f1c33072cc5845c86ce23b602b780653d5c5",
+    "repeatability": {"runs":2,"comparison":"byte-identical full manifest.json","manifestSha256":"2c4a774ee6501f78446ff223a91ee808bba82fcda6bf19dd0dcee6d05c181864"},
+    "builtPartyChecksumsValid": [true,true,true,true,true,true],
+    "observed": {
+      "initial": {"frame":0,"sha256":"43418788986354a37ae5eab07bbd35679b1a0759c63976d62916f39f3add8b9b","rngValue":919694434,"currentMove":0,"player":{"hp":155,"pp":[20,10,40,10]},"opponent":{"hp":152,"status2":0}},
+      "preForesightLowKickNoEffect": {"frame":225,"sha256":"2e05cb75b79c43cbb940207e3d63d15d7e83e0518a2f4b4d0af3651b2ccd142d","rngValue":3690816045,"currentMove":67,"player":{"pp":[19,10,40,10]},"opponent":{"hp":152,"status2":0}},
+      "foresightSet": {"frame":900,"sha256":"f01cc1c198baf8d540196bead670b1a56c88745cc190795b406bb75feaaa4c43","rngValue":1941898439,"currentMove":193,"player":{"pp":[19,10,39,10]},"opponent":{"hp":152,"status2":536870912}},
+      "postForesightLowKickDamage": {"frame":1650,"sha256":"c36660d06aee2325e7f84d2411e91d968d31dd83961723f3d273ef01fbfd8159","rngValue":1636055286,"currentMove":67,"player":{"pp":[18,10,39,10]},"opponent":{"hp":141,"status2":536870912}},
+      "repeatForesightNoFailure": {"frame":2225,"sha256":"ecdedd651c5f95cc654ebadde54ea5d52e44e9496d0423657ac694442d9c2e78","rngValue":1038309310,"currentMove":193,"player":{"pp":[18,10,38,10]},"opponent":{"hp":141,"status2":536870912}}
+    }
+  },
+  "boundedRemainder": "The OFF manifest publicly exposes active move, PP, HP, status2, RNG snapshots, controller flags, framebuffer hashes, and complete-party checksums. It directly shows a Normal/Fighting target's status2 bit becoming 536870912, the initial Low Kick doing no HP damage, the post-Foresight Low Kick reducing Haunter HP 152→141, and a repeat Foresight spending PP while the bit stays set. It cannot expose gBattlescriptCurrInstr, gBattlerTarget, exact result/message IDs, move-result flags, hidden action selection, or which in-turn operation advanced RNG. Opcode length, unconditional duplicate semantics (there is no duplicate-failure pointer), command-local RNG/controller absence, source type-chart/accuracy consumers, and switch/faint/Baton-Pass clearing are source-only claims. This is evidence only and adds no production registration."
+}

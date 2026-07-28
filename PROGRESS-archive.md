@@ -1,4 +1,1022 @@
 ---
+## 595 — [BOUNDED MAIN WORKER 2026-07-28 ~05:17] Magic Coat executes through shared reflection
+
+- **State:** committed `eea67d6` + `df318e2` + `ab50198`; tree green at
+  **356 files / 4158 tests**, focused opcode/canceler/full-turn/rules/ratchet
+  coverage **58/58**, and production build. OFF oracle info, census
+  regeneration, all **42/42** checks, ratchets **6/6**, and `git diff
+  --check` pass. Census is exactly **155/214 effects, 284/355 moves,
+  232/276 Factory-L50 distinct, 2753/2957 weighted**.
+- **Did:** globally registered five-byte `0xdf` with its exact failure
+  pointer. It retargets attacker→self and sets attacker-owned
+  `ppNotAffectedByPressure`; last action jumps without arming, otherwise it
+  sets the existing `bounceMove` bit, including repeated arms with no guard.
+  The shared attack canceler now performs the source Pressure PP delegation,
+  clears the target-owned arm, executes `BattleScript_MagicCoatBounce`, and
+  uses the existing `VARIOUS_SET_MAGIC_COAT_TARGET`/Follow Me retarget path.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next shared registration target; do not widen the generic
+  controller or resume the retired canonical Battle-2 march.
+- **Notes:** handler inventory **162→163**. Generic full-turn Spoink Magic
+  Coat→Onix Tail Whip proves exact PP/message/stat-event order, only Onix
+  Defense **6→5**, and shared action/end-turn cleanup with no active-battler
+  flag leak. The attack-canceler unsupported barrier count deliberately
+  shrank **5→4**; no unsupported barrier was added. No recording import,
+  controller widening, RNG, private handler, presentation/tick branch, issue
+  removal, or DEFERRED item.
+
+---
+## 594 — [SUPERVISOR VERIFY 2026-07-28 ~05:06] Revenge accepted; Magic Coat evidence folded
+
+- **State:** reviewed union green at **354 files / 4153 tests** and focused
+  **35/35**; production build, both-oracle info, census regeneration,
+  freshness/ratchets **15/15**, and `git diff --check` pass. Census is exactly
+  **154/214 effects, 283/355 moves, 231/276 Factory-L50 distinct, 2750/2957
+  weighted**, all **42/42**.
+- **Did:** accepted global Revenge `0xd6`, complete predicate matrix, and
+  shared receipt/damage/cleanup full-turn proof after source/diff review.
+  Folded Magic Coat source/OFF evidence and independently replayed exact
+  manifest `5b737f68…0a303870`: Spoink spends Magic Coat PP, Onix spends Tail
+  Whip PP, and only Onix's public Defense falls **6→5**, distinguishing the
+  real bounce from a no-op.
+- **Next:** register five-byte `B_SCR_OP_TRYSETMAGICCOAT` globally through
+  the existing ProtectStruct `bounceMove` and attack-canceler retarget seam.
+  Prove last-action failure, non-last arm (without a duplicate guard),
+  Pressure exemption ownership, shared reflected Tail Whip behavior, and
+  turn cleanup. Expected census:
+  **155/214, 284/355, 232/276, 2753/2957**.
+- **Notes:** handler inventory is **162**; hidden bounce flags, PC/stack,
+  attacker-target swaps, and Pressure helper causality remain source-only.
+  No unsupported/import ratchet, recording import, private handler,
+  controller widening, animation/presentation/tick branch, issue removal,
+  DEFERRED item, or oracle lifecycle action. Animation branch remains
+  intentionally unmerged after its post-orient advance.
+
+---
+## 593 — [BOUNDED MAIN WORKER 2026-07-28 ~05:02] Revenge executes through shared receipts
+
+- **State:** committed `0255aba` + `25bd18b` + `f2be703`; tree green at
+  **353 files / 4150 tests**, focused opcode/full-turn/rules/ratchet coverage
+  **35/35**, and production build. Both oracle infos, census regeneration,
+  all **42/42** checks, ratchets **6/6**, and `git diff --check` pass. Census
+  is exactly **154/214 effects, 283/355 moves, 231/276 Factory-L50 distinct,
+  2750/2957 weighted**.
+- **Did:** globally registered operand-free one-byte `0xd6`. The attacker-
+  owned physical/special receipt predicate compares each nonzero receipt's
+  owner to the current target; success writes exactly `dmgMultiplier=2`,
+  failure preserves arbitrary incoming multipliers, and both paths advance
+  one byte with no local RNG, controller, or message work. The complete
+  matrix covers zero, mismatches, physical, special, both, mixed owners, and
+  opposite target.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next shared registration target; do not widen the generic
+  seven-battle controller or extend the retired canonical Battle-2 march.
+- **Notes:** handler inventory **161→162**. A generic Factory full-turn proof
+  has faster real Tackle produce the existing receipt, Revenge consume it
+  through the common doubled damage/PP/message path, shared turn cleanup zero
+  all four receipt fields, and a later Splash→Revenge action reset to
+  multiplier 1 with no leak. No unsupported/import ratchet change, recording
+  import, private handler, controller widening, animation/presentation/tick
+  branch, issue removal, DEFERRED item, or oracle lifecycle action.
+
+---
+## 592 — [SUPERVISOR VERIFY 2026-07-28 ~04:56] Foresight accepted; Revenge evidence folded
+
+- **State:** reviewed union green at **351 files / 4139 tests** and focused
+  **275/275**; production build, both-oracle info, census regeneration,
+  freshness/ratchets **15/15**, and `git diff --check` pass. Census is exactly
+  **153/214 effects, 282/355 moves, 230/276 Factory-L50 distinct, 2747/2957
+  weighted**, all **42/42**.
+- **Did:** accepted global Foresight `0xb1` and its shared accuracy/type/full-
+  turn proof after source/diff review, retaining Low Kick's independent weight
+  barrier. Folded Revenge source/OFF evidence and independently replayed exact
+  manifest `a52074df…597dd64`: real Tackle reduces Machop **145→136** before
+  Revenge spends PP, then Chansey visibly falls **325→45**; ProtectStruct
+  history and multiplier causality remain source-only.
+- **Next:** register operand-free
+  `B_SCR_OP_DOUBLEDAMAGEDEALTIFDAMAGED` globally. Reuse the modeled
+  per-turn physical/special ProtectStruct receipts, exact matching-target
+  predicate, per-action multiplier reset, shared damage consumer, and turn
+  cleanup. Expected census:
+  **154/214, 283/355, 231/276, 2750/2957**.
+- **Notes:** handler inventory is **161**; Revenge's undamaged no-double path
+  needs a Tier-1 matrix even though the public receipt stages only the damaged
+  path. No unsupported/import ratchet, recording import, private handler,
+  controller widening, animation/presentation/tick branch, issue removal,
+  DEFERRED item, or oracle lifecycle action. Animation branch remains
+  intentionally unmerged after its post-orient advance.
+
+---
+## 591 — [BOUNDED MAIN WORKER 2026-07-28 ~04:53] Foresight executes globally; Low Kick entry remains source-bounded
+
+- **State:** committed `d2c651e` + `49da21b`; tree green at **350 files /
+  4136 tests**, focused Foresight/consumer/ratchet coverage **286/286**, and
+  production build. Both oracle infos, census regeneration/freshness, all
+  **42/42** checks, ratchets **6/6**, and `git diff --check` pass. Census is
+  exactly **153/214 effects, 282/355 moves, 230/276 Factory-L50 distinct,
+  2747/2957 weighted**.
+- **Did:** globally registered operand-free one-byte `0xb1`. It always ORs
+  target-owned `STATUS2_FORESIGHT`, advances one byte, and repeated use is
+  successful/idempotent with zero local RNG, controller, or message work;
+  non-target battlers and unrelated target fields stay immutable. Pinned the
+  existing shared accuracy/evasion and Ghost-immunity consumers. A generic
+  full-turn Factory scenario proves pre-Foresight immunity, PP→identified
+  message/status order, post-Foresight damage, and repeat success with no
+  private/controller path.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next shared registration target; do not widen the generic
+  seven-battle controller or extend the retired canonical Battle-2 march.
+- **Notes:** handler inventory **160→161**. The full-turn receipt uses the
+  already-executable common hit script; Low Kick itself is pinned at the
+  shared Fighting/Ghost type consumer but its full entry still honestly
+  barriers on separate unregistered `B_SCR_OP_WEIGHTDAMAGECALCULATION`.
+  Registering that opcode would exceed this one-opcode scope and change the
+  required census. Switch/faint/Baton-Pass clearing remains source-bounded.
+  No unsupported/import ratchet change, recording import, private handler,
+  animation/presentation/tick branch, issue removal, DEFERRED item, or oracle
+  lifecycle action.
+
+---
+## 590 — [SUPERVISOR VERIFY 2026-07-28 ~04:45] Taunt accepted; Foresight evidence folded
+
+- **State:** reviewed union green at **348 files / 4130 tests** and focused
+  **85/85**; production build, both-oracle info, census regeneration,
+  freshness/ratchets **15/15**, and `git diff --check` pass. Census is exactly
+  **152/214 effects, 280/355 moves, 229/276 Factory-L50 distinct, 2744/2957
+  weighted**, all **42/42**.
+- **Did:** accepted global Taunt `0xd0`, functional-timer representation,
+  end-turn expiry, and generic Factory admission/canceler proof after
+  source/diff review. Folded Foresight source/OFF evidence and independently
+  replayed exact manifest `2c4a774e…05c181864`: Low Kick is immune before
+  Foresight, then reduces Haunter **152→141** after the exposed target bit is
+  set; repeat Foresight is source-confirmed idempotent success, not failure.
+- **Next:** register operand-free `B_SCR_OP_SETFORESIGHT` globally. Prove
+  unconditional target-owned `STATUS2_FORESIGHT`, repeat success, zero local
+  RNG/controller/message work, and the already-shared accuracy/type consumers
+  through a full-turn pre/post Ghost-immunity scenario. Expected census:
+  **153/214, 282/355, 230/276, 2747/2957**.
+- **Notes:** handler inventory is **160**; Foresight switch/faint/Baton-Pass
+  clearing remains source-bounded while the setter and public immunity window
+  are exact. No unsupported/import ratchet, recording import, private handler,
+  controller widening, animation/presentation/tick branch, issue removal,
+  DEFERRED item, or oracle lifecycle action. Animation branch advanced after
+  orient and remains intentionally unmerged until a future orient.
+
+---
+## 589 — [BOUNDED MAIN WORKER 2026-07-28 ~04:42] Taunt executes and expires through shared mechanics
+
+- **State:** committed `22c5095` + `11c0d5a` + `18d50ec`; tree green at
+  **347 files / 4127 tests**, focused cross-layer Taunt coverage **96/96**,
+  ratchets **6/6**, and production build. Both oracle infos, census
+  regeneration/freshness, all **42/42** checks, and `git diff --check` pass.
+  Census is exactly **152/214 effects, 280/355 moves, 229/276 Factory-L50
+  distinct, 2744/2957 weighted**.
+- **Did:** globally registered five-byte pointer opcode `0xd0`; success writes
+  target-owned functional `tauntTimer=2` and falls through, while any nonzero
+  timer jumps to duplicate failure unchanged. Both paths own zero local RNG,
+  controller, or message work. Replaced `ENDTURN_TAUNT`'s case barrier with
+  one source-ordered nonzero decrement per present battler (**2→1→0**) and no
+  event/controller/RNG work. A shared full-turn Factory scenario proves
+  Taunt PP→success-message order, the target's already-collected Splash
+  rejected by the existing attack canceler without PP spend, next-boundary
+  Splash rejection by the existing limitation/admission mask at timer 1,
+  and restored admissibility after expiry.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next shared registration target; do not widen the generic
+  singles controller or extend the retired canonical Battle-2 march.
+- **Notes:** handler inventory **159→160**. Full pinned-tree usage inspection
+  found `tauntTimer2` written only by `Cmd_settaunt` and never read or
+  decremented; it is intentionally not represented, avoiding a fictitious
+  second functional lifetime. No unsupported/import ratchet change,
+  recording import, private handler, animation/presentation/tick branch,
+  issue removal, DEFERRED item, or oracle lifecycle action.
+
+---
+## 588 — [SUPERVISOR VERIFY 2026-07-28 ~04:29] IncrementGameStat accepted; Perish Song evidence folded
+
+- **State:** reviewed union green at **345 files / 4118 tests** and focused
+  **47/47**; production build, both-oracle info, census regeneration, ratchets
+  **6/6**, and `git diff --check` pass. Census is exactly **151/214 effects,
+  279/355 moves, 228/276 Factory-L50 distinct, 2742/2957 weighted**, all
+  **42/42**.
+- **Did:** accepted global IncrementGameStat `0x60` plus the source-required
+  shared 25%-recoil effect after source/diff review: save/meta ownership stays
+  outside battle and Factory state, Splash ordering is typed, and forced
+  Struggle now completes the common hit/recoil path. Folded independently
+  replayed Perish Song source/OFF evidence (`e0f1d6d6…93c6a61`): the public
+  receipt pins the observed shared countdown only; immunity, switching,
+  terminal faint, and Baton Pass remain source-bounded.
+- **Next:** register `B_SCR_OP_SETTAUNT` globally from accepted evidence and
+  remove the generic end-turn Taunt case barrier. Preserve exact duplicate
+  failure, target timer **2**, shared status-move admission/attack-canceler
+  paths, and per-battler end-turn decrement without widening the singles
+  controller. Expected census:
+  **152/214, 280/355, 229/276, 2744/2957**.
+- **Notes:** handler inventory is **159**; the source-only `tauntTimer2` mirror
+  is not consulted by Emerald end-turn/action logic and must not create a
+  second controller timer. No unsupported/import ratchet, recording import,
+  animation/presentation/tick branch, issue removal, DEFERRED item, or oracle
+  lifecycle action. Animation branch has advanced since orient and was not
+  folded mid-session.
+
+---
+## 587 — [BOUNDED MAIN WORKER 2026-07-28 ~04:25] IncrementGameStat executes through the save/meta seam
+
+- **State:** committed `795366f`; tree green at **344 files / 4115 tests**,
+  focused opcode/continuation coverage **305/305**, ratchets **6/6**, and
+  production build. Both oracle infos, handler/program freshness, census
+  regeneration, and `git diff --check` pass. Census is exactly **151/214
+  effects, 279/355 moves, 228/276 Factory-L50 distinct, 2742/2957 weighted**,
+  all **42/42**.
+- **Did:** globally registered two-byte raw-u8 `0x60`. A resolved player-side
+  attacker emits a frozen typed game-stat increment event; an opponent emits
+  none, and both advance unconditionally with no opcode-local RNG, controller,
+  message, or battle-state work. The separate decoded save/meta consumer owns
+  valid indices **<52**, no-op invalid indices, and **0xFFFFFF** saturation.
+  Shared Splash proves PP → event → message order. Source-shaped
+  `MOVE_EFFECT_RECOIL_25` support carries Torment/Disable forced Struggle past
+  the former barrier through the existing hit and quarter-recoil route.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next shared registration target; do not widen the generic
+  seven-battle controller or extend the retired canonical Battle-2 march.
+- **Notes:** handler inventory **158→159**. The event receipt remains decoded
+  semantic save metadata; no encrypted save counter or Mauville story state
+  entered rules, Factory, controller, or presentation state. No
+  unsupported/import ratchet change, recording import, private handler,
+  animation/presentation/tick branch, issue removal, DEFERRED item, or oracle
+  lifecycle action.
+
+---
+## 586 — [SUPERVISOR VERIFY 2026-07-28 ~04:10] Refresh accepted; bounded Encore evidence folded
+
+- **State:** reviewed union green at **343 files / 4106 tests** and focused
+  **40/40**; production build, census regeneration, ratchets **6/6**, and
+  `git diff --check` pass. Census is exactly **149/214 effects, 275/355
+  moves, 226/276 Factory-L50 distinct, 2738/2957 weighted**, all **42/42**.
+- **Did:** accepted global Refresh `0xcd` after source/diff review: exact
+  status predicate, active/party zeroing, semantic status-data event, and
+  shared pending-controller acknowledgement are pinned. Folded Encore
+  source/OFF evidence after narrowing its public Tackle-window vocabulary;
+  independently replayed manifest `329676e3…8bba2`.
+- **Next:** register `B_SCR_OP_INCREMENTGAMESTAT` globally through a typed
+  save/meta event seam, not Factory round state. Prove player-side
+  gating, raw-u8 operand/range/saturation ownership, zero RNG/controller
+  work, Splash ordering, and Struggle continuation through the shared hit
+  route. Expected census:
+  **151/214, 279/355, 228/276, 2742/2957**.
+- **Notes:** handler inventory is **158**; Encore remains evidence only and
+  its timer/forced-choice/cleanup claims are source-pinned. Refresh receipt
+  remains `12571c44…a68012`. No unsupported/import ratchet, recording import,
+  animation/presentation/tick branch, issue removal, DEFERRED item, or oracle
+  lifecycle action.
+
+---
+## 585 — [BOUNDED MAIN WORKER 2026-07-28 ~04:06] Refresh executes globally
+
+- **State:** committed `d1aad3a` + `054e8fa`; tree green at **342 files /
+  4103 tests**, focused Refresh/evidence/handler coverage **31/31**, ratchets
+  **6/6**, and production build. Both oracle infos, census freshness, and
+  `git diff --check` pass. Census is exactly **149/214 effects, 275/355
+  moves, 226/276 Factory-L50 distinct, 2738/2957 weighted**, all **42/42**.
+- **Did:** globally registered five-byte Refresh `0xcd` through the shared
+  source-shaped rules context. Poison, Toxic (including its counter), burn,
+  and paralysis clear the active attacker status word and matching persistent
+  party slot; healthy, sleep, and freeze jump unchanged after shared PP
+  reduction. Success emits the shared `REQUEST_STATUS_BATTLE` semantic event,
+  marks only the attacker controller pending, blocks controller-sensitive
+  continuation, and resumes through the existing acknowledgement seam.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next shared registration target; do not widen the generic
+  singles controller or extend the retired canonical Battle-2 march.
+- **Notes:** accepted OFF receipt remains `12571c447d03…22a68012`: Toxic
+  active/party **384/128→0/0**, Refresh PP **19→18**, HP **305**, command-local
+  RNG unchanged. Handler inventory **157→158** only. No barrier/import
+  ratchet, recording import, private handler, animation/presentation/tick
+  branch, issue removal, DEFERRED item, or oracle lifecycle action.
+
+---
+## 584 — [SUPERVISOR VERIFY 2026-07-28 ~04:00] Torment accepted; party-heal evidence folded
+
+- **State:** reviewed union green at **341 files / 4093 tests** and focused
+  **38/38**; production build, both-oracle info, census regeneration, ratchets
+  **6/6**, and `git diff --check` pass. Census is exactly **148/214 effects,
+  274/355 moves, 225/276 Factory-L50 distinct, 2736/2957 weighted**, all
+  **42/42**.
+- **Did:** accepted global Torment `0xce` after source/diff review: the opcode
+  owns only the target bit/failure branch, while shared
+  `CheckMoveLimitations` now drives repeated-move rejection and forced
+  Struggle without a controller-local Torment branch. Folded Heal
+  Bell/Aromatherapy source/OFF evidence and independently replayed its
+  deterministic manifest (`8b4d2414…96cc6c8`).
+- **Next:** register `B_SCR_OP_CUREIFBURNEDPARALYZEDORPOISONED` / Refresh
+  globally from the accepted source/OFF evidence. Prove accepted-status mask,
+  healthy/sleep/freeze failure, active plus persistent party status zeroing,
+  controller blocking/sync, and zero local RNG. Expected census:
+  **149/214, 275/355, 226/276, 2738/2957**.
+- **Notes:** handler inventory is **157**; party-heal remains evidence only.
+  Torment receipt remains `f7a00036…b28c2`; party-heal source-only bounds are
+  explicit for Soundproof, benched poison, and doubles. No unsupported/import
+  ratchet, recording import, animation/presentation/tick branch, issue
+  removal, DEFERRED item, or oracle lifecycle action.
+
+---
+## 582 — [SUPERVISOR VERIFY 2026-07-28 ~03:47] Helping Hand accepted; Refresh evidence folded
+
+- **State:** reviewed union green at **339 files / 4082 tests** and focused
+  **20/20**; production build, census regeneration, ratchets **6/6**, and
+  `git diff --check` pass. Census is exactly **147/214 effects, 273/355
+  moves, 224/276 Factory-L50 distinct, 2732/2957 weighted**, all **42/42**.
+- **Did:** accepted global Helping Hand `0xd1` after source/diff review:
+  topology-derived partner retargeting, all doubles guards, shared **15/10**
+  damage consumer, +5 priority, and generic cleanup are pinned without
+  widening the singles controller. Folded independently replayed Refresh
+  source/OFF evidence (`12571c44…a68012`): toxic status/counter clear,
+  active/party sync, and healthy failure are exact.
+- **Next:** register `B_SCR_OP_SETTORMENT` globally from the accepted source/OFF
+  evidence. Prove target-owned `STATUS2_TORMENT`, duplicate failure with PP
+  spend, generic repeated-move admission/forced Struggle, and no private
+  controller path. Expected census:
+  **148/214, 274/355, 225/276, 2736/2957**.
+- **Notes:** handler inventory is **156**; Refresh remains evidence only.
+  Helping Hand receipt remains `4d40725e…fa3b6f`; Refresh receipt is
+  `12571c44…a68012`. No unsupported/import ratchet, recording import,
+  animation/presentation/tick branch, issue removal, DEFERRED item, or oracle
+  lifecycle action.
+
+---
+## 580 — [SUPERVISOR VERIFY 2026-07-28 ~03:37] Corrected Skill Swap accepted; Taunt evidence folded
+
+- **State:** reviewed union green at **337 files / 4071 tests** and focused
+  **87/87**; production build, both-oracle freshness/info, census
+  regeneration, ratchets **6/6**, and `git diff --check` pass. Census is
+  exactly **146/214 effects, 272/355 moves, 223/276 Factory-L50 distinct,
+  2727/2957 weighted**, all **42/42**.
+- **Did:** accepted Skill Swap only after `a358f91` reused the canonical
+  no-effect mask and shared role resolver and made the engine/oracle party
+  claims exact. Independently replayed the accepted ability exchange
+  (`1bb13425…54cd241a`). Folded and replayed Taunt source/OFF evidence
+  (`3c08746c…2441a`): status-move block, duplicate PP spend, forced Struggle,
+  and later expiry/allowed Splash are public and deterministic.
+- **Next:** register `B_SCR_OP_TRYSETHELPINGHAND` globally. Prove all doubles
+  topology/absent/already-marked branches in isolated source-shaped contexts,
+  the existing 15/10 damage consumer and turn cleanup, plus the accepted
+  singles PP-before-failure receipt. Expected census:
+  **147/214, 273/355, 224/276, 2732/2957**.
+- **Notes:** handler inventory is **155**; switch restoration remains bounded
+  at the shared unmodeled `abilityNum` seam. Taunt is evidence only. No
+  unsupported/import ratchet, private handler, recording import, animation/
+  presentation/tick branch, issue removal, DEFERRED item, or oracle lifecycle
+  action.
+
+---
+## 578 — [BOUNDED MAIN WORKER 2026-07-28 ~03:29] Skill Swap executes globally
+
+- **State:** committed `b8bc27a` + `50014d7`; tree green at **336 files /
+  4068 tests**, focused **68/68**, and ratchets **6/6**. Production build,
+  both-oracle freshness/info, census regeneration, and `git diff --check`
+  pass. Census is exactly **146/214 effects, 272/355 moves, 223/276
+  Factory-L50 distinct, 2727/2957 weighted**, all **42/42**.
+- **Did:** globally registered five-byte `0xda` through
+  `createBattleScriptStatusRulesHandlers`. Exact both-NONE, either Wonder
+  Guard, and `MOVE_RESULT_NO_EFFECT` failures jump to the decoded pointer;
+  single-NONE succeeds. Success swaps only the two active ability bytes and
+  owns zero RNG/events/party/HP/status/stage/PP/last-used-ability/entry-hook
+  writes. The shared script proves PP-before-command failure.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next shared registration target; do not extend the retired
+  canonical Battle-2 march.
+- **Notes:** accepted action seed **3034451114** runs Girafarig/Shuckle
+  **39/5→5/39**, player PP **10→9**, HP **177→172** only from later Tackle,
+  final RNG **3031698222 / 4 calls**; oracle scenario/manifest hashes remain
+  `aac80633…836dd883` / `1bb13425…54cd241a`, with persistent party abilities
+  **39/5**. Handler inventory **154→155** only. The shared switch seam still
+  lacks party species/abilityNum metadata and retains the stale active byte;
+  its exact boundary is pinned, so physical switch restoration remains
+  bounded rather than gaining a private handler. No new barrier/import
+  ratchet, recording import, controller-local handler, animation/tick branch,
+  issue removal, or oracle lifecycle action.
+
+---
+## 577 — [SUPERVISOR VERIFY 2026-07-28 ~03:20] Secret Power accepted; Torment evidence folded
+
+- **State:** reviewed union green at **335 files / 4063 tests** and focused
+  **35/35**; production build, both-oracle freshness/info, census
+  regeneration, ratchets **6/6**, and `git diff --check` pass. Census is
+  exactly **145/214 effects, 271/355 moves, 222/276 Factory-L50 distinct,
+  2722/2957 weighted**, all **42/42**.
+- **Did:** accepted globally registered Secret Power `0xe4` after an
+  independent exact OFF replay (`dce99201…d38474`) and source/diff review;
+  BUILDING maps to paralysis while the shared hit/effect chain owns PP,
+  damage, status, and four RNG calls. Folded source-only Torment `0xce`
+  evidence with an exact repeat replay (`f7a00036…b28c2`): target-owned
+  `STATUS2_TORMENT`, duplicate PP spend, all-duplicate-move Struggle
+  admission, and persistent active status are pinned.
+- **Next:** implement `B_SCR_OP_TRYSWAPABILITIES` / Skill Swap globally
+  from the accepted OFF/source evidence, including exact failure predicates,
+  active-only ability exchange, and switch-in restoration. Expected census:
+  **146/214, 272/355, 223/276, 2727/2957**.
+- **Notes:** handler inventory is **154**; Secret Power's action-boundary
+  proof remains target **362→311**, PP **20→19**, status1 **0→64**, final RNG
+  **1633612974 / 4 calls**. Torment is evidence only. No unsupported/import
+  ratchet, private handler, recording import, animation/presentation/tick
+  branch, issue removal, DEFERRED item, or oracle lifecycle action.
+
+---
+## 576 — [BOUNDED MAIN WORKER 2026-07-28 ~03:15] Secret Power executes through the shared hit/effect chain
+
+- **State:** committed `25fe673`; tree green at **334 files / 4060 tests**,
+  focused **317/317** (final strict replay **29/29**), and ratchets **6/6**.
+  Production build, both-oracle freshness/info, census regeneration, and
+  `git diff --check` pass. Census is exactly **145/214 effects, 271/355
+  moves, 222/276 Factory-L50 distinct, 2722/2957 weighted**, all **42/42**.
+- **Did:** globally registered operandless `0xe4`; it advances one byte and
+  maps every raw u8 `gBattleEnvironment` to the exact source move-effect byte,
+  writing nothing else. The immutable context validates/persists the field;
+  legacy focused construction defaults once, while all three production
+  Factory constructors explicitly supply **BUILDING (8)**. Program and
+  generic full-turn tests retain PP/damage/secondary ownership in the shared
+  `EffectHit` / `seteffectwithchance` / `SetMoveEffect` chain.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next shared registration target; do not extend the retired
+  canonical Battle-2 march.
+- **Notes:** the seed-3 stock lab's exact action-boundary RNG
+  **983916074** reaches Delcatty Secret Power paralysis through shared code:
+  target **362→311**, PP **20→19**, status1 **0→64**, final RNG
+  **1633612974 / 4 calls**. Handler inventory **153→154** only. No shared
+  barrier, unsupported/import ratchet, recording import, private handler,
+  animation/presentation/tick branch, scenario/evidence mutation, issue
+  removal, or oracle lifecycle action.
+
+---
+## 575 — [SUPERVISOR VERIFY 2026-07-28 ~03:01] Corrected Follow Me accepted; Trick and game-stat evidence folded
+
+- **State:** reviewed union green at **333 files / 4055 tests** and focused
+  **95/95**; production build, both-oracle freshness/info, census
+  regeneration, ratchets, and `git diff --check` pass. Census is exactly
+  **144/214 effects, 270/355 moves, 221/276 Factory-L50 distinct,
+  2716/2957 weighted**, all **42/42**.
+- **Did:** accepted Follow Me only after `aeb56de` implemented both source
+  cleanup calls and proved an early end-turn barrier cannot retain the timer.
+  Merged and independently replayed Trick's active+persistent Choice Band /
+  Leftovers swap (`165501dd…1adf37`) and Splash's PP-before-hidden-game-stat
+  receipt (`3a4f4af1…1fc9ff`). Game stats **26/27** are save/meta counters
+  (24-bit saturation), not round-rule state.
+- **Next:** register operandless `0xe4`
+  `B_SCR_OP_GETSECRETPOWEREFFECT` globally with a source-shaped battle
+  environment field and Factory **BUILDING → paralysis** handoff through the
+  existing secondary-effect chain. Expected census:
+  **145/214, 271/355, 222/276, 2722/2957**.
+- **Notes:** handler inventory is **153**; no new unsupported barrier/import
+  ratchet, private handler, recording import, animation/presentation/tick
+  branch, DEFERRED item, issue removal, or oracle lifecycle action.
+
+---
+## 574 — [BOUNDED MAIN WORKER CORRECTION 2026-07-28 ~03:00] Follow Me clears at both source cleanup calls
+
+- **State:** committed `aeb56de`; tree green at **331 files / 4048 tests**,
+  focused **108/108**, and ratchets **6/6**. Production build, both-oracle
+  freshness/info, census regeneration, and `git diff --check` pass. Census
+  remains exactly **144/214 effects, 270/355 moves, 221/276 Factory-L50
+  distinct, 2716/2957 weighted**, all **42/42**.
+- **Did:** matched `BattleTurnPassed` source order: the shared Follow Me helper
+  clears both timers at entry `TurnValuesCleanUp(TRUE)` before field/battler/
+  faint/delayed barriers, then runs idempotently again at the
+  `TurnValuesCleanUp(FALSE)` tail/terminal completion paths. A live
+  `ENDTURN_ITEMS1` case-barrier proof returns with zero timers while retaining
+  inert targets and all unrelated side fields. `setforcedtarget` now reuses
+  the shared battler-role validator.
+- **Next:** supervisor verify this bounded correction, then select the next
+  finite shared registration target; do not extend the retired Battle-2 march.
+- **Notes:** opcode behavior, handler inventory **153**, full-turn outcome,
+  census, and scenario/manifest hashes `b1015a6a…07f00f` /
+  `e150f267…889ece` are unchanged. No new handler/barrier, ratchet/import,
+  recording, animation/presentation/scenario, issue, oracle lifecycle, or
+  PAPERCUT change.
+
+---
+## 573 — [BOUNDED MAIN WORKER 2026-07-28 ~02:52] Follow Me executes and expires generically
+
+- **State:** committed `b29ecd1`; tree green at **331 files / 4047 tests**,
+  focused **100/100**, and ratchets **6/6**. Production build, both-oracle
+  freshness/info, census regeneration, and `git diff --check` pass. Census is
+  exactly **144/214 effects, 270/355 moves, 221/276 Factory-L50 distinct,
+  2716/2957 weighted**, all **42/42**.
+- **Did:** globally registered operandless `0xca`: after ordinary PP spend it
+  always advances and immutably writes only the attacker side's timer **1**
+  and target, including same-side overwrite. The shared BattleTurnPassed entry
+  clears both timers before field/battler/faint/delayed work and the tail
+  repeats that idempotent clear, retaining inert targets; a generic singles
+  full turn spends both Follow Me PP and reaches the next decision with zero
+  HP/stat/lock/RNG changes.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next shared registration target; do not extend the retired
+  canonical Battle-2 march.
+- **Notes:** the six source retarget readers/HP guards remain evidence-pinned;
+  Counter/Mirror Coat/GetMoveTarget doubles ownership was not widened. Handler
+  inventory ratchet **152→153** only; no unsupported-branch/import ratchet,
+  recording import, private handler, animation/presentation/scenario branch,
+  issue removal, oracle lifecycle action, or PAPERCUT.
+
+---
+## 571 — [BOUNDED MAIN WORKER CORRECTION 2026-07-28 ~02:35] Minimize consumer proof corrected
+
+- **State:** committed `507fde7`; tree green at **329 files / 4037 tests**,
+  focused **24/24**, and ratchets **6/6**. Production build, both-oracle
+  freshness/info, census regeneration, and `git diff --check` pass. Census
+  remains **143/214 effects, 269/355 moves, 220/276 Factory-L50 distinct,
+  2711/2957 weighted**, all **42/42**.
+- **Did:** removed `SETMINIMIZE`'s duplicate `STATUS3_MINIMIZED` declaration;
+  its producer and the existing jump consumer now import one canonical source
+  constant. Replaced the post-MoveEnd multiplier claim with a same-seed,
+  same-+1-evasion Double Team control: Stomp leaves Minimize at **974 HP
+  (25 damage)** versus control **987 HP (12 damage)**, with exact PP/stage/
+  status outcomes; the isolated shared jump/setbyte exact-2 proof remains.
+- **Next:** supervisor verify this bounded correction, then select the next
+  finite shared registration target; do not extend the retired Battle-2 march.
+- **Notes:** production semantics, census, evidence, and all ratchets are
+  unchanged. No `MoveValuesCleanUp`, private override, scenario/presentation/
+  animation change, issue removal, oracle lifecycle action, or PAPERCUT.
+
+---
+## 570 — [BOUNDED MAIN WORKER 2026-07-28 ~02:28] Minimize executes and Stomp consumes it generically
+
+- **State:** committed `29f2a0c`; tree green at **329 files / 4037 tests**,
+  focused **321/321**, and ratchets **6/6**. Production build, both-oracle
+  freshness/info, census regeneration, and `git diff --check` pass. Census is
+  exactly **143/214 effects, 269/355 moves, 220/276 Factory-L50 distinct,
+  2711/2957 weighted**, all **42/42**.
+- **Did:** globally registered operandless `0xc7`: it always advances and only
+  `HITMARKER_OBEYS` ORs `STATUS3_MINIMIZED` onto the selected attacker.
+  Source/program tests pin max-evasion persistence and the existing Stomp
+  target branch's shared `setbyte sDMG_MULTIPLIER, 2`; a generic full turn
+  proves manual Minimize PP/evasion/status3 before slower Stomp consumes it.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next shared registration target; do not extend the retired
+  canonical Battle-2 march.
+- **Notes:** existing battle-init, ordinary-switch, faint, and Baton Pass
+  exclusion seams are pinned without widening their ownership. OFF evidence
+  remains manifest `67c617f7…c842977`. No RNG/message/stat/lock ownership,
+  barrier/import ratchet change, recording import, animation/presentation/
+  scenario branch, oracle lifecycle action, issue removal, or PAPERCUT.
+
+---
+## 572 — [SUPERVISOR VERIFY 2026-07-28 ~02:38] Corrected Minimize accepted; Skill Swap evidence folded
+
+- **State:** reviewed union green at **330 files / 4040 tests** and focused
+  **42/42**; production build, both-oracle freshness/info, census
+  regeneration, ratchets, and `git diff --check` pass. Census is exactly
+  **143/214 effects, 269/355 moves, 220/276 Factory-L50 distinct,
+  2711/2957 weighted**, all **42/42**.
+- **Did:** accepted Minimize only after `507fde7` unified the producer/consumer
+  status constant and replaced a transient multiplier snapshot with the
+  same-seed Stomp damage control (**25 vs 12**). Merged and independently
+  replayed the successful Skill Swap OFF checkpoint: active abilities
+  **39/5 → 5/39**, persistent party abilities unchanged, PP **10→9**, exact
+  manifest `1bb13425…54cd241a`.
+- **Next:** register operandless `0xca` `B_SCR_OP_SETFORCEDTARGET` globally:
+  attacker-side timer **1**, attacker target, one-byte advance, PP-before-write,
+  end-turn timer clear, zero RNG. Keep the generic controller honest in
+  singles; source-pin doubles retarget readers without inventing doubles.
+  Expected census: **144/214, 270/355, 221/276, 2716/2957**.
+- **Notes:** no private handler, recording import, barrier/import ratchet
+  change, animation/presentation/scenario branch, DEFERRED item, issue
+  removal, or oracle lifecycle action.
+
+---
+## 569 — [BOUNDED MAIN WORKER CORRECTION 2026-07-28 ~02:17] Fury Cutter mirrors raw C integer widths
+
+- **State:** committed `0d638cb`; tree green at **328 files / 4031 tests**,
+  focused **84/84**, and ratchets **6/6**. Production build, both-oracle
+  freshness/info, census regeneration, and `git diff --check` pass. Census
+  remains **142/214 effects, 268/355 moves, 219/276 Factory-L50 distinct,
+  2706/2957 weighted**, all **42/42**.
+- **Did:** replaced the general JS clamp/exponentiation with exact source
+  widths: raw u8 counters increment modulo 256 unless exactly 5, and source
+  power plus every doubling stores through u16. Tests pin raw **5→5**,
+  **6→7**, **255→0**, and overflow **250×2⁹→62464**.
+- **Next:** supervisor verify this bounded correction and select the next
+  finite shared registration target; do not extend the retired canonical
+  Battle-2 march.
+- **Notes:** normal gameplay remains **1..5 / 10..160**; no-effect reset,
+  registration, zero RNG/lock, and generic full turns remain green. Entry
+  568's archived “cap” wording is narrowed to that normal producer invariant.
+  No barrier/import ratchet, census, evidence, animation, issue, or PAPERCUT
+  change.
+
+---
+## 568 — [BOUNDED MAIN WORKER 2026-07-28 ~02:10] Fury Cutter executes source-completely
+
+- **State:** committed `7b92344`; tree green at **327 files / 4025 tests**,
+  focused **326/326**, and ratchets **6/6**. Production build, both-oracle
+  freshness, census regeneration, and `git diff --check` pass. Census is
+  exactly **142/214 effects, 268/355 moves, 219/276 Factory-L50 distinct,
+  2706/2957 weighted**, all **42/42**.
+- **Did:** globally registered operandless `0xb5`: the normal attacker-owned
+  **0..5** producer sequence reaches and holds five with powers
+  **10/20/40/80/160**, plus exact no-effect jump/reset, both
+  `BattleScript_FuryCutterHit` passes, and zero lock/RNG ownership. Generic
+  full turns prove six manual PP spends, Double Team persistence, and the
+  normal fixed point; Protect now shares `CancelMultiTurnMoves`, while
+  existing switch/faint clears are pinned.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next shared registration target; do not extend the retired
+  canonical Battle-2 march.
+- **Notes:** OFF evidence remains manifests `9ca031ee…2057c9`,
+  `eb76399c…e3ce7`, and `7a7a04d8…dbf9d3`. Used-item/failed-run
+  `ClearFuryCutterDestinyBondGrudge` owners are not executable here, so no
+  unreachable subsystem was invented. No barrier/import ratchet change,
+  recording import, animation/presentation/scenario branch, oracle lifecycle
+  action, issue removal, or PAPERCUT.
+
+---
+## 567 — [SUPERVISOR VERIFY 2026-07-28 ~01:59] Corrected Disable accepted; three evidence checkpoints merged
+
+- **State:** reviewed union green at **325 files / 4016 tests** and focused
+  **366/366**; production build, both-oracle freshness, census regeneration,
+  ratchets, and `git diff --check` pass. Census is exactly **141/214 effects,
+  267/355 moves, 218/276 Factory-L50 distinct, 2701/2957 weighted**, all
+  **42/42**.
+- **Did:** accepted Disable only after corrective `31a2fd7` removed the private
+  full-turn opcode overrides. Exact `0xa3`, target-owned timer/start,
+  duplicate-id admission, direct canceler, switch/faint clear, and ordered
+  end-turn expiry remain generic; forced Struggle stops honestly at shared
+  `B_SCR_OP_INCREMENTGAMESTAT`. Merged and independently replayed Fury Cutter,
+  Minimize/Stomp, and Follow Me OFF evidence.
+- **Next:** register operandless `0xb5` `B_SCR_OP_FURYCUTTERCALC`: attacker
+  normal **0..5** sequence fixed at 5 with powers **10/20/40/80/160**,
+  normal-move persistence, no-effect/Protect/switch/faint clears, and no
+  lock/RNG ownership. Expected census is **142/214, 268/355, 219/276,
+  2706/2957**.
+- **Notes:** Fury Cutter manifests `9ca031ee…2057c9` and
+  `7a7a04d8…dbf9d3`, Minimize `67c617f7…c842977`, Follow Me
+  `e150f267…889ece`. The latter two source-pin hidden status/timer semantics
+  without claiming unavailable singles observations. No barrier/import
+  ratchet change, recording import, animation edit, DEFERRED item, or oracle
+  lifecycle action.
+
+---
+## 566 — [BOUNDED MAIN WORKER CORRECTION 2026-07-28 ~01:56] Full-turn execution uses the shared opcode frontier
+
+- **State:** committed `31a2fd7`; tree green at **322 files / 4007 tests**,
+  focused **90/90**, and ratchets **6/6**. Production build, both-oracle
+  freshness, census regeneration, and `git diff --check` pass. Census remains
+  exactly **141/214 effects, 267/355 moves, 218/276 Factory-L50 distinct,
+  2701/2957 weighted**, all **42/42**.
+- **Did:** removed the full-turn controller's private `incrementgamestat` and
+  Struggle-recoil `seteffectwithchance` handlers; both execution sites now use
+  only `createBattleScriptStatusRulesHandlers`. Full-turn Disable still proves
+  duplicate filtering, direct selected-move cancellation, forced Struggle, and
+  zero Tackle PP spend, then stops honestly at `B_SCR_OP_INCREMENTGAMESTAT`.
+- **Next:** supervisor verify this correction and select the next finite shared
+  registration target. `incrementgamestat` and Struggle recoil remain separate
+  executable-frontier units; do not extend the retired Battle-2 march.
+- **Notes:** this supersedes entry 565's full-turn claims of Struggle history,
+  recoil, end-turn expiry, and same-state Tackle resumption past that barrier.
+  Isolated Disable opcode/end-turn/switch/faint coverage remains green. No
+  unsupported-branch barrier count, recording import, animation file, issue,
+  oracle lifecycle action, or PAPERCUT changed.
+
+---
+## 565 — [BOUNDED MAIN WORKER 2026-07-28 ~01:49] Disable executes source-completely
+
+- **State:** committed `e566e53`; tree green at **322 files / 4007 tests**
+  and focused **324/324**. Production build, both-oracle freshness, census
+  regeneration, and `git diff --check` pass. Census is exactly **141/214
+  effects, 267/355 moves, 218/276 Factory-L50 distinct, 2701/2957
+  weighted**, all **42/42**.
+- **Did:** registered exact five-byte opcode `0xa3`, target-owned first-slot
+  match/PP predicate, one-draw 2–5 timer/start, zero-mutation failure jumps,
+  switch/faint clearing, and source-ordered `ENDTURN_DISABLE`. Generic legal
+  decisions intersect Disable with Encore, disable every duplicate-id slot,
+  force real Struggle, and preserve direct-attempt canceler ownership.
+- **Next:** supervisor verify this executable-frontier increment and select
+  the next finite source registration target; do not resume the retired
+  canonical Battle-2 march.
+- **Notes:** controlled seed 9 reproduces merged OFF PP **20→19→18**, prevents
+  selected disabled Tackle PP loss, forces all-Tackle Struggle, expires with
+  `BattleScript_DisabledNoMore`, and restores Tackle legality/PP. No new
+  unsupported barrier, recording import, animation/presentation/scenario
+  branch, issue removal, oracle lifecycle action, or PAPERCUT.
+
+---
+## 564 — [SUPERVISOR VERIFY 2026-07-28 ~01:24] Corrected Future Sight accepted; Disable evidence merged
+
+- **State:** reviewed union green at **321 files / 3994 tests** and focused
+  **276/276**; production build, both-oracle freshness, census regeneration,
+  and `git diff --check` pass. Census is exactly **140/214 effects, 266/355
+  moves, 217/276 Factory-L50 distinct, 2696/2957 weighted**, all **42/42**.
+- **Did:** accepted the Future Sight increment only after corrective `3e949d1`
+  made delayed ownership source-exact: prior move/effect/power and history
+  persist, while stored move drives explicit accuracy/message/animation and
+  `adjustnormaldamage2` alone omits False Swipe. Merged and independently
+  replayed Disable evidence `9cb0921`.
+- **Next:** register exact five-byte `0xa3`
+  `B_SCR_OP_DISABLELASTUSEDATTACK`, target-owned first move-id match against
+  `gLastMoves`, one-draw 2–5 timer/start value, all failure branches, ordinary
+  move admission, switch clearing, and `ENDTURN_DISABLE`. Expected census is
+  **141/214, 267/355, 218/276, 2701/2957**.
+- **Notes:** Future Sight retains Tackle **33 / effect 0 / power 35** and HP
+  **140→103**. Disable OFF evidence observes PP **20→19→18**, forced Struggle,
+  then Tackle resumption; manifest `ea9f5139…a1019`. No barrier/import ratchet
+  change, recording import, animation edit, DEFERRED item, or oracle lifecycle
+  action.
+
+---
+## 563 — [BOUNDED MAIN WORKER CORRECTION 2026-07-28 ~01:23] Future Sight delayed ownership is source-exact
+
+- **State:** committed Future Sight increment plus corrective `3e949d1`; tree
+  green at **321 files / 3994 tests** and focused **273/273**. Production
+  build, both-oracle freshness, census regeneration, and `git diff --check`
+  pass. Census remains exactly **140/214 effects, 266/355 moves, 217/276
+  Factory-L50 distinct, 2696/2957 weighted**, all **42/42**.
+- **Did:** delayed Future Sight/Doom Desire now restores only stored attacker,
+  target, and damage while preserving prior `currentMove`/effect/power.
+  Explicit stored-move accuracy/animation/message routing remains intact;
+  `moveendfromto` stops before last-move history writes. Source-faithful
+  `adjustnormaldamage2` shares random/Endure/Focus Band/Substitute/flags
+  behavior but omits False Swipe's clamp.
+- **Next:** supervisor verify the corrected executable-frontier increment and
+  select the next finite source registration target; do not resume the
+  retired canonical Battle-2 march.
+- **Notes:** the generic proof retains Tackle **33 / effect 0 / power 35**,
+  matches OFF HP **140→103**, and never records Future Sight/Doom Desire as a
+  delayed last move. No barrier/import ratchet change, recording import,
+  animation edit, scenario/tick/render branch, issue removal, oracle lifecycle
+  action, or PAPERCUT.
+
+---
+## 562 — [SUPERVISOR VERIFY 2026-07-28 ~00:51] Defense Curl accepted; Future Sight evidence merged
+
+- **State:** reviewed union green at **319 files / 3976 tests**; production
+  build, both-oracle freshness, census regeneration, and `git diff --check`
+  pass. Census is exactly **139/214 effects, 264/355 moves, 216/276
+  Factory-L50 distinct, 2691/2957 weighted**, with all **42/42** checks.
+- **Did:** accepted `7a96b10` / `7989330`: exact attacker-owned Defense Curl
+  bit, ordered stat change, and genuine generic Defense Curl→Rollout full-turn
+  continuation. Merged Future Sight evidence `b5d192e` after source review
+  and two byte-identical OFF replays.
+- **Next:** register exact five-byte `0xc3`
+  `B_SCR_OP_TRYSETFUTUREATTACK` and its positional delayed end-turn subsystem:
+  duplicate-pending branch, stored base damage/attacker/move/timer, switch and
+  faint semantics, delayed accuracy/random damage, Substitute handling, and
+  Protect/type/STAB exclusions. Expected census is **140/214, 266/355,
+  217/276, 2696/2957**.
+- **Notes:** Future Sight evidence observes PP **15→14→13**, setup and duplicate
+  target HP **140**, then delayed HP **140→103** with side bit 64 clearing;
+  manifest `ecd032fb…ee2448f`. No barrier/import ratchet increase, recording
+  import, animation edit, DEFERRED item, or oracle lifecycle action.
+
+---
+## 558 — [SUPERVISOR VERIFY 2026-07-28 ~00:07] Wish accepted; Secret Power evidence merged
+
+- **State:** reviewed union green at **314 files / 3954 tests** and focused
+  **105/105**; production build, both-oracle freshness, census regeneration,
+  and `git diff --check` pass. Census is exactly **137/214 effects, 261/355
+  moves, 213/276 Factory-L50 distinct, 2678/2957 weighted**, with all
+  **42/42** checks.
+- **Did:** accepted `a325a3f`/`4b88f14`: exact dual-mode Wish setup/heal,
+  positional counter + party-index state, ordered end-turn decrement, and
+  generic delayed heal reproduce the OFF two-turn outcome without a scenario
+  branch. Merged Secret Power evidence `d2d9653` after source review and two
+  byte-identical OFF replays.
+- **Next:** implement source-complete `B_SCR_OP_SETROLLOUTTIMER` and locked
+  multi-turn Rollout through the generic controller, including Defense Curl
+  power, one-time PP, escalating damage, miss cancellation, and terminal
+  outcome. Expected census is **138/214, 263/355, 215/276, 2685/2957**.
+- **Notes:** Wish matches HP **140→123→106→140**, PP **10→9→8**. Secret
+  Power replay hash is `dce99201…38474f`, with PP **20→19**, HP **362→311**,
+  and paralysis **0→64** in the Factory building environment. No barrier/
+  ratchet increase, recording import, animation edit, DEFERRED item, or
+  oracle lifecycle action.
+
+---
+## 557 — [BOUNDED MAIN WORKER 2026-07-28 ~00:04] Wish executes delayed positional heal generically
+
+- **State:** committed `a325a3f`/`4b88f14`; tree green at **313 files / 3951
+  tests** and focused **105/105**. Production build, both-oracle freshness,
+  census regeneration, and `git diff --check` pass. Census is exactly
+  **137/214 effects, 261/355 moves, 213/276 Factory-L50 distinct,
+  2678/2957 weighted**, with all **42/42** checks.
+- **Did:** registered exact six-byte `0xd4` `B_SCR_OP_TRYWISH` setup/heal
+  modes with positional counter + original party-index ownership, pending and
+  full-HP branches, prepared wishing-mon identity, and minimum-one negative
+  half-max heal. `ENDTURN_WISH` now runs after screens/before weather in
+  battler order, decrements through fainted slots without dispatch, and runs
+  the genuine delayed-heal/full-HP scripts.
+- **Next:** supervisor verify this executable-frontier increment and select
+  the next finite source registration target; do not resume the retired
+  canonical Battle-2 march.
+- **Notes:** the generic two-turn Espeon/Tackle proof matches OFF HP
+  **140→123→106→140** and Wish PP **10→9→8**, including pending failure and
+  capped heal. No barrier/ratchet increase, recording import, scenario/tick/
+  render branch, animation-lane edit, DEFERRED item, oracle lifecycle action,
+  or PAPERCUT.
+
+---
+## 556 — [SUPERVISOR VERIFY 2026-07-27 ~23:49] Sleep Talk accepted; Wish and Rollout evidence merged
+
+- **State:** reviewed union green at **312 files / 3945 tests**; production
+  build, both-oracle freshness, census regeneration, and `git diff --check`
+  pass. Census is **136/214 effects, 260/355 moves, 212/276 Factory-L50
+  distinct, 2670/2957 weighted**, with all **42/42** checks.
+- **Did:** accepted `c7b9822`/`6e33331`: the paired Sleep Talk opcodes own
+  exact limitations, retry RNG, targeting, and no-stack called-effect
+  dispatch, including a generic full-turn Whiscash→Fissure terminal win.
+  Merged Wish evidence `e18ab8e` and Rollout evidence `f5dfb5d` after focused
+  verification and twice reproducing each OFF manifest.
+- **Next:** implement source-complete six-byte `B_SCR_OP_TRYWISH`, including
+  positional counter/party-index state, pending-Wish failure,
+  `ENDTURN_WISH` decrement/dispatch, delayed half-max heal, and full-HP route.
+  Expected census is **137/214, 261/355, 213/276, 2678/2957**.
+- **Notes:** Wish reproduces `b8f3eaea…40bf` (damage **140→123**, PP
+  **10→9→8**, capped heal **106→140**); Rollout reproduces
+  `4460104b…9677` (Defense Curl, PP **20→19**, locked HP
+  **362→327→170→12→0**). No barrier/ratchet increase, recording import,
+  animation edit, DEFERRED item, or oracle lifecycle action.
+
+---
+## 555 — [BOUNDED MAIN WORKER 2026-07-27 ~23:46] Sleep Talk executes called moves generically
+
+- **State:** committed `c7b9822`/`6e33331`; tree green at **310 files / 3938
+  tests** and focused **322/322**. Production build, Battle Scene OFF oracle
+  freshness, census regeneration, and `git diff --check` pass. Census is
+  exactly **136/214 effects, 260/355 moves, 212/276 Factory-L50 distinct,
+  2670/2957 weighted**, with all **42/42** checks.
+- **Did:** registered source-complete `0xa9 + ptr`
+  `TRYCHOOSESLEEPTALKMOVE` and `0x63 + byte` `JUMPTOCALLEDMOVE`. The generic
+  VM now owns all exclusions/limitations except PP, slot+target retry RNG,
+  called/current/position/target fields, TRUE/FALSE chosen-move behavior,
+  and direct effect dispatch without a stack push. Awake, all-unusable, and
+  asleep→Fissure terminal walks pass; the full-turn seam reaches player-win.
+- **Next:** supervisor verify this executable-frontier increment and select
+  the next finite Stage 8 registration target.
+- **Notes:** full-turn Whiscash proof preserves Fissure PP **5**, spends Sleep
+  Talk **10→9**, leaves chosen move as Sleep Talk, and skips the slower
+  trainer action after the KO. No barrier/ratchet increase, recording import,
+  presentation/animation edit, canonical Battle-2 work, or PAPERCUT.
+
+---
+## 554 — [SUPERVISOR VERIFY 2026-07-27 ~23:25] Substitute accepted; Sleep Talk evidence merged
+
+- **State:** reviewed union green at **309 files / 3911 tests**; production
+  build, both-oracle freshness, and `git diff --check` pass. Census is
+  **135/214 effects, 259/355 moves, 211/276 Factory-L50 distinct,
+  2662/2957 weighted**.
+- **Did:** accepted `b179bd5`/`2c84860`: source-complete
+  `B_SCR_OP_SETSUBSTITUTE` matches the strict quarter-HP branches and its
+  generic two-turn proof preserves HP **155→117**, PP **10→9→8**, and the
+  live substitute. Merged `6791d53` after independently replaying the OFF
+  Sleep Talk scenario twice at manifest `6cc123e5…c3b`.
+- **Next:** implement paired `B_SCR_OP_TRYCHOOSESLEEPTALKMOVE` /
+  `B_SCR_OP_JUMPTOCALLEDMOVE`, including exact exclusions, retry RNG,
+  called-move targeting, direct no-return effect dispatch, and awake/all-
+  unusable/asleep-call terminal routes. Expected census is
+  **136/214, 260/355, 212/276, 2670/2957**.
+- **Notes:** the replay observes awake PP **10→9**, real Spore sleep, asleep
+  Sleep Talk PP **9→8**, called Fissure with its PP still **5**, and the KO.
+  Hidden selection/PC fields are source-pinned. No new barrier, recording
+  import, animation edit, DEFERRED item, or oracle lifecycle action.
+
+---
+## 552 — [SUPERVISOR VERIFY 2026-07-27 ~23:10] Destiny Bond terminal path accepted; Substitute evidence merged
+
+- **State:** reviewed union green at **307 files / 3898 tests**; focused
+  **266/266**, production build, oracle freshness, and `git diff --check`
+  pass. Census is **134/214 effects, 258/355 moves, 210/276 Factory-L50
+  distinct, 2652/2957 weighted**.
+- **Did:** accepted `410c751`/`5eb6a0f`: the reusable ordered multi-push VM
+  control reproduces Destiny Bond's nested avenging→original-faint→caller
+  returns, and a generic Wobbuffet→Snorlax Explosion turn reaches terminal
+  with both faints exactly once. The hit-chain barrier ratchet shrank
+  **23→22**.
+- **Next:** register the one-byte `B_SCR_OP_SETSUBSTITUTE` /
+  `EFFECT_SUBSTITUTE` from merged source/OFF evidence. Implement both strict
+  low-HP failure and success mutations, plus already-live and cross-action
+  persistence routes; regenerate the expected **+1/+1/+1/+10** delta.
+- **Notes:** merged `f48d51f` after twice reproducing Golem Substitute at
+  manifest `19e525d9…f7c7d`: HP **155→117**, PP **10→9→8**, and the live bit
+  persist through a second real failed use. Low-HP internal fields are
+  source-pinned but not oracle-exposed. No new barrier, recording import,
+  animation edit, DEFERRED item, or oracle lifecycle action.
+
+---
+## 550 — [SUPERVISOR VERIFY 2026-07-27 ~22:51] Focus Punch executable; Destiny Bond evidence banked
+
+- **State:** reviewed union green at **305 files / 3889 tests**; focused
+  **42/42**, build, freshness, and `git diff --check` pass. Census is
+  **133/214 effects, 257/355 moves, 209/276 Factory-L50 distinct,
+  2642/2957 weighted**.
+- **Did:** folded `animation-main` through `06259d7` at orient and verified
+  the union, then accepted `769f538`'s source-complete
+  `B_SCR_OP_JUMPIFNODAMAGE`. Both genuine Focus Punch routes reach `END`;
+  the OFF manifests independently reproduce `380326f3…b19` damaged and
+  `6df18da0…c53` undamaged.
+- **Next:** register the one-byte `B_SCR_OP_SETDESTINYBOND` /
+  `EFFECT_DESTINY_BOND` from the merged source/OFF evidence, pin the
+  attacker-owned action-lifetime bit and genuine effect/avenging walks, then
+  regenerate the expected **+1/+1/+1/+10** census delta.
+- **Notes:** merged `2733778` after twice reproducing Wobbuffet Destiny Bond
+  → Snorlax Explosion at manifest `12dc947d…e86d4`; full parties, PP
+  **5→4**, live `STATUS2_DESTINY_BOND`, dual faint, and clear are observed.
+  No unsupported barrier/ratchet change, recording import, animation edit,
+  DEFERRED item, or oracle lifecycle action.
+
+---
+## 548 — [SUPERVISOR WIND-DOWN 2026-07-27 ~22:20] Focus Punch OFF branch evidence merged reproducibly
+
+- **State:** final union green at **300 files / 3862 tests**; `npm run
+  build`, oracle freshness, and `git diff --check` pass. The unchanged
+  Battle-2 OFF seam remains **16/16 exact**; census remains **132/214
+  effects, 256/355 moves, 208/276 Factory-L50 distinct, 2631/2957 weighted**
+  with all **42/42** checks.
+- **Did:** independently replayed and merged `d880c5c`'s paired legal
+  Focus Punch scenarios. Physical damage **135→111** falls through to the
+  lost-focus route; Light Screen leaves Breloom **135/135**, so the same
+  opcode jumps into the hit chain and damages Starmie **135→66**. Both spend
+  Focus Punch PP **20→19** and reproduced byte-identical manifests:
+  damaged `380326f3…b19`, undamaged `6df18da0…c53`.
+- **Next:** register the source-complete five-byte
+  `B_SCR_OP_JUMPIFNODAMAGE` / `Cmd_jumpifnodamage`, carrying the attacker's
+  physical/special damage receipts through the generic turn state. Pin both
+  receipt fields, both branch polarities, the exact pointer, and genuine
+  Focus Punch lost-focus/hit-chain terminal walks.
+- **Notes:** `animation-main` advanced after this session's orient fold and
+  now has 13 commits absent from `master` (head `a158d9c`); leave its active
+  animation-supervisor worktree untouched and fold it at the next main
+  orient. Focus evidence's honest boundary is that the lab manifest does not
+  expose raw `ProtectStruct` receipt words; source pins their reset/write
+  sites. No production recording import, oracle lifecycle action, animation
+  edit, DEFERRED item, or PAPERCUT.
+
+---
+## 549 — [BOUNDED MAIN WORKER 2026-07-27 ~22:48] Focus Punch executes both damage-receipt routes
+
+- **State:** tree green at **304 files / 3887 tests**; build, oracle
+  freshness, and `git diff --check` pass. Census is **133/214 effects,
+  257/355 moves, 209/276 Factory-L50 distinct, 2642/2957 weighted**, exact
+  **+1/+1/+1/+11**, with all **42/42** checks.
+- **Did:** committed `769f538`, registering the sole five-byte opcode
+  `0xcf` / `Cmd_jumpifnodamage`. It reads the attacker's existing
+  ProtectStruct physical/special receipts: either nonzero falls through;
+  both zero jump exactly to `BattleScript_HitFromAccCheck`. Genuine Focus
+  Punch walks now reach their own `END` through lost-focus and hit-chain
+  routes, including PP **20→19**, Starmie **135→66**, and exact RNG ledgers.
+- **Next:** source-scout and register the newly generated top blocker
+  `B_SCR_OP_SETDESTINYBOND` / `EFFECT_DESTINY_BOND` (expected
+  **+1/+1/+1/+10**) from targeted OFF evidence.
+- **Notes:** the generic full-turn proof shows Swift's real
+  `datahpupdate` receipt survives action cleanup into lost focus, while
+  Light Screen leaves zero receipts; the existing next-turn owner resets
+  both fields. No new plumbing, unsupported barrier/ratchet change,
+  recording import, oracle lifecycle action, animation edit, or PAPERCUT.
+
+---
+## 547 — [SUPERVISOR SOURCE REVIEW 2026-07-27 ~22:18] Baton Pass registration tightened before acceptance
+
+- **State:** reviewed tree green at **299 files / 3857 tests**; `npm run
+  build` and `git diff --check` pass. Executable-frontier census remains
+  **132/214 effects, 256/355 moves, 208/276 Factory-L50 distinct,
+  2631/2957 weighted**.
+- **Did:** rejected inactive `gBattlersCount` selector sentinels, corrected
+  the Baton Pass mask citation, and completed the source-exact singles
+  `SwitchInClearSetData` collateral: switching clears an opposing wrap and
+  Baton Pass refreshes an opposing sure-hit timer to two turns. The terminal
+  proof no longer asserts the deliberately stale active-slot PP/loadout that
+  this context cannot rebuild.
+- **Next:** merge the independently replayed Focus Punch OFF evidence, then
+  register `B_SCR_OP_JUMPIFNODAMAGE` / `EFFECT_FOCUS_PUNCH` from its paired
+  damage/no-damage routes.
+- **Notes:** deliberately raised `battleScriptSwitchinOpcode.ts`'s barrier
+  ratchet **8→10** for doubles-only wrapped-by and sure-hit-owner identities;
+  both are source-named and reachability-tested while singles remain exact.
+  Focused **60/60**, full **3857/3857**. No recording import, oracle
+  lifecycle action, animation edit, or PAPERCUT.
+
+---
+## 546 — [BOUNDED MAIN WORKER 2026-07-27 ~22:10] Baton Pass executes through source jumpifcantswitch
+
+- **State:** tree green at **299 files / 3852 tests**; build, freshness, and
+  `git diff --check` pass. The unchanged Battle-2 OFF trace remains **16/16
+  exact**.
+- **Did:** committed `33b24cb`, registering both concrete six-byte
+  `B_SCR_OP_JUMPIFCANTSWITCH` starts. Ordinary singles now resolve/mask both
+  selectors, own `gActiveBattler`, honor or bypass the three volatile gates,
+  and scan either six-slot party for a living non-egg bench. Genuine Baton
+  Pass success/no-bench scripts reach their real `END`; success spends PP,
+  switches, preserves the source-transferable volatile/stages, emits switch
+  provenance, and consumes no RNG.
+- **Next:** register the generated top blocker `B_SCR_OP_JUMPIFNODAMAGE` /
+  `EFFECT_FOCUS_PUNCH` from pinned source and targeted OFF evidence.
+- **Notes:** census is **132/214 effects, 256/355 moves, 208/276 Factory-L50
+  distinct, 2631/2957 weighted**, exact **+1/+1/+1/+13**, all **42/42**
+  checks. The one intentional new barrier/ratchet pin is
+  `battleScriptJumpifcantswitchOpcode.ts`'s in-game-partner/MULTI/
+  two-opponents/ordinary-doubles identity scan
+  (`battle_script_commands.c:4714-4848`). Focused **87/87**, full
+  **3852/3852**. No recording import, oracle lifecycle action, animation edit,
+  or PAPERCUT.
+
+---
 ## 545 — [SUPERVISOR VERIFY 2026-07-27 ~21:58] Baton Pass OFF evidence merged reproducibly
 
 - **State:** union green at **298 files / 3840 tests**; `npm run build`,
@@ -22858,3 +23876,189 @@ both verify scripts/census independently re-verified before this entry.)*
 - **Notes:** the killing API error hit mid-response during docs; no code
   was lost (all rungs committed). The launcher's "unauthenticated/
   sandboxed" postflight hint is again noise on this failure mode.
+---
+## 551 — [BOUNDED MAIN WORKER 2026-07-27 ~23:04] Destiny Bond executes and avenges through the real faint stack
+
+- **State:** tree green at **306 files / 3895 tests**; focused **281/281**,
+  production build, oracle freshness, and `git diff --check` pass. Census is
+  **134/214 effects, 258/355 moves, 210/276 Factory-L50 distinct,
+  2652/2957 weighted**, exact **+1/+1/+1/+10**, with all **42/42** checks.
+- **Did:** committed `410c751` and `5eb6a0f`: registered source-complete
+  one-byte opcode `0xaa` / `Cmd_setdestinybond`; genuine
+  `BattleScript_EffectDestinyBond` reaches `END` with PP **5→4** and its live
+  attacker bit/message. `Cmd_tryfaintmon` now clears the marker, pushes the
+  original continuation then faint script, owns attacker-HP damage, executes
+  passive HP update + attacker faint, and returns through the target faint
+  exactly once. Generic Wobbuffet Destiny Bond → slower Snorlax Explosion
+  reaches the real terminal boundary.
+- **Next:** continue from the regenerated top blocker
+  `B_SCR_OP_SETSUBSTITUTE` / `EFFECT_SUBSTITUTE`.
+- **Notes:** retired the existing hit-chain barrier and ratchet exactly
+  **23→22**; added no barrier or recording import. The existing
+  `CANCELER_FLAGS` owner proves the bit clears before the user's next ordinary
+  action. Oracle OFF evidence remains manifest `12dc947d…e86d4`; no oracle
+  lifecycle action, animation edit, canonical Battle-2 work, or PAPERCUT.
+---
+## 553 — [BOUNDED MAIN WORKER 2026-07-27 ~23:21] Substitute executes and persists across real actions
+
+- **State:** tree green at **308 files / 3908 tests**; focused **277/277**,
+  production build, OFF-oracle freshness, and `git diff --check` pass. Census
+  is **135/214 effects, 259/355 moves, 211/276 Factory-L50 distinct,
+  2662/2957 weighted**, exact **+1/+1/+1/+10**, with all **42/42** checks.
+- **Did:** committed `b179bd5`/`2c84860`: registered source-complete one-byte
+  opcode `0x9c` / `Cmd_setsubstitute`, including strict HP boundary,
+  minimum-one quarter, attacker field ownership, and zero direct HP/event/
+  controller/RNG side effects. Genuine success, low-HP failure, and
+  already-live routes reach `END`; the generic two-turn Golem→Harden proof
+  matches HP **155→117** and PP **10→9→8** with the live state preserved.
+- **Next:** supervisor verify this increment, then choose from the regenerated
+  top frontier led by Sleep Talk's two-opcode set or `B_SCR_OP_TRYWISH`.
+- **Notes:** added the source `gSubstituteUsedStringIds` table and the existing
+  full-turn pause port's missing `B_WAIT_TIME_SHORT=32` literal. Existing
+  hit-chain/MOVEEND tests still pin persistence until `substituteHP==0`, then
+  clear. No barrier/ratchet increase, recording import, animation/render edit,
+  canonical Battle-2 work, oracle lifecycle action, or PAPERCUT.
+
+---
+## 559 — [BOUNDED MAIN WORKER 2026-07-28 ~00:38] Rollout executes source-completely
+
+- **State:** committed `adfada6` / `8407f7b` / `027c39f`; tree green at
+  **316 files / 3966 tests**. Production build, focused **40/40**, OFF-oracle
+  freshness/replay, census regeneration, and `git diff --check` pass. Census
+  is exactly **138/214 effects, 263/355 moves, 215/276 Factory-L50 distinct,
+  2685/2957 weighted**, all **42/42** checks.
+- **Did:** registered operandless `0xb3`
+  `B_SCR_OP_ROLLOUTDAMAGECALCULATION` with attacker-owned timer/start,
+  `STATUS2_MULTIPLETURNS`, selected-slot + `gLockedMoves` persistence,
+  initial-only PP, exact five-hit/Defense Curl power ladder, final unlock,
+  and miss/no-effect cancellation. Full-turn selection now auto-confirms
+  player, trainer, and simultaneous locks while retaining one RNG/event
+  stream and ordinary faint/terminal routing.
+- **Next:** supervisor verify this executable-frontier increment and select
+  the next finite source registration target; do not resume the retired
+  canonical Battle-2 march.
+- **Notes:** controlled seed 32731 reproduces merged OFF evidence HP
+  **362→327→170→12→0**, Rollout PP **20→19**, and player-win; fresh oracle
+  manifest is byte-identical at `4460104b…9479677`. Defense Curl's separate
+  setter remains the explicitly bounded next opcode, so the proof starts
+  from its source/evidence-pinned post-state. No barrier/import ratchet
+  change, recording import, scenario/tick/render branch, animation edit,
+  issue removal, oracle lifecycle action, or PAPERCUT.
+
+---
+## 561 — [BOUNDED MAIN WORKER 2026-07-28 ~00:47] Defense Curl executes source-completely
+
+- **State:** committed `7a96b10` / `7989330` / `e02e90d` / `a854043`;
+  tree green at **318 files / 3973 tests** and focused **40/40**. Production
+  build, both-oracle freshness, census regeneration, and `git diff --check`
+  pass. Census is exactly **139/214 effects, 264/355 moves, 216/276
+  Factory-L50 distinct, 2691/2957 weighted**, all **42/42** checks.
+- **Did:** registered exact operandless `0xbf`
+  `B_SCR_OP_SETDEFENSECURLBIT`: unconditional attacker-only status2 bit-30
+  OR and one-byte advance. Tests pin both attacker identities and persistence
+  when the ordered later +1 Defense change is maxed/fails. The generic
+  full-turn proof now selects Defense Curl from untouched Shuckle state,
+  observes PP **40→39**, Defense **6→7**, and bit 30, then selects Rollout.
+- **Next:** supervisor verify this executable-frontier increment and select
+  the next finite source registration target; do not resume the retired
+  canonical Battle-2 march.
+- **Notes:** controlled seed 32731 preserves zero-call Defense Curl and
+  reproduces merged OFF evidence Rollout PP **20→19**, locked HP
+  **362→327→170→12→0**, and player-win. No barrier/import ratchet increase,
+  recording import, scenario/tick/render branch, animation edit, issue
+  removal, oracle lifecycle action, or PAPERCUT.
+
+---
+## 560 — [SUPERVISOR VERIFY 2026-07-28 ~00:40] Rollout accepted; Defense Curl evidence merged
+
+- **State:** reviewed union green at **317 files / 3969 tests** and focused
+  **52/52**; production build, both-oracle freshness, census regeneration,
+  and `git diff --check` pass. Census is exactly **138/214 effects, 263/355
+  moves, 215/276 Factory-L50 distinct, 2685/2957 weighted**, with all
+  **42/42** checks.
+- **Did:** accepted `adfada6` / `8407f7b` / `027c39f`: exact Rollout timer,
+  lock, selected slot, Defense Curl power ladder, initial-only PP, symmetric
+  automatic action selection, continuous RNG/events, miss unlock, and
+  terminal routing all execute through the generic controller. Merged
+  Defense Curl evidence `8ec52e5` after source review and two identical OFF
+  replays.
+- **Next:** register source-complete one-byte `0xbf`
+  `B_SCR_OP_SETDEFENSECURLBIT`, including attacker-only unconditional bit
+  ownership, script ordering before the +1 Defense attempt, maxed-stat bit
+  persistence, and a generic Defense Curl→Rollout continuation. Expected
+  census is **139/214, 264/355, 216/276, 2691/2957**.
+- **Notes:** generic Rollout and OFF evidence both reach HP
+  **362→327→170→12→0** with PP **20→19**; manifest
+  `4460104b…9479677`. Defense Curl evidence observes PP **40→39**, bit 30,
+  and Defense **6→7**. No barrier/import ratchet increase, recording import,
+  animation edit, DEFERRED item, or oracle lifecycle action.
+---
+## 579 — [BOUNDED MAIN REVIEW WORKER 2026-07-28 ~03:35] Skill Swap shares canonical rule helpers
+
+- **State:** committed `a358f91`; tree green at **337 files / 4071 tests**,
+  focused **87/87**, and ratchets **6/6**. Production build, both-oracle
+  freshness/info, census regeneration, and `git diff --check` pass. Census is
+  unchanged at **146/214 effects, 272/355 moves, 223/276 Factory-L50
+  distinct, 2727/2957 weighted**, all **42/42**.
+- **Did:** removed Skill Swap's duplicate no-effect mask and weaker role
+  resolver; `0xda` now reuses
+  `BATTLE_SCRIPT_MOVE_RESULT_NO_EFFECT` and `requireBattlerRole` exactly like
+  Fury Cutter/Rollout. Tightened tests so engine party assertions cover only
+  modeled fields; persistent party abilities **39/5** remain an oracle-receipt
+  claim. Corrected the shared switch-seam wording: species is modeled,
+  `abilityNum` is not.
+- **Next:** supervisor verify this review correction and select the next
+  finite executable-frontier increment; do not extend the retired canonical
+  Battle-2 march.
+- **Notes:** Skill Swap behavior, census, handler inventory **155**, oracle
+  evidence/hashes, and Taunt evidence are unchanged. Physical switch
+  restoration remains exactly bounded at the shared seam with its stale active
+  ability byte. No semantic, barrier/import-ratchet, controller, metadata,
+  ability, animation, or issue change.
+---
+## 581 — [BOUNDED MAIN WORKER 2026-07-28 ~03:44] Helping Hand executes globally
+
+- **State:** committed `db756e6`; tree green at **338 files / 4079 tests**,
+  focused **348/348**, and ratchets **6/6**. Production build, census
+  freshness, both oracle infos, and `git diff --check` pass. Census is exactly
+  **147/214 effects, 273/355 moves, 224/276 Factory-L50 distinct,
+  2732/2957 weighted**, all **42/42**.
+- **Did:** globally registered five-byte `0xd1`. It always retargets to the
+  attacker's position-derived partner, including failure; doubles success
+  requires present/unmarked attacker and partner and writes only the partner
+  `helpingHand` bit. Tests cover every attacker/guard combination across
+  canonical and noncanonical positions, exact zero-RNG immutability, shared
+  **15/10** damage, +5 priority, and generic turn/faint cleanup.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next shared registration target; do not widen the Factory
+  singles controller or extend the retired canonical Battle-2 march.
+- **Notes:** accepted singles action seed **1996693384** spends Helping Hand
+  PP **20→19** before exact failure, writes no bit/success message, and retains
+  oracle receipt `4d40725e…fa3b6f`. Handler inventory **155→156** only. No
+  barrier/import ratchet, recording import, private/controller-local handler,
+  animation/presentation/tick branch, scenario/evidence mutation, issue
+  removal, or oracle lifecycle action.
+---
+## 583 — [BOUNDED MAIN WORKER 2026-07-28 ~03:56] Torment executes globally
+
+- **State:** committed `5887fc3`; tree green at **340 files / 4090 tests**,
+  focused Torment/receipt/handler coverage **29/29**, and ratchets **6/6**.
+  Production build, both oracle infos, census regeneration, and
+  `git diff --check` pass. Census is exactly **148/214 effects, 274/355
+  moves, 225/276 Factory-L50 distinct, 2736/2957 weighted**, all **42/42**.
+- **Did:** globally registered five-byte `0xce`. Success ORs only canonical
+  `STATUS2_TORMENT` into the resolved target; duplicate jumps to the decoded
+  failure pointer. Both branches own zero local RNG/events and preserve every
+  unrelated field. The generic Factory controller now consumes the shared
+  source-shaped `CheckMoveLimitations` port: every last-move duplicate is
+  withheld, and an all-duplicate moveset exposes one forced Struggle command.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next shared registration target; do not widen the Factory
+  singles controller or extend the retired canonical Battle-2 march.
+- **Notes:** the accepted OFF receipt remains
+  `f7a000367213…e3f16b27ab28c2`: Torment PP **15→14→13**, target status2
+  **0→2147483648**, repeated Tackle slots force Struggle without Tackle PP
+  loss. Handler inventory **156→157** only. No barrier/import ratchet,
+  recording import, private handler, animation/presentation/tick branch,
+  scenario/evidence mutation, issue removal, DEFERRED item, or oracle
+  lifecycle action.

@@ -1,0 +1,68 @@
+{
+  "schema": "magic-coat-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "sourceSha256": {
+    "battle_script_commands.c": "e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c",
+    "battle_scripts_1.s": "4ac3e610b68c11ef0f4e4c0fc62ddba7fda5a8400e43705428868978ec7551a6",
+    "battle_script.inc": "0a8e1c3bdf4c49d07b2e09ff8ab524812a5217b9735106e1b79b6be261a6db7e",
+    "battle_script_commands.h": "842cce6dd704b09b24a49abdca67ee7a8062a2e3a465e1b764fc63c0d230580f",
+    "battle_move_effects.h": "32192c0d0014b5a63edb5b34b8d8475739891eaee66dc610a45d30574879b00e",
+    "battle.h": "8ef0355f2345592094c82cfde6641644a6b7157012104736416f8c05f34f0685",
+    "battle_main.c": "ee79b86ff0f681ab783b363135fd84d050e7123bea2a77c5530f2c7ddc8b8408",
+    "battle_util.c": "2ba9ee4efe913effa119c8342281745f481910ca1b20cd76b470673062a45fd5",
+    "battle_moves.h": "8b3d4d143b807807af97ce7288e0cc0ccdd55b6b64ac45824e35a549836b3a0c",
+    "battle_frontier_mons.h": "557c1a97247cbb84357b99035fb11cf0bfe45abe8393a0992fe8146bfc51f67f",
+    "battle_frontier_mons.h.constants": "00fb47e144978d3a24a304047f5463217ac7b535ee6f8719e2adf47cc592387a",
+    "moves.h": "d32746c9ad3ed1bbfbb93712f13e01ab1c43f48a78f3605ef9db5095e8d19d27",
+    "pokemon.h": "e0153a94a2fc0f84e6de372494dfb01e88be4d9cf1cbbeca5e56b8a0b645f7e5"
+  },
+  "instruction": {
+    "opcode": 223,
+    "opcodeHex": "0xdf",
+    "length": 5,
+    "operands": ["failure pointer (u32)"],
+    "handler": "Cmd_trysetmagiccoat",
+    "ownership": {
+      "target": "gBattlerTarget = gBattlerAttacker",
+      "pressureExemption": "gSpecialStatuses[gBattlerAttacker].ppNotAffectedByPressure = 1",
+      "armedBit": "gProtectStructs[gBattlerAttacker].bounceMove = TRUE"
+    },
+    "failure": {
+      "predicate": "gCurrentTurnActionNumber == gBattlersCount - 1",
+      "behavior": "gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + 1)"
+    },
+    "duplicate": "no existing bounceMove test; a non-last action arms the attacker bit and advances",
+    "pc": {"success": "gBattlescriptCurrInstr += 5", "failure": "read operand pointer"},
+    "localRngCalls": 0,
+    "localControllerCalls": 0
+  },
+  "bounce": {
+    "attackCancelerPredicate": "gProtectStructs[gBattlerTarget].bounceMove && (gBattleMoves[gCurrentMove].flags & FLAG_MAGIC_COAT_AFFECTED)",
+    "ownership": "the checked and cleared bounceMove belongs to gBattlerTarget, not gBattlerAttacker",
+    "immediate": ["PressurePPLose(gBattlerAttacker, gBattlerTarget, MOVE_MAGIC_COAT)", "clear target bounceMove", "BattleScriptPushCursor()", "gBattlescriptCurrInstr = BattleScript_MagicCoatBounce", "return"],
+    "resume": "BattleScript_MagicCoatBounce prints and PP-reduces the incoming move, ORs ATTACKSTRING_PRINTED | NO_PPDEDUCT | ALLOW_NO_PP, calls setmagiccoattarget BS_ATTACKER, then returns to attackcanceler.",
+    "retarget": "VARIOUS_SET_MAGIC_COAT_TARGET assigns gBattlerAttacker = gBattlerTarget, then uses the opposite-side Follow Me target if live, otherwise gActiveBattler.",
+    "lifetime": "BattleTurnPassed ultimately calls TurnValuesCleanUp(FALSE), which byte-clears each active ProtectStruct; switch-in also explicitly clears bounceMove.",
+    "rngAndControllerBoundary": "Cmd_trysetmagiccoat and the Magic Coat branch in Cmd_attackcanceler have no local Random call. PressurePPLose is a separate delegated helper: it only emits a PP controller update if the original attacker has Pressure and the matching permanent Magic Coat slot is found."
+  },
+  "frontier": {
+    "level50MagicCoatSetIds": [121, 220, 251],
+    "allFactorySnatchSetIds": [],
+    "move": {"id": 277, "name": "MOVE_MAGIC_COAT", "effect": "EFFECT_MAGIC_COAT", "effectId": 183, "pp": 15, "target": "MOVE_TARGET_DEPENDS", "priority": 4},
+    "bounceDiscriminantMove": {"id": 39, "name": "MOVE_TAIL_WHIP", "effect": "EFFECT_DEFENSE_DOWN", "pp": 30, "flags": ["FLAG_MAGIC_COAT_AFFECTED"]}
+  },
+  "case": {
+    "scenario": "tools/battle-lab/mechanic-magic-coat-spoink-onix-off.json",
+    "scenarioSha256": "65c738a5b1f7a13e6a578ebe422903512d500128dd8c4fa2666d5b4cd72d574f",
+    "repeatability": {"runs": 2, "comparison": "byte-identical full manifest.json", "manifestSha256": "5b737f6807036cbc50cd4235a16dc49294cf9c3eb136070cc36c55870a303870"},
+    "builtPartyChecksumsValid": [true, true, true, true, true, true],
+    "observed": {
+      "initial": {"frame": 0, "sha256": "5e673506633406b7383a92ec1fcbbaf11c018a415ba17c5437d7799c920a49d7", "rngValue": 919694434, "currentMove": 0, "player": {"pp": [15,15,15,15], "defenseStage": 6}, "opponent": {"pp": [30,30,30,30], "defenseStage": 6}},
+      "magicCoatPpSpent": {"frame": 100, "sha256": "1b3a4d0933cef74c82ee0f735f4bd46613ccaebf3ebe9662bfdf30f7a4bb6eb7", "rngValue": 919694434, "currentMove": 277, "player": {"pp": [14,15,15,15], "defenseStage": 6}, "opponent": {"pp": [30,30,30,30], "defenseStage": 6}},
+      "tailWhipPpSpent": {"frame": 250, "sha256": "5ae5fec0b436a55a90783e4ac17579f3595c2d8d773484b65d3b01bafb609494", "rngValue": 919694434, "currentMove": 39, "player": {"pp": [14,15,15,15], "defenseStage": 6}, "opponent": {"pp": [30,29,30,30], "defenseStage": 6}},
+      "bouncePublic": {"frame": 400, "sha256": "266c503dc3bf16d6a44f15542dd79c490a197c15a6d91a171828d16b3ec5d371", "rngValue": 3690816045, "currentMove": 39, "player": {"pp": [14,15,15,15], "defenseStage": 6}, "opponent": {"pp": [30,29,30,30], "defenseStage": 5}},
+      "settled": {"frame": 650, "sha256": "a17f4e6b13ec6f6561df50a532449156ab6763ac646ca6a1ec398f227364b819", "rngValue": 1850371763, "currentMove": 0, "player": {"pp": [14,15,15,15], "defenseStage": 6}, "opponent": {"pp": [30,29,30,30], "defenseStage": 5}}
+    }
+  },
+  "boundedRemainder": "The public OFF manifest shows complete-party checksum validity, framebuffer hashes, current move, PP, and stat stages: Magic Coat PP falls, Tail Whip PP falls, then only Onix's public Defense stage is 5 while Spoink remains 6. That distinguishes a bounce from a no-op. It does not expose ProtectStruct bits, ppNotAffectedByPressure, action selection, script PC/stack, hit-marker/result flags, target/attacker swaps, Pressure helper causality, or the exact internal point at which Tail Whip's target changes. Those are source-only facts; whole-turn RNG snapshots do not attribute a change to either command."
+}

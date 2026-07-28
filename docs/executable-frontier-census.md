@@ -4,16 +4,16 @@ Generated 2026-07-28. Rerun: `npx tsx tools/report/executable-frontier-census.ts
 
 Answers ROADMAP S10's Executable-frontier reset question directly: not "how many opcodes are registered" but **how many of the 355 moves can the kernel execute end-to-end today, and what exactly blocks each of the rest.** Every `BattleScript_Effect*` entry in the committed topology (`src/data/gen/battle-script-topology.json` + `battle-script-graph.json`) is walked for full opcode reachability (branches, goto/call targets, the shared hit-chain tail) against the opcode set the engine currently registers (read live from `src/engine/battleScriptRulesContext.ts`'s `createBattleScriptStatusRulesHandlers`, so this doc cannot drift from what the engine actually installs).
 
-**Key finding:** the single highest-leverage next registration is `B_SCR_OP_JUMPIFNODAMAGE` -- registering exactly that set would flip **1 effect / 1 move (1 Factory-L50, 11 weighted)** from blocked to executable in one step (EFFECT_FOCUS_PUNCH) -- the largest single entry in the ranked table below. This paragraph is generated fresh from the current registered-opcode set every run, so it always names today's actual top blocker, not a past one -- see PROGRESS.md for the registration history (e.g. the 2026-07-25 B_SCR_OP_JUMPIFHALFWORD/JUMPIFSTATUS3CONDITION/ORWORD entry-chokepoint trio).
+**Key finding:** the single highest-leverage next registration is `B_SCR_OP_TRYSWAPITEMS` -- registering exactly that set would flip **1 effect / 1 move (1 Factory-L50, 5 weighted)** from blocked to executable in one step (EFFECT_TRICK) -- the largest single entry in the ranked table below. This paragraph is generated fresh from the current registered-opcode set every run, so it always names today's actual top blocker, not a past one -- see PROGRESS.md for the registration history (e.g. the 2026-07-25 B_SCR_OP_JUMPIFHALFWORD/JUMPIFSTATUS3CONDITION/ORWORD entry-chokepoint trio).
 
 ## Headline counts
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 132 | 214 | 61.7% |
-| Moves (unweighted, all 355) | 256 | 355 | 72.1% |
-| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 208 | 276 | 75.4% |
-| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2631 | 2957 | 89.0% |
+| Effect scripts | 156 | 214 | 72.9% |
+| Moves (unweighted, all 355) | 285 | 355 | 80.3% |
+| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 233 | 276 | 84.4% |
+| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2755 | 2957 | 93.2% |
 
 "Executable" means every opcode on every statically reachable path from the effect's entry script has a dispatch entry today (registered barriers included, per ROADMAP S10 §1's (a)/(b) policy). It is not a semantic-correctness claim -- see Caveats.
 
@@ -23,31 +23,31 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 
 | Missing opcode(s) | Effects unlocked | Moves unlocked (unweighted) | Factory-L50 moves (unweighted) | Factory-L50 weighted |
 | --- | --- | --- | --- | --- |
-| `B_SCR_OP_JUMPIFNODAMAGE` | 1 (EFFECT_FOCUS_PUNCH) | 1 | 1 | 11 |
-| `B_SCR_OP_SETDESTINYBOND` | 1 (EFFECT_DESTINY_BOND) | 1 | 1 | 10 |
-| `B_SCR_OP_SETSUBSTITUTE` | 1 (EFFECT_SUBSTITUTE) | 1 | 1 | 10 |
-| `B_SCR_OP_JUMPTOCALLEDMOVE`, `B_SCR_OP_TRYCHOOSESLEEPTALKMOVE` | 1 (EFFECT_SLEEP_TALK) | 1 | 1 | 8 |
-| `B_SCR_OP_TRYWISH` | 1 (EFFECT_WISH) | 1 | 1 | 8 |
-| `B_SCR_OP_ROLLOUTDAMAGECALCULATION` | 1 (EFFECT_ROLLOUT) | 2 | 2 | 7 |
-| `B_SCR_OP_GETSECRETPOWEREFFECT` | 1 (EFFECT_SECRET_POWER) | 1 | 1 | 6 |
-| `B_SCR_OP_SETDEFENSECURLBIT` | 1 (EFFECT_DEFENSE_CURL) | 1 | 1 | 6 |
-| `B_SCR_OP_TRYSETFUTUREATTACK` | 1 (EFFECT_FUTURE_SIGHT) | 2 | 1 | 5 |
-| `B_SCR_OP_DISABLELASTUSEDATTACK` | 1 (EFFECT_DISABLE) | 1 | 1 | 5 |
-| `B_SCR_OP_FURYCUTTERCALC` | 1 (EFFECT_FURY_CUTTER) | 1 | 1 | 5 |
-| `B_SCR_OP_SETFORCEDTARGET` | 1 (EFFECT_FOLLOW_ME) | 1 | 1 | 5 |
-| `B_SCR_OP_SETMINIMIZE` | 1 (EFFECT_MINIMIZE) | 1 | 1 | 5 |
-| `B_SCR_OP_TRYSETHELPINGHAND` | 1 (EFFECT_HELPING_HAND) | 1 | 1 | 5 |
-| `B_SCR_OP_TRYSWAPABILITIES` | 1 (EFFECT_SKILL_SWAP) | 1 | 1 | 5 |
 | `B_SCR_OP_TRYSWAPITEMS` | 1 (EFFECT_TRICK) | 1 | 1 | 5 |
-| `B_SCR_OP_INCREMENTGAMESTAT` | 2 (EFFECT_RECOIL, EFFECT_SPLASH) | 4 | 2 | 4 |
 | `B_SCR_OP_HEALPARTYSTATUS` | 1 (EFFECT_HEAL_BELL) | 2 | 2 | 4 |
-| `B_SCR_OP_SETTORMENT` | 1 (EFFECT_TORMENT) | 1 | 1 | 4 |
 | `B_SCR_OP_TRYSETENCORE` | 1 (EFFECT_ENCORE) | 1 | 1 | 4 |
 | `B_SCR_OP_TRYSETPERISHSONG` | 1 (EFFECT_PERISH_SONG) | 1 | 1 | 4 |
-| `B_SCR_OP_SETFORESIGHT` | 1 (EFFECT_FORESIGHT) | 2 | 1 | 3 |
-| `B_SCR_OP_DOUBLEDAMAGEDEALTIFDAMAGED` | 1 (EFFECT_REVENGE) | 1 | 1 | 3 |
-| `B_SCR_OP_TRYSETMAGICCOAT` | 1 (EFFECT_MAGIC_COAT) | 1 | 1 | 3 |
 | `B_SCR_OP_TRYSETSPIKES` | 1 (EFFECT_SPIKES) | 1 | 1 | 3 |
+| `B_SCR_OP_SCALEDAMAGEBYHEALTHRATIO` | 1 (EFFECT_ERUPTION) | 2 | 2 | 2 |
+| `B_SCR_OP_JUMPIFARRAYEQUAL` | 1 (EFFECT_TEETER_DANCE) | 1 | 1 | 2 |
+| `B_SCR_OP_MAGNITUDEDAMAGECALCULATION` | 1 (EFFECT_MAGNITUDE) | 1 | 1 | 2 |
+| `B_SCR_OP_MAXATTACKHALVEHP` | 1 (EFFECT_BELLY_DRUM) | 1 | 1 | 2 |
+| `B_SCR_OP_METRONOME` | 1 (EFFECT_METRONOME) | 1 | 1 | 2 |
+| `B_SCR_OP_PAINSPLITDMGCALC` | 1 (EFFECT_PAIN_SPLIT) | 1 | 1 | 2 |
+| `B_SCR_OP_SETFOCUSENERGY` | 1 (EFFECT_FOCUS_ENERGY) | 1 | 1 | 2 |
+| `B_SCR_OP_STOCKPILE` | 1 (EFFECT_STOCKPILE) | 1 | 1 | 2 |
+| `B_SCR_OP_STOCKPILETOHPHEAL` | 1 (EFFECT_SWALLOW) | 1 | 1 | 2 |
+| `B_SCR_OP_TRYSETGRUDGE` | 1 (EFFECT_GRUDGE) | 1 | 1 | 2 |
+| `B_SCR_OP_TRYSPITEPPREDUCE` | 1 (EFFECT_SPITE) | 1 | 1 | 2 |
+| `B_SCR_OP_DAMAGETOHALFTARGETHP` | 1 (EFFECT_SUPER_FANG) | 1 | 1 | 1 |
+| `B_SCR_OP_HIDDENPOWERCALC` | 1 (EFFECT_HIDDEN_POWER) | 1 | 1 | 1 |
+| `B_SCR_OP_NORMALISEBUFFS` | 1 (EFFECT_HAZE) | 1 | 1 | 1 |
+| `B_SCR_OP_PRESENTDAMAGECALCULATION` | 1 (EFFECT_PRESENT) | 1 | 1 | 1 |
+| `B_SCR_OP_STOCKPILETOBASEDAMAGE` | 1 (EFFECT_SPIT_UP) | 1 | 1 | 1 |
+| `B_SCR_OP_TRYCOPYABILITY` | 1 (EFFECT_ROLE_PLAY) | 1 | 1 | 1 |
+| `B_SCR_OP_TRYMEMENTO` | 1 (EFFECT_MEMENTO) | 1 | 1 | 1 |
+| `B_SCR_OP_TRYRECYCLEITEM` | 1 (EFFECT_RECYCLE) | 1 | 1 | 1 |
+| `B_SCR_OP_SETALWAYSHITFLAG` | 1 (EFFECT_LOCK_ON) | 2 | 0 | 0 |
 
 ## Per-effect detail
 
@@ -101,7 +101,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_RECOIL_IF_MISS | `BattleScript_EffectRecoilIfMiss` | executable | - | - | 2 | 1 (1) |
 | EFFECT_MIST | `BattleScript_EffectMist` | executable | - | - | 1 | 0 (0) |
 | EFFECT_FOCUS_ENERGY | `BattleScript_EffectFocusEnergy` | blocked-on-opcodes | `B_SCR_OP_SETFOCUSENERGY` (edge branch only) | - | 1 | 1 (2) |
-| EFFECT_RECOIL | `BattleScript_EffectRecoil` | blocked-on-opcodes | `B_SCR_OP_INCREMENTGAMESTAT` (edge branch only) | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_RECOIL_25 is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 3 | 2 (4) |
+| EFFECT_RECOIL | `BattleScript_EffectRecoil` | executable | - | - | 3 | 2 (4) |
 | EFFECT_CONFUSE | `BattleScript_EffectConfuse` | executable | - | - | 3 | 3 (48) |
 | EFFECT_ATTACK_UP_2 | `BattleScript_EffectAttackUp2` | executable | - | - | 1 | 1 (15) |
 | EFFECT_DEFENSE_UP_2 | `BattleScript_EffectDefenseUp2` | executable | - | - | 3 | 3 (12) |
@@ -132,14 +132,14 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_CONFUSE_HIT | `BattleScript_EffectConfuseHit` | executable | - | - | 6 | 6 (42) |
 | EFFECT_TWINEEDLE | `BattleScript_EffectTwineedle` | executable | - | - | 1 | 1 (1) |
 | EFFECT_VITAL_THROW | `BattleScript_EffectHit` | executable | - | - | 1 | 0 (0) |
-| EFFECT_SUBSTITUTE | `BattleScript_EffectSubstitute` | blocked-on-opcodes | `B_SCR_OP_SETSUBSTITUTE` (edge branch only) | - | 1 | 1 (10) |
+| EFFECT_SUBSTITUTE | `BattleScript_EffectSubstitute` | executable | - | - | 1 | 1 (10) |
 | EFFECT_RECHARGE | `BattleScript_EffectRecharge` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_RECHARGE is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 4 | 1 (4) |
 | EFFECT_RAGE | `BattleScript_EffectRage` | blocked-on-subsystem | - | Cmd_seteffectprimary dispatch: MOVE_EFFECT_RAGE is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 1 | 0 (0) |
 | EFFECT_MIMIC | `BattleScript_EffectMimic` | blocked-on-opcodes | `B_SCR_OP_MIMICATTACKCOPY` (edge branch only) | - | 1 | 0 (0) |
 | EFFECT_METRONOME | `BattleScript_EffectMetronome` | blocked-on-opcodes | `B_SCR_OP_METRONOME` (main path) | - | 1 | 1 (2) |
 | EFFECT_LEECH_SEED | `BattleScript_EffectLeechSeed` | executable | - | - | 1 | 1 (12) |
-| EFFECT_SPLASH | `BattleScript_EffectSplash` | blocked-on-opcodes | `B_SCR_OP_INCREMENTGAMESTAT` (main path) | - | 1 | 0 (0) |
-| EFFECT_DISABLE | `BattleScript_EffectDisable` | blocked-on-opcodes | `B_SCR_OP_DISABLELASTUSEDATTACK` (edge branch only) | - | 1 | 1 (5) |
+| EFFECT_SPLASH | `BattleScript_EffectSplash` | executable | - | - | 1 | 0 (0) |
+| EFFECT_DISABLE | `BattleScript_EffectDisable` | executable | - | - | 1 | 1 (5) |
 | EFFECT_LEVEL_DAMAGE | `BattleScript_EffectLevelDamage` | executable | - | - | 2 | 2 (10) |
 | EFFECT_PSYWAVE | `BattleScript_EffectPsywave` | executable | - | - | 1 | 1 (2) |
 | EFFECT_COUNTER | `BattleScript_EffectCounter` | executable | - | - | 1 | 1 (40) |
@@ -150,8 +150,8 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_LOCK_ON | `BattleScript_EffectLockOn` | blocked-on-opcodes | `B_SCR_OP_SETALWAYSHITFLAG` (edge branch only) | - | 2 | 0 (0) |
 | EFFECT_SKETCH | `BattleScript_EffectSketch` | blocked-on-opcodes | `B_SCR_OP_COPYMOVEPERMANENTLY` (edge branch only) | - | 1 | 0 (0) |
 | EFFECT_UNUSED_60 | `BattleScript_EffectHit` | executable | - | - | 0 | 0 (0) |
-| EFFECT_SLEEP_TALK | `BattleScript_EffectSleepTalk` | blocked-on-opcodes | `B_SCR_OP_TRYCHOOSESLEEPTALKMOVE`, `B_SCR_OP_JUMPTOCALLEDMOVE` (edge branch only) | B_SCR_OP_JUMPTOCALLEDMOVE: runtime-resolved jump target (called move's own effect script), not statically enumerable | 1 | 1 (8) |
-| EFFECT_DESTINY_BOND | `BattleScript_EffectDestinyBond` | blocked-on-opcodes | `B_SCR_OP_SETDESTINYBOND` (main path) | - | 1 | 1 (10) |
+| EFFECT_SLEEP_TALK | `BattleScript_EffectSleepTalk` | executable | - | - | 1 | 1 (8) |
+| EFFECT_DESTINY_BOND | `BattleScript_EffectDestinyBond` | executable | - | - | 1 | 1 (10) |
 | EFFECT_FLAIL | `BattleScript_EffectFlail` | executable | - | - | 2 | 2 (20) |
 | EFFECT_SPITE | `BattleScript_EffectSpite` | blocked-on-opcodes | `B_SCR_OP_TRYSPITEPPREDUCE` (edge branch only) | - | 1 | 1 (2) |
 | EFFECT_FALSE_SWIPE | `BattleScript_EffectHit` | executable | - | - | 1 | 0 (0) |
@@ -161,18 +161,18 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_THIEF | `BattleScript_EffectThief` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_STEAL_ITEM is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 2 | 1 (1) |
 | EFFECT_MEAN_LOOK | `BattleScript_EffectMeanLook` | blocked-on-subsystem | - | Cmd_seteffectprimary dispatch: MOVE_EFFECT_PREVENT_ESCAPE is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 3 | 3 (6) |
 | EFFECT_NIGHTMARE | `BattleScript_EffectNightmare` | blocked-on-subsystem | - | Cmd_seteffectprimary dispatch: MOVE_EFFECT_NIGHTMARE is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 1 | 1 (2) |
-| EFFECT_MINIMIZE | `BattleScript_EffectMinimize` | blocked-on-opcodes | `B_SCR_OP_SETMINIMIZE` (main path) | - | 1 | 1 (5) |
+| EFFECT_MINIMIZE | `BattleScript_EffectMinimize` | executable | - | - | 1 | 1 (5) |
 | EFFECT_CURSE | `BattleScript_EffectCurse` | executable | - | - | 1 | 1 (18) |
 | EFFECT_UNUSED_6E | `BattleScript_EffectHit` | executable | - | - | 0 | 0 (0) |
 | EFFECT_PROTECT | `BattleScript_EffectProtect` | executable | - | - | 2 | 2 (37) |
 | EFFECT_SPIKES | `BattleScript_EffectSpikes` | blocked-on-opcodes | `B_SCR_OP_TRYSETSPIKES` (main path) | - | 1 | 1 (3) |
-| EFFECT_FORESIGHT | `BattleScript_EffectForesight` | blocked-on-opcodes | `B_SCR_OP_SETFORESIGHT` (edge branch only) | - | 2 | 1 (3) |
+| EFFECT_FORESIGHT | `BattleScript_EffectForesight` | executable | - | - | 2 | 1 (3) |
 | EFFECT_PERISH_SONG | `BattleScript_EffectPerishSong` | blocked-on-opcodes | `B_SCR_OP_TRYSETPERISHSONG` (main path) | Cmd_jumpifability: ABILITY_SOUNDPROOF is outside the engine's widened ability set (battleScriptIngrainLeechSeedWrapOpcode.ts) -- battle_script_commands.c:3105 | 1 | 1 (4) |
 | EFFECT_SANDSTORM | `BattleScript_EffectSandstorm` | executable | - | - | 1 | 1 (14) |
 | EFFECT_ENDURE | `BattleScript_EffectEndure` | executable | - | - | 1 | 1 (24) |
-| EFFECT_ROLLOUT | `BattleScript_EffectRollout` | blocked-on-opcodes | `B_SCR_OP_ROLLOUTDAMAGECALCULATION` (edge branch only) | - | 2 | 2 (7) |
+| EFFECT_ROLLOUT | `BattleScript_EffectRollout` | executable | - | - | 2 | 2 (7) |
 | EFFECT_SWAGGER | `BattleScript_EffectSwagger` | executable | - | - | 1 | 1 (23) |
-| EFFECT_FURY_CUTTER | `BattleScript_EffectFuryCutter` | blocked-on-opcodes | `B_SCR_OP_FURYCUTTERCALC` (edge branch only) | - | 1 | 1 (5) |
+| EFFECT_FURY_CUTTER | `BattleScript_EffectFuryCutter` | executable | - | - | 1 | 1 (5) |
 | EFFECT_ATTRACT | `BattleScript_EffectAttract` | executable | - | - | 1 | 1 (45) |
 | EFFECT_RETURN | `BattleScript_EffectReturn` | executable | - | - | 1 | 1 (8) |
 | EFFECT_PRESENT | `BattleScript_EffectPresent` | blocked-on-opcodes | `B_SCR_OP_PRESENTDAMAGECALCULATION` (edge branch only) | - | 1 | 1 (1) |
@@ -201,7 +201,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_SKULL_BASH | `BattleScript_EffectSkullBash` | executable | - | - | 1 | 0 (0) |
 | EFFECT_TWISTER | `BattleScript_EffectTwister` | executable | - | - | 1 | 0 (0) |
 | EFFECT_EARTHQUAKE | `BattleScript_EffectEarthquake` | executable | - | - | 1 | 1 (147) |
-| EFFECT_FUTURE_SIGHT | `BattleScript_EffectFutureSight` | blocked-on-opcodes | `B_SCR_OP_TRYSETFUTUREATTACK` (main path) | - | 2 | 1 (5) |
+| EFFECT_FUTURE_SIGHT | `BattleScript_EffectFutureSight` | executable | - | - | 2 | 1 (5) |
 | EFFECT_GUST | `BattleScript_EffectGust` | executable | - | - | 1 | 0 (0) |
 | EFFECT_FLINCH_MINIMIZE_HIT | `BattleScript_EffectStomp` | executable | - | - | 4 | 4 (10) |
 | EFFECT_SOLAR_BEAM | `BattleScript_EffectSolarBeam` | executable | - | - | 1 | 1 (16) |
@@ -209,7 +209,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_TELEPORT | `BattleScript_EffectTeleport` | executable | - | - | 1 | 0 (0) |
 | EFFECT_BEAT_UP | `BattleScript_EffectBeatUp` | blocked-on-opcodes | `B_SCR_OP_TRYDOBEATUP` (edge branch only) | - | 1 | 0 (0) |
 | EFFECT_SEMI_INVULNERABLE | `BattleScript_EffectSemiInvulnerable` | executable | - | - | 4 | 4 (32) |
-| EFFECT_DEFENSE_CURL | `BattleScript_EffectDefenseCurl` | blocked-on-opcodes | `B_SCR_OP_SETDEFENSECURLBIT` (main path) | - | 1 | 1 (6) |
+| EFFECT_DEFENSE_CURL | `BattleScript_EffectDefenseCurl` | executable | - | - | 1 | 1 (6) |
 | EFFECT_SOFTBOILED | `BattleScript_EffectSoftboiled` | executable | - | - | 2 | 2 (7) |
 | EFFECT_FAKE_OUT | `BattleScript_EffectFakeOut` | executable | - | - | 1 | 1 (15) |
 | EFFECT_UPROAR | `BattleScript_EffectUproar` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_UPROAR is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 1 | 1 (1) |
@@ -218,39 +218,39 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_SWALLOW | `BattleScript_EffectSwallow` | blocked-on-opcodes | `B_SCR_OP_STOCKPILETOHPHEAL` (main path) | - | 1 | 1 (2) |
 | EFFECT_UNUSED_A3 | `BattleScript_EffectHit` | executable | - | - | 0 | 0 (0) |
 | EFFECT_HAIL | `BattleScript_EffectHail` | executable | - | - | 1 | 1 (7) |
-| EFFECT_TORMENT | `BattleScript_EffectTorment` | blocked-on-opcodes | `B_SCR_OP_SETTORMENT` (edge branch only) | - | 1 | 1 (4) |
+| EFFECT_TORMENT | `BattleScript_EffectTorment` | executable | - | - | 1 | 1 (4) |
 | EFFECT_FLATTER | `BattleScript_EffectFlatter` | executable | - | - | 1 | 1 (2) |
 | EFFECT_WILL_O_WISP | `BattleScript_EffectWillOWisp` | blocked-on-subsystem | - | Cmd_jumpifability: ABILITY_WATER_VEIL is outside the engine's widened ability set (battleScriptIngrainLeechSeedWrapOpcode.ts) -- battle_script_commands.c:3105 | 1 | 1 (10) |
 | EFFECT_MEMENTO | `BattleScript_EffectMemento` | blocked-on-opcodes | `B_SCR_OP_TRYMEMENTO` (edge branch only) | - | 1 | 1 (1) |
 | EFFECT_FACADE | `BattleScript_EffectFacade` | executable | - | - | 1 | 1 (19) |
-| EFFECT_FOCUS_PUNCH | `BattleScript_EffectFocusPunch` | blocked-on-opcodes | `B_SCR_OP_JUMPIFNODAMAGE` (main path) | - | 1 | 1 (11) |
+| EFFECT_FOCUS_PUNCH | `BattleScript_EffectFocusPunch` | executable | - | - | 1 | 1 (11) |
 | EFFECT_SMELLINGSALT | `BattleScript_EffectSmellingsalt` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_REMOVE_PARALYSIS is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 1 | 1 (1) |
-| EFFECT_FOLLOW_ME | `BattleScript_EffectFollowMe` | blocked-on-opcodes | `B_SCR_OP_SETFORCEDTARGET` (main path) | - | 1 | 1 (5) |
+| EFFECT_FOLLOW_ME | `BattleScript_EffectFollowMe` | executable | - | - | 1 | 1 (5) |
 | EFFECT_NATURE_POWER | `BattleScript_EffectNaturePower` | blocked-on-opcodes | `B_SCR_OP_CALLENVIRONMENTATTACK` (main path) | - | 1 | 0 (0) |
 | EFFECT_CHARGE | `BattleScript_EffectCharge` | blocked-on-opcodes | `B_SCR_OP_SETCHARGE` (main path) | - | 1 | 0 (0) |
-| EFFECT_TAUNT | `BattleScript_EffectTaunt` | blocked-on-opcodes | `B_SCR_OP_SETTAUNT` (edge branch only) | - | 1 | 1 (2) |
-| EFFECT_HELPING_HAND | `BattleScript_EffectHelpingHand` | blocked-on-opcodes | `B_SCR_OP_TRYSETHELPINGHAND` (main path) | - | 1 | 1 (5) |
+| EFFECT_TAUNT | `BattleScript_EffectTaunt` | executable | - | - | 1 | 1 (2) |
+| EFFECT_HELPING_HAND | `BattleScript_EffectHelpingHand` | executable | - | - | 1 | 1 (5) |
 | EFFECT_TRICK | `BattleScript_EffectTrick` | blocked-on-opcodes | `B_SCR_OP_TRYSWAPITEMS` (edge branch only) | - | 1 | 1 (5) |
 | EFFECT_ROLE_PLAY | `BattleScript_EffectRolePlay` | blocked-on-opcodes | `B_SCR_OP_TRYCOPYABILITY` (edge branch only) | - | 1 | 1 (1) |
-| EFFECT_WISH | `BattleScript_EffectWish` | blocked-on-opcodes | `B_SCR_OP_TRYWISH` (main path) | - | 1 | 1 (8) |
-| EFFECT_ASSIST | `BattleScript_EffectAssist` | blocked-on-opcodes | `B_SCR_OP_ASSISTATTACKSELECT`, `B_SCR_OP_JUMPTOCALLEDMOVE` (main path) | B_SCR_OP_JUMPTOCALLEDMOVE: runtime-resolved jump target (called move's own effect script), not statically enumerable | 1 | 0 (0) |
+| EFFECT_WISH | `BattleScript_EffectWish` | executable | - | - | 1 | 1 (8) |
+| EFFECT_ASSIST | `BattleScript_EffectAssist` | blocked-on-opcodes | `B_SCR_OP_ASSISTATTACKSELECT` (main path) | - | 1 | 0 (0) |
 | EFFECT_INGRAIN | `BattleScript_EffectIngrain` | executable | - | - | 1 | 1 (5) |
 | EFFECT_SUPERPOWER | `BattleScript_EffectSuperpower` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_ATK_DEF_DOWN is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 1 | 1 (3) |
-| EFFECT_MAGIC_COAT | `BattleScript_EffectMagicCoat` | blocked-on-opcodes | `B_SCR_OP_TRYSETMAGICCOAT` (main path) | - | 1 | 1 (3) |
+| EFFECT_MAGIC_COAT | `BattleScript_EffectMagicCoat` | executable | - | - | 1 | 1 (3) |
 | EFFECT_RECYCLE | `BattleScript_EffectRecycle` | blocked-on-opcodes | `B_SCR_OP_TRYRECYCLEITEM` (main path) | - | 1 | 1 (1) |
-| EFFECT_REVENGE | `BattleScript_EffectRevenge` | blocked-on-opcodes | `B_SCR_OP_DOUBLEDAMAGEDEALTIFDAMAGED` (main path) | - | 1 | 1 (3) |
+| EFFECT_REVENGE | `BattleScript_EffectRevenge` | executable | - | - | 1 | 1 (3) |
 | EFFECT_BRICK_BREAK | `BattleScript_EffectBrickBreak` | executable | - | - | 1 | 1 (46) |
 | EFFECT_YAWN | `BattleScript_EffectYawn` | executable | - | - | 1 | 1 (10) |
 | EFFECT_KNOCK_OFF | `BattleScript_EffectKnockOff` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_KNOCK_OFF is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 1 | 1 (7) |
 | EFFECT_ENDEAVOR | `BattleScript_EffectEndeavor` | executable | - | - | 1 | 1 (4) |
 | EFFECT_ERUPTION | `BattleScript_EffectEruption` | blocked-on-opcodes | `B_SCR_OP_SCALEDAMAGEBYHEALTHRATIO` (main path) | - | 2 | 2 (2) |
-| EFFECT_SKILL_SWAP | `BattleScript_EffectSkillSwap` | blocked-on-opcodes | `B_SCR_OP_TRYSWAPABILITIES` (edge branch only) | - | 1 | 1 (5) |
+| EFFECT_SKILL_SWAP | `BattleScript_EffectSkillSwap` | executable | - | - | 1 | 1 (5) |
 | EFFECT_IMPRISON | `BattleScript_EffectImprison` | blocked-on-opcodes | `B_SCR_OP_TRYIMPRISON` (main path) | - | 1 | 0 (0) |
-| EFFECT_REFRESH | `BattleScript_EffectRefresh` | blocked-on-opcodes | `B_SCR_OP_CUREIFBURNEDPARALYZEDORPOISONED` (main path) | - | 1 | 1 (2) |
+| EFFECT_REFRESH | `BattleScript_EffectRefresh` | executable | - | - | 1 | 1 (2) |
 | EFFECT_GRUDGE | `BattleScript_EffectGrudge` | blocked-on-opcodes | `B_SCR_OP_TRYSETGRUDGE` (main path) | - | 1 | 1 (2) |
 | EFFECT_SNATCH | `BattleScript_EffectSnatch` | blocked-on-opcodes | `B_SCR_OP_TRYSETSNATCH` (main path) | - | 1 | 0 (0) |
-| EFFECT_LOW_KICK | `BattleScript_EffectLowKick` | blocked-on-opcodes | `B_SCR_OP_WEIGHTDAMAGECALCULATION` (main path) | - | 1 | 1 (2) |
-| EFFECT_SECRET_POWER | `BattleScript_EffectSecretPower` | blocked-on-opcodes | `B_SCR_OP_GETSECRETPOWEREFFECT` (main path) | - | 1 | 1 (6) |
+| EFFECT_LOW_KICK | `BattleScript_EffectLowKick` | executable | - | - | 1 | 1 (2) |
+| EFFECT_SECRET_POWER | `BattleScript_EffectSecretPower` | executable | - | - | 1 | 1 (6) |
 | EFFECT_DOUBLE_EDGE | `BattleScript_EffectDoubleEdge` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_RECOIL_33 is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 2 | 1 (52) |
 | EFFECT_TEETER_DANCE | `BattleScript_EffectTeeterDance` | blocked-on-opcodes | `B_SCR_OP_JUMPIFARRAYEQUAL` (main path) | - | 1 | 1 (2) |
 | EFFECT_BLAZE_KICK | `BattleScript_EffectBurnHit` | executable | - | - | 1 | 1 (1) |
@@ -288,7 +288,7 @@ All checks passed for this run.
 - **One deliberate semantic exception:** `Cmd_seteffectwithchance`'s SetMoveEffect dispatch (`applySetMoveEffect`, `src/engine/battleScriptHitChainOpcode.ts:1760-1971`) is opcode-registered but internally branches on the `MOVE_EFFECT_*` byte a script sets via the preceding `setmoveeffect` statement. This is the only production dispatcher today where opcode registration and per-script executability diverge (PROGRESS 444), so this census specifically tracks that one operand value along each walk -- reading the supported-byte set live from the engine's own exported `SET_MOVE_EFFECT_SUPPORTED_BYTES` (ISSUES #44) rather than a second hand-maintained copy, with a name<->id lookup table guarded by an assertion that fails the run if the engine's dispatch grows an id this tool cannot name yet. Every other multi-branch dispatcher's internal barriers are *not* modeled operand-by-operand here -- if a future dispatcher gains the same pattern (registered opcode, narrow-input barrier), this tool will overstate its effects as fully executable until a similar tracked exception is added.
 - **Call/return modeling.** A `call` edge is treated as reaching *both* the callee's entry (to collect its opcodes) and the callsite's recorded continuation (`callsiteContinuations`), unconditionally. This assumes the callee always returns; it does not model the callee diverging (e.g. hitting `end` without returning), which would make this census's reachable set a strict superset of the true one in rare cases -- i.e. it can only make an effect look *more* blocked than reality, never less.
 - **"Main path" is a conservative proxy, not a dominance analysis.** An opcode is reported as reached "on the main path" only if some route from the entry reaches it using zero conditional forks (unconditional fallthrough, unconditional `goto`, and calls only). Any instruction beyond the first conditional jump in a script is reported as "edge branch only" even if every real branch of that fork reconverges to the same later instruction. This under-claims "main path" rather than over-claiming it.
-- **Dynamic dispatch, two categories.** `B_SCR_OP_JUMPTOCALLEDMOVE` (Metronome/Sleep Talk/Assist-style "run another move's effect script") has a runtime-computed target with no static label operand; those call sites are reported as a subsystem note (dynamic move-effect dispatch), not walked further. Separately, `B_SCR_OP_FORCERANDOMSWITCH`'s success target (`BattleScript_SuccessForceOut`) is fixed at compile time but never spelled as a bytecode operand -- `Cmd_forcerandomswitch` writes `gBattlescriptCurrInstr` directly (`battle_script_commands.c:7181`) instead of reading one. Since that target IS statically known, it is modeled as a real jump edge (`HARDCODED_SUCCESS_TARGETS` in this tool) so the walk actually visits it, unlike the genuinely-unresolvable `JUMPTOCALLEDMOVE` case.
+- **Dynamic dispatch, two categories.** `B_SCR_OP_JUMPTOCALLEDMOVE` (Metronome/Sleep Talk/Assist-style "run another move's effect script") has a runtime-computed target with no static label operand. The called script is not walked from that call site; once the dynamic opcode itself is registered, the caller is executable and each possible called effect remains accountable in its own census row. Separately, `B_SCR_OP_FORCERANDOMSWITCH`'s success target (`BattleScript_SuccessForceOut`) is fixed at compile time but never spelled as a bytecode operand -- `Cmd_forcerandomswitch` writes `gBattlescriptCurrInstr` directly (`battle_script_commands.c:7181`) instead of reading one. Since that target IS statically known, it is modeled as a real jump edge (`HARDCODED_SUCCESS_TARGETS` in this tool) so the walk actually visits it, unlike the runtime-resolved `JUMPTOCALLEDMOVE` case.
 - **Control-flow correction pass.** `src/data/gen/battle-script-graph.json`'s edge extractor (`tools/extract/extract-battle-script-graph.ts`) only recognizes a script-pointer operand as a jump target when the opcode name matches a fixed pattern (`B_SCR_OP_JUMPIF*`, plus a short unconditional allowlist). Opcodes with a differently-named pointer operand (`accuracycheck`'s failPtr, `statbuffchange`'s jumpptr, `forcerandomswitch`'s ptr, ...) get zero jump edge from the committed graph. This tool corrects that mechanically from the graph's own `labelOperands` (already computed per statement, just not wired into every edge) rather than opcode-by-opcode: any statement with a label operand not already covered by an existing jump/call edge gets one synthesized, which can only make an effect look more blocked than the committed graph claims, never less. The one further correction needed is `B_SCR_OP_FORCERANDOMSWITCH` specifically: audited against `battle_script_commands.c` this session, it never falls through to its assembly successor on any branch (unlike every other audited "ptr"-operand opcode, which do genuinely advance on the non-jump branch), so its one fabricated fallthrough edge is suppressed rather than kept alongside the added jump edges (`NEVER_FALLS_THROUGH_OPCODES` in this tool). See docs/roar-multihit-registration-scout.md for the EFFECT_ROAR case this was found from.
 - **Factory-L50 legality** is taken directly from the topology's own precomputed `level50FactoryReachableEffects` join (the 850-set boundary); this tool does not recompute Factory legality itself.
 

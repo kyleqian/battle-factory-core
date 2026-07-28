@@ -222,7 +222,7 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     expect(result.state.scheduler.pendingControllerBattlers).toEqual([1]);
   });
 
-  it("switchindataupdate: rebuilds species/hp/status1/types from the party record and resets stat stages/status2/status3/the modeled DisableStruct fields to neutral", () => {
+  it("switchindataupdate pins the shared restoration boundary: species/hp/status/types reset, while ability restoration requiring unmodeled abilityNum remains bounded", () => {
     const rc = context({
       battlers: [
         battler({ side: 0, species: URSARING, types: ["TYPE_NORMAL", "TYPE_NORMAL"] }),
@@ -239,6 +239,8 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
           rolloutTimer: 3,
           furyCutterCounter: 2,
           disabledMove: KARATE_CHOP,
+          disableTimer: 5,
+          disableTimerStartValue: 5,
           tauntTimer: 4,
         }),
         battler({ side: 0 }),
@@ -259,8 +261,13 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     expect(updated.rolloutTimer).toBe(0);
     expect(updated.furyCutterCounter).toBe(0);
     expect(updated.disabledMove).toBe(0);
+    expect(updated.disableTimer).toBe(0);
+    expect(updated.disableTimerStartValue).toBe(0);
     expect(updated.tauntTimer).toBe(0);
-    // ability/item/moves/pp are not rebuilt (untracked, see file header) -- ability stays stale.
+    // Exact bounded remainder for Skill Swap lifecycle: the shared seam owns
+    // the source switch boundary and party species is modeled, but abilityNum
+    // is not, so it cannot yet derive GetAbilityBySpecies here. Do not add a
+    // private Skill Swap lifecycle handler; the active byte remains stale.
     expect(updated.ability).toBe(ABILITY_GUTS);
   });
 
@@ -296,6 +303,7 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
           types: ["TYPE_GRASS", "TYPE_GRASS"],
           partyIndex: 2,
           ability: ABILITY_GUTS,
+          status3: 1 << 8, // STATUS3_MINIMIZED is deliberately excluded from the Baton Pass mask.
         }),
         battler({ side: 0 }),
         battler({ side: 1 }),
@@ -335,6 +343,7 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     expect(result.state.rulesContext.battlers[0].status3).toBe(
       STATUS3_ALWAYS_HITS_TURN_2,
     );
+    expect(result.state.rulesContext.battlers[1].status3 & (1 << 8)).toBe(0);
   });
 
   it("switchindataupdate: doubles wrap ownership stays behind a named identity barrier", () => {

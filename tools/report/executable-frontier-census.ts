@@ -176,10 +176,9 @@ function firstInstruction(labelName: string, guard: Set<string> = new Set()): { 
 // edge is left untouched.
 const NEVER_FALLS_THROUGH_OPCODES = new Set(["B_SCR_OP_FORCERANDOMSWITCH"]);
 
-// forcerandomswitch's success target is a THIRD dynamic-dispatch category
-// alongside this census's one previously-documented case
-// (B_SCR_OP_JUMPTOCALLEDMOVE, a genuinely runtime-computed target with no
-// static label operand at all -- see the "Dynamic dispatch" caveat below):
+// forcerandomswitch's success target is a distinct dynamic-dispatch category
+// beside B_SCR_OP_JUMPTOCALLEDMOVE (a runtime-computed target with no static
+// label operand at all -- see the "Dynamic dispatch" caveat below):
 // a target that IS fixed at compile time, just never spelled as a bytecode
 // operand, because battle_script_commands.c writes
 // `gBattlescriptCurrInstr = BattleScript_SuccessForceOut` directly (:7181)
@@ -187,7 +186,7 @@ const NEVER_FALLS_THROUGH_OPCODES = new Set(["B_SCR_OP_FORCERANDOMSWITCH"]);
 // is modeled as a real jump edge to a real label (so the walk actually
 // visits BattleScript_SuccessForceOut/BattleScript_TrainerBattleForceOut and
 // discovers SWITCHOUTABILITIES/RETURNTOBALL), not as an unresolvable
-// dynamic-jump note the way JUMPTOCALLEDMOVE is.
+// unresolved dynamic-jump note.
 const HARDCODED_SUCCESS_TARGETS: Readonly<Record<string, string>> = Object.freeze({
   B_SCR_OP_FORCERANDOMSWITCH: "BattleScript_SuccessForceOut",
 });
@@ -273,6 +272,7 @@ const MOVE_EFFECT_ID_BY_NAME: Readonly<Record<string, number>> = Object.freeze({
   MOVE_EFFECT_FLINCH: 8,
   MOVE_EFFECT_CHARGING: 12,
   MOVE_EFFECT_WRAP: 13,
+  MOVE_EFFECT_RECOIL_25: 14,
   MOVE_EFFECT_ATK_PLUS_1: 15,
   MOVE_EFFECT_DEF_PLUS_1: 16,
   MOVE_EFFECT_SPD_PLUS_1: 17,
@@ -436,6 +436,9 @@ function walk(entryLabel: string, allowConditionalForks: boolean): WalkResult {
       if (edge.to === null) {
         // Dynamic transfer (e.g. B_SCR_OP_JUMPTOCALLEDMOVE): the target is a
         // runtime-computed move-effect script, not a static label operand.
+        // The opcode itself remains enumerable/registrable; classification
+        // below treats a registered dynamic dispatcher as executable while
+        // leaving each possible called effect to its own census row.
         const opcodeName = statement.opcodeBindings?.[0] ?? statement.mnemonic;
         dynamicJumpOpcodes.add(opcodeName);
         continue;
@@ -470,7 +473,9 @@ type EffectReport = {
 const effectReports: EffectReport[] = topology.effects.map((effect) => {
   const full = walk(effect.entryScript, true);
   const missingOpcodes = full.opcodesUsed.filter((op) => !REGISTERED_OPCODES.has(op));
-  const dynamicNotes = full.dynamicJumpOpcodes.map(
+  const dynamicNotes = full.dynamicJumpOpcodes
+    .filter((op) => !REGISTERED_OPCODES.has(op))
+    .map(
     (op) => `${op}: runtime-resolved jump target (called move's own effect script), not statically enumerable`,
   );
   const subsystemNotes = [...full.subsystemBlockers, ...dynamicNotes];
@@ -995,13 +1000,14 @@ lines.push(
 );
 lines.push(
   "- **Dynamic dispatch, two categories.** `B_SCR_OP_JUMPTOCALLEDMOVE` (Metronome/Sleep Talk/Assist-style "
-  + "\"run another move's effect script\") has a runtime-computed target with no static label operand; those "
-  + "call sites are reported as a subsystem note (dynamic move-effect dispatch), not walked further. Separately, "
+  + "\"run another move's effect script\") has a runtime-computed target with no static label operand. The "
+  + "called script is not walked from that call site; once the dynamic opcode itself is registered, the caller "
+  + "is executable and each possible called effect remains accountable in its own census row. Separately, "
   + "`B_SCR_OP_FORCERANDOMSWITCH`'s success target (`BattleScript_SuccessForceOut`) is fixed at compile time but "
   + "never spelled as a bytecode operand -- `Cmd_forcerandomswitch` writes `gBattlescriptCurrInstr` directly "
   + "(`battle_script_commands.c:7181`) instead of reading one. Since that target IS statically known, it is "
   + "modeled as a real jump edge (`HARDCODED_SUCCESS_TARGETS` in this tool) so the walk actually visits it, "
-  + "unlike the genuinely-unresolvable `JUMPTOCALLEDMOVE` case.",
+  + "unlike the runtime-resolved `JUMPTOCALLEDMOVE` case.",
 );
 lines.push(
   "- **Control-flow correction pass.** `src/data/gen/battle-script-graph.json`'s edge extractor "

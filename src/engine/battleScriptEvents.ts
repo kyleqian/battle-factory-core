@@ -37,6 +37,16 @@ export type BattleScriptSelectionMessageSnapshot = Readonly<{
   ];
 }>;
 
+export type BattleScriptGameStat =
+  | Readonly<{
+    index: 26;
+    symbol: "GAME_STAT_USED_SPLASH";
+  }>
+  | Readonly<{
+    index: 27;
+    symbol: "GAME_STAT_USED_STRUGGLE";
+  }>;
+
 export type BattleScriptSemanticEventPayload =
   | Readonly<{
     kind: "message";
@@ -108,6 +118,15 @@ export type BattleScriptSemanticEventPayload =
     kind: "set-battler-item";
     battler: BattleScriptBattlerId;
     item: number;
+  }>
+  | Readonly<{
+    /**
+     * Save/meta observation from Cmd_incrementgamestat. The Battle Script
+     * machine deliberately does not own SaveBlock encryption, range checks,
+     * or saturation; battleGameStatMeta.ts consumes this typed intent.
+     */
+    kind: "game-stat-increment";
+    gameStat: BattleScriptGameStat;
   }>
   | Readonly<{
     kind: "trainer-slide-in";
