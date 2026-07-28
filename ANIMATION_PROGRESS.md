@@ -301,6 +301,27 @@ stays unsupported because the Factory building environment dispatches to
 complete dense acceptance. No battle state, RNG/controller/facility logic,
 boundary list, unsupported barrier, or absolute-tick branch changed.
 
+## MOVE_FAINT_ATTACK promoted exact; audio/VBlank workload closes delayed control (2026-07-28)
+
+**Verdict:** `MOVE_FAINT_ATTACK` is exact. Canonical opponent-front,
+portable player-back, and the +30 delayed-control complete bodies each pass
+**221/221** dense shared-framebuffer frames twice fresh. Coverage is now
+**64 exact / 0 partial / 212 unsupported**.
+
+**Scheduler/evidence:** the general production workload producer advances the
+bootstrap-probed audio state (`gPcmDmaCounter=6`, seven-VBlank PCM period;
+`c15=8`, 15-state CGB clock). It feeds ordered VBlank register-copy and
+RunTasks work through the typed presentation seam. Fresh cycle evidence shows
+canonical RunTasks at VCOUNT 3, queueing `BLDALPHA 0x0d03` behind displayed
+`0x0e02`; the delayed PCM-refill/audio-work phase resumes at VCOUNT 224 and
+writes hardware `0x0d03` immediately. The probe records source software
+tasks, audio counters/channel flags, OAM/matrices/palettes/registers, and raw
+RGB. Portable evidence remains byte-identical (`a96823883d3b02dd`).
+
+**Scope:** no move-name, animation-age, input-delay, coordinate, RGB, pixel,
+battle-number, turn-number, damage, RNG/controller/facility, canonical
+boundary, unsupported barrier, or shared-core-interface exception changed.
+
 ## MOVE_FAINT_ATTACK typed workload seam checkpoint; remains partial (2026-07-28)
 
 **Verdict:** `MOVE_FAINT_ATTACK` remains the sole partial. Canonical
