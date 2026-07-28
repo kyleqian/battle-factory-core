@@ -181,6 +181,24 @@ function createCopyarrayHandler(): BattleScriptOpcodeHandler<BattleScriptRulesCo
       return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }), { rulesContext: nextRulesContext });
     }
     /**
+     * `copybyte cMULTISTRING_CHOOSER, sTWOTURN_STRINGID` (macro sugar for
+     * `copyarray cMULTISTRING_CHOOSER, sTWOTURN_STRINGID, 1`) --
+     * `BattleScriptFirstChargingTurn`'s own instruction, shared verbatim by
+     * all five two-turn-charge effects (semi-invulnerable registration rung
+     * 3, docs/semi-invulnerable-registration-scout.md §1b/§5 rung 3). Both
+     * pointers already exist in this engine's pointer table
+     * (`battleScriptSetByte.ts`); mirrors the `cEFFECT_CHOOSER<-sMULTIHIT_EFFECT`
+     * tuple immediately above exactly.
+     */
+    if (size === "0x1" && dst === "cMULTISTRING_CHOOSER" && src === "sTWOTURN_STRINGID") {
+      const value = readBattleScriptRulesByte(rulesContext, "sTWOTURN_STRINGID");
+      const nextRulesContext = value === null ? null : writeBattleScriptRulesByte(rulesContext, "cMULTISTRING_CHOOSER", value);
+      if (nextRulesContext === null) {
+        throw new Error("Cmd_copyarray: cMULTISTRING_CHOOSER<-sTWOTURN_STRINGID became undecodable");
+      }
+      return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }), { rulesContext: nextRulesContext });
+    }
+    /**
      * `BattleScript_MultiHitPrintStrings`'s own `copyarray gBattleTextBuff1,
      * sMULTIHIT_STRING, 6` (also found live this session, on the multi-hit
      * family's normal happy path, right before `printstring

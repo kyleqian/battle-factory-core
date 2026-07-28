@@ -271,6 +271,42 @@ describe("Wrap-family setter (Cmd_seteffectwithchance's MOVE_EFFECT_WRAP case)",
   });
 });
 
+describe(
+  "copybyte cMULTISTRING_CHOOSER, sTWOTURN_STRINGID (semi-invulnerable registration rung 3, "
+    + "docs/semi-invulnerable-registration-scout.md §1b/§5 rung 3 -- BattleScriptFirstChargingTurn's own "
+    + "instruction, shared by all five two-turn-charge effects)",
+  () => {
+    const pc = program.instructions.find(
+      (instruction) =>
+        instruction.source.label === "BattleScriptFirstChargingTurn" && instruction.opcodeName === "B_SCR_OP_COPYARRAY",
+    )!.programCounter;
+
+    function stepAtProgramCounter(rulesContext: BattleScriptRulesContext) {
+      const execution = createBattleScriptStatusRulesExecution(program, "BattleScriptFirstChargingTurn", rulesContext, 1, externalPorts());
+      const patched = Object.freeze({ ...execution.state, programCounter: pc });
+      return { execution, result: stepBattleScriptMachine(program, patched, execution.handlers) };
+    }
+
+    /** src/battle_message.c:1025-1035 -- B_MSG_TURN1_FLY/DIG, two of the eight sTWOTURN_STRINGID values this tuple carries. */
+    const B_MSG_TURN1_FLY = 4;
+    const B_MSG_TURN1_DIG = 5;
+
+    it("copies sTWOTURN_STRINGID (B_MSG_TURN1_FLY) into cMULTISTRING_CHOOSER", () => {
+      const { result } = stepAtProgramCounter(context({}, { twoTurnStringId: B_MSG_TURN1_FLY }));
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.rulesContext.multistringChooser).toBe(B_MSG_TURN1_FLY);
+      expect(result.state.programCounter).toBe(pc + 1);
+    });
+
+    it("copies sTWOTURN_STRINGID (B_MSG_TURN1_DIG) into cMULTISTRING_CHOOSER", () => {
+      const { result } = stepAtProgramCounter(context({}, { twoTurnStringId: B_MSG_TURN1_DIG }));
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.rulesContext.multistringChooser).toBe(B_MSG_TURN1_DIG);
+      expect(result.state.programCounter).toBe(pc + 1);
+    });
+  },
+);
+
 describe("(b) unsupported-branch barriers -- COPYARRAY/JUMPIFABILITY/MANIPULATEDAMAGE are generic multi-site opcodes, narrowed to this slice's own operand tuple", () => {
   function stepAtProgramCounter(pc: number, rulesContext: BattleScriptRulesContext) {
     const execution = createBattleScriptStatusRulesExecution(program, "BattleScript_EffectHit", rulesContext, 1, externalPorts());
