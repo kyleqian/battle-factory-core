@@ -15,6 +15,36 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 600 — [SUPERVISOR VERIFY 2026-07-28 ~05:55] Spikes accepted; Focus Energy evidence folded
+
+- **State:** reviewed union green at **362 files / 4206 tests** and focused
+  **330/330**; production build, both-oracle info, census regeneration,
+  ratchets **6/6**, and `git diff --check` pass. Census is exactly
+  **157/214 effects, 286/355 moves, 234/276 Factory-L50 distinct,
+  2758/2957 weighted**, all **42/42**.
+- **Did:** accepted Spikes `0xb0` plus the shared persistent side-condition,
+  switch-in damage/message/controller/guard/faint paths after source/diff and
+  public forced-switch review. Folded the repaired complete-party Focus
+  Energy source/OFF packet and independently replayed exact manifest
+  `e96bcff2…12d489c1`: first use sets attacker status2 `0x00100000` and
+  spends PP; the real repeated selection spends PP, fails before the opcode,
+  and preserves the bit/HP.
+- **Next:** register operand-free `B_SCR_OP_SETFOCUSENERGY` (`0x9a`)
+  globally. Prove attacker-only success and defensive duplicate branches,
+  exact multichooser/result flags/one-byte PC with zero local RNG/controller,
+  the real script's pre-opcode duplicate bypass, shared crit-stage +2/cap
+  consumer, ordinary-switch clear, and Baton Pass retention. Expected
+  census: **158/214, 287/355, 235/276, 2760/2957**.
+- **Notes:** handler inventory is **165**. Spikes deliberately retired the
+  switch-in **10→9** and hit-chain **22→21** barriers; Rapid Spin remains
+  bounded at the earlier `MOVE_EFFECT_RAPIDSPIN` barrier. Focus Energy's
+  defensive in-opcode failure, PC/selector, switch lifetime, and crit
+  causality are source-only; public evidence covers real success and the
+  script-level repeat. No recording import, private handler,
+  presentation/tick branch, issue removal, DEFERRED item, or oracle lifecycle
+  action. Animation branch remains intentionally unmerged after orient.
+
+---
 ## 599 — [BOUNDED MAIN WORKER 2026-07-28 ~05:58] Spikes executes across shared switch-in path
 
 - **State:** committed `9b8473e` + `db739ac`; tree green at **361 files /
@@ -64,25 +94,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   handler, presentation/tick branch, issue removal, DEFERRED item, or oracle
   lifecycle action. Animation branch remains intentionally unmerged after
   its post-orient advance.
-
----
-## 597 — [BOUNDED MAIN WORKER 2026-07-28 ~05:28] Low Kick executes through shared damage
-
-- **State:** committed `6e96b30` + `28d2294` + `103881c` + `ff8c8c6`;
-  tree green at **359 files / 4183 tests**, focused
-  opcode/rules/hit-chain/action/full-turn coverage **294/294**, production
-  build, ratchets **6/6**, both oracle infos, and `git diff --check`.
-  Census is exactly **156/214 effects, 285/355 moves, 233/276 Factory-L50
-  distinct, 2755/2957 weighted**, all **42/42** checks.
-- **Did:** extended the pinned species extractor with Pokédex hectogram
-  weights for all 386 real Pokédex entries. The 25 unreachable OLD_UNOWN
-  compatibility ids remain explicitly absent. The handler proves all 12
-  strict bracket edges, arbitrary catalog rows, both target ids, immutable
-  ownership, and exact one-byte PC with unchanged RNG/events/scheduler.
-- **Next:** supervisor verify this bounded executable-frontier increment and
-  select the next source-complete registration target.
-- **Notes:** handler inventory is **164**. No recording import, local
-  RNG/controller/message work, private move path, unsupported barrier, or
-  ratchet change. Generic Machoke→Chansey Low Kick proves PP, shared
-  accuracy/type/damage/HP and effectiveness messages, opponent Splash, and
-  `dynamicBasePower` reset at the next decision.
