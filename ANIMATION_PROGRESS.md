@@ -1,5 +1,29 @@
 # Animation coverage
 
+## MOVE_HEADBUTT promoted exact; source OAM latch compositor closed (2026-07-28)
+
+**Verdict:** `MOVE_HEADBUTT` is exact. Fresh complete legal set-24
+ZIGZAGOON/ONIX Scene-ON evidence passes the entire move-owned animation body
+plus first clear display at **48/48** frames **77-124** player-back and
+**48/48** frames **81-128** opponent-front through source/reducer, typed seam,
+registers, hardware battler OAM/matrices/palettes, side-relative audio, raw
+RGB, and the shared framebuffer, twice fresh. Coverage is now **62 exact / 1
+partial / 213 unsupported**.
+
+**Renderer/evidence:** source extraction byte-pins ZIGZAGOON front/back and
+reuses the already source-generated `ANIM_TAG_IMPACT`. The narrow compositor
+ports the prior-software affine/OAM transfer, both source task-to-OAM display
+latches, flashing IMPACT visibility, field chrome, healthboxes, and move text.
+Independent outputs remain byte-identical (player `28e574bd…c858`, opponent
+`fcc0a0e8…1281`).
+
+**Scope/siblings:** `MOVE_HORN_ATTACK`, `MOVE_HORN_DRILL`, and
+`MOVE_DRILL_PECK` remain unsupported because their horn,
+drill-BG/scroll/repeated-impact, and whirlwind/hitsplat-task bodies lack
+independent complete dense acceptance. No battle logic, RNG/controller/
+facility state, boundary list, unsupported barrier, absolute-tick/input-delay,
+coordinate/RGB, or pixel exception changed.
+
 ## MOVE_HEADBUTT complete typed/hardware checkpoint; remains partial (2026-07-28)
 
 **Verdict:** `MOVE_HEADBUTT` is partial. Fresh complete legal set-24
