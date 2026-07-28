@@ -62,6 +62,7 @@ import { createBattleScriptJumpifabilitypresentOpcodeHandlers } from "./battleSc
 import { createBattleScriptRecoverbasedonsunlightOpcodeHandlers } from "./battleScriptRecoverbasedonsunlightOpcode.ts";
 import { createBattleScriptCurseOpcodeHandlers } from "./battleScriptCurseOpcode.ts";
 import { createBattleScriptRemainingHpToPowerOpcodeHandlers } from "./battleScriptRemainingHpToPowerOpcode.ts";
+import { createBattleScriptFriendshipToDamageOpcodeHandlers } from "./battleScriptFriendshipToDamageOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -2282,6 +2283,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptRecoverbasedonsunlightOpcodeHandlers(program),
     ...createBattleScriptCurseOpcodeHandlers(program, resolveRulesBattlerForBattleScript),
     ...createBattleScriptRemainingHpToPowerOpcodeHandlers(program),
+    ...createBattleScriptFriendshipToDamageOpcodeHandlers(program),
   });
 }
 

@@ -13,6 +13,7 @@ import {
 const STRENGTH = 70; // EFFECT_HIT, TYPE_NORMAL -- the banked KO-scenario move (factoryBattleScriptTerminalDecision.test.ts).
 const EMBER = 52; // EFFECT_BURN_HIT, TYPE_FIRE, 10% MOVE_EFFECT_BURN secondary proc.
 const FLAIL = 175; // EFFECT_FLAIL -- writes source gDynamicBasePower before the shared hit chain.
+const FRUSTRATION = 218; // EFFECT_FRUSTRATION -- friendship 0 writes source gDynamicBasePower 102.
 /** The banked KO-scenario seed (factoryBattleScriptTerminalDecision.test.ts, docs/hit-chain-ground-truth.md). */
 const KO_SCENARIO_RNG_SEED = 919694434;
 /** Brute-force-found: Ember's 10% burn proc actually lands on turn 1 with this seed, per this move's own real hit-chain RNG order (accuracy, crit, damage, secondary-effect-chance). */
@@ -211,7 +212,7 @@ describe("factory full-turn decision -- decision -> both actions -> end-turn -> 
   );
 
   it(
-    "clears one action's dynamic power before the next mover: low-HP Flail cannot strengthen "
+    "clears one action's dynamic power before the next mover: low-HP Flail and friendship-powered Frustration cannot strengthen "
       + "the trainer's ordinary Strength (HandleAction_ActionFinished, battle_util.c:678)",
     () => {
       const sharedPlayer = {
@@ -261,9 +262,12 @@ describe("factory full-turn decision -- decision -> both actions -> end-turn -> 
       };
 
       const afterFlail = runTurn(FLAIL);
+      const afterFrustration = runTurn(FRUSTRATION);
       const ordinaryControl = runTurn(STRENGTH);
       expect(afterFlail.battlers[0]!.hp).toBe(ordinaryControl.battlers[0]!.hp);
+      expect(afterFrustration.battlers[0]!.hp).toBe(ordinaryControl.battlers[0]!.hp);
       expect(afterFlail.dynamicBasePower).toBe(0);
+      expect(afterFrustration.dynamicBasePower).toBe(0);
       expect(ordinaryControl.dynamicBasePower).toBe(0);
     },
   );
