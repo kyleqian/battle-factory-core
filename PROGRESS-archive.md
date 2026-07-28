@@ -1,4 +1,27 @@
 ---
+## 575 — [SUPERVISOR VERIFY 2026-07-28 ~03:01] Corrected Follow Me accepted; Trick and game-stat evidence folded
+
+- **State:** reviewed union green at **333 files / 4055 tests** and focused
+  **95/95**; production build, both-oracle freshness/info, census
+  regeneration, ratchets, and `git diff --check` pass. Census is exactly
+  **144/214 effects, 270/355 moves, 221/276 Factory-L50 distinct,
+  2716/2957 weighted**, all **42/42**.
+- **Did:** accepted Follow Me only after `aeb56de` implemented both source
+  cleanup calls and proved an early end-turn barrier cannot retain the timer.
+  Merged and independently replayed Trick's active+persistent Choice Band /
+  Leftovers swap (`165501dd…1adf37`) and Splash's PP-before-hidden-game-stat
+  receipt (`3a4f4af1…1fc9ff`). Game stats **26/27** are save/meta counters
+  (24-bit saturation), not round-rule state.
+- **Next:** register operandless `0xe4`
+  `B_SCR_OP_GETSECRETPOWEREFFECT` globally with a source-shaped battle
+  environment field and Factory **BUILDING → paralysis** handoff through the
+  existing secondary-effect chain. Expected census:
+  **145/214, 271/355, 222/276, 2722/2957**.
+- **Notes:** handler inventory is **153**; no new unsupported barrier/import
+  ratchet, private handler, recording import, animation/presentation/tick
+  branch, DEFERRED item, issue removal, or oracle lifecycle action.
+
+---
 ## 574 — [BOUNDED MAIN WORKER CORRECTION 2026-07-28 ~03:00] Follow Me clears at both source cleanup calls
 
 - **State:** committed `aeb56de`; tree green at **331 files / 4048 tests**,
