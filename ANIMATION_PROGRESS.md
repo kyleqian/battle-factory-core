@@ -1,5 +1,35 @@
 # Animation coverage
 
+## MOVE_SURF staged; create_surf_wave evidence checkpoint complete (2026-07-28)
+
+**Verdict:** `MOVE_SURF` is staged only. Fresh complete legal Scene-ON
+WARTORTLE/SHUCKLE mechanic-lab parties capture every `currentMove=57` frame
+(**370** frames 39–408 player-back, **367** frames 39–405 opponent-front) and
+the complete source-owned controller/scanline window plus first inactive
+cleanup (**144/144**, frames 72–215 player-back and 76–219 opponent-front).
+Both outputs and concatenated raw-RGB streams are byte-identical twice fresh:
+player `19cf632a…800dae` / `fc0c3faa…163ed5`; opponent
+`66a3f92d…c97ffa` / `be3db045…ea4c6`. Coverage is now **65 exact / 0 partial
+/ 1 staged / 210 unsupported**.
+
+**Model/evidence:** `create_surf_wave` owns BG1 water gfx, side-selected
+player/opponent tilemap, Surf/Muddy palette, `AnimTask_CreateSurfWave`, and
+the `AnimTask_SurfWaveScanlineEffect` alpha-DMA task—no effect software sprite.
+The committed probe captures complete task/sprite bodies, BG tilemap/scroll/
+affine and raw VRAM, palettes, registers, OAM/matrices, both audio players/
+pans, RGB, script identities, assets, and cleanup; source extraction
+byte-pins exactly the required water tiles, two Factory tilemaps, and palettes.
+
+**Siblings/scope/next:** `MOVE_MUDDY_WATER` remains unsupported: same command
+but a Muddy palette and pre-command `SE_M_WHIRLPOOL`, requiring independent
+dense acceptance. `MOVE_SECRET_POWER` remains unsupported: Factory
+`BATTLE_ENVIRONMENT_BUILDING` dispatches `Move_STRENGTH`, not `Move_SURF`.
+Next: port the two Surf tasks as a relative-age reducer, add a typed seam and
+BG1/scanline framebuffer renderer, then prove both 144-frame windows before
+considering a separate Muddy Water stage. No battle logic/RNG/controller/
+facility state, boundary list, unsupported barrier, or absolute-tick,
+move-number, input-delay, coordinate/RGB/pixel exception changed.
+
 ## MOVE_THUNDER_WAVE promoted exact; complete Spark-track seam closed (2026-07-28)
 
 **Verdict:** `MOVE_THUNDER_WAVE` is exact. Fresh complete legal Scene-ON
