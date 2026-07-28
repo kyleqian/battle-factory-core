@@ -1,4 +1,22 @@
 ---
+## 604 — [BOUNDED MAIN WORKER 2026-07-28 ~06:22] Encore shared seams repaired and pinned
+
+- **State:** committed `6e6bd33`; tree green at **366 files / 4229 tests**, focused
+  Encore/end-turn/switch/ratchet coverage **112/112**, production build, and
+  `git diff --check`.
+- **Did:** added exact RNG value/ledger ownership and full-turn proofs for
+  both sides' automatic encored choices, slot/target/PP use, multi-turn lock
+  precedence, successful script order, and repeat failure. Pinned end-turn
+  decrement, timer/PP expiry messages, silent slot-overwrite cleanup, and
+  ordinary/Baton Pass switch cleanup. Repaired the audited `battle_util.c`
+  discrepancy: an overwritten stored slot now clears all execution-owned
+  Encore fields and uses the live slot move instead of being misclassified as
+  Struggle.
+- **Next:** supervisor verify this repair and resume finite Stage 8 selection.
+- **Notes:** no oracle claim, unsupported barrier, recording import,
+  presentation/controller/round widening, issue removal, or census change.
+
+---
 ## 603 — [BOUNDED MAIN WORKER 2026-07-28 ~06:14] Encore executes through shared choice/lifetime paths
 
 - **State:** committed `b2e406a` + `a954fd3` + `c6f3b09`; tree green at **365 files /

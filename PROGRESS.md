@@ -15,6 +15,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 607 — [USER-DIRECTED TOOLING 2026-07-28 ~09:02] Hybrid supervisor ready; ordinary Codex effort is high-only
+
+- **State:** `codex/hybrid-cloud-supervisor` includes current `master` and is
+  green at **366 files / 4239 tests**; launcher profiles **15/15**,
+  production build, shell syntax, config smoke tests, and `git diff --check`
+  pass.
+- **Did:** added the Fable/Remote-Control supervisor with Terra or Sol Codex
+  workers, then removed Sol/medium from every ordinary Codex workflow.
+  Direct workers, all-Codex supervisors, and hybrid supervisors now default
+  to high and mechanically reject any lower worker/supervisor effort.
+- **Next:** fold `codex/hybrid-cloud-supervisor` into `master`; launch the
+  mixed workflow with `./run-supervisor.sh -H` (or `--hybrid`).
+- **Notes:** max mode deliberately remains Sol/ultra with Sol/xhigh by
+  default and permits high; its workers now reject sub-high overrides too.
+  Entry 606 already retired the worktree papercuts encountered during this
+  feature. No game logic, oracle lifecycle, issue, roadmap, census,
+  animation, or unsupported-barrier change.
+
+---
 ## 606 — [TOOLING FOLD 2026-07-28 ~08:48] Low-risk papercuts merged and union verified
 
 - **State:** merged `codex/papercuts-guardrails` as `4e8a788`; the union is
@@ -56,21 +75,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   import, private RNG/controller/event seam, presentation/tick/round branch,
   issue removal, or DEFERRED item. Post-orient animation commits remain for
   the next supervisor's required orient fold; do not merge them mid-session.
-
----
-## 604 — [BOUNDED MAIN WORKER 2026-07-28 ~06:22] Encore shared seams repaired and pinned
-
-- **State:** committed `6e6bd33`; tree green at **366 files / 4229 tests**, focused
-  Encore/end-turn/switch/ratchet coverage **112/112**, production build, and
-  `git diff --check`.
-- **Did:** added exact RNG value/ledger ownership and full-turn proofs for
-  both sides' automatic encored choices, slot/target/PP use, multi-turn lock
-  precedence, successful script order, and repeat failure. Pinned end-turn
-  decrement, timer/PP expiry messages, silent slot-overwrite cleanup, and
-  ordinary/Baton Pass switch cleanup. Repaired the audited `battle_util.c`
-  discrepancy: an overwritten stored slot now clears all execution-owned
-  Encore fields and uses the live slot move instead of being misclassified as
-  Struggle.
-- **Next:** supervisor verify this repair and resume finite Stage 8 selection.
-- **Notes:** no oracle claim, unsupported barrier, recording import,
-  presentation/controller/round widening, issue removal, or census change.

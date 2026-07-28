@@ -110,12 +110,13 @@ describe("Supervisor and worker launcher profiles", () => {
       worker_launch_mode: "managed",
       worker_routing: "tiered",
       worker_model: "gpt-5.6-sol",
-      worker_effort: "medium",
+      worker_effort: "high",
     });
   });
 
   it.each([
     ["hybrid shorthand", ["--hybrid"]],
+    ["short hybrid shorthand", ["-H"]],
     [
       "explicit mixed providers",
       ["--provider", "claude", "--worker-provider", "codex"],
@@ -139,7 +140,7 @@ describe("Supervisor and worker launcher profiles", () => {
         worker_launch_mode: "background",
         worker_routing: "tiered",
         worker_model: "gpt-5.6-sol",
-        worker_effort: "medium",
+        worker_effort: "high",
       });
     },
   );
@@ -205,7 +206,7 @@ describe("Supervisor and worker launcher profiles", () => {
     expect(configFrom(lowered.stdout).worker_effort).toBe("high");
   });
 
-  it("lets a hybrid supervisor route both Terra and Sol Codex worker tiers", () => {
+  it("lets a hybrid supervisor route both Terra/high and Sol/high workers", () => {
     const terra = runLauncher(
       "tools/run-subagent.sh",
       [
@@ -223,7 +224,7 @@ describe("Supervisor and worker launcher profiles", () => {
         "--model",
         "gpt-5.6-sol",
         "--effort",
-        "medium",
+        "high",
         "--print-config",
       ],
       { POKEBENCH_WORKER_PROVIDER: "codex" },
@@ -239,8 +240,53 @@ describe("Supervisor and worker launcher profiles", () => {
     expect(configFrom(sol.stdout)).toMatchObject({
       worker_provider: "codex",
       worker_model: "gpt-5.6-sol",
-      worker_effort: "medium",
+      worker_effort: "high",
     });
+  });
+
+  it("rejects sub-high effort in every ordinary Codex workflow", () => {
+    const directWorker = runLauncher("tools/run-subagent.sh", [
+      "--provider",
+      "codex",
+      "--effort",
+      "medium",
+      "--print-config",
+    ]);
+    const codexSupervisor = runLauncher("run-supervisor.sh", [
+      "--provider",
+      "codex",
+      "--effort",
+      "medium",
+      "--print-config",
+    ]);
+    const hybridWorkerOverride = runLauncher(
+      "run-supervisor.sh",
+      ["--hybrid", "--print-config"],
+      { WORKER_REASONING_EFFORT: "medium" },
+    );
+    const maxWorker = runLauncher("tools/run-subagent.sh", [
+      "--max-mode",
+      "--effort",
+      "medium",
+      "--print-config",
+    ]);
+
+    expect(directWorker.status).toBe(2);
+    expect(directWorker.stderr).toContain(
+      "ordinary Codex worker effort is fixed at high",
+    );
+    expect(codexSupervisor.status).toBe(2);
+    expect(codexSupervisor.stderr).toContain(
+      "ordinary Codex supervisor effort is fixed at high",
+    );
+    expect(hybridWorkerOverride.status).toBe(2);
+    expect(hybridWorkerOverride.stderr).toContain(
+      "ordinary Codex worker effort is fixed at high",
+    );
+    expect(maxWorker.status).toBe(2);
+    expect(maxWorker.stderr).toContain(
+      "max-mode worker effort must be high or xhigh",
+    );
   });
 
   it.each([["--read-only"], ["--audit"]])(

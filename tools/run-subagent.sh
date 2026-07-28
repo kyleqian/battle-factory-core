@@ -3,7 +3,7 @@
 #
 # Launches one fresh headless worker. The default remains the original Claude
 # worker (claude-sonnet-5); a Codex supervisor automatically selects the Codex
-# worker profile (gpt-5.6-sol at medium effort). Codex max mode instead locks
+# worker profile (gpt-5.6-sol at high effort). Codex max mode instead locks
 # workers to gpt-5.6-sol and defaults them to xhigh. The transcript is
 # summarized to a fixed-size handoff and retained in the log file named below.
 # Killing a worker at any point is safe —
@@ -17,7 +17,7 @@
 #     -p, --provider NAME   claude (default) or codex
 #     -M, --max-mode        Codex Sol/xhigh worker profile
 #     -m, --model NAME      worker model (provider default)
-#     -e, --effort EFFORT   Codex reasoning effort (default medium)
+#     -e, --effort EFFORT   Codex reasoning effort (high; max mode also xhigh)
 #     -w, --worktree        alias for --lane side
 #         --animation-worktree
 #                           alias for --lane animation
@@ -62,7 +62,7 @@ Usage: tools/run-subagent.sh [options] "step brief for the worker"
   -M, --max-mode        Codex all-Sol profile: fixes the model at
                         gpt-5.6-sol and defaults effort to xhigh
   -m, --model NAME      worker model (provider default)
-  -e, --effort EFFORT   Codex reasoning effort (default medium)
+  -e, --effort EFFORT   Codex reasoning effort (high; max mode also xhigh)
   -w, --worktree        alias for --lane side
       --animation-worktree
                         alias for --lane animation
@@ -189,18 +189,21 @@ case "$PROVIDER" in
     ;;
   codex)
     MODEL="${MODEL:-gpt-5.6-sol}"
-    REASONING_EFFORT="${REASONING_EFFORT:-medium}"
-    if [[ ! "$REASONING_EFFORT" =~ ^(none|low|medium|high|xhigh)$ ]]; then
-      echo "run-subagent: unsupported reasoning effort '$REASONING_EFFORT' (maximum allowed: xhigh)" >&2
-      exit 2
-    fi
-    if [[ "$MAX_MODE" != "1" && "$MODEL" == *sol* && "$REASONING_EFFORT" == "xhigh" ]]; then
-      echo "run-subagent: Sol reasoning effort is capped at high outside --max-mode (got '$REASONING_EFFORT')" >&2
-      exit 2
-    fi
     if [[ "$MAX_MODE" == "1" && "$MODEL" != "gpt-5.6-sol" ]]; then
       echo "run-subagent: max mode only permits gpt-5.6-sol workers (got '$MODEL')" >&2
       exit 2
+    fi
+    if [[ "$MAX_MODE" == "1" ]]; then
+      if [[ ! "$REASONING_EFFORT" =~ ^(high|xhigh)$ ]]; then
+        echo "run-subagent: max-mode worker effort must be high or xhigh (got '$REASONING_EFFORT')" >&2
+        exit 2
+      fi
+    else
+      REASONING_EFFORT="${REASONING_EFFORT:-high}"
+      if [[ "$REASONING_EFFORT" != "high" ]]; then
+        echo "run-subagent: ordinary Codex worker effort is fixed at high (got '$REASONING_EFFORT')" >&2
+        exit 2
+      fi
     fi
     command -v codex >/dev/null 2>&1 || { echo "run-subagent: codex CLI not found on PATH" >&2; exit 127; }
     ;;

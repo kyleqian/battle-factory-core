@@ -17,14 +17,15 @@ The launcher supports three first-class profiles:
 - `./run-supervisor.sh` — Claude Fable supervisor with Claude Sonnet workers;
 - `./run-supervisor.sh --provider codex` — Codex Sol/high supervisor with
   tiered Codex workers;
-- `./run-supervisor.sh --hybrid` — Claude Fable supervisor, available through
+- `./run-supervisor.sh -H` (`--hybrid`) — Claude Fable supervisor, available through
   Claude Remote Control in interactive mode, with the same tiered Codex
   workers as the ordinary Codex workflow.
 
-`--hybrid` is shorthand for `--provider claude --worker-provider codex`.
+`-H` / `--hybrid` is shorthand for
+`--provider claude --worker-provider codex`.
 Worker provider and worker tier are independent of the supervisor model:
-the hybrid Fable supervisor chooses Terra/high, Sol/medium, or Sol/high for
-each brief and passes those choices to `tools/run-subagent.sh`.
+the hybrid Fable supervisor chooses Terra/high or Sol/high for each brief and
+passes that model choice to `tools/run-subagent.sh`.
 
 Read `AGENTS.md`, the authoritative reset at the start of ROADMAP Stage 8, and
 S10's **Executable-frontier reset** (the current stage's ordered next steps and
@@ -80,25 +81,22 @@ edit.
    before launching the worker** (AGENTS.md's commit discipline applies to
    you too; any session can be killed at any moment, and the next one resumes
    from git alone).
-   **Whenever the worker provider is Codex — including `--hybrid` — choose
-   the worker tier explicitly:**
+   **Whenever the worker provider is Codex — including `--hybrid` — effort
+   is high and the supervisor chooses the model explicitly:**
    - `gpt-5.6-terra` / `high`: bounded read-heavy probes, deterministic
      extraction, or mechanical documentation with little architecture
      judgment.
-   - `gpt-5.6-sol` / `medium` (launcher default): normal implementation and
-     verification work.
-   - `gpt-5.6-sol` / `high`: cross-layer architecture, ambiguous ownership/
-     timing evidence, or the first sharply scoped repair after a failed
-     worker.
+   - `gpt-5.6-sol` / `high` (launcher default): implementation,
+     verification, cross-layer architecture, ambiguous ownership/timing
+     evidence, or evidence-driven repair.
    The ordinary Codex profile keeps the supervisor at Sol/high; the hybrid
    profile keeps it at Claude Fable while retaining this worker routing.
-   Outside max mode, Sol is mechanically capped at high; Terra/xhigh remains
-   available only as an explicit override, and the narrow Terra tier still
-   defaults to high. `./run-supervisor.sh --max-mode` selects the Codex
-   provider automatically and switches to an all-Sol profile: the supervisor
-   runs Sol/ultra, every worker is locked to Sol, and workers default to xhigh
-   (the worker ceiling). Max mode rejects both the hybrid profile and a Terra
-   worker override.
+   Outside max mode, both Codex supervisor and worker launchers mechanically
+   reject every effort other than high. `./run-supervisor.sh --max-mode`
+   selects the Codex provider automatically and switches to an all-Sol
+   profile: the supervisor runs Sol/ultra, every worker is locked to Sol, and
+   workers default to xhigh (the worker ceiling) while permitting high.
+   Max mode rejects both the hybrid profile and a Terra worker override.
    Before every battle-lane brief, apply the **novelty gate**: name the new
    reusable mechanism, unique screen, or generic state transition it adds.
    "The next canonical Battle 2 turn/window" is not a mechanism and must not
@@ -137,8 +135,7 @@ edit.
 
    ```sh
    ./tools/run-subagent.sh --model gpt-5.6-terra --effort high --brief-file /tmp/scout.txt
-   ./tools/run-subagent.sh --model gpt-5.6-sol --effort medium --brief-file /tmp/implementation.txt
-   ./tools/run-subagent.sh --model gpt-5.6-sol --effort high --brief-file /tmp/repair.txt
+   ./tools/run-subagent.sh --model gpt-5.6-sol --effort high --brief-file /tmp/implementation.txt
    ```
 
    Wait for it to finish before launching another into
