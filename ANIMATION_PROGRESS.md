@@ -1,30 +1,32 @@
 # Animation coverage
 
-## MOVE_ASTONISH staged; StretchTargetUp source-window evidence complete (2026-07-28)
+## MOVE_ASTONISH promoted exact; full source body closed (2026-07-28)
 
-**Verdict:** `MOVE_ASTONISH` is staged only. Legal Factory set-144
-`FRONTIER_MON_LOUDRED` (species 371) against ONIX gives complete Scene-ON
-source-script-plus-first-inactive windows of **63/63** frames **220–282**
-player-back and **219–281** opponent-front, twice fresh. Pinned evidence/raw
-RGB digests: player `f5216872…01ba93` / `ad5dcf52…3f2c90`; opponent
-`4329dc1c…513451` / `ba9b56fe…ce3c71`. Coverage is **66 exact / 0 partial /
-2 staged / 208 unsupported**.
+**Verdict:** `MOVE_ASTONISH` is exact. Legal Factory set-144
+`FRONTIER_MON_LOUDRED` (species 371) against ONIX passes the complete Scene-ON
+source-script-plus-first-inactive window at **63/63** source, typed seam,
+hardware, and shared-framebuffer frames **220–282** player-back and **219–281**
+opponent-front, twice fresh. Pinned evidence/raw RGB digests are player
+`20d66e8b…77568` / `ad5dcf52…3f2c90`; opponent
+`48912cfb…c209` / `ba9b56fe…ce3c71`. Coverage is **67 exact / 0 partial /
+1 staged / 208 unsupported**.
 
-**Source/scope:** `Move_ASTONISH` loads SWEAT_BEAD, plays ENCORE at attacker
-pan, creates HorizontalLunge, waits 25, creates two SprayWaterDroplets,
-plays target-pan SKETCH, then starts ShakeMon2 and StretchTargetUp. The task
-itself runs two 10-frame affine legs, alternates x2 ±4, clears x2/y2, and
-destroys. The portable probe records script/tasks/sprites, battler affine,
-OAM/matrices, palettes, registers, both audio players, raw RGB, and framebuffer
-hashes. This establishes StretchTargetUp is not self-contained: lunge, both
-droplets, ShakeMon2, audio, and wait/cleanup are co-owned requirements.
+**Model:** the source-relative reducer ports SWEAT_BEAD load/free lifetime,
+ENCORE and SKETCH pans, HorizontalLunge, the 25-frame wait, both Random2-owned
+SprayWaterDroplet callbacks, ShakeMon2 task-slot writes, both 10-frame
+StretchTargetUp affine legs, wait semantics, and cleanup. The typed Scene-ON
+seam owns presentation-only RNG outputs and geometry. The compositor uses
+source-extracted Loudred/SWEAT_BEAD art, existing Onix/chrome components,
+source OAM priority, and the split affine-entry scanout latch (Shake x2 before
+the following matrix/vertical-anchor transfer). No battle logic, RNG advance,
+turn order, controller, facility state, boundary list, or unsupported barrier
+changed.
 
-**Remainder/siblings:** no reducer, typed seam, compositor, or game-state code
-changed, and exact is unclaimed. Implement the whole 63-frame relative source
-body and prove shared-framebuffer equality twice in both orientations before
-promotion. `MOVE_FAKE_OUT` and `MOVE_TRICK` remain unsupported pending their
-own complete dense evidence; source proves their FakeOut/white-blend and
-bag/dust/dual-stretch/beam bodies are distinct.
+**Siblings:** `MOVE_FAKE_OUT` remains unsupported because it adds
+`AnimTask_FakeOut` and a post-body white blend. `MOVE_TRICK` remains
+unsupported because it adds ITEM_BAG/SPEED_DUST assets, two bag affine
+programs, StretchAttackerUp, repeated DOUBLE_TEAM sounds, and Hydro Cannon
+beams. Neither received independent dense move acceptance.
 
 ## MOVE_FAKE_TEARS corrected-species source body exact; remains staged (2026-07-28)
 

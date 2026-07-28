@@ -1663,12 +1663,13 @@
     },
     {
       "move": "MOVE_ASTONISH",
-      "status": "staged",
+      "status": "exact",
       "covered": [
         "legal Factory set-144 FRONTIER_MON_LOUDRED (species 371, Relaxed, Attack/HP EVs) stages MOVE_ASTONISH against ONIX in both Scene-ON orientations through full mechanicLab party construction",
-        "fresh dense local-mGBA receipts cover the complete source-script interval plus first inactive cleanup: 63/63 frames 220-282 player-back and 219-281 opponent-front, twice fresh; the source/evidence and concatenated raw RGB digests are pinned in the fixtures",
-        "the probe records source pointer/offset, visual tasks, sprites and battler affine state, OAM/matrices, palette tags/faded/unfaded/hardware palettes, registers, both audio players, raw RGB, and framebuffer SHA-256 for every source-window frame",
-        "source audit proves StretchTargetUp starts a two-leg 10-frame affine program, alternates target x2 +/-4, then clears x2/y2 and destroys; Astonish concurrently owns HorizontalLunge, two SWEAT_BEAD droplets, ShakeMon2, two sounds, and waitforvisualfinish",
+        "fresh dense local-mGBA receipts pass the complete source-script interval plus first inactive cleanup at 63/63 source, typed-seam, hardware, register/audio, raw-RGB, and shared-application-framebuffer frames 220-282 player-back and 219-281 opponent-front, twice fresh; player evidence/raw digests are 20d66e8b3346721d98ff3642b8eec2ed9ed582440d84556c39cf10adff577568 / ad5dcf528d589e03c07d18dec7b0b77ae286c58dd588d357a48f6a6d923f2c90 and opponent digests are 48912cfb7cb21883a19effd46abdf0d0083484627b82d1cb3ed8c1cb4affc209 / ba9b56fec83c40524f952a679cf66fd222998f415a6d24876c7ece1a45ce3c71",
+        "the source-relative reducer and typed Scene-ON seam port SWEAT_BEAD load/free, both pan sounds, HorizontalLunge, the 25-frame delay, both Random2-owned SprayWaterDroplet callbacks, ShakeMon2 task-slot writes, both ten-frame StretchTargetUp affine legs, waitforvisualfinish, and cleanup",
+        "the compositor uses source-extracted Loudred front/back and SWEAT_BEAD art, existing Onix and shared field chrome, source OAM overlap priority, and the source-owned split affine-entry scanout latch in which ShakeMon2 x2 precedes the following matrix/vertical-anchor transfer",
+        "no battle logic, battle RNG advance, damage, turn order, controller, round/facility state, boundary list, or unsupported barrier changed",
         "MOVE_FAKE_OUT remains unsupported: it adds AnimTask_FakeOut and a post-body background white blend. MOVE_TRICK remains unsupported: it adds ITEM_BAG/SPEED_DUST assets, two bag affine programs, StretchAttackerUp, repeated DOUBLE_TEAM sound cues, and Hydro Cannon beams. Neither has independent dense move acceptance."
       ],
       "evidence": [
@@ -1679,9 +1680,14 @@
         "tools/compare/astonishProbe.py",
         "tools/compare/astonishEvidence.ts",
         "tools/compare/astonishSourceAudit.ts",
+        "tools/compare/extractAstonishAssets.ts",
+        "src/animation/assets/astonish.json",
+        "src/animation/astonish.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/astonish.test.ts",
         "tests/animation/astonishEvidence.test.ts"
-      ],
-      "remaining": "Do not promote from component evidence. Port the entire 63-frame source window through a source-relative reducer and typed presentation seam, including HorizontalLunge, both droplet callbacks, ShakeMon2, StretchTargetUp, audio, and cleanup; then prove shared-framebuffer equality twice fresh in both orientations and independently accept Fake Out and Trick."
+      ]
     }
   ],
   "queue": [
