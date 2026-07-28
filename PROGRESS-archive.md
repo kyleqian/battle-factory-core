@@ -1,4 +1,81 @@
 ---
+## 525 — [BOUNDED WORKER 2026-07-27 ~17:15] EFFECT_MULTI_HIT/DOUBLE_HIT/TWINEEDLE registered end to end; EFFECT_TRIPLE_KICK/ROAR named remainder
+
+- **State:** tree green at **272 files / 3609 tests** (271/3597 → +1 file /
+  +12 tests: new `battleScriptMultiHitFamily.test.ts`), `npm run build`
+  clean. Census regenerated: **115/214 effects, 233/355 moves, 187/276
+  Factory-L50 unweighted, 2401/2957 weighted (81.2%)** — up from 111/217/177/
+  2378. 36/36 self-checks pass (3 pins moved from `requireExactMissingOpcodes`
+  to `requireExecutable`, reason named in the generator's own comment).
+- **Did:** followed `docs/roar-multihit-registration-scout.md` §4's rung
+  order. Registered `B_SCR_OP_INITMULTIHITSTRING` (zero-operand advance —
+  its only reader-carrying byte has no writer/reader anywhere in scope) and
+  `B_SCR_OP_JUMPIFHASNOHP` (`battleScriptRuleCommands.ts`, both new opcode
+  IDs 142/227). Widened three already-registered dispatchers on narrow new
+  operand values: `JUMPIFHALFWORD`+`gChosenMove` (Sleep-Talk gate),
+  `JUMPIFBYTE`'s shared value table +`MOVE_RESULT_FOE_ENDURED` (Endure
+  re-check), `JUMPIFABILITY`+`ABILITY_SUCTION_CUPS` (Roar rung 1, done since
+  cheap and independent — **found and fixed the scout's one dossier slip**:
+  it cited value `31`, the real header value is `21` — 31 is
+  `ABILITY_LIGHTNING_ROD`).
+- **Two further hidden barriers found live** (budgeted for per the brief;
+  found by actually running the committed scripts to terminal, not by
+  trusting the scout doc's §1c/§1d tables): (1) `COPYARRAY`'s
+  `(cEFFECT_CHOOSER, sMULTIHIT_EFFECT, 1)` tuple — the scout's own table
+  marked this whole opcode "yes, already registered," missing that this
+  specific tuple wasn't. (2) The `sMULTIHIT_STRING + 4` hits-landed
+  counter's `ADDBYTE` write and its `gBattleTextBuff1 <- sMULTIHIT_STRING`
+  `COPYARRAY` presentation read — the scout's §1d table scoped this counter
+  to Triple Kick only; it's real on **every** multi-hit iteration
+  (`BattleScript_DoMultiHit`'s own shared tail). Both widened: the first
+  reuses the existing SETBYTE byte-table read/write; the second got its own
+  dedicated `multiHitStringCounter` rules field (can't join the shared
+  SETBYTE pointer universe — that table's own eager-validation invariant
+  requires every listed pointer have a concrete `setbyte` site, and this one
+  never does, only `addbyte`) plus a pure-advance no-op for the presentation
+  copy (text-buffer bytes have no reader in this engine's scope, same
+  boundary `INITMULTIHITSTRING`'s own doc comment already established).
+- **Tests:** `battleScriptMultiHitFamily.test.ts` — full committed-script
+  walks for all three effects to a genuine `{kind:"terminal",
+  opcodeName:"B_SCR_OP_END"}` halt via the real production handler
+  composition, RNG roll counts pinned (1 accuracy + hit-count draw(s) + 2
+  rolls/hit-landed + 1 final effect-chance roll), including two different
+  MULTI_HIT hit counts from different seeds and TWINEEDLE's poison-chance
+  composition (both outcomes). Plus isolated dispatch tests for
+  INITMULTIHITSTRING/JUMPIFHASNOHP (`battleScriptRuleCommands.test.ts`) and
+  fixed 6 now-stale barrier-pin tests across
+  `battleScriptJumpifhalfwordOpcode.test.ts`/`battleScriptJumpifbyteOpcode.test.ts`/
+  `battleScriptIngrainLeechSeedWrapOpcode.test.ts`/`battleScriptSetByte.test.ts`
+  that predated these widenings (one was testing the *wrong* thing entirely —
+  see Notes). Updated 8 handler-count pins (+2 opcodes: 122→124 in the main
+  composition; `141, 248` → `141, 142, 227, 248` in 8 smaller composition
+  tests) and the ratchet's `battleScriptDamagingWeatherOpcode.ts` barrier
+  count (3→4, named: the new `sMULTIHIT_STRING + 4` special case has its own
+  narrow guard, distinct from the shared-universe fallback's).
+- **Remainder (named, not hidden):** `EFFECT_TRIPLE_KICK` (scout §4 rungs
+  7-9: `damagecalcOpcodeHandler` needs to read the already-tracked
+  `rules.tripleKickPower` instead of hardcoded 0; a second `JUMPIFBYTE`
+  memByte case for its own hit-counter; already inherits this session's
+  INITMULTIHITSTRING/JUMPIFHASNOHP/gChosenMove/FOE_ENDURED/sMULTIHIT_STRING+4
+  widenings for free — confirmed it now runs past all of them and barriers
+  cleanly on the still-real `sTRIPLE_KICK_POWER, 10` ADDBYTE gap, not a
+  silent fallthrough) and `EFFECT_ROAR` (scout §4 rungs 10-14: new
+  `FORCERANDOMSWITCH`/`SWITCHOUTABILITIES`/`RETURNTOBALL` opcodes, the
+  PARTY_SIZE=6 rejection-sampling switch pick, composition with the existing
+  switch-in tail). Both untouched this session — ran out of budget after the
+  two hidden-barrier detours above; the multi-hit family itself is the
+  brief's own named "mandatory resting state" (§4 puts it before Roar's own
+  rungs 10-14), landed complete and green.
+- **Notes:** one real dossier slip found (`ABILITY_SUCTION_CUPS` = 21 not
+  31) plus two hidden barriers beyond the scout's own list, both budgeted-for
+  by the brief and both fixed within this step, not deferred. **One of my
+  own first-draft test fixes was itself wrong** (assumed `JUMPIFABILITY`'s
+  barrier fires on an unrecognized *battler* ability rather than an
+  unrecognized *script comparand* — caught by actually running it, corrected
+  before committing). No PAPERCUT. Three commits: multi-hit registration +
+  tests, census regen.
+
+---
 ## 524 — [SUPERVISOR 2026-07-27 ~16:35] rounds 2-4 verified + merged; census extractor FIXED (Roar row was fabricated); census 80.4% weighted; round 5 dispatched
 
 - **State:** master green at **271 files / 3597 tests**, `npm run build`

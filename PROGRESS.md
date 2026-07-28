@@ -15,6 +15,81 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 528 — [BOUNDED WORKER 2026-07-27 ~19:15] EFFECT_EXPLOSION registered end to end (EXPLOSION census set)
+
+- **State:** tree green at **275 files / 3639 tests** (274/3632 → +1 file /
+  +7 tests: new `battleScriptExplosionOpcode.test.ts` 5 tests, +2 in
+  `damageCalc.test.ts`), `npm run build` clean. Census regenerated: **117/214
+  effects, 237/355 moves, 191/276 Factory-L50 unweighted, 2466/2957 weighted
+  (83.4%)** — up from 116/214/235/189/2441. **Actual flip matches the
+  brief's predicted end-state exactly**: +1 effect / +2 moves / +25
+  weighted. 38/38 self-checks pass (new `requireExecutable("EFFECT_EXPLOSION")`
+  pin added, 37→38).
+- **Did:** new `battleScriptExplosionOpcode.ts` registers
+  `B_SCR_OP_TRYEXPLOSION` (`Cmd_tryexplosion`, `battle_script_commands.c
+  :6538-6575`) and `B_SCR_OP_SETATKHPTOZERO` (`:6577-6588`), both
+  source-complete with **zero barriers**. `Cmd_tryexplosion`'s Damp scan
+  covers **every active battler** (`0..battlersCount`, no absent-flag
+  filter — re-verified from source per the brief, not just attacker/target)
+  and, on success, re-points `gBattlerTarget` via the exact same
+  first-valid-target loop `Cmd_selectfirstvalidtarget` already implements
+  (`resolveFirstValidTarget`, exported from `battleScriptTargetIterationOpcode.ts`
+  and reused rather than duplicated). `gBattleMoveDamage = gBattleMons[
+  gActiveBattler].hp` is genuinely dead (the immediately-following
+  `BtlController_EmitHealthBarUpdate` call passes the literal
+  `INSTANT_HP_BAR_DROP` sentinel `0x7FFF`, not that value, and `damagecalc`
+  overwrites `gBattleMoveDamage` a few opcodes later before anything else
+  reads it) — not modeled, matching this engine's existing precedent for
+  provably-unread state. `Cmd_setatkhptozero` mirrors `Cmd_datahpupdate`'s
+  negative-damage (HP-gain) branch: `withBattler`/`withBattleScriptPartyMemberHp`
+  write-through, `hp-change` event, own controller round trip. Both compose
+  with the already-registered `tryfaintmon`/`moveend`/switch-in machinery
+  unmodified — no other opcode in `BattleScript_EffectExplosion`
+  (`data/battle_scripts_1.s:374-408`) needed new registration.
+  **Fixed a real pre-existing gap** (per the brief's explicit ask to check):
+  `damageCalc.ts`'s `calculateBaseDamage` never modeled EFFECT_EXPLOSION's
+  own Defense-halving (`pokemon.c:3228-3230` — Self-Destruct/Explosion cut
+  the defender's raw Defense in half, truncated, before the crit-adjusted-
+  stat step). Added a `moveEffect` input field and the halving branch; wired
+  from `damagecalcOpcodeHandler`'s `moveRow.effect` read
+  (`battleScriptHitChainOpcode.ts`). Pinned directly with a focused
+  `damageCalc.test.ts` unit test (50 unhalved vs 99 halved at identical
+  inputs) in addition to the full-script walk's own regression guard.
+- **Tests:** full committed-script walks to a genuine `{kind:"terminal",
+  opcodeName:"B_SCR_OP_END"}` halt: success (attacker's HP forced to 0 via
+  `setatkhptozero`, faints through the real `tryfaintmon` ->
+  `BattleScript_FaintAttacker` chain — `playfaintcry`/`dofaintanimation`/
+  `cleareffectsonfaint` were all already registered — target takes
+  halved-defense damage, RNG ledger pinned at exactly 3 draws: critcalc +
+  adjustnormaldamage + accuracycheck), Damp-blocked (ability on the target,
+  plus a second case with Damp on neither attacker nor target — reachable
+  only under a doubles topology since singles' own `gBattlersCount=2`
+  correctly excludes slots 2/3, proving the scan loop is genuinely general
+  rather than hardcoded to attacker+target), attacker-faints-target-survives,
+  and simultaneous KO (both `tryfaintmon BS_TARGET` and `tryfaintmon
+  BS_ATTACKER` resolve for real in one walk). No legal single-ability-slot
+  Damp Factory set was checked for/needed — the brief's own sanctioned
+  fallback (construct the battler state directly) was used since that's
+  strictly simpler and the ability-scan logic doesn't care how the ability
+  got there. Confirmed `BattleScript_EffectExplosion` never calls
+  `checkteamslost` itself (only the separate `BattleScript_HandleFaintedMon`
+  does) — noted in the test file rather than fabricating an unreachable
+  checkteamslost pin.
+- **Hidden barriers found:** **zero** — both opcodes are fully source-complete
+  end to end; no new entries needed in `PINNED_BARRIER_COUNTS`. A useful
+  side effect surfaced during census regen: `EFFECT_MEMENTO`'s own
+  blocked-on-opcodes list shrank from two missing opcodes to one
+  (`B_SCR_OP_TRYMEMENTO` alone) now that `SETATKHPTOZERO` — shared plumbing
+  between the two effects — is registered; `EFFECT_MEMENTO` itself stays
+  blocked (out of scope this step, noted only as a side effect, not claimed
+  as progress).
+- **Notes:** no PAPERCUT. Three commits: opcode registration + tests,
+  census regen (generator self-check pin included in that same commit).
+  `EFFECT_SEMI_INVULNERABLE` (scouted, 4 moves/32 weighted, the census's
+  new #1 row) is the next ranked set; `EFFECT_FLAIL`/`EFFECT_RETURN`+
+  `EFFECT_FRUSTRATION`/`EFFECT_CURSE` follow close behind.
+
+---
 ## 527 — [BOUNDED WORKER 2026-07-27 ~18:35] turn11-featherdance ATK-floor text wired from kernel events (§14.3)
 
 - **State:** tree green at **274 files / 3632 tests** (unchanged — no new
@@ -132,79 +207,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   census regen. `EFFECT_RAGE`/`EFFECT_SLEEP_TALK`/semi-invulnerable/
   `EFFECT_EXPLOSION` (out of scope this step) remain the next ranked rows.
 
----
-## 525 — [BOUNDED WORKER 2026-07-27 ~17:15] EFFECT_MULTI_HIT/DOUBLE_HIT/TWINEEDLE registered end to end; EFFECT_TRIPLE_KICK/ROAR named remainder
-
-- **State:** tree green at **272 files / 3609 tests** (271/3597 → +1 file /
-  +12 tests: new `battleScriptMultiHitFamily.test.ts`), `npm run build`
-  clean. Census regenerated: **115/214 effects, 233/355 moves, 187/276
-  Factory-L50 unweighted, 2401/2957 weighted (81.2%)** — up from 111/217/177/
-  2378. 36/36 self-checks pass (3 pins moved from `requireExactMissingOpcodes`
-  to `requireExecutable`, reason named in the generator's own comment).
-- **Did:** followed `docs/roar-multihit-registration-scout.md` §4's rung
-  order. Registered `B_SCR_OP_INITMULTIHITSTRING` (zero-operand advance —
-  its only reader-carrying byte has no writer/reader anywhere in scope) and
-  `B_SCR_OP_JUMPIFHASNOHP` (`battleScriptRuleCommands.ts`, both new opcode
-  IDs 142/227). Widened three already-registered dispatchers on narrow new
-  operand values: `JUMPIFHALFWORD`+`gChosenMove` (Sleep-Talk gate),
-  `JUMPIFBYTE`'s shared value table +`MOVE_RESULT_FOE_ENDURED` (Endure
-  re-check), `JUMPIFABILITY`+`ABILITY_SUCTION_CUPS` (Roar rung 1, done since
-  cheap and independent — **found and fixed the scout's one dossier slip**:
-  it cited value `31`, the real header value is `21` — 31 is
-  `ABILITY_LIGHTNING_ROD`).
-- **Two further hidden barriers found live** (budgeted for per the brief;
-  found by actually running the committed scripts to terminal, not by
-  trusting the scout doc's §1c/§1d tables): (1) `COPYARRAY`'s
-  `(cEFFECT_CHOOSER, sMULTIHIT_EFFECT, 1)` tuple — the scout's own table
-  marked this whole opcode "yes, already registered," missing that this
-  specific tuple wasn't. (2) The `sMULTIHIT_STRING + 4` hits-landed
-  counter's `ADDBYTE` write and its `gBattleTextBuff1 <- sMULTIHIT_STRING`
-  `COPYARRAY` presentation read — the scout's §1d table scoped this counter
-  to Triple Kick only; it's real on **every** multi-hit iteration
-  (`BattleScript_DoMultiHit`'s own shared tail). Both widened: the first
-  reuses the existing SETBYTE byte-table read/write; the second got its own
-  dedicated `multiHitStringCounter` rules field (can't join the shared
-  SETBYTE pointer universe — that table's own eager-validation invariant
-  requires every listed pointer have a concrete `setbyte` site, and this one
-  never does, only `addbyte`) plus a pure-advance no-op for the presentation
-  copy (text-buffer bytes have no reader in this engine's scope, same
-  boundary `INITMULTIHITSTRING`'s own doc comment already established).
-- **Tests:** `battleScriptMultiHitFamily.test.ts` — full committed-script
-  walks for all three effects to a genuine `{kind:"terminal",
-  opcodeName:"B_SCR_OP_END"}` halt via the real production handler
-  composition, RNG roll counts pinned (1 accuracy + hit-count draw(s) + 2
-  rolls/hit-landed + 1 final effect-chance roll), including two different
-  MULTI_HIT hit counts from different seeds and TWINEEDLE's poison-chance
-  composition (both outcomes). Plus isolated dispatch tests for
-  INITMULTIHITSTRING/JUMPIFHASNOHP (`battleScriptRuleCommands.test.ts`) and
-  fixed 6 now-stale barrier-pin tests across
-  `battleScriptJumpifhalfwordOpcode.test.ts`/`battleScriptJumpifbyteOpcode.test.ts`/
-  `battleScriptIngrainLeechSeedWrapOpcode.test.ts`/`battleScriptSetByte.test.ts`
-  that predated these widenings (one was testing the *wrong* thing entirely —
-  see Notes). Updated 8 handler-count pins (+2 opcodes: 122→124 in the main
-  composition; `141, 248` → `141, 142, 227, 248` in 8 smaller composition
-  tests) and the ratchet's `battleScriptDamagingWeatherOpcode.ts` barrier
-  count (3→4, named: the new `sMULTIHIT_STRING + 4` special case has its own
-  narrow guard, distinct from the shared-universe fallback's).
-- **Remainder (named, not hidden):** `EFFECT_TRIPLE_KICK` (scout §4 rungs
-  7-9: `damagecalcOpcodeHandler` needs to read the already-tracked
-  `rules.tripleKickPower` instead of hardcoded 0; a second `JUMPIFBYTE`
-  memByte case for its own hit-counter; already inherits this session's
-  INITMULTIHITSTRING/JUMPIFHASNOHP/gChosenMove/FOE_ENDURED/sMULTIHIT_STRING+4
-  widenings for free — confirmed it now runs past all of them and barriers
-  cleanly on the still-real `sTRIPLE_KICK_POWER, 10` ADDBYTE gap, not a
-  silent fallthrough) and `EFFECT_ROAR` (scout §4 rungs 10-14: new
-  `FORCERANDOMSWITCH`/`SWITCHOUTABILITIES`/`RETURNTOBALL` opcodes, the
-  PARTY_SIZE=6 rejection-sampling switch pick, composition with the existing
-  switch-in tail). Both untouched this session — ran out of budget after the
-  two hidden-barrier detours above; the multi-hit family itself is the
-  brief's own named "mandatory resting state" (§4 puts it before Roar's own
-  rungs 10-14), landed complete and green.
-- **Notes:** one real dossier slip found (`ABILITY_SUCTION_CUPS` = 21 not
-  31) plus two hidden barriers beyond the scout's own list, both budgeted-for
-  by the brief and both fixed within this step, not deferred. **One of my
-  own first-draft test fixes was itself wrong** (assumed `JUMPIFABILITY`'s
-  barrier fires on an unrecognized *battler* ability rather than an
-  unrecognized *script comparand* — caught by actually running it, corrected
-  before committing). No PAPERCUT. Three commits: multi-hit registration +
-  tests, census regen.
