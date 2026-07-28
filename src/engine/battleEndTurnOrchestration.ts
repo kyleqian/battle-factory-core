@@ -48,8 +48,6 @@ import {
   resolveBattleScriptBattlerHoldEffect,
   resolveBattleScriptBattlerHoldEffectParam,
   resolveBattleScriptMoveBasePp,
-  resolveBattleScriptCurrentMoveEffect,
-  resolveBattleScriptCurrentMovePower,
   wasBattleScriptBattlerUnableToUseMove,
   withBattleScriptPartyMemberStatus1,
   type BattleScriptRulesBattlerState,
@@ -1664,9 +1662,6 @@ function runFutureAttacksAfterFaints(
     }
     rc = Object.freeze({
       ...rc,
-      currentMove: storedMove,
-      currentMoveEffect: resolveBattleScriptCurrentMoveEffect(storedMove),
-      currentMovePower: resolveBattleScriptCurrentMovePower(storedMove),
       battleMoveDamage: rc.futureSightDmg[battler],
       multistringChooser: storedMove === MOVE_FUTURE_SIGHT ? 0 : 1,
       sideStatuses: Object.freeze(sideStatuses),

@@ -96,7 +96,12 @@ describe("Battle Scene OFF Future Sight / trysetfutureattack registration eviden
     expect(observed.futureSet).toMatchObject({ currentMove: 248, player: { pp: [25, 10, 14, 20] }, opponent: { hp: 140 }, sideStatuses: [0, 64] });
     expect(observed.duplicatePendingAttempt).toMatchObject({ player: { pp: [25, 10, 13, 20] }, opponent: { hp: 140 }, sideStatuses: [0, 64] });
     expect(observed.delayedHitScheduled).toMatchObject({ opponent: { hp: 140 }, sideStatuses: [0, 0] });
-    expect(observed.delayedHit).toMatchObject({ opponent: { hp: 103, maxHp: 140 }, sideStatuses: [0, 0], outcome: 0 });
+    expect(observed.delayedHit).toMatchObject({
+      currentMove: 33,
+      opponent: { hp: 103, maxHp: 140 },
+      sideStatuses: [0, 0],
+      outcome: 0,
+    });
     expect(observed.futureSet.player.pp[2] - observed.duplicatePendingAttempt.player.pp[2]).toBe(1);
     expect(observed.delayedHitScheduled.opponent.hp - observed.delayedHit.opponent.hp).toBe(37);
   });

@@ -197,7 +197,7 @@ describe("B_SCR_OP_TRYSETFUTUREATTACK", () => {
 });
 
 describe("Future Sight through the generic full-turn seam", () => {
-  it("matches the merged OFF Kadabra proof: ordinary PP, duplicate failure, delayed 140→103, and side-bit clear", () => {
+  it("matches the merged OFF Kadabra proof and does not rewrite ordinary move history", () => {
     let state: ReturnType<typeof createFactoryFullTurnBattleState> = createFactoryFullTurnBattleState({
       requestId: 1,
       // The stock mechanicLab trainer AI consumes unrelated draws. This
@@ -260,18 +260,21 @@ describe("Future Sight through the generic full-turn seam", () => {
     expect(targetHp).toEqual([140, 140, 103]);
     expect(state.rules.rulesContext.futureSightCounter[1]).toBe(0);
     expect(state.rules.rulesContext.sideStatuses[1] & SIDE_STATUS_FUTUREATTACK).toBe(0);
+    expect(state.rules.rulesContext.moveHistory.lastMoves).toEqual([FUTURE_SIGHT, TACKLE, 0, 0]);
+    expect(state.rules.rulesContext.moveHistory.lastMoves).not.toContain(DOOM_DESIRE);
     expect(state.rng.calls).toBe(14);
   });
 });
 
 describe("positional delayed Future Sight resolution", () => {
-  it("decrements 3→2→1→0 after faint actions, restores attacker/move, clears bit, and draws only accuracy+damage", () => {
+  it("decrements 3→2→1→0 after faint actions, restores attacker/damage only, clears bit, and draws only accuracy+damage", () => {
     let rc = rules({
+      currentMove: TACKLE,
       sideStatuses: [0, SIDE_STATUS_FUTUREATTACK],
       futureSightCounter: [0, 3, 0, 0],
       futureSightMove: [0, FUTURE_SIGHT, 0, 0],
       futureSightAttacker: [0, 0, 0, 0],
-      futureSightDmg: [0, 40, 0, 0],
+      futureSightDmg: [0, 44, 0, 0],
     });
     const first = endTurn(rc);
     expect(first.kind).toBe("next-turn");
@@ -282,16 +285,56 @@ describe("positional delayed Future Sight resolution", () => {
     const second = endTurn(rc);
     expect(second.state.rulesContext.futureSightCounter[1]).toBe(1);
     expect(second.state.rng.calls).toBe(0);
-    const third = endTurn(second.state.rulesContext);
+    const third = endTurn(second.state.rulesContext, 19);
     if (third.kind === "non-terminal-barrier") throw new Error(`barrier ${third.instruction.opcodeName} ${third.instruction.source.label}:${third.instruction.source.statementLine}`);
     expect(third.kind).toBe("next-turn");
     expect(third.state.rulesContext.futureSightCounter[1]).toBe(0);
     expect(third.state.rulesContext.sideStatuses[1] & SIDE_STATUS_FUTUREATTACK).toBe(0);
     expect(third.state.rulesContext.selectorRoles).toMatchObject({ attacker: 0, target: 1 });
-    expect(third.state.rulesContext.currentMove).toBe(FUTURE_SIGHT);
-    expect(third.state.rulesContext.battlers[1].hp).toBeLessThan(140);
+    expect(third.state.rulesContext.currentMove).toBe(TACKLE);
+    expect(third.state.rulesContext.currentMoveEffect).toBe(0);
+    expect(third.state.rulesContext.currentMovePower).toBe(35);
+    expect(third.state.rulesContext.battlers[1].hp).toBe(103);
+    expect(third.state.events).toContainEqual(expect.objectContaining({
+      kind: "message",
+      messageId: "STRINGID_PKMNTOOKATTACK",
+    }));
+    expect(third.state.events).toContainEqual(expect.objectContaining({
+      kind: "animation",
+      animationId: "FUTURE_SIGHT_HIT",
+      battler: 0,
+    }));
     expect(third.state.rng.calls).toBe(2);
   });
+
+  it.each([FUTURE_SIGHT, DOOM_DESIRE])(
+    "stops moveendfromto before history state 14 and never records delayed move %i",
+    (storedMove) => {
+      const moveHistory = {
+        lastPrintedMoves: [91, 92, 93, 94],
+        lastMoves: [TACKLE, 45, 46, 47],
+        lastResultingMoves: [48, 49, 50, 51],
+        lastLandedMoves: [52, 53, 54, 55],
+        lastHitByType: [56, 57, 58, 59],
+        lastHitBy: [0, 1, 2, 3],
+        lastTakenMove: Array(16).fill(60),
+        lastTakenMoveFrom: Array(32).fill(61),
+      };
+      const result = endTurn(rules({
+        currentMove: TACKLE,
+        moveHistory,
+        sideStatuses: [0, SIDE_STATUS_FUTUREATTACK],
+        futureSightCounter: [0, 1, 0, 0],
+        futureSightMove: [0, storedMove, 0, 0],
+        futureSightAttacker: [0, 0, 0, 0],
+        futureSightDmg: [0, 44, 0, 0],
+      }), 19);
+      if (result.kind === "non-terminal-barrier") throw new Error(`barrier ${result.instruction.opcodeName}`);
+      expect(result.state.rulesContext.moveHistory).toEqual(moveHistory);
+      expect(result.state.rulesContext.moveHistory.lastMoves).not.toContain(storedMove);
+      expect(result.state.rulesContext.currentMove).toBe(TACKLE);
+    },
+  );
 
   it("targets a switched replacement in the same slot, bypasses Protect, and lets Substitute absorb", () => {
     const switched = rules({
@@ -324,6 +367,7 @@ describe("positional delayed Future Sight resolution", () => {
 
   it("routes Doom Desire through the same positional timer with its own accuracy and hit animation", () => {
     const result = endTurn(rules({
+      currentMove: TACKLE,
       sideStatuses: [0, SIDE_STATUS_FUTUREATTACK],
       futureSightCounter: [0, 1, 0, 0],
       futureSightMove: [0, DOOM_DESIRE, 0, 0],
@@ -331,7 +375,7 @@ describe("positional delayed Future Sight resolution", () => {
       futureSightDmg: [0, 50, 0, 0],
     }));
     expect(result.kind).toBe("next-turn");
-    expect(result.state.rulesContext.currentMove).toBe(DOOM_DESIRE);
+    expect(result.state.rulesContext.currentMove).toBe(TACKLE);
     expect(result.state.rulesContext.battlers[1].hp).toBeLessThan(140);
     expect(result.state.rng.calls).toBe(2);
     expect(result.state.events).toContainEqual(expect.objectContaining({

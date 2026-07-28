@@ -1106,6 +1106,71 @@ describe("production adjustnormaldamage (Cmd_adjustnormaldamage) dispatch", () =
   });
 });
 
+describe("production adjustnormaldamage2 (Cmd_adjustnormaldamage2) dispatch", () => {
+  it("omits only False Swipe's clamp while consuming the same random roll", () => {
+    const rc = context(0, {}, { currentMove: FALSE_SWIPE, battleMoveDamage: 999 }, { hp: 10 });
+    const seed = rngValueBeforeU16(52212);
+    const ordinary = stepAtOpcode("B_SCR_OP_ADJUSTNORMALDAMAGE", rc, seed).result;
+    const delayed = stepAtOpcode("B_SCR_OP_ADJUSTNORMALDAMAGE2", rc, seed).result;
+    expect(ordinary.kind).toBe("advanced");
+    expect(delayed.kind).toBe("advanced");
+    expect(ordinary.state.rulesContext.battleMoveDamage).toBe(9);
+    expect(delayed.state.rulesContext.battleMoveDamage).toBe(959);
+    expect(ordinary.state.rulesContext.moveResultFlags).toBe(0);
+    expect(delayed.state.rulesContext.moveResultFlags).toBe(0);
+    expect(ordinary.state.rng.calls).toBe(1);
+    expect(delayed.state.rng.calls).toBe(1);
+    expect(ordinary.state.rng.ledger[0]!.randomValue).toBe(52212);
+    expect(delayed.state.rng.ledger[0]!.randomValue).toBe(52212);
+    expect(delayed.state.rng.ledger[0]!.reason).toBe("adjustnormaldamage2");
+  });
+
+  it("preserves the shared Endure clamp and flag despite a False Swipe current move", () => {
+    const rc = context(
+      0,
+      {},
+      { currentMove: FALSE_SWIPE, battleMoveDamage: 999 },
+      { hp: 10, endured: 1 },
+    );
+    const { result } = stepAtOpcode("B_SCR_OP_ADJUSTNORMALDAMAGE2", rc, rngValueBeforeU16(52212));
+    expect(result.kind).toBe("advanced");
+    expect(result.state.rulesContext.battleMoveDamage).toBe(9);
+    expect(result.state.rulesContext.moveResultFlags & (1 << 6)).toBe(1 << 6);
+    expect(result.state.rng.calls).toBe(1);
+  });
+
+  it("preserves Substitute's suppression of both False Swipe and Endure clamps", () => {
+    const rc = context(
+      0,
+      {},
+      { currentMove: FALSE_SWIPE, battleMoveDamage: 999 },
+      { hp: 10, endured: 1, status2: 1 << 24 },
+    );
+    const { result } = stepAtOpcode("B_SCR_OP_ADJUSTNORMALDAMAGE2", rc, rngValueBeforeU16(52212));
+    expect(result.kind).toBe("advanced");
+    expect(result.state.rulesContext.battleMoveDamage).toBe(959);
+    expect(result.state.rulesContext.moveResultFlags & (1 << 6)).toBe(0);
+    expect(result.state.rng.calls).toBe(1);
+  });
+
+  it("preserves the Focus Band barrier at Cmd_adjustnormaldamage2's own source line", () => {
+    const rc = context(
+      0,
+      {},
+      { currentMove: FALSE_SWIPE, battleMoveDamage: 999 },
+      { hp: 10, item: HOLD_EFFECT_ITEM_FOCUS_BAND },
+    );
+    const { result } = stepAtOpcode("B_SCR_OP_ADJUSTNORMALDAMAGE2", rc, rngValueBeforeU16(52212));
+    expect(result.kind).toBe("halted");
+    expect(result.state.haltReason).toMatchObject({
+      kind: "unsupported-branch",
+      sourceFile: "battle_script_commands.c",
+      sourceLine: 1720,
+    });
+    expect(result.state.rng.calls).toBe(0);
+  });
+});
+
 describe("production setdamagetohealthdifference (Cmd_setdamagetohealthdifference) dispatch", () => {
   it("registers B_SCR_OP_SETDAMAGETOHEALTHDIFFERENCE", () => {
     const instruction = program.instructions.find((i) => i.opcodeName === "B_SCR_OP_SETDAMAGETOHEALTHDIFFERENCE")!;

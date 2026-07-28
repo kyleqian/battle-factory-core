@@ -1647,39 +1647,50 @@ export const mirrorcoatdamagecalculatorOpcodeHandler: BattleScriptOpcodeHandler<
 };
 
 /**
- * Cmd_adjustnormaldamage (battle_script_commands.c:1658-1698): the always-run
- * ApplyRandomDmgMultiplier roll, then the False Swipe/Endure/Focus-Band HP
- * clamp. Focus Band's own roll (`Random() % 100 < param`, gated on the target
+ * Shared body of Cmd_adjustnormaldamage (battle_script_commands.c:1658-1698)
+ * and Cmd_adjustnormaldamage2 (1701-1741). Both consume the random-damage
+ * roll and share Focus Band, Endure, Substitute, flags, and HP semantics.
+ * Their sole source difference is whether EFFECT_FALSE_SWIPE participates in
+ * the survival clamp.
+ *
+ * Focus Band's own roll (`Random() % 100 < param`, gated on the target
  * actually holding it) needs gSpecialStatuses[target].focusBanded, which this
  * engine does not model -- barriered, but ONLY when the target's resolved
  * holdEffect is actually Focus Band, never on the plain (no-item or
  * different-item) path, which is fully implemented per source.
  */
-export const adjustnormaldamageOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (
-  context,
-) => {
+function adjustNormalDamageOpcodeHandler(
+  context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
+  includeFalseSwipe: boolean,
+): ReturnType<BattleScriptOpcodeHandler<BattleScriptRulesContext>> {
   const rulesContext = context.state.rulesContext;
   const target = requireBattlerRole(rulesContext, "target");
   const targetBattler = rulesContext.battlers[target];
+  const commandName = includeFalseSwipe ? "Cmd_adjustnormaldamage" : "Cmd_adjustnormaldamage2";
 
-  const { rng, randomValue } = drawBattleScriptRng(context.state.rng, context.instruction, "adjustnormaldamage");
+  const { rng, randomValue } = drawBattleScriptRng(
+    context.state.rng,
+    context.instruction,
+    includeFalseSwipe ? "adjustnormaldamage" : "adjustnormaldamage2",
+  );
   let damage = applyRandomDamageMultiplier(rulesContext.battleMoveDamage, randomValue);
 
   const holdEffectId = resolveBattleScriptBattlerHoldEffect(rulesContext, target);
   if (holdEffectId === HOLD_EFFECT_ID_FOCUS_BAND) {
     return unsupportedBranch(
       context,
-      "Cmd_adjustnormaldamage's HOLD_EFFECT_FOCUS_BAND roll needs gSpecialStatuses[target].focusBanded, "
+      `${commandName}'s HOLD_EFFECT_FOCUS_BAND roll needs gSpecialStatuses[target].focusBanded, `
         + "which this engine does not model yet",
       "battle_script_commands.c",
-      1677,
+      includeFalseSwipe ? 1677 : 1720,
     );
   }
 
-  const moveRow = requireMoveRow(rulesContext.currentMove);
+  const falseSwipeApplies = includeFalseSwipe
+    && requireMoveRow(rulesContext.currentMove).effect === "EFFECT_FALSE_SWIPE";
   const hasSubstitute = (targetBattler.status2 & BATTLE_SCRIPT_STATUS2_SUBSTITUTE) !== 0;
   const shouldClamp = !hasSubstitute
-    && (moveRow.effect === "EFFECT_FALSE_SWIPE" || targetBattler.endured === 1)
+    && (falseSwipeApplies || targetBattler.endured === 1)
     && targetBattler.hp <= damage;
 
   let moveResultFlags = rulesContext.moveResultFlags;
@@ -1695,7 +1706,15 @@ export const adjustnormaldamageOpcodeHandler: BattleScriptOpcodeHandler<BattleSc
     Object.freeze({ kind: "advance" }),
     { rulesContext: Object.freeze({ ...rulesContext, battleMoveDamage: damage, moveResultFlags }), rng },
   );
-};
+}
+
+export const adjustnormaldamageOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (
+  context,
+) => adjustNormalDamageOpcodeHandler(context, true);
+
+export const adjustnormaldamage2OpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (
+  context,
+) => adjustNormalDamageOpcodeHandler(context, false);
 
 /**
  * Cmd_setdamagetohealthdifference (battle_script_commands.c:9366-9377),
@@ -3595,10 +3614,7 @@ export function createBattleScriptHitChainOpcodeHandlers(
   install("B_SCR_OP_DMGTOLEVEL", dmgtolevelOpcodeHandler);
   install("B_SCR_OP_PSYWAVEDAMAGEEFFECT", psywavedamageeffectOpcodeHandler);
   install("B_SCR_OP_ADJUSTNORMALDAMAGE", adjustnormaldamageOpcodeHandler);
-  // Cmd_adjustnormaldamage2 differs only by omitting False Swipe's clamp.
-  // Future Sight/Doom Desire can never have EFFECT_FALSE_SWIPE, so the
-  // shared handler is behavior-identical for both concrete call sites.
-  install("B_SCR_OP_ADJUSTNORMALDAMAGE2", adjustnormaldamageOpcodeHandler);
+  install("B_SCR_OP_ADJUSTNORMALDAMAGE2", adjustnormaldamage2OpcodeHandler);
   install("B_SCR_OP_SETDAMAGETOHEALTHDIFFERENCE", setdamagetohealthdifferenceOpcodeHandler);
   install("B_SCR_OP_ADJUSTSETDAMAGE", adjustsetdamageOpcodeHandler);
   install("B_SCR_OP_COUNTERDAMAGECALCULATOR", counterdamagecalculatorOpcodeHandler);
