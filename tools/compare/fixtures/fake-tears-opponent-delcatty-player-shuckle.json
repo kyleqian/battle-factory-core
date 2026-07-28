@@ -6,6 +6,16 @@
   "pair": "DELCATTY (opponent-front) -> SHUCKLE (player-back)",
   "move": "FAKE_TEARS",
   "orientation": "opponent-to-player",
+  "controllerWindow": {"startFrame": 39, "endFrame": 360, "frameCount": 322},
+  "phaseWindows": {
+    "preAnimation": {"startFrame": 39, "endFrame": 79, "frameCount": 41},
+    "sourceAnimation": {"startFrame": 80, "endFrame": 166, "frameCount": 87},
+    "statDropStatus": {"startFrame": 167, "endFrame": 255, "frameCount": 89},
+    "messagePostAnimation": {"startFrame": 256, "endFrame": 359, "frameCount": 104},
+    "cleanup": {"startFrame": 360, "endFrame": 360, "frameCount": 1}
+  },
+  "evidenceSha256": "c9b2f3d8ad20833d39e7f8cd73c0908e9c64c72b2dcf41ba0c86abc7615221ff",
+  "rawRgbSha256": "e7828c486bd06f3a5db51c186fa84542397dfc44ef7a570f9b47c8e8fe2938fc",
   "sourceVisualWindow": {"startFrame": 80, "endFrame": 166},
   "appStage": {"presentationAge": 0},
   "attacker": {"species":"DELCATTY","geometry":{"side":"opponent","spriteCorner":{"x":144,"y":16},"animationCenter":{"x":176,"y":48},"battlePositionCenter":{"x":176,"y":40}}},

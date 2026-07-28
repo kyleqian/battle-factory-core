@@ -19,11 +19,22 @@ type Fixture = SceneOnFakeTearsConfig & {
   scenario: string;
   probe: string;
   orientation: string;
+  controllerWindow: Window;
+  phaseWindows: Readonly<Record<Phase, Window>>;
+  evidenceSha256: string;
+  rawRgbSha256: string;
   sourceVisualWindow: {
     startFrame: number; endFrame: number;
   };
   appStage: { presentationAge: number };
 };
+type Window = { startFrame: number; endFrame: number; frameCount: number };
+type Phase =
+  | "preAnimation"
+  | "sourceAnimation"
+  | "statDropStatus"
+  | "messagePostAnimation"
+  | "cleanup";
 type Matrix = { a: number; b: number; c: number; d: number };
 type Sprite = {
   slot: number;
@@ -45,7 +56,7 @@ type Frame = {
   se1: { songHeader: number; tracks: { flags: number; panX: number }[] };
   se2: { songHeader: number; tracks: { flags: number; panX: number }[] };
 };
-type Probe = { schema: string; frames: Frame[] };
+type Probe = { schema: string; captureWindow: Window; frames: Frame[] };
 
 const root = resolve(dirname(new URL(import.meta.url).pathname), "../..");
 const fixtures = process.argv.slice(2);
@@ -55,6 +66,9 @@ if (fixtures.length !== 2) {
   );
 }
 const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
+const outputDigests = new Map<string, string>();
+const rawRgbDigests = new Map<string, string>();
+const auditSummaries = new Map<string, string>();
 const shape = (sprite: Sprite) => ({
   slot: sprite.slot,
   x: sprite.x,
@@ -63,6 +77,14 @@ const shape = (sprite: Sprite) => ({
   y2: sprite.y2,
   matrix: sprite.matrix,
 });
+
+function phaseForFrame(fixture: Fixture, frame: number): Phase {
+  for (const phase of Object.keys(fixture.phaseWindows) as Phase[]) {
+    const window = fixture.phaseWindows[phase];
+    if (frame >= window.startFrame && frame <= window.endFrame) return phase;
+  }
+  throw new Error(`${fixture.orientation}: frame ${frame} is outside the phase audit`);
+}
 
 function verify(fixturePath: string, runNumber: number): void {
   const fixture = JSON.parse(
@@ -85,9 +107,29 @@ function verify(fixturePath: string, runNumber: number): void {
   if (run.stdout) process.stdout.write(run.stdout);
   if (run.stderr) process.stderr.write(run.stderr);
   if (run.status !== 0) process.exit(run.status ?? 1);
-  const probe = JSON.parse(readFileSync(output, "utf8")) as Probe;
+  const outputBytes = readFileSync(output);
+  const probe = JSON.parse(outputBytes.toString()) as Probe;
   if (probe.schema !== "fake-tears-blend-particle-dense-evidence/v1") {
     throw new Error(`${fixture.orientation}: unexpected probe schema`);
+  }
+  if (
+    !same(probe.captureWindow, fixture.controllerWindow)
+    || probe.frames.length !== fixture.controllerWindow.frameCount
+    || probe.frames.some((frame, index) =>
+      frame.frame !== fixture.controllerWindow.startFrame + index
+      || frame.currentMove !== 313)
+  ) {
+    throw new Error(`${fixture.orientation}: corrected-species controller window is not dense`);
+  }
+  const phaseCount = new Map<Phase, number>();
+  for (const frame of probe.frames) {
+    const phase = phaseForFrame(fixture, frame.frame);
+    phaseCount.set(phase, (phaseCount.get(phase) ?? 0) + 1);
+  }
+  for (const phase of Object.keys(fixture.phaseWindows) as Phase[]) {
+    if (phaseCount.get(phase) !== fixture.phaseWindows[phase].frameCount) {
+      throw new Error(`${fixture.orientation}: ${phase} phase count changed`);
+    }
   }
   const rows = probe.frames.filter((frame) =>
     frame.frame >= fixture.sourceVisualWindow.startFrame
@@ -225,9 +267,130 @@ function verify(fixturePath: string, runNumber: number): void {
       `${failures.slice(0, 40).join("\n")}\ndiagnostic=${scratch}`,
     );
   }
+
+  const rgbDigest = createHash("sha256");
+  const framebufferAudit: Record<Phase, {
+    exact: number;
+    mismatched: number;
+    pixels: number;
+    regions: Record<string, number>;
+  }> = Object.fromEntries(
+    (Object.keys(fixture.phaseWindows) as Phase[]).map((phase) => [
+      phase,
+      {
+        exact: 0,
+        mismatched: 0,
+        pixels: 0,
+        regions: {
+          attacker: 0,
+          target: 0,
+          opponentBox: 0,
+          playerBox: 0,
+          text: 0,
+          other: 0,
+        },
+      },
+    ]),
+  ) as typeof framebufferAudit;
+  for (const oracle of probe.frames) {
+    if (
+      oracle.hardwareOam.length !== 128
+      || oracle.hardwareMatrices.length !== 32
+      || oracle.hardwarePalette.length !== 512
+      || oracle.fadedPalette.length !== 512
+      || oracle.registers.bldcnt === undefined
+      || oracle.se1.tracks.length !== 3
+      || oracle.se2.tracks.length !== 3
+    ) {
+      throw new Error(`${fixture.orientation}: frame ${oracle.frame} has an incomplete hardware receipt`);
+    }
+    const rgb = readFileSync(
+      join(rgbDir, `${String(oracle.frame).padStart(5, "0")}.rgb`),
+    );
+    rgbDigest.update(rgb);
+    if (createHash("sha256").update(rgb).digest("hex") !== oracle.sha256) {
+      throw new Error(`${fixture.orientation}: frame ${oracle.frame} raw RGB receipt changed`);
+    }
+    const age = fixture.appStage.presentationAge
+      + oracle.frame - fixture.sourceVisualWindow.startFrame;
+    const engine: EngineState = {
+      ...createInitialState(),
+      rngMode: "frontierBattle",
+      sceneOnPresentation: {
+        ...createSceneOnMovePresentation({
+          move: "FAKE_TEARS",
+          attacker: fixture.attacker,
+          target: fixture.target,
+          attackerPictureBounds: fixture.attackerPictureBounds,
+          fieldProfile: fixture.fieldProfile,
+        }),
+        age,
+      },
+    };
+    const app = render(engine);
+    const phase = phaseForFrame(fixture, oracle.frame);
+    const audit = framebufferAudit[phase];
+    let diff = 0;
+    for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
+      if (
+        app[pixel * 4] !== rgb[pixel * 3]
+        || app[pixel * 4 + 1] !== rgb[pixel * 3 + 1]
+        || app[pixel * 4 + 2] !== rgb[pixel * 3 + 2]
+      ) {
+        diff += 1;
+        const x = pixel % 240;
+        const y = Math.floor(pixel / 240);
+        if (x >= 24 && x < 120 && y >= 32 && y < 136) audit.regions.attacker += 1;
+        else if (x >= 128 && x < 224 && y < 96) audit.regions.target += 1;
+        else if (y < 48 && x < 136) audit.regions.opponentBox += 1;
+        else if (y >= 72 && y < 128 && x >= 104) audit.regions.playerBox += 1;
+        else if (y >= 128) audit.regions.text += 1;
+        else audit.regions.other += 1;
+      }
+    }
+    audit.pixels += diff;
+    if (diff === 0) audit.exact += 1;
+    else audit.mismatched += 1;
+  }
+  const sourceAudit = framebufferAudit.sourceAnimation;
+  if (
+    sourceAudit.exact !== fixture.phaseWindows.sourceAnimation.frameCount
+    || sourceAudit.mismatched !== 0
+  ) {
+    throw new Error(`${fixture.orientation}: source framebuffer acceptance regressed`);
+  }
+  const outerMismatchFrames = (Object.keys(framebufferAudit) as Phase[])
+    .filter((phase) => phase !== "sourceAnimation")
+    .reduce((sum, phase) => sum + framebufferAudit[phase].mismatched, 0);
+  if (outerMismatchFrames === 0) {
+    throw new Error(`${fixture.orientation}: ownership audit unexpectedly has no outer mismatch`);
+  }
+  const outputDigest = createHash("sha256").update(outputBytes).digest("hex");
+  const rawDigest = rgbDigest.digest("hex");
+  if (
+    outputDigest !== fixture.evidenceSha256
+    || rawDigest !== fixture.rawRgbSha256
+  ) {
+    throw new Error(`${fixture.orientation}: full-window proof digest changed`);
+  }
+  const auditSummary = JSON.stringify(framebufferAudit);
+  for (const [map, value, label] of [
+    [outputDigests, outputDigest, "evidence"],
+    [rawRgbDigests, rawDigest, "raw RGB"],
+    [auditSummaries, auditSummary, "framebuffer audit"],
+  ] as const) {
+    const previous = map.get(fixture.orientation);
+    if (previous !== undefined && previous !== value) {
+      throw new Error(`${fixture.orientation}: fresh ${label} changed`);
+    }
+    map.set(fixture.orientation, value);
+  }
   console.log(
     `${fixture.orientation} run ${runNumber}: `
-    + `${exact}/${FAKE_TEARS_SOURCE_FRAME_COUNT} source/seam/framebuffer exact`,
+    + `${exact}/${FAKE_TEARS_SOURCE_FRAME_COUNT} source/seam/framebuffer exact; `
+    + `322/322 controller receipts; evidence ${outputDigest}; rgb ${rawDigest}; `
+    + `outer ${outerMismatchFrames}/235 framebuffer mismatches `
+    + `${auditSummary}`,
   );
 }
 
