@@ -119,6 +119,7 @@ describe("production removeitem (Cmd_removeitem) dispatch -- battle_script_comma
       expect(result.kind).toBe("advanced");
       if (result.kind !== "advanced") throw new Error("expected advance");
       expect(result.state.rulesContext.battlers[0]!.item).toBe(0);
+      expect(result.state.rulesContext.usedHeldItems).toEqual([ITEM_HELD_FOR_TEST, 0, 0, 0]);
       expect(result.state.scheduler.pendingControllerBattlers).toEqual([0]);
       expect(result.state.events).toEqual([
         expect.objectContaining({ kind: "set-battler-item", battler: 0, item: 0 }),
@@ -135,6 +136,7 @@ describe("production removeitem (Cmd_removeitem) dispatch -- battle_script_comma
       expect(result.kind).toBe("advanced");
       if (result.kind !== "advanced") throw new Error("expected advance");
       expect(result.state.rulesContext.battlers[1]!.item).toBe(0);
+      expect(result.state.rulesContext.usedHeldItems).toEqual([0, ITEM_HELD_FOR_TEST, 0, 0]);
       expect(result.state.scheduler.pendingControllerBattlers).toEqual([1]);
     });
   });

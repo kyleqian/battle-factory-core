@@ -82,6 +82,7 @@ import { createBattleScriptGetSecretPowerEffectOpcodeHandlers } from "./battleSc
 import { createBattleScriptTryswapabilitiesOpcodeHandlers } from "./battleScriptTryswapabilitiesOpcode.ts";
 import { createBattleScriptTrymementoOpcodeHandlers } from "./battleScriptTrymementoOpcode.ts";
 import { createBattleScriptTrycopyabilityOpcodeHandlers } from "./battleScriptTrycopyabilityOpcode.ts";
+import { createBattleScriptTryrecycleitemOpcodeHandlers } from "./battleScriptTryrecycleitemOpcode.ts";
 import { createBattleScriptTrysethelpinghandOpcodeHandlers } from "./battleScriptTrysethelpinghandOpcode.ts";
 import { createBattleScriptTryswapitemsOpcodeHandlers } from "./battleScriptTryswapitemsOpcode.ts";
 import { createBattleScriptSettormentOpcodeHandlers } from "./battleScriptSettormentOpcode.ts";
@@ -670,6 +671,8 @@ export type BattleScriptRulesContext = Readonly<
     choicedMove: BattleScriptMoveEndHalfwords;
     /** Source u16 gBattleStruct->changedItems[MAX_BATTLERS_COUNT]. */
     changedItems: BattleScriptMoveEndHalfwords;
+    /** Source u16 gBattleStruct->usedHeldItems[MAX_BATTLERS_COUNT], populated by Cmd_removeitem and consumed by Recycle. */
+    usedHeldItems: BattleScriptMoveEndHalfwords;
     /** Source gWishFutureKnock.knockedOffMons[NUM_BATTLE_SIDES], one six-party-slot mask per side. */
     knockedOffMons: readonly [number, number];
     /**
@@ -824,6 +827,7 @@ export type BattleScriptRulesContextInput = Readonly<{
   rolloutTimerStartValues?: readonly number[];
   choicedMove?: readonly number[];
   changedItems?: readonly number[];
+  usedHeldItems?: readonly number[];
   knockedOffMons?: readonly [number?, number?];
   monToSwitchIntoId?: readonly number[];
   battleStructAbsentBattlerFlags?: number;
@@ -2282,6 +2286,11 @@ export function createBattleScriptRulesContext(
     0xffff,
     "changedItems",
   ) as BattleScriptMoveEndHalfwords;
+  const usedHeldItems = createMoveEndArray(
+    input.usedHeldItems,
+    0xffff,
+    "usedHeldItems",
+  ) as BattleScriptMoveEndHalfwords;
   const chosenMovePositions = createMoveEndArray(
     input.chosenMovePositions,
     3,
@@ -2389,6 +2398,7 @@ export function createBattleScriptRulesContext(
     rolloutTimerStartValues,
     choicedMove,
     changedItems,
+    usedHeldItems,
     knockedOffMons: Object.freeze([
       requireUnsigned(input.knockedOffMons?.[0] ?? 0, 0x3f, "knockedOffMons[0]"),
       requireUnsigned(input.knockedOffMons?.[1] ?? 0, 0x3f, "knockedOffMons[1]"),
@@ -2749,6 +2759,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptTryswapabilitiesOpcodeHandlers(program),
     ...createBattleScriptTrymementoOpcodeHandlers(program),
     ...createBattleScriptTrycopyabilityOpcodeHandlers(program),
+    ...createBattleScriptTryrecycleitemOpcodeHandlers(program),
   });
 }
 
