@@ -1073,6 +1073,7 @@ export type SceneOnMoveConfig =
   | SceneOnHyperFangConfig
   | SceneOnSwaggerConfig
   | SceneOnTauntConfig
+  | SceneOnScaryFaceConfig
   | SceneOnSparkConfig
   | SceneOnCharmConfig
   | SceneOnSelfDestructConfig

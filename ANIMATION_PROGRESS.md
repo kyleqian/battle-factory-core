@@ -44,6 +44,31 @@ animation. A status caused by a move is not part of that move's animation.
   presentation seam and all source- or evidence-required variants are covered.
 - No entry means unsupported.
 
+## MOVE_SCARY_FACE promoted exact; complete hardware/pixel closure (2026-07-27)
+
+**Verdict:** `MOVE_SCARY_FACE` is exact. Legal set-133 RHYHORN versus
+constrained SHUCKLE matches the complete move-owned windows **190/190** at
+79-268 player-back and 83-272 opponent-front through source/software,
+typed-seam, hardware OAM/palettes/registers, live audio, raw RGB, and the
+shared framebuffer, reproduced twice fresh in both orientations with no body
+exclusions. Coverage is **52 exact / 3 partial / 221 unsupported**.
+
+**Renderer/evidence:** the narrow compositor uses the extracted RHYHORN,
+SHUCKLE, Scary Face BG/tilemaps, and EYE_SPARKLE assets. It ports the split
+hardware palette-transfer cadence, BG1 alpha/register lifecycle, one-display
+eye OAM and two-display battler-task latches, source painter order, field
+chrome/healthboxes/text, all three live sound intervals, and complete teardown.
+The fixture HP profiles now reflect the complete legal parties actually staged
+by the ROM (RHYHORN 187, SHUCKLE 127), replacing the partial-era estimates.
+
+**Controls/scope:** CHARM remains **93/93 + 4/4 cleanup** and SPARK
+**115/115 + 2/2 cleanup** exact in both orientations twice fresh. The stock
+shared-`gBattleAnimArgs` overwrite remains pinned: literal offset1/pattern0 is
+executed as runtime offset3/pattern1. GLARE, THUNDER, and TRI ATTACK remain
+unsupported pending their own complete evidence. Generic speed-stat
+presentation remains outside the move-owned boundary. No boundary-ratchet,
+unsupported-barrier, canonical-import, battle-state, RNG, or controller change.
+
 ## SCARY_FACE presentation-assets checkpoint; remains partial (2026-07-27)
 
 **State:** Coverage remains **51 exact / 4 partial / 221 unsupported**.

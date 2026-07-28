@@ -7,6 +7,8 @@ import scaryFaceAsset from "../../src/animation/assets/scary-face.json" with { t
 import {
   SCARY_FACE_CLEAN_BOUNDARY_AGE,
   scaryFaceAtAge,
+  scaryFaceAttackerPaletteBlackCoeffAtAge,
+  scaryFacePaletteBlackCoeffAtAge,
 } from "../../src/animation/scaryFace.ts";
 import {
   createSceneOnMovePresentation,
@@ -33,6 +35,15 @@ describe("MOVE_SCARY_FACE source-relative reducer", () => {
       [SCARY_FACE_CLEAN_BOUNDARY_AGE, null, null, true],
     ]);
     expect(state(59).soundRestart).toBe("SE_M_LEER");
+  });
+
+  it("ports the split BG/attacker hardware palette-transfer cadence", () => {
+    expect([0, 4, 5, 39, 40, 143, 148, 149, 183, 184, 189].map(
+      (age) => scaryFacePaletteBlackCoeffAtAge(age),
+    )).toEqual([0, 0, 2, 14, 16, 16, 14, 14, 0, 0, 0]);
+    expect([4, 5, 6, 148, 149].map(
+      (age) => scaryFaceAttackerPaletteBlackCoeffAtAge(age),
+    )).toEqual([0, 0, 2, 16, 14]);
   });
 
   it("ports the side-selected BG1 task's full 0→14→0 schedule", () => {

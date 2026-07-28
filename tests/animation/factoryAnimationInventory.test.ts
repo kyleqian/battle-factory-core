@@ -68,11 +68,11 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // SCARY FACE closes the complete software/typed seam as partial.
+        // SCARY FACE closes its complete hardware/pixel seam as exact.
         unsupported: 221,
         staged: 0,
-        partial: 4,
-        exact: 51,
+        partial: 3,
+        exact: 52,
       },
       {
         tier: "openOnly",

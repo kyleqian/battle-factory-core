@@ -551,6 +551,7 @@ import poisonFangAsset from "../animation/assets/poisonFang.json" with { type: "
 import hyperFangAsset from "../animation/assets/hyperFang.json" with { type: "json" };
 import swaggerAsset from "../animation/assets/swagger.json" with { type: "json" };
 import tauntAsset from "../animation/assets/taunt.json" with { type: "json" };
+import scaryFaceAsset from "../animation/assets/scary-face.json" with { type: "json" };
 import charmAsset from "../animation/assets/charm.json" with { type: "json" };
 import selfDestructAsset from "../animation/assets/selfDestruct.json" with { type: "json" };
 import explosionAsset from "../animation/assets/explosion.json" with { type: "json" };
@@ -674,6 +675,7 @@ import {
   sceneOnHyperFangView,
   sceneOnSwaggerView,
   sceneOnTauntView,
+  sceneOnScaryFaceView,
   sceneOnSelfDestructView,
   sceneOnExplosionView,
   sceneOnDynamicPunchView,
@@ -696,6 +698,7 @@ import {
   type SceneOnMovePresentationState,
   type SceneOnSparkPresentationState,
   type SceneOnCharmPresentationState,
+  type SceneOnScaryFacePresentationState,
 } from "../animation/sceneOnPresentation.ts";
 import {
   extremeSpeedBackgroundVariant,
@@ -1033,6 +1036,15 @@ const tauntArt = tauntAsset as {
   finger: { tileset: Tileset; palette: RgbColor[] };
   murkrowBack: { tileset: Tileset; palette: RgbColor[] };
   murkrowFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const scaryFaceArt = scaryFaceAsset as {
+  rhyhornBack: { tileset: Tileset; palette: RgbColor[] };
+  rhyhornFront: { tileset: Tileset; palette: RgbColor[] };
+  background: {
+    tileset: Tileset; palette: RgbColor[];
+    playerTilemap: Tilemap; opponentTilemap: Tilemap;
+  };
+  eyeSparkle: { tileset: Tileset; palette: RgbColor[] };
 };
 const selfDestructArt = selfDestructAsset as {
   explosion: { tileset: Tileset; palette: RgbColor[] };
@@ -3771,6 +3783,37 @@ function blendPaletteBanksToward(
   coeff: number,
 ): RgbColor[][] {
   return palettes.map((palette) => blendPaletteToward(palette, target, coeff));
+}
+
+/** Source BG1 Scary Face layer, alpha-composited over the already-sorted field. */
+function drawScaryFaceBackgroundBlended(
+  fb: Uint8Array,
+  tilemap: Tilemap,
+  eva: number,
+): void {
+  const evb = 16 - eva;
+  for (let y = 0; y < 160; y += 1) {
+    const tileRow = Math.floor(y / 8);
+    const inTileY = y % 8;
+    for (let x = 0; x < 240; x += 1) {
+      const tileCol = Math.floor(x / 8);
+      const inTileX = x % 8;
+      const entry = tilemap.entries[tileRow * tilemap.width + tileCol];
+      if (!entry || entry.palette !== 8) continue;
+      const tile = scaryFaceArt.background.tileset.tiles[entry.tile];
+      if (!tile) continue;
+      const sx = entry.hFlip ? 7 - inTileX : inTileX;
+      const sy = entry.vFlip ? 7 - inTileY : inTileY;
+      const index = tile[sy * 8 + sx]!;
+      if (index === 0) continue;
+      const color = scaryFaceArt.background.palette[index];
+      if (!color) continue;
+      const offset = (y * 240 + x) * 4;
+      fb[offset] = blendChannel(color.r, fb[offset]!, eva, evb);
+      fb[offset + 1] = blendChannel(color.g, fb[offset + 1]!, eva, evb);
+      fb[offset + 2] = blendChannel(color.b, fb[offset + 2]!, eva, evb);
+    }
+  }
 }
 /**
  * Same nearest-neighbor affine sampling as `drawSpriteSheetAffineTinted`, but with INDEPENDENT x/y scale (a true stretch, not uniform), a vertical pixel offset, and the sprite's OWN palette (optionally blended toward `tintColor` at `tintCoeff`) instead of a flat tint.
@@ -15902,6 +15945,148 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "RATICATE used" : "Foe RATICATE used",
       "HYPER FANG!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SCARY_FACE") {
+    const scaryState = state as SceneOnScaryFacePresentationState;
+    const view = sceneOnScaryFaceView(scaryState);
+    const eyesDisplayed = sceneOnScaryFaceView({
+      ...scaryState, age: scaryState.age - 1,
+    });
+    // Battler task writes traverse software OAM and the hardware buffer over
+    // two displays, the same stock latch proved by CHARM's battler task.
+    const targetDisplayed = sceneOnScaryFaceView({
+      ...scaryState, age: scaryState.age - 2,
+    }).targetOffset;
+    const playerToOpponent =
+      view.attacker.species === "RHYHORN"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "RHYHORN"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged SCARY_FACE pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const rhyhornSource = playerToOpponent
+      ? scaryFaceArt.rhyhornBack : scaryFaceArt.rhyhornFront;
+    const rhyhorn = playerToOpponent
+      ? rhyhornSource
+      : { ...rhyhornSource, tileset: subTileset(rhyhornSource.tileset, 0, 8) };
+    const shuckle = playerToOpponent
+      ? {
+          ...selfDestructArt.shuckleFront,
+          tileset: subTileset(selfDestructArt.shuckleFront.tileset, 0, 8),
+        }
+      : selfDestructArt.shuckleBack;
+    const black = { r: 0, g: 0, b: 0 };
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      blendPaletteBanksToward(
+        battleBg.palette, black, view.paletteBlackCoeff,
+      ),
+    );
+
+    type ScaryFacePainterItem = {
+      priority: number; subpriority: number; top: number; slot: number;
+      draw: () => void;
+    };
+    const items: ScaryFacePainterItem[] = [];
+    const attackerPalette = blendPaletteToward(
+      rhyhorn.palette, black, view.attackerPaletteBlackCoeff,
+    );
+    items.push({
+      priority: 2,
+      subpriority: view.attacker.geometry.side === "player" ? 30 : 40,
+      top: view.attacker.geometry.spriteCorner.y,
+      slot: playerToOpponent ? 6 : 8,
+      draw: () => drawSpriteSheet(
+        fb, rhyhorn.tileset, attackerPalette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+      ),
+    }, {
+      priority: 2,
+      subpriority: view.target.geometry.side === "player" ? 30 : 40,
+      top: view.target.geometry.spriteCorner.y,
+      slot: playerToOpponent ? 8 : 6,
+      draw: () => drawSpriteSheet(
+        fb, shuckle.tileset, shuckle.palette,
+        view.target.geometry.spriteCorner.x + targetDisplayed.x2,
+        view.target.geometry.spriteCorner.y,
+      ),
+    });
+    const eyeRows = [0, 2, 4, 2, 0] as const;
+    for (const [index, eye] of eyesDisplayed.eyes.entries()) {
+      const tileset = subTileset(
+        scaryFaceArt.eyeSparkle.tileset, eyeRows[eye.frame], 2,
+      );
+      items.push({
+        priority: 2,
+        subpriority: view.attacker.geometry.side === "player" ? 30 : 40,
+        top: eye.y - 8,
+        slot: 3 + index,
+        draw: () => drawSpriteSheet(
+          fb, tileset, scaryFaceArt.eyeSparkle.palette,
+          eye.x - 8, eye.y - 8,
+        ),
+      });
+    }
+    items.sort((a, b) =>
+      b.priority - a.priority || b.subpriority - a.subpriority
+      || a.top - b.top || b.slot - a.slot);
+    for (const item of items) item.draw();
+
+    if (view.background) {
+      const backgroundDisplayed = sceneOnScaryFaceView({
+        ...scaryState, age: scaryState.age - 1,
+      }).background;
+      drawScaryFaceBackgroundBlended(
+        fb,
+        view.background.tilemap === "gBattleAnimBgTilemap_ScaryFacePlayer"
+          ? scaryFaceArt.background.playerTilemap
+          : scaryFaceArt.background.opponentTilemap,
+        backgroundDisplayed?.task.blendY ?? 0,
+      );
+    }
+
+    drawSendOutHealthbox(
+      fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "SHUCKLE" : "RHYHORN",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb, composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "RHYHORN" : "SHUCKLE",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "RHYHORN used" : "Foe RHYHORN used",
+      "SCARY FACE!",
       99,
     );
     return;

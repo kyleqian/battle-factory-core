@@ -16,6 +16,10 @@ export interface ScaryFaceEye {
 
 export interface ScaryFaceState {
   readonly paletteBlend: "toBlack" | "fromBlack" | null;
+  /** Hardware-visible coefficient for the selected battle BG banks. */
+  readonly paletteBlackCoeff: number;
+  /** Hardware-visible attacker OBJ coefficient (initial transfer is +1 display). */
+  readonly attackerPaletteBlackCoeff: number;
   readonly background: null | Readonly<{
     tilemap: "gBattleAnimBgTilemap_ScaryFacePlayer"
       | "gBattleAnimBgTilemap_ScaryFaceOpponent";
@@ -38,6 +42,24 @@ export interface ScaryFaceState {
 
 export const SCARY_FACE_CLEAN_BOUNDARY_AGE = 189;
 const PATTERN_1 = [-1, 0, 1, 0, -1, 1, 0, -1, 0, 1] as const;
+
+/**
+ * `simple_palette_blend(... delay=3, 0↔16, RGB_BLACK)` reaches display
+ * palette memory in coefficient-two steps. The source fade starts at age 0
+ * and age 143; the hardware transfer first exposes those steps at ages 5
+ * and 149 respectively.
+ */
+export function scaryFacePaletteBlackCoeffAtAge(age: number): number {
+  if (age < 0) return 0;
+  if (age < 143) return Math.min(16, Math.floor(age / 5) * 2);
+  return Math.max(0, 16 - Math.floor((age - 143) / 5) * 2);
+}
+
+export function scaryFaceAttackerPaletteBlackCoeffAtAge(age: number): number {
+  if (age < 143) return scaryFacePaletteBlackCoeffAtAge(age - 1);
+  if (age < 144) return 16;
+  return Math.max(0, 16 - Math.floor((age - 144) / 5) * 2);
+}
 
 function taskAtAge(age: number): ScaryFaceTaskState | null {
   if (age < 59 || age > 141) return null;
@@ -120,6 +142,8 @@ export function scaryFaceAtAge(
   return {
     paletteBlend: age >= 0 && age <= 45 ? "toBlack"
       : age >= 143 && age <= 188 ? "fromBlack" : null,
+    paletteBlackCoeff: scaryFacePaletteBlackCoeffAtAge(age),
+    attackerPaletteBlackCoeff: scaryFaceAttackerPaletteBlackCoeffAtAge(age),
     background: task === null ? null : {
       tilemap: targetSide === "opponent"
         ? "gBattleAnimBgTilemap_ScaryFacePlayer"
