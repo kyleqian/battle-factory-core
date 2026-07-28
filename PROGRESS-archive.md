@@ -1,4 +1,29 @@
 ---
+## 580 — [SUPERVISOR VERIFY 2026-07-28 ~03:37] Corrected Skill Swap accepted; Taunt evidence folded
+
+- **State:** reviewed union green at **337 files / 4071 tests** and focused
+  **87/87**; production build, both-oracle freshness/info, census
+  regeneration, ratchets **6/6**, and `git diff --check` pass. Census is
+  exactly **146/214 effects, 272/355 moves, 223/276 Factory-L50 distinct,
+  2727/2957 weighted**, all **42/42**.
+- **Did:** accepted Skill Swap only after `a358f91` reused the canonical
+  no-effect mask and shared role resolver and made the engine/oracle party
+  claims exact. Independently replayed the accepted ability exchange
+  (`1bb13425…54cd241a`). Folded and replayed Taunt source/OFF evidence
+  (`3c08746c…2441a`): status-move block, duplicate PP spend, forced Struggle,
+  and later expiry/allowed Splash are public and deterministic.
+- **Next:** register `B_SCR_OP_TRYSETHELPINGHAND` globally. Prove all doubles
+  topology/absent/already-marked branches in isolated source-shaped contexts,
+  the existing 15/10 damage consumer and turn cleanup, plus the accepted
+  singles PP-before-failure receipt. Expected census:
+  **147/214, 273/355, 224/276, 2732/2957**.
+- **Notes:** handler inventory is **155**; switch restoration remains bounded
+  at the shared unmodeled `abilityNum` seam. Taunt is evidence only. No
+  unsupported/import ratchet, private handler, recording import, animation/
+  presentation/tick branch, issue removal, DEFERRED item, or oracle lifecycle
+  action.
+
+---
 ## 578 — [BOUNDED MAIN WORKER 2026-07-28 ~03:29] Skill Swap executes globally
 
 - **State:** committed `b8bc27a` + `50014d7`; tree green at **336 files /

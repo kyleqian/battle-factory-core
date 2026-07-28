@@ -15,6 +15,31 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 583 — [BOUNDED MAIN WORKER 2026-07-28 ~03:56] Torment executes globally
+
+- **State:** committed `5887fc3`; tree green at **340 files / 4090 tests**,
+  focused Torment/receipt/handler coverage **29/29**, and ratchets **6/6**.
+  Production build, both oracle infos, census regeneration, and
+  `git diff --check` pass. Census is exactly **148/214 effects, 274/355
+  moves, 225/276 Factory-L50 distinct, 2736/2957 weighted**, all **42/42**.
+- **Did:** globally registered five-byte `0xce`. Success ORs only canonical
+  `STATUS2_TORMENT` into the resolved target; duplicate jumps to the decoded
+  failure pointer. Both branches own zero local RNG/events and preserve every
+  unrelated field. The generic Factory controller now consumes the shared
+  source-shaped `CheckMoveLimitations` port: every last-move duplicate is
+  withheld, and an all-duplicate moveset exposes one forced Struggle command.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next shared registration target; do not widen the Factory
+  singles controller or extend the retired canonical Battle-2 march.
+- **Notes:** the accepted OFF receipt remains
+  `f7a000367213…e3f16b27ab28c2`: Torment PP **15→14→13**, target status2
+  **0→2147483648**, repeated Tackle slots force Struggle without Tackle PP
+  loss. Handler inventory **156→157** only. No barrier/import ratchet,
+  recording import, private handler, animation/presentation/tick branch,
+  scenario/evidence mutation, issue removal, DEFERRED item, or oracle
+  lifecycle action.
+
+---
 ## 582 — [SUPERVISOR VERIFY 2026-07-28 ~03:47] Helping Hand accepted; Refresh evidence folded
 
 - **State:** reviewed union green at **339 files / 4082 tests** and focused
@@ -61,28 +86,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   barrier/import ratchet, recording import, private/controller-local handler,
   animation/presentation/tick branch, scenario/evidence mutation, issue
   removal, or oracle lifecycle action.
-
----
-## 580 — [SUPERVISOR VERIFY 2026-07-28 ~03:37] Corrected Skill Swap accepted; Taunt evidence folded
-
-- **State:** reviewed union green at **337 files / 4071 tests** and focused
-  **87/87**; production build, both-oracle freshness/info, census
-  regeneration, ratchets **6/6**, and `git diff --check` pass. Census is
-  exactly **146/214 effects, 272/355 moves, 223/276 Factory-L50 distinct,
-  2727/2957 weighted**, all **42/42**.
-- **Did:** accepted Skill Swap only after `a358f91` reused the canonical
-  no-effect mask and shared role resolver and made the engine/oracle party
-  claims exact. Independently replayed the accepted ability exchange
-  (`1bb13425…54cd241a`). Folded and replayed Taunt source/OFF evidence
-  (`3c08746c…2441a`): status-move block, duplicate PP spend, forced Struggle,
-  and later expiry/allowed Splash are public and deterministic.
-- **Next:** register `B_SCR_OP_TRYSETHELPINGHAND` globally. Prove all doubles
-  topology/absent/already-marked branches in isolated source-shaped contexts,
-  the existing 15/10 damage consumer and turn cleanup, plus the accepted
-  singles PP-before-failure receipt. Expected census:
-  **147/214, 273/355, 224/276, 2732/2957**.
-- **Notes:** handler inventory is **155**; switch restoration remains bounded
-  at the shared unmodeled `abilityNum` seam. Taunt is evidence only. No
-  unsupported/import ratchet, private handler, recording import, animation/
-  presentation/tick branch, issue removal, DEFERRED item, or oracle lifecycle
-  action.

@@ -10,10 +10,10 @@ Answers ROADMAP S10's Executable-frontier reset question directly: not "how many
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 147 | 214 | 68.7% |
-| Moves (unweighted, all 355) | 273 | 355 | 76.9% |
-| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 224 | 276 | 81.2% |
-| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2732 | 2957 | 92.4% |
+| Effect scripts | 148 | 214 | 69.2% |
+| Moves (unweighted, all 355) | 274 | 355 | 77.2% |
+| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 225 | 276 | 81.5% |
+| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2736 | 2957 | 92.5% |
 
 "Executable" means every opcode on every statically reachable path from the effect's entry script has a dispatch entry today (registered barriers included, per ROADMAP S10 §1's (a)/(b) policy). It is not a semantic-correctness claim -- see Caveats.
 
@@ -26,7 +26,6 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_TRYSWAPITEMS` | 1 (EFFECT_TRICK) | 1 | 1 | 5 |
 | `B_SCR_OP_INCREMENTGAMESTAT` | 2 (EFFECT_RECOIL, EFFECT_SPLASH) | 4 | 2 | 4 |
 | `B_SCR_OP_HEALPARTYSTATUS` | 1 (EFFECT_HEAL_BELL) | 2 | 2 | 4 |
-| `B_SCR_OP_SETTORMENT` | 1 (EFFECT_TORMENT) | 1 | 1 | 4 |
 | `B_SCR_OP_TRYSETENCORE` | 1 (EFFECT_ENCORE) | 1 | 1 | 4 |
 | `B_SCR_OP_TRYSETPERISHSONG` | 1 (EFFECT_PERISH_SONG) | 1 | 1 | 4 |
 | `B_SCR_OP_SETFORESIGHT` | 1 (EFFECT_FORESIGHT) | 2 | 1 | 3 |
@@ -48,6 +47,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_TRYSPITEPPREDUCE` | 1 (EFFECT_SPITE) | 1 | 1 | 2 |
 | `B_SCR_OP_WEIGHTDAMAGECALCULATION` | 1 (EFFECT_LOW_KICK) | 1 | 1 | 2 |
 | `B_SCR_OP_DAMAGETOHALFTARGETHP` | 1 (EFFECT_SUPER_FANG) | 1 | 1 | 1 |
+| `B_SCR_OP_HIDDENPOWERCALC` | 1 (EFFECT_HIDDEN_POWER) | 1 | 1 | 1 |
 
 ## Per-effect detail
 
@@ -218,7 +218,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_SWALLOW | `BattleScript_EffectSwallow` | blocked-on-opcodes | `B_SCR_OP_STOCKPILETOHPHEAL` (main path) | - | 1 | 1 (2) |
 | EFFECT_UNUSED_A3 | `BattleScript_EffectHit` | executable | - | - | 0 | 0 (0) |
 | EFFECT_HAIL | `BattleScript_EffectHail` | executable | - | - | 1 | 1 (7) |
-| EFFECT_TORMENT | `BattleScript_EffectTorment` | blocked-on-opcodes | `B_SCR_OP_SETTORMENT` (edge branch only) | - | 1 | 1 (4) |
+| EFFECT_TORMENT | `BattleScript_EffectTorment` | executable | - | - | 1 | 1 (4) |
 | EFFECT_FLATTER | `BattleScript_EffectFlatter` | executable | - | - | 1 | 1 (2) |
 | EFFECT_WILL_O_WISP | `BattleScript_EffectWillOWisp` | blocked-on-subsystem | - | Cmd_jumpifability: ABILITY_WATER_VEIL is outside the engine's widened ability set (battleScriptIngrainLeechSeedWrapOpcode.ts) -- battle_script_commands.c:3105 | 1 | 1 (10) |
 | EFFECT_MEMENTO | `BattleScript_EffectMemento` | blocked-on-opcodes | `B_SCR_OP_TRYMEMENTO` (edge branch only) | - | 1 | 1 (1) |
