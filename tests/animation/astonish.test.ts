@@ -1,3 +1,7 @@
+import { execFileSync } from "node:child_process";
+import { mkdtempSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   ASTONISH_FRAME_COUNT,
@@ -136,5 +140,19 @@ describe("MOVE_ASTONISH source reducer", () => {
     expect(ASTONISH_FRAME_COUNT).toBe(63);
     expect(sceneOnAstonishView({ ...stage, age: 62 }).active).toBe(true);
     expect(sceneOnAstonishView({ ...stage, age: 63 }).active).toBe(false);
+  });
+
+  it("regenerates LOUDRED and SWEAT_BEAD assets byte-for-byte", () => {
+    const scratch = mkdtempSync(join(tmpdir(), "pokebench-astonish-assets-"));
+    const output = join(scratch, "astonish.json");
+    execFileSync(process.execPath, [
+      "--experimental-strip-types",
+      "tools/compare/extractAstonishAssets.ts",
+      "--out",
+      output,
+    ]);
+    expect(readFileSync(output)).toEqual(
+      readFileSync("src/animation/assets/astonish.json"),
+    );
   });
 });
