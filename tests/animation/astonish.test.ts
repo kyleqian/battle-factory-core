@@ -40,7 +40,7 @@ describe("MOVE_ASTONISH source reducer", () => {
       { age: 14, x2: 0 },
     ]);
     expect(astonishAtAge(
-      3, "player", { x: 176, y: 42 }, 2, playerRandom,
+      4, "player", { x: 176, y: 42 }, 2, playerRandom,
     ).sound).toEqual({ id: "SE_M_ENCORE", pan: -64 });
     expect(astonishAtAge(
       31, "opponent", { x: 72, y: 80 }, 0, opponentRandom,
@@ -72,6 +72,12 @@ describe("MOVE_ASTONISH source reducer", () => {
     expect(astonishAtAge(
       61, "player", { x: 176, y: 42 }, 2, playerRandom,
     ).droplets).toEqual([]);
+    expect(astonishAtAge(
+      31, "opponent", { x: 72, y: 80 }, 0, opponentRandom,
+    ).droplets.map(({ x, y }) => ({ x, y }))).toEqual([
+      { x: 72, y: 112 },
+      { x: 72, y: 112 },
+    ]);
   });
 
   it("ports task-slot shared writes, both affine legs, and side pic offsets", () => {
@@ -138,8 +144,8 @@ describe("MOVE_ASTONISH source reducer", () => {
       droplets: [{ x: 176, y: 72 }, { x: 176, y: 72 }],
     });
     expect(ASTONISH_FRAME_COUNT).toBe(63);
-    expect(sceneOnAstonishView({ ...stage, age: 62 }).active).toBe(true);
-    expect(sceneOnAstonishView({ ...stage, age: 63 }).active).toBe(false);
+    expect(sceneOnAstonishView({ ...stage, age: 61 }).active).toBe(true);
+    expect(sceneOnAstonishView({ ...stage, age: 62 }).active).toBe(false);
   });
 
   it("regenerates LOUDRED and SWEAT_BEAD assets byte-for-byte", () => {

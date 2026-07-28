@@ -549,6 +549,7 @@ import dizzyPunchAsset from "../animation/assets/dizzyPunch.json" with { type: "
 import covetAsset from "../animation/assets/covet.json" with { type: "json" };
 import headbuttAsset from "../animation/assets/headbutt.json" with { type: "json" };
 import bodySlamAsset from "../animation/assets/body-slam.json" with { type: "json" };
+import astonishAsset from "../animation/assets/astonish.json" with { type: "json" };
 import synthesisAsset from "../animation/assets/synthesis.json" with { type: "json" };
 import milkDrinkAsset from "../animation/assets/milk-drink.json" with { type: "json" };
 import supersonicAsset from "../animation/assets/supersonic.json" with { type: "json" };
@@ -693,6 +694,7 @@ import {
   sceneOnTwineedleView,
   sceneOnTailGlowView,
   sceneOnDizzyPunchView,
+  sceneOnAstonishView,
   sceneOnSwaggerView,
   sceneOnTauntView,
   sceneOnScaryFaceView,
@@ -736,6 +738,7 @@ import {
   type SceneOnTwineedleConfig,
   type SceneOnTailGlowConfig,
   type SceneOnDizzyPunchConfig,
+  type SceneOnAstonishConfig,
 } from "../animation/sceneOnPresentation.ts";
 import {
   extremeSpeedBackgroundVariant,
@@ -1065,6 +1068,11 @@ const headbuttArt = headbuttAsset as {
 const bodySlamArt = bodySlamAsset as {
   lickitungBack: { tileset: Tileset; palette: RgbColor[] };
   lickitungFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const astonishArt = astonishAsset as {
+  loudredBack: { tileset: Tileset; palette: RgbColor[] };
+  loudredFront: { tileset: Tileset; palette: RgbColor[] };
+  sweatBead: { tileset: Tileset; palette: RgbColor[] };
 };
 const synthesisArt = synthesisAsset as {
   sparkle2: { tileset: Tileset; palette: RgbColor[] };
@@ -15588,6 +15596,148 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "FLAAFFY used" : "Foe FLAAFFY used",
       "THUNDER WAVE!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "ASTONISH") {
+    const astonishState =
+      state as SceneOnMovePresentationState<SceneOnAstonishConfig>;
+    const view = sceneOnAstonishView(astonishState);
+    // BuildOamBuffer and OBJ palette transfer precede RunTasks. Both battler
+    // transforms and droplets therefore reach the framebuffer from the
+    // preceding source reducer age.
+    const displayed = sceneOnAstonishView({
+      ...astonishState,
+      age: astonishState.age - 1,
+    });
+    const affineDisplayed = sceneOnAstonishView({
+      ...astonishState,
+      age: astonishState.age - 2,
+    });
+    const playerToOpponent =
+      view.attacker.species === "LOUDRED"
+      && view.attacker.geometry.side === "player"
+      && view.targetBattler.species === "ONIX"
+      && view.targetBattler.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "LOUDRED"
+      && view.attacker.geometry.side === "opponent"
+      && view.targetBattler.species === "ONIX"
+      && view.targetBattler.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged ASTONISH pair `
+        + `${view.attacker.species}->${view.targetBattler.species}`,
+      );
+    }
+    const loudredSource = playerToOpponent
+      ? astonishArt.loudredBack
+      : astonishArt.loudredFront;
+    const loudred = playerToOpponent
+      ? loudredSource
+      : {
+          ...loudredSource,
+          tileset: subTileset(loudredSource.tileset, 0, 8),
+        };
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+
+    const targetBaselineX2 =
+      playerToOpponent && displayed.age < 31 ? 1 : 0;
+    if (displayed.target.stretchActive) {
+      // PrepareBattlerSpriteForRotScale enters affine-double OAM on the first
+      // task tick, but its matrix/anchor transfer reaches the scanout on the
+      // following tick. ShakeMon2's earlier task slot has already supplied
+      // that first affine frame's x2.
+      const affineX2 = affineDisplayed.target.stretchActive
+        ? affineDisplayed.target.x2
+        : displayed.target.x2;
+      drawSpriteSheetAffineStretch(
+        fb,
+        onix.tileset,
+        onix.palette,
+        view.targetBattler.geometry.spriteCorner.x + targetBaselineX2,
+        view.targetBattler.geometry.spriteCorner.y,
+        affineDisplayed.target.matrix.a,
+        affineDisplayed.target.matrix.d,
+        affineDisplayed.target.y2,
+        { r: 0, g: 0, b: 0 },
+        0,
+        true,
+        affineX2,
+      );
+    } else {
+      drawSpriteSheet(
+        fb,
+        onix.tileset,
+        onix.palette,
+        view.targetBattler.geometry.spriteCorner.x + targetBaselineX2,
+        view.targetBattler.geometry.spriteCorner.y,
+      );
+    }
+    drawSpriteSheet(
+      fb,
+      loudred.tileset,
+      loudred.palette,
+      view.attacker.geometry.spriteCorner.x + displayed.attackerX2,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    // Lower OAM indices win overlapping OBJ pixels; paint high slots first.
+    for (const droplet of [...displayed.droplets].reverse()) {
+      const draw = droplet.hFlip ? drawSpriteSheetHFlip : drawSpriteSheet;
+      draw(
+        fb,
+        astonishArt.sweatBead.tileset,
+        astonishArt.sweatBead.palette,
+        droplet.x + droplet.x2 - 4,
+        droplet.y + droplet.y2 - 4,
+      );
+    }
+
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "LOUDRED",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "LOUDRED" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "LOUDRED used" : "Foe LOUDRED used",
+      "ASTONISH!",
       99,
     );
     return;

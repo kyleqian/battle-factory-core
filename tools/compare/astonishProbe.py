@@ -41,6 +41,7 @@ def main() -> None:
     script_active, script_ptr = by_name["gAnimScriptActive"], by_name["sBattleAnimScriptPtr"]
     move_start, move_end = by_name["Move_ASTONISH"], by_name["Move_SEISMIC_TOSS"]
     battler_ids = sy["gBattlerSpriteIds"]
+    song_table = sy["gSongTable"]
     tracked = ("AnimTask_StretchTargetUp", "AnimTask_ShakeMon2", "AnimTask_ShakeMon2_Step")
     tracked_funcs = {name: by_name[name] | 1 for name in tracked}
     templates = {name: sy[name] for name in ("gHorizontalLungeSpriteTemplate", "gSprayWaterDropletSpriteTemplate")}
@@ -126,6 +127,8 @@ def main() -> None:
                                   "captureWindow": {"startFrame": rows[0]["frame"], "endFrame": rows[-1]["frame"], "frameCount": len(rows)},
                                   "sourceWindow": {"startFrame": source[0]["frame"], "endFrame": source[-1]["frame"], "frameCount": len(source)},
                                   "sourceSymbols": {"Move_ASTONISH": move_start, "Move_SEISMIC_TOSS": move_end, **tracked_funcs},
+                                  "songHeaders": {"SE_M_ENCORE": u32(song_table + 222 * 8),
+                                                  "SE_M_SKETCH": u32(song_table + 205 * 8)},
                                   "templates": templates, "frames": rows}, separators=(",", ":")) + "\n")
     print(f"wrote {OUTPUT}: capture {rows[0]['frame']}..{rows[-1]['frame']}; source {source[0]['frame']}..{source[-1]['frame']}")
 

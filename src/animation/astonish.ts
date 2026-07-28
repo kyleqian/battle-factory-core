@@ -158,7 +158,10 @@ export function astonishAtAge(
     dropletAtLocalAge(
       effectLocalAge,
       index as 0 | 1,
-      { x: targetCenter.x, y: targetCenter.y + 30 },
+      {
+        x: targetCenter.x,
+        y: targetCenter.y + 32 - targetPictureYOffset,
+      },
       random,
     )
   ).filter((droplet): droplet is AstonishDroplet => droplet !== null);
@@ -175,7 +178,7 @@ export function astonishAtAge(
       targetPictureYOffset,
     ),
     droplets,
-    sound: age === 3
+    sound: age === 4
       ? {
           id: "SE_M_ENCORE",
           pan: attackerSide === "player" ? -64 : 63,
@@ -186,6 +189,6 @@ export function astonishAtAge(
             pan: attackerSide === "player" ? 63 : -63,
           }
         : null,
-    active: age >= 0 && age <= ASTONISH_CLEANUP_AGE,
+    active: age >= 0 && age < ASTONISH_CLEANUP_AGE,
   };
 }
