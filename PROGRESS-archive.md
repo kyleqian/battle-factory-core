@@ -1,4 +1,26 @@
 ---
+## 565 — [BOUNDED MAIN WORKER 2026-07-28 ~01:49] Disable executes source-completely
+
+- **State:** committed `e566e53`; tree green at **322 files / 4007 tests**
+  and focused **324/324**. Production build, both-oracle freshness, census
+  regeneration, and `git diff --check` pass. Census is exactly **141/214
+  effects, 267/355 moves, 218/276 Factory-L50 distinct, 2701/2957
+  weighted**, all **42/42**.
+- **Did:** registered exact five-byte opcode `0xa3`, target-owned first-slot
+  match/PP predicate, one-draw 2–5 timer/start, zero-mutation failure jumps,
+  switch/faint clearing, and source-ordered `ENDTURN_DISABLE`. Generic legal
+  decisions intersect Disable with Encore, disable every duplicate-id slot,
+  force real Struggle, and preserve direct-attempt canceler ownership.
+- **Next:** supervisor verify this executable-frontier increment and select
+  the next finite source registration target; do not resume the retired
+  canonical Battle-2 march.
+- **Notes:** controlled seed 9 reproduces merged OFF PP **20→19→18**, prevents
+  selected disabled Tackle PP loss, forces all-Tackle Struggle, expires with
+  `BattleScript_DisabledNoMore`, and restores Tackle legality/PP. No new
+  unsupported barrier, recording import, animation/presentation/scenario
+  branch, issue removal, oracle lifecycle action, or PAPERCUT.
+
+---
 ## 564 — [SUPERVISOR VERIFY 2026-07-28 ~01:24] Corrected Future Sight accepted; Disable evidence merged
 
 - **State:** reviewed union green at **321 files / 3994 tests** and focused

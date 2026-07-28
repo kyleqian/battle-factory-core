@@ -15,6 +15,30 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 568 — [BOUNDED MAIN WORKER 2026-07-28 ~02:10] Fury Cutter executes source-completely
+
+- **State:** committed `7b92344`; tree green at **327 files / 4025 tests**,
+  focused **326/326**, and ratchets **6/6**. Production build, both-oracle
+  freshness, census regeneration, and `git diff --check` pass. Census is
+  exactly **142/214 effects, 268/355 moves, 219/276 Factory-L50 distinct,
+  2706/2957 weighted**, all **42/42**.
+- **Did:** globally registered operandless `0xb5`: attacker-owned counter cap
+  five, powers **10/20/40/80/160**, exact no-effect jump/reset, both
+  `BattleScript_FuryCutterHit` passes, and zero lock/RNG ownership. Generic
+  full turns prove six manual PP spends, Double Team persistence, and cap;
+  Protect now shares `CancelMultiTurnMoves`, while existing switch/faint clears
+  are pinned.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next shared registration target; do not extend the retired
+  canonical Battle-2 march.
+- **Notes:** OFF evidence remains manifests `9ca031ee…2057c9`,
+  `eb76399c…e3ce7`, and `7a7a04d8…dbf9d3`. Used-item/failed-run
+  `ClearFuryCutterDestinyBondGrudge` owners are not executable here, so no
+  unreachable subsystem was invented. No barrier/import ratchet change,
+  recording import, animation/presentation/scenario branch, oracle lifecycle
+  action, issue removal, or PAPERCUT.
+
+---
 ## 567 — [SUPERVISOR VERIFY 2026-07-28 ~01:59] Corrected Disable accepted; three evidence checkpoints merged
 
 - **State:** reviewed union green at **325 files / 4016 tests** and focused
@@ -60,25 +84,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Isolated Disable opcode/end-turn/switch/faint coverage remains green. No
   unsupported-branch barrier count, recording import, animation file, issue,
   oracle lifecycle action, or PAPERCUT changed.
-
----
-## 565 — [BOUNDED MAIN WORKER 2026-07-28 ~01:49] Disable executes source-completely
-
-- **State:** committed `e566e53`; tree green at **322 files / 4007 tests**
-  and focused **324/324**. Production build, both-oracle freshness, census
-  regeneration, and `git diff --check` pass. Census is exactly **141/214
-  effects, 267/355 moves, 218/276 Factory-L50 distinct, 2701/2957
-  weighted**, all **42/42**.
-- **Did:** registered exact five-byte opcode `0xa3`, target-owned first-slot
-  match/PP predicate, one-draw 2–5 timer/start, zero-mutation failure jumps,
-  switch/faint clearing, and source-ordered `ENDTURN_DISABLE`. Generic legal
-  decisions intersect Disable with Encore, disable every duplicate-id slot,
-  force real Struggle, and preserve direct-attempt canceler ownership.
-- **Next:** supervisor verify this executable-frontier increment and select
-  the next finite source registration target; do not resume the retired
-  canonical Battle-2 march.
-- **Notes:** controlled seed 9 reproduces merged OFF PP **20→19→18**, prevents
-  selected disabled Tackle PP loss, forces all-Tackle Struggle, expires with
-  `BattleScript_DisabledNoMore`, and restores Tackle legality/PP. No new
-  unsupported barrier, recording import, animation/presentation/scenario
-  branch, issue removal, oracle lifecycle action, or PAPERCUT.
