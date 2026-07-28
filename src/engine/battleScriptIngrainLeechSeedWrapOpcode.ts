@@ -353,6 +353,12 @@ const ABILITY_SUCTION_CUPS = 21;
 const ABILITY_ROCK_HEAD = 69;
 /** include/constants/abilities.h:47; Perish Song's post-success all-battler message loop. */
 const ABILITY_SOUNDPROOF = 43;
+/**
+ * include/constants/abilities.h:45. Will-O-Wisp checks the target for Water
+ * Veil before its accuracy roll, then calls the shared burn-prevention
+ * script when present (`battle_scripts_1.s:2174-2195`).
+ */
+const ABILITY_WATER_VEIL = 41;
 const JUMPIFABILITY_VALUES: ReadonlyMap<string, number> = new Map([
   ["ABILITY_LIQUID_OOZE", ABILITY_LIQUID_OOZE],
   ["ABILITY_LIMBER", ABILITY_LIMBER],
@@ -363,6 +369,7 @@ const JUMPIFABILITY_VALUES: ReadonlyMap<string, number> = new Map([
   ["ABILITY_SUCTION_CUPS", ABILITY_SUCTION_CUPS],
   ["ABILITY_ROCK_HEAD", ABILITY_ROCK_HEAD],
   ["ABILITY_SOUNDPROOF", ABILITY_SOUNDPROOF],
+  ["ABILITY_WATER_VEIL", ABILITY_WATER_VEIL],
 ]);
 /** Exported so tools/report/executable-frontier-census.ts's jumpifability value-coverage check never drifts from what this opcode actually dispatches (same live-import precedent as SET_MOVE_EFFECT_SUPPORTED_BYTES). */
 export const JUMPIFABILITY_SUPPORTED_ABILITY_NAMES: ReadonlySet<string> = new Set(JUMPIFABILITY_VALUES.keys());
@@ -378,7 +385,8 @@ export const JUMPIFABILITY_SUPPORTED_ABILITY_NAMES: ReadonlySet<string> = new Se
  * Leech Seed, Immunity/Limber/Own Tempo for the primary status-move cluster,
  * Vital Spirit/Insomnia for Yawn, Suction Cups for Roar per
  * docs/roar-multihit-registration-scout.md §4 rung 1, and Rock Head for the
- * shared recoil script). `RecordAbilityBattle` remains untracked AI-history
+ * shared recoil script, Soundproof for Perish Song, and Water Veil for
+ * Will-O-Wisp). `RecordAbilityBattle` remains untracked AI-history
  * bookkeeping. The source's `gBattleScripting.battlerWithAbility` write is
  * materialized because Yawn's ability-message callback copies it to
  * `sBATTLER`.

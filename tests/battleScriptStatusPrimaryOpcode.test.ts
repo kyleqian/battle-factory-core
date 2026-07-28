@@ -28,9 +28,11 @@ const SLEEP_POWDER = 79; // EFFECT_SLEEP, 75 acc, TYPE_GRASS
 const TOXIC = 92; // EFFECT_TOXIC, 85 acc, TYPE_POISON
 const POISON_POWDER = 77; // EFFECT_POISON, 75 acc, TYPE_POISON
 const CONFUSE_RAY = 109; // EFFECT_CONFUSE, 100 acc, TYPE_GHOST
+const WILL_O_WISP = 261; // EFFECT_WILL_O_WISP, 75 acc, TYPE_FIRE
 const STATUS1_PARALYSIS = 1 << 6;
 const STATUS1_POISON = 1 << 3;
 const STATUS1_TOXIC_POISON = 1 << 7;
+const STATUS1_BURN = 1 << 4;
 const STATUS2_CONFUSION_MASK = 0x7;
 const SIDE_STATUS_SAFEGUARD = 1 << 5;
 const ABILITY_LIMBER = 7;
@@ -39,6 +41,7 @@ const ABILITY_OWN_TEMPO = 20;
 const ABILITY_SOUNDPROOF = 43;
 const ABILITY_INSOMNIA = 15;
 const ABILITY_VITAL_SPIRIT = 72;
+const ABILITY_WATER_VEIL = 41;
 
 function battler(changes: Partial<BattleScriptRulesBattler> = {}): BattleScriptRulesBattler {
   return Object.freeze({
@@ -484,6 +487,62 @@ describe("primary status-move opcode cluster: full committed scripts (docs/statu
     expect(result.state.rng.calls).toBe(0);
   });
 
+  it("Will-O-Wisp succeeds through the existing primary burn callback to END with one accuracy draw", () => {
+    const rc = context(
+      0,
+      { moves: [WILL_O_WISP, 0, 0, 0], pp: [15, 0, 0, 0] },
+      { currentMove: WILL_O_WISP },
+    );
+    const result = runToTerminal("BattleScript_EffectWillOWisp", rc, 1);
+    expect(result.state.rulesContext.battlers[1].status1).toBe(STATUS1_BURN);
+    expect(result.state.events).toEqual(expect.arrayContaining([
+      expect.objectContaining({ kind: "message", messageId: "STRINGID_PKMNWASBURNED" }),
+      expect.objectContaining({ kind: "status-icon-update", battler: 1, status1: STATUS1_BURN }),
+    ]));
+    expect(result.state.rng).toMatchObject({
+      calls: 1,
+      ledger: [expect.objectContaining({ reason: "accuracycheck" })],
+    });
+  });
+
+  it("Water Veil takes Will-O-Wisp's pre-accuracy immunity branch through END and records the ability with zero draws", () => {
+    const rc = context(
+      0,
+      { moves: [WILL_O_WISP, 0, 0, 0], pp: [15, 0, 0, 0] },
+      {
+        currentMove: WILL_O_WISP,
+        selectorRoles: { attacker: 0, target: 1, effectBattler: 0 },
+      },
+      { ability: ABILITY_WATER_VEIL },
+    );
+    const result = runToTerminal("BattleScript_EffectWillOWisp", rc, 1);
+    expect(result.state.rulesContext.battlers[1].status1).toBe(0);
+    expect(result.state.rulesContext).toMatchObject({
+      lastUsedAbility: ABILITY_WATER_VEIL,
+      battlerWithAbility: 1,
+      selectorRoles: { effectBattler: 1 },
+    });
+    expect(result.state.events).toEqual(expect.arrayContaining([
+      expect.objectContaining({ kind: "message", messageId: "STRINGID_PKMNSXPREVENTSBURNS" }),
+    ]));
+    expect(result.state.rng).toEqual({ value: 1, calls: 0, ledger: [] });
+  });
+
+  it("Will-O-Wisp fails against an already-statused target before accuracy and reaches END without replacing status", () => {
+    const rc = context(
+      0,
+      { moves: [WILL_O_WISP, 0, 0, 0], pp: [15, 0, 0, 0] },
+      { currentMove: WILL_O_WISP },
+      { status1: STATUS1_POISON },
+    );
+    const result = runToTerminal("BattleScript_EffectWillOWisp", rc, 1);
+    expect(result.state.rulesContext.battlers[1].status1).toBe(STATUS1_POISON);
+    expect(result.state.events).toEqual(expect.arrayContaining([
+      expect.objectContaining({ kind: "message", messageId: "STRINGID_BUTITFAILED" }),
+    ]));
+    expect(result.state.rng).toEqual({ value: 1, calls: 0, ledger: [] });
+  });
+
   it("the EFFECT_PARALYZE_HIT sibling wrapper reaches the same paralysis message/icon callback through END without the primary-only copyarray prevention branch", () => {
     const rc = context(
       0,
@@ -517,6 +576,7 @@ describe("primary status-move opcode cluster: full committed scripts (docs/statu
       ["BattleScript_EffectToxic", TOXIC],
       ["BattleScript_EffectPoison", POISON_POWDER],
       ["BattleScript_EffectParalyze", THUNDER_WAVE],
+      ["BattleScript_EffectWillOWisp", WILL_O_WISP],
     ] as const) {
       const rc = context(0, { moves: [move, 0, 0, 0] }, { currentMove: move });
       const first = runToTerminal(entry, rc, 1).state;

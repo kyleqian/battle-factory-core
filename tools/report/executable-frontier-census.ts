@@ -1097,13 +1097,14 @@ const validationChecks: Array<() => void> = [
   // and SetMoveEffect cases, so these ratchets deliberately flip positive.
   () => requireExecutable("EFFECT_MEAN_LOOK"),
   () => requireExecutable("EFFECT_NIGHTMARE"),
-  () => requireBlockedMentioning("EFFECT_WILL_O_WISP", "ABILITY_WATER_VEIL"),
+  () => requireExecutable("EFFECT_WILL_O_WISP"),
   // Exact per-operand blocker sets. These deliberately pin only rows whose
   // hidden blocker is mechanically visible to the new handler-surface gates;
   // state/consumer-only dossiers (including Hidden Power IV ownership) stay
   // unpinned so concurrent opcode work can merge without a false ratchet.
   () => requireExactMechanicalBlockers("EFFECT_MEAN_LOOK", []),
   () => requireExactMechanicalBlockers("EFFECT_NIGHTMARE", []),
+  () => requireExactMechanicalBlockers("EFFECT_WILL_O_WISP", []),
   () => requireExecutable("EFFECT_THIEF"),
   () => requireExactMechanicalBlockers("EFFECT_THIEF", []),
   () => requireExecutable("EFFECT_KNOCK_OFF"),

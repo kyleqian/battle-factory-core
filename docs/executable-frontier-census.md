@@ -10,10 +10,10 @@ Answers ROADMAP S10's Executable-frontier reset question directly: not "how many
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 189 | 214 | 88.3% |
-| Moves (unweighted, all 355) | 329 | 355 | 92.7% |
-| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 269 | 276 | 97.5% |
-| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2940 | 2957 | 99.4% |
+| Effect scripts | 190 | 214 | 88.8% |
+| Moves (unweighted, all 355) | 330 | 355 | 93.0% |
+| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 270 | 276 | 97.8% |
+| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2950 | 2957 | 99.8% |
 
 "Executable" means every opcode on every statically reachable path from the effect's entry script has a dispatch entry today and every use of the explicitly tracked narrowed operand surfaces is accepted. Other registered runtime barriers remain included per ROADMAP S10 §1's (a)/(b) policy. It is not a semantic-correctness claim -- see Caveats.
 
@@ -215,7 +215,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_HAIL | `BattleScript_EffectHail` | executable | - | - | 1 | 1 (7) |
 | EFFECT_TORMENT | `BattleScript_EffectTorment` | executable | - | - | 1 | 1 (4) |
 | EFFECT_FLATTER | `BattleScript_EffectFlatter` | executable | - | - | 1 | 1 (2) |
-| EFFECT_WILL_O_WISP | `BattleScript_EffectWillOWisp` | blocked-on-subsystem | - | Cmd_jumpifability: ABILITY_WATER_VEIL is outside the engine's widened ability set (battleScriptIngrainLeechSeedWrapOpcode.ts) -- battle_script_commands.c:3105 | 1 | 1 (10) |
+| EFFECT_WILL_O_WISP | `BattleScript_EffectWillOWisp` | executable | - | - | 1 | 1 (10) |
 | EFFECT_MEMENTO | `BattleScript_EffectMemento` | blocked-on-opcodes | `B_SCR_OP_TRYMEMENTO` (edge branch only) | - | 1 | 1 (1) |
 | EFFECT_FACADE | `BattleScript_EffectFacade` | executable | - | - | 1 | 1 (19) |
 | EFFECT_FOCUS_PUNCH | `BattleScript_EffectFocusPunch` | executable | - | - | 1 | 1 (11) |
