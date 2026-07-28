@@ -15,6 +15,34 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 598 — [SUPERVISOR VERIFY 2026-07-28 ~05:31] Low Kick accepted; Spikes evidence folded
+
+- **State:** reviewed union green at **360 files / 4186 tests** and focused
+  extraction/opcode/full-turn/evidence/ratchet coverage **60/60**;
+  production build, both-oracle info, census regeneration, ratchets **6/6**,
+  and `git diff --check` pass. Census is exactly **156/214 effects,
+  285/355 moves, 233/276 Factory-L50 distinct, 2755/2957 weighted**, all
+  **42/42**.
+- **Did:** accepted global Low Kick `0xdd`, source-derived species weights,
+  complete bracket/ownership matrix, and shared PP/accuracy/type/damage/
+  cleanup full-turn proof after source/diff/extractor review. Folded Spikes
+  source/OFF evidence and independently replayed exact manifest
+  `42ce4988…2604c742`: opponent Spikes, a real player switch, grounded
+  Rhyhorn **155→136** (`floor(155/8)`), then a second real set to layer 2.
+- **Next:** register five-byte `B_SCR_OP_TRYSETSPIKES` and remove the
+  matching switch-in barrier through a general side-condition seam. Prove
+  opposing-side ownership, all 0→1→2→3/failure branches, Pressure exemption,
+  persistent layers, Flying/Levitate immunity, one-switch guard, exact
+  1/8–1/6–1/4 damage, messages/HP events, Rapid Spin removal, and no leak.
+  Expected census: **157/214, 286/355, 234/276, 2758/2957**.
+- **Notes:** handler inventory is **164**. Spikes script PC/stack, all hidden
+  counters/flags, immunity cases, and non-public layer edges remain source-
+  pinned. No new unsupported/import ratchet, recording import, private
+  handler, presentation/tick branch, issue removal, DEFERRED item, or oracle
+  lifecycle action. Animation branch remains intentionally unmerged after
+  its post-orient advance.
+
+---
 ## 597 — [BOUNDED MAIN WORKER 2026-07-28 ~05:28] Low Kick executes through shared damage
 
 - **State:** committed `6e96b30` + `28d2294` + `103881c` + `ff8c8c6`;
@@ -66,30 +94,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   animation/presentation/tick branch, issue removal, DEFERRED item, or
   oracle lifecycle action. Animation branch remains intentionally unmerged
   after its post-orient advance.
-
----
-## 595 — [BOUNDED MAIN WORKER 2026-07-28 ~05:17] Magic Coat executes through shared reflection
-
-- **State:** committed `eea67d6` + `df318e2` + `ab50198`; tree green at
-  **356 files / 4158 tests**, focused opcode/canceler/full-turn/rules/ratchet
-  coverage **58/58**, and production build. OFF oracle info, census
-  regeneration, all **42/42** checks, ratchets **6/6**, and `git diff
-  --check` pass. Census is exactly **155/214 effects, 284/355 moves,
-  232/276 Factory-L50 distinct, 2753/2957 weighted**.
-- **Did:** globally registered five-byte `0xdf` with its exact failure
-  pointer. It retargets attacker→self and sets attacker-owned
-  `ppNotAffectedByPressure`; last action jumps without arming, otherwise it
-  sets the existing `bounceMove` bit, including repeated arms with no guard.
-  The shared attack canceler now performs the source Pressure PP delegation,
-  clears the target-owned arm, executes `BattleScript_MagicCoatBounce`, and
-  uses the existing `VARIOUS_SET_MAGIC_COAT_TARGET`/Follow Me retarget path.
-- **Next:** supervisor verify this finite executable-frontier increment and
-  select the next shared registration target; do not widen the generic
-  controller or resume the retired canonical Battle-2 march.
-- **Notes:** handler inventory **162→163**. Generic full-turn Spoink Magic
-  Coat→Onix Tail Whip proves exact PP/message/stat-event order, only Onix
-  Defense **6→5**, and shared action/end-turn cleanup with no active-battler
-  flag leak. The attack-canceler unsupported barrier count deliberately
-  shrank **5→4**; no unsupported barrier was added. No recording import,
-  controller widening, RNG, private handler, presentation/tick branch, issue
-  removal, or DEFERRED item.
