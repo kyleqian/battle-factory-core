@@ -49,6 +49,8 @@ function battler(
     furyCutterCounter: changes.furyCutterCounter ?? 0,
     truantCounter: changes.truantCounter ?? 0,
     rechargeTimer: changes.rechargeTimer ?? 0,
+    chargeTimer: changes.chargeTimer ?? 0,
+    chargeTimerStartValue: changes.chargeTimerStartValue ?? 0,
     flinchImmobility: changes.flinchImmobility ?? 0,
     disabledMove: changes.disabledMove ?? 0,
     disableTimer: changes.disableTimer ?? 0,

@@ -382,6 +382,8 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
   it("switchindataupdate clears Focus Energy ordinarily, retains it through Baton Pass, and clears Encore in both routes", () => {
     const STATUS2_FOCUS_ENERGY = 1 << 20;
     const STATUS2_TORMENT = 1 << 31;
+    const STATUS3_MUDSPORT = 1 << 16;
+    const STATUS3_WATERSPORT = 1 << 17;
     const source = {
       battlers: [
         battler({ side: 0, species: URSARING, types: ["TYPE_NORMAL", "TYPE_NORMAL"] }),
@@ -394,7 +396,9 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
           encoredMovePos: 2,
           encoreTimer: 4,
           encoreTimerStartValue: 4,
-          status3: 1 << 5,
+          status3: (1 << 5) | STATUS3_MUDSPORT | STATUS3_WATERSPORT,
+          chargeTimer: 2,
+          chargeTimerStartValue: 2,
           perishSongTimer: 3,
           perishSongTimerStartValue: 3,
           stockpileCounter: 3,
@@ -412,6 +416,7 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     expect(ordinary.state.rulesContext.battlers[1]).toMatchObject({
       encoredMove: 0, encoredMovePos: 0, encoreTimer: 0, encoreTimerStartValue: 0,
       perishSongTimer: 0, perishSongTimerStartValue: 0,
+      status3: 0, chargeTimer: 0, chargeTimerStartValue: 0,
       stockpileCounter: 0,
     });
 
@@ -425,6 +430,8 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     expect(batonPass.state.rulesContext.battlers[1]).toMatchObject({
       encoredMove: 0, encoredMovePos: 0, encoreTimer: 0, encoreTimerStartValue: 0,
       perishSongTimer: 3, perishSongTimerStartValue: 3,
+      status3: (1 << 5) | STATUS3_MUDSPORT | STATUS3_WATERSPORT,
+      chargeTimer: 0, chargeTimerStartValue: 0,
       stockpileCounter: 0,
     });
   });

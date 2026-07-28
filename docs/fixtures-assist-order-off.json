@@ -1,0 +1,4561 @@
+{
+  "profile": "battle-scene-off",
+  "scenario": "mechanic-assist-order-off.json",
+  "readOnlyAfterConstruction": true,
+  "totalFrames": 1134,
+  "transitions": [
+    {
+      "tick": 0,
+      "randCount": 9419,
+      "rngValue": 2707423266,
+      "currentMove": 0,
+      "calledMove": 0,
+      "chosenMove": 0,
+      "attacker": 0,
+      "target": 1,
+      "effectBattler": 0,
+      "scriptingBattler": 0,
+      "turnOrder": [
+        0,
+        1
+      ],
+      "beatUpIndex": 2,
+      "status3": [
+        0,
+        0
+      ],
+      "alwaysHits": [
+        false,
+        false
+      ],
+      "imprisoned": [
+        false,
+        false
+      ],
+      "sureHitOwner": [
+        0,
+        0
+      ],
+      "transformedPersonality": [
+        0,
+        0
+      ],
+      "mimickedMoves": [
+        0,
+        0
+      ],
+      "stealMove": [
+        false,
+        false
+      ],
+      "controllerA": [
+        [
+          18,
+          255
+        ],
+        [
+          53,
+          0
+        ]
+      ],
+      "battleMons": [
+        {
+          "species": 161,
+          "stats": [
+            66,
+            54,
+            40,
+            55,
+            65
+          ],
+          "moves": [
+            274,
+            33,
+            33,
+            33
+          ],
+          "ivsAbilityBits": 1073741823,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 50,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            20,
+            35,
+            35,
+            35
+          ],
+          "hp": 110,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 110,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 125000,
+          "personality": 2349019075,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        },
+        {
+          "species": 143,
+          "stats": [
+            130,
+            85,
+            35,
+            85,
+            130
+          ],
+          "moves": [
+            150,
+            150,
+            150,
+            150
+          ],
+          "ivsAbilityBits": 1072726015,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 17,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            40,
+            40,
+            40,
+            40
+          ],
+          "hp": 235,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 235,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 156250,
+          "personality": 1793700000,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        }
+      ]
+    },
+    {
+      "tick": 2,
+      "randCount": 9419,
+      "rngValue": 2707423266,
+      "currentMove": 0,
+      "calledMove": 0,
+      "chosenMove": 0,
+      "attacker": 0,
+      "target": 1,
+      "effectBattler": 0,
+      "scriptingBattler": 0,
+      "turnOrder": [
+        0,
+        1
+      ],
+      "beatUpIndex": 3,
+      "status3": [
+        0,
+        0
+      ],
+      "alwaysHits": [
+        false,
+        false
+      ],
+      "imprisoned": [
+        false,
+        false
+      ],
+      "sureHitOwner": [
+        0,
+        0
+      ],
+      "transformedPersonality": [
+        0,
+        0
+      ],
+      "mimickedMoves": [
+        0,
+        0
+      ],
+      "stealMove": [
+        false,
+        false
+      ],
+      "controllerA": [
+        [
+          20,
+          0
+        ],
+        [
+          53,
+          0
+        ]
+      ],
+      "battleMons": [
+        {
+          "species": 161,
+          "stats": [
+            66,
+            54,
+            40,
+            55,
+            65
+          ],
+          "moves": [
+            274,
+            33,
+            33,
+            33
+          ],
+          "ivsAbilityBits": 1073741823,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 50,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            20,
+            35,
+            35,
+            35
+          ],
+          "hp": 110,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 110,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 125000,
+          "personality": 2349019075,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        },
+        {
+          "species": 143,
+          "stats": [
+            130,
+            85,
+            35,
+            85,
+            130
+          ],
+          "moves": [
+            150,
+            150,
+            150,
+            150
+          ],
+          "ivsAbilityBits": 1072726015,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 17,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            40,
+            40,
+            40,
+            40
+          ],
+          "hp": 235,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 235,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 156250,
+          "personality": 1793700000,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        }
+      ]
+    },
+    {
+      "tick": 34,
+      "randCount": 9419,
+      "rngValue": 2707423266,
+      "currentMove": 0,
+      "calledMove": 0,
+      "chosenMove": 0,
+      "attacker": 0,
+      "target": 1,
+      "effectBattler": 0,
+      "scriptingBattler": 0,
+      "turnOrder": [
+        0,
+        1
+      ],
+      "beatUpIndex": 4,
+      "status3": [
+        0,
+        0
+      ],
+      "alwaysHits": [
+        false,
+        false
+      ],
+      "imprisoned": [
+        false,
+        false
+      ],
+      "sureHitOwner": [
+        0,
+        0
+      ],
+      "transformedPersonality": [
+        0,
+        0
+      ],
+      "mimickedMoves": [
+        0,
+        0
+      ],
+      "stealMove": [
+        false,
+        false
+      ],
+      "controllerA": [
+        [
+          20,
+          0
+        ],
+        [
+          53,
+          0
+        ]
+      ],
+      "battleMons": [
+        {
+          "species": 161,
+          "stats": [
+            66,
+            54,
+            40,
+            55,
+            65
+          ],
+          "moves": [
+            274,
+            33,
+            33,
+            33
+          ],
+          "ivsAbilityBits": 1073741823,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 50,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            20,
+            35,
+            35,
+            35
+          ],
+          "hp": 110,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 110,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 125000,
+          "personality": 2349019075,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        },
+        {
+          "species": 143,
+          "stats": [
+            130,
+            85,
+            35,
+            85,
+            130
+          ],
+          "moves": [
+            150,
+            150,
+            150,
+            150
+          ],
+          "ivsAbilityBits": 1072726015,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 17,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            40,
+            40,
+            40,
+            40
+          ],
+          "hp": 235,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 235,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 156250,
+          "personality": 1793700000,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        }
+      ]
+    },
+    {
+      "tick": 35,
+      "randCount": 9419,
+      "rngValue": 2707423266,
+      "currentMove": 0,
+      "calledMove": 0,
+      "chosenMove": 0,
+      "attacker": 0,
+      "target": 1,
+      "effectBattler": 0,
+      "scriptingBattler": 0,
+      "turnOrder": [
+        0,
+        1
+      ],
+      "beatUpIndex": 5,
+      "status3": [
+        0,
+        0
+      ],
+      "alwaysHits": [
+        false,
+        false
+      ],
+      "imprisoned": [
+        false,
+        false
+      ],
+      "sureHitOwner": [
+        0,
+        0
+      ],
+      "transformedPersonality": [
+        0,
+        0
+      ],
+      "mimickedMoves": [
+        0,
+        0
+      ],
+      "stealMove": [
+        false,
+        false
+      ],
+      "controllerA": [
+        [
+          53,
+          0
+        ],
+        [
+          53,
+          0
+        ]
+      ],
+      "battleMons": [
+        {
+          "species": 161,
+          "stats": [
+            66,
+            54,
+            40,
+            55,
+            65
+          ],
+          "moves": [
+            274,
+            33,
+            33,
+            33
+          ],
+          "ivsAbilityBits": 1073741823,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 50,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            20,
+            35,
+            35,
+            35
+          ],
+          "hp": 110,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 110,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 125000,
+          "personality": 2349019075,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        },
+        {
+          "species": 143,
+          "stats": [
+            130,
+            85,
+            35,
+            85,
+            130
+          ],
+          "moves": [
+            150,
+            150,
+            150,
+            150
+          ],
+          "ivsAbilityBits": 1072726015,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 17,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            40,
+            40,
+            40,
+            40
+          ],
+          "hp": 235,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 235,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 156250,
+          "personality": 1793700000,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        }
+      ]
+    },
+    {
+      "tick": 38,
+      "randCount": 9419,
+      "rngValue": 2707423266,
+      "currentMove": 0,
+      "calledMove": 0,
+      "chosenMove": 0,
+      "attacker": 1,
+      "target": 1,
+      "effectBattler": 0,
+      "scriptingBattler": 0,
+      "turnOrder": [
+        0,
+        1
+      ],
+      "beatUpIndex": 5,
+      "status3": [
+        0,
+        0
+      ],
+      "alwaysHits": [
+        false,
+        false
+      ],
+      "imprisoned": [
+        false,
+        false
+      ],
+      "sureHitOwner": [
+        0,
+        0
+      ],
+      "transformedPersonality": [
+        0,
+        0
+      ],
+      "mimickedMoves": [
+        0,
+        0
+      ],
+      "stealMove": [
+        false,
+        false
+      ],
+      "controllerA": [
+        [
+          53,
+          0
+        ],
+        [
+          53,
+          0
+        ]
+      ],
+      "battleMons": [
+        {
+          "species": 161,
+          "stats": [
+            66,
+            54,
+            40,
+            55,
+            65
+          ],
+          "moves": [
+            274,
+            33,
+            33,
+            33
+          ],
+          "ivsAbilityBits": 1073741823,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 50,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            20,
+            35,
+            35,
+            35
+          ],
+          "hp": 110,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 110,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 125000,
+          "personality": 2349019075,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        },
+        {
+          "species": 143,
+          "stats": [
+            130,
+            85,
+            35,
+            85,
+            130
+          ],
+          "moves": [
+            150,
+            150,
+            150,
+            150
+          ],
+          "ivsAbilityBits": 1072726015,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 17,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            40,
+            40,
+            40,
+            40
+          ],
+          "hp": 235,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 235,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 156250,
+          "personality": 1793700000,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        }
+      ]
+    },
+    {
+      "tick": 39,
+      "randCount": 9419,
+      "rngValue": 2707423266,
+      "currentMove": 274,
+      "calledMove": 0,
+      "chosenMove": 274,
+      "attacker": 0,
+      "target": 1,
+      "effectBattler": 0,
+      "scriptingBattler": 0,
+      "turnOrder": [
+        0,
+        1
+      ],
+      "beatUpIndex": 5,
+      "status3": [
+        0,
+        0
+      ],
+      "alwaysHits": [
+        false,
+        false
+      ],
+      "imprisoned": [
+        false,
+        false
+      ],
+      "sureHitOwner": [
+        0,
+        0
+      ],
+      "transformedPersonality": [
+        0,
+        0
+      ],
+      "mimickedMoves": [
+        0,
+        0
+      ],
+      "stealMove": [
+        false,
+        false
+      ],
+      "controllerA": [
+        [
+          53,
+          0
+        ],
+        [
+          53,
+          0
+        ]
+      ],
+      "battleMons": [
+        {
+          "species": 161,
+          "stats": [
+            66,
+            54,
+            40,
+            55,
+            65
+          ],
+          "moves": [
+            274,
+            33,
+            33,
+            33
+          ],
+          "ivsAbilityBits": 1073741823,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 50,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            20,
+            35,
+            35,
+            35
+          ],
+          "hp": 110,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 110,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 125000,
+          "personality": 2349019075,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        },
+        {
+          "species": 143,
+          "stats": [
+            130,
+            85,
+            35,
+            85,
+            130
+          ],
+          "moves": [
+            150,
+            150,
+            150,
+            150
+          ],
+          "ivsAbilityBits": 1072726015,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 17,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            40,
+            40,
+            40,
+            40
+          ],
+          "hp": 235,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 235,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 156250,
+          "personality": 1793700000,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        }
+      ]
+    },
+    {
+      "tick": 41,
+      "randCount": 9419,
+      "rngValue": 2707423266,
+      "currentMove": 274,
+      "calledMove": 0,
+      "chosenMove": 274,
+      "attacker": 0,
+      "target": 1,
+      "effectBattler": 0,
+      "scriptingBattler": 0,
+      "turnOrder": [
+        0,
+        1
+      ],
+      "beatUpIndex": 5,
+      "status3": [
+        0,
+        0
+      ],
+      "alwaysHits": [
+        false,
+        false
+      ],
+      "imprisoned": [
+        false,
+        false
+      ],
+      "sureHitOwner": [
+        0,
+        0
+      ],
+      "transformedPersonality": [
+        0,
+        0
+      ],
+      "mimickedMoves": [
+        0,
+        0
+      ],
+      "stealMove": [
+        false,
+        false
+      ],
+      "controllerA": [
+        [
+          16,
+          0
+        ],
+        [
+          53,
+          0
+        ]
+      ],
+      "battleMons": [
+        {
+          "species": 161,
+          "stats": [
+            66,
+            54,
+            40,
+            55,
+            65
+          ],
+          "moves": [
+            274,
+            33,
+            33,
+            33
+          ],
+          "ivsAbilityBits": 1073741823,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 50,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            20,
+            35,
+            35,
+            35
+          ],
+          "hp": 110,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 110,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 125000,
+          "personality": 2349019075,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        },
+        {
+          "species": 143,
+          "stats": [
+            130,
+            85,
+            35,
+            85,
+            130
+          ],
+          "moves": [
+            150,
+            150,
+            150,
+            150
+          ],
+          "ivsAbilityBits": 1072726015,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 17,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            40,
+            40,
+            40,
+            40
+          ],
+          "hp": 235,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 235,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 156250,
+          "personality": 1793700000,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        }
+      ]
+    },
+    {
+      "tick": 62,
+      "randCount": 9420,
+      "rngValue": 2989935341,
+      "currentMove": 274,
+      "calledMove": 45,
+      "chosenMove": 274,
+      "attacker": 0,
+      "target": 1,
+      "effectBattler": 0,
+      "scriptingBattler": 0,
+      "turnOrder": [
+        0,
+        1
+      ],
+      "beatUpIndex": 5,
+      "status3": [
+        0,
+        0
+      ],
+      "alwaysHits": [
+        false,
+        false
+      ],
+      "imprisoned": [
+        false,
+        false
+      ],
+      "sureHitOwner": [
+        0,
+        0
+      ],
+      "transformedPersonality": [
+        0,
+        0
+      ],
+      "mimickedMoves": [
+        0,
+        0
+      ],
+      "stealMove": [
+        false,
+        false
+      ],
+      "controllerA": [
+        [
+          16,
+          0
+        ],
+        [
+          53,
+          0
+        ]
+      ],
+      "battleMons": [
+        {
+          "species": 161,
+          "stats": [
+            66,
+            54,
+            40,
+            55,
+            65
+          ],
+          "moves": [
+            274,
+            33,
+            33,
+            33
+          ],
+          "ivsAbilityBits": 1073741823,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 50,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            20,
+            35,
+            35,
+            35
+          ],
+          "hp": 110,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 110,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 125000,
+          "personality": 2349019075,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        },
+        {
+          "species": 143,
+          "stats": [
+            130,
+            85,
+            35,
+            85,
+            130
+          ],
+          "moves": [
+            150,
+            150,
+            150,
+            150
+          ],
+          "ivsAbilityBits": 1072726015,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 17,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            40,
+            40,
+            40,
+            40
+          ],
+          "hp": 235,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 235,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 156250,
+          "personality": 1793700000,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        }
+      ]
+    },
+    {
+      "tick": 100,
+      "randCount": 9420,
+      "rngValue": 2989935341,
+      "currentMove": 45,
+      "calledMove": 45,
+      "chosenMove": 274,
+      "attacker": 0,
+      "target": 1,
+      "effectBattler": 0,
+      "scriptingBattler": 0,
+      "turnOrder": [
+        0,
+        1
+      ],
+      "beatUpIndex": 5,
+      "status3": [
+        0,
+        0
+      ],
+      "alwaysHits": [
+        false,
+        false
+      ],
+      "imprisoned": [
+        false,
+        false
+      ],
+      "sureHitOwner": [
+        0,
+        0
+      ],
+      "transformedPersonality": [
+        0,
+        0
+      ],
+      "mimickedMoves": [
+        0,
+        0
+      ],
+      "stealMove": [
+        false,
+        false
+      ],
+      "controllerA": [
+        [
+          16,
+          0
+        ],
+        [
+          53,
+          0
+        ]
+      ],
+      "battleMons": [
+        {
+          "species": 161,
+          "stats": [
+            66,
+            54,
+            40,
+            55,
+            65
+          ],
+          "moves": [
+            274,
+            33,
+            33,
+            33
+          ],
+          "ivsAbilityBits": 1073741823,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 50,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            20,
+            35,
+            35,
+            35
+          ],
+          "hp": 110,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 110,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 125000,
+          "personality": 2349019075,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        },
+        {
+          "species": 143,
+          "stats": [
+            130,
+            85,
+            35,
+            85,
+            130
+          ],
+          "moves": [
+            150,
+            150,
+            150,
+            150
+          ],
+          "ivsAbilityBits": 1072726015,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 17,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            40,
+            40,
+            40,
+            40
+          ],
+          "hp": 235,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 235,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 156250,
+          "personality": 1793700000,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        }
+      ]
+    },
+    {
+      "tick": 105,
+      "randCount": 9421,
+      "rngValue": 3010919772,
+      "currentMove": 45,
+      "calledMove": 45,
+      "chosenMove": 274,
+      "attacker": 0,
+      "target": 1,
+      "effectBattler": 0,
+      "scriptingBattler": 0,
+      "turnOrder": [
+        0,
+        1
+      ],
+      "beatUpIndex": 5,
+      "status3": [
+        0,
+        0
+      ],
+      "alwaysHits": [
+        false,
+        false
+      ],
+      "imprisoned": [
+        false,
+        false
+      ],
+      "sureHitOwner": [
+        0,
+        0
+      ],
+      "transformedPersonality": [
+        0,
+        0
+      ],
+      "mimickedMoves": [
+        0,
+        0
+      ],
+      "stealMove": [
+        false,
+        false
+      ],
+      "controllerA": [
+        [
+          16,
+          0
+        ],
+        [
+          53,
+          0
+        ]
+      ],
+      "battleMons": [
+        {
+          "species": 161,
+          "stats": [
+            66,
+            54,
+            40,
+            55,
+            65
+          ],
+          "moves": [
+            274,
+            33,
+            33,
+            33
+          ],
+          "ivsAbilityBits": 1073741823,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 50,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            20,
+            35,
+            35,
+            35
+          ],
+          "hp": 110,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 110,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 125000,
+          "personality": 2349019075,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        },
+        {
+          "species": 143,
+          "stats": [
+            130,
+            85,
+            35,
+            85,
+            130
+          ],
+          "moves": [
+            150,
+            150,
+            150,
+            150
+          ],
+          "ivsAbilityBits": 1072726015,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 17,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            40,
+            40,
+            40,
+            40
+          ],
+          "hp": 235,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 235,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 156250,
+          "personality": 1793700000,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        }
+      ]
+    },
+    {
+      "tick": 126,
+      "randCount": 9421,
+      "rngValue": 3010919772,
+      "currentMove": 45,
+      "calledMove": 45,
+      "chosenMove": 274,
+      "attacker": 0,
+      "target": 1,
+      "effectBattler": 0,
+      "scriptingBattler": 0,
+      "turnOrder": [
+        0,
+        1
+      ],
+      "beatUpIndex": 5,
+      "status3": [
+        0,
+        0
+      ],
+      "alwaysHits": [
+        false,
+        false
+      ],
+      "imprisoned": [
+        false,
+        false
+      ],
+      "sureHitOwner": [
+        0,
+        0
+      ],
+      "transformedPersonality": [
+        0,
+        0
+      ],
+      "mimickedMoves": [
+        0,
+        0
+      ],
+      "stealMove": [
+        false,
+        false
+      ],
+      "controllerA": [
+        [
+          2,
+          9
+        ],
+        [
+          53,
+          0
+        ]
+      ],
+      "battleMons": [
+        {
+          "species": 161,
+          "stats": [
+            66,
+            54,
+            40,
+            55,
+            65
+          ],
+          "moves": [
+            274,
+            33,
+            33,
+            33
+          ],
+          "ivsAbilityBits": 1073741823,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 50,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            19,
+            35,
+            35,
+            35
+          ],
+          "hp": 110,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 110,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 125000,
+          "personality": 2349019075,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        },
+        {
+          "species": 143,
+          "stats": [
+            130,
+            85,
+            35,
+            85,
+            130
+          ],
+          "moves": [
+            150,
+            150,
+            150,
+            150
+          ],
+          "ivsAbilityBits": 1072726015,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 17,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            40,
+            40,
+            40,
+            40
+          ],
+          "hp": 235,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 235,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 156250,
+          "personality": 1793700000,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        }
+      ]
+    },
+    {
+      "tick": 127,
+      "randCount": 9421,
+      "rngValue": 3010919772,
+      "currentMove": 45,
+      "calledMove": 45,
+      "chosenMove": 274,
+      "attacker": 0,
+      "target": 1,
+      "effectBattler": 0,
+      "scriptingBattler": 0,
+      "turnOrder": [
+        0,
+        1
+      ],
+      "beatUpIndex": 5,
+      "status3": [
+        0,
+        0
+      ],
+      "alwaysHits": [
+        false,
+        false
+      ],
+      "imprisoned": [
+        false,
+        false
+      ],
+      "sureHitOwner": [
+        0,
+        0
+      ],
+      "transformedPersonality": [
+        0,
+        0
+      ],
+      "mimickedMoves": [
+        0,
+        0
+      ],
+      "stealMove": [
+        false,
+        false
+      ],
+      "controllerA": [
+        [
+          2,
+          9
+        ],
+        [
+          53,
+          0
+        ]
+      ],
+      "battleMons": [
+        {
+          "species": 161,
+          "stats": [
+            66,
+            54,
+            40,
+            55,
+            65
+          ],
+          "moves": [
+            274,
+            33,
+            33,
+            33
+          ],
+          "ivsAbilityBits": 1073741823,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 50,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            19,
+            35,
+            35,
+            35
+          ],
+          "hp": 110,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 110,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 125000,
+          "personality": 2349019075,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        },
+        {
+          "species": 143,
+          "stats": [
+            130,
+            85,
+            35,
+            85,
+            130
+          ],
+          "moves": [
+            150,
+            150,
+            150,
+            150
+          ],
+          "ivsAbilityBits": 1072726015,
+          "stages": [
+            6,
+            5,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 17,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            40,
+            40,
+            40,
+            40
+          ],
+          "hp": 235,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 235,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 156250,
+          "personality": 1793700000,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        }
+      ]
+    },
+    {
+      "tick": 165,
+      "randCount": 9421,
+      "rngValue": 3010919772,
+      "currentMove": 45,
+      "calledMove": 45,
+      "chosenMove": 274,
+      "attacker": 0,
+      "target": 1,
+      "effectBattler": 0,
+      "scriptingBattler": 0,
+      "turnOrder": [
+        0,
+        1
+      ],
+      "beatUpIndex": 5,
+      "status3": [
+        0,
+        0
+      ],
+      "alwaysHits": [
+        false,
+        false
+      ],
+      "imprisoned": [
+        false,
+        false
+      ],
+      "sureHitOwner": [
+        0,
+        0
+      ],
+      "transformedPersonality": [
+        0,
+        0
+      ],
+      "mimickedMoves": [
+        0,
+        0
+      ],
+      "stealMove": [
+        false,
+        false
+      ],
+      "controllerA": [
+        [
+          2,
+          9
+        ],
+        [
+          52,
+          1
+        ]
+      ],
+      "battleMons": [
+        {
+          "species": 161,
+          "stats": [
+            66,
+            54,
+            40,
+            55,
+            65
+          ],
+          "moves": [
+            274,
+            33,
+            33,
+            33
+          ],
+          "ivsAbilityBits": 1073741823,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 50,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            19,
+            35,
+            35,
+            35
+          ],
+          "hp": 110,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 110,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 125000,
+          "personality": 2349019075,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        },
+        {
+          "species": 143,
+          "stats": [
+            130,
+            85,
+            35,
+            85,
+            130
+          ],
+          "moves": [
+            150,
+            150,
+            150,
+            150
+          ],
+          "ivsAbilityBits": 1072726015,
+          "stages": [
+            6,
+            5,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 17,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            40,
+            40,
+            40,
+            40
+          ],
+          "hp": 235,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 235,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 156250,
+          "personality": 1793700000,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        }
+      ]
+    },
+    {
+      "tick": 242,
+      "randCount": 9421,
+      "rngValue": 3010919772,
+      "currentMove": 45,
+      "calledMove": 45,
+      "chosenMove": 274,
+      "attacker": 0,
+      "target": 1,
+      "effectBattler": 0,
+      "scriptingBattler": 0,
+      "turnOrder": [
+        0,
+        1
+      ],
+      "beatUpIndex": 5,
+      "status3": [
+        0,
+        0
+      ],
+      "alwaysHits": [
+        false,
+        false
+      ],
+      "imprisoned": [
+        false,
+        false
+      ],
+      "sureHitOwner": [
+        0,
+        0
+      ],
+      "transformedPersonality": [
+        0,
+        0
+      ],
+      "mimickedMoves": [
+        0,
+        0
+      ],
+      "stealMove": [
+        false,
+        false
+      ],
+      "controllerA": [
+        [
+          16,
+          0
+        ],
+        [
+          52,
+          1
+        ]
+      ],
+      "battleMons": [
+        {
+          "species": 161,
+          "stats": [
+            66,
+            54,
+            40,
+            55,
+            65
+          ],
+          "moves": [
+            274,
+            33,
+            33,
+            33
+          ],
+          "ivsAbilityBits": 1073741823,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 50,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            19,
+            35,
+            35,
+            35
+          ],
+          "hp": 110,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 110,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 125000,
+          "personality": 2349019075,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        },
+        {
+          "species": 143,
+          "stats": [
+            130,
+            85,
+            35,
+            85,
+            130
+          ],
+          "moves": [
+            150,
+            150,
+            150,
+            150
+          ],
+          "ivsAbilityBits": 1072726015,
+          "stages": [
+            6,
+            5,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 17,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            40,
+            40,
+            40,
+            40
+          ],
+          "hp": 235,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 235,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 156250,
+          "personality": 1793700000,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        }
+      ]
+    },
+    {
+      "tick": 335,
+      "randCount": 9421,
+      "rngValue": 3010919772,
+      "currentMove": 45,
+      "calledMove": 45,
+      "chosenMove": 274,
+      "attacker": 0,
+      "target": 1,
+      "effectBattler": 0,
+      "scriptingBattler": 0,
+      "turnOrder": [
+        0,
+        1
+      ],
+      "beatUpIndex": 5,
+      "status3": [
+        0,
+        0
+      ],
+      "alwaysHits": [
+        false,
+        false
+      ],
+      "imprisoned": [
+        false,
+        false
+      ],
+      "sureHitOwner": [
+        0,
+        0
+      ],
+      "transformedPersonality": [
+        0,
+        0
+      ],
+      "mimickedMoves": [
+        0,
+        0
+      ],
+      "stealMove": [
+        false,
+        false
+      ],
+      "controllerA": [
+        [
+          51,
+          0
+        ],
+        [
+          52,
+          1
+        ]
+      ],
+      "battleMons": [
+        {
+          "species": 161,
+          "stats": [
+            66,
+            54,
+            40,
+            55,
+            65
+          ],
+          "moves": [
+            274,
+            33,
+            33,
+            33
+          ],
+          "ivsAbilityBits": 1073741823,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 50,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            19,
+            35,
+            35,
+            35
+          ],
+          "hp": 110,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 110,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 125000,
+          "personality": 2349019075,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        },
+        {
+          "species": 143,
+          "stats": [
+            130,
+            85,
+            35,
+            85,
+            130
+          ],
+          "moves": [
+            150,
+            150,
+            150,
+            150
+          ],
+          "ivsAbilityBits": 1072726015,
+          "stages": [
+            6,
+            5,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 17,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            40,
+            40,
+            40,
+            40
+          ],
+          "hp": 235,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 235,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 156250,
+          "personality": 1793700000,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        }
+      ]
+    },
+    {
+      "tick": 336,
+      "randCount": 9421,
+      "rngValue": 3010919772,
+      "currentMove": 45,
+      "calledMove": 45,
+      "chosenMove": 274,
+      "attacker": 0,
+      "target": 1,
+      "effectBattler": 0,
+      "scriptingBattler": 0,
+      "turnOrder": [
+        0,
+        1
+      ],
+      "beatUpIndex": 5,
+      "status3": [
+        0,
+        0
+      ],
+      "alwaysHits": [
+        false,
+        false
+      ],
+      "imprisoned": [
+        false,
+        false
+      ],
+      "sureHitOwner": [
+        0,
+        0
+      ],
+      "transformedPersonality": [
+        0,
+        0
+      ],
+      "mimickedMoves": [
+        0,
+        0
+      ],
+      "stealMove": [
+        false,
+        false
+      ],
+      "controllerA": [
+        [
+          51,
+          0
+        ],
+        [
+          51,
+          0
+        ]
+      ],
+      "battleMons": [
+        {
+          "species": 161,
+          "stats": [
+            66,
+            54,
+            40,
+            55,
+            65
+          ],
+          "moves": [
+            274,
+            33,
+            33,
+            33
+          ],
+          "ivsAbilityBits": 1073741823,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 50,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            19,
+            35,
+            35,
+            35
+          ],
+          "hp": 110,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 110,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 125000,
+          "personality": 2349019075,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        },
+        {
+          "species": 143,
+          "stats": [
+            130,
+            85,
+            35,
+            85,
+            130
+          ],
+          "moves": [
+            150,
+            150,
+            150,
+            150
+          ],
+          "ivsAbilityBits": 1072726015,
+          "stages": [
+            6,
+            5,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 17,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            40,
+            40,
+            40,
+            40
+          ],
+          "hp": 235,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 235,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 156250,
+          "personality": 1793700000,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        }
+      ]
+    },
+    {
+      "tick": 340,
+      "randCount": 9421,
+      "rngValue": 3010919772,
+      "currentMove": 0,
+      "calledMove": 45,
+      "chosenMove": 274,
+      "attacker": 0,
+      "target": 1,
+      "effectBattler": 0,
+      "scriptingBattler": 0,
+      "turnOrder": [
+        0,
+        1
+      ],
+      "beatUpIndex": 5,
+      "status3": [
+        0,
+        0
+      ],
+      "alwaysHits": [
+        false,
+        false
+      ],
+      "imprisoned": [
+        false,
+        false
+      ],
+      "sureHitOwner": [
+        0,
+        0
+      ],
+      "transformedPersonality": [
+        0,
+        0
+      ],
+      "mimickedMoves": [
+        0,
+        0
+      ],
+      "stealMove": [
+        false,
+        false
+      ],
+      "controllerA": [
+        [
+          51,
+          0
+        ],
+        [
+          51,
+          0
+        ]
+      ],
+      "battleMons": [
+        {
+          "species": 161,
+          "stats": [
+            66,
+            54,
+            40,
+            55,
+            65
+          ],
+          "moves": [
+            274,
+            33,
+            33,
+            33
+          ],
+          "ivsAbilityBits": 1073741823,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 50,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            19,
+            35,
+            35,
+            35
+          ],
+          "hp": 110,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 110,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 125000,
+          "personality": 2349019075,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        },
+        {
+          "species": 143,
+          "stats": [
+            130,
+            85,
+            35,
+            85,
+            130
+          ],
+          "moves": [
+            150,
+            150,
+            150,
+            150
+          ],
+          "ivsAbilityBits": 1072726015,
+          "stages": [
+            6,
+            5,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 17,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            40,
+            40,
+            40,
+            40
+          ],
+          "hp": 235,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 235,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 156250,
+          "personality": 1793700000,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        }
+      ]
+    },
+    {
+      "tick": 341,
+      "randCount": 9421,
+      "rngValue": 3010919772,
+      "currentMove": 150,
+      "calledMove": 45,
+      "chosenMove": 150,
+      "attacker": 1,
+      "target": 1,
+      "effectBattler": 0,
+      "scriptingBattler": 0,
+      "turnOrder": [
+        0,
+        1
+      ],
+      "beatUpIndex": 5,
+      "status3": [
+        0,
+        0
+      ],
+      "alwaysHits": [
+        false,
+        false
+      ],
+      "imprisoned": [
+        false,
+        false
+      ],
+      "sureHitOwner": [
+        0,
+        0
+      ],
+      "transformedPersonality": [
+        0,
+        0
+      ],
+      "mimickedMoves": [
+        0,
+        0
+      ],
+      "stealMove": [
+        false,
+        false
+      ],
+      "controllerA": [
+        [
+          51,
+          0
+        ],
+        [
+          51,
+          0
+        ]
+      ],
+      "battleMons": [
+        {
+          "species": 161,
+          "stats": [
+            66,
+            54,
+            40,
+            55,
+            65
+          ],
+          "moves": [
+            274,
+            33,
+            33,
+            33
+          ],
+          "ivsAbilityBits": 1073741823,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 50,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            19,
+            35,
+            35,
+            35
+          ],
+          "hp": 110,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 110,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 125000,
+          "personality": 2349019075,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        },
+        {
+          "species": 143,
+          "stats": [
+            130,
+            85,
+            35,
+            85,
+            130
+          ],
+          "moves": [
+            150,
+            150,
+            150,
+            150
+          ],
+          "ivsAbilityBits": 1072726015,
+          "stages": [
+            6,
+            5,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 17,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            40,
+            40,
+            40,
+            40
+          ],
+          "hp": 235,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 235,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 156250,
+          "personality": 1793700000,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        }
+      ]
+    },
+    {
+      "tick": 343,
+      "randCount": 9421,
+      "rngValue": 3010919772,
+      "currentMove": 150,
+      "calledMove": 45,
+      "chosenMove": 150,
+      "attacker": 1,
+      "target": 1,
+      "effectBattler": 0,
+      "scriptingBattler": 0,
+      "turnOrder": [
+        0,
+        1
+      ],
+      "beatUpIndex": 5,
+      "status3": [
+        0,
+        0
+      ],
+      "alwaysHits": [
+        false,
+        false
+      ],
+      "imprisoned": [
+        false,
+        false
+      ],
+      "sureHitOwner": [
+        0,
+        0
+      ],
+      "transformedPersonality": [
+        0,
+        0
+      ],
+      "mimickedMoves": [
+        0,
+        0
+      ],
+      "stealMove": [
+        false,
+        false
+      ],
+      "controllerA": [
+        [
+          51,
+          0
+        ],
+        [
+          16,
+          0
+        ]
+      ],
+      "battleMons": [
+        {
+          "species": 161,
+          "stats": [
+            66,
+            54,
+            40,
+            55,
+            65
+          ],
+          "moves": [
+            274,
+            33,
+            33,
+            33
+          ],
+          "ivsAbilityBits": 1073741823,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 50,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            19,
+            35,
+            35,
+            35
+          ],
+          "hp": 110,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 110,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 125000,
+          "personality": 2349019075,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        },
+        {
+          "species": 143,
+          "stats": [
+            130,
+            85,
+            35,
+            85,
+            130
+          ],
+          "moves": [
+            150,
+            150,
+            150,
+            150
+          ],
+          "ivsAbilityBits": 1072726015,
+          "stages": [
+            6,
+            5,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 17,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            40,
+            40,
+            40,
+            40
+          ],
+          "hp": 235,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 235,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 156250,
+          "personality": 1793700000,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        }
+      ]
+    },
+    {
+      "tick": 368,
+      "randCount": 9421,
+      "rngValue": 3010919772,
+      "currentMove": 150,
+      "calledMove": 45,
+      "chosenMove": 150,
+      "attacker": 1,
+      "target": 1,
+      "effectBattler": 0,
+      "scriptingBattler": 0,
+      "turnOrder": [
+        0,
+        1
+      ],
+      "beatUpIndex": 5,
+      "status3": [
+        0,
+        0
+      ],
+      "alwaysHits": [
+        false,
+        false
+      ],
+      "imprisoned": [
+        false,
+        false
+      ],
+      "sureHitOwner": [
+        0,
+        0
+      ],
+      "transformedPersonality": [
+        0,
+        0
+      ],
+      "mimickedMoves": [
+        0,
+        0
+      ],
+      "stealMove": [
+        false,
+        false
+      ],
+      "controllerA": [
+        [
+          51,
+          0
+        ],
+        [
+          2,
+          9
+        ]
+      ],
+      "battleMons": [
+        {
+          "species": 161,
+          "stats": [
+            66,
+            54,
+            40,
+            55,
+            65
+          ],
+          "moves": [
+            274,
+            33,
+            33,
+            33
+          ],
+          "ivsAbilityBits": 1073741823,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 50,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            19,
+            35,
+            35,
+            35
+          ],
+          "hp": 110,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 110,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 125000,
+          "personality": 2349019075,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        },
+        {
+          "species": 143,
+          "stats": [
+            130,
+            85,
+            35,
+            85,
+            130
+          ],
+          "moves": [
+            150,
+            150,
+            150,
+            150
+          ],
+          "ivsAbilityBits": 1072726015,
+          "stages": [
+            6,
+            5,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 17,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            39,
+            40,
+            40,
+            40
+          ],
+          "hp": 235,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 235,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 156250,
+          "personality": 1793700000,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        }
+      ]
+    },
+    {
+      "tick": 405,
+      "randCount": 9421,
+      "rngValue": 3010919772,
+      "currentMove": 150,
+      "calledMove": 45,
+      "chosenMove": 150,
+      "attacker": 1,
+      "target": 1,
+      "effectBattler": 0,
+      "scriptingBattler": 0,
+      "turnOrder": [
+        0,
+        1
+      ],
+      "beatUpIndex": 5,
+      "status3": [
+        0,
+        0
+      ],
+      "alwaysHits": [
+        false,
+        false
+      ],
+      "imprisoned": [
+        false,
+        false
+      ],
+      "sureHitOwner": [
+        0,
+        0
+      ],
+      "transformedPersonality": [
+        0,
+        0
+      ],
+      "mimickedMoves": [
+        0,
+        0
+      ],
+      "stealMove": [
+        false,
+        false
+      ],
+      "controllerA": [
+        [
+          51,
+          0
+        ],
+        [
+          16,
+          0
+        ]
+      ],
+      "battleMons": [
+        {
+          "species": 161,
+          "stats": [
+            66,
+            54,
+            40,
+            55,
+            65
+          ],
+          "moves": [
+            274,
+            33,
+            33,
+            33
+          ],
+          "ivsAbilityBits": 1073741823,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 50,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            19,
+            35,
+            35,
+            35
+          ],
+          "hp": 110,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 110,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 125000,
+          "personality": 2349019075,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        },
+        {
+          "species": 143,
+          "stats": [
+            130,
+            85,
+            35,
+            85,
+            130
+          ],
+          "moves": [
+            150,
+            150,
+            150,
+            150
+          ],
+          "ivsAbilityBits": 1072726015,
+          "stages": [
+            6,
+            5,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 17,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            39,
+            40,
+            40,
+            40
+          ],
+          "hp": 235,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 235,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 156250,
+          "personality": 1793700000,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        }
+      ]
+    },
+    {
+      "tick": 494,
+      "randCount": 9421,
+      "rngValue": 3010919772,
+      "currentMove": 150,
+      "calledMove": 45,
+      "chosenMove": 150,
+      "attacker": 1,
+      "target": 1,
+      "effectBattler": 0,
+      "scriptingBattler": 0,
+      "turnOrder": [
+        0,
+        1
+      ],
+      "beatUpIndex": 5,
+      "status3": [
+        0,
+        0
+      ],
+      "alwaysHits": [
+        false,
+        false
+      ],
+      "imprisoned": [
+        false,
+        false
+      ],
+      "sureHitOwner": [
+        0,
+        0
+      ],
+      "transformedPersonality": [
+        0,
+        0
+      ],
+      "mimickedMoves": [
+        0,
+        0
+      ],
+      "stealMove": [
+        false,
+        false
+      ],
+      "controllerA": [
+        [
+          51,
+          0
+        ],
+        [
+          51,
+          0
+        ]
+      ],
+      "battleMons": [
+        {
+          "species": 161,
+          "stats": [
+            66,
+            54,
+            40,
+            55,
+            65
+          ],
+          "moves": [
+            274,
+            33,
+            33,
+            33
+          ],
+          "ivsAbilityBits": 1073741823,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 50,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            19,
+            35,
+            35,
+            35
+          ],
+          "hp": 110,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 110,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 125000,
+          "personality": 2349019075,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        },
+        {
+          "species": 143,
+          "stats": [
+            130,
+            85,
+            35,
+            85,
+            130
+          ],
+          "moves": [
+            150,
+            150,
+            150,
+            150
+          ],
+          "ivsAbilityBits": 1072726015,
+          "stages": [
+            6,
+            5,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 17,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            39,
+            40,
+            40,
+            40
+          ],
+          "hp": 235,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 235,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 156250,
+          "personality": 1793700000,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        }
+      ]
+    },
+    {
+      "tick": 498,
+      "randCount": 9421,
+      "rngValue": 3010919772,
+      "currentMove": 0,
+      "calledMove": 45,
+      "chosenMove": 150,
+      "attacker": 1,
+      "target": 1,
+      "effectBattler": 0,
+      "scriptingBattler": 0,
+      "turnOrder": [
+        0,
+        1
+      ],
+      "beatUpIndex": 5,
+      "status3": [
+        0,
+        0
+      ],
+      "alwaysHits": [
+        false,
+        false
+      ],
+      "imprisoned": [
+        false,
+        false
+      ],
+      "sureHitOwner": [
+        0,
+        0
+      ],
+      "transformedPersonality": [
+        0,
+        0
+      ],
+      "mimickedMoves": [
+        0,
+        0
+      ],
+      "stealMove": [
+        false,
+        false
+      ],
+      "controllerA": [
+        [
+          51,
+          0
+        ],
+        [
+          51,
+          0
+        ]
+      ],
+      "battleMons": [
+        {
+          "species": 161,
+          "stats": [
+            66,
+            54,
+            40,
+            55,
+            65
+          ],
+          "moves": [
+            274,
+            33,
+            33,
+            33
+          ],
+          "ivsAbilityBits": 1073741823,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 50,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            19,
+            35,
+            35,
+            35
+          ],
+          "hp": 110,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 110,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 125000,
+          "personality": 2349019075,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        },
+        {
+          "species": 143,
+          "stats": [
+            130,
+            85,
+            35,
+            85,
+            130
+          ],
+          "moves": [
+            150,
+            150,
+            150,
+            150
+          ],
+          "ivsAbilityBits": 1072726015,
+          "stages": [
+            6,
+            5,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 17,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            39,
+            40,
+            40,
+            40
+          ],
+          "hp": 235,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 235,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 156250,
+          "personality": 1793700000,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        }
+      ]
+    },
+    {
+      "tick": 499,
+      "randCount": 9421,
+      "rngValue": 3010919772,
+      "currentMove": 0,
+      "calledMove": 45,
+      "chosenMove": 150,
+      "attacker": 1,
+      "target": 1,
+      "effectBattler": 0,
+      "scriptingBattler": 0,
+      "turnOrder": [
+        0,
+        1
+      ],
+      "beatUpIndex": 0,
+      "status3": [
+        0,
+        0
+      ],
+      "alwaysHits": [
+        false,
+        false
+      ],
+      "imprisoned": [
+        false,
+        false
+      ],
+      "sureHitOwner": [
+        0,
+        0
+      ],
+      "transformedPersonality": [
+        0,
+        0
+      ],
+      "mimickedMoves": [
+        0,
+        0
+      ],
+      "stealMove": [
+        false,
+        false
+      ],
+      "controllerA": [
+        [
+          51,
+          0
+        ],
+        [
+          51,
+          0
+        ]
+      ],
+      "battleMons": [
+        {
+          "species": 161,
+          "stats": [
+            66,
+            54,
+            40,
+            55,
+            65
+          ],
+          "moves": [
+            274,
+            33,
+            33,
+            33
+          ],
+          "ivsAbilityBits": 1073741823,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 50,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            19,
+            35,
+            35,
+            35
+          ],
+          "hp": 110,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 110,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 125000,
+          "personality": 2349019075,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        },
+        {
+          "species": 143,
+          "stats": [
+            130,
+            85,
+            35,
+            85,
+            130
+          ],
+          "moves": [
+            150,
+            150,
+            150,
+            150
+          ],
+          "ivsAbilityBits": 1072726015,
+          "stages": [
+            6,
+            5,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 17,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            39,
+            40,
+            40,
+            40
+          ],
+          "hp": 235,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 235,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 156250,
+          "personality": 1793700000,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        }
+      ]
+    },
+    {
+      "tick": 500,
+      "randCount": 9422,
+      "rngValue": 4228139167,
+      "currentMove": 0,
+      "calledMove": 45,
+      "chosenMove": 150,
+      "attacker": 1,
+      "target": 1,
+      "effectBattler": 0,
+      "scriptingBattler": 0,
+      "turnOrder": [
+        0,
+        1
+      ],
+      "beatUpIndex": 0,
+      "status3": [
+        0,
+        0
+      ],
+      "alwaysHits": [
+        false,
+        false
+      ],
+      "imprisoned": [
+        false,
+        false
+      ],
+      "sureHitOwner": [
+        0,
+        0
+      ],
+      "transformedPersonality": [
+        0,
+        0
+      ],
+      "mimickedMoves": [
+        0,
+        0
+      ],
+      "stealMove": [
+        false,
+        false
+      ],
+      "controllerA": [
+        [
+          51,
+          0
+        ],
+        [
+          51,
+          0
+        ]
+      ],
+      "battleMons": [
+        {
+          "species": 161,
+          "stats": [
+            66,
+            54,
+            40,
+            55,
+            65
+          ],
+          "moves": [
+            274,
+            33,
+            33,
+            33
+          ],
+          "ivsAbilityBits": 1073741823,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 50,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            19,
+            35,
+            35,
+            35
+          ],
+          "hp": 110,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 110,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 125000,
+          "personality": 2349019075,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        },
+        {
+          "species": 143,
+          "stats": [
+            130,
+            85,
+            35,
+            85,
+            130
+          ],
+          "moves": [
+            150,
+            150,
+            150,
+            150
+          ],
+          "ivsAbilityBits": 1072726015,
+          "stages": [
+            6,
+            5,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 17,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            39,
+            40,
+            40,
+            40
+          ],
+          "hp": 235,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 235,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 156250,
+          "personality": 1793700000,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        }
+      ]
+    },
+    {
+      "tick": 502,
+      "randCount": 9422,
+      "rngValue": 4228139167,
+      "currentMove": 0,
+      "calledMove": 45,
+      "chosenMove": 150,
+      "attacker": 1,
+      "target": 1,
+      "effectBattler": 0,
+      "scriptingBattler": 0,
+      "turnOrder": [
+        0,
+        1
+      ],
+      "beatUpIndex": 1,
+      "status3": [
+        0,
+        0
+      ],
+      "alwaysHits": [
+        false,
+        false
+      ],
+      "imprisoned": [
+        false,
+        false
+      ],
+      "sureHitOwner": [
+        0,
+        0
+      ],
+      "transformedPersonality": [
+        0,
+        0
+      ],
+      "mimickedMoves": [
+        0,
+        0
+      ],
+      "stealMove": [
+        false,
+        false
+      ],
+      "controllerA": [
+        [
+          51,
+          0
+        ],
+        [
+          51,
+          0
+        ]
+      ],
+      "battleMons": [
+        {
+          "species": 161,
+          "stats": [
+            66,
+            54,
+            40,
+            55,
+            65
+          ],
+          "moves": [
+            274,
+            33,
+            33,
+            33
+          ],
+          "ivsAbilityBits": 1073741823,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 50,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            19,
+            35,
+            35,
+            35
+          ],
+          "hp": 110,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 110,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 125000,
+          "personality": 2349019075,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        },
+        {
+          "species": 143,
+          "stats": [
+            130,
+            85,
+            35,
+            85,
+            130
+          ],
+          "moves": [
+            150,
+            150,
+            150,
+            150
+          ],
+          "ivsAbilityBits": 1072726015,
+          "stages": [
+            6,
+            5,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 17,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            39,
+            40,
+            40,
+            40
+          ],
+          "hp": 235,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 235,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 156250,
+          "personality": 1793700000,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        }
+      ]
+    },
+    {
+      "tick": 503,
+      "randCount": 9422,
+      "rngValue": 4228139167,
+      "currentMove": 0,
+      "calledMove": 45,
+      "chosenMove": 150,
+      "attacker": 1,
+      "target": 1,
+      "effectBattler": 0,
+      "scriptingBattler": 0,
+      "turnOrder": [
+        0,
+        1
+      ],
+      "beatUpIndex": 2,
+      "status3": [
+        0,
+        0
+      ],
+      "alwaysHits": [
+        false,
+        false
+      ],
+      "imprisoned": [
+        false,
+        false
+      ],
+      "sureHitOwner": [
+        0,
+        0
+      ],
+      "transformedPersonality": [
+        0,
+        0
+      ],
+      "mimickedMoves": [
+        0,
+        0
+      ],
+      "stealMove": [
+        false,
+        false
+      ],
+      "controllerA": [
+        [
+          18,
+          255
+        ],
+        [
+          18,
+          255
+        ]
+      ],
+      "battleMons": [
+        {
+          "species": 161,
+          "stats": [
+            66,
+            54,
+            40,
+            55,
+            65
+          ],
+          "moves": [
+            274,
+            33,
+            33,
+            33
+          ],
+          "ivsAbilityBits": 1073741823,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 50,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            19,
+            35,
+            35,
+            35
+          ],
+          "hp": 110,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 110,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 125000,
+          "personality": 2349019075,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        },
+        {
+          "species": 143,
+          "stats": [
+            130,
+            85,
+            35,
+            85,
+            130
+          ],
+          "moves": [
+            150,
+            150,
+            150,
+            150
+          ],
+          "ivsAbilityBits": 1072726015,
+          "stages": [
+            6,
+            5,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 17,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            39,
+            40,
+            40,
+            40
+          ],
+          "hp": 235,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 235,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 156250,
+          "personality": 1793700000,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        }
+      ]
+    },
+    {
+      "tick": 507,
+      "randCount": 9427,
+      "rngValue": 1890801770,
+      "currentMove": 0,
+      "calledMove": 45,
+      "chosenMove": 150,
+      "attacker": 1,
+      "target": 1,
+      "effectBattler": 0,
+      "scriptingBattler": 0,
+      "turnOrder": [
+        0,
+        1
+      ],
+      "beatUpIndex": 2,
+      "status3": [
+        0,
+        0
+      ],
+      "alwaysHits": [
+        false,
+        false
+      ],
+      "imprisoned": [
+        false,
+        false
+      ],
+      "sureHitOwner": [
+        0,
+        0
+      ],
+      "transformedPersonality": [
+        0,
+        0
+      ],
+      "mimickedMoves": [
+        0,
+        0
+      ],
+      "stealMove": [
+        false,
+        false
+      ],
+      "controllerA": [
+        [
+          18,
+          255
+        ],
+        [
+          20,
+          0
+        ]
+      ],
+      "battleMons": [
+        {
+          "species": 161,
+          "stats": [
+            66,
+            54,
+            40,
+            55,
+            65
+          ],
+          "moves": [
+            274,
+            33,
+            33,
+            33
+          ],
+          "ivsAbilityBits": 1073741823,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 50,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            19,
+            35,
+            35,
+            35
+          ],
+          "hp": 110,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 110,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 125000,
+          "personality": 2349019075,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        },
+        {
+          "species": 143,
+          "stats": [
+            130,
+            85,
+            35,
+            85,
+            130
+          ],
+          "moves": [
+            150,
+            150,
+            150,
+            150
+          ],
+          "ivsAbilityBits": 1072726015,
+          "stages": [
+            6,
+            5,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 17,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            39,
+            40,
+            40,
+            40
+          ],
+          "hp": 235,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 235,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 156250,
+          "personality": 1793700000,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        }
+      ]
+    },
+    {
+      "tick": 509,
+      "randCount": 9427,
+      "rngValue": 1890801770,
+      "currentMove": 0,
+      "calledMove": 45,
+      "chosenMove": 150,
+      "attacker": 1,
+      "target": 1,
+      "effectBattler": 0,
+      "scriptingBattler": 0,
+      "turnOrder": [
+        0,
+        1
+      ],
+      "beatUpIndex": 2,
+      "status3": [
+        0,
+        0
+      ],
+      "alwaysHits": [
+        false,
+        false
+      ],
+      "imprisoned": [
+        false,
+        false
+      ],
+      "sureHitOwner": [
+        0,
+        0
+      ],
+      "transformedPersonality": [
+        0,
+        0
+      ],
+      "mimickedMoves": [
+        0,
+        0
+      ],
+      "stealMove": [
+        false,
+        false
+      ],
+      "controllerA": [
+        [
+          18,
+          255
+        ],
+        [
+          53,
+          0
+        ]
+      ],
+      "battleMons": [
+        {
+          "species": 161,
+          "stats": [
+            66,
+            54,
+            40,
+            55,
+            65
+          ],
+          "moves": [
+            274,
+            33,
+            33,
+            33
+          ],
+          "ivsAbilityBits": 1073741823,
+          "stages": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 50,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            19,
+            35,
+            35,
+            35
+          ],
+          "hp": 110,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 110,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 125000,
+          "personality": 2349019075,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        },
+        {
+          "species": 143,
+          "stats": [
+            130,
+            85,
+            35,
+            85,
+            130
+          ],
+          "moves": [
+            150,
+            150,
+            150,
+            150
+          ],
+          "ivsAbilityBits": 1072726015,
+          "stages": [
+            6,
+            5,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "ability": 17,
+          "types": [
+            0,
+            0
+          ],
+          "unknown": 0,
+          "pp": [
+            39,
+            40,
+            40,
+            40
+          ],
+          "hp": 235,
+          "level": 50,
+          "friendship": 70,
+          "maxHp": 235,
+          "item": 0,
+          "ppBonuses": 0,
+          "experience": 156250,
+          "personality": 1793700000,
+          "status1": 0,
+          "status2": 0,
+          "otId": 416049562
+        }
+      ]
+    }
+  ]
+}

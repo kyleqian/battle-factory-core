@@ -148,6 +148,7 @@ function verify(fixturePath: string, runNumber: number): void {
     target: fixture.target,
     attackerPictureBounds: fixture.attackerPictureBounds,
     fieldProfile: fixture.fieldProfile,
+    controllerPresentation: fixture.controllerPresentation,
   });
   const beforeWindow = probe.frames.find(
     (frame) => frame.frame === fixture.sourceVisualWindow.startFrame - 1,
@@ -323,6 +324,7 @@ function verify(fixturePath: string, runNumber: number): void {
           target: fixture.target,
           attackerPictureBounds: fixture.attackerPictureBounds,
           fieldProfile: fixture.fieldProfile,
+          controllerPresentation: fixture.controllerPresentation,
         }),
         age,
       },
@@ -362,8 +364,11 @@ function verify(fixturePath: string, runNumber: number): void {
   const outerMismatchFrames = (Object.keys(framebufferAudit) as Phase[])
     .filter((phase) => phase !== "sourceAnimation")
     .reduce((sum, phase) => sum + framebufferAudit[phase].mismatched, 0);
-  if (outerMismatchFrames === 0) {
-    throw new Error(`${fixture.orientation}: ownership audit unexpectedly has no outer mismatch`);
+  if (outerMismatchFrames !== 0) {
+    throw new Error(
+      `${fixture.orientation}: ${outerMismatchFrames} outer framebuffer mismatches remain `
+      + auditSummary,
+    );
   }
   const outputDigest = createHash("sha256").update(outputBytes).digest("hex");
   const rawDigest = rgbDigest.digest("hex");
@@ -389,7 +394,7 @@ function verify(fixturePath: string, runNumber: number): void {
     `${fixture.orientation} run ${runNumber}: `
     + `${exact}/${FAKE_TEARS_SOURCE_FRAME_COUNT} source/seam/framebuffer exact; `
     + `322/322 controller receipts; evidence ${outputDigest}; rgb ${rawDigest}; `
-    + `outer ${outerMismatchFrames}/235 framebuffer mismatches `
+    + `${322 - outerMismatchFrames}/322 shared-framebuffer exact; `
     + `${auditSummary}`,
   );
 }

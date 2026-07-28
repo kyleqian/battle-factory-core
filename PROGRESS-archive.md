@@ -1,4 +1,30 @@
 ---
+## 633 — [BOUNDED MAIN WORKER 2026-07-28 ~14:15] Environment attacks source-complete
+
+- **State:** tree green at **404 files / 4581 tests**, production build, OFF
+  oracle info, and `git diff --check`. Census is exactly **204/214 effects,
+  344/355 moves, 275/276 distinct, 2955/2957 weighted**: assigned-baseline
+  delta **+2/+2/+0/+0**; all **70** census validations pass.
+- **Did:** registered source-exact Weather Ball across clear/rain/sand/sun/hail
+  and temporary/permanent bits, including live Cloud Nine/Air Lock
+  suppression. Registered Nature Power's complete environment table and its
+  unusual push/continuation/return ordering; Factory Building selects Swift
+  and actually executes its effect script to END.
+- **Next:** supervisor verify commits `52726af7` and `e31f0b73`; resume
+  tail-plan row 4 (Charge/Sports) without expanding into Lock On, Transform,
+  Metronome, or other later rows.
+- **Notes:** Weather Ball reaches END through every weather/suppression branch
+  with the ordinary **4-draw** hit ledger. Building→Swift dispatch draws zero;
+  Swift owns **crit/variance/zero-effect = 16838/44065/53998**, while Nature
+  Power's original slot loses PP and histories record Nature Power as last
+  move but Swift as resulting/landed move. The dossier's broader zero-local-
+  draw claim was corrected: selected-target environments rejection-draw
+  **16838, 44065** in `GetMoveTarget`. All ten selected effects reach END and
+  canonical replays are exact. Deliberate handler exact-set pin **196→198**.
+  No barriers, recording imports, presentation, round, tick, roadmap, issue,
+  or oracle-trace changes.
+
+---
 ## 632 — [BOUNDED MAIN WORKER 2026-07-28 ~14:00] Type-change setters source-complete
 
 - **State:** tree green at **402 files / 4564 tests**, production build, OFF

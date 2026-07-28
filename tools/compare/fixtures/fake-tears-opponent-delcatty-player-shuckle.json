@@ -21,5 +21,13 @@
   "attacker": {"species":"DELCATTY","geometry":{"side":"opponent","spriteCorner":{"x":144,"y":16},"animationCenter":{"x":176,"y":48},"battlePositionCenter":{"x":176,"y":40}}},
   "target": {"species":"SHUCKLE","geometry":{"side":"player","spriteCorner":{"x":40,"y":59},"animationCenter":{"x":72,"y":91},"battlePositionCenter":{"x":72,"y":80}}},
   "attackerPictureBounds": {"left":152,"right":200,"top":24},
+  "controllerPresentation": {
+    "kind":"resolved-stat-drop",
+    "kickoff":{"messageId":"STRINGID_USEDMOVE","firstAge":-35,"selection":{"moveIds":[33,33,33,33],"maxPP":[35,35,35,35],"cursor":0}},
+    "statChange":{"battler":"target","stat":"special-defense","from":6,"to":4},
+    "statAnimation":{"animationId":"STATS_CHANGE","argument":55,"firstAge":94},
+    "result":{"messageId":"STRINGID_DEFENDERSSTATFELL","firstAge":179},
+    "moveEnd":{"clearAge":280}
+  },
   "fieldProfile": {"playerHp":127,"playerMaxHp":127,"opponentHp":145,"opponentMaxHp":145,"playerGender":"male","opponentGender":"male"}
 }
