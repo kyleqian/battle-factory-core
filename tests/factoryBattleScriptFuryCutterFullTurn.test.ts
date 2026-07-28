@@ -58,7 +58,7 @@ function config(): FactoryFullTurnConfig {
 }
 
 describe("factory full-turn Fury Cutter shared executable frontier", () => {
-  it("requires every choice, spends PP each time, preserves an intervening move, caps at five, and never locks", () => {
+  it("requires every choice, spends PP each time, preserves an intervening move, holds the normal sequence at five, and never locks", () => {
     let state = createFactoryFullTurnBattleState(config());
     const choices = [
       PLAYER_FURY_CUTTER,

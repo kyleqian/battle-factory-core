@@ -22,7 +22,9 @@ import {
 } from "./battleScriptRulesContext.ts";
 import { requireBattlerRole, withBattler } from "./battleScriptHitChainOpcode.ts";
 
-const FURY_CUTTER_COUNTER_CAP = 5;
+const FURY_CUTTER_COUNTER_FIXED_POINT = 5;
+const U8_MASK = 0xff;
+const U16_MASK = 0xffff;
 
 const furyCutterCalcHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (
   context,
@@ -46,11 +48,14 @@ const furyCutterCalcHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext>
     );
   }
 
-  const counter = Math.min(
-    rules.battlers[attacker].furyCutterCounter + 1,
-    FURY_CUTTER_COUNTER_CAP,
-  );
-  const dynamicBasePower = rules.currentMovePower * (2 ** (counter - 1));
+  const sourceCounter = rules.battlers[attacker].furyCutterCounter;
+  const counter = sourceCounter === FURY_CUTTER_COUNTER_FIXED_POINT
+    ? sourceCounter
+    : (sourceCounter + 1) & U8_MASK;
+  let dynamicBasePower = rules.currentMovePower & U16_MASK;
+  for (let i = 1; i < counter; i += 1) {
+    dynamicBasePower = (dynamicBasePower * 2) & U16_MASK;
+  }
   return transitionBattleScriptCommand(
     context,
     Object.freeze({ kind: "advance" }),

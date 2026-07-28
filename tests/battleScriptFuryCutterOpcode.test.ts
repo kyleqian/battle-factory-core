@@ -20,6 +20,7 @@ import {
 import { BATTLE_SCRIPT_STATUS2_MASKS } from "../src/engine/battleScriptSourceConstants.ts";
 
 const FURY_CUTTER = 210;
+const EXPLOSION = 153;
 const program = loadBattleScriptProgram();
 const instruction = program.instructions.find(
   (candidate) => candidate.opcodeName === "B_SCR_OP_FURYCUTTERCALC",
@@ -141,7 +142,7 @@ describe("source-complete B_SCR_OP_FURYCUTTERCALC registration", () => {
     });
   });
 
-  it("increments the attacker-owned u8 below cap and produces 10/20/40/80/160", () => {
+  it("increments the normal attacker-owned u8 sequence through 10/20/40/80/160", () => {
     let current = rules();
     for (const [counter, power] of [10, 20, 40, 80, 160].entries()) {
       const after = stepFuryCutter(current);
@@ -156,17 +157,40 @@ describe("source-complete B_SCR_OP_FURYCUTTERCALC registration", () => {
     }
   });
 
-  it("stays capped at five while recomputing the current move's 160 power", () => {
+  it.each([
+    { rawCounter: 5, nextCounter: 5, dynamicBasePower: 160 },
+    { rawCounter: 6, nextCounter: 7, dynamicBasePower: 640 },
+    { rawCounter: 255, nextCounter: 0, dynamicBasePower: 10 },
+  ])(
+    "mirrors the source u8 transition from raw $rawCounter to $nextCounter",
+    ({ rawCounter, nextCounter, dynamicBasePower }) => {
+      const after = stepFuryCutter(rules(
+        {
+          furyCutterCounter: rawCounter,
+          status2: BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_DEFENSE_CURL,
+        },
+        { dynamicBasePower: 777, lockedMoves: [7, 8, 9, 10] },
+      ));
+      expect(after.rulesContext.battlers[0]).toMatchObject({
+        furyCutterCounter: nextCounter,
+        status2: BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_DEFENSE_CURL,
+      });
+      expect(after.rulesContext.dynamicBasePower).toBe(dynamicBasePower);
+      expect(after.rulesContext.lockedMoves).toEqual([7, 8, 9, 10]);
+    },
+  );
+
+  it("wraps gDynamicBasePower as u16 after each source multiplication", () => {
     const after = stepFuryCutter(rules(
-      { furyCutterCounter: 5, status2: BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_DEFENSE_CURL },
-      { dynamicBasePower: 777, lockedMoves: [7, 8, 9, 10] },
+      {
+        furyCutterCounter: 9,
+        moves: [EXPLOSION, 33, 0, 0],
+      },
+      { currentMove: EXPLOSION },
     ));
-    expect(after.rulesContext.battlers[0]).toMatchObject({
-      furyCutterCounter: 5,
-      status2: BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_DEFENSE_CURL,
-    });
-    expect(after.rulesContext.dynamicBasePower).toBe(160);
-    expect(after.rulesContext.lockedMoves).toEqual([7, 8, 9, 10]);
+    expect(after.rulesContext.currentMovePower).toBe(250);
+    expect(after.rulesContext.battlers[0].furyCutterCounter).toBe(10);
+    expect(after.rulesContext.dynamicBasePower).toBe(62_464);
   });
 
   it("owns the selected attacker rather than battler zero", () => {
