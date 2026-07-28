@@ -40,6 +40,8 @@ function battler(
     rechargeTimer: changes.rechargeTimer ?? 0,
     flinchImmobility: changes.flinchImmobility ?? 0,
     disabledMove: changes.disabledMove ?? BATTLE_SCRIPT_MOVE_NONE,
+    encoreTimer: changes.encoreTimer ?? 0,
+    encoredMove: changes.encoredMove ?? 0,
     usedDisabledMove: changes.usedDisabledMove ?? 0,
     tauntTimer: changes.tauntTimer ?? 0,
     usedTauntedMove: changes.usedTauntedMove ?? 0,
