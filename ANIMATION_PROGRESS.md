@@ -1,5 +1,29 @@
 # Animation coverage
 
+## ABSORB presentation-assets checkpoint; remains partial (2026-07-27)
+
+**State:** Coverage remains **52 exact / 4 partial / 220 unsupported**.
+`MOVE_ABSORB` retains its complete **195/195** software/typed proof in both
+orientations twice fresh; no renderer or framebuffer claim was added.
+
+**Did:** source extraction now byte-pins legal set-131 LOMBRE back/front art
+and the literal ORBS, IMPACT, and BLUE_STAR sheets. The three effect sheets
+are byte-identical to the exact RECOVER/DYNAMIC_PUNCH source assets; exact
+shared ONIX battle-mon art remains reused. The focused asset/boundary tests,
+full **3761/3761** Tier-1 suite, and production build pass.
+
+**Next:** refresh the stale shared Scene-ON oracle, then strengthen the probe
+for hardware OAM/matrices/order, hardware and tagged palette transfers,
+registers, live audio, raw RGB, and shared framebuffer. Port the narrow ABSORB
+compositor and prove **195/195** in both orientations twice fresh; rerun exact
+RECOVER and SYNTHESIS controls. Keep MEGA_DRAIN, DREAM_EATER, and GIGA_DRAIN
+unsupported.
+
+**Notes:** freshness validation correctly stopped new staging because ports
+8012/8014 predate `5d97a57`; workers do not restart shared services. No
+boundary-ratchet, unsupported-barrier, engine, battle-state, RNG, controller,
+or canonical-import change.
+
 ## MOVE_ABSORB promoted partial; complete source/software/typed seam (2026-07-27)
 
 **Verdict:** `MOVE_ABSORB` is partial. The legal set-131 LOMBRE Scene-ON
