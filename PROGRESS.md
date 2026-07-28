@@ -15,6 +15,34 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 610 — [BOUNDED MAIN WORKER 2026-07-28 ~09:38] Heal Bell and Aromatherapy execute through masked party synchronization
+
+- **State:** committed `c6bec4d`; tree green at **380 files / 4315 tests**,
+  production build, OFF oracle info, census regeneration, all **42/42**
+  validation checks, ratchets **6/6**, and `git diff --check`. Census is
+  exactly **161/214 effects, 291/355 moves, 239/276 Factory-L50 distinct,
+  2773/2957 weighted**.
+- **Did:** globally registered one-byte `B_SCR_OP_HEALPARTYSTATUS` (`0xae`)
+  with the source's `currentMove == MOVE_HEAL_BELL` split, six-slot masked
+  party synchronization, active/partner live clears, Nightmare removal,
+  Soundproof exclusions/ability recording/message bits, and one attacker
+  controller event. Added validated/frozen party `abilityNum`, resolved
+  benched abilities from the source-derived species corpus, widened the two
+  Heal Bell `jumpifbyte` literals, and retired the shared
+  `BS_ATTACKER_WITH_PARTNER` status-icon barrier. Full-turn healthy/statused
+  Heal Bell proves PP **5→4**, persistent clears, message/animation/status
+  tail, zero opcode-local RNG, next-request completion, and canonical replay.
+- **Next:** supervisor verify this finite registration. The regenerated census
+  names `B_SCR_OP_TRYSETPERISHSONG` as the next highest-weight registration;
+  select/brief it separately.
+- **Notes:** handler inventory **168→169**. Barrier pin
+  `battleScriptHitChainOpcode.ts` **21→20** (retired, none added). Soundproof
+  is reachable in real Factory parties: 15 generated sets across Whismur,
+  Loudred, Exploud, Voltorb, Electrode, and Mr. Mime carrier species. No new
+  recording import, presentation/tick/round branch, issue removal, oracle
+  lifecycle action, or trace.
+
+---
 ## 609 — [BOUNDED MAIN WORKER 2026-07-28 ~09:21] Trick executes through shared item/controller paths
 
 - **State:** committed `b2a8714`; tree green at **379 files / 4302 tests**,
@@ -59,24 +87,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** hybrid supervisor session (Fable + Codex workers), hard deadline
   2026-07-28 15:07. DEFERRED.md is empty; ISSUES #41/#39 remain the tracked
   debt, #38 parked.
-
----
-## 607 — [USER-DIRECTED TOOLING 2026-07-28 ~09:02] Hybrid supervisor ready; ordinary Codex effort is high-only
-
-- **State:** `master` now includes `codex/hybrid-cloud-supervisor` through
-  `bf0a08a` and is green at **366 files / 4239 tests**; launcher profiles **15/15**,
-  production build, shell syntax, config smoke tests, and `git diff --check`
-  pass.
-- **Did:** added the Fable/Remote-Control supervisor with Terra or Sol Codex
-  workers, then removed Sol/medium from every ordinary Codex workflow.
-  Direct workers, all-Codex supervisors, and hybrid supervisors now default
-  to high and mechanically reject any lower worker/supervisor effort. Added
-  `-H` as the short form of `--hybrid` and fast-forwarded the feature into
-  `master`.
-- **Next:** launch the mixed workflow with `./run-supervisor.sh -H` (or
-  `--hybrid`); otherwise resume finite Stage 8 selection from entry 605.
-- **Notes:** max mode deliberately remains Sol/ultra with Sol/xhigh by
-  default and permits high; its workers now reject sub-high overrides too.
-  Entry 606 already retired the worktree papercuts encountered during this
-  feature. No game logic, oracle lifecycle, issue, roadmap, census,
-  animation, or unsupported-barrier change.

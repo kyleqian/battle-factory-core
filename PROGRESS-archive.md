@@ -1,4 +1,25 @@
 ---
+## 607 — [USER-DIRECTED TOOLING 2026-07-28 ~09:02] Hybrid supervisor ready; ordinary Codex effort is high-only
+
+- **State:** `master` now includes `codex/hybrid-cloud-supervisor` through
+  `bf0a08a` and is green at **366 files / 4239 tests**; launcher profiles **15/15**,
+  production build, shell syntax, config smoke tests, and `git diff --check`
+  pass.
+- **Did:** added the Fable/Remote-Control supervisor with Terra or Sol Codex
+  workers, then removed Sol/medium from every ordinary Codex workflow.
+  Direct workers, all-Codex supervisors, and hybrid supervisors now default
+  to high and mechanically reject any lower worker/supervisor effort. Added
+  `-H` as the short form of `--hybrid` and fast-forwarded the feature into
+  `master`.
+- **Next:** launch the mixed workflow with `./run-supervisor.sh -H` (or
+  `--hybrid`); otherwise resume finite Stage 8 selection from entry 605.
+- **Notes:** max mode deliberately remains Sol/ultra with Sol/xhigh by
+  default and permits high; its workers now reject sub-high overrides too.
+  Entry 606 already retired the worktree papercuts encountered during this
+  feature. No game logic, oracle lifecycle, issue, roadmap, census,
+  animation, or unsupported-barrier change.
+
+---
 ## 606 — [TOOLING FOLD 2026-07-28 ~08:48] Low-risk papercuts merged and union verified
 
 - **State:** merged `codex/papercuts-guardrails` as `4e8a788`; the union is
