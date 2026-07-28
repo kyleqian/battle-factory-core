@@ -1,3 +1,39 @@
+## 636 — [BOUNDED MAIN WORKER 2026-07-28 ~15:07] Frontier-tail row 4 source-complete
+
+- **State:** tree green at **421 files / 4642 tests**, production build, OFF
+  oracle info, and `git diff --check`. Census is exactly **207/214 effects,
+  347/355 moves, 275/276 distinct, 2955/2957 weighted**: assigned-baseline
+  delta **+3/+3/+0/+0**; all **70** census validations pass.
+- **Did:** registered Charge with both four-bit timer fields, switch reset,
+  Electric-only doubling, and exact `2 -> 1 -> 0` end-turn expiry. Registered
+  shared Mud/Water Sport success/failure setter and print table; either active
+  side now halves matching Electric/Fire power before the base formula, with
+  ordinary-switch clear and Baton-Pass retention.
+- **Next:** supervisor verify Charge commit `1fdc288f` and the following
+  Sports commit; resume tail-plan row 5a (Lock On/Mind Reader), not later rows.
+- **Notes:** all three full shells reach END and setters draw zero locally;
+  Charge repeat refreshes, while both Sport repeats take the source failure
+  pointer. Dossier claims rechecked against pinned source with no correction
+  needed. Deliberate handler exact-set pin **198→200**. No barriers,
+  canonical-recording imports, presentation, round,
+  tick, roadmap, issue, or oracle-trace changes.
+- **Supervisor addendum (~15:20):** verified (suite 421/4643 after merges,
+  build, census regen idempotent at the exact totals). Merged the side
+  scout branch (OFF evidence docs + fixtures + reusable probe for rows
+  5a-c: Lock On/Imprison/Snatch; Imprison one-Pressure receipt reproduced
+  by supervisor rerun; two dossier corrections banked — Lock On needs the
+  combined bit+identity accuracy predicate in both forms, Snatch
+  arbitration is `gBattlerByTurnOrder` not battler ID) and folded
+  `animation-main`'s final wind-down commit (blue-orb legal set-range
+  correction). A NEW animation supervisor session started 15:06 (runs to
+  ~21:06) — folds continue at orient/wind-down. Next main brief: the
+  stat-drop seam handoff (assumption recorded: proceeding while the
+  animation session is live because its own ledger asks main for it;
+  worker instructed to keep any `src/animation` seam-type widening
+  minimal).
+
+---
+
 ## 635 — [SUPERVISOR ORIENT 2026-07-28 ~14:55] New session: animation fold (Smokescreen exact), OFF oracle restarted fresh
 
 - **State:** folded `animation-main` (4 commits: Smokescreen staged→typed

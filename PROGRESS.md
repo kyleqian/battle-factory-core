@@ -13,6 +13,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 639 — [BOUNDED MAIN WORKER 2026-07-28 ~15:59] Frontier-tail row 5a source-complete
+
+- **State:** committed `ee91c6f6`; tree green at **423 files / 4654 tests**,
+  production build, OFF oracle info, and `git diff --check`. Census is exactly
+  **208/214 effects, 349/355 moves, 275/276 distinct, 2955/2957 weighted**:
+  assigned-baseline delta **+1/+2/+0/+0**; all **70** validations pass.
+- **Did:** registered the shared Lock On/Mind Reader setter with replace-not-OR
+  packed counter and durable `battlerWithSureHit` ownership. Both accuracy
+  forms and OHKO consume the combined bit+owner predicate; expiry, ordinary
+  switch, Baton Pass preservation/refresh, and faint cleanup are source-complete.
+- **Next:** supervisor verify `ee91c6f6`; continue the ordered tail plan at row
+  5b (Imprison), not later rows.
+- **Notes:** receipt-shaped Tier-1 proof pins setter **1 accuracy draw** then
+  owned Zap Cannon **0 accuracy + 3 later hit-chain draws**; Substitute draws
+  zero. Both moves share EFFECT_LOCK_ON. Deliberate barrier pins:
+  HitChain **18→16**, Switchin **8→6**, TryKO **2→1**; handler exact-set
+  **200→201**. No new barrier, canonical import, presentation, round, tick,
+  roadmap, issue, or oracle-trace change.
+
+
+---
 
 ## 638 — [BOUNDED MAIN WORKER 2026-07-28 ~15:40] Fake Tears full controller window exact
 
@@ -62,42 +83,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   byte-identical twice. No canonical import, absolute tick, baked frame,
   RNG/kernel rule, boundary-list, coverage-ledger, or unsupported barrier
   change.
-
-
----
-## 636 — [BOUNDED MAIN WORKER 2026-07-28 ~15:07] Frontier-tail row 4 source-complete
-
-- **State:** tree green at **421 files / 4642 tests**, production build, OFF
-  oracle info, and `git diff --check`. Census is exactly **207/214 effects,
-  347/355 moves, 275/276 distinct, 2955/2957 weighted**: assigned-baseline
-  delta **+3/+3/+0/+0**; all **70** census validations pass.
-- **Did:** registered Charge with both four-bit timer fields, switch reset,
-  Electric-only doubling, and exact `2 -> 1 -> 0` end-turn expiry. Registered
-  shared Mud/Water Sport success/failure setter and print table; either active
-  side now halves matching Electric/Fire power before the base formula, with
-  ordinary-switch clear and Baton-Pass retention.
-- **Next:** supervisor verify Charge commit `1fdc288f` and the following
-  Sports commit; resume tail-plan row 5a (Lock On/Mind Reader), not later rows.
-- **Notes:** all three full shells reach END and setters draw zero locally;
-  Charge repeat refreshes, while both Sport repeats take the source failure
-  pointer. Dossier claims rechecked against pinned source with no correction
-  needed. Deliberate handler exact-set pin **198→200**. No barriers,
-  canonical-recording imports, presentation, round,
-  tick, roadmap, issue, or oracle-trace changes.
-- **Supervisor addendum (~15:20):** verified (suite 421/4643 after merges,
-  build, census regen idempotent at the exact totals). Merged the side
-  scout branch (OFF evidence docs + fixtures + reusable probe for rows
-  5a-c: Lock On/Imprison/Snatch; Imprison one-Pressure receipt reproduced
-  by supervisor rerun; two dossier corrections banked — Lock On needs the
-  combined bit+identity accuracy predicate in both forms, Snatch
-  arbitration is `gBattlerByTurnOrder` not battler ID) and folded
-  `animation-main`'s final wind-down commit (blue-orb legal set-range
-  correction). A NEW animation supervisor session started 15:06 (runs to
-  ~21:06) — folds continue at orient/wind-down. Next main brief: the
-  stat-drop seam handoff (assumption recorded: proceeding while the
-  animation session is live because its own ledger asks main for it;
-  worker instructed to keep any `src/animation` seam-type widening
-  minimal).
 
 
 ---
