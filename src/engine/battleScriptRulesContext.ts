@@ -84,6 +84,7 @@ import { createBattleScriptTryswapitemsOpcodeHandlers } from "./battleScriptTrys
 import { createBattleScriptSettormentOpcodeHandlers } from "./battleScriptSettormentOpcode.ts";
 import { createBattleScriptTrysetencoreOpcodeHandlers } from "./battleScriptTrysetencoreOpcode.ts";
 import { createBattleScriptTrysetperishsongOpcodeHandlers } from "./battleScriptTrysetperishsongOpcode.ts";
+import { createBattleScriptRankedBatch1OpcodeHandlers } from "./battleScriptRankedBatch1Opcode.ts";
 import { createBattleScriptSettauntOpcodeHandlers } from "./battleScriptSettauntOpcode.ts";
 import { createBattleScriptSetforesightOpcodeHandlers } from "./battleScriptSetforesightOpcode.ts";
 import { createBattleScriptSetfocusenergyOpcodeHandlers } from "./battleScriptSetfocusenergyOpcode.ts";
@@ -2553,6 +2554,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptDisablelastusedattackOpcodeHandlers(program),
     ...createBattleScriptTrysetencoreOpcodeHandlers(program),
     ...createBattleScriptTrysetperishsongOpcodeHandlers(program),
+    ...createBattleScriptRankedBatch1OpcodeHandlers(program),
     ...createBattleScriptFuryCutterOpcodeHandlers(program),
     ...createBattleScriptSetminimizeOpcodeHandlers(program),
     ...createBattleScriptSetforcedtargetOpcodeHandlers(program),
