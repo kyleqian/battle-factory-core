@@ -469,7 +469,7 @@ describe("source-shaped Battle Script rules context", () => {
 });
 
 describe("production status rules handler and execution seam", () => {
-  it("composes all 156 source-safe handlers, including Helping Hand and Skill Swap, once", () => {
+  it("composes all 157 source-safe handlers, including Torment, Helping Hand, and Skill Swap, once", () => {
     const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts());
     expect(Object.keys(handlers).map(Number).sort((a, b) => a - b)).toEqual([
       0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
@@ -479,7 +479,7 @@ describe("production status rules handler and execution seam", () => {
       61, 62, 63, 65, 66, 67, 69, 70, 71, 72, 73, 74, 76, 77, 78, 79, 80, 81,
       82, 83, 84, 85, 86, 88, 92, 97, 98, 99, 100, 101, 102, 104,
       105, 106, 111, 115, 118, 119, 120, 121, 122, 123, 125, 126, 127, 128, 129, 130, 131, 132, 136, 137, 140, 141, 142, 143, 146, 147,
-      149, 150, 151, 152, 153, 156, 159, 160, 161, 162, 163, 169, 170, 171, 172, 175, 179, 180, 181, 182, 184, 187, 189, 191, 192, 194, 195, 197, 198, 199, 200, 202, 207, 209, 212, 213, 215, 216, 218, 226, 227, 228, 231, 238, 246, 248,
+      149, 150, 151, 152, 153, 156, 159, 160, 161, 162, 163, 169, 170, 171, 172, 175, 179, 180, 181, 182, 184, 187, 189, 191, 192, 194, 195, 197, 198, 199, 200, 202, 206, 207, 209, 212, 213, 215, 216, 218, 226, 227, 228, 231, 238, 246, 248,
     ]);
   });
 

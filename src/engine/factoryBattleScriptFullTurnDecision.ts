@@ -73,6 +73,7 @@ import {
   type BattleState,
 } from "./battleDecisionBoundary.ts";
 import { handleBattleActionFinished } from "./battleActionFinished.ts";
+import { checkBattleScriptMoveLimitations } from "./battleScriptActionAdmission.ts";
 import {
   acknowledgeBattleScriptMachineController,
   createBattleScriptRngState,
@@ -795,11 +796,12 @@ function legalMoveDecisions(
   const locked = lockedMoveDecision(rulesContext, battler);
   if (locked !== null) return Object.freeze([locked]);
   const source = rulesContext.battlers[battler]!;
-  const unusable = source.moves.map((moveId, slot) =>
-    moveId === 0
-    || source.pp[slot] === 0
-    || (source.disabledMove !== 0 && moveId === source.disabledMove)
-    || (source.encoreTimer !== 0 && moveId !== source.encoredMove)
+  const unusableMask = checkBattleScriptMoveLimitations(
+    rulesContext,
+    battler,
+  );
+  const unusable = source.moves.map((_moveId, slot) =>
+    (unusableMask & (1 << slot)) !== 0
   );
   if (unusable.every(Boolean)) {
     const moveSlot = rulesContext.chosenMovePositions[battler] as BattleMoveSlot;
@@ -826,13 +828,9 @@ function usesForcedStruggle(
   battler: BattleSinglesBattler,
 ): boolean {
   if (lockedMoveDecision(rulesContext, battler) !== null) return false;
-  const source = rulesContext.battlers[battler]!;
-  return source.moves.every((moveId, slot) =>
-    moveId === 0
-    || source.pp[slot] === 0
-    || (source.disabledMove !== 0 && moveId === source.disabledMove)
-    || (source.encoreTimer !== 0 && moveId !== source.encoredMove)
-  );
+  return (
+    checkBattleScriptMoveLimitations(rulesContext, battler) & 0x0f
+  ) === 0x0f;
 }
 
 /**
