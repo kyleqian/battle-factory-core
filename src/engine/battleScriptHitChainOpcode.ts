@@ -79,7 +79,6 @@ import {
   applyStab,
   calculateAccuracy,
   calculateBaseDamage,
-  CRITICAL_HIT_CHANCE_ONE_IN,
   getCriticalHitChanceStage,
   isTypePhysical,
   rollAccuracyHits,
