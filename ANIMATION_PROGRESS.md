@@ -46,10 +46,30 @@ animation. A status caused by a move is not part of that move's animation.
 
 ## Current resumable state (2026-07-27)
 
-Coverage is **48/276 exact, 4 partial, 224 unsupported**. TAUNT is partial at
+Coverage is **49/276 exact, 3 partial, 224 unsupported**. TAUNT is exact at
 **125/125 player-back + 125/125 opponent-front** complete source-component,
-typed-seam, software/hardware-OAM, palette/register, and audio frames,
-reproduced twice fresh. Raw RGB remains explicitly **0/125 unattempted**.
+typed-seam, software/hardware-OAM, affine-matrix, palette/register/audio,
+raw-RGB, and shared-seam framebuffer frames, reproduced twice fresh.
+
+## TAUNT promoted exact; thought-bubble/finger display path closed (2026-07-27)
+
+**Verdict:** `MOVE_TAUNT` is exact. Legal set-184 MURKROW fixtures remain
+unchanged in both orientations against constrained SHUCKLE. Complete windows
+76-200 player-back and 80-204 opponent-front match **125/125** source,
+typed-seam, hardware-transfer/matrix/palette/register/audio, raw-RGB, and
+framebuffer frames twice fresh.
+
+**Renderer/evidence:** MURKROW back/front plus THOUGHT_BUBBLE/FINGER_2 art and
+palettes regenerate byte-for-byte; the literal existing ANGER asset alone is
+reused. The narrow battleScene case ports one-display transfer, runtime
+subpriority/Y/slot painter order, field chrome/healthboxes/text, and teardown.
+The comparator now pins raw-RGB digests, software slots/subpriorities, reverse
+hardware-OAM order, hardware affine matrices, and palette-tag lifetime.
+
+**Controls/scope:** RAZOR LEAF remains **139/139** and SWAGGER **161/161**
+source-component plus framebuffer exact in both orientations. No absolute
+ticks, screenshots, canonical imports, unsupported barriers, state changes,
+or boundary widening were added.
 
 ## TAUNT source/hardware body closed; framebuffer remainder bounded (2026-07-27)
 

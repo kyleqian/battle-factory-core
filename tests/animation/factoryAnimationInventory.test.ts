@@ -68,11 +68,11 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // TAUNT closes source/hardware/typed evidence; RGB remains partial.
+        // TAUNT closes its complete source/hardware/typed/RGB seam.
         unsupported: 224,
         staged: 0,
-        partial: 4,
-        exact: 48,
+        partial: 3,
+        exact: 49,
       },
       {
         tier: "openOnly",
