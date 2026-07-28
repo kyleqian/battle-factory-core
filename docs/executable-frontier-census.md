@@ -10,8 +10,8 @@ Answers ROADMAP S10's Executable-frontier reset question directly: not "how many
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 196 | 214 | 91.6% |
-| Moves (unweighted, all 355) | 336 | 355 | 94.6% |
+| Effect scripts | 197 | 214 | 92.1% |
+| Moves (unweighted, all 355) | 337 | 355 | 94.9% |
 | Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 275 | 276 | 99.6% |
 | Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2955 | 2957 | 99.9% |
 
@@ -27,7 +27,6 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_ASSISTATTACKSELECT` | 1 (EFFECT_ASSIST) | 1 | 0 | 0 |
 | `B_SCR_OP_CALLENVIRONMENTATTACK` | 1 (EFFECT_NATURE_POWER) | 1 | 0 | 0 |
 | `B_SCR_OP_COPYMOVEPERMANENTLY` | 1 (EFFECT_SKETCH) | 1 | 0 | 0 |
-| `B_SCR_OP_MIMICATTACKCOPY` | 1 (EFFECT_MIMIC) | 1 | 0 | 0 |
 | `B_SCR_OP_SETCHARGE` | 1 (EFFECT_CHARGE) | 1 | 0 | 0 |
 | `B_SCR_OP_SETTYPETOENVIRONMENT` | 1 (EFFECT_CAMOUFLAGE) | 1 | 0 | 0 |
 | `B_SCR_OP_SETTYPETORANDOMRESISTANCE` | 1 (EFFECT_CONVERSION_2) | 1 | 0 | 0 |
@@ -124,7 +123,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_SUBSTITUTE | `BattleScript_EffectSubstitute` | executable | - | - | 1 | 1 (10) |
 | EFFECT_RECHARGE | `BattleScript_EffectRecharge` | executable | - | - | 4 | 1 (4) |
 | EFFECT_RAGE | `BattleScript_EffectRage` | executable | - | - | 1 | 0 (0) |
-| EFFECT_MIMIC | `BattleScript_EffectMimic` | blocked-on-opcodes | `B_SCR_OP_MIMICATTACKCOPY` (edge branch only) | - | 1 | 0 (0) |
+| EFFECT_MIMIC | `BattleScript_EffectMimic` | executable | - | - | 1 | 0 (0) |
 | EFFECT_METRONOME | `BattleScript_EffectMetronome` | blocked-on-opcodes | `B_SCR_OP_METRONOME` (main path) | Dynamic effect-universe gate: B_SCR_OP_METRONOME(selectable-effect-universe) -- the selected runtime effect is not statically enumerable here, so this row remains blocked until every legal Metronome destination is executable (docs/ranked-single-opcodes-notes.md § Metronome gate) | 1 | 1 (2) |
 | EFFECT_LEECH_SEED | `BattleScript_EffectLeechSeed` | executable | - | - | 1 | 1 (12) |
 | EFFECT_SPLASH | `BattleScript_EffectSplash` | executable | - | - | 1 | 0 (0) |
