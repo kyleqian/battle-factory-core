@@ -68,10 +68,10 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // TAUNT closes its complete source/hardware/typed/RGB seam.
-        unsupported: 224,
+        // SPARK closes its source/hardware/typed seam; rendering remains.
+        unsupported: 223,
         staged: 0,
-        partial: 3,
+        partial: 4,
         exact: 49,
       },
       {

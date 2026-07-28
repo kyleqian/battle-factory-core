@@ -44,6 +44,24 @@ animation. A status caused by a move is not part of that move's animation.
   presentation seam and all source- or evidence-required variants are covered.
 - No entry means unsupported.
 
+## MOVE_SPARK promoted partial; complete source body closed (2026-07-27)
+
+**Verdict:** `MOVE_SPARK` is partial. The legal set-187 MINUN fixtures match
+the complete move-owned source windows **115/115** at 79-193 player-back and
+83-197 opponent-front, twice fresh, with no excluded frames. The relative
+reducer and typed `sceneOnPresentation` seam cover all six affine sparks,
+eight flashing affine/orbit/tile instances, three attacker palette legs plus
+resets, HorizontalLunge, impact, target ShakeMon, the eight-sprite
+ElectricityEffect, five sound boundaries/pans, wait sequencing, software and
+hardware OAM/matrix/palette/register/audio lifetimes, and teardown.
+Coverage is now **49/276 exact, 4 partial, 223 unsupported**.
+
+**Remainder:** no render assets or draw case were added and `battleScene.ts`
+is untouched. Source-derived MINUN/SHUCKLE/SPARK_2/IMPACT assets, live
+composition through the existing renderer, and **115/115 raw-RGB/framebuffer
+equality in both orientations twice fresh** remain before exact. THUNDERBOLT,
+THUNDER_WAVE, ZAP_CANNON, and THUNDER_SHOCK remain unsupported.
+
 ## MOVE_SPARK staging checkpoint; remains unsupported (2026-07-27)
 
 **Verdict:** `MOVE_SPARK` remains unsupported. Both complete legal

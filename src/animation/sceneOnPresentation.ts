@@ -183,6 +183,10 @@ import {
   type TauntState,
 } from "./taunt.ts";
 import {
+  sparkAtAge,
+  type SparkState,
+} from "./spark.ts";
+import {
   selfDestructAtAge,
   type SelfDestructState,
 } from "./selfDestruct.ts";
@@ -860,6 +864,18 @@ export interface SceneOnTauntConfig {
   readonly attackerHead: Readonly<{ x: number; y: number }>;
 }
 
+export interface SceneOnSparkConfig {
+  readonly move: "SPARK";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source X_2/Y_PIC_OFFSET coordinates, explicit because species pictures differ. */
+  readonly attackerPictureOffset: Readonly<{ x: number; y: number }>;
+  readonly targetPictureOffset: Readonly<{ x: number; y: number }>;
+  readonly attackerBgPriority: number;
+  readonly targetBgPriority: number;
+}
+
 export interface SceneOnSelfDestructConfig {
   readonly move: "SELF_DESTRUCT";
   readonly attacker: SceneOnPresentationBattler;
@@ -1045,7 +1061,7 @@ export type SceneOnMoveConfig =
   | SceneOnKnockOffConfig;
 
 export interface SceneOnMovePresentationState<
-  TConfig extends SceneOnMoveConfig = SceneOnMoveConfig,
+  TConfig extends SceneOnMoveConfig | SceneOnSparkConfig = SceneOnMoveConfig,
 > {
   readonly age: number;
   readonly config: TConfig;
@@ -1057,6 +1073,8 @@ export type SceneOnRazorLeafPresentationState =
   SceneOnMovePresentationState<SceneOnRazorLeafConfig>;
 export type SceneOnTauntPresentationState =
   SceneOnMovePresentationState<SceneOnTauntConfig>;
+export type SceneOnSparkPresentationState =
+  SceneOnMovePresentationState<SceneOnSparkConfig>;
 
 export interface SceneOnSupersonicView {
   readonly age: number;
@@ -1123,6 +1141,12 @@ export interface SceneOnSwaggerView extends SwaggerState {
 }
 
 export interface SceneOnTauntView extends TauntState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSparkView extends SparkState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -1666,7 +1690,8 @@ function assertIntegerPoint(
  * supplied as immutable inputs and never resolved or mutated here.
  */
 export function createSceneOnMovePresentation<
-  TConfig extends SceneOnMoveConfig | SceneOnRazorLeafConfig | SceneOnTauntConfig,
+  TConfig extends SceneOnMoveConfig | SceneOnRazorLeafConfig | SceneOnTauntConfig
+    | SceneOnSparkConfig,
 >(
   config: TConfig,
 ): SceneOnMovePresentationState<TConfig> {
@@ -2250,6 +2275,35 @@ export function sceneOnTauntView(
       state.config.attackerHead,
       state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is Move_SPARK's first displayed palette/sprite source tick. */
+export function sceneOnSparkView(
+  state: SceneOnSparkPresentationState,
+): SceneOnSparkView {
+  if (state.config.move !== "SPARK") {
+    throw new Error(`expected SPARK presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...sparkAtAge(
+      state.age,
+      {
+        side: state.config.attacker.geometry.side,
+        center: state.config.attacker.geometry.animationCenter,
+        pictureOffset: state.config.attackerPictureOffset,
+        bgPriority: state.config.attackerBgPriority,
+      },
+      {
+        side: state.config.target.geometry.side,
+        center: state.config.target.geometry.animationCenter,
+        pictureOffset: state.config.targetPictureOffset,
+        bgPriority: state.config.targetBgPriority,
+      },
     ),
   };
 }

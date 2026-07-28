@@ -1,5 +1,5 @@
 {
-  "schema": "scene-on-staging-evidence/v1",
+  "schema": "scene-on-portable-component/v1",
   "oracleProfile": "battle-scene-on",
   "scenario": "tools/battle-lab/mechanic-spark-opponent-minun-player-shuckle.json",
   "probe": "tools/compare/sparkProbe.py",
@@ -8,8 +8,17 @@
   "orientation": "opponent-to-player",
   "currentMoveWindow": {"startFrame": 39, "endFrame": 363, "frameCount": 325},
   "sourceVisualWindow": {"startFrame": 83, "endFrame": 197},
+  "denseWindow": {"startFrame": 83, "endFrame": 197},
+  "appStage": {"presentationAge": 0},
+  "attacker": {"species":"MINUN","geometry":{"side":"opponent","spriteCorner":{"x":144,"y":20},"animationCenter":{"x":176,"y":52},"battlePositionCenter":{"x":176,"y":40}}},
+  "target": {"species":"SHUCKLE","geometry":{"side":"player","spriteCorner":{"x":40,"y":59},"animationCenter":{"x":72,"y":91},"battlePositionCenter":{"x":72,"y":80}}},
+  "attackerPictureOffset": {"x":176,"y":52},
+  "targetPictureOffset": {"x":72,"y":80},
+  "attackerBgPriority": 2,
+  "targetBgPriority": 2,
+  "fieldProfile": {"playerHp":127,"playerMaxHp":127,"opponentHp":167,"opponentMaxHp":167,"playerGender":"male","opponentGender":"female"},
   "acceptance": {
-    "status": "unsupported",
-    "note": "Semantic source/window staging only; no reducer, typed seam, asset extraction, hardware/OAM, or framebuffer comparison exists."
+    "status": "partial",
+    "note": "Complete source-component and typed-seam evidence only; renderer and raw-RGB/framebuffer parity remain."
   }
 }

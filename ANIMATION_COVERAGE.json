@@ -2,6 +2,28 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_SPARK",
+      "status": "partial",
+      "covered": [
+        "complete legal Level-50 Scene-ON mechanicLab parties stage MINUN, the real Factory set-187 SPARK carrier, in both player-back and opponent-front orientations against slower constrained SHUCKLE",
+        "complete move-owned source-component windows 79-193 player-back and 83-197 opponent-front match 115/115 dense reducer and typed-seam frames twice fresh, with no excluded frames",
+        "the relative-age reducer ports all six affine gSparkElectricitySpriteTemplate instances, all eight affine/orbit/tile/invisibility gSparkElectricityFlashingSpriteTemplate instances, three attacker palette-cycle legs and resets, HorizontalLunge, impact, target AnimTask_ShakeMon, all eight post-impact ElectricityEffect sprites, five sound boundaries/pans, wait sequencing, asset/palette/register/audio lifetimes, hardware OAM transfer/matrix state, and teardown",
+        "software rendering assets, the battleScene draw path, framebuffer composition, and raw-RGB equality are deliberately absent; those are the precise remainder before exact"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-spark-player-minun-opponent-shuckle.json",
+        "tools/battle-lab/mechanic-spark-opponent-minun-player-shuckle.json",
+        "tools/compare/fixtures/spark-player-minun-opponent-shuckle.json",
+        "tools/compare/fixtures/spark-opponent-minun-player-shuckle.json",
+        "tools/compare/sparkEvidence.ts",
+        "tools/compare/sparkProbe.py",
+        "src/animation/spark.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "tests/animation/spark.test.ts"
+      ],
+      "remaining": "Extract source-derived MINUN back/front, SHUCKLE back/front, ANIM_TAG_SPARK_2, and ANIM_TAG_IMPACT render assets; add the narrow live draw/composition path and require 115/115 raw-RGB plus shared-seam framebuffer equality in both orientations twice fresh before exact."
+    },
+    {
       "move": "MOVE_SELF_DESTRUCT",
       "status": "exact",
       "covered": [
@@ -1521,7 +1543,7 @@
         "MOVE_THUNDER_WAVE",
         "MOVE_ZAP_CANNON"
       ],
-      "goal": "MOVE_SPARK has source-legal Scene-ON staging only: MINUN Factory set 187 reaches MOVE_SPARK in both player-back and opponent-front orientations, with source visual windows 79-193 and 83-197 respectively; it remains unsupported. A future independent dense acceptance must port three attacker color palette-cycle legs plus their three reset commands, six gSparkElectricitySpriteTemplate particles, eight gSparkElectricityFlashingSpriteTemplate particles, post-impact ElectricityEffect, HorizontalLunge, target ShakeMon, five sound boundaries, wait-for-visual-finish sequencing, side-relative X/X2/picture-offset-Y geometry, asset/palette lifetime, hardware OAM/matrices/registers/audio, cleanup, and shared-seam framebuffer evidence. THUNDERBOLT, THUNDER_WAVE, ZAP_CANNON, and THUNDER_SHOCK each retain distinct complete scripts and remain unsupported without their own evidence."
+      "goal": "MOVE_SPARK is partial: legal set-187 MINUN fixtures match the complete 115/115 source-component and typed-seam body in both orientations twice fresh, including all six affine sparks, eight affine/orbit/tile/flashing sparks, palette legs/resets, HorizontalLunge, impact, target ShakeMon, eight-sprite ElectricityEffect, five sound boundaries, software/hardware OAM and matrices, palette/register/audio lifetimes, wait sequencing, and teardown. Renderer assets, battleScene drawing, framebuffer composition, and raw-RGB equality remain before exact. THUNDERBOLT, THUNDER_WAVE, ZAP_CANNON, and THUNDER_SHOCK each retain distinct complete scripts and remain unsupported without their own evidence."
     },
     {
       "id": "knock-off-lunge-shake",
