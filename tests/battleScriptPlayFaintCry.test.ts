@@ -25,6 +25,7 @@ const program = loadBattleScriptProgram();
 const rules = Object.freeze({
   marker: "faint-cry-controller-neutral",
   multiHitCounter: 2,
+  multiHitStringCounter: 0,
   battlers: [],
   moveResultFlags: 0,
   moveEffectByte: 0,

@@ -212,7 +212,7 @@ describe("production damaging-weather opcode dispatch (screens/weather registrat
   describe("Cmd_addbyte -- modeled site vs. barrier", () => {
     const pc = findPc("B_SCR_OP_ADDBYTE", "BattleScript_DamagingWeatherLoopIncrement");
     const sBattlerPc = findPc("B_SCR_OP_ADDBYTE", "BattleScript_WeatherFormChangesLoop");
-    const barrierPc = findPc("B_SCR_OP_ADDBYTE", "BattleScript_DoTripleKickAttack");
+    const tripleKickPowerPc = findPc("B_SCR_OP_ADDBYTE", "BattleScript_DoTripleKickAttack");
 
     it("(pass-through) increments gBattleCommunication by 1", () => {
       const rc = context({ battleCommunication0: 2 });
@@ -228,11 +228,11 @@ describe("production damaging-weather opcode dispatch (screens/weather registrat
       expect(result.state.rulesContext.scriptingBattler).toBe(1);
     });
 
-    it("(unsupported-branch) barriers on an unmodeled addbyte operand (Triple Kick's own counter, delta 10 isn't a resolvable literal)", () => {
-      const { result } = stepAtProgramCounter(barrierPc, context());
-      expect(result.kind).toBe("halted");
-      if (result.kind !== "halted") throw new Error("expected halted");
-      expect(result.state.haltReason?.kind).toBe("unsupported-branch");
+    it("(pass-through, docs/roar-multihit-registration-scout.md §4 rung 7) increments sTRIPLE_KICK_POWER by 10 (BattleScript_DoTripleKickAttack's first addbyte -- the literal \"10\" is now a resolvable SETBYTE_VALUES entry, closing Triple Kick's last named ADDBYTE barrier)", () => {
+      const rc = context({ tripleKickPower: 10 });
+      const { result } = stepAtProgramCounter(tripleKickPowerPc, rc);
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.rulesContext.tripleKickPower).toBe(20);
     });
   });
 

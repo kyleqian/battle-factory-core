@@ -22,6 +22,7 @@ const program = loadBattleScriptProgram();
 const rules = Object.freeze({
   marker: "waitanimation-controller-barrier-only",
   multiHitCounter: 2,
+  multiHitStringCounter: 0,
   battlers: [],
   moveResultFlags: 0,
   moveEffectByte: 0,

@@ -33,6 +33,8 @@ const program = loadBattleScriptProgram();
 const MOVE_SPIKE_CANNON = 131; // EFFECT_MULTI_HIT, power 20
 const MOVE_DOUBLE_KICK = 24; // EFFECT_DOUBLE_HIT, power 30
 const MOVE_TWINEEDLE = 41; // EFFECT_TWINEEDLE, power 25
+/** EFFECT_TRIPLE_KICK's only member -- power 10 (ramping 10/20/30 per hit via sTRIPLE_KICK_POWER), 90 accuracy. Unlike the rest of the family, each hit gets its own accuracycheck (BattleScript_DoTripleKickAttack re-enters it every loop iteration), so accuracy is not a confound to remove here -- it is the per-hit branch scout §4 rungs 7-9 register. */
+const MOVE_TRIPLE_KICK = 167;
 
 function battler(changes: Partial<BattleScriptRulesBattler> = {}): BattleScriptRulesBattler {
   return Object.freeze({
@@ -192,5 +194,40 @@ describe("EFFECT_TWINEEDLE: full committed script walk, genuine terminal halt", 
     const result = runToTerminal("BattleScript_EffectTwineedle", context(MOVE_TWINEEDLE), 55);
     expect(result.state.rulesContext.battlers[1]!.status1).toBe(1 << 3);
     expect(result.state.rng.calls).toBe(6);
+  });
+});
+
+/**
+ * EFFECT_TRIPLE_KICK: docs/roar-multihit-registration-scout.md §4 rungs 7-9
+ * plus two more hidden barriers found live running this exact committed
+ * script (budgeted for by the brief, not in the scout's own §1d table):
+ * `Cmd_copyarray`'s `gDynamicBasePower<-sTRIPLE_KICK_POWER, 2` tuple (the
+ * scout's table wrongly marked this "registered" -- it was never in
+ * `battleScriptIngrainLeechSeedWrapOpcode.ts`'s accepted tuple set) and
+ * `Cmd_jumpifbyte`'s standalone `MOVE_RESULT_DOESNT_AFFECT_FOE` value
+ * (`BattleScript_TripleKickPrintStrings`' own gate on every resolution, hit
+ * or miss). Unlike the rest of the family, each hit re-runs its own
+ * `accuracycheck`, so three genuinely different script paths exist and are
+ * each walked to a real terminal halt below.
+ */
+describe("EFFECT_TRIPLE_KICK: full committed script walk, genuine terminal halt, per-hit accuracy + power ramp", () => {
+  it("seed whose very first accuracycheck misses: zero hits land, sTRIPLE_KICK_POWER never even matters, straight to BattleScript_TripleKickNoMoreHits -> PrintStrings (skips the \"Hit X times!\" print, sMULTIHIT_STRING+4 stays 0) -> End", () => {
+    const result = runToTerminal("BattleScript_EffectTripleKick", context(MOVE_TRIPLE_KICK), 6);
+    expect(result.state.rulesContext.battlers[1]!.hp).toBe(999); // no hit landed
+    expect(result.state.rng.calls).toBe(2); // 1(hit-1 acc, missed) + 1(final effect-chance roll, always drawn)
+  });
+
+  it("seed where hits 1-2 land (power 10, then 20) then hit 3's own accuracycheck misses: partial sequence reaches BattleScript_TripleKickNoMoreHits with sMULTIHIT_STRING+4 = 2 (clears MOVE_RESULT_MISSED, prints \"Hit 2 times!\")", () => {
+    const result = runToTerminal("BattleScript_EffectTripleKick", context(MOVE_TRIPLE_KICK), 1);
+    expect(result.state.rulesContext.battlers[1]!.hp).toBe(971); // 2 hits landed, power 10 then 20
+    // 1(hit-1 acc) + 2(hit-1 crit+dmg) + 1(hit-2 acc) + 2(hit-2 crit+dmg) + 1(hit-3 acc, missed) + 1(final)
+    expect(result.state.rng.calls).toBe(8);
+  });
+
+  it("seed where all 3 hits land: full 10/20/30 power ramp, loop exits via decrementmultihit's own counter-exhausted fallthrough (not the accuracy-miss fail tail)", () => {
+    const result = runToTerminal("BattleScript_EffectTripleKick", context(MOVE_TRIPLE_KICK), 2);
+    expect(result.state.rulesContext.battlers[1]!.hp).toBe(943); // 3 hits landed, power 10/20/30
+    // 3 * (1 acc + 2 crit/dmg) + 1(final effect-chance roll)
+    expect(result.state.rng.calls).toBe(10);
   });
 });

@@ -135,9 +135,23 @@ function createSetseededHandler(): BattleScriptOpcodeHandler<BattleScriptRulesCo
  * typecalc can multiply gBattleMoveDamage by STAB/type-effectiveness, then
  * restores it unmodified afterward -- the move's real damage is genuinely
  * immune to typecalc's own side effect, a real source mechanism this
- * widening surfaces, not a special case. Every other of this opcode's 16
- * concrete call sites (Triple Kick, Pain Split, Bide, Curse, ability-
- * immunity messages, ...) is the single named barrier below.
+ * widening surfaces, not a special case.
+ *
+ * A fourth tuple (hidden barrier found live this session running Triple
+ * Kick's own committed script -- docs/roar-multihit-registration-scout.md
+ * §1d's table had marked `copyhword gDynamicBasePower, sTRIPLE_KICK_POWER`
+ * "macro sugar: copyarray, registered", which was wrong; the tuple itself was
+ * never in this dispatcher's accepted set): `BattleScript_DoTripleKickAttack`'s
+ * own `copyhword gDynamicBasePower, sTRIPLE_KICK_POWER` (macro sugar for
+ * `copyarray gDynamicBasePower, sTRIPLE_KICK_POWER, 2`). `gDynamicBasePower`
+ * has no materialized field in this engine -- `damagecalcOpcodeHandler`
+ * (`battleScriptHitChainOpcode.ts`, scout §4 rung 7) reads
+ * `rules.tripleKickPower` directly rather than through a copied-to
+ * intermediate, so this copy is a pure-advance no-op here, the same
+ * "the destination has no reader in this engine's scope" boundary the
+ * `gBattleTextBuff1<-sMULTIHIT_STRING` case below already establishes.
+ * Every other of this opcode's 16 concrete call sites (Pain Split, Bide,
+ * Curse, ability-immunity messages, ...) is the single named barrier below.
  */
 function createCopyarrayHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
   return (context) => {
@@ -154,6 +168,9 @@ function createCopyarrayHandler(): BattleScriptOpcodeHandler<BattleScriptRulesCo
     if (size === "0x4" && dst === "gHpDealt" && src === "gBattleMoveDamage") {
       const nextRulesContext = Object.freeze({ ...rulesContext, hpDealt: rulesContext.battleMoveDamage });
       return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }), { rulesContext: nextRulesContext });
+    }
+    if (size === "0x2" && dst === "gDynamicBasePower" && src === "sTRIPLE_KICK_POWER") {
+      return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }));
     }
     if (size === "0x1" && dst === "cEFFECT_CHOOSER" && src === "sMULTIHIT_EFFECT") {
       const value = readBattleScriptRulesByte(rulesContext, "sMULTIHIT_EFFECT");
