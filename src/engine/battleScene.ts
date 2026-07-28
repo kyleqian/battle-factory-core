@@ -635,6 +635,7 @@ import {
   resolveTurn2EndeavorAttackLines,
   resolveTurn2EndeavorHpEndpoints,
 } from "./turn2EndeavorPresentationStaging.ts";
+import { resolveTurn11AtkFloorLines } from "./turn11FeatherDancePresentationStaging.ts";
 import {
   sceneOnDoubleTeamView,
   sceneOnBindView,
@@ -11497,6 +11498,19 @@ function drawTurn11RockSlideWindow(fb: Uint8Array, t: number): void {
  * same "handoff at the next move's own kickoff-text start" shape every prior
  * turn's own dispatcher already establishes.
  */
+/**
+ * Presentation-seam wiring (`docs/presentation-seam-scout.md` §14.3 step 1):
+ * turn 11's own ATK-floor banner text ("ONIX’s ATTACK\nwon’t go lower!"),
+ * now re-derived from `turn11FeatherDancePresentationStaging.ts`'s own staged
+ * `stat-stage-change`/`STRINGID_STATSWONTDECREASE` pair via
+ * `resolveTurn11AtkFloorLines` -- byte-identical content, including the curly
+ * apostrophe, but now identified from provenance (`BattleScript_
+ * StatDownPrintString`), not a bare literal. `TURN11_ATKFLOOR_LINE1`/`LINE2`
+ * themselves stay defined (§14.3's own "no literal dies" note) -- this was
+ * their only call site.
+ */
+const [TURN11_ATKFLOOR_KICKOFF_LINE1, TURN11_ATKFLOOR_KICKOFF_LINE2] = resolveTurn11AtkFloorLines();
+
 function drawTurn11FeatherDanceWindow(fb: Uint8Array, t: number, pressTick: number): void {
   if (t >= rockSlideTextStartTick(TURN11_ROCKSLIDE_PRESS_TICK)) {
     drawTurn11RockSlideWindow(fb, t);
@@ -11507,7 +11521,7 @@ function drawTurn11FeatherDanceWindow(fb: Uint8Array, t: number, pressTick: numb
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   const atkFloorStart = turn11AtkFloorTextStartTick(pressTick);
   if (t >= atkFloorStart) {
-    drawMessageTextLines(fb, TURN11_ATKFLOOR_LINE1, TURN11_ATKFLOOR_LINE2, turn11AtkFloorTextVisibleChars(t, pressTick));
+    drawMessageTextLines(fb, TURN11_ATKFLOOR_KICKOFF_LINE1, TURN11_ATKFLOOR_KICKOFF_LINE2, turn11AtkFloorTextVisibleChars(t, pressTick));
   } else {
     drawMessageTextLines(fb, TURN6_FEATHERDANCE_LINE1, TURN6_FEATHERDANCE_LINE2, turn6FeatherDanceTextVisibleChars(t, pressTick));
   }

@@ -6,6 +6,12 @@ presentation window must be re-driven from kernel semantic events instead of
 turn-N state, with its committed trace still passing at its recorded count.
 This document is reconnaissance only — **no production code was changed**.
 
+> **Oracle routing note (2026-07-27):** the historical `turn*-*.json` trace
+> family predates the `oracleProfile` field, so `npm run compare` routes it
+> to Battle Scene **ON** (8012) by AGENTS.md's documented legacy contract.
+> Every acceptance count in this file is that ON-profile bar, intentionally
+> — do not "fix" a trace by forcing 8014 (see PAPERCUTS.md).
+
 ## 1. Kernel semantic event surface as it exists today
 
 The event union is declared in full at `src/engine/battleScriptEvents.ts:40-144`
@@ -2793,3 +2799,516 @@ new file/10 new tests from this session's own
 `turn11FeatherDancePresentationStaging.test.ts`). `npm run build` clean.
 `executableFrontierRatchet.test.ts` unmoved (6/6, zero new barriers, no
 canonical recording import added).
+
+### 14.5 Wiring landed, 2026-07-27 (main lane, bounded worker)
+
+§14.3's plan executed as written, step 1 as the sole rung (steps 2/3 are
+explicit no-touch scoping notes, not actions). Every §14.3 citation
+(`battleScene.ts:11441-11455`'s `drawTurn11FeatherDanceWindow` body,
+`:11449-11451`'s `atkFloorStart` branch, `:11280-11282`'s
+`TURN11_ATKFLOOR_LINE1/2`/`TURN11_ATKFLOOR_TEXT_TOTAL` trio) was re-verified
+against this worktree's own `HEAD` (`776fb8b`) before editing and matched
+exactly — no drift since §14 was scouted, no design-doc slip found.
+
+`battleScene.ts` gained one module-level const pair,
+`TURN11_ATKFLOOR_KICKOFF_LINE1`/`LINE2`, resolved once at module load from
+`turn11FeatherDancePresentationStaging.ts`'s already-staged, already-tested
+`resolveTurn11AtkFloorLines()` — the same "resolve once at module load"
+shape `TURN6_ATKFELL_KICKOFF_LINE1/2` (§12.6), `TURN6_FEATHERDANCE_KICKOFF_
+LINE1/2` (§12.5), and `TURN2_ENDEAVOR_ATTACK_LINE1/2` (§13.5) already
+established, placed directly above `drawTurn11FeatherDanceWindow` (the
+`TURN2_ENDEAVOR_ATTACK_LINE1/2`-style local placement, not the top-of-file
+grouping the turn-6 pair used). `drawTurn11FeatherDanceWindow`'s own
+`atkFloorStart` branch (`:11451` pre-edit) now draws these instead of the
+raw `TURN11_ATKFLOOR_LINE1`/`LINE2` literals. **Zero bridge edits** — §14.2's
+own finding held: the existing `resolveFeatherDanceKickoffPresentation
+WindowContent` bridge (built for turn 6's WORKED branch, §12.3 step 1)
+already resolves this floored branch unchanged; no rework was needed, and
+`tests/turn11FeatherDancePresentationStaging.test.ts`'s own pre-existing
+equivalence assertion (`resolveTurn11AtkFloorLines()` byte-identical to
+`TURN11_ATKFLOOR_LINE1/2`, curly apostrophe included) passed unmodified,
+confirming the staged proof's own claim before this step ever touched
+production code.
+
+Step 2 (kickoff-text branch, `TURN6_FEATHERDANCE_LINE1/2` via
+`turn6FeatherDanceTextVisibleChars`) and the ROCK_SLIDE half
+(`drawTurn11RockSlideWindow`) are untouched — verified live by `git diff`
+touching only the import block and the one ATK-floor branch line.
+
+**No literal died.** `TURN11_ATKFLOOR_LINE1`/`LINE2`
+(`battleScene.ts:11281-11282` post-edit) stay defined — `grep -n
+"TURN11_ATKFLOOR_LINE1\|TURN11_ATKFLOOR_LINE2" src/ tests/` shows their only
+remaining reader is `tests/battleScene.test.ts`'s own pre-existing literal
+assertion (unaffected — it asserts the raw constants' own values, not this
+window's rendered output) and `tests/turn11FeatherDancePresentationStaging.test.ts`'s
+own equivalence assertion; this was their only production call site and it
+is now retired, exactly as §14.3 step 1 scoped.
+
+**Acceptance, re-verified this session:** the full §14.3 regression sweep
+run AFTER this change reproduced every recorded count exactly —
+`turn11-featherdance.json` 178/178 (twice, determinism check),
+`turn11-menu.json` 56/56, `turn11-rockslide.json` 163/163,
+`turn6-featherdance.json` 90/90, `turn6-statfall.json` 127/127,
+`turn2-endeavor.json` 77/77, `turn3-rockslide.json` 256/256,
+`turn1-rockslide.json` 256/256, `turn5-rockslide.json` 256/256,
+`turn4-doubleteam.json` 250/250 — byte-identical to §14.4's own pristine-HEAD
+baseline, no regression. `npm test` **274 files, 3632 tests** unchanged from
+this session's own start (no new test file — this step wires an
+already-tested staging-module export into production code, adds no new
+bridge surface to test; §14.4's own recorded 269/3570 was itself stale
+against this worktree's `HEAD`, confirmed by stashing this change and
+re-running — the gap is entries 524-526's own intervening Roar/multi-hit
+test additions, unrelated to this step). `npm run build` clean.
+`executableFrontierRatchet.test.ts` unmoved (6/6, zero new barriers).
+
+## 15. Prep-scout for the NEXT window, 2026-07-27 (`turn13-sandattack.json`), side lane
+
+Read-only recon plus one unwired staging module/test — the same §8-§14
+contract (recon + staged proof + plan, **no production wiring**). This
+session touches no `battleScene.ts`, `presentationEventWindowBridge.ts`, or
+`battleStringResolver.ts`. All line numbers below are re-verified against
+this worktree's own `HEAD` (`08073dc`).
+
+### Candidate confirmation (not a full re-weigh)
+
+`git log --oneline 23d998a..HEAD -- src/engine/battleScene.ts
+src/engine/presentationEventWindowBridge.ts src/engine/battleStringResolver.ts`
+(`23d998a` = §14's own docs commit) returns **empty** — zero production
+commits touched any of the three files since §14 weighed its own
+candidates table (§13's table, re-cited by §14). So every row's own verdict
+stands unchanged, re-verified cheaply (not re-argued) this session:
+`drawTurn7FeatherDanceKickoffText`/`drawTurn8FeatherDanceKickoffText`
+(`battleScene.ts:9384`/`:9573`) still exist unchanged and `turn7-feathers
+.json`/`turn8-feathers.json` still capture exactly 145/162 frames (byte-
+identical to §13's own citation) — still hollow for a staging deliverable,
+their own captured ranges rendering byte-identical already-resolved
+kickoff text, nothing new to stage. `drawTurn9QuickAttackWindow`
+(`:10378`) still exists unchanged and `turn9-quickattack.json`/`-b.json`
+still capture 169/77 frames — still animation-residual-heavy
+(`docs/battle-turn-notes.md` §36-§41's own still-open pixel gaps,
+untouched by any commit since §13/§14). `turn12-rockslide-miss.json` still
+captures exactly 38 frames, still sparse across a 749-tick span spanning
+four-plus already-distinct functions (kickoff text, ROCK_SLIDE attack, the
+miss message, the resettled turn-13 menu) — still not a single bounded
+leaf, same "multi-dispatcher" rejection §12/§13 already gave, re-verified
+by the same frame count. `turn11-featherdance.json` is §14's own pick,
+already covered by this dossier's own §14 deliverable (not re-litigated
+here; per this brief's own framing it is "consumed" — a main-lane wiring
+step, not yet landed as of this commit, but already fully staged/proved/
+planned, so this session moves one step further down the cadence rather
+than re-covering it).
+
+**Verdict: `turn13-sandattack.json` is confirmed the correct next pick.**
+It is the smallest remaining candidate that is BOTH unblocked (no
+apostrophe/glyph prerequisite — its own kickoff text, "Foe PIDGEOTTO
+used"/"SAND-ATTACK!", `battleScene.ts:11813-11814`, has none) AND
+genuinely new (an opponent-target ACCURACY-stat-down, a `stat` value this
+dossier's staged proofs have never exercised before — §13's own table
+entry, re-cited verbatim: "a genuinely NEW bridge shape... a target-
+accuracy banner mechanism this dossier hasn't staged before"). Whether
+that table entry's own *speculative* framing ("genuinely NEW bridge
+shape") survives contact with a real staged run is exactly what §15.2
+below answers from evidence, not from the table's own prior guess.
+
+### 15.1 Every input `turn13-sandattack.json` consumes today (re-verified against `HEAD`)
+
+**Dispatch-routing chain**, `drawFightSubmenuWindow` (`battleScene.ts:5658+`):
+
+| input | line(s) | condition to REACH this window |
+| --- | --- | --- |
+| `turn14Resolved` | `:5678-5686` | false — routes to turn 15's own dispatcher otherwise |
+| `turn13Resolved` | `:5687-5693` | false — routes to turn 14's own dispatcher otherwise |
+| `turn12Resolved` | `:5694-5703` | **true** — the one condition that actually selects `drawTurn13FightSubmenuWindow(fb, t, sm, turn13KoDismissTick)` (`:5701`); every check above it is a false/pass-through gate, same "scheduler/PC state, no content mapping" class every prior window's own dispatch chain already established |
+
+**`drawTurn13FightSubmenuWindow`'s own body** (`battleScene.ts:11761-11794`):
+
+| input | line(s) | condition / role in THIS window |
+| --- | --- | --- |
+| `sm.openElapsed === null` | `:11762-11765` | false — the FIGHT submenu is already open (turn 13's own real press already landed) |
+| `t < revealTick` (`TICK0+sm.openElapsed+FIGHT_SUBMENU_OPEN_DELAY`) | `:11766-11780` | false — past the submenu's own open-animation window (this branch's own comment documents a real per-turn residue: this regime needs an UNSHIFTED raw `t`, a -2-tick difference from turn 12's own analogous branch, oracle-pixel-bisected, presentation-native, not a kernel fact) |
+| `sm.confirmElapsed !== null` | `:11781` | true — turn 13's own real A-confirm press already landed, `pressTick = TICK0 + sm.confirmElapsed` (=15419 at runtime, `docs/turn13-notes.md` §3) |
+| `t >= turn13SandAttackTextStartTick(pressTick)` | `:11782-11787` | true for this trace's own capture range — **the one condition that actually selects** `drawTurn13SandAttackWindow(fb, t, pressTick, koDismissTick)` (`:11785`); every check above it is a false/pass-through gate, same "scheduler/PC state, no content mapping" class every prior window's own dispatch chain already established |
+
+**`drawTurn13SandAttackWindow`'s own body** (`battleScene.ts:12065-12082`):
+
+| input | line(s) | condition / role in THIS window |
+| --- | --- | --- |
+| `t >= dragonBreathTextStartTick(TURN13_DRAGONBREATH_PRESS_TICK)` | `:12066-12069` | false for this trace's entire capture range (15420-15650; `TURN13_DRAGONBREATH_PRESS_TICK`=15516, `dragonBreathTextStartTick` adds +192=15708, `:12107`) — the DRAGON_BREATH half (Onix's own later move, a separate hit chain, `drawTurn13DragonBreathWindow`, `:12134+`) is never reached by this trace at all, genuinely out of scope |
+| `frozenBounceTick = turn13KickoffBounceTick(t, pressTick)` / `drawTurn13FieldBase(fb, t, frozenBounceTick, undefined, undefined, 0, false, turn13SandAttackPidgeottoX2(t, pressTick))` | `:12070-12071`, formula `:11741-11744` | presentation-native frozen-bounce-phase + attacker-slide bookkeeping (`turn13SandAttackPidgeottoX2`, `:11934-11941`, a RAM-exact 7-entry pinned table, `pressTick+56..+62`) — no kernel-content mapping, same "own regime, own shift constant" class every prior turn's equivalent wrapper already establishes |
+| `drawTurn13SandAttackDirt(fb, t, pressTick)` | `:12072`, body `:12021-12035` | the 30-sprite dirt-cloud closed form (`TURN13_SANDATTACK_DIRT_TABLE`, `:11977-12014`, RAM-exact linear-translation table) — pure sprite-motion presentation, no kernel-content mapping (this window's own `captureFrames` already excludes the small residual-OAM-order span, `docs/turn13-notes.md`'s own "excluded, not faked" finding, unchanged) |
+| `accEva = turn13SandAttackAccEva(t, pressTick)` / `drawTurn13SandAttackAccBanner(fb, t, pressTick, accEva)` | `:12074-12075`, formulas `:11844-11894` | the accuracy-drop stat-change banner (BG1 scroll + alpha blend, `accuracy` palette/`decrease` tilemap) — **presentation timing/graphic only**; the banner's own EXISTENCE and DIRECTION (decrease) are hardcoded module constants today (`TURN13_SANDATTACK_ACC_TARGET_BLEND`=10, `TURN13_SANDATTACK_ACC_BG1_X`=64), not derived from any kernel event — §15.2 below proves the kernel DOES emit the same fact (`stat-stage-change{stat:"accuracy", from:6, to:5}`) this hardcoded schedule silently assumes |
+| `t >= accFellStart` (`turn13AccFellTextStartTick(pressTick)`) → `drawMessageTextLines(fb, TURN13_ACCFELL_LINE1, TURN13_ACCFELL_LINE2, ...)` | `:12076-12080`, literals `:11907-11918` | the genuinely new content class this window adds: "ONIX’s accuracy" / "fell!" (curly apostrophe, already-resolved glyph per entry 520 — same charmap fix §14's own candidate confirmation already re-verified, no new prerequisite) |
+| else: `drawMessageTextLines(fb, TURN13_SANDATTACK_LINE1, TURN13_SANDATTACK_LINE2, ...)` | `:12081`, literals `:11813-11814` | the kickoff text ("Foe PIDGEOTTO used"/"SAND-ATTACK!", no apostrophe) — mechanically the SAME `STRINGID_USEDMOVE` shape every sibling module's own kickoff line already resolves, just a new move/species pairing |
+
+**RAM-dump / HP-constant reads** — this window has NONE (unlike turn 2's
+own ENDEAVOR): SAND_ATTACK deals no damage, so no `anchorPlayerBattler.hp`-
+style read or drain-interpolation call exists anywhere in
+`drawTurn13SandAttackWindow`'s own body — both mons' HP (Onix 4, Pidgeotto
+16) are handled entirely by `drawTurn13FieldBase`'s own static defaults
+(`onixHp: number = TURN12_ONIX_AFTER_AERIALACE_HP`, `pidgeottoHp: number =
+TURN11_PIDGEOTTO_AFTER_ROCKSLIDE_HP`, `:11723`), no fresh read needed for
+THIS window.
+
+**Hidden-state finding this brief's own §11-§14 precedent asks to flag:**
+Onix's own accuracy stat stage (6, neutral, about to drop to 5 per
+`docs/turn13-notes.md` §3/§4(d)) is **never read as a number anywhere in
+`battleScene.ts`** — re-confirmed live this session (`grep -n "statStage"
+src/engine/battleScene.ts` returns zero hits, same as §14's own finding).
+Which literal branch renders (the accuracy-drop banner + "fell!" text vs. a
+hypothetical floored "won't go lower!" branch) is a fixed dispatch fact
+baked into this specific trace's own hand-authored tick table
+(`turn13AccFellTextStartTick`), not derived from any live stat-stage value
+— same "no plausible mapping today, only a kernel-provable consistency"
+class every prior window's own hidden-state finding already established.
+A SECOND hidden fact, specific to this window: the dirt-throw sprites'
+per-call `(0,0)/(10,10)/(-10,-10)/(20,5)/(-20,-5)` script-authored offset
+arguments are dead — `AnimDirtScatter` never reads them
+(`docs/turn13-notes.md`'s own "(a)" finding, re-confirmed unchanged this
+session by re-reading `battle_anim_ground.c`) — a genuine source quirk, not
+a bug in this port, already correctly modeled by `TURN13_SANDATTACK_DIRT_
+TABLE`'s own RAM-exact (not script-derived) per-sprite table.
+
+**Tick anchors** (all `pressTick`-relative offsets, `pressTick`=15419 at
+runtime): `turn13SandAttackTextStartTick`=+13 (`:11816-11819`),
+`TURN13_SANDATTACK_ACC_RAMP_START_DELAY`=+118/`_HOLD_END_DELAY`=+157/
+`_RAMPDOWN_ANCHOR_DELAY`=+158 (`:11845-11847`), `turn13AccFellTextStartTick`
+=+189 (`:11910-11913`), `TURN13_SANDATTACK_SLIDE_START_OFFSET`=+56
+(`:11934`), `TURN13_SANDATTACK_DIRT_WAVE_ANCHOR_OFFSET`=+61 (`:11964`),
+`TURN13_DRAGONBREATH_PRESS_TICK`=15516 (a synthetic anchor, `:12107`, out
+of this window's own scope) — all presentation-native, same "not a kernel
+gap" finding §8.4's Option A already established, re-confirmed here a
+ninth time.
+
+### 15.2 Staged proof: what the kernel emits today for this window's own content
+
+EFFECT_ACCURACY_DOWN's own dispatch-table entry point,
+`BattleScript_EffectAccuracyDown` (`reference/pokeemerald/data/
+battle_scripts_1.s:528-530`: `setstatchanger STAT_ACC, 1, TRUE` then `goto
+BattleScript_EffectStatDown`), is confirmed present in the compiled
+`battle-script-program.json`'s own `blocks` array (inspected directly this
+session: `{"label": "BattleScript_EffectAccuracyDown", "line": 528, ...}`),
+and its own `setstatchanger` operand triad compiles to the setbyte literal
+`"STAT_ACC | 1 << 4 | TRUE << 7"` — **already** a registered constant in
+`battleScriptSetByte.ts:190` (`6 | (1 << 4) | (1 << 7)`), confirmed by
+inspecting that file directly. **Zero new opcode registration needed** —
+the exact literal SAND_ATTACK's own script emits was already wired for
+some other stat-down move before this session, same "opcode-registration
+already done" finding class §14.2 established for EFFECT_ATTACK_DOWN_2.
+
+`src/engine/turn13SandAttackPresentationStaging.ts` (new, **unwired** —
+not imported by `battleScene.ts` or any production file, adds no new
+`presentationEventWindowBridge.ts` function) stages a real hit chain:
+Pidgeotto's (side 1) real turn-13 SAND_ATTACK against Onix (side 0), real
+level-50 stats (unchanged since `docs/turn6-notes.md` §4: ONIX
+atk/def/spd/spA/spD=51/187/76/36/72, PIDGEOTTO 98/61/77/56/56), real
+turn-13 HP (Onix 4, Pidgeotto 16, `docs/turn13-notes.md` §3), real
+pre-move stat stages (Onix's own ATK floored at the engine-encoded value 0
+= real -6, unchanged; Onix's own accuracy neutral at 6 entering).
+
+**The RNG seed and the accuracy-stage write are BOTH live-verified this
+session with a fresh probe, not re-cited from the existing dossier text
+alone** (the existing `docs/turn13-notes.md` §2 ledger names the *step
+count* but never prints the actual `gRngValue` integers). Ran
+`tools/probe/ram-probe.py` against `tools/probe/specs/turn13-rng-watch
+.json`'s own committed 108-segment button script, extended locally (a
+scratch copy, not a repo edit) with two extra watch columns
+(`gBattleMons+0x1E`/`+0x76`, Onix's/Pidgeotto's own `statStages[STAT_ACC]`
+byte, same offset convention `docs/turn13-notes.md` §3 already cites for
+the ATK-stage columns): `gRngValue` flat at **2173905089** through tick
+15429, `accStage0`(Onix) flat at **6** through tick 15463, `atkStage0`
+flat at **0** (the floor) throughout. At tick **15430**, `gRngValue`
+commits to **2287569056** — exactly the SAND_ATTACK accuracy-check roll,
+matching `docs/turn13-notes.md` §2's own ledger row ("15430 | 1 |
+Pidgeotto's SAND_ATTACK accuracy-family roll") to the tick. At tick
+**15464**, `accStage0` commits **6 → 5** — matching `docs/turn13-notes.md`'s
+own "(d)" finding to the tick. **Verified live this session**:
+`advanceRngValue(2173905089)` (`src/engine/rng.ts`'s own `BigInt`-based LCG
+step) equals EXACTLY 2287569056 — this module's own dedicated test
+assertion. The seed entering the roll is simply turn 13's own entering
+value (no LCG inversion needed), same shape §14.2 already established for
+a flat-RNG-entering turn.
+
+The real staged event dump (`vite-node`, this session, not hand-derived —
+full provenance printed, not just `sourceLabel`):
+
+```
+accStageAfter: 5   (6 -> 5, byte-identical to this session's own live-probed
+                     RAM finding above)
+rngCalls: 1, rngValueAfter: 2287569056 (byte-identical to the live probe)
+event kinds, in order:
+  message                       {messageId:"STRINGID_USEDMOVE"}                        sourceLabel: BattleScript_EffectStatDown      (battle_scripts_1.s:538, Cmd_attackstring)
+  set-battler-pp-data           {battler:1, movePosition:3, pp:14}                       sourceLabel: BattleScript_EffectStatDown      (:539, Cmd_ppreduce, 15 -> 14)
+  stat-stage-change             {battler:0, stat:"accuracy", from:6, to:5}               sourceLabel: BattleScript_EffectStatDown      (:540, Cmd_statbuffchange)
+  animation                     {animationId:"MOVE_ANIMATION", battler:1, args:[28,0,0,0,0,0]}  sourceLabel: BattleScript_StatDownDoAnim (:546, Cmd_attackanimation)
+  animation                     {animationId:"STATS_CHANGE", battler:0, args:[27]}       sourceLabel: BattleScript_StatDownDoAnim      (:549, Cmd_playanimation)
+  message                       {messageId:"STRINGID_DEFENDERSSTATFELL"}                sourceLabel: BattleScript_StatDownPrintString (:551, Cmd_printfromtable)
+  set-battler-sprite-visibility {battler:1, invisible:false}                             sourceLabel: BattleScript_MoveEnd             (:268, moveend pass-through)
+  set-battler-sprite-visibility {battler:0, invisible:false}                             sourceLabel: BattleScript_MoveEnd             (:268, moveend pass-through)
+```
+
+**This is a real, non-floored drop** (6 → 5, unlike §14's own floored 0→0
+case) — so, unlike turn 11's own stream, this one DOES include the
+`StatDownDoAnim` branch's two `animation` events (`MOVE_ANIMATION` +
+`STATS_CHANGE`), matching turn 6's own WORKED-case shape (§12.2) rather
+than turn 11's own short-circuited one. The `STATS_CHANGE` argument is
+`27` here (vs. turn 6's own `46`, §11.2) — a different decorative value,
+consistent with a different stat/direction combination; this module does
+not chase that argument's own encoding further (out of this staging
+module's own scope, decorative only, `battleScriptPlaystatchangeanimationOpcode.ts`'s
+own header already documents it as "inert for this non-presentation engine
+beyond being carried as the emitted event's decorative argument").
+
+**The "roles inverted vs turn 6" question this checkpoint's own brief
+raised, answered from these staged events, not assumed**: `changeStatBuffs`'s
+own message-selection arithmetic (`battleScriptStatBuffs.ts:274-303`)
+computes `isAttackerActive = target === activeBattler`; for SAND_ATTACK —
+an opponent-targeted move (`MOVE_TARGET_SELECTED`, `moves.json` id 28) with
+no `MOVE_EFFECT_AFFECTS_USER` bit, structurally identical to FEATHER_DANCE
+in this respect — `activeBattler` is assigned `target` itself (Onix,
+battler 0), so this comparison is trivially true, IDENTICALLY to turn 6's
+own case (§12.2's own citation of the same source lines). **Roles are NOT
+inverted**: both moves are opponent(Pidgeotto)-attacks-target(Onix,
+player)'s-own-stat, same side pairing (attacker=1, target=0), same
+`isAttackerActive` derivation, same resulting messageId family
+(`STRINGID_DEFENDERSSTATFELL`, confirmed live above, `STRINGID_
+ATTACKERSSTATFELL` absent) — proven, not merely asserted, by this staged
+run's own event stream. The only genuine differences from turn 6 are the
+`stat` value (`accuracy` vs `attack`) and the magnitude (1 vs 2, hence
+`statFellBuff2`'s own "fell!" not "harshly fell!" tail, byte-matching
+`battleScene.ts:11908`'s own already-committed `TURN13_ACCFELL_LINE2`
+literal).
+
+**Zero new/widened bridge function needed — a genuine finding, not an
+assumption, proven by direct call.**
+`presentationEventWindowBridge.ts`'s existing `resolveFeatherDanceKickoff
+PresentationWindowContent` (built for turn 6's own WORKED branch, §12.3
+step 1; already reused unchanged by turn 11's own floored branch, §14.2)
+requires exactly three signals: a `message` under `BattleScript_
+EffectStatDown`, a same-labeled `stat-stage-change`, and a `BattleScript_
+StatDownPrintString`-labeled message. **All three are present in THIS
+accuracy-down run too** (lines 538/540/551 above), with `stat:"accuracy"`
+and `STRINGID_DEFENDERSSTATFELL` instead of turn 6's `stat:"attack"` — the
+bridge's own `statChange.stat` field is populated generically from
+whichever `stat-stage-change` event's own `stat` field is present, never
+hardcoded to `"attack"` (confirmed by re-reading `presentationEventWindow
+Bridge.ts:230-235` directly this session). Called UNCHANGED against this
+staged run's own event list
+(`resolveTurn13SandAttackWindowContent`, this module), it resolves
+correctly — **verified live by this module's own passing test**
+(`tests/turn13SandAttackPresentationStaging.test.ts`, 9/9 green), not
+merely argued from the label match. §13's own table entry calling this "a
+genuinely NEW bridge shape" was a fair *prior guess* from the mapping
+table alone; the real staged run refutes it — the shape is new only in
+its `stat` VALUE, not in its event-kind/sourceLabel STRUCTURE, and the
+existing bridge already generalizes across both axes (floored-vs-worked,
+attack-vs-accuracy) without modification.
+
+**Resolver byte-identity, verified (the turn6/turn11 precedent test
+shape)**: `resolveTurn13SandAttackKickoffLines()` resolves
+`STRINGID_USEDMOVE` to `["Foe PIDGEOTTO used", "SAND-ATTACK!"]` —
+byte-identical to `TURN13_SANDATTACK_LINE1`/`LINE2`
+(`battleScene.ts:11813-11814`). `resolveTurn13AccFellLines()` resolves
+`STRINGID_DEFENDERSSTATFELL`'s real template
+(`src/data/gen/battle-message-templates.json`, `{B_DEF_NAME_WITH_PREFIX}'s
+{B_BUFF1}\n{B_BUFF2}`) through the UNMODIFIED shared `resolveBattleString
+Lines` to `["ONIX’s accuracy", "fell!"]` — byte-identical to `TURN13_
+ACCFELL_LINE1`/`LINE2` (`battleScene.ts:11907-11908`), asserted directly
+by this module's own test. `STAT_NAMES`'s own `STAT_ACC` entry is already
+`"accuracy"` (lowercase, `battle-message-templates.json`, inspected
+directly) — **no new asset extraction needed**, matching `docs/turn13-
+notes.md`'s own "(c)"/assets finding that `stat-anim-banner.json` already
+has the `accuracy` palette too.
+
+**Named gaps, current as of this staged run** (§12.2/§13.2/§14.2 format):
+
+| turn-N input | kernel replacement | today |
+| --- | --- | --- |
+| `sm.openElapsed`/`revealTick`/`sm.confirmElapsed`/`turn13SandAttackTextStartTick` dispatch chain (§15.1) | none — scheduler/PC state | **no plausible mapping**, same gap-7 class every prior window found |
+| `TURN13_SANDATTACK_LINE1`/`LINE2` ("Foe PIDGEOTTO used\nSAND-ATTACK!") | `message{messageId:"STRINGID_USEDMOVE"}` | **fully proven, re-derived from a real run of THIS turn's own script** — mechanically identical to every sibling module's own kickoff row |
+| Onix's own accuracy stat stage, 6 → 5 (never read anywhere in `battleScene.ts`, §15.1's own hidden-state finding) | `stat-stage-change{battler:0, stat:"accuracy", from:6, to:5}` | **emitted today, proven this session** — the real production emission site (`battleScriptStatBuffs.ts:274-303`) is reachable end-to-end from SAND_ATTACK's own real script entry with turn 13's own real neutral-entering stage |
+| `TURN13_ACCFELL_LINE1`/`LINE2` ("ONIX’s accuracy\nfell!") | `message{messageId:"STRINGID_DEFENDERSSTATFELL"}` | **fully proven, byte-identical resolve** — the apostrophe glyph is already resolved (entry 520, re-confirmed by this module's own test), no prerequisite blocks this |
+| accuracy-drop banner's own EXISTENCE/direction (`TURN13_SANDATTACK_ACC_*` constants, hardcoded today) | `stat-stage-change` (same event as above) `+` `animation{animationId:"STATS_CHANGE", battler:0, args:[27]}` | **emitted today, proven this session** — unlike turn 11's floored case, THIS run's own `StatDownDoAnim` branch genuinely fires (real drop, not floored), so a real `STATS_CHANGE` animation event exists to justify the banner's own existing hardcoded schedule |
+| PP readout (Pidgeotto's own SAND_ATTACK, 1st use this battle, 15→14) | `set-battler-pp-data{battler:1, movePosition:3, pp:14}` | **emitted today, proven this run**, independently RAM-confirmed (`docs/turn13-notes.md` §3) |
+| ONIX/PIDGEOTTO HP (4/16) | no `hp-change` events anywhere in this stream | **no kernel event needed** — SAND_ATTACK deals no damage, same "steady-state read" finding every prior sibling module already made |
+| dirt-throw sprite table / attacker slide (`TURN13_SANDATTACK_DIRT_TABLE`, `turn13SandAttackPidgeottoX2`, Part A) | n/a — presentation-only sprite motion, RAM-exact already | not applicable to this module's own scope — a separate, already-wired mechanism (per `docs/turn13-notes.md`'s own "(i) pure wiring, verbatim" verdict for (a)) |
+| DRAGON_BREATH half (`drawTurn13DragonBreathWindow`, out of scope) | n/a — a separate hit chain, Onix's own later move | not applicable to this window, same class as every prior window's own non-content tick anchors |
+
+**What this staged run does and does not prove:** it proves the real
+SAND_ATTACK opponent-target chain reproduces turn 13's OWN specific real
+transition (6→5 accuracy, first use) and that the resulting `stat-stage-
+change`/`STRINGID_DEFENDERSSTATFELL` pair (plus the real `STATS_CHANGE`
+animation event) is genuinely reachable end-to-end through the real
+script, using turn 13's OWN real RNG seed (live-probed, not inverted). It
+also proves `presentationEventWindowBridge.ts` needs **zero** new or
+widened bridge shape — refuting §13's own prior speculative "genuinely
+NEW bridge shape" framing with a real staged run, not just re-asserting
+the opposite. It does NOT re-derive the dirt-throw/attacker-slide
+mechanism (already wired elsewhere, `docs/turn13-notes.md`'s own "(a)"
+verdict, out of this module's own scope) or the DRAGON_BREATH half (a
+separate, later hit chain, genuinely out of this window's own scope).
+
+### 15.3 Ordered wiring plan (acceptance: `turn13-sandattack.json` still passes at 190/190, regression sweep over the adjacent turn-13 family plus the checkpoint's own standing acceptance bar unchanged)
+
+This window's own new text (`TURN13_ACCFELL_LINE1/2`) has the SAME
+apostrophe-bearing shape `TURN6_ATKFELL_LINE1/2`/`TURN11_ATKFLOOR_LINE1/2`
+needed — but the prerequisite is **already satisfied** (entry 520,
+re-confirmed §15.2's own byte-identity assertion), so nothing blocks this
+plan.
+
+1. Wire `drawTurn13SandAttackWindow`'s ACCFELL branch (`battleScene.ts:12076-12080`)
+   to source its two message lines from `turn13SandAttackPresentationStaging.ts`'s
+   `resolveTurn13AccFellLines()` instead of the raw `TURN13_ACCFELL_LINE1`/
+   `LINE2` literals — byte-identical content, mechanical swap (§12.3/§13.3/
+   §14.3's own precedent shape), same "resolve once at module load" pattern
+   every sibling wiring step established. `TURN13_ACCFELL_LINE1`/`LINE2`
+   themselves have no other call site today (`grep -n "TURN13_ACCFELL_LINE"
+   src/engine/battleScene.ts` finds only this one definition + this one
+   use) — this step retires their only direct read, but the constants can
+   stay defined (harmless) or be inlined into the new resolved consts,
+   whichever the wiring worker's own established convention (§12.5/§13.5)
+   prefers.
+2. Do **NOT** touch `drawTurn13SandAttackWindow`'s own kickoff-text branch
+   (`:12081`, `TURN13_SANDATTACK_LINE1/2`) in this same step unless the
+   wiring worker chooses to also fold in `resolveTurn13SandAttackKickoffLines()`
+   — this literal has no other call site either (`grep -n
+   "TURN13_SANDATTACK_LINE" src/engine/battleScene.ts` finds only this one
+   definition + this one use, UNLIKE turn 6/7/8/11's shared kickoff-text
+   literal), so wiring it carries no cross-window risk; still listed as
+   optional/step-2 rather than mandatory-step-1 purely to keep this plan's
+   own first step minimal and isolated, matching §11.3's own "narrow to
+   what's actually unblocked" discipline.
+3. Do **NOT** touch the accuracy-drop banner's own graphic code
+   (`drawTurn13SandAttackAccBanner`, `:11867-11894`, and its `eva`/`bg1Y`
+   schedule constants, `:11844-11864`) — §15.2 proves the kernel emits the
+   fact this schedule assumes (a real accuracy drop, hence a real
+   `STATS_CHANGE` animation), but wiring the banner's own TIMING to a
+   kernel tick is a presentation-native concern (no kernel timestamp
+   exists on any event, gap 4/7's own standing finding, unchanged) — out of
+   this plan's own scope, same class as every prior window's un-wireable
+   presentation-timing residuals.
+4. The dirt-throw/attacker-slide mechanism (`drawTurn13SandAttackDirt`,
+   `turn13SandAttackPidgeottoX2`, Part A) and the DRAGON_BREATH half
+   (`drawTurn13DragonBreathWindow`) stay completely untouched — separate,
+   already-wired-elsewhere or out-of-scope mechanisms, same "narrow to
+   what's actually unblocked" discipline every prior window's plan used
+   for its adjacent out-of-scope reads.
+5. Re-run `npm run compare -- turn13-sandattack.json` and confirm it still
+   matches at **190/190** (recorded count) before/after, PLUS a regression
+   sweep of `turn13-menu.json` (57/57, this turn's own pre-open/confirm-
+   press-transient sibling), `turn13-switchin.json` (242/242, this turn's
+   own post-KO-dismiss sibling sharing `drawTurn13FieldBase`),
+   `turn13-dragonbreath-faint.json` (141/141, this turn's own DRAGON_BREATH-
+   half sibling, step-4's own explicit no-touch target), `turn12-menu.json`
+   (46/46) and `turn12-aerialace.json` (131/131, the regime this window's
+   own `turn13KickoffBounceTick`/`TURN13_REGIME8_TO_REGIME1_SHIFT` anchors
+   off), `turn11-menu.json` (56/56) and `turn11-featherdance.json`
+   (178/178, §14's own pick, sharing `resolveFeatherDanceKickoffPresentation
+   WindowContent`), `turn10-aerialace.json` (93/93), `turn6-featherdance
+   .json` (90/90) and `turn6-statfall.json` (127/127, this bridge's own
+   FIRST two call sites), and `turn2-endeavor.json` (77/77) — the
+   checkpoint's own established acceptance bar, matching the exact live
+   counts §15.4 below re-pinned this session.
+
+**No literal should die in this step.** `TURN13_SANDATTACK_LINE1`/`LINE2`
+and `TURN13_ACCFELL_LINE1`/`LINE2` (`battleScene.ts:11813-11814`,
+`:11907-11908`) each have exactly one call site (this window's own two
+branches) — step 1 retires the ACCFELL branch's direct literal read only;
+step 2 (optional) would retire the kickoff branch's.
+
+### 15.4 Comparator re-pin
+
+**A methodology finding, stated plainly before the numbers below, because
+it bears directly on what "against 127.0.0.1:8014" means for THIS specific
+trace family**: `turn13-sandattack.json` (like every sibling trace used in
+this whole §8-§15 chain) has no `oracleProfile` field, so `tools/compare/
+run.ts:87`'s own hardcoded default (`trace.oracleProfile ?? "battle-scene-on"`)
+selects **battle-scene-on**, which `tools/compare/oracleProfiles.ts`
+resolves to `POKEBENCH_ANIMATION_ORACLE_URL` — **127.0.0.1:8012** in this
+session's own exported environment (confirmed directly: `oracleUrlForProfile
+("battle-scene-on") === "http://127.0.0.1:8012"`), NOT the 127.0.0.1:8014
+Battle-Scene-OFF oracle this side lane is nominally assigned. This is not
+new drift introduced this session — re-running the SAME standard,
+unmodified `npm run compare` invocation is exactly what reproduces every
+count this whole dossier chain (§8-§14) has ever recorded for this trace
+family, so it is the historically-correct, zero-drift invocation. Verified
+directly this session that this is a real, structural fact and not a
+fluke: forcing the literal 8014 URL (unsetting `POKEBENCH_ANIMATION_ORACLE_URL`
+for one invocation) drops `turn13-sandattack.json` to 78/190,
+`turn2-endeavor.json` to 23/77, and `turn6-featherdance.json` to 64/90 —
+this whole "turn-N" presentation trace family's pixels were built against
+Battle-Scene-ON's real output (richer move-effect animation content), and
+genuinely do not replay identically under Battle-Scene-OFF (which the
+oracle's own `bin/oracle info` documents as skipping "move/effect... front-
+sprite entrance animations"). The KERNEL semantics this session's own
+staging module exercises (RNG, PP, stat stages, message IDs) are
+scene-mode-agnostic by construction (`battleScriptPlaystatchangeanimationOpcode
+.ts`'s own header: "Under Battle Scene OFF this command's visible output...
+is out of scope, but its effect on battle STATE is real and this port
+models it exactly") — it is specifically the PRESENTATION comparator for
+this pre-existing trace family that has always targeted ON pixels,
+consistent across every sibling count below. Flagged here for the
+supervisor's own visibility, not treated as a blocker: fixing it (if ever
+wanted) would mean either giving these traces an explicit `oracleProfile`
+field or accepting they measure a different thing than their name
+suggests — both out of this recon-only step's own scope.
+
+Ran twice live this session (determinism check), plus a named
+adjacent-trace regression sweep, from this worktree, using the standard
+unmodified `npm run compare` invocation (the historically-correct one,
+per the finding above):
+
+```
+$ npm run compare -- turn13-sandattack.json --summary   (run 1)
+190/190 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn13-sandattack.json --summary   (run 2, determinism check)
+190/190 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn13-menu.json --summary
+57/57 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn13-switchin.json --summary
+242/242 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn13-dragonbreath-faint.json --summary
+141/141 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn12-menu.json --summary
+46/46 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn12-aerialace.json --summary
+131/131 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn11-menu.json --summary
+56/56 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn11-featherdance.json --summary
+178/178 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn10-aerialace.json --summary
+93/93 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn6-featherdance.json --summary
+90/90 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn6-statfall.json --summary
+127/127 frames matched -> tools/compare/out/latest
+
+$ npm run compare -- turn2-endeavor.json --summary
+77/77 frames matched -> tools/compare/out/latest
+```
+
+`turn13-sandattack.json` matches its recorded count (190/190) both runs —
+re-pinned live, this is the baseline the wiring step (§15.3) must
+preserve. Every adjacent trace re-confirms its own current live count
+(two — `turn12-aerialace.json`/`turn10-aerialace.json` — read higher than
+a stale 2026-07-21 doc citation of 56/56 and 23/23 in `docs/turn13-notes
+.md`'s own Part-A session, because those traces' own `captureFrames` have
+been extended by later sessions since; not a regression, just this
+session's own live count superseding an older, narrower citation), proving
+this session's read-only recon (plus the new unwired `turn13SandAttack
+PresentationStaging.ts` module) touched nothing live. `npm test` **273
+files, 3618 tests** (272/3609 at §14's own baseline + 1 new file/9 new
+tests from this session's own `turn13SandAttackPresentationStaging.test.ts`).
+`npm run build` clean. `executableFrontierRatchet.test.ts` unmoved (6/6,
+zero new barriers, no canonical recording import added).
