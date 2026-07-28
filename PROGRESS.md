@@ -15,6 +15,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 571 — [BOUNDED MAIN WORKER CORRECTION 2026-07-28 ~02:35] Minimize consumer proof corrected
+
+- **State:** committed `507fde7`; tree green at **329 files / 4037 tests**,
+  focused **24/24**, and ratchets **6/6**. Production build, both-oracle
+  freshness/info, census regeneration, and `git diff --check` pass. Census
+  remains **143/214 effects, 269/355 moves, 220/276 Factory-L50 distinct,
+  2711/2957 weighted**, all **42/42**.
+- **Did:** removed `SETMINIMIZE`'s duplicate `STATUS3_MINIMIZED` declaration;
+  its producer and the existing jump consumer now import one canonical source
+  constant. Replaced the post-MoveEnd multiplier claim with a same-seed,
+  same-+1-evasion Double Team control: Stomp leaves Minimize at **974 HP
+  (25 damage)** versus control **987 HP (12 damage)**, with exact PP/stage/
+  status outcomes; the isolated shared jump/setbyte exact-2 proof remains.
+- **Next:** supervisor verify this bounded correction, then select the next
+  finite shared registration target; do not extend the retired Battle-2 march.
+- **Notes:** production semantics, census, evidence, and all ratchets are
+  unchanged. No `MoveValuesCleanUp`, private override, scenario/presentation/
+  animation change, issue removal, oracle lifecycle action, or PAPERCUT.
+
+---
 ## 570 — [BOUNDED MAIN WORKER 2026-07-28 ~02:28] Minimize executes and Stomp consumes it generically
 
 - **State:** committed `29f2a0c`; tree green at **329 files / 4037 tests**,
@@ -53,31 +73,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Battle-2 march.
 - **Notes:** normal gameplay remains **1..5 / 10..160**; no-effect reset,
   registration, zero RNG/lock, and generic full turns remain green. Entry
-  568's “cap” wording is narrowed below to that normal producer invariant.
+  568's archived “cap” wording is narrowed to that normal producer invariant.
   No barrier/import ratchet, census, evidence, animation, issue, or PAPERCUT
   change.
-
----
-## 568 — [BOUNDED MAIN WORKER 2026-07-28 ~02:10] Fury Cutter executes source-completely
-
-- **State:** committed `7b92344`; tree green at **327 files / 4025 tests**,
-  focused **326/326**, and ratchets **6/6**. Production build, both-oracle
-  freshness, census regeneration, and `git diff --check` pass. Census is
-  exactly **142/214 effects, 268/355 moves, 219/276 Factory-L50 distinct,
-  2706/2957 weighted**, all **42/42**.
-- **Did:** globally registered operandless `0xb5`: the normal attacker-owned
-  **0..5** producer sequence reaches and holds five with powers
-  **10/20/40/80/160**, plus exact no-effect jump/reset, both
-  `BattleScript_FuryCutterHit` passes, and zero lock/RNG ownership. Generic
-  full turns prove six manual PP spends, Double Team persistence, and the
-  normal fixed point; Protect now shares `CancelMultiTurnMoves`, while
-  existing switch/faint clears are pinned.
-- **Next:** supervisor verify this finite executable-frontier increment and
-  select the next shared registration target; do not extend the retired
-  canonical Battle-2 march.
-- **Notes:** OFF evidence remains manifests `9ca031ee…2057c9`,
-  `eb76399c…e3ce7`, and `7a7a04d8…dbf9d3`. Used-item/failed-run
-  `ClearFuryCutterDestinyBondGrudge` owners are not executable here, so no
-  unreachable subsystem was invented. No barrier/import ratchet change,
-  recording import, animation/presentation/scenario branch, oracle lifecycle
-  action, issue removal, or PAPERCUT.
