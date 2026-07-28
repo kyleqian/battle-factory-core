@@ -1,4 +1,28 @@
 ---
+## 582 — [SUPERVISOR VERIFY 2026-07-28 ~03:47] Helping Hand accepted; Refresh evidence folded
+
+- **State:** reviewed union green at **339 files / 4082 tests** and focused
+  **20/20**; production build, census regeneration, ratchets **6/6**, and
+  `git diff --check` pass. Census is exactly **147/214 effects, 273/355
+  moves, 224/276 Factory-L50 distinct, 2732/2957 weighted**, all **42/42**.
+- **Did:** accepted global Helping Hand `0xd1` after source/diff review:
+  topology-derived partner retargeting, all doubles guards, shared **15/10**
+  damage consumer, +5 priority, and generic cleanup are pinned without
+  widening the singles controller. Folded independently replayed Refresh
+  source/OFF evidence (`12571c44…a68012`): toxic status/counter clear,
+  active/party sync, and healthy failure are exact.
+- **Next:** register `B_SCR_OP_SETTORMENT` globally from the accepted source/OFF
+  evidence. Prove target-owned `STATUS2_TORMENT`, duplicate failure with PP
+  spend, generic repeated-move admission/forced Struggle, and no private
+  controller path. Expected census:
+  **148/214, 274/355, 225/276, 2736/2957**.
+- **Notes:** handler inventory is **156**; Refresh remains evidence only.
+  Helping Hand receipt remains `4d40725e…fa3b6f`; Refresh receipt is
+  `12571c44…a68012`. No unsupported/import ratchet, recording import,
+  animation/presentation/tick branch, issue removal, DEFERRED item, or oracle
+  lifecycle action.
+
+---
 ## 580 — [SUPERVISOR VERIFY 2026-07-28 ~03:37] Corrected Skill Swap accepted; Taunt evidence folded
 
 - **State:** reviewed union green at **337 files / 4071 tests** and focused

@@ -15,6 +15,30 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 585 — [BOUNDED MAIN WORKER 2026-07-28 ~04:06] Refresh executes globally
+
+- **State:** committed `d1aad3a` + `054e8fa`; tree green at **342 files /
+  4103 tests**, focused Refresh/evidence/handler coverage **31/31**, ratchets
+  **6/6**, and production build. Both oracle infos, census freshness, and
+  `git diff --check` pass. Census is exactly **149/214 effects, 275/355
+  moves, 226/276 Factory-L50 distinct, 2738/2957 weighted**, all **42/42**.
+- **Did:** globally registered five-byte Refresh `0xcd` through the shared
+  source-shaped rules context. Poison, Toxic (including its counter), burn,
+  and paralysis clear the active attacker status word and matching persistent
+  party slot; healthy, sleep, and freeze jump unchanged after shared PP
+  reduction. Success emits the shared `REQUEST_STATUS_BATTLE` semantic event,
+  marks only the attacker controller pending, blocks controller-sensitive
+  continuation, and resumes through the existing acknowledgement seam.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next shared registration target; do not widen the generic
+  singles controller or extend the retired canonical Battle-2 march.
+- **Notes:** accepted OFF receipt remains `12571c447d03…22a68012`: Toxic
+  active/party **384/128→0/0**, Refresh PP **19→18**, HP **305**, command-local
+  RNG unchanged. Handler inventory **157→158** only. No barrier/import
+  ratchet, recording import, private handler, animation/presentation/tick
+  branch, issue removal, DEFERRED item, or oracle lifecycle action.
+
+---
 ## 584 — [SUPERVISOR VERIFY 2026-07-28 ~04:00] Torment accepted; party-heal evidence folded
 
 - **State:** reviewed union green at **341 files / 4093 tests** and focused
@@ -62,28 +86,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   loss. Handler inventory **156→157** only. No barrier/import ratchet,
   recording import, private handler, animation/presentation/tick branch,
   scenario/evidence mutation, issue removal, DEFERRED item, or oracle
-  lifecycle action.
-
----
-## 582 — [SUPERVISOR VERIFY 2026-07-28 ~03:47] Helping Hand accepted; Refresh evidence folded
-
-- **State:** reviewed union green at **339 files / 4082 tests** and focused
-  **20/20**; production build, census regeneration, ratchets **6/6**, and
-  `git diff --check` pass. Census is exactly **147/214 effects, 273/355
-  moves, 224/276 Factory-L50 distinct, 2732/2957 weighted**, all **42/42**.
-- **Did:** accepted global Helping Hand `0xd1` after source/diff review:
-  topology-derived partner retargeting, all doubles guards, shared **15/10**
-  damage consumer, +5 priority, and generic cleanup are pinned without
-  widening the singles controller. Folded independently replayed Refresh
-  source/OFF evidence (`12571c44…a68012`): toxic status/counter clear,
-  active/party sync, and healthy failure are exact.
-- **Next:** register `B_SCR_OP_SETTORMENT` globally from the accepted source/OFF
-  evidence. Prove target-owned `STATUS2_TORMENT`, duplicate failure with PP
-  spend, generic repeated-move admission/forced Struggle, and no private
-  controller path. Expected census:
-  **148/214, 274/355, 225/276, 2736/2957**.
-- **Notes:** handler inventory is **156**; Refresh remains evidence only.
-  Helping Hand receipt remains `4d40725e…fa3b6f`; Refresh receipt is
-  `12571c44…a68012`. No unsupported/import ratchet, recording import,
-  animation/presentation/tick branch, issue removal, DEFERRED item, or oracle
   lifecycle action.
