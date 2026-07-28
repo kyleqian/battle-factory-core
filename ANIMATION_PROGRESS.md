@@ -1,5 +1,41 @@
 # Animation coverage
 
+## MOVE_FAKE_TEARS full-window ownership audited; remains staged (2026-07-28)
+
+**Verdict:** `MOVE_FAKE_TEARS` remains staged. Corrected legal set-267
+DELCATTY evidence now densely verifies every **322/322** `currentMove=313`
+frame **39–360** twice fresh in both orientations, including source/component
+state where active plus hardware OAM/matrices/palettes, registers, both audio
+players, raw RGB, and the application framebuffer. The animation-owned source
+body remains exact at **87/87** frames **76–162** player-back and **80–166**
+opponent-front. Full evidence/raw digests are player
+`3b2470bd…e1c5a9` / `4aaf80e…de8e1` and opponent
+`c9b2f3d8…5221ff` / `e7828c48…938fc`, byte-identical across both fresh runs.
+
+**Phase/ownership audit:** player-back partitions as pre-animation **39–75
+(37)**, source **76–162 (87)**, stat/status **163–251 (89)**,
+message/post-animation **252–359 (108)**, cleanup **360 (1)**.
+Opponent-front partitions as **39–79 (41)**, **80–166 (87)**, **167–255
+(89)**, **256–359 (104)**, and **360 (1)**. Pinned ROM source assigns only
+`Move_FAKE_TEARS` to animation. `BattleScript_EffectStatDown`,
+`Cmd_statbuffchange`/`ChangeStatBuffs`, `B_ANIM_STATS_CHANGE`, the stat
+message/wait, and `BattleScript_MoveEnd` own the other **235** frames.
+The existing standalone animation seam has no typed controller command or
+resolved stat/message/cleanup input: only 19 static outer frames coincide and
+**216/235** outer application framebuffers mismatch in each orientation
+(player 30 pre + 80 status + 105 message/post + 1 cleanup; opponent
+34 + 80 + 101 + 1). No controller behavior was synthesized.
+
+**For the main program:** expose the already-resolved Scene-ON stat-drop
+controller presentation through the shared seam—kickoff/text-printer state,
+`B_ANIM_STATS_CHANGE` receipts, stat-result message/wait, and move-end cleanup—
+without moving stage outcomes, RNG, script advancement, or controller
+ownership into animation. Then rerun `fakeTearsPortable.ts`; exact promotion
+still requires 322/322 shared-framebuffer and typed-seam equality twice fresh
+in both orientations. `MOVE_HEAT_WAVE` and `MOVE_LUSTER_PURGE` remain
+unsupported. Coverage stays **68 exact / 0 partial / 1 staged / 207
+unsupported**.
+
 ## MOVE_SPIKE_CANNON promoted exact; complete WindUpLunge body closed (2026-07-28)
 
 **Verdict:** `MOVE_SPIKE_CANNON` is exact. Legal Level-50 Factory set-260
