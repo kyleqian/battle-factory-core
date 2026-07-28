@@ -44,6 +44,40 @@ animation. A status caused by a move is not part of that move's animation.
   presentation seam and all source- or evidence-required variants are covered.
 - No entry means unsupported.
 
+## MOVE_SCARY_FACE source/staging checkpoint; remains unsupported (2026-07-27)
+
+**Verdict:** `MOVE_SCARY_FACE` remains unsupported and coverage stays
+**51 exact / 3 partial / 222 unsupported**. Fresh Battle-Scene-ON
+`mechanicLab` runs now stage the real challenge-0 Level-50 set-133 RHYHORN
+carrier against a slower constrained SHUCKLE in both orientations. Both use
+complete three-mon parties, four SCARY FACE choices on the active carrier,
+four TACKLE choices on the active target, and reach the real speed-drop result
+without damage or status.
+
+**Source audit:** `Move_SCARY_FACE` owns the full BG/attacker/defender-partner
+black ramp, attacker-pan Psybeam, delay 10, attacker-pan Leer,
+`AnimTask_ScaryFace`'s side-selected BG1 tilemap/image/palette and 0→14→0
+BLDALPHA schedule, delay 13, two `ANIM_TAG_EYE_SPARKLE` sprites with literal
+(-16,-8)/(16,-8) offsets and 0/4/8/4/0 four-frame animation, then
+`AnimTask_ShakeTargetInPattern(20,1,FALSE,pattern0)`, target-pan String Shot 2,
+the reverse palette ramp, waits, asset/task/register/audio teardown, and the
+clear separation before generic speed-stage result presentation.
+`scaryFaceSourceAudit.ts` pins these literals and audits the siblings:
+GLARE shares the `(20,1,FALSE,pattern0)` task but adds GlareEyeDots and
+different palette/audio scheduling; THUNDER uses `(30,3,TRUE,pattern0)` plus
+BG_THUNDER; TRI ATTACK uses both `(20,3,TRUE,pattern1)` and
+`(20,3,TRUE,pattern0)` inside its distinct triangle/fire/lightning/ice body.
+All three remain unsupported.
+
+**Exact next action:** add a source-derived relative SCARY FACE reducer and a
+fresh dense mGBA probe/comparator over the complete move-owned window in both
+orientations twice, pinning BG1 tilemap/image/palette, software sprites/tasks,
+hardware OAM/palette/register transfer, all three audio intervals, target
+offset schedule, and teardown through the typed seam. Only then may SCARY FACE
+become partial; hardware OAM/palette/audio/raw-RGB/shared-framebuffer
+composition remains the explicit exact remainder. No renderer or engine file
+was touched.
+
 ## MOVE_CHARM promoted exact; magenta-heart compositor closed (2026-07-27)
 
 **Verdict:** `MOVE_CHARM` is exact. Complete legal Scene-ON parties retain the
