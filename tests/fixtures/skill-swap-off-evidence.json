@@ -1,0 +1,57 @@
+{
+  "schema": "skill-swap-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "instruction": {
+    "opcode": 218,
+    "opcodeHex": "0xda",
+    "length": 5,
+    "operands": [{"width": 4, "encoding": "little-endian relocation pointer", "value": "failure script target"}],
+    "failure": {"pc": "gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + 1)"},
+    "success": {"pc": "gBattlescriptCurrInstr += 5", "write": "swap gBattleMons[gBattlerAttacker].ability with gBattleMons[gBattlerTarget].ability through local abilityAtk"},
+    "guards": ["both active abilities are ABILITY_NONE", "attacker active ability is ABILITY_WONDER_GUARD", "target active ability is ABILITY_WONDER_GUARD", "gMoveResultFlags & MOVE_RESULT_NO_EFFECT"],
+    "localRngCalls": 0,
+    "entryHooks": "none: Cmd_tryswapabilities only exchanges active gBattleMons ability bytes and does not call AbilityBattleEffects"
+  },
+  "sourceSha256": {
+    "battle_script_commands.c": "e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c",
+    "battle_scripts_1.s": "4ac3e610b68c11ef0f4e4c0fc62ddba7fda5a8400e43705428868978ec7551a6",
+    "battle_script.inc": "0a8e1c3bdf4c49d07b2e09ff8ab524812a5217b9735106e1b79b6be261a6db7e",
+    "battle_script_commands.h": "842cce6dd704b09b24a49abdca67ee7a8062a2e3a465e1b764fc63c0d230580f",
+    "battle_move_effects.h": "32192c0d0014b5a63edb5b34b8d8475739891eaee66dc610a45d30574879b00e",
+    "moves.h": "d32746c9ad3ed1bbfbb93712f13e01ab1c43f48a78f3605ef9db5095e8d19d27",
+    "battle_moves.h": "8b3d4d143b807807af97ce7288e0cc0ccdd55b6b64ac45824e35a549836b3a0c",
+    "battle_frontier_mons.h": "557c1a97247cbb84357b99035fb11cf0bfe45abe8393a0992fe8146bfc51f67f",
+    "battle_frontier_mons.h.constants": "00fb47e144978d3a24a304047f5463217ac7b535ee6f8719e2adf47cc592387a",
+    "abilities.h": "1c1b93de5d5ff65d8b3066e9b40229b5d30e02842e587e3851a1d708ece1292b",
+    "battle_main.c": "ee79b86ff0f681ab783b363135fd84d050e7123bea2a77c5530f2c7ddc8b8408"
+  },
+  "effect": {
+    "id": 191,
+    "script": ["attackcanceler", "attackstring", "ppreduce", "accuracycheck BattleScript_ButItFailed, NO_ACC_CALC_CHECK_LOCK_ON", "tryswapabilities BattleScript_ButItFailed", "attackanimation", "waitanimation", "printstring STRINGID_PKMNSWAPPEDABILITIES", "waitmessage B_WAIT_TIME_LONG", "goto BattleScript_MoveEnd"],
+    "move": {"id": 285, "pp": 10, "power": 0, "accuracy": 100, "target": "MOVE_TARGET_SELECTED", "priority": 0, "flags": ["FLAG_PROTECT_AFFECTED", "FLAG_MIRROR_MOVE_AFFECTED"]},
+    "failureAfterPp": true
+  },
+  "lifecycle": {
+    "activeOwnership": "the command mutates only active gBattleMons abilities",
+    "switchIn": "Cmd_switchindataupdate reloads BattlePokemon from controller data then derives ability from species and abilityNum; a switch-in therefore replaces the active swapped byte with the entering mon's source ability",
+    "partyPersistence": "the stock party records are not mutated by the command",
+    "damageAndEntryHooks": "Skill Swap itself has power 0 and makes no HP/status/stat-stage/damage mutation. It must not replay weather, Intimidate, Trace, Forecast, or other entry hooks at swap time; later normal ability consumers use the exchanged active ability."
+  },
+  "frontierCarrier": {"setId": 235, "name": "FRONTIER_MON_GIRAFARIG_1", "level50Eligible": true, "species": 203, "moves": [60, 23, 273, 285], "item": "BATTLE_FRONTIER_ITEM_PETAYA_BERRY", "nature": "NATURE_QUIET"},
+  "case": {
+    "scenario": "tools/battle-lab/mechanic-skill-swap-girafarig-shuckle-off.json",
+    "scenarioSha256": "aac80633c822d3233fcd1e2c6b856dc0e6dc398718c268bf0253b93b836dd883",
+    "repeatability": {"runs": 2, "comparison": "byte-identical full manifest.json", "manifestSha256": "1bb134250c004e197818c6bbddbaacf1e2e0f94d06e90124885c7dcf54cd241a"},
+    "builtPartyChecksumsValid": [true, true, true, true, true, true],
+    "observed": [
+      {"frame": 0, "sha256": "a8184d81aed86b77a28673320acce3fcf5fdb0c0edade065a04533af20aa92aa", "rngValue": 3034451114, "currentMove": 0, "player": {"ability": 39, "persistentAbility": 39, "hp": 177, "pp": [20,20,10,10]}, "opponent": {"ability": 5, "persistentAbility": 5, "hp": 127, "pp": [35,35,35,35]}},
+      {"frame": 125, "sha256": "ee45b93540754b269ca3c0e4bbe3c9ac2d69f0ccb2ad0b71f4793bc2e1469475", "rngValue": 3034451114, "currentMove": 285, "player": {"ability": 39, "persistentAbility": 39, "hp": 177, "pp": [20,20,10,10]}, "opponent": {"ability": 5, "persistentAbility": 5, "hp": 127, "pp": [35,35,35,35]}},
+      {"frame": 150, "sha256": "13828e00c77ac3edf43089b867d6386b81e1843344c23ed680d0a50061bc4a2d", "rngValue": 3034451114, "currentMove": 285, "player": {"ability": 5, "persistentAbility": 39, "hp": 177, "pp": [20,20,10,9]}, "opponent": {"ability": 39, "persistentAbility": 5, "hp": 127, "pp": [35,35,35,35]}},
+      {"frame": 275, "sha256": "21003d49a8658f65475210703345696f02f4da5b125522d7075602b300439663", "rngValue": 3034451114, "currentMove": 285, "player": {"ability": 5, "persistentAbility": 39, "hp": 177, "pp": [20,20,10,9]}, "opponent": {"ability": 39, "persistentAbility": 5, "hp": 127, "pp": [35,35,35,35]}},
+      {"frame": 325, "sha256": "f7ddd40add550e7d1819a5b3a9b429c0c506ca12c1f5cd8fcf603fb4fd2170c5", "rngValue": 1941898439, "currentMove": 33, "player": {"ability": 5, "persistentAbility": 39, "hp": 177, "pp": [20,20,10,9]}, "opponent": {"ability": 39, "persistentAbility": 5, "hp": 127, "pp": [35,35,34,35]}},
+      {"frame": 450, "sha256": "1d50773385161d567287a574806f85ea7e8a23789df4979fce7bf39607e3eae6", "rngValue": 1630250804, "currentMove": 0, "player": {"ability": 5, "persistentAbility": 39, "hp": 172, "pp": [20,20,10,9]}, "opponent": {"ability": 39, "persistentAbility": 5, "hp": 127, "pp": [35,35,34,35]}},
+      {"frame": 875, "sha256": "87ac6c56087207c3f6a8b0c6161783fcc8f778a34ec1fe28ce3b9098dc12c3ab", "rngValue": 1630250804, "currentMove": 0, "player": {"ability": 5, "persistentAbility": 39, "hp": 172, "pp": [20,20,10,9]}, "opponent": {"ability": 39, "persistentAbility": 5, "hp": 127, "pp": [35,35,34,35]}}
+    ]
+  },
+  "boundedRemainder": "The public singles receipt proves successful active-ability exchange, PP timing, no local-RNG change through the command window, no direct HP change from Skill Swap, and unchanged persistent party abilities. It cannot directly expose the script PC, failure pointer path, both-NONE/Wonder Guard/no-effect failures, doubles targeting, a physical switch-out-and-back restoration, or a later ability-specific damage/entry-hook branch; those remain source-pinned rather than inferred from this receipt."
+}
