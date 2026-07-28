@@ -5,6 +5,60 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
+## #50 — Switch-in reconstruction leaks outgoing battler's ability/IVs/stats/maxHP
+
+Audit-confirmed (2026-07-28 read-only day audit, supervisor-verified).
+`battleScriptSwitchinOpcode.ts:380-415` spreads the outgoing active battler
+and replaces only species/HP/status/item/moves/PP/types — source
+(`battle_script_commands.c:4631-4639`) overwrites the ENTIRE `BattlePokemon`
+then re-derives ability. Party model (`battleScriptRulesContext.ts:501-516`)
+has `abilityNum` but lacks IVs/battle stats/maxHP/level/personality.
+Failures: Role Play'd Levitate survives a switch (wrong Ground immunity);
+Hidden Power uses the outgoing mon's IVs; Present/Swallow/Pain Split-class
+maxHP reads go stale. The stale-ability pin at
+`tests/battleScriptSwitchinOpcode.test.ts:240-287` documents a "bounded
+remainder" whose premise is obsolete (party `abilityNum` exists now).
+Fix shape: extend party records with the missing derivation inputs (or
+per-member derived stats), rebuild the battler wholesale on ordinary switch,
+and re-derive ability the source way; audit's suggested corroboration probe:
+one OFF mechanicLab trace — Role Play Levitate → switch to different-IV
+rental → RAM-check `gBattleMons` before a Ground move and Hidden Power.
+
+## #51 — Successful Sleep/Freeze omit CancelMultiTurnMoves
+
+Audit-confirmed. Source calls `CancelMultiTurnMoves(gEffectBattler)` on the
+Sleep (`battle_script_commands.c:2296`) and Freeze (`:2392`) success paths,
+clearing multi-turn/Thrash/Uproar/Bide/semi-invulnerable/Rollout/Fury Cutter
+state (`battle_util.c:877-888`). The engine's own comment at
+`battleScriptHitChainOpcode.ts:3009-3035` acknowledges omitting it for
+Sleep; Freeze (`:3070-3078`) likewise only sets `statusChanged`. Failures:
+Sleep Powder against a Rollout-locked target leaves `STATUS2_MULTIPLETURNS`
++ `rolloutTimer` alive; Tri Attack's Freeze against a Thrash/Uproar user
+leaves the lock alive. Fix: invoke the existing cancel-multi-turn reducer
+(Uproar/Rapid Spin work landed its pieces) from the shared status write for
+these two statuses, with cross-state tests.
+
+## #52 — Trick omits both PREPARE_ITEM_BUFFER message operands
+
+Audit-confirmed. Source prepares both item buffers before the switched-items
+messages (`battle_script_commands.c:9263-9264`; strings consume
+`{B_BUFF1}`/`{B_BUFF2}`, `battle_message.c:228-230`).
+`battleScriptTryswapitemsOpcode.ts:174-209` carries only the string id — no
+item-name substitutions (rules context has move/number/money buffers, no
+item slots: `battleScriptRulesContext.ts:747-756`). Fix: add the typed item
+buffer slots following the existing substitution pattern and emit both.
+
+## (audit note, 2026-07-28) Plausible-unconfirmed pair
+
+`seteffectprimary` returns without the `moveEffectByte` clear that
+`seteffectwithchance` performs (source clears at
+`battle_script_commands.c:2905`; engine clearing finalizer only on the
+chance path, `battleScriptHitChainOpcode.ts:3568-3573,3644-3648`) — full-turn
+constructors currently reset it, so leakage needs a resumed/called-script
+path to observe. Heal Bell writes `lastUsedAbility` where source only calls
+`RecordAbilityBattle` — currently inert (no string consumes it). Probe or
+fix alongside #50-#52.
+
 ## #41 — Production engine modules import canonical RAM recordings
 
 **Symptom:** shipped `src/engine/` code reads recorded state from the single
