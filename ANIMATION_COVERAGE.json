@@ -1728,8 +1728,8 @@
       "status": "staged",
       "covered": [
         "legal Level-50 Factory set-127 KOFFING/ONIX mechanicLab parties establish the complete Scene-ON source interval through first inactive cleanup at 125/125 frames 214-338 player-back and 302-426 opponent-front, twice fresh and byte-identical",
-        "smokescreenProbe.py records source script offsets/waits, all active templates/callbacks and task lifecycles, palette tags, software/hardware OAM and affine matrices, palettes/registers, SE1/SE2 pans, raw RGB, and cleanup; receipts are player 46ebf2ef5de54c4eb236de1ffd18e19d6ce2612190e9b6b4757113d8e38b0364 / RGB 435cca4a1786edc5b03e798384a2b6f5372c942d57cd7e3c65bbfdc6fb1adf35 and opponent 18c1d1f4c6cff7f12fb9636c14bd281a1fae09aed7cf8eb7f8b43937a908d3a4 / RGB 9a38c4eb183c95eeed6c1611f16e259197436a2ce9b019bc47247213c623e430",
-        "source topology is BLACK_BALL translation, dynamic four-part SmokescreenImpact tile/palette lifetime, twelve BLACK_SMOKE lifecycles, target ShakeMon2, wait-for-visual completion, and first inactive cleanup; no reducer, typed seam, compositor, or game-state ownership changed",
+        "smokescreenProbe.py records source script offsets/waits, all active templates/callbacks and task lifecycles, palette tags, software/hardware OAM and affine matrices, palettes/registers, SE1/SE2 pans, raw RGB, and cleanup; corrected receipts are player 5c81fa1f4730eb2f2e9ad20a4571cf4250e21602ed3dcded556171f7fe1ba9ee / RGB 435cca4a1786edc5b03e798384a2b6f5372c942d57cd7e3c65bbfdc6fb1adf35 and opponent 910665d10af69973d25be40ee32a122a04e0006e6e1d4e9fd78984835dc78170 / RGB 9a38c4eb183c95eeed6c1611f16e259197436a2ce9b019bc47247213c623e430",
+        "source topology is BLACK_BALL translation, dynamic four-part SmokescreenImpact tile/palette lifetime, twelve BLACK_SMOKE lifecycles, wait-for-visual completion, and first inactive cleanup; there is no task lifecycle or target ShakeMon2—the prior audit crossed into the much later Move_BUBBLE block, while the corrected immediate Move_CONVERSION boundary and both dense probes prove an empty task topology",
         "MOVE_OCTAZOOKA remains unsupported: its shared BLACK_BALL is followed by a distinct 20-frame ball translation and four delayed GRAY_SMOKE gOctazookaSmokeSpriteTemplate lifecycles with different audio and no independently dense acceptance"
       ],
       "evidence": [
@@ -1740,7 +1740,7 @@
         "tools/compare/smokescreenProbe.py",
         "tests/animation/smokescreenEvidence.test.ts"
       ],
-      "remaining": "Implement no presentation from this checkpoint. Smokescreen needs a source-relative reducer, typed Scene-ON seam, source-derived Black Ball/Black Smoke/impact assets, and 125/125 shared-framebuffer equality twice fresh in both orientations before exact promotion. Octazooka needs its own full dense evidence."
+      "remaining": "The assigned exact gate is blocked by its requirement for a target ShakeMon2 that Emerald's Move_SMOKESCREEN does not create; adding one would diverge from all 125 accepted raw frames. After correcting the brief, Smokescreen needs the actual source-relative reducer, typed Scene-ON seam, source-derived Black Ball/Black Smoke/impact assets, and 125/125 shared-framebuffer equality twice fresh in both orientations before exact promotion. Octazooka needs its own full dense evidence."
     },
     {
       "move": "MOVE_ASTONISH",

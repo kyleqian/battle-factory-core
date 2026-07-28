@@ -1,27 +1,34 @@
 # Animation coverage
 
-## MOVE_SMOKESCREEN staged; BLACK_BALL source evidence complete (2026-07-28)
+## MOVE_SMOKESCREEN staged; erroneous ShakeMon2 ownership removed (2026-07-28)
 
 **Verdict:** `MOVE_SMOKESCREEN` is staged, not exact. Legal Level-50 Factory
 set-127 `FRONTIER_MON_KOFFING` against ONIX establishes the full Scene-ON
 source interval through first inactive cleanup at **125/125** frames **214–338**
 player-back and **302–426** opponent-front. Two fresh mGBA runs per orientation
 were byte-identical, including every raw RGB frame digest. Receipts are player
-`46ebf2ef…8b0364` / `435cca4a…1adf35`; opponent `18c1d1f4…08d3a4` /
+`5c81fa1f…1ba9ee` / `435cca4a…1adf35`; opponent `910665d1…c78170` /
 `9a38c4eb…23e430`.
 
 **Evidence/topology:** `smokescreenProbe.py` retains source offsets/waits,
 templates/callbacks/tasks, palette tags, software/hardware OAM and affine
 matrices, palettes/registers, SE1/SE2 pans, raw RGB, and cleanup. The source
 body is BLACK_BALL translation, dynamically loaded four-part SmokescreenImpact,
-twelve BLACK_SMOKE lifecycles, target `ShakeMon2`, visual-finish wait, and the
-first inactive cleanup. No reducer, typed seam, compositor, battle/controller
-state, or acceptance was implemented.
+twelve BLACK_SMOKE lifecycles, visual-finish wait, and the first inactive
+cleanup. It has **no task lifecycle and no target shake**: the prior audit
+incorrectly sliced from `Move_SMOKESCREEN` to the much later `Move_BUBBLE`
+label and found an unrelated `AnimTask_ShakeMon2`. The corrected audit ends at
+the immediate `Move_CONVERSION` label, asserts no `ShakeMon2`, and the probe
+requires an empty task topology plus the dynamic impact template. No reducer,
+typed seam, compositor, battle/controller state, or acceptance was implemented.
 
 **Sibling boundary:** `MOVE_OCTAZOOKA` remains unsupported. It has a distinct
 20-frame BLACK_BALL translation, four delayed GRAY_SMOKE
 `gOctazookaSmokeSpriteTemplate` lifecycles, and different target audio; it has
-no independent dense evidence. Exact Smokescreen still needs a source-relative
+no independent dense evidence. The assigned exact gate was internally
+contradictory because it required the nonexistent target `ShakeMon2`; adding
+that task would necessarily fail the accepted raw frames. Exact Smokescreen
+still needs a corrected brief followed by the actual source-relative
 reducer/seam/assets and full shared-framebuffer equality twice fresh in both
 orientations. Coverage is **69 exact / 0 partial / 2 staged / 205 unsupported**.
 

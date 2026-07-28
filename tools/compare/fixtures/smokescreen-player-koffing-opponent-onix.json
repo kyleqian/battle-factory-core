@@ -7,6 +7,6 @@
   "pair": "Factory set-127 KOFFING player-back -> ONIX opponent-front",
   "move": "SMOKESCREEN",
   "sourceWindow": { "startFrame": 214, "endFrame": 338, "frameCount": 125 },
-  "evidenceSha256": "46ebf2ef5de54c4eb236de1ffd18e19d6ce2612190e9b6b4757113d8e38b0364",
+  "evidenceSha256": "5c81fa1f4730eb2f2e9ad20a4571cf4250e21602ed3dcded556171f7fe1ba9ee",
   "rawRgbSha256": "435cca4a1786edc5b03e798384a2b6f5372c942d57cd7e3c65bbfdc6fb1adf35"
 }
