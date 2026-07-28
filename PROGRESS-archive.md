@@ -1,4 +1,26 @@
 ---
+## 550 — [SUPERVISOR VERIFY 2026-07-27 ~22:51] Focus Punch executable; Destiny Bond evidence banked
+
+- **State:** reviewed union green at **305 files / 3889 tests**; focused
+  **42/42**, build, freshness, and `git diff --check` pass. Census is
+  **133/214 effects, 257/355 moves, 209/276 Factory-L50 distinct,
+  2642/2957 weighted**.
+- **Did:** folded `animation-main` through `06259d7` at orient and verified
+  the union, then accepted `769f538`'s source-complete
+  `B_SCR_OP_JUMPIFNODAMAGE`. Both genuine Focus Punch routes reach `END`;
+  the OFF manifests independently reproduce `380326f3…b19` damaged and
+  `6df18da0…c53` undamaged.
+- **Next:** register the one-byte `B_SCR_OP_SETDESTINYBOND` /
+  `EFFECT_DESTINY_BOND` from the merged source/OFF evidence, pin the
+  attacker-owned action-lifetime bit and genuine effect/avenging walks, then
+  regenerate the expected **+1/+1/+1/+10** census delta.
+- **Notes:** merged `2733778` after twice reproducing Wobbuffet Destiny Bond
+  → Snorlax Explosion at manifest `12dc947d…e86d4`; full parties, PP
+  **5→4**, live `STATUS2_DESTINY_BOND`, dual faint, and clear are observed.
+  No unsupported barrier/ratchet change, recording import, animation edit,
+  DEFERRED item, or oracle lifecycle action.
+
+---
 ## 548 — [SUPERVISOR WIND-DOWN 2026-07-27 ~22:20] Focus Punch OFF branch evidence merged reproducibly
 
 - **State:** final union green at **300 files / 3862 tests**; `npm run
