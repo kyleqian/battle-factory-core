@@ -28,11 +28,8 @@
  * Every case this doc marks Factory-L50-reachable but whose state this
  * engine doesn't model yet is a named barrier gated on its own real
  * trigger condition (never a blanket skip) -- see the per-case comments
- * below. `HandleWishPerishSongOnTurnEnd` and the ENDTURN_WISH field case
- * have no modeled trigger state anywhere in this engine at all (no
- * `wishCounter`/perish-song fields) and stay explicit, documented no-ops --
- * matching this step's own brief, which names Wish/Uproar as allowed
- * deferrals.
+ * below. Wish and Future Sight/Doom Desire now have source-shaped positional
+ * state and execute in their real phases; Perish Song remains unmodeled.
  */
 import {
   acknowledgeBattleScriptMachineController,
@@ -1751,9 +1748,9 @@ function finishFaintedThenDelayed(
  * strict superset of the `TRUE` clear and produces the same end state for
  * every case this engine models (no rung yet needs the `TRUE`/`FALSE`
  * split's mid-pass timing distinction -- see
- * `docs/counter-retaliation-design.md` §2.2). `HandleWishPerishSongOnTurnEnd`
- * (no modeled Perish Song/Future Sight state) stays out of this rung's
- * modeled scope and is not applied.
+ * `docs/counter-retaliation-design.md` §2.2). The post-faint positional
+ * Future Sight/Doom Desire phase is applied below; Perish Song remains the
+ * unmodeled portion of `HandleWishPerishSongOnTurnEnd`.
  */
 export function runBattleEndTurnOrchestration(
   program: BattleScriptProgram,
