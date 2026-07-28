@@ -1,5 +1,29 @@
 # Animation coverage
 
+## MOVE_COVET promoted exact; ITEM_BAG load/transfer proved (2026-07-28)
+
+**Verdict:** `MOVE_COVET` is exact. Fresh complete legal challenge-1
+set-203 LINOONE/SHUCKLE Scene-ON evidence passes the complete move-owned
+load/body/cleanup window at **114/114** frames **73-186** player-back and
+**77-190** opponent-front through reducer/component state, typed seam,
+registers, hardware OAM/matrices/palettes, side-relative audio, raw RGB, and
+the shared framebuffer, twice fresh. Coverage is now **61 exact / 1 partial /
+214 unsupported**.
+
+**Renderer/evidence:** the source reducer reuses exact Charm hearts and
+RockMonBackAndForth, then ports target ShakeMon2 and the Dizzy Punch loop.
+`ANIM_TAG_ITEM_BAG` is source-extracted and its load, palette tag, and
+prior-software hardware transfer are pinned; the stock Covet script creates
+no bag sprite. The compositor adds LINOONE front/back and the source battler
+task display latch. Fresh evidence is byte-identical (player
+`af4e7838…1df7`, opponent `cd62d0bd…bc17`).
+
+**Scope/siblings:** `MOVE_PRESENT` and `MOVE_TRICK` remain unsupported because
+they instantiate distinct ITEM_BAG affine/callback programs and have no
+independent dense acceptance. No battle logic, RNG/controller/facility state,
+boundary list, unsupported barrier, or absolute-tick/input-delay/coordinate/
+RGB/pixel exception changed.
+
 ## MOVE_DIZZY_PUNCH promoted exact; source compositor closes both orientations (2026-07-28)
 
 **Verdict:** `MOVE_DIZZY_PUNCH` is exact. Fresh complete legal set-145

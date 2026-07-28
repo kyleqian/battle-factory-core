@@ -202,7 +202,7 @@
         "ANIM_TAG_MAGENTA_HEART regenerates byte-for-byte from pinned source; the narrow shared compositor reuses the already-exact SPARK MINUN/SHUCKLE field assets and matches all 93 body frames plus four clear teardown frames in both orientations twice fresh",
         "every body frame pins software task/sprite identity, slot, order and callback state; hardware OAM/order/matrices/flags; palette buffers/tag lifetime; audio header/pan/terminal absence; raw RGB digest; and the shared framebuffer, with no excluded body frames",
         "the move boundary proves zero visual/sound tasks, zero heart software/hardware OAM, reset attacker offsets/matrix, freed MAGENTA_HEART palette tag, and four clear frames before the separately-owned generic stat task",
-        "COVET source audit confirms the complete CHARM prefix is literal and then adds a target ShakeMon2 plus Dizzy Punch loop, so COVET remains unsupported without independent complete dense move acceptance; FAKE TEARS and TICKLE use materially different RockMonBackAndForth arguments and distinct bodies and also remain unsupported"
+        "COVET now has independent exact dense acceptance for its complete CHARM prefix plus terminal target ShakeMon2 and Dizzy Punch loop; FAKE TEARS and TICKLE use materially different RockMonBackAndForth arguments and distinct bodies and remain unsupported"
       ],
       "evidence": [
         "tools/battle-lab/mechanic-charm-player-minun-opponent-shuckle.json",
@@ -217,6 +217,32 @@
         "src/animation/sceneOnPresentation.ts",
         "tests/animation/charm.test.ts",
         "src/engine/battleScene.ts"
+      ]
+    },
+    {
+      "move": "MOVE_COVET",
+      "status": "exact",
+      "covered": [
+        "fresh complete legal challenge-1 Factory parties stage the real set-203 LINOONE carrier against constrained SHUCKLE in both orientations; the complete move-owned load/body/cleanup window is exact at 114/114 frames 73-186 player-back and 77-190 opponent-front",
+        "the source-relative reducer and typed presentation seam reuse exact RockMonBackAndForth and all three MagentaHeart callbacks, then port target AnimTask_ShakeMon2(target,2,0,8,1), the three-event SE_M_DIZZY_PUNCH loop, side-relative pans, and the terminal clear display",
+        "source extraction byte-pins LINOONE front/back and literal ANIM_TAG_ITEM_BAG art; Emerald's Move_COVET loads ITEM_BAG but creates no item-bag sprite, so the proof pins its palette tag and prior-software hardware transfer while requiring zero ITEM_BAG OAM",
+        "the narrow shared compositor reuses exact SHUCKLE, MAGENTA_HEART, battle field, healthbox, window, and text assets, and adds source-derived LINOONE painting plus the battler-task display latch including its creation-transfer +offset display",
+        "covetPortable.ts proves reducer/seam state, software sprite/task identity, registers, hardware OAM/matrices/palettes, both loaded tags, live side-relative audio, raw RGB, and shared-framebuffer equality on all 114/114 frames in both orientations twice fresh; independent evidence is byte-identical with player digest af4e7838ff518aad3eccb9a78ea2f9a474a1982fddfbb2c4733d3173fcf61df7 and opponent digest cd62d0bd923c42f92c773c3bbe4c49f5450c2086e98e5df1e4127d0fdbeebc17",
+        "MOVE_PRESENT and MOVE_TRICK remain unsupported independent acceptance units: both instantiate ITEM_BAG sprites with distinct affine/callback programs not exercised by COVET"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-covet-player-linoone-opponent-shuckle.json",
+        "tools/battle-lab/mechanic-covet-opponent-linoone-player-shuckle.json",
+        "tools/compare/fixtures/covet-player-linoone-opponent-shuckle.json",
+        "tools/compare/fixtures/covet-opponent-linoone-player-shuckle.json",
+        "tools/compare/covetProbe.py",
+        "tools/compare/covetPortable.ts",
+        "tools/compare/extractCovetAssets.ts",
+        "src/animation/assets/covet.json",
+        "src/animation/covet.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
+        "tests/animation/covet.test.ts"
       ]
     },
     {
@@ -1540,7 +1566,7 @@
         "MOVE_TICKLE",
         "MOVE_COVET"
       ],
-      "goal": "MOVE_CHARM proves its complete 93-frame source component and typed relative seam in both MINUN orientations twice fresh. Exact remains blocked only on the shared-seam hardware OAM/palette/audio/raw-RGB framebuffer compositor. COVET was source-audited: it uses the complete CHARM prefix and then adds target ShakeMon2 plus a Dizzy Punch loop. FAKE TEARS uses RockMonBackAndForth(attacker,2,1) after particle blending and adds eight tear sprites; TICKLE uses RockMonBackAndForth(target,6,2) after eye-sparkle/palette/SwayMon work. All three siblings remain unsupported pending independent complete dense evidence."
+      "goal": "MOVE_CHARM is exact for its complete 93-frame source component and typed relative seam in both MINUN orientations. MOVE_COVET is independently exact for 114/114 frames in both set-203 LINOONE orientations, reusing CHARM honestly and adding target ShakeMon2, ITEM_BAG load/transfer, and its Dizzy Punch audio loop. FAKE TEARS uses RockMonBackAndForth(attacker,2,1) after particle blending and adds eight tear sprites; TICKLE uses RockMonBackAndForth(target,6,2) after eye-sparkle/palette/SwayMon work. Both remain unsupported pending independent complete dense evidence."
     },
     {
       "id": "razor-leaf-particle-cutter",

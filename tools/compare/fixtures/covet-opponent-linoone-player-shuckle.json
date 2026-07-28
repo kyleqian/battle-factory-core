@@ -1,0 +1,14 @@
+{
+  "schema": "scene-on-portable-component/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-covet-opponent-linoone-player-shuckle.json",
+  "probe": "tools/compare/covetProbe.py",
+  "pair": "LINOONE (opponent-front) -> SHUCKLE (player-back)",
+  "move": "COVET",
+  "orientation": "opponent-to-player",
+  "sourceVisualWindow": {"startFrame": 77, "endFrame": 190},
+  "appStage": {"presentationAge": 0},
+  "attacker": {"species":"LINOONE","geometry":{"side":"opponent","spriteCorner":{"x":144,"y":11},"animationCenter":{"x":176,"y":43},"battlePositionCenter":{"x":176,"y":40}}},
+  "target": {"species":"SHUCKLE","geometry":{"side":"player","spriteCorner":{"x":40,"y":59},"animationCenter":{"x":72,"y":91},"battlePositionCenter":{"x":72,"y":80}}},
+  "fieldProfile": {"playerHp":127,"playerMaxHp":127,"opponentHp":185,"opponentMaxHp":185,"playerGender":"male","opponentGender":"female"}
+}

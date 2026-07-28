@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
-  COVET_ASSET_UNLOAD_AGE,
+  COVET_CLEANUP_AGE,
   COVET_CHARM_START_AGE,
   COVET_FRAME_COUNT,
   COVET_ITEM_BAG_LOAD_AGE,
@@ -42,10 +42,11 @@ describe("MOVE_COVET source reducer", () => {
       .toMatchObject({ targetOffset: { x2: -2, y2: 0 }, shakeActive: true });
     expect(covetAtAge(COVET_SHAKE_START_AGE + 14, "player", { x: 72, y: 80 }))
       .toMatchObject({ targetOffset: { x2: 0, y2: 0 }, shakeActive: false });
-    expect(COVET_FRAME_COUNT).toBe(135);
-    expect(covetAtAge(COVET_ASSET_UNLOAD_AGE, "player", { x: 72, y: 80 }))
+    expect(COVET_FRAME_COUNT).toBe(114);
+    expect(covetAtAge(COVET_CLEANUP_AGE, "player", { x: 72, y: 80 }))
       .toMatchObject({
-        heartAssetLoaded: false, itemBagAssetLoaded: false, active: true,
+        heartAssetLoaded: true, itemBagAssetLoaded: true, active: true,
+        targetOffset: { x2: 0, y2: 0 }, shakeActive: false,
       });
   });
 
@@ -69,8 +70,8 @@ describe("MOVE_COVET source reducer", () => {
       species,
       geometry: {
         side,
-        spriteCorner: side === "player" ? { x: 40, y: 48 } : { x: 144, y: 8 },
-        animationCenter: side === "player" ? { x: 72, y: 80 } : { x: 176, y: 40 },
+        spriteCorner: side === "player" ? { x: 40, y: 63 } : { x: 144, y: 11 },
+        animationCenter: side === "player" ? { x: 72, y: 95 } : { x: 176, y: 43 },
         battlePositionCenter: side === "player" ? { x: 72, y: 80 } : { x: 176, y: 40 },
       },
     });

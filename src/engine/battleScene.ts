@@ -17190,6 +17190,9 @@ export function renderSceneOnMovePresentation(
     const items: CharmPainterItem[] = [];
     const attackerSlot = playerToOpponent ? 13 : 15;
     const targetSlot = playerToOpponent ? 15 : 10;
+    const displayedTargetOffset = isCovet
+      ? (view as ReturnType<typeof sceneOnCovetView>).displayedTargetOffset
+      : { x2: 0, y2: 0 };
     items.push({
       priority: 2,
       subpriority: view.attacker.geometry.side === "player" ? 30 : 40,
@@ -17210,7 +17213,8 @@ export function renderSceneOnMovePresentation(
       slot: targetSlot,
       draw: () => drawSpriteSheet(
         fb, shuckle.tileset, shuckle.palette,
-        view.target.geometry.spriteCorner.x, view.target.geometry.spriteCorner.y,
+        view.target.geometry.spriteCorner.x + displayedTargetOffset.x2,
+        view.target.geometry.spriteCorner.y + displayedTargetOffset.y2,
       ),
     });
     for (const heart of displayedCharm.hearts) {
@@ -17229,20 +17233,6 @@ export function renderSceneOnMovePresentation(
       b.priority - a.priority || b.subpriority - a.subpriority
       || a.top - b.top || b.slot - a.slot);
     for (const item of items) item.draw();
-
-    if (isCovet) {
-      const targetOffset =
-        (displayed as ReturnType<typeof sceneOnCovetView>).targetOffset;
-      if (targetOffset.x2 !== 0 || targetOffset.y2 !== 0) {
-        // Repaint the opaque target at the terminal ShakeMon2 position. No
-        // ITEM_BAG sprite is drawn: the source script only loads that tag.
-        drawSpriteSheet(
-          fb, shuckle.tileset, shuckle.palette,
-          view.target.geometry.spriteCorner.x + targetOffset.x2,
-          view.target.geometry.spriteCorner.y + targetOffset.y2,
-        );
-      }
-    }
 
     drawSendOutHealthbox(
       fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
