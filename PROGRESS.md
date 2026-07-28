@@ -15,6 +15,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 597 — [BOUNDED MAIN WORKER 2026-07-28 ~05:35] Low Kick source-weight catalog landed
+
+- **State:** source-derived species weights are extracted into the existing
+  complete `species-stats.json` catalog; focused regeneration/catalog tests
+  pass.
+- **Did:** extended the pinned species extractor with Pokédex hectogram
+  weights for all 386 real Pokédex entries. The 25 unreachable OLD_UNOWN
+  compatibility ids remain explicitly `null` rather than receiving invented
+  data; Chansey 346, Snorlax 4600, Onix 2100, and arbitrary endpoints are
+  pinned.
+- **Next:** register operand-free `0xdd`, prove all strict weight brackets and
+  ownership/immutability/one-byte behavior, then land generic full-turn Low
+  Kick through shared damage/action cleanup.
+- **Notes:** no production handler, recording import, RNG/controller work,
+  private move path, unsupported barrier, or ratchet change yet.
+
+---
 ## 596 — [SUPERVISOR VERIFY 2026-07-28 ~05:20] Magic Coat accepted; Low Kick evidence folded
 
 - **State:** reviewed union green at **357 files / 4161 tests** and focused
@@ -71,30 +88,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   shrank **5→4**; no unsupported barrier was added. No recording import,
   controller widening, RNG, private handler, presentation/tick branch, issue
   removal, or DEFERRED item.
-
----
-## 594 — [SUPERVISOR VERIFY 2026-07-28 ~05:06] Revenge accepted; Magic Coat evidence folded
-
-- **State:** reviewed union green at **354 files / 4153 tests** and focused
-  **35/35**; production build, both-oracle info, census regeneration,
-  freshness/ratchets **15/15**, and `git diff --check` pass. Census is exactly
-  **154/214 effects, 283/355 moves, 231/276 Factory-L50 distinct, 2750/2957
-  weighted**, all **42/42**.
-- **Did:** accepted global Revenge `0xd6`, complete predicate matrix, and
-  shared receipt/damage/cleanup full-turn proof after source/diff review.
-  Folded Magic Coat source/OFF evidence and independently replayed exact
-  manifest `5b737f68…0a303870`: Spoink spends Magic Coat PP, Onix spends Tail
-  Whip PP, and only Onix's public Defense falls **6→5**, distinguishing the
-  real bounce from a no-op.
-- **Next:** register five-byte `B_SCR_OP_TRYSETMAGICCOAT` globally through
-  the existing ProtectStruct `bounceMove` and attack-canceler retarget seam.
-  Prove last-action failure, non-last arm (without a duplicate guard),
-  Pressure exemption ownership, shared reflected Tail Whip behavior, and
-  turn cleanup. Expected census:
-  **155/214, 284/355, 232/276, 2753/2957**.
-- **Notes:** handler inventory is **162**; hidden bounce flags, PC/stack,
-  attacker-target swaps, and Pressure helper causality remain source-only.
-  No unsupported/import ratchet, recording import, private handler,
-  controller widening, animation/presentation/tick branch, issue removal,
-  DEFERRED item, or oracle lifecycle action. Animation branch remains
-  intentionally unmerged after its post-orient advance.

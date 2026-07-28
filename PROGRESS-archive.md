@@ -24008,3 +24008,30 @@ both verify scripts/census independently re-verified before this entry.)*
   recording import, private handler, animation/presentation/tick branch,
   scenario/evidence mutation, issue removal, DEFERRED item, or oracle
   lifecycle action.
+## 594 — [SUPERVISOR VERIFY 2026-07-28 ~05:06] Revenge accepted; Magic Coat evidence folded
+
+- **State:** reviewed union green at **354 files / 4153 tests** and focused
+  **35/35**; production build, both-oracle info, census regeneration,
+  freshness/ratchets **15/15**, and `git diff --check` pass. Census is exactly
+  **154/214 effects, 283/355 moves, 231/276 Factory-L50 distinct, 2750/2957
+  weighted**, all **42/42**.
+- **Did:** accepted global Revenge `0xd6`, complete predicate matrix, and
+  shared receipt/damage/cleanup full-turn proof after source/diff review.
+  Folded Magic Coat source/OFF evidence and independently replayed exact
+  manifest `5b737f68…0a303870`: Spoink spends Magic Coat PP, Onix spends Tail
+  Whip PP, and only Onix's public Defense falls **6→5**, distinguishing the
+  real bounce from a no-op.
+- **Next:** register five-byte `B_SCR_OP_TRYSETMAGICCOAT` globally through
+  the existing ProtectStruct `bounceMove` and attack-canceler retarget seam.
+  Prove last-action failure, non-last arm (without a duplicate guard),
+  Pressure exemption ownership, shared reflected Tail Whip behavior, and
+  turn cleanup. Expected census:
+  **155/214, 284/355, 232/276, 2753/2957**.
+- **Notes:** handler inventory is **162**; hidden bounce flags, PC/stack,
+  attacker-target swaps, and Pressure helper causality remain source-only.
+  No unsupported/import ratchet, recording import, private handler,
+  controller widening, animation/presentation/tick branch, issue removal,
+  DEFERRED item, or oracle lifecycle action. Animation branch remains
+  intentionally unmerged after its post-orient advance.
+
+---
