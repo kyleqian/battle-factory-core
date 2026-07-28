@@ -1,4 +1,7 @@
 import { execFileSync } from "node:child_process";
+import { mkdtempSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { bodySlamAtAge } from "../../src/animation/bodySlam.ts";
 import {
@@ -95,5 +98,27 @@ describe("MOVE_BODY_SLAM source-relative reducer", () => {
     expect(output).toContain('"MOVE_RETURN":"unsupported:');
     expect(output).toContain('"MOVE_FLATTER":"unsupported:');
     expect(output).toContain('"MOVE_WEATHER_BALL":"outside Factory and unsupported:');
+  });
+
+  it("regenerates LICKITUNG and the shared IMPACT receipt byte-for-byte", () => {
+    const scratch = mkdtempSync(join(tmpdir(), "pokebench-body-slam-assets-"));
+    const output = join(scratch, "body-slam.json");
+    execFileSync(process.execPath, [
+      "--experimental-strip-types",
+      "tools/compare/extractBodySlamAssets.ts",
+      "--out",
+      output,
+    ]);
+    expect(readFileSync(output)).toEqual(
+      readFileSync("src/animation/assets/body-slam.json"),
+    );
+
+    const impact = JSON.parse(
+      readFileSync("src/assets/gen/battle-anim-hitsplat.json", "utf8"),
+    ) as { source: string };
+    expect(impact.source).toContain(
+      "graphics/battle_anims/sprites/impact.png",
+    );
+    expect(impact.source).toContain("ANIM_TAG_IMPACT");
   });
 });
