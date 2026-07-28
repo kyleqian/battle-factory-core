@@ -1503,6 +1503,27 @@
       "goal": "FLY exactly proves a phase-relative, side-parameterized two-turn charge/strike reducer, source-derived player-back MURKROW art, and a reusable framebuffer/healthbox/controller adapter in both legal orientations. Opponent windows are 151/151 and 248/248; player windows are 147/147 and 244/244, all with zero exclusions. The canonical charge/miss window is also 213/213 after its flattened layered-scene path reused the established opponent terrain cutoff through the generic affine-stretch clip parameter. BOUNCE exactly proves both charge bodies at 24/24, no-status strike/controller windows at 299/299 opponent-front and 197/197 player-back, and the successful-paralysis strike/controller/menu variant at 450/450; its Status_Paralysis electricity asset/spawns and AnimTask_ShakeMon2 framebuffer handoff now live in a reusable move-agnostic visual component. DIVE remains unsupported without independent dense move evidence."
     },
     {
+      "id": "spark-2-electricity",
+      "components": [
+        "asset:ANIM_TAG_SPARK_2",
+        "sprite:gSparkElectricitySpriteTemplate",
+        "sprite:gSparkElectricityFlashingSpriteTemplate",
+        "sprite:gElectricitySpriteTemplate",
+        "subroutine:ElectricityEffect",
+        "visualCommand:blend_color_cycle",
+        "sprite:gHorizontalLungeSpriteTemplate",
+        "task:AnimTask_ShakeMon",
+        "visualCommand:create_basic_hitsplat_sprite"
+      ],
+      "representatives": [
+        "MOVE_SPARK",
+        "MOVE_THUNDERBOLT",
+        "MOVE_THUNDER_WAVE",
+        "MOVE_ZAP_CANNON"
+      ],
+      "goal": "MOVE_SPARK has source-legal Scene-ON staging only: MINUN Factory set 187 reaches MOVE_SPARK in both player-back and opponent-front orientations, with source visual windows 79-193 and 83-197 respectively; it remains unsupported. A future independent dense acceptance must port three attacker color palette-cycle legs plus their three reset commands, six gSparkElectricitySpriteTemplate particles, eight gSparkElectricityFlashingSpriteTemplate particles, post-impact ElectricityEffect, HorizontalLunge, target ShakeMon, five sound boundaries, wait-for-visual-finish sequencing, side-relative X/X2/picture-offset-Y geometry, asset/palette lifetime, hardware OAM/matrices/registers/audio, cleanup, and shared-seam framebuffer evidence. THUNDERBOLT, THUNDER_WAVE, ZAP_CANNON, and THUNDER_SHOCK each retain distinct complete scripts and remain unsupported without their own evidence."
+    },
+    {
       "id": "knock-off-lunge-shake",
       "components": [
         "sprite:gHorizontalLungeSpriteTemplate",

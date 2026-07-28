@@ -44,6 +44,41 @@ animation. A status caused by a move is not part of that move's animation.
   presentation seam and all source- or evidence-required variants are covered.
 - No entry means unsupported.
 
+## MOVE_SPARK staging checkpoint; remains unsupported (2026-07-27)
+
+**Verdict:** `MOVE_SPARK` remains unsupported. Both complete legal
+Battle-Scene-ON `mechanicLab` parties stage the real challenge-0 Level-50
+`FRONTIER_MON_MINUN_1` set **187** (species 354, Docile, HP/Defense EVs,
+Salac Berry, source Spark/Charm/Encore/Helping Hand); the active carrier has
+four legal SPARK choices and slower SHUCKLE has four TACKLE choices. The
+fresh mGBA probe, run through `tools/run-mgba-probe.py`, reaches current move
+209 in both orientations: player-back MINUN current-move window **39-263
+(225 frames)** / visual body **79-193**, opponent-front MINUN **39-363
+(325)** / visual body **83-197**. Both outcomes are status-free. These are
+candidate dense windows only—there is no reducer, typed seam, source asset,
+OAM/register/audio comparator, renderer, or pixel claim.
+
+**Source boundary/inventory:** `src/battle_factory.c`'s Level-50 challenge-0
+range is 110-199; `battle_frontier_mons.h` set 187 is MINUN with SPARK;
+`data/battle_anim_scripts.s:1945-1989` owns three attacker color
+palette-cycle legs plus their three reset commands, six
+`gSparkElectricitySpriteTemplate` particles, eight flashing electricity
+sprites, HorizontalLunge, target hit-splat/ShakeMon, three attacker-pan
+Thunderbolt2 events, target Hyper Beam, wait gates, and the post-impact
+eight-sprite `ElectricityEffect` / target-pan Thunderbolt2
+(`:10137`). `src/battle_anim_electric.c:119-220,515-677` defines the affine
+spark, flashing/tile-cycle, target electricity callbacks and their
+side-relative X/X2/picture-offset-Y geometry. Future evidence must port all
+palette, movement/shake, flashing, sound, wait, geometry, lifetime and
+teardown details in both orientations; THUNDERBOLT, THUNDER_WAVE, ZAP_CANNON,
+and THUNDER_SHOCK remain independently unsupported.
+
+**Evidence:** committed scenarios, semantic mGBA probe, and no-pixel
+staging comparator are `mechanic-spark-*.json`, `sparkProbe.py`,
+`sparkEvidence.ts`, and `fixtures/spark-*.json`. `ANIM_TAG_SPARK_2` is now a
+non-exclusive component track, but no move coverage was promoted. Existing
+exact controls and renderer code were untouched.
+
 ## Current resumable state (2026-07-27)
 
 Coverage is **49/276 exact, 3 partial, 224 unsupported**. TAUNT is exact at

@@ -1,0 +1,15 @@
+{
+  "schema": "scene-on-staging-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-spark-player-minun-opponent-shuckle.json",
+  "probe": "tools/compare/sparkProbe.py",
+  "pair": "MINUN (player-back) -> SHUCKLE (opponent-front)",
+  "move": "SPARK",
+  "orientation": "player-to-opponent",
+  "currentMoveWindow": {"startFrame": 39, "endFrame": 263, "frameCount": 225},
+  "sourceVisualWindow": {"startFrame": 79, "endFrame": 193},
+  "acceptance": {
+    "status": "unsupported",
+    "note": "Semantic source/window staging only; no reducer, typed seam, asset extraction, hardware/OAM, or framebuffer comparison exists."
+  }
+}
