@@ -23,6 +23,7 @@ import {
   resolveBattleScriptLabel,
 } from "./battleScriptProgram.ts";
 import {
+  BATTLE_SCRIPT_BATTLE_ENVIRONMENT_BUILDING,
   BATTLE_SCRIPT_BATTLE_TYPE_FACTORY,
   BATTLE_SCRIPT_BATTLE_TYPE_TRAINER,
   createBattleScriptRulesContext,
@@ -333,6 +334,7 @@ function createInitialRules(config: FactoryAsleepMoveConfig): FactoryBattleScrip
     battleOutcome: 0,
     currentMove: 0,
     currentMovePosition: 0,
+    gBattleEnvironment: BATTLE_SCRIPT_BATTLE_ENVIRONMENT_BUILDING,
     moveResultFlags: 0,
     dmgMultiplier: 1,
     critMultiplier: 1,

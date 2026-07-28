@@ -77,6 +77,7 @@ import { createBattleScriptDisablelastusedattackOpcodeHandlers } from "./battleS
 import { createBattleScriptFuryCutterOpcodeHandlers } from "./battleScriptFuryCutterOpcode.ts";
 import { createBattleScriptSetminimizeOpcodeHandlers } from "./battleScriptSetminimizeOpcode.ts";
 import { createBattleScriptSetforcedtargetOpcodeHandlers } from "./battleScriptSetforcedtargetOpcode.ts";
+import { createBattleScriptGetSecretPowerEffectOpcodeHandlers } from "./battleScriptGetSecretPowerEffectOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -115,6 +116,8 @@ export const BATTLE_SCRIPT_BATTLE_TYPE_DOUBLE = 1 << 0;
 export const BATTLE_SCRIPT_BATTLE_TYPE_TRAINER = 1 << 3;
 export const BATTLE_SCRIPT_BATTLE_TYPE_ARENA = 1 << 18;
 export const BATTLE_SCRIPT_BATTLE_TYPE_FACTORY = 1 << 19;
+/** include/constants/battle.h:321; Factory battle-room map type INDOOR resolves to this environment. */
+export const BATTLE_SCRIPT_BATTLE_ENVIRONMENT_BUILDING = 8;
 export const BATTLE_SCRIPT_HITMARKER_NO_ATTACKSTRING = 1 << 9;
 export const BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE = 1 << 19;
 export const BATTLE_SCRIPT_MOVE_TARGET_BOTH = 1 << 3;
@@ -519,6 +522,8 @@ export type BattleScriptRulesContext = Readonly<
     currentMoveEffect: number;
     currentMovePower: number;
     currentMovePosition: number;
+    /** Source u8 gBattleEnvironment, initialized from BattleSetup_GetEnvironmentId before battle controllers. */
+    gBattleEnvironment: number;
     /** Source u8 gLastUsedAbility. */
     lastUsedAbility: number;
     multiHitCounter: number;
@@ -675,6 +680,8 @@ export type BattleScriptRulesContextInput = Readonly<{
   battleOutcome: number;
   currentMove: number;
   currentMovePosition: number;
+  /** Legacy focused inputs default here; production Factory inputs explicitly supply BUILDING. */
+  gBattleEnvironment?: number;
   lastUsedAbility?: number;
   moveResultFlags: number;
   dmgMultiplier: number;
@@ -2090,6 +2097,11 @@ export function createBattleScriptRulesContext(
       3,
       "currentMovePosition",
     ),
+    gBattleEnvironment: requireUnsigned(
+      input.gBattleEnvironment ?? 0,
+      0xff,
+      "gBattleEnvironment",
+    ),
     lastUsedAbility: requireUnsigned(
       input.lastUsedAbility ?? 0,
       0xff,
@@ -2448,6 +2460,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptFuryCutterOpcodeHandlers(program),
     ...createBattleScriptSetminimizeOpcodeHandlers(program),
     ...createBattleScriptSetforcedtargetOpcodeHandlers(program),
+    ...createBattleScriptGetSecretPowerEffectOpcodeHandlers(program),
   });
 }
 

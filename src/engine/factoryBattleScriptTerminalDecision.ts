@@ -56,6 +56,7 @@ import {
   type BattleScriptFaintedActionsResult,
 } from "./battleScriptFaintedActionsOrchestration.ts";
 import {
+  BATTLE_SCRIPT_BATTLE_ENVIRONMENT_BUILDING,
   BATTLE_SCRIPT_BATTLE_TYPE_FACTORY,
   BATTLE_SCRIPT_BATTLE_TYPE_TRAINER,
   BATTLE_SCRIPT_PARTY_SIZE,
@@ -311,6 +312,7 @@ function createInitialRules(config: FactoryTerminalMoveConfig): FactoryTerminalD
     battleOutcome: 0,
     currentMove: 0,
     currentMovePosition: 0,
+    gBattleEnvironment: BATTLE_SCRIPT_BATTLE_ENVIRONMENT_BUILDING,
     moveResultFlags: 0,
     dmgMultiplier: 1,
     critMultiplier: 1,

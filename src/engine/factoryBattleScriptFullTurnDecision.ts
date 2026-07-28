@@ -96,6 +96,7 @@ import {
 import { runBattleEndTurnOrchestration } from "./battleEndTurnOrchestration.ts";
 import { effectiveSpeed, getWhoStrikesFirst, type TurnOrderBattler } from "./turnOrder.ts";
 import {
+  BATTLE_SCRIPT_BATTLE_ENVIRONMENT_BUILDING,
   BATTLE_SCRIPT_BATTLE_TYPE_FACTORY,
   BATTLE_SCRIPT_BATTLE_TYPE_TRAINER,
   BATTLE_SCRIPT_PARTY_SIZE,
@@ -376,6 +377,7 @@ function createInitialRules(config: FactoryFullTurnConfig): FactoryFullTurnDecis
     battleOutcome: 0,
     currentMove: 0,
     currentMovePosition: 0,
+    gBattleEnvironment: BATTLE_SCRIPT_BATTLE_ENVIRONMENT_BUILDING,
     moveResultFlags: 0,
     dmgMultiplier: 1,
     critMultiplier: 1,
