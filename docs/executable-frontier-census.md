@@ -10,16 +10,16 @@ Answers ROADMAP S10's Executable-frontier reset question directly: not "how many
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 171 | 214 | 79.9% |
-| Moves (unweighted, all 355) | 307 | 355 | 86.5% |
-| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 249 | 276 | 90.2% |
-| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2902 | 2957 | 98.1% |
+| Effect scripts | 166 | 214 | 77.6% |
+| Moves (unweighted, all 355) | 294 | 355 | 82.8% |
+| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 238 | 276 | 86.2% |
+| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2763 | 2957 | 93.4% |
 
-"Executable" means every opcode on every statically reachable path from the effect's entry script has a dispatch entry today (registered barriers included, per ROADMAP S10 §1's (a)/(b) policy). It is not a semantic-correctness claim -- see Caveats.
+"Executable" means every opcode on every statically reachable path from the effect's entry script has a dispatch entry today and every use of the explicitly tracked narrowed operand surfaces is accepted. Other registered runtime barriers remain included per ROADMAP S10 §1's (a)/(b) policy. It is not a semantic-correctness claim -- see Caveats.
 
 ## Ranked next registration by unlocked-move count
 
-Each row is an exact set of missing opcodes -- registering only *some* of a multi-opcode set would not unlock these effects, so opcodes are grouped by the combination an effect actually needs, not credited individually. Effects already blocked only on a subsystem note (no missing opcode) are not rankable here; see the per-effect table.
+Each row is an exact set of missing opcodes -- registering only *some* of a multi-opcode set would not unlock these effects, so opcodes are grouped by the combination an effect actually needs, not credited individually. Any effect with an independent subsystem/operand note is not rankable here even when it also has missing opcodes, because opcode registration alone would not unlock it; see the per-effect table.
 
 | Missing opcode(s) | Effects unlocked | Moves unlocked (unweighted) | Factory-L50 moves (unweighted) | Factory-L50 weighted |
 | --- | --- | --- | --- | --- |
@@ -27,10 +27,6 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_JUMPIFARRAYEQUAL` | 1 (EFFECT_TEETER_DANCE) | 1 | 1 | 2 |
 | `B_SCR_OP_MAGNITUDEDAMAGECALCULATION` | 1 (EFFECT_MAGNITUDE) | 1 | 1 | 2 |
 | `B_SCR_OP_MAXATTACKHALVEHP` | 1 (EFFECT_BELLY_DRUM) | 1 | 1 | 2 |
-| `B_SCR_OP_METRONOME` | 1 (EFFECT_METRONOME) | 1 | 1 | 2 |
-| `B_SCR_OP_PAINSPLITDMGCALC` | 1 (EFFECT_PAIN_SPLIT) | 1 | 1 | 2 |
-| `B_SCR_OP_STOCKPILE` | 1 (EFFECT_STOCKPILE) | 1 | 1 | 2 |
-| `B_SCR_OP_STOCKPILETOHPHEAL` | 1 (EFFECT_SWALLOW) | 1 | 1 | 2 |
 | `B_SCR_OP_TRYSETGRUDGE` | 1 (EFFECT_GRUDGE) | 1 | 1 | 2 |
 | `B_SCR_OP_TRYSPITEPPREDUCE` | 1 (EFFECT_SPITE) | 1 | 1 | 2 |
 | `B_SCR_OP_DAMAGETOHALFTARGETHP` | 1 (EFFECT_SUPER_FANG) | 1 | 1 | 1 |
@@ -42,19 +38,23 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_TRYMEMENTO` | 1 (EFFECT_MEMENTO) | 1 | 1 | 1 |
 | `B_SCR_OP_TRYRECYCLEITEM` | 1 (EFFECT_RECYCLE) | 1 | 1 | 1 |
 | `B_SCR_OP_SETALWAYSHITFLAG` | 1 (EFFECT_LOCK_ON) | 2 | 0 | 0 |
-| `B_SCR_OP_SETTYPEBASEDHALVERS` | 2 (EFFECT_MUD_SPORT, EFFECT_WATER_SPORT) | 2 | 0 | 0 |
 | `B_SCR_OP_ASSISTATTACKSELECT` | 1 (EFFECT_ASSIST) | 1 | 0 | 0 |
 | `B_SCR_OP_CALLENVIRONMENTATTACK` | 1 (EFFECT_NATURE_POWER) | 1 | 0 | 0 |
 | `B_SCR_OP_COPYMOVEPERMANENTLY` | 1 (EFFECT_SKETCH) | 1 | 0 | 0 |
 | `B_SCR_OP_MIMICATTACKCOPY` | 1 (EFFECT_MIMIC) | 1 | 0 | 0 |
 | `B_SCR_OP_SETBIDE` | 1 (EFFECT_BIDE) | 1 | 0 | 0 |
+| `B_SCR_OP_SETCHARGE` | 1 (EFFECT_CHARGE) | 1 | 0 | 0 |
+| `B_SCR_OP_SETTYPETOENVIRONMENT` | 1 (EFFECT_CAMOUFLAGE) | 1 | 0 | 0 |
+| `B_SCR_OP_SETTYPETORANDOMRESISTANCE` | 1 (EFFECT_CONVERSION_2) | 1 | 0 | 0 |
+| `B_SCR_OP_SETWEATHERBALLTYPE` | 1 (EFFECT_WEATHER_BALL) | 1 | 0 | 0 |
+| `B_SCR_OP_TRYCONVERSIONTYPECHANGE` | 1 (EFFECT_CONVERSION) | 1 | 0 | 0 |
 
 ## Per-effect detail
 
 | Effect | Entry script | Classification | Missing opcode(s) | Subsystem notes | Moves | Factory-L50 moves (weighted) |
 | --- | --- | --- | --- | --- | --- | --- |
 | EFFECT_HIT | `BattleScript_EffectHit` | executable | - | - | 24 | 12 (162) |
-| EFFECT_SLEEP | `BattleScript_EffectSleep` | executable | - | - | 6 | 6 (39) |
+| EFFECT_SLEEP | `BattleScript_EffectSleep` | blocked-on-subsystem | - | Operand gate: B_SCR_OP_PRINTFROMTABLE(gFellAsleepStringIds) -- gFellAsleepStringIds is outside the engine's accepted string-table pointer set (src/engine/battleScriptHitChainOpcode.ts:279; battle_script_commands.c:2184) | 6 | 6 (39) |
 | EFFECT_POISON_HIT | `BattleScript_EffectPoisonHit` | executable | - | - | 4 | 3 (44) |
 | EFFECT_ABSORB | `BattleScript_EffectAbsorb` | executable | - | - | 4 | 3 (43) |
 | EFFECT_BURN_HIT | `BattleScript_EffectBurnHit` | executable | - | - | 5 | 5 (76) |
@@ -86,7 +86,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_CONVERSION | `BattleScript_EffectConversion` | blocked-on-opcodes | `B_SCR_OP_TRYCONVERSIONTYPECHANGE` (main path) | - | 1 | 0 (0) |
 | EFFECT_FLINCH_HIT | `BattleScript_EffectFlinchHit` | executable | - | - | 6 | 5 (103) |
 | EFFECT_RESTORE_HP | `BattleScript_EffectRestoreHp` | executable | - | - | 2 | 1 (22) |
-| EFFECT_TOXIC | `BattleScript_EffectToxic` | executable | - | - | 1 | 1 (26) |
+| EFFECT_TOXIC | `BattleScript_EffectToxic` | blocked-on-subsystem | - | Operand gate: B_SCR_OP_COPYARRAY(gEffectBattler, gBattlerTarget, 0x1) -- (gEffectBattler, gBattlerTarget, 0x1) is outside the engine's accepted pointer-tuple universe (src/engine/battleScriptIngrainLeechSeedWrapOpcode.ts:154; battle_script_commands.c:3837) | 1 | 1 (26) |
 | EFFECT_PAY_DAY | `BattleScript_EffectPayDay` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_PAYDAY is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 1 | 0 (0) |
 | EFFECT_LIGHT_SCREEN | `BattleScript_EffectLightScreen` | executable | - | - | 1 | 1 (23) |
 | EFFECT_TRI_ATTACK | `BattleScript_EffectTriAttack` | executable | - | - | 1 | 1 (8) |
@@ -110,7 +110,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_SPECIAL_DEFENSE_UP_2 | `BattleScript_EffectSpecialDefenseUp2` | executable | - | - | 1 | 1 (13) |
 | EFFECT_ACCURACY_UP_2 | `BattleScript_EffectHit` | executable | - | - | 0 | 0 (0) |
 | EFFECT_EVASION_UP_2 | `BattleScript_EffectHit` | executable | - | - | 0 | 0 (0) |
-| EFFECT_TRANSFORM | `BattleScript_EffectTransform` | blocked-on-opcodes | `B_SCR_OP_TRANSFORMDATAEXECUTION` (main path) | - | 1 | 0 (0) |
+| EFFECT_TRANSFORM | `BattleScript_EffectTransform` | blocked-on-opcodes | `B_SCR_OP_TRANSFORMDATAEXECUTION` (main path) | Operand gate: B_SCR_OP_PRINTFROMTABLE(gTransformUsedStringIds) -- gTransformUsedStringIds is outside the engine's accepted string-table pointer set (src/engine/battleScriptHitChainOpcode.ts:279; battle_script_commands.c:2184) | 1 | 0 (0) |
 | EFFECT_ATTACK_DOWN_2 | `BattleScript_EffectAttackDown2` | executable | - | - | 2 | 2 (8) |
 | EFFECT_DEFENSE_DOWN_2 | `BattleScript_EffectDefenseDown2` | executable | - | - | 1 | 1 (12) |
 | EFFECT_SPEED_DOWN_2 | `BattleScript_EffectSpeedDown2` | executable | - | - | 2 | 2 (24) |
@@ -119,8 +119,8 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_ACCURACY_DOWN_2 | `BattleScript_EffectHit` | executable | - | - | 0 | 0 (0) |
 | EFFECT_EVASION_DOWN_2 | `BattleScript_EffectHit` | executable | - | - | 0 | 0 (0) |
 | EFFECT_REFLECT | `BattleScript_EffectReflect` | executable | - | - | 1 | 1 (16) |
-| EFFECT_POISON | `BattleScript_EffectPoison` | executable | - | - | 2 | 0 (0) |
-| EFFECT_PARALYZE | `BattleScript_EffectParalyze` | executable | - | - | 3 | 3 (64) |
+| EFFECT_POISON | `BattleScript_EffectPoison` | blocked-on-subsystem | - | Operand gate: B_SCR_OP_COPYARRAY(gEffectBattler, gBattlerTarget, 0x1) -- (gEffectBattler, gBattlerTarget, 0x1) is outside the engine's accepted pointer-tuple universe (src/engine/battleScriptIngrainLeechSeedWrapOpcode.ts:154; battle_script_commands.c:3837) | 2 | 0 (0) |
+| EFFECT_PARALYZE | `BattleScript_EffectParalyze` | blocked-on-subsystem | - | Operand gate: B_SCR_OP_COPYARRAY(gEffectBattler, gBattlerTarget, 0x1) -- (gEffectBattler, gBattlerTarget, 0x1) is outside the engine's accepted pointer-tuple universe (src/engine/battleScriptIngrainLeechSeedWrapOpcode.ts:154; battle_script_commands.c:3837) | 3 | 3 (64) |
 | EFFECT_ATTACK_DOWN_HIT | `BattleScript_EffectAttackDownHit` | executable | - | - | 1 | 1 (3) |
 | EFFECT_DEFENSE_DOWN_HIT | `BattleScript_EffectDefenseDownHit` | executable | - | - | 4 | 3 (32) |
 | EFFECT_SPEED_DOWN_HIT | `BattleScript_EffectSpeedDownHit` | executable | - | - | 6 | 4 (48) |
@@ -136,7 +136,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_RECHARGE | `BattleScript_EffectRecharge` | executable | - | - | 4 | 1 (4) |
 | EFFECT_RAGE | `BattleScript_EffectRage` | executable | - | - | 1 | 0 (0) |
 | EFFECT_MIMIC | `BattleScript_EffectMimic` | blocked-on-opcodes | `B_SCR_OP_MIMICATTACKCOPY` (edge branch only) | - | 1 | 0 (0) |
-| EFFECT_METRONOME | `BattleScript_EffectMetronome` | blocked-on-opcodes | `B_SCR_OP_METRONOME` (main path) | - | 1 | 1 (2) |
+| EFFECT_METRONOME | `BattleScript_EffectMetronome` | blocked-on-opcodes | `B_SCR_OP_METRONOME` (main path) | Dynamic effect-universe gate: B_SCR_OP_METRONOME(selectable-effect-universe) -- the selected runtime effect is not statically enumerable here, so this row remains blocked until every legal Metronome destination is executable (docs/ranked-single-opcodes-notes.md § Metronome gate) | 1 | 1 (2) |
 | EFFECT_LEECH_SEED | `BattleScript_EffectLeechSeed` | executable | - | - | 1 | 1 (12) |
 | EFFECT_SPLASH | `BattleScript_EffectSplash` | executable | - | - | 1 | 0 (0) |
 | EFFECT_DISABLE | `BattleScript_EffectDisable` | executable | - | - | 1 | 1 (5) |
@@ -144,7 +144,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_PSYWAVE | `BattleScript_EffectPsywave` | executable | - | - | 1 | 1 (2) |
 | EFFECT_COUNTER | `BattleScript_EffectCounter` | executable | - | - | 1 | 1 (40) |
 | EFFECT_ENCORE | `BattleScript_EffectEncore` | executable | - | - | 1 | 1 (4) |
-| EFFECT_PAIN_SPLIT | `BattleScript_EffectPainSplit` | blocked-on-opcodes | `B_SCR_OP_PAINSPLITDMGCALC` (edge branch only) | - | 1 | 1 (2) |
+| EFFECT_PAIN_SPLIT | `BattleScript_EffectPainSplit` | blocked-on-opcodes | `B_SCR_OP_PAINSPLITDMGCALC` (edge branch only) | Operand gate: B_SCR_OP_COPYARRAY(gBattleMoveDamage, sPAINSPLIT_HP, 0x4) -- (gBattleMoveDamage, sPAINSPLIT_HP, 0x4) is outside the engine's accepted pointer-tuple universe (src/engine/battleScriptIngrainLeechSeedWrapOpcode.ts:154; battle_script_commands.c:3837) | 1 | 1 (2) |
 | EFFECT_SNORE | `BattleScript_EffectSnore` | executable | - | - | 1 | 1 (1) |
 | EFFECT_CONVERSION_2 | `BattleScript_EffectConversion2` | blocked-on-opcodes | `B_SCR_OP_SETTYPETORANDOMRESISTANCE` (main path) | - | 1 | 0 (0) |
 | EFFECT_LOCK_ON | `BattleScript_EffectLockOn` | blocked-on-opcodes | `B_SCR_OP_SETALWAYSHITFLAG` (edge branch only) | - | 2 | 0 (0) |
@@ -158,9 +158,9 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_HEAL_BELL | `BattleScript_EffectHealBell` | executable | - | - | 2 | 2 (4) |
 | EFFECT_QUICK_ATTACK | `BattleScript_EffectHit` | executable | - | - | 3 | 3 (28) |
 | EFFECT_TRIPLE_KICK | `BattleScript_EffectTripleKick` | executable | - | - | 1 | 1 (1) |
-| EFFECT_THIEF | `BattleScript_EffectThief` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_STEAL_ITEM is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 2 | 1 (1) |
-| EFFECT_MEAN_LOOK | `BattleScript_EffectMeanLook` | blocked-on-subsystem | - | Cmd_seteffectprimary dispatch: MOVE_EFFECT_PREVENT_ESCAPE is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 3 | 3 (6) |
-| EFFECT_NIGHTMARE | `BattleScript_EffectNightmare` | blocked-on-subsystem | - | Cmd_seteffectprimary dispatch: MOVE_EFFECT_NIGHTMARE is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 1 | 1 (2) |
+| EFFECT_THIEF | `BattleScript_EffectThief` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_STEAL_ITEM is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522<br>Operand gate: B_SCR_OP_PLAYANIMATION(B_ANIM_ITEM_STEAL) -- B_ANIM_ITEM_STEAL is outside the engine's accepted animation-id set (src/engine/battleScriptStatbuffchangeOpcode.ts:189; battle_script_commands.c:4011) | 2 | 1 (1) |
+| EFFECT_MEAN_LOOK | `BattleScript_EffectMeanLook` | blocked-on-subsystem | - | Operand gate: B_SCR_OP_JUMPIFSTATUS2(STATUS2_ESCAPE_PREVENTION) -- STATUS2_ESCAPE_PREVENTION is outside the engine's accepted status2-mask set (src/engine/battleScriptStatbuffchangeOpcode.ts:318; battle_script_commands.c:3096)<br>Cmd_seteffectprimary dispatch: MOVE_EFFECT_PREVENT_ESCAPE is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 3 | 3 (6) |
+| EFFECT_NIGHTMARE | `BattleScript_EffectNightmare` | blocked-on-subsystem | - | Operand gate: B_SCR_OP_JUMPIFSTATUS2(STATUS2_NIGHTMARE) -- STATUS2_NIGHTMARE is outside the engine's accepted status2-mask set (src/engine/battleScriptStatbuffchangeOpcode.ts:318; battle_script_commands.c:3096)<br>Cmd_seteffectprimary dispatch: MOVE_EFFECT_NIGHTMARE is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 1 | 1 (2) |
 | EFFECT_MINIMIZE | `BattleScript_EffectMinimize` | executable | - | - | 1 | 1 (5) |
 | EFFECT_CURSE | `BattleScript_EffectCurse` | executable | - | - | 1 | 1 (18) |
 | EFFECT_UNUSED_6E | `BattleScript_EffectHit` | executable | - | - | 0 | 0 (0) |
@@ -182,7 +182,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_MAGNITUDE | `BattleScript_EffectMagnitude` | blocked-on-opcodes | `B_SCR_OP_MAGNITUDEDAMAGECALCULATION` (main path) | - | 1 | 1 (2) |
 | EFFECT_BATON_PASS | `BattleScript_EffectBatonPass` | executable | - | - | 1 | 1 (13) |
 | EFFECT_PURSUIT | `BattleScript_EffectHit` | executable | - | - | 1 | 1 (6) |
-| EFFECT_RAPID_SPIN | `BattleScript_EffectRapidSpin` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_RAPIDSPIN is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 1 | 1 (1) |
+| EFFECT_RAPID_SPIN | `BattleScript_EffectRapidSpin` | blocked-on-opcodes | `B_SCR_OP_RAPIDSPINFREE` (edge branch only) | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_RAPIDSPIN is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522<br>Operand gate: B_SCR_OP_COPYARRAY(gBattlerTarget, sBATTLER, 0x1) -- (gBattlerTarget, sBATTLER, 0x1) is outside the engine's accepted pointer-tuple universe (src/engine/battleScriptIngrainLeechSeedWrapOpcode.ts:154; battle_script_commands.c:3837) | 1 | 1 (1) |
 | EFFECT_SONICBOOM | `BattleScript_EffectSonicboom` | executable | - | - | 1 | 1 (1) |
 | EFFECT_UNUSED_83 | `BattleScript_EffectHit` | executable | - | - | 0 | 0 (0) |
 | EFFECT_MORNING_SUN | `BattleScript_EffectMorningSun` | executable | - | - | 1 | 0 (0) |
@@ -213,14 +213,14 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_SOFTBOILED | `BattleScript_EffectSoftboiled` | executable | - | - | 2 | 2 (7) |
 | EFFECT_FAKE_OUT | `BattleScript_EffectFakeOut` | executable | - | - | 1 | 1 (15) |
 | EFFECT_UPROAR | `BattleScript_EffectUproar` | executable | - | - | 1 | 1 (1) |
-| EFFECT_STOCKPILE | `BattleScript_EffectStockpile` | blocked-on-opcodes | `B_SCR_OP_STOCKPILE` (main path) | - | 1 | 1 (2) |
+| EFFECT_STOCKPILE | `BattleScript_EffectStockpile` | blocked-on-opcodes | `B_SCR_OP_STOCKPILE` (main path) | Operand gate: B_SCR_OP_PRINTFROMTABLE(gStockpileUsedStringIds) -- gStockpileUsedStringIds is outside the engine's accepted string-table pointer set (src/engine/battleScriptHitChainOpcode.ts:279; battle_script_commands.c:2184) | 1 | 1 (2) |
 | EFFECT_SPIT_UP | `BattleScript_EffectSpitUp` | blocked-on-opcodes | `B_SCR_OP_STOCKPILETOBASEDAMAGE` (edge branch only) | - | 1 | 1 (1) |
-| EFFECT_SWALLOW | `BattleScript_EffectSwallow` | blocked-on-opcodes | `B_SCR_OP_STOCKPILETOHPHEAL` (main path) | - | 1 | 1 (2) |
+| EFFECT_SWALLOW | `BattleScript_EffectSwallow` | blocked-on-opcodes | `B_SCR_OP_STOCKPILETOHPHEAL` (main path) | Operand gate: B_SCR_OP_PRINTFROMTABLE(gSwallowFailStringIds) -- gSwallowFailStringIds is outside the engine's accepted string-table pointer set (src/engine/battleScriptHitChainOpcode.ts:279; battle_script_commands.c:2184) | 1 | 1 (2) |
 | EFFECT_UNUSED_A3 | `BattleScript_EffectHit` | executable | - | - | 0 | 0 (0) |
 | EFFECT_HAIL | `BattleScript_EffectHail` | executable | - | - | 1 | 1 (7) |
 | EFFECT_TORMENT | `BattleScript_EffectTorment` | executable | - | - | 1 | 1 (4) |
 | EFFECT_FLATTER | `BattleScript_EffectFlatter` | executable | - | - | 1 | 1 (2) |
-| EFFECT_WILL_O_WISP | `BattleScript_EffectWillOWisp` | blocked-on-subsystem | - | Cmd_jumpifability: ABILITY_WATER_VEIL is outside the engine's widened ability set (battleScriptIngrainLeechSeedWrapOpcode.ts) -- battle_script_commands.c:3105 | 1 | 1 (10) |
+| EFFECT_WILL_O_WISP | `BattleScript_EffectWillOWisp` | blocked-on-subsystem | - | Cmd_jumpifability: ABILITY_WATER_VEIL is outside the engine's widened ability set (battleScriptIngrainLeechSeedWrapOpcode.ts) -- battle_script_commands.c:3105<br>Operand gate: B_SCR_OP_COPYARRAY(gEffectBattler, gBattlerTarget, 0x1) -- (gEffectBattler, gBattlerTarget, 0x1) is outside the engine's accepted pointer-tuple universe (src/engine/battleScriptIngrainLeechSeedWrapOpcode.ts:154; battle_script_commands.c:3837) | 1 | 1 (10) |
 | EFFECT_MEMENTO | `BattleScript_EffectMemento` | blocked-on-opcodes | `B_SCR_OP_TRYMEMENTO` (edge branch only) | - | 1 | 1 (1) |
 | EFFECT_FACADE | `BattleScript_EffectFacade` | executable | - | - | 1 | 1 (19) |
 | EFFECT_FOCUS_PUNCH | `BattleScript_EffectFocusPunch` | executable | - | - | 1 | 1 (11) |
@@ -240,8 +240,8 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_RECYCLE | `BattleScript_EffectRecycle` | blocked-on-opcodes | `B_SCR_OP_TRYRECYCLEITEM` (main path) | - | 1 | 1 (1) |
 | EFFECT_REVENGE | `BattleScript_EffectRevenge` | executable | - | - | 1 | 1 (3) |
 | EFFECT_BRICK_BREAK | `BattleScript_EffectBrickBreak` | executable | - | - | 1 | 1 (46) |
-| EFFECT_YAWN | `BattleScript_EffectYawn` | executable | - | - | 1 | 1 (10) |
-| EFFECT_KNOCK_OFF | `BattleScript_EffectKnockOff` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_KNOCK_OFF is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 1 | 1 (7) |
+| EFFECT_YAWN | `BattleScript_EffectYawn` | blocked-on-subsystem | - | Operand gate: B_SCR_OP_COPYARRAY(sBATTLER, sBATTLER_WITH_ABILITY, 0x1) -- (sBATTLER, sBATTLER_WITH_ABILITY, 0x1) is outside the engine's accepted pointer-tuple universe (src/engine/battleScriptIngrainLeechSeedWrapOpcode.ts:154; battle_script_commands.c:3837) | 1 | 1 (10) |
+| EFFECT_KNOCK_OFF | `BattleScript_EffectKnockOff` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_KNOCK_OFF is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522<br>Operand gate: B_SCR_OP_PLAYANIMATION(B_ANIM_ITEM_KNOCKOFF) -- B_ANIM_ITEM_KNOCKOFF is outside the engine's accepted animation-id set (src/engine/battleScriptStatbuffchangeOpcode.ts:189; battle_script_commands.c:4011) | 1 | 1 (7) |
 | EFFECT_ENDEAVOR | `BattleScript_EffectEndeavor` | executable | - | - | 1 | 1 (4) |
 | EFFECT_ERUPTION | `BattleScript_EffectEruption` | blocked-on-opcodes | `B_SCR_OP_SCALEDAMAGEBYHEALTHRATIO` (main path) | - | 2 | 2 (2) |
 | EFFECT_SKILL_SWAP | `BattleScript_EffectSkillSwap` | executable | - | - | 1 | 1 (5) |
@@ -254,7 +254,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_DOUBLE_EDGE | `BattleScript_EffectDoubleEdge` | executable | - | - | 2 | 1 (52) |
 | EFFECT_TEETER_DANCE | `BattleScript_EffectTeeterDance` | blocked-on-opcodes | `B_SCR_OP_JUMPIFARRAYEQUAL` (main path) | - | 1 | 1 (2) |
 | EFFECT_BLAZE_KICK | `BattleScript_EffectBurnHit` | executable | - | - | 1 | 1 (1) |
-| EFFECT_MUD_SPORT | `BattleScript_EffectMudSport` | blocked-on-opcodes | `B_SCR_OP_SETTYPEBASEDHALVERS` (main path) | - | 1 | 0 (0) |
+| EFFECT_MUD_SPORT | `BattleScript_EffectMudSport` | blocked-on-opcodes | `B_SCR_OP_SETTYPEBASEDHALVERS` (main path) | Operand gate: B_SCR_OP_PRINTFROMTABLE(gSportsUsedStringIds) -- gSportsUsedStringIds is outside the engine's accepted string-table pointer set (src/engine/battleScriptHitChainOpcode.ts:279; battle_script_commands.c:2184) | 1 | 0 (0) |
 | EFFECT_POISON_FANG | `BattleScript_EffectPoisonFang` | executable | - | - | 1 | 1 (2) |
 | EFFECT_WEATHER_BALL | `BattleScript_EffectWeatherBall` | blocked-on-opcodes | `B_SCR_OP_SETWEATHERBALLTYPE` (main path) | - | 1 | 0 (0) |
 | EFFECT_OVERHEAT | `BattleScript_EffectOverheat` | executable | - | - | 2 | 1 (23) |
@@ -263,7 +263,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_SKY_UPPERCUT | `BattleScript_EffectSkyUppercut` | executable | - | - | 1 | 1 (3) |
 | EFFECT_BULK_UP | `BattleScript_EffectBulkUp` | executable | - | - | 1 | 1 (5) |
 | EFFECT_POISON_TAIL | `BattleScript_EffectPoisonHit` | executable | - | - | 1 | 1 (1) |
-| EFFECT_WATER_SPORT | `BattleScript_EffectWaterSport` | blocked-on-opcodes | `B_SCR_OP_SETTYPEBASEDHALVERS` (main path) | - | 1 | 0 (0) |
+| EFFECT_WATER_SPORT | `BattleScript_EffectWaterSport` | blocked-on-opcodes | `B_SCR_OP_SETTYPEBASEDHALVERS` (main path) | Operand gate: B_SCR_OP_PRINTFROMTABLE(gSportsUsedStringIds) -- gSportsUsedStringIds is outside the engine's accepted string-table pointer set (src/engine/battleScriptHitChainOpcode.ts:279; battle_script_commands.c:2184) | 1 | 0 (0) |
 | EFFECT_CALM_MIND | `BattleScript_EffectCalmMind` | executable | - | - | 1 | 1 (16) |
 | EFFECT_DRAGON_DANCE | `BattleScript_EffectDragonDance` | executable | - | - | 1 | 1 (14) |
 | EFFECT_CAMOUFLAGE | `BattleScript_EffectCamouflage` | blocked-on-opcodes | `B_SCR_OP_SETTYPETOENVIRONMENT` (main path) | - | 1 | 0 (0) |
@@ -273,7 +273,9 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 The tool itself asserts these before writing this doc and exits nonzero on any mismatch:
 
 - `EFFECT_HIT`, `EFFECT_POISON_HIT`, `EFFECT_BURN_HIT`, `EFFECT_FREEZE_HIT`, `EFFECT_PARALYZE_HIT` each executable -- the SetMoveEffect quartet's own dispatch was already source-complete (PROGRESS 444), and B_SCR_OP_JUMPIFHALFWORD/JUMPIFSTATUS3CONDITION/ORWORD (registered 2026-07-25) closed the shared-entry chokepoint that used to block all five on an unrelated instruction
-- `EFFECT_SLEEP`, `EFFECT_TOXIC` blocked, mentioning `Cmd_seteffectprimary` (still fully unregistered)
+- `EFFECT_SLEEP`, `EFFECT_TOXIC`, `EFFECT_POISON`, `EFFECT_PARALYZE`, and `EFFECT_YAWN` blocked on their exact `PRINTFROMTABLE`/`COPYARRAY` operand sets; these are source-selected callback or prevention-script barriers that the former opcode-only walk missed
+- `EFFECT_RECOIL` executable with its source-selected recoil callback walked: `ABILITY_ROCK_HEAD` is accepted by the engine's live `JUMPIFABILITY` surface
+- Mean Look/Nightmare, Thief/Knock Off, Rapid Spin, Pain Split, Stockpile/Swallow, and Metronome each have an exact operand/dynamic-universe blocker-set ratchet; Rapid Spin and Pain Split also retain their exact missing-opcode sets
 - `EFFECT_RECOIL_IF_MISS` executable (a real positive: it enters via `BattleScript_HitFromAtkString`, skipping the chokepoint entirely, and reaches moveend/checkteamslost)
 - `EFFECT_ATTACK_DOWN_HIT`, `EFFECT_DEFENSE_DOWN_HIT`, `EFFECT_SPEED_DOWN_HIT`, `EFFECT_SPECIAL_ATTACK_DOWN_HIT`, `EFFECT_SPECIAL_DEFENSE_DOWN_HIT`, `EFFECT_ACCURACY_DOWN_HIT`, `EFFECT_ATTACK_UP_HIT`, `EFFECT_DEFENSE_UP_HIT` each executable (ISSUES #44: `SETMOVEEFFECT_SUPPORTED` is now derived from the engine's own exported `SET_MOVE_EFFECT_SUPPORTED_BYTES`, which spreads `STAT_MOVE_EFFECT_TABLE`'s keys, instead of a hand list that predated that table's registration)
 - `EFFECT_MULTI_HIT`, `EFFECT_DOUBLE_HIT`, `EFFECT_TWINEEDLE` each executable (2026-07-27, scout §4 rungs 2-6: `B_SCR_OP_INITMULTIHITSTRING`/`B_SCR_OP_JUMPIFHASNOHP` registered, `JUMPIFHALFWORD`/`JUMPIFBYTE` per-operand widenings for `gChosenMove`/`MOVE_RESULT_FOE_ENDURED`, plus two further hidden barriers found running the committed scripts live rather than trusting the scout dossier -- `COPYARRAY`'s `cEFFECT_CHOOSER<-sMULTIHIT_EFFECT` tuple, and the `sMULTIHIT_STRING+4` hits-landed counter's `ADDBYTE` write / `gBattleTextBuff1` `COPYARRAY` read, both real on every multi-hit iteration, not Triple-Kick-only as the dossier's §1d table claimed)
@@ -284,11 +286,12 @@ All checks passed for this run.
 
 ## Caveats (read before trusting a number here)
 
-- **Registration coverage, not semantic verification.** "Executable" means every reachable opcode has a dispatch entry, not that its behavior is bit-exact or complete. A registered opcode with a narrow (b)-policy barrier still counts as "registered" per ROADMAP S10 §1 unless it is the one named exception below.
-- **One deliberate semantic exception:** `Cmd_seteffectwithchance`'s SetMoveEffect dispatch (`applySetMoveEffect`, `src/engine/battleScriptHitChainOpcode.ts:1760-1971`) is opcode-registered but internally branches on the `MOVE_EFFECT_*` byte a script sets via the preceding `setmoveeffect` statement. This is the only production dispatcher today where opcode registration and per-script executability diverge (PROGRESS 444), so this census specifically tracks that one operand value along each walk -- reading the supported-byte set live from the engine's own exported `SET_MOVE_EFFECT_SUPPORTED_BYTES` (ISSUES #44) rather than a second hand-maintained copy, with a name<->id lookup table guarded by an assertion that fails the run if the engine's dispatch grows an id this tool cannot name yet. Every other multi-branch dispatcher's internal barriers are *not* modeled operand-by-operand here -- if a future dispatcher gains the same pattern (registered opcode, narrow-input barrier), this tool will overstate its effects as fully executable until a similar tracked exception is added.
+- **Registration coverage, not semantic verification.** "Executable" means every reachable opcode has a dispatch entry and the tracked static operand gates accept that script's operands, not that behavior is bit-exact or every durable consumer exists. Registered runtime/state barriers still count as "registered" per ROADMAP S10 §1 unless they are one of the explicit static gates below.
+- **Tracked registered-operand gates.** `Cmd_seteffectwithchance`/`Cmd_seteffectprimary`'s SetMoveEffect dispatch (`applySetMoveEffect`, `src/engine/battleScriptHitChainOpcode.ts:1760-1971`) is opcode-registered but internally branches on the `MOVE_EFFECT_*` byte a script sets via the preceding `setmoveeffect` statement. The census tracks that operand along each walk, reading the supported-byte set live from the engine's own exported `SET_MOVE_EFFECT_SUPPORTED_BYTES` (ISSUES #44) rather than a second hand-maintained copy, with a name<->id lookup table guarded by an assertion that fails the run if the engine's dispatch grows an id this tool cannot name yet. It also reads `JUMPIFSTATUS2`, `PLAYANIMATION`, `COPYARRAY`/`COPYBYTE`, and `PRINTFROMTABLE` acceptance directly from the private production declarations that enforce them; `JUMPIFABILITY` keeps using its engine-exported live set. `JUMPIFARRAYEQUAL` is probed through its real installed handler once registered. An unaccepted operand is a subsystem blocker even though the opcode itself is installed. Other registered multi-branch runtime barriers are not modeled operand-by-operand.
+- **Fixed C-selected callbacks.** SetMoveEffect callback labels and `Cmd_rapidspinfree`'s cleanup labels do not appear as bytecode operands, so the committed graph cannot expose them. The census derives those fixed labels from the pinned `battle_script_commands.c` and walks them as additional paths. This is what makes recoil's Rock Head gate, Thief/Knock Off's item animations, and Rapid Spin's Wrap-return copy tuple visible without hand-maintaining callback labels.
 - **Call/return modeling.** A `call` edge is treated as reaching *both* the callee's entry (to collect its opcodes) and the callsite's recorded continuation (`callsiteContinuations`), unconditionally. This assumes the callee always returns; it does not model the callee diverging (e.g. hitting `end` without returning), which would make this census's reachable set a strict superset of the true one in rare cases -- i.e. it can only make an effect look *more* blocked than reality, never less.
 - **"Main path" is a conservative proxy, not a dominance analysis.** An opcode is reported as reached "on the main path" only if some route from the entry reaches it using zero conditional forks (unconditional fallthrough, unconditional `goto`, and calls only). Any instruction beyond the first conditional jump in a script is reported as "edge branch only" even if every real branch of that fork reconverges to the same later instruction. This under-claims "main path" rather than over-claiming it.
-- **Dynamic dispatch, two categories.** `B_SCR_OP_JUMPTOCALLEDMOVE` (Metronome/Sleep Talk/Assist-style "run another move's effect script") has a runtime-computed target with no static label operand. The called script is not walked from that call site; once the dynamic opcode itself is registered, the caller is executable and each possible called effect remains accountable in its own census row. Separately, `B_SCR_OP_FORCERANDOMSWITCH`'s success target (`BattleScript_SuccessForceOut`) is fixed at compile time but never spelled as a bytecode operand -- `Cmd_forcerandomswitch` writes `gBattlescriptCurrInstr` directly (`battle_script_commands.c:7181`) instead of reading one. Since that target IS statically known, it is modeled as a real jump edge (`HARDCODED_SUCCESS_TARGETS` in this tool) so the walk actually visits it, unlike the runtime-resolved `JUMPTOCALLEDMOVE` case.
+- **Dynamic dispatch, three categories.** `B_SCR_OP_JUMPTOCALLEDMOVE` (Sleep Talk/Assist-style "run another move's effect script") has a runtime-computed target with no static label operand. The called script is not walked from that call site; once the dynamic opcode itself is registered, the caller is executable and each possible called effect remains accountable in its own census row. Metronome is the explicit exception: its legal selectable universe is the move's entire contract, so its own row retains a named dynamic-universe blocker even after opcode registration and cannot appear as a one-opcode win. Separately, `B_SCR_OP_FORCERANDOMSWITCH`'s success target (`BattleScript_SuccessForceOut`) is fixed at compile time but never spelled as a bytecode operand -- `Cmd_forcerandomswitch` writes `gBattlescriptCurrInstr` directly (`battle_script_commands.c:7181`) instead of reading one. Since that target IS statically known, it is modeled as a real jump edge (`HARDCODED_SUCCESS_TARGETS` in this tool) so the walk actually visits it, unlike the runtime-resolved `JUMPTOCALLEDMOVE` case.
 - **Control-flow correction pass.** `src/data/gen/battle-script-graph.json`'s edge extractor (`tools/extract/extract-battle-script-graph.ts`) only recognizes a script-pointer operand as a jump target when the opcode name matches a fixed pattern (`B_SCR_OP_JUMPIF*`, plus a short unconditional allowlist). Opcodes with a differently-named pointer operand (`accuracycheck`'s failPtr, `statbuffchange`'s jumpptr, `forcerandomswitch`'s ptr, ...) get zero jump edge from the committed graph. This tool corrects that mechanically from the graph's own `labelOperands` (already computed per statement, just not wired into every edge) rather than opcode-by-opcode: any statement with a label operand not already covered by an existing jump/call edge gets one synthesized, which can only make an effect look more blocked than the committed graph claims, never less. The one further correction needed is `B_SCR_OP_FORCERANDOMSWITCH` specifically: audited against `battle_script_commands.c` this session, it never falls through to its assembly successor on any branch (unlike every other audited "ptr"-operand opcode, which do genuinely advance on the non-jump branch), so its one fabricated fallthrough edge is suppressed rather than kept alongside the added jump edges (`NEVER_FALLS_THROUGH_OPCODES` in this tool). See docs/roar-multihit-registration-scout.md for the EFFECT_ROAR case this was found from.
 - **Factory-L50 legality** is taken directly from the topology's own precomputed `level50FactoryReachableEffects` join (the 850-set boundary); this tool does not recompute Factory legality itself.
 
