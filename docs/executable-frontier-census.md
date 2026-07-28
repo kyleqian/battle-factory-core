@@ -4,16 +4,16 @@ Generated 2026-07-28. Rerun: `npx tsx tools/report/executable-frontier-census.ts
 
 Answers ROADMAP S10's Executable-frontier reset question directly: not "how many opcodes are registered" but **how many of the 355 moves can the kernel execute end-to-end today, and what exactly blocks each of the rest.** Every `BattleScript_Effect*` entry in the committed topology (`src/data/gen/battle-script-topology.json` + `battle-script-graph.json`) is walked for full opcode reachability (branches, goto/call targets, the shared hit-chain tail) against the opcode set the engine currently registers (read live from `src/engine/battleScriptRulesContext.ts`'s `createBattleScriptStatusRulesHandlers`, so this doc cannot drift from what the engine actually installs).
 
-**Key finding:** the single highest-leverage next registration is `B_SCR_OP_JUMPTOCALLEDMOVE`, `B_SCR_OP_TRYCHOOSESLEEPTALKMOVE` -- registering exactly that set would flip **1 effect / 1 move (1 Factory-L50, 8 weighted)** from blocked to executable in one step (EFFECT_SLEEP_TALK) -- the largest single entry in the ranked table below. This paragraph is generated fresh from the current registered-opcode set every run, so it always names today's actual top blocker, not a past one -- see PROGRESS.md for the registration history (e.g. the 2026-07-25 B_SCR_OP_JUMPIFHALFWORD/JUMPIFSTATUS3CONDITION/ORWORD entry-chokepoint trio).
+**Key finding:** the single highest-leverage next registration is `B_SCR_OP_TRYWISH` -- registering exactly that set would flip **1 effect / 1 move (1 Factory-L50, 8 weighted)** from blocked to executable in one step (EFFECT_WISH) -- the largest single entry in the ranked table below. This paragraph is generated fresh from the current registered-opcode set every run, so it always names today's actual top blocker, not a past one -- see PROGRESS.md for the registration history (e.g. the 2026-07-25 B_SCR_OP_JUMPIFHALFWORD/JUMPIFSTATUS3CONDITION/ORWORD entry-chokepoint trio).
 
 ## Headline counts
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 135 | 214 | 63.1% |
-| Moves (unweighted, all 355) | 259 | 355 | 73.0% |
-| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 211 | 276 | 76.4% |
-| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2662 | 2957 | 90.0% |
+| Effect scripts | 136 | 214 | 63.6% |
+| Moves (unweighted, all 355) | 260 | 355 | 73.2% |
+| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 212 | 276 | 76.8% |
+| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2670 | 2957 | 90.3% |
 
 "Executable" means every opcode on every statically reachable path from the effect's entry script has a dispatch entry today (registered barriers included, per ROADMAP S10 §1's (a)/(b) policy). It is not a semantic-correctness claim -- see Caveats.
 
@@ -23,7 +23,6 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 
 | Missing opcode(s) | Effects unlocked | Moves unlocked (unweighted) | Factory-L50 moves (unweighted) | Factory-L50 weighted |
 | --- | --- | --- | --- | --- |
-| `B_SCR_OP_JUMPTOCALLEDMOVE`, `B_SCR_OP_TRYCHOOSESLEEPTALKMOVE` | 1 (EFFECT_SLEEP_TALK) | 1 | 1 | 8 |
 | `B_SCR_OP_TRYWISH` | 1 (EFFECT_WISH) | 1 | 1 | 8 |
 | `B_SCR_OP_ROLLOUTDAMAGECALCULATION` | 1 (EFFECT_ROLLOUT) | 2 | 2 | 7 |
 | `B_SCR_OP_GETSECRETPOWEREFFECT` | 1 (EFFECT_SECRET_POWER) | 1 | 1 | 6 |
@@ -48,6 +47,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_SCALEDAMAGEBYHEALTHRATIO` | 1 (EFFECT_ERUPTION) | 2 | 2 | 2 |
 | `B_SCR_OP_CUREIFBURNEDPARALYZEDORPOISONED` | 1 (EFFECT_REFRESH) | 1 | 1 | 2 |
 | `B_SCR_OP_JUMPIFARRAYEQUAL` | 1 (EFFECT_TEETER_DANCE) | 1 | 1 | 2 |
+| `B_SCR_OP_MAGNITUDEDAMAGECALCULATION` | 1 (EFFECT_MAGNITUDE) | 1 | 1 | 2 |
 
 ## Per-effect detail
 
@@ -150,7 +150,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_LOCK_ON | `BattleScript_EffectLockOn` | blocked-on-opcodes | `B_SCR_OP_SETALWAYSHITFLAG` (edge branch only) | - | 2 | 0 (0) |
 | EFFECT_SKETCH | `BattleScript_EffectSketch` | blocked-on-opcodes | `B_SCR_OP_COPYMOVEPERMANENTLY` (edge branch only) | - | 1 | 0 (0) |
 | EFFECT_UNUSED_60 | `BattleScript_EffectHit` | executable | - | - | 0 | 0 (0) |
-| EFFECT_SLEEP_TALK | `BattleScript_EffectSleepTalk` | blocked-on-opcodes | `B_SCR_OP_TRYCHOOSESLEEPTALKMOVE`, `B_SCR_OP_JUMPTOCALLEDMOVE` (edge branch only) | B_SCR_OP_JUMPTOCALLEDMOVE: runtime-resolved jump target (called move's own effect script), not statically enumerable | 1 | 1 (8) |
+| EFFECT_SLEEP_TALK | `BattleScript_EffectSleepTalk` | executable | - | - | 1 | 1 (8) |
 | EFFECT_DESTINY_BOND | `BattleScript_EffectDestinyBond` | executable | - | - | 1 | 1 (10) |
 | EFFECT_FLAIL | `BattleScript_EffectFlail` | executable | - | - | 2 | 2 (20) |
 | EFFECT_SPITE | `BattleScript_EffectSpite` | blocked-on-opcodes | `B_SCR_OP_TRYSPITEPPREDUCE` (edge branch only) | - | 1 | 1 (2) |
@@ -233,7 +233,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_TRICK | `BattleScript_EffectTrick` | blocked-on-opcodes | `B_SCR_OP_TRYSWAPITEMS` (edge branch only) | - | 1 | 1 (5) |
 | EFFECT_ROLE_PLAY | `BattleScript_EffectRolePlay` | blocked-on-opcodes | `B_SCR_OP_TRYCOPYABILITY` (edge branch only) | - | 1 | 1 (1) |
 | EFFECT_WISH | `BattleScript_EffectWish` | blocked-on-opcodes | `B_SCR_OP_TRYWISH` (main path) | - | 1 | 1 (8) |
-| EFFECT_ASSIST | `BattleScript_EffectAssist` | blocked-on-opcodes | `B_SCR_OP_ASSISTATTACKSELECT`, `B_SCR_OP_JUMPTOCALLEDMOVE` (main path) | B_SCR_OP_JUMPTOCALLEDMOVE: runtime-resolved jump target (called move's own effect script), not statically enumerable | 1 | 0 (0) |
+| EFFECT_ASSIST | `BattleScript_EffectAssist` | blocked-on-opcodes | `B_SCR_OP_ASSISTATTACKSELECT` (main path) | - | 1 | 0 (0) |
 | EFFECT_INGRAIN | `BattleScript_EffectIngrain` | executable | - | - | 1 | 1 (5) |
 | EFFECT_SUPERPOWER | `BattleScript_EffectSuperpower` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_ATK_DEF_DOWN is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 1 | 1 (3) |
 | EFFECT_MAGIC_COAT | `BattleScript_EffectMagicCoat` | blocked-on-opcodes | `B_SCR_OP_TRYSETMAGICCOAT` (main path) | - | 1 | 1 (3) |
@@ -288,7 +288,7 @@ All checks passed for this run.
 - **One deliberate semantic exception:** `Cmd_seteffectwithchance`'s SetMoveEffect dispatch (`applySetMoveEffect`, `src/engine/battleScriptHitChainOpcode.ts:1760-1971`) is opcode-registered but internally branches on the `MOVE_EFFECT_*` byte a script sets via the preceding `setmoveeffect` statement. This is the only production dispatcher today where opcode registration and per-script executability diverge (PROGRESS 444), so this census specifically tracks that one operand value along each walk -- reading the supported-byte set live from the engine's own exported `SET_MOVE_EFFECT_SUPPORTED_BYTES` (ISSUES #44) rather than a second hand-maintained copy, with a name<->id lookup table guarded by an assertion that fails the run if the engine's dispatch grows an id this tool cannot name yet. Every other multi-branch dispatcher's internal barriers are *not* modeled operand-by-operand here -- if a future dispatcher gains the same pattern (registered opcode, narrow-input barrier), this tool will overstate its effects as fully executable until a similar tracked exception is added.
 - **Call/return modeling.** A `call` edge is treated as reaching *both* the callee's entry (to collect its opcodes) and the callsite's recorded continuation (`callsiteContinuations`), unconditionally. This assumes the callee always returns; it does not model the callee diverging (e.g. hitting `end` without returning), which would make this census's reachable set a strict superset of the true one in rare cases -- i.e. it can only make an effect look *more* blocked than reality, never less.
 - **"Main path" is a conservative proxy, not a dominance analysis.** An opcode is reported as reached "on the main path" only if some route from the entry reaches it using zero conditional forks (unconditional fallthrough, unconditional `goto`, and calls only). Any instruction beyond the first conditional jump in a script is reported as "edge branch only" even if every real branch of that fork reconverges to the same later instruction. This under-claims "main path" rather than over-claiming it.
-- **Dynamic dispatch, two categories.** `B_SCR_OP_JUMPTOCALLEDMOVE` (Metronome/Sleep Talk/Assist-style "run another move's effect script") has a runtime-computed target with no static label operand; those call sites are reported as a subsystem note (dynamic move-effect dispatch), not walked further. Separately, `B_SCR_OP_FORCERANDOMSWITCH`'s success target (`BattleScript_SuccessForceOut`) is fixed at compile time but never spelled as a bytecode operand -- `Cmd_forcerandomswitch` writes `gBattlescriptCurrInstr` directly (`battle_script_commands.c:7181`) instead of reading one. Since that target IS statically known, it is modeled as a real jump edge (`HARDCODED_SUCCESS_TARGETS` in this tool) so the walk actually visits it, unlike the genuinely-unresolvable `JUMPTOCALLEDMOVE` case.
+- **Dynamic dispatch, two categories.** `B_SCR_OP_JUMPTOCALLEDMOVE` (Metronome/Sleep Talk/Assist-style "run another move's effect script") has a runtime-computed target with no static label operand. The called script is not walked from that call site; once the dynamic opcode itself is registered, the caller is executable and each possible called effect remains accountable in its own census row. Separately, `B_SCR_OP_FORCERANDOMSWITCH`'s success target (`BattleScript_SuccessForceOut`) is fixed at compile time but never spelled as a bytecode operand -- `Cmd_forcerandomswitch` writes `gBattlescriptCurrInstr` directly (`battle_script_commands.c:7181`) instead of reading one. Since that target IS statically known, it is modeled as a real jump edge (`HARDCODED_SUCCESS_TARGETS` in this tool) so the walk actually visits it, unlike the runtime-resolved `JUMPTOCALLEDMOVE` case.
 - **Control-flow correction pass.** `src/data/gen/battle-script-graph.json`'s edge extractor (`tools/extract/extract-battle-script-graph.ts`) only recognizes a script-pointer operand as a jump target when the opcode name matches a fixed pattern (`B_SCR_OP_JUMPIF*`, plus a short unconditional allowlist). Opcodes with a differently-named pointer operand (`accuracycheck`'s failPtr, `statbuffchange`'s jumpptr, `forcerandomswitch`'s ptr, ...) get zero jump edge from the committed graph. This tool corrects that mechanically from the graph's own `labelOperands` (already computed per statement, just not wired into every edge) rather than opcode-by-opcode: any statement with a label operand not already covered by an existing jump/call edge gets one synthesized, which can only make an effect look more blocked than the committed graph claims, never less. The one further correction needed is `B_SCR_OP_FORCERANDOMSWITCH` specifically: audited against `battle_script_commands.c` this session, it never falls through to its assembly successor on any branch (unlike every other audited "ptr"-operand opcode, which do genuinely advance on the non-jump branch), so its one fabricated fallthrough edge is suppressed rather than kept alongside the added jump edges (`NEVER_FALLS_THROUGH_OPCODES` in this tool). See docs/roar-multihit-registration-scout.md for the EFFECT_ROAR case this was found from.
 - **Factory-L50 legality** is taken directly from the topology's own precomputed `level50FactoryReachableEffects` join (the 850-set boundary); this tool does not recompute Factory legality itself.
 

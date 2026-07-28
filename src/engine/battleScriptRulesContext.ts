@@ -68,6 +68,7 @@ import { createBattleScriptFriendshipToDamageOpcodeHandlers } from "./battleScri
 import { createBattleScriptCopyFoeStatsOpcodeHandlers } from "./battleScriptCopyFoeStatsOpcode.ts";
 import { createBattleScriptJumpifcantswitchOpcodeHandlers } from "./battleScriptJumpifcantswitchOpcode.ts";
 import { createBattleScriptJumpifnodamageOpcodeHandlers } from "./battleScriptJumpifnodamageOpcode.ts";
+import { createBattleScriptSleepTalkOpcodeHandlers } from "./battleScriptSleepTalkOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -138,6 +139,9 @@ export type BattleScriptSideTimerState = Readonly<{
   safeguardTimer: number;
   safeguardBattlerId: BattleScriptBattlerId;
   mistBattlerId: BattleScriptBattlerId;
+  /** Source u8 followmeTimer/followmeTarget, consumed by GetMoveTarget. */
+  followmeTimer: number;
+  followmeTarget: BattleScriptBattlerId;
 }>;
 
 export type BattleScriptSideTimerInput = Readonly<{
@@ -148,6 +152,8 @@ export type BattleScriptSideTimerInput = Readonly<{
   safeguardTimer?: number;
   safeguardBattlerId?: BattleScriptBattlerId;
   mistBattlerId?: BattleScriptBattlerId;
+  followmeTimer?: number;
+  followmeTarget?: BattleScriptBattlerId;
 }>;
 
 type BattleScriptRulesBattlerBase = Readonly<{
@@ -203,6 +209,9 @@ type BattleScriptRulesBattlerBase = Readonly<{
 }>;
 
 type BattleScriptMoveEndBattlerMetadata = Readonly<{
+  /** Source DisableStruct::encoreTimer/encoredMove, consumed by CheckMoveLimitations. */
+  encoreTimer: number;
+  encoredMove: number;
   /** Source u16 gBattleMons[battler].item. */
   item: number;
   /** Source s8 gBattleMons[battler].statStages[NUM_BATTLE_STATS]. */
@@ -322,6 +331,8 @@ export type BattleScriptRulesBattler = BattleScriptRulesBattlerBase & Readonly<{
    * construction boundary. Production constructors supply source values.
    */
   item?: number;
+  encoreTimer?: number;
+  encoredMove?: number;
   statStages?: readonly number[];
   specialStatus?: Readonly<{
     restoredBattlerSprite?: 0 | 1;
@@ -520,6 +531,8 @@ export type BattleScriptRulesContext = Readonly<
     scriptingBideDmg: number;
     /** Source u8 gAbsentBattlerFlags, limited to the four battler bits. */
     absentBattlerFlags: number;
+    /** Source u16 gCalledMove, distinct from both current and chosen move. */
+    calledMove: number;
     /** Source u16 gChosenMove, distinct from gCurrentMove. */
     chosenMove: number;
     /** Source u16 gBattleStruct->choicedMove[MAX_BATTLERS_COUNT]. */
@@ -641,6 +654,7 @@ export type BattleScriptRulesContextInput = Readonly<{
   bideTarget?: readonly BattleScriptBattlerId[];
   scriptingBideDmg?: number;
   absentBattlerFlags?: number;
+  calledMove?: number;
   chosenMove?: number;
   choicedMove?: readonly number[];
   changedItems?: readonly number[];
@@ -1635,6 +1649,8 @@ function buildSideTimerState(
     safeguardTimer: requireUnsigned(input?.safeguardTimer ?? 0, 0xff, `sideTimers[${side}].safeguardTimer`),
     safeguardBattlerId: requireSideTimerBattlerId(input?.safeguardBattlerId, `sideTimers[${side}].safeguardBattlerId`),
     mistBattlerId: requireSideTimerBattlerId(input?.mistBattlerId, `sideTimers[${side}].mistBattlerId`),
+    followmeTimer: requireUnsigned(input?.followmeTimer ?? 0, 0xff, `sideTimers[${side}].followmeTimer`),
+    followmeTarget: requireSideTimerBattlerId(input?.followmeTarget, `sideTimers[${side}].followmeTarget`),
   });
 }
 
@@ -1730,6 +1746,16 @@ export function createBattleScriptRulesContext(
       battler.disabledMove,
       0xffff,
       `battlers[${index}].disabledMove`,
+    ),
+    encoreTimer: requireUnsigned(
+      battler.encoreTimer ?? 0,
+      0xff,
+      `battlers[${index}].encoreTimer`,
+    ),
+    encoredMove: requireUnsigned(
+      battler.encoredMove ?? 0,
+      0xffff,
+      `battlers[${index}].encoredMove`,
     ),
     usedDisabledMove: requireUnsigned(
       battler.usedDisabledMove,
@@ -2030,6 +2056,7 @@ export function createBattleScriptRulesContext(
       0x0f,
       "absentBattlerFlags",
     ),
+    calledMove: requireUnsigned(input.calledMove ?? 0, 0xffff, "calledMove"),
     chosenMove: requireUnsigned(input.chosenMove ?? 0, 0xffff, "chosenMove"),
     choicedMove,
     changedItems,
@@ -2294,6 +2321,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptCopyFoeStatsOpcodeHandlers(program),
     ...createBattleScriptJumpifcantswitchOpcodeHandlers(program),
     ...createBattleScriptJumpifnodamageOpcodeHandlers(program),
+    ...createBattleScriptSleepTalkOpcodeHandlers(program),
   });
 }
 

@@ -183,6 +183,7 @@ describe("source-shaped Battle Script rules context", () => {
       "battlers",
       "bideDmg",
       "bideTarget",
+      "calledMove",
       "changedItems",
       "choicedMove",
       "chosenMove",
@@ -449,7 +450,7 @@ describe("source-shaped Battle Script rules context", () => {
 });
 
 describe("production status rules handler and execution seam", () => {
-  it("composes all 142 source-safe handlers, including SETSUBSTITUTE and SETDESTINYBOND, once", () => {
+  it("composes all 144 source-safe handlers, including the Sleep Talk pair, once", () => {
     const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts());
     expect(Object.keys(handlers).map(Number).sort((a, b) => a - b)).toEqual([
       0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12,
@@ -457,9 +458,9 @@ describe("production status rules handler and execution seam", () => {
       29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43,
       45, 46, 47, 49, 50, 51, 53, 54, 56, 57, 58, 60,
       61, 62, 63, 65, 66, 67, 69, 70, 71, 72, 73, 74, 76, 77, 78, 79, 80, 81,
-      82, 83, 84, 85, 86, 88, 92, 97, 98, 100, 101, 102, 104,
+      82, 83, 84, 85, 86, 88, 92, 97, 98, 99, 100, 101, 102, 104,
       105, 106, 111, 115, 118, 119, 120, 121, 122, 123, 125, 126, 127, 128, 129, 130, 131, 132, 136, 137, 140, 141, 142, 143, 146, 147,
-      149, 150, 151, 152, 153, 156, 159, 160, 161, 162, 170, 171, 172, 175, 180, 182, 184, 187, 189, 192, 194, 197, 198, 200, 207, 213, 215, 216, 226, 227, 231, 238, 246, 248,
+      149, 150, 151, 152, 153, 156, 159, 160, 161, 162, 169, 170, 171, 172, 175, 180, 182, 184, 187, 189, 192, 194, 197, 198, 200, 207, 213, 215, 216, 226, 227, 231, 238, 246, 248,
     ]);
   });
 

@@ -1,4 +1,26 @@
 ---
+## 552 — [SUPERVISOR VERIFY 2026-07-27 ~23:10] Destiny Bond terminal path accepted; Substitute evidence merged
+
+- **State:** reviewed union green at **307 files / 3898 tests**; focused
+  **266/266**, production build, oracle freshness, and `git diff --check`
+  pass. Census is **134/214 effects, 258/355 moves, 210/276 Factory-L50
+  distinct, 2652/2957 weighted**.
+- **Did:** accepted `410c751`/`5eb6a0f`: the reusable ordered multi-push VM
+  control reproduces Destiny Bond's nested avenging→original-faint→caller
+  returns, and a generic Wobbuffet→Snorlax Explosion turn reaches terminal
+  with both faints exactly once. The hit-chain barrier ratchet shrank
+  **23→22**.
+- **Next:** register the one-byte `B_SCR_OP_SETSUBSTITUTE` /
+  `EFFECT_SUBSTITUTE` from merged source/OFF evidence. Implement both strict
+  low-HP failure and success mutations, plus already-live and cross-action
+  persistence routes; regenerate the expected **+1/+1/+1/+10** delta.
+- **Notes:** merged `f48d51f` after twice reproducing Golem Substitute at
+  manifest `19e525d9…f7c7d`: HP **155→117**, PP **10→9→8**, and the live bit
+  persist through a second real failed use. Low-HP internal fields are
+  source-pinned but not oracle-exposed. No new barrier, recording import,
+  animation edit, DEFERRED item, or oracle lifecycle action.
+
+---
 ## 550 — [SUPERVISOR VERIFY 2026-07-27 ~22:51] Focus Punch executable; Destiny Bond evidence banked
 
 - **State:** reviewed union green at **305 files / 3889 tests**; focused

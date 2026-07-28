@@ -15,6 +15,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 555 — [BOUNDED MAIN WORKER 2026-07-27 ~23:42] Sleep Talk executes called moves generically
+
+- **State:** implementation/focused suite green at **322/322**; TypeScript
+  compile and `git diff --check` pass. Census is the exact requested
+  **136/214 effects, 260/355 moves, 212/276 Factory-L50 distinct,
+  2670/2957 weighted**, with all **42/42** checks.
+- **Did:** registered source-complete `0xa9 + ptr`
+  `TRYCHOOSESLEEPTALKMOVE` and `0x63 + byte` `JUMPTOCALLEDMOVE`. The generic
+  VM now owns all exclusions/limitations except PP, slot+target retry RNG,
+  called/current/position/target fields, TRUE/FALSE chosen-move behavior,
+  and direct effect dispatch without a stack push. Awake, all-unusable, and
+  asleep→Fissure terminal walks pass; the full-turn seam reaches player-win.
+- **Next:** run full `npm test`, production build, OFF-oracle freshness, and
+  final diff checks; then record the green commit/hash and hand off.
+- **Notes:** full-turn Whiscash proof preserves Fissure PP **5**, spends Sleep
+  Talk **10→9**, leaves chosen move as Sleep Talk, and skips the slower
+  trainer action after the KO. No barrier/ratchet increase, recording import,
+  presentation/animation edit, or canonical Battle-2 work.
+
+---
 ## 554 — [SUPERVISOR VERIFY 2026-07-27 ~23:25] Substitute accepted; Sleep Talk evidence merged
 
 - **State:** reviewed union green at **309 files / 3911 tests**; production
@@ -56,25 +76,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   hit-chain/MOVEEND tests still pin persistence until `substituteHP==0`, then
   clear. No barrier/ratchet increase, recording import, animation/render edit,
   canonical Battle-2 work, oracle lifecycle action, or PAPERCUT.
-
----
-## 552 — [SUPERVISOR VERIFY 2026-07-27 ~23:10] Destiny Bond terminal path accepted; Substitute evidence merged
-
-- **State:** reviewed union green at **307 files / 3898 tests**; focused
-  **266/266**, production build, oracle freshness, and `git diff --check`
-  pass. Census is **134/214 effects, 258/355 moves, 210/276 Factory-L50
-  distinct, 2652/2957 weighted**.
-- **Did:** accepted `410c751`/`5eb6a0f`: the reusable ordered multi-push VM
-  control reproduces Destiny Bond's nested avenging→original-faint→caller
-  returns, and a generic Wobbuffet→Snorlax Explosion turn reaches terminal
-  with both faints exactly once. The hit-chain barrier ratchet shrank
-  **23→22**.
-- **Next:** register the one-byte `B_SCR_OP_SETSUBSTITUTE` /
-  `EFFECT_SUBSTITUTE` from merged source/OFF evidence. Implement both strict
-  low-HP failure and success mutations, plus already-live and cross-action
-  persistence routes; regenerate the expected **+1/+1/+1/+10** delta.
-- **Notes:** merged `f48d51f` after twice reproducing Golem Substitute at
-  manifest `19e525d9…f7c7d`: HP **155→117**, PP **10→9→8**, and the live bit
-  persist through a second real failed use. Low-HP internal fields are
-  source-pinned but not oracle-exposed. No new barrier, recording import,
-  animation edit, DEFERRED item, or oracle lifecycle action.
