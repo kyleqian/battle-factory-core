@@ -199,6 +199,10 @@ describe("source-shaped Battle Script rules context", () => {
       "dynamicBasePower",
       "dynamicMoveType",
       "enigmaBerryHoldEffects",
+      "futureSightAttacker",
+      "futureSightCounter",
+      "futureSightDmg",
+      "futureSightMove",
       "giveExpState",
       "hitMarker",
       "hpDealt",
@@ -461,17 +465,17 @@ describe("source-shaped Battle Script rules context", () => {
 });
 
 describe("production status rules handler and execution seam", () => {
-  it("composes all 147 source-safe handlers, including Sleep Talk, Wish, Rollout, and Defense Curl, once", () => {
+  it("composes all 149 source-safe handlers, including Future Sight, once", () => {
     const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts());
     expect(Object.keys(handlers).map(Number).sort((a, b) => a - b)).toEqual([
-      0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12,
+      0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
       13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 24, 25, 26, 27, 28,
       29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43,
       45, 46, 47, 49, 50, 51, 53, 54, 56, 57, 58, 60,
       61, 62, 63, 65, 66, 67, 69, 70, 71, 72, 73, 74, 76, 77, 78, 79, 80, 81,
       82, 83, 84, 85, 86, 88, 92, 97, 98, 99, 100, 101, 102, 104,
       105, 106, 111, 115, 118, 119, 120, 121, 122, 123, 125, 126, 127, 128, 129, 130, 131, 132, 136, 137, 140, 141, 142, 143, 146, 147,
-      149, 150, 151, 152, 153, 156, 159, 160, 161, 162, 169, 170, 171, 172, 175, 179, 180, 182, 184, 187, 189, 191, 192, 194, 197, 198, 200, 207, 212, 213, 215, 216, 226, 227, 231, 238, 246, 248,
+      149, 150, 151, 152, 153, 156, 159, 160, 161, 162, 169, 170, 171, 172, 175, 179, 180, 182, 184, 187, 189, 191, 192, 194, 195, 197, 198, 200, 207, 212, 213, 215, 216, 226, 227, 231, 238, 246, 248,
     ]);
   });
 

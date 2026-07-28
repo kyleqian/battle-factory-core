@@ -21,6 +21,7 @@ import { SET_MOVE_EFFECT_SUPPORTED_BYTES } from "../src/engine/battleScriptHitCh
 
 const program = loadBattleScriptProgram();
 const TACKLE = 33; // EFFECT_HIT, power 35, accuracy 95, TYPE_NORMAL
+const FUTURE_SIGHT = 248;
 const MOVE_SURF = 57; // EFFECT_HIT, MOVE_TARGET_BOTH -- BattleScript_EffectHit's own underwater-guard move
 /** include/constants/battle.h:175. */
 const STATUS3_UNDERWATER = 1 << 18;
@@ -318,7 +319,7 @@ describe("production accuracycheck (Cmd_accuracycheck) dispatch", () => {
   });
 
   describe("(b) unsupported-branch barriers", () => {
-    it("halts on the remaining non-ACC_CURR_MOVE, non-NO_ACC_CALC_CHECK_LOCK_ON call sites (11 total non-ACC_CURR_MOVE sites; 8 use NO_ACC_CALC_CHECK_LOCK_ON, real since docs/yawn-thrash-endturn-design.md Rung 1; bare NO_ACC_CALC (1) and explicit-move-id (MOVE_FUTURE_SIGHT/MOVE_DOOM_DESIRE, 2) remain barriered)", () => {
+    it("halts on the remaining bare NO_ACC_CALC call site (Future Sight/Doom Desire explicit ids and NO_ACC_CALC_CHECK_LOCK_ON are registered)", () => {
       const stillUnsupported = program.instructions.find(
         (i) => i.opcodeName === "B_SCR_OP_ACCURACYCHECK"
           && i.operands[1]?.expression !== "ACC_CURR_MOVE"
@@ -345,12 +346,16 @@ describe("production accuracycheck (Cmd_accuracycheck) dispatch", () => {
     });
 
     it("halts when the target holds one of AbilityBattleEffects(ABILITYEFFECT_ABSORBING)'s three real switch cases on a hit (Volt Absorb/Water Absorb/Flash Fire unmodeled) but not any other ability (falls through that switch with no effect, per source)", () => {
-      for (const ability of [10, 11, 18]) { // ABILITY_VOLT_ABSORB, ABILITY_WATER_ABSORB, ABILITY_FLASH_FIRE
-        const rc = context(0, {}, {}, { ability });
+      for (const [ability, move] of [[10, 209], [11, 55], [18, 53]] as const) {
+        // Volt Absorb/Spark, Water Absorb/Water Gun, Flash Fire/Flamethrower.
+        const rc = context(0, {}, { currentMove: move }, { ability });
         const { result } = stepFrom("BattleScript_HitFromAccCheck", rc, 1);
         expect(result.kind).toBe("halted");
         expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 1020 });
       }
+      // The source switch only activates on its matching move type.
+      const mismatched = context(0, {}, { currentMove: FUTURE_SIGHT }, { ability: 10 });
+      expect(stepFrom("BattleScript_HitFromAccCheck", mismatched, 1).result.kind).toBe("advanced");
       const rcOtherAbility = context(0, {}, {}, { ability: 3 }); // ABILITY_KEEN_EYE, not one of the three switch cases
       const { result: otherResult } = stepFrom("BattleScript_HitFromAccCheck", rcOtherAbility, 1);
       expect(otherResult.kind).toBe("advanced");
