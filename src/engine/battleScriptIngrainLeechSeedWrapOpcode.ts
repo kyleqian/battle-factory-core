@@ -150,8 +150,10 @@ function createSetseededHandler(): BattleScriptOpcodeHandler<BattleScriptRulesCo
  * intermediate, so this copy is a pure-advance no-op here, the same
  * "the destination has no reader in this engine's scope" boundary the
  * `gBattleTextBuff1<-sMULTIHIT_STRING` case below already establishes.
- * Every other of this opcode's 16 concrete call sites (Pain Split, Bide,
- * Curse, ability-immunity messages, ...) is the single named barrier below.
+ * Curse's `copybyte gBattlerTarget, gBattlerAttacker` is also a direct
+ * selector-role assignment and is modeled without inventing a byte-address
+ * layer. Every other concrete call site (Pain Split, Bide, ability-immunity
+ * messages, ...) remains the single named barrier below.
  */
 function createCopyarrayHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
   return (context) => {
@@ -197,6 +199,21 @@ function createCopyarrayHandler(): BattleScriptOpcodeHandler<BattleScriptRulesCo
         throw new Error("Cmd_copyarray: cMULTISTRING_CHOOSER<-sTWOTURN_STRINGID became undecodable");
       }
       return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }), { rulesContext: nextRulesContext });
+    }
+    if (size === "0x1" && dst === "gBattlerTarget" && src === "gBattlerAttacker") {
+      const attacker = rulesContext.selectorRoles.attacker;
+      if (attacker === null) {
+        throw new Error("Cmd_copyarray: gBattlerTarget<-gBattlerAttacker requires an attacker role");
+      }
+      const nextRulesContext = Object.freeze({
+        ...rulesContext,
+        selectorRoles: Object.freeze({ ...rulesContext.selectorRoles, target: attacker }),
+      });
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        { rulesContext: nextRulesContext },
+      );
     }
     /**
      * `BattleScript_MultiHitPrintStrings`'s own `copyarray gBattleTextBuff1,

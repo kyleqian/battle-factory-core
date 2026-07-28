@@ -382,7 +382,7 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     const instruction = program.instructions[VARIOUS_RESET_PLAYER_FAINTED_PC]!;
     const patched = Object.freeze({
       ...instruction,
-      operands: Object.freeze([instruction.operands[0]!, Object.freeze({ ...instruction.operands[1]!, expression: "3" })]),
+      operands: Object.freeze([instruction.operands[0]!, Object.freeze({ ...instruction.operands[1]!, expression: "99" })]),
     });
     const patchedProgram = Object.freeze({
       ...program,

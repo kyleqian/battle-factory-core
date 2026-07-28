@@ -21,6 +21,7 @@
  * documented, not silently faked.
  */
 import {
+  drawBattleScriptRng,
   markBattleScriptControllerPending,
   transitionBattleScriptCommand,
   type BattleScriptBlockReason,
@@ -122,7 +123,7 @@ function controllerBusyBlock(
 }
 
 /**
- * include/constants/battle_script_commands.h -- the two `various` ids this
+ * include/constants/battle_script_commands.h -- the three `various` ids this
  * file resolves; every other case name stays unrecognized (barriers).
  * VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT (23, battle_script_commands.c:
  * 6480-6482) widens this existing barrier's modeled operand set --
@@ -135,7 +136,9 @@ function controllerBusyBlock(
  */
 const VARIOUS_RESET_PLAYER_FAINTED = 7;
 const VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT = 23;
+const VARIOUS_GET_MOVE_TARGET = 3;
 const NAMED_BYTE_CONSTANTS = new Map<string, number>([
+  ["VARIOUS_GET_MOVE_TARGET", VARIOUS_GET_MOVE_TARGET],
   ["VARIOUS_RESET_PLAYER_FAINTED", VARIOUS_RESET_PLAYER_FAINTED],
   ["VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT", VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT],
 ]);
@@ -414,11 +417,14 @@ function cancelallactionsOpcodeHandler(
 }
 
 /**
- * `Cmd_various` case `VARIOUS_RESET_PLAYER_FAINTED` (7) only
- * (`battle_script_commands.c:6371-6379`, reached here via `resetplayerfainted`
- * `BS_ATTACKER`). Every other `id` is a named barrier -- this handler is
- * registered generically for the whole program, exactly like the other
- * generic opcodes (`jumpifword`, `setbyte`), not just this script.
+ * `Cmd_various` cases `VARIOUS_GET_MOVE_TARGET` (3),
+ * `VARIOUS_RESET_PLAYER_FAINTED` (7), and
+ * `VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT` (23). GET_MOVE_TARGET's
+ * `MOVE_TARGET_SELECTED` branch is source-complete for singles: it repeats
+ * `Random() % gBattlersCount` until it finds a present opposing battler.
+ * Doubles still use the handler's existing generic barrier because Follow
+ * Me and Lightning Rod target redirection require state this context does
+ * not own. Every other `id` is that same named barrier.
  */
 function createVariousOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
   return (context) => {
@@ -431,7 +437,14 @@ function createVariousOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRul
       throw new Error(`invalid B_SCR_OP_VARIOUS shape at program counter ${context.state.programCounter}`);
     }
     const id = resolveByteLiteral(idOperand.expression);
-    if (id !== VARIOUS_RESET_PLAYER_FAINTED && id !== VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT) {
+    const rules = context.state.rulesContext;
+    const getMoveTargetSupported = id === VARIOUS_GET_MOVE_TARGET
+      && rules.battleTopology.battlersCount === 2;
+    if (
+      id !== VARIOUS_RESET_PLAYER_FAINTED
+      && id !== VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT
+      && !getMoveTargetSupported
+    ) {
       return unsupportedBranch(
         context,
         `Cmd_various case ${idOperand.expression} is not modeled`,
@@ -444,7 +457,29 @@ function createVariousOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRul
         `Cmd_various: unresolved battler selector at program counter ${context.state.programCounter}`,
       );
     }
-    const rules = context.state.rulesContext;
+    if (id === VARIOUS_GET_MOVE_TARGET) {
+      const attackerState = rules.battlers[battler];
+      let rng = context.state.rng;
+      let target: 0 | 1 | 2 | 3;
+      do {
+        const draw = drawBattleScriptRng(rng, context.instruction, "GetMoveTarget(MOVE_TARGET_SELECTED)");
+        rng = draw.rng;
+        target = (draw.randomValue % rules.battleTopology.battlersCount) as 0 | 1 | 2 | 3;
+      } while (
+        target === battler
+        || rules.battlers[target].side === attackerState.side
+        || (rules.absentBattlerFlags & (1 << target)) !== 0
+      );
+      const nextRules = Object.freeze({
+        ...rules,
+        selectorRoles: Object.freeze({ ...rules.selectorRoles, target }),
+      });
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        { rulesContext: nextRules, rng },
+      );
+    }
 
     if (id === VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT) {
       const alreadyStatusedMoveAttempt = (rules.alreadyStatusedMoveAttempt | (1 << battler)) >>> 0;

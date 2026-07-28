@@ -60,6 +60,7 @@ import { createBattleScriptExplosionOpcodeHandlers } from "./battleScriptExplosi
 import { createBattleScriptJumpifnotfirstturnOpcodeHandlers } from "./battleScriptJumpifnotfirstturnOpcode.ts";
 import { createBattleScriptJumpifabilitypresentOpcodeHandlers } from "./battleScriptJumpifabilitypresentOpcode.ts";
 import { createBattleScriptRecoverbasedonsunlightOpcodeHandlers } from "./battleScriptRecoverbasedonsunlightOpcode.ts";
+import { createBattleScriptCurseOpcodeHandlers } from "./battleScriptCurseOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -2270,6 +2271,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptJumpifnotfirstturnOpcodeHandlers(program),
     ...createBattleScriptJumpifabilitypresentOpcodeHandlers(program),
     ...createBattleScriptRecoverbasedonsunlightOpcodeHandlers(program),
+    ...createBattleScriptCurseOpcodeHandlers(program, resolveRulesBattlerForBattleScript),
   });
 }
 
