@@ -57,6 +57,9 @@ import { createBattleScriptTryKOOpcodeHandlers } from "./battleScriptTryKOOpcode
 import { createBattleScriptTrysetdestinybondtohappenOpcodeHandlers } from "./battleScriptTrysetdestinybondtohappenOpcode.ts";
 import { createBattleScriptForceSwitchOpcodeHandlers } from "./battleScriptForceSwitchOpcode.ts";
 import { createBattleScriptExplosionOpcodeHandlers } from "./battleScriptExplosionOpcode.ts";
+import { createBattleScriptJumpifnotfirstturnOpcodeHandlers } from "./battleScriptJumpifnotfirstturnOpcode.ts";
+import { createBattleScriptJumpifabilitypresentOpcodeHandlers } from "./battleScriptJumpifabilitypresentOpcode.ts";
+import { createBattleScriptRecoverbasedonsunlightOpcodeHandlers } from "./battleScriptRecoverbasedonsunlightOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -2264,6 +2267,9 @@ export function createBattleScriptStatusRulesHandlers(
       resolveBattlerForBattleScript: resolveRulesBattlerForBattleScript,
     }),
     ...createBattleScriptSemiInvulnerableBitOpcodeHandlers(program),
+    ...createBattleScriptJumpifnotfirstturnOpcodeHandlers(program),
+    ...createBattleScriptJumpifabilitypresentOpcodeHandlers(program),
+    ...createBattleScriptRecoverbasedonsunlightOpcodeHandlers(program),
   });
 }
 

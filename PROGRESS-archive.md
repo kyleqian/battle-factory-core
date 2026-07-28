@@ -1,4 +1,118 @@
 ---
+## 528 — [BOUNDED WORKER 2026-07-27 ~19:15] EFFECT_EXPLOSION registered end to end (EXPLOSION census set)
+
+- **State:** tree green at **275 files / 3639 tests** (274/3632 → +1 file /
+  +7 tests: new `battleScriptExplosionOpcode.test.ts` 5 tests, +2 in
+  `damageCalc.test.ts`), `npm run build` clean. Census regenerated: **117/214
+  effects, 237/355 moves, 191/276 Factory-L50 unweighted, 2466/2957 weighted
+  (83.4%)** — up from 116/214/235/189/2441. **Actual flip matches the
+  brief's predicted end-state exactly**: +1 effect / +2 moves / +25
+  weighted. 38/38 self-checks pass (new `requireExecutable("EFFECT_EXPLOSION")`
+  pin added, 37→38).
+- **Did:** new `battleScriptExplosionOpcode.ts` registers
+  `B_SCR_OP_TRYEXPLOSION` (`Cmd_tryexplosion`, `battle_script_commands.c
+  :6538-6575`) and `B_SCR_OP_SETATKHPTOZERO` (`:6577-6588`), both
+  source-complete with **zero barriers**. `Cmd_tryexplosion`'s Damp scan
+  covers **every active battler** (`0..battlersCount`, no absent-flag
+  filter — re-verified from source per the brief, not just attacker/target)
+  and, on success, re-points `gBattlerTarget` via the exact same
+  first-valid-target loop `Cmd_selectfirstvalidtarget` already implements
+  (`resolveFirstValidTarget`, exported from `battleScriptTargetIterationOpcode.ts`
+  and reused rather than duplicated). `gBattleMoveDamage = gBattleMons[
+  gActiveBattler].hp` is genuinely dead (the immediately-following
+  `BtlController_EmitHealthBarUpdate` call passes the literal
+  `INSTANT_HP_BAR_DROP` sentinel `0x7FFF`, not that value, and `damagecalc`
+  overwrites `gBattleMoveDamage` a few opcodes later before anything else
+  reads it) — not modeled, matching this engine's existing precedent for
+  provably-unread state. `Cmd_setatkhptozero` mirrors `Cmd_datahpupdate`'s
+  negative-damage (HP-gain) branch: `withBattler`/`withBattleScriptPartyMemberHp`
+  write-through, `hp-change` event, own controller round trip. Both compose
+  with the already-registered `tryfaintmon`/`moveend`/switch-in machinery
+  unmodified — no other opcode in `BattleScript_EffectExplosion`
+  (`data/battle_scripts_1.s:374-408`) needed new registration.
+  **Fixed a real pre-existing gap** (per the brief's explicit ask to check):
+  `damageCalc.ts`'s `calculateBaseDamage` never modeled EFFECT_EXPLOSION's
+  own Defense-halving (`pokemon.c:3228-3230` — Self-Destruct/Explosion cut
+  the defender's raw Defense in half, truncated, before the crit-adjusted-
+  stat step). Added a `moveEffect` input field and the halving branch; wired
+  from `damagecalcOpcodeHandler`'s `moveRow.effect` read
+  (`battleScriptHitChainOpcode.ts`). Pinned directly with a focused
+  `damageCalc.test.ts` unit test (50 unhalved vs 99 halved at identical
+  inputs) in addition to the full-script walk's own regression guard.
+- **Tests:** full committed-script walks to a genuine `{kind:"terminal",
+  opcodeName:"B_SCR_OP_END"}` halt: success (attacker's HP forced to 0 via
+  `setatkhptozero`, faints through the real `tryfaintmon` ->
+  `BattleScript_FaintAttacker` chain — `playfaintcry`/`dofaintanimation`/
+  `cleareffectsonfaint` were all already registered — target takes
+  halved-defense damage, RNG ledger pinned at exactly 3 draws: critcalc +
+  adjustnormaldamage + accuracycheck), Damp-blocked (ability on the target,
+  plus a second case with Damp on neither attacker nor target — reachable
+  only under a doubles topology since singles' own `gBattlersCount=2`
+  correctly excludes slots 2/3, proving the scan loop is genuinely general
+  rather than hardcoded to attacker+target), attacker-faints-target-survives,
+  and simultaneous KO (both `tryfaintmon BS_TARGET` and `tryfaintmon
+  BS_ATTACKER` resolve for real in one walk). No legal single-ability-slot
+  Damp Factory set was checked for/needed — the brief's own sanctioned
+  fallback (construct the battler state directly) was used since that's
+  strictly simpler and the ability-scan logic doesn't care how the ability
+  got there. Confirmed `BattleScript_EffectExplosion` never calls
+  `checkteamslost` itself (only the separate `BattleScript_HandleFaintedMon`
+  does) — noted in the test file rather than fabricating an unreachable
+  checkteamslost pin.
+- **Hidden barriers found:** **zero** — both opcodes are fully source-complete
+  end to end; no new entries needed in `PINNED_BARRIER_COUNTS`. A useful
+  side effect surfaced during census regen: `EFFECT_MEMENTO`'s own
+  blocked-on-opcodes list shrank from two missing opcodes to one
+  (`B_SCR_OP_TRYMEMENTO` alone) now that `SETATKHPTOZERO` — shared plumbing
+  between the two effects — is registered; `EFFECT_MEMENTO` itself stays
+  blocked (out of scope this step, noted only as a side effect, not claimed
+  as progress).
+- **Notes:** no PAPERCUT. Three commits: opcode registration + tests,
+  census regen (generator self-check pin included in that same commit).
+  `EFFECT_SEMI_INVULNERABLE` (scouted, 4 moves/32 weighted, the census's
+  new #1 row) is the next ranked set; `EFFECT_FLAIL`/`EFFECT_RETURN`+
+  `EFFECT_FRUSTRATION`/`EFFECT_CURSE` follow close behind.
+
+## 527 — [BOUNDED WORKER 2026-07-27 ~18:35] turn11-featherdance ATK-floor text wired from kernel events (§14.3)
+
+- **State:** tree green at **274 files / 3632 tests** (unchanged — no new
+  test file; this step wires an already-tested staging-module export into
+  production code), `npm run build` clean. `executableFrontierRatchet.test.ts`
+  unmoved (6/6, zero new barriers).
+- **Did:** executed `docs/presentation-seam-scout.md` §14.3's plan exactly —
+  wired `drawTurn11FeatherDanceWindow`'s ATK-floor branch
+  (`battleScene.ts:11451`) to draw a new module-level const pair,
+  `TURN11_ATKFLOOR_KICKOFF_LINE1`/`LINE2`, resolved once at module load from
+  the already-committed, already-tested
+  `turn11FeatherDancePresentationStaging.ts`'s `resolveTurn11AtkFloorLines()`,
+  instead of the raw `TURN11_ATKFLOOR_LINE1`/`LINE2` literals. Zero bridge
+  edits (§14.2's finding held — the existing turn-6 bridge resolves this
+  floored branch unchanged). Kickoff-text branch and ROCK_SLIDE half
+  untouched, per plan scoping (`git diff` touches only the import line + one
+  const block + one call-site swap). All §14.3/§14.4 citations re-verified
+  against `HEAD` before editing — no drift, no design-doc slip this time.
+  Appended §14.5 completion note to the scout doc, mirroring §13.5's format.
+- **Verified:** `turn11-featherdance.json` 178/178 before AND after (twice
+  after, determinism check) — byte-identical to §14.4's pinned baseline. Full
+  §14.3 regression sweep (`turn11-menu.json` 56/56, `turn11-rockslide.json`
+  163/163, `turn6-featherdance.json` 90/90, `turn6-statfall.json` 127/127,
+  `turn2-endeavor.json` 77/77, `turn3-rockslide.json` 256/256,
+  `turn1-rockslide.json` 256/256, `turn5-rockslide.json` 256/256,
+  `turn4-doubleteam.json` 250/250) — every count matches its recorded value,
+  zero regressions. `TURN11_ATKFLOOR_LINE1`/`LINE2` stay defined (no literal
+  died) — confirmed by grep their only remaining readers are the two
+  pre-existing tests, not production code.
+- **Notes:** §14.4's own doc text cited `npm test` as 269/3570 (stale
+  against this worktree's `HEAD` — entries 524-526's Roar/multi-hit work
+  landed 274/3632 in between); noted in the §14.5 completion note so the
+  discrepancy doesn't read as this step's own regression. No PAPERCUT. One
+  commit (wiring), one commit (docs: §14.5 note + this entry).
+- **Next:** turn13-sandattack wiring is banked (§15) for a later step — out
+  of this step's scope, not started. EXPLOSION pair (25) / SEMI_INVULNERABLE
+  trio (32) remain the next ranked census rows.
+
+
+---
 ## 526 — [BOUNDED WORKER 2026-07-27 ~18:00] EFFECT_TRIPLE_KICK + EFFECT_ROAR registered end to end; roar-multihit cluster (5 effects/18 moves/63 weighted) complete
 
 - **State:** tree green at **273 files / 3623 tests** (272/3609 → +1 file /

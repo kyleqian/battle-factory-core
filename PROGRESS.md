@@ -15,6 +15,136 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 531 — [SUPERVISOR WIND-DOWN 2026-07-27 ~19:00] session complete: 10 rounds / 16 workers, all green, all verified and merged
+
+- **State (final):** tree committed and green at **284 files / 3735 tests**
+  (session start 263/3512; the union includes the wind-down animation
+  fold), `npm run build` clean, clean `git status`, zero unmerged side
+  branches, zero stale worktrees, ~91 commits this session.
+  `animation-main` folded twice (6 commits at orient: SWAGGER +
+  SELF_DESTRUCT exact; 35 at wind-down: TAUNT exact + SPARK partial +
+  tooling — coverage now **49/276 exact, 4 partial**; their supervisor
+  session is still live, so later commits fold next orient). **No DEFERRED
+  entries — nothing blocks the next `run-supervisor.sh`.** All 16 workers
+  across 10 rounds completed (0 failures, 0 salvages, no usage limits).
+- **Census: 105/214 → 126/214 effects, 206/355 → 249/355 moves, 167/276 →
+  201/276 Factory-L50, 2251/2957 → 2548/2957 weighted (76.1% → 86.2%)**
+  via 6 registration steps whose predicted flips ALL matched actuals
+  exactly: TRYINFATUATING+JUMPIFCONFUSEDANDSTATMAXED (+70, incl. gender
+  model + 2 barrier narrowings), RESTORE_HP/SOFTBOILED/OHKO (+57, incl. a
+  dormant destiny-bond hitMarker bug fix), multi-hit cluster (+23-part),
+  Roar+TRIPLE_KICK (+63 with multi-hit, incl. BATTLE_TYPE_ARENA slip fix),
+  EXPLOSION pair (+25, incl. missing Explosion defense-halving in
+  damageCalc), semi-invulnerable 7-item set (+35, 4 effects), sunlight-
+  heal/FAKE_OUT/SOLAR_BEAM rows (+47, 5 effects). 42/42 census
+  self-checks; next top rows: EFFECT_CURSE pair (18), FLAIL (20),
+  RETURN/FRUSTRATION (18).
+- **Census instrument FIXED (side rounds 2-3, supervisor-verified against
+  raw source):** the CFG extractor missed operand-carried jump edges (170
+  synthesized across ~60 mnemonics) and fabricated Roar’s fallthrough into
+  the adjacent script; corrected rows pinned with exact-set self-checks.
+  Scout dossier docs/roar-multihit-registration-scout.md consumed same
+  session; docs/semi-invulnerable-registration-scout.md scouted AND
+  consumed same session (its corrected 4-effects-not-1 prediction proved
+  exact).
+- **Seam program: 4 windows wired from kernel events this session** —
+  turn2-endeavor (§13.3, 77/77), turn6-statfall ATK-fell text (§12.3 step
+  3, 127/127), turn11-featherdance ATK-floor text (§14.3, 178/178), each
+  first-try in 6-20 min against banked scouts; §15 (turn13-sandattack,
+  190/190 re-pinned, existing bridge suffices) is banked unconsumed for
+  next session. Prerequisite unblock chain: the apostrophe-charmap
+  extractor bug (alias '\'' = B4 never applied) fixed with 129 templates
+  corrected → unblocked both turn6-statfall and turn11 the same session.
+  turn-N traces route ON-profile BY DESIGN (AGENTS.md legacy contract) —
+  seam-doc banner + PAPERCUTS entry added.
+- **AI CV ground truth:** AccuracyDown DRAW SITEs 3/4 live-verified
+  (19/19 predicted draws, both seeds/reruns; 499-scenario verify suite
+  ALL PASS rerun by supervisor); EvasionUp sites 6/7 + AccuracyDown's
+  analogous pair closed as structurally UNSTAGEABLE with documented
+  reasons (volatile status on the AI's own battler; switching clears it)
+  — negative closure, not debt.
+- **Next (in order):** census ranked-table descent (CURSE pair, FLAIL,
+  RETURN/FRUSTRATION); §15 turn13-sandattack wiring (banked, zero new
+  bridge surface); next §16 prep-scout per cadence; ISSUES #41/#39 keep
+  retiring window by window.
+- **Notes:** 1 new PAPERCUTS entry (turn-N ON-profile routing rediscovery).
+  Supervisor process notes: cwd-poisoned-shell trap bit twice more (7
+  lifetime) — one merge chain self-no-op'd and deleted its own cwd; branch
+  survived, recovered clean; every post-worktree block now starts with an
+  absolute cd. Worker entry-header timestamps drifted up to +1.5h again —
+  scheduling was done off `date`. Oracle services fresh all session; the
+  user's `codex/oracle-tooling-papercuts` worktree untouched.
+
+---
+## 530 — [BOUNDED WORKER 2026-07-27 ~20:20] Three single-opcode census rows registered; +5 effects/+5 moves/+47 weighted (matches assigned prediction exactly)
+
+- **State:** tree green at **282 files / 3745 tests** (279/3704 → +3 files /
+  +41 tests: new `battleScriptRecoverbasedonsunlightOpcode.test.ts` (12),
+  `battleScriptJumpifnotfirstturnOpcode.test.ts` (6),
+  `battleScriptJumpifabilitypresentOpcode.test.ts` (11), plus pin updates in
+  `battleScriptJumpifhalfwordOpcode.test.ts` and `battleScriptRulesContext.test.ts`
+  for the 3 new opcode ids), `npm run build` clean. Census regenerated:
+  **126/214 effects, 249/355 moves, 201/276 Factory-L50 unweighted, 2548/2957
+  weighted (86.2%)** — up from 121/214/244/197/2501. **Actual flip matches
+  the assigned brief's predicted totals exactly** (+5/+5/+4/+47 across
+  effects/moves/Factory-L50-unweighted/weighted) and each individual row's
+  own predicted weighted share (16+15+16=47). `executableFrontierRatchet.test.ts`
+  unmoved (6/6, zero net new barriers).
+- **Did:** all three assigned rows, in order. **(1) `B_SCR_OP_RECOVERBASEDONSUNLIGHT`**
+  (new `battleScriptRecoverbasedonsunlightOpcode.ts`) — Morning Sun/Synthesis/
+  Moonlight share one identical script (`data/battle_scripts_1.s:1731-1738`),
+  so one registration flips all three. Weather-scaled heal fraction derived
+  source-exactly (2/3 sun via the source's own unreduced `20*maxHP/30`
+  literal, 1/2 no-weather-or-no-effect, 1/4 other), `WEATHER_HAS_EFFECT`
+  composed from the new ability-on-field scan (below) rather than
+  reimplemented. Zero barriers, zero `Random(` calls. **(2)
+  `B_SCR_OP_JUMPIFNOTFIRSTTURN`** (new `battleScriptJumpifnotfirstturnOpcode.ts`)
+  — the brief's own open question ("does the engine model isFirstTurn?")
+  resolved to **yes, already durable**
+  (`battleScriptRulesContext.ts`'s `isFirstTurn`, previously only read by
+  Speed Boost's `!= 2` exception) — no new engine field needed, just the
+  opcode itself. Zero barriers. **(3) `B_SCR_OP_JUMPIFABILITYPRESENT`** (new
+  `battleScriptJumpifabilitypresentOpcode.ts`) — the any-battler-on-field
+  ability scan (`ABILITYEFFECT_CHECK_ON_FIELD`), exported as
+  `abilityPresentOnField` and reused by row 1's own `WEATHER_HAS_EFFECT`.
+  Both concrete call sites (Cloud Nine, Air Lock) are fixed facts of the
+  compiled program, so the ability-operand domain is validated **eagerly at
+  registration** (mirroring `Cmd_clearstatusfromeffect`'s own exact-shape
+  check) rather than deferred to an unreachable runtime barrier — no ratchet
+  growth. **Verified and widened the scout-flagged gap**: `docs/semi-invulnerable-registration-scout.md`'s
+  named `gBattleWeather` `JUMPIFHALFWORD` gap on Solar Beam's own
+  sun-skips-charge check was real and is now closed (`gBattleWeather` ->
+  `rules.weather`, `B_WEATHER_SUN` added to the halfword value universe) —
+  the existing barrier test for this pointer was converted to a
+  no-longer-halts pass-through test, same pattern as the prior `gChosenMove`
+  widening.
+- **Tests:** full committed-script Tier-1 walks to genuine `{kind:"terminal",
+  opcodeName:"B_SCR_OP_END"}` halts for every flipped effect. Row 1: Morning
+  Sun under clear weather (heal=maxHP/2, 0 RNG), Synthesis under sun
+  (heal=floor(20*maxHP/30), 0 RNG), Moonlight under rain (heal=maxHP/4, 0
+  RNG), plus the shared full-HP fail tail and a Cloud-Nine-nullifies-sun
+  case. Row 2: Fake Out first-turn success (flinch composes through the real
+  `seteffectwithchance` certain-branch — **3 RNG draws, not 4**: `MOVE_EFFECT_CERTAIN`
+  takes `Cmd_seteffectwithchance`'s certain branch, which applies the effect
+  directly with no percent-chance roll at all, unlike the non-certain tail
+  every other hit-chain walk in this engine pins at 4) and the not-first-turn
+  fail tail (0 RNG). Row 3: Solar Beam's full two-turn cycle (charge turn 0
+  RNG, attack turn 4 RNG — same shape as Razor Wind/Dive), the sun-skip
+  single-turn walk (4 RNG, no separate charge turn at all), and a
+  Cloud-Nine-under-sun case proving the ability check runs before the
+  weather check. All RNG roll counts pinned directly against the real
+  handler composition, not assumed.
+- **Notes:** no PAPERCUT. One real correction found and fixed while writing
+  tests, not assumed from the brief: Fake Out's guaranteed flinch draws 3
+  RNG rolls, not 4 — `MOVE_EFFECT_CERTAIN` bypasses `Cmd_seteffectwithchance`'s
+  percent-chance roll entirely (source's own `if (certain) ... else { Random()
+  ... }` structure), distinct from the semi-invulnerable trio's own
+  moveEffectByte-0 case (not CERTAIN) which does still draw that roll
+  unconditionally. Five commits: one per opcode/row plus census regen. Next
+  ranked census rows (out of this step's scope): `EFFECT_CURSE` pair,
+  `EFFECT_FLAIL`, `EFFECT_RETURN`+`EFFECT_FRUSTRATION`.
+
+---
 ## 529 — [BOUNDED WORKER 2026-07-27 ~19:45] Semi-invulnerable trio registered end to end; +4 effects/+7 moves/+35 weighted (matches scout exactly)
 
 - **State:** tree green at **276 files / 3675 tests** (275/3639 → +1 file /
@@ -87,118 +217,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   zero weighted impact) are the scout's own named remainder, out of this
   step's scope. `EFFECT_FLAIL`/`EFFECT_RETURN`+`EFFECT_FRUSTRATION`/
   `EFFECT_CURSE` remain the next ranked census rows per entry 528.
-
----
-## 528 — [BOUNDED WORKER 2026-07-27 ~19:15] EFFECT_EXPLOSION registered end to end (EXPLOSION census set)
-
-- **State:** tree green at **275 files / 3639 tests** (274/3632 → +1 file /
-  +7 tests: new `battleScriptExplosionOpcode.test.ts` 5 tests, +2 in
-  `damageCalc.test.ts`), `npm run build` clean. Census regenerated: **117/214
-  effects, 237/355 moves, 191/276 Factory-L50 unweighted, 2466/2957 weighted
-  (83.4%)** — up from 116/214/235/189/2441. **Actual flip matches the
-  brief's predicted end-state exactly**: +1 effect / +2 moves / +25
-  weighted. 38/38 self-checks pass (new `requireExecutable("EFFECT_EXPLOSION")`
-  pin added, 37→38).
-- **Did:** new `battleScriptExplosionOpcode.ts` registers
-  `B_SCR_OP_TRYEXPLOSION` (`Cmd_tryexplosion`, `battle_script_commands.c
-  :6538-6575`) and `B_SCR_OP_SETATKHPTOZERO` (`:6577-6588`), both
-  source-complete with **zero barriers**. `Cmd_tryexplosion`'s Damp scan
-  covers **every active battler** (`0..battlersCount`, no absent-flag
-  filter — re-verified from source per the brief, not just attacker/target)
-  and, on success, re-points `gBattlerTarget` via the exact same
-  first-valid-target loop `Cmd_selectfirstvalidtarget` already implements
-  (`resolveFirstValidTarget`, exported from `battleScriptTargetIterationOpcode.ts`
-  and reused rather than duplicated). `gBattleMoveDamage = gBattleMons[
-  gActiveBattler].hp` is genuinely dead (the immediately-following
-  `BtlController_EmitHealthBarUpdate` call passes the literal
-  `INSTANT_HP_BAR_DROP` sentinel `0x7FFF`, not that value, and `damagecalc`
-  overwrites `gBattleMoveDamage` a few opcodes later before anything else
-  reads it) — not modeled, matching this engine's existing precedent for
-  provably-unread state. `Cmd_setatkhptozero` mirrors `Cmd_datahpupdate`'s
-  negative-damage (HP-gain) branch: `withBattler`/`withBattleScriptPartyMemberHp`
-  write-through, `hp-change` event, own controller round trip. Both compose
-  with the already-registered `tryfaintmon`/`moveend`/switch-in machinery
-  unmodified — no other opcode in `BattleScript_EffectExplosion`
-  (`data/battle_scripts_1.s:374-408`) needed new registration.
-  **Fixed a real pre-existing gap** (per the brief's explicit ask to check):
-  `damageCalc.ts`'s `calculateBaseDamage` never modeled EFFECT_EXPLOSION's
-  own Defense-halving (`pokemon.c:3228-3230` — Self-Destruct/Explosion cut
-  the defender's raw Defense in half, truncated, before the crit-adjusted-
-  stat step). Added a `moveEffect` input field and the halving branch; wired
-  from `damagecalcOpcodeHandler`'s `moveRow.effect` read
-  (`battleScriptHitChainOpcode.ts`). Pinned directly with a focused
-  `damageCalc.test.ts` unit test (50 unhalved vs 99 halved at identical
-  inputs) in addition to the full-script walk's own regression guard.
-- **Tests:** full committed-script walks to a genuine `{kind:"terminal",
-  opcodeName:"B_SCR_OP_END"}` halt: success (attacker's HP forced to 0 via
-  `setatkhptozero`, faints through the real `tryfaintmon` ->
-  `BattleScript_FaintAttacker` chain — `playfaintcry`/`dofaintanimation`/
-  `cleareffectsonfaint` were all already registered — target takes
-  halved-defense damage, RNG ledger pinned at exactly 3 draws: critcalc +
-  adjustnormaldamage + accuracycheck), Damp-blocked (ability on the target,
-  plus a second case with Damp on neither attacker nor target — reachable
-  only under a doubles topology since singles' own `gBattlersCount=2`
-  correctly excludes slots 2/3, proving the scan loop is genuinely general
-  rather than hardcoded to attacker+target), attacker-faints-target-survives,
-  and simultaneous KO (both `tryfaintmon BS_TARGET` and `tryfaintmon
-  BS_ATTACKER` resolve for real in one walk). No legal single-ability-slot
-  Damp Factory set was checked for/needed — the brief's own sanctioned
-  fallback (construct the battler state directly) was used since that's
-  strictly simpler and the ability-scan logic doesn't care how the ability
-  got there. Confirmed `BattleScript_EffectExplosion` never calls
-  `checkteamslost` itself (only the separate `BattleScript_HandleFaintedMon`
-  does) — noted in the test file rather than fabricating an unreachable
-  checkteamslost pin.
-- **Hidden barriers found:** **zero** — both opcodes are fully source-complete
-  end to end; no new entries needed in `PINNED_BARRIER_COUNTS`. A useful
-  side effect surfaced during census regen: `EFFECT_MEMENTO`'s own
-  blocked-on-opcodes list shrank from two missing opcodes to one
-  (`B_SCR_OP_TRYMEMENTO` alone) now that `SETATKHPTOZERO` — shared plumbing
-  between the two effects — is registered; `EFFECT_MEMENTO` itself stays
-  blocked (out of scope this step, noted only as a side effect, not claimed
-  as progress).
-- **Notes:** no PAPERCUT. Three commits: opcode registration + tests,
-  census regen (generator self-check pin included in that same commit).
-  `EFFECT_SEMI_INVULNERABLE` (scouted, 4 moves/32 weighted, the census's
-  new #1 row) is the next ranked set; `EFFECT_FLAIL`/`EFFECT_RETURN`+
-  `EFFECT_FRUSTRATION`/`EFFECT_CURSE` follow close behind.
-
----
-## 527 — [BOUNDED WORKER 2026-07-27 ~18:35] turn11-featherdance ATK-floor text wired from kernel events (§14.3)
-
-- **State:** tree green at **274 files / 3632 tests** (unchanged — no new
-  test file; this step wires an already-tested staging-module export into
-  production code), `npm run build` clean. `executableFrontierRatchet.test.ts`
-  unmoved (6/6, zero new barriers).
-- **Did:** executed `docs/presentation-seam-scout.md` §14.3's plan exactly —
-  wired `drawTurn11FeatherDanceWindow`'s ATK-floor branch
-  (`battleScene.ts:11451`) to draw a new module-level const pair,
-  `TURN11_ATKFLOOR_KICKOFF_LINE1`/`LINE2`, resolved once at module load from
-  the already-committed, already-tested
-  `turn11FeatherDancePresentationStaging.ts`'s `resolveTurn11AtkFloorLines()`,
-  instead of the raw `TURN11_ATKFLOOR_LINE1`/`LINE2` literals. Zero bridge
-  edits (§14.2's finding held — the existing turn-6 bridge resolves this
-  floored branch unchanged). Kickoff-text branch and ROCK_SLIDE half
-  untouched, per plan scoping (`git diff` touches only the import line + one
-  const block + one call-site swap). All §14.3/§14.4 citations re-verified
-  against `HEAD` before editing — no drift, no design-doc slip this time.
-  Appended §14.5 completion note to the scout doc, mirroring §13.5's format.
-- **Verified:** `turn11-featherdance.json` 178/178 before AND after (twice
-  after, determinism check) — byte-identical to §14.4's pinned baseline. Full
-  §14.3 regression sweep (`turn11-menu.json` 56/56, `turn11-rockslide.json`
-  163/163, `turn6-featherdance.json` 90/90, `turn6-statfall.json` 127/127,
-  `turn2-endeavor.json` 77/77, `turn3-rockslide.json` 256/256,
-  `turn1-rockslide.json` 256/256, `turn5-rockslide.json` 256/256,
-  `turn4-doubleteam.json` 250/250) — every count matches its recorded value,
-  zero regressions. `TURN11_ATKFLOOR_LINE1`/`LINE2` stay defined (no literal
-  died) — confirmed by grep their only remaining readers are the two
-  pre-existing tests, not production code.
-- **Notes:** §14.4's own doc text cited `npm test` as 269/3570 (stale
-  against this worktree's `HEAD` — entries 524-526's Roar/multi-hit work
-  landed 274/3632 in between); noted in the §14.5 completion note so the
-  discrepancy doesn't read as this step's own regression. No PAPERCUT. One
-  commit (wiring), one commit (docs: §14.5 note + this entry).
-- **Next:** turn13-sandattack wiring is banked (§15) for a later step — out
-  of this step's scope, not started. EXPLOSION pair (25) / SEMI_INVULNERABLE
-  trio (32) remain the next ranked census rows.
-

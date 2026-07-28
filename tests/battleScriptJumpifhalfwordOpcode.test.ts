@@ -158,12 +158,25 @@ describe("production jumpifhalfword (Cmd_jumpifhalfword) dispatch", () => {
       expect(sleepTalk.state.programCounter).toBe(target!.programCounter);
     });
 
-    it("halts on an unmodeled memHword pointer (gBattleWeather, EFFECT_SOLAR_BEAM's own first-turn check)", () => {
-      const pc = findJumpifhalfwordPc("BattleScript_EffectSolarBeam", (ops) => ops[1] === "gBattleWeather");
-      const { result } = stepAtProgramCounter(pc, context());
-      expect(result.kind).toBe("halted");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch" });
-    });
+    it(
+      "no longer halts on gBattleWeather (semi-invulnerable-registration-scout.md's own named remainder widened "
+        + "it; EFFECT_SOLAR_BEAM's own sun-skips-charge first-turn check, CMP_COMMON_BITS against B_WEATHER_SUN)",
+      () => {
+        const B_WEATHER_SUN = (1 << 5) | (1 << 6);
+        const B_WEATHER_RAIN = (1 << 0) | (1 << 1) | (1 << 2);
+        const pc = findJumpifhalfwordPc("BattleScript_EffectSolarBeam", (ops) => ops[1] === "gBattleWeather");
+
+        const { result: sun } = stepAtProgramCounter(pc, context({ weather: B_WEATHER_SUN }));
+        if (sun.kind !== "advanced") throw new Error("expected advance (jump)");
+        const target = program.instructions.find((i) => i.source.label === "BattleScript_SolarBeamOnFirstTurn");
+        expect(target).toBeDefined();
+        expect(sun.state.programCounter).toBe(target!.programCounter);
+
+        const { result: noSun } = stepAtProgramCounter(pc, context({ weather: B_WEATHER_RAIN }));
+        if (noSun.kind !== "advanced") throw new Error("expected advance");
+        expect(noSun.state.programCounter).toBe(pc + 1);
+      },
+    );
 
     it("pass-through: BattleScript_EffectHit's own Surf guard never trips the barrier", () => {
       const pc = findJumpifhalfwordPc(
