@@ -1,0 +1,122 @@
+{
+  "schema": "return-frustration-friendship-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "source": {
+    "effectScript": "reference/pokeemerald/data/battle_scripts_1.s:1657-1662",
+    "friendshipCommand": "reference/pokeemerald/src/battle_script_commands.c:8603-8611",
+    "moveRecords": "reference/pokeemerald/src/data/battle_moves.h:2811-2849"
+  },
+  "publicAbiBoundary": {
+    "exposes": ["friendship", "moves", "hp", "maxHp", "pp", "stats", "rngValue", "controller state", "party checksum validity"],
+    "doesNotExpose": ["gDynamicBasePower", "gBattleMoveDamage", "gBattlescriptCurrInstr"],
+    "rule": "Power is derived from the captured pre-action friendship using the exact source integer division. Target HP loss is the public applied-damage fact; endpoint RNG values pin repeatability without attributing individual internal draws."
+  },
+  "repeatability": {
+    "runsPerCase": 2,
+    "comparison": "byte-identical manifest.json",
+    "allMatched": true
+  },
+  "oracleConstruction": {
+    "customPartiesBuiltBeforeBattle": true,
+    "playerSpecies": [328, 1, 4],
+    "opponentSpecies": [20, 187, 129],
+    "checksumValid": [true, true, true, true, true, true]
+  },
+  "commonActiveRamFacts": {
+    "player": {
+      "species": 328,
+      "types": [11, 11],
+      "ability": 33,
+      "stats": {"attack": 18, "defense": 40, "speed": 145, "spAttack": 62, "spDefense": 75},
+      "maxHp": 95
+    },
+    "opponent": {
+      "species": 20,
+      "moves": [150, 150, 150, 150],
+      "types": [0, 0],
+      "ability": 50,
+      "stats": {"attack": 101, "defense": 123, "speed": 91, "spAttack": 70, "spDefense": 90},
+      "maxHp": 162
+    }
+  },
+  "cases": [
+    {
+      "id": "return-minimum",
+      "move": 216,
+      "friendship": 0,
+      "derivedPower": 0,
+      "scenario": "tools/battle-lab/mechanic-return-friendship-0-off.json",
+      "scenarioSha256": "8b69fa3b04d0d51a1cd1f03e7b5ce7dbcbefeaad4615e687b196b57665f4830c",
+      "runManifestSha256": ["d86f181c050280d5f0f1b2fec0a0816fc496f3f6420d712de750beba6dc81dff", "d86f181c050280d5f0f1b2fec0a0816fc496f3f6420d712de750beba6dc81dff"],
+      "captures": [
+        {"frame": 0, "sha256": "682f58a1b3a5ac09fc639fc496b85150ee9981ed4160a7a3328f794ae3bc0c44", "rngValue": 919694434, "engine": {"activeBattler": 2, "controllerExecFlags": 1, "playerControllerCommand": 18, "opponentControllerCommand": 53, "currentMove": 0}, "player": {"hp": 95, "pp": [20, 40, 35, 20]}, "opponent": {"hp": 162, "pp": [40, 40, 40, 40]}},
+        {"frame": 734, "sha256": "da620f084e81ad26d34ae1072b23478e131cea1f302d57e39486448f3eddda8d", "rngValue": 2210656548, "engine": {"activeBattler": 2, "controllerExecFlags": 1, "playerControllerCommand": 18, "opponentControllerCommand": 53, "currentMove": 0}, "player": {"hp": 95, "pp": [19, 40, 35, 20]}, "opponent": {"hp": 160, "pp": [40, 39, 40, 40]}}
+      ]
+    },
+    {
+      "id": "return-floor-interior",
+      "move": 216,
+      "friendship": 127,
+      "derivedPower": 50,
+      "scenario": "tools/battle-lab/mechanic-return-friendship-127-off.json",
+      "scenarioSha256": "d13f4012175522aa379292523f3f9a110b8aa61e537604aa1b9d205e9fedd889",
+      "runManifestSha256": ["6ece145019f1812567eae8f0c7a4ae0f0e5795aaca9b7e71521a8a21d0a92328", "6ece145019f1812567eae8f0c7a4ae0f0e5795aaca9b7e71521a8a21d0a92328"],
+      "captures": [
+        {"frame": 0, "sha256": "682f58a1b3a5ac09fc639fc496b85150ee9981ed4160a7a3328f794ae3bc0c44", "rngValue": 919694434, "engine": {"activeBattler": 2, "controllerExecFlags": 1, "playerControllerCommand": 18, "opponentControllerCommand": 53, "currentMove": 0}, "player": {"hp": 95, "pp": [20, 40, 35, 20]}, "opponent": {"hp": 162, "pp": [40, 40, 40, 40]}},
+        {"frame": 734, "sha256": "00106c516dc4dce7d45e9b40e6825464695cfbf15566cb77db6e7f154cc4a9a3", "rngValue": 2210656548, "engine": {"activeBattler": 2, "controllerExecFlags": 1, "playerControllerCommand": 18, "opponentControllerCommand": 53, "currentMove": 0}, "player": {"hp": 95, "pp": [19, 40, 35, 20]}, "opponent": {"hp": 158, "pp": [40, 39, 40, 40]}}
+      ]
+    },
+    {
+      "id": "return-maximum",
+      "move": 216,
+      "friendship": 255,
+      "derivedPower": 102,
+      "scenario": "tools/battle-lab/mechanic-return-friendship-255-off.json",
+      "scenarioSha256": "f25479e70c882d3d28f8982ac489424543cbeb0acf99a8fa51f3283b4fa41173",
+      "runManifestSha256": ["daeb5ecaa96e4adfc32076a7543c5df051e1afe718e06428b96d2c5030c03b29", "daeb5ecaa96e4adfc32076a7543c5df051e1afe718e06428b96d2c5030c03b29"],
+      "captures": [
+        {"frame": 0, "sha256": "682f58a1b3a5ac09fc639fc496b85150ee9981ed4160a7a3328f794ae3bc0c44", "rngValue": 919694434, "engine": {"activeBattler": 2, "controllerExecFlags": 1, "playerControllerCommand": 18, "opponentControllerCommand": 53, "currentMove": 0}, "player": {"hp": 95, "pp": [20, 40, 35, 20]}, "opponent": {"hp": 162, "pp": [40, 40, 40, 40]}},
+        {"frame": 734, "sha256": "e90c158c34d34a479f015c9f6dc270b06c7fe074d3435a6830ca6621ac27bdc7", "rngValue": 2210656548, "engine": {"activeBattler": 2, "controllerExecFlags": 1, "playerControllerCommand": 18, "opponentControllerCommand": 53, "currentMove": 0}, "player": {"hp": 95, "pp": [19, 40, 35, 20]}, "opponent": {"hp": 155, "pp": [40, 39, 40, 40]}}
+      ]
+    },
+    {
+      "id": "frustration-maximum",
+      "move": 218,
+      "friendship": 0,
+      "derivedPower": 102,
+      "scenario": "tools/battle-lab/mechanic-frustration-friendship-0-off.json",
+      "scenarioSha256": "db47fb9c954e5ac0d3a2f50053d9edf9bdb0d8c3121acbfbc22dea6b8f14e589",
+      "runManifestSha256": ["0ae4bb4cc174b2a4529a2046783b56bd3e3aa740ef626d2b7b3a9cf08f2e277c", "0ae4bb4cc174b2a4529a2046783b56bd3e3aa740ef626d2b7b3a9cf08f2e277c"],
+      "captures": [
+        {"frame": 0, "sha256": "682f58a1b3a5ac09fc639fc496b85150ee9981ed4160a7a3328f794ae3bc0c44", "rngValue": 919694434, "engine": {"activeBattler": 2, "controllerExecFlags": 1, "playerControllerCommand": 18, "opponentControllerCommand": 53, "currentMove": 0}, "player": {"hp": 95, "pp": [20, 40, 35, 20]}, "opponent": {"hp": 162, "pp": [40, 40, 40, 40]}},
+        {"frame": 734, "sha256": "e90c158c34d34a479f015c9f6dc270b06c7fe074d3435a6830ca6621ac27bdc7", "rngValue": 2210656548, "engine": {"activeBattler": 2, "controllerExecFlags": 1, "playerControllerCommand": 18, "opponentControllerCommand": 53, "currentMove": 0}, "player": {"hp": 95, "pp": [19, 40, 35, 20]}, "opponent": {"hp": 155, "pp": [40, 39, 40, 40]}}
+      ]
+    },
+    {
+      "id": "frustration-floor-interior",
+      "move": 218,
+      "friendship": 127,
+      "derivedPower": 51,
+      "scenario": "tools/battle-lab/mechanic-frustration-friendship-127-off.json",
+      "scenarioSha256": "cda13e0db75a8339be8de7f2b2f59c1f1807373a6eba6fde7a135bffbf1b4b7a",
+      "runManifestSha256": ["2abe23607bb1c5940a548bd2bd80cd0f7b5af409c77bda3fe467e78d8a583b82", "2abe23607bb1c5940a548bd2bd80cd0f7b5af409c77bda3fe467e78d8a583b82"],
+      "captures": [
+        {"frame": 0, "sha256": "682f58a1b3a5ac09fc639fc496b85150ee9981ed4160a7a3328f794ae3bc0c44", "rngValue": 919694434, "engine": {"activeBattler": 2, "controllerExecFlags": 1, "playerControllerCommand": 18, "opponentControllerCommand": 53, "currentMove": 0}, "player": {"hp": 95, "pp": [20, 40, 35, 20]}, "opponent": {"hp": 162, "pp": [40, 40, 40, 40]}},
+        {"frame": 734, "sha256": "ef815ec07fb32ab0240d83dc047e92c4729420772c43be5dad293bff8c827c0c", "rngValue": 2210656548, "engine": {"activeBattler": 2, "controllerExecFlags": 1, "playerControllerCommand": 18, "opponentControllerCommand": 53, "currentMove": 0}, "player": {"hp": 95, "pp": [19, 40, 35, 20]}, "opponent": {"hp": 158, "pp": [40, 39, 40, 40]}}
+      ]
+    },
+    {
+      "id": "frustration-minimum",
+      "move": 218,
+      "friendship": 255,
+      "derivedPower": 0,
+      "scenario": "tools/battle-lab/mechanic-frustration-friendship-255-off.json",
+      "scenarioSha256": "e6c6951f35dc04ddf6236d607dd871adae582d77798a6867cd647d2b49793f7f",
+      "runManifestSha256": ["dd3ecccd01ec165763df352ccd0275fae461178942f3315ecbde8a8a96e44dea", "dd3ecccd01ec165763df352ccd0275fae461178942f3315ecbde8a8a96e44dea"],
+      "captures": [
+        {"frame": 0, "sha256": "682f58a1b3a5ac09fc639fc496b85150ee9981ed4160a7a3328f794ae3bc0c44", "rngValue": 919694434, "engine": {"activeBattler": 2, "controllerExecFlags": 1, "playerControllerCommand": 18, "opponentControllerCommand": 53, "currentMove": 0}, "player": {"hp": 95, "pp": [20, 40, 35, 20]}, "opponent": {"hp": 162, "pp": [40, 40, 40, 40]}},
+        {"frame": 734, "sha256": "1c84c37fc3bdd587f4c2cd324e65526a9e4c7ee1c5e56434267ad882a06d2fdb", "rngValue": 2210656548, "engine": {"activeBattler": 2, "controllerExecFlags": 1, "playerControllerCommand": 18, "opponentControllerCommand": 53, "currentMove": 0}, "player": {"hp": 95, "pp": [19, 40, 35, 20]}, "opponent": {"hp": 160, "pp": [40, 39, 40, 40]}}
+      ]
+    }
+  ]
+}
