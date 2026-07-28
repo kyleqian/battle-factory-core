@@ -61,7 +61,12 @@ describe("MOVE_TAIL_GLOW source reducer", () => {
     expect(asset.source.carrier).toContain("FRONTIER_MON_VOLBEAT_2 set 277");
     expect(asset.source.siblings.MOVE_SUPERPOWER).toContain("METEOR/FLAT_ROCK");
     expect(asset.source.siblings.MOVE_SHOCK_WAVE).toContain("LIGHTNING");
+    expect(asset.source.volbeatBack).toContain("FRONTIER_MON_VOLBEAT_2 set 277");
+    expect(asset.source.volbeatFront).toContain("anim_front.png frame 0");
+    expect(asset.source.reused).toContain("SHUCKLE");
     expect(asset.circleOfLight.tileset).toMatchObject({ columns: 8, rows: 8 });
+    expect(asset.volbeatBack.tileset).toMatchObject({ columns: 8, rows: 8 });
+    expect(asset.volbeatFront.tileset).toMatchObject({ columns: 8, rows: 16 });
     const scratch = mkdtempSync(join(tmpdir(), "pokebench-tail-glow-assets-"));
     const output = join(scratch, "tail-glow.json");
     execFileSync("node", [
