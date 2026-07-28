@@ -1,0 +1,93 @@
+{
+  "schema": "psych-up-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "source": {
+    "effectScript": "reference/pokeemerald/data/battle_scripts_1.s:1790-1799",
+    "copyFoeStatsCommand": "reference/pokeemerald/src/battle_script_commands.c:8808-8819",
+    "psychUpMove": "reference/pokeemerald/src/data/battle_moves.h:3175-3186",
+    "statStageOrder": "reference/pokeemerald/include/constants/pokemon.h:75-90",
+    "snorlaxCurse": "reference/pokeemerald/src/data/pokemon/egg_moves.h:483-489",
+    "drowzeePsychUp": "reference/pokeemerald/src/data/pokemon/level_up_learnsets.h:1302-1313"
+  },
+  "statStageOrder": ["hp", "attack", "defense", "speed", "spAttack", "spDefense", "accuracy", "evasion"],
+  "repeatability": {
+    "runsPerCase": 2,
+    "comparison": "byte-identical full manifest.json",
+    "allMatched": true
+  },
+  "cases": [
+    {
+      "id": "copies-all-eight-stages-after-non-ghost-curse",
+      "scenario": "tools/battle-lab/mechanic-psych-up-curse-off.json",
+      "scenarioSha256": "fc864926de00506591d6675ceeae31b3d6984961593440a1d026122c35b30fa0",
+      "runManifestSha256": [
+        "deed191a6754c76252f1b1058a9be18f8eca210bdeb83da2fea2efbe9950f126",
+        "deed191a6754c76252f1b1058a9be18f8eca210bdeb83da2fea2efbe9950f126"
+      ],
+      "builtPartyChecksumsValid": [true, true, true, true, true, true],
+      "captures": [
+        {
+          "frame": 0,
+          "sha256": "6e7aec48feed4dc3a37b21a2acf6e950d5058d4aff42365c28f18183996ae7df",
+          "rngValue": 1621732966,
+          "currentMove": 0,
+          "player": {"species": 143, "speed": 90, "hp": 235, "maxHp": 235, "status1": 0, "status2": 0, "status3": 0, "statStages": [6,6,6,6,6,6,6,6], "pp": [10,10,10,10]},
+          "opponent": {"species": 96, "speed": 42, "hp": 135, "maxHp": 135, "status1": 0, "status2": 0, "status3": 0, "statStages": [6,6,6,6,6,6,6,6], "pp": [10,10,10,10]}
+        },
+        {
+          "frame": 360,
+          "sha256": "d192afcbd75469f5050db3d5da80dbff837876e0d033b8453a2eb411aab5fea1",
+          "rngValue": 1621732966,
+          "currentMove": 174,
+          "player": {"species": 143, "speed": 90, "hp": 235, "maxHp": 235, "status1": 0, "status2": 0, "status3": 0, "statStages": [6,7,7,5,6,6,6,6], "pp": [9,10,10,10]},
+          "opponent": {"species": 96, "speed": 42, "hp": 135, "maxHp": 135, "status1": 0, "status2": 0, "status3": 0, "statStages": [6,6,6,6,6,6,6,6], "pp": [10,10,10,10]}
+        },
+        {
+          "frame": 500,
+          "sha256": "07835c434448d444ed93567569675e99e069ae8de109426799a9a071c396d140",
+          "rngValue": 1621732966,
+          "currentMove": 244,
+          "player": {"species": 143, "speed": 90, "hp": 235, "maxHp": 235, "status1": 0, "status2": 0, "status3": 0, "statStages": [6,7,7,5,6,6,6,6], "pp": [9,10,10,10]},
+          "opponent": {"species": 96, "speed": 42, "hp": 135, "maxHp": 135, "status1": 0, "status2": 0, "status3": 0, "statStages": [6,7,7,5,6,6,6,6], "pp": [10,9,10,10]}
+        }
+      ]
+    },
+    {
+      "id": "neutral-stages-copy-without-hp-or-curse-status-copy",
+      "scenario": "tools/battle-lab/mechanic-psych-up-neutral-off.json",
+      "scenarioSha256": "9f8c597739b60c3ed3a1607566bbf1d62d50250b9b4393e959f9fb84e67dfcfc",
+      "runManifestSha256": [
+        "4503f4ba569a0494412a103b94763d29d214004593c979f4444562620c230ed7",
+        "4503f4ba569a0494412a103b94763d29d214004593c979f4444562620c230ed7"
+      ],
+      "builtPartyChecksumsValid": [true, true, true, true, true, true],
+      "captures": [
+        {
+          "frame": 0,
+          "sha256": "b4ffe4cf87e2b6470640741039ce32c490995f331443239daa265351ef192abc",
+          "rngValue": 919694434,
+          "currentMove": 0,
+          "player": {"species": 93, "speed": 115, "hp": 120, "maxHp": 120, "status1": 0, "status2": 0, "status3": 0, "statStages": [6,6,6,6,6,6,6,6], "pp": [10,10,10,10]},
+          "opponent": {"species": 96, "speed": 42, "hp": 135, "maxHp": 135, "status1": 0, "status2": 0, "status3": 0, "statStages": [6,6,6,6,6,6,6,6], "pp": [10,10,10,10]}
+        },
+        {
+          "frame": 280,
+          "sha256": "393d6605e94fec505a47816903c496c614d7f5f36097aadbdc0866e6ee2959df",
+          "rngValue": 919694434,
+          "currentMove": 174,
+          "player": {"species": 93, "speed": 115, "hp": 60, "maxHp": 120, "status1": 0, "status2": 0, "status3": 0, "statStages": [6,6,6,6,6,6,6,6], "pp": [9,10,10,10]},
+          "opponent": {"species": 96, "speed": 42, "hp": 135, "maxHp": 135, "status1": 0, "status2": 268435456, "status3": 0, "statStages": [6,6,6,6,6,6,6,6], "pp": [10,10,10,10]}
+        },
+        {
+          "frame": 450,
+          "sha256": "92d4c2f76bdf0446f1c69e6f2c93a10afffcd59efcb7370abd6ef6d1ea8b74f7",
+          "rngValue": 919694434,
+          "currentMove": 244,
+          "player": {"species": 93, "speed": 115, "hp": 60, "maxHp": 120, "status1": 0, "status2": 0, "status3": 0, "statStages": [6,6,6,6,6,6,6,6], "pp": [9,10,10,10]},
+          "opponent": {"species": 96, "speed": 42, "hp": 135, "maxHp": 135, "status1": 0, "status2": 268435456, "status3": 0, "statStages": [6,6,6,6,6,6,6,6], "pp": [10,9,10,10]}
+        }
+      ]
+    }
+  ],
+  "boundedRemainder": "Evidence isolates the singles success path and neutral-stage control. Snatch interception, doubles target selection, and presentation timing remain outside this fixture; the source command has no reachable failure branch because its encoded pointer is unused."
+}
