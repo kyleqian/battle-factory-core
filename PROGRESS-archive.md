@@ -23670,3 +23670,26 @@ both verify scripts/census independently re-verified before this entry.)*
   restoration remains exactly bounded at the shared seam with its stale active
   ability byte. No semantic, barrier/import-ratchet, controller, metadata,
   ability, animation, or issue change.
+---
+## 581 — [BOUNDED MAIN WORKER 2026-07-28 ~03:44] Helping Hand executes globally
+
+- **State:** committed `db756e6`; tree green at **338 files / 4079 tests**,
+  focused **348/348**, and ratchets **6/6**. Production build, census
+  freshness, both oracle infos, and `git diff --check` pass. Census is exactly
+  **147/214 effects, 273/355 moves, 224/276 Factory-L50 distinct,
+  2732/2957 weighted**, all **42/42**.
+- **Did:** globally registered five-byte `0xd1`. It always retargets to the
+  attacker's position-derived partner, including failure; doubles success
+  requires present/unmarked attacker and partner and writes only the partner
+  `helpingHand` bit. Tests cover every attacker/guard combination across
+  canonical and noncanonical positions, exact zero-RNG immutability, shared
+  **15/10** damage, +5 priority, and generic turn/faint cleanup.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next shared registration target; do not widen the Factory
+  singles controller or extend the retired canonical Battle-2 march.
+- **Notes:** accepted singles action seed **1996693384** spends Helping Hand
+  PP **20→19** before exact failure, writes no bit/success message, and retains
+  oracle receipt `4d40725e…fa3b6f`. Handler inventory **155→156** only. No
+  barrier/import ratchet, recording import, private/controller-local handler,
+  animation/presentation/tick branch, scenario/evidence mutation, issue
+  removal, or oracle lifecycle action.

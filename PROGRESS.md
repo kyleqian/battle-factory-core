@@ -15,6 +15,31 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 584 — [SUPERVISOR VERIFY 2026-07-28 ~04:00] Torment accepted; party-heal evidence folded
+
+- **State:** reviewed union green at **341 files / 4093 tests** and focused
+  **38/38**; production build, both-oracle info, census regeneration, ratchets
+  **6/6**, and `git diff --check` pass. Census is exactly **148/214 effects,
+  274/355 moves, 225/276 Factory-L50 distinct, 2736/2957 weighted**, all
+  **42/42**.
+- **Did:** accepted global Torment `0xce` after source/diff review: the opcode
+  owns only the target bit/failure branch, while shared
+  `CheckMoveLimitations` now drives repeated-move rejection and forced
+  Struggle without a controller-local Torment branch. Folded Heal
+  Bell/Aromatherapy source/OFF evidence and independently replayed its
+  deterministic manifest (`8b4d2414…96cc6c8`).
+- **Next:** register `B_SCR_OP_CUREIFBURNEDPARALYZEDORPOISONED` / Refresh
+  globally from the accepted source/OFF evidence. Prove accepted-status mask,
+  healthy/sleep/freeze failure, active plus persistent party status zeroing,
+  controller blocking/sync, and zero local RNG. Expected census:
+  **149/214, 275/355, 226/276, 2738/2957**.
+- **Notes:** handler inventory is **157**; party-heal remains evidence only.
+  Torment receipt remains `f7a00036…b28c2`; party-heal source-only bounds are
+  explicit for Soundproof, benched poison, and doubles. No unsupported/import
+  ratchet, recording import, animation/presentation/tick branch, issue
+  removal, DEFERRED item, or oracle lifecycle action.
+
+---
 ## 583 — [BOUNDED MAIN WORKER 2026-07-28 ~03:56] Torment executes globally
 
 - **State:** committed `5887fc3`; tree green at **340 files / 4090 tests**,
@@ -62,27 +87,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `12571c44…a68012`. No unsupported/import ratchet, recording import,
   animation/presentation/tick branch, issue removal, DEFERRED item, or oracle
   lifecycle action.
-
----
-## 581 — [BOUNDED MAIN WORKER 2026-07-28 ~03:44] Helping Hand executes globally
-
-- **State:** committed `db756e6`; tree green at **338 files / 4079 tests**,
-  focused **348/348**, and ratchets **6/6**. Production build, census
-  freshness, both oracle infos, and `git diff --check` pass. Census is exactly
-  **147/214 effects, 273/355 moves, 224/276 Factory-L50 distinct,
-  2732/2957 weighted**, all **42/42**.
-- **Did:** globally registered five-byte `0xd1`. It always retargets to the
-  attacker's position-derived partner, including failure; doubles success
-  requires present/unmarked attacker and partner and writes only the partner
-  `helpingHand` bit. Tests cover every attacker/guard combination across
-  canonical and noncanonical positions, exact zero-RNG immutability, shared
-  **15/10** damage, +5 priority, and generic turn/faint cleanup.
-- **Next:** supervisor verify this finite executable-frontier increment and
-  select the next shared registration target; do not widen the Factory
-  singles controller or extend the retired canonical Battle-2 march.
-- **Notes:** accepted singles action seed **1996693384** spends Helping Hand
-  PP **20→19** before exact failure, writes no bit/success message, and retains
-  oracle receipt `4d40725e…fa3b6f`. Handler inventory **155→156** only. No
-  barrier/import ratchet, recording import, private/controller-local handler,
-  animation/presentation/tick branch, scenario/evidence mutation, issue
-  removal, or oracle lifecycle action.
