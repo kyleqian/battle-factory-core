@@ -15,6 +15,45 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 527 — [BOUNDED WORKER 2026-07-27 ~18:35] turn11-featherdance ATK-floor text wired from kernel events (§14.3)
+
+- **State:** tree green at **274 files / 3632 tests** (unchanged — no new
+  test file; this step wires an already-tested staging-module export into
+  production code), `npm run build` clean. `executableFrontierRatchet.test.ts`
+  unmoved (6/6, zero new barriers).
+- **Did:** executed `docs/presentation-seam-scout.md` §14.3's plan exactly —
+  wired `drawTurn11FeatherDanceWindow`'s ATK-floor branch
+  (`battleScene.ts:11451`) to draw a new module-level const pair,
+  `TURN11_ATKFLOOR_KICKOFF_LINE1`/`LINE2`, resolved once at module load from
+  the already-committed, already-tested
+  `turn11FeatherDancePresentationStaging.ts`'s `resolveTurn11AtkFloorLines()`,
+  instead of the raw `TURN11_ATKFLOOR_LINE1`/`LINE2` literals. Zero bridge
+  edits (§14.2's finding held — the existing turn-6 bridge resolves this
+  floored branch unchanged). Kickoff-text branch and ROCK_SLIDE half
+  untouched, per plan scoping (`git diff` touches only the import line + one
+  const block + one call-site swap). All §14.3/§14.4 citations re-verified
+  against `HEAD` before editing — no drift, no design-doc slip this time.
+  Appended §14.5 completion note to the scout doc, mirroring §13.5's format.
+- **Verified:** `turn11-featherdance.json` 178/178 before AND after (twice
+  after, determinism check) — byte-identical to §14.4's pinned baseline. Full
+  §14.3 regression sweep (`turn11-menu.json` 56/56, `turn11-rockslide.json`
+  163/163, `turn6-featherdance.json` 90/90, `turn6-statfall.json` 127/127,
+  `turn2-endeavor.json` 77/77, `turn3-rockslide.json` 256/256,
+  `turn1-rockslide.json` 256/256, `turn5-rockslide.json` 256/256,
+  `turn4-doubleteam.json` 250/250) — every count matches its recorded value,
+  zero regressions. `TURN11_ATKFLOOR_LINE1`/`LINE2` stay defined (no literal
+  died) — confirmed by grep their only remaining readers are the two
+  pre-existing tests, not production code.
+- **Notes:** §14.4's own doc text cited `npm test` as 269/3570 (stale
+  against this worktree's `HEAD` — entries 524-526's Roar/multi-hit work
+  landed 274/3632 in between); noted in the §14.5 completion note so the
+  discrepancy doesn't read as this step's own regression. No PAPERCUT. One
+  commit (wiring), one commit (docs: §14.5 note + this entry).
+- **Next:** turn13-sandattack wiring is banked (§15) for a later step — out
+  of this step's scope, not started. EXPLOSION pair (25) / SEMI_INVULNERABLE
+  trio (32) remain the next ranked census rows.
+
+---
 ## 526 — [BOUNDED WORKER 2026-07-27 ~18:00] EFFECT_TRIPLE_KICK + EFFECT_ROAR registered end to end; roar-multihit cluster (5 effects/18 moves/63 weighted) complete
 
 - **State:** tree green at **273 files / 3623 tests** (272/3609 → +1 file /
@@ -169,41 +208,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   unrecognized *script comparand* — caught by actually running it, corrected
   before committing). No PAPERCUT. Three commits: multi-hit registration +
   tests, census regen.
-
----
-## 524 — [SUPERVISOR 2026-07-27 ~16:35] rounds 2-4 verified + merged; census extractor FIXED (Roar row was fabricated); census 80.4% weighted; round 5 dispatched
-
-- **State:** master green at **271 files / 3597 tests**, `npm run build`
-  clean, zero unmerged branches, zero stale worktrees. Census regenerated on
-  the union: **111/214 effects, 217/355 moves, 2378/2957 weighted (80.4%)**
-  — entry 523's predicted +57 flip confirmed exactly, all 36 self-checks
-  pass (4 new exact-set pins).
-- **Seam program this session:** turn2-endeavor (§13.3, 77/77) and
-  turn6-statfall ATK-fell text (§12.3 step 3, 127/127) both wired from
-  kernel events; §14 prep-scout banked for turn11-featherdance (178/178
-  re-pinned twice; clamp string is STRINGID_STATSWONTDECREASE, zero
-  animation events, ZERO new bridge surface needed — existing turn-6 bridge
-  resolves it; resolver byte-identity to the curly-glyph literals
-  confirmed).
-- **Census correction (side rounds 2-3, verified by supervisor against raw
-  source):** EFFECT_ROAR's ranked-table row was a control-flow extractor
-  fabrication — the walker missed operand-carried jump edges (170 across
-  ~60 mnemonics) and fabricated a fallthrough from Roar's script into the
-  physically-adjacent EffectMultiHit. Fixed generically in the census's
-  graph-consumption layer (labelOperands synthesis + case-by-case-audited
-  fallthrough suppression: only forcerandomswitch never falls through, per
-  battle_script_commands.c:7164-7386); Roar's true set is FOUR opcodes
-  (FINISHACTION/FORCERANDOMSWITCH/RETURNTOBALL/SWITCHOUTABILITIES) + a
-  Suction Cups jumpifability widening; EFFECT_RAGE gained a previously
-  invisible CLEARSTATUSFROMEFFECT blocker (second real bug, same class).
-  Scout dossier: docs/roar-multihit-registration-scout.md (14-rung plan +
-  multi-hit per-operand gaps: JUMPIFHALFWORD gChosenMove, JUMPIFBYTE
-  MOVE_RESULT_FOE_ENDURED, TRIPLE_KICK power-ramp + hit-counter ptr).
-- **Round 5 (dispatched):** main → Roar + multi-hit cluster registration
-  per the scout's 14-rung plan (5 effects / 18 moves / 63 weighted
-  predicted) ∥ side → live-stage the remaining recipe-only AI CV draw
-  sites (§24.5 sites 6 ingrain / 7 curse, then §19.5's 4).
-- **Next:** verify round 5; round 6 main = turn11-featherdance wiring
-  (§14.3); then EXPLOSION pair (25) / SEMI_INVULNERABLE trio (32) as time
-  allows; wind-down from ~19:40 (fold animation-main again — their session
-  is live).

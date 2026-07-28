@@ -1,4 +1,42 @@
 ---
+## 524 — [SUPERVISOR 2026-07-27 ~16:35] rounds 2-4 verified + merged; census extractor FIXED (Roar row was fabricated); census 80.4% weighted; round 5 dispatched
+
+- **State:** master green at **271 files / 3597 tests**, `npm run build`
+  clean, zero unmerged branches, zero stale worktrees. Census regenerated on
+  the union: **111/214 effects, 217/355 moves, 2378/2957 weighted (80.4%)**
+  — entry 523's predicted +57 flip confirmed exactly, all 36 self-checks
+  pass (4 new exact-set pins).
+- **Seam program this session:** turn2-endeavor (§13.3, 77/77) and
+  turn6-statfall ATK-fell text (§12.3 step 3, 127/127) both wired from
+  kernel events; §14 prep-scout banked for turn11-featherdance (178/178
+  re-pinned twice; clamp string is STRINGID_STATSWONTDECREASE, zero
+  animation events, ZERO new bridge surface needed — existing turn-6 bridge
+  resolves it; resolver byte-identity to the curly-glyph literals
+  confirmed).
+- **Census correction (side rounds 2-3, verified by supervisor against raw
+  source):** EFFECT_ROAR's ranked-table row was a control-flow extractor
+  fabrication — the walker missed operand-carried jump edges (170 across
+  ~60 mnemonics) and fabricated a fallthrough from Roar's script into the
+  physically-adjacent EffectMultiHit. Fixed generically in the census's
+  graph-consumption layer (labelOperands synthesis + case-by-case-audited
+  fallthrough suppression: only forcerandomswitch never falls through, per
+  battle_script_commands.c:7164-7386); Roar's true set is FOUR opcodes
+  (FINISHACTION/FORCERANDOMSWITCH/RETURNTOBALL/SWITCHOUTABILITIES) + a
+  Suction Cups jumpifability widening; EFFECT_RAGE gained a previously
+  invisible CLEARSTATUSFROMEFFECT blocker (second real bug, same class).
+  Scout dossier: docs/roar-multihit-registration-scout.md (14-rung plan +
+  multi-hit per-operand gaps: JUMPIFHALFWORD gChosenMove, JUMPIFBYTE
+  MOVE_RESULT_FOE_ENDURED, TRIPLE_KICK power-ramp + hit-counter ptr).
+- **Round 5 (dispatched):** main → Roar + multi-hit cluster registration
+  per the scout's 14-rung plan (5 effects / 18 moves / 63 weighted
+  predicted) ∥ side → live-stage the remaining recipe-only AI CV draw
+  sites (§24.5 sites 6 ingrain / 7 curse, then §19.5's 4).
+- **Next:** verify round 5; round 6 main = turn11-featherdance wiring
+  (§14.3); then EXPLOSION pair (25) / SEMI_INVULNERABLE trio (32) as time
+  allows; wind-down from ~19:40 (fold animation-main again — their session
+  is live).
+
+---
 ## 523 — [BOUNDED WORKER 2026-07-27 ~16:30] B_SCR_OP_TRYHEALHALFHEALTH + B_SCR_OP_TRYKO + B_SCR_OP_TRYSETDESTINYBONDTOHAPPEN registered; EFFECT_RESTORE_HP/EFFECT_SOFTBOILED/EFFECT_OHKO executable end to end
 
 - **State:** tree green at **270 files / 3587 tests** (+2 files / +27 tests

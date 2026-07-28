@@ -2800,6 +2800,67 @@ new file/10 new tests from this session's own
 `executableFrontierRatchet.test.ts` unmoved (6/6, zero new barriers, no
 canonical recording import added).
 
+### 14.5 Wiring landed, 2026-07-27 (main lane, bounded worker)
+
+§14.3's plan executed as written, step 1 as the sole rung (steps 2/3 are
+explicit no-touch scoping notes, not actions). Every §14.3 citation
+(`battleScene.ts:11441-11455`'s `drawTurn11FeatherDanceWindow` body,
+`:11449-11451`'s `atkFloorStart` branch, `:11280-11282`'s
+`TURN11_ATKFLOOR_LINE1/2`/`TURN11_ATKFLOOR_TEXT_TOTAL` trio) was re-verified
+against this worktree's own `HEAD` (`776fb8b`) before editing and matched
+exactly — no drift since §14 was scouted, no design-doc slip found.
+
+`battleScene.ts` gained one module-level const pair,
+`TURN11_ATKFLOOR_KICKOFF_LINE1`/`LINE2`, resolved once at module load from
+`turn11FeatherDancePresentationStaging.ts`'s already-staged, already-tested
+`resolveTurn11AtkFloorLines()` — the same "resolve once at module load"
+shape `TURN6_ATKFELL_KICKOFF_LINE1/2` (§12.6), `TURN6_FEATHERDANCE_KICKOFF_
+LINE1/2` (§12.5), and `TURN2_ENDEAVOR_ATTACK_LINE1/2` (§13.5) already
+established, placed directly above `drawTurn11FeatherDanceWindow` (the
+`TURN2_ENDEAVOR_ATTACK_LINE1/2`-style local placement, not the top-of-file
+grouping the turn-6 pair used). `drawTurn11FeatherDanceWindow`'s own
+`atkFloorStart` branch (`:11451` pre-edit) now draws these instead of the
+raw `TURN11_ATKFLOOR_LINE1`/`LINE2` literals. **Zero bridge edits** — §14.2's
+own finding held: the existing `resolveFeatherDanceKickoffPresentation
+WindowContent` bridge (built for turn 6's WORKED branch, §12.3 step 1)
+already resolves this floored branch unchanged; no rework was needed, and
+`tests/turn11FeatherDancePresentationStaging.test.ts`'s own pre-existing
+equivalence assertion (`resolveTurn11AtkFloorLines()` byte-identical to
+`TURN11_ATKFLOOR_LINE1/2`, curly apostrophe included) passed unmodified,
+confirming the staged proof's own claim before this step ever touched
+production code.
+
+Step 2 (kickoff-text branch, `TURN6_FEATHERDANCE_LINE1/2` via
+`turn6FeatherDanceTextVisibleChars`) and the ROCK_SLIDE half
+(`drawTurn11RockSlideWindow`) are untouched — verified live by `git diff`
+touching only the import block and the one ATK-floor branch line.
+
+**No literal died.** `TURN11_ATKFLOOR_LINE1`/`LINE2`
+(`battleScene.ts:11281-11282` post-edit) stay defined — `grep -n
+"TURN11_ATKFLOOR_LINE1\|TURN11_ATKFLOOR_LINE2" src/ tests/` shows their only
+remaining reader is `tests/battleScene.test.ts`'s own pre-existing literal
+assertion (unaffected — it asserts the raw constants' own values, not this
+window's rendered output) and `tests/turn11FeatherDancePresentationStaging.test.ts`'s
+own equivalence assertion; this was their only production call site and it
+is now retired, exactly as §14.3 step 1 scoped.
+
+**Acceptance, re-verified this session:** the full §14.3 regression sweep
+run AFTER this change reproduced every recorded count exactly —
+`turn11-featherdance.json` 178/178 (twice, determinism check),
+`turn11-menu.json` 56/56, `turn11-rockslide.json` 163/163,
+`turn6-featherdance.json` 90/90, `turn6-statfall.json` 127/127,
+`turn2-endeavor.json` 77/77, `turn3-rockslide.json` 256/256,
+`turn1-rockslide.json` 256/256, `turn5-rockslide.json` 256/256,
+`turn4-doubleteam.json` 250/250 — byte-identical to §14.4's own pristine-HEAD
+baseline, no regression. `npm test` **274 files, 3632 tests** unchanged from
+this session's own start (no new test file — this step wires an
+already-tested staging-module export into production code, adds no new
+bridge surface to test; §14.4's own recorded 269/3570 was itself stale
+against this worktree's `HEAD`, confirmed by stashing this change and
+re-running — the gap is entries 524-526's own intervening Roar/multi-hit
+test additions, unrelated to this step). `npm run build` clean.
+`executableFrontierRatchet.test.ts` unmoved (6/6, zero new barriers).
+
 ## 15. Prep-scout for the NEXT window, 2026-07-27 (`turn13-sandattack.json`), side lane
 
 Read-only recon plus one unwired staging module/test — the same §8-§14
