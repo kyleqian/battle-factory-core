@@ -2697,6 +2697,39 @@ describe("production printfromtable (Cmd_printfromtable) dispatch", () => {
       expect.objectContaining({ kind: "message", messageId: "STRINGID_PKMNSXHADNOEFFECTONY" }),
     ]);
   });
+
+  describe(
+    "BattleScriptFirstChargingTurn's own printfromtable gFirstTurnOfTwoStringIds "
+      + "(semi-invulnerable registration rung 4, docs/semi-invulnerable-registration-scout.md §1b/§5 rung 4 -- "
+      + "all 8 B_MSG_TURN1_* indices, shared by all five two-turn-charge effects)",
+    () => {
+      const pc = program.instructions.find((i) =>
+        i.opcodeName === "B_SCR_OP_PRINTFROMTABLE" && i.operands[0]?.expression === "gFirstTurnOfTwoStringIds"
+      )!.programCounter;
+
+      const cases: readonly [number, string][] = [
+        [0, "STRINGID_PKMNWHIPPEDWHIRLWIND"], // B_MSG_TURN1_RAZOR_WIND
+        [1, "STRINGID_PKMNTOOKSUNLIGHT"], // B_MSG_TURN1_SOLAR_BEAM
+        [2, "STRINGID_PKMNLOWEREDHEAD"], // B_MSG_TURN1_SKULL_BASH
+        [3, "STRINGID_PKMNISGLOWING"], // B_MSG_TURN1_SKY_ATTACK
+        [4, "STRINGID_PKMNFLEWHIGH"], // B_MSG_TURN1_FLY
+        [5, "STRINGID_PKMNDUGHOLE"], // B_MSG_TURN1_DIG
+        [6, "STRINGID_PKMNHIDUNDERWATER"], // B_MSG_TURN1_DIVE
+        [7, "STRINGID_PKMNSPRANGUP"], // B_MSG_TURN1_BOUNCE
+      ];
+
+      for (const [index, stringId] of cases) {
+        it(`MULTISTRING_CHOOSER ${index}: resolves ${stringId}`, () => {
+          const rc = context(0, {}, { multistringChooser: index });
+          const { result } = stepAtProgramCounter(pc, rc);
+          if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+          expect(result.state.events).toEqual([
+            expect.objectContaining({ kind: "message", messageId: stringId }),
+          ]);
+        });
+      }
+    },
+  );
 });
 
 describe("production updatestatusicon (Cmd_updatestatusicon) dispatch", () => {

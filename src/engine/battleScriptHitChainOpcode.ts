@@ -364,6 +364,24 @@ const PRINTFROMTABLE_TABLES: Readonly<Record<string, readonly string[]>> = Objec
   ]),
   /** battle_message.c:1108-1111 -- BattleScript_KOFail's own table (Cmd_tryKO, battleScriptTryKOOpcode.ts), B_MSG_KO_MISS(0)/KO_UNAFFECTED(1). */
   gKOFailedStringIds: Object.freeze(["STRINGID_ATTACKMISSED", "STRINGID_PKMNUNAFFECTED"]),
+  /**
+   * battle_message.c:1025-1035 -- `BattleScriptFirstChargingTurn`'s own
+   * `printfromtable gFirstTurnOfTwoStringIds`, indexed by `sTWOTURN_STRINGID`
+   * (semi-invulnerable registration rung 4, docs/semi-invulnerable-
+   * registration-scout.md §1b/§5 rung 4). Shared by all five two-turn-charge
+   * effects' turn-1 message. B_MSG_TURN1_RAZOR_WIND(0)/SOLAR_BEAM(1)/
+   * SKULL_BASH(2)/SKY_ATTACK(3)/FLY(4)/DIG(5)/DIVE(6)/BOUNCE(7).
+   */
+  gFirstTurnOfTwoStringIds: Object.freeze([
+    "STRINGID_PKMNWHIPPEDWHIRLWIND",
+    "STRINGID_PKMNTOOKSUNLIGHT",
+    "STRINGID_PKMNLOWEREDHEAD",
+    "STRINGID_PKMNISGLOWING",
+    "STRINGID_PKMNFLEWHIGH",
+    "STRINGID_PKMNDUGHOLE",
+    "STRINGID_PKMNHIDUNDERWATER",
+    "STRINGID_PKMNSPRANGUP",
+  ]),
 });
 
 const MOVE_EFFECT_LABEL_BY_BYTE: Readonly<Record<number, string>> = Object.freeze({
