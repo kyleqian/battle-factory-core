@@ -10,10 +10,10 @@ Answers ROADMAP S10's Executable-frontier reset question directly: not "how many
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 185 | 214 | 86.4% |
-| Moves (unweighted, all 355) | 324 | 355 | 91.3% |
-| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 266 | 276 | 96.4% |
-| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2931 | 2957 | 99.1% |
+| Effect scripts | 186 | 214 | 86.9% |
+| Moves (unweighted, all 355) | 325 | 355 | 91.5% |
+| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 267 | 276 | 96.7% |
+| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2932 | 2957 | 99.2% |
 
 "Executable" means every opcode on every statically reachable path from the effect's entry script has a dispatch entry today and every use of the explicitly tracked narrowed operand surfaces is accepted. Other registered runtime barriers remain included per ROADMAP S10 §1's (a)/(b) policy. It is not a semantic-correctness claim -- see Caveats.
 
@@ -105,7 +105,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_SPECIAL_DEFENSE_UP_2 | `BattleScript_EffectSpecialDefenseUp2` | executable | - | - | 1 | 1 (13) |
 | EFFECT_ACCURACY_UP_2 | `BattleScript_EffectHit` | executable | - | - | 0 | 0 (0) |
 | EFFECT_EVASION_UP_2 | `BattleScript_EffectHit` | executable | - | - | 0 | 0 (0) |
-| EFFECT_TRANSFORM | `BattleScript_EffectTransform` | blocked-on-opcodes | `B_SCR_OP_TRANSFORMDATAEXECUTION` (main path) | Operand gate: B_SCR_OP_PRINTFROMTABLE(gTransformUsedStringIds) -- gTransformUsedStringIds is outside the engine's accepted string-table pointer set (src/engine/battleScriptHitChainOpcode.ts:282; battle_script_commands.c:2184) | 1 | 0 (0) |
+| EFFECT_TRANSFORM | `BattleScript_EffectTransform` | blocked-on-opcodes | `B_SCR_OP_TRANSFORMDATAEXECUTION` (main path) | Operand gate: B_SCR_OP_PRINTFROMTABLE(gTransformUsedStringIds) -- gTransformUsedStringIds is outside the engine's accepted string-table pointer set (src/engine/battleScriptHitChainOpcode.ts:283; battle_script_commands.c:2184) | 1 | 0 (0) |
 | EFFECT_ATTACK_DOWN_2 | `BattleScript_EffectAttackDown2` | executable | - | - | 2 | 2 (8) |
 | EFFECT_DEFENSE_DOWN_2 | `BattleScript_EffectDefenseDown2` | executable | - | - | 1 | 1 (12) |
 | EFFECT_SPEED_DOWN_2 | `BattleScript_EffectSpeedDown2` | executable | - | - | 2 | 2 (24) |
@@ -177,7 +177,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_MAGNITUDE | `BattleScript_EffectMagnitude` | executable | - | - | 1 | 1 (2) |
 | EFFECT_BATON_PASS | `BattleScript_EffectBatonPass` | executable | - | - | 1 | 1 (13) |
 | EFFECT_PURSUIT | `BattleScript_EffectHit` | executable | - | - | 1 | 1 (6) |
-| EFFECT_RAPID_SPIN | `BattleScript_EffectRapidSpin` | blocked-on-opcodes | `B_SCR_OP_RAPIDSPINFREE` (edge branch only) | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_RAPIDSPIN is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522<br>Operand gate: B_SCR_OP_COPYARRAY(gBattlerTarget, sBATTLER, 0x1) -- (gBattlerTarget, sBATTLER, 0x1) is outside the engine's accepted pointer-tuple universe (src/engine/battleScriptIngrainLeechSeedWrapOpcode.ts:155; battle_script_commands.c:3837) | 1 | 1 (1) |
+| EFFECT_RAPID_SPIN | `BattleScript_EffectRapidSpin` | executable | - | - | 1 | 1 (1) |
 | EFFECT_SONICBOOM | `BattleScript_EffectSonicboom` | executable | - | - | 1 | 1 (1) |
 | EFFECT_UNUSED_83 | `BattleScript_EffectHit` | executable | - | - | 0 | 0 (0) |
 | EFFECT_MORNING_SUN | `BattleScript_EffectMorningSun` | executable | - | - | 1 | 0 (0) |
@@ -249,7 +249,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_DOUBLE_EDGE | `BattleScript_EffectDoubleEdge` | executable | - | - | 2 | 1 (52) |
 | EFFECT_TEETER_DANCE | `BattleScript_EffectTeeterDance` | executable | - | - | 1 | 1 (2) |
 | EFFECT_BLAZE_KICK | `BattleScript_EffectBurnHit` | executable | - | - | 1 | 1 (1) |
-| EFFECT_MUD_SPORT | `BattleScript_EffectMudSport` | blocked-on-opcodes | `B_SCR_OP_SETTYPEBASEDHALVERS` (main path) | Operand gate: B_SCR_OP_PRINTFROMTABLE(gSportsUsedStringIds) -- gSportsUsedStringIds is outside the engine's accepted string-table pointer set (src/engine/battleScriptHitChainOpcode.ts:282; battle_script_commands.c:2184) | 1 | 0 (0) |
+| EFFECT_MUD_SPORT | `BattleScript_EffectMudSport` | blocked-on-opcodes | `B_SCR_OP_SETTYPEBASEDHALVERS` (main path) | Operand gate: B_SCR_OP_PRINTFROMTABLE(gSportsUsedStringIds) -- gSportsUsedStringIds is outside the engine's accepted string-table pointer set (src/engine/battleScriptHitChainOpcode.ts:283; battle_script_commands.c:2184) | 1 | 0 (0) |
 | EFFECT_POISON_FANG | `BattleScript_EffectPoisonFang` | executable | - | - | 1 | 1 (2) |
 | EFFECT_WEATHER_BALL | `BattleScript_EffectWeatherBall` | blocked-on-opcodes | `B_SCR_OP_SETWEATHERBALLTYPE` (main path) | - | 1 | 0 (0) |
 | EFFECT_OVERHEAT | `BattleScript_EffectOverheat` | executable | - | - | 2 | 1 (23) |
@@ -258,7 +258,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_SKY_UPPERCUT | `BattleScript_EffectSkyUppercut` | executable | - | - | 1 | 1 (3) |
 | EFFECT_BULK_UP | `BattleScript_EffectBulkUp` | executable | - | - | 1 | 1 (5) |
 | EFFECT_POISON_TAIL | `BattleScript_EffectPoisonHit` | executable | - | - | 1 | 1 (1) |
-| EFFECT_WATER_SPORT | `BattleScript_EffectWaterSport` | blocked-on-opcodes | `B_SCR_OP_SETTYPEBASEDHALVERS` (main path) | Operand gate: B_SCR_OP_PRINTFROMTABLE(gSportsUsedStringIds) -- gSportsUsedStringIds is outside the engine's accepted string-table pointer set (src/engine/battleScriptHitChainOpcode.ts:282; battle_script_commands.c:2184) | 1 | 0 (0) |
+| EFFECT_WATER_SPORT | `BattleScript_EffectWaterSport` | blocked-on-opcodes | `B_SCR_OP_SETTYPEBASEDHALVERS` (main path) | Operand gate: B_SCR_OP_PRINTFROMTABLE(gSportsUsedStringIds) -- gSportsUsedStringIds is outside the engine's accepted string-table pointer set (src/engine/battleScriptHitChainOpcode.ts:283; battle_script_commands.c:2184) | 1 | 0 (0) |
 | EFFECT_CALM_MIND | `BattleScript_EffectCalmMind` | executable | - | - | 1 | 1 (16) |
 | EFFECT_DRAGON_DANCE | `BattleScript_EffectDragonDance` | executable | - | - | 1 | 1 (14) |
 | EFFECT_CAMOUFLAGE | `BattleScript_EffectCamouflage` | blocked-on-opcodes | `B_SCR_OP_SETTYPETOENVIRONMENT` (main path) | - | 1 | 0 (0) |

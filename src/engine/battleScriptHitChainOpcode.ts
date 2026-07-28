@@ -232,6 +232,7 @@ const MOVE_EFFECT_RAGE = 30;
 const MOVE_EFFECT_PREVENT_ESCAPE = 32;
 const MOVE_EFFECT_NIGHTMARE = 33;
 const MOVE_EFFECT_ALL_STATS_UP = 34;
+const MOVE_EFFECT_RAPIDSPIN = 35;
 const MOVE_EFFECT_REMOVE_PARALYSIS = 36;
 const MOVE_EFFECT_ATK_DEF_DOWN = 37;
 /** include/constants/battle.h:291 -- Double-Edge's one-third damage-derived recoil. */
@@ -545,6 +546,7 @@ export const SET_MOVE_EFFECT_SUPPORTED_BYTES: ReadonlySet<number> = new Set<numb
   MOVE_EFFECT_PREVENT_ESCAPE,
   MOVE_EFFECT_NIGHTMARE,
   MOVE_EFFECT_ALL_STATS_UP,
+  MOVE_EFFECT_RAPIDSPIN,
   MOVE_EFFECT_REMOVE_PARALYSIS,
   MOVE_EFFECT_ATK_DEF_DOWN,
   MOVE_EFFECT_RECOIL_33,
@@ -2716,6 +2718,14 @@ function applySetMoveEffect(
     }
     if (effectByte === MOVE_EFFECT_ALL_STATS_UP) {
       const programCounter = resolveRequiredLabelProgramCounter(context.program, "BattleScript_AllStatsUp");
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "call", programCounter }),
+        { rulesContext: baseRulesContext },
+      );
+    }
+    if (effectByte === MOVE_EFFECT_RAPIDSPIN) {
+      const programCounter = resolveRequiredLabelProgramCounter(context.program, "BattleScript_RapidSpinAway");
       return transitionBattleScriptCommand(
         context,
         Object.freeze({ kind: "call", programCounter }),

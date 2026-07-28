@@ -32,7 +32,9 @@ import { isBattlerOfType, unsupportedBranch, withBattler } from "./battleScriptH
 import { readBattleScriptRulesByte, writeBattleScriptRulesByte } from "./battleScriptSetByte.ts";
 import {
   BATTLE_SCRIPT_MOVE_RESULT_MISSED,
+  BATTLE_SCRIPT_STATUS2_WRAPPED_MASK,
   BATTLE_SCRIPT_STATUS3_LEECHSEED,
+  BATTLE_SCRIPT_STATUS3_LEECHSEED_BATTLER_MASK,
   BATTLE_SCRIPT_STATUS3_ROOTED,
 } from "./battleScriptSourceConstants.ts";
 import {
@@ -44,6 +46,8 @@ import {
 const B_MSG_LEECH_SEED_SET = 0;
 const B_MSG_LEECH_SEED_MISS = 1;
 const B_MSG_LEECH_SEED_FAIL = 2;
+/** include/constants/battle.h:213; shared side-status cell owned by Cmd_trysetspikes. */
+const SIDE_STATUS_SPIKES = 1 << 4;
 
 /**
  * `Cmd_trysetroots` (`battle_script_commands.c:9326-9336`). No accuracy
@@ -224,6 +228,25 @@ function createCopyarrayHandler(): BattleScriptOpcodeHandler<BattleScriptRulesCo
       const nextRulesContext = Object.freeze({
         ...rulesContext,
         selectorRoles: Object.freeze({ ...rulesContext.selectorRoles, target: attacker }),
+      });
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        { rulesContext: nextRulesContext },
+      );
+    }
+    /**
+     * `BattleScript_WrapFree` restores gBattlerTarget from the target saved
+     * by Cmd_rapidspinfree in gBattleScripting.battler. The source
+     * `copybyte` macro expands to this exact one-byte Cmd_copyarray tuple.
+     */
+    if (size === "0x1" && dst === "gBattlerTarget" && src === "sBATTLER") {
+      const nextRulesContext = Object.freeze({
+        ...rulesContext,
+        selectorRoles: Object.freeze({
+          ...rulesContext.selectorRoles,
+          target: rulesContext.scriptingBattler,
+        }),
       });
       return transitionBattleScriptCommand(
         context,
@@ -425,6 +448,96 @@ function createManipulatedamageHandler(): BattleScriptOpcodeHandler<BattleScript
   };
 }
 
+/**
+ * `Cmd_rapidspinfree` (`battle_script_commands.c:8821-8855`).
+ *
+ * One invocation removes at most one condition, in source priority order.
+ * Each successful branch pushes the current opcode cursor, calls its message
+ * subscript, and therefore resumes this same handler after `return`. The Wrap
+ * branch saves/restores the pre-message target through `sBATTLER`, retargets
+ * the message to the wrapping battler, and prepares the trapping move name in
+ * the typed gBattleTextBuff1 move slot before clearing the live attribution.
+ * No branch reads Random().
+ */
+function createRapidspinfreeHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
+  return (context) => {
+    const rulesContext = context.state.rulesContext;
+    const attacker = rulesContext.selectorRoles.attacker;
+    const target = rulesContext.selectorRoles.target;
+    if (attacker === null || target === null) {
+      throw new Error("Cmd_rapidspinfree requires attacker and target roles");
+    }
+    const attackerState = rulesContext.battlers[attacker];
+
+    if ((attackerState.status2 & BATTLE_SCRIPT_STATUS2_WRAPPED_MASK) !== 0) {
+      const nextRulesContext = withBattler(rulesContext, attacker, {
+        status2: (attackerState.status2 & ~BATTLE_SCRIPT_STATUS2_WRAPPED_MASK) >>> 0,
+        wrappedBy: 0,
+      });
+      const wrapFree = resolveBattleScriptLabel(context.program, "BattleScript_WrapFree");
+      if (!wrapFree) throw new Error("Cmd_rapidspinfree: committed program has no BattleScript_WrapFree");
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "call-current", programCounter: wrapFree.programCounter }),
+        {
+          rulesContext: Object.freeze({
+            ...nextRulesContext,
+            scriptingBattler: target,
+            selectorRoles: Object.freeze({
+              ...nextRulesContext.selectorRoles,
+              target: attackerState.wrappedBy,
+            }),
+            battleTextBuff1Move: attackerState.wrappedMove,
+          }),
+        },
+      );
+    }
+
+    if ((attackerState.status3 & BATTLE_SCRIPT_STATUS3_LEECHSEED) !== 0) {
+      const nextRulesContext = withBattler(rulesContext, attacker, {
+        status3: (
+          attackerState.status3
+          & ~BATTLE_SCRIPT_STATUS3_LEECHSEED
+          & ~BATTLE_SCRIPT_STATUS3_LEECHSEED_BATTLER_MASK
+        ) >>> 0,
+      });
+      const leechSeedFree = resolveBattleScriptLabel(context.program, "BattleScript_LeechSeedFree");
+      if (!leechSeedFree) throw new Error("Cmd_rapidspinfree: committed program has no BattleScript_LeechSeedFree");
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "call-current", programCounter: leechSeedFree.programCounter }),
+        { rulesContext: nextRulesContext },
+      );
+    }
+
+    const side = attackerState.side;
+    if ((rulesContext.sideStatuses[side] & SIDE_STATUS_SPIKES) !== 0) {
+      const sideStatuses = [...rulesContext.sideStatuses] as [number, number];
+      sideStatuses[side] = (sideStatuses[side] & ~SIDE_STATUS_SPIKES) >>> 0;
+      const sideTimers = [...rulesContext.sideTimers] as [
+        BattleScriptRulesContext["sideTimers"][0],
+        BattleScriptRulesContext["sideTimers"][1],
+      ];
+      sideTimers[side] = Object.freeze({ ...sideTimers[side], spikesAmount: 0 });
+      const spikesFree = resolveBattleScriptLabel(context.program, "BattleScript_SpikesFree");
+      if (!spikesFree) throw new Error("Cmd_rapidspinfree: committed program has no BattleScript_SpikesFree");
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "call-current", programCounter: spikesFree.programCounter }),
+        {
+          rulesContext: Object.freeze({
+            ...rulesContext,
+            sideStatuses: Object.freeze(sideStatuses),
+            sideTimers: Object.freeze(sideTimers),
+          }),
+        },
+      );
+    }
+
+    return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }));
+  };
+}
+
 function findInstructionOpcodeId(program: BattleScriptProgram, opcodeName: string): number {
   const instruction = program.instructions.find((candidate) => candidate.opcodeName === opcodeName);
   if (!instruction) throw new Error(`committed Battle Script program does not emit ${opcodeName}`);
@@ -457,5 +570,6 @@ export function createBattleScriptIngrainLeechSeedWrapOpcodeHandlers(
     [findInstructionOpcodeId(program, "B_SCR_OP_COPYARRAY")]: createCopyarrayHandler(),
     [findInstructionOpcodeId(program, "B_SCR_OP_JUMPIFABILITY")]: createJumpifabilityHandler(),
     [findInstructionOpcodeId(program, "B_SCR_OP_MANIPULATEDAMAGE")]: createManipulatedamageHandler(),
+    ...registerSingleInstruction(program, "B_SCR_OP_RAPIDSPINFREE", 0, createRapidspinfreeHandler()),
   });
 }

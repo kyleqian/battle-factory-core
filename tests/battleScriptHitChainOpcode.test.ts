@@ -3838,7 +3838,7 @@ describe("SetMoveEffect family-B cluster 1", () => {
   const OVERHEAT = 315;
   const RECHARGE = 1 << 22;
 
-  it("exports exactly the seven newly source-complete bytes while the other family-B cases remain barriered", () => {
+  it("exports the cluster-1 bytes while the remaining family-B cases stay barriered", () => {
     for (const effect of [
       MOVE_EFFECT_TRI_ATTACK,
       MOVE_EFFECT_RECHARGE,
@@ -3850,7 +3850,8 @@ describe("SetMoveEffect family-B cluster 1", () => {
     ]) {
       expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(effect)).toBe(true);
     }
-    for (const effect of [11, 31, 35, 54]) {
+    expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(35)).toBe(true); // Rapid Spin, Cluster 3
+    for (const effect of [11, 31, 54]) {
       expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(effect)).toBe(false);
     }
   });
@@ -4226,9 +4227,10 @@ describe("SetMoveEffect family-B cluster 2: recoil and Uproar dispatch", () => {
     return stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc).result;
   }
 
-  it("exports Recoil 33 while the six deferred family-B bytes remain barriered", () => {
+  it("exports Recoil 33 and Rapid Spin while the remaining deferred family-B bytes stay barriered", () => {
     expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(MOVE_EFFECT_RECOIL_33)).toBe(true);
-    for (const effect of [11, 31, 35, 54]) {
+    expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(35)).toBe(true);
+    for (const effect of [11, 31, 54]) {
       expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(effect)).toBe(false);
     }
   });

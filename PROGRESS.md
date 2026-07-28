@@ -15,6 +15,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 624 — [BOUNDED MAIN WORKER 2026-07-28 ~12:16] Rapid Spin cleanup source-complete
+
+- **State:** tree green at **391 files / 4466 tests**, production build, OFF
+  oracle info, and `git diff --check`. Census is exactly **186/214 effects,
+  325/355 moves, 267/276 distinct, 2932/2957 weighted**: inherited-baseline
+  delta **+1/+1/+1/+1**; all **64** census validations pass.
+- **Did:** registered source-order `RAPIDSPINFREE`: Wrap saves/restores the
+  original target, clears trapping plus `wrappedBy`, and prepares the typed
+  wrapped-move message; Leech Seed clears status plus owner bits; same-side
+  Spikes clears its status plus layer count. The exact
+  `gBattlerTarget <- sBATTLER` copy tuple and family-B byte are executable.
+- **Next:** supervisor verify this commit. Rapid Spin has no remainder; resume
+  the supervisor's ranked order without expanding into Thief/Knock Off/Pay
+  Day or Metronome from this worker.
+- **Notes:** all individual conditions, all-set priority, none-set no-op,
+  full committed script to END, deterministic replay, and cleanup-local zero
+  RNG are pinned. Deliberate exact-set moves: Rapid Spin's missing-opcode and
+  copy-tuple blockers now require executable; handler surface **182→183**.
+  No new barriers, recording imports, presentation, round, tick, roadmap,
+  issue, or oracle-trace changes.
+
+---
 ## 623 — [BOUNDED MAIN WORKER 2026-07-28 ~12:02] Ranked Batch 3 source-complete
 
 - **State:** tree green at **391 files / 4460 tests**, production build, OFF
@@ -59,30 +81,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   real Mean Look barrier; recorded in place. Deliberate barrier ratchet
   moves: HitChain **19→18**, Switchin **9→8**. Rapid Spin, Thief, Knock Off,
   and Pay Day remain honestly barriered; no presentation/round/tick changes.
-
----
-## 621 — [SUPERVISOR VERIFY+FOLD 2026-07-28 ~11:40] Grudge+Spite accepted; Batch-3 and Cluster-4 receipts folded; Swallow gloss corrected
-
-- **State:** verified entry 620 (suite, build) and reconciled the census the
-  worker deliberately skipped: exactly **179/214 effects, 316/355 moves,
-  258/276 distinct, 2916/2957 weighted** (+2/+2/+2/+4). Merged two side
-  branches: `fbe2eba1` (`docs/ranked-batch3-off-evidence.md` — Pain Split
-  117/100→108/108; Stockpile×2→Swallow 67→150 = floor(167/2); fourth-use
-  failure; Spit Up receipt honestly deferred, sole carrier is dual-ability)
-  and `b113d9af` (`docs/family-b-cluster4-off-evidence.md` — Covet active+
-  party transfer, Sticky Hold block with damage/PP proceeding, Knock Off
-  clears active item but leaves the party record intact). Union green at
-  **388 files / 4431 tests**.
-- **Did:** corrected the ranked dossier §3.8 in place (supervisor-verified
-  against `Cmd_stockpiletohpheal`): Swallow heals **1/4, 1/2, FULL** at
-  counters 1/2/3 — not /8,/4,/2. The Batch-3 engine brief carries the fix.
-  Note: the cwd self-merge trap bit an 8th time (merge/cleanup block started
-  inside the worktree); branch survived, recovered from the main tree, zero
-  loss.
-- **Next:** round 9 dispatched — main: family-B Cluster 3 engine (Mean Look/
-  Nightmare rung mandatory, Rapid Spin rung optional; predicted **+3/+5/+5/
-  +9**) against the banked receipts. Then Batch-3 engine (+4 effects/+7
-  weighted). Cluster 4 receipts are banked for this or the next session.
-- **Notes:** animation supervisor is live concurrently (animation-main has
-  fresh commits + a nested worker); fold at wind-down. No deferred questions.
-  Deadline 15:07.

@@ -572,6 +572,7 @@ const MOVE_EFFECT_ID_BY_NAME: Readonly<Record<string, number>> = Object.freeze({
   MOVE_EFFECT_PREVENT_ESCAPE: 32,
   MOVE_EFFECT_NIGHTMARE: 33,
   MOVE_EFFECT_ALL_STATS_UP: 34,
+  MOVE_EFFECT_RAPIDSPIN: 35,
   MOVE_EFFECT_REMOVE_PARALYSIS: 36,
   MOVE_EFFECT_ATK_DEF_DOWN: 37,
   MOVE_EFFECT_RECOIL_33: 38,
@@ -1106,10 +1107,10 @@ const validationChecks: Array<() => void> = [
   () => requireExactMechanicalBlockers("EFFECT_KNOCK_OFF", [
     "Operand gate: B_SCR_OP_PLAYANIMATION(B_ANIM_ITEM_KNOCKOFF)",
   ]),
-  () => requireExactMechanicalBlockers("EFFECT_RAPID_SPIN", [
-    "Operand gate: B_SCR_OP_COPYARRAY(gBattlerTarget, sBATTLER, 0x1)",
-  ]),
-  () => requireExactMissingOpcodes("EFFECT_RAPID_SPIN", ["B_SCR_OP_RAPIDSPINFREE"]),
+  // Family-B Cluster 3's final rung: Cmd_rapidspinfree, its Wrap-return
+  // copy tuple, and MOVE_EFFECT_RAPIDSPIN's C-selected callback are live.
+  () => requireExecutable("EFFECT_RAPID_SPIN"),
+  () => requireExactMechanicalBlockers("EFFECT_RAPID_SPIN", []),
   // Ranked Batch 3: the source scratch, Shell Bell suppression, exact copy
   // tuple, and both HP controller writes are now represented end-to-end.
   () => requireExecutable("EFFECT_PAIN_SPLIT"),
