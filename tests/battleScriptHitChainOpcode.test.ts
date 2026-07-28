@@ -3838,7 +3838,7 @@ describe("SetMoveEffect family-B cluster 1", () => {
   const OVERHEAT = 315;
   const RECHARGE = 1 << 22;
 
-  it("exports the cluster-1 bytes while the remaining family-B cases stay barriered", () => {
+  it("exports the cluster-1 and item-motion bytes while Pay Day stays barriered", () => {
     for (const effect of [
       MOVE_EFFECT_TRI_ATTACK,
       MOVE_EFFECT_RECHARGE,
@@ -3851,9 +3851,9 @@ describe("SetMoveEffect family-B cluster 1", () => {
       expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(effect)).toBe(true);
     }
     expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(35)).toBe(true); // Rapid Spin, Cluster 3
-    for (const effect of [11, 31, 54]) {
-      expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(effect)).toBe(false);
-    }
+    expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(31)).toBe(true); // Steal Item, Cluster 4
+    expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(54)).toBe(true); // Knock Off, Cluster 4
+    expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(11)).toBe(false); // Pay Day, Cluster 4 rung (b)
   });
 
   for (const [seed, status1, label] of [
@@ -4227,12 +4227,12 @@ describe("SetMoveEffect family-B cluster 2: recoil and Uproar dispatch", () => {
     return stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc).result;
   }
 
-  it("exports Recoil 33 and Rapid Spin while the remaining deferred family-B bytes stay barriered", () => {
+  it("exports Recoil 33, Rapid Spin, and item motion while Pay Day stays barriered", () => {
     expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(MOVE_EFFECT_RECOIL_33)).toBe(true);
     expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(35)).toBe(true);
-    for (const effect of [11, 31, 54]) {
-      expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(effect)).toBe(false);
-    }
+    expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(31)).toBe(true);
+    expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(54)).toBe(true);
+    expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(11)).toBe(false);
   });
 
   it("Double-Edge derives one-third recoil with C truncation and consumes no RNG", () => {

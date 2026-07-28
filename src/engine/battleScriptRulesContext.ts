@@ -613,6 +613,8 @@ export type BattleScriptRulesContext = Readonly<
     gBattleEnvironment: number;
     /** Source u8 gLastUsedAbility. */
     lastUsedAbility: number;
+    /** Source u16 gLastUsedItem, prepared by item-steal/knock-off messages. */
+    lastUsedItem: number;
     multiHitCounter: number;
     /**
      * Source u8 gBattleScripting.multihitString[4] (`sMULTIHIT_STRING + 4`,
@@ -782,6 +784,7 @@ export type BattleScriptRulesContextInput = Readonly<{
   /** Legacy focused inputs default here; production Factory inputs explicitly supply BUILDING. */
   gBattleEnvironment?: number;
   lastUsedAbility?: number;
+  lastUsedItem?: number;
   moveResultFlags: number;
   dmgMultiplier: number;
   critMultiplier: number;
@@ -2324,6 +2327,7 @@ export function createBattleScriptRulesContext(
       0xff,
       "lastUsedAbility",
     ),
+    lastUsedItem: requireUnsigned(input.lastUsedItem ?? 0, 0xffff, "lastUsedItem"),
     moveResultFlags: requireUnsigned(input.moveResultFlags, 0xff, "moveResultFlags"),
     dmgMultiplier: requireUnsigned(input.dmgMultiplier, 0xff, "dmgMultiplier"),
     critMultiplier: requireUnsigned(input.critMultiplier, 0xff, "critMultiplier"),

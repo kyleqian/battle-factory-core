@@ -216,6 +216,8 @@ const PLAYANIMATION_ANIM_TYPES: ReadonlyMap<
    * B_ANIM_INGRAIN_HEAL).
    */
   ["B_ANIM_HELD_ITEM_EFFECT", { argExpression: "NULL", animationId: "HELD_ITEM_EFFECT", readsAnimArg1: false }],
+  ["B_ANIM_ITEM_STEAL", { argExpression: "NULL", animationId: "ITEM_STEAL", readsAnimArg1: false }],
+  ["B_ANIM_ITEM_KNOCKOFF", { argExpression: "NULL", animationId: "ITEM_KNOCKOFF", readsAnimArg1: false }],
 ]);
 
 function createPlayanimationOpcodeHandler(

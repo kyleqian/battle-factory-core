@@ -215,6 +215,7 @@ describe("source-shaped Battle Script rules context", () => {
       "hpDealt",
       "knockedOffMons",
       "lastUsedAbility",
+      "lastUsedItem",
       "learnMoveState",
       "lockedMoves",
       "lvlBoxState",

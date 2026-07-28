@@ -44,6 +44,7 @@ import {
   resolveBattleScriptBattlerPartner,
   resolveBattleScriptMoveTarget,
   resolveBattleScriptMoveType,
+  withBattleScriptPartyMemberItem,
   withBattleScriptPartyMemberHp,
   withBattleScriptPartyMemberPp,
   withBattleScriptPartyMemberStatus1,
@@ -221,6 +222,7 @@ const MOVE_EFFECT_FLINCH = 8;
 const MOVE_EFFECT_TRI_ATTACK = 9;
 /** include/constants/battle.h:256 -- Uproar's user-owned lock/timer effect. */
 const MOVE_EFFECT_UPROAR = 10;
+const MOVE_EFFECT_PAYDAY = 11;
 /** include/constants/battle.h:259 -- SetMoveEffect's two-turn-charge case (docs/semi-invulnerable-registration-scout.md §5 rung 2). */
 const MOVE_EFFECT_CHARGING = 12;
 /** include/constants/battle.h:260 -- SetMoveEffect's Wrap-family case (docs/ingrain-leechseed-wrap-ground-truth.md §1c/§5 slice 2). */
@@ -229,6 +231,7 @@ const MOVE_EFFECT_WRAP = 13;
 const MOVE_EFFECT_RECOIL_25 = 14;
 const MOVE_EFFECT_RECHARGE = 29;
 const MOVE_EFFECT_RAGE = 30;
+const MOVE_EFFECT_STEAL_ITEM = 31;
 const MOVE_EFFECT_PREVENT_ESCAPE = 32;
 const MOVE_EFFECT_NIGHTMARE = 33;
 const MOVE_EFFECT_ALL_STATS_UP = 34;
@@ -237,6 +240,7 @@ const MOVE_EFFECT_REMOVE_PARALYSIS = 36;
 const MOVE_EFFECT_ATK_DEF_DOWN = 37;
 /** include/constants/battle.h:291 -- Double-Edge's one-third damage-derived recoil. */
 const MOVE_EFFECT_RECOIL_33 = 38;
+const MOVE_EFFECT_KNOCK_OFF = 54;
 /** include/constants/battle.h:300 -- SetMoveEffect's Thrash-family lock-in case (docs/yawn-thrash-endturn-design.md §3, Rung 4). */
 const MOVE_EFFECT_THRASH = 53;
 const MOVE_EFFECT_SP_ATK_TWO_DOWN = 59;
@@ -538,6 +542,7 @@ export const SET_MOVE_EFFECT_SUPPORTED_BYTES: ReadonlySet<number> = new Set<numb
   MOVE_EFFECT_FLINCH,
   MOVE_EFFECT_TRI_ATTACK,
   MOVE_EFFECT_UPROAR,
+  MOVE_EFFECT_STEAL_ITEM,
   MOVE_EFFECT_CHARGING,
   MOVE_EFFECT_WRAP,
   MOVE_EFFECT_RECOIL_25,
@@ -550,6 +555,7 @@ export const SET_MOVE_EFFECT_SUPPORTED_BYTES: ReadonlySet<number> = new Set<numb
   MOVE_EFFECT_REMOVE_PARALYSIS,
   MOVE_EFFECT_ATK_DEF_DOWN,
   MOVE_EFFECT_RECOIL_33,
+  MOVE_EFFECT_KNOCK_OFF,
   MOVE_EFFECT_THRASH,
   MOVE_EFFECT_SP_ATK_TWO_DOWN,
   ...Object.keys(STAT_MOVE_EFFECT_TABLE).map(Number),
@@ -2490,6 +2496,53 @@ function resolveRequiredLabelProgramCounter(program: BattleScriptProgram, label:
   return entry.programCounter;
 }
 
+const ITEM_NONE = 0;
+const ITEM_ORANGE_MAIL = 121;
+const ITEM_RETRO_MAIL = 132;
+const ABILITY_STICKY_HOLD = 60;
+const BATTLE_TYPE_LINK = 1 << 1;
+const BATTLE_TYPE_EREADER_TRAINER = 1 << 11;
+const BATTLE_TYPE_BATTLE_TOWER = 1 << 8;
+const BATTLE_TYPE_DOME = 1 << 16;
+const BATTLE_TYPE_PALACE = 1 << 17;
+const BATTLE_TYPE_ARENA = 1 << 18;
+const BATTLE_TYPE_FACTORY = 1 << 19;
+const BATTLE_TYPE_PIKE = 1 << 20;
+const BATTLE_TYPE_PYRAMID = 1 << 21;
+const BATTLE_TYPE_RECORDED_LINK = 1 << 25;
+const BATTLE_TYPE_TRAINER_HILL = 1 << 26;
+const BATTLE_TYPE_SECRET_BASE = 1 << 27;
+const BATTLE_TYPE_FRONTIER = (
+  BATTLE_TYPE_BATTLE_TOWER
+  | BATTLE_TYPE_DOME
+  | BATTLE_TYPE_PALACE
+  | BATTLE_TYPE_ARENA
+  | BATTLE_TYPE_FACTORY
+  | BATTLE_TYPE_PIKE
+  | BATTLE_TYPE_PYRAMID
+);
+const ITEM_STEAL_ALLOWED_SPECIAL_BATTLES = (
+  BATTLE_TYPE_EREADER_TRAINER
+  | BATTLE_TYPE_FRONTIER
+  | BATTLE_TYPE_LINK
+  | BATTLE_TYPE_RECORDED_LINK
+  | BATTLE_TYPE_SECRET_BASE
+);
+
+function isMail(item: number): boolean {
+  return item >= ITEM_ORANGE_MAIL && item <= ITEM_RETRO_MAIL;
+}
+
+function replaceMoveEndHalfword(
+  values: BattleScriptMoveEndHalfwords,
+  battler: BattleScriptBattlerId,
+  value: number,
+): BattleScriptMoveEndHalfwords {
+  return Object.freeze(values.map((candidate, index) =>
+    index === battler ? value : candidate
+  )) as unknown as BattleScriptMoveEndHalfwords;
+}
+
 /**
  * SetMoveEffect (battle_script_commands.c:2234-2521), narrowed to
  * Cmd_seteffectwithchance's own call site: both of its dispatch sites always
@@ -2552,7 +2605,11 @@ function applySetMoveEffect(
   // Target at 0 HP (:2261-2264) -- the quartet's bytes (2-5) never equal
   // MOVE_EFFECT_PAYDAY(11)/STEAL_ITEM(31), so source's exclusion for those
   // two never applies here.
-  if (effectBattlerState.hp === 0) {
+  if (
+    effectBattlerState.hp === 0
+    && effectByte !== MOVE_EFFECT_PAYDAY
+    && effectByte !== MOVE_EFFECT_STEAL_ITEM
+  ) {
     return passThrough();
   }
   // Substitute (:2266-2267).
@@ -2689,6 +2746,80 @@ function applySetMoveEffect(
         { rulesContext: nextRulesContext },
       );
     }
+    if (effectByte === MOVE_EFFECT_STEAL_ITEM) {
+      const flags = baseRulesContext.battleTopology.battleTypeFlags;
+      const attackerState = baseRulesContext.battlers[attacker];
+      const targetState = baseRulesContext.battlers[target];
+      if ((flags & BATTLE_TYPE_TRAINER_HILL) !== 0) return passThrough();
+      const regularBattle = (flags & ITEM_STEAL_ALLOWED_SPECIAL_BATTLES) === 0;
+      if (attackerState.side === 1 && regularBattle) return passThrough();
+      if (
+        regularBattle
+        && (
+          baseRulesContext.knockedOffMons[attackerState.side]
+          & (1 << attackerState.partyIndex)
+        ) !== 0
+      ) {
+        return passThrough();
+      }
+      if (targetState.item !== ITEM_NONE && targetState.ability === ABILITY_STICKY_HOLD) {
+        const programCounter = resolveRequiredLabelProgramCounter(context.program, "BattleScript_NoItemSteal");
+        return transitionBattleScriptCommand(
+          context,
+          Object.freeze({ kind: "call", programCounter }),
+          {
+            rulesContext: Object.freeze({
+              ...baseRulesContext,
+              lastUsedAbility: ABILITY_STICKY_HOLD,
+            }),
+          },
+        );
+      }
+      if (
+        attackerState.item !== ITEM_NONE
+        || targetState.item === BATTLE_SCRIPT_ITEM_ENIGMA_BERRY
+        || isMail(targetState.item)
+        || targetState.item === ITEM_NONE
+      ) {
+        return passThrough();
+      }
+      let nextRules = withBattler(baseRulesContext, target, { item: ITEM_NONE });
+      const stolenItem = targetState.item;
+      let party = withBattleScriptPartyMemberItem(
+        nextRules.party,
+        attackerState.side,
+        attackerState.partyIndex,
+        stolenItem,
+      );
+      party = withBattleScriptPartyMemberItem(
+        party,
+        targetState.side,
+        targetState.partyIndex,
+        ITEM_NONE,
+      );
+      nextRules = Object.freeze({
+        ...nextRules,
+        party,
+        lastUsedItem: stolenItem,
+        changedItems: replaceMoveEndHalfword(nextRules.changedItems, attacker, stolenItem),
+        choicedMove: replaceMoveEndHalfword(nextRules.choicedMove, target, 0),
+      });
+      let scheduler = markBattleScriptControllerPending(context.state.scheduler, attacker);
+      scheduler = markBattleScriptControllerPending(scheduler, target);
+      const programCounter = resolveRequiredLabelProgramCounter(context.program, "BattleScript_ItemSteal");
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "call", programCounter }),
+        {
+          rulesContext: nextRules,
+          scheduler,
+          events: Object.freeze([
+            Object.freeze({ kind: "set-battler-item" as const, battler: attacker, item: stolenItem }),
+            Object.freeze({ kind: "set-battler-item" as const, battler: target, item: ITEM_NONE }),
+          ]),
+        },
+      );
+    }
     if (effectByte === MOVE_EFFECT_PREVENT_ESCAPE) {
       const nextRulesContext = withBattler(baseRulesContext, target, {
         status2: (
@@ -2771,6 +2902,47 @@ function applySetMoveEffect(
     }
     if (effectByte === MOVE_EFFECT_THRASH) {
       return applyThrashMoveEffect(context, baseRulesContext, effectBattler);
+    }
+    if (effectByte === MOVE_EFFECT_KNOCK_OFF) {
+      const targetState = baseRulesContext.battlers[effectBattler];
+      if (targetState.ability === ABILITY_STICKY_HOLD) {
+        if (targetState.item === ITEM_NONE) return passThrough();
+        const programCounter = resolveRequiredLabelProgramCounter(
+          context.program,
+          "BattleScript_StickyHoldActivates",
+        );
+        return transitionBattleScriptCommand(
+          context,
+          Object.freeze({ kind: "jump", programCounter }),
+          {
+            rulesContext: Object.freeze({
+              ...baseRulesContext,
+              lastUsedAbility: ABILITY_STICKY_HOLD,
+            }),
+          },
+        );
+      }
+      if (targetState.item === ITEM_NONE) return passThrough();
+      const side = targetState.side;
+      const knockedOffMons = Object.freeze(
+        baseRulesContext.knockedOffMons.map((mask, index) =>
+          index === side ? (mask | (1 << targetState.partyIndex)) : mask
+        ),
+      ) as readonly [number, number];
+      const nextRules = withBattler(baseRulesContext, effectBattler, { item: ITEM_NONE });
+      const programCounter = resolveRequiredLabelProgramCounter(context.program, "BattleScript_KnockedOff");
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "call", programCounter }),
+        {
+          rulesContext: Object.freeze({
+            ...nextRules,
+            lastUsedItem: targetState.item,
+            knockedOffMons,
+            choicedMove: replaceMoveEndHalfword(nextRules.choicedMove, effectBattler, 0),
+          }),
+        },
+      );
     }
     const statEntry = STAT_MOVE_EFFECT_TABLE[effectByte];
     if (statEntry) {

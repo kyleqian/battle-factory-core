@@ -13,12 +13,10 @@
  * come from the party record at the newly-decided raw index; types resolve
  * from the species table; stat stages/status2/status3/the modeled
  * DisableStruct-shaped fields reset to `SwitchInClearSetData`'s neutral
- * values (`battle_main.c:3152-3258`). `ability`/`item`/`moves`/`pp` are real
- * source rebuilds (`GetAbilityBySpecies`, the knocked-off-item check, the
- * full `BattlePokemon` byte copy) this engine does not model at all (no
- * species-ability table, no party moves/pp carried per battler) -- they stay
- * whatever the battler slot's previous occupant left, untracked and
- * documented, not silently faked.
+ * values (`battle_main.c:3152-3258`). Party moves/PP and held item are now
+ * rebuilt too; the item is forced to NONE when the side/party-slot bit in
+ * `knockedOffMons` is set. Ability restoration remains bounded because this
+ * engine does not yet derive `GetAbilityBySpecies` from party `abilityNum`.
  */
 import {
   drawBattleScriptRng,
@@ -301,7 +299,8 @@ function createGetswitchedmondataOpcodeHandler(
  * `battlerPreventingEscape`/`battlerWithSureHit` identity this engine does
  * not model -- named barriers, gated on the bit actually being set on some
  * other battler (never true for a plain KO switch-in, so unreached here).
- * `ability`/`item`/`moves`/`pp` stay untouched (see file header).
+ * The party item is restored unless this party slot's durable Knock Off bit
+ * suppresses it; moves/PP are rebuilt from the same controller payload.
  */
 function createSwitchindataupdateOpcodeHandler(
   isControllerIdle: BattleScriptControllerIdlePort<BattleScriptRulesContext>,
@@ -365,6 +364,11 @@ function createSwitchindataupdateOpcodeHandler(
 
     const side = active.side === 0 ? "player" : "opponent";
     const partyMember = rules.party[side][active.partyIndex];
+    const item = (
+      rules.knockedOffMons[active.side] & (1 << active.partyIndex)
+    ) !== 0
+      ? 0
+      : partyMember.item;
     const types = resolveSpeciesTypes(partyMember.species);
     if (!types) {
       throw new Error(
@@ -380,6 +384,7 @@ function createSwitchindataupdateOpcodeHandler(
           species: partyMember.species,
           hp: partyMember.hp,
           status1: partyMember.status1,
+          item,
           moves: partyMember.moves,
           pp: partyMember.pp,
           types,

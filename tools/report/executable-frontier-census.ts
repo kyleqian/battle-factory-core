@@ -569,6 +569,7 @@ const MOVE_EFFECT_ID_BY_NAME: Readonly<Record<string, number>> = Object.freeze({
   MOVE_EFFECT_EVS_MINUS_1: 28,
   MOVE_EFFECT_RECHARGE: 29,
   MOVE_EFFECT_RAGE: 30,
+  MOVE_EFFECT_STEAL_ITEM: 31,
   MOVE_EFFECT_PREVENT_ESCAPE: 32,
   MOVE_EFFECT_NIGHTMARE: 33,
   MOVE_EFFECT_ALL_STATS_UP: 34,
@@ -591,6 +592,7 @@ const MOVE_EFFECT_ID_BY_NAME: Readonly<Record<string, number>> = Object.freeze({
   MOVE_EFFECT_ACC_MINUS_2: 51,
   MOVE_EFFECT_EVS_MINUS_2: 52,
   MOVE_EFFECT_THRASH: 53,
+  MOVE_EFFECT_KNOCK_OFF: 54,
   MOVE_EFFECT_SP_ATK_TWO_DOWN: 59,
 });
 const NAMED_MOVE_EFFECT_IDS = new Set(Object.values(MOVE_EFFECT_ID_BY_NAME));
@@ -1101,12 +1103,10 @@ const validationChecks: Array<() => void> = [
   // unpinned so concurrent opcode work can merge without a false ratchet.
   () => requireExactMechanicalBlockers("EFFECT_MEAN_LOOK", []),
   () => requireExactMechanicalBlockers("EFFECT_NIGHTMARE", []),
-  () => requireExactMechanicalBlockers("EFFECT_THIEF", [
-    "Operand gate: B_SCR_OP_PLAYANIMATION(B_ANIM_ITEM_STEAL)",
-  ]),
-  () => requireExactMechanicalBlockers("EFFECT_KNOCK_OFF", [
-    "Operand gate: B_SCR_OP_PLAYANIMATION(B_ANIM_ITEM_KNOCKOFF)",
-  ]),
+  () => requireExecutable("EFFECT_THIEF"),
+  () => requireExactMechanicalBlockers("EFFECT_THIEF", []),
+  () => requireExecutable("EFFECT_KNOCK_OFF"),
+  () => requireExactMechanicalBlockers("EFFECT_KNOCK_OFF", []),
   // Family-B Cluster 3's final rung: Cmd_rapidspinfree, its Wrap-return
   // copy tuple, and MOVE_EFFECT_RAPIDSPIN's C-selected callback are live.
   () => requireExecutable("EFFECT_RAPID_SPIN"),

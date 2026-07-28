@@ -38,6 +38,7 @@ const URSARING = 217;
 const ABILITY_GUTS = 62;
 const ABILITY_INTIMIDATE = 22;
 const ABILITY_TRUANT = 54;
+const ITEM_LEFTOVERS = 200;
 
 function battler(changes: Partial<BattleScriptRulesBattler> = {}): BattleScriptRulesBattler {
   return Object.freeze({
@@ -85,7 +86,7 @@ function opponentBench(): BattleScriptPartyMemberInput[] {
   return [
     { species: SUNKERN, hp: 0, status1: 0, moves: [TACKLE, 0, 0, 0] },
     EMPTY_SLOT,
-    { species: MACHOP, hp: 145, status1: 0, moves: [KARATE_CHOP, 0, 0, 0] },
+    { species: MACHOP, hp: 145, status1: 0, item: ITEM_LEFTOVERS, moves: [KARATE_CHOP, 0, 0, 0] },
     EMPTY_SLOT,
     EMPTY_SLOT,
     EMPTY_SLOT,
@@ -268,6 +269,7 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     expect(updated.species).toBe(MACHOP);
     expect(updated.hp).toBe(145);
     expect(updated.status1).toBe(0);
+    expect(updated.item).toBe(ITEM_LEFTOVERS);
     expect(updated.types).toEqual(["TYPE_FIGHTING", "TYPE_FIGHTING"]);
     expect(updated.statStages).toEqual([6, 6, 6, 6, 6, 6, 6, 6]);
     expect(updated.status2).toBe(0);
@@ -283,6 +285,33 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     // is not, so it cannot yet derive GetAbilityBySpecies here. Do not add a
     // private Skill Swap lifecycle handler; the active byte remains stale.
     expect(updated.ability).toBe(ABILITY_GUTS);
+  });
+
+  it("switchindataupdate suppresses a knocked-off party item but restores an ordinary stored item", () => {
+    const active = [
+      battler({ side: 0, species: URSARING, types: ["TYPE_NORMAL", "TYPE_NORMAL"] }),
+      battler({
+        side: 1,
+        species: SUNKERN,
+        item: 0,
+        hp: 0,
+        types: ["TYPE_GRASS", "TYPE_GRASS"],
+        partyIndex: 2,
+        ability: ABILITY_GUTS,
+      }),
+      battler({ side: 0 }),
+      battler({ side: 1 }),
+    ] as const;
+    for (const [knockedOffMons, expectedItem] of [
+      [[0, 0], ITEM_LEFTOVERS],
+      [[0, 1 << 2], 0],
+    ] as const) {
+      const rc = context({ battlers: active, knockedOffMons });
+      const { result } = stepAtProgramCounter(SWITCHINDATAUPDATE_PC, rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.rulesContext.battlers[1].item).toBe(expectedItem);
+      expect(result.state.rulesContext.party.opponent[2].item).toBe(ITEM_LEFTOVERS);
+    }
   });
 
   it("switchindataupdate clears Focus Energy ordinarily, retains it through Baton Pass, and clears Encore in both routes", () => {
