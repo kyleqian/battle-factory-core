@@ -1,4 +1,30 @@
 ---
+## 616 — [SUPERVISOR VERIFY+FOLD 2026-07-28 ~10:35] Perish Song accepted; ranked-opcodes dossier and Cluster-3 receipts folded
+
+- **State:** independently verified entry 615 (suite, build, census idempotent
+  at **171/214, 307/355, 249/276, 2902/2957**; Soundproof + `BS_SCRIPTING`
+  live in the ability handler) and merged two side branches: `80049c35`
+  (`docs/ranked-single-opcodes-notes.md` — falsified 7 of 12 ranked families'
+  one-opcode-flip premises; ordered Batches 1-3 worth +13 effects/+25
+  weighted; Metronome pinned as an end-of-universe gate) and `ab2d66cd`
+  (`docs/family-b-cluster3-off-evidence.md` — Mean Look status2 0x04000000
+  with rejected switch + Roar-release, Nightmare 0x08000000 with HP
+  116→87→58 and wake-clears, twice-run byte-identical). Union green at
+  **383 files / 4372 tests**; both side worktrees removed.
+- **Did:** bumped the oracle-lab papercut (3rd hit). The Perish worker
+  self-surfaced the dossier-predicted `BS_SCRIPTING` selector gap and widened
+  it with the opcode, as the committed-script-to-end acceptance was designed
+  to force.
+- **Next:** round 6 dispatched — main: ranked Batch 1 (Eruption/Water Spout,
+  Teeter Dance, Magnitude, Belly Drum, Super Fang, Hidden Power; predicted
+  **+6/+7/+7/+10**; census regen deliberately skipped, supervisor reconciles
+  post-merge); side: census-generator per-operand hardening
+  (jumpifstatus2/playanimation/jumpifarrayequal/printfromtable/copyarray +
+  Metronome dynamic-jump gate). Then Grudge+Spite (Batch 2 remainder,
+  +2/+2/+2/+4) and Cluster 3 engine work against the banked receipts.
+- **Notes:** no deferred questions. Deadline 15:07.
+
+---
 ## 615 — [BOUNDED MAIN WORKER 2026-07-28 ~10:25] Perish Song executes through terminal countdown
 
 - **State:** tree green at **382 files / 4368 tests**, production build, OFF

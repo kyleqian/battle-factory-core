@@ -15,6 +15,31 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 619 — [BOUNDED MAIN WORKER 2026-07-28 ~11:05] Status-family callback operands restored semantically
+
+- **State:** tree green at **384 files / 4402 tests**, production build, OFF
+  oracle info, `git diff --check`, and census **177/214 effects, 314/355
+  moves, 256/276 distinct, 2912/2957 weighted**; all **62/62** census
+  validations pass. Predicted and actual delta: **+5/+13/+11/+139**.
+- **Did:** registered source-exact `gFellAsleepStringIds`; implemented real
+  `gEffectBattler <- gBattlerTarget` and
+  `sBATTLER <- sBATTLER_WITH_ABILITY` assignments, including materialized
+  `battlerWithAbility` writes in `jumpifability`. Full committed scripts now
+  reach END for Sleep, Toxic, Poison, Paralysis, Yawn first-stage and
+  ability-prevention paths, asserting messages, status icons, state,
+  deterministic replay, and exact RNG ledgers. The damaging
+  `EFFECT_PARALYZE_HIT` sibling is also terminal-walked.
+- **Next:** supervisor verify commit `7f0c8789`. Then continue the assigned
+  order with Grudge+Spite (+4 weighted) or family-B Cluster 3 against banked
+  evidence; no remainder from this step.
+- **Notes:** deliberate census pin move: five exact mechanical-blocker checks
+  now require executable. No new barriers, barrier-count pin moves, recording
+  imports, oracle traces, presentation/tick/round branches, roadmap, or issue
+  edits. `EFFECT_PARALYZE_HIT` was already executable because its secondary
+  status path shares the callback but cannot enter the primary move's
+  Limber-prevention copy branch.
+
+---
 ## 618 — [SUPERVISOR VERIFY+FOLD 2026-07-28 ~11:00] Batch 1 accepted; hardened census folded — five status effects were runtime false positives
 
 - **State:** verified entry 617 (suite **384/4391**, build) and merged census
@@ -61,30 +86,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   barrier-pin moves, recording imports, census metadata edits, census/doc
   regeneration, oracle traces, presentation/tick/round branches, roadmap, or
   issue edits.
-
----
-## 616 — [SUPERVISOR VERIFY+FOLD 2026-07-28 ~10:35] Perish Song accepted; ranked-opcodes dossier and Cluster-3 receipts folded
-
-- **State:** independently verified entry 615 (suite, build, census idempotent
-  at **171/214, 307/355, 249/276, 2902/2957**; Soundproof + `BS_SCRIPTING`
-  live in the ability handler) and merged two side branches: `80049c35`
-  (`docs/ranked-single-opcodes-notes.md` — falsified 7 of 12 ranked families'
-  one-opcode-flip premises; ordered Batches 1-3 worth +13 effects/+25
-  weighted; Metronome pinned as an end-of-universe gate) and `ab2d66cd`
-  (`docs/family-b-cluster3-off-evidence.md` — Mean Look status2 0x04000000
-  with rejected switch + Roar-release, Nightmare 0x08000000 with HP
-  116→87→58 and wake-clears, twice-run byte-identical). Union green at
-  **383 files / 4372 tests**; both side worktrees removed.
-- **Did:** bumped the oracle-lab papercut (3rd hit). The Perish worker
-  self-surfaced the dossier-predicted `BS_SCRIPTING` selector gap and widened
-  it with the opcode, as the committed-script-to-end acceptance was designed
-  to force.
-- **Next:** round 6 dispatched — main: ranked Batch 1 (Eruption/Water Spout,
-  Teeter Dance, Magnitude, Belly Drum, Super Fang, Hidden Power; predicted
-  **+6/+7/+7/+10**; census regen deliberately skipped, supervisor reconciles
-  post-merge); side: census-generator per-operand hardening
-  (jumpifstatus2/playanimation/jumpifarrayequal/printfromtable/copyarray +
-  Metronome dynamic-jump gate). Then Grudge+Spite (Batch 2 remainder,
-  +2/+2/+2/+4) and Cluster 3 engine work against the banked receipts.
-- **Notes:** no deferred questions. Deadline 15:07.
-
