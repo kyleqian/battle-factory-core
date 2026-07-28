@@ -2816,11 +2816,17 @@ describe("production tryfaintmon (Cmd_tryfaintmon) dispatch", () => {
   });
 
   describe("(b) unsupported-branch barriers", () => {
-    it("halts on HITMARKER_DESTINYBOND with the attacker still alive (BattleScript_DestinyBondTakesLife unmodeled)", () => {
+    it("HITMARKER_DESTINYBOND schedules the avenging script above the original target-faint continuation", () => {
       const rc = context(0, {}, { hitMarker: HITMARKER_DESTINYBOND }, { hp: 0 });
       const { result } = stepAtOpcode("B_SCR_OP_TRYFAINTMON", rc);
-      expect(result.kind).toBe("halted");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 3020 });
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_DestinyBondTakesLife"));
+      expect(result.state.callStack).toEqual([
+        findTryfaintmonPc((ops) => ops[0] === "BS_TARGET" && ops[1] === "FALSE") + 1,
+        labelPc("BattleScript_FaintTarget"),
+      ]);
+      expect(result.state.rulesContext.hitMarker & HITMARKER_DESTINYBOND).toBe(0);
+      expect(result.state.rulesContext.battleMoveDamage).toBe(rc.battlers[0]!.hp);
     });
 
     it("halts on the target's STATUS3_GRUDGE vs. a different-side attacker (BattleScript_GrudgeTakesPP unmodeled)", () => {

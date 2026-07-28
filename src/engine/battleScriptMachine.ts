@@ -167,6 +167,12 @@ export type BattleScriptControlDirective =
    * program counter.
    */
   | Readonly<{ kind: "call-explicit"; programCounter: number; returnProgramCounter: number }>
+  /**
+   * Source performs multiple consecutive `BattleScriptPush` calls before
+   * selecting a new cursor. Entries are appended in source push order, so the
+   * final entry is the first one popped by `return`.
+   */
+  | Readonly<{ kind: "call-stack"; programCounter: number; returnProgramCounters: readonly number[] }>
   | Readonly<{ kind: "return" }>
   | Readonly<{ kind: "controller-return" }>
   | Readonly<{ kind: "scheduler-progress" }>
@@ -942,6 +948,18 @@ export function stepBattleScriptMachine<RulesContext extends object>(
       next = freezeState(
         transition.control.programCounter,
         [...state.callStack, transition.control.returnProgramCounter],
+        state.instructionsExecuted + 1,
+        null,
+        transition.scheduler,
+        transition.rulesContext,
+        transition.rng,
+        events,
+      );
+      break;
+    case "call-stack":
+      next = freezeState(
+        transition.control.programCounter,
+        [...state.callStack, ...transition.control.returnProgramCounters],
         state.instructionsExecuted + 1,
         null,
         transition.scheduler,

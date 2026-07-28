@@ -55,6 +55,7 @@ import { createBattleScriptJumpifconfusedandstatmaxedOpcodeHandlers } from "./ba
 import { createBattleScriptTryhealhalfhealthOpcodeHandlers } from "./battleScriptTryhealhalfhealthOpcode.ts";
 import { createBattleScriptTryKOOpcodeHandlers } from "./battleScriptTryKOOpcode.ts";
 import { createBattleScriptTrysetdestinybondtohappenOpcodeHandlers } from "./battleScriptTrysetdestinybondtohappenOpcode.ts";
+import { createBattleScriptSetdestinybondOpcodeHandlers } from "./battleScriptSetdestinybondOpcode.ts";
 import { createBattleScriptForceSwitchOpcodeHandlers } from "./battleScriptForceSwitchOpcode.ts";
 import { createBattleScriptExplosionOpcodeHandlers } from "./battleScriptExplosionOpcode.ts";
 import { createBattleScriptJumpifnotfirstturnOpcodeHandlers } from "./battleScriptJumpifnotfirstturnOpcode.ts";
@@ -2271,6 +2272,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptTryhealhalfhealthOpcodeHandlers(program),
     ...createBattleScriptTryKOOpcodeHandlers(program),
     ...createBattleScriptTrysetdestinybondtohappenOpcodeHandlers(program),
+    ...createBattleScriptSetdestinybondOpcodeHandlers(program),
     ...createBattleScriptForceSwitchOpcodeHandlers(program, {
       isControllerIdle: sourceExternalPorts.isControllerIdle,
     }),
