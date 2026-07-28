@@ -15,6 +15,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 556 — [SUPERVISOR VERIFY 2026-07-27 ~23:49] Sleep Talk accepted; Wish and Rollout evidence merged
+
+- **State:** reviewed union green at **312 files / 3945 tests**; production
+  build, both-oracle freshness, census regeneration, and `git diff --check`
+  pass. Census is **136/214 effects, 260/355 moves, 212/276 Factory-L50
+  distinct, 2670/2957 weighted**, with all **42/42** checks.
+- **Did:** accepted `c7b9822`/`6e33331`: the paired Sleep Talk opcodes own
+  exact limitations, retry RNG, targeting, and no-stack called-effect
+  dispatch, including a generic full-turn Whiscash→Fissure terminal win.
+  Merged Wish evidence `e18ab8e` and Rollout evidence `f5dfb5d` after focused
+  verification and twice reproducing each OFF manifest.
+- **Next:** implement source-complete six-byte `B_SCR_OP_TRYWISH`, including
+  positional counter/party-index state, pending-Wish failure, `ENDTURN_WISH`
+  decrement/dispatch, delayed half-max heal, and full-HP route. Expected
+  census is **137/214, 261/355, 213/276, 2678/2957**.
+- **Notes:** Wish reproduces `b8f3eaea…40bf` (damage **140→123**, PP
+  **10→9→8**, capped heal **106→140**); Rollout reproduces
+  `4460104b…9677` (Defense Curl, PP **20→19**, locked HP
+  **362→327→170→12→0**). No barrier/ratchet increase, recording import,
+  animation edit, DEFERRED item, or oracle lifecycle action.
+
+---
 ## 555 — [BOUNDED MAIN WORKER 2026-07-27 ~23:46] Sleep Talk executes called moves generically
 
 - **State:** committed `c7b9822`/`6e33331`; tree green at **310 files / 3938
@@ -56,24 +78,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Sleep Talk PP **9→8**, called Fissure with its PP still **5**, and the KO.
   Hidden selection/PC fields are source-pinned. No new barrier, recording
   import, animation edit, DEFERRED item, or oracle lifecycle action.
-
----
-## 553 — [BOUNDED MAIN WORKER 2026-07-27 ~23:21] Substitute executes and persists across real actions
-
-- **State:** tree green at **308 files / 3908 tests**; focused **277/277**,
-  production build, OFF-oracle freshness, and `git diff --check` pass. Census
-  is **135/214 effects, 259/355 moves, 211/276 Factory-L50 distinct,
-  2662/2957 weighted**, exact **+1/+1/+1/+10**, with all **42/42** checks.
-- **Did:** committed `b179bd5`/`2c84860`: registered source-complete one-byte
-  opcode `0x9c` / `Cmd_setsubstitute`, including strict HP boundary,
-  minimum-one quarter, attacker field ownership, and zero direct HP/event/
-  controller/RNG side effects. Genuine success, low-HP failure, and
-  already-live routes reach `END`; the generic two-turn Golem→Harden proof
-  matches HP **155→117** and PP **10→9→8** with the live state preserved.
-- **Next:** supervisor verify this increment, then choose from the regenerated
-  top frontier led by Sleep Talk's two-opcode set or `B_SCR_OP_TRYWISH`.
-- **Notes:** added the source `gSubstituteUsedStringIds` table and the existing
-  full-turn pause port's missing `B_WAIT_TIME_SHORT=32` literal. Existing
-  hit-chain/MOVEEND tests still pin persistence until `substituteHP==0`, then
-  clear. No barrier/ratchet increase, recording import, animation/render edit,
-  canonical Battle-2 work, oracle lifecycle action, or PAPERCUT.
