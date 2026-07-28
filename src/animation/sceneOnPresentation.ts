@@ -261,6 +261,11 @@ import {
   type DizzyPunchState,
 } from "./dizzyPunch.ts";
 import {
+  astonishAtAge,
+  type AstonishDropletRandom,
+  type AstonishState,
+} from "./astonish.ts";
+import {
   razorLeafAtAge,
   type RazorLeafState,
 } from "./razorLeaf.ts";
@@ -1103,6 +1108,20 @@ export interface SceneOnDizzyPunchConfig {
   readonly attackerPersonality: number;
 }
 
+export interface SceneOnAstonishConfig {
+  readonly move: "ASTONISH";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source mon-pic coordinate consumed by SetBattlerSpriteYOffsetFromYScale. */
+  readonly targetPictureYOffset: number;
+  /** Four masked Random2 outputs produced before the two callback bodies. */
+  readonly dropletRandom: readonly [
+    AstonishDropletRandom,
+    AstonishDropletRandom,
+  ];
+}
+
 export interface SceneOnRazorLeafConfig {
   readonly move: "RAZOR_LEAF";
   readonly attacker: SceneOnPresentationBattler;
@@ -1266,6 +1285,7 @@ export type SceneOnMoveConfig =
   | SceneOnExplosionConfig
   | SceneOnDynamicPunchConfig
   | SceneOnDizzyPunchConfig
+  | SceneOnAstonishConfig
   | SceneOnRazorLeafConfig
   | SceneOnPoisonTailConfig
   | SceneOnToxicConfig
@@ -1492,6 +1512,12 @@ export interface SceneOnDizzyPunchView extends DizzyPunchState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnAstonishView extends AstonishState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly targetBattler: SceneOnPresentationBattler;
 }
 
 export interface SceneOnRazorLeafView extends RazorLeafState {
@@ -3008,6 +3034,29 @@ export function sceneOnDizzyPunchView(
       state.age,
       state.config.attacker.geometry.side,
       state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is Astonish's displayed SWEAT_BEAD load command. */
+export function sceneOnAstonishView(
+  state: SceneOnMovePresentationState<SceneOnAstonishConfig>,
+): SceneOnAstonishView {
+  if (state.config.move !== "ASTONISH") {
+    throw new Error(
+      `expected ASTONISH presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    targetBattler: state.config.target,
+    ...astonishAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.target.geometry.animationCenter,
+      state.config.targetPictureYOffset,
+      state.config.dropletRandom,
     ),
   };
 }
