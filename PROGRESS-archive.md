@@ -1,4 +1,25 @@
 ---
+## 569 — [BOUNDED MAIN WORKER CORRECTION 2026-07-28 ~02:17] Fury Cutter mirrors raw C integer widths
+
+- **State:** committed `0d638cb`; tree green at **328 files / 4031 tests**,
+  focused **84/84**, and ratchets **6/6**. Production build, both-oracle
+  freshness/info, census regeneration, and `git diff --check` pass. Census
+  remains **142/214 effects, 268/355 moves, 219/276 Factory-L50 distinct,
+  2706/2957 weighted**, all **42/42**.
+- **Did:** replaced the general JS clamp/exponentiation with exact source
+  widths: raw u8 counters increment modulo 256 unless exactly 5, and source
+  power plus every doubling stores through u16. Tests pin raw **5→5**,
+  **6→7**, **255→0**, and overflow **250×2⁹→62464**.
+- **Next:** supervisor verify this bounded correction and select the next
+  finite shared registration target; do not extend the retired canonical
+  Battle-2 march.
+- **Notes:** normal gameplay remains **1..5 / 10..160**; no-effect reset,
+  registration, zero RNG/lock, and generic full turns remain green. Entry
+  568's archived “cap” wording is narrowed to that normal producer invariant.
+  No barrier/import ratchet, census, evidence, animation, issue, or PAPERCUT
+  change.
+
+---
 ## 568 — [BOUNDED MAIN WORKER 2026-07-28 ~02:10] Fury Cutter executes source-completely
 
 - **State:** committed `7b92344`; tree green at **327 files / 4025 tests**,

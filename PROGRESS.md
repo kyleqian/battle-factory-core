@@ -15,6 +15,29 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 572 — [SUPERVISOR VERIFY 2026-07-28 ~02:38] Corrected Minimize accepted; Skill Swap evidence folded
+
+- **State:** reviewed union green at **330 files / 4040 tests** and focused
+  **42/42**; production build, both-oracle freshness/info, census
+  regeneration, ratchets, and `git diff --check` pass. Census is exactly
+  **143/214 effects, 269/355 moves, 220/276 Factory-L50 distinct,
+  2711/2957 weighted**, all **42/42**.
+- **Did:** accepted Minimize only after `507fde7` unified the producer/consumer
+  status constant and replaced a transient multiplier snapshot with the
+  same-seed Stomp damage control (**25 vs 12**). Merged and independently
+  replayed the successful Skill Swap OFF checkpoint: active abilities
+  **39/5 → 5/39**, persistent party abilities unchanged, PP **10→9**, exact
+  manifest `1bb13425…54cd241a`.
+- **Next:** register operandless `0xca` `B_SCR_OP_SETFORCEDTARGET` globally:
+  attacker-side timer **1**, attacker target, one-byte advance, PP-before-write,
+  end-turn timer clear, zero RNG. Keep the generic controller honest in
+  singles; source-pin doubles retarget readers without inventing doubles.
+  Expected census: **144/214, 270/355, 221/276, 2716/2957**.
+- **Notes:** no private handler, recording import, barrier/import ratchet
+  change, animation/presentation/scenario branch, DEFERRED item, issue
+  removal, or oracle lifecycle action.
+
+---
 ## 571 — [BOUNDED MAIN WORKER CORRECTION 2026-07-28 ~02:35] Minimize consumer proof corrected
 
 - **State:** committed `507fde7`; tree green at **329 files / 4037 tests**,
@@ -55,24 +78,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   remains manifest `67c617f7…c842977`. No RNG/message/stat/lock ownership,
   barrier/import ratchet change, recording import, animation/presentation/
   scenario branch, oracle lifecycle action, issue removal, or PAPERCUT.
-
----
-## 569 — [BOUNDED MAIN WORKER CORRECTION 2026-07-28 ~02:17] Fury Cutter mirrors raw C integer widths
-
-- **State:** committed `0d638cb`; tree green at **328 files / 4031 tests**,
-  focused **84/84**, and ratchets **6/6**. Production build, both-oracle
-  freshness/info, census regeneration, and `git diff --check` pass. Census
-  remains **142/214 effects, 268/355 moves, 219/276 Factory-L50 distinct,
-  2706/2957 weighted**, all **42/42**.
-- **Did:** replaced the general JS clamp/exponentiation with exact source
-  widths: raw u8 counters increment modulo 256 unless exactly 5, and source
-  power plus every doubling stores through u16. Tests pin raw **5→5**,
-  **6→7**, **255→0**, and overflow **250×2⁹→62464**.
-- **Next:** supervisor verify this bounded correction and select the next
-  finite shared registration target; do not extend the retired canonical
-  Battle-2 march.
-- **Notes:** normal gameplay remains **1..5 / 10..160**; no-effect reset,
-  registration, zero RNG/lock, and generic full turns remain green. Entry
-  568's archived “cap” wording is narrowed to that normal producer invariant.
-  No barrier/import ratchet, census, evidence, animation, issue, or PAPERCUT
-  change.
