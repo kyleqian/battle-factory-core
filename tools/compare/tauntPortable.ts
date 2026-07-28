@@ -7,6 +7,7 @@ import {
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import {
   tauntAtAge,
   type TauntState,
@@ -38,6 +39,7 @@ interface Fixture {
   };
 }
 interface Sprite {
+  slot: number; subpriority: number;
   attr0: number; attr1: number; attr2: number;
   x: number; y: number; x2: number; y2: number;
   template: number; callback: number;
@@ -49,10 +51,14 @@ interface SoundPlayer {
   tracks: readonly { flags: number; panX: number }[];
 }
 interface Frame {
-  frame: number; sprites: readonly Sprite[];
+  frame: number; sha256: string; sprites: readonly Sprite[];
   hardwareOam: readonly (readonly number[])[];
+  hardwareMatrices: readonly {
+    a: number; b: number; c: number; d: number;
+  }[];
   fadedPalette: readonly number[]; unfadedPalette: readonly number[];
   hardwarePalette: readonly number[];
+  paletteTags: readonly number[];
   bldcnt: number; bldalpha: number; bldy: number;
   se1: SoundPlayer; se2: SoundPlayer;
 }
@@ -119,6 +125,7 @@ function expectedSoftware(state: TauntState): readonly string[] {
       0x8800 + 537 + sprite.frame * 16,
       Number(sprite.hFlip), 256,
       callbackFor("bubble", sprite.age),
+      3, fixture.attackerSide === "player" ? 19 : 29,
     ].join(","));
   }
   if (state.finger) {
@@ -129,6 +136,7 @@ function expectedSoftware(state: TauntState): readonly string[] {
       0x7800 + 305 + sprite.frame * 16,
       Number(sprite.hFlip), 256,
       callbackFor("finger", sprite.age),
+      4, fixture.attackerSide === "player" ? 18 : 28,
     ].join(","));
   }
   for (const mark of state.angerMarks) {
@@ -138,9 +146,10 @@ function expectedSoftware(state: TauntState): readonly string[] {
       mark.x, mark.y, mark.x - 8, mark.y - 8,
       0x9800 + 353, 0, matrix,
       callbackFor("anger", mark.age),
+      3, fixture.target.geometry.side === "player" ? 28 : 38,
     ].join(","));
   }
-  return result.sort();
+  return result;
 }
 
 function actualSoftware(sprite: Sprite): string {
@@ -150,7 +159,7 @@ function actualSoftware(sprite: Sprite): string {
   return [
     sprite.template, sprite.x, sprite.y, left, top, sprite.attr2,
     affine ? 0 : (sprite.attr1 >> 12) & 1,
-    sprite.matrix.a, sprite.callback,
+    sprite.matrix.a, sprite.callback, sprite.slot, sprite.subpriority,
   ].join(",");
 }
 
@@ -166,7 +175,7 @@ function expectedHardware(state: TauntState): readonly string[] {
       return [0x100 | top, 0x4000 | left, attr2].join(",");
     }
     return [top, 0x8000 | hFlip << 12 | left, attr2].join(",");
-  }).sort();
+  }).reverse();
 }
 
 const failures: string[] = [];
@@ -185,7 +194,7 @@ for (let frame = fixture.denseWindow.startFrame;
   );
   const seam = sceneOnTauntView({ ...stage, age });
   const softwareExpected = expectedSoftware(expected);
-  const softwareActual = oracle.sprites.map(actualSoftware).sort();
+  const softwareActual = oracle.sprites.map(actualSoftware);
   const software = JSON.stringify(softwareActual) === JSON.stringify(softwareExpected);
   const prior = tauntAtAge(
     age - 1, fixture.attackerSide, fixture.attackerHead,
@@ -199,10 +208,10 @@ for (let frame = fixture.denseWindow.startFrame;
         || palette === 7 && tile >= 305 && tile <= 337
         || palette === 9 && tile === 353;
     })
-    .map((oam) => [oam[0], oam[1], oam[2]].join(",")).sort();
+    .map((oam) => [oam[0], oam[1], oam[2]].join(","));
   const hardwareExpected = expectedHardware(prior);
   const hardware = JSON.stringify(hardwareActual) === JSON.stringify(hardwareExpected);
-  const palette = oracle.hardwarePalette.every(
+  const palettePixels = oracle.hardwarePalette.every(
     (color, index) => color === oracle.fadedPalette[index],
   ) && [7, 8, 9].every((bank) => {
     const first = 256 + bank * 16;
@@ -210,7 +219,23 @@ for (let frame = fixture.denseWindow.startFrame;
       (color, index) => color === oracle.fadedPalette[first + index],
     );
   });
+  const assetsLoaded = age < 124;
+  const palette = palettePixels
+    && oracle.paletteTags[7] === (assetsLoaded ? 10214 : 0xffff)
+    && oracle.paletteTags[8] === (assetsLoaded ? 10209 : 0xffff)
+    && oracle.paletteTags[9] === (assetsLoaded ? 10087 : 0xffff);
   const registers = oracle.bldcnt === 0 && oracle.bldalpha === 0 && oracle.bldy === 0;
+  const hardwareMatrix = prior.angerMarks.every((mark) => {
+    const oam = oracle.hardwareOam.find(
+      (item) => ((item[2] ?? 0) & 0xffff) === 0x9800 + 353,
+    );
+    const matrix = oracle.hardwareMatrices[((oam?.[1] ?? 0) >> 9) & 31];
+    const expectedMatrix = Math.trunc(0x10000 / mark.xScale);
+    return matrix?.a === expectedMatrix
+      && matrix.b === 0
+      && matrix.c === 0
+      && matrix.d === expectedMatrix;
+  });
   let sound = true;
   if (expected.soundRestart) {
     const player = expected.soundRestart === "SE_M_TAIL_WHIP" ? oracle.se2 : oracle.se1;
@@ -225,11 +250,14 @@ for (let frame = fixture.denseWindow.startFrame;
   const seamShape = JSON.stringify({
     ...seam, age: undefined, attacker: undefined, target: undefined,
   }) === JSON.stringify(expected);
-  if (software && hardware && palette && registers && sound && seamShape) {
+  if (
+    software && hardware && hardwareMatrix && palette
+    && registers && sound && seamShape
+  ) {
     matches += 1;
   } else {
     failures.push(
-      `frame ${frame}/age ${age}: software=${software} hardware=${hardware} palette=${palette} registers=${registers} sound=${sound} seam=${seamShape}`
+      `frame ${frame}/age ${age}: software=${software} hardware=${hardware} matrix=${hardwareMatrix} palette=${palette} registers=${registers} sound=${sound} seam=${seamShape}`
       + (software ? "" : `\n actual=${JSON.stringify(softwareActual)}\n expect=${JSON.stringify(softwareExpected)}`)
       + (hardware ? "" : `\n hwactual=${JSON.stringify(hardwareActual)}\n hwexpect=${JSON.stringify(hardwareExpected)}`),
     );
@@ -243,6 +271,9 @@ for (let frame = fixture.denseWindow.startFrame;
   const rgb = readFileSync(
     join(rgbDir, `${String(frame).padStart(5, "0")}.rgb`),
   );
+  if (createHash("sha256").update(rgb).digest("hex") !== oracle.sha256) {
+    throw new Error(`raw RGB digest mismatch at frame ${frame}`);
+  }
   let diffPixels = 0;
   for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
     if (

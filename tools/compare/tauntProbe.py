@@ -29,6 +29,7 @@ def main() -> None:
                         check=True, capture_output=True, text=True).stdout
     symbols = {p[2]: int(p[0], 16) | 1 for line in nm.splitlines()
                if len(p := line.split()) == 3}
+    palette_tags = symbols["sSpritePaletteTags"] & ~1
     template_names = ("gThoughtBubbleSpriteTemplate", "gTauntFingerSpriteTemplate",
                       "gAngerMarkSpriteTemplate")
     templates = {name: oracle.symbols[name] for name in template_names}
@@ -78,9 +79,14 @@ def main() -> None:
         rows.append({"frame": frame, "sha256": hashlib.sha256(rgb).hexdigest(),
           "playerSprite": battler(0), "opponentSprite": battler(1), "sprites": active,
           "hardwareOam": [[u16(0x07000000+i*8+j) for j in (0,2,4)] for i in range(128)],
+          "hardwareMatrices": [
+              {"a": s16(0x07000006+i*0x20), "b": s16(0x0700000e+i*0x20),
+               "c": s16(0x07000016+i*0x20), "d": s16(0x0700001e+i*0x20)}
+              for i in range(32)],
           "fadedPalette": [u16(faded+i*2) for i in range(512)],
           "unfadedPalette": [u16(unfaded+i*2) for i in range(512)],
           "hardwarePalette": [u16(0x05000000+i*2) for i in range(512)],
+          "paletteTags": [u16(palette_tags+i*2) for i in range(16)],
           "bldcnt": u16(0x04000050), "bldalpha": u16(0x04000052),
           "bldy": u16(0x04000054),
           "se1": {"songHeader": oracle.read_u32(se1_info), "status": oracle.read_u32(se1_info+4),
