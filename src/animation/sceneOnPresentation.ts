@@ -3555,7 +3555,10 @@ export function sceneOnShadowPunchView(
     attacker: state.config.attacker,
     target: state.config.target,
     backgroundGhost: shadowPunchBackgroundIsGhost(animationAge),
-    backgroundBldy: shadowPunchBackgroundBldy(animationAge),
+    backgroundBldy: shadowPunchBackgroundBldy(
+      animationAge,
+      state.config.attacker.geometry.side,
+    ),
     attackerVisible: shadowPunchAttackerVisible(animationAge),
     attackerX2: shadowPunchAttackerX2(
       animationAge - SHADOW_PUNCH_PUNCH_TASK_FIRST_AGE,

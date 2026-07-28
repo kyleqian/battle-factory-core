@@ -30,9 +30,14 @@ interface Fixture {
 
 interface ProbeSprite {
   readonly slot: number;
+  readonly x: number;
+  readonly y: number;
   readonly x2: number;
   readonly y2: number;
   readonly invisible: boolean;
+  readonly subpriority: number;
+  readonly matrix: readonly number[];
+  readonly hardwareMatrix: readonly number[];
 }
 
 interface ProbeFrame {
@@ -46,6 +51,14 @@ interface ProbeFrame {
   readonly traceSprites: readonly ProbeSprite[];
   readonly fistSprite: ProbeSprite | null;
   readonly hitsplatSprites: readonly ProbeSprite[];
+  readonly fadedPalette: readonly number[];
+  readonly unfadedPalette: readonly number[];
+  readonly hardwarePalette: readonly number[];
+  readonly hardwareOam: readonly (readonly number[])[];
+  readonly se1: {
+    readonly songHeader: number;
+    readonly tracks: readonly { readonly flags: number; readonly panX: number }[];
+  };
 }
 
 const root = resolve(dirname(new URL(import.meta.url).pathname), "../..");
@@ -74,6 +87,10 @@ if (run.stderr) process.stderr.write(run.stderr);
 if (run.status !== 0) process.exit(run.status ?? 1);
 
 const probe = JSON.parse(readFileSync(output, "utf8")) as {
+  readonly songHeaders: {
+    readonly SE_M_COMET_PUNCH: number;
+    readonly SE_M_JUMP_KICK: number;
+  };
   readonly frames: readonly ProbeFrame[];
 };
 const frames = new Map(probe.frames.map((frame) => [frame.frame, frame]));
@@ -96,6 +113,7 @@ let engine: EngineState = {
 };
 
 let componentMatching = 0;
+let strengthenedMatching = 0;
 let framebufferMatching = 0;
 const framebufferMismatches: string[] = [];
 const componentMismatches: string[] = [];
@@ -130,9 +148,98 @@ for (
     hitsplat: record.hitsplatSprites.length > 0,
     targetShakeX2: record.target.x2,
   };
-  if (JSON.stringify(app) === JSON.stringify(oracle)) componentMatching += 1;
+  const componentExact = JSON.stringify(app) === JSON.stringify(oracle);
+  if (componentExact) componentMatching += 1;
   else if (componentMismatches.length < 12) {
     componentMismatches.push(`${frame}: oracle=${JSON.stringify(oracle)} app=${JSON.stringify(app)}`);
+  }
+
+  const alpha = age >= 41 && age <= 59;
+  const fade = age <= 36 || (
+    age >= 61
+    && age <= (fixture.attacker.geometry.side === "player" ? 99 : 98)
+  );
+  const registersExact = alpha
+    ? record.bldcnt === 16192 && record.bldalpha === 2057 && record.bldy === 0
+    : fade
+      ? record.bldcnt === 232 && record.bldalpha === 0
+        && record.bldy === view.backgroundBldy
+      : record.bldcnt === 0 && record.bldalpha === 0
+        && record.bldy === view.backgroundBldy;
+  const tracePaletteExact = !alpha || record.fadedPalette
+    .slice(0x190, 0x1a0)
+    .every((color, index) => {
+      const source = record.unfadedPalette[0x190 + index]!;
+      const r = ((source & 31) * 3) >> 4;
+      const g = (((source >> 5) & 31) * 3) >> 4;
+      const b = (((source >> 10) & 31) * 3) >> 4;
+      return color === (r | (g << 5) | (b << 10));
+    });
+  const hardwarePaletteExact = !alpha || age === 41 || record.hardwarePalette
+    .slice(0x170, 0x1a0)
+    .every((color, index) => color === record.fadedPalette[0x170 + index]);
+  const activeHardware = record.hardwareOam.filter(
+    (oam) => (((oam[0] ?? 0) & 0x0300) !== 0x0200),
+  );
+  const cloneSource = sceneOnShadowPunchView({
+    ...stage,
+    age: age - (age < 50 ? 2 : 1),
+  });
+  const expectedCloneCount = (
+    age === 50
+      ? cloneSource.clones.filter((clone) => clone.creationAge !== 8)
+      : cloneSource.clones
+  ).length;
+  const hardwareCloneCount = activeHardware.filter(
+    (oam) => (((oam[2] ?? 0) >> 12) & 15) === 9,
+  ).length;
+  const hardwareFistCount = activeHardware.filter(
+    (oam) => ((oam[2] ?? 0) & 1023) === 537,
+  ).length;
+  const hardwareHitsplatCount = activeHardware.filter(
+    (oam) => ((oam[2] ?? 0) & 1023) === 305,
+  ).length;
+  const hardwareOamExact =
+    hardwareCloneCount === expectedCloneCount
+    && hardwareFistCount === Number(age >= 50 && age <= 58)
+    && hardwareHitsplatCount === Number(age >= 50 && age <= 59);
+  const spriteHardwareExact =
+    (record.fistSprite === null || (
+      record.fistSprite.x === fixture.target.geometry.animationCenter.x
+      && record.fistSprite.y === fixture.target.geometry.animationCenter.y
+      && record.fistSprite.subpriority === record.target.subpriority - 4
+    ))
+    && record.hitsplatSprites.every((sprite) =>
+      sprite.x === fixture.target.geometry.animationCenter.x
+      && sprite.y === fixture.target.geometry.animationCenter.y
+      && sprite.subpriority === record.target.subpriority - 3
+      && JSON.stringify(sprite.matrix) === "[303,0,0,303]"
+      && (
+        age === 49
+          ? JSON.stringify(sprite.hardwareMatrix) === "[256,0,0,256]"
+          : JSON.stringify(sprite.hardwareMatrix) === "[303,0,0,303]"
+      ));
+  const attackerPan = fixture.attacker.geometry.side === "player" ? -64 : 63;
+  const targetPan = fixture.target.geometry.side === "player" ? -63 : 63;
+  const audioExact =
+    (age < 41 || age > 74)
+    || (age <= 48
+      ? record.se1.songHeader === probe.songHeaders.SE_M_JUMP_KICK
+        && record.se1.tracks[0]?.panX === attackerPan
+      : record.se1.songHeader === probe.songHeaders.SE_M_COMET_PUNCH
+        && record.se1.tracks.slice(0, 2).every((track) => track.panX === targetPan));
+  if (
+    componentExact && registersExact && tracePaletteExact
+    && hardwarePaletteExact && hardwareOamExact && spriteHardwareExact
+    && audioExact
+  ) strengthenedMatching += 1;
+  else if (componentMismatches.length < 30) {
+    componentMismatches.push(
+      `${frame}: component=${componentExact} registers=${registersExact}`
+      + ` tracePalette=${tracePaletteExact} hardwarePalette=${hardwarePaletteExact}`
+      + ` hardwareOam=${hardwareOamExact}(${hardwareCloneCount}/${hardwareFistCount}/${hardwareHitsplatCount})`
+      + ` spriteHardware=${spriteHardwareExact} audio=${audioExact}`,
+    );
   }
 
   const oracleRgb = readFileSync(
@@ -141,6 +248,8 @@ for (
   const rgba = render(engine);
   let framebufferExact = true;
   let framebufferDiff = 0;
+  let attackerRegionDiff = 0;
+  let targetRegionDiff = 0;
   let minDiffX = 240;
   let minDiffY = 160;
   let maxDiffX = -1;
@@ -156,6 +265,8 @@ for (
       framebufferDiff += 1;
       const x = pixel % 240;
       const y = Math.floor(pixel / 240);
+      if (x < 128 && y < 128) attackerRegionDiff += 1;
+      if (x >= 128 && y < 128) targetRegionDiff += 1;
       minDiffX = Math.min(minDiffX, x);
       minDiffY = Math.min(minDiffY, y);
       maxDiffX = Math.max(maxDiffX, x);
@@ -170,9 +281,10 @@ for (
     }
   }
   if (framebufferExact) framebufferMatching += 1;
-  else if (framebufferMismatches.length < 12) {
+  else if (framebufferMismatches.length < 30) {
     framebufferMismatches.push(
       `${frame}:${framebufferDiff}px@${minDiffX},${minDiffY}-${maxDiffX},${maxDiffY}`
+      + `(attacker=${attackerRegionDiff},target=${targetRegionDiff})`
       + `[${diffSamples.join(";")}]`,
     );
   }
@@ -191,11 +303,16 @@ const total =
 console.log(
   `${componentMatching}/${total} dense SHADOW_PUNCH component frames matched`,
 );
+console.log(
+  `${strengthenedMatching}/${total} dense SHADOW_PUNCH typed/hardware/audio frames matched`,
+);
 console.log(`${framebufferMatching}/${total} dense SHADOW_PUNCH framebuffer frames matched`);
 if (componentMismatches.length) console.log(componentMismatches.join("\n"));
 if (framebufferMismatches.length) {
   console.log(`first framebuffer mismatches: ${framebufferMismatches.join(", ")}`);
 }
 process.exit(
-  componentMatching === total && framebufferMatching === total ? 0 : 1,
+  componentMatching === total
+    && strengthenedMatching === total
+    && framebufferMatching === total ? 0 : 1,
 );

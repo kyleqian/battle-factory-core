@@ -124,6 +124,13 @@ export function shadowPunchClonePriority(attackerSubpriority: number): 2 | 3 {
 export const SHADOW_PUNCH_TRACE_BLEND_COEFF = 13;
 /** `setalpha 9, 8` - the trace clones' own `ST_OAM_OBJ_BLEND` translucency (RAM-confirmed BLDCNT=0x3F40: 1st target OBJ, 2nd target BG0-3+OBJ+BD, alpha-blend mode). */
 export const SHADOW_PUNCH_TRACE_ALPHA = { eva: 9, evb: 8 } as const;
+/** Live BLDCNT/BLDALPHA window for `monbg` plus the trace OBJ stack. */
+export const SHADOW_PUNCH_ALPHA_FIRST_AGE = 41;
+export const SHADOW_PUNCH_ALPHA_LAST_AGE = 59;
+
+export function shadowPunchAlphaActive(age: number): boolean {
+  return age >= SHADOW_PUNCH_ALPHA_FIRST_AGE && age <= SHADOW_PUNCH_ALPHA_LAST_AGE;
+}
 
 /**
  * `fadetobg BG_GHOST` / `restorebg` fade-ramp (`BLDY`, hardware-driven,
@@ -151,17 +158,20 @@ const SHADOW_PUNCH_BLDY_TABLE: readonly number[] = [
 export const SHADOW_PUNCH_GHOST_BG_FIRST_AGE = 16;
 export const SHADOW_PUNCH_GHOST_BG_LAST_AGE = 78;
 
-export function shadowPunchBackgroundBldy(age: number): number {
-  return SHADOW_PUNCH_BLDY_TABLE[age] ?? 0;
+export function shadowPunchBackgroundBldy(
+  age: number,
+  attackerSide: "player" | "opponent" = "player",
+): number {
+  // The opponent-side restore task drops its full-black hold one callback
+  // earlier; fresh BLDY reads are otherwise identical through age 82.
+  const sampledAge = attackerSide === "opponent" && age >= 83 ? age + 1 : age;
+  return SHADOW_PUNCH_BLDY_TABLE[sampledAge] ?? 0;
 }
 
 export function shadowPunchBackgroundIsGhost(age: number): boolean {
   return age >= SHADOW_PUNCH_GHOST_BG_FIRST_AGE && age <= SHADOW_PUNCH_GHOST_BG_LAST_AGE;
 }
 
-/** `setalpha 9,8`'s own BLDALPHA window - RAM-confirmed active ages 41-59 (the punch task's own body plus the two ticks `clearmonbg`/`blendoff` cost before the register actually clears). */
-export const SHADOW_PUNCH_ALPHA_FIRST_AGE = 41;
-export const SHADOW_PUNCH_ALPHA_LAST_AGE = 59;
 /** `AnimTask_AttackerPunchWithTrace`'s own first RAM-observable tick (this module's local age 0), relative to `fadetobg`'s own age 0. */
 export const SHADOW_PUNCH_PUNCH_TASK_FIRST_AGE = 41;
 /** `create_fist_sprite`/`create_basic_hitsplat_sprite` - RAM-confirmed visible windows, same template/affine shape FIRE_PUNCH's own (already-proven) fist/hitsplat use. */
@@ -193,18 +203,14 @@ export function shadowPunchAttackerVisible(age: number): boolean {
 }
 
 /**
- * Framebuffer-only display lag for the attacker/clone mechanism (the
- * attacker's own `invisible` flag, `x2`, and every trace clone) - RAM-pixel
- * diffed directly (`dump-shadowpunch-rgb.py`'s own RGB capture vs this
- * module's component predictions, both orientations): a RAM write at tick N
- * (e.g. `attacker.invisible` flipping true at RAM tick 38) is not visible
- * on screen until tick N+1 - the ordinary GBA OAM-buffer double-buffering
- * lag, same class DRAGON_RAGE's own per-mechanism `FRAMEBUFFER_*_AGE_LAG`
- * constants already document for its shake/slide/fire-spit tasks. Scoped to
- * ONLY the attacker/clone draw calls (not background/target-shake/hitsplat/
- * fist, which RAM-pixel-diff clean at zero lag) - a uniform whole-view lag
- * was tried first and rejected: it fixes this window but breaks the
- * already-exact settled tail (the BLDY ramp's own tick boundaries do NOT
- * share this lag).
+ * Fresh `gSprites`, `gMain.oamBuffer`, hardware OAM, and raw-RGB reads show
+ * that the photographed epochs differ per transfer path: ordinary sprite
+ * callbacks trail by one frame, while newly-created trace clones first
+ * appear after two. Clone retirement is already reflected after one frame;
+ * the handoff frame is handled at the draw seam by excluding the not-yet-
+ * transferred ninth clone. These are hardware-buffer boundaries, not a
+ * whole-animation timing offset.
  */
-export const SHADOW_PUNCH_ATTACKER_FRAMEBUFFER_LAG = 3;
+export const SHADOW_PUNCH_DISPLAY_OAM_LAG = 1;
+export const SHADOW_PUNCH_CLONE_DISPLAY_LAG = 2;
+export const SHADOW_PUNCH_CLONE_RETIREMENT_FIRST_AGE = 50;

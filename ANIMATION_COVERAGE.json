@@ -1199,9 +1199,11 @@
     },
     {
       "move": "MOVE_SHADOW_PUNCH",
-      "status": "partial",
+      "status": "exact",
       "covered": [
-        "legal zero-PP-Up Level-50 mechanicLab HAUNTER-vs-ONIX, player-attacker orientation (HAUNTER player-back to ONIX opponent-front): complete move body wired through the shared Scene-ON seam this session (sceneOnShadowPunchView, battleScene.ts's SHADOW_PUNCH draw case) after fixing a compile-breaking mid-rework left by the prior cap-killed session (an `attackerView` variable was referenced but never defined - restored as a phase-aware view using the already-committed SHADOW_PUNCH_ATTACKER_FRAMEBUFFER_LAG constant, mirroring DRAGON_RAGE's own per-mechanism lagged-view precedent); component math (attacker visibility/x2, clone x2 set, target shake x2, bldy, fist/hitsplat gating) matches the oracle's own RAM reads exactly at every dense tick, 111/111; dense framebuffer count is 84/111 (relative ages 0-110 / oracle frames 85-195)"
+        "Complete legal zero-PP-Up Level-50 mechanicLab HAUNTER-vs-ONIX move-owned Scene-ON bodies are exact in both required orientations: player-back HAUNTER -> opponent-front ONIX is 106/106 at frames 85-190, and opponent-front HAUNTER -> player-back ONIX is 105/105 at frames 89-193. The strengthened comparator checks source/software components, typed seam state, registers, stale allocated trace-palette behavior, hardware palette transfer, effect/clone OAM counts and affine matrices, side-specific live audio headers/pans, raw RGB, and shared framebuffer equality; both orientations reproduced twice fresh.",
+        "The player repair is source/hardware-derived: AllocSpritePalette assigns slot 9 but the punch task copies the attacker only into the faded row, so BlendPalette darkens the stale unfaded battle-interface HP-bar row. Fresh gMain.oamBuffer/hardware OAM reads establish two-frame clone creation transfer, one-frame retirement transfer, the ninth-clone handoff/order, priority-3 clones behind the opaque BG2 monbg copy, the exact fist/hitsplat anchors and 303 affine matrix, and the move's live setalpha 9,8 impact blend.",
+        "The opponent orientation was independently proved rather than inherited: hardware anchor y=9 replaces the stale fixture y=13; source-selected priority-2 clones win over and blend against the BG1 monbg copy; the restore-BLDY full-black hold is one callback shorter; and SpriteCB_EnemyShadow unhides the extracted 32x8 elevated-enemy shadow one hardware epoch after gAnimScriptActive clears. Generic post-move result/message tails begin at player age 106 and opponent age 105 and are excluded by the source-owned animation boundary."
       ],
       "evidence": [
         "tools/battle-lab/mechanic-shadow-punch-haunter-onix.json",
@@ -1209,6 +1211,9 @@
         "tools/compare/fixtures/shadow-punch-player-haunter-opponent-onix.json",
         "tools/compare/fixtures/shadow-punch-opponent-haunter-player-onix.json",
         "tools/compare/shadowPunchPortable.ts",
+        "tools/compare/shadowPunchProbe.py",
+        "tools/extract/extract-shadow-punch-assets.ts",
+        "src/assets/gen/battle-anim-ghost-bg.json",
         "src/animation/shadowPunch.ts",
         "src/animation/sceneOnPresentation.ts",
         "src/engine/battleScene.ts",
@@ -1217,8 +1222,7 @@
         "tools/probe/dump-shadowpunch-rgb.py",
         "tools/compare/scratch/shadowpunch-lag-bisect.ts",
         "tools/compare/scratch/shadowpunch-attacker-lag-bisect.ts"
-      ],
-      "remaining": "Player-attacker orientation (haunter-onix fixture): 27/111 dense framebuffer frames still mismatch, all in three disjoint, named families - (1) render ages 41-48 / frames 126-133 (up to 3384px, bbox ~x41-131,y64-111): a color-level mismatch in the attacker/clone punch-trace region. Bisected SHADOW_PUNCH_ATTACKER_FRAMEBUFFER_LAG across 0/1/2/4 this session - all four values produce a byte-identical 84/111, so this family is NOT a timing/lag artifact (only a grossly wrong lag like 20 moves the count, and only for the worse); the real cause is most likely a clone paint-order/blend-coefficient bug in the same class as DRAGON_RAGE's own fire-plume z-order residual (needs a gMain.oamBuffer RAM read of the live clone stack, not another lag guess). (2) render ages 49-62 / frames 134-147 (up to 4914px, bbox reaching x177-206,y12-71): a top-of-screen hitsplat/fist region mismatch, unattributed this session - candidate is the reused TURN9_HITSPLAT_MATRIX affine-stretch schedule not matching this move's own hitsplat anchor ages. (3) render ages 106-110 / frames 191-195 (up to 3195px, a large near-white region covering most of the screen): this is the generic post-move result/message textbox appearing - an out-of-scope reusable presentation component per this lane's own acceptance rule (generic hit reactions/HP/result presentation are independently covered and never block or promote a move), not part of SHADOW_PUNCH's own animation body; the fixture's own denseWindow (endFrame 195) should be trimmed to exclude this tail next session rather than treated as a required remainder. Opponent-attacker orientation (onix-haunter fixture) was attempted this session and found materially worse, a genuinely different problem, not yet root-caused: component match is only 95/111 (a real BLDY-ramp one-tick drift starting ~frame 172, oracle decrementing one tick ahead of the app's own table - a new, orientation-specific timing bug with zero counterpart in the player-attacker orientation), and framebuffer match is 0/111 (every single dense frame mismatches, dominated by a persistent ~1590px region from frame 89 in the attacker-side bbox x151-201,y14-71 whose fading-gradient signature suggests the player-attacker fixture's own lag=3 constant does not transfer to this orientation). Next session should RAM-pixel-probe the opponent-attacker orientation independently (do not assume the player-attacker fixes carry over), re-check the `x2 -= tBattlerSpriteId` quirk's sign for the opponent-side attacker slot, then return to the player-attacker families (1) and (2) with a fresh OAM-buffer probe before attempting a third fit."
+      ]
     },
     {
       "move": "MOVE_GROWTH",

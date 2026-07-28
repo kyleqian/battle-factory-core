@@ -2,10 +2,10 @@
   "schema": "scene-on-portable-component/v1",
   "oracleProfile": "battle-scene-on",
   "scenario": "tools/battle-lab/mechanic-shadow-punch-onix-haunter-dense.json",
-  "probe": "tools/probe/dump-shadowpunch-rgb.py",
+  "probe": "tools/compare/shadowPunchProbe.py",
   "pair": "HAUNTER (opponent-front) -> ONIX (player-back)",
   "move": "SHADOW_PUNCH",
-  "denseWindow": {"startFrame": 89, "endFrame": 199},
+  "denseWindow": {"startFrame": 89, "endFrame": 193},
   "appStage": {"firstFramePresentationAge": 0},
   "attackerSpriteId": 8,
   "attackerMoveSpeed": -8,
@@ -14,8 +14,8 @@
     "species": "HAUNTER",
     "geometry": {
       "side": "opponent",
-      "spriteCorner": {"x": 144, "y": 13},
-      "animationCenter": {"x": 176, "y": 45},
+      "spriteCorner": {"x": 144, "y": 9},
+      "animationCenter": {"x": 176, "y": 41},
       "battlePositionCenter": {"x": 176, "y": 40}
     }
   },

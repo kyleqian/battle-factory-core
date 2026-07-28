@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   shadowPunchAttackerVisible,
   shadowPunchAttackerX2,
+  shadowPunchAlphaActive,
   shadowPunchBackgroundBldy,
   shadowPunchBackgroundIsGhost,
   shadowPunchClonePaintOrder,
@@ -114,6 +115,9 @@ describe("shadowPunch AnimTask_AttackerPunchWithTrace port", () => {
     expect(shadowPunchBackgroundBldy(84)).toBe(15);
     expect(shadowPunchBackgroundBldy(99)).toBe(0);
     expect(shadowPunchBackgroundBldy(200)).toBe(0);
+    expect(shadowPunchBackgroundBldy(82, "opponent")).toBe(16);
+    expect(shadowPunchBackgroundBldy(83, "opponent")).toBe(15);
+    expect(shadowPunchBackgroundBldy(98, "opponent")).toBe(0);
   });
 
   it("swaps to the BG_GHOST background once the fade-out completes and back once restorebg's own fade-out completes", () => {
@@ -150,5 +154,12 @@ describe("shadowPunch AnimTask_AttackerPunchWithTrace port", () => {
     expect(shadowPunchAttackerVisible(38)).toBe(false);
     expect(shadowPunchAttackerVisible(59)).toBe(false);
     expect(shadowPunchAttackerVisible(60)).toBe(true);
+  });
+
+  it("pins the live monbg/trace alpha body independently of OAM teardown", () => {
+    expect(shadowPunchAlphaActive(40)).toBe(false);
+    expect(shadowPunchAlphaActive(41)).toBe(true);
+    expect(shadowPunchAlphaActive(59)).toBe(true);
+    expect(shadowPunchAlphaActive(60)).toBe(false);
   });
 });

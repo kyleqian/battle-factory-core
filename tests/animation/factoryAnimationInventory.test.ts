@@ -68,11 +68,11 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // DRAGON_RAGE closes its complete hardware/framebuffer seam as exact.
+        // SHADOW_PUNCH closes its complete hardware/framebuffer seam as exact.
         unsupported: 219,
         staged: 0,
-        partial: 2,
-        exact: 55,
+        partial: 1,
+        exact: 56,
       },
       {
         tier: "openOnly",

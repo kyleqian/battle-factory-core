@@ -14,10 +14,16 @@ import { parseTilemap } from "./tilemap.ts";
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, "..", "..");
 const ref = join(root, "reference", "pokeemerald", "graphics", "battle_anims", "backgrounds");
+const spriteRef = join(root, "reference", "pokeemerald", "graphics", "battle_anims", "sprites");
+const battleInterfaceRef = join(root, "reference", "pokeemerald", "graphics", "battle_interface");
 const out = join(root, "src", "assets", "gen", "battle-anim-ghost-bg.json");
 
 const image = decodeIndexedPng(join(ref, "ghost.png"));
+const bentSpoon = decodeIndexedPng(join(spriteRef, "bent_spoon.png"));
+const hpbar = decodeIndexedPng(join(battleInterfaceRef, "hpbar.png"));
+const enemyShadow = decodeIndexedPng(join(battleInterfaceRef, "enemy_mon_shadow.png"));
 const sliced = sliceTiles(image);
+const shadowSliced = sliceTiles(enemyShadow);
 const tilemap = parseTilemap(readFileSync(join(ref, "ghost.bin")), 32, 32);
 
 mkdirSync(dirname(out), { recursive: true });
@@ -29,6 +35,21 @@ writeFileSync(out, `${JSON.stringify({
     tiles: sliced.tiles.map((tile) => [...tile.pixels]),
   },
   palette: image.palette,
+  // The task copies the attacker only into the faded row; BlendPalette then
+  // reads this allocated tag's unfaded row, preserving a vanilla tint quirk.
+  bentSpoonPalette: bentSpoon.palette,
+  // AllocSpritePalette assigns slot 9 without loading Bent Spoon's palette.
+  // That unfaded row still contains the source-identical battle-interface
+  // HP-bar palette; BlendPalette reads it after the task's faded-only copy.
+  traceScratchUnfadedPalette: hpbar.palette,
+  opponentShadow: {
+    tileset: {
+      columns: shadowSliced.columns,
+      rows: shadowSliced.rows,
+      tiles: shadowSliced.tiles.map((tile) => [...tile.pixels]),
+    },
+    palette: enemyShadow.palette,
+  },
   tilemap,
 })}\n`);
 console.log(`wrote ${out}`);

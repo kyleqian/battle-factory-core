@@ -714,7 +714,11 @@ import { futureSightBgPaletteRowAtAge } from "../animation/futureSight.ts";
 import { confusionBgPaletteRowAtAge, CONFUSION_WINDOW2_START_AGE, confusionTargetEffectAtAge } from "../animation/confusion.ts";
 import { psychicBgPaletteRowAtAge, PSYCHIC_WINDOW2_START_AGE, psychicTargetEffectAtAge, PSYCHIC_BLEND_TINT_COLOR } from "../animation/psychic.ts";
 import {
-  SHADOW_PUNCH_ATTACKER_FRAMEBUFFER_LAG,
+  shadowPunchAlphaActive,
+  SHADOW_PUNCH_CLONE_DISPLAY_LAG,
+  SHADOW_PUNCH_CLONE_RETIREMENT_FIRST_AGE,
+  SHADOW_PUNCH_DISPLAY_OAM_LAG,
+  SHADOW_PUNCH_TARGET_SHAKE,
   SHADOW_PUNCH_TRACE_ALPHA,
   SHADOW_PUNCH_TRACE_BLEND_COEFF,
 } from "../animation/shadowPunch.ts";
@@ -1182,7 +1186,14 @@ const charmeleonBackSprite = (battleBackSpritesAsset as Record<string, BattleBac
 const haunterBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).HAUNTER!;
 const ivysaurBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).IVYSAUR!;
 const kadabraBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).KADABRA!;
-const battleAnimGhostBg = battleAnimGhostBgAsset as { tileset: Tileset; palette: RgbColor[]; tilemap: Tilemap };
+const battleAnimGhostBg = battleAnimGhostBgAsset as {
+  tileset: Tileset;
+  palette: RgbColor[];
+  bentSpoonPalette: RgbColor[];
+  traceScratchUnfadedPalette: RgbColor[];
+  opponentShadow: { tileset: Tileset; palette: RgbColor[] };
+  tilemap: Tilemap;
+};
 const battleAnimPsychicBg = battleAnimPsychicBgAsset as { tileset: Tileset; palette: RgbColor[]; tilemap: Tilemap };
 const extremeSpeedBg = (extremeSpeedAsset as {
   background: {
@@ -22716,14 +22727,30 @@ export function renderSceneOnMovePresentation(
 
   if (state.config.move === "SHADOW_PUNCH") {
     const view = sceneOnShadowPunchView(state);
-    // Per-mechanism framebuffer capture lag (shadowPunch.ts's own doc
-    // comment on SHADOW_PUNCH_ATTACKER_FRAMEBUFFER_LAG): only the
-    // attacker/clone draw calls lag one RAM-write tick behind the rest of
-    // the view (background/target-shake/hitsplat/fist read RAM-pixel-clean
-    // at zero lag), mirroring DRAGON_RAGE's own phase-aware attacker view.
+    // The live callback state and final `gMain.oamBuffer` photographed by
+    // the shared framebuffer are distinct epochs for the moving BG/trace
+    // stack. Newly-created fist/hitsplat sprites already occupy that buffer
+    // in their creation frame.
+    const oamBufferView = sceneOnShadowPunchView({
+      ...state,
+      age: state.age - SHADOW_PUNCH_DISPLAY_OAM_LAG,
+    });
+    const cloneView = sceneOnShadowPunchView({
+      ...state,
+      age: state.age - (
+        state.age < SHADOW_PUNCH_CLONE_RETIREMENT_FIRST_AGE
+          ? SHADOW_PUNCH_CLONE_DISPLAY_LAG
+          : SHADOW_PUNCH_DISPLAY_OAM_LAG
+      ),
+    });
+    // `clearmonbg` restores the real attacker through the same one-transfer
+    // hardware path. Before the alpha body, the old three-epoch transition
+    // remains independently exact.
     const attackerView = sceneOnShadowPunchView({
       ...state,
-      age: state.age - SHADOW_PUNCH_ATTACKER_FRAMEBUFFER_LAG,
+      age: state.age - (
+        state.age >= 60 ? 0 : 3
+      ),
     });
     const playerToOpponent =
       view.attacker.species === "HAUNTER"
@@ -22767,40 +22794,73 @@ export function renderSceneOnMovePresentation(
         subpalettes: battleBg.palette.map(gpuDarken),
       });
     }
+    const drawMonBg = () => {
+      if (!shadowPunchAlphaActive(view.animationAge)) return;
+      drawSpriteSheet(
+        fb,
+        attackerSprite.tileset,
+        attackerSprite.palette,
+        view.attacker.geometry.spriteCorner.x + oamBufferView.attackerX2,
+        view.attacker.geometry.spriteCorner.y,
+      );
+    };
+    // The player's priority-3 clones sit behind the priority-2 monbg copy.
+    // The opponent's source-selected priority-2 clones instead win over its
+    // BG1 monbg copy and blend against that copy as their target-2 layer.
+    if (opponentToPlayer) drawMonBg();
+    const cloneBackdrop = fb.slice();
+    const clonePalette = blendPaletteToward(
+      battleAnimGhostBg.traceScratchUnfadedPalette,
+      { r: 0, g: 0, b: 0 },
+      SHADOW_PUNCH_TRACE_BLEND_COEFF,
+    );
+    const displayedClones =
+      state.age === SHADOW_PUNCH_CLONE_RETIREMENT_FIRST_AGE
+        ? cloneView.clones.filter((clone) => clone.creationAge !== 8)
+        : state.age > SHADOW_PUNCH_CLONE_RETIREMENT_FIRST_AGE
+          ? [...cloneView.clones].sort((a, b) => b.creationAge - a.creationAge)
+          : cloneView.clones;
+    displayedClones.forEach((clone) => {
+      drawSpriteSheetBlendedOverBackdrop(
+        fb,
+        cloneBackdrop,
+        attackerSprite.tileset,
+        clonePalette,
+        cloneView.attacker.geometry.spriteCorner.x + clone.x2,
+        cloneView.attacker.geometry.spriteCorner.y,
+        SHADOW_PUNCH_TRACE_ALPHA.eva,
+        SHADOW_PUNCH_TRACE_ALPHA.evb,
+      );
+    });
+    if (playerToOpponent) drawMonBg();
+    const displayedTargetShakeX2 =
+      view.animationAge < 50
+        ? oamBufferView.targetShakeX2
+        : shakeMonOffsetAtTick(
+          SHADOW_PUNCH_TARGET_SHAKE.xOffset,
+          SHADOW_PUNCH_TARGET_SHAKE.yOffset,
+          SHADOW_PUNCH_TARGET_SHAKE.numTimes,
+          SHADOW_PUNCH_TARGET_SHAKE.frameDelay,
+          view.animationAge - 50,
+        ).x2;
+    // `SpriteCB_EnemyShadow` unhides elevated opponent shadows only after
+    // the animation script clears; hardware OAM exposes it one frame later.
+    if (opponentToPlayer && view.animationAge >= 101) {
+      drawSpriteSheet(
+        fb,
+        battleAnimGhostBg.opponentShadow.tileset,
+        battleAnimGhostBg.opponentShadow.palette,
+        view.attacker.geometry.animationCenter.x - 16,
+        view.attacker.geometry.battlePositionCenter.y + 25,
+      );
+    }
     drawSpriteSheet(
       fb,
       targetSprite.tileset,
       targetSprite.palette,
-      view.target.geometry.spriteCorner.x + view.targetShakeX2,
+      view.target.geometry.spriteCorner.x + displayedTargetShakeX2,
       view.target.geometry.spriteCorner.y,
     );
-    // Hardware alpha-blend is a single compositor pass over the final
-    // per-pixel top two layers, not a per-sprite cumulative blend: only the
-    // FRONTMOST (topmost-drawn) clone at a given pixel actually blends
-    // against whatever is directly behind it. Every other clone underneath
-    // is fully occluded at that pixel (opaque, not re-blended) - drawing
-    // every clone with its own blended call would cumulatively re-darken
-    // already-blended pixels each layer deeper, which is not how the GBA's
-    // one-shot blend special effect works and produced a visibly too-dark
-    // stack (oracle-pixel-caught).
-    const clonePalette = blendPaletteToward(attackerSprite.palette, { r: 0, g: 0, b: 0 }, SHADOW_PUNCH_TRACE_BLEND_COEFF);
-    attackerView.clones.forEach((clone, i) => {
-      const ox = attackerView.attacker.geometry.spriteCorner.x + clone.x2;
-      const oy = attackerView.attacker.geometry.spriteCorner.y;
-      if (i === attackerView.clones.length - 1) {
-        drawSpriteSheetBlendedOverFb(
-          fb,
-          attackerSprite.tileset,
-          clonePalette,
-          ox,
-          oy,
-          SHADOW_PUNCH_TRACE_ALPHA.eva,
-          SHADOW_PUNCH_TRACE_ALPHA.evb,
-        );
-      } else {
-        drawSpriteSheet(fb, attackerSprite.tileset, clonePalette, ox, oy);
-      }
-    });
     if (attackerView.attackerVisible) {
       drawSpriteSheet(
         fb,
@@ -22810,7 +22870,12 @@ export function renderSceneOnMovePresentation(
         attackerView.attacker.geometry.spriteCorner.y,
       );
     }
-    if (view.hitsplatVisible) {
+    // The hitsplat wins the OBJ tie against Onix, so hardware blends it
+    // against the next eligible BG layer, not the obscured target sprite.
+    const effectBackdrop = cloneBackdrop.slice();
+    const hitsplatDisplayed =
+      view.animationAge >= 50 && view.animationAge <= 59;
+    if (hitsplatDisplayed) {
       drawSpriteSheetAffineStretchBlendedOverFb(
         fb,
         battleAnimHitsplat.tileset,
@@ -22819,13 +22884,15 @@ export function renderSceneOnMovePresentation(
         view.target.geometry.animationCenter.y - 16,
         TURN9_HITSPLAT_MATRIX,
         TURN9_HITSPLAT_MATRIX,
-        12,
-        8,
+        SHADOW_PUNCH_TRACE_ALPHA.eva,
+        SHADOW_PUNCH_TRACE_ALPHA.evb,
         true,
-        "live",
+        effectBackdrop,
       );
     }
-    if (view.fistVisible) {
+    const fistDisplayed =
+      view.animationAge >= 50 && view.animationAge <= 58;
+    if (fistDisplayed) {
       drawSpriteSheet(
         fb,
         subTileset(battleAnimHandsAndFeet.tileset, 0, 4),

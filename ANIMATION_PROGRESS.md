@@ -1,5 +1,31 @@
 # Animation coverage
 
+## MOVE_SHADOW_PUNCH promoted exact; stale palette/OAM transfer closed (2026-07-27)
+
+**Verdict:** `MOVE_SHADOW_PUNCH` is exact for both complete move-owned
+Scene-ON bodies. Player-back HAUNTER -> opponent-front ONIX is **106/106**
+(frames 85-190), and opponent-front HAUNTER -> player-back ONIX is
+**105/105** (frames 89-193). Source/software, typed seam, registers, hardware
+OAM/matrices/palettes, live audio, raw RGB, and shared framebuffer all match,
+twice fresh in both orientations. Coverage is now **56 exact / 1 partial /
+219 unsupported**.
+
+**Player repair:** fresh `gMain.oamBuffer`, hardware OAM, matrix, palette, and
+raw-RGB evidence found a vanilla palette-lifecycle quirk: the task copies the
+attacker only into the allocated slot's faded row, then `BlendPalette` reads
+the stale unfaded HP-bar row. The seam now also ports distinct clone creation
+and retirement transfer epochs, ninth-clone slot ordering, priority-3
+clone/BG2-monbg order, and the move's own 9/8 impact blend and anchors.
+
+**Opponent proof/boundary:** independent evidence corrected HAUNTER's front
+anchor to y=9, placed priority-2 clones over the BG1 monbg copy, pinned the
+one-callback-shorter restore-BLDY hold, and extracted the 32x8 elevated-enemy
+shadow that `SpriteCB_EnemyShadow` reveals after the script clears. The
+generic result/message tails begin at player age 106 and opponent age 105,
+after `gAnimScriptActive` and visual tasks are clear, so the fixtures stop at
+the last clean move-owned frames. No battle logic, RNG, controller/facility
+state, boundary list, unsupported barrier, or absolute-tick branch changed.
+
 ## MOVE_FAINT_ATTACK register-queue checkpoint; remains partial (2026-07-27)
 
 **Verdict:** `MOVE_FAINT_ATTACK` remains partial. Canonical opponent-front
