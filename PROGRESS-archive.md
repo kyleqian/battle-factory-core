@@ -1,4 +1,23 @@
 ---
+## 606 — [TOOLING FOLD 2026-07-28 ~08:48] Low-risk papercuts merged and union verified
+
+- **State:** merged `codex/papercuts-guardrails` as `4e8a788`; the union is
+  green at **366 files / 4231 tests**, production build, Python tooling
+  checks **8/8**, both oracle infos, and `git diff --check`.
+- **Did:** retired four recorded papercuts with worktree-safe harness
+  resolution for freshness and terminal extraction, explicit commit-free
+  `--read-only` / `--audit` worker postflight, terminal RAM-probe bitfield
+  extraction, and a default battle-lab output ignore. The merge had zero
+  changed-path overlap with the 195-file supervisor advance.
+- **Next:** before further oracle-backed staging, the launcher/supervisor must
+  refresh Scene-OFF after harness `0d4ad46`; then resume the accepted Trick
+  target from entry 605.
+- **Notes:** both endpoints answer bootstrap v5. Scene-ON freshness passes;
+  Scene-OFF started 2026-07-27 22:36, before the harness's 2026-07-28 08:42
+  commit, so freshness correctly fails. No oracle lifecycle action, game
+  logic, issue, roadmap, census, animation, or unsupported-barrier change.
+
+---
 ## 605 — [SUPERVISOR VERIFY 2026-07-28 ~06:24] Encore accepted after shared-seam repair
 
 - **State:** independently reviewed the implementation and repair diffs and

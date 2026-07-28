@@ -15,6 +15,31 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 609 — [BOUNDED MAIN WORKER 2026-07-28 ~09:21] Trick executes through shared item/controller paths
+
+- **State:** committed `b2a8714`; tree green at **379 files / 4302 tests**,
+  production build, OFF oracle info, census regeneration, all **42/42**
+  validation checks, ratchets **6/6**, and `git diff --check`. Census is
+  exactly **160/214 effects, 289/355 moves, 237/276 Factory-L50 distinct,
+  2769/2957 weighted**.
+- **Did:** globally registered five-byte `B_SCR_OP_TRYSWAPITEMS` (`0xd2`)
+  with source-ordered Trainer Hill/opponent-regular/Knock Off/two-empty/
+  Enigma/Mail/Sticky Hold guards and no barriers. Success reuses attacker
+  `changedItems`, active held items, both held-item controller events and
+  party mirrors, both Choice cells, and `MOVEEND_CHANGED_ITEMS`; the shared
+  `printfromtable` handler now resolves `gItemSwapStringIds`. Full-turn Furret
+  Trick proves PP **10→9**, transient/restored item ownership, persistent
+  player+opponent party swaps, bookkeeping clear, and zero opcode-local RNG.
+- **Next:** supervisor verify this finite registration. The regenerated census
+  names `B_SCR_OP_HEALPARTYSTATUS` as the next highest-leverage single
+  registration; select/brief it separately.
+- **Notes:** handler inventory **167→168**. Sticky Hold uses the existing
+  `lastUsedAbility`/ability-record convention and fixed
+  `BattleScript_StickyHoldActivates` transfer. No unsupported barrier,
+  barrier-pin change, recording import, private item path, presentation/tick/
+  round branch, issue removal, oracle lifecycle action, or new trace.
+
+---
 ## 608 — [SUPERVISOR ORIENT 2026-07-28 ~09:10] Animation fold verified; session open on Trick frontier
 
 - **State:** merged `animation-main` (55 commits through `7119ac3`, Headbutt/
@@ -55,24 +80,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Entry 606 already retired the worktree papercuts encountered during this
   feature. No game logic, oracle lifecycle, issue, roadmap, census,
   animation, or unsupported-barrier change.
-
----
-## 606 — [TOOLING FOLD 2026-07-28 ~08:48] Low-risk papercuts merged and union verified
-
-- **State:** merged `codex/papercuts-guardrails` as `4e8a788`; the union is
-  green at **366 files / 4231 tests**, production build, Python tooling
-  checks **8/8**, both oracle infos, and `git diff --check`.
-- **Did:** retired four recorded papercuts with worktree-safe harness
-  resolution for freshness and terminal extraction, explicit commit-free
-  `--read-only` / `--audit` worker postflight, terminal RAM-probe bitfield
-  extraction, and a default battle-lab output ignore. The merge had zero
-  changed-path overlap with the 195-file supervisor advance.
-- **Next:** before further oracle-backed staging, the launcher/supervisor must
-  refresh Scene-OFF after harness `0d4ad46`; then resume the accepted Trick
-  target from entry 605.
-- **Notes:** both endpoints answer bootstrap v5. Scene-ON freshness passes;
-  Scene-OFF started 2026-07-27 22:36, before the harness's 2026-07-28 08:42
-  commit, so freshness correctly fails. No oracle lifecycle action, game
-  logic, issue, roadmap, census, animation, or unsupported-barrier change.
-
----
