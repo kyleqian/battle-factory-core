@@ -270,6 +270,7 @@ const MOVE_EFFECT_ID_BY_NAME: Readonly<Record<string, number>> = Object.freeze({
   MOVE_EFFECT_TOXIC: 6,
   MOVE_EFFECT_CONFUSION: 7,
   MOVE_EFFECT_FLINCH: 8,
+  MOVE_EFFECT_TRI_ATTACK: 9,
   MOVE_EFFECT_CHARGING: 12,
   MOVE_EFFECT_WRAP: 13,
   MOVE_EFFECT_RECOIL_25: 14,
@@ -287,6 +288,11 @@ const MOVE_EFFECT_ID_BY_NAME: Readonly<Record<string, number>> = Object.freeze({
   MOVE_EFFECT_SP_DEF_MINUS_1: 26,
   MOVE_EFFECT_ACC_MINUS_1: 27,
   MOVE_EFFECT_EVS_MINUS_1: 28,
+  MOVE_EFFECT_RECHARGE: 29,
+  MOVE_EFFECT_RAGE: 30,
+  MOVE_EFFECT_ALL_STATS_UP: 34,
+  MOVE_EFFECT_REMOVE_PARALYSIS: 36,
+  MOVE_EFFECT_ATK_DEF_DOWN: 37,
   MOVE_EFFECT_ATK_PLUS_2: 39,
   MOVE_EFFECT_DEF_PLUS_2: 40,
   MOVE_EFFECT_SPD_PLUS_2: 41,
@@ -302,6 +308,7 @@ const MOVE_EFFECT_ID_BY_NAME: Readonly<Record<string, number>> = Object.freeze({
   MOVE_EFFECT_ACC_MINUS_2: 51,
   MOVE_EFFECT_EVS_MINUS_2: 52,
   MOVE_EFFECT_THRASH: 53,
+  MOVE_EFFECT_SP_ATK_TWO_DOWN: 59,
 });
 const NAMED_MOVE_EFFECT_IDS = new Set(Object.values(MOVE_EFFECT_ID_BY_NAME));
 
@@ -568,9 +575,15 @@ const validationChecks: Array<() => void> = [
   () => requireExecutable("EFFECT_FLINCH_HIT"),
   () => requireExecutable("EFFECT_FLINCH_MINIMIZE_HIT"),
   () => requireExecutable("EFFECT_TWISTER"),
-  // TRI_ATTACK recurses into a re-rolled SetMoveEffect call and stays a named
-  // (b) barrier -- out of this session's scope.
-  () => requireBlockedMentioning("EFFECT_TRI_ATTACK", "MOVE_EFFECT_TRI_ATTACK"),
+  // Family-B cluster 1: source-complete dispatch plus all C-selected
+  // callbacks execute through their committed tails.
+  () => requireExecutable("EFFECT_TRI_ATTACK"),
+  () => requireExecutable("EFFECT_RECHARGE"),
+  () => requireExecutable("EFFECT_RAGE"),
+  () => requireExecutable("EFFECT_ALL_STATS_UP_HIT"),
+  () => requireExecutable("EFFECT_SMELLINGSALT"),
+  () => requireExecutable("EFFECT_SUPERPOWER"),
+  () => requireExecutable("EFFECT_OVERHEAT"),
   // A real positive: EFFECT_RECOIL_IF_MISS (Jump Kick/Hi Jump Kick) enters via
   // BattleScript_HitFromAtkString directly, skipping BattleScript_EffectHit's
   // own label entirely, and its whole reachable set -- including the shared
@@ -607,14 +620,6 @@ const validationChecks: Array<() => void> = [
   // engine's widened 4-value set. These four rows were PROGRESS 473's own
   // named false positives -- pinned blocked now that the census actually
   // checks the operand, not just the opcode name.
-  // EFFECT_RAGE's own blocked-on-opcodes/blocked-on-subsystem KIND moved this
-  // session (see below) because the control-flow fix newly walks its
-  // previously-unreachable BattleScript_RageMiss branch (accuracycheck's
-  // failPtr operand, never modeled as an edge before this fix) and discovers
-  // a genuine B_SCR_OP_CLEARSTATUSFROMEFFECT gap there; this check's own
-  // needle-substring assertion still passes unmodified either way, since it
-  // checks both missingOpcodes and subsystemNotes together.
-  () => requireBlockedMentioning("EFFECT_RAGE", "MOVE_EFFECT_RAGE"),
   () => requireBlockedMentioning("EFFECT_MEAN_LOOK", "MOVE_EFFECT_PREVENT_ESCAPE"),
   () => requireBlockedMentioning("EFFECT_NIGHTMARE", "MOVE_EFFECT_NIGHTMARE"),
   () => requireBlockedMentioning("EFFECT_WILL_O_WISP", "ABILITY_WATER_VEIL"),
