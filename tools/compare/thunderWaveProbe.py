@@ -34,6 +34,7 @@ def main() -> None:
     move_script = syms["Move_THUNDER_WAVE"]
     move_script_end = syms["Move_BEAT_UP"]
     move_script_cleanup = move_script_end - 1
+    song_table = syms["gSongTable"]
     def u16(a): return oracle.read_u8(a) | oracle.read_u8(a+1) << 8
     def s16(a):
         v=u16(a); return v-0x10000 if v>=0x8000 else v
@@ -101,6 +102,17 @@ def main() -> None:
     active_window={"startFrame":active_rows[0]["frame"],"endFrame":active_rows[-1]["frame"],"frameCount":len(active_rows)}
     source_window={"startFrame":active_rows[0]["frame"],"endFrame":rows[cleanup]["frame"],"frameCount":cleanup-source_start+1}
     capture_window={"startFrame":rows[0]["frame"],"endFrame":rows[-1]["frame"],"frameCount":len(rows)}
-    OUTPUT.write_text(json.dumps({"schema":"thunder-wave-dense-evidence/v2","setup":setup,"captureWindow":capture_window,"activeSourceScriptWindow":active_window,"sourceAnimationWindow":source_window,"frames":rows},separators=(",",":"))+"\n")
+    OUTPUT.write_text(json.dumps({
+        "schema":"thunder-wave-dense-evidence/v3",
+        "setup":setup,
+        "captureWindow":capture_window,
+        "activeSourceScriptWindow":active_window,
+        "sourceAnimationWindow":source_window,
+        "songHeaders":{
+            "SE_M_THUNDER_WAVE":oracle.read_u32(song_table+138*8),
+            "SE_M_THUNDERBOLT2":oracle.read_u32(song_table+119*8),
+        },
+        "frames":rows,
+    },separators=(",",":"))+"\n")
     print(f"wrote {OUTPUT}: capture {capture_window}, active script {active_window}, source animation incl. cleanup {source_window}")
 main()

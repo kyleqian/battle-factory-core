@@ -1,36 +1,33 @@
 # Animation coverage
 
-## MOVE_THUNDER_WAVE staged; ANIM_TAG_SPARK source/evidence checkpoint (2026-07-28)
+## MOVE_THUNDER_WAVE promoted exact; complete Spark-track seam closed (2026-07-28)
 
-**Verdict:** `MOVE_THUNDER_WAVE` is staged, not partial or exact. Complete legal
-Scene-ON FLAAFFY/SHUCKLE mechanic-lab evidence captures the broader
-`currentMove=86` window at **334/334** frames **39-372** in both orientations.
-Live script state proves the narrower source load/body/cleanup window at
-**120/120** frames **79-198** player-back and **83-202** opponent-front,
-including first inactive offset-110 teardown. Each complete output and raw-RGB
-stream reproduced byte-identically twice (player `c4fe8bb3…045fd` /
-`aaa201bb…1c5a5`, opponent `aa1cc413…7cd57` / `e97ad2bd…0236e`).
-Coverage is **64 exact / 0 partial / 1 staged / 211 unsupported**.
+**Verdict:** `MOVE_THUNDER_WAVE` is exact. Fresh complete legal Scene-ON
+FLAAFFY/SHUCKLE evidence passes all **120/120** source load/body/cleanup
+frames **79-198** player-back and **83-202** opponent-front through the
+source-relative reducer, typed seam, software tasks/sprites, registers,
+hardware OAM/matrices/palettes, both audio players/pans, raw RGB, and shared
+framebuffer, twice fresh. The first inactive offset-110 teardown is included;
+the later `Task_DoStatusAnimation` remains excluded. Coverage is now **65
+exact / 0 partial / 0 staged / 211 unsupported**.
 
-**Source/evidence:** `Move_THUNDER_WAVE` loads SPARK/SPARK_2/SPARK_H, fades
-the field, creates ElectricBolt, plays its target-panned cue, then creates the
-three staggered target ThunderWave bands before the inverse fade/cleanup. The
-probe records the active flag, source pointer/offset, wait counter, complete
-active task identities/bodies, software sprites, OAM/matrices, loaded tags,
-faded/unfaded/hardware palettes, registers, both audio players/pans, and raw
-RGB over every current-move frame. It excludes the later, distinct
-`Task_DoStatusAnimation` interval from the source move window.
-`ANIM_TAG_SPARK` and inseparable
-SPARK_H are byte-preserving source-extracted with a regenerating receipt;
-SPARK_2 remains the existing generated shared asset.
+**Renderer/evidence:** the reducer ports SPARK/SPARK_2/SPARK_H loads, field
+0→6→0 fade, five staggered ElectricBolt segments and their source OAM latch,
+both side-relative sound families, all three two-sprite flashing bands, task
+counts, and cleanup. The narrow compositor source-extracts FLAAFFY and
+SPARK/SPARK_H, reuses exact SHUCKLE and shared chrome, and consumes prior
+software OAM/palette state. Fresh v3 outputs are byte-identical (player
+`3d8b1bee…267ee` / raw `aaa201bb…1c5a5`; opponent `0454b5a2…1b424` /
+raw `e97ad2bd…0236e`).
 
-**Scope/siblings:** `MOVE_THUNDERBOLT` stays unsupported: its three offset
-ElectricBolt tasks, SHOCK_3 orb, eight flashing SPARK_2 sprites, target
-palette body, and different sounds require independent dense evidence.
-`MOVE_SHOCK_WAVE` stays unsupported: it adds ELECTRIC_ORBS/CIRCLE_OF_LIGHT/
-LIGHTNING and charging/progressing/lightning/shake/palette tasks. No renderer,
-battle logic/RNG/controller/facility state, boundary list, unsupported barrier,
-or absolute-tick/input-delay/coordinate/RGB/pixel exception changed.
+**Scope/siblings/next:** `MOVE_THUNDERBOLT` stays unsupported with its triple
+bolt, SHOCK_3 orb, eight affine sparks, target palette body, and distinct
+sounds. `MOVE_ZAP_CANNON` stays unsupported with BLACK_BALL_2, eight orbiting
+sparks, ShakeMon2, ElectricityEffect, and distinct pans. Neither has complete
+dense evidence; exact `MOVE_SPARK` is preserved. Next select a bounded
+Level-50 representative from the coverage queue. No battle logic/RNG/
+controller/facility state, boundary list, unsupported barrier, or absolute-
+tick/move-number/input-delay/coordinate/RGB/pixel exception changed.
 
 ## MOVE_BODY_SLAM promoted exact; audio and framebuffer repaired (2026-07-28)
 

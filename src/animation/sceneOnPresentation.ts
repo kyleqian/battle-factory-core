@@ -1019,6 +1019,8 @@ export interface SceneOnThunderWaveConfig {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** `GetBattlerSpriteCoord(target, X_2/Y_2)` used by `createsprite`. */
+  readonly targetEffectCenter: Readonly<{ x: number; y: number }>;
 }
 
 export interface SceneOnCharmConfig {
@@ -2783,7 +2785,7 @@ export function sceneOnThunderWaveView(
     ...thunderWaveAtAge(
       state.age,
       state.config.attacker.geometry.side,
-      state.config.target.geometry.animationCenter,
+      state.config.targetEffectCenter,
       state.config.target.geometry.battlePositionCenter,
     ),
   };

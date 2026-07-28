@@ -11,7 +11,7 @@ describe("MOVE_THUNDER_WAVE source-relative reducer", () => {
   const player = (age: number) =>
     thunderWaveAtAge(age, "player", { x: 176, y: 49 }, { x: 176, y: 40 });
   const opponent = (age: number) =>
-    thunderWaveAtAge(age, "opponent", { x: 72, y: 91 }, { x: 72, y: 80 });
+    thunderWaveAtAge(age, "opponent", { x: 72, y: 99 }, { x: 72, y: 80 });
 
   it("ports the load, field fade, ElectricBolt, and first sound", () => {
     expect([0, 1, 4, 7, 119].map((age) => player(age).assets)).toEqual([
@@ -101,6 +101,7 @@ describe("MOVE_THUNDER_WAVE source-relative reducer", () => {
           battlePositionCenter: { x: 176, y: 40 },
         },
       },
+      targetEffectCenter: { x: 176, y: 49 },
       fieldProfile: {
         playerHp: 145, playerMaxHp: 145,
         opponentHp: 127, opponentMaxHp: 127,

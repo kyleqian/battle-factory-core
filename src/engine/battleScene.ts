@@ -590,6 +590,7 @@ import battleAnimIceCrystalsAsset from "../assets/gen/battle-anim-ice-crystals.j
 import battleAnimIceCubeAsset from "../assets/gen/battle-anim-ice-cube.json" with { type: "json" };
 import battleAnimLightningAsset from "../assets/gen/battle-anim-lightning.json" with { type: "json" };
 import battleAnimSpark2Asset from "../assets/gen/battle-anim-spark-2.json" with { type: "json" };
+import thunderWaveAsset from "../assets/gen/battle-anim-spark.json" with { type: "json" };
 import battleBackSpritesAsset from "../assets/gen/battle-back-sprites.json" with { type: "json" };
 import battleAnimItemHealAsset from "../assets/gen/battle-anim-item-heal.json" with { type: "json" };
 import fontNormalData from "../data/gen/font-normal.json" with { type: "json" };
@@ -705,6 +706,7 @@ import {
   sceneOnShadowBallView,
   sceneOnEncoreView,
   sceneOnSparkView,
+  sceneOnThunderWaveView,
   sceneOnCharmView,
   sceneOnCovetView,
   sceneOnDragonClawView,
@@ -716,6 +718,7 @@ import {
   type SceneOnMovePresentationState,
   type SceneOnFirePunchConfig,
   type SceneOnSparkPresentationState,
+  type SceneOnThunderWavePresentationState,
   type SceneOnCharmPresentationState,
   type SceneOnCovetPresentationState,
   type SceneOnScaryFacePresentationState,
@@ -1196,6 +1199,12 @@ const spark2Art = battleAnimSpark2Asset as {
     list: number[][][];
   };
   palette: RgbColor[];
+};
+const thunderWaveArt = thunderWaveAsset as {
+  sparkBolt: { tileset: Tileset; palette: RgbColor[] };
+  sparkBands: { tileset: Tileset; palette: RgbColor[] };
+  flaffyBack: { tileset: Tileset; palette: RgbColor[] };
+  flaffyFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const charmArt = charmAsset as {
   magentaHeart: { tileset: Tileset; palette: RgbColor[] };
@@ -15221,6 +15230,185 @@ export function renderSceneOnMovePresentation(
   fb: Uint8Array,
   state: SceneOnMovePresentationState,
 ): void {
+  if (state.config.move === "THUNDER_WAVE") {
+    const waveState = state as SceneOnThunderWavePresentationState;
+    const view = sceneOnThunderWaveView(waveState);
+    // Palette/OAM DMA precedes UpdatePaletteFade and the source callbacks,
+    // so the displayed field coefficient and effect sprites are one
+    // source-relative reducer age behind the live software state.
+    const displayed = sceneOnThunderWaveView({
+      ...waveState,
+      age: waveState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "FLAAFFY"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "FLAAFFY"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged THUNDER_WAVE pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const carrierSource = playerToOpponent
+      ? thunderWaveArt.flaffyBack
+      : thunderWaveArt.flaffyFront;
+    const flaffy = playerToOpponent
+      ? carrierSource
+      : {
+          ...carrierSource,
+          tileset: subTileset(carrierSource.tileset, 0, 8),
+        };
+    const shuckle = playerToOpponent
+      ? {
+          ...selfDestructArt.shuckleFront,
+          tileset: subTileset(selfDestructArt.shuckleFront.tileset, 0, 8),
+        }
+      : selfDestructArt.shuckleBack;
+    const black = { r: 0, g: 0, b: 0 };
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      blendPaletteBanksToward(
+        battleBg.palette,
+        black,
+        displayed.backgroundPaletteY,
+      ),
+    );
+
+    type ThunderWavePainterItem = {
+      priority: number;
+      subpriority: number;
+      top: number;
+      slot: number;
+      draw: () => void;
+    };
+    const items: ThunderWavePainterItem[] = [{
+      priority: 2,
+      subpriority: view.attacker.geometry.side === "player" ? 30 : 40,
+      top: view.attacker.geometry.spriteCorner.y,
+      slot: 6,
+      draw: () => drawSpriteSheet(
+        fb,
+        flaffy.tileset,
+        flaffy.palette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+      ),
+    }, {
+      priority: 2,
+      subpriority: view.target.geometry.side === "player" ? 30 : 40,
+      top: view.target.geometry.spriteCorner.y,
+      slot: 8,
+      draw: () => drawSpriteSheet(
+        fb,
+        shuckle.tileset,
+        shuckle.palette,
+        view.target.geometry.spriteCorner.x,
+        view.target.geometry.spriteCorner.y,
+      ),
+    }];
+    for (const bolt of displayed.bolts) {
+      // ElectricBolt changes its 8x8 template to the vertical 8x16 shape
+      // inside the creation callback. That first software record still has
+      // the template's pre-callback coordinates and is not displayed.
+      if (bolt.localAge === 0) continue;
+      const tileset = subTileset(
+        thunderWaveArt.sparkBolt.tileset,
+        bolt.tileOffset,
+        2,
+      );
+      items.push({
+        priority: 2,
+        subpriority: 2,
+        top: bolt.y - 4,
+        slot: bolt.slot,
+        draw: () => drawSpriteSheet(
+          fb,
+          tileset,
+          thunderWaveArt.sparkBolt.palette,
+          bolt.x - 4,
+          bolt.y - 4,
+        ),
+      });
+    }
+    for (const band of displayed.bands) {
+      if (band.hidden) continue;
+      const tileset = subTileset(
+        thunderWaveArt.sparkBands.tileset,
+        band.tileOffset / 4,
+        2,
+      );
+      items.push({
+        priority: 2,
+        subpriority: view.target.geometry.side === "player" ? 28 : 38,
+        top: band.y - 8,
+        slot: band.slot,
+        draw: () => drawSpriteSheet(
+          fb,
+          tileset,
+          thunderWaveArt.sparkBands.palette,
+          band.x - 16,
+          band.y - 8,
+        ),
+      });
+    }
+    items.sort((a, b) =>
+      b.priority - a.priority
+      || b.subpriority - a.subpriority
+      || a.top - b.top
+      || b.slot - a.slot);
+    for (const item of items) item.draw();
+
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "SHUCKLE" : "FLAAFFY",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "FLAAFFY" : "SHUCKLE",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "FLAAFFY used" : "Foe FLAAFFY used",
+      "THUNDER WAVE!",
+      99,
+    );
+    return;
+  }
+
   if (state.config.move === "BODY_SLAM") {
     const bodyState =
       state as SceneOnMovePresentationState<SceneOnBodySlamConfig>;

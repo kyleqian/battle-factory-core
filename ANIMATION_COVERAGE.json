@@ -3,12 +3,13 @@
   "entries": [
     {
       "move": "MOVE_THUNDER_WAVE",
-      "status": "staged",
-      "remaining": "Port the source-relative ElectricBolt, three ThunderWave bands, palette fades, asset lifetimes, side-relative audio, and cleanup behind the existing presentation seam; then prove every dense framebuffer frame twice fresh in both orientations before any partial/exact promotion.",
+      "status": "exact",
       "covered": [
-        "Source receipt: Move_THUNDER_WAVE (data/battle_anim_scripts.s:1124-1144) loads ANIM_TAG_SPARK, SPARK_2, and SPARK_H; field F_PAL_BG fades 0->6, then the ElectricBolt task and target-panned SE_M_THUNDER_WAVE precede the 20-frame wait, looped SE_M_THUNDERBOLT2, and three gThunderWaveSpriteTemplate bands at target (-16,-16), (-16,0), and (-16,16), each staggered by four frames. The inverse F_PAL_BG fade and visual waits clean up before end.",
-        "Fresh validated local-mGBA probes capture every currentMove=86 frame 39-372 (334/334), including gAnimScriptActive, the live script pointer/offset, wait counter, complete active task identities/bodies, software sprites, OAM/matrices, loaded tags, faded/unfaded/hardware palettes, registers, SE1/SE2 state/pan, and raw RGB. Those states prove the narrower source Move_THUNDER_WAVE load/body/cleanup window is player frames 79-198 and opponent frames 83-202 (120/120 each, including first inactive offset-110 teardown); the later Task_DoStatusAnimation interval is distinct. Each complete output and raw-RGB stream reproduced byte-identically twice (player c4fe8bb33c05aff8b6e3781a07593fcfbb157500a6480bdc4b0f585daac045fd / aaa201bbc68db150c1c9becd9a83a30ff331569f75176f3937ec00b6b521c5a5; opponent aa1cc41318232115fb8fc20f0e07b60c2d7b034d00cf5064d39c549cb5a7cd57 / e97ad2bd2ad2ad6880ef7c5a0dfaa7113f603b21df970d19e5a42e76bc00236e).",
-        "ANIM_TAG_SPARK is byte-preserving source-extracted with the inseparable Thunder Wave SPARK_H; the pre-existing generated SPARK_2 remains the shared status/electricity asset. No renderer is added, so status is staged only."
+        "fresh complete legal FLAAFFY/SHUCKLE Scene-ON evidence passes the entire source Move_THUNDER_WAVE load/body/cleanup interval including first inactive offset-110 teardown at 120/120 frames 79-198 player-back and 83-202 opponent-front through source/component state, typed seam, software tasks/sprites, registers, hardware OAM/matrices/palettes, both audio players and pans, raw RGB, and the shared framebuffer, twice fresh; the later Task_DoStatusAnimation remains a distinct excluded interval",
+        "the pure source-relative reducer ports byte-ordered SPARK/SPARK_2/SPARK_H loads, F_PAL_BG 0->6 hold and 6->0 cleanup, five staggered 8x16 ElectricBolt segments including their source creation-display latch, target-panned SE_M_THUNDER_WAVE, four looped SE_M_THUNDERBOLT2 restarts, three staggered pairs of flashing ThunderWave bands, task counts, and cleanup without battle-clock, move-number, input-delay, RGB, or pixel exceptions",
+        "the narrow shared compositor source-extracts both FLAAFFY orientations plus decoded SPARK/SPARK_H, reuses exact SHUCKLE and field chrome, consumes prior software OAM/palette state, uses typed GetBattlerSpriteCoord target geometry, and matches all 120/120 framebuffer frames in both orientations; fresh v3 outputs reproduce byte-identically with player digest 3d8b1bee1a05da063dcd39bddd53296f0957cb8a13c4491fab42eaf3b1f267ee / raw RGB aaa201bbc68db150c1c9becd9a83a30ff331569f75176f3937ec00b6b521c5a5 and opponent digest 0454b5a2523a3ff924884e867007cbcc6006bbfc324c33f2a211c9ce1e61b424 / raw RGB e97ad2bd2ad2ad6880ef7c5a0dfaa7113f603b21df970d19e5a42e76bc00236e",
+        "MOVE_THUNDERBOLT remains unsupported after source audit because it adds three differently placed ElectricBolt tasks, SHOCK_3 orb, eight affine SPARK_2 sprites, a target palette body, and distinct sounds without independent complete dense evidence",
+        "MOVE_ZAP_CANNON remains unsupported after source audit because it adds BLACK_BALL_2 projectile motion, eight orbiting ZapCannon sparks, ShakeMon2, ElectricityEffect, and a distinct pan sequence without independent complete dense evidence; exact MOVE_SPARK remains independently preserved"
       ],
       "evidence": [
         "tools/battle-lab/mechanic-thunder-wave-player-flaaffy-opponent-shuckle.json",
@@ -16,10 +17,14 @@
         "tools/compare/fixtures/thunder-wave-player-flaaffy-opponent-shuckle.json",
         "tools/compare/fixtures/thunder-wave-opponent-flaaffy-player-shuckle.json",
         "tools/compare/thunderWaveProbe.py",
+        "tools/compare/thunderWavePortable.ts",
+        "tools/compare/thunderWaveSourceAudit.ts",
         "tools/compare/extractThunderWaveAssets.ts",
         "src/assets/gen/battle-anim-spark.json",
+        "src/animation/thunderWave.ts",
         "tests/animation/thunderWaveAssets.test.ts",
-        "tests/animation/thunderWaveEvidence.test.ts"
+        "tests/animation/thunderWaveEvidence.test.ts",
+        "tests/animation/thunderWave.test.ts"
       ]
     },
     {
