@@ -32,6 +32,8 @@ mkdirSync(dirname(out), { recursive: true });
 writeFileSync(out, `${JSON.stringify({
   source: {
     script: "data/battle_anim_scripts.s:5066-5080 Move_REFLECT",
+    carrier:
+      "graphics/pokemon/shuppet/front.png; gMonFrontPic_Shuppet (back art reused from exact KNOCK_OFF)",
     blueLightWall:
       "graphics/battle_anims/sprites/green_light_wall.png + blue_light_wall.pal; src/graphics.c:552,555; ANIM_TAG_BLUE_LIGHT_WALL; gReflectWallSpriteTemplate",
     sparkle4:
@@ -47,6 +49,7 @@ writeFileSync(out, `${JSON.stringify({
     ...sprite("graphics/battle_anims/sprites/sparkle_4.png"),
     palette: decodeIndexedPng(join(ref, "graphics/battle_anims/sprites/sparkle_3.png")).palette,
   },
+  shuppetFront: sprite("graphics/pokemon/shuppet/front.png"),
   templates: {
     reflectWall: {
       source: "src/battle_anim_psychic.c:64-75",
