@@ -17,10 +17,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ---
 ## 561 — [BOUNDED MAIN WORKER 2026-07-28 ~00:47] Defense Curl executes source-completely
 
-- **State:** committed `7a96b10` / `7989330` / `e02e90d`; focused **16/16**
-  and production build pass. Census is exactly **139/214 effects, 264/355
-  moves, 216/276 Factory-L50 distinct, 2691/2957 weighted**, all **42/42**
-  checks.
+- **State:** committed `7a96b10` / `7989330` / `e02e90d` / `a854043`;
+  tree green at **318 files / 3973 tests** and focused **40/40**. Production
+  build, both-oracle freshness, census regeneration, and `git diff --check`
+  pass. Census is exactly **139/214 effects, 264/355 moves, 216/276
+  Factory-L50 distinct, 2691/2957 weighted**, all **42/42** checks.
 - **Did:** registered exact operandless `0xbf`
   `B_SCR_OP_SETDEFENSECURLBIT`: unconditional attacker-only status2 bit-30
   OR and one-byte advance. Tests pin both attacker identities and persistence
