@@ -258,6 +258,17 @@ describe("Swallow", () => {
     expect(result.state.rng.calls).toBe(0);
   });
 
+  it("clamps a sub-one quarter heal to one HP", () => {
+    const result = stepOpcode(
+      rules(MOVE_SWALLOW, { hp: 1, maxHP: 3, stockpileCounter: 1 }),
+      "B_SCR_OP_STOCKPILETOHPHEAL",
+    );
+    if (result.kind !== "advanced") throw new Error("minimum Swallow did not advance");
+    expect(result.state.rulesContext.battleMoveDamage).toBe(-1);
+    expect(result.state.rulesContext.battlers[0].stockpileCounter).toBe(0);
+    expect(result.state.rng.calls).toBe(0);
+  });
+
   it("distinguishes zero-counter and full-HP failures, clearing only the latter", () => {
     const zero = stepOpcode(
       rules(MOVE_SWALLOW, { hp: 67, stockpileCounter: 0 }),

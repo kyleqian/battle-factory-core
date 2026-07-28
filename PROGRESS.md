@@ -17,7 +17,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ---
 ## 623 — [BOUNDED MAIN WORKER 2026-07-28 ~12:02] Ranked Batch 3 source-complete
 
-- **State:** tree green at **391 files / 4458 tests**, production build, OFF
+- **State:** tree green at **391 files / 4460 tests**, production build, OFF
   oracle info, and `git diff --check`. Census is exactly **185/214 effects,
   324/355 moves, 266/276 distinct, 2931/2957 weighted**: inherited Batch-3
   delta **+4/+4/+4/+7**; all **64** census validations pass.

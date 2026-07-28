@@ -65,11 +65,16 @@ function party(hp: number): readonly BattleScriptPartyMemberInput[] {
   ]);
 }
 
-function rules(attackerHp: number, targetHp: number, targetStatus2 = 0) {
+function rules(
+  attackerHp: number,
+  targetHp: number,
+  targetStatus2 = 0,
+  targetMaxHp = 116,
+) {
   return createBattleScriptRulesContext({
     battlers: [
       battler(0, attackerHp, { maxHP: 167 }),
-      battler(1, targetHp, { maxHP: 116, status2: targetStatus2 }),
+      battler(1, targetHp, { maxHP: targetMaxHp, status2: targetStatus2 }),
       battler(0, 0),
       battler(1, 0),
     ],
@@ -203,5 +208,13 @@ describe("B_SCR_OP_PAINSPLITDMGCALC / EFFECT_PAIN_SPLIT", () => {
     const finished = handleBattleActionFinished(first, 0);
     expect(finished.rulesContext.painSplitHp).toBe(0);
     expect(finished.rulesContext.battlers[1].specialStatus.shellBellDmg).toBe(0);
+  });
+
+  it("uses the existing HP-update clamp when the shared average exceeds a battler's maxHP", () => {
+    const final = run(rules(167, 50, 0, 50));
+    expect(final.rulesContext.battlers[0].hp).toBe(108);
+    expect(final.rulesContext.battlers[1].hp).toBe(50);
+    expect(final.rulesContext.party.opponent[0].hp).toBe(50);
+    expect(final.rng.calls).toBe(0);
   });
 });
