@@ -17,6 +17,7 @@ import type { BattleScriptBattlerSelectorResolverPort } from "./battleScriptSour
 
 export type BattleScriptMultiHitRulesContext = Readonly<{
   multiHitCounter: number;
+  multiHitStringCounter: number;
   battlers: readonly Readonly<{ hp: number }>[];
 }>;
 
@@ -262,17 +263,23 @@ export function createBattleScriptRuleCommandHandlers<
   /**
    * `Cmd_initmultihitstring` (`battle_script_commands.c:7157-7161`):
    * `PREPARE_BYTE_NUMBER_BUFFER(gBattleScripting.multihitString, 1, 0)`, a
-   * zero-operand text-formatting buffer init. The one byte of that buffer
-   * with any real reader elsewhere in the source (`multihitString[4]` aka
-   * `sMULTIHIT_STRING + 4`, Triple Kick's own hit-landed counter) has no
-   * writer OR reader anywhere in this engine yet -- `Cmd_addbyte`'s own
-   * registration (`battleScriptDamagingWeatherOpcode.ts`) already names that
-   * exact pointer as an explicit (b) barrier, so modeling this opcode's
-   * zeroing write here would be dead state with no consumer. Source-complete
-   * as a pure advance until that barrier is widened.
+   * zero-operand text-formatting buffer init that zeroes `multihitString[4]`
+   * (aka `sMULTIHIT_STRING + 4`, Triple Kick's own hits-landed counter) as
+   * its `number` argument. PROGRESS 525 widened `Cmd_addbyte` to write this
+   * counter (`battleScriptDamagingWeatherOpcode.ts`'s `multiHitStringCounter`
+   * field) and docs/roar-multihit-registration-scout.md §4 rung 8 widens
+   * `Cmd_jumpifbyte` to read it (`battleScriptJumpifbyteOpcode.ts`) -- this
+   * opcode's own zeroing write is real now that both a writer and a reader
+   * exist, not dead state. Every effect that calls `initmultihitstring`
+   * (MULTI_HIT/DOUBLE_HIT/TWINEEDLE too) gets this reset harmlessly: only
+   * Triple Kick's own script ever reads the counter back.
    */
   install("B_SCR_OP_INITMULTIHITSTRING", (context) => {
-    return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }));
+    const rulesContext = Object.freeze({
+      ...context.state.rulesContext,
+      multiHitStringCounter: 0,
+    }) as RulesContext;
+    return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }), { rulesContext });
   });
 
   /**

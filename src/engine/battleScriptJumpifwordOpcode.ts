@@ -77,6 +77,20 @@ const JUMPIFWORD_VALUES: ReadonlyMap<string, number> = new Map([
   ["BATTLE_TYPE_RECORDED_LINK", BATTLE_TYPE_RECORDED_LINK],
   ["BATTLE_TYPE_FRONTIER", BATTLE_TYPE_FRONTIER],
   ["HITMARKER_PLAYER_FAINTED", HITMARKER_PLAYER_FAINTED],
+  /**
+   * `BattleScript_EffectRoar`'s own `jumpifbattletype BATTLE_TYPE_ARENA,
+   * BattleScript_ButItFailed` (`data/battle_scripts_1.s:601`). Real dossier
+   * slip found live running Roar's committed script (docs/roar-multihit-
+   * registration-scout.md §1a's own table wrongly claimed this was "already
+   * in JUMPIFWORD_VALUES" -- `BATTLE_TYPE_ARENA` was only ever a local
+   * building block for `BATTLE_TYPE_FRONTIER`'s OR-combination above, never
+   * exposed as its own standalone comparand). Level-50 Factory singles are
+   * never Battle Arena (`BATTLE_TYPE_ARENA` is Frontier-facility-exclusive,
+   * mutually distinct from `BATTLE_TYPE_FACTORY`), so this comparison is
+   * always false for Factory -- registering the value (not special-casing
+   * the branch) lets the real always-false compare run instead of barriering.
+   */
+  ["BATTLE_TYPE_ARENA", BATTLE_TYPE_ARENA],
 ]);
 
 /**

@@ -48,14 +48,20 @@ const program = loadBattleScriptProgram();
 
 type FixtureRules = Readonly<{
   multiHitCounter: number;
+  multiHitStringCounter: number;
   marker: "rule-command";
   party: readonly string[];
   battlers: readonly Readonly<{ hp: number }>[];
 }>;
 
-function rules(multiHitCounter = 9, battlerHp: readonly number[] = [100, 100, 100, 100]): FixtureRules {
+function rules(
+  multiHitCounter = 9,
+  battlerHp: readonly number[] = [100, 100, 100, 100],
+  multiHitStringCounter = 0,
+): FixtureRules {
   return Object.freeze({
     multiHitCounter,
+    multiHitStringCounter,
     marker: "rule-command",
     battlers: Object.freeze(battlerHp.map((hp) => Object.freeze({ hp }))),
     party: Object.freeze(["ONIX", "MAGBY"]),
@@ -1153,16 +1159,18 @@ describe("source-mapped Battle Script INITMULTIHITSTRING rule command (docs/roar
     ]);
   });
 
-  it("advances unconditionally, zero RNG, zero rules mutation (Cmd_initmultihitstring's only reader-carrying byte, multihitString[4]/sMULTIHIT_STRING+4, has no writer or reader anywhere in this engine yet)", () => {
+  it("advances and zeroes multiHitStringCounter (Cmd_initmultihitstring's PREPARE_BYTE_NUMBER_BUFFER zeroes multihitString[4]/sMULTIHIT_STRING+4, Triple Kick's own hits-landed counter -- real now that Cmd_addbyte writes it and Cmd_jumpifbyte reads it, docs/roar-multihit-registration-scout.md §4 rung 8), zero RNG", () => {
     const instruction = initmultihitstringOccurrences()[0]!;
-    const initial = stateAt(instruction, rules());
+    const initial = stateAt(instruction, rules(9, [100, 100, 100, 100], 3));
     const transition = handlers(literalResolver)[instruction.opcodeId]!(Object.freeze({
       program,
       instruction,
       state: initial,
     }));
     expect(transition.control).toEqual({ kind: "advance" });
-    expect(transition.rulesContext).toBe(initial.rulesContext);
+    expect(transition.rulesContext).not.toBe(initial.rulesContext);
+    expect(transition.rulesContext?.multiHitStringCounter).toBe(0);
+    expect(transition.rulesContext?.multiHitCounter).toBe(9);
     expect(transition.rng).toBe(initial.rng);
   });
 });

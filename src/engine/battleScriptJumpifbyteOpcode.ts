@@ -48,12 +48,19 @@ const JUMPIFBYTE_COMPARATORS: ReadonlyMap<string, number> = new Map([
  * The memByte pointer universe this engine can resolve today: every already
  * source-modeled scratch/global byte field any jumpifbyte call site in the
  * committed program actually reads (grepped across all 56 concrete
- * occurrences). `sMULTIHIT_STRING + 4` (Triple Kick's own multi-hit string
- * buffer, `include/constants/battle_script_commands.h:260`) and
- * `sBATTLE_STYLE` (the Set/Battle-Style option,
+ * occurrences). `sBATTLE_STYLE` (the Set/Battle-Style option,
  * `include/constants/battle_script_commands.h:275`, read only by the
- * non-terminal switch-in Yes/No dialog) have no reader anywhere in this
- * engine and fall through to the unsupported-operand barrier.
+ * non-terminal switch-in Yes/No dialog) has no reader anywhere in this
+ * engine and falls through to the unsupported-operand barrier.
+ * `sMULTIHIT_STRING + 4` (Triple Kick's own hits-landed counter,
+ * `include/constants/battle_script_commands.h:260`) is widened here per
+ * docs/roar-multihit-registration-scout.md §4 rung 8 --
+ * `BattleScript_TripleKickNoMoreHits`/`_PrintStrings`' own
+ * `jumpifbyte CMP_EQUAL, sMULTIHIT_STRING + 4, 0, ...` reads, backed by the
+ * `multiHitStringCounter` field `Cmd_addbyte` already writes on every
+ * multi-hit iteration (`battleScriptDamagingWeatherOpcode.ts`, PROGRESS 525)
+ * and `Cmd_initmultihitstring` now zeroes at script entry
+ * (`battleScriptRuleCommands.ts`).
  */
 function readJumpifbyteMemByte(
   rules: BattleScriptRulesContext,
@@ -68,6 +75,7 @@ function readJumpifbyteMemByte(
     case "cMISS_TYPE": return rules.missType;
     case "gCritMultiplier": return rules.critMultiplier;
     case "sB_ANIM_TURN": return rules.animTurn;
+    case "sMULTIHIT_STRING + 4": return rules.multiHitStringCounter;
     default: return null;
   }
 }

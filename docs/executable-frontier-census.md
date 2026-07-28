@@ -1,19 +1,19 @@
 # Executable-frontier census
 
-Generated 2026-07-27. Rerun: `npx tsx tools/report/executable-frontier-census.ts`
+Generated 2026-07-28. Rerun: `npx tsx tools/report/executable-frontier-census.ts`
 
 Answers ROADMAP S10's Executable-frontier reset question directly: not "how many opcodes are registered" but **how many of the 355 moves can the kernel execute end-to-end today, and what exactly blocks each of the rest.** Every `BattleScript_Effect*` entry in the committed topology (`src/data/gen/battle-script-topology.json` + `battle-script-graph.json`) is walked for full opcode reachability (branches, goto/call targets, the shared hit-chain tail) against the opcode set the engine currently registers (read live from `src/engine/battleScriptRulesContext.ts`'s `createBattleScriptStatusRulesHandlers`, so this doc cannot drift from what the engine actually installs).
 
-**Key finding:** the single highest-leverage next registration is `B_SCR_OP_FINISHACTION`, `B_SCR_OP_FORCERANDOMSWITCH`, `B_SCR_OP_RETURNTOBALL`, `B_SCR_OP_SWITCHOUTABILITIES` -- registering exactly that set would flip **1 effect / 2 moves (2 Factory-L50, 40 weighted)** from blocked to executable in one step (EFFECT_ROAR) -- the largest single entry in the ranked table below. This paragraph is generated fresh from the current registered-opcode set every run, so it always names today's actual top blocker, not a past one -- see PROGRESS.md for the registration history (e.g. the 2026-07-25 B_SCR_OP_JUMPIFHALFWORD/JUMPIFSTATUS3CONDITION/ORWORD entry-chokepoint trio).
+**Key finding:** the single highest-leverage next registration is `B_SCR_OP_CLEARSEMIINVULNERABLEBIT`, `B_SCR_OP_CLEARSTATUSFROMEFFECT`, `B_SCR_OP_SETSEMIINVULNERABLEBIT` -- registering exactly that set would flip **1 effect / 4 moves (4 Factory-L50, 32 weighted)** from blocked to executable in one step (EFFECT_SEMI_INVULNERABLE) -- the largest single entry in the ranked table below. This paragraph is generated fresh from the current registered-opcode set every run, so it always names today's actual top blocker, not a past one -- see PROGRESS.md for the registration history (e.g. the 2026-07-25 B_SCR_OP_JUMPIFHALFWORD/JUMPIFSTATUS3CONDITION/ORWORD entry-chokepoint trio).
 
 ## Headline counts
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 115 | 214 | 53.7% |
-| Moves (unweighted, all 355) | 233 | 355 | 65.6% |
-| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 187 | 276 | 67.8% |
-| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2401 | 2957 | 81.2% |
+| Effect scripts | 116 | 214 | 54.2% |
+| Moves (unweighted, all 355) | 235 | 355 | 66.2% |
+| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 189 | 276 | 68.5% |
+| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2441 | 2957 | 82.5% |
 
 "Executable" means every opcode on every statically reachable path from the effect's entry script has a dispatch entry today (registered barriers included, per ROADMAP S10 §1's (a)/(b) policy). It is not a semantic-correctness claim -- see Caveats.
 
@@ -23,7 +23,6 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 
 | Missing opcode(s) | Effects unlocked | Moves unlocked (unweighted) | Factory-L50 moves (unweighted) | Factory-L50 weighted |
 | --- | --- | --- | --- | --- |
-| `B_SCR_OP_FINISHACTION`, `B_SCR_OP_FORCERANDOMSWITCH`, `B_SCR_OP_RETURNTOBALL`, `B_SCR_OP_SWITCHOUTABILITIES` | 1 (EFFECT_ROAR) | 2 | 2 | 40 |
 | `B_SCR_OP_CLEARSEMIINVULNERABLEBIT`, `B_SCR_OP_CLEARSTATUSFROMEFFECT`, `B_SCR_OP_SETSEMIINVULNERABLEBIT` | 1 (EFFECT_SEMI_INVULNERABLE) | 4 | 4 | 32 |
 | `B_SCR_OP_SETATKHPTOZERO`, `B_SCR_OP_TRYEXPLOSION` | 1 (EFFECT_EXPLOSION) | 2 | 2 | 25 |
 | `B_SCR_OP_REMAININGHPTOPOWER` | 1 (EFFECT_FLAIL) | 2 | 2 | 20 |
@@ -33,7 +32,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_CLEARSTATUSFROMEFFECT`, `B_SCR_OP_JUMPIFABILITYPRESENT` | 1 (EFFECT_SOLAR_BEAM) | 1 | 1 | 16 |
 | `B_SCR_OP_JUMPIFNOTFIRSTTURN` | 1 (EFFECT_FAKE_OUT) | 1 | 1 | 15 |
 | `B_SCR_OP_COPYFOESTATS` | 1 (EFFECT_PSYCH_UP) | 1 | 1 | 14 |
-| `B_SCR_OP_JUMPIFCANTSWITCH`, `B_SCR_OP_RETURNTOBALL`, `B_SCR_OP_SWITCHOUTABILITIES` | 1 (EFFECT_BATON_PASS) | 1 | 1 | 13 |
+| `B_SCR_OP_JUMPIFCANTSWITCH` | 1 (EFFECT_BATON_PASS) | 1 | 1 | 13 |
 | `B_SCR_OP_JUMPIFNODAMAGE` | 1 (EFFECT_FOCUS_PUNCH) | 1 | 1 | 11 |
 | `B_SCR_OP_SETDESTINYBOND` | 1 (EFFECT_DESTINY_BOND) | 1 | 1 | 10 |
 | `B_SCR_OP_SETSUBSTITUTE` | 1 (EFFECT_SUBSTITUTE) | 1 | 1 | 10 |
@@ -48,6 +47,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_SETFORCEDTARGET` | 1 (EFFECT_FOLLOW_ME) | 1 | 1 | 5 |
 | `B_SCR_OP_SETMINIMIZE` | 1 (EFFECT_MINIMIZE) | 1 | 1 | 5 |
 | `B_SCR_OP_TRYSETHELPINGHAND` | 1 (EFFECT_HELPING_HAND) | 1 | 1 | 5 |
+| `B_SCR_OP_TRYSWAPABILITIES` | 1 (EFFECT_SKILL_SWAP) | 1 | 1 | 5 |
 
 ## Per-effect detail
 
@@ -81,7 +81,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_HAZE | `BattleScript_EffectHaze` | blocked-on-opcodes | `B_SCR_OP_NORMALISEBUFFS` (main path) | - | 1 | 1 (1) |
 | EFFECT_BIDE | `BattleScript_EffectBide` | blocked-on-opcodes | `B_SCR_OP_SETBIDE` (main path) | - | 1 | 0 (0) |
 | EFFECT_RAMPAGE | `BattleScript_EffectRampage` | executable | - | - | 3 | 2 (6) |
-| EFFECT_ROAR | `BattleScript_EffectRoar` | blocked-on-opcodes | `B_SCR_OP_FORCERANDOMSWITCH`, `B_SCR_OP_SWITCHOUTABILITIES`, `B_SCR_OP_RETURNTOBALL`, `B_SCR_OP_FINISHACTION` (edge branch only) | - | 2 | 2 (40) |
+| EFFECT_ROAR | `BattleScript_EffectRoar` | executable | - | - | 2 | 2 (40) |
 | EFFECT_MULTI_HIT | `BattleScript_EffectMultiHit` | executable | - | - | 12 | 6 (9) |
 | EFFECT_CONVERSION | `BattleScript_EffectConversion` | blocked-on-opcodes | `B_SCR_OP_TRYCONVERSIONTYPECHANGE` (main path) | - | 1 | 0 (0) |
 | EFFECT_FLINCH_HIT | `BattleScript_EffectFlinchHit` | executable | - | - | 6 | 5 (103) |
@@ -180,7 +180,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_SAFEGUARD | `BattleScript_EffectSafeguard` | executable | - | - | 1 | 1 (7) |
 | EFFECT_THAW_HIT | `BattleScript_EffectThawHit` | executable | - | - | 2 | 1 (2) |
 | EFFECT_MAGNITUDE | `BattleScript_EffectMagnitude` | blocked-on-opcodes | `B_SCR_OP_MAGNITUDEDAMAGECALCULATION` (main path) | - | 1 | 1 (2) |
-| EFFECT_BATON_PASS | `BattleScript_EffectBatonPass` | blocked-on-opcodes | `B_SCR_OP_JUMPIFCANTSWITCH`, `B_SCR_OP_SWITCHOUTABILITIES`, `B_SCR_OP_RETURNTOBALL` (edge branch only) | - | 1 | 1 (13) |
+| EFFECT_BATON_PASS | `BattleScript_EffectBatonPass` | blocked-on-opcodes | `B_SCR_OP_JUMPIFCANTSWITCH` (edge branch only) | - | 1 | 1 (13) |
 | EFFECT_PURSUIT | `BattleScript_EffectHit` | executable | - | - | 1 | 1 (6) |
 | EFFECT_RAPID_SPIN | `BattleScript_EffectRapidSpin` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_RAPIDSPIN is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 1 | 1 (1) |
 | EFFECT_SONICBOOM | `BattleScript_EffectSonicboom` | executable | - | - | 1 | 1 (1) |
@@ -276,8 +276,9 @@ The tool itself asserts these before writing this doc and exits nonzero on any m
 - `EFFECT_SLEEP`, `EFFECT_TOXIC` blocked, mentioning `Cmd_seteffectprimary` (still fully unregistered)
 - `EFFECT_RECOIL_IF_MISS` executable (a real positive: it enters via `BattleScript_HitFromAtkString`, skipping the chokepoint entirely, and reaches moveend/checkteamslost)
 - `EFFECT_ATTACK_DOWN_HIT`, `EFFECT_DEFENSE_DOWN_HIT`, `EFFECT_SPEED_DOWN_HIT`, `EFFECT_SPECIAL_ATTACK_DOWN_HIT`, `EFFECT_SPECIAL_DEFENSE_DOWN_HIT`, `EFFECT_ACCURACY_DOWN_HIT`, `EFFECT_ATTACK_UP_HIT`, `EFFECT_DEFENSE_UP_HIT` each executable (ISSUES #44: `SETMOVEEFFECT_SUPPORTED` is now derived from the engine's own exported `SET_MOVE_EFFECT_SUPPORTED_BYTES`, which spreads `STAT_MOVE_EFFECT_TABLE`'s keys, instead of a hand list that predated that table's registration)
-- `EFFECT_ROAR` blocked on exactly `B_SCR_OP_FORCERANDOMSWITCH`, `B_SCR_OP_SWITCHOUTABILITIES`, `B_SCR_OP_RETURNTOBALL`, `B_SCR_OP_FINISHACTION` -- a control-flow extractor fix (2026-07-27, docs/roar-multihit-registration-scout.md): the graph previously fabricated a fallthrough edge from `forcerandomswitch` into the physically-next label (`BattleScript_EffectMultiHit`), which wrongly credited `INITMULTIHITSTRING`/`JUMPIFHASNOHP` to this row; the corrected walk instead follows `forcerandomswitch`'s real two-way branch (its own fail-pointer operand, plus the hardcoded, bytecode-invisible `BattleScript_SuccessForceOut` success target). Still blocked, scout §4 rungs 10-14
-- `EFFECT_MULTI_HIT`, `EFFECT_DOUBLE_HIT`, `EFFECT_TWINEEDLE` each executable (2026-07-27, scout §4 rungs 2-6: `B_SCR_OP_INITMULTIHITSTRING`/`B_SCR_OP_JUMPIFHASNOHP` registered, `JUMPIFHALFWORD`/`JUMPIFBYTE` per-operand widenings for `gChosenMove`/`MOVE_RESULT_FOE_ENDURED`, plus two further hidden barriers found running the committed scripts live rather than trusting the scout dossier -- `COPYARRAY`'s `cEFFECT_CHOOSER<-sMULTIHIT_EFFECT` tuple, and the `sMULTIHIT_STRING+4` hits-landed counter's `ADDBYTE` write / `gBattleTextBuff1` `COPYARRAY` read, both real on every multi-hit iteration, not Triple-Kick-only as the dossier's §1d table claimed). `EFFECT_TRIPLE_KICK` remains blocked (scout §4 rungs 7-9: dynamic base-power plumbing + its own hit-counter byte reader)
+- `EFFECT_MULTI_HIT`, `EFFECT_DOUBLE_HIT`, `EFFECT_TWINEEDLE` each executable (2026-07-27, scout §4 rungs 2-6: `B_SCR_OP_INITMULTIHITSTRING`/`B_SCR_OP_JUMPIFHASNOHP` registered, `JUMPIFHALFWORD`/`JUMPIFBYTE` per-operand widenings for `gChosenMove`/`MOVE_RESULT_FOE_ENDURED`, plus two further hidden barriers found running the committed scripts live rather than trusting the scout dossier -- `COPYARRAY`'s `cEFFECT_CHOOSER<-sMULTIHIT_EFFECT` tuple, and the `sMULTIHIT_STRING+4` hits-landed counter's `ADDBYTE` write / `gBattleTextBuff1` `COPYARRAY` read, both real on every multi-hit iteration, not Triple-Kick-only as the dossier's §1d table claimed)
+- `EFFECT_TRIPLE_KICK` executable (2026-07-27, scout §4 rungs 7-9: `damagecalcOpcodeHandler` now reads `rules.tripleKickPower` for the real 10/20/30 dynamic-base-power ramp; `ADDBYTE`'s `sTRIPLE_KICK_POWER` delta literal `10` and `JUMPIFBYTE`'s `sMULTIHIT_STRING+4`/standalone `MOVE_RESULT_DOESNT_AFFECT_FOE` are now resolvable; plus a hidden barrier found live running the committed script that the scout dossier's §1d table wrongly called "registered" -- `COPYARRAY`'s `gDynamicBasePower<-sTRIPLE_KICK_POWER` tuple, now modeled as a pure-advance no-op since `gDynamicBasePower` has no materialized field here)
+- `EFFECT_ROAR` executable (2026-07-27, scout §4 rungs 10-14: `B_SCR_OP_FORCERANDOMSWITCH`/`SWITCHOUTABILITIES`/`RETURNTOBALL` registered source-complete; `B_SCR_OP_FINISHACTION` registered as an unconditional (b) barrier per docs/script-terminal-gate3-evidence.md's own deferral, but that barrier sits on `BattleScript_SuccessForceOut`'s not-taken `BATTLE_TYPE_TRAINER == false` fork arm, which this census's static walk always visits regardless of runtime battle-type dominance -- see Caveats -- so the row is executable via its real, taken-for-Factory branch. A real `BATTLE_TYPE_ARENA` value gap found live running this exact script (defined locally in `battleScriptJumpifwordOpcode.ts` but never added to `JUMPIFWORD_VALUES`, despite the scout dossier's §1a table calling it "already registered") was fixed in that file, not a control-flow-extractor regression)
 
 All checks passed for this run.
 

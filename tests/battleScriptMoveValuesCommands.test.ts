@@ -453,6 +453,7 @@ describe("source-mapped Battle Script MOVEVALUESCLEANUP rule command", () => {
     const combinedRules: CombinedRules = Object.freeze({
       ...rules(),
       multiHitCounter: 3,
+      multiHitStringCounter: 0,
       battlers: [],
     });
     const sourceHandlers = createBattleScriptSourceCommandHandlers<CombinedRules>(

@@ -125,6 +125,17 @@ const ATOMIC_VALUES = Object.freeze({
   "MOVE_RESULT_SUPER_EFFECTIVE | MOVE_RESULT_NOT_VERY_EFFECTIVE": (1 << 1) | (1 << 2),
   "MOVE_RESULT_MISSED | MOVE_RESULT_DOESNT_AFFECT_FOE": (1 << 0) | (1 << 3),
   /**
+   * `include/constants/battle.h:223` -- standalone bit, distinct from the
+   * `MISSED | DOESNT_AFFECT_FOE` pair above. Widened per
+   * docs/roar-multihit-registration-scout.md §4 rung 8's follow-up (hidden
+   * barrier found live running Triple Kick's own committed script, not in
+   * the scout's own §1d table): `BattleScript_TripleKickPrintStrings`' own
+   * `jumpifbyte CMP_COMMON_BITS, gMoveResultFlags, MOVE_RESULT_DOESNT_AFFECT_FOE,
+   * BattleScript_TripleKickEnd` (`data/battle_scripts_1.s:1430`) gates the
+   * "Hit X times!" string print on every Triple Kick resolution, hit or miss.
+   */
+  MOVE_RESULT_DOESNT_AFFECT_FOE: 1 << 3,
+  /**
    * `jumpifmovehadnoeffect`'s own expansion (asm/macros/battle_script.inc:
    * 1430-1432 -- `jumpifbyte CMP_COMMON_BITS, gMoveResultFlags,
    * MOVE_RESULT_NO_EFFECT, ptr`), the gate `BattleScript_EffectEndeavor`
@@ -153,6 +164,16 @@ const SETBYTE_VALUES: Readonly<Record<string, number>> = Object.freeze({
   "0": 0,
   "1": 1,
   "2": 2,
+  /**
+   * `addbyte sTRIPLE_KICK_POWER, 10` (`data/battle_scripts_1.s:1401`) --
+   * docs/roar-multihit-registration-scout.md §4 rung 7's ADDBYTE-delta gap
+   * (PROGRESS 525 confirmed this is the real barrier Triple Kick hits, not a
+   * silent fallthrough). A plain byte literal like "0"/"1"/"2" above, not a
+   * masked/shifted expression -- widened generically here since
+   * `resolveBattleScriptSetByteValue` is the shared literal resolver every
+   * SETBYTE/BICBYTE/ADDBYTE/JUMPIFBYTE call site already uses.
+   */
+  "10": 10,
   "(0) & 0xFF": 0,
   "((0) >> 8) & 0xFF": 0,
   "(20) & 0xFF": 20,
