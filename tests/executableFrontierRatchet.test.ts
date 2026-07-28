@@ -110,7 +110,7 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // HITMARKER_DESTINYBOND branch now source-completely schedules
   // BattleScript_DestinyBondTakesLife above the original faint-script frame.
   ["src/engine/battleScriptHitChainOpcode.ts", 22],
-  ["src/engine/battleScriptAttackCancelerOpcode.ts", 5],
+  ["src/engine/battleScriptAttackCancelerOpcode.ts", 4],
   ["src/engine/battleScriptMoveEndOpcode.ts", 7],
   ["src/engine/battleScriptJumpifbyteOpcode.ts", 1],
   // Forced-switch ground truth §4 slice 1: one operand-shape barrier, shared
