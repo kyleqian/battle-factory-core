@@ -397,7 +397,11 @@ Protected, it calculates ordinary base damage times counter, writes
 `animTurn`, applies Helping Hand, then always clears the counter
 (`reference/pokeemerald/src/battle_script_commands.c:6868-6892`).
 `stockpiletohpheal` fails at zero, or clears the counter and fails at full HP;
-otherwise it heals maxHP/8, /4, or /2 for counters 1, 2, or 3 (minimum one),
+otherwise it heals ~~maxHP/8, /4, or /2~~ **[CORRECTED 2026-07-28,
+supervisor-verified against `Cmd_stockpiletohpheal`: the formula is
+`maxHP / (1 << (3 - counter))`, i.e. 1/4, 1/2, or FULL HP for counters
+1/2/3 — corroborated live by `docs/ranked-batch3-off-evidence.md`'s
+receipt (heal 83 = floor(167/2) at counter 2)]** (minimum one),
 writes `animTurn`, retargets the attacker, and clears the counter
 (`reference/pokeemerald/src/battle_script_commands.c:6894-6922`). These
 handlers draw no RNG.

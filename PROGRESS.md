@@ -15,6 +15,33 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 621 — [SUPERVISOR VERIFY+FOLD 2026-07-28 ~11:40] Grudge+Spite accepted; Batch-3 and Cluster-4 receipts folded; Swallow gloss corrected
+
+- **State:** verified entry 620 (suite, build) and reconciled the census the
+  worker deliberately skipped: exactly **179/214 effects, 316/355 moves,
+  258/276 distinct, 2916/2957 weighted** (+2/+2/+2/+4). Merged two side
+  branches: `fbe2eba1` (`docs/ranked-batch3-off-evidence.md` — Pain Split
+  117/100→108/108; Stockpile×2→Swallow 67→150 = floor(167/2); fourth-use
+  failure; Spit Up receipt honestly deferred, sole carrier is dual-ability)
+  and `b113d9af` (`docs/family-b-cluster4-off-evidence.md` — Covet active+
+  party transfer, Sticky Hold block with damage/PP proceeding, Knock Off
+  clears active item but leaves the party record intact). Union green at
+  **388 files / 4431 tests**.
+- **Did:** corrected the ranked dossier §3.8 in place (supervisor-verified
+  against `Cmd_stockpiletohpheal`): Swallow heals **1/4, 1/2, FULL** at
+  counters 1/2/3 — not /8,/4,/2. The Batch-3 engine brief carries the fix.
+  Note: the cwd self-merge trap bit an 8th time (merge/cleanup block started
+  inside the worktree); branch survived, recovered from the main tree, zero
+  loss.
+- **Next:** round 9 dispatched — main: family-B Cluster 3 engine (Mean Look/
+  Nightmare rung mandatory, Rapid Spin rung optional; predicted **+3/+5/+5/
+  +9**) against the banked receipts. Then Batch-3 engine (+4 effects/+7
+  weighted). Cluster 4 receipts are banked for this or the next session.
+- **Notes:** animation supervisor is live concurrently (animation-main has
+  fresh commits + a nested worker); fold at wind-down. No deferred questions.
+  Deadline 15:07.
+
+---
 ## 620 — [BOUNDED MAIN WORKER 2026-07-28 ~11:21] Grudge and Spite execute complete PP lifecycles
 
 - **State:** tree green at **386 files / 4423 tests**, production build, OFF
@@ -38,50 +65,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   imports, generator-metadata entries, census/doc regeneration, roadmap,
   issue, oracle-trace, presentation, tick, or round edits.
 
----
-## 619 — [BOUNDED MAIN WORKER 2026-07-28 ~11:05] Status-family callback operands restored semantically
-
-- **State:** tree green at **384 files / 4402 tests**, production build, OFF
-  oracle info, `git diff --check`, and census **177/214 effects, 314/355
-  moves, 256/276 distinct, 2912/2957 weighted**; all **62/62** census
-  validations pass. Predicted and actual delta: **+5/+13/+11/+139**.
-- **Did:** registered source-exact `gFellAsleepStringIds`; implemented real
-  `gEffectBattler <- gBattlerTarget` and
-  `sBATTLER <- sBATTLER_WITH_ABILITY` assignments, including materialized
-  `battlerWithAbility` writes in `jumpifability`. Full committed scripts now
-  reach END for Sleep, Toxic, Poison, Paralysis, Yawn first-stage and
-  ability-prevention paths, asserting messages, status icons, state,
-  deterministic replay, and exact RNG ledgers. The damaging
-  `EFFECT_PARALYZE_HIT` sibling is also terminal-walked.
-- **Next:** supervisor verify commit `7f0c8789`. Then continue the assigned
-  order with Grudge+Spite (+4 weighted) or family-B Cluster 3 against banked
-  evidence; no remainder from this step.
-- **Notes:** deliberate census pin move: five exact mechanical-blocker checks
-  now require executable. No new barriers, barrier-count pin moves, recording
-  imports, oracle traces, presentation/tick/round branches, roadmap, or issue
-  edits. `EFFECT_PARALYZE_HIT` was already executable because its secondary
-  status path shares the callback but cannot enter the primary move's
-  Limber-prevention copy branch.
-
----
-## 618 — [SUPERVISOR VERIFY+FOLD 2026-07-28 ~11:00] Batch 1 accepted; hardened census folded — five status effects were runtime false positives
-
-- **State:** verified entry 617 (suite **384/4391**, build) and merged census
-  hardening `f80a90e7`; regenerated on the union as `693d2100`. Census is now
-  honest at **172/214 effects, 301/355 moves, 245/276 distinct, 2773/2957
-  weighted** (Batch 1's +6/+7/+7/+10 landed; validation checks 47→62).
-- **Did:** confirmed the hardening's headline down-flip myself before merging:
-  EFFECT_SLEEP/TOXIC/POISON/PARALYZE/YAWN were runtime false positives —
-  their success paths halt today on unaccepted operands
-  (`printfromtable gFellAsleepStringIds`; `copyarray (gEffectBattler,
-  gBattlerTarget, 1)`; Yawn's `(sBATTLER, sBATTLER_WITH_ABILITY, 1)`). Root
-  cause of the blind spot: their integration tests ran UNTIL the callback
-  label, not through it (`tests/battleScriptStatusPrimaryOpcode.test.ts:425`),
-  and the pre-hardening census walked opcode presence only. The generator now
-  reads all operand surfaces live and gates Metronome's dynamic universe.
-- **Next:** round 7 dispatched — main: status-family operand restoration
-  (semantic widenings + through-the-callback committed-script tests; predicted
-  **+5/+13/+11/+139** → 177/214, 314/355, 256/276, 2912/2957); side: Batch-3
-  staging receipts (Pain Split/Stockpile family). Then Grudge+Spite (+4) and
-  family-B Cluster 3 engine work against the banked receipts.
-- **Notes:** no deferred questions. Deadline 15:07.
