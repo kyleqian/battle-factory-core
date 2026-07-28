@@ -206,6 +206,12 @@ describe("ranked Batch 1 committed scripts", () => {
       expect(state.haltReason).toMatchObject({ kind: "terminal", opcodeName: "B_SCR_OP_END" });
       expect(state.rng.calls).toBe(4);
     }
+    const overridden = run(
+      "BattleScript_EffectEruption",
+      rules(284, {}, {}, { dynamicBasePower: 77 }),
+      7,
+    );
+    expect(overridden.rulesContext.dynamicBasePower).toBe(77);
   });
 
   it("walks Super Fang to terminal with exactly accuracy + zero-effect draws", () => {
@@ -218,10 +224,13 @@ describe("ranked Batch 1 committed scripts", () => {
     const success = run("BattleScript_EffectBellyDrum", rules(187, { hp: 51, maxHP: 101 }), 7);
     expect(success.rulesContext.battlers[0].statStages[1]).toBe(12);
     expect(success.rulesContext.battlers[0].hp).toBe(1);
+    expect(success.rulesContext.party.player[0].hp).toBe(1);
+    expect(success.rng.calls).toBe(0);
     const even = run("BattleScript_EffectBellyDrum", rules(187, { hp: 51, maxHP: 100 }), 7);
     expect(even.rulesContext.battlers[0].hp).toBe(1);
     for (const attacker of [
       { hp: 50, maxHP: 101 },
+      { hp: 40, maxHP: 101 },
       { hp: 100, maxHP: 100, statStages: [6, 12, 6, 6, 6, 6, 6, 6] as const },
     ]) {
       const failed = run("BattleScript_EffectBellyDrum", rules(187, attacker), 7);
@@ -230,15 +239,19 @@ describe("ranked Batch 1 committed scripts", () => {
   });
 
   it("Teeter Dance covers attacker skip, Own Tempo, existing confusion, and Substitute", () => {
+    const normal = run("BattleScript_EffectTeeterDance", rules(298), 7);
+    expect(normal.haltReason).toMatchObject({ kind: "terminal", opcodeName: "B_SCR_OP_END" });
+    expect(normal.rulesContext.battlers[1].status2 & 0x7).not.toBe(0);
+    expect(normal.rng.calls).toBe(2); // accuracy + confusion duration
     for (const target of [
-      {},
       { ability: 20 },
-      { status2: 1 << 28 },
+      { status2: 0x7 },
       { status2: 1 << 24, substituteHP: 20 },
       { hp: 0, maxHP: 100 },
     ]) {
       const state = run("BattleScript_EffectTeeterDance", rules(298, {}, target), 7);
       expect(state.haltReason).toMatchObject({ kind: "terminal", opcodeName: "B_SCR_OP_END" });
+      expect(state.rng.calls).toBe(0);
     }
     const safeguarded = run(
       "BattleScript_EffectTeeterDance",
@@ -246,6 +259,8 @@ describe("ranked Batch 1 committed scripts", () => {
       7,
     );
     expect(safeguarded.haltReason).toMatchObject({ kind: "terminal" });
+    expect(safeguarded.rulesContext.battlers[1].status2 & 0x7).toBe(0);
+    expect(safeguarded.rng.calls).toBe(1); // source accuracy precedes Safeguard
   });
 
   it("Magnitude consumes one table draw before the ordinary hit path", () => {
