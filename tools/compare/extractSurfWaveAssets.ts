@@ -29,6 +29,24 @@ function sprite(path: string, palettePath: string) {
   };
 }
 
+function parseWideTilemap(bytes: Uint8Array) {
+  const entries = [];
+  for (let y = 0; y < 32; y += 1) {
+    for (let x = 0; x < 64; x += 1) {
+      const block = x >>> 5;
+      const offset = (block * 1024 + y * 32 + (x & 31)) * 2;
+      const value = bytes[offset]! | (bytes[offset + 1]! << 8);
+      entries.push({
+        tile: value & 0x3ff,
+        hFlip: (value & 0x400) !== 0,
+        vFlip: (value & 0x800) !== 0,
+        palette: (value >>> 12) & 0xf,
+      });
+    }
+  }
+  return { width: 64, height: 32, entries };
+}
+
 mkdirSync(dirname(out), { recursive: true });
 writeFileSync(out, `${JSON.stringify({
   source: {
@@ -50,8 +68,12 @@ writeFileSync(out, `${JSON.stringify({
     surfPalette: water.palette,
     muddyWaterPalette: loadJascPal(join(ref, "water_muddy.pal")),
   },
-  playerTilemap: [...readFileSync(join(ref, "water_player.bin"))],
-  opponentTilemap: [...readFileSync(join(ref, "water_opponent.bin"))],
+  playerTilemap: parseWideTilemap(
+    readFileSync(join(ref, "water_player.bin")),
+  ),
+  opponentTilemap: parseWideTilemap(
+    readFileSync(join(ref, "water_opponent.bin")),
+  ),
   wartortleBack: sprite(
     "graphics/pokemon/wartortle/back.png",
     "graphics/pokemon/wartortle/normal.pal",

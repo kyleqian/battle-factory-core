@@ -3,6 +3,7 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+import { createHash } from "node:crypto";
 import asset from "../../src/animation/assets/surf-wave.json" with { type: "json" };
 import { SURF_WAVE_FRAME_COUNT, surfWaveAtAge } from "../../src/animation/surfWave.ts";
 import {
@@ -10,6 +11,7 @@ import {
   sceneOnSurfView,
   type SceneOnSurfConfig,
 } from "../../src/animation/sceneOnPresentation.ts";
+import { createInitialState, render } from "../../src/engine/core.ts";
 
 describe("visualCommand:create_surf_wave source checkpoint", () => {
   it("extracts exactly the Factory-required water assets and source dispatch", () => {
@@ -17,8 +19,10 @@ describe("visualCommand:create_surf_wave source checkpoint", () => {
     expect(asset.source.carriers[1]).toContain("MARSHTOMP_2 set 295");
     expect(asset.source.excluded).toContain("no software sprite");
     expect(asset.water).toMatchObject({ columns: 16, rows: 16 });
-    expect(asset.playerTilemap).toHaveLength(4096);
-    expect(asset.opponentTilemap).toHaveLength(4096);
+    expect(asset.playerTilemap).toMatchObject({ width: 64, height: 32 });
+    expect(asset.playerTilemap.entries).toHaveLength(2048);
+    expect(asset.opponentTilemap).toMatchObject({ width: 64, height: 32 });
+    expect(asset.opponentTilemap.entries).toHaveLength(2048);
     const scratch = mkdtempSync(join(tmpdir(), "pokebench-surf-wave-assets-"));
     const output = join(scratch, "surf-wave.json");
     execFileSync("node", ["--experimental-strip-types", resolve("tools/compare/extractSurfWaveAssets.ts"), "--out", output]);
@@ -37,14 +41,14 @@ describe("visualCommand:create_surf_wave source checkpoint", () => {
       scanline: { lower: 48, upper: 112 },
     });
     expect(surfWaveAtAge(4, "opponent")).toMatchObject({
-      bgScroll: { x: 288, y: 256 },
+      bgScroll: { x: 0, y: 0 },
       scanline: { lower: 0, upper: 1 },
     });
-    expect(surfWaveAtAge(28, "player")).toMatchObject({
+    expect(surfWaveAtAge(30, "player")).toMatchObject({
       blend: { eva: 13, evb: 3 },
-      soundRestart: "SE_M_SURF", soundPan: 63,
+      soundRestart: "SE_M_SURF", soundPan: -62,
     });
-    expect(surfWaveAtAge(28, "opponent").soundPan).toBe(-64);
+    expect(surfWaveAtAge(30, "opponent").soundPan).toBe(61);
     expect(surfWaveAtAge(136, "player")).toMatchObject({
       controllerPhase: "clear", blend: { eva: 0, evb: 16 },
     });
@@ -86,5 +90,44 @@ describe("visualCommand:create_surf_wave source checkpoint", () => {
       target: { species: "SHUCKLE" },
       scanline: { lower: 0, upper: 112 }, paletteRotations: 12,
     });
+  });
+
+  it("composites BG1 through the shared framebuffer and clears exactly", () => {
+    const config: SceneOnSurfConfig = {
+      move: "SURF",
+      attacker: {
+        species: "WARTORTLE",
+        geometry: {
+          side: "player",
+          spriteCorner: { x: 40, y: 58 },
+          animationCenter: { x: 72, y: 90 },
+          battlePositionCenter: { x: 72, y: 80 },
+        },
+      },
+      target: {
+        species: "SHUCKLE",
+        geometry: {
+          side: "opponent",
+          spriteCorner: { x: 144, y: 17 },
+          animationCenter: { x: 176, y: 49 },
+          battlePositionCenter: { x: 176, y: 40 },
+        },
+      },
+      fieldProfile: {
+        playerHp: 134, playerMaxHp: 134,
+        opponentHp: 127, opponentMaxHp: 127,
+      },
+    };
+    const stage = createSceneOnMovePresentation(config);
+    const frame = (age: number) => render({
+      ...createInitialState(),
+      rngMode: "frontierBattle",
+      sceneOnPresentation: { ...stage, age },
+    });
+    const digest = (bytes: Uint8Array) =>
+      createHash("sha256").update(bytes).digest("hex");
+    expect(frame(52)).toHaveLength(240 * 160 * 4);
+    expect(digest(frame(52))).not.toBe(digest(frame(0)));
+    expect(digest(frame(143))).toBe(digest(frame(0)));
   });
 });

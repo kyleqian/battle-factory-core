@@ -59,7 +59,7 @@ export function surfWaveAtAge(
             ? "stopping"
             : "inactive";
   const bgLoaded = age >= 4 && age <= 141;
-  const scrollStep = Math.max(0, Math.min(132, age - 4));
+  const scrollStep = Math.max(0, Math.min(133, age - 4));
   const initialX = player ? 0 : -224;
   const initialY = player ? -48 : 256;
   const dx = player ? -2 : 2;
@@ -78,8 +78,12 @@ export function surfWaveAtAge(
     bgLoaded,
     bgScroll: age >= 4 && age <= 142
       ? {
-          x: wrap9(initialX + dx * scrollStep),
-          y: wrap9(initialY + dy * scrollStep),
+          x: !player && age === 4
+            ? 0
+            : wrap9(initialX + dx * scrollStep),
+          y: !player && age === 4
+            ? 0
+            : wrap9(initialY + dy * scrollStep),
         }
       : { x: 0, y: 0 },
     blend: age >= 4 && age <= 142
@@ -89,7 +93,7 @@ export function surfWaveAtAge(
     paletteRotations: age >= 4
       ? Math.floor(Math.min(132, age - 3) / 4)
       : 0,
-    soundRestart: age === 28 ? "SE_M_SURF" : null,
-    soundPan: age === 28 ? (player ? 63 : -64) : null,
+    soundRestart: age === 30 ? "SE_M_SURF" : null,
+    soundPan: age === 30 ? (player ? -62 : 61) : null,
   };
 }

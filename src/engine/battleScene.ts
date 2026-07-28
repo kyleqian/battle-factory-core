@@ -591,6 +591,7 @@ import battleAnimIceCubeAsset from "../assets/gen/battle-anim-ice-cube.json" wit
 import battleAnimLightningAsset from "../assets/gen/battle-anim-lightning.json" with { type: "json" };
 import battleAnimSpark2Asset from "../assets/gen/battle-anim-spark-2.json" with { type: "json" };
 import thunderWaveAsset from "../assets/gen/battle-anim-spark.json" with { type: "json" };
+import surfWaveAsset from "../animation/assets/surf-wave.json" with { type: "json" };
 import battleBackSpritesAsset from "../assets/gen/battle-back-sprites.json" with { type: "json" };
 import battleAnimItemHealAsset from "../assets/gen/battle-anim-item-heal.json" with { type: "json" };
 import fontNormalData from "../data/gen/font-normal.json" with { type: "json" };
@@ -707,6 +708,7 @@ import {
   sceneOnEncoreView,
   sceneOnSparkView,
   sceneOnThunderWaveView,
+  sceneOnSurfView,
   sceneOnCharmView,
   sceneOnCovetView,
   sceneOnDragonClawView,
@@ -719,6 +721,7 @@ import {
   type SceneOnFirePunchConfig,
   type SceneOnSparkPresentationState,
   type SceneOnThunderWavePresentationState,
+  type SceneOnSurfPresentationState,
   type SceneOnCharmPresentationState,
   type SceneOnCovetPresentationState,
   type SceneOnScaryFacePresentationState,
@@ -1205,6 +1208,18 @@ const thunderWaveArt = thunderWaveAsset as {
   sparkBands: { tileset: Tileset; palette: RgbColor[] };
   flaffyBack: { tileset: Tileset; palette: RgbColor[] };
   flaffyFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const surfWaveArt = surfWaveAsset as {
+  water: {
+    columns: number;
+    rows: number;
+    tiles: readonly { pixels: readonly number[]; subpalette: number }[];
+    surfPalette: RgbColor[];
+  };
+  playerTilemap: Tilemap;
+  opponentTilemap: Tilemap;
+  wartortleBack: { tileset: Tileset; palette: RgbColor[] };
+  wartortleFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const charmArt = charmAsset as {
   magentaHeart: { tileset: Tileset; palette: RgbColor[] };
@@ -15230,6 +15245,167 @@ export function renderSceneOnMovePresentation(
   fb: Uint8Array,
   state: SceneOnMovePresentationState,
 ): void {
+  if (state.config.move === "SURF") {
+    const surfState = state as SceneOnSurfPresentationState;
+    const view = sceneOnSurfView(surfState);
+    // Palette transfer and scanline-buffer selection precede the source
+    // callbacks; BG scroll registers are already the current display values.
+    const displayedEffect = sceneOnSurfView({
+      ...surfState,
+      age: surfState.age - 1,
+    });
+    const displayedScan = sceneOnSurfView({
+      ...surfState,
+      age: surfState.age
+        - (surfState.config.attacker.geometry.side === "player" ? 1 : 2),
+    });
+    const playerToOpponent =
+      view.attacker.species === "WARTORTLE"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "WARTORTLE"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged SURF pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    const wartortle = playerToOpponent
+      ? surfWaveArt.wartortleBack
+      : {
+          ...surfWaveArt.wartortleFront,
+          tileset: subTileset(surfWaveArt.wartortleFront.tileset, 0, 8),
+        };
+    const shuckle = playerToOpponent
+      ? {
+          ...selfDestructArt.shuckleFront,
+          tileset: subTileset(selfDestructArt.shuckleFront.tileset, 0, 8),
+        }
+      : selfDestructArt.shuckleBack;
+    drawSpriteSheet(
+      fb,
+      wartortle.tileset,
+      wartortle.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    drawSpriteSheet(
+      fb,
+      shuckle.tileset,
+      shuckle.palette,
+      view.target.geometry.spriteCorner.x,
+      view.target.geometry.spriteCorner.y,
+    );
+
+    // BG1 is priority 1: it alpha-composites over the priority-2 field and
+    // battlers, while priority-1 OBJ healthboxes and priority-0 BG0 chrome
+    // remain in front. The scanline task changes only EVA/EVB per row.
+    if (view.age >= 5 && view.age <= 136) {
+      const tilemap = playerToOpponent
+        ? surfWaveArt.playerTilemap
+        : surfWaveArt.opponentTilemap;
+      const palette = [...surfWaveArt.water.surfPalette];
+      const turns = displayedEffect.paletteRotations % 7;
+      for (let i = 0; i < turns; i += 1) {
+        const last = palette[7]!;
+        for (let j = 7; j > 1; j -= 1) palette[j] = palette[j - 1]!;
+        palette[1] = last;
+      }
+      const mapWidth = tilemap.width * 8;
+      const mapHeight = tilemap.height * 8;
+      for (let y = 0; y < 160; y += 1) {
+        const eva =
+          y >= displayedScan.scanline.lower
+            && y < displayedScan.scanline.upper
+            ? displayedEffect.blend.eva
+            : displayedScan.scanline.outsideEva;
+        if (eva === 0) continue;
+        const evb = 16 - eva;
+        const mapY = (y + view.bgScroll.y) % mapHeight;
+        const tileRow = Math.floor(mapY / 8);
+        const inTileY = mapY % 8;
+        for (let x = 0; x < 240; x += 1) {
+          const mapX = (x + view.bgScroll.x) % mapWidth;
+          const tileCol = Math.floor(mapX / 8);
+          const inTileX = mapX % 8;
+          const entry = tilemap.entries[tileRow * tilemap.width + tileCol];
+          if (!entry) continue;
+          const tile = surfWaveArt.water.tiles[entry.tile];
+          if (!tile) continue;
+          const sx = entry.hFlip ? 7 - inTileX : inTileX;
+          const sy = entry.vFlip ? 7 - inTileY : inTileY;
+          const index = tile.pixels[sy * 8 + sx]!;
+          if (index === 0) continue;
+          const color = palette[index];
+          if (!color) continue;
+          const offset = (y * 240 + x) * 4;
+          fb[offset] = blendChannel(color.r, fb[offset]!, eva, evb);
+          fb[offset + 1] = blendChannel(
+            color.g,
+            fb[offset + 1]!,
+            eva,
+            evb,
+          );
+          fb[offset + 2] = blendChannel(
+            color.b,
+            fb[offset + 2]!,
+            eva,
+            evb,
+          );
+        }
+      }
+    }
+
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "SHUCKLE" : "WARTORTLE",
+        level: 50,
+        gender: "male",
+        hpFraction: 1,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "WARTORTLE" : "SHUCKLE",
+        level: 50,
+        gender: "male",
+        hpFraction: 1,
+        status: "none",
+        currentHp: playerToOpponent ? 134 : 127,
+        maxHp: playerToOpponent ? 134 : 127,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "WARTORTLE used" : "Foe WARTORTLE used",
+      "SURF!",
+      99,
+    );
+    return;
+  }
+
   if (state.config.move === "THUNDER_WAVE") {
     const waveState = state as SceneOnThunderWavePresentationState;
     const view = sceneOnThunderWaveView(waveState);
