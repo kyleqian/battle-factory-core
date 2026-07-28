@@ -1293,6 +1293,22 @@
   ],
   "componentTracks": [
     {
+      "id": "shake-target-in-pattern-scary-face",
+      "components": [
+        "task:AnimTask_ShakeTargetInPattern",
+        "task:AnimTask_ScaryFace",
+        "asset:ANIM_TAG_EYE_SPARKLE",
+        "sprite:gEyeSparkleSpriteTemplate"
+      ],
+      "representatives": [
+        "MOVE_SCARY_FACE",
+        "MOVE_GLARE",
+        "MOVE_THUNDER",
+        "MOVE_TRI_ATTACK"
+      ],
+      "goal": "MOVE_SCARY_FACE has legal set-133 RHYHORN versus SHUCKLE Scene-ON staging in both orientations plus a pinned source audit, but remains unsupported. Next, prove its complete move-owned BG1/task schedule, eye sprites, patterned target offsets, source audio restart boundaries, teardown, and typed relative seam densely in both orientations twice before partial promotion. Hardware OAM/palette/register transfer, live audio state, raw RGB, and shared framebuffer remain the exact remainder. GLARE, THUNDER, and TRI_ATTACK have materially different bodies or task arguments and remain unsupported pending independent complete dense evidence."
+    },
+    {
       "id": "rock-mon-back-and-forth-magenta-heart",
       "components": [
         "task:AnimTask_RockMonBackAndForth",

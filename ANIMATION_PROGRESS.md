@@ -71,12 +71,11 @@ All three remain unsupported.
 
 **Exact next action:** add a source-derived relative SCARY FACE reducer and a
 fresh dense mGBA probe/comparator over the complete move-owned window in both
-orientations twice, pinning BG1 tilemap/image/palette, software sprites/tasks,
-hardware OAM/palette/register transfer, all three audio intervals, target
-offset schedule, and teardown through the typed seam. Only then may SCARY FACE
-become partial; hardware OAM/palette/audio/raw-RGB/shared-framebuffer
-composition remains the explicit exact remainder. No renderer or engine file
-was touched.
+orientations twice, pinning the BG1/task schedule, software sprites, target
+offsets, source audio restart boundaries, teardown, and the typed relative
+seam. Only then may SCARY FACE become partial. Hardware OAM/palette/register
+transfer, live audio state, raw RGB, and shared-framebuffer composition remain
+the explicit exact remainder. No renderer or engine file was touched.
 
 ## MOVE_CHARM promoted exact; magenta-heart compositor closed (2026-07-27)
 
