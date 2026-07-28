@@ -548,6 +548,7 @@ import tailGlowAsset from "../animation/assets/tail-glow.json" with { type: "jso
 import dizzyPunchAsset from "../animation/assets/dizzyPunch.json" with { type: "json" };
 import covetAsset from "../animation/assets/covet.json" with { type: "json" };
 import headbuttAsset from "../animation/assets/headbutt.json" with { type: "json" };
+import bodySlamAsset from "../animation/assets/body-slam.json" with { type: "json" };
 import synthesisAsset from "../animation/assets/synthesis.json" with { type: "json" };
 import milkDrinkAsset from "../animation/assets/milk-drink.json" with { type: "json" };
 import supersonicAsset from "../animation/assets/supersonic.json" with { type: "json" };
@@ -685,6 +686,7 @@ import {
   sceneOnHyperFangView,
   sceneOnBiteView,
   sceneOnHeadbuttView,
+  sceneOnBodySlamView,
   sceneOnTwineedleView,
   sceneOnTailGlowView,
   sceneOnDizzyPunchView,
@@ -721,6 +723,7 @@ import {
   type SceneOnReflectPresentationState,
   type SceneOnBiteConfig,
   type SceneOnHeadbuttConfig,
+  type SceneOnBodySlamConfig,
   type SceneOnTwineedleConfig,
   type SceneOnTailGlowConfig,
   type SceneOnDizzyPunchConfig,
@@ -1044,6 +1047,10 @@ const covetArt = covetAsset as {
 const headbuttArt = headbuttAsset as {
   zigzagoonBack: { tileset: Tileset; palette: RgbColor[] };
   zigzagoonFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const bodySlamArt = bodySlamAsset as {
+  lickitungBack: { tileset: Tileset; palette: RgbColor[] };
+  lickitungFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const synthesisArt = synthesisAsset as {
   sparkle2: { tileset: Tileset; palette: RgbColor[] };
@@ -15138,6 +15145,143 @@ export function renderSceneOnMovePresentation(
   fb: Uint8Array,
   state: SceneOnMovePresentationState,
 ): void {
+  if (state.config.move === "BODY_SLAM") {
+    const bodyState =
+      state as SceneOnMovePresentationState<SceneOnBodySlamConfig>;
+    const view = sceneOnBodySlamView(bodyState);
+    // BuildOamBuffer and OBJ palette transfer precede the source callbacks.
+    // Both battler translations and the IMPACT sprite therefore consume the
+    // preceding software reducer age at the shared framebuffer seam.
+    const displayed = sceneOnBodySlamView({
+      ...bodyState,
+      age: bodyState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "LICKITUNG"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "LICKITUNG"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged BODY_SLAM pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const lickitungSource = playerToOpponent
+      ? bodySlamArt.lickitungBack
+      : bodySlamArt.lickitungFront;
+    const lickitung = playerToOpponent
+      ? lickitungSource
+      : {
+          ...lickitungSource,
+          tileset: subTileset(lickitungSource.tileset, 0, 8),
+        };
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+
+    const targetIdle = playerToOpponent && bodyState.age < 48
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      lickitung.tileset,
+      lickitung.palette,
+      view.attacker.geometry.spriteCorner.x + displayed.attackerOffset.x2,
+      view.attacker.geometry.spriteCorner.y + displayed.attackerOffset.y2,
+    );
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x
+        + targetIdle.x2 + displayed.targetOffset.x2,
+      view.target.geometry.spriteCorner.y
+        + targetIdle.y2 + displayed.targetOffset.y2,
+    );
+
+    // Before `monbg ANIM_DEF_PARTNER` reaches display OAM, the player-back
+    // target remains an OBJ in front of the opponent-front attacker.
+    // Afterwards the target is the target-2 BG beneath both attacker/impact.
+    let target2Backdrop: Uint8Array;
+    if (opponentToPlayer && bodyState.age < 7) {
+      drawAttacker();
+      drawTarget();
+      target2Backdrop = fb.slice();
+    } else {
+      drawTarget();
+      // Target-2 is the non-OBJ stack selected by the semi-transparent
+      // hitsplat; snapshot it before painting either OBJ above the monbg.
+      target2Backdrop = fb.slice();
+      drawAttacker();
+    }
+    if (displayed.hitsplat) {
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb,
+        target2Backdrop,
+        battleAnimHitsplat.tileset,
+        battleAnimHitsplat.palette,
+        displayed.hitsplat.x,
+        displayed.hitsplat.y,
+        256,
+        0,
+        0,
+        256,
+        12,
+        8,
+        false,
+      );
+    }
+
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "LICKITUNG",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "LICKITUNG" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "LICKITUNG used" : "Foe LICKITUNG used",
+      "BODY SLAM!",
+      99,
+    );
+    return;
+  }
+
   if (state.config.move === "HEADBUTT") {
     const headbuttState =
       state as SceneOnMovePresentationState<SceneOnHeadbuttConfig>;

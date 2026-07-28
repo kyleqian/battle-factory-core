@@ -1,32 +1,31 @@
 # Animation coverage
 
-## MOVE_BODY_SLAM two-player audio repair; remains partial (2026-07-28)
+## MOVE_BODY_SLAM promoted exact; audio and framebuffer repaired (2026-07-28)
 
-**Verdict:** `MOVE_BODY_SLAM` is partial. Fresh complete legal set-269
+**Verdict:** `MOVE_BODY_SLAM` is exact. Fresh complete legal set-269
 LICKITUNG/ONIX Scene-ON evidence passes the complete move-owned source-script
 window plus first clear display at **107/107** frames **303-409** player-back
 and **107/107** frames **232-338** opponent-front through reducer/component,
 typed seam, software callbacks/tasks, registers, hardware battler
-OAM/matrices/palette transfer, complete two-player audio, and raw RGB, twice
-fresh. The repaired v2 probe proves `SE_M_TAKE_DOWN` on **SE2** at attacker
-pan (age 7) and both `SE_M_MEGA_KICK2` loop cues on **SE1** at target pan
-(ages 44/54), including player identity/status/flags in both orientations.
-Coverage is now **62 exact / 2 partial / 212 unsupported**. Independent
+OAM/matrices/palette transfer, complete two-player audio, raw RGB, and the
+shared framebuffer, twice fresh. The repaired v2 probe proves
+`SE_M_TAKE_DOWN` on **SE2** at attacker pan (age 7) and both
+`SE_M_MEGA_KICK2` loop cues on **SE1** at target pan (ages 44/54), including
+player identity/status/flags in both orientations. Coverage is now **63 exact
+/ 1 partial / 212 unsupported**. Independent
 outputs are byte-identical (player `79e4bfaa…258c`, opponent
 `02c0ee9d…8c01`).
 
-**Reusable model/evidence:** the pure source-relative reducer ports
+**Renderer/model:** source extraction byte-pins LICKITUNG front/back and
+reuses source-generated IMPACT. The narrow compositor ports the source pic
+coordinates, target monbg, prior-software battler/effect OAM and palette
+transfer, 12:8 alpha, both moving battlers, chrome, healthboxes, text, and
+first clear. The pure source-relative reducer ports
 `gVerticalDipSpriteTemplate(6,1,attacker)`, both offset slides, animation-0
 IMPACT, target `AnimTask_ShakeMonInPlace(4,0,12,1)`, both return slides,
-target monbg, 12:8 alpha registers, side-relative sounds, and cleanup. The
-shared HTTP oracle freshness check rejected both running services as older
-than animation HEAD, so the evidence used the required validated local-mGBA
-path and did not restart shared oracle state.
+target monbg, 12:8 alpha registers, side-relative sounds, and cleanup.
 
-**Exact remainder/siblings:** exact remains unclaimed until the narrow shared
-framebuffer compositor extracts LICKITUNG front/back, reuses source-generated
-IMPACT, ports target monbg/prior-software transfer/chrome/healthboxes/text, and
-proves **107/107** framebuffer equality twice fresh in both orientations.
+**Siblings/scope:** the evidence used the required validated local-mGBA path.
 `MOVE_RETURN` remains unsupported pending all four friendship branches;
 `MOVE_FLATTER` remains unsupported pending spotlight/fades/38 confetti and
 distinct sounds; outside-Factory `MOVE_WEATHER_BALL` remains unsupported

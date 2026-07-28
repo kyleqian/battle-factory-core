@@ -60,7 +60,7 @@ describe("MOVE_BODY_SLAM source-relative reducer", () => {
       attacker: {
         species: "LICKITUNG",
         geometry: {
-          side: "player", spriteCorner: { x: 40, y: 48 },
+          side: "player", spriteCorner: { x: 40, y: 62 },
           animationCenter: { x: 72, y: 88 },
           battlePositionCenter: { x: 72, y: 80 },
         },
@@ -74,7 +74,7 @@ describe("MOVE_BODY_SLAM source-relative reducer", () => {
         },
       },
       fieldProfile: {
-        playerHp: 155, playerMaxHp: 155,
+        playerHp: 148, playerMaxHp: 165,
         opponentHp: 110, opponentMaxHp: 110,
       },
     };

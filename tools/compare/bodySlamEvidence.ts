@@ -9,6 +9,7 @@ import {
   sceneOnBodySlamView,
   type SceneOnBodySlamConfig,
 } from "../../src/animation/sceneOnPresentation.ts";
+import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 
 interface Fixture {
   readonly scenario: string;
@@ -90,9 +91,9 @@ function verify(fixturePath: string, runNumber: number): void {
     attacker: {
       species: "LICKITUNG",
       geometry: playerToOpponent
-        ? { side: "player", spriteCorner: { x: 40, y: 48 },
+        ? { side: "player", spriteCorner: { x: 40, y: 62 },
             animationCenter: { x: 72, y: 88 }, battlePositionCenter: { x: 72, y: 80 } }
-        : { side: "opponent", spriteCorner: { x: 144, y: 24 },
+        : { side: "opponent", spriteCorner: { x: 144, y: 16 },
             animationCenter: { x: 176, y: 56 }, battlePositionCenter: { x: 176, y: 40 } },
     },
     target: {
@@ -104,7 +105,7 @@ function verify(fixturePath: string, runNumber: number): void {
             animationCenter: { x: 72, y: 88 }, battlePositionCenter: { x: 72, y: 80 } },
     },
     fieldProfile: {
-      playerHp: playerToOpponent ? 165 : 110,
+      playerHp: playerToOpponent ? 148 : 110,
       playerMaxHp: playerToOpponent ? 165 : 110,
       opponentHp: playerToOpponent ? 110 : 165,
       opponentMaxHp: playerToOpponent ? 110 : 165,
@@ -113,6 +114,7 @@ function verify(fixturePath: string, runNumber: number): void {
   const stage = createSceneOnMovePresentation(config);
   const errors: string[] = [];
   let matched = 0;
+  let framebufferMatched = 0;
   for (let frame = fixture.denseWindow.startFrame;
     frame <= fixture.denseWindow.endFrame; frame += 1) {
     const age = frame - fixture.denseWindow.startFrame;
@@ -175,6 +177,30 @@ function verify(fixturePath: string, runNumber: number): void {
     );
     const audio = takeDown && megaKick2;
     const raw = readFileSync(join(rgbDir, `${String(frame).padStart(5, "0")}.rgb`));
+    const engine: EngineState = {
+      ...createInitialState(),
+      rngMode: "frontierBattle",
+      sceneOnPresentation: { ...stage, age },
+    };
+    const app = render(engine);
+    let framebufferDiff = 0;
+    const samples: string[] = [];
+    for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
+      if (app[pixel * 4] !== raw[pixel * 3]
+        || app[pixel * 4 + 1] !== raw[pixel * 3 + 1]
+        || app[pixel * 4 + 2] !== raw[pixel * 3 + 2]) {
+        framebufferDiff += 1;
+        if (samples.length < 4) {
+          samples.push(
+            `${pixel % 240},${Math.floor(pixel / 240)}:`
+            + `${app[pixel * 4]},${app[pixel * 4 + 1]},${app[pixel * 4 + 2]}`
+            + `!=${raw[pixel * 3]},${raw[pixel * 3 + 1]},${raw[pixel * 3 + 2]}`,
+          );
+        }
+      }
+    }
+    const framebuffer = framebufferDiff === 0;
+    if (framebuffer) framebufferMatched += 1;
     const ok = attacker.x2 === expected.attackerOffset.x2
       && attacker.y2 === expected.attackerOffset.y2
       && target.x2 === expected.targetOffset.x2 + targetIdle
@@ -196,14 +222,22 @@ function verify(fixturePath: string, runNumber: number): void {
       && (age >= 7 && age <= 101
         ? actual.bldcnt === 0x3F40 && actual.bldalpha === 0x080C
         : actual.bldcnt === 0 && actual.bldalpha === 0)
-      && createHash("sha256").update(raw).digest("hex") === actual.sha256;
+      && createHash("sha256").update(raw).digest("hex") === actual.sha256
+      && framebuffer;
     if (ok) matched += 1;
-    else errors.push(`frame ${frame}/age ${age} failed dense receipt`);
+    else errors.push(
+      `frame ${frame}/age ${age} failed dense receipt; framebuffer=`
+      + `${framebuffer} diff=${framebufferDiff} ${samples.join(";")}`,
+    );
   }
   const total = fixture.denseWindow.endFrame - fixture.denseWindow.startFrame + 1;
-  console.log(`${fixture.orientation} run ${runNumber}: ${matched}/${total}; digest ${digest}`);
+  console.log(
+    `${fixture.orientation} run ${runNumber}: ${matched}/${total}; `
+    + `framebuffer ${framebufferMatched}/${total}; digest ${digest}`,
+  );
   if (errors.length) {
     console.error(errors.slice(0, 30).join("\n"));
+    console.error(`scratch: ${scratch}`);
     process.exit(1);
   }
 }
