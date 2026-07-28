@@ -68,10 +68,10 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // SPARK closes its full source/hardware/typed/framebuffer seam.
-        unsupported: 223,
+        // CHARM closes its full source/typed component seam as partial.
+        unsupported: 222,
         staged: 0,
-        partial: 3,
+        partial: 4,
         exact: 50,
       },
       {
