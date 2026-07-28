@@ -1,0 +1,62 @@
+{
+  "schema": "helping-hand-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "sourceSha256": {
+    "battle_script_commands.c": "e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c",
+    "battle_scripts_1.s": "4ac3e610b68c11ef0f4e4c0fc62ddba7fda5a8400e43705428868978ec7551a6",
+    "battle_script.inc": "0a8e1c3bdf4c49d07b2e09ff8ab524812a5217b9735106e1b79b6be261a6db7e",
+    "battle_script_commands.h": "842cce6dd704b09b24a49abdca67ee7a8062a2e3a465e1b764fc63c0d230580f",
+    "battle.h": "8ef0355f2345592094c82cfde6641644a6b7157012104736416f8c05f34f0685",
+    "battle_main.c": "ee79b86ff0f681ab783b363135fd84d050e7123bea2a77c5530f2c7ddc8b8408",
+    "battle_moves.h": "8b3d4d143b807807af97ce7288e0cc0ccdd55b6b64ac45824e35a549836b3a0c",
+    "battle_frontier_mons.h": "557c1a97247cbb84357b99035fb11cf0bfe45abe8393a0992fe8146bfc51f67f",
+    "battle_frontier_mons.h.constants": "00fb47e144978d3a24a304047f5463217ac7b535ee6f8719e2adf47cc592387a",
+    "moves.h": "d32746c9ad3ed1bbfbb93712f13e01ab1c43f48a78f3605ef9db5095e8d19d27",
+    "items.h": "8e9aacc0ffbd41ce0092176a89f624b59be300df60c996d718d61119e747dbd4",
+    "pokemon.h": "e0153a94a2fc0f84e6de372494dfb01e88be4d9cf1cbbeca5e56b8a0b645f7e5"
+  },
+  "instruction": {
+    "opcode": 209,
+    "opcodeHex": "0xd1",
+    "length": 5,
+    "operands": [{"width": 4, "encoding": "little-endian relocation pointer", "value": "failure script target"}],
+    "targetAssignment": "gBattlerTarget = GetBattlerAtPosition(BATTLE_PARTNER(GetBattlerPosition(gBattlerAttacker)))",
+    "success": {"pc": "gBattlescriptCurrInstr += 5", "write": "gProtectStructs[gBattlerTarget].helpingHand = 1"},
+    "failure": {"pc": "gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + 1)"},
+    "guards": ["gBattleTypeFlags & BATTLE_TYPE_DOUBLE", "!(gAbsentBattlerFlags & gBitTable[gBattlerTarget])", "!gProtectStructs[gBattlerAttacker].helpingHand", "!gProtectStructs[gBattlerTarget].helpingHand"],
+    "localRngCalls": 0
+  },
+  "effect": {
+    "move": {"id": 270, "name": "MOVE_HELPING_HAND", "effect": "EFFECT_HELPING_HAND", "pp": 20, "target": "MOVE_TARGET_USER", "priority": 5},
+    "script": ["attackcanceler", "attackstring", "ppreduce", "trysethelpinghand BattleScript_ButItFailed", "attackanimation", "waitanimation", "printstring STRINGID_PKMNREADYTOHELP", "waitmessage B_WAIT_TIME_LONG", "goto BattleScript_MoveEnd"],
+    "failure": ["BattleScript_ButItFailed", "pause B_WAIT_TIME_SHORT", "orbyte gMoveResultFlags, MOVE_RESULT_FAILED", "resultmessage"],
+    "damageConsumers": ["Cmd_damagecalc: gProtectStructs[gBattlerAttacker].helpingHand", "AI_CalcDmg: gProtectStructs[attacker].helpingHand"],
+    "damageMultiplier": "damage = damage * 15 / 10",
+    "lifetime": "TurnValuesCleanUp(FALSE) byte-clears every active ProtectStruct after end-turn effects/faint/Wish-Perish work; FaintClearSetData explicitly sets active helpingHand FALSE. SwitchInClearSetData does not retain any ProtectStruct member, and ordinary end-turn cleanup has already removed the per-turn bit.",
+    "actionOrder": "Helping Hand is priority +5; GetWhoStrikesFirst compares chosen move priority before speed, so a successful helper normally marks its partner before lower-priority partner damage."
+  },
+  "frontierCarrier": {"setId": 186, "name": "FRONTIER_MON_PLUSLE_1", "level50Eligible": true, "species": 311, "moves": [209, 313, 98, 270], "item": 171, "nature": 6},
+  "case": {
+    "id": "factory-plusle-helping-hand-singles-fails-after-pp-off",
+    "scenario": "tools/battle-lab/mechanic-helping-hand-plusle-chansey-off.json",
+    "scenarioSha256": "834a666da1255ec9cee79cc2d87c6ca10f0c44c0895b635041f76bfa8a6a42b6",
+    "repeatability": {"runs": 2, "comparison": "byte-identical full manifest.json", "manifestSha256": "4d40725e524a3bbf5249362a663a24be2e1d0397cc75e4ee6631e81860fa3b6f"},
+    "builtPartyChecksumsValid": [true, true, true, true, true, true],
+    "observed": [
+      {"frame": 0, "sha256": "2c05a45b2bfae9821607682ac743b74665aa5af42a024f7baa5c4caf8eae581e", "rngValue": 3044190370, "currentMove": 0, "player": {"hp": 147, "pp": [20,20,30,20]}, "opponent": {"hp": 362, "pp": [35,35,35,35]}},
+      {"frame": 100, "sha256": "3b11987315cba4e6018d71675f44aeafe34999a31c11039fff284bb913961550", "rngValue": 661875487, "currentMove": 209, "player": {"hp": 147, "pp": [19,20,30,20]}, "opponent": {"hp": 362, "pp": [35,35,35,35]}},
+      {"frame": 300, "sha256": "632f736288ca6785f0179ce5c489ca52d80161637599eba4642663163ec16a27", "rngValue": 1046647018, "currentMove": 0, "player": {"hp": 138, "pp": [19,20,30,20]}, "opponent": {"hp": 349, "pp": [35,35,34,35]}},
+      {"frame": 700, "sha256": "2952d5cc9a3c35cf445d17e149a2b0ed00b6ffa39f40056a0ad8e64206afbf0d", "rngValue": 1996693384, "currentMove": 0, "player": {"hp": 138, "pp": [19,20,30,20]}, "opponent": {"hp": 349, "pp": [35,35,34,35]}},
+      {"frame": 750, "sha256": "2ddb0d2bcb284cb6be071e8e604ff411045cdf1f7bebbfe8bcf4619e86e5517c", "rngValue": 1996693384, "currentMove": 270, "player": {"hp": 138, "pp": [19,20,30,20]}, "opponent": {"hp": 349, "pp": [35,35,34,35]}},
+      {"frame": 775, "sha256": "ff5ec8216a025b2febcb28deb4a540842f6fd17b869fd459727a54960ea19ad1", "rngValue": 1996693384, "currentMove": 270, "player": {"hp": 138, "pp": [19,20,30,19]}, "opponent": {"hp": 349, "pp": [35,35,34,35]}},
+      {"frame": 800, "sha256": "ff5ec8216a025b2febcb28deb4a540842f6fd17b869fd459727a54960ea19ad1", "rngValue": 1996693384, "currentMove": 270, "player": {"hp": 138, "pp": [19,20,30,19]}, "opponent": {"hp": 349, "pp": [35,35,34,35]}},
+      {"frame": 825, "sha256": "53f84c7ccf01dc983a40f02e7b930cdfbf956ccd70c4a66c7b370bd6d13180aa", "rngValue": 1996693384, "currentMove": 270, "player": {"hp": 138, "pp": [19,20,30,19]}, "opponent": {"hp": 349, "pp": [35,35,34,35]}},
+      {"frame": 850, "sha256": "53f84c7ccf01dc983a40f02e7b930cdfbf956ccd70c4a66c7b370bd6d13180aa", "rngValue": 1996693384, "currentMove": 270, "player": {"hp": 138, "pp": [19,20,30,19]}, "opponent": {"hp": 349, "pp": [35,35,34,35]}},
+      {"frame": 875, "sha256": "53f84c7ccf01dc983a40f02e7b930cdfbf956ccd70c4a66c7b370bd6d13180aa", "rngValue": 1996693384, "currentMove": 270, "player": {"hp": 138, "pp": [19,20,30,19]}, "opponent": {"hp": 349, "pp": [35,35,34,35]}},
+      {"frame": 900, "sha256": "3da4399344d4f99b364f1bb9c2d2371e55e82aadf7cf4aaaf4bc3d7b08581c98", "rngValue": 2334145883, "currentMove": 33, "player": {"hp": 138, "pp": [19,20,30,19]}, "opponent": {"hp": 349, "pp": [35,35,34,35]}},
+      {"frame": 1100, "sha256": "d3a6088b7f87055d91ad5dc3b7be5f323aef8ddc27d7cb09aa4da0485f1e2964", "rngValue": 810337402, "currentMove": 0, "player": {"hp": 129, "pp": [19,20,30,19]}, "opponent": {"hp": 349, "pp": [35,35,34,34]}},
+      {"frame": 1300, "sha256": "cc434b845edf7cc0a9edbcf0f004282af54aab6072adfa0e47b433dd7b0d10bb", "rngValue": 810337402, "currentMove": 0, "player": {"hp": 129, "pp": [19,20,30,19]}, "opponent": {"hp": 349, "pp": [35,35,34,34]}}
+    ]
+  },
+  "boundedRemainder": "Battle-lab v1 is Level-50 singles, so it supplies no active partner. The OFF manifest exposes no script PC, gBattlerTarget, gProtectStructs.helpingHand, action-order array, or damage intermediate. It proves only legal construction, use/currentMove, PP, HP, public RNG, checksums, and framebuffer hashes. Doubles success, partner damage 15/10, and the bit's internal lifetime are source-pinned rather than claimed as oracle observations. This evidence adds no production registration."
+}
