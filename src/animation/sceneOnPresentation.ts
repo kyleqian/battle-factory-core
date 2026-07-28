@@ -187,6 +187,10 @@ import {
   type SparkState,
 } from "./spark.ts";
 import {
+  charmAtAge,
+  type CharmState,
+} from "./charm.ts";
+import {
   selfDestructAtAge,
   type SelfDestructState,
 } from "./selfDestruct.ts";
@@ -882,6 +886,13 @@ export interface SceneOnSparkConfig {
   readonly hardwareTieSlotOrder?: readonly number[];
 }
 
+export interface SceneOnCharmConfig {
+  readonly move: "CHARM";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnSelfDestructConfig {
   readonly move: "SELF_DESTRUCT";
   readonly attacker: SceneOnPresentationBattler;
@@ -1068,7 +1079,7 @@ export type SceneOnMoveConfig =
   | SceneOnKnockOffConfig;
 
 export interface SceneOnMovePresentationState<
-  TConfig extends SceneOnMoveConfig = SceneOnMoveConfig,
+  TConfig extends SceneOnMoveConfig | SceneOnCharmConfig = SceneOnMoveConfig,
 > {
   readonly age: number;
   readonly config: TConfig;
@@ -1082,6 +1093,8 @@ export type SceneOnTauntPresentationState =
   SceneOnMovePresentationState<SceneOnTauntConfig>;
 export type SceneOnSparkPresentationState =
   SceneOnMovePresentationState<SceneOnSparkConfig>;
+export type SceneOnCharmPresentationState =
+  SceneOnMovePresentationState<SceneOnCharmConfig>;
 
 export interface SceneOnSupersonicView {
   readonly age: number;
@@ -1154,6 +1167,12 @@ export interface SceneOnTauntView extends TauntState {
 }
 
 export interface SceneOnSparkView extends SparkState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnCharmView extends CharmState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -1698,7 +1717,7 @@ function assertIntegerPoint(
  */
 export function createSceneOnMovePresentation<
   TConfig extends SceneOnMoveConfig | SceneOnRazorLeafConfig | SceneOnTauntConfig
-    | SceneOnSparkConfig,
+    | SceneOnSparkConfig | SceneOnCharmConfig,
 >(
   config: TConfig,
 ): SceneOnMovePresentationState<TConfig> {
@@ -2316,6 +2335,25 @@ export function sceneOnSparkView(
         bgPriority: state.config.targetBgPriority,
         impactPosition: state.config.targetImpactPosition,
       },
+    ),
+  };
+}
+
+/** `age=0` is Move_CHARM's first displayed rock/heart source tick. */
+export function sceneOnCharmView(
+  state: SceneOnCharmPresentationState,
+): SceneOnCharmView {
+  if (state.config.move !== "CHARM") {
+    throw new Error(`expected CHARM presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...charmAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.battlePositionCenter,
     ),
   };
 }
