@@ -82,6 +82,7 @@ import { createBattleScriptTryswapabilitiesOpcodeHandlers } from "./battleScript
 import { createBattleScriptTrysethelpinghandOpcodeHandlers } from "./battleScriptTrysethelpinghandOpcode.ts";
 import { createBattleScriptSettormentOpcodeHandlers } from "./battleScriptSettormentOpcode.ts";
 import { createBattleScriptSettauntOpcodeHandlers } from "./battleScriptSettauntOpcode.ts";
+import { createBattleScriptSetforesightOpcodeHandlers } from "./battleScriptSetforesightOpcode.ts";
 import { createBattleScriptRefreshOpcodeHandlers } from "./battleScriptRefreshOpcode.ts";
 import { createBattleScriptIncrementGameStatOpcodeHandlers } from "./battleScriptIncrementGameStatOpcode.ts";
 import {
@@ -2471,6 +2472,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptIncrementGameStatOpcodeHandlers(program),
     ...createBattleScriptSettormentOpcodeHandlers(program),
     ...createBattleScriptSettauntOpcodeHandlers(program),
+    ...createBattleScriptSetforesightOpcodeHandlers(program),
     ...createBattleScriptTrysethelpinghandOpcodeHandlers(program),
     ...createBattleScriptTryswapabilitiesOpcodeHandlers(program),
   });
