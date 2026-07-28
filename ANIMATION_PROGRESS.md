@@ -1,5 +1,36 @@
 # Animation coverage
 
+## MOVE_BODY_SLAM complete typed/hardware checkpoint; remains partial (2026-07-28)
+
+**Verdict:** `MOVE_BODY_SLAM` is partial. Fresh complete legal set-269
+LICKITUNG/ONIX Scene-ON evidence passes the complete move-owned source-script
+window plus first clear display at **107/107** frames **303-409** player-back
+and **107/107** frames **232-338** opponent-front through reducer/component,
+typed seam, software callbacks/tasks, registers, hardware battler
+OAM/matrices/palette transfer, side-relative audio, and raw RGB, twice fresh.
+Coverage is now **62 exact / 2 partial / 212 unsupported**. Independent
+outputs are byte-identical (player `80033875…f88`, opponent
+`febf0299…02b`).
+
+**Reusable model/evidence:** the pure source-relative reducer ports
+`gVerticalDipSpriteTemplate(6,1,attacker)`, both offset slides, animation-0
+IMPACT, target `AnimTask_ShakeMonInPlace(4,0,12,1)`, both return slides,
+target monbg, 12:8 alpha registers, side-relative sounds, and cleanup. The
+shared HTTP oracle freshness check rejected both running services as older
+than animation HEAD, so the evidence used the required validated local-mGBA
+path and did not restart shared oracle state.
+
+**Exact remainder/siblings:** exact remains unclaimed until the narrow shared
+framebuffer compositor extracts LICKITUNG front/back, reuses source-generated
+IMPACT, ports target monbg/prior-software transfer/chrome/healthboxes/text, and
+proves **107/107** framebuffer equality twice fresh in both orientations.
+`MOVE_RETURN` remains unsupported pending all four friendship branches;
+`MOVE_FLATTER` remains unsupported pending spotlight/fades/38 confetti and
+distinct sounds; outside-Factory `MOVE_WEATHER_BALL` remains unsupported
+pending its weather-dispatched bodies. No battle logic, RNG/controller/
+facility state, boundary list, unsupported barrier, absolute tick, input
+delay, coordinate/RGB, or pixel exception changed.
+
 ## MOVE_HEADBUTT promoted exact; source OAM latch compositor closed (2026-07-28)
 
 **Verdict:** `MOVE_HEADBUTT` is exact. Fresh complete legal set-24

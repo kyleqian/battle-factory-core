@@ -17,6 +17,10 @@ import {
   type HeadbuttState,
 } from "./headbutt.ts";
 import {
+  bodySlamAtAge,
+  type BodySlamState,
+} from "./bodySlam.ts";
+import {
   twineedleEffectAtAge,
   type TwineedleEffect,
 } from "./twineedle.ts";
@@ -427,6 +431,7 @@ export interface SceneOnPresentationBattler {
     | "HITMONCHAN"
     | "SPINDA"
     | "LINOONE"
+    | "LICKITUNG"
     | "WEEPINBELL"
     | "MEOWTH"
     | "BEEDRILL";
@@ -944,6 +949,13 @@ export interface SceneOnHeadbuttConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnBodySlamConfig {
+  readonly move: "BODY_SLAM";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnTwineedleConfig {
   readonly move: "TWINEEDLE";
   readonly attacker: SceneOnPresentationBattler;
@@ -1196,6 +1208,7 @@ export type SceneOnMoveConfig =
   | SceneOnHyperFangConfig
   | SceneOnBiteConfig
   | SceneOnHeadbuttConfig
+  | SceneOnBodySlamConfig
   | SceneOnTwineedleConfig
   | SceneOnSwaggerConfig
   | SceneOnTauntConfig
@@ -1329,6 +1342,12 @@ export interface SceneOnBiteView extends BiteEffect {
 }
 
 export interface SceneOnHeadbuttView extends HeadbuttState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnBodySlamView extends BodySlamState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -1938,7 +1957,7 @@ export function createSceneOnMovePresentation<
     | SceneOnSparkConfig | SceneOnCharmConfig | SceneOnTailGlowConfig
     | SceneOnScaryFaceConfig
     | SceneOnAbsorbConfig | SceneOnReflectConfig | SceneOnBiteConfig
-    | SceneOnHeadbuttConfig,
+    | SceneOnHeadbuttConfig | SceneOnBodySlamConfig,
 >(
   config: TConfig,
 ): SceneOnMovePresentationState<TConfig> {
@@ -2582,6 +2601,25 @@ export function sceneOnHeadbuttView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...headbuttAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is BODY SLAM's first active source-script display. */
+export function sceneOnBodySlamView(
+  state: SceneOnMovePresentationState<SceneOnBodySlamConfig>,
+): SceneOnBodySlamView {
+  if (state.config.move !== "BODY_SLAM") {
+    throw new Error(`expected BODY_SLAM presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...bodySlamAtAge(
       state.age,
       state.config.attacker.geometry.side,
       state.config.target.geometry.animationCenter,

@@ -1,0 +1,10 @@
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-body-slam-player-lickitung-opponent-onix.json",
+  "probe": "tools/compare/bodySlamProbe.py",
+  "pair": "Factory set-269 LICKITUNG player-back -> ONIX opponent-front",
+  "orientation": "player-to-opponent",
+  "denseWindow": { "startFrame": 303, "endFrame": 409 },
+  "attackerSide": "player"
+}
