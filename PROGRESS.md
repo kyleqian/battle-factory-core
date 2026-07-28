@@ -15,6 +15,33 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 587 — [BOUNDED MAIN WORKER 2026-07-28 ~04:25] IncrementGameStat executes through the save/meta seam
+
+- **State:** committed `795366f`; tree green at **344 files / 4115 tests**,
+  focused opcode/continuation coverage **305/305**, ratchets **6/6**, and
+  production build. Both oracle infos, handler/program freshness, census
+  regeneration, and `git diff --check` pass. Census is exactly **151/214
+  effects, 279/355 moves, 228/276 Factory-L50 distinct, 2742/2957 weighted**,
+  all **42/42**.
+- **Did:** globally registered two-byte raw-u8 `0x60`. A resolved player-side
+  attacker emits a frozen typed game-stat increment event; an opponent emits
+  none, and both advance unconditionally with no opcode-local RNG, controller,
+  message, or battle-state work. The separate decoded save/meta consumer owns
+  valid indices **<52**, no-op invalid indices, and **0xFFFFFF** saturation.
+  Shared Splash proves PP → event → message order. Source-shaped
+  `MOVE_EFFECT_RECOIL_25` support carries Torment/Disable forced Struggle past
+  the former barrier through the existing hit and quarter-recoil route.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next shared registration target; do not widen the generic
+  seven-battle controller or extend the retired canonical Battle-2 march.
+- **Notes:** handler inventory **158→159**. The event receipt remains decoded
+  semantic save metadata; no encrypted save counter or Mauville story state
+  entered rules, Factory, controller, or presentation state. No
+  unsupported/import ratchet change, recording import, private handler,
+  animation/presentation/tick branch, issue removal, DEFERRED item, or oracle
+  lifecycle action.
+
+---
 ## 586 — [SUPERVISOR VERIFY 2026-07-28 ~04:10] Refresh accepted; bounded Encore evidence folded
 
 - **State:** reviewed union green at **343 files / 4106 tests** and focused
@@ -61,28 +88,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   RNG unchanged. Handler inventory **157→158** only. No barrier/import
   ratchet, recording import, private handler, animation/presentation/tick
   branch, issue removal, DEFERRED item, or oracle lifecycle action.
-
----
-## 584 — [SUPERVISOR VERIFY 2026-07-28 ~04:00] Torment accepted; party-heal evidence folded
-
-- **State:** reviewed union green at **341 files / 4093 tests** and focused
-  **38/38**; production build, both-oracle info, census regeneration, ratchets
-  **6/6**, and `git diff --check` pass. Census is exactly **148/214 effects,
-  274/355 moves, 225/276 Factory-L50 distinct, 2736/2957 weighted**, all
-  **42/42**.
-- **Did:** accepted global Torment `0xce` after source/diff review: the opcode
-  owns only the target bit/failure branch, while shared
-  `CheckMoveLimitations` now drives repeated-move rejection and forced
-  Struggle without a controller-local Torment branch. Folded Heal
-  Bell/Aromatherapy source/OFF evidence and independently replayed its
-  deterministic manifest (`8b4d2414…96cc6c8`).
-- **Next:** register `B_SCR_OP_CUREIFBURNEDPARALYZEDORPOISONED` / Refresh
-  globally from the accepted source/OFF evidence. Prove accepted-status mask,
-  healthy/sleep/freeze failure, active plus persistent party status zeroing,
-  controller blocking/sync, and zero local RNG. Expected census:
-  **149/214, 275/355, 226/276, 2738/2957**.
-- **Notes:** handler inventory is **157**; party-heal remains evidence only.
-  Torment receipt remains `f7a00036…b28c2`; party-heal source-only bounds are
-  explicit for Soundproof, benched poison, and doubles. No unsupported/import
-  ratchet, recording import, animation/presentation/tick branch, issue
-  removal, DEFERRED item, or oracle lifecycle action.

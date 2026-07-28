@@ -1,4 +1,29 @@
 ---
+## 584 — [SUPERVISOR VERIFY 2026-07-28 ~04:00] Torment accepted; party-heal evidence folded
+
+- **State:** reviewed union green at **341 files / 4093 tests** and focused
+  **38/38**; production build, both-oracle info, census regeneration, ratchets
+  **6/6**, and `git diff --check` pass. Census is exactly **148/214 effects,
+  274/355 moves, 225/276 Factory-L50 distinct, 2736/2957 weighted**, all
+  **42/42**.
+- **Did:** accepted global Torment `0xce` after source/diff review: the opcode
+  owns only the target bit/failure branch, while shared
+  `CheckMoveLimitations` now drives repeated-move rejection and forced
+  Struggle without a controller-local Torment branch. Folded Heal
+  Bell/Aromatherapy source/OFF evidence and independently replayed its
+  deterministic manifest (`8b4d2414…96cc6c8`).
+- **Next:** register `B_SCR_OP_CUREIFBURNEDPARALYZEDORPOISONED` / Refresh
+  globally from the accepted source/OFF evidence. Prove accepted-status mask,
+  healthy/sleep/freeze failure, active plus persistent party status zeroing,
+  controller blocking/sync, and zero local RNG. Expected census:
+  **149/214, 275/355, 226/276, 2738/2957**.
+- **Notes:** handler inventory is **157**; party-heal remains evidence only.
+  Torment receipt remains `f7a00036…b28c2`; party-heal source-only bounds are
+  explicit for Soundproof, benched poison, and doubles. No unsupported/import
+  ratchet, recording import, animation/presentation/tick branch, issue
+  removal, DEFERRED item, or oracle lifecycle action.
+
+---
 ## 582 — [SUPERVISOR VERIFY 2026-07-28 ~03:47] Helping Hand accepted; Refresh evidence folded
 
 - **State:** reviewed union green at **339 files / 4082 tests** and focused
