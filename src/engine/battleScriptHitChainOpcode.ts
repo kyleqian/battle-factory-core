@@ -217,14 +217,23 @@ const PRIMARY_STATUS_MOVE_EFFECT = MOVE_EFFECT_TOXIC;
 /** include/constants/battle.h:254-255 -- the first two family-B (status2/misc) MOVE_EFFECT_* values. */
 const MOVE_EFFECT_CONFUSION = 7;
 const MOVE_EFFECT_FLINCH = 8;
+const MOVE_EFFECT_TRI_ATTACK = 9;
 /** include/constants/battle.h:259 -- SetMoveEffect's two-turn-charge case (docs/semi-invulnerable-registration-scout.md §5 rung 2). */
 const MOVE_EFFECT_CHARGING = 12;
 /** include/constants/battle.h:260 -- SetMoveEffect's Wrap-family case (docs/ingrain-leechseed-wrap-ground-truth.md §1c/§5 slice 2). */
 const MOVE_EFFECT_WRAP = 13;
 /** include/constants/battle.h:261 -- shared 25%-of-damage recoil used by Struggle and ordinary recoil moves. */
 const MOVE_EFFECT_RECOIL_25 = 14;
+const MOVE_EFFECT_RECHARGE = 29;
+const MOVE_EFFECT_RAGE = 30;
+const MOVE_EFFECT_ALL_STATS_UP = 34;
+const MOVE_EFFECT_REMOVE_PARALYSIS = 36;
+const MOVE_EFFECT_ATK_DEF_DOWN = 37;
 /** include/constants/battle.h:300 -- SetMoveEffect's Thrash-family lock-in case (docs/yawn-thrash-endturn-design.md §3, Rung 4). */
 const MOVE_EFFECT_THRASH = 53;
+const MOVE_EFFECT_SP_ATK_TWO_DOWN = 59;
+/** include/constants/battle.h:147. */
+const STATUS2_RAGE = 1 << 23;
 /**
  * `gTrappingMoves` (`battle_message.c:1256-1264`) -- the fixed 6-move family
  * MOVE_EFFECT_WRAP's own duration/message dispatch indexes by, in this exact
@@ -499,10 +508,17 @@ export const SET_MOVE_EFFECT_SUPPORTED_BYTES: ReadonlySet<number> = new Set<numb
   MOVE_EFFECT_TOXIC,
   MOVE_EFFECT_CONFUSION,
   MOVE_EFFECT_FLINCH,
+  MOVE_EFFECT_TRI_ATTACK,
   MOVE_EFFECT_CHARGING,
   MOVE_EFFECT_WRAP,
   MOVE_EFFECT_RECOIL_25,
+  MOVE_EFFECT_RECHARGE,
+  MOVE_EFFECT_RAGE,
+  MOVE_EFFECT_ALL_STATS_UP,
+  MOVE_EFFECT_REMOVE_PARALYSIS,
+  MOVE_EFFECT_ATK_DEF_DOWN,
   MOVE_EFFECT_THRASH,
+  MOVE_EFFECT_SP_ATK_TWO_DOWN,
   ...Object.keys(STAT_MOVE_EFFECT_TABLE).map(Number),
 ]);
 
@@ -2486,6 +2502,25 @@ function applySetMoveEffect(
     if (effectByte === MOVE_EFFECT_FLINCH) {
       return applyFlinchMoveEffect(context, baseRulesContext, effectBattler, certain);
     }
+    if (effectByte === MOVE_EFFECT_TRI_ATTACK) {
+      if (effectBattlerState.status1 !== 0) return passThrough();
+      const { rng, randomValue } = drawBattleScriptRng(
+        context.state.rng,
+        context.instruction,
+        "SetMoveEffect Tri Attack status selector (Random() % 3 + 3)",
+      );
+      const recursiveContext = Object.freeze({
+        ...context,
+        state: Object.freeze({ ...context.state, rng }),
+      });
+      return applySetMoveEffect(
+        recursiveContext,
+        baseRulesContext,
+        (randomValue % 3) + MOVE_EFFECT_BURN,
+        false,
+        false,
+      );
+    }
     if (effectByte === MOVE_EFFECT_WRAP) {
       return applyWrapMoveEffect(context, baseRulesContext, effectBattler);
     }
@@ -2508,6 +2543,80 @@ function applySetMoveEffect(
     }
     if (effectByte === MOVE_EFFECT_CHARGING) {
       return applyChargingMoveEffect(context, baseRulesContext, effectBattler);
+    }
+    if (effectByte === MOVE_EFFECT_RECHARGE) {
+      if ((effectBattlerState.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_RECHARGE) !== 0) {
+        return passThrough();
+      }
+      const lockedMoves = Object.freeze(
+        baseRulesContext.lockedMoves.map((move, index) =>
+          index === effectBattler ? baseRulesContext.currentMove : move
+        ),
+      ) as BattleScriptMoveEndHalfwords;
+      const nextRulesContext = withBattler(baseRulesContext, effectBattler, {
+        status2: (effectBattlerState.status2 | BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_RECHARGE) >>> 0,
+        rechargeTimer: 2,
+      });
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        { rulesContext: Object.freeze({ ...nextRulesContext, lockedMoves }) },
+      );
+    }
+    if (effectByte === MOVE_EFFECT_RAGE) {
+      const nextRulesContext = withBattler(baseRulesContext, attacker, {
+        status2: (baseRulesContext.battlers[attacker].status2 | STATUS2_RAGE) >>> 0,
+      });
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        { rulesContext: nextRulesContext },
+      );
+    }
+    if (effectByte === MOVE_EFFECT_ALL_STATS_UP) {
+      const programCounter = resolveRequiredLabelProgramCounter(context.program, "BattleScript_AllStatsUp");
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "call", programCounter }),
+        { rulesContext: baseRulesContext },
+      );
+    }
+    if (effectByte === MOVE_EFFECT_REMOVE_PARALYSIS) {
+      const targetState = baseRulesContext.battlers[target];
+      if ((targetState.status1 & STATUS1_PARALYSIS) === 0) return passThrough();
+      const newStatus1 = (targetState.status1 & ~STATUS1_PARALYSIS) >>> 0;
+      const updatedContext = withBattler(baseRulesContext, target, { status1: newStatus1 });
+      const nextRulesContext = Object.freeze({
+        ...updatedContext,
+        party: withBattleScriptPartyMemberStatus1(
+          updatedContext.party,
+          targetState.side,
+          targetState.partyIndex,
+          newStatus1,
+        ),
+      });
+      const programCounter = resolveRequiredLabelProgramCounter(context.program, "BattleScript_TargetPRLZHeal");
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "call", programCounter }),
+        {
+          rulesContext: nextRulesContext,
+          events: Object.freeze([
+            Object.freeze({ kind: "set-battler-status-data" as const, battler: target, status1: newStatus1 }),
+          ]),
+        },
+      );
+    }
+    if (effectByte === MOVE_EFFECT_ATK_DEF_DOWN || effectByte === MOVE_EFFECT_SP_ATK_TWO_DOWN) {
+      const label = effectByte === MOVE_EFFECT_ATK_DEF_DOWN
+        ? "BattleScript_AtkDefDown"
+        : "BattleScript_SAtkDown2";
+      const programCounter = resolveRequiredLabelProgramCounter(context.program, label);
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "call", programCounter }),
+        { rulesContext: baseRulesContext },
+      );
     }
     if (effectByte === MOVE_EFFECT_THRASH) {
       return applyThrashMoveEffect(context, baseRulesContext, effectBattler);
