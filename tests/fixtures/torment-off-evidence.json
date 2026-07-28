@@ -1,0 +1,65 @@
+{
+  "schema": "torment-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "sourceSha256": {
+    "battle_script_commands.c": "e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c",
+    "battle_scripts_1.s": "4ac3e610b68c11ef0f4e4c0fc62ddba7fda5a8400e43705428868978ec7551a6",
+    "battle_script.inc": "0a8e1c3bdf4c49d07b2e09ff8ab524812a5217b9735106e1b79b6be261a6db7e",
+    "battle_script_commands.h": "842cce6dd704b09b24a49abdca67ee7a8062a2e3a465e1b764fc63c0d230580f",
+    "battle.h": "bba2f9d9b3d98fa01b5f0a8f7dede9f2f0be5617c735242b741a7e0c8e4a5d1e",
+    "battle_util.c": "2ba9ee4efe913effa119c8342281745f481910ca1b20cd76b470673062a45fd5",
+    "battle_main.c": "ee79b86ff0f681ab783b363135fd84d050e7123bea2a77c5530f2c7ddc8b8408",
+    "battle_moves.h": "8b3d4d143b807807af97ce7288e0cc0ccdd55b6b64ac45824e35a549836b3a0c",
+    "battle_frontier_mons.h": "557c1a97247cbb84357b99035fb11cf0bfe45abe8393a0992fe8146bfc51f67f",
+    "battle_message.c": "5874441ca8fea30caed82e6762c7a1dca8be9c60c8bf8912b74517d0ef7e0f17"
+  },
+  "instruction": {
+    "opcode": 206,
+    "opcodeHex": "0xce",
+    "length": 5,
+    "operands": [{"width": 4, "encoding": "little-endian relocation pointer", "value": "failure script target"}],
+    "pc": {"success": "gBattlescriptCurrInstr += 5", "alreadyTormented": "gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + 1)"}
+  },
+  "state": {
+    "effect": {"id": 165, "name": "EFFECT_TORMENT"},
+    "owner": "gBattleMons[gBattlerTarget].status2",
+    "bit": {"name": "STATUS2_TORMENT", "value": "1 << 31", "unsignedValue": 2147483648},
+    "success": "The command ORs only STATUS2_TORMENT into the target's status2; it has no timer, DisableStruct field, attacker write, battle-type branch, controller command, or Random() call.",
+    "duplicate": "An already-tormented target takes the encoded failure pointer with no command-local state mutation or Random() call. It leaves the existing bit set."
+  },
+  "effectScript": {
+    "move": {"id": 259, "name": "MOVE_TORMENT", "effect": "EFFECT_TORMENT", "power": 0, "accuracy": 100, "pp": 15, "target": "MOVE_TARGET_SELECTED", "priority": 0},
+    "order": ["attackcanceler", "attackstring", "ppreduce", "accuracycheck BattleScript_ButItFailed, ACC_CURR_MOVE", "settorment BattleScript_ButItFailed", "attackanimation", "waitanimation", "printstring STRINGID_PKMNSUBJECTEDTOTORMENT", "waitmessage B_WAIT_TIME_LONG", "goto BattleScript_MoveEnd"],
+    "ppAndRng": "Both success and duplicate first execute ppreduce, then accuracycheck. Cmd_settorment itself owns zero Random() calls; the source accuracycheck executes its own Random() % 100 + 1 before the setter (unless an earlier AccuracyCalcHelper/protect return applies). Thus a duplicate can spend PP and take the preceding accuracy roll, but the setter supplies neither a timer draw nor any other local RNG draw.",
+    "messages": {"success": "STRINGID_PKMNSUBJECTEDTOTORMENT", "duplicate": "BattleScript_ButItFailed (sets MOVE_RESULT_FAILED and runs resultmessage)"}
+  },
+  "admission": {
+    "manualSelection": "TrySetCantSelectMoveBattleScript rejects an ordinary selected move exactly when it equals gLastMoves[active], is not MOVE_STRUGGLE, and active status2 carries STATUS2_TORMENT. It cancels multi-turn moves; ordinary battles choose BattleScript_SelectingTormentedMove, while Palace uses its distinct selection script and palaceUnableToUseMove flag.",
+    "limitations": "CheckMoveLimitations marks every slot whose move id equals gLastMoves[battler] when MOVE_LIMITATION_TORMENTED is requested and status2 carries the bit. Duplicate slot ids are all marked, not just the last selected index. Its Encore and Choice-Band tests are independent later predicates in the same slot loop; their masks combine, and Torment itself neither reads nor clears either field.",
+    "struggle": "AreAllMovesUnusable runs the all-limitations mask; when all four slots are blocked it sets noValidMoves and the selection script. Move selection then replaces the chosen move with MOVE_STRUGGLE, clears noValidMoves, sets HITMARKER_NO_PPDEDUCT, and targets Struggle. The explicit manual-selection check excludes MOVE_STRUGGLE."
+  },
+  "lifetime": {
+    "battleInit": "BeginBattleIntro calls BattleStartClearSetData, then BattleIntroGetMonsData copies each BattlePokemon and explicitly sets status2 = 0 for each non-Safari active battler before first action. BattleStartClearSetData also resets gLastMoves to MOVE_NONE.",
+    "endTurn": "No Torment timer or Torment-specific end-turn clear exists. The normal turn handoff clears STATUS2_FLINCHED only, so Torment persists across end turns until active-battler replacement or battle teardown/reinitialization.",
+    "switch": "Ordinary SwitchInClearSetData assigns active status2 = 0 and gLastMoves = MOVE_NONE.",
+    "batonPass": "Baton Pass masks status2 down to CONFUSION, FOCUS_ENERGY, SUBSTITUTE, ESCAPE_PREVENTION, and CURSED; STATUS2_TORMENT is absent and is therefore cleared. It then resets gLastMoves to MOVE_NONE.",
+    "faint": "FaintClearSetData assigns active status2 = 0 and gLastMoves = MOVE_NONE."
+  },
+  "frontierCarrier": {"setId": 127, "name": "FRONTIER_MON_KOFFING", "level50Eligible": true, "species": 109, "moves": [124, 108, 259, 114], "item": 211, "nature": 24},
+  "case": {
+    "id": "factory-koffing-torment-chansey-success-duplicate-struggle-off",
+    "scenario": "tools/battle-lab/mechanic-torment-koffing-chansey-off.json",
+    "scenarioSha256": "e041654b22f45239aab7f9cb16e8f5cdb7b61f58c42f39a4cb53bc4e35bba3aa",
+    "repeatability": {"runs": 2, "comparison": "byte-identical full manifest.json", "manifestSha256": "f7a0003672131070f36641ade4d017eddef0d0f55468be7a41e3f16b27ab28c2"},
+    "builtPartyChecksumsValid": [true, true, true, true, true, true],
+    "observed": {
+      "initial": {"frame": 0, "sha256": "12a585d018b32b00a21e3ee914d4c6dd80c4183fbe9d575f4eb1973f87f7f6f6", "rngValue": 919694434, "currentMove": 0, "player": {"hp": 147, "pp": [20,20,15,30], "status2": 0}, "opponent": {"hp": 362, "pp": [35,35,35,35], "status2": 0}},
+      "tormentSet": {"frame": 300, "sha256": "0e8e1e6db0a19ee7fbe581099935706ce41a26120dcca8ed01cc596d7a786c3b", "rngValue": 2756097505, "currentMove": 259, "player": {"hp": 139, "pp": [20,20,14,30], "status2": 0}, "opponent": {"hp": 362, "pp": [35,34,35,35], "status2": 2147483648}},
+      "persistedNextDecision": {"frame": 400, "sha256": "203725227f19524e7fa24e225f1473961b626f5d9e0a599940ba1cb11f86221b", "rngValue": 1250713408, "currentMove": 0, "player": {"hp": 139, "pp": [20,20,14,30], "status2": 0}, "opponent": {"hp": 362, "pp": [35,34,35,35], "status2": 2147483648}},
+      "allTackleSlotsBlockedStruggle": {"frame": 800, "sha256": "4df2b2e810741d5e7abfeaa3374cd681286a4763f2bf2937f1f906854003fb33", "rngValue": 2210656548, "currentMove": 165, "player": {"hp": 139, "pp": [20,20,14,30], "status2": 0}, "opponent": {"hp": 362, "pp": [35,34,35,35], "status2": 2147483648}},
+      "duplicateFailureAfterPp": {"frame": 1000, "sha256": "c91155ca4fd75a25ddaaa9d6588ec8aa3a25dc70b6908ae49faa8e8fd961e79a", "rngValue": 1941898439, "currentMove": 259, "player": {"hp": 133, "pp": [20,20,13,30], "status2": 0}, "opponent": {"hp": 361, "pp": [35,34,35,35], "status2": 2147483648}},
+      "postDuplicateDecision": {"frame": 1200, "sha256": "069a345b1bc054e45ebc14dff6b284ff1e333f7649e9ccf40606534fdc52ebc8", "rngValue": 2184965245, "currentMove": 0, "player": {"hp": 133, "pp": [20,20,13,30], "status2": 0}, "opponent": {"hp": 361, "pp": [35,34,35,35], "status2": 2147483648}}
+    }
+  },
+  "boundedRemainder": "The OFF manifest exposes status2, active HP/PP/current move/RNG, controller state, party checksums, and framebuffer hashes, but not gBattlescriptCurrInstr, decoded message/result flags, gBattlerTarget, gLastMoves, selection-script pointers, noValidMoves, HITMARKER_NO_PPDEDUCT, or Choice/Encore fields. The trace proves the public target-owned bit, both Torment PP reductions, the all-identical-slot Struggle result without Tackle PP loss, persistence through two decision boundaries, and reproducible hashes. Exact branch PC/message, last-move ownership, Choice/Encore composition, and init/switch/faint/Baton-Pass lifecycle are source-pinned; no unsupported claim is made about a live switch, faint, Baton Pass, Palace, or manual attempt by the tormented battler. This is evidence only and adds no production registration."
+}
