@@ -322,6 +322,25 @@ describe("positional delayed Future Sight resolution", () => {
     expect(result.state.rng.calls).toBe(2);
   });
 
+  it("routes Doom Desire through the same positional timer with its own accuracy and hit animation", () => {
+    const result = endTurn(rules({
+      sideStatuses: [0, SIDE_STATUS_FUTUREATTACK],
+      futureSightCounter: [0, 1, 0, 0],
+      futureSightMove: [0, DOOM_DESIRE, 0, 0],
+      futureSightAttacker: [0, 0, 0, 0],
+      futureSightDmg: [0, 50, 0, 0],
+    }));
+    expect(result.kind).toBe("next-turn");
+    expect(result.state.rulesContext.currentMove).toBe(DOOM_DESIRE);
+    expect(result.state.rulesContext.battlers[1].hp).toBeLessThan(140);
+    expect(result.state.rng.calls).toBe(2);
+    expect(result.state.events).toContainEqual(expect.objectContaining({
+      kind: "animation",
+      animationId: "DOOM_DESIRE_HIT",
+      battler: 0,
+    }));
+  });
+
   it("skips absent positions without decrement; a present fainted slot decrements to zero without hit or side-bit clear", () => {
     const absent = endTurn(rules({
       absentBattlerFlags: 0b0010,
