@@ -44,6 +44,34 @@ animation. A status caused by a move is not part of that move's animation.
   presentation seam and all source- or evidence-required variants are covered.
 - No entry means unsupported.
 
+## SCARY_FACE presentation-assets checkpoint; remains partial (2026-07-27)
+
+**State:** Coverage remains **51 exact / 4 partial / 221 unsupported**.
+`MOVE_SCARY_FACE` still has its complete **190/190** software/typed proof in
+both orientations; the session wound down at the next independently green
+checkpoint before any renderer claim.
+
+**Did:** merged `master` through `d0c04f8`, then landed `d9e447c`. The new
+source extractor and byte-for-byte test pin legal set-133 RHYHORN back/front
+art, the Scary Face BG image and both side tilemaps, and EYE_SPARKLE; exact
+SHUCKLE art remains reused. Supervisor verification passed **3754/3754**
+tests with the role variable removed for the launcher-profile test, the
+production build, and an independent extractor/cmp run.
+
+**Next:** add the narrow Scary Face compositor and extend its portable proof
+to hardware OAM/palette/register transfer, live audio, raw RGB, and shared
+framebuffer **190/190** in both orientations twice fresh. Keep GLARE, THUNDER,
+and TRI ATTACK unsupported until each has complete dense evidence.
+
+**Notes:** no renderer, engine wiring, coverage status, boundary ratchet, or
+main-program file changed in this increment. No animation deferral is open.
+**For the main program:** the new launcher-profile test inherits
+`POKEBENCH_ROLE=supervisor|worker` and makes raw in-session `npm test` fail
+four probes with exit 3; `env -u POKEBENCH_ROLE npm test` is fully green.
+The freshness checker also resolves a nested animation worktree's run root as
+the harness root; the actual Scene-ON service was current against
+`POKEBENCH_HARNESS_ROOT`.
+
 ## MOVE_SCARY_FACE promoted partial; complete software/typed seam (2026-07-27)
 
 **Verdict:** `MOVE_SCARY_FACE` is partial. Legal set-133 RHYHORN versus

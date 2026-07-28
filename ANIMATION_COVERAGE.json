@@ -1330,7 +1330,7 @@
         "MOVE_THUNDER",
         "MOVE_TRI_ATTACK"
       ],
-      "goal": "MOVE_SCARY_FACE is partial after 190/190 complete move-owned source/software/typed-seam frames passed in both orientations twice, including the stock shared-argument overwrite from literal offset1/pattern0 to runtime offset3/pattern1. Exact still requires hardware OAM/palette/register transfer, live audio state, raw RGB, and shared-framebuffer equality. GLARE, THUNDER, and TRI_ATTACK have materially different bodies or task arguments and remain unsupported pending independent complete dense evidence."
+      "goal": "MOVE_SCARY_FACE is partial after 190/190 complete move-owned source/software/typed-seam frames passed in both orientations twice, including the stock shared-argument overwrite from literal offset1/pattern0 to runtime offset3/pattern1. Source-derived legal set-133 RHYHORN back/front art, the Scary Face BG image and both side tilemaps, and EYE_SPARKLE now regenerate byte-for-byte; exact still requires the narrow compositor plus hardware OAM/palette/register transfer, live audio state, raw RGB, and shared-framebuffer equality. GLARE, THUNDER, and TRI_ATTACK have materially different bodies or task arguments and remain unsupported pending independent complete dense evidence."
     },
     {
       "id": "rock-mon-back-and-forth-magenta-heart",
