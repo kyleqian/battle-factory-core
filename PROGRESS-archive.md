@@ -1,4 +1,23 @@
 ---
+## 543 — [BOUNDED MAIN WORKER 2026-07-27 ~21:43] Full-turn singles requests use source move targets
+
+- **State:** tree green at **296 files / 3829 tests**; `npm run build` and
+  `git diff --check` clean. The unchanged Battle-2 OFF trace remains
+  **16/16 exact**.
+- **Did:** extended the generated full-turn move view with `target` and ported
+  the represented singles branches of `GetMoveTarget`: USER stays on the
+  actor; SELECTED/DEPENDS/BOTH/FOES_AND_ALLY/OPPONENTS_FIELD/RANDOM select the
+  only foe without RNG. Canonical ONIX SANDSTORM slot 3 and KABUTO PROTECT
+  slot 3 now self-target at initial/trainer/next-turn boundaries; all other
+  canonical slots oppose. The existing slot-3 execution/PP proof remains.
+- **Next:** source-completely register `B_SCR_OP_COPYFOESTATS` /
+  `EFFECT_PSYCH_UP`, walk neutral/non-neutral scripts to END, and regenerate
+  the executable-frontier census for exact **+1/+1/+1/+14**.
+- **Notes:** focused **24/24**, full **3829/3829**, build/compare/diff green.
+  No RNG target draw, unsupported barrier, recording import, ratchet change,
+  oracle lifecycle action, animation edit, or PAPERCUT.
+
+---
 ## 542 — [BOUNDED MAIN WORKER 2026-07-27 ~21:33] Full-turn singles requests are move-slot generic
 
 - **State:** tree green at **295 files / 3824 tests**; `npm run build` and
