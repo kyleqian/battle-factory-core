@@ -1,5 +1,24 @@
 # Animation coverage
 
+## MOVE_FAKE_TEARS promoted exact; resolved stat-drop window closed (2026-07-28)
+
+**Verdict:** `MOVE_FAKE_TEARS` is exact. Corrected legal Level-50 Factory
+set-267 DELCATTY→SHUCKLE fixtures pass the complete Scene-ON
+`currentMove=313` window at **322/322** controller receipts and
+shared-framebuffer frames **39–360**, twice fresh in both orientations. This
+includes pre-animation, the **87-frame** source body, **89-frame** stat/status
+phase, result/message/post-animation, and cleanup. Evidence/raw-RGB digests
+are player `3b2470bd…e1c5a9` / `4aaf80e8…de8e1` and opponent
+`c9b2f3d8…5221ff` / `e7828c48…938fc`.
+
+**Boundary:** the resolved-stat-drop receipt seam presents only the already
+resolved kickoff/text printer, `B_ANIM_STATS_CHANGE`, result printer/wait, and
+move-end cleanup. It does not apply the stage outcome, advance RNG/scripts, or
+own controller, turn, or facility state. The portable verifier's mismatch path
+now constructs its framebuffer audit before reporting it. `MOVE_HEAT_WAVE` and
+`MOVE_LUSTER_PURGE` remain unsupported. Coverage is **71 exact / 0 partial /
+0 staged / 205 unsupported**.
+
 ## Reversal legal dense-ROM evidence complete; presentation remains unsupported (2026-07-28)
 
 **Verdict:** Evidence-only checkpoint. `MOVE_REVERSAL` and `MOVE_SWALLOW`

@@ -361,6 +361,7 @@ function verify(fixturePath: string, runNumber: number): void {
   ) {
     throw new Error(`${fixture.orientation}: source framebuffer acceptance regressed`);
   }
+  const auditSummary = JSON.stringify(framebufferAudit);
   const outerMismatchFrames = (Object.keys(framebufferAudit) as Phase[])
     .filter((phase) => phase !== "sourceAnimation")
     .reduce((sum, phase) => sum + framebufferAudit[phase].mismatched, 0);
@@ -378,7 +379,6 @@ function verify(fixturePath: string, runNumber: number): void {
   ) {
     throw new Error(`${fixture.orientation}: full-window proof digest changed`);
   }
-  const auditSummary = JSON.stringify(framebufferAudit);
   for (const [map, value, label] of [
     [outputDigests, outputDigest, "evidence"],
     [rawRgbDigests, rawDigest, "raw RGB"],

@@ -1685,13 +1685,13 @@
     },
     {
       "move": "MOVE_FAKE_TEARS",
-      "status": "staged",
+      "status": "exact",
       "covered": [
         "corrected legal set-267 fixtures use Emerald internal species 316 (DELCATTY); the inherited scenarios and checkpoint fixtures use species 301 (NINCADA), so that evidence is retained as history but is not legal DELCATTY acceptance",
         "complete corrected-species source-owned load/body/free/clear windows pass 87/87 frames 76-162 player-back and 80-166 opponent-front twice fresh through the source-relative reducer, typed seam, software tasks/sprites, palette/OAM/register/audio lifecycles, raw RGB, and shared framebuffer",
-        "the corrected legal set-267 DELCATTY portable verifier now checks every 322/322 currentMove=313 frame 39-360 twice fresh in both orientations: source/component state where active plus complete hardware OAM/matrix/palette/register/audio/raw-RGB receipts and the application framebuffer; full evidence/raw digests are player 3b2470bdd96c77c68cf1f66686324335c078651b41e0c5d3ca2699a3bee1c5a9 / 4aaf80e8cc8bdc94a0c369fce50893cfd6d84fd5f9dc7e565b2ed625a8cde8e1 and opponent c9b2f3d8ad20833d39e7f8cd73c0908e9c64c72b2dcf41ba0c86abc7615221ff / e7828c486bd06f3a5db51c186fa84542397dfc44ef7a570f9b47c8e8fe2938fc",
+        "the corrected legal set-267 DELCATTY portable verifier passes every 322/322 currentMove=313 frame 39-360 twice fresh in both orientations, including pre-animation, all 87 source-body frames, 89 stat/status frames, result/message/post-animation, and cleanup; source/component state where active plus complete hardware OAM/matrix/palette/register/audio/raw-RGB receipts and the shared application framebuffer are exact. Full evidence/raw digests are player 3b2470bdd96c77c68cf1f66686324335c078651b41e0c5d3ca2699a3bee1c5a9 / 4aaf80e8cc8bdc94a0c369fce50893cfd6d84fd5f9dc7e565b2ed625a8cde8e1 and opponent c9b2f3d8ad20833d39e7f8cd73c0908e9c64c72b2dcf41ba0c86abc7615221ff / e7828c486bd06f3a5db51c186fa84542397dfc44ef7a570f9b47c8e8fe2938fc",
         "pinned ROM source and dense state partition player-back as pre-animation 39-75 (37), source 76-162 (87), stat/status 163-251 (89), message/post-animation 252-359 (108), cleanup 360 (1), and opponent-front as 39-79 (41), 80-166 (87), 167-255 (89), 256-359 (104), 360 (1); only Move_FAKE_TEARS is animation-owned, while BattleScript_EffectStatDown, Cmd_statbuffchange/ChangeStatBuffs, B_ANIM_STATS_CHANGE, stat messaging/wait, and BattleScript_MoveEnd own the other 235 frames",
-        "the existing standalone animation seam has no typed controller command or resolved stat/message/cleanup input: 216/235 outer application framebuffers mismatch in each orientation (player 30 pre + 80 status + 105 message/post + 1 cleanup; opponent 34 + 80 + 101 + 1), while 19 static outer frames merely coincide and remain unaccepted; no controller behavior was synthesized",
+        "the typed resolved-stat-drop controller receipt seam carries already-resolved kickoff/text-printer, B_ANIM_STATS_CHANGE, stat-result message/wait, and move-end cleanup presentation only. It does not apply the stat outcome, advance RNG or the script, or own turn/facility/controller state; the focused pure controller receipt test pins that boundary",
         "the reducer ports zero-delay BlendParticle, speed-1 two-rock RockMonBackAndForth, four Tail Whip restarts, eight typed tear-drop sequences, SMALL_BUBBLES blend, load-only THOUGHT_BUBBLE/MUSIC_NOTES tags, waits, frees, and cleanup; the compositor uses source-extracted DELCATTY front/back art and shared SHUCKLE chrome",
         "historical, now-disqualified species-301 NINCADA/SHUCKLE fixtures captured 321 currentMove=313 frames 39-359 and the BlendParticle creation/inactive latch at 2/2 frames 84-85 player-back and 88-89 opponent-front twice fresh; they are retained only as provenance and are not legal set-267 DELCATTY acceptance",
         "that historical mGBA probe records full source script identity/offset/wait, task and sprite bodies, OBJ palette tags plus faded/unfaded/hardware palettes, OAM/matrices, registers, both audio players, raw RGB, and framebuffer state; Fake Tears' args (tag SMALL_BUBBLES, delay 0, initial 4, target 4, RGB(12,11,31)) make the task latch/destroy in Cmd_createvisualtask before it can survive a post-frame gTasks snapshot",
@@ -1720,8 +1720,7 @@
         "src/animation/assets/fake-tears.json",
         "tests/animation/fakeTears.test.ts",
         "tests/animation/fakeTearsControllerWindowAudit.test.ts"
-      ],
-      "remaining": "The corrected-species contract discrepancy is resolved at 322 currentMove=313 frames 39-360. Exact remains blocked on the main-owned controller seam: expose already-resolved Scene-ON kickoff/text-printer state, B_ANIM_STATS_CHANGE presentation, stat-result message/wait, and BattleScript_MoveEnd cleanup without moving stat outcomes, RNG, or script/controller advancement into animation, then require 322/322 shared-framebuffer and typed-seam equality twice fresh in both orientations."
+      ]
     },
     {
       "move": "MOVE_SMOKESCREEN",
