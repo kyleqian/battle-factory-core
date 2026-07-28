@@ -1,4 +1,29 @@
 ---
+## 577 — [SUPERVISOR VERIFY 2026-07-28 ~03:20] Secret Power accepted; Torment evidence folded
+
+- **State:** reviewed union green at **335 files / 4063 tests** and focused
+  **35/35**; production build, both-oracle freshness/info, census
+  regeneration, ratchets **6/6**, and `git diff --check` pass. Census is
+  exactly **145/214 effects, 271/355 moves, 222/276 Factory-L50 distinct,
+  2722/2957 weighted**, all **42/42**.
+- **Did:** accepted globally registered Secret Power `0xe4` after an
+  independent exact OFF replay (`dce99201…d38474`) and source/diff review;
+  BUILDING maps to paralysis while the shared hit/effect chain owns PP,
+  damage, status, and four RNG calls. Folded source-only Torment `0xce`
+  evidence with an exact repeat replay (`f7a00036…b28c2`): target-owned
+  `STATUS2_TORMENT`, duplicate PP spend, all-duplicate-move Struggle
+  admission, and persistent active status are pinned.
+- **Next:** implement `B_SCR_OP_TRYSWAPABILITIES` / Skill Swap globally
+  from the accepted OFF/source evidence, including exact failure predicates,
+  active-only ability exchange, and switch-in restoration. Expected census:
+  **146/214, 272/355, 223/276, 2727/2957**.
+- **Notes:** handler inventory is **154**; Secret Power's action-boundary
+  proof remains target **362→311**, PP **20→19**, status1 **0→64**, final RNG
+  **1633612974 / 4 calls**. Torment is evidence only. No unsupported/import
+  ratchet, private handler, recording import, animation/presentation/tick
+  branch, issue removal, DEFERRED item, or oracle lifecycle action.
+
+---
 ## 576 — [BOUNDED MAIN WORKER 2026-07-28 ~03:15] Secret Power executes through the shared hit/effect chain
 
 - **State:** committed `25fe673`; tree green at **334 files / 4060 tests**,

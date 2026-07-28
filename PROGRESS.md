@@ -15,6 +15,31 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 580 — [SUPERVISOR VERIFY 2026-07-28 ~03:37] Corrected Skill Swap accepted; Taunt evidence folded
+
+- **State:** reviewed union green at **337 files / 4071 tests** and focused
+  **87/87**; production build, both-oracle freshness/info, census
+  regeneration, ratchets **6/6**, and `git diff --check` pass. Census is
+  exactly **146/214 effects, 272/355 moves, 223/276 Factory-L50 distinct,
+  2727/2957 weighted**, all **42/42**.
+- **Did:** accepted Skill Swap only after `a358f91` reused the canonical
+  no-effect mask and shared role resolver and made the engine/oracle party
+  claims exact. Independently replayed the accepted ability exchange
+  (`1bb13425…54cd241a`). Folded and replayed Taunt source/OFF evidence
+  (`3c08746c…2441a`): status-move block, duplicate PP spend, forced Struggle,
+  and later expiry/allowed Splash are public and deterministic.
+- **Next:** register `B_SCR_OP_TRYSETHELPINGHAND` globally. Prove all doubles
+  topology/absent/already-marked branches in isolated source-shaped contexts,
+  the existing 15/10 damage consumer and turn cleanup, plus the accepted
+  singles PP-before-failure receipt. Expected census:
+  **147/214, 273/355, 224/276, 2732/2957**.
+- **Notes:** handler inventory is **155**; switch restoration remains bounded
+  at the shared unmodeled `abilityNum` seam. Taunt is evidence only. No
+  unsupported/import ratchet, private handler, recording import, animation/
+  presentation/tick branch, issue removal, DEFERRED item, or oracle lifecycle
+  action.
+
+---
 ## 579 — [BOUNDED MAIN REVIEW WORKER 2026-07-28 ~03:35] Skill Swap shares canonical rule helpers
 
 - **State:** committed `a358f91`; tree green at **337 files / 4071 tests**,
@@ -65,28 +90,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   bounded rather than gaining a private handler. No new barrier/import
   ratchet, recording import, controller-local handler, animation/tick branch,
   issue removal, or oracle lifecycle action.
-
----
-## 577 — [SUPERVISOR VERIFY 2026-07-28 ~03:20] Secret Power accepted; Torment evidence folded
-
-- **State:** reviewed union green at **335 files / 4063 tests** and focused
-  **35/35**; production build, both-oracle freshness/info, census
-  regeneration, ratchets **6/6**, and `git diff --check` pass. Census is
-  exactly **145/214 effects, 271/355 moves, 222/276 Factory-L50 distinct,
-  2722/2957 weighted**, all **42/42**.
-- **Did:** accepted globally registered Secret Power `0xe4` after an
-  independent exact OFF replay (`dce99201…d38474`) and source/diff review;
-  BUILDING maps to paralysis while the shared hit/effect chain owns PP,
-  damage, status, and four RNG calls. Folded source-only Torment `0xce`
-  evidence with an exact repeat replay (`f7a00036…b28c2`): target-owned
-  `STATUS2_TORMENT`, duplicate PP spend, all-duplicate-move Struggle
-  admission, and persistent active status are pinned.
-- **Next:** implement `B_SCR_OP_TRYSWAPABILITIES` / Skill Swap globally
-  from the accepted OFF/source evidence, including exact failure predicates,
-  active-only ability exchange, and switch-in restoration. Expected census:
-  **146/214, 272/355, 223/276, 2727/2957**.
-- **Notes:** handler inventory is **154**; Secret Power's action-boundary
-  proof remains target **362→311**, PP **20→19**, status1 **0→64**, final RNG
-  **1633612974 / 4 calls**. Torment is evidence only. No unsupported/import
-  ratchet, private handler, recording import, animation/presentation/tick
-  branch, issue removal, DEFERRED item, or oracle lifecycle action.
