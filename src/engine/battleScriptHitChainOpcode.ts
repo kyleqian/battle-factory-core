@@ -570,7 +570,7 @@ function resolveHitChainBattlerOperand(
   return "unsupported";
 }
 
-function requireBattlerRole(
+export function requireBattlerRole(
   rulesContext: BattleScriptRulesContext,
   role: "attacker" | "target",
 ): BattleScriptBattlerId {

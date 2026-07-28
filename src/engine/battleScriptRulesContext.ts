@@ -37,6 +37,10 @@ import { createBattleScriptDamagingWeatherOpcodeHandlers } from "./battleScriptD
 import { createBattleScriptTryCastformDataChangeOpcodeHandlers } from "./battleScriptTryCastformDataChangeOpcode.ts";
 import { createBattleScriptIngrainLeechSeedWrapOpcodeHandlers } from "./battleScriptIngrainLeechSeedWrapOpcode.ts";
 import { createBattleScriptRemoveitemOpcodeHandlers } from "./battleScriptRemoveitemOpcode.ts";
+import {
+  createBattleScriptClearstatusfromeffectOpcodeHandlers,
+  createBattleScriptSemiInvulnerableBitOpcodeHandlers,
+} from "./battleScriptSemiInvulnerableOpcode.ts";
 import { createBattleScriptStatusPrimaryOpcodeHandlers } from "./battleScriptStatusPrimaryOpcode.ts";
 import { createBattleScriptSetyawnOpcodeHandlers } from "./battleScriptSetyawnOpcode.ts";
 import { createBattleScriptConfuseifrepeatingattackendsOpcodeHandlers } from "./battleScriptConfuseifrepeatingattackendsOpcode.ts";
@@ -2256,6 +2260,10 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptExplosionOpcodeHandlers(program, {
       isControllerIdle: sourceExternalPorts.isControllerIdle,
     }),
+    ...createBattleScriptClearstatusfromeffectOpcodeHandlers(program, {
+      resolveBattlerForBattleScript: resolveRulesBattlerForBattleScript,
+    }),
+    ...createBattleScriptSemiInvulnerableBitOpcodeHandlers(program),
   });
 }
 
