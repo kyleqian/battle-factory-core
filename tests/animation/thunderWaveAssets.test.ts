@@ -14,6 +14,12 @@ describe("ANIM_TAG_SPARK source extraction", () => {
     expect(asset.spark4bpp.sha256).toMatch(/^[0-9a-f]{64}$/);
     // The 32x32 sheet supplies two 32x16 OAM frames.
     expect(asset.sparkH).toMatchObject({ width: 32, height: 32 });
+    expect(asset.sparkBolt.tileset).toMatchObject({ columns: 1, rows: 8 });
+    expect(asset.sparkBands.tileset).toMatchObject({ columns: 4, rows: 4 });
+    expect(asset.flaffyBack.tileset).toMatchObject({ columns: 8, rows: 8 });
+    expect(asset.flaffyFront.tileset.rows).toBeGreaterThanOrEqual(8);
+    expect(asset.source.siblings.MOVE_THUNDERBOLT).toContain("distinct");
+    expect(asset.source.siblings.MOVE_ZAP_CANNON).toContain("distinct");
   });
 
   it("regenerates byte-for-byte from the pinned source files", () => {

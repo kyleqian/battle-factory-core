@@ -25,6 +25,14 @@ import {
   type TwineedleEffect,
 } from "./twineedle.ts";
 import {
+  spikeCannonEffectAtAge,
+  type SpikeCannonEffect,
+} from "./spikeCannon.ts";
+import {
+  sonicBoomEffectAtAge,
+  type SonicBoomEffect,
+} from "./sonicBoom.ts";
+import {
   metallicShineAtAge,
   type MetallicShineState,
 } from "./metallicShine.ts";
@@ -220,6 +228,14 @@ import {
   type SparkState,
 } from "./spark.ts";
 import {
+  thunderWaveAtAge,
+  type ThunderWaveState,
+} from "./thunderWave.ts";
+import {
+  surfWaveAtAge,
+  type SurfWaveState,
+} from "./surfWave.ts";
+import {
   charmAtAge,
   type CharmState,
 } from "./charm.ts";
@@ -227,6 +243,11 @@ import {
   covetAtAge,
   type CovetState,
 } from "./covet.ts";
+import {
+  fakeTearsAtAge,
+  type FakeTearsBounds,
+  type FakeTearsState,
+} from "./fakeTears.ts";
 import {
   tailGlowAtAge,
   type TailGlowState,
@@ -247,6 +268,11 @@ import {
   dizzyPunchAtAge,
   type DizzyPunchState,
 } from "./dizzyPunch.ts";
+import {
+  astonishAtAge,
+  type AstonishDropletRandom,
+  type AstonishState,
+} from "./astonish.ts";
 import {
   razorLeafAtAge,
   type RazorLeafState,
@@ -389,6 +415,7 @@ export interface SceneOnBattlerGeometry {
 export interface SceneOnPresentationBattler {
   readonly species:
     | "ONIX"
+    | "MAGNETON"
     | "MAGBY"
     | "GROVYLE"
     | "PIDGEOTTO"
@@ -418,6 +445,7 @@ export interface SceneOnPresentationBattler {
     | "SHUPPET"
     | "PLUSLE"
     | "MINUN"
+    | "FLAAFFY"
     | "VOLBEAT"
     | "ZIGZAGOON"
     | "SABLEYE"
@@ -432,10 +460,13 @@ export interface SceneOnPresentationBattler {
     | "HITMONCHAN"
     | "SPINDA"
     | "LINOONE"
+    | "DELCATTY"
     | "LICKITUNG"
     | "WEEPINBELL"
     | "MEOWTH"
-    | "BEEDRILL";
+    | "BEEDRILL"
+    | "OMASTAR"
+    | "WARTORTLE";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -964,6 +995,20 @@ export interface SceneOnTwineedleConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnSpikeCannonConfig {
+  readonly move: "SPIKE_CANNON";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+export interface SceneOnSonicBoomConfig {
+  readonly move: "SONIC_BOOM";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnSwaggerConfig {
   readonly move: "SWAGGER";
   readonly attacker: SceneOnPresentationBattler;
@@ -1009,6 +1054,22 @@ export interface SceneOnSparkConfig {
   readonly hardwareTieSlotOrder?: readonly number[];
 }
 
+export interface SceneOnThunderWaveConfig {
+  readonly move: "THUNDER_WAVE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** `GetBattlerSpriteCoord(target, X_2/Y_2)` used by `createsprite`. */
+  readonly targetEffectCenter: Readonly<{ x: number; y: number }>;
+}
+
+export interface SceneOnSurfConfig {
+  readonly move: "SURF";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnCharmConfig {
   readonly move: "CHARM";
   readonly attacker: SceneOnPresentationBattler;
@@ -1021,6 +1082,15 @@ export interface SceneOnCovetConfig {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+export interface SceneOnFakeTearsConfig {
+  readonly move: "FAKE_TEARS";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** `GetBattlerSpriteCoordAttr(LEFT/RIGHT/TOP)` for the legal DELCATTY pic. */
+  readonly attackerPictureBounds: Readonly<FakeTearsBounds>;
 }
 
 export interface SceneOnTailGlowConfig {
@@ -1060,6 +1130,20 @@ export interface SceneOnDizzyPunchConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
   /** Exact legal carrier personality used by Emerald's front-only spots. */
   readonly attackerPersonality: number;
+}
+
+export interface SceneOnAstonishConfig {
+  readonly move: "ASTONISH";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source mon-pic coordinate consumed by SetBattlerSpriteYOffsetFromYScale. */
+  readonly targetPictureYOffset: number;
+  /** Four masked Random2 outputs produced before the two callback bodies. */
+  readonly dropletRandom: readonly [
+    AstonishDropletRandom,
+    AstonishDropletRandom,
+  ];
 }
 
 export interface SceneOnRazorLeafConfig {
@@ -1211,17 +1295,23 @@ export type SceneOnMoveConfig =
   | SceneOnHeadbuttConfig
   | SceneOnBodySlamConfig
   | SceneOnTwineedleConfig
+  | SceneOnSpikeCannonConfig
+  | SceneOnSonicBoomConfig
   | SceneOnSwaggerConfig
   | SceneOnTauntConfig
   | SceneOnScaryFaceConfig
   | SceneOnSparkConfig
+  | SceneOnThunderWaveConfig
+  | SceneOnSurfConfig
   | SceneOnCharmConfig
   | SceneOnCovetConfig
+  | SceneOnFakeTearsConfig
   | SceneOnTailGlowConfig
   | SceneOnSelfDestructConfig
   | SceneOnExplosionConfig
   | SceneOnDynamicPunchConfig
   | SceneOnDizzyPunchConfig
+  | SceneOnAstonishConfig
   | SceneOnRazorLeafConfig
   | SceneOnPoisonTailConfig
   | SceneOnToxicConfig
@@ -1271,10 +1361,16 @@ export type SceneOnReflectPresentationState =
   SceneOnMovePresentationState<SceneOnReflectConfig>;
 export type SceneOnSparkPresentationState =
   SceneOnMovePresentationState<SceneOnSparkConfig>;
+export type SceneOnThunderWavePresentationState =
+  SceneOnMovePresentationState<SceneOnThunderWaveConfig>;
+export type SceneOnSurfPresentationState =
+  SceneOnMovePresentationState<SceneOnSurfConfig>;
 export type SceneOnCharmPresentationState =
   SceneOnMovePresentationState<SceneOnCharmConfig>;
 export type SceneOnCovetPresentationState =
   SceneOnMovePresentationState<SceneOnCovetConfig>;
+export type SceneOnFakeTearsPresentationState =
+  SceneOnMovePresentationState<SceneOnFakeTearsConfig>;
 export type SceneOnTailGlowPresentationState =
   SceneOnMovePresentationState<SceneOnTailGlowConfig>;
 
@@ -1360,6 +1456,18 @@ export interface SceneOnTwineedleView extends TwineedleEffect {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnSpikeCannonView extends SpikeCannonEffect {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSonicBoomView extends SonicBoomEffect {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnSwaggerView extends SwaggerState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -1384,6 +1492,18 @@ export interface SceneOnSparkView extends SparkState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnThunderWaveView extends ThunderWaveState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSurfView extends SurfWaveState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnCharmView extends CharmState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -1391,6 +1511,12 @@ export interface SceneOnCharmView extends CharmState {
 }
 
 export interface SceneOnCovetView extends CovetState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnFakeTearsView extends FakeTearsState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -1424,6 +1550,12 @@ export interface SceneOnDizzyPunchView extends DizzyPunchState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnAstonishView extends AstonishState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly targetBattler: SceneOnPresentationBattler;
 }
 
 export interface SceneOnRazorLeafView extends RazorLeafState {
@@ -2650,6 +2782,50 @@ export function sceneOnTwineedleView(
   };
 }
 
+/** `age=0` is SPIKE CANNON's first source-script load display. */
+export function sceneOnSpikeCannonView(
+  state: SceneOnMovePresentationState<SceneOnSpikeCannonConfig>,
+): SceneOnSpikeCannonView {
+  if (state.config.move !== "SPIKE_CANNON") {
+    throw new Error(
+      `expected SPIKE_CANNON presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...spikeCannonEffectAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is SONIC BOOM's first source-script AIR_WAVE load display. */
+export function sceneOnSonicBoomView(
+  state: SceneOnMovePresentationState<SceneOnSonicBoomConfig>,
+): SceneOnSonicBoomView {
+  if (state.config.move !== "SONIC_BOOM") {
+    throw new Error(
+      `expected SONIC_BOOM presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...sonicBoomEffectAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
 /** `age=0` is GrowAndShrink's first displayed task frame. */
 export function sceneOnSwaggerView(
   state: SceneOnMovePresentationState,
@@ -2746,6 +2922,43 @@ export function sceneOnSparkView(
   };
 }
 
+/** `age=0` is Move_THUNDER_WAVE's active source-script offset-zero display. */
+export function sceneOnThunderWaveView(
+  state: SceneOnThunderWavePresentationState,
+): SceneOnThunderWaveView {
+  if (state.config.move !== "THUNDER_WAVE") {
+    throw new Error(
+      `expected THUNDER_WAVE presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...thunderWaveAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.targetEffectCenter,
+      state.config.target.geometry.battlePositionCenter,
+    ),
+  };
+}
+
+/** `age=0` is Move_SURF's active source-script offset-zero display. */
+export function sceneOnSurfView(
+  state: SceneOnSurfPresentationState,
+): SceneOnSurfView {
+  if (state.config.move !== "SURF") {
+    throw new Error(`expected SURF presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...surfWaveAtAge(state.age, state.config.attacker.geometry.side),
+  };
+}
+
 /** `age=0` is Move_CHARM's first displayed rock/heart source tick. */
 export function sceneOnCharmView(
   state: SceneOnCharmPresentationState,
@@ -2780,6 +2993,27 @@ export function sceneOnCovetView(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.battlePositionCenter,
+    ),
+  };
+}
+
+/** `age=0` is Move_FAKE_TEARS' first displayed SMALL_BUBBLES load. */
+export function sceneOnFakeTearsView(
+  state: SceneOnFakeTearsPresentationState,
+): SceneOnFakeTearsView {
+  if (state.config.move !== "FAKE_TEARS") {
+    throw new Error(
+      `expected FAKE_TEARS presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...fakeTearsAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attackerPictureBounds,
     ),
   };
 }
@@ -2882,6 +3116,29 @@ export function sceneOnDizzyPunchView(
       state.age,
       state.config.attacker.geometry.side,
       state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is Astonish's displayed SWEAT_BEAD load command. */
+export function sceneOnAstonishView(
+  state: SceneOnMovePresentationState<SceneOnAstonishConfig>,
+): SceneOnAstonishView {
+  if (state.config.move !== "ASTONISH") {
+    throw new Error(
+      `expected ASTONISH presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    targetBattler: state.config.target,
+    ...astonishAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.target.geometry.animationCenter,
+      state.config.targetPictureYOffset,
+      state.config.dropletRandom,
     ),
   };
 }

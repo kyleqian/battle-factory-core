@@ -1,0 +1,42 @@
+{
+  "schema": "scene-on-spike-cannon-portable/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-spike-cannon-opponent-omastar-player-onix.json",
+  "probe": "tools/compare/spikeCannonProbe.py",
+  "pair": "Factory set-260 OMASTAR opponent-front -> ONIX player-back",
+  "orientation": "opponent-to-player",
+  "move": "SPIKE_CANNON",
+  "sourceWindow": {
+    "startFrame": 90,
+    "endFrame": 173,
+    "frameCount": 84
+  },
+  "evidenceSha256": "7c4e2dd5481323c175e92641b68339553e1d0a8a8aa5adbf7a8fc84a3134b8a2",
+  "rawRgbSha256": "8f393625ce9871d50fb2ffff6b9160d5deca6384286cf57b0af45a1681163c2a",
+  "attacker": {
+    "species": "OMASTAR",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 15 },
+      "animationCenter": { "x": 176, "y": 47 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 48 },
+      "animationCenter": { "x": 72, "y": 88 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 110,
+    "playerMaxHp": 110,
+    "opponentHp": 177,
+    "opponentMaxHp": 177,
+    "playerGender": "male",
+    "opponentGender": "male"
+  }
+}

@@ -66,8 +66,14 @@ function matrixAtRotation(rotation: number): CharmMatrix {
 export function rockMonBackAndForthAtAge(
   age: number,
   side: CharmSide,
+  rotationSpeedIncrease = 0,
+  rocks = 2,
 ): CharmRockState {
-  if (age < 0 || age >= 64) {
+  const speed = Math.max(0, Math.min(2, rotationSpeedIncrease));
+  const phaseTicks = 8 - 2 * speed;
+  const cycleTicks = phaseTicks * 4;
+  const lifetime = cycleTicks * rocks;
+  if (age < 0 || age >= lifetime) {
     return {
       active: false,
       x2: 0,
@@ -77,19 +83,21 @@ export function rockMonBackAndForthAtAge(
     };
   }
   const direction = side === "player" ? 1 : -1;
+  const xStep = (speed + 2) * direction;
+  const rotationStep = (0x100 + speed * 0x80) * direction;
   let x2 = 0;
   let rotation = 0;
   for (let callback = 0; callback <= age; callback++) {
-    const cycleAge = callback & 31;
-    if (cycleAge < 8) {
-      x2 += 2 * direction;
-      rotation -= 0x100 * direction;
-    } else if (cycleAge < 24) {
-      x2 -= 2 * direction;
-      rotation += 0x100 * direction;
+    const cycleAge = callback % cycleTicks;
+    if (cycleAge < phaseTicks) {
+      x2 += xStep;
+      rotation -= rotationStep;
+    } else if (cycleAge < phaseTicks * 3) {
+      x2 -= xStep;
+      rotation += rotationStep;
     } else {
-      x2 += 2 * direction;
-      rotation -= 0x100 * direction;
+      x2 += xStep;
+      rotation -= rotationStep;
     }
   }
   const matrix = matrixAtRotation(rotation);

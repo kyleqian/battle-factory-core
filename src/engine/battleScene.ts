@@ -544,11 +544,14 @@ import absorbAsset from "../animation/assets/absorb.json" with { type: "json" };
 import reflectAsset from "../animation/assets/reflect.json" with { type: "json" };
 import biteAsset from "../animation/assets/bite.json" with { type: "json" };
 import twineedleAsset from "../animation/assets/twineedle.json" with { type: "json" };
+import spikeCannonAsset from "../animation/assets/spike-cannon.json" with { type: "json" };
+import sonicBoomAsset from "../animation/assets/sonic-boom.json" with { type: "json" };
 import tailGlowAsset from "../animation/assets/tail-glow.json" with { type: "json" };
 import dizzyPunchAsset from "../animation/assets/dizzyPunch.json" with { type: "json" };
 import covetAsset from "../animation/assets/covet.json" with { type: "json" };
 import headbuttAsset from "../animation/assets/headbutt.json" with { type: "json" };
 import bodySlamAsset from "../animation/assets/body-slam.json" with { type: "json" };
+import astonishAsset from "../animation/assets/astonish.json" with { type: "json" };
 import synthesisAsset from "../animation/assets/synthesis.json" with { type: "json" };
 import milkDrinkAsset from "../animation/assets/milk-drink.json" with { type: "json" };
 import supersonicAsset from "../animation/assets/supersonic.json" with { type: "json" };
@@ -562,6 +565,7 @@ import swaggerAsset from "../animation/assets/swagger.json" with { type: "json" 
 import tauntAsset from "../animation/assets/taunt.json" with { type: "json" };
 import scaryFaceAsset from "../animation/assets/scary-face.json" with { type: "json" };
 import charmAsset from "../animation/assets/charm.json" with { type: "json" };
+import fakeTearsAsset from "../animation/assets/fake-tears.json" with { type: "json" };
 import selfDestructAsset from "../animation/assets/selfDestruct.json" with { type: "json" };
 import explosionAsset from "../animation/assets/explosion.json" with { type: "json" };
 import dynamicPunchAsset from "../animation/assets/dynamicPunch.json" with { type: "json" };
@@ -590,6 +594,8 @@ import battleAnimIceCrystalsAsset from "../assets/gen/battle-anim-ice-crystals.j
 import battleAnimIceCubeAsset from "../assets/gen/battle-anim-ice-cube.json" with { type: "json" };
 import battleAnimLightningAsset from "../assets/gen/battle-anim-lightning.json" with { type: "json" };
 import battleAnimSpark2Asset from "../assets/gen/battle-anim-spark-2.json" with { type: "json" };
+import thunderWaveAsset from "../assets/gen/battle-anim-spark.json" with { type: "json" };
+import surfWaveAsset from "../animation/assets/surf-wave.json" with { type: "json" };
 import battleBackSpritesAsset from "../assets/gen/battle-back-sprites.json" with { type: "json" };
 import battleAnimItemHealAsset from "../assets/gen/battle-anim-item-heal.json" with { type: "json" };
 import fontNormalData from "../data/gen/font-normal.json" with { type: "json" };
@@ -688,8 +694,11 @@ import {
   sceneOnHeadbuttView,
   sceneOnBodySlamView,
   sceneOnTwineedleView,
+  sceneOnSpikeCannonView,
+  sceneOnSonicBoomView,
   sceneOnTailGlowView,
   sceneOnDizzyPunchView,
+  sceneOnAstonishView,
   sceneOnSwaggerView,
   sceneOnTauntView,
   sceneOnScaryFaceView,
@@ -705,8 +714,11 @@ import {
   sceneOnShadowBallView,
   sceneOnEncoreView,
   sceneOnSparkView,
+  sceneOnThunderWaveView,
+  sceneOnSurfView,
   sceneOnCharmView,
   sceneOnCovetView,
+  sceneOnFakeTearsView,
   sceneOnDragonClawView,
   sceneOnSingView,
   sceneOnFutureSightView,
@@ -716,8 +728,11 @@ import {
   type SceneOnMovePresentationState,
   type SceneOnFirePunchConfig,
   type SceneOnSparkPresentationState,
+  type SceneOnThunderWavePresentationState,
+  type SceneOnSurfPresentationState,
   type SceneOnCharmPresentationState,
   type SceneOnCovetPresentationState,
+  type SceneOnFakeTearsPresentationState,
   type SceneOnScaryFacePresentationState,
   type SceneOnAbsorbPresentationState,
   type SceneOnReflectPresentationState,
@@ -725,8 +740,11 @@ import {
   type SceneOnHeadbuttConfig,
   type SceneOnBodySlamConfig,
   type SceneOnTwineedleConfig,
+  type SceneOnSpikeCannonConfig,
+  type SceneOnSonicBoomConfig,
   type SceneOnTailGlowConfig,
   type SceneOnDizzyPunchConfig,
+  type SceneOnAstonishConfig,
 } from "../animation/sceneOnPresentation.ts";
 import {
   extremeSpeedBackgroundVariant,
@@ -1029,6 +1047,16 @@ const twineedleArt = twineedleAsset as {
   beedrillBack: { tileset: Tileset; palette: RgbColor[] };
   beedrillFront: { tileset: Tileset; palette: RgbColor[] };
 };
+const spikeCannonArt = spikeCannonAsset as {
+  omastarBack: { tileset: Tileset; palette: RgbColor[] };
+  omastarFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const sonicBoomArt = sonicBoomAsset as {
+  airWave: { tileset: Tileset; palette: RgbColor[] };
+  enemyShadow: { tileset: Tileset; palette: RgbColor[] };
+  magnetonBack: { tileset: Tileset; palette: RgbColor[] };
+  magnetonFront: { tileset: Tileset; palette: RgbColor[] };
+};
 const tailGlowArt = tailGlowAsset as {
   circleOfLight: { tileset: Tileset; palette: RgbColor[] };
   volbeatBack: { tileset: Tileset; palette: RgbColor[] };
@@ -1056,6 +1084,11 @@ const headbuttArt = headbuttAsset as {
 const bodySlamArt = bodySlamAsset as {
   lickitungBack: { tileset: Tileset; palette: RgbColor[] };
   lickitungFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const astonishArt = astonishAsset as {
+  loudredBack: { tileset: Tileset; palette: RgbColor[] };
+  loudredFront: { tileset: Tileset; palette: RgbColor[] };
+  sweatBead: { tileset: Tileset; palette: RgbColor[] };
 };
 const synthesisArt = synthesisAsset as {
   sparkle2: { tileset: Tileset; palette: RgbColor[] };
@@ -1197,8 +1230,31 @@ const spark2Art = battleAnimSpark2Asset as {
   };
   palette: RgbColor[];
 };
+const thunderWaveArt = thunderWaveAsset as {
+  sparkBolt: { tileset: Tileset; palette: RgbColor[] };
+  sparkBands: { tileset: Tileset; palette: RgbColor[] };
+  flaffyBack: { tileset: Tileset; palette: RgbColor[] };
+  flaffyFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const surfWaveArt = surfWaveAsset as {
+  water: {
+    columns: number;
+    rows: number;
+    tiles: readonly { pixels: readonly number[]; subpalette: number }[];
+    surfPalette: RgbColor[];
+  };
+  playerTilemap: Tilemap;
+  opponentTilemap: Tilemap;
+  wartortleBack: { tileset: Tileset; palette: RgbColor[] };
+  wartortleFront: { tileset: Tileset; palette: RgbColor[] };
+};
 const charmArt = charmAsset as {
   magentaHeart: { tileset: Tileset; palette: RgbColor[] };
+};
+const fakeTearsArt = fakeTearsAsset as {
+  delcattyBack: { tileset: Tileset; palette: RgbColor[] };
+  delcattyFront: { tileset: Tileset; palette: RgbColor[] };
+  smallBubbles: { tileset: Tileset; palette: RgbColor[] };
 };
 const dragonClawArt = dragonClawAsset as {
   smallEmber: { tileset: Tileset; palette: RgbColor[] };
@@ -15221,6 +15277,488 @@ export function renderSceneOnMovePresentation(
   fb: Uint8Array,
   state: SceneOnMovePresentationState,
 ): void {
+  if (state.config.move === "SURF") {
+    const surfState = state as SceneOnSurfPresentationState;
+    const view = sceneOnSurfView(surfState);
+    // Palette transfer and scanline-buffer selection precede the source
+    // callbacks; BG scroll registers are already the current display values.
+    const displayedEffect = sceneOnSurfView({
+      ...surfState,
+      age: surfState.age - 1,
+    });
+    const displayedScan = sceneOnSurfView({
+      ...surfState,
+      age: surfState.age
+        - (surfState.config.attacker.geometry.side === "player" ? 1 : 2),
+    });
+    const playerToOpponent =
+      view.attacker.species === "WARTORTLE"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "WARTORTLE"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged SURF pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    const wartortle = playerToOpponent
+      ? surfWaveArt.wartortleBack
+      : {
+          ...surfWaveArt.wartortleFront,
+          tileset: subTileset(surfWaveArt.wartortleFront.tileset, 0, 8),
+        };
+    const shuckle = playerToOpponent
+      ? {
+          ...selfDestructArt.shuckleFront,
+          tileset: subTileset(selfDestructArt.shuckleFront.tileset, 0, 8),
+        }
+      : selfDestructArt.shuckleBack;
+    drawSpriteSheet(
+      fb,
+      wartortle.tileset,
+      wartortle.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    drawSpriteSheet(
+      fb,
+      shuckle.tileset,
+      shuckle.palette,
+      view.target.geometry.spriteCorner.x,
+      view.target.geometry.spriteCorner.y,
+    );
+
+    // BG1 is priority 1: it alpha-composites over the priority-2 field and
+    // battlers, while priority-1 OBJ healthboxes and priority-0 BG0 chrome
+    // remain in front. The scanline task changes only EVA/EVB per row.
+    if (view.age >= 5 && view.age <= 136) {
+      const tilemap = playerToOpponent
+        ? surfWaveArt.playerTilemap
+        : surfWaveArt.opponentTilemap;
+      const palette = [...surfWaveArt.water.surfPalette];
+      const turns = displayedEffect.paletteRotations % 7;
+      for (let i = 0; i < turns; i += 1) {
+        const last = palette[7]!;
+        for (let j = 7; j > 1; j -= 1) palette[j] = palette[j - 1]!;
+        palette[1] = last;
+      }
+      const mapWidth = tilemap.width * 8;
+      const mapHeight = tilemap.height * 8;
+      for (let y = 0; y < 160; y += 1) {
+        const eva =
+          y >= displayedScan.scanline.lower
+            && y < displayedScan.scanline.upper
+            ? displayedEffect.blend.eva
+            : displayedScan.scanline.outsideEva;
+        if (eva === 0) continue;
+        const evb = 16 - eva;
+        const mapY = (y + view.bgScroll.y) % mapHeight;
+        const tileRow = Math.floor(mapY / 8);
+        const inTileY = mapY % 8;
+        for (let x = 0; x < 240; x += 1) {
+          const mapX = (x + view.bgScroll.x) % mapWidth;
+          const tileCol = Math.floor(mapX / 8);
+          const inTileX = mapX % 8;
+          const entry = tilemap.entries[tileRow * tilemap.width + tileCol];
+          if (!entry) continue;
+          const tile = surfWaveArt.water.tiles[entry.tile];
+          if (!tile) continue;
+          const sx = entry.hFlip ? 7 - inTileX : inTileX;
+          const sy = entry.vFlip ? 7 - inTileY : inTileY;
+          const index = tile.pixels[sy * 8 + sx]!;
+          if (index === 0) continue;
+          const color = palette[index];
+          if (!color) continue;
+          const offset = (y * 240 + x) * 4;
+          fb[offset] = blendChannel(color.r, fb[offset]!, eva, evb);
+          fb[offset + 1] = blendChannel(
+            color.g,
+            fb[offset + 1]!,
+            eva,
+            evb,
+          );
+          fb[offset + 2] = blendChannel(
+            color.b,
+            fb[offset + 2]!,
+            eva,
+            evb,
+          );
+        }
+      }
+    }
+
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "SHUCKLE" : "WARTORTLE",
+        level: 50,
+        gender: "male",
+        hpFraction: 1,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "WARTORTLE" : "SHUCKLE",
+        level: 50,
+        gender: "male",
+        hpFraction: 1,
+        status: "none",
+        currentHp: playerToOpponent ? 134 : 127,
+        maxHp: playerToOpponent ? 134 : 127,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "WARTORTLE used" : "Foe WARTORTLE used",
+      "SURF!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "THUNDER_WAVE") {
+    const waveState = state as SceneOnThunderWavePresentationState;
+    const view = sceneOnThunderWaveView(waveState);
+    // Palette/OAM DMA precedes UpdatePaletteFade and the source callbacks,
+    // so the displayed field coefficient and effect sprites are one
+    // source-relative reducer age behind the live software state.
+    const displayed = sceneOnThunderWaveView({
+      ...waveState,
+      age: waveState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "FLAAFFY"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "FLAAFFY"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged THUNDER_WAVE pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const carrierSource = playerToOpponent
+      ? thunderWaveArt.flaffyBack
+      : thunderWaveArt.flaffyFront;
+    const flaffy = playerToOpponent
+      ? carrierSource
+      : {
+          ...carrierSource,
+          tileset: subTileset(carrierSource.tileset, 0, 8),
+        };
+    const shuckle = playerToOpponent
+      ? {
+          ...selfDestructArt.shuckleFront,
+          tileset: subTileset(selfDestructArt.shuckleFront.tileset, 0, 8),
+        }
+      : selfDestructArt.shuckleBack;
+    const black = { r: 0, g: 0, b: 0 };
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      blendPaletteBanksToward(
+        battleBg.palette,
+        black,
+        displayed.backgroundPaletteY,
+      ),
+    );
+
+    type ThunderWavePainterItem = {
+      priority: number;
+      subpriority: number;
+      top: number;
+      slot: number;
+      draw: () => void;
+    };
+    const items: ThunderWavePainterItem[] = [{
+      priority: 2,
+      subpriority: view.attacker.geometry.side === "player" ? 30 : 40,
+      top: view.attacker.geometry.spriteCorner.y,
+      slot: 6,
+      draw: () => drawSpriteSheet(
+        fb,
+        flaffy.tileset,
+        flaffy.palette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+      ),
+    }, {
+      priority: 2,
+      subpriority: view.target.geometry.side === "player" ? 30 : 40,
+      top: view.target.geometry.spriteCorner.y,
+      slot: 8,
+      draw: () => drawSpriteSheet(
+        fb,
+        shuckle.tileset,
+        shuckle.palette,
+        view.target.geometry.spriteCorner.x,
+        view.target.geometry.spriteCorner.y,
+      ),
+    }];
+    for (const bolt of displayed.bolts) {
+      // ElectricBolt changes its 8x8 template to the vertical 8x16 shape
+      // inside the creation callback. That first software record still has
+      // the template's pre-callback coordinates and is not displayed.
+      if (bolt.localAge === 0) continue;
+      const tileset = subTileset(
+        thunderWaveArt.sparkBolt.tileset,
+        bolt.tileOffset,
+        2,
+      );
+      items.push({
+        priority: 2,
+        subpriority: 2,
+        top: bolt.y - 4,
+        slot: bolt.slot,
+        draw: () => drawSpriteSheet(
+          fb,
+          tileset,
+          thunderWaveArt.sparkBolt.palette,
+          bolt.x - 4,
+          bolt.y - 4,
+        ),
+      });
+    }
+    for (const band of displayed.bands) {
+      if (band.hidden) continue;
+      const tileset = subTileset(
+        thunderWaveArt.sparkBands.tileset,
+        band.tileOffset / 4,
+        2,
+      );
+      items.push({
+        priority: 2,
+        subpriority: view.target.geometry.side === "player" ? 28 : 38,
+        top: band.y - 8,
+        slot: band.slot,
+        draw: () => drawSpriteSheet(
+          fb,
+          tileset,
+          thunderWaveArt.sparkBands.palette,
+          band.x - 16,
+          band.y - 8,
+        ),
+      });
+    }
+    items.sort((a, b) =>
+      b.priority - a.priority
+      || b.subpriority - a.subpriority
+      || a.top - b.top
+      || b.slot - a.slot);
+    for (const item of items) item.draw();
+
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "SHUCKLE" : "FLAAFFY",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "FLAAFFY" : "SHUCKLE",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "FLAAFFY used" : "Foe FLAAFFY used",
+      "THUNDER WAVE!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "ASTONISH") {
+    const astonishState =
+      state as SceneOnMovePresentationState<SceneOnAstonishConfig>;
+    const view = sceneOnAstonishView(astonishState);
+    // BuildOamBuffer and OBJ palette transfer precede RunTasks. Both battler
+    // transforms and droplets therefore reach the framebuffer from the
+    // preceding source reducer age.
+    const displayed = sceneOnAstonishView({
+      ...astonishState,
+      age: astonishState.age - 1,
+    });
+    const affineDisplayed = sceneOnAstonishView({
+      ...astonishState,
+      age: astonishState.age - 2,
+    });
+    const playerToOpponent =
+      view.attacker.species === "LOUDRED"
+      && view.attacker.geometry.side === "player"
+      && view.targetBattler.species === "ONIX"
+      && view.targetBattler.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "LOUDRED"
+      && view.attacker.geometry.side === "opponent"
+      && view.targetBattler.species === "ONIX"
+      && view.targetBattler.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged ASTONISH pair `
+        + `${view.attacker.species}->${view.targetBattler.species}`,
+      );
+    }
+    const loudredSource = playerToOpponent
+      ? astonishArt.loudredBack
+      : astonishArt.loudredFront;
+    const loudred = playerToOpponent
+      ? loudredSource
+      : {
+          ...loudredSource,
+          tileset: subTileset(loudredSource.tileset, 0, 8),
+        };
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+
+    const targetBaselineX2 =
+      playerToOpponent && displayed.age < 31 ? 1 : 0;
+    if (displayed.target.stretchActive) {
+      // PrepareBattlerSpriteForRotScale enters affine-double OAM on the first
+      // task tick, but its matrix/anchor transfer reaches the scanout on the
+      // following tick. ShakeMon2's earlier task slot has already supplied
+      // that first affine frame's x2.
+      const affineX2 = affineDisplayed.target.stretchActive
+        ? affineDisplayed.target.x2
+        : displayed.target.x2;
+      drawSpriteSheetAffineStretch(
+        fb,
+        onix.tileset,
+        onix.palette,
+        view.targetBattler.geometry.spriteCorner.x + targetBaselineX2,
+        view.targetBattler.geometry.spriteCorner.y,
+        affineDisplayed.target.matrix.a,
+        affineDisplayed.target.matrix.d,
+        affineDisplayed.target.y2,
+        { r: 0, g: 0, b: 0 },
+        0,
+        true,
+        affineX2,
+      );
+    } else {
+      drawSpriteSheet(
+        fb,
+        onix.tileset,
+        onix.palette,
+        view.targetBattler.geometry.spriteCorner.x + targetBaselineX2,
+        view.targetBattler.geometry.spriteCorner.y,
+      );
+    }
+    drawSpriteSheet(
+      fb,
+      loudred.tileset,
+      loudred.palette,
+      view.attacker.geometry.spriteCorner.x + displayed.attackerX2,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    // Lower OAM indices win overlapping OBJ pixels; paint high slots first.
+    for (const droplet of [...displayed.droplets].reverse()) {
+      const draw = droplet.hFlip ? drawSpriteSheetHFlip : drawSpriteSheet;
+      draw(
+        fb,
+        astonishArt.sweatBead.tileset,
+        astonishArt.sweatBead.palette,
+        droplet.x + droplet.x2 - 4,
+        droplet.y + droplet.y2 - 4,
+      );
+    }
+
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "LOUDRED",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "LOUDRED" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "LOUDRED used" : "Foe LOUDRED used",
+      "ASTONISH!",
+      99,
+    );
+    return;
+  }
+
   if (state.config.move === "BODY_SLAM") {
     const bodyState =
       state as SceneOnMovePresentationState<SceneOnBodySlamConfig>;
@@ -15923,6 +16461,296 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "BEEDRILL used" : "Foe BEEDRILL used",
       "TWINEEDLE!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SONIC_BOOM") {
+    const sonicState =
+      state as SceneOnMovePresentationState<SceneOnSonicBoomConfig>;
+    const view = sceneOnSonicBoomView(sonicState);
+    const displayed = sceneOnSonicBoomView({
+      ...sonicState,
+      age: view.battlerDisplayAge,
+    });
+    const playerToOpponent =
+      view.attacker.species === "MAGNETON"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "MAGNETON"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged SONIC_BOOM pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const magnetonSource = playerToOpponent
+      ? sonicBoomArt.magnetonBack : sonicBoomArt.magnetonFront;
+    const magneton = playerToOpponent
+      ? magnetonSource
+      : {
+          ...magnetonSource,
+          tileset: subTileset(magnetonSource.tileset, 0, 8),
+        };
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    // SpriteCB_EnemyShadow observes gAnimScriptActive after the first source
+    // display has already reached scanout. Magneton's nonzero elevation
+    // therefore leaves exactly one source-relative shadow display.
+    if (opponentToPlayer && view.age === 0) {
+      drawSpriteSheet(
+        fb,
+        sonicBoomArt.enemyShadow.tileset,
+        sonicBoomArt.enemyShadow.palette,
+        view.attacker.geometry.animationCenter.x - 16,
+        view.attacker.geometry.battlePositionCenter.y + 25,
+      );
+    }
+    const targetBaselineX2 =
+      playerToOpponent && displayed.age < 28 ? 1 : 0;
+    drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x
+        + targetBaselineX2 + displayed.targetOffset.x2,
+      view.target.geometry.spriteCorner.y + displayed.targetOffset.y2,
+    );
+    const nonObjTarget2 = fb.slice();
+    const drawMagneton = () => drawSpriteSheet(
+      fb,
+      magneton.tileset,
+      magneton.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    if (opponentToPlayer) drawMagneton();
+    const sortedEffects = displayed.sprites.slice().sort(
+      (left, right) => right.oamSlot - left.oamSlot,
+    );
+    for (const sprite of sortedEffects) {
+      if (!view.alpha) continue;
+      const art = sprite.kind === "air-wave"
+        ? sonicBoomArt.airWave
+        : battleAnimHitsplat;
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb,
+        nonObjTarget2,
+        art.tileset,
+        art.palette,
+        sprite.x + sprite.x2,
+        sprite.y + sprite.y2,
+        sprite.matrix.a,
+        sprite.matrix.b,
+        sprite.matrix.c,
+        sprite.matrix.d,
+        view.alpha.eva,
+        view.alpha.evb,
+        sprite.kind === "air-wave",
+      );
+    }
+    if (playerToOpponent) drawMagneton();
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "MAGNETON",
+        level: 50,
+        gender: playerToOpponent
+          ? state.config.fieldProfile.opponentGender ?? "male"
+          : "none",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "MAGNETON" : "ONIX",
+        level: 50,
+        gender: playerToOpponent
+          ? "none"
+          : state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "MAGNETON used" : "Foe MAGNETON used",
+      "SONICBOOM!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SPIKE_CANNON") {
+    const spikeState =
+      state as SceneOnMovePresentationState<SceneOnSpikeCannonConfig>;
+    const view = sceneOnSpikeCannonView(spikeState);
+    // BuildOamBuffer and OBJ palette transfer precede the source callbacks
+    // represented by the reducer. The hardware-visible battlers/effects are
+    // therefore the immediately preceding software state.
+    const displayed = sceneOnSpikeCannonView({
+      ...spikeState,
+      age: view.battlerDisplayAge,
+    });
+    const playerToOpponent =
+      view.attacker.species === "OMASTAR"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "OMASTAR"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged SPIKE_CANNON pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const omastarSource = playerToOpponent
+      ? spikeCannonArt.omastarBack : spikeCannonArt.omastarFront;
+    const omastar = playerToOpponent
+      ? omastarSource
+      : {
+          ...omastarSource,
+          tileset: subTileset(omastarSource.tileset, 0, 8),
+        };
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    const targetBaselineX2 =
+      playerToOpponent && displayed.age < 46 ? 1 : 0;
+    drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x
+        + targetBaselineX2 + displayed.targetOffset.x2,
+      view.target.geometry.spriteCorner.y + displayed.targetOffset.y2,
+    );
+    const nonObjTarget2 = fb.slice();
+    const sortedEffects = displayed.sprites.slice().sort(
+      (left, right) => left.oamSlot - right.oamSlot,
+    );
+    const drawNeedles = () => {
+      for (const sprite of sortedEffects) {
+        if (sprite.kind !== "needle") continue;
+        drawSpriteSheetAffineRotate(
+          fb,
+          twineedleArt.needle.tileset,
+          twineedleArt.needle.palette,
+          sprite.x + sprite.x2,
+          sprite.y + sprite.y2,
+          sprite.matrix.a,
+          sprite.matrix.b,
+          sprite.matrix.c,
+          sprite.matrix.d,
+          undefined,
+          false,
+        );
+      }
+    };
+    // The set-260 Omastar receipts place the shared subpriority-2 stingers
+    // ahead of its battler OAM in both legal singles orientations.
+    drawSpriteSheet(
+      fb,
+      omastar.tileset,
+      omastar.palette,
+      view.attacker.geometry.spriteCorner.x
+        + displayed.attackerOffset.x2,
+      view.attacker.geometry.spriteCorner.y + displayed.attackerOffset.y2,
+    );
+    drawNeedles();
+    // SortSprites assigns the three equal-subpriority effects to hardware OAM
+    // in opposite slot order across the two battler sides: player-back maps
+    // software 5/4/3 to hardware 9/10/11, opponent-front maps 3/4/5. Paint
+    // back-to-front so the lower hardware OAM index wins in either branch.
+    const impactBackToFront = playerToOpponent
+      ? sortedEffects
+      : sortedEffects.slice().reverse();
+    for (const sprite of impactBackToFront) {
+      if (sprite.kind === "impact" && view.alpha) {
+        drawSpriteSheetAffineRotateBlendedOverFb(
+          fb,
+          nonObjTarget2,
+          battleAnimHitsplat.tileset,
+          battleAnimHitsplat.palette,
+          sprite.x,
+          sprite.y,
+          sprite.matrix.a,
+          sprite.matrix.b,
+          sprite.matrix.c,
+          sprite.matrix.d,
+          view.alpha.eva,
+          view.alpha.evb,
+          false,
+        );
+      }
+    }
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "OMASTAR",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "OMASTAR" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "OMASTAR used" : "Foe OMASTAR used",
+      "SPIKE CANNON!",
       99,
     );
     return;
@@ -17483,6 +18311,139 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "MINUN used" : "Foe MINUN used",
       "SPARK!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "FAKE_TEARS") {
+    const fakeState = state as SceneOnFakeTearsPresentationState;
+    const view = sceneOnFakeTearsView(fakeState);
+    const displayed = sceneOnFakeTearsView({
+      ...fakeState,
+      age: fakeState.age - 1,
+    });
+    // Battler task rot/scale writes traverse the task -> software sprite ->
+    // hardware OAM pipeline one display later than effect-sprite callbacks.
+    const displayedRock = sceneOnFakeTearsView({
+      ...fakeState,
+      age: fakeState.age - 2,
+    }).rock;
+    const playerToOpponent =
+      view.attacker.species === "DELCATTY"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "DELCATTY"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged FAKE_TEARS pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const delcattySource = playerToOpponent
+      ? fakeTearsArt.delcattyBack
+      : fakeTearsArt.delcattyFront;
+    const delcatty = playerToOpponent
+      ? delcattySource
+      : {
+          ...delcattySource,
+          tileset: subTileset(delcattySource.tileset, 0, 8),
+        };
+    const shuckle = playerToOpponent
+      ? {
+          ...selfDestructArt.shuckleFront,
+          tileset: subTileset(selfDestructArt.shuckleFront.tileset, 0, 8),
+        }
+      : selfDestructArt.shuckleBack;
+    const tearFrame = subTileset(fakeTearsArt.smallBubbles.tileset, 2, 2);
+    const tearPalette = blendPaletteToward(
+      fakeTearsArt.smallBubbles.palette,
+      { r: 99, g: 90, b: 255 },
+      displayed.smallBubblesBlendY,
+    );
+
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    drawSpriteSheet(
+      fb,
+      shuckle.tileset,
+      shuckle.palette,
+      view.target.geometry.spriteCorner.x,
+      view.target.geometry.spriteCorner.y,
+    );
+    drawSpriteSheetAffineRotate(
+      fb,
+      delcatty.tileset,
+      delcatty.palette,
+      view.attacker.geometry.animationCenter.x + displayedRock.x2,
+      view.attacker.geometry.animationCenter.y + displayedRock.y2,
+      displayedRock.matrix.a,
+      displayedRock.matrix.b,
+      displayedRock.matrix.c,
+      displayedRock.matrix.d,
+    );
+    for (const tear of displayed.tears) {
+      drawSpriteSheetAffineRotate(
+        fb,
+        tearFrame,
+        tearPalette,
+        tear.x + tear.x2,
+        tear.y + tear.y2,
+        tear.matrix.a,
+        tear.matrix.b,
+        tear.matrix.c,
+        tear.matrix.d,
+        undefined,
+        false,
+      );
+    }
+
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "SHUCKLE" : "DELCATTY",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "DELCATTY" : "SHUCKLE",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "DELCATTY used" : "Foe DELCATTY used",
+      "FAKE TEARS!",
       99,
     );
     return;

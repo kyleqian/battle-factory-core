@@ -5,6 +5,8 @@ import { createHash } from "node:crypto";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { decodeIndexedPng } from "../extract/indexedPng.ts";
+import { loadJascPal } from "../extract/jascPal.ts";
+import { sliceTiles } from "../extract/tiles.ts";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const ref = join(root, "reference/pokeemerald");
@@ -19,6 +21,19 @@ const raw = (path: string) => {
 };
 const sparkH = decodeIndexedPng(join(ref, "graphics/battle_anims/sprites/spark_h.png"));
 
+function sprite(path: string, palettePath?: string) {
+  const image = decodeIndexedPng(join(ref, path));
+  const sliced = sliceTiles(image);
+  return {
+    tileset: {
+      columns: sliced.columns,
+      rows: sliced.rows,
+      tiles: sliced.tiles.map((tile) => [...tile.pixels]),
+    },
+    palette: palettePath ? loadJascPal(join(ref, palettePath)) : image.palette,
+  };
+}
+
 mkdirSync(dirname(out), { recursive: true });
 writeFileSync(out, `${JSON.stringify({
   source: {
@@ -26,6 +41,14 @@ writeFileSync(out, `${JSON.stringify({
     spark: "graphics/battle_anims/sprites/spark.4bpp + spark.pal; src/graphics.c:568-569; ANIM_TAG_SPARK; 0x300 bytes",
     sparkH: "graphics/battle_anims/sprites/spark_h.png; src/graphics.c:571 and src/data/battle_anim.h:1185/1478; ANIM_TAG_SPARK_H; gThunderWaveSpriteTemplate",
     spark2: "src/assets/gen/battle-anim-spark-2.json; ANIM_TAG_SPARK_2 is already source-extracted",
+    carrier:
+      "SPECIES_FLAAFFY 180; complete legal mechanic-lab parties; normal palette",
+    siblings: {
+      MOVE_THUNDERBOLT:
+        "distinct triple ElectricBolt, SHOCK_3 orb, eight flashing SPARK_2 sprites, target palette body, and sounds",
+      MOVE_ZAP_CANNON:
+        "distinct BLACK_BALL_2 projectile, eight ZapCannon sparks, ShakeMon2, ElectricityEffect, and sounds",
+    },
   },
   spark4bpp: raw("graphics/battle_anims/sprites/spark.4bpp"),
   sparkPaletteJasc: raw("graphics/battle_anims/sprites/spark.pal"),
@@ -33,6 +56,22 @@ writeFileSync(out, `${JSON.stringify({
     width: sparkH.width, height: sparkH.height,
     indices: [...sparkH.indices], palette: sparkH.palette,
   },
+  sparkBolt: sprite(
+    "graphics/battle_anims/sprites/spark_0.png",
+    "graphics/battle_anims/sprites/spark.pal",
+  ),
+  sparkBands: sprite(
+    "graphics/battle_anims/sprites/spark_h.png",
+    "graphics/battle_anims/sprites/spark.pal",
+  ),
+  flaffyBack: sprite(
+    "graphics/pokemon/flaaffy/back.png",
+    "graphics/pokemon/flaaffy/normal.pal",
+  ),
+  flaffyFront: sprite(
+    "graphics/pokemon/flaaffy/anim_front.png",
+    "graphics/pokemon/flaaffy/normal.pal",
+  ),
   templates: {
     electricBolt: "src/battle_anim_electric.c:221-229 gElectricBoltSegmentSpriteTemplate; 8x8 non-affine",
     thunderWave: "src/battle_anim_electric.c:231-239 gThunderWaveSpriteTemplate; 32x16 non-affine",

@@ -1,0 +1,12 @@
+{
+  "schema": "scene-on-smokescreen-portable/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-smokescreen-player-koffing-opponent-onix.json",
+  "probe": "tools/compare/smokescreenProbe.py",
+  "orientation": "player-to-opponent",
+  "pair": "Factory set-127 KOFFING player-back -> ONIX opponent-front",
+  "move": "SMOKESCREEN",
+  "sourceWindow": { "startFrame": 214, "endFrame": 338, "frameCount": 125 },
+  "evidenceSha256": "5c81fa1f4730eb2f2e9ad20a4571cf4250e21602ed3dcded556171f7fe1ba9ee",
+  "rawRgbSha256": "435cca4a1786edc5b03e798384a2b6f5372c942d57cd7e3c65bbfdc6fb1adf35"
+}

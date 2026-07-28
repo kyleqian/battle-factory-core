@@ -1,0 +1,25 @@
+{
+  "schema": "scene-on-portable-component/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/compare/fixtures/mechanic-fake-tears-player-delcatty-opponent-shuckle.json",
+  "probe": "tools/compare/fakeTearsBlendParticleProbe.py",
+  "pair": "DELCATTY (player-back) -> SHUCKLE (opponent-front)",
+  "move": "FAKE_TEARS",
+  "orientation": "player-to-opponent",
+  "controllerWindow": {"startFrame": 39, "endFrame": 360, "frameCount": 322},
+  "phaseWindows": {
+    "preAnimation": {"startFrame": 39, "endFrame": 75, "frameCount": 37},
+    "sourceAnimation": {"startFrame": 76, "endFrame": 162, "frameCount": 87},
+    "statDropStatus": {"startFrame": 163, "endFrame": 251, "frameCount": 89},
+    "messagePostAnimation": {"startFrame": 252, "endFrame": 359, "frameCount": 108},
+    "cleanup": {"startFrame": 360, "endFrame": 360, "frameCount": 1}
+  },
+  "evidenceSha256": "3b2470bdd96c77c68cf1f66686324335c078651b41e0c5d3ca2699a3bee1c5a9",
+  "rawRgbSha256": "4aaf80e8cc8bdc94a0c369fce50893cfd6d84fd5f9dc7e565b2ed625a8cde8e1",
+  "sourceVisualWindow": {"startFrame": 76, "endFrame": 162},
+  "appStage": {"presentationAge": 0},
+  "attacker": {"species":"DELCATTY","geometry":{"side":"player","spriteCorner":{"x":40,"y":56},"animationCenter":{"x":72,"y":88},"battlePositionCenter":{"x":72,"y":80}}},
+  "target": {"species":"SHUCKLE","geometry":{"side":"opponent","spriteCorner":{"x":144,"y":17},"animationCenter":{"x":176,"y":49},"battlePositionCenter":{"x":176,"y":40}}},
+  "attackerPictureBounds": {"left":40,"right":104,"top":72},
+  "fieldProfile": {"playerHp":145,"playerMaxHp":145,"opponentHp":127,"opponentMaxHp":127,"playerGender":"male","opponentGender":"male"}
+}

@@ -1,36 +1,337 @@
 # Animation coverage
 
-## MOVE_THUNDER_WAVE staged; ANIM_TAG_SPARK source/evidence checkpoint (2026-07-28)
+## MOVE_SMOKESCREEN staged; erroneous ShakeMon2 ownership removed (2026-07-28)
 
-**Verdict:** `MOVE_THUNDER_WAVE` is staged, not partial or exact. Complete legal
-Scene-ON FLAAFFY/SHUCKLE mechanic-lab evidence captures the broader
-`currentMove=86` window at **334/334** frames **39-372** in both orientations.
-Live script state proves the narrower source load/body/cleanup window at
-**120/120** frames **79-198** player-back and **83-202** opponent-front,
-including first inactive offset-110 teardown. Each complete output and raw-RGB
-stream reproduced byte-identically twice (player `c4fe8bb3…045fd` /
-`aaa201bb…1c5a5`, opponent `aa1cc413…7cd57` / `e97ad2bd…0236e`).
-Coverage is **64 exact / 0 partial / 1 staged / 211 unsupported**.
+**Verdict:** `MOVE_SMOKESCREEN` is staged, not exact. Legal Level-50 Factory
+set-127 `FRONTIER_MON_KOFFING` against ONIX establishes the full Scene-ON
+source interval through first inactive cleanup at **125/125** frames **214–338**
+player-back and **302–426** opponent-front. Two fresh mGBA runs per orientation
+were byte-identical, including every raw RGB frame digest. Receipts are player
+`5c81fa1f…1ba9ee` / `435cca4a…1adf35`; opponent `910665d1…c78170` /
+`9a38c4eb…23e430`.
 
-**Source/evidence:** `Move_THUNDER_WAVE` loads SPARK/SPARK_2/SPARK_H, fades
-the field, creates ElectricBolt, plays its target-panned cue, then creates the
-three staggered target ThunderWave bands before the inverse fade/cleanup. The
-probe records the active flag, source pointer/offset, wait counter, complete
-active task identities/bodies, software sprites, OAM/matrices, loaded tags,
-faded/unfaded/hardware palettes, registers, both audio players/pans, and raw
-RGB over every current-move frame. It excludes the later, distinct
-`Task_DoStatusAnimation` interval from the source move window.
-`ANIM_TAG_SPARK` and inseparable
-SPARK_H are byte-preserving source-extracted with a regenerating receipt;
-SPARK_2 remains the existing generated shared asset.
+**Evidence/topology:** `smokescreenProbe.py` retains source offsets/waits,
+templates/callbacks/tasks, palette tags, software/hardware OAM and affine
+matrices, palettes/registers, SE1/SE2 pans, raw RGB, and cleanup. The source
+body is BLACK_BALL translation, dynamically loaded four-part SmokescreenImpact,
+twelve BLACK_SMOKE lifecycles, visual-finish wait, and the first inactive
+cleanup. It has **no task lifecycle and no target shake**: the prior audit
+incorrectly sliced from `Move_SMOKESCREEN` to the much later `Move_BUBBLE`
+label and found an unrelated `AnimTask_ShakeMon2`. The corrected audit ends at
+the immediate `Move_CONVERSION` label, asserts no `ShakeMon2`, and the probe
+requires an empty task topology plus the dynamic impact template. No reducer,
+typed seam, compositor, battle/controller state, or acceptance was implemented.
 
-**Scope/siblings:** `MOVE_THUNDERBOLT` stays unsupported: its three offset
-ElectricBolt tasks, SHOCK_3 orb, eight flashing SPARK_2 sprites, target
-palette body, and different sounds require independent dense evidence.
-`MOVE_SHOCK_WAVE` stays unsupported: it adds ELECTRIC_ORBS/CIRCLE_OF_LIGHT/
-LIGHTNING and charging/progressing/lightning/shake/palette tasks. No renderer,
-battle logic/RNG/controller/facility state, boundary list, unsupported barrier,
-or absolute-tick/input-delay/coordinate/RGB/pixel exception changed.
+**Sibling boundary:** `MOVE_OCTAZOOKA` remains unsupported. It has a distinct
+20-frame BLACK_BALL translation, four delayed GRAY_SMOKE
+`gOctazookaSmokeSpriteTemplate` lifecycles, and different target audio; it has
+no independent dense evidence. The assigned exact gate was internally
+contradictory because it required the nonexistent target `ShakeMon2`; adding
+that task would necessarily fail the accepted raw frames. Exact Smokescreen
+still needs a corrected brief followed by the actual source-relative
+reducer/seam/assets and full shared-framebuffer equality twice fresh in both
+orientations. Coverage is **69 exact / 0 partial / 2 staged / 205 unsupported**.
+
+## MOVE_SONIC_BOOM promoted exact; complete AIR_WAVE body closed (2026-07-28)
+
+**Verdict:** `MOVE_SONIC_BOOM` is exact. Legal Level-50 Factory set-244
+`FRONTIER_MON_MAGNETON_1` against ONIX passes the complete Scene-ON source
+body through first inactive cleanup at **52/52** source/component, typed-seam,
+hardware, and shared-framebuffer frames **78–129** player-back and
+**82–133** opponent-front, twice fresh. Byte-identical evidence/raw-RGB
+digests are player `0a7fc886…1662bb` / `8692f81c…18dee` and opponent
+`0c923df2…4f6a6` / `b2449044…f7f3f`. Coverage is **69 exact / 0 partial /
+1 staged / 206 unsupported**.
+
+**Model/evidence:** the source-relative reducer ports all three duration-15
+`gSonicBoomSpriteTemplate` translations, side-derived affine matrices and
+Razor-Wind pans, the animation-2 target IMPACT, `ShakeMon(3,0,10,1)`,
+partner monbg/target split priority, 12:8 alpha, waits, and cleanup. The typed
+seam and shared hardware compositor source-extract AIR_WAVE and Magneton art,
+reuse exact IMPACT/ShakeMon/Onix/chrome components, and reproduce the
+orientation-specific OBJ order plus the one-display elevated enemy-shadow
+latch before `SpriteCB_EnemyShadow` observes `gAnimScriptActive`. The portable
+verifier proves source offsets, tasks/sprites, OAM/matrices/palettes,
+registers/audio, raw RGB, and application framebuffer on every frame.
+
+**Boundary:** `MOVE_AIR_CUTTER` remains unsupported. It shares AIR_WAVE but
+owns `AnimTask_AirCutterProjectile`, CUT/`gAirCutterSliceSpriteTemplate`,
+both target and `ANIM_DEF_PARTNER` `ShakeMon2(2,0,8,1)` calls, and distinct
+wait/audio timing without independent dense move acceptance. No battle logic,
+RNG, controller, turn order, round/facility state, boundary list, or
+unsupported barrier changed.
+
+## MOVE_SONIC_BOOM complete AIR_WAVE evidence staged; Air Cutter audited (2026-07-28)
+
+**Verdict:** `MOVE_SONIC_BOOM` is staged, not exact. Legal Level-50 Factory
+set-244 `FRONTIER_MON_MAGNETON_1` (Magneton) against ONIX establishes the
+complete source-owned Scene-ON window from its first sourced display through
+first inactive cleanup at **52/52** frames **78–129** player-back and
+**82–133** opponent-front, twice fresh and byte-identical. Full
+evidence/raw-RGB digests are player `9c3e744f…15eff7` /
+`c98fa1b4…a7e38a` and opponent `e66adb5a…ab7ffe3` /
+`f9d02f74…cb576d`.
+
+**Evidence/topology:** `Move_SONIC_BOOM` loads AIR_WAVE and IMPACT, opens
+`ANIM_DEF_PARTNER` monbg with target split priority and 12:8 alpha, calls the
+Razor-Wind-panned `gSonicBoomSpriteTemplate` body three times (each
+16,0→0,0/duration 15 with 4-frame script waits), starts
+`ShakeMon(target,3,0,10,1)`, then creates its animation-2 target IMPACT and
+cleans monbg/blend. Dense portable receipts retain every source offset/wait,
+template/callback/task instance, AIR_WAVE+IMPACT palette tags, target/partner
+OAM ordering, matrices, registers, SE1/SE2+pans, raw RGB/framebuffer, and
+first inactive frame in both orientations. No reducer, seam, renderer, or
+battle/controller state changed.
+
+**Boundary:** `MOVE_AIR_CUTTER` remains unsupported. It shares AIR_WAVE but
+also owns `AnimTask_AirCutterProjectile`, CUT/`gAirCutterSliceSpriteTemplate`,
+both target and `ANIM_DEF_PARTNER` `ShakeMon2(2,0,8,1)` calls, and distinct
+wait/audio timing; it has no independent dense acceptance. Exact Sonic Boom
+still requires a typed presentation seam, source-relative reducer/compositor,
+and complete shared-framebuffer equality twice fresh. Coverage is **68 exact
+/ 0 partial / 2 staged / 206 unsupported**.
+
+## MOVE_FAKE_TEARS full-window ownership audited; remains staged (2026-07-28)
+
+**Verdict:** `MOVE_FAKE_TEARS` remains staged. Corrected legal set-267
+DELCATTY evidence now densely verifies every **322/322** `currentMove=313`
+frame **39–360** twice fresh in both orientations, including source/component
+state where active plus hardware OAM/matrices/palettes, registers, both audio
+players, raw RGB, and the application framebuffer. The animation-owned source
+body remains exact at **87/87** frames **76–162** player-back and **80–166**
+opponent-front. Full evidence/raw digests are player
+`3b2470bd…e1c5a9` / `4aaf80e…de8e1` and opponent
+`c9b2f3d8…5221ff` / `e7828c48…938fc`, byte-identical across both fresh runs.
+
+**Phase/ownership audit:** player-back partitions as pre-animation **39–75
+(37)**, source **76–162 (87)**, stat/status **163–251 (89)**,
+message/post-animation **252–359 (108)**, cleanup **360 (1)**.
+Opponent-front partitions as **39–79 (41)**, **80–166 (87)**, **167–255
+(89)**, **256–359 (104)**, and **360 (1)**. Pinned ROM source assigns only
+`Move_FAKE_TEARS` to animation. `BattleScript_EffectStatDown`,
+`Cmd_statbuffchange`/`ChangeStatBuffs`, `B_ANIM_STATS_CHANGE`, the stat
+message/wait, and `BattleScript_MoveEnd` own the other **235** frames.
+The existing standalone animation seam has no typed controller command or
+resolved stat/message/cleanup input: only 19 static outer frames coincide and
+**216/235** outer application framebuffers mismatch in each orientation
+(player 30 pre + 80 status + 105 message/post + 1 cleanup; opponent
+34 + 80 + 101 + 1). No controller behavior was synthesized.
+
+**For the main program:** expose the already-resolved Scene-ON stat-drop
+controller presentation through the shared seam—kickoff/text-printer state,
+`B_ANIM_STATS_CHANGE` receipts, stat-result message/wait, and move-end cleanup—
+without moving stage outcomes, RNG, script advancement, or controller
+ownership into animation. Then rerun `fakeTearsPortable.ts`; exact promotion
+still requires 322/322 shared-framebuffer and typed-seam equality twice fresh
+in both orientations. `MOVE_HEAT_WAVE` and `MOVE_LUSTER_PURGE` remain
+unsupported. Coverage stays **68 exact / 0 partial / 1 staged / 207
+unsupported**.
+
+## MOVE_SPIKE_CANNON promoted exact; complete WindUpLunge body closed (2026-07-28)
+
+**Verdict:** `MOVE_SPIKE_CANNON` is exact. Legal Level-50 Factory set-260
+`FRONTIER_MON_OMASTAR_1` versus ONIX passes its complete Scene-ON source body
+through first inactive cleanup at **84/84** source, typed-seam, hardware, and
+shared-framebuffer frames **86–169** player-back and **90–173**
+opponent-front, twice fresh. Pinned evidence/raw RGB digests are player
+`80760b25…c854654` / `c5af7071…97e61`; opponent
+`7c4e2dd5…134b8a2` / `8f393625…3c2a`. Coverage is **68 exact / 0 partial /
+1 staged / 207 unsupported**.
+
+**Model/evidence:** the source-relative reducer ports side-inverting
+`AnimTask_WindUpLunge`, `SlideMonToOriginalPos`, three attacker-relative
+linear NEEDLE stingers, three simultaneous animation-2 invert hitsplats,
+`ShakeMon2(3,0,7,1)`, target monbg/split priority/12:8 alpha, both looped
+audio families, source OAM transfer ordering, and cleanup. The typed seam and
+shared compositor use source-extracted Omastar art plus the source-identical
+Twineedle NEEDLE, linear-stinger, invert-hitsplat, ShakeMon2, alpha, and
+cleanup primitives. Dedicated complete legal mechanic-lab scenarios now
+materialize the set-260 Omastar directly. The portable verifier records tasks/sprites, OAM,
+matrices, palettes, registers, audio, raw RGB, and the application
+framebuffer on every frame. No battle logic, RNG, turn order, controller,
+facility state, boundary list, or unsupported barrier changed.
+
+**Siblings:** `MOVE_TAKE_DOWN` remains unsupported (23+10+10 lunge, blend,
+offset/shake/returns); `MOVE_BRICK_BREAK` remains unsupported (two-turn wall
+branch, horizontal lunges, fist/shards/BG blend); outside-Factory
+`MOVE_SNATCH` remains unsupported (bare 10+10+6 lunge). None received
+independent dense acceptance.
+
+## MOVE_ASTONISH promoted exact; full source body closed (2026-07-28)
+
+**Verdict:** `MOVE_ASTONISH` is exact. Legal Factory set-144
+`FRONTIER_MON_LOUDRED` (species 371) against ONIX passes the complete Scene-ON
+source-script-plus-first-inactive window at **63/63** source, typed seam,
+hardware, and shared-framebuffer frames **220–282** player-back and **219–281**
+opponent-front, twice fresh. Pinned evidence/raw RGB digests are player
+`20d66e8b…77568` / `ad5dcf52…3f2c90`; opponent
+`48912cfb…c209` / `ba9b56fe…ce3c71`. Coverage is **67 exact / 0 partial /
+1 staged / 208 unsupported**.
+
+**Model:** the source-relative reducer ports SWEAT_BEAD load/free lifetime,
+ENCORE and SKETCH pans, HorizontalLunge, the 25-frame wait, both Random2-owned
+SprayWaterDroplet callbacks, ShakeMon2 task-slot writes, both 10-frame
+StretchTargetUp affine legs, wait semantics, and cleanup. The typed Scene-ON
+seam owns presentation-only RNG outputs and geometry. The compositor uses
+source-extracted Loudred/SWEAT_BEAD art, existing Onix/chrome components,
+source OAM priority, and the split affine-entry scanout latch (Shake x2 before
+the following matrix/vertical-anchor transfer). No battle logic, RNG advance,
+turn order, controller, facility state, boundary list, or unsupported barrier
+changed.
+
+**Siblings:** `MOVE_FAKE_OUT` remains unsupported because it adds
+`AnimTask_FakeOut` and a post-body white blend. `MOVE_TRICK` remains
+unsupported because it adds ITEM_BAG/SPEED_DUST assets, two bag affine
+programs, StretchAttackerUp, repeated DOUBLE_TEAM sounds, and Hydro Cannon
+beams. Neither received independent dense move acceptance.
+
+## MOVE_FAKE_TEARS corrected-species source body exact; remains staged (2026-07-28)
+
+**Verdict:** `MOVE_FAKE_TEARS` remains staged. The inherited “set-267
+DELCATTY” scenarios use internal species **301 (NINCADA)**, so their earlier
+321-frame evidence cannot satisfy legal DELCATTY acceptance. Corrected
+mechanic-lab fixtures use Emerald species **316 (DELCATTY)**. Their complete
+source-owned load/body/free/clear window is exact twice fresh at **87/87**
+frames **76–162** player-back and **80–166** opponent-front through reducer,
+typed seam, tasks/sprites, asset/palette/OAM/register/audio lifecycles, raw
+RGB, and shared framebuffer. Second-run probe/raw digests are player
+`3b2470bd…e1c5a9` / `4aaf80e…de8e1`; opponent `c9b2f3d8…5221ff` /
+`e7828c48…938fc`.
+
+**Model:** source-relative state ports zero-delay `AnimTask_BlendParticle`,
+speed-1/two-rock `AnimTask_RockMonBackAndForth`, all four Tail Whip restarts,
+eight typed 32-callback tear arcs/affines, SMALL_BUBBLES blend, the
+load-only THOUGHT_BUBBLE/MUSIC_NOTES tags, waits, frees, and cleanup. The
+shared compositor adds source-extracted DELCATTY front/back art and reuses
+SHUCKLE field chrome, affine sprite composition, healthboxes, and text. Pure
+tests pin the reducer, typed seam, exact affine callback states, source asset
+regeneration, audio duration, and both legal picture bounds.
+
+**Acceptance remainder:** corrected-species fresh captures contain
+`currentMove=313` on **322 frames 39–360**, not the inherited/assigned
+**321 frames 39–359**. The portable verifier intentionally proves only the
+87 source-owned frames, leaving **235/322** controller-window frames per
+orientation (pre-animation, stat-drop, message/post-animation) unaccepted.
+No exception was added and coverage stays **66 exact / 0 partial / 1 staged /
+209 unsupported**. A later worker must resolve the corrected-species
+controller-window contract and reproduce every remaining frame twice fresh
+before promotion. `MOVE_HEAT_WAVE` and `MOVE_LUSTER_PURGE` remain unsupported.
+
+## MOVE_FAKE_TEARS staged; AnimTask_BlendParticle latch evidence complete (2026-07-28)
+
+**Historical verdict, superseded:** `MOVE_FAKE_TEARS` was staged from
+species-301 fixtures then mislabeled DELCATTY; species 301 is NINCADA, so this
+is retained only as provenance and not legal set-267 acceptance. Those
+Scene-ON NINCADA/SHUCKLE parties capture every `currentMove=313` frame
+(**321**, 39–359) and the complete source-owned BlendParticle
+creation/display latch plus first inactive cleanup (**2/2**, frames **84–85**
+player-back and **88–89** opponent-front) twice fresh. Outputs are
+byte-identical: player `ad60a3d3…995067d` / raw `8a434003…b7a390`; opponent
+`8a7c58ab…2ff07cc` / raw `75dd472a…c33a94`. Coverage is now **66 exact / 0
+partial / 1 staged / 209 unsupported**.
+
+**Evidence/scope:** `AnimTask_BlendParticle` selects the source-extracted
+SMALL_BUBBLES OBJ palette and Fake Tears supplies `(delay=0, initial=4,
+target=4)`, so the creation dispatch latches then destroys the task before it
+can survive a post-frame `gTasks` snapshot. The probe records script/task/
+sprite/OAM/matrix/palette/register/audio/raw-RGB/framebuffer state; the first
+inactive latch shares its frame with the subsequent RockMon launch, which is
+explicitly a boundary—not accepted or modeled. No reducer, typed seam, app
+compositor, battle logic/RNG/controller/facility state, boundary list, or
+unsupported barrier changed.
+
+**Siblings:** `MOVE_HEAT_WAVE` remains unsupported (FLYING_DIRT plus
+sandstorm/background, both-target motion, pan, crescents). `MOVE_LUSTER_PURGE`
+remains unsupported (psychic/white BG, circle, two particle tags, random
+hitsplats/sounds, shake, restore). Neither received independent complete dense
+move acceptance.
+
+## MOVE_SURF promoted exact; create_surf_wave BG1/scanline seam closed (2026-07-28)
+
+**Verdict:** `MOVE_SURF` is exact. Fresh complete legal Scene-ON
+WARTORTLE/SHUCKLE evidence passes the complete source-owned controller and
+scanline window plus first inactive cleanup at exactly **144/144** frames
+**72-215** player-back and **76-219** opponent-front through reducer, typed
+seam, registers/audio, raw RGB, and shared framebuffer twice fresh. Outputs
+remain byte-identical: player `19cf632a…800dae` / raw
+`fc0c3faa…163ed5`; opponent `66a3f92d…c97ffa` / raw
+`be3db045…ea4c6`. Coverage is now **66 exact / 0 partial / 0 staged / 210
+unsupported**.
+
+**Model/renderer:** the pure relative-age reducer ports
+`AnimTask_CreateSurfWave` and `AnimTask_SurfWaveScanlineEffect`: side-selected
+512x256 BG1 tilemaps, side-relative scroll, 1→13 hold→0 alpha, expanding
+scan regions, four-frame palette rotation, `SE_M_SURF` pan, BG clear, and
+scanline teardown. The narrow shared compositor source-extracts WARTORTLE
+front/back and water art, layers priority-1 BG1 over the field/battlers but
+under healthboxes/BG0, and ports the palette-transfer plus side-specific
+scanline-buffer display latches without absolute-tick or pixel exceptions.
+
+**Scope/siblings:** `MOVE_MUDDY_WATER` remains unsupported: it requires its
+Muddy palette and pre-command `SE_M_WHIRLPOOL` to earn independent complete
+dense acceptance. `MOVE_SECRET_POWER` remains unsupported: the Factory
+building environment dispatches Strength, not Surf. No battle logic, RNG,
+controller, turn order, round/facility state, boundary list, or unsupported
+barrier changed.
+
+## MOVE_SURF staged; create_surf_wave evidence checkpoint complete (2026-07-28)
+
+**Verdict:** `MOVE_SURF` is staged only. Fresh complete legal Scene-ON
+WARTORTLE/SHUCKLE mechanic-lab parties capture every `currentMove=57` frame
+(**370** frames 39–408 player-back, **367** frames 39–405 opponent-front) and
+the complete source-owned controller/scanline window plus first inactive
+cleanup (**144/144**, frames 72–215 player-back and 76–219 opponent-front).
+Both outputs and concatenated raw-RGB streams are byte-identical twice fresh:
+player `19cf632a…800dae` / `fc0c3faa…163ed5`; opponent
+`66a3f92d…c97ffa` / `be3db045…ea4c6`. Coverage is now **65 exact / 0 partial
+/ 1 staged / 210 unsupported**.
+
+**Model/evidence:** `create_surf_wave` owns BG1 water gfx, side-selected
+player/opponent tilemap, Surf/Muddy palette, `AnimTask_CreateSurfWave`, and
+the `AnimTask_SurfWaveScanlineEffect` alpha-DMA task—no effect software sprite.
+The committed probe captures complete task/sprite bodies, BG tilemap/scroll/
+affine and raw VRAM, palettes, registers, OAM/matrices, both audio players/
+pans, RGB, script identities, assets, and cleanup; source extraction
+byte-pins exactly the required water tiles, two Factory tilemaps, and palettes.
+
+**Siblings/scope/next:** `MOVE_MUDDY_WATER` remains unsupported: same command
+but a Muddy palette and pre-command `SE_M_WHIRLPOOL`, requiring independent
+dense acceptance. `MOVE_SECRET_POWER` remains unsupported: Factory
+`BATTLE_ENVIRONMENT_BUILDING` dispatches `Move_STRENGTH`, not `Move_SURF`.
+Next: port the two Surf tasks as a relative-age reducer, add a typed seam and
+BG1/scanline framebuffer renderer, then prove both 144-frame windows before
+considering a separate Muddy Water stage. No battle logic/RNG/controller/
+facility state, boundary list, unsupported barrier, or absolute-tick,
+move-number, input-delay, coordinate/RGB/pixel exception changed.
+
+## MOVE_THUNDER_WAVE promoted exact; complete Spark-track seam closed (2026-07-28)
+
+**Verdict:** `MOVE_THUNDER_WAVE` is exact. Fresh complete legal Scene-ON
+FLAAFFY/SHUCKLE evidence passes all **120/120** source load/body/cleanup
+frames **79-198** player-back and **83-202** opponent-front through the
+source-relative reducer, typed seam, software tasks/sprites, registers,
+hardware OAM/matrices/palettes, both audio players/pans, raw RGB, and shared
+framebuffer, twice fresh. The first inactive offset-110 teardown is included;
+the later `Task_DoStatusAnimation` remains excluded. Coverage is now **65
+exact / 0 partial / 0 staged / 211 unsupported**.
+
+**Renderer/evidence:** the reducer ports SPARK/SPARK_2/SPARK_H loads, field
+0→6→0 fade, five staggered ElectricBolt segments and their source OAM latch,
+both side-relative sound families, all three two-sprite flashing bands, task
+counts, and cleanup. The narrow compositor source-extracts FLAAFFY and
+SPARK/SPARK_H, reuses exact SHUCKLE and shared chrome, and consumes prior
+software OAM/palette state. Fresh v3 outputs are byte-identical (player
+`3d8b1bee…267ee` / raw `aaa201bb…1c5a5`; opponent `0454b5a2…1b424` /
+raw `e97ad2bd…0236e`).
+
+**Scope/siblings/next:** `MOVE_THUNDERBOLT` stays unsupported with its triple
+bolt, SHOCK_3 orb, eight affine sparks, target palette body, and distinct
+sounds. `MOVE_ZAP_CANNON` stays unsupported with BLACK_BALL_2, eight orbiting
+sparks, ShakeMon2, ElectricityEffect, and distinct pans. Neither has complete
+dense evidence; exact `MOVE_SPARK` is preserved. Next select a bounded
+Level-50 representative from the coverage queue. No battle logic/RNG/
+controller/facility state, boundary list, unsupported barrier, or absolute-
+tick/move-number/input-delay/coordinate/RGB/pixel exception changed.
 
 ## MOVE_BODY_SLAM promoted exact; audio and framebuffer repaired (2026-07-28)
 

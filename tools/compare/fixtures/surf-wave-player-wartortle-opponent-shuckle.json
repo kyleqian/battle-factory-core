@@ -1,0 +1,10 @@
+{
+  "schema": "scene-on-surf-wave-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-surf-player-wartortle-opponent-shuckle.json",
+  "probe": "tools/compare/surfWaveProbe.py",
+  "orientation": "player-back WARTORTLE -> opponent-front SHUCKLE",
+  "currentMoveWindow": {"startFrame":39,"endFrame":408,"frameCount":370},
+  "sourceOwnedComponentWindow": {"startFrame":72,"endFrame":215,"frameCount":144},
+  "activeSourceScriptWindow": {"startFrame":72,"endFrame":214,"frameCount":143}
+}
