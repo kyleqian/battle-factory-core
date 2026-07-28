@@ -1,4 +1,9 @@
+import { execFileSync } from "node:child_process";
+import { mkdtempSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import scaryFaceAsset from "../../src/animation/assets/scary-face.json" with { type: "json" };
 import {
   SCARY_FACE_CLEAN_BOUNDARY_AGE,
   scaryFaceAtAge,
@@ -99,5 +104,41 @@ describe("MOVE_SCARY_FACE source-relative reducer", () => {
       targetOffset: { x2: 3, y2: 0 },
       shakeTask: { shakeNum: 2 },
     });
+  });
+
+  it("re-extracts RHYHORN, BG1 variants, and EYE_SPARKLE byte-for-byte", () => {
+    expect(scaryFaceAsset.source).toMatchObject({
+      rhyhornBack: expect.stringContaining("set 133"),
+      rhyhornFront: expect.stringContaining("SPECIES_RHYHORN 111"),
+      target: expect.stringContaining("SHUCKLE"),
+      background: expect.stringContaining("scary_face_{player,opponent}.bin"),
+      eyeSparkle: expect.stringContaining("ANIM_TAG_EYE_SPARKLE"),
+    });
+    expect(scaryFaceAsset.rhyhornBack.tileset).toMatchObject({
+      columns: 8, rows: 8,
+    });
+    expect(scaryFaceAsset.rhyhornFront.tileset).toMatchObject({
+      columns: 8, rows: 16,
+    });
+    expect(scaryFaceAsset.background.tileset).toMatchObject({
+      columns: 16, rows: 5,
+    });
+    expect(scaryFaceAsset.background.playerTilemap.entries).toHaveLength(1024);
+    expect(scaryFaceAsset.background.opponentTilemap.entries).toHaveLength(1024);
+    expect(scaryFaceAsset.eyeSparkle.tileset).toMatchObject({
+      columns: 2, rows: 8,
+    });
+
+    const scratch = mkdtempSync(join(tmpdir(), "pokebench-scary-face-assets-"));
+    const output = join(scratch, "scary-face.json");
+    execFileSync(process.execPath, [
+      "--experimental-strip-types",
+      resolve("tools/compare/extractScaryFaceAssets.ts"),
+      "--out",
+      output,
+    ]);
+    expect(readFileSync(output)).toEqual(
+      readFileSync(resolve("src/animation/assets/scary-face.json")),
+    );
   });
 });
