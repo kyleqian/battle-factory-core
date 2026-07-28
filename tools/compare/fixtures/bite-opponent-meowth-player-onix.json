@@ -1,12 +1,39 @@
 {
-  "schema": "scene-on-portable-component/v1",
+  "schema": "scene-on-portable-evidence/v2",
   "oracleProfile": "battle-scene-on",
   "scenario": "tools/battle-lab/mechanic-poison-fang-opponent-zubat-player-onix.json",
   "probe": "tools/compare/poisonFangProbe.py",
   "probeMoveId": 44,
   "pair": "Factory set-56 MEOWTH opponent-front -> ONIX player-back",
+  "orientation": "opponent-to-player",
   "move": "BITE",
   "denseWindow": { "startFrame": 84, "endFrame": 109 },
   "targetSide": "player",
-  "targetCenter": { "x": 72, "y": 88 }
+  "targetCenter": { "x": 72, "y": 88 },
+  "attacker": {
+    "species": "MEOWTH",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 20 },
+      "animationCenter": { "x": 176, "y": 52 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 48 },
+      "animationCenter": { "x": 72, "y": 88 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 110,
+    "playerMaxHp": 110,
+    "opponentHp": 147,
+    "opponentMaxHp": 147,
+    "playerGender": "male",
+    "opponentGender": "male"
+  }
 }

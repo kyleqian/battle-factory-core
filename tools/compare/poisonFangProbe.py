@@ -69,6 +69,10 @@ def main() -> None:
                   "Task_FadeToBg", "AnimTask_GrowAndShrink",
                   "AnimTask_GrowAndShrink_Step")
     task_funcs = {symbols[name] for name in task_names}
+    palette_tags = symbols["sSpritePaletteTags"] & ~1
+    visual_task_count = oracle.symbols["gAnimVisualTaskCount"]
+    sound_task_count = oracle.symbols["gAnimSoundTaskCount"]
+    anim_script_active = oracle.symbols["gAnimScriptActive"]
     def u16(a: int) -> int: return oracle.read_u8(a) | (oracle.read_u8(a + 1) << 8)
     def s16(a: int) -> int:
         v = u16(a)
@@ -116,19 +120,25 @@ def main() -> None:
           "tasks":active_tasks(),"fadedPalette":[u16(faded+i*2) for i in range(512)],
           "unfadedPalette":[u16(unfaded+i*2) for i in range(512)],
           "hardwarePalette":[u16(0x05000000+i*2) for i in range(512)],
+          "paletteTags":[u16(palette_tags+i*2) for i in range(16)],
           "hardwareOam":[[u16(0x07000000+i*8+j) for j in (0,2,4)] for i in range(128)],
+          "hardwareMatrices":[[s16(0x07000006+i*0x20+j)
+                               for j in (0,8,16,24)] for i in range(32)],
+          "visualTaskCount":oracle.read_u8(visual_task_count),
+          "soundTaskCount":oracle.read_u8(sound_task_count),
+          "animScriptActive":bool(oracle.read_u8(anim_script_active)),
           "se1":{"songHeader":oracle.read_u32(se1_info),"status":oracle.read_u32(se1_info+4),
                  "tracks":[{"flags":oracle.read_u8(se1_tracks+i*0x50),
                             "pan":s8(se1_tracks+i*0x50+0x14),
                             "panX":s8(se1_tracks+i*0x50+0x15)} for i in range(3)]},
-          "bldcnt":u16(0x04000050),"bldalpha":u16(0x04000052),
+          "dispcnt":u16(0x04000000),"bldcnt":u16(0x04000050),"bldalpha":u16(0x04000052),
           "bldy":u16(0x04000054)})
     frame = 0
     capture(frame)
     for segment in request["trace"]["segments"]:
         for _ in range(segment["frames"]):
             oracle.advance(segment.get("buttons", [])); frame += 1; capture(frame)
-    OUTPUT.write_text(json.dumps({"schema":"poison-fang-dense-evidence/v1","setup":setup,
+    OUTPUT.write_text(json.dumps({"schema":"poison-fang-dense-evidence/v2","setup":setup,
       "templates":templates,"taskFuncs":{name:symbols[name] for name in task_names},
       "songHeaders":{"SE_M_BITE":oracle.read_u32(song_table+161*8),
                      "SE_M_LEER":oracle.read_u32(song_table+192*8),

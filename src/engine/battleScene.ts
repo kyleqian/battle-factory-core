@@ -542,6 +542,7 @@ import knockOffAsset from "../animation/assets/knock-off.json" with { type: "jso
 import recoverAsset from "../animation/assets/recover.json" with { type: "json" };
 import absorbAsset from "../animation/assets/absorb.json" with { type: "json" };
 import reflectAsset from "../animation/assets/reflect.json" with { type: "json" };
+import biteAsset from "../animation/assets/bite.json" with { type: "json" };
 import synthesisAsset from "../animation/assets/synthesis.json" with { type: "json" };
 import milkDrinkAsset from "../animation/assets/milk-drink.json" with { type: "json" };
 import supersonicAsset from "../animation/assets/supersonic.json" with { type: "json" };
@@ -677,6 +678,7 @@ import {
   sceneOnSludgeBombView,
   sceneOnPoisonFangView,
   sceneOnHyperFangView,
+  sceneOnBiteView,
   sceneOnSwaggerView,
   sceneOnTauntView,
   sceneOnScaryFaceView,
@@ -705,6 +707,7 @@ import {
   type SceneOnScaryFacePresentationState,
   type SceneOnAbsorbPresentationState,
   type SceneOnReflectPresentationState,
+  type SceneOnBiteConfig,
 } from "../animation/sceneOnPresentation.ts";
 import {
   extremeSpeedBackgroundVariant,
@@ -991,6 +994,11 @@ const absorbArt = absorbAsset as {
 const reflectArt = reflectAsset as {
   blueLightWall: { tileset: Tileset; palette: RgbColor[] };
   sparkle4: { tileset: Tileset; palette: RgbColor[] };
+};
+const biteArt = biteAsset as {
+  sharpTeeth: { tileset: Tileset; palette: RgbColor[] };
+  meowthBack: { tileset: Tileset; palette: RgbColor[] };
+  meowthFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const synthesisArt = synthesisAsset as {
   sparkle2: { tileset: Tileset; palette: RgbColor[] };
@@ -15056,6 +15064,137 @@ export function renderSceneOnMovePresentation(
   fb: Uint8Array,
   state: SceneOnMovePresentationState,
 ): void {
+  if (state.config.move === "BITE") {
+    const biteState = state as SceneOnMovePresentationState<SceneOnBiteConfig>;
+    const view = sceneOnBiteView(biteState);
+    // BuildOamBuffer and palette transfer precede the callbacks represented
+    // by the reducer, so the displayed OBJ/battler receipts are one age
+    // behind the live software state.
+    const displayed = sceneOnBiteView({
+      ...biteState,
+      age: biteState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "MEOWTH"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "MEOWTH"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged BITE pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+
+    const meowthSource = playerToOpponent
+      ? biteArt.meowthBack
+      : biteArt.meowthFront;
+    const meowth = playerToOpponent
+      ? meowthSource
+      : { ...meowthSource, tileset: subTileset(meowthSource.tileset, 0, 8) };
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+
+    // `monbg ANIM_TARGET` makes the target a real BG target-2 layer for all
+    // three semi-transparent effect OBJs. ONIX's front idle leaves x2=1
+    // until ShakeMon's creation clears it at reducer age 12.
+    const targetBaselineX2 =
+      playerToOpponent && displayed.age < 12 ? 1 : 0;
+    drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x
+        + targetBaselineX2 + displayed.targetOffset.x2,
+      view.target.geometry.spriteCorner.y + displayed.targetOffset.y2,
+    );
+    const nonObjTarget2 = fb.slice();
+    drawSpriteSheet(
+      fb,
+      meowth.tileset,
+      meowth.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+
+    // `BuildOamBuffer` sorts these equal-priority sprites in reverse
+    // allocator order: slot 5 receives the lowest hardware OAM index, then
+    // 4, then 3. Paint source slots ascending so the hardware winner is
+    // applied last after the PPU has selected a single OBJ pixel.
+    if (view.alpha) {
+      for (const sprite of displayed.sprites.slice().sort(
+        (left, right) => left.oamSlot - right.oamSlot,
+      )) {
+        const art = sprite.kind === "sharpTeeth"
+          ? biteArt.sharpTeeth
+          : battleAnimHitsplat;
+        drawSpriteSheetAffineRotateBlendedOverFb(
+          fb,
+          nonObjTarget2,
+          art.tileset,
+          art.palette,
+          sprite.x + sprite.x2,
+          sprite.y + sprite.y2,
+          sprite.matrix.a,
+          sprite.matrix.b,
+          sprite.matrix.c,
+          sprite.matrix.d,
+          view.alpha.eva,
+          view.alpha.evb,
+          false,
+        );
+      }
+    }
+
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "MEOWTH",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "MEOWTH" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "MEOWTH used" : "Foe MEOWTH used",
+      "BITE!",
+      99,
+    );
+    return;
+  }
+
   if (state.config.move === "REFLECT") {
     const reflectState = state as SceneOnReflectPresentationState;
     const view = sceneOnReflectView(reflectState);

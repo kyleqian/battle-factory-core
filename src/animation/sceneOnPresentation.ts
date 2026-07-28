@@ -403,7 +403,8 @@ export interface SceneOnPresentationBattler {
     | "SHUCKLE"
     | "GLALIE"
     | "HITMONCHAN"
-    | "WEEPINBELL";
+    | "WEEPINBELL"
+    | "MEOWTH";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -1129,6 +1130,7 @@ export type SceneOnMoveConfig =
   | SceneOnSludgeBombConfig
   | SceneOnPoisonFangConfig
   | SceneOnHyperFangConfig
+  | SceneOnBiteConfig
   | SceneOnSwaggerConfig
   | SceneOnTauntConfig
   | SceneOnScaryFaceConfig
