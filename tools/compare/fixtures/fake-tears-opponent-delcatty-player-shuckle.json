@@ -1,0 +1,15 @@
+{
+  "schema": "scene-on-portable-component/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/compare/fixtures/mechanic-fake-tears-opponent-delcatty-player-shuckle.json",
+  "probe": "tools/compare/fakeTearsBlendParticleProbe.py",
+  "pair": "DELCATTY (opponent-front) -> SHUCKLE (player-back)",
+  "move": "FAKE_TEARS",
+  "orientation": "opponent-to-player",
+  "sourceVisualWindow": {"startFrame": 80, "endFrame": 166},
+  "appStage": {"presentationAge": 0},
+  "attacker": {"species":"DELCATTY","geometry":{"side":"opponent","spriteCorner":{"x":144,"y":16},"animationCenter":{"x":176,"y":48},"battlePositionCenter":{"x":176,"y":40}}},
+  "target": {"species":"SHUCKLE","geometry":{"side":"player","spriteCorner":{"x":40,"y":59},"animationCenter":{"x":72,"y":91},"battlePositionCenter":{"x":72,"y":80}}},
+  "attackerPictureBounds": {"left":152,"right":200,"top":24},
+  "fieldProfile": {"playerHp":127,"playerMaxHp":127,"opponentHp":145,"opponentMaxHp":145,"playerGender":"male","opponentGender":"male"}
+}

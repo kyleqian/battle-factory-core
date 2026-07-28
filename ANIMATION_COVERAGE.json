@@ -1630,6 +1630,9 @@
       "move": "MOVE_FAKE_TEARS",
       "status": "staged",
       "covered": [
+        "corrected legal set-267 fixtures use Emerald internal species 316 (DELCATTY); the inherited scenarios and checkpoint fixtures use species 301 (NINCADA), so that evidence is retained as history but is not legal DELCATTY acceptance",
+        "complete corrected-species source-owned load/body/free/clear windows pass 87/87 frames 76-162 player-back and 80-166 opponent-front twice fresh through the source-relative reducer, typed seam, software tasks/sprites, palette/OAM/register/audio lifecycles, raw RGB, and shared framebuffer",
+        "the reducer ports zero-delay BlendParticle, speed-1 two-rock RockMonBackAndForth, four Tail Whip restarts, eight typed tear-drop sequences, SMALL_BUBBLES blend, load-only THOUGHT_BUBBLE/MUSIC_NOTES tags, waits, frees, and cleanup; the compositor uses source-extracted DELCATTY front/back art and shared SHUCKLE chrome",
         "fresh complete legal Scene-ON set-267 DELCATTY/SHUCKLE mechanic-lab parties capture every currentMove=313 frame (321 frames 39-359) in both attacker orientations and prove the complete source-owned AnimTask_BlendParticle creation/display latch plus first inactive cleanup at 2/2 frames 84-85 player-back and 88-89 opponent-front, twice fresh",
         "the committed mGBA probe records full source script identity/offset/wait, task and sprite bodies, OBJ palette tags plus faded/unfaded/hardware palettes, OAM/matrices, registers, both audio players, raw RGB, and framebuffer state; Fake Tears' args (tag SMALL_BUBBLES, delay 0, initial 4, target 4, RGB(12,11,31)) make the task latch/destroy in Cmd_createvisualtask before it can survive a post-frame gTasks snapshot",
         "the source-owned second frame is only the required first inactive/display latch. RockMonBackAndForth begins in that same batched next-source frame and is explicitly recorded as a boundary, not accepted or modeled by this checkpoint. No reducer, typed seam, app compositor, battle logic, RNG, turn order, facility state, boundary list, or unsupported barrier changed",
@@ -1645,9 +1648,18 @@
         "tools/compare/fakeTearsBlendParticleSourceAudit.ts",
         "tools/compare/extractBlendParticleAssets.ts",
         "src/animation/assets/blend-particle-small-bubbles.json",
-        "tests/animation/fakeTearsBlendParticle.test.ts"
+        "tests/animation/fakeTearsBlendParticle.test.ts",
+        "tools/compare/fixtures/mechanic-fake-tears-player-delcatty-opponent-shuckle.json",
+        "tools/compare/fixtures/mechanic-fake-tears-opponent-delcatty-player-shuckle.json",
+        "tools/compare/fixtures/fake-tears-player-delcatty-opponent-shuckle.json",
+        "tools/compare/fixtures/fake-tears-opponent-delcatty-player-shuckle.json",
+        "tools/compare/fakeTearsPortable.ts",
+        "tools/compare/extractFakeTearsAssets.ts",
+        "src/animation/fakeTears.ts",
+        "src/animation/assets/fake-tears.json",
+        "tests/animation/fakeTears.test.ts"
       ],
-      "remaining": "Port Fake Tears' later RockMonBackAndForth, tail-whip loop, eight typed tear/thought-bubble/music-note sprites, their asset/OAM/palette/audio lifecycles, typed presentation seam, and shared framebuffer through the complete move-owned window in both orientations; only then evaluate exact acceptance."
+      "remaining": "Corrected-species fresh captures contain 322 currentMove=313 frames 39-360 rather than the inherited/assigned 321 frames 39-359. Resolve that contract discrepancy and reproduce the 235 controller-window frames outside each exact 87-frame source body (pre-animation, stat-drop, message/post-animation) twice fresh in both orientations, without exceptions, before exact promotion."
     }
   ],
   "queue": [

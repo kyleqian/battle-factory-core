@@ -562,6 +562,7 @@ import swaggerAsset from "../animation/assets/swagger.json" with { type: "json" 
 import tauntAsset from "../animation/assets/taunt.json" with { type: "json" };
 import scaryFaceAsset from "../animation/assets/scary-face.json" with { type: "json" };
 import charmAsset from "../animation/assets/charm.json" with { type: "json" };
+import fakeTearsAsset from "../animation/assets/fake-tears.json" with { type: "json" };
 import selfDestructAsset from "../animation/assets/selfDestruct.json" with { type: "json" };
 import explosionAsset from "../animation/assets/explosion.json" with { type: "json" };
 import dynamicPunchAsset from "../animation/assets/dynamicPunch.json" with { type: "json" };
@@ -711,6 +712,7 @@ import {
   sceneOnSurfView,
   sceneOnCharmView,
   sceneOnCovetView,
+  sceneOnFakeTearsView,
   sceneOnDragonClawView,
   sceneOnSingView,
   sceneOnFutureSightView,
@@ -724,6 +726,7 @@ import {
   type SceneOnSurfPresentationState,
   type SceneOnCharmPresentationState,
   type SceneOnCovetPresentationState,
+  type SceneOnFakeTearsPresentationState,
   type SceneOnScaryFacePresentationState,
   type SceneOnAbsorbPresentationState,
   type SceneOnReflectPresentationState,
@@ -1223,6 +1226,11 @@ const surfWaveArt = surfWaveAsset as {
 };
 const charmArt = charmAsset as {
   magentaHeart: { tileset: Tileset; palette: RgbColor[] };
+};
+const fakeTearsArt = fakeTearsAsset as {
+  delcattyBack: { tileset: Tileset; palette: RgbColor[] };
+  delcattyFront: { tileset: Tileset; palette: RgbColor[] };
+  smallBubbles: { tileset: Tileset; palette: RgbColor[] };
 };
 const dragonClawArt = dragonClawAsset as {
   smallEmber: { tileset: Tileset; palette: RgbColor[] };
@@ -17847,6 +17855,139 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "MINUN used" : "Foe MINUN used",
       "SPARK!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "FAKE_TEARS") {
+    const fakeState = state as SceneOnFakeTearsPresentationState;
+    const view = sceneOnFakeTearsView(fakeState);
+    const displayed = sceneOnFakeTearsView({
+      ...fakeState,
+      age: fakeState.age - 1,
+    });
+    // Battler task rot/scale writes traverse the task -> software sprite ->
+    // hardware OAM pipeline one display later than effect-sprite callbacks.
+    const displayedRock = sceneOnFakeTearsView({
+      ...fakeState,
+      age: fakeState.age - 2,
+    }).rock;
+    const playerToOpponent =
+      view.attacker.species === "DELCATTY"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "DELCATTY"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged FAKE_TEARS pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const delcattySource = playerToOpponent
+      ? fakeTearsArt.delcattyBack
+      : fakeTearsArt.delcattyFront;
+    const delcatty = playerToOpponent
+      ? delcattySource
+      : {
+          ...delcattySource,
+          tileset: subTileset(delcattySource.tileset, 0, 8),
+        };
+    const shuckle = playerToOpponent
+      ? {
+          ...selfDestructArt.shuckleFront,
+          tileset: subTileset(selfDestructArt.shuckleFront.tileset, 0, 8),
+        }
+      : selfDestructArt.shuckleBack;
+    const tearFrame = subTileset(fakeTearsArt.smallBubbles.tileset, 2, 2);
+    const tearPalette = blendPaletteToward(
+      fakeTearsArt.smallBubbles.palette,
+      { r: 99, g: 90, b: 255 },
+      displayed.smallBubblesBlendY,
+    );
+
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    drawSpriteSheet(
+      fb,
+      shuckle.tileset,
+      shuckle.palette,
+      view.target.geometry.spriteCorner.x,
+      view.target.geometry.spriteCorner.y,
+    );
+    drawSpriteSheetAffineRotate(
+      fb,
+      delcatty.tileset,
+      delcatty.palette,
+      view.attacker.geometry.animationCenter.x + displayedRock.x2,
+      view.attacker.geometry.animationCenter.y + displayedRock.y2,
+      displayedRock.matrix.a,
+      displayedRock.matrix.b,
+      displayedRock.matrix.c,
+      displayedRock.matrix.d,
+    );
+    for (const tear of displayed.tears) {
+      drawSpriteSheetAffineRotate(
+        fb,
+        tearFrame,
+        tearPalette,
+        tear.x + tear.x2,
+        tear.y + tear.y2,
+        tear.matrix.a,
+        tear.matrix.b,
+        tear.matrix.c,
+        tear.matrix.d,
+        undefined,
+        false,
+      );
+    }
+
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "SHUCKLE" : "DELCATTY",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "DELCATTY" : "SHUCKLE",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction:
+          state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "DELCATTY used" : "Foe DELCATTY used",
+      "FAKE TEARS!",
       99,
     );
     return;

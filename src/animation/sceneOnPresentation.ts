@@ -236,6 +236,11 @@ import {
   type CovetState,
 } from "./covet.ts";
 import {
+  fakeTearsAtAge,
+  type FakeTearsBounds,
+  type FakeTearsState,
+} from "./fakeTears.ts";
+import {
   tailGlowAtAge,
   type TailGlowState,
 } from "./tailGlow.ts";
@@ -441,6 +446,7 @@ export interface SceneOnPresentationBattler {
     | "HITMONCHAN"
     | "SPINDA"
     | "LINOONE"
+    | "DELCATTY"
     | "LICKITUNG"
     | "WEEPINBELL"
     | "MEOWTH"
@@ -1049,6 +1055,15 @@ export interface SceneOnCovetConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnFakeTearsConfig {
+  readonly move: "FAKE_TEARS";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** `GetBattlerSpriteCoordAttr(LEFT/RIGHT/TOP)` for the legal DELCATTY pic. */
+  readonly attackerPictureBounds: Readonly<FakeTearsBounds>;
+}
+
 export interface SceneOnTailGlowConfig {
   readonly move: "TAIL_GLOW";
   readonly attacker: SceneOnPresentationBattler;
@@ -1245,6 +1260,7 @@ export type SceneOnMoveConfig =
   | SceneOnSurfConfig
   | SceneOnCharmConfig
   | SceneOnCovetConfig
+  | SceneOnFakeTearsConfig
   | SceneOnTailGlowConfig
   | SceneOnSelfDestructConfig
   | SceneOnExplosionConfig
@@ -1307,6 +1323,8 @@ export type SceneOnCharmPresentationState =
   SceneOnMovePresentationState<SceneOnCharmConfig>;
 export type SceneOnCovetPresentationState =
   SceneOnMovePresentationState<SceneOnCovetConfig>;
+export type SceneOnFakeTearsPresentationState =
+  SceneOnMovePresentationState<SceneOnFakeTearsConfig>;
 export type SceneOnTailGlowPresentationState =
   SceneOnMovePresentationState<SceneOnTailGlowConfig>;
 
@@ -1435,6 +1453,12 @@ export interface SceneOnCharmView extends CharmState {
 }
 
 export interface SceneOnCovetView extends CovetState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnFakeTearsView extends FakeTearsState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -2861,6 +2885,27 @@ export function sceneOnCovetView(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.battlePositionCenter,
+    ),
+  };
+}
+
+/** `age=0` is Move_FAKE_TEARS' first displayed SMALL_BUBBLES load. */
+export function sceneOnFakeTearsView(
+  state: SceneOnFakeTearsPresentationState,
+): SceneOnFakeTearsView {
+  if (state.config.move !== "FAKE_TEARS") {
+    throw new Error(
+      `expected FAKE_TEARS presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...fakeTearsAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attackerPictureBounds,
     ),
   };
 }

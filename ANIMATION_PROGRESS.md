@@ -1,5 +1,37 @@
 # Animation coverage
 
+## MOVE_FAKE_TEARS corrected-species source body exact; remains staged (2026-07-28)
+
+**Verdict:** `MOVE_FAKE_TEARS` remains staged. The inherited “set-267
+DELCATTY” scenarios use internal species **301 (NINCADA)**, so their earlier
+321-frame evidence cannot satisfy legal DELCATTY acceptance. Corrected
+mechanic-lab fixtures use Emerald species **316 (DELCATTY)**. Their complete
+source-owned load/body/free/clear window is exact twice fresh at **87/87**
+frames **76–162** player-back and **80–166** opponent-front through reducer,
+typed seam, tasks/sprites, asset/palette/OAM/register/audio lifecycles, raw
+RGB, and shared framebuffer. Second-run probe/raw digests are player
+`3b2470bd…e1c5a9` / `4aaf80e…de8e1`; opponent `c9b2f3d8…5221ff` /
+`e7828c48…938fc`.
+
+**Model:** source-relative state ports zero-delay `AnimTask_BlendParticle`,
+speed-1/two-rock `AnimTask_RockMonBackAndForth`, all four Tail Whip restarts,
+eight typed 32-callback tear arcs/affines, SMALL_BUBBLES blend, the
+load-only THOUGHT_BUBBLE/MUSIC_NOTES tags, waits, frees, and cleanup. The
+shared compositor adds source-extracted DELCATTY front/back art and reuses
+SHUCKLE field chrome, affine sprite composition, healthboxes, and text. Pure
+tests pin the reducer, typed seam, exact affine callback states, source asset
+regeneration, audio duration, and both legal picture bounds.
+
+**Acceptance remainder:** corrected-species fresh captures contain
+`currentMove=313` on **322 frames 39–360**, not the inherited/assigned
+**321 frames 39–359**. The portable verifier intentionally proves only the
+87 source-owned frames, leaving **235/322** controller-window frames per
+orientation (pre-animation, stat-drop, message/post-animation) unaccepted.
+No exception was added and coverage stays **66 exact / 0 partial / 1 staged /
+209 unsupported**. A later worker must resolve the corrected-species
+controller-window contract and reproduce every remaining frame twice fresh
+before promotion. `MOVE_HEAT_WAVE` and `MOVE_LUSTER_PURGE` remain unsupported.
+
 ## MOVE_FAKE_TEARS staged; AnimTask_BlendParticle latch evidence complete (2026-07-28)
 
 **Verdict:** `MOVE_FAKE_TEARS` is staged only. Fresh complete legal Scene-ON
