@@ -1,0 +1,63 @@
+{
+  "schema": "encore-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "sourceSha256": {
+    "battle_script_commands.c": "e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c",
+    "battle_scripts_1.s": "4ac3e610b68c11ef0f4e4c0fc62ddba7fda5a8400e43705428868978ec7551a6",
+    "battle_script.inc": "0a8e1c3bdf4c49d07b2e09ff8ab524812a5217b9735106e1b79b6be261a6db7e",
+    "battle_script_commands.h": "842cce6dd704b09b24a49abdca67ee7a8062a2e3a465e1b764fc63c0d230580f",
+    "battle.h": "8ef0355f2345592094c82cfde6641644a6b7157012104736416f8c05f34f0685",
+    "battle_util.c": "2ba9ee4efe913effa119c8342281745f481910ca1b20cd76b470673062a45fd5",
+    "battle_main.c": "ee79b86ff0f681ab783b363135fd84d050e7123bea2a77c5530f2c7ddc8b8408",
+    "random.c": "71d7335fde4c0c7dd8c3245560defa2e23124b8ba8ec5d50bf1295ebc24bdcdf",
+    "battle_moves.h": "8b3d4d143b807807af97ce7288e0cc0ccdd55b6b64ac45824e35a549836b3a0c",
+    "battle_message.c": "5874441ca8fea30caed82e6762c7a1dca8be9c60c8bf8912b74517d0ef7e0f17"
+  },
+  "instruction": {
+    "opcode": 164,
+    "opcodeHex": "0xa4",
+    "length": 5,
+    "operands": [{"width": 4, "encoding": "little-endian relocation pointer", "value": "failure script target"}],
+    "pc": {"success": "gBattlescriptCurrInstr += 5", "failure": "gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + 1)"}
+  },
+  "state": {
+    "owner": "gDisableStructs[gBattlerTarget]",
+    "fields": ["encoredMove", "encoredMovePos", "encoreTimer", "encoreTimerStartValue"],
+    "success": "Finds the target slot whose move equals gLastMoves[target], then writes its move id and slot position. The target PP at that position must be nonzero and no target Encore may already exist.",
+    "invalidLastMove": ["MOVE_STRUGGLE", "MOVE_ENCORE", "MOVE_MIRROR_MOVE"],
+    "timer": "After the move/id position writes, the command consumes exactly one Random() result and stores (Random() & 3) + 3 into both target timer fields. Random returns gRngValue >> 16 after advancing the LCG.",
+    "expiry": "At ENDTURN_ENCORE, replacement of the stored slot move clears encoredMove/timer silently; otherwise decrement first, then timer zero or encored-slot PP zero clears both and runs BattleScript_EncoredNoMore."
+  },
+  "effectScript": {
+    "move": {"id": 227, "name": "MOVE_ENCORE", "effect": "EFFECT_ENCORE", "power": 0, "accuracy": 100, "pp": 5, "target": "MOVE_TARGET_SELECTED", "priority": 0},
+    "order": ["attackcanceler", "accuracycheck BattleScript_PrintMoveMissed, ACC_CURR_MOVE", "attackstring", "ppreduce", "trysetencore BattleScript_ButItFailed", "attackanimation", "waitanimation", "printstring STRINGID_PKMNGOTENCORE", "waitmessage B_WAIT_TIME_LONG", "goto BattleScript_MoveEnd"],
+    "messages": {"success": "STRINGID_PKMNGOTENCORE", "failure": "BattleScript_ButItFailed", "expiry": "BattleScript_EncoredNoMore / STRINGID_PKMNENCOREENDED"}
+  },
+  "admission": {
+    "choice": "Before ordinary AI selection, the action-selection state replaces gChosenMoveByBattler and chosen move position with target-owned encoredMove/encoredMovePos whenever encoredMove is nonzero.",
+    "execution": "At move execution, a still-matching target-owned encored move overwrites gCurrentMove/gChosenMove and their positions. A slot overwrite clears encoredMove, encoredMovePos, and encoreTimer before using the live slot move.",
+    "limitations": "CheckMoveLimitations marks every slot not equal to target-owned encoredMove whenever encoreTimer is nonzero. Its Disable, Torment, Taunt, Imprison, and Choice predicates are independent and combine in the same mask loop.",
+    "struggle": "AreAllMovesUnusable exposes BattleScript_NoMovesLeft; later selection replaces the move with Struggle and sets HITMARKER_NO_PPDEDUCT. Encore itself neither owns that fallback nor a controller command."
+  },
+  "lifetime": {
+    "switch": "SwitchInClearSetData zeroes the active DisableStruct and resets gLastMoves.",
+    "batonPass": "Baton Pass also zeroes the DisableStruct, then restores only substituteHP, battlerWithSureHit, both Perish Song timer fields, battlerPreventingEscape, and truantSwitchInHack: no Encore field survives.",
+    "faint": "FaintClearSetData zeroes status2, statuses3, and the active DisableStruct, then resets gLastMoves."
+  },
+  "case": {
+    "id": "minun-encore-chansey-success-forced-duplicate-off",
+    "scenario": "tools/battle-lab/mechanic-encore-minun-chansey-off.json",
+    "scenarioSha256": "d35ca78f86033779aaa8b369f34b16e169a23d5e286720ad728ba41baa356024",
+    "repeatability": {"runs": 2, "comparison": "byte-identical full manifest.json", "manifestSha256": "329676e3ac0cfb47f22254562dc910a2203d4531040d6392c0bb65030fe8bba2"},
+    "builtPartyChecksumsValid": [true, true, true, true, true, true],
+    "observed": {
+      "initial": {"frame": 0, "sha256": "72f65b61f8c57085009cd1900186b1ac0bee9d17e7220ec470e86957beab806b", "rngValue": 919694434, "currentMove": 0, "playerPp": [35,40,5,40], "opponentPp": [35,35,35,35]},
+      "lastMoveStaged": {"frame": 325, "sha256": "603330a07665add2b39ceacbc9788496947cc0512ec7490462cdbe14d2dceecd", "currentMove": 0, "opponentPp": [35,34,35,35]},
+      "encoreSuccess": {"frame": 725, "sha256": "1d6420babbd6c74de9ecf1b50fddd6aafb4a2f7aa535d939b40be2651178fdb1", "rngValue": 2319805938, "currentMove": 227, "playerPp": [34,40,4,40], "opponentPp": [35,34,35,35]},
+      "firstForcedTackle": {"frame": 875, "sha256": "c17ee58ef355760555877b7a6308e7a6da80bf3a9ca57f40fa28e351add8e4ec", "currentMove": 33, "opponentPp": [34,34,35,35]},
+      "duplicateEncoreFailureAfterPp": {"frame": 1350, "sha256": "566f8c87a072beb99e2dd129f0fee2af72f03eb8fe091d5158df629f5fc9c888", "rngValue": 1300148282, "currentMove": 227, "playerPp": [34,40,3,40], "opponentPp": [34,34,35,35]},
+      "repeatedForcedTackle": {"frame": 1500, "sha256": "38a74f600e8feca36c7c43c9da621e562f29743cbc8ad0edd4df62b921edfe12", "currentMove": 33, "opponentPp": [33,34,35,35]}
+    }
+  },
+  "boundedRemainder": "The public OFF manifest exposes active move id, PP, RNG, controller state, party checksums, and framebuffer hashes, but not gLastMoves, DisableStruct fields, script PC/result flags, controller buffers, AI chosen-slot state, or the expiry message ID. It proves a real prior Tackle, successful Encore PP spend, target-side Tackle PP spends while the effect is active, repeat Encore PP spend/failure, and deterministic output. The timer formula/draw ordering, exact failure predicates, forced-choice replacement, expiry, interactions with Disable/Torment, and switch/faint/Baton Pass cleanup are source-pinned; the identical four Chansey slots intentionally cannot distinguish a free post-expiry Tackle from a forced one. No production opcode is registered."
+}
