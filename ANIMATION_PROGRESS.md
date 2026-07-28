@@ -1,5 +1,32 @@
 # Animation coverage
 
+## MOVE_TAIL_GLOW promoted exact; shared framebuffer closed (2026-07-28)
+
+**Verdict:** `MOVE_TAIL_GLOW` is exact. Fresh complete legal set-277
+VOLBEAT/SHUCKLE Scene-ON evidence passes all **203/203** move-owned frames and
+cleanup at frames **73-275** player-back and **77-279** opponent-front through
+source/software, typed seam, registers, hardware OAM/matrices/palettes,
+side-relative audio, raw RGB, and the shared framebuffer, twice fresh.
+Coverage is now **59 exact / 1 partial / 216 unsupported**.
+
+**Renderer/evidence:** source extraction now byte-pins both VOLBEAT
+orientations alongside CIRCLE_OF_LIGHT. The narrow compositor ports the
+source-exact BG palette banks, attacker monbg target-2 stack, prior-software
+hardware transfer, affine 12:8-alpha orb, field chrome, healthboxes, text, and
+cleanup. Dense framebuffer closure also corrected the palette reducer to
+Emerald's fixed `deltaY=2` coefficients **0→2→4→2→0** and the source-derived
+player-back corner to `48 + back yOffset(8) = 56`; the separate orb
+`Y_PIC_OFFSET` remains 96. Independent receipts remain byte-identical (player
+`9ed6c575…7f1`, opponent `2d5b4d2f…84a1`).
+
+**Scope/siblings:** `MOVE_SUPERPOWER` remains unsupported with its distinct
+METEOR/FLAT_ROCK/orb/rocks/fireball/BG-shake/four-sound body.
+`MOVE_SHOCK_WAVE` remains unsupported with distinct ELECTRIC_ORBS/SPARK/
+LIGHTNING and charging/bolt/lightning/shake/palette tasks. Neither has
+independent dense acceptance. No battle logic/RNG/controller/facility state,
+boundary list, unsupported barrier, or absolute-tick/input-delay/coordinate/
+RGB/pixel exception changed.
+
 ## MOVE_TAIL_GLOW complete typed/hardware checkpoint; remains partial (2026-07-28)
 
 **Verdict:** `MOVE_TAIL_GLOW` is partial. Fresh complete legal set-277
