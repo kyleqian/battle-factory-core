@@ -15,6 +15,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 599 — [BOUNDED MAIN WORKER 2026-07-28 ~05:40] Spikes setter registered
+
+- **State:** first commit-ready slice green: focused opcode/rules/ratchet
+  coverage **33/33** and production build pass.
+- **Did:** globally registered five-byte `B_SCR_OP_TRYSETSPIKES` (`0xb0`)
+  with its exact failure pointer and attacker-opposite ownership. Added the
+  source `u8 spikesAmount` field on both side timers; Tier-1 pins 0→1→2→3,
+  exactly-3 Pressure-exempt failure, representable corrupt increments, PC,
+  and zero local RNG/events/controller work. Handler inventory **164→165**.
+- **Next:** replace the switch-in Spikes barrier with the shared source
+  scripts, damage/immunity/guard/cleanup/event path; prove persistence and a
+  public forced-switch receipt, then run full census/ratchets/build.
+- **Notes:** Rapid Spin remains blocked before `rapidspinfree` by the existing
+  source-backed `MOVE_EFFECT_RAPIDSPIN` SetMoveEffect barrier; do not widen it
+  as part of this setter slice. No new barrier/import/presentation branch.
+
+---
 ## 598 — [SUPERVISOR VERIFY 2026-07-28 ~05:31] Low Kick accepted; Spikes evidence folded
 
 - **State:** reviewed union green at **360 files / 4186 tests** and focused
