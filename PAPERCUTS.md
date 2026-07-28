@@ -347,19 +347,6 @@ worker (PROGRESS entry 13).
   step" already implies it; scratch loops that reset tracked files
   should operate on copies under the scratch dir instead.
 
-## ram-probe.py path vocabulary can't extract sub-byte bitfields (2026-07-20)
-
-- **What:** the multi-hop `"path"` spec (added 2026-07-20) reads whole
-  bytes/words only — no shift-and-mask step — so OAM bitfields like
-  `paletteNum` can't be probed directly; the switch-in scout had to
-  drop its materialize-tint verification rather than extend the tool
-  mid-task.
-- **Hits:** 1.
-- **Cost each:** ~5 min + one dropped verification goal.
-- **Workaround:** probe the containing u16 and decode in the analysis
-  script; or a future session adds a `{"op":"mask","shift":N,"mask":M}`
-  step to the path vocabulary (small, backward-compatible).
-
 ## Pixel-sampling a palette-fade table from a screenshot under-resolves steps (2026-07-20)
 
 - **What:** deriving a fade/tint coefficient table by sampling rendered
