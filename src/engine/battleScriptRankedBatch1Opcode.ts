@@ -102,16 +102,30 @@ const jumpIfArrayEqualHandler: BattleScriptOpcodeHandler<BattleScriptRulesContex
 };
 
 const magnitudeHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (context) => {
+  const rules = context.state.rulesContext;
+  const attacker = requireBattlerRole(rules, "attacker");
   const draw = drawBattleScriptRng(
     context.state.rng,
     context.instruction,
     "magnitudedamagecalculation:table",
   );
   const selected = magnitudeForRoll(draw.randomValue % 100);
+  let target = 0;
+  for (; target < rules.battleTopology.battlersCount; target += 1) {
+    if (target === attacker) continue;
+    if ((rules.absentBattlerFlags & (1 << target)) === 0) break;
+  }
+  if (target >= rules.battleTopology.battlersCount) {
+    throw new Error("Cmd_magnitudedamagecalculation found no present non-attacker target");
+  }
   return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }), {
     rng: draw.rng,
     rulesContext: Object.freeze({
-      ...context.state.rulesContext,
+      ...rules,
+      selectorRoles: Object.freeze({
+        ...rules.selectorRoles,
+        target: target as 0 | 1 | 2 | 3,
+      }),
       dynamicBasePower: selected.power,
       battleTextBuff1ByteNumber: selected.magnitude,
     }),
