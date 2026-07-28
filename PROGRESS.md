@@ -15,6 +15,31 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 560 — [SUPERVISOR VERIFY 2026-07-28 ~00:40] Rollout accepted; Defense Curl evidence merged
+
+- **State:** reviewed union green at **317 files / 3969 tests** and focused
+  **52/52**; production build, both-oracle freshness, census regeneration,
+  and `git diff --check` pass. Census is exactly **138/214 effects, 263/355
+  moves, 215/276 Factory-L50 distinct, 2685/2957 weighted**, with all
+  **42/42** checks.
+- **Did:** accepted `adfada6` / `8407f7b` / `027c39f`: exact Rollout timer,
+  lock, selected slot, Defense Curl power ladder, initial-only PP, symmetric
+  automatic action selection, continuous RNG/events, miss unlock, and
+  terminal routing all execute through the generic controller. Merged
+  Defense Curl evidence `8ec52e5` after source review and two identical OFF
+  replays.
+- **Next:** register source-complete one-byte `0xbf`
+  `B_SCR_OP_SETDEFENSECURLBIT`, including attacker-only unconditional bit
+  ownership, script ordering before the +1 Defense attempt, maxed-stat bit
+  persistence, and a generic Defense Curl→Rollout continuation. Expected
+  census is **139/214, 264/355, 216/276, 2691/2957**.
+- **Notes:** generic Rollout and OFF evidence both reach HP
+  **362→327→170→12→0** with PP **20→19**; manifest
+  `4460104b…9479677`. Defense Curl evidence observes PP **40→39**, bit 30,
+  and Defense **6→7**. No barrier/import ratchet increase, recording import,
+  animation edit, DEFERRED item, or oracle lifecycle action.
+
+---
 ## 559 — [BOUNDED MAIN WORKER 2026-07-28 ~00:38] Rollout executes source-completely
 
 - **State:** committed `adfada6` / `8407f7b` / `027c39f`; tree green at
@@ -62,26 +87,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   and paralysis **0→64** in the Factory building environment. No barrier/
   ratchet increase, recording import, animation edit, DEFERRED item, or
   oracle lifecycle action.
-
----
-## 557 — [BOUNDED MAIN WORKER 2026-07-28 ~00:04] Wish executes delayed positional heal generically
-
-- **State:** committed `a325a3f`/`4b88f14`; tree green at **313 files / 3951
-  tests** and focused **105/105**. Production build, both-oracle freshness,
-  census regeneration, and `git diff --check` pass. Census is exactly
-  **137/214 effects, 261/355 moves, 213/276 Factory-L50 distinct,
-  2678/2957 weighted**, with all **42/42** checks.
-- **Did:** registered exact six-byte `0xd4` `B_SCR_OP_TRYWISH` setup/heal
-  modes with positional counter + original party-index ownership, pending and
-  full-HP branches, prepared wishing-mon identity, and minimum-one negative
-  half-max heal. `ENDTURN_WISH` now runs after screens/before weather in
-  battler order, decrements through fainted slots without dispatch, and runs
-  the genuine delayed-heal/full-HP scripts.
-- **Next:** supervisor verify this executable-frontier increment and select
-  the next finite source registration target; do not resume the retired
-  canonical Battle-2 march.
-- **Notes:** the generic two-turn Espeon/Tackle proof matches OFF HP
-  **140→123→106→140** and Wish PP **10→9→8**, including pending failure and
-  capped heal. No barrier/ratchet increase, recording import, scenario/tick/
-  render branch, animation-lane edit, DEFERRED item, oracle lifecycle action,
-  or PAPERCUT.

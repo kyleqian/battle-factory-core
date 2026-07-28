@@ -1,4 +1,27 @@
 ---
+## 557 — [BOUNDED MAIN WORKER 2026-07-28 ~00:04] Wish executes delayed positional heal generically
+
+- **State:** committed `a325a3f`/`4b88f14`; tree green at **313 files / 3951
+  tests** and focused **105/105**. Production build, both-oracle freshness,
+  census regeneration, and `git diff --check` pass. Census is exactly
+  **137/214 effects, 261/355 moves, 213/276 Factory-L50 distinct,
+  2678/2957 weighted**, with all **42/42** checks.
+- **Did:** registered exact six-byte `0xd4` `B_SCR_OP_TRYWISH` setup/heal
+  modes with positional counter + original party-index ownership, pending and
+  full-HP branches, prepared wishing-mon identity, and minimum-one negative
+  half-max heal. `ENDTURN_WISH` now runs after screens/before weather in
+  battler order, decrements through fainted slots without dispatch, and runs
+  the genuine delayed-heal/full-HP scripts.
+- **Next:** supervisor verify this executable-frontier increment and select
+  the next finite source registration target; do not resume the retired
+  canonical Battle-2 march.
+- **Notes:** the generic two-turn Espeon/Tackle proof matches OFF HP
+  **140→123→106→140** and Wish PP **10→9→8**, including pending failure and
+  capped heal. No barrier/ratchet increase, recording import, scenario/tick/
+  render branch, animation-lane edit, DEFERRED item, oracle lifecycle action,
+  or PAPERCUT.
+
+---
 ## 556 — [SUPERVISOR VERIFY 2026-07-27 ~23:49] Sleep Talk accepted; Wish and Rollout evidence merged
 
 - **State:** reviewed union green at **312 files / 3945 tests**; production
