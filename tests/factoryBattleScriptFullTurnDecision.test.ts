@@ -12,6 +12,7 @@ import {
 
 const STRENGTH = 70; // EFFECT_HIT, TYPE_NORMAL -- the banked KO-scenario move (factoryBattleScriptTerminalDecision.test.ts).
 const EMBER = 52; // EFFECT_BURN_HIT, TYPE_FIRE, 10% MOVE_EFFECT_BURN secondary proc.
+const FLAIL = 175; // EFFECT_FLAIL -- writes source gDynamicBasePower before the shared hit chain.
 /** The banked KO-scenario seed (factoryBattleScriptTerminalDecision.test.ts, docs/hit-chain-ground-truth.md). */
 const KO_SCENARIO_RNG_SEED = 919694434;
 /** Brute-force-found: Ember's 10% burn proc actually lands on turn 1 with this seed, per this move's own real hit-chain RNG order (accuracy, crit, damage, secondary-effect-chance). */
@@ -206,6 +207,64 @@ describe("factory full-turn decision -- decision -> both actions -> end-turn -> 
       expect((rc2.battlers as Array<{ hp: number }>)[1]!.hp).toBe(739); // 869 -> 739, same total drop as turn 1: recurrence.
       // Turn 2's own tick is the SAME flat floor(999/8) = 124 -- no growth (Toxic's own counter is the only status that grows, docs/end-turn-ground-truth.md §2b).
       expect(rc2.battleMoveDamage).toBe(124);
+    },
+  );
+
+  it(
+    "clears one action's dynamic power before the next mover: low-HP Flail cannot strengthen "
+      + "the trainer's ordinary Strength (HandleAction_ActionFinished, battle_util.c:678)",
+    () => {
+      const sharedPlayer = {
+        species: 1,
+        attack: 50,
+        defense: 200,
+        spAttack: 50,
+        spDefense: 200,
+        speed: 100,
+        hp: 100,
+        maxHp: 10_000,
+      };
+      const sharedTrainer = {
+        species: 43,
+        moveId: STRENGTH,
+        attack: 50,
+        defense: 200,
+        spAttack: 50,
+        spDefense: 200,
+        speed: 50,
+        hp: 999,
+      };
+
+      const runTurn = (playerMoveId: number) => {
+        const initial = createFactoryFullTurnBattleState(config({
+          player: { ...sharedPlayer, moveId: playerMoveId },
+          trainer: sharedTrainer,
+        }));
+        const afterPlayer = submitFactoryFullTurnDecision(initial, {
+          requestId: 1,
+          side: "player",
+          decision: PLAYER_ATTACKS,
+        });
+        if (afterPlayer.kind !== "decision-required") throw new Error("expected trainer decision");
+        const result = submitFactoryFullTurnDecision(afterPlayer.state, {
+          requestId: 2,
+          side: "trainer",
+          decision: TRAINER_ATTACKS,
+        });
+        if (result.kind !== "decision-required") throw new Error("expected next-turn decision");
+        return (result.state.rules as {
+          rulesContext: {
+            dynamicBasePower: number;
+            battlers: ReadonlyArray<{ hp: number }>;
+          };
+        }).rulesContext;
+      };
+
+      const afterFlail = runTurn(FLAIL);
+      const ordinaryControl = runTurn(STRENGTH);
+      expect(afterFlail.battlers[0]!.hp).toBe(ordinaryControl.battlers[0]!.hp);
+      expect(afterFlail.dynamicBasePower).toBe(0);
+      expect(ordinaryControl.dynamicBasePower).toBe(0);
     },
   );
 

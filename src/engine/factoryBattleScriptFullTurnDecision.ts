@@ -580,6 +580,11 @@ function buildActionContext(
     currentMove: moveId,
     currentMovePosition: 0,
     chosenMove: moveId,
+    // HandleAction_ActionFinished clears the prior action's power override
+    // before dispatching the next battler (battle_util.c:678). Applying the
+    // same reset at this reducer's generic action boundary prevents a
+    // Flail/Reversal/Triple-Kick override from leaking into a sibling move.
+    dynamicBasePower: 0,
   });
 }
 
