@@ -1,4 +1,31 @@
 ---
+## 587 — [BOUNDED MAIN WORKER 2026-07-28 ~04:25] IncrementGameStat executes through the save/meta seam
+
+- **State:** committed `795366f`; tree green at **344 files / 4115 tests**,
+  focused opcode/continuation coverage **305/305**, ratchets **6/6**, and
+  production build. Both oracle infos, handler/program freshness, census
+  regeneration, and `git diff --check` pass. Census is exactly **151/214
+  effects, 279/355 moves, 228/276 Factory-L50 distinct, 2742/2957 weighted**,
+  all **42/42**.
+- **Did:** globally registered two-byte raw-u8 `0x60`. A resolved player-side
+  attacker emits a frozen typed game-stat increment event; an opponent emits
+  none, and both advance unconditionally with no opcode-local RNG, controller,
+  message, or battle-state work. The separate decoded save/meta consumer owns
+  valid indices **<52**, no-op invalid indices, and **0xFFFFFF** saturation.
+  Shared Splash proves PP → event → message order. Source-shaped
+  `MOVE_EFFECT_RECOIL_25` support carries Torment/Disable forced Struggle past
+  the former barrier through the existing hit and quarter-recoil route.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next shared registration target; do not widen the generic
+  seven-battle controller or extend the retired canonical Battle-2 march.
+- **Notes:** handler inventory **158→159**. The event receipt remains decoded
+  semantic save metadata; no encrypted save counter or Mauville story state
+  entered rules, Factory, controller, or presentation state. No
+  unsupported/import ratchet change, recording import, private handler,
+  animation/presentation/tick branch, issue removal, DEFERRED item, or oracle
+  lifecycle action.
+
+---
 ## 586 — [SUPERVISOR VERIFY 2026-07-28 ~04:10] Refresh accepted; bounded Encore evidence folded
 
 - **State:** reviewed union green at **343 files / 4106 tests** and focused

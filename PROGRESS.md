@@ -15,6 +15,32 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 590 — [SUPERVISOR VERIFY 2026-07-28 ~04:45] Taunt accepted; Foresight evidence folded
+
+- **State:** reviewed union green at **348 files / 4130 tests** and focused
+  **85/85**; production build, both-oracle info, census regeneration,
+  freshness/ratchets **15/15**, and `git diff --check` pass. Census is exactly
+  **152/214 effects, 280/355 moves, 229/276 Factory-L50 distinct, 2744/2957
+  weighted**, all **42/42**.
+- **Did:** accepted global Taunt `0xd0`, functional-timer representation,
+  end-turn expiry, and generic Factory admission/canceler proof after
+  source/diff review. Folded Foresight source/OFF evidence and independently
+  replayed exact manifest `2c4a774e…05c181864`: Low Kick is immune before
+  Foresight, then reduces Haunter **152→141** after the exposed target bit is
+  set; repeat Foresight is source-confirmed idempotent success, not failure.
+- **Next:** register operand-free `B_SCR_OP_SETFORESIGHT` globally. Prove
+  unconditional target-owned `STATUS2_FORESIGHT`, repeat success, zero local
+  RNG/controller/message work, and the already-shared accuracy/type consumers
+  through a full-turn pre/post Ghost-immunity scenario. Expected census:
+  **153/214, 282/355, 230/276, 2747/2957**.
+- **Notes:** handler inventory is **160**; Foresight switch/faint/Baton-Pass
+  clearing remains source-bounded while the setter and public immunity window
+  are exact. No unsupported/import ratchet, recording import, private handler,
+  controller widening, animation/presentation/tick branch, issue removal,
+  DEFERRED item, or oracle lifecycle action. Animation branch advanced after
+  orient and remains intentionally unmerged until a future orient.
+
+---
 ## 589 — [BOUNDED MAIN WORKER 2026-07-28 ~04:42] Taunt executes and expires through shared mechanics
 
 - **State:** committed `22c5095` + `11c0d5a` + `18d50ec`; tree green at
@@ -70,30 +96,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   animation/presentation/tick branch, issue removal, DEFERRED item, or oracle
   lifecycle action. Animation branch has advanced since orient and was not
   folded mid-session.
-
----
-## 587 — [BOUNDED MAIN WORKER 2026-07-28 ~04:25] IncrementGameStat executes through the save/meta seam
-
-- **State:** committed `795366f`; tree green at **344 files / 4115 tests**,
-  focused opcode/continuation coverage **305/305**, ratchets **6/6**, and
-  production build. Both oracle infos, handler/program freshness, census
-  regeneration, and `git diff --check` pass. Census is exactly **151/214
-  effects, 279/355 moves, 228/276 Factory-L50 distinct, 2742/2957 weighted**,
-  all **42/42**.
-- **Did:** globally registered two-byte raw-u8 `0x60`. A resolved player-side
-  attacker emits a frozen typed game-stat increment event; an opponent emits
-  none, and both advance unconditionally with no opcode-local RNG, controller,
-  message, or battle-state work. The separate decoded save/meta consumer owns
-  valid indices **<52**, no-op invalid indices, and **0xFFFFFF** saturation.
-  Shared Splash proves PP → event → message order. Source-shaped
-  `MOVE_EFFECT_RECOIL_25` support carries Torment/Disable forced Struggle past
-  the former barrier through the existing hit and quarter-recoil route.
-- **Next:** supervisor verify this finite executable-frontier increment and
-  select the next shared registration target; do not widen the generic
-  seven-battle controller or extend the retired canonical Battle-2 march.
-- **Notes:** handler inventory **158→159**. The event receipt remains decoded
-  semantic save metadata; no encrypted save counter or Mauville story state
-  entered rules, Factory, controller, or presentation state. No
-  unsupported/import ratchet change, recording import, private handler,
-  animation/presentation/tick branch, issue removal, DEFERRED item, or oracle
-  lifecycle action.
