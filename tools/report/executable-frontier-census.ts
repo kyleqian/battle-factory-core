@@ -525,31 +525,6 @@ function requireBlockedMentioning(effectName: string, needle: string): void {
   }
 }
 
-// Pins the EXACT missing-opcode set, not just a substring -- unlike
-// requireBlockedMentioning, this fails if the set gains or loses an entry,
-// so a future regression of the forcerandomswitch control-flow fix (e.g. the
-// fabricated-fallthrough bug reappearing, or the corrected switch-out tail
-// silently dropping an opcode) fails loudly instead of quietly passing a
-// substring check.
-function requireExactMissingOpcodes(effectName: string, expectedOpcodes: string[]): void {
-  const report = reportByEffectId.get(effectIdByName(effectName))!;
-  if (report.classification.kind !== "blocked-on-opcodes") {
-    throw new Error(
-      `ground-truth drift: ${effectName} expected blocked-on-opcodes, got ${report.classification.kind}`,
-    );
-  }
-  const actual = [...report.classification.missingOpcodes].sort();
-  const expected = [...expectedOpcodes].sort();
-  const matches = actual.length === expected.length && actual.every((opcode, index) => opcode === expected[index]);
-  if (!matches) {
-    throw new Error(
-      `ground-truth drift: ${effectName} expected exact missing-opcode set [${expected.join(", ")}], got `
-      + `[${actual.join(", ")}] -- if this is a legitimate topology change, update this pin with evidence, `
-      + "don't just relax it",
-    );
-  }
-}
-
 const validationChecks: Array<() => void> = [
   // Registration checkpoint (2026-07-25): B_SCR_OP_JUMPIFHALFWORD,
   // B_SCR_OP_JUMPIFSTATUS3CONDITION, and B_SCR_OP_ORWORD are now registered,
@@ -637,27 +612,6 @@ const validationChecks: Array<() => void> = [
   () => requireBlockedMentioning("EFFECT_MEAN_LOOK", "MOVE_EFFECT_PREVENT_ESCAPE"),
   () => requireBlockedMentioning("EFFECT_NIGHTMARE", "MOVE_EFFECT_NIGHTMARE"),
   () => requireBlockedMentioning("EFFECT_WILL_O_WISP", "ABILITY_WATER_VEIL"),
-  // Control-flow extractor fix regression pins (this session,
-  // docs/roar-multihit-registration-scout.md "Headline correction" + §1).
-  // EFFECT_ROAR's real blocker set, walked through its actual C-side success
-  // continuation (BattleScript_SuccessForceOut -> BattleScript_
-  // TrainerBattleForceOut, battle_script_commands.c:7181) instead of the
-  // previous bogus fallthrough into BattleScript_EffectMultiHit. If this ever
-  // reports INITMULTIHITSTRING/JUMPIFHASNOHP again, the forcerandomswitch
-  // control-flow fix (NEVER_FALLS_THROUGH_OPCODES /
-  // HARDCODED_SUCCESS_TARGETS above) regressed. FINISHACTION is a real find,
-  // not a mismatch with the scout's 3-opcode prediction: it sits on the
-  // not-taken (BATTLE_TYPE_TRAINER == false) side of BattleScript_
-  // SuccessForceOut's own jumpifbattletype fork, which this census's full
-  // walk always visits (see Caveats -- it does not model runtime battle-type
-  // dominance), even though that branch is structurally dead for Level-50
-  // Factory singles.
-  () => requireExactMissingOpcodes("EFFECT_ROAR", [
-    "B_SCR_OP_FORCERANDOMSWITCH",
-    "B_SCR_OP_SWITCHOUTABILITIES",
-    "B_SCR_OP_RETURNTOBALL",
-    "B_SCR_OP_FINISHACTION",
-  ]),
   // Registration checkpoint (2026-07-27, docs/roar-multihit-registration-
   // scout.md §4 rungs 2-6): B_SCR_OP_INITMULTIHITSTRING/B_SCR_OP_JUMPIFHASNOHP
   // registered, plus the JUMPIFHALFWORD (gChosenMove) and JUMPIFBYTE
@@ -670,6 +624,35 @@ const validationChecks: Array<() => void> = [
   () => requireExecutable("EFFECT_MULTI_HIT"),
   () => requireExecutable("EFFECT_DOUBLE_HIT"),
   () => requireExecutable("EFFECT_TWINEEDLE"),
+  // Registration checkpoint (2026-07-27, docs/roar-multihit-registration-
+  // scout.md §4 rungs 7-9): damagecalcOpcodeHandler now reads
+  // rules.tripleKickPower for the real 10/20/30 dynamic-base-power ramp;
+  // ADDBYTE's sTRIPLE_KICK_POWER delta literal "10" and JUMPIFBYTE's
+  // sMULTIHIT_STRING+4/standalone MOVE_RESULT_DOESNT_AFFECT_FOE are now
+  // resolvable; COPYARRAY's gDynamicBasePower<-sTRIPLE_KICK_POWER tuple
+  // (a hidden barrier the scout's §1d table wrongly called "registered")
+  // is now modeled as a pure-advance no-op. Moved from blocked-on-opcodes
+  // (this pin did not exist before this session -- Triple Kick was still
+  // blocked when the census was last regenerated, PROGRESS 525) to
+  // executable.
+  () => requireExecutable("EFFECT_TRIPLE_KICK"),
+  // Registration checkpoint (2026-07-27, docs/roar-multihit-registration-
+  // scout.md §4 rungs 10-14): B_SCR_OP_FORCERANDOMSWITCH/SWITCHOUTABILITIES/
+  // RETURNTOBALL registered (source-complete, zero barriers);
+  // B_SCR_OP_FINISHACTION registered as an unconditional (b) barrier
+  // (battleScriptForceSwitchOpcode.ts, per docs/script-terminal-gate3-
+  // evidence.md's own deferral) but that barrier sits on the not-taken
+  // (BATTLE_TYPE_TRAINER == false) side of BattleScript_SuccessForceOut's
+  // own jumpifbattletype fork, which this census's static walk always
+  // visits regardless of runtime battle-type dominance (see Caveats) --
+  // so the walk still reports the effect executable via its real,
+  // taken-for-Factory branch. Moved from the previous
+  // requireExactMissingOpcodes pin (the census's own control-flow-fix
+  // regression guard, no longer needed now that the row is executable
+  // rather than blocked -- a real BATTLE_TYPE_ARENA value gap found live
+  // running this exact script, fixed in battleScriptJumpifwordOpcode.ts,
+  // not a control-flow-extractor regression).
+  () => requireExecutable("EFFECT_ROAR"),
 ];
 
 let validationFailed = false;
@@ -915,23 +898,34 @@ lines.push(
   + "`STAT_MOVE_EFFECT_TABLE`'s keys, instead of a hand list that predated that table's registration)",
 );
 lines.push(
-  "- `EFFECT_ROAR` blocked on exactly `B_SCR_OP_FORCERANDOMSWITCH`, `B_SCR_OP_SWITCHOUTABILITIES`, "
-  + "`B_SCR_OP_RETURNTOBALL`, `B_SCR_OP_FINISHACTION` -- a control-flow extractor fix (2026-07-27, "
-  + "docs/roar-multihit-registration-scout.md): the graph previously fabricated a fallthrough edge from "
-  + "`forcerandomswitch` into the physically-next label (`BattleScript_EffectMultiHit`), which wrongly "
-  + "credited `INITMULTIHITSTRING`/`JUMPIFHASNOHP` to this row; the corrected walk instead follows "
-  + "`forcerandomswitch`'s real two-way branch (its own fail-pointer operand, plus the hardcoded, "
-  + "bytecode-invisible `BattleScript_SuccessForceOut` success target). Still blocked, scout §4 rungs 10-14",
-);
-lines.push(
   "- `EFFECT_MULTI_HIT`, `EFFECT_DOUBLE_HIT`, `EFFECT_TWINEEDLE` each executable (2026-07-27, scout §4 "
   + "rungs 2-6: `B_SCR_OP_INITMULTIHITSTRING`/`B_SCR_OP_JUMPIFHASNOHP` registered, `JUMPIFHALFWORD`/"
   + "`JUMPIFBYTE` per-operand widenings for `gChosenMove`/`MOVE_RESULT_FOE_ENDURED`, plus two further "
   + "hidden barriers found running the committed scripts live rather than trusting the scout dossier -- "
   + "`COPYARRAY`'s `cEFFECT_CHOOSER<-sMULTIHIT_EFFECT` tuple, and the `sMULTIHIT_STRING+4` hits-landed "
   + "counter's `ADDBYTE` write / `gBattleTextBuff1` `COPYARRAY` read, both real on every multi-hit "
-  + "iteration, not Triple-Kick-only as the dossier's §1d table claimed). `EFFECT_TRIPLE_KICK` remains "
-  + "blocked (scout §4 rungs 7-9: dynamic base-power plumbing + its own hit-counter byte reader)",
+  + "iteration, not Triple-Kick-only as the dossier's §1d table claimed)",
+);
+lines.push(
+  "- `EFFECT_TRIPLE_KICK` executable (2026-07-27, scout §4 rungs 7-9: `damagecalcOpcodeHandler` now reads "
+  + "`rules.tripleKickPower` for the real 10/20/30 dynamic-base-power ramp; `ADDBYTE`'s `sTRIPLE_KICK_POWER` "
+  + "delta literal `10` and `JUMPIFBYTE`'s `sMULTIHIT_STRING+4`/standalone `MOVE_RESULT_DOESNT_AFFECT_FOE` "
+  + "are now resolvable; plus a hidden barrier found live running the committed script that the scout "
+  + "dossier's §1d table wrongly called \"registered\" -- `COPYARRAY`'s "
+  + "`gDynamicBasePower<-sTRIPLE_KICK_POWER` tuple, now modeled as a pure-advance no-op since "
+  + "`gDynamicBasePower` has no materialized field here)",
+);
+lines.push(
+  "- `EFFECT_ROAR` executable (2026-07-27, scout §4 rungs 10-14: `B_SCR_OP_FORCERANDOMSWITCH`/"
+  + "`SWITCHOUTABILITIES`/`RETURNTOBALL` registered source-complete; `B_SCR_OP_FINISHACTION` registered "
+  + "as an unconditional (b) barrier per docs/script-terminal-gate3-evidence.md's own deferral, but that "
+  + "barrier sits on `BattleScript_SuccessForceOut`'s not-taken `BATTLE_TYPE_TRAINER == false` fork arm, "
+  + "which this census's static walk always visits regardless of runtime battle-type dominance -- see "
+  + "Caveats -- so the row is executable via its real, taken-for-Factory branch. A real "
+  + "`BATTLE_TYPE_ARENA` value gap found live running this exact script (defined locally in "
+  + "`battleScriptJumpifwordOpcode.ts` but never added to `JUMPIFWORD_VALUES`, despite the scout dossier's "
+  + "§1a table calling it \"already registered\") was fixed in that file, not a control-flow-extractor "
+  + "regression)",
 );
 lines.push("");
 lines.push("All checks passed for this run.");
