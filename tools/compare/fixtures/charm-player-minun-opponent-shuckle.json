@@ -1,0 +1,7 @@
+{
+  "schema": "charm-portable-fixture/v1",
+  "scenario": "tools/battle-lab/mechanic-charm-player-minun-opponent-shuckle.json",
+  "probe": "tools/compare/charmProbe.py",
+  "attackerSide": "player",
+  "attackerCenter": {"x": 72, "y": 80}
+}

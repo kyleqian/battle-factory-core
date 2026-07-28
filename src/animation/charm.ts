@@ -126,7 +126,8 @@ export function magentaHeartAtAge(
     x,
     y: attackerCenter.y + 20,
     x2: (GBA_SINE_TABLE_256[(data1 - 7) & 0xff]! * 8) >> 8,
-    y2: data2 >> 8,
+    // The callback writes y2 before subtracting 0x80 from stored data2.
+    y2: (-0x80 - 0x80 * localAge) >> 8,
     data0: localAge + 2,
     data1,
     data2,

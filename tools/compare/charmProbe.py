@@ -23,9 +23,12 @@ def main() -> None:
     lab = BattleLab(oracle, "battle-scene-on")
     setup = lab.prepare(request)
     sprites = oracle.symbols["gSprites"]
+    matrices = oracle.symbols["gOamMatrices"]
     visual_count = oracle.symbols["gAnimVisualTaskCount"]
     anim_attacker = oracle.symbols["gBattleAnimAttacker"]
     current_rows = []
+    def s16(value: int) -> int:
+        return value - 0x10000 if value >= 0x8000 else value
     frame = 0
     for segment in request["trace"]["segments"]:
         for _ in range(segment["frames"]):
@@ -38,18 +41,28 @@ def main() -> None:
             for slot in range(64):
                 base = sprites + slot * 0x44
                 if oracle.read_u8(base + 0x3e) & 1:
+                    matrix_num = (oracle.read_u16(base + 2) >> 9) & 0x1f
+                    matrix = matrices + matrix_num * 8
                     active.append({
                         "slot": slot,
                         "template": oracle.read_u32(base + 0x14),
                         "callback": oracle.read_u32(base + 0x1c),
-                        "x": oracle.read_u16(base + 0x20),
-                        "y": oracle.read_u16(base + 0x22),
-                        "x2": oracle.read_u16(base + 0x24),
-                        "y2": oracle.read_u16(base + 0x26),
+                        "x": s16(oracle.read_u16(base + 0x20)),
+                        "y": s16(oracle.read_u16(base + 0x22)),
+                        "x2": s16(oracle.read_u16(base + 0x24)),
+                        "y2": s16(oracle.read_u16(base + 0x26)),
                         "attr0": oracle.read_u16(base),
                         "attr1": oracle.read_u16(base + 2),
                         "attr2": oracle.read_u16(base + 4),
-                        "data": [oracle.read_u16(base + 0x2e + i * 2) for i in range(8)],
+                        "matrixNum": matrix_num,
+                        "matrix": {
+                            "a": s16(oracle.read_u16(matrix)),
+                            "b": s16(oracle.read_u16(matrix + 2)),
+                            "c": s16(oracle.read_u16(matrix + 4)),
+                            "d": s16(oracle.read_u16(matrix + 6)),
+                        },
+                        "data": [s16(oracle.read_u16(base + 0x2e + i * 2))
+                                 for i in range(8)],
                     })
             current_rows.append({
                 "frame": frame,
@@ -62,6 +75,7 @@ def main() -> None:
     OUTPUT.write_text(json.dumps({
         "schema": "charm-window-probe/v1",
         "setup": setup,
+        "magentaHeartTemplate": oracle.symbols["gMagentaHeartSpriteTemplate"],
         "firstFrame": current_rows[0]["frame"],
         "lastFrame": current_rows[-1]["frame"],
         "rows": current_rows,
