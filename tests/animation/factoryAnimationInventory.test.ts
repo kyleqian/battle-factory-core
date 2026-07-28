@@ -68,11 +68,11 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // ABSORB closes its source/software/typed seam as partial.
+        // ABSORB closes its complete hardware/framebuffer seam as exact.
         unsupported: 220,
         staged: 0,
-        partial: 4,
-        exact: 52,
+        partial: 3,
+        exact: 53,
       },
       {
         tier: "openOnly",

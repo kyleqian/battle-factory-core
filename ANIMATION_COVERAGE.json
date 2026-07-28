@@ -3,14 +3,14 @@
   "entries": [
     {
       "move": "MOVE_ABSORB",
-      "status": "partial",
+      "status": "exact",
       "covered": [
-        "complete legal Scene-ON set-131 LOMBRE scenarios pass the full source/software/typed-seam window 223-416 plus clear frame 417 at 195/195 in player-back and opponent-front orientations twice fresh",
-        "the relative reducer ports green BG palettes 1-3 through the exact 0/2/4/2/0 ramp, monbg/splitbgprio_foes/alpha lifecycle, animation-2 hitsplat, AnimTask_ShakeMon display latch, all eight literal absorption-orb calls and target-to-attacker horizontal arcs, shared HealingEffect, three sound identities/pans/restarts, and cleanup",
-        "the portable proof pins every effect sprite identity, position/offset, frame, affine matrix, allocator slot/order, palette-controller lifetime, selected faded/unfaded palettes, blend registers, target offsets, named monbg tasks, audio headers/active-track pans, and zero-effect teardown without absolute battle ticks or framebuffer data",
-        "source/probe-specific BATTLER_COORD semantics are typed inputs: player LOMBRE arcs/heals at 72,96 while opponent LOMBRE arcs/heals at 176,49; opponent ONIX impact starts at 176,42 and player ONIX at 72,88",
+        "complete legal Scene-ON set-131 LOMBRE scenarios pass the full move-owned window 223-416 plus clear frame 417 at 195/195 source/software, typed-seam, hardware, raw-RGB, and shared-framebuffer frames in player-back and opponent-front orientations twice fresh",
+        "the relative reducer and narrow compositor port green hardware BG banks 1-3 through the exact 0/2/4/2/0 ramp, monbg/splitbgprio_foes/alpha lifecycle, animation-2 semi-transparent hitsplat, the one-display AnimTask_ShakeMon latch, all eight semi-transparent target-to-attacker absorption arcs, shared HealingEffect stars, field chrome, and cleanup",
+        "the strengthened portable proof pins software sprite identity/geometry/affine state and allocator slots; source sSpriteOrder to hardware OAM transfer; affine matrices; faded, unfaded, and hardware palette transfer plus ORBS/BLUE_STAR/IMPACT tags; BG1 and blend registers; task counts; all three live sound identities/restarts/pans; raw RGB digest; and shared framebuffer equality",
+        "source/probe-specific BATTLER_COORD semantics remain typed inputs: player LOMBRE arcs/heals at 72,96 while opponent LOMBRE arcs/heals at 176,49; opponent ONIX impact starts at 176,42 and player ONIX at 72,88; framebuffer evidence corrects the player-back ONIX art corner to 40,48 and pins legal in-window HP as LOMBRE 152/167 and ONIX 110/110",
         "legal set-131 LOMBRE back/front art and literal ORBS, IMPACT, and BLUE_STAR sheets regenerate byte-for-byte from pinned source; the effect sheets equal the exact RECOVER/DYNAMIC_PUNCH assets by source identity, and exact shared ONIX battle-mon art remains reused",
-        "MEGA_DRAIN, DREAM_EATER, and GIGA_DRAIN remain unsupported because their independently audited scripts differ in orb multiplicity/arguments, blend strength, impact/background/scale/fire-spread bodies, and audio"
+        "RECOVER remains exact at 169/169 and SYNTHESIS at 130/130 in both orientations after the change; MEGA_DRAIN, DREAM_EATER, and GIGA_DRAIN remain unsupported because their independently audited scripts differ in orb multiplicity/arguments, blend strength, impact/background/scale/fire-spread bodies, and audio"
       ],
       "evidence": [
         "tools/battle-lab/mechanic-absorb-player-lombre-opponent-onix.json",
@@ -23,9 +23,9 @@
         "src/animation/assets/absorb.json",
         "src/animation/absorb.ts",
         "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
         "tests/animation/absorb.test.ts"
-      ],
-      "remaining": "After the shared Scene-ON oracle is refreshed, strengthen hardware OAM/matrix/order, faded/unfaded/hardware palette transfer and tag, register, live-audio, raw-RGB, and shared-framebuffer evidence; port the narrow shared compositor and prove all 195 frames twice in both orientations, then rerun exact RECOVER and SYNTHESIS controls."
+      ]
     },
     {
       "move": "MOVE_SCARY_FACE",
@@ -1803,7 +1803,7 @@
         "MOVE_MOONLIGHT",
         "MOVE_SWALLOW"
       ],
-      "goal": "MOVE_RECOVER proves the complete three-wave RecoverAbsorbEffect plus attacker HealingEffect body in both orientations at 169/169 component/RAM and framebuffer frames, reproduced twice. MOVE_MILK_DRINK independently proves its complete bottle/thin-ring/target HealingEffect2 body in both orientations at 186/186 component/RAM and framebuffer frames, reproduced twice. MOVE_SYNTHESIS independently proves its complete GrantingStarsEffect/blend/load-boundary/attacker HealingEffect body in both orientations at 130/130 component/task/RAM/palette and framebuffer frames, reproduced twice. RECOVER remains 169/169, MILK DRINK 186/186, and BIND 45/45 in both orientations as regression controls. No other sibling is promoted: ABSORB needs its 8-orb sine drain/hitsplat/green field body; MEGA_DRAIN its paired 16-orb stronger-green body; DREAM_EATER its psychic-background/target-scale-and-shake/24-orb body; GIGA_DRAIN its 24-orb/high-green body; SOFT_BOILED has a distinct breaking-egg pair, attacker shake, two offset affine-program-0 thin rings, palette blend, and target HealingEffect2 body and needs its own dense move evidence; PRESENT has a distinct common moving item-bag body plus conditional five-explosion damage body or nine-green-particle healing body before target HealingEffect2, and needs dense evidence for both conditional outcomes; MOONLIGHT needs its blackout/moon/alpha/sparkle pipeline; and SWALLOW needs its move-turn-dependent deform/shake/blue-orb multiplicity. Each remains unsupported pending its own complete dense acceptance."
+      "goal": "MOVE_RECOVER proves the complete three-wave RecoverAbsorbEffect plus attacker HealingEffect body in both orientations at 169/169 component/RAM and framebuffer frames, reproduced twice. MOVE_ABSORB independently proves its eight-orb drain/hitsplat/green-field body plus attacker HealingEffect at 195/195 complete hardware/framebuffer frames in both orientations, reproduced twice. MOVE_MILK_DRINK independently proves its complete bottle/thin-ring/target HealingEffect2 body in both orientations at 186/186 component/RAM and framebuffer frames, reproduced twice. MOVE_SYNTHESIS independently proves its complete GrantingStarsEffect/blend/load-boundary/attacker HealingEffect body in both orientations at 130/130 component/task/RAM/palette and framebuffer frames, reproduced twice. RECOVER remains 169/169, SYNTHESIS 130/130, MILK DRINK 186/186, and BIND 45/45 in both orientations as regression controls. No other sibling is promoted: MEGA_DRAIN needs its paired 16-orb stronger-green body; DREAM_EATER its psychic-background/target-scale-and-shake/24-orb body; GIGA_DRAIN its 24-orb/high-green body; SOFT_BOILED has a distinct breaking-egg pair, attacker shake, two offset affine-program-0 thin rings, palette blend, and target HealingEffect2 body and needs its own dense move evidence; PRESENT has a distinct common moving item-bag body plus conditional five-explosion damage body or nine-green-particle healing body before target HealingEffect2, and needs dense evidence for both conditional outcomes; MOONLIGHT needs its blackout/moon/alpha/sparkle pipeline; and SWALLOW needs its move-turn-dependent deform/shake/blue-orb multiplicity. Each remains unsupported pending its own complete dense acceptance."
     },
     {
       "id": "absorption-orb-drain",
@@ -1818,7 +1818,7 @@
         "MOVE_DREAM_EATER",
         "MOVE_GIGA_DRAIN"
       ],
-      "goal": "MOVE_ABSORB is partial with a complete 195/195 source/software/typed-seam proof in both orientations twice fresh: all eight target-to-attacker arcs, green palette/register/monbg lifecycle, impact/shake, HealingEffect, audio, allocator order, and cleanup. Exact still requires source presentation assets, hardware OAM/palette transfer, raw RGB, and shared framebuffer wiring. No sibling is promoted: MEGA DRAIN has 16 paired orbs, blend 8, hitsplat animation 1 and Bubble3; GIGA DRAIN has blend 12, 24 variable-amplitude orbs, three FireSpread sprites and Giga Drain audio; DREAM EATER adds psychic background/scale/shake, omits IMPACT, and has 24-orb Swagger body. LEECH LIFE is not Level-50 Factory scope."
+      "goal": "MOVE_ABSORB is exact at 195/195 complete source/software/typed-seam, hardware OAM/matrix/order, palette/register/audio, raw-RGB, and shared-framebuffer frames in both orientations twice fresh: all eight target-to-attacker arcs, green field lifecycle, impact/shake, HealingEffect, and cleanup. No sibling is promoted: MEGA DRAIN has 16 paired orbs, blend 8, hitsplat animation 1 and Bubble3; GIGA DRAIN has blend 12, 24 variable-amplitude orbs, three FireSpread sprites and Giga Drain audio; DREAM EATER adds psychic background/scale/shake, omits IMPACT, and has 24-orb Swagger body. LEECH LIFE is not Level-50 Factory scope."
     }
   ],
   "variantAudits": {

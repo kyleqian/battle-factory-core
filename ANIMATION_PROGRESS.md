@@ -1,5 +1,32 @@
 # Animation coverage
 
+## MOVE_ABSORB promoted exact; drain compositor closed (2026-07-27)
+
+**Verdict:** `MOVE_ABSORB` is exact. Legal set-131 LOMBRE versus constrained
+ONIX matches the complete move-owned frames **223-417 (195/195)** through the
+source/software reducer, typed seam, hardware OAM/matrices/order, tagged
+palette transfers, registers/monbg, live audio, raw RGB, and shared
+framebuffer in both orientations, reproduced twice fresh. Coverage is now
+**53 exact / 3 partial / 220 unsupported**.
+
+**Renderer/evidence:** the narrow compositor reuses source-extracted LOMBRE,
+ONIX, ORBS, IMPACT, and BLUE_STAR assets and ports the green hardware-bank
+ramp, split priority/alpha, semi-transparent hitsplat and eight absorption
+arcs, one-display effect and ShakeMon latches, HealingEffect stars, field
+chrome, and teardown. The strengthened probe pins stock `sSpriteOrder`
+transfer, affine matrices, palette tags/buffers, task counts, BG1/blend
+registers, and all three sound intervals. Framebuffer evidence corrects the
+player-back ONIX art corner to `(40,48)` and pins the legal in-window profiles
+as LOMBRE **152/167 HP** and ONIX **110/110 HP**.
+
+**Controls/scope:** RECOVER remains **169/169** and SYNTHESIS **130/130**
+framebuffer-exact in both orientations after the change. MEGA_DRAIN,
+DREAM_EATER, and GIGA_DRAIN remain unsupported with their audited distinct
+orb counts/arguments, blend strengths, impact/background/fire bodies, and
+audio. Full Tier-1 is green at **3762/3762** and the production build passes.
+No boundary-list, unsupported-barrier, canonical-import, battle-state, RNG,
+controller, outcome, or facility-state change.
+
 ## ABSORB presentation-assets checkpoint; remains partial (2026-07-27)
 
 **State:** Coverage remains **52 exact / 4 partial / 220 unsupported**.
@@ -45,14 +72,6 @@ hardware OAM/palette transfer, raw RGB, and the shared framebuffer; no engine
 file was touched. MEGA DRAIN, DREAM EATER, and GIGA DRAIN retain their audited
 blend/orb/impact/background/fire/audio differences and remain unsupported.
 RECOVER and SYNTHESIS remain exact shared-HealingEffect controls.
-
-## ABSORB absorption-orb evidence checkpoint; remains unsupported (2026-07-27)
-
-**Verdict:** `MOVE_ABSORB` remains unsupported. Fresh legal Scene-ON `mechanicLab` parties stage the real Level-50 set-131 LOMBRE carrier (Quirky, Attack/HP EV spread, source ABSORB slot) in player-back and opponent-front orientations against constrained ONIX; all active LOMBRE choices are ABSORB and all ONIX choices are TACKLE. The two scenarios capture every source-relative body/cleanup frame 223–417.
-
-**Proof:** dense mGBA evidence reaches the identical complete move-owned presentation window **223–416** both orientations, with cleanup at 417: green BG blend/`monbg`/`splitbgprio_foes` setup; target hitsplat/shake; eight `create_absorption_orb_sprite` starts at four-frame cadence (257–333, six live peak), `gAbsorptionOrbSpriteTemplate` / `AnimAbsorptionOrb` target-to-attacker arcs, source palette/register ownership, SE player lifetimes, HealingEffect stars, reset, and clear boundary. Geometry mirrors only by source battler centers: player LOMBRE 72,88 from ONIX 176,42; opponent LOMBRE 176,49 from ONIX 72,80. No renderer, engine, status, or app comparator was changed.
-
-**Sibling audit:** MEGA_DRAIN reuses the outer body and command/template/callback but has 16 paired orbs, stronger green blend (8), hitsplat animation 1, and `SE_M_BUBBLE3`; GIGA_DRAIN has blend 12, 24 variable-amplitude orbs plus three FireSpread sprites and `SE_M_GIGA_DRAIN`; DREAM_EATER shares the 24-orb tail family but adds psychic BG, target scale/shake, no IMPACT, and `SE_M_SWAGGER`. All remain unsupported; LEECH LIFE is outside Level-50 Factory scope and lower priority. The new non-exclusive component track records only the shared command proof.
 
 Living status for the Battle Scene ON lane. Source scope is generated in
 `factory-animation-inventory.json`; the script dependency graph is generated
