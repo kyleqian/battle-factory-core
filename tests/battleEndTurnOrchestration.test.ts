@@ -20,6 +20,7 @@ const STATUS1_TOXIC_POISON = 1 << 7;
 const B_WAIT_TIME_LONG = 64;
 /** include/constants/battle.h:140-141,158-159,167. */
 const STATUS3_ROOTED = 1 << 10;
+const STATUS3_CHARGED_UP = 1 << 9;
 const STATUS3_LEECHSEED = 1 << 2;
 const STATUS2_WRAPPED_MASK = (1 << 13) | (1 << 14) | (1 << 15);
 /** include/abilities.h:68. */
@@ -95,6 +96,8 @@ function battler(changes: Partial<BattleScriptRulesBattler> & { maxHP?: number }
     furyCutterCounter: changes.furyCutterCounter ?? 0,
     truantCounter: changes.truantCounter ?? 0,
     rechargeTimer: changes.rechargeTimer ?? 0,
+    chargeTimer: changes.chargeTimer ?? 0,
+    chargeTimerStartValue: changes.chargeTimerStartValue ?? 0,
     flinchImmobility: changes.flinchImmobility ?? 0,
     disabledMove: changes.disabledMove ?? 0,
     usedDisabledMove: changes.usedDisabledMove ?? 0,
@@ -195,6 +198,40 @@ function scratchState(rulesContext: BattleScriptRulesContext, attacker: 0 | 1) {
 }
 
 describe("runBattleEndTurnOrchestration (BattleTurnPassed equivalent)", () => {
+  it("ENDTURN_CHARGE decrements 2 -> 1, then expires 1 -> 0 and clears only the charged bit", () => {
+    const rc = context({
+      battlers: [
+        battler({
+          side: 0,
+          status3: STATUS3_CHARGED_UP | STATUS3_ROOTED,
+          chargeTimer: 2,
+          chargeTimerStartValue: 2,
+        }),
+        battler({ side: 1, partyIndex: 2 }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+    });
+    const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(0));
+    const first = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
+    expect(first.kind).toBe("next-turn");
+    if (first.kind !== "next-turn") throw new Error("expected next-turn");
+    expect(first.state.rulesContext.battlers[0]).toMatchObject({
+      status3: STATUS3_CHARGED_UP | STATUS3_ROOTED,
+      chargeTimer: 1,
+      chargeTimerStartValue: 2,
+    });
+    const second = runBattleEndTurnOrchestration(program, handlers, first.state);
+    expect(second.kind).toBe("next-turn");
+    if (second.kind !== "next-turn") throw new Error("expected next-turn");
+    expect(second.state.rulesContext.battlers[0]).toMatchObject({
+      status3: STATUS3_ROOTED,
+      chargeTimer: 0,
+      chargeTimerStartValue: 2,
+    });
+    expect(second.state.rng.calls).toBe(0);
+  });
+
   it("ENDTURN_NIGHTMARES pins the OFF receipt's 116 -> 87 -> 58 quarter-HP ladder with zero RNG", () => {
     const rc = context({
       battlers: [

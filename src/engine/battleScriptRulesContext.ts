@@ -109,6 +109,7 @@ import { createBattleScriptSetbideOpcodeHandlers } from "./battleScriptSetbideOp
 import { createBattleScriptLastMoveOpcodeHandlers } from "./battleScriptLastMoveOpcode.ts";
 import { createBattleScriptTypeChangeOpcodeHandlers } from "./battleScriptTypeChangeOpcode.ts";
 import { createBattleScriptEnvironmentAttackOpcodeHandlers } from "./battleScriptEnvironmentAttackOpcode.ts";
+import { createBattleScriptChargeSportOpcodeHandlers } from "./battleScriptChargeSportOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -280,6 +281,9 @@ type BattleScriptRulesBattlerBase = Readonly<{
 }>;
 
 type BattleScriptMoveEndBattlerMetadata = Readonly<{
+  /** DisableStruct's paired four-bit Charge lifetime fields. */
+  chargeTimer: number;
+  chargeTimerStartValue: number;
   /** Source gBattleMons[battler] IV bitfields, consumed by Hidden Power. */
   ivs: BattleScriptIvs;
   /** Source four-bit DisableStruct::mimickedMoves mask. */
@@ -425,6 +429,8 @@ export type BattleScriptRulesBattler = BattleScriptRulesBattlerBase & Readonly<{
    * construction boundary. Production constructors supply source values.
    */
   item?: number;
+  chargeTimer?: number;
+  chargeTimerStartValue?: number;
   /** Legacy focused fixtures default to six zero IVs at the construction boundary. */
   ivs?: BattleScriptIvs;
   mimickedMoves?: number;
@@ -2069,6 +2075,16 @@ export function createBattleScriptRulesContext(
       0xff,
       `battlers[${index}].rechargeTimer`,
     ),
+    chargeTimer: requireUnsigned(
+      battler.chargeTimer ?? 0,
+      0x0f,
+      `battlers[${index}].chargeTimer`,
+    ),
+    chargeTimerStartValue: requireUnsigned(
+      battler.chargeTimerStartValue ?? 0,
+      0x0f,
+      `battlers[${index}].chargeTimerStartValue`,
+    ),
     flinchImmobility: requireUnsigned(
       battler.flinchImmobility,
       1,
@@ -2848,6 +2864,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptLastMoveOpcodeHandlers(program),
     ...createBattleScriptTypeChangeOpcodeHandlers(program),
     ...createBattleScriptEnvironmentAttackOpcodeHandlers(program),
+    ...createBattleScriptChargeSportOpcodeHandlers(program),
     ...createBattleScriptSettormentOpcodeHandlers(program),
     ...createBattleScriptSettauntOpcodeHandlers(program),
     ...createBattleScriptSetforesightOpcodeHandlers(program),

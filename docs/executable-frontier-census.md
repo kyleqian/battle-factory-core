@@ -10,8 +10,8 @@ Answers ROADMAP S10's Executable-frontier reset question directly: not "how many
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 204 | 214 | 95.3% |
-| Moves (unweighted, all 355) | 344 | 355 | 96.9% |
+| Effect scripts | 205 | 214 | 95.8% |
+| Moves (unweighted, all 355) | 345 | 355 | 97.2% |
 | Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 275 | 276 | 99.6% |
 | Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2955 | 2957 | 99.9% |
 
@@ -25,7 +25,6 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | --- | --- | --- | --- | --- |
 | `B_SCR_OP_SETALWAYSHITFLAG` | 1 (EFFECT_LOCK_ON) | 2 | 0 | 0 |
 | `B_SCR_OP_ASSISTATTACKSELECT` | 1 (EFFECT_ASSIST) | 1 | 0 | 0 |
-| `B_SCR_OP_SETCHARGE` | 1 (EFFECT_CHARGE) | 1 | 0 | 0 |
 | `B_SCR_OP_TRYDOBEATUP` | 1 (EFFECT_BEAT_UP) | 1 | 0 | 0 |
 | `B_SCR_OP_TRYIMPRISON` | 1 (EFFECT_IMPRISON) | 1 | 0 | 0 |
 | `B_SCR_OP_TRYSETSNATCH` | 1 (EFFECT_SNATCH) | 1 | 0 | 0 |
@@ -208,7 +207,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_SMELLINGSALT | `BattleScript_EffectSmellingsalt` | executable | - | - | 1 | 1 (1) |
 | EFFECT_FOLLOW_ME | `BattleScript_EffectFollowMe` | executable | - | - | 1 | 1 (5) |
 | EFFECT_NATURE_POWER | `BattleScript_EffectNaturePower` | executable | - | - | 1 | 0 (0) |
-| EFFECT_CHARGE | `BattleScript_EffectCharge` | blocked-on-opcodes | `B_SCR_OP_SETCHARGE` (main path) | - | 1 | 0 (0) |
+| EFFECT_CHARGE | `BattleScript_EffectCharge` | executable | - | - | 1 | 0 (0) |
 | EFFECT_TAUNT | `BattleScript_EffectTaunt` | executable | - | - | 1 | 1 (2) |
 | EFFECT_HELPING_HAND | `BattleScript_EffectHelpingHand` | executable | - | - | 1 | 1 (5) |
 | EFFECT_TRICK | `BattleScript_EffectTrick` | executable | - | - | 1 | 1 (5) |

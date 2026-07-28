@@ -138,6 +138,8 @@ const STATUS1_TOXIC_COUNTER = (1 << 8) | (1 << 9) | (1 << 10) | (1 << 11);
 const STATUS1_TOXIC_TURN_1 = 1 << 8;
 const STATUS1_TOXIC_TURN_15 = 15 << 8;
 const STATUS1_PSN_ANY = STATUS1_POISON | STATUS1_TOXIC_POISON;
+/** include/constants/battle.h:166. */
+const STATUS3_CHARGED_UP = 1 << 9;
 /** include/constants/battle.h:125 -- STATUS1_ANY, HOLD_EFFECT_CURE_STATUS's own gate. */
 const STATUS1_ANY = BATTLE_SCRIPT_STATUS1_SLEEP | STATUS1_POISON | STATUS1_BURN
   | STATUS1_FREEZE | STATUS1_PARALYSIS | STATUS1_TOXIC_POISON;
@@ -1446,7 +1448,22 @@ function runDoBattlerEndTurnEffects(
       }
     }
     // ENDTURN_LOCK_ON: doc-proven dead for Factory (zero MOVE_LOCK_ON/MOVE_MIND_READER carriers, B15) -- skipped, not silently ignored.
-    // ENDTURN_CHARGE: no modeled chargeTimer/STATUS3_CHARGED_UP -- inert no-op today (doc B16).
+    // ENDTURN_CHARGE (`battle_util.c:1743-1747`): decrement the functional
+    // timer and clear the charged bit exactly when it reaches zero. The
+    // paired start-value field is source metadata and is not decremented.
+    const chargeBattler = state.rulesContext.battlers[battler];
+    if (chargeBattler.chargeTimer !== 0) {
+      const chargeTimer = chargeBattler.chargeTimer - 1;
+      state = Object.freeze({
+        ...state,
+        rulesContext: withBattler(state.rulesContext, battler, {
+          chargeTimer,
+          status3: chargeTimer === 0
+            ? (chargeBattler.status3 & ~STATUS3_CHARGED_UP) >>> 0
+            : chargeBattler.status3,
+        }),
+      });
+    }
     // ENDTURN_TAUNT (`battle_util.c:1748-1752`): unlike Disable/Encore,
     // expiry owns no script, message, controller request, or RNG draw. The
     // source decrements only the functional tauntTimer; Cmd_settaunt's

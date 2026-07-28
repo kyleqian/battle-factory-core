@@ -14,6 +14,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > entry 468's animation items are the animation supervisor's backlog now.
 
 
+## 636 — [BOUNDED MAIN WORKER 2026-07-28 ~15:03] Frontier-tail row 4 partial: Charge source-complete
+
+- **State:** Charge is independently green; census exactly **205/214 effects,
+  345/355 moves, 275/276 distinct, 2955/2957 weighted**, all **70**
+  validations passing. Targeted Charge/end-turn tests and production build
+  pass.
+- **Did:** registered `B_SCR_OP_SETCHARGE`; added both four-bit DisableStruct
+  timer fields, switch reset, and exact `2 -> 1 -> 0` end-turn expiry/bit
+  clear. Pinned zero-draw full-shell walk, repeat refresh, and Electric-only
+  doubling.
+- **Next:** finish row 4 with shared Mud/Water Sport setter, print table,
+  either-side pre-formula power scan, repeat failures, and switch/Baton-Pass
+  lifetime; expected final census **207/347/275/2955**.
+- **Notes:** dossier claims checked against pinned source with no correction
+  needed. No barriers or canonical-recording imports.
+
+
 ---
 ## 635 — [SUPERVISOR ORIENT 2026-07-28 ~14:55] New session: animation fold (Smokescreen exact), OFF oracle restarted fresh
 

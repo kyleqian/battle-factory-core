@@ -183,6 +183,8 @@ function emptyBattler(side: 0 | 1): BattleScriptRulesBattlerState {
     furyCutterCounter: 0,
     truantCounter: 0,
     rechargeTimer: 0,
+    chargeTimer: 0,
+    chargeTimerStartValue: 0,
     flinchImmobility: 0,
     disabledMove: 0,
     disableTimer: 0,

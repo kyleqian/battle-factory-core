@@ -450,6 +450,8 @@ function createSwitchindataupdateOpcodeHandler(
           stockpileCounter: 0,
           truantCounter: 0 as const,
           rechargeTimer: 0,
+          chargeTimer: 0,
+          chargeTimerStartValue: 0,
           disabledMove: 0,
           disableTimer: 0,
           disableTimerStartValue: 0,
