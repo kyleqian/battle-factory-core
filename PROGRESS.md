@@ -13,6 +13,52 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > parallel-workers note). This replaces the temporary animation pause —
 > entry 468's animation items are the animation supervisor's backlog now.
 
+## 643 — [BOUNDED MAIN WORKER 2026-07-28 ~16:40] Frontier-tail row 6b Beat Up source-complete
+
+- **State:** committed `ebc331fb`; tree green at **429 files / 4681 tests**,
+  production build, OFF oracle info, and `git diff --check`. Census is exactly
+  **212/214 effects, 353/355 moves, 275/276 distinct, 2955/2957 weighted**:
+  assigned-baseline delta **+1/+1/+0/+0**; all **70** validations pass.
+- **Did:** registered `B_SCR_OP_TRYDOBEATUP` with the source six-slot
+  HP/species/Egg/status scan, active-slot inclusion, per-member nickname, and
+  exact ordered integer base-Attack/base-Defense formula. The Level-50
+  constant is an explicit S10 mission bound; Helping Hand is the sole
+  post-formula multiplier.
+- **Next:** supervisor verify `ebc331fb`; continue only at ordered row 7
+  Transform, not Metronome or retired canonical Battle 2 work.
+- **Notes:** consumed mandatory `docs/beatup-off-evidence.md`; receipt-shaped
+  Tier-1 pins `gBattleCommunication[0]` **0→2→3→6**, target **160→154**,
+  and exactly accuracy + two crit/variance pairs (**5 draws**). Tests cover
+  every invalid-member filter, zero/one/three hitters, active hitter,
+  slot-specific damage/nickname, Helping Hand, and end-vs-initial-failure.
+  Deliberate handler exact-set pin **206→207**. No barrier, canonical import,
+  recording, presentation, round, tick, roadmap, or issue change.
+
+---
+
+## 642 — [BOUNDED MAIN WORKER 2026-07-28 ~16:29] Frontier-tail row 6a Assist source-complete
+
+- **State:** committed `9c9a6337`; tree green at **428 files / 4676 tests**,
+  production build, OFF oracle info, and `git diff --check`. Census is exactly
+  **211/214 effects, 352/355 moves, 275/276 distinct, 2955/2957 weighted**:
+  assigned-baseline delta **+1/+1/+0/+0**; all **70** validations pass.
+- **Did:** registered `B_SCR_OP_ASSISTATTACKSELECT` beside the existing shared
+  called-move machinery. It scans party slot then move slot, excludes the
+  user's active party slot (not same-species records), applies the exact
+  invalid/forbidden bounds, scaled-selects once, retargets, and takes the
+  no-candidate failure pointer without a draw.
+- **Next:** supervisor verify this commit; continue only from the ordered
+  frontier-tail plan, not Beat Up/Transform/Metronome unless separately assigned.
+- **Notes:** consumed `docs/assist-off-evidence.md`; receipt test reproduces
+  seed `0x29a72072` → `0xb237ecfd`, low byte `0x37`, candidate index 1/Growl.
+  Tests pin active/empty/Egg/forbidden filters, same-species inclusion,
+  party-major order, no dedup, exact Uproar boundary, zero-candidate failure,
+  and existing `jumptocalledmove TRUE` target/RNG/PP ownership. Deliberate
+  handler exact-set pin **205→206**. No barrier, canonical import, recording,
+  presentation, round, tick, roadmap, or issue change.
+
+
+---
 ## 641 — [BOUNDED MAIN WORKER 2026-07-28 ~16:20] Frontier-tail row 5c Snatch source-complete
 
 - **State:** committed `42863c36`; tree green at **425 files / 4661 tests**,
@@ -31,45 +77,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   consumption, push/return, cleanup, and zero draws. Deliberate handler pin
   **202→205** (setter plus two resume-script role opcodes); canceler barrier
   pin **4→3**. No canonical import, recording, round, tick, or roadmap change.
-
-
----
-## 640 — [BOUNDED MAIN WORKER 2026-07-28 ~16:08] Frontier-tail row 5b Imprison source-complete
-
-- **State:** committed `8a8aec19`; tree green at **424 files / 4658 tests**,
-  production build, OFF oracle info, and `git diff --check`. Census is exactly
-  **209/214 effects, 350/355 moves, 275/276 distinct, 2955/2957 weighted**:
-  assigned-baseline delta **+1/+1/+0/+0**; all **70** validations pass.
-- **Did:** registered `B_SCR_OP_TRYIMPRISON` with already-set failure,
-  source-ordered opposing overlap scan, and its pre-scan special Pressure
-  loop. Each opposing Pressure holder removes one extra Imprison PP while
-  the whole loop emits one persistent controller update; the existing
-  action-admission scan consumes the newly-set bit.
-- **Next:** supervisor verify `8a8aec19`; continue only from the ordered
-  frontier-tail plan, not retired canonical Battle 2 work.
-- **Notes:** consumed `docs/imprison-off-evidence.md`; Tier-1 pins zero draws,
-  normal **10→9** plus one-Pressure **9→8**, zero/multiple Pressure, overlap/
-  no-overlap/already-set, single post-loop update, and admission denial.
-  Deliberate handler exact-set pin **201→202**. No barrier, canonical import,
-  presentation, round, tick, roadmap, issue, or oracle-trace change.
-
-
----
-## 639 — [BOUNDED MAIN WORKER 2026-07-28 ~15:59] Frontier-tail row 5a source-complete
-
-- **State:** committed `ee91c6f6`; tree green at **423 files / 4654 tests**,
-  production build, OFF oracle info, and `git diff --check`. Census is exactly
-  **208/214 effects, 349/355 moves, 275/276 distinct, 2955/2957 weighted**:
-  assigned-baseline delta **+1/+2/+0/+0**; all **70** validations pass.
-- **Did:** registered the shared Lock On/Mind Reader setter with replace-not-OR
-  packed counter and durable `battlerWithSureHit` ownership. Both accuracy
-  forms and OHKO consume the combined bit+owner predicate; expiry, ordinary
-  switch, Baton Pass preservation/refresh, and faint cleanup are source-complete.
-- **Next:** supervisor verify `ee91c6f6`; continue the ordered tail plan at row
-  5b (Imprison), not later rows.
-- **Notes:** receipt-shaped Tier-1 proof pins setter **1 accuracy draw** then
-  owned Zap Cannon **0 accuracy + 3 later hit-chain draws**; Substitute draws
-  zero. Both moves share EFFECT_LOCK_ON. Deliberate barrier pins:
-  HitChain **18→16**, Switchin **8→6**, TryKO **2→1**; handler exact-set
-  **200→201**. No new barrier, canonical import, presentation, round, tick,
-  roadmap, issue, or oracle-trace change.
