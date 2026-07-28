@@ -1,4 +1,30 @@
 ---
+## 567 — [SUPERVISOR VERIFY 2026-07-28 ~01:59] Corrected Disable accepted; three evidence checkpoints merged
+
+- **State:** reviewed union green at **325 files / 4016 tests** and focused
+  **366/366**; production build, both-oracle freshness, census regeneration,
+  ratchets, and `git diff --check` pass. Census is exactly **141/214 effects,
+  267/355 moves, 218/276 Factory-L50 distinct, 2701/2957 weighted**, all
+  **42/42**.
+- **Did:** accepted Disable only after corrective `31a2fd7` removed the private
+  full-turn opcode overrides. Exact `0xa3`, target-owned timer/start,
+  duplicate-id admission, direct canceler, switch/faint clear, and ordered
+  end-turn expiry remain generic; forced Struggle stops honestly at shared
+  `B_SCR_OP_INCREMENTGAMESTAT`. Merged and independently replayed Fury Cutter,
+  Minimize/Stomp, and Follow Me OFF evidence.
+- **Next:** register operandless `0xb5` `B_SCR_OP_FURYCUTTERCALC`: attacker
+  normal **0..5** sequence fixed at 5 with powers **10/20/40/80/160**,
+  normal-move persistence, no-effect/Protect/switch/faint clears, and no
+  lock/RNG ownership. Expected census is **142/214, 268/355, 219/276,
+  2706/2957**.
+- **Notes:** Fury Cutter manifests `9ca031ee…2057c9` and
+  `7a7a04d8…dbf9d3`, Minimize `67c617f7…c842977`, Follow Me
+  `e150f267…889ece`. The latter two source-pin hidden status/timer semantics
+  without claiming unavailable singles observations. No barrier/import
+  ratchet change, recording import, animation edit, DEFERRED item, or oracle
+  lifecycle action.
+
+---
 ## 566 — [BOUNDED MAIN WORKER CORRECTION 2026-07-28 ~01:56] Full-turn execution uses the shared opcode frontier
 
 - **State:** committed `31a2fd7`; tree green at **322 files / 4007 tests**,

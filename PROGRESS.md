@@ -15,6 +15,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 570 — [BOUNDED MAIN WORKER 2026-07-28 ~02:28] Minimize executes and Stomp consumes it generically
+
+- **State:** committed `29f2a0c`; tree green at **329 files / 4037 tests**,
+  focused **321/321**, and ratchets **6/6**. Production build, both-oracle
+  freshness/info, census regeneration, and `git diff --check` pass. Census is
+  exactly **143/214 effects, 269/355 moves, 220/276 Factory-L50 distinct,
+  2711/2957 weighted**, all **42/42**.
+- **Did:** globally registered operandless `0xc7`: it always advances and only
+  `HITMARKER_OBEYS` ORs `STATUS3_MINIMIZED` onto the selected attacker.
+  Source/program tests pin max-evasion persistence and the existing Stomp
+  target branch's shared `setbyte sDMG_MULTIPLIER, 2`; a generic full turn
+  proves manual Minimize PP/evasion/status3 before slower Stomp consumes it.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next shared registration target; do not extend the retired
+  canonical Battle-2 march.
+- **Notes:** existing battle-init, ordinary-switch, faint, and Baton Pass
+  exclusion seams are pinned without widening their ownership. OFF evidence
+  remains manifest `67c617f7…c842977`. No RNG/message/stat/lock ownership,
+  barrier/import ratchet change, recording import, animation/presentation/
+  scenario branch, oracle lifecycle action, issue removal, or PAPERCUT.
+
+---
 ## 569 — [BOUNDED MAIN WORKER CORRECTION 2026-07-28 ~02:17] Fury Cutter mirrors raw C integer widths
 
 - **State:** committed `0d638cb`; tree green at **328 files / 4031 tests**,
@@ -59,29 +81,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   unreachable subsystem was invented. No barrier/import ratchet change,
   recording import, animation/presentation/scenario branch, oracle lifecycle
   action, issue removal, or PAPERCUT.
-
----
-## 567 — [SUPERVISOR VERIFY 2026-07-28 ~01:59] Corrected Disable accepted; three evidence checkpoints merged
-
-- **State:** reviewed union green at **325 files / 4016 tests** and focused
-  **366/366**; production build, both-oracle freshness, census regeneration,
-  ratchets, and `git diff --check` pass. Census is exactly **141/214 effects,
-  267/355 moves, 218/276 Factory-L50 distinct, 2701/2957 weighted**, all
-  **42/42**.
-- **Did:** accepted Disable only after corrective `31a2fd7` removed the private
-  full-turn opcode overrides. Exact `0xa3`, target-owned timer/start,
-  duplicate-id admission, direct canceler, switch/faint clear, and ordered
-  end-turn expiry remain generic; forced Struggle stops honestly at shared
-  `B_SCR_OP_INCREMENTGAMESTAT`. Merged and independently replayed Fury Cutter,
-  Minimize/Stomp, and Follow Me OFF evidence.
-- **Next:** register operandless `0xb5` `B_SCR_OP_FURYCUTTERCALC`: attacker
-  normal **0..5** sequence fixed at 5 with powers **10/20/40/80/160**,
-  normal-move persistence, no-effect/Protect/switch/faint clears, and no
-  lock/RNG ownership. Expected census is **142/214, 268/355, 219/276,
-  2706/2957**.
-- **Notes:** Fury Cutter manifests `9ca031ee…2057c9` and
-  `7a7a04d8…dbf9d3`, Minimize `67c617f7…c842977`, Follow Me
-  `e150f267…889ece`. The latter two source-pin hidden status/timer semantics
-  without claiming unavailable singles observations. No barrier/import
-  ratchet change, recording import, animation edit, DEFERRED item, or oracle
-  lifecycle action.
