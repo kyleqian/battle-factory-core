@@ -17,7 +17,7 @@ import {
   loadBattleScriptProgram,
   resolveBattleScriptLabel,
 } from "../src/engine/battleScriptProgram.ts";
-import { BATTLE_SCRIPT_STATUS3_MINIMIZED } from "../src/engine/battleScriptSetminimizeOpcode.ts";
+import { BATTLE_SCRIPT_STATUS3_MINIMIZED } from "../src/engine/battleScriptSourceConstants.ts";
 
 const MINIMIZE = 107;
 const STOMP = 23;

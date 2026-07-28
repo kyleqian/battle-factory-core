@@ -17,9 +17,8 @@ import {
   BATTLE_SCRIPT_HITMARKER_OBEYS,
   type BattleScriptRulesContext,
 } from "./battleScriptRulesContext.ts";
+import { BATTLE_SCRIPT_STATUS3_MINIMIZED } from "./battleScriptSourceConstants.ts";
 import { requireBattlerRole, withBattler } from "./battleScriptHitChainOpcode.ts";
-
-export const BATTLE_SCRIPT_STATUS3_MINIMIZED = 1 << 8;
 
 const setminimizeHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (
   context,
