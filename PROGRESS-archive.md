@@ -1,4 +1,28 @@
 ---
+## 546 — [BOUNDED MAIN WORKER 2026-07-27 ~22:10] Baton Pass executes through source jumpifcantswitch
+
+- **State:** tree green at **299 files / 3852 tests**; build, freshness, and
+  `git diff --check` pass. The unchanged Battle-2 OFF trace remains **16/16
+  exact**.
+- **Did:** committed `33b24cb`, registering both concrete six-byte
+  `B_SCR_OP_JUMPIFCANTSWITCH` starts. Ordinary singles now resolve/mask both
+  selectors, own `gActiveBattler`, honor or bypass the three volatile gates,
+  and scan either six-slot party for a living non-egg bench. Genuine Baton
+  Pass success/no-bench scripts reach their real `END`; success spends PP,
+  switches, preserves the source-transferable volatile/stages, emits switch
+  provenance, and consumes no RNG.
+- **Next:** register the generated top blocker `B_SCR_OP_JUMPIFNODAMAGE` /
+  `EFFECT_FOCUS_PUNCH` from pinned source and targeted OFF evidence.
+- **Notes:** census is **132/214 effects, 256/355 moves, 208/276 Factory-L50
+  distinct, 2631/2957 weighted**, exact **+1/+1/+1/+13**, all **42/42**
+  checks. The one intentional new barrier/ratchet pin is
+  `battleScriptJumpifcantswitchOpcode.ts`'s in-game-partner/MULTI/
+  two-opponents/ordinary-doubles identity scan
+  (`battle_script_commands.c:4714-4848`). Focused **87/87**, full
+  **3852/3852**. No recording import, oracle lifecycle action, animation edit,
+  or PAPERCUT.
+
+---
 ## 545 — [SUPERVISOR VERIFY 2026-07-27 ~21:58] Baton Pass OFF evidence merged reproducibly
 
 - **State:** union green at **298 files / 3840 tests**; `npm run build`,

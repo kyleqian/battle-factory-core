@@ -15,6 +15,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 549 — [BOUNDED MAIN WORKER 2026-07-27 ~22:48] Focus Punch executes both damage-receipt routes
+
+- **State:** tree green at **304 files / 3887 tests**; build, oracle
+  freshness, and `git diff --check` pass. Census is **133/214 effects,
+  257/355 moves, 209/276 Factory-L50 distinct, 2642/2957 weighted**, exact
+  **+1/+1/+1/+11**, with all **42/42** checks.
+- **Did:** committed `769f538`, registering the sole five-byte opcode
+  `0xcf` / `Cmd_jumpifnodamage`. It reads the attacker's existing
+  ProtectStruct physical/special receipts: either nonzero falls through;
+  both zero jump exactly to `BattleScript_HitFromAccCheck`. Genuine Focus
+  Punch walks now reach their own `END` through lost-focus and hit-chain
+  routes, including PP **20→19**, Starmie **135→66**, and exact RNG ledgers.
+- **Next:** source-scout and register the newly generated top blocker
+  `B_SCR_OP_SETDESTINYBOND` / `EFFECT_DESTINY_BOND` (expected
+  **+1/+1/+1/+10**) from targeted OFF evidence.
+- **Notes:** the generic full-turn proof shows Swift's real
+  `datahpupdate` receipt survives action cleanup into lost focus, while
+  Light Screen leaves zero receipts; the existing next-turn owner resets
+  both fields. No new plumbing, unsupported barrier/ratchet change,
+  recording import, oracle lifecycle action, animation edit, or PAPERCUT.
+
+---
 ## 548 — [SUPERVISOR WIND-DOWN 2026-07-27 ~22:20] Focus Punch OFF branch evidence merged reproducibly
 
 - **State:** final union green at **300 files / 3862 tests**; `npm run
@@ -62,27 +84,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   both are source-named and reachability-tested while singles remain exact.
   Focused **60/60**, full **3857/3857**. No recording import, oracle
   lifecycle action, animation edit, or PAPERCUT.
-
----
-## 546 — [BOUNDED MAIN WORKER 2026-07-27 ~22:10] Baton Pass executes through source jumpifcantswitch
-
-- **State:** tree green at **299 files / 3852 tests**; build, freshness, and
-  `git diff --check` pass. The unchanged Battle-2 OFF trace remains **16/16
-  exact**.
-- **Did:** committed `33b24cb`, registering both concrete six-byte
-  `B_SCR_OP_JUMPIFCANTSWITCH` starts. Ordinary singles now resolve/mask both
-  selectors, own `gActiveBattler`, honor or bypass the three volatile gates,
-  and scan either six-slot party for a living non-egg bench. Genuine Baton
-  Pass success/no-bench scripts reach their real `END`; success spends PP,
-  switches, preserves the source-transferable volatile/stages, emits switch
-  provenance, and consumes no RNG.
-- **Next:** register the generated top blocker `B_SCR_OP_JUMPIFNODAMAGE` /
-  `EFFECT_FOCUS_PUNCH` from pinned source and targeted OFF evidence.
-- **Notes:** census is **132/214 effects, 256/355 moves, 208/276 Factory-L50
-  distinct, 2631/2957 weighted**, exact **+1/+1/+1/+13**, all **42/42**
-  checks. The one intentional new barrier/ratchet pin is
-  `battleScriptJumpifcantswitchOpcode.ts`'s in-game-partner/MULTI/
-  two-opponents/ordinary-doubles identity scan
-  (`battle_script_commands.c:4714-4848`). Focused **87/87**, full
-  **3852/3852**. No recording import, oracle lifecycle action, animation edit,
-  or PAPERCUT.
