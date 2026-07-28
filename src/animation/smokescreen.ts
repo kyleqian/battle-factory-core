@@ -164,14 +164,15 @@ export function smokescreenEffectAtAge(
     ...smokeAtAge(age, targetCenter),
   ];
   const attackerPan = attackerSide === "player" ? -64 : 63;
-  const targetPan = attackerSide === "player" ? 63 : -64;
+  const targetPan = attackerSide === "player" ? 63 : -63;
   return {
     active: age >= 0 && age <= 123,
     dynamicImpactAssetsLoaded: age >= 43 && age <= 55,
     visualTaskCount: Number(ball !== null) + (age >= 47 && age <= 122 ? 12 : 0),
     sprites,
     soundEvents: [
-      { age: 4, song: "SE_M_DOUBLE_TEAM", pan: attackerPan },
+      // MPlay begins three displays after the script's playse command.
+      { age: 7, song: "SE_M_DOUBLE_TEAM", pan: attackerPan },
       { age: 47, song: "SE_M_SAND_ATTACK", pan: targetPan },
     ],
     taskTopology: [],

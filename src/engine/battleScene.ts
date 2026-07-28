@@ -546,6 +546,7 @@ import biteAsset from "../animation/assets/bite.json" with { type: "json" };
 import twineedleAsset from "../animation/assets/twineedle.json" with { type: "json" };
 import spikeCannonAsset from "../animation/assets/spike-cannon.json" with { type: "json" };
 import sonicBoomAsset from "../animation/assets/sonic-boom.json" with { type: "json" };
+import smokescreenAsset from "../animation/assets/smokescreen.json" with { type: "json" };
 import tailGlowAsset from "../animation/assets/tail-glow.json" with { type: "json" };
 import dizzyPunchAsset from "../animation/assets/dizzyPunch.json" with { type: "json" };
 import covetAsset from "../animation/assets/covet.json" with { type: "json" };
@@ -696,6 +697,7 @@ import {
   sceneOnTwineedleView,
   sceneOnSpikeCannonView,
   sceneOnSonicBoomView,
+  sceneOnSmokescreenView,
   sceneOnTailGlowView,
   sceneOnDizzyPunchView,
   sceneOnAstonishView,
@@ -742,6 +744,7 @@ import {
   type SceneOnTwineedleConfig,
   type SceneOnSpikeCannonConfig,
   type SceneOnSonicBoomConfig,
+  type SceneOnSmokescreenConfig,
   type SceneOnTailGlowConfig,
   type SceneOnDizzyPunchConfig,
   type SceneOnAstonishConfig,
@@ -1056,6 +1059,13 @@ const sonicBoomArt = sonicBoomAsset as {
   enemyShadow: { tileset: Tileset; palette: RgbColor[] };
   magnetonBack: { tileset: Tileset; palette: RgbColor[] };
   magnetonFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const smokescreenArt = smokescreenAsset as {
+  blackBall: { tileset: Tileset; palette: RgbColor[] };
+  blackSmoke: { tileset: Tileset; palette: RgbColor[] };
+  impact: { tileset: Tileset; palette: RgbColor[] };
+  koffingBack: { tileset: Tileset; palette: RgbColor[] };
+  koffingFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const tailGlowArt = tailGlowAsset as {
   circleOfLight: { tileset: Tileset; palette: RgbColor[] };
@@ -16461,6 +16471,157 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "BEEDRILL used" : "Foe BEEDRILL used",
       "TWINEEDLE!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SMOKESCREEN") {
+    const smokeState =
+      state as SceneOnMovePresentationState<SceneOnSmokescreenConfig>;
+    const view = sceneOnSmokescreenView(smokeState);
+    // BuildOamBuffer precedes animation callbacks: hardware scanout observes
+    // the prior source-relative software state.
+    const displayed = sceneOnSmokescreenView({
+      ...smokeState,
+      age: view.battlerDisplayAge,
+    });
+    const playerToOpponent =
+      view.attacker.species === "KOFFING"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "KOFFING"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged SMOKESCREEN pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const koffingSource = playerToOpponent
+      ? smokescreenArt.koffingBack : smokescreenArt.koffingFront;
+    const koffing = playerToOpponent
+      ? koffingSource
+      : { ...koffingSource, tileset: subTileset(koffingSource.tileset, 0, 8) };
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    // The enemy-shadow callback observes the active-script flag one display
+    // after this source window begins, leaving one source-relative latch.
+    if (opponentToPlayer && view.age === 0) {
+      drawSpriteSheet(
+        fb,
+        sonicBoomArt.enemyShadow.tileset,
+        sonicBoomArt.enemyShadow.palette,
+        view.attacker.geometry.animationCenter.x - 16,
+        view.attacker.geometry.battlePositionCenter.y + 25,
+      );
+    }
+    const ball = displayed.sprites.find(
+      (sprite) => sprite.kind === "black-ball",
+    );
+    const drawBall = () => {
+      if (!ball || ball.invisible) return;
+      drawSpriteSheet(
+        fb,
+        smokescreenArt.blackBall.tileset,
+        smokescreenArt.blackBall.palette,
+        ball.x + ball.x2 - 4,
+        ball.y + ball.y2 - 4,
+      );
+    };
+    const drawOnix = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x + (playerToOpponent ? 1 : 0),
+      view.target.geometry.spriteCorner.y,
+    );
+    const drawKoffing = () => drawSpriteSheet(
+      fb,
+      koffing.tileset,
+      koffing.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    if (playerToOpponent) {
+      drawOnix();
+      drawBall();
+      drawKoffing();
+    } else {
+      drawKoffing();
+      drawOnix();
+      drawBall();
+    }
+    // SortSprites transfers these priority-2 objects ahead of the target
+    // battler in hardware OAM for both accepted orientations.
+    for (const sprite of displayed.sprites) {
+      if (sprite.invisible || sprite.kind !== "black-smoke") continue;
+      drawSpriteSheet(
+        fb,
+        smokescreenArt.blackSmoke.tileset,
+        smokescreenArt.blackSmoke.palette,
+        sprite.x + sprite.x2 - 16,
+        sprite.y + sprite.y2 - 8,
+      );
+    }
+    // Dynamically loaded impact children are priority 1 and composite above
+    // both battlers. Each animation frame is a 2x2-tile row slice.
+    for (const sprite of displayed.sprites) {
+      if (sprite.kind !== "impact") continue;
+      drawSpriteSheetFlipped(
+        fb,
+        subTileset(smokescreenArt.impact.tileset, sprite.frame * 2, 2),
+        smokescreenArt.impact.palette,
+        sprite.x - 8,
+        sprite.y - 8,
+        sprite.hFlip,
+        sprite.vFlip,
+      );
+    }
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "KOFFING",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "KOFFING" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "KOFFING used" : "Foe KOFFING used",
+      "SMOKESCREEN!",
       99,
     );
     return;

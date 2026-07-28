@@ -61,7 +61,7 @@ describe("MOVE_SMOKESCREEN source-relative reducer", () => {
 
   it("pins audio pans, empty task topology, and first inactive cleanup", () => {
     expect(player(0).soundEvents).toEqual([
-      { age: 4, song: "SE_M_DOUBLE_TEAM", pan: -64 },
+      { age: 7, song: "SE_M_DOUBLE_TEAM", pan: -64 },
       { age: 47, song: "SE_M_SAND_ATTACK", pan: 63 },
     ]);
     expect(player(123)).toMatchObject({ active: true, taskTopology: [] });

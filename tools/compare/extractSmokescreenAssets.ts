@@ -26,21 +26,20 @@ function sprite(path: string, palettePath?: string) {
 }
 
 mkdirSync(dirname(out), { recursive: true });
+const blackSmoke = sprite("graphics/battle_anims/sprites/black_smoke.png");
+const blackBall = sprite("graphics/battle_anims/sprites/black_ball.png");
 writeFileSync(out, `${JSON.stringify({
   source: {
     script: "data/battle_anim_scripts.s:2264-2286 Move_SMOKESCREEN",
     particles:
-      "black_ball.png/black_ball.pal (ANIM_TAG_BLACK_BALL), black_smoke.png (ANIM_TAG_BLACK_SMOKE), smokescreen_impact.png (dynamic tag 55019)",
+      "black_ball.png with the source table's shared black_smoke palette (ANIM_TAG_BLACK_BALL), black_smoke.png (ANIM_TAG_BLACK_SMOKE), smokescreen_impact.png (dynamic tag 55019)",
     carrier:
       "graphics/pokemon/koffing/{back.png,anim_front.png,normal.pal}; legal Level-50 FRONTIER_MON_KOFFING set 127",
     topology:
       "AnimThrowProjectile; SmokescreenImpact dynamic four-child lifetime; twelve AnimBlackSmoke_Step sprites; no visual task survives dispatch",
   },
-  blackBall: sprite(
-    "graphics/battle_anims/sprites/black_ball.png",
-    "graphics/battle_anims/sprites/black_ball.pal",
-  ),
-  blackSmoke: sprite("graphics/battle_anims/sprites/black_smoke.png"),
+  blackBall: { ...blackBall, palette: blackSmoke.palette },
+  blackSmoke,
   impact: sprite("graphics/battle_anims/sprites/smokescreen_impact.png"),
   koffingBack: sprite(
     "graphics/pokemon/koffing/back.png",
