@@ -118,6 +118,8 @@ function battler(changes: Partial<BattleScriptRulesBattler> & { maxHP?: number }
     encoredMove: changes.encoredMove ?? 0,
     encoredMovePos: changes.encoredMovePos ?? 0,
     encoreTimerStartValue: changes.encoreTimerStartValue ?? 0,
+    perishSongTimer: changes.perishSongTimer ?? 0,
+    perishSongTimerStartValue: changes.perishSongTimerStartValue ?? 0,
   }) as unknown as BattleScriptRulesBattler;
 }
 
@@ -1633,4 +1635,107 @@ describe("runBattleEndTurnOrchestration (BattleTurnPassed equivalent)", () => {
       );
     },
   );
+});
+
+describe("HandleWishPerishSongOnTurnEnd state 1", () => {
+  const STATUS3_PERISH_SONG = 1 << 5;
+
+  it("walks battlerByTurnOrder, formats the current timer, decrements each active holder, skips absent slots, and draws no RNG", () => {
+    const rc = context({
+      battlers: [
+        battler({ side: 0, status3: STATUS3_PERISH_SONG, perishSongTimer: 3, perishSongTimerStartValue: 3 }),
+        battler({ side: 1, partyIndex: 2, status3: STATUS3_PERISH_SONG, perishSongTimer: 2, perishSongTimerStartValue: 3 }),
+        battler({ side: 0, status3: STATUS3_PERISH_SONG, perishSongTimer: 3, perishSongTimerStartValue: 3 }),
+        battler({ side: 1 }),
+      ],
+      battlerByTurnOrder: [1, 0, 2, 3],
+    });
+    const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(0));
+    const initial = scratchState(rc, 0);
+    const first = runBattleEndTurnOrchestration(program, handlers, initial);
+    expect(first.kind).toBe("next-turn");
+    if (first.kind !== "next-turn") throw new Error("expected next-turn");
+    expect(first.state.rulesContext.battlers.map(({ perishSongTimer }) => perishSongTimer))
+      .toEqual([2, 1, 3, 0]);
+    // Opponent timer 2 is formatted first; player timer 3 is formatted last.
+    expect(first.state.rulesContext.battleTextBuff1ByteNumber).toBe(3);
+    expect(first.state.rng.calls).toBe(initial.rng.calls);
+
+    const second = runBattleEndTurnOrchestration(program, handlers, first.state);
+    expect(second.kind).toBe("next-turn");
+    if (second.kind !== "next-turn") throw new Error("expected next-turn");
+    expect(second.state.rulesContext.battlers.slice(0, 2).map(({ perishSongTimer }) => perishSongTimer))
+      .toEqual([1, 0]);
+    expect(second.state.rng.calls).toBe(initial.rng.calls);
+
+    const absent = context({
+      battlers: [
+        battler({ side: 0, status3: STATUS3_PERISH_SONG, perishSongTimer: 3 }),
+        battler({ side: 1, partyIndex: 2, status3: STATUS3_PERISH_SONG, perishSongTimer: 2 }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+      absentBattlerFlags: 1 << 1,
+      battleStructAbsentBattlerFlags: 1 << 1,
+    });
+    const skipped = runBattleEndTurnOrchestration(program, handlers, scratchState(absent, 0));
+    expect(skipped.kind).toBe("next-turn");
+    expect(skipped.state.rulesContext.battlers.slice(0, 2).map(({ perishSongTimer }) => perishSongTimer))
+      .toEqual([2, 2]);
+  });
+
+  it("zero timer clears the bit, deals current HP as passive damage, routes through faint cleanup/checkteamslost, and decides the outcome", () => {
+    const rc = context({
+      battlers: [
+        battler({
+          side: 0,
+          hp: 100,
+          maxHP: 100,
+          status3: STATUS3_PERISH_SONG,
+          perishSongTimer: 0,
+          perishSongTimerStartValue: 3,
+        }),
+        battler({ side: 1, partyIndex: 2 }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+      battlerByTurnOrder: [0, 1, 2, 3],
+    });
+    const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(0));
+    const initial = scratchState(rc, 0);
+    const result = runBattleEndTurnOrchestration(program, handlers, initial);
+    expect(result.kind).toBe("terminal");
+    if (result.kind !== "terminal") throw new Error("expected terminal");
+    expect(result.state.rulesContext.battlers[0]).toMatchObject({
+      hp: 0,
+      status3: 0,
+      perishSongTimer: 0,
+      perishSongTimerStartValue: 0,
+    });
+    expect(result.state.rulesContext.party.player[0]!.hp).toBe(0);
+    expect(result.state.rulesContext.battleOutcome).not.toBe(0);
+    expect(result.state.rulesContext.battleTextBuff1ByteNumber).toBe(0);
+    expect(result.state.rng.calls).toBe(initial.rng.calls);
+    expect(result.state.events.some((event) =>
+      event.kind === "health-bar-update" && event.battler === 0
+    )).toBe(true);
+  });
+
+  it("when both sides are at zero, turn order feeds the first faint through checkteamslost before the scan resumes", () => {
+    const rc = context({
+      battlers: [
+        battler({ side: 0, status3: STATUS3_PERISH_SONG, perishSongTimer: 0, perishSongTimerStartValue: 3 }),
+        battler({ side: 1, partyIndex: 2, status3: STATUS3_PERISH_SONG, perishSongTimer: 0, perishSongTimerStartValue: 3 }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+      battlerByTurnOrder: [1, 0, 2, 3],
+    });
+    const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+    const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
+    expect(result.kind).toBe("terminal");
+    expect(result.state.rulesContext.battlers.slice(0, 2).map(({ hp }) => hp))
+      .toEqual([100, 0]);
+    expect(result.state.rulesContext.battleOutcome).not.toBe(0);
+  });
 });

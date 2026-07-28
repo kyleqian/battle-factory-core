@@ -280,6 +280,8 @@ const ABILITY_SUCTION_CUPS = 21;
  * recoil for Rock Head (data/battle_scripts_1.s:3938-3949).
  */
 const ABILITY_ROCK_HEAD = 69;
+/** include/constants/abilities.h:47; Perish Song's post-success all-battler message loop. */
+const ABILITY_SOUNDPROOF = 43;
 const JUMPIFABILITY_VALUES: ReadonlyMap<string, number> = new Map([
   ["ABILITY_LIQUID_OOZE", ABILITY_LIQUID_OOZE],
   ["ABILITY_LIMBER", ABILITY_LIMBER],
@@ -289,6 +291,7 @@ const JUMPIFABILITY_VALUES: ReadonlyMap<string, number> = new Map([
   ["ABILITY_INSOMNIA", ABILITY_INSOMNIA],
   ["ABILITY_SUCTION_CUPS", ABILITY_SUCTION_CUPS],
   ["ABILITY_ROCK_HEAD", ABILITY_ROCK_HEAD],
+  ["ABILITY_SOUNDPROOF", ABILITY_SOUNDPROOF],
 ]);
 /** Exported so tools/report/executable-frontier-census.ts's jumpifability value-coverage check never drifts from what this opcode actually dispatches (same live-import precedent as SET_MOVE_EFFECT_SUPPORTED_BYTES). */
 export const JUMPIFABILITY_SUPPORTED_ABILITY_NAMES: ReadonlySet<string> = new Set(JUMPIFABILITY_VALUES.keys());
@@ -318,6 +321,8 @@ function createJumpifabilityHandler(): BattleScriptOpcodeHandler<BattleScriptRul
       ? rulesContext.selectorRoles.target
       : battlerExpression === "BS_ATTACKER"
         ? rulesContext.selectorRoles.attacker
+        : battlerExpression === "BS_SCRIPTING"
+          ? rulesContext.scriptingBattler
         : null;
     const abilityId = abilityOperand === undefined ? undefined : JUMPIFABILITY_VALUES.get(abilityOperand.expression);
     if (battler === null || abilityId === undefined) {

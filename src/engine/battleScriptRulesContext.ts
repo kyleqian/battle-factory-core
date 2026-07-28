@@ -83,6 +83,7 @@ import { createBattleScriptTrysethelpinghandOpcodeHandlers } from "./battleScrip
 import { createBattleScriptTryswapitemsOpcodeHandlers } from "./battleScriptTryswapitemsOpcode.ts";
 import { createBattleScriptSettormentOpcodeHandlers } from "./battleScriptSettormentOpcode.ts";
 import { createBattleScriptTrysetencoreOpcodeHandlers } from "./battleScriptTrysetencoreOpcode.ts";
+import { createBattleScriptTrysetperishsongOpcodeHandlers } from "./battleScriptTrysetperishsongOpcode.ts";
 import { createBattleScriptSettauntOpcodeHandlers } from "./battleScriptSettauntOpcode.ts";
 import { createBattleScriptSetforesightOpcodeHandlers } from "./battleScriptSetforesightOpcode.ts";
 import { createBattleScriptSetfocusenergyOpcodeHandlers } from "./battleScriptSetfocusenergyOpcode.ts";
@@ -246,6 +247,9 @@ type BattleScriptMoveEndBattlerMetadata = Readonly<{
   encoredMove: number;
   encoredMovePos: number;
   encoreTimerStartValue: number;
+  /** Source DisableStruct's paired four-bit Perish Song countdown fields. */
+  perishSongTimer: number;
+  perishSongTimerStartValue: number;
   /** Source u16 gBattleMons[battler].item. */
   item: number;
   /** Source s8 gBattleMons[battler].statStages[NUM_BATTLE_STATS]. */
@@ -371,6 +375,8 @@ export type BattleScriptRulesBattler = BattleScriptRulesBattlerBase & Readonly<{
   encoredMove?: number;
   encoredMovePos?: number;
   encoreTimerStartValue?: number;
+  perishSongTimer?: number;
+  perishSongTimerStartValue?: number;
   statStages?: readonly number[];
   specialStatus?: Readonly<{
     restoredBattlerSprite?: 0 | 1;
@@ -670,6 +676,8 @@ export type BattleScriptRulesContext = Readonly<
     futureSightDmg: readonly [number, number, number, number];
     /** Typed form of PREPARE_MON_NICK_WITH_PREFIX_BUFFER(gBattleTextBuff1, battler, partyIndex). */
     battleTextBuff1MonNick: BattleScriptPreparedMonNick | null;
+    /** Typed form of PREPARE_BYTE_NUMBER_BUFFER(gBattleTextBuff1, 1, value). */
+    battleTextBuff1ByteNumber: number | null;
     /**
      * Source gBattlerByTurnOrder[MAX_BATTLERS_COUNT] -- populated by
      * `ENDTURN_ORDER`'s `GetWhoStrikesFirst` insertion sort
@@ -787,6 +795,7 @@ export type BattleScriptRulesContextInput = Readonly<{
   futureSightAttacker?: readonly number[];
   futureSightDmg?: readonly number[];
   battleTextBuff1MonNick?: BattleScriptPreparedMonNick | null;
+  battleTextBuff1ByteNumber?: number | null;
   battlerByTurnOrder?: readonly number[];
   currentTurnActionNumber?: number;
 }>;
@@ -1888,6 +1897,16 @@ export function createBattleScriptRulesContext(
       0x0f,
       `battlers[${index}].encoreTimerStartValue`,
     ),
+    perishSongTimer: requireUnsigned(
+      battler.perishSongTimer ?? 0,
+      0x0f,
+      `battlers[${index}].perishSongTimer`,
+    ),
+    perishSongTimerStartValue: requireUnsigned(
+      battler.perishSongTimerStartValue ?? 0,
+      0x0f,
+      `battlers[${index}].perishSongTimerStartValue`,
+    ),
     usedDisabledMove: requireUnsigned(
       battler.usedDisabledMove,
       1,
@@ -2314,6 +2333,10 @@ export function createBattleScriptRulesContext(
         battler: requireUnsigned(input.battleTextBuff1MonNick.battler, 3, "battleTextBuff1MonNick.battler") as BattleScriptBattlerId,
         partyIndex: requireUnsigned(input.battleTextBuff1MonNick.partyIndex, 5, "battleTextBuff1MonNick.partyIndex"),
       }),
+    battleTextBuff1ByteNumber: input.battleTextBuff1ByteNumber === null
+      || input.battleTextBuff1ByteNumber === undefined
+      ? null
+      : requireUnsigned(input.battleTextBuff1ByteNumber, 0xff, "battleTextBuff1ByteNumber"),
     battlerByTurnOrder: Object.freeze([
       requireUnsigned(input.battlerByTurnOrder?.[0] ?? 0, 3, "battlerByTurnOrder[0]"),
       requireUnsigned(input.battlerByTurnOrder?.[1] ?? 1, 3, "battlerByTurnOrder[1]"),
@@ -2529,6 +2552,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptTrysetfutureattackOpcodeHandlers(program),
     ...createBattleScriptDisablelastusedattackOpcodeHandlers(program),
     ...createBattleScriptTrysetencoreOpcodeHandlers(program),
+    ...createBattleScriptTrysetperishsongOpcodeHandlers(program),
     ...createBattleScriptFuryCutterOpcodeHandlers(program),
     ...createBattleScriptSetminimizeOpcodeHandlers(program),
     ...createBattleScriptSetforcedtargetOpcodeHandlers(program),

@@ -89,6 +89,8 @@ export const BATTLE_SCRIPT_MOVE_BIDE = 117;
 export const BATTLE_SCRIPT_STATUS3_SEMI_INVULNERABLE =
   (1 << 6 | 1 << 7 | 1 << 18) >>> 0;
 export const BATTLE_SCRIPT_STATUS3_ALWAYS_HITS = (1 << 3 | 1 << 4) >>> 0;
+/** include/constants/battle.h:160 -- the Perish Song active marker. */
+export const BATTLE_SCRIPT_STATUS3_PERISH_SONG = 1 << 5;
 export const BATTLE_SCRIPT_STATUS3_ON_AIR = 1 << 6;
 export const BATTLE_SCRIPT_STATUS3_UNDERGROUND = 1 << 7;
 export const BATTLE_SCRIPT_STATUS3_MINIMIZED = 1 << 8;

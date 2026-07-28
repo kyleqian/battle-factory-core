@@ -178,6 +178,8 @@ function emptyBattler(side: 0 | 1): BattleScriptRulesBattlerState {
     encoredMove: 0,
     encoredMovePos: 0,
     encoreTimerStartValue: 0,
+    perishSongTimer: 0,
+    perishSongTimerStartValue: 0,
     usedDisabledMove: 0,
     tauntTimer: 0,
     usedTauntedMove: 0,

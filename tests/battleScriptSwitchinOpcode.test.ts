@@ -71,6 +71,8 @@ function battler(changes: Partial<BattleScriptRulesBattler> = {}): BattleScriptR
     level: changes.level ?? 50,
     friendship: changes.friendship ?? 0,
     partyIndex: changes.partyIndex ?? 0,
+    perishSongTimer: changes.perishSongTimer,
+    perishSongTimerStartValue: changes.perishSongTimerStartValue,
   });
 }
 
@@ -296,6 +298,9 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
           encoredMovePos: 2,
           encoreTimer: 4,
           encoreTimerStartValue: 4,
+          status3: 1 << 5,
+          perishSongTimer: 3,
+          perishSongTimerStartValue: 3,
         }),
         battler({ side: 0 }),
         battler({ side: 1 }),
@@ -309,6 +314,7 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     expect(ordinary.state.rulesContext.battlers[1].status2).toBe(0);
     expect(ordinary.state.rulesContext.battlers[1]).toMatchObject({
       encoredMove: 0, encoredMovePos: 0, encoreTimer: 0, encoreTimerStartValue: 0,
+      perishSongTimer: 0, perishSongTimerStartValue: 0,
     });
 
     const batonPass = stepAtProgramCounter(
@@ -320,6 +326,7 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
       .toBe(STATUS2_FOCUS_ENERGY);
     expect(batonPass.state.rulesContext.battlers[1]).toMatchObject({
       encoredMove: 0, encoredMovePos: 0, encoreTimer: 0, encoreTimerStartValue: 0,
+      perishSongTimer: 3, perishSongTimerStartValue: 3,
     });
   });
 

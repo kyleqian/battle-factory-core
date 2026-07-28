@@ -293,7 +293,8 @@ function createGetswitchedmondataOpcodeHandler(
  * carried Substitute HP.
  * Rebuilds species/hp/status1/types from the party record at the
  * already-updated `partyIndex`; resets stat stages/status2/status3/the
- * modeled DisableStruct-shaped fields to their neutral values; clears the
+ * modeled DisableStruct-shaped fields to their neutral values (while the
+ * existing Baton Pass branch carries both Perish Song timer fields); clears the
  * `STATUS2_INFATUATED_WITH(battler)` bit on every other battler exactly like
  * `cleareffectsonfaint`'s own precedent (`battleScriptHitChainOpcode.ts`).
  * `STATUS2_ESCAPE_PREVENTION`/`STATUS3_ALWAYS_HITS` cross-battler clears need
@@ -404,6 +405,8 @@ function createSwitchindataupdateOpcodeHandler(
           encoredMovePos: 0,
           encoreTimer: 0,
           encoreTimerStartValue: 0,
+          perishSongTimer: isBatonPass ? candidate.perishSongTimer : 0,
+          perishSongTimerStartValue: isBatonPass ? candidate.perishSongTimerStartValue : 0,
           usedDisabledMove: 0 as const,
           tauntTimer: 0,
           usedTauntedMove: 0 as const,

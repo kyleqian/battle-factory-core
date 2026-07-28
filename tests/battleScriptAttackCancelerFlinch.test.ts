@@ -50,6 +50,8 @@ function battler(
     encoredMove: changes.encoredMove ?? 0,
     encoredMovePos: changes.encoredMovePos ?? 0,
     encoreTimerStartValue: changes.encoreTimerStartValue ?? 0,
+    perishSongTimer: changes.perishSongTimer ?? 0,
+    perishSongTimerStartValue: changes.perishSongTimerStartValue ?? 0,
     usedDisabledMove: changes.usedDisabledMove ?? 0,
     tauntTimer: changes.tauntTimer ?? 0,
     usedTauntedMove: changes.usedTauntedMove ?? 0,

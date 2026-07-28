@@ -1,4 +1,30 @@
 ---
+## 612 — [BOUNDED MAIN WORKER 2026-07-28 ~09:53] Seven dispatch-ready family-B move effects execute end to end
+
+- **State:** commits `e1d2243`/`ef9a9d9`; tree green at **380 files / 4337
+  tests**, production build, OFF oracle info, census regeneration, all
+  **47/47** validation checks, ratchets **6/6**, and `git diff --check`.
+  Census is exactly **168/214 effects, 303/355 moves, 246/276 Factory-L50
+  distinct, 2845/2957 weighted**.
+- **Did:** retired the shared `applySetMoveEffect` barrier for exactly Tri
+  Attack, Recharge, Rage, All Stats Up, Remove Paralysis, Atk/Def Down, and
+  Sp. Atk Two Down. Reused recursive family-A status writes, recharge/lock,
+  Rage, party status, and stat-stage owners plus the three committed callback
+  scripts. Added every-branch/RNG/stat-boundary/recharge-clear tests and one
+  full terminal committed-script walk with canonical replay per effect.
+- **Next:** supervisor verify this finite cluster and combine it with the side
+  OFF corroboration. Then take dossier Cluster 2 (Recoil 33 + Rock Head and
+  Uproar end-turn), leaving the other eight family-B bytes barriered until
+  their named downstream blockers land.
+- **Notes:** predicted and actual delta both **+7 effects/+12 moves/+7
+  distinct/+72 weighted**; all seven rows flipped. Raw C/script re-derivation
+  confirmed the dossier—no falsified claim or unmodeled cell. Recharge's
+  clearing turn source-faithfully leaves stale `lockedMoves` inert. The one
+  family-B barrier statement remains reachable for all eight deferred bytes;
+  barrier pins unchanged, none added. Census reporter changes are only the
+  seven required constant-name/positive-validation metadata entries.
+
+---
 ## 611 — [SUPERVISOR VERIFY+FOLD 2026-07-28 ~09:45] Trick and Heal Bell accepted; family-B falsification dossier folded
 
 - **State:** independently verified entries 609/610 (suite **380/4315**,

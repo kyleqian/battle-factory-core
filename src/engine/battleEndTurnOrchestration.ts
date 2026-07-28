@@ -29,7 +29,8 @@
  * engine doesn't model yet is a named barrier gated on its own real
  * trigger condition (never a blanket skip) -- see the per-case comments
  * below. Wish and Future Sight/Doom Desire now have source-shaped positional
- * state and execute in their real phases; Perish Song remains unmodeled.
+ * state and execute in their real phases, including Perish Song's ordered
+ * countdown/faint pass after delayed attacks.
  */
 import {
   acknowledgeBattleScriptMachineController,
@@ -73,6 +74,7 @@ import {
   BATTLE_SCRIPT_STATUS2_WRAPPED_MASK,
   BATTLE_SCRIPT_STATUS3_LEECHSEED,
   BATTLE_SCRIPT_STATUS3_LEECHSEED_BATTLER_MASK,
+  BATTLE_SCRIPT_STATUS3_PERISH_SONG,
   BATTLE_SCRIPT_STATUS3_ROOTED,
   BATTLE_SCRIPT_STATUS3_YAWN,
   BATTLE_SCRIPT_STATUS3_YAWN_TURN_1,
@@ -98,6 +100,8 @@ const ENCORED_NO_MORE_LABEL = "BattleScript_EncoredNoMore";
 const WISH_COMES_TRUE_LABEL = "BattleScript_WishComesTrue";
 /** `HandleWishPerishSongOnTurnEnd` state 0's delayed-attack script. */
 const MON_TOOK_FUTURE_ATTACK_LABEL = "BattleScript_MonTookFutureAttack";
+const PERISH_SONG_TAKES_LIFE_LABEL = "BattleScript_PerishSongTakesLife";
+const PERISH_SONG_COUNT_GOES_DOWN_LABEL = "BattleScript_PerishSongCountGoesDown";
 const SIDE_STATUS_FUTUREATTACK = 1 << 6;
 const MOVE_FUTURE_SIGHT = 248;
 /** `ItemBattleEffects(ITEMEFFECT_NORMAL, ...)`'s ten `BattleScriptExecute`+`end2` labels this registration wires (docs/endturn-abilities-items-ground-truth.md §1c/§5 slice 4). */
@@ -1855,6 +1859,120 @@ function mapFaintedActionsResult(result: BattleScriptFaintedActionsResult): Batt
 type PostFaintKind = "next-turn" | "resumed" | "terminal";
 
 /**
+ * `HandleWishPerishSongOnTurnEnd` state 1. The source resumes
+ * `BattleTurnPassed` between each fired script, so a zero-timer faint is
+ * processed before the positional scan continues.
+ */
+function runPerishSongAfterFutureAttacks(
+  program: BattleScriptProgram,
+  handlers: Handlers,
+  initialState: MachineState,
+  initialCompletionKind: PostFaintKind,
+): BattleEndTurnResult {
+  let state = initialState;
+  let completionKind = initialCompletionKind;
+  const count = state.rulesContext.battleTopology.battlersCount;
+  for (let orderIndex = 0; orderIndex < count; orderIndex += 1) {
+    const battler = state.rulesContext.battlerByTurnOrder[orderIndex] as BattleScriptBattlerId;
+    if ((state.rulesContext.absentBattlerFlags & (1 << battler)) !== 0) continue;
+    const battlerState = state.rulesContext.battlers[battler];
+    if ((battlerState.status3 & BATTLE_SCRIPT_STATUS3_PERISH_SONG) === 0) continue;
+
+    const currentTimer = battlerState.perishSongTimer;
+    let rulesContext: BattleScriptRulesContext;
+    let label: string;
+    if (currentTimer === 0) {
+      rulesContext = withBattler(state.rulesContext, battler, {
+        status3: (battlerState.status3 & ~BATTLE_SCRIPT_STATUS3_PERISH_SONG) >>> 0,
+      });
+      rulesContext = Object.freeze({
+        ...rulesContext,
+        battleMoveDamage: battlerState.hp,
+        battleTextBuff1ByteNumber: currentTimer,
+        selectorRoles: Object.freeze({
+          ...rulesContext.selectorRoles,
+          attacker: battler,
+        }),
+      });
+      label = PERISH_SONG_TAKES_LIFE_LABEL;
+    } else {
+      rulesContext = withBattler(state.rulesContext, battler, {
+        perishSongTimer: currentTimer - 1,
+      });
+      rulesContext = Object.freeze({
+        ...rulesContext,
+        battleTextBuff1ByteNumber: currentTimer,
+        selectorRoles: Object.freeze({
+          ...rulesContext.selectorRoles,
+          attacker: battler,
+        }),
+      });
+      label = PERISH_SONG_COUNT_GOES_DOWN_LABEL;
+    }
+
+    const fired = runTickScript(program, handlers, state, rulesContext, battler, label);
+    if (fired.kind === "opcode-barrier") {
+      return Object.freeze({
+        kind: "non-terminal-barrier",
+        state: fired.state,
+        instruction: fired.instruction,
+      });
+    }
+    state = fired.state;
+
+    if (currentTimer === 0 && state.rulesContext.battlers[battler].hp === 0) {
+      const fainted = runBattleScriptFaintedActionsOrchestration(program, handlers, state);
+      if (fainted.kind === "terminal") {
+        return Object.freeze({
+          kind: "terminal",
+          state: Object.freeze({
+            ...fainted.state,
+            rulesContext: clearFollowMeTimersForTurnValuesCleanUp(
+              fainted.state.rulesContext,
+            ),
+          }),
+        });
+      }
+      if (fainted.kind === "player-choice-required") {
+        return Object.freeze({
+          kind: "player-choice-required",
+          state: fainted.state,
+          battler: fainted.battler,
+          faintedPartyIndex: fainted.faintedPartyIndex,
+          legalPartyIndexes: fainted.legalPartyIndexes,
+        });
+      }
+      if (fainted.kind === "non-terminal-barrier") {
+        return Object.freeze({
+          kind: "non-terminal-barrier",
+          state: fainted.state,
+          instruction: fainted.instruction,
+        });
+      }
+      state = fainted.state;
+      if (fainted.kind === "resumed") completionKind = "resumed";
+    }
+  }
+
+  if (completionKind === "terminal") {
+    return Object.freeze({
+      kind: "terminal",
+      state: Object.freeze({
+        ...state,
+        rulesContext: clearFollowMeTimersForTurnValuesCleanUp(state.rulesContext),
+      }),
+    });
+  }
+  return Object.freeze({
+    kind: completionKind,
+    state: Object.freeze({
+      ...state,
+      rulesContext: finishTurnValuesCleanUp(state.rulesContext),
+    }),
+  });
+}
+
+/**
  * `HandleWishPerishSongOnTurnEnd` state 0. Unlike field/battler end-turn
  * effects this is positional (0..gBattlersCount-1), runs after faint actions,
  * and is not gated by battleOutcome.
@@ -1944,24 +2062,12 @@ function runFutureAttacksAfterFaints(
     }
   }
 
-  if (completionKind === "terminal") {
-    return Object.freeze({
-      kind: "terminal",
-      state: Object.freeze({
-        ...state,
-        rulesContext: clearFollowMeTimersForTurnValuesCleanUp(
-          state.rulesContext,
-        ),
-      }),
-    });
-  }
-  return Object.freeze({
-    kind: completionKind,
-    state: Object.freeze({
-      ...state,
-      rulesContext: finishTurnValuesCleanUp(state.rulesContext),
-    }),
-  });
+  return runPerishSongAfterFutureAttacks(
+    program,
+    handlers,
+    state,
+    completionKind,
+  );
 }
 
 function finishFaintedThenDelayed(
@@ -1994,8 +2100,8 @@ function finishFaintedThenDelayed(
  * `docs/counter-retaliation-design.md` §2.2). That tail calls the same timer
  * helper again, matching source and making the clear idempotent. The
  * post-faint positional Future Sight/Doom Desire phase is applied below;
- * Perish Song remains the unmodeled portion of
- * `HandleWishPerishSongOnTurnEnd`.
+ * The post-faint positional Future Sight/Doom Desire and Perish Song phases
+ * are both applied below in their source order.
  */
 export function runBattleEndTurnOrchestration(
   program: BattleScriptProgram,
