@@ -10,10 +10,10 @@ Answers ROADMAP S10's Executable-frontier reset question directly: not "how many
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 156 | 214 | 72.9% |
-| Moves (unweighted, all 355) | 285 | 355 | 80.3% |
-| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 233 | 276 | 84.4% |
-| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2755 | 2957 | 93.2% |
+| Effect scripts | 157 | 214 | 73.4% |
+| Moves (unweighted, all 355) | 286 | 355 | 80.6% |
+| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 234 | 276 | 84.8% |
+| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2758 | 2957 | 93.3% |
 
 "Executable" means every opcode on every statically reachable path from the effect's entry script has a dispatch entry today (registered barriers included, per ROADMAP S10 §1's (a)/(b) policy). It is not a semantic-correctness claim -- see Caveats.
 
@@ -27,7 +27,6 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_HEALPARTYSTATUS` | 1 (EFFECT_HEAL_BELL) | 2 | 2 | 4 |
 | `B_SCR_OP_TRYSETENCORE` | 1 (EFFECT_ENCORE) | 1 | 1 | 4 |
 | `B_SCR_OP_TRYSETPERISHSONG` | 1 (EFFECT_PERISH_SONG) | 1 | 1 | 4 |
-| `B_SCR_OP_TRYSETSPIKES` | 1 (EFFECT_SPIKES) | 1 | 1 | 3 |
 | `B_SCR_OP_SCALEDAMAGEBYHEALTHRATIO` | 1 (EFFECT_ERUPTION) | 2 | 2 | 2 |
 | `B_SCR_OP_JUMPIFARRAYEQUAL` | 1 (EFFECT_TEETER_DANCE) | 1 | 1 | 2 |
 | `B_SCR_OP_MAGNITUDEDAMAGECALCULATION` | 1 (EFFECT_MAGNITUDE) | 1 | 1 | 2 |
@@ -48,6 +47,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_TRYMEMENTO` | 1 (EFFECT_MEMENTO) | 1 | 1 | 1 |
 | `B_SCR_OP_TRYRECYCLEITEM` | 1 (EFFECT_RECYCLE) | 1 | 1 | 1 |
 | `B_SCR_OP_SETALWAYSHITFLAG` | 1 (EFFECT_LOCK_ON) | 2 | 0 | 0 |
+| `B_SCR_OP_SETTYPEBASEDHALVERS` | 2 (EFFECT_MUD_SPORT, EFFECT_WATER_SPORT) | 2 | 0 | 0 |
 
 ## Per-effect detail
 
@@ -165,7 +165,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_CURSE | `BattleScript_EffectCurse` | executable | - | - | 1 | 1 (18) |
 | EFFECT_UNUSED_6E | `BattleScript_EffectHit` | executable | - | - | 0 | 0 (0) |
 | EFFECT_PROTECT | `BattleScript_EffectProtect` | executable | - | - | 2 | 2 (37) |
-| EFFECT_SPIKES | `BattleScript_EffectSpikes` | blocked-on-opcodes | `B_SCR_OP_TRYSETSPIKES` (main path) | - | 1 | 1 (3) |
+| EFFECT_SPIKES | `BattleScript_EffectSpikes` | executable | - | - | 1 | 1 (3) |
 | EFFECT_FORESIGHT | `BattleScript_EffectForesight` | executable | - | - | 2 | 1 (3) |
 | EFFECT_PERISH_SONG | `BattleScript_EffectPerishSong` | blocked-on-opcodes | `B_SCR_OP_TRYSETPERISHSONG` (main path) | Cmd_jumpifability: ABILITY_SOUNDPROOF is outside the engine's widened ability set (battleScriptIngrainLeechSeedWrapOpcode.ts) -- battle_script_commands.c:3105 | 1 | 1 (4) |
 | EFFECT_SANDSTORM | `BattleScript_EffectSandstorm` | executable | - | - | 1 | 1 (14) |

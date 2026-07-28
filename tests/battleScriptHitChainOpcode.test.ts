@@ -2941,12 +2941,33 @@ describe("production tryfaintmon (Cmd_tryfaintmon) dispatch", () => {
       if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
     });
 
-    it("halts on the tryfaintmon_spikes form (mode byte TRUE), regardless of fainted state", () => {
-      const pc = findTryfaintmonPc((ops) => ops[1] === "TRUE");
+    it("tryfaintmon_spikes advances when no faint marker is set", () => {
+      const pc = findTryfaintmonPc((ops) => ops[0] === "BS_ATTACKER" && ops[1] === "TRUE");
       const rc = context(0);
       const { result } = stepAtProgramCounter(pc, rc);
-      expect(result.kind).toBe("halted");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 2969 });
+      expect(result.kind).toBe("advanced");
+      expect(result.state.programCounter).toBe(pc + 1);
+    });
+
+    it("tryfaintmon_spikes pops the switch-in return, clears the damaged guard, and jumps on a marked faint", () => {
+      const pc = findTryfaintmonPc((ops) => ops[0] === "BS_ATTACKER" && ops[1] === "TRUE");
+      const rc = context(0, {}, {
+        hitMarker: TRYFAINTMON_ATTACKER_FAINTED_BIT,
+        sideStatuses: [(1 << 4) | (1 << 9), 0],
+      });
+      const execution = createBattleScriptStatusRulesExecution(
+        program, "BattleScript_HitFromCritCalc", rc, 1, externalPorts(),
+      );
+      const state = Object.freeze({
+        ...execution.state,
+        programCounter: pc,
+        callStack: Object.freeze([777]),
+      });
+      const result = stepBattleScriptMachine(program, state, execution.handlers);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_SpikesOnAttackerFainted"));
+      expect(result.state.callStack).toEqual([]);
+      expect(result.state.rulesContext.sideStatuses[0]).toBe(1 << 4);
     });
   });
 });

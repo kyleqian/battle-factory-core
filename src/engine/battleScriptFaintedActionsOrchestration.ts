@@ -74,7 +74,7 @@ const HANDLE_FAINTED_MON_LABEL = "BattleScript_HandleFaintedMon";
  * blocked-then-acknowledged budget tick per opcode, per the auto-
  * acknowledgement loop below.
  */
-const SCRIPT_BUDGET = 64;
+const SCRIPT_BUDGET = 128;
 
 export type BattleScriptFaintedActionsResult =
   | Readonly<{
@@ -236,8 +236,9 @@ function acknowledgeAllPendingControllers(
  * opcodes never wait on a controller, but the forced-switch dance's own
  * round trips (`getswitchedmondata`, `switchinanim`, `hidepartystatussummary`,
  * `drawpartystatussummary`) do mark a battler pending -- `blocked` steps are
- * auto-acknowledged here rather than left for the caller, matching the
- * transparent-passthrough model established above.
+ * auto-acknowledged here rather than left for the caller. Spikes also reaches
+ * the shared waitmessage scheduler; its scheduler-only progress is likewise
+ * transparent and consumes no script instruction.
  */
 function runScriptToOwnEnd(
   program: BattleScriptProgram,
@@ -263,6 +264,10 @@ function runScriptToOwnEnd(
         );
       }
       state = acknowledged;
+      continue;
+    }
+    if (stepped.kind === "scheduler-progressed") {
+      state = stepped.state;
       continue;
     }
     if (stepped.kind === "halted") {
