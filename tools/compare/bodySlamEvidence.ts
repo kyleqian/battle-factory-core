@@ -23,6 +23,14 @@ interface Sprite {
   readonly y: number; readonly x2: number; readonly y2: number;
   readonly matrix: Readonly<{ a: number; b: number; c: number; d: number }>;
 }
+interface SoundPlayer {
+  readonly songHeader: number;
+  readonly status: number;
+  readonly tracks: readonly {
+    readonly flags: number;
+    readonly panX: number;
+  }[];
+}
 interface Frame {
   readonly frame: number; readonly sha256: string; readonly animScriptActive: boolean;
   readonly playerSprite: Sprite; readonly opponentSprite: Sprite;
@@ -30,9 +38,8 @@ interface Frame {
   readonly fadedPalette: readonly number[]; readonly hardwarePalette: readonly number[];
   readonly hardwareOam: readonly (readonly number[])[];
   readonly hardwareMatrices: readonly (readonly number[])[];
-  readonly se1: { readonly songHeader: number; readonly tracks: readonly {
-    readonly flags: number; readonly panX: number;
-  }[] };
+  readonly se1: SoundPlayer;
+  readonly se2: SoundPlayer;
   readonly dispcnt: number; readonly bldcnt: number;
   readonly bldalpha: number; readonly bldy: number;
 }
@@ -67,7 +74,7 @@ function verify(fixturePath: string, runNumber: number): void {
   if (run.stderr) process.stderr.write(run.stderr);
   if (run.status !== 0) process.exit(run.status ?? 1);
   const probe = JSON.parse(readFileSync(output, "utf8")) as Probe;
-  if (probe.schema !== "body-slam-dense-evidence/v1") {
+  if (probe.schema !== "body-slam-dense-evidence/v2") {
     throw new Error(`unexpected probe schema ${probe.schema}`);
   }
   const digest = createHash("sha256").update(readFileSync(output)).digest("hex");
@@ -149,11 +156,24 @@ function verify(fixturePath: string, runNumber: number): void {
           .every((color, i) =>
             color === priorFrame.fadedPalette[256 + (sprite.attr2 >>> 12) * 16 + i])
       );
-    const audio = age !== 44 && age !== 54 || (
+    // `playsewithpan` allocates TAKE_DOWN on SE2 while the loop-sound task
+    // owns SE1. Check both player headers at each source command boundary so
+    // a stale shared track/pan byte cannot masquerade as the correct player.
+    const takeDown = age !== 7 || (
+      actual.se2.songHeader === probe.songHeaders.SE_M_TAKE_DOWN
+      && actual.se2.status === 0
+      && actual.se2.tracks[0]?.flags === 131
+      && actual.se2.tracks[0]?.panX === (playerToOpponent ? -64 : 63)
+      && actual.se1.songHeader !== probe.songHeaders.SE_M_TAKE_DOWN
+    );
+    const megaKick2 = age !== 44 && age !== 54 || (
       actual.se1.songHeader === probe.songHeaders.SE_M_MEGA_KICK2
+      && actual.se1.status === 0
       && actual.se1.tracks[0]?.flags === 131
       && actual.se1.tracks[0]?.panX === (playerToOpponent ? 63 : -63)
+      && actual.se2.songHeader !== probe.songHeaders.SE_M_MEGA_KICK2
     );
+    const audio = takeDown && megaKick2;
     const raw = readFileSync(join(rgbDir, `${String(frame).padStart(5, "0")}.rgb`));
     const ok = attacker.x2 === expected.attackerOffset.x2
       && attacker.y2 === expected.attackerOffset.y2

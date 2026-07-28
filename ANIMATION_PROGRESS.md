@@ -1,16 +1,19 @@
 # Animation coverage
 
-## MOVE_BODY_SLAM complete typed/hardware checkpoint; remains partial (2026-07-28)
+## MOVE_BODY_SLAM two-player audio repair; remains partial (2026-07-28)
 
 **Verdict:** `MOVE_BODY_SLAM` is partial. Fresh complete legal set-269
 LICKITUNG/ONIX Scene-ON evidence passes the complete move-owned source-script
 window plus first clear display at **107/107** frames **303-409** player-back
 and **107/107** frames **232-338** opponent-front through reducer/component,
 typed seam, software callbacks/tasks, registers, hardware battler
-OAM/matrices/palette transfer, side-relative audio, and raw RGB, twice fresh.
+OAM/matrices/palette transfer, complete two-player audio, and raw RGB, twice
+fresh. The repaired v2 probe proves `SE_M_TAKE_DOWN` on **SE2** at attacker
+pan (age 7) and both `SE_M_MEGA_KICK2` loop cues on **SE1** at target pan
+(ages 44/54), including player identity/status/flags in both orientations.
 Coverage is now **62 exact / 2 partial / 212 unsupported**. Independent
-outputs are byte-identical (player `80033875…f88`, opponent
-`febf0299…02b`).
+outputs are byte-identical (player `79e4bfaa…258c`, opponent
+`02c0ee9d…8c01`).
 
 **Reusable model/evidence:** the pure source-relative reducer ports
 `gVerticalDipSpriteTemplate(6,1,attacker)`, both offset slides, animation-0

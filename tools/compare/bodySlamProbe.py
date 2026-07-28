@@ -39,7 +39,9 @@ def main() -> None:
     anim_attacker = oracle.symbols["gBattleAnimAttacker"]
     anim_target = oracle.symbols["gBattleAnimTarget"]
     se1_info = oracle.symbols["gMPlayInfo_SE1"]
+    se2_info = oracle.symbols["gMPlayInfo_SE2"]
     se1_tracks = oracle.symbols["gMPlayTrack_SE1"]
+    se2_tracks = oracle.symbols["gMPlayTrack_SE2"]
     song_table = oracle.symbols["gSongTable"]
     nm = subprocess.run(
         ["arm-none-eabi-nm", str(reference / "pokeemerald.elf")],
@@ -72,6 +74,16 @@ def main() -> None:
     def s8(address: int) -> int:
         value = oracle.read_u8(address)
         return value - 0x100 if value >= 0x80 else value
+
+    def sound_player(info: int, tracks: int) -> dict:
+        return {
+            "songHeader": oracle.read_u32(info),
+            "status": oracle.read_u32(info + 4),
+            "tracks": [{
+                "flags": oracle.read_u8(tracks + i * 0x50),
+                "panX": s8(tracks + i * 0x50 + 0x15),
+            } for i in range(3)],
+        }
 
     def sprite(slot: int) -> dict:
         base = sprites + slot * 0x44
@@ -142,13 +154,8 @@ def main() -> None:
                 [s16(0x07000006 + i * 0x20 + offset) for offset in (0, 8, 16, 24)]
                 for i in range(32)
             ],
-            "se1": {
-                "songHeader": oracle.read_u32(se1_info),
-                "tracks": [{
-                    "flags": oracle.read_u8(se1_tracks + i * 0x50),
-                    "panX": s8(se1_tracks + i * 0x50 + 0x15),
-                } for i in range(3)],
-            },
+            "se1": sound_player(se1_info, se1_tracks),
+            "se2": sound_player(se2_info, se2_tracks),
             "dispcnt": u16(0x04000000), "bldcnt": u16(0x04000050),
             "bldalpha": u16(0x04000052), "bldy": u16(0x04000054),
         })
@@ -163,7 +170,7 @@ def main() -> None:
     if not frames:
         raise RuntimeError("stock ROM did not reach MOVE_BODY_SLAM")
     OUTPUT.write_text(json.dumps({
-        "schema": "body-slam-dense-evidence/v1", "setup": setup,
+        "schema": "body-slam-dense-evidence/v2", "setup": setup,
         "templates": templates, "taskFuncs": task_funcs,
         "songHeaders": {
             "SE_M_TAKE_DOWN": oracle.read_u32(song_table + 152 * 8),
