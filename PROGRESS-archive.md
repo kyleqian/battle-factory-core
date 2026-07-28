@@ -1,4 +1,28 @@
 ---
+## 536 — [BOUNDED WORKER 2026-07-27 ~20:44] EFFECT_FLAIL executes Flail/Reversal end to end; exact +1/+2/+2/+20
+
+- **State:** tree committed and green at **290 files / 3786 tests**;
+  `npm run build` clean. Census regenerates to **128/214 effects, 252/355
+  moves, 204/276 Factory-L50 distinct, 2586/2957 weighted (87.5%)**, the
+  assigned exact **+1 effect / +2 moves / +2 distinct / +20 weighted**, with
+  all **42/42** ground-truth checks passing.
+- **Did:** `53b4dc2` source-ports/registers
+  `B_SCR_OP_REMAININGHPTOPOWER`, materializes generic `gDynamicBasePower`
+  through the existing damage calculator and Triple Kick copy, and adds
+  Tier-1 coverage for every inclusive HP-band boundary plus Flail/Reversal
+  hit, miss, Protect, faint, and zero-HP-attacker terminals at genuine
+  `B_SCR_OP_END`. `e101563` regenerates the verified census.
+- **Next:** supervisor verify this completed registration and merge the
+  file-disjoint OFF-profile evidence, then continue the generated ranked
+  frontier at `B_SCR_OP_FRIENDSHIPTODAMAGECALCULATION` /
+  `EFFECT_RETURN` + `EFFECT_FRUSTRATION` (**+2/+2/+2/+18** predicted).
+- **Notes:** `tests/executableFrontierRatchet.test.ts` is unchanged: no new
+  unsupported barrier and no canonical-recording import. Battle Scene OFF
+  oracle freshness was checked at baseline only (`9c89c741…f297`); no oracle
+  lifecycle action, evidence-file edit, or recording-derived production
+  behavior. No PAPERCUT.
+
+---
 ## 535 — [SUPERVISOR VERIFY 2026-07-27 ~20:34] Curse registration + repeatable OFF-profile evidence merged green
 
 - **State:** union committed and green at **289 files / 3766 tests**;
