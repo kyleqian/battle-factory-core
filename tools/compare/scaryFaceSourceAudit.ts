@@ -44,6 +44,12 @@ const scaryRequired = [
 for (const literal of scaryRequired) {
   if (!scary.includes(literal)) throw new Error(`SCARY_FACE lost literal: ${literal}`);
 }
+const shakeLiteral = "createvisualtask AnimTask_ShakeTargetInPattern, 3, 20, 1, FALSE";
+const reverseBlend =
+  "simple_palette_blend selector=F_PAL_BG | F_PAL_ATK_SIDE | F_PAL_DEF_PARTNER, delay=3, initial_blend_y=16, target_blend_y=0, color=RGB_BLACK";
+if (scary.indexOf(reverseBlend) < scary.indexOf(shakeLiteral)) {
+  throw new Error("SCARY_FACE no longer overwrites shared args after shake creation");
+}
 
 if (!effects.includes("gBattleAnimBgTilemap_ScaryFacePlayer")
   || !effects.includes("gBattleAnimBgTilemap_ScaryFaceOpponent")
@@ -74,6 +80,9 @@ if (Object.values(siblingDifferences).some((proved) => !proved)) {
 console.log(JSON.stringify({
   move: "MOVE_SCARY_FACE",
   taskLiteral: { maxShakes: 20, offset: 1, vertical: false, pattern: 0 },
+  observedDelayedRuntimeArgs: {
+    maxShakes: 20, offset: 3, vertical: false, pattern: 16,
+  },
   eyeFrames: [0, 4, 8, 4, 0],
   eyeFrameDuration: 4,
   siblingsRemainUnsupported: Object.keys(siblingDifferences),

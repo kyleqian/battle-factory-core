@@ -2,6 +2,30 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_SCARY_FACE",
+      "status": "partial",
+      "remaining": "Exact requires complete dense hardware OAM/palette/register transfer, live audio state, raw RGB, and shared-framebuffer equality in both legal orientations twice; GLARE, THUNDER, and TRI_ATTACK remain separate unsupported acceptance units.",
+      "covered": [
+        "complete legal Level-50 Scene-ON parties stage the real challenge-0 set-133 RHYHORN carrier against slower constrained SHUCKLE in both orientations",
+        "complete move-owned frames 79-268 player-back and 83-272 opponent-front match 190/190 source, software, and typed relative-seam states twice fresh, with no excluded body frames and a clean boundary before generic speed-stat presentation",
+        "the reducer ports both invisible palette controllers, attacker/target audio restart boundaries, side-selected Scary Face BG1 identity, the complete AnimTask_ScaryFace 0-to-14-to-0 task schedule, both side-mirrored EyeSparkle sprites and all animation cells, patterned target offsets, and teardown",
+        "dense software evidence exposes the stock shared-gBattleAnimArgs overwrite: the script literal is ShakeTargetInPattern(20,1,FALSE,pattern0), while the immediately following palette command makes the delayed task execute runtime offset 3/pattern1; both contracts and every resulting offset are pinned",
+        "hardware OAM/palette/register transfer, live audio state, raw RGB, and shared-framebuffer equality remain the exact remainder; GLARE, THUNDER, and TRI_ATTACK remain unsupported"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-scary-face-player-rhyhorn-opponent-shuckle.json",
+        "tools/battle-lab/mechanic-scary-face-opponent-rhyhorn-player-shuckle.json",
+        "tools/compare/fixtures/scary-face-player-rhyhorn-opponent-shuckle.json",
+        "tools/compare/fixtures/scary-face-opponent-rhyhorn-player-shuckle.json",
+        "tools/compare/scaryFaceSourceAudit.ts",
+        "tools/compare/scaryFacePortable.ts",
+        "tools/compare/scaryFaceProbe.py",
+        "src/animation/scaryFace.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "tests/animation/scaryFace.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_CHARM",
       "status": "exact",
       "covered": [
@@ -1306,7 +1330,7 @@
         "MOVE_THUNDER",
         "MOVE_TRI_ATTACK"
       ],
-      "goal": "MOVE_SCARY_FACE has legal set-133 RHYHORN versus SHUCKLE Scene-ON staging in both orientations plus a pinned source audit, but remains unsupported. Next, prove its complete move-owned BG1/task schedule, eye sprites, patterned target offsets, source audio restart boundaries, teardown, and typed relative seam densely in both orientations twice before partial promotion. Hardware OAM/palette/register transfer, live audio state, raw RGB, and shared framebuffer remain the exact remainder. GLARE, THUNDER, and TRI_ATTACK have materially different bodies or task arguments and remain unsupported pending independent complete dense evidence."
+      "goal": "MOVE_SCARY_FACE is partial after 190/190 complete move-owned source/software/typed-seam frames passed in both orientations twice, including the stock shared-argument overwrite from literal offset1/pattern0 to runtime offset3/pattern1. Exact still requires hardware OAM/palette/register transfer, live audio state, raw RGB, and shared-framebuffer equality. GLARE, THUNDER, and TRI_ATTACK have materially different bodies or task arguments and remain unsupported pending independent complete dense evidence."
     },
     {
       "id": "rock-mon-back-and-forth-magenta-heart",

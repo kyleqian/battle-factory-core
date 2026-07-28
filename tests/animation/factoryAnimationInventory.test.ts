@@ -68,10 +68,10 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // CHARM closes its full shared compositor and teardown seam as exact.
-        unsupported: 222,
+        // SCARY FACE closes the complete software/typed seam as partial.
+        unsupported: 221,
         staged: 0,
-        partial: 3,
+        partial: 4,
         exact: 51,
       },
       {

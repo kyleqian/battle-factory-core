@@ -44,38 +44,28 @@ animation. A status caused by a move is not part of that move's animation.
   presentation seam and all source- or evidence-required variants are covered.
 - No entry means unsupported.
 
-## MOVE_SCARY_FACE source/staging checkpoint; remains unsupported (2026-07-27)
+## MOVE_SCARY_FACE promoted partial; complete software/typed seam (2026-07-27)
 
-**Verdict:** `MOVE_SCARY_FACE` remains unsupported and coverage stays
-**51 exact / 3 partial / 222 unsupported**. Fresh Battle-Scene-ON
-`mechanicLab` runs now stage the real challenge-0 Level-50 set-133 RHYHORN
-carrier against a slower constrained SHUCKLE in both orientations. Both use
-complete three-mon parties, four SCARY FACE choices on the active carrier,
-four TACKLE choices on the active target, and reach the real speed-drop result
-without damage or status.
+**Verdict:** `MOVE_SCARY_FACE` is partial. Legal set-133 RHYHORN versus
+constrained SHUCKLE passes the complete move-owned source/software/typed seam
+**190/190** in both orientations, twice fresh, with no excluded body frames
+and a clean boundary before generic speed-stat presentation. Coverage is
+**51 exact / 4 partial / 221 unsupported**.
 
-**Source audit:** `Move_SCARY_FACE` owns the full BG/attacker/defender-partner
-black ramp, attacker-pan Psybeam, delay 10, attacker-pan Leer,
-`AnimTask_ScaryFace`'s side-selected BG1 tilemap/image/palette and 0→14→0
-BLDALPHA schedule, delay 13, two `ANIM_TAG_EYE_SPARKLE` sprites with literal
-(-16,-8)/(16,-8) offsets and 0/4/8/4/0 four-frame animation, then
-`AnimTask_ShakeTargetInPattern(20,1,FALSE,pattern0)`, target-pan String Shot 2,
-the reverse palette ramp, waits, asset/task/register/audio teardown, and the
-clear separation before generic speed-stage result presentation.
-`scaryFaceSourceAudit.ts` pins these literals and audits the siblings:
-GLARE shares the `(20,1,FALSE,pattern0)` task but adds GlareEyeDots and
-different palette/audio scheduling; THUNDER uses `(30,3,TRUE,pattern0)` plus
-BG_THUNDER; TRI ATTACK uses both `(20,3,TRUE,pattern1)` and
-`(20,3,TRUE,pattern0)` inside its distinct triangle/fire/lightning/ice body.
-All three remain unsupported.
+**Proof:** the reducer and fresh mGBA probe cover both invisible palette
+controllers; side-selected BG1 tilemap/image/palette identity and the complete
+`AnimTask_ScaryFace` 0→14→0 schedule; both side-mirrored EyeSparkle sprites
+and all 0/4/8/4/0 cells; all three source audio restart boundaries; target
+offsets; software task/sprite state; teardown; and the typed Scene-ON seam.
+A real stock-ROM quirk is now explicit: the script literal is
+`ShakeTargetInPattern(20,1,FALSE,pattern0)`, but the task rereads shared
+`gBattleAnimArgs` after the following palette command overwrites it, so legal
+execution uses offset 3/pattern1. Both the literal and every observed runtime
+offset are pinned. GLARE, THUNDER, and TRI ATTACK remain unsupported.
 
-**Exact next action:** add a source-derived relative SCARY FACE reducer and a
-fresh dense mGBA probe/comparator over the complete move-owned window in both
-orientations twice, pinning the BG1/task schedule, software sprites, target
-offsets, source audio restart boundaries, teardown, and the typed relative
-seam. Only then may SCARY FACE become partial. Hardware OAM/palette/register
-transfer, live audio state, raw RGB, and shared-framebuffer composition remain
-the explicit exact remainder. No renderer or engine file was touched.
+**Exact remainder:** hardware OAM/palette/register transfer, live audio state,
+raw RGB, and shared-framebuffer equality. No renderer or engine file was
+touched.
 
 ## MOVE_CHARM promoted exact; magenta-heart compositor closed (2026-07-27)
 

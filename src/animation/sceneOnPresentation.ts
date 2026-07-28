@@ -183,6 +183,10 @@ import {
   type TauntState,
 } from "./taunt.ts";
 import {
+  scaryFaceAtAge,
+  type ScaryFaceState,
+} from "./scaryFace.ts";
+import {
   sparkAtAge,
   type SparkState,
 } from "./spark.ts";
@@ -375,6 +379,7 @@ export interface SceneOnPresentationBattler {
     | "CLAMPERL"
     | "SEVIPER"
     | "SUDOWOODO"
+    | "RHYHORN"
     | "SHUCKLE"
     | "GLALIE"
     | "HITMONCHAN"
@@ -868,6 +873,15 @@ export interface SceneOnTauntConfig {
   readonly attackerHead: Readonly<{ x: number; y: number }>;
 }
 
+export interface SceneOnScaryFaceConfig {
+  readonly move: "SCARY_FACE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source `InitSpritePosToAnimAttacker(sprite, TRUE)` coordinate. */
+  readonly attackerEyeCenter: Readonly<{ x: number; y: number }>;
+}
+
 export interface SceneOnSparkConfig {
   readonly move: "SPARK";
   readonly attacker: SceneOnPresentationBattler;
@@ -1080,7 +1094,7 @@ export type SceneOnMoveConfig =
   | SceneOnKnockOffConfig;
 
 export interface SceneOnMovePresentationState<
-  TConfig extends SceneOnMoveConfig = SceneOnMoveConfig,
+  TConfig extends SceneOnMoveConfig | SceneOnScaryFaceConfig = SceneOnMoveConfig,
 > {
   readonly age: number;
   readonly config: TConfig;
@@ -1092,6 +1106,8 @@ export type SceneOnRazorLeafPresentationState =
   SceneOnMovePresentationState<SceneOnRazorLeafConfig>;
 export type SceneOnTauntPresentationState =
   SceneOnMovePresentationState<SceneOnTauntConfig>;
+export type SceneOnScaryFacePresentationState =
+  SceneOnMovePresentationState<SceneOnScaryFaceConfig>;
 export type SceneOnSparkPresentationState =
   SceneOnMovePresentationState<SceneOnSparkConfig>;
 export type SceneOnCharmPresentationState =
@@ -1162,6 +1178,12 @@ export interface SceneOnSwaggerView extends SwaggerState {
 }
 
 export interface SceneOnTauntView extends TauntState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnScaryFaceView extends ScaryFaceState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -1718,7 +1740,7 @@ function assertIntegerPoint(
  */
 export function createSceneOnMovePresentation<
   TConfig extends SceneOnMoveConfig | SceneOnRazorLeafConfig | SceneOnTauntConfig
-    | SceneOnSparkConfig | SceneOnCharmConfig,
+    | SceneOnSparkConfig | SceneOnCharmConfig | SceneOnScaryFaceConfig,
 >(
   config: TConfig,
 ): SceneOnMovePresentationState<TConfig> {
@@ -2302,6 +2324,26 @@ export function sceneOnTauntView(
       state.config.attackerHead,
       state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is the first move-owned to-black palette controller frame. */
+export function sceneOnScaryFaceView(
+  state: SceneOnScaryFacePresentationState,
+): SceneOnScaryFaceView {
+  if (state.config.move !== "SCARY_FACE") {
+    throw new Error(`expected SCARY_FACE presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...scaryFaceAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.target.geometry.side,
+      state.config.attackerEyeCenter,
     ),
   };
 }
