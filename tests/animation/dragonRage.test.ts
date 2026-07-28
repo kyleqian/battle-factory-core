@@ -2,6 +2,10 @@ import { describe, expect, it } from "vitest";
 import playerProbe from "../../src/data/gen/dragonrage-full-probe-player-attacker.json" with { type: "json" };
 import opponentProbe from "../../src/data/gen/dragonrage-full-probe-opponent-attacker.json" with { type: "json" };
 import {
+  createSceneOnMovePresentation,
+  sceneOnDragonRageView,
+} from "../../src/animation/sceneOnPresentation.ts";
+import {
   DRAGON_RAGE_FIRE_PLUME_SPAWNS,
   DRAGON_RAGE_FIRE_SPIT_GEOMETRY,
   DRAGON_RAGE_ATTACKER_SHAKE,
@@ -123,6 +127,43 @@ describe("attacker/target AnimTask_ShakeMon (reused primitive, first ATTACKER-si
   it("two or more ticks before creation stays zero (guard unaffected outside the one-tick transient)", () => {
     expect(shakeMonOffsetAtRenderTick(DRAGON_RAGE_ATTACKER_SHAKE, 0, -2)).toEqual({ x2: 0, y2: 0 });
     expect(shakeMonOffsetAtRenderTick(DRAGON_RAGE_ATTACKER_SHAKE, 0, -10)).toEqual({ x2: 0, y2: 0 });
+  });
+
+  it("target creation transient replaces ONIX's settled front-animation offset in composed OAM", () => {
+    const stage = createSceneOnMovePresentation({
+      move: "DRAGON_RAGE",
+      attacker: {
+        species: "CHARMELEON",
+        geometry: {
+          side: "player",
+          spriteCorner: { x: 40, y: 57 },
+          animationCenter: { x: 72, y: 97 },
+          battlePositionCenter: { x: 72, y: 80 },
+        },
+      },
+      target: {
+        species: "ONIX",
+        geometry: {
+          side: "opponent",
+          spriteCorner: { x: 144, y: 10 },
+          animationCenter: { x: 176, y: 42 },
+          battlePositionCenter: { x: 176, y: 40 },
+        },
+      },
+      fieldProfile: {
+        playerHp: 133,
+        playerMaxHp: 133,
+        opponentHp: 110,
+        opponentMaxHp: 110,
+      },
+    });
+
+    // targetShakeTick=97. Age 95 still carries ONIX's settled send-out
+    // offset; age 96 is the composed creation write observed in OAM at RAM
+    // tick 186 and photographed at render age 98 under the shake lag.
+    expect(sceneOnDragonRageView({ ...stage, age: 95 }).targetOffset).toEqual({ x2: 1, y2: 0 });
+    expect(sceneOnDragonRageView({ ...stage, age: 96 }).targetOffset).toEqual({ x2: 1, y2: 0 });
+    expect(sceneOnDragonRageView({ ...stage, age: 96 }).displayedTargetOffset).toEqual({ x2: 0, y2: 3 });
   });
 });
 

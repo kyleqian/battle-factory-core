@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
 import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -27,6 +28,7 @@ interface Fixture {
 }
 
 interface ProbeSprite {
+  readonly slot: number;
   readonly x: number;
   readonly y: number;
   readonly x2: number;
@@ -37,6 +39,9 @@ interface ProbeSprite {
   readonly matrixB: number;
   readonly matrixC: number;
   readonly matrixD: number;
+  readonly matrixNum: number;
+  readonly invisible: boolean;
+  readonly attr: readonly number[];
 }
 
 interface ProbeFrame {
@@ -45,6 +50,18 @@ interface ProbeFrame {
   readonly target: ProbeSprite;
   readonly fireSpitSprites: readonly ProbeSprite[];
   readonly firePlumeSprites: readonly ProbeSprite[];
+  readonly animSoundTaskCount: number;
+  readonly hardwareOam: readonly (readonly number[])[];
+  readonly hardwareMatrices: readonly (readonly number[])[];
+  readonly registers: { readonly dispcnt: number; readonly bldcnt: number; readonly bldalpha: number };
+  readonly fadedPalette: readonly number[];
+  readonly hardwarePalette: readonly number[];
+  readonly se1: {
+    readonly songHeader: number;
+    readonly status: number;
+    readonly tracks: readonly { readonly flags: number; readonly panX: number }[];
+  };
+  readonly sha256: string;
 }
 
 const root = resolve(dirname(new URL(import.meta.url).pathname), "../..");
@@ -73,6 +90,7 @@ if (run.stderr) process.stderr.write(run.stderr);
 if (run.status !== 0) process.exit(run.status ?? 1);
 
 const probe = JSON.parse(readFileSync(output, "utf8")) as {
+  readonly songHeaders: { readonly dragonRage: number; readonly flameWheel2: number };
   readonly frames: readonly ProbeFrame[];
 };
 const frames = new Map(probe.frames.map((frame) => [frame.frame, frame]));
@@ -95,16 +113,6 @@ let componentMatching = 0;
 let framebufferMatching = 0;
 const framebufferMismatches: string[] = [];
 const componentMismatches: string[] = [];
-
-// ONIX's own sprite (either side) can carry a constant baseline x2 residual
-// unrelated to any DRAGON_RAGE mechanism (the same species-specific OAM
-// quirk this file's `spriteCorner`s already bake in, e.g. opponent-side
-// {x:145} instead of the generic {x:144}) - self-calibrate it from the
-// dense window's own first frame rather than hardcoding a species constant
-// here, since the exact residual is per-species/per-orientation.
-const baselineFrame = frames.get(fixture.denseWindow.startFrame)!;
-const attackerBaseline = { x2: baselineFrame.attacker.x2, y2: baselineFrame.attacker.y2 };
-const targetBaseline = { x2: baselineFrame.target.x2, y2: baselineFrame.target.y2 };
 
 function plumeKey(p: { x: number; y: number; subpriority: number; sheetFrame: number }): string {
   return JSON.stringify({ x: p.x, y: p.y, subpriority: p.subpriority, sheetFrame: p.sheetFrame });
@@ -134,7 +142,9 @@ for (
     ? JSON.stringify({
       x: record.fireSpitSprites[0].x + record.fireSpitSprites[0].x2,
       y: record.fireSpitSprites[0].y + record.fireSpitSprites[0].y2,
-      frame: record.fireSpitSprites[0].animCmdIndex,
+      // `animCmdIndex` selects commands whose literal tile offsets are
+      // 16/32/48, i.e. sheet row-blocks 1/2/3.
+      frame: record.fireSpitSprites[0].animCmdIndex + 1,
       matrix: {
         pa: record.fireSpitSprites[0].matrixA,
         pb: record.fireSpitSprites[0].matrixB,
@@ -159,24 +169,70 @@ for (
   });
   const oracle = JSON.stringify({
     attackerOffset: {
-      x2: record.attacker.x2 - attackerBaseline.x2,
-      y2: record.attacker.y2 - attackerBaseline.y2,
+      x2: record.attacker.x2,
+      y2: record.attacker.y2,
     },
     targetOffset: {
-      x2: record.target.x2 - targetBaseline.x2,
-      y2: record.target.y2 - targetBaseline.y2,
+      x2: record.target.x2,
+      y2: record.target.y2,
     },
     fireSpit: oracleFireSpit,
     firePlumes: oraclePlumes,
   });
-  if (app === oracle) componentMatching += 1;
-  else if (componentMismatches.length < 8) {
-    componentMismatches.push(`${frame}: oracle=${oracle} app=${app}`);
+  const prior = frames.get(frame - 1);
+  const priorSprites = prior
+    ? [prior.attacker, prior.target, ...prior.fireSpitSprites, ...prior.firePlumeSprites]
+      .filter((sprite) => !sprite.invisible)
+    : [];
+  const hardwareOam = priorSprites.every((sprite) =>
+    record.hardwareOam.some((entry) => JSON.stringify(entry) === JSON.stringify(sprite.attr)));
+  const hardwarePalettes = priorSprites.every((sprite) => {
+    const bank = sprite.attr[2]! >>> 12;
+    const start = 256 + bank * 16;
+    return record.hardwarePalette.slice(start, start + 16).every(
+      (color, offset) => color === prior!.fadedPalette[start + offset],
+    );
+  });
+  const priorAffine = prior?.fireSpitSprites[0];
+  const hardwareMatrix = !priorAffine || JSON.stringify(
+    record.hardwareMatrices[priorAffine.matrixNum],
+  ) === JSON.stringify([
+    priorAffine.matrixA,
+    priorAffine.matrixB,
+    priorAffine.matrixC,
+    priorAffine.matrixD,
+  ]);
+  const registers = record.registers.dispcnt === 0xbf40
+    && record.registers.bldcnt === 0
+    && record.registers.bldalpha === 0;
+  const activeTracks = record.se1.tracks.filter((track) => track.flags !== 0);
+  const expectedPan = record.se1.songHeader === probe.songHeaders.dragonRage
+    ? (fixture.attacker.geometry.side === "player" ? -64 : 63)
+    // `loopsewithpan` clamps the player's target-pan endpoint to -63,
+    // while the one-shot attacker-pan command preserves -64.
+    : (fixture.target.geometry.side === "player" ? -63 : 63);
+  const sound = activeTracks.length === 0 || (
+    (record.se1.songHeader === probe.songHeaders.dragonRage
+      || record.se1.songHeader === probe.songHeaders.flameWheel2)
+    && activeTracks.every((track) => track.panX === expectedPan)
+  );
+  if (app === oracle && hardwareOam && hardwarePalettes
+    && hardwareMatrix && registers && sound) {
+    componentMatching += 1;
+  } else if (componentMismatches.length < 8) {
+    componentMismatches.push(
+      `${frame}: typed=${app === oracle} oam=${hardwareOam} `
+      + `palette=${hardwarePalettes} matrix=${hardwareMatrix} `
+      + `registers=${registers} sound=${sound} oracle=${oracle} app=${app}`,
+    );
   }
 
   const oracleRgb = readFileSync(
     join(scratch, "rgb", `${String(frame).padStart(5, "0")}.rgb`),
   );
+  if (createHash("sha256").update(oracleRgb).digest("hex") !== record.sha256) {
+    throw new Error(`frame ${frame}: raw RGB digest mismatch`);
+  }
   const rgba = render(engine);
   let framebufferExact = true;
   let framebufferDiff = 0;
@@ -228,7 +284,7 @@ for (
 const total =
   fixture.denseWindow.endFrame - fixture.denseWindow.startFrame + 1;
 console.log(
-  `${componentMatching}/${total} dense DRAGON_RAGE component frames matched`,
+  `${componentMatching}/${total} dense DRAGON_RAGE component/typed/hardware frames matched`,
 );
 console.log(`${framebufferMatching}/${total} dense DRAGON_RAGE framebuffer frames matched`);
 if (componentMismatches.length) console.log(componentMismatches.join("\n"));

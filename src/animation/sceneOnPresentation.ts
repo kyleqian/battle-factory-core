@@ -1712,6 +1712,8 @@ export interface SceneOnDragonRageView {
   readonly target: SceneOnPresentationBattler;
   readonly attackerOffset: Readonly<{ x2: number; y2: number }>;
   readonly targetOffset: Readonly<{ x2: number; y2: number }>;
+  /** Hardware-composed target offset, including the creation-write transient that live sprite fields do not retain. */
+  readonly displayedTargetOffset: Readonly<{ x2: number; y2: number }>;
   readonly fireSpit: DragonRageFireSpitState | null;
   readonly firePlumes: readonly SceneOnDragonRageFirePlume[];
 }
@@ -1984,6 +1986,7 @@ function dragonRageTargetOffset(
     const idle = speciesFrontIdleRestOffset(target.species);
     if (idle) return idle;
   }
+  if (animationAge < schedule.targetShakeTick) return { x2: 0, y2: 0 };
   return shakeMonOffsetAtRenderTick(DRAGON_RAGE_TARGET_SHAKE, schedule.targetShakeTick, animationAge);
 }
 
@@ -2004,13 +2007,33 @@ export function sceneOnDragonRageView(
   // 40 opponent) - species-independent, same value `ember.ts`'s own callers
   // already pass in as `targetSubpriority`.
   const targetSubpriority = state.config.target.geometry.side === "player" ? 30 : 40;
+  const targetOffset = dragonRageTargetOffset(
+    animationAge,
+    schedule,
+    state.config.target,
+  );
+  // The priority-5 task's creation write is composed into OAM before its
+  // same-frame synchronous step collapses the live sprite fields back to
+  // zero. This display-only boundary takes precedence over the front-
+  // animation rest offset because AnimTask_ShakeMon writes absolute x2/y2.
+  // `dump-dragonrage-oam.py` captures the split at player-attacker RAM tick
+  // 186: live x2/y2=(0,0), composed OAM x=144,y=13, i.e. (0,+3).
+  const displayedTargetOffset =
+    animationAge === schedule.targetShakeTick - 1
+      ? shakeMonOffsetAtRenderTick(
+        DRAGON_RAGE_TARGET_SHAKE,
+        schedule.targetShakeTick,
+        animationAge,
+      )
+      : targetOffset;
   return {
     age: state.age,
     animationAge,
     attacker: state.config.attacker,
     target: state.config.target,
     attackerOffset: dragonRageAttackerOffset(animationAge, schedule, attackerSide),
-    targetOffset: dragonRageTargetOffset(animationAge, schedule, state.config.target),
+    targetOffset,
+    displayedTargetOffset,
     fireSpit: dragonRageFireSpitStateAtAge(
       animationAge - schedule.fireSpitTick,
       DRAGON_RAGE_FIRE_SPIT_GEOMETRY[attackerSide],

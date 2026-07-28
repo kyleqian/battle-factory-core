@@ -22641,8 +22641,8 @@ export function renderSceneOnMovePresentation(
       fb,
       targetSprite.tileset,
       targetSprite.palette,
-      view.target.geometry.spriteCorner.x + targetShakeView.targetOffset.x2,
-      view.target.geometry.spriteCorner.y + targetShakeView.targetOffset.y2,
+      view.target.geometry.spriteCorner.x + targetShakeView.displayedTargetOffset.x2,
+      view.target.geometry.spriteCorner.y + targetShakeView.displayedTargetOffset.y2,
     );
     for (const plume of frontPlumes) drawPlume(plume);
     const drawAttacker = () => {

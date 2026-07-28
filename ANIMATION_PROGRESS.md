@@ -1,5 +1,36 @@
 # Animation coverage
 
+## MOVE_DRAGON_RAGE promoted exact; composed-OAM creation boundary closed (2026-07-27)
+
+**Verdict:** `MOVE_DRAGON_RAGE` is exact. Complete legal CHARMELEON/ONIX
+Scene-ON windows match **150/150** frames 89-238 player-attacker and
+**150/150** frames 93-242 opponent-attacker through source/software, typed
+seam, hardware OAM/matrices/palettes/registers, live audio, raw RGB, and the
+shared framebuffer in both orientations, reproduced twice fresh. Coverage is
+now **55 exact / 2 partial / 219 unsupported**.
+
+**Residual repair/evidence:** the lone player render-age-98 mismatch was a
+display-transfer ordering gap. At RAM tick 186, target `AnimTask_ShakeMon`'s
+absolute creation write replaces ONIX's settled `(x2=1,y2=0)` with `(0,3)`;
+the strengthened `gMain.oamBuffer` probe sees composed OAM `(x=144,y=13)`
+while the synchronously stepped live fields have already collapsed to
+`(0,0)`. The seam now keeps live `targetOffset` distinct from
+`displayedTargetOffset`, and the draw path consumes the composed value only
+at that source boundary. The portable proof also corrects its typed
+sheet-block comparison, pins prior-software-to-hardware OAM/matrix/palette
+transfer, `DISPCNT`/zero blend state, both sound headers and side-specific
+pans, raw-RGB digests, and every shared output frame.
+
+**Orientations/controls/siblings:** opponent-attacker geometry was staged and
+proved independently; its target-side `loopsewithpan` clamps the player pan
+to **-63**, distinct from the player-attacker one-shot's **-64**.
+`MOVE_DRAGON_BREATH` remains **85/85**, `MOVE_FLAMETHROWER` **126/126**,
+`MOVE_BLAZE_KICK` **78/78**, and `MOVE_EMBER` **63/63** in both orientations
+after the repair. `MOVE_FIRE_BLAST` and `MOVE_FIRE_SPIN` remain unsupported:
+their audited templates/bodies are distinct and still lack complete dense
+acceptance. No battle logic, RNG, controller, outcome, facility state,
+boundary list, unsupported barrier, or canonical-recording import changed.
+
 ## MOVE_REFLECT promoted exact; blue-light-wall compositor closed (2026-07-27)
 
 **Verdict:** `MOVE_REFLECT` is exact. The complete legal MINUN/SHUCKLE

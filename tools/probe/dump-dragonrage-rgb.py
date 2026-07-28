@@ -57,6 +57,7 @@ GBATTLEANIMATTACKER = 0x02038436
 GBATTLEANIMTARGET = 0x02038437
 GANIMSCRIPTACTIVE = 0x020383FD
 GANIMVISUALTASKCOUNT = 0x020383FE
+GANIMSOUNDTASKCOUNT = 0x020383FF
 
 GTASKS = 0x03005E00
 TASK_SIZE = 0x28
@@ -66,6 +67,8 @@ ANIM_TASK_SHAKE_MON_STEP = 0x080D5220
 
 GOAMMATRICES = 0x02021BC0
 OAMMATRIX_SIZE = 0x08
+GPLTTBUFFERUNFADED = 0x02037B14
+GPLTTBUFFERFADED = 0x02037714
 
 FIRE_PLUME_TEMPLATE_ADDR = 0x08596F28
 FIRE_SPIT_TEMPLATE_ADDR = 0x08596F80
@@ -96,6 +99,8 @@ def main() -> None:
     lab = BattleLab(oracle, profile)
     setup = lab.prepare(request)
     RGB_DIR.mkdir()
+    gmplayinfo_se1 = oracle.symbols["gMPlayInfo_SE1"]
+    gmplaytrack_se1 = oracle.symbols["gMPlayTrack_SE1"]
 
     def s16(v: int) -> int:
         return v - 0x10000 if v & 0x8000 else v
@@ -109,6 +114,23 @@ def main() -> None:
     def read_u32(addr: int) -> int:
         b = [oracle.read_u8(addr + i) for i in range(4)]
         return b[0] | (b[1] << 8) | (b[2] << 16) | (b[3] << 24)
+
+    def read_s8(addr: int) -> int:
+        value = oracle.read_u8(addr)
+        return value - 0x100 if value & 0x80 else value
+
+    def sound_player() -> dict:
+        return {
+            "songHeader": oracle.read_u32(gmplayinfo_se1),
+            "status": oracle.read_u32(gmplayinfo_se1 + 4),
+            "tracks": [
+                {
+                    "flags": oracle.read_u8(gmplaytrack_se1 + i * 0x50),
+                    "panX": read_s8(gmplaytrack_se1 + i * 0x50 + 0x15),
+                }
+                for i in range(3)
+            ],
+        }
 
     def sprite_common(slot: int) -> dict:
         base = GSPRITES + slot * SPRITE_SIZE
@@ -132,12 +154,15 @@ def main() -> None:
             "matrixC": read_s16(mbase + 4),
             "matrixD": read_s16(mbase + 6),
             "data": [read_s16(base + SPRITE_DATA_OFF + i * 2) for i in range(8)],
+            "attr": [read_u16(base), read_u16(base + 2), read_u16(base + 4)],
         }
 
-    def capture(frame: int) -> None:
+    def capture(frame: int) -> dict | None:
+        snapshot = lab.snapshot()
+        if snapshot["engine"]["currentMove"] != 82:
+            return None
         rgb = oracle.screen_rgb()
         (RGB_DIR / f"{frame:05d}.rgb").write_bytes(rgb)
-        snapshot = lab.snapshot()
 
         attacker_battler = oracle.read_u8(GBATTLEANIMATTACKER)
         target_battler = oracle.read_u8(GBATTLEANIMTARGET)
@@ -185,6 +210,7 @@ def main() -> None:
             "sha256": hashlib.sha256(rgb).hexdigest(),
             "animScriptActive": oracle.read_u8(GANIMSCRIPTACTIVE),
             "animVisualTaskCount": oracle.read_u8(GANIMVISUALTASKCOUNT),
+            "animSoundTaskCount": oracle.read_u8(GANIMSOUNDTASKCOUNT),
             "player": snapshot["battlers"]["player"],
             "opponent": snapshot["battlers"]["opponent"],
             "playerPersonality": oracle.read_u32(oracle.symbols["gBattleMons"] + 0x48),
@@ -195,17 +221,38 @@ def main() -> None:
             "fireSpitSprites": fire_spit_sprites,
             "firePlumeSprites": fire_plume_sprites,
             "slideSprites": slide_sprites,
+            "hardwareOam": [
+                [read_u16(0x07000000 + i * 8 + offset) for offset in (0, 2, 4)]
+                for i in range(128)
+            ],
+            "hardwareMatrices": [
+                [read_s16(0x07000006 + i * 0x20 + offset) for offset in (0, 8, 16, 24)]
+                for i in range(32)
+            ],
+            "registers": {
+                "dispcnt": read_u16(0x04000000),
+                "bldcnt": read_u16(0x04000050),
+                "bldalpha": read_u16(0x04000052),
+            },
+            "fadedPalette": [read_u16(GPLTTBUFFERFADED + i * 2) for i in range(512)],
+            "unfadedPalette": [read_u16(GPLTTBUFFERUNFADED + i * 2) for i in range(512)],
+            "hardwarePalette": [read_u16(0x05000000 + i * 2) for i in range(512)],
+            "se1": sound_player(),
         }
 
     records = []
     frame = 0
-    records.append(capture(frame))
+    first = capture(frame)
+    if first is not None:
+        records.append(first)
     for segment in request["trace"]["segments"]:
         buttons = segment.get("buttons", [])
         for _ in range(int(segment["frames"])):
             oracle.advance(buttons)
             frame += 1
-            records.append(capture(frame))
+            record = capture(frame)
+            if record is not None:
+                records.append(record)
 
     OUTPUT_PATH.write_text(
         json.dumps(
@@ -213,6 +260,10 @@ def main() -> None:
                 "schema": "dragonrage-dense-rgb/v1",
                 "profile": profile,
                 "setup": setup,
+                "songHeaders": {
+                    "dragonRage": oracle.read_u32(oracle.symbols["gSongTable"] + 171 * 8),
+                    "flameWheel2": oracle.read_u32(oracle.symbols["gSongTable"] + 145 * 8),
+                },
                 "frames": records,
             },
             indent=2,
