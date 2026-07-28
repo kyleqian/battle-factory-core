@@ -1,4 +1,28 @@
 ---
+## 534 — [BOUNDED WORKER 2026-07-27 ~20:28] EFFECT_CURSE registered end to end; +1 effect / +1 move / +18 weighted
+
+- **State:** tree committed and green at **288 files / 3761 tests**;
+  `npm run build` clean. Census regenerated to **127/214 effects, 250/355
+  moves, 202/276 Factory-L50 distinct, 2566/2957 weighted (86.8%)**.
+  The actual delta is the assigned **+1 effect / +1 move / +1 distinct /
+  +18 weighted**, with all **42/42** census self-checks passing.
+- **Did:** implemented source-complete generic handlers for
+  `B_SCR_OP_JUMPIFTYPE2` (both type slots) and `B_SCR_OP_CURSETARGET`
+  (already-cursed failure plus half-max-HP damage), then composed the committed
+  `BattleScript_EffectCurse` through its existing selectors, stat reducers,
+  damage path, and move-end events. Tier-1 walks reach genuine
+  `B_SCR_OP_END` terminals for Ghost and non-Ghost users and pin exact
+  HP/status2/stat-stage/event/PP/RNG behavior, including stat-limit failure,
+  already-cursed, substitute, and random-target fallback boundaries.
+- **Next:** supervisor verify/merge this completed step, then resume the ranked
+  frontier at `B_SCR_OP_REMAININGHPTOPOWER` / `EFFECT_FLAIL`; RETURN and
+  FRUSTRATION follow. End-turn Curse damage remains explicitly out of scope.
+- **Notes:** `tests/executableFrontierRatchet.test.ts` is unchanged; no new
+  unsupported barriers or canonical-recording imports. Battle Scene OFF oracle
+  freshness was checked at baseline only; no oracle lifecycle action or
+  recording-derived behavior. No PAPERCUT.
+
+---
 ## 533 — [SUPERVISOR ORIENT 2026-07-27 ~20:12] animation fold + fresh green OFF-profile baseline
 
 - **State:** union committed except for this ledger/test-fix step and green at
