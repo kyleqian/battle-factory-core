@@ -1,4 +1,28 @@
 ---
+## 573 — [BOUNDED MAIN WORKER 2026-07-28 ~02:52] Follow Me executes and expires generically
+
+- **State:** committed `b29ecd1`; tree green at **331 files / 4047 tests**,
+  focused **100/100**, and ratchets **6/6**. Production build, both-oracle
+  freshness/info, census regeneration, and `git diff --check` pass. Census is
+  exactly **144/214 effects, 270/355 moves, 221/276 Factory-L50 distinct,
+  2716/2957 weighted**, all **42/42**.
+- **Did:** globally registered operandless `0xca`: after ordinary PP spend it
+  always advances and immutably writes only the attacker side's timer **1**
+  and target, including same-side overwrite. The shared BattleTurnPassed entry
+  clears both timers before field/battler/faint/delayed work and the tail
+  repeats that idempotent clear, retaining inert targets; a generic singles
+  full turn spends both Follow Me PP and reaches the next decision with zero
+  HP/stat/lock/RNG changes.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next shared registration target; do not extend the retired
+  canonical Battle-2 march.
+- **Notes:** the six source retarget readers/HP guards remain evidence-pinned;
+  Counter/Mirror Coat/GetMoveTarget doubles ownership was not widened. Handler
+  inventory ratchet **152→153** only; no unsupported-branch/import ratchet,
+  recording import, private handler, animation/presentation/scenario branch,
+  issue removal, oracle lifecycle action, or PAPERCUT.
+
+---
 ## 571 — [BOUNDED MAIN WORKER CORRECTION 2026-07-28 ~02:35] Minimize consumer proof corrected
 
 - **State:** committed `507fde7`; tree green at **329 files / 4037 tests**,

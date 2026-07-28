@@ -15,6 +15,32 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 576 — [BOUNDED MAIN WORKER 2026-07-28 ~03:15] Secret Power executes through the shared hit/effect chain
+
+- **State:** committed `25fe673`; tree green at **334 files / 4060 tests**,
+  focused **317/317** (final strict replay **29/29**), and ratchets **6/6**.
+  Production build, both-oracle freshness/info, census regeneration, and
+  `git diff --check` pass. Census is exactly **145/214 effects, 271/355
+  moves, 222/276 Factory-L50 distinct, 2722/2957 weighted**, all **42/42**.
+- **Did:** globally registered operandless `0xe4`; it advances one byte and
+  maps every raw u8 `gBattleEnvironment` to the exact source move-effect byte,
+  writing nothing else. The immutable context validates/persists the field;
+  legacy focused construction defaults once, while all three production
+  Factory constructors explicitly supply **BUILDING (8)**. Program and
+  generic full-turn tests retain PP/damage/secondary ownership in the shared
+  `EffectHit` / `seteffectwithchance` / `SetMoveEffect` chain.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next shared registration target; do not extend the retired
+  canonical Battle-2 march.
+- **Notes:** the seed-3 stock lab's exact action-boundary RNG
+  **983916074** reaches Delcatty Secret Power paralysis through shared code:
+  target **362→311**, PP **20→19**, status1 **0→64**, final RNG
+  **1633612974 / 4 calls**. Handler inventory **153→154** only. No shared
+  barrier, unsupported/import ratchet, recording import, private handler,
+  animation/presentation/tick branch, scenario/evidence mutation, issue
+  removal, or oracle lifecycle action.
+
+---
 ## 575 — [SUPERVISOR VERIFY 2026-07-28 ~03:01] Corrected Follow Me accepted; Trick and game-stat evidence folded
 
 - **State:** reviewed union green at **333 files / 4055 tests** and focused
@@ -59,27 +85,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `e150f267…889ece` are unchanged. No new handler/barrier, ratchet/import,
   recording, animation/presentation/scenario, issue, oracle lifecycle, or
   PAPERCUT change.
-
----
-## 573 — [BOUNDED MAIN WORKER 2026-07-28 ~02:52] Follow Me executes and expires generically
-
-- **State:** committed `b29ecd1`; tree green at **331 files / 4047 tests**,
-  focused **100/100**, and ratchets **6/6**. Production build, both-oracle
-  freshness/info, census regeneration, and `git diff --check` pass. Census is
-  exactly **144/214 effects, 270/355 moves, 221/276 Factory-L50 distinct,
-  2716/2957 weighted**, all **42/42**.
-- **Did:** globally registered operandless `0xca`: after ordinary PP spend it
-  always advances and immutably writes only the attacker side's timer **1**
-  and target, including same-side overwrite. The shared BattleTurnPassed entry
-  clears both timers before field/battler/faint/delayed work and the tail
-  repeats that idempotent clear, retaining inert targets; a generic singles
-  full turn spends both Follow Me PP and reaches the next decision with zero
-  HP/stat/lock/RNG changes.
-- **Next:** supervisor verify this finite executable-frontier increment and
-  select the next shared registration target; do not extend the retired
-  canonical Battle-2 march.
-- **Notes:** the six source retarget readers/HP guards remain evidence-pinned;
-  Counter/Mirror Coat/GetMoveTarget doubles ownership was not widened. Handler
-  inventory ratchet **152→153** only; no unsupported-branch/import ratchet,
-  recording import, private handler, animation/presentation/scenario branch,
-  issue removal, oracle lifecycle action, or PAPERCUT.
