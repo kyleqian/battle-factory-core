@@ -8,7 +8,32 @@
   "move": "SONIC_BOOM",
   "captureWindow": { "startFrame": 39, "endFrame": 206, "frameCount": 168 },
   "sourceWindow": { "startFrame": 82, "endFrame": 133, "frameCount": 52 },
-  "evidenceSha256": "e66adb5af38f4bddf6e242bb968a1ac9fa5ba5761dc04c85dab807113ab7ffe3",
-  "rawRgbSha256": "f9d02f74a3e0a1d72a88be324c64733b79045434957e01c2b8fa688b92cb576d",
-  "freshRuns": 2
+  "evidenceSha256": "0c923df22e7c650153c9c782a307c218db9750d5f403f6b8e1a78954b2a4f6a6",
+  "rawRgbSha256": "b2449044c36802b2737d46c141915fb6dc160edd187cf0b951284b7ff30f7f3f",
+  "freshRuns": 2,
+  "attacker": {
+    "species": "MAGNETON",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 8 },
+      "animationCenter": { "x": 176, "y": 40 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 48 },
+      "animationCenter": { "x": 72, "y": 88 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 110,
+    "playerMaxHp": 110,
+    "opponentHp": 125,
+    "opponentMaxHp": 125,
+    "playerGender": "male"
+  }
 }

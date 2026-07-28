@@ -545,6 +545,7 @@ import reflectAsset from "../animation/assets/reflect.json" with { type: "json" 
 import biteAsset from "../animation/assets/bite.json" with { type: "json" };
 import twineedleAsset from "../animation/assets/twineedle.json" with { type: "json" };
 import spikeCannonAsset from "../animation/assets/spike-cannon.json" with { type: "json" };
+import sonicBoomAsset from "../animation/assets/sonic-boom.json" with { type: "json" };
 import tailGlowAsset from "../animation/assets/tail-glow.json" with { type: "json" };
 import dizzyPunchAsset from "../animation/assets/dizzyPunch.json" with { type: "json" };
 import covetAsset from "../animation/assets/covet.json" with { type: "json" };
@@ -694,6 +695,7 @@ import {
   sceneOnBodySlamView,
   sceneOnTwineedleView,
   sceneOnSpikeCannonView,
+  sceneOnSonicBoomView,
   sceneOnTailGlowView,
   sceneOnDizzyPunchView,
   sceneOnAstonishView,
@@ -739,6 +741,7 @@ import {
   type SceneOnBodySlamConfig,
   type SceneOnTwineedleConfig,
   type SceneOnSpikeCannonConfig,
+  type SceneOnSonicBoomConfig,
   type SceneOnTailGlowConfig,
   type SceneOnDizzyPunchConfig,
   type SceneOnAstonishConfig,
@@ -1047,6 +1050,12 @@ const twineedleArt = twineedleAsset as {
 const spikeCannonArt = spikeCannonAsset as {
   omastarBack: { tileset: Tileset; palette: RgbColor[] };
   omastarFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const sonicBoomArt = sonicBoomAsset as {
+  airWave: { tileset: Tileset; palette: RgbColor[] };
+  enemyShadow: { tileset: Tileset; palette: RgbColor[] };
+  magnetonBack: { tileset: Tileset; palette: RgbColor[] };
+  magnetonFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const tailGlowArt = tailGlowAsset as {
   circleOfLight: { tileset: Tileset; palette: RgbColor[] };
@@ -16452,6 +16461,145 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "BEEDRILL used" : "Foe BEEDRILL used",
       "TWINEEDLE!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SONIC_BOOM") {
+    const sonicState =
+      state as SceneOnMovePresentationState<SceneOnSonicBoomConfig>;
+    const view = sceneOnSonicBoomView(sonicState);
+    const displayed = sceneOnSonicBoomView({
+      ...sonicState,
+      age: view.battlerDisplayAge,
+    });
+    const playerToOpponent =
+      view.attacker.species === "MAGNETON"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "MAGNETON"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged SONIC_BOOM pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const magnetonSource = playerToOpponent
+      ? sonicBoomArt.magnetonBack : sonicBoomArt.magnetonFront;
+    const magneton = playerToOpponent
+      ? magnetonSource
+      : {
+          ...magnetonSource,
+          tileset: subTileset(magnetonSource.tileset, 0, 8),
+        };
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    // SpriteCB_EnemyShadow observes gAnimScriptActive after the first source
+    // display has already reached scanout. Magneton's nonzero elevation
+    // therefore leaves exactly one source-relative shadow display.
+    if (opponentToPlayer && view.age === 0) {
+      drawSpriteSheet(
+        fb,
+        sonicBoomArt.enemyShadow.tileset,
+        sonicBoomArt.enemyShadow.palette,
+        view.attacker.geometry.animationCenter.x - 16,
+        view.attacker.geometry.battlePositionCenter.y + 25,
+      );
+    }
+    const targetBaselineX2 =
+      playerToOpponent && displayed.age < 28 ? 1 : 0;
+    drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x
+        + targetBaselineX2 + displayed.targetOffset.x2,
+      view.target.geometry.spriteCorner.y + displayed.targetOffset.y2,
+    );
+    const nonObjTarget2 = fb.slice();
+    const drawMagneton = () => drawSpriteSheet(
+      fb,
+      magneton.tileset,
+      magneton.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    if (opponentToPlayer) drawMagneton();
+    const sortedEffects = displayed.sprites.slice().sort(
+      (left, right) => right.oamSlot - left.oamSlot,
+    );
+    for (const sprite of sortedEffects) {
+      if (!view.alpha) continue;
+      const art = sprite.kind === "air-wave"
+        ? sonicBoomArt.airWave
+        : battleAnimHitsplat;
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb,
+        nonObjTarget2,
+        art.tileset,
+        art.palette,
+        sprite.x + sprite.x2,
+        sprite.y + sprite.y2,
+        sprite.matrix.a,
+        sprite.matrix.b,
+        sprite.matrix.c,
+        sprite.matrix.d,
+        view.alpha.eva,
+        view.alpha.evb,
+        sprite.kind === "air-wave",
+      );
+    }
+    if (playerToOpponent) drawMagneton();
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "MAGNETON",
+        level: 50,
+        gender: playerToOpponent
+          ? state.config.fieldProfile.opponentGender ?? "male"
+          : "none",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "MAGNETON" : "ONIX",
+        level: 50,
+        gender: playerToOpponent
+          ? "none"
+          : state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "MAGNETON used" : "Foe MAGNETON used",
+      "SONICBOOM!",
       99,
     );
     return;

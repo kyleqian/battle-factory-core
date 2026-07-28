@@ -12,8 +12,10 @@ describe("MOVE_SONIC_BOOM source presentation assets", () => {
     expect(asset.source.script).toContain("Move_SONIC_BOOM");
     expect(asset.source.projectile).toContain("ANIM_TAG_AIR_WAVE");
     expect(asset.source.magneton).toContain("FRONTIER_MON_MAGNETON_1 set 244");
+    expect(asset.source.enemyShadow).toContain("PALTAG_SHADOW");
     expect(asset.source.reused).toContain("AnimTask_ShakeMon");
     expect(asset.airWave.tileset).toMatchObject({ columns: 4, rows: 2 });
+    expect(asset.enemyShadow.tileset).toMatchObject({ columns: 4, rows: 1 });
     expect(asset.magnetonBack.tileset).toMatchObject({ columns: 8, rows: 8 });
     expect(asset.magnetonFront.tileset).toMatchObject({ columns: 8 });
     expect(asset.airWave.palette).toHaveLength(16);
