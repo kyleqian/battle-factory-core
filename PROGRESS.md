@@ -15,6 +15,33 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 633 — [BOUNDED MAIN WORKER 2026-07-28 ~14:15] Environment attacks source-complete
+
+- **State:** tree green at **404 files / 4581 tests**, production build, OFF
+  oracle info, and `git diff --check`. Census is exactly **204/214 effects,
+  344/355 moves, 275/276 distinct, 2955/2957 weighted**: assigned-baseline
+  delta **+2/+2/+0/+0**; all **70** census validations pass.
+- **Did:** registered source-exact Weather Ball across clear/rain/sand/sun/hail
+  and temporary/permanent bits, including live Cloud Nine/Air Lock
+  suppression. Registered Nature Power's complete environment table and its
+  unusual push/continuation/return ordering; Factory Building selects Swift
+  and actually executes its effect script to END.
+- **Next:** supervisor verify commits `52726af7` and `e31f0b73`; resume
+  tail-plan row 4 (Charge/Sports) without expanding into Lock On, Transform,
+  Metronome, or other later rows.
+- **Notes:** Weather Ball reaches END through every weather/suppression branch
+  with the ordinary **4-draw** hit ledger. Building→Swift dispatch draws zero;
+  Swift owns **crit/variance/zero-effect = 16838/44065/53998**, while Nature
+  Power's original slot loses PP and histories record Nature Power as last
+  move but Swift as resulting/landed move. The dossier's broader zero-local-
+  draw claim was corrected: selected-target environments rejection-draw
+  **16838, 44065** in `GetMoveTarget`. All ten selected effects reach END and
+  canonical replays are exact. Deliberate handler exact-set pin **196→198**.
+  No barriers, recording imports, presentation, round, tick, roadmap, issue,
+  or oracle-trace changes.
+
+
+---
 ## 632 — [BOUNDED MAIN WORKER 2026-07-28 ~14:00] Type-change setters source-complete
 
 - **State:** tree green at **402 files / 4564 tests**, production build, OFF
@@ -67,35 +94,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   the source `REQUEST_MOVES_PP_BATTLE` semantic event and `ppBonuses` active/
   party owner; no barriers, recording imports, presentation, round, tick,
   roadmap, issue, or oracle-trace changes.
-
----
-## 630 — [BOUNDED MAIN WORKER 2026-07-28 ~13:32] Audit fixes #50–#52 plus plausible pair source-complete
-
-- **State:** all assigned rungs are green at **398 files / 4528 tests**, production
-  build, OFF oracle info, and `git diff --check`; census remains
-  **196/214 effects, 336/355 moves, 275/276 distinct, 2955/2957 weighted**.
-- **Did:** closed ISSUES #51 by routing successful Sleep and Freeze writes
-  through the existing source-complete `CancelMultiTurnMoves` reducer before
-  status1 is written. Closed ISSUES #52 with typed item slots for both Trick
-  buffers in source order; Furret's result event now carries `LEFTOVERS` then
-  `CHOICE BAND`. Closed ISSUES #50 by extending party records with the source
-  switch payload and rebuilding the incoming battler's ability, IVs,
-  personality, level, friendship, HP ceiling, and battle stats. Tests pin
-  Role Play ability retirement, incoming-IV Hidden Power, incoming-maxHP
-  Swallow, and the unchanged Baton Pass carve-outs. Closed the plausible pair:
-  `seteffectprimary` clears its effect selector before callback resumption,
-  while Heal Bell's `RecordAbilityBattle` calls leave `lastUsedAbility`
-  untouched.
-- **Next:** supervisor verify commits `31702fd6`, `642b1ae6`, `ce0cbd6f`, and
-  the final plausible-pair commit; resume the ranked tail plan afterward.
-- **Notes:** the reducer clears every engine-owned source field: multi-turn,
-  Thrash/Petal Dance lock, Uproar, Bide, semi-invulnerability, Rollout timer,
-  and Fury Cutter counter. Source `gLockedMoves` has no engine-owned readback
-  and is correctly not part of `CancelMultiTurnMoves`. Trick's display names
-  come from the source-extracted Factory item table. Factory party adapters
-  materialize their source-fixed IV 3 and controller-computed stats. No
-  executability, census, barrier, recording-import, presentation, round,
-  tick, roadmap, or canonical-replay pin changed; the obsolete stale-ability
-  assertion moved because the replacement behavior is source-correct. The
-  primary clear is observable at its pushed callback boundary; it deliberately
-  preserves `multiHitEffect`, matching the distinct source dispatchers.
