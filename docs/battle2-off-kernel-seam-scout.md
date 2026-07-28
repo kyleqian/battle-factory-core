@@ -1,5 +1,13 @@
 # Battle 2 OFF kernel-seam scout
 
+> **Resolution (2026-07-27):** The four barriers below are historical.
+> Controller correctness landed in `22ddfcd` (complete battler inputs,
+> submitted move-slot propagation, source-complete represented action
+> cleanup, and provenance-bearing public events); the Scene-OFF consumer
+> landed in `f4427c0` (the same nine-command projection and unchanged 16/16
+> compare). The evidence and original verdict remain below as the record that
+> motivated those commits.
+
 Bounded SIDE-lane evidence only. This checkpoint does not edit a production
 module, shared controller interface, canonical trace, or supervisor ledger.
 It follows S8's authoritative stop at tick 33331: the existing short staged

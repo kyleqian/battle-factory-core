@@ -117,6 +117,109 @@ describe("factory full-turn decision -- decision -> both actions -> end-turn -> 
   });
 
   it(
+    "publishes every configured nonzero player slot at the initial and next-turn boundaries, "
+      + "then executes a nonzero submitted slot with exact position, PP, and interpreter provenance",
+    () => {
+      const slotGenericConfig = config({
+        player: {
+          species: 1,
+          moveId: STRENGTH,
+          moves: [STRENGTH, 0, EMBER, FRUSTRATION],
+          pp: [16, 0, 25, 20],
+          friendship: 0,
+          attack: 50,
+          defense: 200,
+          spAttack: 50,
+          spDefense: 200,
+          speed: 50,
+          hp: 999,
+        },
+        trainer: {
+          species: 43,
+          moveId: STRENGTH,
+          attack: 50,
+          defense: 200,
+          spAttack: 50,
+          spDefense: 200,
+          speed: 100,
+          hp: 999,
+        },
+      });
+      const playerLegalDecisions = [
+        { kind: "use-move", moveSlot: 0, targetBattler: 1 },
+        { kind: "use-move", moveSlot: 2, targetBattler: 1 },
+        { kind: "use-move", moveSlot: 3, targetBattler: 1 },
+      ];
+      const initial = createFactoryFullTurnBattleState(slotGenericConfig);
+      expect(initial.boundary).toEqual({
+        kind: "decision-required",
+        request: {
+          kind: "command",
+          requestId: 1,
+          side: "player",
+          battler: 0,
+          legalDecisions: playerLegalDecisions,
+        },
+      });
+      expect(() => submitFactoryFullTurnDecision(initial, {
+        requestId: 1,
+        side: "player",
+        decision: { kind: "use-move", moveSlot: 1, targetBattler: 1 },
+      })).toThrow(/not legal for current command request/);
+
+      const afterPlayer = submitFactoryFullTurnDecision(initial, {
+        requestId: 1,
+        side: "player",
+        decision: { kind: "use-move", moveSlot: 3, targetBattler: 1 },
+      });
+      if (afterPlayer.kind !== "decision-required") throw new Error("expected trainer decision");
+      expect(afterPlayer.nextRequest).toEqual({
+        kind: "command",
+        requestId: 2,
+        side: "trainer",
+        battler: 1,
+        legalDecisions: [
+          { kind: "use-move", moveSlot: 0, targetBattler: 0 },
+        ],
+      });
+
+      const result = submitFactoryFullTurnDecision(afterPlayer.state, {
+        requestId: 2,
+        side: "trainer",
+        decision: TRAINER_ATTACKS,
+      });
+      if (result.kind !== "decision-required") throw new Error("expected next-turn player decision");
+      expect(result.nextRequest).toEqual({
+        kind: "command",
+        requestId: 3,
+        side: "player",
+        battler: 0,
+        legalDecisions: playerLegalDecisions,
+      });
+
+      const rulesContext = result.state.rules.rulesContext;
+      expect(rulesContext.currentMovePosition).toBe(3);
+      expect(rulesContext.battlers[0]!.pp).toEqual([16, 0, 25, 19]);
+      const playerPpEvent = result.events.find(({ payload }) =>
+        payload.kind === "set-battler-pp-data"
+        && payload.battler === 0
+      );
+      expect(playerPpEvent).toEqual(expect.objectContaining({
+        payload: {
+          kind: "set-battler-pp-data",
+          battler: 0,
+          movePosition: 3,
+          pp: 19,
+        },
+        provenance: expect.objectContaining({
+          sourceLabel: "BattleScript_HitFromAtkString",
+          opcodeName: "B_SCR_OP_PPREDUCE",
+        }),
+      }));
+    },
+  );
+
+  it(
     "a full two-turn cycle: real GetWhoStrikesFirst order (player speed 100 > trainer speed 50, no tie), "
       + "each hit chain's own 4-roll ledger (accuracy/crit/damage/seteffectwithchance), runBattleEndTurnOrchestration, "
       + "then a coherent next decision boundary -- proving the LCG stream stays single and continuous across turns",

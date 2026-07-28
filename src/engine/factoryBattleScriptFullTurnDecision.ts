@@ -51,9 +51,9 @@
  * cancelled second action doesn't gate `BattleTurnPassed`, only
  * `gBattleOutcome` does).
  *
- * Both sides model exactly one real move (slot 0) -- matching
- * `factoryBattleScriptTerminalDecision.ts`'s own staged-singles precedent
- * -- so legal decisions never need arbitrary move-slot selection.
+ * Both sides publish one legal decision for every nonzero moveset slot. The
+ * same source-shaped helper owns both singles requests, including the
+ * opposing battler target, so initial and subsequent turns cannot drift.
  */
 import {
   createBattleState,
@@ -66,6 +66,7 @@ import {
   type BattleDecisionSubmission,
   type BattleDecisionTransitionResult,
   type BattleJsonObject,
+  type BattleMoveDecision,
   type BattleMoveSlot,
   type BattlePartyIndex,
   type BattleSinglesBattler,
@@ -390,7 +391,7 @@ export function createFactoryFullTurnBattleState(
       requestId: config.requestId,
       side: "player",
       battler: 0,
-      legalDecisions: [{ kind: "use-move", moveSlot: 0, targetBattler: 1 }],
+      legalDecisions: legalMoveDecisions(rules.rulesContext, 0),
     },
   }) as BattleState<FactoryFullTurnDecisionRules>;
 }
@@ -699,18 +700,25 @@ function machineBarrierBoundary(instruction: BattleScriptInstruction, instructio
 }
 
 /**
- * The trainer's real legal move slots for this turn (item 1's real 4-move
- * set): one `use-move` decision per nonzero moveset slot, matching
- * `factoryAiDecisionPolicy.ts`'s own `legalBySlot` expectations for a real
- * mask-1/7 policy decision (mask-0's own precedent supports the same
- * multi-slot shape already; this reducer's trainer side just never needed it
- * before item 1).
+ * Source `HandleInputChooseMove` publishes the configured moves in slot
+ * order. This full-turn adapter is singles-only, so the other active battler
+ * is the authoritative target for either side. A zero move id is an empty
+ * slot, not a legal command; `submitBattleDecision` remains the public
+ * membership validator for submitted slots.
  */
-function trainerLegalDecisions(rulesContext: BattleScriptRulesContext) {
-  const moves = rulesContext.battlers[1]!.moves;
+function legalMoveDecisions(
+  rulesContext: BattleScriptRulesContext,
+  battler: BattleSinglesBattler,
+): readonly BattleMoveDecision[] {
+  const targetBattler: BattleSinglesBattler = battler === 0 ? 1 : 0;
+  const moves = rulesContext.battlers[battler]!.moves;
   const legal = moves.flatMap((moveId, slot) =>
     moveId !== 0
-      ? [Object.freeze({ kind: "use-move" as const, moveSlot: slot as BattleMoveSlot, targetBattler: 0 as const })]
+      ? [Object.freeze({
+          kind: "use-move" as const,
+          moveSlot: slot as BattleMoveSlot,
+          targetBattler,
+        })]
       : []);
   return Object.freeze(legal);
 }
@@ -805,9 +813,7 @@ function runEndTurnTail(
         requestId: nextRequestId,
         side: "player",
         battler: 0 as const,
-        legalDecisions: Object.freeze([
-          Object.freeze({ kind: "use-move" as const, moveSlot: 0 as const, targetBattler: 1 as const }),
-        ]),
+        legalDecisions: legalMoveDecisions(endTurn.state.rulesContext, 0),
       }),
     }),
   );
@@ -933,7 +939,6 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
       || ctx.request.side !== "player"
       || ctx.request.battler !== 0
       || ctx.decision.kind !== "use-move"
-      || ctx.decision.moveSlot !== 0
     ) {
       throw new Error("factory full-turn decision requires the player's staged singles use-move command");
     }
@@ -954,7 +959,7 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
           requestId: ctx.request.requestId + 1,
           side: "trainer",
           battler: 1 as const,
-          legalDecisions: trainerLegalDecisions(rules.rulesContext),
+          legalDecisions: legalMoveDecisions(rules.rulesContext, 1),
         }),
       }),
     });

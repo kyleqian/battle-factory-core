@@ -88,6 +88,16 @@ function runCanonicalBattle2Turn() {
 describe("Battle 2 OFF real-kernel seam scout", () => {
   it("constructs the canonical battlers directly through the public config", () => {
     const initial = createFactoryFullTurnBattleState(CONFIG);
+    expect(initial.boundary).toMatchObject({
+      request: {
+        legalDecisions: [
+          { kind: "use-move", moveSlot: 0, targetBattler: 1 },
+          { kind: "use-move", moveSlot: 1, targetBattler: 1 },
+          { kind: "use-move", moveSlot: 2, targetBattler: 1 },
+          { kind: "use-move", moveSlot: 3, targetBattler: 1 },
+        ],
+      },
+    });
     const [onix, kabuto] = initial.rules.rulesContext.battlers;
     expect(onix).toMatchObject({
       ability: 5,
@@ -118,7 +128,12 @@ describe("Battle 2 OFF real-kernel seam scout", () => {
       requestId: 3,
       side: "player",
       battler: 0,
-      legalDecisions: [{ kind: "use-move", moveSlot: 0, targetBattler: 1 }],
+      legalDecisions: [
+        { kind: "use-move", moveSlot: 0, targetBattler: 1 },
+        { kind: "use-move", moveSlot: 1, targetBattler: 1 },
+        { kind: "use-move", moveSlot: 2, targetBattler: 1 },
+        { kind: "use-move", moveSlot: 3, targetBattler: 1 },
+      ],
     });
 
     const [onix, kabuto] = result.state.rules.rulesContext.battlers;

@@ -1,4 +1,27 @@
 ---
+## 539 — [SUPERVISOR VERIFY 2026-07-27 ~21:06] Return/Frustration + Battle-2 OFF kernel-seam evidence merged green
+
+- **State:** union green at **293 files / 3819 tests**; `npm run build`
+  clean. Census regenerates byte-clean at **130/214 effects, 254/355 moves,
+  206/276 Factory-L50 distinct, 2604/2957 weighted (88.1%)**, with **42/42**
+  checks. The unchanged staged Battle-2 OFF trace remains **16/16** and the
+  selected OFF oracle is fresh at `9c89c741…f297`.
+- **Did:** independently reviewed and verified the generic Return/Frustration
+  opcode, all u8 friendship boundaries, terminal paths, and cross-action
+  cleanup. Merged `83718d2`, a file-disjoint real-kernel scout proving exact
+  Battle-2 turn-1 HP/stat outcomes and four source move draws. It pins the
+  remaining reusable seam gaps: canonical ability/item/PP inputs, submitted
+  move-slot propagation, complete represented `HandleAction_ActionFinished`
+  cleanup, and provenance preservation through the public boundary.
+- **Next:** source-completely fix those four shared-controller gaps, then
+  project the resulting immutable semantic events and request-3 boundary onto
+  the existing nine relative OFF commands. Preserve the unchanged 16-frame
+  trace and do not fabricate the eight later next-turn controller/AI draws.
+- **Notes:** side worktree/branch removed. No new unsupported barrier,
+  canonical-recording production import, ratchet change, or deferred decision.
+  No PAPERCUT.
+
+---
 ## 538 — [BOUNDED WORKER 2026-07-27 ~21:02] Return/Frustration execute end to end; exact +2/+2/+2/+18
 
 - **State:** tree committed and green at **292 files / 3816 tests**;

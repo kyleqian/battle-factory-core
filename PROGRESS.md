@@ -15,6 +15,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 542 — [BOUNDED MAIN WORKER 2026-07-27 ~21:33] Full-turn singles requests are move-slot generic
+
+- **State:** tree green at **295 files / 3824 tests**; `npm run build` and
+  `git diff --check` clean. The unchanged Battle-2 OFF trace remains
+  **16/16 exact**.
+- **Did:** one shared singles legal-move helper now publishes every nonzero
+  configured slot, in order, with the opposing target for player/trainer and
+  at both initial/next-turn boundaries. Removed the player slot-0 reducer
+  guard; public legality still rejects empty slots. Tier-1 submits player
+  slot 3 and pins final `currentMovePosition=3`, slot-3 PP **20→19**, and
+  PP-event interpreter provenance. Added the scout’s historical-resolution
+  note pointing to `22ddfcd` / `f4427c0`.
+- **Next:** supervisor verify this correction, the preserved canonical
+  ONIX/KABUTO **650807554 / 4-call** result, exact nine-command projection,
+  and unchanged **16/16**, then resume the ranked S10 executable frontier.
+- **Notes:** focused **24/24**, full **3824/3824**, build/compare/diff green.
+  No unsupported barrier, canonical-recording import, ratchet change,
+  oracle lifecycle action, animation edit, or PAPERCUT.
+
+---
 ## 541 — [BOUNDED MAIN WORKER 2026-07-27 ~21:24] Real full-turn kernel now drives the exact Battle-2 OFF seam
 
 - **State:** union green at **295 files / 3823 tests**; `npm run build`
@@ -56,26 +76,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** focused **28/28**, full **3820/3820**, build green; baseline OFF
   oracle hash `9c89c741…f297`. No oracle lifecycle action, canonical recording
   import, unsupported barrier, ratchet change, or PAPERCUT.
-
----
-## 539 — [SUPERVISOR VERIFY 2026-07-27 ~21:06] Return/Frustration + Battle-2 OFF kernel-seam evidence merged green
-
-- **State:** union green at **293 files / 3819 tests**; `npm run build`
-  clean. Census regenerates byte-clean at **130/214 effects, 254/355 moves,
-  206/276 Factory-L50 distinct, 2604/2957 weighted (88.1%)**, with **42/42**
-  checks. The unchanged staged Battle-2 OFF trace remains **16/16** and the
-  selected OFF oracle is fresh at `9c89c741…f297`.
-- **Did:** independently reviewed and verified the generic Return/Frustration
-  opcode, all u8 friendship boundaries, terminal paths, and cross-action
-  cleanup. Merged `83718d2`, a file-disjoint real-kernel scout proving exact
-  Battle-2 turn-1 HP/stat outcomes and four source move draws. It pins the
-  remaining reusable seam gaps: canonical ability/item/PP inputs, submitted
-  move-slot propagation, complete represented `HandleAction_ActionFinished`
-  cleanup, and provenance preservation through the public boundary.
-- **Next:** source-completely fix those four shared-controller gaps, then
-  project the resulting immutable semantic events and request-3 boundary onto
-  the existing nine relative OFF commands. Preserve the unchanged 16-frame
-  trace and do not fabricate the eight later next-turn controller/AI draws.
-- **Notes:** side worktree/branch removed. No new unsupported barrier,
-  canonical-recording production import, ratchet change, or deferred decision.
-  No PAPERCUT.
