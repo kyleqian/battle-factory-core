@@ -15,25 +15,30 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
-## 559 — [BOUNDED MAIN WORKER 2026-07-28 ~00:20] Rollout opcode and source state execute
+## 559 — [BOUNDED MAIN WORKER 2026-07-28 ~00:38] Rollout executes source-completely
 
-- **State:** first green step ready to commit at **315 files / 3962 tests**;
-  production build, focused **42/42**, census regeneration, barrier ratchet,
-  and `git diff --check` pass. Census is exactly **138/214 effects, 263/355
-  moves, 215/276 Factory-L50 distinct, 2685/2957 weighted**, all **42/42**
-  checks.
+- **State:** committed `adfada6` / `8407f7b` / `027c39f`; tree green at
+  **316 files / 3966 tests**. Production build, focused **40/40**, OFF-oracle
+  freshness/replay, census regeneration, and `git diff --check` pass. Census
+  is exactly **138/214 effects, 263/355 moves, 215/276 Factory-L50 distinct,
+  2685/2957 weighted**, all **42/42** checks.
 - **Did:** registered operandless `0xb3`
-  `B_SCR_OP_ROLLOUTDAMAGECALCULATION` with attacker-owned timer/start value,
-  `STATUS2_MULTIPLETURNS`, `gLockedMoves`, exact five-hit power ladder,
-  Defense Curl doubling, final unlock, and miss/no-effect
-  `CancelMultiTurnMoves` transfer to `BattleScript_MoveMissedPause`.
-- **Next:** wire locked action selection through the generic full-turn
-  boundary, then land the evidence-aligned Shuckle/Blissey multi-turn
-  damage/PP/terminal proof.
-- **Notes:** source state is durable and frozen; cancellation deliberately
-  preserves timer-start/locked-move just like source. No barrier/ratchet
-  increase, recording import, scenario/tick/render branch, animation edit,
-  or oracle lifecycle action.
+  `B_SCR_OP_ROLLOUTDAMAGECALCULATION` with attacker-owned timer/start,
+  `STATUS2_MULTIPLETURNS`, selected-slot + `gLockedMoves` persistence,
+  initial-only PP, exact five-hit/Defense Curl power ladder, final unlock,
+  and miss/no-effect cancellation. Full-turn selection now auto-confirms
+  player, trainer, and simultaneous locks while retaining one RNG/event
+  stream and ordinary faint/terminal routing.
+- **Next:** supervisor verify this executable-frontier increment and select
+  the next finite source registration target; do not resume the retired
+  canonical Battle-2 march.
+- **Notes:** controlled seed 32731 reproduces merged OFF evidence HP
+  **362→327→170→12→0**, Rollout PP **20→19**, and player-win; fresh oracle
+  manifest is byte-identical at `4460104b…9479677`. Defense Curl's separate
+  setter remains the explicitly bounded next opcode, so the proof starts
+  from its source/evidence-pinned post-state. No barrier/import ratchet
+  change, recording import, scenario/tick/render branch, animation edit,
+  issue removal, oracle lifecycle action, or PAPERCUT.
 
 ---
 ## 558 — [SUPERVISOR VERIFY 2026-07-28 ~00:07] Wish accepted; Secret Power evidence merged
