@@ -3,12 +3,13 @@
   "entries": [
     {
       "move": "MOVE_BITE",
-      "status": "partial",
+      "status": "exact",
       "covered": [
-        "fresh complete legal Factory-party Scene-ON evidence stages real set-56 MEOWTH against ONIX in both orientations; the move-owned sharp-teeth-through-blendoff window is frames 80-105 player-back and 84-109 opponent-front",
+        "fresh complete legal Factory-party Scene-ON evidence stages real set-56 MEOWTH against ONIX in both orientations; the move-owned sharp-teeth-through-blendoff window is exact at 26/26 frames 80-105 player-back and 26/26 frames 84-109 opponent-front",
         "the source-relative reducer and typed presentation seam port both gSharpTeethSpriteTemplate affine programs, signed 8.8 inward/outward translation, animation-2 IMPACT, AnimTask_ShakeMon(target,0,4,7,1), target monbg, 12/8 alpha, side-relative SE_M_BITE pan, and clear teardown",
-        "bitePortable.ts proves all 26/26 source-component frames in both orientations; independent fresh probe replays are byte-identical with player digest 3ad220d18c7c50a49325e03ef4af578022adb713baceaf7eb0c4047aa55c5a59 and opponent digest db087980c29b02ac94aed957dcf1331de182d1da70cf6dae90deeab4bd655f12",
-        "exact remains unclaimed: the narrow shared framebuffer compositor does not yet draw SHARP_TEETH or prove complete hardware OAM/matrices/palette/register transfer, live raw RGB, and shared framebuffer equality across this body twice fresh",
+        "source extraction byte-pins the literal SHARP_TEETH sheet, palette, and 64x64 affine semi-transparent OAM contract plus both legal set-56 MEOWTH carrier sheets; the compositor reuses the existing IMPACT, ONIX, healthbox, text-window, and battle-chrome assets",
+        "the narrow shared compositor ports the prior-software-to-hardware OAM, affine-matrix, and palette transfer; reverse sprite-allocation hardware priority; opponent target x2 baseline; target monbg; and complete visual/blend cleanup without a move-number, input-delay, absolute-tick, or pixel exception",
+        "bitePortable.ts proves software state, hardware OAM/matrices/palettes/registers, live side-relative audio, raw RGB, and shared framebuffer equality on all 26/26 frames in both orientations twice fresh; independent outputs are byte-identical with player digest 008f491de1b034f632c7a01f369c5d92dc65817865c1c7ad5bb6848bec6b3fa6 and opponent digest 309e54ed1c262469cacdcbe5388ee8343af56dc65709eb052589d12350050e52",
         "MOVE_CRUNCH remains unsupported: source adds BG_DARK fade/restore plus a second diagonal sharp-teeth/IMPACT/ShakeMon sequence with distinct animations, offsets, and shake arguments, requiring its own complete dense evidence",
         "MOVE_SECRET_POWER remains unsupported: Factory battles use BATTLE_ENVIRONMENT_BUILDING and dispatch to Move_STRENGTH, while only the cave branch dispatches to Move_BITE; its environment task and building body require independent complete dense evidence"
       ],
@@ -19,11 +20,14 @@
         "tools/compare/fixtures/bite-opponent-meowth-player-onix.json",
         "tools/compare/poisonFangProbe.py",
         "tools/compare/bitePortable.ts",
+        "tools/compare/extractBiteAssets.ts",
+        "src/animation/assets/bite.json",
         "src/animation/bite.ts",
         "src/animation/sceneOnPresentation.ts",
-        "tests/animation/bite.test.ts"
-      ],
-      "remaining": "Keep MOVE_BITE partial. Extract and byte-pin SHARP_TEETH assets, port the narrow shared framebuffer compositor, and prove the complete 26-frame body plus cleanup through hardware OAM/matrices/palette/register transfer, live audio, raw RGB, and shared framebuffer equality twice fresh in both orientations."
+        "src/engine/battleScene.ts",
+        "tests/animation/bite.test.ts",
+        "tests/animation/biteAssets.test.ts"
+      ]
     },
     {
       "move": "MOVE_REFLECT",

@@ -1,5 +1,29 @@
 # Animation coverage
 
+## MOVE_BITE promoted exact; SHARP_TEETH framebuffer closed (2026-07-28)
+
+**Verdict:** `MOVE_BITE` is exact. Fresh complete legal Factory-party
+Scene-ON evidence passes the complete move-owned body and cleanup at **26/26**
+frames **80-105** player-back and **26/26** frames **84-109** opponent-front.
+Coverage is now **57 exact / 1 partial / 218 unsupported**.
+
+**Renderer/evidence:** source extraction byte-pins the literal SHARP_TEETH
+sheet, palette, and OAM contract plus the legal set-56 MEOWTH carrier sheets;
+the narrow shared compositor reuses IMPACT, ONIX, healthbox, window, and chrome
+assets. The portable proof pins software state, prior-software-to-hardware
+OAM/matrix/palette transfer, registers, side-relative audio, raw RGB, shared
+framebuffer equality, and cleanup twice fresh in both orientations. Independent
+outputs are byte-identical (player `008f491d…fa6`, opponent
+`309e54ed…e52`).
+
+**Scope/controls:** `MOVE_CRUNCH` remains unsupported because it adds BG_DARK
+fade/restore and a second distinct diagonal bite/shake pass.
+`MOVE_SECRET_POWER` remains unsupported because the Factory building
+environment dispatches to `Move_STRENGTH`; only its cave branch reaches
+`Move_BITE`. Neither has independent dense acceptance. No battle
+logic/RNG/controller/facility state, boundary list, unsupported barrier, or
+absolute-tick/input-delay/pixel exception changed.
+
 ## MOVE_BITE promoted partial; SHARP_TEETH typed seam checkpoint (2026-07-28)
 
 **Verdict:** `MOVE_BITE` is partial. Fresh complete legal Factory-party

@@ -68,11 +68,10 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        // BITE now has a complete component seam but no framebuffer claim.
         unsupported: 218,
         staged: 0,
-        partial: 2,
-        exact: 56,
+        partial: 1,
+        exact: 57,
       },
       {
         tier: "openOnly",
