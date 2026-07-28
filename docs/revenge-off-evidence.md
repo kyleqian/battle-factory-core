@@ -1,0 +1,13 @@
+# Revenge / `B_SCR_OP_DOUBLEDAMAGEDEALTIFDAMAGED` evidence
+
+This is a SIDE-lane source-and-Battle-Scene-OFF checkpoint only. It adds no production interpreter, controller, rendering, or animation code.
+
+`doubledamagedealtifdamaged` is opcode `0xD6`, exactly one byte with no operands. It reads the **acting attacker**'s `gProtectStructs` receipt and tests either nonzero physical damage whose recorded battler equals the current target, or the corresponding special pair. A true predicate writes `gBattleScripting.dmgMultiplier = 2`; either path advances the script PC by one byte. The opcode does not call `Random`, emit a controller command, or mark controller execution.
+
+`EFFECT_REVENGE` contains only this opcode and `goto BattleScript_EffectHit`. The normal hit path subsequently calculates base damage and multiplies it by critical and `dmgMultiplier`; `HandleAction_UseMove` resets that multiplier to one before each action. Thus the opcode changes the per-action damage calculation, not PP, targeting, or controller state. Revenge is Fighting, power 60, PP 10, selected-target, priority -4.
+
+The only producer for these `ProtectStruct` fields is `Cmd_datahpupdate`: after real non-passive HP damage it records physical damage except Pain Split, otherwise special damage, and records the attacker for `BS_TARGET` (the target for other selectors). Consumers are Counter, Mirror Coat, `jumpifnodamage`, and this Revenge opcode. Normal `BattleTurnPassed` runs end-turn/faint/Wish-Perish work before `TurnValuesCleanUp(FALSE)`, which byte-clears every active ProtectStruct; this receipt is therefore turn-local. These are source facts.
+
+[`mechanic-revenge-machop-chansey-off.json`](../tools/battle-lab/mechanic-revenge-machop-chansey-off.json) builds six complete legal party records. Machop has Revenge in its lower-left slot, and the faster Chansey has four Tackle slots, constraining real AI without injecting a choice. The input selects Revenge normally. At frame 100 Chansey's public PP shows Tackle; at 200 Machop has actually lost 9 HP; at 250 Revenge has spent PP; and at 600 Chansey is at 45/325 HP (a public 280-HP loss). All six party checksums are valid at every cited capture. Two full OFF manifests are byte-identical: `a52074df…82597dd64`; scenario SHA-256: `b113b7ef…3d78857b6`.
+
+The manifest cannot expose the script PC, turn-order array, ProtectStruct history, multiplier, random-damage intermediate, or command causality. The initial undamaged state, then the real pre-Revenge Tackle receipt, publicly distinguish the staged windows; the exact no-double predicate and multiplier causality remain source-pinned rather than inferred from HP alone.
