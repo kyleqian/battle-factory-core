@@ -136,6 +136,10 @@ import {
   type RecoverEffectSprite,
 } from "./recover.ts";
 import {
+  absorbAtAge,
+  type AbsorbState,
+} from "./absorb.ts";
+import {
   synthesisEffectAtAge,
   type SynthesisSprite,
 } from "./synthesis.ts";
@@ -358,6 +362,7 @@ export interface SceneOnPresentationBattler {
     | "HAUNTER"
     | "IVYSAUR"
     | "KADABRA"
+    | "LOMBRE"
     | "MILTANK"
     | "LOUDRED"
     | "DUSTOX"
@@ -785,6 +790,24 @@ export interface SceneOnRecoverConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnAbsorbConfig {
+  readonly move: "ABSORB";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** `InitSpritePosToAnimAttacker(TRUE)` center used by HealingEffect. */
+  readonly healingCenter: Readonly<{ x: number; y: number }>;
+  /** `BATTLER_COORD_X_2/Y_PIC_OFFSET` endpoint used by absorption arcs. */
+  readonly absorptionCenter: Readonly<{ x: number; y: number }>;
+  /** Fresh-probed allocator facts for the staged occupied-slot topology. */
+  readonly allocatorProfile: Readonly<{
+    readonly hitsplat: number;
+    readonly orbs: readonly number[];
+    readonly stars: readonly number[];
+    readonly paletteController: number;
+  }>;
+}
+
 export interface SceneOnSynthesisConfig {
   readonly move: "SYNTHESIS";
   readonly attacker: SceneOnPresentationBattler;
@@ -1095,7 +1118,8 @@ export type SceneOnMoveConfig =
   | SceneOnKnockOffConfig;
 
 export interface SceneOnMovePresentationState<
-  TConfig extends SceneOnMoveConfig | SceneOnScaryFaceConfig = SceneOnMoveConfig,
+  TConfig extends SceneOnMoveConfig | SceneOnScaryFaceConfig | SceneOnAbsorbConfig
+    = SceneOnMoveConfig,
 > {
   readonly age: number;
   readonly config: TConfig;
@@ -1582,6 +1606,12 @@ export interface SceneOnRecoverView {
   readonly sprites: readonly RecoverEffectSprite[];
 }
 
+export interface SceneOnAbsorbView extends AbsorbState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnSynthesisView {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -1741,7 +1771,8 @@ function assertIntegerPoint(
  */
 export function createSceneOnMovePresentation<
   TConfig extends SceneOnMoveConfig | SceneOnRazorLeafConfig | SceneOnTauntConfig
-    | SceneOnSparkConfig | SceneOnCharmConfig | SceneOnScaryFaceConfig,
+    | SceneOnSparkConfig | SceneOnCharmConfig | SceneOnScaryFaceConfig
+    | SceneOnAbsorbConfig,
 >(
   config: TConfig,
 ): SceneOnMovePresentationState<TConfig> {
@@ -2093,6 +2124,27 @@ export function sceneOnRecoverView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...effect,
+  };
+}
+
+/** `age` is relative to the source script's `monbg ANIM_DEF_PARTNER`. */
+export function sceneOnAbsorbView(
+  state: SceneOnMovePresentationState<SceneOnAbsorbConfig>,
+): SceneOnAbsorbView {
+  if (state.config.move !== "ABSORB") {
+    throw new Error(`expected ABSORB presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...absorbAtAge(
+      state.age,
+      state.config.target.geometry.animationCenter,
+      state.config.absorptionCenter,
+      state.config.attacker.geometry.side,
+      state.config.healingCenter,
+    ),
   };
 }
 

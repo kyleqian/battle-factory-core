@@ -2,6 +2,29 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_ABSORB",
+      "status": "partial",
+      "covered": [
+        "complete legal Scene-ON set-131 LOMBRE scenarios pass the full source/software/typed-seam window 223-416 plus clear frame 417 at 195/195 in player-back and opponent-front orientations twice fresh",
+        "the relative reducer ports green BG palettes 1-3 through the exact 0/2/4/2/0 ramp, monbg/splitbgprio_foes/alpha lifecycle, animation-2 hitsplat, AnimTask_ShakeMon display latch, all eight literal absorption-orb calls and target-to-attacker horizontal arcs, shared HealingEffect, three sound identities/pans/restarts, and cleanup",
+        "the portable proof pins every effect sprite identity, position/offset, frame, affine matrix, allocator slot/order, palette-controller lifetime, selected faded/unfaded palettes, blend registers, target offsets, named monbg tasks, audio headers/active-track pans, and zero-effect teardown without absolute battle ticks or framebuffer data",
+        "source/probe-specific BATTLER_COORD semantics are typed inputs: player LOMBRE arcs/heals at 72,96 while opponent LOMBRE arcs/heals at 176,49; opponent ONIX impact starts at 176,42 and player ONIX at 72,88",
+        "MEGA_DRAIN, DREAM_EATER, and GIGA_DRAIN remain unsupported because their independently audited scripts differ in orb multiplicity/arguments, blend strength, impact/background/scale/fire-spread bodies, and audio"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-absorb-player-lombre-opponent-onix.json",
+        "tools/battle-lab/mechanic-absorb-opponent-lombre-player-onix.json",
+        "tools/compare/fixtures/absorb-player-lombre-opponent-onix.json",
+        "tools/compare/fixtures/absorb-opponent-lombre-player-onix.json",
+        "tools/compare/absorbProbe.py",
+        "tools/compare/absorbPortable.ts",
+        "src/animation/absorb.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "tests/animation/absorb.test.ts"
+      ],
+      "remaining": "Extract LOMBRE/ONIX and ORBS/IMPACT/BLUE_STAR presentation assets, port hardware OAM and palette-transfer latches in the shared compositor, and prove all 195 raw-RGB/framebuffer frames twice in both orientations without changing battleScene.ts in this software-only step."
+    },
+    {
       "move": "MOVE_SCARY_FACE",
       "status": "exact",
       "covered": [
@@ -1792,7 +1815,7 @@
         "MOVE_DREAM_EATER",
         "MOVE_GIGA_DRAIN"
       ],
-      "goal": "MOVE_ABSORB has fresh legal Scene-ON oracle-only evidence in both orientations: real set-131 LOMBRE, complete visual window 223-416 plus clear frame 417, eight target-to-attacker absorption orbs issued at four-frame cadence (257-333, six live peak), source palette/register/audio lifetimes and HealingEffect teardown. This establishes the shared command/template/callback track only; ABSORB remains unsupported without a matching app seam/comparator. No sibling is promoted: MEGA DRAIN has 16 paired orbs, blend 8, hitsplat animation 1 and Bubble3; GIGA DRAIN has blend 12, 24 variable-amplitude orbs, three FireSpread sprites and Giga Drain audio; DREAM EATER adds psychic background/scale/shake, omits IMPACT, and has 24-orb Swagger body. LEECH LIFE is not Level-50 Factory scope."
+      "goal": "MOVE_ABSORB is partial with a complete 195/195 source/software/typed-seam proof in both orientations twice fresh: all eight target-to-attacker arcs, green palette/register/monbg lifecycle, impact/shake, HealingEffect, audio, allocator order, and cleanup. Exact still requires source presentation assets, hardware OAM/palette transfer, raw RGB, and shared framebuffer wiring. No sibling is promoted: MEGA DRAIN has 16 paired orbs, blend 8, hitsplat animation 1 and Bubble3; GIGA DRAIN has blend 12, 24 variable-amplitude orbs, three FireSpread sprites and Giga Drain audio; DREAM EATER adds psychic background/scale/shake, omits IMPACT, and has 24-orb Swagger body. LEECH LIFE is not Level-50 Factory scope."
     }
   ],
   "variantAudits": {

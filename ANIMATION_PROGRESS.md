@@ -1,5 +1,27 @@
 # Animation coverage
 
+## MOVE_ABSORB promoted partial; complete source/software/typed seam (2026-07-27)
+
+**Verdict:** `MOVE_ABSORB` is partial. The legal set-131 LOMBRE Scene-ON
+fixtures pass the complete move-owned source/software/typed window
+**195/195** at oracle frames 223-417 in both orientations, twice fresh,
+including the clear frame. Coverage is **52 exact / 4 partial / 220
+unsupported**.
+
+**Proof:** the relative reducer and expanded live probe cover the exact green
+BG palette 0/2/4/2/0 ramp and restore, monbg/split priority/alpha lifecycle,
+animation-2 hitsplat, ShakeMon latch, all eight literal target-to-attacker
+absorption arcs, shared HealingEffect, three sound identities/restarts/pans,
+allocator slots/order, and complete teardown. Side/source coordinates are
+explicit typed inputs: player LOMBRE uses 72,96; opponent LOMBRE 176,49;
+ONIX impact centers are 176,42 front and 72,88 back.
+
+**Remainder/siblings:** exact still requires source presentation assets,
+hardware OAM/palette transfer, raw RGB, and the shared framebuffer; no engine
+file was touched. MEGA DRAIN, DREAM EATER, and GIGA DRAIN retain their audited
+blend/orb/impact/background/fire/audio differences and remain unsupported.
+RECOVER and SYNTHESIS remain exact shared-HealingEffect controls.
+
 ## ABSORB absorption-orb evidence checkpoint; remains unsupported (2026-07-27)
 
 **Verdict:** `MOVE_ABSORB` remains unsupported. Fresh legal Scene-ON `mechanicLab` parties stage the real Level-50 set-131 LOMBRE carrier (Quirky, Attack/HP EV spread, source ABSORB slot) in player-back and opponent-front orientations against constrained ONIX; all active LOMBRE choices are ABSORB and all ONIX choices are TACKLE. The two scenarios capture every source-relative body/cleanup frame 223–417.
