@@ -34,9 +34,11 @@ before promotion. `MOVE_HEAT_WAVE` and `MOVE_LUSTER_PURGE` remain unsupported.
 
 ## MOVE_FAKE_TEARS staged; AnimTask_BlendParticle latch evidence complete (2026-07-28)
 
-**Verdict:** `MOVE_FAKE_TEARS` is staged only. Fresh complete legal Scene-ON
-set-267 DELCATTY/SHUCKLE mechanic-lab parties capture every `currentMove=313`
-frame (**321**, 39–359) and the complete source-owned BlendParticle
+**Historical verdict, superseded:** `MOVE_FAKE_TEARS` was staged from
+species-301 fixtures then mislabeled DELCATTY; species 301 is NINCADA, so this
+is retained only as provenance and not legal set-267 acceptance. Those
+Scene-ON NINCADA/SHUCKLE parties capture every `currentMove=313` frame
+(**321**, 39–359) and the complete source-owned BlendParticle
 creation/display latch plus first inactive cleanup (**2/2**, frames **84–85**
 player-back and **88–89** opponent-front) twice fresh. Outputs are
 byte-identical: player `ad60a3d3…995067d` / raw `8a434003…b7a390`; opponent
