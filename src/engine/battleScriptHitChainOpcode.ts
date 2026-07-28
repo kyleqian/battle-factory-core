@@ -261,6 +261,12 @@ const B_MSG_STATUS_HAD_NO_EFFECT = 2;
 
 /** printfromtable's registered small constant tables, each indexed by MULTISTRING_CHOOSER. */
 const PRINTFROMTABLE_TABLES: Readonly<Record<string, readonly string[]>> = Object.freeze({
+  /** battle_message.c:1235-1240 -- Trick's taken/given/both item-result table. */
+  gItemSwapStringIds: Object.freeze([
+    "STRINGID_PKMNOBTAINEDX",
+    "STRINGID_PKMNOBTAINEDX2",
+    "STRINGID_PKMNOBTAINEDXYOBTAINEDZ",
+  ]),
   gFocusEnergyUsedStringIds: Object.freeze([
     "STRINGID_PKMNGETTINGPUMPED",
     "STRINGID_BUTITFAILED",

@@ -80,6 +80,7 @@ import { createBattleScriptSetforcedtargetOpcodeHandlers } from "./battleScriptS
 import { createBattleScriptGetSecretPowerEffectOpcodeHandlers } from "./battleScriptGetSecretPowerEffectOpcode.ts";
 import { createBattleScriptTryswapabilitiesOpcodeHandlers } from "./battleScriptTryswapabilitiesOpcode.ts";
 import { createBattleScriptTrysethelpinghandOpcodeHandlers } from "./battleScriptTrysethelpinghandOpcode.ts";
+import { createBattleScriptTryswapitemsOpcodeHandlers } from "./battleScriptTryswapitemsOpcode.ts";
 import { createBattleScriptSettormentOpcodeHandlers } from "./battleScriptSettormentOpcode.ts";
 import { createBattleScriptTrysetencoreOpcodeHandlers } from "./battleScriptTrysetencoreOpcode.ts";
 import { createBattleScriptSettauntOpcodeHandlers } from "./battleScriptSettauntOpcode.ts";
@@ -441,6 +442,8 @@ export type BattleScriptPartyMemberState = Readonly<{
   hp: number;
   /** Source gPlayerParty/gEnemyParty[].status1 -- kept in sync by SetMoveEffect's status write, mirroring datahpupdate's HP sync. */
   status1: number;
+  /** Source gPlayerParty/gEnemyParty[].heldItem, synchronized by REQUEST_HELDITEM_BATTLE controller writes. */
+  item: number;
   /** Source MON_DATA_MOVE1..4 -- read by GetMostSuitableMonToSwitchInto's super-effective-move gate (forced-switch-ground-truth.md §1b/§4 slice 2). */
   moves: BattleScriptPartyMemberMoves;
 }>;
@@ -588,6 +591,8 @@ export type BattleScriptRulesContext = Readonly<
     choicedMove: BattleScriptMoveEndHalfwords;
     /** Source u16 gBattleStruct->changedItems[MAX_BATTLERS_COUNT]. */
     changedItems: BattleScriptMoveEndHalfwords;
+    /** Source gWishFutureKnock.knockedOffMons[NUM_BATTLE_SIDES], one six-party-slot mask per side. */
+    knockedOffMons: readonly [number, number];
     /**
      * Source u8 gBattleStruct->monToSwitchIntoId[MAX_BATTLERS_COUNT] --
      * PARTY_SIZE (6) is the "undecided" sentinel; 0-5 is a resolved bench
@@ -726,6 +731,7 @@ export type BattleScriptRulesContextInput = Readonly<{
   rolloutTimerStartValues?: readonly number[];
   choicedMove?: readonly number[];
   changedItems?: readonly number[];
+  knockedOffMons?: readonly [number?, number?];
   monToSwitchIntoId?: readonly number[];
   battleStructAbsentBattlerFlags?: number;
   alreadyStatusedMoveAttempt?: number;
@@ -787,6 +793,7 @@ export type BattleScriptPartyMemberInput = Readonly<{
   isEgg?: boolean;
   hp?: number;
   status1?: number;
+  item?: number;
   moves?: readonly [number?, number?, number?, number?];
 }>;
 
@@ -1597,6 +1604,7 @@ const BATTLE_SCRIPT_EMPTY_PARTY_MEMBER: BattleScriptPartyMemberState = Object.fr
   isEgg: false,
   hp: 0,
   status1: 0,
+  item: 0,
   moves: BATTLE_SCRIPT_EMPTY_PARTY_MEMBER_MOVES,
 });
 
@@ -1631,6 +1639,7 @@ function createBattleScriptPartyState(
       isEgg: Boolean(member.isEgg),
       hp: requireUnsigned(member.hp ?? 0, 0xffff, `${field}[${index}].hp`),
       status1: requireUnsigned(member.status1 ?? 0, 0xffff_ffff, `${field}[${index}].status1`) >>> 0,
+      item: requireUnsigned(member.item ?? 0, 0xffff, `${field}[${index}].item`),
       moves: createBattleScriptPartyMemberMoves(member.moves, `${field}[${index}].moves`),
     })),
   ) as unknown as BattleScriptPartyState;
@@ -1686,6 +1695,26 @@ export function withBattleScriptPartyMemberStatus1(
   if (member.status1 === status1) return party;
   const nextState = state.map((candidate, index) =>
     index === partyIndex ? Object.freeze({ ...candidate, status1 }) : candidate
+  ) as unknown as BattleScriptPartyState;
+  return Object.freeze({ ...party, [sideKey]: Object.freeze(nextState) });
+}
+
+/**
+ * REQUEST_HELDITEM_BATTLE's player/opponent controller handlers write the
+ * supplied u16 to the active battler's corresponding persistent party slot.
+ */
+export function withBattleScriptPartyMemberItem(
+  party: BattleScriptPartyBySide,
+  side: 0 | 1,
+  partyIndex: number,
+  item: number,
+): BattleScriptPartyBySide {
+  const sideKey = side === 0 ? "player" : "opponent";
+  const state = party[sideKey];
+  const member = state[partyIndex];
+  if (member.item === item) return party;
+  const nextState = state.map((candidate, index) =>
+    index === partyIndex ? Object.freeze({ ...candidate, item }) : candidate
   ) as unknown as BattleScriptPartyState;
   return Object.freeze({ ...party, [sideKey]: Object.freeze(nextState) });
 }
@@ -2179,6 +2208,10 @@ export function createBattleScriptRulesContext(
     rolloutTimerStartValues,
     choicedMove,
     changedItems,
+    knockedOffMons: Object.freeze([
+      requireUnsigned(input.knockedOffMons?.[0] ?? 0, 0x3f, "knockedOffMons[0]"),
+      requireUnsigned(input.knockedOffMons?.[1] ?? 0, 0x3f, "knockedOffMons[1]"),
+    ]) as readonly [number, number],
     monToSwitchIntoId,
     battleStructAbsentBattlerFlags: requireUnsigned(
       input.battleStructAbsentBattlerFlags ?? 0,
@@ -2505,6 +2538,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptTrysetspikesOpcodeHandlers(program),
     ...createBattleScriptTrysetmagiccoatOpcodeHandlers(program),
     ...createBattleScriptTrysethelpinghandOpcodeHandlers(program),
+    ...createBattleScriptTryswapitemsOpcodeHandlers(program),
     ...createBattleScriptTryswapabilitiesOpcodeHandlers(program),
   });
 }

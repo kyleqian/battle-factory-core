@@ -346,7 +346,13 @@ function activeBattler(
 }
 
 function partySlot(config: FactoryFullTurnBattlerConfig): BattleScriptPartyMemberInput {
-  return { species: config.species, isEgg: false, hp: config.hp, status1: config.status1 ?? 0 };
+  return {
+    species: config.species,
+    isEgg: false,
+    hp: config.hp,
+    status1: config.status1 ?? 0,
+    item: config.item ?? 0,
+  };
 }
 
 const EMPTY_PARTY_SLOT: BattleScriptPartyMemberInput = Object.freeze({ species: 0, isEgg: false, hp: 0 });
