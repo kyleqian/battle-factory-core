@@ -1,4 +1,32 @@
 ---
+## 588 — [SUPERVISOR VERIFY 2026-07-28 ~04:29] IncrementGameStat accepted; Perish Song evidence folded
+
+- **State:** reviewed union green at **345 files / 4118 tests** and focused
+  **47/47**; production build, both-oracle info, census regeneration, ratchets
+  **6/6**, and `git diff --check` pass. Census is exactly **151/214 effects,
+  279/355 moves, 228/276 Factory-L50 distinct, 2742/2957 weighted**, all
+  **42/42**.
+- **Did:** accepted global IncrementGameStat `0x60` plus the source-required
+  shared 25%-recoil effect after source/diff review: save/meta ownership stays
+  outside battle and Factory state, Splash ordering is typed, and forced
+  Struggle now completes the common hit/recoil path. Folded independently
+  replayed Perish Song source/OFF evidence (`e0f1d6d6…93c6a61`): the public
+  receipt pins the observed shared countdown only; immunity, switching,
+  terminal faint, and Baton Pass remain source-bounded.
+- **Next:** register `B_SCR_OP_SETTAUNT` globally from accepted evidence and
+  remove the generic end-turn Taunt case barrier. Preserve exact duplicate
+  failure, target timer **2**, shared status-move admission/attack-canceler
+  paths, and per-battler end-turn decrement without widening the singles
+  controller. Expected census:
+  **152/214, 280/355, 229/276, 2744/2957**.
+- **Notes:** handler inventory is **159**; the source-only `tauntTimer2` mirror
+  is not consulted by Emerald end-turn/action logic and must not create a
+  second controller timer. No unsupported/import ratchet, recording import,
+  animation/presentation/tick branch, issue removal, DEFERRED item, or oracle
+  lifecycle action. Animation branch has advanced since orient and was not
+  folded mid-session.
+
+---
 ## 587 — [BOUNDED MAIN WORKER 2026-07-28 ~04:25] IncrementGameStat executes through the save/meta seam
 
 - **State:** committed `795366f`; tree green at **344 files / 4115 tests**,
