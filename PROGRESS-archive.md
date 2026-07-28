@@ -1,4 +1,26 @@
 ---
+## 611 — [SUPERVISOR VERIFY+FOLD 2026-07-28 ~09:45] Trick and Heal Bell accepted; family-B falsification dossier folded
+
+- **State:** independently verified entries 609/610 (suite **380/4315**,
+  build, census idempotent at **161/214, 291/355, 239/276, 2773/2957**) and
+  merged side scout `80f4c24` — `docs/set-move-effect-family-b-notes.md`, a
+  15-case falsification of the family-B `applySetMoveEffect` cluster. Union
+  green; side worktree removed.
+- **Did:** spot-checked the dossier's two load-bearing claims myself
+  (ABILITY_ROCK_HEAD absent from the `jumpifability` map ⇒ the census's
+  "executable" EFFECT_RECOIL row is a runtime false positive; `jumpifstatus2`
+  operand map is the narrow 4-value set blocking Mean Look/Nightmare
+  pre-dispatch). Dossier orders 4 implementation clusters totalling
+  +15 effects/+24 moves/+142 weighted; only 7 cases are dispatch-ready now.
+- **Next:** round 3 dispatched — main: Cluster 1 (7 dispatch-ready cases,
+  predicted **+7 effects/+12 moves/+7 distinct/+72 weighted**); side: OFF
+  corroboration staging (Tri Attack/Overheat/AncientPower receipts). Then
+  Cluster 2 (recoil+Rock Head+Uproar, +53 weighted) and census-generator
+  per-operand checks (jumpifstatus2/playanimation/copyarray + Rock Head).
+- **Notes:** census generator blind spots are recorded in the dossier §1;
+  generator hardening is deliberately sequenced AFTER engine work per the
+  dossier. No deferred questions. Deadline 15:07.
+---
 ## 609 — [BOUNDED MAIN WORKER 2026-07-28 ~09:21] Trick executes through shared item/controller paths
 
 - **State:** committed `b2a8714`; tree green at **379 files / 4302 tests**,

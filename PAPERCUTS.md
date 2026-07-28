@@ -169,12 +169,13 @@ Per entry:
 - **Workaround:** split each outcome/control into a fresh
   `run-mgba-probe.py` wrapper invocation and merge only the concise evidence.
 
-## `bin/oracle run` always prints the full capture manifest
+## `bin/oracle run`/`lab` always print the full capture manifest
 
 - **What:** targeted oracle probes with dense captures flood the terminal with
-  the complete manifest even when only the written artifacts are needed.
-- **Hits:** 1.
-- **Cost each:** ~2 min.
+  the complete manifest even when only the written artifacts are needed;
+  `bin/oracle lab` does the same for battle-lab scenarios.
+- **Hits:** 2 (run 2026-07-2x; lab 2026-07-28 Cluster-1 staging worker).
+- **Cost each:** ~1-2 min.
 - **Workaround:** redirect successful oracle stdout to `/dev/null` and inspect
   the named manifest or RAM probe output directly.
 

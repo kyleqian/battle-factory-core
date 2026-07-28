@@ -15,6 +15,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 614 — [SUPERVISOR VERIFY+FOLD 2026-07-28 ~10:25] Clusters 1-2 accepted; OFF corroboration receipts folded
+
+- **State:** independently verified entries 612/613 (suite, build, census
+  idempotent at **170/214, 306/355, 248/276, 2898/2957**; Rock Head live in
+  the `jumpifability` map; EFFECT_RECOIL/DOUBLE_EDGE/UPROAR rows executable)
+  and merged side staging `7a0602c0` — `docs/family-b-cluster1-off-evidence.md`
+  with twice-run byte-identical Tri Attack/Overheat/AncientPower OFF receipts
+  (real paralysis proc, Sp.Atk 6→4→2 with damage 17→9, five-stat proc) plus
+  hermetic fixture tests. Union green at **381 files / 4359 tests**; side
+  worktree removed. Bumped the oracle-manifest papercut (`lab` variant).
+- **Did:** the family-B program's first two clusters are done at exactly the
+  dossier's predicted +125 weighted; six bytes stay barriered pending their
+  named blockers (Clusters 3-4).
+- **Next:** main: Perish Song (opcode + Soundproof `jumpifability` widening +
+  perish half of `HandleWishPerishSongOnTurnEnd`, banked evidence). Side
+  (running): ranked-single-opcodes falsification scout. Then census-generator
+  per-operand hardening and scout-ordered small-opcode batches.
+- **Notes:** engine-vs-receipt A/B comparison for the Cluster-1 receipts is
+  available follow-up work (receipts corroborate the ROM; engine is
+  Tier-1-pinned from source). No deferred questions. Deadline 15:07.
+
+---
 ## 613 — [BOUNDED MAIN WORKER 2026-07-28 ~10:08] Recoil/Rock Head and Uproar cluster execute end to end
 
 - **State:** rung (a) committed as `e2c3c149`; full cluster green at **380
@@ -66,25 +88,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   barrier pins unchanged, none added. Census reporter changes are only the
   seven required constant-name/positive-validation metadata entries.
 
----
-## 611 — [SUPERVISOR VERIFY+FOLD 2026-07-28 ~09:45] Trick and Heal Bell accepted; family-B falsification dossier folded
-
-- **State:** independently verified entries 609/610 (suite **380/4315**,
-  build, census idempotent at **161/214, 291/355, 239/276, 2773/2957**) and
-  merged side scout `80f4c24` — `docs/set-move-effect-family-b-notes.md`, a
-  15-case falsification of the family-B `applySetMoveEffect` cluster. Union
-  green; side worktree removed.
-- **Did:** spot-checked the dossier's two load-bearing claims myself
-  (ABILITY_ROCK_HEAD absent from the `jumpifability` map ⇒ the census's
-  "executable" EFFECT_RECOIL row is a runtime false positive; `jumpifstatus2`
-  operand map is the narrow 4-value set blocking Mean Look/Nightmare
-  pre-dispatch). Dossier orders 4 implementation clusters totalling
-  +15 effects/+24 moves/+142 weighted; only 7 cases are dispatch-ready now.
-- **Next:** round 3 dispatched — main: Cluster 1 (7 dispatch-ready cases,
-  predicted **+7 effects/+12 moves/+7 distinct/+72 weighted**); side: OFF
-  corroboration staging (Tri Attack/Overheat/AncientPower receipts). Then
-  Cluster 2 (recoil+Rock Head+Uproar, +53 weighted) and census-generator
-  per-operand checks (jumpifstatus2/playanimation/copyarray + Rock Head).
-- **Notes:** census generator blind spots are recorded in the dossier §1;
-  generator hardening is deliberately sequenced AFTER engine work per the
-  dossier. No deferred questions. Deadline 15:07.
