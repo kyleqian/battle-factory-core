@@ -1,4 +1,29 @@
 ---
+## 632 — [BOUNDED MAIN WORKER 2026-07-28 ~14:00] Type-change setters source-complete
+
+- **State:** tree green at **402 files / 4564 tests**, production build, OFF
+  oracle info, and `git diff --check`. Census is exactly **202/214 effects,
+  342/355 moves, 275/276 distinct, 2955/2957 weighted**: assigned-baseline
+  delta **+3/+3/+0/+0**; all **70** census validations pass.
+- **Did:** registered source-exact Conversion, Conversion 2, and Camouflage
+  setters against the existing active-type owner plus a typed type-name
+  buffer. Conversion preserves occupied-prefix/full-four-slot rejection
+  sampling and Mystery remapping. Conversion 2 preserves no-history/two-turn
+  failure, table-index rejection sampling, the 1,000-attempt fallback, and
+  Emerald's stale-`i` fallback predicate bug. Camouflage carries the complete
+  ten-environment map; Factory Building resolves to Normal.
+- **Next:** supervisor verify commit `c664b145`; resume tail-plan row 3b
+  environment attacks. Do not expand this worker into Charge/Sports,
+  Transform, Metronome, or other tail rows.
+- **Notes:** every success/failure script walk reaches END and canonical
+  replay is exact. Conversion's rejection sample draws **16838, 44065**
+  (seed 1). Conversion 2's exact samples draw once (**33676**) and twice
+  (**33676, 28355**, seed 2); its forced fallback accepts 1,000 indices via
+  **1,140** raw draws (seed 1, final **41163**). Deliberate handler exact-set
+  pin **193→196**. No barriers, recording imports, presentation, round, tick,
+  roadmap, issue, or oracle-trace changes.
+
+---
 ## 631 — [BOUNDED MAIN WORKER 2026-07-28 ~13:49] Last-move family source-complete
 
 - **State:** tree green at **401 files / 4556 tests**, production build, OFF

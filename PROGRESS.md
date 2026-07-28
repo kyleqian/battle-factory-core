@@ -15,6 +15,29 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 635 — [SUPERVISOR ORIENT 2026-07-28 ~14:55] New session: animation fold (Smokescreen exact), OFF oracle restarted fresh
+
+- **State:** folded `animation-main` (4 commits: Smokescreen staged→typed
+  seam→**promoted exact 125/125 both orientations**, plus the corrected Blue
+  Orb/Reversal topology audit; coverage **70 exact / 1 staged / 205
+  unsupported**). Union green at **420 files / 4632 tests** + production
+  build. OFF oracle failed the freshness check (started 09:06, harness HEAD
+  11:00) — restarted at 14:54; both profiles now PASS.
+- **Did:** orient + fold only so far. The animation supervisor is live until
+  ~15:07 with one evidence-only Reversal probe worker; its final commits fold
+  after wind-down. Its ledger's "For the main program" ask: expose the
+  resolved Scene-ON stat-drop controller presentation (kickoff/text-printer,
+  `B_ANIM_STATS_CHANGE` receipts, stat message/wait, move-end cleanup)
+  through the shared seam, then rerun `fakeTearsPortable.ts` (Fake Tears
+  exact needs 322/322 both orientations).
+- **Next:** main lane tail row 4 (Charge + Mud/Water Sport,
+  `docs/frontier-tail-notes.md` §3.12/§3.16, predicted census 207/347/275/
+  2955); side lane rows 5a–c falsification/receipt scout; then the stat-drop
+  seam handoff after the final animation fold; then rows 5a→8 toward
+  214/214.
+- **Notes:** DEFERRED.md empty. Session deadline 20:49.
+
+---
 ## 634 — [SUPERVISOR WIND-DOWN 2026-07-28 ~14:25] Session close: census 159→204/214 effects, 2764→2955/2957 weighted; final animation fold verified
 
 - **State:** verified entries 631-633 (each census-idempotent at its exact
@@ -75,31 +98,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   canonical replays are exact. Deliberate handler exact-set pin **196→198**.
   No barriers, recording imports, presentation, round, tick, roadmap, issue,
   or oracle-trace changes.
-
-
----
-## 632 — [BOUNDED MAIN WORKER 2026-07-28 ~14:00] Type-change setters source-complete
-
-- **State:** tree green at **402 files / 4564 tests**, production build, OFF
-  oracle info, and `git diff --check`. Census is exactly **202/214 effects,
-  342/355 moves, 275/276 distinct, 2955/2957 weighted**: assigned-baseline
-  delta **+3/+3/+0/+0**; all **70** census validations pass.
-- **Did:** registered source-exact Conversion, Conversion 2, and Camouflage
-  setters against the existing active-type owner plus a typed type-name
-  buffer. Conversion preserves occupied-prefix/full-four-slot rejection
-  sampling and Mystery remapping. Conversion 2 preserves no-history/two-turn
-  failure, table-index rejection sampling, the 1,000-attempt fallback, and
-  Emerald's stale-`i` fallback predicate bug. Camouflage carries the complete
-  ten-environment map; Factory Building resolves to Normal.
-- **Next:** supervisor verify commit `c664b145`; resume tail-plan row 3b
-  environment attacks. Do not expand this worker into Charge/Sports,
-  Transform, Metronome, or other tail rows.
-- **Notes:** every success/failure script walk reaches END and canonical
-  replay is exact. Conversion's rejection sample draws **16838, 44065**
-  (seed 1). Conversion 2's exact samples draw once (**33676**) and twice
-  (**33676, 28355**, seed 2); its forced fallback accepts 1,000 indices via
-  **1,140** raw draws (seed 1, final **41163**). Deliberate handler exact-set
-  pin **193→196**. No barriers, recording imports, presentation, round, tick,
-  roadmap, issue, or oracle-trace changes.
-
-
