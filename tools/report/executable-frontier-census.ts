@@ -653,6 +653,15 @@ const validationChecks: Array<() => void> = [
   // running this exact script, fixed in battleScriptJumpifwordOpcode.ts,
   // not a control-flow-extractor regression).
   () => requireExecutable("EFFECT_ROAR"),
+  // Registration checkpoint (EXPLOSION census set, PROGRESS 528):
+  // B_SCR_OP_TRYEXPLOSION/B_SCR_OP_SETATKHPTOZERO registered
+  // (battleScriptExplosionOpcode.ts, source-complete, zero barriers). Moved
+  // from blocked-on-opcodes to executable. Side effect worth noting (not a
+  // pin here, since EFFECT_MEMENTO stays blocked overall): its own
+  // blocked-on-opcodes list also shrank from two missing opcodes to one
+  // (B_SCR_OP_TRYMEMENTO alone) now that SETATKHPTOZERO -- shared plumbing
+  // between the two effects -- is registered.
+  () => requireExecutable("EFFECT_EXPLOSION"),
 ];
 
 let validationFailed = false;
