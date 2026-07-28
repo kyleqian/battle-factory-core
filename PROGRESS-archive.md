@@ -1,3 +1,24 @@
+## 640 — [BOUNDED MAIN WORKER 2026-07-28 ~16:08] Frontier-tail row 5b Imprison source-complete
+
+- **State:** committed `8a8aec19`; tree green at **424 files / 4658 tests**,
+  production build, OFF oracle info, and `git diff --check`. Census is exactly
+  **209/214 effects, 350/355 moves, 275/276 distinct, 2955/2957 weighted**:
+  assigned-baseline delta **+1/+1/+0/+0**; all **70** validations pass.
+- **Did:** registered `B_SCR_OP_TRYIMPRISON` with already-set failure,
+  source-ordered opposing overlap scan, and its pre-scan special Pressure
+  loop. Each opposing Pressure holder removes one extra Imprison PP while
+  the whole loop emits one persistent controller update; the existing
+  action-admission scan consumes the newly-set bit.
+- **Next:** supervisor verify `8a8aec19`; continue only from the ordered
+  frontier-tail plan, not retired canonical Battle 2 work.
+- **Notes:** consumed `docs/imprison-off-evidence.md`; Tier-1 pins zero draws,
+  normal **10→9** plus one-Pressure **9→8**, zero/multiple Pressure, overlap/
+  no-overlap/already-set, single post-loop update, and admission denial.
+  Deliberate handler exact-set pin **201→202**. No barrier, canonical import,
+  presentation, round, tick, roadmap, issue, or oracle-trace change.
+
+---
+
 ## 639 — [BOUNDED MAIN WORKER 2026-07-28 ~15:59] Frontier-tail row 5a source-complete
 
 - **State:** committed `ee91c6f6`; tree green at **423 files / 4654 tests**,
