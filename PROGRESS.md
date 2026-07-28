@@ -15,6 +15,31 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 563 — [BOUNDED MAIN WORKER 2026-07-28 ~01:12] Future Sight resolves positionally and generically
+
+- **State:** committed `6be131e` / `3fb83e0` / `a2ffbc2` / `e306da5`;
+  tree green at **320 files / 3985 tests** and focused **275/275**.
+  Production build, both-oracle freshness, census regeneration, and
+  `git diff --check` pass. Census is exactly **140/214 effects, 266/355
+  moves, 217/276 Factory-L50 distinct, 2696/2957 weighted**, all **42/42**.
+- **Did:** registered exact five-byte `0xc3`
+  `B_SCR_OP_TRYSETFUTUREATTACK`, positional counter/move/attacker/base-damage
+  arrays and side bit 64, duplicate branch, and source-ordered post-faint
+  delayed resolution. Explicit delayed accuracy, random damage, switch-slot
+  targeting, Protect bypass, Substitute absorption, absent/fainted slots,
+  and shared Doom Desire routing execute through generic handlers.
+- **Next:** supervisor verify this executable-frontier increment and select
+  the next finite source registration target; do not resume the retired
+  canonical Battle-2 march.
+- **Notes:** the generic Kadabra/Tackle proof matches OFF PP **15→14→13**
+  (then 12 on the third duplicate), target HP **140→140→103**, and bit
+  **64→0**. Controlled seed 8 replaces lab seed 1 because injected decisions
+  omit unrelated trainer-AI draws; setup arithmetic is separately pinned at
+  stored base damage 44 and the delayed 85% roll gives 37. No new unsupported
+  barrier/import, recording import, animation-lane edit, scenario/tick/render
+  branch, issue removal, oracle lifecycle action, or PAPERCUT.
+
+---
 ## 562 — [SUPERVISOR VERIFY 2026-07-28 ~00:51] Defense Curl accepted; Future Sight evidence merged
 
 - **State:** reviewed union green at **319 files / 3976 tests**; production
@@ -58,28 +83,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **362→327→170→12→0**, and player-win. No barrier/import ratchet increase,
   recording import, scenario/tick/render branch, animation edit, issue
   removal, oracle lifecycle action, or PAPERCUT.
-
----
-## 560 — [SUPERVISOR VERIFY 2026-07-28 ~00:40] Rollout accepted; Defense Curl evidence merged
-
-- **State:** reviewed union green at **317 files / 3969 tests** and focused
-  **52/52**; production build, both-oracle freshness, census regeneration,
-  and `git diff --check` pass. Census is exactly **138/214 effects, 263/355
-  moves, 215/276 Factory-L50 distinct, 2685/2957 weighted**, with all
-  **42/42** checks.
-- **Did:** accepted `adfada6` / `8407f7b` / `027c39f`: exact Rollout timer,
-  lock, selected slot, Defense Curl power ladder, initial-only PP, symmetric
-  automatic action selection, continuous RNG/events, miss unlock, and
-  terminal routing all execute through the generic controller. Merged
-  Defense Curl evidence `8ec52e5` after source review and two identical OFF
-  replays.
-- **Next:** register source-complete one-byte `0xbf`
-  `B_SCR_OP_SETDEFENSECURLBIT`, including attacker-only unconditional bit
-  ownership, script ordering before the +1 Defense attempt, maxed-stat bit
-  persistence, and a generic Defense Curl→Rollout continuation. Expected
-  census is **139/214, 264/355, 216/276, 2691/2957**.
-- **Notes:** generic Rollout and OFF evidence both reach HP
-  **362→327→170→12→0** with PP **20→19**; manifest
-  `4460104b…9479677`. Defense Curl evidence observes PP **40→39**, bit 30,
-  and Defense **6→7**. No barrier/import ratchet increase, recording import,
-  animation edit, DEFERRED item, or oracle lifecycle action.
