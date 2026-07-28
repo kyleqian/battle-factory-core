@@ -10,10 +10,10 @@ Answers ROADMAP S10's Executable-frontier reset question directly: not "how many
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 138 | 214 | 64.5% |
-| Moves (unweighted, all 355) | 263 | 355 | 74.1% |
-| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 215 | 276 | 77.9% |
-| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2685 | 2957 | 90.8% |
+| Effect scripts | 139 | 214 | 65.0% |
+| Moves (unweighted, all 355) | 264 | 355 | 74.4% |
+| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 216 | 276 | 78.3% |
+| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2691 | 2957 | 91.0% |
 
 "Executable" means every opcode on every statically reachable path from the effect's entry script has a dispatch entry today (registered barriers included, per ROADMAP S10 §1's (a)/(b) policy). It is not a semantic-correctness claim -- see Caveats.
 
@@ -24,7 +24,6 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | Missing opcode(s) | Effects unlocked | Moves unlocked (unweighted) | Factory-L50 moves (unweighted) | Factory-L50 weighted |
 | --- | --- | --- | --- | --- |
 | `B_SCR_OP_GETSECRETPOWEREFFECT` | 1 (EFFECT_SECRET_POWER) | 1 | 1 | 6 |
-| `B_SCR_OP_SETDEFENSECURLBIT` | 1 (EFFECT_DEFENSE_CURL) | 1 | 1 | 6 |
 | `B_SCR_OP_TRYSETFUTUREATTACK` | 1 (EFFECT_FUTURE_SIGHT) | 2 | 1 | 5 |
 | `B_SCR_OP_DISABLELASTUSEDATTACK` | 1 (EFFECT_DISABLE) | 1 | 1 | 5 |
 | `B_SCR_OP_FURYCUTTERCALC` | 1 (EFFECT_FURY_CUTTER) | 1 | 1 | 5 |
@@ -48,6 +47,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_MAGNITUDEDAMAGECALCULATION` | 1 (EFFECT_MAGNITUDE) | 1 | 1 | 2 |
 | `B_SCR_OP_MAXATTACKHALVEHP` | 1 (EFFECT_BELLY_DRUM) | 1 | 1 | 2 |
 | `B_SCR_OP_METRONOME` | 1 (EFFECT_METRONOME) | 1 | 1 | 2 |
+| `B_SCR_OP_PAINSPLITDMGCALC` | 1 (EFFECT_PAIN_SPLIT) | 1 | 1 | 2 |
 
 ## Per-effect detail
 
@@ -209,7 +209,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_TELEPORT | `BattleScript_EffectTeleport` | executable | - | - | 1 | 0 (0) |
 | EFFECT_BEAT_UP | `BattleScript_EffectBeatUp` | blocked-on-opcodes | `B_SCR_OP_TRYDOBEATUP` (edge branch only) | - | 1 | 0 (0) |
 | EFFECT_SEMI_INVULNERABLE | `BattleScript_EffectSemiInvulnerable` | executable | - | - | 4 | 4 (32) |
-| EFFECT_DEFENSE_CURL | `BattleScript_EffectDefenseCurl` | blocked-on-opcodes | `B_SCR_OP_SETDEFENSECURLBIT` (main path) | - | 1 | 1 (6) |
+| EFFECT_DEFENSE_CURL | `BattleScript_EffectDefenseCurl` | executable | - | - | 1 | 1 (6) |
 | EFFECT_SOFTBOILED | `BattleScript_EffectSoftboiled` | executable | - | - | 2 | 2 (7) |
 | EFFECT_FAKE_OUT | `BattleScript_EffectFakeOut` | executable | - | - | 1 | 1 (15) |
 | EFFECT_UPROAR | `BattleScript_EffectUproar` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_UPROAR is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 1 | 1 (1) |
