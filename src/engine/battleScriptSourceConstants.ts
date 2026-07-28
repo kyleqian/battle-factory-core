@@ -49,8 +49,18 @@ export const BATTLE_SCRIPT_MOVE_LIMITATIONS = Object.freeze({
 } as const);
 
 export const BATTLE_SCRIPT_STATUS1_SLEEP = 0x0000_0007;
+export const BATTLE_SCRIPT_STATUS1_POISON = 1 << 3;
+export const BATTLE_SCRIPT_STATUS1_BURN = 1 << 4;
 export const BATTLE_SCRIPT_STATUS1_FREEZE = 1 << 5;
 export const BATTLE_SCRIPT_STATUS1_PARALYSIS = 1 << 6;
+export const BATTLE_SCRIPT_STATUS1_TOXIC_POISON = 1 << 7;
+/** Cmd_cureifburnedparalyzedorpoisoned's exact accepted-status predicate. */
+export const BATTLE_SCRIPT_STATUS1_REFRESH_CURE_MASK = (
+  BATTLE_SCRIPT_STATUS1_POISON
+  | BATTLE_SCRIPT_STATUS1_BURN
+  | BATTLE_SCRIPT_STATUS1_PARALYSIS
+  | BATTLE_SCRIPT_STATUS1_TOXIC_POISON
+) >>> 0;
 export const BATTLE_SCRIPT_STATUS3_IMPRISONED_OTHERS = 1 << 13;
 export const BATTLE_SCRIPT_STATUS3_GRUDGE = 1 << 14;
 
