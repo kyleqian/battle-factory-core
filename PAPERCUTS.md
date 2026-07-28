@@ -174,7 +174,8 @@ Per entry:
 - **What:** targeted oracle probes with dense captures flood the terminal with
   the complete manifest even when only the written artifacts are needed;
   `bin/oracle lab` does the same for battle-lab scenarios.
-- **Hits:** 2 (run 2026-07-2x; lab 2026-07-28 Cluster-1 staging worker).
+- **Hits:** 3 (run 2026-07-2x; lab 2026-07-28 Cluster-1 and Cluster-3
+  staging workers — both pre-warned in their briefs, still ~1 min each).
 - **Cost each:** ~1-2 min.
 - **Workaround:** redirect successful oracle stdout to `/dev/null` and inspect
   the named manifest or RAM probe output directly.
