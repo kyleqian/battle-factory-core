@@ -25,6 +25,10 @@ import {
   type TwineedleEffect,
 } from "./twineedle.ts";
 import {
+  spikeCannonEffectAtAge,
+  type SpikeCannonEffect,
+} from "./spikeCannon.ts";
+import {
   metallicShineAtAge,
   type MetallicShineState,
 } from "./metallicShine.ts";
@@ -456,6 +460,7 @@ export interface SceneOnPresentationBattler {
     | "WEEPINBELL"
     | "MEOWTH"
     | "BEEDRILL"
+    | "OMASTAR"
     | "WARTORTLE";
   readonly geometry: SceneOnBattlerGeometry;
 }
@@ -985,6 +990,13 @@ export interface SceneOnTwineedleConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnSpikeCannonConfig {
+  readonly move: "SPIKE_CANNON";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnSwaggerConfig {
   readonly move: "SWAGGER";
   readonly attacker: SceneOnPresentationBattler;
@@ -1271,6 +1283,7 @@ export type SceneOnMoveConfig =
   | SceneOnHeadbuttConfig
   | SceneOnBodySlamConfig
   | SceneOnTwineedleConfig
+  | SceneOnSpikeCannonConfig
   | SceneOnSwaggerConfig
   | SceneOnTauntConfig
   | SceneOnScaryFaceConfig
@@ -1425,6 +1438,12 @@ export interface SceneOnBodySlamView extends BodySlamState {
 }
 
 export interface SceneOnTwineedleView extends TwineedleEffect {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSpikeCannonView extends SpikeCannonEffect {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -2736,6 +2755,28 @@ export function sceneOnTwineedleView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...twineedleEffectAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is SPIKE CANNON's first source-script load display. */
+export function sceneOnSpikeCannonView(
+  state: SceneOnMovePresentationState<SceneOnSpikeCannonConfig>,
+): SceneOnSpikeCannonView {
+  if (state.config.move !== "SPIKE_CANNON") {
+    throw new Error(
+      `expected SPIKE_CANNON presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...spikeCannonEffectAtAge(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.animationCenter,

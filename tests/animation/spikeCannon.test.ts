@@ -3,6 +3,10 @@ import {
   spikeCannonEffectAtAge,
   spikeCannonNeedleMatrix,
 } from "../../src/animation/spikeCannon.ts";
+import {
+  createSceneOnMovePresentation,
+  sceneOnSpikeCannonView,
+} from "../../src/animation/sceneOnPresentation.ts";
 import { windUpLungeAtTick } from "../../src/animation/windUpLunge.ts";
 
 const wind = {
@@ -119,5 +123,46 @@ describe("MOVE_SPIKE_CANNON source-relative reducer", () => {
       { age: 51, song: "SE_M_HORN_ATTACK", pan: 63 },
       { age: 57, song: "SE_M_HORN_ATTACK", pan: 63 },
     ]);
+  });
+
+  it("exposes only presentation geometry through the typed Scene-ON seam", () => {
+    const stage = createSceneOnMovePresentation({
+      move: "SPIKE_CANNON",
+      attacker: {
+        species: "OMASTAR",
+        geometry: {
+          side: "player",
+          spriteCorner: { x: 40, y: 56 },
+          animationCenter: { x: 72, y: 96 },
+          battlePositionCenter: { x: 72, y: 80 },
+        },
+      },
+      target: {
+        species: "ONIX",
+        geometry: {
+          side: "opponent",
+          spriteCorner: { x: 144, y: 10 },
+          animationCenter: { x: 176, y: 42 },
+          battlePositionCenter: { x: 176, y: 40 },
+        },
+      },
+      fieldProfile: {
+        playerHp: 177,
+        playerMaxHp: 177,
+        opponentHp: 110,
+        opponentMaxHp: 110,
+      },
+    });
+    expect(sceneOnSpikeCannonView({ ...stage, age: 24 })).toMatchObject({
+      age: 24,
+      attacker: { species: "OMASTAR" },
+      target: { species: "ONIX" },
+      attackerOffset: { x2: 3, y2: 0 },
+      sprites: [
+        { kind: "needle", oamSlot: 4 },
+        { kind: "needle", oamSlot: 5 },
+        { kind: "needle", oamSlot: 7 },
+      ],
+    });
   });
 });
