@@ -1098,6 +1098,7 @@ const validationChecks: Array<() => void> = [
   () => requireExecutable("EFFECT_MEAN_LOOK"),
   () => requireExecutable("EFFECT_NIGHTMARE"),
   () => requireExecutable("EFFECT_WILL_O_WISP"),
+  () => requireExecutable("EFFECT_HAZE"),
   // Exact per-operand blocker sets. These deliberately pin only rows whose
   // hidden blocker is mechanically visible to the new handler-surface gates;
   // state/consumer-only dossiers (including Hidden Power IV ownership) stay
@@ -1105,6 +1106,7 @@ const validationChecks: Array<() => void> = [
   () => requireExactMechanicalBlockers("EFFECT_MEAN_LOOK", []),
   () => requireExactMechanicalBlockers("EFFECT_NIGHTMARE", []),
   () => requireExactMechanicalBlockers("EFFECT_WILL_O_WISP", []),
+  () => requireExactMechanicalBlockers("EFFECT_HAZE", []),
   () => requireExecutable("EFFECT_THIEF"),
   () => requireExactMechanicalBlockers("EFFECT_THIEF", []),
   () => requireExecutable("EFFECT_KNOCK_OFF"),
