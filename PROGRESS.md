@@ -15,6 +15,30 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 536 — [BOUNDED WORKER 2026-07-27 ~20:44] EFFECT_FLAIL executes Flail/Reversal end to end; exact +1/+2/+2/+20
+
+- **State:** tree committed and green at **290 files / 3786 tests**;
+  `npm run build` clean. Census regenerates to **128/214 effects, 252/355
+  moves, 204/276 Factory-L50 distinct, 2586/2957 weighted (87.5%)**, the
+  assigned exact **+1 effect / +2 moves / +2 distinct / +20 weighted**, with
+  all **42/42** ground-truth checks passing.
+- **Did:** `53b4dc2` source-ports/registers
+  `B_SCR_OP_REMAININGHPTOPOWER`, materializes generic `gDynamicBasePower`
+  through the existing damage calculator and Triple Kick copy, and adds
+  Tier-1 coverage for every inclusive HP-band boundary plus Flail/Reversal
+  hit, miss, Protect, faint, and zero-HP-attacker terminals at genuine
+  `B_SCR_OP_END`. `e101563` regenerates the verified census.
+- **Next:** supervisor verify this completed registration and merge the
+  file-disjoint OFF-profile evidence, then continue the generated ranked
+  frontier at `B_SCR_OP_FRIENDSHIPTODAMAGECALCULATION` /
+  `EFFECT_RETURN` + `EFFECT_FRUSTRATION` (**+2/+2/+2/+18** predicted).
+- **Notes:** `tests/executableFrontierRatchet.test.ts` is unchanged: no new
+  unsupported barrier and no canonical-recording import. Battle Scene OFF
+  oracle freshness was checked at baseline only (`9c89c741…f297`); no oracle
+  lifecycle action, evidence-file edit, or recording-derived production
+  behavior. No PAPERCUT.
+
+---
 ## 535 — [SUPERVISOR VERIFY 2026-07-27 ~20:34] Curse registration + repeatable OFF-profile evidence merged green
 
 - **State:** union committed and green at **289 files / 3766 tests**;
@@ -59,27 +83,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   unsupported barriers or canonical-recording imports. Battle Scene OFF oracle
   freshness was checked at baseline only; no oracle lifecycle action or
   recording-derived behavior. No PAPERCUT.
-
-
----
-## 533 — [SUPERVISOR ORIENT 2026-07-27 ~20:12] animation fold + fresh green OFF-profile baseline
-
-- **State:** union committed except for this ledger/test-fix step and green at
-  **287 files / 3753 tests**; `npm run build` clean. Battle Scene OFF oracle
-  is fresh at canonical SHA `9c89c741…f297`; census remains
-  **126/214 effects, 249/355 moves, 201/276 Factory-L50, 2548/2957 weighted
-  (86.2%)**. No deferred questions.
-- **Did:** folded all 10 `animation-main` commits absent from `master`
-  (`d0c04f8`: Spark framebuffer closure, CHARM exact, Scary Face partial +
-  evidence). The union exposed one supervisor-only launcher-test leak:
-  `POKEBENCH_ROLE=supervisor` was not scrubbed by
-  `codexLauncherProfiles.test.ts`; its five subprocess checks are hermetic
-  again. Restarted the stale port-8014 service and re-ran freshness, full
-  Tier-1, and build on the union.
-- **Next:** resume the ranked executable census with the `EFFECT_CURSE` pair
-  while a file-disjoint side worker prepares the next staged OFF-profile
-  presentation-seam evidence; verify/merge both, then continue with FLAIL and
-  the banked §15 seam wiring.
-- **Notes:** no executable-frontier ratchet or barrier change. No PAPERCUT.
-
----
