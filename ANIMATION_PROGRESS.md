@@ -1,5 +1,11 @@
 # Animation coverage
 
+## ANIM_TAG_BLUE_ORB source audit checkpoint; Reversal and Swallow remain unsupported (2026-07-28)
+
+**Verdict:** Evidence-only checkpoint. `MOVE_REVERSAL` and `MOVE_SWALLOW` remain unsupported; neither is staged or exact. Source audit selects legal Level-50 Factory set-326 `FRONTIER_MON_VIGOROTH_2` (Vigoroth) against set-156 ONIX as the Reversal representative. Reversal loads BLUE_ORB/HANDS_AND_FEET/IMPACT, runs Detect plus two distinct palette blends, makes six 26-frame `gReversalOrbSpriteTemplate` orbital callbacks, then lunge/fist/hitsplat and `AnimTask_ShakeTargetBasedOnMovePowerOrDmg`—so the shared BLUE_ORB is only one component in its complete topology.
+
+**Sibling boundary:** `MOVE_SWALLOW` is distinct and unsupported: it loads BLUE_ORB plus BLUE_STAR, deforms and shakes the attacker, emits one/two/three five-orb `gSwallowBlueOrbSpriteTemplate` waves according to move turn, then runs `HealingEffect`. Its source callback rises into the attacker and its deform affine task lifecycle are not Reversal's orbital callback. The next worker must add portable mGBA fixtures/probe for Vigoroth→Onix and Onix→Vigoroth, capture every `currentMove=179` frame through first inactive cleanup, verify the full source/hardware/audio/raw-RGB receipts twice fresh per orientation, and only then consider a staged Reversal entry. No renderer, reducer, seam, battle logic, coverage status, or acceptance changed.
+
 ## MOVE_SMOKESCREEN promoted exact; complete BLACK_BALL body closed (2026-07-28)
 
 **Verdict:** `MOVE_SMOKESCREEN` is exact. Legal Level-50 Factory set-127
