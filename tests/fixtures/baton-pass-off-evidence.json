@@ -1,0 +1,115 @@
+{
+  "schema": "baton-pass-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "source": {
+    "macro": "reference/pokeemerald/asm/macros/battle_script.inc:470-474",
+    "opcodeEnum": "reference/pokeemerald/include/constants/battle_script_commands.h:80-86",
+    "opcodeDispatch": "reference/pokeemerald/src/battle_script_commands.c:404-411",
+    "selectorAndFlag": "reference/pokeemerald/include/constants/battle_script_commands.h:303-315,367-368",
+    "handler": "reference/pokeemerald/src/battle_script_commands.c:4700-4850",
+    "battlerSelector": "reference/pokeemerald/src/battle_util.c:694-735",
+    "volatileMasks": "reference/pokeemerald/include/constants/battle.h:140-158",
+    "effectScript": "reference/pokeemerald/data/battle_scripts_1.s:1694-1714",
+    "batonPassMove": "reference/pokeemerald/src/data/battle_moves.h:2941-2952",
+    "frontierLedybaSet": "reference/pokeemerald/src/data/battle_frontier/battle_frontier_mons.h:283-288",
+    "batonPassSwitchClear": "reference/pokeemerald/src/battle_main.c:3155-3228"
+  },
+  "sourceSha256": {
+    "battle_script_commands.c": "e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c",
+    "battle_scripts_1.s": "4ac3e610b68c11ef0f4e4c0fc62ddba7fda5a8400e43705428868978ec7551a6",
+    "battle_script.inc": "0a8e1c3bdf4c49d07b2e09ff8ab524812a5217b9735106e1b79b6be261a6db7e",
+    "battle_script_commands.h": "842cce6dd704b09b24a49abdca67ee7a8062a2e3a465e1b764fc63c0d230580f",
+    "battle_moves.h": "8b3d4d143b807807af97ce7288e0cc0ccdd55b6b64ac45824e35a549836b3a0c"
+  },
+  "instruction": {
+    "opcode": 79,
+    "opcodeHex": "0x4f",
+    "length": 6,
+    "operandWidths": [1, 4],
+    "layout": [
+      {"offset": 0, "width": 1, "meaning": "B_SCR_OP_JUMPIFCANTSWITCH"},
+      {"offset": 1, "width": 1, "meaning": "battle-script battler selector plus bit-7 escape-prevention bypass"},
+      {"offset": 2, "width": 4, "meaning": "little-endian branch pointer"}
+    ],
+    "ignoreEscapePreventionMask": 128,
+    "batonPassBattlerOperand": 129,
+    "batonPassSelectorAfterMask": 1,
+    "pc": {
+      "cannotSwitch": "load the pointer encoded at instruction bytes 2..5",
+      "canSwitch": "advance by 6 bytes"
+    }
+  },
+  "branchContract": {
+    "polarity": "branch exactly when the selected battler cannot switch",
+    "volatileGate": "without bit 7, STATUS2_WRAPPED, STATUS2_ESCAPE_PREVENTION, or STATUS3_ROOTED branches before party scanning",
+    "eligibleMon": "species is not SPECIES_NONE, is not an egg, HP is nonzero, and its party index is not one of the side's currently active battlers",
+    "topology": [
+      {"mode": "in-game partner", "range": "the selected battler's 3-slot MULTI_PARTY_SIZE half"},
+      {"mode": "multi", "range": "the selected trainer's 3-slot half, chosen by link flank or opponent battler"},
+      {"mode": "two opponents on opponent side", "range": "the opponent battler's PARTY_SIZE/2 half"},
+      {"mode": "ordinary singles/doubles", "range": "all six side-party slots, excluding both active side battlers; in singles both exclusions name the same battler"}
+    ],
+    "batonPass": "BattleScript_EffectBatonPass fails in Arena first, then encodes 0x80|BS_ATTACKER so wrapped, escape-prevention, and rooted do not block its party-availability check"
+  },
+  "repeatability": {
+    "runs": 2,
+    "comparison": "byte-identical full manifest.json",
+    "manifestSha256": [
+      "f9d042cc04725e38e0dd491e9abb920067ff6f7677419ed31d899765cdcbea93",
+      "f9d042cc04725e38e0dd491e9abb920067ff6f7677419ed31d899765cdcbea93"
+    ]
+  },
+  "scenario": {
+    "path": "tools/battle-lab/mechanic-baton-pass-success-off.json",
+    "sha256": "d2aa5b52f843d0eb235bec656255af0bd00ce37ea4b8eeee16ca4107b342bb52",
+    "builtPartyChecksumsValid": [true, true, true, true, true, true],
+    "captures": [
+      {
+        "frame": 0,
+        "sha256": "cb3f0360708c9866f028150cae3d30d4a5ac47ba9dc4184f43ecea4e800cf76c",
+        "rngValue": 1621732966,
+        "currentMove": 0,
+        "player": {"species": 165, "partyIndex": 0, "hp": 115, "maxHp": 115, "pp": [20,30,40,30], "status1": 0, "status2": 0, "status3": 0, "statStages": [6,6,6,6,6,6,6,6]},
+        "opponent": {"species": 129, "partyIndex": 0, "hp": 95, "maxHp": 95, "pp": [5,5,5,5]}
+      },
+      {
+        "frame": 200,
+        "sha256": "cec78cc9ec7f6726b6ce1d310b09658897af22f859a56bf23a7bf9bfce002add",
+        "rngValue": 1621732966,
+        "currentMove": 212,
+        "player": {"species": 165, "partyIndex": 0, "hp": 115, "maxHp": 115, "pp": [20,30,40,30], "status1": 0, "status2": 67108864, "status3": 0, "statStages": [6,6,6,6,6,6,6,6]},
+        "opponent": {"species": 129, "partyIndex": 0, "hp": 95, "maxHp": 95, "pp": [5,4,5,5]}
+      },
+      {
+        "frame": 416,
+        "sha256": "c48cd1bf9450044b0913b8382ae9ca4b6e8c717a52f855875ef677f2b5b9a518",
+        "rngValue": 1621732966,
+        "currentMove": 226,
+        "player": {"species": 165, "partyIndex": 0, "hp": 115, "maxHp": 115, "pp": [20,30,39,30], "status1": 0, "status2": 67108864, "status3": 0, "statStages": [6,6,6,6,6,6,6,6]},
+        "opponent": {"species": 129, "partyIndex": 0, "hp": 95, "maxHp": 95, "pp": [5,4,5,5]}
+      },
+      {
+        "frame": 650,
+        "sha256": "b485c654d758daa5e1cdba5129ab65f4d01ff531c3ccb5c6e7b4f4cf8e1033b4",
+        "rngValue": 1621732966,
+        "currentMove": 0,
+        "player": {"species": 1, "partyIndex": 1, "hp": 120, "maxHp": 120, "pp": [35,35,35,35], "status1": 0, "status2": 67108864, "status3": 0, "statStages": [6,6,6,6,6,6,6,6]},
+        "opponent": {"species": 129, "partyIndex": 0, "hp": 95, "maxHp": 95, "pp": [5,4,5,5]}
+      },
+      {
+        "frame": 750,
+        "sha256": "f4e1d201778a246f13d462d87c5052dd9e10373d9e788e88c29461d9b275c892",
+        "rngValue": 2210656548,
+        "currentMove": 0,
+        "player": {"species": 1, "partyIndex": 1, "hp": 120, "maxHp": 120, "pp": [35,35,35,35], "status1": 0, "status2": 67108864, "status3": 0, "statStages": [6,6,6,6,6,6,6,6]},
+        "opponent": {"species": 129, "partyIndex": 0, "hp": 95, "maxHp": 95, "pp": [5,4,5,5]}
+      }
+    ],
+    "playerPartyFinal": [
+      {"species": 165, "hp": 115, "maxHp": 115, "pp": [20,30,39,30], "status1": 0, "checksumValid": true},
+      {"species": 1, "hp": 120, "maxHp": 120, "pp": [35,35,35,35], "status1": 0, "checksumValid": true},
+      {"species": 4, "hp": 114, "maxHp": 114, "pp": [35,35,35,35], "status1": 0, "checksumValid": true}
+    ]
+  },
+  "boundedRemainder": "A no-bench branch was not staged: overrides.parties requires three complete healthy pre-battle Pokemon per side and forbids transient faint-state injection. Arena is outside the Factory mechanicLab contract. Source pins both failure routes; this trace honestly stages the escape-prevention bypass boundary and successful party switch."
+}
