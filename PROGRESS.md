@@ -15,7 +15,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 641 — [BOUNDED MAIN WORKER 2026-07-28 ~16:20] Frontier-tail row 5c Snatch source-complete
 
-- **State:** ready to commit; tree green at **425 files / 4661 tests**,
+- **State:** committed `42863c36`; tree green at **425 files / 4661 tests**,
   production build, OFF oracle info, and `git diff --check`. Census is exactly
   **210/214 effects, 351/355 moves, 275/276 distinct, 2955/2957 weighted**:
   assigned-baseline delta **+1/+1/+0/+0**; all **70** validations pass.
