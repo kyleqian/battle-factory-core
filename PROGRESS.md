@@ -15,6 +15,29 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 557 — [BOUNDED MAIN WORKER 2026-07-28 ~00:04] Wish executes delayed positional heal generically
+
+- **State:** committed `a325a3f`/`4b88f14`; tree green at **313 files / 3951
+  tests** and focused **105/105**. Production build, both-oracle freshness,
+  census regeneration, and `git diff --check` pass. Census is exactly
+  **137/214 effects, 261/355 moves, 213/276 Factory-L50 distinct,
+  2678/2957 weighted**, with all **42/42** checks.
+- **Did:** registered exact six-byte `0xd4` `B_SCR_OP_TRYWISH` setup/heal
+  modes with positional counter + original party-index ownership, pending and
+  full-HP branches, prepared wishing-mon identity, and minimum-one negative
+  half-max heal. `ENDTURN_WISH` now runs after screens/before weather in
+  battler order, decrements through fainted slots without dispatch, and runs
+  the genuine delayed-heal/full-HP scripts.
+- **Next:** supervisor verify this executable-frontier increment and select
+  the next finite source registration target; do not resume the retired
+  canonical Battle-2 march.
+- **Notes:** the generic two-turn Espeon/Tackle proof matches OFF HP
+  **140→123→106→140** and Wish PP **10→9→8**, including pending failure and
+  capped heal. No barrier/ratchet increase, recording import, scenario/tick/
+  render branch, animation-lane edit, DEFERRED item, oracle lifecycle action,
+  or PAPERCUT.
+
+---
 ## 556 — [SUPERVISOR VERIFY 2026-07-27 ~23:49] Sleep Talk accepted; Wish and Rollout evidence merged
 
 - **State:** reviewed union green at **312 files / 3945 tests**; production
@@ -56,25 +79,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Talk **10→9**, leaves chosen move as Sleep Talk, and skips the slower
   trainer action after the KO. No barrier/ratchet increase, recording import,
   presentation/animation edit, canonical Battle-2 work, or PAPERCUT.
-
----
-## 554 — [SUPERVISOR VERIFY 2026-07-27 ~23:25] Substitute accepted; Sleep Talk evidence merged
-
-- **State:** reviewed union green at **309 files / 3911 tests**; production
-  build, both-oracle freshness, and `git diff --check` pass. Census is
-  **135/214 effects, 259/355 moves, 211/276 Factory-L50 distinct,
-  2662/2957 weighted**.
-- **Did:** accepted `b179bd5`/`2c84860`: source-complete
-  `B_SCR_OP_SETSUBSTITUTE` matches the strict quarter-HP branches and its
-  generic two-turn proof preserves HP **155→117**, PP **10→9→8**, and the
-  live substitute. Merged `6791d53` after independently replaying the OFF
-  Sleep Talk scenario twice at manifest `6cc123e5…c3b`.
-- **Next:** implement paired `B_SCR_OP_TRYCHOOSESLEEPTALKMOVE` /
-  `B_SCR_OP_JUMPTOCALLEDMOVE`, including exact exclusions, retry RNG,
-  called-move targeting, direct no-return effect dispatch, and awake/all-
-  unusable/asleep-call terminal routes. Expected census is
-  **136/214, 260/355, 212/276, 2670/2957**.
-- **Notes:** the replay observes awake PP **10→9**, real Spore sleep, asleep
-  Sleep Talk PP **9→8**, called Fissure with its PP still **5**, and the KO.
-  Hidden selection/PC fields are source-pinned. No new barrier, recording
-  import, animation edit, DEFERRED item, or oracle lifecycle action.

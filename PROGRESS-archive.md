@@ -1,4 +1,26 @@
 ---
+## 554 — [SUPERVISOR VERIFY 2026-07-27 ~23:25] Substitute accepted; Sleep Talk evidence merged
+
+- **State:** reviewed union green at **309 files / 3911 tests**; production
+  build, both-oracle freshness, and `git diff --check` pass. Census is
+  **135/214 effects, 259/355 moves, 211/276 Factory-L50 distinct,
+  2662/2957 weighted**.
+- **Did:** accepted `b179bd5`/`2c84860`: source-complete
+  `B_SCR_OP_SETSUBSTITUTE` matches the strict quarter-HP branches and its
+  generic two-turn proof preserves HP **155→117**, PP **10→9→8**, and the
+  live substitute. Merged `6791d53` after independently replaying the OFF
+  Sleep Talk scenario twice at manifest `6cc123e5…c3b`.
+- **Next:** implement paired `B_SCR_OP_TRYCHOOSESLEEPTALKMOVE` /
+  `B_SCR_OP_JUMPTOCALLEDMOVE`, including exact exclusions, retry RNG,
+  called-move targeting, direct no-return effect dispatch, and awake/all-
+  unusable/asleep-call terminal routes. Expected census is
+  **136/214, 260/355, 212/276, 2670/2957**.
+- **Notes:** the replay observes awake PP **10→9**, real Spore sleep, asleep
+  Sleep Talk PP **9→8**, called Fissure with its PP still **5**, and the KO.
+  Hidden selection/PC fields are source-pinned. No new barrier, recording
+  import, animation edit, DEFERRED item, or oracle lifecycle action.
+
+---
 ## 552 — [SUPERVISOR VERIFY 2026-07-27 ~23:10] Destiny Bond terminal path accepted; Substitute evidence merged
 
 - **State:** reviewed union green at **307 files / 3898 tests**; focused
