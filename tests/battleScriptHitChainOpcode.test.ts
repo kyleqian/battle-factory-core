@@ -77,6 +77,7 @@ function battler(changes: Partial<BattleScriptRulesBattler> & { maxHP?: number }
     wrappedMove: changes.wrappedMove,
     wrappedBy: changes.wrappedBy,
     battlerPreventingEscape: changes.battlerPreventingEscape,
+    battlerWithSureHit: changes.battlerWithSureHit,
   });
 }
 
@@ -365,11 +366,11 @@ describe("production accuracycheck (Cmd_accuracycheck) dispatch", () => {
       expect(result.state.rng.calls).toBe(0);
     });
 
-    it("halts on STATUS3_ALWAYS_HITS (Lock-On, battlerWithSureHit unmodeled)", () => {
-      const rc = context(0, {}, {}, { status3: 1 << 3 });
+    it("bit without matching Lock-On ownership still performs the ordinary accuracy draw", () => {
+      const rc = context(0, {}, {}, { status3: 1 << 3, battlerWithSureHit: 1 });
       const { result } = stepFrom("BattleScript_HitFromAccCheck", rc, 1);
-      expect(result.kind).toBe("halted");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 1052 });
+      expect(result.kind).toBe("advanced");
+      expect(result.state.rng.calls).toBe(1);
     });
 
     it("halts when the target holds one of AbilityBattleEffects(ABILITYEFFECT_ABSORBING)'s three real switch cases on a hit (Volt Absorb/Water Absorb/Flash Fire unmodeled) but not any other ability (falls through that switch with no effect, per source)", () => {
@@ -432,11 +433,16 @@ describe("production accuracycheck (Cmd_accuracycheck) NO_ACC_CALC_CHECK_LOCK_ON
     expect(result.state.rulesContext.moveResultFlags & 1).toBe(0);
   });
 
-  it("(b) unsupported-branch: STATUS3_ALWAYS_HITS halts (Lock-On, battlerWithSureHit unmodeled -- provably unreachable today, never set by any production code)", () => {
-    const rc = context(0, {}, {}, { status3: 1 << 3 });
+  it("matching Lock-On ownership directly advances, while bit without identity still checks semi-invulnerability", () => {
+    const rc = context(0, {}, {}, { status3: (1 << 3) | (1 << 7), battlerWithSureHit: 0 });
     const { result } = stepAtProgramCounter(noAccCalcPc, rc, 1);
-    expect(result.kind).toBe("halted");
-    expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 1105 });
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.programCounter).toBe(noAccCalcPc + 1);
+    const mismatch = context(0, {}, {}, { status3: (1 << 3) | (1 << 7), battlerWithSureHit: 1 });
+    const second = stepAtProgramCounter(noAccCalcPc, mismatch, 1).result;
+    if (second.kind !== "advanced") throw new Error("expected advance");
+    expect(second.state.programCounter).toBe(labelPc("BattleScript_ButItFailed"));
   });
 });
 
@@ -3110,6 +3116,7 @@ describe("production cleareffectsonfaint (Cmd_cleareffectsonfaint) dispatch", ()
           stockpileCounter: 3,
           protected: 1,
           protectUses: 3,
+          battlerWithSureHit: 0,
         },
       );
       const { result } = stepAtProgramCounter(cleareffectsonfaintTargetPc, rc);
@@ -3132,6 +3139,7 @@ describe("production cleareffectsonfaint (Cmd_cleareffectsonfaint) dispatch", ()
       // battleScriptProtectlikeOpcode.ts's own field exists (previously a no-op, see
       // that file's history: this field simply didn't exist on the engine's battler state).
       expect(target.protectUses).toBe(0);
+      expect(target.battlerWithSureHit).toBe(0);
       expect(result.state.rulesContext.moveHistory.lastHitBy[1]).toBe(0xff);
       expect(result.state.events).toEqual([
         expect.objectContaining({ kind: "set-battler-status-data", battler: 1, status1: 0 }),
@@ -3197,6 +3205,31 @@ describe("production cleareffectsonfaint (Cmd_cleareffectsonfaint) dispatch", ()
     const otherResult = stepAtProgramCounter(cleareffectsonfaintTargetPc, otherOwner).result;
     if (otherResult.kind !== "advanced") throw new Error(`expected advance, got ${otherResult.kind}`);
     expect(otherResult.state.rulesContext.battlers[0].status2).toBe(1 << 26);
+  });
+
+  it("faint cleanup clears another battler's sure-hit marker only when the fainted battler owns it", () => {
+    const owned = context(
+      0,
+      { status3: 1 << 3, battlerWithSureHit: 1 },
+      {},
+      { hp: 0 },
+    );
+    const ownedResult = stepAtProgramCounter(cleareffectsonfaintTargetPc, owned).result;
+    if (ownedResult.kind !== "advanced") throw new Error("expected advance");
+    expect(ownedResult.state.rulesContext.battlers[0]).toMatchObject({
+      status3: 0,
+      battlerWithSureHit: 0,
+    });
+
+    const other = context(
+      0,
+      { status3: 1 << 3, battlerWithSureHit: 2 },
+      {},
+      { hp: 0 },
+    );
+    const otherResult = stepAtProgramCounter(cleareffectsonfaintTargetPc, other).result;
+    if (otherResult.kind !== "advanced") throw new Error("expected advance");
+    expect(otherResult.state.rulesContext.battlers[0].status3).toBe(1 << 3);
   });
 });
 

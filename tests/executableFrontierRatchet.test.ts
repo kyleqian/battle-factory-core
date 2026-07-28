@@ -117,7 +117,9 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // barrier is retired rather than moved.
   // 19 -> 18 (Family-B Cluster 3): FaintClearSetData's owner-sensitive Mean
   // Look release now reads battlerPreventingEscape instead of barriering.
-  ["src/engine/battleScriptHitChainOpcode.ts", 18],
+  // 18 -> 16 (Lock On / Mind Reader): both accuracy forms now apply the
+  // source's packed-status + battlerWithSureHit ownership predicate.
+  ["src/engine/battleScriptHitChainOpcode.ts", 16],
   ["src/engine/battleScriptAttackCancelerOpcode.ts", 4],
   ["src/engine/battleScriptMoveEndOpcode.ts", 7],
   ["src/engine/battleScriptJumpifbyteOpcode.ts", 1],
@@ -149,22 +151,19 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // GETSWITCHEDMONDATA/SWITCHINDATAUPDATE, SWITCHINANIM, HPTHRESHOLDS,
   // CANCELALLACTIONS, VARIOUS's RESET_PLAYER_FAINTED case, SWITCHINEFFECTS):
   // switchhandleorder's cases 0/1 (multi-battler collection / order-only, not
-  // this script's case 2/3); switchindataupdate's STATUS3_ALWAYS_HITS
-  // cross-battler clear (battlerWithSureHit identity, unmodeled);
-  // SwitchInClearSetData's
-  // unconditional STATUS2_WRAPPED clear and Baton Pass's opposing
-  // STATUS3_ALWAYS_HITS timer refresh add two doubles-only identity barriers
-  // (singles ownership is exact); switchinanim's BATTLE_TYPE_ARENA
+  // this script's case 2/3); SwitchInClearSetData's unconditional
+  // STATUS2_WRAPPED clear; switchinanim's BATTLE_TYPE_ARENA
   // point-init call (never set for Factory); various's every id other than
   // RESET_PLAYER_FAINTED (7); switchineffects's Truant switch-in-hack counter
   // set and its AbilityBattleEffects
   // (ABILITYEFFECT_ON_SWITCHIN) dispatch for the small closed set of trigger
-  // abilities. 8 total, none reached by the committed forced-switch fixtures;
+  // abilities. 6 total, none reached by the committed forced-switch fixtures;
   // the Spikes fixture now executes its shared path, while their other state
   // carries no trigger ability/item/escape/sure-hit/wrapped dependency.
   // 10 -> 9: Spikes damage now executes through the shared source scripts.
   // 9 -> 8: Mean Look release now compares battlerPreventingEscape.
-  ["src/engine/battleScriptSwitchinOpcode.ts", 8],
+  // 8 -> 6: Lock On clear/refresh now compares battlerWithSureHit.
+  ["src/engine/battleScriptSwitchinOpcode.ts", 6],
   // Primary-effect stat-change registration (docs/primary-stat-ground-truth.md):
   // Cmd_playanimation is narrowed to its B_ANIM_STATS_CHANGE arm (the only
   // animType BattleScript_EffectStatUp/EffectStatDown ever pass) -- any other
@@ -271,10 +270,9 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // subsystem Cmd_adjustnormaldamage/Cmd_adjustsetdamage already barrier on
   // -- a distinct call site, not a narrowing); its STATUS3_ALWAYS_HITS
   // Lock-On/Mind-Reader branch needs gDisableStructs[target].
-  // battlerWithSureHit (unmodeled, and per accuracycheck's own established
-  // finding, never actually set by any production code path). 2 total, both
-  // reachability-tested in tests/battleScriptTryKOOpcode.test.ts.
-  ["src/engine/battleScriptTryKOOpcode.ts", 2],
+  // Lock On ownership is now source-complete; only Focus Band remains. 1
+  // total, reachability-tested in tests/battleScriptTryKOOpcode.test.ts.
+  ["src/engine/battleScriptTryKOOpcode.ts", 1],
   // B_SCR_OP_FORCERANDOMSWITCH/SWITCHOUTABILITIES/RETURNTOBALL/FINISHACTION
   // registration (EFFECT_ROAR, docs/roar-multihit-registration-scout.md §4
   // rungs 10-14): Cmd_forcerandomswitch/Cmd_switchoutabilities/

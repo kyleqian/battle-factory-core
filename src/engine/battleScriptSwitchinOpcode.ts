@@ -329,10 +329,9 @@ function createGetswitchedmondataOpcodeHandler(
  * existing Baton Pass branch carries both Perish Song timer fields); clears the
  * `STATUS2_INFATUATED_WITH(battler)` bit on every other battler exactly like
  * `cleareffectsonfaint`'s own precedent (`battleScriptHitChainOpcode.ts`).
- * `STATUS2_ESCAPE_PREVENTION`/`STATUS3_ALWAYS_HITS` cross-battler clears need
- * `battlerPreventingEscape`/`battlerWithSureHit` identity this engine does
- * not model -- named barriers, gated on the bit actually being set on some
- * other battler (never true for a plain KO switch-in, so unreached here).
+ * Cross-battler escape-prevention and sure-hit cleanup compare their durable
+ * DisableStruct owner identities; Baton Pass carries the incoming identities
+ * and refreshes an opposing lock owned by the departing battler.
  * The party item is restored unless this party slot's durable Knock Off bit
  * suppresses it; moves/PP are rebuilt from the same controller payload.
  */
@@ -353,20 +352,6 @@ function createSwitchindataupdateOpcodeHandler(
     const isBatonPass =
       rules.currentMoveEffect === BATTLE_SCRIPT_EFFECT_BATON_PASS;
 
-    if (!isBatonPass) {
-      for (let i = 0; i < battlersCount; i += 1) {
-        if (i === battler) continue;
-        const otherStatus3 = rules.battlers[i as 0 | 1 | 2 | 3].status3;
-        if ((otherStatus3 & STATUS3_ALWAYS_HITS) !== 0) {
-          return unsupportedBranch(
-            context,
-            `SwitchInClearSetData's STATUS3_ALWAYS_HITS cross-battler clear (battler ${i}) needs `
-              + "gDisableStructs[battler].battlerWithSureHit identity, not modeled here",
-            3166,
-          );
-        }
-      }
-    }
     for (let i = 0; i < battlersCount; i += 1) {
       if (i === battler) continue;
       const other = rules.battlers[i as 0 | 1 | 2 | 3];
@@ -379,19 +364,6 @@ function createSwitchindataupdateOpcodeHandler(
           `SwitchInClearSetData's STATUS2_WRAPPED cross-battler clear (battler ${i}) needs `
             + "gBattleStruct->wrappedBy identity outside singles",
           3199,
-        );
-      }
-      if (
-        isBatonPass
-        && battlersCount !== 2
-        && other.side !== active.side
-        && (other.status3 & STATUS3_ALWAYS_HITS) !== 0
-      ) {
-        return unsupportedBranch(
-          context,
-          `SwitchInClearSetData's Baton Pass STATUS3_ALWAYS_HITS refresh (battler ${i}) needs `
-            + "gDisableStructs[battler].battlerWithSureHit identity outside singles",
-          3180,
         );
       }
     }
@@ -466,6 +438,7 @@ function createSwitchindataupdateOpcodeHandler(
           usedTauntedMove: 0 as const,
           usedImprisonedMove: 0 as const,
           battlerPreventingEscape: isBatonPass ? candidate.battlerPreventingEscape : 0,
+          battlerWithSureHit: isBatonPass ? candidate.battlerWithSureHit : 0,
           isFirstTurn: 2,
         });
       }
@@ -484,15 +457,21 @@ function createSwitchindataupdateOpcodeHandler(
       ) >>> 0;
       const refreshesSureHit =
         isBatonPass
-        && battlersCount === 2
         && candidate.side !== active.side
-        && (candidate.status3 & STATUS3_ALWAYS_HITS) !== 0;
+        && (candidate.status3 & STATUS3_ALWAYS_HITS) !== 0
+        && candidate.battlerWithSureHit === battler;
+      const clearsSureHit =
+        !isBatonPass
+        && (candidate.status3 & STATUS3_ALWAYS_HITS) !== 0
+        && candidate.battlerWithSureHit === battler;
       const status3 = refreshesSureHit
         ? (
           (candidate.status3 & ~STATUS3_ALWAYS_HITS)
           | STATUS3_ALWAYS_HITS_TURN_2
         ) >>> 0
-        : candidate.status3;
+        : clearsSureHit
+          ? (candidate.status3 & ~STATUS3_ALWAYS_HITS) >>> 0
+          : candidate.status3;
       return status2 === candidate.status2 && status3 === candidate.status3
         ? candidate
         : Object.freeze({
@@ -500,6 +479,7 @@ function createSwitchindataupdateOpcodeHandler(
             status2,
             status3,
             ...(clearsEscapePrevention ? { battlerPreventingEscape: 0 as BattleScriptBattlerId } : {}),
+            ...(clearsSureHit ? { battlerWithSureHit: 0 as BattleScriptBattlerId } : {}),
           });
     }) as unknown as BattleScriptRulesBattlers;
 

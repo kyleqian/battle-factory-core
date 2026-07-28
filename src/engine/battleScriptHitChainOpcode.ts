@@ -875,12 +875,8 @@ function checkWonderGuardAndLevitate(
  * doc's own §0 opcode census marked this opcode ID "[registered]" without
  * catching that this specific operand form was still unhandled -- verified
  * against source this session, not assumed). Computes NO accuracy roll at
- * all: either an unconditional sure-hit (Lock-On/Mind-Reader,
- * `STATUS3_ALWAYS_HITS` -- barriered here exactly like the `ACC_CURR_MOVE`
- * branch below, and for the same reason: `gDisableStructs.battlerWithSureHit`
- * is not modeled. Provably unreachable today regardless, since
- * `battleScriptSwitchinOpcode.ts`'s own read-only precedent confirms no
- * production code ever sets `STATUS3_ALWAYS_HITS`), a semi-invulnerable miss
+ * all: either an identity-qualified sure-hit (Lock-On/Mind-Reader), a
+ * semi-invulnerable miss
  * (a bare jump to the fail label -- source's own `JumpIfMoveAffectedByProtect`
  * is never reached down this sub-branch, so no `MOVE_RESULT_MISSED` flag or
  * `missType` is set here, unlike the Protect-gate branch below), or
@@ -900,14 +896,12 @@ function accuracycheckNoAccCalc(
   const target = requireBattlerRole(rulesContext, "target");
   const targetBattler = rulesContext.battlers[target];
 
-  if (checksLockOn && (targetBattler.status3 & BATTLE_SCRIPT_STATUS3_ALWAYS_HITS) !== 0) {
-    return unsupportedBranch(
-      context,
-      "AccuracyCalcHelper's STATUS3_ALWAYS_HITS Lock-On/Mind-Reader sure-hit branch needs "
-        + "gDisableStructs[target].battlerWithSureHit, which this engine does not model yet",
-      "battle_script_commands.c",
-      1105,
-    );
+  if (
+    checksLockOn
+    && (targetBattler.status3 & BATTLE_SCRIPT_STATUS3_ALWAYS_HITS) !== 0
+    && targetBattler.battlerWithSureHit === attacker
+  ) {
+    return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }));
   }
 
   const semiInvulnerableMask = (
@@ -991,14 +985,11 @@ export const accuracycheckOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptR
     return jumpToMissTarget(context, withFlags, attacker, target, context.state.rng);
   }
 
-  if ((targetBattler.status3 & BATTLE_SCRIPT_STATUS3_ALWAYS_HITS) !== 0) {
-    return unsupportedBranch(
-      context,
-      "AccuracyCalcHelper's STATUS3_ALWAYS_HITS Lock-On/Mind-Reader sure-hit branch needs "
-        + "gDisableStructs[target].battlerWithSureHit, which this engine does not model yet",
-      "battle_script_commands.c",
-      1052,
-    );
+  if (
+    (targetBattler.status3 & BATTLE_SCRIPT_STATUS3_ALWAYS_HITS) !== 0
+    && targetBattler.battlerWithSureHit === attacker
+  ) {
+    return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }));
   }
 
   let hitMarker = rulesContext.hitMarker;
@@ -4167,6 +4158,7 @@ function createCleareffectsonfaintOpcodeHandler(
           protected: 0 as const,
           protectUses: 0,
           battlerPreventingEscape: 0,
+          battlerWithSureHit: 0,
         });
       }
       // FaintClearSetData (battle_main.c:3281): other battlers wrapped BY the
@@ -4175,18 +4167,26 @@ function createCleareffectsonfaintOpcodeHandler(
       const preventedByActive =
         (candidate.status2 & STATUS2_ESCAPE_PREVENTION) !== 0
         && candidate.battlerPreventingEscape === active;
+      const sureHitByActive =
+        (candidate.status3 & BATTLE_SCRIPT_STATUS3_ALWAYS_HITS) !== 0
+        && candidate.battlerWithSureHit === active;
       const status2 = (
         candidate.status2
         & ~infatuationBit
         & (wrappedByActive ? ~STATUS2_WRAPPED_MASK : ~0)
         & (preventedByActive ? ~STATUS2_ESCAPE_PREVENTION : ~0)
       ) >>> 0;
-      return status2 === candidate.status2
+      const status3 = sureHitByActive
+        ? (candidate.status3 & ~BATTLE_SCRIPT_STATUS3_ALWAYS_HITS) >>> 0
+        : candidate.status3;
+      return status2 === candidate.status2 && status3 === candidate.status3
         ? candidate
         : Object.freeze({
             ...candidate,
             status2,
+            status3,
             ...(preventedByActive ? { battlerPreventingEscape: 0 as BattleScriptBattlerId } : {}),
+            ...(sureHitByActive ? { battlerWithSureHit: 0 as BattleScriptBattlerId } : {}),
           });
     }) as unknown as BattleScriptRulesBattlers;
 

@@ -56,6 +56,7 @@ function battler(changes: Partial<BattleScriptRulesBattler> = {}): BattleScriptR
     level: changes.level ?? 50,
     friendship: changes.friendship ?? 0,
     partyIndex: changes.partyIndex ?? 0,
+    battlerWithSureHit: changes.battlerWithSureHit,
   } as BattleScriptRulesBattler);
 }
 
@@ -195,12 +196,20 @@ describe("production tryKO (Cmd_tryKO) dispatch", () => {
       expect(result.kind).not.toBe("halted");
     });
 
-    it("halts on the target's STATUS3_ALWAYS_HITS (Lock-On/Mind-Reader, gDisableStructs.battlerWithSureHit unmodeled)", () => {
+    it("matching Lock-On ownership skips the OHKO draw; bit without matching identity still draws", () => {
       const STATUS3_ALWAYS_HITS = (1 << 3) | (1 << 4); // battleScriptSourceConstants.ts BATTLE_SCRIPT_STATUS3_ALWAYS_HITS
-      const rc = context(0, {}, { status3: STATUS3_ALWAYS_HITS });
-      const result = stepAtTryKO(rc);
-      expect(result.kind).toBe("halted");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 7531 });
+      const owned = stepAtTryKO(context(0, {}, {
+        status3: STATUS3_ALWAYS_HITS,
+        battlerWithSureHit: 0,
+      }));
+      if (owned.kind !== "advanced") throw new Error("expected advance");
+      expect(owned.state.rng.calls).toBe(0);
+      const mismatch = stepAtTryKO(context(0, {}, {
+        status3: STATUS3_ALWAYS_HITS,
+        battlerWithSureHit: 1,
+      }));
+      if (mismatch.kind !== "advanced") throw new Error("expected advance");
+      expect(mismatch.state.rng.calls).toBe(1);
     });
   });
 
