@@ -80,6 +80,7 @@ import {
   calculateAccuracy,
   calculateBaseDamage,
   CRITICAL_HIT_CHANCE_ONE_IN,
+  getCriticalHitChanceStage,
   isTypePhysical,
   rollAccuracyHits,
   rollIsCriticalHit,
@@ -1179,16 +1180,21 @@ export const critcalcOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesC
   const moveRow = requireMoveRow(rulesContext.currentMove);
 
   const holdEffectId = resolveBattleScriptBattlerHoldEffect(rulesContext, attacker);
-  let critChance = 0;
-  if ((attackerBattler.status2 & BATTLE_SCRIPT_STATUS2_FOCUS_ENERGY) !== 0) critChance += 2;
-  if (moveRow.effect === "EFFECT_HIGH_CRITICAL") critChance += 1;
-  if (moveRow.effect === "EFFECT_SKY_ATTACK") critChance += 1;
-  if (moveRow.effect === "EFFECT_BLAZE_KICK") critChance += 1;
-  if (moveRow.effect === "EFFECT_POISON_TAIL") critChance += 1;
-  if (holdEffectId === HOLD_EFFECT_ID_SCOPE_LENS) critChance += 1;
-  if (holdEffectId === HOLD_EFFECT_ID_LUCKY_PUNCH && attackerBattler.species === SPECIES_CHANSEY) critChance += 2;
-  if (holdEffectId === HOLD_EFFECT_ID_STICK && attackerBattler.species === SPECIES_FARFETCHD) critChance += 2;
-  if (critChance >= CRITICAL_HIT_CHANCE_ONE_IN.length) critChance = CRITICAL_HIT_CHANCE_ONE_IN.length - 1;
+  const attackerHoldEffect = holdEffectId === HOLD_EFFECT_ID_SCOPE_LENS
+    ? "HOLD_EFFECT_SCOPE_LENS"
+    : holdEffectId === HOLD_EFFECT_ID_LUCKY_PUNCH
+      ? "HOLD_EFFECT_LUCKY_PUNCH"
+      : holdEffectId === HOLD_EFFECT_ID_STICK
+        ? "HOLD_EFFECT_STICK"
+        : null;
+  const critChance = getCriticalHitChanceStage({
+    focusEnergy:
+      (attackerBattler.status2 & BATTLE_SCRIPT_STATUS2_FOCUS_ENERGY) !== 0,
+    moveEffect: moveRow.effect,
+    attackerHoldEffect,
+    isChansey: attackerBattler.species === SPECIES_CHANSEY,
+    isFarfetchd: attackerBattler.species === SPECIES_FARFETCHD,
+  });
 
   const immune = targetBattler.ability === ABILITY_BATTLE_ARMOR
     || targetBattler.ability === ABILITY_SHELL_ARMOR

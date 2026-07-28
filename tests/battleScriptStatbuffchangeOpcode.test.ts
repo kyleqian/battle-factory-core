@@ -315,8 +315,11 @@ describe("primary-effect stat-change route (Cmd_statbuffchange + SETGRAPHICALSTA
       expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 4011 });
     });
 
-    it("Cmd_jumpifstatus2 halts on a status2 value outside the registered set (SUBSTITUTE/CONFUSION/MULTIPLETURNS)", () => {
-      const REGISTERED = new Set(["STATUS2_SUBSTITUTE", "STATUS2_CONFUSION", "STATUS2_MULTIPLETURNS"]);
+    it("Cmd_jumpifstatus2 halts on a status2 value outside the registered set (SUBSTITUTE/CONFUSION/MULTIPLETURNS/FOCUS_ENERGY)", () => {
+      const REGISTERED = new Set([
+        "STATUS2_SUBSTITUTE", "STATUS2_CONFUSION",
+        "STATUS2_MULTIPLETURNS", "STATUS2_FOCUS_ENERGY",
+      ]);
       const found = program.instructions.find(
         (i) => i.opcodeName === "B_SCR_OP_JUMPIFSTATUS2" && !REGISTERED.has(i.operands[1]?.expression ?? ""),
       );

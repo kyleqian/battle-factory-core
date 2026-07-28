@@ -281,6 +281,38 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     expect(updated.ability).toBe(ABILITY_GUTS);
   });
 
+  it("switchindataupdate clears Focus Energy ordinarily and retains it through the existing Baton Pass mask", () => {
+    const STATUS2_FOCUS_ENERGY = 1 << 20;
+    const STATUS2_TORMENT = 1 << 31;
+    const source = {
+      battlers: [
+        battler({ side: 0, species: URSARING, types: ["TYPE_NORMAL", "TYPE_NORMAL"] }),
+        battler({
+          side: 1, species: SUNKERN, hp: 0,
+          types: ["TYPE_GRASS", "TYPE_GRASS"], partyIndex: 2,
+          ability: ABILITY_GUTS,
+          status2: (STATUS2_FOCUS_ENERGY | STATUS2_TORMENT) >>> 0,
+        }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+    };
+    const ordinary = stepAtProgramCounter(
+      SWITCHINDATAUPDATE_PC,
+      context(source),
+    ).result;
+    if (ordinary.kind !== "advanced") throw new Error("expected ordinary advance");
+    expect(ordinary.state.rulesContext.battlers[1].status2).toBe(0);
+
+    const batonPass = stepAtProgramCounter(
+      SWITCHINDATAUPDATE_PC,
+      context({ ...source, currentMove: 226 }),
+    ).result;
+    if (batonPass.kind !== "advanced") throw new Error("expected Baton Pass advance");
+    expect(batonPass.state.rulesContext.battlers[1].status2)
+      .toBe(STATUS2_FOCUS_ENERGY);
+  });
+
   it("switchindataupdate: clears STATUS2_INFATUATED_WITH(battler) on the other battler", () => {
     const infatuatedBit = 1 << (16 + 1); // STATUS2_INFATUATED_WITH(battler 1)
     const rc = context({
