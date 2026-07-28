@@ -3,18 +3,24 @@
 ## MOVE_THUNDER_WAVE staged; ANIM_TAG_SPARK source/evidence checkpoint (2026-07-28)
 
 **Verdict:** `MOVE_THUNDER_WAVE` is staged, not partial or exact. Complete legal
-Scene-ON FLAAFFY/SHUCKLE mechanic-lab evidence captures its source-owned
-load/body/cleanup at **334/334** frames **39-372** in player-back and
-opponent-front orientations. Each fresh local-mGBA output reproduced
-byte-identically twice (player `27725cc2…b30a3`, opponent `c54b9739…1b8c7`).
-Coverage is **64 exact / 0 partial / 1 staged / 212 unsupported**.
+Scene-ON FLAAFFY/SHUCKLE mechanic-lab evidence captures the broader
+`currentMove=86` window at **334/334** frames **39-372** in both orientations.
+Live script state proves the narrower source load/body/cleanup window at
+**120/120** frames **79-198** player-back and **83-202** opponent-front,
+including first inactive offset-110 teardown. Each complete output and raw-RGB
+stream reproduced byte-identically twice (player `c4fe8bb3…045fd` /
+`aaa201bb…1c5a5`, opponent `aa1cc413…7cd57` / `e97ad2bd…0236e`).
+Coverage is **64 exact / 0 partial / 1 staged / 211 unsupported**.
 
 **Source/evidence:** `Move_THUNDER_WAVE` loads SPARK/SPARK_2/SPARK_H, fades
 the field, creates ElectricBolt, plays its target-panned cue, then creates the
 three staggered target ThunderWave bands before the inverse fade/cleanup. The
-probe records source component state, tasks/sprites, OAM/matrices,
-faded/unfaded/hardware palettes, blend registers, both audio players/pans, and
-raw RGB over every current-move frame. `ANIM_TAG_SPARK` and inseparable
+probe records the active flag, source pointer/offset, wait counter, complete
+active task identities/bodies, software sprites, OAM/matrices, loaded tags,
+faded/unfaded/hardware palettes, registers, both audio players/pans, and raw
+RGB over every current-move frame. It excludes the later, distinct
+`Task_DoStatusAnimation` interval from the source move window.
+`ANIM_TAG_SPARK` and inseparable
 SPARK_H are byte-preserving source-extracted with a regenerating receipt;
 SPARK_2 remains the existing generated shared asset.
 
