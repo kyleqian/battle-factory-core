@@ -1,0 +1,54 @@
+{
+  "schema": "minimize-stomp-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "sourceSha256": {
+    "battle_script_commands.c": "e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c",
+    "battle_scripts_1.s": "4ac3e610b68c11ef0f4e4c0fc62ddba7fda5a8400e43705428868978ec7551a6",
+    "battle_script.inc": "0a8e1c3bdf4c49d07b2e09ff8ab524812a5217b9735106e1b79b6be261a6db7e",
+    "battle_script_commands.h": "842cce6dd704b09b24a49abdca67ee7a8062a2e3a465e1b764fc63c0d230580f",
+    "constants_battle.h": "bba2f9d9b3d98fa01b5f0a8f7dede9f2f0be5617c735242b741a7e0c8e4a5d1e",
+    "battle_main.c": "ee79b86ff0f681ab783b363135fd84d050e7123bea2a77c5530f2c7ddc8b8408",
+    "battle_moves.h": "8b3d4d143b807807af97ce7288e0cc0ccdd55b6b64ac45824e35a549836b3a0c",
+    "battle_frontier_mons.h": "557c1a97247cbb84357b99035fb11cf0bfe45abe8393a0992fe8146bfc51f67f",
+    "battle_frontier_mons.h.constants": "00fb47e144978d3a24a304047f5463217ac7b535ee6f8719e2adf47cc592387a"
+  },
+  "instruction": {
+    "opcode": 199,
+    "opcodeHex": "0xc7",
+    "length": 1,
+    "operandWidths": [],
+    "pc": "gBattlescriptCurrInstr++",
+    "owner": "gStatuses3[gBattlerAttacker]",
+    "bit": "STATUS3_MINIMIZED (1 << 8)",
+    "gate": "gHitMarker & HITMARKER_OBEYS"
+  },
+  "sourceBehavior": {
+    "effectOrder": "BattleScript_EffectMinimize: attackcanceler, setminimize, setstatchanger STAT_EVASION +1, then BattleScript_EffectStatUpAfterAtkCanceler (attackstring, ppreduce, statbuffchange).",
+    "maxEvasion": "setminimize executes before statbuffchange. At MAX_STAT_STAGE, ChangeStatBuffs selects B_MSG_STAT_WONT_INCREASE and STAT_CHANGE_ALLOW_PTR sets MOVE_RESULT_MISSED; Cmd_setminimize has no rollback, so its already-written bit remains until a later lifecycle clear.",
+    "lifetime": "No source reader clears STATUS3_MINIMIZED alone. Battle initialization clears every gStatuses3 slot; ordinary switching and FaintClearSetData assign the active slot to zero. Baton Pass masks gStatuses3 to LEech Seed/Always Hits/Perish Song/Rooted/Mud Sport/Water Sport only, so it clears MINIMIZED while Cmd_switchindataupdate preserves the old statStages before that mask.",
+    "stomp": "BattleScript_EffectStomp tests STATUS3_MINIMIZED on BS_TARGET; if present it writes sDMG_MULTIPLIER = 2 and then enters BattleScript_FlinchEffect. If absent it enters the same flinch route without that write."
+  },
+  "moves": {
+    "minimize": {"id": 107, "effect": "EFFECT_MINIMIZE", "pp": 20, "target": "MOVE_TARGET_USER"},
+    "stomp": {"id": 23, "effect": "EFFECT_FLINCH_MINIMIZE_HIT", "power": 65, "accuracy": 100, "pp": 20}
+  },
+  "frontierCarriers": {
+    "minimize": {"setId": 128, "name": "FRONTIER_MON_STARYU", "level50Eligible": true, "species": 120, "moves": [61, 107, 129, 113], "item": "BATTLE_FRONTIER_ITEM_SHELL_BELL", "nature": "NATURE_QUIRKY"},
+    "stomp": {"setId": 235, "name": "FRONTIER_MON_GIRAFARIG_1", "level50Eligible": true, "species": 203, "moves": [60, 23, 273, 285], "item": "BATTLE_FRONTIER_ITEM_PETAYA_BERRY", "nature": "NATURE_QUIET"}
+  },
+  "case": {
+    "id": "factory-staryu-minimize-then-girafarig-stomp",
+    "scenario": "tools/battle-lab/mechanic-minimize-staryu-girafarig-stomp-off.json",
+    "scenarioSha256": "0fd8c08d6e0ae7d98ff388395111990e37045efe9c7088e17b1b45d8eff08a55",
+    "repeatability": {"runs": 2, "comparison": "byte-identical full manifest.json", "manifestSha256": "67c617f7e38f3ce045008e9ed8b78dd8b0fb1918f8a23fa55fd86fd08c842977"},
+    "builtPartyChecksumsValid": [true, true, true, true, true, true],
+    "captures": [
+      {"frame": 0, "framebufferSha256": "8e6f9882e1dcf97802165f0a2ff6e9923a91b01125db5e6cd54890102135e457", "rngValue": 1046647018, "currentMove": 0, "player": {"hp": 105, "maxHp": 105, "pp": [20,20,20,30], "stats": {"attack":58,"defense":75,"speed":150,"spAttack":122,"spDefense":75}, "evasionStage": 6, "status3": 0}, "opponent": {"hp":177,"maxHp":177,"pp":[20,20,20,20],"stats":{"attack":132,"defense":76,"speed":90,"spAttack":121,"spDefense":85},"status3":0}},
+      {"frame": 200, "framebufferSha256": "32bb661d420f9b83e9eac608ca001f1c2b0c30a79571f68ad6ff912acf9394ae", "rngValue": 1046647018, "currentMove": 107, "player": {"hp":105,"maxHp":105,"pp":[20,19,20,30],"evasionStage":7,"status3":256}, "opponent":{"hp":177,"maxHp":177,"pp":[20,20,20,20],"status3":0}},
+      {"frame": 450, "framebufferSha256": "e685b353e637832f456dd950e4622a0f020e6b5c63804b28bcd2ac772b75497b", "rngValue": 2463073799, "currentMove": 23, "player": {"hp":105,"maxHp":105,"pp":[20,19,20,30],"evasionStage":7,"status3":256}, "opponent":{"hp":177,"maxHp":177,"pp":[20,20,19,20],"status3":0}},
+      {"frame": 600, "framebufferSha256": "5f6353e415951ccd3aa0fbb8396672ca2f574be2c0ae1ad600626a06d7952010", "rngValue": 765236078, "currentMove": 23, "player": {"hp":0,"maxHp":105,"pp":[20,19,20,30],"evasionStage":7,"status3":256}, "opponent":{"hp":177,"maxHp":177,"pp":[20,20,19,20],"status3":0}},
+      {"frame": 816, "framebufferSha256": "4690fefffb148ae345c3250f394ee93d94dc4ca878d63d7b79fbbc90925b5c46", "rngValue": 765236078, "currentMove": 23, "player": {"hp":0,"maxHp":105,"pp":[20,19,20,30],"evasionStage":6,"status3":0}, "opponent":{"hp":177,"maxHp":177,"pp":[20,20,19,20],"status3":0}}
+    ]
+  },
+  "boundedRemainder": "The OFF manifest observes a real MINIMIZE PP/evasion/status3 change, a later real STOMP selection, its HP result, and eventual faint cleanup. It does not expose script PC, gHitMarker, attacker/target globals, sDMG_MULTIPLIER, damage rolls, or the Baton Pass mask at runtime; those semantics are source-pinned. The single post-Minimize STOMP result is not compared to another damage roll and is not itself proof of a numeric multiplier. This fixture registers evidence only and adds no production behavior."
+}
