@@ -1,0 +1,60 @@
+{
+  "schema": "refresh-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "instruction": {
+    "opcode": 205,
+    "opcodeHex": "0xcd",
+    "length": 5,
+    "operands": [{"width": 4, "encoding": "little-endian relocation pointer", "value": "failure script target"}],
+    "pc": {"success": "gBattlescriptCurrInstr += 5", "failure": "gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + 1)"},
+    "owner": "gBattleMons[gBattlerAttacker].status1",
+    "acceptedStatusMask": ["STATUS1_POISON", "STATUS1_BURN", "STATUS1_PARALYSIS", "STATUS1_TOXIC_POISON"],
+    "success": {"status1": 0, "activeBattler": "gBattlerAttacker", "controller": "BtlController_EmitSetMonData(B_COMM_TO_CONTROLLER, REQUEST_STATUS_BATTLE, 0, 4, &gBattleMons[gActiveBattler].status1)", "marksController": true},
+    "localRngCalls": 0
+  },
+  "sourceSha256": {
+    "battle_script_commands.c": "e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c",
+    "battle_scripts_1.s": "4ac3e610b68c11ef0f4e4c0fc62ddba7fda5a8400e43705428868978ec7551a6",
+    "battle_script.inc": "0a8e1c3bdf4c49d07b2e09ff8ab524812a5217b9735106e1b79b6be261a6db7e",
+    "battle_script_commands.h": "842cce6dd704b09b24a49abdca67ee7a8062a2e3a465e1b764fc63c0d230580f",
+    "battle_move_effects.h": "32192c0d0014b5a63edb5b34b8d8475739891eaee66dc610a45d30574879b00e",
+    "moves.h": "d32746c9ad3ed1bbfbb93712f13e01ab1c43f48a78f3605ef9db5095e8d19d27",
+    "battle.h": "bba2f9d9b3d98fa01b5f0a8f7dede9f2f0be5617c735242b741a7e0c8e4a5d1e",
+    "battle_controllers.h": "f3118ef3597300334ad3fe0809fe9405882348d9f2b3fc4dd54c4b5cf5742e69",
+    "battle_controllers.c": "019dfa02cb7d3219d1b3cb034053bbb76008220fd51d8b79d3eed809ff00dfb3",
+    "battle_util.c": "2ba9ee4efe913effa119c8342281745f481910ca1b20cd76b470673062a45fd5",
+    "battle_util.h": "e0df6824026d8c4ae5d024be577638749fa5923bab6558ace74e4e5578a9e48a",
+    "battle_moves.h": "8b3d4d143b807807af97ce7288e0cc0ccdd55b6b64ac45824e35a549836b3a0c",
+    "battle_frontier_mons.h": "557c1a97247cbb84357b99035fb11cf0bfe45abe8393a0992fe8146bfc51f67f",
+    "battle_frontier_mons.h.constants": "00fb47e144978d3a24a304047f5463217ac7b535ee6f8719e2adf47cc592387a",
+    "battle_factory.c": "7762bf366045ed91a3c280a7e4d20ccc9df9bba305c529ad6b24df2250a072f6"
+  },
+  "effect": {
+    "id": 193,
+    "script": ["attackcanceler", "attackstring", "ppreduce", "cureifburnedparalyzedorpoisoned BattleScript_ButItFailed", "attackanimation", "waitanimation", "printstring STRINGID_PKMNSTATUSNORMAL", "waitmessage B_WAIT_TIME_LONG", "updatestatusicon BS_ATTACKER", "goto BattleScript_MoveEnd"],
+    "move": {"id": 287, "pp": 20, "power": 0, "accuracy": 100, "target": "MOVE_TARGET_USER", "priority": 0, "flags": ["FLAG_SNATCH_AFFECTED"]},
+    "failureAfterPp": true
+  },
+  "lifecycle": {
+    "activeOwnership": "the opcode writes the active attacker BattlePokemon status1 to zero",
+    "persistentPartySync": "the source emits a four-byte REQUEST_STATUS_BATTLE SetMonData request for active attacker party slot 0; the player controller's REQUEST_STATUS_BATTLE writes MON_DATA_STATUS",
+    "controllerBlocking": "the source marks the attacker for controller execution; later updatestatusicon returns while gBattleControllerExecFlags is nonzero, then emits attacker status1/status2 and marks that controller",
+    "unsupportedStatuses": "healthy, sleep, and freeze take the pointer failure route; the command does not alter status or emit the SetMonData request on that route"
+  },
+  "frontierCarrier": {"setId": 227, "name": "FRONTIER_MON_CHANSEY_1", "level50Eligible": true, "species": 113, "moves": [118,287,111,107], "item": 142, "itemTableId": "BATTLE_FRONTIER_ITEM_SITRUS_BERRY", "nature": 7, "evs": {"hp":0,"attack":0,"defense":255,"speed":0,"spAttack":0,"spDefense":255}},
+  "case": {
+    "scenario": "tools/battle-lab/mechanic-refresh-chansey-toxic-off.json",
+    "scenarioSha256": "727c9744ad636eee9e405fb580f80943704934a0be242dc470471f781710ca52",
+    "repeatability": {"runs":2,"comparison":"byte-identical full manifest.json","manifestSha256":"12571c447d03ec9ca1a71fd55c7715862d2c226539404571f307b96522a68012"},
+    "builtPartyChecksumsValid": [true,true,true,true,true,true],
+    "observed": {
+      "initialHealthy": {"frame":0,"sha256":"de1ba07a572523933430182a075f40cebdd4a65fab20c970f8dd5202501d9320","rngValue":3034451114,"currentMove":0,"player":{"hp":325,"pp":[10,20,40,20],"status1":0},"persistentStatus1":0},
+      "healthyFailureAfterPp": {"frame":100,"sha256":"0bd411528739afc6aa699ac4e6d3255bf0325a3b2c164331ae4a51a04e88ded2","rngValue":3034451114,"currentMove":287,"player":{"hp":325,"pp":[10,19,40,20],"status1":0},"persistentStatus1":0},
+      "realToxicLanded": {"frame":300,"sha256":"6287d06a5a54466e9ee3dedfda7a8b84783079330a631829a3e809cfdfe9e0c4","rngValue":2682491093,"currentMove":92,"player":{"hp":325,"pp":[10,19,40,20],"status1":128},"persistentStatus1":128},
+      "toxicBeforeRefresh": {"frame":750,"sha256":"9f0975435e88fdaf211ef3e9d25d08379b08fbc5484b7bc3988dfe4cb8677950","rngValue":786441859,"currentMove":287,"player":{"hp":305,"pp":[10,19,40,20],"status1":384},"persistentStatus1":128},
+      "toxicSuccess": {"frame":775,"sha256":"d0ee72d38de60e6d4cbe7f5d920160f44a782c2744f9e9ebdbc329433e181600","rngValue":786441859,"currentMove":287,"player":{"hp":305,"pp":[10,18,40,20],"status1":0},"persistentStatus1":0},
+      "successHold": {"frame":900,"sha256":"362df57a3ecab8c6d0b118ea9dae79f4df74e85f76e3de7d02e4f895d3a75a9e","rngValue":786441859,"currentMove":287,"player":{"hp":305,"pp":[10,18,40,20],"status1":0},"persistentStatus1":0}
+    }
+  },
+  "boundedRemainder": "The complete-party singles receipt directly proves a healthy pointer-path failure after PP and a real Toxic-to-zero success with synchronized persistent party status. It cannot expose the instruction PC, command emission buffer, pending-controller bit at the exact opcode frame, decoded message text, sleep/freeze failures, burn/paralysis/ordinary-poison variants, Snatch redirection, or doubles targeting; those exact semantics remain source-pinned rather than inferred from public captures."
+}
