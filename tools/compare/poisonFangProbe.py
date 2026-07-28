@@ -16,7 +16,19 @@ from emerald_core import EmeraldOracle  # noqa: E402
 
 def main() -> None:
     raw_request = json.loads(SCENARIO.read_text())
-    if MOVE_ID == 44:
+    if MOVE_ID == 41:
+        parties = raw_request["overrides"]["parties"]
+        for side in ("player", "opponent"):
+            mon = parties[side][0]
+            if mon["species"] == 41:
+                # Real Level-50 Factory BEEDRILL carrier: Naughty,
+                # Speed/Attack, Scope Lens. Constrain all slots so either AI
+                # orientation selects TWINEEDLE without decision injection.
+                mon.update({"species": 15, "nature": 3, "moves": [41] * 4,
+                            "item": 198})
+                mon["evs"] = {"hp": 0, "attack": 255, "defense": 0,
+                              "speed": 255, "spAttack": 0, "spDefense": 0}
+    elif MOVE_ID == 44:
         parties = raw_request["overrides"]["parties"]
         for side in ("player", "opponent"):
             mon = parties[side][0]
@@ -58,6 +70,8 @@ def main() -> None:
     nm = subprocess.run(["arm-none-eabi-nm", str(reference / "pokeemerald.elf")], check=True, capture_output=True, text=True).stdout
     symbols = {line.split()[2]: int(line.split()[0], 16) | 1 for line in nm.splitlines() if len(line.split()) == 3}
     template_names = (
+        ("gLinearStingerSpriteTemplate", "gHandleInvertHitSplatSpriteTemplate")
+        if MOVE_ID == 41 else
         ("gSharpTeethSpriteTemplate", "gBasicHitSplatSpriteTemplate")
         if MOVE_ID == 44 else
         ("gFangSpriteTemplate",) if MOVE_ID == 158 else
@@ -65,6 +79,7 @@ def main() -> None:
         ("gFangSpriteTemplate", "gPoisonBubbleSpriteTemplate"))
     templates = {name: oracle.symbols[name] for name in template_names}
     task_names = ("AnimTask_ShakeMon", "AnimTask_ShakeMon_Step",
+                  "AnimTask_ShakeMon2", "AnimTask_ShakeMon2_Step",
                   "AnimTask_BlendColorCycle", "AnimTask_BlendColorCycleLoop",
                   "Task_FadeToBg", "AnimTask_GrowAndShrink",
                   "AnimTask_GrowAndShrink_Step")
@@ -140,7 +155,9 @@ def main() -> None:
             oracle.advance(segment.get("buttons", [])); frame += 1; capture(frame)
     OUTPUT.write_text(json.dumps({"schema":"poison-fang-dense-evidence/v2","setup":setup,
       "templates":templates,"taskFuncs":{name:symbols[name] for name in task_names},
-      "songHeaders":{"SE_M_BITE":oracle.read_u32(song_table+161*8),
+      "songHeaders":{"SE_M_RAZOR_WIND2":oracle.read_u32(song_table+145*8),
+                     "SE_M_HORN_ATTACK":oracle.read_u32(song_table+143*8),
+                     "SE_M_BITE":oracle.read_u32(song_table+161*8),
                      "SE_M_LEER":oracle.read_u32(song_table+192*8),
                      "SE_M_SWAGGER":oracle.read_u32(song_table+193*8),
                      "SE_M_SWAGGER2":oracle.read_u32(song_table+194*8),
