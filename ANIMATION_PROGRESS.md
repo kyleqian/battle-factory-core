@@ -1,5 +1,39 @@
 # Animation coverage
 
+## ANIM_TAG_DUCK / MOVE_DIZZY_PUNCH source-and-seam checkpoint; remains unsupported (2026-07-28)
+
+**Verdict:** `MOVE_DIZZY_PUNCH` remains unsupported; coverage stays **59
+exact / 1 partial / 216 unsupported**. Fresh complete legal set-145
+SPINDA/ONIX Scene-ON scenarios pin the move-owned body at frames **90-158**
+player-back and **94-162** opponent-front. The source-relative reducer and
+typed seam now port both horizontal lunges, both target ShakeMon2 tasks,
+both fist and animation-1 IMPACT instances, both literal six-duck waves,
+12:8 alpha/target-monbg, side-relative sound identities, and cleanup.
+`ANIM_TAG_DUCK`, SPINDA front/back art, HANDS_AND_FEET, and IMPACT regenerate
+byte-for-byte.
+
+**Evidence/boundary:** a fresh local-mGBA scout invoked through
+`tools/run-mgba-probe.py` captured every `currentMove=146` frame with
+software sprites/tasks, hardware OAM/matrices/palettes/registers, audio, and
+raw RGB (player digest `d6779742…fa3`, opponent `429cd8b2…07f`). The
+committed source audit pins exactly 12 `gDizzyPunchDuckSpriteTemplate`
+instances and proves that Emerald's `Move_DIZZY_PUNCH` has **zero**
+`gFallingFeatherSpriteTemplate`/`ANIM_TAG_WHITE_FEATHER` commands; those
+belong to `Move_FEATHER_DANCE`, so no unsupported feather behavior was
+invented.
+
+**Exact remainder/siblings:** commit a dedicated reproducible dense probe
+and portable comparator, strengthen every relative-age reducer receipt
+against both orientations twice fresh, then add the narrow shared compositor
+for SPINDA, fists, animation-1 IMPACT, all ducks, prior-software hardware
+transfer, palettes/registers/audio/raw RGB, and **69/69** shared-framebuffer
+equality plus the clear tail. `MOVE_TEETER_DANCE` remains unsupported with
+its distinct movement task and five fast music-note paths/sounds.
+`MOVE_SIGNAL_BEAM` remains unsupported with its distinct red/green orb
+stream, sine timer, shakes, pan sweep, and target palette cycle. No engine,
+battle state, RNG/controller/facility logic, coverage status, boundary list,
+unsupported barrier, or absolute-tick/input-delay/pixel exception changed.
+
 ## MOVE_TAIL_GLOW promoted exact; shared framebuffer closed (2026-07-28)
 
 **Verdict:** `MOVE_TAIL_GLOW` is exact. Fresh complete legal set-277
