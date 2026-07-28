@@ -15,6 +15,67 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 531 — [SUPERVISOR WIND-DOWN 2026-07-27 ~19:00] session complete: 10 rounds / 16 workers, all green, all verified and merged
+
+- **State (final):** tree committed and green at **284 files / 3735 tests**
+  (session start 263/3512; the union includes the wind-down animation
+  fold), `npm run build` clean, clean `git status`, zero unmerged side
+  branches, zero stale worktrees, ~91 commits this session.
+  `animation-main` folded twice (6 commits at orient: SWAGGER +
+  SELF_DESTRUCT exact; 35 at wind-down: TAUNT exact + SPARK partial +
+  tooling — coverage now **49/276 exact, 4 partial**; their supervisor
+  session is still live, so later commits fold next orient). **No DEFERRED
+  entries — nothing blocks the next `run-supervisor.sh`.** All 16 workers
+  across 10 rounds completed (0 failures, 0 salvages, no usage limits).
+- **Census: 105/214 → 126/214 effects, 206/355 → 249/355 moves, 167/276 →
+  201/276 Factory-L50, 2251/2957 → 2548/2957 weighted (76.1% → 86.2%)**
+  via 6 registration steps whose predicted flips ALL matched actuals
+  exactly: TRYINFATUATING+JUMPIFCONFUSEDANDSTATMAXED (+70, incl. gender
+  model + 2 barrier narrowings), RESTORE_HP/SOFTBOILED/OHKO (+57, incl. a
+  dormant destiny-bond hitMarker bug fix), multi-hit cluster (+23-part),
+  Roar+TRIPLE_KICK (+63 with multi-hit, incl. BATTLE_TYPE_ARENA slip fix),
+  EXPLOSION pair (+25, incl. missing Explosion defense-halving in
+  damageCalc), semi-invulnerable 7-item set (+35, 4 effects), sunlight-
+  heal/FAKE_OUT/SOLAR_BEAM rows (+47, 5 effects). 42/42 census
+  self-checks; next top rows: EFFECT_CURSE pair (18), FLAIL (20),
+  RETURN/FRUSTRATION (18).
+- **Census instrument FIXED (side rounds 2-3, supervisor-verified against
+  raw source):** the CFG extractor missed operand-carried jump edges (170
+  synthesized across ~60 mnemonics) and fabricated Roar’s fallthrough into
+  the adjacent script; corrected rows pinned with exact-set self-checks.
+  Scout dossier docs/roar-multihit-registration-scout.md consumed same
+  session; docs/semi-invulnerable-registration-scout.md scouted AND
+  consumed same session (its corrected 4-effects-not-1 prediction proved
+  exact).
+- **Seam program: 4 windows wired from kernel events this session** —
+  turn2-endeavor (§13.3, 77/77), turn6-statfall ATK-fell text (§12.3 step
+  3, 127/127), turn11-featherdance ATK-floor text (§14.3, 178/178), each
+  first-try in 6-20 min against banked scouts; §15 (turn13-sandattack,
+  190/190 re-pinned, existing bridge suffices) is banked unconsumed for
+  next session. Prerequisite unblock chain: the apostrophe-charmap
+  extractor bug (alias '\'' = B4 never applied) fixed with 129 templates
+  corrected → unblocked both turn6-statfall and turn11 the same session.
+  turn-N traces route ON-profile BY DESIGN (AGENTS.md legacy contract) —
+  seam-doc banner + PAPERCUTS entry added.
+- **AI CV ground truth:** AccuracyDown DRAW SITEs 3/4 live-verified
+  (19/19 predicted draws, both seeds/reruns; 499-scenario verify suite
+  ALL PASS rerun by supervisor); EvasionUp sites 6/7 + AccuracyDown's
+  analogous pair closed as structurally UNSTAGEABLE with documented
+  reasons (volatile status on the AI's own battler; switching clears it)
+  — negative closure, not debt.
+- **Next (in order):** census ranked-table descent (CURSE pair, FLAIL,
+  RETURN/FRUSTRATION); §15 turn13-sandattack wiring (banked, zero new
+  bridge surface); next §16 prep-scout per cadence; ISSUES #41/#39 keep
+  retiring window by window.
+- **Notes:** 1 new PAPERCUTS entry (turn-N ON-profile routing rediscovery).
+  Supervisor process notes: cwd-poisoned-shell trap bit twice more (7
+  lifetime) — one merge chain self-no-op'd and deleted its own cwd; branch
+  survived, recovered clean; every post-worktree block now starts with an
+  absolute cd. Worker entry-header timestamps drifted up to +1.5h again —
+  scheduling was done off `date`. Oracle services fresh all session; the
+  user's `codex/oracle-tooling-papercuts` worktree untouched.
+
+---
 ## 530 — [BOUNDED WORKER 2026-07-27 ~20:20] Three single-opcode census rows registered; +5 effects/+5 moves/+47 weighted (matches assigned prediction exactly)
 
 - **State:** tree green at **282 files / 3745 tests** (279/3704 → +3 files /
@@ -156,79 +217,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   zero weighted impact) are the scout's own named remainder, out of this
   step's scope. `EFFECT_FLAIL`/`EFFECT_RETURN`+`EFFECT_FRUSTRATION`/
   `EFFECT_CURSE` remain the next ranked census rows per entry 528.
-
----
-## 528 — [BOUNDED WORKER 2026-07-27 ~19:15] EFFECT_EXPLOSION registered end to end (EXPLOSION census set)
-
-- **State:** tree green at **275 files / 3639 tests** (274/3632 → +1 file /
-  +7 tests: new `battleScriptExplosionOpcode.test.ts` 5 tests, +2 in
-  `damageCalc.test.ts`), `npm run build` clean. Census regenerated: **117/214
-  effects, 237/355 moves, 191/276 Factory-L50 unweighted, 2466/2957 weighted
-  (83.4%)** — up from 116/214/235/189/2441. **Actual flip matches the
-  brief's predicted end-state exactly**: +1 effect / +2 moves / +25
-  weighted. 38/38 self-checks pass (new `requireExecutable("EFFECT_EXPLOSION")`
-  pin added, 37→38).
-- **Did:** new `battleScriptExplosionOpcode.ts` registers
-  `B_SCR_OP_TRYEXPLOSION` (`Cmd_tryexplosion`, `battle_script_commands.c
-  :6538-6575`) and `B_SCR_OP_SETATKHPTOZERO` (`:6577-6588`), both
-  source-complete with **zero barriers**. `Cmd_tryexplosion`'s Damp scan
-  covers **every active battler** (`0..battlersCount`, no absent-flag
-  filter — re-verified from source per the brief, not just attacker/target)
-  and, on success, re-points `gBattlerTarget` via the exact same
-  first-valid-target loop `Cmd_selectfirstvalidtarget` already implements
-  (`resolveFirstValidTarget`, exported from `battleScriptTargetIterationOpcode.ts`
-  and reused rather than duplicated). `gBattleMoveDamage = gBattleMons[
-  gActiveBattler].hp` is genuinely dead (the immediately-following
-  `BtlController_EmitHealthBarUpdate` call passes the literal
-  `INSTANT_HP_BAR_DROP` sentinel `0x7FFF`, not that value, and `damagecalc`
-  overwrites `gBattleMoveDamage` a few opcodes later before anything else
-  reads it) — not modeled, matching this engine's existing precedent for
-  provably-unread state. `Cmd_setatkhptozero` mirrors `Cmd_datahpupdate`'s
-  negative-damage (HP-gain) branch: `withBattler`/`withBattleScriptPartyMemberHp`
-  write-through, `hp-change` event, own controller round trip. Both compose
-  with the already-registered `tryfaintmon`/`moveend`/switch-in machinery
-  unmodified — no other opcode in `BattleScript_EffectExplosion`
-  (`data/battle_scripts_1.s:374-408`) needed new registration.
-  **Fixed a real pre-existing gap** (per the brief's explicit ask to check):
-  `damageCalc.ts`'s `calculateBaseDamage` never modeled EFFECT_EXPLOSION's
-  own Defense-halving (`pokemon.c:3228-3230` — Self-Destruct/Explosion cut
-  the defender's raw Defense in half, truncated, before the crit-adjusted-
-  stat step). Added a `moveEffect` input field and the halving branch; wired
-  from `damagecalcOpcodeHandler`'s `moveRow.effect` read
-  (`battleScriptHitChainOpcode.ts`). Pinned directly with a focused
-  `damageCalc.test.ts` unit test (50 unhalved vs 99 halved at identical
-  inputs) in addition to the full-script walk's own regression guard.
-- **Tests:** full committed-script walks to a genuine `{kind:"terminal",
-  opcodeName:"B_SCR_OP_END"}` halt: success (attacker's HP forced to 0 via
-  `setatkhptozero`, faints through the real `tryfaintmon` ->
-  `BattleScript_FaintAttacker` chain — `playfaintcry`/`dofaintanimation`/
-  `cleareffectsonfaint` were all already registered — target takes
-  halved-defense damage, RNG ledger pinned at exactly 3 draws: critcalc +
-  adjustnormaldamage + accuracycheck), Damp-blocked (ability on the target,
-  plus a second case with Damp on neither attacker nor target — reachable
-  only under a doubles topology since singles' own `gBattlersCount=2`
-  correctly excludes slots 2/3, proving the scan loop is genuinely general
-  rather than hardcoded to attacker+target), attacker-faints-target-survives,
-  and simultaneous KO (both `tryfaintmon BS_TARGET` and `tryfaintmon
-  BS_ATTACKER` resolve for real in one walk). No legal single-ability-slot
-  Damp Factory set was checked for/needed — the brief's own sanctioned
-  fallback (construct the battler state directly) was used since that's
-  strictly simpler and the ability-scan logic doesn't care how the ability
-  got there. Confirmed `BattleScript_EffectExplosion` never calls
-  `checkteamslost` itself (only the separate `BattleScript_HandleFaintedMon`
-  does) — noted in the test file rather than fabricating an unreachable
-  checkteamslost pin.
-- **Hidden barriers found:** **zero** — both opcodes are fully source-complete
-  end to end; no new entries needed in `PINNED_BARRIER_COUNTS`. A useful
-  side effect surfaced during census regen: `EFFECT_MEMENTO`'s own
-  blocked-on-opcodes list shrank from two missing opcodes to one
-  (`B_SCR_OP_TRYMEMENTO` alone) now that `SETATKHPTOZERO` — shared plumbing
-  between the two effects — is registered; `EFFECT_MEMENTO` itself stays
-  blocked (out of scope this step, noted only as a side effect, not claimed
-  as progress).
-- **Notes:** no PAPERCUT. Three commits: opcode registration + tests,
-  census regen (generator self-check pin included in that same commit).
-  `EFFECT_SEMI_INVULNERABLE` (scouted, 4 moves/32 weighted, the census's
-  new #1 row) is the next ranked set; `EFFECT_FLAIL`/`EFFECT_RETURN`+
-  `EFFECT_FRUSTRATION`/`EFFECT_CURSE` follow close behind.
-

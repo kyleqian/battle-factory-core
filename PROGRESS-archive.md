@@ -1,3 +1,78 @@
+---
+## 528 — [BOUNDED WORKER 2026-07-27 ~19:15] EFFECT_EXPLOSION registered end to end (EXPLOSION census set)
+
+- **State:** tree green at **275 files / 3639 tests** (274/3632 → +1 file /
+  +7 tests: new `battleScriptExplosionOpcode.test.ts` 5 tests, +2 in
+  `damageCalc.test.ts`), `npm run build` clean. Census regenerated: **117/214
+  effects, 237/355 moves, 191/276 Factory-L50 unweighted, 2466/2957 weighted
+  (83.4%)** — up from 116/214/235/189/2441. **Actual flip matches the
+  brief's predicted end-state exactly**: +1 effect / +2 moves / +25
+  weighted. 38/38 self-checks pass (new `requireExecutable("EFFECT_EXPLOSION")`
+  pin added, 37→38).
+- **Did:** new `battleScriptExplosionOpcode.ts` registers
+  `B_SCR_OP_TRYEXPLOSION` (`Cmd_tryexplosion`, `battle_script_commands.c
+  :6538-6575`) and `B_SCR_OP_SETATKHPTOZERO` (`:6577-6588`), both
+  source-complete with **zero barriers**. `Cmd_tryexplosion`'s Damp scan
+  covers **every active battler** (`0..battlersCount`, no absent-flag
+  filter — re-verified from source per the brief, not just attacker/target)
+  and, on success, re-points `gBattlerTarget` via the exact same
+  first-valid-target loop `Cmd_selectfirstvalidtarget` already implements
+  (`resolveFirstValidTarget`, exported from `battleScriptTargetIterationOpcode.ts`
+  and reused rather than duplicated). `gBattleMoveDamage = gBattleMons[
+  gActiveBattler].hp` is genuinely dead (the immediately-following
+  `BtlController_EmitHealthBarUpdate` call passes the literal
+  `INSTANT_HP_BAR_DROP` sentinel `0x7FFF`, not that value, and `damagecalc`
+  overwrites `gBattleMoveDamage` a few opcodes later before anything else
+  reads it) — not modeled, matching this engine's existing precedent for
+  provably-unread state. `Cmd_setatkhptozero` mirrors `Cmd_datahpupdate`'s
+  negative-damage (HP-gain) branch: `withBattler`/`withBattleScriptPartyMemberHp`
+  write-through, `hp-change` event, own controller round trip. Both compose
+  with the already-registered `tryfaintmon`/`moveend`/switch-in machinery
+  unmodified — no other opcode in `BattleScript_EffectExplosion`
+  (`data/battle_scripts_1.s:374-408`) needed new registration.
+  **Fixed a real pre-existing gap** (per the brief's explicit ask to check):
+  `damageCalc.ts`'s `calculateBaseDamage` never modeled EFFECT_EXPLOSION's
+  own Defense-halving (`pokemon.c:3228-3230` — Self-Destruct/Explosion cut
+  the defender's raw Defense in half, truncated, before the crit-adjusted-
+  stat step). Added a `moveEffect` input field and the halving branch; wired
+  from `damagecalcOpcodeHandler`'s `moveRow.effect` read
+  (`battleScriptHitChainOpcode.ts`). Pinned directly with a focused
+  `damageCalc.test.ts` unit test (50 unhalved vs 99 halved at identical
+  inputs) in addition to the full-script walk's own regression guard.
+- **Tests:** full committed-script walks to a genuine `{kind:"terminal",
+  opcodeName:"B_SCR_OP_END"}` halt: success (attacker's HP forced to 0 via
+  `setatkhptozero`, faints through the real `tryfaintmon` ->
+  `BattleScript_FaintAttacker` chain — `playfaintcry`/`dofaintanimation`/
+  `cleareffectsonfaint` were all already registered — target takes
+  halved-defense damage, RNG ledger pinned at exactly 3 draws: critcalc +
+  adjustnormaldamage + accuracycheck), Damp-blocked (ability on the target,
+  plus a second case with Damp on neither attacker nor target — reachable
+  only under a doubles topology since singles' own `gBattlersCount=2`
+  correctly excludes slots 2/3, proving the scan loop is genuinely general
+  rather than hardcoded to attacker+target), attacker-faints-target-survives,
+  and simultaneous KO (both `tryfaintmon BS_TARGET` and `tryfaintmon
+  BS_ATTACKER` resolve for real in one walk). No legal single-ability-slot
+  Damp Factory set was checked for/needed — the brief's own sanctioned
+  fallback (construct the battler state directly) was used since that's
+  strictly simpler and the ability-scan logic doesn't care how the ability
+  got there. Confirmed `BattleScript_EffectExplosion` never calls
+  `checkteamslost` itself (only the separate `BattleScript_HandleFaintedMon`
+  does) — noted in the test file rather than fabricating an unreachable
+  checkteamslost pin.
+- **Hidden barriers found:** **zero** — both opcodes are fully source-complete
+  end to end; no new entries needed in `PINNED_BARRIER_COUNTS`. A useful
+  side effect surfaced during census regen: `EFFECT_MEMENTO`'s own
+  blocked-on-opcodes list shrank from two missing opcodes to one
+  (`B_SCR_OP_TRYMEMENTO` alone) now that `SETATKHPTOZERO` — shared plumbing
+  between the two effects — is registered; `EFFECT_MEMENTO` itself stays
+  blocked (out of scope this step, noted only as a side effect, not claimed
+  as progress).
+- **Notes:** no PAPERCUT. Three commits: opcode registration + tests,
+  census regen (generator self-check pin included in that same commit).
+  `EFFECT_SEMI_INVULNERABLE` (scouted, 4 moves/32 weighted, the census's
+  new #1 row) is the next ranked set; `EFFECT_FLAIL`/`EFFECT_RETURN`+
+  `EFFECT_FRUSTRATION`/`EFFECT_CURSE` follow close behind.
+
 ## 527 — [BOUNDED WORKER 2026-07-27 ~18:35] turn11-featherdance ATK-floor text wired from kernel events (§14.3)
 
 - **State:** tree green at **274 files / 3632 tests** (unchanged — no new
