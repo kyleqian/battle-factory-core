@@ -10,10 +10,10 @@ Answers ROADMAP S10's Executable-frontier reset question directly: not "how many
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 143 | 214 | 66.8% |
-| Moves (unweighted, all 355) | 269 | 355 | 75.8% |
-| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 220 | 276 | 79.7% |
-| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2711 | 2957 | 91.7% |
+| Effect scripts | 144 | 214 | 67.3% |
+| Moves (unweighted, all 355) | 270 | 355 | 76.1% |
+| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 221 | 276 | 80.1% |
+| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2716 | 2957 | 91.8% |
 
 "Executable" means every opcode on every statically reachable path from the effect's entry script has a dispatch entry today (registered barriers included, per ROADMAP S10 §1's (a)/(b) policy). It is not a semantic-correctness claim -- see Caveats.
 
@@ -24,7 +24,6 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | Missing opcode(s) | Effects unlocked | Moves unlocked (unweighted) | Factory-L50 moves (unweighted) | Factory-L50 weighted |
 | --- | --- | --- | --- | --- |
 | `B_SCR_OP_GETSECRETPOWEREFFECT` | 1 (EFFECT_SECRET_POWER) | 1 | 1 | 6 |
-| `B_SCR_OP_SETFORCEDTARGET` | 1 (EFFECT_FOLLOW_ME) | 1 | 1 | 5 |
 | `B_SCR_OP_TRYSETHELPINGHAND` | 1 (EFFECT_HELPING_HAND) | 1 | 1 | 5 |
 | `B_SCR_OP_TRYSWAPABILITIES` | 1 (EFFECT_SKILL_SWAP) | 1 | 1 | 5 |
 | `B_SCR_OP_TRYSWAPITEMS` | 1 (EFFECT_TRICK) | 1 | 1 | 5 |
@@ -48,6 +47,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_SETTAUNT` | 1 (EFFECT_TAUNT) | 1 | 1 | 2 |
 | `B_SCR_OP_STOCKPILE` | 1 (EFFECT_STOCKPILE) | 1 | 1 | 2 |
 | `B_SCR_OP_STOCKPILETOHPHEAL` | 1 (EFFECT_SWALLOW) | 1 | 1 | 2 |
+| `B_SCR_OP_TRYSETGRUDGE` | 1 (EFFECT_GRUDGE) | 1 | 1 | 2 |
 
 ## Per-effect detail
 
@@ -225,7 +225,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_FACADE | `BattleScript_EffectFacade` | executable | - | - | 1 | 1 (19) |
 | EFFECT_FOCUS_PUNCH | `BattleScript_EffectFocusPunch` | executable | - | - | 1 | 1 (11) |
 | EFFECT_SMELLINGSALT | `BattleScript_EffectSmellingsalt` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_REMOVE_PARALYSIS is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 1 | 1 (1) |
-| EFFECT_FOLLOW_ME | `BattleScript_EffectFollowMe` | blocked-on-opcodes | `B_SCR_OP_SETFORCEDTARGET` (main path) | - | 1 | 1 (5) |
+| EFFECT_FOLLOW_ME | `BattleScript_EffectFollowMe` | executable | - | - | 1 | 1 (5) |
 | EFFECT_NATURE_POWER | `BattleScript_EffectNaturePower` | blocked-on-opcodes | `B_SCR_OP_CALLENVIRONMENTATTACK` (main path) | - | 1 | 0 (0) |
 | EFFECT_CHARGE | `BattleScript_EffectCharge` | blocked-on-opcodes | `B_SCR_OP_SETCHARGE` (main path) | - | 1 | 0 (0) |
 | EFFECT_TAUNT | `BattleScript_EffectTaunt` | blocked-on-opcodes | `B_SCR_OP_SETTAUNT` (edge branch only) | - | 1 | 1 (2) |

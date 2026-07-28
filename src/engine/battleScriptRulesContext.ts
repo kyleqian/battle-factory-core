@@ -76,6 +76,7 @@ import { createBattleScriptTrysetfutureattackOpcodeHandlers } from "./battleScri
 import { createBattleScriptDisablelastusedattackOpcodeHandlers } from "./battleScriptDisablelastusedattackOpcode.ts";
 import { createBattleScriptFuryCutterOpcodeHandlers } from "./battleScriptFuryCutterOpcode.ts";
 import { createBattleScriptSetminimizeOpcodeHandlers } from "./battleScriptSetminimizeOpcode.ts";
+import { createBattleScriptSetforcedtargetOpcodeHandlers } from "./battleScriptSetforcedtargetOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -137,7 +138,7 @@ export type BattleScriptSpecialStatus = Readonly<{
   specialDmg: number;
 }>;
 
-/** struct SideTimer's reflect/lightscreen/safeguard/mist-battlerId fields (include/battle.h:149-174) -- see the field comment on BattleScriptRulesContext.sideTimers. */
+/** Modeled struct SideTimer fields, including Follow Me's timer/target (include/battle.h:149-174) -- see the field comment on BattleScriptRulesContext.sideTimers. */
 export type BattleScriptSideTimerState = Readonly<{
   reflectTimer: number;
   reflectBattlerId: BattleScriptBattlerId;
@@ -615,7 +616,9 @@ export type BattleScriptRulesContext = Readonly<
      * etc.), read back by DoFieldEndTurnEffects' own end-turn cases to
      * reassign BS_ATTACKER for the wear-off script. mistBattlerId is kept
      * here (not beside mistTimers above) since Cmd_setmist writes it too but
-     * no pre-existing reader needed it before this registration.
+     * no pre-existing reader needed it before that registration. Follow Me's
+     * timer/target are also carried here for Cmd_setforcedtarget, the existing
+     * source-shaped GetMoveTarget reader, and the generic turn-tail cleanup.
      */
     sideTimers: readonly [BattleScriptSideTimerState, BattleScriptSideTimerState];
     /** Source u32 gBattleWeather. */
@@ -2444,6 +2447,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptDisablelastusedattackOpcodeHandlers(program),
     ...createBattleScriptFuryCutterOpcodeHandlers(program),
     ...createBattleScriptSetminimizeOpcodeHandlers(program),
+    ...createBattleScriptSetforcedtargetOpcodeHandlers(program),
   });
 }
 

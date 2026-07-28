@@ -1653,13 +1653,44 @@ function clearProtectStructsForNextTurn(rulesContext: BattleScriptRulesContext):
   return next;
 }
 
+/**
+ * `TurnValuesCleanUp(FALSE)`'s side-global Follow Me lifetime clear
+ * (`battle_main.c:4857-4886`). This runs at the ordinary BattleTurnPassed
+ * tail, after faint handling and the Future Sight/Wish-Perish phase. Only
+ * both timers clear; the stored targets remain inert and otherwise every
+ * side-timer field is preserved.
+ */
+function clearFollowMeTimersAtTurnTail(
+  rulesContext: BattleScriptRulesContext,
+): BattleScriptRulesContext {
+  const [player, opponent] = rulesContext.sideTimers;
+  if (player.followmeTimer === 0 && opponent.followmeTimer === 0) {
+    return rulesContext;
+  }
+  return Object.freeze({
+    ...rulesContext,
+    sideTimers: Object.freeze([
+      Object.freeze({ ...player, followmeTimer: 0 }),
+      Object.freeze({ ...opponent, followmeTimer: 0 }),
+    ]) as readonly [BattleScriptSideTimerState, BattleScriptSideTimerState],
+  });
+}
+
+function finishTurnValuesCleanUp(
+  rulesContext: BattleScriptRulesContext,
+): BattleScriptRulesContext {
+  return clearFollowMeTimersAtTurnTail(
+    clearProtectStructsForNextTurn(rulesContext),
+  );
+}
+
 function mapFaintedActionsResult(result: BattleScriptFaintedActionsResult): BattleEndTurnResult {
   if (result.kind === "no-fainted-battlers") {
     return Object.freeze({
       kind: "next-turn",
       state: Object.freeze({
         ...result.state,
-        rulesContext: clearProtectStructsForNextTurn(result.state.rulesContext),
+        rulesContext: finishTurnValuesCleanUp(result.state.rulesContext),
       }),
     });
   }
@@ -1742,7 +1773,17 @@ function runFutureAttacksAfterFaints(
     // HandleFaintedMonActions before this positional scan resumes.
     if (state.rulesContext.battlers[battler].hp === 0) {
       const fainted = runBattleScriptFaintedActionsOrchestration(program, handlers, state);
-      if (fainted.kind === "terminal") return Object.freeze({ kind: "terminal", state: fainted.state });
+      if (fainted.kind === "terminal") {
+        return Object.freeze({
+          kind: "terminal",
+          state: Object.freeze({
+            ...fainted.state,
+            rulesContext: clearFollowMeTimersAtTurnTail(
+              fainted.state.rulesContext,
+            ),
+          }),
+        });
+      }
       if (fainted.kind === "player-choice-required") {
         return Object.freeze({
           kind: "player-choice-required",
@@ -1759,12 +1800,20 @@ function runFutureAttacksAfterFaints(
     }
   }
 
-  if (completionKind === "terminal") return Object.freeze({ kind: "terminal", state });
+  if (completionKind === "terminal") {
+    return Object.freeze({
+      kind: "terminal",
+      state: Object.freeze({
+        ...state,
+        rulesContext: clearFollowMeTimersAtTurnTail(state.rulesContext),
+      }),
+    });
+  }
   return Object.freeze({
     kind: completionKind,
     state: Object.freeze({
       ...state,
-      rulesContext: clearProtectStructsForNextTurn(state.rulesContext),
+      rulesContext: finishTurnValuesCleanUp(state.rulesContext),
     }),
   });
 }

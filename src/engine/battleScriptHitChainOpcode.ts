@@ -1556,13 +1556,13 @@ export const typecalc2OpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRules
  * short-circuits on gate (a) first, so a false gate (a) makes the dummy
  * `hitter` read inert regardless of its value (pure `GetBattlerSide`, no
  * side effect either way) -- this port relies on the same short-circuit.
- * Follow Me's redirect (`gSideTimers[].followmeTimer`) has no field in this
- * engine's `BattleScriptSideTimerState` at all, so it is a structural (not
- * gated) no-op -- retaliation always targets the recorded hitter directly,
- * matching prep-scout §6's "unreachable in L50 singles" finding. Failure
- * writes the real, already-modeled `ppNotAffectedByPressure` field and jumps
- * to the operand's fail target (`BattleScript_FailedFromAtkString` at every
- * real call site).
+ * Follow Me's fields now have shared `BattleScriptSideTimerState` ownership,
+ * but Counter's separate retarget reader is intentionally not widened in
+ * this finite registration unit: it is unobservable in Factory L50 singles
+ * and retaliation still targets the recorded hitter directly, matching
+ * prep-scout §6. Failure writes the real, already-modeled
+ * `ppNotAffectedByPressure` field and jumps to the operand's fail target
+ * (`BattleScript_FailedFromAtkString` at every real call site).
  */
 export const counterdamagecalculatorOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (
   context,
