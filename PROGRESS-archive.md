@@ -1,4 +1,28 @@
 ---
+## 585 — [BOUNDED MAIN WORKER 2026-07-28 ~04:06] Refresh executes globally
+
+- **State:** committed `d1aad3a` + `054e8fa`; tree green at **342 files /
+  4103 tests**, focused Refresh/evidence/handler coverage **31/31**, ratchets
+  **6/6**, and production build. Both oracle infos, census freshness, and
+  `git diff --check` pass. Census is exactly **149/214 effects, 275/355
+  moves, 226/276 Factory-L50 distinct, 2738/2957 weighted**, all **42/42**.
+- **Did:** globally registered five-byte Refresh `0xcd` through the shared
+  source-shaped rules context. Poison, Toxic (including its counter), burn,
+  and paralysis clear the active attacker status word and matching persistent
+  party slot; healthy, sleep, and freeze jump unchanged after shared PP
+  reduction. Success emits the shared `REQUEST_STATUS_BATTLE` semantic event,
+  marks only the attacker controller pending, blocks controller-sensitive
+  continuation, and resumes through the existing acknowledgement seam.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next shared registration target; do not widen the generic
+  singles controller or extend the retired canonical Battle-2 march.
+- **Notes:** accepted OFF receipt remains `12571c447d03…22a68012`: Toxic
+  active/party **384/128→0/0**, Refresh PP **19→18**, HP **305**, command-local
+  RNG unchanged. Handler inventory **157→158** only. No barrier/import
+  ratchet, recording import, private handler, animation/presentation/tick
+  branch, issue removal, DEFERRED item, or oracle lifecycle action.
+
+---
 ## 584 — [SUPERVISOR VERIFY 2026-07-28 ~04:00] Torment accepted; party-heal evidence folded
 
 - **State:** reviewed union green at **341 files / 4093 tests** and focused
