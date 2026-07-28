@@ -106,7 +106,10 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // assumed away, per this codebase's own house style. Reachability-tested:
   // tests/battleScriptHitChainOpcode.test.ts "production accuracycheck
   // (Cmd_accuracycheck) NO_ACC_CALC_CHECK_LOCK_ON dispatch".
-  ["src/engine/battleScriptHitChainOpcode.ts", 23],
+  // 23 -> 22 (EFFECT_DESTINY_BOND): Cmd_tryfaintmon's
+  // HITMARKER_DESTINYBOND branch now source-completely schedules
+  // BattleScript_DestinyBondTakesLife above the original faint-script frame.
+  ["src/engine/battleScriptHitChainOpcode.ts", 22],
   ["src/engine/battleScriptAttackCancelerOpcode.ts", 5],
   ["src/engine/battleScriptMoveEndOpcode.ts", 7],
   ["src/engine/battleScriptJumpifbyteOpcode.ts", 1],

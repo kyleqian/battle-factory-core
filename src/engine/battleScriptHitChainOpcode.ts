@@ -659,7 +659,7 @@ function jumpToMissTarget(
 /**
  * TrySetDestinyBondToHappen (battle_script_commands.c:8285-8294): sets the
  * shared per-action `hitMarker`'s `HITMARKER_DESTINYBOND` bit (consumed later
- * by `Cmd_tryfaintmon`'s own barrier, `:3184` in this file) when the TARGET
+ * by `Cmd_tryfaintmon`'s avenging-script branch) when the TARGET
  * currently carries `STATUS2_DESTINY_BOND` (from using the move on some
  * earlier turn), the two battlers are on opposite sides, and no Grudge has
  * already consumed this hitmarker slot this action. Exported so both of
@@ -3294,11 +3294,29 @@ function createTryfaintmonOpcodeHandler(): BattleScriptOpcodeHandler<BattleScrip
     const targetBattler = rulesContext.battlers[requireBattlerRole(rulesContext, "target")];
 
     if ((hitMarker & HITMARKER_DESTINYBOND) !== 0 && attackerBattler.hp !== 0) {
-      return unsupportedBranch(
+      const faintScript = resolveBattleScriptLabel(context.program, faintTargetLabel);
+      if (!faintScript) throw new Error(`tryfaintmon: committed program has no label ${faintTargetLabel}`);
+      const destinyBond = resolveBattleScriptLabel(context.program, "BattleScript_DestinyBondTakesLife");
+      if (!destinyBond) throw new Error("tryfaintmon: committed program has no BattleScript_DestinyBondTakesLife");
+      const damageOwner = rulesContext.battlers[isAttackerOperand
+        ? requireBattlerRole(rulesContext, "target")
+        : requireBattlerRole(rulesContext, "attacker")];
+      const nextRulesContext = Object.freeze({
+        ...rulesContext,
+        hitMarker: (hitMarker & ~HITMARKER_DESTINYBOND) >>> 0,
+        battleMoveDamage: damageOwner.hp,
+      });
+      return transitionBattleScriptCommand(
         context,
-        "Cmd_tryfaintmon's HITMARKER_DESTINYBOND branch (BattleScript_DestinyBondTakesLife) is not modeled",
-        "battle_script_commands.c",
-        3020,
+        Object.freeze({
+          kind: "call-stack",
+          programCounter: destinyBond.programCounter,
+          returnProgramCounters: Object.freeze([
+            context.state.programCounter + 1,
+            faintScript.programCounter,
+          ]),
+        }),
+        { rulesContext: nextRulesContext },
       );
     }
 

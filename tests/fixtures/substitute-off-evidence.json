@@ -1,0 +1,49 @@
+{
+  "schema": "substitute-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "sourceSha256": {
+    "battle_script_commands.c": "e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c",
+    "battle_scripts_1.s": "4ac3e610b68c11ef0f4e4c0fc62ddba7fda5a8400e43705428868978ec7551a6",
+    "battle_script.inc": "0a8e1c3bdf4c49d07b2e09ff8ab524812a5217b9735106e1b79b6be261a6db7e",
+    "battle_script_commands.h": "842cce6dd704b09b24a49abdca67ee7a8062a2e3a465e1b764fc63c0d230580f",
+    "constants_battle.h": "bba2f9d9b3d98fa01b5f0a8f7dede9f2f0be5617c735242b741a7e0c8e4a5d1e",
+    "battle.h": "8ef0355f2345592094c82cfde6641644a6b7157012104736416f8c05f34f0685",
+    "battle_message.c": "5874441ca8fea30caed82e6762c7a1dca8be9c60c8bf8912b74517d0ef7e0f17",
+    "battle_moves.h": "8b3d4d143b807807af97ce7288e0cc0ccdd55b6b64ac45824e35a549836b3a0c",
+    "battle_frontier_mons.h": "557c1a97247cbb84357b99035fb11cf0bfe45abe8393a0992fe8146bfc51f67f"
+  },
+  "instruction": {"opcode": 156, "opcodeHex": "0x9c", "length": 1, "operandWidths": [], "pc": "unconditionally advances by one byte after either handler branch"},
+  "handler": {
+    "owner": "gBattlerAttacker",
+    "quarterMaxHp": "floor(gBattleMons[gBattlerAttacker].maxHP / 4), with a defensive zero-to-one fallback",
+    "failure": {"predicate": "gBattleMons[gBattlerAttacker].hp <= quarterMaxHp", "moveDamage": 0, "messageChooser": "B_MSG_SUBSTITUTE_FAILED"},
+    "success": {"moveDamage": "quarterMaxHp, with the same defensive zero-to-one fallback", "status2Set": "STATUS2_SUBSTITUTE (1 << 24)", "status2Cleared": "STATUS2_WRAPPED", "substituteHp": "gDisableStructs[gBattlerAttacker].substituteHP = gBattleMoveDamage", "messageChooser": "B_MSG_SET_SUBSTITUTE", "hitMarkerSet": "HITMARKER_IGNORE_SUBSTITUTE"}
+  },
+  "scriptRoutes": {
+    "effectPrefix": ["attackcanceler", "ppreduce", "attackstring", "waitstate"],
+    "alreadyLive": "jumpifstatus2 BS_ATTACKER, STATUS2_SUBSTITUTE, BattleScript_AlreadyHasSubstitute; setalreadystatusedmoveattempt, short pause, STRINGID_PKMNHASSUBSTITUTE, MoveEnd",
+    "handlerFailure": "setsubstitute then chooser == B_MSG_SUBSTITUTE_FAILED: short pause, gSubstituteUsedStringIds[B_MSG_SUBSTITUTE_FAILED] = STRINGID_TOOWEAKFORSUBSTITUTE, MoveEnd",
+    "handlerSuccess": "setsubstitute then chooser != B_MSG_SUBSTITUTE_FAILED: attackanimation, waitanimation, healthbarupdate BS_ATTACKER, datahpupdate BS_ATTACKER, gSubstituteUsedStringIds[B_MSG_SET_SUBSTITUTE] = STRINGID_PKMNMADESUBSTITUTE, MoveEnd",
+    "persistence": "the handler sets attacker status2/substituteHP; MOVEEND_SUBSTITUTE clears STATUS2_SUBSTITUTE for each battler only when its substituteHP is zero"
+  },
+  "move": {"id": 164, "effect": 79, "pp": 10, "target": "MOVE_TARGET_USER", "priority": 0},
+  "frontierCarrier": {"setId": 498, "name": "FRONTIER_MON_GOLEM_2", "species": 76, "moves": [264, 164, 104, 156], "level": 50},
+  "repeatability": {"runsPerCase": 2, "comparison": "byte-identical full manifest.json", "allMatched": true},
+  "case": {
+    "id": "golem-creates-and-then-reselects-a-live-substitute",
+    "scenario": "tools/battle-lab/mechanic-substitute-repeat-off.json",
+    "scenarioSha256": "70ea17e15cd6b4b69ed31aee61dac13054c1413a04985d2f9192dc869d6dad73",
+    "runManifestSha256": ["19e525d9cf58eff251211f762925e07d28bde3d6585e0dd05255b872ec2f7c7d", "19e525d9cf58eff251211f762925e07d28bde3d6585e0dd05255b872ec2f7c7d"],
+    "builtPartyChecksumsValid": [true, true, true, true, true, true],
+    "captures": [
+      {"frame": 0, "rngValue": 1621732966, "currentMove": 0, "player": {"hp": 155, "maxHp": 155, "pp": [20, 10, 15, 10], "status2": 0}, "opponent": {"hp": 95, "pp": [30, 30, 30, 30], "status2": 0}},
+      {"frame": 120, "rngValue": 1621732966, "currentMove": 164, "player": {"hp": 155, "maxHp": 155, "pp": [20, 9, 15, 10], "status2": 16777216}, "opponent": {"hp": 95, "pp": [30, 30, 30, 30], "status2": 0}},
+      {"frame": 300, "rngValue": 1621732966, "currentMove": 164, "player": {"hp": 117, "maxHp": 155, "pp": [20, 9, 15, 10], "status2": 16777216}, "opponent": {"hp": 95, "pp": [30, 30, 30, 30], "status2": 0}},
+      {"frame": 700, "rngValue": 1160559944, "currentMove": 0, "player": {"hp": 117, "maxHp": 155, "pp": [20, 9, 15, 10], "status2": 16777216}, "opponent": {"hp": 95, "pp": [30, 29, 30, 30], "status2": 0}},
+      {"frame": 800, "rngValue": 1160559944, "currentMove": 164, "player": {"hp": 117, "maxHp": 155, "pp": [20, 8, 15, 10], "status2": 16777216}, "opponent": {"hp": 95, "pp": [30, 29, 30, 30], "status2": 0}},
+      {"frame": 900, "rngValue": 1160559944, "currentMove": 164, "player": {"hp": 117, "maxHp": 155, "pp": [20, 8, 15, 10], "status2": 16777216}, "opponent": {"hp": 95, "pp": [30, 29, 30, 30], "status2": 0}},
+      {"frame": 1200, "rngValue": 3278432283, "currentMove": 0, "player": {"hp": 117, "maxHp": 155, "pp": [20, 8, 15, 10], "status2": 16777216}, "opponent": {"hp": 95, "pp": [29, 29, 30, 30], "status2": 0}}
+    ]
+  },
+  "boundedRemainder": "The manifest exposes active HP, max HP, PP, status2, RNG, controller state, party checksums, and framebuffer hashes. It does not expose gDisableStructs[].substituteHP, gBattleMoveDamage, gBattleCommunication[MULTISTRING_CHOOSER], gHitMarker, BattleScript PC, or decoded text. Source therefore pins the internal branch/mutation and message routing; the ROM captures prove two real controller-selected PP reductions, floor(155/4)=38 HP loss, persistence into the next action, and the live-substitute message framebuffer. This is evidence only and does not implement or register the opcode/effect."
+}
