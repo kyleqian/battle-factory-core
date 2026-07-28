@@ -107,6 +107,7 @@ import { createBattleScriptGivepaydaymoneyOpcodeHandlers } from "./battleScriptG
 import { createBattleScriptNormalisebuffsOpcodeHandlers } from "./battleScriptNormalisebuffsOpcode.ts";
 import { createBattleScriptSetbideOpcodeHandlers } from "./battleScriptSetbideOpcode.ts";
 import { createBattleScriptLastMoveOpcodeHandlers } from "./battleScriptLastMoveOpcode.ts";
+import { createBattleScriptTypeChangeOpcodeHandlers } from "./battleScriptTypeChangeOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -775,6 +776,8 @@ export type BattleScriptRulesContext = Readonly<
     battleTextBuff1Move: number | null;
     /** Typed form of PREPARE_ITEM_BUFFER(gBattleTextBuff1, item). */
     battleTextBuff1Item: number | null;
+    /** Typed form of PREPARE_TYPE_BUFFER(gBattleTextBuff1, type). */
+    battleTextBuff1Type: string | null;
     /** Typed form of PREPARE_BYTE_NUMBER_BUFFER(gBattleTextBuff2, 1, value). */
     battleTextBuff2ByteNumber: number | null;
     /** Typed form of PREPARE_ITEM_BUFFER(gBattleTextBuff2, item). */
@@ -907,6 +910,7 @@ export type BattleScriptRulesContextInput = Readonly<{
   battleTextBuff1PaydayMoney?: number | null;
   battleTextBuff1Move?: number | null;
   battleTextBuff1Item?: number | null;
+  battleTextBuff1Type?: string | null;
   battleTextBuff2ByteNumber?: number | null;
   battleTextBuff2Item?: number | null;
   battlerByTurnOrder?: readonly number[];
@@ -2599,6 +2603,7 @@ export function createBattleScriptRulesContext(
       || input.battleTextBuff1Item === undefined
       ? null
       : requireUnsigned(input.battleTextBuff1Item, 0xffff, "battleTextBuff1Item"),
+    battleTextBuff1Type: input.battleTextBuff1Type ?? null,
     battleTextBuff2ByteNumber: input.battleTextBuff2ByteNumber === null
       || input.battleTextBuff2ByteNumber === undefined
       ? null
@@ -2840,6 +2845,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptNormalisebuffsOpcodeHandlers(program),
     ...createBattleScriptSetbideOpcodeHandlers(program),
     ...createBattleScriptLastMoveOpcodeHandlers(program),
+    ...createBattleScriptTypeChangeOpcodeHandlers(program),
     ...createBattleScriptSettormentOpcodeHandlers(program),
     ...createBattleScriptSettauntOpcodeHandlers(program),
     ...createBattleScriptSetforesightOpcodeHandlers(program),
