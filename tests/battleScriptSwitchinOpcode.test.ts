@@ -222,7 +222,7 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     expect(result.state.scheduler.pendingControllerBattlers).toEqual([1]);
   });
 
-  it("switchindataupdate: rebuilds species/hp/status1/types from the party record and resets stat stages/status2/status3/the modeled DisableStruct fields to neutral", () => {
+  it("switchindataupdate pins the shared restoration boundary: species/hp/status/types reset, while unmodeled species/abilityNum restoration remains bounded", () => {
     const rc = context({
       battlers: [
         battler({ side: 0, species: URSARING, types: ["TYPE_NORMAL", "TYPE_NORMAL"] }),
@@ -264,7 +264,10 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     expect(updated.disableTimer).toBe(0);
     expect(updated.disableTimerStartValue).toBe(0);
     expect(updated.tauntTimer).toBe(0);
-    // ability/item/moves/pp are not rebuilt (untracked, see file header) -- ability stays stale.
+    // Exact bounded remainder for Skill Swap lifecycle: the shared seam owns
+    // the source switch boundary, but party species/abilityNum metadata is not
+    // modeled, so it cannot yet derive GetAbilityBySpecies here. Do not add a
+    // private Skill Swap lifecycle handler; the active byte remains stale.
     expect(updated.ability).toBe(ABILITY_GUTS);
   });
 

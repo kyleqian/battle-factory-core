@@ -78,6 +78,7 @@ import { createBattleScriptFuryCutterOpcodeHandlers } from "./battleScriptFuryCu
 import { createBattleScriptSetminimizeOpcodeHandlers } from "./battleScriptSetminimizeOpcode.ts";
 import { createBattleScriptSetforcedtargetOpcodeHandlers } from "./battleScriptSetforcedtargetOpcode.ts";
 import { createBattleScriptGetSecretPowerEffectOpcodeHandlers } from "./battleScriptGetSecretPowerEffectOpcode.ts";
+import { createBattleScriptTryswapabilitiesOpcodeHandlers } from "./battleScriptTryswapabilitiesOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -2461,6 +2462,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptSetminimizeOpcodeHandlers(program),
     ...createBattleScriptSetforcedtargetOpcodeHandlers(program),
     ...createBattleScriptGetSecretPowerEffectOpcodeHandlers(program),
+    ...createBattleScriptTryswapabilitiesOpcodeHandlers(program),
   });
 }
 
