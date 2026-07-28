@@ -493,6 +493,31 @@ describe("source-complete B_SCR_OP_JUMPIFCANTSWITCH registration", () => {
     expect(trainer.state.programCounter).toBe(batonStart.programCounter + 1);
   });
 
+  it("rejects selectors that resolve to the inactive gBattlersCount sentinel", () => {
+    const missingPlayerLeft = context({
+      battleTopology: {
+        battlersCount: 2,
+        battleTypeFlags:
+          BATTLE_SCRIPT_BATTLE_TYPE_TRAINER | BATTLE_SCRIPT_BATTLE_TYPE_FACTORY,
+        battlerPositions: [1, 2, 0xff, 0xff],
+      },
+    });
+    expect(() => stepBattleScriptMachine(
+      program,
+      directState(faintedStart, missingPlayerLeft),
+      createBattleScriptJumpifcantswitchOpcodeHandlers(program),
+    )).toThrow(/did not resolve to an active battler/);
+
+    const inactiveAttacker = context({
+      selectorRoles: { attacker: 2, target: 1 },
+    });
+    expect(() => stepBattleScriptMachine(
+      program,
+      directState(batonStart, inactiveAttacker),
+      createBattleScriptJumpifcantswitchOpcodeHandlers(program),
+    )).toThrow(/did not resolve to an active battler/);
+  });
+
   it("reaches the one named non-singles topology barrier with source active-battler ownership", () => {
     const rules = context({
       battleTopology: {
@@ -546,7 +571,6 @@ describe("BattleScript_EffectBatonPass genuine terminal walks", () => {
       species: 1,
       partyIndex: 1,
       hp: 120,
-      pp: [39, 0, 0, 0],
       statStages: RAISED_STAGES,
       status2: transferableStatus2,
     });

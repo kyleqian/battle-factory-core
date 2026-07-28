@@ -44,6 +44,7 @@ import {
   type BattleScriptRulesContext,
   type BattleScriptStatStages,
 } from "./battleScriptRulesContext.ts";
+import { BATTLE_SCRIPT_STATUS2_WRAPPED_MASK } from "./battleScriptSourceConstants.ts";
 import speciesTypesData from "../data/gen/species-types.json" with { type: "json" };
 
 /** include/constants/battle.h:60. */
@@ -60,13 +61,15 @@ const SIDE_STATUS_SPIKES = 1 << 4;
 /** include/constants/battle.h:150/160 -- cross-battler identity (battlerPreventingEscape/battlerWithSureHit) this engine does not model. */
 const STATUS2_ESCAPE_PREVENTION = 1 << 26;
 const STATUS3_ALWAYS_HITS = (1 << 3) | (1 << 4);
-/** battle_main.c:3169-3170 -- the exact volatile masks SwitchInClearSetData carries through Baton Pass. */
+/** battle_main.c:3175-3176 -- the exact volatile masks SwitchInClearSetData carries through Baton Pass. */
 const BATON_PASS_STATUS2 =
   ((1 << 0) | (1 << 1) | (1 << 2) | (1 << 20) | (1 << 24)
     | STATUS2_ESCAPE_PREVENTION | (1 << 28)) >>> 0;
 const BATON_PASS_STATUS3 =
   ((1 << 0) | (1 << 1) | (1 << 2) | STATUS3_ALWAYS_HITS | (1 << 5)
     | (1 << 10) | (1 << 16) | (1 << 17)) >>> 0;
+/** include/constants/battle.h:161 -- reset when Baton Pass changes a sure-hit target. */
+const STATUS3_ALWAYS_HITS_TURN_2 = (2 << 3) & STATUS3_ALWAYS_HITS;
 /** include/constants/abilities.h -- battle_util.c:2488-2599's ABILITYEFFECT_ON_SWITCHIN switch cases. */
 const ABILITY_DRIZZLE = 2;
 const ABILITY_CLOUD_NINE = 13;
@@ -332,6 +335,34 @@ function createSwitchindataupdateOpcodeHandler(
         }
       }
     }
+    for (let i = 0; i < battlersCount; i += 1) {
+      if (i === battler) continue;
+      const other = rules.battlers[i as 0 | 1 | 2 | 3];
+      if (
+        battlersCount !== 2
+        && (other.status2 & BATTLE_SCRIPT_STATUS2_WRAPPED_MASK) !== 0
+      ) {
+        return unsupportedBranch(
+          context,
+          `SwitchInClearSetData's STATUS2_WRAPPED cross-battler clear (battler ${i}) needs `
+            + "gBattleStruct->wrappedBy identity outside singles",
+          3199,
+        );
+      }
+      if (
+        isBatonPass
+        && battlersCount !== 2
+        && other.side !== active.side
+        && (other.status3 & STATUS3_ALWAYS_HITS) !== 0
+      ) {
+        return unsupportedBranch(
+          context,
+          `SwitchInClearSetData's Baton Pass STATUS3_ALWAYS_HITS refresh (battler ${i}) needs `
+            + "gDisableStructs[battler].battlerWithSureHit identity outside singles",
+          3180,
+        );
+      }
+    }
 
     const side = active.side === 0 ? "player" : "opponent";
     const partyMember = rules.party[side][active.partyIndex];
@@ -366,8 +397,28 @@ function createSwitchindataupdateOpcodeHandler(
           usedImprisonedMove: 0 as const,
         });
       }
-      const status2 = (candidate.status2 & ~infatuationBit) >>> 0;
-      return status2 === candidate.status2 ? candidate : Object.freeze({ ...candidate, status2 });
+      const clearsWrapped =
+        battlersCount === 2
+        && (candidate.status2 & BATTLE_SCRIPT_STATUS2_WRAPPED_MASK) !== 0;
+      const status2 = (
+        candidate.status2
+        & ~infatuationBit
+        & (clearsWrapped ? ~BATTLE_SCRIPT_STATUS2_WRAPPED_MASK : ~0)
+      ) >>> 0;
+      const refreshesSureHit =
+        isBatonPass
+        && battlersCount === 2
+        && candidate.side !== active.side
+        && (candidate.status3 & STATUS3_ALWAYS_HITS) !== 0;
+      const status3 = refreshesSureHit
+        ? (
+          (candidate.status3 & ~STATUS3_ALWAYS_HITS)
+          | STATUS3_ALWAYS_HITS_TURN_2
+        ) >>> 0
+        : candidate.status3;
+      return status2 === candidate.status2 && status3 === candidate.status3
+        ? candidate
+        : Object.freeze({ ...candidate, status2, status3 });
     }) as unknown as BattleScriptRulesBattlers;
 
     return transitionBattleScriptCommand(

@@ -15,6 +15,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 547 — [SUPERVISOR SOURCE REVIEW 2026-07-27 ~22:18] Baton Pass registration tightened before acceptance
+
+- **State:** reviewed tree green at **299 files / 3857 tests**; `npm run
+  build` and `git diff --check` pass. Executable-frontier census remains
+  **132/214 effects, 256/355 moves, 208/276 Factory-L50 distinct,
+  2631/2957 weighted**.
+- **Did:** rejected inactive `gBattlersCount` selector sentinels, corrected
+  the Baton Pass mask citation, and completed the source-exact singles
+  `SwitchInClearSetData` collateral: switching clears an opposing wrap and
+  Baton Pass refreshes an opposing sure-hit timer to two turns. The terminal
+  proof no longer asserts the deliberately stale active-slot PP/loadout that
+  this context cannot rebuild.
+- **Next:** merge the independently replayed Focus Punch OFF evidence, then
+  register `B_SCR_OP_JUMPIFNODAMAGE` / `EFFECT_FOCUS_PUNCH` from its paired
+  damage/no-damage routes.
+- **Notes:** deliberately raised `battleScriptSwitchinOpcode.ts`'s barrier
+  ratchet **8→10** for doubles-only wrapped-by and sure-hit-owner identities;
+  both are source-named and reachability-tested while singles remain exact.
+  Focused **60/60**, full **3857/3857**. No recording import, oracle
+  lifecycle action, animation edit, or PAPERCUT.
+
+---
 ## 546 — [BOUNDED MAIN WORKER 2026-07-27 ~22:10] Baton Pass executes through source jumpifcantswitch
 
 - **State:** tree green at **299 files / 3852 tests**; build, freshness, and
@@ -58,24 +80,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** focused **5/5**, full **3840/3840**, build/freshness/diff green.
   No fabricated no-bench trace, unsupported barrier, recording import,
   ratchet change, oracle lifecycle action, animation edit, or PAPERCUT.
-
----
-## 544 — [SUPERVISOR SOURCE CORRECTION 2026-07-27 ~21:55] Psych Up executes source-completely
-
-- **State:** tree green at **297 files / 3835 tests**; `npm run build`,
-  census, freshness, and `git diff --check` pass. The unchanged Battle-2 OFF
-  trace remains **16/16 exact**.
-- **Did:** registered `B_SCR_OP_COPYFOESTATS` / `Cmd_copyfoestats` as the
-  source's unconditional five-byte command: copy all eight target stat stages
-  to the attacker, ignore the unused failure pointer, and change nothing else.
-  Opcode isolation plus neutral/non-neutral `BattleScript_EffectPsychUp`
-  walks reach their real `END`, pin PP/events/provenance, preserve HP/status,
-  existing animation state, and zero-call RNG. Corrected a false brief claim
-  before commit: the command does not write animation arguments.
-- **Next:** merge the file-disjoint Baton Pass OFF evidence, then register the
-  newly top-ranked `B_SCR_OP_JUMPIFCANTSWITCH` / `EFFECT_BATON_PASS`.
-- **Notes:** census is **131/214 effects, 255/355 moves, 207/276 Factory-L50
-  distinct, 2618/2957 weighted**, exact **+1/+1/+1/+14**, all **42/42**
-  checks. Focused **53/53** and full **3835/3835** pass. No unsupported
-  barrier, recording import, ratchet change, oracle lifecycle action,
-  animation edit, or PAPERCUT.

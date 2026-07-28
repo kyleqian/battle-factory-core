@@ -279,6 +279,126 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     expect(result.state.rulesContext.battlers[0].status2 & infatuatedBit).toBe(0);
   });
 
+  it("switchindataupdate: singles clears another battler's wrap owned by the switching battler", () => {
+    const STATUS2_WRAPPED = (1 << 13) | (1 << 14) | (1 << 15);
+    const rc = context({
+      battlers: [
+        battler({
+          side: 0,
+          species: URSARING,
+          types: ["TYPE_NORMAL", "TYPE_NORMAL"],
+          status2: STATUS2_WRAPPED,
+        }),
+        battler({
+          side: 1,
+          species: SUNKERN,
+          hp: 0,
+          types: ["TYPE_GRASS", "TYPE_GRASS"],
+          partyIndex: 2,
+          ability: ABILITY_GUTS,
+        }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+    });
+    const { result } = stepAtProgramCounter(SWITCHINDATAUPDATE_PC, rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.rulesContext.battlers[0].status2 & STATUS2_WRAPPED).toBe(0);
+  });
+
+  it("switchindataupdate: Baton Pass refreshes an opposing singles sure-hit timer to two turns", () => {
+    const STATUS3_ALWAYS_HITS_TURN_1 = 1 << 3;
+    const STATUS3_ALWAYS_HITS_TURN_2 = 2 << 3;
+    const rc = context({
+      currentMove: 226,
+      battlers: [
+        battler({
+          side: 0,
+          species: URSARING,
+          types: ["TYPE_NORMAL", "TYPE_NORMAL"],
+          status3: STATUS3_ALWAYS_HITS_TURN_1,
+        }),
+        battler({
+          side: 1,
+          species: SUNKERN,
+          hp: 0,
+          types: ["TYPE_GRASS", "TYPE_GRASS"],
+          partyIndex: 2,
+          ability: ABILITY_GUTS,
+        }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+    });
+    const { result } = stepAtProgramCounter(SWITCHINDATAUPDATE_PC, rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.rulesContext.battlers[0].status3).toBe(
+      STATUS3_ALWAYS_HITS_TURN_2,
+    );
+  });
+
+  it("switchindataupdate: doubles wrap ownership stays behind a named identity barrier", () => {
+    const STATUS2_WRAPPED = (1 << 13) | (1 << 14) | (1 << 15);
+    const rc = context({
+      battleTopology: {
+        battlersCount: 4,
+        battleTypeFlags:
+          BATTLE_TYPE_TRAINER | BATTLE_TYPE_FACTORY | (1 << 0),
+        battlerPositions: [0, 1, 2, 3],
+      },
+      battlers: [
+        battler({ side: 0, status2: STATUS2_WRAPPED }),
+        battler({
+          side: 1,
+          species: SUNKERN,
+          hp: 0,
+          types: ["TYPE_GRASS", "TYPE_GRASS"],
+          partyIndex: 2,
+          ability: ABILITY_GUTS,
+        }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+    });
+    const { result } = stepAtProgramCounter(SWITCHINDATAUPDATE_PC, rc);
+    expect(result.kind).toBe("halted");
+    expect(result.state.haltReason).toMatchObject({
+      kind: "unsupported-branch",
+      sourceLine: 3199,
+    });
+  });
+
+  it("switchindataupdate: doubles Baton Pass sure-hit ownership stays behind a named identity barrier", () => {
+    const rc = context({
+      currentMove: 226,
+      battleTopology: {
+        battlersCount: 4,
+        battleTypeFlags:
+          BATTLE_TYPE_TRAINER | BATTLE_TYPE_FACTORY | (1 << 0),
+        battlerPositions: [0, 1, 2, 3],
+      },
+      battlers: [
+        battler({ side: 0, status3: 1 << 3 }),
+        battler({
+          side: 1,
+          species: SUNKERN,
+          hp: 0,
+          types: ["TYPE_GRASS", "TYPE_GRASS"],
+          partyIndex: 2,
+          ability: ABILITY_GUTS,
+        }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+    });
+    const { result } = stepAtProgramCounter(SWITCHINDATAUPDATE_PC, rc);
+    expect(result.kind).toBe("halted");
+    expect(result.state.haltReason).toMatchObject({
+      kind: "unsupported-branch",
+      sourceLine: 3180,
+    });
+  });
+
   it("switchindataupdate: STATUS2_ESCAPE_PREVENTION on another battler is a named barrier (battlerPreventingEscape identity not modeled)", () => {
     const STATUS2_ESCAPE_PREVENTION = 1 << 26;
     const rc = context({

@@ -140,7 +140,10 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // switchhandleorder's cases 0/1 (multi-battler collection / order-only, not
   // this script's case 2/3); switchindataupdate's STATUS2_ESCAPE_PREVENTION
   // and STATUS3_ALWAYS_HITS cross-battler clears (battlerPreventingEscape/
-  // battlerWithSureHit identity, unmodeled); switchinanim's BATTLE_TYPE_ARENA
+  // battlerWithSureHit identity, unmodeled); SwitchInClearSetData's
+  // unconditional STATUS2_WRAPPED clear and Baton Pass's opposing
+  // STATUS3_ALWAYS_HITS timer refresh add two doubles-only identity barriers
+  // (singles ownership is exact); switchinanim's BATTLE_TYPE_ARENA
   // point-init call (never set for Factory); various's every id other than
   // RESET_PLAYER_FAINTED (7); switchineffects's Spikes branch (structurally
   // unreachable -- SIDE_STATUS_SPIKES has no writer anywhere in this engine,
@@ -150,8 +153,8 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // (ABILITYEFFECT_ON_SWITCHIN) dispatch for the small closed set of trigger
   // abilities. 8 total, none reachable by either committed forced-switch
   // fixture (their switched-in mons carry a non-trigger ability, no item, no
-  // Spikes/escape/sure-hit state).
-  ["src/engine/battleScriptSwitchinOpcode.ts", 8],
+  // Spikes/escape/sure-hit/wrapped state).
+  ["src/engine/battleScriptSwitchinOpcode.ts", 10],
   // Primary-effect stat-change registration (docs/primary-stat-ground-truth.md):
   // Cmd_playanimation is narrowed to its B_ANIM_STATS_CHANGE arm (the only
   // animType BattleScript_EffectStatUp/EffectStatDown ever pass) -- any other

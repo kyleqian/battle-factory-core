@@ -107,7 +107,10 @@ function resolveSelectedBattler(
         B_POSITION_PLAYER_LEFT,
       )
       : null;
-  if (!isBattleScriptBattlerId(battler)) {
+  if (
+    !isBattleScriptBattlerId(battler)
+    || battler >= rules.battleTopology.battlersCount
+  ) {
     throw new Error(
       `Cmd_jumpifcantswitch: selector ${selector} did not resolve to an active battler`,
     );

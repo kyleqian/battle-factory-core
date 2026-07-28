@@ -1,4 +1,25 @@
 ---
+## 544 — [SUPERVISOR SOURCE CORRECTION 2026-07-27 ~21:55] Psych Up executes source-completely
+
+- **State:** tree green at **297 files / 3835 tests**; `npm run build`,
+  census, freshness, and `git diff --check` pass. The unchanged Battle-2 OFF
+  trace remains **16/16 exact**.
+- **Did:** registered `B_SCR_OP_COPYFOESTATS` / `Cmd_copyfoestats` as the
+  source's unconditional five-byte command: copy all eight target stat stages
+  to the attacker, ignore the unused failure pointer, and change nothing else.
+  Opcode isolation plus neutral/non-neutral `BattleScript_EffectPsychUp`
+  walks reach their real `END`, pin PP/events/provenance, preserve HP/status,
+  existing animation state, and zero-call RNG. Corrected a false brief claim
+  before commit: the command does not write animation arguments.
+- **Next:** merge the file-disjoint Baton Pass OFF evidence, then register the
+  newly top-ranked `B_SCR_OP_JUMPIFCANTSWITCH` / `EFFECT_BATON_PASS`.
+- **Notes:** census is **131/214 effects, 255/355 moves, 207/276 Factory-L50
+  distinct, 2618/2957 weighted**, exact **+1/+1/+1/+14**, all **42/42**
+  checks. Focused **53/53** and full **3835/3835** pass. No unsupported
+  barrier, recording import, ratchet change, oracle lifecycle action,
+  animation edit, or PAPERCUT.
+
+---
 ## 543 — [BOUNDED MAIN WORKER 2026-07-27 ~21:43] Full-turn singles requests use source move targets
 
 - **State:** tree green at **296 files / 3829 tests**; `npm run build` and
