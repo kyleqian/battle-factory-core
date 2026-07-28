@@ -2848,15 +2848,65 @@ describe("production updatestatusicon (Cmd_updatestatusicon) dispatch", () => {
     ]);
   });
 
-  describe("(b) unsupported-branch barriers", () => {
-    it("halts on BS_ATTACKER_WITH_PARTNER (doubles-only branch, not modeled)", () => {
-      const pc = program.instructions.find((i) =>
-        i.opcodeName === "B_SCR_OP_UPDATESTATUSICON" && i.operands[0]?.expression === "BS_ATTACKER_WITH_PARTNER"
-      )!.programCounter;
-      const rc = context(0);
+  describe("BS_ATTACKER_WITH_PARTNER", () => {
+    const pc = program.instructions.find((i) =>
+      i.opcodeName === "B_SCR_OP_UPDATESTATUSICON" && i.operands[0]?.expression === "BS_ATTACKER_WITH_PARTNER"
+    )!.programCounter;
+
+    it("singles emits only the present attacker", () => {
+      const rc = context(0, { status1: STATUS1_PARALYSIS_BIT });
       const { result } = stepAtProgramCounter(pc, rc);
-      expect(result.kind).toBe("halted");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 7711 });
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.scheduler.pendingControllerBattlers).toEqual([0]);
+      expect(result.state.events).toEqual([
+        expect.objectContaining({
+          kind: "status-icon-update",
+          battler: 0,
+          status1: STATUS1_PARALYSIS_BIT,
+        }),
+      ]);
+    });
+
+    it("doubles emits attacker then positional partner, skipping an absent partner", () => {
+      const doubles = {
+        battlersCount: 4 as const,
+        battleTypeFlags: BATTLE_SCRIPT_BATTLE_TYPE_DOUBLE,
+        battlerPositions: [0, 1, 2, 3],
+      };
+      const battlers = [
+        battler({ side: 0, status1: STATUS1_PARALYSIS_BIT }),
+        battler({ side: 1 }),
+        battler({ side: 0, status1: STATUS1_BURN_BIT }),
+        battler({ side: 1 }),
+      ];
+      const present = stepAtProgramCounter(
+        pc,
+        context(0, {}, { battlers, battleTopology: doubles }),
+      ).result;
+      if (present.kind !== "advanced") throw new Error(`expected advance, got ${present.kind}`);
+      expect(present.state.scheduler).toMatchObject({
+        activeBattler: 2,
+        pendingControllerBattlers: [0, 2],
+      });
+      expect(present.state.events).toEqual([
+        expect.objectContaining({ kind: "status-icon-update", battler: 0 }),
+        expect.objectContaining({ kind: "status-icon-update", battler: 2 }),
+      ]);
+
+      const absent = stepAtProgramCounter(
+        pc,
+        context(0, {}, {
+          battlers,
+          battleTopology: doubles,
+          absentBattlerFlags: 1 << 2,
+        }),
+      ).result;
+      if (absent.kind !== "advanced") throw new Error(`expected advance, got ${absent.kind}`);
+      expect(absent.state.scheduler).toMatchObject({
+        activeBattler: 2,
+        pendingControllerBattlers: [0],
+      });
+      expect(absent.state.events).toHaveLength(1);
     });
   });
 });

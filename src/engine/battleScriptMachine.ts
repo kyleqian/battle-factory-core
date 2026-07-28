@@ -684,6 +684,7 @@ function freezeEventPayload(
     case "draw-party-status-summary":
     case "set-battler-sprite-visibility":
     case "set-battler-status-data":
+    case "set-party-status-data":
     case "status-icon-update":
     case "set-battler-pp-data":
     case "set-battler-item":

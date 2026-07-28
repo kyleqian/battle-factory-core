@@ -100,6 +100,17 @@ export type BattleScriptSemanticEventPayload =
     status1: number;
   }>
   | Readonly<{
+    /**
+     * BtlController_EmitSetMonData(REQUEST_STATUS_BATTLE, partyMask, ...)
+     * from Cmd_healpartystatus. The controller applies the same raw status
+     * word to every selected party record.
+     */
+    kind: "set-party-status-data";
+    battler: BattleScriptBattlerId;
+    partyMask: number;
+    status1: number;
+  }>
+  | Readonly<{
     /** BtlController_EmitStatusIconUpdate(status1, status2) -- Cmd_updatestatusicon's icon-redraw notify, distinct from the data-sync set-battler-status-data. */
     kind: "status-icon-update";
     battler: BattleScriptBattlerId;

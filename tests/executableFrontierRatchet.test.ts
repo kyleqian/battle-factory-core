@@ -111,7 +111,11 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // BattleScript_DestinyBondTakesLife above the original faint-script frame.
   // 22 -> 21 (EFFECT_SPIKES): tryfaintmon_spikes now executes its guarded
   // pass-through and faint pop/jump, clearing SPIKES_DAMAGED at the source point.
-  ["src/engine/battleScriptHitChainOpcode.ts", 21],
+  // 21 -> 20 (EFFECT_HEAL_BELL): Cmd_updatestatusicon's
+  // BS_ATTACKER_WITH_PARTNER branch now emits for the present attacker and,
+  // only in doubles, its present positional partner. The former blanket
+  // barrier is retired rather than moved.
+  ["src/engine/battleScriptHitChainOpcode.ts", 20],
   ["src/engine/battleScriptAttackCancelerOpcode.ts", 4],
   ["src/engine/battleScriptMoveEndOpcode.ts", 7],
   ["src/engine/battleScriptJumpifbyteOpcode.ts", 1],

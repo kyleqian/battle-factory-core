@@ -91,6 +91,7 @@ import { createBattleScriptTrysetmagiccoatOpcodeHandlers } from "./battleScriptT
 import { createBattleScriptWeightDamageOpcodeHandlers } from "./battleScriptWeightDamageOpcode.ts";
 import { createBattleScriptTrysetspikesOpcodeHandlers } from "./battleScriptTrysetspikesOpcode.ts";
 import { createBattleScriptRefreshOpcodeHandlers } from "./battleScriptRefreshOpcode.ts";
+import { createBattleScriptHealpartystatusOpcodeHandlers } from "./battleScriptHealpartystatusOpcode.ts";
 import { createBattleScriptIncrementGameStatOpcodeHandlers } from "./battleScriptIncrementGameStatOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
@@ -439,6 +440,8 @@ export type BattleScriptPartyMemberMoves = readonly [number, number, number, num
 export type BattleScriptPartyMemberState = Readonly<{
   species: number;
   isEgg: boolean;
+  /** Source MON_DATA_ABILITY_NUM (0 or 1). */
+  abilityNum: number;
   hp: number;
   /** Source gPlayerParty/gEnemyParty[].status1 -- kept in sync by SetMoveEffect's status write, mirroring datahpupdate's HP sync. */
   status1: number;
@@ -791,6 +794,7 @@ export type BattleScriptRulesContextInput = Readonly<{
 export type BattleScriptPartyMemberInput = Readonly<{
   species?: number;
   isEgg?: boolean;
+  abilityNum?: number;
   hp?: number;
   status1?: number;
   item?: number;
@@ -1602,6 +1606,7 @@ const BATTLE_SCRIPT_EMPTY_PARTY_MEMBER_MOVES: BattleScriptPartyMemberMoves = Obj
 const BATTLE_SCRIPT_EMPTY_PARTY_MEMBER: BattleScriptPartyMemberState = Object.freeze({
   species: 0,
   isEgg: false,
+  abilityNum: 0,
   hp: 0,
   status1: 0,
   item: 0,
@@ -1637,6 +1642,7 @@ function createBattleScriptPartyState(
     input.map((member, index) => Object.freeze({
       species: requireUnsigned(member.species ?? 0, 0xffff, `${field}[${index}].species`),
       isEgg: Boolean(member.isEgg),
+      abilityNum: requireUnsigned(member.abilityNum ?? 0, 1, `${field}[${index}].abilityNum`),
       hp: requireUnsigned(member.hp ?? 0, 0xffff, `${field}[${index}].hp`),
       status1: requireUnsigned(member.status1 ?? 0, 0xffff_ffff, `${field}[${index}].status1`) >>> 0,
       item: requireUnsigned(member.item ?? 0, 0xffff, `${field}[${index}].item`),
@@ -2528,6 +2534,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptSetforcedtargetOpcodeHandlers(program),
     ...createBattleScriptGetSecretPowerEffectOpcodeHandlers(program),
     ...createBattleScriptRefreshOpcodeHandlers(program),
+    ...createBattleScriptHealpartystatusOpcodeHandlers(program),
     ...createBattleScriptIncrementGameStatOpcodeHandlers(program),
     ...createBattleScriptSettormentOpcodeHandlers(program),
     ...createBattleScriptSettauntOpcodeHandlers(program),

@@ -16,6 +16,7 @@ import {
   type BattleScriptOpcodeHandlerContext,
   type BattleScriptOpcodeHandlers,
   type BattleScriptRngState,
+  type BattleScriptSchedulerState,
 } from "./battleScriptMachine.ts";
 import {
   resolveBattleScriptLabel,
@@ -29,6 +30,7 @@ import type {
   BattleScriptMessagePreparationPort,
 } from "./battleScriptSourceCommands.ts";
 import {
+  BATTLE_SCRIPT_BATTLE_TYPE_DOUBLE,
   BATTLE_SCRIPT_BATTLE_TYPE_ARENA,
   BATTLE_SCRIPT_HITMARKER_ATTACKSTRING_PRINTED,
   BATTLE_SCRIPT_HITMARKER_NO_ATTACKSTRING,
@@ -39,6 +41,7 @@ import {
   BATTLE_SCRIPT_MOVE_TARGET_BOTH,
   BATTLE_SCRIPT_STATUS2_SUBSTITUTE,
   resolveBattleScriptBattlerHoldEffect,
+  resolveBattleScriptBattlerPartner,
   resolveBattleScriptMoveTarget,
   resolveBattleScriptMoveType,
   withBattleScriptPartyMemberHp,
@@ -261,6 +264,14 @@ const B_MSG_STATUS_HAD_NO_EFFECT = 2;
 
 /** printfromtable's registered small constant tables, each indexed by MULTISTRING_CHOOSER. */
 const PRINTFROMTABLE_TABLES: Readonly<Record<string, readonly string[]>> = Object.freeze({
+  /** battle_message.c:1132-1139 -- Heal Bell's four Soundproof selectors plus Aromatherapy. */
+  gPartyStatusHealStringIds: Object.freeze([
+    "STRINGID_BELLCHIMED",
+    "STRINGID_BELLCHIMED",
+    "STRINGID_BELLCHIMED",
+    "STRINGID_BELLCHIMED",
+    "STRINGID_SOOTHINGAROMA",
+  ]),
   /** battle_message.c:1235-1240 -- Trick's taken/given/both item-result table. */
   gItemSwapStringIds: Object.freeze([
     "STRINGID_PKMNOBTAINEDX",
@@ -3246,10 +3257,9 @@ function createPrintfromtableOpcodeHandler(
 }
 
 /**
- * Cmd_updatestatusicon (battle_script_commands.c:7699-7730). The
- * BS_ATTACKER_WITH_PARTNER doubles branch (its own gAbsentBattlerFlags-gated
- * up-to-two-emit loop) is a clean (b) barrier -- the status-write quartet's
- * own scripts only ever call `updatestatusicon BS_EFFECT_BATTLER`.
+ * Cmd_updatestatusicon (battle_script_commands.c:7699-7730), including the
+ * BS_ATTACKER_WITH_PARTNER source branch's absent-gated attacker emit and
+ * optional doubles-partner emit.
  */
 function createUpdatestatusiconOpcodeHandler(
   isControllerIdle: BattleScriptControllerIdlePort<BattleScriptRulesContext>,
@@ -3267,11 +3277,52 @@ function createUpdatestatusiconOpcodeHandler(
       );
     }
     if (operand.expression === "BS_ATTACKER_WITH_PARTNER") {
-      return unsupportedBranch(
+      const rules = context.state.rulesContext;
+      const attacker = requireBattlerRole(rules, "attacker");
+      const events = [];
+      let scheduler: BattleScriptSchedulerState = Object.freeze({
+        ...context.state.scheduler,
+        activeBattler: attacker,
+      });
+      if ((rules.absentBattlerFlags & (1 << attacker)) === 0) {
+        const state = rules.battlers[attacker];
+        scheduler = markBattleScriptControllerPending(scheduler, attacker);
+        events.push(Object.freeze({
+          kind: "status-icon-update" as const,
+          battler: attacker,
+          status1: state.status1,
+          status2: state.status2,
+        }));
+      }
+      if (
+        (
+          rules.battleTopology.battleTypeFlags
+          & BATTLE_SCRIPT_BATTLE_TYPE_DOUBLE
+        ) !== 0
+      ) {
+        const partner = resolveBattleScriptBattlerPartner(
+          rules.battleTopology,
+          attacker,
+        ) as BattleScriptBattlerId;
+        scheduler = Object.freeze({ ...scheduler, activeBattler: partner });
+        if ((rules.absentBattlerFlags & (1 << partner)) === 0) {
+          const state = rules.battlers[partner];
+          scheduler = markBattleScriptControllerPending(scheduler, partner);
+          events.push(Object.freeze({
+            kind: "status-icon-update" as const,
+            battler: partner,
+            status1: state.status1,
+            status2: state.status2,
+          }));
+        }
+      }
+      return transitionBattleScriptCommand(
         context,
-        "Cmd_updatestatusicon's BS_ATTACKER_WITH_PARTNER doubles branch is not modeled",
-        "battle_script_commands.c",
-        7711,
+        Object.freeze({ kind: "advance" }),
+        {
+          scheduler,
+          events: Object.freeze(events),
+        },
       );
     }
     const battler = resolveBattlerForBattleScript(context, operand);

@@ -162,6 +162,8 @@ export type FactoryFullTurnBattlerConfig = Readonly<{
   pp?: readonly [number, number, number, number];
   /** Source `gBattleMons[].ability`; omitted legacy configs retain the old zero default. */
   ability?: number;
+  /** Source party record's MON_DATA_ABILITY_NUM. */
+  abilityNum?: number;
   /** Source `gBattleMons[].item`; omitted legacy configs retain the old zero default. */
   item?: number;
   /** Source `gBattleMons[].friendship`; omitted legacy configs retain the old zero default. */
@@ -349,6 +351,7 @@ function partySlot(config: FactoryFullTurnBattlerConfig): BattleScriptPartyMembe
   return {
     species: config.species,
     isEgg: false,
+    abilityNum: config.abilityNum ?? 0,
     hp: config.hp,
     status1: config.status1 ?? 0,
     item: config.item ?? 0,

@@ -76,6 +76,9 @@ const ATOMIC_VALUES = Object.freeze({
   /** battle_string_ids.h:519 -- delayed Future Sight/Doom Desire selector. */
   B_MSG_FUTURE_SIGHT: 0,
   B_MSG_DOOM_DESIRE: 1,
+  /** battle_string_ids.h:513-514 -- Heal Bell's two OR-able Soundproof bits. */
+  B_MSG_BELL_SOUNDPROOF_ATTACKER: 1,
+  B_MSG_BELL_SOUNDPROOF_PARTNER: 2,
   B_MSG_TURN1_RAZOR_WIND: 0,
   B_MSG_TURN1_SOLAR_BEAM: 1,
   B_MSG_TURN1_SKULL_BASH: 2,
