@@ -1,1 +1,11 @@
-{"schema":"scene-on-reversal-evidence/v1","oracleProfile":"battle-scene-on","scenario":"tools/battle-lab/mechanic-reversal-player-vigoroth-opponent-delcatty.json","probe":"tools/compare/reversalProbe.py","orientation":"player-vigoroth-to-opponent-delcatty","sourceWindow":{"startFrame":77,"endFrame":250,"frameCount":174},"evidenceSha256":"7cfd54c7456c2c67633bf2c9232ed6f02e8cbcee60599dba639e56cd6166d07b","rawRgbSha256":"9794481ceaad271187b4d9b949dd9561fb169140f62514ee4d11022eb4394830"}
+{
+  "schema": "scene-on-reversal-evidence/v2",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-reversal-player-vigoroth-opponent-delcatty.json",
+  "probe": "tools/compare/reversalProbe.py",
+  "orientation": "player-vigoroth-to-opponent-delcatty",
+  "captureWindow": {"startFrame": 414, "endFrame": 624, "frameCount": 211},
+  "sourceWindow": {"startFrame": 451, "endFrame": 624, "frameCount": 174},
+  "evidenceSha256": "f4f3dce725b38c7f857a76e6a8d890e983c680ca6032dcfaee5553f7cd5b3a0c",
+  "rawRgbSha256": "1a761bb08df97ee8b7732f58a46d6da5c249ea2a74495052e6ffabcd54ccb621"
+}

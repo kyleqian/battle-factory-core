@@ -1784,6 +1784,26 @@
   ],
   "componentTracks": [
     {
+      "id": "blue-orb-reversal-evidence",
+      "components": [
+        "asset:ANIM_TAG_BLUE_ORB",
+        "asset:ANIM_TAG_HANDS_AND_FEET",
+        "asset:ANIM_TAG_IMPACT",
+        "sprite:gHorizontalLungeSpriteTemplate",
+        "sprite:gReversalOrbSpriteTemplate",
+        "task:AnimTask_ShakeTargetBasedOnMovePowerOrDmg",
+        "visualCommand:blend_color_cycle",
+        "visualCommand:complex_palette_blend",
+        "visualCommand:create_basic_hitsplat_sprite",
+        "visualCommand:create_fist_sprite"
+      ],
+      "representatives": [
+        "MOVE_REVERSAL",
+        "MOVE_SWALLOW"
+      ],
+      "goal": "Evidence-only, with no coverage promotion: legally corrected challenge-2 complete parties [326,327,328] versus [267,268,269] and the reverse prove every currentMove=179 frame through first inactive cleanup twice fresh. Emerald internal set/species identities are VIGOROTH/LUNATONE/SOLROCK 365/348/349 and DELCATTY/SABLEYE/LICKITUNG 316/322/108; 302 is NINJASK and is rejected. Player Vigoroth receipts cover 211/211 current-move frames 414-624 and source frames 451-624; opponent Vigoroth covers 215/215 frames 363-577 and source frames 404-577. The portable v2 receipt proves source offsets/waits, both complex palette-blend lifecycles, BlendColorCycle, Detect/Reversal/Vital Throw audio, six ReversalOrb lifecycles/callbacks, lunge/fist/impact, power/damage shake, software+hardware OAM/matrices/palettes/registers, raw RGB, and cleanup. MOVE_REVERSAL remains unsupported until a genuine reducer/assets/typed-seam/shared-framebuffer contract passes the same complete window; MOVE_SWALLOW remains independently unsupported because it adds BLUE_STAR, move-turn-dependent five-orb waves, attacker deform/shake, and HealingEffect."
+    },
+    {
       "id": "blue-light-wall-reflect",
       "components": [
         "asset:ANIM_TAG_BLUE_LIGHT_WALL",
