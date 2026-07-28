@@ -438,6 +438,7 @@ function createSwitchindataupdateOpcodeHandler(
           item,
           moves: partyMember.moves,
           pp: partyMember.pp,
+          ppBonuses: partyMember.ppBonuses,
           types,
           statStages: isBatonPass ? candidate.statStages : DEFAULT_STAT_STAGES,
           status2: isBatonPass ? (candidate.status2 & BATON_PASS_STATUS2) >>> 0 : 0,

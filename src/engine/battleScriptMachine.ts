@@ -676,6 +676,12 @@ function freezeEventPayload(
         ...payload,
         snapshot: createBattleScriptSelectionMessageSnapshot(payload.snapshot),
       });
+    case "set-battler-moves-pp-data":
+      return Object.freeze({
+        ...payload,
+        moves: Object.freeze([...payload.moves]) as unknown as typeof payload.moves,
+        pp: Object.freeze([...payload.pp]) as unknown as typeof payload.pp,
+      });
     case "play-se":
     case "play-fanfare":
     case "play-faint-cry":

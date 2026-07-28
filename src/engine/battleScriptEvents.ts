@@ -125,6 +125,14 @@ export type BattleScriptSemanticEventPayload =
     pp: number;
   }>
   | Readonly<{
+    /** BtlController_EmitSetMonData(REQUEST_MOVES_PP_BATTLE). */
+    kind: "set-battler-moves-pp-data";
+    battler: BattleScriptBattlerId;
+    moves: readonly [number, number, number, number];
+    pp: readonly [number, number, number, number];
+    ppBonuses: number;
+  }>
+  | Readonly<{
     /** BtlController_EmitSetMonData(REQUEST_HELDITEM_BATTLE) -- Cmd_removeitem's own consumption notify (battle_script_commands.c:5901-5915). */
     kind: "set-battler-item";
     battler: BattleScriptBattlerId;

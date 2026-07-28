@@ -10,8 +10,8 @@ Answers ROADMAP S10's Executable-frontier reset question directly: not "how many
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 197 | 214 | 92.1% |
-| Moves (unweighted, all 355) | 337 | 355 | 94.9% |
+| Effect scripts | 198 | 214 | 92.5% |
+| Moves (unweighted, all 355) | 338 | 355 | 95.2% |
 | Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 275 | 276 | 99.6% |
 | Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2955 | 2957 | 99.9% |
 
@@ -26,7 +26,6 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_SETALWAYSHITFLAG` | 1 (EFFECT_LOCK_ON) | 2 | 0 | 0 |
 | `B_SCR_OP_ASSISTATTACKSELECT` | 1 (EFFECT_ASSIST) | 1 | 0 | 0 |
 | `B_SCR_OP_CALLENVIRONMENTATTACK` | 1 (EFFECT_NATURE_POWER) | 1 | 0 | 0 |
-| `B_SCR_OP_COPYMOVEPERMANENTLY` | 1 (EFFECT_SKETCH) | 1 | 0 | 0 |
 | `B_SCR_OP_SETCHARGE` | 1 (EFFECT_CHARGE) | 1 | 0 | 0 |
 | `B_SCR_OP_SETTYPETOENVIRONMENT` | 1 (EFFECT_CAMOUFLAGE) | 1 | 0 | 0 |
 | `B_SCR_OP_SETTYPETORANDOMRESISTANCE` | 1 (EFFECT_CONVERSION_2) | 1 | 0 | 0 |
@@ -136,7 +135,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_SNORE | `BattleScript_EffectSnore` | executable | - | - | 1 | 1 (1) |
 | EFFECT_CONVERSION_2 | `BattleScript_EffectConversion2` | blocked-on-opcodes | `B_SCR_OP_SETTYPETORANDOMRESISTANCE` (main path) | - | 1 | 0 (0) |
 | EFFECT_LOCK_ON | `BattleScript_EffectLockOn` | blocked-on-opcodes | `B_SCR_OP_SETALWAYSHITFLAG` (edge branch only) | - | 2 | 0 (0) |
-| EFFECT_SKETCH | `BattleScript_EffectSketch` | blocked-on-opcodes | `B_SCR_OP_COPYMOVEPERMANENTLY` (edge branch only) | - | 1 | 0 (0) |
+| EFFECT_SKETCH | `BattleScript_EffectSketch` | executable | - | - | 1 | 0 (0) |
 | EFFECT_UNUSED_60 | `BattleScript_EffectHit` | executable | - | - | 0 | 0 (0) |
 | EFFECT_SLEEP_TALK | `BattleScript_EffectSleepTalk` | executable | - | - | 1 | 1 (8) |
 | EFFECT_DESTINY_BOND | `BattleScript_EffectDestinyBond` | executable | - | - | 1 | 1 (10) |

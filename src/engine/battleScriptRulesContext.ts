@@ -282,6 +282,8 @@ type BattleScriptMoveEndBattlerMetadata = Readonly<{
   ivs: BattleScriptIvs;
   /** Source four-bit DisableStruct::mimickedMoves mask. */
   mimickedMoves: number;
+  /** Source gBattleMons[battler].ppBonuses packed two-bit PP Up fields. */
+  ppBonuses: number;
   /** Source two-bit DisableStruct::stockpileCounter (0..3). */
   stockpileCounter: number;
   /** DisableStruct's paired four-bit duration fields. */
@@ -424,6 +426,7 @@ export type BattleScriptRulesBattler = BattleScriptRulesBattlerBase & Readonly<{
   /** Legacy focused fixtures default to six zero IVs at the construction boundary. */
   ivs?: BattleScriptIvs;
   mimickedMoves?: number;
+  ppBonuses?: number;
   stockpileCounter?: number;
   disableTimer?: number;
   disableTimerStartValue?: number;
@@ -527,6 +530,8 @@ export type BattleScriptPartyMemberState = Readonly<{
   moves: BattleScriptPartyMemberMoves;
   /** Source MON_DATA_PP1..4, synchronized by REQUEST_PPMOVE1_BATTLE controller writes. */
   pp: BattleScriptPartyMemberPp;
+  /** Source MON_DATA_PP_BONUSES, included in REQUEST_MOVES_PP_BATTLE. */
+  ppBonuses: number;
 }>;
 
 export type BattleScriptPartyState = readonly [
@@ -927,6 +932,7 @@ export type BattleScriptPartyMemberInput = Readonly<{
   item?: number;
   moves?: readonly [number?, number?, number?, number?];
   pp?: readonly [number?, number?, number?, number?];
+  ppBonuses?: number;
 }>;
 
 function requireUnsigned(value: number, maximum: number, field: string): number {
@@ -1755,6 +1761,7 @@ const BATTLE_SCRIPT_EMPTY_PARTY_MEMBER: BattleScriptPartyMemberState = Object.fr
   item: 0,
   moves: BATTLE_SCRIPT_EMPTY_PARTY_MEMBER_MOVES,
   pp: BATTLE_SCRIPT_EMPTY_PARTY_MEMBER_PP,
+  ppBonuses: 0,
 });
 
 function createBattleScriptPartyMemberMoves(
@@ -1813,6 +1820,7 @@ function createBattleScriptPartyState(
           (value, movePosition) => requireUnsigned(value, 0xff, `${field}[${index}].pp[${movePosition}]`),
         ),
       ) as unknown as BattleScriptPartyMemberPp,
+      ppBonuses: requireUnsigned(member.ppBonuses ?? 0, 0xff, `${field}[${index}].ppBonuses`),
     })),
   ) as unknown as BattleScriptPartyState;
 }
@@ -1909,6 +1917,25 @@ export function withBattleScriptPartyMemberPp(
   const nextState = state.map((candidate, index) =>
     index === partyIndex
       ? Object.freeze({ ...candidate, pp: Object.freeze(nextPp) })
+      : candidate
+  ) as unknown as BattleScriptPartyState;
+  return Object.freeze({ ...party, [sideKey]: Object.freeze(nextState) });
+}
+
+/** REQUEST_MOVES_PP_BATTLE atomically persists all four moves/PP plus PP Ups. */
+export function withBattleScriptPartyMemberMovesPp(
+  party: BattleScriptPartyBySide,
+  side: 0 | 1,
+  partyIndex: number,
+  moves: BattleScriptPartyMemberMoves,
+  pp: BattleScriptPartyMemberPp,
+  ppBonuses: number,
+): BattleScriptPartyBySide {
+  const sideKey = side === 0 ? "player" : "opponent";
+  const state = party[sideKey];
+  const nextState = state.map((candidate, index) =>
+    index === partyIndex
+      ? Object.freeze({ ...candidate, moves, pp, ppBonuses })
       : candidate
   ) as unknown as BattleScriptPartyState;
   return Object.freeze({ ...party, [sideKey]: Object.freeze(nextState) });
@@ -2230,6 +2257,7 @@ export function createBattleScriptRulesContext(
       0x0f,
       `battlers[${index}].mimickedMoves`,
     ),
+    ppBonuses: requireUnsigned(battler.ppBonuses ?? 0, 0xff, `battlers[${index}].ppBonuses`),
     stockpileCounter: requireUnsigned(
       battler.stockpileCounter ?? 0,
       3,

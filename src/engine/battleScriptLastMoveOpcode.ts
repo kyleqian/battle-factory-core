@@ -7,6 +7,7 @@
  * BattleScriptRulesContext.
  */
 import {
+  markBattleScriptControllerPending,
   transitionBattleScriptCommand,
   type BattleScriptOpcodeHandler,
   type BattleScriptOpcodeHandlers,
@@ -14,6 +15,7 @@ import {
 import { resolveBattleScriptLabel, type BattleScriptProgram } from "./battleScriptProgram.ts";
 import { requireBattlerRole, withBattler } from "./battleScriptHitChainOpcode.ts";
 import {
+  withBattleScriptPartyMemberMovesPp,
   type BattleScriptRulesContext,
 } from "./battleScriptRulesContext.ts";
 import { BATTLE_SCRIPT_STATUS2_TRANSFORMED } from "./battleScriptSourceConstants.ts";
@@ -29,6 +31,7 @@ const BASE_PP_BY_MOVE = new Map(
 const MOVE_NONE = 0;
 const MOVE_STRUGGLE = 165;
 const MOVE_UNAVAILABLE = 0xffff;
+const MOVE_SKETCH = 166;
 
 function requireMove(name: string): number {
   const move = MOVE_BY_NAME.get(name);
@@ -103,11 +106,79 @@ function createMimicHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContex
   };
 }
 
+function createSketchHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
+  return (context) => {
+    const rules = context.state.rulesContext;
+    const attacker = requireBattlerRole(rules, "attacker");
+    const target = requireBattlerRole(rules, "target");
+    const copiedMove = rules.moveHistory.lastPrintedMoves[target]!;
+    const attackerState = rules.battlers[attacker];
+    const duplicateOutsideSketch = attackerState.moves.some(
+      (move) => move !== MOVE_SKETCH && move === copiedMove,
+    );
+    const chosenRules = Object.freeze({ ...rules, chosenMove: MOVE_UNAVAILABLE });
+    if (
+      (attackerState.status2 & BATTLE_SCRIPT_STATUS2_TRANSFORMED) !== 0
+      || copiedMove === MOVE_STRUGGLE
+      || copiedMove === MOVE_NONE
+      || copiedMove === MOVE_UNAVAILABLE
+      || copiedMove === MOVE_SKETCH
+      || duplicateOutsideSketch
+    ) {
+      return jumpToFailure(Object.freeze({
+        ...context,
+        state: Object.freeze({ ...context.state, rulesContext: chosenRules }),
+      }));
+    }
+
+    const slot = rules.currentMovePosition;
+    const moves = Object.freeze(attackerState.moves.map((move, index) =>
+      index === slot ? copiedMove : move
+    )) as unknown as BattleScriptRulesContext["battlers"][number]["moves"];
+    const pp = Object.freeze(attackerState.pp.map((value, index) =>
+      index === slot ? BASE_PP_BY_MOVE.get(copiedMove) ?? 0 : value
+    )) as unknown as BattleScriptRulesContext["battlers"][number]["pp"];
+    const next = withBattler(chosenRules, attacker, { moves, pp });
+    const party = withBattleScriptPartyMemberMovesPp(
+      rules.party,
+      attackerState.side,
+      attackerState.partyIndex,
+      moves,
+      pp,
+      attackerState.ppBonuses,
+    );
+    return transitionBattleScriptCommand(
+      context,
+      Object.freeze({ kind: "advance" }),
+      {
+        rulesContext: Object.freeze({
+          ...next,
+          party,
+          battleTextBuff1Move: copiedMove,
+        }),
+        scheduler: markBattleScriptControllerPending(context.state.scheduler, attacker),
+        events: Object.freeze([
+          Object.freeze({
+            kind: "set-battler-moves-pp-data" as const,
+            battler: attacker,
+            moves,
+            pp,
+            ppBonuses: attackerState.ppBonuses,
+          }),
+        ]),
+      },
+    );
+  };
+}
+
 export function createBattleScriptLastMoveOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
   const mimic = program.instructions.filter(
     ({ opcodeName }) => opcodeName === "B_SCR_OP_MIMICATTACKCOPY",
+  );
+  const sketch = program.instructions.filter(
+    ({ opcodeName }) => opcodeName === "B_SCR_OP_COPYMOVEPERMANENTLY",
   );
   if (
     mimic.length !== 1
@@ -118,7 +189,17 @@ export function createBattleScriptLastMoveOpcodeHandlers(
   ) {
     throw new Error(`invalid B_SCR_OP_MIMICATTACKCOPY committed shape (${mimic.length})`);
   }
+  if (
+    sketch.length !== 1
+    || sketch[0]!.opcodeId !== 0xa8
+    || sketch[0]!.dispatcher !== "Cmd_copymovepermanently"
+    || sketch[0]!.operands.length !== 1
+    || sketch[0]!.operands[0]?.widthBytes !== 4
+  ) {
+    throw new Error(`invalid B_SCR_OP_COPYMOVEPERMANENTLY committed shape (${sketch.length})`);
+  }
   return Object.freeze({
     [mimic[0]!.opcodeId]: createMimicHandler(),
+    [sketch[0]!.opcodeId]: createSketchHandler(),
   });
 }
