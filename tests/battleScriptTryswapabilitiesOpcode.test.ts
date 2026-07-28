@@ -360,15 +360,19 @@ describe("source-complete B_SCR_OP_TRYSWAPABILITIES registration", () => {
       value: 3_031_698_222,
       calls: 4,
     });
-    // This engine party slice carries species/isEgg/hp/status1/moves, but no
+    // This engine party slice carries species/isEgg/hp/status1/moves/PP, but no
     // ability or abilityNum. Tackle writes its modeled player HP; these
     // assertions claim only the carried fields' resulting values. Persistent
     // abilities 39/5 belong solely to the accepted oracle receipt.
     expect(context.party.player[0]).toEqual({
       ...modeledPartyBefore.player[0],
       hp: 172,
+      pp: context.battlers[0].pp,
     });
-    expect(context.party.opponent[0]).toEqual(modeledPartyBefore.opponent[0]);
+    expect(context.party.opponent[0]).toEqual({
+      ...modeledPartyBefore.opponent[0],
+      pp: context.battlers[1].pp,
+    });
     expect(context.party.player.slice(1)).toEqual(modeledPartyBefore.player.slice(1));
     expect(context.party.opponent.slice(1)).toEqual(modeledPartyBefore.opponent.slice(1));
     expect(result.events.find(({ payload }) =>

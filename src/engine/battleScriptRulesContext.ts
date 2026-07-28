@@ -84,6 +84,7 @@ import { createBattleScriptTryswapitemsOpcodeHandlers } from "./battleScriptTrys
 import { createBattleScriptSettormentOpcodeHandlers } from "./battleScriptSettormentOpcode.ts";
 import { createBattleScriptTrysetencoreOpcodeHandlers } from "./battleScriptTrysetencoreOpcode.ts";
 import { createBattleScriptTrysetperishsongOpcodeHandlers } from "./battleScriptTrysetperishsongOpcode.ts";
+import { createBattleScriptTrysetgrudgeOpcodeHandlers } from "./battleScriptTrysetgrudgeOpcode.ts";
 import { createBattleScriptRankedBatch1OpcodeHandlers } from "./battleScriptRankedBatch1Opcode.ts";
 import { createBattleScriptSettauntOpcodeHandlers } from "./battleScriptSettauntOpcode.ts";
 import { createBattleScriptSetforesightOpcodeHandlers } from "./battleScriptSetforesightOpcode.ts";
@@ -470,6 +471,7 @@ export type BattleScriptSelectorRoleBindings = Readonly<{
 export const BATTLE_SCRIPT_PARTY_SIZE = 6;
 
 export type BattleScriptPartyMemberMoves = readonly [number, number, number, number];
+export type BattleScriptPartyMemberPp = readonly [number, number, number, number];
 
 /** The exact GetMonData fields Cmd_checkteamslost and GetMostSuitableMonToSwitchInto read per party slot. */
 export type BattleScriptPartyMemberState = Readonly<{
@@ -484,6 +486,8 @@ export type BattleScriptPartyMemberState = Readonly<{
   item: number;
   /** Source MON_DATA_MOVE1..4 -- read by GetMostSuitableMonToSwitchInto's super-effective-move gate (forced-switch-ground-truth.md §1b/§4 slice 2). */
   moves: BattleScriptPartyMemberMoves;
+  /** Source MON_DATA_PP1..4, synchronized by REQUEST_PPMOVE1_BATTLE controller writes. */
+  pp: BattleScriptPartyMemberPp;
 }>;
 
 export type BattleScriptPartyState = readonly [
@@ -709,6 +713,8 @@ export type BattleScriptRulesContext = Readonly<
     battleTextBuff1MonNick: BattleScriptPreparedMonNick | null;
     /** Typed form of PREPARE_BYTE_NUMBER_BUFFER(gBattleTextBuff1, 1, value). */
     battleTextBuff1ByteNumber: number | null;
+    /** Typed form of PREPARE_MOVE_BUFFER(gBattleTextBuff1, move). */
+    battleTextBuff1Move: number | null;
     /**
      * Source gBattlerByTurnOrder[MAX_BATTLERS_COUNT] -- populated by
      * `ENDTURN_ORDER`'s `GetWhoStrikesFirst` insertion sort
@@ -828,6 +834,7 @@ export type BattleScriptRulesContextInput = Readonly<{
   futureSightDmg?: readonly number[];
   battleTextBuff1MonNick?: BattleScriptPreparedMonNick | null;
   battleTextBuff1ByteNumber?: number | null;
+  battleTextBuff1Move?: number | null;
   battlerByTurnOrder?: readonly number[];
   currentTurnActionNumber?: number;
 }>;
@@ -840,6 +847,7 @@ export type BattleScriptPartyMemberInput = Readonly<{
   status1?: number;
   item?: number;
   moves?: readonly [number?, number?, number?, number?];
+  pp?: readonly [number?, number?, number?, number?];
 }>;
 
 function requireUnsigned(value: number, maximum: number, field: string): number {
@@ -1643,6 +1651,7 @@ function createBattleScriptBattleTopology(
 }
 
 const BATTLE_SCRIPT_EMPTY_PARTY_MEMBER_MOVES: BattleScriptPartyMemberMoves = Object.freeze([0, 0, 0, 0]);
+const BATTLE_SCRIPT_EMPTY_PARTY_MEMBER_PP: BattleScriptPartyMemberPp = Object.freeze([0, 0, 0, 0]);
 
 const BATTLE_SCRIPT_EMPTY_PARTY_MEMBER: BattleScriptPartyMemberState = Object.freeze({
   species: 0,
@@ -1652,6 +1661,7 @@ const BATTLE_SCRIPT_EMPTY_PARTY_MEMBER: BattleScriptPartyMemberState = Object.fr
   status1: 0,
   item: 0,
   moves: BATTLE_SCRIPT_EMPTY_PARTY_MEMBER_MOVES,
+  pp: BATTLE_SCRIPT_EMPTY_PARTY_MEMBER_PP,
 });
 
 function createBattleScriptPartyMemberMoves(
@@ -1688,6 +1698,11 @@ function createBattleScriptPartyState(
       status1: requireUnsigned(member.status1 ?? 0, 0xffff_ffff, `${field}[${index}].status1`) >>> 0,
       item: requireUnsigned(member.item ?? 0, 0xffff, `${field}[${index}].item`),
       moves: createBattleScriptPartyMemberMoves(member.moves, `${field}[${index}].moves`),
+      pp: Object.freeze(
+        createBattleScriptPartyMemberMoves(member.pp, `${field}[${index}].pp`).map(
+          (value, movePosition) => requireUnsigned(value, 0xff, `${field}[${index}].pp[${movePosition}]`),
+        ),
+      ) as unknown as BattleScriptPartyMemberPp,
     })),
   ) as unknown as BattleScriptPartyState;
 }
@@ -1762,6 +1777,29 @@ export function withBattleScriptPartyMemberItem(
   if (member.item === item) return party;
   const nextState = state.map((candidate, index) =>
     index === partyIndex ? Object.freeze({ ...candidate, item }) : candidate
+  ) as unknown as BattleScriptPartyState;
+  return Object.freeze({ ...party, [sideKey]: Object.freeze(nextState) });
+}
+
+/** REQUEST_PPMOVE1_BATTLE + slot writes one durable party PP byte. */
+export function withBattleScriptPartyMemberPp(
+  party: BattleScriptPartyBySide,
+  side: 0 | 1,
+  partyIndex: number,
+  movePosition: number,
+  pp: number,
+): BattleScriptPartyBySide {
+  const sideKey = side === 0 ? "player" : "opponent";
+  const state = party[sideKey];
+  const member = state[partyIndex];
+  if (member.pp[movePosition] === pp) return party;
+  const nextPp = member.pp.map((value, index) =>
+    index === movePosition ? pp : value
+  ) as unknown as BattleScriptPartyMemberPp;
+  const nextState = state.map((candidate, index) =>
+    index === partyIndex
+      ? Object.freeze({ ...candidate, pp: Object.freeze(nextPp) })
+      : candidate
   ) as unknown as BattleScriptPartyState;
   return Object.freeze({ ...party, [sideKey]: Object.freeze(nextState) });
 }
@@ -2385,6 +2423,10 @@ export function createBattleScriptRulesContext(
       || input.battleTextBuff1ByteNumber === undefined
       ? null
       : requireUnsigned(input.battleTextBuff1ByteNumber, 0xff, "battleTextBuff1ByteNumber"),
+    battleTextBuff1Move: input.battleTextBuff1Move === null
+      || input.battleTextBuff1Move === undefined
+      ? null
+      : requireUnsigned(input.battleTextBuff1Move, 0xffff, "battleTextBuff1Move"),
     battlerByTurnOrder: Object.freeze([
       requireUnsigned(input.battlerByTurnOrder?.[0] ?? 0, 3, "battlerByTurnOrder[0]"),
       requireUnsigned(input.battlerByTurnOrder?.[1] ?? 1, 3, "battlerByTurnOrder[1]"),
@@ -2601,6 +2643,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptDisablelastusedattackOpcodeHandlers(program),
     ...createBattleScriptTrysetencoreOpcodeHandlers(program),
     ...createBattleScriptTrysetperishsongOpcodeHandlers(program),
+    ...createBattleScriptTrysetgrudgeOpcodeHandlers(program),
     ...createBattleScriptRankedBatch1OpcodeHandlers(program),
     ...createBattleScriptFuryCutterOpcodeHandlers(program),
     ...createBattleScriptSetminimizeOpcodeHandlers(program),

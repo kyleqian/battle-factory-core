@@ -2990,13 +2990,6 @@ describe("production tryfaintmon (Cmd_tryfaintmon) dispatch", () => {
       expect(result.state.rulesContext.battleMoveDamage).toBe(rc.battlers[0]!.hp);
     });
 
-    it("halts on the target's STATUS3_GRUDGE vs. a different-side attacker (BattleScript_GrudgeTakesPP unmodeled)", () => {
-      const rc = context(0, {}, { currentMove: TACKLE }, { hp: 0, status3: STATUS3_GRUDGE });
-      const { result } = stepAtOpcode("B_SCR_OP_TRYFAINTMON", rc);
-      expect(result.kind).toBe("halted");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 3027 });
-    });
-
     it("Grudge does not fire on MOVE_STRUGGLE, matching source's explicit exclusion", () => {
       const rc = context(0, {}, { currentMove: 165 /* MOVE_STRUGGLE */ }, { hp: 0, status3: STATUS3_GRUDGE });
       const { result } = stepAtOpcode("B_SCR_OP_TRYFAINTMON", rc);

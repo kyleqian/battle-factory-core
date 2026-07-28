@@ -115,7 +115,7 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // BS_ATTACKER_WITH_PARTNER branch now emits for the present attacker and,
   // only in doubles, its present positional partner. The former blanket
   // barrier is retired rather than moved.
-  ["src/engine/battleScriptHitChainOpcode.ts", 20],
+  ["src/engine/battleScriptHitChainOpcode.ts", 19],
   ["src/engine/battleScriptAttackCancelerOpcode.ts", 4],
   ["src/engine/battleScriptMoveEndOpcode.ts", 7],
   ["src/engine/battleScriptJumpifbyteOpcode.ts", 1],

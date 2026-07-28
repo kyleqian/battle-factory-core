@@ -45,6 +45,7 @@ import {
   resolveBattleScriptMoveTarget,
   resolveBattleScriptMoveType,
   withBattleScriptPartyMemberHp,
+  withBattleScriptPartyMemberPp,
   withBattleScriptPartyMemberStatus1,
   type BattleScriptMoveEndHalfwords,
   type BattleScriptMoveHistory,
@@ -1187,7 +1188,17 @@ export const ppreduceOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesC
     const nextPp = currentPp > ppToDeduct ? currentPp - ppToDeduct : 0;
     const pp = attackerBattler.pp.map((value, index) => (index === slot ? nextPp : value)) as unknown as
       BattleScriptRulesBattlerState["pp"];
-    nextRulesContext = withBattler(rulesContext, attacker, { pp });
+    const withActivePp = withBattler(rulesContext, attacker, { pp });
+    nextRulesContext = Object.freeze({
+      ...withActivePp,
+      party: withBattleScriptPartyMemberPp(
+        withActivePp.party,
+        attackerBattler.side,
+        attackerBattler.partyIndex,
+        slot,
+        nextPp,
+      ),
+    });
 
     const isPermanent = (attackerBattler.status2 & BATTLE_SCRIPT_STATUS2_TRANSFORMED) === 0;
     if (isPermanent) {
@@ -3623,6 +3634,12 @@ function createTryfaintmonOpcodeHandler(): BattleScriptOpcodeHandler<BattleScrip
     const attackerBattler = rulesContext.battlers[requireBattlerRole(rulesContext, "attacker")];
     const targetBattler = rulesContext.battlers[requireBattlerRole(rulesContext, "target")];
 
+    const grudgeApplies = (targetBattler.status3 & STATUS3_GRUDGE) !== 0
+      && (hitMarker & HITMARKER_GRUDGE) === 0
+      && attackerBattler.side !== targetBattler.side
+      && attackerBattler.hp !== 0
+      && rulesContext.currentMove !== BATTLE_SCRIPT_MOVE_STRUGGLE;
+
     if ((hitMarker & HITMARKER_DESTINYBOND) !== 0 && attackerBattler.hp !== 0) {
       const faintScript = resolveBattleScriptLabel(context.program, faintTargetLabel);
       if (!faintScript) throw new Error(`tryfaintmon: committed program has no label ${faintTargetLabel}`);
@@ -3636,32 +3653,38 @@ function createTryfaintmonOpcodeHandler(): BattleScriptOpcodeHandler<BattleScrip
         hitMarker: (hitMarker & ~HITMARKER_DESTINYBOND) >>> 0,
         battleMoveDamage: damageOwner.hp,
       });
-      return transitionBattleScriptCommand(
+      if (!grudgeApplies) {
+        return transitionBattleScriptCommand(
+          context,
+          Object.freeze({
+            kind: "call-stack",
+            programCounter: destinyBond.programCounter,
+            returnProgramCounters: Object.freeze([
+              context.state.programCounter + 1,
+              faintScript.programCounter,
+            ]),
+          }),
+          { rulesContext: nextRulesContext },
+        );
+      }
+      return scheduleGrudge(
         context,
-        Object.freeze({
-          kind: "call-stack",
-          programCounter: destinyBond.programCounter,
-          returnProgramCounters: Object.freeze([
-            context.state.programCounter + 1,
-            faintScript.programCounter,
-          ]),
-        }),
-        { rulesContext: nextRulesContext },
+        nextRulesContext,
+        Object.freeze([
+          context.state.programCounter + 1,
+          faintScript.programCounter,
+          destinyBond.programCounter,
+        ]),
       );
     }
 
-    if (
-      (targetBattler.status3 & STATUS3_GRUDGE) !== 0
-      && (hitMarker & HITMARKER_GRUDGE) === 0
-      && attackerBattler.side !== targetBattler.side
-      && attackerBattler.hp !== 0
-      && rulesContext.currentMove !== BATTLE_SCRIPT_MOVE_STRUGGLE
-    ) {
-      return unsupportedBranch(
+    if (grudgeApplies) {
+      const faintScript = resolveBattleScriptLabel(context.program, faintTargetLabel);
+      if (!faintScript) throw new Error(`tryfaintmon: committed program has no label ${faintTargetLabel}`);
+      return scheduleGrudge(
         context,
-        "Cmd_tryfaintmon's STATUS3_GRUDGE branch (BattleScript_GrudgeTakesPP) is not modeled",
-        "battle_script_commands.c",
-        3027,
+        Object.freeze({ ...rulesContext, hitMarker }),
+        Object.freeze([context.state.programCounter + 1, faintScript.programCounter]),
       );
     }
 
@@ -3674,6 +3697,57 @@ function createTryfaintmonOpcodeHandler(): BattleScriptOpcodeHandler<BattleScrip
       { rulesContext: Object.freeze({ ...rulesContext, hitMarker }) },
     );
   };
+}
+
+function scheduleGrudge(
+  context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
+  rulesContext: BattleScriptRulesContext,
+  returnProgramCounters: readonly number[],
+): BattleScriptCommandTransition<BattleScriptRulesContext> {
+  const attacker = requireBattlerRole(rulesContext, "attacker");
+  const attackerState = rulesContext.battlers[attacker];
+  const movePosition = rulesContext.chosenMovePositions[attacker]!;
+  const pp = attackerState.pp.map((value, index) =>
+    index === movePosition ? 0 : value
+  ) as unknown as BattleScriptRulesBattlerState["pp"];
+  const withActivePp = withBattler(rulesContext, attacker, { pp });
+  const nextRulesContext = Object.freeze({
+    ...withActivePp,
+    party: withBattleScriptPartyMemberPp(
+      withActivePp.party,
+      attackerState.side,
+      attackerState.partyIndex,
+      movePosition,
+      0,
+    ),
+    battleTextBuff1Move: attackerState.moves[movePosition]!,
+  });
+  const grudgeScript = resolveBattleScriptLabel(context.program, "BattleScript_GrudgeTakesPP");
+  if (!grudgeScript) throw new Error("tryfaintmon: committed program has no BattleScript_GrudgeTakesPP");
+  const scheduler = markBattleScriptControllerPending(
+    Object.freeze({ ...context.state.scheduler, activeBattler: attacker }),
+    attacker,
+  );
+  return transitionBattleScriptCommand(
+    context,
+    Object.freeze({
+      kind: "call-stack",
+      programCounter: grudgeScript.programCounter,
+      returnProgramCounters: Object.freeze([...returnProgramCounters]),
+    }),
+    {
+      rulesContext: nextRulesContext,
+      scheduler,
+      events: Object.freeze([
+        Object.freeze({
+          kind: "set-battler-pp-data" as const,
+          battler: attacker,
+          movePosition,
+          pp: 0,
+        }),
+      ]),
+    },
+  );
 }
 
 /** include/constants/battle.h:150 -- identity-ambiguous without gDisableStructs[].battlerPreventingEscape. */

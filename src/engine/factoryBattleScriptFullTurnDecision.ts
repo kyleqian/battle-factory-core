@@ -356,6 +356,15 @@ function activeBattler(
 }
 
 function partySlot(config: FactoryFullTurnBattlerConfig): BattleScriptPartyMemberInput {
+  const moves = config.moves ?? ([config.moveId, 0, 0, 0] as const);
+  const pp = config.pp ?? (
+    moves.map((moveId) => (moveId !== 0 ? 16 : 0)) as unknown as readonly [
+      number,
+      number,
+      number,
+      number,
+    ]
+  );
   return {
     species: config.species,
     isEgg: false,
@@ -363,6 +372,8 @@ function partySlot(config: FactoryFullTurnBattlerConfig): BattleScriptPartyMembe
     hp: config.hp,
     status1: config.status1 ?? 0,
     item: config.item ?? 0,
+    moves,
+    pp,
   };
 }
 
