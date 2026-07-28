@@ -1,0 +1,63 @@
+{
+  "schema": "sleep-talk-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "sourceSha256": {
+    "battle_script_commands.c": "e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c",
+    "battle_scripts_1.s": "4ac3e610b68c11ef0f4e4c0fc62ddba7fda5a8400e43705428868978ec7551a6",
+    "battle_script.inc": "0a8e1c3bdf4c49d07b2e09ff8ab524812a5217b9735106e1b79b6be261a6db7e",
+    "battle_script_commands.h": "842cce6dd704b09b24a49abdca67ee7a8062a2e3a465e1b764fc63c0d230580f",
+    "battle_util.c": "2ba9ee4efe913effa119c8342281745f481910ca1b20cd76b470673062a45fd5",
+    "battle.h": "bba2f9d9b3d98fa01b5f0a8f7dede9f2f0be5617c735242b741a7e0c8e4a5d1e",
+    "battle_message.c": "5874441ca8fea30caed82e6762c7a1dca8be9c60c8bf8912b74517d0ef7e0f17",
+    "battle_string_ids.h": "b643974828dd265d2ee40c20a8a5e4bc98a091133c2a9db795bf7d38f692372a",
+    "battle_moves.h": "8b3d4d143b807807af97ce7288e0cc0ccdd55b6b64ac45824e35a549836b3a0c",
+    "battle_frontier_mons.h": "557c1a97247cbb84357b99035fb11cf0bfe45abe8393a0992fe8146bfc51f67f",
+    "battle_frontier_mons.h.constants": "00fb47e144978d3a24a304047f5463217ac7b535ee6f8719e2adf47cc592387a",
+    "moves.h": "d32746c9ad3ed1bbfbb93712f13e01ab1c43f48a78f3605ef9db5095e8d19d27"
+  },
+  "instructions": {
+    "tryChooseSleepTalkMove": {
+      "opcode": 169,
+      "opcodeHex": "0xa9",
+      "length": 5,
+      "operands": [{"width": 4, "encoding": "little-endian relocation pointer", "value": "BattleScript_SleepTalkUsingMove"}],
+      "pc": {"allUnusable": "gBattlescriptCurrInstr += 5", "selected": "gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + 1)"}
+    },
+    "jumpToCalledMove": {
+      "opcode": 99,
+      "opcodeHex": "0x63",
+      "length": 2,
+      "operands": [{"width": 1, "encoding": "literal", "value": "TRUE (1)"}],
+      "pc": "gBattlescriptCurrInstr = gBattleScriptsForMoveEffects[gBattleMoves[gCurrentMove].effect]"
+    }
+  },
+  "selection": {
+    "preExcluded": ["MOVE_NONE", "MOVE_SLEEP_TALK", "MOVE_ASSIST", "MOVE_MIRROR_MOVE", "MOVE_METRONOME", "MOVE_FOCUS_PUNCH", "MOVE_UPROAR", "IsTwoTurnsMove"],
+    "limitations": "CheckMoveLimitations(attacker, unusableMovesBits, ~MOVE_LIMITATION_PP)",
+    "random": "do movePosition = MOD(Random(), MAX_MON_MOVES); while (gBitTable[movePosition] & unusableMovesBits)",
+    "selectedOwnership": "gCalledMove = attacker.moves[movePosition]; gCurrMovePos = movePosition; target = GetMoveTarget(gCalledMove, NO_TARGET_OVERRIDE)",
+    "dispatchOwnership": "TRUE sets gCurrentMove = gCalledMove and leaves gChosenMove as MOVE_SLEEP_TALK",
+    "calledMovePp": "HITMARKER_NO_PPDEDUCT prevents the called script from deducting its own PP"
+  },
+  "repeatability": {"runsPerCase": 2, "comparison": "byte-identical full manifest.json", "allMatched": true},
+  "case": {
+    "scenario": "tools/battle-lab/mechanic-sleep-talk-whiscash-spore-off.json",
+    "scenarioSha256": "e6851d5c675e6ddcda446d077d95a533dfb4f97147ab3a96f2694a4908329147",
+    "runManifestSha256": ["6cc123e5678ee3f620ef1d2b406d6872597d06a3e777c31991104fed2d122c3b", "6cc123e5678ee3f620ef1d2b406d6872597d06a3e777c31991104fed2d122c3b"],
+    "builtPartyChecksumsValid": [true, true, true, true, true, true],
+    "captures": [
+      {"frame": 0, "rngValue": 648273789, "currentMove": 0, "player": {"hp": 185, "pp": [10, 10, 15, 5], "status1": 0}, "opponent": {"hp": 135, "pp": [15, 15, 15, 15]}},
+      {"frame": 100, "rngValue": 648273789, "currentMove": 214, "player": {"hp": 185, "pp": [9, 10, 15, 5], "status1": 0}, "opponent": {"hp": 135, "pp": [15, 15, 15, 15]}},
+      {"frame": 300, "rngValue": 2118145967, "currentMove": 147, "player": {"hp": 185, "pp": [9, 10, 15, 5], "status1": 2}, "opponent": {"hp": 135, "pp": [15, 15, 15, 14]}},
+      {"frame": 400, "rngValue": 613574693, "currentMove": 0, "player": {"hp": 185, "pp": [9, 10, 15, 5], "status1": 2}, "opponent": {"hp": 135, "pp": [15, 15, 15, 14]}},
+      {"frame": 800, "rngValue": 613574693, "currentMove": 214, "player": {"hp": 185, "pp": [9, 10, 15, 5], "status1": 1}, "opponent": {"hp": 135, "pp": [15, 15, 15, 14]}},
+      {"frame": 900, "rngValue": 3986388119, "currentMove": 90, "player": {"hp": 185, "pp": [8, 10, 15, 5], "status1": 1}, "opponent": {"hp": 135, "pp": [15, 15, 15, 14]}},
+      {"frame": 1200, "rngValue": 209782462, "currentMove": 90, "player": {"hp": 185, "pp": [8, 10, 15, 5], "status1": 1}, "opponent": {"hp": 0, "pp": [15, 15, 15, 14]}},
+      {"frame": 1500, "rngValue": 401744729, "currentMove": 90, "player": {"hp": 185, "pp": [8, 10, 15, 5], "status1": 1}, "opponent": {"hp": 0, "pp": [15, 15, 15, 14]}}
+    ]
+  },
+  "oracleExposure": {
+    "notExposed": ["gBattlescriptCurrInstr / concrete runtime PC", "gCalledMove", "gChosenMove", "gCurrMovePos", "battle-script stack", "message string IDs", "individual Random call attribution"],
+    "sourceBackedInference": "The handler has a direct computed jump and no BattleScriptPushCursor/return operation; the called effect terminates through BattleScript_MoveEnd/end rather than returning to Sleep Talk."
+  }
+}
