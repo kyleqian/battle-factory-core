@@ -18,6 +18,11 @@ const PLAYER_ROLLOUT = Object.freeze({
   moveSlot: 0 as const,
   targetBattler: 1 as const,
 });
+const PLAYER_DEFENSE_CURL = Object.freeze({
+  kind: "use-move" as const,
+  moveSlot: 1 as const,
+  targetBattler: 0 as const,
+});
 const TRAINER_SLEEP_TALK = Object.freeze({
   kind: "use-move" as const,
   moveSlot: 0 as const,
@@ -26,11 +31,8 @@ const TRAINER_SLEEP_TALK = Object.freeze({
 
 /**
  * Complete active-mon state derived from the merged Battle Scene OFF
- * mechanicLab evidence's legal Shuckle 1 / Blissey matchup. Defense Curl has
- * already resolved here: its independently sourced effect leaves DEF at 7
- * and STATUS2_DEFENSE_CURL set before Rollout is selected. This keeps the
- * proof focused on Rollout's one census effect while preserving the exact
- * state handed to BattleScript_EffectRollout by the real prior turn.
+ * mechanicLab evidence's legal Shuckle 1 / Blissey matchup. The Rollout-only
+ * tests use the exact state after the evidence's real Defense Curl turn.
  *
  * Seed 32731 is a controlled full-turn seed whose ordinary Emerald LCG draws
  * select the same first four observed damages as the evidence: 35, 157, 158,
@@ -73,6 +75,20 @@ function rolloutConfig(rngSeed = 32731): FactoryFullTurnConfig {
   };
 }
 
+/** Same evidence matchup before either selected move has executed. */
+function defenseCurlRolloutConfig(rngSeed = 32731): FactoryFullTurnConfig {
+  const config = rolloutConfig(rngSeed);
+  return {
+    ...config,
+    player: {
+      ...config.player,
+      pp: [20, 40, 10, 10],
+      status2: 0,
+      statStages: [6, 6, 6, 6, 6, 6, 6, 6],
+    },
+  };
+}
+
 function submitTrainerSleepTalk(
   state: ReturnType<typeof createFactoryFullTurnBattleState>,
   requestId: number,
@@ -84,12 +100,12 @@ function submitTrainerSleepTalk(
   });
 }
 
-describe("factory full-turn Rollout continuation", () => {
+describe("factory full-turn Defense Curl / Rollout continuation", () => {
   it(
-    "locks the selected move across four actions, spends PP once, applies the "
-      + "Defense Curl 60/120/240/480 ladder, and reaches the evidence HP/terminal route",
+    "selects Defense Curl then Rollout, preserves ownership/PP/stat state, locks "
+      + "continuations, and reaches the evidence HP/terminal route",
     () => {
-      const initial = createFactoryFullTurnBattleState(rolloutConfig());
+      const initial = createFactoryFullTurnBattleState(defenseCurlRolloutConfig());
       expect(initial.boundary).toEqual({
         kind: "decision-required",
         request: {
@@ -109,15 +125,43 @@ describe("factory full-turn Rollout continuation", () => {
       const afterPlayer = submitFactoryFullTurnDecision(initial, {
         requestId: 1,
         side: "player",
-        decision: PLAYER_ROLLOUT,
+        decision: PLAYER_DEFENSE_CURL,
       });
       if (afterPlayer.kind !== "decision-required") {
-        throw new Error("expected the initial trainer command");
+        throw new Error("expected the trainer command after Defense Curl selection");
       }
 
-      let state = afterPlayer.state;
+      const afterDefenseCurl = submitTrainerSleepTalk(afterPlayer.state, 2);
+      if (afterDefenseCurl.kind !== "decision-required") {
+        throw new Error("expected a fresh player command after Defense Curl");
+      }
+      expect(afterDefenseCurl.nextRequest).toMatchObject({
+        requestId: 3,
+        side: "player",
+        battler: 0,
+      });
+      const defenseCurlRules = afterDefenseCurl.state.rules.rulesContext;
+      expect(defenseCurlRules.battlers[0]!.pp).toEqual([20, 39, 10, 10]);
+      expect(defenseCurlRules.battlers[0]!.statStages[2]).toBe(7);
+      expect(defenseCurlRules.battlers[0]!.status2).toBe(DEFENSE_CURL_STATUS);
+      expect(defenseCurlRules.battlers[1]!.hp).toBe(362);
+      expect(afterDefenseCurl.state.rng.calls).toBe(0);
+
+      const afterRolloutSelection = submitFactoryFullTurnDecision(
+        afterDefenseCurl.state,
+        {
+          requestId: 3,
+          side: "player",
+          decision: PLAYER_ROLLOUT,
+        },
+      );
+      if (afterRolloutSelection.kind !== "decision-required") {
+        throw new Error("expected the trainer command after Rollout selection");
+      }
+
+      let state = afterRolloutSelection.state;
       const observedHp: number[] = [];
-      for (const requestId of [2, 3, 4]) {
+      for (const [hitIndex, requestId] of [4, 5, 6].entries()) {
         const result = submitTrainerSleepTalk(state, requestId);
         if (result.kind !== "decision-required") {
           throw new Error(`expected locked trainer command after request ${requestId}`);
@@ -141,13 +185,13 @@ describe("factory full-turn Rollout continuation", () => {
         expect(rules.lockedMoves[0]).toBe(ROLLOUT);
         expect(rules.chosenMovePositions[0]).toBe(0);
         expect(rules.rolloutTimerStartValues[0]).toBe(5);
-        expect(rules.battlers[0]!.rolloutTimer).toBe(6 - requestId);
-        expect(result.state.rng.calls).toBe((requestId - 1) * 4);
+        expect(rules.battlers[0]!.rolloutTimer).toBe(4 - hitIndex);
+        expect(result.state.rng.calls).toBe((hitIndex + 1) * 4);
         state = result.state;
       }
 
       expect(observedHp).toEqual([327, 170, 12]);
-      const terminal = submitTrainerSleepTalk(state, 5);
+      const terminal = submitTrainerSleepTalk(state, 7);
       expect(terminal.kind).toBe("terminal");
       if (terminal.kind !== "terminal") throw new Error("expected Rollout KO");
       expect(terminal.outcome).toBe("player-win");
