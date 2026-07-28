@@ -261,6 +261,17 @@ describe("ranked Batch 1 committed scripts", () => {
     expect(safeguarded.haltReason).toMatchObject({ kind: "terminal" });
     expect(safeguarded.rulesContext.battlers[1].status2 & 0x7).toBe(0);
     expect(safeguarded.rng.calls).toBe(1); // source accuracy precedes Safeguard
+    const missed = run(
+      "BattleScript_EffectTeeterDance",
+      rules(
+        298,
+        { statStages: [6, 6, 6, 6, 6, 6, 0, 6] },
+        { statStages: [6, 6, 6, 6, 6, 6, 6, 12] },
+      ),
+      1,
+    );
+    expect(missed.rulesContext.battlers[1].status2 & 0x7).toBe(0);
+    expect(missed.rng.calls).toBe(1);
   });
 
   it("Magnitude consumes one table draw before the ordinary hit path", () => {
@@ -291,5 +302,20 @@ describe("ranked Batch 1 committed scripts", () => {
     expect(state.rulesContext.dynamicBasePower).toBe(hiddenPowerFromIvs(ivs).power);
     expect(state.rulesContext.dynamicMoveType).toBe(hiddenPowerFromIvs(ivs).dynamicMoveType);
     expect(Object.isFrozen(state.rulesContext.battlers[0].ivs)).toBe(true);
+  });
+
+  it("canonically replays every Batch 1 effect byte-for-byte from the same seed", () => {
+    for (const [entry, context] of [
+      ["BattleScript_EffectEruption", rules(284)],
+      ["BattleScript_EffectTeeterDance", rules(298)],
+      ["BattleScript_EffectMagnitude", rules(222)],
+      ["BattleScript_EffectBellyDrum", rules(187, { hp: 51, maxHP: 100 })],
+      ["BattleScript_EffectSuperFang", rules(162)],
+      ["BattleScript_EffectHiddenPower", rules(237, { ivs: {
+        hp: 31, attack: 30, defense: 31, speed: 30, spAttack: 31, spDefense: 30,
+      } })],
+    ] as const) {
+      expect(run(entry, context, 0x1234_5678)).toEqual(run(entry, context, 0x1234_5678));
+    }
   });
 });
