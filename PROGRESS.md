@@ -17,7 +17,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ---
 ## 615 — [BOUNDED MAIN WORKER 2026-07-28 ~10:25] Perish Song executes through terminal countdown
 
-- **State:** tree green at **382 files / 4367 tests**, production build, OFF
+- **State:** tree green at **382 files / 4368 tests**, production build, OFF
   oracle info, census regeneration, all **47/47** validation checks, ratchets
   **6/6**, and `git diff --check`. Census is exactly **171/214 effects,
   307/355 moves, 249/276 Factory-L50 distinct, 2902/2957 weighted**.

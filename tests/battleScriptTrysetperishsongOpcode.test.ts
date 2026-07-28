@@ -198,6 +198,22 @@ describe("B_SCR_OP_TRYSETPERISHSONG", () => {
       .toEqual([2, 2]);
   });
 
+  it("matches the ordinary OFF receipt: PP 5->4 and both battlers start at timer 3", () => {
+    const result = runToTerminal(context());
+    expect(result.kind).toBe("halted");
+    expect(result.state.haltReason).toMatchObject({ kind: "terminal" });
+    expect(result.state.rulesContext.battlers[0].pp[0]).toBe(4);
+    expect(result.state.rulesContext.battlers.slice(0, 2).map((b) => ({
+      status3: b.status3,
+      timer: b.perishSongTimer,
+      start: b.perishSongTimerStartValue,
+    }))).toEqual([
+      { status3: STATUS3_PERISH_SONG, timer: 3, start: 3 },
+      { status3: STATUS3_PERISH_SONG, timer: 3, start: 3 },
+    ]);
+    expect(result.state.rng.calls).toBe(0);
+  });
+
   it("runs the full committed effect script through its BS_SCRIPTING Soundproof loop, with canonical replay and zero RNG", () => {
     const source = context({}, { ability: ABILITY_SOUNDPROOF });
     const first = runToTerminal(source);
