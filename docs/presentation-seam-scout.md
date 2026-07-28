@@ -6,6 +6,12 @@ presentation window must be re-driven from kernel semantic events instead of
 turn-N state, with its committed trace still passing at its recorded count.
 This document is reconnaissance only — **no production code was changed**.
 
+> **Oracle routing note (2026-07-27):** the historical `turn*-*.json` trace
+> family predates the `oracleProfile` field, so `npm run compare` routes it
+> to Battle Scene **ON** (8012) by AGENTS.md's documented legacy contract.
+> Every acceptance count in this file is that ON-profile bar, intentionally
+> — do not "fix" a trace by forcing 8014 (see PAPERCUTS.md).
+
 ## 1. Kernel semantic event surface as it exists today
 
 The event union is declared in full at `src/engine/battleScriptEvents.ts:40-144`
