@@ -1,5 +1,34 @@
 # Animation coverage
 
+## MOVE_SONIC_BOOM promoted exact; complete AIR_WAVE body closed (2026-07-28)
+
+**Verdict:** `MOVE_SONIC_BOOM` is exact. Legal Level-50 Factory set-244
+`FRONTIER_MON_MAGNETON_1` against ONIX passes the complete Scene-ON source
+body through first inactive cleanup at **52/52** source/component, typed-seam,
+hardware, and shared-framebuffer frames **78–129** player-back and
+**82–133** opponent-front, twice fresh. Byte-identical evidence/raw-RGB
+digests are player `0a7fc886…1662bb` / `8692f81c…18dee` and opponent
+`0c923df2…4f6a6` / `b2449044…f7f3f`. Coverage is **69 exact / 0 partial /
+1 staged / 206 unsupported**.
+
+**Model/evidence:** the source-relative reducer ports all three duration-15
+`gSonicBoomSpriteTemplate` translations, side-derived affine matrices and
+Razor-Wind pans, the animation-2 target IMPACT, `ShakeMon(3,0,10,1)`,
+partner monbg/target split priority, 12:8 alpha, waits, and cleanup. The typed
+seam and shared hardware compositor source-extract AIR_WAVE and Magneton art,
+reuse exact IMPACT/ShakeMon/Onix/chrome components, and reproduce the
+orientation-specific OBJ order plus the one-display elevated enemy-shadow
+latch before `SpriteCB_EnemyShadow` observes `gAnimScriptActive`. The portable
+verifier proves source offsets, tasks/sprites, OAM/matrices/palettes,
+registers/audio, raw RGB, and application framebuffer on every frame.
+
+**Boundary:** `MOVE_AIR_CUTTER` remains unsupported. It shares AIR_WAVE but
+owns `AnimTask_AirCutterProjectile`, CUT/`gAirCutterSliceSpriteTemplate`,
+both target and `ANIM_DEF_PARTNER` `ShakeMon2(2,0,8,1)` calls, and distinct
+wait/audio timing without independent dense move acceptance. No battle logic,
+RNG, controller, turn order, round/facility state, boundary list, or
+unsupported barrier changed.
+
 ## MOVE_SONIC_BOOM complete AIR_WAVE evidence staged; Air Cutter audited (2026-07-28)
 
 **Verdict:** `MOVE_SONIC_BOOM` is staged, not exact. Legal Level-50 Factory
