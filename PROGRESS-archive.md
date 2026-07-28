@@ -24355,3 +24355,31 @@ both verify scripts/census independently re-verified before this entry.)*
   reaches `BattleScript_ButItFailed` before `setfocusenergy`.
 
 ---
+## 610 — [BOUNDED MAIN WORKER 2026-07-28 ~09:38] Heal Bell and Aromatherapy execute through masked party synchronization
+
+- **State:** committed `c6bec4d`; tree green at **380 files / 4315 tests**,
+  production build, OFF oracle info, census regeneration, all **42/42**
+  validation checks, ratchets **6/6**, and `git diff --check`. Census is
+  exactly **161/214 effects, 291/355 moves, 239/276 Factory-L50 distinct,
+  2773/2957 weighted**.
+- **Did:** globally registered one-byte `B_SCR_OP_HEALPARTYSTATUS` (`0xae`)
+  with the source's `currentMove == MOVE_HEAL_BELL` split, six-slot masked
+  party synchronization, active/partner live clears, Nightmare removal,
+  Soundproof exclusions/ability recording/message bits, and one attacker
+  controller event. Added validated/frozen party `abilityNum`, resolved
+  benched abilities from the source-derived species corpus, widened the two
+  Heal Bell `jumpifbyte` literals, and retired the shared
+  `BS_ATTACKER_WITH_PARTNER` status-icon barrier. Full-turn healthy/statused
+  Heal Bell proves PP **5→4**, persistent clears, message/animation/status
+  tail, zero opcode-local RNG, next-request completion, and canonical replay.
+- **Next:** supervisor verify this finite registration. The regenerated census
+  names `B_SCR_OP_TRYSETPERISHSONG` as the next highest-weight registration;
+  select/brief it separately.
+- **Notes:** handler inventory **168→169**. Barrier pin
+  `battleScriptHitChainOpcode.ts` **21→20** (retired, none added). Soundproof
+  is reachable in real Factory parties: 15 generated sets across Whismur,
+  Loudred, Exploud, Voltorb, Electrode, and Mr. Mime carrier species. No new
+  recording import, presentation/tick/round branch, issue removal, oracle
+  lifecycle action, or trace.
+
+---

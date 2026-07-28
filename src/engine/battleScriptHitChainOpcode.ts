@@ -229,6 +229,8 @@ const MOVE_EFFECT_RAGE = 30;
 const MOVE_EFFECT_ALL_STATS_UP = 34;
 const MOVE_EFFECT_REMOVE_PARALYSIS = 36;
 const MOVE_EFFECT_ATK_DEF_DOWN = 37;
+/** include/constants/battle.h:291 -- Double-Edge's one-third damage-derived recoil. */
+const MOVE_EFFECT_RECOIL_33 = 38;
 /** include/constants/battle.h:300 -- SetMoveEffect's Thrash-family lock-in case (docs/yawn-thrash-endturn-design.md §3, Rung 4). */
 const MOVE_EFFECT_THRASH = 53;
 const MOVE_EFFECT_SP_ATK_TWO_DOWN = 59;
@@ -517,6 +519,7 @@ export const SET_MOVE_EFFECT_SUPPORTED_BYTES: ReadonlySet<number> = new Set<numb
   MOVE_EFFECT_ALL_STATS_UP,
   MOVE_EFFECT_REMOVE_PARALYSIS,
   MOVE_EFFECT_ATK_DEF_DOWN,
+  MOVE_EFFECT_RECOIL_33,
   MOVE_EFFECT_THRASH,
   MOVE_EFFECT_SP_ATK_TWO_DOWN,
   ...Object.keys(STAT_MOVE_EFFECT_TABLE).map(Number),
@@ -2526,6 +2529,25 @@ function applySetMoveEffect(
     }
     if (effectByte === MOVE_EFFECT_RECOIL_25) {
       const recoilDamage = Math.max(1, Math.trunc(baseRulesContext.hpDealt / 4));
+      const programCounter = resolveRequiredLabelProgramCounter(
+        context.program,
+        "BattleScript_MoveEffectRecoil",
+      );
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "call", programCounter }),
+        {
+          rulesContext: Object.freeze({
+            ...baseRulesContext,
+            battleMoveDamage: recoilDamage,
+          }),
+        },
+      );
+    }
+    if (effectByte === MOVE_EFFECT_RECOIL_33) {
+      // SetMoveEffect, battle_script_commands.c:2843-2850: signed C division
+      // truncates toward zero, then the zero result is raised to one.
+      const recoilDamage = Math.max(1, Math.trunc(baseRulesContext.hpDealt / 3));
       const programCounter = resolveRequiredLabelProgramCounter(
         context.program,
         "BattleScript_MoveEffectRecoil",

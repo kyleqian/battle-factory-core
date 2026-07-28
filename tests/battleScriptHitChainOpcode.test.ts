@@ -2034,6 +2034,8 @@ const MOVE_EFFECT_RAGE = 30;
 const MOVE_EFFECT_ALL_STATS_UP = 34;
 const MOVE_EFFECT_REMOVE_PARALYSIS = 36;
 const MOVE_EFFECT_ATK_DEF_DOWN = 37;
+const MOVE_EFFECT_RECOIL_25 = 14;
+const MOVE_EFFECT_RECOIL_33 = 38;
 const MOVE_EFFECT_SP_ATK_TWO_DOWN = 59;
 const MOVE_EFFECT_AFFECTS_USER = 1 << 6;
 const STATUS2_RAGE = 1 << 23;
@@ -2045,6 +2047,7 @@ const ABILITY_LIMBER = 7;
 const ABILITY_IMMUNITY = 17;
 const ABILITY_SHIELD_DUST = 19;
 const ABILITY_MAGMA_ARMOR = 40;
+const ABILITY_ROCK_HEAD = 69;
 const ABILITY_WATER_VEIL = 41;
 const HITMARKER_STATUS_ABILITY_EFFECT = 1 << 13;
 const B_MSG_STATUSED = 0;
@@ -3840,7 +3843,7 @@ describe("SetMoveEffect family-B cluster 1", () => {
     ]) {
       expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(effect)).toBe(true);
     }
-    for (const effect of [10, 11, 31, 32, 33, 35, 38, 54]) {
+    for (const effect of [10, 11, 31, 32, 33, 35, 54]) {
       expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(effect)).toBe(false);
     }
   });
@@ -4159,5 +4162,201 @@ describe("SetMoveEffect family-B cluster 1 committed-script integrations", () =>
     // Source CancelMultiTurnMoves does not clear gLockedMoves; the stale
     // halfword is inert once STATUS2_MULTIPLETURNS/RECHARGE are absent.
     expect(second.state.rulesContext.lockedMoves[0]).toBe(63);
+  });
+});
+
+describe("SetMoveEffect family-B cluster 2 rung (a): damage-derived recoil", () => {
+  const DOUBLE_EDGE = 38;
+  const TAKE_DOWN = 36;
+
+  function runEntryToEnd(
+    entryLabel: string,
+    rulesContext: BattleScriptRulesContext,
+    rngSeed: number,
+  ) {
+    const execution = createBattleScriptStatusRulesExecution(
+      program,
+      entryLabel,
+      rulesContext,
+      rngSeed,
+      externalPorts({
+        resolveHalfwordOperand: (_context, operand) =>
+          operand.expression === "B_WAIT_TIME_LONG" || operand.expression === "B_WAIT_TIME_SHORT"
+            ? 1
+            : null,
+      }),
+    );
+    let result = stepBattleScriptMachine(program, execution.state, execution.handlers);
+    let steps = 1;
+    while (result.kind !== "halted" && steps < 1000) {
+      result = stepBattleScriptMachine(
+        program,
+        ackAllPending(result.state),
+        execution.handlers,
+      );
+      steps += 1;
+    }
+    if (result.kind !== "halted") throw new Error(`${entryLabel} did not terminate after ${steps} steps`);
+    expect(result.state.haltReason).toMatchObject({ kind: "terminal", opcodeName: "B_SCR_OP_END" });
+    return result;
+  }
+
+  function dispatchRecoil(
+    effectByte: number,
+    hpDealt: number,
+    attackerChanges: Partial<BattleScriptRulesBattler> = {},
+  ) {
+    const rc = context(
+      0,
+      { hp: 100, maxHP: 100, ...attackerChanges },
+      {
+        currentMove: effectByte === MOVE_EFFECT_RECOIL_33 ? DOUBLE_EDGE : TAKE_DOWN,
+        moveEffectByte: effectByte | MOVE_EFFECT_AFFECTS_USER | MOVE_EFFECT_CERTAIN,
+        hpDealt,
+      },
+      { hp: 100, maxHP: 100 },
+    );
+    return stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc).result;
+  }
+
+  it("exports Recoil 33 while the six deferred family-B bytes remain barriered", () => {
+    expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(MOVE_EFFECT_RECOIL_33)).toBe(true);
+    for (const effect of [11, 31, 32, 33, 35, 54]) {
+      expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(effect)).toBe(false);
+    }
+  });
+
+  it("Double-Edge derives one-third recoil with C truncation and consumes no RNG", () => {
+    const result = dispatchRecoil(MOVE_EFFECT_RECOIL_33, 50);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.rulesContext.battleMoveDamage).toBe(16);
+    expect(result.state.programCounter).toBe(labelPc("BattleScript_MoveEffectRecoil"));
+    expect(result.state.callStack).toHaveLength(1);
+    expect(result.state.rng.calls).toBe(0);
+  });
+
+  it("Double-Edge raises zero quotient to minimum recoil 1", () => {
+    const result = dispatchRecoil(MOVE_EFFECT_RECOIL_33, 2);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.rulesContext.battleMoveDamage).toBe(1);
+    expect(result.state.rng.calls).toBe(0);
+  });
+
+  it("the existing 25% recoil case uses the same committed callback and consumes no RNG", () => {
+    const result = dispatchRecoil(MOVE_EFFECT_RECOIL_25, 50);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.rulesContext.battleMoveDamage).toBe(12);
+    expect(result.state.programCounter).toBe(labelPc("BattleScript_MoveEffectRecoil"));
+    expect(result.state.rng.calls).toBe(0);
+  });
+
+  it("Rock Head is accepted by jumpifability and skips the HP-update tail", () => {
+    const dispatch = dispatchRecoil(MOVE_EFFECT_RECOIL_33, 50, { ability: ABILITY_ROCK_HEAD });
+    if (dispatch.kind !== "advanced") throw new Error(`expected advance, got ${dispatch.kind}`);
+    const execution = createBattleScriptStatusRulesExecution(
+      program,
+      "BattleScript_MoveEffectRecoil",
+      dispatch.state.rulesContext,
+      dispatch.state.rng.value,
+      externalPorts(),
+    );
+    let result = stepBattleScriptMachine(program, execution.state, execution.handlers);
+    while (result.kind !== "halted" && result.state.callStack.length === 0 && result.state.events.length === 0) {
+      result = stepBattleScriptMachine(program, result.state, execution.handlers);
+    }
+    expect(result.kind).toBe("halted");
+    expect(result.state.haltReason).toMatchObject({ kind: "return-stack-underflow" });
+    expect(result.state.rulesContext.battlers[0]!.hp).toBe(100);
+    expect(result.state.rulesContext.lastUsedAbility).toBe(ABILITY_ROCK_HEAD);
+    expect(result.state.events).toEqual([]);
+  });
+
+  it("Double-Edge committed script damages the target before recoil self-KO, then faints the attacker", () => {
+    const rc = context(
+      0,
+      {
+        ability: 0,
+        hp: 5,
+        maxHP: 100,
+        attack: 200,
+        level: 50,
+        types: ["TYPE_NORMAL", "TYPE_NORMAL"],
+        moves: [DOUBLE_EDGE, 0, 0, 0],
+        pp: [15, 0, 0, 0],
+      },
+      { currentMove: DOUBLE_EDGE },
+      { hp: 1000, maxHP: 1000, defense: 50 },
+    );
+    const finished = runEntryToEnd("BattleScript_EffectDoubleEdge", rc, 1);
+    expect(finished.state.rulesContext.battlers[1]!.hp).toBeLessThan(1000);
+    expect(finished.state.rulesContext.battlers[0]!.hp).toBe(0);
+    const targetDamage = finished.state.events.findIndex(
+      (event) => event.kind === "hp-change" && event.battler === 1,
+    );
+    const recoilDamage = finished.state.events.findIndex(
+      (event) => event.kind === "hp-change" && event.battler === 0,
+    );
+    const attackerFaint = finished.state.events.findIndex(
+      (event) => event.kind === "faint-animation" && event.battler === 0,
+    );
+    expect(targetDamage).toBeGreaterThanOrEqual(0);
+    expect(recoilDamage).toBeGreaterThan(targetDamage);
+    expect(attackerFaint).toBeGreaterThan(recoilDamage);
+    expect(finished.state.rng.ledger.map((entry) => entry.reason)).toEqual([
+      "accuracycheck",
+      "critcalc",
+      "adjustnormaldamage",
+    ]);
+  });
+
+  for (const [name, entryLabel, move] of [
+    ["Double-Edge", "BattleScript_EffectDoubleEdge", DOUBLE_EDGE],
+    ["Take Down", "BattleScript_EffectRecoil", TAKE_DOWN],
+  ] as const) {
+    it(`${name} full committed script reaches MOVEEND and canonically replays through the shared Rock Head gate`, () => {
+      const rc = context(
+        0,
+        {
+          ability: 0,
+          hp: 100,
+          maxHP: 100,
+          attack: 70,
+          moves: [move, 0, 0, 0],
+          pp: [10, 0, 0, 0],
+        },
+        { currentMove: move },
+        { hp: 1000, maxHP: 1000, defense: 70 },
+      );
+      const finished = runEntryToEnd(entryLabel, rc, 1);
+      expect(finished.state.rulesContext.battlers[0]!.hp).toBeLessThan(100);
+      expect(finished.state.rng.ledger.some((entry) => entry.reason === "seteffectwithchance")).toBe(false);
+      const replay = runEntryToEnd(entryLabel, rc, 1);
+      expect(replay.state.rulesContext).toEqual(finished.state.rulesContext);
+      expect(replay.state.rng.ledger).toEqual(finished.state.rng.ledger);
+      expect(replay.state.events).toEqual(finished.state.events);
+    });
+  }
+
+  it("Rock Head negates recoil in a full committed Double-Edge turn", () => {
+    const rc = context(
+      0,
+      {
+        ability: ABILITY_ROCK_HEAD,
+        hp: 100,
+        maxHP: 100,
+        attack: 70,
+        moves: [DOUBLE_EDGE, 0, 0, 0],
+        pp: [10, 0, 0, 0],
+      },
+      { currentMove: DOUBLE_EDGE },
+      { hp: 1000, maxHP: 1000, defense: 70 },
+    );
+    const finished = runEntryToEnd("BattleScript_EffectDoubleEdge", rc, 1);
+    expect(finished.state.rulesContext.battlers[1]!.hp).toBeLessThan(1000);
+    expect(finished.state.rulesContext.battlers[0]!.hp).toBe(100);
+    expect(finished.state.rulesContext.lastUsedAbility).toBe(ABILITY_ROCK_HEAD);
+    expect(finished.state.events).not.toContainEqual(
+      expect.objectContaining({ kind: "hp-change", battler: 0 }),
+    );
   });
 });

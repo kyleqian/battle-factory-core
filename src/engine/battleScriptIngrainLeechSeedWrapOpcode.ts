@@ -274,6 +274,12 @@ const ABILITY_INSOMNIA = 15;
  * (`data/battle_scripts_1.s:596`) needs this value.
  */
 const ABILITY_SUCTION_CUPS = 21;
+/**
+ * include/constants/abilities.h:73. Both the 25% and 33% damage-derived
+ * recoil cases call BattleScript_MoveEffectRecoil, whose attacker gate skips
+ * recoil for Rock Head (data/battle_scripts_1.s:3938-3949).
+ */
+const ABILITY_ROCK_HEAD = 69;
 const JUMPIFABILITY_VALUES: ReadonlyMap<string, number> = new Map([
   ["ABILITY_LIQUID_OOZE", ABILITY_LIQUID_OOZE],
   ["ABILITY_LIMBER", ABILITY_LIMBER],
@@ -282,6 +288,7 @@ const JUMPIFABILITY_VALUES: ReadonlyMap<string, number> = new Map([
   ["ABILITY_VITAL_SPIRIT", ABILITY_VITAL_SPIRIT],
   ["ABILITY_INSOMNIA", ABILITY_INSOMNIA],
   ["ABILITY_SUCTION_CUPS", ABILITY_SUCTION_CUPS],
+  ["ABILITY_ROCK_HEAD", ABILITY_ROCK_HEAD],
 ]);
 /** Exported so tools/report/executable-frontier-census.ts's jumpifability value-coverage check never drifts from what this opcode actually dispatches (same live-import precedent as SET_MOVE_EFFECT_SUPPORTED_BYTES). */
 export const JUMPIFABILITY_SUPPORTED_ABILITY_NAMES: ReadonlySet<string> = new Set(JUMPIFABILITY_VALUES.keys());
@@ -293,10 +300,11 @@ export const JUMPIFABILITY_SUPPORTED_ABILITY_NAMES: ReadonlySet<string> = new Se
  * one of those two, never the BS_ATTACKER_SIDE/BS_NOT_ATTACKER_SIDE
  * `AbilityBattleEffects` side-check branches) and, per
  * docs/status-cluster-ground-truth.md and docs/yawn-thrash-endturn-design.md
- * §1b, the seven concrete ability ids this widening covers (Liquid Ooze for
+ * §1b, the concrete ability ids this widening covers (Liquid Ooze for
  * Leech Seed, Immunity/Limber/Own Tempo for the primary status-move cluster,
  * Vital Spirit/Insomnia for Yawn, Suction Cups for Roar per
- * docs/roar-multihit-registration-scout.md §4 rung 1). `RecordAbilityBattle`/
+ * docs/roar-multihit-registration-scout.md §4 rung 1, and Rock Head for the
+ * shared recoil script). `RecordAbilityBattle`/
  * `gBattleScripting.battlerWithAbility` are the same untracked AI-history
  * bookkeeping `Cmd_cleareffectsonfaint`'s own doc comment already established
  * has no reader in this engine's scope.

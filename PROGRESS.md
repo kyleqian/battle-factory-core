@@ -15,6 +15,32 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 613 — [BOUNDED MAIN WORKER 2026-07-28 ~10:00] Recoil 33 and shared Rock Head gate execute end to end
+
+- **State:** rung (a) implementation green at **380 files / 4346 tests**,
+  production build, OFF oracle info, census regeneration, all **47/47**
+  validation checks, ratchets **6/6**, and `git diff --check`. Census is
+  exactly **169/214 effects, 305/355 moves, 247/276 Factory-L50 distinct,
+  2897/2957 weighted**.
+- **Did:** added `ABILITY_ROCK_HEAD` to the registered `jumpifability`
+  operands and implemented `MOVE_EFFECT_RECOIL_33` as source-exact
+  `max(1, trunc(gHpDealt / 3))` damage followed by the shared committed
+  recoil callback. Tests cover normal/minimum recoil, attacker self-faint
+  after target damage, Rock Head negation, zero case-local RNG, canonical
+  replay, and full terminal committed-script walks for both Double-Edge and
+  the collateral 25% Take Down class.
+- **Next:** supervisor verify this mandatory rung, then dispatch rung (b)
+  alone: Uproar fresh/duplicate dispatch, end-turn continuation/wake/
+  decrement/expiry/cancellation, and Yawn's live Uproar sleep block. Keep Pay
+  Day, Thief, Mean Look, Nightmare, Rapid Spin, and Knock Off barriered.
+- **Notes:** predicted and actual rung delta both **+1 effect/+2 moves/+1
+  distinct/+52 weighted**; the existing counted `EFFECT_RECOIL` row stays
+  count-neutral but is no longer a runtime false positive. No new barrier,
+  barrier-pin move, recording import, presentation/tick/round branch, issue
+  removal, oracle lifecycle action, or trace. Full-cluster remaining delta is
+  exactly **+1/+1/+1/+1** to **170/306/248/2898**.
+
+---
 ## 612 — [BOUNDED MAIN WORKER 2026-07-28 ~09:53] Seven dispatch-ready family-B move effects execute end to end
 
 - **State:** commits `e1d2243`/`ef9a9d9`; tree green at **380 files / 4337
@@ -62,31 +88,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** census generator blind spots are recorded in the dossier §1;
   generator hardening is deliberately sequenced AFTER engine work per the
   dossier. No deferred questions. Deadline 15:07.
-
----
-## 610 — [BOUNDED MAIN WORKER 2026-07-28 ~09:38] Heal Bell and Aromatherapy execute through masked party synchronization
-
-- **State:** committed `c6bec4d`; tree green at **380 files / 4315 tests**,
-  production build, OFF oracle info, census regeneration, all **42/42**
-  validation checks, ratchets **6/6**, and `git diff --check`. Census is
-  exactly **161/214 effects, 291/355 moves, 239/276 Factory-L50 distinct,
-  2773/2957 weighted**.
-- **Did:** globally registered one-byte `B_SCR_OP_HEALPARTYSTATUS` (`0xae`)
-  with the source's `currentMove == MOVE_HEAL_BELL` split, six-slot masked
-  party synchronization, active/partner live clears, Nightmare removal,
-  Soundproof exclusions/ability recording/message bits, and one attacker
-  controller event. Added validated/frozen party `abilityNum`, resolved
-  benched abilities from the source-derived species corpus, widened the two
-  Heal Bell `jumpifbyte` literals, and retired the shared
-  `BS_ATTACKER_WITH_PARTNER` status-icon barrier. Full-turn healthy/statused
-  Heal Bell proves PP **5→4**, persistent clears, message/animation/status
-  tail, zero opcode-local RNG, next-request completion, and canonical replay.
-- **Next:** supervisor verify this finite registration. The regenerated census
-  names `B_SCR_OP_TRYSETPERISHSONG` as the next highest-weight registration;
-  select/brief it separately.
-- **Notes:** handler inventory **168→169**. Barrier pin
-  `battleScriptHitChainOpcode.ts` **21→20** (retired, none added). Soundproof
-  is reachable in real Factory parties: 15 generated sets across Whismur,
-  Loudred, Exploud, Voltorb, Electrode, and Mr. Mime carrier species. No new
-  recording import, presentation/tick/round branch, issue removal, oracle
-  lifecycle action, or trace.
