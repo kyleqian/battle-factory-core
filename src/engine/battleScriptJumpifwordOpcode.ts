@@ -69,6 +69,15 @@ const BATTLE_TYPE_FRONTIER =
   | BATTLE_TYPE_FACTORY | BATTLE_TYPE_PIKE | BATTLE_TYPE_PYRAMID;
 /** include/constants/battle.h:199. Distinct global (`gHitMarker`) from the BATTLE_TYPE_* bits above. */
 const HITMARKER_PLAYER_FAINTED = 1 << 22;
+/**
+ * include/constants/battle.h:186. Semi-invulnerable registration rung 1
+ * (docs/semi-invulnerable-registration-scout.md §5 rung 1). Every one of the
+ * five two-turn-charge effects' own entry script runs `jumpifword
+ * CMP_COMMON_BITS, gHitMarker, HITMARKER_NO_ATTACKSTRING, <SecondTurnLabel>`
+ * as its second instruction, unconditionally -- shared by
+ * EFFECT_SEMI_INVULNERABLE/RAZOR_WIND/SKY_ATTACK/SKULL_BASH/SOLAR_BEAM alike.
+ */
+const HITMARKER_NO_ATTACKSTRING = 1 << 9;
 
 const JUMPIFWORD_VALUES: ReadonlyMap<string, number> = new Map([
   ["BATTLE_TYPE_DOUBLE", BATTLE_TYPE_DOUBLE],
@@ -77,6 +86,7 @@ const JUMPIFWORD_VALUES: ReadonlyMap<string, number> = new Map([
   ["BATTLE_TYPE_RECORDED_LINK", BATTLE_TYPE_RECORDED_LINK],
   ["BATTLE_TYPE_FRONTIER", BATTLE_TYPE_FRONTIER],
   ["HITMARKER_PLAYER_FAINTED", HITMARKER_PLAYER_FAINTED],
+  ["HITMARKER_NO_ATTACKSTRING", HITMARKER_NO_ATTACKSTRING],
   /**
    * `BattleScript_EffectRoar`'s own `jumpifbattletype BATTLE_TYPE_ARENA,
    * BattleScript_ButItFailed` (`data/battle_scripts_1.s:601`). Real dossier

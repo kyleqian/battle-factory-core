@@ -214,13 +214,6 @@ describe("production jumpifword (Cmd_jumpifword) dispatch", () => {
   );
 
   describe("(b) unsupported-branch barrier", () => {
-    it("halts on an unmodeled comparison value (HITMARKER_NO_ATTACKSTRING, gHitMarker itself is modeled)", () => {
-      const pc = findJumpifwordPc("BattleScript_EffectRazorWind", (ops) => ops[2] === "HITMARKER_NO_ATTACKSTRING");
-      const { result } = stepAtProgramCounter(pc, context());
-      expect(result.kind).toBe("halted");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch" });
-    });
-
     it("pass-through: the Factory-path TRAINER gate never trips the barrier", () => {
       const pc = findJumpifwordPc(
         "BattleScript_HandleFaintedMon",
@@ -239,6 +232,48 @@ describe("production jumpifword (Cmd_jumpifword) dispatch", () => {
       expect(result.kind).toBe("advanced");
     });
   });
+
+  describe(
+    "HITMARKER_NO_ATTACKSTRING (semi-invulnerable registration rung 1, "
+      + "docs/semi-invulnerable-registration-scout.md §5 rung 1 -- shared by all "
+      + "five two-turn-charge effects' own entry guard, second instruction)",
+    () => {
+      const pc = findJumpifwordPc("BattleScript_EffectRazorWind", (ops) => ops[2] === "HITMARKER_NO_ATTACKSTRING");
+
+      it("taken: jumps to BattleScript_TwoTurnMovesSecondTurn when HITMARKER_NO_ATTACKSTRING is set", () => {
+        const HITMARKER_NO_ATTACKSTRING = 1 << 9;
+        const { result } = stepAtProgramCounter(pc, context({ hitMarker: HITMARKER_NO_ATTACKSTRING }));
+        if (result.kind !== "advanced") throw new Error("expected advance");
+        const target = program.instructions.find((i) => i.source.label === "BattleScript_TwoTurnMovesSecondTurn");
+        expect(target).toBeDefined();
+        expect(result.state.programCounter).toBe(target!.programCounter);
+      });
+
+      it("not taken: falls through to the turn-1 setup when the bit is unset", () => {
+        const { result } = stepAtProgramCounter(pc, context({ hitMarker: 0 }));
+        if (result.kind !== "advanced") throw new Error("expected advance");
+        expect(result.state.programCounter).toBe(pc + 1);
+      });
+
+      it("reachability: all five two-turn-charge effects' entry guards use this exact instruction shape", () => {
+        for (const label of [
+          "BattleScript_EffectRazorWind",
+          "BattleScript_EffectSkyAttack",
+          "BattleScript_EffectSkullBash",
+          "BattleScript_SolarBeamDecideTurn",
+          "BattleScript_EffectSemiInvulnerable",
+        ]) {
+          const found = program.instructions.find(
+            (instruction) =>
+              instruction.opcodeName === "B_SCR_OP_JUMPIFWORD"
+              && instruction.source.label === label
+              && instruction.operands[2]?.expression === "HITMARKER_NO_ATTACKSTRING",
+          );
+          expect(found, `${label} should have a HITMARKER_NO_ATTACKSTRING jumpifword`).toBeDefined();
+        }
+      });
+    },
+  );
 
   describe("all six CMP_* comparators (source-complete compare logic)", () => {
     const basePc = findJumpifwordPc(
