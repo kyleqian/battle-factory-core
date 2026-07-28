@@ -8,15 +8,15 @@
  * remains a raw party-array index throughout, exactly as this engine's
  * `party.opponent[i]`/`party.player[i]` already index.
  *
- * `getswitchedmondata`/`switchindataupdate` are the first "rebuild an active
- * battler from a bench record" registration (§4 slice 4): species/hp/status1
- * come from the party record at the newly-decided raw index; types resolve
- * from the species table; stat stages/status2/status3/the modeled
+ * `getswitchedmondata`/`switchindataupdate` rebuild the source BattlePokemon
+ * wholesale from the party/controller record at the newly-decided raw index:
+ * ability is re-derived from species + abilityNum, and IVs, personality,
+ * level, friendship, max HP, and every battle stat replace the outgoing
+ * values. Types resolve from the species table; stat stages/status2/status3/the modeled
  * DisableStruct-shaped fields reset to `SwitchInClearSetData`'s neutral
  * values (`battle_main.c:3152-3258`). Party moves/PP and held item are now
  * rebuilt too; the item is forced to NONE when the side/party-slot bit in
- * `knockedOffMons` is set. Ability restoration remains bounded because this
- * engine does not yet derive `GetAbilityBySpecies` from party `abilityNum`.
+ * `knockedOffMons` is set.
  */
 import {
   drawBattleScriptRng,
@@ -45,6 +45,7 @@ import {
 } from "./battleScriptRulesContext.ts";
 import { BATTLE_SCRIPT_STATUS2_WRAPPED_MASK } from "./battleScriptSourceConstants.ts";
 import speciesTypesData from "../data/gen/species-types.json" with { type: "json" };
+import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
 
 /** include/constants/battle.h:60. */
 const BATTLE_TYPE_LINK = 1 << 1;
@@ -90,11 +91,44 @@ const SWITCH_IN_ABILITY_EFFECTS = new Set([
 
 type SpeciesTypesRow = Readonly<{ name: string; types: readonly [string, string] }>;
 const SPECIES_TYPES_ROWS = speciesTypesData.species as unknown as readonly SpeciesTypesRow[];
+type SpeciesStatsRow = Readonly<{ id: number; abilities: readonly [string, string] }>;
+const SPECIES_STATS_BY_ID = new Map(
+  (speciesStatsData.species as unknown as readonly SpeciesStatsRow[]).map((row) => [row.id, row]),
+);
+/** include/constants/abilities.h: source symbols in exact numeric-id order. */
+const ABILITY_SYMBOLS = Object.freeze([
+  "ABILITY_NONE", "ABILITY_STENCH", "ABILITY_DRIZZLE", "ABILITY_SPEED_BOOST",
+  "ABILITY_BATTLE_ARMOR", "ABILITY_STURDY", "ABILITY_DAMP", "ABILITY_LIMBER",
+  "ABILITY_SAND_VEIL", "ABILITY_STATIC", "ABILITY_VOLT_ABSORB", "ABILITY_WATER_ABSORB",
+  "ABILITY_OBLIVIOUS", "ABILITY_CLOUD_NINE", "ABILITY_COMPOUND_EYES", "ABILITY_INSOMNIA",
+  "ABILITY_COLOR_CHANGE", "ABILITY_IMMUNITY", "ABILITY_FLASH_FIRE", "ABILITY_SHIELD_DUST",
+  "ABILITY_OWN_TEMPO", "ABILITY_SUCTION_CUPS", "ABILITY_INTIMIDATE", "ABILITY_SHADOW_TAG",
+  "ABILITY_ROUGH_SKIN", "ABILITY_WONDER_GUARD", "ABILITY_LEVITATE", "ABILITY_EFFECT_SPORE",
+  "ABILITY_SYNCHRONIZE", "ABILITY_CLEAR_BODY", "ABILITY_NATURAL_CURE", "ABILITY_LIGHTNING_ROD",
+  "ABILITY_SERENE_GRACE", "ABILITY_SWIFT_SWIM", "ABILITY_CHLOROPHYLL", "ABILITY_ILLUMINATE",
+  "ABILITY_TRACE", "ABILITY_HUGE_POWER", "ABILITY_POISON_POINT", "ABILITY_INNER_FOCUS",
+  "ABILITY_MAGMA_ARMOR", "ABILITY_WATER_VEIL", "ABILITY_MAGNET_PULL", "ABILITY_SOUNDPROOF",
+  "ABILITY_RAIN_DISH", "ABILITY_SAND_STREAM", "ABILITY_PRESSURE", "ABILITY_THICK_FAT",
+  "ABILITY_EARLY_BIRD", "ABILITY_FLAME_BODY", "ABILITY_RUN_AWAY", "ABILITY_KEEN_EYE",
+  "ABILITY_HYPER_CUTTER", "ABILITY_PICKUP", "ABILITY_TRUANT", "ABILITY_HUSTLE",
+  "ABILITY_CUTE_CHARM", "ABILITY_PLUS", "ABILITY_MINUS", "ABILITY_FORECAST",
+  "ABILITY_STICKY_HOLD", "ABILITY_SHED_SKIN", "ABILITY_GUTS", "ABILITY_MARVEL_SCALE",
+  "ABILITY_LIQUID_OOZE", "ABILITY_OVERGROW", "ABILITY_BLAZE", "ABILITY_TORRENT",
+  "ABILITY_SWARM", "ABILITY_ROCK_HEAD", "ABILITY_DROUGHT", "ABILITY_ARENA_TRAP",
+  "ABILITY_VITAL_SPIRIT", "ABILITY_WHITE_SMOKE", "ABILITY_PURE_POWER", "ABILITY_SHELL_ARMOR",
+  "ABILITY_CACOPHONY", "ABILITY_AIR_LOCK",
+]);
+const ABILITY_ID_BY_SYMBOL = new Map(ABILITY_SYMBOLS.map((symbol, id) => [symbol, id]));
 
 /** gSpeciesInfo[species].types -- species-types.json is indexed by (speciesId - 1). */
 function resolveSpeciesTypes(species: number): readonly [string, string] | null {
   const row = SPECIES_TYPES_ROWS[species - 1];
   return row ? row.types : null;
+}
+
+function resolveSpeciesAbility(species: number, abilityNum: number): number | null {
+  const symbol = SPECIES_STATS_BY_ID.get(species)?.abilities[abilityNum];
+  return symbol === undefined ? null : (ABILITY_ID_BY_SYMBOL.get(symbol) ?? null);
 }
 
 function statusInfatuatedWithBit(battler: number): number {
@@ -375,6 +409,12 @@ function createSwitchindataupdateOpcodeHandler(
         `Cmd_switchindataupdate: species ${partyMember.species} has no gSpeciesInfo types row`,
       );
     }
+    const ability = resolveSpeciesAbility(partyMember.species, partyMember.abilityNum);
+    if (ability === null) {
+      throw new Error(
+        `Cmd_switchindataupdate: species ${partyMember.species} ability slot ${partyMember.abilityNum} is unresolved`,
+      );
+    }
 
     const infatuationBit = statusInfatuatedWithBit(battler);
     const battlers = rules.battlers.map((candidate, index) => {
@@ -382,7 +422,18 @@ function createSwitchindataupdateOpcodeHandler(
         return Object.freeze({
           ...candidate,
           species: partyMember.species,
+          ability,
+          ivs: partyMember.ivs,
+          personality: partyMember.personality,
           hp: partyMember.hp,
+          maxHP: partyMember.maxHP,
+          attack: partyMember.attack,
+          defense: partyMember.defense,
+          speed: partyMember.speed,
+          spAttack: partyMember.spAttack,
+          spDefense: partyMember.spDefense,
+          level: partyMember.level,
+          friendship: partyMember.friendship,
           status1: partyMember.status1,
           item,
           moves: partyMember.moves,
@@ -412,6 +463,7 @@ function createSwitchindataupdateOpcodeHandler(
           usedTauntedMove: 0 as const,
           usedImprisonedMove: 0 as const,
           battlerPreventingEscape: isBatonPass ? candidate.battlerPreventingEscape : 0,
+          isFirstTurn: 2,
         });
       }
       const clearsWrapped =

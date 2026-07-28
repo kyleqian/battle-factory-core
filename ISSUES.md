@@ -5,25 +5,6 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #50 — Switch-in reconstruction leaks outgoing battler's ability/IVs/stats/maxHP
-
-Audit-confirmed (2026-07-28 read-only day audit, supervisor-verified).
-`battleScriptSwitchinOpcode.ts:380-415` spreads the outgoing active battler
-and replaces only species/HP/status/item/moves/PP/types — source
-(`battle_script_commands.c:4631-4639`) overwrites the ENTIRE `BattlePokemon`
-then re-derives ability. Party model (`battleScriptRulesContext.ts:501-516`)
-has `abilityNum` but lacks IVs/battle stats/maxHP/level/personality.
-Failures: Role Play'd Levitate survives a switch (wrong Ground immunity);
-Hidden Power uses the outgoing mon's IVs; Present/Swallow/Pain Split-class
-maxHP reads go stale. The stale-ability pin at
-`tests/battleScriptSwitchinOpcode.test.ts:240-287` documents a "bounded
-remainder" whose premise is obsolete (party `abilityNum` exists now).
-Fix shape: extend party records with the missing derivation inputs (or
-per-member derived stats), rebuild the battler wholesale on ordinary switch,
-and re-derive ability the source way; audit's suggested corroboration probe:
-one OFF mechanicLab trace — Role Play Levitate → switch to different-IV
-rental → RAM-check `gBattleMons` before a Ground move and Hidden Power.
-
 ## (audit note, 2026-07-28) Plausible-unconfirmed pair
 
 `seteffectprimary` returns without the `moveEffectByte` clear that

@@ -500,12 +500,23 @@ export const BATTLE_SCRIPT_PARTY_SIZE = 6;
 export type BattleScriptPartyMemberMoves = readonly [number, number, number, number];
 export type BattleScriptPartyMemberPp = readonly [number, number, number, number];
 
-/** The exact GetMonData fields Cmd_checkteamslost and GetMostSuitableMonToSwitchInto read per party slot. */
+/** Source party/controller payload fields needed by team checks and active switch reconstruction. */
 export type BattleScriptPartyMemberState = Readonly<{
   species: number;
   isEgg: boolean;
   /** Source MON_DATA_ABILITY_NUM (0 or 1). */
   abilityNum: number;
+  /** Serialized BattlePokemon derivation inputs and controller-computed battle stats. */
+  ivs: BattleScriptIvs;
+  personality: number;
+  level: number;
+  friendship: number;
+  maxHP: number;
+  attack: number;
+  defense: number;
+  speed: number;
+  spAttack: number;
+  spDefense: number;
   hp: number;
   /** Source gPlayerParty/gEnemyParty[].status1 -- kept in sync by SetMoveEffect's status write, mirroring datahpupdate's HP sync. */
   status1: number;
@@ -526,7 +537,7 @@ export type BattleScriptPartyState = readonly [
   BattleScriptPartyMemberState,
 ];
 
-/** Source gPlayerParty/gEnemyParty, narrowed to the three fields above. */
+/** Source gPlayerParty/gEnemyParty, narrowed to the fields above. */
 export type BattleScriptPartyBySide = Readonly<{
   player: BattleScriptPartyState;
   opponent: BattleScriptPartyState;
@@ -900,6 +911,16 @@ export type BattleScriptPartyMemberInput = Readonly<{
   species?: number;
   isEgg?: boolean;
   abilityNum?: number;
+  ivs?: BattleScriptIvs;
+  personality?: number;
+  level?: number;
+  friendship?: number;
+  maxHP?: number;
+  attack?: number;
+  defense?: number;
+  speed?: number;
+  spAttack?: number;
+  spDefense?: number;
   hp?: number;
   status1?: number;
   item?: number;
@@ -1718,6 +1739,16 @@ const BATTLE_SCRIPT_EMPTY_PARTY_MEMBER: BattleScriptPartyMemberState = Object.fr
   species: 0,
   isEgg: false,
   abilityNum: 0,
+  ivs: uniformBattleScriptIvs(0),
+  personality: 0,
+  level: 0,
+  friendship: 0,
+  maxHP: 0,
+  attack: 0,
+  defense: 0,
+  speed: 0,
+  spAttack: 0,
+  spDefense: 0,
   hp: 0,
   status1: 0,
   item: 0,
@@ -1755,7 +1786,24 @@ function createBattleScriptPartyState(
       species: requireUnsigned(member.species ?? 0, 0xffff, `${field}[${index}].species`),
       isEgg: Boolean(member.isEgg),
       abilityNum: requireUnsigned(member.abilityNum ?? 0, 1, `${field}[${index}].abilityNum`),
+      ivs: Object.freeze({
+        hp: requireUnsigned(member.ivs?.hp ?? 0, 31, `${field}[${index}].ivs.hp`),
+        attack: requireUnsigned(member.ivs?.attack ?? 0, 31, `${field}[${index}].ivs.attack`),
+        defense: requireUnsigned(member.ivs?.defense ?? 0, 31, `${field}[${index}].ivs.defense`),
+        speed: requireUnsigned(member.ivs?.speed ?? 0, 31, `${field}[${index}].ivs.speed`),
+        spAttack: requireUnsigned(member.ivs?.spAttack ?? 0, 31, `${field}[${index}].ivs.spAttack`),
+        spDefense: requireUnsigned(member.ivs?.spDefense ?? 0, 31, `${field}[${index}].ivs.spDefense`),
+      }),
+      personality: requireUnsigned(member.personality ?? 0, 0xffff_ffff, `${field}[${index}].personality`) >>> 0,
+      level: requireUnsigned(member.level ?? 0, 0xff, `${field}[${index}].level`),
+      friendship: requireUnsigned(member.friendship ?? 0, 0xff, `${field}[${index}].friendship`),
       hp: requireUnsigned(member.hp ?? 0, 0xffff, `${field}[${index}].hp`),
+      maxHP: requireUnsigned(member.maxHP ?? member.hp ?? 0, 0xffff, `${field}[${index}].maxHP`),
+      attack: requireUnsigned(member.attack ?? 0, 0xffff, `${field}[${index}].attack`),
+      defense: requireUnsigned(member.defense ?? 0, 0xffff, `${field}[${index}].defense`),
+      speed: requireUnsigned(member.speed ?? 0, 0xffff, `${field}[${index}].speed`),
+      spAttack: requireUnsigned(member.spAttack ?? 0, 0xffff, `${field}[${index}].spAttack`),
+      spDefense: requireUnsigned(member.spDefense ?? 0, 0xffff, `${field}[${index}].spDefense`),
       status1: requireUnsigned(member.status1 ?? 0, 0xffff_ffff, `${field}[${index}].status1`) >>> 0,
       item: requireUnsigned(member.item ?? 0, 0xffff, `${field}[${index}].item`),
       moves: createBattleScriptPartyMemberMoves(member.moves, `${field}[${index}].moves`),

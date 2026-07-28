@@ -15,6 +15,7 @@ import {
   type BattleScriptMachineState,
 } from "../src/engine/battleScriptMachine.ts";
 import { resolveBattleScriptLabel } from "../src/engine/battleScriptProgram.ts";
+import { hiddenPowerFromIvs } from "../src/engine/battleScriptRankedBatch1Opcode.ts";
 
 const program = loadBattleScriptProgram();
 const TACKLE = 33;
@@ -36,6 +37,7 @@ const MACHOP = 66;
 const URSARING = 217;
 /** include/constants/abilities.h. */
 const ABILITY_GUTS = 62;
+const ABILITY_LEVITATE = 26;
 const ABILITY_INTIMIDATE = 22;
 const ABILITY_TRUANT = 54;
 const ITEM_LEFTOVERS = 200;
@@ -86,7 +88,24 @@ function opponentBench(): BattleScriptPartyMemberInput[] {
   return [
     { species: SUNKERN, hp: 0, status1: 0, moves: [TACKLE, 0, 0, 0] },
     EMPTY_SLOT,
-    { species: MACHOP, hp: 145, status1: 0, item: ITEM_LEFTOVERS, moves: [KARATE_CHOP, 0, 0, 0] },
+    {
+      species: MACHOP,
+      abilityNum: 0,
+      ivs: { hp: 31, attack: 30, defense: 29, speed: 28, spAttack: 27, spDefense: 26 },
+      personality: 0x1234_5678,
+      level: 50,
+      friendship: 70,
+      hp: 145,
+      maxHP: 180,
+      attack: 97,
+      defense: 71,
+      speed: 63,
+      spAttack: 58,
+      spDefense: 66,
+      status1: 0,
+      item: ITEM_LEFTOVERS,
+      moves: [KARATE_CHOP, 0, 0, 0],
+    },
     EMPTY_SLOT,
     EMPTY_SLOT,
     EMPTY_SLOT,
@@ -167,6 +186,8 @@ const SWITCHINANIM_PC = pcFor("B_SCR_OP_SWITCHINANIM", "BattleScript_FaintedMonS
 const VARIOUS_RESET_PLAYER_FAINTED_PC = pcFor("B_SCR_OP_VARIOUS", "BattleScript_FaintedMonSendOutNew");
 const SWITCHINEFFECTS_PC = pcFor("B_SCR_OP_SWITCHINEFFECTS", "BattleScript_FaintedMonSendOutNew");
 const CANCELALLACTIONS_PC = pcFor("B_SCR_OP_CANCELALLACTIONS", "BattleScript_FaintedMonSendOutNew");
+const HIDDENPOWERCALC_PC = pcFor("B_SCR_OP_HIDDENPOWERCALC", "BattleScript_EffectHiddenPower");
+const STOCKPILETOHPHEAL_PC = pcFor("B_SCR_OP_STOCKPILETOHPHEAL", "BattleScript_EffectSwallow");
 
 function stepAtProgramCounter(pc: number, rulesContext: BattleScriptRulesContext) {
   const execution = createBattleScriptStatusRulesExecution(
@@ -237,7 +258,7 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     expect(result.state.scheduler.pendingControllerBattlers).toEqual([1]);
   });
 
-  it("switchindataupdate pins the shared restoration boundary: species/hp/status/types reset, while ability restoration requiring unmodeled abilityNum remains bounded", () => {
+  it("switchindataupdate rebuilds the incoming BattlePokemon wholesale, so Role Play'd Levitate does not survive an ordinary switch", () => {
     const rc = context({
       battlers: [
         battler({ side: 0, species: URSARING, types: ["TYPE_NORMAL", "TYPE_NORMAL"] }),
@@ -247,7 +268,7 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
           hp: 0,
           types: ["TYPE_GRASS", "TYPE_GRASS"],
           partyIndex: 2, // already flipped by getswitchedmondata
-          ability: ABILITY_GUTS,
+          ability: ABILITY_LEVITATE,
           status2: 0x1234,
           status3: 0x40,
           statStages: [2, 2, 2, 2, 2, 2, 2, 2],
@@ -271,6 +292,15 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     expect(updated.status1).toBe(0);
     expect(updated.item).toBe(ITEM_LEFTOVERS);
     expect(updated.types).toEqual(["TYPE_FIGHTING", "TYPE_FIGHTING"]);
+    expect(updated.ability).toBe(ABILITY_GUTS);
+    expect(updated.ivs).toEqual({ hp: 31, attack: 30, defense: 29, speed: 28, spAttack: 27, spDefense: 26 });
+    expect(updated.personality).toBe(0x1234_5678);
+    expect(updated.level).toBe(50);
+    expect(updated.friendship).toBe(70);
+    expect(updated.maxHP).toBe(180);
+    expect(updated).toMatchObject({
+      attack: 97, defense: 71, speed: 63, spAttack: 58, spDefense: 66,
+    });
     expect(updated.statStages).toEqual([6, 6, 6, 6, 6, 6, 6, 6]);
     expect(updated.status2).toBe(0);
     expect(updated.status3).toBe(0);
@@ -280,11 +310,46 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     expect(updated.disableTimer).toBe(0);
     expect(updated.disableTimerStartValue).toBe(0);
     expect(updated.tauntTimer).toBe(0);
-    // Exact bounded remainder for Skill Swap lifecycle: the shared seam owns
-    // the source switch boundary and party species is modeled, but abilityNum
-    // is not, so it cannot yet derive GetAbilityBySpecies here. Do not add a
-    // private Skill Swap lifecycle handler; the active byte remains stale.
-    expect(updated.ability).toBe(ABILITY_GUTS);
+  });
+
+  it("Hidden Power and maxHP-reading effects consume the incoming member's reconstructed values", () => {
+    const switched = stepAtProgramCounter(
+      SWITCHINDATAUPDATE_PC,
+      context({
+        battlers: [
+          battler({ side: 0, species: URSARING }),
+          battler({
+            side: 1,
+            species: SUNKERN,
+            partyIndex: 2,
+            ability: ABILITY_LEVITATE,
+            ivs: { hp: 0, attack: 0, defense: 0, speed: 0, spAttack: 0, spDefense: 0 },
+            maxHP: 7,
+          }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      }),
+    ).result;
+    if (switched.kind !== "advanced") throw new Error("expected switch advance");
+    const incoming = switched.state.rulesContext.battlers[1];
+    const effectContext = createBattleScriptRulesContext({
+      ...switched.state.rulesContext,
+      selectorRoles: { attacker: 1, target: 0, effectBattler: 0, fainted: 1 },
+      battlers: switched.state.rulesContext.battlers.map((candidate, index) =>
+        index === 1 ? { ...candidate, stockpileCounter: 1 } : candidate
+      ) as unknown as BattleScriptRulesContextInput["battlers"],
+    });
+
+    const hiddenPower = stepAtProgramCounter(HIDDENPOWERCALC_PC, effectContext).result;
+    if (hiddenPower.kind !== "advanced") throw new Error("expected Hidden Power advance");
+    const expectedHiddenPower = hiddenPowerFromIvs(incoming.ivs);
+    expect(hiddenPower.state.rulesContext.dynamicBasePower).toBe(expectedHiddenPower.power);
+    expect(hiddenPower.state.rulesContext.dynamicMoveType).toBe(expectedHiddenPower.dynamicMoveType);
+
+    const swallow = stepAtProgramCounter(STOCKPILETOHPHEAL_PC, effectContext).result;
+    if (swallow.kind !== "advanced") throw new Error("expected Swallow advance");
+    expect(swallow.state.rulesContext.battleMoveDamage).toBe(-45);
   });
 
   it("switchindataupdate suppresses a knocked-off party item but restores an ordinary stored item", () => {

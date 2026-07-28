@@ -231,7 +231,15 @@ const STAGED_PLAYER_SPECIES = 1; // SPECIES_BULBASAUR
 const STAGED_OPPONENT_SPECIES = 43; // SPECIES_ODDISH -- TYPE_GRASS, matching the staged target's real type
 
 function partySlot(hp: number, alive: boolean): BattleScriptPartyMemberInput {
-  return { species: alive ? STAGED_OPPONENT_SPECIES : 0, isEgg: false, hp };
+  return {
+    species: alive ? STAGED_OPPONENT_SPECIES : 0,
+    isEgg: false,
+    ivs: FACTORY_FIRST_CHALLENGE_IVS,
+    personality: 0,
+    level: 50,
+    hp,
+    maxHP: hp,
+  };
 }
 
 /**

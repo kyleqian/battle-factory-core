@@ -174,6 +174,8 @@ export type FactoryFullTurnBattlerConfig = Readonly<{
   ability?: number;
   /** Source party record's MON_DATA_ABILITY_NUM. */
   abilityNum?: number;
+  /** Source personality; its nature bits are carried through switch reconstruction. */
+  personality?: number;
   /** Source `gBattleMons[].item`; omitted legacy configs retain the old zero default. */
   item?: number;
   /** Source `gBattleMons[].friendship`; omitted legacy configs retain the old zero default. */
@@ -347,6 +349,7 @@ function activeBattler(
     hp: config.hp,
     item: config.item ?? 0,
     species: config.species,
+    personality: config.personality ?? 0,
     attack: config.attack,
     defense: config.defense,
     spAttack: config.spAttack,
@@ -383,7 +386,17 @@ function partySlot(config: FactoryFullTurnBattlerConfig): BattleScriptPartyMembe
     species: config.species,
     isEgg: false,
     abilityNum: config.abilityNum ?? 0,
+    ivs: FACTORY_FIRST_CHALLENGE_IVS,
+    personality: config.personality ?? 0,
+    level: 50,
+    friendship: config.friendship ?? 0,
     hp: config.hp,
+    maxHP: config.maxHp ?? config.hp,
+    attack: config.attack,
+    defense: config.defense,
+    speed: config.speed,
+    spAttack: config.spAttack,
+    spDefense: config.spDefense,
     status1: config.status1 ?? 0,
     item: config.item ?? 0,
     moves,
@@ -395,7 +408,16 @@ const EMPTY_PARTY_SLOT: BattleScriptPartyMemberInput = Object.freeze({ species: 
 
 /** A bench slot (party index 1 or 2, items 2/3's forced-switch proofs) -- species/moves come from `override`, `hp` is the only required field. */
 function benchSlot(hp: number, override?: BattleScriptPartyMemberInput): BattleScriptPartyMemberInput {
-  return { species: 0, isEgg: false, hp, ...override };
+  return {
+    species: 0,
+    isEgg: false,
+    ivs: FACTORY_FIRST_CHALLENGE_IVS,
+    personality: 0,
+    level: 50,
+    hp,
+    maxHP: hp,
+    ...override,
+  };
 }
 
 function createInitialRules(config: FactoryFullTurnConfig): FactoryFullTurnDecisionRules {
