@@ -2,6 +2,32 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_HEADBUTT",
+      "status": "partial",
+      "covered": [
+        "fresh complete legal Factory-party Scene-ON evidence stages real set-24 ZIGZAGOON against ONIX in both orientations; the complete move-owned animation body plus first clear display passes 48/48 source/reducer, typed-seam, register, hardware battler OAM/matrix/palette-transfer, side-relative audio, and raw-RGB checks twice fresh at frames 77-124 player-back and 81-128 opponent-front",
+        "the source-relative reducer ports all three gBowMonSpriteTemplate phases, side-relative translation and rotation matrices, SetBattlerSpriteYOffsetFromRotation, AnimTask_ShakeMonInPlace(attacker,2,0,4,1), AnimTask_ShakeMon(target,5,0,6,1), the animation-1 flashing IMPACT sprite, both sounds, and cleanup",
+        "headbuttProbe.py records every currentMove=29 frame through tools/run-mgba-probe.py, and headbuttEvidence.ts proves the dense reducer/component, software callback/task, hardware battler OAM/matrix/palette/register, audio, raw-RGB, and first-clear receipts twice fresh; independent outputs are byte-identical with player digest 28e574bdd25de356a9dea0d6866024c7f8c3ff23911929fbd68c8737861ec858 and opponent digest fcc0a0e8ca5eef91ce7d68f5ca0419f66fe5942f170536e48595619658de1281",
+        "exact remains unclaimed until the shared framebuffer compositor extracts ZIGZAGOON front/back art and IMPACT assets, ports battler affine/OAM display transfer, flashing impact visibility, field chrome/healthboxes/text, and proves 48/48 shared-framebuffer equality twice fresh in both orientations",
+        "MOVE_HORN_ATTACK remains unsupported because it adds ANIM_TAG_HORN_HIT and gHornHitSpriteTemplate and lacks independent complete dense acceptance",
+        "MOVE_HORN_DRILL remains unsupported because it adds drill BG/scroll, horn sprite, long dual shakes, and repeated impacts and lacks independent complete dense acceptance",
+        "MOVE_DRILL_PECK remains unsupported because it adds whirlwind assets, AnimTask_DrillPeckHitSplats, looped sound, and ShakeMon2 and lacks independent complete dense acceptance"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-headbutt-player-zigzagoon-opponent-onix.json",
+        "tools/battle-lab/mechanic-headbutt-opponent-zigzagoon-player-onix.json",
+        "tools/compare/fixtures/headbutt-player-zigzagoon-opponent-onix.json",
+        "tools/compare/fixtures/headbutt-opponent-zigzagoon-player-onix.json",
+        "tools/compare/headbuttProbe.py",
+        "tools/compare/headbuttEvidence.ts",
+        "tools/compare/headbuttSourceAudit.ts",
+        "src/animation/headbutt.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "tests/animation/headbutt.test.ts"
+      ],
+      "remaining": "Keep MOVE_HEADBUTT partial. Extract ZIGZAGOON front/back and ANIM_TAG_IMPACT art, add the narrow shared framebuffer compositor for the battler affine/OAM display transfer, flashing impact visibility, field chrome, healthboxes, and move text, then require 48/48 shared-framebuffer equality through the first clear display twice fresh in both orientations. Do not promote MOVE_HORN_ATTACK, MOVE_HORN_DRILL, or MOVE_DRILL_PECK without their own complete dense acceptance."
+    },
+    {
       "move": "MOVE_DIZZY_PUNCH",
       "status": "exact",
       "covered": [

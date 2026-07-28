@@ -1,5 +1,32 @@
 # Animation coverage
 
+## MOVE_HEADBUTT complete typed/hardware checkpoint; remains partial (2026-07-28)
+
+**Verdict:** `MOVE_HEADBUTT` is partial. Fresh complete legal set-24
+ZIGZAGOON/ONIX Scene-ON evidence passes the entire move-owned animation body
+plus first clear display at **48/48** frames **77-124** player-back and
+**48/48** frames **81-128** opponent-front through source/reducer, typed seam,
+registers, hardware battler OAM/matrices/palette transfer, side-relative
+audio, and raw RGB, twice fresh. Coverage is now **61 exact / 2 partial / 213
+unsupported**.
+
+**Reusable model/evidence:** the relative-age reducer ports
+`gBowMonSpriteTemplate` phases 0/1/2, side-relative translation/rotation and
+`SetBattlerSpriteYOffsetFromRotation`, attacker
+`AnimTask_ShakeMonInPlace(2,0,4,1)`, target `AnimTask_ShakeMon(5,0,6,1)`,
+animation-1 flashing IMPACT, both sounds, and cleanup. Independent outputs are
+byte-identical (player `28e574bd…c858`, opponent `fcc0a0e8…1281`).
+
+**Exact remainder/siblings:** exact remains unclaimed until the shared
+framebuffer compositor extracts ZIGZAGOON front/back and IMPACT art, ports the
+battler affine/OAM display transfer plus flashing visibility and field chrome,
+and proves **48/48** shared-framebuffer equality twice fresh in both
+orientations. `MOVE_HORN_ATTACK`, `MOVE_HORN_DRILL`, and `MOVE_DRILL_PECK`
+remain unsupported because their horn, drill-BG/scroll/repeated-impact, and
+whirlwind/hitsplat-task bodies respectively lack independent dense acceptance.
+No battle logic, RNG/controller/facility state, boundary list, unsupported
+barrier, absolute-tick/input-delay, or coordinate/RGB/pixel exception changed.
+
 ## MOVE_COVET promoted exact; ITEM_BAG load/transfer proved (2026-07-28)
 
 **Verdict:** `MOVE_COVET` is exact. Fresh complete legal challenge-1
