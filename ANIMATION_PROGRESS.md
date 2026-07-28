@@ -1,5 +1,33 @@
 # Animation coverage
 
+## MOVE_SURF promoted exact; create_surf_wave BG1/scanline seam closed (2026-07-28)
+
+**Verdict:** `MOVE_SURF` is exact. Fresh complete legal Scene-ON
+WARTORTLE/SHUCKLE evidence passes the complete source-owned controller and
+scanline window plus first inactive cleanup at exactly **144/144** frames
+**72-215** player-back and **76-219** opponent-front through reducer, typed
+seam, registers/audio, raw RGB, and shared framebuffer twice fresh. Outputs
+remain byte-identical: player `19cf632a…800dae` / raw
+`fc0c3faa…163ed5`; opponent `66a3f92d…c97ffa` / raw
+`be3db045…ea4c6`. Coverage is now **66 exact / 0 partial / 0 staged / 210
+unsupported**.
+
+**Model/renderer:** the pure relative-age reducer ports
+`AnimTask_CreateSurfWave` and `AnimTask_SurfWaveScanlineEffect`: side-selected
+512x256 BG1 tilemaps, side-relative scroll, 1→13 hold→0 alpha, expanding
+scan regions, four-frame palette rotation, `SE_M_SURF` pan, BG clear, and
+scanline teardown. The narrow shared compositor source-extracts WARTORTLE
+front/back and water art, layers priority-1 BG1 over the field/battlers but
+under healthboxes/BG0, and ports the palette-transfer plus side-specific
+scanline-buffer display latches without absolute-tick or pixel exceptions.
+
+**Scope/siblings:** `MOVE_MUDDY_WATER` remains unsupported: it requires its
+Muddy palette and pre-command `SE_M_WHIRLPOOL` to earn independent complete
+dense acceptance. `MOVE_SECRET_POWER` remains unsupported: the Factory
+building environment dispatches Strength, not Surf. No battle logic, RNG,
+controller, turn order, round/facility state, boundary list, or unsupported
+barrier changed.
+
 ## MOVE_SURF staged; create_surf_wave evidence checkpoint complete (2026-07-28)
 
 **Verdict:** `MOVE_SURF` is staged only. Fresh complete legal Scene-ON

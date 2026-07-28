@@ -3,13 +3,14 @@
   "entries": [
     {
       "move": "MOVE_SURF",
-      "status": "staged",
+      "status": "exact",
       "covered": [
-        "fresh complete legal Scene-ON WARTORTLE/SHUCKLE mechanic-lab parties capture every currentMove=57 frame (370 frames 39-408 player-back and 367 frames 39-405 opponent-front) plus the exact source-owned create_surf_wave controller/scanline task window and first inactive cleanup at 144/144 frames 72-215 player-back and 76-219 opponent-front",
-        "surfWaveProbe.py records complete raw task bodies and software sprites, hardware OAM/matrices, BG tilemap/scroll/affine and raw BG1 VRAM, all palettes, registers, both audio players/pans, raw RGB, source script identities, and cleanup through tools/run-mgba-probe.py; fresh outputs and concatenated raw-RGB streams are byte-identical twice per orientation (player output 19cf632a59c62828a18cedbbef72f2a822bb22aa1eeb38b2378b43431f800dae / RGB fc0c3faa6bffce97bf44f8f29c3f6a56a4c98e444d4c719f9e78bc1669163ed5; opponent output 66a3f92dee5ce999289b2eb50aa8fa89969737d41607530e87ab37e57dc97ffa / RGB be3db04558b5e8baef6c81a0a8995f3c66b89f9f09b6e1a15fd9ba68c34ea4c6)",
-        "source audit proves create_surf_wave is BG1 water gfx plus player/opponent tilemaps, Surf or Muddy palette, AnimTask_CreateSurfWave and AnimTask_SurfWaveScanlineEffect alpha DMA; no software effect sprite is created. Byte-preserving extraction includes only water tiles, both Factory tilemaps, and the Surf/Muddy palettes.",
+        "fresh complete legal Scene-ON WARTORTLE/SHUCKLE mechanic-lab parties pass the complete create_surf_wave controller/scanline task window plus first inactive cleanup at exactly 144/144 frames 72-215 player-back and 76-219 opponent-front through source state, typed seam, registers/audio, raw RGB, and shared framebuffer twice fresh",
+        "the pure source-relative reducer ports AnimTask_CreateSurfWave and AnimTask_SurfWaveScanlineEffect: side-selected 512x256 BG1 tilemaps, side-relative scroll, 1-to-13 hold and 13-to-0 alpha, expanding player/opponent scan regions, four-frame palette rotation, panse SE_M_SURF, BG clear, scanline stop, and first inactive teardown",
+        "the narrow compositor source-extracts WARTORTLE front/back, water tiles, both wide Factory tilemaps, and Surf/Muddy palettes; it composes priority-1 BG1 over the shared field/battlers but under healthboxes/BG0, ports the source palette-transfer lag and side-specific scanline-buffer lag, and preserves renderer ownership without move-number, input-delay, absolute-tick, coordinate/RGB, or pixel exceptions",
+        "surfWavePortable.ts proves every reducer/seam/register/audio/raw-RGB/shared-framebuffer frame twice fresh in both orientations; independent outputs are byte-identical with player output digest 19cf632a59c62828a18cedbbef72f2a822bb22aa1eeb38b2378b43431f800dae / RGB fc0c3faa6bffce97bf44f8f29c3f6a56a4c98e444d4c719f9e78bc1669163ed5 and opponent output digest 66a3f92dee5ce999289b2eb50aa8fa89969737d41607530e87ab37e57dc97ffa / RGB be3db04558b5e8baef6c81a0a8995f3c66b89f9f09b6e1a15fd9ba68c34ea4c6",
         "MOVE_MUDDY_WATER remains unsupported: it shares the command but changes the palette and starts SE_M_WHIRLPOOL before the command, so it needs independent dense acceptance. MOVE_SECRET_POWER remains unsupported: Factory BATTLE_ENVIRONMENT_BUILDING dispatches Move_STRENGTH, not Move_SURF; only its water branch reaches Surf.",
-        "staged only: no source-relative reducer, typed presentation seam, or framebuffer renderer exists yet. No battle logic/RNG/controller/facility state, boundary list, unsupported barrier, or absolute-tick/move-number/input-delay/coordinate/RGB/pixel exception changed."
+        "no battle logic, RNG, controller, turn order, round/facility state, boundary list, or unsupported barrier changed"
       ],
       "evidence": [
         "tools/battle-lab/mechanic-surf-player-wartortle-opponent-shuckle.json",
@@ -18,12 +19,15 @@
         "tools/compare/fixtures/surf-wave-opponent-wartortle-player-shuckle.json",
         "tools/compare/surfWaveProbe.py",
         "tools/compare/surfWaveEvidence.ts",
+        "tools/compare/surfWavePortable.ts",
         "tools/compare/surfWaveSourceAudit.ts",
         "tools/compare/extractSurfWaveAssets.ts",
         "src/animation/assets/surf-wave.json",
+        "src/animation/surfWave.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "src/engine/battleScene.ts",
         "tests/animation/surfWave.test.ts"
-      ],
-      "remaining": "Port AnimTask_CreateSurfWave and AnimTask_SurfWaveScanlineEffect into a source-relative reducer, thread a typed battle-presentation seam, then render extracted BG1 tiles/tilemaps/palette rotation/scanline alpha plus shared field chrome to prove 144/144 framebuffer equality twice fresh in both WARTORTLE orientations; separately stage and accept MUDDY_WATER before promotion."
+      ]
     },
     {
       "move": "MOVE_THUNDER_WAVE",
