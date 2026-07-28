@@ -259,6 +259,8 @@ function emptyBattler(side: 0 | 1): BattleScriptRulesBattlerState {
     disableTimerStartValue: 0,
     encoreTimer: 0,
     encoredMove: 0,
+    encoredMovePos: 0,
+    encoreTimerStartValue: 0,
     usedDisabledMove: 0,
     tauntTimer: 0,
     usedTauntedMove: 0,
@@ -844,6 +846,17 @@ function lockedMoveDecision(
   battler: BattleSinglesBattler,
 ): BattleMoveDecision | null {
   const battlerState = rulesContext.battlers[battler]!;
+  if (
+    battlerState.encoreTimer !== 0
+    && battlerState.encoredMove !== 0
+    && battlerState.moves[battlerState.encoredMovePos] === battlerState.encoredMove
+  ) {
+    return Object.freeze({
+      kind: "use-move",
+      moveSlot: battlerState.encoredMovePos as BattleMoveSlot,
+      targetBattler: sourceMoveTarget(battlerState.encoredMove, battler),
+    });
+  }
   if (
     (
       battlerState.status2
