@@ -63,6 +63,7 @@ import { createBattleScriptRecoverbasedonsunlightOpcodeHandlers } from "./battle
 import { createBattleScriptCurseOpcodeHandlers } from "./battleScriptCurseOpcode.ts";
 import { createBattleScriptRemainingHpToPowerOpcodeHandlers } from "./battleScriptRemainingHpToPowerOpcode.ts";
 import { createBattleScriptFriendshipToDamageOpcodeHandlers } from "./battleScriptFriendshipToDamageOpcode.ts";
+import { createBattleScriptCopyFoeStatsOpcodeHandlers } from "./battleScriptCopyFoeStatsOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -2284,6 +2285,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptCurseOpcodeHandlers(program, resolveRulesBattlerForBattleScript),
     ...createBattleScriptRemainingHpToPowerOpcodeHandlers(program),
     ...createBattleScriptFriendshipToDamageOpcodeHandlers(program),
+    ...createBattleScriptCopyFoeStatsOpcodeHandlers(program),
   });
 }
 

@@ -1,4 +1,25 @@
 ---
+## 541 — [BOUNDED MAIN WORKER 2026-07-27 ~21:24] Real full-turn kernel now drives the exact Battle-2 OFF seam
+
+- **State:** union green at **295 files / 3823 tests**; `npm run build`
+  clean. The unchanged `battle2-off-turn1-staged.json` trace remains
+  **16/16 exact** on the selected OFF profile.
+- **Did:** the existing Scene-OFF adapter now projects provenance-bearing
+  semantic events plus the genuine request-3 boundary into the same nine
+  relative commands, acknowledging exactly at
+  **145,146,160,260,261,311,400,404,405**. The existing app stage now retains
+  the immutable full-turn transition and renders names/HP/stat/text from its
+  projection; kernel RNG stays honestly at **650807554 / 4 calls**.
+- **Next:** supervisor independently verify `22ddfcd` plus this presentation
+  commit and the unchanged **16/16** trace, then resume the ranked S10
+  executable frontier. The retired staged 12-draw scenario may be removed
+  later only after auditing its remaining callers.
+- **Notes:** focused **17/17**, full **3823/3823**, build and `git diff
+  --check` green. Preserved the concurrent file-disjoint Return/Frustration
+  evidence merge. No synthetic eight-draw tail, canonical recording import,
+  unsupported barrier, ratchet change, oracle lifecycle action, or PAPERCUT.
+
+---
 ## 540 — [BOUNDED MAIN WORKER 2026-07-27 ~21:17] Full-turn controller seam source-correct and provenance-bearing
 
 - **State:** tree green at **294 files / 3820 tests**; `npm run build`

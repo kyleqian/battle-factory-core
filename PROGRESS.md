@@ -15,6 +15,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 544 — [SUPERVISOR SOURCE CORRECTION 2026-07-27 ~21:55] Psych Up executes source-completely
+
+- **State:** tree green at **297 files / 3835 tests**; `npm run build`,
+  census, freshness, and `git diff --check` pass. The unchanged Battle-2 OFF
+  trace remains **16/16 exact**.
+- **Did:** registered `B_SCR_OP_COPYFOESTATS` / `Cmd_copyfoestats` as the
+  source's unconditional five-byte command: copy all eight target stat stages
+  to the attacker, ignore the unused failure pointer, and change nothing else.
+  Opcode isolation plus neutral/non-neutral `BattleScript_EffectPsychUp`
+  walks reach their real `END`, pin PP/events/provenance, preserve HP/status,
+  existing animation state, and zero-call RNG. Corrected a false brief claim
+  before commit: the command does not write animation arguments.
+- **Next:** merge the file-disjoint Baton Pass OFF evidence, then register the
+  newly top-ranked `B_SCR_OP_JUMPIFCANTSWITCH` / `EFFECT_BATON_PASS`.
+- **Notes:** census is **131/214 effects, 255/355 moves, 207/276 Factory-L50
+  distinct, 2618/2957 weighted**, exact **+1/+1/+1/+14**, all **42/42**
+  checks. Focused **53/53** and full **3835/3835** pass. No unsupported
+  barrier, recording import, ratchet change, oracle lifecycle action,
+  animation edit, or PAPERCUT.
+
+---
 ## 543 — [BOUNDED MAIN WORKER 2026-07-27 ~21:43] Full-turn singles requests use source move targets
 
 - **State:** tree green at **296 files / 3829 tests**; `npm run build` and
@@ -52,24 +73,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** focused **24/24**, full **3824/3824**, build/compare/diff green.
   No unsupported barrier, canonical-recording import, ratchet change,
   oracle lifecycle action, animation edit, or PAPERCUT.
-
----
-## 541 — [BOUNDED MAIN WORKER 2026-07-27 ~21:24] Real full-turn kernel now drives the exact Battle-2 OFF seam
-
-- **State:** union green at **295 files / 3823 tests**; `npm run build`
-  clean. The unchanged `battle2-off-turn1-staged.json` trace remains
-  **16/16 exact** on the selected OFF profile.
-- **Did:** the existing Scene-OFF adapter now projects provenance-bearing
-  semantic events plus the genuine request-3 boundary into the same nine
-  relative commands, acknowledging exactly at
-  **145,146,160,260,261,311,400,404,405**. The existing app stage now retains
-  the immutable full-turn transition and renders names/HP/stat/text from its
-  projection; kernel RNG stays honestly at **650807554 / 4 calls**.
-- **Next:** supervisor independently verify `22ddfcd` plus this presentation
-  commit and the unchanged **16/16** trace, then resume the ranked S10
-  executable frontier. The retired staged 12-draw scenario may be removed
-  later only after auditing its remaining callers.
-- **Notes:** focused **17/17**, full **3823/3823**, build and `git diff
-  --check` green. Preserved the concurrent file-disjoint Return/Frustration
-  evidence merge. No synthetic eight-draw tail, canonical recording import,
-  unsupported barrier, ratchet change, oracle lifecycle action, or PAPERCUT.
