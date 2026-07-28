@@ -15,6 +15,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 533 — [SUPERVISOR ORIENT 2026-07-27 ~20:12] animation fold + fresh green OFF-profile baseline
+
+- **State:** union committed except for this ledger/test-fix step and green at
+  **287 files / 3753 tests**; `npm run build` clean. Battle Scene OFF oracle
+  is fresh at canonical SHA `9c89c741…f297`; census remains
+  **126/214 effects, 249/355 moves, 201/276 Factory-L50, 2548/2957 weighted
+  (86.2%)**. No deferred questions.
+- **Did:** folded all 10 `animation-main` commits absent from `master`
+  (`d0c04f8`: Spark framebuffer closure, CHARM exact, Scary Face partial +
+  evidence). The union exposed one supervisor-only launcher-test leak:
+  `POKEBENCH_ROLE=supervisor` was not scrubbed by
+  `codexLauncherProfiles.test.ts`; its five subprocess checks are hermetic
+  again. Restarted the stale port-8014 service and re-ran freshness, full
+  Tier-1, and build on the union.
+- **Next:** resume the ranked executable census with the `EFFECT_CURSE` pair
+  while a file-disjoint side worker prepares the next staged OFF-profile
+  presentation-seam evidence; verify/merge both, then continue with FLAIL and
+  the banked §15 seam wiring.
+- **Notes:** no executable-frontier ratchet or barrier change. No PAPERCUT.
+
+---
 ## 532 — [USER-DIRECTED TOOLING 2026-07-27 ~20:10] Codex max mode added: Sol/ultra supervisor, all-Sol workers up to xhigh
 
 - **State:** tree green at **285 files / 3740 tests** (+1 file / +5
