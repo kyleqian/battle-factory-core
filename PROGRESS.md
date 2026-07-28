@@ -15,6 +15,29 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 623 — [BOUNDED MAIN WORKER 2026-07-28 ~12:02] Ranked Batch 3 source-complete
+
+- **State:** tree green at **391 files / 4458 tests**, production build, OFF
+  oracle info, and `git diff --check`. Census is exactly **185/214 effects,
+  324/355 moves, 266/276 distinct, 2931/2957 weighted**: inherited Batch-3
+  delta **+4/+4/+4/+7**; all **64** census validations pass.
+- **Did:** registered `PAINSPLITDMGCALC` plus the signed `painSplitHp` copy
+  tuple and Shell Bell suppression; registered all three Stockpile-family
+  handlers with a shared 0..3 switch/faint/Baton-cleared counter, both exact
+  print tables, corrected 1/4–1/2–full Swallow healing, and source
+  post-base-damage Spit Up scaling/Helping Hand/Protect behavior. All four
+  committed scripts reach END with deterministic replays and exact ledgers.
+- **Next:** supervisor verify commits `7c2dcb02` and `b375e333`; Batch 3 has
+  no remainder. Then resume entry 622's bounded Rapid Spin rung unless the
+  supervisor reprioritizes the already-banked Cluster-4 item receipts.
+- **Notes:** receipt pins include Pain Split **117/100→108/108**, PP 20→19,
+  zero draws; Swallow **67→150** at counter 2; fourth Stockpile failure.
+  Spit Up remains source/hermetic-only by the banked carrier rule. Deliberate
+  census moves: Pain Split/Stockpile/Swallow/Spit Up exact blocker pins now
+  require executable; no barrier-count, recording-import, presentation,
+  round, tick, roadmap, issue, or oracle-trace changes.
+
+---
 ## 622 — [BOUNDED MAIN WORKER 2026-07-28 ~11:38] Mean Look + Nightmare source-complete; Rapid Spin remains barriered
 
 - **State:** rung (a) is green at **389 files / 4441 tests** plus production
@@ -63,27 +86,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** animation supervisor is live concurrently (animation-main has
   fresh commits + a nested worker); fold at wind-down. No deferred questions.
   Deadline 15:07.
-
----
-## 620 — [BOUNDED MAIN WORKER 2026-07-28 ~11:21] Grudge and Spite execute complete PP lifecycles
-
-- **State:** tree green at **386 files / 4423 tests**, production build, OFF
-  oracle info, ratchets **6/6**, and `git diff --check`. Both ranked Batch-2
-  remainder effects reach their own committed-script `END`; expected census
-  delta is **+2 effects / +2 moves / +2 distinct / +4 weighted**.
-- **Did:** registered exact `TRYSETGRUDGE` and `TRYSPITEPPREDUCE` handlers.
-  Grudge now schedules its chosen-move PP zero, durable party write, typed
-  move buffer, controller event, message, Destiny Bond continuation, and
-  target faint in source order. Spite owns the four-bit `mimickedMoves`
-  mask, exact pre-draw failures and `(Random() & 3) + 2` draw, clamp/zero
-  cancellation, typed move/number buffers, Mimic/Transform persistence gate,
-  and active/party/controller PP synchronization across switch.
-- **Next:** supervisor verify commits `bf1080d5` and `55c49c62`, then
-  reconcile the concurrent census owner and expect totals
-  **179/214 effects, 316/355 moves, 258/276 distinct, 2916/2957 weighted**.
-  No remainder from this step.
-- **Notes:** raw-source re-derivation found zero dossier corrections and zero
-  surprise barriers. Deliberate barrier ratchet move: HitChain **20→19**
-  retires Grudge's named `tryfaintmon` barrier. No new barriers, recording
-  imports, generator-metadata entries, census/doc regeneration, roadmap,
-  issue, oracle-trace, presentation, tick, or round edits.

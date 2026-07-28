@@ -1,4 +1,28 @@
 ---
+## 620 — [BOUNDED MAIN WORKER 2026-07-28 ~11:21] Grudge and Spite execute complete PP lifecycles
+
+- **State:** tree green at **386 files / 4423 tests**, production build, OFF
+  oracle info, ratchets **6/6**, and `git diff --check`. Both ranked Batch-2
+  remainder effects reach their own committed-script `END`; expected census
+  delta is **+2 effects / +2 moves / +2 distinct / +4 weighted**.
+- **Did:** registered exact `TRYSETGRUDGE` and `TRYSPITEPPREDUCE` handlers.
+  Grudge now schedules its chosen-move PP zero, durable party write, typed
+  move buffer, controller event, message, Destiny Bond continuation, and
+  target faint in source order. Spite owns the four-bit `mimickedMoves`
+  mask, exact pre-draw failures and `(Random() & 3) + 2` draw, clamp/zero
+  cancellation, typed move/number buffers, Mimic/Transform persistence gate,
+  and active/party/controller PP synchronization across switch.
+- **Next:** supervisor verify commits `bf1080d5` and `55c49c62`, then
+  reconcile the concurrent census owner and expect totals
+  **179/214 effects, 316/355 moves, 258/276 distinct, 2916/2957 weighted**.
+  No remainder from this step.
+- **Notes:** raw-source re-derivation found zero dossier corrections and zero
+  surprise barriers. Deliberate barrier ratchet move: HitChain **20→19**
+  retires Grudge's named `tryfaintmon` barrier. No new barriers, recording
+  imports, generator-metadata entries, census/doc regeneration, roadmap,
+  issue, oracle-trace, presentation, tick, or round edits.
+
+---
 ## 619 — [BOUNDED MAIN WORKER 2026-07-28 ~11:05] Status-family callback operands restored semantically
 
 - **State:** tree green at **384 files / 4402 tests**, production build, OFF
