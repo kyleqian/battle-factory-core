@@ -125,6 +125,14 @@ export type BattleScriptSemanticEventPayload =
     pp: number;
   }>
   | Readonly<{
+    /** BtlController_EmitResetActionMoveSelection(..., RESET_MOVE_SELECTION). */
+    kind: "reset-action-move-selection";
+    battler: BattleScriptBattlerId;
+    reset: "move-selection";
+    command: 54;
+    argument: 2;
+  }>
+  | Readonly<{
     /** BtlController_EmitSetMonData(REQUEST_MOVES_PP_BATTLE). */
     kind: "set-battler-moves-pp-data";
     battler: BattleScriptBattlerId;

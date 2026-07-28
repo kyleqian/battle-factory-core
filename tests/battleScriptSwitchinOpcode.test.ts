@@ -94,6 +94,7 @@ function opponentBench(): BattleScriptPartyMemberInput[] {
       abilityNum: 0,
       ivs: { hp: 31, attack: 30, defense: 29, speed: 28, spAttack: 27, spDefense: 26 },
       personality: 0x1234_5678,
+      experience: 125000,
       level: 50,
       friendship: 70,
       hp: 145,
@@ -279,6 +280,8 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
           disableTimer: 5,
           disableTimerStartValue: 5,
           tauntTimer: 4,
+          abilityNum: 1,
+          transformedMonPersonality: 50,
         }),
         battler({ side: 0 }),
         battler({ side: 1 }),
@@ -296,6 +299,9 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     expect(updated.ability).toBe(ABILITY_GUTS);
     expect(updated.ivs).toEqual({ hp: 31, attack: 30, defense: 29, speed: 28, spAttack: 27, spDefense: 26 });
     expect(updated.personality).toBe(0x1234_5678);
+    expect(updated.experience).toBe(125000);
+    expect(updated.abilityNum).toBe(0);
+    expect(updated.transformedMonPersonality).toBe(0);
     expect(updated.level).toBe(50);
     expect(updated.friendship).toBe(70);
     expect(updated.maxHP).toBe(180);

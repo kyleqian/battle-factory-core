@@ -8,8 +8,8 @@ Answers ROADMAP S10's Executable-frontier reset question directly: not "how many
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 212 | 214 | 99.1% |
-| Moves (unweighted, all 355) | 353 | 355 | 99.4% |
+| Effect scripts | 213 | 214 | 99.5% |
+| Moves (unweighted, all 355) | 354 | 355 | 99.7% |
 | Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 275 | 276 | 99.6% |
 | Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2955 | 2957 | 99.9% |
 
@@ -84,7 +84,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_SPECIAL_DEFENSE_UP_2 | `BattleScript_EffectSpecialDefenseUp2` | executable | - | - | 1 | 1 (13) |
 | EFFECT_ACCURACY_UP_2 | `BattleScript_EffectHit` | executable | - | - | 0 | 0 (0) |
 | EFFECT_EVASION_UP_2 | `BattleScript_EffectHit` | executable | - | - | 0 | 0 (0) |
-| EFFECT_TRANSFORM | `BattleScript_EffectTransform` | blocked-on-opcodes | `B_SCR_OP_TRANSFORMDATAEXECUTION` (main path) | Operand gate: B_SCR_OP_PRINTFROMTABLE(gTransformUsedStringIds) -- gTransformUsedStringIds is outside the engine's accepted string-table pointer set (src/engine/battleScriptHitChainOpcode.ts:288; battle_script_commands.c:2184) | 1 | 0 (0) |
+| EFFECT_TRANSFORM | `BattleScript_EffectTransform` | executable | - | - | 1 | 0 (0) |
 | EFFECT_ATTACK_DOWN_2 | `BattleScript_EffectAttackDown2` | executable | - | - | 2 | 2 (8) |
 | EFFECT_DEFENSE_DOWN_2 | `BattleScript_EffectDefenseDown2` | executable | - | - | 1 | 1 (12) |
 | EFFECT_SPEED_DOWN_2 | `BattleScript_EffectSpeedDown2` | executable | - | - | 2 | 2 (24) |

@@ -286,6 +286,11 @@ const B_MSG_STATUS_HAD_NO_EFFECT = 2;
 
 /** printfromtable's registered small constant tables, each indexed by MULTISTRING_CHOOSER. */
 const PRINTFROMTABLE_TABLES: Readonly<Record<string, readonly string[]>> = Object.freeze({
+  /** battle_message.c:1060-1065 -- Transform success/failure selectors. */
+  gTransformUsedStringIds: Object.freeze([
+    "STRINGID_PKMNTRANSFORMEDINTO",
+    "STRINGID_BUTITFAILED",
+  ]),
   /** battle_message.c:1126-1131 -- Mud Sport / Water Sport. */
   gSportsUsedStringIds: Object.freeze([
     "STRINGID_ELECTRICITYWEAKENED",
@@ -4083,9 +4088,8 @@ function replaceAt<T extends readonly number[]>(values: T, index: number, value:
  * set on some other battler (never true for a plain damaging-move KO, so
  * unreached on this rung's own scenario). `protectUses` is now a real write
  * (`battleScriptProtectlikeOpcode.ts`'s own field), tested below. The
- * remaining struct-wide DisableStruct/ProtectStruct
- * fields FaintClearSetData zeroes (transformedMonPersonality,
- * chargeTimer*, battlerWithSureHit, isFirstTurn, truantSwitchInHack,
+ * Remaining struct-wide DisableStruct/ProtectStruct fields FaintClearSetData
+ * zeroes (isFirstTurn, truantSwitchInHack,
  * ProtectStruct's noValidMoves/fleeType/physicalDmg/
  * specialDmg/physicalBattlerId/specialBattlerId), gActionSelectionCursor/
  * gMoveSelectionCursor, gBattleResources->flags->flags, the species-base
@@ -4159,6 +4163,7 @@ function createCleareffectsonfaintOpcodeHandler(
           protectUses: 0,
           battlerPreventingEscape: 0,
           battlerWithSureHit: 0,
+          transformedMonPersonality: 0,
         });
       }
       // FaintClearSetData (battle_main.c:3281): other battlers wrapped BY the

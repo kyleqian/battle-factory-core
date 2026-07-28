@@ -3117,6 +3117,7 @@ describe("production cleareffectsonfaint (Cmd_cleareffectsonfaint) dispatch", ()
           protected: 1,
           protectUses: 3,
           battlerWithSureHit: 0,
+          transformedMonPersonality: 50,
         },
       );
       const { result } = stepAtProgramCounter(cleareffectsonfaintTargetPc, rc);
@@ -3140,6 +3141,7 @@ describe("production cleareffectsonfaint (Cmd_cleareffectsonfaint) dispatch", ()
       // that file's history: this field simply didn't exist on the engine's battler state).
       expect(target.protectUses).toBe(0);
       expect(target.battlerWithSureHit).toBe(0);
+      expect(target.transformedMonPersonality).toBe(0);
       expect(result.state.rulesContext.moveHistory.lastHitBy[1]).toBe(0xff);
       expect(result.state.events).toEqual([
         expect.objectContaining({ kind: "set-battler-status-data", battler: 1, status1: 0 }),
