@@ -195,6 +195,58 @@ describe("runBattleEndTurnOrchestration (BattleTurnPassed equivalent)", () => {
   });
 
   it(
+    "ENDTURN_TAUNT follows per-battler tracker order and decrements each present nonzero timer exactly once "
+      + "(2->1, 1->0) with no message/controller/RNG work",
+    () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0, tauntTimer: 2 }),
+          battler({ side: 1, partyIndex: 2, tauntTimer: 1 }),
+          battler({ side: 0, tauntTimer: 7 }),
+          battler({ side: 1, tauntTimer: 9 }),
+        ],
+        // ENDTURN_ORDER consumes this source-shaped order for the two active
+        // battlers. Slots 2/3 are outside battlersCount and must stay exact.
+        battlerByTurnOrder: [1, 0, 3, 2],
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+      const initial = scratchState(rc, 1);
+      const result = runBattleEndTurnOrchestration(program, handlers, initial);
+      expect(result.kind).toBe("next-turn");
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      expect(result.state.rulesContext.battlers.map(({ tauntTimer }) =>
+        tauntTimer
+      )).toEqual([1, 0, 7, 9]);
+      expect(result.state.rng).toBe(initial.rng);
+      expect(result.state.events).toBe(initial.events);
+      expect(result.state.scheduler).toBe(initial.scheduler);
+      expect(Object.isFrozen(result.state.rulesContext.battlers[0])).toBe(true);
+      expect(Object.isFrozen(result.state.rulesContext.battlers[1])).toBe(true);
+    },
+  );
+
+  it("ENDTURN_TAUNT skips an absent battler and leaves its timer untouched", () => {
+    const rc = context({
+      battlers: [
+        battler({ side: 0, tauntTimer: 2 }),
+        battler({ side: 1, partyIndex: 2, tauntTimer: 2 }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+      absentBattlerFlags: 1 << 1,
+    });
+    const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+    const initial = scratchState(rc, 1);
+    const result = runBattleEndTurnOrchestration(program, handlers, initial);
+    expect(result.kind).toBe("next-turn");
+    if (result.kind !== "next-turn") throw new Error("expected next-turn");
+    expect(result.state.rulesContext.battlers[0].tauntTimer).toBe(1);
+    expect(result.state.rulesContext.battlers[1].tauntTimer).toBe(2);
+    expect(result.state.rng).toBe(initial.rng);
+    expect(result.state.events).toBe(initial.events);
+  });
+
+  it(
     "(ISSUES #46) the full ProtectStruct table clears once per turn on the next-turn transition "
       + "(TurnValuesCleanUp(FALSE), docs/counter-retaliation-design.md §2.4) -- every modeled field, "
       + "on every battler, not just the one an admission reducer happened to overwrite",

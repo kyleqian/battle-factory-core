@@ -1271,12 +1271,22 @@ function runDoBattlerEndTurnEffects(
     }
     if (disable.kind === "outcome-decided") return Object.freeze({ kind: "outcome-decided", state: disable.state });
     state = disable.state;
-    const b2 = state.rulesContext.battlers[battler];
     // ENDTURN_ENCORE: no modeled encoreTimer/encoredMove -- inert no-op today (doc B14).
     // ENDTURN_LOCK_ON: doc-proven dead for Factory (zero MOVE_LOCK_ON/MOVE_MIND_READER carriers, B15) -- skipped, not silently ignored.
     // ENDTURN_CHARGE: no modeled chargeTimer/STATUS3_CHARGED_UP -- inert no-op today (doc B16).
-    if (b2.tauntTimer !== 0) {
-      return Object.freeze({ kind: "case-barrier", state, caseName: "ENDTURN_TAUNT", detail: "tauntTimer set but its decrement/BattleScript_EncoredNoMore-sibling clear is not wired" });
+    // ENDTURN_TAUNT (`battle_util.c:1748-1752`): unlike Disable/Encore,
+    // expiry owns no script, message, controller request, or RNG draw. The
+    // source decrements only the functional tauntTimer; Cmd_settaunt's
+    // write-only tauntTimer2 mirror is intentionally absent from rules state
+    // (battleScriptSettauntOpcode.ts).
+    const tauntTimer = state.rulesContext.battlers[battler].tauntTimer;
+    if (tauntTimer !== 0) {
+      state = Object.freeze({
+        ...state,
+        rulesContext: withBattler(state.rulesContext, battler, {
+          tauntTimer: tauntTimer - 1,
+        }),
+      });
     }
     const yawn = applyTickOutcome(runYawnTick(program, handlers, state, battler));
     if (yawn.kind === "opcode-barrier") {
