@@ -15,21 +15,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
-## 597 — [BOUNDED MAIN WORKER 2026-07-28 ~05:35] Low Kick source-weight catalog landed
+## 597 — [BOUNDED MAIN WORKER 2026-07-28 ~05:40] Low Kick opcode and source-weight catalog landed
 
-- **State:** source-derived species weights are extracted into the existing
-  complete `species-stats.json` catalog; focused regeneration/catalog tests
-  pass.
+- **State:** operand-free `0xdd` is globally registered with source-derived
+  target weight lookup; focused opcode/rules/catalog coverage is **44/44**.
 - **Did:** extended the pinned species extractor with Pokédex hectogram
   weights for all 386 real Pokédex entries. The 25 unreachable OLD_UNOWN
-  compatibility ids remain explicitly `null` rather than receiving invented
-  data; Chansey 346, Snorlax 4600, Onix 2100, and arbitrary endpoints are
-  pinned.
-- **Next:** register operand-free `0xdd`, prove all strict weight brackets and
-  ownership/immutability/one-byte behavior, then land generic full-turn Low
-  Kick through shared damage/action cleanup.
-- **Notes:** no production handler, recording import, RNG/controller work,
-  private move path, unsupported barrier, or ratchet change yet.
+  compatibility ids remain explicitly absent. The handler proves all 12
+  strict bracket edges, arbitrary catalog rows, both target ids, immutable
+  ownership, and exact one-byte PC with unchanged RNG/events/scheduler.
+- **Next:** land generic full-turn Low Kick through shared PP, accuracy, type,
+  damage, messages, and action-reset cleanup; then run the complete acceptance
+  command set and regenerate the census.
+- **Notes:** handler inventory is **164**. No recording import, local
+  RNG/controller/message work, private move path, unsupported barrier, or
+  ratchet change.
 
 ---
 ## 596 — [SUPERVISOR VERIFY 2026-07-28 ~05:20] Magic Coat accepted; Low Kick evidence folded
