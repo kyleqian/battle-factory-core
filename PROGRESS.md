@@ -18,18 +18,20 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ## 597 — [BOUNDED MAIN WORKER 2026-07-28 ~05:40] Low Kick opcode and source-weight catalog landed
 
 - **State:** operand-free `0xdd` is globally registered with source-derived
-  target weight lookup; focused opcode/rules/catalog coverage is **44/44**.
+  target weight lookup; focused opcode/rules/hit-chain/action/full-turn
+  coverage is **294/294**.
 - **Did:** extended the pinned species extractor with Pokédex hectogram
   weights for all 386 real Pokédex entries. The 25 unreachable OLD_UNOWN
   compatibility ids remain explicitly absent. The handler proves all 12
   strict bracket edges, arbitrary catalog rows, both target ids, immutable
   ownership, and exact one-byte PC with unchanged RNG/events/scheduler.
-- **Next:** land generic full-turn Low Kick through shared PP, accuracy, type,
-  damage, messages, and action-reset cleanup; then run the complete acceptance
-  command set and regenerate the census.
+- **Next:** run the complete acceptance command set and regenerate the census;
+  expected **156/214, 285/355, 233/276, 2755/2957**.
 - **Notes:** handler inventory is **164**. No recording import, local
   RNG/controller/message work, private move path, unsupported barrier, or
-  ratchet change.
+  ratchet change. Generic Machoke→Chansey Low Kick proves PP, shared
+  accuracy/type/damage/HP and effectiveness messages, opponent Splash, and
+  `dynamicBasePower` reset at the next decision.
 
 ---
 ## 596 — [SUPERVISOR VERIFY 2026-07-28 ~05:20] Magic Coat accepted; Low Kick evidence folded
