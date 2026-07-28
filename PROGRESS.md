@@ -15,6 +15,29 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 573 — [BOUNDED MAIN WORKER 2026-07-28 ~02:52] Follow Me executes and expires generically
+
+- **State:** committed `b29ecd1`; tree green at **331 files / 4047 tests**,
+  focused **100/100**, and ratchets **6/6**. Production build, both-oracle
+  freshness/info, census regeneration, and `git diff --check` pass. Census is
+  exactly **144/214 effects, 270/355 moves, 221/276 Factory-L50 distinct,
+  2716/2957 weighted**, all **42/42**.
+- **Did:** globally registered operandless `0xca`: after ordinary PP spend it
+  always advances and immutably writes only the attacker side's timer **1**
+  and target, including same-side overwrite. The shared BattleTurnPassed tail
+  clears both timers after faint/delayed work while retaining inert targets;
+  a generic singles full turn spends both Follow Me PP and reaches the next
+  decision with zero HP/stat/lock/RNG changes.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next shared registration target; do not extend the retired
+  canonical Battle-2 march.
+- **Notes:** the six source retarget readers/HP guards remain evidence-pinned;
+  Counter/Mirror Coat/GetMoveTarget doubles ownership was not widened. Handler
+  inventory ratchet **152→153** only; no unsupported-branch/import ratchet,
+  recording import, private handler, animation/presentation/scenario branch,
+  issue removal, oracle lifecycle action, or PAPERCUT.
+
+---
 ## 572 — [SUPERVISOR VERIFY 2026-07-28 ~02:38] Corrected Minimize accepted; Skill Swap evidence folded
 
 - **State:** reviewed union green at **330 files / 4040 tests** and focused
@@ -56,25 +79,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** production semantics, census, evidence, and all ratchets are
   unchanged. No `MoveValuesCleanUp`, private override, scenario/presentation/
   animation change, issue removal, oracle lifecycle action, or PAPERCUT.
-
----
-## 570 — [BOUNDED MAIN WORKER 2026-07-28 ~02:28] Minimize executes and Stomp consumes it generically
-
-- **State:** committed `29f2a0c`; tree green at **329 files / 4037 tests**,
-  focused **321/321**, and ratchets **6/6**. Production build, both-oracle
-  freshness/info, census regeneration, and `git diff --check` pass. Census is
-  exactly **143/214 effects, 269/355 moves, 220/276 Factory-L50 distinct,
-  2711/2957 weighted**, all **42/42**.
-- **Did:** globally registered operandless `0xc7`: it always advances and only
-  `HITMARKER_OBEYS` ORs `STATUS3_MINIMIZED` onto the selected attacker.
-  Source/program tests pin max-evasion persistence and the existing Stomp
-  target branch's shared `setbyte sDMG_MULTIPLIER, 2`; a generic full turn
-  proves manual Minimize PP/evasion/status3 before slower Stomp consumes it.
-- **Next:** supervisor verify this finite executable-frontier increment and
-  select the next shared registration target; do not extend the retired
-  canonical Battle-2 march.
-- **Notes:** existing battle-init, ordinary-switch, faint, and Baton Pass
-  exclusion seams are pinned without widening their ownership. OFF evidence
-  remains manifest `67c617f7…c842977`. No RNG/message/stat/lock ownership,
-  barrier/import ratchet change, recording import, animation/presentation/
-  scenario branch, oracle lifecycle action, issue removal, or PAPERCUT.

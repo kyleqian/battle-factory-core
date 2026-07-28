@@ -1,4 +1,26 @@
 ---
+## 570 — [BOUNDED MAIN WORKER 2026-07-28 ~02:28] Minimize executes and Stomp consumes it generically
+
+- **State:** committed `29f2a0c`; tree green at **329 files / 4037 tests**,
+  focused **321/321**, and ratchets **6/6**. Production build, both-oracle
+  freshness/info, census regeneration, and `git diff --check` pass. Census is
+  exactly **143/214 effects, 269/355 moves, 220/276 Factory-L50 distinct,
+  2711/2957 weighted**, all **42/42**.
+- **Did:** globally registered operandless `0xc7`: it always advances and only
+  `HITMARKER_OBEYS` ORs `STATUS3_MINIMIZED` onto the selected attacker.
+  Source/program tests pin max-evasion persistence and the existing Stomp
+  target branch's shared `setbyte sDMG_MULTIPLIER, 2`; a generic full turn
+  proves manual Minimize PP/evasion/status3 before slower Stomp consumes it.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next shared registration target; do not extend the retired
+  canonical Battle-2 march.
+- **Notes:** existing battle-init, ordinary-switch, faint, and Baton Pass
+  exclusion seams are pinned without widening their ownership. OFF evidence
+  remains manifest `67c617f7…c842977`. No RNG/message/stat/lock ownership,
+  barrier/import ratchet change, recording import, animation/presentation/
+  scenario branch, oracle lifecycle action, issue removal, or PAPERCUT.
+
+---
 ## 569 — [BOUNDED MAIN WORKER CORRECTION 2026-07-28 ~02:17] Fury Cutter mirrors raw C integer widths
 
 - **State:** committed `0d638cb`; tree green at **328 files / 4031 tests**,
