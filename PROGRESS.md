@@ -17,16 +17,18 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ---
 ## 607 — [USER-DIRECTED TOOLING 2026-07-28 ~09:02] Hybrid supervisor ready; ordinary Codex effort is high-only
 
-- **State:** `codex/hybrid-cloud-supervisor` includes current `master` and is
-  green at **366 files / 4239 tests**; launcher profiles **15/15**,
+- **State:** `master` now includes `codex/hybrid-cloud-supervisor` through
+  `bf0a08a` and is green at **366 files / 4239 tests**; launcher profiles **15/15**,
   production build, shell syntax, config smoke tests, and `git diff --check`
   pass.
 - **Did:** added the Fable/Remote-Control supervisor with Terra or Sol Codex
   workers, then removed Sol/medium from every ordinary Codex workflow.
   Direct workers, all-Codex supervisors, and hybrid supervisors now default
-  to high and mechanically reject any lower worker/supervisor effort.
-- **Next:** fold `codex/hybrid-cloud-supervisor` into `master`; launch the
-  mixed workflow with `./run-supervisor.sh -H` (or `--hybrid`).
+  to high and mechanically reject any lower worker/supervisor effort. Added
+  `-H` as the short form of `--hybrid` and fast-forwarded the feature into
+  `master`.
+- **Next:** launch the mixed workflow with `./run-supervisor.sh -H` (or
+  `--hybrid`); otherwise resume finite Stage 8 selection from entry 605.
 - **Notes:** max mode deliberately remains Sol/ultra with Sol/xhigh by
   default and permits high; its workers now reject sub-high overrides too.
   Entry 606 already retired the worktree papercuts encountered during this
