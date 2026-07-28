@@ -8,7 +8,11 @@ import {
   type BattleScriptStatusRulesExternalPorts,
 } from "../src/engine/battleScriptRulesContext.ts";
 import { loadBattleScriptProgram } from "../src/engine/battleScriptProgram.ts";
-import { stepBattleScriptMachine } from "../src/engine/battleScriptMachine.ts";
+import {
+  acknowledgeBattleScriptMachineController,
+  stepBattleScriptMachine,
+  type BattleScriptMachineState,
+} from "../src/engine/battleScriptMachine.ts";
 
 /**
  * Semi-invulnerable registration rungs 6-7
@@ -21,6 +25,7 @@ const MOVE_FLY = 19;
 const MOVE_DIG = 91;
 const MOVE_DIVE = 291;
 const MOVE_BOUNCE = 340;
+const MOVE_RAZOR_WIND = 13;
 const TACKLE = 33;
 /** include/constants/battle.h:139,163,164,175,259,300. */
 const STATUS2_MULTIPLETURNS = 1 << 12;
@@ -244,4 +249,146 @@ describe("B_SCR_OP_CLEARSTATUSFROMEFFECT (registered, one selector-resolution ba
       expect(result.kind).toBe("advanced");
     });
   });
+});
+
+/**
+ * Rung 8: full committed-script walks to a genuine `{kind:"terminal",
+ * opcodeName:"B_SCR_OP_END"}` halt, through the real production handler
+ * composition -- both turns of the two-turn cycle, plus the shared-plumbing
+ * (RAZOR_WIND-class) proof. Mirrors battleScriptExplosionOpcode.test.ts's
+ * own step/ackAllPending/runToTerminal shape.
+ */
+describe("EFFECT_SEMI_INVULNERABLE / EFFECT_RAZOR_WIND: full committed-script two-turn walk, genuine terminal halts", () => {
+  function walkPorts(): BattleScriptStatusRulesExternalPorts {
+    const B_WAIT_TIME_LONG = 64;
+    const B_WAIT_TIME_SHORT = 32;
+    return Object.freeze({
+      isControllerIdle: () => true,
+      prepareMessage: (_ctx, operand) =>
+        operand.expression.startsWith("STRINGID_")
+          ? Object.freeze({ kind: "message" as const, messageId: operand.expression, substitutions: Object.freeze([]) })
+          : null,
+      prepareSelectionMessage: () => null,
+      prepareSelectionMessageFromTable: () => null,
+      resolveAttackerBattler: () => null,
+      resolveBattlerAtPosition: () => null,
+      resolveHalfwordOperand: (_ctx, operand) => {
+        if (operand.expression === "B_WAIT_TIME_LONG") return B_WAIT_TIME_LONG;
+        if (operand.expression === "B_WAIT_TIME_SHORT") return B_WAIT_TIME_SHORT;
+        return /^[0-9]+$/.test(operand.expression) ? Number(operand.expression) : null;
+      },
+      resolveByteOperand: (_ctx, operand) => (/^[0-9]+$/.test(operand.expression) ? Number(operand.expression) : null),
+    });
+  }
+
+  function ackAllPending(
+    state: BattleScriptMachineState<BattleScriptRulesContext>,
+  ): BattleScriptMachineState<BattleScriptRulesContext> {
+    let next = state;
+    for (const battlerId of state.scheduler.pendingControllerBattlers) {
+      next = acknowledgeBattleScriptMachineController(next, battlerId);
+    }
+    return next;
+  }
+
+  function step(
+    state: BattleScriptMachineState<BattleScriptRulesContext>,
+    handlers: ReturnType<typeof createBattleScriptStatusRulesExecution>["handlers"],
+  ) {
+    let result = stepBattleScriptMachine(program, state, handlers);
+    let guard = 0;
+    while (result.kind === "scheduler-progressed" || result.kind === "blocked") {
+      guard += 1;
+      if (guard > 500) throw new Error("step() did not converge");
+      const nextState = result.kind === "blocked" ? ackAllPending(result.state) : result.state;
+      result = stepBattleScriptMachine(program, nextState, handlers);
+    }
+    return result;
+  }
+
+  function runToTerminal(entryLabel: string, rc: BattleScriptRulesContext, rngSeed: number) {
+    const execution = createBattleScriptStatusRulesExecution(program, entryLabel, rc, rngSeed, walkPorts());
+    let result = step(execution.state, execution.handlers);
+    let steps = 0;
+    while (result.kind === "advanced" && steps < 500) {
+      steps += 1;
+      result = step(result.state, execution.handlers);
+    }
+    if (result.kind !== "halted") throw new Error(`script did not reach its own end: ${result.kind}`);
+    expect(result.state.haltReason).toMatchObject({ kind: "terminal", opcodeName: "B_SCR_OP_END" });
+    return result;
+  }
+
+  it(
+    "MOVE_DIVE (100 accuracy, no turn-2 accuracy-roll confound): charge turn sets STATUS2_MULTIPLETURNS + "
+      + "chargingTurn + STATUS3_UNDERWATER (zero RNG), an opponent's Tackle misses the semi-invulnerable "
+      + "attacker on the charge-gap turn, then the attack turn clears both bits and lands on the target",
+    () => {
+      const chargeTurnRc = context({}, { currentMove: MOVE_DIVE });
+      const chargeResult = runToTerminal("BattleScript_EffectSemiInvulnerable", chargeTurnRc, 1);
+      const afterCharge = chargeResult.state.rulesContext;
+      expect(afterCharge.battlers[0]!.status2 & STATUS2_MULTIPLETURNS).toBe(STATUS2_MULTIPLETURNS);
+      expect(afterCharge.battlers[0]!.chargingTurn).toBe(1);
+      expect(afterCharge.battlers[0]!.status3 & STATUS3_UNDERWATER).toBe(STATUS3_UNDERWATER);
+      expect(chargeResult.state.rng.calls).toBe(0); // BattleScriptFirstChargingTurn draws no RNG
+
+      // Opponent-attack-misses-the-charge-gap proof (accuracycheck's already-registered ACC_CURR_MOVE consumer).
+      const accuracycheckPc = program.instructions.find(
+        (i) => i.opcodeName === "B_SCR_OP_ACCURACYCHECK" && i.source.label === "BattleScript_HitFromAccCheck",
+      )!.programCounter;
+      const opponentAttackRc = context({}, { currentMove: TACKLE }, { status3: afterCharge.battlers[0]!.status3 });
+      const oppExecution = createBattleScriptStatusRulesExecution(
+        program,
+        "BattleScript_HitFromAccCheck",
+        opponentAttackRc,
+        1,
+        walkPorts(),
+      );
+      const oppPatched = Object.freeze({ ...oppExecution.state, programCounter: accuracycheckPc });
+      const oppResult = stepBattleScriptMachine(program, oppPatched, oppExecution.handlers);
+      if (oppResult.kind !== "advanced") throw new Error(`expected advance, got ${oppResult.kind}`);
+      const missTarget = program.instructions.find((i) => i.source.label === "BattleScript_PrintMoveMissed")!;
+      expect(oppResult.state.programCounter).toBe(missTarget.programCounter);
+      expect(oppResult.state.rng.calls).toBe(0); // the semi-invulnerable dodge short-circuits before any accuracy roll
+
+      // Attack-turn release, continuing the SAME rulesContext (chargingTurn/UNDERWATER still live)
+      // and the SAME rngSeed -- turn 1 drew 0, so this reproduces the seed-1 ledger continuously.
+      const attackTurnResult = runToTerminal("BattleScript_SecondTurnSemiInvulnerable", afterCharge, 1);
+      const afterAttack = attackTurnResult.state.rulesContext;
+      expect(afterAttack.battlers[0]!.status2 & STATUS2_MULTIPLETURNS).toBe(0); // clearstatusfromeffect
+      expect(afterAttack.battlers[0]!.status3 & STATUS3_UNDERWATER).toBe(0); // clearsemiinvulnerablebit
+      expect(afterAttack.battlers[1]!.hp).toBeLessThan(100); // Dive landed on the target
+      // Dive is 100 accuracy (no possible turn-2 miss on the roll itself) --
+      // accuracycheck (1, guaranteed pass) + critcalc (1) + adjustnormaldamage's
+      // random 85-100% spread (1) + BattleScript_HitFromAtkString's tail
+      // seteffectwithchance (1, unconditional per docs/hit-chain-ground-truth.md's
+      // roll 4 -- moveEffectByte is 0 here, but Cmd_seteffectwithchance still
+      // draws Random() before checking percentChance/effectByte) = 4 draws.
+      // Correction to the scout's own §3 note, which undercounted this at 3.
+      expect(attackTurnResult.state.rng.calls).toBe(4);
+    },
+  );
+
+  it(
+    "EFFECT_RAZOR_WIND (shared-plumbing proof, no SETSEMIINVULNERABLEBIT/CLEARSEMIINVULNERABLEBIT needed): "
+      + "charge turn sets STATUS2_MULTIPLETURNS + chargingTurn (zero RNG, status3 untouched -- Razor Wind is "
+      + "not one of the three semi-invulnerable moves), attack turn clears the bit and lands on the target",
+    () => {
+      const chargeTurnRc = context({}, { currentMove: MOVE_RAZOR_WIND });
+      const chargeResult = runToTerminal("BattleScript_EffectRazorWind", chargeTurnRc, 1);
+      const afterCharge = chargeResult.state.rulesContext;
+      expect(afterCharge.battlers[0]!.status2 & STATUS2_MULTIPLETURNS).toBe(STATUS2_MULTIPLETURNS);
+      expect(afterCharge.battlers[0]!.chargingTurn).toBe(1);
+      expect(afterCharge.battlers[0]!.status3).toBe(0); // Razor Wind never touches status3
+      expect(chargeResult.state.rng.calls).toBe(0);
+
+      const attackTurnResult = runToTerminal("BattleScript_TwoTurnMovesSecondTurn", afterCharge, 1);
+      const afterAttack = attackTurnResult.state.rulesContext;
+      expect(afterAttack.battlers[0]!.status2 & STATUS2_MULTIPLETURNS).toBe(0);
+      expect(afterAttack.battlers[1]!.hp).toBeLessThan(100);
+      // Razor Wind is 100 accuracy: accuracycheck (1) + critcalc (1) + adjustnormaldamage (1)
+      // + the tail's unconditional seteffectwithchance (1) = 4 draws, same shape as Dive above.
+      expect(attackTurnResult.state.rng.calls).toBe(4);
+    },
+  );
 });
