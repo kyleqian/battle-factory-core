@@ -15,20 +15,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
-## 597 — [BOUNDED MAIN WORKER 2026-07-28 ~05:40] Low Kick opcode and source-weight catalog landed
+## 597 — [BOUNDED MAIN WORKER 2026-07-28 ~05:28] Low Kick executes through shared damage
 
-- **State:** operand-free `0xdd` is globally registered with source-derived
-  target weight lookup; focused opcode/rules/hit-chain/action/full-turn
-  coverage is **294/294**. Regenerated census is exactly **156/214 effects,
-  285/355 moves, 233/276 Factory-L50 distinct, 2755/2957 weighted**, all
-  **42/42** checks.
+- **State:** committed `6e96b30` + `28d2294` + `103881c` + `ff8c8c6`;
+  tree green at **359 files / 4183 tests**, focused
+  opcode/rules/hit-chain/action/full-turn coverage **294/294**, production
+  build, ratchets **6/6**, both oracle infos, and `git diff --check`.
+  Census is exactly **156/214 effects, 285/355 moves, 233/276 Factory-L50
+  distinct, 2755/2957 weighted**, all **42/42** checks.
 - **Did:** extended the pinned species extractor with Pokédex hectogram
   weights for all 386 real Pokédex entries. The 25 unreachable OLD_UNOWN
   compatibility ids remain explicitly absent. The handler proves all 12
   strict bracket edges, arbitrary catalog rows, both target ids, immutable
   ownership, and exact one-byte PC with unchanged RNG/events/scheduler.
-- **Next:** run full suite/build, explicit ratchets, both oracle infos, and
-  final diff checks.
+- **Next:** supervisor verify this bounded executable-frontier increment and
+  select the next source-complete registration target.
 - **Notes:** handler inventory is **164**. No recording import, local
   RNG/controller/message work, private move path, unsupported barrier, or
   ratchet change. Generic Machoke→Chansey Low Kick proves PP, shared
