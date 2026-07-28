@@ -44,6 +44,30 @@ animation. A status caused by a move is not part of that move's animation.
   presentation seam and all source- or evidence-required variants are covered.
 - No entry means unsupported.
 
+## MOVE_CHARM promoted partial; complete source body closed (2026-07-27)
+
+**Verdict:** `MOVE_CHARM` is partial. Complete legal Scene-ON parties stage
+the real challenge-0 Level-50 set-187 MINUN carrier against slower constrained
+SHUCKLE in both orientations. The stock ROM reaches move 204; the complete
+move-owned body is cleanly bounded before the generic stat result at **93/93**
+frames (72-164 player-back, 76-168 opponent-front), reproduced twice fresh,
+with a four-frame zero-task gap before the stat animation.
+
+**Source/evidence:** the reducer and typed relative seam port literal
+`AnimTask_RockMonBackAndForth(attacker,2,0)`, both side geometries and affine
+matrices, three `gMagentaHeartSpriteTemplate` instances, their source callback,
+software slots/order/lifetimes, three CHARM sound restart boundaries, asset
+and task teardown. `ANIM_TAG_MAGENTA_HEART` regenerates byte-for-byte; exact
+SPARK MINUN/SHUCKLE field art will be reused rather than duplicated.
+
+**Remainder/siblings:** no `battleScene.ts` draw case was added. Exact needs
+93/93 hardware OAM/matrix/palette/audio and raw-RGB/shared-framebuffer equality
+in both orientations twice, plus SPARK's mandatory fresh 115/115+2/2 control.
+COVET was source-audited: it has the literal full CHARM prefix then adds target
+ShakeMon2/Dizzy Punch loop, so it stays unsupported. FAKE TEARS and TICKLE use
+different task arguments and distinct bodies and also stay unsupported.
+Coverage is **50 exact / 4 partial / 222 unsupported**.
+
 ## MOVE_SPARK promoted exact; shared framebuffer closed (2026-07-27)
 
 **Verdict:** `MOVE_SPARK` is exact. Both legal set-187 MINUN orientations
