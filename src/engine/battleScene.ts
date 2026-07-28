@@ -704,6 +704,7 @@ import {
   sceneOnPsychicView,
   sceneOnKnockOffView,
   type SceneOnMovePresentationState,
+  type SceneOnFirePunchConfig,
   type SceneOnSparkPresentationState,
   type SceneOnCharmPresentationState,
   type SceneOnScaryFacePresentationState,
@@ -23485,7 +23486,10 @@ export function renderSceneOnMovePresentation(
     return;
   }
 
-  const view = sceneOnFirePunchView(state);
+  const view = sceneOnFirePunchView(
+    state as SceneOnMovePresentationState<SceneOnFirePunchConfig>,
+  );
+  const firePunchConfig = state.config as SceneOnFirePunchConfig;
   const { attacker, target, resolution } = view;
   const player = attacker.geometry.side === "player" ? attacker : target;
   const opponent = attacker.geometry.side === "opponent" ? attacker : target;
@@ -23579,9 +23583,9 @@ export function renderSceneOnMovePresentation(
     target.geometry.side === "player" ? resolution.healthboxY2 : 0,
   );
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
-  const effectiveness = state.config.resolutionProfile.effectivenessMessage;
+  const effectiveness = firePunchConfig.resolutionProfile.effectivenessMessage;
   const burnMessageStart =
-    state.config.resolutionProfile.burnMessageTextStartAge;
+    firePunchConfig.resolutionProfile.burnMessageTextStartAge;
   if (burnMessageStart !== undefined && view.age >= burnMessageStart) {
     const line = `${target.species} was burned!`;
     drawMessageTextLines(
@@ -23605,7 +23609,7 @@ export function renderSceneOnMovePresentation(
       ? `Foe ${attacker.species} used`
       : `${attacker.species} used`;
     const line2 = "FIRE PUNCH!";
-    const textStartAge = state.config.moveTextStartAge ?? -1;
+    const textStartAge = firePunchConfig.moveTextStartAge ?? -1;
     drawMessageTextLines(
       fb,
       line1,

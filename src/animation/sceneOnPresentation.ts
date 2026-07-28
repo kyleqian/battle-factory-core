@@ -216,6 +216,10 @@ import {
   type CharmState,
 } from "./charm.ts";
 import {
+  tailGlowAtAge,
+  type TailGlowState,
+} from "./tailGlow.ts";
+import {
   selfDestructAtAge,
   type SelfDestructState,
 } from "./selfDestruct.ts";
@@ -397,6 +401,7 @@ export interface SceneOnPresentationBattler {
     | "SHUPPET"
     | "PLUSLE"
     | "MINUN"
+    | "VOLBEAT"
     | "SABLEYE"
     | "ALTARIA"
     | "AZURILL"
@@ -976,6 +981,15 @@ export interface SceneOnCharmConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnTailGlowConfig {
+  readonly move: "TAIL_GLOW";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source X_2/Y_PIC_OFFSET coordinate for the legal carrier picture. */
+  readonly attackerPictureOffset: Readonly<{ x: number; y: number }>;
+}
+
 export interface SceneOnSelfDestructConfig {
   readonly move: "SELF_DESTRUCT";
   readonly attacker: SceneOnPresentationBattler;
@@ -1149,6 +1163,7 @@ export type SceneOnMoveConfig =
   | SceneOnScaryFaceConfig
   | SceneOnSparkConfig
   | SceneOnCharmConfig
+  | SceneOnTailGlowConfig
   | SceneOnSelfDestructConfig
   | SceneOnExplosionConfig
   | SceneOnDynamicPunchConfig
@@ -1201,6 +1216,8 @@ export type SceneOnSparkPresentationState =
   SceneOnMovePresentationState<SceneOnSparkConfig>;
 export type SceneOnCharmPresentationState =
   SceneOnMovePresentationState<SceneOnCharmConfig>;
+export type SceneOnTailGlowPresentationState =
+  SceneOnMovePresentationState<SceneOnTailGlowConfig>;
 
 export interface SceneOnSupersonicView {
   readonly age: number;
@@ -1297,6 +1314,12 @@ export interface SceneOnSparkView extends SparkState {
 }
 
 export interface SceneOnCharmView extends CharmState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnTailGlowView extends TailGlowState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -1849,7 +1872,8 @@ function assertIntegerPoint(
  */
 export function createSceneOnMovePresentation<
   TConfig extends SceneOnMoveConfig | SceneOnRazorLeafConfig | SceneOnTauntConfig
-    | SceneOnSparkConfig | SceneOnCharmConfig | SceneOnScaryFaceConfig
+    | SceneOnSparkConfig | SceneOnCharmConfig | SceneOnTailGlowConfig
+    | SceneOnScaryFaceConfig
     | SceneOnAbsorbConfig | SceneOnReflectConfig | SceneOnBiteConfig,
 >(
   config: TConfig,
@@ -2615,6 +2639,25 @@ export function sceneOnCharmView(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.battlePositionCenter,
+    ),
+  };
+}
+
+/** `age=0` is the source `loadspritegfx` display for Move_TAIL_GLOW. */
+export function sceneOnTailGlowView(
+  state: SceneOnTailGlowPresentationState,
+): SceneOnTailGlowView {
+  if (state.config.move !== "TAIL_GLOW") {
+    throw new Error(`expected TAIL_GLOW presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...tailGlowAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attackerPictureOffset,
     ),
   };
 }

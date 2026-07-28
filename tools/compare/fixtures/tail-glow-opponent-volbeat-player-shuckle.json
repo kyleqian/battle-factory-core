@@ -1,0 +1,15 @@
+{
+  "schema": "scene-on-portable-component/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-tail-glow-opponent-volbeat-player-shuckle.json",
+  "probe": "tools/compare/tailGlowProbe.py",
+  "pair": "VOLBEAT (opponent-front) -> SHUCKLE (player-back)",
+  "move": "TAIL_GLOW",
+  "orientation": "opponent-to-player",
+  "sourceVisualWindow": {"startFrame":77,"endFrame":279},
+  "appStage": {"presentationAge":0},
+  "attacker": {"species":"VOLBEAT","geometry":{"side":"opponent","spriteCorner":{"x":144,"y":16},"animationCenter":{"x":176,"y":48},"battlePositionCenter":{"x":176,"y":40}}},
+  "target": {"species":"SHUCKLE","geometry":{"side":"player","spriteCorner":{"x":40,"y":59},"animationCenter":{"x":72,"y":91},"battlePositionCenter":{"x":72,"y":80}}},
+  "attackerPictureOffset": {"x":176,"y":48},
+  "fieldProfile": {"playerHp":127,"playerMaxHp":127,"opponentHp":140,"opponentMaxHp":140,"playerGender":"male","opponentGender":"male"}
+}

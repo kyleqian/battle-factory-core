@@ -1,5 +1,34 @@
 # Animation coverage
 
+## MOVE_TAIL_GLOW complete typed/hardware checkpoint; remains partial (2026-07-28)
+
+**Verdict:** `MOVE_TAIL_GLOW` is partial. Fresh complete legal set-277
+VOLBEAT/SHUCKLE Scene-ON evidence passes the entire **203/203** frame asset
+load through unload envelope at frames **73-275** player-back and **77-279**
+opponent-front through source/software, typed seam, registers, hardware
+OAM/matrices/palette transfer, side-relative audio, and raw-RGB receipts,
+twice fresh. Coverage is now **58 exact / 2 partial / 216 unsupported**.
+
+**Reusable model/evidence:** the relative-age reducer ports BG
+`simple_palette_blend` 0→4→0, attacker monbg, 12/8 alpha, the 18-frame
+growth plus six pulse cycles of `gTailGlowOrbSpriteTemplate`, six
+side-relative `SE_M_MORNING_SUN` restarts, and cleanup. Source extraction
+byte-pins `ANIM_TAG_CIRCLE_OF_LIGHT` and the legal Factory carrier.
+Independent outputs are byte-identical (player `9ed6c575…7f1`, opponent
+`2d5b4d2f…84a1`).
+
+**Exact remainder/siblings:** exact remains unclaimed because the shared
+framebuffer compositor deliberately rejects TAIL GLOW; it still needs
+VOLBEAT art, BG palette/monbg composition, affine-alpha circle painting,
+field chrome/text, and **203/203** shared-framebuffer equality twice fresh in
+both orientations. `MOVE_SUPERPOWER` stays unsupported with its distinct
+METEOR/FLAT_ROCK/orb/rocks/fireball/BG-shake/four-sound body.
+`MOVE_SHOCK_WAVE` stays unsupported with distinct ELECTRIC_ORBS/SPARK/
+LIGHTNING and charging/bolt/lightning/shake/palette tasks. Neither has
+independent dense acceptance. No battle logic/RNG/controller/facility state,
+boundary list, unsupported barrier, or absolute-tick/input-delay/pixel
+exception changed.
+
 ## MOVE_TWINEEDLE promoted exact; NEEDLE framebuffer closed (2026-07-28)
 
 **Verdict:** `MOVE_TWINEEDLE` is exact. Fresh complete legal Factory-party

@@ -2,6 +2,32 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_TAIL_GLOW",
+      "status": "partial",
+      "covered": [
+        "fresh complete legal Factory-party Scene-ON evidence stages real set-277 VOLBEAT against SHUCKLE in both orientations; the complete CIRCLE_OF_LIGHT load through asset unload envelope passes 203/203 source/software, typed-seam, register, hardware OAM/matrix/palette-transfer, side-relative audio, and raw-RGB receipt checks twice fresh at frames 73-275 player-back and 77-279 opponent-front",
+        "the relative-age reducer ports simple_palette_blend BG 0-to-4-to-0, attacker monbg, 12/8 alpha, gTailGlowOrbSpriteTemplate creation at relative age 21, its 18-frame growth plus six 16-frame pulse cycles, six SE_M_MORNING_SUN restarts at relative ages 42/58/74/90/106/122, side pans -64/63, and complete cleanup at relative age 202",
+        "source extraction byte-pins the 64x64 ANIM_TAG_CIRCLE_OF_LIGHT indexed sheet/palette and records the real legal Factory carrier; the portable evidence reproduces byte-identically with player digest 9ed6c5751ba094719723233ab865ff34d81020746cad741ec12ef6acb490b7f1 and opponent digest 2d5b4d2f0afe8cda3b4c2dd240d84a2182deb60266ff2526a57f174eba5b84a1",
+        "exact remains unclaimed because the shared framebuffer compositor deliberately rejects TAIL_GLOW; remaining work is source-extracted VOLBEAT front/back art, BG palette blend and attacker monbg composition, affine alpha circle painting, field chrome/text, and 203/203 shared-framebuffer equality twice fresh in both orientations",
+        "MOVE_SUPERPOWER remains unsupported: source adds METEOR and FLAT_ROCK assets, dedicated orb/rock/fireball templates, BG-Y shake, ShakeMon2, and four distinct sounds across a much longer body",
+        "MOVE_SHOCK_WAVE remains unsupported: source adds ELECTRIC_ORBS, SPARK, and LIGHTNING assets; charging, growing-orb, progressing-bolt, lightning, ShakeMon, and two palette tasks; it requires independent complete dense evidence"
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-tail-glow-player-volbeat-opponent-shuckle.json",
+        "tools/battle-lab/mechanic-tail-glow-opponent-volbeat-player-shuckle.json",
+        "tools/compare/fixtures/tail-glow-player-volbeat-opponent-shuckle.json",
+        "tools/compare/fixtures/tail-glow-opponent-volbeat-player-shuckle.json",
+        "tools/compare/tailGlowProbe.py",
+        "tools/compare/tailGlowPortable.ts",
+        "tools/compare/extractTailGlowAssets.ts",
+        "src/animation/assets/tail-glow.json",
+        "src/animation/tailGlow.ts",
+        "src/animation/sceneOnPresentation.ts",
+        "tests/animation/tailGlow.test.ts"
+      ],
+      "remaining": "Keep MOVE_TAIL_GLOW partial until the shared framebuffer path ports source-extracted VOLBEAT front/back art, BG palette blending and attacker monbg composition, affine-alpha CIRCLE_OF_LIGHT painting, field chrome/text, and proves all 203/203 complete move-owned frames plus cleanup through shared-framebuffer equality twice fresh in both orientations. Do not promote MOVE_SUPERPOWER or MOVE_SHOCK_WAVE without independent complete dense evidence for their distinct bodies."
+    },
+    {
       "move": "MOVE_BITE",
       "status": "exact",
       "covered": [
