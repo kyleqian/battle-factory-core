@@ -216,6 +216,10 @@ import {
   type CharmState,
 } from "./charm.ts";
 import {
+  covetAtAge,
+  type CovetState,
+} from "./covet.ts";
+import {
   tailGlowAtAge,
   type TailGlowState,
 } from "./tailGlow.ts";
@@ -417,6 +421,7 @@ export interface SceneOnPresentationBattler {
     | "GLALIE"
     | "HITMONCHAN"
     | "SPINDA"
+    | "LINOONE"
     | "WEEPINBELL"
     | "MEOWTH"
     | "BEEDRILL";
@@ -986,6 +991,13 @@ export interface SceneOnCharmConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnCovetConfig {
+  readonly move: "COVET";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnTailGlowConfig {
   readonly move: "TAIL_GLOW";
   readonly attacker: SceneOnPresentationBattler;
@@ -1177,6 +1189,7 @@ export type SceneOnMoveConfig =
   | SceneOnScaryFaceConfig
   | SceneOnSparkConfig
   | SceneOnCharmConfig
+  | SceneOnCovetConfig
   | SceneOnTailGlowConfig
   | SceneOnSelfDestructConfig
   | SceneOnExplosionConfig
@@ -1233,6 +1246,8 @@ export type SceneOnSparkPresentationState =
   SceneOnMovePresentationState<SceneOnSparkConfig>;
 export type SceneOnCharmPresentationState =
   SceneOnMovePresentationState<SceneOnCharmConfig>;
+export type SceneOnCovetPresentationState =
+  SceneOnMovePresentationState<SceneOnCovetConfig>;
 export type SceneOnTailGlowPresentationState =
   SceneOnMovePresentationState<SceneOnTailGlowConfig>;
 
@@ -1331,6 +1346,12 @@ export interface SceneOnSparkView extends SparkState {
 }
 
 export interface SceneOnCharmView extends CharmState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnCovetView extends CovetState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -2659,6 +2680,25 @@ export function sceneOnCharmView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...charmAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.battlePositionCenter,
+    ),
+  };
+}
+
+/** `age=0` is Move_COVET's first displayed MAGENTA_HEART load. */
+export function sceneOnCovetView(
+  state: SceneOnCovetPresentationState,
+): SceneOnCovetView {
+  if (state.config.move !== "COVET") {
+    throw new Error(`expected COVET presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...covetAtAge(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.battlePositionCenter,

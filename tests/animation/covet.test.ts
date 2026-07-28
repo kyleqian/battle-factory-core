@@ -11,6 +11,12 @@ import {
   COVET_SHAKE_START_AGE,
   covetAtAge,
 } from "../../src/animation/covet.ts";
+import {
+  createSceneOnMovePresentation,
+  sceneOnCovetView,
+  type SceneOnPresentationBattler,
+} from "../../src/animation/sceneOnPresentation.ts";
+import { createInitialState, render } from "../../src/engine/core.ts";
 
 describe("MOVE_COVET source reducer", () => {
   it("ports both source loads and the complete Charm prefix", () => {
@@ -53,5 +59,39 @@ describe("MOVE_COVET source reducer", () => {
     expect(readFileSync(output)).toEqual(
       readFileSync("src/animation/assets/covet.json"),
     );
+  });
+
+  it("threads both legal orientations through the typed shared seam", () => {
+    const battler = (
+      species: SceneOnPresentationBattler["species"],
+      side: "player" | "opponent",
+    ): SceneOnPresentationBattler => ({
+      species,
+      geometry: {
+        side,
+        spriteCorner: side === "player" ? { x: 40, y: 48 } : { x: 144, y: 8 },
+        animationCenter: side === "player" ? { x: 72, y: 80 } : { x: 176, y: 40 },
+        battlePositionCenter: side === "player" ? { x: 72, y: 80 } : { x: 176, y: 40 },
+      },
+    });
+    for (const side of ["player", "opponent"] as const) {
+      const stage = createSceneOnMovePresentation({
+        move: "COVET",
+        attacker: battler("LINOONE", side),
+        target: battler("SHUCKLE", side === "player" ? "opponent" : "player"),
+        fieldProfile: side === "player"
+          ? { playerHp: 185, playerMaxHp: 185, opponentHp: 127, opponentMaxHp: 127 }
+          : { playerHp: 127, playerMaxHp: 127, opponentHp: 185, opponentMaxHp: 185 },
+      });
+      expect(sceneOnCovetView({ ...stage, age: COVET_SHAKE_START_AGE }))
+        .toMatchObject({
+          attacker: { species: "LINOONE" }, target: { species: "SHUCKLE" },
+          shakeActive: true,
+        });
+      expect(render({
+        ...createInitialState(), rngMode: "frontierBattle",
+        sceneOnPresentation: { ...stage, age: COVET_CHARM_START_AGE },
+      })).toHaveLength(240 * 160 * 4);
+    }
   });
 });

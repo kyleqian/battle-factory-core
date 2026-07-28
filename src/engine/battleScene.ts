@@ -546,6 +546,7 @@ import biteAsset from "../animation/assets/bite.json" with { type: "json" };
 import twineedleAsset from "../animation/assets/twineedle.json" with { type: "json" };
 import tailGlowAsset from "../animation/assets/tail-glow.json" with { type: "json" };
 import dizzyPunchAsset from "../animation/assets/dizzyPunch.json" with { type: "json" };
+import covetAsset from "../animation/assets/covet.json" with { type: "json" };
 import synthesisAsset from "../animation/assets/synthesis.json" with { type: "json" };
 import milkDrinkAsset from "../animation/assets/milk-drink.json" with { type: "json" };
 import supersonicAsset from "../animation/assets/supersonic.json" with { type: "json" };
@@ -701,6 +702,7 @@ import {
   sceneOnEncoreView,
   sceneOnSparkView,
   sceneOnCharmView,
+  sceneOnCovetView,
   sceneOnDragonClawView,
   sceneOnSingView,
   sceneOnFutureSightView,
@@ -711,6 +713,7 @@ import {
   type SceneOnFirePunchConfig,
   type SceneOnSparkPresentationState,
   type SceneOnCharmPresentationState,
+  type SceneOnCovetPresentationState,
   type SceneOnScaryFacePresentationState,
   type SceneOnAbsorbPresentationState,
   type SceneOnReflectPresentationState,
@@ -1029,6 +1032,11 @@ const dizzyPunchArt = dizzyPunchAsset as {
   spindaSpots: readonly {
     x: number; y: number; mask: readonly number[];
   }[];
+};
+const covetArt = covetAsset as {
+  linooneBack: { tileset: Tileset; palette: RgbColor[] };
+  linooneFront: { tileset: Tileset; palette: RgbColor[] };
+  itemBag: { tileset: Tileset; palette: RgbColor[] };
 };
 const synthesisArt = synthesisAsset as {
   sparkle2: { tileset: Tileset; palette: RgbColor[] };
@@ -17113,35 +17121,60 @@ export function renderSceneOnMovePresentation(
     return;
   }
 
-  if (state.config.move === "CHARM") {
-    const charmState = state as SceneOnCharmPresentationState;
-    const view = sceneOnCharmView(charmState);
-    const displayed = sceneOnCharmView({ ...charmState, age: charmState.age - 1 });
+  if (state.config.move === "CHARM" || state.config.move === "COVET") {
+    const isCovet = state.config.move === "COVET";
+    const charmState = state as
+      | SceneOnCharmPresentationState
+      | SceneOnCovetPresentationState;
+    const view = isCovet
+      ? sceneOnCovetView(charmState as SceneOnCovetPresentationState)
+      : sceneOnCharmView(charmState as SceneOnCharmPresentationState);
+    const displayed = isCovet
+      ? sceneOnCovetView({
+          ...(charmState as SceneOnCovetPresentationState),
+          age: charmState.age - 1,
+        })
+      : sceneOnCharmView({
+          ...(charmState as SceneOnCharmPresentationState),
+          age: charmState.age - 1,
+        });
+    const displayedCharm = isCovet
+      ? (displayed as ReturnType<typeof sceneOnCovetView>).charm
+      : displayed as ReturnType<typeof sceneOnCharmView>;
     // Battler-task writes reach this captured framebuffer one display later
     // than ordinary effect-sprite software OAM.
-    const displayedRock = sceneOnCharmView({
-      ...charmState, age: charmState.age - 2,
-    }).rock;
+    const displayedRock = isCovet
+      ? sceneOnCovetView({
+          ...(charmState as SceneOnCovetPresentationState),
+          age: charmState.age - 2,
+        }).charm.rock
+      : sceneOnCharmView({
+          ...(charmState as SceneOnCharmPresentationState),
+          age: charmState.age - 2,
+        }).rock;
+    const attackerSpecies = isCovet ? "LINOONE" : "MINUN";
     const playerToOpponent =
-      view.attacker.species === "MINUN"
+      view.attacker.species === attackerSpecies
       && view.attacker.geometry.side === "player"
       && view.target.species === "SHUCKLE"
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "MINUN"
+      view.attacker.species === attackerSpecies
       && view.attacker.geometry.side === "opponent"
       && view.target.species === "SHUCKLE"
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
-        `unsupported staged CHARM pair ${view.attacker.species}->${view.target.species}`,
+        `unsupported staged ${state.config.move} pair `
+        + `${view.attacker.species}->${view.target.species}`,
       );
     }
-    const minunSource = playerToOpponent
-      ? encoreArt.minunBack : encoreArt.minunFront;
-    const minun = playerToOpponent
-      ? minunSource
-      : { ...minunSource, tileset: subTileset(minunSource.tileset, 0, 8) };
+    const attackerSource = isCovet
+      ? (playerToOpponent ? covetArt.linooneBack : covetArt.linooneFront)
+      : (playerToOpponent ? encoreArt.minunBack : encoreArt.minunFront);
+    const attackerArt = playerToOpponent
+      ? attackerSource
+      : { ...attackerSource, tileset: subTileset(attackerSource.tileset, 0, 8) };
     const shuckle = playerToOpponent
       ? {
           ...selfDestructArt.shuckleFront,
@@ -17163,7 +17196,7 @@ export function renderSceneOnMovePresentation(
       top: view.attacker.geometry.spriteCorner.y + displayedRock.y2,
       slot: attackerSlot,
       draw: () => drawSpriteSheetAffineRotate(
-        fb, minun.tileset, minun.palette,
+        fb, attackerArt.tileset, attackerArt.palette,
         view.attacker.geometry.animationCenter.x + displayedRock.x2,
         view.attacker.geometry.animationCenter.y + displayedRock.y2,
         displayedRock.matrix.a, displayedRock.matrix.b,
@@ -17180,13 +17213,13 @@ export function renderSceneOnMovePresentation(
         view.target.geometry.spriteCorner.x, view.target.geometry.spriteCorner.y,
       ),
     });
-    for (const heart of displayed.hearts) {
+    for (const heart of displayedCharm.hearts) {
       items.push({
         priority: 1,
         subpriority: view.attacker.geometry.side === "player" ? 31 : 41,
         top: heart.y + heart.y2 - 8,
         slot: heart.slot,
-        draw: () => drawSpriteSheet(
+      draw: () => drawSpriteSheet(
           fb, charmArt.magentaHeart.tileset, charmArt.magentaHeart.palette,
           heart.x + heart.x2 - 8, heart.y + heart.y2 - 8,
         ),
@@ -17197,9 +17230,23 @@ export function renderSceneOnMovePresentation(
       || a.top - b.top || b.slot - a.slot);
     for (const item of items) item.draw();
 
+    if (isCovet) {
+      const targetOffset =
+        (displayed as ReturnType<typeof sceneOnCovetView>).targetOffset;
+      if (targetOffset.x2 !== 0 || targetOffset.y2 !== 0) {
+        // Repaint the opaque target at the terminal ShakeMon2 position. No
+        // ITEM_BAG sprite is drawn: the source script only loads that tag.
+        drawSpriteSheet(
+          fb, shuckle.tileset, shuckle.palette,
+          view.target.geometry.spriteCorner.x + targetOffset.x2,
+          view.target.geometry.spriteCorner.y + targetOffset.y2,
+        );
+      }
+    }
+
     drawSendOutHealthbox(
       fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
-        name: playerToOpponent ? "SHUCKLE" : "MINUN",
+        name: playerToOpponent ? "SHUCKLE" : attackerSpecies,
         level: 50,
         gender: state.config.fieldProfile.opponentGender ?? "male",
         hpFraction: state.config.fieldProfile.opponentHp
@@ -17209,7 +17256,7 @@ export function renderSceneOnMovePresentation(
     );
     drawComposedPlayerHealthbox(
       fb, composePlayerHealthbox(playerHealthboxAssets, {
-        name: playerToOpponent ? "MINUN" : "SHUCKLE",
+        name: playerToOpponent ? attackerSpecies : "SHUCKLE",
         level: 50,
         gender: state.config.fieldProfile.playerGender ?? "male",
         hpFraction: state.config.fieldProfile.playerHp
@@ -17221,7 +17268,12 @@ export function renderSceneOnMovePresentation(
     );
     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
     drawMessageTextLines(
-      fb, playerToOpponent ? "MINUN used" : "Foe MINUN used", "CHARM!", 99,
+      fb,
+      playerToOpponent
+        ? `${attackerSpecies} used`
+        : `Foe ${attackerSpecies} used`,
+      `${state.config.move}!`,
+      99,
     );
     return;
   }
