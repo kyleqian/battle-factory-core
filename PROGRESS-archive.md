@@ -1,4 +1,27 @@
 ---
+## 599 — [BOUNDED MAIN WORKER 2026-07-28 ~05:58] Spikes executes across shared switch-in path
+
+- **State:** committed `9b8473e` + `db739ac`; tree green at **361 files /
+  4202 tests**, focused opcode/switch/faint/full-turn/ratchet coverage
+  **308/308**, production build, both oracle infos, ratchets **6/6**, and
+  `git diff --check`. Census is exactly **157/214 effects, 286/355 moves,
+  234/276 Factory-L50 distinct, 2758/2957 weighted**, all **42/42** checks.
+- **Did:** globally registered five-byte `B_SCR_OP_TRYSETSPIKES` (`0xb0`)
+  with exact failure pointer/opposite ownership and both-side `spikesAmount`.
+  The shared switch-in scripts now execute layer **1/8, 1/6, 1/4** HP,
+  min-1, Flying/Levitate immunity, damaged-guard set/clear, HP/message/
+  controller order, and faint pop/jump topology. Public two-turn decision
+  proof persists one layer and switches grounded Rhyhorn **155→136**.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next source-complete target; do not widen Rapid Spin here.
+- **Notes:** handler inventory **164→165**; unsupported barriers deliberately
+  shrink switch-in **10→9** and hit-chain **22→21**, with none added. Rapid
+  Spin remains a named source-backed remainder: `EFFECT_RAPID_SPIN` stops at
+  the existing `MOVE_EFFECT_RAPIDSPIN` barrier before `rapidspinfree`, so its
+  bit/counter clear was not widened. No recording import, private handler,
+  generic controller/tick/presentation branch, issue removal, or RNG seam.
+
+---
 ## 598 — [SUPERVISOR VERIFY 2026-07-28 ~05:31] Low Kick accepted; Spikes evidence folded
 
 - **State:** reviewed union green at **360 files / 4186 tests** and focused
