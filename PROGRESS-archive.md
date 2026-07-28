@@ -23150,3 +23150,29 @@ both verify scripts/census independently re-verified before this entry.)*
   hit-chain/MOVEEND tests still pin persistence until `substituteHP==0`, then
   clear. No barrier/ratchet increase, recording import, animation/render edit,
   canonical Battle-2 work, oracle lifecycle action, or PAPERCUT.
+
+---
+## 559 — [BOUNDED MAIN WORKER 2026-07-28 ~00:38] Rollout executes source-completely
+
+- **State:** committed `adfada6` / `8407f7b` / `027c39f`; tree green at
+  **316 files / 3966 tests**. Production build, focused **40/40**, OFF-oracle
+  freshness/replay, census regeneration, and `git diff --check` pass. Census
+  is exactly **138/214 effects, 263/355 moves, 215/276 Factory-L50 distinct,
+  2685/2957 weighted**, all **42/42** checks.
+- **Did:** registered operandless `0xb3`
+  `B_SCR_OP_ROLLOUTDAMAGECALCULATION` with attacker-owned timer/start,
+  `STATUS2_MULTIPLETURNS`, selected-slot + `gLockedMoves` persistence,
+  initial-only PP, exact five-hit/Defense Curl power ladder, final unlock,
+  and miss/no-effect cancellation. Full-turn selection now auto-confirms
+  player, trainer, and simultaneous locks while retaining one RNG/event
+  stream and ordinary faint/terminal routing.
+- **Next:** supervisor verify this executable-frontier increment and select
+  the next finite source registration target; do not resume the retired
+  canonical Battle-2 march.
+- **Notes:** controlled seed 32731 reproduces merged OFF evidence HP
+  **362→327→170→12→0**, Rollout PP **20→19**, and player-win; fresh oracle
+  manifest is byte-identical at `4460104b…9479677`. Defense Curl's separate
+  setter remains the explicitly bounded next opcode, so the proof starts
+  from its source/evidence-pinned post-state. No barrier/import ratchet
+  change, recording import, scenario/tick/render branch, animation edit,
+  issue removal, oracle lifecycle action, or PAPERCUT.

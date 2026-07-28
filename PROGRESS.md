@@ -15,6 +15,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 562 — [SUPERVISOR VERIFY 2026-07-28 ~00:51] Defense Curl accepted; Future Sight evidence merged
+
+- **State:** reviewed union green at **319 files / 3976 tests**; production
+  build, both-oracle freshness, census regeneration, and `git diff --check`
+  pass. Census is exactly **139/214 effects, 264/355 moves, 216/276
+  Factory-L50 distinct, 2691/2957 weighted**, with all **42/42** checks.
+- **Did:** accepted `7a96b10` / `7989330`: exact attacker-owned Defense Curl
+  bit, ordered stat change, and genuine generic Defense Curl→Rollout full-turn
+  continuation. Merged Future Sight evidence `b5d192e` after source review
+  and two byte-identical OFF replays.
+- **Next:** register exact five-byte `0xc3`
+  `B_SCR_OP_TRYSETFUTUREATTACK` and its positional delayed end-turn subsystem:
+  duplicate-pending branch, stored base damage/attacker/move/timer, switch and
+  faint semantics, delayed accuracy/random damage, Substitute handling, and
+  Protect/type/STAB exclusions. Expected census is **140/214, 266/355,
+  217/276, 2696/2957**.
+- **Notes:** Future Sight evidence observes PP **15→14→13**, setup and duplicate
+  target HP **140**, then delayed HP **140→103** with side bit 64 clearing;
+  manifest `ecd032fb…ee2448f`. No barrier/import ratchet increase, recording
+  import, animation edit, DEFERRED item, or oracle lifecycle action.
+
+---
 ## 561 — [BOUNDED MAIN WORKER 2026-07-28 ~00:47] Defense Curl executes source-completely
 
 - **State:** committed `7a96b10` / `7989330` / `e02e90d` / `a854043`;
@@ -61,29 +83,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `4460104b…9479677`. Defense Curl evidence observes PP **40→39**, bit 30,
   and Defense **6→7**. No barrier/import ratchet increase, recording import,
   animation edit, DEFERRED item, or oracle lifecycle action.
-
----
-## 559 — [BOUNDED MAIN WORKER 2026-07-28 ~00:38] Rollout executes source-completely
-
-- **State:** committed `adfada6` / `8407f7b` / `027c39f`; tree green at
-  **316 files / 3966 tests**. Production build, focused **40/40**, OFF-oracle
-  freshness/replay, census regeneration, and `git diff --check` pass. Census
-  is exactly **138/214 effects, 263/355 moves, 215/276 Factory-L50 distinct,
-  2685/2957 weighted**, all **42/42** checks.
-- **Did:** registered operandless `0xb3`
-  `B_SCR_OP_ROLLOUTDAMAGECALCULATION` with attacker-owned timer/start,
-  `STATUS2_MULTIPLETURNS`, selected-slot + `gLockedMoves` persistence,
-  initial-only PP, exact five-hit/Defense Curl power ladder, final unlock,
-  and miss/no-effect cancellation. Full-turn selection now auto-confirms
-  player, trainer, and simultaneous locks while retaining one RNG/event
-  stream and ordinary faint/terminal routing.
-- **Next:** supervisor verify this executable-frontier increment and select
-  the next finite source registration target; do not resume the retired
-  canonical Battle-2 march.
-- **Notes:** controlled seed 32731 reproduces merged OFF evidence HP
-  **362→327→170→12→0**, Rollout PP **20→19**, and player-win; fresh oracle
-  manifest is byte-identical at `4460104b…9479677`. Defense Curl's separate
-  setter remains the explicitly bounded next opcode, so the proof starts
-  from its source/evidence-pinned post-state. No barrier/import ratchet
-  change, recording import, scenario/tick/render branch, animation edit,
-  issue removal, oracle lifecycle action, or PAPERCUT.
