@@ -398,8 +398,12 @@ three-member Level-50 party fixture. Exact flip: **+1/+1/+0/+0**.
 Earthquake, Hydro Pump, Surf, Bubble Beam, Rock Slide, Shadow Ball, or Swift,
 with the Factory building environment selecting Swift. The opcode clears the
 attack-string marker, replaces current move, retargets, pushes the selected
-effect script, and advances its own continuation. It draws **zero** locally;
-the selected move owns all later draws
+effect script, and advances its own continuation. The earlier zero-draw claim
+was too broad: `GetMoveTarget` is called inside this opcode, so selected-target
+moves rejection-draw until an opposing battler is found (seed 1 in singles:
+**16838** rejects the user, **44065** accepts the foe). Building-selected
+Swift targets both and therefore draws **zero** in the opcode; Swift owns the
+later crit, variance, and zero-effect draws
 (`reference/pokeemerald/src/battle_script_commands.c:759-771,9109-9116`).
 
 **Committed path, owners, and staging.** The entry is cancel/string/pause,
@@ -408,9 +412,14 @@ the selected move owns all later draws
 real context field initialized to Building in Factory decisions
 (`src/engine/battleScriptRulesContext.ts:614-615`;
 `src/engine/factoryBattleScriptFullTurnDecision.ts:433`), and effect/power,
-target, control stack, and downstream scripts exist. No hidden state owner is
-missing. No 850-set L50 carrier exists (`docs/executable-frontier-census.md:
-223`). Exact flip: **+1/+1/+0/+0**.
+target, control stack, and downstream scripts exist. The pushed script runs
+only after Nature Power's continuation returns. Its `ppreduce` uses the
+unchanged move-position slot, so Nature Power loses one PP even though
+`gCurrentMove` is Swift. Move end records Nature Power as `gLastMoves`, Swift
+as `gLastResultingMoves` and `gLastLandedMoves`, and Swift's Normal type as
+`gLastHitByType`. No hidden state owner is missing. No 850-set L50 carrier
+exists (`docs/executable-frontier-census.md:223`). Exact flip:
+**+1/+1/+0/+0**.
 
 ### 3.12 Charge — `B_SCR_OP_SETCHARGE`
 
