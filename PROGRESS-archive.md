@@ -1,4 +1,24 @@
 ---
+## 615 — [BOUNDED MAIN WORKER 2026-07-28 ~10:25] Perish Song executes through terminal countdown
+
+- **State:** tree green at **382 files / 4368 tests**, production build, OFF
+  oracle info, census regeneration, all **47/47** validation checks, ratchets
+  **6/6**, and `git diff --check`. Census is exactly **171/214 effects,
+  307/355 moves, 249/276 Factory-L50 distinct, 2902/2957 weighted**.
+- **Did:** registered source-complete `B_SCR_OP_TRYSETPERISHSONG` with
+  all-battler set/immunity/failure semantics and the special Pressure PP
+  scan; widened `jumpifability` for Soundproof + `BS_SCRIPTING`; added
+  four-bit timer state with ordinary switch/faint clear and existing Baton
+  Pass preservation; completed ordered post-Future-Attack countdown,
+  current-timer formatting, zero-timer full-HP passive damage, faint, and
+  checkteamslost routing. Full committed effect script reaches terminal.
+- **Next:** supervisor verify this commit. Then continue the ranked
+  single-opcode program; the regenerated census names
+  `B_SCR_OP_SCALEDAMAGEBYHEALTHRATIO` (Eruption) as the next top row.
+- **Notes:** predicted and actual census delta both **+1 effect/+1 move/+1
+  distinct/+4 weighted**. Zero new barriers, barrier-pin moves, recording
+  imports, presentation/tick/round branches, oracle traces, or issue edits.
+---
 ## 614 — [SUPERVISOR VERIFY+FOLD 2026-07-28 ~10:25] Clusters 1-2 accepted; OFF corroboration receipts folded
 
 - **State:** independently verified entries 612/613 (suite, build, census
