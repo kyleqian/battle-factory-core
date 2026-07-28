@@ -1122,7 +1122,8 @@
         "canonical opponent-front MURKROW to player-back MAGBY, complete dense body in turn16 and repeated turn17 occurrences (221/221 each)",
         "portable synthetic player-back ONIX to opponent-front GROVYLE, complete dense relative ages 0-220 / oracle frames 2344-2564 (221/221) through the shared Scene-ON adapter, reproduced twice fresh with identical probe digest",
         "the +30 delayed-control surface reproduced 220/221 twice fresh, with only age 150 / frame 21006 differing by 789 pixels; cycle-level evidence reproduced byte-identically twice and proves canonical RunTasks writes buffered BLDALPHA 0x0d03 at VCOUNT 3, queues offset 0x52, and transfers hardware at VCOUNT 166 after the displayed frame, while the delayed run makes the same task write at VCOUNT 224 and therefore exposes hardware 0x0d03 before the next compositor sample",
-        "the reusable source port models SetGpuReg's software buffer, unique waiting list, VBlank scanline 161-225 and forced-blank immediate hardware writes, and CopyBufferedValuesToGpuRegs draining the latest buffered values; focused tests pin canonical queued and delayed immediate BLDALPHA paths without a move, delay, or absolute-tick branch"
+        "the reusable source port models SetGpuReg's software buffer, unique waiting list, VBlank scanline 161-225 and forced-blank immediate hardware writes, and CopyBufferedValuesToGpuRegs draining the latest buffered values; focused tests pin canonical queued and delayed immediate BLDALPHA paths without a move, delay, or absolute-tick branch",
+        "the shared presentation seam now accepts the minimum typed display-interval workload: ordered CopyBufferedValuesToGpuRegs/RunTasks steps with VCOUNT and already-derived GPU writes plus prior register state; fresh live evidence reproduced twice and proves the generic scheduler samples canonical 0x0e02 versus VBlank-overrun 0x0d03 without any move, age, delay, absolute-frame, or pixel discriminator"
       ],
       "evidence": [
         "tools/compare/traces/turn16-rung2a.json",
@@ -1130,12 +1131,14 @@
         "tools/compare/fixtures/faint-attack-onix-grovyle.json",
         "tools/compare/faintAttackPortable.ts",
         "tools/compare/faintAttackRegisterQueueProbe.py",
+        "tools/compare/faintAttackRegisterQueueEvidence.ts",
         "tools/probe/stage-fire-punch-portable-on.py",
         "docs/faint-attack-portable-staging-probe.md",
         "src/animation/gpuRegisterQueue.ts",
+        "src/animation/sceneOnPresentation.ts",
         "tests/animation/gpuRegisterQueue.test.ts"
       ],
-      "remaining": "Retain parked ISSUES #38's single +30 delayed-control frame and keep MOVE_FAINT_ATTACK partial. The register queue itself is now source-ported; exact next requires a general CPU-work/VCOUNT scheduler that predicts whether RunTasks executes the write at visible VCOUNT 3 or VBlank VCOUNT 224, feeds that phase through the shared presentation seam, closes delayed age 150 without an absolute-tick/delay/pixel exception, and then proves complete dense player/opponent surfaces twice fresh."
+      "remaining": "Keep MOVE_FAINT_ATTACK partial. The register queue and typed shared-seam input now model both proven schedules exactly, but the ordinary battle presentation path still needs a general source-workload producer for those display-interval steps. Feed the seam from that scheduler, close delayed age 150 without an absolute-tick/delay/pixel exception, and then prove complete dense player/opponent surfaces twice fresh with component/register/raw-RGB/shared-framebuffer evidence."
     },
     {
       "move": "MOVE_EMBER",

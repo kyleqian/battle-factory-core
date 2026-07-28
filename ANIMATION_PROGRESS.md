@@ -1,5 +1,34 @@
 # Animation coverage
 
+## MOVE_FAINT_ATTACK typed workload seam checkpoint; remains partial (2026-07-28)
+
+**Verdict:** `MOVE_FAINT_ATTACK` remains the sole partial. Canonical
+opponent-front and portable player-back complete bodies are still **221/221**
+exact; the portable body reproduced twice fresh with the same probe digest.
+The +30 delayed full app control remains **220/221**, differing only at age
+150 / frame 21006. Coverage remains **56 exact / 1 partial / 219
+unsupported**.
+
+**Reusable model/evidence:** `gpuRegisterQueue.ts` now accepts an ordered,
+typed CPU workload for the interval between displayed samples. Its steps
+carry only source operation (`CopyBufferedValuesToGpuRegs` or `RunTasks`),
+VCOUNT, and already-derived GPU writes; there is no move, animation age,
+input delay, absolute frame, or pixel input. `sceneOnPresentation.ts` carries
+that interval and prior register state through the shared seam. Fresh
+`faintAttackRegisterQueueEvidence.ts` runs the bounded mGBA probe through
+`run-mgba-probe.py` and proves both actual intervals twice: canonical VCOUNT
+3 queues `0x0d03` and samples `0x0e02`, while the overrun VCOUNT 224 writes
+immediately and samples `0x0d03`.
+
+**Exact remainder:** the ordinary battle presentation path does not yet have
+a general source-workload scheduler that produces these display-interval
+steps. Until it does, it cannot distinguish two logically identical
+animation ages without an invalid delay/tick exception. Feed the typed seam
+from such a general producer, require delayed **221/221**, then repeat both
+complete bodies with component/register/raw-RGB/shared-framebuffer evidence
+twice fresh. No boundary list, battle logic/RNG/controller/facility state, or
+unsupported barrier changed.
+
 ## MOVE_SHADOW_PUNCH promoted exact; stale palette/OAM transfer closed (2026-07-27)
 
 **Verdict:** `MOVE_SHADOW_PUNCH` is exact for both complete move-owned
