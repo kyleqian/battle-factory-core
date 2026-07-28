@@ -1,4 +1,24 @@
 ---
+## 571 — [BOUNDED MAIN WORKER CORRECTION 2026-07-28 ~02:35] Minimize consumer proof corrected
+
+- **State:** committed `507fde7`; tree green at **329 files / 4037 tests**,
+  focused **24/24**, and ratchets **6/6**. Production build, both-oracle
+  freshness/info, census regeneration, and `git diff --check` pass. Census
+  remains **143/214 effects, 269/355 moves, 220/276 Factory-L50 distinct,
+  2711/2957 weighted**, all **42/42**.
+- **Did:** removed `SETMINIMIZE`'s duplicate `STATUS3_MINIMIZED` declaration;
+  its producer and the existing jump consumer now import one canonical source
+  constant. Replaced the post-MoveEnd multiplier claim with a same-seed,
+  same-+1-evasion Double Team control: Stomp leaves Minimize at **974 HP
+  (25 damage)** versus control **987 HP (12 damage)**, with exact PP/stage/
+  status outcomes; the isolated shared jump/setbyte exact-2 proof remains.
+- **Next:** supervisor verify this bounded correction, then select the next
+  finite shared registration target; do not extend the retired Battle-2 march.
+- **Notes:** production semantics, census, evidence, and all ratchets are
+  unchanged. No `MoveValuesCleanUp`, private override, scenario/presentation/
+  animation change, issue removal, oracle lifecycle action, or PAPERCUT.
+
+---
 ## 570 — [BOUNDED MAIN WORKER 2026-07-28 ~02:28] Minimize executes and Stomp consumes it generically
 
 - **State:** committed `29f2a0c`; tree green at **329 files / 4037 tests**,

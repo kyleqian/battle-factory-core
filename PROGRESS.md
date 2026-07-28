@@ -15,6 +15,29 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 574 — [BOUNDED MAIN WORKER CORRECTION 2026-07-28 ~03:00] Follow Me clears at both source cleanup calls
+
+- **State:** committed `aeb56de`; tree green at **331 files / 4048 tests**,
+  focused **108/108**, and ratchets **6/6**. Production build, both-oracle
+  freshness/info, census regeneration, and `git diff --check` pass. Census
+  remains exactly **144/214 effects, 270/355 moves, 221/276 Factory-L50
+  distinct, 2716/2957 weighted**, all **42/42**.
+- **Did:** matched `BattleTurnPassed` source order: the shared Follow Me helper
+  clears both timers at entry `TurnValuesCleanUp(TRUE)` before field/battler/
+  faint/delayed barriers, then runs idempotently again at the
+  `TurnValuesCleanUp(FALSE)` tail/terminal completion paths. A live
+  `ENDTURN_ITEMS1` case-barrier proof returns with zero timers while retaining
+  inert targets and all unrelated side fields. `setforcedtarget` now reuses
+  the shared battler-role validator.
+- **Next:** supervisor verify this bounded correction, then select the next
+  finite shared registration target; do not extend the retired Battle-2 march.
+- **Notes:** opcode behavior, handler inventory **153**, full-turn outcome,
+  census, and scenario/manifest hashes `b1015a6a…07f00f` /
+  `e150f267…889ece` are unchanged. No new handler/barrier, ratchet/import,
+  recording, animation/presentation/scenario, issue, oracle lifecycle, or
+  PAPERCUT change.
+
+---
 ## 573 — [BOUNDED MAIN WORKER 2026-07-28 ~02:52] Follow Me executes and expires generically
 
 - **State:** committed `b29ecd1`; tree green at **331 files / 4047 tests**,
@@ -24,10 +47,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   2716/2957 weighted**, all **42/42**.
 - **Did:** globally registered operandless `0xca`: after ordinary PP spend it
   always advances and immutably writes only the attacker side's timer **1**
-  and target, including same-side overwrite. The shared BattleTurnPassed tail
-  clears both timers after faint/delayed work while retaining inert targets;
-  a generic singles full turn spends both Follow Me PP and reaches the next
-  decision with zero HP/stat/lock/RNG changes.
+  and target, including same-side overwrite. The shared BattleTurnPassed entry
+  clears both timers before field/battler/faint/delayed work and the tail
+  repeats that idempotent clear, retaining inert targets; a generic singles
+  full turn spends both Follow Me PP and reaches the next decision with zero
+  HP/stat/lock/RNG changes.
 - **Next:** supervisor verify this finite executable-frontier increment and
   select the next shared registration target; do not extend the retired
   canonical Battle-2 march.
@@ -59,23 +83,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** no private handler, recording import, barrier/import ratchet
   change, animation/presentation/scenario branch, DEFERRED item, issue
   removal, or oracle lifecycle action.
-
----
-## 571 — [BOUNDED MAIN WORKER CORRECTION 2026-07-28 ~02:35] Minimize consumer proof corrected
-
-- **State:** committed `507fde7`; tree green at **329 files / 4037 tests**,
-  focused **24/24**, and ratchets **6/6**. Production build, both-oracle
-  freshness/info, census regeneration, and `git diff --check` pass. Census
-  remains **143/214 effects, 269/355 moves, 220/276 Factory-L50 distinct,
-  2711/2957 weighted**, all **42/42**.
-- **Did:** removed `SETMINIMIZE`'s duplicate `STATUS3_MINIMIZED` declaration;
-  its producer and the existing jump consumer now import one canonical source
-  constant. Replaced the post-MoveEnd multiplier claim with a same-seed,
-  same-+1-evasion Double Team control: Stomp leaves Minimize at **974 HP
-  (25 damage)** versus control **987 HP (12 damage)**, with exact PP/stage/
-  status outcomes; the isolated shared jump/setbyte exact-2 proof remains.
-- **Next:** supervisor verify this bounded correction, then select the next
-  finite shared registration target; do not extend the retired Battle-2 march.
-- **Notes:** production semantics, census, evidence, and all ratchets are
-  unchanged. No `MoveValuesCleanUp`, private override, scenario/presentation/
-  animation change, issue removal, oracle lifecycle action, or PAPERCUT.
