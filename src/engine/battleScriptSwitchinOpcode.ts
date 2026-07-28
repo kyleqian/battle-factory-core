@@ -390,6 +390,7 @@ function createSwitchindataupdateOpcodeHandler(
           rolloutTimer: 0,
           furyCutterCounter: 0,
           mimickedMoves: 0,
+          stockpileCounter: 0,
           truantCounter: 0 as const,
           rechargeTimer: 0,
           disabledMove: 0,

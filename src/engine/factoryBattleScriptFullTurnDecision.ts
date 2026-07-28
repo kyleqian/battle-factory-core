@@ -259,6 +259,7 @@ function emptyBattler(side: 0 | 1): BattleScriptRulesBattlerState {
     item: 0,
     ivs: ZERO_IVS,
     mimickedMoves: 0,
+    stockpileCounter: 0,
     moves: Object.freeze([0, 0, 0, 0] as const),
     pp: Object.freeze([0, 0, 0, 0] as const),
     statStages: ZERO_STAT_STAGES,

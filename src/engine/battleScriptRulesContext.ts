@@ -88,6 +88,7 @@ import { createBattleScriptTrysetgrudgeOpcodeHandlers } from "./battleScriptTrys
 import { createBattleScriptTryspiteppreduceOpcodeHandlers } from "./battleScriptTryspiteppreduceOpcode.ts";
 import { createBattleScriptRankedBatch1OpcodeHandlers } from "./battleScriptRankedBatch1Opcode.ts";
 import { createBattleScriptPainSplitOpcodeHandlers } from "./battleScriptPainSplitOpcode.ts";
+import { createBattleScriptStockpileOpcodeHandlers } from "./battleScriptStockpileOpcode.ts";
 import { createBattleScriptSettauntOpcodeHandlers } from "./battleScriptSettauntOpcode.ts";
 import { createBattleScriptSetforesightOpcodeHandlers } from "./battleScriptSetforesightOpcode.ts";
 import { createBattleScriptSetfocusenergyOpcodeHandlers } from "./battleScriptSetfocusenergyOpcode.ts";
@@ -273,6 +274,8 @@ type BattleScriptMoveEndBattlerMetadata = Readonly<{
   ivs: BattleScriptIvs;
   /** Source four-bit DisableStruct::mimickedMoves mask. */
   mimickedMoves: number;
+  /** Source two-bit DisableStruct::stockpileCounter (0..3). */
+  stockpileCounter: number;
   /** DisableStruct's paired four-bit duration fields. */
   disableTimer: number;
   disableTimerStartValue: number;
@@ -413,6 +416,7 @@ export type BattleScriptRulesBattler = BattleScriptRulesBattlerBase & Readonly<{
   /** Legacy focused fixtures default to six zero IVs at the construction boundary. */
   ivs?: BattleScriptIvs;
   mimickedMoves?: number;
+  stockpileCounter?: number;
   disableTimer?: number;
   disableTimerStartValue?: number;
   encoreTimer?: number;
@@ -2146,6 +2150,11 @@ export function createBattleScriptRulesContext(
       0x0f,
       `battlers[${index}].mimickedMoves`,
     ),
+    stockpileCounter: requireUnsigned(
+      battler.stockpileCounter ?? 0,
+      3,
+      `battlers[${index}].stockpileCounter`,
+    ),
     personality: requireUnsigned(battler.personality ?? 0, 0xffff_ffff, `battlers[${index}].personality`) >>> 0,
     attack: requireUnsigned(battler.attack ?? 0, 0xffff, `battlers[${index}].attack`),
     defense: requireUnsigned(battler.defense ?? 0, 0xffff, `battlers[${index}].defense`),
@@ -2688,6 +2697,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptTryspiteppreduceOpcodeHandlers(program),
     ...createBattleScriptRankedBatch1OpcodeHandlers(program),
     ...createBattleScriptPainSplitOpcodeHandlers(program),
+    ...createBattleScriptStockpileOpcodeHandlers(program),
     ...createBattleScriptFuryCutterOpcodeHandlers(program),
     ...createBattleScriptSetminimizeOpcodeHandlers(program),
     ...createBattleScriptSetforcedtargetOpcodeHandlers(program),

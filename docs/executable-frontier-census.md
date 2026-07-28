@@ -10,10 +10,10 @@ Answers ROADMAP S10's Executable-frontier reset question directly: not "how many
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 182 | 214 | 85.0% |
-| Moves (unweighted, all 355) | 321 | 355 | 90.4% |
-| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 263 | 276 | 95.3% |
-| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2926 | 2957 | 99.0% |
+| Effect scripts | 185 | 214 | 86.4% |
+| Moves (unweighted, all 355) | 324 | 355 | 91.3% |
+| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 266 | 276 | 96.4% |
+| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2931 | 2957 | 99.1% |
 
 "Executable" means every opcode on every statically reachable path from the effect's entry script has a dispatch entry today and every use of the explicitly tracked narrowed operand surfaces is accepted. Other registered runtime barriers remain included per ROADMAP S10 §1's (a)/(b) policy. It is not a semantic-correctness claim -- see Caveats.
 
@@ -25,7 +25,6 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | --- | --- | --- | --- | --- |
 | `B_SCR_OP_NORMALISEBUFFS` | 1 (EFFECT_HAZE) | 1 | 1 | 1 |
 | `B_SCR_OP_PRESENTDAMAGECALCULATION` | 1 (EFFECT_PRESENT) | 1 | 1 | 1 |
-| `B_SCR_OP_STOCKPILETOBASEDAMAGE` | 1 (EFFECT_SPIT_UP) | 1 | 1 | 1 |
 | `B_SCR_OP_TRYCOPYABILITY` | 1 (EFFECT_ROLE_PLAY) | 1 | 1 | 1 |
 | `B_SCR_OP_TRYMEMENTO` | 1 (EFFECT_MEMENTO) | 1 | 1 | 1 |
 | `B_SCR_OP_TRYRECYCLEITEM` | 1 (EFFECT_RECYCLE) | 1 | 1 | 1 |
@@ -209,9 +208,9 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_SOFTBOILED | `BattleScript_EffectSoftboiled` | executable | - | - | 2 | 2 (7) |
 | EFFECT_FAKE_OUT | `BattleScript_EffectFakeOut` | executable | - | - | 1 | 1 (15) |
 | EFFECT_UPROAR | `BattleScript_EffectUproar` | executable | - | - | 1 | 1 (1) |
-| EFFECT_STOCKPILE | `BattleScript_EffectStockpile` | blocked-on-opcodes | `B_SCR_OP_STOCKPILE` (main path) | Operand gate: B_SCR_OP_PRINTFROMTABLE(gStockpileUsedStringIds) -- gStockpileUsedStringIds is outside the engine's accepted string-table pointer set (src/engine/battleScriptHitChainOpcode.ts:282; battle_script_commands.c:2184) | 1 | 1 (2) |
-| EFFECT_SPIT_UP | `BattleScript_EffectSpitUp` | blocked-on-opcodes | `B_SCR_OP_STOCKPILETOBASEDAMAGE` (edge branch only) | - | 1 | 1 (1) |
-| EFFECT_SWALLOW | `BattleScript_EffectSwallow` | blocked-on-opcodes | `B_SCR_OP_STOCKPILETOHPHEAL` (main path) | Operand gate: B_SCR_OP_PRINTFROMTABLE(gSwallowFailStringIds) -- gSwallowFailStringIds is outside the engine's accepted string-table pointer set (src/engine/battleScriptHitChainOpcode.ts:282; battle_script_commands.c:2184) | 1 | 1 (2) |
+| EFFECT_STOCKPILE | `BattleScript_EffectStockpile` | executable | - | - | 1 | 1 (2) |
+| EFFECT_SPIT_UP | `BattleScript_EffectSpitUp` | executable | - | - | 1 | 1 (1) |
+| EFFECT_SWALLOW | `BattleScript_EffectSwallow` | executable | - | - | 1 | 1 (2) |
 | EFFECT_UNUSED_A3 | `BattleScript_EffectHit` | executable | - | - | 0 | 0 (0) |
 | EFFECT_HAIL | `BattleScript_EffectHail` | executable | - | - | 1 | 1 (7) |
 | EFFECT_TORMENT | `BattleScript_EffectTorment` | executable | - | - | 1 | 1 (4) |

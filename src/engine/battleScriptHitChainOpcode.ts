@@ -280,6 +280,16 @@ const B_MSG_STATUS_HAD_NO_EFFECT = 2;
 
 /** printfromtable's registered small constant tables, each indexed by MULTISTRING_CHOOSER. */
 const PRINTFROMTABLE_TABLES: Readonly<Record<string, readonly string[]>> = Object.freeze({
+  /** battle_message.c:981-986. */
+  gStockpileUsedStringIds: Object.freeze([
+    "STRINGID_PKMNSTOCKPILED",
+    "STRINGID_PKMNCANTSTOCKPILE",
+  ]),
+  /** battle_message.c:991-996. */
+  gSwallowFailStringIds: Object.freeze([
+    "STRINGID_FAILEDTOSWALLOW",
+    "STRINGID_PKMNHPFULL",
+  ]),
   /** battle_message.c:1084-1088 -- sleep's ordinary/ability-caused selectors. */
   gFellAsleepStringIds: Object.freeze([
     "STRINGID_PKMNFELLASLEEP",
@@ -1298,6 +1308,49 @@ function toDamageCalcStatStages(battler: BattleScriptRulesBattlerState) {
 }
 
 /**
+ * Source `CalculateBaseDamage` call shared by Cmd_damagecalc and
+ * Cmd_stockpiletobasedamage. This deliberately excludes crit, dmgMultiplier,
+ * Charge, Helping Hand, and Stockpile's own post-call multiplier.
+ */
+export function calculateBattleScriptBaseDamageForCurrentMove(
+  rulesContext: BattleScriptRulesContext,
+): number {
+  const attacker = requireBattlerRole(rulesContext, "attacker");
+  const target = requireBattlerRole(rulesContext, "target");
+  const attackerBattler = rulesContext.battlers[attacker];
+  const targetBattler = rulesContext.battlers[target];
+  const moveRow = requireMoveRow(rulesContext.currentMove);
+  return calculateBaseDamage({
+    attacker: {
+      attack: attackerBattler.attack,
+      defense: attackerBattler.defense,
+      spAttack: attackerBattler.spAttack,
+      spDefense: attackerBattler.spDefense,
+      level: attackerBattler.level,
+      types: attackerBattler.types,
+      statStages: toDamageCalcStatStages(attackerBattler),
+      isBurned: (attackerBattler.status1 & STATUS1_BURN) !== 0,
+      ability: ABILITY_NAME_BY_ID[attackerBattler.ability] ?? null,
+    },
+    defender: {
+      attack: targetBattler.attack,
+      defense: targetBattler.defense,
+      spAttack: targetBattler.spAttack,
+      spDefense: targetBattler.spDefense,
+      level: targetBattler.level,
+      types: targetBattler.types,
+      statStages: toDamageCalcStatStages(targetBattler),
+    },
+    movePower: rulesContext.dynamicBasePower !== 0
+      ? rulesContext.dynamicBasePower
+      : moveRow.power,
+    moveType: resolveMoveTypeName(rulesContext, rulesContext.currentMove),
+    isCriticalHit: rulesContext.critMultiplier === 2,
+    moveEffect: moveRow.effect,
+  });
+}
+
+/**
  * Cmd_damagecalc (battle_script_commands.c:1288-1301): CalculateBaseDamage
  * (consumed via damageCalc.ts's pinned calculateBaseDamage) times
  * gCritMultiplier (set by critcalc above) times gBattleScripting.dmgMultiplier
@@ -1322,40 +1375,11 @@ export const damagecalcOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRule
 ) => {
   const rulesContext = context.state.rulesContext;
   const attacker = requireBattlerRole(rulesContext, "attacker");
-  const target = requireBattlerRole(rulesContext, "target");
   const attackerBattler = rulesContext.battlers[attacker];
-  const targetBattler = rulesContext.battlers[target];
   const move = rulesContext.currentMove;
-  const moveRow = requireMoveRow(move);
   const moveType = resolveMoveTypeName(rulesContext, move);
-  const isCriticalHit = rulesContext.critMultiplier === 2;
 
-  let damage = calculateBaseDamage({
-    attacker: {
-      attack: attackerBattler.attack,
-      defense: attackerBattler.defense,
-      spAttack: attackerBattler.spAttack,
-      spDefense: attackerBattler.spDefense,
-      level: attackerBattler.level,
-      types: attackerBattler.types,
-      statStages: toDamageCalcStatStages(attackerBattler),
-      isBurned: (attackerBattler.status1 & STATUS1_BURN) !== 0,
-      ability: ABILITY_NAME_BY_ID[attackerBattler.ability] ?? null,
-    },
-    defender: {
-      attack: targetBattler.attack,
-      defense: targetBattler.defense,
-      spAttack: targetBattler.spAttack,
-      spDefense: targetBattler.spDefense,
-      level: targetBattler.level,
-      types: targetBattler.types,
-      statStages: toDamageCalcStatStages(targetBattler),
-    },
-    movePower: rulesContext.dynamicBasePower !== 0 ? rulesContext.dynamicBasePower : moveRow.power,
-    moveType,
-    isCriticalHit,
-    moveEffect: moveRow.effect,
-  });
+  let damage = calculateBattleScriptBaseDamageForCurrentMove(rulesContext);
 
   damage = damage * rulesContext.critMultiplier * rulesContext.dmgMultiplier;
   if ((attackerBattler.status3 & STATUS3_CHARGED_UP) !== 0 && moveType === "TYPE_ELECTRIC") {
@@ -3829,7 +3853,6 @@ function replaceAt<T extends readonly number[]>(values: T, index: number, value:
  * (`battleScriptProtectlikeOpcode.ts`'s own field), tested below. The
  * remaining struct-wide DisableStruct/ProtectStruct
  * fields FaintClearSetData zeroes (transformedMonPersonality,
- * stockpileCounter,
  * chargeTimer*, battlerWithSureHit, isFirstTurn, truantSwitchInHack,
  * ProtectStruct's noValidMoves/fleeType/physicalDmg/
  * specialDmg/physicalBattlerId/specialBattlerId), gActionSelectionCursor/
@@ -3877,6 +3900,7 @@ function createCleareffectsonfaintOpcodeHandler(
           rolloutTimer: 0,
           furyCutterCounter: 0,
           mimickedMoves: 0,
+          stockpileCounter: 0,
           truantCounter: 0 as const,
           rechargeTimer: 0,
           flinchImmobility: 0 as const,

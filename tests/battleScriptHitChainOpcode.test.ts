@@ -3075,6 +3075,7 @@ describe("production cleareffectsonfaint (Cmd_cleareffectsonfaint) dispatch", ()
           disabledMove: 12,
           disableTimer: 4,
           disableTimerStartValue: 5,
+          stockpileCounter: 3,
           protected: 1,
           protectUses: 3,
         },
@@ -3093,6 +3094,7 @@ describe("production cleareffectsonfaint (Cmd_cleareffectsonfaint) dispatch", ()
       expect(target.disabledMove).toBe(0);
       expect(target.disableTimer).toBe(0);
       expect(target.disableTimerStartValue).toBe(0);
+      expect(target.stockpileCounter).toBe(0);
       expect(target.protected).toBe(0);
       // FaintClearSetData's DisableStruct::protectUses zero -- a real write now that
       // battleScriptProtectlikeOpcode.ts's own field exists (previously a no-op, see

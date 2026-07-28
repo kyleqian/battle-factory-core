@@ -172,6 +172,8 @@ const SETBYTE_VALUES: Readonly<Record<string, number>> = Object.freeze({
   "0": 0,
   "1": 1,
   "2": 2,
+  /** battle_string_ids.h:410; Spit Up's pre-handler Protect branch. */
+  B_MSG_PROTECTED: 1,
   /**
    * `addbyte sTRIPLE_KICK_POWER, 10` (`data/battle_scripts_1.s:1401`) --
    * docs/roar-multihit-registration-scout.md §4 rung 7's ADDBYTE-delta gap

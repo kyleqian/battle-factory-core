@@ -30,6 +30,7 @@ function battler(
       hp: 0, attack: 0, defense: 0, speed: 0, spAttack: 0, spDefense: 0,
     }),
     mimickedMoves: changes.mimickedMoves ?? 0,
+    stockpileCounter: changes.stockpileCounter ?? 0,
     moves: changes.moves ?? Object.freeze([0, 0, 0, 0]),
     pp: changes.pp ?? Object.freeze([35, 0, 0, 0]),
     statStages: changes.statStages ?? Object.freeze([0, 0, 0, 0, 0, 0, 0, 0]),

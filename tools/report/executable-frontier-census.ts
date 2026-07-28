@@ -1114,14 +1114,14 @@ const validationChecks: Array<() => void> = [
   // tuple, and both HP controller writes are now represented end-to-end.
   () => requireExecutable("EFFECT_PAIN_SPLIT"),
   () => requireExactMechanicalBlockers("EFFECT_PAIN_SPLIT", []),
-  () => requireExactMechanicalBlockers("EFFECT_STOCKPILE", [
-    "Operand gate: B_SCR_OP_PRINTFROMTABLE(gStockpileUsedStringIds)",
-  ]),
-  () => requireExactMissingOpcodes("EFFECT_STOCKPILE", ["B_SCR_OP_STOCKPILE"]),
-  () => requireExactMechanicalBlockers("EFFECT_SWALLOW", [
-    "Operand gate: B_SCR_OP_PRINTFROMTABLE(gSwallowFailStringIds)",
-  ]),
-  () => requireExactMissingOpcodes("EFFECT_SWALLOW", ["B_SCR_OP_STOCKPILETOHPHEAL"]),
+  // Ranked Batch 3 shared counter/lifetime subsystem: all three handlers,
+  // both print tables, Spit Up's Protect comparand, and the hit/heal tails.
+  () => requireExecutable("EFFECT_STOCKPILE"),
+  () => requireExecutable("EFFECT_SWALLOW"),
+  () => requireExecutable("EFFECT_SPIT_UP"),
+  () => requireExactMechanicalBlockers("EFFECT_STOCKPILE", []),
+  () => requireExactMechanicalBlockers("EFFECT_SWALLOW", []),
+  () => requireExactMechanicalBlockers("EFFECT_SPIT_UP", []),
   () => requireExactMechanicalBlockers("EFFECT_METRONOME", [
     "Dynamic effect-universe gate: B_SCR_OP_METRONOME(selectable-effect-universe)",
   ]),
