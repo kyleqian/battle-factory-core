@@ -15,6 +15,31 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 567 — [SUPERVISOR VERIFY 2026-07-28 ~01:59] Corrected Disable accepted; three evidence checkpoints merged
+
+- **State:** reviewed union green at **325 files / 4016 tests** and focused
+  **366/366**; production build, both-oracle freshness, census regeneration,
+  ratchets, and `git diff --check` pass. Census is exactly **141/214 effects,
+  267/355 moves, 218/276 Factory-L50 distinct, 2701/2957 weighted**, all
+  **42/42**.
+- **Did:** accepted Disable only after corrective `31a2fd7` removed the private
+  full-turn opcode overrides. Exact `0xa3`, target-owned timer/start,
+  duplicate-id admission, direct canceler, switch/faint clear, and ordered
+  end-turn expiry remain generic; forced Struggle stops honestly at shared
+  `B_SCR_OP_INCREMENTGAMESTAT`. Merged and independently replayed Fury Cutter,
+  Minimize/Stomp, and Follow Me OFF evidence.
+- **Next:** register operandless `0xb5` `B_SCR_OP_FURYCUTTERCALC`: attacker
+  counter cap 5, powers **10/20/40/80/160**, normal-move persistence,
+  no-effect/Protect/switch/faint clears, and no lock/RNG ownership. Expected
+  census is **142/214, 268/355, 219/276, 2706/2957**.
+- **Notes:** Fury Cutter manifests `9ca031ee…2057c9` and
+  `7a7a04d8…dbf9d3`, Minimize `67c617f7…c842977`, Follow Me
+  `e150f267…889ece`. The latter two source-pin hidden status/timer semantics
+  without claiming unavailable singles observations. No barrier/import
+  ratchet change, recording import, animation edit, DEFERRED item, or oracle
+  lifecycle action.
+
+---
 ## 566 — [BOUNDED MAIN WORKER CORRECTION 2026-07-28 ~01:56] Full-turn execution uses the shared opcode frontier
 
 - **State:** committed `31a2fd7`; tree green at **322 files / 4007 tests**,
@@ -57,26 +82,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `BattleScript_DisabledNoMore`, and restores Tackle legality/PP. No new
   unsupported barrier, recording import, animation/presentation/scenario
   branch, issue removal, oracle lifecycle action, or PAPERCUT.
-
----
-## 564 — [SUPERVISOR VERIFY 2026-07-28 ~01:24] Corrected Future Sight accepted; Disable evidence merged
-
-- **State:** reviewed union green at **321 files / 3994 tests** and focused
-  **276/276**; production build, both-oracle freshness, census regeneration,
-  and `git diff --check` pass. Census is exactly **140/214 effects, 266/355
-  moves, 217/276 Factory-L50 distinct, 2696/2957 weighted**, all **42/42**.
-- **Did:** accepted the Future Sight increment only after corrective `3e949d1`
-  made delayed ownership source-exact: prior move/effect/power and history
-  persist, while stored move drives explicit accuracy/message/animation and
-  `adjustnormaldamage2` alone omits False Swipe. Merged and independently
-  replayed Disable evidence `9cb0921`.
-- **Next:** register exact five-byte `0xa3`
-  `B_SCR_OP_DISABLELASTUSEDATTACK`, target-owned first move-id match against
-  `gLastMoves`, one-draw 2–5 timer/start value, all failure branches, ordinary
-  move admission, switch clearing, and `ENDTURN_DISABLE`. Expected census is
-  **141/214, 267/355, 218/276, 2701/2957**.
-- **Notes:** Future Sight retains Tackle **33 / effect 0 / power 35** and HP
-  **140→103**. Disable OFF evidence observes PP **20→19→18**, forced Struggle,
-  then Tackle resumption; manifest `ea9f5139…a1019`. No barrier/import ratchet
-  change, recording import, animation edit, DEFERRED item, or oracle lifecycle
-  action.

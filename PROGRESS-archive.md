@@ -1,4 +1,27 @@
 ---
+## 564 — [SUPERVISOR VERIFY 2026-07-28 ~01:24] Corrected Future Sight accepted; Disable evidence merged
+
+- **State:** reviewed union green at **321 files / 3994 tests** and focused
+  **276/276**; production build, both-oracle freshness, census regeneration,
+  and `git diff --check` pass. Census is exactly **140/214 effects, 266/355
+  moves, 217/276 Factory-L50 distinct, 2696/2957 weighted**, all **42/42**.
+- **Did:** accepted the Future Sight increment only after corrective `3e949d1`
+  made delayed ownership source-exact: prior move/effect/power and history
+  persist, while stored move drives explicit accuracy/message/animation and
+  `adjustnormaldamage2` alone omits False Swipe. Merged and independently
+  replayed Disable evidence `9cb0921`.
+- **Next:** register exact five-byte `0xa3`
+  `B_SCR_OP_DISABLELASTUSEDATTACK`, target-owned first move-id match against
+  `gLastMoves`, one-draw 2–5 timer/start value, all failure branches, ordinary
+  move admission, switch clearing, and `ENDTURN_DISABLE`. Expected census is
+  **141/214, 267/355, 218/276, 2701/2957**.
+- **Notes:** Future Sight retains Tackle **33 / effect 0 / power 35** and HP
+  **140→103**. Disable OFF evidence observes PP **20→19→18**, forced Struggle,
+  then Tackle resumption; manifest `ea9f5139…a1019`. No barrier/import ratchet
+  change, recording import, animation edit, DEFERRED item, or oracle lifecycle
+  action.
+
+---
 ## 563 — [BOUNDED MAIN WORKER CORRECTION 2026-07-28 ~01:23] Future Sight delayed ownership is source-exact
 
 - **State:** committed Future Sight increment plus corrective `3e949d1`; tree
