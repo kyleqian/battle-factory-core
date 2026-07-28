@@ -21,6 +21,8 @@ const B_WAIT_TIME_LONG = 64;
 /** include/constants/battle.h:140-141,158-159,167. */
 const STATUS3_ROOTED = 1 << 10;
 const STATUS3_CHARGED_UP = 1 << 9;
+const STATUS3_ALWAYS_HITS_TURN_1 = 1 << 3;
+const STATUS3_ALWAYS_HITS_TURN_2 = 2 << 3;
 const STATUS3_LEECHSEED = 1 << 2;
 const STATUS2_WRAPPED_MASK = (1 << 13) | (1 << 14) | (1 << 15);
 /** include/abilities.h:68. */
@@ -198,6 +200,26 @@ function scratchState(rulesContext: BattleScriptRulesContext, attacker: 0 | 1) {
 }
 
 describe("runBattleEndTurnOrchestration (BattleTurnPassed equivalent)", () => {
+  it("ENDTURN_LOCK_ON decrements two turns to one, then expires while preserving unrelated status3", () => {
+    const rc = context({
+      battlers: [
+        battler({ side: 0, status3: STATUS3_ALWAYS_HITS_TURN_2 | STATUS3_ROOTED }),
+        battler({ side: 1, partyIndex: 2 }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+    });
+    const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(0));
+    const first = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
+    if (first.kind !== "next-turn") throw new Error("expected next-turn");
+    expect(first.state.rulesContext.battlers[0].status3).toBe(
+      STATUS3_ALWAYS_HITS_TURN_1 | STATUS3_ROOTED,
+    );
+    const second = runBattleEndTurnOrchestration(program, handlers, first.state);
+    if (second.kind !== "next-turn") throw new Error("expected next-turn");
+    expect(second.state.rulesContext.battlers[0].status3).toBe(STATUS3_ROOTED);
+  });
+
   it("ENDTURN_CHARGE decrements 2 -> 1, then expires 1 -> 0 and clears only the charged bit", () => {
     const rc = context({
       battlers: [

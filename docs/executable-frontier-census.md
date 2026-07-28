@@ -4,14 +4,14 @@ Generated 2026-07-28. Rerun: `npx tsx tools/report/executable-frontier-census.ts
 
 Answers ROADMAP S10's Executable-frontier reset question directly: not "how many opcodes are registered" but **how many of the 355 moves can the kernel execute end-to-end today, and what exactly blocks each of the rest.** Every `BattleScript_Effect*` entry in the committed topology (`src/data/gen/battle-script-topology.json` + `battle-script-graph.json`) is walked for full opcode reachability (branches, goto/call targets, the shared hit-chain tail) against the opcode set the engine currently registers (read live from `src/engine/battleScriptRulesContext.ts`'s `createBattleScriptStatusRulesHandlers`, so this doc cannot drift from what the engine actually installs).
 
-**Key finding:** the single highest-leverage next registration is `B_SCR_OP_SETALWAYSHITFLAG` -- registering exactly that set would flip **1 effect / 2 moves (0 Factory-L50, 0 weighted)** from blocked to executable in one step (EFFECT_LOCK_ON) -- the largest single entry in the ranked table below. This paragraph is generated fresh from the current registered-opcode set every run, so it always names today's actual top blocker, not a past one -- see PROGRESS.md for the registration history (e.g. the 2026-07-25 B_SCR_OP_JUMPIFHALFWORD/JUMPIFSTATUS3CONDITION/ORWORD entry-chokepoint trio).
+**Key finding:** the single highest-leverage next registration is `B_SCR_OP_ASSISTATTACKSELECT` -- registering exactly that set would flip **1 effect / 1 move (0 Factory-L50, 0 weighted)** from blocked to executable in one step (EFFECT_ASSIST) -- the largest single entry in the ranked table below. This paragraph is generated fresh from the current registered-opcode set every run, so it always names today's actual top blocker, not a past one -- see PROGRESS.md for the registration history (e.g. the 2026-07-25 B_SCR_OP_JUMPIFHALFWORD/JUMPIFSTATUS3CONDITION/ORWORD entry-chokepoint trio).
 
 ## Headline counts
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 207 | 214 | 96.7% |
-| Moves (unweighted, all 355) | 347 | 355 | 97.7% |
+| Effect scripts | 210 | 214 | 98.1% |
+| Moves (unweighted, all 355) | 351 | 355 | 98.9% |
 | Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 275 | 276 | 99.6% |
 | Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2955 | 2957 | 99.9% |
 
@@ -23,11 +23,8 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 
 | Missing opcode(s) | Effects unlocked | Moves unlocked (unweighted) | Factory-L50 moves (unweighted) | Factory-L50 weighted |
 | --- | --- | --- | --- | --- |
-| `B_SCR_OP_SETALWAYSHITFLAG` | 1 (EFFECT_LOCK_ON) | 2 | 0 | 0 |
 | `B_SCR_OP_ASSISTATTACKSELECT` | 1 (EFFECT_ASSIST) | 1 | 0 | 0 |
 | `B_SCR_OP_TRYDOBEATUP` | 1 (EFFECT_BEAT_UP) | 1 | 0 | 0 |
-| `B_SCR_OP_TRYIMPRISON` | 1 (EFFECT_IMPRISON) | 1 | 0 | 0 |
-| `B_SCR_OP_TRYSETSNATCH` | 1 (EFFECT_SNATCH) | 1 | 0 | 0 |
 
 ## Per-effect detail
 
@@ -127,7 +124,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_PAIN_SPLIT | `BattleScript_EffectPainSplit` | executable | - | - | 1 | 1 (2) |
 | EFFECT_SNORE | `BattleScript_EffectSnore` | executable | - | - | 1 | 1 (1) |
 | EFFECT_CONVERSION_2 | `BattleScript_EffectConversion2` | executable | - | - | 1 | 0 (0) |
-| EFFECT_LOCK_ON | `BattleScript_EffectLockOn` | blocked-on-opcodes | `B_SCR_OP_SETALWAYSHITFLAG` (edge branch only) | - | 2 | 0 (0) |
+| EFFECT_LOCK_ON | `BattleScript_EffectLockOn` | executable | - | - | 2 | 0 (0) |
 | EFFECT_SKETCH | `BattleScript_EffectSketch` | executable | - | - | 1 | 0 (0) |
 | EFFECT_UNUSED_60 | `BattleScript_EffectHit` | executable | - | - | 0 | 0 (0) |
 | EFFECT_SLEEP_TALK | `BattleScript_EffectSleepTalk` | executable | - | - | 1 | 1 (8) |
@@ -225,10 +222,10 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_ENDEAVOR | `BattleScript_EffectEndeavor` | executable | - | - | 1 | 1 (4) |
 | EFFECT_ERUPTION | `BattleScript_EffectEruption` | executable | - | - | 2 | 2 (2) |
 | EFFECT_SKILL_SWAP | `BattleScript_EffectSkillSwap` | executable | - | - | 1 | 1 (5) |
-| EFFECT_IMPRISON | `BattleScript_EffectImprison` | blocked-on-opcodes | `B_SCR_OP_TRYIMPRISON` (main path) | - | 1 | 0 (0) |
+| EFFECT_IMPRISON | `BattleScript_EffectImprison` | executable | - | - | 1 | 0 (0) |
 | EFFECT_REFRESH | `BattleScript_EffectRefresh` | executable | - | - | 1 | 1 (2) |
 | EFFECT_GRUDGE | `BattleScript_EffectGrudge` | executable | - | - | 1 | 1 (2) |
-| EFFECT_SNATCH | `BattleScript_EffectSnatch` | blocked-on-opcodes | `B_SCR_OP_TRYSETSNATCH` (main path) | - | 1 | 0 (0) |
+| EFFECT_SNATCH | `BattleScript_EffectSnatch` | executable | - | - | 1 | 0 (0) |
 | EFFECT_LOW_KICK | `BattleScript_EffectLowKick` | executable | - | - | 1 | 1 (2) |
 | EFFECT_SECRET_POWER | `BattleScript_EffectSecretPower` | executable | - | - | 1 | 1 (6) |
 | EFFECT_DOUBLE_EDGE | `BattleScript_EffectDoubleEdge` | executable | - | - | 2 | 1 (52) |

@@ -20,12 +20,9 @@
  *    `gBattlescriptCurrInstr` to that label's address outright, not through
  *    the operand pointer -- same "hardcoded jump" shape as `Cmd_
  *    tryinfatuating`'s Oblivious block).
- * 4. `STATUS3_ALWAYS_HITS` (Lock-On/Mind Reader, `:7523`) -- barriered.
- *    `gDisableStructs[target].battlerWithSureHit` is not modeled, and (per
- *    `battleScriptHitChainOpcode.ts`'s own `accuracycheckNoAccCalcCheckLockOn`
- *    finding) no production code path ever sets `STATUS3_ALWAYS_HITS` in the
- *    first place, so this covers both the sure-hit sub-branch (`:7531`) and
- *    its own recompute-fallback `else` in one barrier.
+ * 4. `STATUS3_ALWAYS_HITS` (Lock-On/Mind Reader, `:7523`) bypasses the
+ *    formula and draw only when the saved owner is this attacker and its
+ *    level is high enough; every nonmatching/underleveled case falls through.
  * 5. The real formula (`:7536-7545`): `chance = moveAccuracy + (attackerLevel
  *    - targetLevel)`; hit iff `(Random() % 100 + 1) < chance` AND
  *    `attackerLevel >= targetLevel` -- the level clause is a hard override,
@@ -131,21 +128,20 @@ function createTryKOHandler(program: BattleScriptProgram): BattleScriptOpcodeHan
       );
     }
 
-    if ((targetBattler.status3 & BATTLE_SCRIPT_STATUS3_ALWAYS_HITS) !== 0) {
-      return unsupportedBranch(
-        context,
-        "Cmd_tryKO's STATUS3_ALWAYS_HITS Lock-On/Mind-Reader branch needs gDisableStructs[target]."
-          + "battlerWithSureHit, which this engine does not model yet (no production code sets "
-          + "STATUS3_ALWAYS_HITS in the first place, per accuracycheck's own established finding)",
-        "battle_script_commands.c",
-        7531,
-      );
-    }
-
     const moveAccuracy = requireMoveAccuracy(rulesContext.currentMove);
-    const { rng, randomValue } = drawBattleScriptRng(context.state.rng, context.instruction, "tryko");
+    const ownedSureHit =
+      (targetBattler.status3 & BATTLE_SCRIPT_STATUS3_ALWAYS_HITS) !== 0
+      && targetBattler.battlerWithSureHit === attacker
+      && attackerBattler.level >= targetBattler.level;
+    const draw = ownedSureHit
+      ? null
+      : drawBattleScriptRng(context.state.rng, context.instruction, "tryko");
     const chanceValue = moveAccuracy + (attackerBattler.level - targetBattler.level);
-    const hit = (randomValue % 100) + 1 < chanceValue && attackerBattler.level >= targetBattler.level;
+    const hit = ownedSureHit || (
+      ((draw!.randomValue % 100) + 1 < chanceValue)
+      && attackerBattler.level >= targetBattler.level
+    );
+    const rng = draw?.rng ?? context.state.rng;
 
     if (hit) {
       let battleMoveDamage: number;

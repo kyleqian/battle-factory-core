@@ -78,6 +78,7 @@ function battler(changes: Partial<BattleScriptRulesBattler> = {}): BattleScriptR
     perishSongTimerStartValue: changes.perishSongTimerStartValue,
     stockpileCounter: changes.stockpileCounter,
     battlerPreventingEscape: changes.battlerPreventingEscape,
+    battlerWithSureHit: changes.battlerWithSureHit,
   });
 }
 
@@ -490,6 +491,7 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
           species: URSARING,
           types: ["TYPE_NORMAL", "TYPE_NORMAL"],
           status3: STATUS3_ALWAYS_HITS_TURN_1,
+          battlerWithSureHit: 1,
         }),
         battler({
           side: 1,
@@ -509,6 +511,33 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
       STATUS3_ALWAYS_HITS_TURN_2,
     );
     expect(result.state.rulesContext.battlers[1].status3 & (1 << 8)).toBe(0);
+  });
+
+  it("switchindataupdate: Baton Pass preserves the switching target's saved sure-hit owner", () => {
+    const rc = context({
+      currentMove: 226,
+      battlers: [
+        battler({ side: 0 }),
+        battler({
+          side: 1,
+          species: SUNKERN,
+          hp: 0,
+          types: ["TYPE_GRASS", "TYPE_GRASS"],
+          partyIndex: 2,
+          ability: ABILITY_GUTS,
+          status3: 1 << 3,
+          battlerWithSureHit: 0,
+        }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+    });
+    const { result } = stepAtProgramCounter(SWITCHINDATAUPDATE_PC, rc);
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battlers[1]).toMatchObject({
+      status3: 1 << 3,
+      battlerWithSureHit: 0,
+    });
   });
 
   it("switchindataupdate: doubles wrap ownership stays behind a named identity barrier", () => {
@@ -542,7 +571,7 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     });
   });
 
-  it("switchindataupdate: doubles Baton Pass sure-hit ownership stays behind a named identity barrier", () => {
+  it("switchindataupdate: doubles Baton Pass refreshes only the opposing lock owned by the departing battler", () => {
     const rc = context({
       currentMove: 226,
       battleTopology: {
@@ -552,7 +581,7 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
         battlerPositions: [0, 1, 2, 3],
       },
       battlers: [
-        battler({ side: 0, status3: 1 << 3 }),
+        battler({ side: 0, status3: 1 << 3, battlerWithSureHit: 1 }),
         battler({
           side: 1,
           species: SUNKERN,
@@ -566,11 +595,8 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
       ],
     });
     const { result } = stepAtProgramCounter(SWITCHINDATAUPDATE_PC, rc);
-    expect(result.kind).toBe("halted");
-    expect(result.state.haltReason).toMatchObject({
-      kind: "unsupported-branch",
-      sourceLine: 3180,
-    });
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battlers[0].status3).toBe(2 << 3);
   });
 
   it("switchindataupdate: departing Mean Look owner releases the trapped battler", () => {
@@ -594,19 +620,45 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     expect(result.state.rulesContext.battlers[0].status2).toBe(0);
   });
 
-  it("switchindataupdate: STATUS3_ALWAYS_HITS on another battler is a named barrier (battlerWithSureHit identity not modeled)", () => {
+  it("switchindataupdate: ordinary switch clears a lock owned by the departing battler", () => {
     const STATUS3_ALWAYS_HITS = (1 << 3) | (1 << 4);
     const rc = context({
       battlers: [
-        battler({ side: 0, species: URSARING, types: ["TYPE_NORMAL", "TYPE_NORMAL"], status3: STATUS3_ALWAYS_HITS }),
+        battler({ side: 0, species: URSARING, types: ["TYPE_NORMAL", "TYPE_NORMAL"], status3: STATUS3_ALWAYS_HITS, battlerWithSureHit: 1 }),
         battler({ side: 1, species: SUNKERN, hp: 0, types: ["TYPE_GRASS", "TYPE_GRASS"], partyIndex: 2, ability: ABILITY_GUTS }),
         battler({ side: 0 }),
         battler({ side: 1 }),
       ],
     });
     const { result } = stepAtProgramCounter(SWITCHINDATAUPDATE_PC, rc);
-    expect(result.kind).toBe("halted");
-    expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch" });
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battlers[0]).toMatchObject({ status3: 0, battlerWithSureHit: 0 });
+  });
+
+  it("switchindataupdate: ordinary switch also clears the departing target's own marker and owner", () => {
+    const rc = context({
+      battlers: [
+        battler({ side: 0 }),
+        battler({
+          side: 1,
+          species: SUNKERN,
+          hp: 0,
+          types: ["TYPE_GRASS", "TYPE_GRASS"],
+          partyIndex: 2,
+          ability: ABILITY_GUTS,
+          status3: 1 << 3,
+          battlerWithSureHit: 2,
+        }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+    });
+    const { result } = stepAtProgramCounter(SWITCHINDATAUPDATE_PC, rc);
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battlers[1]).toMatchObject({
+      status3: 0,
+      battlerWithSureHit: 0,
+    });
   });
 
   it("hpthresholds: pure no-op advance (writes only the untracked gBattleStruct->hpScale)", () => {

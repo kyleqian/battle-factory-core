@@ -280,6 +280,7 @@ function emptyBattler(side: 0 | 1): BattleScriptRulesBattlerState {
     wrappedMove: 0,
     wrappedBy: side,
     battlerPreventingEscape: side,
+    battlerWithSureHit: 0,
     isFirstTurn: 0,
   });
 }

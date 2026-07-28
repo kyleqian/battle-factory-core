@@ -83,6 +83,8 @@ import { createBattleScriptTryswapabilitiesOpcodeHandlers } from "./battleScript
 import { createBattleScriptTrymementoOpcodeHandlers } from "./battleScriptTrymementoOpcode.ts";
 import { createBattleScriptTrycopyabilityOpcodeHandlers } from "./battleScriptTrycopyabilityOpcode.ts";
 import { createBattleScriptTryrecycleitemOpcodeHandlers } from "./battleScriptTryrecycleitemOpcode.ts";
+import { createBattleScriptTryimprisonOpcodeHandlers } from "./battleScriptTryimprisonOpcode.ts";
+import { createBattleScriptSnatchOpcodeHandlers } from "./battleScriptSnatchOpcode.ts";
 import { createBattleScriptTrysethelpinghandOpcodeHandlers } from "./battleScriptTrysethelpinghandOpcode.ts";
 import { createBattleScriptTryswapitemsOpcodeHandlers } from "./battleScriptTryswapitemsOpcode.ts";
 import { createBattleScriptSettormentOpcodeHandlers } from "./battleScriptSettormentOpcode.ts";
@@ -110,6 +112,7 @@ import { createBattleScriptLastMoveOpcodeHandlers } from "./battleScriptLastMove
 import { createBattleScriptTypeChangeOpcodeHandlers } from "./battleScriptTypeChangeOpcode.ts";
 import { createBattleScriptEnvironmentAttackOpcodeHandlers } from "./battleScriptEnvironmentAttackOpcode.ts";
 import { createBattleScriptChargeSportOpcodeHandlers } from "./battleScriptChargeSportOpcode.ts";
+import { createBattleScriptSetalwayshitflagOpcodeHandlers } from "./battleScriptSetalwayshitflagOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -406,6 +409,8 @@ type BattleScriptMoveEndBattlerMetadata = Readonly<{
    * trap.
    */
   battlerPreventingEscape: BattleScriptBattlerId;
+  /** Source DisableStruct owner of this battler's Lock On / Mind Reader marker. */
+  battlerWithSureHit: BattleScriptBattlerId;
   /**
    * Source `gDisableStructs[battler].isFirstTurn` -- set to 2 at battle
    * init/switch-in (`battle_main.c:3051,3220,3312`), decremented by
@@ -478,6 +483,7 @@ export type BattleScriptRulesBattler = BattleScriptRulesBattlerBase & Readonly<{
   wrappedMove?: number;
   wrappedBy?: BattleScriptBattlerId;
   battlerPreventingEscape?: BattleScriptBattlerId;
+  battlerWithSureHit?: BattleScriptBattlerId;
   isFirstTurn?: number;
 }>;
 
@@ -2306,6 +2312,11 @@ export function createBattleScriptRulesContext(
       3,
       `battlers[${index}].battlerPreventingEscape`,
     ) as BattleScriptBattlerId,
+    battlerWithSureHit: requireUnsigned(
+      battler.battlerWithSureHit ?? 0,
+      3,
+      `battlers[${index}].battlerWithSureHit`,
+    ) as BattleScriptBattlerId,
     isFirstTurn: requireUnsigned(battler.isFirstTurn ?? 0, 2, `battlers[${index}].isFirstTurn`),
     ...(battler.confusionDamage === undefined ? {} : {
       confusionDamage: Object.freeze({
@@ -2865,6 +2876,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptTypeChangeOpcodeHandlers(program),
     ...createBattleScriptEnvironmentAttackOpcodeHandlers(program),
     ...createBattleScriptChargeSportOpcodeHandlers(program),
+    ...createBattleScriptSetalwayshitflagOpcodeHandlers(program),
     ...createBattleScriptSettormentOpcodeHandlers(program),
     ...createBattleScriptSettauntOpcodeHandlers(program),
     ...createBattleScriptSetforesightOpcodeHandlers(program),
@@ -2879,6 +2891,8 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptTrymementoOpcodeHandlers(program),
     ...createBattleScriptTrycopyabilityOpcodeHandlers(program),
     ...createBattleScriptTryrecycleitemOpcodeHandlers(program),
+    ...createBattleScriptTryimprisonOpcodeHandlers(program),
+    ...createBattleScriptSnatchOpcodeHandlers(program),
   });
 }
 

@@ -300,21 +300,46 @@ describe("production opcode 0 (Cmd_attackcanceler) dispatch", () => {
       expect(result.state.scheduler.pendingControllerBattlers).toContain(1);
     });
 
-    it("halts on the Snatch redirect loop (Tier-1-constructed; absent from every Factory set)", () => {
+    it("selects the first armed Snatcher by action order, not battler id, and clears only the winner", () => {
+      const result = stepOpcodeZero(
+        createBattleScriptRulesContext({
+          battlers: [
+            battler({ side: 0, stealMove: 1, moves: [289, 0, 0, 0], pp: [9, 0, 0, 0] }),
+            battler({ side: 1, stealMove: 1, moves: [289, 0, 0, 0], pp: [8, 0, 0, 0] }),
+            battler({ side: 0 }),
+            battler({ side: 1 }),
+          ],
+          selectorRoles: { attacker: 0, target: 0, effectBattler: 0 },
+          scriptingBattler: 0, atkCancelerTracker: 0, battleOutcome: 0,
+          currentMove: SWORDS_DANCE, currentMovePosition: 0, moveResultFlags: 0,
+          dmgMultiplier: 1, critMultiplier: 1, moveEffectByte: 0, missType: 0,
+          hitMarker: 0, multiHitCounter: 0, battlerByTurnOrder: [1, 0, 2, 3],
+        }),
+      );
+      expect(result.kind).toBe("advanced");
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_SnatchedMove"));
+      expect(result.state.callStack).toEqual([labelPc(ENTRY_LABEL)]);
+      expect(result.state.rulesContext.scriptingBattler).toBe(1);
+      expect(result.state.rulesContext.battlers.map(({ stealMove }) => stealMove ?? 0))
+        .toEqual([1, 0, 0, 0]);
+      expect(result.state.rng.calls).toBe(0);
+    });
+
+    it("Pressure charges only the winning Snatcher's Snatch slot and emits one permanent update", () => {
       const result = stepOpcodeZero(
         withSinglesAttacker(
           0,
-          {},
-          { currentMove: SWORDS_DANCE },
-          { stealMove: 1 },
+          { ability: 46 },
+          { currentMove: SWORDS_DANCE, battlerByTurnOrder: [1, 0, 2, 3] },
+          { stealMove: 1, moves: [TACKLE, 289, 0, 0], pp: [35, 7, 0, 0] },
         ),
       );
-      expect(result.kind).toBe("halted");
-      expect(result.state.haltReason).toMatchObject({
-        kind: "unsupported-branch",
-        sourceFile: "battle_script_commands.c",
-        sourceLine: 973,
+      expect(result.kind).toBe("advanced");
+      expect(result.state.rulesContext.battlers[1].pp).toEqual([35, 6, 0, 0]);
+      expect(result.state.events.at(-1)).toMatchObject({
+        kind: "set-battler-pp-data", battler: 1, movePosition: 1, pp: 6,
       });
+      expect(result.state.scheduler.pendingControllerBattlers).toContain(1);
     });
 
     it("halts on Lightning Rod redirection (Tier-1-constructed; unreachable in Level-50 singles)", () => {

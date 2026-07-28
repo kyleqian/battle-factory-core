@@ -87,6 +87,7 @@ function battler(
     wrappedMove: changes.wrappedMove ?? 0,
     wrappedBy: changes.wrappedBy ?? 0,
     battlerPreventingEscape: changes.battlerPreventingEscape ?? 0,
+    battlerWithSureHit: changes.battlerWithSureHit ?? 0,
     isFirstTurn: changes.isFirstTurn ?? 0,
   });
 }

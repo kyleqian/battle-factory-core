@@ -183,7 +183,7 @@ function createSetgraphicalstatchangevaluesOpcodeHandler(): BattleScriptOpcodeHa
  * an empty `arguments` array, matching that same sibling handler's
  * `WEATHER_VAR` precedent.
  *
- * Any other animType (e.g. B_ANIM_SMOKEBALL_ESCAPE, B_ANIM_SNATCH_MOVE) still
+ * Any other animType (e.g. B_ANIM_SMOKEBALL_ESCAPE) still
  * barriers rather than approximating the other branches.
  */
 const PLAYANIMATION_ANIM_TYPES: ReadonlyMap<
@@ -218,6 +218,8 @@ const PLAYANIMATION_ANIM_TYPES: ReadonlyMap<
   ["B_ANIM_HELD_ITEM_EFFECT", { argExpression: "NULL", animationId: "HELD_ITEM_EFFECT", readsAnimArg1: false }],
   ["B_ANIM_ITEM_STEAL", { argExpression: "NULL", animationId: "ITEM_STEAL", readsAnimArg1: false }],
   ["B_ANIM_ITEM_KNOCKOFF", { argExpression: "NULL", animationId: "ITEM_KNOCKOFF", readsAnimArg1: false }],
+  /** BattleScript_SnatchedMove's unconditional controller animation. */
+  ["B_ANIM_SNATCH_MOVE", { argExpression: "NULL", animationId: "SNATCH_MOVE", readsAnimArg1: false }],
 ]);
 
 function createPlayanimationOpcodeHandler(

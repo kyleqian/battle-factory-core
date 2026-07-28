@@ -74,6 +74,7 @@ import {
   BATTLE_SCRIPT_STATUS2_WRAPPED_MASK,
   BATTLE_SCRIPT_STATUS3_LEECHSEED,
   BATTLE_SCRIPT_STATUS3_LEECHSEED_BATTLER_MASK,
+  BATTLE_SCRIPT_STATUS3_ALWAYS_HITS,
   BATTLE_SCRIPT_STATUS3_PERISH_SONG,
   BATTLE_SCRIPT_STATUS3_ROOTED,
   BATTLE_SCRIPT_STATUS3_YAWN,
@@ -1447,7 +1448,16 @@ function runDoBattlerEndTurnEffects(
         }
       }
     }
-    // ENDTURN_LOCK_ON: doc-proven dead for Factory (zero MOVE_LOCK_ON/MOVE_MIND_READER carriers, B15) -- skipped, not silently ignored.
+    // ENDTURN_LOCK_ON (`battle_util.c:1738-1742`): subtract one packed turn.
+    const lockOnBattler = state.rulesContext.battlers[battler];
+    if ((lockOnBattler.status3 & BATTLE_SCRIPT_STATUS3_ALWAYS_HITS) !== 0) {
+      state = Object.freeze({
+        ...state,
+        rulesContext: withBattler(state.rulesContext, battler, {
+          status3: (lockOnBattler.status3 - (1 << 3)) >>> 0,
+        }),
+      });
+    }
     // ENDTURN_CHARGE (`battle_util.c:1743-1747`): decrement the functional
     // timer and clear the charged bit exactly when it reaches zero. The
     // paired start-value field is source metadata and is not decremented.
