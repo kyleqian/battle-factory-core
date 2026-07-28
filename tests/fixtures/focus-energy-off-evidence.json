@@ -1,0 +1,78 @@
+{
+  "schema": "focus-energy-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "sourceSha256": {
+    "battle_script_commands.c": "e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c",
+    "battle_scripts_1.s": "4ac3e610b68c11ef0f4e4c0fc62ddba7fda5a8400e43705428868978ec7551a6",
+    "battle_script.inc": "0a8e1c3bdf4c49d07b2e09ff8ab524812a5217b9735106e1b79b6be261a6db7e",
+    "battle_script_commands.h": "842cce6dd704b09b24a49abdca67ee7a8062a2e3a465e1b764fc63c0d230580f",
+    "constants_battle.h": "bba2f9d9b3d98fa01b5f0a8f7dede9f2f0be5617c735242b741a7e0c8e4a5d1e",
+    "battle_main.c": "ee79b86ff0f681ab783b363135fd84d050e7123bea2a77c5530f2c7ddc8b8408"
+  },
+  "instruction": {
+    "opcode": 154,
+    "opcodeHex": "0x9a",
+    "length": 1,
+    "operands": [],
+    "handler": "Cmd_setfocusenergy",
+    "attackerBit": 1048576,
+    "success": {
+      "predicate": "attacker STATUS2_FOCUS_ENERGY clear",
+      "writes": "OR STATUS2_FOCUS_ENERGY into gBattleMons[gBattlerAttacker].status2; MULTISTRING_CHOOSER = B_MSG_GETTING_PUMPED"
+    },
+    "defensiveFailure": {
+      "predicate": "attacker STATUS2_FOCUS_ENERGY set",
+      "writes": "OR MOVE_RESULT_FAILED; MULTISTRING_CHOOSER = B_MSG_FOCUS_ENERGY_FAILED"
+    },
+    "pc": "gBattlescriptCurrInstr++ on both branches",
+    "localRngCalls": 0,
+    "localControllerCalls": 0
+  },
+  "publicScript": {
+    "sequence": ["attackcanceler", "attackstring", "ppreduce", "jumpifstatus2 BS_ATTACKER, STATUS2_FOCUS_ENERGY, BattleScript_ButItFailed", "setfocusenergy", "attackanimation", "waitanimation", "printfromtable gFocusEnergyUsedStringIds", "waitmessage B_WAIT_TIME_LONG", "goto BattleScript_MoveEnd"],
+    "duplicateBypass": "The real duplicate jumps to BattleScript_ButItFailed before setfocusenergy, pauses, ORs MOVE_RESULT_FAILED, emits resultmessage, waits, and goes to BattleScript_MoveEnd.",
+    "defensiveHandlerFailurePubliclyReached": false
+  },
+  "criticalHitConsumer": {
+    "focusEnergyStages": 2,
+    "tableOneIn": [16, 8, 4, 3, 2],
+    "maximumStage": 4,
+    "contributorsBeforeCap": {
+      "highCriticalMoveEffects": 1,
+      "scopeLens": 1,
+      "luckyPunchChansey": 2,
+      "stickFarfetchd": 2
+    }
+  },
+  "lifetime": {
+    "ordinarySwitch": "SwitchInClearSetData clears gBattleMons[gActiveBattler].status2 to 0",
+    "batonPass": "SwitchInClearSetData masks status2 with a set that explicitly retains STATUS2_FOCUS_ENERGY",
+    "ownership": "per-active-Pokemon volatile status2, not side or permanent party state"
+  },
+  "case": {
+    "scenario": "tools/battle-lab/mechanic-focus-energy-success-repeat-off.json",
+    "scenarioSha256": "e5dc33dc6ca9b62982ff7d2cac0f4d93dad1cff1025789979efddc47a09b5b87",
+    "repeatability": {
+      "runs": 2,
+      "comparison": "byte-identical full manifest.json",
+      "manifestSha256": "e96bcff2b5772a67db2dff838b85ff4e8429d3fc4eb90f19bc2b85d212d489c1"
+    },
+    "captureContract": {
+      "count": 247,
+      "totalFrames": 1108,
+      "maximumAllowed": 256
+    },
+    "builtPartyChecksumsValid": [true, true, true, true, true, true],
+    "observed": {
+      "initial": {"frame":0,"sha256":"48e113edc9643f7c025309fbb3b0e5bc297eda493d3fa4d0e710e61ceeaa3e45","state":{"rngValue":3690816045,"currentMove":0,"sideStatuses":[0,0],"player":{"species":66,"hp":145,"maxHp":145,"pp":[30,35,35,35],"status2":0},"opponent":{"species":113,"hp":325,"maxHp":325,"pp":[40,40,40,40],"status2":0}}},
+      "selected": {"frame":60,"sha256":"3ea36dd5bf1f9f01ce83bf42c63c404dabbc336c68789cabdb4baa33dbf96b4a","state":{"rngValue":983229340,"currentMove":116,"sideStatuses":[0,0],"player":{"species":66,"hp":145,"maxHp":145,"pp":[30,35,35,35],"status2":0},"opponent":{"species":113,"hp":325,"maxHp":325,"pp":[40,40,40,40],"status2":0}}},
+      "success": {"frame":99,"sha256":"5e769603b8ac422acf7f53f6cfbb7b09d4c6c11d68877a34d2915ff3eae8a092","state":{"rngValue":983229340,"currentMove":116,"sideStatuses":[0,0],"player":{"species":66,"hp":145,"maxHp":145,"pp":[29,35,35,35],"status2":1048576},"opponent":{"species":113,"hp":325,"maxHp":325,"pp":[40,40,40,40],"status2":0}}},
+      "opponentSplash": {"frame":300,"sha256":"c282f9504ff67a9a134f445358306b329dd8267e8dba17ee034ac1407deddae0","state":{"rngValue":983229340,"currentMove":150,"sideStatuses":[0,0],"player":{"species":66,"hp":145,"maxHp":145,"pp":[29,35,35,35],"status2":1048576},"opponent":{"species":113,"hp":325,"maxHp":325,"pp":[40,39,40,40],"status2":0}}},
+      "nextChoice": {"frame":540,"sha256":"cc859f6d914ff837e109e25c9a8c885e594ef6f9786555863342187844560c18","state":{"rngValue":2682491093,"currentMove":0,"sideStatuses":[0,0],"player":{"species":66,"hp":145,"maxHp":145,"pp":[29,35,35,35],"status2":1048576},"opponent":{"species":113,"hp":325,"maxHp":325,"pp":[40,39,40,40],"status2":0}}},
+      "repeatSelection": {"frame":585,"sha256":"24f655a3a0d64433db6e522621c9fd0987220c31a6c78e3c99953fc1837d1032","state":{"rngValue":2682491093,"currentMove":0,"sideStatuses":[0,0],"player":{"species":66,"hp":145,"maxHp":145,"pp":[29,35,35,35],"status2":1048576},"opponent":{"species":113,"hp":325,"maxHp":325,"pp":[40,39,40,40],"status2":0}}},
+      "repeatFailed": {"frame":1000,"sha256":"6b6576fa9b34e9804390a867201a99b55a4048ce93bd84ab00ed3bf142dcf7ed","state":{"rngValue":2184965245,"currentMove":0,"sideStatuses":[0,0],"player":{"species":66,"hp":145,"maxHp":145,"pp":[28,35,35,35],"status2":1048576},"opponent":{"species":113,"hp":325,"maxHp":325,"pp":[40,39,40,39],"status2":0}}},
+      "settled": {"frame":1105,"sha256":"6b6576fa9b34e9804390a867201a99b55a4048ce93bd84ab00ed3bf142dcf7ed","state":{"rngValue":2184965245,"currentMove":0,"sideStatuses":[0,0],"player":{"species":66,"hp":145,"maxHp":145,"pp":[28,35,35,35],"status2":1048576},"opponent":{"species":113,"hp":325,"maxHp":325,"pp":[40,39,40,39],"status2":0}}}
+    }
+  },
+  "boundedRemainder": "The public OFF receipt proves a complete checksum-valid six-Pokemon setup, one real successful Focus Energy use, persistence through the turn, a second real selection that spends PP and fails while retaining the bit, exact public state snapshots, and exact framebuffer hashes. It does not expose script PC/stack, MULTISTRING_CHOOSER, gBattlerAttacker, gMoveResultFlags, per-command controller traffic, the defensive Cmd_setfocusenergy failure branch, switch/Baton Pass lifetime, or a controlled critical-hit trial. Those are explicitly bounded source-only facts."
+}

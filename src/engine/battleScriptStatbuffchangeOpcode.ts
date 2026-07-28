@@ -203,6 +203,11 @@ const PLAYANIMATION_ANIM_TYPES: ReadonlyMap<
   ["B_ANIM_INGRAIN_HEAL", { argExpression: "NULL", animationId: "INGRAIN_HEAL", readsAnimArg1: false }],
   ["B_ANIM_LEECH_SEED_DRAIN", { argExpression: "sB_ANIM_ARG1", animationId: "LEECH_SEED_DRAIN", readsAnimArg1: true }],
   ["B_ANIM_TURN_TRAP", { argExpression: "sB_ANIM_ARG1", animationId: "TURN_TRAP", readsAnimArg1: true }],
+  /** BattleScript_WishComesTrue's delayed-heal presentation command. */
+  ["B_ANIM_WISH_HEAL", { argExpression: "NULL", animationId: "WISH_HEAL", readsAnimArg1: false }],
+  /** BattleScript_MonTookFutureAttack's two delayed-hit controller commands. */
+  ["B_ANIM_FUTURE_SIGHT_HIT", { argExpression: "NULL", animationId: "FUTURE_SIGHT_HIT", readsAnimArg1: false }],
+  ["B_ANIM_DOOM_DESIRE_HIT", { argExpression: "NULL", animationId: "DOOM_DESIRE_HIT", readsAnimArg1: false }],
   /**
    * docs/endturn-abilities-items-ground-truth.md §1c/§5 slice 4 -- every
    * `ITEMEFFECT_NORMAL` end2 script (Leftovers/White Herb/all 8 cure
@@ -308,10 +313,13 @@ const STATUS2_CONFUSION = 0x7;
  * locally for the same import-cycle reason as STATUS2_SUBSTITUTE above.
  */
 const STATUS2_MULTIPLETURNS = 1 << 12;
+/** include/constants/battle.h:144 -- Focus Energy's public duplicate guard. */
+const STATUS2_FOCUS_ENERGY = 1 << 20;
 const JUMPIFSTATUS2_VALUES: ReadonlyMap<string, number> = new Map([
   ["STATUS2_SUBSTITUTE", STATUS2_SUBSTITUTE],
   ["STATUS2_CONFUSION", STATUS2_CONFUSION],
   ["STATUS2_MULTIPLETURNS", STATUS2_MULTIPLETURNS],
+  ["STATUS2_FOCUS_ENERGY", STATUS2_FOCUS_ENERGY],
 ]);
 
 function createJumpifstatus2OpcodeHandler(

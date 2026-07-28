@@ -9,11 +9,16 @@ import {
   submitFactoryAiDecision,
   type FactoryAiScoredView,
 } from "../src/engine/factoryAiDecisionPolicy.ts";
+import { BATTLE_SCRIPT_STATUS3_MINIMIZED } from "../src/engine/battleScriptSourceConstants.ts";
 
 const STRENGTH = 70; // EFFECT_HIT, TYPE_NORMAL -- the banked KO-scenario move (factoryBattleScriptTerminalDecision.test.ts).
 const EMBER = 52; // EFFECT_BURN_HIT, TYPE_FIRE, 10% MOVE_EFFECT_BURN secondary proc.
 const FLAIL = 175; // EFFECT_FLAIL -- writes source gDynamicBasePower before the shared hit chain.
 const FRUSTRATION = 218; // EFFECT_FRUSTRATION -- friendship 0 writes source gDynamicBasePower 102.
+const DOUBLE_TEAM = 104;
+const MINIMIZE = 107;
+const STOMP = 23;
+const SPIKES = 191;
 /** The banked KO-scenario seed (factoryBattleScriptTerminalDecision.test.ts, docs/hit-chain-ground-truth.md). */
 const KO_SCENARIO_RNG_SEED = 919694434;
 /** Brute-force-found: Ember's 10% burn proc actually lands on turn 1 with this seed, per this move's own real hit-chain RNG order (accuracy, crit, damage, secondary-effect-chance). */
@@ -93,6 +98,53 @@ const PLAYER_ATTACKS = Object.freeze({ kind: "use-move" as const, moveSlot: 0 as
 const TRAINER_ATTACKS = Object.freeze({ kind: "use-move" as const, moveSlot: 0 as const, targetBattler: 0 as const });
 
 describe("factory full-turn decision -- decision -> both actions -> end-turn -> next decision boundary", () => {
+  it("makes Stomp deal greater damage after Minimize than after a same-seed +1-evasion Double Team control", () => {
+    const run = (playerMove: typeof MINIMIZE | typeof DOUBLE_TEAM) => {
+      const initial = createFactoryFullTurnBattleState(config({
+        player: {
+          species: 120, moveId: playerMove, attack: 50, defense: 200,
+          pp: [20, 0, 0, 0], spAttack: 50, spDefense: 200, speed: 100, hp: 999,
+        },
+        trainer: {
+          species: 203, moveId: STOMP, attack: 50, defense: 200,
+          pp: [20, 0, 0, 0], spAttack: 50, spDefense: 200, speed: 50, hp: 999,
+        },
+      }));
+      expect(initial.rules.rulesContext.battlers[0]!.status3).toBe(0);
+      expect(initial.rules.rulesContext.battlers[1]!.status3).toBe(0);
+      const afterPlayer = submitFactoryFullTurnDecision(initial, {
+        requestId: 1,
+        side: "player",
+        decision: { kind: "use-move", moveSlot: 0, targetBattler: 0 },
+      });
+      if (afterPlayer.kind !== "decision-required") throw new Error("expected trainer decision");
+      const result = submitFactoryFullTurnDecision(afterPlayer.state, {
+        requestId: 2,
+        side: "trainer",
+        decision: TRAINER_ATTACKS,
+      });
+      if (result.kind !== "decision-required") throw new Error("expected next-turn decision");
+      return result.state.rules.rulesContext;
+    };
+
+    const minimized = run(MINIMIZE);
+    const control = run(DOUBLE_TEAM);
+    expect(minimized.battlers[0]!.pp[0]).toBe(19);
+    expect(control.battlers[0]!.pp[0]).toBe(19);
+    expect(minimized.battlers[0]!.statStages[7]).toBe(7);
+    expect(control.battlers[0]!.statStages[7]).toBe(7);
+    expect(minimized.battlers[0]!.status3 & BATTLE_SCRIPT_STATUS3_MINIMIZED)
+      .toBe(BATTLE_SCRIPT_STATUS3_MINIMIZED);
+    expect(control.battlers[0]!.status3 & BATTLE_SCRIPT_STATUS3_MINIMIZED).toBe(0);
+    expect(minimized.battlers[1]!.pp[0]).toBe(19);
+    expect(control.battlers[1]!.pp[0]).toBe(19);
+    expect(minimized.battlers[0]!.hp).toBe(974);
+    expect(control.battlers[0]!.hp).toBe(987);
+    expect(999 - minimized.battlers[0]!.hp).toBeGreaterThan(999 - control.battlers[0]!.hp);
+    expect(minimized.lockedMoves).toEqual([0, 0, 0, 0]);
+    expect(control.lockedMoves).toEqual([0, 0, 0, 0]);
+  });
+
   it("asks the player, then the trainer, before resolving anything (both sides collected before turn order)", () => {
     const initial = createFactoryFullTurnBattleState(config());
     expect(initial.boundary).toEqual({
@@ -521,6 +573,77 @@ describe(
     );
   },
 );
+
+describe("factory full-turn public Spikes persistence and switch-in receipt", () => {
+  it("sets one layer on turn 1, persists it, then a public forced switch brings grounded Rhyhorn in at 155 -> 136 and clears only the damaged guard", () => {
+    const RHYHORN = 111;
+    const initial = createFactoryFullTurnBattleState(config({
+      player: {
+        species: 43, moveId: DOUBLE_TEAM, pp: [15, 0, 0, 0],
+        attack: 50, defense: 50, spAttack: 50, spDefense: 50,
+        speed: 50, hp: 90, maxHp: 155,
+      },
+      trainer: {
+        species: 91, moveId: SPIKES, moves: [SPIKES, STRENGTH, 0, 0],
+        pp: [20, 15, 0, 0], attack: 200, defense: 50,
+        spAttack: 50, spDefense: 50, speed: 100, hp: 100,
+        types: ["TYPE_WATER", "TYPE_ICE"],
+      },
+      playerBenchHp: [155, 0],
+      playerBenchOverride: [{
+        species: RHYHORN,
+        moves: [STRENGTH, 0, 0, 0],
+      }, undefined],
+    }));
+    expect(initial.rules.rulesContext.sideStatuses).toEqual([0, 0]);
+    expect(initial.rules.rulesContext.sideTimers.map(({ spikesAmount }) => spikesAmount)).toEqual([0, 0]);
+
+    const turn1Player = submitFactoryFullTurnDecision(initial, {
+      requestId: 1, side: "player",
+      decision: { kind: "use-move", moveSlot: 0, targetBattler: 0 },
+    });
+    if (turn1Player.kind !== "decision-required") throw new Error("expected trainer turn-1 decision");
+    const turn1 = submitFactoryFullTurnDecision(turn1Player.state, {
+      requestId: 2, side: "trainer",
+      decision: { kind: "use-move", moveSlot: 0, targetBattler: 0 },
+    });
+    if (turn1.kind !== "decision-required") throw new Error("expected turn-2 player decision");
+    expect(turn1.state.rules.rulesContext.sideStatuses[0]).toBe(1 << 4);
+    expect(turn1.state.rules.rulesContext.sideTimers[0].spikesAmount).toBe(1);
+
+    const turn2Player = submitFactoryFullTurnDecision(turn1.state, {
+      requestId: 3, side: "player",
+      decision: { kind: "use-move", moveSlot: 0, targetBattler: 0 },
+    });
+    if (turn2Player.kind !== "decision-required") throw new Error("expected trainer turn-2 decision");
+    const knockedOut = submitFactoryFullTurnDecision(turn2Player.state, {
+      requestId: 4, side: "trainer",
+      decision: { kind: "use-move", moveSlot: 1, targetBattler: 0 },
+    });
+    if (knockedOut.kind !== "decision-required") throw new Error("expected public forced-switch decision");
+    expect(knockedOut.nextRequest).toMatchObject({
+      kind: "forced-switch", side: "player", battler: 0, legalPartyIndexes: [1],
+    });
+    expect(knockedOut.state.rules.rulesContext.sideStatuses[0]).toBe(1 << 4);
+    expect(knockedOut.state.rules.rulesContext.sideTimers[0].spikesAmount).toBe(1);
+
+    const switched = submitFactoryFullTurnDecision(knockedOut.state, {
+      requestId: knockedOut.nextRequest.requestId,
+      side: "player",
+      decision: { kind: "switch", partyIndex: 1 },
+    });
+    if (switched.kind !== "decision-required") throw new Error("expected post-switch command decision");
+    const rc = switched.state.rules.rulesContext;
+    expect(rc.battlers[0]).toMatchObject({
+      species: RHYHORN, partyIndex: 1, maxHP: 155, hp: 136,
+      types: ["TYPE_GROUND", "TYPE_ROCK"],
+    });
+    expect(rc.party.player[1].hp).toBe(136);
+    expect(rc.sideStatuses[0]).toBe(1 << 4);
+    expect(rc.sideTimers[0].spikesAmount).toBe(1);
+    expect(rc.sideStatuses[0] & (1 << 9)).toBe(0);
+  });
+});
 
 describe(
   "factory full-turn decision -- non-terminal forced-switch variant (item 2, entry 450's own proof-3 "

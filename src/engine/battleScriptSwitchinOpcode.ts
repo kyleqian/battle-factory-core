@@ -31,7 +31,8 @@ import {
   type BattleScriptOpcodeHandlerContext,
   type BattleScriptOpcodeHandlers,
 } from "./battleScriptMachine.ts";
-import type { BattleScriptProgram } from "./battleScriptProgram.ts";
+import { resolveBattleScriptLabel, type BattleScriptProgram } from "./battleScriptProgram.ts";
+import type { BattleScriptBattlerId } from "./battleScriptEvents.ts";
 import type { BattleScriptControllerIdlePort } from "./battleScriptSourceCommands.ts";
 import {
   resolveRulesBattlerForBattleScript,
@@ -56,8 +57,12 @@ const DEFAULT_STAT_STAGES = Object.freeze([
   DEFAULT_STAT_STAGE, DEFAULT_STAT_STAGE, DEFAULT_STAT_STAGE, DEFAULT_STAT_STAGE,
   DEFAULT_STAT_STAGE, DEFAULT_STAT_STAGE, DEFAULT_STAT_STAGE, DEFAULT_STAT_STAGE,
 ]) as unknown as BattleScriptStatStages;
-/** include/constants/battle.h:213 -- narrowed sideStatuses only carries SAFEGUARD, so this bit is structurally always 0 today; checked anyway for source fidelity. */
+/** include/constants/battle.h:213/217. */
 const SIDE_STATUS_SPIKES = 1 << 4;
+const SIDE_STATUS_SPIKES_DAMAGED = 1 << 9;
+const STATUS2_DESTINY_BOND = 1 << 25;
+const HITMARKER_DESTINYBOND = 1 << 6;
+const ABILITY_LEVITATE = 26;
 /** include/constants/battle.h:150/160 -- cross-battler identity (battlerPreventingEscape/battlerWithSureHit) this engine does not model. */
 const STATUS2_ESCAPE_PREVENTION = 1 << 26;
 const STATUS3_ALWAYS_HITS = (1 << 3) | (1 << 4);
@@ -148,7 +153,9 @@ function controllerBusyBlock(
 const VARIOUS_RESET_PLAYER_FAINTED = 7;
 const VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT = 23;
 const VARIOUS_GET_MOVE_TARGET = 3;
+const VARIOUS_SET_MAGIC_COAT_TARGET = 1;
 const NAMED_BYTE_CONSTANTS = new Map<string, number>([
+  ["VARIOUS_SET_MAGIC_COAT_TARGET", VARIOUS_SET_MAGIC_COAT_TARGET],
   ["VARIOUS_GET_MOVE_TARGET", VARIOUS_GET_MOVE_TARGET],
   ["VARIOUS_RESET_PLAYER_FAINTED", VARIOUS_RESET_PLAYER_FAINTED],
   ["VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT", VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT],
@@ -391,6 +398,12 @@ function createSwitchindataupdateOpcodeHandler(
           truantCounter: 0 as const,
           rechargeTimer: 0,
           disabledMove: 0,
+          disableTimer: 0,
+          disableTimerStartValue: 0,
+          encoredMove: 0,
+          encoredMovePos: 0,
+          encoreTimer: 0,
+          encoreTimerStartValue: 0,
           usedDisabledMove: 0 as const,
           tauntTimer: 0,
           usedTauntedMove: 0 as const,
@@ -521,6 +534,8 @@ function createVariousOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRul
     const getMoveTargetSupported = id === VARIOUS_GET_MOVE_TARGET
       && rules.battleTopology.battlersCount === 2;
     if (
+      id !== VARIOUS_SET_MAGIC_COAT_TARGET
+      &&
       id !== VARIOUS_RESET_PLAYER_FAINTED
       && id !== VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT
       && !getMoveTargetSupported
@@ -561,6 +576,34 @@ function createVariousOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRul
       );
     }
 
+    if (id === VARIOUS_SET_MAGIC_COAT_TARGET) {
+      const currentTarget = rules.selectorRoles.target;
+      if (currentTarget === null) {
+        throw new Error("Cmd_various VARIOUS_SET_MAGIC_COAT_TARGET requires a target role");
+      }
+      const attacker = currentTarget;
+      const oppositeSide = rules.battlers[attacker].side === 0 ? 1 : 0;
+      const sideTimer = rules.sideTimers[oppositeSide];
+      const target: BattleScriptBattlerId = sideTimer.followmeTimer !== 0
+        && rules.battlers[sideTimer.followmeTarget].hp !== 0
+        ? sideTimer.followmeTarget
+        : battler as BattleScriptBattlerId;
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        {
+          rulesContext: Object.freeze({
+            ...rules,
+            selectorRoles: Object.freeze({
+              ...rules.selectorRoles,
+              attacker,
+              target,
+            }),
+          }),
+        },
+      );
+    }
+
     if (id === VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT) {
       const alreadyStatusedMoveAttempt = (rules.alreadyStatusedMoveAttempt | (1 << battler)) >>> 0;
       return transitionBattleScriptCommand(
@@ -589,14 +632,10 @@ function createVariousOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRul
 }
 
 /**
- * `Cmd_switchineffects` (`battle_script_commands.c:5219-5299`). Spikes is a
- * named barrier gated on the real `SIDE_STATUS_SPIKES` bit -- structurally
- * unreachable today since no move/opcode anywhere in this engine ever writes
- * that bit (`battleScriptRulesContext.ts`'s `sideStatuses` genuinely carries
- * REFLECT/LIGHTSCREEN/MIST/SAFEGUARD since the screens/weather setter
- * registration, docs/screens-weather-ground-truth.md, but Spikes has no
- * setter of its own yet), so this can never be set by any fixture this
- * engine can build. The Truant switch-in hack and
+ * `Cmd_switchineffects` (`battle_script_commands.c:5219-5299`). Spikes runs
+ * through the source's shared BattleScript_SpikesOn* scripts. The transient
+ * SPIKES_DAMAGED bit makes the pushed-cursor re-entry a no-damage pass that
+ * clears the guard before normal switch-in hooks. The Truant switch-in hack and
  * `AbilityBattleEffects(ABILITYEFFECT_ON_SWITCHIN)` are named barriers gated
  * on the switched-in battler's real `ability` value (a small, closed set of
  * trigger abilities, `battle_util.c:2485-2599`); `ItemBattleEffects
@@ -621,11 +660,45 @@ function createSwitchineffectsOpcodeHandler(): BattleScriptOpcodeHandler<BattleS
     const rules = context.state.rulesContext;
     const active = rules.battlers[battler as 0 | 1 | 2 | 3];
     const side = active.side;
-    if ((rules.sideStatuses[side] & SIDE_STATUS_SPIKES) !== 0) {
-      return unsupportedBranch(
+    const faintedMask = (1 << (28 + battler)) >>> 0;
+    const hitMarkerWithoutFainted = (rules.hitMarker & ~faintedMask) >>> 0;
+    const isFlying = active.types.includes("TYPE_FLYING");
+    const shouldDamage = (rules.sideStatuses[side] & SIDE_STATUS_SPIKES_DAMAGED) === 0
+      && (rules.sideStatuses[side] & SIDE_STATUS_SPIKES) !== 0
+      && !isFlying
+      && active.ability !== ABILITY_LEVITATE;
+    if (shouldDamage) {
+      const layers = rules.sideTimers[side].spikesAmount;
+      if (layers < 1 || layers > 3) {
+        throw new Error(`Cmd_switchineffects requires a source-valid Spikes layer count 1..3, got ${layers}`);
+      }
+      const scriptName = operand.expression === "BS_TARGET"
+        ? "BattleScript_SpikesOnTarget"
+        : operand.expression === "BS_ATTACKER"
+        ? "BattleScript_SpikesOnAttacker"
+        : "BattleScript_SpikesOnFaintedBattler";
+      const script = resolveBattleScriptLabel(context.program, scriptName);
+      if (!script) throw new Error(`committed Battle Script program has no ${scriptName}`);
+      const sideStatuses = [...rules.sideStatuses] as [number, number];
+      sideStatuses[side] = (sideStatuses[side] | SIDE_STATUS_SPIKES_DAMAGED) >>> 0;
+      const battlers = rules.battlers.map((candidate, index) =>
+        index === battler
+          ? Object.freeze({ ...candidate, status2: (candidate.status2 & ~STATUS2_DESTINY_BOND) >>> 0 })
+          : candidate
+      ) as unknown as BattleScriptRulesBattlers;
+      return transitionBattleScriptCommand(
         context,
-        `Cmd_switchineffects's Spikes damage-on-switch-in branch (side ${side}) is not modeled`,
-        5229,
+        Object.freeze({ kind: "call-current", programCounter: script.programCounter }),
+        {
+          rulesContext: Object.freeze({
+            ...rules,
+            battlers: Object.freeze(battlers),
+            scriptingBattler: battler as BattleScriptBattlerId,
+            battleMoveDamage: Math.max(1, Math.trunc(active.maxHP / ((5 - layers) * 2))),
+            hitMarker: (hitMarkerWithoutFainted & ~HITMARKER_DESTINYBOND) >>> 0,
+            sideStatuses: Object.freeze(sideStatuses),
+          }),
+        },
       );
     }
     if (active.ability === ABILITY_TRUANT) {
@@ -642,12 +715,18 @@ function createSwitchineffectsOpcodeHandler(): BattleScriptOpcodeHandler<BattleS
         2485,
       );
     }
-    const faintedMask = (1 << (28 + battler)) >>> 0;
-    const hitMarker = (rules.hitMarker & ~faintedMask) >>> 0;
+    const sideStatuses = [...rules.sideStatuses] as [number, number];
+    sideStatuses[side] = (sideStatuses[side] & ~SIDE_STATUS_SPIKES_DAMAGED) >>> 0;
     return transitionBattleScriptCommand(
       context,
       Object.freeze({ kind: "advance" }),
-      { rulesContext: Object.freeze({ ...rules, hitMarker }) },
+      {
+        rulesContext: Object.freeze({
+          ...rules,
+          hitMarker: hitMarkerWithoutFainted,
+          sideStatuses: Object.freeze(sideStatuses),
+        }),
+      },
     );
   };
 }

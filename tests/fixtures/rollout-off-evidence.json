@@ -1,0 +1,73 @@
+{
+  "schema": "rollout-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "sourceSha256": {
+    "battle_script_commands.c": "e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c",
+    "battle_scripts_1.s": "4ac3e610b68c11ef0f4e4c0fc62ddba7fda5a8400e43705428868978ec7551a6",
+    "battle_script.inc": "0a8e1c3bdf4c49d07b2e09ff8ab524812a5217b9735106e1b79b6be261a6db7e",
+    "battle_script_commands.h": "842cce6dd704b09b24a49abdca67ee7a8062a2e3a465e1b764fc63c0d230580f",
+    "constants_battle.h": "bba2f9d9b3d98fa01b5f0a8f7dede9f2f0be5617c735242b741a7e0c8e4a5d1e",
+    "battle.h": "8ef0355f2345592094c82cfde6641644a6b7157012104736416f8c05f34f0685",
+    "battle_util.c": "2ba9ee4efe913effa119c8342281745f481910ca1b20cd76b470673062a45fd5",
+    "battle_main.c": "ee79b86ff0f681ab783b363135fd84d050e7123bea2a77c5530f2c7ddc8b8408",
+    "battle_moves.h": "8b3d4d143b807807af97ce7288e0cc0ccdd55b6b64ac45824e35a549836b3a0c",
+    "battle_frontier_mons.h": "557c1a97247cbb84357b99035fb11cf0bfe45abe8393a0992fe8146bfc51f67f",
+    "battle_frontier_mons.h.constants": "00fb47e144978d3a24a304047f5463217ac7b535ee6f8719e2adf47cc592387a"
+  },
+  "instruction": {
+    "opcode": 179,
+    "opcodeHex": "0xb3",
+    "length": 1,
+    "operandWidths": [],
+    "pc": {
+      "successfulHit": "gBattlescriptCurrInstr++",
+      "noEffectMiss": "CancelMultiTurnMoves(gBattlerAttacker); gBattlescriptCurrInstr = BattleScript_MoveMissedPause"
+    }
+  },
+  "handler": {
+    "owner": "gBattlerAttacker",
+    "initialSuccessfulHit": {
+      "rolloutTimer": 5,
+      "rolloutTimerStartValue": 5,
+      "status2Set": "STATUS2_MULTIPLETURNS (1 << 12)",
+      "lockedMove": "gLockedMoves[gBattlerAttacker] = gCurrentMove"
+    },
+    "eachSuccessfulHit": {
+      "decrement": "--gDisableStructs[gBattlerAttacker].rolloutTimer",
+      "lastHit": "clear STATUS2_MULTIPLETURNS when the decremented timer is zero",
+      "dynamicBasePower": "move power * 2^(4 - rolloutTimer after decrement)",
+      "defenseCurl": "double gDynamicBasePower when attacker status2 has STATUS2_DEFENSE_CURL",
+      "defenseCurlPowers": [60, 120, 240, 480, 960]
+    },
+    "cancellation": {
+      "directNoEffect": "Cmd_rolloutdamagecalculation calls CancelMultiTurnMoves before BattleScript_MoveMissedPause",
+      "CancelMultiTurnMoves": "clears STATUS2_MULTIPLETURNS, STATUS2_LOCK_CONFUSE, STATUS2_UPROAR, STATUS2_BIDE, STATUS3_SEMI_INVULNERABLE, rolloutTimer, and furyCutterCounter; it does not clear rolloutTimerStartValue or gLockedMoves"
+    }
+  },
+  "effect": {
+    "id": 117,
+    "move": {"id": 205, "name": "MOVE_ROLLOUT", "power": 30, "accuracy": 90, "pp": 20, "effect": "EFFECT_ROLLOUT"},
+    "script": "attackcanceler, attackstring, skip ppreduce when STATUS2_MULTIPLETURNS is already set, accuracycheck, typecalc2, rolloutdamagecalculation, HitFromCritCalc",
+    "controllerLock": "HandleTurnActionSelectionState uses B_ACTION_USE_MOVE without prompting when STATUS2_MULTIPLETURNS is set; HandleAction_UseMove takes gLockedMoves while that status is set"
+  },
+  "frontierCarrier": {"setId": 432, "name": "FRONTIER_MON_SHUCKLE_1", "species": 213, "moves": [205, 111, 214, 156], "level": 50},
+  "repeatability": {"runsPerCase": 2, "comparison": "byte-identical full manifest.json", "allMatched": true},
+  "case": {
+    "id": "factory-shuckle-defense-curl-then-four-rollout-hits",
+    "scenario": "tools/battle-lab/mechanic-rollout-defense-curl-off.json",
+    "scenarioSha256": "fd1e0baee7bec28fa7d85746387e4a91d526f57a660e853f5e277b98e7aab41f",
+    "runManifestSha256": ["4460104ba9d448e255dd46c66f9922b85f4cdb1b77e711c6c1bb96c219479677", "4460104ba9d448e255dd46c66f9922b85f4cdb1b77e711c6c1bb96c219479677"],
+    "builtPartyChecksumsValid": [true, true, true, true, true, true],
+    "captures": [
+      {"frame": 0, "sha256": "c9d093cebe9c9699ea69c78b1c34c44b70ff104cb65ba39d1830e822e30bdeca", "rngValue": 648273789, "currentMove": 0, "player": {"hp": 95, "maxHp": 95, "pp": [20, 40, 10, 10], "status2": 0}, "opponent": {"hp": 362, "maxHp": 362, "pp": [40, 40, 40, 40]}},
+      {"frame": 300, "sha256": "4cd486e1f2d58c010408666a2e682f88b5fd2aab6f970464e85aaa953d4758b3", "rngValue": 648273789, "currentMove": 111, "player": {"hp": 95, "pp": [20, 39, 10, 10], "status2": 1073741824, "defenseStage": 7}, "opponent": {"hp": 362}},
+      {"frame": 666, "sha256": "c9d093cebe9c9699ea69c78b1c34c44b70ff104cb65ba39d1830e822e30bdeca", "rngValue": 1066434947, "currentMove": 0, "player": {"hp": 95, "pp": [20, 39, 10, 10], "status2": 1073741824}, "opponent": {"hp": 362}},
+      {"frame": 900, "sha256": "64d5e097a93fbb473caae71c079869a397c4d86ac5c99e229e2243da4818f2d6", "rngValue": 1066434947, "currentMove": 205, "player": {"hp": 95, "pp": [20, 39, 10, 10], "status2": 1073741824}, "opponent": {"hp": 362}},
+      {"frame": 1100, "sha256": "e01f19bc29f20dda715fe1f659889c61e06c27ec2fb208c1e9919a1a502acc95", "rngValue": 2053397965, "currentMove": 150, "player": {"hp": 95, "pp": [19, 39, 10, 10], "status2": 1073745920}, "opponent": {"hp": 327, "maxHp": 362}},
+      {"frame": 1500, "sha256": "9fdefd6fda8e6ee52b2b59f02f2f3301dc65fe12ff96c18c270c9f1688bdb4a3", "rngValue": 3714258566, "currentMove": 205, "player": {"hp": 95, "pp": [19, 39, 10, 10], "status2": 1073745920}, "opponent": {"hp": 170, "maxHp": 362}},
+      {"frame": 2100, "sha256": "aa14c6081f5adfc743bdb15e92adcd8dfd12f0076055e2b689b187b92bb426da", "rngValue": 2090291921, "currentMove": 150, "player": {"hp": 95, "pp": [19, 39, 10, 10], "status2": 1073745920}, "opponent": {"hp": 12, "maxHp": 362}},
+      {"frame": 2500, "sha256": "64cbfee0e315e0dce100d59d1ecef351da2bd5da1cc593905f368f542d9658ce", "rngValue": 3367570629, "currentMove": 205, "battleOutcome": 0, "player": {"hp": 95, "pp": [19, 39, 10, 10], "status2": 1073745920}, "opponent": {"hp": 0, "maxHp": 362}}
+    ]
+  },
+  "boundedRemainder": "The manifest exposes frame hashes plus active HP, PP, current move, status2, stat stages, controller command, RNG, and party checksums. It does not expose gDisableStructs[].rolloutTimer/rolloutTimerStartValue, gLockedMoves, gDynamicBasePower, gBattleMoveDamage, BattleScript PC, or the miss/reset path. Those hidden fields and the exact cancellation owner are source-pinned above. The observed run proves a real Defense Curl, only the initial Rollout PP reduction (20 to 19), persisted STATUS2_MULTIPLETURNS across three escalating non-KO HP losses (35, 157, 158), and a fourth real Rollout KO. It intentionally does not stage a separate miss/cancellation route. This is evidence only and does not implement or register the opcode/effect."
+}

@@ -56,6 +56,7 @@ import {
   type BattleScriptFaintedActionsResult,
 } from "./battleScriptFaintedActionsOrchestration.ts";
 import {
+  BATTLE_SCRIPT_BATTLE_ENVIRONMENT_BUILDING,
   BATTLE_SCRIPT_BATTLE_TYPE_FACTORY,
   BATTLE_SCRIPT_BATTLE_TYPE_TRAINER,
   BATTLE_SCRIPT_PARTY_SIZE,
@@ -171,6 +172,12 @@ function emptyBattler(side: 0 | 1): BattleScriptRulesBattlerState {
     rechargeTimer: 0,
     flinchImmobility: 0,
     disabledMove: 0,
+    disableTimer: 0,
+    disableTimerStartValue: 0,
+    encoreTimer: 0,
+    encoredMove: 0,
+    encoredMovePos: 0,
+    encoreTimerStartValue: 0,
     usedDisabledMove: 0,
     tauntTimer: 0,
     usedTauntedMove: 0,
@@ -307,6 +314,7 @@ function createInitialRules(config: FactoryTerminalMoveConfig): FactoryTerminalD
     battleOutcome: 0,
     currentMove: 0,
     currentMovePosition: 0,
+    gBattleEnvironment: BATTLE_SCRIPT_BATTLE_ENVIRONMENT_BUILDING,
     moveResultFlags: 0,
     dmgMultiplier: 1,
     critMultiplier: 1,

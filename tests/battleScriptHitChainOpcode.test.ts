@@ -21,6 +21,7 @@ import { SET_MOVE_EFFECT_SUPPORTED_BYTES } from "../src/engine/battleScriptHitCh
 
 const program = loadBattleScriptProgram();
 const TACKLE = 33; // EFFECT_HIT, power 35, accuracy 95, TYPE_NORMAL
+const FUTURE_SIGHT = 248;
 const MOVE_SURF = 57; // EFFECT_HIT, MOVE_TARGET_BOTH -- BattleScript_EffectHit's own underwater-guard move
 /** include/constants/battle.h:175. */
 const STATUS3_UNDERWATER = 1 << 18;
@@ -298,6 +299,35 @@ describe("production accuracycheck (Cmd_accuracycheck) dispatch", () => {
     expect(result.state.rulesContext.missType).toBe(0); // B_MSG_MISSED
   });
 
+  it("the target Foresight bit makes the shared accuracy path ignore target evasion", () => {
+    const target = {
+      statStages: [6, 6, 6, 6, 6, 6, 6, 12] as const,
+    };
+    const without = stepFrom(
+      "BattleScript_HitFromAccCheck",
+      context(0, {}, {}, target),
+      1,
+    ).result;
+    expect(without.kind).toBe("advanced");
+    if (without.kind !== "advanced") throw new Error("expected advance");
+    expect(without.state.programCounter).toBe(labelPc("BattleScript_PrintMoveMissed"));
+
+    const withForesight = stepFrom(
+      "BattleScript_HitFromAccCheck",
+      context(0, {}, {}, {
+        ...target,
+        status2: 1 << 29,
+      }),
+      1,
+    ).result;
+    expect(withForesight.kind).toBe("advanced");
+    if (withForesight.kind !== "advanced") throw new Error("expected advance");
+    expect(withForesight.state.programCounter).toBe(
+      labelPc("BattleScript_HitFromAtkString"),
+    );
+    expect(withForesight.state.rng.calls).toBe(1);
+  });
+
   it("Protect: jumps to the miss target with zero RNG and B_MSG_PROTECTED", () => {
     const rc = context(0, {}, {}, { protected: 1 });
     const { result } = stepFrom("BattleScript_HitFromAccCheck", rc, 1);
@@ -318,7 +348,7 @@ describe("production accuracycheck (Cmd_accuracycheck) dispatch", () => {
   });
 
   describe("(b) unsupported-branch barriers", () => {
-    it("halts on the remaining non-ACC_CURR_MOVE, non-NO_ACC_CALC_CHECK_LOCK_ON call sites (11 total non-ACC_CURR_MOVE sites; 8 use NO_ACC_CALC_CHECK_LOCK_ON, real since docs/yawn-thrash-endturn-design.md Rung 1; bare NO_ACC_CALC (1) and explicit-move-id (MOVE_FUTURE_SIGHT/MOVE_DOOM_DESIRE, 2) remain barriered)", () => {
+    it("halts on the remaining bare NO_ACC_CALC call site (Future Sight/Doom Desire explicit ids and NO_ACC_CALC_CHECK_LOCK_ON are registered)", () => {
       const stillUnsupported = program.instructions.find(
         (i) => i.opcodeName === "B_SCR_OP_ACCURACYCHECK"
           && i.operands[1]?.expression !== "ACC_CURR_MOVE"
@@ -345,12 +375,16 @@ describe("production accuracycheck (Cmd_accuracycheck) dispatch", () => {
     });
 
     it("halts when the target holds one of AbilityBattleEffects(ABILITYEFFECT_ABSORBING)'s three real switch cases on a hit (Volt Absorb/Water Absorb/Flash Fire unmodeled) but not any other ability (falls through that switch with no effect, per source)", () => {
-      for (const ability of [10, 11, 18]) { // ABILITY_VOLT_ABSORB, ABILITY_WATER_ABSORB, ABILITY_FLASH_FIRE
-        const rc = context(0, {}, {}, { ability });
+      for (const [ability, move] of [[10, 209], [11, 55], [18, 53]] as const) {
+        // Volt Absorb/Spark, Water Absorb/Water Gun, Flash Fire/Flamethrower.
+        const rc = context(0, {}, { currentMove: move }, { ability });
         const { result } = stepFrom("BattleScript_HitFromAccCheck", rc, 1);
         expect(result.kind).toBe("halted");
         expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 1020 });
       }
+      // The source switch only activates on its matching move type.
+      const mismatched = context(0, {}, { currentMove: FUTURE_SIGHT }, { ability: 10 });
+      expect(stepFrom("BattleScript_HitFromAccCheck", mismatched, 1).result.kind).toBe("advanced");
       const rcOtherAbility = context(0, {}, {}, { ability: 3 }); // ABILITY_KEEN_EYE, not one of the three switch cases
       const { result: otherResult } = stepFrom("BattleScript_HitFromAccCheck", rcOtherAbility, 1);
       expect(otherResult.kind).toBe("advanced");
@@ -777,11 +811,11 @@ describe("production typecalc (Cmd_typecalc) dispatch", () => {
     expect(result.state.rulesContext.lastUsedAbility).toBe(ABILITY_LEVITATE);
   });
 
-  it("Foresight lets Normal hit a Ghost target (skips only the immunity table row)", () => {
+  it("Foresight lets Low Kick hit a Ghost target through the shared Fighting type consumer", () => {
     const rc = context(
       0,
       { types: ["TYPE_WATER", "TYPE_WATER"] }, // avoid STAB muddying the pinned 10
-      { battleMoveDamage: 10 },
+      { currentMove: 67 /* MOVE_LOW_KICK, TYPE_FIGHTING */, battleMoveDamage: 10 },
       { types: ["TYPE_GHOST", "TYPE_GHOST"], status2: 1 << 29 },
     );
     const { result } = stepAtOpcode("B_SCR_OP_TYPECALC", rc);
@@ -1098,6 +1132,71 @@ describe("production adjustnormaldamage (Cmd_adjustnormaldamage) dispatch", () =
       if (result.kind !== "advanced") throw new Error("expected advance");
       expect(result.state.rulesContext.battleMoveDamage).toBe(9); // hp - 1, clamped via Endure, item ignored
     });
+  });
+});
+
+describe("production adjustnormaldamage2 (Cmd_adjustnormaldamage2) dispatch", () => {
+  it("omits only False Swipe's clamp while consuming the same random roll", () => {
+    const rc = context(0, {}, { currentMove: FALSE_SWIPE, battleMoveDamage: 999 }, { hp: 10 });
+    const seed = rngValueBeforeU16(52212);
+    const ordinary = stepAtOpcode("B_SCR_OP_ADJUSTNORMALDAMAGE", rc, seed).result;
+    const delayed = stepAtOpcode("B_SCR_OP_ADJUSTNORMALDAMAGE2", rc, seed).result;
+    expect(ordinary.kind).toBe("advanced");
+    expect(delayed.kind).toBe("advanced");
+    expect(ordinary.state.rulesContext.battleMoveDamage).toBe(9);
+    expect(delayed.state.rulesContext.battleMoveDamage).toBe(959);
+    expect(ordinary.state.rulesContext.moveResultFlags).toBe(0);
+    expect(delayed.state.rulesContext.moveResultFlags).toBe(0);
+    expect(ordinary.state.rng.calls).toBe(1);
+    expect(delayed.state.rng.calls).toBe(1);
+    expect(ordinary.state.rng.ledger[0]!.randomValue).toBe(52212);
+    expect(delayed.state.rng.ledger[0]!.randomValue).toBe(52212);
+    expect(delayed.state.rng.ledger[0]!.reason).toBe("adjustnormaldamage2");
+  });
+
+  it("preserves the shared Endure clamp and flag despite a False Swipe current move", () => {
+    const rc = context(
+      0,
+      {},
+      { currentMove: FALSE_SWIPE, battleMoveDamage: 999 },
+      { hp: 10, endured: 1 },
+    );
+    const { result } = stepAtOpcode("B_SCR_OP_ADJUSTNORMALDAMAGE2", rc, rngValueBeforeU16(52212));
+    expect(result.kind).toBe("advanced");
+    expect(result.state.rulesContext.battleMoveDamage).toBe(9);
+    expect(result.state.rulesContext.moveResultFlags & (1 << 6)).toBe(1 << 6);
+    expect(result.state.rng.calls).toBe(1);
+  });
+
+  it("preserves Substitute's suppression of both False Swipe and Endure clamps", () => {
+    const rc = context(
+      0,
+      {},
+      { currentMove: FALSE_SWIPE, battleMoveDamage: 999 },
+      { hp: 10, endured: 1, status2: 1 << 24 },
+    );
+    const { result } = stepAtOpcode("B_SCR_OP_ADJUSTNORMALDAMAGE2", rc, rngValueBeforeU16(52212));
+    expect(result.kind).toBe("advanced");
+    expect(result.state.rulesContext.battleMoveDamage).toBe(959);
+    expect(result.state.rulesContext.moveResultFlags & (1 << 6)).toBe(0);
+    expect(result.state.rng.calls).toBe(1);
+  });
+
+  it("preserves the Focus Band barrier at Cmd_adjustnormaldamage2's own source line", () => {
+    const rc = context(
+      0,
+      {},
+      { currentMove: FALSE_SWIPE, battleMoveDamage: 999 },
+      { hp: 10, item: HOLD_EFFECT_ITEM_FOCUS_BAND },
+    );
+    const { result } = stepAtOpcode("B_SCR_OP_ADJUSTNORMALDAMAGE2", rc, rngValueBeforeU16(52212));
+    expect(result.kind).toBe("halted");
+    expect(result.state.haltReason).toMatchObject({
+      kind: "unsupported-branch",
+      sourceFile: "battle_script_commands.c",
+      sourceLine: 1720,
+    });
+    expect(result.state.rng.calls).toBe(0);
   });
 });
 
@@ -2842,12 +2941,33 @@ describe("production tryfaintmon (Cmd_tryfaintmon) dispatch", () => {
       if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
     });
 
-    it("halts on the tryfaintmon_spikes form (mode byte TRUE), regardless of fainted state", () => {
-      const pc = findTryfaintmonPc((ops) => ops[1] === "TRUE");
+    it("tryfaintmon_spikes advances when no faint marker is set", () => {
+      const pc = findTryfaintmonPc((ops) => ops[0] === "BS_ATTACKER" && ops[1] === "TRUE");
       const rc = context(0);
       const { result } = stepAtProgramCounter(pc, rc);
-      expect(result.kind).toBe("halted");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 2969 });
+      expect(result.kind).toBe("advanced");
+      expect(result.state.programCounter).toBe(pc + 1);
+    });
+
+    it("tryfaintmon_spikes pops the switch-in return, clears the damaged guard, and jumps on a marked faint", () => {
+      const pc = findTryfaintmonPc((ops) => ops[0] === "BS_ATTACKER" && ops[1] === "TRUE");
+      const rc = context(0, {}, {
+        hitMarker: TRYFAINTMON_ATTACKER_FAINTED_BIT,
+        sideStatuses: [(1 << 4) | (1 << 9), 0],
+      });
+      const execution = createBattleScriptStatusRulesExecution(
+        program, "BattleScript_HitFromCritCalc", rc, 1, externalPorts(),
+      );
+      const state = Object.freeze({
+        ...execution.state,
+        programCounter: pc,
+        callStack: Object.freeze([777]),
+      });
+      const result = stepBattleScriptMachine(program, state, execution.handlers);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_SpikesOnAttackerFainted"));
+      expect(result.state.callStack).toEqual([]);
+      expect(result.state.rulesContext.sideStatuses[0]).toBe(1 << 4);
     });
   });
 });
@@ -2893,13 +3013,15 @@ describe("production cleareffectsonfaint (Cmd_cleareffectsonfaint) dispatch", ()
           hp: 0,
           status1: 0x40,
           status2: 0x1234,
-          status3: 0x8,
+          status3: 0x108, // includes STATUS3_MINIMIZED; FaintClearSetData owns the whole-slot clear.
           statStages: [2, 3, 4, 5, 6, 7, 8, 9],
           rolloutTimer: 3,
           furyCutterCounter: 2,
           tauntTimer: 1,
           rechargeTimer: 1,
           disabledMove: 12,
+          disableTimer: 4,
+          disableTimerStartValue: 5,
           protected: 1,
           protectUses: 3,
         },
@@ -2916,6 +3038,8 @@ describe("production cleareffectsonfaint (Cmd_cleareffectsonfaint) dispatch", ()
       expect(target.tauntTimer).toBe(0);
       expect(target.rechargeTimer).toBe(0);
       expect(target.disabledMove).toBe(0);
+      expect(target.disableTimer).toBe(0);
+      expect(target.disableTimerStartValue).toBe(0);
       expect(target.protected).toBe(0);
       // FaintClearSetData's DisableStruct::protectUses zero -- a real write now that
       // battleScriptProtectlikeOpcode.ts's own field exists (previously a no-op, see

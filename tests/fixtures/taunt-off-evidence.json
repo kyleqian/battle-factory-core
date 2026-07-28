@@ -1,0 +1,70 @@
+{
+  "schema": "taunt-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "sourceSha256": {
+    "battle_script_commands.c": "e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c",
+    "battle_scripts_1.s": "4ac3e610b68c11ef0f4e4c0fc62ddba7fda5a8400e43705428868978ec7551a6",
+    "battle_script.inc": "0a8e1c3bdf4c49d07b2e09ff8ab524812a5217b9735106e1b79b6be261a6db7e",
+    "battle_script_commands.h": "842cce6dd704b09b24a49abdca67ee7a8062a2e3a465e1b764fc63c0d230580f",
+    "battle.h": "8ef0355f2345592094c82cfde6641644a6b7157012104736416f8c05f34f0685",
+    "battle_util.c": "2ba9ee4efe913effa119c8342281745f481910ca1b20cd76b470673062a45fd5",
+    "battle_main.c": "ee79b86ff0f681ab783b363135fd84d050e7123bea2a77c5530f2c7ddc8b8408",
+    "battle_moves.h": "8b3d4d143b807807af97ce7288e0cc0ccdd55b6b64ac45824e35a549836b3a0c",
+    "battle_frontier_mons.h": "557c1a97247cbb84357b99035fb11cf0bfe45abe8393a0992fe8146bfc51f67f",
+    "battle_frontier_mons.h.constants": "00fb47e144978d3a24a304047f5463217ac7b535ee6f8719e2adf47cc592387a",
+    "battle_factory.c": "7762bf366045ed91a3c280a7e4d20ccc9df9bba305c529ad6b24df2250a072f6",
+    "battle_tower.c": "3b5aaaa8857b92027972d05c0b1f63beb1c7d3b5fcf7565e38a9c15a5114ce4d",
+    "battle_message.c": "5874441ca8fea30caed82e6762c7a1dca8be9c60c8bf8912b74517d0ef7e0f17"
+  },
+  "instruction": {
+    "opcode": 208,
+    "opcodeHex": "0xd0",
+    "length": 5,
+    "operands": [{"width": 4, "encoding": "little-endian relocation pointer", "value": "failure script target"}],
+    "pc": {"success": "gBattlescriptCurrInstr += 5", "alreadyTaunted": "gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + 1)"}
+  },
+  "state": {
+    "effect": {"id": 175, "name": "EFFECT_TAUNT"},
+    "owner": "gDisableStructs[gBattlerTarget]",
+    "success": "When target tauntTimer is zero, Cmd_settaunt writes target tauntTimer = 2 and target tauntTimer2 = 2, then advances five bytes. It performs no Random() call.",
+    "duplicate": "When target tauntTimer is nonzero, Cmd_settaunt takes the encoded failure pointer and performs no setter-local write or Random() call."
+  },
+  "effectScript": {
+    "move": {"id": 269, "name": "MOVE_TAUNT", "effect": "EFFECT_TAUNT", "power": 0, "accuracy": 100, "pp": 20, "target": "MOVE_TARGET_SELECTED", "priority": 0},
+    "order": ["attackcanceler", "attackstring", "ppreduce", "accuracycheck BattleScript_ButItFailed, ACC_CURR_MOVE", "settaunt BattleScript_ButItFailed", "attackanimation", "waitanimation", "printstring STRINGID_PKMNFELLFORTAUNT", "waitmessage B_WAIT_TIME_LONG", "goto BattleScript_MoveEnd"],
+    "ppAndRng": "Both the successful and already-taunted paths first run ppreduce and accuracycheck. Cmd_settaunt itself has no Random() call; source places accuracycheck before the setter, so the setter supplies neither an accuracy roll nor any other local RNG draw.",
+    "messages": {"success": "STRINGID_PKMNFELLFORTAUNT", "duplicate": "BattleScript_ButItFailed (sets MOVE_RESULT_FAILED and runs resultmessage)"}
+  },
+  "admission": {
+    "manualSelection": "TrySetCantSelectMoveBattleScript rejects a selected power-0 move when active tauntTimer is nonzero, choosing BattleScript_SelectingNotAllowedMoveTaunt in an ordinary battle and the Palace-specific selection script in Palace. A damaging move (power nonzero) does not satisfy this Taunt predicate.",
+    "actionCanceler": "CANCELER_TAUNTED blocks an executing power-0 current move when attacker tauntTimer is nonzero, marks usedTauntedMove, cancels multi-turn moves, and branches to BattleScript_MoveUsedIsTaunted.",
+    "limitations": "CheckMoveLimitations marks every power-0 slot when MOVE_LIMITATION_TAUNT is requested and that battler's tauntTimer is nonzero. It does not mark damaging slots for Taunt; its independent later Encore and Choice predicates combine masks.",
+    "struggle": "AreAllMovesUnusable uses MOVE_LIMITATIONS_ALL. When every slot is unavailable it selects MOVE_STRUGGLE, clears noValidMoves, sets HITMARKER_NO_PPDEDUCT, and targets Struggle."
+  },
+  "lifetime": {
+    "battleInit": "BattleStartClearSetData / BattleIntroGetMonsData initialize battle state before action selection; active status2 is set to zero, and active DisableStruct data is initialized independently of the status2 field.",
+    "endTurn": "ENDTURN_TAUNT decrements target tauntTimer once per end-turn pass if it is nonzero. The source has no tauntTimer2 decrement at that site; tauntTimer2 is written by Cmd_settaunt.",
+    "switch": "SwitchInClearSetData clears the active DisableStruct bytewise, then restores only listed Baton-Pass fields; neither Taunt timer is restored. It also resets gLastMoves for the replacing active battler.",
+    "batonPass": "Baton Pass preserves only listed DisableStruct fields (substitute HP, sure-hit battler, Perish Song timers, and escape-prevention battler), so both Taunt timer fields are cleared.",
+    "faint": "FaintClearSetData clears the active DisableStruct bytewise and resets gLastMoves."
+  },
+  "frontierCarrier": {"setId": 184, "name": "FRONTIER_MON_MURKROW_1", "level50Eligible": true, "species": 198, "moves": [65, 19, 259, 269], "item": 221, "nature": 24, "evs": {"hp": 170, "attack": 0, "defense": 170, "speed": 0, "spAttack": 0, "spDefense": 170}},
+  "case": {
+    "id": "factory-murkrow-taunt-chansey-success-duplicate-struggle-expiry-off",
+    "scenario": "tools/battle-lab/mechanic-taunt-murkrow-chansey-off.json",
+    "scenarioSha256": "27d37703077a7638185a47e6e41274b73385691f2cd31c46b1d0333e30da52e1",
+    "repeatability": {"runs": 2, "comparison": "byte-identical full manifest.json", "manifestSha256": "3c08746cacf9269395d58778278afdc299171733c126d79d7669fa7d6722441a"},
+    "builtPartyChecksumsValid": [true, true, true, true, true, true],
+    "observed": {
+      "initial": {"frame": 0, "sha256": "8bc1bcfd6bdcf0a8f5176fb9a9ee4cbe93aa7c300a4aa153362fb74c82220a75", "rngValue": 919694434, "currentMove": 0, "player": {"hp": 156, "pp": [20,15,15,20], "status2": 0}, "opponent": {"hp": 362, "pp": [40,40,40,40], "status2": 0}},
+      "tauntSuccess": {"frame": 200, "sha256": "b1322aa10eb274c4c747e3923f0ec3d28a7f6d7b6e4d705f1e647919221be72c", "rngValue": 3690816045, "currentMove": 269, "player": {"hp": 156, "pp": [20,15,15,19], "status2": 0}, "opponent": {"hp": 362, "pp": [40,40,40,40], "status2": 0}},
+      "splashBlocked": {"frame": 300, "sha256": "c379ce875ce204a87c6c4c308cbce0fefdb69b52899333b31f6faf5c2681bc4a", "rngValue": 3690816045, "currentMove": 150, "player": {"hp": 156, "pp": [20,15,15,19], "status2": 0}, "opponent": {"hp": 362, "pp": [40,40,40,40], "status2": 0}},
+      "persistedNextDecision": {"frame": 800, "sha256": "3ac97993163bd31689807c4bd1c9920a125fb75f88872dd7fabf46e9da357f23", "rngValue": 983229340, "currentMove": 0, "player": {"hp": 156, "pp": [20,15,15,19], "status2": 0}, "opponent": {"hp": 362, "pp": [40,40,40,40], "status2": 0}},
+      "duplicateFailureAfterPp": {"frame": 1500, "sha256": "286e45adf8774d3ddc53283f13702423257e97896380f5e70cfb960ca170808c", "rngValue": 3421819359, "currentMove": 269, "player": {"hp": 156, "pp": [20,15,15,18], "status2": 0}, "opponent": {"hp": 362, "pp": [40,40,40,40], "status2": 0}},
+      "allSplashSlotsForcedStruggle": {"frame": 1600, "sha256": "4ba3d242c5c47dfd9f2dcb0e727f46c817d5cda1f4bbb41b9933b3fba0b99518", "rngValue": 3034451114, "currentMove": 165, "player": {"hp": 156, "pp": [20,15,15,18], "status2": 0}, "opponent": {"hp": 362, "pp": [40,40,40,40], "status2": 0}},
+      "postExpiryDecision": {"frame": 1800, "sha256": "69835978bcc1e81989906d1c913d81056c562f22219160753ca9c374cc44da6a", "rngValue": 1160559944, "currentMove": 0, "player": {"hp": 149, "pp": [20,15,15,18], "status2": 0}, "opponent": {"hp": 361, "pp": [40,40,40,40], "status2": 0}},
+      "splashAllowedAfterExpiry": {"frame": 2500, "sha256": "b55aa2339fe70927c11520073f5dd7eb849dbd2b92d5cae238055e4820ea7664", "rngValue": 1530931116, "currentMove": 150, "player": {"hp": 149, "pp": [19,15,15,18], "status2": 0}, "opponent": {"hp": 281, "pp": [39,40,40,40], "status2": 0}}
+    }
+  },
+  "boundedRemainder": "The OFF manifest exposes framebuffer hashes, active HP/PP/current move/RNG, status2, controller state, and built-party checksums, but not gBattlescriptCurrInstr, gBattlerTarget, tauntTimer, tauntTimer2, gLastMoves, selected-move scripts, noValidMoves, HITMARKER_NO_PPDEDUCT, result flags, or RNG attribution. The trace publicly proves the success and blocked-status text windows, Taunt's two PP reductions, forced Struggle with no Splash PP loss, persistence to a following decision, and later Splash PP use after expiry. Exact timer values, target ownership, pointer/PC, action-admission internals, switch/faint/Baton-Pass clearing, and setter-local RNG absence are source-pinned only; this does not claim a live switch, faint, Baton Pass, Palace selection, or a timer value from public output. This is evidence only and adds no production registration."
+}

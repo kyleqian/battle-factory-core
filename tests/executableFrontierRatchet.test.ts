@@ -109,8 +109,10 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // 23 -> 22 (EFFECT_DESTINY_BOND): Cmd_tryfaintmon's
   // HITMARKER_DESTINYBOND branch now source-completely schedules
   // BattleScript_DestinyBondTakesLife above the original faint-script frame.
-  ["src/engine/battleScriptHitChainOpcode.ts", 22],
-  ["src/engine/battleScriptAttackCancelerOpcode.ts", 5],
+  // 22 -> 21 (EFFECT_SPIKES): tryfaintmon_spikes now executes its guarded
+  // pass-through and faint pop/jump, clearing SPIKES_DAMAGED at the source point.
+  ["src/engine/battleScriptHitChainOpcode.ts", 21],
+  ["src/engine/battleScriptAttackCancelerOpcode.ts", 4],
   ["src/engine/battleScriptMoveEndOpcode.ts", 7],
   ["src/engine/battleScriptJumpifbyteOpcode.ts", 1],
   // Forced-switch ground truth §4 slice 1: one operand-shape barrier, shared
@@ -148,16 +150,14 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // STATUS3_ALWAYS_HITS timer refresh add two doubles-only identity barriers
   // (singles ownership is exact); switchinanim's BATTLE_TYPE_ARENA
   // point-init call (never set for Factory); various's every id other than
-  // RESET_PLAYER_FAINTED (7); switchineffects's Spikes branch (structurally
-  // unreachable -- SIDE_STATUS_SPIKES has no writer anywhere in this engine,
-  // even after the screens/weather setter registration widened sideStatuses
-  // to genuinely carry REFLECT/LIGHTSCREEN/MIST/SAFEGUARD too), its Truant
-  // switch-in-hack counter set, and its AbilityBattleEffects
+  // RESET_PLAYER_FAINTED (7); switchineffects's Truant switch-in-hack counter
+  // set and its AbilityBattleEffects
   // (ABILITYEFFECT_ON_SWITCHIN) dispatch for the small closed set of trigger
-  // abilities. 8 total, none reachable by either committed forced-switch
-  // fixture (their switched-in mons carry a non-trigger ability, no item, no
-  // Spikes/escape/sure-hit/wrapped state).
-  ["src/engine/battleScriptSwitchinOpcode.ts", 10],
+  // abilities. 9 total, none reached by the committed forced-switch fixtures;
+  // the Spikes fixture now executes its shared path, while their other state
+  // carries no trigger ability/item/escape/sure-hit/wrapped dependency.
+  // 10 -> 9: Spikes damage now executes through the shared source scripts.
+  ["src/engine/battleScriptSwitchinOpcode.ts", 9],
   // Primary-effect stat-change registration (docs/primary-stat-ground-truth.md):
   // Cmd_playanimation is narrowed to its B_ANIM_STATS_CHANGE arm (the only
   // animType BattleScript_EffectStatUp/EffectStatDown ever pass) -- any other

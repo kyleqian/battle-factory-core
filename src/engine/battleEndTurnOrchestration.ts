@@ -28,11 +28,8 @@
  * Every case this doc marks Factory-L50-reachable but whose state this
  * engine doesn't model yet is a named barrier gated on its own real
  * trigger condition (never a blanket skip) -- see the per-case comments
- * below. `HandleWishPerishSongOnTurnEnd` and the ENDTURN_WISH field case
- * have no modeled trigger state anywhere in this engine at all (no
- * `wishCounter`/perish-song fields) and stay explicit, documented no-ops --
- * matching this step's own brief, which names Wish/Uproar as allowed
- * deferrals.
+ * below. Wish and Future Sight/Doom Desire now have source-shaped positional
+ * state and execute in their real phases; Perish Song remains unmodeled.
  */
 import {
   acknowledgeBattleScriptMachineController,
@@ -90,6 +87,16 @@ const WRAP_ENDS_LABEL = "BattleScript_WrapEnds";
 const YAWN_MAKES_ASLEEP_LABEL = "BattleScript_YawnMakesAsleep";
 /** `ENDTURN_THRASH`'s own lock-expiry confusion script (`battle_scripts_1.s:3790-3794`, docs/yawn-thrash-endturn-design.md §4) -- `BattleScriptExecute`+`end2`, no `END3`. */
 const THRASH_CONFUSES_LABEL = "BattleScript_ThrashConfuses";
+/** `ENDTURN_DISABLE`'s expiry script (`battle_scripts_1.s:3363-3367`). */
+const DISABLED_NO_MORE_LABEL = "BattleScript_DisabledNoMore";
+/** `ENDTURN_ENCORE`'s expiry script (`battle_scripts_1.s:3374-3377`). */
+const ENCORED_NO_MORE_LABEL = "BattleScript_EncoredNoMore";
+/** `ENDTURN_WISH`'s delayed-heal script (`battle_scripts_1.s:3589-3610`). */
+const WISH_COMES_TRUE_LABEL = "BattleScript_WishComesTrue";
+/** `HandleWishPerishSongOnTurnEnd` state 0's delayed-attack script. */
+const MON_TOOK_FUTURE_ATTACK_LABEL = "BattleScript_MonTookFutureAttack";
+const SIDE_STATUS_FUTUREATTACK = 1 << 6;
+const MOVE_FUTURE_SIGHT = 248;
 /** `ItemBattleEffects(ITEMEFFECT_NORMAL, ...)`'s ten `BattleScriptExecute`+`end2` labels this registration wires (docs/endturn-abilities-items-ground-truth.md §1c/§5 slice 4). */
 const ITEM_HEAL_HP_END2_LABEL = "BattleScript_ItemHealHP_End2";
 const WHITE_HERB_END2_LABEL = "BattleScript_WhiteHerbEnd2";
@@ -371,6 +378,55 @@ function runTickScript(
     return Object.freeze({ kind: "opcode-barrier", state: run.state, instruction: run.instruction });
   }
   return Object.freeze({ kind: "fired", state: run.state });
+}
+
+/**
+ * `ENDTURN_DISABLE` (`battle_util.c:1696-1720`). A transformed/overwritten
+ * moveset can make the stored move id stale; that clears silently before any
+ * decrement. Normal expiry predecrements the four-bit timer, retains the
+ * original start value, and executes the wear-off script only at zero.
+ */
+function runDisableTick(
+  program: BattleScriptProgram,
+  handlers: Handlers,
+  state: MachineState,
+  battler: BattleScriptBattlerId,
+): TickOutcome {
+  const source = state.rulesContext.battlers[battler];
+  if (source.disableTimer === 0) {
+    return Object.freeze({ kind: "advance", state });
+  }
+  if (!source.moves.includes(source.disabledMove)) {
+    return Object.freeze({
+      kind: "advance",
+      state: Object.freeze({
+        ...state,
+        rulesContext: withBattler(state.rulesContext, battler, {
+          disabledMove: 0,
+          disableTimer: 0,
+        }),
+      }),
+    });
+  }
+  const disableTimer = source.disableTimer - 1;
+  const rulesContext = withBattler(state.rulesContext, battler, {
+    disableTimer,
+    ...(disableTimer === 0 ? { disabledMove: 0 } : {}),
+  });
+  if (disableTimer !== 0) {
+    return Object.freeze({
+      kind: "advance",
+      state: Object.freeze({ ...state, rulesContext }),
+    });
+  }
+  return runTickScript(
+    program,
+    handlers,
+    state,
+    rulesContext,
+    battler,
+    DISABLED_NO_MORE_LABEL,
+  );
 }
 
 type RunToEnd3Result =
@@ -1211,15 +1267,65 @@ function runDoBattlerEndTurnEffects(
     if (thrash.kind === "outcome-decided") return Object.freeze({ kind: "outcome-decided", state: thrash.state });
     state = thrash.state;
 
-    const b2 = state.rulesContext.battlers[battler];
-    if (b2.disabledMove !== 0) {
-      return Object.freeze({ kind: "case-barrier", state, caseName: "ENDTURN_DISABLE", detail: "disabledMove set but the disableTimer decrement/BattleScript_DisabledNoMore path is not wired" });
+    const disable = applyTickOutcome(runDisableTick(program, handlers, state, battler));
+    if (disable.kind === "opcode-barrier") {
+      return Object.freeze({ kind: "opcode-barrier", state: disable.state, instruction: disable.instruction });
     }
-    // ENDTURN_ENCORE: no modeled encoreTimer/encoredMove -- inert no-op today (doc B14).
+    if (disable.kind === "outcome-decided") return Object.freeze({ kind: "outcome-decided", state: disable.state });
+    state = disable.state;
+    const encoreSource = state.rulesContext.battlers[battler];
+    if (encoreSource.encoreTimer !== 0) {
+      const slotMatches =
+        encoreSource.moves[encoreSource.encoredMovePos] === encoreSource.encoredMove;
+      if (!slotMatches) {
+        state = Object.freeze({
+          ...state,
+          rulesContext: withBattler(state.rulesContext, battler, {
+            encoredMove: 0,
+            encoreTimer: 0,
+          }),
+        });
+      } else {
+        const encoreTimer = encoreSource.encoreTimer - 1;
+        const expires = encoreTimer === 0 || encoreSource.pp[encoreSource.encoredMovePos] === 0;
+        const rulesContext = withBattler(state.rulesContext, battler, {
+          encoreTimer: expires ? 0 : encoreTimer,
+          ...(expires ? { encoredMove: 0 } : {}),
+        });
+        if (expires) {
+          const encore = applyTickOutcome(runTickScript(
+            program,
+            handlers,
+            state,
+            rulesContext,
+            battler,
+            ENCORED_NO_MORE_LABEL,
+          ));
+          if (encore.kind === "opcode-barrier") {
+            return Object.freeze({ kind: "opcode-barrier", state: encore.state, instruction: encore.instruction });
+          }
+          if (encore.kind === "outcome-decided") return Object.freeze({ kind: "outcome-decided", state: encore.state });
+          state = encore.state;
+        } else {
+          state = Object.freeze({ ...state, rulesContext });
+        }
+      }
+    }
     // ENDTURN_LOCK_ON: doc-proven dead for Factory (zero MOVE_LOCK_ON/MOVE_MIND_READER carriers, B15) -- skipped, not silently ignored.
     // ENDTURN_CHARGE: no modeled chargeTimer/STATUS3_CHARGED_UP -- inert no-op today (doc B16).
-    if (b2.tauntTimer !== 0) {
-      return Object.freeze({ kind: "case-barrier", state, caseName: "ENDTURN_TAUNT", detail: "tauntTimer set but its decrement/BattleScript_EncoredNoMore-sibling clear is not wired" });
+    // ENDTURN_TAUNT (`battle_util.c:1748-1752`): unlike Disable/Encore,
+    // expiry owns no script, message, controller request, or RNG draw. The
+    // source decrements only the functional tauntTimer; Cmd_settaunt's
+    // write-only tauntTimer2 mirror is intentionally absent from rules state
+    // (battleScriptSettauntOpcode.ts).
+    const tauntTimer = state.rulesContext.battlers[battler].tauntTimer;
+    if (tauntTimer !== 0) {
+      state = Object.freeze({
+        ...state,
+        rulesContext: withBattler(state.rulesContext, battler, {
+          tauntTimer: tauntTimer - 1,
+        }),
+      });
     }
     const yawn = applyTickOutcome(runYawnTick(program, handlers, state, battler));
     if (yawn.kind === "opcode-barrier") {
@@ -1441,13 +1547,11 @@ function runDamagingWeatherFieldCase(
 /**
  * `DoFieldEndTurnEffects`'s 9 non-ENDTURN_ORDER cases (`battle_util.c:1181
  * -1438`). REFLECT/LIGHT_SCREEN/MIST/SAFEGUARD (F2-F5), RAIN/SUN (F7/F9),
- * and SANDSTORM/HAIL (F8/F10) are all fully wired
+ * WISH (F6), and SANDSTORM/HAIL (F8/F10) are all fully wired
  * (docs/screens-weather-ground-truth.md §6 slices 1-3/4/5) -- RAIN/SUN's own
  * `playanimation BS_ATTACKER, B_ANIM_RAIN_CONTINUES`/`B_ANIM_SUN_CONTINUES`
  * calls are now covered by `battleScriptStatbuffchangeOpcode.ts`'s widened
- * PLAYANIMATION handler. `ENDTURN_WISH` has no modeled trigger state at all
- * (no `wishCounter` field) and is an explicit, documented no-op (this step's
- * brief names Wish as an allowed deferral alongside Uproar/Leech Seed).
+ * PLAYANIMATION handler.
  */
 function runDoFieldEndTurnEffects(
   program: BattleScriptProgram,
@@ -1487,7 +1591,36 @@ function runDoFieldEndTurnEffects(
     if (safeguard.kind === "opcode-barrier") return Object.freeze({ kind: "opcode-barrier", state: safeguard.state, instruction: safeguard.instruction });
     state = safeguard.state;
     if (safeguard.kind === "fired" && state.rulesContext.battleOutcome !== 0) return Object.freeze({ kind: "outcome-decided", state });
-    // ENDTURN_WISH: no modeled wishCounter field -- explicit deferred no-op (this step's brief).
+  }
+
+  // ENDTURN_WISH follows every side-screen case and precedes all weather
+  // cases. It walks positional slots through gBattlerByTurnOrder, decrements
+  // every live counter, and only dispatches the script when the decrement
+  // reaches zero on a currently living positional battler.
+  for (let orderIndex = 0; orderIndex < state.rulesContext.battleTopology.battlersCount; orderIndex += 1) {
+    const battler = state.rulesContext.battlerByTurnOrder[orderIndex] as BattleScriptBattlerId;
+    const counter = state.rulesContext.wishCounter[battler];
+    if (counter === 0) continue;
+    const wishCounter = [...state.rulesContext.wishCounter] as [number, number, number, number];
+    wishCounter[battler] = counter - 1;
+    const decremented = Object.freeze({
+      ...state.rulesContext,
+      wishCounter: Object.freeze(wishCounter),
+    });
+    state = Object.freeze({ ...state, rulesContext: decremented });
+    if (wishCounter[battler] !== 0 || decremented.battlers[battler].hp === 0) continue;
+    const targeted = Object.freeze({
+      ...decremented,
+      selectorRoles: Object.freeze({ ...decremented.selectorRoles, target: battler }),
+    });
+    const wish = runTickScript(program, handlers, state, targeted, battler, WISH_COMES_TRUE_LABEL);
+    if (wish.kind === "opcode-barrier") {
+      return Object.freeze({ kind: "opcode-barrier", state: wish.state, instruction: wish.instruction });
+    }
+    state = wish.state;
+    if (state.rulesContext.battleOutcome !== 0) {
+      return Object.freeze({ kind: "outcome-decided", state });
+    }
   }
 
   const rc = state.rulesContext;
@@ -1518,20 +1651,16 @@ function runDoFieldEndTurnEffects(
 
 /**
  * `ENDTURN_ORDER`'s `gBattlerByTurnOrder` recompute, narrowed to what this
- * engine can actually determine: `gBattleMons[].speed` has no home anywhere
- * in `BattleScriptRulesContext` (a wholly separate subsystem from
- * `turnOrder.ts`'s own speed model), so relative tick order between two
- * battlers that BOTH have a live end-turn condition is not resolvable here
- * yet -- this defaults to ascending battler id, documented, not silently
- * guessed. Both this doc's own live scenarios (§2a/§2b) and this rung's
- * integration proofs only ever give ONE battler a live end-turn condition,
- * so this simplification is not exercised by anything this rung asserts.
+ * engine receives from the full-turn seam. That seam has already run
+ * SetActionsAndBattlersTurnOrder and stores its positional order in the
+ * source-shaped `gBattlerByTurnOrder` field. Standalone contexts default the
+ * field to ascending battler id.
  */
 function computeBattlerOrder(rulesContext: BattleScriptRulesContext): readonly BattleScriptBattlerId[] {
   const count = rulesContext.battleTopology.battlersCount;
-  const order: BattleScriptBattlerId[] = [];
-  for (let i = 0; i < count; i += 1) order.push(i as BattleScriptBattlerId);
-  return Object.freeze(order);
+  return Object.freeze(
+    rulesContext.battlerByTurnOrder.slice(0, count) as BattleScriptBattlerId[],
+  );
 }
 
 /**
@@ -1573,13 +1702,45 @@ function clearProtectStructsForNextTurn(rulesContext: BattleScriptRulesContext):
   return next;
 }
 
+/**
+ * `TurnValuesCleanUp`'s unconditional side-global Follow Me lifetime clear
+ * (`battle_main.c:4857-4892`). The source statements sit outside the
+ * `var0` branch, so BattleTurnPassed executes them at both its entry
+ * `TurnValuesCleanUp(TRUE)` and tail `TurnValuesCleanUp(FALSE)` calls. Only
+ * both timers clear; the stored targets remain inert and otherwise every
+ * side-timer field is preserved.
+ */
+function clearFollowMeTimersForTurnValuesCleanUp(
+  rulesContext: BattleScriptRulesContext,
+): BattleScriptRulesContext {
+  const [player, opponent] = rulesContext.sideTimers;
+  if (player.followmeTimer === 0 && opponent.followmeTimer === 0) {
+    return rulesContext;
+  }
+  return Object.freeze({
+    ...rulesContext,
+    sideTimers: Object.freeze([
+      Object.freeze({ ...player, followmeTimer: 0 }),
+      Object.freeze({ ...opponent, followmeTimer: 0 }),
+    ]) as readonly [BattleScriptSideTimerState, BattleScriptSideTimerState],
+  });
+}
+
+function finishTurnValuesCleanUp(
+  rulesContext: BattleScriptRulesContext,
+): BattleScriptRulesContext {
+  return clearFollowMeTimersForTurnValuesCleanUp(
+    clearProtectStructsForNextTurn(rulesContext),
+  );
+}
+
 function mapFaintedActionsResult(result: BattleScriptFaintedActionsResult): BattleEndTurnResult {
   if (result.kind === "no-fainted-battlers") {
     return Object.freeze({
       kind: "next-turn",
       state: Object.freeze({
         ...result.state,
-        rulesContext: clearProtectStructsForNextTurn(result.state.rulesContext),
+        rulesContext: finishTurnValuesCleanUp(result.state.rulesContext),
       }),
     });
   }
@@ -1597,6 +1758,132 @@ function mapFaintedActionsResult(result: BattleScriptFaintedActionsResult): Batt
   return Object.freeze({ kind: "non-terminal-barrier", state: result.state, instruction: result.instruction });
 }
 
+type PostFaintKind = "next-turn" | "resumed" | "terminal";
+
+/**
+ * `HandleWishPerishSongOnTurnEnd` state 0. Unlike field/battler end-turn
+ * effects this is positional (0..gBattlersCount-1), runs after faint actions,
+ * and is not gated by battleOutcome.
+ */
+function runFutureAttacksAfterFaints(
+  program: BattleScriptProgram,
+  handlers: Handlers,
+  initialState: MachineState,
+  completionKind: PostFaintKind,
+): BattleEndTurnResult {
+  let state = initialState;
+  const count = state.rulesContext.battleTopology.battlersCount;
+  for (let index = 0; index < count; index += 1) {
+    const battler = index as BattleScriptBattlerId;
+    if ((state.rulesContext.absentBattlerFlags & (1 << battler)) !== 0) continue;
+    const oldCounter = state.rulesContext.futureSightCounter[battler];
+    if (oldCounter === 0) continue;
+
+    const counters = [...state.rulesContext.futureSightCounter] as [number, number, number, number];
+    counters[battler] = oldCounter - 1;
+    let rc: BattleScriptRulesContext = Object.freeze({
+      ...state.rulesContext,
+      futureSightCounter: Object.freeze(counters),
+    });
+    state = Object.freeze({ ...state, rulesContext: rc });
+    if (counters[battler] !== 0 || rc.battlers[battler].hp === 0) continue;
+
+    const storedMove = rc.futureSightMove[battler];
+    const storedAttacker = rc.futureSightAttacker[battler] as BattleScriptBattlerId;
+    const sideStatuses = [...rc.sideStatuses] as [number, number];
+    const partner = (battler ^ 2) as BattleScriptBattlerId;
+    if (counters[battler] === 0 && counters[partner] === 0) {
+      sideStatuses[rc.battlers[battler].side] &= ~SIDE_STATUS_FUTUREATTACK;
+    }
+    rc = Object.freeze({
+      ...rc,
+      battleMoveDamage: rc.futureSightDmg[battler],
+      multistringChooser: storedMove === MOVE_FUTURE_SIGHT ? 0 : 1,
+      sideStatuses: Object.freeze(sideStatuses),
+      selectorRoles: Object.freeze({
+        ...rc.selectorRoles,
+        attacker: storedAttacker,
+        target: battler,
+      }),
+    });
+    const fired = runTickScript(
+      program,
+      handlers,
+      state,
+      rc,
+      storedAttacker,
+      MON_TOOK_FUTURE_ATTACK_LABEL,
+    );
+    if (fired.kind === "opcode-barrier") {
+      return Object.freeze({ kind: "non-terminal-barrier", state: fired.state, instruction: fired.instruction });
+    }
+    state = fired.state;
+
+    // A delayed KO re-enters BattleTurnPassed and therefore reaches
+    // HandleFaintedMonActions before this positional scan resumes.
+    if (state.rulesContext.battlers[battler].hp === 0) {
+      const fainted = runBattleScriptFaintedActionsOrchestration(program, handlers, state);
+      if (fainted.kind === "terminal") {
+        return Object.freeze({
+          kind: "terminal",
+          state: Object.freeze({
+            ...fainted.state,
+            rulesContext: clearFollowMeTimersForTurnValuesCleanUp(
+              fainted.state.rulesContext,
+            ),
+          }),
+        });
+      }
+      if (fainted.kind === "player-choice-required") {
+        return Object.freeze({
+          kind: "player-choice-required",
+          state: fainted.state,
+          battler: fainted.battler,
+          faintedPartyIndex: fainted.faintedPartyIndex,
+          legalPartyIndexes: fainted.legalPartyIndexes,
+        });
+      }
+      if (fainted.kind === "non-terminal-barrier") {
+        return Object.freeze({ kind: "non-terminal-barrier", state: fainted.state, instruction: fainted.instruction });
+      }
+      state = fainted.state;
+    }
+  }
+
+  if (completionKind === "terminal") {
+    return Object.freeze({
+      kind: "terminal",
+      state: Object.freeze({
+        ...state,
+        rulesContext: clearFollowMeTimersForTurnValuesCleanUp(
+          state.rulesContext,
+        ),
+      }),
+    });
+  }
+  return Object.freeze({
+    kind: completionKind,
+    state: Object.freeze({
+      ...state,
+      rulesContext: finishTurnValuesCleanUp(state.rulesContext),
+    }),
+  });
+}
+
+function finishFaintedThenDelayed(
+  program: BattleScriptProgram,
+  handlers: Handlers,
+  result: BattleScriptFaintedActionsResult,
+): BattleEndTurnResult {
+  if (result.kind === "player-choice-required" || result.kind === "non-terminal-barrier") {
+    return mapFaintedActionsResult(result);
+  }
+  const completionKind: PostFaintKind = result.kind === "no-fainted-battlers"
+    ? "next-turn"
+    : result.kind;
+  return runFutureAttacksAfterFaints(program, handlers, result.state, completionKind);
+}
+
 /**
  * The C-side `BattleTurnPassed` loop equivalent. Call once both of a turn's
  * actions have finished (their own move scripts, and any mid-turn faints'
@@ -1604,23 +1891,29 @@ function mapFaintedActionsResult(result: BattleScriptFaintedActionsResult): Batt
  * point) and before the next turn's decision boundary is computed.
  *
  * `TurnValuesCleanUp(TRUE)` (top of `BattleTurnPassed`, source `var0=TRUE`)
- * clears only `protected`/`endured` and is not modeled as a separate step --
- * this engine instead applies the full `ProtectStruct` memset once, at the
- * position matching `TurnValuesCleanUp(FALSE)`'s call site (the *tail* of
- * `BattleTurnPassed`, `battle_main.c:3974`, doc §1.3/§2.4), which is a
- * strict superset of the `TRUE` clear and produces the same end state for
- * every case this engine models (no rung yet needs the `TRUE`/`FALSE`
- * split's mid-pass timing distinction -- see
- * `docs/counter-retaliation-design.md` §2.2). `HandleWishPerishSongOnTurnEnd`
- * (no modeled Perish Song/Future Sight state) stays out of this rung's
- * modeled scope and is not applied.
+ * clears `protected`/`endured` plus both Follow Me timers. The timers are
+ * cleared literally at entry below, before any field/battler/faint/delayed
+ * work can return a resumable barrier. The full `ProtectStruct` memset
+ * remains modeled once at `TurnValuesCleanUp(FALSE)`'s tail call
+ * (`battle_main.c:3974`, doc §1.3/§2.4); no modeled reader currently needs
+ * its `TRUE`/`FALSE` mid-pass split (see
+ * `docs/counter-retaliation-design.md` §2.2). That tail calls the same timer
+ * helper again, matching source and making the clear idempotent. The
+ * post-faint positional Future Sight/Doom Desire phase is applied below;
+ * Perish Song remains the unmodeled portion of
+ * `HandleWishPerishSongOnTurnEnd`.
  */
 export function runBattleEndTurnOrchestration(
   program: BattleScriptProgram,
   handlers: Handlers,
   initialState: MachineState,
 ): BattleEndTurnResult {
-  let state = initialState;
+  let state = Object.freeze({
+    ...initialState,
+    rulesContext: clearFollowMeTimersForTurnValuesCleanUp(
+      initialState.rulesContext,
+    ),
+  });
 
   if (state.rulesContext.battleOutcome === 0) {
     const battlerOrder = computeBattlerOrder(state.rulesContext);
@@ -1642,7 +1935,7 @@ export function runBattleEndTurnOrchestration(
     }
     if (fieldResult.kind === "outcome-decided") {
       const faintedResult = runBattleScriptFaintedActionsOrchestration(program, handlers, fieldResult.state);
-      return mapFaintedActionsResult(faintedResult);
+      return finishFaintedThenDelayed(program, handlers, faintedResult);
     }
     state = fieldResult.state;
 
@@ -1658,6 +1951,5 @@ export function runBattleEndTurnOrchestration(
 
   // HandleFaintedMonActions() always runs, gBattleOutcome gate or not (doc §1) -- reuse the already-landed orchestration verbatim.
   const faintedResult = runBattleScriptFaintedActionsOrchestration(program, handlers, state);
-  return mapFaintedActionsResult(faintedResult);
-  // HandleWishPerishSongOnTurnEnd: no modeled Wish/Perish Song/Future Sight state -- explicit deferred no-op (this step's brief).
+  return finishFaintedThenDelayed(program, handlers, faintedResult);
 }

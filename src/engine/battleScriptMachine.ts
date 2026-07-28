@@ -167,6 +167,8 @@ export type BattleScriptControlDirective =
    * program counter.
    */
   | Readonly<{ kind: "call-explicit"; programCounter: number; returnProgramCounter: number }>
+  /** BattleScriptPop followed by an unrelated jump (tryfaintmon_spikes). */
+  | Readonly<{ kind: "jump-pop"; programCounter: number }>
   /**
    * Source performs multiple consecutive `BattleScriptPush` calls before
    * selecting a new cursor. Entries are appended in source push order, so the
@@ -685,11 +687,17 @@ function freezeEventPayload(
     case "status-icon-update":
     case "set-battler-pp-data":
     case "set-battler-item":
+    case "game-stat-increment":
     case "trainer-slide-in":
     case "trainer-slide-out":
     case "status-animation":
     case "health-bar-update":
-      return Object.freeze({ ...payload });
+      return payload.kind === "game-stat-increment"
+        ? Object.freeze({
+          ...payload,
+          gameStat: Object.freeze({ ...payload.gameStat }),
+        })
+        : Object.freeze({ ...payload });
     case "animation":
       return Object.freeze({ ...payload, arguments: Object.freeze([...payload.arguments]) });
     case "hp-change":
@@ -948,6 +956,18 @@ export function stepBattleScriptMachine<RulesContext extends object>(
       next = freezeState(
         transition.control.programCounter,
         [...state.callStack, transition.control.returnProgramCounter],
+        state.instructionsExecuted + 1,
+        null,
+        transition.scheduler,
+        transition.rulesContext,
+        transition.rng,
+        events,
+      );
+      break;
+    case "jump-pop":
+      next = freezeState(
+        transition.control.programCounter,
+        state.callStack.slice(0, -1),
         state.instructionsExecuted + 1,
         null,
         transition.scheduler,

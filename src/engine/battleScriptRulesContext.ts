@@ -56,6 +56,7 @@ import { createBattleScriptTryhealhalfhealthOpcodeHandlers } from "./battleScrip
 import { createBattleScriptTryKOOpcodeHandlers } from "./battleScriptTryKOOpcode.ts";
 import { createBattleScriptTrysetdestinybondtohappenOpcodeHandlers } from "./battleScriptTrysetdestinybondtohappenOpcode.ts";
 import { createBattleScriptSetdestinybondOpcodeHandlers } from "./battleScriptSetdestinybondOpcode.ts";
+import { createBattleScriptSetsubstituteOpcodeHandlers } from "./battleScriptSetsubstituteOpcode.ts";
 import { createBattleScriptForceSwitchOpcodeHandlers } from "./battleScriptForceSwitchOpcode.ts";
 import { createBattleScriptExplosionOpcodeHandlers } from "./battleScriptExplosionOpcode.ts";
 import { createBattleScriptJumpifnotfirstturnOpcodeHandlers } from "./battleScriptJumpifnotfirstturnOpcode.ts";
@@ -67,6 +68,29 @@ import { createBattleScriptFriendshipToDamageOpcodeHandlers } from "./battleScri
 import { createBattleScriptCopyFoeStatsOpcodeHandlers } from "./battleScriptCopyFoeStatsOpcode.ts";
 import { createBattleScriptJumpifcantswitchOpcodeHandlers } from "./battleScriptJumpifcantswitchOpcode.ts";
 import { createBattleScriptJumpifnodamageOpcodeHandlers } from "./battleScriptJumpifnodamageOpcode.ts";
+import { createBattleScriptSleepTalkOpcodeHandlers } from "./battleScriptSleepTalkOpcode.ts";
+import { createBattleScriptTrywishOpcodeHandlers } from "./battleScriptTrywishOpcode.ts";
+import { createBattleScriptRolloutOpcodeHandlers } from "./battleScriptRolloutOpcode.ts";
+import { createBattleScriptSetDefenseCurlBitOpcodeHandlers } from "./battleScriptSetDefenseCurlBitOpcode.ts";
+import { createBattleScriptTrysetfutureattackOpcodeHandlers } from "./battleScriptTrysetfutureattackOpcode.ts";
+import { createBattleScriptDisablelastusedattackOpcodeHandlers } from "./battleScriptDisablelastusedattackOpcode.ts";
+import { createBattleScriptFuryCutterOpcodeHandlers } from "./battleScriptFuryCutterOpcode.ts";
+import { createBattleScriptSetminimizeOpcodeHandlers } from "./battleScriptSetminimizeOpcode.ts";
+import { createBattleScriptSetforcedtargetOpcodeHandlers } from "./battleScriptSetforcedtargetOpcode.ts";
+import { createBattleScriptGetSecretPowerEffectOpcodeHandlers } from "./battleScriptGetSecretPowerEffectOpcode.ts";
+import { createBattleScriptTryswapabilitiesOpcodeHandlers } from "./battleScriptTryswapabilitiesOpcode.ts";
+import { createBattleScriptTrysethelpinghandOpcodeHandlers } from "./battleScriptTrysethelpinghandOpcode.ts";
+import { createBattleScriptSettormentOpcodeHandlers } from "./battleScriptSettormentOpcode.ts";
+import { createBattleScriptTrysetencoreOpcodeHandlers } from "./battleScriptTrysetencoreOpcode.ts";
+import { createBattleScriptSettauntOpcodeHandlers } from "./battleScriptSettauntOpcode.ts";
+import { createBattleScriptSetforesightOpcodeHandlers } from "./battleScriptSetforesightOpcode.ts";
+import { createBattleScriptSetfocusenergyOpcodeHandlers } from "./battleScriptSetfocusenergyOpcode.ts";
+import { createBattleScriptDoubleDamageIfDamagedOpcodeHandlers } from "./battleScriptDoubleDamageIfDamagedOpcode.ts";
+import { createBattleScriptTrysetmagiccoatOpcodeHandlers } from "./battleScriptTrysetmagiccoatOpcode.ts";
+import { createBattleScriptWeightDamageOpcodeHandlers } from "./battleScriptWeightDamageOpcode.ts";
+import { createBattleScriptTrysetspikesOpcodeHandlers } from "./battleScriptTrysetspikesOpcode.ts";
+import { createBattleScriptRefreshOpcodeHandlers } from "./battleScriptRefreshOpcode.ts";
+import { createBattleScriptIncrementGameStatOpcodeHandlers } from "./battleScriptIncrementGameStatOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -105,6 +129,8 @@ export const BATTLE_SCRIPT_BATTLE_TYPE_DOUBLE = 1 << 0;
 export const BATTLE_SCRIPT_BATTLE_TYPE_TRAINER = 1 << 3;
 export const BATTLE_SCRIPT_BATTLE_TYPE_ARENA = 1 << 18;
 export const BATTLE_SCRIPT_BATTLE_TYPE_FACTORY = 1 << 19;
+/** include/constants/battle.h:321; Factory battle-room map type INDOOR resolves to this environment. */
+export const BATTLE_SCRIPT_BATTLE_ENVIRONMENT_BUILDING = 8;
 export const BATTLE_SCRIPT_HITMARKER_NO_ATTACKSTRING = 1 << 9;
 export const BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE = 1 << 19;
 export const BATTLE_SCRIPT_MOVE_TARGET_BOTH = 1 << 3;
@@ -128,7 +154,7 @@ export type BattleScriptSpecialStatus = Readonly<{
   specialDmg: number;
 }>;
 
-/** struct SideTimer's reflect/lightscreen/safeguard/mist-battlerId fields (include/battle.h:149-174) -- see the field comment on BattleScriptRulesContext.sideTimers. */
+/** Modeled struct SideTimer fields, including Follow Me's timer/target (include/battle.h:149-174) -- see the field comment on BattleScriptRulesContext.sideTimers. */
 export type BattleScriptSideTimerState = Readonly<{
   reflectTimer: number;
   reflectBattlerId: BattleScriptBattlerId;
@@ -137,6 +163,11 @@ export type BattleScriptSideTimerState = Readonly<{
   safeguardTimer: number;
   safeguardBattlerId: BattleScriptBattlerId;
   mistBattlerId: BattleScriptBattlerId;
+  /** Source u8 followmeTimer/followmeTarget, consumed by GetMoveTarget. */
+  followmeTimer: number;
+  followmeTarget: BattleScriptBattlerId;
+  /** Source u8 spikesAmount, paired with SIDE_STATUS_SPIKES. */
+  spikesAmount: number;
 }>;
 
 export type BattleScriptSideTimerInput = Readonly<{
@@ -147,6 +178,9 @@ export type BattleScriptSideTimerInput = Readonly<{
   safeguardTimer?: number;
   safeguardBattlerId?: BattleScriptBattlerId;
   mistBattlerId?: BattleScriptBattlerId;
+  followmeTimer?: number;
+  followmeTarget?: BattleScriptBattlerId;
+  spikesAmount?: number;
 }>;
 
 type BattleScriptRulesBattlerBase = Readonly<{
@@ -202,6 +236,14 @@ type BattleScriptRulesBattlerBase = Readonly<{
 }>;
 
 type BattleScriptMoveEndBattlerMetadata = Readonly<{
+  /** DisableStruct's paired four-bit duration fields. */
+  disableTimer: number;
+  disableTimerStartValue: number;
+  /** Source DisableStruct::encoreTimer/encoredMove, consumed by CheckMoveLimitations. */
+  encoreTimer: number;
+  encoredMove: number;
+  encoredMovePos: number;
+  encoreTimerStartValue: number;
   /** Source u16 gBattleMons[battler].item. */
   item: number;
   /** Source s8 gBattleMons[battler].statStages[NUM_BATTLE_STATS]. */
@@ -321,6 +363,12 @@ export type BattleScriptRulesBattler = BattleScriptRulesBattlerBase & Readonly<{
    * construction boundary. Production constructors supply source values.
    */
   item?: number;
+  disableTimer?: number;
+  disableTimerStartValue?: number;
+  encoreTimer?: number;
+  encoredMove?: number;
+  encoredMovePos?: number;
+  encoreTimerStartValue?: number;
   statStages?: readonly number[];
   specialStatus?: Readonly<{
     restoredBattlerSprite?: 0 | 1;
@@ -462,6 +510,11 @@ export type BattleScriptBattlerPositions = readonly [
 
 export type BattleScriptBattlersCount = 2 | 4;
 
+export type BattleScriptPreparedMonNick = Readonly<{
+  battler: BattleScriptBattlerId;
+  partyIndex: number;
+}>;
+
 /** Exact immutable globals used by source battler-position helpers. */
 export type BattleScriptBattleTopology = Readonly<{
   battlersCount: BattleScriptBattlersCount;
@@ -489,6 +542,8 @@ export type BattleScriptRulesContext = Readonly<
     currentMoveEffect: number;
     currentMovePower: number;
     currentMovePosition: number;
+    /** Source u8 gBattleEnvironment, initialized from BattleSetup_GetEnvironmentId before battle controllers. */
+    gBattleEnvironment: number;
     /** Source u8 gLastUsedAbility. */
     lastUsedAbility: number;
     multiHitCounter: number;
@@ -519,8 +574,16 @@ export type BattleScriptRulesContext = Readonly<
     scriptingBideDmg: number;
     /** Source u8 gAbsentBattlerFlags, limited to the four battler bits. */
     absentBattlerFlags: number;
+    /** Source u16 gCalledMove, distinct from both current and chosen move. */
+    calledMove: number;
     /** Source u16 gChosenMove, distinct from gCurrentMove. */
     chosenMove: number;
+    /** Source u8 gBattleStruct->chosenMovePositions[MAX_BATTLERS_COUNT]. */
+    chosenMovePositions: BattleScriptMoveEndBytes;
+    /** Source u16 gLockedMoves[MAX_BATTLERS_COUNT]. */
+    lockedMoves: BattleScriptMoveEndHalfwords;
+    /** Source four-bit gDisableStructs[battler].rolloutTimerStartValue. */
+    rolloutTimerStartValues: BattleScriptMoveEndBytes;
     /** Source u16 gBattleStruct->choicedMove[MAX_BATTLERS_COUNT]. */
     choicedMove: BattleScriptMoveEndHalfwords;
     /** Source u16 gBattleStruct->changedItems[MAX_BATTLERS_COUNT]. */
@@ -563,9 +626,9 @@ export type BattleScriptRulesContext = Readonly<
      * weather setter registration (docs/screens-weather-ground-truth.md §2)
      * to genuinely carry REFLECT/LIGHTSCREEN/MIST too, now that
      * Cmd_setreflect/setlightscreen/setmist/setsafeguard are real writers.
-     * SIDE_STATUS_SPIKES (and every other unregistered bit) still can never
-     * be set by any fixture this engine can build -- see
-     * battleScriptSwitchinOpcode.ts's own barrier note.
+     * SIDE_STATUS_SPIKES and its transient SPIKES_DAMAGED guard are also
+     * modeled by trysetspikes/switchineffects. Other unregistered bits still
+     * have no source writer in this engine.
      */
     sideStatuses: readonly [number, number];
     /** Source u8 gSideTimers[side].mistTimer -- ChangeStatBuffs' own Mist guard (0 = inactive). */
@@ -578,13 +641,27 @@ export type BattleScriptRulesContext = Readonly<
      * etc.), read back by DoFieldEndTurnEffects' own end-turn cases to
      * reassign BS_ATTACKER for the wear-off script. mistBattlerId is kept
      * here (not beside mistTimers above) since Cmd_setmist writes it too but
-     * no pre-existing reader needed it before this registration.
+     * no pre-existing reader needed it before that registration. Follow Me's
+     * timer/target are also carried here for Cmd_setforcedtarget, the existing
+     * source-shaped GetMoveTarget reader, and the generic turn-tail cleanup.
+     * spikesAmount is the persistent layer counter paired with sideStatuses.
      */
     sideTimers: readonly [BattleScriptSideTimerState, BattleScriptSideTimerState];
     /** Source u32 gBattleWeather. */
     weather: number;
     /** Source u8 gWishFutureKnock.weatherDuration -- the one shared weather timer every Cmd_set<weather> writes (include/battle.h:172, byte offset 0x28). */
     weatherTimer: number;
+    /** Source gWishFutureKnock.wishCounter[MAX_BATTLERS_COUNT], owned by positional battler slots. */
+    wishCounter: readonly [number, number, number, number];
+    /** Source gWishFutureKnock.wishMonId[MAX_BATTLERS_COUNT], the setup-time party index for each positional Wish. */
+    wishMonId: readonly [number, number, number, number];
+    /** Source gWishFutureKnock delayed-attack arrays, keyed by positional battler slot. */
+    futureSightCounter: readonly [number, number, number, number];
+    futureSightMove: readonly [number, number, number, number];
+    futureSightAttacker: readonly [number, number, number, number];
+    futureSightDmg: readonly [number, number, number, number];
+    /** Typed form of PREPARE_MON_NICK_WITH_PREFIX_BUFFER(gBattleTextBuff1, battler, partyIndex). */
+    battleTextBuff1MonNick: BattleScriptPreparedMonNick | null;
     /**
      * Source gBattlerByTurnOrder[MAX_BATTLERS_COUNT] -- populated by
      * `ENDTURN_ORDER`'s `GetWhoStrikesFirst` insertion sort
@@ -624,6 +701,8 @@ export type BattleScriptRulesContextInput = Readonly<{
   battleOutcome: number;
   currentMove: number;
   currentMovePosition: number;
+  /** Legacy focused inputs default here; production Factory inputs explicitly supply BUILDING. */
+  gBattleEnvironment?: number;
   lastUsedAbility?: number;
   moveResultFlags: number;
   dmgMultiplier: number;
@@ -640,7 +719,11 @@ export type BattleScriptRulesContextInput = Readonly<{
   bideTarget?: readonly BattleScriptBattlerId[];
   scriptingBideDmg?: number;
   absentBattlerFlags?: number;
+  calledMove?: number;
   chosenMove?: number;
+  chosenMovePositions?: readonly number[];
+  lockedMoves?: readonly number[];
+  rolloutTimerStartValues?: readonly number[];
   choicedMove?: readonly number[];
   changedItems?: readonly number[];
   monToSwitchIntoId?: readonly number[];
@@ -688,6 +771,13 @@ export type BattleScriptRulesContextInput = Readonly<{
   sideTimers?: readonly [BattleScriptSideTimerInput?, BattleScriptSideTimerInput?];
   weather?: number;
   weatherTimer?: number;
+  wishCounter?: readonly number[];
+  wishMonId?: readonly number[];
+  futureSightCounter?: readonly number[];
+  futureSightMove?: readonly number[];
+  futureSightAttacker?: readonly number[];
+  futureSightDmg?: readonly number[];
+  battleTextBuff1MonNick?: BattleScriptPreparedMonNick | null;
   battlerByTurnOrder?: readonly number[];
   currentTurnActionNumber?: number;
 }>;
@@ -1634,6 +1724,9 @@ function buildSideTimerState(
     safeguardTimer: requireUnsigned(input?.safeguardTimer ?? 0, 0xff, `sideTimers[${side}].safeguardTimer`),
     safeguardBattlerId: requireSideTimerBattlerId(input?.safeguardBattlerId, `sideTimers[${side}].safeguardBattlerId`),
     mistBattlerId: requireSideTimerBattlerId(input?.mistBattlerId, `sideTimers[${side}].mistBattlerId`),
+    followmeTimer: requireUnsigned(input?.followmeTimer ?? 0, 0xff, `sideTimers[${side}].followmeTimer`),
+    followmeTarget: requireSideTimerBattlerId(input?.followmeTarget, `sideTimers[${side}].followmeTarget`),
+    spikesAmount: requireUnsigned(input?.spikesAmount ?? 0, 0xff, `sideTimers[${side}].spikesAmount`),
   });
 }
 
@@ -1729,6 +1822,36 @@ export function createBattleScriptRulesContext(
       battler.disabledMove,
       0xffff,
       `battlers[${index}].disabledMove`,
+    ),
+    disableTimer: requireUnsigned(
+      battler.disableTimer ?? 0,
+      0x0f,
+      `battlers[${index}].disableTimer`,
+    ),
+    disableTimerStartValue: requireUnsigned(
+      battler.disableTimerStartValue ?? 0,
+      0x0f,
+      `battlers[${index}].disableTimerStartValue`,
+    ),
+    encoreTimer: requireUnsigned(
+      battler.encoreTimer ?? 0,
+      0x0f,
+      `battlers[${index}].encoreTimer`,
+    ),
+    encoredMove: requireUnsigned(
+      battler.encoredMove ?? 0,
+      0xffff,
+      `battlers[${index}].encoredMove`,
+    ),
+    encoredMovePos: requireUnsigned(
+      battler.encoredMovePos ?? 0,
+      3,
+      `battlers[${index}].encoredMovePos`,
+    ),
+    encoreTimerStartValue: requireUnsigned(
+      battler.encoreTimerStartValue ?? 0,
+      0x0f,
+      `battlers[${index}].encoreTimerStartValue`,
     ),
     usedDisabledMove: requireUnsigned(
       battler.usedDisabledMove,
@@ -1955,6 +2078,21 @@ export function createBattleScriptRulesContext(
     0xffff,
     "changedItems",
   ) as BattleScriptMoveEndHalfwords;
+  const chosenMovePositions = createMoveEndArray(
+    input.chosenMovePositions,
+    3,
+    "chosenMovePositions",
+  ) as BattleScriptMoveEndBytes;
+  const lockedMoves = createMoveEndArray(
+    input.lockedMoves,
+    0xffff,
+    "lockedMoves",
+  ) as BattleScriptMoveEndHalfwords;
+  const rolloutTimerStartValues = createMoveEndArray(
+    input.rolloutTimerStartValues,
+    0x0f,
+    "rolloutTimerStartValues",
+  ) as BattleScriptMoveEndBytes;
   const monToSwitchIntoId = createMoveEndArray(
     input.monToSwitchIntoId ?? [
       BATTLE_SCRIPT_PARTY_SIZE,
@@ -1990,6 +2128,11 @@ export function createBattleScriptRulesContext(
       input.currentMovePosition,
       3,
       "currentMovePosition",
+    ),
+    gBattleEnvironment: requireUnsigned(
+      input.gBattleEnvironment ?? 0,
+      0xff,
+      "gBattleEnvironment",
     ),
     lastUsedAbility: requireUnsigned(
       input.lastUsedAbility ?? 0,
@@ -2029,7 +2172,11 @@ export function createBattleScriptRulesContext(
       0x0f,
       "absentBattlerFlags",
     ),
+    calledMove: requireUnsigned(input.calledMove ?? 0, 0xffff, "calledMove"),
     chosenMove: requireUnsigned(input.chosenMove ?? 0, 0xffff, "chosenMove"),
+    chosenMovePositions,
+    lockedMoves,
+    rolloutTimerStartValues,
     choicedMove,
     changedItems,
     monToSwitchIntoId,
@@ -2085,6 +2232,49 @@ export function createBattleScriptRulesContext(
     ]) as unknown as readonly [BattleScriptSideTimerState, BattleScriptSideTimerState],
     weather: requireUnsigned(input.weather ?? 0, 0xffff_ffff, "weather") >>> 0,
     weatherTimer: requireUnsigned(input.weatherTimer ?? 0, 0xff, "weatherTimer"),
+    wishCounter: Object.freeze([
+      requireUnsigned(input.wishCounter?.[0] ?? 0, 0xff, "wishCounter[0]"),
+      requireUnsigned(input.wishCounter?.[1] ?? 0, 0xff, "wishCounter[1]"),
+      requireUnsigned(input.wishCounter?.[2] ?? 0, 0xff, "wishCounter[2]"),
+      requireUnsigned(input.wishCounter?.[3] ?? 0, 0xff, "wishCounter[3]"),
+    ]) as unknown as readonly [number, number, number, number],
+    wishMonId: Object.freeze([
+      requireUnsigned(input.wishMonId?.[0] ?? 0, 5, "wishMonId[0]"),
+      requireUnsigned(input.wishMonId?.[1] ?? 0, 5, "wishMonId[1]"),
+      requireUnsigned(input.wishMonId?.[2] ?? 0, 5, "wishMonId[2]"),
+      requireUnsigned(input.wishMonId?.[3] ?? 0, 5, "wishMonId[3]"),
+    ]) as unknown as readonly [number, number, number, number],
+    futureSightCounter: Object.freeze([
+      requireUnsigned(input.futureSightCounter?.[0] ?? 0, 0xff, "futureSightCounter[0]"),
+      requireUnsigned(input.futureSightCounter?.[1] ?? 0, 0xff, "futureSightCounter[1]"),
+      requireUnsigned(input.futureSightCounter?.[2] ?? 0, 0xff, "futureSightCounter[2]"),
+      requireUnsigned(input.futureSightCounter?.[3] ?? 0, 0xff, "futureSightCounter[3]"),
+    ]) as unknown as readonly [number, number, number, number],
+    futureSightMove: Object.freeze([
+      requireUnsigned(input.futureSightMove?.[0] ?? 0, 0xffff, "futureSightMove[0]"),
+      requireUnsigned(input.futureSightMove?.[1] ?? 0, 0xffff, "futureSightMove[1]"),
+      requireUnsigned(input.futureSightMove?.[2] ?? 0, 0xffff, "futureSightMove[2]"),
+      requireUnsigned(input.futureSightMove?.[3] ?? 0, 0xffff, "futureSightMove[3]"),
+    ]) as unknown as readonly [number, number, number, number],
+    futureSightAttacker: Object.freeze([
+      requireUnsigned(input.futureSightAttacker?.[0] ?? 0, 3, "futureSightAttacker[0]"),
+      requireUnsigned(input.futureSightAttacker?.[1] ?? 0, 3, "futureSightAttacker[1]"),
+      requireUnsigned(input.futureSightAttacker?.[2] ?? 0, 3, "futureSightAttacker[2]"),
+      requireUnsigned(input.futureSightAttacker?.[3] ?? 0, 3, "futureSightAttacker[3]"),
+    ]) as unknown as readonly [number, number, number, number],
+    futureSightDmg: Object.freeze([
+      requireSigned32(input.futureSightDmg?.[0] ?? 0, "futureSightDmg[0]"),
+      requireSigned32(input.futureSightDmg?.[1] ?? 0, "futureSightDmg[1]"),
+      requireSigned32(input.futureSightDmg?.[2] ?? 0, "futureSightDmg[2]"),
+      requireSigned32(input.futureSightDmg?.[3] ?? 0, "futureSightDmg[3]"),
+    ]) as unknown as readonly [number, number, number, number],
+    battleTextBuff1MonNick: input.battleTextBuff1MonNick === null
+      || input.battleTextBuff1MonNick === undefined
+      ? null
+      : Object.freeze({
+        battler: requireUnsigned(input.battleTextBuff1MonNick.battler, 3, "battleTextBuff1MonNick.battler") as BattleScriptBattlerId,
+        partyIndex: requireUnsigned(input.battleTextBuff1MonNick.partyIndex, 5, "battleTextBuff1MonNick.partyIndex"),
+      }),
     battlerByTurnOrder: Object.freeze([
       requireUnsigned(input.battlerByTurnOrder?.[0] ?? 0, 3, "battlerByTurnOrder[0]"),
       requireUnsigned(input.battlerByTurnOrder?.[1] ?? 1, 3, "battlerByTurnOrder[1]"),
@@ -2273,6 +2463,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptTryKOOpcodeHandlers(program),
     ...createBattleScriptTrysetdestinybondtohappenOpcodeHandlers(program),
     ...createBattleScriptSetdestinybondOpcodeHandlers(program),
+    ...createBattleScriptSetsubstituteOpcodeHandlers(program),
     ...createBattleScriptForceSwitchOpcodeHandlers(program, {
       isControllerIdle: sourceExternalPorts.isControllerIdle,
     }),
@@ -2292,6 +2483,29 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptCopyFoeStatsOpcodeHandlers(program),
     ...createBattleScriptJumpifcantswitchOpcodeHandlers(program),
     ...createBattleScriptJumpifnodamageOpcodeHandlers(program),
+    ...createBattleScriptSleepTalkOpcodeHandlers(program),
+    ...createBattleScriptTrywishOpcodeHandlers(program),
+    ...createBattleScriptRolloutOpcodeHandlers(program),
+    ...createBattleScriptSetDefenseCurlBitOpcodeHandlers(program),
+    ...createBattleScriptTrysetfutureattackOpcodeHandlers(program),
+    ...createBattleScriptDisablelastusedattackOpcodeHandlers(program),
+    ...createBattleScriptTrysetencoreOpcodeHandlers(program),
+    ...createBattleScriptFuryCutterOpcodeHandlers(program),
+    ...createBattleScriptSetminimizeOpcodeHandlers(program),
+    ...createBattleScriptSetforcedtargetOpcodeHandlers(program),
+    ...createBattleScriptGetSecretPowerEffectOpcodeHandlers(program),
+    ...createBattleScriptRefreshOpcodeHandlers(program),
+    ...createBattleScriptIncrementGameStatOpcodeHandlers(program),
+    ...createBattleScriptSettormentOpcodeHandlers(program),
+    ...createBattleScriptSettauntOpcodeHandlers(program),
+    ...createBattleScriptSetforesightOpcodeHandlers(program),
+    ...createBattleScriptSetfocusenergyOpcodeHandlers(program),
+    ...createBattleScriptDoubleDamageIfDamagedOpcodeHandlers(program),
+    ...createBattleScriptWeightDamageOpcodeHandlers(program),
+    ...createBattleScriptTrysetspikesOpcodeHandlers(program),
+    ...createBattleScriptTrysetmagiccoatOpcodeHandlers(program),
+    ...createBattleScriptTrysethelpinghandOpcodeHandlers(program),
+    ...createBattleScriptTryswapabilitiesOpcodeHandlers(program),
   });
 }
 

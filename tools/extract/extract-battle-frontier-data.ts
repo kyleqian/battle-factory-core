@@ -142,7 +142,7 @@ function readRef(...parts: string[]): string {
   writeJson(join(DATA_GEN, "natures.json"), { natures });
 }
 
-// --- Species base stats + abilities: every real Emerald species ------------
+// --- Species base stats, abilities, and Pokédex weights ---------------------
 //
 // `species_info.h` has a real entry for ids 1..411, except for the 25 legacy
 // old-Unown save-compatibility slots. Those use a C macro shorthand rather
@@ -155,6 +155,12 @@ function readRef(...parts: string[]): string {
     .filter(([, id]) => id >= 1 && id <= 411)
     .sort(([, a], [, b]) => a - b);
   const speciesInfo = readRef("src", "data", "pokemon", "species_info.h");
+  const pokedexEntries = readRef("src", "data", "pokemon", "pokedex_entries.h");
+  const weightByNationalDexName = new Map(
+    [...pokedexEntries.matchAll(
+      /\[(NATIONAL_DEX_[A-Z0-9_]+)\]\s*=\s*\{[\s\S]*?\.weight\s*=\s*(\d+),[\s\S]*?\n    \},?/g,
+    )].map((match) => [match[1]!, Number(match[2])]),
+  );
 
   const species: Array<{
     id: number;
@@ -167,6 +173,7 @@ function readRef(...parts: string[]): string {
     baseSpDefense: number;
     abilities: string[];
     genderRatio: number;
+    weightHectograms: number | null;
   }> = [];
 
   function macroBody(macroName: string): string {
@@ -235,10 +242,28 @@ function readRef(...parts: string[]): string {
       baseSpDefense: field("baseSpDefense"),
       abilities,
       genderRatio: genderRatioField(body, name),
+      // SpeciesToNationalPokedexNum is the same-name mapping in pokemon.c.
+      // The 25 OLD_UNOWN_* compatibility ids deliberately have no
+      // gPokedexEntries row; preserve that source absence instead of
+      // inventing a weight for species that cannot occur in Factory parties.
+      weightHectograms: weightByNationalDexName.get(
+        name.replace(/^SPECIES_/, "NATIONAL_DEX_"),
+      ) ?? null,
     });
   }
 
   if (species.length !== 411) throw new Error(`expected 411 real species, extracted ${species.length}`);
+  const missingWeights = species.filter(({ weightHectograms }) => weightHectograms === null);
+  if (
+    missingWeights.length !== 25
+    || missingWeights.some(({ name }) => !/^SPECIES_OLD_UNOWN_[B-Z]$/.test(name))
+  ) {
+    throw new Error(
+      `expected only 25 OLD_UNOWN compatibility ids without Pokédex weights, got ${
+        missingWeights.map(({ name }) => name).join(", ")
+      }`,
+    );
+  }
 
   writeJson(join(DATA_GEN, "species-stats.json"), { species });
 }

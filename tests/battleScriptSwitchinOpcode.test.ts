@@ -9,7 +9,12 @@ import {
   type BattleScriptStatusRulesExternalPorts,
 } from "../src/engine/battleScriptRulesContext.ts";
 import { loadBattleScriptProgram } from "../src/engine/battleScriptProgram.ts";
-import { stepBattleScriptMachine } from "../src/engine/battleScriptMachine.ts";
+import {
+  acknowledgeBattleScriptMachineController,
+  stepBattleScriptMachine,
+  type BattleScriptMachineState,
+} from "../src/engine/battleScriptMachine.ts";
+import { resolveBattleScriptLabel } from "../src/engine/battleScriptProgram.ts";
 
 const program = loadBattleScriptProgram();
 const TACKLE = 33;
@@ -126,12 +131,17 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
   return Object.freeze({
     isControllerIdle: (ctx: { state: { scheduler: { pendingControllerBattlers: readonly unknown[] } } }) =>
       ctx.state.scheduler.pendingControllerBattlers.length === 0,
-    prepareMessage: () => null,
+    prepareMessage: (_ctx, operand) => Object.freeze({
+      kind: "message" as const,
+      messageId: operand.expression,
+      substitutions: Object.freeze([]),
+    }),
     prepareSelectionMessage: () => null,
     prepareSelectionMessageFromTable: () => null,
     resolveAttackerBattler: () => null,
     resolveBattlerAtPosition: () => null,
-    resolveHalfwordOperand: () => null,
+    resolveHalfwordOperand: (_ctx, operand) =>
+      operand.expression === "B_WAIT_TIME_LONG" ? 64 : null,
     resolveByteOperand: () => null,
   });
 }
@@ -222,7 +232,7 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     expect(result.state.scheduler.pendingControllerBattlers).toEqual([1]);
   });
 
-  it("switchindataupdate: rebuilds species/hp/status1/types from the party record and resets stat stages/status2/status3/the modeled DisableStruct fields to neutral", () => {
+  it("switchindataupdate pins the shared restoration boundary: species/hp/status/types reset, while ability restoration requiring unmodeled abilityNum remains bounded", () => {
     const rc = context({
       battlers: [
         battler({ side: 0, species: URSARING, types: ["TYPE_NORMAL", "TYPE_NORMAL"] }),
@@ -239,6 +249,8 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
           rolloutTimer: 3,
           furyCutterCounter: 2,
           disabledMove: KARATE_CHOP,
+          disableTimer: 5,
+          disableTimerStartValue: 5,
           tauntTimer: 4,
         }),
         battler({ side: 0 }),
@@ -259,9 +271,56 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     expect(updated.rolloutTimer).toBe(0);
     expect(updated.furyCutterCounter).toBe(0);
     expect(updated.disabledMove).toBe(0);
+    expect(updated.disableTimer).toBe(0);
+    expect(updated.disableTimerStartValue).toBe(0);
     expect(updated.tauntTimer).toBe(0);
-    // ability/item/moves/pp are not rebuilt (untracked, see file header) -- ability stays stale.
+    // Exact bounded remainder for Skill Swap lifecycle: the shared seam owns
+    // the source switch boundary and party species is modeled, but abilityNum
+    // is not, so it cannot yet derive GetAbilityBySpecies here. Do not add a
+    // private Skill Swap lifecycle handler; the active byte remains stale.
     expect(updated.ability).toBe(ABILITY_GUTS);
+  });
+
+  it("switchindataupdate clears Focus Energy ordinarily, retains it through Baton Pass, and clears Encore in both routes", () => {
+    const STATUS2_FOCUS_ENERGY = 1 << 20;
+    const STATUS2_TORMENT = 1 << 31;
+    const source = {
+      battlers: [
+        battler({ side: 0, species: URSARING, types: ["TYPE_NORMAL", "TYPE_NORMAL"] }),
+        battler({
+          side: 1, species: SUNKERN, hp: 0,
+          types: ["TYPE_GRASS", "TYPE_GRASS"], partyIndex: 2,
+          ability: ABILITY_GUTS,
+          status2: (STATUS2_FOCUS_ENERGY | STATUS2_TORMENT) >>> 0,
+          encoredMove: KARATE_CHOP,
+          encoredMovePos: 2,
+          encoreTimer: 4,
+          encoreTimerStartValue: 4,
+        }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+    };
+    const ordinary = stepAtProgramCounter(
+      SWITCHINDATAUPDATE_PC,
+      context(source),
+    ).result;
+    if (ordinary.kind !== "advanced") throw new Error("expected ordinary advance");
+    expect(ordinary.state.rulesContext.battlers[1].status2).toBe(0);
+    expect(ordinary.state.rulesContext.battlers[1]).toMatchObject({
+      encoredMove: 0, encoredMovePos: 0, encoreTimer: 0, encoreTimerStartValue: 0,
+    });
+
+    const batonPass = stepAtProgramCounter(
+      SWITCHINDATAUPDATE_PC,
+      context({ ...source, currentMove: 226 }),
+    ).result;
+    if (batonPass.kind !== "advanced") throw new Error("expected Baton Pass advance");
+    expect(batonPass.state.rulesContext.battlers[1].status2)
+      .toBe(STATUS2_FOCUS_ENERGY);
+    expect(batonPass.state.rulesContext.battlers[1]).toMatchObject({
+      encoredMove: 0, encoredMovePos: 0, encoreTimer: 0, encoreTimerStartValue: 0,
+    });
   });
 
   it("switchindataupdate: clears STATUS2_INFATUATED_WITH(battler) on the other battler", () => {
@@ -296,6 +355,7 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
           types: ["TYPE_GRASS", "TYPE_GRASS"],
           partyIndex: 2,
           ability: ABILITY_GUTS,
+          status3: 1 << 8, // STATUS3_MINIMIZED is deliberately excluded from the Baton Pass mask.
         }),
         battler({ side: 0 }),
         battler({ side: 1 }),
@@ -335,6 +395,7 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     expect(result.state.rulesContext.battlers[0].status3).toBe(
       STATUS3_ALWAYS_HITS_TURN_2,
     );
+    expect(result.state.rulesContext.battlers[1].status3 & (1 << 8)).toBe(0);
   });
 
   it("switchindataupdate: doubles wrap ownership stays behind a named identity barrier", () => {
@@ -532,12 +593,72 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     expect(result.state.rulesContext.hitMarker & HITMARKER_FAINTED_1).toBe(0);
   });
 
-  it("switchineffects: Spikes is a named barrier (structurally unreachable -- sideStatuses only carries Safeguard)", () => {
-    const SIDE_STATUS_SPIKES = 1 << 4;
-    const rc = context({ sideStatuses: [0, SIDE_STATUS_SPIKES] });
+  it.each([
+    [1, 160, 20], [2, 160, 26], [3, 160, 40], [1, 1, 1],
+  ] as const)("switchineffects: layer %i deals maxHP source fraction (%i -> %i), emits shared events in order, then clears its guard", (layers, maxHP, damage) => {
+    const rc = context({
+      battlers: [
+        battler({ side: 0, species: URSARING }),
+        battler({ side: 1, species: SUNKERN, hp: maxHP, maxHP, partyIndex: 0, ability: ABILITY_GUTS }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+      sideStatuses: [0, 1 << 4],
+      sideTimers: [{}, { spikesAmount: layers }],
+      hitMarker: (1 << (28 + 1)) | (1 << 6),
+    });
+    const { execution, result } = stepAtProgramCounter(SWITCHINEFFECTS_PC, rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.programCounter).toBe(resolveBattleScriptLabel(program, "BattleScript_SpikesOnFaintedBattler")!.programCounter);
+    expect(result.state.callStack).toEqual([SWITCHINEFFECTS_PC]);
+    expect(result.state.rulesContext.battleMoveDamage).toBe(damage);
+    expect(result.state.rulesContext.sideStatuses[1]).toBe((1 << 4) | (1 << 9));
+    expect(result.state.rulesContext.hitMarker & ((1 << (28 + 1)) | (1 << 6))).toBe(0);
+
+    let state: BattleScriptMachineState<BattleScriptRulesContext> = result.state;
+    for (let guard = 0; guard < 300 && state.programCounter !== SWITCHINEFFECTS_PC + 1; guard += 1) {
+      for (const pending of state.scheduler.pendingControllerBattlers) {
+        state = acknowledgeBattleScriptMachineController(state, pending);
+      }
+      const next = stepBattleScriptMachine(program, state, execution.handlers);
+      if (next.kind === "halted" || next.kind === "unsupported") {
+        throw new Error(`Spikes script stopped at ${next.kind}: ${JSON.stringify(next.state.haltReason)}`);
+      }
+      state = next.state;
+    }
+    expect(state.programCounter).toBe(SWITCHINEFFECTS_PC + 1);
+    expect(state.rulesContext.battlers[1].hp).toBe(maxHP - damage);
+    expect(state.rulesContext.sideStatuses[1]).toBe(1 << 4);
+    expect(state.rulesContext.sideTimers[1].spikesAmount).toBe(layers);
+    expect(state.events.map((event) => event.kind)).toEqual([
+      "health-bar-update", "hp-change", "message",
+    ]);
+    expect(state.events[0]).toMatchObject({ battler: 1, healthValue: damage });
+    expect(state.events[1]).toMatchObject({ battler: 1, from: maxHP, to: maxHP - damage });
+    expect(state.events[2]).toMatchObject({ messageId: "STRINGID_PKMNHURTBYSPIKES" });
+    expect(state.rng).toBe(result.state.rng);
+  });
+
+  it.each([
+    [["TYPE_FLYING", "TYPE_NORMAL"] as const, 0],
+    [["TYPE_GROUND", "TYPE_GROUND"] as const, 26],
+  ])("switchineffects: Flying and Levitate are immune and clear a stale damaged guard", (types, ability) => {
+    const rc = context({
+      battlers: [
+        battler({ side: 0 }),
+        battler({ side: 1, hp: 99, maxHP: 120, types, ability }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+      sideStatuses: [0, (1 << 4) | (1 << 9)],
+      sideTimers: [{}, { spikesAmount: 3 }],
+    });
     const { result } = stepAtProgramCounter(SWITCHINEFFECTS_PC, rc);
-    expect(result.kind).toBe("halted");
-    expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch" });
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.programCounter).toBe(SWITCHINEFFECTS_PC + 1);
+    expect(result.state.rulesContext.battlers[1].hp).toBe(99);
+    expect(result.state.rulesContext.sideStatuses[1]).toBe(1 << 4);
+    expect(result.state.events).toEqual([]);
   });
 
   it("switchineffects: Truant switch-in-hack is a named barrier", () => {

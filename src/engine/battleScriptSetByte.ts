@@ -61,6 +61,8 @@ const ATOMIC_VALUES = Object.freeze({
   B_MSG_ABSORB: 0,
   B_MSG_ABSORB_OOZE: 1,
   B_MSG_ABILITY_PREVENTS_MOVE_STATUS: 0,
+  /** battle_string_ids.h:416 -- BattleScript_EffectSubstitute's strict low-HP branch comparand. */
+  B_MSG_SUBSTITUTE_FAILED: 1,
   B_MSG_LEECH_SEED_DRAIN: 3,
   B_MSG_LEECH_SEED_OOZE: 4,
   B_MSG_STAT_FELL_EMPTY: 3,
@@ -71,6 +73,9 @@ const ATOMIC_VALUES = Object.freeze({
   B_MSG_STAT_ROSE_ITEM: 4,
   /** battle_string_ids.h:447 -- `BattleScript_RainContinuesOrEnds`'s own `jumpifbyte CMP_EQUAL, cMULTISTRING_CHOOSER, B_MSG_RAIN_STOPPED, ...` comparand. */
   B_MSG_RAIN_STOPPED: 2,
+  /** battle_string_ids.h:519 -- delayed Future Sight/Doom Desire selector. */
+  B_MSG_FUTURE_SIGHT: 0,
+  B_MSG_DOOM_DESIRE: 1,
   B_MSG_TURN1_RAZOR_WIND: 0,
   B_MSG_TURN1_SOLAR_BEAM: 1,
   B_MSG_TURN1_SKULL_BASH: 2,

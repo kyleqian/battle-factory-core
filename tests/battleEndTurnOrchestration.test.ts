@@ -109,6 +109,10 @@ function battler(changes: Partial<BattleScriptRulesBattler> & { maxHP?: number }
     partyIndex: changes.partyIndex ?? 0,
     wrappedMove: changes.wrappedMove,
     wrappedBy: changes.wrappedBy,
+    encoreTimer: changes.encoreTimer ?? 0,
+    encoredMove: changes.encoredMove ?? 0,
+    encoredMovePos: changes.encoredMovePos ?? 0,
+    encoreTimerStartValue: changes.encoreTimerStartValue ?? 0,
   }) as unknown as BattleScriptRulesBattler;
 }
 
@@ -184,6 +188,34 @@ function scratchState(rulesContext: BattleScriptRulesContext, attacker: 0 | 1) {
 }
 
 describe("runBattleEndTurnOrchestration (BattleTurnPassed equivalent)", () => {
+  it.each([
+    ["decrements without expiry", { encoreTimer: 3, encoredMove: MOVE_TACKLE, encoredMovePos: 0, moves: [MOVE_TACKLE, 0, 0, 0], pp: [2, 0, 0, 0] }, 2, MOVE_TACKLE, false],
+    ["timer expiry messages", { encoreTimer: 1, encoredMove: MOVE_TACKLE, encoredMovePos: 0, moves: [MOVE_TACKLE, 0, 0, 0], pp: [2, 0, 0, 0] }, 0, 0, true],
+    ["zero-PP expiry messages", { encoreTimer: 3, encoredMove: MOVE_TACKLE, encoredMovePos: 0, moves: [MOVE_TACKLE, 0, 0, 0], pp: [0, 0, 0, 0] }, 0, 0, true],
+    ["slot overwrite clears silently", { encoreTimer: 3, encoredMove: MOVE_TACKLE, encoredMovePos: 0, moves: [MOVE_HYDRO_PUMP, 0, 0, 0], pp: [2, 0, 0, 0] }, 0, 0, false],
+  ] as const)("ENDTURN_ENCORE %s", (_name, changes, timer, move, messages) => {
+    const rc = context({
+      battlers: [
+        battler({ side: 0, ...changes }),
+        battler({ side: 1, partyIndex: 2 }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+    });
+    const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(0));
+    const initial = scratchState(rc, 0);
+    const result = runBattleEndTurnOrchestration(program, handlers, initial);
+    expect(result.kind).toBe("next-turn");
+    if (result.kind !== "next-turn") throw new Error("expected next-turn");
+    expect(result.state.rulesContext.battlers[0]).toMatchObject({
+      encoreTimer: timer,
+      encoredMove: move,
+    });
+    expect(result.state.events.some((event) =>
+      event.kind === "message" && event.messageId === "STRINGID_PKMNENCOREENDED"
+    )).toBe(messages);
+  });
+
   it("no live end-turn condition on either battler: next-turn with zero RNG and an unchanged rulesContext", () => {
     const rc = context();
     const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
@@ -192,6 +224,58 @@ describe("runBattleEndTurnOrchestration (BattleTurnPassed equivalent)", () => {
     expect(result.kind).toBe("next-turn");
     expect(result.state.rulesContext.battlers[1]!.hp).toBe(100);
     expect(result.state.rng.calls).toBe(initial.rng.calls);
+  });
+
+  it(
+    "ENDTURN_TAUNT follows per-battler tracker order and decrements each present nonzero timer exactly once "
+      + "(2->1, 1->0) with no message/controller/RNG work",
+    () => {
+      const rc = context({
+        battlers: [
+          battler({ side: 0, tauntTimer: 2 }),
+          battler({ side: 1, partyIndex: 2, tauntTimer: 1 }),
+          battler({ side: 0, tauntTimer: 7 }),
+          battler({ side: 1, tauntTimer: 9 }),
+        ],
+        // ENDTURN_ORDER consumes this source-shaped order for the two active
+        // battlers. Slots 2/3 are outside battlersCount and must stay exact.
+        battlerByTurnOrder: [1, 0, 3, 2],
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+      const initial = scratchState(rc, 1);
+      const result = runBattleEndTurnOrchestration(program, handlers, initial);
+      expect(result.kind).toBe("next-turn");
+      if (result.kind !== "next-turn") throw new Error("expected next-turn");
+      expect(result.state.rulesContext.battlers.map(({ tauntTimer }) =>
+        tauntTimer
+      )).toEqual([1, 0, 7, 9]);
+      expect(result.state.rng).toBe(initial.rng);
+      expect(result.state.events).toBe(initial.events);
+      expect(result.state.scheduler).toBe(initial.scheduler);
+      expect(Object.isFrozen(result.state.rulesContext.battlers[0])).toBe(true);
+      expect(Object.isFrozen(result.state.rulesContext.battlers[1])).toBe(true);
+    },
+  );
+
+  it("ENDTURN_TAUNT skips an absent battler and leaves its timer untouched", () => {
+    const rc = context({
+      battlers: [
+        battler({ side: 0, tauntTimer: 2 }),
+        battler({ side: 1, partyIndex: 2, tauntTimer: 2 }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+      absentBattlerFlags: 1 << 1,
+    });
+    const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+    const initial = scratchState(rc, 1);
+    const result = runBattleEndTurnOrchestration(program, handlers, initial);
+    expect(result.kind).toBe("next-turn");
+    if (result.kind !== "next-turn") throw new Error("expected next-turn");
+    expect(result.state.rulesContext.battlers[0].tauntTimer).toBe(1);
+    expect(result.state.rulesContext.battlers[1].tauntTimer).toBe(2);
+    expect(result.state.rng).toBe(initial.rng);
+    expect(result.state.events).toBe(initial.events);
   });
 
   it(

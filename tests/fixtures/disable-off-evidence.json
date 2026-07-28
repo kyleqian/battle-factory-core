@@ -1,0 +1,68 @@
+{
+  "schema": "disable-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "sourceSha256": {
+    "battle_script_commands.c": "e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c",
+    "battle_scripts_1.s": "4ac3e610b68c11ef0f4e4c0fc62ddba7fda5a8400e43705428868978ec7551a6",
+    "battle_script.inc": "0a8e1c3bdf4c49d07b2e09ff8ab524812a5217b9735106e1b79b6be261a6db7e",
+    "battle_script_commands.h": "842cce6dd704b09b24a49abdca67ee7a8062a2e3a465e1b764fc63c0d230580f",
+    "battle.h": "8ef0355f2345592094c82cfde6641644a6b7157012104736416f8c05f34f0685",
+    "battle_util.c": "2ba9ee4efe913effa119c8342281745f481910ca1b20cd76b470673062a45fd5",
+    "battle_main.c": "ee79b86ff0f681ab783b363135fd84d050e7123bea2a77c5530f2c7ddc8b8408",
+    "battle_message.c": "5874441ca8fea30caed82e6762c7a1dca8be9c60c8bf8912b74517d0ef7e0f17",
+    "battle_moves.h": "8b3d4d143b807807af97ce7288e0cc0ccdd55b6b64ac45824e35a549836b3a0c",
+    "battle_frontier_mons.h": "557c1a97247cbb84357b99035fb11cf0bfe45abe8393a0992fe8146bfc51f67f",
+    "moves.h": "d32746c9ad3ed1bbfbb93712f13e01ab1c43f48a78f3605ef9db5095e8d19d27",
+    "battle_frontier_mons.h.constants": "00fb47e144978d3a24a304047f5463217ac7b535ee6f8719e2adf47cc592387a"
+  },
+  "instruction": {
+    "opcode": 163,
+    "opcodeHex": "0xa3",
+    "length": 5,
+    "operands": [{"width": 4, "encoding": "little-endian relocation pointer", "value": "failure script target"}],
+    "pc": {
+      "success": "gBattlescriptCurrInstr += 5",
+      "failure": "gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + 1)"
+    }
+  },
+  "sourceBehavior": {
+    "owner": "The command reads and writes gBattleMons/gDisableStructs indexed by gBattlerTarget; it does not mutate the attacker's DisableStruct.",
+    "lastUsedIdentity": "It compares gLastMoves[target] against moves[0..3] and uses the first matching move-id slot. It stores only disabledMove (u16 move id), not a slot position; duplicate move ids therefore resolve to the first matching slot.",
+    "success": "Only disabledMove == MOVE_NONE, a matching target move slot, and that selected slot's nonzero PP succeed. It prepares gBattleTextBuff1, stores the move id, then consumes exactly one Random() for disableTimer = (Random() & 3) + 2 and copies it to disableTimerStartValue.",
+    "failure": "There is no special-case Struggle, invalid-last-move, already-disabled, PP-zero, or Encore branch in Cmd_disablelastusedattack. Any failed predicate takes the pointer and performs no command-local Random() or state mutation. Since ordinary move slots do not contain MOVE_STRUGGLE/MOVE_UNAVAILABLE, those last-move values fail the scan; an empty MOVE_NONE slot also fails normally because its PP is zero.",
+    "scriptOrder": "BattleScript_EffectDisable executes attackcanceler, attackstring, ppreduce, accuracycheck failure-pointer, then this opcode. Thus a duplicate attempt can consume Disable PP (and its preceding accuracy roll) before this command jumps to BattleScript_ButItFailed; success then prints STRINGID_PKMNMOVEWASDISABLED directly, rather than selecting a multi-string chooser.",
+    "admissionAndEncore": "CheckMoveLimitations independently marks every slot whose move id equals disabledMove when MOVE_LIMITATION_DISABLED is requested; Encore independently marks every non-encored slot. Cmd_disablelastusedattack itself never reads Encore fields. Attempting the disabled move reaches CANCELER_DISABLED, sets ProtectStruct.usedDisabledMove, gBattleScripting.battler, HITMARKER_UNABLE_TO_USE_MOVE, cancels multi-turn moves, and transfers to BattleScript_MoveUsedIsDisabled.",
+    "endTurn": "ENDTURN_DISABLE operates on gActiveBattler: it first clears disabledMove/timer silently if that move id is no longer in any slot; otherwise it decrements the four-bit timer. A decrement to zero clears disabledMove and runs BattleScript_DisabledNoMore. disableTimerStartValue is not cleared there.",
+    "switchAndFaint": "Battle-start and both battler-reload paths byte-clear the whole DisableStruct and reset gLastMoves for the active battler. The audited command/end-turn paths contain no separate direct clear merely because HP is zero; a replacement's normal reload clears the slot.",
+    "battleTypes": "Cmd_disablelastusedattack has no battle-type condition. The only audited battle-type difference is move-selection handling: Palace routes a disabled selection to BattleScript_SelectingDisabledMoveInPalace; ordinary singles use BattleScript_SelectingDisabledMove."
+  },
+  "frontierCarrier": {
+    "setId": 169,
+    "name": "FRONTIER_MON_KADABRA_1",
+    "level50Eligible": true,
+    "species": 64,
+    "moves": [93, 272, 248, 50],
+    "item": 214
+  },
+  "case": {
+    "id": "factory-kadabra-disable-chansey-success-duplicate-and-expiry-off",
+    "scenario": "tools/battle-lab/mechanic-disable-kadabra-chansey-off.json",
+    "scenarioSha256": "d28949e32478bc2fc9f06bbebbc7aa2d40f694ebb60c5a3918b168f7e5164965",
+    "repeatability": {
+      "runs": 2,
+      "comparison": "byte-identical full manifest.json",
+      "manifestSha256": "ea9f51393ba1fe6ff2d89b0ca3893afb184086fde7f1a9588d533cc4c33a1019"
+    },
+    "builtPartyChecksumsValid": [true, true, true, true, true, true],
+    "observed": {
+      "initial": {"frame": 0, "rngValue": 3034451114, "player": {"hp": 147, "pp": [25, 10, 15, 20]}, "opponent": {"hp": 362, "pp": [35, 35, 35, 35]}},
+      "lastUsedTackle": {"frame": 300, "rngValue": 3278432283, "currentMove": 33, "player": {"pp": [24, 10, 15, 20]}, "opponent": {"hp": 336, "pp": [35, 35, 34, 35]}},
+      "disableSuccess": {"frame": 800, "rngValue": 3368350594, "currentMove": 50, "player": {"hp": 138, "pp": [24, 10, 15, 19]}, "opponent": {"hp": 336, "pp": [35, 35, 34, 35]}},
+      "duplicatePendingFailure": {"frame": 2100, "rngValue": 1493602236, "currentMove": 50, "player": {"hp": 138, "pp": [24, 10, 15, 18]}, "opponent": {"hp": 336, "pp": [35, 35, 34, 35]}},
+      "allSlotsDisabledStruggle": {"frame": 2200, "rngValue": 3432941446, "currentMove": 165, "player": {"hp": 138, "pp": [24, 10, 15, 18]}, "opponent": {"hp": 336, "pp": [35, 35, 34, 35]}},
+      "tackleResumed": {"frame": 3000, "rngValue": 942736218, "currentMove": 33, "player": {"hp": 121, "pp": [24, 10, 15, 17]}, "opponent": {"hp": 334, "pp": [35, 34, 34, 35]}},
+      "settled": {"frame": 3300, "rngValue": 842450419, "player": {"hp": 121, "pp": [24, 10, 15, 17]}, "opponent": {"hp": 334, "pp": [35, 34, 34, 35]}}
+    }
+  },
+  "boundedRemainder": "The OFF manifest exposes framebuffer hashes, RNG value, current move, HP, PP, public status words, controller state, party checksums, and outcome, but not DisableStruct.disabledMove, disableTimer, disableTimerStartValue, gLastMoves, script PC, decoded message text, attacker/target globals, or the exact RNG call boundary within a move. The fixture therefore observes PP 20→19 on success, 19→18 on the duplicate attempt, Struggle (165) while Chansey has only Tackle slots, and later Tackle (33) with PP consumption. The exact duration and all hidden ownership/clear details above are source-pinned, not inferred from those observations. This is evidence only; it adds no production registration."
+}

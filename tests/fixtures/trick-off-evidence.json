@@ -1,0 +1,78 @@
+{
+  "schema": "trick-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "sourceSha256": {
+    "battle_script_commands.c": "e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c",
+    "battle_scripts_1.s": "4ac3e610b68c11ef0f4e4c0fc62ddba7fda5a8400e43705428868978ec7551a6",
+    "battle_script.inc": "0a8e1c3bdf4c49d07b2e09ff8ab524812a5217b9735106e1b79b6be261a6db7e",
+    "battle_script_commands.h": "842cce6dd704b09b24a49abdca67ee7a8062a2e3a465e1b764fc63c0d230580f",
+    "battle_move_effects.h": "32192c0d0014b5a63edb5b34b8d8475739891eaee66dc610a45d30574879b00e",
+    "battle_moves.h": "8b3d4d143b807807af97ce7288e0cc0ccdd55b6b64ac45824e35a549836b3a0c",
+    "battle_frontier_mons.h": "557c1a97247cbb84357b99035fb11cf0bfe45abe8393a0992fe8146bfc51f67f",
+    "battle_frontier_mons.constants.h": "00fb47e144978d3a24a304047f5463217ac7b535ee6f8719e2adf47cc592387a",
+    "battle_frontier.h": "67463eb9a278a5621d2c6fc1130925557e1466ca547e00bcf3b1b9ca8420db42",
+    "battle_tower.c": "3b5aaaa8857b92027972d05c0b1f63beb1c7d3b5fcf7565e38a9c15a5114ce4d",
+    "battle_main.c": "ee79b86ff0f681ab783b363135fd84d050e7123bea2a77c5530f2c7ddc8b8408",
+    "battle_controller_player.c": "c4234153a31d54bd97beb6432ee3ff398fa7b3f12ae94a3453e4ef2d662192d9",
+    "battle_controller_opponent.c": "6cb600e2c78dbbbe223bab43124ecece2de502d3bee70388864b1d45633f5932",
+    "battle_message.c": "5874441ca8fea30caed82e6762c7a1dca8be9c60c8bf8912b74517d0ef7e0f17",
+    "battle_util.c": "2ba9ee4efe913effa119c8342281745f481910ca1b20cd76b470673062a45fd5",
+    "moves.h": "d32746c9ad3ed1bbfbb93712f13e01ab1c43f48a78f3605ef9db5095e8d19d27",
+    "items.h": "8e9aacc0ffbd41ce0092176a89f624b59be300df60c996d718d61119e747dbd4",
+    "pokemon.h": "e0153a94a2fc0f84e6de372494dfb01e88be4d9cf1cbbeca5e56b8a0b645f7e5"
+  },
+  "instruction": {
+    "opcode": 210,
+    "opcodeHex": "0xd2",
+    "length": 5,
+    "operands": [{"width": 4, "encoding": "little-endian relocation pointer", "value": "failure script target"}],
+    "failurePc": "gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + 1)",
+    "successPc": "gBattlescriptCurrInstr += 5",
+    "localRngCalls": 0,
+    "guards": [
+      "gBattleTypeFlags & BATTLE_TYPE_TRAINER_HILL",
+      "GetBattlerSide(gBattlerAttacker) == B_SIDE_OPPONENT && !(gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_EREADER_TRAINER | BATTLE_TYPE_FRONTIER | BATTLE_TYPE_SECRET_BASE | BATTLE_TYPE_RECORDED_LINK))",
+      "!(allowed item-swap battle type) && (gWishFutureKnock.knockedOffMons[sideAttacker] & gBitTable[gBattlerPartyIndexes[gBattlerAttacker]] || gWishFutureKnock.knockedOffMons[sideTarget] & gBitTable[gBattlerPartyIndexes[gBattlerTarget]])",
+      "both active items are ITEM_NONE",
+      "either active item is ITEM_ENIGMA_BERRY",
+      "IS_ITEM_MAIL on either active item",
+      "gBattleMons[gBattlerTarget].ability == ABILITY_STICKY_HOLD"
+    ],
+    "stickyHold": {
+      "pc": "BattleScript_StickyHoldActivates",
+      "lastUsedAbility": "gBattleMons[gBattlerTarget].ability",
+      "record": "RecordAbilityBattle(gBattlerTarget, gLastUsedAbility)"
+    },
+    "successMutation": {
+      "changedItems": "gBattleStruct->changedItems[gBattlerAttacker] = target item",
+      "activeItems": "attacker becomes ITEM_NONE, target becomes old attacker item before controller acknowledgement",
+      "controllerWrites": ["attacker REQUEST_HELDITEM_BATTLE from changedItems[attacker]", "target REQUEST_HELDITEM_BATTLE from target active item"],
+      "choiceReset": "both battlers' two-byte choicedMove entries are zeroed",
+      "messages": ["B_MSG_ITEM_SWAP_BOTH", "B_MSG_ITEM_SWAP_TAKEN", "B_MSG_ITEM_SWAP_GIVEN"]
+    }
+  },
+  "effect": {
+    "move": {"id": 271, "name": "MOVE_TRICK", "effect": "EFFECT_TRICK", "pp": 10, "target": "MOVE_TARGET_SELECTED", "priority": 0},
+    "script": ["attackcanceler", "attackstring", "ppreduce", "jumpifstatus2 BS_TARGET, STATUS2_SUBSTITUTE, BattleScript_ButItFailed", "accuracycheck BattleScript_ButItFailed, ACC_CURR_MOVE", "tryswapitems BattleScript_ButItFailed", "attackanimation", "waitanimation", "printstring STRINGID_PKMNSWITCHEDITEMS", "waitmessage B_WAIT_TIME_LONG", "printfromtable gItemSwapStringIds", "waitmessage B_WAIT_TIME_LONG", "goto BattleScript_MoveEnd"],
+    "persistence": "MOVEEND_CHANGED_ITEMS applies non-NONE changedItems back to gBattleMons and clears those bookkeeping slots. The player and opponent controller SetMonData handlers write REQUEST_HELDITEM_BATTLE to the active party record. Subsequent item checks read gBattleMons[].item, including move-admission Choice Band logic and move-end item effects.",
+    "rng": "Cmd_tryswapitems has zero local Random calls; any observed RNG change is surrounding battle work, not this command."
+  },
+  "frontierCarrier": {"setId": 304, "name": "FRONTIER_MON_FURRET_2", "level50Eligible": true, "species": 162, "moves": [271, 218, 247, 266], "item": 186, "itemTableId": 16, "nature": 3},
+  "case": {
+    "id": "factory-furret-trick-chansey-unequal-items-off",
+    "scenario": "tools/battle-lab/mechanic-trick-furret-chansey-off.json",
+    "scenarioSha256": "178827be6c8e8870a9ea67742ed597358fbd3eafc71481f8fda0558e9ac0cb85",
+    "repeatability": {"runs": 2, "comparison": "byte-identical full manifest.json", "manifestSha256": "165501dd788331d27b42a4f9cc449c2231fc273364ea28cb7bf40b5dce1adf37"},
+    "builtPartyChecksumsValid": [true, true, true, true, true, true],
+    "denseWindow": {"start": 600, "end": 800, "step": 5},
+    "observed": [
+      {"frame": 0, "sha256": "9e4fc75bbddcdc556a244eaa8d5aa27d0c830ea174107f54c1917ff46c84c103", "rngValue": 1281834649, "currentMove": 0, "player": {"hp": 160, "pp": [10,20,15,20], "activeItem": 186, "partyItem": 186}, "opponent": {"hp": 362, "pp": [35,35,35,35], "activeItem": 200, "partyItem": 200}},
+      {"frame": 600, "sha256": "b337f4f3a56aecd35a59e0781fd2a1e8ec9c465e4936a79029a1313b417a0e8e", "rngValue": 1079944600, "currentMove": 271, "player": {"hp": 160, "pp": [9,20,15,20], "activeItem": 0, "partyItem": 200}, "opponent": {"hp": 362, "pp": [35,35,35,35], "activeItem": 186, "partyItem": 186}},
+      {"frame": 740, "sha256": "03e168d3860e07e5edae5a1fc5df080f76c097892daad93886542be6760cb73d", "rngValue": 1079944600, "currentMove": 271, "player": {"hp": 160, "pp": [9,20,15,20], "activeItem": 200, "partyItem": 200}, "opponent": {"hp": 362, "pp": [35,35,35,35], "activeItem": 186, "partyItem": 186}},
+      {"frame": 745, "sha256": "03e168d3860e07e5edae5a1fc5df080f76c097892daad93886542be6760cb73d", "rngValue": 3931189803, "currentMove": 33, "player": {"hp": 160, "pp": [9,20,15,20], "activeItem": 200, "partyItem": 200}, "opponent": {"hp": 362, "pp": [35,35,35,35], "activeItem": 186, "partyItem": 186}},
+      {"frame": 900, "sha256": "d1f9d3ac1212b150158848b96d4848093bd99c6fa559a5095f9a3148e95f07a5", "rngValue": 2645574908, "currentMove": 0, "player": {"hp": 148, "pp": [9,20,15,20], "activeItem": 200, "partyItem": 200}, "opponent": {"hp": 362, "pp": [35,35,35,34], "activeItem": 186, "partyItem": 186}},
+      {"frame": 1268, "sha256": "03571a2f479fac64ede91a88a59e519efb734f22e4156da1714efce23fed0db7", "rngValue": 36778066, "currentMove": 0, "player": {"hp": 158, "pp": [9,20,15,20], "activeItem": 200, "partyItem": 200}, "opponent": {"hp": 362, "pp": [35,35,35,34], "activeItem": 186, "partyItem": 186}}
+    ]
+  },
+  "boundedRemainder": "This is a successful ordinary Factory battle with no substitute, mail, Enigma Berry, knocked-off item, Trainer Hill, opposing-side regular-battle, or Sticky Hold guard staged. The public manifest exposes neither script PC, battle flags, gWishFutureKnock, changedItems, choicedMove, gLastUsedAbility, nor ability-record data; those facts are source-pinned. It proves only the complete legal parties, framebuffer hashes, current move, PP, active/party held items, HP, public RNG, and checksum validity. No production registration is implied."
+}

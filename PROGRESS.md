@@ -15,65 +15,62 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
-## 553 — [USER-DIRECTED TOOLING 2026-07-27 ~23:10] Hybrid Fable-supervisor/Codex-worker profile ready on isolated branch
+## 606 — [TOOLING FOLD 2026-07-28 ~08:48] Low-risk papercuts merged and union verified
 
-- **State:** `codex/hybrid-cloud-supervisor` includes current `master` and is
-  green at **307 files / 3904 tests**; focused launcher profiles **11/11**,
-  production build, shell syntax, oracle info, and `git diff --check` pass.
-- **Did:** committed `4b7bf77`, adding `run-supervisor.sh --hybrid` plus the
-  equivalent `--provider claude --worker-provider codex` profile. Claude
-  Fable remains the interactive Remote Control supervisor; each bounded
-  worker is routed independently to Terra/high, Sol/medium, or Sol/high, with
-  provider-correct background/poll instructions.
-- **Next:** review and fast-forward or cherry-pick
-  `codex/hybrid-cloud-supervisor`; launch with
-  `./run-supervisor.sh --hybrid`.
-- **Notes:** all-Claude, ordinary all-Codex, and max-mode profiles remain
-  regression-pinned; contradictory hybrid/max or Claude-worker selections
-  fail fast. No game-code logic, oracle lifecycle, ratchet/barrier, recording
-  import, animation, or issue change.
-
----
-## 552 — [SUPERVISOR VERIFY 2026-07-27 ~23:10] Destiny Bond terminal path accepted; Substitute evidence merged
-
-- **State:** reviewed union green at **307 files / 3898 tests**; focused
-  **266/266**, production build, oracle freshness, and `git diff --check`
-  pass. Census is **134/214 effects, 258/355 moves, 210/276 Factory-L50
-  distinct, 2652/2957 weighted**.
-- **Did:** accepted `410c751`/`5eb6a0f`: the reusable ordered multi-push VM
-  control reproduces Destiny Bond's nested avenging→original-faint→caller
-  returns, and a generic Wobbuffet→Snorlax Explosion turn reaches terminal
-  with both faints exactly once. The hit-chain barrier ratchet shrank
-  **23→22**.
-- **Next:** register the one-byte `B_SCR_OP_SETSUBSTITUTE` /
-  `EFFECT_SUBSTITUTE` from merged source/OFF evidence. Implement both strict
-  low-HP failure and success mutations, plus already-live and cross-action
-  persistence routes; regenerate the expected **+1/+1/+1/+10** delta.
-- **Notes:** merged `f48d51f` after twice reproducing Golem Substitute at
-  manifest `19e525d9…f7c7d`: HP **155→117**, PP **10→9→8**, and the live bit
-  persist through a second real failed use. Low-HP internal fields are
-  source-pinned but not oracle-exposed. No new barrier, recording import,
-  animation edit, DEFERRED item, or oracle lifecycle action.
+- **State:** merged `codex/papercuts-guardrails` as `4e8a788`; the union is
+  green at **366 files / 4231 tests**, production build, Python tooling
+  checks **8/8**, both oracle infos, and `git diff --check`.
+- **Did:** retired four recorded papercuts with worktree-safe harness
+  resolution for freshness and terminal extraction, explicit commit-free
+  `--read-only` / `--audit` worker postflight, terminal RAM-probe bitfield
+  extraction, and a default battle-lab output ignore. The merge had zero
+  changed-path overlap with the 195-file supervisor advance.
+- **Next:** before further oracle-backed staging, the launcher/supervisor must
+  refresh Scene-OFF after harness `0d4ad46`; then resume the accepted Trick
+  target from entry 605.
+- **Notes:** both endpoints answer bootstrap v5. Scene-ON freshness passes;
+  Scene-OFF started 2026-07-27 22:36, before the harness's 2026-07-28 08:42
+  commit, so freshness correctly fails. No oracle lifecycle action, game
+  logic, issue, roadmap, census, animation, or unsupported-barrier change.
 
 ---
-## 551 — [BOUNDED MAIN WORKER 2026-07-27 ~23:04] Destiny Bond executes and avenges through the real faint stack
+## 605 — [SUPERVISOR VERIFY 2026-07-28 ~06:24] Encore accepted after shared-seam repair
 
-- **State:** tree green at **306 files / 3895 tests**; focused **281/281**,
-  production build, oracle freshness, and `git diff --check` pass. Census is
-  **134/214 effects, 258/355 moves, 210/276 Factory-L50 distinct,
-  2652/2957 weighted**, exact **+1/+1/+1/+10**, with all **42/42** checks.
-- **Did:** committed `410c751` and `5eb6a0f`: registered source-complete
-  one-byte opcode `0xaa` / `Cmd_setdestinybond`; genuine
-  `BattleScript_EffectDestinyBond` reaches `END` with PP **5→4** and its live
-  attacker bit/message. `Cmd_tryfaintmon` now clears the marker, pushes the
-  original continuation then faint script, owns attacker-HP damage, executes
-  passive HP update + attacker faint, and returns through the target faint
-  exactly once. Generic Wobbuffet Destiny Bond → slower Snorlax Explosion
-  reaches the real terminal boundary.
-- **Next:** continue from the regenerated top blocker
-  `B_SCR_OP_SETSUBSTITUTE` / `EFFECT_SUBSTITUTE`.
-- **Notes:** retired the existing hit-chain barrier and ratchet exactly
-  **23→22**; added no barrier or recording import. The existing
-  `CANCELER_FLAGS` owner proves the bit clears before the user's next ordinary
-  action. Oracle OFF evidence remains manifest `12dc947d…e86d4`; no oracle
-  lifecycle action, animation edit, canonical Battle-2 work, or PAPERCUT.
+- **State:** independently reviewed the implementation and repair diffs and
+  verified focused Encore/full-turn/end-turn/switch/ratchet coverage
+  **112/112**, production build, both oracle infos, census regeneration,
+  all **42/42** validation checks, and `git diff --check`. The worker's full
+  suite is green at **366 files / 4229 tests**. Census is exactly **159/214
+  effects, 288/355 moves, 236/276 Factory-L50 distinct, 2764/2957 weighted**.
+- **Did:** accepted global Encore `0xa4` and the complete shared state,
+  automatic choice, move-limitation, action-execution, end-turn, and switch
+  seams. Supervisor review found an overwritten-slot path lacking a direct
+  proof; the repair now matches `battle_util.c`: execute the live stored-slot
+  move, clear Encore, and never misclassify it as Struggle. Exact duration
+  RNG, both-side forced actions, PP/script order, repeat failure, expiry,
+  switch cleanup, and multi-turn precedence are pinned.
+- **Next:** implement source-complete `B_SCR_OP_TRYSWAPITEMS` through the
+  shared item/change-state paths using the accepted Trick source/OFF evidence.
+  Expected census: **160/214, 289/355, 237/276, 2769/2957**.
+- **Notes:** handler inventory is **167**. No unsupported barrier, recording
+  import, private RNG/controller/event seam, presentation/tick/round branch,
+  issue removal, or DEFERRED item. Post-orient animation commits remain for
+  the next supervisor's required orient fold; do not merge them mid-session.
+
+---
+## 604 — [BOUNDED MAIN WORKER 2026-07-28 ~06:22] Encore shared seams repaired and pinned
+
+- **State:** committed `6e6bd33`; tree green at **366 files / 4229 tests**, focused
+  Encore/end-turn/switch/ratchet coverage **112/112**, production build, and
+  `git diff --check`.
+- **Did:** added exact RNG value/ledger ownership and full-turn proofs for
+  both sides' automatic encored choices, slot/target/PP use, multi-turn lock
+  precedence, successful script order, and repeat failure. Pinned end-turn
+  decrement, timer/PP expiry messages, silent slot-overwrite cleanup, and
+  ordinary/Baton Pass switch cleanup. Repaired the audited `battle_util.c`
+  discrepancy: an overwritten stored slot now clears all execution-owned
+  Encore fields and uses the live slot move instead of being misclassified as
+  Struggle.
+- **Next:** supervisor verify this repair and resume finite Stage 8 selection.
+- **Notes:** no oracle claim, unsupported barrier, recording import,
+  presentation/controller/round widening, issue removal, or census change.

@@ -1,0 +1,69 @@
+{
+  "schema": "fury-cutter-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "sourceSha256": {
+    "battle_script_commands.c": "e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c",
+    "battle_scripts_1.s": "4ac3e610b68c11ef0f4e4c0fc62ddba7fda5a8400e43705428868978ec7551a6",
+    "battle_script.inc": "0a8e1c3bdf4c49d07b2e09ff8ab524812a5217b9735106e1b79b6be261a6db7e",
+    "battle_script_commands.h": "842cce6dd704b09b24a49abdca67ee7a8062a2e3a465e1b764fc63c0d230580f",
+    "battle.h": "8ef0355f2345592094c82cfde6641644a6b7157012104736416f8c05f34f0685",
+    "constants_battle.h": "bba2f9d9b3d98fa01b5f0a8f7dede9f2f0be5617c735242b741a7e0c8e4a5d1e",
+    "battle_util.c": "2ba9ee4efe913effa119c8342281745f481910ca1b20cd76b470673062a45fd5",
+    "battle_main.c": "ee79b86ff0f681ab783b363135fd84d050e7123bea2a77c5530f2c7ddc8b8408",
+    "battle_moves.h": "8b3d4d143b807807af97ce7288e0cc0ccdd55b6b64ac45824e35a549836b3a0c",
+    "battle_frontier_mons.h": "557c1a97247cbb84357b99035fb11cf0bfe45abe8393a0992fe8146bfc51f67f",
+    "battle_frontier_mons.h.constants": "00fb47e144978d3a24a304047f5463217ac7b535ee6f8719e2adf47cc592387a",
+    "moves.h": "d32746c9ad3ed1bbfbb93712f13e01ab1c43f48a78f3605ef9db5095e8d19d27",
+    "items.h": "8e9aacc0ffbd41ce0092176a89f624b59be300df60c996d718d61119e747dbd4",
+    "pokemon.h": "e0153a94a2fc0f84e6de372494dfb01e88be4d9cf1cbbeca5e56b8a0b645f7e5"
+  },
+  "instruction": {
+    "opcode": 181,
+    "opcodeHex": "0xb5",
+    "length": 1,
+    "operandWidths": [],
+    "pc": {
+      "successfulHit": "gBattlescriptCurrInstr++",
+      "noEffect": "gDisableStructs[gBattlerAttacker].furyCutterCounter = 0; gBattlescriptCurrInstr = BattleScript_MoveMissedPause"
+    }
+  },
+  "sourceBehavior": {
+    "ownerAndCap": "u8 gDisableStructs[gBattlerAttacker].furyCutterCounter; increment only when not MOVE_RESULT_NO_EFFECT and only while value != 5",
+    "dynamicPower": "gBattleMoves[gCurrentMove].power * 2^(counter - 1) after increment; MOVE_FURY_CUTTER gives [10, 20, 40, 80, 160] for counters [1, 2, 3, 4, 5]",
+    "ordering": "attackcanceler, attackstring, ppreduce, accuracycheck, furycuttercalc, critcalc, damagecalc, typecalc, jumpifmovehadnoeffect back to furycuttercalc, adjustnormaldamage",
+    "resetAndPersistence": "MOVE_RESULT_NO_EFFECT includes MISSED, DOESNT_AFFECT_FOE, and FAILED; direct no-effect resets. Cmd_ppreduce calls CancelMultiTurnMoves on a Protect gate, which also resets this counter. Normal non-Fury-Cutter move use has no Fury Cutter clear, so its counter persists; source has no gLastMoves/history read in Cmd_furycuttercalc. SwitchInClearSetData and FaintClearSetData zero the whole active DisableStruct; Baton Pass restores only Substitute/sure-hit/Perish/prevent-escape fields, never Fury Cutter. ClearFuryCutterDestinyBondGrudge also clears it for a used item and failed player run.",
+    "lockAndRng": "Cmd_furycuttercalc neither sets STATUS2_MULTIPLETURNS nor gLockedMoves and calls no Random(); each manual Fury Cutter selection pays PP before accuracy. Accuracy, crit, and normal random damage belong to their later generic commands."
+  },
+  "move": {"id": 210, "name": "MOVE_FURY_CUTTER", "effect": "EFFECT_FURY_CUTTER", "power": 10, "accuracy": 95, "pp": 20, "flags": ["FLAG_MAKES_CONTACT", "FLAG_PROTECT_AFFECTED", "FLAG_MIRROR_MOVE_AFFECTED", "FLAG_KINGS_ROCK_AFFECTED"]},
+  "frontierCarrier": {"setId": 188, "name": "FRONTIER_MON_GROVYLE_1", "level50Eligible": true, "species": 278, "moves": [210, 283, 280, 104], "item": 179, "itemName": "ITEM_BRIGHT_POWDER", "evSpread": ["F_EV_SPREAD_ATTACK", "F_EV_SPREAD_HP"], "nature": 7, "natureName": "NATURE_RELAXED"},
+  "cases": {
+    "fourHits": {
+      "scenario": "tools/battle-lab/mechanic-fury-cutter-grovyle-four-hits-off.json",
+      "scenarioSha256": "723ad99f1a1e0090847d157c22ace141e3495a08ceb0fe3207b7610aa6dfb553",
+      "repeatability": {"runs": 2, "comparison": "byte-identical full manifest.json", "manifestSha256": "9ca031eeb44d2279d42dd8faec7f308b072f39256574b3808ff83f784b2057c9"},
+      "builtPartyChecksumsValid": [true, true, true, true, true, true],
+      "observed": {
+        "initial": {"frame": 0, "sha256": "31f210bdc1bd10e12db00e9f0b40219fd5dee160a808dc6e7493b683f3e2c3db", "rngValue": 648273789, "playerPp": [20, 5, 15, 15], "opponentHp": 362},
+        "hits": [
+          {"frame": 300, "sha256": "0889ec499e5c43e61fb774bfebfb36dee3885e6b4ff21b9062834e1269375e7d", "rngValue": 2170533937, "playerPp": [19, 5, 15, 15], "opponentHp": 327},
+          {"frame": 900, "sha256": "040c3769a39194aa4ee495967ec1753d8d6e541fae4e23f3571ba9c092788379", "rngValue": 895780075, "playerPp": [18, 5, 15, 15], "opponentHp": 293},
+          {"frame": 1500, "sha256": "5b9177f716b4d61f7f0898f36431537368cf490f598b2404e03ed2a661361de1", "rngValue": 1501192309, "playerPp": [17, 5, 15, 15], "opponentHp": 227},
+          {"frame": 2400, "sha256": "0036e44a386a4637ebb5ab02079f53a1f049513be4f9c09c943158d62b50d027", "rngValue": 3367570629, "playerPp": [16, 5, 15, 15], "opponentHp": 93}
+        ]
+      }
+    },
+    "otherMovePersists": {
+      "scenario": "tools/battle-lab/mechanic-fury-cutter-grovyle-interruption-off.json",
+      "scenarioSha256": "dadd4a39d9e7b8b1ae207850ca0a09816d1f3b5ea72a601a330dce85b76a361f",
+      "repeatability": {"runs": 2, "comparison": "byte-identical full manifest.json", "manifestSha256": "eb76399c874131a91865415b44a6855fdc4f4006443c08fe8f150701cf5e3ce7"},
+      "observed": {"secondHit": {"frame": 900, "playerPp": [18, 5, 15, 15], "opponentHp": 293}, "doubleTeam": {"frame": 1500, "currentMove": 104, "playerPp": [18, 5, 15, 14], "evasionStage": 7, "opponentHp": 293}, "followingFuryCutter": {"frame": 2400, "playerPp": [17, 5, 15, 14], "opponentHp": 224}}
+    },
+    "protectAttempt": {
+      "scenario": "tools/battle-lab/mechanic-fury-cutter-grovyle-protect-reset-off.json",
+      "scenarioSha256": "08acb5e281508d0a75bb81a36ddc47fbbf30adb72fc03c1552fd1c32f0f4da71",
+      "repeatability": {"runs": 2, "comparison": "byte-identical full manifest.json", "manifestSha256": "7a7a04d82c66015dfb6fc9e4ebc7beb3aa0562a279f955e09be2a1e2e9dbf9d3"},
+      "observed": {"blockedAttempts": [{"frame": 300, "playerPp": [19, 5, 15, 15], "opponentHp": 362}, {"frame": 900, "playerPp": [18, 5, 15, 15], "opponentHp": 362}, {"frame": 1500, "playerPp": [17, 5, 15, 15], "opponentHp": 362}], "laterHit": {"frame": 1800, "playerPp": [17, 5, 15, 15], "opponentHp": 343}}
+    }
+  },
+  "boundedRemainder": "Battle Scene OFF manifests expose framebuffer/RNG hashes, active HP, PP, moves, status fields, party checksums, and controller state, but not gDisableStructs[].furyCutterCounter, gDynamicBasePower, gMoveResultFlags, battle-script PC, current attacker/target indexes, critical flag, or damage random multiplier. Thus the oracle proves real legal-controller PP/HP routes and repeatability; source pins counter, power, reset, and exact opcode semantics. The four observed damages must not be equated to the source power ladder because their RNG/critical modifiers differ. This is evidence only and adds no production opcode/effect implementation."
+}
