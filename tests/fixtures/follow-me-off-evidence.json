@@ -1,0 +1,61 @@
+{
+  "schema": "follow-me-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "sourceSha256": {
+    "battle_script_commands.c": "e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c",
+    "battle_scripts_1.s": "4ac3e610b68c11ef0f4e4c0fc62ddba7fda5a8400e43705428868978ec7551a6",
+    "battle_script.inc": "0a8e1c3bdf4c49d07b2e09ff8ab524812a5217b9735106e1b79b6be261a6db7e",
+    "battle_script_commands.h": "842cce6dd704b09b24a49abdca67ee7a8062a2e3a465e1b764fc63c0d230580f",
+    "battle.h": "8ef0355f2345592094c82cfde6641644a6b7157012104736416f8c05f34f0685",
+    "battle_util.c": "2ba9ee4efe913effa119c8342281745f481910ca1b20cd76b470673062a45fd5",
+    "battle_main.c": "ee79b86ff0f681ab783b363135fd84d050e7123bea2a77c5530f2c7ddc8b8408",
+    "battle_moves.h": "8b3d4d143b807807af97ce7288e0cc0ccdd55b6b64ac45824e35a549836b3a0c",
+    "battle_frontier_mons.h": "557c1a97247cbb84357b99035fb11cf0bfe45abe8393a0992fe8146bfc51f67f",
+    "battle_message.c": "5874441ca8fea30caed82e6762c7a1dca8be9c60c8bf8912b74517d0ef7e0f17"
+  },
+  "instruction": {
+    "opcode": 202,
+    "opcodeHex": "0xca",
+    "length": 1,
+    "operandWidths": [],
+    "pc": "gBattlescriptCurrInstr++"
+  },
+  "state": {
+    "owner": "gSideTimers[GetBattlerSide(gBattlerAttacker)]",
+    "writes": {
+      "followmeTimer": 1,
+      "followmeTarget": "gBattlerAttacker"
+    },
+    "conditions": "Unconditional command: no local target, HP, battle-type, RNG, failure, or result-flag branch.",
+    "overwrite": "Every successful Follow Me on one side writes that side's sole timer and target; a later acting same-side user overwrites the earlier target."
+  },
+  "effect": {
+    "move": {"id": 266, "name": "MOVE_FOLLOW_ME", "effect": "EFFECT_FOLLOW_ME", "power": 0, "pp": 20, "target": "MOVE_TARGET_USER", "priority": 3},
+    "script": ["attackcanceler", "attackstring", "ppreduce", "setforcedtarget", "attackanimation", "waitanimation", "printstring STRINGID_PKMNCENTERATTENTION", "waitmessage B_WAIT_TIME_LONG", "goto BattleScript_MoveEnd"],
+    "message": "{B_ATK_NAME_WITH_PREFIX} became the\\ncenter of attention!"
+  },
+  "readers": [
+    {"source": "HandleAction_UseMove", "file": "src/battle_util.c", "mode": "selected target", "conditions": "timer != 0; current move target is MOVE_TARGET_SELECTED; attacker side differs from stored target side; stored target HP != 0", "result": "gBattlerTarget = followmeTarget"},
+    {"source": "GetMoveTarget", "file": "src/battle_util.c", "mode": "MOVE_TARGET_SELECTED", "conditions": "timer != 0 and stored target HP != 0", "result": "returns followmeTarget"},
+    {"source": "GetMoveTarget", "file": "src/battle_util.c", "mode": "MOVE_TARGET_RANDOM", "conditions": "timer != 0 and stored target HP != 0", "result": "returns followmeTarget"},
+    {"source": "Cmd_various VARIOUS_SET_MAGIC_COAT_TARGET", "file": "src/battle_script_commands.c", "mode": "Magic Coat", "conditions": "opposite-side timer != 0 and stored target HP != 0", "result": "sets gBattlerTarget = followmeTarget"},
+    {"source": "Cmd_counterdamagecalculator", "file": "src/battle_script_commands.c", "mode": "Counter", "conditions": "Counter's normal physical-damage/opposite-side/live-original-target predicate then target-side timer and stored target HP", "result": "sets gBattlerTarget = followmeTarget"},
+    {"source": "Cmd_mirrorcoatdamagecalculator", "file": "src/battle_script_commands.c", "mode": "Mirror Coat", "conditions": "Mirror Coat's normal special-damage/opposite-side/live-original-target predicate then target-side timer and stored target HP", "result": "sets gBattlerTarget = followmeTarget"}
+  ],
+  "lifetime": "TurnValuesCleanUp(FALSE), called after field/battler end-turn effects and faint/Wish-Perish handling in BattleTurnPassed, clears only followmeTimer for both sides. followmeTarget is retained but inert. Thus the effect lasts only the turn in which it was set; a fainted stored target is additionally rejected by every retarget reader's HP guard.",
+  "frontierCarrier": {"setId": 107, "name": "FRONTIER_MON_CLEFAIRY", "level50Eligible": true, "species": 35, "moves": [266, 216, 227, 47], "item": 221, "nature": 1},
+  "case": {
+    "id": "factory-clefairy-follow-me-then-return-versus-chansey-off",
+    "scenario": "tools/battle-lab/mechanic-follow-me-clefairy-chansey-off.json",
+    "scenarioSha256": "b1015a6a34dd70f49a7a10d3a9b7cf56fe671bd641eed3c04a9d4069fe07f00f",
+    "repeatability": {"runs": 2, "comparison": "byte-identical full manifest.json", "manifestSha256": "e150f267cc96f5f1085d214dab4ec058ba238acc2d196435cd37f589ca889ece"},
+    "builtPartyChecksumsValid": [true, true, true, true, true, true],
+    "observed": {
+      "initial": {"frame": 0, "sha256": "da35a1041fcdcda74bad835f2ad1e242edcb3950ed8849d9b4a68bdc2734fc3a", "rngValue": 3044190370, "currentMove": 0, "player": {"hp": 177, "pp": [20, 20, 5, 15]}, "opponent": {"hp": 362, "pp": [35, 35, 35, 35]}},
+      "followMe": {"frame": 100, "sha256": "92d4d1d4febddebf5b6c4ebb7374215ae2ada780862528ee8868bd9189dcf1c1", "rngValue": 3044190370, "currentMove": 266, "player": {"hp": 177, "pp": [19, 20, 5, 15]}, "opponent": {"hp": 362, "pp": [35, 35, 35, 35]}},
+      "opponentTackleAfterFollowMe": {"frame": 300, "sha256": "a3b78086adbe9adee0295f42f6951ca6d71df57404033e35eff24cac60f6f237", "rngValue": 661875487, "currentMove": 33, "player": {"hp": 177, "pp": [19, 20, 5, 15]}, "opponent": {"hp": 362, "pp": [35, 35, 34, 35]}},
+      "nextTurnReturn": {"frame": 900, "sha256": "c3561a6cf6abe0cdbb45f982756c603802dac8617f19cded7696d6f48096fd4c", "rngValue": 2003244527, "currentMove": 216, "player": {"hp": 153, "pp": [19, 19, 5, 15]}, "opponent": {"hp": 362, "pp": [35, 35, 34, 34]}}
+    }
+  },
+  "boundedRemainder": "Battle-lab v1 is Level-50 singles and its public OFF manifest does not expose SideTimer.followmeTimer/followmeTarget, script PC, gBattlerTarget, decoded message state, or an active partner/alternate target. The legal trace proves use, PP, current move, RNG, checksums, and frame hashes only. It cannot and does not claim an observable Follow Me retarget; the timer, same-turn doubles redirection, HP guard, overwrite, and exact clear lifecycle are source-pinned. This evidence adds no production registration."
+}
