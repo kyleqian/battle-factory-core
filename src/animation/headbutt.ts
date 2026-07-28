@@ -1,5 +1,4 @@
 import { GBA_SINE_TABLE_256 } from "../engine/battleMenu.ts";
-import { shakeMonOffsetAtTick } from "./shakeMon.ts";
 
 export type HeadbuttSide = "player" | "opponent";
 
@@ -75,9 +74,13 @@ export function headbuttAtAge(
   if (age === 28 || age === 31 || age === 32) attackerShakeX2 = -2;
   if (age === 29 || age === 30) attackerShakeX2 = 2;
   const attackerY2 = Math.abs(attackerMatrix.c) >> 3;
-  const targetOffset = age < 30
-    ? { x2: 0, y2: 0 }
-    : shakeMonOffsetAtTick(5, 0, 6, 1, age - 30);
+  // This call is created by the animation script after the ordinary task
+  // pass. Its displayed RunTasks cadence therefore holds each state for two
+  // frames (unlike call sites that can reuse shakeMonOffsetAtTick directly).
+  const targetShakeBlock = Math.floor((age - 30) / 2);
+  const targetOffset = age >= 30 && age <= 37
+    ? { x2: targetShakeBlock % 2 === 0 ? 5 : 0, y2: 0 }
+    : { x2: 0, y2: 0 };
   const controllers: HeadbuttController[] = [];
   if (age >= 4 && age <= 15) controllers.push({ phase: 0, active: true });
   if (age >= 21 && age <= 26) controllers.push({ phase: 1, active: true });

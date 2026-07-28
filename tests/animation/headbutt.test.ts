@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { headbuttAtAge } from "../../src/animation/headbutt.ts";
+import {
+  createSceneOnMovePresentation,
+  sceneOnHeadbuttView,
+} from "../../src/animation/sceneOnPresentation.ts";
 
 describe("MOVE_HEADBUTT source reducer", () => {
   const player = (age: number) =>
@@ -38,7 +42,7 @@ describe("MOVE_HEADBUTT source reducer", () => {
     )).toEqual([-2, 2, 2, -2, -2, 0]);
     expect([28, 29, 30, 31, 32, 33, 34, 35, 36].map(
       (age) => player(age).targetOffset.x2,
-    )).toEqual([0, 0, 5, 0, 0, 5, 5, 0, 0]);
+    )).toEqual([0, 0, 5, 5, 0, 0, 5, 5, 0]);
     expect([28, 29, 30, 40, 41].map((age) =>
       player(age).impacts.map((impact) => impact.invisible)
     )).toEqual([[true], [false], [true], [true], []]);
@@ -48,5 +52,42 @@ describe("MOVE_HEADBUTT source reducer", () => {
     });
     expect(player(46).active).toBe(true);
     expect(player(47).active).toBe(false);
+  });
+
+  it("exposes only relative age and battler geometry through the typed seam", () => {
+    const stage = createSceneOnMovePresentation({
+      move: "HEADBUTT",
+      attacker: {
+        species: "ZIGZAGOON",
+        geometry: {
+          side: "player",
+          spriteCorner: { x: 40, y: 56 },
+          animationCenter: { x: 72, y: 88 },
+          battlePositionCenter: { x: 72, y: 80 },
+        },
+      },
+      target: {
+        species: "ONIX",
+        geometry: {
+          side: "opponent",
+          spriteCorner: { x: 144, y: 10 },
+          animationCenter: { x: 176, y: 42 },
+          battlePositionCenter: { x: 176, y: 40 },
+        },
+      },
+      fieldProfile: {
+        playerHp: 145,
+        playerMaxHp: 145,
+        opponentHp: 110,
+        opponentMaxHp: 110,
+      },
+    });
+    expect(sceneOnHeadbuttView({ ...stage, age: 28 })).toMatchObject({
+      age: 28,
+      attacker: { species: "ZIGZAGOON" },
+      target: { species: "ONIX" },
+      attackerOffset: { x2: -2, y2: 9 },
+      impacts: [{ x: 176, y: 42, animation: 1, invisible: true }],
+    });
   });
 });

@@ -13,6 +13,10 @@ import {
   type BiteEffect,
 } from "./bite.ts";
 import {
+  headbuttAtAge,
+  type HeadbuttState,
+} from "./headbutt.ts";
+import {
   twineedleEffectAtAge,
   type TwineedleEffect,
 } from "./twineedle.ts";
@@ -410,6 +414,7 @@ export interface SceneOnPresentationBattler {
     | "PLUSLE"
     | "MINUN"
     | "VOLBEAT"
+    | "ZIGZAGOON"
     | "SABLEYE"
     | "ALTARIA"
     | "AZURILL"
@@ -932,6 +937,13 @@ export interface SceneOnBiteConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnHeadbuttConfig {
+  readonly move: "HEADBUTT";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnTwineedleConfig {
   readonly move: "TWINEEDLE";
   readonly attacker: SceneOnPresentationBattler;
@@ -1183,6 +1195,7 @@ export type SceneOnMoveConfig =
   | SceneOnPoisonFangConfig
   | SceneOnHyperFangConfig
   | SceneOnBiteConfig
+  | SceneOnHeadbuttConfig
   | SceneOnTwineedleConfig
   | SceneOnSwaggerConfig
   | SceneOnTauntConfig
@@ -1310,6 +1323,12 @@ export interface SceneOnHyperFangView extends HyperFangEffect {
 }
 
 export interface SceneOnBiteView extends BiteEffect {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnHeadbuttView extends HeadbuttState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -1918,7 +1937,8 @@ export function createSceneOnMovePresentation<
   TConfig extends SceneOnMoveConfig | SceneOnRazorLeafConfig | SceneOnTauntConfig
     | SceneOnSparkConfig | SceneOnCharmConfig | SceneOnTailGlowConfig
     | SceneOnScaryFaceConfig
-    | SceneOnAbsorbConfig | SceneOnReflectConfig | SceneOnBiteConfig,
+    | SceneOnAbsorbConfig | SceneOnReflectConfig | SceneOnBiteConfig
+    | SceneOnHeadbuttConfig,
 >(
   config: TConfig,
 ): SceneOnMovePresentationState<TConfig> {
@@ -2545,6 +2565,25 @@ export function sceneOnBiteView(
     ...biteEffectAtAge(
       state.age,
       state.config.target.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is HEADBUTT's source `loadspritegfx ANIM_TAG_IMPACT` display. */
+export function sceneOnHeadbuttView(
+  state: SceneOnMovePresentationState<SceneOnHeadbuttConfig>,
+): SceneOnHeadbuttView {
+  if (state.config.move !== "HEADBUTT") {
+    throw new Error(`expected HEADBUTT presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...headbuttAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
       state.config.target.geometry.animationCenter,
     ),
   };

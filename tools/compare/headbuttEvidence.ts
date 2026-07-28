@@ -3,6 +3,11 @@ import { spawnSync } from "node:child_process";
 import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
+import { headbuttAtAge } from "../../src/animation/headbutt.ts";
+import {
+  createSceneOnMovePresentation,
+  sceneOnHeadbuttView,
+} from "../../src/animation/sceneOnPresentation.ts";
 
 interface Fixture {
   readonly scenario: string;
@@ -98,6 +103,44 @@ function verify(fixturePath: string, runNumber: number): void {
   digests.set(fixture.orientation, digest);
 
   const frames = new Map(probe.frames.map((frame) => [frame.frame, frame]));
+  const playerToOpponent = fixture.attackerSide === "player";
+  const stage = createSceneOnMovePresentation({
+    move: "HEADBUTT",
+    attacker: {
+      species: "ZIGZAGOON",
+      geometry: playerToOpponent
+        ? {
+            side: "player", spriteCorner: { x: 40, y: 59 },
+            animationCenter: { x: 72, y: 91 },
+            battlePositionCenter: { x: 72, y: 80 },
+          }
+        : {
+            side: "opponent", spriteCorner: { x: 144, y: 23 },
+            animationCenter: { x: 176, y: 55 },
+            battlePositionCenter: { x: 176, y: 40 },
+          },
+    },
+    target: {
+      species: "ONIX",
+      geometry: playerToOpponent
+        ? {
+            side: "opponent", spriteCorner: { x: 144, y: 10 },
+            animationCenter: { x: 176, y: 42 },
+            battlePositionCenter: { x: 176, y: 40 },
+          }
+        : {
+            side: "player", spriteCorner: { x: 40, y: 48 },
+            animationCenter: { x: 72, y: 88 },
+            battlePositionCenter: { x: 72, y: 80 },
+          },
+    },
+    fieldProfile: {
+      playerHp: playerToOpponent ? 145 : 110,
+      playerMaxHp: playerToOpponent ? 145 : 110,
+      opponentHp: playerToOpponent ? 110 : 145,
+      opponentMaxHp: playerToOpponent ? 110 : 145,
+    },
+  });
   const errors: string[] = [];
   let matched = 0;
   for (
@@ -160,16 +203,47 @@ function verify(fixturePath: string, runNumber: number): void {
     );
     const registers = actual.dispcnt === 0xBF40
       && actual.bldcnt === 0 && actual.bldalpha === 0 && actual.bldy === 0;
+    const expected = headbuttAtAge(
+      age,
+      fixture.attackerSide,
+      stage.config.target.geometry.animationCenter,
+    );
+    const seam = sceneOnHeadbuttView({ ...stage, age });
+    const attacker = playerToOpponent ? actual.playerSprite : actual.opponentSprite;
+    const target = playerToOpponent ? actual.opponentSprite : actual.playerSprite;
+    const targetBaselineX2 = playerToOpponent && age < 28 ? 1 : 0;
+    const reducer = same(
+      { x2: attacker.x2, y2: attacker.y2, matrix: attacker.matrix },
+      {
+        ...expected.attackerOffset,
+        matrix: expected.attackerMatrix,
+      },
+    ) && target.x2 === targetBaselineX2 + expected.targetOffset.x2
+      && target.y2 === expected.targetOffset.y2
+      && bow.length === expected.controllers.length
+      && impact.length === expected.impacts.length
+      && impact.every((sprite, index) => {
+        const item = expected.impacts[index]!;
+        return sprite.x === item.x && sprite.y === item.y
+          && sprite.invisible === item.invisible
+          && same(sprite.matrix, item.matrix);
+      })
+      && expected.active === actual.animScriptActive
+      && same(seam.attackerOffset, expected.attackerOffset)
+      && same(seam.attackerMatrix, expected.attackerMatrix)
+      && same(seam.targetOffset, expected.targetOffset)
+      && same(seam.impacts, expected.impacts);
     const shape = bow.length === (bowExpected ? 1 : 0)
       && impact.length === (impactExpected ? 1 : 0)
       && tasks && active && hardware && headbuttSound && impactSound
-      && registers && rawDigest === actual.sha256;
+      && registers && rawDigest === actual.sha256 && reducer;
     if (shape) matched += 1;
     else errors.push(
       `frame ${frame}/age ${age}: bow=${bow.length} impact=${impact.length} `
       + `tasks=${tasks} active=${active} hardware=${hardware} `
       + `headbuttSound=${headbuttSound} impactSound=${impactSound} `
-      + `registers=${registers} raw=${rawDigest === actual.sha256}`,
+      + `registers=${registers} raw=${rawDigest === actual.sha256} `
+      + `reducer=${reducer}`,
     );
   }
   const total =
