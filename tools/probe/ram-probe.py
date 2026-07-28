@@ -27,6 +27,11 @@ Run with the harness's mGBA-enabled interpreter (NOT system python3):
         {"derefU8Scaled": 68},
         {"addSymbol": "gSprites"},
         {"add": 46}
+    ], "size": 2},
+    {"name": "paletteNum", "path": [
+        {"symbol": "gSprites"},
+        {"add": 46},
+        {"op": "mask", "shift": 12, "mask": "0xf"}
     ], "size": 2}
   ],
   "startTick": 0   // optional, record only from this tick onward (default 0)
@@ -50,8 +55,12 @@ offset). A running cursor starts undefined and each hop transforms it:
   {"derefU8Scaled": M}      cursor = read_u8(cursor) * M  (turn a byte read
                              at `cursor` - e.g. a dynamic sprite/slot id -
                              into a scaled array index for the next hop)
-The final cursor is the address `read_sized` reads from (per the watch's
-own "size", same as "addr").
+  {"op": "mask",
+   "shift": N, "mask": M}   terminal hop: read the final cursor using the
+                             watch's own "size", then return
+                             (value >> N) & M. N defaults to 0; M is required.
+Without a terminal mask, the final cursor is the address `read_sized` reads
+from (per the watch's own "size", same as "addr").
 
 Output: {"ticks": [{"tick": 0, "cursorPos": 0, "coeff": 0, ...}, ...]}
 
@@ -88,6 +97,7 @@ ORACLE_DIR = HARNESS_ROOT / "oracle"
 sys.path.insert(0, str(ORACLE_DIR))
 
 from emerald_core import EmeraldOracle  # noqa: E402
+from ram_probe_path import read_path_value  # noqa: E402
 
 REFERENCE_POKEEMERALD = (WORKTREE_ROOT / "reference" / "pokeemerald").resolve()
 ROM_PATH = REFERENCE_POKEEMERALD / "pokeemerald.gba"
@@ -117,29 +127,7 @@ def resolve_base(oracle: EmeraldOracle, label: str) -> int:
     return addr
 
 
-def resolve_path(oracle: EmeraldOracle, path: list) -> int:
-    cursor: int | None = None
-    for hop in path:
-        if "symbol" in hop:
-            cursor = resolve_base(oracle, hop["symbol"])
-        elif "add" in hop:
-            cursor = cursor + int(hop["add"])
-        elif "addSymbol" in hop:
-            cursor = cursor + resolve_base(oracle, hop["addSymbol"])
-        elif hop.get("derefU32"):
-            cursor = oracle.read_u32(cursor)
-        elif "derefU8Scaled" in hop:
-            cursor = oracle.read_u8(cursor) * int(hop["derefU8Scaled"])
-        else:
-            raise ValueError(f"unrecognized path hop {hop!r}")
-    if cursor is None:
-        raise ValueError("empty path")
-    return cursor
-
-
 def resolve_addr(oracle: EmeraldOracle, watch: dict) -> int:
-    if "path" in watch:
-        return resolve_path(oracle, watch["path"])
     spec = watch["addr"]
     if "+" in spec:
         label, offset_str = spec.split("+", 1)
@@ -164,6 +152,19 @@ def read_sized(oracle: EmeraldOracle, addr: int, size: int) -> int:
     raise ValueError(f"unsupported size {size}")
 
 
+def read_watch(oracle: EmeraldOracle, watch: dict) -> int:
+    size = int(watch.get("size", 1))
+    if "path" in watch:
+        return read_path_value(
+            oracle,
+            watch["path"],
+            size,
+            resolve_base,
+            read_sized,
+        )
+    return read_sized(oracle, resolve_addr(oracle, watch), size)
+
+
 def main() -> None:
     spec = json.loads(SPEC_PATH.read_text())
     profile = spec.get("oracleProfile", "battle-scene-on")
@@ -186,8 +187,7 @@ def main() -> None:
     def record():
         row = {"tick": tick}
         for w in watches:
-            addr = resolve_addr(oracle, w)
-            row[w["name"]] = read_sized(oracle, addr, int(w.get("size", 1)))
+            row[w["name"]] = read_watch(oracle, w)
         ticks_out.append(row)
 
     if tick >= start_tick:

@@ -6,16 +6,33 @@
 //   node --experimental-strip-types tools/extract/extract-factory-terminal-messages.ts
 //   node --experimental-strip-types tools/extract/extract-factory-terminal-messages.ts --out-dir /tmp/out
 
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, "..", "..");
 const REF = join(ROOT, "reference", "pokeemerald");
-const HARNESS_ROOT = resolve(
-  process.env.POKEBENCH_HARNESS_ROOT ?? join(ROOT, "..", ".."),
-);
+
+function findHarnessRoot(start: string): string {
+  const configured = process.env.POKEBENCH_HARNESS_ROOT;
+  if (configured) {
+    const candidate = resolve(configured);
+    if (existsSync(join(candidate, "oracle", "bootstrap", "factory.sav"))) return candidate;
+    throw new Error(`invalid POKEBENCH_HARNESS_ROOT: ${candidate}`);
+  }
+
+  let candidate = resolve(start);
+  while (true) {
+    if (existsSync(join(candidate, "oracle", "bootstrap", "factory.sav"))) return candidate;
+    const parent = dirname(candidate);
+    if (parent === candidate) break;
+    candidate = parent;
+  }
+  throw new Error(`could not find harness root above ${start}; set POKEBENCH_HARNESS_ROOT`);
+}
+
+const HARNESS_ROOT = findHarnessRoot(ROOT);
 const outIndex = process.argv.indexOf("--out-dir");
 if (outIndex !== -1 && !process.argv[outIndex + 1]) throw new Error("--out-dir needs a directory");
 const OUT_DIR = outIndex === -1 ? join(ROOT, "src", "data", "gen") : resolve(process.argv[outIndex + 1]!);
