@@ -4,16 +4,16 @@ Generated 2026-07-28. Rerun: `npx tsx tools/report/executable-frontier-census.ts
 
 Answers ROADMAP S10's Executable-frontier reset question directly: not "how many opcodes are registered" but **how many of the 355 moves can the kernel execute end-to-end today, and what exactly blocks each of the rest.** Every `BattleScript_Effect*` entry in the committed topology (`src/data/gen/battle-script-topology.json` + `battle-script-graph.json`) is walked for full opcode reachability (branches, goto/call targets, the shared hit-chain tail) against the opcode set the engine currently registers (read live from `src/engine/battleScriptRulesContext.ts`'s `createBattleScriptStatusRulesHandlers`, so this doc cannot drift from what the engine actually installs).
 
-**Key finding:** the single highest-leverage next registration is `B_SCR_OP_SETDESTINYBOND` -- registering exactly that set would flip **1 effect / 1 move (1 Factory-L50, 10 weighted)** from blocked to executable in one step (EFFECT_DESTINY_BOND) -- the largest single entry in the ranked table below. This paragraph is generated fresh from the current registered-opcode set every run, so it always names today's actual top blocker, not a past one -- see PROGRESS.md for the registration history (e.g. the 2026-07-25 B_SCR_OP_JUMPIFHALFWORD/JUMPIFSTATUS3CONDITION/ORWORD entry-chokepoint trio).
+**Key finding:** the single highest-leverage next registration is `B_SCR_OP_SETSUBSTITUTE` -- registering exactly that set would flip **1 effect / 1 move (1 Factory-L50, 10 weighted)** from blocked to executable in one step (EFFECT_SUBSTITUTE) -- the largest single entry in the ranked table below. This paragraph is generated fresh from the current registered-opcode set every run, so it always names today's actual top blocker, not a past one -- see PROGRESS.md for the registration history (e.g. the 2026-07-25 B_SCR_OP_JUMPIFHALFWORD/JUMPIFSTATUS3CONDITION/ORWORD entry-chokepoint trio).
 
 ## Headline counts
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 133 | 214 | 62.1% |
-| Moves (unweighted, all 355) | 257 | 355 | 72.4% |
-| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 209 | 276 | 75.7% |
-| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2642 | 2957 | 89.3% |
+| Effect scripts | 134 | 214 | 62.6% |
+| Moves (unweighted, all 355) | 258 | 355 | 72.7% |
+| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 210 | 276 | 76.1% |
+| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2652 | 2957 | 89.7% |
 
 "Executable" means every opcode on every statically reachable path from the effect's entry script has a dispatch entry today (registered barriers included, per ROADMAP S10 §1's (a)/(b) policy). It is not a semantic-correctness claim -- see Caveats.
 
@@ -23,7 +23,6 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 
 | Missing opcode(s) | Effects unlocked | Moves unlocked (unweighted) | Factory-L50 moves (unweighted) | Factory-L50 weighted |
 | --- | --- | --- | --- | --- |
-| `B_SCR_OP_SETDESTINYBOND` | 1 (EFFECT_DESTINY_BOND) | 1 | 1 | 10 |
 | `B_SCR_OP_SETSUBSTITUTE` | 1 (EFFECT_SUBSTITUTE) | 1 | 1 | 10 |
 | `B_SCR_OP_JUMPTOCALLEDMOVE`, `B_SCR_OP_TRYCHOOSESLEEPTALKMOVE` | 1 (EFFECT_SLEEP_TALK) | 1 | 1 | 8 |
 | `B_SCR_OP_TRYWISH` | 1 (EFFECT_WISH) | 1 | 1 | 8 |
@@ -48,6 +47,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_TRYSETMAGICCOAT` | 1 (EFFECT_MAGIC_COAT) | 1 | 1 | 3 |
 | `B_SCR_OP_TRYSETSPIKES` | 1 (EFFECT_SPIKES) | 1 | 1 | 3 |
 | `B_SCR_OP_SCALEDAMAGEBYHEALTHRATIO` | 1 (EFFECT_ERUPTION) | 2 | 2 | 2 |
+| `B_SCR_OP_CUREIFBURNEDPARALYZEDORPOISONED` | 1 (EFFECT_REFRESH) | 1 | 1 | 2 |
 
 ## Per-effect detail
 
@@ -151,7 +151,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_SKETCH | `BattleScript_EffectSketch` | blocked-on-opcodes | `B_SCR_OP_COPYMOVEPERMANENTLY` (edge branch only) | - | 1 | 0 (0) |
 | EFFECT_UNUSED_60 | `BattleScript_EffectHit` | executable | - | - | 0 | 0 (0) |
 | EFFECT_SLEEP_TALK | `BattleScript_EffectSleepTalk` | blocked-on-opcodes | `B_SCR_OP_TRYCHOOSESLEEPTALKMOVE`, `B_SCR_OP_JUMPTOCALLEDMOVE` (edge branch only) | B_SCR_OP_JUMPTOCALLEDMOVE: runtime-resolved jump target (called move's own effect script), not statically enumerable | 1 | 1 (8) |
-| EFFECT_DESTINY_BOND | `BattleScript_EffectDestinyBond` | blocked-on-opcodes | `B_SCR_OP_SETDESTINYBOND` (main path) | - | 1 | 1 (10) |
+| EFFECT_DESTINY_BOND | `BattleScript_EffectDestinyBond` | executable | - | - | 1 | 1 (10) |
 | EFFECT_FLAIL | `BattleScript_EffectFlail` | executable | - | - | 2 | 2 (20) |
 | EFFECT_SPITE | `BattleScript_EffectSpite` | blocked-on-opcodes | `B_SCR_OP_TRYSPITEPPREDUCE` (edge branch only) | - | 1 | 1 (2) |
 | EFFECT_FALSE_SWIPE | `BattleScript_EffectHit` | executable | - | - | 1 | 0 (0) |

@@ -20,9 +20,15 @@ import {
   BATTLE_SCRIPT_HITMARKER_DESTINYBOND,
   BATTLE_SCRIPT_STATUS2_MASKS,
 } from "../src/engine/battleScriptSourceConstants.ts";
+import {
+  createFactoryFullTurnBattleState,
+  submitFactoryFullTurnDecision,
+  type FactoryFullTurnConfig,
+} from "../src/engine/factoryBattleScriptFullTurnDecision.ts";
 
 const DESTINY_BOND = 194;
 const TACKLE = 33;
+const EXPLOSION = 153;
 const program = loadBattleScriptProgram();
 const setInstruction = program.instructions.find(
   (instruction) => instruction.opcodeName === "B_SCR_OP_SETDESTINYBOND",
@@ -295,5 +301,63 @@ describe("Cmd_tryfaintmon Destiny Bond avenging path", () => {
     expect(result.state.programCounter).toBe(resolveBattleScriptLabel(program, "BattleScript_FaintTarget")!.programCounter);
     expect(result.state.callStack).toEqual([tryFaint.programCounter + 1]);
     expect(result.state.rulesContext.battleMoveDamage).toBe(source.battleMoveDamage);
+  });
+});
+
+describe("generic full-turn Destiny Bond integration", () => {
+  it("runs faster Wobbuffet Destiny Bond then slower Snorlax Explosion to the real terminal boundary", () => {
+    const config: FactoryFullTurnConfig = {
+      requestId: 1,
+      rngSeed: 919694434,
+      player: {
+        species: 202,
+        moveId: DESTINY_BOND,
+        moves: [DESTINY_BOND, 0, 0, 0],
+        pp: [5, 0, 0, 0],
+        attack: 50,
+        defense: 58,
+        spAttack: 50,
+        spDefense: 58,
+        speed: 100,
+        hp: 265,
+        maxHp: 265,
+        types: ["TYPE_PSYCHIC", "TYPE_PSYCHIC"],
+      },
+      trainer: {
+        species: 143,
+        moveId: EXPLOSION,
+        moves: [EXPLOSION, EXPLOSION, EXPLOSION, EXPLOSION],
+        pp: [5, 5, 5, 5],
+        attack: 140,
+        defense: 100,
+        spAttack: 65,
+        spDefense: 110,
+        speed: 50,
+        hp: 235,
+        maxHp: 235,
+        types: ["TYPE_NORMAL", "TYPE_NORMAL"],
+      },
+    };
+    const initial = createFactoryFullTurnBattleState(config);
+    const afterPlayer = submitFactoryFullTurnDecision(initial, {
+      requestId: 1,
+      side: "player",
+      decision: { kind: "use-move", moveSlot: 0, targetBattler: 0 },
+    });
+    if (afterPlayer.kind !== "decision-required") throw new Error(`expected trainer decision, got ${afterPlayer.kind}`);
+    const terminal = submitFactoryFullTurnDecision(afterPlayer.state, {
+      requestId: 2,
+      side: "trainer",
+      decision: { kind: "use-move", moveSlot: 0, targetBattler: 0 },
+    });
+    expect(terminal.kind).toBe("terminal");
+    if (terminal.kind !== "terminal") throw new Error(`expected terminal, got ${terminal.kind}`);
+    const rulesContext = terminal.state.rules.rulesContext;
+    expect(rulesContext.battlers[0]!.hp).toBe(0);
+    expect(rulesContext.battlers[1]!.hp).toBe(0);
+    expect(rulesContext.battlers[0]!.pp[0]).toBe(4);
+    expect(rulesContext.battlers[1]!.pp[0]).toBe(4);
+    expect(rulesContext.battlers[0]!.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_DESTINY_BOND).toBe(0);
+    expect(terminal.events.filter(({ payload }) => payload.kind === "faint-animation")).toHaveLength(2);
   });
 });
