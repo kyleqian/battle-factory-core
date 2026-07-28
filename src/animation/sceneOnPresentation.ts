@@ -33,6 +33,10 @@ import {
   type SonicBoomEffect,
 } from "./sonicBoom.ts";
 import {
+  smokescreenEffectAtAge,
+  type SmokescreenEffect,
+} from "./smokescreen.ts";
+import {
   metallicShineAtAge,
   type MetallicShineState,
 } from "./metallicShine.ts";
@@ -415,6 +419,7 @@ export interface SceneOnBattlerGeometry {
 export interface SceneOnPresentationBattler {
   readonly species:
     | "ONIX"
+    | "KOFFING"
     | "MAGNETON"
     | "MAGBY"
     | "GROVYLE"
@@ -1009,6 +1014,13 @@ export interface SceneOnSonicBoomConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnSmokescreenConfig {
+  readonly move: "SMOKESCREEN";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnSwaggerConfig {
   readonly move: "SWAGGER";
   readonly attacker: SceneOnPresentationBattler;
@@ -1297,6 +1309,7 @@ export type SceneOnMoveConfig =
   | SceneOnTwineedleConfig
   | SceneOnSpikeCannonConfig
   | SceneOnSonicBoomConfig
+  | SceneOnSmokescreenConfig
   | SceneOnSwaggerConfig
   | SceneOnTauntConfig
   | SceneOnScaryFaceConfig
@@ -1463,6 +1476,12 @@ export interface SceneOnSpikeCannonView extends SpikeCannonEffect {
 }
 
 export interface SceneOnSonicBoomView extends SonicBoomEffect {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnSmokescreenView extends SmokescreenEffect {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -2818,6 +2837,28 @@ export function sceneOnSonicBoomView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...sonicBoomEffectAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is SMOKESCREEN's first BLACK_SMOKE load display. */
+export function sceneOnSmokescreenView(
+  state: SceneOnMovePresentationState<SceneOnSmokescreenConfig>,
+): SceneOnSmokescreenView {
+  if (state.config.move !== "SMOKESCREEN") {
+    throw new Error(
+      `expected SMOKESCREEN presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...smokescreenEffectAtAge(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.animationCenter,

@@ -6,7 +6,10 @@
   "orientation": "player-to-opponent",
   "pair": "Factory set-127 KOFFING player-back -> ONIX opponent-front",
   "move": "SMOKESCREEN",
+  "attacker": {"species":"KOFFING","geometry":{"side":"player","spriteCorner":{"x":40,"y":57},"animationCenter":{"x":72,"y":97},"battlePositionCenter":{"x":72,"y":80}}},
+  "target": {"species":"ONIX","geometry":{"side":"opponent","spriteCorner":{"x":144,"y":10},"animationCenter":{"x":176,"y":42},"battlePositionCenter":{"x":176,"y":40}}},
+  "fieldProfile": {"playerHp":127,"playerMaxHp":136,"playerGender":"male","opponentHp":110,"opponentMaxHp":110,"opponentGender":"male"},
   "sourceWindow": { "startFrame": 214, "endFrame": 338, "frameCount": 125 },
-  "evidenceSha256": "5c81fa1f4730eb2f2e9ad20a4571cf4250e21602ed3dcded556171f7fe1ba9ee",
+  "evidenceSha256": "14911b5a3e7e3756f6d6b701ed0ca9bb2466feb8244c9fd9c61ef5bd9bc3be59",
   "rawRgbSha256": "435cca4a1786edc5b03e798384a2b6f5372c942d57cd7e3c65bbfdc6fb1adf35"
 }

@@ -1,5 +1,38 @@
 # Animation coverage
 
+## ANIM_TAG_BLUE_ORB source audit checkpoint; Reversal and Swallow remain unsupported (2026-07-28)
+
+**Verdict:** Evidence-only checkpoint. `MOVE_REVERSAL` and `MOVE_SWALLOW` remain unsupported; neither is staged or exact. Source audit selects legal Level-50 Factory set-326 `FRONTIER_MON_VIGOROTH_2` (Vigoroth) against set-156 ONIX as the Reversal representative. Reversal loads BLUE_ORB/HANDS_AND_FEET/IMPACT, runs Detect plus two distinct palette blends, makes six 26-frame `gReversalOrbSpriteTemplate` orbital callbacks, then lunge/fist/hitsplat and `AnimTask_ShakeTargetBasedOnMovePowerOrDmg`—so the shared BLUE_ORB is only one component in its complete topology.
+
+**Sibling boundary:** `MOVE_SWALLOW` is distinct and unsupported: it loads BLUE_ORB plus BLUE_STAR, deforms and shakes the attacker, emits one/two/three five-orb `gSwallowBlueOrbSpriteTemplate` waves according to move turn, then runs `HealingEffect`. Its source callback rises into the attacker and its deform affine task lifecycle are not Reversal's orbital callback. The next worker must add portable mGBA fixtures/probe for Vigoroth→Onix and Onix→Vigoroth, capture every `currentMove=179` frame through first inactive cleanup, verify the full source/hardware/audio/raw-RGB receipts twice fresh per orientation, and only then consider a staged Reversal entry. No renderer, reducer, seam, battle logic, coverage status, or acceptance changed.
+
+## MOVE_SMOKESCREEN promoted exact; complete BLACK_BALL body closed (2026-07-28)
+
+**Verdict:** `MOVE_SMOKESCREEN` is exact. Legal Level-50 Factory set-127
+KOFFING against ONIX passes the complete Scene-ON source body through first
+inactive cleanup at **125/125** source/component, typed-seam, hardware, and
+shared-framebuffer frames **214–338** player-back and **302–426**
+opponent-front, twice fresh. Stable evidence/raw-RGB digests are player
+`14911b5a…3be59` / `435cca4a…1adf35` and opponent
+`01bbc709…a963d` / `9a38c4eb…23e430`.
+
+**Model/evidence:** the pure source-relative reducer ports the 35-callback
+BLACK_BALL horizontal arc, dynamically loaded/freed four-part
+SmokescreenImpact, all twelve 75-callback blinking BLACK_SMOKE translations,
+both panned sounds, waits, and first inactive cleanup. The typed Scene-ON seam
+and shared compositor use reproducibly extracted legal Koffing/BLACK_BALL/
+BLACK_SMOKE/impact art, reuse exact Onix/chrome/enemy-shadow primitives, and
+match source hardware OAM transfer ordering. The corrected portable probe
+requires an empty task topology and checks software/hardware OAM, matrix mode,
+palettes/registers/audio, raw RGB, and application framebuffer every frame.
+
+**Boundary:** `MOVE_OCTAZOOKA` remains unsupported. Its shared BLACK_BALL tag
+owns a distinct 20-frame translation, four delayed GRAY_SMOKE
+`gOctazookaSmokeSpriteTemplate` lifecycles, and different audio without
+independent dense acceptance. No battle logic, RNG, controller, turn order,
+round/facility state, boundary list, or unsupported barrier changed. Coverage
+is **70 exact / 0 partial / 1 staged / 205 unsupported**.
+
 ## MOVE_SMOKESCREEN staged; erroneous ShakeMon2 ownership removed (2026-07-28)
 
 **Verdict:** `MOVE_SMOKESCREEN` is staged, not exact. Legal Level-50 Factory
