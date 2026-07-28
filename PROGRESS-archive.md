@@ -1,4 +1,27 @@
 ---
+## 563 — [BOUNDED MAIN WORKER CORRECTION 2026-07-28 ~01:23] Future Sight delayed ownership is source-exact
+
+- **State:** committed Future Sight increment plus corrective `3e949d1`; tree
+  green at **321 files / 3994 tests** and focused **273/273**. Production
+  build, both-oracle freshness, census regeneration, and `git diff --check`
+  pass. Census remains exactly **140/214 effects, 266/355 moves, 217/276
+  Factory-L50 distinct, 2696/2957 weighted**, all **42/42**.
+- **Did:** delayed Future Sight/Doom Desire now restores only stored attacker,
+  target, and damage while preserving prior `currentMove`/effect/power.
+  Explicit stored-move accuracy/animation/message routing remains intact;
+  `moveendfromto` stops before last-move history writes. Source-faithful
+  `adjustnormaldamage2` shares random/Endure/Focus Band/Substitute/flags
+  behavior but omits False Swipe's clamp.
+- **Next:** supervisor verify the corrected executable-frontier increment and
+  select the next finite source registration target; do not resume the
+  retired canonical Battle-2 march.
+- **Notes:** the generic proof retains Tackle **33 / effect 0 / power 35**,
+  matches OFF HP **140→103**, and never records Future Sight/Doom Desire as a
+  delayed last move. No barrier/import ratchet change, recording import,
+  animation edit, scenario/tick/render branch, issue removal, oracle lifecycle
+  action, or PAPERCUT.
+
+---
 ## 562 — [SUPERVISOR VERIFY 2026-07-28 ~00:51] Defense Curl accepted; Future Sight evidence merged
 
 - **State:** reviewed union green at **319 files / 3976 tests**; production

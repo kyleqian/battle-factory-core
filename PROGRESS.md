@@ -15,6 +15,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 566 — [BOUNDED MAIN WORKER CORRECTION 2026-07-28 ~01:56] Full-turn execution uses the shared opcode frontier
+
+- **State:** committed `31a2fd7`; tree green at **322 files / 4007 tests**,
+  focused **90/90**, and ratchets **6/6**. Production build, both-oracle
+  freshness, census regeneration, and `git diff --check` pass. Census remains
+  exactly **141/214 effects, 267/355 moves, 218/276 Factory-L50 distinct,
+  2701/2957 weighted**, all **42/42**.
+- **Did:** removed the full-turn controller's private `incrementgamestat` and
+  Struggle-recoil `seteffectwithchance` handlers; both execution sites now use
+  only `createBattleScriptStatusRulesHandlers`. Full-turn Disable still proves
+  duplicate filtering, direct selected-move cancellation, forced Struggle, and
+  zero Tackle PP spend, then stops honestly at `B_SCR_OP_INCREMENTGAMESTAT`.
+- **Next:** supervisor verify this correction and select the next finite shared
+  registration target. `incrementgamestat` and Struggle recoil remain separate
+  executable-frontier units; do not extend the retired Battle-2 march.
+- **Notes:** this supersedes entry 565's full-turn claims of Struggle history,
+  recoil, end-turn expiry, and same-state Tackle resumption past that barrier.
+  Isolated Disable opcode/end-turn/switch/faint coverage remains green. No
+  unsupported-branch barrier count, recording import, animation file, issue,
+  oracle lifecycle action, or PAPERCUT changed.
+
+---
 ## 565 — [BOUNDED MAIN WORKER 2026-07-28 ~01:49] Disable executes source-completely
 
 - **State:** committed `e566e53`; tree green at **322 files / 4007 tests**
@@ -58,26 +80,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   then Tackle resumption; manifest `ea9f5139…a1019`. No barrier/import ratchet
   change, recording import, animation edit, DEFERRED item, or oracle lifecycle
   action.
-
----
-## 563 — [BOUNDED MAIN WORKER CORRECTION 2026-07-28 ~01:23] Future Sight delayed ownership is source-exact
-
-- **State:** committed Future Sight increment plus corrective `3e949d1`; tree
-  green at **321 files / 3994 tests** and focused **273/273**. Production
-  build, both-oracle freshness, census regeneration, and `git diff --check`
-  pass. Census remains exactly **140/214 effects, 266/355 moves, 217/276
-  Factory-L50 distinct, 2696/2957 weighted**, all **42/42**.
-- **Did:** delayed Future Sight/Doom Desire now restores only stored attacker,
-  target, and damage while preserving prior `currentMove`/effect/power.
-  Explicit stored-move accuracy/animation/message routing remains intact;
-  `moveendfromto` stops before last-move history writes. Source-faithful
-  `adjustnormaldamage2` shares random/Endure/Focus Band/Substitute/flags
-  behavior but omits False Swipe's clamp.
-- **Next:** supervisor verify the corrected executable-frontier increment and
-  select the next finite source registration target; do not resume the
-  retired canonical Battle-2 march.
-- **Notes:** the generic proof retains Tackle **33 / effect 0 / power 35**,
-  matches OFF HP **140→103**, and never records Future Sight/Doom Desire as a
-  delayed last move. No barrier/import ratchet change, recording import,
-  animation edit, scenario/tick/render branch, issue removal, oracle lifecycle
-  action, or PAPERCUT.
