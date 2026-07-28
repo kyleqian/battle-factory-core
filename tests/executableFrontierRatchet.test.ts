@@ -111,7 +111,13 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // BattleScript_DestinyBondTakesLife above the original faint-script frame.
   // 22 -> 21 (EFFECT_SPIKES): tryfaintmon_spikes now executes its guarded
   // pass-through and faint pop/jump, clearing SPIKES_DAMAGED at the source point.
-  ["src/engine/battleScriptHitChainOpcode.ts", 21],
+  // 21 -> 20 (EFFECT_HEAL_BELL): Cmd_updatestatusicon's
+  // BS_ATTACKER_WITH_PARTNER branch now emits for the present attacker and,
+  // only in doubles, its present positional partner. The former blanket
+  // barrier is retired rather than moved.
+  // 19 -> 18 (Family-B Cluster 3): FaintClearSetData's owner-sensitive Mean
+  // Look release now reads battlerPreventingEscape instead of barriering.
+  ["src/engine/battleScriptHitChainOpcode.ts", 18],
   ["src/engine/battleScriptAttackCancelerOpcode.ts", 4],
   ["src/engine/battleScriptMoveEndOpcode.ts", 7],
   ["src/engine/battleScriptJumpifbyteOpcode.ts", 1],
@@ -143,9 +149,9 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // GETSWITCHEDMONDATA/SWITCHINDATAUPDATE, SWITCHINANIM, HPTHRESHOLDS,
   // CANCELALLACTIONS, VARIOUS's RESET_PLAYER_FAINTED case, SWITCHINEFFECTS):
   // switchhandleorder's cases 0/1 (multi-battler collection / order-only, not
-  // this script's case 2/3); switchindataupdate's STATUS2_ESCAPE_PREVENTION
-  // and STATUS3_ALWAYS_HITS cross-battler clears (battlerPreventingEscape/
-  // battlerWithSureHit identity, unmodeled); SwitchInClearSetData's
+  // this script's case 2/3); switchindataupdate's STATUS3_ALWAYS_HITS
+  // cross-battler clear (battlerWithSureHit identity, unmodeled);
+  // SwitchInClearSetData's
   // unconditional STATUS2_WRAPPED clear and Baton Pass's opposing
   // STATUS3_ALWAYS_HITS timer refresh add two doubles-only identity barriers
   // (singles ownership is exact); switchinanim's BATTLE_TYPE_ARENA
@@ -153,11 +159,12 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // RESET_PLAYER_FAINTED (7); switchineffects's Truant switch-in-hack counter
   // set and its AbilityBattleEffects
   // (ABILITYEFFECT_ON_SWITCHIN) dispatch for the small closed set of trigger
-  // abilities. 9 total, none reached by the committed forced-switch fixtures;
+  // abilities. 8 total, none reached by the committed forced-switch fixtures;
   // the Spikes fixture now executes its shared path, while their other state
   // carries no trigger ability/item/escape/sure-hit/wrapped dependency.
   // 10 -> 9: Spikes damage now executes through the shared source scripts.
-  ["src/engine/battleScriptSwitchinOpcode.ts", 9],
+  // 9 -> 8: Mean Look release now compares battlerPreventingEscape.
+  ["src/engine/battleScriptSwitchinOpcode.ts", 8],
   // Primary-effect stat-change registration (docs/primary-stat-ground-truth.md):
   // Cmd_playanimation is narrowed to its B_ANIM_STATS_CHANGE arm (the only
   // animType BattleScript_EffectStatUp/EffectStatDown ever pass) -- any other

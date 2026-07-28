@@ -169,12 +169,14 @@ Per entry:
 - **Workaround:** split each outcome/control into a fresh
   `run-mgba-probe.py` wrapper invocation and merge only the concise evidence.
 
-## `bin/oracle run` always prints the full capture manifest
+## `bin/oracle run`/`lab` always print the full capture manifest
 
 - **What:** targeted oracle probes with dense captures flood the terminal with
-  the complete manifest even when only the written artifacts are needed.
-- **Hits:** 1.
-- **Cost each:** ~2 min.
+  the complete manifest even when only the written artifacts are needed;
+  `bin/oracle lab` does the same for battle-lab scenarios.
+- **Hits:** 3 (run 2026-07-2x; lab 2026-07-28 Cluster-1 and Cluster-3
+  staging workers — both pre-warned in their briefs, still ~1 min each).
+- **Cost each:** ~1-2 min.
 - **Workaround:** redirect successful oracle stdout to `/dev/null` and inspect
   the named manifest or RAM probe output directly.
 
@@ -488,3 +490,15 @@ worker (PROGRESS entry 13).
   "profile-routed (ON for this family)" instead of naming a port; a
   one-line banner in docs/presentation-seam-scout.md's intro would stop
   the rediscovery loop at the doc every scout reads first.
+
+## Codex `apply_patch` fails to match PROGRESS-archive.md tail blocks
+
+- **What:** workers rotating the progress ledger via `apply_patch` hit
+  repeated context-match failures on the archive's final block (large,
+  frequently-shifting file; trailing-newline sensitivity), retrying until
+  falling back to another edit path.
+- **Hits:** 1 (four-opcode worker, 2026-07-28).
+- **Cost each:** ~2 min.
+- **Workaround:** append to `PROGRESS-archive.md` by prepending after the
+  header with a shell heredoc or targeted `sed` instead of whole-block
+  patch matching; supervisors already rotate this way.

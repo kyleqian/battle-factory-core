@@ -61,6 +61,7 @@ import {
   BATTLE_SCRIPT_BATTLE_TYPE_TRAINER,
   BATTLE_SCRIPT_PARTY_SIZE,
   createBattleScriptRulesContext,
+  uniformBattleScriptIvs,
   createBattleScriptStatusRulesExecution,
   createBattleScriptStatusRulesHandlers,
   type BattleScriptPartyMemberInput,
@@ -80,6 +81,9 @@ const B_OUTCOME_DREW = 3;
 const PROGRAM = loadBattleScriptProgram();
 const NEUTRAL_STAT_STAGES = Object.freeze([6, 6, 6, 6, 6, 6, 6, 6] as const);
 const ZERO_STAT_STAGES = Object.freeze([0, 0, 0, 0, 0, 0, 0, 0] as const);
+const ZERO_IVS = uniformBattleScriptIvs(0);
+/** GetFactoryMonFixedIV(challenge 0, non-final) => sFixedIVTable[0][0] = 3. */
+const FACTORY_FIRST_CHALLENGE_IVS = uniformBattleScriptIvs(3);
 
 /** Pins the raw B_OUTCOME_* byte (`Cmd_checkteamslost`'s only writer) onto the kernel's 3-valued BattleOutcome. */
 export function mapFactoryBattleOutcome(battleOutcome: number): BattleOutcome {
@@ -158,18 +162,29 @@ function emptyBattler(side: 0 | 1): BattleScriptRulesBattlerState {
     ability: 0,
     hp: 0,
     item: 0,
+    ivs: ZERO_IVS,
+    mimickedMoves: 0,
+    ppBonuses: 0,
+    stockpileCounter: 0,
     moves: Object.freeze([0, 0, 0, 0] as const),
     pp: Object.freeze([0, 0, 0, 0] as const),
     statStages: ZERO_STAT_STAGES,
     status1: 0,
     status2: 0,
     status3: 0,
-    specialStatus: Object.freeze({ restoredBattlerSprite: 0, physicalDmg: 0, specialDmg: 0 }),
+    specialStatus: Object.freeze({
+      restoredBattlerSprite: 0,
+      physicalDmg: 0,
+      specialDmg: 0,
+      shellBellDmg: 0,
+    }),
     substituteHP: 0,
     rolloutTimer: 0,
     furyCutterCounter: 0,
     truantCounter: 0,
     rechargeTimer: 0,
+    chargeTimer: 0,
+    chargeTimerStartValue: 0,
     flinchImmobility: 0,
     disabledMove: 0,
     disableTimer: 0,
@@ -178,6 +193,8 @@ function emptyBattler(side: 0 | 1): BattleScriptRulesBattlerState {
     encoredMove: 0,
     encoredMovePos: 0,
     encoreTimerStartValue: 0,
+    perishSongTimer: 0,
+    perishSongTimerStartValue: 0,
     usedDisabledMove: 0,
     tauntTimer: 0,
     usedTauntedMove: 0,
@@ -207,6 +224,7 @@ function emptyBattler(side: 0 | 1): BattleScriptRulesBattlerState {
     turnOrderNum: 1,
     wrappedMove: 0,
     wrappedBy: side,
+    battlerPreventingEscape: side,
     isFirstTurn: 0,
   });
 }
@@ -216,7 +234,15 @@ const STAGED_PLAYER_SPECIES = 1; // SPECIES_BULBASAUR
 const STAGED_OPPONENT_SPECIES = 43; // SPECIES_ODDISH -- TYPE_GRASS, matching the staged target's real type
 
 function partySlot(hp: number, alive: boolean): BattleScriptPartyMemberInput {
-  return { species: alive ? STAGED_OPPONENT_SPECIES : 0, isEgg: false, hp };
+  return {
+    species: alive ? STAGED_OPPONENT_SPECIES : 0,
+    isEgg: false,
+    ivs: FACTORY_FIRST_CHALLENGE_IVS,
+    personality: 0,
+    level: 50,
+    hp,
+    maxHP: hp,
+  };
 }
 
 /**
@@ -240,6 +266,7 @@ function createInitialRules(config: FactoryTerminalMoveConfig): FactoryTerminalD
 
   const mover: BattleScriptRulesBattlerState = Object.freeze({
     ...emptyBattler(moverBattler),
+    ivs: FACTORY_FIRST_CHALLENGE_IVS,
     hp: 100,
     species: STAGED_PLAYER_SPECIES,
     attack: config.attackerAttack,
@@ -252,6 +279,7 @@ function createInitialRules(config: FactoryTerminalMoveConfig): FactoryTerminalD
   });
   const defender: BattleScriptRulesBattlerState = Object.freeze({
     ...emptyBattler(defenderBattler),
+    ivs: FACTORY_FIRST_CHALLENGE_IVS,
     hp: config.targetHp,
     species: STAGED_OPPONENT_SPECIES,
     defense: config.targetDefense,

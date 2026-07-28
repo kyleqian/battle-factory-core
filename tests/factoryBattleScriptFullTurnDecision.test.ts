@@ -98,6 +98,35 @@ const PLAYER_ATTACKS = Object.freeze({ kind: "use-move" as const, moveSlot: 0 as
 const TRAINER_ATTACKS = Object.freeze({ kind: "use-move" as const, moveSlot: 0 as const, targetBattler: 0 as const });
 
 describe("factory full-turn decision -- decision -> both actions -> end-turn -> next decision boundary", () => {
+  it("excludes and rejects a party-switch command while Mean Look's 0x04000000 trap is active", () => {
+    const initial = createFactoryFullTurnBattleState(config({
+      player: {
+        species: 1,
+        moveId: STRENGTH,
+        attack: 200,
+        defense: 50,
+        spAttack: 50,
+        spDefense: 50,
+        speed: 100,
+        hp: 999,
+        status2: 1 << 26,
+      },
+      playerBenchHp: [100, 0],
+    }));
+    if (initial.boundary.kind !== "decision-required") throw new Error("expected command request");
+    expect(initial.boundary.request.kind).toBe("command");
+    if (initial.boundary.request.kind !== "command") throw new Error("expected command request");
+    expect(initial.boundary.request.legalDecisions).not.toContainEqual({
+      kind: "switch",
+      partyIndex: 1,
+    });
+    expect(() => submitFactoryFullTurnDecision(initial, {
+      requestId: 1,
+      side: "player",
+      decision: { kind: "switch", partyIndex: 1 },
+    })).toThrow(/not legal/);
+  });
+
   it("makes Stomp deal greater damage after Minimize than after a same-seed +1-evasion Double Team control", () => {
     const run = (playerMove: typeof MINIMIZE | typeof DOUBLE_TEAM) => {
       const initial = createFactoryFullTurnBattleState(config({

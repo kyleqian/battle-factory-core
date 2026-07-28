@@ -15,9 +15,9 @@
  * COPYARRAY/JUMPIFABILITY/MANIPULATEDAMAGE are generic multi-site opcodes
  * (16/18/4 concrete call sites across the whole committed program, one
  * shared opcodeId each) -- only the exact operand tuple this doc's own
- * scope needs is modeled; every other concrete call site (Triple Kick's
- * counter, Bide's damage store, Pain Split, the many other
- * jumpifability-gated ability preventions, Recoil/Beat Up's own damage
+ * scope needs is modeled; later focused registrations have widened selected
+ * COPYARRAY tuples (including Pain Split and Bide), while remaining
+ * jumpifability-gated ability preventions and Beat Up's own damage
  * manipulation, ...) is a single named (b) barrier, the same policy
  * `battleScriptDamagingWeatherOpcode.ts`'s ADDBYTE/BICWORD/
  * JUMPIFARRAYNOTEQUAL handlers already established.
@@ -32,7 +32,9 @@ import { isBattlerOfType, unsupportedBranch, withBattler } from "./battleScriptH
 import { readBattleScriptRulesByte, writeBattleScriptRulesByte } from "./battleScriptSetByte.ts";
 import {
   BATTLE_SCRIPT_MOVE_RESULT_MISSED,
+  BATTLE_SCRIPT_STATUS2_WRAPPED_MASK,
   BATTLE_SCRIPT_STATUS3_LEECHSEED,
+  BATTLE_SCRIPT_STATUS3_LEECHSEED_BATTLER_MASK,
   BATTLE_SCRIPT_STATUS3_ROOTED,
 } from "./battleScriptSourceConstants.ts";
 import {
@@ -44,6 +46,8 @@ import {
 const B_MSG_LEECH_SEED_SET = 0;
 const B_MSG_LEECH_SEED_MISS = 1;
 const B_MSG_LEECH_SEED_FAIL = 2;
+/** include/constants/battle.h:213; shared side-status cell owned by Cmd_trysetspikes. */
+const SIDE_STATUS_SPIKES = 1 << 4;
 
 /**
  * `Cmd_trysetroots` (`battle_script_commands.c:9326-9336`). No accuracy
@@ -146,10 +150,14 @@ function createSetseededHandler(): BattleScriptOpcodeHandler<BattleScriptRulesCo
  * `copyarray gDynamicBasePower, sTRIPLE_KICK_POWER, 2`). The source
  * destination is materialized now that both Triple Kick and Flail/Reversal
  * write/read it through Cmd_damagecalc.
+ * Bide's release script also copies its reducer-owned
+ * `gBattleScripting.bideDmg` scratch cell into `gBattleMoveDamage`; this is
+ * the existing state handoff, not a parallel accumulator.
  * Curse's `copybyte gBattlerTarget, gBattlerAttacker` is also a direct
  * selector-role assignment and is modeled without inventing a byte-address
- * layer. Every other concrete call site (Pain Split, Bide, ability-immunity
- * messages, ...) remains the single named barrier below.
+ * layer. The status-prevention and Yawn message-selector tuples are likewise
+ * direct role assignments. Every unrecognized concrete tuple remains the
+ * single named barrier below.
  */
 function createCopyarrayHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
   return (context) => {
@@ -166,6 +174,28 @@ function createCopyarrayHandler(): BattleScriptOpcodeHandler<BattleScriptRulesCo
     if (size === "0x4" && dst === "gHpDealt" && src === "gBattleMoveDamage") {
       const nextRulesContext = Object.freeze({ ...rulesContext, hpDealt: rulesContext.battleMoveDamage });
       return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }), { rulesContext: nextRulesContext });
+    }
+    if (size === "0x4" && dst === "gBattleMoveDamage" && src === "sPAINSPLIT_HP") {
+      const nextRulesContext = Object.freeze({
+        ...rulesContext,
+        battleMoveDamage: rulesContext.painSplitHp,
+      });
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        { rulesContext: nextRulesContext },
+      );
+    }
+    if (size === "0x4" && dst === "gBattleMoveDamage" && src === "sBIDE_DMG") {
+      const nextRulesContext = Object.freeze({
+        ...rulesContext,
+        battleMoveDamage: rulesContext.scriptingBideDmg,
+      });
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        { rulesContext: nextRulesContext },
+      );
     }
     if (size === "0x2" && dst === "gDynamicBasePower" && src === "sTRIPLE_KICK_POWER") {
       const nextRulesContext = Object.freeze({
@@ -212,6 +242,61 @@ function createCopyarrayHandler(): BattleScriptOpcodeHandler<BattleScriptRulesCo
       const nextRulesContext = Object.freeze({
         ...rulesContext,
         selectorRoles: Object.freeze({ ...rulesContext.selectorRoles, target: attacker }),
+      });
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        { rulesContext: nextRulesContext },
+      );
+    }
+    /**
+     * `BattleScript_WrapFree` restores gBattlerTarget from the target saved
+     * by Cmd_rapidspinfree in gBattleScripting.battler. The source
+     * `copybyte` macro expands to this exact one-byte Cmd_copyarray tuple.
+     */
+    if (size === "0x1" && dst === "gBattlerTarget" && src === "sBATTLER") {
+      const nextRulesContext = Object.freeze({
+        ...rulesContext,
+        selectorRoles: Object.freeze({
+          ...rulesContext.selectorRoles,
+          target: rulesContext.scriptingBattler,
+        }),
+      });
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        { rulesContext: nextRulesContext },
+      );
+    }
+    /**
+     * The Poison/Toxic/Paralysis ability-prevention scripts assign their
+     * target to gEffectBattler before entering the shared status-prevention
+     * message callback (`battle_scripts_1.s:715,1035`).
+     */
+    if (size === "0x1" && dst === "gEffectBattler" && src === "gBattlerTarget") {
+      const target = rulesContext.selectorRoles.target;
+      if (target === null) {
+        throw new Error("Cmd_copyarray: gEffectBattler<-gBattlerTarget requires a target role");
+      }
+      const nextRulesContext = Object.freeze({
+        ...rulesContext,
+        selectorRoles: Object.freeze({ ...rulesContext.selectorRoles, effectBattler: target }),
+      });
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        { rulesContext: nextRulesContext },
+      );
+    }
+    /**
+     * Yawn's Insomnia/Vital Spirit callback copies the battler recorded by
+     * Cmd_jumpifability into gBattleScripting.battler for its ability-holder
+     * message (`battle_scripts_1.s:2468-2472`).
+     */
+    if (size === "0x1" && dst === "sBATTLER" && src === "sBATTLER_WITH_ABILITY") {
+      const nextRulesContext = Object.freeze({
+        ...rulesContext,
+        scriptingBattler: rulesContext.battlerWithAbility,
       });
       return transitionBattleScriptCommand(
         context,
@@ -274,6 +359,20 @@ const ABILITY_INSOMNIA = 15;
  * (`data/battle_scripts_1.s:596`) needs this value.
  */
 const ABILITY_SUCTION_CUPS = 21;
+/**
+ * include/constants/abilities.h:73. Both the 25% and 33% damage-derived
+ * recoil cases call BattleScript_MoveEffectRecoil, whose attacker gate skips
+ * recoil for Rock Head (data/battle_scripts_1.s:3938-3949).
+ */
+const ABILITY_ROCK_HEAD = 69;
+/** include/constants/abilities.h:47; Perish Song's post-success all-battler message loop. */
+const ABILITY_SOUNDPROOF = 43;
+/**
+ * include/constants/abilities.h:45. Will-O-Wisp checks the target for Water
+ * Veil before its accuracy roll, then calls the shared burn-prevention
+ * script when present (`battle_scripts_1.s:2174-2195`).
+ */
+const ABILITY_WATER_VEIL = 41;
 const JUMPIFABILITY_VALUES: ReadonlyMap<string, number> = new Map([
   ["ABILITY_LIQUID_OOZE", ABILITY_LIQUID_OOZE],
   ["ABILITY_LIMBER", ABILITY_LIMBER],
@@ -282,6 +381,9 @@ const JUMPIFABILITY_VALUES: ReadonlyMap<string, number> = new Map([
   ["ABILITY_VITAL_SPIRIT", ABILITY_VITAL_SPIRIT],
   ["ABILITY_INSOMNIA", ABILITY_INSOMNIA],
   ["ABILITY_SUCTION_CUPS", ABILITY_SUCTION_CUPS],
+  ["ABILITY_ROCK_HEAD", ABILITY_ROCK_HEAD],
+  ["ABILITY_SOUNDPROOF", ABILITY_SOUNDPROOF],
+  ["ABILITY_WATER_VEIL", ABILITY_WATER_VEIL],
 ]);
 /** Exported so tools/report/executable-frontier-census.ts's jumpifability value-coverage check never drifts from what this opcode actually dispatches (same live-import precedent as SET_MOVE_EFFECT_SUPPORTED_BYTES). */
 export const JUMPIFABILITY_SUPPORTED_ABILITY_NAMES: ReadonlySet<string> = new Set(JUMPIFABILITY_VALUES.keys());
@@ -293,13 +395,15 @@ export const JUMPIFABILITY_SUPPORTED_ABILITY_NAMES: ReadonlySet<string> = new Se
  * one of those two, never the BS_ATTACKER_SIDE/BS_NOT_ATTACKER_SIDE
  * `AbilityBattleEffects` side-check branches) and, per
  * docs/status-cluster-ground-truth.md and docs/yawn-thrash-endturn-design.md
- * §1b, the seven concrete ability ids this widening covers (Liquid Ooze for
+ * §1b, the concrete ability ids this widening covers (Liquid Ooze for
  * Leech Seed, Immunity/Limber/Own Tempo for the primary status-move cluster,
  * Vital Spirit/Insomnia for Yawn, Suction Cups for Roar per
- * docs/roar-multihit-registration-scout.md §4 rung 1). `RecordAbilityBattle`/
- * `gBattleScripting.battlerWithAbility` are the same untracked AI-history
- * bookkeeping `Cmd_cleareffectsonfaint`'s own doc comment already established
- * has no reader in this engine's scope.
+ * docs/roar-multihit-registration-scout.md §4 rung 1, and Rock Head for the
+ * shared recoil script, Soundproof for Perish Song, and Water Veil for
+ * Will-O-Wisp). `RecordAbilityBattle` remains untracked AI-history
+ * bookkeeping. The source's `gBattleScripting.battlerWithAbility` write is
+ * materialized because Yawn's ability-message callback copies it to
+ * `sBATTLER`.
  */
 function createJumpifabilityHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
   return (context) => {
@@ -310,6 +414,8 @@ function createJumpifabilityHandler(): BattleScriptOpcodeHandler<BattleScriptRul
       ? rulesContext.selectorRoles.target
       : battlerExpression === "BS_ATTACKER"
         ? rulesContext.selectorRoles.attacker
+        : battlerExpression === "BS_SCRIPTING"
+          ? rulesContext.scriptingBattler
         : null;
     const abilityId = abilityOperand === undefined ? undefined : JUMPIFABILITY_VALUES.get(abilityOperand.expression);
     if (battler === null || abilityId === undefined) {
@@ -327,7 +433,11 @@ function createJumpifabilityHandler(): BattleScriptOpcodeHandler<BattleScriptRul
     }
     const target = resolveBattleScriptLabel(context.program, jumpOperand!.expression);
     if (!target) throw new Error(`Cmd_jumpifability: unresolved jump target ${jumpOperand!.expression}`);
-    const nextRulesContext = Object.freeze({ ...rulesContext, lastUsedAbility: abilityId });
+    const nextRulesContext = Object.freeze({
+      ...rulesContext,
+      lastUsedAbility: abilityId,
+      battlerWithAbility: battler,
+    });
     return transitionBattleScriptCommand(
       context,
       Object.freeze({ kind: "jump", programCounter: target.programCounter }),
@@ -357,6 +467,96 @@ function createManipulatedamageHandler(): BattleScriptOpcodeHandler<BattleScript
     }
     const nextRulesContext = Object.freeze({ ...rulesContext, battleMoveDamage: -rulesContext.battleMoveDamage });
     return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }), { rulesContext: nextRulesContext });
+  };
+}
+
+/**
+ * `Cmd_rapidspinfree` (`battle_script_commands.c:8821-8855`).
+ *
+ * One invocation removes at most one condition, in source priority order.
+ * Each successful branch pushes the current opcode cursor, calls its message
+ * subscript, and therefore resumes this same handler after `return`. The Wrap
+ * branch saves/restores the pre-message target through `sBATTLER`, retargets
+ * the message to the wrapping battler, and prepares the trapping move name in
+ * the typed gBattleTextBuff1 move slot before clearing the live attribution.
+ * No branch reads Random().
+ */
+function createRapidspinfreeHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
+  return (context) => {
+    const rulesContext = context.state.rulesContext;
+    const attacker = rulesContext.selectorRoles.attacker;
+    const target = rulesContext.selectorRoles.target;
+    if (attacker === null || target === null) {
+      throw new Error("Cmd_rapidspinfree requires attacker and target roles");
+    }
+    const attackerState = rulesContext.battlers[attacker];
+
+    if ((attackerState.status2 & BATTLE_SCRIPT_STATUS2_WRAPPED_MASK) !== 0) {
+      const nextRulesContext = withBattler(rulesContext, attacker, {
+        status2: (attackerState.status2 & ~BATTLE_SCRIPT_STATUS2_WRAPPED_MASK) >>> 0,
+        wrappedBy: 0,
+      });
+      const wrapFree = resolveBattleScriptLabel(context.program, "BattleScript_WrapFree");
+      if (!wrapFree) throw new Error("Cmd_rapidspinfree: committed program has no BattleScript_WrapFree");
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "call-current", programCounter: wrapFree.programCounter }),
+        {
+          rulesContext: Object.freeze({
+            ...nextRulesContext,
+            scriptingBattler: target,
+            selectorRoles: Object.freeze({
+              ...nextRulesContext.selectorRoles,
+              target: attackerState.wrappedBy,
+            }),
+            battleTextBuff1Move: attackerState.wrappedMove,
+          }),
+        },
+      );
+    }
+
+    if ((attackerState.status3 & BATTLE_SCRIPT_STATUS3_LEECHSEED) !== 0) {
+      const nextRulesContext = withBattler(rulesContext, attacker, {
+        status3: (
+          attackerState.status3
+          & ~BATTLE_SCRIPT_STATUS3_LEECHSEED
+          & ~BATTLE_SCRIPT_STATUS3_LEECHSEED_BATTLER_MASK
+        ) >>> 0,
+      });
+      const leechSeedFree = resolveBattleScriptLabel(context.program, "BattleScript_LeechSeedFree");
+      if (!leechSeedFree) throw new Error("Cmd_rapidspinfree: committed program has no BattleScript_LeechSeedFree");
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "call-current", programCounter: leechSeedFree.programCounter }),
+        { rulesContext: nextRulesContext },
+      );
+    }
+
+    const side = attackerState.side;
+    if ((rulesContext.sideStatuses[side] & SIDE_STATUS_SPIKES) !== 0) {
+      const sideStatuses = [...rulesContext.sideStatuses] as [number, number];
+      sideStatuses[side] = (sideStatuses[side] & ~SIDE_STATUS_SPIKES) >>> 0;
+      const sideTimers = [...rulesContext.sideTimers] as [
+        BattleScriptRulesContext["sideTimers"][0],
+        BattleScriptRulesContext["sideTimers"][1],
+      ];
+      sideTimers[side] = Object.freeze({ ...sideTimers[side], spikesAmount: 0 });
+      const spikesFree = resolveBattleScriptLabel(context.program, "BattleScript_SpikesFree");
+      if (!spikesFree) throw new Error("Cmd_rapidspinfree: committed program has no BattleScript_SpikesFree");
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "call-current", programCounter: spikesFree.programCounter }),
+        {
+          rulesContext: Object.freeze({
+            ...rulesContext,
+            sideStatuses: Object.freeze(sideStatuses),
+            sideTimers: Object.freeze(sideTimers),
+          }),
+        },
+      );
+    }
+
+    return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }));
   };
 }
 
@@ -392,5 +592,6 @@ export function createBattleScriptIngrainLeechSeedWrapOpcodeHandlers(
     [findInstructionOpcodeId(program, "B_SCR_OP_COPYARRAY")]: createCopyarrayHandler(),
     [findInstructionOpcodeId(program, "B_SCR_OP_JUMPIFABILITY")]: createJumpifabilityHandler(),
     [findInstructionOpcodeId(program, "B_SCR_OP_MANIPULATEDAMAGE")]: createManipulatedamageHandler(),
+    ...registerSingleInstruction(program, "B_SCR_OP_RAPIDSPINFREE", 0, createRapidspinfreeHandler()),
   });
 }

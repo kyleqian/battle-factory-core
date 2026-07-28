@@ -103,6 +103,7 @@ import {
   BATTLE_SCRIPT_BATTLE_TYPE_TRAINER,
   BATTLE_SCRIPT_PARTY_SIZE,
   createBattleScriptRulesContext,
+  uniformBattleScriptIvs,
   createBattleScriptStatusRulesHandlers,
   type BattleScriptPartyMemberInput,
   type BattleScriptRulesBattlerState,
@@ -119,6 +120,7 @@ import {
 import { mapFactoryBattleOutcome } from "./factoryBattleScriptTerminalDecision.ts";
 import movesData from "../data/gen/moves.json" with { type: "json" };
 import topologyData from "../data/gen/battle-script-topology.json" with { type: "json" };
+import frontierHeldItemsData from "../data/gen/battle-frontier-held-items.json" with { type: "json" };
 
 const ADAPTER = "factory-full-turn/v1";
 const B_WAIT_TIME_LONG = 64;
@@ -140,9 +142,17 @@ const MOVES_BY_ID = new Map(
 const TOPOLOGY_BY_MOVE = new Map(
   (topologyData.moves as readonly TopologyMoveRow[]).map((move) => [move.id, move]),
 );
+const FACTORY_ITEM_NAME_BY_ID = new Map(
+  (frontierHeldItemsData.entries as readonly Readonly<{ itemId: number; displayName: string }>[]).map(
+    ({ itemId, displayName }) => [itemId, displayName],
+  ),
+);
 const PROGRAM = loadBattleScriptProgram();
 const NEUTRAL_STAT_STAGES = Object.freeze([6, 6, 6, 6, 6, 6, 6, 6] as const);
 const ZERO_STAT_STAGES = Object.freeze([0, 0, 0, 0, 0, 0, 0, 0] as const);
+const ZERO_IVS = uniformBattleScriptIvs(0);
+/** GetFactoryMonFixedIV(challenge 0, non-final) => sFixedIVTable[0][0] = 3. */
+const FACTORY_FIRST_CHALLENGE_IVS = uniformBattleScriptIvs(3);
 
 type MachineState = BattleScriptMachineState<BattleScriptRulesContext>;
 type Handlers = BattleScriptOpcodeHandlers<BattleScriptRulesContext>;
@@ -162,6 +172,10 @@ export type FactoryFullTurnBattlerConfig = Readonly<{
   pp?: readonly [number, number, number, number];
   /** Source `gBattleMons[].ability`; omitted legacy configs retain the old zero default. */
   ability?: number;
+  /** Source party record's MON_DATA_ABILITY_NUM. */
+  abilityNum?: number;
+  /** Source personality; its nature bits are carried through switch reconstruction. */
+  personality?: number;
   /** Source `gBattleMons[].item`; omitted legacy configs retain the old zero default. */
   item?: number;
   /** Source `gBattleMons[].friendship`; omitted legacy configs retain the old zero default. */
@@ -251,18 +265,29 @@ function emptyBattler(side: 0 | 1): BattleScriptRulesBattlerState {
     ability: 0,
     hp: 0,
     item: 0,
+    ivs: ZERO_IVS,
+    mimickedMoves: 0,
+    ppBonuses: 0,
+    stockpileCounter: 0,
     moves: Object.freeze([0, 0, 0, 0] as const),
     pp: Object.freeze([0, 0, 0, 0] as const),
     statStages: ZERO_STAT_STAGES,
     status1: 0,
     status2: 0,
     status3: 0,
-    specialStatus: Object.freeze({ restoredBattlerSprite: 0, physicalDmg: 0, specialDmg: 0 }),
+    specialStatus: Object.freeze({
+      restoredBattlerSprite: 0,
+      physicalDmg: 0,
+      specialDmg: 0,
+      shellBellDmg: 0,
+    }),
     substituteHP: 0,
     rolloutTimer: 0,
     furyCutterCounter: 0,
     truantCounter: 0,
     rechargeTimer: 0,
+    chargeTimer: 0,
+    chargeTimerStartValue: 0,
     flinchImmobility: 0,
     disabledMove: 0,
     disableTimer: 0,
@@ -271,6 +296,8 @@ function emptyBattler(side: 0 | 1): BattleScriptRulesBattlerState {
     encoredMove: 0,
     encoredMovePos: 0,
     encoreTimerStartValue: 0,
+    perishSongTimer: 0,
+    perishSongTimerStartValue: 0,
     usedDisabledMove: 0,
     tauntTimer: 0,
     usedTauntedMove: 0,
@@ -300,6 +327,7 @@ function emptyBattler(side: 0 | 1): BattleScriptRulesBattlerState {
     turnOrderNum: 1,
     wrappedMove: 0,
     wrappedBy: side,
+    battlerPreventingEscape: side,
     isFirstTurn: 0,
   });
 }
@@ -319,10 +347,12 @@ function activeBattler(
   );
   return Object.freeze({
     ...emptyBattler(side),
+    ivs: FACTORY_FIRST_CHALLENGE_IVS,
     ability: config.ability ?? 0,
     hp: config.hp,
     item: config.item ?? 0,
     species: config.species,
+    personality: config.personality ?? 0,
     attack: config.attack,
     defense: config.defense,
     spAttack: config.spAttack,
@@ -346,14 +376,51 @@ function activeBattler(
 }
 
 function partySlot(config: FactoryFullTurnBattlerConfig): BattleScriptPartyMemberInput {
-  return { species: config.species, isEgg: false, hp: config.hp, status1: config.status1 ?? 0 };
+  const moves = config.moves ?? ([config.moveId, 0, 0, 0] as const);
+  const pp = config.pp ?? (
+    moves.map((moveId) => (moveId !== 0 ? 16 : 0)) as unknown as readonly [
+      number,
+      number,
+      number,
+      number,
+    ]
+  );
+  return {
+    species: config.species,
+    isEgg: false,
+    abilityNum: config.abilityNum ?? 0,
+    ivs: FACTORY_FIRST_CHALLENGE_IVS,
+    personality: config.personality ?? 0,
+    level: 50,
+    friendship: config.friendship ?? 0,
+    hp: config.hp,
+    maxHP: config.maxHp ?? config.hp,
+    attack: config.attack,
+    defense: config.defense,
+    speed: config.speed,
+    spAttack: config.spAttack,
+    spDefense: config.spDefense,
+    status1: config.status1 ?? 0,
+    item: config.item ?? 0,
+    moves,
+    pp,
+  };
 }
 
 const EMPTY_PARTY_SLOT: BattleScriptPartyMemberInput = Object.freeze({ species: 0, isEgg: false, hp: 0 });
 
 /** A bench slot (party index 1 or 2, items 2/3's forced-switch proofs) -- species/moves come from `override`, `hp` is the only required field. */
 function benchSlot(hp: number, override?: BattleScriptPartyMemberInput): BattleScriptPartyMemberInput {
-  return { species: 0, isEgg: false, hp, ...override };
+  return {
+    species: 0,
+    isEgg: false,
+    ivs: FACTORY_FIRST_CHALLENGE_IVS,
+    personality: 0,
+    level: 50,
+    hp,
+    maxHP: hp,
+    ...override,
+  };
 }
 
 function createInitialRules(config: FactoryFullTurnConfig): FactoryFullTurnDecisionRules {
@@ -547,14 +614,30 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
   return Object.freeze({
     isControllerIdle: (context: Readonly<{ state: MachineState }>) =>
       context.state.scheduler.pendingControllerBattlers.length === 0,
-    prepareMessage: (_context: unknown, operand: Readonly<{ expression: string }>) =>
-      operand.expression.startsWith("STRINGID_")
-        ? Object.freeze({
-          kind: "message" as const,
-          messageId: operand.expression,
-          substitutions: Object.freeze([]),
-        })
-        : null,
+    prepareMessage: (
+      context: Readonly<{ state: MachineState }>,
+      operand: Readonly<{ expression: string }>,
+    ) => {
+      if (!operand.expression.startsWith("STRINGID_")) return null;
+      const rules = context.state.rulesContext;
+      const itemName = (item: number | null) => item === null
+        ? null
+        : (FACTORY_ITEM_NAME_BY_ID.get(item) ?? `ITEM_${item}`);
+      const buff1 = itemName(rules.battleTextBuff1Item);
+      const buff2 = itemName(rules.battleTextBuff2Item);
+      const substitutions = operand.expression === "STRINGID_PKMNOBTAINEDX"
+        ? (buff1 === null ? [] : [buff1])
+        : operand.expression === "STRINGID_PKMNOBTAINEDX2"
+          ? (buff2 === null ? [] : [buff2])
+          : operand.expression === "STRINGID_PKMNOBTAINEDXYOBTAINEDZ"
+            ? [buff1, buff2].filter((value): value is string => value !== null)
+            : [];
+      return Object.freeze({
+        kind: "message" as const,
+        messageId: operand.expression,
+        substitutions: Object.freeze(substitutions),
+      });
+    },
     prepareSelectionMessage: () => null,
     prepareSelectionMessageFromTable: () => null,
     // Dynamic (not a fixed closure value): the attacker role changes across

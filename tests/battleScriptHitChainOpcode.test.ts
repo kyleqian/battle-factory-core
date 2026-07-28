@@ -76,6 +76,7 @@ function battler(changes: Partial<BattleScriptRulesBattler> & { maxHP?: number }
     turnOrderNum: changes.turnOrderNum,
     wrappedMove: changes.wrappedMove,
     wrappedBy: changes.wrappedBy,
+    battlerPreventingEscape: changes.battlerPreventingEscape,
   });
 }
 
@@ -348,23 +349,20 @@ describe("production accuracycheck (Cmd_accuracycheck) dispatch", () => {
   });
 
   describe("(b) unsupported-branch barriers", () => {
-    it("halts on the remaining bare NO_ACC_CALC call site (Future Sight/Doom Desire explicit ids and NO_ACC_CALC_CHECK_LOCK_ON are registered)", () => {
-      const stillUnsupported = program.instructions.find(
+    it("bare NO_ACC_CALC (Mean Look) advances without RNG and skips the Lock-On identity check", () => {
+      const bareNoAccuracy = program.instructions.find(
         (i) => i.opcodeName === "B_SCR_OP_ACCURACYCHECK"
-          && i.operands[1]?.expression !== "ACC_CURR_MOVE"
-          && i.operands[1]?.expression !== "NO_ACC_CALC_CHECK_LOCK_ON",
+          && i.operands[1]?.expression === "NO_ACC_CALC",
       );
-      expect(stillUnsupported).toBeDefined();
-      const rc = context(0);
+      expect(bareNoAccuracy).toBeDefined();
+      const rc = context(0, {}, {}, { status3: 1 << 3 });
       const { execution } = stepFrom("BattleScript_HitFromAccCheck", rc, 1);
-      const patched = Object.freeze({ ...execution.state, programCounter: stillUnsupported!.programCounter });
+      const patched = Object.freeze({ ...execution.state, programCounter: bareNoAccuracy!.programCounter });
       const result = stepBattleScriptMachine(program, patched, execution.handlers);
-      expect(result.kind).toBe("halted");
-      expect(result.state.haltReason).toMatchObject({
-        kind: "unsupported-branch",
-        sourceFile: "battle_script_commands.c",
-        sourceLine: 1103,
-      });
+      expect(result.kind).toBe("advanced");
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.programCounter).toBe(bareNoAccuracy!.programCounter + 1);
+      expect(result.state.rng.calls).toBe(0);
     });
 
     it("halts on STATUS3_ALWAYS_HITS (Lock-On, battlerWithSureHit unmodeled)", () => {
@@ -2027,7 +2025,18 @@ const MOVE_EFFECT_SLEEP = 1;
 const MOVE_EFFECT_TOXIC = 6;
 const MOVE_EFFECT_CONFUSION = 7;
 const MOVE_EFFECT_FLINCH = 8;
+const MOVE_EFFECT_TRI_ATTACK = 9;
 const MOVE_EFFECT_UPROAR = 10;
+const MOVE_EFFECT_RECHARGE = 29;
+const MOVE_EFFECT_RAGE = 30;
+const MOVE_EFFECT_ALL_STATS_UP = 34;
+const MOVE_EFFECT_REMOVE_PARALYSIS = 36;
+const MOVE_EFFECT_ATK_DEF_DOWN = 37;
+const MOVE_EFFECT_RECOIL_25 = 14;
+const MOVE_EFFECT_RECOIL_33 = 38;
+const MOVE_EFFECT_SP_ATK_TWO_DOWN = 59;
+const MOVE_EFFECT_AFFECTS_USER = 1 << 6;
+const STATUS2_RAGE = 1 << 23;
 const STATUS1_POISON = 1 << 3;
 const STATUS1_BURN_BIT = 1 << 4;
 const STATUS1_FREEZE_BIT = 1 << 5;
@@ -2036,6 +2045,7 @@ const ABILITY_LIMBER = 7;
 const ABILITY_IMMUNITY = 17;
 const ABILITY_SHIELD_DUST = 19;
 const ABILITY_MAGMA_ARMOR = 40;
+const ABILITY_ROCK_HEAD = 69;
 const ABILITY_WATER_VEIL = 41;
 const HITMARKER_STATUS_ABILITY_EFFECT = 1 << 13;
 const B_MSG_STATUSED = 0;
@@ -2113,6 +2123,38 @@ describe("production seteffectwithchance (Cmd_seteffectwithchance) dispatch", ()
       if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
       expect(result.state.programCounter).toBe(labelPc("BattleScript_MoveEffectFreeze"));
       expect(result.state.rulesContext.battlers[1]!.status1).toBe(STATUS1_FREEZE_BIT);
+    });
+
+    it("SLEEP: landing on a Rollout-locked target cancels the lock and its timer", () => {
+      const rc = context(
+        0,
+        {},
+        { moveEffectByte: MOVE_EFFECT_SLEEP | MOVE_EFFECT_CERTAIN },
+        { status2: 0x1000, rolloutTimer: 3 },
+      );
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.rulesContext.battlers[1]).toMatchObject({
+        status2: 0,
+        rolloutTimer: 0,
+      });
+    });
+
+    it("SLEEP: a target with no multi-turn lock preserves unrelated status2/status3 state", () => {
+      const rc = context(
+        0,
+        {},
+        { moveEffectByte: MOVE_EFFECT_SLEEP | MOVE_EFFECT_CERTAIN },
+        { status2: 0x8000_0001, status3: 0x20 },
+      );
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.rulesContext.battlers[1]).toMatchObject({
+        status2: 0x8000_0001,
+        status3: 0x20,
+        rolloutTimer: 0,
+        furyCutterCounter: 0,
+      });
     });
 
     it("FREEZE: sun weather blocks the freeze (WEATHER_HAS_EFFECT && B_WEATHER_SUN)", () => {
@@ -2323,15 +2365,15 @@ describe("production seteffectwithchance (Cmd_seteffectwithchance) dispatch", ()
       expect(result.state.rulesContext.battlers[1]!.status1).toBe(0);
     });
 
-    it("halts on a still-unmodeled family-B byte (UPROAR, > PRIMARY_STATUS_MOVE_EFFECT): status2/misc switch barrier remains for every byte but CONFUSION/FLINCH", () => {
-      const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_UPROAR | MOVE_EFFECT_CERTAIN });
+    it("halts on a still-unmodeled family-B byte (> PRIMARY_STATUS_MOVE_EFFECT)", () => {
+      const rc = context(0, {}, { moveEffectByte: 55 | MOVE_EFFECT_CERTAIN });
       const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
       expect(result.kind).toBe("halted");
       expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 2522 });
     });
 
-    it("halts when the chance roll succeeds with a still-unmodeled family-B effect byte (UPROAR)", () => {
-      const rc = context(0, {}, { currentMove: MUD_SLAP, moveEffectByte: MOVE_EFFECT_UPROAR });
+    it("halts when the chance roll succeeds with a still-unmodeled family-B effect byte", () => {
+      const rc = context(0, {}, { currentMove: MUD_SLAP, moveEffectByte: 55 });
       const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
       expect(result.kind).toBe("halted");
       expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 2522 });
@@ -2848,15 +2890,65 @@ describe("production updatestatusicon (Cmd_updatestatusicon) dispatch", () => {
     ]);
   });
 
-  describe("(b) unsupported-branch barriers", () => {
-    it("halts on BS_ATTACKER_WITH_PARTNER (doubles-only branch, not modeled)", () => {
-      const pc = program.instructions.find((i) =>
-        i.opcodeName === "B_SCR_OP_UPDATESTATUSICON" && i.operands[0]?.expression === "BS_ATTACKER_WITH_PARTNER"
-      )!.programCounter;
-      const rc = context(0);
+  describe("BS_ATTACKER_WITH_PARTNER", () => {
+    const pc = program.instructions.find((i) =>
+      i.opcodeName === "B_SCR_OP_UPDATESTATUSICON" && i.operands[0]?.expression === "BS_ATTACKER_WITH_PARTNER"
+    )!.programCounter;
+
+    it("singles emits only the present attacker", () => {
+      const rc = context(0, { status1: STATUS1_PARALYSIS_BIT });
       const { result } = stepAtProgramCounter(pc, rc);
-      expect(result.kind).toBe("halted");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 7711 });
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.scheduler.pendingControllerBattlers).toEqual([0]);
+      expect(result.state.events).toEqual([
+        expect.objectContaining({
+          kind: "status-icon-update",
+          battler: 0,
+          status1: STATUS1_PARALYSIS_BIT,
+        }),
+      ]);
+    });
+
+    it("doubles emits attacker then positional partner, skipping an absent partner", () => {
+      const doubles = {
+        battlersCount: 4 as const,
+        battleTypeFlags: BATTLE_SCRIPT_BATTLE_TYPE_DOUBLE,
+        battlerPositions: [0, 1, 2, 3],
+      };
+      const battlers = [
+        battler({ side: 0, status1: STATUS1_PARALYSIS_BIT }),
+        battler({ side: 1 }),
+        battler({ side: 0, status1: STATUS1_BURN_BIT }),
+        battler({ side: 1 }),
+      ];
+      const present = stepAtProgramCounter(
+        pc,
+        context(0, {}, { battlers, battleTopology: doubles }),
+      ).result;
+      if (present.kind !== "advanced") throw new Error(`expected advance, got ${present.kind}`);
+      expect(present.state.scheduler).toMatchObject({
+        activeBattler: 2,
+        pendingControllerBattlers: [0, 2],
+      });
+      expect(present.state.events).toEqual([
+        expect.objectContaining({ kind: "status-icon-update", battler: 0 }),
+        expect.objectContaining({ kind: "status-icon-update", battler: 2 }),
+      ]);
+
+      const absent = stepAtProgramCounter(
+        pc,
+        context(0, {}, {
+          battlers,
+          battleTopology: doubles,
+          absentBattlerFlags: 1 << 2,
+        }),
+      ).result;
+      if (absent.kind !== "advanced") throw new Error(`expected advance, got ${absent.kind}`);
+      expect(absent.state.scheduler).toMatchObject({
+        activeBattler: 2,
+        pendingControllerBattlers: [0],
+      });
+      expect(absent.state.events).toHaveLength(1);
     });
   });
 });
@@ -2926,13 +3018,6 @@ describe("production tryfaintmon (Cmd_tryfaintmon) dispatch", () => {
       ]);
       expect(result.state.rulesContext.hitMarker & HITMARKER_DESTINYBOND).toBe(0);
       expect(result.state.rulesContext.battleMoveDamage).toBe(rc.battlers[0]!.hp);
-    });
-
-    it("halts on the target's STATUS3_GRUDGE vs. a different-side attacker (BattleScript_GrudgeTakesPP unmodeled)", () => {
-      const rc = context(0, {}, { currentMove: TACKLE }, { hp: 0, status3: STATUS3_GRUDGE });
-      const { result } = stepAtOpcode("B_SCR_OP_TRYFAINTMON", rc);
-      expect(result.kind).toBe("halted");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 3027 });
     });
 
     it("Grudge does not fire on MOVE_STRUGGLE, matching source's explicit exclusion", () => {
@@ -3022,6 +3107,7 @@ describe("production cleareffectsonfaint (Cmd_cleareffectsonfaint) dispatch", ()
           disabledMove: 12,
           disableTimer: 4,
           disableTimerStartValue: 5,
+          stockpileCounter: 3,
           protected: 1,
           protectUses: 3,
         },
@@ -3040,6 +3126,7 @@ describe("production cleareffectsonfaint (Cmd_cleareffectsonfaint) dispatch", ()
       expect(target.disabledMove).toBe(0);
       expect(target.disableTimer).toBe(0);
       expect(target.disableTimerStartValue).toBe(0);
+      expect(target.stockpileCounter).toBe(0);
       expect(target.protected).toBe(0);
       // FaintClearSetData's DisableStruct::protectUses zero -- a real write now that
       // battleScriptProtectlikeOpcode.ts's own field exists (previously a no-op, see
@@ -3079,14 +3166,6 @@ describe("production cleareffectsonfaint (Cmd_cleareffectsonfaint) dispatch", ()
   });
 
   describe("(b) unsupported-branch barriers", () => {
-    it("halts when another battler has STATUS2_ESCAPE_PREVENTION set (gDisableStructs[].battlerPreventingEscape identity unmodeled)", () => {
-      const rc = context(0, { status2: 1 << 26 }, {}, { hp: 0 });
-      const { result } = stepAtProgramCounter(cleareffectsonfaintTargetPc, rc);
-      expect(result.kind).toBe("halted");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 3277 });
-    });
-
-
     it("halts on an unsupported selector spelling (Battle Arena's BS_OPPONENT1), not BS_TARGET/BS_ATTACKER", () => {
       const pc = program.instructions.find((i) =>
         i.opcodeName === "B_SCR_OP_CLEAREFFECTSONFAINT" && i.operands[0]?.expression === "BS_OPPONENT1"
@@ -3096,6 +3175,28 @@ describe("production cleareffectsonfaint (Cmd_cleareffectsonfaint) dispatch", ()
       expect(result.kind).toBe("halted");
       expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 3064 });
     });
+  });
+
+  it("Roar/faint-style removal clears Mean Look only when the departing battler owns the trap", () => {
+    const owned = context(
+      0,
+      { status2: 1 << 26, battlerPreventingEscape: 1 },
+      {},
+      { hp: 0 },
+    );
+    const ownedResult = stepAtProgramCounter(cleareffectsonfaintTargetPc, owned).result;
+    if (ownedResult.kind !== "advanced") throw new Error(`expected advance, got ${ownedResult.kind}`);
+    expect(ownedResult.state.rulesContext.battlers[0].status2).toBe(0);
+
+    const otherOwner = context(
+      0,
+      { status2: 1 << 26, battlerPreventingEscape: 2 },
+      {},
+      { hp: 0 },
+    );
+    const otherResult = stepAtProgramCounter(cleareffectsonfaintTargetPc, otherOwner).result;
+    if (otherResult.kind !== "advanced") throw new Error(`expected advance, got ${otherResult.kind}`);
+    expect(otherResult.state.rulesContext.battlers[0].status2).toBe(1 << 26);
   });
 });
 
@@ -3758,3 +3859,632 @@ describe(
     });
   },
 );
+
+describe("SetMoveEffect family-B cluster 1", () => {
+  const TRI_ATTACK = 161;
+  const HYPER_BEAM = 63;
+  const RAGE = 99;
+  const ANCIENT_POWER = 246;
+  const SMELLING_SALT = 265;
+  const SUPERPOWER = 276;
+  const OVERHEAT = 315;
+  const RECHARGE = 1 << 22;
+
+  it("exports the cluster-1 and item-motion bytes while Pay Day stays barriered", () => {
+    for (const effect of [
+      MOVE_EFFECT_TRI_ATTACK,
+      MOVE_EFFECT_RECHARGE,
+      MOVE_EFFECT_RAGE,
+      MOVE_EFFECT_ALL_STATS_UP,
+      MOVE_EFFECT_REMOVE_PARALYSIS,
+      MOVE_EFFECT_ATK_DEF_DOWN,
+      MOVE_EFFECT_SP_ATK_TWO_DOWN,
+    ]) {
+      expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(effect)).toBe(true);
+    }
+    expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(35)).toBe(true); // Rapid Spin, Cluster 3
+    expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(31)).toBe(true); // Steal Item, Cluster 4
+    expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(54)).toBe(true); // Knock Off, Cluster 4
+    expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(11)).toBe(true); // Pay Day, Cluster 4 rung (b)
+  });
+
+  for (const [seed, status1, label] of [
+    [4, STATUS1_BURN_BIT, "BattleScript_MoveEffectBurn"],
+    [3, STATUS1_FREEZE_BIT, "BattleScript_MoveEffectFreeze"],
+    [0, STATUS1_PARALYSIS_BIT, "BattleScript_MoveEffectParalysis"],
+  ] as const) {
+    it(`Tri Attack seed ${seed}: one chance draw plus one selector draw recursively uses ${label}`, () => {
+      const rc = context(0, {}, { currentMove: TRI_ATTACK, moveEffectByte: MOVE_EFFECT_TRI_ATTACK });
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc, seed);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.rng.calls).toBe(2);
+      expect(result.state.rng.ledger.map((entry) => entry.reason)).toEqual([
+        "seteffectwithchance",
+        "SetMoveEffect Tri Attack status selector (Random() % 3 + 3)",
+      ]);
+      expect(result.state.programCounter).toBe(labelPc(label));
+      expect(result.state.rulesContext.battlers[1]!.status1).toBe(status1);
+      expect(result.state.rulesContext.party.opponent[0]!.status1).toBe(status1);
+    });
+  }
+
+  it("Tri Attack Freeze cancels an Uproar/Thrash user's complete multi-turn state", () => {
+    const rc = context(
+      0,
+      {},
+      { currentMove: TRI_ATTACK, moveEffectByte: MOVE_EFFECT_TRI_ATTACK },
+      {
+        status2: 0x70 | 0xc00 | 0x1000,
+        status3: 0x0004_00c0,
+        furyCutterCounter: 2,
+      },
+    );
+    const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc, 3);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.rulesContext.battlers[1]).toMatchObject({
+      status1: STATUS1_FREEZE_BIT,
+      status2: 0,
+      status3: 0,
+      furyCutterCounter: 0,
+    });
+  });
+
+  it("Tri Attack chance failure consumes only the chance draw", () => {
+    const rc = context(0, {}, { currentMove: TRI_ATTACK, moveEffectByte: MOVE_EFFECT_TRI_ATTACK });
+    const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc, 1);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.rng.calls).toBe(1);
+    expect(result.state.rulesContext.battlers[1]!.status1).toBe(0);
+  });
+
+  it("Tri Attack already-statused no-op consumes the successful chance draw but no selector draw", () => {
+    const rc = context(
+      0,
+      {},
+      { currentMove: TRI_ATTACK, moveEffectByte: MOVE_EFFECT_TRI_ATTACK },
+      { status1: STATUS1_BURN_BIT },
+    );
+    const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc, 4);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.rng.calls).toBe(1);
+    expect(result.state.rulesContext.battlers[1]!.status1).toBe(STATUS1_BURN_BIT);
+  });
+
+  it("Recharge certain path writes the bit, timer, and current-move lock with zero RNG; duplicate is a no-op", () => {
+    const effect = MOVE_EFFECT_RECHARGE | MOVE_EFFECT_AFFECTS_USER | MOVE_EFFECT_CERTAIN;
+    const rc = context(0, {}, { currentMove: HYPER_BEAM, moveEffectByte: effect, lockedMoves: [7, 8, 9, 10] });
+    const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.rng.calls).toBe(0);
+    expect(result.state.rulesContext.battlers[0]!.status2 & RECHARGE).toBe(RECHARGE);
+    expect(result.state.rulesContext.battlers[0]!.rechargeTimer).toBe(2);
+    expect(result.state.rulesContext.lockedMoves).toEqual([HYPER_BEAM, 8, 9, 10]);
+
+    const duplicate = context(
+      0,
+      { status2: RECHARGE, rechargeTimer: 1 },
+      { currentMove: HYPER_BEAM, moveEffectByte: effect, lockedMoves: [7, 8, 9, 10] },
+    );
+    const { result: noOp } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", duplicate);
+    if (noOp.kind !== "advanced") throw new Error(`expected advance, got ${noOp.kind}`);
+    expect(noOp.state.rulesContext.battlers[0]!.rechargeTimer).toBe(1);
+    expect(noOp.state.rulesContext.lockedMoves).toEqual([7, 8, 9, 10]);
+  });
+
+  it("Rage primary dispatch always writes the attacker's rage bit with zero RNG", () => {
+    const rc = context(0, {}, { currentMove: RAGE, moveEffectByte: MOVE_EFFECT_RAGE });
+    const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTPRIMARY", rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.rng.calls).toBe(0);
+    expect(result.state.rulesContext.battlers[0]!.status2 & STATUS2_RAGE).toBe(STATUS2_RAGE);
+  });
+
+  it("All Stats Up consumes one successful chance draw and calls its source-ordered callback; failure draws once and skips", () => {
+    const effect = MOVE_EFFECT_ALL_STATS_UP | MOVE_EFFECT_AFFECTS_USER;
+    const successRc = context(0, {}, { currentMove: ANCIENT_POWER, moveEffectByte: effect });
+    const { result: success } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", successRc, 0);
+    if (success.kind !== "advanced") throw new Error(`expected advance, got ${success.kind}`);
+    expect(success.state.rng.calls).toBe(1);
+    expect(success.state.programCounter).toBe(labelPc("BattleScript_AllStatsUp"));
+    const { result: failure } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", successRc, 1);
+    if (failure.kind !== "advanced") throw new Error(`expected advance, got ${failure.kind}`);
+    expect(failure.state.rng.calls).toBe(1);
+    expect(failure.state.callStack).toEqual([]);
+  });
+
+  it("Remove Paralysis clears active and party status, emits one controller write, and is a zero-RNG no-op when healthy", () => {
+    const effect = MOVE_EFFECT_REMOVE_PARALYSIS | MOVE_EFFECT_CERTAIN;
+    const rc = context(0, {}, { currentMove: SMELLING_SALT, moveEffectByte: effect }, {
+      status1: STATUS1_PARALYSIS_BIT,
+    });
+    const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.rng.calls).toBe(0);
+    expect(result.state.rulesContext.battlers[1]!.status1).toBe(0);
+    expect(result.state.rulesContext.party.opponent[0]!.status1).toBe(0);
+    expect(result.state.events).toEqual([
+      expect.objectContaining({ kind: "set-battler-status-data", battler: 1, status1: 0 }),
+    ]);
+    const healthy = context(0, {}, { currentMove: SMELLING_SALT, moveEffectByte: effect });
+    const { result: noOp } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", healthy);
+    if (noOp.kind !== "advanced") throw new Error(`expected advance, got ${noOp.kind}`);
+    expect(noOp.state.rng.calls).toBe(0);
+    expect(noOp.state.events).toEqual([]);
+  });
+
+  for (const [effect, move, label] of [
+    [MOVE_EFFECT_ATK_DEF_DOWN, SUPERPOWER, "BattleScript_AtkDefDown"],
+    [MOVE_EFFECT_SP_ATK_TWO_DOWN, OVERHEAT, "BattleScript_SAtkDown2"],
+  ] as const) {
+    it(`${label}: certain user-directed dispatch calls the committed callback with zero RNG`, () => {
+      const rc = context(0, {}, {
+        currentMove: move,
+        moveEffectByte: effect | MOVE_EFFECT_AFFECTS_USER | MOVE_EFFECT_CERTAIN,
+      });
+      const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc);
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+      expect(result.state.rng.calls).toBe(0);
+      expect(result.state.programCounter).toBe(labelPc(label));
+    });
+  }
+});
+
+describe("SetMoveEffect family-B cluster 1 committed-script integrations", () => {
+  function runEntryToEnd(
+    entryLabel: string,
+    rulesContext: BattleScriptRulesContext,
+    rngSeed: number,
+  ) {
+    const execution = createBattleScriptStatusRulesExecution(
+      program,
+      entryLabel,
+      rulesContext,
+      rngSeed,
+      externalPorts({
+        resolveHalfwordOperand: (_context, operand) =>
+          operand.expression === "B_WAIT_TIME_LONG" || operand.expression === "B_WAIT_TIME_SHORT"
+            ? 1
+            : null,
+      }),
+    );
+    let state = execution.state;
+    let result = stepBattleScriptMachine(program, state, execution.handlers);
+    let steps = 1;
+    while (result.kind !== "halted" && steps < 1000) {
+      state = ackAllPending(result.state);
+      result = stepBattleScriptMachine(program, state, execution.handlers);
+      steps += 1;
+    }
+    if (result.kind !== "halted") {
+      throw new Error(`${entryLabel} did not reach its own end after ${steps} steps at pc ${result.state.programCounter}`);
+    }
+    expect(result.state.haltReason).toMatchObject({ kind: "terminal", opcodeName: "B_SCR_OP_END" });
+    return result;
+  }
+
+  const cases = [
+    {
+      name: "Tri Attack",
+      entry: "BattleScript_EffectTriAttack",
+      move: 161,
+      seed: 1,
+      target: {},
+      verify: (rc: BattleScriptRulesContext) => expect(rc.battlers[1]!.status1).not.toBe(0),
+    },
+    {
+      name: "Recharge",
+      entry: "BattleScript_EffectRecharge",
+      move: 63,
+      seed: 1,
+      target: {},
+      verify: (rc: BattleScriptRulesContext) => {
+        expect(rc.battlers[0]!.status2 & (1 << 22)).not.toBe(0);
+        expect(rc.battlers[0]!.rechargeTimer).toBe(2);
+        expect(rc.lockedMoves[0]).toBe(63);
+      },
+    },
+    {
+      name: "Rage",
+      entry: "BattleScript_EffectRage",
+      move: 99,
+      seed: 1,
+      target: {},
+      verify: (rc: BattleScriptRulesContext) =>
+        expect(rc.battlers[0]!.status2 & STATUS2_RAGE).toBe(STATUS2_RAGE),
+    },
+    {
+      name: "All Stats Up",
+      entry: "BattleScript_EffectAllStatsUpHit",
+      move: 246,
+      seed: 61,
+      target: {},
+      verify: (rc: BattleScriptRulesContext) =>
+        expect(rc.battlers[0]!.statStages.slice(1, 6)).toEqual([7, 7, 7, 7, 7]),
+    },
+    {
+      name: "Remove Paralysis",
+      entry: "BattleScript_EffectSmellingsalt",
+      move: 265,
+      seed: 1,
+      target: { status1: STATUS1_PARALYSIS_BIT },
+      verify: (rc: BattleScriptRulesContext) => {
+        expect(rc.battlers[1]!.status1).toBe(0);
+        expect(rc.party.opponent[0]!.status1).toBe(0);
+      },
+    },
+    {
+      name: "Atk/Def Down",
+      entry: "BattleScript_EffectSuperpower",
+      move: 276,
+      seed: 1,
+      target: {},
+      verify: (rc: BattleScriptRulesContext) =>
+        expect(rc.battlers[0]!.statStages.slice(1, 3)).toEqual([5, 5]),
+    },
+    {
+      name: "Sp. Atk Two Down",
+      entry: "BattleScript_EffectOverheat",
+      move: 315,
+      seed: 1,
+      target: {},
+      verify: (rc: BattleScriptRulesContext) =>
+        expect(rc.battlers[0]!.statStages[4]).toBe(4),
+    },
+  ] as const;
+
+  for (const fixture of cases) {
+    it(`${fixture.name}: real entry reaches its own end without a hidden opcode/operand barrier and canonically replays`, () => {
+      const rc = context(
+        0,
+        {
+          attack: 70,
+          defense: 70,
+          spAttack: 70,
+          spDefense: 70,
+          moves: [fixture.move, 0, 0, 0],
+          pp: [10, 0, 0, 0],
+        },
+        { currentMove: fixture.move },
+        { hp: 1000, maxHP: 1000, defense: 70, spDefense: 70, ...fixture.target },
+      );
+      const finished = runEntryToEnd(fixture.entry, rc, fixture.seed);
+      fixture.verify(finished.state.rulesContext);
+      const replay = runEntryToEnd(fixture.entry, rc, fixture.seed);
+      expect(replay.state.rulesContext).toEqual(finished.state.rulesContext);
+      expect(replay.state.rng.ledger).toEqual(finished.state.rng.ledger);
+    });
+  }
+
+  it("All Stats Up returns without writes at the all-max boundary after exactly its one chance draw", () => {
+    const maxed = context(
+      0,
+      {
+        attack: 70,
+        spAttack: 70,
+        statStages: [6, 12, 12, 12, 12, 12, 6, 6],
+        moves: [246, 0, 0, 0],
+        pp: [5, 0, 0, 0],
+      },
+      { currentMove: 246 },
+      { hp: 1000, maxHP: 1000, defense: 70, spDefense: 70 },
+    );
+    const finished = runEntryToEnd("BattleScript_EffectAllStatsUpHit", maxed, 61);
+    expect(finished.state.rulesContext.battlers[0]!.statStages).toEqual([6, 12, 12, 12, 12, 12, 6, 6]);
+    expect(finished.state.rng.ledger.filter((entry) => entry.reason === "seteffectwithchance")).toHaveLength(1);
+  });
+
+  it("Superpower and Overheat clamp independently at lower stat-room boundaries", () => {
+    const superpower = context(
+      0,
+      {
+        attack: 70,
+        statStages: [6, 0, 6, 6, 6, 6, 6, 6],
+        moves: [276, 0, 0, 0],
+        pp: [5, 0, 0, 0],
+      },
+      { currentMove: 276 },
+      { hp: 1000, maxHP: 1000, defense: 70 },
+    );
+    const superpowerEnd = runEntryToEnd("BattleScript_EffectSuperpower", superpower, 1);
+    expect(superpowerEnd.state.rulesContext.battlers[0]!.statStages.slice(1, 3)).toEqual([0, 5]);
+
+    const overheat = context(
+      0,
+      {
+        spAttack: 70,
+        statStages: [6, 6, 6, 6, 1, 6, 6, 6],
+        moves: [315, 0, 0, 0],
+        pp: [5, 0, 0, 0],
+      },
+      { currentMove: 315 },
+      { hp: 1000, maxHP: 1000, spDefense: 70 },
+    );
+    const overheatEnd = runEntryToEnd("BattleScript_EffectOverheat", overheat, 1);
+    expect(overheatEnd.state.rulesContext.battlers[0]!.statStages[4]).toBe(0);
+  });
+
+  it("Recharge's next selected action is denied by the existing canceler and clears the lock cell", () => {
+    const recharge = context(
+      0,
+      { attack: 70, moves: [63, 0, 0, 0], pp: [5, 0, 0, 0] },
+      { currentMove: 63 },
+      { hp: 1000, maxHP: 1000, defense: 70 },
+    );
+    const first = runEntryToEnd("BattleScript_EffectRecharge", recharge, 1);
+    const clearingTurn = Object.freeze({
+      ...first.state.rulesContext,
+      currentMove: TACKLE,
+      currentMovePosition: 0,
+      atkCancelerTracker: 0,
+    });
+    const second = runEntryToEnd("BattleScript_EffectHit", clearingTurn, first.state.rng.value);
+    expect(second.state.rulesContext.battlers[0]!.status2 & (1 << 22)).toBe(0);
+    expect(second.state.rulesContext.battlers[0]!.rechargeTimer).toBe(0);
+    // Source CancelMultiTurnMoves does not clear gLockedMoves; the stale
+    // halfword is inert once STATUS2_MULTIPLETURNS/RECHARGE are absent.
+    expect(second.state.rulesContext.lockedMoves[0]).toBe(63);
+  });
+});
+
+describe("SetMoveEffect family-B cluster 2: recoil and Uproar dispatch", () => {
+  const DOUBLE_EDGE = 38;
+  const TAKE_DOWN = 36;
+
+  function runEntryToEnd(
+    entryLabel: string,
+    rulesContext: BattleScriptRulesContext,
+    rngSeed: number,
+  ) {
+    const execution = createBattleScriptStatusRulesExecution(
+      program,
+      entryLabel,
+      rulesContext,
+      rngSeed,
+      externalPorts({
+        resolveHalfwordOperand: (_context, operand) =>
+          operand.expression === "B_WAIT_TIME_LONG" || operand.expression === "B_WAIT_TIME_SHORT"
+            ? 1
+            : null,
+      }),
+    );
+    let result = stepBattleScriptMachine(program, execution.state, execution.handlers);
+    let steps = 1;
+    while (result.kind !== "halted" && steps < 1000) {
+      result = stepBattleScriptMachine(
+        program,
+        ackAllPending(result.state),
+        execution.handlers,
+      );
+      steps += 1;
+    }
+    if (result.kind !== "halted") throw new Error(`${entryLabel} did not terminate after ${steps} steps`);
+    expect(result.state.haltReason).toMatchObject({ kind: "terminal", opcodeName: "B_SCR_OP_END" });
+    return result;
+  }
+
+  function dispatchRecoil(
+    effectByte: number,
+    hpDealt: number,
+    attackerChanges: Partial<BattleScriptRulesBattler> = {},
+  ) {
+    const rc = context(
+      0,
+      { hp: 100, maxHP: 100, ...attackerChanges },
+      {
+        currentMove: effectByte === MOVE_EFFECT_RECOIL_33 ? DOUBLE_EDGE : TAKE_DOWN,
+        moveEffectByte: effectByte | MOVE_EFFECT_AFFECTS_USER | MOVE_EFFECT_CERTAIN,
+        hpDealt,
+      },
+      { hp: 100, maxHP: 100 },
+    );
+    return stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc).result;
+  }
+
+  it("exports Recoil 33, Rapid Spin, and item motion while Pay Day stays barriered", () => {
+    expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(MOVE_EFFECT_RECOIL_33)).toBe(true);
+    expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(35)).toBe(true);
+    expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(31)).toBe(true);
+    expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(54)).toBe(true);
+    expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(11)).toBe(true);
+  });
+
+  it("Double-Edge derives one-third recoil with C truncation and consumes no RNG", () => {
+    const result = dispatchRecoil(MOVE_EFFECT_RECOIL_33, 50);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.rulesContext.battleMoveDamage).toBe(16);
+    expect(result.state.programCounter).toBe(labelPc("BattleScript_MoveEffectRecoil"));
+    expect(result.state.callStack).toHaveLength(1);
+    expect(result.state.rng.calls).toBe(0);
+  });
+
+  it("Double-Edge raises zero quotient to minimum recoil 1", () => {
+    const result = dispatchRecoil(MOVE_EFFECT_RECOIL_33, 2);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.rulesContext.battleMoveDamage).toBe(1);
+    expect(result.state.rng.calls).toBe(0);
+  });
+
+  it("the existing 25% recoil case uses the same committed callback and consumes no RNG", () => {
+    const result = dispatchRecoil(MOVE_EFFECT_RECOIL_25, 50);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.rulesContext.battleMoveDamage).toBe(12);
+    expect(result.state.programCounter).toBe(labelPc("BattleScript_MoveEffectRecoil"));
+    expect(result.state.rng.calls).toBe(0);
+  });
+
+  it("Rock Head is accepted by jumpifability and skips the HP-update tail", () => {
+    const dispatch = dispatchRecoil(MOVE_EFFECT_RECOIL_33, 50, { ability: ABILITY_ROCK_HEAD });
+    if (dispatch.kind !== "advanced") throw new Error(`expected advance, got ${dispatch.kind}`);
+    const execution = createBattleScriptStatusRulesExecution(
+      program,
+      "BattleScript_MoveEffectRecoil",
+      dispatch.state.rulesContext,
+      dispatch.state.rng.value,
+      externalPorts(),
+    );
+    let result = stepBattleScriptMachine(program, execution.state, execution.handlers);
+    while (result.kind !== "halted" && result.state.callStack.length === 0 && result.state.events.length === 0) {
+      result = stepBattleScriptMachine(program, result.state, execution.handlers);
+    }
+    expect(result.kind).toBe("halted");
+    expect(result.state.haltReason).toMatchObject({ kind: "return-stack-underflow" });
+    expect(result.state.rulesContext.battlers[0]!.hp).toBe(100);
+    expect(result.state.rulesContext.lastUsedAbility).toBe(ABILITY_ROCK_HEAD);
+    expect(result.state.events).toEqual([]);
+  });
+
+  it("Double-Edge committed script damages the target before recoil self-KO, then faints the attacker", () => {
+    const rc = context(
+      0,
+      {
+        ability: 0,
+        hp: 5,
+        maxHP: 100,
+        attack: 200,
+        level: 50,
+        types: ["TYPE_NORMAL", "TYPE_NORMAL"],
+        moves: [DOUBLE_EDGE, 0, 0, 0],
+        pp: [15, 0, 0, 0],
+      },
+      { currentMove: DOUBLE_EDGE },
+      { hp: 1000, maxHP: 1000, defense: 50 },
+    );
+    const finished = runEntryToEnd("BattleScript_EffectDoubleEdge", rc, 1);
+    expect(finished.state.rulesContext.battlers[1]!.hp).toBeLessThan(1000);
+    expect(finished.state.rulesContext.battlers[0]!.hp).toBe(0);
+    const targetDamage = finished.state.events.findIndex(
+      (event) => event.kind === "hp-change" && event.battler === 1,
+    );
+    const recoilDamage = finished.state.events.findIndex(
+      (event) => event.kind === "hp-change" && event.battler === 0,
+    );
+    const attackerFaint = finished.state.events.findIndex(
+      (event) => event.kind === "faint-animation" && event.battler === 0,
+    );
+    expect(targetDamage).toBeGreaterThanOrEqual(0);
+    expect(recoilDamage).toBeGreaterThan(targetDamage);
+    expect(attackerFaint).toBeGreaterThan(recoilDamage);
+    expect(finished.state.rng.ledger.map((entry) => entry.reason)).toEqual([
+      "accuracycheck",
+      "critcalc",
+      "adjustnormaldamage",
+    ]);
+  });
+
+  for (const [name, entryLabel, move] of [
+    ["Double-Edge", "BattleScript_EffectDoubleEdge", DOUBLE_EDGE],
+    ["Take Down", "BattleScript_EffectRecoil", TAKE_DOWN],
+  ] as const) {
+    it(`${name} full committed script reaches MOVEEND and canonically replays through the shared Rock Head gate`, () => {
+      const rc = context(
+        0,
+        {
+          ability: 0,
+          hp: 100,
+          maxHP: 100,
+          attack: 70,
+          moves: [move, 0, 0, 0],
+          pp: [10, 0, 0, 0],
+        },
+        { currentMove: move },
+        { hp: 1000, maxHP: 1000, defense: 70 },
+      );
+      const finished = runEntryToEnd(entryLabel, rc, 1);
+      expect(finished.state.rulesContext.battlers[0]!.hp).toBeLessThan(100);
+      expect(finished.state.rng.ledger.some((entry) => entry.reason === "seteffectwithchance")).toBe(false);
+      const replay = runEntryToEnd(entryLabel, rc, 1);
+      expect(replay.state.rulesContext).toEqual(finished.state.rulesContext);
+      expect(replay.state.rng.ledger).toEqual(finished.state.rng.ledger);
+      expect(replay.state.events).toEqual(finished.state.events);
+    });
+  }
+
+  it("Rock Head negates recoil in a full committed Double-Edge turn", () => {
+    const rc = context(
+      0,
+      {
+        ability: ABILITY_ROCK_HEAD,
+        hp: 100,
+        maxHP: 100,
+        attack: 70,
+        moves: [DOUBLE_EDGE, 0, 0, 0],
+        pp: [10, 0, 0, 0],
+      },
+      { currentMove: DOUBLE_EDGE },
+      { hp: 1000, maxHP: 1000, defense: 70 },
+    );
+    const finished = runEntryToEnd("BattleScript_EffectDoubleEdge", rc, 1);
+    expect(finished.state.rulesContext.battlers[1]!.hp).toBeLessThan(1000);
+    expect(finished.state.rulesContext.battlers[0]!.hp).toBe(100);
+    expect(finished.state.rulesContext.lastUsedAbility).toBe(ABILITY_ROCK_HEAD);
+    expect(finished.state.events).not.toContainEqual(
+      expect.objectContaining({ kind: "hp-change", battler: 0 }),
+    );
+  });
+
+  it("fresh Uproar consumes the standard chance draw then its source timer draw, locks the move for 2-5 turns, and calls its message script", () => {
+    const UPROAR = 253;
+    const rc = context(
+      0,
+      { moves: [UPROAR, 0, 0, 0], pp: [10, 0, 0, 0] },
+      {
+        currentMove: UPROAR,
+        moveEffectByte: MOVE_EFFECT_UPROAR | MOVE_EFFECT_AFFECTS_USER,
+        lockedMoves: [0, 0, 0, 0],
+      },
+    );
+    const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc, 1);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.rng.calls).toBe(2);
+    expect(result.state.rng.ledger.map((entry) => entry.reason)).toEqual([
+      "seteffectwithchance",
+      "SetMoveEffect Uproar duration ((Random() & 3) + 2)",
+    ]);
+    const turns = (result.state.rng.ledger[1]!.randomValue & 3) + 2;
+    expect(result.state.rulesContext.battlers[0]!.status2 & 0x70).toBe(turns << 4);
+    expect(result.state.rulesContext.battlers[0]!.status2 & (1 << 12)).not.toBe(0);
+    expect(result.state.rulesContext.lockedMoves[0]).toBe(UPROAR);
+    expect(result.state.programCounter).toBe(labelPc("BattleScript_MoveEffectUproar"));
+  });
+
+  it("continuing Uproar still consumes its chance draw but neither rerolls duration nor rewrites the lock", () => {
+    const UPROAR = 253;
+    const status2 = (4 << 4) | (1 << 12);
+    const rc = context(
+      0,
+      { status2, moves: [UPROAR, 0, 0, 0], pp: [10, 0, 0, 0] },
+      {
+        currentMove: UPROAR,
+        moveEffectByte: MOVE_EFFECT_UPROAR | MOVE_EFFECT_AFFECTS_USER,
+        lockedMoves: [UPROAR, 2, 3, 4],
+      },
+    );
+    const { result } = stepAtOpcode("B_SCR_OP_SETEFFECTWITHCHANCE", rc, 1);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.rng.ledger.map((entry) => entry.reason)).toEqual(["seteffectwithchance"]);
+    expect(result.state.rulesContext.battlers[0]!.status2).toBe(status2);
+    expect(result.state.rulesContext.lockedMoves).toEqual([UPROAR, 2, 3, 4]);
+    expect(result.state.callStack).toEqual([]);
+  });
+
+  it("Uproar full committed script reaches MOVEEND and canonically replays", () => {
+    const UPROAR = 253;
+    const rc = context(
+      0,
+      { attack: 70, moves: [UPROAR, 0, 0, 0], pp: [10, 0, 0, 0] },
+      { currentMove: UPROAR },
+      { hp: 1000, maxHP: 1000, defense: 70 },
+    );
+    const finished = runEntryToEnd("BattleScript_EffectUproar", rc, 1);
+    expect(finished.state.rulesContext.battlers[0]!.status2 & 0x70).not.toBe(0);
+    expect(finished.state.rulesContext.lockedMoves[0]).toBe(UPROAR);
+    expect(finished.state.rng.ledger.map((entry) => entry.reason).slice(-2)).toEqual([
+      "seteffectwithchance",
+      "SetMoveEffect Uproar duration ((Random() & 3) + 2)",
+    ]);
+    const replay = runEntryToEnd("BattleScript_EffectUproar", rc, 1);
+    expect(replay.state.rulesContext).toEqual(finished.state.rulesContext);
+    expect(replay.state.rng.ledger).toEqual(finished.state.rng.ledger);
+    expect(replay.state.events).toEqual(finished.state.events);
+  });
+});

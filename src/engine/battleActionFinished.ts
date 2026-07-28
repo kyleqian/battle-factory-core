@@ -13,7 +13,7 @@
  * - `gBattleCommunication[3]` and `[4]` (only slots 0/1 exist in the current
  *   context);
  * - `SpecialStatus::{statLowered,intimidatedMon,traced,
- *   faintedHasReplacement,focusBanded,shellBellDmg,physicalBattlerId,
+ *   faintedHasReplacement,focusBanded,physicalBattlerId,
  *   specialBattlerId}`. The represented `lightningRodRedirected`,
  *   `restoredBattlerSprite`, `ppNotAffectedByPressure`, `physicalDmg`, and
  *   `specialDmg` fields are cleared below.
@@ -79,6 +79,7 @@ function clearRepresentedSpecialStatus(
       restoredBattlerSprite: 0,
       physicalDmg: 0,
       specialDmg: 0,
+      shellBellDmg: 0,
     }),
   });
 }
@@ -143,6 +144,7 @@ export function handleBattleActionFinished(
       currentMoveEffect: 0,
       currentMovePower: 0,
       battleMoveDamage: 0,
+      painSplitHp: 0,
       moveResultFlags: 0,
       animTurn: 0,
       animTargetsHit: 0,

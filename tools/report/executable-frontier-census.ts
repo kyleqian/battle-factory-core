@@ -16,25 +16,31 @@
  * (src/engine/battleScriptRulesContext.ts's createBattleScriptStatusRulesHandlers)
  * so the census never drifts from what the engine actually installs.
  *
- * Scope: this measures STATIC OPCODE REACHABILITY (does every opcode a script
- * can touch have a dispatch entry), not semantic correctness. See "Caveats"
- * in the generated doc for the exact modeling rules and their one deliberate
- * semantic exception (Cmd_seteffectwithchance's SetMoveEffect dispatch).
+ * Scope: this measures STATIC EXECUTION REACHABILITY: opcode registration,
+ * the engine's narrowed operand surfaces, and fixed C-selected callback
+ * scripts. It is not full semantic correctness. See "Caveats" in the
+ * generated doc for the exact modeling rules.
  */
-import { readFileSync, writeFileSync } from "node:fs";
+import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { SET_MOVE_EFFECT_SUPPORTED_BYTES } from "../../src/engine/battleScriptHitChainOpcode.ts";
 import { JUMPIFABILITY_SUPPORTED_ABILITY_NAMES } from "../../src/engine/battleScriptIngrainLeechSeedWrapOpcode.ts";
+import { createBattleScriptMachine } from "../../src/engine/battleScriptMachine.ts";
 import { loadBattleScriptProgram } from "../../src/engine/battleScriptProgram.ts";
-import { createBattleScriptStatusRulesHandlers } from "../../src/engine/battleScriptRulesContext.ts";
+import {
+  createBattleScriptRulesContext,
+  createBattleScriptStatusRulesHandlers,
+} from "../../src/engine/battleScriptRulesContext.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(HERE, "..", "..");
 const TOPOLOGY_PATH = join(REPO_ROOT, "src/data/gen/battle-script-topology.json");
 const GRAPH_PATH = join(REPO_ROOT, "src/data/gen/battle-script-graph.json");
 const OUTPUT_PATH = join(REPO_ROOT, "docs/executable-frontier-census.md");
+const ENGINE_DIR = join(REPO_ROOT, "src/engine");
+const BATTLE_COMMANDS_PATH = join(REPO_ROOT, "reference/pokeemerald/src/battle_script_commands.c");
 const RERUN_COMMAND = "npx tsx tools/report/executable-frontier-census.ts";
 
 // ---------------------------------------------------------------------------
@@ -79,21 +85,197 @@ const topology = JSON.parse(readFileSync(TOPOLOGY_PATH, "utf8")) as Topology;
 const graph = JSON.parse(readFileSync(GRAPH_PATH, "utf8")) as Graph;
 
 // ---------------------------------------------------------------------------
+// Operand-acceptance surfaces, mechanically extracted from the production
+// handlers that enforce them. These constants are intentionally private in
+// the engine modules; the report tool reads their declarations instead of
+// maintaining a second accepted-value list that can drift.
+// ---------------------------------------------------------------------------
+
+type EngineSurface = Readonly<{
+  sourcePath: string;
+  relativePath: string;
+  source: string;
+}>;
+
+function engineSurface(relativePath: string): EngineSurface {
+  const sourcePath = join(REPO_ROOT, relativePath);
+  return Object.freeze({ sourcePath, relativePath, source: readFileSync(sourcePath, "utf8") });
+}
+
+function requireSlice(source: string, startMarker: string, endMarker: string, description: string): string {
+  const start = source.indexOf(startMarker);
+  if (start < 0) throw new Error(`executable-frontier census: cannot find ${description} start marker ${startMarker}`);
+  const end = source.indexOf(endMarker, start + startMarker.length);
+  if (end < 0) throw new Error(`executable-frontier census: cannot find ${description} end marker ${endMarker}`);
+  return source.slice(start, end);
+}
+
+function sourceLineOf(surface: EngineSurface, marker: string): number {
+  const index = surface.source.indexOf(marker);
+  if (index < 0) {
+    throw new Error(`executable-frontier census: ${surface.relativePath} no longer contains ${marker}`);
+  }
+  return surface.source.slice(0, index).split("\n").length;
+}
+
+function extractMapKeys(surface: EngineSurface, declaration: string): ReadonlySet<string> {
+  const block = requireSlice(
+    surface.source,
+    declaration,
+    "\n]);",
+    `${surface.relativePath}'s ${declaration} map`,
+  );
+  const keys = [...block.matchAll(/\[\s*"([^"]+)"\s*,/g)].map((match) => match[1]!);
+  if (keys.length === 0 || new Set(keys).size !== keys.length) {
+    throw new Error(
+      `executable-frontier census: ${surface.relativePath}'s ${declaration} keys became empty or duplicated`,
+    );
+  }
+  return new Set(keys);
+}
+
+function extractRecordKeys(surface: EngineSurface, declaration: string): ReadonlySet<string> {
+  const block = requireSlice(
+    surface.source,
+    declaration,
+    "\n});",
+    `${surface.relativePath}'s ${declaration} record`,
+  );
+  const keys = [...block.matchAll(/^\s{2}([A-Za-z_][A-Za-z0-9_]*):/gm)].map((match) => match[1]!);
+  if (keys.length === 0 || new Set(keys).size !== keys.length) {
+    throw new Error(
+      `executable-frontier census: ${surface.relativePath}'s ${declaration} keys became empty or duplicated`,
+    );
+  }
+  return new Set(keys);
+}
+
+const STATBUFFCHANGE_SURFACE = engineSurface("src/engine/battleScriptStatbuffchangeOpcode.ts");
+const COPYARRAY_SURFACE = engineSurface("src/engine/battleScriptIngrainLeechSeedWrapOpcode.ts");
+const HIT_CHAIN_SURFACE = engineSurface("src/engine/battleScriptHitChainOpcode.ts");
+
+const JUMPIFSTATUS2_SUPPORTED_MASK_NAMES = extractMapKeys(
+  STATBUFFCHANGE_SURFACE,
+  "const JUMPIFSTATUS2_VALUES",
+);
+const PLAYANIMATION_SUPPORTED_ANIMATION_NAMES = extractMapKeys(
+  STATBUFFCHANGE_SURFACE,
+  "const PLAYANIMATION_ANIM_TYPES",
+);
+const PRINTFROMTABLE_SUPPORTED_POINTER_NAMES = extractRecordKeys(
+  HIT_CHAIN_SURFACE,
+  "const PRINTFROMTABLE_TABLES",
+);
+
+function copyarrayTupleKey(dst: string, src: string, size: string): string {
+  return `${dst}, ${src}, ${size}`;
+}
+
+function extractCopyarrayTupleKeys(): ReadonlySet<string> {
+  const block = requireSlice(
+    COPYARRAY_SURFACE.source,
+    "function createCopyarrayHandler",
+    "\n/** include/abilities.h",
+    "createCopyarrayHandler",
+  );
+  const candidateCount = [...block.matchAll(/if \(size ===/g)].length;
+  const tuples = [...block.matchAll(
+    /if \(size === "([^"]+)" && dst === "([^"]+)" && src === "([^"]+)"\)/g,
+  )].map((match) => copyarrayTupleKey(match[2]!, match[3]!, match[1]!));
+  if (tuples.length === 0 || tuples.length !== candidateCount || new Set(tuples).size !== tuples.length) {
+    throw new Error(
+      "executable-frontier census: createCopyarrayHandler's accepted tuple guards changed shape; "
+      + "update the mechanical extractor instead of allowing the census to drift",
+    );
+  }
+  return new Set(tuples);
+}
+
+const COPYARRAY_SUPPORTED_TUPLE_KEYS = extractCopyarrayTupleKeys();
+
+const OPERAND_SURFACE_LOCATIONS = Object.freeze({
+  B_SCR_OP_JUMPIFSTATUS2:
+    `${STATBUFFCHANGE_SURFACE.relativePath}:${sourceLineOf(STATBUFFCHANGE_SURFACE, "const JUMPIFSTATUS2_VALUES")}`,
+  B_SCR_OP_PLAYANIMATION:
+    `${STATBUFFCHANGE_SURFACE.relativePath}:${sourceLineOf(STATBUFFCHANGE_SURFACE, "const PLAYANIMATION_ANIM_TYPES")}`,
+  B_SCR_OP_COPYARRAY:
+    `${COPYARRAY_SURFACE.relativePath}:${sourceLineOf(COPYARRAY_SURFACE, "function createCopyarrayHandler")}`,
+  B_SCR_OP_PRINTFROMTABLE:
+    `${HIT_CHAIN_SURFACE.relativePath}:${sourceLineOf(HIT_CHAIN_SURFACE, "const PRINTFROMTABLE_TABLES")}`,
+});
+
+// ---------------------------------------------------------------------------
 // Registered-opcode set, read from the real production handler composition.
-// The composition needs a BattleScriptProgram and a ports bag; only opcode
-// *keys* matter here (never invoked), so a no-op Proxy stands in for ports --
-// installHandler() only closes over port functions, it never calls them at
-// registration time.
+// The composition needs a BattleScriptProgram and a ports bag. Most handlers
+// are inspected only by key; JUMPIFARRAYEQUAL is also invoked with a frozen
+// probe context once registered. The Proxy therefore reports controller-idle
+// and returns null from every other external port.
 // ---------------------------------------------------------------------------
 
 const PROGRAM = loadBattleScriptProgram();
-const noopPorts = new Proxy({}, { get: () => () => undefined }) as never;
-const handlerMap = createBattleScriptStatusRulesHandlers(PROGRAM, noopPorts);
+const probePorts = new Proxy(
+  {},
+  {
+    get: (_target, property) =>
+      property === "isControllerIdle"
+        ? () => true
+        : () => null,
+  },
+) as never;
+const handlerMap = createBattleScriptStatusRulesHandlers(PROGRAM, probePorts);
 const registeredOpcodeIds = new Set(Object.keys(handlerMap).map(Number));
 const opcodeNameById = new Map(topology.opcodes.map((o) => [o.id, o.opcode]));
 const REGISTERED_OPCODES = new Set(
   [...registeredOpcodeIds].map((id) => opcodeNameById.get(id)).filter((name): name is string => Boolean(name)),
 );
+
+const programInstructionBySourceKey = new Map(
+  PROGRAM.instructions.map((instruction) => [
+    `${instruction.source.label}:${instruction.source.statementLine}`,
+    instruction,
+  ]),
+);
+
+function probeBattler(side: 0 | 1) {
+  return Object.freeze({
+    side,
+    ability: 0,
+    hp: 100,
+    moves: Object.freeze([0, 0, 0, 0] as const),
+    pp: Object.freeze([10, 10, 10, 10] as const),
+    status1: 0,
+    status2: 0,
+    status3: 0,
+    substituteHP: 0,
+    rolloutTimer: 0,
+    furyCutterCounter: 0,
+    truantCounter: 0 as const,
+    rechargeTimer: 0,
+    flinchImmobility: 0 as const,
+    disabledMove: 0,
+    usedDisabledMove: 0 as const,
+    tauntTimer: 0,
+    usedTauntedMove: 0 as const,
+    usedImprisonedMove: 0 as const,
+  });
+}
+
+const OPERAND_PROBE_RULES = createBattleScriptRulesContext({
+  battlers: [probeBattler(0), probeBattler(1), probeBattler(0), probeBattler(1)],
+  selectorRoles: { attacker: 0, target: 1, effectBattler: 1, fainted: null },
+  scriptingBattler: 0,
+  atkCancelerTracker: 0,
+  battleOutcome: 0,
+  currentMove: 0,
+  currentMovePosition: 0,
+  moveResultFlags: 0,
+  dmgMultiplier: 1,
+  critMultiplier: 1,
+  moveEffectByte: 0,
+  missType: 0,
+  hitMarker: 0,
+  multiHitCounter: 0,
+});
 
 // ---------------------------------------------------------------------------
 // Graph indices
@@ -131,6 +313,96 @@ function firstInstruction(labelName: string, guard: Set<string> = new Set()): { 
   if (!label.nextLabel) throw new Error(`empty label ${labelName} has no successor to resolve through`);
   return firstInstruction(label.nextLabel, guard);
 }
+
+// SetMoveEffect and a few opcode handlers choose Battle Script callbacks in C
+// rather than carrying their destinations as bytecode operands. Recover those
+// fixed targets from the pinned source so operand checks also visit the hidden
+// callback scripts (e.g. recoil, item motion, and Rapid Spin cleanup).
+const BATTLE_COMMANDS_SOURCE = readFileSync(BATTLE_COMMANDS_PATH, "utf8");
+
+function extractMoveEffectCallbackTargets(): ReadonlyMap<string, readonly string[]> {
+  const tableBlock = requireSlice(
+    BATTLE_COMMANDS_SOURCE,
+    "static const u8 *const sMoveEffectBS_Ptrs[]",
+    "\nstatic const struct WindowTemplate",
+    "sMoveEffectBS_Ptrs",
+  );
+  const tableTargets = new Map<string, string>();
+  for (const match of tableBlock.matchAll(
+    /\[(MOVE_EFFECT_[A-Z0-9_]+)\]\s*=\s*(BattleScript_[A-Za-z0-9_]+)/g,
+  )) {
+    tableTargets.set(match[1]!, match[2]!);
+  }
+
+  const setMoveEffectBlock = requireSlice(
+    BATTLE_COMMANDS_SOURCE,
+    "void SetMoveEffect(bool8 primary, u8 certain)",
+    "\nstatic void Cmd_seteffectwithchance",
+    "SetMoveEffect",
+  );
+  const cases = [...setMoveEffectBlock.matchAll(/case (MOVE_EFFECT_[A-Z0-9_]+):/g)];
+  const targets = new Map<string, Set<string>>();
+  for (let index = 0; index < cases.length; index += 1) {
+    const match = cases[index]!;
+    const effect = match[1]!;
+    const start = match.index! + match[0].length;
+    const end = cases[index + 1]?.index ?? setMoveEffectBlock.length;
+    const caseBody = setMoveEffectBlock.slice(start, end);
+    const bucket = targets.get(effect) ?? new Set<string>();
+    for (const labelMatch of caseBody.matchAll(/\b(BattleScript_[A-Za-z0-9_]+)\b/g)) {
+      bucket.add(labelMatch[1]!);
+    }
+    if (caseBody.includes("sMoveEffectBS_Ptrs")) {
+      const tableTarget = tableTargets.get(effect);
+      if (!tableTarget) {
+        throw new Error(`executable-frontier census: ${effect} uses sMoveEffectBS_Ptrs but has no table row`);
+      }
+      bucket.add(tableTarget);
+    }
+    if (bucket.size > 0) targets.set(effect, bucket);
+  }
+
+  // The status1 branch selects the table before entering the family-B switch.
+  // Non-placeholder rows are real callback scripts; the repeated Sleep
+  // placeholder is intentionally ignored unless it is MOVE_EFFECT_SLEEP.
+  for (const [effect, label] of tableTargets) {
+    if (label !== "BattleScript_MoveEffectSleep" || effect === "MOVE_EFFECT_SLEEP") {
+      const bucket = targets.get(effect) ?? new Set<string>();
+      bucket.add(label);
+      targets.set(effect, bucket);
+    }
+  }
+
+  for (const [effect, labels] of targets) {
+    for (const label of labels) {
+      if (!labelsByName.has(label)) {
+        throw new Error(`executable-frontier census: ${effect}'s source-selected callback ${label} is absent from graph`);
+      }
+    }
+  }
+  return new Map([...targets].map(([effect, labels]) => [effect, [...labels]]));
+}
+
+function extractFunctionBattleScriptTargets(functionName: string, nextFunctionName: string): readonly string[] {
+  const block = requireSlice(
+    BATTLE_COMMANDS_SOURCE,
+    `static void ${functionName}(void)\n{`,
+    `\nstatic void ${nextFunctionName}`,
+    functionName,
+  );
+  const targets = new Set(
+    [...block.matchAll(/\b(BattleScript_[A-Za-z0-9_]+)\b/g)].map((match) => match[1]!),
+  );
+  if (targets.size === 0) {
+    throw new Error(`executable-frontier census: ${functionName} no longer exposes any Battle Script callback targets`);
+  }
+  return [...targets];
+}
+
+const MOVE_EFFECT_CALLBACK_TARGETS = extractMoveEffectCallbackTargets();
+const C_SELECTED_OPCODE_TARGETS: Readonly<Record<string, readonly string[]>> = Object.freeze({
+  B_SCR_OP_RAPIDSPINFREE: extractFunctionBattleScriptTargets("Cmd_rapidspinfree", "Cmd_setdefensecurlbit"),
+});
 
 // ---------------------------------------------------------------------------
 // Control-flow correction pass (extractor mechanism-level fix, ROADMAP S10 /
@@ -187,8 +459,9 @@ const NEVER_FALLS_THROUGH_OPCODES = new Set(["B_SCR_OP_FORCERANDOMSWITCH"]);
 // visits BattleScript_SuccessForceOut/BattleScript_TrainerBattleForceOut and
 // discovers SWITCHOUTABILITIES/RETURNTOBALL), not as an unresolvable
 // unresolved dynamic-jump note.
-const HARDCODED_SUCCESS_TARGETS: Readonly<Record<string, string>> = Object.freeze({
-  B_SCR_OP_FORCERANDOMSWITCH: "BattleScript_SuccessForceOut",
+const HARDCODED_SUCCESS_TARGETS: Readonly<Record<string, readonly string[]>> = Object.freeze({
+  B_SCR_OP_FORCERANDOMSWITCH: Object.freeze(["BattleScript_SuccessForceOut"]),
+  ...C_SELECTED_OPCODE_TARGETS,
 });
 
 function getOrInitEdgeBucket(map: Map<string, GraphEdge[]>, key: string): GraphEdge[] {
@@ -218,10 +491,16 @@ for (const label of graph.labels) {
     }
 
     for (const opcode of bindings) {
-      const hardcodedTarget = HARDCODED_SUCCESS_TARGETS[opcode];
-      if (!hardcodedTarget) continue;
+      const hardcodedTargets = HARDCODED_SUCCESS_TARGETS[opcode];
+      if (!hardcodedTargets) continue;
       const bucket = getOrInitEdgeBucket(correctedEdgesFromKey, key);
-      bucket.push({ from: { label: label.name, line: statement.line }, to: firstInstruction(hardcodedTarget), kind: "jump" });
+      for (const hardcodedTarget of hardcodedTargets) {
+        bucket.push({
+          from: { label: label.name, line: statement.line },
+          to: firstInstruction(hardcodedTarget),
+          kind: "jump",
+        });
+      }
     }
 
     for (const target of statement.labelOperands ?? []) {
@@ -239,17 +518,16 @@ for (const label of graph.labels) {
 const edgesFromKey = correctedEdgesFromKey;
 
 // ---------------------------------------------------------------------------
-// The one deliberate semantic exception: Cmd_seteffectwithchance's
+// The original registered-operand exception: Cmd_seteffectwithchance's
 // SetMoveEffect dispatch (applySetMoveEffect,
 // src/engine/battleScriptHitChainOpcode.ts:1760-1971, itself a source-faithful
 // port of battle_script_commands.c's Cmd_seteffectwithchance switch). The
 // opcode B_SCR_OP_SETEFFECTWITHCHANCE is registered, but which MOVE_EFFECT_*
 // byte a specific effect script feeds it (via the preceding `setmoveeffect`
 // statement, itself just a literal-operand B_SCR_OP_SETBYTE) decides whether
-// that registered opcode halts. This is the only place this census tracks an
-// operand value rather than only opcode names, because it is the only
-// production dispatcher where "opcode registered" and "this script's use of
-// it executes" diverge today (PROGRESS 444).
+// that registered opcode halts. The reachability walk below now applies the
+// same principle to every statically enumerable operand surface named in the
+// two 2026-07-28 census-hardening dossiers.
 // ---------------------------------------------------------------------------
 
 // include/constants/battle.h:247-299 -- MOVE_EFFECT_* token name -> numeric
@@ -270,6 +548,9 @@ const MOVE_EFFECT_ID_BY_NAME: Readonly<Record<string, number>> = Object.freeze({
   MOVE_EFFECT_TOXIC: 6,
   MOVE_EFFECT_CONFUSION: 7,
   MOVE_EFFECT_FLINCH: 8,
+  MOVE_EFFECT_TRI_ATTACK: 9,
+  MOVE_EFFECT_UPROAR: 10,
+  MOVE_EFFECT_PAYDAY: 11,
   MOVE_EFFECT_CHARGING: 12,
   MOVE_EFFECT_WRAP: 13,
   MOVE_EFFECT_RECOIL_25: 14,
@@ -287,6 +568,16 @@ const MOVE_EFFECT_ID_BY_NAME: Readonly<Record<string, number>> = Object.freeze({
   MOVE_EFFECT_SP_DEF_MINUS_1: 26,
   MOVE_EFFECT_ACC_MINUS_1: 27,
   MOVE_EFFECT_EVS_MINUS_1: 28,
+  MOVE_EFFECT_RECHARGE: 29,
+  MOVE_EFFECT_RAGE: 30,
+  MOVE_EFFECT_STEAL_ITEM: 31,
+  MOVE_EFFECT_PREVENT_ESCAPE: 32,
+  MOVE_EFFECT_NIGHTMARE: 33,
+  MOVE_EFFECT_ALL_STATS_UP: 34,
+  MOVE_EFFECT_RAPIDSPIN: 35,
+  MOVE_EFFECT_REMOVE_PARALYSIS: 36,
+  MOVE_EFFECT_ATK_DEF_DOWN: 37,
+  MOVE_EFFECT_RECOIL_33: 38,
   MOVE_EFFECT_ATK_PLUS_2: 39,
   MOVE_EFFECT_DEF_PLUS_2: 40,
   MOVE_EFFECT_SPD_PLUS_2: 41,
@@ -302,6 +593,8 @@ const MOVE_EFFECT_ID_BY_NAME: Readonly<Record<string, number>> = Object.freeze({
   MOVE_EFFECT_ACC_MINUS_2: 51,
   MOVE_EFFECT_EVS_MINUS_2: 52,
   MOVE_EFFECT_THRASH: 53,
+  MOVE_EFFECT_KNOCK_OFF: 54,
+  MOVE_EFFECT_SP_ATK_TWO_DOWN: 59,
 });
 const NAMED_MOVE_EFFECT_IDS = new Set(Object.values(MOVE_EFFECT_ID_BY_NAME));
 
@@ -348,6 +641,137 @@ function classifySetMoveEffectDispatch(opcodeName: string, pendingEffect: string
   };
 }
 
+const OPERAND_BLOCKER_PREFIX = "Operand gate:";
+const DYNAMIC_UNIVERSE_BLOCKER_PREFIX = "Dynamic effect-universe gate:";
+
+function operandBlocker(key: string, explanation: string): Blocker {
+  return { kind: "subsystem", detail: `${OPERAND_BLOCKER_PREFIX} ${key} -- ${explanation}` };
+}
+
+function engineRegistrationLocation(opcodeName: string): string {
+  const candidates: Array<{ path: string; line: number }> = [];
+  for (const filename of readdirSync(ENGINE_DIR)) {
+    if (!filename.endsWith(".ts")) continue;
+    const source = readFileSync(join(ENGINE_DIR, filename), "utf8");
+    const lines = source.split("\n");
+    for (let index = 0; index < lines.length; index += 1) {
+      const line = lines[index]!;
+      if (
+        line.includes(`"${opcodeName}"`)
+        && (
+          line.includes("findInstructionOpcodeId")
+          || line.includes("instruction.opcodeName")
+          || line.includes("install(")
+        )
+      ) {
+        candidates.push({ path: `src/engine/${filename}`, line: index + 1 });
+      }
+    }
+  }
+  if (candidates.length === 0) {
+    throw new Error(`executable-frontier census: cannot locate production registration for ${opcodeName}`);
+  }
+  const candidate = candidates[candidates.length - 1]!;
+  return `${candidate.path}:${candidate.line}`;
+}
+
+function probeRegisteredOperandHandler(statement: GraphStatement & { label: string }, opcodeName: string): Blocker | null {
+  if (!REGISTERED_OPCODES.has(opcodeName)) return null;
+  const instruction = programInstructionBySourceKey.get(nodeKey(statement.label, statement.line));
+  if (!instruction || instruction.opcodeName !== opcodeName) {
+    throw new Error(
+      `executable-frontier census: cannot resolve ${statement.label}:${statement.line} to ${opcodeName}'s real instruction`,
+    );
+  }
+  const handler = handlerMap[instruction.opcodeId];
+  if (!handler) throw new Error(`executable-frontier census: registered ${opcodeName} has no live handler`);
+  const initial = createBattleScriptMachine(PROGRAM, instruction.source.label, OPERAND_PROBE_RULES, 1);
+  const state = Object.freeze({ ...initial, programCounter: instruction.programCounter });
+  let transition;
+  try {
+    transition = handler(Object.freeze({ program: PROGRAM, instruction, state }));
+  } catch (error) {
+    throw new Error(
+      `executable-frontier census: live operand probe for ${opcodeName} at `
+      + `${statement.label}:${statement.line} threw: ${String(error instanceof Error ? error.message : error)}`,
+    );
+  }
+  if (transition.control.kind !== "halt" || transition.control.reason.kind !== "unsupported-branch") return null;
+  const operands = instruction.operands.map((operand) => operand.expression).join(", ");
+  const reason = transition.control.reason;
+  const key = `${opcodeName}(${operands})`;
+  return operandBlocker(
+    key,
+    `${reason.sourceConstruct} (${engineRegistrationLocation(opcodeName)}; `
+    + `${reason.sourceFile}:${reason.sourceLine})`,
+  );
+}
+
+function classifyRegisteredOperand(statement: GraphStatement & { label: string }): Blocker | null {
+  const bindings = statement.opcodeBindings ?? [];
+
+  if (bindings.includes("B_SCR_OP_JUMPIFSTATUS2") && REGISTERED_OPCODES.has("B_SCR_OP_JUMPIFSTATUS2")) {
+    const mask = statement.operandTokens[1] ?? "<missing>";
+    if (!JUMPIFSTATUS2_SUPPORTED_MASK_NAMES.has(mask)) {
+      return operandBlocker(
+        `B_SCR_OP_JUMPIFSTATUS2(${mask})`,
+        `${mask} is outside the engine's accepted status2-mask set `
+        + `(${OPERAND_SURFACE_LOCATIONS.B_SCR_OP_JUMPIFSTATUS2}; battle_script_commands.c:3096)`,
+      );
+    }
+  }
+
+  if (bindings.includes("B_SCR_OP_PLAYANIMATION") && REGISTERED_OPCODES.has("B_SCR_OP_PLAYANIMATION")) {
+    const animation = statement.operandTokens[1] ?? "<missing>";
+    if (!PLAYANIMATION_SUPPORTED_ANIMATION_NAMES.has(animation)) {
+      return operandBlocker(
+        `B_SCR_OP_PLAYANIMATION(${animation})`,
+        `${animation} is outside the engine's accepted animation-id set `
+        + `(${OPERAND_SURFACE_LOCATIONS.B_SCR_OP_PLAYANIMATION}; battle_script_commands.c:4011)`,
+      );
+    }
+  }
+
+  if (bindings.includes("B_SCR_OP_COPYARRAY") && REGISTERED_OPCODES.has("B_SCR_OP_COPYARRAY")) {
+    const instruction = programInstructionBySourceKey.get(nodeKey(statement.label, statement.line));
+    if (!instruction || instruction.opcodeName !== "B_SCR_OP_COPYARRAY") {
+      throw new Error(
+        `executable-frontier census: cannot resolve ${statement.label}:${statement.line} to COPYARRAY instruction`,
+      );
+    }
+    const [dst, src, size] = instruction.operands.map((operand) => operand.expression);
+    const tuple = copyarrayTupleKey(dst ?? "<missing>", src ?? "<missing>", size ?? "<missing>");
+    if (!COPYARRAY_SUPPORTED_TUPLE_KEYS.has(tuple)) {
+      return operandBlocker(
+        `B_SCR_OP_COPYARRAY(${tuple})`,
+        `(${tuple}) is outside the engine's accepted pointer-tuple universe `
+        + `(${OPERAND_SURFACE_LOCATIONS.B_SCR_OP_COPYARRAY}; battle_script_commands.c:3837)`,
+      );
+    }
+  }
+
+  if (bindings.includes("B_SCR_OP_PRINTFROMTABLE") && REGISTERED_OPCODES.has("B_SCR_OP_PRINTFROMTABLE")) {
+    const pointer = statement.operandTokens[0] ?? "<missing>";
+    if (!PRINTFROMTABLE_SUPPORTED_POINTER_NAMES.has(pointer)) {
+      return operandBlocker(
+        `B_SCR_OP_PRINTFROMTABLE(${pointer})`,
+        `${pointer} is outside the engine's accepted string-table pointer set `
+        + `(${OPERAND_SURFACE_LOCATIONS.B_SCR_OP_PRINTFROMTABLE}; battle_script_commands.c:2184)`,
+      );
+    }
+  }
+
+  // The Batch-1 main-lane implementation owns this currently-unregistered
+  // opcode. Probe its real installed handler once present, so this side-lane
+  // generator automatically follows the exact tuple that implementation
+  // accepts without predicting or duplicating its private representation.
+  if (bindings.includes("B_SCR_OP_JUMPIFARRAYEQUAL")) {
+    return probeRegisteredOperandHandler(statement, "B_SCR_OP_JUMPIFARRAYEQUAL");
+  }
+
+  return null;
+}
+
 // ---------------------------------------------------------------------------
 // Reachability walk
 // ---------------------------------------------------------------------------
@@ -379,12 +803,18 @@ function walk(entryLabel: string, allowConditionalForks: boolean): WalkResult {
     let nextPendingEffect = node.pendingEffect;
     if (statement.kind === "instruction") {
       for (const opcodeName of statement.opcodeBindings ?? []) opcodesUsed.add(opcodeName);
+      const operandGate = classifyRegisteredOperand(statement);
+      if (operandGate) subsystemBlockers.add(operandGate.detail);
       if (statement.mnemonic === "setmoveeffect") {
         nextPendingEffect = parseMoveEffectBase(statement.rawOperands);
       }
       if (statement.opcodeBindings?.includes("B_SCR_OP_SETEFFECTWITHCHANCE")) {
         const blocker = classifySetMoveEffectDispatch("Cmd_seteffectwithchance", node.pendingEffect);
         if (blocker) subsystemBlockers.add(blocker.detail);
+        for (const callbackLabel of MOVE_EFFECT_CALLBACK_TARGETS.get(node.pendingEffect ?? "") ?? []) {
+          const callback = firstInstruction(callbackLabel);
+          queue.push({ label: callback.label, line: callback.line, pendingEffect: null });
+        }
         nextPendingEffect = null; // finalizeSeteffectwithchance always resets moveEffectByte to 0
       }
       // Cmd_seteffectprimary (battle_script_commands.c:2941-2944, `SetMoveEffect(TRUE, 0)`) reads the
@@ -395,10 +825,14 @@ function walk(entryLabel: string, allowConditionalForks: boolean): WalkResult {
       if (statement.opcodeBindings?.includes("B_SCR_OP_SETEFFECTPRIMARY")) {
         const blocker = classifySetMoveEffectDispatch("Cmd_seteffectprimary", node.pendingEffect);
         if (blocker) subsystemBlockers.add(blocker.detail);
+        for (const callbackLabel of MOVE_EFFECT_CALLBACK_TARGETS.get(node.pendingEffect ?? "") ?? []) {
+          const callback = firstInstruction(callbackLabel);
+          queue.push({ label: callback.label, line: callback.line, pendingEffect: null });
+        }
         nextPendingEffect = null;
       }
       // Cmd_jumpifability (battle_script_commands.c:3105-3149) is registered, but the engine's own
-      // handler unconditionally barriers when the ability operand is outside its widened 4-value set
+      // handler unconditionally barriers when the ability operand is outside its live widened set
       // (battleScriptIngrainLeechSeedWrapOpcode.ts) -- regardless of which branch (jump/fallthrough) is
       // actually taken at runtime, since the check happens before the ability comparison. Same
       // "registered opcode, narrow operand" blind spot as SETEFFECTPRIMARY/SETEFFECTWITHCHANCE above.
@@ -410,6 +844,14 @@ function walk(entryLabel: string, allowConditionalForks: boolean): WalkResult {
             + "(battleScriptIngrainLeechSeedWrapOpcode.ts) -- battle_script_commands.c:3105",
           );
         }
+      }
+      if (statement.opcodeBindings?.includes("B_SCR_OP_METRONOME")) {
+        subsystemBlockers.add(
+          `${DYNAMIC_UNIVERSE_BLOCKER_PREFIX} B_SCR_OP_METRONOME(selectable-effect-universe) -- `
+          + "the selected runtime effect is not statically enumerable here, so this row remains blocked "
+          + "until every legal Metronome destination is executable (docs/ranked-single-opcodes-notes.md "
+          + "§ Metronome gate)",
+        );
       }
     }
 
@@ -531,6 +973,49 @@ function requireBlockedMentioning(effectName: string, needle: string): void {
   }
 }
 
+function requireExactMissingOpcodes(effectName: string, expectedOpcodes: string[]): void {
+  const report = reportByEffectId.get(effectIdByName(effectName))!;
+  if (report.classification.kind !== "blocked-on-opcodes") {
+    throw new Error(
+      `ground-truth drift: ${effectName} expected blocked-on-opcodes, got ${report.classification.kind}`,
+    );
+  }
+  const actual = [...report.classification.missingOpcodes].sort();
+  const expected = [...expectedOpcodes].sort();
+  const matches = actual.length === expected.length && actual.every((opcode, index) => opcode === expected[index]);
+  if (!matches) {
+    throw new Error(
+      `ground-truth drift: ${effectName} expected exact missing-opcode set [${expected.join(", ")}], got `
+      + `[${actual.join(", ")}]`,
+    );
+  }
+}
+
+function requireExactMechanicalBlockers(effectName: string, expectedBlockers: string[]): void {
+  const report = reportByEffectId.get(effectIdByName(effectName))!;
+  const notes = report.classification.kind === "executable"
+    ? []
+    : report.classification.kind === "blocked-on-opcodes"
+      ? report.classification.subsystemNotes
+      : report.classification.notes;
+  const actual = notes
+    .filter(
+      (note) =>
+        note.startsWith(OPERAND_BLOCKER_PREFIX)
+        || note.startsWith(DYNAMIC_UNIVERSE_BLOCKER_PREFIX),
+    )
+    .map((note) => note.split(" -- ")[0]!)
+    .sort();
+  const expected = [...expectedBlockers].sort();
+  const matches = actual.length === expected.length && actual.every((blocker, index) => blocker === expected[index]);
+  if (!matches) {
+    throw new Error(
+      `ground-truth drift: ${effectName} expected exact mechanical blocker set [${expected.join(", ")}], got `
+      + `[${actual.join(", ")}]`,
+    );
+  }
+}
+
 const validationChecks: Array<() => void> = [
   // Registration checkpoint (2026-07-25): B_SCR_OP_JUMPIFHALFWORD,
   // B_SCR_OP_JUMPIFSTATUS3CONDITION, and B_SCR_OP_ORWORD are now registered,
@@ -546,21 +1031,13 @@ const validationChecks: Array<() => void> = [
   () => requireExecutable("EFFECT_BURN_HIT"),
   () => requireExecutable("EFFECT_FREEZE_HIT"),
   () => requireExecutable("EFFECT_PARALYZE_HIT"),
-  // Primary status-move opcode cluster registration
-  // (docs/status-cluster-ground-truth.md): Cmd_seteffectprimary +
-  // Cmd_jumpifstatus/Cmd_jumpiftype/Cmd_jumpifsideaffecting/
-  // Cmd_jumpifcantmakeasleep are now registered, so all five of this
-  // cluster's effects flip to executable by this tool's own static
-  // opcode-reachability walk. EFFECT_TOXIC/POISON/PARALYZE/CONFUSE's
-  // additional real-correctness dependency on Cmd_jumpifability/
-  // Cmd_jumpifstatus2's concrete-value widening (also done this session,
-  // battleScriptIngrainLeechSeedWrapOpcode.ts/battleScriptStatbuffchangeOpcode.ts)
-  // is exactly the "registered opcode, narrow-input barrier" gap this tool's
-  // own Caveats section already documents as invisible to this walk.
+  // Primary status-move callback operand restoration: the sleep string table
+  // and the two source-exact copyarray tuples now execute semantically.
   () => requireExecutable("EFFECT_SLEEP"),
   () => requireExecutable("EFFECT_TOXIC"),
   () => requireExecutable("EFFECT_POISON"),
   () => requireExecutable("EFFECT_PARALYZE"),
+  () => requireExecutable("EFFECT_YAWN"),
   () => requireExecutable("EFFECT_CONFUSE"),
   // MOVE_EFFECT_CONFUSION/MOVE_EFFECT_FLINCH registration (this session):
   // zero new opcodes for either, so both flip straight to executable.
@@ -568,9 +1045,20 @@ const validationChecks: Array<() => void> = [
   () => requireExecutable("EFFECT_FLINCH_HIT"),
   () => requireExecutable("EFFECT_FLINCH_MINIMIZE_HIT"),
   () => requireExecutable("EFFECT_TWISTER"),
-  // TRI_ATTACK recurses into a re-rolled SetMoveEffect call and stays a named
-  // (b) barrier -- out of this session's scope.
-  () => requireBlockedMentioning("EFFECT_TRI_ATTACK", "MOVE_EFFECT_TRI_ATTACK"),
+  // Family-B cluster 1: source-complete dispatch plus all C-selected
+  // callbacks execute through their committed tails.
+  () => requireExecutable("EFFECT_TRI_ATTACK"),
+  () => requireExecutable("EFFECT_RECHARGE"),
+  () => requireExecutable("EFFECT_RAGE"),
+  () => requireExecutable("EFFECT_ALL_STATS_UP_HIT"),
+  () => requireExecutable("EFFECT_SMELLINGSALT"),
+  () => requireExecutable("EFFECT_SUPERPOWER"),
+  () => requireExecutable("EFFECT_OVERHEAT"),
+  // Operand-mechanical census hardening (2026-07-28): the recoil callback is
+  // source-selected rather than a bytecode label operand, but its Rock Head
+  // value is in the engine's live JUMPIFABILITY set, so the row stays a true
+  // positive after the callback itself is walked.
+  () => requireExecutable("EFFECT_RECOIL"),
   // A real positive: EFFECT_RECOIL_IF_MISS (Jump Kick/Hi Jump Kick) enters via
   // BattleScript_HitFromAtkString directly, skipping BattleScript_EffectHit's
   // own label entirely, and its whole reachable set -- including the shared
@@ -604,20 +1092,45 @@ const validationChecks: Array<() => void> = [
   // ISSUES #45 fix: classifySetMoveEffectDispatch now also intercepts
   // B_SCR_OP_SETEFFECTPRIMARY (previously only SETEFFECTWITHCHANCE), and a new
   // jumpifability value-coverage check catches ability operands outside the
-  // engine's widened 4-value set. These four rows were PROGRESS 473's own
-  // named false positives -- pinned blocked now that the census actually
-  // checks the operand, not just the opcode name.
-  // EFFECT_RAGE's own blocked-on-opcodes/blocked-on-subsystem KIND moved this
-  // session (see below) because the control-flow fix newly walks its
-  // previously-unreachable BattleScript_RageMiss branch (accuracycheck's
-  // failPtr operand, never modeled as an edge before this fix) and discovers
-  // a genuine B_SCR_OP_CLEARSTATUSFROMEFFECT gap there; this check's own
-  // needle-substring assertion still passes unmodified either way, since it
-  // checks both missingOpcodes and subsystemNotes together.
-  () => requireBlockedMentioning("EFFECT_RAGE", "MOVE_EFFECT_RAGE"),
-  () => requireBlockedMentioning("EFFECT_MEAN_LOOK", "MOVE_EFFECT_PREVENT_ESCAPE"),
-  () => requireBlockedMentioning("EFFECT_NIGHTMARE", "MOVE_EFFECT_NIGHTMARE"),
-  () => requireBlockedMentioning("EFFECT_WILL_O_WISP", "ABILITY_WATER_VEIL"),
+  // engine's widened ability set. These four rows were PROGRESS 473's own
+  // named false positives. Cluster 3 now source-completes both operand gates
+  // and SetMoveEffect cases, so these ratchets deliberately flip positive.
+  () => requireExecutable("EFFECT_MEAN_LOOK"),
+  () => requireExecutable("EFFECT_NIGHTMARE"),
+  () => requireExecutable("EFFECT_WILL_O_WISP"),
+  () => requireExecutable("EFFECT_HAZE"),
+  // Exact per-operand blocker sets. These deliberately pin only rows whose
+  // hidden blocker is mechanically visible to the new handler-surface gates;
+  // state/consumer-only dossiers (including Hidden Power IV ownership) stay
+  // unpinned so concurrent opcode work can merge without a false ratchet.
+  () => requireExactMechanicalBlockers("EFFECT_MEAN_LOOK", []),
+  () => requireExactMechanicalBlockers("EFFECT_NIGHTMARE", []),
+  () => requireExactMechanicalBlockers("EFFECT_WILL_O_WISP", []),
+  () => requireExactMechanicalBlockers("EFFECT_HAZE", []),
+  () => requireExecutable("EFFECT_THIEF"),
+  () => requireExactMechanicalBlockers("EFFECT_THIEF", []),
+  () => requireExecutable("EFFECT_KNOCK_OFF"),
+  () => requireExactMechanicalBlockers("EFFECT_KNOCK_OFF", []),
+  () => requireExecutable("EFFECT_PAY_DAY"),
+  // Family-B Cluster 3's final rung: Cmd_rapidspinfree, its Wrap-return
+  // copy tuple, and MOVE_EFFECT_RAPIDSPIN's C-selected callback are live.
+  () => requireExecutable("EFFECT_RAPID_SPIN"),
+  () => requireExactMechanicalBlockers("EFFECT_RAPID_SPIN", []),
+  // Ranked Batch 3: the source scratch, Shell Bell suppression, exact copy
+  // tuple, and both HP controller writes are now represented end-to-end.
+  () => requireExecutable("EFFECT_PAIN_SPLIT"),
+  () => requireExactMechanicalBlockers("EFFECT_PAIN_SPLIT", []),
+  // Ranked Batch 3 shared counter/lifetime subsystem: all three handlers,
+  // both print tables, Spit Up's Protect comparand, and the hit/heal tails.
+  () => requireExecutable("EFFECT_STOCKPILE"),
+  () => requireExecutable("EFFECT_SWALLOW"),
+  () => requireExecutable("EFFECT_SPIT_UP"),
+  () => requireExactMechanicalBlockers("EFFECT_STOCKPILE", []),
+  () => requireExactMechanicalBlockers("EFFECT_SWALLOW", []),
+  () => requireExactMechanicalBlockers("EFFECT_SPIT_UP", []),
+  () => requireExactMechanicalBlockers("EFFECT_METRONOME", [
+    "Dynamic effect-universe gate: B_SCR_OP_METRONOME(selectable-effect-universe)",
+  ]),
   // Registration checkpoint (2026-07-27, docs/roar-multihit-registration-
   // scout.md §4 rungs 2-6): B_SCR_OP_INITMULTIHITSTRING/B_SCR_OP_JUMPIFHASNOHP
   // registered, plus the JUMPIFHALFWORD (gChosenMove) and JUMPIFBYTE
@@ -759,6 +1272,10 @@ type OpcodeSetRank = {
 const rankByOpcodeSet = new Map<string, OpcodeSetRank>();
 for (const row of effectRows) {
   if (row.report.classification.kind !== "blocked-on-opcodes") continue;
+  // A missing-opcode row with an independent operand/subsystem note is not
+  // unlocked by registering that opcode set, so presenting it in this table
+  // would recreate the ranked-dossier false premise this hardening fixes.
+  if (row.report.classification.subsystemNotes.length > 0) continue;
   const opcodes = [...row.report.classification.missingOpcodes].sort();
   const key = opcodes.join(" + ");
   const existing = rankByOpcodeSet.get(key);
@@ -867,7 +1384,8 @@ lines.push(
 lines.push("");
 lines.push(
   "\"Executable\" means every opcode on every statically reachable path from the effect's entry script "
-  + "has a dispatch entry today (registered barriers included, per ROADMAP S10 §1's (a)/(b) policy). "
+  + "has a dispatch entry today and every use of the explicitly tracked narrowed operand surfaces is accepted. "
+  + "Other registered runtime barriers remain included per ROADMAP S10 §1's (a)/(b) policy. "
   + "It is not a semantic-correctness claim -- see Caveats.",
 );
 lines.push("");
@@ -877,8 +1395,8 @@ lines.push("");
 lines.push(
   "Each row is an exact set of missing opcodes -- registering only *some* of a multi-opcode set would not "
   + "unlock these effects, so opcodes are grouped by the combination an effect actually needs, not credited "
-  + "individually. Effects already blocked only on a subsystem note (no missing opcode) are not rankable "
-  + "here; see the per-effect table.",
+  + "individually. Any effect with an independent subsystem/operand note is not rankable here even when it "
+  + "also has missing opcodes, because opcode registration alone would not unlock it; see the per-effect table.",
 );
 lines.push("");
 lines.push("| Missing opcode(s) | Effects unlocked | Moves unlocked (unweighted) | Factory-L50 moves (unweighted) | Factory-L50 weighted |");
@@ -919,7 +1437,20 @@ lines.push(
   + "and B_SCR_OP_JUMPIFHALFWORD/JUMPIFSTATUS3CONDITION/ORWORD (registered 2026-07-25) closed the "
   + "shared-entry chokepoint that used to block all five on an unrelated instruction",
 );
-lines.push("- `EFFECT_SLEEP`, `EFFECT_TOXIC` blocked, mentioning `Cmd_seteffectprimary` (still fully unregistered)");
+lines.push(
+  "- `EFFECT_SLEEP`, `EFFECT_TOXIC`, `EFFECT_POISON`, `EFFECT_PARALYZE`, and `EFFECT_YAWN` executable after "
+  + "semantic restoration of their exact `PRINTFROMTABLE`/`COPYARRAY` callback operands (2026-07-28); "
+  + "the hardened walk's former blocker pins now require all five to remain executable",
+);
+lines.push(
+  "- `EFFECT_RECOIL` executable with its source-selected recoil callback walked: "
+  + "`ABILITY_ROCK_HEAD` is accepted by the engine's live `JUMPIFABILITY` surface",
+);
+lines.push(
+  "- Mean Look/Nightmare, Thief/Knock Off, Rapid Spin, Pain Split, Stockpile/Swallow, and Metronome each "
+  + "have an exact operand/dynamic-universe blocker-set ratchet; Rapid Spin and Pain Split also retain their "
+  + "exact missing-opcode sets",
+);
 lines.push("- `EFFECT_RECOIL_IF_MISS` executable (a real positive: it enters via `BattleScript_HitFromAtkString`, skipping the chokepoint entirely, and reaches moveend/checkteamslost)");
 lines.push(
   "- `EFFECT_ATTACK_DOWN_HIT`, `EFFECT_DEFENSE_DOWN_HIT`, `EFFECT_SPEED_DOWN_HIT`, "
@@ -966,23 +1497,30 @@ lines.push("## Caveats (read before trusting a number here)");
 lines.push("");
 lines.push(
   "- **Registration coverage, not semantic verification.** \"Executable\" means every reachable opcode "
-  + "has a dispatch entry, not that its behavior is bit-exact or complete. A registered opcode with a "
-  + "narrow (b)-policy barrier still counts as \"registered\" per ROADMAP S10 §1 unless it is the one "
-  + "named exception below.",
+  + "has a dispatch entry and the tracked static operand gates accept that script's operands, not that behavior "
+  + "is bit-exact or every durable consumer exists. Registered runtime/state barriers still count as "
+  + "\"registered\" per ROADMAP S10 §1 unless they are one of the explicit static gates below.",
 );
 lines.push(
-  "- **One deliberate semantic exception:** `Cmd_seteffectwithchance`'s SetMoveEffect dispatch "
+  "- **Tracked registered-operand gates.** `Cmd_seteffectwithchance`/`Cmd_seteffectprimary`'s SetMoveEffect dispatch "
   + "(`applySetMoveEffect`, `src/engine/battleScriptHitChainOpcode.ts:1760-1971`) is opcode-registered but "
   + "internally branches on the `MOVE_EFFECT_*` byte a script sets via the preceding `setmoveeffect` "
-  + "statement. This is the only production dispatcher today where opcode registration and per-script "
-  + "executability diverge (PROGRESS 444), so this census specifically tracks that one operand value along "
-  + "each walk -- reading the supported-byte set live from the engine's own exported "
+  + "statement. The census tracks that operand along each walk, reading the supported-byte set live from "
+  + "the engine's own exported "
   + "`SET_MOVE_EFFECT_SUPPORTED_BYTES` (ISSUES #44) rather than a second hand-maintained copy, with a "
   + "name<->id lookup table guarded by an assertion that fails the run if the engine's dispatch grows an id "
-  + "this tool cannot name yet. Every other multi-branch dispatcher's internal barriers are *not* modeled "
-  + "operand-by-operand here -- if a future dispatcher gains the same pattern (registered opcode, "
-  + "narrow-input barrier), this tool will overstate its effects as fully executable until a similar tracked "
-  + "exception is added.",
+  + "this tool cannot name yet. It also reads `JUMPIFSTATUS2`, `PLAYANIMATION`, `COPYARRAY`/`COPYBYTE`, and "
+  + "`PRINTFROMTABLE` acceptance directly from the private production declarations that enforce them; "
+  + "`JUMPIFABILITY` keeps using its engine-exported live set. `JUMPIFARRAYEQUAL` is probed through its real "
+  + "installed handler once registered. An unaccepted operand is a subsystem blocker even though the opcode "
+  + "itself is installed. Other registered multi-branch runtime barriers are not modeled operand-by-operand.",
+);
+lines.push(
+  "- **Fixed C-selected callbacks.** SetMoveEffect callback labels and `Cmd_rapidspinfree`'s cleanup labels "
+  + "do not appear as bytecode operands, so the committed graph cannot expose them. The census derives those "
+  + "fixed labels from the pinned `battle_script_commands.c` and walks them as additional paths. This is what "
+  + "makes recoil's Rock Head gate, Thief/Knock Off's item animations, and Rapid Spin's Wrap-return copy tuple "
+  + "visible without hand-maintaining callback labels.",
 );
 lines.push(
   "- **Call/return modeling.** A `call` edge is treated as reaching *both* the callee's entry (to collect "
@@ -999,10 +1537,12 @@ lines.push(
   + "reconverges to the same later instruction. This under-claims \"main path\" rather than over-claiming it.",
 );
 lines.push(
-  "- **Dynamic dispatch, two categories.** `B_SCR_OP_JUMPTOCALLEDMOVE` (Metronome/Sleep Talk/Assist-style "
+  "- **Dynamic dispatch, three categories.** `B_SCR_OP_JUMPTOCALLEDMOVE` (Sleep Talk/Assist-style "
   + "\"run another move's effect script\") has a runtime-computed target with no static label operand. The "
   + "called script is not walked from that call site; once the dynamic opcode itself is registered, the caller "
-  + "is executable and each possible called effect remains accountable in its own census row. Separately, "
+  + "is executable and each possible called effect remains accountable in its own census row. Metronome is the "
+  + "explicit exception: its legal selectable universe is the move's entire contract, so its own row retains a "
+  + "named dynamic-universe blocker even after opcode registration and cannot appear as a one-opcode win. Separately, "
   + "`B_SCR_OP_FORCERANDOMSWITCH`'s success target (`BattleScript_SuccessForceOut`) is fixed at compile time but "
   + "never spelled as a bytecode operand -- `Cmd_forcerandomswitch` writes `gBattlescriptCurrInstr` directly "
   + "(`battle_script_commands.c:7181`) instead of reading one. Since that target IS statically known, it is "

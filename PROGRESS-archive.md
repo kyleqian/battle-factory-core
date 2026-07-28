@@ -1,4 +1,640 @@
 ---
+## 632 — [BOUNDED MAIN WORKER 2026-07-28 ~14:00] Type-change setters source-complete
+
+- **State:** tree green at **402 files / 4564 tests**, production build, OFF
+  oracle info, and `git diff --check`. Census is exactly **202/214 effects,
+  342/355 moves, 275/276 distinct, 2955/2957 weighted**: assigned-baseline
+  delta **+3/+3/+0/+0**; all **70** census validations pass.
+- **Did:** registered source-exact Conversion, Conversion 2, and Camouflage
+  setters against the existing active-type owner plus a typed type-name
+  buffer. Conversion preserves occupied-prefix/full-four-slot rejection
+  sampling and Mystery remapping. Conversion 2 preserves no-history/two-turn
+  failure, table-index rejection sampling, the 1,000-attempt fallback, and
+  Emerald's stale-`i` fallback predicate bug. Camouflage carries the complete
+  ten-environment map; Factory Building resolves to Normal.
+- **Next:** supervisor verify commit `c664b145`; resume tail-plan row 3b
+  environment attacks. Do not expand this worker into Charge/Sports,
+  Transform, Metronome, or other tail rows.
+- **Notes:** every success/failure script walk reaches END and canonical
+  replay is exact. Conversion's rejection sample draws **16838, 44065**
+  (seed 1). Conversion 2's exact samples draw once (**33676**) and twice
+  (**33676, 28355**, seed 2); its forced fallback accepts 1,000 indices via
+  **1,140** raw draws (seed 1, final **41163**). Deliberate handler exact-set
+  pin **193→196**. No barriers, recording imports, presentation, round, tick,
+  roadmap, issue, or oracle-trace changes.
+
+---
+## 631 — [BOUNDED MAIN WORKER 2026-07-28 ~13:49] Last-move family source-complete
+
+- **State:** tree green at **401 files / 4556 tests**, production build, OFF
+  oracle info, and `git diff --check`. Census is exactly **199/214 effects,
+  339/355 moves, 275/276 distinct, 2955/2957 weighted**: assigned-baseline
+  delta **+3/+3/+0/+0**; all **70** census validations pass.
+- **Did:** registered source-exact Mirror Move, Mimic, and Sketch consumers of
+  the existing packed move-end histories. Mirror Move prefers its packed
+  last-taken cell, otherwise draws exactly once from the per-source list,
+  suppresses Pressure on empty failure, retargets, and dynamically jumps into
+  the selected effect. Mimic owns every forbidden/duplicate/Transform and
+  script-level Substitute gate, temporary slot/PP≤5 write, volatile bit, and
+  typed move message. Sketch owns its exact gates plus atomic active/controller/
+  durable-party moves, PP, and PP-bonus persistence and typed move message.
+- **Next:** supervisor verify commits `9850db3a`, `5a3bca4e`, and `96b310cf`;
+  resume the ranked tail plan. Do not expand this worker into Metronome,
+  Transform, type-change, or other tail rows.
+- **Notes:** Mirror Move's executable Splash selection reaches END; its blocked
+  Snatch selection honestly halts on `B_SCR_OP_TRYSETSNATCH`, confirming the
+  census keeps the selected universe in each selected effect's row. Fallback
+  candidate selection draws once (**16838**, seed 1); preferred/failure,
+  Mimic, and Sketch draw zero. Full success/failure walks and canonical
+  replays are exact. Deliberate handler exact-set pin **190→193**. Sketch adds
+  the source `REQUEST_MOVES_PP_BATTLE` semantic event and `ppBonuses` active/
+  party owner; no barriers, recording imports, presentation, round, tick,
+  roadmap, issue, or oracle-trace changes.
+---
+## 630 — [BOUNDED MAIN WORKER 2026-07-28 ~13:32] Audit fixes #50–#52 plus plausible pair source-complete
+
+- **State:** all assigned rungs are green at **398 files / 4528 tests**, production
+  build, OFF oracle info, and `git diff --check`; census remains
+  **196/214 effects, 336/355 moves, 275/276 distinct, 2955/2957 weighted**.
+- **Did:** closed ISSUES #51 by routing successful Sleep and Freeze writes
+  through the existing source-complete `CancelMultiTurnMoves` reducer before
+  status1 is written. Closed ISSUES #52 with typed item slots for both Trick
+  buffers in source order; Furret's result event now carries `LEFTOVERS` then
+  `CHOICE BAND`. Closed ISSUES #50 by extending party records with the source
+  switch payload and rebuilding the incoming battler's ability, IVs,
+  personality, level, friendship, HP ceiling, and battle stats. Tests pin
+  Role Play ability retirement, incoming-IV Hidden Power, incoming-maxHP
+  Swallow, and the unchanged Baton Pass carve-outs. Closed the plausible pair:
+  `seteffectprimary` clears its effect selector before callback resumption,
+  while Heal Bell's `RecordAbilityBattle` calls leave `lastUsedAbility`
+  untouched.
+- **Next:** supervisor verify commits `31702fd6`, `642b1ae6`, `ce0cbd6f`, and
+  the final plausible-pair commit; resume the ranked tail plan afterward.
+- **Notes:** the reducer clears every engine-owned source field: multi-turn,
+  Thrash/Petal Dance lock, Uproar, Bide, semi-invulnerability, Rollout timer,
+  and Fury Cutter counter. Source `gLockedMoves` has no engine-owned readback
+  and is correctly not part of `CancelMultiTurnMoves`. Trick's display names
+  come from the source-extracted Factory item table. Factory party adapters
+  materialize their source-fixed IV 3 and controller-computed stats. No
+  executability, census, barrier, recording-import, presentation, round,
+  tick, roadmap, or canonical-replay pin changed; the obsolete stale-ability
+  assertion moved because the replacement behavior is source-correct. The
+  primary clear is observable at its pushed callback boundary; it deliberately
+  preserves `multiHitEffect`, matching the distinct source dispatchers.
+
+
+---
+## 629 — [BOUNDED MAIN WORKER 2026-07-28 ~13:11] Bide setter and release handoff source-complete
+
+- **State:** tree green at **399 files / 4524 tests**, production build, OFF
+  oracle info, and `git diff --check`. Census is exactly **196/214 effects,
+  336/355 moves, 275/276 distinct, 2955/2957 weighted**: assigned-baseline
+  delta **+1/+1/+0/+0**; all **70** census validations pass.
+- **Did:** registered source-exact `SETBIDE`: two-turn counter, multi-turn
+  lock, current-move lock, and attacker-only accumulated-damage zero. Physical
+  and special `datahpupdate` damage feed the existing accumulator/target; the
+  existing canceler stores, restores the saved target, doubles damage, and
+  selects release/no-energy. Closed the release script's hidden existing-state
+  handoff for `copyword gBattleMoveDamage, sBIDE_DMG`.
+- **Next:** supervisor verify this commit, then take the dossier's last-move
+  family step. Do not expand into Metronome or other tail rows from this worker.
+- **Notes:** full setup, storing, positive release, and no-energy scripts reach
+  END. The release proof accumulates **17 physical + 23 special → 80 damage**
+  and draws exactly once for accuracy (**16838**, seed 1); all other Bide
+  steps draw zero. Canonical replay is exact. Deliberate handler exact-set pin
+  **189→190**; Bide's census opcode blocker is now empty. No new barriers,
+  recording imports, presentation, round, tick, roadmap, issue, or trace
+  changes.
+
+---
+## 628 — [BOUNDED MAIN WORKER 2026-07-28 ~13:01] Present + Memento + Role Play + Recycle source-complete
+
+- **State:** tree green at **397 files / 4519 tests**, production build, OFF
+  oracle info, and `git diff --check`. Census is exactly **195/214 effects,
+  335/355 moves, 275/276 distinct, 2955/2957 weighted**: assigned-baseline
+  delta **+4/+4/+4/+4**; all **70** census validations pass.
+- **Did:** source-ported Present's exact low-byte damage/heal bands; Memento's
+  minimized-stat/Protect/Substitute gates, self-faint ordering, and terminal
+  checkteamslost handoff; Role Play's exact NONE/Wonder Guard exclusions and
+  ability-name message substitution; Recycle's consumed-item ledger,
+  `removeitem` writer, active/party restore, and item-name message.
+- **Next:** supervisor verify commits `dd5fd24c`, `7eb51f0b`, `076990f4`,
+  and `40e742f2`; all four assigned flips are complete. Resume the ranked
+  order without expanding into Metronome or zero-Factory-weight rows.
+- **Notes:** predicted-vs-actual is **+1/+1/+1/+1 for every effect**, with
+  zero shortfall. Present damage/heal ledgers are 5/2 draws; the other three
+  effects draw zero. Memento exposed and closed one hidden registered-opcode
+  operand gap (`B_MSG_DEFENDER_STAT_FELL`). Deliberate exact-set move:
+  handler surface **185→189**; the regenerated per-effect blocker rows are
+  executable. No new barriers, recording imports, presentation, round, tick,
+  roadmap, issue, or oracle-trace changes.
+
+---
+## 627 — [BOUNDED MAIN WORKER 2026-07-28 ~12:41] Will-O-Wisp + Haze source-complete
+
+- **State:** tree green at **393 files / 4494 tests**, production build, OFF
+  oracle info, and `git diff --check`. Census is exactly **191/214 effects,
+  331/355 moves, 271/276 distinct, 2951/2957 weighted**: inherited-baseline
+  delta **+2/+2/+2/+11**; all **70** census validations pass.
+- **Did:** widened `Cmd_jumpifability` to source value 41/Water Veil and
+  walked Will-O-Wisp success, immunity, and already-statused paths through
+  the existing burn callback to END. Registered `NORMALISEBUFFS` as the
+  source loop over every battler/all eight stage slots; Haze changes no
+  status or DisableStruct state.
+- **Next:** supervisor verify commits `6c2fdbbb` and `7fae3e10`; both assigned
+  flips are complete. Resume the supervisor's ranked order without expanding
+  into Present, Memento, Role Play, Recycle, Metronome, or zero-weight rows.
+- **Notes:** Will-O-Wisp success draws accuracy exactly once; Water Veil and
+  already-statused branches draw zero. Haze draws zero and is tested after
+  six real prior moves per side stage all seven relevant stats. Canonical
+  replays are exact. Deliberate exact-set moves: Will-O-Wisp's Water Veil
+  blocker and Haze's opcode blocker now require executable/empty; handler
+  surface **184→185**. No new barriers, recording imports, presentation,
+  round, tick, roadmap, issue, or oracle-trace changes.
+
+---
+## 626 — [BOUNDED MAIN WORKER 2026-07-28 ~12:29] Family-B Cluster 4 source-complete
+
+- **State:** tree green at **392 files / 4487 tests**, production build, OFF
+  oracle info, and `git diff --check`. Census is exactly **189/214 effects,
+  329/355 moves, 269/276 distinct, 2940/2957 weighted**: Pay Day adds
+  **+1/+1/+0/+0** over committed rung (a); all **67** census validations pass.
+- **Did:** added source-exact player-side `level * 5` u16 Pay Day accumulation
+  with wrap saturation and the shared zero-HP exception; registered
+  `givepaydaymoney` with multiplier, link/recorded-link/no-pot exclusions,
+  payout message buffer, and the source 999999 save-money cap.
+- **Next:** supervisor verify commits `4bc6759b` and `510f602c`; Cluster 4 has
+  no remainder, so resume the supervisor's ranked order.
+- **Notes:** Pay Day is intentionally Tier-1/source-only because the census
+  confirms zero Factory-L50 carriers. Tests pin player/opponent side, target
+  faint, saturation, payout/cap, multiplier, exclusions, full script to END,
+  canonical replay, and exact four-draw move / zero-draw payout ledgers. No
+  new barriers, recording imports, presentation, round, tick, roadmap, issue,
+  or oracle-trace changes.
+
+---
+## 625 — [BOUNDED MAIN WORKER 2026-07-28 ~12:23] Cluster 4 rung (a) item ownership implemented
+
+- **State:** tree green at **392 files / 4479 tests**, production build, and
+  `git diff --check`. Census is exactly **188/214 effects, 328/355 moves,
+  269/276 distinct, 2940/2957 weighted**: inherited-baseline delta
+  **+2/+3/+2/+8**; all **66** census validations pass.
+- **Did:** source-ported Thief/Covet's complete battle-type/knocked-off/
+  Sticky Hold/item gates, persistent held-item controller writes,
+  `changedItems`/`lastUsedItem`, and Choice clearing; source-ported Knock
+  Off's active-only clear, per-side party-slot mask, Sticky Hold branch, and
+  switch-in suppression. Both item-animation operands are semantic.
+- **Next:** finish full verification and commit rung (a), then implement Pay
+  Day's source pot plus `givepaydaymoney` consumer only if the time box remains
+  safe.
+- **Notes:** receipt pins cover Covet active+party transfer, damage/PP through
+  Sticky Hold, zero-HP steal, occupied/empty/Enigma/Mail no-ops, Knock Off's
+  active-clear/party-intact asymmetry, Choice clear, Sticky Hold/no-item,
+  switch persistence, full scripts to END, canonical replay, and exact
+  four-draw ledgers. No new barriers, recording imports, presentation,
+  round, tick, roadmap, issue, or oracle-trace changes.
+
+---
+## 624 — [BOUNDED MAIN WORKER 2026-07-28 ~12:16] Rapid Spin cleanup source-complete
+
+- **State:** tree green at **391 files / 4466 tests**, production build, OFF
+  oracle info, and `git diff --check`. Census is exactly **186/214 effects,
+  325/355 moves, 267/276 distinct, 2932/2957 weighted**: inherited-baseline
+  delta **+1/+1/+1/+1**; all **64** census validations pass.
+- **Did:** registered source-order `RAPIDSPINFREE`: Wrap saves/restores the
+  original target, clears trapping plus `wrappedBy`, and prepares the typed
+  wrapped-move message; Leech Seed clears status plus owner bits; same-side
+  Spikes clears its status plus layer count. The exact
+  `gBattlerTarget <- sBATTLER` copy tuple and family-B byte are executable.
+- **Next:** supervisor verify this commit. Rapid Spin has no remainder; resume
+  the supervisor's ranked order without expanding into Thief/Knock Off/Pay
+  Day or Metronome from this worker.
+- **Notes:** all individual conditions, all-set priority, none-set no-op,
+  full committed script to END, deterministic replay, and cleanup-local zero
+  RNG are pinned. Deliberate exact-set moves: Rapid Spin's missing-opcode and
+  copy-tuple blockers now require executable; handler surface **182→183**.
+  No new barriers, recording imports, presentation, round, tick, roadmap,
+  issue, or oracle-trace changes.
+
+---
+## 623 — [BOUNDED MAIN WORKER 2026-07-28 ~12:02] Ranked Batch 3 source-complete
+
+- **State:** tree green at **391 files / 4460 tests**, production build, OFF
+  oracle info, and `git diff --check`. Census is exactly **185/214 effects,
+  324/355 moves, 266/276 distinct, 2931/2957 weighted**: inherited Batch-3
+  delta **+4/+4/+4/+7**; all **64** census validations pass.
+- **Did:** registered `PAINSPLITDMGCALC` plus the signed `painSplitHp` copy
+  tuple and Shell Bell suppression; registered all three Stockpile-family
+  handlers with a shared 0..3 switch/faint/Baton-cleared counter, both exact
+  print tables, corrected 1/4–1/2–full Swallow healing, and source
+  post-base-damage Spit Up scaling/Helping Hand/Protect behavior. All four
+  committed scripts reach END with deterministic replays and exact ledgers.
+- **Next:** supervisor verify commits `7c2dcb02` and `b375e333`; Batch 3 has
+  no remainder. Then resume entry 622's bounded Rapid Spin rung unless the
+  supervisor reprioritizes the already-banked Cluster-4 item receipts.
+- **Notes:** receipt pins include Pain Split **117/100→108/108**, PP 20→19,
+  zero draws; Swallow **67→150** at counter 2; fourth Stockpile failure.
+  Spit Up remains source/hermetic-only by the banked carrier rule. Deliberate
+  census moves: Pain Split/Stockpile/Swallow/Spit Up exact blocker pins now
+  require executable; no barrier-count, recording-import, presentation,
+  round, tick, roadmap, issue, or oracle-trace changes.
+
+---
+## 622 — [BOUNDED MAIN WORKER 2026-07-28 ~11:38] Mean Look + Nightmare source-complete; Rapid Spin remains barriered
+
+- **State:** rung (a) is green at **389 files / 4441 tests** plus production
+  build and OFF oracle info. Census is **181/214 effects, 320/355 moves,
+  262/276 distinct, 2924/2957 weighted**: actual **+2/+4/+4/+8**, exactly
+  the dossier's rung-(a) prediction; all 62 census validations pass.
+- **Did:** widened every committed `jumpifstatus2` operand and Mean Look's
+  previously-undocumented bare `NO_ACC_CALC`; added source-shaped
+  `battlerPreventingEscape`, owner-sensitive switch/faint/Roar release, and
+  trapped command rejection; wired Nightmare at the real end-turn phase
+  with floor(maxHP/4), wake cleanup, party HP sync, and zero RNG.
+  Receipt pins cover `0x04000000`/`0x08000000`, 116→87→58, no post-wake
+  tick, release, duplicate/Substitute/awake failures, and full scripts to END.
+- **Next:** implement rung (b) only: `B_SCR_OP_RAPIDSPINFREE`, the
+  `gBattlerTarget <- sBATTLER` copy tuple, typed wrapped-move buffer/message,
+  then retire `MOVE_EFFECT_RAPIDSPIN`; expect **+1/+1/+1/+1** to
+  182/214, 321/355, 263/276, 2925/2957.
+- **Notes:** correction headline: dossier §3.7 missed bare `NO_ACC_CALC` as a
+  real Mean Look barrier; recorded in place. Deliberate barrier ratchet
+  moves: HitChain **19→18**, Switchin **9→8**. Rapid Spin, Thief, Knock Off,
+  and Pay Day remain honestly barriered; no presentation/round/tick changes.
+
+---
+## 621 — [SUPERVISOR VERIFY+FOLD 2026-07-28 ~11:40] Grudge+Spite accepted; Batch-3 and Cluster-4 receipts folded; Swallow gloss corrected
+
+- **State:** verified entry 620 (suite, build) and reconciled the census the
+  worker deliberately skipped: exactly **179/214 effects, 316/355 moves,
+  258/276 distinct, 2916/2957 weighted** (+2/+2/+2/+4). Merged two side
+  branches: `fbe2eba1` (`docs/ranked-batch3-off-evidence.md` — Pain Split
+  117/100→108/108; Stockpile×2→Swallow 67→150 = floor(167/2); fourth-use
+  failure; Spit Up receipt honestly deferred, sole carrier is dual-ability)
+  and `b113d9af` (`docs/family-b-cluster4-off-evidence.md` — Covet active+
+  party transfer, Sticky Hold block with damage/PP proceeding, Knock Off
+  clears active item but leaves the party record intact). Union green at
+  **388 files / 4431 tests**.
+- **Did:** corrected the ranked dossier §3.8 in place (supervisor-verified
+  against `Cmd_stockpiletohpheal`): Swallow heals **1/4, 1/2, FULL** at
+  counters 1/2/3 — not /8,/4,/2. The Batch-3 engine brief carries the fix.
+  Note: the cwd self-merge trap bit an 8th time (merge/cleanup block started
+  inside the worktree); branch survived, recovered from the main tree, zero
+  loss.
+- **Next:** round 9 dispatched — main: family-B Cluster 3 engine (Mean Look/
+  Nightmare rung mandatory, Rapid Spin rung optional; predicted **+3/+5/+5/
+  +9**) against the banked receipts. Then Batch-3 engine (+4 effects/+7
+  weighted). Cluster 4 receipts are banked for this or the next session.
+- **Notes:** animation supervisor is live concurrently (animation-main has
+  fresh commits + a nested worker); fold at wind-down. No deferred questions.
+  Deadline 15:07.
+
+---
+## 620 — [BOUNDED MAIN WORKER 2026-07-28 ~11:21] Grudge and Spite execute complete PP lifecycles
+
+- **State:** tree green at **386 files / 4423 tests**, production build, OFF
+  oracle info, ratchets **6/6**, and `git diff --check`. Both ranked Batch-2
+  remainder effects reach their own committed-script `END`; expected census
+  delta is **+2 effects / +2 moves / +2 distinct / +4 weighted**.
+- **Did:** registered exact `TRYSETGRUDGE` and `TRYSPITEPPREDUCE` handlers.
+  Grudge now schedules its chosen-move PP zero, durable party write, typed
+  move buffer, controller event, message, Destiny Bond continuation, and
+  target faint in source order. Spite owns the four-bit `mimickedMoves`
+  mask, exact pre-draw failures and `(Random() & 3) + 2` draw, clamp/zero
+  cancellation, typed move/number buffers, Mimic/Transform persistence gate,
+  and active/party/controller PP synchronization across switch.
+- **Next:** supervisor verify commits `bf1080d5` and `55c49c62`, then
+  reconcile the concurrent census owner and expect totals
+  **179/214 effects, 316/355 moves, 258/276 distinct, 2916/2957 weighted**.
+  No remainder from this step.
+- **Notes:** raw-source re-derivation found zero dossier corrections and zero
+  surprise barriers. Deliberate barrier ratchet move: HitChain **20→19**
+  retires Grudge's named `tryfaintmon` barrier. No new barriers, recording
+  imports, generator-metadata entries, census/doc regeneration, roadmap,
+  issue, oracle-trace, presentation, tick, or round edits.
+
+---
+## 619 — [BOUNDED MAIN WORKER 2026-07-28 ~11:05] Status-family callback operands restored semantically
+
+- **State:** tree green at **384 files / 4402 tests**, production build, OFF
+  oracle info, `git diff --check`, and census **177/214 effects, 314/355
+  moves, 256/276 distinct, 2912/2957 weighted**; all **62/62** census
+  validations pass. Predicted and actual delta: **+5/+13/+11/+139**.
+- **Did:** registered source-exact `gFellAsleepStringIds`; implemented real
+  `gEffectBattler <- gBattlerTarget` and
+  `sBATTLER <- sBATTLER_WITH_ABILITY` assignments, including materialized
+  `battlerWithAbility` writes in `jumpifability`. Full committed scripts now
+  reach END for Sleep, Toxic, Poison, Paralysis, Yawn first-stage and
+  ability-prevention paths, asserting messages, status icons, state,
+  deterministic replay, and exact RNG ledgers. The damaging
+  `EFFECT_PARALYZE_HIT` sibling is also terminal-walked.
+- **Next:** supervisor verify commit `7f0c8789`. Then continue the assigned
+  order with Grudge+Spite (+4 weighted) or family-B Cluster 3 against banked
+  evidence; no remainder from this step.
+- **Notes:** deliberate census pin move: five exact mechanical-blocker checks
+  now require executable. No new barriers, barrier-count pin moves, recording
+  imports, oracle traces, presentation/tick/round branches, roadmap, or issue
+  edits. `EFFECT_PARALYZE_HIT` was already executable because its secondary
+  status path shares the callback but cannot enter the primary move's
+  Limber-prevention copy branch.
+
+---
+## 618 — [SUPERVISOR VERIFY+FOLD 2026-07-28 ~11:00] Batch 1 accepted; hardened census folded — five status effects were runtime false positives
+
+- **State:** verified entry 617 (suite **384/4391**, build) and merged census
+  hardening `f80a90e7`; regenerated on the union as `693d2100`. Census is now
+  honest at **172/214 effects, 301/355 moves, 245/276 distinct, 2773/2957
+  weighted** (Batch 1's +6/+7/+7/+10 landed; validation checks 47→62).
+- **Did:** confirmed the hardening's headline down-flip myself before merging:
+  EFFECT_SLEEP/TOXIC/POISON/PARALYZE/YAWN were runtime false positives —
+  their success paths halt today on unaccepted operands
+  (`printfromtable gFellAsleepStringIds`; `copyarray (gEffectBattler,
+  gBattlerTarget, 1)`; Yawn's `(sBATTLER, sBATTLER_WITH_ABILITY, 1)`). Root
+  cause of the blind spot: their integration tests ran UNTIL the callback
+  label, not through it (`tests/battleScriptStatusPrimaryOpcode.test.ts:425`),
+  and the pre-hardening census walked opcode presence only. The generator now
+  reads all operand surfaces live and gates Metronome's dynamic universe.
+- **Next:** round 7 dispatched — main: status-family operand restoration
+  (semantic widenings + through-the-callback committed-script tests; predicted
+  **+5/+13/+11/+139** → 177/214, 314/355, 256/276, 2912/2957); side: Batch-3
+  staging receipts (Pain Split/Stockpile family). Then Grudge+Spite (+4) and
+  family-B Cluster 3 engine work against the banked receipts.
+- **Notes:** no deferred questions. Deadline 15:07.
+---
+## 617 — [BOUNDED MAIN WORKER 2026-07-28 ~10:48] Ranked-opcodes Batch 1 executes all six effects
+
+- **State:** tree green at **384 files / 4391 tests**, production build, OFF
+  oracle info, ratchets **6/6**, and `git diff --check`. Registered Eruption/
+  Water Spout, Teeter Dance, Magnitude, Belly Drum, Super Fang, and Hidden
+  Power; the census generator/doc were deliberately not run or edited.
+- **Did:** ported the five scalar/branch handlers plus Magnitude's one-draw
+  seven-bucket table, formatted number, and source target rescan. Added
+  source-shaped frozen six-IV battler state and Hidden Power's exact 30-70
+  power / Fighting-Dark type derivation; current first-challenge Factory
+  adapters materialize source `GetFactoryMonFixedIV(0,FALSE) == 3`. Tests pin
+  arithmetic edges, every Teeter singles branch, Underground pre-formula
+  doubling, controller/party HP sync, exact RNG counts, terminal walks, and
+  deterministic canonical replays.
+- **Next:** supervisor verify commits `62a3532b..ae81e86a`, regenerate/reconcile
+  the concurrently hardened census, and expect the brief's
+  **+6 effects / +7 moves / +7 distinct / +10 weighted** delta (from current
+  171/307/249/2902 to **177/314/256/2912**).
+- **Notes:** raw `battle_script_commands.c` + `battle_scripts_1.s`
+  re-derivation found **zero dossier corrections**. Zero new barriers,
+  barrier-pin moves, recording imports, census metadata edits, census/doc
+  regeneration, oracle traces, presentation/tick/round branches, roadmap, or
+  issue edits.
+
+---
+## 616 — [SUPERVISOR VERIFY+FOLD 2026-07-28 ~10:35] Perish Song accepted; ranked-opcodes dossier and Cluster-3 receipts folded
+
+- **State:** independently verified entry 615 (suite, build, census idempotent
+  at **171/214, 307/355, 249/276, 2902/2957**; Soundproof + `BS_SCRIPTING`
+  live in the ability handler) and merged two side branches: `80049c35`
+  (`docs/ranked-single-opcodes-notes.md` — falsified 7 of 12 ranked families'
+  one-opcode-flip premises; ordered Batches 1-3 worth +13 effects/+25
+  weighted; Metronome pinned as an end-of-universe gate) and `ab2d66cd`
+  (`docs/family-b-cluster3-off-evidence.md` — Mean Look status2 0x04000000
+  with rejected switch + Roar-release, Nightmare 0x08000000 with HP
+  116→87→58 and wake-clears, twice-run byte-identical). Union green at
+  **383 files / 4372 tests**; both side worktrees removed.
+- **Did:** bumped the oracle-lab papercut (3rd hit). The Perish worker
+  self-surfaced the dossier-predicted `BS_SCRIPTING` selector gap and widened
+  it with the opcode, as the committed-script-to-end acceptance was designed
+  to force.
+- **Next:** round 6 dispatched — main: ranked Batch 1 (Eruption/Water Spout,
+  Teeter Dance, Magnitude, Belly Drum, Super Fang, Hidden Power; predicted
+  **+6/+7/+7/+10**; census regen deliberately skipped, supervisor reconciles
+  post-merge); side: census-generator per-operand hardening
+  (jumpifstatus2/playanimation/jumpifarrayequal/printfromtable/copyarray +
+  Metronome dynamic-jump gate). Then Grudge+Spite (Batch 2 remainder,
+  +2/+2/+2/+4) and Cluster 3 engine work against the banked receipts.
+- **Notes:** no deferred questions. Deadline 15:07.
+
+---
+## 615 — [BOUNDED MAIN WORKER 2026-07-28 ~10:25] Perish Song executes through terminal countdown
+
+- **State:** tree green at **382 files / 4368 tests**, production build, OFF
+  oracle info, census regeneration, all **47/47** validation checks, ratchets
+  **6/6**, and `git diff --check`. Census is exactly **171/214 effects,
+  307/355 moves, 249/276 Factory-L50 distinct, 2902/2957 weighted**.
+- **Did:** registered source-complete `B_SCR_OP_TRYSETPERISHSONG` with
+  all-battler set/immunity/failure semantics and the special Pressure PP
+  scan; widened `jumpifability` for Soundproof + `BS_SCRIPTING`; added
+  four-bit timer state with ordinary switch/faint clear and existing Baton
+  Pass preservation; completed ordered post-Future-Attack countdown,
+  current-timer formatting, zero-timer full-HP passive damage, faint, and
+  checkteamslost routing. Full committed effect script reaches terminal.
+- **Next:** supervisor verify this commit. Then continue the ranked
+  single-opcode program; the regenerated census names
+  `B_SCR_OP_SCALEDAMAGEBYHEALTHRATIO` (Eruption) as the next top row.
+- **Notes:** predicted and actual census delta both **+1 effect/+1 move/+1
+  distinct/+4 weighted**. Zero new barriers, barrier-pin moves, recording
+  imports, presentation/tick/round branches, oracle traces, or issue edits.
+---
+## 614 — [SUPERVISOR VERIFY+FOLD 2026-07-28 ~10:25] Clusters 1-2 accepted; OFF corroboration receipts folded
+
+- **State:** independently verified entries 612/613 (suite, build, census
+  idempotent at **170/214, 306/355, 248/276, 2898/2957**; Rock Head live in
+  the `jumpifability` map; EFFECT_RECOIL/DOUBLE_EDGE/UPROAR rows executable)
+  and merged side staging `7a0602c0` — `docs/family-b-cluster1-off-evidence.md`
+  with twice-run byte-identical Tri Attack/Overheat/AncientPower OFF receipts
+  (real paralysis proc, Sp.Atk 6→4→2 with damage 17→9, five-stat proc) plus
+  hermetic fixture tests. Union green at **381 files / 4359 tests**; side
+  worktree removed. Bumped the oracle-manifest papercut (`lab` variant).
+- **Did:** the family-B program's first two clusters are done at exactly the
+  dossier's predicted +125 weighted; six bytes stay barriered pending their
+  named blockers (Clusters 3-4).
+- **Next:** main: Perish Song (opcode + Soundproof `jumpifability` widening +
+  perish half of `HandleWishPerishSongOnTurnEnd`, banked evidence). Side
+  (running): ranked-single-opcodes falsification scout. Then census-generator
+  per-operand hardening and scout-ordered small-opcode batches.
+- **Notes:** engine-vs-receipt A/B comparison for the Cluster-1 receipts is
+  available follow-up work (receipts corroborate the ROM; engine is
+  Tier-1-pinned from source). No deferred questions. Deadline 15:07.
+
+---
+## 613 — [BOUNDED MAIN WORKER 2026-07-28 ~10:08] Recoil/Rock Head and Uproar cluster execute end to end
+
+- **State:** rung (a) committed as `e2c3c149`; full cluster green at **380
+  files / 4356 tests**, production build, OFF oracle info, census
+  regeneration, all **47/47** validation checks, ratchets **6/6**, and `git
+  diff --check`. Census is exactly **170/214 effects, 306/355 moves, 248/276
+  Factory-L50 distinct, 2898/2957 weighted**.
+- **Did:** added `ABILITY_ROCK_HEAD` and source-exact 33% recoil through the
+  shared callback, including collateral full-script proof for the existing
+  25% recoil row. Added fresh/duplicate Uproar dispatch with its chance +
+  `(Random() & 3) + 2` duration draws, move lock, committed callback, and
+  complete end-turn owner: ordered sleeper wakes, Soundproof exemption,
+  decrement, continuation/expiry messages, unable-to-move cancellation, and
+  Yawn's now-live Uproar sleep block.
+- **Next:** supervisor verify both green commits. Keep Pay Day, Thief, Mean
+  Look, Nightmare, Rapid Spin, and Knock Off barriered for their separately
+  scoped downstream owners; census-generator hardening also remains a
+  separate step.
+- **Notes:** predicted and actual full-cluster delta both **+2 effects/+3
+  moves/+2 distinct/+53 weighted**. Rung (a) was **+1/+2/+1/+52**; Uproar
+  was **+1/+1/+1/+1**. The counted `EFFECT_RECOIL` row stayed count-neutral
+  and is no longer a runtime false positive. No new barrier, barrier-pin
+  move, recording import, presentation/tick/round branch, issue removal,
+  oracle lifecycle action, or trace.
+---
+## 612 — [BOUNDED MAIN WORKER 2026-07-28 ~09:53] Seven dispatch-ready family-B move effects execute end to end
+
+- **State:** commits `e1d2243`/`ef9a9d9`; tree green at **380 files / 4337
+  tests**, production build, OFF oracle info, census regeneration, all
+  **47/47** validation checks, ratchets **6/6**, and `git diff --check`.
+  Census is exactly **168/214 effects, 303/355 moves, 246/276 Factory-L50
+  distinct, 2845/2957 weighted**.
+- **Did:** retired the shared `applySetMoveEffect` barrier for exactly Tri
+  Attack, Recharge, Rage, All Stats Up, Remove Paralysis, Atk/Def Down, and
+  Sp. Atk Two Down. Reused recursive family-A status writes, recharge/lock,
+  Rage, party status, and stat-stage owners plus the three committed callback
+  scripts. Added every-branch/RNG/stat-boundary/recharge-clear tests and one
+  full terminal committed-script walk with canonical replay per effect.
+- **Next:** supervisor verify this finite cluster and combine it with the side
+  OFF corroboration. Then take dossier Cluster 2 (Recoil 33 + Rock Head and
+  Uproar end-turn), leaving the other eight family-B bytes barriered until
+  their named downstream blockers land.
+- **Notes:** predicted and actual delta both **+7 effects/+12 moves/+7
+  distinct/+72 weighted**; all seven rows flipped. Raw C/script re-derivation
+  confirmed the dossier—no falsified claim or unmodeled cell. Recharge's
+  clearing turn source-faithfully leaves stale `lockedMoves` inert. The one
+  family-B barrier statement remains reachable for all eight deferred bytes;
+  barrier pins unchanged, none added. Census reporter changes are only the
+  seven required constant-name/positive-validation metadata entries.
+
+---
+## 611 — [SUPERVISOR VERIFY+FOLD 2026-07-28 ~09:45] Trick and Heal Bell accepted; family-B falsification dossier folded
+
+- **State:** independently verified entries 609/610 (suite **380/4315**,
+  build, census idempotent at **161/214, 291/355, 239/276, 2773/2957**) and
+  merged side scout `80f4c24` — `docs/set-move-effect-family-b-notes.md`, a
+  15-case falsification of the family-B `applySetMoveEffect` cluster. Union
+  green; side worktree removed.
+- **Did:** spot-checked the dossier's two load-bearing claims myself
+  (ABILITY_ROCK_HEAD absent from the `jumpifability` map ⇒ the census's
+  "executable" EFFECT_RECOIL row is a runtime false positive; `jumpifstatus2`
+  operand map is the narrow 4-value set blocking Mean Look/Nightmare
+  pre-dispatch). Dossier orders 4 implementation clusters totalling
+  +15 effects/+24 moves/+142 weighted; only 7 cases are dispatch-ready now.
+- **Next:** round 3 dispatched — main: Cluster 1 (7 dispatch-ready cases,
+  predicted **+7 effects/+12 moves/+7 distinct/+72 weighted**); side: OFF
+  corroboration staging (Tri Attack/Overheat/AncientPower receipts). Then
+  Cluster 2 (recoil+Rock Head+Uproar, +53 weighted) and census-generator
+  per-operand checks (jumpifstatus2/playanimation/copyarray + Rock Head).
+- **Notes:** census generator blind spots are recorded in the dossier §1;
+  generator hardening is deliberately sequenced AFTER engine work per the
+  dossier. No deferred questions. Deadline 15:07.
+---
+## 609 — [BOUNDED MAIN WORKER 2026-07-28 ~09:21] Trick executes through shared item/controller paths
+
+- **State:** committed `b2a8714`; tree green at **379 files / 4302 tests**,
+  production build, OFF oracle info, census regeneration, all **42/42**
+  validation checks, ratchets **6/6**, and `git diff --check`. Census is
+  exactly **160/214 effects, 289/355 moves, 237/276 Factory-L50 distinct,
+  2769/2957 weighted**.
+- **Did:** globally registered five-byte `B_SCR_OP_TRYSWAPITEMS` (`0xd2`)
+  with source-ordered Trainer Hill/opponent-regular/Knock Off/two-empty/
+  Enigma/Mail/Sticky Hold guards and no barriers. Success reuses attacker
+  `changedItems`, active held items, both held-item controller events and
+  party mirrors, both Choice cells, and `MOVEEND_CHANGED_ITEMS`; the shared
+  `printfromtable` handler now resolves `gItemSwapStringIds`. Full-turn Furret
+  Trick proves PP **10→9**, transient/restored item ownership, persistent
+  player+opponent party swaps, bookkeeping clear, and zero opcode-local RNG.
+- **Next:** supervisor verify this finite registration. The regenerated census
+  names `B_SCR_OP_HEALPARTYSTATUS` as the next highest-leverage single
+  registration; select/brief it separately.
+- **Notes:** handler inventory **167→168**. Sticky Hold uses the existing
+  `lastUsedAbility`/ability-record convention and fixed
+  `BattleScript_StickyHoldActivates` transfer. No unsupported barrier,
+  barrier-pin change, recording import, private item path, presentation/tick/
+  round branch, issue removal, oracle lifecycle action, or new trace.
+
+---
+## 608 — [SUPERVISOR ORIENT 2026-07-28 ~09:10] Animation fold verified; session open on Trick frontier
+
+- **State:** merged `animation-main` (55 commits through `7119ac3`, Headbutt/
+  Body Slam/Faint Attack/Covet/Dizzy Punch/Tail Glow/Twineedle/Bite/Reflect/
+  Dragon Rage/Shadow Punch exact promotions plus staged Thunder Wave; animation
+  coverage now **64 exact / 0 partial / 1 staged / 211 unsupported**) into
+  `master` as `dc8c6e5`. Union green: **378 files / 4287 tests**, production
+  build passes, `git diff --check` clean. Both oracles restarted 09:06 at
+  harness HEAD `0d4ad46`; `check-oracle-freshness.sh` passes, retiring entry
+  606's Scene-OFF staleness note.
+- **Did:** required orient fold only; no engine, census, or issue change.
+  Animation ledger top entry carries no "For the main program:" line.
+- **Next:** dispatch the accepted Trick step from entry 605 — source-complete
+  `B_SCR_OP_TRYSWAPITEMS` through the shared item/change-state paths using
+  `docs/trick-off-evidence.md`. Expected census: **160/214, 289/355, 237/276,
+  2769/2957**.
+- **Notes:** hybrid supervisor session (Fable + Codex workers), hard deadline
+  2026-07-28 15:07. DEFERRED.md is empty; ISSUES #41/#39 remain the tracked
+  debt, #38 parked.
+---
+## 607 — [USER-DIRECTED TOOLING 2026-07-28 ~09:02] Hybrid supervisor ready; ordinary Codex effort is high-only
+
+- **State:** `master` now includes `codex/hybrid-cloud-supervisor` through
+  `bf0a08a` and is green at **366 files / 4239 tests**; launcher profiles **15/15**,
+  production build, shell syntax, config smoke tests, and `git diff --check`
+  pass.
+- **Did:** added the Fable/Remote-Control supervisor with Terra or Sol Codex
+  workers, then removed Sol/medium from every ordinary Codex workflow.
+  Direct workers, all-Codex supervisors, and hybrid supervisors now default
+  to high and mechanically reject any lower worker/supervisor effort. Added
+  `-H` as the short form of `--hybrid` and fast-forwarded the feature into
+  `master`.
+- **Next:** launch the mixed workflow with `./run-supervisor.sh -H` (or
+  `--hybrid`); otherwise resume finite Stage 8 selection from entry 605.
+- **Notes:** max mode deliberately remains Sol/ultra with Sol/xhigh by
+  default and permits high; its workers now reject sub-high overrides too.
+  Entry 606 already retired the worktree papercuts encountered during this
+  feature. No game logic, oracle lifecycle, issue, roadmap, census,
+  animation, or unsupported-barrier change.
+
+---
+## 606 — [TOOLING FOLD 2026-07-28 ~08:48] Low-risk papercuts merged and union verified
+
+- **State:** merged `codex/papercuts-guardrails` as `4e8a788`; the union is
+  green at **366 files / 4231 tests**, production build, Python tooling
+  checks **8/8**, both oracle infos, and `git diff --check`.
+- **Did:** retired four recorded papercuts with worktree-safe harness
+  resolution for freshness and terminal extraction, explicit commit-free
+  `--read-only` / `--audit` worker postflight, terminal RAM-probe bitfield
+  extraction, and a default battle-lab output ignore. The merge had zero
+  changed-path overlap with the 195-file supervisor advance.
+- **Next:** before further oracle-backed staging, the launcher/supervisor must
+  refresh Scene-OFF after harness `0d4ad46`; then resume the accepted Trick
+  target from entry 605.
+- **Notes:** both endpoints answer bootstrap v5. Scene-ON freshness passes;
+  Scene-OFF started 2026-07-27 22:36, before the harness's 2026-07-28 08:42
+  commit, so freshness correctly fails. No oracle lifecycle action, game
+  logic, issue, roadmap, census, animation, or unsupported-barrier change.
+
+---
+## 605 — [SUPERVISOR VERIFY 2026-07-28 ~06:24] Encore accepted after shared-seam repair
+
+- **State:** independently reviewed the implementation and repair diffs and
+  verified focused Encore/full-turn/end-turn/switch/ratchet coverage
+  **112/112**, production build, both oracle infos, census regeneration,
+  all **42/42** validation checks, and `git diff --check`. The worker's full
+  suite is green at **366 files / 4229 tests**. Census is exactly **159/214
+  effects, 288/355 moves, 236/276 Factory-L50 distinct, 2764/2957 weighted**.
+- **Did:** accepted global Encore `0xa4` and the complete shared state,
+  automatic choice, move-limitation, action-execution, end-turn, and switch
+  seams. Supervisor review found an overwritten-slot path lacking a direct
+  proof; the repair now matches `battle_util.c`: execute the live stored-slot
+  move, clear Encore, and never misclassify it as Struggle. Exact duration
+  RNG, both-side forced actions, PP/script order, repeat failure, expiry,
+  switch cleanup, and multi-turn precedence are pinned.
+- **Next:** implement source-complete `B_SCR_OP_TRYSWAPITEMS` through the
+  shared item/change-state paths using the accepted Trick source/OFF evidence.
+  Expected census: **160/214, 289/355, 237/276, 2769/2957**.
+- **Notes:** handler inventory is **167**. No unsupported barrier, recording
+  import, private RNG/controller/event seam, presentation/tick/round branch,
+  issue removal, or DEFERRED item. Post-orient animation commits remain for
+  the next supervisor's required orient fold; do not merge them mid-session.
+---
 ## 604 — [BOUNDED MAIN WORKER 2026-07-28 ~06:22] Encore shared seams repaired and pinned
 
 - **State:** committed `6e6bd33`; tree green at **366 files / 4229 tests**, focused
@@ -24245,5 +24881,33 @@ both verify scripts/census independently re-verified before this entry.)*
   recording import, presentation/tick/controller widening, issue removal, or
   DEFERRED item. The public repeated use spends PP, preserves the bit, and
   reaches `BattleScript_ButItFailed` before `setfocusenergy`.
+
+---
+## 610 — [BOUNDED MAIN WORKER 2026-07-28 ~09:38] Heal Bell and Aromatherapy execute through masked party synchronization
+
+- **State:** committed `c6bec4d`; tree green at **380 files / 4315 tests**,
+  production build, OFF oracle info, census regeneration, all **42/42**
+  validation checks, ratchets **6/6**, and `git diff --check`. Census is
+  exactly **161/214 effects, 291/355 moves, 239/276 Factory-L50 distinct,
+  2773/2957 weighted**.
+- **Did:** globally registered one-byte `B_SCR_OP_HEALPARTYSTATUS` (`0xae`)
+  with the source's `currentMove == MOVE_HEAL_BELL` split, six-slot masked
+  party synchronization, active/partner live clears, Nightmare removal,
+  Soundproof exclusions/ability recording/message bits, and one attacker
+  controller event. Added validated/frozen party `abilityNum`, resolved
+  benched abilities from the source-derived species corpus, widened the two
+  Heal Bell `jumpifbyte` literals, and retired the shared
+  `BS_ATTACKER_WITH_PARTNER` status-icon barrier. Full-turn healthy/statused
+  Heal Bell proves PP **5→4**, persistent clears, message/animation/status
+  tail, zero opcode-local RNG, next-request completion, and canonical replay.
+- **Next:** supervisor verify this finite registration. The regenerated census
+  names `B_SCR_OP_TRYSETPERISHSONG` as the next highest-weight registration;
+  select/brief it separately.
+- **Notes:** handler inventory **168→169**. Barrier pin
+  `battleScriptHitChainOpcode.ts` **21→20** (retired, none added). Soundproof
+  is reachable in real Factory parties: 15 generated sets across Whismur,
+  Loudred, Exploud, Voltorb, Electrode, and Mr. Mime carrier species. No new
+  recording import, presentation/tick/round branch, issue removal, oracle
+  lifecycle action, or trace.
 
 ---

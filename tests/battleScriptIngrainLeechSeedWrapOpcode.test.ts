@@ -314,13 +314,13 @@ describe("(b) unsupported-branch barriers -- COPYARRAY/JUMPIFABILITY/MANIPULATED
     return { execution, result: stepBattleScriptMachine(program, patched, execution.handlers) };
   }
 
-  it("Cmd_copyarray halts on any operand tuple other than gBattleMoveDamage<-gHpDealt, size 4 (e.g. Pain Split's own sPAINSPLIT_HP copy)", () => {
+  it("Cmd_copyarray accepts Pain Split's exact signed scratch tuple", () => {
     const pc = program.instructions.find(
       (instruction) => instruction.source.label === "BattleScript_EffectPainSplit" && instruction.opcodeName === "B_SCR_OP_COPYARRAY",
     )!.programCounter;
-    const { result } = stepAtProgramCounter(pc, context());
-    expect(result.kind).toBe("halted");
-    expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch" });
+    const { result } = stepAtProgramCounter(pc, context({}, { painSplitHp: -17 }));
+    expect(result.kind).toBe("advanced");
+    expect(result.state.rulesContext.battleMoveDamage).toBe(-17);
   });
 
   it("Cmd_jumpifability no longer halts on ABILITY_SUCTION_CUPS (docs/roar-multihit-registration-scout.md §4 rung 1; real value 21, not the dossier's cited 31)", () => {

@@ -65,6 +65,7 @@ import { createBattleScriptRecoverbasedonsunlightOpcodeHandlers } from "./battle
 import { createBattleScriptCurseOpcodeHandlers } from "./battleScriptCurseOpcode.ts";
 import { createBattleScriptRemainingHpToPowerOpcodeHandlers } from "./battleScriptRemainingHpToPowerOpcode.ts";
 import { createBattleScriptFriendshipToDamageOpcodeHandlers } from "./battleScriptFriendshipToDamageOpcode.ts";
+import { createBattleScriptPresentDamageOpcodeHandlers } from "./battleScriptPresentDamageOpcode.ts";
 import { createBattleScriptCopyFoeStatsOpcodeHandlers } from "./battleScriptCopyFoeStatsOpcode.ts";
 import { createBattleScriptJumpifcantswitchOpcodeHandlers } from "./battleScriptJumpifcantswitchOpcode.ts";
 import { createBattleScriptJumpifnodamageOpcodeHandlers } from "./battleScriptJumpifnodamageOpcode.ts";
@@ -79,9 +80,19 @@ import { createBattleScriptSetminimizeOpcodeHandlers } from "./battleScriptSetmi
 import { createBattleScriptSetforcedtargetOpcodeHandlers } from "./battleScriptSetforcedtargetOpcode.ts";
 import { createBattleScriptGetSecretPowerEffectOpcodeHandlers } from "./battleScriptGetSecretPowerEffectOpcode.ts";
 import { createBattleScriptTryswapabilitiesOpcodeHandlers } from "./battleScriptTryswapabilitiesOpcode.ts";
+import { createBattleScriptTrymementoOpcodeHandlers } from "./battleScriptTrymementoOpcode.ts";
+import { createBattleScriptTrycopyabilityOpcodeHandlers } from "./battleScriptTrycopyabilityOpcode.ts";
+import { createBattleScriptTryrecycleitemOpcodeHandlers } from "./battleScriptTryrecycleitemOpcode.ts";
 import { createBattleScriptTrysethelpinghandOpcodeHandlers } from "./battleScriptTrysethelpinghandOpcode.ts";
+import { createBattleScriptTryswapitemsOpcodeHandlers } from "./battleScriptTryswapitemsOpcode.ts";
 import { createBattleScriptSettormentOpcodeHandlers } from "./battleScriptSettormentOpcode.ts";
 import { createBattleScriptTrysetencoreOpcodeHandlers } from "./battleScriptTrysetencoreOpcode.ts";
+import { createBattleScriptTrysetperishsongOpcodeHandlers } from "./battleScriptTrysetperishsongOpcode.ts";
+import { createBattleScriptTrysetgrudgeOpcodeHandlers } from "./battleScriptTrysetgrudgeOpcode.ts";
+import { createBattleScriptTryspiteppreduceOpcodeHandlers } from "./battleScriptTryspiteppreduceOpcode.ts";
+import { createBattleScriptRankedBatch1OpcodeHandlers } from "./battleScriptRankedBatch1Opcode.ts";
+import { createBattleScriptPainSplitOpcodeHandlers } from "./battleScriptPainSplitOpcode.ts";
+import { createBattleScriptStockpileOpcodeHandlers } from "./battleScriptStockpileOpcode.ts";
 import { createBattleScriptSettauntOpcodeHandlers } from "./battleScriptSettauntOpcode.ts";
 import { createBattleScriptSetforesightOpcodeHandlers } from "./battleScriptSetforesightOpcode.ts";
 import { createBattleScriptSetfocusenergyOpcodeHandlers } from "./battleScriptSetfocusenergyOpcode.ts";
@@ -90,7 +101,15 @@ import { createBattleScriptTrysetmagiccoatOpcodeHandlers } from "./battleScriptT
 import { createBattleScriptWeightDamageOpcodeHandlers } from "./battleScriptWeightDamageOpcode.ts";
 import { createBattleScriptTrysetspikesOpcodeHandlers } from "./battleScriptTrysetspikesOpcode.ts";
 import { createBattleScriptRefreshOpcodeHandlers } from "./battleScriptRefreshOpcode.ts";
+import { createBattleScriptHealpartystatusOpcodeHandlers } from "./battleScriptHealpartystatusOpcode.ts";
 import { createBattleScriptIncrementGameStatOpcodeHandlers } from "./battleScriptIncrementGameStatOpcode.ts";
+import { createBattleScriptGivepaydaymoneyOpcodeHandlers } from "./battleScriptGivepaydaymoneyOpcode.ts";
+import { createBattleScriptNormalisebuffsOpcodeHandlers } from "./battleScriptNormalisebuffsOpcode.ts";
+import { createBattleScriptSetbideOpcodeHandlers } from "./battleScriptSetbideOpcode.ts";
+import { createBattleScriptLastMoveOpcodeHandlers } from "./battleScriptLastMoveOpcode.ts";
+import { createBattleScriptTypeChangeOpcodeHandlers } from "./battleScriptTypeChangeOpcode.ts";
+import { createBattleScriptEnvironmentAttackOpcodeHandlers } from "./battleScriptEnvironmentAttackOpcode.ts";
+import { createBattleScriptChargeSportOpcodeHandlers } from "./battleScriptChargeSportOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -148,10 +167,36 @@ export type BattleScriptStatStages = readonly [
   number,
 ];
 
+/** Source gBattleMons six independent 5-bit IV fields. */
+export type BattleScriptIvs = Readonly<{
+  hp: number;
+  attack: number;
+  defense: number;
+  speed: number;
+  spAttack: number;
+  spDefense: number;
+}>;
+
+export function uniformBattleScriptIvs(iv: number): BattleScriptIvs {
+  if (!Number.isSafeInteger(iv) || iv < 0 || iv > 31) {
+    throw new Error(`uniform IV must be an integer in 0..31, got ${iv}`);
+  }
+  return Object.freeze({
+    hp: iv,
+    attack: iv,
+    defense: iv,
+    speed: iv,
+    spAttack: iv,
+    spDefense: iv,
+  });
+}
+
 export type BattleScriptSpecialStatus = Readonly<{
   restoredBattlerSprite: 0 | 1;
   physicalDmg: number;
   specialDmg: number;
+  /** Source s32 gSpecialStatuses[battler].shellBellDmg. */
+  shellBellDmg: number;
 }>;
 
 /** Modeled struct SideTimer fields, including Follow Me's timer/target (include/battle.h:149-174) -- see the field comment on BattleScriptRulesContext.sideTimers. */
@@ -236,6 +281,17 @@ type BattleScriptRulesBattlerBase = Readonly<{
 }>;
 
 type BattleScriptMoveEndBattlerMetadata = Readonly<{
+  /** DisableStruct's paired four-bit Charge lifetime fields. */
+  chargeTimer: number;
+  chargeTimerStartValue: number;
+  /** Source gBattleMons[battler] IV bitfields, consumed by Hidden Power. */
+  ivs: BattleScriptIvs;
+  /** Source four-bit DisableStruct::mimickedMoves mask. */
+  mimickedMoves: number;
+  /** Source gBattleMons[battler].ppBonuses packed two-bit PP Up fields. */
+  ppBonuses: number;
+  /** Source two-bit DisableStruct::stockpileCounter (0..3). */
+  stockpileCounter: number;
   /** DisableStruct's paired four-bit duration fields. */
   disableTimer: number;
   disableTimerStartValue: number;
@@ -244,6 +300,9 @@ type BattleScriptMoveEndBattlerMetadata = Readonly<{
   encoredMove: number;
   encoredMovePos: number;
   encoreTimerStartValue: number;
+  /** Source DisableStruct's paired four-bit Perish Song countdown fields. */
+  perishSongTimer: number;
+  perishSongTimerStartValue: number;
   /** Source u16 gBattleMons[battler].item. */
   item: number;
   /** Source s8 gBattleMons[battler].statStages[NUM_BATTLE_STATS]. */
@@ -341,6 +400,13 @@ type BattleScriptMoveEndBattlerMetadata = Readonly<{
    */
   wrappedBy: BattleScriptBattlerId;
   /**
+   * Source `gDisableStructs[battler].battlerPreventingEscape` -- the owner
+   * of this battler's STATUS2_ESCAPE_PREVENTION bit. Switch/faint cleanup
+   * compares this identity with the departing battler before clearing the
+   * trap.
+   */
+  battlerPreventingEscape: BattleScriptBattlerId;
+  /**
    * Source `gDisableStructs[battler].isFirstTurn` -- set to 2 at battle
    * init/switch-in (`battle_main.c:3051,3220,3312`), decremented by
    * `TurnValuesCleanUp(FALSE)` (not modeled by this engine yet, see
@@ -363,17 +429,27 @@ export type BattleScriptRulesBattler = BattleScriptRulesBattlerBase & Readonly<{
    * construction boundary. Production constructors supply source values.
    */
   item?: number;
+  chargeTimer?: number;
+  chargeTimerStartValue?: number;
+  /** Legacy focused fixtures default to six zero IVs at the construction boundary. */
+  ivs?: BattleScriptIvs;
+  mimickedMoves?: number;
+  ppBonuses?: number;
+  stockpileCounter?: number;
   disableTimer?: number;
   disableTimerStartValue?: number;
   encoreTimer?: number;
   encoredMove?: number;
   encoredMovePos?: number;
   encoreTimerStartValue?: number;
+  perishSongTimer?: number;
+  perishSongTimerStartValue?: number;
   statStages?: readonly number[];
   specialStatus?: Readonly<{
     restoredBattlerSprite?: 0 | 1;
     physicalDmg?: number;
     specialDmg?: number;
+    shellBellDmg?: number;
   }>;
   chargingTurn?: 0 | 1;
   /** ProtectStruct bits read by WasUnableToUseMove but not by admission yet. */
@@ -401,6 +477,7 @@ export type BattleScriptRulesBattler = BattleScriptRulesBattlerBase & Readonly<{
   turnOrderNum?: number;
   wrappedMove?: number;
   wrappedBy?: BattleScriptBattlerId;
+  battlerPreventingEscape?: BattleScriptBattlerId;
   isFirstTurn?: number;
 }>;
 
@@ -433,16 +510,36 @@ export type BattleScriptSelectorRoleBindings = Readonly<{
 export const BATTLE_SCRIPT_PARTY_SIZE = 6;
 
 export type BattleScriptPartyMemberMoves = readonly [number, number, number, number];
+export type BattleScriptPartyMemberPp = readonly [number, number, number, number];
 
-/** The exact GetMonData fields Cmd_checkteamslost and GetMostSuitableMonToSwitchInto read per party slot. */
+/** Source party/controller payload fields needed by team checks and active switch reconstruction. */
 export type BattleScriptPartyMemberState = Readonly<{
   species: number;
   isEgg: boolean;
+  /** Source MON_DATA_ABILITY_NUM (0 or 1). */
+  abilityNum: number;
+  /** Serialized BattlePokemon derivation inputs and controller-computed battle stats. */
+  ivs: BattleScriptIvs;
+  personality: number;
+  level: number;
+  friendship: number;
+  maxHP: number;
+  attack: number;
+  defense: number;
+  speed: number;
+  spAttack: number;
+  spDefense: number;
   hp: number;
   /** Source gPlayerParty/gEnemyParty[].status1 -- kept in sync by SetMoveEffect's status write, mirroring datahpupdate's HP sync. */
   status1: number;
+  /** Source gPlayerParty/gEnemyParty[].heldItem, synchronized by REQUEST_HELDITEM_BATTLE controller writes. */
+  item: number;
   /** Source MON_DATA_MOVE1..4 -- read by GetMostSuitableMonToSwitchInto's super-effective-move gate (forced-switch-ground-truth.md §1b/§4 slice 2). */
   moves: BattleScriptPartyMemberMoves;
+  /** Source MON_DATA_PP1..4, synchronized by REQUEST_PPMOVE1_BATTLE controller writes. */
+  pp: BattleScriptPartyMemberPp;
+  /** Source MON_DATA_PP_BONUSES, included in REQUEST_MOVES_PP_BATTLE. */
+  ppBonuses: number;
 }>;
 
 export type BattleScriptPartyState = readonly [
@@ -454,7 +551,7 @@ export type BattleScriptPartyState = readonly [
   BattleScriptPartyMemberState,
 ];
 
-/** Source gPlayerParty/gEnemyParty, narrowed to the three fields above. */
+/** Source gPlayerParty/gEnemyParty, narrowed to the fields above. */
 export type BattleScriptPartyBySide = Readonly<{
   player: BattleScriptPartyState;
   opponent: BattleScriptPartyState;
@@ -536,6 +633,8 @@ export type BattleScriptRulesContext = Readonly<
     battlers: BattleScriptRulesBattlers;
     selectorRoles: BattleScriptSelectorRoleBindings;
     scriptingBattler: BattleScriptBattlerId;
+    /** Source u8 gBattleScripting.battlerWithAbility, written by successful jumpifability checks. */
+    battlerWithAbility: BattleScriptBattlerId;
     atkCancelerTracker: number;
     battleOutcome: number;
     currentMove: number;
@@ -546,6 +645,14 @@ export type BattleScriptRulesContext = Readonly<
     gBattleEnvironment: number;
     /** Source u8 gLastUsedAbility. */
     lastUsedAbility: number;
+    /** Source u16 gLastUsedItem, prepared by item-steal/knock-off messages. */
+    lastUsedItem: number;
+    /** Source u16 gPaydayMoney. */
+    paydayMoney: number;
+    /** Source u8 gBattleStruct->moneyMultiplier. */
+    moneyMultiplier: number;
+    /** Decrypted source SaveBlock1 money value, capped by AddMoney. */
+    playerMoney: number;
     multiHitCounter: number;
     /**
      * Source u8 gBattleScripting.multihitString[4] (`sMULTIHIT_STRING + 4`,
@@ -562,6 +669,8 @@ export type BattleScriptRulesContext = Readonly<
     /** Source u16 gBattleScripting.animArg1 -- the only field Cmd_playanimation's sB_ANIM_ARG1 operand dereferences (animArg2 is never read by playanimation). */
     animArg1: number;
     battleMoveDamage: number;
+    /** Source s32 gBattleScripting.painSplitHp scratch. */
+    painSplitHp: number;
     /** Source u16 gDynamicBasePower, read by Cmd_damagecalc as its power override. */
     dynamicBasePower: number;
     /** Source s32 gHpDealt -- Cmd_datahpupdate's real-damage-dealt bookkeeping. */
@@ -588,6 +697,10 @@ export type BattleScriptRulesContext = Readonly<
     choicedMove: BattleScriptMoveEndHalfwords;
     /** Source u16 gBattleStruct->changedItems[MAX_BATTLERS_COUNT]. */
     changedItems: BattleScriptMoveEndHalfwords;
+    /** Source u16 gBattleStruct->usedHeldItems[MAX_BATTLERS_COUNT], populated by Cmd_removeitem and consumed by Recycle. */
+    usedHeldItems: BattleScriptMoveEndHalfwords;
+    /** Source gWishFutureKnock.knockedOffMons[NUM_BATTLE_SIDES], one six-party-slot mask per side. */
+    knockedOffMons: readonly [number, number];
     /**
      * Source u8 gBattleStruct->monToSwitchIntoId[MAX_BATTLERS_COUNT] --
      * PARTY_SIZE (6) is the "undecided" sentinel; 0-5 is a resolved bench
@@ -662,6 +775,20 @@ export type BattleScriptRulesContext = Readonly<
     futureSightDmg: readonly [number, number, number, number];
     /** Typed form of PREPARE_MON_NICK_WITH_PREFIX_BUFFER(gBattleTextBuff1, battler, partyIndex). */
     battleTextBuff1MonNick: BattleScriptPreparedMonNick | null;
+    /** Typed form of PREPARE_BYTE_NUMBER_BUFFER(gBattleTextBuff1, 1, value). */
+    battleTextBuff1ByteNumber: number | null;
+    /** Typed PREPARE_HWORD_NUMBER_BUFFER value from givepaydaymoney. */
+    battleTextBuff1PaydayMoney: number | null;
+    /** Typed form of PREPARE_MOVE_BUFFER(gBattleTextBuff1, move). */
+    battleTextBuff1Move: number | null;
+    /** Typed form of PREPARE_ITEM_BUFFER(gBattleTextBuff1, item). */
+    battleTextBuff1Item: number | null;
+    /** Typed form of PREPARE_TYPE_BUFFER(gBattleTextBuff1, type). */
+    battleTextBuff1Type: string | null;
+    /** Typed form of PREPARE_BYTE_NUMBER_BUFFER(gBattleTextBuff2, 1, value). */
+    battleTextBuff2ByteNumber: number | null;
+    /** Typed form of PREPARE_ITEM_BUFFER(gBattleTextBuff2, item). */
+    battleTextBuff2Item: number | null;
     /**
      * Source gBattlerByTurnOrder[MAX_BATTLERS_COUNT] -- populated by
      * `ENDTURN_ORDER`'s `GetWhoStrikesFirst` insertion sort
@@ -697,6 +824,7 @@ export type BattleScriptRulesContextInput = Readonly<{
     fainted?: BattleScriptBattlerId | null;
   }>;
   scriptingBattler: BattleScriptBattlerId;
+  battlerWithAbility?: BattleScriptBattlerId;
   atkCancelerTracker: number;
   battleOutcome: number;
   currentMove: number;
@@ -704,6 +832,10 @@ export type BattleScriptRulesContextInput = Readonly<{
   /** Legacy focused inputs default here; production Factory inputs explicitly supply BUILDING. */
   gBattleEnvironment?: number;
   lastUsedAbility?: number;
+  lastUsedItem?: number;
+  paydayMoney?: number;
+  moneyMultiplier?: number;
+  playerMoney?: number;
   moveResultFlags: number;
   dmgMultiplier: number;
   critMultiplier: number;
@@ -713,6 +845,7 @@ export type BattleScriptRulesContextInput = Readonly<{
   multiHitCounter: number;
   multistringChooser?: number;
   battleMoveDamage?: number;
+  painSplitHp?: number;
   dynamicBasePower?: number;
   hpDealt?: number;
   bideDmg?: readonly number[];
@@ -726,6 +859,8 @@ export type BattleScriptRulesContextInput = Readonly<{
   rolloutTimerStartValues?: readonly number[];
   choicedMove?: readonly number[];
   changedItems?: readonly number[];
+  usedHeldItems?: readonly number[];
+  knockedOffMons?: readonly [number?, number?];
   monToSwitchIntoId?: readonly number[];
   battleStructAbsentBattlerFlags?: number;
   alreadyStatusedMoveAttempt?: number;
@@ -778,6 +913,13 @@ export type BattleScriptRulesContextInput = Readonly<{
   futureSightAttacker?: readonly number[];
   futureSightDmg?: readonly number[];
   battleTextBuff1MonNick?: BattleScriptPreparedMonNick | null;
+  battleTextBuff1ByteNumber?: number | null;
+  battleTextBuff1PaydayMoney?: number | null;
+  battleTextBuff1Move?: number | null;
+  battleTextBuff1Item?: number | null;
+  battleTextBuff1Type?: string | null;
+  battleTextBuff2ByteNumber?: number | null;
+  battleTextBuff2Item?: number | null;
   battlerByTurnOrder?: readonly number[];
   currentTurnActionNumber?: number;
 }>;
@@ -785,9 +927,23 @@ export type BattleScriptRulesContextInput = Readonly<{
 export type BattleScriptPartyMemberInput = Readonly<{
   species?: number;
   isEgg?: boolean;
+  abilityNum?: number;
+  ivs?: BattleScriptIvs;
+  personality?: number;
+  level?: number;
+  friendship?: number;
+  maxHP?: number;
+  attack?: number;
+  defense?: number;
+  speed?: number;
+  spAttack?: number;
+  spDefense?: number;
   hp?: number;
   status1?: number;
+  item?: number;
   moves?: readonly [number?, number?, number?, number?];
+  pp?: readonly [number?, number?, number?, number?];
+  ppBonuses?: number;
 }>;
 
 function requireUnsigned(value: number, maximum: number, field: string): number {
@@ -842,6 +998,10 @@ function createBattleScriptSpecialStatus(
     specialDmg: requireSigned32(
       value?.specialDmg ?? 0,
       `battlers[${battler}].specialStatus.specialDmg`,
+    ),
+    shellBellDmg: requireSigned32(
+      value?.shellBellDmg ?? 0,
+      `battlers[${battler}].specialStatus.shellBellDmg`,
     ),
   });
 }
@@ -1591,13 +1751,28 @@ function createBattleScriptBattleTopology(
 }
 
 const BATTLE_SCRIPT_EMPTY_PARTY_MEMBER_MOVES: BattleScriptPartyMemberMoves = Object.freeze([0, 0, 0, 0]);
+const BATTLE_SCRIPT_EMPTY_PARTY_MEMBER_PP: BattleScriptPartyMemberPp = Object.freeze([0, 0, 0, 0]);
 
 const BATTLE_SCRIPT_EMPTY_PARTY_MEMBER: BattleScriptPartyMemberState = Object.freeze({
   species: 0,
   isEgg: false,
+  abilityNum: 0,
+  ivs: uniformBattleScriptIvs(0),
+  personality: 0,
+  level: 0,
+  friendship: 0,
+  maxHP: 0,
+  attack: 0,
+  defense: 0,
+  speed: 0,
+  spAttack: 0,
+  spDefense: 0,
   hp: 0,
   status1: 0,
+  item: 0,
   moves: BATTLE_SCRIPT_EMPTY_PARTY_MEMBER_MOVES,
+  pp: BATTLE_SCRIPT_EMPTY_PARTY_MEMBER_PP,
+  ppBonuses: 0,
 });
 
 function createBattleScriptPartyMemberMoves(
@@ -1629,9 +1804,34 @@ function createBattleScriptPartyState(
     input.map((member, index) => Object.freeze({
       species: requireUnsigned(member.species ?? 0, 0xffff, `${field}[${index}].species`),
       isEgg: Boolean(member.isEgg),
+      abilityNum: requireUnsigned(member.abilityNum ?? 0, 1, `${field}[${index}].abilityNum`),
+      ivs: Object.freeze({
+        hp: requireUnsigned(member.ivs?.hp ?? 0, 31, `${field}[${index}].ivs.hp`),
+        attack: requireUnsigned(member.ivs?.attack ?? 0, 31, `${field}[${index}].ivs.attack`),
+        defense: requireUnsigned(member.ivs?.defense ?? 0, 31, `${field}[${index}].ivs.defense`),
+        speed: requireUnsigned(member.ivs?.speed ?? 0, 31, `${field}[${index}].ivs.speed`),
+        spAttack: requireUnsigned(member.ivs?.spAttack ?? 0, 31, `${field}[${index}].ivs.spAttack`),
+        spDefense: requireUnsigned(member.ivs?.spDefense ?? 0, 31, `${field}[${index}].ivs.spDefense`),
+      }),
+      personality: requireUnsigned(member.personality ?? 0, 0xffff_ffff, `${field}[${index}].personality`) >>> 0,
+      level: requireUnsigned(member.level ?? 0, 0xff, `${field}[${index}].level`),
+      friendship: requireUnsigned(member.friendship ?? 0, 0xff, `${field}[${index}].friendship`),
       hp: requireUnsigned(member.hp ?? 0, 0xffff, `${field}[${index}].hp`),
+      maxHP: requireUnsigned(member.maxHP ?? member.hp ?? 0, 0xffff, `${field}[${index}].maxHP`),
+      attack: requireUnsigned(member.attack ?? 0, 0xffff, `${field}[${index}].attack`),
+      defense: requireUnsigned(member.defense ?? 0, 0xffff, `${field}[${index}].defense`),
+      speed: requireUnsigned(member.speed ?? 0, 0xffff, `${field}[${index}].speed`),
+      spAttack: requireUnsigned(member.spAttack ?? 0, 0xffff, `${field}[${index}].spAttack`),
+      spDefense: requireUnsigned(member.spDefense ?? 0, 0xffff, `${field}[${index}].spDefense`),
       status1: requireUnsigned(member.status1 ?? 0, 0xffff_ffff, `${field}[${index}].status1`) >>> 0,
+      item: requireUnsigned(member.item ?? 0, 0xffff, `${field}[${index}].item`),
       moves: createBattleScriptPartyMemberMoves(member.moves, `${field}[${index}].moves`),
+      pp: Object.freeze(
+        createBattleScriptPartyMemberMoves(member.pp, `${field}[${index}].pp`).map(
+          (value, movePosition) => requireUnsigned(value, 0xff, `${field}[${index}].pp[${movePosition}]`),
+        ),
+      ) as unknown as BattleScriptPartyMemberPp,
+      ppBonuses: requireUnsigned(member.ppBonuses ?? 0, 0xff, `${field}[${index}].ppBonuses`),
     })),
   ) as unknown as BattleScriptPartyState;
 }
@@ -1686,6 +1886,68 @@ export function withBattleScriptPartyMemberStatus1(
   if (member.status1 === status1) return party;
   const nextState = state.map((candidate, index) =>
     index === partyIndex ? Object.freeze({ ...candidate, status1 }) : candidate
+  ) as unknown as BattleScriptPartyState;
+  return Object.freeze({ ...party, [sideKey]: Object.freeze(nextState) });
+}
+
+/**
+ * REQUEST_HELDITEM_BATTLE's player/opponent controller handlers write the
+ * supplied u16 to the active battler's corresponding persistent party slot.
+ */
+export function withBattleScriptPartyMemberItem(
+  party: BattleScriptPartyBySide,
+  side: 0 | 1,
+  partyIndex: number,
+  item: number,
+): BattleScriptPartyBySide {
+  const sideKey = side === 0 ? "player" : "opponent";
+  const state = party[sideKey];
+  const member = state[partyIndex];
+  if (member.item === item) return party;
+  const nextState = state.map((candidate, index) =>
+    index === partyIndex ? Object.freeze({ ...candidate, item }) : candidate
+  ) as unknown as BattleScriptPartyState;
+  return Object.freeze({ ...party, [sideKey]: Object.freeze(nextState) });
+}
+
+/** REQUEST_PPMOVE1_BATTLE + slot writes one durable party PP byte. */
+export function withBattleScriptPartyMemberPp(
+  party: BattleScriptPartyBySide,
+  side: 0 | 1,
+  partyIndex: number,
+  movePosition: number,
+  pp: number,
+): BattleScriptPartyBySide {
+  const sideKey = side === 0 ? "player" : "opponent";
+  const state = party[sideKey];
+  const member = state[partyIndex];
+  if (member.pp[movePosition] === pp) return party;
+  const nextPp = member.pp.map((value, index) =>
+    index === movePosition ? pp : value
+  ) as unknown as BattleScriptPartyMemberPp;
+  const nextState = state.map((candidate, index) =>
+    index === partyIndex
+      ? Object.freeze({ ...candidate, pp: Object.freeze(nextPp) })
+      : candidate
+  ) as unknown as BattleScriptPartyState;
+  return Object.freeze({ ...party, [sideKey]: Object.freeze(nextState) });
+}
+
+/** REQUEST_MOVES_PP_BATTLE atomically persists all four moves/PP plus PP Ups. */
+export function withBattleScriptPartyMemberMovesPp(
+  party: BattleScriptPartyBySide,
+  side: 0 | 1,
+  partyIndex: number,
+  moves: BattleScriptPartyMemberMoves,
+  pp: BattleScriptPartyMemberPp,
+  ppBonuses: number,
+): BattleScriptPartyBySide {
+  const sideKey = side === 0 ? "player" : "opponent";
+  const state = party[sideKey];
+  const nextState = state.map((candidate, index) =>
+    index === partyIndex
+      ? Object.freeze({ ...candidate, moves, pp, ppBonuses })
+      : candidate
   ) as unknown as BattleScriptPartyState;
   return Object.freeze({ ...party, [sideKey]: Object.freeze(nextState) });
 }
@@ -1813,6 +2075,16 @@ export function createBattleScriptRulesContext(
       0xff,
       `battlers[${index}].rechargeTimer`,
     ),
+    chargeTimer: requireUnsigned(
+      battler.chargeTimer ?? 0,
+      0x0f,
+      `battlers[${index}].chargeTimer`,
+    ),
+    chargeTimerStartValue: requireUnsigned(
+      battler.chargeTimerStartValue ?? 0,
+      0x0f,
+      `battlers[${index}].chargeTimerStartValue`,
+    ),
     flinchImmobility: requireUnsigned(
       battler.flinchImmobility,
       1,
@@ -1852,6 +2124,16 @@ export function createBattleScriptRulesContext(
       battler.encoreTimerStartValue ?? 0,
       0x0f,
       `battlers[${index}].encoreTimerStartValue`,
+    ),
+    perishSongTimer: requireUnsigned(
+      battler.perishSongTimer ?? 0,
+      0x0f,
+      `battlers[${index}].perishSongTimer`,
+    ),
+    perishSongTimerStartValue: requireUnsigned(
+      battler.perishSongTimerStartValue ?? 0,
+      0x0f,
+      `battlers[${index}].perishSongTimerStartValue`,
     ),
     usedDisabledMove: requireUnsigned(
       battler.usedDisabledMove,
@@ -1983,6 +2265,25 @@ export function createBattleScriptRulesContext(
       })(),
     ) as unknown as readonly [string, string],
     species: requireUnsigned(battler.species ?? 0, 0xffff, `battlers[${index}].species`),
+    ivs: Object.freeze({
+      hp: requireUnsigned(battler.ivs?.hp ?? 0, 31, `battlers[${index}].ivs.hp`),
+      attack: requireUnsigned(battler.ivs?.attack ?? 0, 31, `battlers[${index}].ivs.attack`),
+      defense: requireUnsigned(battler.ivs?.defense ?? 0, 31, `battlers[${index}].ivs.defense`),
+      speed: requireUnsigned(battler.ivs?.speed ?? 0, 31, `battlers[${index}].ivs.speed`),
+      spAttack: requireUnsigned(battler.ivs?.spAttack ?? 0, 31, `battlers[${index}].ivs.spAttack`),
+      spDefense: requireUnsigned(battler.ivs?.spDefense ?? 0, 31, `battlers[${index}].ivs.spDefense`),
+    }),
+    mimickedMoves: requireUnsigned(
+      battler.mimickedMoves ?? 0,
+      0x0f,
+      `battlers[${index}].mimickedMoves`,
+    ),
+    ppBonuses: requireUnsigned(battler.ppBonuses ?? 0, 0xff, `battlers[${index}].ppBonuses`),
+    stockpileCounter: requireUnsigned(
+      battler.stockpileCounter ?? 0,
+      3,
+      `battlers[${index}].stockpileCounter`,
+    ),
     personality: requireUnsigned(battler.personality ?? 0, 0xffff_ffff, `battlers[${index}].personality`) >>> 0,
     attack: requireUnsigned(battler.attack ?? 0, 0xffff, `battlers[${index}].attack`),
     defense: requireUnsigned(battler.defense ?? 0, 0xffff, `battlers[${index}].defense`),
@@ -2000,6 +2301,11 @@ export function createBattleScriptRulesContext(
     turnOrderNum: requireUnsigned(battler.turnOrderNum ?? 1, 0xff, `battlers[${index}].turnOrderNum`),
     wrappedMove: requireUnsigned(battler.wrappedMove ?? 0, 0xffff, `battlers[${index}].wrappedMove`),
     wrappedBy: requireUnsigned(battler.wrappedBy ?? 0, 3, `battlers[${index}].wrappedBy`) as BattleScriptBattlerId,
+    battlerPreventingEscape: requireUnsigned(
+      battler.battlerPreventingEscape ?? 0,
+      3,
+      `battlers[${index}].battlerPreventingEscape`,
+    ) as BattleScriptBattlerId,
     isFirstTurn: requireUnsigned(battler.isFirstTurn ?? 0, 2, `battlers[${index}].isFirstTurn`),
     ...(battler.confusionDamage === undefined ? {} : {
       confusionDamage: Object.freeze({
@@ -2049,6 +2355,13 @@ export function createBattleScriptRulesContext(
   if (scriptingBattler === null) {
     throw new Error("scriptingBattler must be a battler id 0..3");
   }
+  const battlerWithAbility = requireRole(
+    input.battlerWithAbility ?? 0,
+    "battlerWithAbility",
+  );
+  if (battlerWithAbility === null) {
+    throw new Error("battlerWithAbility must be a battler id 0..3");
+  }
   const currentMove = requireUnsigned(input.currentMove, 0xffff, "currentMove");
   const bideDmgInput = input.bideDmg ?? [0, 0, 0, 0];
   if (!Array.isArray(bideDmgInput) || bideDmgInput.length !== 4) {
@@ -2077,6 +2390,11 @@ export function createBattleScriptRulesContext(
     input.changedItems,
     0xffff,
     "changedItems",
+  ) as BattleScriptMoveEndHalfwords;
+  const usedHeldItems = createMoveEndArray(
+    input.usedHeldItems,
+    0xffff,
+    "usedHeldItems",
   ) as BattleScriptMoveEndHalfwords;
   const chosenMovePositions = createMoveEndArray(
     input.chosenMovePositions,
@@ -2115,6 +2433,7 @@ export function createBattleScriptRulesContext(
     battlers: Object.freeze(battlers),
     selectorRoles,
     scriptingBattler,
+    battlerWithAbility,
     atkCancelerTracker: requireUnsigned(
       input.atkCancelerTracker,
       0xff,
@@ -2139,6 +2458,10 @@ export function createBattleScriptRulesContext(
       0xff,
       "lastUsedAbility",
     ),
+    lastUsedItem: requireUnsigned(input.lastUsedItem ?? 0, 0xffff, "lastUsedItem"),
+    paydayMoney: requireUnsigned(input.paydayMoney ?? 0, 0xffff, "paydayMoney"),
+    moneyMultiplier: requireUnsigned(input.moneyMultiplier ?? 1, 0xff, "moneyMultiplier"),
+    playerMoney: requireUnsigned(input.playerMoney ?? 0, 999_999, "playerMoney"),
     moveResultFlags: requireUnsigned(input.moveResultFlags, 0xff, "moveResultFlags"),
     dmgMultiplier: requireUnsigned(input.dmgMultiplier, 0xff, "dmgMultiplier"),
     critMultiplier: requireUnsigned(input.critMultiplier, 0xff, "critMultiplier"),
@@ -2155,6 +2478,7 @@ export function createBattleScriptRulesContext(
       input.battleMoveDamage ?? 0,
       "battleMoveDamage",
     ),
+    painSplitHp: requireSigned32(input.painSplitHp ?? 0, "painSplitHp"),
     dynamicBasePower: requireUnsigned(
       input.dynamicBasePower ?? 0,
       0xffff,
@@ -2179,6 +2503,11 @@ export function createBattleScriptRulesContext(
     rolloutTimerStartValues,
     choicedMove,
     changedItems,
+    usedHeldItems,
+    knockedOffMons: Object.freeze([
+      requireUnsigned(input.knockedOffMons?.[0] ?? 0, 0x3f, "knockedOffMons[0]"),
+      requireUnsigned(input.knockedOffMons?.[1] ?? 0, 0x3f, "knockedOffMons[1]"),
+    ]) as readonly [number, number],
     monToSwitchIntoId,
     battleStructAbsentBattlerFlags: requireUnsigned(
       input.battleStructAbsentBattlerFlags ?? 0,
@@ -2275,6 +2604,31 @@ export function createBattleScriptRulesContext(
         battler: requireUnsigned(input.battleTextBuff1MonNick.battler, 3, "battleTextBuff1MonNick.battler") as BattleScriptBattlerId,
         partyIndex: requireUnsigned(input.battleTextBuff1MonNick.partyIndex, 5, "battleTextBuff1MonNick.partyIndex"),
       }),
+    battleTextBuff1ByteNumber: input.battleTextBuff1ByteNumber === null
+      || input.battleTextBuff1ByteNumber === undefined
+      ? null
+      : requireUnsigned(input.battleTextBuff1ByteNumber, 0xff, "battleTextBuff1ByteNumber"),
+    battleTextBuff1PaydayMoney: input.battleTextBuff1PaydayMoney === null
+      || input.battleTextBuff1PaydayMoney === undefined
+      ? null
+      : requireUnsigned(input.battleTextBuff1PaydayMoney, 0xffff_ffff, "battleTextBuff1PaydayMoney"),
+    battleTextBuff1Move: input.battleTextBuff1Move === null
+      || input.battleTextBuff1Move === undefined
+      ? null
+      : requireUnsigned(input.battleTextBuff1Move, 0xffff, "battleTextBuff1Move"),
+    battleTextBuff1Item: input.battleTextBuff1Item === null
+      || input.battleTextBuff1Item === undefined
+      ? null
+      : requireUnsigned(input.battleTextBuff1Item, 0xffff, "battleTextBuff1Item"),
+    battleTextBuff1Type: input.battleTextBuff1Type ?? null,
+    battleTextBuff2ByteNumber: input.battleTextBuff2ByteNumber === null
+      || input.battleTextBuff2ByteNumber === undefined
+      ? null
+      : requireUnsigned(input.battleTextBuff2ByteNumber, 0xff, "battleTextBuff2ByteNumber"),
+    battleTextBuff2Item: input.battleTextBuff2Item === null
+      || input.battleTextBuff2Item === undefined
+      ? null
+      : requireUnsigned(input.battleTextBuff2Item, 0xffff, "battleTextBuff2Item"),
     battlerByTurnOrder: Object.freeze([
       requireUnsigned(input.battlerByTurnOrder?.[0] ?? 0, 3, "battlerByTurnOrder[0]"),
       requireUnsigned(input.battlerByTurnOrder?.[1] ?? 1, 3, "battlerByTurnOrder[1]"),
@@ -2480,6 +2834,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptCurseOpcodeHandlers(program, resolveRulesBattlerForBattleScript),
     ...createBattleScriptRemainingHpToPowerOpcodeHandlers(program),
     ...createBattleScriptFriendshipToDamageOpcodeHandlers(program),
+    ...createBattleScriptPresentDamageOpcodeHandlers(program),
     ...createBattleScriptCopyFoeStatsOpcodeHandlers(program),
     ...createBattleScriptJumpifcantswitchOpcodeHandlers(program),
     ...createBattleScriptJumpifnodamageOpcodeHandlers(program),
@@ -2490,12 +2845,26 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptTrysetfutureattackOpcodeHandlers(program),
     ...createBattleScriptDisablelastusedattackOpcodeHandlers(program),
     ...createBattleScriptTrysetencoreOpcodeHandlers(program),
+    ...createBattleScriptTrysetperishsongOpcodeHandlers(program),
+    ...createBattleScriptTrysetgrudgeOpcodeHandlers(program),
+    ...createBattleScriptTryspiteppreduceOpcodeHandlers(program),
+    ...createBattleScriptRankedBatch1OpcodeHandlers(program),
+    ...createBattleScriptPainSplitOpcodeHandlers(program),
+    ...createBattleScriptStockpileOpcodeHandlers(program),
     ...createBattleScriptFuryCutterOpcodeHandlers(program),
     ...createBattleScriptSetminimizeOpcodeHandlers(program),
     ...createBattleScriptSetforcedtargetOpcodeHandlers(program),
     ...createBattleScriptGetSecretPowerEffectOpcodeHandlers(program),
     ...createBattleScriptRefreshOpcodeHandlers(program),
+    ...createBattleScriptHealpartystatusOpcodeHandlers(program),
     ...createBattleScriptIncrementGameStatOpcodeHandlers(program),
+    ...createBattleScriptGivepaydaymoneyOpcodeHandlers(program),
+    ...createBattleScriptNormalisebuffsOpcodeHandlers(program),
+    ...createBattleScriptSetbideOpcodeHandlers(program),
+    ...createBattleScriptLastMoveOpcodeHandlers(program),
+    ...createBattleScriptTypeChangeOpcodeHandlers(program),
+    ...createBattleScriptEnvironmentAttackOpcodeHandlers(program),
+    ...createBattleScriptChargeSportOpcodeHandlers(program),
     ...createBattleScriptSettormentOpcodeHandlers(program),
     ...createBattleScriptSettauntOpcodeHandlers(program),
     ...createBattleScriptSetforesightOpcodeHandlers(program),
@@ -2505,7 +2874,11 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptTrysetspikesOpcodeHandlers(program),
     ...createBattleScriptTrysetmagiccoatOpcodeHandlers(program),
     ...createBattleScriptTrysethelpinghandOpcodeHandlers(program),
+    ...createBattleScriptTryswapitemsOpcodeHandlers(program),
     ...createBattleScriptTryswapabilitiesOpcodeHandlers(program),
+    ...createBattleScriptTrymementoOpcodeHandlers(program),
+    ...createBattleScriptTrycopyabilityOpcodeHandlers(program),
+    ...createBattleScriptTryrecycleitemOpcodeHandlers(program),
   });
 }
 

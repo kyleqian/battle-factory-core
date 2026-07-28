@@ -100,6 +100,17 @@ export type BattleScriptSemanticEventPayload =
     status1: number;
   }>
   | Readonly<{
+    /**
+     * BtlController_EmitSetMonData(REQUEST_STATUS_BATTLE, partyMask, ...)
+     * from Cmd_healpartystatus. The controller applies the same raw status
+     * word to every selected party record.
+     */
+    kind: "set-party-status-data";
+    battler: BattleScriptBattlerId;
+    partyMask: number;
+    status1: number;
+  }>
+  | Readonly<{
     /** BtlController_EmitStatusIconUpdate(status1, status2) -- Cmd_updatestatusicon's icon-redraw notify, distinct from the data-sync set-battler-status-data. */
     kind: "status-icon-update";
     battler: BattleScriptBattlerId;
@@ -112,6 +123,14 @@ export type BattleScriptSemanticEventPayload =
     /** gCurrMovePos slot, and the raw post-deduction u8 EmitSetMonData(REQUEST_PPMOVE1_BATTLE + slot) sends. */
     movePosition: number;
     pp: number;
+  }>
+  | Readonly<{
+    /** BtlController_EmitSetMonData(REQUEST_MOVES_PP_BATTLE). */
+    kind: "set-battler-moves-pp-data";
+    battler: BattleScriptBattlerId;
+    moves: readonly [number, number, number, number];
+    pp: readonly [number, number, number, number];
+    ppBonuses: number;
   }>
   | Readonly<{
     /** BtlController_EmitSetMonData(REQUEST_HELDITEM_BATTLE) -- Cmd_removeitem's own consumption notify (battle_script_commands.c:5901-5915). */

@@ -28,6 +28,7 @@ import {
   BATTLE_SCRIPT_BATTLE_TYPE_TRAINER,
   createBattleScriptRulesContext,
   createBattleScriptStatusRulesExecution,
+  uniformBattleScriptIvs,
   type BattleScriptRulesBattlerState,
   type BattleScriptRulesContext,
 } from "./battleScriptRulesContext.ts";
@@ -80,6 +81,9 @@ const TOPOLOGY_BY_MOVE = new Map(
 const PROGRAM = loadBattleScriptProgram();
 const NEUTRAL_STAT_STAGES = Object.freeze([6, 6, 6, 6, 6, 6, 6, 6] as const);
 const ZERO_STAT_STAGES = Object.freeze([0, 0, 0, 0, 0, 0, 0, 0] as const);
+const ZERO_IVS = uniformBattleScriptIvs(0);
+/** GetFactoryMonFixedIV(challenge 0, non-final) => sFixedIVTable[0][0] = 3. */
+const FACTORY_FIRST_CHALLENGE_IVS = uniformBattleScriptIvs(3);
 
 export type FactoryAsleepMoveConfig = Readonly<{
   playerSetId: number;
@@ -213,6 +217,10 @@ function emptyBattler(side: 0 | 1): BattleScriptRulesBattlerState {
     ability: 0,
     hp: 0,
     item: 0,
+    ivs: ZERO_IVS,
+    mimickedMoves: 0,
+    ppBonuses: 0,
+    stockpileCounter: 0,
     moves: Object.freeze([0, 0, 0, 0] as const),
     pp: Object.freeze([0, 0, 0, 0] as const),
     statStages: ZERO_STAT_STAGES,
@@ -223,12 +231,15 @@ function emptyBattler(side: 0 | 1): BattleScriptRulesBattlerState {
       restoredBattlerSprite: 0,
       physicalDmg: 0,
       specialDmg: 0,
+      shellBellDmg: 0,
     }),
     substituteHP: 0,
     rolloutTimer: 0,
     furyCutterCounter: 0,
     truantCounter: 0,
     rechargeTimer: 0,
+    chargeTimer: 0,
+    chargeTimerStartValue: 0,
     flinchImmobility: 0,
     disabledMove: 0,
     disableTimer: 0,
@@ -237,6 +248,8 @@ function emptyBattler(side: 0 | 1): BattleScriptRulesBattlerState {
     encoredMove: 0,
     encoredMovePos: 0,
     encoreTimerStartValue: 0,
+    perishSongTimer: 0,
+    perishSongTimerStartValue: 0,
     usedDisabledMove: 0,
     tauntTimer: 0,
     usedTauntedMove: 0,
@@ -266,6 +279,7 @@ function emptyBattler(side: 0 | 1): BattleScriptRulesBattlerState {
     turnOrderNum: 1,
     wrappedMove: 0,
     wrappedBy: side,
+    battlerPreventingEscape: side,
     isFirstTurn: 0,
   });
 }
@@ -280,6 +294,7 @@ function activeBattler(
 ): BattleScriptRulesBattlerState {
   return Object.freeze({
     ...emptyBattler(side),
+    ivs: FACTORY_FIRST_CHALLENGE_IVS,
     ability,
     hp,
     item,

@@ -29,7 +29,8 @@
  * engine doesn't model yet is a named barrier gated on its own real
  * trigger condition (never a blanket skip) -- see the per-case comments
  * below. Wish and Future Sight/Doom Desire now have source-shaped positional
- * state and execute in their real phases; Perish Song remains unmodeled.
+ * state and execute in their real phases, including Perish Song's ordered
+ * countdown/faint pass after delayed attacks.
  */
 import {
   acknowledgeBattleScriptMachineController,
@@ -66,12 +67,14 @@ import {
 } from "./battleScriptCallbackStack.ts";
 import { cancelBattleScriptMultiTurnMoves } from "./battleScriptMultiTurnCancellation.ts";
 import {
+  BATTLE_SCRIPT_ABILITY_SOUNDPROOF,
   BATTLE_SCRIPT_STATUS1_SLEEP,
   BATTLE_SCRIPT_STATUS2_LOCK_CONFUSE_TURN_1,
   BATTLE_SCRIPT_STATUS2_MASKS,
   BATTLE_SCRIPT_STATUS2_WRAPPED_MASK,
   BATTLE_SCRIPT_STATUS3_LEECHSEED,
   BATTLE_SCRIPT_STATUS3_LEECHSEED_BATTLER_MASK,
+  BATTLE_SCRIPT_STATUS3_PERISH_SONG,
   BATTLE_SCRIPT_STATUS3_ROOTED,
   BATTLE_SCRIPT_STATUS3_YAWN,
   BATTLE_SCRIPT_STATUS3_YAWN_TURN_1,
@@ -79,10 +82,13 @@ import {
 
 const POISON_TURN_DMG_LABEL = "BattleScript_PoisonTurnDmg";
 const BURN_TURN_DMG_LABEL = "BattleScript_BurnTurnDmg";
+const NIGHTMARE_TURN_DMG_LABEL = "BattleScript_NightmareTurnDmg";
 const INGRAIN_TURN_HEAL_LABEL = "BattleScript_IngrainTurnHeal";
 const LEECH_SEED_TURN_DRAIN_LABEL = "BattleScript_LeechSeedTurnDrain";
 const WRAP_TURN_DMG_LABEL = "BattleScript_WrapTurnDmg";
 const WRAP_ENDS_LABEL = "BattleScript_WrapEnds";
+const UPROAR_WAKE_LABEL = "BattleScript_MonWokeUpInUproar";
+const UPROAR_TURNS_LABEL = "BattleScript_PrintUproarOverTurns";
 /** `ENDTURN_YAWN`'s own sleep-transition script (`battle_scripts_1.s:3878-3885`, docs/yawn-thrash-endturn-design.md §2) -- `BattleScriptExecute`+`end2`, no `END3`. */
 const YAWN_MAKES_ASLEEP_LABEL = "BattleScript_YawnMakesAsleep";
 /** `ENDTURN_THRASH`'s own lock-expiry confusion script (`battle_scripts_1.s:3790-3794`, docs/yawn-thrash-endturn-design.md §4) -- `BattleScriptExecute`+`end2`, no `END3`. */
@@ -95,6 +101,8 @@ const ENCORED_NO_MORE_LABEL = "BattleScript_EncoredNoMore";
 const WISH_COMES_TRUE_LABEL = "BattleScript_WishComesTrue";
 /** `HandleWishPerishSongOnTurnEnd` state 0's delayed-attack script. */
 const MON_TOOK_FUTURE_ATTACK_LABEL = "BattleScript_MonTookFutureAttack";
+const PERISH_SONG_TAKES_LIFE_LABEL = "BattleScript_PerishSongTakesLife";
+const PERISH_SONG_COUNT_GOES_DOWN_LABEL = "BattleScript_PerishSongCountGoesDown";
 const SIDE_STATUS_FUTUREATTACK = 1 << 6;
 const MOVE_FUTURE_SIGHT = 248;
 /** `ItemBattleEffects(ITEMEFFECT_NORMAL, ...)`'s ten `BattleScriptExecute`+`end2` labels this registration wires (docs/endturn-abilities-items-ground-truth.md §1c/§5 slice 4). */
@@ -130,6 +138,8 @@ const STATUS1_TOXIC_COUNTER = (1 << 8) | (1 << 9) | (1 << 10) | (1 << 11);
 const STATUS1_TOXIC_TURN_1 = 1 << 8;
 const STATUS1_TOXIC_TURN_15 = 15 << 8;
 const STATUS1_PSN_ANY = STATUS1_POISON | STATUS1_TOXIC_POISON;
+/** include/constants/battle.h:166. */
+const STATUS3_CHARGED_UP = 1 << 9;
 /** include/constants/battle.h:125 -- STATUS1_ANY, HOLD_EFFECT_CURE_STATUS's own gate. */
 const STATUS1_ANY = BATTLE_SCRIPT_STATUS1_SLEEP | STATUS1_POISON | STATUS1_BURN
   | STATUS1_FREEZE | STATUS1_PARALYSIS | STATUS1_TOXIC_POISON;
@@ -584,6 +594,38 @@ function runBattlerStatusDamageTick(
 }
 
 /**
+ * `ENDTURN_NIGHTMARES` (`battle_util.c:1561-1579`): after ordinary
+ * poison/burn and before Curse, deal floor(maxHP/4), minimum one, while
+ * asleep. If Sleep has already cleared, remove Nightmare without damage or
+ * a script. No RNG is drawn.
+ */
+function runNightmareTick(
+  program: BattleScriptProgram,
+  handlers: Handlers,
+  state: MachineState,
+  battler: BattleScriptBattlerId,
+): TickOutcome {
+  const b = state.rulesContext.battlers[battler];
+  if ((b.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_NIGHTMARE) === 0 || b.hp === 0) {
+    return Object.freeze({ kind: "advance", state });
+  }
+  if ((b.status1 & BATTLE_SCRIPT_STATUS1_SLEEP) === 0) {
+    return Object.freeze({
+      kind: "advance",
+      state: Object.freeze({
+        ...state,
+        rulesContext: withBattler(state.rulesContext, battler, {
+          status2: (b.status2 & ~BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_NIGHTMARE) >>> 0,
+        }),
+      }),
+    });
+  }
+  const damage = floorDivAtLeastOne(b.maxHP, 4);
+  const rc = Object.freeze({ ...state.rulesContext, battleMoveDamage: damage });
+  return runTickScript(program, handlers, state, rc, battler, NIGHTMARE_TURN_DMG_LABEL);
+}
+
+/**
  * `ENDTURN_INGRAIN` (`battle_util.c:1480-1492`,
  * docs/ingrain-leechseed-wrap-ground-truth.md §2a) -- zero `Random()` draws,
  * heal capped at maxHP by `datahpupdate`'s own negative-damage branch, no
@@ -663,7 +705,8 @@ function runWrapTick(
 }
 
 /**
- * `ENDTURN_THRASH` (`battle_util.c:1674-1695`, docs/yawn-thrash-endturn-design.md
+ * Source notes for `runThrashTick` below: `ENDTURN_THRASH`
+ * (`battle_util.c:1674-1695`, docs/yawn-thrash-endturn-design.md
  * §4) -- wires the case-barrier `battleEndTurnOrchestration.ts` has carried
  * live since Rung 4 landed `STATUS2_LOCK_CONFUSE` (any battler whose lock-in
  * bit was ever set used to halt here; this rung is that barrier's own real
@@ -723,6 +766,80 @@ function runWrapTick(
  * silent-block precedent elsewhere in this codebase, e.g.
  * `applyFlinchMoveEffect`'s Inner Focus non-`certain` branch).
  */
+/**
+ * `ENDTURN_UPROAR` (`battle_util.c:1625-1672`). The resumable source case
+ * wakes one eligible sleeper and repeats without advancing its tracker; this
+ * monolithic orchestrator equivalently drains that ordered wake loop before
+ * performing the single timer decrement and continuation/expiry message.
+ */
+function runUproarTick(
+  program: BattleScriptProgram,
+  handlers: Handlers,
+  initialState: MachineState,
+  battler: BattleScriptBattlerId,
+): TickOutcome {
+  const source = initialState.rulesContext.battlers[battler];
+  if ((source.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_UPROAR) === 0) {
+    return Object.freeze({ kind: "advance", state: initialState });
+  }
+
+  let state = initialState;
+  const { battlersCount } = state.rulesContext.battleTopology;
+  for (let i = 0; i < battlersCount; i += 1) {
+    const sleeper = i as BattleScriptBattlerId;
+    const sleeperState = state.rulesContext.battlers[sleeper];
+    if (
+      (sleeperState.status1 & BATTLE_SCRIPT_STATUS1_SLEEP) === 0
+      || sleeperState.ability === BATTLE_SCRIPT_ABILITY_SOUNDPROOF
+    ) {
+      continue;
+    }
+    const status1 = (sleeperState.status1 & ~BATTLE_SCRIPT_STATUS1_SLEEP) >>> 0;
+    let rulesContext = withBattler(state.rulesContext, sleeper, {
+      status1,
+      status2: (
+        sleeperState.status2
+        & ~BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_NIGHTMARE
+      ) >>> 0,
+    });
+    rulesContext = Object.freeze({
+      ...rulesContext,
+      party: withBattleScriptPartyMemberStatus1(
+        rulesContext.party,
+        sleeperState.side,
+        sleeperState.partyIndex,
+        status1,
+      ),
+    });
+    const wake = runTickScript(program, handlers, state, rulesContext, sleeper, UPROAR_WAKE_LABEL);
+    if (wake.kind === "opcode-barrier") return wake;
+    state = wake.state;
+  }
+
+  const active = state.rulesContext.battlers[battler];
+  const decrementedStatus2 = (active.status2 - (1 << 4)) >>> 0;
+  let rulesContext = withBattler(state.rulesContext, battler, { status2: decrementedStatus2 });
+  const unable = wasBattleScriptBattlerUnableToUseMove(rulesContext, battler);
+  const continues = !unable
+    && (decrementedStatus2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_UPROAR) !== 0;
+  if (continues) {
+    rulesContext = withBattler(rulesContext, battler, {
+      status2: (
+        rulesContext.battlers[battler].status2
+        | BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS
+      ) >>> 0,
+    });
+  } else {
+    rulesContext = cancelBattleScriptMultiTurnMoves(rulesContext, battler).rulesContext;
+  }
+  rulesContext = Object.freeze({
+    ...rulesContext,
+    multistringChooser: continues ? 0 : 1,
+  });
+  return runTickScript(program, handlers, state, rulesContext, battler, UPROAR_TURNS_LABEL);
+}
+
+/** Implements the Thrash reducer documented above the adjacent Uproar case. */
 function runThrashTick(
   program: BattleScriptProgram,
   handlers: Handlers,
@@ -780,11 +897,9 @@ function runThrashTick(
  * fall-asleep AND-chain only ever runs on the SAME pass the decrement empties
  * the counter. `ability !== VITAL_SPIRIT/INSOMNIA` reuses Rung 1's own
  * `JUMPIFABILITY_VALUES` ids as a plain equality check (a C-side `if`, not a
- * script opcode, here). `!UproarWakeUpCheck(gActiveBattler)` is provably
- * always `TRUE` in this engine's reachable state space -- `STATUS2_UPROAR` is
- * never set by any production code (confirmed by grep, doc §2) -- and is
- * omitted rather than modeled as a call that can never observe its `FALSE`
- * input. `CancelMultiTurnMoves` reuses the shared `cancelBattleScriptMulti
+ * script opcode, here). `!UproarWakeUpCheck(gActiveBattler)` scans active
+ * battlers for STATUS2_UPROAR and blocks sleep unless this battler has
+ * Soundproof. `CancelMultiTurnMoves` reuses the shared `cancelBattleScriptMulti
  * TurnMoves` helper (already landed for `battleScriptActionAdmission.ts`,
  * not new this rung). The sleep-turn draw
  * (`STATUS1_SLEEP_TURN((Random() & 3) + 2)`) is the ONLY `Random()` call in
@@ -817,7 +932,20 @@ function runYawnTick(
   const yawnExpired = (decrementedStatus3 & BATTLE_SCRIPT_STATUS3_YAWN) === 0;
   const noStatus1 = (b.status1 & STATUS1_ANY) === 0;
   const noBlockingAbility = b.ability !== ABILITY_VITAL_SPIRIT && b.ability !== ABILITY_INSOMNIA;
-  if (!yawnExpired || !noStatus1 || !noBlockingAbility) {
+  let blockedByUproar = false;
+  if (b.ability !== BATTLE_SCRIPT_ABILITY_SOUNDPROOF) {
+    const { battlersCount } = decrementedRc.battleTopology;
+    for (let i = 0; i < battlersCount; i += 1) {
+      if (
+        (decrementedRc.battlers[i as BattleScriptBattlerId].status2
+          & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_UPROAR) !== 0
+      ) {
+        blockedByUproar = true;
+        break;
+      }
+    }
+  }
+  if (!yawnExpired || !noStatus1 || !noBlockingAbility || blockedByUproar) {
     return Object.freeze({ kind: "advance", state: Object.freeze({ ...state, rulesContext: decrementedRc }) });
   }
 
@@ -1183,7 +1311,7 @@ type BattlerLoopResult =
  * this engine already tracks and barriers if it's ever actually set
  * (currently never, since no move/ability effect in this engine sets any of
  * them yet) -- a real, live check, not a blanket skip. Cases with no modeled
- * trigger state at all (Uproar, Encore, Charge) are documented,
+ * trigger state at all (Charge) are documented,
  * permanently-inert no-ops today; Lock-On is skipped per the doc's own
  * dead-for-Factory finding (B15); Abilities remains pure-C breadth
  * explicitly out of this doc's scope (B2).
@@ -1243,11 +1371,14 @@ function runDoBattlerEndTurnEffects(
     if (statusDamage.kind === "outcome-decided") return Object.freeze({ kind: "outcome-decided", state: statusDamage.state });
     state = statusDamage.state;
 
-    const b = state.rulesContext.battlers[battler];
-    if ((b.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_NIGHTMARE) !== 0) {
-      return Object.freeze({ kind: "case-barrier", state, caseName: "ENDTURN_NIGHTMARES", detail: "STATUS2_NIGHTMARE set but BattleScript_NightmareTurnDmg is not wired" });
+    const nightmare = applyTickOutcome(runNightmareTick(program, handlers, state, battler));
+    if (nightmare.kind === "opcode-barrier") {
+      return Object.freeze({ kind: "opcode-barrier", state: nightmare.state, instruction: nightmare.instruction });
     }
-    void BATTLE_SCRIPT_STATUS1_SLEEP; // real Nightmare guard also requires STATUS1_SLEEP; the NIGHTMARE bit alone already can't be set today, so this sub-guard is moot until Nightmare's own move effect exists.
+    if (nightmare.kind === "outcome-decided") return Object.freeze({ kind: "outcome-decided", state: nightmare.state });
+    state = nightmare.state;
+
+    const b = state.rulesContext.battlers[battler];
     if ((b.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_CURSED) !== 0) {
       return Object.freeze({ kind: "case-barrier", state, caseName: "ENDTURN_CURSE", detail: "STATUS2_CURSED set but BattleScript_CurseTurnDmg is not wired" });
     }
@@ -1258,7 +1389,12 @@ function runDoBattlerEndTurnEffects(
     }
     if (wrap.kind === "outcome-decided") return Object.freeze({ kind: "outcome-decided", state: wrap.state });
     state = wrap.state;
-    // ENDTURN_UPROAR: no modeled uproar timer -- permanently inert no-op today (doc B11).
+    const uproar = applyTickOutcome(runUproarTick(program, handlers, state, battler));
+    if (uproar.kind === "opcode-barrier") {
+      return Object.freeze({ kind: "opcode-barrier", state: uproar.state, instruction: uproar.instruction });
+    }
+    if (uproar.kind === "outcome-decided") return Object.freeze({ kind: "outcome-decided", state: uproar.state });
+    state = uproar.state;
 
     const thrash = applyTickOutcome(runThrashTick(program, handlers, state, battler));
     if (thrash.kind === "opcode-barrier") {
@@ -1312,7 +1448,22 @@ function runDoBattlerEndTurnEffects(
       }
     }
     // ENDTURN_LOCK_ON: doc-proven dead for Factory (zero MOVE_LOCK_ON/MOVE_MIND_READER carriers, B15) -- skipped, not silently ignored.
-    // ENDTURN_CHARGE: no modeled chargeTimer/STATUS3_CHARGED_UP -- inert no-op today (doc B16).
+    // ENDTURN_CHARGE (`battle_util.c:1743-1747`): decrement the functional
+    // timer and clear the charged bit exactly when it reaches zero. The
+    // paired start-value field is source metadata and is not decremented.
+    const chargeBattler = state.rulesContext.battlers[battler];
+    if (chargeBattler.chargeTimer !== 0) {
+      const chargeTimer = chargeBattler.chargeTimer - 1;
+      state = Object.freeze({
+        ...state,
+        rulesContext: withBattler(state.rulesContext, battler, {
+          chargeTimer,
+          status3: chargeTimer === 0
+            ? (chargeBattler.status3 & ~STATUS3_CHARGED_UP) >>> 0
+            : chargeBattler.status3,
+        }),
+      });
+    }
     // ENDTURN_TAUNT (`battle_util.c:1748-1752`): unlike Disable/Encore,
     // expiry owns no script, message, controller request, or RNG draw. The
     // source decrements only the functional tauntTimer; Cmd_settaunt's
@@ -1761,6 +1912,120 @@ function mapFaintedActionsResult(result: BattleScriptFaintedActionsResult): Batt
 type PostFaintKind = "next-turn" | "resumed" | "terminal";
 
 /**
+ * `HandleWishPerishSongOnTurnEnd` state 1. The source resumes
+ * `BattleTurnPassed` between each fired script, so a zero-timer faint is
+ * processed before the positional scan continues.
+ */
+function runPerishSongAfterFutureAttacks(
+  program: BattleScriptProgram,
+  handlers: Handlers,
+  initialState: MachineState,
+  initialCompletionKind: PostFaintKind,
+): BattleEndTurnResult {
+  let state = initialState;
+  let completionKind = initialCompletionKind;
+  const count = state.rulesContext.battleTopology.battlersCount;
+  for (let orderIndex = 0; orderIndex < count; orderIndex += 1) {
+    const battler = state.rulesContext.battlerByTurnOrder[orderIndex] as BattleScriptBattlerId;
+    if ((state.rulesContext.absentBattlerFlags & (1 << battler)) !== 0) continue;
+    const battlerState = state.rulesContext.battlers[battler];
+    if ((battlerState.status3 & BATTLE_SCRIPT_STATUS3_PERISH_SONG) === 0) continue;
+
+    const currentTimer = battlerState.perishSongTimer;
+    let rulesContext: BattleScriptRulesContext;
+    let label: string;
+    if (currentTimer === 0) {
+      rulesContext = withBattler(state.rulesContext, battler, {
+        status3: (battlerState.status3 & ~BATTLE_SCRIPT_STATUS3_PERISH_SONG) >>> 0,
+      });
+      rulesContext = Object.freeze({
+        ...rulesContext,
+        battleMoveDamage: battlerState.hp,
+        battleTextBuff1ByteNumber: currentTimer,
+        selectorRoles: Object.freeze({
+          ...rulesContext.selectorRoles,
+          attacker: battler,
+        }),
+      });
+      label = PERISH_SONG_TAKES_LIFE_LABEL;
+    } else {
+      rulesContext = withBattler(state.rulesContext, battler, {
+        perishSongTimer: currentTimer - 1,
+      });
+      rulesContext = Object.freeze({
+        ...rulesContext,
+        battleTextBuff1ByteNumber: currentTimer,
+        selectorRoles: Object.freeze({
+          ...rulesContext.selectorRoles,
+          attacker: battler,
+        }),
+      });
+      label = PERISH_SONG_COUNT_GOES_DOWN_LABEL;
+    }
+
+    const fired = runTickScript(program, handlers, state, rulesContext, battler, label);
+    if (fired.kind === "opcode-barrier") {
+      return Object.freeze({
+        kind: "non-terminal-barrier",
+        state: fired.state,
+        instruction: fired.instruction,
+      });
+    }
+    state = fired.state;
+
+    if (currentTimer === 0 && state.rulesContext.battlers[battler].hp === 0) {
+      const fainted = runBattleScriptFaintedActionsOrchestration(program, handlers, state);
+      if (fainted.kind === "terminal") {
+        return Object.freeze({
+          kind: "terminal",
+          state: Object.freeze({
+            ...fainted.state,
+            rulesContext: clearFollowMeTimersForTurnValuesCleanUp(
+              fainted.state.rulesContext,
+            ),
+          }),
+        });
+      }
+      if (fainted.kind === "player-choice-required") {
+        return Object.freeze({
+          kind: "player-choice-required",
+          state: fainted.state,
+          battler: fainted.battler,
+          faintedPartyIndex: fainted.faintedPartyIndex,
+          legalPartyIndexes: fainted.legalPartyIndexes,
+        });
+      }
+      if (fainted.kind === "non-terminal-barrier") {
+        return Object.freeze({
+          kind: "non-terminal-barrier",
+          state: fainted.state,
+          instruction: fainted.instruction,
+        });
+      }
+      state = fainted.state;
+      if (fainted.kind === "resumed") completionKind = "resumed";
+    }
+  }
+
+  if (completionKind === "terminal") {
+    return Object.freeze({
+      kind: "terminal",
+      state: Object.freeze({
+        ...state,
+        rulesContext: clearFollowMeTimersForTurnValuesCleanUp(state.rulesContext),
+      }),
+    });
+  }
+  return Object.freeze({
+    kind: completionKind,
+    state: Object.freeze({
+      ...state,
+      rulesContext: finishTurnValuesCleanUp(state.rulesContext),
+    }),
+  });
+}
+
+/**
  * `HandleWishPerishSongOnTurnEnd` state 0. Unlike field/battler end-turn
  * effects this is positional (0..gBattlersCount-1), runs after faint actions,
  * and is not gated by battleOutcome.
@@ -1850,24 +2115,12 @@ function runFutureAttacksAfterFaints(
     }
   }
 
-  if (completionKind === "terminal") {
-    return Object.freeze({
-      kind: "terminal",
-      state: Object.freeze({
-        ...state,
-        rulesContext: clearFollowMeTimersForTurnValuesCleanUp(
-          state.rulesContext,
-        ),
-      }),
-    });
-  }
-  return Object.freeze({
-    kind: completionKind,
-    state: Object.freeze({
-      ...state,
-      rulesContext: finishTurnValuesCleanUp(state.rulesContext),
-    }),
-  });
+  return runPerishSongAfterFutureAttacks(
+    program,
+    handlers,
+    state,
+    completionKind,
+  );
 }
 
 function finishFaintedThenDelayed(
@@ -1900,8 +2153,8 @@ function finishFaintedThenDelayed(
  * `docs/counter-retaliation-design.md` §2.2). That tail calls the same timer
  * helper again, matching source and making the clear idempotent. The
  * post-faint positional Future Sight/Doom Desire phase is applied below;
- * Perish Song remains the unmodeled portion of
- * `HandleWishPerishSongOnTurnEnd`.
+ * The post-faint positional Future Sight/Doom Desire and Perish Song phases
+ * are both applied below in their source order.
  */
 export function runBattleEndTurnOrchestration(
   program: BattleScriptProgram,

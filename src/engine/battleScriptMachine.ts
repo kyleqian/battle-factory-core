@@ -676,6 +676,12 @@ function freezeEventPayload(
         ...payload,
         snapshot: createBattleScriptSelectionMessageSnapshot(payload.snapshot),
       });
+    case "set-battler-moves-pp-data":
+      return Object.freeze({
+        ...payload,
+        moves: Object.freeze([...payload.moves]) as unknown as typeof payload.moves,
+        pp: Object.freeze([...payload.pp]) as unknown as typeof payload.pp,
+      });
     case "play-se":
     case "play-fanfare":
     case "play-faint-cry":
@@ -684,6 +690,7 @@ function freezeEventPayload(
     case "draw-party-status-summary":
     case "set-battler-sprite-visibility":
     case "set-battler-status-data":
+    case "set-party-status-data":
     case "status-icon-update":
     case "set-battler-pp-data":
     case "set-battler-item":

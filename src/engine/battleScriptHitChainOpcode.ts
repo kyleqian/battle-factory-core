@@ -16,6 +16,7 @@ import {
   type BattleScriptOpcodeHandlerContext,
   type BattleScriptOpcodeHandlers,
   type BattleScriptRngState,
+  type BattleScriptSchedulerState,
 } from "./battleScriptMachine.ts";
 import {
   resolveBattleScriptLabel,
@@ -29,6 +30,7 @@ import type {
   BattleScriptMessagePreparationPort,
 } from "./battleScriptSourceCommands.ts";
 import {
+  BATTLE_SCRIPT_BATTLE_TYPE_DOUBLE,
   BATTLE_SCRIPT_BATTLE_TYPE_ARENA,
   BATTLE_SCRIPT_HITMARKER_ATTACKSTRING_PRINTED,
   BATTLE_SCRIPT_HITMARKER_NO_ATTACKSTRING,
@@ -39,9 +41,12 @@ import {
   BATTLE_SCRIPT_MOVE_TARGET_BOTH,
   BATTLE_SCRIPT_STATUS2_SUBSTITUTE,
   resolveBattleScriptBattlerHoldEffect,
+  resolveBattleScriptBattlerPartner,
   resolveBattleScriptMoveTarget,
   resolveBattleScriptMoveType,
+  withBattleScriptPartyMemberItem,
   withBattleScriptPartyMemberHp,
+  withBattleScriptPartyMemberPp,
   withBattleScriptPartyMemberStatus1,
   type BattleScriptMoveEndHalfwords,
   type BattleScriptMoveHistory,
@@ -98,6 +103,7 @@ import {
   STAT_SPDEF,
   STAT_SPEED,
 } from "./battleScriptStatBuffs.ts";
+import { cancelBattleScriptMultiTurnMoves } from "./battleScriptMultiTurnCancellation.ts";
 
 type MoveRow = Readonly<{
   id: number;
@@ -214,14 +220,33 @@ const PRIMARY_STATUS_MOVE_EFFECT = MOVE_EFFECT_TOXIC;
 /** include/constants/battle.h:254-255 -- the first two family-B (status2/misc) MOVE_EFFECT_* values. */
 const MOVE_EFFECT_CONFUSION = 7;
 const MOVE_EFFECT_FLINCH = 8;
+const MOVE_EFFECT_TRI_ATTACK = 9;
+/** include/constants/battle.h:256 -- Uproar's user-owned lock/timer effect. */
+const MOVE_EFFECT_UPROAR = 10;
+const MOVE_EFFECT_PAYDAY = 11;
 /** include/constants/battle.h:259 -- SetMoveEffect's two-turn-charge case (docs/semi-invulnerable-registration-scout.md §5 rung 2). */
 const MOVE_EFFECT_CHARGING = 12;
 /** include/constants/battle.h:260 -- SetMoveEffect's Wrap-family case (docs/ingrain-leechseed-wrap-ground-truth.md §1c/§5 slice 2). */
 const MOVE_EFFECT_WRAP = 13;
 /** include/constants/battle.h:261 -- shared 25%-of-damage recoil used by Struggle and ordinary recoil moves. */
 const MOVE_EFFECT_RECOIL_25 = 14;
+const MOVE_EFFECT_RECHARGE = 29;
+const MOVE_EFFECT_RAGE = 30;
+const MOVE_EFFECT_STEAL_ITEM = 31;
+const MOVE_EFFECT_PREVENT_ESCAPE = 32;
+const MOVE_EFFECT_NIGHTMARE = 33;
+const MOVE_EFFECT_ALL_STATS_UP = 34;
+const MOVE_EFFECT_RAPIDSPIN = 35;
+const MOVE_EFFECT_REMOVE_PARALYSIS = 36;
+const MOVE_EFFECT_ATK_DEF_DOWN = 37;
+/** include/constants/battle.h:291 -- Double-Edge's one-third damage-derived recoil. */
+const MOVE_EFFECT_RECOIL_33 = 38;
+const MOVE_EFFECT_KNOCK_OFF = 54;
 /** include/constants/battle.h:300 -- SetMoveEffect's Thrash-family lock-in case (docs/yawn-thrash-endturn-design.md §3, Rung 4). */
 const MOVE_EFFECT_THRASH = 53;
+const MOVE_EFFECT_SP_ATK_TWO_DOWN = 59;
+/** include/constants/battle.h:147. */
+const STATUS2_RAGE = 1 << 23;
 /**
  * `gTrappingMoves` (`battle_message.c:1256-1264`) -- the fixed 6-move family
  * MOVE_EFFECT_WRAP's own duration/message dispatch indexes by, in this exact
@@ -261,6 +286,35 @@ const B_MSG_STATUS_HAD_NO_EFFECT = 2;
 
 /** printfromtable's registered small constant tables, each indexed by MULTISTRING_CHOOSER. */
 const PRINTFROMTABLE_TABLES: Readonly<Record<string, readonly string[]>> = Object.freeze({
+  /** battle_message.c:981-986. */
+  gStockpileUsedStringIds: Object.freeze([
+    "STRINGID_PKMNSTOCKPILED",
+    "STRINGID_PKMNCANTSTOCKPILE",
+  ]),
+  /** battle_message.c:991-996. */
+  gSwallowFailStringIds: Object.freeze([
+    "STRINGID_FAILEDTOSWALLOW",
+    "STRINGID_PKMNHPFULL",
+  ]),
+  /** battle_message.c:1084-1088 -- sleep's ordinary/ability-caused selectors. */
+  gFellAsleepStringIds: Object.freeze([
+    "STRINGID_PKMNFELLASLEEP",
+    "STRINGID_PKMNMADESLEEP",
+  ]),
+  /** battle_message.c:1132-1139 -- Heal Bell's four Soundproof selectors plus Aromatherapy. */
+  gPartyStatusHealStringIds: Object.freeze([
+    "STRINGID_BELLCHIMED",
+    "STRINGID_BELLCHIMED",
+    "STRINGID_BELLCHIMED",
+    "STRINGID_BELLCHIMED",
+    "STRINGID_SOOTHINGAROMA",
+  ]),
+  /** battle_message.c:1235-1240 -- Trick's taken/given/both item-result table. */
+  gItemSwapStringIds: Object.freeze([
+    "STRINGID_PKMNOBTAINEDX",
+    "STRINGID_PKMNOBTAINEDX2",
+    "STRINGID_PKMNOBTAINEDXYOBTAINEDZ",
+  ]),
   gFocusEnergyUsedStringIds: Object.freeze([
     "STRINGID_PKMNGETTINGPUMPED",
     "STRINGID_BUTITFAILED",
@@ -317,6 +371,11 @@ const PRINTFROMTABLE_TABLES: Readonly<Record<string, readonly string[]>> = Objec
     "STRINGID_PKMNCANTSLEEPINUPROAR2",
     "STRINGID_UPROARKEPTPKMNAWAKE",
     "STRINGID_PKMNSTAYEDAWAKEUSING",
+  ]),
+  /** battle_message.c:975-979 -- ENDTURN_UPROAR continuation/expiry. */
+  gUproarOverTurnStringIds: Object.freeze([
+    "STRINGID_PKMNMAKINGUPROAR",
+    "STRINGID_PKMNCALMEDDOWN",
   ]),
   /** battle_message.c:1208-1212 -- BattleScript_BerryCureChosenStatusRet's own table, shared by HOLD_EFFECT_CURE_STATUS (Lum) and HOLD_EFFECT_CURE_ATTRACT (Mental Herb) (docs/endturn-abilities-items-ground-truth.md §1c). */
   gBerryEffectStringIds: Object.freeze([
@@ -482,10 +541,25 @@ export const SET_MOVE_EFFECT_SUPPORTED_BYTES: ReadonlySet<number> = new Set<numb
   MOVE_EFFECT_TOXIC,
   MOVE_EFFECT_CONFUSION,
   MOVE_EFFECT_FLINCH,
+  MOVE_EFFECT_TRI_ATTACK,
+  MOVE_EFFECT_UPROAR,
+  MOVE_EFFECT_PAYDAY,
+  MOVE_EFFECT_STEAL_ITEM,
   MOVE_EFFECT_CHARGING,
   MOVE_EFFECT_WRAP,
   MOVE_EFFECT_RECOIL_25,
+  MOVE_EFFECT_RECHARGE,
+  MOVE_EFFECT_RAGE,
+  MOVE_EFFECT_PREVENT_ESCAPE,
+  MOVE_EFFECT_NIGHTMARE,
+  MOVE_EFFECT_ALL_STATS_UP,
+  MOVE_EFFECT_RAPIDSPIN,
+  MOVE_EFFECT_REMOVE_PARALYSIS,
+  MOVE_EFFECT_ATK_DEF_DOWN,
+  MOVE_EFFECT_RECOIL_33,
+  MOVE_EFFECT_KNOCK_OFF,
   MOVE_EFFECT_THRASH,
+  MOVE_EFFECT_SP_ATK_TWO_DOWN,
   ...Object.keys(STAT_MOVE_EFFECT_TABLE).map(Number),
 ]);
 
@@ -812,15 +886,16 @@ function checkWonderGuardAndLevitate(
  * Bond tail, which is unreachable whenever Protect was the reason for
  * jumping in the first place (the `if` branch taken instead).
  */
-function accuracycheckNoAccCalcCheckLockOn(
+function accuracycheckNoAccCalc(
   context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
+  checksLockOn: boolean,
 ): BattleScriptCommandTransition<BattleScriptRulesContext> {
   const rulesContext = context.state.rulesContext;
   const attacker = requireBattlerRole(rulesContext, "attacker");
   const target = requireBattlerRole(rulesContext, "target");
   const targetBattler = rulesContext.battlers[target];
 
-  if ((targetBattler.status3 & BATTLE_SCRIPT_STATUS3_ALWAYS_HITS) !== 0) {
+  if (checksLockOn && (targetBattler.status3 & BATTLE_SCRIPT_STATUS3_ALWAYS_HITS) !== 0) {
     return unsupportedBranch(
       context,
       "AccuracyCalcHelper's STATUS3_ALWAYS_HITS Lock-On/Mind-Reader sure-hit branch needs "
@@ -857,18 +932,25 @@ function accuracycheckNoAccCalcCheckLockOn(
  * are source-complete: `ACC_CURR_MOVE` (`BattleScript_EffectHit` and 53 of
  * the program's other accuracycheck sites), the two explicit delayed-attack
  * literals (`MOVE_FUTURE_SIGHT`/`MOVE_DOOM_DESIRE`), and
- * `NO_ACC_CALC_CHECK_LOCK_ON`
- * (`accuracycheckNoAccCalcCheckLockOn` above, `BattleScript_EffectYawn`'s own
- * site -- 1 of 8 sites using this literal, the rest still barriered behind
- * their own separate unregistered opcodes). Bare `NO_ACC_CALC` remains an
- * explicit barrier.
+ * `NO_ACC_CALC_CHECK_LOCK_ON` (`accuracycheckNoAccCalc` above,
+ * `BattleScript_EffectYawn`'s own site -- 1 of 8 sites using this literal,
+ * the rest still barriered behind their own separate unregistered opcodes),
+ * and Mean Look's sole bare `NO_ACC_CALC`. The bare form shares the no-roll
+ * semi-invulnerability/Protect path but source-skips the Lock-On identity
+ * comparison.
  */
 export const accuracycheckOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (
   context,
 ) => {
   const moveOperand = context.instruction.operands[1];
-  if (moveOperand?.expression === "NO_ACC_CALC_CHECK_LOCK_ON") {
-    return accuracycheckNoAccCalcCheckLockOn(context);
+  if (
+    moveOperand?.expression === "NO_ACC_CALC_CHECK_LOCK_ON"
+    || moveOperand?.expression === "NO_ACC_CALC"
+  ) {
+    return accuracycheckNoAccCalc(
+      context,
+      moveOperand.expression === "NO_ACC_CALC_CHECK_LOCK_ON",
+    );
   }
   const explicitMove = moveOperand?.expression === "MOVE_FUTURE_SIGHT"
     ? 248
@@ -1138,7 +1220,17 @@ export const ppreduceOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesC
     const nextPp = currentPp > ppToDeduct ? currentPp - ppToDeduct : 0;
     const pp = attackerBattler.pp.map((value, index) => (index === slot ? nextPp : value)) as unknown as
       BattleScriptRulesBattlerState["pp"];
-    nextRulesContext = withBattler(rulesContext, attacker, { pp });
+    const withActivePp = withBattler(rulesContext, attacker, { pp });
+    nextRulesContext = Object.freeze({
+      ...withActivePp,
+      party: withBattleScriptPartyMemberPp(
+        withActivePp.party,
+        attackerBattler.side,
+        attackerBattler.partyIndex,
+        slot,
+        nextPp,
+      ),
+    });
 
     const isPermanent = (attackerBattler.status2 & BATTLE_SCRIPT_STATUS2_TRANSFORMED) === 0;
     if (isPermanent) {
@@ -1226,6 +1318,49 @@ function toDamageCalcStatStages(battler: BattleScriptRulesBattlerState) {
 }
 
 /**
+ * Source `CalculateBaseDamage` call shared by Cmd_damagecalc and
+ * Cmd_stockpiletobasedamage. This deliberately excludes crit, dmgMultiplier,
+ * Charge, Helping Hand, and Stockpile's own post-call multiplier.
+ */
+export function calculateBattleScriptBaseDamageForCurrentMove(
+  rulesContext: BattleScriptRulesContext,
+): number {
+  const attacker = requireBattlerRole(rulesContext, "attacker");
+  const target = requireBattlerRole(rulesContext, "target");
+  const attackerBattler = rulesContext.battlers[attacker];
+  const targetBattler = rulesContext.battlers[target];
+  const moveRow = requireMoveRow(rulesContext.currentMove);
+  return calculateBaseDamage({
+    attacker: {
+      attack: attackerBattler.attack,
+      defense: attackerBattler.defense,
+      spAttack: attackerBattler.spAttack,
+      spDefense: attackerBattler.spDefense,
+      level: attackerBattler.level,
+      types: attackerBattler.types,
+      statStages: toDamageCalcStatStages(attackerBattler),
+      isBurned: (attackerBattler.status1 & STATUS1_BURN) !== 0,
+      ability: ABILITY_NAME_BY_ID[attackerBattler.ability] ?? null,
+    },
+    defender: {
+      attack: targetBattler.attack,
+      defense: targetBattler.defense,
+      spAttack: targetBattler.spAttack,
+      spDefense: targetBattler.spDefense,
+      level: targetBattler.level,
+      types: targetBattler.types,
+      statStages: toDamageCalcStatStages(targetBattler),
+    },
+    movePower: rulesContext.dynamicBasePower !== 0
+      ? rulesContext.dynamicBasePower
+      : moveRow.power,
+    moveType: resolveMoveTypeName(rulesContext, rulesContext.currentMove),
+    isCriticalHit: rulesContext.critMultiplier === 2,
+    moveEffect: moveRow.effect,
+  });
+}
+
+/**
  * Cmd_damagecalc (battle_script_commands.c:1288-1301): CalculateBaseDamage
  * (consumed via damageCalc.ts's pinned calculateBaseDamage) times
  * gCritMultiplier (set by critcalc above) times gBattleScripting.dmgMultiplier
@@ -1250,40 +1385,11 @@ export const damagecalcOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRule
 ) => {
   const rulesContext = context.state.rulesContext;
   const attacker = requireBattlerRole(rulesContext, "attacker");
-  const target = requireBattlerRole(rulesContext, "target");
   const attackerBattler = rulesContext.battlers[attacker];
-  const targetBattler = rulesContext.battlers[target];
   const move = rulesContext.currentMove;
-  const moveRow = requireMoveRow(move);
   const moveType = resolveMoveTypeName(rulesContext, move);
-  const isCriticalHit = rulesContext.critMultiplier === 2;
 
-  let damage = calculateBaseDamage({
-    attacker: {
-      attack: attackerBattler.attack,
-      defense: attackerBattler.defense,
-      spAttack: attackerBattler.spAttack,
-      spDefense: attackerBattler.spDefense,
-      level: attackerBattler.level,
-      types: attackerBattler.types,
-      statStages: toDamageCalcStatStages(attackerBattler),
-      isBurned: (attackerBattler.status1 & STATUS1_BURN) !== 0,
-      ability: ABILITY_NAME_BY_ID[attackerBattler.ability] ?? null,
-    },
-    defender: {
-      attack: targetBattler.attack,
-      defense: targetBattler.defense,
-      spAttack: targetBattler.spAttack,
-      spDefense: targetBattler.spDefense,
-      level: targetBattler.level,
-      types: targetBattler.types,
-      statStages: toDamageCalcStatStages(targetBattler),
-    },
-    movePower: rulesContext.dynamicBasePower !== 0 ? rulesContext.dynamicBasePower : moveRow.power,
-    moveType,
-    isCriticalHit,
-    moveEffect: moveRow.effect,
-  });
+  let damage = calculateBattleScriptBaseDamageForCurrentMove(rulesContext);
 
   damage = damage * rulesContext.critMultiplier * rulesContext.dmgMultiplier;
   if ((attackerBattler.status3 & STATUS3_CHARGED_UP) !== 0 && moveType === "TYPE_ELECTRIC") {
@@ -2392,6 +2498,53 @@ function resolveRequiredLabelProgramCounter(program: BattleScriptProgram, label:
   return entry.programCounter;
 }
 
+const ITEM_NONE = 0;
+const ITEM_ORANGE_MAIL = 121;
+const ITEM_RETRO_MAIL = 132;
+const ABILITY_STICKY_HOLD = 60;
+const BATTLE_TYPE_LINK = 1 << 1;
+const BATTLE_TYPE_EREADER_TRAINER = 1 << 11;
+const BATTLE_TYPE_BATTLE_TOWER = 1 << 8;
+const BATTLE_TYPE_DOME = 1 << 16;
+const BATTLE_TYPE_PALACE = 1 << 17;
+const BATTLE_TYPE_ARENA = 1 << 18;
+const BATTLE_TYPE_FACTORY = 1 << 19;
+const BATTLE_TYPE_PIKE = 1 << 20;
+const BATTLE_TYPE_PYRAMID = 1 << 21;
+const BATTLE_TYPE_RECORDED_LINK = 1 << 25;
+const BATTLE_TYPE_TRAINER_HILL = 1 << 26;
+const BATTLE_TYPE_SECRET_BASE = 1 << 27;
+const BATTLE_TYPE_FRONTIER = (
+  BATTLE_TYPE_BATTLE_TOWER
+  | BATTLE_TYPE_DOME
+  | BATTLE_TYPE_PALACE
+  | BATTLE_TYPE_ARENA
+  | BATTLE_TYPE_FACTORY
+  | BATTLE_TYPE_PIKE
+  | BATTLE_TYPE_PYRAMID
+);
+const ITEM_STEAL_ALLOWED_SPECIAL_BATTLES = (
+  BATTLE_TYPE_EREADER_TRAINER
+  | BATTLE_TYPE_FRONTIER
+  | BATTLE_TYPE_LINK
+  | BATTLE_TYPE_RECORDED_LINK
+  | BATTLE_TYPE_SECRET_BASE
+);
+
+function isMail(item: number): boolean {
+  return item >= ITEM_ORANGE_MAIL && item <= ITEM_RETRO_MAIL;
+}
+
+function replaceMoveEndHalfword(
+  values: BattleScriptMoveEndHalfwords,
+  battler: BattleScriptBattlerId,
+  value: number,
+): BattleScriptMoveEndHalfwords {
+  return Object.freeze(values.map((candidate, index) =>
+    index === battler ? value : candidate
+  )) as unknown as BattleScriptMoveEndHalfwords;
+}
+
 /**
  * SetMoveEffect (battle_script_commands.c:2234-2521), narrowed to
  * Cmd_seteffectwithchance's own call site: both of its dispatch sites always
@@ -2454,7 +2607,11 @@ function applySetMoveEffect(
   // Target at 0 HP (:2261-2264) -- the quartet's bytes (2-5) never equal
   // MOVE_EFFECT_PAYDAY(11)/STEAL_ITEM(31), so source's exclusion for those
   // two never applies here.
-  if (effectBattlerState.hp === 0) {
+  if (
+    effectBattlerState.hp === 0
+    && effectByte !== MOVE_EFFECT_PAYDAY
+    && effectByte !== MOVE_EFFECT_STEAL_ITEM
+  ) {
     return passThrough();
   }
   // Substitute (:2266-2267).
@@ -2468,6 +2625,73 @@ function applySetMoveEffect(
     }
     if (effectByte === MOVE_EFFECT_FLINCH) {
       return applyFlinchMoveEffect(context, baseRulesContext, effectBattler, certain);
+    }
+    if (effectByte === MOVE_EFFECT_TRI_ATTACK) {
+      if (effectBattlerState.status1 !== 0) return passThrough();
+      const { rng, randomValue } = drawBattleScriptRng(
+        context.state.rng,
+        context.instruction,
+        "SetMoveEffect Tri Attack status selector (Random() % 3 + 3)",
+      );
+      const recursiveContext = Object.freeze({
+        ...context,
+        state: Object.freeze({ ...context.state, rng }),
+      });
+      return applySetMoveEffect(
+        recursiveContext,
+        baseRulesContext,
+        (randomValue % 3) + MOVE_EFFECT_BURN,
+        false,
+        false,
+      );
+    }
+    if (effectByte === MOVE_EFFECT_UPROAR) {
+      if ((effectBattlerState.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_UPROAR) !== 0) {
+        return passThrough();
+      }
+      const { rng, randomValue } = drawBattleScriptRng(
+        context.state.rng,
+        context.instruction,
+        "SetMoveEffect Uproar duration ((Random() & 3) + 2)",
+      );
+      const uproarTurns = (randomValue & 3) + 2;
+      const lockedMoves = Object.freeze(
+        baseRulesContext.lockedMoves.map((move, index) =>
+          index === effectBattler ? baseRulesContext.currentMove : move
+        ),
+      ) as BattleScriptMoveEndHalfwords;
+      const withUproar = withBattler(baseRulesContext, effectBattler, {
+        status2: (
+          effectBattlerState.status2
+          | BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS
+          | (uproarTurns << 4)
+        ) >>> 0,
+      });
+      const programCounter = resolveRequiredLabelProgramCounter(
+        context.program,
+        "BattleScript_MoveEffectUproar",
+      );
+      return transitionBattleScriptCommand(
+        Object.freeze({ ...context, state: Object.freeze({ ...context.state, rng }) }),
+        Object.freeze({ kind: "call", programCounter }),
+        { rulesContext: Object.freeze({ ...withUproar, lockedMoves }) },
+      );
+    }
+    if (effectByte === MOVE_EFFECT_PAYDAY) {
+      let paydayMoney = baseRulesContext.paydayMoney;
+      if (baseRulesContext.battlers[attacker].side === 0) {
+        const next = (paydayMoney + (baseRulesContext.battlers[attacker].level * 5)) & 0xffff;
+        paydayMoney = paydayMoney > next ? 0xffff : next;
+      }
+      const programCounter = resolveRequiredLabelProgramCounter(
+        context.program,
+        "BattleScript_MoveEffectPayDay",
+      );
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "call", programCounter }),
+        { rulesContext: Object.freeze({ ...baseRulesContext, paydayMoney }) },
+      );
     }
     if (effectByte === MOVE_EFFECT_WRAP) {
       return applyWrapMoveEffect(context, baseRulesContext, effectBattler);
@@ -2489,11 +2713,254 @@ function applySetMoveEffect(
         },
       );
     }
+    if (effectByte === MOVE_EFFECT_RECOIL_33) {
+      // SetMoveEffect, battle_script_commands.c:2843-2850: signed C division
+      // truncates toward zero, then the zero result is raised to one.
+      const recoilDamage = Math.max(1, Math.trunc(baseRulesContext.hpDealt / 3));
+      const programCounter = resolveRequiredLabelProgramCounter(
+        context.program,
+        "BattleScript_MoveEffectRecoil",
+      );
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "call", programCounter }),
+        {
+          rulesContext: Object.freeze({
+            ...baseRulesContext,
+            battleMoveDamage: recoilDamage,
+          }),
+        },
+      );
+    }
     if (effectByte === MOVE_EFFECT_CHARGING) {
       return applyChargingMoveEffect(context, baseRulesContext, effectBattler);
     }
+    if (effectByte === MOVE_EFFECT_RECHARGE) {
+      if ((effectBattlerState.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_RECHARGE) !== 0) {
+        return passThrough();
+      }
+      const lockedMoves = Object.freeze(
+        baseRulesContext.lockedMoves.map((move, index) =>
+          index === effectBattler ? baseRulesContext.currentMove : move
+        ),
+      ) as BattleScriptMoveEndHalfwords;
+      const nextRulesContext = withBattler(baseRulesContext, effectBattler, {
+        status2: (effectBattlerState.status2 | BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_RECHARGE) >>> 0,
+        rechargeTimer: 2,
+      });
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        { rulesContext: Object.freeze({ ...nextRulesContext, lockedMoves }) },
+      );
+    }
+    if (effectByte === MOVE_EFFECT_RAGE) {
+      const nextRulesContext = withBattler(baseRulesContext, attacker, {
+        status2: (baseRulesContext.battlers[attacker].status2 | STATUS2_RAGE) >>> 0,
+      });
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        { rulesContext: nextRulesContext },
+      );
+    }
+    if (effectByte === MOVE_EFFECT_STEAL_ITEM) {
+      const flags = baseRulesContext.battleTopology.battleTypeFlags;
+      const attackerState = baseRulesContext.battlers[attacker];
+      const targetState = baseRulesContext.battlers[target];
+      if ((flags & BATTLE_TYPE_TRAINER_HILL) !== 0) return passThrough();
+      const regularBattle = (flags & ITEM_STEAL_ALLOWED_SPECIAL_BATTLES) === 0;
+      if (attackerState.side === 1 && regularBattle) return passThrough();
+      if (
+        regularBattle
+        && (
+          baseRulesContext.knockedOffMons[attackerState.side]
+          & (1 << attackerState.partyIndex)
+        ) !== 0
+      ) {
+        return passThrough();
+      }
+      if (targetState.item !== ITEM_NONE && targetState.ability === ABILITY_STICKY_HOLD) {
+        const programCounter = resolveRequiredLabelProgramCounter(context.program, "BattleScript_NoItemSteal");
+        return transitionBattleScriptCommand(
+          context,
+          Object.freeze({ kind: "call", programCounter }),
+          {
+            rulesContext: Object.freeze({
+              ...baseRulesContext,
+              lastUsedAbility: ABILITY_STICKY_HOLD,
+            }),
+          },
+        );
+      }
+      if (
+        attackerState.item !== ITEM_NONE
+        || targetState.item === BATTLE_SCRIPT_ITEM_ENIGMA_BERRY
+        || isMail(targetState.item)
+        || targetState.item === ITEM_NONE
+      ) {
+        return passThrough();
+      }
+      let nextRules = withBattler(baseRulesContext, target, { item: ITEM_NONE });
+      const stolenItem = targetState.item;
+      let party = withBattleScriptPartyMemberItem(
+        nextRules.party,
+        attackerState.side,
+        attackerState.partyIndex,
+        stolenItem,
+      );
+      party = withBattleScriptPartyMemberItem(
+        party,
+        targetState.side,
+        targetState.partyIndex,
+        ITEM_NONE,
+      );
+      nextRules = Object.freeze({
+        ...nextRules,
+        party,
+        lastUsedItem: stolenItem,
+        changedItems: replaceMoveEndHalfword(nextRules.changedItems, attacker, stolenItem),
+        choicedMove: replaceMoveEndHalfword(nextRules.choicedMove, target, 0),
+      });
+      let scheduler = markBattleScriptControllerPending(context.state.scheduler, attacker);
+      scheduler = markBattleScriptControllerPending(scheduler, target);
+      const programCounter = resolveRequiredLabelProgramCounter(context.program, "BattleScript_ItemSteal");
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "call", programCounter }),
+        {
+          rulesContext: nextRules,
+          scheduler,
+          events: Object.freeze([
+            Object.freeze({ kind: "set-battler-item" as const, battler: attacker, item: stolenItem }),
+            Object.freeze({ kind: "set-battler-item" as const, battler: target, item: ITEM_NONE }),
+          ]),
+        },
+      );
+    }
+    if (effectByte === MOVE_EFFECT_PREVENT_ESCAPE) {
+      const nextRulesContext = withBattler(baseRulesContext, target, {
+        status2: (
+          baseRulesContext.battlers[target].status2
+          | STATUS2_ESCAPE_PREVENTION
+        ) >>> 0,
+        battlerPreventingEscape: attacker,
+      });
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        { rulesContext: nextRulesContext },
+      );
+    }
+    if (effectByte === MOVE_EFFECT_NIGHTMARE) {
+      const nextRulesContext = withBattler(baseRulesContext, target, {
+        status2: (
+          baseRulesContext.battlers[target].status2
+          | BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_NIGHTMARE
+        ) >>> 0,
+      });
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        { rulesContext: nextRulesContext },
+      );
+    }
+    if (effectByte === MOVE_EFFECT_ALL_STATS_UP) {
+      const programCounter = resolveRequiredLabelProgramCounter(context.program, "BattleScript_AllStatsUp");
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "call", programCounter }),
+        { rulesContext: baseRulesContext },
+      );
+    }
+    if (effectByte === MOVE_EFFECT_RAPIDSPIN) {
+      const programCounter = resolveRequiredLabelProgramCounter(context.program, "BattleScript_RapidSpinAway");
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "call", programCounter }),
+        { rulesContext: baseRulesContext },
+      );
+    }
+    if (effectByte === MOVE_EFFECT_REMOVE_PARALYSIS) {
+      const targetState = baseRulesContext.battlers[target];
+      if ((targetState.status1 & STATUS1_PARALYSIS) === 0) return passThrough();
+      const newStatus1 = (targetState.status1 & ~STATUS1_PARALYSIS) >>> 0;
+      const updatedContext = withBattler(baseRulesContext, target, { status1: newStatus1 });
+      const nextRulesContext = Object.freeze({
+        ...updatedContext,
+        party: withBattleScriptPartyMemberStatus1(
+          updatedContext.party,
+          targetState.side,
+          targetState.partyIndex,
+          newStatus1,
+        ),
+      });
+      const programCounter = resolveRequiredLabelProgramCounter(context.program, "BattleScript_TargetPRLZHeal");
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "call", programCounter }),
+        {
+          rulesContext: nextRulesContext,
+          events: Object.freeze([
+            Object.freeze({ kind: "set-battler-status-data" as const, battler: target, status1: newStatus1 }),
+          ]),
+        },
+      );
+    }
+    if (effectByte === MOVE_EFFECT_ATK_DEF_DOWN || effectByte === MOVE_EFFECT_SP_ATK_TWO_DOWN) {
+      const label = effectByte === MOVE_EFFECT_ATK_DEF_DOWN
+        ? "BattleScript_AtkDefDown"
+        : "BattleScript_SAtkDown2";
+      const programCounter = resolveRequiredLabelProgramCounter(context.program, label);
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "call", programCounter }),
+        { rulesContext: baseRulesContext },
+      );
+    }
     if (effectByte === MOVE_EFFECT_THRASH) {
       return applyThrashMoveEffect(context, baseRulesContext, effectBattler);
+    }
+    if (effectByte === MOVE_EFFECT_KNOCK_OFF) {
+      const targetState = baseRulesContext.battlers[effectBattler];
+      if (targetState.ability === ABILITY_STICKY_HOLD) {
+        if (targetState.item === ITEM_NONE) return passThrough();
+        const programCounter = resolveRequiredLabelProgramCounter(
+          context.program,
+          "BattleScript_StickyHoldActivates",
+        );
+        return transitionBattleScriptCommand(
+          context,
+          Object.freeze({ kind: "jump", programCounter }),
+          {
+            rulesContext: Object.freeze({
+              ...baseRulesContext,
+              lastUsedAbility: ABILITY_STICKY_HOLD,
+            }),
+          },
+        );
+      }
+      if (targetState.item === ITEM_NONE) return passThrough();
+      const side = targetState.side;
+      const knockedOffMons = Object.freeze(
+        baseRulesContext.knockedOffMons.map((mask, index) =>
+          index === side ? (mask | (1 << targetState.partyIndex)) : mask
+        ),
+      ) as readonly [number, number];
+      const nextRules = withBattler(baseRulesContext, effectBattler, { item: ITEM_NONE });
+      const programCounter = resolveRequiredLabelProgramCounter(context.program, "BattleScript_KnockedOff");
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "call", programCounter }),
+        {
+          rulesContext: Object.freeze({
+            ...nextRules,
+            lastUsedItem: targetState.item,
+            knockedOffMons,
+            choicedMove: replaceMoveEndHalfword(nextRules.choicedMove, effectBattler, 0),
+          }),
+        },
+      );
     }
     const statEntry = STAT_MOVE_EFFECT_TABLE[effectByte];
     if (statEntry) {
@@ -2547,9 +3014,8 @@ function applySetMoveEffect(
       // scripts' own jumpifcantmakeasleep/jumpifstatus already filtered these
       // cases before seteffectprimary ever runs) -- ported anyway for
       // SetMoveEffect fidelity, matching every other family-A case's full
-      // port. CancelMultiTurnMoves(gEffectBattler) on the success path is not
-      // modeled, matching this same function's pre-existing MOVE_EFFECT_FREEZE
-      // case (also a CancelMultiTurnMoves call site) already omitting it.
+      // port. The success path shares source CancelMultiTurnMoves with Freeze;
+      // finishStatusWrite applies that full reducer before writing status1.
       let uproarActive = false;
       if (effectBattlerState.ability !== ABILITY_SOUNDPROOF) {
         const { battlersCount } = baseRulesContext.battleTopology;
@@ -2664,7 +3130,10 @@ function applySetMoveEffect(
     newStatus1: number,
     rng?: BattleScriptRngState,
   ): BattleScriptCommandTransition<BattleScriptRulesContext> {
-    const updatedContext = withBattler(baseRulesContext, effectBattler, { status1: newStatus1 });
+    const statusWriteBase = effectByte === MOVE_EFFECT_SLEEP || effectByte === MOVE_EFFECT_FREEZE
+      ? cancelBattleScriptMultiTurnMoves(baseRulesContext, effectBattler).rulesContext
+      : baseRulesContext;
+    const updatedContext = withBattler(statusWriteBase, effectBattler, { status1: newStatus1 });
     const finalRulesContext = Object.freeze({
       ...updatedContext,
       hitMarker: nextHitMarker,
@@ -2990,9 +3459,8 @@ function applyChargingMoveEffect(
  * .ts`'s `buildActionContext`/`runMoveAction`, every battle-lab/Tier-1 test)
  * takes the move id as a given external input, never derives it internally.
  * So `gLockedMoves` has no read-back consumer in this codebase at any layer
- * -- the same "state written but provably unobservable here" shape this
- * function's own MOVE_EFFECT_SLEEP/MOVE_EFFECT_FREEZE cases already use to
- * omit `CancelMultiTurnMoves(gEffectBattler)`, not a gap to fill later.
+ * -- an inert source field distinct from the observable status/counter state
+ * that Sleep and Freeze clear through `CancelMultiTurnMoves`.
  */
 function applyThrashMoveEffect(
   context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
@@ -3178,7 +3646,24 @@ function createSeteffectwithchanceOpcodeHandler(): BattleScriptOpcodeHandler<Bat
 function createSeteffectprimaryOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
   return (context) => {
     const rulesContext = context.state.rulesContext;
-    return applySetMoveEffect(context, rulesContext, rulesContext.moveEffectByte, true, false);
+    const transition = applySetMoveEffect(
+      context,
+      rulesContext,
+      rulesContext.moveEffectByte,
+      true,
+      false,
+    );
+    // SetMoveEffect's shared tail clears MOVE_EFFECT_BYTE before any pushed
+    // effect script resumes (battle_script_commands.c:2905). Unlike
+    // Cmd_seteffectwithchance, Cmd_seteffectprimary does not clear
+    // multihitMoveEffect.
+    return Object.freeze({
+      ...transition,
+      rulesContext: Object.freeze({
+        ...transition.rulesContext,
+        moveEffectByte: 0,
+      }),
+    });
   };
 }
 
@@ -3240,10 +3725,9 @@ function createPrintfromtableOpcodeHandler(
 }
 
 /**
- * Cmd_updatestatusicon (battle_script_commands.c:7699-7730). The
- * BS_ATTACKER_WITH_PARTNER doubles branch (its own gAbsentBattlerFlags-gated
- * up-to-two-emit loop) is a clean (b) barrier -- the status-write quartet's
- * own scripts only ever call `updatestatusicon BS_EFFECT_BATTLER`.
+ * Cmd_updatestatusicon (battle_script_commands.c:7699-7730), including the
+ * BS_ATTACKER_WITH_PARTNER source branch's absent-gated attacker emit and
+ * optional doubles-partner emit.
  */
 function createUpdatestatusiconOpcodeHandler(
   isControllerIdle: BattleScriptControllerIdlePort<BattleScriptRulesContext>,
@@ -3261,11 +3745,52 @@ function createUpdatestatusiconOpcodeHandler(
       );
     }
     if (operand.expression === "BS_ATTACKER_WITH_PARTNER") {
-      return unsupportedBranch(
+      const rules = context.state.rulesContext;
+      const attacker = requireBattlerRole(rules, "attacker");
+      const events = [];
+      let scheduler: BattleScriptSchedulerState = Object.freeze({
+        ...context.state.scheduler,
+        activeBattler: attacker,
+      });
+      if ((rules.absentBattlerFlags & (1 << attacker)) === 0) {
+        const state = rules.battlers[attacker];
+        scheduler = markBattleScriptControllerPending(scheduler, attacker);
+        events.push(Object.freeze({
+          kind: "status-icon-update" as const,
+          battler: attacker,
+          status1: state.status1,
+          status2: state.status2,
+        }));
+      }
+      if (
+        (
+          rules.battleTopology.battleTypeFlags
+          & BATTLE_SCRIPT_BATTLE_TYPE_DOUBLE
+        ) !== 0
+      ) {
+        const partner = resolveBattleScriptBattlerPartner(
+          rules.battleTopology,
+          attacker,
+        ) as BattleScriptBattlerId;
+        scheduler = Object.freeze({ ...scheduler, activeBattler: partner });
+        if ((rules.absentBattlerFlags & (1 << partner)) === 0) {
+          const state = rules.battlers[partner];
+          scheduler = markBattleScriptControllerPending(scheduler, partner);
+          events.push(Object.freeze({
+            kind: "status-icon-update" as const,
+            battler: partner,
+            status1: state.status1,
+            status2: state.status2,
+          }));
+        }
+      }
+      return transitionBattleScriptCommand(
         context,
-        "Cmd_updatestatusicon's BS_ATTACKER_WITH_PARTNER doubles branch is not modeled",
-        "battle_script_commands.c",
-        7711,
+        Object.freeze({ kind: "advance" }),
+        {
+          scheduler,
+          events: Object.freeze(events),
+        },
       );
     }
     const battler = resolveBattlerForBattleScript(context, operand);
@@ -3390,6 +3915,12 @@ function createTryfaintmonOpcodeHandler(): BattleScriptOpcodeHandler<BattleScrip
     const attackerBattler = rulesContext.battlers[requireBattlerRole(rulesContext, "attacker")];
     const targetBattler = rulesContext.battlers[requireBattlerRole(rulesContext, "target")];
 
+    const grudgeApplies = (targetBattler.status3 & STATUS3_GRUDGE) !== 0
+      && (hitMarker & HITMARKER_GRUDGE) === 0
+      && attackerBattler.side !== targetBattler.side
+      && attackerBattler.hp !== 0
+      && rulesContext.currentMove !== BATTLE_SCRIPT_MOVE_STRUGGLE;
+
     if ((hitMarker & HITMARKER_DESTINYBOND) !== 0 && attackerBattler.hp !== 0) {
       const faintScript = resolveBattleScriptLabel(context.program, faintTargetLabel);
       if (!faintScript) throw new Error(`tryfaintmon: committed program has no label ${faintTargetLabel}`);
@@ -3403,32 +3934,38 @@ function createTryfaintmonOpcodeHandler(): BattleScriptOpcodeHandler<BattleScrip
         hitMarker: (hitMarker & ~HITMARKER_DESTINYBOND) >>> 0,
         battleMoveDamage: damageOwner.hp,
       });
-      return transitionBattleScriptCommand(
+      if (!grudgeApplies) {
+        return transitionBattleScriptCommand(
+          context,
+          Object.freeze({
+            kind: "call-stack",
+            programCounter: destinyBond.programCounter,
+            returnProgramCounters: Object.freeze([
+              context.state.programCounter + 1,
+              faintScript.programCounter,
+            ]),
+          }),
+          { rulesContext: nextRulesContext },
+        );
+      }
+      return scheduleGrudge(
         context,
-        Object.freeze({
-          kind: "call-stack",
-          programCounter: destinyBond.programCounter,
-          returnProgramCounters: Object.freeze([
-            context.state.programCounter + 1,
-            faintScript.programCounter,
-          ]),
-        }),
-        { rulesContext: nextRulesContext },
+        nextRulesContext,
+        Object.freeze([
+          context.state.programCounter + 1,
+          faintScript.programCounter,
+          destinyBond.programCounter,
+        ]),
       );
     }
 
-    if (
-      (targetBattler.status3 & STATUS3_GRUDGE) !== 0
-      && (hitMarker & HITMARKER_GRUDGE) === 0
-      && attackerBattler.side !== targetBattler.side
-      && attackerBattler.hp !== 0
-      && rulesContext.currentMove !== BATTLE_SCRIPT_MOVE_STRUGGLE
-    ) {
-      return unsupportedBranch(
+    if (grudgeApplies) {
+      const faintScript = resolveBattleScriptLabel(context.program, faintTargetLabel);
+      if (!faintScript) throw new Error(`tryfaintmon: committed program has no label ${faintTargetLabel}`);
+      return scheduleGrudge(
         context,
-        "Cmd_tryfaintmon's STATUS3_GRUDGE branch (BattleScript_GrudgeTakesPP) is not modeled",
-        "battle_script_commands.c",
-        3027,
+        Object.freeze({ ...rulesContext, hitMarker }),
+        Object.freeze([context.state.programCounter + 1, faintScript.programCounter]),
       );
     }
 
@@ -3441,6 +3978,57 @@ function createTryfaintmonOpcodeHandler(): BattleScriptOpcodeHandler<BattleScrip
       { rulesContext: Object.freeze({ ...rulesContext, hitMarker }) },
     );
   };
+}
+
+function scheduleGrudge(
+  context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
+  rulesContext: BattleScriptRulesContext,
+  returnProgramCounters: readonly number[],
+): BattleScriptCommandTransition<BattleScriptRulesContext> {
+  const attacker = requireBattlerRole(rulesContext, "attacker");
+  const attackerState = rulesContext.battlers[attacker];
+  const movePosition = rulesContext.chosenMovePositions[attacker]!;
+  const pp = attackerState.pp.map((value, index) =>
+    index === movePosition ? 0 : value
+  ) as unknown as BattleScriptRulesBattlerState["pp"];
+  const withActivePp = withBattler(rulesContext, attacker, { pp });
+  const nextRulesContext = Object.freeze({
+    ...withActivePp,
+    party: withBattleScriptPartyMemberPp(
+      withActivePp.party,
+      attackerState.side,
+      attackerState.partyIndex,
+      movePosition,
+      0,
+    ),
+    battleTextBuff1Move: attackerState.moves[movePosition]!,
+  });
+  const grudgeScript = resolveBattleScriptLabel(context.program, "BattleScript_GrudgeTakesPP");
+  if (!grudgeScript) throw new Error("tryfaintmon: committed program has no BattleScript_GrudgeTakesPP");
+  const scheduler = markBattleScriptControllerPending(
+    Object.freeze({ ...context.state.scheduler, activeBattler: attacker }),
+    attacker,
+  );
+  return transitionBattleScriptCommand(
+    context,
+    Object.freeze({
+      kind: "call-stack",
+      programCounter: grudgeScript.programCounter,
+      returnProgramCounters: Object.freeze([...returnProgramCounters]),
+    }),
+    {
+      rulesContext: nextRulesContext,
+      scheduler,
+      events: Object.freeze([
+        Object.freeze({
+          kind: "set-battler-pp-data" as const,
+          battler: attacker,
+          movePosition,
+          pp: 0,
+        }),
+      ]),
+    },
+  );
 }
 
 /** include/constants/battle.h:150 -- identity-ambiguous without gDisableStructs[].battlerPreventingEscape. */
@@ -3482,10 +4070,9 @@ function replaceAt<T extends readonly number[]>(values: T, index: number, value:
  * unreached on this rung's own scenario). `protectUses` is now a real write
  * (`battleScriptProtectlikeOpcode.ts`'s own field), tested below. The
  * remaining struct-wide DisableStruct/ProtectStruct
- * fields FaintClearSetData zeroes (transformedMonPersonality, encoredMove*,
- * stockpileCounter, perishSongTimer*,
+ * fields FaintClearSetData zeroes (transformedMonPersonality,
  * chargeTimer*, battlerWithSureHit, isFirstTurn, truantSwitchInHack,
- * mimickedMoves, ProtectStruct's noValidMoves/fleeType/physicalDmg/
+ * ProtectStruct's noValidMoves/fleeType/physicalDmg/
  * specialDmg/physicalBattlerId/specialBattlerId), gActionSelectionCursor/
  * gMoveSelectionCursor, gBattleResources->flags->flags, the species-base
  * `types` reassignment (this engine has no code path that ever moves `types`
@@ -3514,20 +4101,6 @@ function createCleareffectsonfaintOpcodeHandler(
     const active = resolved;
     const { battlersCount } = rulesContext.battleTopology;
 
-    for (let i = 0; i < battlersCount; i += 1) {
-      if (i === active) continue;
-      const otherStatus2 = rulesContext.battlers[i as BattleScriptBattlerId].status2;
-      if ((otherStatus2 & STATUS2_ESCAPE_PREVENTION) !== 0) {
-        return unsupportedBranch(
-          context,
-          `FaintClearSetData's STATUS2_ESCAPE_PREVENTION cross-battler clear (battler ${i}) needs `
-            + "gDisableStructs[battler].battlerPreventingEscape identity, not modeled here",
-          "battle_main.c",
-          3277,
-        );
-      }
-    }
-
     const activeBattlerState = rulesContext.battlers[active];
     const isArena = (rulesContext.battleTopology.battleTypeFlags & BATTLE_SCRIPT_BATTLE_TYPE_ARENA) !== 0;
     const clearsStatus1 = !isArena || activeBattlerState.hp === 0;
@@ -3544,12 +4117,16 @@ function createCleareffectsonfaintOpcodeHandler(
           statStages: DEFAULT_STAT_STAGES,
           rolloutTimer: 0,
           furyCutterCounter: 0,
+          mimickedMoves: 0,
+          stockpileCounter: 0,
           truantCounter: 0 as const,
           rechargeTimer: 0,
           flinchImmobility: 0 as const,
           disabledMove: 0,
           disableTimer: 0,
           disableTimerStartValue: 0,
+          perishSongTimer: 0,
+          perishSongTimerStartValue: 0,
           usedDisabledMove: 0 as const,
           tauntTimer: 0,
           usedTauntedMove: 0 as const,
@@ -3566,13 +4143,28 @@ function createCleareffectsonfaintOpcodeHandler(
           flag2Unknown: 0 as const,
           protected: 0 as const,
           protectUses: 0,
+          battlerPreventingEscape: 0,
         });
       }
       // FaintClearSetData (battle_main.c:3281): other battlers wrapped BY the
       // fainted one are freed -- real gBattleStruct->wrappedBy identity, not a barrier.
       const wrappedByActive = (candidate.status2 & STATUS2_WRAPPED_MASK) !== 0 && candidate.wrappedBy === active;
-      const status2 = (candidate.status2 & ~infatuationBit & (wrappedByActive ? ~STATUS2_WRAPPED_MASK : ~0)) >>> 0;
-      return status2 === candidate.status2 ? candidate : Object.freeze({ ...candidate, status2 });
+      const preventedByActive =
+        (candidate.status2 & STATUS2_ESCAPE_PREVENTION) !== 0
+        && candidate.battlerPreventingEscape === active;
+      const status2 = (
+        candidate.status2
+        & ~infatuationBit
+        & (wrappedByActive ? ~STATUS2_WRAPPED_MASK : ~0)
+        & (preventedByActive ? ~STATUS2_ESCAPE_PREVENTION : ~0)
+      ) >>> 0;
+      return status2 === candidate.status2
+        ? candidate
+        : Object.freeze({
+            ...candidate,
+            status2,
+            ...(preventedByActive ? { battlerPreventingEscape: 0 as BattleScriptBattlerId } : {}),
+          });
     }) as unknown as BattleScriptRulesBattlers;
 
     let {

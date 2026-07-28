@@ -139,6 +139,27 @@ describe("production jumpifbyte (Cmd_jumpifbyte) dispatch", () => {
     expect(result.state.programCounter).not.toBe(pc + 1);
   });
 
+  it.each([
+    ["B_MSG_BELL_SOUNDPROOF_ATTACKER", 1],
+    ["B_MSG_BELL_SOUNDPROOF_PARTNER", 2],
+  ])("resolves Heal Bell's %s bit through the shared byte-literal universe", (value, bit) => {
+    const pc = findJumpifbytePc(
+      (ops) =>
+        ops[0] === "CMP_NO_COMMON_BITS"
+        && ops[1] === "cMULTISTRING_CHOOSER"
+        && ops[2] === value,
+    );
+    const absent = stepAtProgramCounter(pc, context({ multistringChooser: 0 })).result;
+    const present = stepAtProgramCounter(pc, context({ multistringChooser: bit })).result;
+    expect(absent.kind).toBe("advanced");
+    expect(present.kind).toBe("advanced");
+    if (absent.kind !== "advanced" || present.kind !== "advanced") {
+      throw new Error("expected both Heal Bell comparisons to execute");
+    }
+    expect(absent.state.programCounter).not.toBe(pc + 1);
+    expect(present.state.programCounter).toBe(pc + 1);
+  });
+
   describe("(b) unsupported-branch barriers", () => {
     it("halts on an unmodeled memByte pointer (sBATTLE_STYLE, only reachable off the terminal WIN path)", () => {
       const pc = findJumpifbytePc((ops) => ops[1] === "sBATTLE_STYLE");

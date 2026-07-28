@@ -65,6 +65,8 @@ const ATOMIC_VALUES = Object.freeze({
   B_MSG_SUBSTITUTE_FAILED: 1,
   B_MSG_LEECH_SEED_DRAIN: 3,
   B_MSG_LEECH_SEED_OOZE: 4,
+  /** battle_string_ids.h:404 -- Memento's post-statbuffchange success/failure discriminator. */
+  B_MSG_DEFENDER_STAT_FELL: 1,
   B_MSG_STAT_FELL_EMPTY: 3,
   /** battle_string_ids.h:397,405 -- both literally 2, the same shared MULTISTRING_CHOOSER value ChangeStatBuffs' clamp tail writes for either direction. */
   B_MSG_STAT_WONT_INCREASE: 2,
@@ -76,6 +78,9 @@ const ATOMIC_VALUES = Object.freeze({
   /** battle_string_ids.h:519 -- delayed Future Sight/Doom Desire selector. */
   B_MSG_FUTURE_SIGHT: 0,
   B_MSG_DOOM_DESIRE: 1,
+  /** battle_string_ids.h:513-514 -- Heal Bell's two OR-able Soundproof bits. */
+  B_MSG_BELL_SOUNDPROOF_ATTACKER: 1,
+  B_MSG_BELL_SOUNDPROOF_PARTNER: 2,
   B_MSG_TURN1_RAZOR_WIND: 0,
   B_MSG_TURN1_SOLAR_BEAM: 1,
   B_MSG_TURN1_SKULL_BASH: 2,
@@ -169,6 +174,8 @@ const SETBYTE_VALUES: Readonly<Record<string, number>> = Object.freeze({
   "0": 0,
   "1": 1,
   "2": 2,
+  /** battle_string_ids.h:410; Spit Up's pre-handler Protect branch. */
+  B_MSG_PROTECTED: 1,
   /**
    * `addbyte sTRIPLE_KICK_POWER, 10` (`data/battle_scripts_1.s:1401`) --
    * docs/roar-multihit-registration-scout.md §4 rung 7's ADDBYTE-delta gap

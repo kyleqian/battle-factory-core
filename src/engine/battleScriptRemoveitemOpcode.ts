@@ -4,10 +4,8 @@
  * notify (`BtlController_EmitSetMonData(REQUEST_HELDITEM_BATTLE)` +
  * `MarkBattlerForControllerExec`). No busy gate at all (same "always
  * advances" shape as `Cmd_hitanimation` -- battle_script_commands.c never
- * checks `gBattleControllerExecFlags` here), and `usedHeldItems[battler]`
- * (the pre-clear item snapshot, consumed by Recycle/Bug Bite/Pluck -- none
- * of which this engine models yet) is intentionally not tracked: no ported
- * consumer reads it.
+ * checks `gBattleControllerExecFlags` here). The pre-clear item is written
+ * to `usedHeldItems[battler]`, the source record Recycle consumes.
  *
  * This is the one new opcode `docs/endturn-abilities-items-ground-truth.md`
  * §5 slice 4 needs: every one of the ten `ItemBattleEffects`
@@ -52,7 +50,16 @@ function createRemoveitemOpcodeHandler(
         5905,
       );
     }
-    const rulesContext = withBattler(context.state.rulesContext, battler, { item: ITEM_NONE });
+    const source = context.state.rulesContext;
+    const usedHeldItems = Object.freeze(
+      source.usedHeldItems.map((item, index) =>
+        index === battler ? source.battlers[battler].item : item
+      ),
+    ) as BattleScriptRulesContext["usedHeldItems"];
+    const rulesContext = Object.freeze({
+      ...withBattler(source, battler, { item: ITEM_NONE }),
+      usedHeldItems,
+    });
     const scheduler = markBattleScriptControllerPending(context.state.scheduler, battler);
     return transitionBattleScriptCommand(
       context,

@@ -88,6 +88,7 @@ function input(
     ],
     selectorRoles: changes.selectorRoles ?? { attacker: 3, effectBattler: 1 },
     scriptingBattler: changes.scriptingBattler ?? 0,
+    battlerWithAbility: changes.battlerWithAbility ?? 0,
     atkCancelerTracker: changes.atkCancelerTracker ?? 0,
     battleOutcome: changes.battleOutcome ?? 0,
     currentMove: changes.currentMove ?? 92,
@@ -179,9 +180,17 @@ describe("source-shaped Battle Script rules context", () => {
       "battleMoveDamage",
       "battleOutcome",
       "battleStructAbsentBattlerFlags",
+      "battleTextBuff1ByteNumber",
+      "battleTextBuff1Item",
       "battleTextBuff1MonNick",
+      "battleTextBuff1Move",
+      "battleTextBuff1PaydayMoney",
+      "battleTextBuff1Type",
+      "battleTextBuff2ByteNumber",
+      "battleTextBuff2Item",
       "battleTopology",
       "battlerByTurnOrder",
+      "battlerWithAbility",
       "battlers",
       "bideDmg",
       "bideTarget",
@@ -208,13 +217,16 @@ describe("source-shaped Battle Script rules context", () => {
       "giveExpState",
       "hitMarker",
       "hpDealt",
+      "knockedOffMons",
       "lastUsedAbility",
+      "lastUsedItem",
       "learnMoveState",
       "lockedMoves",
       "lvlBoxState",
       "missType",
       "mistTimers",
       "monToSwitchIntoId",
+      "moneyMultiplier",
       "moveEffectByte",
       "moveHistory",
       "moveResultFlags",
@@ -223,7 +235,10 @@ describe("source-shaped Battle Script rules context", () => {
       "multiHitEffect",
       "multiHitStringCounter",
       "multistringChooser",
+      "painSplitHp",
       "party",
+      "paydayMoney",
+      "playerMoney",
       "rolloutTimerStartValues",
       "scriptingBattler",
       "scriptingBideDmg",
@@ -234,6 +249,7 @@ describe("source-shaped Battle Script rules context", () => {
       "statChanger",
       "tripleKickPower",
       "twoTurnStringId",
+      "usedHeldItems",
       "weather",
       "weatherTimer",
       "wishCounter",
@@ -246,6 +262,8 @@ describe("source-shaped Battle Script rules context", () => {
     expect(Object.isFrozen(created.bideTarget)).toBe(true);
     expect(Object.isFrozen(created.choicedMove)).toBe(true);
     expect(Object.isFrozen(created.changedItems)).toBe(true);
+    expect(Object.isFrozen(created.usedHeldItems)).toBe(true);
+    expect(Object.isFrozen(created.knockedOffMons)).toBe(true);
     expect(Object.isFrozen(created.chosenMovePositions)).toBe(true);
     expect(Object.isFrozen(created.lockedMoves)).toBe(true);
     expect(Object.isFrozen(created.rolloutTimerStartValues)).toBe(true);
@@ -259,6 +277,7 @@ describe("source-shaped Battle Script rules context", () => {
     expect(created.battlers.every(Object.isFrozen)).toBe(true);
     expect(created.battlers.every((value) => Object.isFrozen(value.pp))).toBe(true);
     expect(created.battlers[0]).not.toBe(source.battlers[0]);
+    expect(created.battlerWithAbility).toBe(0);
   });
 
   it("rejects malformed battler arrays, source widths, counters, and invalid roles", () => {
@@ -276,6 +295,7 @@ describe("source-shaped Battle Script rules context", () => {
       { gBattleEnvironment: -1 },
       { gBattleEnvironment: 256 },
       { lastUsedAbility: 256 },
+      { battlerWithAbility: 4 as BattleScriptBattlerId },
       { moveResultFlags: 256 },
       { dmgMultiplier: -1 },
       { critMultiplier: 256 },
@@ -469,17 +489,17 @@ describe("source-shaped Battle Script rules context", () => {
 });
 
 describe("production status rules handler and execution seam", () => {
-  it("composes all 167 source-safe handlers, including Encore, Focus Energy, Spikes, Low Kick, Magic Coat, Revenge, Foresight, Taunt, Torment, IncrementGameStat, Refresh, Helping Hand, and Skill Swap, once", () => {
+  it("composes all 198 source-safe handlers, including Nature Power, Weather Ball, type changes, Mirror Move, Sketch, Mimic, Bide, Present, Memento, Role Play, Recycle, Pay Day payout, and Haze normalization, once", () => {
     const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts());
     expect(Object.keys(handlers).map(Number).sort((a, b) => a - b)).toEqual([
       0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
       13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 24, 25, 26, 27, 28,
-      29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43,
+      29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44,
       45, 46, 47, 49, 50, 51, 53, 54, 56, 57, 58, 60,
       61, 62, 63, 65, 66, 67, 69, 70, 71, 72, 73, 74, 76, 77, 78, 79, 80, 81,
       82, 83, 84, 85, 86, 88, 92, 96, 97, 98, 99, 100, 101, 102, 104,
-      105, 106, 111, 115, 118, 119, 120, 121, 122, 123, 125, 126, 127, 128, 129, 130, 131, 132, 136, 137, 140, 141, 142, 143, 146, 147,
-      149, 150, 151, 152, 153, 154, 156, 159, 160, 161, 162, 163, 164, 169, 170, 171, 172, 175, 176, 177, 179, 180, 181, 182, 184, 187, 189, 191, 192, 194, 195, 197, 198, 199, 200, 202, 205, 206, 207, 208, 209, 212, 213, 214, 215, 216, 218, 221, 223, 226, 227, 228, 231, 238, 246, 248,
+      105, 106, 111, 115, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147,
+      148, 149, 150, 151, 152, 153, 154, 156, 157, 159, 160, 161, 162, 163, 164, 165, 166, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 187, 188, 189, 190, 191, 192, 193, 194, 195, 197, 198, 199, 200, 201, 202, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 220, 221, 223, 226, 227, 228, 231, 233, 234, 235, 238, 246, 248,
     ]);
   });
 

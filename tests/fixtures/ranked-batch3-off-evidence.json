@@ -1,0 +1,68 @@
+{
+  "schema": "ranked-batch3-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "sourceSha256": {
+    "battle_script_commands.c": "e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c",
+    "battle_scripts_1.s": "4ac3e610b68c11ef0f4e4c0fc62ddba7fda5a8400e43705428868978ec7551a6",
+    "battle_main.c": "ee79b86ff0f681ab783b363135fd84d050e7123bea2a77c5530f2c7ddc8b8408",
+    "battle_frontier_mons.h": "557c1a97247cbb84357b99035fb11cf0bfe45abe8393a0992fe8146bfc51f67f",
+    "species_info.h": "1aac881bb02361339dc4dd33c7a5804a7127c0367426b77b982ee213a713e0af",
+    "battle_moves.h": "8b3d4d143b807807af97ce7288e0cc0ccdd55b6b64ac45824e35a549836b3a0c",
+    "battle_frontier_mons.json": "6f7e9b57201ca8d513dab853c53aa7e23d35329ea52df6a464e7fe311d9fe21c"
+  },
+  "cases": {
+    "painSplit": {
+      "scenario": "tools/battle-lab/mechanic-pain-split-misdreavus-shuckle-off.json",
+      "scenarioSha256": "8158857466b98c8018a6bfb32461de6ea15a888f617e1d223fe192038ceb251d",
+      "manifestSha256": "a026549d2f40a01cb719cf3bbfcfa1fbc06d4e77cb41cd4a53914e58869686d7",
+      "captureGrid": {"start": 0, "end": 2025, "step": 25, "count": 82},
+      "initialPartyChecksumsValid": [true, true, true, true, true, true],
+      "carrier": {"setId":374,"name":"FRONTIER_MON_MISDREAVUS_1","species":200,"moves":[220,247,109,86],"item":196,"nature":8,"ability":26,"speed":105},
+      "target": {"species":213,"moves":[101,101,101,101],"ability":5,"speed":10},
+      "observedStates": [
+        {"frame":0,"sha256":"bccf331d980b233c15a66100aeac4401dc9b8978e616b65962f50ce5acaf1771","rngValue":983229340,"currentMove":0,"playerHp":167,"playerPp":[20,15,10,20],"opponentHp":116,"opponentPp":[15,15,15,15]},
+        {"frame":200,"sha256":"f64c337227590aa9fa39f13cb4e258182278cf03cdfcc4c3c2eb4ccfb18cd097","rngValue":2756097505,"currentMove":247,"playerHp":167,"playerPp":[20,14,10,20],"opponentHp":100,"opponentPp":[15,15,15,15]},
+        {"frame":400,"sha256":"49de96802dac126119bd6b920938ead5e7e071473362547f88c6d131290704ed","rngValue":1530931116,"currentMove":0,"playerHp":117,"playerPp":[20,14,10,20],"opponentHp":100,"opponentPp":[15,15,14,15]},
+        {"frame":1125,"sha256":"3d47fa720945ab6bd60037f834518842cc3931a532d103c0acc733d3382b143a","rngValue":1530931116,"currentMove":220,"playerHp":117,"playerPp":[19,14,10,20],"opponentHp":100,"opponentPp":[15,15,14,15]},
+        {"frame":1175,"sha256":"afbc57da8be378b933368917176ca5d81d96739fc273601a385364ee4d21ab01","rngValue":1530931116,"currentMove":220,"playerHp":108,"playerPp":[19,14,10,20],"opponentHp":100,"opponentPp":[15,15,14,15]},
+        {"frame":1200,"sha256":"995e133e9b25090cb1a526c6e65422abdd3d0a2cf09e58642af7957d0df24e24","rngValue":1530931116,"currentMove":220,"playerHp":108,"playerPp":[19,14,10,20],"opponentHp":108,"opponentPp":[15,15,14,15]}
+      ]
+    },
+    "swallowScaled": {
+      "scenario": "tools/battle-lab/mechanic-stockpile-swallow-scaled-pelipper-shuckle-off.json",
+      "scenarioSha256": "d3a715d069dda376789ae401a596ff804a3aae65f41b3e08762ceb7df06f6e97",
+      "manifestSha256": "6ed78a539cdc5348054a1e4418c6bbc85fa7771e10d92c8573af880e65c39188",
+      "captureGrid": {"start": 0, "end": 2700, "step": 25, "count": 109},
+      "initialPartyChecksumsValid": [true, true, true, true, true, true],
+      "carrier": {"setId":213,"name":"FRONTIER_MON_PELIPPER_1","species":310,"moves":[352,332,254,256],"itemOverride":0,"nature":16,"ability":51,"speed":85},
+      "target": {"species":213,"moves":[101,101,101,101],"ability":5,"speed":10},
+      "observedStates": [
+        {"frame":0,"sha256":"35d5dc1af948f4fa53bf03f8661821c8e067c1eece3630fb395a9933d95852e9","rngValue":919694434,"currentMove":0,"playerHp":167,"playerPp":[20,20,10,10]},
+        {"frame":175,"sha256":"82ebe1ddc30eda232c4d080a191ee16002005ca85227d0c15038bc375c6166ca","rngValue":919694434,"currentMove":254,"playerHp":167,"playerPp":[20,20,9,10]},
+        {"frame":1075,"sha256":"5ba1b1d5534ae040dd87fd23d4a27545f054c913ccaf2e5d70804bc186b7aabb","rngValue":3034451114,"currentMove":254,"playerHp":117,"playerPp":[20,20,8,10]},
+        {"frame":1275,"sha256":"4cc26edcb96939e233f8de9f0b2fda79ada202d483503ccb53df239151a3199f","rngValue":2682491093,"currentMove":101,"playerHp":67,"playerPp":[20,20,8,10]},
+        {"frame":1900,"sha256":"12bbb2ef6e30cad58ad774512e9dac4599560fb6476859ce1b92343655a62812","rngValue":2319805938,"currentMove":256,"playerHp":67,"playerPp":[20,20,8,9]},
+        {"frame":2025,"sha256":"8422d57410288d0701317caf3f32c7dd470a80edf427018ff8752045bd41d029","rngValue":2319805938,"currentMove":256,"playerHp":150,"playerPp":[20,20,8,9]}
+      ]
+    },
+    "stockpileLimit": {
+      "scenario": "tools/battle-lab/mechanic-stockpile-swallow-pelipper-shuckle-off.json",
+      "scenarioSha256": "b66393a5249ea6ac7fe8c76935f778e7a65940b9b875ad1796b38657c9fb25a7",
+      "manifestSha256": "163cd0efad08365d80160c7c0aa017c1b9981cdf5d25d60e3ae2e92f84b5b197",
+      "captureGrid": {"start": 0, "end": 6325, "step": 25, "count": 254},
+      "initialPartyChecksumsValid": [true, true, true, true, true, true],
+      "carrier": {"setId":213,"name":"FRONTIER_MON_PELIPPER_1","species":310,"moves":[352,332,254,256],"item":142,"nature":16,"ability":51,"speed":85},
+      "target": {"species":213,"moves":[157,157,157,157],"ability":5,"speed":10},
+      "observedStates": [
+        {"frame":175,"sha256":"82ebe1ddc30eda232c4d080a191ee16002005ca85227d0c15038bc375c6166ca","rngValue":983229340,"currentMove":254,"playerHp":167,"playerPp":[20,20,9,10],"fact":"PELIPPER STOCKPILED 1!"},
+        {"frame":1075,"sha256":"a935775286231e485f57b2340b4ba0b48e0272243dc7b652382662dedd461e99","rngValue":1160559944,"currentMove":254,"playerHp":137,"playerPp":[20,20,8,10],"fact":"PELIPPER STOCKPILED 2!"},
+        {"frame":2075,"sha256":"58886d5c2541cf0c323a06ddde28fb3b1399bce01673ec8595fa2c1b6741808e","rngValue":1630250804,"currentMove":256,"playerHp":167,"playerPp":[20,20,8,9],"fact":"Swallow consumed the first two-count ladder"},
+        {"frame":2950,"sha256":"82ebe1ddc30eda232c4d080a191ee16002005ca85227d0c15038bc375c6166ca","rngValue":3472808831,"currentMove":254,"playerHp":167,"playerPp":[20,20,7,9],"fact":"post-Swallow counter restarted at 1"},
+        {"frame":3825,"sha256":"a935775286231e485f57b2340b4ba0b48e0272243dc7b652382662dedd461e99","rngValue":620937147,"currentMove":254,"playerHp":137,"playerPp":[20,20,6,9],"fact":"post-Swallow counter reached 2"},
+        {"frame":4725,"sha256":"987daa428ae91bf6909b850e088c1d8fcf713003492fdb8a895d1285c65f729b","rngValue":2927669047,"currentMove":254,"playerHp":110,"playerPp":[20,20,5,9],"fact":"post-Swallow counter reached 3"},
+        {"frame":5625,"sha256":"9118598a76caf82eb17eede940d9d1900a06b470603a38037ef88e993ee93fa6","rngValue":842450419,"currentMove":254,"playerHp":110,"playerPp":[20,20,4,9],"fact":"PELIPPER can't STOCKPILE any more!"}
+      ]
+    }
+  },
+  "spitUpBoundary": "No dynamic Spit Up receipt is claimed: FRONTIER_MON_SWALOT_1 is the sole Factory carrier and SPECIES_SWALOT has two real abilities. Source semantics are pinned hermetically instead."
+}

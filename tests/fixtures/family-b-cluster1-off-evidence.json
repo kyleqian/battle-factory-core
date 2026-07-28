@@ -1,0 +1,166 @@
+{
+  "schema": "family-b-cluster1-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "sourceSha256": {
+    "battle_script_commands.c": "e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c",
+    "battle_scripts_1.s": "4ac3e610b68c11ef0f4e4c0fc62ddba7fda5a8400e43705428868978ec7551a6",
+    "battle_moves.h": "8b3d4d143b807807af97ce7288e0cc0ccdd55b6b64ac45824e35a549836b3a0c",
+    "battle_frontier_mons.h": "557c1a97247cbb84357b99035fb11cf0bfe45abe8393a0992fe8146bfc51f67f",
+    "species_info.h": "1aac881bb02361339dc4dd33c7a5804a7127c0367426b77b982ee213a713e0af",
+    "constants_battle.h": "bba2f9d9b3d98fa01b5f0a8f7dede9f2f0be5617c735242b741a7e0c8e4a5d1e",
+    "moves.h": "d32746c9ad3ed1bbfbb93712f13e01ab1c43f48a78f3605ef9db5095e8d19d27",
+    "pokemon.h": "e0153a94a2fc0f84e6de372494dfb01e88be4d9cf1cbbeca5e56b8a0b645f7e5",
+    "battle_frontier_mons.constants.h": "00fb47e144978d3a24a304047f5463217ac7b535ee6f8719e2adf47cc592387a",
+    "items.h": "8e9aacc0ffbd41ce0092176a89f624b59be300df60c996d718d61119e747dbd4"
+  },
+  "effects": {
+    "triAttack": {
+      "moveId": 161,
+      "effectRow": "EFFECT_TRI_ATTACK",
+      "effectRowId": 36,
+      "moveEffect": "MOVE_EFFECT_TRI_ATTACK",
+      "moveEffectId": 9,
+      "secondaryEffectChance": 20,
+      "sourceDraws": "Every seteffectwithchance visit draws once. A successful chance on a status-free target adds one selector draw; an already-statused target adds none."
+    },
+    "overheat": {
+      "moveId": 315,
+      "effectRow": "EFFECT_OVERHEAT",
+      "effectRowId": 204,
+      "moveEffect": "MOVE_EFFECT_SP_ATK_TWO_DOWN",
+      "moveEffectId": 59,
+      "secondaryEffectChance": 100,
+      "sourceDraws": "MOVE_EFFECT_CERTAIN bypasses the dispatch-chance draw; ordinary accuracy, critical, damage, AI, and turn processing still move the battle RNG."
+    },
+    "ancientPower": {
+      "moveId": 246,
+      "effectRow": "EFFECT_ALL_STATS_UP_HIT",
+      "effectRowId": 140,
+      "moveEffect": "MOVE_EFFECT_ALL_STATS_UP",
+      "moveEffectId": 34,
+      "secondaryEffectChance": 10,
+      "sourceDraws": "Every seteffectwithchance visit draws once; the family case has no additional selector draw."
+    }
+  },
+  "cases": {
+    "triAttack": {
+      "scenario": "tools/battle-lab/mechanic-tri-attack-porygon-shuckle-off.json",
+      "scenarioSha256": "0d74ac40c68ec5c04dd7662b831485fa503d11853c17b57ea836b2dbb50524cd",
+      "repeatability": {
+        "runs": 2,
+        "comparison": "byte-identical full manifest.json",
+        "manifestSha256": "6ec3592ef25143f9661dd9da1f16d31a2793296b11b19d8a1f2daca7ce211f8f"
+      },
+      "captureGrid": {"start": 0, "end": 2175, "step": 25, "count": 88},
+      "initialPartyChecksumsValid": [true, true, true, true, true, true],
+      "carrier": {
+        "setId": 273,
+        "name": "FRONTIER_MON_PORYGON_2",
+        "species": 137,
+        "moves": [161, 94, 86, 105],
+        "item": 133,
+        "nature": 17,
+        "ability": 36,
+        "observedActiveSpeed": 54
+      },
+      "opponent": {"species": 213, "moves": [150, 150, 150, 150], "ability": 5, "observedActiveSpeed": 10},
+      "normalizedFrameHashes": [
+        {"frame": 0, "sha256": "a5677b7b9e33d3f5cd9d567096d940b504ddedf71508759d34e830d5739d44a2"},
+        {"frame": 200, "sha256": "d203c60db405a0f9dc129b4b4b1f37badc29d2f7941e1b1019c6a00b92fac8da"},
+        {"frame": 1000, "sha256": "6957fc15c46305c3bd56aa8f080087f6e73067f84f10d9bd0f2f811b59474583"},
+        {"frame": 1425, "sha256": "9b0e60a75b732d64c845979bb8a8476a3e4cab1fa4d54172f2a1d56c91abf736"},
+        {"frame": 1625, "sha256": "58a5997b6540418ad906938c9778ca433b0626a4d5ad79fcccea1c930b0ac6b1"}
+      ],
+      "observedStates": [
+        {"frame": 0, "rngValue": 919694434, "currentMove": 0, "triAttackPp": 10, "opponentHp": 127, "activeStatus1": 0, "partyStatus1": 0, "controllerExecFlags": 1},
+        {"frame": 200, "rngValue": 3421819359, "currentMove": 161, "triAttackPp": 9, "opponentHp": 116, "activeStatus1": 0, "partyStatus1": 0, "controllerExecFlags": 0},
+        {"frame": 1000, "rngValue": 3278432283, "currentMove": 161, "triAttackPp": 8, "opponentHp": 105, "activeStatus1": 64, "partyStatus1": 64, "controllerExecFlags": 0},
+        {"frame": 1425, "rngValue": 786441859, "currentMove": 161, "triAttackPp": 8, "opponentHp": 105, "activeStatus1": 64, "partyStatus1": 64, "controllerExecFlags": 1},
+        {"frame": 1625, "rngValue": 1630250804, "currentMove": 161, "triAttackPp": 7, "opponentHp": 95, "activeStatus1": 64, "partyStatus1": 64, "controllerExecFlags": 0}
+      ]
+    },
+    "overheat": {
+      "scenario": "tools/battle-lab/mechanic-overheat-solrock-shuckle-off.json",
+      "scenarioSha256": "52a221012297d4e9fc6d5db51b402e75b7939a85b9f8023745a20276a13c5d8d",
+      "repeatability": {
+        "runs": 2,
+        "comparison": "byte-identical full manifest.json",
+        "manifestSha256": "c4c0dfbacad779e67b027bb7ead7629456b375ad78d211f32dd1a8f92241ea3f"
+      },
+      "captureGrid": {"start": 0, "end": 1575, "step": 25, "count": 64},
+      "initialPartyChecksumsValid": [true, true, true, true, true, true],
+      "carrier": {
+        "setId": 328,
+        "name": "FRONTIER_MON_SOLROCK_2",
+        "species": 349,
+        "moves": [89, 157, 322, 315],
+        "item": 0,
+        "nature": 0,
+        "ability": 26,
+        "observedActiveSpeed": 90
+      },
+      "opponent": {"species": 213, "moves": [150, 150, 150, 150], "ability": 5, "observedActiveSpeed": 10},
+      "normalizedFrameHashes": [
+        {"frame": 0, "sha256": "12d9981279b20dc071421e1bb6df58362434744496a52a15e0c95a82c0ee80ea"},
+        {"frame": 375, "sha256": "fea948f33ad07fc83383b14060ec0fad8be34aead06b7283253f0804ad289c84"},
+        {"frame": 950, "sha256": "3c1227248116c36e7c64e6dd0ccce6ad725e2284898604a02c9cf3f19d9bf75d"},
+        {"frame": 1175, "sha256": "f34a847f98433020690acdb87807627a93ac470ac56ddeffb29cde707065a73a"},
+        {"frame": 1400, "sha256": "eaa8e07d462c2c4366ea462719aef91acbc6288a7cbf7e8a33a614de61767308"}
+      ],
+      "observedStates": [
+        {"frame": 0, "rngValue": 919694434, "currentMove": 0, "overheatPp": 5, "opponentHp": 127, "spAttackStage": 6, "controllerExecFlags": 1},
+        {"frame": 375, "rngValue": 3421819359, "currentMove": 315, "overheatPp": 4, "opponentHp": 110, "spAttackStage": 4, "controllerExecFlags": 0},
+        {"frame": 950, "rngValue": 3031698222, "currentMove": 315, "overheatPp": 3, "opponentHp": 110, "spAttackStage": 4, "controllerExecFlags": 0},
+        {"frame": 1175, "rngValue": 3031698222, "currentMove": 315, "overheatPp": 3, "opponentHp": 101, "spAttackStage": 2, "controllerExecFlags": 0},
+        {"frame": 1400, "rngValue": 3031698222, "currentMove": 0, "overheatPp": 3, "opponentHp": 101, "spAttackStage": 2, "controllerExecFlags": 0}
+      ]
+    },
+    "ancientPower": {
+      "scenario": "tools/battle-lab/mechanic-ancient-power-exeggcute-shuckle-off.json",
+      "scenarioSha256": "9511b1fd1f7cf01cb0f18d2fd02d2687b1515d34a4dc7758ab0a9e88d48a18e3",
+      "repeatability": {
+        "runs": 2,
+        "comparison": "byte-identical full manifest.json",
+        "manifestSha256": "19ed44ec3547511ef6efd9686728d96acd4842dc90f018f414b2a178962d01b4"
+      },
+      "captureGrid": {"start": 0, "end": 3175, "step": 25, "count": 128},
+      "initialPartyChecksumsValid": [true, true, true, true, true, true],
+      "carrier": {
+        "setId": 112,
+        "name": "FRONTIER_MON_EXEGGCUTE",
+        "species": 102,
+        "moves": [93, 246, 73, 113],
+        "item": 140,
+        "nature": 4,
+        "ability": 34,
+        "observedActiveSpeed": 60
+      },
+      "opponent": {"species": 213, "moves": [150, 150, 150, 150], "ability": 5, "observedActiveSpeed": 10},
+      "normalizedFrameHashes": [
+        {"frame": 0, "sha256": "26a3fff1eaabb6961affa5031afd90e13f7881770ec09922994d437ff9ee3b8f"},
+        {"frame": 200, "sha256": "d3a44e1e22b717074a7984b0ec9f37608f9a325f55b09b1fa850b43dd7c92f93"},
+        {"frame": 1300, "sha256": "9c462a55578c7c4161b1f0ea85d83da598e691ffa51ee80ab5e27d3ccb63cf94"},
+        {"frame": 1375, "sha256": "2a08d865bf98d35b1f2ca0118f79c03282ede9b7256491bdcad80c6591702bb1"},
+        {"frame": 1450, "sha256": "efa4b2f7a7b5b83e573fec48800544e87fa182d9e571d2c9ba03301ab5f17855"},
+        {"frame": 1550, "sha256": "e79185fea721de42b4f5a8c969c4f7f622813d384c645ce38073e9583175a10b"},
+        {"frame": 1625, "sha256": "07b213061cd9fe1be2cb136590b7897f8595011d69d6f958c77fce31feaad4a6"},
+        {"frame": 1725, "sha256": "80d9745317af66ee0a42b18b0b6c3b1b488b00902325bbaeadc9b083b8b7f55b"},
+        {"frame": 1850, "sha256": "109c9f75c9b00d3ed20ea8f90b27a0421dac1e61ebd73ae66289b2605c307bfc"},
+        {"frame": 2375, "sha256": "670f800365ce1e9a2e49e3e9808f9b71f1fdae047a02878baaa7cbef89de7bfd"}
+      ],
+      "observedStates": [
+        {"frame": 0, "rngValue": 919694434, "currentMove": 0, "ancientPowerPp": 8, "opponentHp": 127, "combatStatStages": [6, 6, 6, 6, 6], "controllerExecFlags": 1},
+        {"frame": 200, "rngValue": 3421819359, "currentMove": 246, "ancientPowerPp": 7, "opponentHp": 112, "combatStatStages": [6, 6, 6, 6, 6], "controllerExecFlags": 0},
+        {"frame": 1300, "rngValue": 530917129, "currentMove": 246, "ancientPowerPp": 6, "opponentHp": 97, "combatStatStages": [6, 6, 6, 6, 6], "controllerExecFlags": 0},
+        {"frame": 1375, "rngValue": 1160559944, "currentMove": 246, "ancientPowerPp": 6, "opponentHp": 97, "combatStatStages": [6, 6, 6, 6, 6], "controllerExecFlags": 1},
+        {"frame": 1450, "rngValue": 1160559944, "currentMove": 246, "ancientPowerPp": 6, "opponentHp": 97, "combatStatStages": [7, 6, 6, 6, 6], "controllerExecFlags": 1},
+        {"frame": 1550, "rngValue": 1160559944, "currentMove": 246, "ancientPowerPp": 6, "opponentHp": 97, "combatStatStages": [7, 7, 6, 6, 6], "controllerExecFlags": 1},
+        {"frame": 1625, "rngValue": 1160559944, "currentMove": 246, "ancientPowerPp": 6, "opponentHp": 97, "combatStatStages": [7, 7, 7, 6, 6], "controllerExecFlags": 1},
+        {"frame": 1725, "rngValue": 1160559944, "currentMove": 246, "ancientPowerPp": 6, "opponentHp": 97, "combatStatStages": [7, 7, 7, 7, 6], "controllerExecFlags": 1},
+        {"frame": 1850, "rngValue": 1160559944, "currentMove": 246, "ancientPowerPp": 6, "opponentHp": 97, "combatStatStages": [7, 7, 7, 7, 7], "controllerExecFlags": 0},
+        {"frame": 2375, "rngValue": 786441859, "currentMove": 246, "ancientPowerPp": 5, "opponentHp": 73, "combatStatStages": [7, 7, 7, 7, 7], "controllerExecFlags": 0}
+      ]
+    }
+  },
+  "observedVsSourceOnly": "The public OFF manifests directly expose PP, HP, active and party status1, statStages, RNG snapshots, controller flags, and framebuffer hashes. Exact command PCs, individual Random() ownership inside the larger turn stream, Tri Attack's unobserved burn/freeze selectors, and all-max-stage behavior remain source-only."
+}

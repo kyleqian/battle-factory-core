@@ -8,17 +8,15 @@
  * remains a raw party-array index throughout, exactly as this engine's
  * `party.opponent[i]`/`party.player[i]` already index.
  *
- * `getswitchedmondata`/`switchindataupdate` are the first "rebuild an active
- * battler from a bench record" registration (§4 slice 4): species/hp/status1
- * come from the party record at the newly-decided raw index; types resolve
- * from the species table; stat stages/status2/status3/the modeled
+ * `getswitchedmondata`/`switchindataupdate` rebuild the source BattlePokemon
+ * wholesale from the party/controller record at the newly-decided raw index:
+ * ability is re-derived from species + abilityNum, and IVs, personality,
+ * level, friendship, max HP, and every battle stat replace the outgoing
+ * values. Types resolve from the species table; stat stages/status2/status3/the modeled
  * DisableStruct-shaped fields reset to `SwitchInClearSetData`'s neutral
- * values (`battle_main.c:3152-3258`). `ability`/`item`/`moves`/`pp` are real
- * source rebuilds (`GetAbilityBySpecies`, the knocked-off-item check, the
- * full `BattlePokemon` byte copy) this engine does not model at all (no
- * species-ability table, no party moves/pp carried per battler) -- they stay
- * whatever the battler slot's previous occupant left, untracked and
- * documented, not silently faked.
+ * values (`battle_main.c:3152-3258`). Party moves/PP and held item are now
+ * rebuilt too; the item is forced to NONE when the side/party-slot bit in
+ * `knockedOffMons` is set.
  */
 import {
   drawBattleScriptRng,
@@ -47,6 +45,7 @@ import {
 } from "./battleScriptRulesContext.ts";
 import { BATTLE_SCRIPT_STATUS2_WRAPPED_MASK } from "./battleScriptSourceConstants.ts";
 import speciesTypesData from "../data/gen/species-types.json" with { type: "json" };
+import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
 
 /** include/constants/battle.h:60. */
 const BATTLE_TYPE_LINK = 1 << 1;
@@ -63,7 +62,7 @@ const SIDE_STATUS_SPIKES_DAMAGED = 1 << 9;
 const STATUS2_DESTINY_BOND = 1 << 25;
 const HITMARKER_DESTINYBOND = 1 << 6;
 const ABILITY_LEVITATE = 26;
-/** include/constants/battle.h:150/160 -- cross-battler identity (battlerPreventingEscape/battlerWithSureHit) this engine does not model. */
+/** include/constants/battle.h:150/160 -- cross-battler identity status bits. */
 const STATUS2_ESCAPE_PREVENTION = 1 << 26;
 const STATUS3_ALWAYS_HITS = (1 << 3) | (1 << 4);
 /** battle_main.c:3175-3176 -- the exact volatile masks SwitchInClearSetData carries through Baton Pass. */
@@ -92,11 +91,44 @@ const SWITCH_IN_ABILITY_EFFECTS = new Set([
 
 type SpeciesTypesRow = Readonly<{ name: string; types: readonly [string, string] }>;
 const SPECIES_TYPES_ROWS = speciesTypesData.species as unknown as readonly SpeciesTypesRow[];
+type SpeciesStatsRow = Readonly<{ id: number; abilities: readonly [string, string] }>;
+const SPECIES_STATS_BY_ID = new Map(
+  (speciesStatsData.species as unknown as readonly SpeciesStatsRow[]).map((row) => [row.id, row]),
+);
+/** include/constants/abilities.h: source symbols in exact numeric-id order. */
+const ABILITY_SYMBOLS = Object.freeze([
+  "ABILITY_NONE", "ABILITY_STENCH", "ABILITY_DRIZZLE", "ABILITY_SPEED_BOOST",
+  "ABILITY_BATTLE_ARMOR", "ABILITY_STURDY", "ABILITY_DAMP", "ABILITY_LIMBER",
+  "ABILITY_SAND_VEIL", "ABILITY_STATIC", "ABILITY_VOLT_ABSORB", "ABILITY_WATER_ABSORB",
+  "ABILITY_OBLIVIOUS", "ABILITY_CLOUD_NINE", "ABILITY_COMPOUND_EYES", "ABILITY_INSOMNIA",
+  "ABILITY_COLOR_CHANGE", "ABILITY_IMMUNITY", "ABILITY_FLASH_FIRE", "ABILITY_SHIELD_DUST",
+  "ABILITY_OWN_TEMPO", "ABILITY_SUCTION_CUPS", "ABILITY_INTIMIDATE", "ABILITY_SHADOW_TAG",
+  "ABILITY_ROUGH_SKIN", "ABILITY_WONDER_GUARD", "ABILITY_LEVITATE", "ABILITY_EFFECT_SPORE",
+  "ABILITY_SYNCHRONIZE", "ABILITY_CLEAR_BODY", "ABILITY_NATURAL_CURE", "ABILITY_LIGHTNING_ROD",
+  "ABILITY_SERENE_GRACE", "ABILITY_SWIFT_SWIM", "ABILITY_CHLOROPHYLL", "ABILITY_ILLUMINATE",
+  "ABILITY_TRACE", "ABILITY_HUGE_POWER", "ABILITY_POISON_POINT", "ABILITY_INNER_FOCUS",
+  "ABILITY_MAGMA_ARMOR", "ABILITY_WATER_VEIL", "ABILITY_MAGNET_PULL", "ABILITY_SOUNDPROOF",
+  "ABILITY_RAIN_DISH", "ABILITY_SAND_STREAM", "ABILITY_PRESSURE", "ABILITY_THICK_FAT",
+  "ABILITY_EARLY_BIRD", "ABILITY_FLAME_BODY", "ABILITY_RUN_AWAY", "ABILITY_KEEN_EYE",
+  "ABILITY_HYPER_CUTTER", "ABILITY_PICKUP", "ABILITY_TRUANT", "ABILITY_HUSTLE",
+  "ABILITY_CUTE_CHARM", "ABILITY_PLUS", "ABILITY_MINUS", "ABILITY_FORECAST",
+  "ABILITY_STICKY_HOLD", "ABILITY_SHED_SKIN", "ABILITY_GUTS", "ABILITY_MARVEL_SCALE",
+  "ABILITY_LIQUID_OOZE", "ABILITY_OVERGROW", "ABILITY_BLAZE", "ABILITY_TORRENT",
+  "ABILITY_SWARM", "ABILITY_ROCK_HEAD", "ABILITY_DROUGHT", "ABILITY_ARENA_TRAP",
+  "ABILITY_VITAL_SPIRIT", "ABILITY_WHITE_SMOKE", "ABILITY_PURE_POWER", "ABILITY_SHELL_ARMOR",
+  "ABILITY_CACOPHONY", "ABILITY_AIR_LOCK",
+]);
+const ABILITY_ID_BY_SYMBOL = new Map(ABILITY_SYMBOLS.map((symbol, id) => [symbol, id]));
 
 /** gSpeciesInfo[species].types -- species-types.json is indexed by (speciesId - 1). */
 function resolveSpeciesTypes(species: number): readonly [string, string] | null {
   const row = SPECIES_TYPES_ROWS[species - 1];
   return row ? row.types : null;
+}
+
+function resolveSpeciesAbility(species: number, abilityNum: number): number | null {
+  const symbol = SPECIES_STATS_BY_ID.get(species)?.abilities[abilityNum];
+  return symbol === undefined ? null : (ABILITY_ID_BY_SYMBOL.get(symbol) ?? null);
 }
 
 function statusInfatuatedWithBit(battler: number): number {
@@ -293,14 +325,16 @@ function createGetswitchedmondataOpcodeHandler(
  * carried Substitute HP.
  * Rebuilds species/hp/status1/types from the party record at the
  * already-updated `partyIndex`; resets stat stages/status2/status3/the
- * modeled DisableStruct-shaped fields to their neutral values; clears the
+ * modeled DisableStruct-shaped fields to their neutral values (while the
+ * existing Baton Pass branch carries both Perish Song timer fields); clears the
  * `STATUS2_INFATUATED_WITH(battler)` bit on every other battler exactly like
  * `cleareffectsonfaint`'s own precedent (`battleScriptHitChainOpcode.ts`).
  * `STATUS2_ESCAPE_PREVENTION`/`STATUS3_ALWAYS_HITS` cross-battler clears need
  * `battlerPreventingEscape`/`battlerWithSureHit` identity this engine does
  * not model -- named barriers, gated on the bit actually being set on some
  * other battler (never true for a plain KO switch-in, so unreached here).
- * `ability`/`item`/`moves`/`pp` stay untouched (see file header).
+ * The party item is restored unless this party slot's durable Knock Off bit
+ * suppresses it; moves/PP are rebuilt from the same controller payload.
  */
 function createSwitchindataupdateOpcodeHandler(
   isControllerIdle: BattleScriptControllerIdlePort<BattleScriptRulesContext>,
@@ -322,16 +356,7 @@ function createSwitchindataupdateOpcodeHandler(
     if (!isBatonPass) {
       for (let i = 0; i < battlersCount; i += 1) {
         if (i === battler) continue;
-        const otherStatus2 = rules.battlers[i as 0 | 1 | 2 | 3].status2;
         const otherStatus3 = rules.battlers[i as 0 | 1 | 2 | 3].status3;
-        if ((otherStatus2 & STATUS2_ESCAPE_PREVENTION) !== 0) {
-          return unsupportedBranch(
-            context,
-            `SwitchInClearSetData's STATUS2_ESCAPE_PREVENTION cross-battler clear (battler ${i}) needs `
-              + "gDisableStructs[battler].battlerPreventingEscape identity, not modeled here",
-            3164,
-          );
-        }
         if ((otherStatus3 & STATUS3_ALWAYS_HITS) !== 0) {
           return unsupportedBranch(
             context,
@@ -373,10 +398,21 @@ function createSwitchindataupdateOpcodeHandler(
 
     const side = active.side === 0 ? "player" : "opponent";
     const partyMember = rules.party[side][active.partyIndex];
+    const item = (
+      rules.knockedOffMons[active.side] & (1 << active.partyIndex)
+    ) !== 0
+      ? 0
+      : partyMember.item;
     const types = resolveSpeciesTypes(partyMember.species);
     if (!types) {
       throw new Error(
         `Cmd_switchindataupdate: species ${partyMember.species} has no gSpeciesInfo types row`,
+      );
+    }
+    const ability = resolveSpeciesAbility(partyMember.species, partyMember.abilityNum);
+    if (ability === null) {
+      throw new Error(
+        `Cmd_switchindataupdate: species ${partyMember.species} ability slot ${partyMember.abilityNum} is unresolved`,
       );
     }
 
@@ -386,8 +422,23 @@ function createSwitchindataupdateOpcodeHandler(
         return Object.freeze({
           ...candidate,
           species: partyMember.species,
+          ability,
+          ivs: partyMember.ivs,
+          personality: partyMember.personality,
           hp: partyMember.hp,
+          maxHP: partyMember.maxHP,
+          attack: partyMember.attack,
+          defense: partyMember.defense,
+          speed: partyMember.speed,
+          spAttack: partyMember.spAttack,
+          spDefense: partyMember.spDefense,
+          level: partyMember.level,
+          friendship: partyMember.friendship,
           status1: partyMember.status1,
+          item,
+          moves: partyMember.moves,
+          pp: partyMember.pp,
+          ppBonuses: partyMember.ppBonuses,
           types,
           statStages: isBatonPass ? candidate.statStages : DEFAULT_STAT_STAGES,
           status2: isBatonPass ? (candidate.status2 & BATON_PASS_STATUS2) >>> 0 : 0,
@@ -395,8 +446,12 @@ function createSwitchindataupdateOpcodeHandler(
           substituteHP: isBatonPass ? candidate.substituteHP : 0,
           rolloutTimer: 0,
           furyCutterCounter: 0,
+          mimickedMoves: 0,
+          stockpileCounter: 0,
           truantCounter: 0 as const,
           rechargeTimer: 0,
+          chargeTimer: 0,
+          chargeTimerStartValue: 0,
           disabledMove: 0,
           disableTimer: 0,
           disableTimerStartValue: 0,
@@ -404,19 +459,28 @@ function createSwitchindataupdateOpcodeHandler(
           encoredMovePos: 0,
           encoreTimer: 0,
           encoreTimerStartValue: 0,
+          perishSongTimer: isBatonPass ? candidate.perishSongTimer : 0,
+          perishSongTimerStartValue: isBatonPass ? candidate.perishSongTimerStartValue : 0,
           usedDisabledMove: 0 as const,
           tauntTimer: 0,
           usedTauntedMove: 0 as const,
           usedImprisonedMove: 0 as const,
+          battlerPreventingEscape: isBatonPass ? candidate.battlerPreventingEscape : 0,
+          isFirstTurn: 2,
         });
       }
       const clearsWrapped =
         battlersCount === 2
         && (candidate.status2 & BATTLE_SCRIPT_STATUS2_WRAPPED_MASK) !== 0;
+      const clearsEscapePrevention =
+        !isBatonPass
+        && (candidate.status2 & STATUS2_ESCAPE_PREVENTION) !== 0
+        && candidate.battlerPreventingEscape === battler;
       const status2 = (
         candidate.status2
         & ~infatuationBit
         & (clearsWrapped ? ~BATTLE_SCRIPT_STATUS2_WRAPPED_MASK : ~0)
+        & (clearsEscapePrevention ? ~STATUS2_ESCAPE_PREVENTION : ~0)
       ) >>> 0;
       const refreshesSureHit =
         isBatonPass
@@ -431,7 +495,12 @@ function createSwitchindataupdateOpcodeHandler(
         : candidate.status3;
       return status2 === candidate.status2 && status3 === candidate.status3
         ? candidate
-        : Object.freeze({ ...candidate, status2, status3 });
+        : Object.freeze({
+            ...candidate,
+            status2,
+            status3,
+            ...(clearsEscapePrevention ? { battlerPreventingEscape: 0 as BattleScriptBattlerId } : {}),
+          });
     }) as unknown as BattleScriptRulesBattlers;
 
     return transitionBattleScriptCommand(
