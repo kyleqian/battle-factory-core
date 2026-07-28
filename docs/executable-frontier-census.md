@@ -4,16 +4,16 @@ Generated 2026-07-28. Rerun: `npx tsx tools/report/executable-frontier-census.ts
 
 Answers ROADMAP S10's Executable-frontier reset question directly: not "how many opcodes are registered" but **how many of the 355 moves can the kernel execute end-to-end today, and what exactly blocks each of the rest.** Every `BattleScript_Effect*` entry in the committed topology (`src/data/gen/battle-script-topology.json` + `battle-script-graph.json`) is walked for full opcode reachability (branches, goto/call targets, the shared hit-chain tail) against the opcode set the engine currently registers (read live from `src/engine/battleScriptRulesContext.ts`'s `createBattleScriptStatusRulesHandlers`, so this doc cannot drift from what the engine actually installs).
 
-**Key finding:** the single highest-leverage next registration is `B_SCR_OP_FRIENDSHIPTODAMAGECALCULATION` -- registering exactly that set would flip **2 effects / 2 moves (2 Factory-L50, 18 weighted)** from blocked to executable in one step (EFFECT_RETURN, EFFECT_FRUSTRATION) -- the largest single entry in the ranked table below. This paragraph is generated fresh from the current registered-opcode set every run, so it always names today's actual top blocker, not a past one -- see PROGRESS.md for the registration history (e.g. the 2026-07-25 B_SCR_OP_JUMPIFHALFWORD/JUMPIFSTATUS3CONDITION/ORWORD entry-chokepoint trio).
+**Key finding:** the single highest-leverage next registration is `B_SCR_OP_COPYFOESTATS` -- registering exactly that set would flip **1 effect / 1 move (1 Factory-L50, 14 weighted)** from blocked to executable in one step (EFFECT_PSYCH_UP) -- the largest single entry in the ranked table below. This paragraph is generated fresh from the current registered-opcode set every run, so it always names today's actual top blocker, not a past one -- see PROGRESS.md for the registration history (e.g. the 2026-07-25 B_SCR_OP_JUMPIFHALFWORD/JUMPIFSTATUS3CONDITION/ORWORD entry-chokepoint trio).
 
 ## Headline counts
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 128 | 214 | 59.8% |
-| Moves (unweighted, all 355) | 252 | 355 | 71.0% |
-| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 204 | 276 | 73.9% |
-| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2586 | 2957 | 87.5% |
+| Effect scripts | 130 | 214 | 60.7% |
+| Moves (unweighted, all 355) | 254 | 355 | 71.5% |
+| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 206 | 276 | 74.6% |
+| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2604 | 2957 | 88.1% |
 
 "Executable" means every opcode on every statically reachable path from the effect's entry script has a dispatch entry today (registered barriers included, per ROADMAP S10 §1's (a)/(b) policy). It is not a semantic-correctness claim -- see Caveats.
 
@@ -23,7 +23,6 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 
 | Missing opcode(s) | Effects unlocked | Moves unlocked (unweighted) | Factory-L50 moves (unweighted) | Factory-L50 weighted |
 | --- | --- | --- | --- | --- |
-| `B_SCR_OP_FRIENDSHIPTODAMAGECALCULATION` | 2 (EFFECT_RETURN, EFFECT_FRUSTRATION) | 2 | 2 | 18 |
 | `B_SCR_OP_COPYFOESTATS` | 1 (EFFECT_PSYCH_UP) | 1 | 1 | 14 |
 | `B_SCR_OP_JUMPIFCANTSWITCH` | 1 (EFFECT_BATON_PASS) | 1 | 1 | 13 |
 | `B_SCR_OP_JUMPIFNODAMAGE` | 1 (EFFECT_FOCUS_PUNCH) | 1 | 1 | 11 |
@@ -48,6 +47,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_TRYSETENCORE` | 1 (EFFECT_ENCORE) | 1 | 1 | 4 |
 | `B_SCR_OP_TRYSETPERISHSONG` | 1 (EFFECT_PERISH_SONG) | 1 | 1 | 4 |
 | `B_SCR_OP_SETFORESIGHT` | 1 (EFFECT_FORESIGHT) | 2 | 1 | 3 |
+| `B_SCR_OP_DOUBLEDAMAGEDEALTIFDAMAGED` | 1 (EFFECT_REVENGE) | 1 | 1 | 3 |
 
 ## Per-effect detail
 
@@ -174,9 +174,9 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_SWAGGER | `BattleScript_EffectSwagger` | executable | - | - | 1 | 1 (23) |
 | EFFECT_FURY_CUTTER | `BattleScript_EffectFuryCutter` | blocked-on-opcodes | `B_SCR_OP_FURYCUTTERCALC` (edge branch only) | - | 1 | 1 (5) |
 | EFFECT_ATTRACT | `BattleScript_EffectAttract` | executable | - | - | 1 | 1 (45) |
-| EFFECT_RETURN | `BattleScript_EffectReturn` | blocked-on-opcodes | `B_SCR_OP_FRIENDSHIPTODAMAGECALCULATION` (edge branch only) | - | 1 | 1 (8) |
+| EFFECT_RETURN | `BattleScript_EffectReturn` | executable | - | - | 1 | 1 (8) |
 | EFFECT_PRESENT | `BattleScript_EffectPresent` | blocked-on-opcodes | `B_SCR_OP_PRESENTDAMAGECALCULATION` (edge branch only) | - | 1 | 1 (1) |
-| EFFECT_FRUSTRATION | `BattleScript_EffectFrustration` | blocked-on-opcodes | `B_SCR_OP_FRIENDSHIPTODAMAGECALCULATION` (edge branch only) | - | 1 | 1 (10) |
+| EFFECT_FRUSTRATION | `BattleScript_EffectFrustration` | executable | - | - | 1 | 1 (10) |
 | EFFECT_SAFEGUARD | `BattleScript_EffectSafeguard` | executable | - | - | 1 | 1 (7) |
 | EFFECT_THAW_HIT | `BattleScript_EffectThawHit` | executable | - | - | 2 | 1 (2) |
 | EFFECT_MAGNITUDE | `BattleScript_EffectMagnitude` | blocked-on-opcodes | `B_SCR_OP_MAGNITUDEDAMAGECALCULATION` (main path) | - | 1 | 1 (2) |
