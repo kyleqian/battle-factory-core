@@ -195,6 +195,55 @@ function scratchState(rulesContext: BattleScriptRulesContext, attacker: 0 | 1) {
 }
 
 describe("runBattleEndTurnOrchestration (BattleTurnPassed equivalent)", () => {
+  it("ENDTURN_NIGHTMARES pins the OFF receipt's 116 -> 87 -> 58 quarter-HP ladder with zero RNG", () => {
+    const rc = context({
+      battlers: [
+        battler({ side: 0, hp: 116, maxHP: 116, status1: 3, status2: STATUS2_NIGHTMARE }),
+        battler({ side: 1, partyIndex: 2 }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+      party: { player: sixSlots(116), opponent: sixSlots(0, 0, 100) },
+    });
+    const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(0));
+    const turn1 = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
+    expect(turn1.kind).toBe("next-turn");
+    if (turn1.kind !== "next-turn") throw new Error("expected next-turn");
+    expect(turn1.state.rulesContext.battlers[0]).toMatchObject({
+      hp: 87,
+      status2: STATUS2_NIGHTMARE,
+    });
+    expect(turn1.state.rulesContext.party.player[0].hp).toBe(87);
+    const turn2 = runBattleEndTurnOrchestration(program, handlers, turn1.state);
+    expect(turn2.kind).toBe("next-turn");
+    if (turn2.kind !== "next-turn") throw new Error("expected next-turn");
+    expect(turn2.state.rulesContext.battlers[0]).toMatchObject({
+      hp: 58,
+      status2: STATUS2_NIGHTMARE,
+    });
+    expect(turn2.state.rulesContext.party.player[0].hp).toBe(58);
+    expect(turn2.state.rng.calls).toBe(0);
+  });
+
+  it("ENDTURN_NIGHTMARES clears the volatile after wake without another HP tick", () => {
+    const rc = context({
+      battlers: [
+        battler({ side: 0, hp: 58, maxHP: 116, status1: 0, status2: STATUS2_NIGHTMARE }),
+        battler({ side: 1, partyIndex: 2 }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+      party: { player: sixSlots(58), opponent: sixSlots(0, 0, 100) },
+    });
+    const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(0));
+    const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
+    expect(result.kind).toBe("next-turn");
+    if (result.kind !== "next-turn") throw new Error("expected next-turn");
+    expect(result.state.rulesContext.battlers[0]).toMatchObject({ hp: 58, status2: 0 });
+    expect(result.state.rulesContext.party.player[0].hp).toBe(58);
+    expect(result.state.rng.calls).toBe(0);
+  });
+
   it.each([
     ["decrements without expiry", { encoreTimer: 3, encoredMove: MOVE_TACKLE, encoredMovePos: 0, moves: [MOVE_TACKLE, 0, 0, 0], pp: [2, 0, 0, 0] }, 2, MOVE_TACKLE, false],
     ["timer expiry messages", { encoreTimer: 1, encoredMove: MOVE_TACKLE, encoredMovePos: 0, moves: [MOVE_TACKLE, 0, 0, 0], pp: [2, 0, 0, 0] }, 0, 0, true],

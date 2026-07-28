@@ -569,6 +569,8 @@ const MOVE_EFFECT_ID_BY_NAME: Readonly<Record<string, number>> = Object.freeze({
   MOVE_EFFECT_EVS_MINUS_1: 28,
   MOVE_EFFECT_RECHARGE: 29,
   MOVE_EFFECT_RAGE: 30,
+  MOVE_EFFECT_PREVENT_ESCAPE: 32,
+  MOVE_EFFECT_NIGHTMARE: 33,
   MOVE_EFFECT_ALL_STATS_UP: 34,
   MOVE_EFFECT_REMOVE_PARALYSIS: 36,
   MOVE_EFFECT_ATK_DEF_DOWN: 37,
@@ -1087,21 +1089,17 @@ const validationChecks: Array<() => void> = [
   // B_SCR_OP_SETEFFECTPRIMARY (previously only SETEFFECTWITHCHANCE), and a new
   // jumpifability value-coverage check catches ability operands outside the
   // engine's widened ability set. These four rows were PROGRESS 473's own
-  // named false positives -- pinned blocked now that the census actually
-  // checks the operand, not just the opcode name.
-  () => requireBlockedMentioning("EFFECT_MEAN_LOOK", "MOVE_EFFECT_PREVENT_ESCAPE"),
-  () => requireBlockedMentioning("EFFECT_NIGHTMARE", "MOVE_EFFECT_NIGHTMARE"),
+  // named false positives. Cluster 3 now source-completes both operand gates
+  // and SetMoveEffect cases, so these ratchets deliberately flip positive.
+  () => requireExecutable("EFFECT_MEAN_LOOK"),
+  () => requireExecutable("EFFECT_NIGHTMARE"),
   () => requireBlockedMentioning("EFFECT_WILL_O_WISP", "ABILITY_WATER_VEIL"),
   // Exact per-operand blocker sets. These deliberately pin only rows whose
   // hidden blocker is mechanically visible to the new handler-surface gates;
   // state/consumer-only dossiers (including Hidden Power IV ownership) stay
   // unpinned so concurrent opcode work can merge without a false ratchet.
-  () => requireExactMechanicalBlockers("EFFECT_MEAN_LOOK", [
-    "Operand gate: B_SCR_OP_JUMPIFSTATUS2(STATUS2_ESCAPE_PREVENTION)",
-  ]),
-  () => requireExactMechanicalBlockers("EFFECT_NIGHTMARE", [
-    "Operand gate: B_SCR_OP_JUMPIFSTATUS2(STATUS2_NIGHTMARE)",
-  ]),
+  () => requireExactMechanicalBlockers("EFFECT_MEAN_LOOK", []),
+  () => requireExactMechanicalBlockers("EFFECT_NIGHTMARE", []),
   () => requireExactMechanicalBlockers("EFFECT_THIEF", [
     "Operand gate: B_SCR_OP_PLAYANIMATION(B_ANIM_ITEM_STEAL)",
   ]),

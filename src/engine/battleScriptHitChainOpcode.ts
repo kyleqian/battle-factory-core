@@ -229,6 +229,8 @@ const MOVE_EFFECT_WRAP = 13;
 const MOVE_EFFECT_RECOIL_25 = 14;
 const MOVE_EFFECT_RECHARGE = 29;
 const MOVE_EFFECT_RAGE = 30;
+const MOVE_EFFECT_PREVENT_ESCAPE = 32;
+const MOVE_EFFECT_NIGHTMARE = 33;
 const MOVE_EFFECT_ALL_STATS_UP = 34;
 const MOVE_EFFECT_REMOVE_PARALYSIS = 36;
 const MOVE_EFFECT_ATK_DEF_DOWN = 37;
@@ -530,6 +532,8 @@ export const SET_MOVE_EFFECT_SUPPORTED_BYTES: ReadonlySet<number> = new Set<numb
   MOVE_EFFECT_RECOIL_25,
   MOVE_EFFECT_RECHARGE,
   MOVE_EFFECT_RAGE,
+  MOVE_EFFECT_PREVENT_ESCAPE,
+  MOVE_EFFECT_NIGHTMARE,
   MOVE_EFFECT_ALL_STATS_UP,
   MOVE_EFFECT_REMOVE_PARALYSIS,
   MOVE_EFFECT_ATK_DEF_DOWN,
@@ -862,15 +866,16 @@ function checkWonderGuardAndLevitate(
  * Bond tail, which is unreachable whenever Protect was the reason for
  * jumping in the first place (the `if` branch taken instead).
  */
-function accuracycheckNoAccCalcCheckLockOn(
+function accuracycheckNoAccCalc(
   context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
+  checksLockOn: boolean,
 ): BattleScriptCommandTransition<BattleScriptRulesContext> {
   const rulesContext = context.state.rulesContext;
   const attacker = requireBattlerRole(rulesContext, "attacker");
   const target = requireBattlerRole(rulesContext, "target");
   const targetBattler = rulesContext.battlers[target];
 
-  if ((targetBattler.status3 & BATTLE_SCRIPT_STATUS3_ALWAYS_HITS) !== 0) {
+  if (checksLockOn && (targetBattler.status3 & BATTLE_SCRIPT_STATUS3_ALWAYS_HITS) !== 0) {
     return unsupportedBranch(
       context,
       "AccuracyCalcHelper's STATUS3_ALWAYS_HITS Lock-On/Mind-Reader sure-hit branch needs "
@@ -907,18 +912,25 @@ function accuracycheckNoAccCalcCheckLockOn(
  * are source-complete: `ACC_CURR_MOVE` (`BattleScript_EffectHit` and 53 of
  * the program's other accuracycheck sites), the two explicit delayed-attack
  * literals (`MOVE_FUTURE_SIGHT`/`MOVE_DOOM_DESIRE`), and
- * `NO_ACC_CALC_CHECK_LOCK_ON`
- * (`accuracycheckNoAccCalcCheckLockOn` above, `BattleScript_EffectYawn`'s own
- * site -- 1 of 8 sites using this literal, the rest still barriered behind
- * their own separate unregistered opcodes). Bare `NO_ACC_CALC` remains an
- * explicit barrier.
+ * `NO_ACC_CALC_CHECK_LOCK_ON` (`accuracycheckNoAccCalc` above,
+ * `BattleScript_EffectYawn`'s own site -- 1 of 8 sites using this literal,
+ * the rest still barriered behind their own separate unregistered opcodes),
+ * and Mean Look's sole bare `NO_ACC_CALC`. The bare form shares the no-roll
+ * semi-invulnerability/Protect path but source-skips the Lock-On identity
+ * comparison.
  */
 export const accuracycheckOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (
   context,
 ) => {
   const moveOperand = context.instruction.operands[1];
-  if (moveOperand?.expression === "NO_ACC_CALC_CHECK_LOCK_ON") {
-    return accuracycheckNoAccCalcCheckLockOn(context);
+  if (
+    moveOperand?.expression === "NO_ACC_CALC_CHECK_LOCK_ON"
+    || moveOperand?.expression === "NO_ACC_CALC"
+  ) {
+    return accuracycheckNoAccCalc(
+      context,
+      moveOperand.expression === "NO_ACC_CALC_CHECK_LOCK_ON",
+    );
   }
   const explicitMove = moveOperand?.expression === "MOVE_FUTURE_SIGHT"
     ? 248
@@ -2651,6 +2663,33 @@ function applySetMoveEffect(
         { rulesContext: nextRulesContext },
       );
     }
+    if (effectByte === MOVE_EFFECT_PREVENT_ESCAPE) {
+      const nextRulesContext = withBattler(baseRulesContext, target, {
+        status2: (
+          baseRulesContext.battlers[target].status2
+          | STATUS2_ESCAPE_PREVENTION
+        ) >>> 0,
+        battlerPreventingEscape: attacker,
+      });
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        { rulesContext: nextRulesContext },
+      );
+    }
+    if (effectByte === MOVE_EFFECT_NIGHTMARE) {
+      const nextRulesContext = withBattler(baseRulesContext, target, {
+        status2: (
+          baseRulesContext.battlers[target].status2
+          | BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_NIGHTMARE
+        ) >>> 0,
+      });
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        { rulesContext: nextRulesContext },
+      );
+    }
     if (effectByte === MOVE_EFFECT_ALL_STATS_UP) {
       const programCounter = resolveRequiredLabelProgramCounter(context.program, "BattleScript_AllStatsUp");
       return transitionBattleScriptCommand(
@@ -3821,20 +3860,6 @@ function createCleareffectsonfaintOpcodeHandler(
     const active = resolved;
     const { battlersCount } = rulesContext.battleTopology;
 
-    for (let i = 0; i < battlersCount; i += 1) {
-      if (i === active) continue;
-      const otherStatus2 = rulesContext.battlers[i as BattleScriptBattlerId].status2;
-      if ((otherStatus2 & STATUS2_ESCAPE_PREVENTION) !== 0) {
-        return unsupportedBranch(
-          context,
-          `FaintClearSetData's STATUS2_ESCAPE_PREVENTION cross-battler clear (battler ${i}) needs `
-            + "gDisableStructs[battler].battlerPreventingEscape identity, not modeled here",
-          "battle_main.c",
-          3277,
-        );
-      }
-    }
-
     const activeBattlerState = rulesContext.battlers[active];
     const isArena = (rulesContext.battleTopology.battleTypeFlags & BATTLE_SCRIPT_BATTLE_TYPE_ARENA) !== 0;
     const clearsStatus1 = !isArena || activeBattlerState.hp === 0;
@@ -3876,13 +3901,28 @@ function createCleareffectsonfaintOpcodeHandler(
           flag2Unknown: 0 as const,
           protected: 0 as const,
           protectUses: 0,
+          battlerPreventingEscape: 0,
         });
       }
       // FaintClearSetData (battle_main.c:3281): other battlers wrapped BY the
       // fainted one are freed -- real gBattleStruct->wrappedBy identity, not a barrier.
       const wrappedByActive = (candidate.status2 & STATUS2_WRAPPED_MASK) !== 0 && candidate.wrappedBy === active;
-      const status2 = (candidate.status2 & ~infatuationBit & (wrappedByActive ? ~STATUS2_WRAPPED_MASK : ~0)) >>> 0;
-      return status2 === candidate.status2 ? candidate : Object.freeze({ ...candidate, status2 });
+      const preventedByActive =
+        (candidate.status2 & STATUS2_ESCAPE_PREVENTION) !== 0
+        && candidate.battlerPreventingEscape === active;
+      const status2 = (
+        candidate.status2
+        & ~infatuationBit
+        & (wrappedByActive ? ~STATUS2_WRAPPED_MASK : ~0)
+        & (preventedByActive ? ~STATUS2_ESCAPE_PREVENTION : ~0)
+      ) >>> 0;
+      return status2 === candidate.status2
+        ? candidate
+        : Object.freeze({
+            ...candidate,
+            status2,
+            ...(preventedByActive ? { battlerPreventingEscape: 0 as BattleScriptBattlerId } : {}),
+          });
     }) as unknown as BattleScriptRulesBattlers;
 
     let {

@@ -63,7 +63,7 @@ const SIDE_STATUS_SPIKES_DAMAGED = 1 << 9;
 const STATUS2_DESTINY_BOND = 1 << 25;
 const HITMARKER_DESTINYBOND = 1 << 6;
 const ABILITY_LEVITATE = 26;
-/** include/constants/battle.h:150/160 -- cross-battler identity (battlerPreventingEscape/battlerWithSureHit) this engine does not model. */
+/** include/constants/battle.h:150/160 -- cross-battler identity status bits. */
 const STATUS2_ESCAPE_PREVENTION = 1 << 26;
 const STATUS3_ALWAYS_HITS = (1 << 3) | (1 << 4);
 /** battle_main.c:3175-3176 -- the exact volatile masks SwitchInClearSetData carries through Baton Pass. */
@@ -323,16 +323,7 @@ function createSwitchindataupdateOpcodeHandler(
     if (!isBatonPass) {
       for (let i = 0; i < battlersCount; i += 1) {
         if (i === battler) continue;
-        const otherStatus2 = rules.battlers[i as 0 | 1 | 2 | 3].status2;
         const otherStatus3 = rules.battlers[i as 0 | 1 | 2 | 3].status3;
-        if ((otherStatus2 & STATUS2_ESCAPE_PREVENTION) !== 0) {
-          return unsupportedBranch(
-            context,
-            `SwitchInClearSetData's STATUS2_ESCAPE_PREVENTION cross-battler clear (battler ${i}) needs `
-              + "gDisableStructs[battler].battlerPreventingEscape identity, not modeled here",
-            3164,
-          );
-        }
         if ((otherStatus3 & STATUS3_ALWAYS_HITS) !== 0) {
           return unsupportedBranch(
             context,
@@ -414,15 +405,21 @@ function createSwitchindataupdateOpcodeHandler(
           tauntTimer: 0,
           usedTauntedMove: 0 as const,
           usedImprisonedMove: 0 as const,
+          battlerPreventingEscape: isBatonPass ? candidate.battlerPreventingEscape : 0,
         });
       }
       const clearsWrapped =
         battlersCount === 2
         && (candidate.status2 & BATTLE_SCRIPT_STATUS2_WRAPPED_MASK) !== 0;
+      const clearsEscapePrevention =
+        !isBatonPass
+        && (candidate.status2 & STATUS2_ESCAPE_PREVENTION) !== 0
+        && candidate.battlerPreventingEscape === battler;
       const status2 = (
         candidate.status2
         & ~infatuationBit
         & (clearsWrapped ? ~BATTLE_SCRIPT_STATUS2_WRAPPED_MASK : ~0)
+        & (clearsEscapePrevention ? ~STATUS2_ESCAPE_PREVENTION : ~0)
       ) >>> 0;
       const refreshesSureHit =
         isBatonPass
@@ -437,7 +434,12 @@ function createSwitchindataupdateOpcodeHandler(
         : candidate.status3;
       return status2 === candidate.status2 && status3 === candidate.status3
         ? candidate
-        : Object.freeze({ ...candidate, status2, status3 });
+        : Object.freeze({
+            ...candidate,
+            status2,
+            status3,
+            ...(clearsEscapePrevention ? { battlerPreventingEscape: 0 as BattleScriptBattlerId } : {}),
+          });
     }) as unknown as BattleScriptRulesBattlers;
 
     return transitionBattleScriptCommand(

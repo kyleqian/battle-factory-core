@@ -310,6 +310,7 @@ function emptyBattler(side: 0 | 1): BattleScriptRulesBattlerState {
     turnOrderNum: 1,
     wrappedMove: 0,
     wrappedBy: side,
+    battlerPreventingEscape: side,
     isFirstTurn: 0,
   });
 }

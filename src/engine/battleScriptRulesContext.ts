@@ -378,6 +378,13 @@ type BattleScriptMoveEndBattlerMetadata = Readonly<{
    */
   wrappedBy: BattleScriptBattlerId;
   /**
+   * Source `gDisableStructs[battler].battlerPreventingEscape` -- the owner
+   * of this battler's STATUS2_ESCAPE_PREVENTION bit. Switch/faint cleanup
+   * compares this identity with the departing battler before clearing the
+   * trap.
+   */
+  battlerPreventingEscape: BattleScriptBattlerId;
+  /**
    * Source `gDisableStructs[battler].isFirstTurn` -- set to 2 at battle
    * init/switch-in (`battle_main.c:3051,3220,3312`), decremented by
    * `TurnValuesCleanUp(FALSE)` (not modeled by this engine yet, see
@@ -443,6 +450,7 @@ export type BattleScriptRulesBattler = BattleScriptRulesBattlerBase & Readonly<{
   turnOrderNum?: number;
   wrappedMove?: number;
   wrappedBy?: BattleScriptBattlerId;
+  battlerPreventingEscape?: BattleScriptBattlerId;
   isFirstTurn?: number;
 }>;
 
@@ -2144,6 +2152,11 @@ export function createBattleScriptRulesContext(
     turnOrderNum: requireUnsigned(battler.turnOrderNum ?? 1, 0xff, `battlers[${index}].turnOrderNum`),
     wrappedMove: requireUnsigned(battler.wrappedMove ?? 0, 0xffff, `battlers[${index}].wrappedMove`),
     wrappedBy: requireUnsigned(battler.wrappedBy ?? 0, 3, `battlers[${index}].wrappedBy`) as BattleScriptBattlerId,
+    battlerPreventingEscape: requireUnsigned(
+      battler.battlerPreventingEscape ?? 0,
+      3,
+      `battlers[${index}].battlerPreventingEscape`,
+    ) as BattleScriptBattlerId,
     isFirstTurn: requireUnsigned(battler.isFirstTurn ?? 0, 2, `battlers[${index}].isFirstTurn`),
     ...(battler.confusionDamage === undefined ? {} : {
       confusionDamage: Object.freeze({

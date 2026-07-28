@@ -15,6 +15,29 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 622 — [BOUNDED MAIN WORKER 2026-07-28 ~11:38] Mean Look + Nightmare source-complete; Rapid Spin remains barriered
+
+- **State:** rung (a) is green at **389 files / 4441 tests** plus production
+  build and OFF oracle info. Census is **181/214 effects, 320/355 moves,
+  262/276 distinct, 2924/2957 weighted**: actual **+2/+4/+4/+8**, exactly
+  the dossier's rung-(a) prediction; all 62 census validations pass.
+- **Did:** widened every committed `jumpifstatus2` operand and Mean Look's
+  previously-undocumented bare `NO_ACC_CALC`; added source-shaped
+  `battlerPreventingEscape`, owner-sensitive switch/faint/Roar release, and
+  trapped command rejection; wired Nightmare at the real end-turn phase
+  with floor(maxHP/4), wake cleanup, party HP sync, and zero RNG.
+  Receipt pins cover `0x04000000`/`0x08000000`, 116→87→58, no post-wake
+  tick, release, duplicate/Substitute/awake failures, and full scripts to END.
+- **Next:** implement rung (b) only: `B_SCR_OP_RAPIDSPINFREE`, the
+  `gBattlerTarget <- sBATTLER` copy tuple, typed wrapped-move buffer/message,
+  then retire `MOVE_EFFECT_RAPIDSPIN`; expect **+1/+1/+1/+1** to
+  182/214, 321/355, 263/276, 2925/2957.
+- **Notes:** correction headline: dossier §3.7 missed bare `NO_ACC_CALC` as a
+  real Mean Look barrier; recorded in place. Deliberate barrier ratchet
+  moves: HitChain **19→18**, Switchin **9→8**. Rapid Spin, Thief, Knock Off,
+  and Pay Day remain honestly barriered; no presentation/round/tick changes.
+
+---
 ## 621 — [SUPERVISOR VERIFY+FOLD 2026-07-28 ~11:40] Grudge+Spite accepted; Batch-3 and Cluster-4 receipts folded; Swallow gloss corrected
 
 - **State:** verified entry 620 (suite, build) and reconciled the census the
@@ -64,4 +87,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   retires Grudge's named `tryfaintmon` barrier. No new barriers, recording
   imports, generator-metadata entries, census/doc regeneration, roadmap,
   issue, oracle-trace, presentation, tick, or round edits.
-

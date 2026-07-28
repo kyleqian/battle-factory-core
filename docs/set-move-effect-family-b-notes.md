@@ -378,6 +378,15 @@ missing
 (`src/engine/battleScriptSwitchinOpcode.ts:288-342`;
 `src/engine/battleScriptHitChainOpcode.ts:3466-3482,3517-3527`).
 
+**Cluster-3 implementation correction (2026-07-28).** Running the complete
+committed entry exposed one additional pre-dispatch operand barrier omitted
+above: Mean Look is the sole bare `accuracycheck ..., NO_ACC_CALC` call site.
+That source branch performs no roll, skips the Lock-On identity comparison,
+and retains only the semi-invulnerability/Protect checks
+(`battle_script_commands.c:1099-1113`). Cluster 3 widened it alongside the
+named status2/identity work; this is why the full entry now reaches MOVEEND
+with an exact zero-draw ledger.
+
 **Census verdict and staging.** The current sole attribution is false:
 dispatch cannot even be reached until the `jumpifstatus2` operand is widened,
 and the state is unsafe until owner-aware cleanup lands. Use

@@ -81,6 +81,7 @@ function battler(
     turnOrderNum: changes.turnOrderNum ?? 1,
     wrappedMove: changes.wrappedMove ?? 0,
     wrappedBy: changes.wrappedBy ?? 0,
+    battlerPreventingEscape: changes.battlerPreventingEscape ?? 0,
     isFirstTurn: changes.isFirstTurn ?? 0,
   });
 }

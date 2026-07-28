@@ -315,27 +315,17 @@ describe("primary-effect stat-change route (Cmd_statbuffchange + SETGRAPHICALSTA
       expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 4011 });
     });
 
-    it("Cmd_jumpifstatus2 halts on a status2 value outside the registered set (SUBSTITUTE/CONFUSION/MULTIPLETURNS/FOCUS_ENERGY)", () => {
+    it("Cmd_jumpifstatus2 accepts every concrete status2 operand in the committed program", () => {
       const REGISTERED = new Set([
         "STATUS2_SUBSTITUTE", "STATUS2_CONFUSION",
         "STATUS2_MULTIPLETURNS", "STATUS2_FOCUS_ENERGY",
+        "STATUS2_ESCAPE_PREVENTION", "STATUS2_NIGHTMARE",
       ]);
-      const found = program.instructions.find(
-        (i) => i.opcodeName === "B_SCR_OP_JUMPIFSTATUS2" && !REGISTERED.has(i.operands[1]?.expression ?? ""),
-      );
-      expect(found).toBeDefined();
-      const rc = context();
-      const execution = createBattleScriptStatusRulesExecution(
-        program,
-        "BattleScript_EffectAttackUp2",
-        rc,
-        1,
-        externalPorts(),
-      );
-      const patched = Object.freeze({ ...execution.state, programCounter: found!.programCounter });
-      const result = stepBattleScriptMachine(program, patched, execution.handlers);
-      expect(result.kind).toBe("halted");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 3096 });
+      const operands = program.instructions
+        .filter((i) => i.opcodeName === "B_SCR_OP_JUMPIFSTATUS2")
+        .map((i) => i.operands[1]?.expression);
+      expect(operands.length).toBeGreaterThan(0);
+      expect(operands.every((operand) => REGISTERED.has(operand ?? ""))).toBe(true);
     });
   });
 });

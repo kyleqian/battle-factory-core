@@ -82,6 +82,7 @@ import {
 
 const POISON_TURN_DMG_LABEL = "BattleScript_PoisonTurnDmg";
 const BURN_TURN_DMG_LABEL = "BattleScript_BurnTurnDmg";
+const NIGHTMARE_TURN_DMG_LABEL = "BattleScript_NightmareTurnDmg";
 const INGRAIN_TURN_HEAL_LABEL = "BattleScript_IngrainTurnHeal";
 const LEECH_SEED_TURN_DRAIN_LABEL = "BattleScript_LeechSeedTurnDrain";
 const WRAP_TURN_DMG_LABEL = "BattleScript_WrapTurnDmg";
@@ -588,6 +589,38 @@ function runBattlerStatusDamageTick(
     return runTickScript(program, handlers, state, rc, battler, BURN_TURN_DMG_LABEL);
   }
   return Object.freeze({ kind: "advance", state });
+}
+
+/**
+ * `ENDTURN_NIGHTMARES` (`battle_util.c:1561-1579`): after ordinary
+ * poison/burn and before Curse, deal floor(maxHP/4), minimum one, while
+ * asleep. If Sleep has already cleared, remove Nightmare without damage or
+ * a script. No RNG is drawn.
+ */
+function runNightmareTick(
+  program: BattleScriptProgram,
+  handlers: Handlers,
+  state: MachineState,
+  battler: BattleScriptBattlerId,
+): TickOutcome {
+  const b = state.rulesContext.battlers[battler];
+  if ((b.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_NIGHTMARE) === 0 || b.hp === 0) {
+    return Object.freeze({ kind: "advance", state });
+  }
+  if ((b.status1 & BATTLE_SCRIPT_STATUS1_SLEEP) === 0) {
+    return Object.freeze({
+      kind: "advance",
+      state: Object.freeze({
+        ...state,
+        rulesContext: withBattler(state.rulesContext, battler, {
+          status2: (b.status2 & ~BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_NIGHTMARE) >>> 0,
+        }),
+      }),
+    });
+  }
+  const damage = floorDivAtLeastOne(b.maxHP, 4);
+  const rc = Object.freeze({ ...state.rulesContext, battleMoveDamage: damage });
+  return runTickScript(program, handlers, state, rc, battler, NIGHTMARE_TURN_DMG_LABEL);
 }
 
 /**
@@ -1336,11 +1369,14 @@ function runDoBattlerEndTurnEffects(
     if (statusDamage.kind === "outcome-decided") return Object.freeze({ kind: "outcome-decided", state: statusDamage.state });
     state = statusDamage.state;
 
-    const b = state.rulesContext.battlers[battler];
-    if ((b.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_NIGHTMARE) !== 0) {
-      return Object.freeze({ kind: "case-barrier", state, caseName: "ENDTURN_NIGHTMARES", detail: "STATUS2_NIGHTMARE set but BattleScript_NightmareTurnDmg is not wired" });
+    const nightmare = applyTickOutcome(runNightmareTick(program, handlers, state, battler));
+    if (nightmare.kind === "opcode-barrier") {
+      return Object.freeze({ kind: "opcode-barrier", state: nightmare.state, instruction: nightmare.instruction });
     }
-    void BATTLE_SCRIPT_STATUS1_SLEEP; // real Nightmare guard also requires STATUS1_SLEEP; the NIGHTMARE bit alone already can't be set today, so this sub-guard is moot until Nightmare's own move effect exists.
+    if (nightmare.kind === "outcome-decided") return Object.freeze({ kind: "outcome-decided", state: nightmare.state });
+    state = nightmare.state;
+
+    const b = state.rulesContext.battlers[battler];
     if ((b.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_CURSED) !== 0) {
       return Object.freeze({ kind: "case-barrier", state, caseName: "ENDTURN_CURSE", detail: "STATUS2_CURSED set but BattleScript_CurseTurnDmg is not wired" });
     }

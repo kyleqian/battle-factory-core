@@ -76,6 +76,7 @@ function battler(changes: Partial<BattleScriptRulesBattler> & { maxHP?: number }
     turnOrderNum: changes.turnOrderNum,
     wrappedMove: changes.wrappedMove,
     wrappedBy: changes.wrappedBy,
+    battlerPreventingEscape: changes.battlerPreventingEscape,
   });
 }
 
@@ -348,23 +349,20 @@ describe("production accuracycheck (Cmd_accuracycheck) dispatch", () => {
   });
 
   describe("(b) unsupported-branch barriers", () => {
-    it("halts on the remaining bare NO_ACC_CALC call site (Future Sight/Doom Desire explicit ids and NO_ACC_CALC_CHECK_LOCK_ON are registered)", () => {
-      const stillUnsupported = program.instructions.find(
+    it("bare NO_ACC_CALC (Mean Look) advances without RNG and skips the Lock-On identity check", () => {
+      const bareNoAccuracy = program.instructions.find(
         (i) => i.opcodeName === "B_SCR_OP_ACCURACYCHECK"
-          && i.operands[1]?.expression !== "ACC_CURR_MOVE"
-          && i.operands[1]?.expression !== "NO_ACC_CALC_CHECK_LOCK_ON",
+          && i.operands[1]?.expression === "NO_ACC_CALC",
       );
-      expect(stillUnsupported).toBeDefined();
-      const rc = context(0);
+      expect(bareNoAccuracy).toBeDefined();
+      const rc = context(0, {}, {}, { status3: 1 << 3 });
       const { execution } = stepFrom("BattleScript_HitFromAccCheck", rc, 1);
-      const patched = Object.freeze({ ...execution.state, programCounter: stillUnsupported!.programCounter });
+      const patched = Object.freeze({ ...execution.state, programCounter: bareNoAccuracy!.programCounter });
       const result = stepBattleScriptMachine(program, patched, execution.handlers);
-      expect(result.kind).toBe("halted");
-      expect(result.state.haltReason).toMatchObject({
-        kind: "unsupported-branch",
-        sourceFile: "battle_script_commands.c",
-        sourceLine: 1103,
-      });
+      expect(result.kind).toBe("advanced");
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.programCounter).toBe(bareNoAccuracy!.programCounter + 1);
+      expect(result.state.rng.calls).toBe(0);
     });
 
     it("halts on STATUS3_ALWAYS_HITS (Lock-On, battlerWithSureHit unmodeled)", () => {
@@ -3134,14 +3132,6 @@ describe("production cleareffectsonfaint (Cmd_cleareffectsonfaint) dispatch", ()
   });
 
   describe("(b) unsupported-branch barriers", () => {
-    it("halts when another battler has STATUS2_ESCAPE_PREVENTION set (gDisableStructs[].battlerPreventingEscape identity unmodeled)", () => {
-      const rc = context(0, { status2: 1 << 26 }, {}, { hp: 0 });
-      const { result } = stepAtProgramCounter(cleareffectsonfaintTargetPc, rc);
-      expect(result.kind).toBe("halted");
-      expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 3277 });
-    });
-
-
     it("halts on an unsupported selector spelling (Battle Arena's BS_OPPONENT1), not BS_TARGET/BS_ATTACKER", () => {
       const pc = program.instructions.find((i) =>
         i.opcodeName === "B_SCR_OP_CLEAREFFECTSONFAINT" && i.operands[0]?.expression === "BS_OPPONENT1"
@@ -3151,6 +3141,28 @@ describe("production cleareffectsonfaint (Cmd_cleareffectsonfaint) dispatch", ()
       expect(result.kind).toBe("halted");
       expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch", sourceLine: 3064 });
     });
+  });
+
+  it("Roar/faint-style removal clears Mean Look only when the departing battler owns the trap", () => {
+    const owned = context(
+      0,
+      { status2: 1 << 26, battlerPreventingEscape: 1 },
+      {},
+      { hp: 0 },
+    );
+    const ownedResult = stepAtProgramCounter(cleareffectsonfaintTargetPc, owned).result;
+    if (ownedResult.kind !== "advanced") throw new Error(`expected advance, got ${ownedResult.kind}`);
+    expect(ownedResult.state.rulesContext.battlers[0].status2).toBe(0);
+
+    const otherOwner = context(
+      0,
+      { status2: 1 << 26, battlerPreventingEscape: 2 },
+      {},
+      { hp: 0 },
+    );
+    const otherResult = stepAtProgramCounter(cleareffectsonfaintTargetPc, otherOwner).result;
+    if (otherResult.kind !== "advanced") throw new Error(`expected advance, got ${otherResult.kind}`);
+    expect(otherResult.state.rulesContext.battlers[0].status2).toBe(1 << 26);
   });
 });
 
@@ -3836,7 +3848,7 @@ describe("SetMoveEffect family-B cluster 1", () => {
     ]) {
       expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(effect)).toBe(true);
     }
-    for (const effect of [11, 31, 32, 33, 35, 54]) {
+    for (const effect of [11, 31, 35, 54]) {
       expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(effect)).toBe(false);
     }
   });
@@ -4214,7 +4226,7 @@ describe("SetMoveEffect family-B cluster 2: recoil and Uproar dispatch", () => {
 
   it("exports Recoil 33 while the six deferred family-B bytes remain barriered", () => {
     expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(MOVE_EFFECT_RECOIL_33)).toBe(true);
-    for (const effect of [11, 31, 32, 33, 35, 54]) {
+    for (const effect of [11, 31, 35, 54]) {
       expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(effect)).toBe(false);
     }
   });

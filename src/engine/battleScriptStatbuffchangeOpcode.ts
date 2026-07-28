@@ -315,11 +315,17 @@ const STATUS2_CONFUSION = 0x7;
 const STATUS2_MULTIPLETURNS = 1 << 12;
 /** include/constants/battle.h:144 -- Focus Energy's public duplicate guard. */
 const STATUS2_FOCUS_ENERGY = 1 << 20;
+/** include/constants/battle.h:150 -- Mean Look's duplicate guard. */
+const STATUS2_ESCAPE_PREVENTION = 1 << 26;
+/** include/constants/battle.h:151 -- Nightmare's duplicate guard. */
+const STATUS2_NIGHTMARE = 1 << 27;
 const JUMPIFSTATUS2_VALUES: ReadonlyMap<string, number> = new Map([
   ["STATUS2_SUBSTITUTE", STATUS2_SUBSTITUTE],
   ["STATUS2_CONFUSION", STATUS2_CONFUSION],
   ["STATUS2_MULTIPLETURNS", STATUS2_MULTIPLETURNS],
   ["STATUS2_FOCUS_ENERGY", STATUS2_FOCUS_ENERGY],
+  ["STATUS2_ESCAPE_PREVENTION", STATUS2_ESCAPE_PREVENTION],
+  ["STATUS2_NIGHTMARE", STATUS2_NIGHTMARE],
 ]);
 
 function createJumpifstatus2OpcodeHandler(

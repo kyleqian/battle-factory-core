@@ -73,6 +73,7 @@ function battler(changes: Partial<BattleScriptRulesBattler> = {}): BattleScriptR
     partyIndex: changes.partyIndex ?? 0,
     perishSongTimer: changes.perishSongTimer,
     perishSongTimerStartValue: changes.perishSongTimerStartValue,
+    battlerPreventingEscape: changes.battlerPreventingEscape,
   });
 }
 
@@ -467,19 +468,25 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     });
   });
 
-  it("switchindataupdate: STATUS2_ESCAPE_PREVENTION on another battler is a named barrier (battlerPreventingEscape identity not modeled)", () => {
+  it("switchindataupdate: departing Mean Look owner releases the trapped battler", () => {
     const STATUS2_ESCAPE_PREVENTION = 1 << 26;
     const rc = context({
       battlers: [
-        battler({ side: 0, species: URSARING, types: ["TYPE_NORMAL", "TYPE_NORMAL"], status2: STATUS2_ESCAPE_PREVENTION }),
+        battler({
+          side: 0,
+          species: URSARING,
+          types: ["TYPE_NORMAL", "TYPE_NORMAL"],
+          status2: STATUS2_ESCAPE_PREVENTION,
+          battlerPreventingEscape: 1,
+        }),
         battler({ side: 1, species: SUNKERN, hp: 0, types: ["TYPE_GRASS", "TYPE_GRASS"], partyIndex: 2, ability: ABILITY_GUTS }),
         battler({ side: 0 }),
         battler({ side: 1 }),
       ],
     });
     const { result } = stepAtProgramCounter(SWITCHINDATAUPDATE_PC, rc);
-    expect(result.kind).toBe("halted");
-    expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch" });
+    expect(result.kind).toBe("advanced");
+    expect(result.state.rulesContext.battlers[0].status2).toBe(0);
   });
 
   it("switchindataupdate: STATUS3_ALWAYS_HITS on another battler is a named barrier (battlerWithSureHit identity not modeled)", () => {
