@@ -1,4 +1,27 @@
 ---
+## 605 — [SUPERVISOR VERIFY 2026-07-28 ~06:24] Encore accepted after shared-seam repair
+
+- **State:** independently reviewed the implementation and repair diffs and
+  verified focused Encore/full-turn/end-turn/switch/ratchet coverage
+  **112/112**, production build, both oracle infos, census regeneration,
+  all **42/42** validation checks, and `git diff --check`. The worker's full
+  suite is green at **366 files / 4229 tests**. Census is exactly **159/214
+  effects, 288/355 moves, 236/276 Factory-L50 distinct, 2764/2957 weighted**.
+- **Did:** accepted global Encore `0xa4` and the complete shared state,
+  automatic choice, move-limitation, action-execution, end-turn, and switch
+  seams. Supervisor review found an overwritten-slot path lacking a direct
+  proof; the repair now matches `battle_util.c`: execute the live stored-slot
+  move, clear Encore, and never misclassify it as Struggle. Exact duration
+  RNG, both-side forced actions, PP/script order, repeat failure, expiry,
+  switch cleanup, and multi-turn precedence are pinned.
+- **Next:** implement source-complete `B_SCR_OP_TRYSWAPITEMS` through the
+  shared item/change-state paths using the accepted Trick source/OFF evidence.
+  Expected census: **160/214, 289/355, 237/276, 2769/2957**.
+- **Notes:** handler inventory is **167**. No unsupported barrier, recording
+  import, private RNG/controller/event seam, presentation/tick/round branch,
+  issue removal, or DEFERRED item. Post-orient animation commits remain for
+  the next supervisor's required orient fold; do not merge them mid-session.
+---
 ## 604 — [BOUNDED MAIN WORKER 2026-07-28 ~06:22] Encore shared seams repaired and pinned
 
 - **State:** committed `6e6bd33`; tree green at **366 files / 4229 tests**, focused
