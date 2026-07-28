@@ -204,7 +204,7 @@
         "the narrow shared compositor draws source-extracted BEEDRILL, opaque rotated NEEDLE sprites, alpha IMPACT sprites over target monbg, healthboxes/window/text, and prior-software display transfer; source subpriority places launch stingers behind player-back BEEDRILL but in front of opponent-front BEEDRILL without an age, coordinate, or pixel exception",
         "twineedlePortable.ts proves all 37/37 software/component/seam and shared-framebuffer frames, target offset receipts, registers, live side-relative audio events, prior-software-to-hardware OAM/matrix/palette transfer, raw RGB, and cleanup twice fresh in both orientations; independent outputs are byte-identical with player digest eb52b2a83a1822e43fdec0a330c252f3813bde5f6d3467d358331c7a12586ec1 and opponent digest b7022f7379ae961b84e045c5232d582069be245e5915e3f1499de8b82f2a5771",
         "MOVE_PIN_MISSILE remains unsupported: source uses three distinct wave-amplitude gPinMissileSpriteTemplate arc translations, three animation-2 basic hitsplats, three short ShakeMon2 tasks, and separate JUMP_KICK/HORN_ATTACK audio timing; it does not call create_linear_stinger_sprite or create_handle_invert_hitsplat_sprite",
-        "MOVE_SPIKE_CANNON remains unsupported: source adds AnimTask_WindUpLunge and gSlideMonToOriginalPosSpriteTemplate, then three attacker-relative linear stingers, three simultaneous animation-2 invert hitsplats, ShakeMon2(target,3,0,7,1), and three-event audio loops; it requires independent complete dense evidence"
+        "MOVE_SPIKE_CANNON is independently staged from dense source-only evidence; its complete 84-frame bodies and implementation remain separate from Twineedle's exact two-stinger reducer."
       ],
       "evidence": [
         "tools/battle-lab/mechanic-poison-fang-player-zubat-opponent-onix.json",
@@ -221,6 +221,27 @@
         "tests/animation/twineedle.test.ts",
         "tests/animation/twineedleAssets.test.ts"
       ]
+    },
+    {
+      "move": "MOVE_SPIKE_CANNON",
+      "status": "staged",
+      "covered": [
+        "legal Level-50 Factory set-260 FRONTIER_MON_OMASTAR_1 (species 139, Quirky, HP/Sp. Atk EVs, Shell Bell) against ONIX is built as complete mechanicLab parties in both Scene-ON orientations, with all four active slots constrained to the legal Spike Cannon move without AI decision injection",
+        "fresh local-mGBA portable receipts capture the complete Move_SPIKE_CANNON source pointer interval through its first inactive cleanup: 84/84 dense frames 86-169 player-back and 90-173 opponent-front, twice fresh; player evidence/raw RGB digests are a16a87adf73fb07c6ebe5c498b6da46a6d7740d76b415afc0b9ccb0d75a4d330 / c5af7071168adebfc894a8708e3309f83bac149b39d0a77dfa3f048345997e61 and opponent digests are 49d861ba81f7cff2d65c60d8dcdedba09c8b40e57925e87e5fe4c7bd6d5766fc / 8f393625ce9871d50fb2ffff6b9160d5deca6384286cf57b0af45a1681163c2a",
+        "the source audit pins the side-inverting AnimTask_WindUpLunge two-step task, gSlideMonToOriginalPos callback, target monbg/splitbgprio/12:8 alpha, three attacker-relative linear NEEDLE stingers, three simultaneous animation-2 invert hitsplats, ShakeMon2(target,3,0,7,1), attacker/target loop-audio families, and clear/blendoff cleanup; each dense frame records script/task/sprite topology, OAM/matrices, palettes, registers, both audio players, raw RGB, and framebuffer",
+        "Twineedle reuse is bounded to NEEDLE, linear-stinger, invert-hitsplat, ShakeMon2, monbg/alpha, and cleanup primitives. Its two-stinger timing and ShakeMon2(target,2,0,5,1) reducer do not cover Spike Cannon. No reducer, typed seam, renderer, assets, shared interface, or exact promotion was added.",
+        "MOVE_TAKE_DOWN remains unsupported: it has a distinct 23+10+10 WindUpLunge plus palette blend, offset sprite, ShakeMonInPlace, and dual return slides. MOVE_BRICK_BREAK remains unsupported: it has a two-turn wall branch, two HorizontalLunges, 24+10+3 WindUpLunge, fist/shards, and background blend. Outside-Factory MOVE_SNATCH remains unsupported with its bare 10+10+6 WindUpLunge and TAKE_DOWN sound."
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-poison-fang-player-zubat-opponent-onix.json",
+        "tools/battle-lab/mechanic-poison-fang-opponent-zubat-player-onix.json",
+        "tools/compare/fixtures/spike-cannon-player-omastar-opponent-onix.json",
+        "tools/compare/fixtures/spike-cannon-opponent-omastar-player-onix.json",
+        "tools/compare/spikeCannonProbe.py",
+        "tools/compare/spikeCannonEvidence.ts",
+        "tools/compare/spikeCannonSourceAudit.ts"
+      ],
+      "remaining": "Port only the source-relative WindUpLunge/return-slide plus three-stinger/three-hitsplat/audio-loop reducer and a typed Scene-ON compositor using legal Omastar art, then prove the same 84-frame receipts through the shared application framebuffer twice fresh before promotion."
     },
     {
       "move": "MOVE_REFLECT",

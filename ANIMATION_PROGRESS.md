@@ -1,5 +1,32 @@
 # Animation coverage
 
+## MOVE_SPIKE_CANNON staged; AnimTask_WindUpLunge evidence complete (2026-07-28)
+
+**Verdict:** `MOVE_SPIKE_CANNON` is staged only. Legal Level-50 Factory
+set-260 `FRONTIER_MON_OMASTAR_1` (species 139, Quirky, HP/Sp. Atk, Shell
+Bell) versus ONIX records its full Scene-ON source-pointer body through first
+inactive cleanup at **84/84** dense frames **86–169** player-back and
+**90–173** opponent-front, twice fresh. Evidence/raw RGB digests: player
+`a16a87ad…4d330` / `c5af7071…97e61`; opponent `49d861ba…766fc` /
+`8f393625…3c2a`. Coverage is **67 exact / 0 partial / 2 staged / 207
+unsupported**.
+
+**Evidence/scope:** the portable source receipt records scripts, all tasks and
+sprites, OAM/matrices/palettes/registers, both audio players, raw RGB, and
+framebuffer every frame. Source owns side-inverting `WindUpLunge`, the
+five-frame return dummy, target monbg/splitbgprio/12:8 alpha, 3 linear NEEDLE
+stingers, 3 animation-2 invert hitsplats, `ShakeMon2(3,0,7,1)`, looped
+Razor-Wind/Horn-Attack audio, and cleanup. Twineedle reuses only primitive
+assets/callback families; its two-stinger timing and `ShakeMon2(2,0,5,1)` do
+not cover this move. No reducer, seam, compositor, asset, exact promotion,
+battle logic/RNG/controller/facility state, or boundary/barrier changed.
+
+**Siblings:** `MOVE_TAKE_DOWN` remains unsupported (23+10+10 lunge, blend,
+offset/shake/returns); `MOVE_BRICK_BREAK` remains unsupported (two-turn
+wall branch, horizontal lunges, fist/shards/BG blend); outside-Factory
+`MOVE_SNATCH` remains unsupported (bare 10+10+6 lunge). Next: source-relative
+reducer plus compositor/Omastar art and full shared-framebuffer proof.
+
 ## MOVE_ASTONISH promoted exact; full source body closed (2026-07-28)
 
 **Verdict:** `MOVE_ASTONISH` is exact. Legal Factory set-144
