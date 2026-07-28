@@ -4,14 +4,14 @@ Generated 2026-07-28. Rerun: `npx tsx tools/report/executable-frontier-census.ts
 
 Answers ROADMAP S10's Executable-frontier reset question directly: not "how many opcodes are registered" but **how many of the 355 moves can the kernel execute end-to-end today, and what exactly blocks each of the rest.** Every `BattleScript_Effect*` entry in the committed topology (`src/data/gen/battle-script-topology.json` + `battle-script-graph.json`) is walked for full opcode reachability (branches, goto/call targets, the shared hit-chain tail) against the opcode set the engine currently registers (read live from `src/engine/battleScriptRulesContext.ts`'s `createBattleScriptStatusRulesHandlers`, so this doc cannot drift from what the engine actually installs).
 
-**Key finding:** the single highest-leverage next registration is `B_SCR_OP_ASSISTATTACKSELECT` -- registering exactly that set would flip **1 effect / 1 move (0 Factory-L50, 0 weighted)** from blocked to executable in one step (EFFECT_ASSIST) -- the largest single entry in the ranked table below. This paragraph is generated fresh from the current registered-opcode set every run, so it always names today's actual top blocker, not a past one -- see PROGRESS.md for the registration history (e.g. the 2026-07-25 B_SCR_OP_JUMPIFHALFWORD/JUMPIFSTATUS3CONDITION/ORWORD entry-chokepoint trio).
+**Key finding:** the single highest-leverage next registration is `B_SCR_OP_TRYDOBEATUP` -- registering exactly that set would flip **1 effect / 1 move (0 Factory-L50, 0 weighted)** from blocked to executable in one step (EFFECT_BEAT_UP) -- the largest single entry in the ranked table below. This paragraph is generated fresh from the current registered-opcode set every run, so it always names today's actual top blocker, not a past one -- see PROGRESS.md for the registration history (e.g. the 2026-07-25 B_SCR_OP_JUMPIFHALFWORD/JUMPIFSTATUS3CONDITION/ORWORD entry-chokepoint trio).
 
 ## Headline counts
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 210 | 214 | 98.1% |
-| Moves (unweighted, all 355) | 351 | 355 | 98.9% |
+| Effect scripts | 211 | 214 | 98.6% |
+| Moves (unweighted, all 355) | 352 | 355 | 99.2% |
 | Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 275 | 276 | 99.6% |
 | Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2955 | 2957 | 99.9% |
 
@@ -23,7 +23,6 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 
 | Missing opcode(s) | Effects unlocked | Moves unlocked (unweighted) | Factory-L50 moves (unweighted) | Factory-L50 weighted |
 | --- | --- | --- | --- | --- |
-| `B_SCR_OP_ASSISTATTACKSELECT` | 1 (EFFECT_ASSIST) | 1 | 0 | 0 |
 | `B_SCR_OP_TRYDOBEATUP` | 1 (EFFECT_BEAT_UP) | 1 | 0 | 0 |
 
 ## Per-effect detail
@@ -210,7 +209,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_TRICK | `BattleScript_EffectTrick` | executable | - | - | 1 | 1 (5) |
 | EFFECT_ROLE_PLAY | `BattleScript_EffectRolePlay` | executable | - | - | 1 | 1 (1) |
 | EFFECT_WISH | `BattleScript_EffectWish` | executable | - | - | 1 | 1 (8) |
-| EFFECT_ASSIST | `BattleScript_EffectAssist` | blocked-on-opcodes | `B_SCR_OP_ASSISTATTACKSELECT` (main path) | - | 1 | 0 (0) |
+| EFFECT_ASSIST | `BattleScript_EffectAssist` | executable | - | - | 1 | 0 (0) |
 | EFFECT_INGRAIN | `BattleScript_EffectIngrain` | executable | - | - | 1 | 1 (5) |
 | EFFECT_SUPERPOWER | `BattleScript_EffectSuperpower` | executable | - | - | 1 | 1 (3) |
 | EFFECT_MAGIC_COAT | `BattleScript_EffectMagicCoat` | executable | - | - | 1 | 1 (3) |

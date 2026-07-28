@@ -68,6 +68,40 @@ const INVALID_CALLED_MOVES = new Set([
   requireMoveId("MOVE_UPROAR"),
 ]);
 
+const ASSIST_INVALID_MOVES = new Set([
+  0, // MOVE_NONE
+  requireMoveId("MOVE_SLEEP_TALK"),
+  requireMoveId("MOVE_ASSIST"),
+  requireMoveId("MOVE_MIRROR_MOVE"),
+  requireMoveId("MOVE_METRONOME"),
+]);
+
+/**
+ * `sMovesForbiddenToCopy` from its first entry through
+ * `ASSIST_FORBIDDEN_END` (`battle_script_commands.c:725-748`). The earlier
+ * MIMIC sentinel is data in Assist's scan, not its terminator.
+ */
+const ASSIST_FORBIDDEN_MOVES = new Set([
+  "MOVE_METRONOME",
+  "MOVE_STRUGGLE",
+  "MOVE_SKETCH",
+  "MOVE_MIMIC",
+  "MOVE_COUNTER",
+  "MOVE_MIRROR_COAT",
+  "MOVE_PROTECT",
+  "MOVE_DETECT",
+  "MOVE_ENDURE",
+  "MOVE_DESTINY_BOND",
+  "MOVE_SLEEP_TALK",
+  "MOVE_THIEF",
+  "MOVE_FOLLOW_ME",
+  "MOVE_SNATCH",
+  "MOVE_HELPING_HAND",
+  "MOVE_COVET",
+  "MOVE_TRICK",
+  "MOVE_FOCUS_PUNCH",
+].map(requireMoveId));
+
 const TWO_TURN_EFFECTS = new Set([
   "EFFECT_SKULL_BASH",
   "EFFECT_RAZOR_WIND",
@@ -323,6 +357,89 @@ function createTryChooseSleepTalkMoveHandler(
   };
 }
 
+function createAssistAttackSelectHandler(
+  program: BattleScriptProgram,
+): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
+  return (context) => {
+    const [pointer] = context.instruction.operands;
+    const failureEntry = pointer?.widthBytes === 4
+      ? resolveBattleScriptLabel(program, pointer.expression)
+      : undefined;
+    if (
+      context.instruction.operands.length !== 1
+      || !failureEntry
+    ) {
+      throw new Error("Cmd_assistattackselect requires one resolved four-byte script pointer");
+    }
+
+    const rules = context.state.rulesContext;
+    const attacker = requireAttacker(rules);
+    const attackerState = rules.battlers[attacker];
+    const party = rules.party[battlerSide(rules, attacker) === 0 ? "player" : "opponent"];
+    const validMoves: number[] = [];
+
+    // Source order is party slot, then move slot. The exclusion is the active
+    // party slot, not species identity, and candidates are not deduplicated.
+    for (let partyIndex = 0; partyIndex < party.length; partyIndex += 1) {
+      const member = party[partyIndex]!;
+      if (
+        partyIndex === attackerState.partyIndex
+        || member.species === 0
+        || member.isEgg
+      ) {
+        continue;
+      }
+      for (const move of member.moves) {
+        if (
+          move !== 0
+          && !ASSIST_INVALID_MOVES.has(move)
+          && !ASSIST_FORBIDDEN_MOVES.has(move)
+        ) {
+          validMoves.push(move);
+        }
+      }
+    }
+
+    if (validMoves.length === 0) {
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "jump", programCounter: failureEntry.programCounter }),
+      );
+    }
+
+    const selection = drawBattleScriptRng(
+      context.state.rng,
+      context.instruction,
+      "assist-scaled-selection",
+    );
+    const selectedIndex = ((selection.randomValue & 0xff) * validMoves.length) >> 8;
+    const calledMove = validMoves[selectedIndex]!;
+    const target = resolveDynamicMoveTarget(
+      rules,
+      attacker,
+      calledMove,
+      context.instruction,
+      selection.rng,
+      "assist-called-move-target",
+    );
+    const nextRules = Object.freeze({
+      ...rules,
+      battlers: target.battlers,
+      calledMove,
+      hitMarker: (rules.hitMarker & ~BATTLE_SCRIPT_HITMARKER_ATTACKSTRING_PRINTED) >>> 0,
+      selectorRoles: Object.freeze({
+        ...rules.selectorRoles,
+        target: target.target,
+      }),
+    });
+    return transitionBattleScriptCommand(
+      context,
+      Object.freeze({ kind: "advance" }),
+      { rulesContext: nextRules, rng: target.rng },
+    );
+  };
+}
+
 function createJumpToCalledMoveHandler(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
@@ -376,6 +493,9 @@ export function createBattleScriptSleepTalkOpcodeHandlers(
   const jumpToCalled = program.instructions.filter(
     (instruction) => instruction.opcodeName === "B_SCR_OP_JUMPTOCALLEDMOVE",
   );
+  const assistSelect = program.instructions.filter(
+    (instruction) => instruction.opcodeName === "B_SCR_OP_ASSISTATTACKSELECT",
+  );
   if (tryChoose.length !== 1) {
     throw new Error(
       `B_SCR_OP_TRYCHOOSESLEEPTALKMOVE requires one concrete start, got ${tryChoose.length}`,
@@ -384,8 +504,14 @@ export function createBattleScriptSleepTalkOpcodeHandlers(
   if (jumpToCalled.length === 0) {
     throw new Error("committed Battle Script program does not emit B_SCR_OP_JUMPTOCALLEDMOVE");
   }
+  if (assistSelect.length !== 1) {
+    throw new Error(
+      `B_SCR_OP_ASSISTATTACKSELECT requires one concrete start, got ${assistSelect.length}`,
+    );
+  }
   return Object.freeze({
     [tryChoose[0]!.opcodeId]: createTryChooseSleepTalkMoveHandler(program),
+    [assistSelect[0]!.opcodeId]: createAssistAttackSelectHandler(program),
     [jumpToCalled[0]!.opcodeId]: createJumpToCalledMoveHandler(program),
   });
 }

@@ -30,10 +30,18 @@ import {
 } from "../src/engine/factoryBattleScriptFullTurnDecision.ts";
 
 const NONE = 0;
+const POUND = 1;
+const SCRATCH = 10;
+const TACKLE = 33;
+const GROWL = 45;
+const COUNTER = 68;
 const FLY = 19;
 const MIRROR_MOVE = 119;
 const BIDE = 117;
 const METRONOME = 118;
+const SPLASH = 150;
+const STRUGGLE = 165;
+const PROTECT = 182;
 const RAZOR_WIND = 13;
 const REST = 156;
 const SKULL_BASH = 130;
@@ -53,6 +61,14 @@ const HITMARKER_UNRELATED = 1 << 18;
 const program = loadBattleScriptProgram();
 const tryChooseInstruction = program.instructions.find(
   (instruction) => instruction.opcodeName === "B_SCR_OP_TRYCHOOSESLEEPTALKMOVE",
+)!;
+const assistSelectInstruction = program.instructions.find(
+  (instruction) => instruction.opcodeName === "B_SCR_OP_ASSISTATTACKSELECT",
+)!;
+const assistJumpTrueInstruction = program.instructions.find(
+  (instruction) =>
+    instruction.opcodeName === "B_SCR_OP_JUMPTOCALLEDMOVE"
+    && instruction.source.label === "BattleScript_EffectAssist",
 )!;
 const jumpTrueInstruction = program.instructions.find(
   (instruction) =>
@@ -231,6 +247,28 @@ function runToTerminal(source: BattleScriptRulesContext, seed: number) {
       : result.state;
   }
   throw new Error("BattleScript_EffectSleepTalk did not reach a terminal");
+}
+
+function runAssistToTerminal(source: BattleScriptRulesContext, seed: number) {
+  const execution = createBattleScriptStatusRulesExecution(
+    program,
+    "BattleScript_EffectAssist",
+    source,
+    seed,
+    externalPorts(),
+  );
+  let state = execution.state;
+  for (let guard = 0; guard < 5000; guard += 1) {
+    const result = stepBattleScriptMachine(program, state, execution.handlers);
+    if (result.kind === "halted") return result.state;
+    if (result.kind === "unsupported") {
+      throw new Error(`unexpected unsupported ${result.instruction.opcodeName}`);
+    }
+    state = result.kind === "blocked"
+      ? acknowledgePending(result.state)
+      : result.state;
+  }
+  throw new Error("BattleScript_EffectAssist did not reach a terminal");
 }
 
 function messages(state: BattleScriptMachineState<BattleScriptRulesContext>): string[] {
@@ -507,5 +545,160 @@ describe("Sleep Talk through the generic full-turn decision seam", () => {
       && payload.battler === 0
       && payload.movePosition === 3
     )).toBe(false);
+  });
+});
+
+describe("Assist source-complete party scan and called-move dispatch", () => {
+  it("pins the opcode shell and its TRUE dynamic dispatch operand", () => {
+    expect(assistSelectInstruction).toMatchObject({
+      opcodeId: 0xde,
+      dispatcher: "Cmd_assistattackselect",
+      source: { label: "BattleScript_EffectAssist", statementLine: 2370 },
+      operands: [{ widthBytes: 4, expression: "BattleScript_FailedFromPPReduce" }],
+    });
+    expect(assistJumpTrueInstruction).toMatchObject({
+      opcodeId: 0x63,
+      operands: [{ widthBytes: 1, expression: "TRUE" }],
+      source: { label: "BattleScript_EffectAssist", statementLine: 2375 },
+    });
+  });
+
+  it("reproduces the OFF receipt's one scaled draw and candidate vector while filtering the active slot, empty/Egg records, and every forbidden class", () => {
+    const source = rules(
+      { partyIndex: 0, species: 161, moves: [ASSIST, NONE, NONE, NONE] },
+      {},
+      {
+        currentMove: ASSIST,
+        chosenMove: ASSIST,
+        hitMarker: HITMARKER_UNRELATED | BATTLE_SCRIPT_HITMARKER_ATTACKSTRING_PRINTED,
+        party: {
+          player: [
+            { species: 161, level: 50, hp: 100, moves: [GROWL, GROWL, GROWL, GROWL] },
+            { species: 161, level: 50, hp: 100, moves: [TACKLE, SLEEP_TALK, MIRROR_MOVE, METRONOME] },
+            { species: 161, level: 50, hp: 100, moves: [GROWL, SCRATCH, POUND, SPLASH] },
+            { species: 0, level: 50, hp: 100, moves: [TACKLE, TACKLE, TACKLE, TACKLE] },
+            { species: 175, isEgg: true, level: 50, hp: 100, moves: [TACKLE, TACKLE, TACKLE, TACKLE] },
+            { species: 161, level: 50, hp: 100, moves: [FOCUS_PUNCH, COUNTER, PROTECT, STRUGGLE] },
+          ],
+        },
+      },
+    );
+    const result = stepAt(assistSelectInstruction, source, 0x29a7_2072);
+    expect(result.state.programCounter).toBe(assistSelectInstruction.programCounter + 1);
+    expect(result.state.rulesContext.calledMove).toBe(GROWL);
+    expect(result.state.rulesContext.selectorRoles.target).toBe(1);
+    expect(result.state.rulesContext.hitMarker).toBe(HITMARKER_UNRELATED);
+    expect(result.state.rng.calls).toBe(1);
+    expect(result.state.rng.value).toBe(0xb237_ecfd);
+    expect(result.state.rng.ledger.map(({ reason, randomValue }) => ({ reason, randomValue }))).toEqual([
+      { reason: "assist-scaled-selection", randomValue: 0xb237 },
+    ]);
+  });
+
+  it("pins party-slot-then-move-slot order without deduplication", () => {
+    const source = rules(
+      { partyIndex: 0, moves: [ASSIST, NONE, NONE, NONE] },
+      {},
+      {
+        currentMove: ASSIST,
+        chosenMove: ASSIST,
+        party: {
+          player: [
+            { species: 340, level: 50, hp: 100, moves: [ASSIST, NONE, NONE, NONE] },
+            { species: 161, level: 50, hp: 100, moves: [TACKLE, SCRATCH, POUND, SPLASH] },
+            { species: 161, level: 50, hp: 100, moves: [GROWL, SURF, REST, FISSURE] },
+            {}, {}, {},
+          ],
+        },
+      },
+    );
+    const result = stepAt(assistSelectInstruction, source, 0x29a7_2072);
+    // low byte 0x37 selects index 1 of eight: SCRATCH only under
+    // party-slot-then-move-slot order (move-slot-major would select GROWL).
+    expect(result.state.rulesContext.calledMove).toBe(SCRATCH);
+    expect(result.state.rng.ledger[0]).toMatchObject({
+      reason: "assist-scaled-selection",
+      randomValue: 0xb237,
+    });
+  });
+
+  it("takes the supplied failure pointer with zero draws when every party move is filtered", () => {
+    const source = rules(
+      { partyIndex: 0, moves: [ASSIST, NONE, NONE, NONE] },
+      {},
+      {
+        currentMove: ASSIST,
+        chosenMove: ASSIST,
+        party: {
+          player: [
+            { species: 340, level: 50, hp: 100, moves: [TACKLE, TACKLE, TACKLE, TACKLE] },
+            { species: 0, level: 50, hp: 100, moves: [TACKLE, TACKLE, TACKLE, TACKLE] },
+            { species: 175, isEgg: true, level: 50, hp: 100, moves: [TACKLE, TACKLE, TACKLE, TACKLE] },
+            { species: 161, level: 50, hp: 100, moves: [SLEEP_TALK, ASSIST, MIRROR_MOVE, METRONOME] },
+            { species: 161, level: 50, hp: 100, moves: [FOCUS_PUNCH, COUNTER, PROTECT, STRUGGLE] },
+            {},
+          ],
+        },
+      },
+    );
+    const result = stepAt(assistSelectInstruction, source, 0x29a7_2072);
+    expect(result.state.programCounter).toBe(
+      resolveBattleScriptLabel(program, "BattleScript_FailedFromPPReduce")!.programCounter,
+    );
+    expect(result.state.rulesContext).toBe(source);
+    expect(result.state.rng.calls).toBe(0);
+  });
+
+  it("does not inherit Sleep Talk's extra Uproar exclusion beyond Assist's exact forbidden-array bound", () => {
+    const source = rules(
+      { partyIndex: 0, moves: [ASSIST, NONE, NONE, NONE] },
+      {},
+      {
+        currentMove: ASSIST,
+        chosenMove: ASSIST,
+        party: {
+          player: [
+            { species: 340, level: 50, hp: 100, moves: [ASSIST, NONE, NONE, NONE] },
+            { species: 161, level: 50, hp: 100, moves: [UPROAR, FOCUS_PUNCH, NONE, NONE] },
+            {}, {}, {}, {},
+          ],
+        },
+      },
+    );
+    const result = stepAt(assistSelectInstruction, source, 0x29a7_2072);
+    expect(result.state.rulesContext.calledMove).toBe(UPROAR);
+    expect(result.state.rng.calls).toBe(1);
+  });
+
+  it("runs the selected move through the existing TRUE path so its target/hit RNG and PP reduction execute while chosen move remains Assist", () => {
+    const source = rules(
+      { partyIndex: 0, moves: [ASSIST, NONE, NONE, NONE], pp: [10, 0, 0, 0] },
+      {},
+      {
+        currentMove: ASSIST,
+        chosenMove: ASSIST,
+        party: {
+          player: [
+            { species: 340, level: 50, hp: 100, moves: [ASSIST, NONE, NONE, NONE], pp: [10, 0, 0, 0] },
+            { species: 161, level: 50, hp: 100, moves: [FISSURE, NONE, NONE, NONE], pp: [5, 0, 0, 0] },
+            {}, {}, {}, {},
+          ],
+        },
+      },
+    );
+    const final = runAssistToTerminal(source, 5);
+    expect(final.haltReason).toMatchObject({ kind: "terminal", opcodeName: "B_SCR_OP_END" });
+    expect(final.rulesContext.calledMove).toBe(FISSURE);
+    expect(final.rulesContext.currentMove).toBe(FISSURE);
+    expect(final.rulesContext.chosenMove).toBe(ASSIST);
+    expect(final.rulesContext.battlers[0].pp).toEqual([9, 0, 0, 0]);
+    expect(final.rulesContext.party.player[0].pp).toEqual([9, 0, 0, 0]);
+    expect(final.rulesContext.party.player[1].pp).toEqual([5, 0, 0, 0]);
+    expect(final.rng.ledger.map(({ reason }) => reason)).toEqual([
+      "assist-scaled-selection",
+      "assist-called-move-target",
+      "tryko",
+      "seteffectwithchance",
+    ]);
   });
 });
