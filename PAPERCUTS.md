@@ -490,3 +490,15 @@ worker (PROGRESS entry 13).
   "profile-routed (ON for this family)" instead of naming a port; a
   one-line banner in docs/presentation-seam-scout.md's intro would stop
   the rediscovery loop at the doc every scout reads first.
+
+## Codex `apply_patch` fails to match PROGRESS-archive.md tail blocks
+
+- **What:** workers rotating the progress ledger via `apply_patch` hit
+  repeated context-match failures on the archive's final block (large,
+  frequently-shifting file; trailing-newline sensitivity), retrying until
+  falling back to another edit path.
+- **Hits:** 1 (four-opcode worker, 2026-07-28).
+- **Cost each:** ~2 min.
+- **Workaround:** append to `PROGRESS-archive.md` by prepending after the
+  header with a shell heredoc or targeted `sed` instead of whole-block
+  patch matching; supervisors already rotate this way.
