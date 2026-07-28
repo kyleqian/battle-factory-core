@@ -1654,13 +1654,14 @@ function clearProtectStructsForNextTurn(rulesContext: BattleScriptRulesContext):
 }
 
 /**
- * `TurnValuesCleanUp(FALSE)`'s side-global Follow Me lifetime clear
- * (`battle_main.c:4857-4886`). This runs at the ordinary BattleTurnPassed
- * tail, after faint handling and the Future Sight/Wish-Perish phase. Only
+ * `TurnValuesCleanUp`'s unconditional side-global Follow Me lifetime clear
+ * (`battle_main.c:4857-4892`). The source statements sit outside the
+ * `var0` branch, so BattleTurnPassed executes them at both its entry
+ * `TurnValuesCleanUp(TRUE)` and tail `TurnValuesCleanUp(FALSE)` calls. Only
  * both timers clear; the stored targets remain inert and otherwise every
  * side-timer field is preserved.
  */
-function clearFollowMeTimersAtTurnTail(
+function clearFollowMeTimersForTurnValuesCleanUp(
   rulesContext: BattleScriptRulesContext,
 ): BattleScriptRulesContext {
   const [player, opponent] = rulesContext.sideTimers;
@@ -1679,7 +1680,7 @@ function clearFollowMeTimersAtTurnTail(
 function finishTurnValuesCleanUp(
   rulesContext: BattleScriptRulesContext,
 ): BattleScriptRulesContext {
-  return clearFollowMeTimersAtTurnTail(
+  return clearFollowMeTimersForTurnValuesCleanUp(
     clearProtectStructsForNextTurn(rulesContext),
   );
 }
@@ -1778,7 +1779,7 @@ function runFutureAttacksAfterFaints(
           kind: "terminal",
           state: Object.freeze({
             ...fainted.state,
-            rulesContext: clearFollowMeTimersAtTurnTail(
+            rulesContext: clearFollowMeTimersForTurnValuesCleanUp(
               fainted.state.rulesContext,
             ),
           }),
@@ -1805,7 +1806,9 @@ function runFutureAttacksAfterFaints(
       kind: "terminal",
       state: Object.freeze({
         ...state,
-        rulesContext: clearFollowMeTimersAtTurnTail(state.rulesContext),
+        rulesContext: clearFollowMeTimersForTurnValuesCleanUp(
+          state.rulesContext,
+        ),
       }),
     });
   }
@@ -1839,23 +1842,29 @@ function finishFaintedThenDelayed(
  * point) and before the next turn's decision boundary is computed.
  *
  * `TurnValuesCleanUp(TRUE)` (top of `BattleTurnPassed`, source `var0=TRUE`)
- * clears only `protected`/`endured` and is not modeled as a separate step --
- * this engine instead applies the full `ProtectStruct` memset once, at the
- * position matching `TurnValuesCleanUp(FALSE)`'s call site (the *tail* of
- * `BattleTurnPassed`, `battle_main.c:3974`, doc §1.3/§2.4), which is a
- * strict superset of the `TRUE` clear and produces the same end state for
- * every case this engine models (no rung yet needs the `TRUE`/`FALSE`
- * split's mid-pass timing distinction -- see
- * `docs/counter-retaliation-design.md` §2.2). The post-faint positional
- * Future Sight/Doom Desire phase is applied below; Perish Song remains the
- * unmodeled portion of `HandleWishPerishSongOnTurnEnd`.
+ * clears `protected`/`endured` plus both Follow Me timers. The timers are
+ * cleared literally at entry below, before any field/battler/faint/delayed
+ * work can return a resumable barrier. The full `ProtectStruct` memset
+ * remains modeled once at `TurnValuesCleanUp(FALSE)`'s tail call
+ * (`battle_main.c:3974`, doc §1.3/§2.4); no modeled reader currently needs
+ * its `TRUE`/`FALSE` mid-pass split (see
+ * `docs/counter-retaliation-design.md` §2.2). That tail calls the same timer
+ * helper again, matching source and making the clear idempotent. The
+ * post-faint positional Future Sight/Doom Desire phase is applied below;
+ * Perish Song remains the unmodeled portion of
+ * `HandleWishPerishSongOnTurnEnd`.
  */
 export function runBattleEndTurnOrchestration(
   program: BattleScriptProgram,
   handlers: Handlers,
   initialState: MachineState,
 ): BattleEndTurnResult {
-  let state = initialState;
+  let state = Object.freeze({
+    ...initialState,
+    rulesContext: clearFollowMeTimersForTurnValuesCleanUp(
+      initialState.rulesContext,
+    ),
+  });
 
   if (state.rulesContext.battleOutcome === 0) {
     const battlerOrder = computeBattlerOrder(state.rulesContext);

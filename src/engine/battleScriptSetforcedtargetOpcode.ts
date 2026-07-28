@@ -17,20 +17,13 @@ import type {
   BattleScriptRulesContext,
   BattleScriptSideTimerState,
 } from "./battleScriptRulesContext.ts";
-
-function requireAttacker(rules: BattleScriptRulesContext): 0 | 1 | 2 | 3 {
-  const attacker = rules.selectorRoles.attacker;
-  if (attacker === null) {
-    throw new Error("Cmd_setforcedtarget requires an attacker role");
-  }
-  return attacker;
-}
+import { requireBattlerRole } from "./battleScriptHitChainOpcode.ts";
 
 const setforcedtargetHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (
   context,
 ) => {
   const rules = context.state.rulesContext;
-  const attacker = requireAttacker(rules);
+  const attacker = requireBattlerRole(rules, "attacker");
   const side = rules.battlers[attacker].side;
   const sideTimers = [...rules.sideTimers] as [
     BattleScriptSideTimerState,

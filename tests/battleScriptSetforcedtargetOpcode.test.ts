@@ -29,6 +29,7 @@ const FUTURE_SIGHT = 248;
 const TACKLE = 33;
 const SIDE_STATUS_FUTUREATTACK = 1 << 6;
 const FACTORY_TRAINER = (1 << 19) | (1 << 3);
+const GANLON_BERRY = 169;
 const program = loadBattleScriptProgram();
 const instruction = program.instructions.find(
   (candidate) => candidate.opcodeName === "B_SCR_OP_SETFORCEDTARGET",
@@ -421,7 +422,7 @@ describe("source-complete B_SCR_OP_SETFORCEDTARGET registration", () => {
 });
 
 describe("Follow Me lifetime through the generic end-turn seam", () => {
-  it("clears both timers together, retains inert targets, preserves every other side field, and draws no RNG", () => {
+  it("matches the entry-and-tail TurnValuesCleanUp calls idempotently: both timers stay zero, targets inert, all other side fields preserved, zero RNG", () => {
     const before = rules({
       sideTimers: [
         {
@@ -450,9 +451,50 @@ describe("Follow Me lifetime through the generic end-turn seam", () => {
     expect(result.state.rulesContext.sideTimers[0].followmeTarget).toBe(2);
     expect(result.state.rulesContext.sideTimers[1].followmeTarget).toBe(3);
     expect(result.state.rng.calls).toBe(0);
+
+    const repeated = endTurn(result.state.rulesContext);
+    expect(repeated.kind).toBe("next-turn");
+    expect(repeated.state.rulesContext.sideTimers).toEqual(
+      result.state.rulesContext.sideTimers,
+    );
   });
 
-  it("runs the post-faint Wish/Perish positional phase before the one turn-tail clear", () => {
+  it("clears at entry before a nonterminal battler-case barrier can return, retaining inert targets and every unrelated side field", () => {
+    const before = rules({
+      battlers: [
+        battler(),
+        battler({ side: 1, item: GANLON_BERRY }),
+        battler(),
+        battler({ side: 1 }),
+      ],
+      sideTimers: [
+        {
+          reflectTimer: 4,
+          reflectBattlerId: 2,
+          followmeTimer: 7,
+          followmeTarget: 2,
+        },
+        {
+          lightscreenTimer: 3,
+          lightscreenBattlerId: 3,
+          followmeTimer: 8,
+          followmeTarget: 3,
+        },
+      ],
+    });
+    const result = endTurn(before);
+    expect(result.kind).toBe("case-barrier");
+    if (result.kind !== "case-barrier") {
+      throw new Error("expected the ENDTURN_ITEMS1 case barrier");
+    }
+    expect(result.caseName).toBe("ENDTURN_ITEMS1");
+    expect(result.state.rulesContext.sideTimers).toEqual([
+      { ...before.sideTimers[0], followmeTimer: 0 },
+      { ...before.sideTimers[1], followmeTimer: 0 },
+    ]);
+  });
+
+  it("clears at entry before the post-faint Wish/Perish positional phase, then repeats the idempotent clear at the tail", () => {
     const before = rules({
       currentMove: TACKLE,
       sideStatuses: [0, SIDE_STATUS_FUTUREATTACK],

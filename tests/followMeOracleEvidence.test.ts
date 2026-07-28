@@ -25,7 +25,7 @@ describe("Battle Scene OFF Follow Me / setforcedtarget registration evidence", (
     expect(commands).toMatch(/static void Cmd_setforcedtarget\(void\)\n\{\n    gSideTimers\[GetBattlerSide\(gBattlerAttacker\)\]\.followmeTimer = 1;\n    gSideTimers\[GetBattlerSide\(gBattlerAttacker\)\]\.followmeTarget = gBattlerAttacker;\n    gBattlescriptCurrInstr\+\+;\n\}/);
   });
 
-  it("pins the full effect order, all retarget readers, HP guards, overwrite, and end-turn clear", () => {
+  it("pins the full effect order, all retarget readers, HP guards, overwrite, and both source-ordered end-turn clears", () => {
     expect({
       "battle_script_commands.c": sha256("reference/pokeemerald/src/battle_script_commands.c"),
       "battle_scripts_1.s": sha256("reference/pokeemerald/data/battle_scripts_1.s"),
@@ -54,9 +54,12 @@ describe("Battle Scene OFF Follow Me / setforcedtarget registration evidence", (
     expect(util).toContain("gBattleMons[gSideTimers[side].followmeTarget].hp != 0");
     expect(commands).toContain("case VARIOUS_SET_MAGIC_COAT_TARGET:");
     expect(commands).toContain("if (gSideTimers[sideTarget].followmeTimer && gBattleMons[gSideTimers[sideTarget].followmeTarget].hp)");
-    expect(main).toContain("gSideTimers[0].followmeTimer = 0;\n    gSideTimers[1].followmeTimer = 0;");
+    expect(main).toMatch(/void BattleTurnPassed\(void\)\n\{[\s\S]*?TurnValuesCleanUp\(TRUE\);[\s\S]*?DoFieldEndTurnEffects\(\)[\s\S]*?DoBattlerEndTurnEffects\(\)[\s\S]*?HandleFaintedMonActions\(\)[\s\S]*?HandleWishPerishSongOnTurnEnd\(\)[\s\S]*?TurnValuesCleanUp\(FALSE\);/);
+    expect(main).toMatch(/static void TurnValuesCleanUp\(bool8 var0\)\n\{[\s\S]*?if \(var0\)[\s\S]*?else[\s\S]*?\n    \}\n\n    gSideTimers\[0\]\.followmeTimer = 0;\n    gSideTimers\[1\]\.followmeTimer = 0;\n\}/);
     expect(evidence.state.overwrite).toContain("later acting same-side user overwrites");
+    expect(evidence.lifetime).toContain("TurnValuesCleanUp(TRUE) at entry");
     expect(evidence.lifetime).toContain("TurnValuesCleanUp(FALSE)");
+    expect(evidence.lifetime).toContain("outside its var0 branch on both calls");
   });
 
   it("keeps the complete-party legal singles receipt reproducible without claiming a doubles redirect", () => {

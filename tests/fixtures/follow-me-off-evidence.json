@@ -42,7 +42,7 @@
     {"source": "Cmd_counterdamagecalculator", "file": "src/battle_script_commands.c", "mode": "Counter", "conditions": "Counter's normal physical-damage/opposite-side/live-original-target predicate then target-side timer and stored target HP", "result": "sets gBattlerTarget = followmeTarget"},
     {"source": "Cmd_mirrorcoatdamagecalculator", "file": "src/battle_script_commands.c", "mode": "Mirror Coat", "conditions": "Mirror Coat's normal special-damage/opposite-side/live-original-target predicate then target-side timer and stored target HP", "result": "sets gBattlerTarget = followmeTarget"}
   ],
-  "lifetime": "TurnValuesCleanUp(FALSE), called after field/battler end-turn effects and faint/Wish-Perish handling in BattleTurnPassed, clears only followmeTimer for both sides. followmeTarget is retained but inert. Thus the effect lasts only the turn in which it was set; a fainted stored target is additionally rejected by every retarget reader's HP guard.",
+  "lifetime": "BattleTurnPassed calls TurnValuesCleanUp(TRUE) at entry before field/battler/faint/Wish-Perish work and TurnValuesCleanUp(FALSE) again at the tail. TurnValuesCleanUp clears followmeTimer for both sides unconditionally outside its var0 branch on both calls; followmeTarget is retained but inert. Thus a resumable end-turn barrier cannot expose the prior turn's timer, and the idempotent tail clear runs again before the next turn. A fainted stored target is additionally rejected by every retarget reader's HP guard.",
   "frontierCarrier": {"setId": 107, "name": "FRONTIER_MON_CLEFAIRY", "level50Eligible": true, "species": 35, "moves": [266, 216, 227, 47], "item": 221, "nature": 1},
   "case": {
     "id": "factory-clefairy-follow-me-then-return-versus-chansey-off",
