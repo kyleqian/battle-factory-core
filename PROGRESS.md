@@ -15,6 +15,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 541 — [BOUNDED MAIN WORKER 2026-07-27 ~21:24] Real full-turn kernel now drives the exact Battle-2 OFF seam
+
+- **State:** union green at **295 files / 3823 tests**; `npm run build`
+  clean. The unchanged `battle2-off-turn1-staged.json` trace remains
+  **16/16 exact** on the selected OFF profile.
+- **Did:** the existing Scene-OFF adapter now projects provenance-bearing
+  semantic events plus the genuine request-3 boundary into the same nine
+  relative commands, acknowledging exactly at
+  **145,146,160,260,261,311,400,404,405**. The existing app stage now retains
+  the immutable full-turn transition and renders names/HP/stat/text from its
+  projection; kernel RNG stays honestly at **650807554 / 4 calls**.
+- **Next:** supervisor independently verify `22ddfcd` plus this presentation
+  commit and the unchanged **16/16** trace, then resume the ranked S10
+  executable frontier. The retired staged 12-draw scenario may be removed
+  later only after auditing its remaining callers.
+- **Notes:** focused **17/17**, full **3823/3823**, build and `git diff
+  --check` green. Preserved the concurrent file-disjoint Return/Frustration
+  evidence merge. No synthetic eight-draw tail, canonical recording import,
+  unsupported barrier, ratchet change, oracle lifecycle action, or PAPERCUT.
+
+---
 ## 540 — [BOUNDED MAIN WORKER 2026-07-27 ~21:17] Full-turn controller seam source-correct and provenance-bearing
 
 - **State:** tree green at **294 files / 3820 tests**; `npm run build`
@@ -58,25 +79,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** side worktree/branch removed. No new unsupported barrier,
   canonical-recording production import, ratchet change, or deferred decision.
   No PAPERCUT.
-
----
-## 538 — [BOUNDED WORKER 2026-07-27 ~21:02] Return/Frustration execute end to end; exact +2/+2/+2/+18
-
-- **State:** tree committed and green at **292 files / 3816 tests**;
-  `npm run build` clean. Census regenerates to **130/214 effects, 254/355
-  moves, 206/276 Factory-L50 distinct, 2604/2957 weighted (88.1%)**, the
-  assigned exact **+2 effects / +2 moves / +2 distinct / +18 weighted**,
-  with all **42/42** checks passing.
-- **Did:** `696d475` source-ports/registers the shared zero-operand
-  `B_SCR_OP_FRIENDSHIPTODAMAGECALCULATION` with exact u8 friendship
-  complement/floor arithmetic and strict effect/dispatch-shape validation.
-  Tier-1 pins both genuine-END walks, all quotient boundaries, extrema,
-  invalid contexts, opcode isolation, miss, Protect, faint, and generic
-  Frustration→ordinary-Strength action-boundary cleanup. `5e51eea`
-  regenerates the census.
-- **Next:** supervisor verify this completed row, then take the generated
-  top-ranked `B_SCR_OP_COPYFOESTATS` / `EFFECT_PSYCH_UP` row
-  (**+1 effect / +1 move / +1 distinct / +14 weighted**).
-- **Notes:** no unsupported barrier, canonical-recording import, ratchet,
-  side-scout file, canonical Battle-2, or oracle lifecycle change. Battle
-  Scene OFF freshness passed at baseline (`9c89c741…f297`). No PAPERCUT.

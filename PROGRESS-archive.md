@@ -1,4 +1,26 @@
 ---
+## 538 — [BOUNDED WORKER 2026-07-27 ~21:02] Return/Frustration execute end to end; exact +2/+2/+2/+18
+
+- **State:** tree committed and green at **292 files / 3816 tests**;
+  `npm run build` clean. Census regenerates to **130/214 effects, 254/355
+  moves, 206/276 Factory-L50 distinct, 2604/2957 weighted (88.1%)**, the
+  assigned exact **+2 effects / +2 moves / +2 distinct / +18 weighted**,
+  with all **42/42** checks passing.
+- **Did:** `696d475` source-ports/registers the shared zero-operand
+  `B_SCR_OP_FRIENDSHIPTODAMAGECALCULATION` with exact u8 friendship
+  complement/floor arithmetic and strict effect/dispatch-shape validation.
+  Tier-1 pins both genuine-END walks, all quotient boundaries, extrema,
+  invalid contexts, opcode isolation, miss, Protect, faint, and generic
+  Frustration→ordinary-Strength action-boundary cleanup. `5e51eea`
+  regenerates the census.
+- **Next:** supervisor verify this completed row, then take the generated
+  top-ranked `B_SCR_OP_COPYFOESTATS` / `EFFECT_PSYCH_UP` row
+  (**+1 effect / +1 move / +1 distinct / +14 weighted**).
+- **Notes:** no unsupported barrier, canonical-recording import, ratchet,
+  side-scout file, canonical Battle-2, or oracle lifecycle change. Battle
+  Scene OFF freshness passed at baseline (`9c89c741…f297`). No PAPERCUT.
+
+---
 ## 537 — [SUPERVISOR VERIFY 2026-07-27 ~20:50] Flail/Reversal implementation + all-band OFF evidence merged green
 
 - **State:** union committed and green at **291 files / 3792 tests**;

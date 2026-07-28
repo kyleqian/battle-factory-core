@@ -8,11 +8,9 @@ import type { Trace } from "./oracleClient.ts";
 import { createInitialState, render, tick } from "../../src/engine/core.ts";
 import { normalizeButtons } from "../../src/input.ts";
 import type { EngineState } from "../../src/engine/core.ts";
-import {
-  BATTLE2_OFF_TURN1_COMMAND_DURATIONS,
-  BATTLE2_OFF_TURN1_SCENARIO,
-} from "../../src/engine/battle2OffScenario.ts";
-import { stageBattleTurn } from "../../src/engine/stagedBattleTurn.ts";
+import { BATTLE2_OFF_TURN1_COMMAND_DURATIONS } from "../../src/engine/battle2OffScenario.ts";
+import { createFactoryFullTurnBattleState } from "../../src/engine/factoryBattleScriptFullTurnDecision.ts";
+import { stageFactoryFullTurnBattle } from "../../src/engine/stagedBattleTurn.ts";
 import {
   createSceneOnMovePresentation,
   ONIX_TO_GROVYLE_FIRE_PUNCH_GEOMETRY,
@@ -80,11 +78,90 @@ const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "battle2-off-turn1-before-confirm": (state) => ({
     ...state,
     rngMode: "frontierBattle",
-    rngValue: BATTLE2_OFF_TURN1_SCENARIO.initial.rngValue,
+    rngValue: 3530724670,
     battleControllerExecFlags: 1,
     battle2Turn1: null,
-    stagedBattleTurn: stageBattleTurn(
-      BATTLE2_OFF_TURN1_SCENARIO,
+    stagedBattleTurn: stageFactoryFullTurnBattle(
+      {
+        initialState: createFactoryFullTurnBattleState({
+          requestId: 1,
+          rngSeed: 3530724670,
+          player: {
+            species: 95,
+            moveId: 157,
+            moves: [157, 20, 225, 201],
+            pp: [10, 20, 20, 10],
+            ability: 5,
+            item: 142,
+            friendship: 0,
+            attack: 51,
+            defense: 187,
+            spAttack: 36,
+            spDefense: 72,
+            speed: 76,
+            hp: 117,
+            maxHp: 117,
+            types: ["TYPE_ROCK", "TYPE_GROUND"],
+          },
+          trainer: {
+            species: 140,
+            moveId: 72,
+            moves: [72, 246, 28, 182],
+            pp: [10, 5, 15, 10],
+            ability: 4,
+            item: 142,
+            friendship: 0,
+            attack: 118,
+            defense: 96,
+            spAttack: 93,
+            spDefense: 51,
+            speed: 61,
+            hp: 91,
+            maxHp: 91,
+            types: ["TYPE_ROCK", "TYPE_WATER"],
+          },
+        }),
+        playerSubmission: {
+          requestId: 1,
+          side: "player",
+          decision: {
+            kind: "use-move",
+            moveSlot: 0,
+            targetBattler: 1,
+          },
+        },
+        trainerSubmission: {
+          requestId: 2,
+          side: "trainer",
+          decision: {
+            kind: "use-move",
+            moveSlot: 2,
+            targetBattler: 0,
+          },
+        },
+        battlers: [
+          {
+            battler: 0,
+            name: "ONIX",
+            moveNames: [
+              "ROCK SLIDE",
+              "BIND",
+              "DRAGONBREATH",
+              "SANDSTORM",
+            ],
+          },
+          {
+            battler: 1,
+            name: "KABUTO",
+            moveNames: [
+              "MEGA DRAIN",
+              "ANCIENTPOWER",
+              "SAND-ATTACK",
+              "PROTECT",
+            ],
+          },
+        ],
+      },
       // Confirm-relative OFF ledger: player resolution through +160,
       // opponent text/effect/stat message through +400, turn/menu gate +405.
       BATTLE2_OFF_TURN1_COMMAND_DURATIONS,
