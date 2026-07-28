@@ -33,9 +33,6 @@ const program = loadBattleScriptProgram();
 const instruction = program.instructions.find(
   (candidate) => candidate.opcodeName === "B_SCR_OP_SETTORMENT",
 )!;
-const incrementGameStatInstruction = program.instructions.find(
-  (candidate) => candidate.opcodeName === "B_SCR_OP_INCREMENTGAMESTAT",
-)!;
 
 function battler(
   changes: Partial<BattleScriptRulesBattler> = {},
@@ -435,7 +432,7 @@ describe("Torment through the generic Factory action-admission seam", () => {
         moveId: TACKLE,
         moves: [TACKLE, TACKLE, TACKLE, TACKLE],
         pp: [35, 35, 35, 35],
-        ability: 30,
+        ability: 69,
         item: 0,
         friendship: 70,
         attack: 30,
@@ -486,30 +483,72 @@ describe("Torment through the generic Factory action-admission seam", () => {
       { kind: "use-move", moveSlot: 1, targetBattler: 0 },
     ]);
 
-    const barrier = submit("trainer", 4, 1, 0);
-    expect(barrier).toMatchObject({
-      kind: "machine-barrier",
-      barrier: {
-        entryLabel: incrementGameStatInstruction.source.label,
-        programCounter: incrementGameStatInstruction.programCounter,
-        opcodeId: 0x60,
-        opcodeName: "B_SCR_OP_INCREMENTGAMESTAT",
+    const beforeStruggleHp = state.rules.rulesContext.battlers[0].hp;
+    const completed = submit("trainer", 4, 1, 0);
+    expect(completed).toMatchObject({
+      kind: "decision-required",
+      nextRequest: {
+        kind: "command",
+        requestId: 5,
+        side: "player",
       },
     });
-    expect(state.rules.rulesContext.currentMove).toBe(STRUGGLE);
+    expect(state.rules.rulesContext.currentMove).toBe(0);
+    expect(state.rules.rulesContext.battlers[0].hp).toBeLessThan(
+      beforeStruggleHp,
+    );
+    expect(state.rules.rulesContext.battlers[1].hp).toBeLessThan(362);
     expect(state.rules.rulesContext.battlers[0].pp).toEqual([20, 20, 13, 30]);
     expect(state.rules.rulesContext.battlers[1].pp).toEqual([35, 34, 35, 35]);
     expect(state.rules.rulesContext.battlers[1].status2).toBe(
       BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_TORMENT,
     );
-    expect(state.rules.rulesContext.moveHistory.lastMoves[1]).toBe(TACKLE);
-    expect(barrier.events.some(({ payload }) =>
+    expect(state.rules.rulesContext.moveHistory.lastMoves[1]).toBe(STRUGGLE);
+    expect(completed.events.some(({ payload }) =>
       payload.kind === "message"
       && payload.messageId === "STRINGID_BUTITFAILED"
     )).toBe(true);
-    expect(barrier.events.some(({ payload }) =>
+    expect(completed.events.some(({ payload }) =>
       payload.kind === "set-battler-pp-data"
       && payload.battler === 0
     )).toBe(true);
+    expect(completed.events.some(({ payload }) =>
+      payload.kind === "hp-change"
+      && payload.battler === 0
+      && payload.from === beforeStruggleHp
+      && payload.to < payload.from
+    )).toBe(true);
+    expect(completed.events.some(({ payload }) =>
+      payload.kind === "hp-change"
+      && payload.battler === 1
+      && payload.from === 362
+      && payload.to < payload.from
+    )).toBe(true);
+    expect(completed.events.some(({ payload }) =>
+      payload.kind === "message"
+      && payload.messageId === "STRINGID_PKMNHITWITHRECOIL"
+    )).toBe(true);
+    expect(completed.events.some(({ payload }) =>
+      payload.kind === "game-stat-increment"
+    )).toBe(false);
+    const directDamage = completed.events.find(({ payload }) =>
+      payload.kind === "hp-change"
+      && payload.battler === 0
+      && payload.from === beforeStruggleHp
+    )?.payload;
+    const recoilDamage = completed.events.find(({ payload }) =>
+      payload.kind === "hp-change"
+      && payload.battler === 1
+      && payload.from === 362
+    )?.payload;
+    if (
+      directDamage?.kind !== "hp-change"
+      || recoilDamage?.kind !== "hp-change"
+    ) {
+      throw new Error("expected direct and recoil HP receipts");
+    }
+    expect(362 - recoilDamage.to).toBe(
+      Math.max(1, Math.trunc((directDamage.from - directDamage.to) / 4)),
+    );
   });
 });

@@ -25,9 +25,6 @@ const program = loadBattleScriptProgram();
 const instruction = program.instructions.find(
   (candidate) => candidate.opcodeName === "B_SCR_OP_DISABLELASTUSEDATTACK",
 )!;
-const incrementGameStatInstruction = program.instructions.find(
-  (candidate) => candidate.opcodeName === "B_SCR_OP_INCREMENTGAMESTAT",
-)!;
 
 function battler(changes: Partial<BattleScriptRulesBattler> = {}): BattleScriptRulesBattler {
   return {
@@ -362,7 +359,7 @@ describe("ENDTURN_DISABLE", () => {
 });
 
 describe("Disable through the generic Factory full-turn seam", () => {
-  it("filters every disabled duplicate, selects Struggle without Tackle PP loss, and stops at the shared handler frontier", () => {
+  it("filters every disabled duplicate and completes forced Struggle through the shared recoil route", () => {
     let state = createFactoryFullTurnBattleState({
       requestId: 1,
       rngSeed: 9,
@@ -448,30 +445,44 @@ describe("Disable through the generic Factory full-turn seam", () => {
     expect(afterDuplicatePlayer.nextRequest.legalDecisions).toEqual([
       { kind: "use-move", moveSlot: 0, targetBattler: 0 },
     ]);
-    const struggleBarrier = submit("trainer", 6, 0, 0);
-    expect(struggleBarrier).toMatchObject({
-      kind: "machine-barrier",
-      barrier: {
-        kind: "battle-script",
-        entryLabel: incrementGameStatInstruction.source.label,
-        programCounter: incrementGameStatInstruction.programCounter,
-        opcodeId: 0x60,
-        opcodeName: "B_SCR_OP_INCREMENTGAMESTAT",
-        dispatcher: "Cmd_incrementgamestat",
+    const playerHpBeforeStruggle = state.rules.rulesContext.battlers[0].hp;
+    const trainerHpBeforeStruggle = state.rules.rulesContext.battlers[1].hp;
+    const completed = submit("trainer", 6, 0, 0);
+    expect(completed).toMatchObject({
+      kind: "decision-required",
+      nextRequest: {
+        kind: "command",
+        requestId: 7,
+        side: "player",
       },
     });
-    if (struggleBarrier.kind !== "machine-barrier") {
-      throw new Error("expected the shared incrementgamestat machine barrier");
+    if (completed.kind !== "decision-required") {
+      throw new Error("expected the completed Struggle turn's next command");
     }
-    expect(struggleBarrier.state.boundary).toEqual({
-      kind: "machine-barrier",
-      barrier: struggleBarrier.barrier,
+    expect(completed.state.boundary).toEqual({
+      kind: "decision-required",
+      request: completed.nextRequest,
     });
     expect(state.rules.rulesContext.battlers[0].pp).toEqual([24, 10, 15, 18]);
     expect(state.rules.rulesContext.battlers[1].pp).toEqual([35, 35, 34, 35]);
-    expect(state.rules.rulesContext.currentMove).toBe(STRUGGLE);
-    // Cmd_incrementgamestat is intentionally absent from the shared
-    // executable census. Struggle history/recoil and this turn's end-turn
-    // expiry are beyond this boundary and are not claimed here.
+    expect(state.rules.rulesContext.currentMove).toBe(0);
+    expect(state.rules.rulesContext.moveHistory.lastMoves[1]).toBe(STRUGGLE);
+    expect(state.rules.rulesContext.battlers[1]).toMatchObject({
+      disabledMove: 0,
+      disableTimer: 0,
+    });
+    expect(state.rules.rulesContext.battlers[0].hp).toBeLessThan(
+      playerHpBeforeStruggle,
+    );
+    expect(state.rules.rulesContext.battlers[1].hp).toBeLessThan(
+      trainerHpBeforeStruggle,
+    );
+    expect(completed.events.some(({ payload }) =>
+      payload.kind === "message"
+      && payload.messageId === "STRINGID_PKMNHITWITHRECOIL"
+    )).toBe(true);
+    expect(completed.events.some(({ payload }) =>
+      payload.kind === "game-stat-increment"
+    )).toBe(false);
   });
 });

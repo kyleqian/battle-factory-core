@@ -82,6 +82,7 @@ import { createBattleScriptTryswapabilitiesOpcodeHandlers } from "./battleScript
 import { createBattleScriptTrysethelpinghandOpcodeHandlers } from "./battleScriptTrysethelpinghandOpcode.ts";
 import { createBattleScriptSettormentOpcodeHandlers } from "./battleScriptSettormentOpcode.ts";
 import { createBattleScriptRefreshOpcodeHandlers } from "./battleScriptRefreshOpcode.ts";
+import { createBattleScriptIncrementGameStatOpcodeHandlers } from "./battleScriptIncrementGameStatOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -2466,6 +2467,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptSetforcedtargetOpcodeHandlers(program),
     ...createBattleScriptGetSecretPowerEffectOpcodeHandlers(program),
     ...createBattleScriptRefreshOpcodeHandlers(program),
+    ...createBattleScriptIncrementGameStatOpcodeHandlers(program),
     ...createBattleScriptSettormentOpcodeHandlers(program),
     ...createBattleScriptTrysethelpinghandOpcodeHandlers(program),
     ...createBattleScriptTryswapabilitiesOpcodeHandlers(program),

@@ -685,11 +685,17 @@ function freezeEventPayload(
     case "status-icon-update":
     case "set-battler-pp-data":
     case "set-battler-item":
+    case "game-stat-increment":
     case "trainer-slide-in":
     case "trainer-slide-out":
     case "status-animation":
     case "health-bar-update":
-      return Object.freeze({ ...payload });
+      return payload.kind === "game-stat-increment"
+        ? Object.freeze({
+          ...payload,
+          gameStat: Object.freeze({ ...payload.gameStat }),
+        })
+        : Object.freeze({ ...payload });
     case "animation":
       return Object.freeze({ ...payload, arguments: Object.freeze([...payload.arguments]) });
     case "hp-change":

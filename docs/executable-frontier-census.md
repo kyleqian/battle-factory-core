@@ -10,10 +10,10 @@ Answers ROADMAP S10's Executable-frontier reset question directly: not "how many
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 149 | 214 | 69.6% |
-| Moves (unweighted, all 355) | 275 | 355 | 77.5% |
-| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 226 | 276 | 81.9% |
-| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2738 | 2957 | 92.6% |
+| Effect scripts | 151 | 214 | 70.6% |
+| Moves (unweighted, all 355) | 279 | 355 | 78.6% |
+| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 228 | 276 | 82.6% |
+| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2742 | 2957 | 92.7% |
 
 "Executable" means every opcode on every statically reachable path from the effect's entry script has a dispatch entry today (registered barriers included, per ROADMAP S10 §1's (a)/(b) policy). It is not a semantic-correctness claim -- see Caveats.
 
@@ -24,7 +24,6 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | Missing opcode(s) | Effects unlocked | Moves unlocked (unweighted) | Factory-L50 moves (unweighted) | Factory-L50 weighted |
 | --- | --- | --- | --- | --- |
 | `B_SCR_OP_TRYSWAPITEMS` | 1 (EFFECT_TRICK) | 1 | 1 | 5 |
-| `B_SCR_OP_INCREMENTGAMESTAT` | 2 (EFFECT_RECOIL, EFFECT_SPLASH) | 4 | 2 | 4 |
 | `B_SCR_OP_HEALPARTYSTATUS` | 1 (EFFECT_HEAL_BELL) | 2 | 2 | 4 |
 | `B_SCR_OP_TRYSETENCORE` | 1 (EFFECT_ENCORE) | 1 | 1 | 4 |
 | `B_SCR_OP_TRYSETPERISHSONG` | 1 (EFFECT_PERISH_SONG) | 1 | 1 | 4 |
@@ -48,6 +47,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_DAMAGETOHALFTARGETHP` | 1 (EFFECT_SUPER_FANG) | 1 | 1 | 1 |
 | `B_SCR_OP_HIDDENPOWERCALC` | 1 (EFFECT_HIDDEN_POWER) | 1 | 1 | 1 |
 | `B_SCR_OP_NORMALISEBUFFS` | 1 (EFFECT_HAZE) | 1 | 1 | 1 |
+| `B_SCR_OP_PRESENTDAMAGECALCULATION` | 1 (EFFECT_PRESENT) | 1 | 1 | 1 |
 
 ## Per-effect detail
 
@@ -101,7 +101,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_RECOIL_IF_MISS | `BattleScript_EffectRecoilIfMiss` | executable | - | - | 2 | 1 (1) |
 | EFFECT_MIST | `BattleScript_EffectMist` | executable | - | - | 1 | 0 (0) |
 | EFFECT_FOCUS_ENERGY | `BattleScript_EffectFocusEnergy` | blocked-on-opcodes | `B_SCR_OP_SETFOCUSENERGY` (edge branch only) | - | 1 | 1 (2) |
-| EFFECT_RECOIL | `BattleScript_EffectRecoil` | blocked-on-opcodes | `B_SCR_OP_INCREMENTGAMESTAT` (edge branch only) | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_RECOIL_25 is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 3 | 2 (4) |
+| EFFECT_RECOIL | `BattleScript_EffectRecoil` | executable | - | - | 3 | 2 (4) |
 | EFFECT_CONFUSE | `BattleScript_EffectConfuse` | executable | - | - | 3 | 3 (48) |
 | EFFECT_ATTACK_UP_2 | `BattleScript_EffectAttackUp2` | executable | - | - | 1 | 1 (15) |
 | EFFECT_DEFENSE_UP_2 | `BattleScript_EffectDefenseUp2` | executable | - | - | 3 | 3 (12) |
@@ -138,7 +138,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_MIMIC | `BattleScript_EffectMimic` | blocked-on-opcodes | `B_SCR_OP_MIMICATTACKCOPY` (edge branch only) | - | 1 | 0 (0) |
 | EFFECT_METRONOME | `BattleScript_EffectMetronome` | blocked-on-opcodes | `B_SCR_OP_METRONOME` (main path) | - | 1 | 1 (2) |
 | EFFECT_LEECH_SEED | `BattleScript_EffectLeechSeed` | executable | - | - | 1 | 1 (12) |
-| EFFECT_SPLASH | `BattleScript_EffectSplash` | blocked-on-opcodes | `B_SCR_OP_INCREMENTGAMESTAT` (main path) | - | 1 | 0 (0) |
+| EFFECT_SPLASH | `BattleScript_EffectSplash` | executable | - | - | 1 | 0 (0) |
 | EFFECT_DISABLE | `BattleScript_EffectDisable` | executable | - | - | 1 | 1 (5) |
 | EFFECT_LEVEL_DAMAGE | `BattleScript_EffectLevelDamage` | executable | - | - | 2 | 2 (10) |
 | EFFECT_PSYWAVE | `BattleScript_EffectPsywave` | executable | - | - | 1 | 1 (2) |

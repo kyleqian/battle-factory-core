@@ -218,6 +218,8 @@ const MOVE_EFFECT_FLINCH = 8;
 const MOVE_EFFECT_CHARGING = 12;
 /** include/constants/battle.h:260 -- SetMoveEffect's Wrap-family case (docs/ingrain-leechseed-wrap-ground-truth.md §1c/§5 slice 2). */
 const MOVE_EFFECT_WRAP = 13;
+/** include/constants/battle.h:261 -- shared 25%-of-damage recoil used by Struggle and ordinary recoil moves. */
+const MOVE_EFFECT_RECOIL_25 = 14;
 /** include/constants/battle.h:300 -- SetMoveEffect's Thrash-family lock-in case (docs/yawn-thrash-endturn-design.md §3, Rung 4). */
 const MOVE_EFFECT_THRASH = 53;
 /**
@@ -478,6 +480,7 @@ export const SET_MOVE_EFFECT_SUPPORTED_BYTES: ReadonlySet<number> = new Set<numb
   MOVE_EFFECT_FLINCH,
   MOVE_EFFECT_CHARGING,
   MOVE_EFFECT_WRAP,
+  MOVE_EFFECT_RECOIL_25,
   MOVE_EFFECT_THRASH,
   ...Object.keys(STAT_MOVE_EFFECT_TABLE).map(Number),
 ]);
@@ -2458,6 +2461,23 @@ function applySetMoveEffect(
     }
     if (effectByte === MOVE_EFFECT_WRAP) {
       return applyWrapMoveEffect(context, baseRulesContext, effectBattler);
+    }
+    if (effectByte === MOVE_EFFECT_RECOIL_25) {
+      const recoilDamage = Math.max(1, Math.trunc(baseRulesContext.hpDealt / 4));
+      const programCounter = resolveRequiredLabelProgramCounter(
+        context.program,
+        "BattleScript_MoveEffectRecoil",
+      );
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "call", programCounter }),
+        {
+          rulesContext: Object.freeze({
+            ...baseRulesContext,
+            battleMoveDamage: recoilDamage,
+          }),
+        },
+      );
     }
     if (effectByte === MOVE_EFFECT_CHARGING) {
       return applyChargingMoveEffect(context, baseRulesContext, effectBattler);
