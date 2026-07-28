@@ -636,6 +636,7 @@ import {
 } from "./battle2Turn1.ts";
 import { drawMode0Objects, drawMode0Ppu, mgbaDarkenColor, type Mode0Oam, type Mode0State } from "./gbaPpu.ts";
 import { compositeSemiTransparentObjPixel } from "./sprites.ts";
+import { fakeTearsControllerDisplayAtAge } from "./fakeTearsControllerPresentation.ts";
 import { resolveTurn5FaintWindowKoHp, resolveTurn5FaintWindowLines } from "./turn5FaintPresentationStaging.ts";
 import {
   resolveTurn1RockSlideAttackLines,
@@ -18480,6 +18481,20 @@ export function renderSceneOnMovePresentation(
   if (state.config.move === "FAKE_TEARS") {
     const fakeState = state as SceneOnFakeTearsPresentationState;
     const view = sceneOnFakeTearsView(fakeState);
+    const moveText = {
+      line1: `${view.attacker.geometry.side === "opponent" ? "Foe " : ""}DELCATTY used`,
+      line2: "FAKE TEARS!",
+    };
+    const resultText = {
+      line1: `${view.target.geometry.side === "opponent" ? "Foe " : ""}SHUCKLE’s SP. DEF`,
+      line2: "harshly fell!",
+    };
+    const controllerDisplay = fakeTearsControllerDisplayAtAge(
+      fakeState.age,
+      fakeState.config.controllerPresentation,
+      moveText.line1.length + moveText.line2.length,
+      resultText.line1.length + resultText.line2.length,
+    );
     const displayed = sceneOnFakeTearsView({
       ...fakeState,
       age: fakeState.age - 1,
@@ -18595,18 +18610,37 @@ export function renderSceneOnMovePresentation(
         maxHp: state.config.fieldProfile.playerMaxHp,
       }),
     );
+    if (controllerDisplay.banner) {
+      drawStatDecreaseBannerForBattlerPalette(
+        fb,
+        shuckle.tileset,
+        view.target.geometry.spriteCorner,
+        controllerDisplay.banner.eva,
+        controllerDisplay.banner.bg1Y,
+        statAnimBanner.palettes.spDefense,
+      );
+    }
     drawTileBg(
       fb,
       battleWindow.tileset,
       battleWindow.tilemap,
       battleWindow.palette,
     );
-    drawMessageTextLines(
-      fb,
-      playerToOpponent ? "DELCATTY used" : "Foe DELCATTY used",
-      "FAKE TEARS!",
-      99,
-    );
+    if (controllerDisplay.resultTextVisibleChars > 0) {
+      drawMessageTextLines(
+        fb,
+        resultText.line1,
+        resultText.line2,
+        controllerDisplay.resultTextVisibleChars,
+      );
+    } else {
+      drawMessageTextLines(
+        fb,
+        moveText.line1,
+        moveText.line2,
+        controllerDisplay.moveTextVisibleChars,
+      );
+    }
     return;
   }
 

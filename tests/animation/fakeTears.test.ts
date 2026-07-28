@@ -129,6 +129,14 @@ describe("MOVE_FAKE_TEARS source reducer", () => {
       target: opponent,
       fieldProfile,
       attackerPictureBounds: playerBounds,
+      controllerPresentation: {
+        kind: "resolved-stat-drop",
+        kickoff: { messageId: "STRINGID_USEDMOVE", firstAge: -31 },
+        statChange: { battler: "target", stat: "special-defense", from: 6, to: 4 },
+        statAnimation: { animationId: "STATS_CHANGE", argument: 55, firstAge: 94 },
+        result: { messageId: "STRINGID_DEFENDERSSTATFELL", firstAge: 179 },
+        moveEnd: { clearAge: 284 },
+      },
     });
     const expected = fakeTearsAtAge(30, "player", playerBounds);
     expect(sceneOnFakeTearsView({ ...stage, age: 30 })).toEqual({

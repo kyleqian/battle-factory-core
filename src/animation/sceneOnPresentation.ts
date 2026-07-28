@@ -1103,6 +1103,34 @@ export interface SceneOnFakeTearsConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
   /** `GetBattlerSpriteCoordAttr(LEFT/RIGHT/TOP)` for the legal DELCATTY pic. */
   readonly attackerPictureBounds: Readonly<FakeTearsBounds>;
+  /**
+   * Typed controller receipts already resolved by the battle engine. The
+   * animation seam carries these unchanged; Fake Tears' source reducer does
+   * not apply the stat result or advance controller/script state.
+   */
+  readonly controllerPresentation: Readonly<{
+    readonly kind: "resolved-stat-drop";
+    readonly kickoff: Readonly<{
+      readonly messageId: "STRINGID_USEDMOVE";
+      readonly firstAge: number;
+    }>;
+    readonly statChange: Readonly<{
+      readonly battler: "target";
+      readonly stat: "special-defense";
+      readonly from: number;
+      readonly to: number;
+    }>;
+    readonly statAnimation: Readonly<{
+      readonly animationId: "STATS_CHANGE";
+      readonly argument: number;
+      readonly firstAge: number;
+    }>;
+    readonly result: Readonly<{
+      readonly messageId: "STRINGID_DEFENDERSSTATFELL";
+      readonly firstAge: number;
+    }>;
+    readonly moveEnd: Readonly<{ readonly clearAge: number }>;
+  }>;
 }
 
 export interface SceneOnTailGlowConfig {

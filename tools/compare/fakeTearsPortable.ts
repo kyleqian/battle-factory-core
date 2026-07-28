@@ -148,6 +148,7 @@ function verify(fixturePath: string, runNumber: number): void {
     target: fixture.target,
     attackerPictureBounds: fixture.attackerPictureBounds,
     fieldProfile: fixture.fieldProfile,
+    controllerPresentation: fixture.controllerPresentation,
   });
   const beforeWindow = probe.frames.find(
     (frame) => frame.frame === fixture.sourceVisualWindow.startFrame - 1,
@@ -323,6 +324,7 @@ function verify(fixturePath: string, runNumber: number): void {
           target: fixture.target,
           attackerPictureBounds: fixture.attackerPictureBounds,
           fieldProfile: fixture.fieldProfile,
+          controllerPresentation: fixture.controllerPresentation,
         }),
         age,
       },
