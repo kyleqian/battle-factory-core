@@ -24184,3 +24184,27 @@ both verify scripts/census independently re-verified before this entry.)*
   recording import, private handler, animation/presentation/tick branch,
   scenario/evidence mutation, issue removal, DEFERRED item, or oracle
   lifecycle action.
+## 601 — [BOUNDED MAIN WORKER 2026-07-28 ~06:05] Focus Energy executes through shared crit/lifetime paths
+
+- **State:** committed `52ee5ed` + `d60f1eb` + `1658239` + `ebfbe8f`; tree green at
+  **364 files / 4214 tests**, focused opcode/rules/full-turn/crit/switch/
+  evidence/ratchet coverage **348/348**, production build, both oracle infos,
+  ratchets **6/6**, and `git diff --check`. Census is exactly **158/214
+  effects, 287/355 moves, 235/276 Factory-L50 distinct, 2760/2957 weighted**,
+  all **42/42** checks.
+- **Did:** globally registered operand-free one-byte
+  `B_SCR_OP_SETFOCUSENERGY` (`0x9a`) with exact attacker-owned success and
+  defensive duplicate branches/selectors. The real effect now executes
+  PP/message/status order and pre-opcode repeat failure through the shared
+  full-turn path; shared `Cmd_critcalc` consumes the existing capped +2-stage
+  calculator. The source switch seam clears the bit ordinarily and retains
+  it through Baton Pass.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next source-complete target.
+- **Notes:** handler inventory **165→166**. Focus Energy and its public guard
+  add no RNG/controller/event work, private move path, unsupported barrier,
+  recording import, presentation/tick/controller widening, issue removal, or
+  DEFERRED item. The public repeated use spends PP, preserves the bit, and
+  reaches `BattleScript_ButItFailed` before `setfocusenergy`.
+
+---

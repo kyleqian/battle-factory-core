@@ -7,6 +7,7 @@ import {
 } from "../src/engine/battleScriptRulesContext.ts";
 import { stepBattleScriptMachine } from "../src/engine/battleScriptMachine.ts";
 import { loadBattleScriptProgram, resolveBattleScriptLabel } from "../src/engine/battleScriptProgram.ts";
+import { GbaRng } from "../src/engine/rng.ts";
 
 const ENCORE = 227;
 const TACKLE = 33;
@@ -59,18 +60,28 @@ function step(lastMove: number, targetChanges: Partial<BattleScriptRulesBattler>
 describe("source-complete B_SCR_OP_TRYSETENCORE registration", () => {
   it("pins opcode, operand, PC, first matching slot, and the exact 3-6 target-owned duration", () => {
     expect(instruction).toMatchObject({ opcodeId: 0xa4, dispatcher: "Cmd_trysetencore", operands: [expect.objectContaining({ widthBytes: 4, expression: "BattleScript_ButItFailed" })] });
-    const results = [0, 1, 2, 3].map((low) => step(TACKLE, {}, (low << 16) >>> 0));
-    for (const result of results) {
+    const seeds = [0, 1, 2, 3, 0x12345678, 0xffffffff];
+    const results = seeds.map((seed) => step(TACKLE, {}, seed));
+    for (const [index, result] of results.entries()) {
       expect(result.kind).toBe("advanced");
       if (result.kind !== "advanced") continue;
       const target = result.state.rulesContext.battlers[1];
+      const expected = (new GbaRng(seeds[index]!).next() & 3) + 3;
       expect(target.encoredMove).toBe(TACKLE);
       expect(target.encoredMovePos).toBe(2);
-      expect(target.encoreTimer).toBeGreaterThanOrEqual(3);
-      expect(target.encoreTimer).toBeLessThanOrEqual(6);
+      expect(target.encoreTimer).toBe(expected);
       expect(target.encoreTimerStartValue).toBe(target.encoreTimer);
       expect(result.state.programCounter).toBe(instruction.programCounter + 1);
       expect(result.state.rng.calls).toBe(1);
+      expect(result.state.rng.ledger).toEqual([
+        expect.objectContaining({
+          reason: "Encore duration ((Random() & 3) + 3)",
+          provenance: expect.objectContaining({
+            programCounter: instruction.programCounter,
+            dispatcher: "Cmd_trysetencore",
+          }),
+        }),
+      ]);
     }
   });
 

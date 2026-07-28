@@ -281,7 +281,7 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     expect(updated.ability).toBe(ABILITY_GUTS);
   });
 
-  it("switchindataupdate clears Focus Energy ordinarily and retains it through the existing Baton Pass mask", () => {
+  it("switchindataupdate clears Focus Energy ordinarily, retains it through Baton Pass, and clears Encore in both routes", () => {
     const STATUS2_FOCUS_ENERGY = 1 << 20;
     const STATUS2_TORMENT = 1 << 31;
     const source = {
@@ -292,6 +292,10 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
           types: ["TYPE_GRASS", "TYPE_GRASS"], partyIndex: 2,
           ability: ABILITY_GUTS,
           status2: (STATUS2_FOCUS_ENERGY | STATUS2_TORMENT) >>> 0,
+          encoredMove: KARATE_CHOP,
+          encoredMovePos: 2,
+          encoreTimer: 4,
+          encoreTimerStartValue: 4,
         }),
         battler({ side: 0 }),
         battler({ side: 1 }),
@@ -303,6 +307,9 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     ).result;
     if (ordinary.kind !== "advanced") throw new Error("expected ordinary advance");
     expect(ordinary.state.rulesContext.battlers[1].status2).toBe(0);
+    expect(ordinary.state.rulesContext.battlers[1]).toMatchObject({
+      encoredMove: 0, encoredMovePos: 0, encoreTimer: 0, encoreTimerStartValue: 0,
+    });
 
     const batonPass = stepAtProgramCounter(
       SWITCHINDATAUPDATE_PC,
@@ -311,6 +318,9 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     if (batonPass.kind !== "advanced") throw new Error("expected Baton Pass advance");
     expect(batonPass.state.rulesContext.battlers[1].status2)
       .toBe(STATUS2_FOCUS_ENERGY);
+    expect(batonPass.state.rulesContext.battlers[1]).toMatchObject({
+      encoredMove: 0, encoredMovePos: 0, encoreTimer: 0, encoreTimerStartValue: 0,
+    });
   });
 
   it("switchindataupdate: clears STATUS2_INFATUATED_WITH(battler) on the other battler", () => {
