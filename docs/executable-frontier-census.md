@@ -10,10 +10,10 @@ Answers ROADMAP S10's Executable-frontier reset question directly: not "how many
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 155 | 214 | 72.4% |
-| Moves (unweighted, all 355) | 284 | 355 | 80.0% |
-| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 232 | 276 | 84.1% |
-| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2753 | 2957 | 93.1% |
+| Effect scripts | 156 | 214 | 72.9% |
+| Moves (unweighted, all 355) | 285 | 355 | 80.3% |
+| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 233 | 276 | 84.4% |
+| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2755 | 2957 | 93.2% |
 
 "Executable" means every opcode on every statically reachable path from the effect's entry script has a dispatch entry today (registered barriers included, per ROADMAP S10 §1's (a)/(b) policy). It is not a semantic-correctness claim -- see Caveats.
 
@@ -39,7 +39,6 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_STOCKPILETOHPHEAL` | 1 (EFFECT_SWALLOW) | 1 | 1 | 2 |
 | `B_SCR_OP_TRYSETGRUDGE` | 1 (EFFECT_GRUDGE) | 1 | 1 | 2 |
 | `B_SCR_OP_TRYSPITEPPREDUCE` | 1 (EFFECT_SPITE) | 1 | 1 | 2 |
-| `B_SCR_OP_WEIGHTDAMAGECALCULATION` | 1 (EFFECT_LOW_KICK) | 1 | 1 | 2 |
 | `B_SCR_OP_DAMAGETOHALFTARGETHP` | 1 (EFFECT_SUPER_FANG) | 1 | 1 | 1 |
 | `B_SCR_OP_HIDDENPOWERCALC` | 1 (EFFECT_HIDDEN_POWER) | 1 | 1 | 1 |
 | `B_SCR_OP_NORMALISEBUFFS` | 1 (EFFECT_HAZE) | 1 | 1 | 1 |
@@ -48,6 +47,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_TRYCOPYABILITY` | 1 (EFFECT_ROLE_PLAY) | 1 | 1 | 1 |
 | `B_SCR_OP_TRYMEMENTO` | 1 (EFFECT_MEMENTO) | 1 | 1 | 1 |
 | `B_SCR_OP_TRYRECYCLEITEM` | 1 (EFFECT_RECYCLE) | 1 | 1 | 1 |
+| `B_SCR_OP_SETALWAYSHITFLAG` | 1 (EFFECT_LOCK_ON) | 2 | 0 | 0 |
 
 ## Per-effect detail
 
@@ -249,7 +249,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_REFRESH | `BattleScript_EffectRefresh` | executable | - | - | 1 | 1 (2) |
 | EFFECT_GRUDGE | `BattleScript_EffectGrudge` | blocked-on-opcodes | `B_SCR_OP_TRYSETGRUDGE` (main path) | - | 1 | 1 (2) |
 | EFFECT_SNATCH | `BattleScript_EffectSnatch` | blocked-on-opcodes | `B_SCR_OP_TRYSETSNATCH` (main path) | - | 1 | 0 (0) |
-| EFFECT_LOW_KICK | `BattleScript_EffectLowKick` | blocked-on-opcodes | `B_SCR_OP_WEIGHTDAMAGECALCULATION` (main path) | - | 1 | 1 (2) |
+| EFFECT_LOW_KICK | `BattleScript_EffectLowKick` | executable | - | - | 1 | 1 (2) |
 | EFFECT_SECRET_POWER | `BattleScript_EffectSecretPower` | executable | - | - | 1 | 1 (6) |
 | EFFECT_DOUBLE_EDGE | `BattleScript_EffectDoubleEdge` | blocked-on-subsystem | - | Cmd_seteffectwithchance dispatch: MOVE_EFFECT_RECOIL_33 is in the family-B (status2/misc) switch, a named (b) barrier in applySetMoveEffect -- battle_script_commands.c:2522 | 2 | 1 (52) |
 | EFFECT_TEETER_DANCE | `BattleScript_EffectTeeterDance` | blocked-on-opcodes | `B_SCR_OP_JUMPIFARRAYEQUAL` (main path) | - | 1 | 1 (2) |
