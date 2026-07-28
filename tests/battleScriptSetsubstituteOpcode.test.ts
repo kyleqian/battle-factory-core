@@ -24,11 +24,21 @@ import {
   BATTLE_SCRIPT_STATUS2_MASKS,
   BATTLE_SCRIPT_STATUS2_WRAPPED_MASK,
 } from "../src/engine/battleScriptSourceConstants.ts";
+import {
+  createFactoryFullTurnBattleState,
+  submitFactoryFullTurnDecision,
+  type FactoryFullTurnConfig,
+} from "../src/engine/factoryBattleScriptFullTurnDecision.ts";
 
 const SUBSTITUTE = 164;
+const FOCUS_PUNCH = 264;
+const DOUBLE_TEAM = 104;
+const REST = 156;
+const HARDEN = 106;
 const STATUS2_UNRELATED = 1 << 20;
 const HITMARKER_UNRELATED = 1 << 18;
 const program = loadBattleScriptProgram();
+type FactoryFullTurnState = ReturnType<typeof createFactoryFullTurnBattleState>;
 const setInstruction = program.instructions.find(
   (instruction) => instruction.opcodeName === "B_SCR_OP_SETSUBSTITUTE",
 )!;
@@ -363,5 +373,86 @@ describe("BattleScript_EffectSubstitute genuine terminal routes", () => {
       substituteHP: 38,
     });
     expect(messageIds(second)).toContain("STRINGID_PKMNHASSUBSTITUTE");
+  });
+});
+
+describe("generic full-turn Golem Substitute persistence", () => {
+  it("matches the banked observable HP 155→117 and PP 10→9→8 over two real turns", () => {
+    const config: FactoryFullTurnConfig = {
+      requestId: 1,
+      rngSeed: 1,
+      player: {
+        species: 76,
+        moveId: SUBSTITUTE,
+        moves: [FOCUS_PUNCH, SUBSTITUTE, DOUBLE_TEAM, REST],
+        pp: [20, 10, 15, 10],
+        attack: 139,
+        defense: 150,
+        spAttack: 67,
+        spDefense: 85,
+        speed: 65,
+        hp: 155,
+        maxHp: 155,
+        types: ["TYPE_ROCK", "TYPE_GROUND"],
+      },
+      trainer: {
+        species: 213,
+        moveId: HARDEN,
+        moves: [HARDEN, HARDEN, HARDEN, HARDEN],
+        pp: [30, 30, 30, 30],
+        attack: 20,
+        defense: 230,
+        spAttack: 20,
+        spDefense: 230,
+        speed: 5,
+        hp: 95,
+        maxHp: 95,
+        types: ["TYPE_BUG", "TYPE_ROCK"],
+      },
+    };
+    let state: FactoryFullTurnState = createFactoryFullTurnBattleState(config);
+
+    const playTurn = (playerRequestId: number, trainerRequestId: number) => {
+      const afterPlayer = submitFactoryFullTurnDecision(state, {
+        requestId: playerRequestId,
+        side: "player",
+        decision: { kind: "use-move", moveSlot: 1, targetBattler: 0 },
+      });
+      if (afterPlayer.kind !== "decision-required") {
+        throw new Error(`expected trainer decision, got ${afterPlayer.kind}`);
+      }
+      const afterTrainer = submitFactoryFullTurnDecision(afterPlayer.state, {
+        requestId: trainerRequestId,
+        side: "trainer",
+        decision: { kind: "use-move", moveSlot: 0, targetBattler: 1 },
+      });
+      if (afterTrainer.kind !== "decision-required") {
+        throw new Error(`expected next-turn decision, got ${afterTrainer.kind}`);
+      }
+      state = afterTrainer.state;
+      return afterTrainer;
+    };
+
+    const first = playTurn(1, 2);
+    expect(first.state.rules.rulesContext.battlers[0]).toMatchObject({
+      hp: 117,
+      maxHP: 155,
+      pp: [20, 9, 15, 10],
+      status2: BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_SUBSTITUTE,
+      substituteHP: 38,
+    });
+
+    const second = playTurn(3, 4);
+    expect(second.state.rules.rulesContext.battlers[0]).toMatchObject({
+      hp: 117,
+      maxHP: 155,
+      pp: [20, 8, 15, 10],
+      status2: BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_SUBSTITUTE,
+      substituteHP: 38,
+    });
+    expect(second.events.some(({ payload }) =>
+      payload.kind === "message"
+      && payload.messageId === "STRINGID_PKMNHASSUBSTITUTE"
+    )).toBe(true);
   });
 });

@@ -112,6 +112,7 @@ import topologyData from "../data/gen/battle-script-topology.json" with { type: 
 
 const ADAPTER = "factory-full-turn/v1";
 const B_WAIT_TIME_LONG = 64;
+const B_WAIT_TIME_SHORT = 32;
 const STAT_SPEED = 3;
 /** Real per-script instruction ceiling, matching battleEndTurnOrchestration.ts's own bump for the DoTurnDmg-family scripts' controller round trips. */
 const SCRIPT_BUDGET = 256;
@@ -520,8 +521,11 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
     resolveAttackerBattler: (context: Readonly<{ state: MachineState }>) =>
       context.state.rulesContext.selectorRoles.attacker,
     resolveBattlerAtPosition: () => null,
-    resolveHalfwordOperand: (_context: unknown, operand: Readonly<{ expression: string }>) =>
-      operand.expression === "B_WAIT_TIME_LONG" ? B_WAIT_TIME_LONG : null,
+    resolveHalfwordOperand: (_context: unknown, operand: Readonly<{ expression: string }>) => {
+      if (operand.expression === "B_WAIT_TIME_LONG") return B_WAIT_TIME_LONG;
+      if (operand.expression === "B_WAIT_TIME_SHORT") return B_WAIT_TIME_SHORT;
+      return null;
+    },
     resolveByteOperand: () => null,
   });
 }
