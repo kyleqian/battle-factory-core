@@ -1,4 +1,24 @@
 ---
+## 608 — [SUPERVISOR ORIENT 2026-07-28 ~09:10] Animation fold verified; session open on Trick frontier
+
+- **State:** merged `animation-main` (55 commits through `7119ac3`, Headbutt/
+  Body Slam/Faint Attack/Covet/Dizzy Punch/Tail Glow/Twineedle/Bite/Reflect/
+  Dragon Rage/Shadow Punch exact promotions plus staged Thunder Wave; animation
+  coverage now **64 exact / 0 partial / 1 staged / 211 unsupported**) into
+  `master` as `dc8c6e5`. Union green: **378 files / 4287 tests**, production
+  build passes, `git diff --check` clean. Both oracles restarted 09:06 at
+  harness HEAD `0d4ad46`; `check-oracle-freshness.sh` passes, retiring entry
+  606's Scene-OFF staleness note.
+- **Did:** required orient fold only; no engine, census, or issue change.
+  Animation ledger top entry carries no "For the main program:" line.
+- **Next:** dispatch the accepted Trick step from entry 605 — source-complete
+  `B_SCR_OP_TRYSWAPITEMS` through the shared item/change-state paths using
+  `docs/trick-off-evidence.md`. Expected census: **160/214, 289/355, 237/276,
+  2769/2957**.
+- **Notes:** hybrid supervisor session (Fable + Codex workers), hard deadline
+  2026-07-28 15:07. DEFERRED.md is empty; ISSUES #41/#39 remain the tracked
+  debt, #38 parked.
+---
 ## 607 — [USER-DIRECTED TOOLING 2026-07-28 ~09:02] Hybrid supervisor ready; ordinary Codex effort is high-only
 
 - **State:** `master` now includes `codex/hybrid-cloud-supervisor` through

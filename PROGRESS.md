@@ -15,6 +15,29 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 611 — [SUPERVISOR VERIFY+FOLD 2026-07-28 ~09:45] Trick and Heal Bell accepted; family-B falsification dossier folded
+
+- **State:** independently verified entries 609/610 (suite **380/4315**,
+  build, census idempotent at **161/214, 291/355, 239/276, 2773/2957**) and
+  merged side scout `80f4c24` — `docs/set-move-effect-family-b-notes.md`, a
+  15-case falsification of the family-B `applySetMoveEffect` cluster. Union
+  green; side worktree removed.
+- **Did:** spot-checked the dossier's two load-bearing claims myself
+  (ABILITY_ROCK_HEAD absent from the `jumpifability` map ⇒ the census's
+  "executable" EFFECT_RECOIL row is a runtime false positive; `jumpifstatus2`
+  operand map is the narrow 4-value set blocking Mean Look/Nightmare
+  pre-dispatch). Dossier orders 4 implementation clusters totalling
+  +15 effects/+24 moves/+142 weighted; only 7 cases are dispatch-ready now.
+- **Next:** round 3 dispatched — main: Cluster 1 (7 dispatch-ready cases,
+  predicted **+7 effects/+12 moves/+7 distinct/+72 weighted**); side: OFF
+  corroboration staging (Tri Attack/Overheat/AncientPower receipts). Then
+  Cluster 2 (recoil+Rock Head+Uproar, +53 weighted) and census-generator
+  per-operand checks (jumpifstatus2/playanimation/copyarray + Rock Head).
+- **Notes:** census generator blind spots are recorded in the dossier §1;
+  generator hardening is deliberately sequenced AFTER engine work per the
+  dossier. No deferred questions. Deadline 15:07.
+
+---
 ## 610 — [BOUNDED MAIN WORKER 2026-07-28 ~09:38] Heal Bell and Aromatherapy execute through masked party synchronization
 
 - **State:** committed `c6bec4d`; tree green at **380 files / 4315 tests**,
@@ -67,23 +90,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   barrier-pin change, recording import, private item path, presentation/tick/
   round branch, issue removal, oracle lifecycle action, or new trace.
 
----
-## 608 — [SUPERVISOR ORIENT 2026-07-28 ~09:10] Animation fold verified; session open on Trick frontier
-
-- **State:** merged `animation-main` (55 commits through `7119ac3`, Headbutt/
-  Body Slam/Faint Attack/Covet/Dizzy Punch/Tail Glow/Twineedle/Bite/Reflect/
-  Dragon Rage/Shadow Punch exact promotions plus staged Thunder Wave; animation
-  coverage now **64 exact / 0 partial / 1 staged / 211 unsupported**) into
-  `master` as `dc8c6e5`. Union green: **378 files / 4287 tests**, production
-  build passes, `git diff --check` clean. Both oracles restarted 09:06 at
-  harness HEAD `0d4ad46`; `check-oracle-freshness.sh` passes, retiring entry
-  606's Scene-OFF staleness note.
-- **Did:** required orient fold only; no engine, census, or issue change.
-  Animation ledger top entry carries no "For the main program:" line.
-- **Next:** dispatch the accepted Trick step from entry 605 — source-complete
-  `B_SCR_OP_TRYSWAPITEMS` through the shared item/change-state paths using
-  `docs/trick-off-evidence.md`. Expected census: **160/214, 289/355, 237/276,
-  2769/2957**.
-- **Notes:** hybrid supervisor session (Fable + Codex workers), hard deadline
-  2026-07-28 15:07. DEFERRED.md is empty; ISSUES #41/#39 remain the tracked
-  debt, #38 parked.
