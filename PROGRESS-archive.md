@@ -1,4 +1,31 @@
 ---
+## 593 — [BOUNDED MAIN WORKER 2026-07-28 ~05:02] Revenge executes through shared receipts
+
+- **State:** committed `0255aba` + `25bd18b` + `f2be703`; tree green at
+  **353 files / 4150 tests**, focused opcode/full-turn/rules/ratchet coverage
+  **35/35**, and production build. Both oracle infos, census regeneration,
+  all **42/42** checks, ratchets **6/6**, and `git diff --check` pass. Census
+  is exactly **154/214 effects, 283/355 moves, 231/276 Factory-L50 distinct,
+  2750/2957 weighted**.
+- **Did:** globally registered operand-free one-byte `0xd6`. The attacker-
+  owned physical/special receipt predicate compares each nonzero receipt's
+  owner to the current target; success writes exactly `dmgMultiplier=2`,
+  failure preserves arbitrary incoming multipliers, and both paths advance
+  one byte with no local RNG, controller, or message work. The complete
+  matrix covers zero, mismatches, physical, special, both, mixed owners, and
+  opposite target.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next shared registration target; do not widen the generic
+  seven-battle controller or extend the retired canonical Battle-2 march.
+- **Notes:** handler inventory **161→162**. A generic Factory full-turn proof
+  has faster real Tackle produce the existing receipt, Revenge consume it
+  through the common doubled damage/PP/message path, shared turn cleanup zero
+  all four receipt fields, and a later Splash→Revenge action reset to
+  multiplier 1 with no leak. No unsupported/import ratchet change, recording
+  import, private handler, controller widening, animation/presentation/tick
+  branch, issue removal, DEFERRED item, or oracle lifecycle action.
+
+---
 ## 592 — [SUPERVISOR VERIFY 2026-07-28 ~04:56] Foresight accepted; Revenge evidence folded
 
 - **State:** reviewed union green at **351 files / 4139 tests** and focused
