@@ -15,6 +15,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 532 — [USER-DIRECTED TOOLING 2026-07-27 ~20:10] Codex max mode added: Sol/ultra supervisor, all-Sol workers up to xhigh
+
+- **State:** tree green at **285 files / 3740 tests** (+1 file / +5
+  launcher-profile tests), `npm run build` clean; oracle Battle Scene OFF
+  profile healthy. Gameplay/census state is unchanged from entry 531.
+- **Did:** `run-supervisor.sh` now accepts `-M` / `--max-mode`, selects Codex
+  automatically, and fixes the supervisor at `gpt-5.6-sol` / `ultra`. The
+  profile propagates into `tools/run-subagent.sh`: every worker is locked to
+  `gpt-5.6-sol`, defaults to `xhigh`, may be explicitly lowered, and rejects
+  Claude/Terra or effort above xhigh. `-m` remains the existing model flag;
+  uppercase `-M` is the non-breaking max-mode shorthand. The ordinary Codex
+  Sol/high supervisor + tiered-worker profile remains unchanged.
+- **Next:** resume entry 531's ordered gameplay work: ranked census descent
+  (CURSE pair, FLAIL, RETURN/FRUSTRATION), then banked §15
+  turn13-sandattack wiring and §16 prep-scout.
+- **Notes:** hermetic launcher tests pin the long/short flags, resolved
+  supervisor/worker profiles, inherited mode, lower worker effort, and
+  Claude/Terra rejection. No executable-frontier ratchet or barrier changes.
+  No PAPERCUT.
+
+---
 ## 531 — [SUPERVISOR WIND-DOWN 2026-07-27 ~19:00] session complete: 10 rounds / 16 workers, all green, all verified and merged
 
 - **State (final):** tree committed and green at **284 files / 3735 tests**

@@ -75,11 +75,15 @@ edit.
    - `gpt-5.6-sol` / `high`: cross-layer architecture, ambiguous ownership/
      timing evidence, or the first sharply scoped repair after a failed
      worker.
-   Keep the Codex supervisor itself at Sol/high. Sol is mechanically capped at
-   high. Terra/xhigh is available only as an explicit override—the narrow
-   Terra tier still defaults to high. Max and ultra are refused globally. This
-   routing does not apply to Claude—the established Claude model and launch
-   flow stay unchanged.
+   The ordinary Codex profile keeps the supervisor at Sol/high. Outside max
+   mode, Sol is mechanically capped at high; Terra/xhigh remains available
+   only as an explicit override, and the narrow Terra tier still defaults to
+   high. `./run-supervisor.sh --max-mode` selects the Codex provider
+   automatically and switches to an all-Sol profile: the supervisor runs
+   Sol/ultra, every worker is locked to Sol, and workers default to xhigh (the
+   worker ceiling). Max mode rejects a Terra worker override. This routing
+   does not apply to Claude—the established Claude model and launch flow stay
+   unchanged.
    Before every battle-lane brief, apply the **novelty gate**: name the new
    reusable mechanism, unique screen, or generic state transition it adds.
    "The next canonical Battle 2 turn/window" is not a mechanism and must not

@@ -3,8 +3,9 @@
 #
 # Launches one fresh headless worker. The default remains the original Claude
 # worker (claude-sonnet-5); a Codex supervisor automatically selects the Codex
-# worker profile (gpt-5.6-sol at medium effort). The transcript is summarized
-# to a fixed-size handoff and retained in the log file named below.
+# worker profile (gpt-5.6-sol at medium effort). Codex max mode instead locks
+# workers to gpt-5.6-sol and defaults them to xhigh. The transcript is
+# summarized to a fixed-size handoff and retained in the log file named below.
 # Killing a worker at any point is safe —
 # workers follow AGENTS.md's commit-often discipline, so the next step resumes
 # from git + PROGRESS.md.
@@ -14,6 +15,7 @@
 #   tools/run-subagent.sh [options] --brief-file path/to/brief.txt
 #     -c, --cap-minutes N   hard cap in minutes (default 60)
 #     -p, --provider NAME   claude (default) or codex
+#     -M, --max-mode        Codex Sol/xhigh worker profile
 #     -m, --model NAME      worker model (provider default)
 #     -e, --effort EFFORT   Codex reasoning effort (default medium)
 #     -w, --worktree        alias for --lane side
@@ -56,6 +58,8 @@ Usage: tools/run-subagent.sh [options] "step brief for the worker"
        tools/run-subagent.sh [options] --brief-file path/to/brief.txt
   -c, --cap-minutes N   hard cap in minutes (default 60)
   -p, --provider NAME   claude (default) or codex
+  -M, --max-mode        Codex all-Sol profile: fixes the model at
+                        gpt-5.6-sol and defaults effort to xhigh
   -m, --model NAME      worker model (provider default)
   -e, --effort EFFORT   Codex reasoning effort (default medium)
   -w, --worktree        alias for --lane side
@@ -67,8 +71,9 @@ Usage: tools/run-subagent.sh [options] "step brief for the worker"
       --brief-file FILE read the step brief verbatim from a file
       --print-config    print the resolved profile without launching
   -h, --help            show this help
-Environment overrides: WORKER_PROVIDER, WORKER_MODEL, WORKER_REASONING_EFFORT.
-Legacy MODEL remains supported for direct worker launches.
+Environment overrides: WORKER_PROVIDER, WORKER_MODEL, WORKER_REASONING_EFFORT,
+POKEBENCH_CODEX_MAX_MODE. Legacy MODEL remains supported for direct worker
+launches.
 Exits with the worker's status; 42 means an account usage/rate limit stopped it
 (either this worker's own, or a sibling's — a 42 in one lane cancels the others).
 Exit 4 means the requested lane already has a live worker (max 3 concurrent:
@@ -81,12 +86,15 @@ CAP_MINUTES="${CAP_MINUTES:-60}"
 PROVIDER="${WORKER_PROVIDER:-${POKEBENCH_WORKER_PROVIDER:-claude}}"
 MODEL="${WORKER_MODEL:-${MODEL:-}}"
 REASONING_EFFORT="${WORKER_REASONING_EFFORT:-}"
+MAX_MODE="${POKEBENCH_CODEX_MAX_MODE:-0}"
 AGENT_LOG="${AGENT_LOG:-}"
 LANE="${WORKER_LANE:-main}"
 if [[ "${WORKTREE:-0}" == "1" ]]; then LANE="side"; fi
 BRIEF=""
 BRIEF_FILE=""
 PRINT_CONFIG=0
+PROVIDER_FLAG_SET=0
+MODEL_FLAG_SET=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -96,10 +104,11 @@ while [[ $# -gt 0 ]]; do
     --animation-worktree|--animation-lane) LANE="animation"; shift ;;
     -l|--lane)        LANE="${2:?--lane needs main, side, or animation}"; shift 2 ;;
     --lane=*)         LANE="${1#*=}"; shift ;;
-    -p|--provider)    PROVIDER="${2:?--provider needs a name}"; shift 2 ;;
-    --provider=*)     PROVIDER="${1#*=}"; shift ;;
-    -m|--model)       MODEL="${2:?--model needs a model name}"; shift 2 ;;
-    --model=*)        MODEL="${1#*=}"; shift ;;
+    -p|--provider)    PROVIDER="${2:?--provider needs a name}"; PROVIDER_FLAG_SET=1; shift 2 ;;
+    --provider=*)     PROVIDER="${1#*=}"; PROVIDER_FLAG_SET=1; shift ;;
+    -M|--max-mode)    MAX_MODE=1; shift ;;
+    -m|--model)       MODEL="${2:?--model needs a model name}"; MODEL_FLAG_SET=1; shift 2 ;;
+    --model=*)        MODEL="${1#*=}"; MODEL_FLAG_SET=1; shift ;;
     -e|--effort)      REASONING_EFFORT="${2:?--effort needs a value}"; shift 2 ;;
     --effort=*)       REASONING_EFFORT="${1#*=}"; shift ;;
     --log)            AGENT_LOG="${2:?--log needs a path}"; shift 2 ;;
@@ -117,6 +126,24 @@ while [[ $# -gt 0 ]]; do
       BRIEF="$1"; shift ;;
   esac
 done
+
+if [[ ! "$MAX_MODE" =~ ^(0|1)$ ]]; then
+  echo "run-subagent: POKEBENCH_CODEX_MAX_MODE must be 0 or 1 (got '$MAX_MODE')" >&2
+  exit 2
+fi
+if [[ "$MAX_MODE" == "1" ]]; then
+  if [[ "$PROVIDER_FLAG_SET" == "1" && "$PROVIDER" != "codex" ]]; then
+    echo "run-subagent: --max-mode is a Codex-only profile and cannot use provider '$PROVIDER'" >&2
+    exit 2
+  fi
+  if [[ "$MODEL_FLAG_SET" == "1" && "$MODEL" != "gpt-5.6-sol" ]]; then
+    echo "run-subagent: max mode only permits gpt-5.6-sol workers (got '$MODEL')" >&2
+    exit 2
+  fi
+  PROVIDER=codex
+  MODEL=gpt-5.6-sol
+  REASONING_EFFORT="${REASONING_EFFORT:-xhigh}"
+fi
 
 if [[ -n "$BRIEF" && -n "$BRIEF_FILE" ]]; then
   echo "run-subagent: use either a positional brief or --brief-file, not both" >&2
@@ -161,8 +188,12 @@ case "$PROVIDER" in
       echo "run-subagent: unsupported reasoning effort '$REASONING_EFFORT' (maximum allowed: xhigh)" >&2
       exit 2
     fi
-    if [[ "$MODEL" == *sol* && "$REASONING_EFFORT" == "xhigh" ]]; then
-      echo "run-subagent: Sol reasoning effort is capped at high (got '$REASONING_EFFORT')" >&2
+    if [[ "$MAX_MODE" != "1" && "$MODEL" == *sol* && "$REASONING_EFFORT" == "xhigh" ]]; then
+      echo "run-subagent: Sol reasoning effort is capped at high outside --max-mode (got '$REASONING_EFFORT')" >&2
+      exit 2
+    fi
+    if [[ "$MAX_MODE" == "1" && "$MODEL" != "gpt-5.6-sol" ]]; then
+      echo "run-subagent: max mode only permits gpt-5.6-sol workers (got '$MODEL')" >&2
       exit 2
     fi
     command -v codex >/dev/null 2>&1 || { echo "run-subagent: codex CLI not found on PATH" >&2; exit 127; }
@@ -194,6 +225,7 @@ if [[ "$PRINT_CONFIG" == "1" ]]; then
   echo "worker_provider=$PROVIDER"
   echo "worker_model=$MODEL"
   echo "worker_effort=${REASONING_EFFORT:-n/a}"
+  echo "max_mode=$MAX_MODE"
   echo "worker_lane=$LANE"
   if [[ "$LANE" == "animation" ]]; then
     echo "oracle_profile=battle-scene-on"
