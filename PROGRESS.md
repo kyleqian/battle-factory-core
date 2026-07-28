@@ -15,6 +15,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 603 — [BOUNDED MAIN WORKER 2026-07-28 ~06:14] Encore executes through shared choice/lifetime paths
+
+- **State:** committed `b2e406a` + `a954fd3`; tree green at **365 files /
+  4221 tests**, production build, both oracle infos, census regeneration,
+  ratchets **6/6**, and `git diff --check`. Census is exactly **159/214
+  effects, 288/355 moves, 236/276 Factory-L50 distinct, 2764/2957
+  weighted**, all **42/42**.
+- **Did:** globally registered five-byte `B_SCR_OP_TRYSETENCORE` (`0xa4`)
+  with source pointer branches, first matching move-slot/PP predicates, and
+  the setter-owned exact 3–6 RNG draw. Shared state now carries the full
+  Encore fields; move limitations and full-turn choice auto-confirm the
+  forced slot, end-turn orchestration decrements and expires on timer/slot
+  rewrite/zero PP through `BattleScript_EncoredNoMore`, and every switch
+  (including Baton Pass) clears Encore.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next source-complete target.
+- **Notes:** handler inventory **166→167**. No unsupported barrier, recording
+  import, private RNG/controller/event seam, presentation/tick/round-controller
+  widening, issue removal, or DEFERRED item.
+
+---
 ## 602 — [SUPERVISOR VERIFY 2026-07-28 ~06:08] Focus Energy accepted
 
 - **State:** independently reviewed and verified the union green at focused
@@ -58,33 +79,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   recording import, presentation/tick/controller widening, issue removal, or
   DEFERRED item. The public repeated use spends PP, preserves the bit, and
   reaches `BattleScript_ButItFailed` before `setfocusenergy`.
-
----
-## 600 — [SUPERVISOR VERIFY 2026-07-28 ~05:55] Spikes accepted; Focus Energy evidence folded
-
-- **State:** reviewed union green at **362 files / 4206 tests** and focused
-  **330/330**; production build, both-oracle info, census regeneration,
-  ratchets **6/6**, and `git diff --check` pass. Census is exactly
-  **157/214 effects, 286/355 moves, 234/276 Factory-L50 distinct,
-  2758/2957 weighted**, all **42/42**.
-- **Did:** accepted Spikes `0xb0` plus the shared persistent side-condition,
-  switch-in damage/message/controller/guard/faint paths after source/diff and
-  public forced-switch review. Folded the repaired complete-party Focus
-  Energy source/OFF packet and independently replayed exact manifest
-  `e96bcff2…12d489c1`: first use sets attacker status2 `0x00100000` and
-  spends PP; the real repeated selection spends PP, fails before the opcode,
-  and preserves the bit/HP.
-- **Next:** register operand-free `B_SCR_OP_SETFOCUSENERGY` (`0x9a`)
-  globally. Prove attacker-only success and defensive duplicate branches,
-  exact multichooser/result flags/one-byte PC with zero local RNG/controller,
-  the real script's pre-opcode duplicate bypass, shared crit-stage +2/cap
-  consumer, ordinary-switch clear, and Baton Pass retention. Expected
-  census: **158/214, 287/355, 235/276, 2760/2957**.
-- **Notes:** handler inventory is **165**. Spikes deliberately retired the
-  switch-in **10→9** and hit-chain **22→21** barriers; Rapid Spin remains
-  bounded at the earlier `MOVE_EFFECT_RAPIDSPIN` barrier. Focus Energy's
-  defensive in-opcode failure, PC/selector, switch lifetime, and crit
-  causality are source-only; public evidence covers real success and the
-  script-level repeat. No recording import, private handler,
-  presentation/tick branch, issue removal, DEFERRED item, or oracle lifecycle
-  action. Animation branch remains intentionally unmerged after orient.

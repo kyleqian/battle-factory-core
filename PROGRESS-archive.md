@@ -241,6 +241,24 @@
   lifecycle action.
 
 ---
+## 600 — [SUPERVISOR VERIFY 2026-07-28 ~05:55] Spikes accepted; Focus Energy evidence folded
+
+- **State:** reviewed union green at **362 files / 4206 tests** and focused
+  **330/330**; production build, both-oracle info, census regeneration,
+  ratchets **6/6**, and `git diff --check` pass. Census is exactly
+  **157/214 effects, 286/355 moves, 234/276 Factory-L50 distinct,
+  2758/2957 weighted**, all **42/42**.
+- **Did:** accepted Spikes `0xb0` plus the shared persistent side-condition,
+  switch-in damage/message/controller/guard/faint paths after source/diff and
+  public forced-switch review. Folded the repaired complete-party Focus
+  Energy source/OFF packet and independently replayed exact manifest
+  `e96bcff2…12d489c1`.
+- **Next:** register `B_SCR_OP_SETFOCUSENERGY` globally.
+- **Notes:** handler inventory is **165**. No recording import, private
+  handler, presentation/tick branch, issue removal, DEFERRED item, or oracle
+  lifecycle action.
+
+---
 ## 590 — [SUPERVISOR VERIFY 2026-07-28 ~04:45] Taunt accepted; Foresight evidence folded
 
 - **State:** reviewed union green at **348 files / 4130 tests** and focused
