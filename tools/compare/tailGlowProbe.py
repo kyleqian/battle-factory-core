@@ -4,9 +4,10 @@ from __future__ import annotations
 import hashlib, json, subprocess, sys
 from pathlib import Path
 
-if len(sys.argv) != 3:
-    raise SystemExit("usage: tailGlowProbe.py <scenario> <output.json>")
+if len(sys.argv) not in (3, 4):
+    raise SystemExit("usage: tailGlowProbe.py <scenario> <output.json> [rgb-dir]")
 SCENARIO, OUTPUT = Path(sys.argv[1]), Path(sys.argv[2])
+RGB_DIR = Path(sys.argv[3]) if len(sys.argv) == 4 else None
 ROOT = Path(__file__).resolve().parents[2]
 HARNESS = next(p for p in (ROOT, *ROOT.parents) if (p / "oracle" / "emerald_core.py").is_file())
 sys.path.insert(0, str(HARNESS / "oracle"))
@@ -42,6 +43,8 @@ def main() -> None:
         value = oracle.read_u8(a)
         return value - 0x100 if value >= 0x80 else value
     rows, frame = [], 0
+    if RGB_DIR is not None:
+        RGB_DIR.mkdir(parents=True, exist_ok=True)
     for segment in request["trace"]["segments"]:
         for _ in range(segment["frames"]):
             oracle.advance(segment.get("buttons", []))
@@ -68,6 +71,8 @@ def main() -> None:
             attacker = oracle.read_u8(oracle.symbols["gBattleAnimAttacker"])
             battler_slot = oracle.read_u8(battler_ids + attacker)
             rgb = oracle.screen_rgb()
+            if RGB_DIR is not None:
+                (RGB_DIR / f"{frame:05d}.rgb").write_bytes(rgb)
             rows.append({
                 "frame": frame, "attacker": attacker,
                 "sha256": hashlib.sha256(rgb).hexdigest(),

@@ -49,7 +49,11 @@ describe("MOVE_TAIL_GLOW source reducer", () => {
     expect(TAIL_GLOW_SOUND_AGES).toEqual([42, 58, 74, 90, 106, 122]);
     expect(tailGlowAtAge(6, "player", { x: 72, y: 96 }))
       .toMatchObject({ bgBlendY: 0, alpha: { eva: 12, evb: 8 }, monBg: true });
-    expect(tailGlowAtAge(17, "player", { x: 72, y: 96 }).bgBlendY).toBe(4);
+    expect(tailGlowAtAge(8, "player", { x: 72, y: 96 }).bgBlendY).toBe(0);
+    expect(tailGlowAtAge(9, "player", { x: 72, y: 96 }).bgBlendY).toBe(2);
+    expect(tailGlowAtAge(13, "player", { x: 72, y: 96 }).bgBlendY).toBe(4);
+    expect(tailGlowAtAge(145, "player", { x: 72, y: 96 }).bgBlendY).toBe(2);
+    expect(tailGlowAtAge(151, "player", { x: 72, y: 96 }).bgBlendY).toBe(0);
     expect(tailGlowAtAge(42, "player", { x: 72, y: 96 }))
       .toMatchObject({ soundRestart: "SE_M_MORNING_SUN", soundPan: -64 });
     expect(tailGlowAtAge(42, "opponent", { x: 176, y: 48 }).soundPan).toBe(63);

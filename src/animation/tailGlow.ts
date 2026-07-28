@@ -39,16 +39,14 @@ export function tailGlowOrbMatrixScale(localAge: number): number | null {
 }
 
 function bgBlendYAtAge(age: number): number {
-  // `simple_palette_blend` delay 2, 0→4 begins at age 6. The reverse
-  // delay-4 controller begins at age 138 and releases the script at age 159.
-  if (age < 8) return 0;
-  if (age < 11) return 1;
-  if (age < 14) return 2;
-  if (age < 17) return 3;
-  if (age < 143) return 4;
-  if (age < 148) return 3;
-  if (age < 153) return 2;
-  if (age < 158) return 1;
+  // `BeginNormalPaletteFade` fixes deltaY=2 (`palette.c:156-193`), so the
+  // delay-2 0→4 task writes coefficients 0,2,4. The reverse delay-4 task
+  // writes 4,2,0. These are software faded-buffer ages; hardware palette
+  // transfer trails them by one display.
+  if (age < 9) return 0;
+  if (age < 13) return 2;
+  if (age < 145) return 4;
+  if (age < 151) return 2;
   return 0;
 }
 

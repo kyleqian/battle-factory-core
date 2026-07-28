@@ -544,6 +544,7 @@ import absorbAsset from "../animation/assets/absorb.json" with { type: "json" };
 import reflectAsset from "../animation/assets/reflect.json" with { type: "json" };
 import biteAsset from "../animation/assets/bite.json" with { type: "json" };
 import twineedleAsset from "../animation/assets/twineedle.json" with { type: "json" };
+import tailGlowAsset from "../animation/assets/tail-glow.json" with { type: "json" };
 import synthesisAsset from "../animation/assets/synthesis.json" with { type: "json" };
 import milkDrinkAsset from "../animation/assets/milk-drink.json" with { type: "json" };
 import supersonicAsset from "../animation/assets/supersonic.json" with { type: "json" };
@@ -681,6 +682,7 @@ import {
   sceneOnHyperFangView,
   sceneOnBiteView,
   sceneOnTwineedleView,
+  sceneOnTailGlowView,
   sceneOnSwaggerView,
   sceneOnTauntView,
   sceneOnScaryFaceView,
@@ -712,6 +714,7 @@ import {
   type SceneOnReflectPresentationState,
   type SceneOnBiteConfig,
   type SceneOnTwineedleConfig,
+  type SceneOnTailGlowConfig,
 } from "../animation/sceneOnPresentation.ts";
 import {
   extremeSpeedBackgroundVariant,
@@ -1008,6 +1011,11 @@ const twineedleArt = twineedleAsset as {
   needle: { tileset: Tileset; palette: RgbColor[] };
   beedrillBack: { tileset: Tileset; palette: RgbColor[] };
   beedrillFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const tailGlowArt = tailGlowAsset as {
+  circleOfLight: { tileset: Tileset; palette: RgbColor[] };
+  volbeatBack: { tileset: Tileset; palette: RgbColor[] };
+  volbeatFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const synthesisArt = synthesisAsset as {
   sparkle2: { tileset: Tileset; palette: RgbColor[] };
@@ -15073,6 +15081,132 @@ export function renderSceneOnMovePresentation(
   fb: Uint8Array,
   state: SceneOnMovePresentationState,
 ): void {
+  if (state.config.move === "TAIL_GLOW") {
+    const tailState =
+      state as SceneOnMovePresentationState<SceneOnTailGlowConfig>;
+    const view = sceneOnTailGlowView(tailState);
+    // UpdatePaletteFade and sprite callbacks mutate software state after
+    // the current palette/OAM transfer. The shared framebuffer therefore
+    // consumes the preceding reducer age for both the BG blend and orb.
+    const displayed = sceneOnTailGlowView({
+      ...tailState,
+      age: tailState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "VOLBEAT"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "VOLBEAT"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "SHUCKLE"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged TAIL_GLOW pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const volbeatSource = playerToOpponent
+      ? tailGlowArt.volbeatBack : tailGlowArt.volbeatFront;
+    const volbeat = playerToOpponent
+      ? volbeatSource
+      : {
+          ...volbeatSource,
+          tileset: subTileset(volbeatSource.tileset, 0, 8),
+        };
+    const shuckle = playerToOpponent
+      ? {
+          ...selfDestructArt.shuckleFront,
+          tileset: subTileset(selfDestructArt.shuckleFront.tileset, 0, 8),
+        }
+      : selfDestructArt.shuckleBack;
+    const black = { r: 0, g: 0, b: 0 };
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      blendPaletteBanksToward(
+        battleBg.palette,
+        black,
+        displayed.bgBlendY,
+      ),
+    );
+    drawSpriteSheet(
+      fb,
+      shuckle.tileset,
+      shuckle.palette,
+      view.target.geometry.spriteCorner.x,
+      view.target.geometry.spriteCorner.y,
+    );
+    // `monbg ANIM_ATTACKER` makes the attacker a real BG target-2 layer
+    // beneath the semi-transparent CIRCLE_OF_LIGHT OBJ.
+    drawSpriteSheet(
+      fb,
+      volbeat.tileset,
+      volbeat.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const nonObjTarget2 = fb.slice();
+    if (displayed.orb && view.alpha) {
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb,
+        nonObjTarget2,
+        tailGlowArt.circleOfLight.tileset,
+        tailGlowArt.circleOfLight.palette,
+        displayed.orb.x,
+        displayed.orb.y,
+        displayed.orb.matrixScale,
+        0,
+        0,
+        displayed.orb.matrixScale,
+        view.alpha.eva,
+        view.alpha.evb,
+        false,
+      );
+    }
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "SHUCKLE" : "VOLBEAT",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "VOLBEAT" : "SHUCKLE",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "VOLBEAT used" : "Foe VOLBEAT used",
+      "TAIL GLOW!",
+      99,
+    );
+    return;
+  }
+
   if (state.config.move === "TWINEEDLE") {
     const needleState =
       state as SceneOnMovePresentationState<SceneOnTwineedleConfig>;

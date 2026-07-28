@@ -13,6 +13,11 @@ import {
   sceneOnTailGlowView,
   type SceneOnPresentationBattler,
 } from "../../src/animation/sceneOnPresentation.ts";
+import {
+  createInitialState,
+  render,
+  type EngineState,
+} from "../../src/engine/core.ts";
 
 type Fixture = {
   scenario: string; probe: string;
@@ -42,15 +47,24 @@ if (fixtures.length !== 2) {
   throw new Error("usage: tailGlowPortable.ts <player-fixture> <opponent-fixture>");
 }
 
+function blendBgr555TowardBlack(color: number, coefficient: number): number {
+  const blend = (channel: number) =>
+    channel + ((-channel * coefficient) >> 4);
+  return blend(color & 0x1f)
+    | (blend((color >>> 5) & 0x1f) << 5)
+    | (blend((color >>> 10) & 0x1f) << 10);
+}
+
 function run(fixturePath: string, runNumber: number): string {
   const fixture = JSON.parse(readFileSync(resolve(fixturePath), "utf8")) as Fixture;
   const scratch = mkdtempSync(join(tmpdir(), "pokebench-tail-glow-evidence-"));
   const output = join(scratch, "probe.json");
+  const rgbDir = join(scratch, "rgb");
   const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));
   const proc = spawnSync("python3", [
     join(root, "tools/run-mgba-probe.py"), output, "--",
     join(vendor, "mgba-venv/bin/python"), resolve(root, fixture.probe),
-    resolve(root, fixture.scenario), output,
+    resolve(root, fixture.scenario), output, rgbDir,
   ], { cwd: root, encoding: "utf8" });
   if (proc.stdout) process.stdout.write(proc.stdout);
   if (proc.stderr) process.stderr.write(proc.stderr);
@@ -72,6 +86,7 @@ function run(fixturePath: string, runNumber: number): string {
     fieldProfile: fixture.fieldProfile,
   });
   const failures: string[] = [];
+  let framebufferMatches = 0;
   for (const [age, row] of rows.entries()) {
     const expected = tailGlowAtAge(
       age, fixture.attacker.geometry.side, fixture.attackerPictureOffset,
@@ -120,21 +135,56 @@ function run(fixturePath: string, runNumber: number): string {
       || row.hardwarePalette.every((color, index) =>
         color === row.fadedPalette[index]
         || color === rows[age - 1]!.fadedPalette[index]);
+    const displayedBgBlendY = tailGlowAtAge(
+      age - 1,
+      fixture.attacker.geometry.side,
+      fixture.attackerPictureOffset,
+    ).bgBlendY;
+    const backgroundPalette = row.hardwarePalette.slice(16, 64).every(
+      (color, offset) => color === blendBgr555TowardBlack(
+        row.unfadedPalette[16 + offset]!,
+        displayedBgBlendY,
+      ),
+    );
     const sound = expected.soundRestart
       ? row.soundTaskCount === 1
         && row.se1.tracks.slice(0, 2).every((track) =>
           track.flags !== 0 && track.panX === expected.soundPan)
       : true;
-    if (!(seamMatch && software && tasks && hardware && registers && transfer && sound)) {
+    const raw = readFileSync(
+      join(rgbDir, `${String(row.frame).padStart(5, "0")}.rgb`),
+    );
+    const rawDigest = createHash("sha256").update(raw).digest("hex")
+      === row.sha256;
+    const engine: EngineState = {
+      ...createInitialState(),
+      rngMode: "frontierBattle",
+      sceneOnPresentation: { ...stage, age },
+    };
+    const app = render(engine);
+    let framebufferDiff = 0;
+    for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
+      if (app[pixel * 4] !== raw[pixel * 3]
+        || app[pixel * 4 + 1] !== raw[pixel * 3 + 1]
+        || app[pixel * 4 + 2] !== raw[pixel * 3 + 2]) {
+        framebufferDiff += 1;
+      }
+    }
+    if (framebufferDiff === 0) framebufferMatches += 1;
+    if (!(seamMatch && software && tasks && hardware && registers && transfer
+      && backgroundPalette && sound && rawDigest && framebufferDiff === 0)) {
       failures.push(`frame ${row.frame}/age ${age}: seam=${seamMatch} sw=${software}`
         + ` tasks=${tasks} hw=${hardware} regs=${registers}`
-        + ` transfer=${transfer} sound=${sound}`);
+        + ` transfer=${transfer} bgPalette=${backgroundPalette}`
+        + ` sound=${sound} raw=${rawDigest}`
+        + ` framebufferDiff=${framebufferDiff}`);
     }
   }
   if (failures.length) throw new Error(failures.slice(0, 30).join("\n"));
   const digest = createHash("sha256").update(bytes).digest("hex");
   console.log(`${fixture.attacker.geometry.side} run ${runNumber}: `
-    + `${rows.length}/${TAIL_GLOW_BODY_FRAME_COUNT} software/hardware/audio rows exact; ${digest}`);
+    + `${rows.length}/${TAIL_GLOW_BODY_FRAME_COUNT} software/hardware/audio rows exact; `
+    + `${framebufferMatches}/${TAIL_GLOW_BODY_FRAME_COUNT} framebuffer; ${digest}`);
   return digest;
 }
 
