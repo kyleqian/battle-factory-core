@@ -51,9 +51,9 @@
  * cancelled second action doesn't gate `BattleTurnPassed`, only
  * `gBattleOutcome` does).
  *
- * Both sides model exactly one real move (slot 0) -- matching
- * `factoryBattleScriptTerminalDecision.ts`'s own staged-singles precedent
- * -- so legal decisions never need arbitrary move-slot selection.
+ * Both sides publish one legal decision for every nonzero moveset slot. The
+ * same source-shaped GetMoveTarget port owns both singles requests, including
+ * user-targeting moves, so initial and subsequent turns cannot drift.
  */
 import {
   createBattleState,
@@ -66,11 +66,13 @@ import {
   type BattleDecisionSubmission,
   type BattleDecisionTransitionResult,
   type BattleJsonObject,
+  type BattleMoveDecision,
   type BattleMoveSlot,
   type BattlePartyIndex,
   type BattleSinglesBattler,
   type BattleState,
 } from "./battleDecisionBoundary.ts";
+import { handleBattleActionFinished } from "./battleActionFinished.ts";
 import {
   acknowledgeBattleScriptMachineController,
   createBattleScriptRngState,
@@ -114,7 +116,11 @@ const STAT_SPEED = 3;
 /** Real per-script instruction ceiling, matching battleEndTurnOrchestration.ts's own bump for the DoTurnDmg-family scripts' controller round trips. */
 const SCRIPT_BUDGET = 256;
 
-type MoveRow = Readonly<{ id: number; priority: number }>;
+type MoveRow = Readonly<{
+  id: number;
+  priority: number;
+  target: readonly string[];
+}>;
 type TopologyMoveRow = Readonly<{ id: number; entryScript: string }>;
 
 const MOVES_BY_ID = new Map(
@@ -141,6 +147,14 @@ export type FactoryFullTurnBattlerConfig = Readonly<{
    * `factoryBattleScriptTerminalDecision.ts`'s own precedent).
    */
   moves?: readonly [number, number, number, number];
+  /** Source `gBattleMons[].pp`; omitted legacy configs retain the old 16-per-nonzero-move default. */
+  pp?: readonly [number, number, number, number];
+  /** Source `gBattleMons[].ability`; omitted legacy configs retain the old zero default. */
+  ability?: number;
+  /** Source `gBattleMons[].item`; omitted legacy configs retain the old zero default. */
+  item?: number;
+  /** Source `gBattleMons[].friendship`; omitted legacy configs retain the old zero default. */
+  friendship?: number;
   attack: number;
   defense: number;
   spAttack: number;
@@ -189,7 +203,10 @@ export type FactoryFullTurnConfig = Readonly<{
 export type FactoryFullTurnDecisionRules = BattleJsonObject & Readonly<{
   adapter: typeof ADAPTER;
   phase: "awaiting-player-command" | "awaiting-trainer-command" | "forced-switch-pending";
-  pendingPlayerDecision: null | Readonly<{ moveSlot: 0; targetBattler: BattleSinglesBattler }>;
+  pendingPlayerDecision: null | Readonly<{
+    moveSlot: BattleMoveSlot;
+    targetBattler: BattleSinglesBattler;
+  }>;
   rulesContext: BattleScriptRulesContext;
   /**
    * Only present in phase "forced-switch-pending": the halted
@@ -264,15 +281,19 @@ function activeBattler(
   config: FactoryFullTurnBattlerConfig,
 ): BattleScriptRulesBattlerState {
   const moves = config.moves ?? ([config.moveId, 0, 0, 0] as const);
-  const pp = moves.map((moveId) => (moveId !== 0 ? 16 : 0)) as unknown as readonly [
-    number,
-    number,
-    number,
-    number,
-  ];
+  const pp = config.pp ?? (
+    moves.map((moveId) => (moveId !== 0 ? 16 : 0)) as unknown as readonly [
+      number,
+      number,
+      number,
+      number,
+    ]
+  );
   return Object.freeze({
     ...emptyBattler(side),
+    ability: config.ability ?? 0,
     hp: config.hp,
+    item: config.item ?? 0,
     species: config.species,
     attack: config.attack,
     defense: config.defense,
@@ -280,6 +301,7 @@ function activeBattler(
     spDefense: config.spDefense,
     speed: config.speed,
     level: 50,
+    friendship: config.friendship ?? 0,
     types: config.types ?? (["TYPE_NORMAL", "TYPE_NORMAL"] as const),
     moves: Object.freeze(moves),
     pp: Object.freeze(pp),
@@ -373,7 +395,7 @@ export function createFactoryFullTurnBattleState(
       requestId: config.requestId,
       side: "player",
       battler: 0,
-      legalDecisions: [{ kind: "use-move", moveSlot: 0, targetBattler: 1 }],
+      legalDecisions: legalMoveDecisions(rules.rulesContext, 0),
     },
   }) as BattleState<FactoryFullTurnDecisionRules>;
 }
@@ -395,7 +417,10 @@ function rulesAt(input: FactoryFullTurnDecisionRules): FactoryFullTurnDecisionRu
     adapter: ADAPTER,
     phase: phase as "awaiting-player-command" | "awaiting-trainer-command",
     pendingPlayerDecision: (input as {
-      pendingPlayerDecision: null | Readonly<{ moveSlot: 0; targetBattler: BattleSinglesBattler }>;
+      pendingPlayerDecision: null | Readonly<{
+        moveSlot: BattleMoveSlot;
+        targetBattler: BattleSinglesBattler;
+      }>;
     }).pendingPlayerDecision,
     rulesContext,
   });
@@ -571,6 +596,7 @@ function buildActionContext(
   priorRulesContext: BattleScriptRulesContext,
   mover: BattleScriptBattlerId,
   moveId: number,
+  moveSlot: BattleMoveSlot,
   target: BattleScriptBattlerId,
 ): BattleScriptRulesContext {
   return createBattleScriptRulesContext({
@@ -578,7 +604,7 @@ function buildActionContext(
     selectorRoles: { attacker: mover, target, effectBattler: target, fainted: null },
     scriptingBattler: mover,
     currentMove: moveId,
-    currentMovePosition: 0,
+    currentMovePosition: moveSlot,
     chosenMove: moveId,
   });
 }
@@ -594,11 +620,18 @@ function runMoveAction(
   priorState: MachineState,
   mover: BattleScriptBattlerId,
   moveId: number,
+  moveSlot: BattleMoveSlot,
   target: BattleScriptBattlerId,
 ): ActionResult {
   const topology = TOPOLOGY_BY_MOVE.get(moveId);
   if (!topology) throw new Error(`move ${moveId} has no source Battle Script entry`);
-  const actionContext = buildActionContext(priorState.rulesContext, mover, moveId, target);
+  const actionContext = buildActionContext(
+    priorState.rulesContext,
+    mover,
+    moveId,
+    moveSlot,
+    target,
+  );
   const started = startBattleScriptExecute(program, topology.entryScript, {
     ...priorState,
     rulesContext: actionContext,
@@ -642,7 +675,17 @@ function withTurnOrderPositions(
     if (index === mover2) return Object.freeze({ ...battler, turnOrderNum: 1 });
     return battler;
   }) as unknown as BattleScriptRulesContext["battlers"];
-  return Object.freeze({ ...rulesContext, battlers: Object.freeze(battlers), currentTurnActionNumber });
+  return Object.freeze({
+    ...rulesContext,
+    battlers: Object.freeze(battlers),
+    battlerByTurnOrder: Object.freeze([
+      mover1,
+      mover2,
+      2,
+      3,
+    ] as const),
+    currentTurnActionNumber,
+  });
 }
 
 function machineBarrierBoundary(instruction: BattleScriptInstruction, instructionsExecuted: number): BattleBoundary {
@@ -661,26 +704,71 @@ function machineBarrierBoundary(instruction: BattleScriptInstruction, instructio
 }
 
 /**
- * The trainer's real legal move slots for this turn (item 1's real 4-move
- * set): one `use-move` decision per nonzero moveset slot, matching
- * `factoryAiDecisionPolicy.ts`'s own `legalBySlot` expectations for a real
- * mask-1/7 policy decision (mask-0's own precedent supports the same
- * multi-slot shape already; this reducer's trainer side just never needed it
- * before item 1).
+ * Singles projection of `GetMoveTarget` (`battle_util.c:3828-3910`) for every
+ * target shape represented by generated `gBattleMoves[]`. Doubles-only
+ * redirection and RANDOM's draw are unreachable with two active battlers:
+ * every non-user shape resolves to the sole opposing active battler without
+ * consuming RNG. Keeping the generated shape strict prevents a future source
+ * expression from silently inheriting the wrong target.
  */
-function trainerLegalDecisions(rulesContext: BattleScriptRulesContext) {
-  const moves = rulesContext.battlers[1]!.moves;
+function sourceMoveTarget(
+  moveId: number,
+  attacker: BattleSinglesBattler,
+): BattleSinglesBattler {
+  const move = MOVES_BY_ID.get(moveId);
+  if (!move) {
+    throw new Error(`move ${moveId} is absent from generated gBattleMoves`);
+  }
+  if (move.target.length !== 1) {
+    throw new Error(
+      `move ${moveId} has unsupported generated target shape ${move.target.join("|")}`,
+    );
+  }
+  switch (move.target[0]) {
+    case "MOVE_TARGET_USER":
+      return attacker;
+    case "MOVE_TARGET_SELECTED":
+    case "MOVE_TARGET_DEPENDS":
+    case "MOVE_TARGET_BOTH":
+    case "MOVE_TARGET_FOES_AND_ALLY":
+    case "MOVE_TARGET_OPPONENTS_FIELD":
+    case "MOVE_TARGET_RANDOM":
+      return attacker === 0 ? 1 : 0;
+    default:
+      throw new Error(
+        `move ${moveId} has unsupported generated target shape ${move.target[0]}`,
+      );
+  }
+}
+
+/**
+ * Source `HandleInputChooseMove` publishes the configured moves in slot
+ * order. A zero move id is an empty slot, not a legal command;
+ * `submitBattleDecision` remains the public membership validator.
+ */
+function legalMoveDecisions(
+  rulesContext: BattleScriptRulesContext,
+  battler: BattleSinglesBattler,
+): readonly BattleMoveDecision[] {
+  const moves = rulesContext.battlers[battler]!.moves;
   const legal = moves.flatMap((moveId, slot) =>
     moveId !== 0
-      ? [Object.freeze({ kind: "use-move" as const, moveSlot: slot as BattleMoveSlot, targetBattler: 0 as const })]
+      ? [Object.freeze({
+          kind: "use-move" as const,
+          moveSlot: slot as BattleMoveSlot,
+          targetBattler: sourceMoveTarget(moveId, battler),
+        })]
       : []);
   return Object.freeze(legal);
 }
 
-function eventPayloads(state: MachineState) {
+function provenanceEvents(state: MachineState) {
   return Object.freeze(state.events.map((event) => {
-    const { sequence: _sequence, provenance: _provenance, ...payload } = event;
-    return Object.freeze(payload);
+    const { sequence: _sequence, provenance, ...payload } = event;
+    return Object.freeze({
+      payload: Object.freeze(payload),
+      provenance,
+    });
   }));
 }
 
@@ -705,7 +793,7 @@ function finishFullTurn(
   }
   return Object.freeze({
     rules: resultRules,
-    events: eventPayloads(finalState),
+    events: provenanceEvents(finalState),
     boundary,
   });
 }
@@ -764,9 +852,7 @@ function runEndTurnTail(
         requestId: nextRequestId,
         side: "player",
         battler: 0 as const,
-        legalDecisions: Object.freeze([
-          Object.freeze({ kind: "use-move" as const, moveSlot: 0 as const, targetBattler: 1 as const }),
-        ]),
+        legalDecisions: legalMoveDecisions(endTurn.state.rulesContext, 0),
       }),
     }),
   );
@@ -793,6 +879,17 @@ function resumeFullTurnForcedSwitch(
   }
   const pending = pendingForcedSwitchAt(ctx.rules);
   const rngBefore = ctx.rng.snapshot();
+  const actingBattler = pending.rulesContext.battlerByTurnOrder[
+    pending.rulesContext.currentTurnActionNumber
+  ];
+  if (
+    actingBattler === undefined
+    || actingBattler >= pending.rulesContext.battleTopology.battlersCount
+  ) {
+    throw new Error(
+      "factory full-turn decision forced-switch resume cannot resolve the acting battler at the current turn position",
+    );
+  }
   const instruction = PROGRAM.instructions[pending.pendingScript.programCounter];
   if (!instruction) {
     throw new Error(
@@ -833,12 +930,16 @@ function resumeFullTurnForcedSwitch(
   }
 
   if (orchestration.kind === "terminal") {
+    const finished = handleBattleActionFinished(
+      orchestration.state,
+      actingBattler as BattleScriptBattlerId,
+    );
     return finishFullTurn(
-      ctx.rng, rngBefore.calls, orchestration.state,
-      buildRules(orchestration.state.rulesContext, "awaiting-player-command", null),
+      ctx.rng, rngBefore.calls, finished,
+      buildRules(finished.rulesContext, "awaiting-player-command", null),
       Object.freeze({
         kind: "terminal",
-        outcome: mapFactoryBattleOutcome(orchestration.state.rulesContext.battleOutcome),
+        outcome: mapFactoryBattleOutcome(finished.rulesContext.battleOutcome),
       }),
     );
   }
@@ -851,7 +952,16 @@ function resumeFullTurnForcedSwitch(
   }
 
   // orchestration.kind === "resumed"
-  return runEndTurnTail(ctx.rng, rngBefore.calls, handlers, orchestration.state, ctx.request.requestId + 1);
+  return runEndTurnTail(
+    ctx.rng,
+    rngBefore.calls,
+    handlers,
+    handleBattleActionFinished(
+      orchestration.state,
+      actingBattler as BattleScriptBattlerId,
+    ),
+    ctx.request.requestId + 1,
+  );
 }
 
 export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTurnDecisionRules> = (
@@ -868,7 +978,6 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
       || ctx.request.side !== "player"
       || ctx.request.battler !== 0
       || ctx.decision.kind !== "use-move"
-      || ctx.decision.moveSlot !== 0
     ) {
       throw new Error("factory full-turn decision requires the player's staged singles use-move command");
     }
@@ -876,7 +985,10 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
       rules: buildRules(
         rules.rulesContext,
         "awaiting-trainer-command",
-        Object.freeze({ moveSlot: 0 as const, targetBattler: ctx.decision.targetBattler }),
+        Object.freeze({
+          moveSlot: ctx.decision.moveSlot,
+          targetBattler: ctx.decision.targetBattler,
+        }),
       ),
       events: [],
       boundary: Object.freeze({
@@ -886,7 +998,7 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
           requestId: ctx.request.requestId + 1,
           side: "trainer",
           battler: 1 as const,
-          legalDecisions: trainerLegalDecisions(rules.rulesContext),
+          legalDecisions: legalMoveDecisions(rules.rulesContext, 1),
         }),
       }),
     });
@@ -904,8 +1016,15 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
   }
 
   const rc0 = rules.rulesContext;
-  const playerMoveId = rc0.battlers[0]!.moves[0];
+  const playerMoveSlot = rules.pendingPlayerDecision.moveSlot;
+  const trainerMoveSlot = ctx.decision.moveSlot;
+  const playerMoveId = rc0.battlers[0]!.moves[playerMoveSlot];
   const trainerMoveId = rc0.battlers[1]!.moves[ctx.decision.moveSlot];
+  if (playerMoveId === 0) {
+    throw new Error(
+      `factory full-turn decision player move slot ${playerMoveSlot} is not usable`,
+    );
+  }
   if (trainerMoveId === 0) {
     throw new Error(`factory full-turn decision trainer move slot ${ctx.decision.moveSlot} is not usable`);
   }
@@ -925,9 +1044,11 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
 
   const mover1: BattleScriptBattlerId = playerFirst ? 0 : 1;
   const mover1MoveId = playerFirst ? playerMoveId : trainerMoveId;
+  const mover1MoveSlot = playerFirst ? playerMoveSlot : trainerMoveSlot;
   const mover1Target: BattleScriptBattlerId = playerFirst ? playerTarget : trainerTarget;
   const mover2: BattleScriptBattlerId = playerFirst ? 1 : 0;
   const mover2MoveId = playerFirst ? trainerMoveId : playerMoveId;
+  const mover2MoveSlot = playerFirst ? trainerMoveSlot : playerMoveSlot;
   const mover2Target: BattleScriptBattlerId = playerFirst ? trainerTarget : playerTarget;
 
   const ports = externalPorts();
@@ -945,7 +1066,15 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
     events: Object.freeze([]),
   });
 
-  const action1 = runMoveAction(PROGRAM, handlers, initialState, mover1, mover1MoveId, mover1Target);
+  const action1 = runMoveAction(
+    PROGRAM,
+    handlers,
+    initialState,
+    mover1,
+    mover1MoveId,
+    mover1MoveSlot,
+    mover1Target,
+  );
   if (action1.kind === "barrier") {
     return finishFullTurn(
       ctx.rng, rngBefore.calls, action1.state,
@@ -956,10 +1085,14 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
 
   const faint1 = runBattleScriptFaintedActionsOrchestration(PROGRAM, handlers, action1.state);
   if (faint1.kind === "terminal") {
+    const finished = handleBattleActionFinished(faint1.state, mover1);
     return finishFullTurn(
-      ctx.rng, rngBefore.calls, faint1.state,
-      buildRules(faint1.state.rulesContext, rules.phase, rules.pendingPlayerDecision),
-      Object.freeze({ kind: "terminal", outcome: mapFactoryBattleOutcome(faint1.state.rulesContext.battleOutcome) }),
+      ctx.rng, rngBefore.calls, finished,
+      buildRules(finished.rulesContext, rules.phase, rules.pendingPlayerDecision),
+      Object.freeze({
+        kind: "terminal",
+        outcome: mapFactoryBattleOutcome(finished.rulesContext.battleOutcome),
+      }),
     );
   }
   if (faint1.kind === "non-terminal-barrier") {
@@ -997,13 +1130,26 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
   }
 
   // faint1.kind is "no-fainted-battlers" (run action 2) or "resumed" (skip action 2, per cancelallactions).
-  let preEndTurnState = faint1.state;
+  let preEndTurnState = handleBattleActionFinished(faint1.state, mover1);
   if (faint1.kind === "no-fainted-battlers") {
     const preAction2State: MachineState = Object.freeze({
-      ...faint1.state,
-      rulesContext: withTurnOrderPositions(faint1.state.rulesContext, 1, mover1, mover2),
+      ...preEndTurnState,
+      rulesContext: withTurnOrderPositions(
+        preEndTurnState.rulesContext,
+        1,
+        mover1,
+        mover2,
+      ),
     });
-    const action2 = runMoveAction(PROGRAM, handlers, preAction2State, mover2, mover2MoveId, mover2Target);
+    const action2 = runMoveAction(
+      PROGRAM,
+      handlers,
+      preAction2State,
+      mover2,
+      mover2MoveId,
+      mover2MoveSlot,
+      mover2Target,
+    );
     if (action2.kind === "barrier") {
       return finishFullTurn(
         ctx.rng, rngBefore.calls, action2.state,
@@ -1013,10 +1159,14 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
     }
     const faint2 = runBattleScriptFaintedActionsOrchestration(PROGRAM, handlers, action2.state);
     if (faint2.kind === "terminal") {
+      const finished = handleBattleActionFinished(faint2.state, mover2);
       return finishFullTurn(
-        ctx.rng, rngBefore.calls, faint2.state,
-        buildRules(faint2.state.rulesContext, rules.phase, rules.pendingPlayerDecision),
-        Object.freeze({ kind: "terminal", outcome: mapFactoryBattleOutcome(faint2.state.rulesContext.battleOutcome) }),
+        ctx.rng, rngBefore.calls, finished,
+        buildRules(finished.rulesContext, rules.phase, rules.pendingPlayerDecision),
+        Object.freeze({
+          kind: "terminal",
+          outcome: mapFactoryBattleOutcome(finished.rulesContext.battleOutcome),
+        }),
       );
     }
     if (faint2.kind === "non-terminal-barrier") {
@@ -1048,7 +1198,10 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
         }),
       );
     }
-    preEndTurnState = faint2.state; // "no-fainted-battlers" or "resumed"
+    preEndTurnState = handleBattleActionFinished(
+      faint2.state,
+      mover2,
+    ); // "no-fainted-battlers" or "resumed"
   }
 
   return runEndTurnTail(ctx.rng, rngBefore.calls, handlers, preEndTurnState, ctx.request.requestId + 1);

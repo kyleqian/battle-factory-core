@@ -1,0 +1,155 @@
+{
+  "schema": "curse-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "source": {
+    "effectScript": "reference/pokeemerald/data/battle_scripts_1.s:1482-1530",
+    "curseTargetCommand": "reference/pokeemerald/src/battle_script_commands.c:8468-8483",
+    "curseMove": "reference/pokeemerald/src/data/battle_moves.h:2265-2276",
+    "status2Cursed": "reference/pokeemerald/include/constants/battle.h:152",
+    "statStages": "reference/pokeemerald/include/constants/pokemon.h:75-91",
+    "controllerTargeting": "reference/pokeemerald/src/battle_controller_player.c:481-506"
+  },
+  "publicAbiBoundary": {
+    "exposes": ["types", "hp", "maxHp", "status2", "statStages", "pp", "parties.checksumValid"],
+    "doesNotExpose": ["gBattleMoveDamage", "gBattlescriptCurrInstr", "Cmd_cursetarget internals"],
+    "rule": "The receipt computes the HP cost from public before/after HP and pins the public cursed bit and stages; it does not add raw addresses or transient-state injection to the trace ABI."
+  },
+  "repeatability": {
+    "runsPerCase": 2,
+    "comparison": "byte-identical manifest.json",
+    "allMatched": true
+  },
+  "cases": [
+    {
+      "id": "ghost-curse-hp-cost-and-target-bit",
+      "scenario": "tools/battle-lab/mechanic-curse-ghost-off.json",
+      "scenarioSha256": "007e54b49c6b6c0a4f4125ce4e9eb5655223f8452cdc64059e053c40165f0da5",
+      "runManifestSha256": [
+        "77a143a89a516c9d53603b5e19d2cc1f5c8b3a0ba7f2fad8e105805b7764a553",
+        "77a143a89a516c9d53603b5e19d2cc1f5c8b3a0ba7f2fad8e105805b7764a553"
+      ],
+      "customPartiesBuiltBeforeBattle": true,
+      "builtParties": {
+        "playerSpecies": [93, 1, 4],
+        "opponentSpecies": [129, 187, 129],
+        "checksumValid": [true, true, true, true, true, true]
+      },
+      "captures": [
+        {
+          "frame": 0,
+          "sha256": "d90d770061d1dcf56a0d2f5337f41cd656aa12ee017f3463d7277db4f4b15b92",
+          "player": {
+            "partyIndex": 0,
+            "species": 93,
+            "types": [7, 3],
+            "hp": 120,
+            "maxHp": 120,
+            "status2": 0,
+            "statStages": [6, 6, 6, 6, 6, 6, 6, 6],
+            "pp": [10, 10, 10, 10]
+          },
+          "opponent": {
+            "partyIndex": 0,
+            "species": 129,
+            "types": [11, 11],
+            "hp": 95,
+            "maxHp": 95,
+            "status2": 0,
+            "statStages": [6, 6, 6, 6, 6, 6, 6, 6],
+            "pp": [40, 40, 40, 40]
+          }
+        },
+        {
+          "frame": 200,
+          "sha256": "d6146c5a0977972b65d09cf19b4eeb05b53d4f874ee2e37b740b6756fb0839a7",
+          "player": {
+            "partyIndex": 0,
+            "species": 93,
+            "types": [7, 3],
+            "hp": 60,
+            "maxHp": 120,
+            "status2": 0,
+            "statStages": [6, 6, 6, 6, 6, 6, 6, 6],
+            "pp": [9, 10, 10, 10]
+          },
+          "opponent": {
+            "partyIndex": 0,
+            "species": 129,
+            "types": [11, 11],
+            "hp": 95,
+            "maxHp": 95,
+            "status2": 268435456,
+            "statStages": [6, 6, 6, 6, 6, 6, 6, 6],
+            "pp": [40, 40, 40, 40]
+          }
+        }
+      ]
+    },
+    {
+      "id": "non-ghost-curse-three-stage-change",
+      "scenario": "tools/battle-lab/mechanic-curse-stat-off.json",
+      "scenarioSha256": "2d6279bba562dbac07436b44ac483145fc4dc2f7aad5c7ba4c02df8c46c405b1",
+      "runManifestSha256": [
+        "8caa69450d6b96303179ba37ce18dc0f368c4d8f862da9ed15540430d6fcdfdc",
+        "8caa69450d6b96303179ba37ce18dc0f368c4d8f862da9ed15540430d6fcdfdc"
+      ],
+      "customPartiesBuiltBeforeBattle": true,
+      "builtParties": {
+        "playerSpecies": [143, 1, 4],
+        "opponentSpecies": [129, 187, 129],
+        "checksumValid": [true, true, true, true, true, true]
+      },
+      "captures": [
+        {
+          "frame": 0,
+          "sha256": "8a2a82621a26dad1c2911ae1789df0fae599449ed87a0849937c0f958122e78c",
+          "player": {
+            "partyIndex": 0,
+            "species": 143,
+            "types": [0, 0],
+            "hp": 235,
+            "maxHp": 235,
+            "status2": 0,
+            "statStages": [6, 6, 6, 6, 6, 6, 6, 6],
+            "pp": [10, 10, 10, 10]
+          },
+          "opponent": {
+            "partyIndex": 0,
+            "species": 129,
+            "types": [11, 11],
+            "hp": 95,
+            "maxHp": 95,
+            "status2": 0,
+            "statStages": [6, 6, 6, 6, 6, 6, 6, 6],
+            "pp": [40, 40, 40, 40]
+          }
+        },
+        {
+          "frame": 450,
+          "sha256": "67b99f4858dd8886ea398b9625b6a2b9e618bf1f3f575d582023a75bdcd8a51a",
+          "player": {
+            "partyIndex": 0,
+            "species": 143,
+            "types": [0, 0],
+            "hp": 235,
+            "maxHp": 235,
+            "status2": 0,
+            "statStages": [6, 7, 7, 5, 6, 6, 6, 6],
+            "pp": [9, 10, 10, 10]
+          },
+          "opponent": {
+            "partyIndex": 0,
+            "species": 129,
+            "types": [11, 11],
+            "hp": 95,
+            "maxHp": 95,
+            "status2": 0,
+            "statStages": [6, 6, 6, 6, 6, 6, 6, 6],
+            "pp": [40, 39, 40, 40]
+          }
+        }
+      ]
+    }
+  ],
+  "boundedRemainder": "The two scenarios stop after their requested branch observations. They do not exercise repeated Curse, substitute/failure paths, stat-stage caps, end-turn Curse damage, switching, doubles targeting, or any raw internal damage/script field."
+}

@@ -140,7 +140,10 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // switchhandleorder's cases 0/1 (multi-battler collection / order-only, not
   // this script's case 2/3); switchindataupdate's STATUS2_ESCAPE_PREVENTION
   // and STATUS3_ALWAYS_HITS cross-battler clears (battlerPreventingEscape/
-  // battlerWithSureHit identity, unmodeled); switchinanim's BATTLE_TYPE_ARENA
+  // battlerWithSureHit identity, unmodeled); SwitchInClearSetData's
+  // unconditional STATUS2_WRAPPED clear and Baton Pass's opposing
+  // STATUS3_ALWAYS_HITS timer refresh add two doubles-only identity barriers
+  // (singles ownership is exact); switchinanim's BATTLE_TYPE_ARENA
   // point-init call (never set for Factory); various's every id other than
   // RESET_PLAYER_FAINTED (7); switchineffects's Spikes branch (structurally
   // unreachable -- SIDE_STATUS_SPIKES has no writer anywhere in this engine,
@@ -150,8 +153,8 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // (ABILITYEFFECT_ON_SWITCHIN) dispatch for the small closed set of trigger
   // abilities. 8 total, none reachable by either committed forced-switch
   // fixture (their switched-in mons carry a non-trigger ability, no item, no
-  // Spikes/escape/sure-hit state).
-  ["src/engine/battleScriptSwitchinOpcode.ts", 8],
+  // Spikes/escape/sure-hit/wrapped state).
+  ["src/engine/battleScriptSwitchinOpcode.ts", 10],
   // Primary-effect stat-change registration (docs/primary-stat-ground-truth.md):
   // Cmd_playanimation is narrowed to its B_ANIM_STATS_CHANGE arm (the only
   // animType BattleScript_EffectStatUp/EffectStatDown ever pass) -- any other
@@ -290,6 +293,14 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // selector (BS_ATTACKER) resolves for real on every reachable committed
   // script this registration drives.
   ["src/engine/battleScriptSemiInvulnerableOpcode.ts", 1],
+  // B_SCR_OP_JUMPIFCANTSWITCH / EFFECT_BATON_PASS registration: ordinary
+  // Level-50 singles resolves both assembled selectors, all three volatile
+  // gates, and the selected side's authoritative six-slot party scan. The
+  // one barrier is the source's in-game-partner/MULTI/two-opponents/ordinary-
+  // doubles scan family (battle_script_commands.c:4714-4848), whose party-
+  // half and second-active-slot identities the current context does not own.
+  // Reachability-tested in tests/battleScriptJumpifcantswitchOpcode.test.ts.
+  ["src/engine/battleScriptJumpifcantswitchOpcode.ts", 1],
 ]);
 
 function recordingImportsIn(file: string): string[] {

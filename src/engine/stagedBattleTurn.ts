@@ -1,17 +1,43 @@
 import type { BattleTurnScenario } from "./battleTurn.ts";
 import { resolveBattleTurn } from "./battleTurn.ts";
+import type {
+  BattleDecisionSubmission,
+  BattleDecisionTransitionResult,
+  BattleState,
+} from "./battleDecisionBoundary.ts";
+import {
+  submitFactoryFullTurnDecision,
+  type FactoryFullTurnDecisionRules,
+} from "./factoryBattleScriptFullTurnDecision.ts";
 import {
   acknowledgeSceneOffCommand,
   advanceSceneOffAdapter,
+  createBattleKernelTurnPresentation,
   createBattleTurnPresentation,
   createSceneOffAdapter,
   pendingSceneOffCommand,
   type BattleTurnPresentationState,
+  type SceneOffKernelBattlerMetadata,
   type SceneOffAdapterState,
 } from "./sceneOffPresentation.ts";
 
+export interface StagedFactoryFullTurnInput {
+  readonly initialState: BattleState<FactoryFullTurnDecisionRules>;
+  readonly playerSubmission: BattleDecisionSubmission;
+  readonly trainerSubmission: BattleDecisionSubmission;
+  readonly battlers: readonly [
+    SceneOffKernelBattlerMetadata,
+    SceneOffKernelBattlerMetadata,
+  ];
+}
+
 export interface StagedBattleTurnState {
-  readonly scenario: BattleTurnScenario;
+  readonly scenario: BattleTurnScenario | null;
+  readonly kernel: StagedFactoryFullTurnInput | null;
+  readonly kernelTransition:
+    | BattleDecisionTransitionResult<FactoryFullTurnDecisionRules>
+    | null;
+  readonly initialOpponentHp: number;
   readonly phase: "awaitingConfirm" | "presenting" | "inputReady";
   readonly presentation: BattleTurnPresentationState | null;
   readonly adapter: SceneOffAdapterState | null;
@@ -26,6 +52,9 @@ export function stageBattleTurn(
 ): StagedBattleTurnState {
   return {
     scenario,
+    kernel: null,
+    kernelTransition: null,
+    initialOpponentHp: scenario.initial.opponent.hp,
     phase: "awaitingConfirm",
     presentation: null,
     adapter: null,
@@ -33,6 +62,48 @@ export function stageBattleTurn(
     inputReadyElapsed: 0,
     nextInputAccepted: false,
   };
+}
+
+function freezeSubmission(
+  submission: BattleDecisionSubmission,
+): BattleDecisionSubmission {
+  return Object.freeze({
+    requestId: submission.requestId,
+    side: submission.side,
+    decision: Object.freeze({ ...submission.decision }),
+  });
+}
+
+export function stageFactoryFullTurnBattle(
+  input: StagedFactoryFullTurnInput,
+  commandDurations: readonly number[] | null = null,
+): StagedBattleTurnState {
+  return Object.freeze({
+    scenario: null,
+    kernel: Object.freeze({
+      initialState: input.initialState,
+      playerSubmission: freezeSubmission(input.playerSubmission),
+      trainerSubmission: freezeSubmission(input.trainerSubmission),
+      battlers: Object.freeze(input.battlers.map((battler) =>
+        Object.freeze({
+          ...battler,
+          moveNames: Object.freeze([...battler.moveNames]),
+        })
+      )) as unknown as StagedFactoryFullTurnInput["battlers"],
+    }),
+    kernelTransition: null,
+    initialOpponentHp:
+      input.initialState.rules.rulesContext.battlers[1]!.hp,
+    phase: "awaitingConfirm",
+    presentation: null,
+    adapter: null,
+    commandDurations:
+      commandDurations === null
+        ? null
+        : Object.freeze([...commandDurations]),
+    inputReadyElapsed: 0,
+    nextInputAccepted: false,
+  });
 }
 
 /**
@@ -52,6 +123,43 @@ export function advanceStagedBattleTurn(
   }
   if (state.phase === "awaitingConfirm") {
     if (!confirm) return state;
+    if (state.kernel) {
+      const afterPlayer = submitFactoryFullTurnDecision(
+        state.kernel.initialState,
+        state.kernel.playerSubmission,
+      );
+      if (afterPlayer.kind !== "decision-required") {
+        throw new Error(
+          "staged full turn did not reach the trainer command boundary",
+        );
+      }
+      const transition = submitFactoryFullTurnDecision(
+        afterPlayer.state,
+        state.kernel.trainerSubmission,
+      );
+      if (transition.kind !== "decision-required") {
+        throw new Error(
+          "staged full turn did not reach the next player command boundary",
+        );
+      }
+      return {
+        ...state,
+        phase: "presenting",
+        kernelTransition: transition,
+        presentation: createBattleKernelTurnPresentation({
+          before: state.kernel.initialState.rules.rulesContext,
+          after: transition.state.rules.rulesContext,
+          events: transition.events,
+          boundary: transition.state.boundary,
+          rngValue: transition.state.rng.value,
+          battlers: state.kernel.battlers,
+        }),
+        adapter: createSceneOffAdapter(),
+      };
+    }
+    if (!state.scenario) {
+      throw new Error("staged turn has neither a scenario nor a kernel input");
+    }
     return {
       ...state,
       phase: "presenting",

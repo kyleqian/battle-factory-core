@@ -412,6 +412,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       stagedBattleTurn,
       rngMode: "frontierBattle",
       rngValue:
+        stagedBattleTurn.kernelTransition?.state.rng.value ??
         stagedBattleTurn.presentation?.resolved.state.rngValue ??
         state.rngValue,
       battleControllerExecFlags:
@@ -2003,7 +2004,7 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
     const staged = state.stagedBattleTurn;
     if (staged.phase === "awaitingConfirm") {
       renderSceneOffTurnView(fb, {
-        opponentHp: 91,
+        opponentHp: staged.initialOpponentHp,
         messageLines: null,
         messageChars: 0,
         statEffectAge: null,
@@ -2015,25 +2016,43 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
     const presentation = staged.presentation!;
     const command = presentation.commands[presentation.commandIndex] ?? null;
     const elapsed = staged.adapter?.elapsed ?? 0;
+    const hpCommand = presentation.commands.find((candidate) =>
+      candidate.type === "hp" && candidate.target === "opponent"
+    );
+    if (!hpCommand || hpCommand.type !== "hp") {
+      throw new Error(
+        "Scene OFF staged turn requires an opponent HP semantic command",
+      );
+    }
+    const statIndex = presentation.commands.findIndex(
+      (candidate) => candidate.type === "stat",
+    );
+    const statTextIndex = presentation.commands.findIndex(
+      (candidate, index) =>
+        candidate.type === "text" && statIndex >= 0 && index > statIndex,
+    );
     const playerMoveDone =
       presentation.commandIndex >= 1 ||
       (presentation.commandIndex === 0 && elapsed >= 139);
-    const opponentMoveStarted = presentation.commandIndex >= 3;
-    const statStarted = presentation.commandIndex >= 5;
-    const statTextStarted = presentation.commandIndex >= 6;
+    const statStarted =
+      statIndex >= 0 && presentation.commandIndex >= statIndex;
+    const statTextStarted =
+      statTextIndex >= 0 && presentation.commandIndex >= statTextIndex;
     const inputVisible = staged.phase === "inputReady" && staged.inputReadyElapsed >= 6;
+    const latestText = [...presentation.commands
+      .slice(0, presentation.commandIndex + 1)]
+      .reverse()
+      .find((candidate) => candidate.type === "text");
     const lines = command?.type === "text"
       ? command.lines
-      : statTextStarted
-        ? ["ONIX’s accuracy", "fell!"]
-        : opponentMoveStarted
-          ? ["Foe KABUTO used", "SAND-ATTACK!"]
-          : ["ONIX used", "ROCK SLIDE!"];
+      : latestText?.type === "text"
+        ? latestText.lines
+        : null;
     renderSceneOffTurnView(fb, {
-      opponentHp: playerMoveDone ? 63 : 91,
+      opponentHp: playerMoveDone ? hpCommand.to : hpCommand.from,
       messageLines: lines,
       messageChars:
-        command?.type === "text"
+        command?.type === "text" && lines
           ? Math.min(
               lines.join("").length,
               Math.max(
@@ -2041,12 +2060,12 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
                 elapsed -
                   (presentation.commandIndex === 0
                     ? 12
-                    : presentation.commandIndex === 6
+                    : presentation.commandIndex === statTextIndex
                       ? -2
                       : 0),
               ),
             )
-          : lines.join("").length,
+          : lines?.join("").length ?? 0,
       statEffectAge: statStarted && !statTextStarted
         ? elapsed * 2 + 94
         : null,

@@ -273,7 +273,7 @@ describe("production damaging-weather opcode dispatch (screens/weather registrat
   describe("Cmd_jumpifarraynotequal (jumpifbytenotequal alias) -- modeled site vs. barrier", () => {
     const pc = findPc("B_SCR_OP_JUMPIFARRAYNOTEQUAL", "BattleScript_DamagingWeatherLoopIncrement");
     const sBattlerPc = findPc("B_SCR_OP_JUMPIFARRAYNOTEQUAL", "BattleScript_WeatherFormChangesLoop");
-    const barrierPc = findPc("B_SCR_OP_JUMPIFARRAYNOTEQUAL", "BattleScript_GhostCurse");
+    const cursePc = findPc("B_SCR_OP_JUMPIFARRAYNOTEQUAL", "BattleScript_GhostCurse");
 
     it("(pass-through) jumps to the loop start while gBattleCommunication != gBattlersCount", () => {
       const rc = context({ battleCommunication0: 1, battleTopology: { battlersCount: 2, battleTypeFlags: (1 << 3) | (1 << 19), battlerPositions: [0, 1, 2, 3] } });
@@ -303,11 +303,10 @@ describe("production damaging-weather opcode dispatch (screens/weather registrat
       expect(result.state.programCounter).toBe(sBattlerPc + 1);
     });
 
-    it("(unsupported-branch) barriers on an unmodeled compare pair (Ghost Curse's gBattlerAttacker/gBattlerTarget compare)", () => {
-      const { result } = stepAtProgramCounter(barrierPc, context());
-      expect(result.kind).toBe("halted");
-      if (result.kind !== "halted") throw new Error("expected halted");
-      expect(result.state.haltReason?.kind).toBe("unsupported-branch");
+    it("(pass-through, Curse widening) compares immutable gBattlerAttacker/gBattlerTarget roles and jumps when they differ", () => {
+      const { result } = stepAtProgramCounter(cursePc, context());
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.programCounter).not.toBe(cursePc + 1);
     });
   });
 

@@ -352,13 +352,16 @@ function createBicwordHandler(): BattleScriptOpcodeHandler<BattleScriptRulesCont
  * Increment`), `gBattlerTarget, gBattlersCount`
  * (`BattleScript_TeeterDanceLoopIncrement`), and `gBattleCommunication + 1,
  * gBattlersCount` (`BattleScript_PalaceEndFlavorText`). Left rejected:
- * Ghost Curse's `gBattlerAttacker, gBattlerTarget` and the link-battle
- * loop's `gBattlerFainted, gBattlersCount` -- `gBattlerAttacker`/
- * `gBattlerFainted` are selector roles this shared universe does not expose
- * as SETBYTE-resolvable pointers -- the single named barrier below.
+ * The selector-role pair `gBattlerAttacker, gBattlerTarget` used by Ghost
+ * Curse is now read directly from the immutable role bindings. Left
+ * rejected: the link-battle loop's `gBattlerFainted, gBattlersCount` --
+ * `gBattlerFainted` is not a SETBYTE-resolvable pointer -- through the same
+ * single named barrier below.
  */
 function readJumpifarraynotequalOperand(rules: BattleScriptRulesContext, expression: string): number | null {
   if (expression === "gBattlersCount") return rules.battleTopology.battlersCount;
+  if (expression === "gBattlerAttacker") return rules.selectorRoles.attacker;
+  if (expression === "gBattlerTarget") return rules.selectorRoles.target;
   return BATTLE_SCRIPT_SETBYTE_POINTER_EXPRESSIONS.includes(expression as never)
     ? readBattleScriptRulesByte(rules, expression)
     : null;

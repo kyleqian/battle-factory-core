@@ -1,0 +1,188 @@
+{
+  "schema": "focus-punch-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "source": {
+    "macro": "reference/pokeemerald/asm/macros/battle_script.inc:1061-1064",
+    "opcodeEnum": "reference/pokeemerald/include/constants/battle_script_commands.h:207-214",
+    "opcodeDispatch": "reference/pokeemerald/src/battle_script_commands.c:531-539",
+    "handler": "reference/pokeemerald/src/battle_script_commands.c:9148-9154",
+    "damageReceiptWrite": "reference/pokeemerald/src/battle_script_commands.c:1919-1968",
+    "receiptFields": "reference/pokeemerald/include/battle.h:104-130",
+    "turnReceiptReset": "reference/pokeemerald/src/battle_main.c:4857-4874",
+    "focusPunchSetup": "reference/pokeemerald/src/battle_main.c:4906-4930",
+    "effectScript": "reference/pokeemerald/data/battle_scripts_1.s:2260-2266",
+    "focusPunchMove": "reference/pokeemerald/src/data/battle_moves.h:3435-3446",
+    "frontierBreloomSet": "reference/pokeemerald/src/data/battle_frontier/battle_frontier_mons.h:3363-3368",
+    "starmieActions": "reference/pokeemerald/src/data/pokemon/level_up_learnsets.h:1659-1681"
+  },
+  "sourceSha256": {
+    "battle_script_commands.c": "e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c",
+    "battle_scripts_1.s": "4ac3e610b68c11ef0f4e4c0fc62ddba7fda5a8400e43705428868978ec7551a6",
+    "battle_script.inc": "0a8e1c3bdf4c49d07b2e09ff8ab524812a5217b9735106e1b79b6be261a6db7e",
+    "battle_script_commands.h": "842cce6dd704b09b24a49abdca67ee7a8062a2e3a465e1b764fc63c0d230580f",
+    "battle.h": "8ef0355f2345592094c82cfde6641644a6b7157012104736416f8c05f34f0685",
+    "battle_main.c": "ee79b86ff0f681ab783b363135fd84d050e7123bea2a77c5530f2c7ddc8b8408",
+    "battle_moves.h": "8b3d4d143b807807af97ce7288e0cc0ccdd55b6b64ac45824e35a549836b3a0c",
+    "battle_frontier_mons.h": "557c1a97247cbb84357b99035fb11cf0bfe45abe8393a0992fe8146bfc51f67f",
+    "level_up_learnsets.h": "a7569a51e3bb0ca4f094830c76c6db45a692c7ed64db21e59bc76a90237599e0"
+  },
+  "instruction": {
+    "opcode": 207,
+    "opcodeHex": "0xcf",
+    "length": 5,
+    "operandWidths": [4],
+    "layout": [
+      {"offset": 0, "width": 1, "meaning": "B_SCR_OP_JUMPIFNODAMAGE"},
+      {"offset": 1, "width": 4, "meaning": "little-endian branch pointer"}
+    ],
+    "reads": [
+      "gProtectStructs[gBattlerAttacker].physicalDmg",
+      "gProtectStructs[gBattlerAttacker].specialDmg"
+    ],
+    "pc": {
+      "eitherReceiptNonzero": "advance by 5 bytes",
+      "bothReceiptsZero": "load the pointer encoded at instruction bytes 1..4"
+    }
+  },
+  "branchContract": {
+    "polarity": "jump exactly when both attacker damage receipts are zero; fall through when either receipt is nonzero",
+    "receiptOwner": "the current gBattlerAttacker, not gBattlerTarget or the last damaging battler",
+    "receiptLifetime": "TurnValuesCleanUp(FALSE) zeroes the entire ProtectStruct before the turn; datahpupdate records real non-passive physical or special HP damage on the damaged battler",
+    "focusPunch": "the zero-receipt jump targets BattleScript_HitFromAccCheck; the nonzero fallthrough reduces PP, prints STRINGID_PKMNLOSTFOCUS, waits, and goes to BattleScript_MoveEnd",
+    "move": {"id": 264, "power": 150, "accuracy": 100, "pp": 20, "priority": -3},
+    "frontierCarrier": {
+      "setId": 480,
+      "species": 307,
+      "moves": [202, 73, 264, 147],
+      "name": "FRONTIER_MON_BRELOOM_2"
+    }
+  },
+  "repeatability": {
+    "runsPerCase": 2,
+    "comparison": "byte-identical full manifest.json",
+    "allMatched": true
+  },
+  "cases": [
+    {
+      "id": "real-damage-falls-through-to-lost-focus",
+      "scenario": "tools/battle-lab/mechanic-focus-punch-damaged-off.json",
+      "scenarioSha256": "ceab94c70969085217488ec42fc8754ef842b793eff37d3fd072cad465d28343",
+      "runManifestSha256": [
+        "380326f3df019ecc7262ff690adc7ce7fc2672645542124b770503f8d9961b19",
+        "380326f3df019ecc7262ff690adc7ce7fc2672645542124b770503f8d9961b19"
+      ],
+      "builtPartyChecksumsValid": [true, true, true, true, true, true],
+      "captures": [
+        {
+          "frame": 0,
+          "sha256": "45eac8c86f123cca81a63d96d820b5c19c8bb8cbbaef48e9dac011e3817be8db",
+          "rngValue": 919694434,
+          "battleOutcome": 0,
+          "currentMove": 0,
+          "player": {"species": 307, "speed": 90, "hp": 135, "maxHp": 135, "pp": [5,10,20,15]},
+          "opponent": {"species": 121, "speed": 135, "hp": 135, "maxHp": 135, "pp": [20,20,20,20]}
+        },
+        {
+          "frame": 240,
+          "sha256": "6fbcf9d4a6ae0911c1478a12fbadeef07a426586b73d57c99d1f665e4ec0be2f",
+          "rngValue": 983229340,
+          "battleOutcome": 0,
+          "currentMove": 129,
+          "player": {"species": 307, "speed": 90, "hp": 135, "maxHp": 135, "pp": [5,10,20,15]},
+          "opponent": {"species": 121, "speed": 135, "hp": 135, "maxHp": 135, "pp": [20,19,20,20]}
+        },
+        {
+          "frame": 360,
+          "sha256": "6ebab8f90c59b5aa53711f3d4a6479e8dc59bbafcf9e7467e230a81149b342c0",
+          "rngValue": 3421819359,
+          "battleOutcome": 0,
+          "currentMove": 264,
+          "player": {"species": 307, "speed": 90, "hp": 111, "maxHp": 135, "pp": [5,10,19,15]},
+          "opponent": {"species": 121, "speed": 135, "hp": 135, "maxHp": 135, "pp": [20,19,20,20]}
+        },
+        {
+          "frame": 400,
+          "sha256": "227a92160101c2ffa6db5c3f0dd4ed57ac8f65ef91425be2fae381a863d2eb76",
+          "rngValue": 3421819359,
+          "battleOutcome": 0,
+          "currentMove": 264,
+          "visibleText": "BRELOOM lost its focus and couldn't move!",
+          "player": {"species": 307, "speed": 90, "hp": 111, "maxHp": 135, "pp": [5,10,19,15]},
+          "opponent": {"species": 121, "speed": 135, "hp": 135, "maxHp": 135, "pp": [20,19,20,20]}
+        },
+        {
+          "frame": 500,
+          "sha256": "fa4bbdb58e9d98c5c05a5d4f19207d6575ee7cdd31b9218aec22f9fed9b1b0a5",
+          "rngValue": 2682491093,
+          "battleOutcome": 0,
+          "currentMove": 0,
+          "player": {"species": 307, "speed": 90, "hp": 111, "maxHp": 135, "pp": [5,10,19,15]},
+          "opponent": {"species": 121, "speed": 135, "hp": 135, "maxHp": 135, "pp": [20,19,20,20]}
+        }
+      ]
+    },
+    {
+      "id": "zero-damage-jumps-into-hit-chain",
+      "scenario": "tools/battle-lab/mechanic-focus-punch-undamaged-off.json",
+      "scenarioSha256": "3f7cd6b1b5677550bf72b43bfc7728b577b08e12001aedccdb6a612d86e0f4a5",
+      "runManifestSha256": [
+        "6df18da00b95509e613f1313a3ac8befaed9496369c842020082e91cad54cc53",
+        "6df18da00b95509e613f1313a3ac8befaed9496369c842020082e91cad54cc53"
+      ],
+      "builtPartyChecksumsValid": [true, true, true, true, true, true],
+      "captures": [
+        {
+          "frame": 0,
+          "sha256": "45eac8c86f123cca81a63d96d820b5c19c8bb8cbbaef48e9dac011e3817be8db",
+          "rngValue": 919694434,
+          "battleOutcome": 0,
+          "currentMove": 0,
+          "opponentLightScreenTurns": 0,
+          "player": {"species": 307, "speed": 90, "hp": 135, "maxHp": 135, "pp": [5,10,20,15]},
+          "opponent": {"species": 121, "speed": 135, "hp": 135, "maxHp": 135, "pp": [30,30,30,30]}
+        },
+        {
+          "frame": 300,
+          "sha256": "275dcf1b77dc2d0b4c33e7c647806e74a1b3ba8274ed6a6ffedc4b36f692c961",
+          "rngValue": 919694434,
+          "battleOutcome": 0,
+          "currentMove": 113,
+          "opponentLightScreenTurns": 5,
+          "player": {"species": 307, "speed": 90, "hp": 135, "maxHp": 135, "pp": [5,10,20,15]},
+          "opponent": {"species": 121, "speed": 135, "hp": 135, "maxHp": 135, "pp": [30,29,30,30]}
+        },
+        {
+          "frame": 500,
+          "sha256": "582a99bc4716dc237e420f8da48ada9d2e91f13b760f75bd1b6b262917a9c065",
+          "rngValue": 3421819359,
+          "battleOutcome": 0,
+          "currentMove": 264,
+          "opponentLightScreenTurns": 5,
+          "player": {"species": 307, "speed": 90, "hp": 135, "maxHp": 135, "pp": [5,10,19,15]},
+          "opponent": {"species": 121, "speed": 135, "hp": 135, "maxHp": 135, "pp": [30,29,30,30]}
+        },
+        {
+          "frame": 600,
+          "sha256": "7dd201a8bfa4ffcc99f1d4bee749f9670e0caa0a356cdddca0daab481b0280de",
+          "rngValue": 3421819359,
+          "battleOutcome": 0,
+          "currentMove": 264,
+          "opponentLightScreenTurns": 5,
+          "player": {"species": 307, "speed": 90, "hp": 135, "maxHp": 135, "pp": [5,10,19,15]},
+          "opponent": {"species": 121, "speed": 135, "hp": 66, "maxHp": 135, "pp": [30,29,30,30]}
+        },
+        {
+          "frame": 700,
+          "sha256": "8e55db93a819f93bcb15dac7e539ae365ecf1561072b7969d8257b7df68f62a0",
+          "rngValue": 2210656548,
+          "battleOutcome": 0,
+          "currentMove": 0,
+          "opponentLightScreenTurns": 4,
+          "player": {"species": 307, "speed": 90, "hp": 135, "maxHp": 135, "pp": [5,10,19,15]},
+          "opponent": {"species": 121, "speed": 135, "hp": 66, "maxHp": 135, "pp": [30,29,30,30]}
+        }
+      ]
+    }
+  ],
+  "boundedRemainder": "The battle-lab manifest does not expose raw ProtectStruct receipt words. The legal Light Screen route proves zero player HP damage and the source pins both receipt fields and their write/reset sites; direct receipt bytes are therefore a source boundary, not a fabricated semantic field. Special-damage fallthrough is source-equivalent but not separately traced because Cmd_jumpifnodamage ORs the two fields."
+}

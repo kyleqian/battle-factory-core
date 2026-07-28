@@ -60,6 +60,11 @@ import { createBattleScriptExplosionOpcodeHandlers } from "./battleScriptExplosi
 import { createBattleScriptJumpifnotfirstturnOpcodeHandlers } from "./battleScriptJumpifnotfirstturnOpcode.ts";
 import { createBattleScriptJumpifabilitypresentOpcodeHandlers } from "./battleScriptJumpifabilitypresentOpcode.ts";
 import { createBattleScriptRecoverbasedonsunlightOpcodeHandlers } from "./battleScriptRecoverbasedonsunlightOpcode.ts";
+import { createBattleScriptCurseOpcodeHandlers } from "./battleScriptCurseOpcode.ts";
+import { createBattleScriptRemainingHpToPowerOpcodeHandlers } from "./battleScriptRemainingHpToPowerOpcode.ts";
+import { createBattleScriptFriendshipToDamageOpcodeHandlers } from "./battleScriptFriendshipToDamageOpcode.ts";
+import { createBattleScriptCopyFoeStatsOpcodeHandlers } from "./battleScriptCopyFoeStatsOpcode.ts";
+import { createBattleScriptJumpifcantswitchOpcodeHandlers } from "./battleScriptJumpifcantswitchOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -500,6 +505,8 @@ export type BattleScriptRulesContext = Readonly<
     /** Source u16 gBattleScripting.animArg1 -- the only field Cmd_playanimation's sB_ANIM_ARG1 operand dereferences (animArg2 is never read by playanimation). */
     animArg1: number;
     battleMoveDamage: number;
+    /** Source u16 gDynamicBasePower, read by Cmd_damagecalc as its power override. */
+    dynamicBasePower: number;
     /** Source s32 gHpDealt -- Cmd_datahpupdate's real-damage-dealt bookkeeping. */
     hpDealt: number;
     /** Source s32 gBideDmg[MAX_BATTLERS_COUNT]. */
@@ -625,6 +632,7 @@ export type BattleScriptRulesContextInput = Readonly<{
   multiHitCounter: number;
   multistringChooser?: number;
   battleMoveDamage?: number;
+  dynamicBasePower?: number;
   hpDealt?: number;
   bideDmg?: readonly number[];
   bideTarget?: readonly BattleScriptBattlerId[];
@@ -2002,6 +2010,11 @@ export function createBattleScriptRulesContext(
       input.battleMoveDamage ?? 0,
       "battleMoveDamage",
     ),
+    dynamicBasePower: requireUnsigned(
+      input.dynamicBasePower ?? 0,
+      0xffff,
+      "dynamicBasePower",
+    ),
     hpDealt: requireSigned32(input.hpDealt ?? 0, "hpDealt"),
     bideDmg,
     bideTarget,
@@ -2270,6 +2283,11 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptJumpifnotfirstturnOpcodeHandlers(program),
     ...createBattleScriptJumpifabilitypresentOpcodeHandlers(program),
     ...createBattleScriptRecoverbasedonsunlightOpcodeHandlers(program),
+    ...createBattleScriptCurseOpcodeHandlers(program, resolveRulesBattlerForBattleScript),
+    ...createBattleScriptRemainingHpToPowerOpcodeHandlers(program),
+    ...createBattleScriptFriendshipToDamageOpcodeHandlers(program),
+    ...createBattleScriptCopyFoeStatsOpcodeHandlers(program),
+    ...createBattleScriptJumpifcantswitchOpcodeHandlers(program),
   });
 }
 

@@ -1,0 +1,232 @@
+{
+  "schema": "flail-reversal-hp-power-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "source": {
+    "effectScript": "reference/pokeemerald/data/battle_scripts_1.s:1345-1347",
+    "remainingHpCommand": "reference/pokeemerald/src/battle_script_commands.c:8303-8315",
+    "hpPowerTable": "reference/pokeemerald/src/battle_script_commands.c:749-756",
+    "scaledHpFraction": "reference/pokeemerald/src/battle_interface.c:2517-2524",
+    "moveRecords": "reference/pokeemerald/src/data/battle_moves.h:2278-2288,2330-2340",
+    "superFangRecord": "reference/pokeemerald/src/data/battle_moves.h:2109-2119",
+    "legalLearnsets": "reference/pokeemerald/src/data/pokemon/level_up_learnsets.h:257-268,2658-2671,4327-4332; reference/pokeemerald/src/data/pokemon/egg_moves.h:660-665"
+  },
+  "publicAbiBoundary": {
+    "ramFacts": [
+      "active battler species",
+      "moves",
+      "types",
+      "ability",
+      "attack/defense/speed stats",
+      "hp/maxHp",
+      "per-slot PP",
+      "RNG value",
+      "controller state",
+      "party checksum validity"
+    ],
+    "doesNotExpose": [
+      "gDynamicBasePower",
+      "gBattleMoveDamage",
+      "gBattlescriptCurrInstr"
+    ],
+    "rule": "Each power is derived exactly from the captured pre-action HP/maxHp with GetScaledHPFraction and the pinned ROM table. Target HP loss is the public applied-damage fact; the Reversal KO row is explicitly capped by remaining target HP."
+  },
+  "repeatability": {
+    "runsPerCase": 2,
+    "comparison": "byte-identical manifest.json",
+    "allMatched": true
+  },
+  "cases": [
+    {
+      "id": "flail-six-hp-power-bands",
+      "move": 175,
+      "scenario": "tools/battle-lab/mechanic-flail-hp-bands-off.json",
+      "scenarioSha256": "e69be0376484c2a89369d39578309664cf1165635dc9d5c34a779af75d93e847",
+      "runManifestSha256": [
+        "a1bb097aace0d4fe47b8c62bb00ad10ded0fa758ca4f14763db9f551d4ee5fd3",
+        "a1bb097aace0d4fe47b8c62bb00ad10ded0fa758ca4f14763db9f551d4ee5fd3"
+      ],
+      "customPartiesBuiltBeforeBattle": true,
+      "builtParties": {
+        "playerSpecies": [328, 1, 4],
+        "opponentSpecies": [20, 187, 129],
+        "checksumValid": [true, true, true, true, true, true]
+      },
+      "activeRamFacts": {
+        "player": {
+          "species": 328,
+          "moves": [175, 150, 33, 175],
+          "types": [11, 11],
+          "ability": 33,
+          "stats": { "attack": 18, "defense": 40, "speed": 145, "spAttack": 62, "spDefense": 75 },
+          "maxHp": 95
+        },
+        "opponent": {
+          "species": 20,
+          "moves": [162, 162, 162, 162],
+          "types": [0, 0],
+          "ability": 50,
+          "stats": { "attack": 101, "defense": 123, "speed": 91, "spAttack": 70, "spDefense": 90 },
+          "maxHp": 162
+        }
+      },
+      "captures": [
+        {
+          "frame": 0,
+          "sha256": "682f58a1b3a5ac09fc639fc496b85150ee9981ed4160a7a3328f794ae3bc0c44",
+          "rngValue": 919694434,
+          "engine": { "activeBattler": 2, "controllerExecFlags": 1, "playerControllerCommand": 18, "opponentControllerCommand": 53, "currentMove": 0 },
+          "player": { "hp": 95, "pp": [15, 40, 35, 15] },
+          "opponent": { "hp": 162, "pp": [10, 10, 10, 10] }
+        },
+        {
+          "frame": 734,
+          "sha256": "05c539722d99a4fdeae9e60ca05b3705af12c7ffc72b581a0dad71d74e893a8b",
+          "rngValue": 3031698222,
+          "engine": { "activeBattler": 2, "controllerExecFlags": 1, "playerControllerCommand": 18, "opponentControllerCommand": 53, "currentMove": 0 },
+          "player": { "hp": 48, "pp": [14, 40, 35, 15] },
+          "opponent": { "hp": 160, "pp": [10, 9, 10, 10] }
+        },
+        {
+          "frame": 1468,
+          "sha256": "6e145ebe1cad4a93c5b5241de18c9d403bdee9015ca4206d0b85e21e6aaaea7a",
+          "rngValue": 1300148282,
+          "engine": { "activeBattler": 2, "controllerExecFlags": 1, "playerControllerCommand": 18, "opponentControllerCommand": 53, "currentMove": 0 },
+          "player": { "hp": 24, "pp": [13, 40, 35, 15] },
+          "opponent": { "hp": 157, "pp": [9, 9, 10, 10] }
+        },
+        {
+          "frame": 2202,
+          "sha256": "56a4b1baff412fab6cf8c8bd042f97d9e64d737890e4d42c3a60c565425b42dc",
+          "rngValue": 3432941446,
+          "engine": { "activeBattler": 2, "controllerExecFlags": 1, "playerControllerCommand": 18, "opponentControllerCommand": 53, "currentMove": 0 },
+          "player": { "hp": 12, "pp": [12, 40, 35, 15] },
+          "opponent": { "hp": 150, "pp": [9, 9, 9, 10] }
+        },
+        {
+          "frame": 2936,
+          "sha256": "2b25f5eb778519f0edb0ce761a0b0e6e83b7d7936a1fda1619b9418b2c6c87ae",
+          "rngValue": 1580793106,
+          "engine": { "activeBattler": 2, "controllerExecFlags": 1, "playerControllerCommand": 18, "opponentControllerCommand": 53, "currentMove": 0 },
+          "player": { "hp": 6, "pp": [11, 40, 35, 15] },
+          "opponent": { "hp": 143, "pp": [9, 9, 8, 10] }
+        },
+        {
+          "frame": 3670,
+          "sha256": "399421680b6a9a1dab6ff321951a4183388b3276584f3e576e3b08e51f1be73c",
+          "rngValue": 4256677086,
+          "engine": { "activeBattler": 2, "controllerExecFlags": 1, "playerControllerCommand": 18, "opponentControllerCommand": 53, "currentMove": 0 },
+          "player": { "hp": 3, "pp": [10, 40, 35, 15] },
+          "opponent": { "hp": 134, "pp": [8, 9, 8, 10] }
+        },
+        {
+          "frame": 4404,
+          "sha256": "254ca2e6c03ced82e4646476515256c84676467b8dc03b23cb9a1d6262723098",
+          "rngValue": 3734287082,
+          "engine": { "activeBattler": 2, "controllerExecFlags": 1, "playerControllerCommand": 18, "opponentControllerCommand": 53, "currentMove": 0 },
+          "player": { "hp": 2, "pp": [9, 40, 35, 15] },
+          "opponent": { "hp": 121, "pp": [8, 9, 8, 9] }
+        }
+      ],
+      "actions": [
+        { "beforeFrame": 0, "afterFrame": 734, "attackerHp": 95, "maxHp": 95, "scaledHpFraction": 48, "power": 20, "targetHpBefore": 162, "targetHpAfter": 160, "targetHpLoss": 2, "targetFainted": false },
+        { "beforeFrame": 734, "afterFrame": 1468, "attackerHp": 48, "maxHp": 95, "scaledHpFraction": 24, "power": 40, "targetHpBefore": 160, "targetHpAfter": 157, "targetHpLoss": 3, "targetFainted": false },
+        { "beforeFrame": 1468, "afterFrame": 2202, "attackerHp": 24, "maxHp": 95, "scaledHpFraction": 12, "power": 80, "targetHpBefore": 157, "targetHpAfter": 150, "targetHpLoss": 7, "targetFainted": false },
+        { "beforeFrame": 2202, "afterFrame": 2936, "attackerHp": 12, "maxHp": 95, "scaledHpFraction": 6, "power": 100, "targetHpBefore": 150, "targetHpAfter": 143, "targetHpLoss": 7, "targetFainted": false },
+        { "beforeFrame": 2936, "afterFrame": 3670, "attackerHp": 6, "maxHp": 95, "scaledHpFraction": 3, "power": 150, "targetHpBefore": 143, "targetHpAfter": 134, "targetHpLoss": 9, "targetFainted": false },
+        { "beforeFrame": 3670, "afterFrame": 4404, "attackerHp": 3, "maxHp": 95, "scaledHpFraction": 1, "power": 200, "targetHpBefore": 134, "targetHpAfter": 121, "targetHpLoss": 13, "targetFainted": false }
+      ]
+    },
+    {
+      "id": "reversal-five-hp-power-bands",
+      "move": 179,
+      "scenario": "tools/battle-lab/mechanic-reversal-hp-bands-off.json",
+      "scenarioSha256": "a07046b0e68b200ebdb1b8509bc41ff768d414b66d0a45952621efd7a9d9b0ce",
+      "runManifestSha256": [
+        "056d7e0925d70864ca2fc8ed04ab3f767da2a8641e7f0514c5f58b585be1e9f6",
+        "056d7e0925d70864ca2fc8ed04ab3f767da2a8641e7f0514c5f58b585be1e9f6"
+      ],
+      "customPartiesBuiltBeforeBattle": true,
+      "builtParties": {
+        "playerSpecies": [193, 1, 4],
+        "opponentSpecies": [20, 187, 129],
+        "checksumValid": [true, true, true, true, true, true]
+      },
+      "activeRamFacts": {
+        "player": {
+          "species": 193,
+          "moves": [179, 33, 98, 104],
+          "types": [6, 2],
+          "ability": 14,
+          "stats": { "attack": 63, "defense": 65, "speed": 161, "spAttack": 127, "spDefense": 65 },
+          "maxHp": 140
+        },
+        "opponent": {
+          "species": 20,
+          "moves": [162, 162, 162, 162],
+          "types": [0, 0],
+          "ability": 50,
+          "stats": { "attack": 101, "defense": 123, "speed": 91, "spAttack": 70, "spDefense": 90 },
+          "maxHp": 162
+        }
+      },
+      "captures": [
+        {
+          "frame": 0,
+          "sha256": "687d937e51c605fe548b050eeef5554aa1efa4c1c3c4a2ba99aac039046bce5c",
+          "rngValue": 3034451114,
+          "engine": { "activeBattler": 2, "controllerExecFlags": 1, "playerControllerCommand": 18, "opponentControllerCommand": 53, "currentMove": 0 },
+          "player": { "hp": 140, "pp": [15, 35, 30, 15] },
+          "opponent": { "hp": 162, "pp": [10, 10, 10, 10] }
+        },
+        {
+          "frame": 734,
+          "sha256": "8e417dd49f6ee0538cb626a212fface5d36acfc7f98db0f1e253dcda333f591a",
+          "rngValue": 1038309310,
+          "engine": { "activeBattler": 2, "controllerExecFlags": 1, "playerControllerCommand": 18, "opponentControllerCommand": 53, "currentMove": 0 },
+          "player": { "hp": 70, "pp": [14, 35, 30, 15] },
+          "opponent": { "hp": 152, "pp": [10, 10, 9, 10] }
+        },
+        {
+          "frame": 1468,
+          "sha256": "f4b7b4c73c257cffcc8b66a5cf4dc1df3d84be44cb74018557b24fbfa43a4a13",
+          "rngValue": 1580793106,
+          "engine": { "activeBattler": 2, "controllerExecFlags": 1, "playerControllerCommand": 18, "opponentControllerCommand": 53, "currentMove": 0 },
+          "player": { "hp": 35, "pp": [13, 35, 30, 15] },
+          "opponent": { "hp": 131, "pp": [10, 10, 9, 9] }
+        },
+        {
+          "frame": 2202,
+          "sha256": "e0f3448840b823c04813377327eda49d7b9dc91b4c51e9071954328af0ab26c1",
+          "rngValue": 3082186918,
+          "engine": { "activeBattler": 2, "controllerExecFlags": 1, "playerControllerCommand": 18, "opponentControllerCommand": 53, "currentMove": 0 },
+          "player": { "hp": 18, "pp": [12, 35, 30, 15] },
+          "opponent": { "hp": 97, "pp": [9, 10, 9, 9] }
+        },
+        {
+          "frame": 2936,
+          "sha256": "f58b855aacefbe64a116fe5896c8a1c94dc3ce4cf5becdb62a3a33f1745b4906",
+          "rngValue": 3125503610,
+          "engine": { "activeBattler": 2, "controllerExecFlags": 1, "playerControllerCommand": 18, "opponentControllerCommand": 53, "currentMove": 0 },
+          "player": { "hp": 9, "pp": [11, 35, 30, 15] },
+          "opponent": { "hp": 52, "pp": [9, 10, 8, 9] }
+        },
+        {
+          "frame": 3670,
+          "sha256": "ee7e0eac9355710fc5dd31cbb2ca8627c8253d79b263023e598076a03248c71c",
+          "rngValue": 3412406782,
+          "engine": { "activeBattler": 2, "controllerExecFlags": 1, "playerControllerCommand": 16, "opponentControllerCommand": 2, "currentMove": 179 },
+          "player": { "hp": 9, "pp": [10, 35, 30, 15] },
+          "opponent": { "hp": 0, "pp": [9, 10, 8, 9] }
+        }
+      ],
+      "actions": [
+        { "beforeFrame": 0, "afterFrame": 734, "attackerHp": 140, "maxHp": 140, "scaledHpFraction": 48, "power": 20, "targetHpBefore": 162, "targetHpAfter": 152, "targetHpLoss": 10, "targetFainted": false },
+        { "beforeFrame": 734, "afterFrame": 1468, "attackerHp": 70, "maxHp": 140, "scaledHpFraction": 24, "power": 40, "targetHpBefore": 152, "targetHpAfter": 131, "targetHpLoss": 21, "targetFainted": false },
+        { "beforeFrame": 1468, "afterFrame": 2202, "attackerHp": 35, "maxHp": 140, "scaledHpFraction": 12, "power": 80, "targetHpBefore": 131, "targetHpAfter": 97, "targetHpLoss": 34, "targetFainted": false },
+        { "beforeFrame": 2202, "afterFrame": 2936, "attackerHp": 18, "maxHp": 140, "scaledHpFraction": 6, "power": 100, "targetHpBefore": 97, "targetHpAfter": 52, "targetHpLoss": 45, "targetFainted": false },
+        { "beforeFrame": 2936, "afterFrame": 3670, "attackerHp": 9, "maxHp": 140, "scaledHpFraction": 3, "power": 150, "targetHpBefore": 52, "targetHpAfter": 0, "targetHpLoss": 52, "targetFainted": true }
+      ]
+    }
+  ],
+  "boundedRemainder": "The matrix proves the shared full/high, mid, boundary-adjacent, and low-HP bands for Flail and Reversal in Level-50 singles. It does not claim exact uncapped Reversal damage beyond the final target's remaining 52 HP, misses, critical hits, items, abilities that modify damage, substitute, doubles, or direct transient gDynamicBasePower/gBattleMoveDamage ABI exposure."
+}

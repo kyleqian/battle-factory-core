@@ -220,6 +220,7 @@ describe("EFFECT_TRIPLE_KICK: full committed script walk, genuine terminal halt,
   it("seed where hits 1-2 land (power 10, then 20) then hit 3's own accuracycheck misses: partial sequence reaches BattleScript_TripleKickNoMoreHits with sMULTIHIT_STRING+4 = 2 (clears MOVE_RESULT_MISSED, prints \"Hit 2 times!\")", () => {
     const result = runToTerminal("BattleScript_EffectTripleKick", context(MOVE_TRIPLE_KICK), 1);
     expect(result.state.rulesContext.battlers[1]!.hp).toBe(971); // 2 hits landed, power 10 then 20
+    expect(result.state.rulesContext.dynamicBasePower).toBe(20); // hit 3 misses before the next scratch-power raise/copy
     // 1(hit-1 acc) + 2(hit-1 crit+dmg) + 1(hit-2 acc) + 2(hit-2 crit+dmg) + 1(hit-3 acc, missed) + 1(final)
     expect(result.state.rng.calls).toBe(8);
   });
@@ -227,6 +228,7 @@ describe("EFFECT_TRIPLE_KICK: full committed script walk, genuine terminal halt,
   it("seed where all 3 hits land: full 10/20/30 power ramp, loop exits via decrementmultihit's own counter-exhausted fallthrough (not the accuracy-miss fail tail)", () => {
     const result = runToTerminal("BattleScript_EffectTripleKick", context(MOVE_TRIPLE_KICK), 2);
     expect(result.state.rulesContext.battlers[1]!.hp).toBe(943); // 3 hits landed, power 10/20/30
+    expect(result.state.rulesContext.dynamicBasePower).toBe(30);
     // 3 * (1 acc + 2 crit/dmg) + 1(final effect-chance roll)
     expect(result.state.rng.calls).toBe(10);
   });

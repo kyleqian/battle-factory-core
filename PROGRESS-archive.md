@@ -1,4 +1,509 @@
 ---
+## 545 — [SUPERVISOR VERIFY 2026-07-27 ~21:58] Baton Pass OFF evidence merged reproducibly
+
+- **State:** union green at **298 files / 3840 tests**; `npm run build`,
+  freshness, and `git diff --check` pass. Psych Up's census remains
+  **131/214, 255/355, 207/276, 2618/2957**.
+- **Did:** independently replayed and merged `1830a9e`'s legal six-mon
+  `mechanicLab` evidence twice; both manifests hash exactly
+  `f9d042cc…a93`. Mean Look creates `STATUS2_ESCAPE_PREVENTION`, then Baton
+  Pass's encoded `0x81` selector correctly bypasses it, spends PP **40→39**,
+  switches LEDYBA slot 0→BULBASAUR slot 1, transfers the volatile, and keeps
+  RNG at **1621732966** through switch completion.
+- **Next:** register the generated top blocker
+  `B_SCR_OP_JUMPIFCANTSWITCH` / `EFFECT_BATON_PASS` from this source/oracle
+  contract. In ordinary singles, pin pointer-branch vs six-byte advance,
+  bit-7 volatile bypass, both sides, and eligible-party scanning; guard or
+  source-completely implement non-singles topology explicitly.
+- **Notes:** focused **5/5**, full **3840/3840**, build/freshness/diff green.
+  No fabricated no-bench trace, unsupported barrier, recording import,
+  ratchet change, oracle lifecycle action, animation edit, or PAPERCUT.
+
+---
+## 544 — [SUPERVISOR SOURCE CORRECTION 2026-07-27 ~21:55] Psych Up executes source-completely
+
+- **State:** tree green at **297 files / 3835 tests**; `npm run build`,
+  census, freshness, and `git diff --check` pass. The unchanged Battle-2 OFF
+  trace remains **16/16 exact**.
+- **Did:** registered `B_SCR_OP_COPYFOESTATS` / `Cmd_copyfoestats` as the
+  source's unconditional five-byte command: copy all eight target stat stages
+  to the attacker, ignore the unused failure pointer, and change nothing else.
+  Opcode isolation plus neutral/non-neutral `BattleScript_EffectPsychUp`
+  walks reach their real `END`, pin PP/events/provenance, preserve HP/status,
+  existing animation state, and zero-call RNG. Corrected a false brief claim
+  before commit: the command does not write animation arguments.
+- **Next:** merge the file-disjoint Baton Pass OFF evidence, then register the
+  newly top-ranked `B_SCR_OP_JUMPIFCANTSWITCH` / `EFFECT_BATON_PASS`.
+- **Notes:** census is **131/214 effects, 255/355 moves, 207/276 Factory-L50
+  distinct, 2618/2957 weighted**, exact **+1/+1/+1/+14**, all **42/42**
+  checks. Focused **53/53** and full **3835/3835** pass. No unsupported
+  barrier, recording import, ratchet change, oracle lifecycle action,
+  animation edit, or PAPERCUT.
+
+---
+## 543 — [BOUNDED MAIN WORKER 2026-07-27 ~21:43] Full-turn singles requests use source move targets
+
+- **State:** tree green at **296 files / 3829 tests**; `npm run build` and
+  `git diff --check` clean. The unchanged Battle-2 OFF trace remains
+  **16/16 exact**.
+- **Did:** extended the generated full-turn move view with `target` and ported
+  the represented singles branches of `GetMoveTarget`: USER stays on the
+  actor; SELECTED/DEPENDS/BOTH/FOES_AND_ALLY/OPPONENTS_FIELD/RANDOM select the
+  only foe without RNG. Canonical ONIX SANDSTORM slot 3 and KABUTO PROTECT
+  slot 3 now self-target at initial/trainer/next-turn boundaries; all other
+  canonical slots oppose. The existing slot-3 execution/PP proof remains.
+- **Next:** source-completely register `B_SCR_OP_COPYFOESTATS` /
+  `EFFECT_PSYCH_UP`, walk neutral/non-neutral scripts to END, and regenerate
+  the executable-frontier census for exact **+1/+1/+1/+14**.
+- **Notes:** focused **24/24**, full **3829/3829**, build/compare/diff green.
+  No RNG target draw, unsupported barrier, recording import, ratchet change,
+  oracle lifecycle action, animation edit, or PAPERCUT.
+
+---
+## 542 — [BOUNDED MAIN WORKER 2026-07-27 ~21:33] Full-turn singles requests are move-slot generic
+
+- **State:** tree green at **295 files / 3824 tests**; `npm run build` and
+  `git diff --check` clean. The unchanged Battle-2 OFF trace remains
+  **16/16 exact**.
+- **Did:** one shared singles legal-move helper now publishes every nonzero
+  configured slot, in order, with the opposing target for player/trainer and
+  at both initial/next-turn boundaries. Removed the player slot-0 reducer
+  guard; public legality still rejects empty slots. Tier-1 submits player
+  slot 3 and pins final `currentMovePosition=3`, slot-3 PP **20→19**, and
+  PP-event interpreter provenance. Added the scout’s historical-resolution
+  note pointing to `22ddfcd` / `f4427c0`.
+- **Next:** supervisor verify this correction, the preserved canonical
+  ONIX/KABUTO **650807554 / 4-call** result, exact nine-command projection,
+  and unchanged **16/16**, then resume the ranked S10 executable frontier.
+- **Notes:** focused **24/24**, full **3824/3824**, build/compare/diff green.
+  No unsupported barrier, canonical-recording import, ratchet change,
+  oracle lifecycle action, animation edit, or PAPERCUT.
+
+---
+## 541 — [BOUNDED MAIN WORKER 2026-07-27 ~21:24] Real full-turn kernel now drives the exact Battle-2 OFF seam
+
+- **State:** union green at **295 files / 3823 tests**; `npm run build`
+  clean. The unchanged `battle2-off-turn1-staged.json` trace remains
+  **16/16 exact** on the selected OFF profile.
+- **Did:** the existing Scene-OFF adapter now projects provenance-bearing
+  semantic events plus the genuine request-3 boundary into the same nine
+  relative commands, acknowledging exactly at
+  **145,146,160,260,261,311,400,404,405**. The existing app stage now retains
+  the immutable full-turn transition and renders names/HP/stat/text from its
+  projection; kernel RNG stays honestly at **650807554 / 4 calls**.
+- **Next:** supervisor independently verify `22ddfcd` plus this presentation
+  commit and the unchanged **16/16** trace, then resume the ranked S10
+  executable frontier. The retired staged 12-draw scenario may be removed
+  later only after auditing its remaining callers.
+- **Notes:** focused **17/17**, full **3823/3823**, build and `git diff
+  --check` green. Preserved the concurrent file-disjoint Return/Frustration
+  evidence merge. No synthetic eight-draw tail, canonical recording import,
+  unsupported barrier, ratchet change, oracle lifecycle action, or PAPERCUT.
+
+---
+## 540 — [BOUNDED MAIN WORKER 2026-07-27 ~21:17] Full-turn controller seam source-correct and provenance-bearing
+
+- **State:** tree green at **294 files / 3820 tests**; `npm run build`
+  clean. The direct canonical ONIX/KABUTO full turn reaches player request
+  **3** with HP **117/63**, PP **9/14**, accuracy **5**, and RNG
+  **650807554 / 4 calls**.
+- **Did:** the backward-compatible full-turn config now carries canonical
+  ability/item/four-slot PP/friendship; both submitted move slots reach
+  `currentMovePosition`. One source-documented `HandleAction_ActionFinished`
+  helper clears every represented action field and script stack. Public
+  boundary events preserve immutable interpreter provenance; the former
+  scout barriers are positive direct-config assertions, including two used-
+  move messages, Sand Attack damage **0**, and exact source labels.
+- **Next:** project the immutable semantic events plus request-3 boundary
+  into the existing nine relative Scene-OFF commands/acknowledgements, then
+  replace only `battle2-off-turn1-before-confirm` and reprove the unchanged
+  trace at **16/16**. Do not synthesize the later eight AI/controller draws.
+- **Notes:** focused **28/28**, full **3820/3820**, build green; baseline OFF
+  oracle hash `9c89c741…f297`. No oracle lifecycle action, canonical recording
+  import, unsupported barrier, ratchet change, or PAPERCUT.
+
+---
+## 539 — [SUPERVISOR VERIFY 2026-07-27 ~21:06] Return/Frustration + Battle-2 OFF kernel-seam evidence merged green
+
+- **State:** union green at **293 files / 3819 tests**; `npm run build`
+  clean. Census regenerates byte-clean at **130/214 effects, 254/355 moves,
+  206/276 Factory-L50 distinct, 2604/2957 weighted (88.1%)**, with **42/42**
+  checks. The unchanged staged Battle-2 OFF trace remains **16/16** and the
+  selected OFF oracle is fresh at `9c89c741…f297`.
+- **Did:** independently reviewed and verified the generic Return/Frustration
+  opcode, all u8 friendship boundaries, terminal paths, and cross-action
+  cleanup. Merged `83718d2`, a file-disjoint real-kernel scout proving exact
+  Battle-2 turn-1 HP/stat outcomes and four source move draws. It pins the
+  remaining reusable seam gaps: canonical ability/item/PP inputs, submitted
+  move-slot propagation, complete represented `HandleAction_ActionFinished`
+  cleanup, and provenance preservation through the public boundary.
+- **Next:** source-completely fix those four shared-controller gaps, then
+  project the resulting immutable semantic events and request-3 boundary onto
+  the existing nine relative OFF commands. Preserve the unchanged 16-frame
+  trace and do not fabricate the eight later next-turn controller/AI draws.
+- **Notes:** side worktree/branch removed. No new unsupported barrier,
+  canonical-recording production import, ratchet change, or deferred decision.
+  No PAPERCUT.
+
+---
+## 538 — [BOUNDED WORKER 2026-07-27 ~21:02] Return/Frustration execute end to end; exact +2/+2/+2/+18
+
+- **State:** tree committed and green at **292 files / 3816 tests**;
+  `npm run build` clean. Census regenerates to **130/214 effects, 254/355
+  moves, 206/276 Factory-L50 distinct, 2604/2957 weighted (88.1%)**, the
+  assigned exact **+2 effects / +2 moves / +2 distinct / +18 weighted**,
+  with all **42/42** checks passing.
+- **Did:** `696d475` source-ports/registers the shared zero-operand
+  `B_SCR_OP_FRIENDSHIPTODAMAGECALCULATION` with exact u8 friendship
+  complement/floor arithmetic and strict effect/dispatch-shape validation.
+  Tier-1 pins both genuine-END walks, all quotient boundaries, extrema,
+  invalid contexts, opcode isolation, miss, Protect, faint, and generic
+  Frustration→ordinary-Strength action-boundary cleanup. `5e51eea`
+  regenerates the census.
+- **Next:** supervisor verify this completed row, then take the generated
+  top-ranked `B_SCR_OP_COPYFOESTATS` / `EFFECT_PSYCH_UP` row
+  (**+1 effect / +1 move / +1 distinct / +14 weighted**).
+- **Notes:** no unsupported barrier, canonical-recording import, ratchet,
+  side-scout file, canonical Battle-2, or oracle lifecycle change. Battle
+  Scene OFF freshness passed at baseline (`9c89c741…f297`). No PAPERCUT.
+
+---
+## 537 — [SUPERVISOR VERIFY 2026-07-27 ~20:50] Flail/Reversal implementation + all-band OFF evidence merged green
+
+- **State:** union committed and green at **291 files / 3792 tests**;
+  `npm run build` clean. Census regenerates byte-clean at **128/214 effects,
+  252/355 moves, 204/276 Factory-L50 distinct, 2586/2957 weighted (87.5%)**,
+  with **42/42** checks. Both oracle profiles are fresh; no deferred decision.
+- **Did:** reviewed the source-port and found one newly materialized
+  cross-action hazard: `gDynamicBasePower` survived into the second mover.
+  Commit `8f55359` ports `HandleAction_ActionFinished`'s generic reset and
+  pins Flail→ordinary-Strength isolation. Independently replayed and merged
+  the side evidence: legal Super Fang staging traverses all six Flail bands
+  and five Reversal bands; supervisor hashes match `a1bb097a…5fd3` and
+  `056d7e09…e9f6`.
+- **Next:** register `B_SCR_OP_FRIENDSHIPTODAMAGECALCULATION` for
+  RETURN/FRUSTRATION (**+2 effects / +2 moves / +2 distinct / +18 weighted**)
+  while a side lane maps the executable replacement of the old staged
+  Battle-2 OFF turn fixture with real full-turn-kernel semantic events.
+- **Notes:** verified side worktree/branch removed. No canonical Battle-2
+  march, new unsupported barrier, ratchet change, or PAPERCUT.
+
+---
+## 536 — [BOUNDED WORKER 2026-07-27 ~20:44] EFFECT_FLAIL executes Flail/Reversal end to end; exact +1/+2/+2/+20
+
+- **State:** tree committed and green at **290 files / 3786 tests**;
+  `npm run build` clean. Census regenerates to **128/214 effects, 252/355
+  moves, 204/276 Factory-L50 distinct, 2586/2957 weighted (87.5%)**, the
+  assigned exact **+1 effect / +2 moves / +2 distinct / +20 weighted**, with
+  all **42/42** ground-truth checks passing.
+- **Did:** `53b4dc2` source-ports/registers
+  `B_SCR_OP_REMAININGHPTOPOWER`, materializes generic `gDynamicBasePower`
+  through the existing damage calculator and Triple Kick copy, and adds
+  Tier-1 coverage for every inclusive HP-band boundary plus Flail/Reversal
+  hit, miss, Protect, faint, and zero-HP-attacker terminals at genuine
+  `B_SCR_OP_END`. `e101563` regenerates the verified census.
+- **Next:** supervisor verify this completed registration and merge the
+  file-disjoint OFF-profile evidence, then continue the generated ranked
+  frontier at `B_SCR_OP_FRIENDSHIPTODAMAGECALCULATION` /
+  `EFFECT_RETURN` + `EFFECT_FRUSTRATION` (**+2/+2/+2/+18** predicted).
+- **Notes:** `tests/executableFrontierRatchet.test.ts` is unchanged: no new
+  unsupported barrier and no canonical-recording import. Battle Scene OFF
+  oracle freshness was checked at baseline only (`9c89c741…f297`); no oracle
+  lifecycle action, evidence-file edit, or recording-derived production
+  behavior. No PAPERCUT.
+
+---
+## 535 — [SUPERVISOR VERIFY 2026-07-27 ~20:34] Curse registration + repeatable OFF-profile evidence merged green
+
+- **State:** union committed and green at **289 files / 3766 tests**;
+  `npm run build` clean. Census regenerates byte-clean at **127/214 effects,
+  250/355 moves, 202/276 Factory-L50 distinct, 2566/2957 weighted (86.8%)**,
+  with all **42/42** ground-truth checks passing. Both oracle profiles are
+  fresh; no deferred decision.
+- **Did:** independently reviewed the generic `EFFECT_CURSE` implementation
+  and its selector/opcode widenings, reproduced both side-lane Battle Scene
+  OFF mechanic-lab traces, then merged the file-disjoint evidence. The ROM
+  gives Ghost Curse **120→60 HP + target status2 `0x10000000`** and non-Ghost
+  Curse neutral stages **ATK/DEF +1, Speed -1**; two worker reruns and the
+  supervisor rerun agree on manifest hashes `77a143a8…a553` and
+  `8caa6945…fdc`.
+- **Next:** register `B_SCR_OP_REMAININGHPTOPOWER` / `EFFECT_FLAIL`
+  generically while a side lane stages repeatable OFF-profile Flail/Reversal
+  HP-band evidence; verify the union, then continue to RETURN/FRUSTRATION.
+- **Notes:** side worktree and merged branch removed after verification. No
+  canonical Battle-2 march, no new unsupported barrier, no ratchet change,
+  and no PAPERCUT.
+
+---
+## 534 — [BOUNDED WORKER 2026-07-27 ~20:28] EFFECT_CURSE registered end to end; +1 effect / +1 move / +18 weighted
+
+- **State:** tree committed and green at **288 files / 3761 tests**;
+  `npm run build` clean. Census regenerated to **127/214 effects, 250/355
+  moves, 202/276 Factory-L50 distinct, 2566/2957 weighted (86.8%)**.
+  The actual delta is the assigned **+1 effect / +1 move / +1 distinct /
+  +18 weighted**, with all **42/42** census self-checks passing.
+- **Did:** implemented source-complete generic handlers for
+  `B_SCR_OP_JUMPIFTYPE2` (both type slots) and `B_SCR_OP_CURSETARGET`
+  (already-cursed failure plus half-max-HP damage), then composed the committed
+  `BattleScript_EffectCurse` through its existing selectors, stat reducers,
+  damage path, and move-end events. Tier-1 walks reach genuine
+  `B_SCR_OP_END` terminals for Ghost and non-Ghost users and pin exact
+  HP/status2/stat-stage/event/PP/RNG behavior, including stat-limit failure,
+  already-cursed, substitute, and random-target fallback boundaries.
+- **Next:** supervisor verify/merge this completed step, then resume the ranked
+  frontier at `B_SCR_OP_REMAININGHPTOPOWER` / `EFFECT_FLAIL`; RETURN and
+  FRUSTRATION follow. End-turn Curse damage remains explicitly out of scope.
+- **Notes:** `tests/executableFrontierRatchet.test.ts` is unchanged; no new
+  unsupported barriers or canonical-recording imports. Battle Scene OFF oracle
+  freshness was checked at baseline only; no oracle lifecycle action or
+  recording-derived behavior. No PAPERCUT.
+
+---
+## 533 — [SUPERVISOR ORIENT 2026-07-27 ~20:12] animation fold + fresh green OFF-profile baseline
+
+- **State:** union committed except for this ledger/test-fix step and green at
+  **287 files / 3753 tests**; `npm run build` clean. Battle Scene OFF oracle
+  is fresh at canonical SHA `9c89c741…f297`; census remains
+  **126/214 effects, 249/355 moves, 201/276 Factory-L50, 2548/2957 weighted
+  (86.2%)**. No deferred questions.
+- **Did:** folded all 10 `animation-main` commits absent from `master`
+  (`d0c04f8`: Spark framebuffer closure, CHARM exact, Scary Face partial +
+  evidence). The union exposed one supervisor-only launcher-test leak:
+  `POKEBENCH_ROLE=supervisor` was not scrubbed by
+  `codexLauncherProfiles.test.ts`; its five subprocess checks are hermetic
+  again. Restarted the stale port-8014 service and re-ran freshness, full
+  Tier-1, and build on the union.
+- **Next:** resume the ranked executable census with the `EFFECT_CURSE` pair
+  while a file-disjoint side worker prepares the next staged OFF-profile
+  presentation-seam evidence; verify/merge both, then continue with FLAIL and
+  the banked §15 seam wiring.
+- **Notes:** no executable-frontier ratchet or barrier change. No PAPERCUT.
+
+---
+## 532 — [USER-DIRECTED TOOLING 2026-07-27 ~20:10] Codex max mode added: Sol/ultra supervisor, all-Sol workers up to xhigh
+
+- **State:** tree green at **285 files / 3740 tests** (+1 file / +5
+  launcher-profile tests), `npm run build` clean; oracle Battle Scene OFF
+  profile healthy. Gameplay/census state is unchanged from entry 531.
+- **Did:** `run-supervisor.sh` now accepts `-M` / `--max-mode`, selects Codex
+  automatically, and fixes the supervisor at `gpt-5.6-sol` / `ultra`. The
+  profile propagates into `tools/run-subagent.sh`: every worker is locked to
+  `gpt-5.6-sol`, defaults to `xhigh`, may be explicitly lowered, and rejects
+  Claude/Terra or effort above xhigh. `-m` remains the existing model flag;
+  uppercase `-M` is the non-breaking max-mode shorthand. The ordinary Codex
+  Sol/high supervisor + tiered-worker profile remains unchanged.
+- **Next:** resume entry 531's ordered gameplay work: ranked census descent
+  (CURSE pair, FLAIL, RETURN/FRUSTRATION), then banked §15
+  turn13-sandattack wiring and §16 prep-scout.
+- **Notes:** hermetic launcher tests pin the long/short flags, resolved
+  supervisor/worker profiles, inherited mode, lower worker effort, and
+  Claude/Terra rejection. No executable-frontier ratchet or barrier changes.
+  No PAPERCUT.
+
+---
+## 531 — [SUPERVISOR WIND-DOWN 2026-07-27 ~19:00] session complete: 10 rounds / 16 workers, all green, all verified and merged
+
+- **State (final):** tree committed and green at **284 files / 3735 tests**
+  (session start 263/3512; the union includes the wind-down animation
+  fold), `npm run build` clean, clean `git status`, zero unmerged side
+  branches, zero stale worktrees, ~91 commits this session.
+  `animation-main` folded twice (6 commits at orient: SWAGGER +
+  SELF_DESTRUCT exact; 35 at wind-down: TAUNT exact + SPARK partial +
+  tooling — coverage now **49/276 exact, 4 partial**; their supervisor
+  session is still live, so later commits fold next orient). **No DEFERRED
+  entries — nothing blocks the next `run-supervisor.sh`.** All 16 workers
+  across 10 rounds completed (0 failures, 0 salvages, no usage limits).
+- **Census: 105/214 → 126/214 effects, 206/355 → 249/355 moves, 167/276 →
+  201/276 Factory-L50, 2251/2957 → 2548/2957 weighted (76.1% → 86.2%)**
+  via 6 registration steps whose predicted flips ALL matched actuals
+  exactly: TRYINFATUATING+JUMPIFCONFUSEDANDSTATMAXED (+70, incl. gender
+  model + 2 barrier narrowings), RESTORE_HP/SOFTBOILED/OHKO (+57, incl. a
+  dormant destiny-bond hitMarker bug fix), multi-hit cluster (+23-part),
+  Roar+TRIPLE_KICK (+63 with multi-hit, incl. BATTLE_TYPE_ARENA slip fix),
+  EXPLOSION pair (+25, incl. missing Explosion defense-halving in
+  damageCalc), semi-invulnerable 7-item set (+35, 4 effects), sunlight-
+  heal/FAKE_OUT/SOLAR_BEAM rows (+47, 5 effects). 42/42 census
+  self-checks; next top rows: EFFECT_CURSE pair (18), FLAIL (20),
+  RETURN/FRUSTRATION (18).
+- **Census instrument FIXED (side rounds 2-3, supervisor-verified against
+  raw source):** the CFG extractor missed operand-carried jump edges (170
+  synthesized across ~60 mnemonics) and fabricated Roar’s fallthrough into
+  the adjacent script; corrected rows pinned with exact-set self-checks.
+  Scout dossier docs/roar-multihit-registration-scout.md consumed same
+  session; docs/semi-invulnerable-registration-scout.md scouted AND
+  consumed same session (its corrected 4-effects-not-1 prediction proved
+  exact).
+- **Seam program: 4 windows wired from kernel events this session** —
+  turn2-endeavor (§13.3, 77/77), turn6-statfall ATK-fell text (§12.3 step
+  3, 127/127), turn11-featherdance ATK-floor text (§14.3, 178/178), each
+  first-try in 6-20 min against banked scouts; §15 (turn13-sandattack,
+  190/190 re-pinned, existing bridge suffices) is banked unconsumed for
+  next session. Prerequisite unblock chain: the apostrophe-charmap
+  extractor bug (alias '\'' = B4 never applied) fixed with 129 templates
+  corrected → unblocked both turn6-statfall and turn11 the same session.
+  turn-N traces route ON-profile BY DESIGN (AGENTS.md legacy contract) —
+  seam-doc banner + PAPERCUTS entry added.
+- **AI CV ground truth:** AccuracyDown DRAW SITEs 3/4 live-verified
+  (19/19 predicted draws, both seeds/reruns; 499-scenario verify suite
+  ALL PASS rerun by supervisor); EvasionUp sites 6/7 + AccuracyDown's
+  analogous pair closed as structurally UNSTAGEABLE with documented
+  reasons (volatile status on the AI's own battler; switching clears it)
+  — negative closure, not debt.
+- **Next (in order):** census ranked-table descent (CURSE pair, FLAIL,
+  RETURN/FRUSTRATION); §15 turn13-sandattack wiring (banked, zero new
+  bridge surface); next §16 prep-scout per cadence; ISSUES #41/#39 keep
+  retiring window by window.
+- **Notes:** 1 new PAPERCUTS entry (turn-N ON-profile routing rediscovery).
+  Supervisor process notes: cwd-poisoned-shell trap bit twice more (7
+  lifetime) — one merge chain self-no-op'd and deleted its own cwd; branch
+  survived, recovered clean; every post-worktree block now starts with an
+  absolute cd. Worker entry-header timestamps drifted up to +1.5h again —
+  scheduling was done off `date`. Oracle services fresh all session; the
+  user's `codex/oracle-tooling-papercuts` worktree untouched.
+
+---
+## 530 — [BOUNDED WORKER 2026-07-27 ~20:20] Three single-opcode census rows registered; +5 effects/+5 moves/+47 weighted (matches assigned prediction exactly)
+
+- **State:** tree green at **282 files / 3745 tests** (279/3704 → +3 files /
+  +41 tests: new `battleScriptRecoverbasedonsunlightOpcode.test.ts` (12),
+  `battleScriptJumpifnotfirstturnOpcode.test.ts` (6),
+  `battleScriptJumpifabilitypresentOpcode.test.ts` (11), plus pin updates in
+  `battleScriptJumpifhalfwordOpcode.test.ts` and `battleScriptRulesContext.test.ts`
+  for the 3 new opcode ids), `npm run build` clean. Census regenerated:
+  **126/214 effects, 249/355 moves, 201/276 Factory-L50 unweighted, 2548/2957
+  weighted (86.2%)** — up from 121/214/244/197/2501. **Actual flip matches
+  the assigned brief's predicted totals exactly** (+5/+5/+4/+47 across
+  effects/moves/Factory-L50-unweighted/weighted) and each individual row's
+  own predicted weighted share (16+15+16=47). `executableFrontierRatchet.test.ts`
+  unmoved (6/6, zero net new barriers).
+- **Did:** all three assigned rows, in order. **(1) `B_SCR_OP_RECOVERBASEDONSUNLIGHT`**
+  (new `battleScriptRecoverbasedonsunlightOpcode.ts`) — Morning Sun/Synthesis/
+  Moonlight share one identical script (`data/battle_scripts_1.s:1731-1738`),
+  so one registration flips all three. Weather-scaled heal fraction derived
+  source-exactly (2/3 sun via the source's own unreduced `20*maxHP/30`
+  literal, 1/2 no-weather-or-no-effect, 1/4 other), `WEATHER_HAS_EFFECT`
+  composed from the new ability-on-field scan (below) rather than
+  reimplemented. Zero barriers, zero `Random(` calls. **(2)
+  `B_SCR_OP_JUMPIFNOTFIRSTTURN`** (new `battleScriptJumpifnotfirstturnOpcode.ts`)
+  — the brief's own open question ("does the engine model isFirstTurn?")
+  resolved to **yes, already durable**
+  (`battleScriptRulesContext.ts`'s `isFirstTurn`, previously only read by
+  Speed Boost's `!= 2` exception) — no new engine field needed, just the
+  opcode itself. Zero barriers. **(3) `B_SCR_OP_JUMPIFABILITYPRESENT`** (new
+  `battleScriptJumpifabilitypresentOpcode.ts`) — the any-battler-on-field
+  ability scan (`ABILITYEFFECT_CHECK_ON_FIELD`), exported as
+  `abilityPresentOnField` and reused by row 1's own `WEATHER_HAS_EFFECT`.
+  Both concrete call sites (Cloud Nine, Air Lock) are fixed facts of the
+  compiled program, so the ability-operand domain is validated **eagerly at
+  registration** (mirroring `Cmd_clearstatusfromeffect`'s own exact-shape
+  check) rather than deferred to an unreachable runtime barrier — no ratchet
+  growth. **Verified and widened the scout-flagged gap**: `docs/semi-invulnerable-registration-scout.md`'s
+  named `gBattleWeather` `JUMPIFHALFWORD` gap on Solar Beam's own
+  sun-skips-charge check was real and is now closed (`gBattleWeather` ->
+  `rules.weather`, `B_WEATHER_SUN` added to the halfword value universe) —
+  the existing barrier test for this pointer was converted to a
+  no-longer-halts pass-through test, same pattern as the prior `gChosenMove`
+  widening.
+- **Tests:** full committed-script Tier-1 walks to genuine `{kind:"terminal",
+  opcodeName:"B_SCR_OP_END"}` halts for every flipped effect. Row 1: Morning
+  Sun under clear weather (heal=maxHP/2, 0 RNG), Synthesis under sun
+  (heal=floor(20*maxHP/30), 0 RNG), Moonlight under rain (heal=maxHP/4, 0
+  RNG), plus the shared full-HP fail tail and a Cloud-Nine-nullifies-sun
+  case. Row 2: Fake Out first-turn success (flinch composes through the real
+  `seteffectwithchance` certain-branch — **3 RNG draws, not 4**: `MOVE_EFFECT_CERTAIN`
+  takes `Cmd_seteffectwithchance`'s certain branch, which applies the effect
+  directly with no percent-chance roll at all, unlike the non-certain tail
+  every other hit-chain walk in this engine pins at 4) and the not-first-turn
+  fail tail (0 RNG). Row 3: Solar Beam's full two-turn cycle (charge turn 0
+  RNG, attack turn 4 RNG — same shape as Razor Wind/Dive), the sun-skip
+  single-turn walk (4 RNG, no separate charge turn at all), and a
+  Cloud-Nine-under-sun case proving the ability check runs before the
+  weather check. All RNG roll counts pinned directly against the real
+  handler composition, not assumed.
+- **Notes:** no PAPERCUT. One real correction found and fixed while writing
+  tests, not assumed from the brief: Fake Out's guaranteed flinch draws 3
+  RNG rolls, not 4 — `MOVE_EFFECT_CERTAIN` bypasses `Cmd_seteffectwithchance`'s
+  percent-chance roll entirely (source's own `if (certain) ... else { Random()
+  ... }` structure), distinct from the semi-invulnerable trio's own
+  moveEffectByte-0 case (not CERTAIN) which does still draw that roll
+  unconditionally. Five commits: one per opcode/row plus census regen. Next
+  ranked census rows (out of this step's scope): `EFFECT_CURSE` pair,
+  `EFFECT_FLAIL`, `EFFECT_RETURN`+`EFFECT_FRUSTRATION`.
+
+---
+## 529 — [BOUNDED WORKER 2026-07-27 ~19:45] Semi-invulnerable trio registered end to end; +4 effects/+7 moves/+35 weighted (matches scout exactly)
+
+- **State:** tree green at **276 files / 3675 tests** (275/3639 → +1 file /
+  +36 tests: new `battleScriptSemiInvulnerableOpcode.test.ts` 20 tests,
+  the remainder from extensions to `battleScriptJumpifwordOpcode.test.ts`,
+  `battleScriptIngrainLeechSeedWrapOpcode.test.ts`, and
+  `battleScriptHitChainOpcode.test.ts` — `battleScriptRulesContext.test.ts`
+  gained no new tests, just an updated handler-id pin), `npm run build`
+  clean. Census regenerated: **121/214 effects, 244/355
+  moves, 197/276 Factory-L50 unweighted, 2501/2957 weighted (84.6%)** — up
+  from 117/214/237/191/2466. **Actual flip matches the assigned brief's
+  predicted +4/+7/+35 exactly**, and matches
+  `docs/semi-invulnerable-registration-scout.md`'s own corrected prediction
+  (not the ranked table's original 1-effect/4-move/32-weighted claim). 42/42
+  self-checks pass (4 new `requireExecutable` pins:
+  `EFFECT_SEMI_INVULNERABLE`/`EFFECT_RAZOR_WIND`/`EFFECT_SKY_ATTACK`/
+  `EFFECT_SKULL_BASH`, 38→42).
+- **Did:** followed the scout's 8-rung order exactly. **4 widenings on
+  already-registered opcodes** (rungs 1-4, each independently committed):
+  `JUMPIFWORD_VALUES`+`HITMARKER_NO_ATTACKSTRING`; a new
+  `applyChargingMoveEffect` (cloned from `applyThrashMoveEffect`'s shape)
+  wired into `applySetMoveEffect`'s `MOVE_EFFECT_CHARGING` case +
+  `SET_MOVE_EFFECT_SUPPORTED_BYTES` + the census's own `MOVE_EFFECT_ID_BY_NAME`
+  token; `COPYARRAY`'s `(cMULTISTRING_CHOOSER, sTWOTURN_STRINGID, 1)` tuple;
+  `PRINTFROMTABLE_TABLES`+`gFirstTurnOfTwoStringIds` (the 8-entry
+  `src/battle_message.c:1025-1035` table). **3 new opcodes** (rungs 6-7, new
+  `battleScriptSemiInvulnerableOpcode.ts`): `B_SCR_OP_CLEARSTATUSFROMEFFECT`
+  (a minimal `{MOVE_EFFECT_CHARGING: STATUS2_MULTIPLETURNS}` lookup,
+  genuinely source-complete for this opcode's entire 5-call-site domain —
+  not scope-limited — one named `(b)` barrier mirroring
+  `battleScriptRemoveitemOpcode.ts`'s identical selector-unavailable shape)
+  and `B_SCR_OP_SETSEMIINVULNERABLEBIT`/`CLEARSEMIINVULNERABLEBIT` (zero
+  barriers, a `gCurrentMove`-keyed `status3` bit write structurally
+  identical to the already-registered `setminimize`). Exported
+  `requireBattlerRole` from `battleScriptHitChainOpcode.ts` for reuse.
+- **Tests:** rung-by-rung unit coverage plus rung 8's full committed-script
+  two-turn walks (mirroring `battleScriptExplosionOpcode.test.ts`'s
+  step/ackAllPending/runToTerminal shape) to a genuine `{kind:"terminal",
+  opcodeName:"B_SCR_OP_END"}` halt: **MOVE_DIVE** (100 accuracy, no turn-2
+  accuracy-roll confound) — charge turn sets `STATUS2_MULTIPLETURNS`+
+  `chargingTurn`+`STATUS3_UNDERWATER` (0 RNG), an opponent's Tackle misses
+  the semi-invulnerable attacker on the charge-gap turn via the
+  already-registered `accuracycheck ACC_CURR_MOVE` consumer (0 RNG, dodge
+  short-circuits before the roll — proves the write/read composition
+  end-to-end), attack turn clears both bits and lands on the target (4 RNG
+  draws). **MOVE_RAZOR_WIND** (shared-plumbing collateral proof, no
+  semi-invulnerable-exclusive opcodes needed) — same charge/attack shape, 0
+  then 4 draws. **Found and fixed one real RNG-ledger slip in the scout's
+  own §3 note**: it predicted 3 draws for the attack turn
+  (accuracy+crit+damage-variance); the real count is **4** —
+  `Cmd_seteffectwithchance`'s tail draws `Random()` unconditionally
+  (`docs/hit-chain-ground-truth.md`'s roll 4) even at `moveEffectByte=0`,
+  confirmed directly against `createSeteffectwithchanceOpcodeHandler`'s own
+  source and doc comment, not assumed.
+- **Notes:** no PAPERCUT. Zero further hidden barriers found beyond the
+  scout's four widenings (unusual for this session's own pattern — the
+  scout's citations all re-verified clean). One incidental discovery, not
+  acted on: `Cmd_clearstatusfromeffect` is also called twice by
+  `BattleScript_BideAttack`/`BattleScript_BideNoEnergyToAttack` (Bide reuses
+  `MOVE_EFFECT_CHARGING` for its own unrelated energy-storing mechanic) —
+  `EFFECT_BIDE` stays blocked on its own separate opcodes regardless; noted
+  because it means this opcode has 5 concrete call sites total (not the "two
+  values" the scout's own table emphasized — value-domain size and
+  call-site count are different things), confirmed directly against the
+  compiled program before writing the eager-validation count rather than
+  trusting the scout's count. Eight commits, one per green rung plus census
+  regen, per the step brief's explicit ask. `EFFECT_SOLAR_BEAM`
+  (needs its own `JUMPIFABILITYPRESENT` opcode + a `gBattleWeather` memHword
+  widening) and `EFFECT_RAGE` (separate `MOVE_EFFECT_RAGE` dispatch gap,
+  zero weighted impact) are the scout's own named remainder, out of this
+  step's scope. `EFFECT_FLAIL`/`EFFECT_RETURN`+`EFFECT_FRUSTRATION`/
+  `EFFECT_CURSE` remain the next ranked census rows per entry 528.
+---
 ## 528 — [BOUNDED WORKER 2026-07-27 ~19:15] EFFECT_EXPLOSION registered end to end (EXPLOSION census set)
 
 - **State:** tree green at **275 files / 3639 tests** (274/3632 → +1 file /
@@ -22353,4 +22858,3 @@ both verify scripts/census independently re-verified before this entry.)*
 - **Notes:** the killing API error hit mid-response during docs; no code
   was lost (all rungs committed). The launcher's "unauthenticated/
   sandboxed" postflight hint is again noise on this failure mode.
-

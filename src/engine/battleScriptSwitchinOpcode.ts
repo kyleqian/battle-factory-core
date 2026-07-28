@@ -21,6 +21,7 @@
  * documented, not silently faked.
  */
 import {
+  drawBattleScriptRng,
   markBattleScriptControllerPending,
   transitionBattleScriptCommand,
   type BattleScriptBlockReason,
@@ -37,11 +38,13 @@ import {
   BATTLE_SCRIPT_BATTLE_TYPE_ARENA,
   BATTLE_SCRIPT_BATTLE_TYPE_DOUBLE,
   BATTLE_SCRIPT_BATTLE_TYPE_TRAINER,
+  BATTLE_SCRIPT_EFFECT_BATON_PASS,
   BATTLE_SCRIPT_PARTY_SIZE,
   type BattleScriptRulesBattlers,
   type BattleScriptRulesContext,
   type BattleScriptStatStages,
 } from "./battleScriptRulesContext.ts";
+import { BATTLE_SCRIPT_STATUS2_WRAPPED_MASK } from "./battleScriptSourceConstants.ts";
 import speciesTypesData from "../data/gen/species-types.json" with { type: "json" };
 
 /** include/constants/battle.h:60. */
@@ -58,6 +61,15 @@ const SIDE_STATUS_SPIKES = 1 << 4;
 /** include/constants/battle.h:150/160 -- cross-battler identity (battlerPreventingEscape/battlerWithSureHit) this engine does not model. */
 const STATUS2_ESCAPE_PREVENTION = 1 << 26;
 const STATUS3_ALWAYS_HITS = (1 << 3) | (1 << 4);
+/** battle_main.c:3175-3176 -- the exact volatile masks SwitchInClearSetData carries through Baton Pass. */
+const BATON_PASS_STATUS2 =
+  ((1 << 0) | (1 << 1) | (1 << 2) | (1 << 20) | (1 << 24)
+    | STATUS2_ESCAPE_PREVENTION | (1 << 28)) >>> 0;
+const BATON_PASS_STATUS3 =
+  ((1 << 0) | (1 << 1) | (1 << 2) | STATUS3_ALWAYS_HITS | (1 << 5)
+    | (1 << 10) | (1 << 16) | (1 << 17)) >>> 0;
+/** include/constants/battle.h:161 -- reset when Baton Pass changes a sure-hit target. */
+const STATUS3_ALWAYS_HITS_TURN_2 = (2 << 3) & STATUS3_ALWAYS_HITS;
 /** include/constants/abilities.h -- battle_util.c:2488-2599's ABILITYEFFECT_ON_SWITCHIN switch cases. */
 const ABILITY_DRIZZLE = 2;
 const ABILITY_CLOUD_NINE = 13;
@@ -122,7 +134,7 @@ function controllerBusyBlock(
 }
 
 /**
- * include/constants/battle_script_commands.h -- the two `various` ids this
+ * include/constants/battle_script_commands.h -- the three `various` ids this
  * file resolves; every other case name stays unrecognized (barriers).
  * VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT (23, battle_script_commands.c:
  * 6480-6482) widens this existing barrier's modeled operand set --
@@ -135,7 +147,9 @@ function controllerBusyBlock(
  */
 const VARIOUS_RESET_PLAYER_FAINTED = 7;
 const VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT = 23;
+const VARIOUS_GET_MOVE_TARGET = 3;
 const NAMED_BYTE_CONSTANTS = new Map<string, number>([
+  ["VARIOUS_GET_MOVE_TARGET", VARIOUS_GET_MOVE_TARGET],
   ["VARIOUS_RESET_PLAYER_FAINTED", VARIOUS_RESET_PLAYER_FAINTED],
   ["VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT", VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT],
 ]);
@@ -237,22 +251,39 @@ function createGetswitchedmondataOpcodeHandler(
           + "-- openpartyscreen must run first",
       );
     }
+    const fromPartyIndex = rules.battlers[battler as 0 | 1 | 2 | 3].partyIndex;
     const battlers = rules.battlers.map((candidate, index) =>
       index === battler ? Object.freeze({ ...candidate, partyIndex: decided }) : candidate
     ) as unknown as BattleScriptRulesBattlers;
     const scheduler = markBattleScriptControllerPending(context.state.scheduler, battler as 0 | 1 | 2 | 3);
+    const events = fromPartyIndex === decided
+      ? Object.freeze([])
+      : Object.freeze([Object.freeze({
+        kind: "switch" as const,
+        side: rules.battlers[battler as 0 | 1 | 2 | 3].side === 0
+          ? "player" as const
+          : "opponent" as const,
+        fromPartyIndex,
+        toPartyIndex: decided,
+      })]);
     return transitionBattleScriptCommand(
       context,
       Object.freeze({ kind: "advance" }),
-      { rulesContext: Object.freeze({ ...rules, battlers: Object.freeze(battlers) }), scheduler },
+      {
+        rulesContext: Object.freeze({ ...rules, battlers: Object.freeze(battlers) }),
+        scheduler,
+        events,
+      },
     );
   };
 }
 
 /**
  * `Cmd_switchindataupdate` (`battle_script_commands.c:4621-4671`) plus
- * `SwitchInClearSetData` (`battle_main.c:3152-3258`), the non-Baton-Pass
- * branch (Factory's forced switch never carries a Baton Pass in progress).
+ * `SwitchInClearSetData` (`battle_main.c:3152-3258`). The ordinary switch
+ * branch resets stages/status2/status3; Baton Pass instead preserves stages,
+ * masks status2/status3 to the source's transferable bits, and retains the
+ * carried Substitute HP.
  * Rebuilds species/hp/status1/types from the party record at the
  * already-updated `partyIndex`; resets stat stages/status2/status3/the
  * modeled DisableStruct-shaped fields to their neutral values; clears the
@@ -278,25 +309,57 @@ function createSwitchindataupdateOpcodeHandler(
     const rules = context.state.rulesContext;
     const active = rules.battlers[battler as 0 | 1 | 2 | 3];
     const { battlersCount } = rules.battleTopology;
+    const isBatonPass =
+      rules.currentMoveEffect === BATTLE_SCRIPT_EFFECT_BATON_PASS;
 
+    if (!isBatonPass) {
+      for (let i = 0; i < battlersCount; i += 1) {
+        if (i === battler) continue;
+        const otherStatus2 = rules.battlers[i as 0 | 1 | 2 | 3].status2;
+        const otherStatus3 = rules.battlers[i as 0 | 1 | 2 | 3].status3;
+        if ((otherStatus2 & STATUS2_ESCAPE_PREVENTION) !== 0) {
+          return unsupportedBranch(
+            context,
+            `SwitchInClearSetData's STATUS2_ESCAPE_PREVENTION cross-battler clear (battler ${i}) needs `
+              + "gDisableStructs[battler].battlerPreventingEscape identity, not modeled here",
+            3164,
+          );
+        }
+        if ((otherStatus3 & STATUS3_ALWAYS_HITS) !== 0) {
+          return unsupportedBranch(
+            context,
+            `SwitchInClearSetData's STATUS3_ALWAYS_HITS cross-battler clear (battler ${i}) needs `
+              + "gDisableStructs[battler].battlerWithSureHit identity, not modeled here",
+            3166,
+          );
+        }
+      }
+    }
     for (let i = 0; i < battlersCount; i += 1) {
       if (i === battler) continue;
-      const otherStatus2 = rules.battlers[i as 0 | 1 | 2 | 3].status2;
-      const otherStatus3 = rules.battlers[i as 0 | 1 | 2 | 3].status3;
-      if ((otherStatus2 & STATUS2_ESCAPE_PREVENTION) !== 0) {
+      const other = rules.battlers[i as 0 | 1 | 2 | 3];
+      if (
+        battlersCount !== 2
+        && (other.status2 & BATTLE_SCRIPT_STATUS2_WRAPPED_MASK) !== 0
+      ) {
         return unsupportedBranch(
           context,
-          `SwitchInClearSetData's STATUS2_ESCAPE_PREVENTION cross-battler clear (battler ${i}) needs `
-            + "gDisableStructs[battler].battlerPreventingEscape identity, not modeled here",
-          3164,
+          `SwitchInClearSetData's STATUS2_WRAPPED cross-battler clear (battler ${i}) needs `
+            + "gBattleStruct->wrappedBy identity outside singles",
+          3199,
         );
       }
-      if ((otherStatus3 & STATUS3_ALWAYS_HITS) !== 0) {
+      if (
+        isBatonPass
+        && battlersCount !== 2
+        && other.side !== active.side
+        && (other.status3 & STATUS3_ALWAYS_HITS) !== 0
+      ) {
         return unsupportedBranch(
           context,
-          `SwitchInClearSetData's STATUS3_ALWAYS_HITS cross-battler clear (battler ${i}) needs `
-            + "gDisableStructs[battler].battlerWithSureHit identity, not modeled here",
-          3166,
+          `SwitchInClearSetData's Baton Pass STATUS3_ALWAYS_HITS refresh (battler ${i}) needs `
+            + "gDisableStructs[battler].battlerWithSureHit identity outside singles",
+          3180,
         );
       }
     }
@@ -319,10 +382,10 @@ function createSwitchindataupdateOpcodeHandler(
           hp: partyMember.hp,
           status1: partyMember.status1,
           types,
-          statStages: DEFAULT_STAT_STAGES,
-          status2: 0,
-          status3: 0,
-          substituteHP: 0,
+          statStages: isBatonPass ? candidate.statStages : DEFAULT_STAT_STAGES,
+          status2: isBatonPass ? (candidate.status2 & BATON_PASS_STATUS2) >>> 0 : 0,
+          status3: isBatonPass ? (candidate.status3 & BATON_PASS_STATUS3) >>> 0 : 0,
+          substituteHP: isBatonPass ? candidate.substituteHP : 0,
           rolloutTimer: 0,
           furyCutterCounter: 0,
           truantCounter: 0 as const,
@@ -334,8 +397,28 @@ function createSwitchindataupdateOpcodeHandler(
           usedImprisonedMove: 0 as const,
         });
       }
-      const status2 = (candidate.status2 & ~infatuationBit) >>> 0;
-      return status2 === candidate.status2 ? candidate : Object.freeze({ ...candidate, status2 });
+      const clearsWrapped =
+        battlersCount === 2
+        && (candidate.status2 & BATTLE_SCRIPT_STATUS2_WRAPPED_MASK) !== 0;
+      const status2 = (
+        candidate.status2
+        & ~infatuationBit
+        & (clearsWrapped ? ~BATTLE_SCRIPT_STATUS2_WRAPPED_MASK : ~0)
+      ) >>> 0;
+      const refreshesSureHit =
+        isBatonPass
+        && battlersCount === 2
+        && candidate.side !== active.side
+        && (candidate.status3 & STATUS3_ALWAYS_HITS) !== 0;
+      const status3 = refreshesSureHit
+        ? (
+          (candidate.status3 & ~STATUS3_ALWAYS_HITS)
+          | STATUS3_ALWAYS_HITS_TURN_2
+        ) >>> 0
+        : candidate.status3;
+      return status2 === candidate.status2 && status3 === candidate.status3
+        ? candidate
+        : Object.freeze({ ...candidate, status2, status3 });
     }) as unknown as BattleScriptRulesBattlers;
 
     return transitionBattleScriptCommand(
@@ -414,11 +497,14 @@ function cancelallactionsOpcodeHandler(
 }
 
 /**
- * `Cmd_various` case `VARIOUS_RESET_PLAYER_FAINTED` (7) only
- * (`battle_script_commands.c:6371-6379`, reached here via `resetplayerfainted`
- * `BS_ATTACKER`). Every other `id` is a named barrier -- this handler is
- * registered generically for the whole program, exactly like the other
- * generic opcodes (`jumpifword`, `setbyte`), not just this script.
+ * `Cmd_various` cases `VARIOUS_GET_MOVE_TARGET` (3),
+ * `VARIOUS_RESET_PLAYER_FAINTED` (7), and
+ * `VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT` (23). GET_MOVE_TARGET's
+ * `MOVE_TARGET_SELECTED` branch is source-complete for singles: it repeats
+ * `Random() % gBattlersCount` until it finds a present opposing battler.
+ * Doubles still use the handler's existing generic barrier because Follow
+ * Me and Lightning Rod target redirection require state this context does
+ * not own. Every other `id` is that same named barrier.
  */
 function createVariousOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
   return (context) => {
@@ -431,7 +517,14 @@ function createVariousOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRul
       throw new Error(`invalid B_SCR_OP_VARIOUS shape at program counter ${context.state.programCounter}`);
     }
     const id = resolveByteLiteral(idOperand.expression);
-    if (id !== VARIOUS_RESET_PLAYER_FAINTED && id !== VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT) {
+    const rules = context.state.rulesContext;
+    const getMoveTargetSupported = id === VARIOUS_GET_MOVE_TARGET
+      && rules.battleTopology.battlersCount === 2;
+    if (
+      id !== VARIOUS_RESET_PLAYER_FAINTED
+      && id !== VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT
+      && !getMoveTargetSupported
+    ) {
       return unsupportedBranch(
         context,
         `Cmd_various case ${idOperand.expression} is not modeled`,
@@ -444,7 +537,29 @@ function createVariousOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRul
         `Cmd_various: unresolved battler selector at program counter ${context.state.programCounter}`,
       );
     }
-    const rules = context.state.rulesContext;
+    if (id === VARIOUS_GET_MOVE_TARGET) {
+      const attackerState = rules.battlers[battler];
+      let rng = context.state.rng;
+      let target: 0 | 1 | 2 | 3;
+      do {
+        const draw = drawBattleScriptRng(rng, context.instruction, "GetMoveTarget(MOVE_TARGET_SELECTED)");
+        rng = draw.rng;
+        target = (draw.randomValue % rules.battleTopology.battlersCount) as 0 | 1 | 2 | 3;
+      } while (
+        target === battler
+        || rules.battlers[target].side === attackerState.side
+        || (rules.absentBattlerFlags & (1 << target)) !== 0
+      );
+      const nextRules = Object.freeze({
+        ...rules,
+        selectorRoles: Object.freeze({ ...rules.selectorRoles, target }),
+      });
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        { rulesContext: nextRules, rng },
+      );
+    }
 
     if (id === VARIOUS_SET_ALREADY_STATUS_MOVE_ATTEMPT) {
       const alreadyStatusedMoveAttempt = (rules.alreadyStatusedMoveAttempt | (1 << battler)) >>> 0;

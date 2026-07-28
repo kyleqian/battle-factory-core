@@ -1200,16 +1200,15 @@ function toDamageCalcStatStages(battler: BattleScriptRulesBattlerState) {
  * gCritMultiplier (set by critcalc above) times gBattleScripting.dmgMultiplier
  * -- the x2 crit step lives HERE, before Cmd_typecalc's STAB/type scaling, not
  * inside calculateBaseDamage itself (docs/hit-chain-ground-truth.md's crit
- * scenario). gDynamicBasePower (Low Kick/Flail-style power overrides) is 0 for
- * every EFFECT_HIT move so movePower is always gBattleMoves[move].power.
+ * scenario). Source `gDynamicBasePower` carries Low Kick/Flail/Triple
+ * Kick-style power overrides; zero selects `gBattleMoves[move].power`.
  * `CalculateBaseDamage`'s own `powerOverride` parameter (`pokemon.c:3119-3122`,
  * `if (!powerOverride) gBattleMovePower = gBattleMoves[move].power; else
  * gBattleMovePower = powerOverride;`) is source-generic: Triple Kick's own
  * `copyhword gDynamicBasePower, sTRIPLE_KICK_POWER` (already-modeled scratch
- * state, `rules.tripleKickPower`) is the one committed-program call site that
- * ever makes it nonzero (docs/roar-multihit-registration-scout.md §4 rung 7),
- * so reading it here needs no per-effect branch -- every other move's
- * `tripleKickPower` stays 0 by construction. Side Reflect/Light Screen and
+ * state, `rules.tripleKickPower`) copies into `rules.dynamicBasePower`;
+ * Cmd_remaininghptopower writes the same source field directly. Reading that
+ * single source-shaped destination needs no per-effect branch. Side Reflect/Light Screen and
  * double-battle spread scaling are not modeled anywhere in this engine yet
  * (consistent with damageCalc.ts's own documented scope) -- both are
  * structurally always their C default (0/false) since no side-condition or
@@ -1249,7 +1248,7 @@ export const damagecalcOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRule
       types: targetBattler.types,
       statStages: toDamageCalcStatStages(targetBattler),
     },
-    movePower: rulesContext.tripleKickPower !== 0 ? rulesContext.tripleKickPower : moveRow.power,
+    movePower: rulesContext.dynamicBasePower !== 0 ? rulesContext.dynamicBasePower : moveRow.power,
     moveType,
     isCriticalHit,
     moveEffect: moveRow.effect,
