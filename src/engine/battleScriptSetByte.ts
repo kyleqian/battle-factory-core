@@ -61,6 +61,8 @@ const ATOMIC_VALUES = Object.freeze({
   B_MSG_ABSORB: 0,
   B_MSG_ABSORB_OOZE: 1,
   B_MSG_ABILITY_PREVENTS_MOVE_STATUS: 0,
+  /** battle_string_ids.h:416 -- BattleScript_EffectSubstitute's strict low-HP branch comparand. */
+  B_MSG_SUBSTITUTE_FAILED: 1,
   B_MSG_LEECH_SEED_DRAIN: 3,
   B_MSG_LEECH_SEED_OOZE: 4,
   B_MSG_STAT_FELL_EMPTY: 3,

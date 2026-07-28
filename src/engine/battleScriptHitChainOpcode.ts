@@ -257,8 +257,12 @@ const B_MSG_ABILITY_PREVENTS_MOVE_STATUS = 0;
 const B_MSG_ABILITY_PREVENTS_ABILITY_STATUS = 1;
 const B_MSG_STATUS_HAD_NO_EFFECT = 2;
 
-/** printfromtable's 7 small constant tables (battle_message.c:1072-1099,1214-1232), 2-3 STRINGID_* entries each, indexed by MULTISTRING_CHOOSER. */
+/** printfromtable's registered small constant tables, each indexed by MULTISTRING_CHOOSER. */
 const PRINTFROMTABLE_TABLES: Readonly<Record<string, readonly string[]>> = Object.freeze({
+  gSubstituteUsedStringIds: Object.freeze([
+    "STRINGID_PKMNMADESUBSTITUTE",
+    "STRINGID_TOOWEAKFORSUBSTITUTE",
+  ]),
   gGotPoisonedStringIds: Object.freeze(["STRINGID_PKMNWASPOISONED", "STRINGID_PKMNPOISONEDBY"]),
   gGotBurnedStringIds: Object.freeze(["STRINGID_PKMNWASBURNED", "STRINGID_PKMNBURNEDBY"]),
   gGotFrozenStringIds: Object.freeze(["STRINGID_PKMNWASFROZEN", "STRINGID_PKMNFROZENBY"]),
