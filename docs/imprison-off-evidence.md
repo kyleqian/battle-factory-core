@@ -30,12 +30,14 @@ required active overlap. Run either using the same checked mGBA wrapper and
 `tools/probe/audit-frontier-tail-off.py` command shown in the Lock On receipt.
 
 - `tools/battle-lab/mechanic-imprison-zero-pressure-off.json`: at frame 65
-  normal PP deduction is 10→9; at 66 status3 becomes `0x2000`. It remains
-  `sRandCount=9419`, `gRngValue=0xa15ab8e2` throughout: zero local draws.
+  normal PP deduction is 10→9; at 66 status3 becomes `0x2000`.
+  `sRandCount` stays 9419 throughout: zero attributed draws. (`gRngValue`
+  itself shows only frame-advance drift with no `Random()` attribution —
+  supervisor rerun 2026-07-28 observed `0xa1600022` at frames 65-66.)
 - `tools/battle-lab/mechanic-imprison-one-pressure-off.json`: against an
   active Dusclops (Pressure), normal deduction is likewise 10→9 at 65, then
   the special loop performs exactly one extra 9→8 at 66 while setting
-  status3 `0x2000`. The same `9419` / `0xa15ab8e2` ledger proves zero RNG.
+  status3 `0x2000`. The same pinned `sRandCount=9419` proves zero RNG.
 
 The receipt distinguishes the required persistent-controller shape by its
 source loop: the extra loss happens before the overlap bit, but controller

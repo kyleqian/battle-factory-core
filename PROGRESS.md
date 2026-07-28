@@ -33,6 +33,20 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   needed. Deliberate handler exact-set pin **198→200**. No barriers,
   canonical-recording imports, presentation, round,
   tick, roadmap, issue, or oracle-trace changes.
+- **Supervisor addendum (~15:20):** verified (suite 421/4643 after merges,
+  build, census regen idempotent at the exact totals). Merged the side
+  scout branch (OFF evidence docs + fixtures + reusable probe for rows
+  5a-c: Lock On/Imprison/Snatch; Imprison one-Pressure receipt reproduced
+  by supervisor rerun; two dossier corrections banked — Lock On needs the
+  combined bit+identity accuracy predicate in both forms, Snatch
+  arbitration is `gBattlerByTurnOrder` not battler ID) and folded
+  `animation-main`'s final wind-down commit (blue-orb legal set-range
+  correction). A NEW animation supervisor session started 15:06 (runs to
+  ~21:06) — folds continue at orient/wind-down. Next main brief: the
+  stat-drop seam handoff (assumption recorded: proceeding while the
+  animation session is live because its own ledger asks main for it;
+  worker instructed to keep any `src/animation` seam-type widening
+  minimal).
 
 
 ---
