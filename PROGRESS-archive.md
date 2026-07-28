@@ -1,4 +1,30 @@
 ---
+## 576 — [BOUNDED MAIN WORKER 2026-07-28 ~03:15] Secret Power executes through the shared hit/effect chain
+
+- **State:** committed `25fe673`; tree green at **334 files / 4060 tests**,
+  focused **317/317** (final strict replay **29/29**), and ratchets **6/6**.
+  Production build, both-oracle freshness/info, census regeneration, and
+  `git diff --check` pass. Census is exactly **145/214 effects, 271/355
+  moves, 222/276 Factory-L50 distinct, 2722/2957 weighted**, all **42/42**.
+- **Did:** globally registered operandless `0xe4`; it advances one byte and
+  maps every raw u8 `gBattleEnvironment` to the exact source move-effect byte,
+  writing nothing else. The immutable context validates/persists the field;
+  legacy focused construction defaults once, while all three production
+  Factory constructors explicitly supply **BUILDING (8)**. Program and
+  generic full-turn tests retain PP/damage/secondary ownership in the shared
+  `EffectHit` / `seteffectwithchance` / `SetMoveEffect` chain.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next shared registration target; do not extend the retired
+  canonical Battle-2 march.
+- **Notes:** the seed-3 stock lab's exact action-boundary RNG
+  **983916074** reaches Delcatty Secret Power paralysis through shared code:
+  target **362→311**, PP **20→19**, status1 **0→64**, final RNG
+  **1633612974 / 4 calls**. Handler inventory **153→154** only. No shared
+  barrier, unsupported/import ratchet, recording import, private handler,
+  animation/presentation/tick branch, scenario/evidence mutation, issue
+  removal, or oracle lifecycle action.
+
+---
 ## 575 — [SUPERVISOR VERIFY 2026-07-28 ~03:01] Corrected Follow Me accepted; Trick and game-stat evidence folded
 
 - **State:** reviewed union green at **333 files / 4055 tests** and focused

@@ -15,6 +15,30 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 579 — [BOUNDED MAIN REVIEW WORKER 2026-07-28 ~03:35] Skill Swap shares canonical rule helpers
+
+- **State:** committed `a358f91`; tree green at **337 files / 4071 tests**,
+  focused **87/87**, and ratchets **6/6**. Production build, both-oracle
+  freshness/info, census regeneration, and `git diff --check` pass. Census is
+  unchanged at **146/214 effects, 272/355 moves, 223/276 Factory-L50
+  distinct, 2727/2957 weighted**, all **42/42**.
+- **Did:** removed Skill Swap's duplicate no-effect mask and weaker role
+  resolver; `0xda` now reuses
+  `BATTLE_SCRIPT_MOVE_RESULT_NO_EFFECT` and `requireBattlerRole` exactly like
+  Fury Cutter/Rollout. Tightened tests so engine party assertions cover only
+  modeled fields; persistent party abilities **39/5** remain an oracle-receipt
+  claim. Corrected the shared switch-seam wording: species is modeled,
+  `abilityNum` is not.
+- **Next:** supervisor verify this review correction and select the next
+  finite executable-frontier increment; do not extend the retired canonical
+  Battle-2 march.
+- **Notes:** Skill Swap behavior, census, handler inventory **155**, oracle
+  evidence/hashes, and Taunt evidence are unchanged. Physical switch
+  restoration remains exactly bounded at the shared seam with its stale active
+  ability byte. No semantic, barrier/import-ratchet, controller, metadata,
+  ability, animation, or issue change.
+
+---
 ## 578 — [BOUNDED MAIN WORKER 2026-07-28 ~03:29] Skill Swap executes globally
 
 - **State:** committed `b8bc27a` + `50014d7`; tree green at **336 files /
@@ -57,7 +81,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   evidence with an exact repeat replay (`f7a00036…b28c2`): target-owned
   `STATUS2_TORMENT`, duplicate PP spend, all-duplicate-move Struggle
   admission, and persistent active status are pinned.
-- **Next:** implement `B_SCR_OP_SWAPATTACKERWITHTARGET` / Skill Swap globally
+- **Next:** implement `B_SCR_OP_TRYSWAPABILITIES` / Skill Swap globally
   from the accepted OFF/source evidence, including exact failure predicates,
   active-only ability exchange, and switch-in restoration. Expected census:
   **146/214, 272/355, 223/276, 2727/2957**.
@@ -66,29 +90,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **1633612974 / 4 calls**. Torment is evidence only. No unsupported/import
   ratchet, private handler, recording import, animation/presentation/tick
   branch, issue removal, DEFERRED item, or oracle lifecycle action.
-
----
-## 576 — [BOUNDED MAIN WORKER 2026-07-28 ~03:15] Secret Power executes through the shared hit/effect chain
-
-- **State:** committed `25fe673`; tree green at **334 files / 4060 tests**,
-  focused **317/317** (final strict replay **29/29**), and ratchets **6/6**.
-  Production build, both-oracle freshness/info, census regeneration, and
-  `git diff --check` pass. Census is exactly **145/214 effects, 271/355
-  moves, 222/276 Factory-L50 distinct, 2722/2957 weighted**, all **42/42**.
-- **Did:** globally registered operandless `0xe4`; it advances one byte and
-  maps every raw u8 `gBattleEnvironment` to the exact source move-effect byte,
-  writing nothing else. The immutable context validates/persists the field;
-  legacy focused construction defaults once, while all three production
-  Factory constructors explicitly supply **BUILDING (8)**. Program and
-  generic full-turn tests retain PP/damage/secondary ownership in the shared
-  `EffectHit` / `seteffectwithchance` / `SetMoveEffect` chain.
-- **Next:** supervisor verify this finite executable-frontier increment and
-  select the next shared registration target; do not extend the retired
-  canonical Battle-2 march.
-- **Notes:** the seed-3 stock lab's exact action-boundary RNG
-  **983916074** reaches Delcatty Secret Power paralysis through shared code:
-  target **362→311**, PP **20→19**, status1 **0→64**, final RNG
-  **1633612974 / 4 calls**. Handler inventory **153→154** only. No shared
-  barrier, unsupported/import ratchet, recording import, private handler,
-  animation/presentation/tick branch, scenario/evidence mutation, issue
-  removal, or oracle lifecycle action.
