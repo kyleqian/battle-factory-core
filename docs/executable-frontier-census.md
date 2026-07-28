@@ -10,10 +10,10 @@ Answers ROADMAP S10's Executable-frontier reset question directly: not "how many
 
 | Metric | Executable | Total | % |
 | --- | --- | --- | --- |
-| Effect scripts | 158 | 214 | 73.8% |
-| Moves (unweighted, all 355) | 287 | 355 | 80.8% |
-| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 235 | 276 | 85.1% |
-| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2760 | 2957 | 93.3% |
+| Effect scripts | 159 | 214 | 74.3% |
+| Moves (unweighted, all 355) | 288 | 355 | 81.1% |
+| Level-50 Factory moves (unweighted, distinct moves in the 850-set) | 236 | 276 | 85.5% |
+| Level-50 Factory moves (weighted by rental-mon count across the 850-set) | 2764 | 2957 | 93.5% |
 
 "Executable" means every opcode on every statically reachable path from the effect's entry script has a dispatch entry today (registered barriers included, per ROADMAP S10 §1's (a)/(b) policy). It is not a semantic-correctness claim -- see Caveats.
 
@@ -25,7 +25,6 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | --- | --- | --- | --- | --- |
 | `B_SCR_OP_TRYSWAPITEMS` | 1 (EFFECT_TRICK) | 1 | 1 | 5 |
 | `B_SCR_OP_HEALPARTYSTATUS` | 1 (EFFECT_HEAL_BELL) | 2 | 2 | 4 |
-| `B_SCR_OP_TRYSETENCORE` | 1 (EFFECT_ENCORE) | 1 | 1 | 4 |
 | `B_SCR_OP_TRYSETPERISHSONG` | 1 (EFFECT_PERISH_SONG) | 1 | 1 | 4 |
 | `B_SCR_OP_SCALEDAMAGEBYHEALTHRATIO` | 1 (EFFECT_ERUPTION) | 2 | 2 | 2 |
 | `B_SCR_OP_JUMPIFARRAYEQUAL` | 1 (EFFECT_TEETER_DANCE) | 1 | 1 | 2 |
@@ -48,6 +47,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | `B_SCR_OP_SETALWAYSHITFLAG` | 1 (EFFECT_LOCK_ON) | 2 | 0 | 0 |
 | `B_SCR_OP_SETTYPEBASEDHALVERS` | 2 (EFFECT_MUD_SPORT, EFFECT_WATER_SPORT) | 2 | 0 | 0 |
 | `B_SCR_OP_ASSISTATTACKSELECT` | 1 (EFFECT_ASSIST) | 1 | 0 | 0 |
+| `B_SCR_OP_CALLENVIRONMENTATTACK` | 1 (EFFECT_NATURE_POWER) | 1 | 0 | 0 |
 
 ## Per-effect detail
 
@@ -143,7 +143,7 @@ Each row is an exact set of missing opcodes -- registering only *some* of a mult
 | EFFECT_LEVEL_DAMAGE | `BattleScript_EffectLevelDamage` | executable | - | - | 2 | 2 (10) |
 | EFFECT_PSYWAVE | `BattleScript_EffectPsywave` | executable | - | - | 1 | 1 (2) |
 | EFFECT_COUNTER | `BattleScript_EffectCounter` | executable | - | - | 1 | 1 (40) |
-| EFFECT_ENCORE | `BattleScript_EffectEncore` | blocked-on-opcodes | `B_SCR_OP_TRYSETENCORE` (edge branch only) | - | 1 | 1 (4) |
+| EFFECT_ENCORE | `BattleScript_EffectEncore` | executable | - | - | 1 | 1 (4) |
 | EFFECT_PAIN_SPLIT | `BattleScript_EffectPainSplit` | blocked-on-opcodes | `B_SCR_OP_PAINSPLITDMGCALC` (edge branch only) | - | 1 | 1 (2) |
 | EFFECT_SNORE | `BattleScript_EffectSnore` | executable | - | - | 1 | 1 (1) |
 | EFFECT_CONVERSION_2 | `BattleScript_EffectConversion2` | blocked-on-opcodes | `B_SCR_OP_SETTYPETORANDOMRESISTANCE` (main path) | - | 1 | 0 (0) |

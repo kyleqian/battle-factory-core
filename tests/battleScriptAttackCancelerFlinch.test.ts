@@ -48,6 +48,8 @@ function battler(
     disableTimerStartValue: changes.disableTimerStartValue ?? 0,
     encoreTimer: changes.encoreTimer ?? 0,
     encoredMove: changes.encoredMove ?? 0,
+    encoredMovePos: changes.encoredMovePos ?? 0,
+    encoreTimerStartValue: changes.encoreTimerStartValue ?? 0,
     usedDisabledMove: changes.usedDisabledMove ?? 0,
     tauntTimer: changes.tauntTimer ?? 0,
     usedTauntedMove: changes.usedTauntedMove ?? 0,
