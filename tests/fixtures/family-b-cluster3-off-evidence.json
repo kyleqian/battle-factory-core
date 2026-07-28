@@ -1,0 +1,103 @@
+{
+  "schema": "family-b-cluster3-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "sourceSha256": {
+    "battle_script_commands.c": "e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c",
+    "battle_scripts_1.s": "4ac3e610b68c11ef0f4e4c0fc62ddba7fda5a8400e43705428868978ec7551a6",
+    "battle_main.c": "ee79b86ff0f681ab783b363135fd84d050e7123bea2a77c5530f2c7ddc8b8408",
+    "battle_util.c": "2ba9ee4efe913effa119c8342281745f481910ca1b20cd76b470673062a45fd5",
+    "battle_moves.h": "8b3d4d143b807807af97ce7288e0cc0ccdd55b6b64ac45824e35a549836b3a0c",
+    "battle_frontier_mons.h": "557c1a97247cbb84357b99035fb11cf0bfe45abe8393a0992fe8146bfc51f67f",
+    "species_info.h": "1aac881bb02361339dc4dd33c7a5804a7127c0367426b77b982ee213a713e0af",
+    "constants_battle.h": "bba2f9d9b3d98fa01b5f0a8f7dede9f2f0be5617c735242b741a7e0c8e4a5d1e",
+    "moves.h": "d32746c9ad3ed1bbfbb93712f13e01ab1c43f48a78f3605ef9db5095e8d19d27",
+    "species.h": "a1867c83e78fb767b16a9c95c4c06d51d56c986fd48d713b98dbf01c8305089d",
+    "items.h": "8e9aacc0ffbd41ce0092176a89f624b59be300df60c996d718d61119e747dbd4"
+  },
+  "effects": {
+    "meanLook": {
+      "moveId": 212,
+      "effectRow": "EFFECT_MEAN_LOOK",
+      "effectRowId": 106,
+      "moveEffect": "MOVE_EFFECT_PREVENT_ESCAPE",
+      "moveEffectId": 32,
+      "status2Mask": 67108864,
+      "sourceDraws": "Mean Look's primary effect draws no RNG. The public snapshots include ordinary AI and turn processing around it."
+    },
+    "nightmare": {
+      "moveId": 171,
+      "effectRow": "EFFECT_NIGHTMARE",
+      "effectRowId": 107,
+      "moveEffect": "MOVE_EFFECT_NIGHTMARE",
+      "moveEffectId": 33,
+      "status2Mask": 134217728,
+      "sourceDraws": "Nightmare's primary effect and end-turn reducer draw no RNG. Hypnosis accuracy and sleep duration are live ROM draws."
+    }
+  },
+  "cases": {
+    "meanLook": {
+      "scenario": "tools/battle-lab/mechanic-mean-look-release-off.json",
+      "scenarioSha256": "a4a9d26d100fd88c87b141fcfc2b825f829b89cb7daf168ad2a27d87f705a7a9",
+      "repeatability": {
+        "runs": 2,
+        "comparison": "byte-identical full manifest.json",
+        "manifestSha256": "716ef8c33fdc87453c2d9798c9992e54e62fed17742ce6280fc421e371708666"
+      },
+      "captureGrid": {"start": 0, "end": 3225, "step": 25, "count": 130},
+      "initialPartyChecksumsValid": [true, true, true, true, true, true],
+      "carrier": {
+        "setId": 289,
+        "name": "FRONTIER_MON_MURKROW_2",
+        "side": "opponent",
+        "species": 198,
+        "moves": [212, 212, 212, 212],
+        "item": 179,
+        "nature": 24,
+        "ability": 15,
+        "observedActiveSpeed": 111
+      },
+      "target": {"species": 213, "moves": [150, 46, 150, 150], "ability": 5, "observedActiveSpeed": 9},
+      "observedStates": [
+        {"frame":0,"sha256":"189baec6d1ebbc45a0f588b58bf284991ee02888adc2ec242e29f1238e1e19c5","rngValue":919694434,"currentMove":0,"playerPartyIndex":0,"playerStatus2":0,"playerPp":[40,20,40,40],"opponentPartyIndex":0,"opponentSpecies":198,"opponentPp":[5,5,5,5],"fact":"untrapped initial state"},
+        {"frame":125,"sha256":"31f99d3d62758ea1c3241f0a9f8cae808f4e1fac16eeecaa2416252b5ed2ae8a","rngValue":919694434,"currentMove":212,"playerPartyIndex":0,"playerStatus2":67108864,"playerPp":[40,20,40,40],"opponentPartyIndex":0,"opponentSpecies":198,"opponentPp":[5,4,5,5],"fact":"Mean Look set escape prevention without visible RNG movement"},
+        {"frame":1000,"sha256":"d5f23feeffeb304a0b11ef440f9f7a729022ebf4d7adab7664fc8baf7cd791df","rngValue":1250713408,"currentMove":0,"playerPartyIndex":0,"playerStatus2":67108864,"playerPp":[39,20,40,40],"opponentPartyIndex":0,"opponentSpecies":198,"opponentPp":[5,4,5,5],"fact":"switch attempt visibly rejected: SHUCKLE can't be switched out!"},
+        {"frame":1650,"sha256":"365723fa760537b57888dd2506fa91554d6d50cae95152233df7323b8621e312","rngValue":530917129,"currentMove":0,"playerPartyIndex":0,"playerStatus2":0,"playerPp":[39,19,40,40],"opponentPartyIndex":1,"opponentSpecies":213,"opponentPp":[5,5,5,5],"fact":"Roar removed Murkrow and escape prevention cleared at the owner change"},
+        {"frame":2600,"sha256":"553a77bea7ecdb678abda555496bca292af9afc7ed0f463724b525edaae3d4de","rngValue":3245321391,"currentMove":0,"playerPartyIndex":1,"playerStatus2":0,"playerPp":[40,40,40,40],"opponentPartyIndex":1,"opponentSpecies":213,"opponentPp":[5,5,5,5],"fact":"same switch path succeeded after preventer removal"},
+        {"frame":2825,"sha256":"9afce6ebdb8f8441262ca22c8eaa45afb889a578847d46fd41e2e4cf84c1d057","rngValue":3245321391,"currentMove":212,"playerPartyIndex":1,"playerStatus2":67108864,"playerPp":[40,40,40,40],"opponentPartyIndex":1,"opponentSpecies":213,"opponentPp":[5,5,5,4],"fact":"replacement's new Mean Look independently trapped the switched-in battler"}
+      ]
+    },
+    "nightmare": {
+      "scenario": "tools/battle-lab/mechanic-nightmare-haunter-shuckle-off.json",
+      "scenarioSha256": "4212ccd2efede44e729b89b5a07357758e5e599756a8837cdd3879352eda5f19",
+      "repeatability": {
+        "runs": 2,
+        "comparison": "byte-identical full manifest.json",
+        "manifestSha256": "a74e32ccf4b4382466e4da5343bafed5da97d97ac69094d2a33d81ce82a8313e"
+      },
+      "captureGrid": {"start": 0, "end": 4925, "step": 25, "count": 198},
+      "initialPartyChecksumsValid": [true, true, true, true, true, true],
+      "carrier": {
+        "setId": 284,
+        "name": "FRONTIER_MON_HAUNTER_2",
+        "side": "player",
+        "species": 93,
+        "moves": [95, 171, 94, 109],
+        "item": 141,
+        "nature": 7,
+        "ability": 26,
+        "observedActiveSpeed": 103
+      },
+      "target": {"species": 213, "moves": [150, 150, 150, 150], "ability": 5, "observedActiveSpeed": 10, "maxHp": 116},
+      "observedStates": [
+        {"frame":0,"sha256":"38dcbb14c81baba91e29f23f78fadc84a16ffdc1bfc5dac3ef5dffbdb5b11c57","rngValue":919694434,"currentMove":0,"carrierPp":[20,15,10,10],"targetHp":116,"targetStatus1":0,"targetStatus2":0,"partyHp":116,"partyStatus1":0,"fact":"awake, nightmare-free initial target"},
+        {"frame":125,"sha256":"7e4d89b68b605ad7b4da2205176dfe190d7dc10a692b120c444c2c3a15010f7e","rngValue":983229340,"currentMove":95,"carrierPp":[19,15,10,10],"targetHp":116,"targetStatus1":4,"targetStatus2":0,"partyHp":116,"partyStatus1":4,"fact":"real Hypnosis produced four-turn sleep"},
+        {"frame":1025,"sha256":"b9ce920be82447ffd80943b82167503c8864d7e48ead4fff81d5cd7ef744c17d","rngValue":3034451114,"currentMove":171,"carrierPp":[19,14,10,10],"targetHp":116,"targetStatus1":3,"targetStatus2":134217728,"partyHp":116,"partyStatus1":3,"fact":"Nightmare PP spent and volatile bit set on sleeping target"},
+        {"frame":1375,"sha256":"df81bb87d878f034ece2dce9b037c2a2a64db4b0ef39f17dfae3622f6265cc0a","rngValue":2682491093,"currentMove":0,"carrierPp":[19,14,10,10],"targetHp":87,"targetStatus1":2,"targetStatus2":134217728,"partyHp":87,"partyStatus1":2,"fact":"first end turn dealt floor(116/4) = 29"},
+        {"frame":2375,"sha256":"9fd449446ce1e9a2e49e3e980b410ece78845c46a9d30a7e26f5e4a8785d8bc9","rngValue":1636055286,"currentMove":0,"carrierPp":[19,13,10,10],"targetHp":58,"targetStatus1":1,"targetStatus2":134217728,"partyHp":58,"partyStatus1":1,"fact":"second end turn dealt another 29"},
+        {"frame":3150,"sha256":"ceb77b7c47ec1b643324d305a0d42a96617a03e5d5343986ddac0d57551b8e37","rngValue":1636055286,"currentMove":150,"carrierPp":[19,12,10,10],"targetHp":58,"targetStatus1":0,"targetStatus2":0,"partyHp":58,"partyStatus1":0,"fact":"natural wake cleared sleep and Nightmare before another HP tick"},
+        {"frame":3400,"sha256":"eac37cb1265f4a6667c89f2df489c615a9b88214eff7c1fb64b143eb42e75843","rngValue":1630250804,"currentMove":0,"carrierPp":[19,12,10,10],"targetHp":58,"targetStatus1":0,"targetStatus2":0,"partyHp":58,"partyStatus1":0,"fact":"settled next-request state retained wake cleanup and HP"}
+      ]
+    }
+  },
+  "observedVsSourceOnly": "The OFF manifests directly expose status1, status2, HP, PP, active and party identity, party persistence, RNG snapshots, controller state, and framebuffer hashes. They do not expose battlerPreventingEscape, battle-script PCs, string IDs, or ownership of individual RNG calls. Mean Look owner identity is therefore source-only, while its observable bit, failed switch, clearing exactly when the staged Murkrow leaves, and subsequent successful switch are observed."
+}
