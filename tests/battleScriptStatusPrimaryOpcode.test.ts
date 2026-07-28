@@ -588,11 +588,19 @@ describe("primary status-move opcode cluster: full committed scripts (docs/statu
   });
 
   it("BattleScript_EffectParalyze (Thunder Wave): status1 gains exactly STATUS1_PARALYSIS, exactly 1 RNG draw (accuracy only)", () => {
-    const rc = context(0, { moves: [THUNDER_WAVE, 0, 0, 0] }, { currentMove: THUNDER_WAVE });
+    const rc = context(
+      0,
+      { moves: [THUNDER_WAVE, 0, 0, 0] },
+      { currentMove: THUNDER_WAVE, multiHitEffect: 0x55 },
+    );
     const { result, steps } = runUntilLabel("BattleScript_EffectParalyze", "BattleScript_MoveEffectParalysis", rc);
     expect(result.kind).toBe("advanced");
     if (result.kind !== "advanced") throw new Error("expected advance");
     expect(result.state.rulesContext.battlers[1].status1).toBe(STATUS1_PARALYSIS);
+    // SetMoveEffect clears the selector before its pushed callback resumes;
+    // primary dispatch does not share the chance opcode's multihit clear.
+    expect(result.state.rulesContext.moveEffectByte).toBe(0);
+    expect(result.state.rulesContext.multiHitEffect).toBe(0x55);
     expect(result.state.rng.calls).toBe(1);
     expect(steps).toBeLessThan(80);
   });

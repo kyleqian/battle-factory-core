@@ -131,6 +131,7 @@ function directRules(
     attackerAbility?: number;
     attackerStatus1?: number;
     attackerStatus2?: number;
+    lastUsedAbility?: number;
   }> = {},
 ): BattleScriptRulesContext {
   const base = createFactoryFullTurnBattleState(config()).rules.rulesContext;
@@ -155,6 +156,7 @@ function directRules(
     },
     currentMove: move,
     chosenMove: move,
+    lastUsedAbility: changes.lastUsedAbility ?? base.lastUsedAbility,
     party: {
       player: playerParty,
       opponent: base.party.opponent,
@@ -325,7 +327,7 @@ describe("source-complete B_SCR_OP_HEALPARTYSTATUS registration", () => {
       .toEqual([0, 0, 0, 0, 0, 0]);
   });
 
-  it("preserves a Soundproof attacker's live status/Nightmare, records the ability, and selects the attacker message bit", () => {
+  it("preserves a Soundproof attacker's live status/Nightmare and gLastUsedAbility while selecting the attacker message bit", () => {
     const source = directRules(BATTLE_SCRIPT_MOVE_HEAL_BELL, party([
       { species: EXPLOUD, hp: 100, abilityNum: 1, status1: 0x80 },
       { species: CHIMECHO, hp: 100, status1: 0x40 },
@@ -333,6 +335,7 @@ describe("source-complete B_SCR_OP_HEALPARTYSTATUS registration", () => {
       attackerAbility: BATTLE_SCRIPT_ABILITY_SOUNDPROOF,
       attackerStatus1: 0x80,
       attackerStatus2: BATTLE_SCRIPT_STATUS2_NIGHTMARE | 0x20,
+      lastUsedAbility: 17,
     });
     const { after } = stepOpcode(source);
     expect(after.rulesContext.battlers[0]).toMatchObject({
@@ -344,15 +347,19 @@ describe("source-complete B_SCR_OP_HEALPARTYSTATUS registration", () => {
     expect(after.rulesContext.multistringChooser)
       .toBe(BATTLE_SCRIPT_B_MSG_BELL_SOUNDPROOF_ATTACKER);
     expect(after.rulesContext.lastUsedAbility)
-      .toBe(BATTLE_SCRIPT_ABILITY_SOUNDPROOF);
+      .toBe(17);
     expect(after.events.at(-1)).toMatchObject({ partyMask: 0b000010 });
   });
 
   it("evaluates the doubles partner branch structurally and ORs the partner Soundproof selector", () => {
-    const singles = directRules(BATTLE_SCRIPT_MOVE_HEAL_BELL, party([
-      { species: CHIMECHO, hp: 100 },
-      { species: EXPLOUD, hp: 100, status1: 0x40 },
-    ]));
+    const singles = directRules(
+      BATTLE_SCRIPT_MOVE_HEAL_BELL,
+      party([
+        { species: CHIMECHO, hp: 100 },
+        { species: EXPLOUD, hp: 100, status1: 0x40 },
+      ]),
+      { lastUsedAbility: 17 },
+    );
     const battlers = singles.battlers.map((battler, index) =>
       index === 2
         ? {
@@ -384,7 +391,7 @@ describe("source-complete B_SCR_OP_HEALPARTYSTATUS registration", () => {
     expect(after.rulesContext.multistringChooser)
       .toBe(BATTLE_SCRIPT_B_MSG_BELL_SOUNDPROOF_PARTNER);
     expect(after.rulesContext.lastUsedAbility)
-      .toBe(BATTLE_SCRIPT_ABILITY_SOUNDPROOF);
+      .toBe(17);
   });
 
   it("recognizes real source Soundproof carriers without a move-specific species list", () => {

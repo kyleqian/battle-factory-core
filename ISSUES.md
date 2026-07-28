@@ -5,17 +5,6 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## (audit note, 2026-07-28) Plausible-unconfirmed pair
-
-`seteffectprimary` returns without the `moveEffectByte` clear that
-`seteffectwithchance` performs (source clears at
-`battle_script_commands.c:2905`; engine clearing finalizer only on the
-chance path, `battleScriptHitChainOpcode.ts:3568-3573,3644-3648`) — full-turn
-constructors currently reset it, so leakage needs a resumed/called-script
-path to observe. Heal Bell writes `lastUsedAbility` where source only calls
-`RecordAbilityBattle` — currently inert (no string consumes it). Probe or
-fix alongside #50-#52.
-
 ## #41 — Production engine modules import canonical RAM recordings
 
 **Symptom:** shipped `src/engine/` code reads recorded state from the single

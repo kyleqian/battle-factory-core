@@ -3646,7 +3646,24 @@ function createSeteffectwithchanceOpcodeHandler(): BattleScriptOpcodeHandler<Bat
 function createSeteffectprimaryOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
   return (context) => {
     const rulesContext = context.state.rulesContext;
-    return applySetMoveEffect(context, rulesContext, rulesContext.moveEffectByte, true, false);
+    const transition = applySetMoveEffect(
+      context,
+      rulesContext,
+      rulesContext.moveEffectByte,
+      true,
+      false,
+    );
+    // SetMoveEffect's shared tail clears MOVE_EFFECT_BYTE before any pushed
+    // effect script resumes (battle_script_commands.c:2905). Unlike
+    // Cmd_seteffectwithchance, Cmd_seteffectprimary does not clear
+    // multihitMoveEffect.
+    return Object.freeze({
+      ...transition,
+      rulesContext: Object.freeze({
+        ...transition.rulesContext,
+        moveEffectByte: 0,
+      }),
+    });
   };
 }
 

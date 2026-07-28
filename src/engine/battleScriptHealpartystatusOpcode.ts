@@ -132,10 +132,8 @@ const healpartystatusHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext
     let chooser = BATTLE_SCRIPT_B_MSG_BELL;
     if (attackerState.ability === BATTLE_SCRIPT_ABILITY_SOUNDPROOF) {
       chooser |= BATTLE_SCRIPT_B_MSG_BELL_SOUNDPROOF_ATTACKER;
-      rules = Object.freeze({
-        ...rules,
-        lastUsedAbility: BATTLE_SCRIPT_ABILITY_SOUNDPROOF,
-      });
+      // Source calls RecordAbilityBattle with the battler's ability. That
+      // records AI history only; it does not write gLastUsedAbility.
     } else {
       rules = clearLiveStatus(rules, attacker);
     }
@@ -146,10 +144,7 @@ const healpartystatusHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext
         === BATTLE_SCRIPT_ABILITY_SOUNDPROOF
       ) {
         chooser |= BATTLE_SCRIPT_B_MSG_BELL_SOUNDPROOF_PARTNER;
-        rules = Object.freeze({
-          ...rules,
-          lastUsedAbility: BATTLE_SCRIPT_ABILITY_SOUNDPROOF,
-        });
+        // As above, RecordAbilityBattle has no gLastUsedAbility side effect.
       } else {
         rules = clearLiveStatus(rules, partner);
       }

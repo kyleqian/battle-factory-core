@@ -15,9 +15,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
-## 630 — [BOUNDED MAIN WORKER 2026-07-28 ~13:34] Audit fixes #50–#52 source-complete
+## 630 — [BOUNDED MAIN WORKER 2026-07-28 ~13:32] Audit fixes #50–#52 plus plausible pair source-complete
 
-- **State:** rungs (a)–(c) are green at **398 files / 4528 tests**, production
+- **State:** all assigned rungs are green at **398 files / 4528 tests**, production
   build, OFF oracle info, and `git diff --check`; census remains
   **196/214 effects, 336/355 moves, 275/276 distinct, 2955/2957 weighted**.
 - **Did:** closed ISSUES #51 by routing successful Sleep and Freeze writes
@@ -28,10 +28,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   switch payload and rebuilding the incoming battler's ability, IVs,
   personality, level, friendship, HP ceiling, and battle stats. Tests pin
   Role Play ability retirement, incoming-IV Hidden Power, incoming-maxHP
-  Swallow, and the unchanged Baton Pass carve-outs.
-- **Next:** if this bounded session has room, inspect and source-align the
-  plausible `seteffectprimary` / Heal Bell audit pair; otherwise supervisor
-  verification can take that unnumbered note.
+  Swallow, and the unchanged Baton Pass carve-outs. Closed the plausible pair:
+  `seteffectprimary` clears its effect selector before callback resumption,
+  while Heal Bell's `RecordAbilityBattle` calls leave `lastUsedAbility`
+  untouched.
+- **Next:** supervisor verify commits `31702fd6`, `642b1ae6`, `ce0cbd6f`, and
+  the final plausible-pair commit; resume the ranked tail plan afterward.
 - **Notes:** the reducer clears every engine-owned source field: multi-turn,
   Thrash/Petal Dance lock, Uproar, Bide, semi-invulnerability, Rollout timer,
   and Fury Cutter counter. Source `gLockedMoves` has no engine-owned readback
@@ -40,7 +42,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   materialize their source-fixed IV 3 and controller-computed stats. No
   executability, census, barrier, recording-import, presentation, round,
   tick, roadmap, or canonical-replay pin changed; the obsolete stale-ability
-  assertion moved because the replacement behavior is source-correct.
+  assertion moved because the replacement behavior is source-correct. The
+  primary clear is observable at its pushed callback boundary; it deliberately
+  preserves `multiHitEffect`, matching the distinct source dispatchers.
 
 ---
 ## 629 — [BOUNDED MAIN WORKER 2026-07-28 ~13:11] Bide setter and release handoff source-complete
