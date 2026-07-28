@@ -9,6 +9,11 @@ import {
   sceneOnTwineedleView,
   type SceneOnTwineedleConfig,
 } from "../../src/animation/sceneOnPresentation.ts";
+import {
+  createInitialState,
+  render,
+  type EngineState,
+} from "../../src/engine/core.ts";
 
 interface Fixture extends SceneOnTwineedleConfig {
   readonly scenario: string;
@@ -125,6 +130,7 @@ function verify(fixturePath: string): void {
   });
   const mismatches: string[] = [];
   let matches = 0;
+  let framebufferMatches = 0;
   for (
     let frame = fixture.denseWindow.startFrame;
     frame <= fixture.denseWindow.endFrame;
@@ -214,6 +220,29 @@ function verify(fixturePath: string): void {
     );
     const rawDigest = createHash("sha256").update(raw).digest("hex")
       === actual.sha256;
+    const engine: EngineState = {
+      ...createInitialState(),
+      rngMode: "frontierBattle",
+      sceneOnPresentation: { ...stage, age },
+    };
+    const app = render(engine);
+    let diff = 0;
+    const samples: string[] = [];
+    for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
+      if (app[pixel * 4] !== raw[pixel * 3]
+        || app[pixel * 4 + 1] !== raw[pixel * 3 + 1]
+        || app[pixel * 4 + 2] !== raw[pixel * 3 + 2]) {
+        diff += 1;
+        if (samples.length < 8) {
+          samples.push(
+            `${pixel % 240},${Math.floor(pixel / 240)}:`
+            + `${app[pixel * 4]},${app[pixel * 4 + 1]},${app[pixel * 4 + 2]}`
+            + `!=${raw[pixel * 3]},${raw[pixel * 3 + 1]},${raw[pixel * 3 + 2]}`,
+          );
+        }
+      }
+    }
+    if (diff === 0) framebufferMatches += 1;
     if (sprites && targetOffset && tasks && registers && sound && hardwareOam
       && hardwarePalette && counts && cleanup && seamShape && rawDigest) {
       matches += 1;
@@ -222,14 +251,23 @@ function verify(fixturePath: string): void {
         `frame ${frame}/age ${age}: sprites=${sprites} offset=${targetOffset} `
         + `tasks=${tasks} regs=${registers} sound=${sound} oam=${hardwareOam} `
         + `pal=${hardwarePalette} counts=${counts} cleanup=${cleanup} `
-        + `seam=${seamShape} raw=${rawDigest}`,
+        + `seam=${seamShape} raw=${rawDigest} framebufferDiff=${diff}`,
+      );
+    }
+    if (diff !== 0 && sprites && targetOffset && tasks && registers && sound
+      && hardwareOam && hardwarePalette && counts && cleanup && seamShape
+      && rawDigest) {
+      mismatches.push(
+        `frame ${frame}/age ${age}: framebufferDiff=${diff} `
+        + `samples=${samples.join(";")}`,
       );
     }
   }
   const total = fixture.denseWindow.endFrame
     - fixture.denseWindow.startFrame + 1;
   console.log(
-    `${fixture.orientation}: components ${matches}/${total}; digest ${digest}`,
+    `${fixture.orientation}: components ${matches}/${total}; `
+    + `framebuffer ${framebufferMatches}/${total}; digest ${digest}`,
   );
   if (mismatches.length) throw new Error(mismatches.join("\n"));
 }

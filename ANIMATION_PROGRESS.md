@@ -1,13 +1,13 @@
 # Animation coverage
 
-## MOVE_TWINEEDLE typed seam checkpoint; remains partial (2026-07-28)
+## MOVE_TWINEEDLE promoted exact; NEEDLE framebuffer closed (2026-07-28)
 
-**Verdict:** `MOVE_TWINEEDLE` is partial. Fresh complete legal Factory-party
+**Verdict:** `MOVE_TWINEEDLE` is exact. Fresh complete legal Factory-party
 Scene-ON evidence passes the complete move-owned body and cleanup at **37/37**
 frames **95-131** player-back and **37/37** frames **99-135** opponent-front
-through software/component, typed-seam, hardware-transfer, audio, register, and
-raw-RGB checks, reproduced twice fresh. Coverage is now **57 exact / 2 partial
-/ 217 unsupported**.
+through software/component, typed-seam, hardware-transfer, audio, register,
+raw-RGB, and shared-framebuffer checks, reproduced twice fresh. Coverage is now
+**58 exact / 1 partial / 217 unsupported**.
 
 **Reusable model/evidence:** the relative-age reducer ports two parallel
 linear stingers, opponent-side inversion, two animation-3 IMPACT sprites,
@@ -16,9 +16,9 @@ families, and cleanup. Source extraction byte-pins NEEDLE, both template
 contracts, and legal set-154 BEEDRILL art. Independent evidence is
 byte-identical (player `eb52b2a8…6ec1`, opponent `b7022f73…5771`).
 
-**Exact remainder/siblings:** exact remains unclaimed until the shared
-framebuffer path draws BEEDRILL/NEEDLE/IMPACT/chrome and proves all **37/37**
-frames twice fresh in both orientations. `MOVE_PIN_MISSILE` stays unsupported
+**Renderer/siblings:** the narrow compositor ports prior-software OAM/palette
+transfer, target monbg, opaque rotated needles, alpha IMPACT, chrome, and
+side-specific battler/stinger subpriority. `MOVE_PIN_MISSILE` stays unsupported
 because it uses three arcing missile waves, basic hitsplats, and distinct short
 shakes/audio. `MOVE_SPIKE_CANNON` stays unsupported because it adds wind-up/
 return tasks, three attacker-relative stingers, three simultaneous hitsplats,

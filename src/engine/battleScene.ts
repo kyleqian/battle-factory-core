@@ -543,6 +543,7 @@ import recoverAsset from "../animation/assets/recover.json" with { type: "json" 
 import absorbAsset from "../animation/assets/absorb.json" with { type: "json" };
 import reflectAsset from "../animation/assets/reflect.json" with { type: "json" };
 import biteAsset from "../animation/assets/bite.json" with { type: "json" };
+import twineedleAsset from "../animation/assets/twineedle.json" with { type: "json" };
 import synthesisAsset from "../animation/assets/synthesis.json" with { type: "json" };
 import milkDrinkAsset from "../animation/assets/milk-drink.json" with { type: "json" };
 import supersonicAsset from "../animation/assets/supersonic.json" with { type: "json" };
@@ -679,6 +680,7 @@ import {
   sceneOnPoisonFangView,
   sceneOnHyperFangView,
   sceneOnBiteView,
+  sceneOnTwineedleView,
   sceneOnSwaggerView,
   sceneOnTauntView,
   sceneOnScaryFaceView,
@@ -708,6 +710,7 @@ import {
   type SceneOnAbsorbPresentationState,
   type SceneOnReflectPresentationState,
   type SceneOnBiteConfig,
+  type SceneOnTwineedleConfig,
 } from "../animation/sceneOnPresentation.ts";
 import {
   extremeSpeedBackgroundVariant,
@@ -999,6 +1002,11 @@ const biteArt = biteAsset as {
   sharpTeeth: { tileset: Tileset; palette: RgbColor[] };
   meowthBack: { tileset: Tileset; palette: RgbColor[] };
   meowthFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const twineedleArt = twineedleAsset as {
+  needle: { tileset: Tileset; palette: RgbColor[] };
+  beedrillBack: { tileset: Tileset; palette: RgbColor[] };
+  beedrillFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const synthesisArt = synthesisAsset as {
   sparkle2: { tileset: Tileset; palette: RgbColor[] };
@@ -15064,6 +15072,149 @@ export function renderSceneOnMovePresentation(
   fb: Uint8Array,
   state: SceneOnMovePresentationState,
 ): void {
+  if (state.config.move === "TWINEEDLE") {
+    const needleState =
+      state as SceneOnMovePresentationState<SceneOnTwineedleConfig>;
+    const view = sceneOnTwineedleView(needleState);
+    const displayed = sceneOnTwineedleView({
+      ...needleState,
+      age: needleState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "BEEDRILL"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "BEEDRILL"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged TWINEEDLE pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const beedrillSource = playerToOpponent
+      ? twineedleArt.beedrillBack : twineedleArt.beedrillFront;
+    const beedrill = playerToOpponent
+      ? beedrillSource
+      : {
+          ...beedrillSource,
+          tileset: subTileset(beedrillSource.tileset, 0, 8),
+        };
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    const targetBaselineX2 =
+      playerToOpponent && displayed.age < 22 ? 1 : 0;
+    drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x
+        + targetBaselineX2 + displayed.targetOffset.x2,
+      view.target.geometry.spriteCorner.y + displayed.targetOffset.y2,
+    );
+    const nonObjTarget2 = fb.slice();
+    const sortedEffects = displayed.sprites.slice().sort(
+      (left, right) => left.oamSlot - right.oamSlot,
+    );
+    const drawNeedles = () => {
+      for (const sprite of sortedEffects) {
+        if (sprite.kind !== "needle") continue;
+        drawSpriteSheetAffineRotate(
+          fb,
+          twineedleArt.needle.tileset,
+          twineedleArt.needle.palette,
+          sprite.x + sprite.x2,
+          sprite.y + sprite.y2,
+          sprite.matrix.a,
+          sprite.matrix.b,
+          sprite.matrix.c,
+          sprite.matrix.d,
+          undefined,
+          false,
+        );
+      }
+    };
+    // Source battler subpriorities straddle the stingers' literal
+    // subpriority 2: player-back needles launch behind their attacker,
+    // opponent-front needles launch in front.
+    if (playerToOpponent) drawNeedles();
+    drawSpriteSheet(
+      fb,
+      beedrill.tileset,
+      beedrill.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    if (opponentToPlayer) drawNeedles();
+    // IMPACT uses subpriority 3 and remains in front of both battlers.
+    for (const sprite of sortedEffects) {
+      if (sprite.kind === "impact" && view.alpha) {
+        drawSpriteSheetAffineRotateBlendedOverFb(
+          fb,
+          nonObjTarget2,
+          battleAnimHitsplat.tileset,
+          battleAnimHitsplat.palette,
+          sprite.x,
+          sprite.y,
+          sprite.matrix.a,
+          sprite.matrix.b,
+          sprite.matrix.c,
+          sprite.matrix.d,
+          view.alpha.eva,
+          view.alpha.evb,
+          false,
+        );
+      }
+    }
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "BEEDRILL",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "BEEDRILL" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "BEEDRILL used" : "Foe BEEDRILL used",
+      "TWINEEDLE!",
+      99,
+    );
+    return;
+  }
+
   if (state.config.move === "BITE") {
     const biteState = state as SceneOnMovePresentationState<SceneOnBiteConfig>;
     const view = sceneOnBiteView(biteState);
@@ -23332,12 +23483,6 @@ export function renderSceneOnMovePresentation(
       99,
     );
     return;
-  }
-
-  if (state.config.move === "TWINEEDLE") {
-    throw new Error(
-      "TWINEEDLE component seam is staged without framebuffer acceptance",
-    );
   }
 
   const view = sceneOnFirePunchView(state);
