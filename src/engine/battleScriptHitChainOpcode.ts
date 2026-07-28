@@ -261,6 +261,10 @@ const B_MSG_STATUS_HAD_NO_EFFECT = 2;
 
 /** printfromtable's registered small constant tables, each indexed by MULTISTRING_CHOOSER. */
 const PRINTFROMTABLE_TABLES: Readonly<Record<string, readonly string[]>> = Object.freeze({
+  gFocusEnergyUsedStringIds: Object.freeze([
+    "STRINGID_PKMNGETTINGPUMPED",
+    "STRINGID_BUTITFAILED",
+  ]),
   gFutureMoveUsedStringIds: Object.freeze([
     "STRINGID_PKMNFORESAWATTACK",
     "STRINGID_PKMNCHOSEXASDESTINY",

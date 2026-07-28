@@ -83,6 +83,7 @@ import { createBattleScriptTrysethelpinghandOpcodeHandlers } from "./battleScrip
 import { createBattleScriptSettormentOpcodeHandlers } from "./battleScriptSettormentOpcode.ts";
 import { createBattleScriptSettauntOpcodeHandlers } from "./battleScriptSettauntOpcode.ts";
 import { createBattleScriptSetforesightOpcodeHandlers } from "./battleScriptSetforesightOpcode.ts";
+import { createBattleScriptSetfocusenergyOpcodeHandlers } from "./battleScriptSetfocusenergyOpcode.ts";
 import { createBattleScriptDoubleDamageIfDamagedOpcodeHandlers } from "./battleScriptDoubleDamageIfDamagedOpcode.ts";
 import { createBattleScriptTrysetmagiccoatOpcodeHandlers } from "./battleScriptTrysetmagiccoatOpcode.ts";
 import { createBattleScriptWeightDamageOpcodeHandlers } from "./battleScriptWeightDamageOpcode.ts";
@@ -2482,6 +2483,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptSettormentOpcodeHandlers(program),
     ...createBattleScriptSettauntOpcodeHandlers(program),
     ...createBattleScriptSetforesightOpcodeHandlers(program),
+    ...createBattleScriptSetfocusenergyOpcodeHandlers(program),
     ...createBattleScriptDoubleDamageIfDamagedOpcodeHandlers(program),
     ...createBattleScriptWeightDamageOpcodeHandlers(program),
     ...createBattleScriptTrysetspikesOpcodeHandlers(program),
