@@ -1,4 +1,25 @@
 ---
+## 602 — [SUPERVISOR VERIFY 2026-07-28 ~06:08] Focus Energy accepted
+
+- **State:** independently reviewed and verified the union green at focused
+  opcode/full-turn/crit/switch/evidence/ratchet coverage **348/348** plus
+  production build, census regeneration, all **42/42** validation checks,
+  and `git diff --check`. Census is exactly **158/214 effects, 287/355
+  moves, 235/276 Factory-L50 distinct, 2760/2957 weighted**.
+- **Did:** accepted global Focus Energy `0x9a`, the real script's duplicate
+  bypass, shared capped critical-hit stage consumer, and source switch
+  lifetime after source/diff review. Both attacker selectors and the
+  defensive duplicate opcode branch are pinned; the public full-turn path
+  proves exact PP/message/status order and repeat failure without a private
+  move path.
+- **Next:** select the next source-complete generic effect; keep the
+  seven-battle round controller and shared presentation seam authoritative.
+- **Notes:** handler inventory is **166**. No new unsupported barrier,
+  recording import, local RNG/controller/event seam, presentation/tick
+  branch, issue removal, or DEFERRED item. Animation branch remains
+  intentionally unmerged after orient.
+
+---
 ## 599 — [BOUNDED MAIN WORKER 2026-07-28 ~05:58] Spikes executes across shared switch-in path
 
 - **State:** committed `9b8473e` + `db739ac`; tree green at **361 files /
