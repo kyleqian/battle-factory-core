@@ -8,10 +8,15 @@ const effects3 = readFileSync("reference/pokeemerald/src/battle_anim_effects_3.c
 const block = (start: string, end: string) => scripts.slice(scripts.indexOf(`${start}:`), scripts.indexOf(`${end}:`, scripts.indexOf(`${start}:`) + start.length));
 
 describe("asset:ANIM_TAG_BLACK_BALL source audit", () => {
-  it("pins Smokescreen's complete Black Ball, impact, smoke, shake, and cleanup topology", () => {
-    const script = block("Move_SMOKESCREEN", "Move_BUBBLE");
-    for (const text of ["loadspritegfx ANIM_TAG_BLACK_SMOKE", "loadspritegfx ANIM_TAG_BLACK_BALL", "gBlackBallSpriteTemplate", "AnimTask_SmokescreenImpact", "SE_M_DOUBLE_TEAM", "SE_M_SAND_ATTACK", "gBlackSmokeSpriteTemplate", "AnimTask_ShakeMon2", "waitforvisualfinish"]) expect(script).toContain(text);
+  it("pins Smokescreen's complete Black Ball, impact, smoke, and cleanup topology", () => {
+    const script = block("Move_SMOKESCREEN", "Move_CONVERSION");
+    for (const text of ["loadspritegfx ANIM_TAG_BLACK_SMOKE", "loadspritegfx ANIM_TAG_BLACK_BALL", "gBlackBallSpriteTemplate", "AnimTask_SmokescreenImpact", "SE_M_DOUBLE_TEAM", "SE_M_SAND_ATTACK", "gBlackSmokeSpriteTemplate", "waitforvisualfinish"]) expect(script).toContain(text);
     expect(script.match(/createsprite gBlackSmokeSpriteTemplate/g)).toHaveLength(12);
+    // Unlike several neighboring impact moves, Emerald's actual Smokescreen
+    // script never creates a battler shake task. This negative assertion keeps
+    // the audit bounded to the immediate next label instead of accidentally
+    // finding an unrelated ShakeMon2 in the later Move_BUBBLE block.
+    expect(script).not.toContain("AnimTask_ShakeMon2");
     for (const text of ["sSmokescreenImpactSpriteSheet", "sSmokescreenImpactSpritePalette", "CreateInvisibleSpriteWithCallback(SpriteCB_SmokescreenImpactMain)", "CreateSprite(&sSmokescreenImpactSpriteTemplate", "FreeSpriteTilesByTag", "FreeSpritePaletteByTag", "AnimBlackSmoke_Step"]) expect(`${smoke}\n${effects3}`).toContain(text);
   });
 

@@ -24,7 +24,7 @@ def main() -> None:
     sprites, matrices, tasks = sy["gSprites"], sy["gOamMatrices"], sy["gTasks"]
     faded, unfaded = sy["gPlttBufferFaded"], sy["gPlttBufferUnfaded"]
     battler_ids, palette_tags = sy["gBattlerSpriteIds"], names["sSpritePaletteTags"]
-    active, ptr, start, end = names["gAnimScriptActive"], names["sBattleAnimScriptPtr"], names["Move_SMOKESCREEN"], names["Move_BUBBLE"]
+    active, ptr, start, end = names["gAnimScriptActive"], names["sBattleAnimScriptPtr"], names["Move_SMOKESCREEN"], names["Move_CONVERSION"]
     def u16(a): return oracle.read_u8(a) | oracle.read_u8(a + 1) << 8
     def u32(a): return u16(a) | u16(a + 2) << 16
     def s16(a):
@@ -55,8 +55,10 @@ def main() -> None:
     last=next((i for i in range(first+1,len(rows)) if not rows[i]["gAnimScriptActive"]),None)
     if last is None: raise RuntimeError("Smokescreen first inactive cleanup was not captured")
     source=rows[first:last+1]; topology={"tasks":sorted({x["func"]["symbol"] for r in source for x in r["tasks"] if x["func"]["symbol"]}),"templates":sorted({x["template"]["symbol"] for r in source for x in r["sprites"] if x["template"]["symbol"]}),"callbacks":sorted({x["callback"]["symbol"] for r in source for x in r["sprites"] if x["callback"]["symbol"]})}
-    required={"gBlackBallSpriteTemplate","gBlackSmokeSpriteTemplate"}
+    required={"gBlackBallSpriteTemplate","gBlackSmokeSpriteTemplate","sSmokescreenImpactSpriteTemplate"}
     if not required <= set(topology["templates"]): raise RuntimeError(f"missing Smokescreen templates: {topology}")
-    OUTPUT.write_text(json.dumps({"schema":"smokescreen-dense-evidence/v1","setup":setup,"captureWindow":{"startFrame":rows[0]["frame"],"endFrame":rows[-1]["frame"],"frameCount":len(rows)},"sourceWindow":{"startFrame":source[0]["frame"],"endFrame":source[-1]["frame"],"frameCount":len(source)},"sourceSymbols":{"Move_SMOKESCREEN":start,"Move_BUBBLE":end},"templates":{n:names[n] for n in ("gBlackBallSpriteTemplate","gBlackSmokeSpriteTemplate")},"songHeaders":{"SE_M_DOUBLE_TEAM":names["se_m_double_team"],"SE_M_SAND_ATTACK":names["se_m_sand_attack"]},"topology":topology,"frames":source},separators=(',',':'))+'\n')
+    if topology["tasks"]:
+        raise RuntimeError(f"Smokescreen unexpectedly created tasks: {topology['tasks']}")
+    OUTPUT.write_text(json.dumps({"schema":"smokescreen-dense-evidence/v1","setup":setup,"captureWindow":{"startFrame":rows[0]["frame"],"endFrame":rows[-1]["frame"],"frameCount":len(rows)},"sourceWindow":{"startFrame":source[0]["frame"],"endFrame":source[-1]["frame"],"frameCount":len(source)},"sourceSymbols":{"Move_SMOKESCREEN":start,"Move_CONVERSION":end},"templates":{n:names[n] for n in ("gBlackBallSpriteTemplate","gBlackSmokeSpriteTemplate")},"songHeaders":{"SE_M_DOUBLE_TEAM":names["se_m_double_team"],"SE_M_SAND_ATTACK":names["se_m_sand_attack"]},"topology":topology,"frames":source},separators=(',',':'))+'\n')
     print(f"wrote {OUTPUT}: source {source[0]['frame']}..{source[-1]['frame']} ({len(source)} frames)")
 main()
