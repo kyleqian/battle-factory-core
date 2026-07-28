@@ -15,6 +15,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 606 — [TOOLING FOLD 2026-07-28 ~08:48] Low-risk papercuts merged and union verified
+
+- **State:** merged `codex/papercuts-guardrails` as `4e8a788`; the union is
+  green at **366 files / 4231 tests**, production build, Python tooling
+  checks **8/8**, both oracle infos, and `git diff --check`.
+- **Did:** retired four recorded papercuts with worktree-safe harness
+  resolution for freshness and terminal extraction, explicit commit-free
+  `--read-only` / `--audit` worker postflight, terminal RAM-probe bitfield
+  extraction, and a default battle-lab output ignore. The merge had zero
+  changed-path overlap with the 195-file supervisor advance.
+- **Next:** before further oracle-backed staging, the launcher/supervisor must
+  refresh Scene-OFF after harness `0d4ad46`; then resume the accepted Trick
+  target from entry 605.
+- **Notes:** both endpoints answer bootstrap v5. Scene-ON freshness passes;
+  Scene-OFF started 2026-07-27 22:36, before the harness's 2026-07-28 08:42
+  commit, so freshness correctly fails. No oracle lifecycle action, game
+  logic, issue, roadmap, census, animation, or unsupported-barrier change.
+
+---
 ## 605 — [SUPERVISOR VERIFY 2026-07-28 ~06:24] Encore accepted after shared-seam repair
 
 - **State:** independently reviewed the implementation and repair diffs and
@@ -55,25 +74,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Next:** supervisor verify this repair and resume finite Stage 8 selection.
 - **Notes:** no oracle claim, unsupported barrier, recording import,
   presentation/controller/round widening, issue removal, or census change.
-
----
-## 603 — [BOUNDED MAIN WORKER 2026-07-28 ~06:14] Encore executes through shared choice/lifetime paths
-
-- **State:** committed `b2e406a` + `a954fd3` + `c6f3b09`; tree green at **365 files /
-  4221 tests**, production build, both oracle infos, census regeneration,
-  ratchets **6/6**, and `git diff --check`. Census is exactly **159/214
-  effects, 288/355 moves, 236/276 Factory-L50 distinct, 2764/2957
-  weighted**, all **42/42**.
-- **Did:** globally registered five-byte `B_SCR_OP_TRYSETENCORE` (`0xa4`)
-  with source pointer branches, first matching move-slot/PP predicates, and
-  the setter-owned exact 3–6 RNG draw. Shared state now carries the full
-  Encore fields; move limitations and full-turn choice auto-confirm the
-  forced slot, end-turn orchestration decrements and expires on timer/slot
-  rewrite/zero PP through `BattleScript_EncoredNoMore`, and every switch
-  (including Baton Pass) clears Encore. Actual action execution retains the
-  source's higher-priority multi-turn lock before Encore.
-- **Next:** supervisor verify this finite executable-frontier increment and
-  select the next source-complete target.
-- **Notes:** handler inventory **166→167**. No unsupported barrier, recording
-  import, private RNG/controller/event seam, presentation/tick/round-controller
-  widening, issue removal, or DEFERRED item.

@@ -1,4 +1,26 @@
 ---
+## 603 — [BOUNDED MAIN WORKER 2026-07-28 ~06:14] Encore executes through shared choice/lifetime paths
+
+- **State:** committed `b2e406a` + `a954fd3` + `c6f3b09`; tree green at **365 files /
+  4221 tests**, production build, both oracle infos, census regeneration,
+  ratchets **6/6**, and `git diff --check`. Census is exactly **159/214
+  effects, 288/355 moves, 236/276 Factory-L50 distinct, 2764/2957
+  weighted**, all **42/42**.
+- **Did:** globally registered five-byte `B_SCR_OP_TRYSETENCORE` (`0xa4`)
+  with source pointer branches, first matching move-slot/PP predicates, and
+  the setter-owned exact 3–6 RNG draw. Shared state now carries the full
+  Encore fields; move limitations and full-turn choice auto-confirm the
+  forced slot, end-turn orchestration decrements and expires on timer/slot
+  rewrite/zero PP through `BattleScript_EncoredNoMore`, and every switch
+  (including Baton Pass) clears Encore. Actual action execution retains the
+  source's higher-priority multi-turn lock before Encore.
+- **Next:** supervisor verify this finite executable-frontier increment and
+  select the next source-complete target.
+- **Notes:** handler inventory **166→167**. No unsupported barrier, recording
+  import, private RNG/controller/event seam, presentation/tick/round-controller
+  widening, issue removal, or DEFERRED item.
+
+---
 ## 602 — [SUPERVISOR VERIFY 2026-07-28 ~06:08] Focus Energy accepted
 
 - **State:** independently reviewed and verified the union green at focused
