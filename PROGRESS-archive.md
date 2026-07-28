@@ -26,6 +26,28 @@
   edit, DEFERRED item, or PAPERCUT.
 
 ---
+## 549 — [BOUNDED MAIN WORKER 2026-07-27 ~22:48] Focus Punch executes both damage-receipt routes
+
+- **State:** tree green at **304 files / 3887 tests**; build, oracle
+  freshness, and `git diff --check` pass. Census is **133/214 effects,
+  257/355 moves, 209/276 Factory-L50 distinct, 2642/2957 weighted**, exact
+  **+1/+1/+1/+11**, with all **42/42** checks.
+- **Did:** committed `769f538`, registering the sole five-byte opcode
+  `0xcf` / `Cmd_jumpifnodamage`. It reads the attacker's existing
+  ProtectStruct physical/special receipts: either nonzero falls through;
+  both zero jump exactly to `BattleScript_HitFromAccCheck`. Genuine Focus
+  Punch walks now reach their own `END` through lost-focus and hit-chain
+  routes, including PP **20→19**, Starmie **135→66**, and exact RNG ledgers.
+- **Next:** source-scout and register the newly generated top blocker
+  `B_SCR_OP_SETDESTINYBOND` / `EFFECT_DESTINY_BOND` (expected
+  **+1/+1/+1/+10**) from targeted OFF evidence.
+- **Notes:** the generic full-turn proof shows Swift's real
+  `datahpupdate` receipt survives action cleanup into lost focus, while
+  Light Screen leaves zero receipts; the existing next-turn owner resets
+  both fields. No new plumbing, unsupported barrier/ratchet change,
+  recording import, oracle lifecycle action, animation edit, or PAPERCUT.
+
+---
 ## 547 — [SUPERVISOR SOURCE REVIEW 2026-07-27 ~22:18] Baton Pass registration tightened before acceptance
 
 - **State:** reviewed tree green at **299 files / 3857 tests**; `npm run

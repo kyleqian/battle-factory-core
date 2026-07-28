@@ -15,6 +15,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 552 — [SUPERVISOR VERIFY 2026-07-27 ~23:10] Destiny Bond terminal path accepted; Substitute evidence merged
+
+- **State:** reviewed union green at **307 files / 3898 tests**; focused
+  **266/266**, production build, oracle freshness, and `git diff --check`
+  pass. Census is **134/214 effects, 258/355 moves, 210/276 Factory-L50
+  distinct, 2652/2957 weighted**.
+- **Did:** accepted `410c751`/`5eb6a0f`: the reusable ordered multi-push VM
+  control reproduces Destiny Bond's nested avenging→original-faint→caller
+  returns, and a generic Wobbuffet→Snorlax Explosion turn reaches terminal
+  with both faints exactly once. The hit-chain barrier ratchet shrank
+  **23→22**.
+- **Next:** register the one-byte `B_SCR_OP_SETSUBSTITUTE` /
+  `EFFECT_SUBSTITUTE` from merged source/OFF evidence. Implement both strict
+  low-HP failure and success mutations, plus already-live and cross-action
+  persistence routes; regenerate the expected **+1/+1/+1/+10** delta.
+- **Notes:** merged `f48d51f` after twice reproducing Golem Substitute at
+  manifest `19e525d9…f7c7d`: HP **155→117**, PP **10→9→8**, and the live bit
+  persist through a second real failed use. Low-HP internal fields are
+  source-pinned but not oracle-exposed. No new barrier, recording import,
+  animation edit, DEFERRED item, or oracle lifecycle action.
+
+---
 ## 551 — [BOUNDED MAIN WORKER 2026-07-27 ~23:04] Destiny Bond executes and avenges through the real faint stack
 
 - **State:** tree green at **306 files / 3895 tests**; focused **281/281**,
@@ -58,25 +80,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **5→4**, live `STATUS2_DESTINY_BOND`, dual faint, and clear are observed.
   No unsupported barrier/ratchet change, recording import, animation edit,
   DEFERRED item, or oracle lifecycle action.
-
----
-## 549 — [BOUNDED MAIN WORKER 2026-07-27 ~22:48] Focus Punch executes both damage-receipt routes
-
-- **State:** tree green at **304 files / 3887 tests**; build, oracle
-  freshness, and `git diff --check` pass. Census is **133/214 effects,
-  257/355 moves, 209/276 Factory-L50 distinct, 2642/2957 weighted**, exact
-  **+1/+1/+1/+11**, with all **42/42** checks.
-- **Did:** committed `769f538`, registering the sole five-byte opcode
-  `0xcf` / `Cmd_jumpifnodamage`. It reads the attacker's existing
-  ProtectStruct physical/special receipts: either nonzero falls through;
-  both zero jump exactly to `BattleScript_HitFromAccCheck`. Genuine Focus
-  Punch walks now reach their own `END` through lost-focus and hit-chain
-  routes, including PP **20→19**, Starmie **135→66**, and exact RNG ledgers.
-- **Next:** source-scout and register the newly generated top blocker
-  `B_SCR_OP_SETDESTINYBOND` / `EFFECT_DESTINY_BOND` (expected
-  **+1/+1/+1/+10**) from targeted OFF evidence.
-- **Notes:** the generic full-turn proof shows Swift's real
-  `datahpupdate` receipt survives action cleanup into lost focus, while
-  Light Screen leaves zero receipts; the existing next-turn owner resets
-  both fields. No new plumbing, unsupported barrier/ratchet change,
-  recording import, oracle lifecycle action, animation edit, or PAPERCUT.
