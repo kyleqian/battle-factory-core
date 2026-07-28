@@ -17,6 +17,7 @@ import {
   stepBattleScriptMachine,
   type BattleScriptMachineState,
 } from "../src/engine/battleScriptMachine.ts";
+import { SET_MOVE_EFFECT_SUPPORTED_BYTES } from "../src/engine/battleScriptHitChainOpcode.ts";
 
 const program = loadBattleScriptProgram();
 const TACKLE = 33; // EFFECT_HIT, power 35, accuracy 95, TYPE_NORMAL
@@ -2442,6 +2443,73 @@ describe("SetMoveEffect confusion/flinch family (registered)", () => {
 });
 
 /**
+ * SetMoveEffect's MOVE_EFFECT_CHARGING case (semi-invulnerable registration
+ * rung 2, docs/semi-invulnerable-registration-scout.md §2d/§5 rung 2). Real
+ * call site: `BattleScriptFirstChargingTurn`'s own `setmoveeffect
+ * MOVE_EFFECT_CHARGING | MOVE_EFFECT_AFFECTS_USER` + `seteffectprimary`,
+ * shared verbatim by all five two-turn-charge effects.
+ */
+describe("SetMoveEffect two-turn-charge family (registered) -- MOVE_EFFECT_CHARGING", () => {
+  const MOVE_EFFECT_CHARGING = 12;
+  const MOVE_EFFECT_AFFECTS_USER = 1 << 6;
+  const STATUS2_MULTIPLETURNS = 1 << 12;
+
+  const setEffectPrimaryPc = program.instructions.find(
+    (instruction) =>
+      instruction.opcodeName === "B_SCR_OP_SETEFFECTPRIMARY"
+      && instruction.source.label === "BattleScriptFirstChargingTurn",
+  )!.programCounter;
+
+  function stepAtChargingSetEffectPrimary(rulesContext: BattleScriptRulesContext, rngSeed = 1) {
+    const execution = createBattleScriptStatusRulesExecution(
+      program,
+      "BattleScriptFirstChargingTurn",
+      rulesContext,
+      rngSeed,
+      externalPorts(),
+    );
+    const patched = Object.freeze({ ...execution.state, programCounter: setEffectPrimaryPc });
+    return { execution, result: stepBattleScriptMachine(program, patched, execution.handlers) };
+  }
+
+  it("turn 1 (not yet charging): sets STATUS2_MULTIPLETURNS + chargingTurn on the attacker, zero RNG, advances (SetMoveEffect just breaks, not a call)", () => {
+    const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_CHARGING | MOVE_EFFECT_AFFECTS_USER });
+    const { execution, result } = stepAtChargingSetEffectPrimary(rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.rng.calls).toBe(execution.state.rng.calls);
+    expect(result.state.rulesContext.battlers[0]!.status2 & STATUS2_MULTIPLETURNS).toBe(STATUS2_MULTIPLETURNS);
+    expect(result.state.rulesContext.battlers[0]!.chargingTurn).toBe(1);
+    expect(result.state.programCounter).toBe(setEffectPrimaryPc + 1);
+  });
+
+  it("MOVE_EFFECT_AFFECTS_USER targets the attacker, never the target", () => {
+    const rc = context(0, {}, { moveEffectByte: MOVE_EFFECT_CHARGING | MOVE_EFFECT_AFFECTS_USER });
+    const { result } = stepAtChargingSetEffectPrimary(rc);
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battlers[1]!.status2).toBe(0);
+    expect(result.state.rulesContext.battlers[1]!.chargingTurn).toBe(0);
+  });
+
+  it("already charging (turn-2 dead-code path, ported for fidelity per applyThrashMoveEffect's own precedent): the shared status2-already-set early-out skips silently, zero RNG, status2/chargingTurn unchanged", () => {
+    const rc = context(
+      0,
+      { status2: STATUS2_MULTIPLETURNS, chargingTurn: 0 },
+      { moveEffectByte: MOVE_EFFECT_CHARGING | MOVE_EFFECT_AFFECTS_USER },
+    );
+    const { execution, result } = stepAtChargingSetEffectPrimary(rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    expect(result.state.rng.calls).toBe(execution.state.rng.calls);
+    expect(result.state.rulesContext.battlers[0]!.status2).toBe(STATUS2_MULTIPLETURNS);
+    expect(result.state.rulesContext.battlers[0]!.chargingTurn).toBe(0);
+    expect(result.state.programCounter).toBe(setEffectPrimaryPc + 1);
+  });
+
+  it("registered in SET_MOVE_EFFECT_SUPPORTED_BYTES (drives the census's SETMOVEEFFECT_SUPPORTED derivation)", () => {
+    expect(SET_MOVE_EFFECT_SUPPORTED_BYTES.has(MOVE_EFFECT_CHARGING)).toBe(true);
+  });
+});
+
+/**
  * Secondary-effect stat-change route (docs/stat-change-confusion-ground-
  * truth.md): SetMoveEffect's ATK/DEF/SPD/SP_ATK/SP_DEF/ACC/EVS +-1/+-2 cases
  * (:2644-2727), all dispatching through the shared changeStatBuffs() core
@@ -2629,6 +2697,39 @@ describe("production printfromtable (Cmd_printfromtable) dispatch", () => {
       expect.objectContaining({ kind: "message", messageId: "STRINGID_PKMNSXHADNOEFFECTONY" }),
     ]);
   });
+
+  describe(
+    "BattleScriptFirstChargingTurn's own printfromtable gFirstTurnOfTwoStringIds "
+      + "(semi-invulnerable registration rung 4, docs/semi-invulnerable-registration-scout.md §1b/§5 rung 4 -- "
+      + "all 8 B_MSG_TURN1_* indices, shared by all five two-turn-charge effects)",
+    () => {
+      const pc = program.instructions.find((i) =>
+        i.opcodeName === "B_SCR_OP_PRINTFROMTABLE" && i.operands[0]?.expression === "gFirstTurnOfTwoStringIds"
+      )!.programCounter;
+
+      const cases: readonly [number, string][] = [
+        [0, "STRINGID_PKMNWHIPPEDWHIRLWIND"], // B_MSG_TURN1_RAZOR_WIND
+        [1, "STRINGID_PKMNTOOKSUNLIGHT"], // B_MSG_TURN1_SOLAR_BEAM
+        [2, "STRINGID_PKMNLOWEREDHEAD"], // B_MSG_TURN1_SKULL_BASH
+        [3, "STRINGID_PKMNISGLOWING"], // B_MSG_TURN1_SKY_ATTACK
+        [4, "STRINGID_PKMNFLEWHIGH"], // B_MSG_TURN1_FLY
+        [5, "STRINGID_PKMNDUGHOLE"], // B_MSG_TURN1_DIG
+        [6, "STRINGID_PKMNHIDUNDERWATER"], // B_MSG_TURN1_DIVE
+        [7, "STRINGID_PKMNSPRANGUP"], // B_MSG_TURN1_BOUNCE
+      ];
+
+      for (const [index, stringId] of cases) {
+        it(`MULTISTRING_CHOOSER ${index}: resolves ${stringId}`, () => {
+          const rc = context(0, {}, { multistringChooser: index });
+          const { result } = stepAtProgramCounter(pc, rc);
+          if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+          expect(result.state.events).toEqual([
+            expect.objectContaining({ kind: "message", messageId: stringId }),
+          ]);
+        });
+      }
+    },
+  );
 });
 
 describe("production updatestatusicon (Cmd_updatestatusicon) dispatch", () => {

@@ -214,6 +214,8 @@ const PRIMARY_STATUS_MOVE_EFFECT = MOVE_EFFECT_TOXIC;
 /** include/constants/battle.h:254-255 -- the first two family-B (status2/misc) MOVE_EFFECT_* values. */
 const MOVE_EFFECT_CONFUSION = 7;
 const MOVE_EFFECT_FLINCH = 8;
+/** include/constants/battle.h:259 -- SetMoveEffect's two-turn-charge case (docs/semi-invulnerable-registration-scout.md §5 rung 2). */
+const MOVE_EFFECT_CHARGING = 12;
 /** include/constants/battle.h:260 -- SetMoveEffect's Wrap-family case (docs/ingrain-leechseed-wrap-ground-truth.md §1c/§5 slice 2). */
 const MOVE_EFFECT_WRAP = 13;
 /** include/constants/battle.h:300 -- SetMoveEffect's Thrash-family lock-in case (docs/yawn-thrash-endturn-design.md §3, Rung 4). */
@@ -362,6 +364,24 @@ const PRINTFROMTABLE_TABLES: Readonly<Record<string, readonly string[]>> = Objec
   ]),
   /** battle_message.c:1108-1111 -- BattleScript_KOFail's own table (Cmd_tryKO, battleScriptTryKOOpcode.ts), B_MSG_KO_MISS(0)/KO_UNAFFECTED(1). */
   gKOFailedStringIds: Object.freeze(["STRINGID_ATTACKMISSED", "STRINGID_PKMNUNAFFECTED"]),
+  /**
+   * battle_message.c:1025-1035 -- `BattleScriptFirstChargingTurn`'s own
+   * `printfromtable gFirstTurnOfTwoStringIds`, indexed by `sTWOTURN_STRINGID`
+   * (semi-invulnerable registration rung 4, docs/semi-invulnerable-
+   * registration-scout.md §1b/§5 rung 4). Shared by all five two-turn-charge
+   * effects' turn-1 message. B_MSG_TURN1_RAZOR_WIND(0)/SOLAR_BEAM(1)/
+   * SKULL_BASH(2)/SKY_ATTACK(3)/FLY(4)/DIG(5)/DIVE(6)/BOUNCE(7).
+   */
+  gFirstTurnOfTwoStringIds: Object.freeze([
+    "STRINGID_PKMNWHIPPEDWHIRLWIND",
+    "STRINGID_PKMNTOOKSUNLIGHT",
+    "STRINGID_PKMNLOWEREDHEAD",
+    "STRINGID_PKMNISGLOWING",
+    "STRINGID_PKMNFLEWHIGH",
+    "STRINGID_PKMNDUGHOLE",
+    "STRINGID_PKMNHIDUNDERWATER",
+    "STRINGID_PKMNSPRANGUP",
+  ]),
 });
 
 const MOVE_EFFECT_LABEL_BY_BYTE: Readonly<Record<number, string>> = Object.freeze({
@@ -448,6 +468,7 @@ export const SET_MOVE_EFFECT_SUPPORTED_BYTES: ReadonlySet<number> = new Set<numb
   MOVE_EFFECT_TOXIC,
   MOVE_EFFECT_CONFUSION,
   MOVE_EFFECT_FLINCH,
+  MOVE_EFFECT_CHARGING,
   MOVE_EFFECT_WRAP,
   MOVE_EFFECT_THRASH,
   ...Object.keys(STAT_MOVE_EFFECT_TABLE).map(Number),
@@ -549,7 +570,7 @@ function resolveHitChainBattlerOperand(
   return "unsupported";
 }
 
-function requireBattlerRole(
+export function requireBattlerRole(
   rulesContext: BattleScriptRulesContext,
   role: "attacker" | "target",
 ): BattleScriptBattlerId {
@@ -2402,6 +2423,9 @@ function applySetMoveEffect(
     if (effectByte === MOVE_EFFECT_WRAP) {
       return applyWrapMoveEffect(context, baseRulesContext, effectBattler);
     }
+    if (effectByte === MOVE_EFFECT_CHARGING) {
+      return applyChargingMoveEffect(context, baseRulesContext, effectBattler);
+    }
     if (effectByte === MOVE_EFFECT_THRASH) {
       return applyThrashMoveEffect(context, baseRulesContext, effectBattler);
     }
@@ -2813,6 +2837,58 @@ function applyWrapMoveEffect(
     context,
     Object.freeze({ kind: "call", programCounter }),
     { rulesContext: nextRulesContext, rng },
+  );
+}
+
+/**
+ * SetMoveEffect's MOVE_EFFECT_CHARGING case (`battle_script_commands.c:2605-
+ * 2610`, docs/semi-invulnerable-registration-scout.md §2d/§5 rung 2). The
+ * two-turn-charge start (Razor Wind/Sky Attack/Skull Bash/Solar Beam/
+ * semi-invulnerable Fly/Dig/Dive/Bounce), reached via `BattleScriptFirstChargingTurn`'s
+ * own unconditional `setmoveeffect MOVE_EFFECT_CHARGING | MOVE_EFFECT_AFFECTS_USER`
+ * + `seteffectprimary`. `sStatusFlagsForMoveEffects[MOVE_EFFECT_CHARGING] ==
+ * STATUS2_MULTIPLETURNS` (`:619`), so the shared family-B early-out
+ * (`status2 & sStatusFlagsForMoveEffects[byte]`, `:2523-2524`) is checking
+ * "is STATUS2_MULTIPLETURNS already set" -- always false the one time this
+ * runs (turn 1, before the bit exists), matching `applyThrashMoveEffect`'s
+ * own reasoning for its structurally identical early-out. Draws no RNG and
+ * never pushes/jumps to a script -- `SetMoveEffect`'s switch just `break`s
+ * for this case, so `"advance"` is correct, not `"call"`.
+ *
+ * `gLockedMoves[gEffectBattler] = gCurrentMove` is deliberately NOT ported,
+ * for the exact reason `applyThrashMoveEffect`'s own doc comment above
+ * establishes: this engine has no ported `HandleAction_UseMove` anywhere, so
+ * `gLockedMoves` has no read-back consumer in this codebase at any layer.
+ * `gProtectStructs[gEffectBattler].chargingTurn = 1` IS ported -- unlike
+ * `gLockedMoves`, `chargingTurn` is already a modeled field
+ * (`BattleScriptRulesContext.battlers[i].chargingTurn`), cheap to set
+ * faithfully even though its one consumer (`resolveBattleScriptMoveEndNextTarget`'s
+ * doubles-only spread-move replay) has no observable effect in Factory-L50
+ * singles scope.
+ */
+function applyChargingMoveEffect(
+  context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
+  baseRulesContext: BattleScriptRulesContext,
+  effectBattler: BattleScriptBattlerId,
+): BattleScriptCommandTransition<BattleScriptRulesContext> {
+  const effectBattlerState = baseRulesContext.battlers[effectBattler];
+  const alreadyCharging = (effectBattlerState.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS) !== 0;
+  if (alreadyCharging) {
+    return transitionBattleScriptCommand(
+      context,
+      Object.freeze({ kind: "advance" }),
+      { rulesContext: baseRulesContext },
+    );
+  }
+
+  const nextRulesContext = withBattler(baseRulesContext, effectBattler, {
+    status2: (effectBattlerState.status2 | BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS) >>> 0,
+    chargingTurn: 1,
+  });
+  return transitionBattleScriptCommand(
+    context,
+    Object.freeze({ kind: "advance" }),
+    { rulesContext: nextRulesContext },
   );
 }
 

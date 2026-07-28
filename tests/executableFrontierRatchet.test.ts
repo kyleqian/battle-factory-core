@@ -278,6 +278,18 @@ const PINNED_BARRIER_COUNTS: ReadonlyMap<string, number> = new Map([
   // generic VARIOUS dispatcher). Reachability-tested directly in
   // tests/battleScriptForceSwitchOpcode.test.ts.
   ["src/engine/battleScriptForceSwitchOpcode.ts", 1],
+  // B_SCR_OP_CLEARSTATUSFROMEFFECT/SETSEMIINVULNERABLEBIT/CLEARSEMIINVULNERABLEBIT
+  // registration (EFFECT_SEMI_INVULNERABLE + collateral EFFECT_RAZOR_WIND/
+  // SKY_ATTACK/SKULL_BASH, docs/semi-invulnerable-registration-scout.md §5
+  // rungs 6-7): Cmd_setsemiinvulnerablebit/Cmd_clearsemiinvulnerablebit
+  // register with zero barriers (a pure gCurrentMove-keyed status3 write, all
+  // 3 concrete instances shaped identically). Cmd_clearstatusfromeffect's
+  // only unmodeled branch is the same GetBattlerForBattleScript selector
+  // shape battleScriptRemoveitemOpcode.ts already established (BS_ATTACKER
+  // before an attacker is assigned) -- all 5 concrete call sites' own
+  // selector (BS_ATTACKER) resolves for real on every reachable committed
+  // script this registration drives.
+  ["src/engine/battleScriptSemiInvulnerableOpcode.ts", 1],
 ]);
 
 function recordingImportsIn(file: string): string[] {

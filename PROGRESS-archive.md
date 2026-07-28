@@ -1,4 +1,83 @@
 ---
+## 526 — [BOUNDED WORKER 2026-07-27 ~18:00] EFFECT_TRIPLE_KICK + EFFECT_ROAR registered end to end; roar-multihit cluster (5 effects/18 moves/63 weighted) complete
+
+- **State:** tree green at **273 files / 3623 tests** (272/3609 → +1 file /
+  +14 tests: new `battleScriptForceSwitchOpcode.test.ts` 11 tests, +3 in
+  `battleScriptMultiHitFamily.test.ts` for Triple Kick), `npm run build`
+  clean. Census regenerated: **116/214 effects, 235/355 moves, 189/276
+  Factory-L50 unweighted, 2441/2957 weighted (82.5%)** — up from
+  115/214/187/276/2401/2957 (81.2%). **Actual flip matches the scout's
+  predicted end-state exactly** (5 effects/18 moves/63 weighted across both
+  sessions; this session's own share: EFFECT_ROAR 2 moves/40 weighted,
+  EFFECT_TRIPLE_KICK 1 move/1 weighted). 37/37 self-checks pass (EFFECT_ROAR's
+  exact-missing-opcode pin retired to `requireExecutable`; EFFECT_TRIPLE_KICK
+  gained a new `requireExecutable` pin; net +1 check).
+- **Did:** followed `docs/roar-multihit-registration-scout.md` §4's rung
+  order (rungs 7-14, entry 525's named remainder).
+  **Triple Kick (rungs 7-9):** `damagecalcOpcodeHandler` now reads
+  `rules.tripleKickPower` for the real 10/20/30 dynamic-base-power ramp
+  (`battleScriptHitChainOpcode.ts`); `ADDBYTE`'s `sTRIPLE_KICK_POWER` delta
+  literal `"10"` and `JUMPIFBYTE`'s standalone `MOVE_RESULT_DOESNT_AFFECT_FOE`
+  (`1<<3`) added as resolvable literals (`battleScriptSetByte.ts`);
+  `JUMPIFBYTE` now reads `sMULTIHIT_STRING + 4` off the `multiHitStringCounter`
+  field entry 525 already wired a writer for; `INITMULTIHITSTRING` now really
+  zeroes that counter (was a no-op advance until this session gave it both a
+  writer and a reader).
+  **Roar (rungs 10-14, new file `battleScriptForceSwitchOpcode.ts`):**
+  registered `B_SCR_OP_FORCERANDOMSWITCH` (`TryDoForceSwitchOut`'s exact
+  PARTY_SIZE=6 rejection sampling, the level-gated `Random()&0xFF` roll only
+  when the target out-levels the attacker, `validMons<=1` fail gate, writes
+  `monToSwitchIntoId` directly via the same plain-reducer pattern
+  `openpartyscreen`'s AI branch uses — Roar's outgoing battler is healthy and
+  gets no say, so it does *not* route through the fainted-replacement
+  decision boundary — then jumps to the hardcoded, bytecode-invisible
+  `BattleScript_SuccessForceOut` label), `B_SCR_OP_SWITCHOUTABILITIES`,
+  `B_SCR_OP_RETURNTOBALL` (both source-complete, zero barriers, compose with
+  the already-registered switch-in tail unmodified), and
+  `B_SCR_OP_FINISHACTION` as a permanent (b) barrier — per
+  `docs/script-terminal-gate3-evidence.md`'s own explicit recommendation to
+  defer real implementation (needs a typed action-scheduler receipt this
+  engine doesn't have), and doubly unreachable for Factory anyway (the
+  trainer-battle fork is always taken; even the counterfactual non-trainer
+  arm barriers first on the pre-existing `VARIOUS_SET_TELEPORT_OUTCOME` guard).
+- **Three hidden barriers found live this session (budgeted for by the
+  brief), beyond entry 525's one dossier slip:** (1) `Cmd_copyarray`'s
+  `gDynamicBasePower<-sTRIPLE_KICK_POWER, 2` tuple — the scout's §1d table
+  wrongly marked this "registered"; it was never in
+  `battleScriptIngrainLeechSeedWrapOpcode.ts`'s accepted tuple set. Widened
+  as a pure-advance no-op (`gDynamicBasePower` has no materialized field —
+  `damagecalc` reads `tripleKickPower` directly). (2) `JUMPIFBYTE`'s
+  standalone `MOVE_RESULT_DOESNT_AFFECT_FOE` value, gating
+  `BattleScript_TripleKickPrintStrings`' own "Hit X times!" print — not in
+  the scout's tables at all. (3) **A second real dossier slip**:
+  `BATTLE_TYPE_ARENA` was defined locally in `battleScriptJumpifwordOpcode.ts`
+  but never actually added to `JUMPIFWORD_VALUES` (only used as an internal
+  building block for the `BATTLE_TYPE_FRONTIER` OR-mask) — the scout's §1a
+  table wrongly claimed it was "already in JUMPIFWORD_VALUES". Fixed: Roar's
+  own `jumpifbattletype BATTLE_TYPE_ARENA, BattleScript_ButItFailed` now
+  resolves (always false for Factory).
+- **Tests:** full committed-script walks to a genuine `{kind:"terminal",
+  opcodeName:"B_SCR_OP_END"}` halt for both effects. Triple Kick: zero-hits
+  miss, partial 2-of-3-hits-then-miss, and all-3-hits-land (via
+  `decrementmultihit`'s own fallthrough exit), each with pinned RNG-roll
+  counts covering per-hit accuracy semantics. Roar: unconditional-success
+  (equal level), roll-gated success/fail (fail hand-verified: roll=14 <=
+  threshold=25), a real accuracy miss (max target evasion), `validMons<=1`
+  fail, Suction Cups and STATUS3_ROOTED pre-checks (zero RNG draws, both
+  gate before either accuracycheck), and the non-trainer
+  `jumpifbattletype` fork arm (barriers on the pre-existing
+  `VARIOUS_SET_TELEPORT_OUTCOME` guard, never reaching FINISHACTION) — plus
+  isolated dispatch tests for `SWITCHOUTABILITIES`' Natural Cure branch and
+  `FINISHACTION`'s own barrier. Updated 8 stale test fixtures'
+  `multiHitStringCounter` field (tsc -b `noUnusedLocals`/shape checks) and
+  2 now-stale barrier-pin tests (Triple Kick's own `ADDBYTE`/
+  `INITMULTIHITSTRING` barriers, both now real pass-through behavior).
+  Handler-count pin 124→128 (4 new opcode IDs).
+- **Notes:** no PAPERCUT. Four commits: Triple Kick + tests, Roar + tests,
+  census regen. `EFFECT_RAGE`/`EFFECT_SLEEP_TALK`/semi-invulnerable/
+  `EFFECT_EXPLOSION` (out of scope this step) remain the next ranked rows.
+
+---
 ## 525 — [BOUNDED WORKER 2026-07-27 ~17:15] EFFECT_MULTI_HIT/DOUBLE_HIT/TWINEEDLE registered end to end; EFFECT_TRIPLE_KICK/ROAR named remainder
 
 - **State:** tree green at **272 files / 3609 tests** (271/3597 → +1 file /

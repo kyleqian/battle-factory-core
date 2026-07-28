@@ -271,6 +271,7 @@ const MOVE_EFFECT_ID_BY_NAME: Readonly<Record<string, number>> = Object.freeze({
   MOVE_EFFECT_TOXIC: 6,
   MOVE_EFFECT_CONFUSION: 7,
   MOVE_EFFECT_FLINCH: 8,
+  MOVE_EFFECT_CHARGING: 12,
   MOVE_EFFECT_WRAP: 13,
   MOVE_EFFECT_ATK_PLUS_1: 15,
   MOVE_EFFECT_DEF_PLUS_1: 16,
@@ -662,6 +663,22 @@ const validationChecks: Array<() => void> = [
   // (B_SCR_OP_TRYMEMENTO alone) now that SETATKHPTOZERO -- shared plumbing
   // between the two effects -- is registered.
   () => requireExecutable("EFFECT_EXPLOSION"),
+  // Registration checkpoint (docs/semi-invulnerable-registration-scout.md §5
+  // rungs 1-8): JUMPIFWORD_VALUES + HITMARKER_NO_ATTACKSTRING, applySetMoveEffect's
+  // MOVE_EFFECT_CHARGING case, COPYARRAY's (cMULTISTRING_CHOOSER,
+  // sTWOTURN_STRINGID, 1) tuple, and PRINTFROMTABLE_TABLES' gFirstTurnOfTwoStringIds
+  // (all four shared by every two-turn-charge effect) plus the three new
+  // opcodes B_SCR_OP_CLEARSTATUSFROMEFFECT/SETSEMIINVULNERABLEBIT/
+  // CLEARSEMIINVULNERABLEBIT (battleScriptSemiInvulnerableOpcode.ts). Moved
+  // from blocked-on-opcodes to executable. EFFECT_RAZOR_WIND/SKY_ATTACK/
+  // SKULL_BASH flip collaterally alongside it -- none needs the two
+  // semi-invulnerable-exclusive opcodes, only the shared widenings +
+  // CLEARSTATUSFROMEFFECT (the scout's own corrected prediction, not the
+  // ranked table's original 1-effect claim).
+  () => requireExecutable("EFFECT_SEMI_INVULNERABLE"),
+  () => requireExecutable("EFFECT_RAZOR_WIND"),
+  () => requireExecutable("EFFECT_SKY_ATTACK"),
+  () => requireExecutable("EFFECT_SKULL_BASH"),
 ];
 
 let validationFailed = false;
