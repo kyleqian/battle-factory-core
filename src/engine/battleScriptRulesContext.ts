@@ -152,6 +152,30 @@ export type BattleScriptStatStages = readonly [
   number,
 ];
 
+/** Source gBattleMons six independent 5-bit IV fields. */
+export type BattleScriptIvs = Readonly<{
+  hp: number;
+  attack: number;
+  defense: number;
+  speed: number;
+  spAttack: number;
+  spDefense: number;
+}>;
+
+export function uniformBattleScriptIvs(iv: number): BattleScriptIvs {
+  if (!Number.isSafeInteger(iv) || iv < 0 || iv > 31) {
+    throw new Error(`uniform IV must be an integer in 0..31, got ${iv}`);
+  }
+  return Object.freeze({
+    hp: iv,
+    attack: iv,
+    defense: iv,
+    speed: iv,
+    spAttack: iv,
+    spDefense: iv,
+  });
+}
+
 export type BattleScriptSpecialStatus = Readonly<{
   restoredBattlerSprite: 0 | 1;
   physicalDmg: number;
@@ -240,6 +264,8 @@ type BattleScriptRulesBattlerBase = Readonly<{
 }>;
 
 type BattleScriptMoveEndBattlerMetadata = Readonly<{
+  /** Source gBattleMons[battler] IV bitfields, consumed by Hidden Power. */
+  ivs: BattleScriptIvs;
   /** DisableStruct's paired four-bit duration fields. */
   disableTimer: number;
   disableTimerStartValue: number;
@@ -370,6 +396,8 @@ export type BattleScriptRulesBattler = BattleScriptRulesBattlerBase & Readonly<{
    * construction boundary. Production constructors supply source values.
    */
   item?: number;
+  /** Legacy focused fixtures default to six zero IVs at the construction boundary. */
+  ivs?: BattleScriptIvs;
   disableTimer?: number;
   disableTimerStartValue?: number;
   encoreTimer?: number;
@@ -2038,6 +2066,14 @@ export function createBattleScriptRulesContext(
       })(),
     ) as unknown as readonly [string, string],
     species: requireUnsigned(battler.species ?? 0, 0xffff, `battlers[${index}].species`),
+    ivs: Object.freeze({
+      hp: requireUnsigned(battler.ivs?.hp ?? 0, 31, `battlers[${index}].ivs.hp`),
+      attack: requireUnsigned(battler.ivs?.attack ?? 0, 31, `battlers[${index}].ivs.attack`),
+      defense: requireUnsigned(battler.ivs?.defense ?? 0, 31, `battlers[${index}].ivs.defense`),
+      speed: requireUnsigned(battler.ivs?.speed ?? 0, 31, `battlers[${index}].ivs.speed`),
+      spAttack: requireUnsigned(battler.ivs?.spAttack ?? 0, 31, `battlers[${index}].ivs.spAttack`),
+      spDefense: requireUnsigned(battler.ivs?.spDefense ?? 0, 31, `battlers[${index}].ivs.spDefense`),
+    }),
     personality: requireUnsigned(battler.personality ?? 0, 0xffff_ffff, `battlers[${index}].personality`) >>> 0,
     attack: requireUnsigned(battler.attack ?? 0, 0xffff, `battlers[${index}].attack`),
     defense: requireUnsigned(battler.defense ?? 0, 0xffff, `battlers[${index}].defense`),

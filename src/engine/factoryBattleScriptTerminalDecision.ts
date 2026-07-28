@@ -61,6 +61,7 @@ import {
   BATTLE_SCRIPT_BATTLE_TYPE_TRAINER,
   BATTLE_SCRIPT_PARTY_SIZE,
   createBattleScriptRulesContext,
+  uniformBattleScriptIvs,
   createBattleScriptStatusRulesExecution,
   createBattleScriptStatusRulesHandlers,
   type BattleScriptPartyMemberInput,
@@ -80,6 +81,9 @@ const B_OUTCOME_DREW = 3;
 const PROGRAM = loadBattleScriptProgram();
 const NEUTRAL_STAT_STAGES = Object.freeze([6, 6, 6, 6, 6, 6, 6, 6] as const);
 const ZERO_STAT_STAGES = Object.freeze([0, 0, 0, 0, 0, 0, 0, 0] as const);
+const ZERO_IVS = uniformBattleScriptIvs(0);
+/** GetFactoryMonFixedIV(challenge 0, non-final) => sFixedIVTable[0][0] = 3. */
+const FACTORY_FIRST_CHALLENGE_IVS = uniformBattleScriptIvs(3);
 
 /** Pins the raw B_OUTCOME_* byte (`Cmd_checkteamslost`'s only writer) onto the kernel's 3-valued BattleOutcome. */
 export function mapFactoryBattleOutcome(battleOutcome: number): BattleOutcome {
@@ -158,6 +162,7 @@ function emptyBattler(side: 0 | 1): BattleScriptRulesBattlerState {
     ability: 0,
     hp: 0,
     item: 0,
+    ivs: ZERO_IVS,
     moves: Object.freeze([0, 0, 0, 0] as const),
     pp: Object.freeze([0, 0, 0, 0] as const),
     statStages: ZERO_STAT_STAGES,
@@ -242,6 +247,7 @@ function createInitialRules(config: FactoryTerminalMoveConfig): FactoryTerminalD
 
   const mover: BattleScriptRulesBattlerState = Object.freeze({
     ...emptyBattler(moverBattler),
+    ivs: FACTORY_FIRST_CHALLENGE_IVS,
     hp: 100,
     species: STAGED_PLAYER_SPECIES,
     attack: config.attackerAttack,
@@ -254,6 +260,7 @@ function createInitialRules(config: FactoryTerminalMoveConfig): FactoryTerminalD
   });
   const defender: BattleScriptRulesBattlerState = Object.freeze({
     ...emptyBattler(defenderBattler),
+    ivs: FACTORY_FIRST_CHALLENGE_IVS,
     hp: config.targetHp,
     species: STAGED_OPPONENT_SPECIES,
     defense: config.targetDefense,

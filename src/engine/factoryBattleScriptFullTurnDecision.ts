@@ -103,6 +103,7 @@ import {
   BATTLE_SCRIPT_BATTLE_TYPE_TRAINER,
   BATTLE_SCRIPT_PARTY_SIZE,
   createBattleScriptRulesContext,
+  uniformBattleScriptIvs,
   createBattleScriptStatusRulesHandlers,
   type BattleScriptPartyMemberInput,
   type BattleScriptRulesBattlerState,
@@ -143,6 +144,9 @@ const TOPOLOGY_BY_MOVE = new Map(
 const PROGRAM = loadBattleScriptProgram();
 const NEUTRAL_STAT_STAGES = Object.freeze([6, 6, 6, 6, 6, 6, 6, 6] as const);
 const ZERO_STAT_STAGES = Object.freeze([0, 0, 0, 0, 0, 0, 0, 0] as const);
+const ZERO_IVS = uniformBattleScriptIvs(0);
+/** GetFactoryMonFixedIV(challenge 0, non-final) => sFixedIVTable[0][0] = 3. */
+const FACTORY_FIRST_CHALLENGE_IVS = uniformBattleScriptIvs(3);
 
 type MachineState = BattleScriptMachineState<BattleScriptRulesContext>;
 type Handlers = BattleScriptOpcodeHandlers<BattleScriptRulesContext>;
@@ -253,6 +257,7 @@ function emptyBattler(side: 0 | 1): BattleScriptRulesBattlerState {
     ability: 0,
     hp: 0,
     item: 0,
+    ivs: ZERO_IVS,
     moves: Object.freeze([0, 0, 0, 0] as const),
     pp: Object.freeze([0, 0, 0, 0] as const),
     statStages: ZERO_STAT_STAGES,
@@ -323,6 +328,7 @@ function activeBattler(
   );
   return Object.freeze({
     ...emptyBattler(side),
+    ivs: FACTORY_FIRST_CHALLENGE_IVS,
     ability: config.ability ?? 0,
     hp: config.hp,
     item: config.item ?? 0,

@@ -16,7 +16,10 @@ import {
   resolveBattleScriptLabel,
   type BattleScriptProgram,
 } from "./battleScriptProgram.ts";
-import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
+import type {
+  BattleScriptIvs,
+  BattleScriptRulesContext,
+} from "./battleScriptRulesContext.ts";
 import { requireBattlerRole, withBattler } from "./battleScriptHitChainOpcode.ts";
 
 const STAT_ATK = 1;
@@ -38,6 +41,22 @@ export function magnitudeForRoll(roll: number): Readonly<{ magnitude: number; po
 
 export function halfTargetHpDamage(hp: number): number {
   return Math.max(1, Math.trunc(hp / 2));
+}
+
+export function hiddenPowerFromIvs(
+  ivs: BattleScriptIvs,
+): Readonly<{ power: number; type: number; dynamicMoveType: number }> {
+  const ordered = [ivs.hp, ivs.attack, ivs.defense, ivs.speed, ivs.spAttack, ivs.spDefense];
+  const powerBits = ordered.reduce((bits, iv, index) => bits | (((iv & 2) >> 1) << index), 0);
+  const typeBits = ordered.reduce((bits, iv, index) => bits | ((iv & 1) << index), 0);
+  const power = Math.trunc((40 * powerBits) / 63) + 30;
+  let type = Math.trunc((15 * typeBits) / 63) + 1;
+  if (type >= 9) type += 1; // skip TYPE_MYSTERY
+  return Object.freeze({
+    power,
+    type,
+    dynamicMoveType: type | 0x40 | 0x80,
+  });
 }
 
 const scaledDamageHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (context) => {
@@ -138,6 +157,19 @@ const damageToHalfTargetHpHandler: BattleScriptOpcodeHandler<BattleScriptRulesCo
   });
 };
 
+const hiddenPowerHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (context) => {
+  const rules = context.state.rulesContext;
+  const attacker = requireBattlerRole(rules, "attacker");
+  const hiddenPower = hiddenPowerFromIvs(rules.battlers[attacker].ivs);
+  return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }), {
+    rulesContext: Object.freeze({
+      ...rules,
+      dynamicBasePower: hiddenPower.power,
+      dynamicMoveType: hiddenPower.dynamicMoveType,
+    }),
+  });
+};
+
 export function createBattleScriptRankedBatch1OpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
@@ -163,5 +195,6 @@ export function createBattleScriptRankedBatch1OpcodeHandlers(
   install("B_SCR_OP_MAGNITUDEDAMAGECALCULATION", "Cmd_magnitudedamagecalculation", 0, magnitudeHandler);
   install("B_SCR_OP_MAXATTACKHALVEHP", "Cmd_maxattackhalvehp", 1, maxAttackHalveHpHandler);
   install("B_SCR_OP_DAMAGETOHALFTARGETHP", "Cmd_damagetohalftargethp", 0, damageToHalfTargetHpHandler);
+  install("B_SCR_OP_HIDDENPOWERCALC", "Cmd_hiddenpowercalc", 0, hiddenPowerHandler);
   return Object.freeze(handlers);
 }

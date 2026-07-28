@@ -28,6 +28,7 @@ import {
   BATTLE_SCRIPT_BATTLE_TYPE_TRAINER,
   createBattleScriptRulesContext,
   createBattleScriptStatusRulesExecution,
+  uniformBattleScriptIvs,
   type BattleScriptRulesBattlerState,
   type BattleScriptRulesContext,
 } from "./battleScriptRulesContext.ts";
@@ -80,6 +81,9 @@ const TOPOLOGY_BY_MOVE = new Map(
 const PROGRAM = loadBattleScriptProgram();
 const NEUTRAL_STAT_STAGES = Object.freeze([6, 6, 6, 6, 6, 6, 6, 6] as const);
 const ZERO_STAT_STAGES = Object.freeze([0, 0, 0, 0, 0, 0, 0, 0] as const);
+const ZERO_IVS = uniformBattleScriptIvs(0);
+/** GetFactoryMonFixedIV(challenge 0, non-final) => sFixedIVTable[0][0] = 3. */
+const FACTORY_FIRST_CHALLENGE_IVS = uniformBattleScriptIvs(3);
 
 export type FactoryAsleepMoveConfig = Readonly<{
   playerSetId: number;
@@ -213,6 +217,7 @@ function emptyBattler(side: 0 | 1): BattleScriptRulesBattlerState {
     ability: 0,
     hp: 0,
     item: 0,
+    ivs: ZERO_IVS,
     moves: Object.freeze([0, 0, 0, 0] as const),
     pp: Object.freeze([0, 0, 0, 0] as const),
     statStages: ZERO_STAT_STAGES,
@@ -282,6 +287,7 @@ function activeBattler(
 ): BattleScriptRulesBattlerState {
   return Object.freeze({
     ...emptyBattler(side),
+    ivs: FACTORY_FIRST_CHALLENGE_IVS,
     ability,
     hp,
     item,

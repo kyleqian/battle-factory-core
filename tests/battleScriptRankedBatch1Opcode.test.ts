@@ -8,6 +8,7 @@ import {
 } from "../src/engine/battleScriptRulesContext.ts";
 import {
   halfTargetHpDamage,
+  hiddenPowerFromIvs,
   magnitudeForRoll,
   scaledDamagePower,
 } from "../src/engine/battleScriptRankedBatch1Opcode.ts";
@@ -44,6 +45,7 @@ function battler(changes: Partial<BattleScriptRulesBattler> = {}): BattleScriptR
     usedTauntedMove: changes.usedTauntedMove ?? 0,
     usedImprisonedMove: changes.usedImprisonedMove ?? 0,
     item: changes.item ?? 0,
+    ivs: changes.ivs,
     statStages: changes.statStages ?? Object.freeze([6, 6, 6, 6, 6, 6, 6, 6]),
     types: changes.types ?? (["TYPE_NORMAL", "TYPE_NORMAL"] as const),
     species: changes.species ?? 1,
@@ -153,6 +155,34 @@ describe("ranked Batch 1 source arithmetic", () => {
   it("floors Super Fang and clamps a one-HP target to one damage", () => {
     expect([1, 2, 3, 100, 101].map(halfTargetHpDamage)).toEqual([1, 1, 1, 50, 50]);
   });
+
+  it("derives Hidden Power's exact degenerate and boundary IV vectors", () => {
+    expect(hiddenPowerFromIvs({
+      hp: 0, attack: 0, defense: 0, speed: 0, spAttack: 0, spDefense: 0,
+    })).toEqual({ power: 30, type: 1, dynamicMoveType: 0xc1 });
+    expect(hiddenPowerFromIvs({
+      hp: 31, attack: 31, defense: 31, speed: 31, spAttack: 31, spDefense: 31,
+    })).toEqual({ power: 70, type: 17, dynamicMoveType: 0xd1 });
+    expect(hiddenPowerFromIvs({
+      hp: 2, attack: 0, defense: 0, speed: 0, spAttack: 0, spDefense: 0,
+    })).toEqual({ power: 30, type: 1, dynamicMoveType: 0xc1 });
+    expect(hiddenPowerFromIvs({
+      hp: 3, attack: 2, defense: 2, speed: 2, spAttack: 2, spDefense: 2,
+    })).toEqual({ power: 70, type: 1, dynamicMoveType: 0xc1 });
+  });
+
+  it("validates each IV as a frozen source 5-bit field", () => {
+    const context = rules(237, {
+      ivs: { hp: 1, attack: 2, defense: 3, speed: 4, spAttack: 5, spDefense: 6 },
+    });
+    expect(context.battlers[0].ivs).toEqual({
+      hp: 1, attack: 2, defense: 3, speed: 4, spAttack: 5, spDefense: 6,
+    });
+    expect(Object.isFrozen(context.battlers[0].ivs)).toBe(true);
+    expect(() => rules(237, {
+      ivs: { hp: 32, attack: 0, defense: 0, speed: 0, spAttack: 0, spDefense: 0 },
+    })).toThrow("battlers[0].ivs.hp");
+  });
 });
 
 describe("ranked Batch 1 committed scripts", () => {
@@ -162,6 +192,7 @@ describe("ranked Batch 1 committed scripts", () => {
     ["B_SCR_OP_MAGNITUDEDAMAGECALCULATION", "Cmd_magnitudedamagecalculation", 0],
     ["B_SCR_OP_MAXATTACKHALVEHP", "Cmd_maxattackhalvehp", 1],
     ["B_SCR_OP_DAMAGETOHALFTARGETHP", "Cmd_damagetohalftargethp", 0],
+    ["B_SCR_OP_HIDDENPOWERCALC", "Cmd_hiddenpowercalc", 0],
   ])("registers %s with its source dispatcher/shape", (name, dispatcher, operands) => {
     const instructions = program.instructions.filter((item) => item.opcodeName === name);
     expect(instructions).toHaveLength(1);
@@ -187,6 +218,8 @@ describe("ranked Batch 1 committed scripts", () => {
     const success = run("BattleScript_EffectBellyDrum", rules(187, { hp: 51, maxHP: 101 }), 7);
     expect(success.rulesContext.battlers[0].statStages[1]).toBe(12);
     expect(success.rulesContext.battlers[0].hp).toBe(1);
+    const even = run("BattleScript_EffectBellyDrum", rules(187, { hp: 51, maxHP: 100 }), 7);
+    expect(even.rulesContext.battlers[0].hp).toBe(1);
     for (const attacker of [
       { hp: 50, maxHP: 101 },
       { hp: 100, maxHP: 100, statStages: [6, 12, 6, 6, 6, 6, 6, 6] as const },
@@ -202,10 +235,17 @@ describe("ranked Batch 1 committed scripts", () => {
       { ability: 20 },
       { status2: 1 << 28 },
       { status2: 1 << 24, substituteHP: 20 },
+      { hp: 0, maxHP: 100 },
     ]) {
       const state = run("BattleScript_EffectTeeterDance", rules(298, {}, target), 7);
       expect(state.haltReason).toMatchObject({ kind: "terminal", opcodeName: "B_SCR_OP_END" });
     }
+    const safeguarded = run(
+      "BattleScript_EffectTeeterDance",
+      rules(298, {}, {}, { sideStatuses: [0, 1 << 5] }),
+      7,
+    );
+    expect(safeguarded.haltReason).toMatchObject({ kind: "terminal" });
   });
 
   it("Magnitude consumes one table draw before the ordinary hit path", () => {
@@ -213,5 +253,28 @@ describe("ranked Batch 1 committed scripts", () => {
     expect(state.haltReason).toMatchObject({ kind: "terminal", opcodeName: "B_SCR_OP_END" });
     expect(state.rng.calls).toBe(4);
     expect(state.rulesContext.battleTextBuff1ByteNumber).toBeGreaterThanOrEqual(4);
+  });
+
+  it("Magnitude doubles the same seeded hit while its target is Underground", () => {
+    const ordinary = run("BattleScript_EffectMagnitude", rules(222), 7);
+    const underground = run(
+      "BattleScript_EffectMagnitude",
+      rules(222, {}, { status3: 1 << 7 }),
+      7,
+    );
+    // Source doubles the base-damage multiplier before the later integer
+    // damage formula, so its floors produce 41 versus 20 (not post-hoc 40).
+    expect([ordinary.rulesContext.hpDealt, underground.rulesContext.hpDealt]).toEqual([20, 41]);
+    expect(underground.rng.calls).toBe(ordinary.rng.calls);
+  });
+
+  it("Hidden Power walks to terminal with four shared-tail draws and frozen IV state", () => {
+    const ivs = { hp: 31, attack: 30, defense: 31, speed: 30, spAttack: 31, spDefense: 30 };
+    const state = run("BattleScript_EffectHiddenPower", rules(237, { ivs }), 7);
+    expect(state.haltReason).toMatchObject({ kind: "terminal", opcodeName: "B_SCR_OP_END" });
+    expect(state.rng.calls).toBe(4);
+    expect(state.rulesContext.dynamicBasePower).toBe(hiddenPowerFromIvs(ivs).power);
+    expect(state.rulesContext.dynamicMoveType).toBe(hiddenPowerFromIvs(ivs).dynamicMoveType);
+    expect(Object.isFrozen(state.rulesContext.battlers[0].ivs)).toBe(true);
   });
 });
