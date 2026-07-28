@@ -14,21 +14,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 > entry 468's animation items are the animation supervisor's backlog now.
 
 
-## 636 — [BOUNDED MAIN WORKER 2026-07-28 ~15:03] Frontier-tail row 4 partial: Charge source-complete
+## 636 — [BOUNDED MAIN WORKER 2026-07-28 ~15:07] Frontier-tail row 4 source-complete
 
-- **State:** Charge is independently green; census exactly **205/214 effects,
-  345/355 moves, 275/276 distinct, 2955/2957 weighted**, all **70**
-  validations passing. Targeted Charge/end-turn tests and production build
-  pass.
-- **Did:** registered `B_SCR_OP_SETCHARGE`; added both four-bit DisableStruct
-  timer fields, switch reset, and exact `2 -> 1 -> 0` end-turn expiry/bit
-  clear. Pinned zero-draw full-shell walk, repeat refresh, and Electric-only
-  doubling.
-- **Next:** finish row 4 with shared Mud/Water Sport setter, print table,
-  either-side pre-formula power scan, repeat failures, and switch/Baton-Pass
-  lifetime; expected final census **207/347/275/2955**.
-- **Notes:** dossier claims checked against pinned source with no correction
-  needed. No barriers or canonical-recording imports.
+- **State:** tree green at **421 files / 4642 tests**, production build, OFF
+  oracle info, and `git diff --check`. Census is exactly **207/214 effects,
+  347/355 moves, 275/276 distinct, 2955/2957 weighted**: assigned-baseline
+  delta **+3/+3/+0/+0**; all **70** census validations pass.
+- **Did:** registered Charge with both four-bit timer fields, switch reset,
+  Electric-only doubling, and exact `2 -> 1 -> 0` end-turn expiry. Registered
+  shared Mud/Water Sport success/failure setter and print table; either active
+  side now halves matching Electric/Fire power before the base formula, with
+  ordinary-switch clear and Baton-Pass retention.
+- **Next:** supervisor verify Charge commit `1fdc288f` and the following
+  Sports commit; resume tail-plan row 5a (Lock On/Mind Reader), not later rows.
+- **Notes:** all three full shells reach END and setters draw zero locally;
+  Charge repeat refreshes, while both Sport repeats take the source failure
+  pointer. Dossier claims rechecked against pinned source with no correction
+  needed. Deliberate handler exact-set pin **198→200**. No barriers,
+  canonical-recording imports, presentation, round,
+  tick, roadmap, issue, or oracle-trace changes.
 
 
 ---
@@ -89,29 +93,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** DEFERRED.md is empty — no open questions. Both oracles stayed
   fresh all session. The animation supervisor was live concurrently; its
   post-fold commits (if any) fold at the next orient. No usage-limit events.
-
----
-## 633 — [BOUNDED MAIN WORKER 2026-07-28 ~14:15] Environment attacks source-complete
-
-- **State:** tree green at **404 files / 4581 tests**, production build, OFF
-  oracle info, and `git diff --check`. Census is exactly **204/214 effects,
-  344/355 moves, 275/276 distinct, 2955/2957 weighted**: assigned-baseline
-  delta **+2/+2/+0/+0**; all **70** census validations pass.
-- **Did:** registered source-exact Weather Ball across clear/rain/sand/sun/hail
-  and temporary/permanent bits, including live Cloud Nine/Air Lock
-  suppression. Registered Nature Power's complete environment table and its
-  unusual push/continuation/return ordering; Factory Building selects Swift
-  and actually executes its effect script to END.
-- **Next:** supervisor verify commits `52726af7` and `e31f0b73`; resume
-  tail-plan row 4 (Charge/Sports) without expanding into Lock On, Transform,
-  Metronome, or other later rows.
-- **Notes:** Weather Ball reaches END through every weather/suppression branch
-  with the ordinary **4-draw** hit ledger. Building→Swift dispatch draws zero;
-  Swift owns **crit/variance/zero-effect = 16838/44065/53998**, while Nature
-  Power's original slot loses PP and histories record Nature Power as last
-  move but Swift as resulting/landed move. The dossier's broader zero-local-
-  draw claim was corrected: selected-target environments rejection-draw
-  **16838, 44065** in `GetMoveTarget`. All ten selected effects reach END and
-  canonical replays are exact. Deliberate handler exact-set pin **196→198**.
-  No barriers, recording imports, presentation, round, tick, roadmap, issue,
-  or oracle-trace changes.

@@ -286,6 +286,11 @@ const B_MSG_STATUS_HAD_NO_EFFECT = 2;
 
 /** printfromtable's registered small constant tables, each indexed by MULTISTRING_CHOOSER. */
 const PRINTFROMTABLE_TABLES: Readonly<Record<string, readonly string[]>> = Object.freeze({
+  /** battle_message.c:1126-1131 -- Mud Sport / Water Sport. */
+  gSportsUsedStringIds: Object.freeze([
+    "STRINGID_ELECTRICITYWEAKENED",
+    "STRINGID_FIREWEAKENED",
+  ]),
   /** battle_message.c:981-986. */
   gStockpileUsedStringIds: Object.freeze([
     "STRINGID_PKMNSTOCKPILED",
@@ -1330,6 +1335,26 @@ export function calculateBattleScriptBaseDamageForCurrentMove(
   const attackerBattler = rulesContext.battlers[attacker];
   const targetBattler = rulesContext.battlers[target];
   const moveRow = requireMoveRow(rulesContext.currentMove);
+  const moveType = resolveMoveTypeName(rulesContext, rulesContext.currentMove);
+  let movePower = rulesContext.dynamicBasePower !== 0
+    ? rulesContext.dynamicBasePower
+    : moveRow.power;
+  const activeBattlers = rulesContext.battlers.slice(
+    0,
+    rulesContext.battleTopology.battlersCount,
+  );
+  if (
+    moveType === "TYPE_ELECTRIC"
+    && activeBattlers.some(({ status3 }) => (status3 & (1 << 16)) !== 0)
+  ) {
+    movePower = Math.trunc(movePower / 2);
+  }
+  if (
+    moveType === "TYPE_FIRE"
+    && activeBattlers.some(({ status3 }) => (status3 & (1 << 17)) !== 0)
+  ) {
+    movePower = Math.trunc(movePower / 2);
+  }
   return calculateBaseDamage({
     attacker: {
       attack: attackerBattler.attack,
@@ -1351,10 +1376,8 @@ export function calculateBattleScriptBaseDamageForCurrentMove(
       types: targetBattler.types,
       statStages: toDamageCalcStatStages(targetBattler),
     },
-    movePower: rulesContext.dynamicBasePower !== 0
-      ? rulesContext.dynamicBasePower
-      : moveRow.power,
-    moveType: resolveMoveTypeName(rulesContext, rulesContext.currentMove),
+    movePower,
+    moveType,
     isCriticalHit: rulesContext.critMultiplier === 2,
     moveEffect: moveRow.effect,
   });
