@@ -65,6 +65,7 @@ import { createBattleScriptRecoverbasedonsunlightOpcodeHandlers } from "./battle
 import { createBattleScriptCurseOpcodeHandlers } from "./battleScriptCurseOpcode.ts";
 import { createBattleScriptRemainingHpToPowerOpcodeHandlers } from "./battleScriptRemainingHpToPowerOpcode.ts";
 import { createBattleScriptFriendshipToDamageOpcodeHandlers } from "./battleScriptFriendshipToDamageOpcode.ts";
+import { createBattleScriptPresentDamageOpcodeHandlers } from "./battleScriptPresentDamageOpcode.ts";
 import { createBattleScriptCopyFoeStatsOpcodeHandlers } from "./battleScriptCopyFoeStatsOpcode.ts";
 import { createBattleScriptJumpifcantswitchOpcodeHandlers } from "./battleScriptJumpifcantswitchOpcode.ts";
 import { createBattleScriptJumpifnodamageOpcodeHandlers } from "./battleScriptJumpifnodamageOpcode.ts";
@@ -2707,6 +2708,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptCurseOpcodeHandlers(program, resolveRulesBattlerForBattleScript),
     ...createBattleScriptRemainingHpToPowerOpcodeHandlers(program),
     ...createBattleScriptFriendshipToDamageOpcodeHandlers(program),
+    ...createBattleScriptPresentDamageOpcodeHandlers(program),
     ...createBattleScriptCopyFoeStatsOpcodeHandlers(program),
     ...createBattleScriptJumpifcantswitchOpcodeHandlers(program),
     ...createBattleScriptJumpifnodamageOpcodeHandlers(program),
