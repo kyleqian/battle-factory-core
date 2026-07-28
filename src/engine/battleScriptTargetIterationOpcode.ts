@@ -56,8 +56,13 @@ function unsupportedBranch(
   );
 }
 
-/** Source Cmd_selectfirstvalidtarget's loop (battle_script_commands.c:8919-8925), identical for singles and doubles. */
-function resolveFirstValidTarget(rules: BattleScriptRulesContext): BattleScriptBattlerId {
+/**
+ * Source Cmd_selectfirstvalidtarget's loop (battle_script_commands.c:8919-8925),
+ * identical for singles and doubles. Exported: Cmd_tryexplosion's own success
+ * branch (battle_script_commands.c:6559-6566, battleScriptExplosionOpcode.ts)
+ * inlines this exact same loop to re-point gBattlerTarget after the Damp scan.
+ */
+export function resolveFirstValidTarget(rules: BattleScriptRulesContext): BattleScriptBattlerId {
   const attacker = rules.selectorRoles.attacker;
   if (attacker === null) {
     throw new Error("Cmd_selectfirstvalidtarget requires a bound gBattlerAttacker");

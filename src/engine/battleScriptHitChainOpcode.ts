@@ -1231,6 +1231,7 @@ export const damagecalcOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRule
     movePower: rulesContext.tripleKickPower !== 0 ? rulesContext.tripleKickPower : moveRow.power,
     moveType,
     isCriticalHit,
+    moveEffect: moveRow.effect,
   });
 
   damage = damage * rulesContext.critMultiplier * rulesContext.dmgMultiplier;

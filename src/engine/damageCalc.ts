@@ -117,6 +117,15 @@ export interface DamageCalcInput {
   sideStatusReflect?: boolean;
   sideStatusLightScreen?: boolean;
   isDoubleBattleSpreadMove?: boolean;
+  /**
+   * gBattleMoves[gCurrentMove].effect (pokemon.c:3228-3230) - Self-Destruct/
+   * Explosion cut the defender's raw Defense in half (truncated) before the
+   * crit-adjusted-stat step, EFFECT_EXPLOSION's only entry in
+   * CalculateBaseDamage. Source reads gCurrentMove here rather than this
+   * function's own `move` parameter, but they're identical on every call
+   * site this engine drives CalculateBaseDamage from.
+   */
+  moveEffect?: string;
 }
 
 /**
@@ -150,6 +159,9 @@ function critAdjustedDefenseStat(rawStat: number, stage: number, isCriticalHit: 
 export function calculateBaseDamage(input: DamageCalcInput): number {
   const { attacker, defender, movePower, moveType, isCriticalHit } = input;
   let damage: number;
+  const defenderDefense = input.moveEffect === "EFFECT_EXPLOSION"
+    ? Math.trunc(defender.defense / 2)
+    : defender.defense;
 
   if (isTypePhysical(moveType)) {
     damage = critAdjustedAttackStat(attacker.attack, attacker.statStages.atk, isCriticalHit);
@@ -157,7 +169,7 @@ export function calculateBaseDamage(input: DamageCalcInput): number {
     damage = damage * movePower;
     damage *= Math.trunc((2 * attacker.level) / 5) + 2;
 
-    const damageHelper = critAdjustedDefenseStat(defender.defense, defender.statStages.def, isCriticalHit);
+    const damageHelper = critAdjustedDefenseStat(defenderDefense, defender.statStages.def, isCriticalHit);
 
     damage = Math.trunc(damage / damageHelper);
     damage = Math.trunc(damage / 50);

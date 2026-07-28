@@ -52,6 +52,7 @@ import { createBattleScriptTryhealhalfhealthOpcodeHandlers } from "./battleScrip
 import { createBattleScriptTryKOOpcodeHandlers } from "./battleScriptTryKOOpcode.ts";
 import { createBattleScriptTrysetdestinybondtohappenOpcodeHandlers } from "./battleScriptTrysetdestinybondtohappenOpcode.ts";
 import { createBattleScriptForceSwitchOpcodeHandlers } from "./battleScriptForceSwitchOpcode.ts";
+import { createBattleScriptExplosionOpcodeHandlers } from "./battleScriptExplosionOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -2250,6 +2251,9 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptTryKOOpcodeHandlers(program),
     ...createBattleScriptTrysetdestinybondtohappenOpcodeHandlers(program),
     ...createBattleScriptForceSwitchOpcodeHandlers(program, {
+      isControllerIdle: sourceExternalPorts.isControllerIdle,
+    }),
+    ...createBattleScriptExplosionOpcodeHandlers(program, {
       isControllerIdle: sourceExternalPorts.isControllerIdle,
     }),
   });
