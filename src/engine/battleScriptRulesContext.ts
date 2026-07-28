@@ -85,6 +85,7 @@ import { createBattleScriptSettormentOpcodeHandlers } from "./battleScriptSettor
 import { createBattleScriptTrysetencoreOpcodeHandlers } from "./battleScriptTrysetencoreOpcode.ts";
 import { createBattleScriptTrysetperishsongOpcodeHandlers } from "./battleScriptTrysetperishsongOpcode.ts";
 import { createBattleScriptTrysetgrudgeOpcodeHandlers } from "./battleScriptTrysetgrudgeOpcode.ts";
+import { createBattleScriptTryspiteppreduceOpcodeHandlers } from "./battleScriptTryspiteppreduceOpcode.ts";
 import { createBattleScriptRankedBatch1OpcodeHandlers } from "./battleScriptRankedBatch1Opcode.ts";
 import { createBattleScriptSettauntOpcodeHandlers } from "./battleScriptSettauntOpcode.ts";
 import { createBattleScriptSetforesightOpcodeHandlers } from "./battleScriptSetforesightOpcode.ts";
@@ -267,6 +268,8 @@ type BattleScriptRulesBattlerBase = Readonly<{
 type BattleScriptMoveEndBattlerMetadata = Readonly<{
   /** Source gBattleMons[battler] IV bitfields, consumed by Hidden Power. */
   ivs: BattleScriptIvs;
+  /** Source four-bit DisableStruct::mimickedMoves mask. */
+  mimickedMoves: number;
   /** DisableStruct's paired four-bit duration fields. */
   disableTimer: number;
   disableTimerStartValue: number;
@@ -399,6 +402,7 @@ export type BattleScriptRulesBattler = BattleScriptRulesBattlerBase & Readonly<{
   item?: number;
   /** Legacy focused fixtures default to six zero IVs at the construction boundary. */
   ivs?: BattleScriptIvs;
+  mimickedMoves?: number;
   disableTimer?: number;
   disableTimerStartValue?: number;
   encoreTimer?: number;
@@ -715,6 +719,8 @@ export type BattleScriptRulesContext = Readonly<
     battleTextBuff1ByteNumber: number | null;
     /** Typed form of PREPARE_MOVE_BUFFER(gBattleTextBuff1, move). */
     battleTextBuff1Move: number | null;
+    /** Typed form of PREPARE_BYTE_NUMBER_BUFFER(gBattleTextBuff2, 1, value). */
+    battleTextBuff2ByteNumber: number | null;
     /**
      * Source gBattlerByTurnOrder[MAX_BATTLERS_COUNT] -- populated by
      * `ENDTURN_ORDER`'s `GetWhoStrikesFirst` insertion sort
@@ -835,6 +841,7 @@ export type BattleScriptRulesContextInput = Readonly<{
   battleTextBuff1MonNick?: BattleScriptPreparedMonNick | null;
   battleTextBuff1ByteNumber?: number | null;
   battleTextBuff1Move?: number | null;
+  battleTextBuff2ByteNumber?: number | null;
   battlerByTurnOrder?: readonly number[];
   currentTurnActionNumber?: number;
 }>;
@@ -2115,6 +2122,11 @@ export function createBattleScriptRulesContext(
       spAttack: requireUnsigned(battler.ivs?.spAttack ?? 0, 31, `battlers[${index}].ivs.spAttack`),
       spDefense: requireUnsigned(battler.ivs?.spDefense ?? 0, 31, `battlers[${index}].ivs.spDefense`),
     }),
+    mimickedMoves: requireUnsigned(
+      battler.mimickedMoves ?? 0,
+      0x0f,
+      `battlers[${index}].mimickedMoves`,
+    ),
     personality: requireUnsigned(battler.personality ?? 0, 0xffff_ffff, `battlers[${index}].personality`) >>> 0,
     attack: requireUnsigned(battler.attack ?? 0, 0xffff, `battlers[${index}].attack`),
     defense: requireUnsigned(battler.defense ?? 0, 0xffff, `battlers[${index}].defense`),
@@ -2427,6 +2439,10 @@ export function createBattleScriptRulesContext(
       || input.battleTextBuff1Move === undefined
       ? null
       : requireUnsigned(input.battleTextBuff1Move, 0xffff, "battleTextBuff1Move"),
+    battleTextBuff2ByteNumber: input.battleTextBuff2ByteNumber === null
+      || input.battleTextBuff2ByteNumber === undefined
+      ? null
+      : requireUnsigned(input.battleTextBuff2ByteNumber, 0xff, "battleTextBuff2ByteNumber"),
     battlerByTurnOrder: Object.freeze([
       requireUnsigned(input.battlerByTurnOrder?.[0] ?? 0, 3, "battlerByTurnOrder[0]"),
       requireUnsigned(input.battlerByTurnOrder?.[1] ?? 1, 3, "battlerByTurnOrder[1]"),
@@ -2644,6 +2660,7 @@ export function createBattleScriptStatusRulesHandlers(
     ...createBattleScriptTrysetencoreOpcodeHandlers(program),
     ...createBattleScriptTrysetperishsongOpcodeHandlers(program),
     ...createBattleScriptTrysetgrudgeOpcodeHandlers(program),
+    ...createBattleScriptTryspiteppreduceOpcodeHandlers(program),
     ...createBattleScriptRankedBatch1OpcodeHandlers(program),
     ...createBattleScriptFuryCutterOpcodeHandlers(program),
     ...createBattleScriptSetminimizeOpcodeHandlers(program),

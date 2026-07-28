@@ -3792,7 +3792,7 @@ function replaceAt<T extends readonly number[]>(values: T, index: number, value:
  * fields FaintClearSetData zeroes (transformedMonPersonality,
  * stockpileCounter,
  * chargeTimer*, battlerWithSureHit, isFirstTurn, truantSwitchInHack,
- * mimickedMoves, ProtectStruct's noValidMoves/fleeType/physicalDmg/
+ * ProtectStruct's noValidMoves/fleeType/physicalDmg/
  * specialDmg/physicalBattlerId/specialBattlerId), gActionSelectionCursor/
  * gMoveSelectionCursor, gBattleResources->flags->flags, the species-base
  * `types` reassignment (this engine has no code path that ever moves `types`
@@ -3851,6 +3851,7 @@ function createCleareffectsonfaintOpcodeHandler(
           statStages: DEFAULT_STAT_STAGES,
           rolloutTimer: 0,
           furyCutterCounter: 0,
+          mimickedMoves: 0,
           truantCounter: 0 as const,
           rechargeTimer: 0,
           flinchImmobility: 0 as const,
