@@ -48,12 +48,17 @@ animation. A status caused by a move is not part of that move's animation.
 
 **Verdict:** `MOVE_SPARK` is partial. The legal set-187 MINUN fixtures match
 the complete move-owned source windows **115/115** at 79-193 player-back and
-83-197 opponent-front, twice fresh, with no excluded frames. The relative
-reducer and typed `sceneOnPresentation` seam cover all six affine sparks,
-eight flashing affine/orbit/tile instances, three attacker palette legs plus
-resets, HorizontalLunge, impact, target ShakeMon, the eight-sprite
-ElectricityEffect, five sound boundaries/pans, wait sequencing, software and
-hardware OAM/matrix/palette/register/audio lifetimes, and teardown.
+83-197 opponent-front, twice fresh, with no excluded frames, plus the minimal
+cleanup tail at ages 115-116 **2/2 twice in both orientations**. The relative
+reducer and typed `sceneOnPresentation` seam cover literal creation identity,
+slot, creation order, subpriority, tile/priority, affine/hidden/flip state and
+matrix for all six affine sparks, eight flashing sprites, the invisible
+HorizontalLunge controller, impact, and all eight ElectricityEffect sprites.
+The comparator also pins the three exact BG/attacker palette ramps and resets,
+the exact target 0→6→0 ramp against unfaded/faded/hardware buffers, five full
+sound restart/continuity/stop intervals and pans, battler offsets, registers,
+one-display hardware OAM order/matrices from reducer-derived prior state, and
+asset/task/OAM teardown. The earlier tautological wait claim is removed.
 Coverage is now **49/276 exact, 4 partial, 223 unsupported**.
 
 **Remainder:** no render assets or draw case were added and `battleScene.ts`
@@ -61,6 +66,14 @@ is untouched. Source-derived MINUN/SHUCKLE/SPARK_2/IMPACT assets, live
 composition through the existing renderer, and **115/115 raw-RGB/framebuffer
 equality in both orientations twice fresh** remain before exact. THUNDERBOLT,
 THUNDER_WAVE, ZAP_CANNON, and THUNDER_SHOCK remain unsupported.
+
+**Repair note:** the opponent-front fixture begins the flashing group with two
+extra source callbacks, one initial affine-slot advance, and persistent
+same-Y slot ordering. Those are explicit fixture/runtime scheduler/allocation
+inputs, not a MINUN or attacker-side rule. The cleanup probe proves age 114's
+last hardware arc, age 115's zero effect OAM/tasks/offsets with palettes still
+owned, and age 116's palette-tag release; later generic result audio is outside
+the tail.
 
 ## MOVE_SPARK staging checkpoint; remains unsupported (2026-07-27)
 

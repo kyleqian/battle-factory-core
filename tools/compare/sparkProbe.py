@@ -15,6 +15,7 @@ from emerald_core import EmeraldOracle  # noqa: E402
 
 MOVE_SPARK = 209
 VISUAL_WINDOWS = {0: (79, 193), 1: (83, 197)}
+CLEANUP_TAIL = 2
 
 def main() -> None:
     request = validate_request(json.loads(SCENARIO.read_text()), "battle-scene-on")
@@ -58,6 +59,9 @@ def main() -> None:
                 "x2": s16(base+0x24), "y2": s16(base+0x26),
                 "template": oracle.read_u32(base+0x14),
                 "callback": oracle.read_u32(base+0x1c),
+                "invisible": bool(oracle.read_u8(base+0x3e) & 4),
+                "hFlip": bool(oracle.read_u8(base+0x3f) & 1),
+                "vFlip": bool(oracle.read_u8(base+0x3f) & 2),
                 "subpriority": oracle.read_u8(base+0x43), "matrixNum": matrix_num,
                 "matrix": {"a": s16(matrix), "b": s16(matrix+2),
                            "c": s16(matrix+4), "d": s16(matrix+6)},
@@ -78,7 +82,7 @@ def main() -> None:
         current_attacker = oracle.read_u8(anim_attacker)
         attacker = current_attacker if attacker is None else attacker
         start, end = VISUAL_WINDOWS[current_attacker]
-        if frame < start or frame > end: return
+        if frame < start or frame > end + CLEANUP_TAIL: return
         active = []
         for slot in range(64):
             base = sprites + slot * 0x44
@@ -89,6 +93,9 @@ def main() -> None:
           "battleAnimTarget": oracle.read_u8(anim_target),
           "visualTaskCount": oracle.read_u8(visual_count),
           "soundTaskCount": oracle.read_u8(sound_count),
+          "activeSpriteCount": sum(
+              1 for slot in range(64)
+              if oracle.read_u8(sprites + slot * 0x44 + 0x3e) & 1),
           "playerSprite": battler(0), "opponentSprite": battler(1), "sprites": active,
           "hardwareOam": [[u16(0x07000000+i*8+j) for j in (0,2,4)] for i in range(128)],
           "hardwareMatrices": [
@@ -107,13 +114,20 @@ def main() -> None:
     for segment in request["trace"]["segments"]:
         for _ in range(segment["frames"]):
             oracle.advance(segment.get("buttons", [])); frame += 1; capture(frame)
-    if attacker is None or len(rows) != 115:
-        raise RuntimeError(f"expected one complete 115-frame SPARK window, got {len(rows)}")
+    if attacker is None or len(rows) != 115 + CLEANUP_TAIL:
+        raise RuntimeError(
+            f"expected 115 SPARK body frames + {CLEANUP_TAIL} cleanup frames, "
+            f"got {len(rows)}")
     headers = {"SE_M_THUNDERBOLT2": oracle.read_u32(song_table+119*8),
                "SE_M_HYPER_BEAM": oracle.read_u32(song_table+215*8)}
-    OUTPUT.write_text(json.dumps({"schema": "spark-dense-evidence/v2",
+    OUTPUT.write_text(json.dumps({"schema": "spark-dense-evidence/v3",
       "setup": setup, "templates": templates, "songHeaders": headers,
-      "window": {"startFrame": rows[0]["frame"], "endFrame": rows[-1]["frame"],
-                 "frameCount": len(rows)}, "frames": rows}) + "\n")
-    print(f"wrote {OUTPUT} (115 source frames; {rows[0]['frame']}..{rows[-1]['frame']})")
+      "window": {"startFrame": rows[0]["frame"],
+                 "bodyEndFrame": rows[114]["frame"],
+                 "cleanupEndFrame": rows[-1]["frame"],
+                 "bodyFrameCount": 115, "cleanupFrameCount": CLEANUP_TAIL},
+      "frames": rows}) + "\n")
+    print(
+        f"wrote {OUTPUT} (115 source frames + {CLEANUP_TAIL} cleanup; "
+        f"{rows[0]['frame']}..{rows[-1]['frame']})")
 main()

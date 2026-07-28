@@ -874,6 +874,10 @@ export interface SceneOnSparkConfig {
   readonly targetPictureOffset: Readonly<{ x: number; y: number }>;
   readonly attackerBgPriority: number;
   readonly targetBgPriority: number;
+  readonly targetImpactPosition?: Readonly<{ x: number; y: number }>;
+  /** Explicit scheduler/allocation state at the flashing-sprite creation tick. */
+  readonly flashingInitialCallbackAdvances?: readonly number[];
+  readonly flashingInitialAffineAdvances?: readonly number[];
 }
 
 export interface SceneOnSelfDestructConfig {
@@ -2297,12 +2301,17 @@ export function sceneOnSparkView(
         center: state.config.attacker.geometry.animationCenter,
         pictureOffset: state.config.attackerPictureOffset,
         bgPriority: state.config.attackerBgPriority,
+        flashingInitialCallbackAdvances:
+          state.config.flashingInitialCallbackAdvances,
+        flashingInitialAffineAdvances:
+          state.config.flashingInitialAffineAdvances,
       },
       {
         side: state.config.target.geometry.side,
         center: state.config.target.geometry.animationCenter,
         pictureOffset: state.config.targetPictureOffset,
         bgPriority: state.config.targetBgPriority,
+        impactPosition: state.config.targetImpactPosition,
       },
     ),
   };
