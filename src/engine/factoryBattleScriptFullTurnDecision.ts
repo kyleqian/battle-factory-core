@@ -837,16 +837,24 @@ function finishFullTurn(
   resultRules: FactoryFullTurnDecisionRules,
   boundary: BattleBoundary,
 ): BattleDecisionReducerOutput<FactoryFullTurnDecisionRules> {
-  for (const entry of finalState.rng.ledger) ctxRng.draw(entry.reason);
-  const rngAfter = ctxRng.snapshot();
-  if (rngAfter.value !== finalState.rng.value || rngAfter.calls !== rngBeforeCalls + finalState.rng.calls) {
-    throw new Error("full-turn reducer RNG reconciliation diverged from the decision boundary cursor");
-  }
+  reconcileFullTurnRng(ctxRng, rngBeforeCalls, finalState);
   return Object.freeze({
     rules: resultRules,
     events: provenanceEvents(finalState),
     boundary,
   });
+}
+
+function reconcileFullTurnRng(
+  ctxRng: BattleDecisionRng,
+  rngBeforeCalls: number,
+  finalState: MachineState,
+): void {
+  for (const entry of finalState.rng.ledger) ctxRng.draw(entry.reason);
+  const rngAfter = ctxRng.snapshot();
+  if (rngAfter.value !== finalState.rng.value || rngAfter.calls !== rngBeforeCalls + finalState.rng.calls) {
+    throw new Error("full-turn reducer RNG reconciliation diverged from the decision boundary cursor");
+  }
 }
 
 /**
@@ -896,6 +904,40 @@ function runEndTurnTail(
   // HandleTurnActionSelectionState auto-confirms a multi-turn player's
   // B_ACTION_USE_MOVE, so only the trainer command remains to collect.
   const lockedPlayerDecision = lockedMoveDecision(endTurn.state.rulesContext, 0);
+  const lockedTrainerDecision = lockedMoveDecision(endTurn.state.rulesContext, 1);
+  if (lockedPlayerDecision !== null && lockedTrainerDecision !== null) {
+    // Source auto-confirms both locked B_ACTION_USE_MOVE entries without
+    // exposing either controller command. Resolve the next turn inside this
+    // same decision transition, preserving the single RNG cursor and
+    // prepending this turn's machine events to the recursively resolved tail.
+    reconcileFullTurnRng(ctxRng, rngBeforeCalls, endTurn.state);
+    const nested = reduceFactoryFullTurnDecision(Object.freeze({
+      rules: buildRules(
+        endTurn.state.rulesContext,
+        "awaiting-trainer-command",
+        Object.freeze({
+          moveSlot: lockedPlayerDecision.moveSlot,
+          targetBattler: lockedPlayerDecision.targetBattler,
+        }),
+      ),
+      request: Object.freeze({
+        kind: "command",
+        requestId: nextRequestId - 1,
+        side: "trainer",
+        battler: 1 as const,
+        legalDecisions: Object.freeze([lockedTrainerDecision]),
+      }),
+      decision: lockedTrainerDecision,
+      rng: ctxRng,
+    }));
+    return Object.freeze({
+      ...nested,
+      events: Object.freeze([
+        ...provenanceEvents(endTurn.state),
+        ...nested.events,
+      ]),
+    });
+  }
   if (lockedPlayerDecision !== null) {
     return finishFullTurn(
       ctxRng, rngBeforeCalls, endTurn.state,
@@ -1059,15 +1101,34 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
     ) {
       throw new Error("factory full-turn decision requires the player's staged singles use-move command");
     }
-    return Object.freeze({
-      rules: buildRules(
-        rules.rulesContext,
-        "awaiting-trainer-command",
-        Object.freeze({
-          moveSlot: ctx.decision.moveSlot,
-          targetBattler: ctx.decision.targetBattler,
+    const pendingRules = buildRules(
+      rules.rulesContext,
+      "awaiting-trainer-command",
+      Object.freeze({
+        moveSlot: ctx.decision.moveSlot,
+        targetBattler: ctx.decision.targetBattler,
+      }),
+    );
+    const lockedTrainerDecision = lockedMoveDecision(rules.rulesContext, 1);
+    if (lockedTrainerDecision !== null) {
+      // HandleTurnActionSelectionState has already auto-confirmed the
+      // trainer's locked action, so the player's submitted command completes
+      // action collection and resolves the turn immediately.
+      return reduceFactoryFullTurnDecision(Object.freeze({
+        rules: pendingRules,
+        request: Object.freeze({
+          kind: "command",
+          requestId: ctx.request.requestId,
+          side: "trainer",
+          battler: 1 as const,
+          legalDecisions: Object.freeze([lockedTrainerDecision]),
         }),
-      ),
+        decision: lockedTrainerDecision,
+        rng: ctx.rng,
+      }));
+    }
+    return Object.freeze({
+      rules: pendingRules,
       events: [],
       boundary: Object.freeze({
         kind: "decision-required",

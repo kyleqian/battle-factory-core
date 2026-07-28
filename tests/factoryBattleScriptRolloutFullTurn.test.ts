@@ -211,4 +211,136 @@ describe("factory full-turn Rollout continuation", () => {
     expect(rules.lockedMoves[0]).toBe(ROLLOUT);
     expect(miss.state.rng.calls).toBe(5);
   });
+
+  it("auto-confirms a trainer-owned Rollout lock after the player supplies the only open command", () => {
+    const config = rolloutConfig();
+    const initial = createFactoryFullTurnBattleState({
+      ...config,
+      player: {
+        ...config.trainer,
+        moveId: SLEEP_TALK,
+        moves: [SLEEP_TALK, 0, 0, 0],
+        pp: [10, 0, 0, 0],
+        hp: 1_000,
+        maxHp: 1_000,
+      },
+      trainer: {
+        ...config.player,
+        moveId: ROLLOUT,
+        moves: [ROLLOUT, DEFENSE_CURL, SLEEP_TALK, REST],
+        pp: [20, 39, 10, 10],
+      },
+    });
+    const afterPlayer = submitFactoryFullTurnDecision(initial, {
+      requestId: 1,
+      side: "player",
+      decision: {
+        kind: "use-move",
+        moveSlot: 0,
+        targetBattler: 1,
+      },
+    });
+    if (afterPlayer.kind !== "decision-required") {
+      throw new Error("expected the trainer's initial Rollout command");
+    }
+    const firstHit = submitFactoryFullTurnDecision(afterPlayer.state, {
+      requestId: 2,
+      side: "trainer",
+      decision: {
+        kind: "use-move",
+        moveSlot: 0,
+        targetBattler: 0,
+      },
+    });
+    if (firstHit.kind !== "decision-required") {
+      throw new Error("expected the only unlocked player command");
+    }
+    expect(firstHit.nextRequest).toMatchObject({
+      requestId: 3,
+      side: "player",
+      battler: 0,
+    });
+    expect(firstHit.state.rules.rulesContext.battlers[1]!.rolloutTimer).toBe(4);
+
+    // This one external player submission resolves both actions: the
+    // trainer's gLockedMoves entry supplies its command without a redundant
+    // trainer decision boundary.
+    const secondHit = submitFactoryFullTurnDecision(firstHit.state, {
+      requestId: 3,
+      side: "player",
+      decision: {
+        kind: "use-move",
+        moveSlot: 0,
+        targetBattler: 1,
+      },
+    });
+    if (secondHit.kind !== "decision-required") {
+      throw new Error("expected the next unlocked player command");
+    }
+    expect(secondHit.nextRequest).toMatchObject({
+      requestId: 4,
+      side: "player",
+      battler: 0,
+    });
+    const rules = secondHit.state.rules.rulesContext;
+    expect(rules.battlers[0]!.hp).toBe(808);
+    expect(rules.battlers[1]!.pp[0]).toBe(19);
+    expect(rules.battlers[1]!.rolloutTimer).toBe(3);
+    expect(rules.lockedMoves[1]).toBe(ROLLOUT);
+    expect(secondHit.state.rng.calls).toBe(8);
+  });
+
+  it("auto-resolves simultaneous locks until both five-hit Rollout sequences release", () => {
+    const base = rolloutConfig(0).player;
+    const initial = createFactoryFullTurnBattleState({
+      requestId: 1,
+      rngSeed: 0,
+      player: {
+        ...base,
+        hp: 5_000,
+        maxHp: 5_000,
+        speed: 22,
+      },
+      trainer: {
+        ...base,
+        hp: 5_000,
+        maxHp: 5_000,
+        speed: 22,
+      },
+    });
+    const afterPlayer = submitFactoryFullTurnDecision(initial, {
+      requestId: 1,
+      side: "player",
+      decision: PLAYER_ROLLOUT,
+    });
+    if (afterPlayer.kind !== "decision-required") {
+      throw new Error("expected the trainer's initial Rollout command");
+    }
+    const completed = submitFactoryFullTurnDecision(afterPlayer.state, {
+      requestId: 2,
+      side: "trainer",
+      decision: {
+        kind: "use-move",
+        moveSlot: 0,
+        targetBattler: 0,
+      },
+    });
+    if (completed.kind !== "decision-required") {
+      throw new Error("expected both completed locks to return to player selection");
+    }
+    expect(completed.nextRequest).toMatchObject({
+      requestId: 3,
+      side: "player",
+      battler: 0,
+    });
+    const rules = completed.state.rules.rulesContext;
+    expect(rules.battlers[0]!.pp[0]).toBe(19);
+    expect(rules.battlers[1]!.pp[0]).toBe(19);
+    expect(rules.battlers[0]!.rolloutTimer).toBe(0);
+    expect(rules.battlers[1]!.rolloutTimer).toBe(0);
+    expect(rules.battlers[0]!.status2).toBe(DEFENSE_CURL_STATUS);
+    expect(rules.battlers[1]!.status2).toBe(DEFENSE_CURL_STATUS);
+    // Five speed ties plus ten Rollout hit chains: 5 + (10 * 4).
+    expect(completed.state.rng.calls).toBe(45);
+  });
 });
