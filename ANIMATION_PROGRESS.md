@@ -1,5 +1,32 @@
 # Animation coverage
 
+## MOVE_FAKE_TEARS staged; AnimTask_BlendParticle latch evidence complete (2026-07-28)
+
+**Verdict:** `MOVE_FAKE_TEARS` is staged only. Fresh complete legal Scene-ON
+set-267 DELCATTY/SHUCKLE mechanic-lab parties capture every `currentMove=313`
+frame (**321**, 39–359) and the complete source-owned BlendParticle
+creation/display latch plus first inactive cleanup (**2/2**, frames **84–85**
+player-back and **88–89** opponent-front) twice fresh. Outputs are
+byte-identical: player `ad60a3d3…995067d` / raw `8a434003…b7a390`; opponent
+`8a7c58ab…2ff07cc` / raw `75dd472a…c33a94`. Coverage is now **66 exact / 0
+partial / 1 staged / 209 unsupported**.
+
+**Evidence/scope:** `AnimTask_BlendParticle` selects the source-extracted
+SMALL_BUBBLES OBJ palette and Fake Tears supplies `(delay=0, initial=4,
+target=4)`, so the creation dispatch latches then destroys the task before it
+can survive a post-frame `gTasks` snapshot. The probe records script/task/
+sprite/OAM/matrix/palette/register/audio/raw-RGB/framebuffer state; the first
+inactive latch shares its frame with the subsequent RockMon launch, which is
+explicitly a boundary—not accepted or modeled. No reducer, typed seam, app
+compositor, battle logic/RNG/controller/facility state, boundary list, or
+unsupported barrier changed.
+
+**Siblings:** `MOVE_HEAT_WAVE` remains unsupported (FLYING_DIRT plus
+sandstorm/background, both-target motion, pan, crescents). `MOVE_LUSTER_PURGE`
+remains unsupported (psychic/white BG, circle, two particle tags, random
+hitsplats/sounds, shake, restore). Neither received independent complete dense
+move acceptance.
+
 ## MOVE_SURF promoted exact; create_surf_wave BG1/scanline seam closed (2026-07-28)
 
 **Verdict:** `MOVE_SURF` is exact. Fresh complete legal Scene-ON

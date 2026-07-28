@@ -1625,6 +1625,29 @@
         "tests/animation/psychicOrientation.test.ts",
         "This session (mirrored fix, not independently re-probed - the family's own byte-identical script/argv already established every relative age transfers unchanged from CONFUSION): applied the identical window-1 creation-boundary fix (psychicAttackerShakeDisplayX2, src/animation/psychic.ts) used directly by sceneOnPsychicView, same mechanism as confusionAttackerShakeDisplayX2 (see MOVE_CONFUSION's own rung-14 entry for the full RAM derivation). Dense comparator (psychicPortable.ts): 137/140 -> 138/140, frame145 (this fixture's own window-1 creation tick, relative age 38 same as CONFUSION's frame119) closed - 1583px bbox eliminated. Window 2's own splice (frame174, relative age 95, same class as CONFUSION's frame176) is left unchanged: CONFUSION's own attempt to unify that splice was tried and empirically refuted this session (see its own rung-14 entry), so it was not re-attempted here either. New Tier-1 test (tests/animation/psychic.test.ts) pins the corrected boundary values. Regression gates rerun once each (time-capped): futureSightPortable.ts 114/114, growthPortable.ts 63/63, bindPortable.ts 45/45."
       ]
+    },
+    {
+      "move": "MOVE_FAKE_TEARS",
+      "status": "staged",
+      "covered": [
+        "fresh complete legal Scene-ON set-267 DELCATTY/SHUCKLE mechanic-lab parties capture every currentMove=313 frame (321 frames 39-359) in both attacker orientations and prove the complete source-owned AnimTask_BlendParticle creation/display latch plus first inactive cleanup at 2/2 frames 84-85 player-back and 88-89 opponent-front, twice fresh",
+        "the committed mGBA probe records full source script identity/offset/wait, task and sprite bodies, OBJ palette tags plus faded/unfaded/hardware palettes, OAM/matrices, registers, both audio players, raw RGB, and framebuffer state; Fake Tears' args (tag SMALL_BUBBLES, delay 0, initial 4, target 4, RGB(12,11,31)) make the task latch/destroy in Cmd_createvisualtask before it can survive a post-frame gTasks snapshot",
+        "the source-owned second frame is only the required first inactive/display latch. RockMonBackAndForth begins in that same batched next-source frame and is explicitly recorded as a boundary, not accepted or modeled by this checkpoint. No reducer, typed seam, app compositor, battle logic, RNG, turn order, facility state, boundary list, or unsupported barrier changed",
+        "MOVE_HEAT_WAVE remains unsupported: it selects FLYING_DIRT but also owns sandstorm/background blends, both-target movement, pan sweep, and four flying-sand crescents. MOVE_LUSTER_PURGE remains unsupported: its white-circle/IMPACT particle calls sit inside a psychic/white BG pipeline, luster circle, six random hitsplats/sounds, target shake, and restore. Neither has independent complete dense move evidence."
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-fake-tears-player-delcatty-opponent-shuckle.json",
+        "tools/battle-lab/mechanic-fake-tears-opponent-delcatty-player-shuckle.json",
+        "tools/compare/fixtures/fake-tears-blend-particle-player-delcatty-opponent-shuckle.json",
+        "tools/compare/fixtures/fake-tears-blend-particle-opponent-delcatty-player-shuckle.json",
+        "tools/compare/fakeTearsBlendParticleProbe.py",
+        "tools/compare/fakeTearsBlendParticleEvidence.ts",
+        "tools/compare/fakeTearsBlendParticleSourceAudit.ts",
+        "tools/compare/extractBlendParticleAssets.ts",
+        "src/animation/assets/blend-particle-small-bubbles.json",
+        "tests/animation/fakeTearsBlendParticle.test.ts"
+      ],
+      "remaining": "Port Fake Tears' later RockMonBackAndForth, tail-whip loop, eight typed tear/thought-bubble/music-note sprites, their asset/OAM/palette/audio lifecycles, typed presentation seam, and shared framebuffer through the complete move-owned window in both orientations; only then evaluate exact acceptance."
     }
   ],
   "queue": [
