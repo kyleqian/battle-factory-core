@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   parseBattleState,
+  serializeBattleState,
   type BattleState,
 } from "../src/engine/battleDecisionBoundary.ts";
 import {
@@ -10,8 +11,6 @@ import {
   type FactoryFullTurnDecisionRules,
 } from "../src/engine/factoryBattleScriptFullTurnDecision.ts";
 import { advanceRngValue } from "../src/engine/rng.ts";
-import { stageTurn1RockSlideHitChain } from "../src/engine/turn1RockSlidePresentationStaging.ts";
-import { stageTurn13SandAttackHitChain } from "../src/engine/turn13SandAttackPresentationStaging.ts";
 
 const CONFIG = {
   requestId: 1,
@@ -20,6 +19,10 @@ const CONFIG = {
     species: 95,
     moveId: 157,
     moves: [157, 20, 225, 201],
+    pp: [10, 20, 20, 10],
+    ability: 5,
+    item: 142,
+    friendship: 0,
     attack: 51,
     defense: 187,
     spAttack: 36,
@@ -33,6 +36,10 @@ const CONFIG = {
     species: 140,
     moveId: 72,
     moves: [72, 246, 28, 182],
+    pp: [10, 5, 15, 10],
+    ability: 4,
+    item: 142,
+    friendship: 0,
     attack: 118,
     defense: 96,
     spAttack: 93,
@@ -55,44 +62,15 @@ const TRAINER_SAND_ATTACK = Object.freeze({
   targetBattler: 0 as const,
 });
 
-/**
- * The public full-turn constructor does not yet accept ability, item, or
- * source PP. Rehydrate its serializable public state with the canonical
- * values so this scout can distinguish the move kernel from that constructor
- * gap. This is test-only source/RAM staging, never a production recording
- * import.
- */
-function canonicalBattle2State(): BattleState<FactoryFullTurnDecisionRules> {
-  const mutable = structuredClone(createFactoryFullTurnBattleState(CONFIG)) as unknown as {
-    rules: {
-      rulesContext: {
-        battlers: Array<{
-          ability: number;
-          item: number;
-          pp: number[];
-        }>;
-      };
-    };
-  };
-  Object.assign(mutable.rules.rulesContext.battlers[0]!, {
-    ability: 5,
-    item: 142,
-    pp: [10, 20, 20, 10],
-  });
-  Object.assign(mutable.rules.rulesContext.battlers[1]!, {
-    ability: 4,
-    item: 142,
-    pp: [10, 5, 15, 10],
-  });
-  return parseBattleState(JSON.stringify(mutable)) as BattleState<FactoryFullTurnDecisionRules>;
-}
-
 function runCanonicalBattle2Turn() {
-  const afterPlayer = submitFactoryFullTurnDecision(canonicalBattle2State(), {
-    requestId: 1,
-    side: "player",
-    decision: PLAYER_ROCK_SLIDE,
-  });
+  const afterPlayer = submitFactoryFullTurnDecision(
+    createFactoryFullTurnBattleState(CONFIG),
+    {
+      requestId: 1,
+      side: "player",
+      decision: PLAYER_ROCK_SLIDE,
+    },
+  );
   if (afterPlayer.kind !== "decision-required") {
     throw new Error("Battle 2 scout expected the trainer command boundary");
   }
@@ -108,22 +86,30 @@ function runCanonicalBattle2Turn() {
 }
 
 describe("Battle 2 OFF real-kernel seam scout", () => {
-  it("records the public constructor's exact canonical-state gap", () => {
+  it("constructs the canonical battlers directly through the public config", () => {
     const initial = createFactoryFullTurnBattleState(CONFIG);
     const [onix, kabuto] = initial.rules.rulesContext.battlers;
     expect(onix).toMatchObject({
-      ability: 0,
-      item: 0,
-      pp: [16, 16, 16, 16],
+      ability: 5,
+      item: 142,
+      pp: [10, 20, 20, 10],
+      friendship: 0,
     });
     expect(kabuto).toMatchObject({
-      ability: 0,
-      item: 0,
-      pp: [16, 16, 16, 16],
+      ability: 4,
+      item: 142,
+      pp: [10, 5, 15, 10],
+      friendship: 0,
     });
+    const serialized = serializeBattleState(initial);
+    const parsed = parseBattleState(serialized) as BattleState<
+      FactoryFullTurnDecisionRules
+    >;
+    expect(serializeBattleState(parsed)).toBe(serialized);
+    expect(parsed).toEqual(initial);
   });
 
-  it("reaches the next player decision with exact HP/stat/action RNG, while pinning the selected-slot and action-reset barriers", () => {
+  it("reaches request 3 with exact HP, selected-slot PP, stat, events, and four-call RNG", () => {
     const { afterPlayer, result } = runCanonicalBattle2Turn();
     expect(afterPlayer.events).toEqual([]);
     expect(afterPlayer.state.rng).toEqual({ value: 3530724670, calls: 0 });
@@ -136,6 +122,16 @@ describe("Battle 2 OFF real-kernel seam scout", () => {
     });
 
     const [onix, kabuto] = result.state.rules.rulesContext.battlers;
+    expect(result.state.rules.rulesContext).toMatchObject({
+      currentMove: 0,
+      currentMovePosition: 2,
+      battleMoveDamage: 0,
+      moveResultFlags: 0,
+      dynamicMoveType: 0,
+      dynamicBasePower: 0,
+      moveendState: 0,
+      multiHitEffect: 0,
+    });
     expect(onix).toMatchObject({
       hp: 117,
       moves: [157, 20, 225, 201],
@@ -147,9 +143,7 @@ describe("Battle 2 OFF real-kernel seam scout", () => {
     expect(kabuto).toMatchObject({
       hp: 63,
       moves: [72, 246, 28, 182],
-      // Honest current barrier: submitted slot 2 executes MOVE_SAND_ATTACK,
-      // but buildActionContext hard-codes currentMovePosition=0.
-      pp: [9, 5, 15, 10],
+      pp: [10, 5, 14, 10],
       ability: 4,
       item: 142,
     });
@@ -167,59 +161,29 @@ describe("Battle 2 OFF real-kernel seam scout", () => {
     ]);
     expect(result.state.rng).toEqual({ value: 650807554, calls: 4 });
 
-    expect(result.events.map(({ sequence, payload }) => ({
-      sequence,
-      kind: payload.kind,
-      messageId: payload.kind === "message" ? payload.messageId : null,
-      battler: "battler" in payload ? payload.battler : null,
-      movePosition: payload.kind === "set-battler-pp-data" ? payload.movePosition : null,
-      pp: payload.kind === "set-battler-pp-data" ? payload.pp : null,
-      animationId: payload.kind === "animation" ? payload.animationId : null,
-      arguments: payload.kind === "animation" ? payload.arguments : null,
-      from: "from" in payload ? payload.from : null,
-      to: "to" in payload ? payload.to : null,
-    }))).toEqual([
-      { sequence: 0, kind: "message", messageId: "STRINGID_USEDMOVE", battler: null, movePosition: null, pp: null, animationId: null, arguments: null, from: null, to: null },
-      { sequence: 1, kind: "set-battler-pp-data", messageId: null, battler: 0, movePosition: 0, pp: 9, animationId: null, arguments: null, from: null, to: null },
-      { sequence: 2, kind: "animation", messageId: null, battler: 0, movePosition: null, pp: null, animationId: "MOVE_ANIMATION", arguments: ["157", "0", "75", "28", "0", "0"], from: null, to: null },
-      { sequence: 3, kind: "play-se", messageId: null, battler: 1, movePosition: null, pp: null, animationId: null, arguments: null, from: null, to: null },
-      { sequence: 4, kind: "animation", messageId: null, battler: 1, movePosition: null, pp: null, animationId: "HIT_ANIMATION", arguments: [], from: null, to: null },
-      { sequence: 5, kind: "health-bar-update", messageId: null, battler: 1, movePosition: null, pp: null, animationId: null, arguments: null, from: null, to: null },
-      { sequence: 6, kind: "hp-change", messageId: null, battler: 1, movePosition: null, pp: null, animationId: null, arguments: null, from: 91, to: 63 },
-      { sequence: 7, kind: "set-battler-sprite-visibility", messageId: null, battler: 0, movePosition: null, pp: null, animationId: null, arguments: null, from: null, to: null },
-      { sequence: 8, kind: "set-battler-sprite-visibility", messageId: null, battler: 1, movePosition: null, pp: null, animationId: null, arguments: null, from: null, to: null },
-      { sequence: 9, kind: "set-battler-pp-data", messageId: null, battler: 1, movePosition: 0, pp: 9, animationId: null, arguments: null, from: null, to: null },
-      { sequence: 10, kind: "stat-stage-change", messageId: null, battler: 0, movePosition: null, pp: null, animationId: null, arguments: null, from: 6, to: 5 },
-      // Honest action-finish barrier: stale battleMoveDamage=28 leaks into
-      // Sand Attack's controller animation arguments.
-      { sequence: 11, kind: "animation", messageId: null, battler: 1, movePosition: null, pp: null, animationId: "MOVE_ANIMATION", arguments: ["28", "1", "0", "28", "0", "0"], from: null, to: null },
-      { sequence: 12, kind: "animation", messageId: null, battler: 0, movePosition: null, pp: null, animationId: "STATS_CHANGE", arguments: ["27"], from: null, to: null },
-      { sequence: 13, kind: "message", messageId: "STRINGID_DEFENDERSSTATFELL", battler: null, movePosition: null, pp: null, animationId: null, arguments: null, from: null, to: null },
-      { sequence: 14, kind: "set-battler-sprite-visibility", messageId: null, battler: 1, movePosition: null, pp: null, animationId: null, arguments: null, from: null, to: null },
-    ]);
-
-    // HITMARKER_ATTACKSTRING_PRINTED also leaks across the action boundary,
-    // suppressing the second move's own STRINGID_USEDMOVE event.
-    expect(result.events.filter(({ payload }) =>
+    const usedMoveMessages = result.events.filter(({ payload }) =>
       payload.kind === "message" && payload.messageId === "STRINGID_USEDMOVE"
-    )).toHaveLength(1);
-    // BattleDecisionBoundary intentionally exposes payloads, not interpreter
-    // provenance. A presentation bridge cannot recover sourceLabel from this
-    // public result without a contract change.
-    expect(result.events.every(({ payload }) =>
-      !Object.hasOwn(payload, "provenance")
-    )).toBe(true);
-  });
-
-  it("pins the source-label/opcode provenance available before the public full-turn boundary strips it", () => {
-    const summarize = (events: ReturnType<typeof stageTurn1RockSlideHitChain>["events"]) =>
-      events.map((event) => ({
-        kind: event.kind,
-        sourceLabel: event.provenance.sourceLabel,
-        opcodeName: event.provenance.opcodeName,
-      }));
-
-    expect(summarize(stageTurn1RockSlideHitChain().events)).toEqual([
+    );
+    expect(usedMoveMessages).toHaveLength(2);
+    expect(result.events.filter(({ payload }) =>
+      payload.kind === "set-battler-pp-data"
+    ).map(({ payload }) => payload)).toEqual([
+      { kind: "set-battler-pp-data", battler: 0, movePosition: 0, pp: 9 },
+      { kind: "set-battler-pp-data", battler: 1, movePosition: 2, pp: 14 },
+    ]);
+    const sandAttackAnimation = result.events.find(({ payload }) =>
+      payload.kind === "animation"
+      && payload.animationId === "MOVE_ANIMATION"
+      && payload.arguments[0] === "28"
+    );
+    expect(sandAttackAnimation?.payload).toMatchObject({
+      arguments: ["28", "0", "0", "0", "0", "0"],
+    });
+    expect(result.events.map((event) => ({
+      kind: event.payload.kind,
+      sourceLabel: event.provenance?.sourceLabel,
+      opcodeName: event.provenance?.opcodeName,
+    }))).toEqual([
       { kind: "message", sourceLabel: "BattleScript_HitFromAtkString", opcodeName: "B_SCR_OP_ATTACKSTRING" },
       { kind: "set-battler-pp-data", sourceLabel: "BattleScript_HitFromAtkString", opcodeName: "B_SCR_OP_PPREDUCE" },
       { kind: "animation", sourceLabel: "BattleScript_HitFromAtkAnimation", opcodeName: "B_SCR_OP_ATTACKANIMATION" },
@@ -229,9 +193,6 @@ describe("Battle 2 OFF real-kernel seam scout", () => {
       { kind: "hp-change", sourceLabel: "BattleScript_HitFromAtkAnimation", opcodeName: "B_SCR_OP_DATAHPUPDATE" },
       { kind: "set-battler-sprite-visibility", sourceLabel: "BattleScript_MoveEnd", opcodeName: "B_SCR_OP_MOVEEND" },
       { kind: "set-battler-sprite-visibility", sourceLabel: "BattleScript_MoveEnd", opcodeName: "B_SCR_OP_MOVEEND" },
-    ]);
-
-    expect(summarize(stageTurn13SandAttackHitChain().events)).toEqual([
       { kind: "message", sourceLabel: "BattleScript_EffectStatDown", opcodeName: "B_SCR_OP_ATTACKSTRING" },
       { kind: "set-battler-pp-data", sourceLabel: "BattleScript_EffectStatDown", opcodeName: "B_SCR_OP_PPREDUCE" },
       { kind: "stat-stage-change", sourceLabel: "BattleScript_EffectStatDown", opcodeName: "B_SCR_OP_STATBUFFCHANGE" },
@@ -241,5 +202,8 @@ describe("Battle 2 OFF real-kernel seam scout", () => {
       { kind: "set-battler-sprite-visibility", sourceLabel: "BattleScript_MoveEnd", opcodeName: "B_SCR_OP_MOVEEND" },
       { kind: "set-battler-sprite-visibility", sourceLabel: "BattleScript_MoveEnd", opcodeName: "B_SCR_OP_MOVEEND" },
     ]);
+    expect(result.events.every((event) =>
+      Object.isFrozen(event.provenance)
+    )).toBe(true);
   });
 });

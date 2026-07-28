@@ -71,6 +71,7 @@ import {
   type BattleSinglesBattler,
   type BattleState,
 } from "./battleDecisionBoundary.ts";
+import { handleBattleActionFinished } from "./battleActionFinished.ts";
 import {
   acknowledgeBattleScriptMachineController,
   createBattleScriptRngState,
@@ -141,6 +142,14 @@ export type FactoryFullTurnBattlerConfig = Readonly<{
    * `factoryBattleScriptTerminalDecision.ts`'s own precedent).
    */
   moves?: readonly [number, number, number, number];
+  /** Source `gBattleMons[].pp`; omitted legacy configs retain the old 16-per-nonzero-move default. */
+  pp?: readonly [number, number, number, number];
+  /** Source `gBattleMons[].ability`; omitted legacy configs retain the old zero default. */
+  ability?: number;
+  /** Source `gBattleMons[].item`; omitted legacy configs retain the old zero default. */
+  item?: number;
+  /** Source `gBattleMons[].friendship`; omitted legacy configs retain the old zero default. */
+  friendship?: number;
   attack: number;
   defense: number;
   spAttack: number;
@@ -189,7 +198,10 @@ export type FactoryFullTurnConfig = Readonly<{
 export type FactoryFullTurnDecisionRules = BattleJsonObject & Readonly<{
   adapter: typeof ADAPTER;
   phase: "awaiting-player-command" | "awaiting-trainer-command" | "forced-switch-pending";
-  pendingPlayerDecision: null | Readonly<{ moveSlot: 0; targetBattler: BattleSinglesBattler }>;
+  pendingPlayerDecision: null | Readonly<{
+    moveSlot: BattleMoveSlot;
+    targetBattler: BattleSinglesBattler;
+  }>;
   rulesContext: BattleScriptRulesContext;
   /**
    * Only present in phase "forced-switch-pending": the halted
@@ -264,15 +276,19 @@ function activeBattler(
   config: FactoryFullTurnBattlerConfig,
 ): BattleScriptRulesBattlerState {
   const moves = config.moves ?? ([config.moveId, 0, 0, 0] as const);
-  const pp = moves.map((moveId) => (moveId !== 0 ? 16 : 0)) as unknown as readonly [
-    number,
-    number,
-    number,
-    number,
-  ];
+  const pp = config.pp ?? (
+    moves.map((moveId) => (moveId !== 0 ? 16 : 0)) as unknown as readonly [
+      number,
+      number,
+      number,
+      number,
+    ]
+  );
   return Object.freeze({
     ...emptyBattler(side),
+    ability: config.ability ?? 0,
     hp: config.hp,
+    item: config.item ?? 0,
     species: config.species,
     attack: config.attack,
     defense: config.defense,
@@ -280,6 +296,7 @@ function activeBattler(
     spDefense: config.spDefense,
     speed: config.speed,
     level: 50,
+    friendship: config.friendship ?? 0,
     types: config.types ?? (["TYPE_NORMAL", "TYPE_NORMAL"] as const),
     moves: Object.freeze(moves),
     pp: Object.freeze(pp),
@@ -395,7 +412,10 @@ function rulesAt(input: FactoryFullTurnDecisionRules): FactoryFullTurnDecisionRu
     adapter: ADAPTER,
     phase: phase as "awaiting-player-command" | "awaiting-trainer-command",
     pendingPlayerDecision: (input as {
-      pendingPlayerDecision: null | Readonly<{ moveSlot: 0; targetBattler: BattleSinglesBattler }>;
+      pendingPlayerDecision: null | Readonly<{
+        moveSlot: BattleMoveSlot;
+        targetBattler: BattleSinglesBattler;
+      }>;
     }).pendingPlayerDecision,
     rulesContext,
   });
@@ -571,6 +591,7 @@ function buildActionContext(
   priorRulesContext: BattleScriptRulesContext,
   mover: BattleScriptBattlerId,
   moveId: number,
+  moveSlot: BattleMoveSlot,
   target: BattleScriptBattlerId,
 ): BattleScriptRulesContext {
   return createBattleScriptRulesContext({
@@ -578,13 +599,8 @@ function buildActionContext(
     selectorRoles: { attacker: mover, target, effectBattler: target, fainted: null },
     scriptingBattler: mover,
     currentMove: moveId,
-    currentMovePosition: 0,
+    currentMovePosition: moveSlot,
     chosenMove: moveId,
-    // HandleAction_ActionFinished clears the prior action's power override
-    // before dispatching the next battler (battle_util.c:678). Applying the
-    // same reset at this reducer's generic action boundary prevents a
-    // Flail/Reversal/Triple-Kick override from leaking into a sibling move.
-    dynamicBasePower: 0,
   });
 }
 
@@ -599,11 +615,18 @@ function runMoveAction(
   priorState: MachineState,
   mover: BattleScriptBattlerId,
   moveId: number,
+  moveSlot: BattleMoveSlot,
   target: BattleScriptBattlerId,
 ): ActionResult {
   const topology = TOPOLOGY_BY_MOVE.get(moveId);
   if (!topology) throw new Error(`move ${moveId} has no source Battle Script entry`);
-  const actionContext = buildActionContext(priorState.rulesContext, mover, moveId, target);
+  const actionContext = buildActionContext(
+    priorState.rulesContext,
+    mover,
+    moveId,
+    moveSlot,
+    target,
+  );
   const started = startBattleScriptExecute(program, topology.entryScript, {
     ...priorState,
     rulesContext: actionContext,
@@ -647,7 +670,17 @@ function withTurnOrderPositions(
     if (index === mover2) return Object.freeze({ ...battler, turnOrderNum: 1 });
     return battler;
   }) as unknown as BattleScriptRulesContext["battlers"];
-  return Object.freeze({ ...rulesContext, battlers: Object.freeze(battlers), currentTurnActionNumber });
+  return Object.freeze({
+    ...rulesContext,
+    battlers: Object.freeze(battlers),
+    battlerByTurnOrder: Object.freeze([
+      mover1,
+      mover2,
+      2,
+      3,
+    ] as const),
+    currentTurnActionNumber,
+  });
 }
 
 function machineBarrierBoundary(instruction: BattleScriptInstruction, instructionsExecuted: number): BattleBoundary {
@@ -682,10 +715,13 @@ function trainerLegalDecisions(rulesContext: BattleScriptRulesContext) {
   return Object.freeze(legal);
 }
 
-function eventPayloads(state: MachineState) {
+function provenanceEvents(state: MachineState) {
   return Object.freeze(state.events.map((event) => {
-    const { sequence: _sequence, provenance: _provenance, ...payload } = event;
-    return Object.freeze(payload);
+    const { sequence: _sequence, provenance, ...payload } = event;
+    return Object.freeze({
+      payload: Object.freeze(payload),
+      provenance,
+    });
   }));
 }
 
@@ -710,7 +746,7 @@ function finishFullTurn(
   }
   return Object.freeze({
     rules: resultRules,
-    events: eventPayloads(finalState),
+    events: provenanceEvents(finalState),
     boundary,
   });
 }
@@ -798,6 +834,17 @@ function resumeFullTurnForcedSwitch(
   }
   const pending = pendingForcedSwitchAt(ctx.rules);
   const rngBefore = ctx.rng.snapshot();
+  const actingBattler = pending.rulesContext.battlerByTurnOrder[
+    pending.rulesContext.currentTurnActionNumber
+  ];
+  if (
+    actingBattler === undefined
+    || actingBattler >= pending.rulesContext.battleTopology.battlersCount
+  ) {
+    throw new Error(
+      "factory full-turn decision forced-switch resume cannot resolve the acting battler at the current turn position",
+    );
+  }
   const instruction = PROGRAM.instructions[pending.pendingScript.programCounter];
   if (!instruction) {
     throw new Error(
@@ -838,12 +885,16 @@ function resumeFullTurnForcedSwitch(
   }
 
   if (orchestration.kind === "terminal") {
+    const finished = handleBattleActionFinished(
+      orchestration.state,
+      actingBattler as BattleScriptBattlerId,
+    );
     return finishFullTurn(
-      ctx.rng, rngBefore.calls, orchestration.state,
-      buildRules(orchestration.state.rulesContext, "awaiting-player-command", null),
+      ctx.rng, rngBefore.calls, finished,
+      buildRules(finished.rulesContext, "awaiting-player-command", null),
       Object.freeze({
         kind: "terminal",
-        outcome: mapFactoryBattleOutcome(orchestration.state.rulesContext.battleOutcome),
+        outcome: mapFactoryBattleOutcome(finished.rulesContext.battleOutcome),
       }),
     );
   }
@@ -856,7 +907,16 @@ function resumeFullTurnForcedSwitch(
   }
 
   // orchestration.kind === "resumed"
-  return runEndTurnTail(ctx.rng, rngBefore.calls, handlers, orchestration.state, ctx.request.requestId + 1);
+  return runEndTurnTail(
+    ctx.rng,
+    rngBefore.calls,
+    handlers,
+    handleBattleActionFinished(
+      orchestration.state,
+      actingBattler as BattleScriptBattlerId,
+    ),
+    ctx.request.requestId + 1,
+  );
 }
 
 export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTurnDecisionRules> = (
@@ -881,7 +941,10 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
       rules: buildRules(
         rules.rulesContext,
         "awaiting-trainer-command",
-        Object.freeze({ moveSlot: 0 as const, targetBattler: ctx.decision.targetBattler }),
+        Object.freeze({
+          moveSlot: ctx.decision.moveSlot,
+          targetBattler: ctx.decision.targetBattler,
+        }),
       ),
       events: [],
       boundary: Object.freeze({
@@ -909,8 +972,15 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
   }
 
   const rc0 = rules.rulesContext;
-  const playerMoveId = rc0.battlers[0]!.moves[0];
+  const playerMoveSlot = rules.pendingPlayerDecision.moveSlot;
+  const trainerMoveSlot = ctx.decision.moveSlot;
+  const playerMoveId = rc0.battlers[0]!.moves[playerMoveSlot];
   const trainerMoveId = rc0.battlers[1]!.moves[ctx.decision.moveSlot];
+  if (playerMoveId === 0) {
+    throw new Error(
+      `factory full-turn decision player move slot ${playerMoveSlot} is not usable`,
+    );
+  }
   if (trainerMoveId === 0) {
     throw new Error(`factory full-turn decision trainer move slot ${ctx.decision.moveSlot} is not usable`);
   }
@@ -930,9 +1000,11 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
 
   const mover1: BattleScriptBattlerId = playerFirst ? 0 : 1;
   const mover1MoveId = playerFirst ? playerMoveId : trainerMoveId;
+  const mover1MoveSlot = playerFirst ? playerMoveSlot : trainerMoveSlot;
   const mover1Target: BattleScriptBattlerId = playerFirst ? playerTarget : trainerTarget;
   const mover2: BattleScriptBattlerId = playerFirst ? 1 : 0;
   const mover2MoveId = playerFirst ? trainerMoveId : playerMoveId;
+  const mover2MoveSlot = playerFirst ? trainerMoveSlot : playerMoveSlot;
   const mover2Target: BattleScriptBattlerId = playerFirst ? trainerTarget : playerTarget;
 
   const ports = externalPorts();
@@ -950,7 +1022,15 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
     events: Object.freeze([]),
   });
 
-  const action1 = runMoveAction(PROGRAM, handlers, initialState, mover1, mover1MoveId, mover1Target);
+  const action1 = runMoveAction(
+    PROGRAM,
+    handlers,
+    initialState,
+    mover1,
+    mover1MoveId,
+    mover1MoveSlot,
+    mover1Target,
+  );
   if (action1.kind === "barrier") {
     return finishFullTurn(
       ctx.rng, rngBefore.calls, action1.state,
@@ -961,10 +1041,14 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
 
   const faint1 = runBattleScriptFaintedActionsOrchestration(PROGRAM, handlers, action1.state);
   if (faint1.kind === "terminal") {
+    const finished = handleBattleActionFinished(faint1.state, mover1);
     return finishFullTurn(
-      ctx.rng, rngBefore.calls, faint1.state,
-      buildRules(faint1.state.rulesContext, rules.phase, rules.pendingPlayerDecision),
-      Object.freeze({ kind: "terminal", outcome: mapFactoryBattleOutcome(faint1.state.rulesContext.battleOutcome) }),
+      ctx.rng, rngBefore.calls, finished,
+      buildRules(finished.rulesContext, rules.phase, rules.pendingPlayerDecision),
+      Object.freeze({
+        kind: "terminal",
+        outcome: mapFactoryBattleOutcome(finished.rulesContext.battleOutcome),
+      }),
     );
   }
   if (faint1.kind === "non-terminal-barrier") {
@@ -1002,13 +1086,26 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
   }
 
   // faint1.kind is "no-fainted-battlers" (run action 2) or "resumed" (skip action 2, per cancelallactions).
-  let preEndTurnState = faint1.state;
+  let preEndTurnState = handleBattleActionFinished(faint1.state, mover1);
   if (faint1.kind === "no-fainted-battlers") {
     const preAction2State: MachineState = Object.freeze({
-      ...faint1.state,
-      rulesContext: withTurnOrderPositions(faint1.state.rulesContext, 1, mover1, mover2),
+      ...preEndTurnState,
+      rulesContext: withTurnOrderPositions(
+        preEndTurnState.rulesContext,
+        1,
+        mover1,
+        mover2,
+      ),
     });
-    const action2 = runMoveAction(PROGRAM, handlers, preAction2State, mover2, mover2MoveId, mover2Target);
+    const action2 = runMoveAction(
+      PROGRAM,
+      handlers,
+      preAction2State,
+      mover2,
+      mover2MoveId,
+      mover2MoveSlot,
+      mover2Target,
+    );
     if (action2.kind === "barrier") {
       return finishFullTurn(
         ctx.rng, rngBefore.calls, action2.state,
@@ -1018,10 +1115,14 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
     }
     const faint2 = runBattleScriptFaintedActionsOrchestration(PROGRAM, handlers, action2.state);
     if (faint2.kind === "terminal") {
+      const finished = handleBattleActionFinished(faint2.state, mover2);
       return finishFullTurn(
-        ctx.rng, rngBefore.calls, faint2.state,
-        buildRules(faint2.state.rulesContext, rules.phase, rules.pendingPlayerDecision),
-        Object.freeze({ kind: "terminal", outcome: mapFactoryBattleOutcome(faint2.state.rulesContext.battleOutcome) }),
+        ctx.rng, rngBefore.calls, finished,
+        buildRules(finished.rulesContext, rules.phase, rules.pendingPlayerDecision),
+        Object.freeze({
+          kind: "terminal",
+          outcome: mapFactoryBattleOutcome(finished.rulesContext.battleOutcome),
+        }),
       );
     }
     if (faint2.kind === "non-terminal-barrier") {
@@ -1053,7 +1154,10 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
         }),
       );
     }
-    preEndTurnState = faint2.state; // "no-fainted-battlers" or "resumed"
+    preEndTurnState = handleBattleActionFinished(
+      faint2.state,
+      mover2,
+    ); // "no-fainted-battlers" or "resumed"
   }
 
   return runEndTurnTail(ctx.rng, rngBefore.calls, handlers, preEndTurnState, ctx.request.requestId + 1);

@@ -1,4 +1,25 @@
 ---
+## 537 — [SUPERVISOR VERIFY 2026-07-27 ~20:50] Flail/Reversal implementation + all-band OFF evidence merged green
+
+- **State:** union committed and green at **291 files / 3792 tests**;
+  `npm run build` clean. Census regenerates byte-clean at **128/214 effects,
+  252/355 moves, 204/276 Factory-L50 distinct, 2586/2957 weighted (87.5%)**,
+  with **42/42** checks. Both oracle profiles are fresh; no deferred decision.
+- **Did:** reviewed the source-port and found one newly materialized
+  cross-action hazard: `gDynamicBasePower` survived into the second mover.
+  Commit `8f55359` ports `HandleAction_ActionFinished`'s generic reset and
+  pins Flail→ordinary-Strength isolation. Independently replayed and merged
+  the side evidence: legal Super Fang staging traverses all six Flail bands
+  and five Reversal bands; supervisor hashes match `a1bb097a…5fd3` and
+  `056d7e09…e9f6`.
+- **Next:** register `B_SCR_OP_FRIENDSHIPTODAMAGECALCULATION` for
+  RETURN/FRUSTRATION (**+2 effects / +2 moves / +2 distinct / +18 weighted**)
+  while a side lane maps the executable replacement of the old staged
+  Battle-2 OFF turn fixture with real full-turn-kernel semantic events.
+- **Notes:** verified side worktree/branch removed. No canonical Battle-2
+  march, new unsupported barrier, ratchet change, or PAPERCUT.
+
+---
 ## 536 — [BOUNDED WORKER 2026-07-27 ~20:44] EFFECT_FLAIL executes Flail/Reversal end to end; exact +1/+2/+2/+20
 
 - **State:** tree committed and green at **290 files / 3786 tests**;

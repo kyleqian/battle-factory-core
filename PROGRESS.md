@@ -15,6 +15,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 
 ---
+## 540 — [BOUNDED MAIN WORKER 2026-07-27 ~21:17] Full-turn controller seam source-correct and provenance-bearing
+
+- **State:** tree green at **294 files / 3820 tests**; `npm run build`
+  clean. The direct canonical ONIX/KABUTO full turn reaches player request
+  **3** with HP **117/63**, PP **9/14**, accuracy **5**, and RNG
+  **650807554 / 4 calls**.
+- **Did:** the backward-compatible full-turn config now carries canonical
+  ability/item/four-slot PP/friendship; both submitted move slots reach
+  `currentMovePosition`. One source-documented `HandleAction_ActionFinished`
+  helper clears every represented action field and script stack. Public
+  boundary events preserve immutable interpreter provenance; the former
+  scout barriers are positive direct-config assertions, including two used-
+  move messages, Sand Attack damage **0**, and exact source labels.
+- **Next:** project the immutable semantic events plus request-3 boundary
+  into the existing nine relative Scene-OFF commands/acknowledgements, then
+  replace only `battle2-off-turn1-before-confirm` and reprove the unchanged
+  trace at **16/16**. Do not synthesize the later eight AI/controller draws.
+- **Notes:** focused **28/28**, full **3820/3820**, build green; baseline OFF
+  oracle hash `9c89c741…f297`. No oracle lifecycle action, canonical recording
+  import, unsupported barrier, ratchet change, or PAPERCUT.
+
+---
 ## 539 — [SUPERVISOR VERIFY 2026-07-27 ~21:06] Return/Frustration + Battle-2 OFF kernel-seam evidence merged green
 
 - **State:** union green at **293 files / 3819 tests**; `npm run build`
@@ -58,24 +80,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** no unsupported barrier, canonical-recording import, ratchet,
   side-scout file, canonical Battle-2, or oracle lifecycle change. Battle
   Scene OFF freshness passed at baseline (`9c89c741…f297`). No PAPERCUT.
-
----
-## 537 — [SUPERVISOR VERIFY 2026-07-27 ~20:50] Flail/Reversal implementation + all-band OFF evidence merged green
-
-- **State:** union committed and green at **291 files / 3792 tests**;
-  `npm run build` clean. Census regenerates byte-clean at **128/214 effects,
-  252/355 moves, 204/276 Factory-L50 distinct, 2586/2957 weighted (87.5%)**,
-  with **42/42** checks. Both oracle profiles are fresh; no deferred decision.
-- **Did:** reviewed the source-port and found one newly materialized
-  cross-action hazard: `gDynamicBasePower` survived into the second mover.
-  Commit `8f55359` ports `HandleAction_ActionFinished`'s generic reset and
-  pins Flail→ordinary-Strength isolation. Independently replayed and merged
-  the side evidence: legal Super Fang staging traverses all six Flail bands
-  and five Reversal bands; supervisor hashes match `a1bb097a…5fd3` and
-  `056d7e09…e9f6`.
-- **Next:** register `B_SCR_OP_FRIENDSHIPTODAMAGECALCULATION` for
-  RETURN/FRUSTRATION (**+2 effects / +2 moves / +2 distinct / +18 weighted**)
-  while a side lane maps the executable replacement of the old staged
-  Battle-2 OFF turn fixture with real full-turn-kernel semantic events.
-- **Notes:** verified side worktree/branch removed. No canonical Battle-2
-  march, new unsupported barrier, ratchet change, or PAPERCUT.

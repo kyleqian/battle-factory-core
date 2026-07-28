@@ -1,5 +1,8 @@
 import { advanceRngValue } from "./rng.ts";
-import type { BattleScriptSemanticEventPayload } from "./battleScriptEvents.ts";
+import type {
+  BattleScriptEventProvenance,
+  BattleScriptSemanticEventPayload,
+} from "./battleScriptEvents.ts";
 
 /**
  * JSON is the persistence boundary for the headless battle kernel. The
@@ -116,7 +119,21 @@ export type BattleState<
 export type BattleKernelSemanticEvent = Readonly<{
   sequence: number;
   payload: BattleScriptSemanticEventPayload;
+  /**
+   * Interpreter provenance is optional for backward compatibility with
+   * reducers that synthesize boundary-level events without a Battle Script
+   * instruction. Machine-backed reducers preserve the exact immutable
+   * receipt instead of asking presentation to infer a label from event order.
+   */
+  provenance?: BattleScriptEventProvenance;
 }>;
+
+export type BattleDecisionReducerSemanticEvent =
+  | BattleScriptSemanticEventPayload
+  | Readonly<{
+    payload: BattleScriptSemanticEventPayload;
+    provenance: BattleScriptEventProvenance;
+  }>;
 
 export type BattleDecisionRng = Readonly<{
   /**
@@ -142,7 +159,7 @@ export type BattleDecisionReducerOutput<
   RulesState extends BattleJsonObject,
 > = Readonly<{
   rules: RulesState;
-  events: readonly BattleScriptSemanticEventPayload[];
+  events: readonly BattleDecisionReducerSemanticEvent[];
   boundary: BattleBoundary;
 }>;
 
@@ -682,6 +699,73 @@ function eventPayloadAt(
   return payload as BattleScriptSemanticEventPayload;
 }
 
+function eventProvenanceAt(
+  value: unknown,
+  path: string,
+): BattleScriptEventProvenance {
+  const provenance = recordAt(value, path);
+  exactKeys(
+    provenance,
+    [
+      "programCounter",
+      "opcodeId",
+      "opcodeName",
+      "dispatcher",
+      "sourceLabel",
+      "sourceStatementLine",
+      "instructionExecution",
+    ],
+    path,
+  );
+  return Object.freeze({
+    programCounter: integerAt(
+      provenance.programCounter,
+      0,
+      U32_MAX,
+      `${path}.programCounter`,
+    ),
+    opcodeId: integerAt(provenance.opcodeId, 0, 0xff, `${path}.opcodeId`),
+    opcodeName: nonEmptyStringAt(provenance.opcodeName, `${path}.opcodeName`),
+    dispatcher: nonEmptyStringAt(provenance.dispatcher, `${path}.dispatcher`),
+    sourceLabel: nonEmptyStringAt(provenance.sourceLabel, `${path}.sourceLabel`),
+    sourceStatementLine: integerAt(
+      provenance.sourceStatementLine,
+      1,
+      Number.MAX_SAFE_INTEGER,
+      `${path}.sourceStatementLine`,
+    ),
+    instructionExecution: integerAt(
+      provenance.instructionExecution,
+      1,
+      Number.MAX_SAFE_INTEGER,
+      `${path}.instructionExecution`,
+    ),
+  });
+}
+
+type NormalizedReducerSemanticEvent = Readonly<{
+  payload: BattleScriptSemanticEventPayload;
+  provenance?: BattleScriptEventProvenance;
+}>;
+
+function reducerSemanticEventAt(
+  value: unknown,
+  path: string,
+): NormalizedReducerSemanticEvent {
+  const record = recordAt(value, path);
+  if (Object.hasOwn(record, "payload") || Object.hasOwn(record, "provenance")) {
+    exactKeys(record, ["payload", "provenance"], path);
+    return Object.freeze({
+      payload: eventPayloadAt(record.payload, `${path}.payload`),
+      provenance: eventProvenanceAt(
+        record.provenance,
+        `${path}.provenance`,
+      ),
+    });
+  }
+  return Object.freeze({ payload: eventPayloadAt(record, path) });
+}
+
 /**
  * Submits exactly one currently requested rules decision. Presentation-only
  * acknowledgements are deliberately absent: semantic events are immutable
@@ -757,15 +841,24 @@ export function submitBattleDecision<
       `Next Battle request id must be greater than current request id ${request.requestId}`,
     );
   }
-  const payloads = output.events.map((event, index) =>
-    eventPayloadAt(event, `Battle decision reducer output.events[${index}]`));
-  if (state.nextEventSequence + payloads.length > Number.MAX_SAFE_INTEGER) {
+  const reducerEvents = output.events.map((event, index) =>
+    reducerSemanticEventAt(
+      event,
+      `Battle decision reducer output.events[${index}]`,
+    ));
+  if (
+    state.nextEventSequence + reducerEvents.length
+    > Number.MAX_SAFE_INTEGER
+  ) {
     throw new Error("Battle semantic event sequence overflow");
   }
-  const events = Object.freeze(payloads.map((payload, index) =>
+  const events = Object.freeze(reducerEvents.map((event, index) =>
     Object.freeze({
       sequence: state.nextEventSequence + index,
-      payload,
+      payload: event.payload,
+      ...(event.provenance === undefined
+        ? {}
+        : { provenance: event.provenance }),
     })));
   const nextState = stateAt<RulesState>({
     schemaVersion: 1,

@@ -392,6 +392,58 @@ describe("battle-level decision boundary ABI", () => {
     expect(Object.isFrozen(message.substitutions)).toBe(true);
   });
 
+  it("preserves immutable Battle Script provenance without requiring it from legacy reducers", () => {
+    const provenance = {
+      programCounter: 12,
+      opcodeId: 16,
+      opcodeName: "B_SCR_OP_PRINTSTRING",
+      dispatcher: "Cmd_printstring",
+      sourceLabel: "BattleScript_Example",
+      sourceStatementLine: 34,
+      instructionExecution: 5,
+    };
+    const reducer: BattleDecisionReducer<FixtureRules> = (context) => ({
+      rules: context.rules,
+      events: [{
+        payload: {
+          kind: "message",
+          messageId: "STRINGID_EXAMPLE",
+          substitutions: [],
+        },
+        provenance,
+      }],
+      boundary: nextBoundary(),
+    });
+    const result = submitBattleDecision(fixtureState(), {
+      requestId: 7,
+      side: "player",
+      decision: { kind: "use-move", moveSlot: 0, targetBattler: 1 },
+    }, reducer);
+
+    expect(result.events[0]).toEqual({
+      sequence: 0,
+      payload: {
+        kind: "message",
+        messageId: "STRINGID_EXAMPLE",
+        substitutions: [],
+      },
+      provenance,
+    });
+    expect(Object.isFrozen(result.events[0]!.provenance)).toBe(true);
+    provenance.sourceLabel = "mutated";
+    expect(result.events[0]!.provenance?.sourceLabel).toBe(
+      "BattleScript_Example",
+    );
+    expect(Object.hasOwn(
+      submitBattleDecision(fixtureState(), {
+        requestId: 7,
+        side: "player",
+        decision: { kind: "use-move", moveSlot: 0, targetBattler: 1 },
+      }, acceptPlayer).events[0]!,
+      "provenance",
+    )).toBe(false);
+  });
+
   it("makes next-request and terminal outcomes mechanically exclusive", () => {
     const next = submitBattleDecision(fixtureState(), {
       requestId: 7,
