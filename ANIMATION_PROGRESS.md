@@ -1,5 +1,31 @@
 # Animation coverage
 
+## MOVE_THUNDER_WAVE staged; ANIM_TAG_SPARK source/evidence checkpoint (2026-07-28)
+
+**Verdict:** `MOVE_THUNDER_WAVE` is staged, not partial or exact. Complete legal
+Scene-ON FLAAFFY/SHUCKLE mechanic-lab evidence captures its source-owned
+load/body/cleanup at **334/334** frames **39-372** in player-back and
+opponent-front orientations. Each fresh local-mGBA output reproduced
+byte-identically twice (player `27725cc2…b30a3`, opponent `c54b9739…1b8c7`).
+Coverage is **64 exact / 0 partial / 1 staged / 212 unsupported**.
+
+**Source/evidence:** `Move_THUNDER_WAVE` loads SPARK/SPARK_2/SPARK_H, fades
+the field, creates ElectricBolt, plays its target-panned cue, then creates the
+three staggered target ThunderWave bands before the inverse fade/cleanup. The
+probe records source component state, tasks/sprites, OAM/matrices,
+faded/unfaded/hardware palettes, blend registers, both audio players/pans, and
+raw RGB over every current-move frame. `ANIM_TAG_SPARK` and inseparable
+SPARK_H are byte-preserving source-extracted with a regenerating receipt;
+SPARK_2 remains the existing generated shared asset.
+
+**Scope/siblings:** `MOVE_THUNDERBOLT` stays unsupported: its three offset
+ElectricBolt tasks, SHOCK_3 orb, eight flashing SPARK_2 sprites, target
+palette body, and different sounds require independent dense evidence.
+`MOVE_SHOCK_WAVE` stays unsupported: it adds ELECTRIC_ORBS/CIRCLE_OF_LIGHT/
+LIGHTNING and charging/progressing/lightning/shake/palette tasks. No renderer,
+battle logic/RNG/controller/facility state, boundary list, unsupported barrier,
+or absolute-tick/input-delay/coordinate/RGB/pixel exception changed.
+
 ## MOVE_BODY_SLAM promoted exact; audio and framebuffer repaired (2026-07-28)
 
 **Verdict:** `MOVE_BODY_SLAM` is exact. Fresh complete legal set-269

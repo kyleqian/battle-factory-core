@@ -2,6 +2,27 @@
   "schema": "factory-animation-coverage/v1",
   "entries": [
     {
+      "move": "MOVE_THUNDER_WAVE",
+      "status": "staged",
+      "remaining": "Port the source-relative ElectricBolt, three ThunderWave bands, palette fades, asset lifetimes, side-relative audio, and cleanup behind the existing presentation seam; then prove every dense framebuffer frame twice fresh in both orientations before any partial/exact promotion.",
+      "covered": [
+        "Source receipt: Move_THUNDER_WAVE (data/battle_anim_scripts.s:1124-1144) loads ANIM_TAG_SPARK, SPARK_2, and SPARK_H; field F_PAL_BG fades 0->6, then the ElectricBolt task and target-panned SE_M_THUNDER_WAVE precede the 20-frame wait, looped SE_M_THUNDERBOLT2, and three gThunderWaveSpriteTemplate bands at target (-16,-16), (-16,0), and (-16,16), each staggered by four frames. The inverse F_PAL_BG fade and visual waits clean up before end.",
+        "Fresh validated local-mGBA probes capture every currentMove=86 frame, including source script/component state, software sprites/tasks, OAM/matrices, faded/unfaded/hardware palettes, blend registers, SE1/SE2 with side-relative pan, and raw RGB: complete frames 39-372 (334/334) for FLAAFFY player-back -> SHUCKLE opponent-front and FLAAFFY opponent-front -> SHUCKLE player-back. Each orientation reproduced byte-identically twice (player receipt 27725cc2926e6f8ada41c1cf803e8a6c8b311bbd34a730fd882548f65ccb30a3; opponent c54b973923e74ac748b0b0de6d67d4267c815e9453179dc13fb0a333cac1b8c7).",
+        "ANIM_TAG_SPARK is byte-preserving source-extracted with the inseparable Thunder Wave SPARK_H; the pre-existing generated SPARK_2 remains the shared status/electricity asset. No renderer is added, so status is staged only."
+      ],
+      "evidence": [
+        "tools/battle-lab/mechanic-thunder-wave-player-flaaffy-opponent-shuckle.json",
+        "tools/battle-lab/mechanic-thunder-wave-opponent-flaaffy-player-shuckle.json",
+        "tools/compare/fixtures/thunder-wave-player-flaaffy-opponent-shuckle.json",
+        "tools/compare/fixtures/thunder-wave-opponent-flaaffy-player-shuckle.json",
+        "tools/compare/thunderWaveProbe.py",
+        "tools/compare/extractThunderWaveAssets.ts",
+        "src/assets/gen/battle-anim-spark.json",
+        "tests/animation/thunderWaveAssets.test.ts",
+        "tests/animation/thunderWaveEvidence.test.ts"
+      ]
+    },
+    {
       "move": "MOVE_BODY_SLAM",
       "status": "exact",
       "covered": [
